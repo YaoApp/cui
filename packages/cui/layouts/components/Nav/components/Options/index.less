@@ -1,0 +1,94 @@
+[data-theme='dark'] {
+	._local {
+		:global {
+			.popover_user_wrap {
+				.user_wrap {
+					background-color: var(--color_bg_nav);
+
+					.info_wrap {
+						background-color: fade(white, 2%);
+					}
+				}
+			}
+		}
+	}
+}
+
+._local {
+	:global {
+		.user_item {
+			margin-top: 12px;
+			margin-bottom: 18px;
+
+			.avatar {
+				&:hover {
+					transform: scale(1.2);
+				}
+			}
+		}
+
+		.popover_user_wrap {
+			.xgen-popover-arrow {
+				display: none;
+			}
+
+			.xgen-popover-inner-content {
+				padding: 0;
+			}
+
+			.user_wrap {
+				overflow: hidden;
+				width: 260px;
+				border: 1px solid var(--color_border_soft);
+				border-radius: 6px;
+				background-color: var(--color_bg_menu);
+				box-shadow: var(--shadow);
+
+				.btn_reset_avatar {
+					top: 10px;
+					right: 10px;
+					width: 24px;
+					height: 24px;
+					border-radius: var(--radius);
+
+					&:hover {
+						background-color: var(--color_bg_menu);
+					}
+				}
+
+				.info_wrap {
+					padding: 15px;
+					border-bottom: 1px solid var(--color_border_soft);
+					background-color: fade(black, 2%);
+
+					.info {
+						margin-left: 12px;
+
+						.user_name {
+							font-weight: bold;
+						}
+
+						.user_account {
+							font-size: 12px;
+						}
+					}
+				}
+
+				.btn_wrap {
+					padding: 15px;
+
+					.btn_logout {
+						i {
+							margin-bottom: 2px;
+						}
+
+						.text {
+							margin-left: 2px;
+							line-height: 1;
+						}
+					}
+				}
+			}
+		}
+	}
+}
