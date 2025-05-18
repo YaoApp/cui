@@ -47,8 +47,8 @@ jobs:
                   - name: Inspect editorjs_plugins dependencies
                     run: cd packages/editorjs_plugins && pnpm ls
 
-                  - name: Inspect xgen dependencies
-                    run: cd packages/xgen && pnpm ls
+                  - name: Inspect cui dependencies
+                    run: cd packages/cui && pnpm ls
 
                   - name: Test Build
                     run: pnpm run build

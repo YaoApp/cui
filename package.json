@@ -4,8 +4,8 @@
       "scripts": {
             "dev": "turbo run dev",
             "build": "turbo run build",
-            "dev:xgen": "turbo run dev --filter=xgen",
-            "build:xgen": "turbo run build --filter=xgen",
+            "dev:cui": "turbo run dev --filter=cui",
+            "build:cui": "turbo run build --filter=cui",
             "prettier": "prettier --parser=typescript --write \"**/*.ts?(x)\"",
             "submodule:init": "git submodule update --init --recursive",
             "submodule:update": "git submodule sync && git submodule update --recursive --remote --merge"

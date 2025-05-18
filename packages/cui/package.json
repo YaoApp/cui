@@ -1,5 +1,5 @@
 {
-      "name": "cui",
+      "name": "@yaoapp/cui",
       "version": "0.10.5",
       "author": "Infinite Wisdom Software",
       "description": "A Chat UI Framework for building AI Native applications on Yao App Engine",
