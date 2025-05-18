@@ -1,14 +1,14 @@
 {
-      "name": "xgen",
-      "version": "1.4.1",
-      "author": "Wendao",
-      "description": "core of xgen.",
+      "name": "cui",
+      "version": "0.10.5",
+      "author": "Infinite Wisdom Software",
+      "description": "A Chat UI Framework for building AI Native applications on Yao App Engine",
       "private": false,
-      "license": "Apache-2.0",
+      "license": "Yao License 1.0",
       "homepage": "https://yaoapps.com",
       "repository": {
             "type": "git",
-            "url": "https://github.com/YaoApp/xgen"
+            "url": "https://github.com/YaoApp/cui"
       },
       "workspaces": [
             "packages/*"
