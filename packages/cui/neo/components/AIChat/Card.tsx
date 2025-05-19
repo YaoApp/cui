@@ -6,7 +6,6 @@ import styles from './Card.less'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
-import { toJS } from 'mobx'
 interface Props {
 	/** Assistant data */
 	data: App.Assistant
@@ -60,28 +59,28 @@ const Card: FC<Props> = ({ data, onClick, onChatClick }) => {
 				</div>
 				<div className={styles.headerMeta}>
 					<div className={styles.statusIcons}>
-						{data.built_in && (
+						{data.built_in == true && (
 							<Tooltip title={is_cn ? '系统内建' : 'Built-in'}>
 								<span className={styles.statusIcon}>
 									<Icon name='icon-package' size={16} color='#b37feb' />
 								</span>
 							</Tooltip>
 						)}
-						{!data.built_in && data.readonly && (
+						{!data.built_in && data.readonly == true && (
 							<Tooltip title={is_cn ? '只读' : 'Readonly'}>
 								<span className={styles.statusIcon}>
 									<Icon name='icon-lock' size={16} color='#faad14' />
 								</span>
 							</Tooltip>
 						)}
-						{data.mentionable && (
+						{data.mentionable == true && (
 							<Tooltip title={is_cn ? '可提及' : 'Mentionable'}>
 								<span className={styles.statusIcon}>
 									<Icon name='icon-at-sign' size={16} color='#52c41a' />
 								</span>
 							</Tooltip>
 						)}
-						{data.automated && (
+						{data.automated == true && (
 							<Tooltip title={is_cn ? '自动化' : 'Automated'}>
 								<span className={styles.statusIcon}>
 									<Icon name='icon-cpu' size={16} color='#1890ff' />

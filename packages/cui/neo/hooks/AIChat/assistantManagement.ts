@@ -2,9 +2,9 @@ import { getToken } from '@/knife'
 import axios from 'axios'
 import to from 'await-to-js'
 import { App } from '@/types'
-import { useMemoizedFn } from 'ahooks'
 const defaultSelectFields = [
 	'assistant_id',
+	'built_in',
 	'automated',
 	'avatar',
 	'connector',

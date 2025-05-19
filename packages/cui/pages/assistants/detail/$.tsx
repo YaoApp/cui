@@ -375,14 +375,14 @@ const AssistantDetail = () => {
 										</span>
 									</Tooltip>
 								)}
-								{mentionable && (
+								{mentionable == true && (
 									<Tooltip title={is_cn ? '可提及' : 'Mentionable'}>
 										<span className={styles.statusIcon}>
 											<Icon name='icon-at-sign' size={16} color='#52c41a' />
 										</span>
 									</Tooltip>
 								)}
-								{automated && (
+								{automated == true && (
 									<Tooltip title={is_cn ? '自动化' : 'Automated'}>
 										<span className={styles.statusIcon}>
 											<Icon name='icon-cpu' size={16} color='#1890ff' />
