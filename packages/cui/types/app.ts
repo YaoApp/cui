@@ -139,6 +139,9 @@ export declare namespace App {
 			signal?: ChatContext['signal']
 			chat_id?: string
 			assistant_id?: string
+			theme?: 'light' | 'dark'
+			locale?: string
+			is_cn?: boolean
 		}
 	}
 

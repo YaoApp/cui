@@ -16,7 +16,7 @@ import { isValidUrl } from '@/utils'
 import DefaultHeader from './Header'
 import MentionTextArea from './MentionTextArea'
 import Assistant from './Assistant'
-import { callbackify } from 'util'
+import { local } from '@yaoapp/storex'
 
 interface AIChatProps {
 	messages?: App.ChatInfo[]
@@ -38,11 +38,17 @@ interface AIChatProps {
 	}
 }
 
+const getTheme = (): App.Theme => {
+	const theme = (local.xgen_theme || 'light') as App.Theme
+	return theme
+}
+
 const AIChat = (props: AIChatProps) => {
 	const showCurrentPage = true
-
 	const global = useGlobal()
 	const locale = getLocale()
+	const theme = getTheme()
+
 	const { search, pathname } = useLocation()
 
 	const is_cn = locale === 'zh-CN'
@@ -106,6 +112,8 @@ const AIChat = (props: AIChatProps) => {
 					namespace: context.namespace,
 					stack: stack || '',
 					pathname,
+					theme,
+					locale,
 					formdata: context.data_item,
 					field: { name: v.name, bind: v.bind },
 					config: v.config,
@@ -172,14 +180,18 @@ const AIChat = (props: AIChatProps) => {
 				attachments: currentAttachments,
 				context: {
 					namespace: context.namespace,
-					stack: stack || '',
 					pathname,
+					stack: stack || '',
+					theme,
+					locale,
+
+					chat_id: chat_id,
+					assistant_id: assistant?.assistant_id || '',
+
 					formdata: context.data_item,
 					field: { name: field.name, bind: field.bind },
 					config: field.config,
-					signal: chat_context.signal,
-					chat_id: chat_id,
-					assistant_id: assistant?.assistant_id || ''
+					signal: chat_context.signal
 				}
 			}
 
