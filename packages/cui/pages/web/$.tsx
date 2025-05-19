@@ -5,6 +5,32 @@ import { local, session } from '@yaoapp/storex'
 import { App } from '@/types'
 import { useAction } from '@/actions'
 
+// Define message types
+export interface IframeMessage {
+	type: string
+	payload?: any
+}
+
+// Create a message sender function
+export const sendMessageToIframe = (iframe: HTMLIFrameElement | null, message: IframeMessage) => {
+	if (!iframe?.contentWindow) {
+		console.warn('Iframe or contentWindow not found')
+		return
+	}
+
+	// Ignore message if it's not from the same origin`
+	if (iframe.contentWindow.location.origin !== window.location.origin) {
+		console.warn('Message from unauthorized origin:', iframe.contentWindow.location.origin)
+		return
+	}
+
+	try {
+		iframe.contentWindow.postMessage(message, window.location.origin)
+	} catch (err) {
+		console.error('Failed to send message to iframe:', err)
+	}
+}
+
 const Index = () => {
 	const { search, pathname } = useLocation()
 
@@ -45,25 +71,72 @@ const Index = () => {
 	}, [])
 
 	// Add event listener to receive message from iframe
-	// Next version will use postMessage to communicate between iframe and parent window
 	useEffect(() => {
 		// Receive message from iframe
-		const message = (e: MessageEvent) => {
+		const handleMessage = (e: MessageEvent) => {
 			const data = e.data || {}
-			const { extra, data_item = {}, action, primary, namespace } = data
-			try {
-				onAction({ namespace, primary, data_item, it: { action, title: '', icon: '' }, extra })
-			} catch (err) {
-				console.error('Failed to run action:', err)
-				console.debug('--- Receive message from iframe ---')
-				console.debug(data)
-				console.debug('---')
+
+			// Handle different message types
+			if (data.type === 'action') {
+				// action: Array<Action.ActionParams>,
+				const { extra, data_item = {}, action, primary = 'id' } = data.payload || {}
+				try {
+					onAction({
+						namespace: pathname,
+						primary,
+						data_item,
+						it: { action, title: '', icon: '' },
+						extra
+					})
+				} catch (err) {
+					console.error('Failed to run action:', err)
+					console.debug('--- Receive message from iframe ---')
+					console.debug(data)
+					console.debug('---')
+					console.debug({
+						namespace: pathname,
+						primary,
+						data_item,
+						it: { action, title: '', icon: '' },
+						extra
+					})
+				}
+			} else {
+				// Handle other message types
+				console.debug('Received message from iframe:', data)
 			}
 		}
 
-		window.addEventListener('message', message)
-		return () => window.removeEventListener('message', message)
+		// Send message to iframe, trigger by event
+		const webSendMessage = (message: IframeMessage) => {
+			if (!ref.current) {
+				console.warn('Iframe not found')
+				return
+			}
+			sendMessageToIframe(ref.current, message)
+		}
+
+		window.$app.Event.on('web/sendMessage', webSendMessage)
+		window.addEventListener('message', handleMessage)
+		return () => {
+			window.removeEventListener('message', handleMessage)
+			window.$app.Event.off('web/sendMessage', webSendMessage)
+		}
 	}, [])
+
+	// Send initial setup message
+	useEffect(() => {
+		if (!loading && ref.current) {
+			sendMessageToIframe(ref.current, {
+				type: 'setup',
+				payload: {
+					theme: getTheme(),
+					locale: getLocale(),
+					token: getToken()
+				}
+			})
+		}
+	}, [loading])
 
 	return (
 		<iframe
