@@ -20,7 +20,7 @@ interface Message {
 const AssistantCreate = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const [formTitle, setFormTitle] = useState(is_cn ? '新助手' : 'New Assistant')
+	const [formTitle, setFormTitle] = useState(is_cn ? '新智能体' : 'New Assistant')
 
 	const global = useGlobal()
 	const { connectors } = global
@@ -84,7 +84,7 @@ const AssistantCreate = () => {
 			const result = await aiChatRef.current.saveAssistant(assistantData)
 
 			if (result && result.assistant_id) {
-				message.success(is_cn ? '助手创建成功' : 'Assistant created successfully')
+				message.success(is_cn ? '智能体创建成功' : 'Assistant created successfully')
 				// Redirect to detail page
 				history.push(`/assistants/detail/${result.assistant_id}`)
 			} else {
@@ -92,7 +92,7 @@ const AssistantCreate = () => {
 			}
 		} catch (error) {
 			console.error('Error creating assistant:', error)
-			message.error(is_cn ? '创建助手失败' : 'Failed to create assistant')
+			message.error(is_cn ? '创建智能体失败' : 'Failed to create assistant')
 		}
 	}
 
@@ -108,10 +108,10 @@ const AssistantCreate = () => {
 								handleBack()
 							}}
 						>
-							{is_cn ? '助手列表' : 'Assistants'}
+							{is_cn ? '智能体列表' : 'Assistants'}
 						</a>
 					</Breadcrumb.Item>
-					<Breadcrumb.Item>{is_cn ? '创建助手' : 'Create Assistant'}</Breadcrumb.Item>
+					<Breadcrumb.Item>{is_cn ? '创建智能体' : 'Create Assistant'}</Breadcrumb.Item>
 				</Breadcrumb>
 				<Button
 					className={styles.backButton}
@@ -156,7 +156,7 @@ const AssistantCreate = () => {
 							<Select
 								placeholder={
 									is_cn
-										? '选择为此助手提供支持的AI连接器'
+										? '选择为此智能体提供支持的AI连接器'
 										: 'Select the AI connector to power this assistant'
 								}
 								showSearch
@@ -176,11 +176,13 @@ const AssistantCreate = () => {
 
 						<Form.Item
 							name='name'
-							label={is_cn ? '助手名称' : 'Assistant Name'}
+							label={is_cn ? '智能体名称' : 'Assistant Name'}
 							rules={[
 								{
 									required: true,
-									message: is_cn ? '请输入助手名称' : 'Please input assistant name'
+									message: is_cn
+										? '请输入智能体名称'
+										: 'Please input assistant name'
 								}
 							]}
 						>
@@ -188,7 +190,7 @@ const AssistantCreate = () => {
 								placeholder={is_cn ? '输入一个描述性名称' : 'Enter a descriptive name'}
 								onChange={(e) => {
 									const name = e.target.value.trim()
-									setFormTitle(name || (is_cn ? '新助手' : 'New Assistant'))
+									setFormTitle(name || (is_cn ? '新智能体' : 'New Assistant'))
 								}}
 							/>
 						</Form.Item>
@@ -207,7 +209,7 @@ const AssistantCreate = () => {
 								autoSize={{ minRows: 4, maxRows: 6 }}
 								placeholder={
 									is_cn
-										? '描述这个助手能做什么以及如何帮助用户...'
+										? '描述这个智能体能做什么以及如何帮助用户...'
 										: 'Describe what this assistant can do and how it can help users...'
 								}
 							/>

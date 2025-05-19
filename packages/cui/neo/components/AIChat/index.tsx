@@ -785,7 +785,7 @@ const AIChat = (props: AIChatProps) => {
 									? '请等待响应...'
 									: 'Please wait for response...'
 								: is_cn
-								? '输入消息，使用 @ 呼叫助手'
+								? '输入消息，使用 @ 呼叫智能体'
 								: 'Type your message, use @ to mention assistant'
 						}
 						autoSize={{ minRows: 4, maxRows: 16 }}

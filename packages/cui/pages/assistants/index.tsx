@@ -75,7 +75,7 @@ const Index = () => {
 
 				setTags(formattedTags)
 			} catch (error) {
-				console.error(is_cn ? '加载助手标签失败:' : 'Failed to load assistant tags:', error)
+				console.error(is_cn ? '加载智能体标签失败:' : 'Failed to load assistant tags:', error)
 			} finally {
 				setTagsLoading(false)
 			}
@@ -124,7 +124,7 @@ const Index = () => {
 					: newData.length > 0 && newPage < (response?.pagecnt || 1)
 			)
 		} catch (error) {
-			console.error(is_cn ? '加载助手失败:' : 'Failed to load assistants:', error)
+			console.error(is_cn ? '加载智能体失败:' : 'Failed to load assistants:', error)
 		} finally {
 			setLoading(false)
 		}
@@ -180,7 +180,7 @@ const Index = () => {
 		<div className={styles.container}>
 			<div className={styles.header}>
 				<div className={styles.titleContainer}>
-					<h1 className={styles.title}>{is_cn ? 'AI 助手' : 'AI Assistants'}</h1>
+					<h1 className={styles.title}>{is_cn ? 'AI 智能体' : 'AI Assistants'}</h1>
 					<div className={styles.createIcon} onClick={handleCreate}>
 						<Icon name='material-add' size={24} />
 						<span className={styles.createText}>{is_cn ? '创建' : 'Create'}</span>
@@ -190,7 +190,7 @@ const Index = () => {
 					<Input
 						size='large'
 						prefix={<SearchOutlined />}
-						placeholder={is_cn ? '搜索 AI 助手...' : 'Search AI assistants...'}
+						placeholder={is_cn ? '搜索 AI 智能体...' : 'Search AI assistants...'}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						onKeyPress={handleKeyPress}

@@ -239,7 +239,7 @@ const Index = (props: IPropsNeo) => {
 								</span>
 							</Then>
 							<Else>
-								<div className='title'>{is_cn ? 'AI业务助手' : 'AI Assistant'}</div>
+								<div className='title'>{is_cn ? 'AI业务智能体' : 'AI Assistant'}</div>
 								<div
 									className='btn_max flex justify_center align_center clickable'
 									onClick={() => setMax(!max)}

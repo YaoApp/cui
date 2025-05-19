@@ -96,7 +96,7 @@ export default function Files({ files: propFiles, onFilesChange }: FilesProps) {
 		<div className={styles.files}>
 			<div className={styles.filesHeader}>
 				<Title level={5} style={{ margin: 0, fontWeight: 500 }}>
-					{is_cn ? '助手文件' : 'Assistant Files'}
+					{is_cn ? '智能体文件' : 'Assistant Files'}
 				</Title>
 				{!readonly && (
 					<Upload

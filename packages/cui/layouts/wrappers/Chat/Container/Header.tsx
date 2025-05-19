@@ -322,7 +322,7 @@ const Header: FC<HeaderProps> = ({
 				</div>
 
 				<div className='header_right'>
-					<Tooltip title={is_cn ? 'AI 助手' : 'AI Assistants'}>
+					<Tooltip title={is_cn ? 'AI 智能体' : 'AI Assistants'}>
 						<Button
 							type='text'
 							className='header_icon_btn'
