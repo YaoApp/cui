@@ -8,7 +8,7 @@ import { useAction } from '@/actions'
 // Define message types
 export interface IframeMessage {
 	type: string
-	payload?: any
+	message?: any
 }
 
 // Create a message sender function
@@ -79,7 +79,7 @@ const Index = () => {
 			// Handle different message types
 			if (data.type === 'action') {
 				// action: Array<Action.ActionParams>,
-				const { extra, data_item = {}, action, primary = 'id' } = data.payload || {}
+				const { extra, data_item = {}, action, primary = 'id' } = data.message || data.payload || {}
 				try {
 					onAction({
 						namespace: pathname,
@@ -129,7 +129,7 @@ const Index = () => {
 		if (!loading && ref.current) {
 			sendMessageToIframe(ref.current, {
 				type: 'setup',
-				payload: {
+				message: {
 					theme: getTheme(),
 					locale: getLocale(),
 					token: getToken()
