@@ -2,6 +2,7 @@ import { getToken } from '@/knife'
 import axios from 'axios'
 import to from 'await-to-js'
 import { App } from '@/types'
+import { getLocale } from '@umijs/max'
 const defaultSelectFields = [
 	'assistant_id',
 	'built_in',
@@ -42,6 +43,7 @@ export const createAssistantManagement = (
 
 		const params = new URLSearchParams()
 		params.append('token', getToken())
+		params.append('locale', getLocale())
 
 		// Default filter values
 		filter = filter || {}
@@ -67,7 +69,7 @@ export const createAssistantManagement = (
 	const getAssistantTags = async () => {
 		if (!neo_api) return []
 
-		const endpoint = `${neo_api}/assistants/tags?token=${encodeURIComponent(getToken())}`
+		const endpoint = `${neo_api}/assistants/tags?token=${encodeURIComponent(getToken())}&locale=${getLocale()}`
 		const [err, res] = await to<{ data: { data: string[] } }>(axios.get(endpoint))
 		if (err) throw err
 
@@ -77,7 +79,9 @@ export const createAssistantManagement = (
 	/** Call Assistant API */
 	const callAssistantAPI = async (assistantId: string, name: string, args: any[] = []) => {
 		if (!neo_api) return null
-		const endpoint = `${neo_api}/assistants/${assistantId}/call?token=${encodeURIComponent(getToken())}`
+		const endpoint = `${neo_api}/assistants/${assistantId}/call?token=${encodeURIComponent(
+			getToken()
+		)}&locale=${getLocale()}`
 		const [err, res] = await to<{ data: any }>(axios.post(endpoint, { name, args }))
 		if (err) throw err
 
@@ -88,7 +92,9 @@ export const createAssistantManagement = (
 	const findAssistant = async (assistantId: string) => {
 		if (!neo_api) return null
 
-		const endpoint = `${neo_api}/assistants/${assistantId}?token=${encodeURIComponent(getToken())}`
+		const endpoint = `${neo_api}/assistants/${assistantId}?token=${encodeURIComponent(
+			getToken()
+		)}&locale=${getLocale()}`
 		const [err, res] = await to<{ data: App.Assistant }>(axios.get(endpoint))
 		if (err) throw err
 
