@@ -69,7 +69,7 @@ const Index = () => {
 					}
 					// If response is already an array of objects with key and label, use it directly
 					else if (response[0] && typeof response[0] === 'object' && 'key' in response[0]) {
-						formattedTags = response
+						formattedTags = [{ key: 'all', label: is_cn ? '全部' : 'All' }, ...response]
 					}
 				}
 
