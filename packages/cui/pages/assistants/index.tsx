@@ -54,8 +54,8 @@ const Index = () => {
 				const response = await getAssistantTags()
 
 				// Transform the string array into the required format
-				let formattedTags: { key: string; label: string }[] = [
-					{ key: 'all', label: is_cn ? '全部' : 'All' }
+				let formattedTags: { key: string; value: string; label: string }[] = [
+					{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }
 				]
 
 				if (Array.isArray(response)) {
@@ -63,13 +63,24 @@ const Index = () => {
 					if (typeof response[0] === 'string') {
 						const tagObjects = response.map((tag: string) => ({
 							key: tag,
+							value: tag,
 							label: tag
 						}))
-						formattedTags = [{ key: 'all', label: is_cn ? '全部' : 'All' }, ...tagObjects]
+						formattedTags = [
+							{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' },
+							...tagObjects
+						]
 					}
 					// If response is already an array of objects with key and label, use it directly
-					else if (response[0] && typeof response[0] === 'object' && 'key' in response[0]) {
-						formattedTags = [{ key: 'all', label: is_cn ? '全部' : 'All' }, ...response]
+					else if (response[0] && typeof response[0] === 'object' && 'value' in response[0]) {
+						formattedTags = [{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }]
+						response.forEach((tag: any) => {
+							formattedTags.push({
+								key: tag.value,
+								value: tag.value,
+								label: tag.label
+							})
+						})
 					}
 				}
 

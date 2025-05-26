@@ -32,9 +32,9 @@ export const createChatManagement = (
 	const getHistory = async () => {
 		if (!chat_id) return
 
-		const endpoint = `${neo_api}/history?token=${encodeURIComponent(getToken())}&chat_id=${chat_id}${
-			assistant_id ? `&assistant_id=${assistant_id}` : ''
-		}`
+		const endpoint = `${neo_api}/history?token=${encodeURIComponent(
+			getToken()
+		)}&chat_id=${chat_id}&locale=${locale}${assistant_id ? `&assistant_id=${assistant_id}` : ''}`
 		const [err, res] = await to<App.ChatHistory>(axios.get(endpoint))
 		if (err) return
 		if (!res?.data) return
@@ -54,6 +54,7 @@ export const createChatManagement = (
 
 		const params = new URLSearchParams()
 		params.append('token', getToken())
+		params.append('locale', locale)
 
 		// Add filter parameters if provided
 		if (filter) {
@@ -90,7 +91,7 @@ export const createChatManagement = (
 		const chatId = id || chat_id
 		if (!chatId) return null
 
-		const endpoint = `${neo_api}/chats/${chatId}?token=${encodeURIComponent(getToken())}`
+		const endpoint = `${neo_api}/chats/${chatId}?token=${encodeURIComponent(getToken())}&locale=${locale}`
 
 		const [err, res] = await to<{ data: App.ChatDetail }>(axios.get(endpoint))
 		if (err) {
@@ -133,9 +134,9 @@ export const createChatManagement = (
 		if (!neo_api) return { chat_id: makeChatID(), placeholder: undefined, exist: false }
 		setLoadingChat(true)
 
-		const endpoint = `${neo_api}/chats/latest?token=${encodeURIComponent(getToken())}&assistant_id=${
-			assistant_id || ''
-		}`
+		const endpoint = `${neo_api}/chats/latest?token=${encodeURIComponent(
+			getToken()
+		)}&locale=${locale}&assistant_id=${assistant_id || ''}`
 
 		const [err, res] = await to<{ data: App.ChatDetail | { placeholder: App.ChatPlaceholder } }>(
 			axios.get(endpoint)
