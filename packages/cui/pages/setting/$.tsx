@@ -66,8 +66,8 @@ const Index = () => {
 	}
 
 	// Change the locale
-	const changeLocale = (locale: string) => {
-		window.$app.Event.emit(`app/getUserMenu`, locale)
+	const changeLocale = async (locale: string) => {
+		await window.$app.Event.emit(`app/getUserMenu`, locale)
 		setLocale(locale)
 	}
 
