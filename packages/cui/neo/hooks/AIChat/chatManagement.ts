@@ -240,6 +240,9 @@ export const createChatManagement = (
 			params.append('keywords', keywords)
 		}
 
+		const locale = getLocale()
+		params.append('locale', locale)
+
 		const endpoint = `${neo_api}/mentions?${params.toString()}`
 		const [err, res] = await to<{ data: App.Mention[] }>(axios.get(endpoint))
 		if (err) throw err

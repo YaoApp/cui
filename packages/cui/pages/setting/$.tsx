@@ -95,7 +95,7 @@ const Index = () => {
 						onChange={(e) => setLocale(e.target.value)}
 						options={[
 							{ label: '中文', value: 'zh-CN' },
-							{ label: 'EN', value: 'en-US' }
+							{ label: 'English', value: 'en-US' }
 						]}
 						optionType='button'
 						buttonStyle='solid'
