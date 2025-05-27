@@ -233,6 +233,12 @@ export declare namespace App {
 			prversion?: string
 		}
 
+		/** CUI version */
+		cui?: {
+			version?: string
+			prversion?: string
+		}
+
 		/** Application developer */
 		developer?: Developer
 

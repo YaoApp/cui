@@ -65,6 +65,18 @@ const Index = () => {
 		commit: 'unknown'
 	}
 
+	const cuiInfo: {
+		version?: string
+		prversion?: string
+		buildTime?: string
+		commit?: string
+	} = global.app_info?.cui || {
+		version: 'unknown',
+		prversion: 'unknown',
+		buildTime: 'unknown',
+		commit: 'unknown'
+	}
+
 	// Change the locale
 	const changeLocale = async (locale: string) => {
 		await window.$app.Event.emit(`app/getUserMenu`, locale)
@@ -74,6 +86,11 @@ const Index = () => {
 	// Parse the yao prversion
 	yaoInfo.commit = yaoInfo.prversion?.split?.('-')?.[0] || 'unknown'
 	yaoInfo.buildTime = yaoInfo.prversion ? yaoInfo.prversion.substring((yaoInfo.commit + '-').length) : 'unknown'
+
+	// Parse the cui version
+	cuiInfo.commit = cuiInfo.prversion?.split?.('-')?.[0] || 'unknown'
+	cuiInfo.buildTime = cuiInfo.prversion ? cuiInfo.prversion.substring((cuiInfo.commit + '-').length) : 'unknown'
+
 	return (
 		<div className={clsx([styles._local, 'w_100 border_box flex flex_column'])}>
 			<div className='setting_items w_100 border_box flex flex_column'>
@@ -114,15 +131,16 @@ const Index = () => {
 						value={global.theme}
 						onChange={(e) => global.setTheme(e.target.value)}
 						options={[
-							{ label: 'Light', value: 'light' },
-							{ label: 'Dark', value: 'dark' }
+							{ label: is_cn ? '浅色' : 'Light', value: 'light' },
+							{ label: is_cn ? '深色' : 'Dark', value: 'dark' }
 						]}
 						optionType='button'
 						buttonStyle='solid'
 						size='small'
 					/>
 				</div>
-				<div className='setting_item w_100 border_box flex justify_between align_center'>
+
+				{/* <div className='setting_item w_100 border_box flex justify_between align_center'>
 					<span className='name'>{is_cn ? '布局' : 'Layout'}</span>
 					<Radio.Group
 						value={global.layout}
@@ -135,7 +153,7 @@ const Index = () => {
 						buttonStyle='solid'
 						size='small'
 					/>
-				</div>
+				</div> */}
 			</div>
 
 			{/* System Info */}
@@ -197,6 +215,33 @@ const Index = () => {
 						</span>
 						<a href='https://yaoapps.com' target='_blank'>
 							{yaoInfo.version}
+						</a>
+					</span>
+				</div>
+
+				<div className='setting_item w_100 border_box flex justify_between align_center'>
+					<span className='name' style={{ minWidth: 80 }}>
+						{is_cn ? 'CUI 版本' : 'CUI Version'}
+					</span>
+					<span
+						className='desc'
+						style={{
+							display: 'flex',
+							justifyContent: 'space-between',
+							width: '100%',
+							alignItems: 'center'
+						}}
+					>
+						<span
+							style={{
+								fontSize: 12,
+								color: 'var(--color_text_secondary)'
+							}}
+						>
+							Built: {cuiInfo.buildTime}, Commit: {cuiInfo.commit}{' '}
+						</span>
+						<a href='https://yaoapps.com' target='_blank'>
+							{cuiInfo.version}
 						</a>
 					</span>
 				</div>
