@@ -26,12 +26,16 @@ export default class Index {
 	}
 
 	@catchError()
-	getUserMenu<Res>() {
+	getUserMenu<Res>(locale?: string) {
 		let lang = window.navigator.language.toLowerCase()
-		try {
-			lang = getLocale()?.toLowerCase()
-		} catch (error) {
-			lang = window.navigator.language.toLowerCase()
+		if (locale) {
+			lang = locale
+		} else {
+			try {
+				lang = getLocale()?.toLowerCase()
+			} catch (error) {
+				lang = window.navigator.language.toLowerCase()
+			}
 		}
 		return axios.get<{}, Response<Res>>(`/api/${window.$app.api_prefix}/app/menu`, { params: { locale: lang } })
 	}

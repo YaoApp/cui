@@ -65,6 +65,12 @@ const Index = () => {
 		commit: 'unknown'
 	}
 
+	// Change the locale
+	const changeLocale = (locale: string) => {
+		window.$app.Event.emit(`app/getUserMenu`, locale)
+		setLocale(locale)
+	}
+
 	// Parse the yao prversion
 	yaoInfo.commit = yaoInfo.prversion?.split?.('-')?.[0] || 'unknown'
 	yaoInfo.buildTime = yaoInfo.prversion ? yaoInfo.prversion.substring((yaoInfo.commit + '-').length) : 'unknown'
@@ -92,7 +98,7 @@ const Index = () => {
 					<span className='name'>{messages.layout.setting.language.title}</span>
 					<Radio.Group
 						value={is_cn ? 'zh-CN' : 'en-US'}
-						onChange={(e) => setLocale(e.target.value)}
+						onChange={(e) => changeLocale(e.target.value)}
 						options={[
 							{ label: '中文', value: 'zh-CN' },
 							{ label: 'English', value: 'en-US' }

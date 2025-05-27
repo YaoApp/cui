@@ -84,8 +84,8 @@ export default class GlobalModel {
 		return Promise.resolve()
 	}
 
-	async getUserMenu() {
-		const { res, err } = await this.service.getUserMenu<App.Menus>()
+	async getUserMenu(locale?: string) {
+		const { res, err } = await this.service.getUserMenu<App.Menus>(locale)
 		if (err) return Promise.reject()
 		this.setMenus(res)
 		return Promise.resolve()
