@@ -17,6 +17,7 @@ export default class GlobalModel {
 	theme: App.Theme = 'light'
 	avatar = {} as AvatarFullConfig
 	default_assistant = {} as App.AssistantSummary
+	agent_storages = {} as App.AgentStorages
 	connectors = {} as App.Connectors
 	locale_messages = {} as LocaleMessages
 	app_info = {} as App.Info
@@ -74,6 +75,9 @@ export default class GlobalModel {
 
 		// Default Assistant
 		this.setDefaultAssistant(res.agent?.default || {})
+
+		// Agent Storages
+		this.setAgentStorages(res.agent?.storages || {})
 
 		// Connectors
 		this.setConnectors(res.agent?.connectors || [])
@@ -158,6 +162,11 @@ export default class GlobalModel {
 	setDefaultAssistant(assistant: App.AssistantSummary) {
 		this.default_assistant = assistant
 		local.default_assistant = assistant
+	}
+
+	setAgentStorages(storages: App.AgentStorages) {
+		this.agent_storages = storages
+		local.agent_storages = storages
 	}
 
 	setDeveloper(developer: App.Developer) {

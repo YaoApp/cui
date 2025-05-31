@@ -76,6 +76,24 @@ export declare namespace App {
 		placeholder?: ChatPlaceholder
 	}
 
+	type AgentStorageType = 'chat' | 'assets' | 'knowledge'
+	type AgentStorages = { [key in AgentStorageType]?: AgentStorage }
+
+	interface AgentStorage {
+		max_size?: number
+		chunk_size?: number
+		allowed_types?: string[]
+	}
+
+	interface UploadOption {
+		compress_image?: boolean
+		compress_size?: number
+		gzip?: boolean
+		knowledge?: boolean
+		chat_id?: string
+		assistant_id?: string
+	}
+
 	interface Connectors {
 		options: Array<{ label: string; value: string }>
 		mapping: Record<string, string>
@@ -275,6 +293,7 @@ export declare namespace App {
 		agent?: {
 			default?: AssistantSummary
 			connectors?: Array<{ label: string; value: string }>
+			storages?: AgentStorages
 		}
 
 		optional?: {

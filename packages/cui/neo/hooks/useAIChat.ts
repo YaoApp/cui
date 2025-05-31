@@ -45,14 +45,7 @@ export default ({ chat_id, upload_options = {} }: AIHookArgs) => {
 		return `/api/${window.$app.api_prefix}${api}`
 	}, [global.app_info.optional?.neo?.api])
 
-	// Create file handlers
-	const { uploadFile, downloadFile, cancelUpload } = createFileHandlers(
-		neo_api,
-		chat_id,
-		assistant_id,
-		uploadControllers,
-		upload_options
-	)
+	const { uploadTo, downloadFile, cancelUpload } = createFileHandlers(neo_api, global.agent_storages, is_cn)
 
 	// Create assistant management
 	const {
@@ -322,7 +315,7 @@ export default ({ chat_id, upload_options = {} }: AIHookArgs) => {
 		assistant,
 		setMessages,
 		cancel,
-		uploadFile,
+		uploadTo,
 		downloadFile,
 		attachments,
 		setAttachments,

@@ -74,7 +74,7 @@ const AIChat = (props: AIChatProps) => {
 		setTitle,
 		setMessages,
 		cancel,
-		uploadFile,
+		uploadTo,
 		attachments,
 		updateAssistant,
 		resetAssistant,
@@ -340,6 +340,7 @@ const AIChat = (props: AIChatProps) => {
 				return
 			}
 		},
+		accept: global.agent_storages?.chat?.allowed_types?.join(',') || 'all',
 		beforeUpload: async (file: RcFile) => {
 			try {
 				const attachment: App.ChatAttachment = {
@@ -357,18 +358,25 @@ const AIChat = (props: AIChatProps) => {
 
 				addAttachment(attachment)
 
-				const result = await uploadFile(file)
+				const result = await uploadTo('chat', file, {
+					compress_image: true,
+					compress_size: 1024,
+					gzip: true,
+					knowledge: false,
+					chat_id: chat_id
+				})
+
 				const updatedAttachment: App.ChatAttachment = {
 					...attachment,
 					status: 'done',
 					url: result.url,
-					thumbUrl: result.thumbUrl || attachment.thumbUrl,
+					thumbUrl: result.url || attachment.thumbUrl,
 					file_id: result.file_id,
 					bytes: result.bytes,
 					created_at: result.created_at,
 					filename: result.filename,
-					content_type: result.content_type,
-					description: result.description || null
+					content_type: result.content_type
+					// description: result.description || null
 				}
 
 				removeAttachment(attachment)
@@ -452,7 +460,13 @@ const AIChat = (props: AIChatProps) => {
 					addAttachment(attachment)
 
 					// 上传文件
-					const result = await uploadFile(rcFile)
+					const result = await uploadTo('chat', rcFile, {
+						compress_image: true,
+						compress_size: 1024,
+						gzip: true,
+						knowledge: false,
+						chat_id: chat_id
+					})
 
 					// 更新attachment状态
 					const updatedAttachment: App.ChatAttachment = {
