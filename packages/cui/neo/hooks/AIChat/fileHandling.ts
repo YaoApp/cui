@@ -231,7 +231,8 @@ export const createFileHandlers = (neo_api: string | undefined, storages: App.Ag
 			const headers: Record<string, string> = {
 				'Content-Range': `bytes ${chunk.start}-${chunk.end}/${file.size}`,
 				'Content-Uid': uid,
-				'Content-Sync': 'true' // Always use sync mode to prevent merge errors
+				'Content-Sync': 'true', // Always use sync mode to prevent merge errors
+				'Content-Fingerprint': uid
 			}
 
 			// Add upload options (remove "option_" prefix)
@@ -343,9 +344,6 @@ export const createFileHandlers = (neo_api: string | undefined, storages: App.Ag
 				// Send the original filename separately to preserve it correctly
 				formData.append('original_filename', file.name)
 
-				console.log('ext', ext)
-				console.log('contentType', contentType)
-
 				// Add upload options (remove "option_" prefix)
 				for (const [key, value] of Object.entries(upload_options)) {
 					if (value !== undefined) {
@@ -354,8 +352,10 @@ export const createFileHandlers = (neo_api: string | undefined, storages: App.Ag
 				}
 
 				// Add sync header for all uploads
+				const fingerprint = await calculateFileFingerprint(file)
 				const headers: Record<string, string> = {
-					'Content-Sync': 'true' // Always use sync mode to prevent merge errors
+					'Content-Sync': 'true', // Always use sync mode to prevent merge errors
+					'Content-Fingerprint': fingerprint
 				}
 
 				const endpoint = `${neo_api}/upload/${storage}?token=${encodeURIComponent(getToken())}`
