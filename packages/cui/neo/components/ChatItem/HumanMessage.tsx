@@ -13,8 +13,6 @@ const HumanMessage = ({ chat_info }: HumanMessageProps) => {
 	const { downloadFile } = useAIChat({ chat_id: chat_info.context?.chat_id })
 
 	const handleFileClick = async (attachment: App.ChatAttachment) => {
-		console.log('chat_info', chat_info)
-
 		if (attachment.type === 'URL') {
 			window.open(attachment.url, '_blank')
 			return

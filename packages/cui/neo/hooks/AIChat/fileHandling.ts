@@ -446,10 +446,7 @@ export const createFileHandlers = (neo_api: string | undefined, storages: App.Ag
 		)}&disposition=${disposition}`
 
 		try {
-			const response = await fetch(endpoint, {
-				credentials: 'include'
-			})
-
+			const response = await fetch(endpoint, { credentials: 'include' })
 			if (!response.ok) {
 				const error = await response.json().catch(() => ({ message: `HTTP ${response.status}` }))
 				throw new Error(
@@ -463,7 +460,7 @@ export const createFileHandlers = (neo_api: string | undefined, storages: App.Ag
 			// Get filename
 			const contentDisposition = response.headers.get('Content-Disposition')
 			const filename = contentDisposition
-				? contentDisposition.split('filename=')[1]?.replace(/["']/g, '')
+				? decodeURIComponent(contentDisposition.split('filename=')[1]?.replace(/["']/g, ''))
 				: file_id
 
 			// Create download link
