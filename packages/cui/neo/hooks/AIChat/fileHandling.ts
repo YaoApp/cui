@@ -111,6 +111,33 @@ export const createFileHandlers = (neo_api: string | undefined, storages: App.Ag
 	// Use Map to manage upload controllers
 	const uploadControllers = new Map<string, AbortController>()
 
+	/**
+	 * Calculate file fingerprint using SHA-256 hash
+	 * This provides a unique identifier based on file content
+	 */
+	const calculateFileFingerprint = async (file: RcFile): Promise<string> => {
+		try {
+			// Read file as ArrayBuffer
+			const arrayBuffer = await file.arrayBuffer()
+
+			// Calculate SHA-256 hash
+			const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
+
+			// Convert to hex string
+			const hashArray = Array.from(new Uint8Array(hashBuffer))
+			const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+
+			// Return fingerprint with file size for additional uniqueness
+			return `${hashHex}_${file.size}`
+		} catch (error) {
+			// Fallback to timestamp-based uid if crypto is not available
+			console.warn('Failed to calculate file fingerprint, falling back to timestamp-based uid:', error)
+			return `${encodeURIComponent(file.name).replace(/[^A-Za-z0-9]/g, '_')}_${Date.now()}_${Math.random()
+				.toString(36)
+				.slice(2, 11)}`
+		}
+	}
+
 	/** Validate file type **/
 	const validateFileType = (file: RcFile, allowedTypes: string[]): boolean => {
 		if (!allowedTypes || allowedTypes.length === 0) {
@@ -372,9 +399,7 @@ export const createFileHandlers = (neo_api: string | undefined, storages: App.Ag
 		}
 
 		// Chunk upload
-		const uid = `${encodeURIComponent(file.name).replace(/[^A-Za-z0-9]/g, '_')}_${Date.now()}_${Math.random()
-			.toString(36)
-			.substr(2, 9)}`
+		const uid = await calculateFileFingerprint(file)
 		const chunks = calculateChunkInfo(file, chunkSize)
 
 		let lastResponse: UploadResponse | null = null
@@ -495,6 +520,7 @@ export const createFileHandlers = (neo_api: string | undefined, storages: App.Ag
 		cancelUpload,
 		cancelAllUploads,
 		validateFileType,
-		parseSize
+		parseSize,
+		calculateFileFingerprint
 	}
 }
