@@ -1,0 +1,169 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# CUI Project Development Rules
+
+## Technology Stack
+
+This project uses:
+- **Frontend**: React + TypeScript + Ant Design (xgen prefix) + LESS + MobX
+- **Build System**: Turbo monorepo with packages/cui as main development package
+- **State Management**: MobX with tsyringe dependency injection
+- **Styling**: LESS preprocessor with CSS Variables
+- **AI Integration**: Neo AI Agent for intelligent assistance
+
+## Theme Variables (@theme)
+
+**IMPORTANT**: Only use CSS variables from `packages/cui/styles/preset/vars.less`
+
+### Primary Colors
+- `--color_main`: #3371fc (light) / #4580ff (dark)
+- `--color_primary`: #3371fc (light) / #4580ff (dark)
+- `--color_main_hover`: #4580ff (light) / #5590ff (dark)
+- `--color_main_active`: #2861e6 (light) / #3470ef (dark)
+
+### Text Colors
+- `--color_text`: #111 (light) / #a2a5b9 (dark)
+- `--color_text_grey`: #999 (light) / #aaa (dark)
+- `--color_text_light`: #666 (light) / #888 (dark)
+- `--color_text_contrast`: black (light) / white (dark)
+- `--color_title`: #363636 (light) / #aaaab3 (dark)
+- `--color_title_grey`: #a9abac (light) / #888890 (dark)
+
+### Background Colors
+- `--color_bg`: #f0f0f0 (light) / #3b3b41 (dark)
+- `--color_bg_nav`: #f9f9f9 (light) / #232326 (dark)
+- `--color_bg_menu`: #ffffff (light) / #2f2f34 (dark)
+- `--color_bg_hover`: #f5f5f5 (light) / #444449 (dark)
+- `--color_bg_active`: #e6e6e6 (light) / #4d4d53 (dark)
+
+### Border Colors
+- `--color_border`: #e6e6e6 (light) / #404046 (dark)
+- `--color_border_light`: rgba(0,0,0,0.06) (light) / rgba(255,255,255,0.06) (dark)
+- `--color_border_soft`: rgba(0,0,0,0.03) (light) / rgba(255,255,255,0.03) (dark)
+
+### Status Colors
+- `--color_success`: #00c853
+- `--color_warning`: #faad14
+- `--color_danger`: #e62965
+- `--color_info`: #3371fc (light) / #4580ff (dark)
+
+### Sizes and Effects
+- `--radius`: 6px
+- `--fontsize`: 14px
+- `--base_height`: 38px
+- `--shadow`: 0 0 30px rgba(0,0,0,0.081) (light) / 0 0 30px rgba(255,255,255,0.06) (dark)
+
+### Usage
+Always use CSS variables with `var()` function: `color: var(--color_text)`
+
+## Component Library (@components)
+
+### Base Components (packages/cui/components/base/)
+Core page structure and data display:
+- Page, Filter, PureTable, PureForm, PureChart, PureList, PureGantt
+- Table, Form, Chart, Modal, Frame, Dashboard
+
+### Edit Components (packages/cui/components/edit/)
+Input and editing functionality:
+- Input, TextArea, Select, DatePicker, TimePicker, RangePicker
+- Upload, RichText, WangEditor, CodeEditor, ColorPicker
+- InputNumber, Password, RadioGroup, CheckboxGroup
+- Tree, Cascader, AutoComplete, Mentions, FormBuilder, FlowBuilder
+
+### View Components (packages/cui/components/view/)
+Read-only data presentation:
+- Text, Image, Color, Tag, Switch, Checkbox, A, Tooltip
+
+### Usage
+```typescript
+import { ComponentName } from '@/components'
+```
+
+## Global State Management (@model)
+
+### Usage
+```typescript
+import { useGlobal } from '@/context'
+const global = useGlobal()
+```
+
+### Key Properties
+- `layout`: Layout mode (Admin | Mobile)
+- `theme`: Theme mode (light | dark)
+- `user`: User information
+- `menus`: Menu data
+- `neo`: Neo AI context
+- `app_info`: Application info
+
+### Key Methods
+- `setTheme(theme)`: Set theme
+- `setLayout(layout)`: Set layout
+- `updateMenuStatus(path)`: Update menu status
+- `setNeo(neo)`: Set Neo context
+
+## Neo AI Agent (@neo)
+
+### Core Hooks
+- **useEventStream**: Basic AI chat with real-time streaming
+- **useAIChat**: Advanced features with file handling and assistant management
+
+### Key Features
+- Real-time message streaming via Server-Sent Events
+- Context awareness with form data and application state
+- File upload/download and attachment handling
+- Multi-assistant support and chat persistence
+
+### Integration
+```typescript
+// Event-driven context integration
+window.$app.Event.on('app/getContext', getContext)
+window.$app.Event.on('app/setNeoVisible', setNeoVisible)
+```
+
+## Development Rules
+
+### Styling Rules
+1. **MUST** use CSS variables from `packages/cui/styles/preset/vars.less`
+2. **NO** hardcoded color values
+3. Use LESS preprocessor
+4. Follow BEM naming convention
+5. Support both light/dark themes automatically
+
+### Component Rules
+1. Use existing component library from `@/components`
+2. New components must support theme adaptation
+3. Follow component category structure (base/edit/view)
+4. Support Shadow DOM isolation where needed
+
+### State Management Rules
+1. Use `useGlobal()` to access global state
+2. Make state changes through model methods
+3. Leverage MobX reactive features
+4. Maintain local state persistence
+
+### Neo Development Rules
+1. Use `useEventStream` for basic AI chat functionality
+2. Use `useAIChat` for advanced features like file handling
+3. Implement proper error handling and loading states
+4. Follow event-driven context integration patterns
+5. Support both studio and production API modes
+6. Maintain chat session persistence
+
+### Dependency Rules
+1. **DO NOT** add new packages unless explicitly required
+2. Prioritize existing tech stack and components
+3. Consider bundle size and performance impact
+
+## Commands
+
+### Development
+- `npm run dev:cui` - Start development server
+- `npm run build:cui` - Build for production
+
+### Code Quality
+- All code formatting handled by Prettier with git hooks
+- Strict TypeScript type checking required
+- Follow semantic naming conventions
