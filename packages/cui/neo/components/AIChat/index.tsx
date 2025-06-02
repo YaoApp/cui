@@ -1,7 +1,7 @@
-import { Button, Upload, message } from 'antd'
+import { Button, Upload, message, Tooltip } from 'antd'
 import { UploadChangeParam, UploadFile, UploadProps, RcFile } from 'antd/es/upload'
 import clsx from 'clsx'
-import { UploadSimple, Sparkle } from 'phosphor-react'
+import { UploadSimple, Sparkle, Database } from 'phosphor-react'
 import { useState, useEffect, useRef, useLayoutEffect, ClipboardEvent } from 'react'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
@@ -16,6 +16,7 @@ import { isValidUrl } from '@/utils'
 import DefaultHeader from './Header'
 import MentionTextArea from './MentionTextArea'
 import Assistant from './Assistant'
+import ResourcePicker from './ResourcePicker'
 import { local } from '@yaoapp/storex'
 
 interface AIChatProps {
@@ -64,6 +65,7 @@ const AIChat = (props: AIChatProps) => {
 	const [placeholder, setPlaceholder] = useState<App.ChatPlaceholder | undefined>(
 		global.default_assistant?.placeholder
 	)
+	const [resourcePickerVisible, setResourcePickerVisible] = useState(false)
 
 	const {
 		assistant,
@@ -563,6 +565,15 @@ const AIChat = (props: AIChatProps) => {
 		}
 	}
 
+	/** Handle Resource Picker **/
+	const handleOpenResourcePicker = useMemoizedFn(() => {
+		setResourcePickerVisible(true)
+	})
+
+	const handleCloseResourcePicker = useMemoizedFn(() => {
+		setResourcePickerVisible(false)
+	})
+
 	return (
 		<div className={clsx(styles.aiChat, className)}>
 			{header || (
@@ -826,14 +837,35 @@ const AIChat = (props: AIChatProps) => {
 				<div className={styles.statusBar}>
 					<div className={styles.leftTools}>
 						<Upload {...uploadProps}>
-							<Button type='text' icon={<UploadSimple size={14} />} disabled={loading} />
+							<Tooltip title={is_cn ? '上传文件' : 'Upload File'} placement='top'>
+								<Button
+									type='text'
+									icon={<UploadSimple size={14} />}
+									disabled={loading}
+								/>
+							</Tooltip>
 						</Upload>
-						<Button
-							type='text'
-							icon={<Sparkle size={14} className={optimizing ? styles.optimizing : ''} />}
-							disabled={loading || optimizing || !inputValue.trim()}
-							onClick={handleOptimize}
-						/>
+						<Tooltip title={is_cn ? '添加数据' : 'Add Data'} placement='top'>
+							<Button
+								type='text'
+								icon={<Database size={14} />}
+								disabled={loading}
+								onClick={handleOpenResourcePicker}
+							/>
+						</Tooltip>
+						<Tooltip title={is_cn ? '优化提示词' : 'Optimize Prompt'} placement='top'>
+							<Button
+								type='text'
+								icon={
+									<Sparkle
+										size={14}
+										className={optimizing ? styles.optimizing : ''}
+									/>
+								}
+								disabled={loading || optimizing || !inputValue.trim()}
+								onClick={handleOptimize}
+							/>
+						</Tooltip>
 					</div>
 					<div className={styles.rightInfo}>
 						{loading || optimizing
@@ -846,6 +878,9 @@ const AIChat = (props: AIChatProps) => {
 					</div>
 				</div>
 			</div>
+
+			{/* Resource Picker Modal */}
+			<ResourcePicker visible={resourcePickerVisible} onClose={handleCloseResourcePicker} />
 		</div>
 	)
 }
