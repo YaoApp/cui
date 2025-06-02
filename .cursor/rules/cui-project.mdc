@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: packages/cui/*
 alwaysApply: false
 ---
 # CUI Project Development Rules
@@ -82,6 +82,36 @@ Read-only data presentation:
 import { ComponentName } from '@/components'
 ```
 
+## Type Definitions (@types)
+
+**IMPORTANT**: For all TypeScript type definitions and interfaces, refer to the `packages/cui/types/` directory.
+
+### Available Type Files
+- `app.ts`: Core application types (Layout, Theme, Chat, Assistant, etc.)
+- `action.ts`: Action-related types for UI interactions
+- `chart.ts`: Chart component types
+- `common.ts`: Common utility types
+- `component.ts`: Component-specific types
+- `dashboard.ts`: Dashboard layout types
+- `form.ts`: Form component types
+- `global.ts`: Global state types
+- `list.ts`: List component types
+- `remote.ts`: Remote API types
+- `table.ts`: Table component types
+- `utils.ts`: Utility types
+
+### Usage
+```typescript
+import type { App, Action, Common } from '@/types'
+// Example: App.Layout, App.ChatMessageType, Action.ActionParams
+```
+
+### Type Reference
+- All types are properly documented with JSDoc comments in the source files
+- Use namespace imports for better organization
+- Follow existing type patterns when creating new types
+- Refer directly to the TypeScript files in `packages/cui/types/` for the most accurate type information
+
 ## Global State Management (@model)
 
 ### Usage
@@ -151,6 +181,13 @@ window.$app.Event.on('app/setNeoVisible', setNeoVisible)
 4. Follow event-driven context integration patterns
 5. Support both studio and production API modes
 6. Maintain chat session persistence
+
+### Type Definition Rules
+1. **MUST** refer to `packages/cui/types/` directory for all type definitions
+2. Use namespace imports: `import type { App, Action, Common } from '@/types'`
+3. Follow existing type patterns when creating new types
+4. All types should be properly documented with JSDoc comments
+5. Refer directly to the TypeScript source files for the most accurate type information
 
 ### Dependency Rules
 1. **DO NOT** add new packages unless explicitly required
