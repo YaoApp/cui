@@ -197,8 +197,8 @@ const DataModel = (props: ResourceChildProps) => {
 	// 渲染模型卡片
 	const renderModelCard = (model: Item) => {
 		const isSelected = selectedModelIds.has(model.id)
-		// 只显示前3个字段，不需要展开功能
-		const previewFields = model.fields.slice(0, 3)
+		// 只显示前2个字段
+		const previewFields = model.fields.slice(0, 2)
 
 		return (
 			<div
@@ -222,7 +222,7 @@ const DataModel = (props: ResourceChildProps) => {
 					<Icon name='material-check_circle' size={16} className={styles.checkIcon} />
 				</div>
 
-				{/* 字段预览 - 只显示前3个 */}
+				{/* 字段预览 - 只显示前2个 */}
 				<div className={styles.fieldsPreview}>
 					<div className={styles.fieldsList}>
 						{previewFields.map((field) => (
@@ -231,10 +231,10 @@ const DataModel = (props: ResourceChildProps) => {
 								<span className={styles.fieldName}>{field.label}</span>
 							</div>
 						))}
-						{model.fields.length > 3 && (
+						{model.fields.length > 2 && (
 							<div className={styles.fieldItem}>
 								<Icon name='material-more_horiz' size={12} />
-								<span>+{model.fields.length - 3}</span>
+								<span>+{model.fields.length - 2}</span>
 							</div>
 						)}
 					</div>

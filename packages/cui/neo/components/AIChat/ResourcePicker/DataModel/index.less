@@ -162,7 +162,7 @@
 		.modelsContent {
 			flex: 1;
 			overflow-y: auto;
-			padding: 16px 20px;
+			padding: 36px;
 			position: relative;
 			background: var(--color_neo_bg_content);
 
@@ -198,7 +198,7 @@
 			flex-direction: column;
 			gap: 16px;
 			color: var(--color_text_grey);
-			background: var(--color_bg_menu);
+			background: var(--color_neo_bg_content);
 
 			:global(.ant-spin) {
 				color: var(--color_main);
@@ -212,7 +212,7 @@
 		.modelsList {
 			display: grid;
 			grid-template-columns: repeat(2, 1fr);
-			gap: 16px;
+			gap: 32px;
 		}
 
 		.modelCard {
@@ -251,7 +251,7 @@
 				display: flex;
 				align-items: flex-start;
 				gap: 12px;
-				padding: 20px;
+				padding: 18px 20px 16px 20px;
 				background: var(--color_neo_bg_header);
 				border-bottom: 1px solid var(--color_neo_border_header);
 				margin-bottom: 0;
@@ -267,20 +267,20 @@
 					min-width: 0;
 
 					.modelName {
-						font-size: 16px;
+						font-size: 14px;
 						font-weight: 600;
 						color: var(--color_neo_text_primary);
 						margin: 0 0 6px 0;
 						overflow: hidden;
 						text-overflow: ellipsis;
 						white-space: nowrap;
-						line-height: 1.3;
+						line-height: 1.4;
 					}
 
 					.modelDescription {
-						font-size: 13px;
+						font-size: 12px;
 						color: var(--color_neo_text_secondary);
-						line-height: 1.5;
+						line-height: 1.6;
 						margin: 0;
 						display: -webkit-box;
 						-webkit-line-clamp: 2;
@@ -298,13 +298,14 @@
 			}
 
 			.fieldsPreview {
-				padding: 16px 20px 20px 20px;
+				padding: 14px 20px 18px 20px;
 				background: var(--color_neo_bg_card);
 
 				.fieldsList {
 					display: flex;
-					flex-wrap: wrap;
+					flex-wrap: nowrap;
 					gap: 8px;
+					overflow: hidden;
 				}
 
 				.fieldItem {
@@ -314,10 +315,12 @@
 					padding: 6px 10px;
 					background: var(--color_neo_bg_field);
 					border-radius: 6px;
-					font-size: 11px;
+					font-size: 9px;
 					color: var(--color_neo_text_tertiary);
 					border: 1px solid var(--color_neo_border_field);
 					transition: all 0.2s ease;
+					white-space: nowrap;
+					flex-shrink: 0;
 
 					&:hover {
 						background: var(--color_neo_bg_field_hover);
@@ -327,10 +330,12 @@
 
 					:global(.xgen-icon) {
 						color: var(--color_neo_text_secondary);
+						font-size: 9px;
 					}
 
 					.fieldName {
 						font-weight: 500;
+						line-height: 1.4;
 					}
 				}
 			}
@@ -351,7 +356,7 @@
 		position: absolute;
 		top: 0;
 		left: 0;
-		background: var(--color_bg_menu);
+		background: var(--color_neo_bg_content);
 
 		:global(.ant-spin) {
 			color: var(--color_main);
