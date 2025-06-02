@@ -21,7 +21,6 @@ const DataModel = (props: ResourceChildProps) => {
 	const [searchKeyword, setSearchKeyword] = useState('')
 	const [loadingCollections, setLoadingCollections] = useState(true)
 	const [loadingModels, setLoadingModels] = useState(false)
-	const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set())
 
 	// 详情模态窗状态
 	const [detailModalVisible, setDetailModalVisible] = useState(false)
@@ -116,7 +115,6 @@ const DataModel = (props: ResourceChildProps) => {
 	const handleCollectionChange = useMemoizedFn((collectionId: string) => {
 		setActiveCollection(collectionId)
 		setSearchKeyword('')
-		setExpandedCards(new Set())
 	})
 
 	// 处理模型选择
@@ -148,18 +146,6 @@ const DataModel = (props: ResourceChildProps) => {
 				}
 			})
 		}
-	})
-
-	// 处理字段展开/收起
-	const handleExpandToggle = useMemoizedFn((modelId: string, e: React.MouseEvent) => {
-		e.stopPropagation()
-		const newExpanded = new Set(expandedCards)
-		if (newExpanded.has(modelId)) {
-			newExpanded.delete(modelId)
-		} else {
-			newExpanded.add(modelId)
-		}
-		setExpandedCards(newExpanded)
 	})
 
 	// 处理查看详情
@@ -211,8 +197,8 @@ const DataModel = (props: ResourceChildProps) => {
 	// 渲染模型卡片
 	const renderModelCard = (model: Item) => {
 		const isSelected = selectedModelIds.has(model.id)
-		const isExpanded = expandedCards.has(model.id)
-		const previewFields = isExpanded ? model.fields : model.fields.slice(0, 3)
+		// 只显示前3个字段，不需要展开功能
+		const previewFields = model.fields.slice(0, 3)
 
 		return (
 			<div
@@ -220,7 +206,7 @@ const DataModel = (props: ResourceChildProps) => {
 				className={`${styles.modelCard} ${isSelected ? styles.selected : ''}`}
 				onClick={() => handleModelSelect(model)}
 				onDoubleClick={(e) => handleViewDetail(model, e)}
-				title={is_cn ? '双击查看详情' : 'Double click to view details'}
+				title={is_cn ? '点击选择，双击查看详情' : 'Click to select, double click for details'}
 			>
 				{/* 模型头部 */}
 				<div className={styles.modelHeader}>
@@ -236,44 +222,8 @@ const DataModel = (props: ResourceChildProps) => {
 					<Icon name='material-check_circle' size={16} className={styles.checkIcon} />
 				</div>
 
-				{/* 模型元信息 */}
-				<div className={styles.modelMeta}>
-					<div className={styles.metaItem}>
-						<Icon name='material-view_column' size={12} />
-						<span>
-							{model.fields.length} {is_cn ? '字段' : 'fields'}
-						</span>
-					</div>
-					{model.relations.length > 0 && (
-						<div className={styles.metaItem}>
-							<Icon name='material-account_tree' size={12} />
-							<span>
-								{model.relations.length} {is_cn ? '关联' : 'relations'}
-							</span>
-						</div>
-					)}
-				</div>
-
-				{/* 字段预览 */}
-				<div className={`${styles.fieldsPreview} ${isExpanded ? styles.expanded : ''}`}>
-					<div className={styles.fieldsHeader}>
-						<span className={styles.fieldsTitle}>
-							{is_cn ? '字段' : 'Fields'} ({model.fields.length})
-						</span>
-						{model.fields.length > 3 && (
-							<div
-								className={styles.expandButton}
-								onClick={(e) => handleExpandToggle(model.id, e)}
-							>
-								<Icon
-									name={
-										isExpanded ? 'material-expand_less' : 'material-expand_more'
-									}
-									size={16}
-								/>
-							</div>
-						)}
-					</div>
+				{/* 字段预览 - 只显示前3个 */}
+				<div className={styles.fieldsPreview}>
 					<div className={styles.fieldsList}>
 						{previewFields.map((field) => (
 							<div key={field.name} className={styles.fieldItem}>
@@ -281,7 +231,7 @@ const DataModel = (props: ResourceChildProps) => {
 								<span className={styles.fieldName}>{field.label}</span>
 							</div>
 						))}
-						{!isExpanded && model.fields.length > 3 && (
+						{model.fields.length > 3 && (
 							<div className={styles.fieldItem}>
 								<Icon name='material-more_horiz' size={12} />
 								<span>+{model.fields.length - 3}</span>
@@ -289,29 +239,6 @@ const DataModel = (props: ResourceChildProps) => {
 						)}
 					</div>
 				</div>
-
-				{/* 关联关系预览 */}
-				{model.relations.length > 0 && (
-					<div className={styles.relationsPreview}>
-						<div className={styles.relationsTitle}>{is_cn ? '关联关系' : 'Relations'}</div>
-						<div className={styles.relationsList}>
-							{model.relations.map((relation) => (
-								<div key={relation.id} className={styles.relationItem}>
-									<Icon
-										name={
-											relation.type === 'hasOne'
-												? 'material-looks_one'
-												: 'material-looks_two'
-										}
-										size={12}
-									/>
-									<span className={styles.relationType}>{relation.type}</span>
-									<span>{relation.model}</span>
-								</div>
-							))}
-						</div>
-					</div>
-				)}
 			</div>
 		)
 	}
