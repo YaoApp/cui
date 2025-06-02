@@ -27,6 +27,9 @@ const DataModel = (props: ResourceChildProps) => {
 	const [detailModalVisible, setDetailModalVisible] = useState(false)
 	const [selectedModel, setSelectedModel] = useState<Item | null>(null)
 
+	// 整体加载状态：集合加载中 OR 初次模型加载中
+	const isInitialLoading = loadingCollections || (activeCollection && loadingModels && models.length === 0)
+
 	// 字段类型图标映射
 	const getFieldTypeIcon = (type: string): string => {
 		const iconMap: Record<string, string> = {
@@ -174,15 +177,6 @@ const DataModel = (props: ResourceChildProps) => {
 
 	// 渲染集合列表
 	const renderCollections = () => {
-		if (loadingCollections) {
-			return (
-				<div className={styles.loadingState}>
-					<Spin size='small' />
-					<div className={styles.loadingText}>{is_cn ? '加载中...' : 'Loading...'}</div>
-				</div>
-			)
-		}
-
 		if (collections.length === 0) {
 			return (
 				<div className={styles.emptyState}>
@@ -198,7 +192,7 @@ const DataModel = (props: ResourceChildProps) => {
 		return (
 			<div className={styles.collectionsList}>
 				{collections.map((collection) => (
-					<Tooltip key={collection.id} title={collection.description} placement='right'>
+					<Tooltip key={collection.id} title={collection.description} placement='left'>
 						<div
 							className={`${styles.collectionItem} ${
 								activeCollection === collection.id ? styles.active : ''
@@ -324,10 +318,11 @@ const DataModel = (props: ResourceChildProps) => {
 
 	// 渲染模型列表
 	const renderModels = () => {
-		if (loadingModels) {
+		// 只在切换集合时显示模型区域loading（非初始加载）
+		if (loadingModels && !isInitialLoading) {
 			return (
-				<div className={styles.loadingState}>
-					<Spin size='small' />
+				<div className={styles.modelsLoadingState}>
+					<Spin />
 					<div className={styles.loadingText}>
 						{is_cn ? '加载数据模型中...' : 'Loading models...'}
 					</div>
@@ -369,13 +364,20 @@ const DataModel = (props: ResourceChildProps) => {
 	// 获取当前集合信息
 	const currentCollection = collections.find((c) => c.id === activeCollection)
 
-	if (loadingCollections) {
+	// 初始加载状态：等集合和第一个集合的模型都加载完成
+	if (isInitialLoading) {
 		return (
 			<div className={styles.dataModelContent}>
 				<div className={styles.loadingState}>
 					<Spin />
 					<div className={styles.loadingText}>
-						{is_cn ? '正在加载数据模型...' : 'Loading data models...'}
+						{loadingCollections
+							? is_cn
+								? '正在加载数据集合...'
+								: 'Loading collections...'
+							: is_cn
+							? '正在加载数据模型...'
+							: 'Loading models...'}
 					</div>
 				</div>
 			</div>
