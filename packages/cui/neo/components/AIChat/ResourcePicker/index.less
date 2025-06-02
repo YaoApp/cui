@@ -1,9 +1,8 @@
 .resourcePickerModal {
 	:global(.ant-modal-content) {
-		border-radius: 8px;
+		border-radius: var(--radius);
 		overflow: hidden;
-		box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12),
-			0 9px 28px 8px rgba(0, 0, 0, 0.05);
+		box-shadow: var(--shadow);
 	}
 
 	:global(.ant-modal-header) {
@@ -15,21 +14,89 @@
 	:global(.ant-modal-body) {
 		padding: 0;
 	}
+
+	// 覆盖 xgen 样式
+	:global(.xgen-modal-header) {
+		padding: 0 !important;
+		border-bottom: none !important;
+		background: transparent !important;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0 !important;
+	}
 }
 
 .modalHeader {
+	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	padding: 16px 20px;
-	border-bottom: 1px solid #f0f0f0;
-	background: #fafafa;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_bg_nav);
+	height: 56px;
+	border-radius: var(--radius) var(--radius) 0 0;
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-shrink: 0;
+		z-index: 1;
+		color: var(--color_title);
+	}
 
 	.modalTitle {
 		font-size: 16px;
 		font-weight: 500;
-		color: #262626;
+		color: var(--color_title);
 		margin: 0;
+	}
+
+	.tabs {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		background: var(--color_bg_nav_tabs);
+		border-radius: 20px;
+		padding: 4px;
+		z-index: 2;
+	}
+
+	.tabItem {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 16px;
+		border-radius: 14px;
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--color_text_grey);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		min-width: 68px;
+		justify-content: center;
+
+		:global(.xgen-icon) {
+			color: inherit;
+		}
+
+		&:hover {
+			color: var(--color_text);
+			background: var(--color_bg_hover);
+		}
+
+		&.tabItemActive {
+			color: var(--color_text);
+			background: var(--color_bg_menu);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		}
 	}
 
 	.closeButton {
@@ -38,38 +105,65 @@
 		justify-content: center;
 		width: 24px;
 		height: 24px;
-		border-radius: 4px;
+		border-radius: var(--radius);
 		cursor: pointer;
-		color: #8c8c8c;
+		color: var(--color_text_grey);
 		transition: all 0.2s ease;
+		flex-shrink: 0;
+		z-index: 1;
 
 		&:hover {
-			background: rgba(0, 0, 0, 0.06);
-			color: #595959;
+			background: var(--color_bg_hover);
+			color: var(--color_text);
 		}
 
 		&:active {
-			background: rgba(0, 0, 0, 0.1);
+			background: var(--color_bg_active);
+		}
+	}
+
+	// 响应式处理：当空间不足时，让tabs降级到左侧布局
+	@media (max-width: 600px) {
+		.tabs {
+			position: static;
+			transform: none;
+			order: 2;
+			margin-left: 16px;
+		}
+
+		.titleSection {
+			order: 1;
+		}
+
+		.closeButton {
+			order: 3;
 		}
 	}
 }
 
 .modalContent {
 	min-height: 400px;
-	padding: 20px;
-	background: #fff;
+	max-height: calc(100vh - 260px);
+	overflow-y: auto;
+	background: var(--color_bg_menu);
+	border-radius: 0 0 var(--radius) var(--radius);
 
-	.emptyContent {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		height: 360px;
-		color: #8c8c8c;
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
 
-		p {
-			margin: 16px 0 0 0;
-			font-size: 14px;
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color_text_grey);
 		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_border_soft);
+		border-radius: 3px;
 	}
 }

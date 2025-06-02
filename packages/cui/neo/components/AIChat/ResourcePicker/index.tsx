@@ -1,7 +1,10 @@
-import { useMemoizedFn } from 'ahooks'
+import { useMemoizedFn, useLocalStorageState } from 'ahooks'
 import { Modal } from 'antd'
 import { getLocale } from '@umijs/max'
+import { Database } from 'phosphor-react'
 import Icon from '@/widgets/Icon'
+import DataModel from './DataModel'
+import KnowledgeBase from './KnowledgeBase'
 import styles from './index.less'
 
 export interface ResourcePickerProps {
@@ -10,6 +13,8 @@ export interface ResourcePickerProps {
 	title?: string
 	width?: number | string
 }
+
+type TabType = 'dataModel' | 'knowledgeBase'
 
 const ResourcePicker = (props: ResourcePickerProps) => {
 	const { visible, onClose, width = 800 } = props
@@ -20,6 +25,24 @@ const ResourcePicker = (props: ResourcePickerProps) => {
 	const defaultTitle = is_cn ? '添加数据' : 'Add Data'
 	const { title = defaultTitle } = props
 
+	// 记住用户上次选择的tab
+	const [activeTab, setActiveTab] = useLocalStorageState<TabType>('resource-picker-tab', {
+		defaultValue: 'dataModel'
+	})
+
+	const tabs = [
+		{
+			key: 'dataModel' as TabType,
+			label: is_cn ? '数据模型' : 'Data Model',
+			icon: 'material-storage'
+		},
+		{
+			key: 'knowledgeBase' as TabType,
+			label: is_cn ? '知识库' : 'Knowledge Base',
+			icon: 'material-library_books'
+		}
+	]
+
 	const handleClose = useMemoizedFn(() => {
 		onClose()
 	})
@@ -28,11 +51,43 @@ const ResourcePicker = (props: ResourcePickerProps) => {
 		handleClose()
 	})
 
+	const handleTabChange = useMemoizedFn((tab: TabType) => {
+		setActiveTab(tab)
+	})
+
+	const renderContent = () => {
+		switch (activeTab) {
+			case 'dataModel':
+				return <DataModel />
+			case 'knowledgeBase':
+				return <KnowledgeBase />
+			default:
+				return <DataModel />
+		}
+	}
+
 	return (
 		<Modal
 			title={
 				<div className={styles.modalHeader}>
-					<span className={styles.modalTitle}>{title}</span>
+					<div className={styles.titleSection}>
+						<Database size={16} weight='bold' />
+						<span className={styles.modalTitle}>{title}</span>
+					</div>
+					<div className={styles.tabs}>
+						{tabs.map((tab) => (
+							<div
+								key={tab.key}
+								className={`${styles.tabItem} ${
+									activeTab === tab.key ? styles.tabItemActive : ''
+								}`}
+								onClick={() => handleTabChange(tab.key)}
+							>
+								<Icon name={tab.icon} size={12} />
+								<span>{tab.label}</span>
+							</div>
+						))}
+					</div>
 					<div className={styles.closeButton} onClick={handleClose}>
 						<Icon name='material-close' size={16} />
 					</div>
@@ -47,17 +102,7 @@ const ResourcePicker = (props: ResourcePickerProps) => {
 			maskClosable={true}
 			className={styles.resourcePickerModal}
 		>
-			<div className={styles.modalContent}>
-				{/* 内容区域先留空，后续可以添加资源选择的具体实现 */}
-				<div className={styles.emptyContent}>
-					<Icon name='material-database' size={48} />
-					<p>
-						{is_cn
-							? '数据模型、知识库、附件等功能开发中...'
-							: 'Data models, knowledge base, attachments features in development...'}
-					</p>
-				</div>
-			</div>
+			<div className={styles.modalContent}>{renderContent()}</div>
 		</Modal>
 	)
 }
