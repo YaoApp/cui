@@ -136,7 +136,7 @@ const Index = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
-	const [loading, setLoading] = useState(false)
+	const [loading, setLoading] = useState(true)
 	const [search, setSearch] = useState('')
 	const [searchText, setSearchText] = useState('')
 	const [page, setPage] = useState(1)
@@ -146,7 +146,8 @@ const Index = () => {
 
 	// 加载数据
 	const loadData = async (reset = false) => {
-		if (loading || (!hasMore && !reset)) return
+		// 如果是重置加载（初始加载或搜索），则允许执行；否则检查 loading 和 hasMore 状态
+		if (!reset && (loading || !hasMore)) return
 
 		setLoading(true)
 		try {
