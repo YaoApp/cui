@@ -322,6 +322,19 @@ const Header: FC<HeaderProps> = ({
 				</div>
 
 				<div className='header_right'>
+					<Tooltip title={is_cn ? '当前任务' : 'Current Task'}>
+						<Button
+							type='text'
+							className='header_icon_btn header_task_btn'
+							onClick={() => navigate('/tasks')}
+						>
+							<div className='header_task_content'>
+								<span className='header_task_text'>{is_cn ? '任务' : 'Tasks'}</span>
+								<span className='header_task_number'>2</span>
+							</div>
+						</Button>
+					</Tooltip>
+
 					<Tooltip title={is_cn ? 'AI 智能体' : 'AI Assistants'}>
 						<Button
 							type='text'

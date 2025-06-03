@@ -292,6 +292,66 @@
 	}
 }
 
+.header_task_btn {
+	width: auto !important;
+	padding: 0 !important;
+	min-width: auto !important;
+	height: auto !important;
+	margin-right: 12px !important;
+
+	.header_task_content {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		padding: 3px 6px 3px 8px;
+		background: var(--color_border_soft);
+		border-radius: 10px;
+		font-size: 11px;
+		transition: all 0.2s ease;
+
+		.header_task_text {
+			color: var(--color_text_light);
+			transition: all 0.2s ease;
+			font-weight: 500;
+			white-space: nowrap;
+		}
+
+		.header_task_number {
+			color: var(--color_danger);
+			font-size: 11px;
+			font-weight: 600;
+			transition: all 0.2s ease;
+			background: rgba(230, 41, 101, 0.1);
+			border-radius: 50%;
+			min-width: 18px;
+			height: 18px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+
+	&:hover {
+		background: transparent !important;
+
+		.header_task_content {
+			background: var(--color_main);
+			transform: translateY(-1px);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+			.header_task_text {
+				color: white;
+				font-weight: 500;
+			}
+
+			.header_task_number {
+				color: white;
+				font-weight: 700;
+			}
+		}
+	}
+}
+
 .header_current_page {
 	font-size: 14px;
 	font-weight: 500;
