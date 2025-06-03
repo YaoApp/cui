@@ -403,9 +403,9 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 			<div className={styles.filesPanel}>
 				<div className={styles.filesHeader}>
 					<div className={styles.headerLeft}>
-						<Icon name='material-folder' size={16} />
+						<Icon name='material-library_books' size={16} />
 						<h4>{selectedCollection?.name || (is_cn ? '文件列表' : 'Files')}</h4>
-						{filteredFiles.length > 0 && (
+						{selectedCollection && (
 							<span className={styles.fileCount}>{filteredFiles.length}</span>
 						)}
 					</div>
@@ -432,8 +432,8 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 							</div>
 							<div className={styles.emptyDescription}>
 								{is_cn
-									? '请从左侧选择一个知识库来查看文件'
-									: 'Please select a knowledge base from the left to view files'}
+									? '请从左侧点击知识库封面来查看文件'
+									: 'Please click on a knowledge base cover from the left to view files'}
 							</div>
 						</div>
 					)}
