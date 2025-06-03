@@ -205,8 +205,8 @@ const DataModel = (props: ResourceChildProps) => {
 				key={model.id}
 				className={`${styles.modelCard} ${isSelected ? styles.selected : ''}`}
 				onClick={() => handleModelSelect(model)}
-				onDoubleClick={(e) => handleViewDetail(model, e)}
-				title={is_cn ? '点击选择，双击查看详情' : 'Click to select, double click for details'}
+				// onDoubleClick={(e) => handleViewDetail(model, e)}
+				// title={is_cn ? '点击选择，双击查看详情' : 'Click to select, double click for details'}
 			>
 				{/* 模型头部 */}
 				<div className={styles.modelHeader}>
