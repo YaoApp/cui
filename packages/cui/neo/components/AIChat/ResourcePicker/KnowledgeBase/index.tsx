@@ -1,5 +1,5 @@
 import { getLocale } from '@umijs/max'
-import { Input, Spin, Drawer } from 'antd'
+import { Input, Spin } from 'antd'
 import { useState, useEffect, useMemo } from 'react'
 import { useMemoizedFn } from 'ahooks'
 import Icon from '@/widgets/Icon'
@@ -17,14 +17,11 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 	const [collections, setCollections] = useState<Collections[]>([])
 	const [files, setFiles] = useState<Files[]>([])
 	const [activeCollection, setActiveCollection] = useState<string>('')
+	const [selectedCollection, setSelectedCollection] = useState<Collections | null>(null)
 	const [searchKeyword, setSearchKeyword] = useState('')
 	const [collectionSearchKeyword, setCollectionSearchKeyword] = useState('')
 	const [loadingCollections, setLoadingCollections] = useState(true)
 	const [loadingFiles, setLoadingFiles] = useState(false)
-
-	// 文件详情抽屉状态
-	const [drawerVisible, setDrawerVisible] = useState(false)
-	const [selectedCollection, setSelectedCollection] = useState<Collections | null>(null)
 
 	// 整体加载状态：集合加载中 OR 初次文件加载中
 	const isInitialLoading = loadingCollections
@@ -122,13 +119,40 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 		return new Set(selectedItems.filter((item) => item.type === 'knowledgeBase').map((item) => item.value))
 	}, [selectedItems])
 
-	// 处理集合点击
+	// 获取选中的集合ID集合
+	const selectedCollectionIds = useMemo(() => {
+		return new Set(
+			selectedItems
+				.filter((item) => item.type === 'knowledgeBase')
+				.map((item) => item.value)
+				.filter((value) => collections.some((col) => col.id === value))
+		)
+	}, [selectedItems, collections])
+
+	// 处理集合点击（展示文件）
 	const handleCollectionClick = useMemoizedFn((collection: Collections) => {
 		setSelectedCollection(collection)
 		setActiveCollection(collection.id)
-		setDrawerVisible(true)
 		setSearchKeyword('')
 		loadFiles(collection.id)
+	})
+
+	// 处理集合选择（RadioBox点击）
+	const handleCollectionSelect = useMemoizedFn((collection: Collections, e: React.MouseEvent) => {
+		e.stopPropagation() // 阻止冒泡到卡片点击事件
+
+		const isSelected = selectedCollectionIds.has(collection.id)
+
+		if (isSelected) {
+			// 已选中的集合，暂不支持取消选择（根据RadioBox行为）
+			return
+		}
+
+		// 选中集合
+		onItemSelect({
+			value: collection.id,
+			label: collection.name
+		})
 	})
 
 	// 处理文件选择
@@ -145,15 +169,6 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 			value: file.file_id,
 			label: file.name
 		})
-	})
-
-	// 关闭抽屉
-	const handleCloseDrawer = useMemoizedFn(() => {
-		setDrawerVisible(false)
-		setSelectedCollection(null)
-		setActiveCollection('')
-		setFiles([])
-		setSearchKeyword('')
 	})
 
 	// 渲染集合列表
@@ -186,27 +201,46 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 
 		return (
 			<div className={styles.collectionsList}>
-				{filteredCollections.map((collection) => (
-					<div
-						key={collection.id}
-						className={styles.collectionCard}
-						onClick={() => handleCollectionClick(collection)}
-					>
-						<div className={styles.collectionCover}>
-							<img src={collection.cover} alt={collection.name} />
-						</div>
-						<div className={styles.collectionInfo}>
-							<h5 className={styles.collectionName}>{collection.name}</h5>
-							<p className={styles.collectionDescription}>{collection.description}</p>
-							<div className={styles.collectionMeta}>
-								<Icon name='material-description' size={12} />
-								<span>
-									{collection.total} {is_cn ? '个文件' : 'files'}
-								</span>
+				{filteredCollections.map((collection) => {
+					const isSelected = selectedCollectionIds.has(collection.id)
+
+					return (
+						<div
+							key={collection.id}
+							className={`${styles.collectionCard} ${isSelected ? styles.selected : ''}`}
+							onClick={() => handleCollectionClick(collection)}
+						>
+							<div className={styles.collectionCover}>
+								<img src={collection.cover} alt={collection.name} />
+							</div>
+							<div className={styles.collectionInfo}>
+								<div
+									className={styles.collectionTitle}
+									onClick={(e) => handleCollectionSelect(collection, e)}
+								>
+									<h5 className={styles.collectionName}>{collection.name}</h5>
+									<Icon
+										name='material-check_circle'
+										size={16}
+										className={styles.checkIcon}
+										style={{
+											color: isSelected
+												? 'var(--color_main)'
+												: 'var(--color_text_grey)'
+										}}
+									/>
+								</div>
+								<p className={styles.collectionDescription}>{collection.description}</p>
+								<div className={styles.collectionMeta}>
+									<Icon name='material-description' size={12} />
+									<span>
+										{collection.total} {is_cn ? '个文件' : 'files'}
+									</span>
+								</div>
 							</div>
 						</div>
-					</div>
-				))}
+					)
+				})}
 			</div>
 		)
 	}
@@ -324,58 +358,66 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 
 	return (
 		<div className={styles.knowledgeBaseContent}>
-			{/* 集合列表 */}
-			<div className={styles.collectionsContent}>
+			{/* 知识库列表面板 */}
+			<div className={styles.collectionsPanel}>
 				<div className={styles.collectionsHeader}>
-					<div className={styles.headerLeft}>
-						<h4>{is_cn ? '知识库' : 'Knowledge Base'}</h4>
-						{filteredCollections.length > 0 && (
-							<span className={styles.collectionCount}>{filteredCollections.length}</span>
-						)}
-					</div>
-					<div className={styles.searchBox}>
-						<Input
-							placeholder={is_cn ? '搜索知识库...' : 'Search knowledge base...'}
-							value={collectionSearchKeyword}
-							onChange={(e) => setCollectionSearchKeyword(e.target.value)}
-							prefix={<Icon name='material-search' size={14} />}
-							allowClear
-						/>
-					</div>
+					<h4>{is_cn ? '知识库' : 'Knowledge Base'}</h4>
+					{filteredCollections.length > 0 && (
+						<span className={styles.collectionCount}>{filteredCollections.length}</span>
+					)}
 				</div>
-				{renderCollections()}
+				<div className={styles.collectionsSearch}>
+					<Input
+						placeholder={is_cn ? '搜索知识库...' : 'Search knowledge base...'}
+						value={collectionSearchKeyword}
+						onChange={(e) => setCollectionSearchKeyword(e.target.value)}
+						prefix={<Icon name='material-search' size={14} />}
+						allowClear
+					/>
+				</div>
+				<div className={styles.collectionsContent}>{renderCollections()}</div>
 			</div>
 
-			{/* 文件抽屉 */}
-			<Drawer
-				title={
-					<div className={styles.drawerTitle}>
+			{/* 文件列表面板 */}
+			<div className={styles.filesPanel}>
+				<div className={styles.filesHeader}>
+					<div className={styles.headerLeft}>
 						<Icon name='material-folder' size={16} />
-						<span>{selectedCollection?.name || (is_cn ? '文件列表' : 'Files')}</span>
+						<h4>{selectedCollection?.name || (is_cn ? '文件列表' : 'Files')}</h4>
 						{filteredFiles.length > 0 && (
 							<span className={styles.fileCount}>{filteredFiles.length}</span>
 						)}
 					</div>
-				}
-				placement='right'
-				onClose={handleCloseDrawer}
-				open={drawerVisible}
-				width='90%'
-				className={styles.filesDrawer}
-				extra={
-					<div className={styles.searchBox}>
-						<Input
-							placeholder={is_cn ? '搜索文件...' : 'Search files...'}
-							value={searchKeyword}
-							onChange={(e) => setSearchKeyword(e.target.value)}
-							prefix={<Icon name='material-search' size={14} />}
-							allowClear
-						/>
-					</div>
-				}
-			>
-				<div className={styles.filesContent}>{renderFiles()}</div>
-			</Drawer>
+					{selectedCollection && (
+						<div className={styles.searchBox}>
+							<Input
+								placeholder={is_cn ? '搜索文件...' : 'Search files...'}
+								value={searchKeyword}
+								onChange={(e) => setSearchKeyword(e.target.value)}
+								prefix={<Icon name='material-search' size={14} />}
+								allowClear
+							/>
+						</div>
+					)}
+				</div>
+				<div className={styles.filesContent}>
+					{selectedCollection ? (
+						renderFiles()
+					) : (
+						<div className={styles.emptyState}>
+							<Icon name='material-touch_app' size={48} />
+							<div className={styles.emptyTitle}>
+								{is_cn ? '选择知识库' : 'Select Knowledge Base'}
+							</div>
+							<div className={styles.emptyDescription}>
+								{is_cn
+									? '请从左侧选择一个知识库来查看文件'
+									: 'Please select a knowledge base from the left to view files'}
+							</div>
+						</div>
+					)}
+				</div>
+			</div>
 		</div>
 	)
 }
