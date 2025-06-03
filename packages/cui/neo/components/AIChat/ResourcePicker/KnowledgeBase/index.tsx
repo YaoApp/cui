@@ -9,7 +9,7 @@ import { mockFetchCollections, mockFetchFiles } from './mockData'
 import styles from './index.less'
 
 const KnowledgeBase = (props: ResourceChildProps) => {
-	const { onItemSelect, selectedItems } = props
+	const { onItemSelect, onItemDeselect, selectedItems } = props
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -144,7 +144,8 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 		const isSelected = selectedCollectionIds.has(collection.id)
 
 		if (isSelected) {
-			// 已选中的集合，暂不支持取消选择（根据RadioBox行为）
+			// 已选中的集合，取消选择
+			onItemDeselect(collection.id)
 			return
 		}
 
@@ -157,10 +158,16 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 
 	// 处理文件选择
 	const handleFileSelect = useMemoizedFn((file: Files) => {
+		// 上传失败或索引失败的文件不可选择
+		if (file.status === 'upload_failed' || file.status === 'index_failed') {
+			return
+		}
+
 		const isSelected = selectedFileIds.has(file.file_id)
 
 		if (isSelected) {
-			// 取消选中（不处理关联）
+			// 已选中的文件，取消选择
+			onItemDeselect(file.file_id)
 			return
 		}
 
@@ -248,12 +255,19 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 	// 渲染文件卡片
 	const renderFileCard = (file: Files) => {
 		const isSelected = selectedFileIds.has(file.file_id)
+		const isDisabled = file.status === 'upload_failed' || file.status === 'index_failed'
 
 		return (
 			<div
 				key={file.file_id}
-				className={`${styles.fileCard} ${isSelected ? styles.selected : ''}`}
+				className={`${styles.fileCard} ${isSelected ? styles.selected : ''} ${
+					isDisabled ? styles.disabled : ''
+				}`}
 				onClick={() => handleFileSelect(file)}
+				style={{
+					cursor: isDisabled ? 'not-allowed' : 'pointer',
+					opacity: isDisabled ? 0.5 : 1
+				}}
 			>
 				{/* 文件头部 */}
 				<div className={styles.fileHeader}>
@@ -262,14 +276,21 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 						<h5 className={styles.fileName}>{file.name}</h5>
 						<p className={styles.fileType}>{file.content_type}</p>
 					</div>
-					<Icon name='material-check_circle' size={16} className={styles.checkIcon} />
+					<Icon
+						name='material-check_circle'
+						size={16}
+						className={styles.checkIcon}
+						style={{
+							opacity: isDisabled ? 0.3 : 1
+						}}
+					/>
 				</div>
 
 				{/* 文件详情 */}
 				<div className={styles.fileDetails}>
 					<div className={styles.fileMetaList}>
 						<div className={styles.fileMeta}>
-							<Icon name='material-storage' size={12} />
+							<Icon name='material-data_usage' size={12} />
 							<span>{formatFileSize(file.bytes)}</span>
 						</div>
 						<div className={styles.fileMeta}>

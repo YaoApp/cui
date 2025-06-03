@@ -347,6 +347,34 @@
 			}
 		}
 
+		&.disabled {
+			cursor: not-allowed;
+
+			&:hover {
+				border-color: var(--color_neo_border_card);
+				box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+				transform: none;
+			}
+
+			.fileHeader {
+				.fileName,
+				.fileType {
+					color: var(--color_text_grey);
+				}
+			}
+
+			.fileDetails {
+				.fileMeta {
+					opacity: 0.6;
+
+					&:hover {
+						background: var(--color_neo_bg_field);
+						border-color: var(--color_neo_border_field);
+					}
+				}
+			}
+		}
+
 		.fileHeader {
 			display: flex;
 			align-items: flex-start;

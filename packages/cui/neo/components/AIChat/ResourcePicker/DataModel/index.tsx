@@ -10,7 +10,7 @@ import DataModelDetailModal from './DetailModal'
 import styles from './index.less'
 
 const DataModel = (props: ResourceChildProps) => {
-	const { onItemSelect, selectedItems } = props
+	const { onItemSelect, onItemDeselect, selectedItems } = props
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -122,7 +122,8 @@ const DataModel = (props: ResourceChildProps) => {
 		const isSelected = selectedModelIds.has(model.id)
 
 		if (isSelected) {
-			// 取消选中（不处理关联）
+			// 已选中的模型，取消选择
+			onItemDeselect(model.id)
 			return
 		}
 

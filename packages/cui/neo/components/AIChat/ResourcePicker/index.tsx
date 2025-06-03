@@ -25,6 +25,7 @@ export interface ResourcePickerProps {
 export interface ResourceChildProps {
 	onItemSelect: (item: Omit<SelectedItem, 'type'>) => void
 	onItemRemove: (value: string) => void
+	onItemDeselect: (value: string) => void
 	selectedItems: SelectedItem[]
 }
 
@@ -92,9 +93,15 @@ const ResourcePicker = (props: ResourcePickerProps) => {
 		setSelectedItems((prev) => prev.filter((item) => item.value !== value))
 	})
 
+	// 取消选择项（从子组件触发）
+	const handleItemDeselect = useMemoizedFn((value: string) => {
+		setSelectedItems((prev) => prev.filter((item) => item.value !== value))
+	})
+
 	const childProps: ResourceChildProps = {
 		onItemSelect: handleItemSelect,
 		onItemRemove: handleItemRemove,
+		onItemDeselect: handleItemDeselect,
 		selectedItems
 	}
 
