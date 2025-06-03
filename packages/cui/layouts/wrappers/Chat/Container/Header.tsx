@@ -322,21 +322,30 @@ const Header: FC<HeaderProps> = ({
 				</div>
 
 				<div className='header_right'>
-					<Tooltip title={is_cn ? '我的账号' : 'My Account'}>
-						<Button
-							type='text'
-							className='header_icon_btn'
-							icon={<Icon name='material-person_pin_circle' size={16} />}
-							onClick={() => navigate('/setting')}
-						/>
-					</Tooltip>
-
 					<Tooltip title={is_cn ? 'AI 智能体' : 'AI Assistants'}>
 						<Button
 							type='text'
 							className='header_icon_btn'
 							icon={<Icon name='material-assistant' size={14} />}
 							onClick={() => navigate('/assistants')}
+						/>
+					</Tooltip>
+
+					<Tooltip title={is_cn ? '知识库' : 'Knowledge Base'}>
+						<Button
+							type='text'
+							className='header_icon_btn'
+							icon={<Icon name='material-library_books' size={14} />}
+							onClick={() => navigate('/knowledge')}
+						/>
+					</Tooltip>
+
+					<Tooltip title={is_cn ? '我的账号' : 'My Account'}>
+						<Button
+							type='text'
+							className='header_icon_btn'
+							icon={<Icon name='material-person_pin_circle' size={16} />}
+							onClick={() => navigate('/setting')}
 						/>
 					</Tooltip>
 

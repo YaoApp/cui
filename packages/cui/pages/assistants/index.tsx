@@ -191,7 +191,14 @@ const Index = () => {
 		<div className={styles.container}>
 			<div className={styles.header}>
 				<div className={styles.titleContainer}>
-					<h1 className={styles.title}>{is_cn ? 'AI 智能体' : 'AI Assistants'}</h1>
+					<div className={styles.titleWithIcon}>
+						<Icon
+							name='material-assistant'
+							size={24}
+							style={{ color: 'var(--color_page_title)' }}
+						/>
+						<h1 className={styles.title}>{is_cn ? 'AI 智能体' : 'AI Assistants'}</h1>
+					</div>
 					<div className={styles.createIcon} onClick={handleCreate}>
 						<Icon name='material-add' size={24} />
 						<span className={styles.createText}>{is_cn ? '创建' : 'Create'}</span>
