@@ -4,25 +4,7 @@ import { SearchOutlined, DeleteOutlined } from '@ant-design/icons'
 import { history, getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
-
-// 知识库数据类型
-interface KnowledgeBase {
-	id: string
-	collection_id: string
-	name: string
-	description: string
-	uid: string
-	public: boolean
-	scope?: any
-	readonly: boolean
-	option?: any
-	system: boolean
-	sort: number
-	cover: string
-	document_count: number // 文档数量
-	created_at: string
-	updated_at: string
-}
+import { KnowledgeBase } from './types'
 
 // 模拟请求延迟
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
