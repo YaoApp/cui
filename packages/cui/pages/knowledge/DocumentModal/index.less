@@ -1,0 +1,330 @@
+.documentModal {
+	// 确保模态窗有足够高的层级
+	z-index: 1000;
+
+	:global(.ant-modal-content) {
+		height: 90vh;
+		display: flex;
+		flex-direction: column;
+		border-radius: 12px;
+		overflow: visible; /* 改为visible，让popover可以显示 */
+		position: relative; /* 确保定位上下文 */
+	}
+
+	:global(.ant-modal-body) {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+		overflow: hidden;
+		height: 100%;
+		position: relative; /* 确保定位上下文 */
+	}
+
+	.closeButton {
+		width: 32px;
+		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 6px;
+		transition: all 0.2s;
+
+		&:hover {
+			background-color: rgba(0, 0, 0, 0.06);
+		}
+	}
+}
+
+.modalContent {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	min-height: 400px;
+	gap: 16px;
+
+	span {
+		color: var(--color_text_grey);
+		font-size: 14px;
+	}
+}
+
+// 以下样式复制自原文档详情页
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--color_border_light);
+	background: var(--color_bg_container);
+	position: relative;
+	z-index: 1; /* 确保header有基础层级 */
+}
+
+.headerLeft {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.titleInfo {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.titleWithBadge {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--color_text);
+	line-height: 1.4;
+}
+
+.fileTypeTag {
+	font-size: 12px;
+	font-weight: 500;
+	border: none;
+	border-radius: 4px;
+	padding: 2px 8px;
+}
+
+.headerRight {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.infoButton,
+.moreButton {
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	transition: all 0.2s;
+
+	&:hover {
+		background-color: var(--color_bg_hover);
+	}
+
+	&.active {
+		background-color: var(--color_primary_bg);
+		color: var(--color_primary);
+	}
+}
+
+// 气泡式文档信息样式
+.documentPopover {
+	position: absolute;
+	top: 60px;
+	right: 54px;
+	width: 350px;
+	background: var(--color_bg_container);
+	border: 1px solid var(--color_border);
+	border-radius: 12px;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+	z-index: 1002; /* 确保在Modal内容之上 */
+	transform: translateY(0);
+	opacity: 1;
+	transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+	&.closing {
+		transform: translateY(-8px);
+		opacity: 0;
+	}
+}
+
+.popoverArrow {
+	position: absolute;
+	top: -6px;
+	right: 58px; /* 调整箭头位置，指向信息按钮 */
+	width: 12px;
+	height: 12px;
+	background: var(--color_bg_container);
+	transform: rotate(45deg);
+	border-top: 1px solid var(--color_border);
+	border-left: 1px solid var(--color_border);
+	z-index: 1003; /* 箭头在popover之上 */
+}
+
+.popoverArrowBorder {
+	position: absolute;
+	top: -7px;
+	right: 58px; /* 调整箭头位置，指向信息按钮 */
+	width: 12px;
+	height: 12px;
+	background: var(--color_bg_container);
+	transform: rotate(45deg);
+	z-index: 1001; /* 箭头边框层级稍低 */
+}
+
+.popoverHeader {
+	padding: 16px;
+	border-bottom: 1px solid var(--color_border_light);
+}
+
+.headerContent {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.fileIcon {
+	width: 32px;
+	height: 32px;
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.fileName {
+	font-size: 16px;
+	font-weight: 500;
+	color: var(--color_text);
+	flex: 1;
+	word-break: break-all;
+}
+
+.popoverBody {
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.metaInfo {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	color: var(--color_text_secondary);
+
+	.anticon {
+		font-size: 14px;
+		color: var(--color_text_tertiary);
+	}
+}
+
+.description {
+	background: var(--color_bg_layout);
+	padding: 12px;
+	border-radius: 8px;
+	font-size: 14px;
+	color: var(--color_text_secondary);
+	line-height: 1.5;
+	margin-top: 8px;
+}
+
+// 内容区域样式
+.content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	position: relative;
+	z-index: 1; /* 确保content区域层级低于popover */
+}
+
+.contentTabs {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	padding: 0 16px 16px 16px; /* 左右和底部有内边距 */
+
+	:global(.ant-tabs-content-holder) {
+		flex: 1;
+		overflow: hidden;
+	}
+
+	:global(.ant-tabs-tabpane) {
+		height: 100%;
+		overflow: auto;
+	}
+}
+
+.tabLabel {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+}
+
+.contentViewer {
+	height: 100%;
+	overflow: auto;
+	padding: 16px;
+	background: var(--color_bg_container);
+	border-radius: 8px;
+}
+
+.documentContentWrapper {
+	height: 100%;
+	width: 100%;
+
+	// 修复FileViewer的显示问题
+	:global(.file-viewer) {
+		height: 100%;
+		width: 100%;
+		border: none;
+		background: transparent;
+
+		.markdown-body {
+			padding: 0;
+			background: transparent;
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+				'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			line-height: 1.6;
+			color: var(--color_text);
+
+			h1,
+			h2,
+			h3,
+			h4,
+			h5,
+			h6 {
+				color: var(--color_text);
+				margin-top: 1.5em;
+				margin-bottom: 0.5em;
+			}
+
+			p {
+				margin-bottom: 1em;
+			}
+
+			code {
+				background: var(--color_bg_layout);
+				padding: 2px 6px;
+				border-radius: 4px;
+				font-size: 0.9em;
+			}
+
+			pre {
+				background: var(--color_bg_layout);
+				padding: 16px;
+				border-radius: 8px;
+				overflow-x: auto;
+			}
+		}
+	}
+}

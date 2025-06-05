@@ -4,6 +4,7 @@ import { Spin, Button, message, Input, Upload, Empty, Badge, Select, Tooltip } f
 import { ArrowLeftOutlined, UploadOutlined, LinkOutlined, FileTextOutlined, SearchOutlined } from '@ant-design/icons'
 import type { UploadProps } from 'antd'
 import Icon from '@/widgets/Icon'
+import DocumentModal from '../DocumentModal'
 import styles from './index.less'
 
 const { TextArea } = Input
@@ -111,6 +112,10 @@ const KnowledgeDetail = () => {
 	const [searchText, setSearchText] = useState('')
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const [splitMode, setSplitMode] = useState<'fixed' | 'smart'>('smart')
+
+	// 模态窗状态
+	const [modalVisible, setModalVisible] = useState(false)
+	const [selectedDocument, setSelectedDocument] = useState<{ collectionId: string; docId: string } | null>(null)
 
 	// 可用标签
 	const availableTags = [
@@ -244,14 +249,22 @@ const KnowledgeDetail = () => {
 	}
 
 	const handleViewDocuments = () => {
-		// 跳转到示例文档页面
-		history.push(`/knowledge/document/${id}/doc_001`)
+		// 打开示例文档模态窗
+		setSelectedDocument({
+			collectionId: id,
+			docId: 'doc_001'
+		})
+		setModalVisible(true)
 	}
 
 	const handleViewSeedDocument = (seed: Seed) => {
 		// 根据seed ID生成doc_id，实际项目中应该使用真实的文档ID
 		const docId = `doc_${seed.id.padStart(3, '0')}`
-		history.push(`/knowledge/document/${id}/${docId}`)
+		setSelectedDocument({
+			collectionId: id,
+			docId: docId
+		})
+		setModalVisible(true)
 	}
 
 	// 过滤种子数据
@@ -539,6 +552,19 @@ const KnowledgeDetail = () => {
 					</div>
 				)}
 			</div>
+
+			{/* 文档详情模态窗 */}
+			{selectedDocument && (
+				<DocumentModal
+					visible={modalVisible}
+					onClose={() => {
+						setModalVisible(false)
+						setSelectedDocument(null)
+					}}
+					collectionId={selectedDocument.collectionId}
+					docId={selectedDocument.docId}
+				/>
+			)}
 		</div>
 	)
 }
