@@ -30,6 +30,9 @@ export interface DocumentSummary {
 	chunk_count: number // 切片数量
 }
 
+// 文档状态枚举
+export type DocumentStatus = 'processing' | 'ready' | 'failed' | 'indexing'
+
 export interface Document {
 	id: string
 	doc_id: string // 文档ID
@@ -41,6 +44,10 @@ export interface Document {
 	content: string
 	created_at: string
 	updated_at: string
+	// 新增字段
+	knowledge_base_name: string // 所属知识库集合名称
+	chunk_count: number // 切片数量
+	status: DocumentStatus // 文档状态
 }
 
 export interface Chunk {

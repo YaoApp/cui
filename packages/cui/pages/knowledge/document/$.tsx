@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, history, getLocale } from '@umijs/max'
 import { Spin, Button, message, Tabs, Empty, Card, Tag, Avatar, Tooltip, Progress, Input } from 'antd'
 import {
@@ -13,7 +13,11 @@ import {
 	UserOutlined,
 	DatabaseOutlined,
 	InfoCircleOutlined,
-	MoreOutlined
+	MoreOutlined,
+	CheckCircleOutlined,
+	CloseCircleOutlined,
+	LoadingOutlined,
+	QuestionCircleOutlined
 } from '@ant-design/icons'
 import Icon from '@/widgets/Icon'
 import FileViewer from '@/components/view/FileViewer'
@@ -51,6 +55,9 @@ const mockDocument: Document = {
 	description: '详细分析了人工智能技术的发展现状、主要趋势和未来展望',
 	uid: 'user123',
 	cover: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop',
+	knowledge_base_name: 'AI技术资料库',
+	chunk_count: 45,
+	status: 'ready',
 	content: `# AI技术发展趋势报告
 
 ## 摘要
@@ -178,6 +185,40 @@ const DocumentDetail = () => {
 	const [documentContent, setDocumentContent] = useState<string>('')
 	const [activeTab, setActiveTab] = useState('content')
 	const [showMetadata, setShowMetadata] = useState(false)
+	const [isClosing, setIsClosing] = useState(false)
+
+	// 添加ref用于检测外部点击
+	const popoverRef = useRef<HTMLDivElement>(null)
+	const infoButtonRef = useRef<HTMLButtonElement>(null)
+
+	// 丝滑关闭函数 - $500动画！
+	const closePopover = () => {
+		setIsClosing(true)
+		setTimeout(() => {
+			setShowMetadata(false)
+			setIsClosing(false)
+		}, 200) // 精确匹配CSS transition时长
+	}
+
+	// 点击外部区域关闭popover
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				showMetadata &&
+				popoverRef.current &&
+				infoButtonRef.current &&
+				!popoverRef.current.contains(event.target as Node) &&
+				!infoButtonRef.current.contains(event.target as Node)
+			) {
+				closePopover()
+			}
+		}
+
+		window.document.addEventListener('mousedown', handleClickOutside)
+		return () => {
+			window.document.removeEventListener('mousedown', handleClickOutside)
+		}
+	}, [showMetadata])
 
 	// 加载知识库信息
 	const loadKnowledgeBase = async () => {
@@ -238,6 +279,39 @@ const DocumentDetail = () => {
 		return typeMap[ext || ''] || { icon: 'material-insert_drive_file', color: '#999', label: 'FILE' }
 	}
 
+	// 获取文档状态信息
+	const getDocumentStatus = (status: string) => {
+		const statusMap: Record<string, { icon: any; color: string; label: string }> = {
+			processing: {
+				icon: <ClockCircleOutlined />,
+				color: 'var(--color_warning)',
+				label: is_cn ? '处理中' : 'Processing'
+			},
+			ready: {
+				icon: <CheckCircleOutlined />,
+				color: 'var(--color_success)',
+				label: is_cn ? '就绪' : 'Ready'
+			},
+			failed: {
+				icon: <CloseCircleOutlined />,
+				color: 'var(--color_danger)',
+				label: is_cn ? '失败' : 'Failed'
+			},
+			indexing: {
+				icon: <LoadingOutlined />,
+				color: 'var(--color_info)',
+				label: is_cn ? '索引中' : 'Indexing'
+			}
+		}
+		return (
+			statusMap[status] || {
+				icon: <QuestionCircleOutlined />,
+				color: 'var(--color_text_grey)',
+				label: status
+			}
+		)
+	}
+
 	// 渲染文档内容
 	const renderDocumentContent = () => {
 		if (!documentContent) {
@@ -284,87 +358,103 @@ const DocumentDetail = () => {
 
 	return (
 		<div className={styles.container}>
-			{/* 简化头部导航 */}
-			<div className={styles.header}>
-				<div className={styles.headerContent}>
-					<div className={styles.headerMain}>
-						<div className={styles.headerLeft}>
-							<Button
-								type='text'
-								icon={<ArrowLeftOutlined />}
-								onClick={handleBack}
-								className={styles.backButton}
-							/>
-							<div className={styles.breadcrumbPath}>
-								<span
-									className={styles.knowledgeBaseName}
-									onClick={() => history.push(`/knowledge/detail/${collectionId}`)}
-								>
-									{knowledgeBase?.name}
-								</span>
-								<Icon name='material-keyboard_arrow_right' size={14} />
-								<span className={styles.documentName}>{document?.name}</span>
-							</div>
+			{/* 头部导航 - 与详情页完全一致 */}
+			<div className={styles.header} style={{ position: 'relative' }}>
+				<div className={styles.headerLeft}>
+					<Button
+						type='text'
+						icon={<ArrowLeftOutlined />}
+						onClick={handleBack}
+						className={styles.backButton}
+					/>
+					<div className={styles.titleInfo}>
+						<div className={styles.titleWithBadge}>
+							<h1 className={styles.title}>{document?.name}</h1>
+							<Tag color={fileType.color} className={styles.fileTypeTag}>
+								{fileType.label}
+							</Tag>
 						</div>
-						<div className={styles.headerRight}>
-							<Tooltip title={is_cn ? '文档信息' : 'Document Info'}>
-								<Button
-									type='text'
-									icon={<InfoCircleOutlined />}
-									onClick={() => setShowMetadata(!showMetadata)}
-									className={`${styles.infoButton} ${
-										showMetadata ? styles.active : ''
-									}`}
-								/>
-							</Tooltip>
-							<Tooltip title={is_cn ? '更多操作' : 'More Actions'}>
-								<Button
-									type='text'
-									icon={<MoreOutlined />}
-									className={styles.moreButton}
-								/>
-							</Tooltip>
+					</div>
+				</div>
+				<div className={styles.headerRight}>
+					<Tooltip title={is_cn ? '文档信息' : 'Document Info'}>
+						<Button
+							type='text'
+							icon={<InfoCircleOutlined />}
+							onClick={() => {
+								if (showMetadata) {
+									closePopover()
+								} else {
+									setShowMetadata(true)
+								}
+							}}
+							className={`${styles.infoButton} ${showMetadata ? styles.active : ''}`}
+							ref={infoButtonRef}
+						/>
+					</Tooltip>
+					<Tooltip title={is_cn ? '更多操作' : 'More Actions'}>
+						<Button type='text' icon={<MoreOutlined />} className={styles.moreButton} />
+					</Tooltip>
+				</div>
+			</div>
+
+			{/* 气泡式文档信息 */}
+			{showMetadata && (
+				<div
+					className={`${styles.documentPopover} ${isClosing ? styles.closing : ''}`}
+					ref={popoverRef}
+				>
+					{/* 三角形箭头 */}
+					<div className={styles.popoverArrow} />
+					<div className={styles.popoverArrowBorder} />
+
+					{/* Card Header */}
+					<div className={styles.popoverHeader}>
+						<div className={styles.headerContent}>
+							<div className={styles.fileIcon} style={{ backgroundColor: fileType.color }}>
+								{fileType.label}
+							</div>
+							<div className={styles.fileName}>{document?.name}</div>
 						</div>
 					</div>
 
-					{/* 可折叠的元信息 */}
-					{showMetadata && (
-						<div className={styles.metadataSection}>
-							<div className={styles.documentInfo}>
-								<div className={styles.fileIconWrapper}>
-									<Icon
-										name={fileType.icon}
-										size={20}
-										style={{ color: fileType.color }}
-									/>
-								</div>
-								<div className={styles.documentDetails}>
-									<h3 className={styles.documentTitle}>{document?.name}</h3>
-									<p className={styles.documentDescription}>
-										{document?.description}
-									</p>
-								</div>
-							</div>
-							<div className={styles.metaCards}>
-								<div className={styles.metaCard}>
-									<Icon name='material-schedule' size={14} />
-									<span>
-										{is_cn ? '更新于' : 'Updated'}{' '}
-										{new Date(document?.updated_at || '').toLocaleDateString()}
-									</span>
-								</div>
-								<div className={styles.metaCard}>
-									<Icon name='material-person' size={14} />
-									<span>{document?.uid}</span>
-								</div>
-								<div className={styles.metaCard}>
-									<Tag color={fileType.color}>{fileType.label}</Tag>
-								</div>
-							</div>
+					{/* Card Body */}
+					<div className={styles.popoverBody}>
+						<div className={styles.metaInfo}>
+							<ClockCircleOutlined />
+							更新时间: {new Date(document?.updated_at || '').toLocaleString('zh-CN')}
 						</div>
-					)}
+
+						<div className={styles.metaInfo}>
+							<UserOutlined />
+							作者: {document?.uid}
+						</div>
+
+						<div className={styles.metaInfo}>
+							<DatabaseOutlined />
+							所属集合: {document?.knowledge_base_name}
+						</div>
+
+						<div className={styles.metaInfo}>
+							<FileTextOutlined />
+							切片数量: {document?.chunk_count || 0}
+						</div>
+
+						<div
+							className={`${styles.metaInfo} ${
+								styles[`status-${document?.status || 'ready'}`] || ''
+							}`}
+						>
+							{getDocumentStatus(document?.status || 'ready').icon}
+							文档状态: {getDocumentStatus(document?.status || 'ready').label}
+						</div>
+
+						{document?.description && (
+							<div className={styles.description}>{document.description}</div>
+						)}
+					</div>
 				</div>
-			</div>
+			)}
 
 			{/* 主要内容区域 */}
 			<div className={styles.content}>
@@ -372,7 +462,6 @@ const DocumentDetail = () => {
 					activeKey={activeTab}
 					onChange={setActiveTab}
 					className={styles.contentTabs}
-					size='large'
 					items={[
 						{
 							key: 'content',
@@ -382,13 +471,7 @@ const DocumentDetail = () => {
 									<span>{is_cn ? '文档内容' : 'Content'}</span>
 								</div>
 							),
-							children: (
-								<div className={styles.tabContent}>
-									<div className={styles.contentCard}>
-										{renderDocumentContent()}
-									</div>
-								</div>
-							)
+							children: renderDocumentContent()
 						},
 						{
 							key: 'chunks',
@@ -398,11 +481,7 @@ const DocumentDetail = () => {
 									<span>{is_cn ? '知识切片' : 'Knowledge Chunks'}</span>
 								</div>
 							),
-							children: (
-								<div className={styles.tabContent}>
-									<div className={styles.contentCard}>{renderChunks()}</div>
-								</div>
-							)
+							children: renderChunks()
 						}
 					]}
 				/>
