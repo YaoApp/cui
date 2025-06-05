@@ -436,11 +436,35 @@
 		display: flex;
 		flex-direction: column;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		position: relative;
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: rgba(51, 113, 252, 0.05);
+			opacity: 0;
+			transition: opacity 0.3s ease;
+			z-index: 1;
+			pointer-events: none;
+		}
 
 		&:hover {
 			transform: translateY(-4px);
 			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-			border-color: var(--color_neo_border_hover);
+			border-color: var(--color_main);
+
+			&::before {
+				opacity: 1;
+			}
+		}
+
+		&:active {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 		}
 
 		.cardHeader {
@@ -452,6 +476,8 @@
 			border-bottom: 1px solid var(--color_neo_border_header);
 			transition: all 0.3s ease;
 			flex-shrink: 0;
+			position: relative;
+			z-index: 2;
 
 			.cardHeaderLeft {
 				flex: 1;
@@ -526,6 +552,7 @@
 			background: var(--color_neo_bg_card);
 			overflow: hidden;
 			position: relative;
+			z-index: 2;
 
 			.cardCover {
 				width: 100%;
@@ -697,6 +724,8 @@
 			min-height: 36px;
 			display: flex;
 			align-items: center;
+			position: relative;
+			z-index: 2;
 
 			.seedTags {
 				display: flex;

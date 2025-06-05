@@ -243,6 +243,17 @@ const KnowledgeDetail = () => {
 		history.push('/knowledge')
 	}
 
+	const handleViewDocuments = () => {
+		// 跳转到示例文档页面
+		history.push(`/knowledge/document/${id}/doc_001`)
+	}
+
+	const handleViewSeedDocument = (seed: Seed) => {
+		// 根据seed ID生成doc_id，实际项目中应该使用真实的文档ID
+		const docId = `doc_${seed.id.padStart(3, '0')}`
+		history.push(`/knowledge/document/${id}/${docId}`)
+	}
+
 	// 过滤种子数据
 	const filteredSeeds = seeds.filter((seed) => {
 		// 搜索过滤
@@ -306,8 +317,14 @@ const KnowledgeDetail = () => {
 						<p className={styles.subtitle}>{knowledgeBase.description}</p>
 					</div>
 				</div>
-				<div className={styles.headerRight} style={{ display: 'none' }}>
-					<Button type='primary'>Publish</Button>
+				<div className={styles.headerRight}>
+					<Tooltip
+						title={is_cn ? '查看知识库中的文档详情' : 'View document details in knowledge base'}
+					>
+						<Button type='default' onClick={handleViewDocuments} icon={<FileTextOutlined />}>
+							{is_cn ? '查看文档' : 'View Documents'}
+						</Button>
+					</Tooltip>
 				</div>
 			</div>
 
@@ -444,7 +461,11 @@ const KnowledgeDetail = () => {
 				{filteredSeeds.length > 0 ? (
 					<div className={styles.seedsGrid}>
 						{filteredSeeds.map((seed) => (
-							<div key={seed.id} className={styles.seedCard}>
+							<div
+								key={seed.id}
+								className={styles.seedCard}
+								onClick={() => handleViewSeedDocument(seed)}
+							>
 								<div className={styles.cardHeader}>
 									<div className={styles.cardHeaderLeft}>
 										<div className={styles.cardTitleWithIcon}>
