@@ -6,6 +6,7 @@ import Icon from '@/widgets/Icon'
 import { KnowledgeBase, Document } from '../types'
 import { mockFetchKnowledgeBase, mockFetchDocument, mockFetchDocumentContent } from './mockData'
 import DocInfo from './DocInfo'
+import ContentLayout from './ContentLayout'
 import styles from './index.less'
 
 interface DocumentModalProps {
@@ -253,23 +254,7 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 
 				{/* 主要内容区域 */}
 				<div className={styles.content}>
-					<div
-						style={{
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							height: '100%',
-							color: '#999',
-							fontSize: '16px',
-							borderBottomLeftRadius: isFullscreen ? '0' : '12px',
-							borderBottomRightRadius: isFullscreen ? '0' : '12px',
-							backgroundColor: '#fafafa'
-						}}
-					>
-						{is_cn
-							? '主要内容区域占位 - 待开发'
-							: 'Main Content Area Placeholder - To Be Developed'}
-					</div>
+					<ContentLayout />
 				</div>
 			</div>
 		</Modal>
