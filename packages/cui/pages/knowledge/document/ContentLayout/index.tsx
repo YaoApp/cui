@@ -25,6 +25,12 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ className }) => {
 		setIsDragging(true)
 	}, [viewMode])
 
+	// 双击恢复居中
+	const handleDoubleClick = useCallback(() => {
+		if (viewMode !== 'dual') return
+		setSplitPosition(50)
+	}, [viewMode])
+
 	const handleMouseMove = useCallback(
 		(e: MouseEvent) => {
 			if (!isDragging || !containerRef.current || viewMode !== 'dual') return
@@ -134,6 +140,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ className }) => {
 					className={`${styles.divider} ${isDragging ? styles.dragging : ''}`}
 					style={{ left: `${splitPosition}%` }}
 					onMouseDown={handleMouseDown}
+					onDoubleClick={handleDoubleClick}
 				></div>
 			)}
 
