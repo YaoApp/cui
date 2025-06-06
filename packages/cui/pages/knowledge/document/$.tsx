@@ -57,6 +57,7 @@ const mockDocument: Document = {
 	cover: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop',
 	knowledge_base_name: 'AI技术资料库',
 	chunk_count: 45,
+	file_size: 1000000,
 	status: 'ready',
 	content: `# AI技术发展趋势报告
 

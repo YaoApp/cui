@@ -48,6 +48,7 @@ export interface Document {
 	knowledge_base_name: string // 所属知识库集合名称
 	chunk_count: number // 切片数量
 	status: DocumentStatus // 文档状态
+	file_size: number // 文件大小（字节）
 }
 
 export interface Chunk {

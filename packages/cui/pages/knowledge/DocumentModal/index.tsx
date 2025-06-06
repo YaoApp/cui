@@ -16,7 +16,8 @@ import {
 	CheckCircleOutlined,
 	CloseCircleOutlined,
 	LoadingOutlined,
-	QuestionCircleOutlined
+	QuestionCircleOutlined,
+	HddOutlined
 } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
@@ -58,6 +59,7 @@ const mockDocument: Document = {
 	knowledge_base_name: 'AI技术资料库',
 	chunk_count: 45,
 	status: 'ready',
+	file_size: 2485760, // 2.4MB
 	content: `# AI技术发展趋势报告
 
 ## 摘要
@@ -163,7 +165,11 @@ const mockFetchKnowledgeBase = async (collectionId: string): Promise<KnowledgeBa
 
 const mockFetchDocument = async (docId: string): Promise<Document> => {
 	await delay(300)
-	return mockDocument
+	// 添加模拟文件大小（随机生成）
+	return {
+		...mockDocument,
+		file_size: Math.floor(Math.random() * 10000000) + 100000 // 100KB 到 10MB
+	}
 }
 
 const mockFetchDocumentContent = async (docId: string): Promise<string> => {
@@ -304,6 +310,15 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 				label: status
 			}
 		)
+	}
+
+	// 格式化文件大小
+	const formatFileSize = (bytes: number): string => {
+		if (bytes === 0) return '0 B'
+		const k = 1024
+		const sizes = ['B', 'KB', 'MB', 'GB']
+		const i = Math.floor(Math.log(bytes) / Math.log(k))
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 	}
 
 	// 渲染文档内容
@@ -481,6 +496,11 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 							<div className={styles.metaInfo}>
 								<FileTextOutlined />
 								切片数量: {document?.chunk_count || 0}
+							</div>
+
+							<div className={styles.metaInfo}>
+								<HddOutlined />
+								文件大小: {formatFileSize(document?.file_size || 0)}
 							</div>
 
 							<div

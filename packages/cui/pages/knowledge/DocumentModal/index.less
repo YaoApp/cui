@@ -130,16 +130,16 @@
 	}
 }
 
-// 气泡式文档信息样式
+// 气泡式文档信息样式 - 采用Neo设计系统配色
 .documentPopover {
 	position: absolute;
 	top: 60px;
 	right: 54px;
 	width: 350px;
-	background: var(--color_bg_container);
-	border: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
 	border-radius: 12px;
-	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 	z-index: 1002; /* 确保在Modal内容之上 */
 	transform: translateY(0);
 	opacity: 1;
@@ -157,10 +157,10 @@
 	right: 58px; /* 调整箭头位置，指向信息按钮 */
 	width: 12px;
 	height: 12px;
-	background: var(--color_bg_container);
+	background: var(--color_neo_bg_card);
 	transform: rotate(45deg);
-	border-top: 1px solid var(--color_border);
-	border-left: 1px solid var(--color_border);
+	border-top: 1px solid var(--color_neo_border_card);
+	border-left: 1px solid var(--color_neo_border_card);
 	z-index: 1003; /* 箭头在popover之上 */
 }
 
@@ -170,70 +170,86 @@
 	right: 58px; /* 调整箭头位置，指向信息按钮 */
 	width: 12px;
 	height: 12px;
-	background: var(--color_bg_container);
+	background: var(--color_neo_bg_card);
 	transform: rotate(45deg);
 	z-index: 1001; /* 箭头边框层级稍低 */
 }
 
 .popoverHeader {
-	padding: 16px;
-	border-bottom: 1px solid var(--color_border_light);
-}
+	padding: 18px 20px 16px 20px;
+	background: var(--color_neo_bg_header);
+	border-bottom: 1px solid var(--color_neo_border_header);
+	border-radius: 12px 12px 0 0; /* 顶部圆角与父容器匹配 */
 
-.headerContent {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
+	.headerContent {
+		display: flex;
+		align-items: center;
+		gap: 12px;
 
-.fileIcon {
-	width: 32px;
-	height: 32px;
-	border-radius: 6px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	font-size: 12px;
-	font-weight: 600;
-}
+		.fileIcon {
+			width: 32px;
+			height: 32px;
+			border-radius: 6px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			font-size: 12px;
+			font-weight: 600;
+		}
 
-.fileName {
-	font-size: 16px;
-	font-weight: 500;
-	color: var(--color_text);
-	flex: 1;
-	word-break: break-all;
-}
-
-.popoverBody {
-	padding: 16px;
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-}
-
-.metaInfo {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-size: 14px;
-	color: var(--color_text_secondary);
-
-	.anticon {
-		font-size: 14px;
-		color: var(--color_text_tertiary);
+		.fileName {
+			font-size: 14px;
+			font-weight: 600;
+			color: var(--color_neo_text_primary);
+			flex: 1;
+			word-break: break-all;
+			line-height: 1.4;
+		}
 	}
 }
 
-.description {
-	background: var(--color_bg_layout);
-	padding: 12px;
-	border-radius: 8px;
-	font-size: 14px;
-	color: var(--color_text_secondary);
-	line-height: 1.5;
-	margin-top: 8px;
+.popoverBody {
+	padding: 20px;
+	background: var(--color_neo_bg_card);
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	border-radius: 0 0 12px 12px; /* 底部圆角与父容器匹配 */
+
+	.metaInfo {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+
+		.anticon {
+			color: var(--color_neo_text_tertiary);
+			font-size: 12px;
+			flex-shrink: 0;
+		}
+
+		span {
+			color: var(--color_neo_text_secondary);
+		}
+	}
+
+	.description {
+		margin: 0;
+		font-size: 12px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.6;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+
+		&:empty {
+			display: none;
+		}
+	}
 }
 
 // 内容区域样式
