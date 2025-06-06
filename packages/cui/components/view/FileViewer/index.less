@@ -1,6 +1,177 @@
+@import '~@/styles/preset/vars.less';
+
 ._local {
 	width: 100%;
-	border: 1px solid var(--color_danger);
-	padding: 10px;
-	border-radius: 6px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	background: var(--color_neo_bg_content);
+	border-radius: 0;
+	overflow: hidden;
+	position: relative;
+
+	// 开发阶段的调试样式
+	&.debug {
+		background: var(--color_neo_bg_card);
+
+		.content {
+			height: 100%;
+			overflow-y: auto;
+			padding: 0;
+
+			// 自定义滚动条样式
+			&::-webkit-scrollbar {
+				width: 12px;
+			}
+
+			&::-webkit-scrollbar-thumb {
+				background: var(--color_border);
+				border-radius: 4px;
+				border: 2px solid var(--color_neo_bg_card);
+
+				&:hover {
+					background: var(--color_text_grey);
+				}
+			}
+
+			&::-webkit-scrollbar-track {
+				background: var(--color_neo_bg_card);
+				border-radius: 4px;
+			}
+		}
+
+		.fileInfo {
+			padding: 16px;
+			background: var(--color_warning_bg);
+			border-bottom: 1px solid var(--color_warning);
+			color: var(--color_neo_text_primary);
+			font-size: 11px;
+			font-family: monospace;
+			line-height: 1.6;
+			flex-shrink: 0;
+
+			&::before {
+				content: '🚧 FileViewer 开发中 / Under Development';
+				display: block;
+				font-weight: bold;
+				margin-bottom: 12px;
+				color: var(--color_warning);
+				font-size: 12px;
+			}
+
+			div {
+				margin-bottom: 4px;
+				word-break: break-all;
+			}
+		}
+
+		.separator {
+			height: 1px;
+			background: var(--color_neo_border_card);
+			flex-shrink: 0;
+		}
+
+		.documentContent {
+			flex: 1;
+			padding: 20px;
+			min-height: 0;
+
+			h3 {
+				margin: 0 0 20px 0;
+				color: var(--color_neo_text_primary);
+				font-size: 16px;
+				font-weight: 600;
+				border-bottom: 2px solid var(--color_main);
+				padding-bottom: 8px;
+			}
+
+			.paragraph {
+				margin-bottom: 24px;
+
+				h4 {
+					margin: 0 0 8px 0;
+					color: var(--color_main);
+					font-size: 14px;
+					font-weight: 500;
+				}
+
+				p {
+					margin: 0;
+					color: var(--color_neo_text_primary);
+					font-size: 14px;
+					line-height: 1.6;
+					text-align: justify;
+					text-indent: 2em;
+				}
+
+				hr {
+					margin: 16px 0;
+					border: none;
+					height: 1px;
+					background: var(--color_neo_border_field);
+				}
+			}
+
+			.footer {
+				margin-top: 40px;
+				padding-top: 20px;
+				border-top: 2px solid var(--color_neo_border_card);
+			}
+		}
+	}
+
+	// 文件预览内容区域
+	.fileContent {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--color_neo_bg_card);
+	}
+
+	// 加载状态
+	.loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 16px;
+		color: var(--color_neo_text_secondary);
+		font-size: 14px;
+	}
+
+	// 错误状态
+	.error {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 16px;
+		color: var(--color_danger);
+		font-size: 14px;
+		text-align: center;
+		padding: 20px;
+
+		i {
+			font-size: 32px;
+			margin-bottom: 8px;
+		}
+	}
+
+	// 不支持的文件类型
+	.unsupported {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 16px;
+		color: var(--color_neo_text_secondary);
+		font-size: 14px;
+		text-align: center;
+		padding: 20px;
+
+		i {
+			font-size: 32px;
+			margin-bottom: 8px;
+			color: var(--color_neo_icon_muted);
+		}
+	}
 }
