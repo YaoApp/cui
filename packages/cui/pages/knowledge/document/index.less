@@ -1,611 +1,346 @@
-// 2025现代文档页面设计 - Neo Design System + 玻璃态效果
-
-.container {
-	min-height: 100vh;
-	overflow-x: hidden;
-	max-width: 1200px;
-	margin: 0 auto;
-}
-
-// ========== 现代化头部设计 ==========
-/* 页面头部 - 与详情页完全一致 */
-.header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 12px;
-	max-width: 1200px;
-	margin-left: auto;
-	margin-right: auto;
-	padding: 24px;
-	position: relative;
-
-	.headerLeft {
-		display: flex;
-		align-items: center;
-		gap: 16px;
-
-		.backButton {
-			color: var(--color_text_grey);
-			border: none;
-			background: none;
-			padding: 8px;
-			border-radius: 6px;
-
-			&:hover {
-				background: var(--color_bg_hover);
-				color: var(--color_main);
-			}
-		}
-
-		.titleInfo {
-			.titleWithBadge {
-				display: flex;
-				align-items: center;
-				gap: 12px;
-
-				.title {
-					font-size: 24px !important;
-					font-weight: 600 !important;
-					color: var(--color_text);
-					margin: 0;
-					line-height: 1.2;
-				}
-
-				.fileTypeTag {
-					background-color: var(--color_neo_bg_header);
-					color: white;
-					border: 1px solid var(--color_neo_border_header);
-					font-weight: 600;
-					font-size: 11px;
-					padding: 4px 10px;
-					border-radius: 8px;
-					white-space: nowrap;
-				}
-			}
-		}
-	}
-
-	.headerRight {
-		display: flex;
-		gap: 8px;
-
-		.infoButton,
-		.moreButton {
-			width: 32px;
-			height: 32px;
-			border-radius: 6px;
-			color: var(--color_text_grey);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			transition: all 0.2s ease;
-			border: none;
-
-			&:hover {
-				color: var(--color_main);
-				background: var(--color_bg_hover);
-			}
-		}
-
-		.infoButton {
-			&.active {
-				color: var(--color_main);
-				background: var(--color_bg_active);
-			}
-		}
-	}
-}
-
-/* 气泡式文档信息 */
-.documentPopover {
-	position: absolute;
-	top: 84px;
-	right: 26px;
-	width: 320px;
-	background: var(--color_neo_bg_card);
-	border: 1px solid var(--color_neo_border_card);
-	border-radius: 8px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.documentModal {
+	// 确保模态窗有足够高的层级
 	z-index: 1000;
 
-	// 丝滑动效 - 完全平滑无跳动
-	opacity: 1;
-	transform: translateY(0) scale(1);
-	transform-origin: top right;
-
-	// 进入动画
-	animation: popoverEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-
-	&.closing {
-		opacity: 0;
-		transform: translateY(-8px) scale(0.95);
-		transition: all 0.2s cubic-bezier(0.4, 0, 1, 1);
-	}
-
-	.popoverArrow {
-		position: absolute;
-		top: -8px;
-		right: 64px;
-		width: 0;
-		height: 0;
-		border-left: 8px solid transparent;
-		border-right: 8px solid transparent;
-		border-bottom: 8px solid var(--color_neo_bg_header);
-		z-index: 1001;
-	}
-
-	.popoverArrowBorder {
-		position: absolute;
-		top: -9px;
-		right: 64px;
-		width: 0;
-		height: 0;
-		border-left: 8px solid transparent;
-		border-right: 8px solid transparent;
-		border-bottom: 8px solid var(--color_neo_border_card);
-		z-index: 1000;
-	}
-
-	.popoverHeader {
-		padding: 16px 20px;
-		border-bottom: 1px solid var(--color_neo_border_header);
-		background: var(--color_neo_bg_header);
-		border-radius: 8px 8px 0 0;
-
-		.headerContent {
-			display: flex;
-			align-items: center;
-			gap: 12px;
-
-			.fileIcon {
-				width: 32px;
-				height: 32px;
-				border-radius: 6px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				color: white;
-				font-size: 12px;
-				font-weight: bold;
-			}
-
-			.fileName {
-				font-size: 14px;
-				font-weight: 600;
-				color: var(--color_neo_text_primary);
-				line-height: 1.4;
-			}
-		}
-	}
-
-	.popoverBody {
-		padding: 16px 20px;
-		border-radius: 0 0 8px 8px;
-
-		.metaInfo {
-			font-size: 12px;
-			color: var(--color_neo_text_secondary);
-			margin-bottom: 12px;
-			display: flex;
-			align-items: center;
-			gap: 6px;
-
-			&.status-processing {
-				color: var(--color_warning);
-			}
-
-			&.status-ready {
-				color: var(--color_success);
-			}
-
-			&.status-failed {
-				color: var(--color_danger);
-			}
-
-			&.status-indexing {
-				color: var(--color_info);
-			}
-		}
-
-		.description {
-			margin-top: 12px;
-			padding: 12px;
-			background: var(--color_neo_bg_field);
-			border-radius: 6px;
-			font-size: 12px;
-			line-height: 1.5;
-			color: var(--color_neo_text_tertiary);
-			border: 1px solid var(--color_neo_border_field);
-		}
-	}
-}
-
-.popoverCard {
-	position: absolute;
-	top: calc(100% + 8px);
-	right: 0;
-	width: 50%;
-	min-width: 400px;
-	background: var(--color_neo_bg_card);
-	border: 1px solid var(--color_neo_border_card);
-	border-radius: 12px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-	animation: popoverSlideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-	overflow: hidden;
-	z-index: 100;
-	transition: all 0.2s ease;
-
-	&:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-		border-color: var(--color_neo_border_hover);
-	}
-}
-
-.popoverCard {
-	.documentInfo {
+	:global(.ant-modal-content) {
+		height: 90vh;
 		display: flex;
-		align-items: flex-start;
-		gap: 12px;
-		padding: 18px 20px 16px 20px;
-		background: var(--color_neo_bg_header);
-		border-bottom: 1px solid var(--color_neo_border_header);
-	}
-
-	.documentLeft {
-		flex: 1;
-		min-width: 0;
-		display: flex;
-		align-items: center;
-		gap: 12px;
-	}
-
-	.documentRight {
-		display: flex;
-		align-items: center;
-		flex-shrink: 0;
-	}
-
-	.fileIconWrapper {
-		width: 40px;
-		height: 40px;
-		border-radius: 8px;
-		background: var(--color_neo_bg_field);
-		border: 1px solid var(--color_neo_border_field);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-	}
-
-	.documentDetails {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.documentTitle {
-		margin: 0;
-		font-size: 14px;
-		font-weight: 600;
-		color: var(--color_neo_text_primary);
-		line-height: 1.4;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.metadataItems {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-	}
-
-	.metaItem {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		padding: 4px 8px;
-		background: var(--color_neo_bg_field);
-		border-radius: 4px;
-		font-size: 10px;
-		color: var(--color_neo_text_tertiary);
-		border: 1px solid var(--color_neo_border_field);
-		transition: all 0.2s ease;
-		white-space: nowrap;
-		flex-shrink: 0;
-
-		&:hover {
-			background: var(--color_neo_bg_field_hover);
-			border-color: var(--color_neo_border_field_hover);
-			transform: translateY(-1px);
-		}
-
-		:global(.xgen-icon) {
-			color: var(--color_neo_text_secondary);
-			font-size: 10px;
-			flex-shrink: 0;
-		}
-
-		span {
-			font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-			font-weight: 500;
-			line-height: 1.4;
-		}
-	}
-
-	.summarySection {
-		padding: 16px 20px 18px 20px;
-		background: var(--color_neo_bg_card);
-		font-size: 12px;
-		color: var(--color_neo_text_secondary);
-		line-height: 1.6;
-	}
-}
-
-// ========== 主要内容区域设计 ==========
-.content {
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 0 24px 24px;
-	min-height: calc(100vh - 200px);
-
-	.contentTabs {
-		background: var(--color_neo_bg_card);
+		flex-direction: column;
 		border-radius: 12px;
-		border: 1px solid var(--color_neo_border_card);
+		overflow: visible; /* 改为visible，让popover可以显示 */
+		position: relative; /* 确保定位上下文 */
+	}
+
+	&.fullscreen {
+		:global(.ant-modal-content) {
+			border-radius: 0;
+			height: 100vh;
+		}
+	}
+
+	:global(.ant-modal-body) {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0;
 		overflow: hidden;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-
-		// Tab样式参考filterSection
-		:global(.xgen-tabs-nav) {
-			background: var(--color_neo_bg_field);
-			border: 1px solid var(--color_neo_border_field);
-			border-radius: var(--radius);
-			margin: 0 0 24px 0;
-			padding: 0;
-
-			:global(.xgen-tabs-nav-wrap) {
-				:global(.xgen-tabs-nav-list) {
-					:global(.xgen-tabs-tab) {
-						padding: 8px 12px;
-						border: none;
-						background: transparent;
-						color: var(--color_neo_text_tertiary);
-						font-weight: 500;
-						font-size: 12px;
-						transition: all 0.2s ease;
-						margin: 4px;
-						border-radius: 4px;
-
-						&:hover {
-							color: var(--color_neo_text_secondary);
-							background: var(--color_neo_bg_field_hover);
-						}
-
-						&:global(.xgen-tabs-tab-active) {
-							color: var(--color_neo_text_primary);
-							background: var(--color_neo_bg_card);
-							font-weight: 600;
-							border: 1px solid var(--color_neo_border_card);
-							box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-						}
-					}
-				}
-			}
-
-			:global(.xgen-tabs-ink-bar) {
-				display: none;
-			}
-		}
-
-		:global(.xgen-tabs-content-holder) {
-			background: var(--color_neo_bg_card);
-
-			:global(.xgen-tabs-content) {
-				:global(.xgen-tabs-tabpane) {
-					outline: none;
-					padding: 24px;
-				}
-			}
-		}
-
-		.tabLabel {
-			display: flex;
-			align-items: center;
-			gap: 4px;
-
-			:global(.anticon) {
-				font-size: 12px;
-			}
-		}
+		height: 100%;
+		position: relative; /* 确保定位上下文 */
 	}
 }
 
-// ========== 文档内容查看器 ==========
-.contentViewer {
-	width: 100%;
-	min-height: 500px;
-	background: var(--color_neo_bg_content);
-	border-radius: 12px;
-	border: 1px solid var(--color_neo_border_card);
+.modalContent {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 	overflow: hidden;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-
-	// 为FileViewer组件添加样式
-	:global(.file-viewer) {
-		background: transparent;
-		border: none;
-		border-radius: 12px;
-	}
 }
 
-// ========== 加载状态 ==========
 .loading {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	height: 60vh;
-	gap: 20px;
-	color: var(--color_neo_text_secondary);
-
-	:global(.xgen-spin) {
-		:global(.xgen-spin-dot) {
-			:global(.xgen-spin-dot-item) {
-				background: var(--color_main);
-			}
-		}
-	}
+	height: 100%;
+	min-height: 400px;
+	gap: 16px;
 
 	span {
-		font-size: 16px;
-		font-weight: 500;
-		animation: pulse 2s infinite;
+		color: var(--color_text_grey);
+		font-size: 14px;
 	}
 }
 
-// ========== 动画效果 ==========
-@keyframes pulse {
-	0%,
-	100% {
-		opacity: 1;
+// 以下样式复制自原文档详情页
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 24px;
+	border-bottom: 1px solid var(--color_border_light);
+	background: var(--color_bg_container);
+	position: relative;
+	z-index: 1; /* 确保header有基础层级 */
+}
+
+.headerLeft {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.titleInfo {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.titleWithBadge {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--color_text);
+	line-height: 1.4;
+}
+
+.fileTypeTag {
+	font-size: 11px;
+	font-weight: 500;
+	border: none;
+	border-radius: 4px;
+	padding: 2px 6px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+}
+
+.headerRight {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.infoButton,
+.moreButton,
+.fullscreenButton,
+.closeButton {
+	padding: 4px;
+	height: 28px;
+	width: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color_text_grey);
+	transition: all 0.2s ease;
+	background: transparent !important;
+
+	&:hover {
+		color: var(--color_main);
+		transform: scale(1.1);
 	}
-	50% {
-		opacity: 0.6;
+
+	&.active {
+		color: var(--color_primary);
 	}
 }
 
-@keyframes slideUp {
-	from {
+// 气泡式文档信息样式 - 采用Neo设计系统配色
+.documentPopover {
+	position: absolute;
+	top: 60px;
+	right: 54px;
+	width: 350px;
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	z-index: 1002; /* 确保在Modal内容之上 */
+	transform: translateY(0);
+	opacity: 1;
+	transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+	&.closing {
+		transform: translateY(-8px);
 		opacity: 0;
-		transform: translateY(20px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
 	}
 }
 
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
+.popoverArrow {
+	position: absolute;
+	top: -6px;
+	right: 75px; /* 对准info按钮中心 */
+	width: 12px;
+	height: 12px;
+	background: var(--color_neo_bg_card);
+	transform: rotate(45deg);
+	border-top: 1px solid var(--color_neo_border_card);
+	border-left: 1px solid var(--color_neo_border_card);
+	z-index: 1003; /* 箭头在popover之上 */
 }
 
-@keyframes slideDown {
-	from {
-		opacity: 0;
-		transform: translateY(-16px);
-		max-height: 0;
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-		max-height: 200px;
-	}
+.popoverArrowBorder {
+	position: absolute;
+	top: -7px;
+	right: 75px; /* 对准info按钮中心 */
+	width: 12px;
+	height: 12px;
+	background: var(--color_neo_bg_card);
+	transform: rotate(45deg);
+	z-index: 1001; /* 箭头边框层级稍低 */
 }
 
-@keyframes slideInRight {
-	from {
-		opacity: 0;
-		transform: translateX(20px) scale(0.95);
-	}
-	to {
-		opacity: 1;
-		transform: translateX(0) scale(1);
-	}
-}
+.popoverHeader {
+	padding: 18px 20px 16px 20px;
+	background: var(--color_neo_bg_header);
+	border-bottom: 1px solid var(--color_neo_border_header);
+	border-radius: 12px 12px 0 0; /* 顶部圆角与父容器匹配 */
 
-@keyframes popoverSlideDown {
-	from {
-		opacity: 0;
-		transform: translateY(-8px) scale(0.95);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0) scale(1);
-	}
-}
+	.headerContent {
+		display: flex;
+		align-items: center;
+		gap: 12px;
 
-// 丝滑的popover动效 - $500奖励动画！
-@keyframes popoverEnter {
-	from {
-		opacity: 0;
-		transform: translateY(-12px) scale(0.92);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0) scale(1);
-	}
-}
-
-.container {
-	animation: fadeIn 0.6s ease;
-}
-
-.content {
-	animation: slideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
-}
-
-// ========== 响应式设计 ==========
-@media (max-width: 768px) {
-	.popoverCard {
-		width: 90%;
-		right: 5%;
-		min-width: 320px;
-	}
-
-	.header {
-		padding: 12px 16px;
-		position: relative;
-	}
-
-	.content {
-		padding: 16px;
-
-		.contentTabs {
+		.fileIcon {
+			width: 32px;
+			height: 32px;
 			border-radius: 6px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			font-size: 12px;
+			font-weight: 600;
+		}
 
-			:global(.xgen-tabs-content) {
-				:global(.xgen-tabs-tabpane) {
-					padding: 16px;
-				}
+		.fileName {
+			font-size: 14px;
+			font-weight: 600;
+			color: var(--color_neo_text_primary);
+			flex: 1;
+			word-break: break-all;
+			line-height: 1.4;
+		}
+	}
+}
+
+.popoverBody {
+	padding: 20px;
+	background: var(--color_neo_bg_card);
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	border-radius: 0 0 12px 12px; /* 底部圆角与父容器匹配 */
+
+	.metaInfo {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+
+		.anticon {
+			color: var(--color_neo_text_tertiary);
+			font-size: 12px;
+			flex-shrink: 0;
+		}
+
+		span {
+			color: var(--color_neo_text_secondary);
+		}
+	}
+
+	.description {
+		margin: 0;
+		font-size: 12px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.6;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+
+		&:empty {
+			display: none;
+		}
+	}
+}
+
+// 内容区域样式
+.content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	position: relative;
+	z-index: 1; /* 确保content区域层级低于popover */
+}
+
+.contentTabs {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	padding: 0 16px 16px 16px; /* 左右和底部有内边距 */
+
+	:global(.ant-tabs-content-holder) {
+		flex: 1;
+		overflow: hidden;
+	}
+
+	:global(.ant-tabs-tabpane) {
+		height: 100%;
+		overflow: auto;
+	}
+}
+
+.tabLabel {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+}
+
+.contentViewer {
+	height: 100%;
+	overflow: auto;
+	padding: 16px;
+	background: var(--color_bg_container);
+	border-radius: 8px;
+}
+
+.documentContentWrapper {
+	height: 100%;
+	width: 100%;
+
+	// 修复FileViewer的显示问题
+	:global(.file-viewer) {
+		height: 100%;
+		width: 100%;
+		border: none;
+		background: transparent;
+
+		.markdown-body {
+			padding: 0;
+			background: transparent;
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+				'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			line-height: 1.6;
+			color: var(--color_text);
+
+			h1,
+			h2,
+			h3,
+			h4,
+			h5,
+			h6 {
+				color: var(--color_text);
+				margin-top: 1.5em;
+				margin-bottom: 0.5em;
+			}
+
+			p {
+				margin-bottom: 1em;
+			}
+
+			code {
+				background: var(--color_bg_layout);
+				padding: 2px 6px;
+				border-radius: 4px;
+				font-size: 0.9em;
+			}
+
+			pre {
+				background: var(--color_bg_layout);
+				padding: 16px;
+				border-radius: 8px;
+				overflow-x: auto;
 			}
 		}
-	}
-}
-
-@media (max-width: 1200px) {
-	.popoverCard {
-		width: 60%;
-		min-width: 360px;
-	}
-}
-
-// ========== 暗色主题适配 ==========
-[data-theme='dark'] {
-	.header {
-		border-bottom-color: var(--color_neo_border_card);
-	}
-
-	.popoverCard {
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-
-		&:hover {
-			box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-		}
-	}
-
-	.contentViewer::before {
-		background: linear-gradient(
-			135deg,
-			rgba(255, 255, 255, 0.05) 0%,
-			rgba(255, 255, 255, 0.02) 50%,
-			rgba(255, 255, 255, 0.01) 100%
-		);
 	}
 }
