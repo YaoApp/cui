@@ -6,11 +6,21 @@ import styles from './index.less'
 
 interface ContentLayoutProps {
 	className?: string
+	OriginalComponent: React.ComponentType<any>
+	ChunksComponent: React.ComponentType<any>
+	docid: string
+	collectionId: string
 }
 
 type ViewMode = 'dual' | 'left' | 'right'
 
-const ContentLayout: React.FC<ContentLayoutProps> = ({ className }) => {
+const ContentLayout: React.FC<ContentLayoutProps> = ({
+	className,
+	OriginalComponent,
+	ChunksComponent,
+	docid,
+	collectionId
+}) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -74,19 +84,6 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ className }) => {
 		setViewMode('dual')
 	}
 
-	// 生成占位内容
-	const generatePlaceholderContent = (title: string) => {
-		const items = []
-		for (let i = 1; i <= 50; i++) {
-			items.push(
-				<div key={i} className={styles.placeholderItem}>
-					{title} - {is_cn ? '内容项' : 'Content Item'} {i}
-				</div>
-			)
-		}
-		return items
-	}
-
 	return (
 		<div
 			ref={containerRef}
@@ -100,38 +97,13 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ className }) => {
 					width: viewMode === 'right' ? '0%' : viewMode === 'left' ? '100%' : `${splitPosition}%`
 				}}
 			>
-				<div className={styles.panelContent}>
-					<div className={styles.panelHeader}>
-						<div className={styles.headerTitle}>
-							<Icon name='material-description' size={14} />
-							<h3>{is_cn ? '原始文档' : 'Original Document'}</h3>
-						</div>
-						{viewMode === 'dual' ? (
-							<Tooltip title={is_cn ? '最大化原始文档' : 'Maximize Original Document'}>
-								<Button
-									type='text'
-									size='small'
-									icon={<Icon name='material-fullscreen' size={14} />}
-									onClick={hideRightPanel}
-									className={styles.headerButton}
-								/>
-							</Tooltip>
-						) : viewMode === 'left' ? (
-							<Tooltip title={is_cn ? '恢复双栏显示' : 'Restore Dual Panels'}>
-								<Button
-									type='text'
-									size='small'
-									icon={<Icon name='material-vertical_split' size={14} />}
-									onClick={restoreDualPanels}
-									className={styles.headerButton}
-								/>
-							</Tooltip>
-						) : null}
-					</div>
-					<div className={styles.scrollableContent}>
-						{generatePlaceholderContent(is_cn ? '原始文档' : 'Original Document')}
-					</div>
-				</div>
+				<OriginalComponent
+					viewMode={viewMode}
+					onHideRightPanel={hideRightPanel}
+					onRestoreDualPanels={restoreDualPanels}
+					docid={docid}
+					collectionId={collectionId}
+				/>
 			</div>
 
 			{/* 分割线 */}
@@ -156,38 +128,13 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ className }) => {
 							: `${100 - splitPosition}%`
 				}}
 			>
-				<div className={styles.panelContent}>
-					<div className={styles.panelHeader}>
-						<div className={styles.headerTitle}>
-							<Icon name='material-list' size={14} />
-							<h3>{is_cn ? '内容分段' : 'Content Segments'}</h3>
-						</div>
-						{viewMode === 'dual' ? (
-							<Tooltip title={is_cn ? '最大化内容分段' : 'Maximize Content Segments'}>
-								<Button
-									type='text'
-									size='small'
-									icon={<Icon name='material-fullscreen' size={14} />}
-									onClick={hideLeftPanel}
-									className={styles.headerButton}
-								/>
-							</Tooltip>
-						) : viewMode === 'right' ? (
-							<Tooltip title={is_cn ? '恢复双栏显示' : 'Restore Dual Panels'}>
-								<Button
-									type='text'
-									size='small'
-									icon={<Icon name='material-vertical_split' size={14} />}
-									onClick={restoreDualPanels}
-									className={styles.headerButton}
-								/>
-							</Tooltip>
-						) : null}
-					</div>
-					<div className={styles.scrollableContent}>
-						{generatePlaceholderContent(is_cn ? '内容分段' : 'Content Segments')}
-					</div>
-				</div>
+				<ChunksComponent
+					viewMode={viewMode}
+					onHideLeftPanel={hideLeftPanel}
+					onRestoreDualPanels={restoreDualPanels}
+					docid={docid}
+					collectionId={collectionId}
+				/>
 			</div>
 		</div>
 	)

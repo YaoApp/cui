@@ -14,7 +14,7 @@ import { getLocale } from '@umijs/max'
 import { Document } from '../types'
 import styles from './index.less'
 
-interface DocInfoProps {
+interface SummaryProps {
 	visible: boolean
 	isClosing: boolean
 	document: Document | null
@@ -22,7 +22,7 @@ interface DocInfoProps {
 	popoverRef: React.RefObject<HTMLDivElement>
 }
 
-const DocInfo: React.FC<DocInfoProps> = ({ visible, isClosing, document, fileType, popoverRef }) => {
+const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, fileType, popoverRef }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -126,4 +126,4 @@ const DocInfo: React.FC<DocInfoProps> = ({ visible, isClosing, document, fileTyp
 	)
 }
 
-export default DocInfo
+export default Summary

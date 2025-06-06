@@ -148,3 +148,22 @@ export const mockFetchDocumentContent = async (docId: string): Promise<string> =
 	await delay(300)
 	return mockDocument.content
 }
+
+// 原始文档Mock数据
+export const mockOriginalData = Array.from({ length: 50 }, (_, index) => ({
+	id: `original_${index + 1}`,
+	title: `原始文档内容项 ${index + 1}`,
+	content: `这是原始文档的第 ${index + 1} 个内容项，包含了完整的文档内容...`,
+	type: 'original'
+}))
+
+// 内容分段Mock数据
+export const mockChunksData = Array.from({ length: 50 }, (_, index) => ({
+	id: `chunk_${index + 1}`,
+	title: `内容分段 ${index + 1}`,
+	content: `这是经过分段处理的第 ${index + 1} 个内容块，便于检索和理解...`,
+	type: 'chunk',
+	chunkIndex: index + 1,
+	tokens: Math.floor(Math.random() * 500) + 100, // 随机token数量
+	similarity: Math.random() * 0.3 + 0.7 // 随机相似度
+}))

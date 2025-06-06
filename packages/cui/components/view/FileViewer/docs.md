@@ -1,0 +1,14 @@
+| 📁 Category         | 🔤 Common Extensions                                                                 | 📄 Description                                      | 📌 Previewable     |
+|--------------------|--------------------------------------------------------------------------------------|-----------------------------------------------------|--------------------|
+| 📝 Text Files       | `.txt`, `.md`, `.log`, `.ini`, `.cfg`, `.csv`                                       | Plain text, logs, config files, lightweight docs    | ✅ Yes              |
+| 💻 Code Files       | `.py`, `.js`, `.ts`, `.java`, `.cpp`, `.go`, `.sh`, `.html`, `.css`, `.json`, `.yaml`, `.xml`, `.yao` | Source code, scripts, markup/config files           | ✅ With syntax highlight |
+| 📄 Office Documents | `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`, `.pdf`, `.odt`, `.ods`           | Common Office documents (text, tables, slides)      | ✅ Partial preview  |
+| 🖼️ Image Files      | `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`, `.svg`, `.webp`, `.tiff`, `.ico`           | Static or animated images                           | ✅ Thumbnail/preview |
+| 🔊 Audio Files      | `.mp3`, `.wav`, `.aac`, `.flac`, `.ogg`, `.m4a`, `.wma`                              | Playable audio formats                              | ✅ Audio player      |
+| 🎥 Video Files      | `.mp4`, `.avi`, `.mov`, `.mkv`, `.flv`, `.webm`, `.wmv`                              | Common video formats                                | ✅ Video player      |
+| 🧱 Data/DB Files    | `.db`, `.sqlite`, `.sql`, `.mdb`, `.parquet`, `.csv`, `.jsonl`, `.tfrecord`, `.recordio` | Structured data and model training datasets         | ✅ Tabular/structured preview |
+| 🌐 Web-related Files| `.html`, `.htm`, `.mhtml`, `.webarchive`, `.har`                                    | Web pages, web archive, network traces              | ✅ Source or rendered view |
+| 🎨 Design/Model Files| `.psd`, `.ai`, `.xd`, `.sketch`, `.fig`, `.blend`, `.glb`, `.fbx`                  | Design files or 3D models                           | ⛔ Special viewer required |
+| 🔤 Font Files       | `.ttf`, `.otf`, `.woff`, `.woff2`                                                   | Font files                                          | ✅ Font preview      |
+| 📚 E-book Files     | `.epub`, `.mobi`, `.azw3`, `.pdf`                                                   | Digital book formats                                | ✅ Readable or convertible |
+| 🔁 Multimodal Datasets| `.json`, `.jsonl`, `.tsv`, `.parquet`, `.webdataset(.tar)`                        | Text-image/audio/video datasets for model training  | ✅ Structured preview |

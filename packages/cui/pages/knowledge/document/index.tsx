@@ -5,8 +5,10 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { KnowledgeBase, Document } from '../types'
 import { mockFetchKnowledgeBase, mockFetchDocument, mockFetchDocumentContent } from './mockData'
-import DocInfo from './DocInfo'
-import ContentLayout from './ContentLayout'
+import Summary from './Summary'
+import Layout from './Layout'
+import Original from './Original'
+import Chunks from './Chunks'
 import styles from './index.less'
 
 interface DocumentModalProps {
@@ -244,7 +246,7 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 				</div>
 
 				{/* 气泡式文档信息 */}
-				<DocInfo
+				<Summary
 					visible={showMetadata}
 					isClosing={isClosing}
 					document={document}
@@ -254,7 +256,12 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 
 				{/* 主要内容区域 */}
 				<div className={styles.content}>
-					<ContentLayout />
+					<Layout
+						OriginalComponent={Original}
+						ChunksComponent={Chunks}
+						docid={docid}
+						collectionId={collectionId}
+					/>
 				</div>
 			</div>
 		</Modal>
