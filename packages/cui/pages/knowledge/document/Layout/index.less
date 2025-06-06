@@ -95,8 +95,34 @@
 	// 可滚动内容区域
 	.scrollableContent {
 		flex: 1;
-		overflow: hidden;
+		overflow-y: auto;
 		min-height: 0;
+		background: var(--color_neo_bg_content);
+
+		// 为原始文档视图保持无滚动（FileViewer内部处理）
+		&:has(.documentViewer) {
+			overflow: hidden;
+		}
+
+		// 自定义滚动条样式（与FileViewer保持一致）
+		&::-webkit-scrollbar {
+			width: 12px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 4px;
+			border: 2px solid var(--color_neo_bg_content);
+
+			&:hover {
+				background: var(--color_text_grey);
+			}
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--color_neo_bg_content);
+			border-radius: 4px;
+		}
 	}
 
 	// 占位内容项
@@ -185,6 +211,430 @@
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+	}
+
+	// 数量徽章
+	.countBadge {
+		margin-left: 8px;
+		font-size: 11px;
+		color: var(--color_neo_text_tertiary);
+		font-weight: normal;
+		background: var(--color_neo_bg_field);
+		padding: 2px 6px;
+		border-radius: 10px;
+		border: 1px solid var(--color_neo_border_field);
+	}
+
+	// 搜索区域
+	.searchSection {
+		padding: 12px 16px;
+		background: var(--color_neo_bg_header);
+		border-bottom: 1px solid var(--color_neo_border_header);
+		flex-shrink: 0;
+	}
+
+	.searchWrapper {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
+
+	.searchInput {
+		flex: 1;
+
+		:global(.ant-input) {
+			font-size: 12px;
+			border-radius: 4px;
+			border: 1px solid var(--color_neo_border_field);
+			background: var(--color_neo_bg_field);
+
+			&:hover {
+				border-color: var(--color_neo_border_field_hover);
+				background: var(--color_neo_bg_field_hover);
+			}
+
+			&:focus {
+				border-color: var(--color_main);
+				box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+			}
+		}
+	}
+
+	.sortSelect {
+		font-size: 12px !important;
+
+		:global(.xgen-select),
+		:global(.ant-select) {
+			font-size: 12px !important;
+		}
+
+		:global(.ant-select-selector),
+		:global(.xgen-select .ant-select-selector) {
+			height: 28px !important;
+			font-size: 12px !important;
+			border-radius: 4px;
+			border: 1px solid var(--color_neo_border_field);
+			background: transparent !important;
+			padding: 0 24px 0 12px !important;
+			display: flex !important;
+			align-items: center !important;
+
+			&:hover {
+				border-color: var(--color_neo_border_field_hover);
+				background: transparent !important;
+			}
+		}
+
+		:global(.ant-select-focused .ant-select-selector),
+		:global(.xgen-select-focused .ant-select-selector) {
+			border-color: var(--color_main) !important;
+			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1) !important;
+			background: transparent !important;
+		}
+
+		:global(.ant-select-selection-item),
+		:global(.xgen-select .ant-select-selection-item) {
+			line-height: 1 !important;
+			color: var(--color_neo_text_primary);
+			font-weight: 500;
+			padding: 0 !important;
+			font-size: 12px !important;
+		}
+
+		:global(.ant-select-arrow),
+		:global(.xgen-select .ant-select-arrow) {
+			color: var(--color_neo_text_secondary);
+			right: 8px;
+			margin-top: 0 !important;
+		}
+	}
+
+	// 下拉选项样式 - 全局样式，不局限于sortSelect
+	:global(.ant-select-dropdown .ant-select-item),
+	:global(.xgen-select-dropdown .ant-select-item) {
+		font-size: 12px !important;
+		padding: 6px 12px;
+		color: var(--color_neo_text_primary);
+
+		&:hover {
+			background: var(--color_neo_bg_field_hover);
+		}
+
+		&.ant-select-item-option-selected {
+			background: var(--color_neo_bg_selected);
+			color: var(--color_main);
+			font-weight: 500;
+		}
+	}
+
+	:global(.ant-select-item-option),
+	:global(.xgen-select-item-option) {
+		font-size: 12px !important;
+	}
+
+	// 自定义分页容器
+	.paginationContainer {
+		padding: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--color_neo_bg_content);
+		border-top: 1px solid var(--color_neo_border_light);
+
+		.paginationControls {
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		}
+
+		.paginationButton {
+			min-width: 28px;
+			height: 28px;
+			padding: 0;
+			font-size: 12px;
+			border-radius: 4px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			&:global(.ant-btn-default) {
+				border-color: var(--color_neo_border_field);
+				background: var(--color_neo_bg_field);
+				color: var(--color_neo_text_primary);
+
+				&:hover {
+					border-color: var(--color_main);
+					color: var(--color_main);
+				}
+
+				&:disabled {
+					border-color: var(--color_neo_border_field);
+					background: var(--color_neo_bg_field);
+					color: var(--color_neo_text_disabled);
+					cursor: not-allowed;
+
+					&:hover {
+						border-color: var(--color_neo_border_field);
+						color: var(--color_neo_text_disabled);
+					}
+				}
+			}
+		}
+	}
+
+	.searchButton {
+		height: 28px;
+		padding: 0 12px;
+		font-size: 12px;
+		border-radius: 4px;
+	}
+
+	// 加载和空状态
+	.loadingContainer {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 40px 20px;
+		color: var(--color_neo_text_secondary);
+
+		i {
+			margin-bottom: 12px;
+			color: var(--color_neo_icon_muted);
+		}
+
+		p {
+			margin: 0;
+			font-size: 14px;
+		}
+	}
+
+	.emptyState {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 40px 20px;
+		color: var(--color_neo_text_secondary);
+
+		i {
+			color: var(--color_neo_icon_muted);
+			margin-bottom: 16px;
+		}
+
+		p {
+			margin: 0;
+			font-size: 14px;
+		}
+	}
+
+	// 切片网格容器
+	.chunksGrid {
+		padding: 16px;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		gap: 12px;
+		align-items: start;
+	}
+
+	// 切片卡片
+	.chunkCard {
+		background: var(--color_neo_bg_card);
+		border: 1px solid var(--color_neo_border_card);
+		border-radius: 6px;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		overflow: hidden;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		display: flex;
+		flex-direction: column;
+		height: fit-content;
+
+		&:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+			border-color: var(--color_neo_border_hover);
+		}
+
+		.cardHeader {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 12px 16px;
+			background: var(--color_neo_bg_header);
+			border-bottom: 1px solid var(--color_neo_border_header);
+
+			.chunkMeta {
+				display: flex;
+				gap: 8px;
+				align-items: center;
+
+				.chunkNumber {
+					padding: 2px 6px;
+					background: var(--color_neo_bg_selected);
+					color: var(--color_main);
+					font-size: 10px;
+					border-radius: 3px;
+					font-weight: 600;
+					border: 1px solid var(--color_neo_border_selected);
+				}
+
+				.textLength {
+					font-size: 10px;
+					padding: 2px 6px;
+					border-radius: 3px;
+					border: 1px solid;
+					white-space: nowrap;
+					color: var(--color_neo_text_tertiary);
+					border-color: var(--color_neo_border_field);
+					background: var(--color_neo_bg_field);
+					font-family: 'Courier New', monospace;
+					font-weight: 500;
+				}
+
+				.category {
+					padding: 2px 6px;
+					background: var(--color_main);
+					color: white;
+					font-size: 10px;
+					border-radius: 3px;
+					font-weight: 500;
+				}
+
+				.source {
+					font-size: 11px;
+					color: var(--color_neo_text_tertiary);
+					background: var(--color_neo_bg_field);
+					padding: 2px 6px;
+					border-radius: 3px;
+					border: 1px solid var(--color_neo_border_field);
+				}
+			}
+
+			.weightRecall {
+				display: flex;
+				gap: 6px;
+				align-items: center;
+
+				.weight,
+				.recall {
+					font-size: 10px;
+					padding: 2px 6px;
+					border-radius: 3px;
+					border: 1px solid;
+					white-space: nowrap;
+				}
+
+				.weight {
+					color: var(--color_warning);
+					border-color: var(--color_warning);
+					background: var(--color_warning_bg);
+				}
+
+				.recall {
+					color: var(--color_info);
+					border-color: var(--color_info);
+					background: var(--color_info_bg);
+				}
+			}
+		}
+
+		.cardContent {
+			padding: 12px 16px;
+			background: var(--color_neo_bg_card);
+			flex: 1;
+
+			.chunkText {
+				margin: 0;
+				font-size: 12px;
+				color: var(--color_neo_text_primary);
+				line-height: 1.4;
+				text-align: justify;
+				display: -webkit-box;
+				-webkit-line-clamp: 4;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+			}
+		}
+
+		.cardFooter {
+			padding: 10px 16px 12px 16px;
+			background: var(--color_neo_bg_card);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+
+			.chunkInfo {
+				display: flex;
+				gap: 8px;
+
+				.infoItem {
+					display: flex;
+					align-items: center;
+					gap: 4px;
+					padding: 3px 6px;
+					background: var(--color_neo_bg_field);
+					border-radius: 3px;
+					font-size: 10px;
+					color: var(--color_neo_text_tertiary);
+					border: 1px solid var(--color_neo_border_field);
+					white-space: nowrap;
+
+					i {
+						color: var(--color_neo_text_secondary);
+						flex-shrink: 0;
+					}
+				}
+			}
+
+			.voteActions {
+				display: flex;
+				gap: 6px;
+				flex-shrink: 0;
+			}
+
+			.voteButton {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				padding: 4px 8px;
+				background: var(--color_neo_bg_field);
+				border: 1px solid var(--color_neo_border_field);
+				border-radius: 4px;
+				font-size: 11px;
+				color: var(--color_neo_text_secondary);
+				cursor: pointer;
+				transition: all 0.2s ease;
+
+				&:hover {
+					background: var(--color_neo_bg_field_hover);
+					border-color: var(--color_neo_border_field_hover);
+					transform: scale(1.05);
+				}
+
+				&:first-child:hover {
+					color: var(--color_success);
+					border-color: var(--color_success);
+					background: var(--color_success_bg);
+				}
+
+				&:last-child:hover {
+					color: var(--color_danger);
+					border-color: var(--color_danger);
+					background: var(--color_danger_bg);
+				}
+
+				i {
+					flex-shrink: 0;
+				}
+
+				span {
+					font-weight: 500;
+					min-width: 12px;
+					text-align: center;
+				}
+			}
+		}
 	}
 }
 
