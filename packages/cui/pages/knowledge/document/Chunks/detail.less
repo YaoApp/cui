@@ -1,0 +1,190 @@
+.chunkDetailModal {
+	:global(.ant-modal-content) {
+		border-radius: var(--radius);
+		overflow: hidden;
+		box-shadow: var(--shadow);
+	}
+
+	:global(.ant-modal-header) {
+		padding: 0;
+		border-bottom: none;
+		background: transparent;
+	}
+
+	:global(.ant-modal-body) {
+		padding: 0;
+	}
+
+	:global(.xgen-modal-header) {
+		padding: 0 !important;
+		border-bottom: none !important;
+		background: transparent !important;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0 !important;
+	}
+}
+
+.modalHeader {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_bg_nav);
+	height: 56px;
+	border-radius: var(--radius) var(--radius) 0 0;
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-shrink: 0;
+		z-index: 1;
+		color: var(--color_title);
+	}
+
+	.modalTitle {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--color_title);
+		margin: 0;
+	}
+
+	.tabs {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		background: var(--color_bg_nav_tabs);
+		border-radius: 20px;
+		padding: 4px;
+		z-index: 2;
+	}
+
+	.tabItem {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 16px;
+		border-radius: 14px;
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--color_text_grey);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		min-width: 68px;
+		justify-content: center;
+
+		:global(.xgen-icon) {
+			color: inherit;
+		}
+
+		&:hover {
+			color: var(--color_text);
+			background: var(--color_bg_hover);
+		}
+
+		&.tabItemActive {
+			color: var(--color_text);
+			background: var(--color_bg_menu);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		}
+	}
+
+	.closeButton {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border-radius: var(--radius);
+		cursor: pointer;
+		color: var(--color_text_grey);
+		transition: all 0.2s ease;
+		flex-shrink: 0;
+		z-index: 1;
+
+		&:hover {
+			background: var(--color_bg_hover);
+			color: var(--color_text);
+		}
+
+		&:active {
+			background: var(--color_bg_active);
+		}
+	}
+
+	// 响应式处理：当空间不足时，让tabs降级到左侧布局
+	@media (max-width: 900px) {
+		.tabs {
+			position: static;
+			transform: none;
+			order: 2;
+			margin-left: 16px;
+		}
+
+		.titleSection {
+			order: 1;
+		}
+
+		.closeButton {
+			order: 3;
+		}
+	}
+}
+
+.modalContent {
+	min-height: 500px;
+	max-height: calc(100vh - 280px);
+	height: 600px;
+	overflow: hidden;
+	background: var(--color_bg_menu);
+	border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.modalFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	background: var(--color_bg_nav);
+	border-radius: 0 0 var(--radius) var(--radius);
+	min-height: 72px;
+
+	.footerLeft {
+		flex: 1;
+		margin-right: 16px;
+		min-width: 0;
+		min-height: 40px;
+		display: flex;
+		align-items: center;
+
+		.chunkInfo {
+			font-size: 12px;
+			color: var(--color_text_grey);
+		}
+	}
+
+	.footerRight {
+		display: flex;
+		gap: 8px;
+		flex-shrink: 0;
+
+		:global(.ant-btn) {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: var(--radius);
+			transition: all 0.2s ease;
+			height: 32px;
+			font-size: 12px;
+		}
+	}
+}

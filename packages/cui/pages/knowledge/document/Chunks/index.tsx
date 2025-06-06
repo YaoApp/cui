@@ -4,6 +4,7 @@ import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { mockChunksData } from '../mockData'
+import ChunkDetail from './detail'
 import styles from '../Layout/index.less'
 
 interface ChunkData {
@@ -38,6 +39,8 @@ const Chunks: React.FC<ChunksProps> = ({ viewMode, onHideLeftPanel, onRestoreDua
 	const [sortBy, setSortBy] = useState<string>('default')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [pageSize, setPageSize] = useState(12)
+	const [detailVisible, setDetailVisible] = useState(false)
+	const [selectedChunk, setSelectedChunk] = useState<any>(null)
 
 	// 根据文档ID加载切片数据
 	useEffect(() => {
@@ -134,6 +137,18 @@ const Chunks: React.FC<ChunksProps> = ({ viewMode, onHideLeftPanel, onRestoreDua
 		message.success(is_cn ? '投票成功' : 'Vote submitted')
 	}
 
+	// 打开详情模态窗口
+	const handleOpenDetail = (chunk: ChunkData) => {
+		setSelectedChunk(chunk)
+		setDetailVisible(true)
+	}
+
+	// 关闭详情模态窗口
+	const handleCloseDetail = () => {
+		setDetailVisible(false)
+		setSelectedChunk(null)
+	}
+
 	// 过滤和排序切片
 	const getFilteredAndSortedChunks = () => {
 		// 先过滤
@@ -224,7 +239,7 @@ const Chunks: React.FC<ChunksProps> = ({ viewMode, onHideLeftPanel, onRestoreDua
 	// 渲染切片卡片
 	const renderChunkCard = (chunk: ChunkData) => {
 		return (
-			<div key={chunk.id} className={styles.chunkCard}>
+			<div key={chunk.id} className={styles.chunkCard} onClick={() => handleOpenDetail(chunk)}>
 				<div className={styles.cardHeader}>
 					<div className={styles.chunkMeta}>
 						<span className={styles.chunkNumber}>#{chunk.id.replace('chunk_', '')}</span>
@@ -257,11 +272,23 @@ const Chunks: React.FC<ChunksProps> = ({ viewMode, onHideLeftPanel, onRestoreDua
 					</div>
 
 					<div className={styles.voteActions}>
-						<button className={styles.voteButton} onClick={() => handleVote(chunk.id, 'up')}>
+						<button
+							className={styles.voteButton}
+							onClick={(e) => {
+								e.stopPropagation()
+								handleVote(chunk.id, 'up')
+							}}
+						>
 							<Icon name='material-thumb_up' size={14} />
 							<span>{chunk.upvotes}</span>
 						</button>
-						<button className={styles.voteButton} onClick={() => handleVote(chunk.id, 'down')}>
+						<button
+							className={styles.voteButton}
+							onClick={(e) => {
+								e.stopPropagation()
+								handleVote(chunk.id, 'down')
+							}}
+						>
 							<Icon name='material-thumb_down' size={14} />
 							<span>{chunk.downvotes}</span>
 						</button>
@@ -422,6 +449,9 @@ const Chunks: React.FC<ChunksProps> = ({ viewMode, onHideLeftPanel, onRestoreDua
 			</div>
 
 			<div className={styles.scrollableContent}>{renderContent()}</div>
+
+			{/* 详情模态窗口 */}
+			<ChunkDetail visible={detailVisible} onClose={handleCloseDetail} chunkData={selectedChunk} />
 		</div>
 	)
 }
