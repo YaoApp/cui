@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Button, Select, Tag, Typography, Empty } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import styles from './index.less'
+import styles from '../detail.less'
+import localStyles from './index.less'
 
 const { Text } = Typography
 
@@ -113,24 +114,24 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ chunkId, onDataLoad }) 
 		if (!graphData?.nodes.length) return null
 
 		return (
-			<div className={styles.entityList}>
-				<h4 className={styles.sectionTitle}>
+			<div className={localStyles.entityList}>
+				<h4 className={localStyles.sectionTitle}>
 					<Icon name='material-account_tree' size={14} />
 					{is_cn ? '实体列表' : 'Entity List'}
 				</h4>
-				<div className={styles.entityItems}>
+				<div className={localStyles.entityItems}>
 					{graphData.nodes.map((node) => (
 						<div
 							key={node.id}
-							className={`${styles.entityItem} ${
-								selectedEntity?.id === node.id ? styles.selected : ''
+							className={`${localStyles.entityItem} ${
+								selectedEntity?.id === node.id ? localStyles.selected : ''
 							}`}
 							onClick={() =>
 								setSelectedEntity(selectedEntity?.id === node.id ? null : node)
 							}
 						>
 							<Icon name={getEntityTypeIcon(node.type)} size={14} />
-							<span className={styles.entityName}>{node.name}</span>
+							<span className={localStyles.entityName}>{node.name}</span>
 							<Tag color={getEntityTypeColor(node.type)}>{node.type}</Tag>
 						</div>
 					))}
@@ -149,8 +150,8 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ chunkId, onDataLoad }) 
 			: graphData.edges
 
 		return (
-			<div className={styles.relationList}>
-				<h4 className={styles.sectionTitle}>
+			<div className={localStyles.relationList}>
+				<h4 className={localStyles.sectionTitle}>
 					<Icon name='material-device_hub' size={14} />
 					{is_cn ? '关系列表' : 'Relations'}
 					{selectedEntity && (
@@ -159,21 +160,21 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ chunkId, onDataLoad }) 
 						</Text>
 					)}
 				</h4>
-				<div className={styles.relationItems}>
+				<div className={localStyles.relationItems}>
 					{filteredEdges.map((edge) => {
 						const sourceNode = graphData.nodes.find((n) => n.id === edge.source)
 						const targetNode = graphData.nodes.find((n) => n.id === edge.target)
 
 						return (
-							<div key={edge.id} className={styles.relationItem}>
-								<div className={styles.relationFlow}>
-									<span className={styles.entityRef}>{sourceNode?.name}</span>
+							<div key={edge.id} className={localStyles.relationItem}>
+								<div className={localStyles.relationFlow}>
+									<span className={localStyles.entityRef}>{sourceNode?.name}</span>
 									<Icon name='material-arrow_forward' size={12} />
-									<span className={styles.relationLabel}>{edge.relation}</span>
+									<span className={localStyles.relationLabel}>{edge.relation}</span>
 									<Icon name='material-arrow_forward' size={12} />
-									<span className={styles.entityRef}>{targetNode?.name}</span>
+									<span className={localStyles.entityRef}>{targetNode?.name}</span>
 								</div>
-								<div className={styles.relationWeight}>
+								<div className={localStyles.relationWeight}>
 									<Text type='secondary' style={{ fontSize: 11 }}>
 										{(edge.weight * 100).toFixed(0)}%
 									</Text>
@@ -187,14 +188,14 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ chunkId, onDataLoad }) 
 	}
 
 	return (
-		<div className={styles.knowledgeGraph}>
-			{/* 标题区域 */}
-			<div className={styles.header}>
-				<div className={styles.titleSection}>
+		<div className={styles.tabContent}>
+			{/* Head */}
+			<div className={styles.tabHeader}>
+				<div className={styles.tabTitle}>
 					<Icon name='material-account_tree' size={16} />
-					<h3 className={styles.title}>{is_cn ? '知识图谱' : 'Knowledge Graph'}</h3>
+					<span>{is_cn ? '知识图谱' : 'Knowledge Graph'}</span>
 				</div>
-				<div className={styles.controlSection}>
+				<div className={localStyles.controlSection}>
 					<Select
 						value={selectedLayout}
 						onChange={setSelectedLayout}
@@ -213,53 +214,56 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ chunkId, onDataLoad }) 
 				</div>
 			</div>
 
-			{/* 图谱可视化区域 */}
-			<div className={styles.graphContainer}>
-				{loading ? (
-					<div className={styles.loadingState}>
-						<Icon name='material-hourglass_empty' size={32} />
-						<Text>{is_cn ? '正在加载知识图谱...' : 'Loading knowledge graph...'}</Text>
-					</div>
-				) : !graphData ? (
-					<Empty
-						image={<Icon name='material-account_tree' size={48} />}
-						description={is_cn ? '暂无知识图谱数据' : 'No knowledge graph data'}
-					/>
-				) : (
-					<div className={styles.graphContent}>
-						{/* 这里将来可以集成图形可视化库如 D3.js, vis.js 等 */}
-						<div className={styles.graphPlaceholder}>
-							<Icon name='material-account_tree' size={48} />
-							<Text type='secondary'>
-								{is_cn
-									? '图形可视化区域 (待集成可视化库)'
-									: 'Graph Visualization Area (Visualization library to be integrated)'}
-							</Text>
-							<Text type='secondary' style={{ fontSize: 12, marginTop: 8 }}>
-								{is_cn
-									? `当前布局: ${
-											layoutOptions.find(
-												(opt) => opt.value === selectedLayout
-											)?.label
-									  }`
-									: `Current Layout: ${
-											layoutOptions.find(
-												(opt) => opt.value === selectedLayout
-											)?.label
-									  }`}
-							</Text>
+			{/* Body */}
+			<div className={localStyles.graphBody}>
+				{/* 图谱可视化区域 */}
+				<div className={localStyles.graphContainer}>
+					{loading ? (
+						<div className={localStyles.loadingState}>
+							<Icon name='material-hourglass_empty' size={32} />
+							<Text>{is_cn ? '正在加载知识图谱...' : 'Loading knowledge graph...'}</Text>
 						</div>
+					) : !graphData ? (
+						<Empty
+							image={<Icon name='material-account_tree' size={48} />}
+							description={is_cn ? '暂无知识图谱数据' : 'No knowledge graph data'}
+						/>
+					) : (
+						<div className={localStyles.graphContent}>
+							{/* 这里将来可以集成图形可视化库如 D3.js, vis.js 等 */}
+							<div className={localStyles.graphPlaceholder}>
+								<Icon name='material-account_tree' size={48} />
+								<Text type='secondary'>
+									{is_cn
+										? '图形可视化区域 (待集成可视化库)'
+										: 'Graph Visualization Area (Visualization library to be integrated)'}
+								</Text>
+								<Text type='secondary' style={{ fontSize: 12, marginTop: 8 }}>
+									{is_cn
+										? `当前布局: ${
+												layoutOptions.find(
+													(opt) => opt.value === selectedLayout
+												)?.label
+										  }`
+										: `Current Layout: ${
+												layoutOptions.find(
+													(opt) => opt.value === selectedLayout
+												)?.label
+										  }`}
+								</Text>
+							</div>
+						</div>
+					)}
+				</div>
+
+				{/* 数据展示区域 */}
+				{graphData && (
+					<div className={localStyles.dataSection}>
+						{renderEntityList()}
+						{renderRelationList()}
 					</div>
 				)}
 			</div>
-
-			{/* 数据展示区域 */}
-			{graphData && (
-				<div className={styles.dataSection}>
-					{renderEntityList()}
-					{renderRelationList()}
-				</div>
-			)}
 		</div>
 	)
 }

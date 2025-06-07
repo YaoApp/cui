@@ -6,6 +6,9 @@ import Icon from '@/widgets/Icon'
 import ChunkEditor from './Editor'
 import KnowledgeGraph from './Graph'
 import ParentsView from './Parents'
+import RecallList from './Recall'
+import VoteList from './Vote'
+import ScoreFormula from './Score'
 import styles from './detail.less'
 
 interface ChunkData {
@@ -25,7 +28,7 @@ interface ChunkDetailProps {
 	chunkData: ChunkData | null
 }
 
-type TabType = 'editor' | 'graph' | 'parents'
+type TabType = 'editor' | 'graph' | 'parents' | 'recall' | 'vote' | 'score'
 
 const ChunkDetail: React.FC<ChunkDetailProps> = ({ visible, onClose, chunkData }) => {
 	const locale = getLocale()
@@ -41,18 +44,33 @@ const ChunkDetail: React.FC<ChunkDetailProps> = ({ visible, onClose, chunkData }
 	const tabs = [
 		{
 			key: 'editor' as TabType,
-			label: is_cn ? '内容编辑' : 'Content Editor',
+			label: is_cn ? '内容' : 'Content',
 			icon: 'material-edit_note'
 		},
 		{
 			key: 'graph' as TabType,
-			label: is_cn ? '知识图谱' : 'Knowledge Graph',
+			label: is_cn ? '图谱' : 'Graph',
 			icon: 'material-account_tree'
 		},
 		{
 			key: 'parents' as TabType,
-			label: is_cn ? '上级分段' : 'Parent Chunks',
+			label: is_cn ? '层级' : 'Hierarchy',
 			icon: 'material-device_hub'
+		},
+		{
+			key: 'recall' as TabType,
+			label: is_cn ? '召回' : 'Recall',
+			icon: 'material-history'
+		},
+		{
+			key: 'vote' as TabType,
+			label: is_cn ? '投票' : 'Votes',
+			icon: 'material-thumb_up'
+		},
+		{
+			key: 'score' as TabType,
+			label: is_cn ? '得分' : 'Score',
+			icon: 'material-calculate'
 		}
 	]
 
@@ -73,6 +91,12 @@ const ChunkDetail: React.FC<ChunkDetailProps> = ({ visible, onClose, chunkData }
 				return <KnowledgeGraph chunkId={chunkData.id} />
 			case 'parents':
 				return <ParentsView chunkId={chunkData.id} />
+			case 'recall':
+				return <RecallList chunkId={chunkData.id} />
+			case 'vote':
+				return <VoteList chunkId={chunkData.id} />
+			case 'score':
+				return <ScoreFormula chunkId={chunkData.id} />
 			default:
 				return <ChunkEditor chunkData={chunkData} onSave={handleSave} />
 		}

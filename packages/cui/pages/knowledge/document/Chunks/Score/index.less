@@ -1,0 +1,188 @@
+// 得分公式组件样式
+
+.scoreFormulaContainer {
+	padding: 20px;
+	overflow: auto;
+	height: 100%;
+
+	.finalScoreCard {
+		margin-bottom: 20px;
+
+		:global(.ant-card-head) {
+			border-bottom: 1px solid var(--color_border);
+			background: var(--color_bg_nav);
+		}
+
+		:global(.ant-card-body) {
+			background: var(--color_bg_menu);
+		}
+	}
+
+	.finalScoreContent {
+		text-align: center;
+
+		.scoreValue {
+			margin-bottom: 16px;
+
+			.scoreNumber {
+				font-size: 32px;
+				font-weight: bold;
+				color: var(--color_primary);
+				margin-right: 12px;
+			}
+
+			.scoreTag {
+				font-size: 12px;
+				vertical-align: middle;
+			}
+		}
+
+		.formulaText {
+			text-align: left;
+			color: var(--color_text);
+
+			.formula {
+				background: var(--color_bg_nav);
+				padding: 8px 12px;
+				border-radius: var(--radius);
+				font-family: 'Courier New', monospace;
+				font-size: 14px;
+				color: var(--color_primary);
+				display: block;
+				margin-top: 8px;
+			}
+		}
+	}
+
+	.scoreComponents {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+		gap: 16px;
+		margin-bottom: 20px;
+	}
+
+	.componentCard {
+		:global(.ant-card-head) {
+			border-bottom: 1px solid var(--color_border);
+			background: var(--color_bg_nav);
+		}
+
+		:global(.ant-card-body) {
+			background: var(--color_bg_menu);
+		}
+
+		.componentTitle {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			color: var(--color_title);
+			font-weight: 500;
+
+			.componentScore {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.weightText {
+				font-size: 11px;
+				color: var(--color_text_grey);
+			}
+		}
+
+		.componentFormula {
+			background: var(--color_bg_nav);
+			padding: 4px 8px;
+			border-radius: 4px;
+			font-family: 'Courier New', monospace;
+			font-size: 12px;
+			color: var(--color_primary);
+		}
+
+		.contribution {
+			font-weight: 500;
+			color: var(--color_success);
+		}
+	}
+
+	.weightConfig {
+		.weightItem {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 12px;
+
+			.weightLabel {
+				min-width: 100px;
+				font-size: 12px;
+				color: var(--color_text);
+			}
+
+			.weightBar {
+				flex: 1;
+				height: 8px;
+				background: var(--color_bg_nav);
+				border-radius: 4px;
+				overflow: hidden;
+
+				.weightFill {
+					height: 100%;
+					background: linear-gradient(90deg, var(--color_primary), var(--color_success));
+					transition: width 0.3s ease;
+				}
+			}
+
+			.weightValue {
+				min-width: 40px;
+				text-align: right;
+				font-size: 12px;
+				color: var(--color_text);
+				font-weight: 500;
+			}
+		}
+	}
+
+	.explanationCard {
+		:global(.ant-card-head) {
+			border-bottom: 1px solid var(--color_border);
+			background: var(--color_bg_nav);
+		}
+
+		:global(.ant-card-body) {
+			background: var(--color_bg_menu);
+		}
+
+		.explanationContent {
+			.explanationList {
+				margin: 0;
+				padding-left: 16px;
+
+				li {
+					color: var(--color_text);
+					font-size: 12px;
+					line-height: 1.6;
+					margin-bottom: 8px;
+
+					&:last-child {
+						margin-bottom: 0;
+					}
+				}
+			}
+		}
+	}
+
+	:global(.ant-descriptions-item-label) {
+		color: var(--color_text_grey);
+		font-weight: 500;
+	}
+
+	:global(.ant-descriptions-item-content) {
+		color: var(--color_text);
+	}
+
+	:global(.ant-divider) {
+		border-color: var(--color_border);
+		color: var(--color_text_grey);
+		font-weight: 500;
+	}
+}

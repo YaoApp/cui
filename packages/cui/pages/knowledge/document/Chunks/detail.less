@@ -188,3 +188,113 @@
 		}
 	}
 }
+
+// 通用Tab内容样式
+.tabContent {
+	height: 100%;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	background: var(--color_bg_menu);
+}
+
+.tabHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_bg_nav);
+	flex-shrink: 0;
+}
+
+.tabTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_title);
+
+	.recordCount {
+		font-size: 12px;
+		color: var(--color_text_grey);
+		font-weight: normal;
+		margin-left: 4px;
+	}
+}
+
+// 通用表格样式
+.tableContainer {
+	flex: 1;
+	overflow: auto;
+	padding: 16px 20px;
+
+	:global(.ant-table) {
+		background: transparent;
+	}
+
+	:global(.ant-table-thead > tr > th) {
+		background: var(--color_bg_nav);
+		border-bottom: 1px solid var(--color_border);
+		color: var(--color_text);
+		font-weight: 500;
+		font-size: 12px;
+	}
+
+	:global(.ant-table-tbody > tr > td) {
+		border-bottom: 1px solid var(--color_border);
+		color: var(--color_text);
+		font-size: 12px;
+		padding: 8px 16px;
+	}
+
+	:global(.ant-table-tbody > tr:hover > td) {
+		background: var(--color_bg_hover);
+	}
+
+	:global(.ant-pagination) {
+		margin-top: 16px;
+		text-align: center;
+	}
+}
+
+// 通用文本样式
+.queryText {
+	max-width: 200px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--color_text);
+	font-size: 12px;
+}
+
+.scoreValue {
+	font-weight: 500;
+	color: var(--color_text);
+}
+
+.timestamp {
+	color: var(--color_text_grey);
+	font-size: 11px;
+}
+
+// 通用按钮样式
+.deleteButton {
+	:global(.anticon) {
+		color: var(--color_error);
+	}
+
+	&:hover {
+		background: var(--color_error_bg) !important;
+	}
+}
+
+// 通用卡片标题样式
+.cardTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--color_title);
+	font-weight: 500;
+}

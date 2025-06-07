@@ -3,7 +3,8 @@ import { Button, Tree, Typography, Tag, Empty, Collapse } from 'antd'
 import type { TreeDataNode } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import styles from './index.less'
+import styles from '../detail.less'
+import localStyles from './index.less'
 
 const { Text, Paragraph } = Typography
 const { Panel } = Collapse
@@ -142,21 +143,21 @@ const ParentsView: React.FC<ParentsViewProps> = ({ chunkId, onChunkSelect }) => 
 			key: chunk.id,
 			title: (
 				<div
-					className={`${styles.treeNode} ${
-						chunk.id === selectedChunkId ? styles.currentChunk : ''
+					className={`${localStyles.treeNode} ${
+						chunk.id === selectedChunkId ? localStyles.currentChunk : ''
 					}`}
 					onClick={() => handleChunkClick(chunk)}
 				>
-					<div className={styles.nodeHeader}>
+					<div className={localStyles.nodeHeader}>
 						<Tag color={getLevelColor(chunk.level)}>{getLevelLabel(chunk.level)}</Tag>
 						<Tag color='purple'>Weight: {chunk.weight.toFixed(2)}</Tag>
 						{chunk.metadata?.section && <Tag>{chunk.metadata.section}</Tag>}
 					</div>
-					<div className={styles.nodeContent}>
+					<div className={localStyles.nodeContent}>
 						<Text style={{ fontSize: 12, lineHeight: 1.5 }}>{truncateText(chunk.text)}</Text>
 					</div>
 					{chunk.metadata?.source_page && (
-						<div className={styles.nodeFooter}>
+						<div className={localStyles.nodeFooter}>
 							<Icon name='material-location_on' size={12} />
 							<Text type='secondary' style={{ fontSize: 11 }}>
 								{is_cn
@@ -177,28 +178,28 @@ const ParentsView: React.FC<ParentsViewProps> = ({ chunkId, onChunkSelect }) => 
 		if (!selectedChunk) return null
 
 		return (
-			<div className={styles.detailView}>
-				<h4 className={styles.detailTitle}>
+			<div className={localStyles.detailView}>
+				<h4 className={localStyles.detailTitle}>
 					<Icon name='material-preview' size={14} />
 					{is_cn ? '分段详情' : 'Chunk Details'}
 				</h4>
 
-				<div className={styles.detailMeta}>
+				<div className={localStyles.detailMeta}>
 					<Tag color={getLevelColor(selectedChunk.level)}>{getLevelLabel(selectedChunk.level)}</Tag>
 					<Tag color='purple'>Weight: {selectedChunk.weight.toFixed(2)}</Tag>
 					{selectedChunk.metadata?.section && <Tag>{selectedChunk.metadata.section}</Tag>}
 				</div>
 
-				<div className={styles.detailContent}>
+				<div className={localStyles.detailContent}>
 					<Paragraph style={{ margin: 0, fontSize: 13, lineHeight: 1.6 }}>
 						{selectedChunk.text}
 					</Paragraph>
 				</div>
 
 				{selectedChunk.metadata && (
-					<div className={styles.detailMeta}>
+					<div className={localStyles.detailMeta}>
 						{selectedChunk.metadata.source_page && (
-							<div className={styles.metaItem}>
+							<div className={localStyles.metaItem}>
 								<Icon name='material-location_on' size={12} />
 								<Text type='secondary' style={{ fontSize: 11 }}>
 									{is_cn
@@ -225,14 +226,14 @@ const ParentsView: React.FC<ParentsViewProps> = ({ chunkId, onChunkSelect }) => 
 	}
 
 	return (
-		<div className={styles.parentsView}>
-			{/* 标题区域 */}
-			<div className={styles.header}>
-				<div className={styles.titleSection}>
-					<Icon name='material-account_tree' size={16} />
-					<h3 className={styles.title}>{is_cn ? '上级分段' : 'Parent Chunks'}</h3>
+		<div className={styles.tabContent}>
+			{/* Head */}
+			<div className={styles.tabHeader}>
+				<div className={styles.tabTitle}>
+					<Icon name='material-device_hub' size={16} />
+					<span>{is_cn ? '上级分段' : 'Parent Chunks'}</span>
 				</div>
-				<div className={styles.actionSection}>
+				<div className={localStyles.actionSection}>
 					<Button
 						size='small'
 						icon={<Icon name='material-refresh' size={14} />}
@@ -244,40 +245,42 @@ const ParentsView: React.FC<ParentsViewProps> = ({ chunkId, onChunkSelect }) => 
 				</div>
 			</div>
 
-			{/* 内容区域 */}
-			{loading ? (
-				<div className={styles.loadingState}>
-					<Icon name='material-hourglass_empty' size={32} />
-					<Text>{is_cn ? '正在加载上级分段...' : 'Loading parent chunks...'}</Text>
-				</div>
-			) : parentsData.length === 0 ? (
-				<Empty
-					image={<Icon name='material-account_tree' size={48} />}
-					description={is_cn ? '暂无上级分段数据' : 'No parent chunks data'}
-				/>
-			) : (
-				<div className={styles.contentArea}>
-					{/* 层级树形视图 */}
-					<div className={styles.treeSection}>
-						<h4 className={styles.sectionTitle}>
-							<Icon name='material-device_hub' size={14} />
-							{is_cn ? '分段层级结构' : 'Chunk Hierarchy'}
-						</h4>
-						<Tree
-							treeData={convertToTreeData(parentsData)}
-							defaultExpandAll
-							expandedKeys={expandedKeys}
-							onExpand={(keys) => setExpandedKeys(keys as string[])}
-							className={styles.chunkTree}
-							showLine={{ showLeafIcon: false }}
-							selectable={false}
-						/>
+			{/* Body */}
+			<div className={localStyles.parentsBody}>
+				{loading ? (
+					<div className={localStyles.loadingState}>
+						<Icon name='material-hourglass_empty' size={32} />
+						<Text>{is_cn ? '正在加载上级分段...' : 'Loading parent chunks...'}</Text>
 					</div>
+				) : parentsData.length === 0 ? (
+					<Empty
+						image={<Icon name='material-account_tree' size={48} />}
+						description={is_cn ? '暂无上级分段数据' : 'No parent chunks data'}
+					/>
+				) : (
+					<div className={localStyles.contentArea}>
+						{/* 层级树形视图 */}
+						<div className={localStyles.treeSection}>
+							<h4 className={localStyles.sectionTitle}>
+								<Icon name='material-device_hub' size={14} />
+								{is_cn ? '分段层级结构' : 'Chunk Hierarchy'}
+							</h4>
+							<Tree
+								treeData={convertToTreeData(parentsData)}
+								defaultExpandAll
+								expandedKeys={expandedKeys}
+								onExpand={(keys) => setExpandedKeys(keys as string[])}
+								className={localStyles.chunkTree}
+								showLine={{ showLeafIcon: false }}
+								selectable={false}
+							/>
+						</div>
 
-					{/* 详情视图 */}
-					{renderDetailView()}
-				</div>
-			)}
+						{/* 详情视图 */}
+						{renderDetailView()}
+					</div>
+				)}
+			</div>
 		</div>
 	)
 }

@@ -1,154 +1,129 @@
+.editorBody {
+	flex: 1;
+	overflow: auto;
+	padding: 16px 20px;
+}
+
+.actionSection {
+	display: flex;
+	gap: 8px;
+}
+
+.editActions {
+	display: flex;
+	gap: 8px;
+}
+
+.metaSection {
+	margin-bottom: 20px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.weightSection {
+	margin-bottom: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.textSection {
+	margin-bottom: 20px;
+}
+
+.voteSection {
+	margin-bottom: 20px;
+}
+
+.fieldLabel {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_text);
+	margin-bottom: 12px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.textEditor {
+	:global(.ant-input) {
+		border-radius: var(--radius);
+		border-color: var(--color_border);
+		background: var(--color_bg_input);
+
+		&:hover {
+			border-color: var(--color_border_hover);
+		}
+
+		&:focus {
+			border-color: var(--color_primary);
+			box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+		}
+	}
+}
+
+.textDisplay {
+	padding: 12px;
+	background: var(--color_bg_input);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	min-height: 240px;
+	max-height: 360px;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color_text_grey);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_border_soft);
+		border-radius: 3px;
+	}
+}
+
+.voteStats {
+	display: flex;
+	gap: 20px;
+}
+
+.voteItem {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 12px;
+	background: var(--color_bg_input);
+	border-radius: var(--radius);
+	border: 1px solid var(--color_border);
+}
+
+.upvoteIcon {
+	color: var(--color_success);
+}
+
+.downvoteIcon {
+	color: var(--color_danger);
+}
+
+// 保留旧的样式用于兼容性
 .chunkEditor {
 	padding: 20px;
 	background: var(--color_bg_menu);
 	height: 100%;
 	overflow-y: auto;
-
-	.header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 20px;
-		padding-bottom: 16px;
-		border-bottom: 1px solid var(--color_border_soft);
-
-		.titleSection {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-
-			.title {
-				margin: 0;
-				font-size: 16px;
-				font-weight: 500;
-				color: var(--color_title);
-			}
-		}
-
-		.actionSection {
-			.editActions {
-				display: flex;
-				gap: 8px;
-			}
-		}
-	}
-
-	.metaSection {
-		margin-bottom: 20px;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-	}
-
-	.weightSection {
-		margin-bottom: 20px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-
-		.fieldLabel {
-			display: flex;
-			align-items: center;
-			gap: 6px;
-			font-size: 14px;
-			font-weight: 500;
-			color: var(--color_text);
-		}
-	}
-
-	.textSection {
-		margin-bottom: 20px;
-
-		.fieldLabel {
-			display: flex;
-			align-items: center;
-			gap: 6px;
-			font-size: 14px;
-			font-weight: 500;
-			color: var(--color_text);
-			margin-bottom: 12px;
-		}
-
-		.textEditor {
-			:global(.ant-input) {
-				border-radius: var(--radius);
-				border-color: var(--color_border);
-				background: var(--color_bg_input);
-
-				&:hover {
-					border-color: var(--color_border_hover);
-				}
-
-				&:focus {
-					border-color: var(--color_primary);
-					box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
-				}
-			}
-		}
-
-		.textDisplay {
-			padding: 12px;
-			background: var(--color_bg_input);
-			border: 1px solid var(--color_border);
-			border-radius: var(--radius);
-			min-height: 240px;
-			max-height: 360px;
-			overflow-y: auto;
-
-			&::-webkit-scrollbar {
-				width: 6px;
-			}
-
-			&::-webkit-scrollbar-thumb {
-				background: var(--color_border);
-				border-radius: 3px;
-
-				&:hover {
-					background: var(--color_text_grey);
-				}
-			}
-
-			&::-webkit-scrollbar-track {
-				background: var(--color_border_soft);
-				border-radius: 3px;
-			}
-		}
-	}
-
-	.voteSection {
-		.fieldLabel {
-			display: flex;
-			align-items: center;
-			gap: 6px;
-			font-size: 14px;
-			font-weight: 500;
-			color: var(--color_text);
-			margin-bottom: 12px;
-		}
-
-		.voteStats {
-			display: flex;
-			gap: 20px;
-
-			.voteItem {
-				display: flex;
-				align-items: center;
-				gap: 6px;
-				padding: 8px 12px;
-				background: var(--color_bg_input);
-				border-radius: var(--radius);
-				border: 1px solid var(--color_border);
-			}
-
-			.upvoteIcon {
-				color: var(--color_success);
-			}
-
-			.downvoteIcon {
-				color: var(--color_danger);
-			}
-		}
-	}
 
 	&::-webkit-scrollbar {
 		width: 6px;

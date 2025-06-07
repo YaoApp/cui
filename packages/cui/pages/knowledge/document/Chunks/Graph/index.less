@@ -1,3 +1,183 @@
+.graphBody {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	padding: 16px 20px;
+}
+
+.controlSection {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.graphContainer {
+	flex: 1;
+	min-height: 300px;
+	margin-bottom: 20px;
+	background: var(--color_bg_card);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	overflow: hidden;
+}
+
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 12px;
+	color: var(--color_text_grey);
+}
+
+.graphContent {
+	height: 100%;
+	position: relative;
+}
+
+.graphPlaceholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 12px;
+	color: var(--color_text_grey);
+}
+
+.dataSection {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+	margin-top: auto;
+
+	@media (max-width: 768px) {
+		grid-template-columns: 1fr;
+	}
+}
+
+.entityList,
+.relationList {
+	background: var(--color_bg_card);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	padding: 16px;
+	max-height: 300px;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color_text_grey);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_border_soft);
+		border-radius: 3px;
+	}
+}
+
+.sectionTitle {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 12px 0;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_title);
+}
+
+.entityItems {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.entityItem {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--color_bg_input);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: var(--color_bg_hover);
+		border-color: var(--color_border_hover);
+	}
+
+	&.selected {
+		background: var(--color_bg_selected);
+		border-color: var(--color_primary);
+	}
+}
+
+.entityName {
+	flex: 1;
+	font-size: 13px;
+	color: var(--color_text);
+}
+
+.relationItems {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.relationItem {
+	background: var(--color_bg_input);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	padding: 8px 12px;
+}
+
+.relationFlow {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 4px;
+	flex-wrap: wrap;
+}
+
+.entityRef {
+	background: var(--color_bg_tag);
+	color: var(--color_text);
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-size: 11px;
+	border: 1px solid var(--color_border);
+	white-space: nowrap;
+}
+
+.relationLabel {
+	background: var(--color_primary_bg);
+	color: var(--color_primary);
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 500;
+	border: 1px solid var(--color_primary_border);
+	white-space: nowrap;
+}
+
+.relationWeight {
+	display: flex;
+	justify-content: flex-end;
+}
+
+// 保留旧的样式用于兼容性，但可能不再使用
 .knowledgeGraph {
 	padding: 20px;
 	background: var(--color_bg_menu);
@@ -5,199 +185,6 @@
 	overflow-y: auto;
 	display: flex;
 	flex-direction: column;
-
-	.header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 20px;
-		padding-bottom: 16px;
-		border-bottom: 1px solid var(--color_border_soft);
-
-		.titleSection {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-
-			.title {
-				margin: 0;
-				font-size: 16px;
-				font-weight: 500;
-				color: var(--color_title);
-			}
-		}
-
-		.controlSection {
-			display: flex;
-			gap: 8px;
-			align-items: center;
-		}
-	}
-
-	.graphContainer {
-		flex: 1;
-		min-height: 300px;
-		margin-bottom: 20px;
-		background: var(--color_bg_card);
-		border: 1px solid var(--color_border);
-		border-radius: var(--radius);
-		overflow: hidden;
-
-		.loadingState {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			height: 100%;
-			gap: 12px;
-			color: var(--color_text_grey);
-		}
-
-		.graphContent {
-			height: 100%;
-			position: relative;
-
-			.graphPlaceholder {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				justify-content: center;
-				height: 100%;
-				gap: 12px;
-				color: var(--color_text_grey);
-			}
-		}
-	}
-
-	.dataSection {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 20px;
-		margin-top: auto;
-
-		@media (max-width: 768px) {
-			grid-template-columns: 1fr;
-		}
-	}
-
-	.entityList,
-	.relationList {
-		background: var(--color_bg_card);
-		border: 1px solid var(--color_border);
-		border-radius: var(--radius);
-		padding: 16px;
-		max-height: 300px;
-		overflow-y: auto;
-
-		.sectionTitle {
-			display: flex;
-			align-items: center;
-			gap: 6px;
-			margin: 0 0 12px 0;
-			font-size: 14px;
-			font-weight: 500;
-			color: var(--color_title);
-		}
-
-		&::-webkit-scrollbar {
-			width: 6px;
-		}
-
-		&::-webkit-scrollbar-thumb {
-			background: var(--color_border);
-			border-radius: 3px;
-
-			&:hover {
-				background: var(--color_text_grey);
-			}
-		}
-
-		&::-webkit-scrollbar-track {
-			background: var(--color_border_soft);
-			border-radius: 3px;
-		}
-	}
-
-	.entityItems {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-
-		.entityItem {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			padding: 8px 12px;
-			background: var(--color_bg_input);
-			border: 1px solid var(--color_border);
-			border-radius: var(--radius);
-			cursor: pointer;
-			transition: all 0.2s ease;
-
-			&:hover {
-				background: var(--color_bg_hover);
-				border-color: var(--color_border_hover);
-			}
-
-			&.selected {
-				background: var(--color_bg_selected);
-				border-color: var(--color_primary);
-			}
-
-			.entityName {
-				flex: 1;
-				font-size: 13px;
-				color: var(--color_text);
-			}
-		}
-	}
-
-	.relationItems {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-
-		.relationItem {
-			background: var(--color_bg_input);
-			border: 1px solid var(--color_border);
-			border-radius: var(--radius);
-			padding: 8px 12px;
-
-			.relationFlow {
-				display: flex;
-				align-items: center;
-				gap: 6px;
-				margin-bottom: 4px;
-				flex-wrap: wrap;
-
-				.entityRef {
-					background: var(--color_bg_tag);
-					color: var(--color_text);
-					padding: 2px 6px;
-					border-radius: 3px;
-					font-size: 11px;
-					border: 1px solid var(--color_border);
-					white-space: nowrap;
-				}
-
-				.relationLabel {
-					background: var(--color_primary_bg);
-					color: var(--color_primary);
-					padding: 2px 6px;
-					border-radius: 3px;
-					font-size: 11px;
-					font-weight: 500;
-					border: 1px solid var(--color_primary_border);
-					white-space: nowrap;
-				}
-			}
-
-			.relationWeight {
-				display: flex;
-				justify-content: flex-end;
-			}
-		}
-	}
 
 	&::-webkit-scrollbar {
 		width: 6px;
