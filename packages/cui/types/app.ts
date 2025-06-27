@@ -83,6 +83,7 @@ export declare namespace App {
 		max_size?: number
 		chunk_size?: number
 		allowed_types?: string[]
+		gzip?: boolean
 	}
 
 	interface UploadOption {

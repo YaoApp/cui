@@ -363,7 +363,7 @@ const AIChat = (props: AIChatProps) => {
 				const result = await uploadTo('chat', file, {
 					compress_image: true,
 					compress_size: 1024,
-					gzip: true,
+					gzip: global.agent_storages?.chat?.gzip || false,
 					knowledge: false,
 					chat_id: chat_id
 				})
