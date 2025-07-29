@@ -1,0 +1,144 @@
+@import '@/styles/preset/vars.less';
+
+.baseButton {
+	border-radius: var(--radius) !important;
+	font-weight: 600 !important;
+	font-size: 15px !important;
+	height: 44px !important;
+	transition: all 0.3s ease !important;
+	line-height: 1 !important;
+}
+
+.variant_primary {
+	background: linear-gradient(135deg, var(--color_main) 0%, var(--color_main_active) 100%) !important;
+	border: none !important;
+	color: white !important;
+	box-shadow: 0 4px 12px rgba(51, 113, 252, 0.3) !important;
+
+	&:hover:not(:disabled) {
+		background: linear-gradient(135deg, var(--color_main_hover) 0%, var(--color_main) 100%) !important;
+		transform: translateY(-2px) !important;
+		box-shadow: 0 6px 20px rgba(51, 113, 252, 0.4) !important;
+		color: white !important;
+		border-color: transparent !important;
+	}
+
+	&:focus {
+		background: linear-gradient(135deg, var(--color_main) 0%, var(--color_main_active) 100%) !important;
+		color: white !important;
+		border-color: transparent !important;
+		box-shadow: 0 4px 12px rgba(51, 113, 252, 0.3) !important;
+	}
+
+	&:active {
+		transform: translateY(0) !important;
+		background: linear-gradient(135deg, var(--color_main_active) 0%, var(--color_main) 100%) !important;
+		color: white !important;
+	}
+
+	&.ant-btn-loading {
+		opacity: 0.8 !important;
+		background: linear-gradient(135deg, var(--color_main) 0%, var(--color_main_active) 100%) !important;
+		color: white !important;
+	}
+
+	/* 禁用状态样式 */
+	&:disabled,
+	&.ant-btn-disabled {
+		background: var(--color_bg_hover) !important;
+		border: 1px solid var(--color_border) !important;
+		color: var(--color_text_grey) !important;
+		box-shadow: none !important;
+		cursor: not-allowed !important;
+		transform: none !important;
+		opacity: 0.7 !important;
+
+		&:hover {
+			background: var(--color_bg_hover) !important;
+			border-color: var(--color_border) !important;
+			color: var(--color_text_grey) !important;
+			box-shadow: none !important;
+			transform: none !important;
+			opacity: 0.7 !important;
+		}
+	}
+}
+
+.variant_social {
+	border: 1px solid var(--color_border) !important;
+	background-color: transparent !important;
+	color: var(--color_text) !important;
+
+	&:hover:not(:disabled) {
+		transform: translateY(-1px) !important;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+		border-color: var(--color_main) !important;
+		color: var(--color_text) !important;
+		background-color: transparent !important;
+	}
+
+	&:focus {
+		border-color: var(--color_main) !important;
+		color: var(--color_text) !important;
+		background-color: transparent !important;
+	}
+
+	&:active {
+		transform: translateY(0) !important;
+	}
+}
+
+.fullWidth {
+	width: 100% !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+	.baseButton {
+		height: 40px !important;
+		font-size: 14px !important;
+	}
+}
+
+/* Dark theme adjustments */
+[data-theme='dark'] {
+	.variant_primary {
+		background: linear-gradient(135deg, #4580ff 0%, #3371fc 100%) !important;
+		box-shadow: 0 4px 12px rgba(69, 128, 255, 0.3) !important;
+
+		&:hover:not(:disabled) {
+			background: linear-gradient(135deg, #5a8fff 0%, #4580ff 100%) !important;
+			box-shadow: 0 6px 20px rgba(69, 128, 255, 0.4) !important;
+		}
+
+		&:disabled,
+		&.ant-btn-disabled {
+			background: rgba(255, 255, 255, 0.08) !important;
+			border: 1px solid rgba(255, 255, 255, 0.12) !important;
+			color: rgba(255, 255, 255, 0.4) !important;
+			box-shadow: none !important;
+			opacity: 1 !important;
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.08) !important;
+				border-color: rgba(255, 255, 255, 0.12) !important;
+				color: rgba(255, 255, 255, 0.4) !important;
+				box-shadow: none !important;
+				transform: none !important;
+			}
+		}
+	}
+
+	.variant_social {
+		background: rgba(255, 255, 255, 0.05) !important;
+		border: 1px solid rgba(255, 255, 255, 0.12) !important;
+		color: rgba(255, 255, 255, 0.9) !important;
+
+		&:hover:not(:disabled) {
+			background: rgba(255, 255, 255, 0.08) !important;
+			border-color: rgba(255, 255, 255, 0.2) !important;
+			color: rgba(255, 255, 255, 1) !important;
+			box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1) !important;
+		}
+	}
+}

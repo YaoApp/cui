@@ -1,0 +1,161 @@
+@import '@/styles/preset/vars.less';
+
+.container {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+
+	.languageSwitcher {
+		background: rgba(0, 0, 0, 0.05);
+		border-radius: var(--radius);
+		padding: 2px;
+		display: flex;
+		gap: 1px;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.08);
+		}
+
+		.langBtn {
+			background: none;
+			border: none;
+			border-radius: calc(var(--radius) * 0.8);
+			color: rgba(0, 0, 0, 0.7);
+			font-size: 11px;
+			font-weight: 500;
+			height: 26px;
+			line-height: 24px;
+			padding: 0 8px;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+			&:hover {
+				background: rgba(0, 0, 0, 0.1);
+				color: rgba(0, 0, 0, 0.9);
+			}
+
+			&.active {
+				background: var(--color_main);
+				color: white;
+
+				&:hover {
+					background: var(--color_main_hover);
+					color: white;
+				}
+			}
+		}
+	}
+
+	.themeSwitcher {
+		.themeToggleBtn {
+			width: 32px;
+			height: 32px;
+			background: rgba(0, 0, 0, 0.05);
+			border: none;
+			border-radius: var(--radius);
+			color: rgba(0, 0, 0, 0.7);
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			font-size: 14px;
+
+			&:hover {
+				background: rgba(0, 0, 0, 0.08);
+				color: rgba(0, 0, 0, 0.9);
+			}
+
+			&.dark {
+				background: var(--color_main);
+				color: white;
+
+				&:hover {
+					background: var(--color_main_hover);
+					color: white;
+				}
+			}
+		}
+	}
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+	.container {
+		gap: 6px;
+
+		.languageSwitcher {
+			padding: 2px;
+
+			.langBtn {
+				font-size: 10px;
+				height: 22px;
+				line-height: 20px;
+				padding: 0 6px;
+			}
+		}
+
+		.themeSwitcher {
+			.themeToggleBtn {
+				width: 28px;
+				height: 28px;
+				font-size: 12px;
+			}
+		}
+	}
+}
+
+/* Dark theme support */
+[data-theme='dark'] {
+	.container {
+		.languageSwitcher {
+			background: rgba(255, 255, 255, 0.08);
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.12);
+			}
+
+			.langBtn {
+				color: rgba(255, 255, 255, 0.7);
+
+				&:hover {
+					background: rgba(255, 255, 255, 0.15);
+					color: rgba(255, 255, 255, 0.9);
+				}
+
+				&.active {
+					background: var(--color_main);
+					color: white;
+
+					&:hover {
+						background: var(--color_main_hover);
+						color: white;
+					}
+				}
+			}
+		}
+
+		.themeSwitcher {
+			.themeToggleBtn {
+				background: rgba(255, 255, 255, 0.08);
+				color: rgba(255, 255, 255, 0.7);
+
+				&:hover {
+					background: rgba(255, 255, 255, 0.12);
+					color: rgba(255, 255, 255, 0.9);
+				}
+
+				&.dark {
+					background: var(--color_main);
+					color: white;
+
+					&:hover {
+						background: var(--color_main_hover);
+						color: white;
+					}
+				}
+			}
+		}
+	}
+}

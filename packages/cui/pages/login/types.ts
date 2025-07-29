@@ -12,6 +12,8 @@ export interface FormValues {
 	mobile: string
 	password: string
 	code: string
+	remember_me?: boolean
+	locale?: string
 }
 
 export interface ReqLogin {
@@ -42,6 +44,58 @@ export interface ResLogin {
 	}
 }
 
+// New types for enhanced login page
+export interface ThirdPartyProvider {
+	id: string
+	name: string
+	icon: string
+	url: string
+	enabled: boolean
+	color?: string
+	textColor?: string
+}
+
+export interface LoginConfig {
+	username: {
+		label: string
+		placeholder: string
+		type: 'email' | 'mobile' | 'both'
+		required: boolean
+	}
+	password: {
+		label: string
+		placeholder: string
+		minLength: number
+		required: boolean
+	}
+	captcha: {
+		enabled: boolean
+		type: 'image' | 'text' | 'cloudflare'
+		endpoint?: string
+		siteKey?: string
+	}
+	thirdPartyProviders: ThirdPartyProvider[]
+	page: {
+		title: string
+		subtitle?: string
+		backgroundImage?: string
+		logo?: string
+		primaryColor?: string
+	}
+	api: {
+		login: string
+		config: string
+		thirdParty: string
+	}
+}
+
+export interface ApiResponse<T = any> {
+	success: boolean
+	data?: T
+	message?: string
+	errors?: Record<string, string[]>
+}
+
 export interface IPropsCommon {
 	type: UserType
 	x: Model
@@ -56,4 +110,24 @@ export interface IPropsForm {
 
 export interface IPropsThirdPartyLogin {
 	items: App.Role['thirdPartyLogin']
+}
+
+// New prop interfaces for enhanced components
+export interface IPropsResponsiveLogin {
+	config?: LoginConfig
+	onLogin: (data: FormValues) => void
+	loading?: boolean
+}
+
+export interface IPropsThemeLanguageSwitcher {
+	theme: 'light' | 'dark'
+	language: string
+	onThemeChange: (theme: 'light' | 'dark') => void
+	onLanguageChange: (language: string) => void
+}
+
+export interface IPropsEnhancedThirdPartyLogin {
+	providers: ThirdPartyProvider[]
+	onProviderClick: (provider: ThirdPartyProvider) => void
+	loading?: boolean
 }

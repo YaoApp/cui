@@ -1,0 +1,146 @@
+@import '@/styles/preset/vars.less';
+
+.captchaContainer {
+	margin-bottom: 16px;
+
+	.imageCaptcha {
+		position: relative;
+
+		.captchaImageWrap {
+			position: absolute;
+			right: 0;
+			top: 0;
+			height: 100%;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 0 14px;
+			z-index: 2;
+
+			.captchaImage {
+				height: 32px;
+				width: auto;
+				border-radius: calc(var(--radius) * 0.6);
+				cursor: pointer;
+				transition: all 0.3s ease;
+
+				&:hover {
+					opacity: 0.8;
+				}
+			}
+
+			.refreshBtn {
+				width: 24px;
+				height: 24px;
+				border: none;
+				background: none;
+				color: var(--color_text_grey);
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: calc(var(--radius) * 0.5);
+				transition: all 0.3s ease;
+
+				&:hover {
+					background: var(--color_bg_hover);
+					color: var(--color_main);
+				}
+
+				&:disabled {
+					opacity: 0.5;
+					cursor: not-allowed;
+				}
+			}
+		}
+	}
+
+	.cloudflareWidget {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 65px;
+
+		.loadingState {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			color: var(--color_text_grey);
+			font-size: 14px;
+
+			span {
+				animation: pulse 1.5s ease-in-out infinite;
+			}
+		}
+
+		.turnstileContainer {
+			width: 100%;
+			display: flex;
+			justify-content: center;
+
+			// Ensure Turnstile widget fits properly
+			:global(.cf-turnstile) {
+				max-width: 100%;
+			}
+		}
+	}
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+	.captchaContainer {
+		margin-bottom: 14px;
+
+		.imageCaptcha {
+			.captchaImageWrap {
+				padding: 0 12px;
+
+				.captchaImage {
+					height: 28px;
+				}
+
+				.refreshBtn {
+					width: 20px;
+					height: 20px;
+				}
+			}
+		}
+
+		.cloudflareWidget {
+			min-height: 60px;
+
+			.loadingState {
+				font-size: 13px;
+			}
+
+			.turnstileContainer {
+				:global(.cf-turnstile) {
+					transform: scale(0.9);
+					transform-origin: center;
+				}
+			}
+		}
+	}
+}
+
+/* Animations */
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+
+/* Dark theme support */
+[data-theme='dark'] {
+	.captchaContainer {
+		.cloudflareWidget {
+			.loadingState {
+				color: rgba(255, 255, 255, 0.7);
+			}
+		}
+	}
+}
