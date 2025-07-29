@@ -25,6 +25,14 @@ const Index = () => {
 	const is_login = pathname.indexOf('/login/') !== -1 || pathname === '/'
 	const is_auth = pathname === '/auth'
 
+	// For OAuth login
+	const is_auth_login = pathname === '/auth/login'
+	const is_auth_login_totp = pathname === '/auth/login/totp'
+	const is_auth_login_sms = pathname === '/auth/login/sms'
+	const is_auth_logout = pathname === '/auth/logout'
+	const is_auth_back = pathname === '/auth/back'
+	const is_auth_consent = pathname === '/auth/consent'
+
 	useLayoutEffect(() => {
 		window.$global = global
 
@@ -56,6 +64,19 @@ const Index = () => {
 	}
 
 	const renderMainContent = () => {
+		// OAuth login
+		if (
+			is_auth_login ||
+			is_auth_consent ||
+			is_auth_login_totp ||
+			is_auth_login_sms ||
+			is_auth_back ||
+			is_auth_logout
+		) {
+			console.log('pathname', pathname, 'OAuth login')
+			return <Outlet />
+		}
+
 		if (is_login) {
 			return (
 				<LoginWrapper {...props_Login_wrapper}>
