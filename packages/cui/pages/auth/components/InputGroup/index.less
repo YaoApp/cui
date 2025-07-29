@@ -1,0 +1,125 @@
+@import '@/styles/preset/vars.less';
+
+.inputGroup {
+	display: grid;
+	grid-template-columns: auto 1fr; // 默认两列：第一列自适应宽度，第二列填充剩余空间
+	width: 100%;
+	margin-bottom: 16px;
+	gap: 0; // 无间隙，允许边框重叠
+	align-items: stretch; // 确保所有子元素高度一致
+
+	// 统一高度设置
+	> * {
+		height: 70px; // 桌面端统一高度
+		min-height: 70px;
+		margin-bottom: 0 !important; // 移除默认margin
+		box-sizing: border-box;
+	}
+
+	// 边框重叠效果
+	> *:not(:first-child) {
+		margin-left: -1px;
+	}
+
+	// hover时提升层级
+	> *:hover {
+		z-index: 2;
+		position: relative;
+	}
+
+	// 第一个元素：保留左侧圆角，移除右侧圆角
+	> *:first-child {
+		border-top-right-radius: 0 !important;
+		border-bottom-right-radius: 0 !important;
+
+		// 深度选择器确保子元素也应用样式
+		* {
+			border-top-right-radius: 0 !important;
+			border-bottom-right-radius: 0 !important;
+		}
+	}
+
+	// 最后一个元素：保留右侧圆角，移除左侧圆角
+	> *:last-child {
+		border-top-left-radius: 0 !important;
+		border-bottom-left-radius: 0 !important;
+
+		// 深度选择器确保子元素也应用样式
+		* {
+			border-top-left-radius: 0 !important;
+			border-bottom-left-radius: 0 !important;
+		}
+	}
+
+	// 中间元素：移除所有圆角
+	> *:not(:first-child):not(:last-child) {
+		border-radius: 0 !important;
+
+		* {
+			border-radius: 0 !important;
+		}
+	}
+
+	// 强制所有类型的子元素统一高度
+	:global(.baseButton),
+	:global(.trigger),
+	:global(.inputContainer),
+	:global(.ant-input),
+	:global(.ant-input-affix-wrapper) {
+		height: 70px !important;
+		min-height: 70px !important;
+		max-height: 70px !important;
+		box-sizing: border-box !important;
+		display: flex !important;
+		align-items: center !important;
+	}
+
+	// 按钮特有样式
+	:global(.baseButton) {
+		padding: 12px 16px !important;
+		line-height: 1.5 !important;
+		min-width: max-content !important;
+		white-space: nowrap !important;
+	}
+
+	// CountryCodeSelect特有样式
+	:global(.trigger) {
+		justify-content: space-between !important;
+	}
+}
+
+// 动态调整grid布局 - 如果有三个子元素就用三列，否则用两列
+.inputGroup:has(> *:nth-child(3)) {
+	grid-template-columns: auto 1fr auto; // 三列：第一和第三自适应，第二列填充
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+	.inputGroup {
+		margin-bottom: 14px;
+
+		// 移动端统一高度
+		> * {
+			height: 64px !important;
+			min-height: 64px !important;
+		}
+
+		// 移动端强制所有子元素统一高度
+		:global(.baseButton),
+		:global(.trigger),
+		:global(.inputContainer),
+		:global(.ant-input),
+		:global(.ant-input-affix-wrapper) {
+			height: 64px !important;
+			min-height: 64px !important;
+			max-height: 64px !important;
+		}
+
+		// 移动端按钮特有样式
+		:global(.baseButton) {
+			padding: 10px 14px !important;
+		}
+	}
+}
+
+/* 暗色主题 - 样式由顶层统一处理 */

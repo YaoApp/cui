@@ -1,0 +1,300 @@
+@import '@/styles/preset/vars.less';
+
+.countryCodeSelect {
+	position: relative;
+	display: inline-block;
+}
+
+.trigger {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	background-color: var(--color_bg_nav);
+	border: 1px solid var(--color_border);
+	border-radius: calc(var(--radius) * 2);
+	padding: 12px 14px; // 完全匹配AuthInput
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	min-height: 46px; // 完全匹配AuthInput
+	box-sizing: border-box;
+	height: auto; // 让高度由min-height和padding决定
+	font-size: 15px;
+	color: var(--color_text);
+	cursor: pointer;
+	min-width: max-content; // 根据内容自适应，不写死宽度
+	white-space: nowrap; // 防止内容换行
+
+	&:hover {
+		background-color: var(--color_bg_hover);
+		border-color: var(--color_main);
+		transform: translateY(-1px);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	&:focus {
+		outline: none;
+		background-color: var(--color_bg_nav);
+		border-color: var(--color_main);
+		box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.2), 0 4px 12px rgba(51, 113, 252, 0.15);
+		transform: translateY(-2px);
+	}
+
+	.flag {
+		font-size: 16px; // 与国旗表情符号保持合适大小
+		line-height: 1;
+	}
+
+	.dialCode {
+		font-weight: 500;
+		font-size: 15px; // 与触发器字体保持一致
+		margin-right: 6px; // 与箭头保持适当间距
+	}
+
+	.chevron {
+		color: var(--color_text_grey);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		transition: all 0.2s ease;
+		margin-left: 4px;
+		opacity: 0.7;
+
+		&:hover {
+			opacity: 1;
+		}
+	}
+}
+
+.dropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	min-width: 320px; // 增加最小宽度，让国家名称完整显示
+	z-index: 1000;
+	background: var(--color_bg_menu);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	margin-top: 4px;
+	overflow: hidden;
+	animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.searchBox {
+	position: relative;
+	padding: 12px;
+	border-bottom: 1px solid var(--color_border);
+
+	.searchIcon {
+		position: absolute;
+		left: 20px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: var(--color_text_grey);
+		opacity: 0.7;
+	}
+
+	.searchInput {
+		width: 100%;
+		padding: 8px 12px 8px 34px; // 调整左侧间距
+		border: 1px solid var(--color_border);
+		border-radius: calc(var(--radius) * 0.8);
+		background: var(--color_bg_nav);
+		color: var(--color_text);
+		font-size: 13px; // 缩小搜索框字体
+		transition: all 0.3s ease;
+
+		&:focus {
+			outline: none;
+			border-color: var(--color_main);
+			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+		}
+
+		&::placeholder {
+			color: var(--color_text_grey);
+		}
+	}
+}
+
+.countryList {
+	max-height: 200px;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_bg_nav);
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color_text_grey);
+		}
+	}
+}
+
+.countryItem {
+	display: flex;
+	align-items: center;
+	gap: 10px; // 增加间距让布局更清晰
+	width: 100%;
+	padding: 10px 12px; // 减少垂直间距
+	border: none;
+	background: transparent;
+	color: var(--color_text);
+	font-size: 13px; // 缩小列表项字体
+	text-align: left;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	min-height: 36px; // 确保足够的高度
+
+	&:hover {
+		background: var(--color_bg_nav);
+	}
+
+	&.selected {
+		background: rgba(51, 113, 252, 0.1);
+		color: var(--color_main);
+	}
+
+	.flag {
+		font-size: 14px; // 与触发器保持一致
+		line-height: 1;
+		flex-shrink: 0;
+	}
+
+	.countryName {
+		flex: 1;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+		font-size: 12px; // 国家名称稍小
+		min-width: 0; // 允许flexbox正确处理overflow
+		margin-right: 8px; // 与区号保持距离
+	}
+
+	.dialCode {
+		font-weight: 500;
+		color: var(--color_text_grey);
+		flex-shrink: 0;
+		font-size: 12px; // 区号字体稍小
+	}
+}
+
+/* Dark theme support */
+[data-theme='dark'] {
+	.trigger {
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		backdrop-filter: blur(10px);
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.08);
+			border-color: rgba(69, 128, 255, 0.4);
+			box-shadow: 0 2px 8px rgba(69, 128, 255, 0.15);
+		}
+
+		&:focus {
+			background: rgba(255, 255, 255, 0.08);
+			border-color: rgba(69, 128, 255, 0.6);
+			box-shadow: 0 0 0 2px rgba(69, 128, 255, 0.25), 0 4px 12px rgba(69, 128, 255, 0.2);
+		}
+
+		.flag,
+		.dialCode {
+			color: rgba(255, 255, 255, 0.95);
+		}
+
+		.chevron {
+			color: rgba(255, 255, 255, 0.6);
+		}
+	}
+
+	.dropdown {
+		background: var(--color_bg_nav);
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	.searchInput {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(255, 255, 255, 0.1);
+
+		&:focus {
+			border-color: rgba(69, 128, 255, 0.6);
+		}
+	}
+
+	.countryItem {
+		&:hover {
+			background: rgba(255, 255, 255, 0.05);
+		}
+	}
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+	.trigger {
+		padding: 10px 12px; // 匹配AuthInput移动端padding
+		min-height: 42px; // 匹配AuthInput移动端min-height
+		font-size: 16px; // 匹配AuthInput移动端字体
+		border-radius: var(--radius); // 匹配AuthInput移动端圆角
+		height: auto; // 让高度由min-height和padding决定
+
+		.flag {
+			font-size: 14px;
+		}
+
+		.dialCode {
+			font-size: 16px; // 与触发器保持一致
+		}
+
+		.chevron {
+			opacity: 0.6;
+		}
+	}
+
+	.dropdown {
+		min-width: 300px; // 移动端也增加宽度
+		width: auto;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	.searchInput {
+		font-size: 16px; // 防止 iOS 缩放
+	}
+
+	.countryItem {
+		padding: 8px 12px;
+		font-size: 14px; // 增大移动端列表项字体
+
+		.flag {
+			font-size: 14px;
+		}
+
+		.countryName {
+			font-size: 14px;
+		}
+
+		.dialCode {
+			font-size: 13px;
+		}
+	}
+}

@@ -218,6 +218,121 @@ export class LoginMockService {
 	}
 
 	/**
+	 * Send SMS verification code
+	 */
+	async sendSmsCode(data: {
+		mobile: string
+		captcha?: string
+	}): Promise<ApiResponse<{ message: string; expiresIn: number }>> {
+		await this.mockDelay(1000)
+
+		// 模拟手机号验证
+		if (!/^1[3-9]\d{9}$/.test(data.mobile)) {
+			return {
+				success: false,
+				message: '请输入正确的手机号码'
+			}
+		}
+
+		// 模拟验证码验证
+		if (data.captcha && !data.captcha.trim()) {
+			return {
+				success: false,
+				message: '请完成验证码验证'
+			}
+		}
+
+		return {
+			success: true,
+			data: {
+				message: '验证码已发送',
+				expiresIn: 300 // 5分钟有效期
+			},
+			message: '验证码发送成功'
+		}
+	}
+
+	/**
+	 * SMS login authentication
+	 */
+	async smsLogin(data: { mobile: string; smsCode: string; locale: string }): Promise<ApiResponse<ResLogin>> {
+		await this.mockDelay(1500)
+
+		// 模拟手机号验证
+		if (!/^1[3-9]\d{9}$/.test(data.mobile)) {
+			return {
+				success: false,
+				message: '请输入正确的手机号码'
+			}
+		}
+
+		// 模拟短信验证码验证（演示用，真实环境应该验证实际发送的验证码）
+		if (data.smsCode === '123456' || data.smsCode === '888888') {
+			// 查找或创建用户
+			let user = this.mockUsers.find((u) => u.mobile === data.mobile)
+			if (!user) {
+				// 为新手机号创建用户
+				const newUserId = this.mockUsers.length + 1
+				user = {
+					id: newUserId,
+					name: `用户${data.mobile.substring(7)}`,
+					email: `${data.mobile}@sms.example.com`,
+					mobile: data.mobile,
+					password: '', // SMS登录不需要密码
+					type: 'user'
+				}
+				this.mockUsers.push(user)
+			}
+
+			// 确保 user 不为 undefined
+			if (!user) {
+				return {
+					success: false,
+					message: '用户创建失败'
+				}
+			}
+
+			const loginResponse: ResLogin = {
+				expires_at: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+				menus: {
+					items: [
+						{
+							id: 1,
+							key: 'dashboard',
+							path: '/dashboard',
+							name: 'Dashboard',
+							icon: 'dashboard'
+						}
+					],
+					setting: [
+						{ id: 2, key: 'settings', path: '/settings', name: 'Settings', icon: 'settings' }
+					]
+				},
+				token: `sms_token_${user.id}_${Date.now()}`,
+				user: {
+					id: user.id,
+					name: user.name,
+					email: user.email,
+					mobile: user.mobile
+				} as any,
+				type: user.type,
+				entry: '/dashboard'
+			}
+
+			return {
+				success: true,
+				data: loginResponse,
+				message: 'SMS登录成功'
+			}
+		}
+
+		return {
+			success: false,
+			message: '验证码错误或已过期'
+		}
+	}
+
+	/**
 	 * Generate mock captcha
 	 */
 	async generateCaptcha(): Promise<ApiResponse<{ id: string; image: string }>> {
