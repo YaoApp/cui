@@ -11,6 +11,7 @@ import AuthLayout from '../components/AuthLayout'
 import Captcha from '../components/Captcha'
 import { FormValues, LoginConfig, ThirdPartyProvider } from '@/pages/login/types'
 import styles from './index.less'
+import { Signin } from '@/openapi'
 
 const ResponsiveLogin = () => {
 	const messages = useIntl()
@@ -118,6 +119,12 @@ const ResponsiveLogin = () => {
 			</div>
 		)
 	}
+
+	// Tests
+	const sigin = new Signin(window.$app.openapi)
+	sigin.GetConfig()
+		.then((res) => console.log('Page Config', res.data))
+		.catch((err) => console.error('Page Config Error', err))
 
 	return (
 		<AuthLayout

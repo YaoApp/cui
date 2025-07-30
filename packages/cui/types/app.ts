@@ -1,3 +1,4 @@
+import { OpenAPIConfig } from '@/openapi'
 import type { Action, Common } from '@/types'
 
 export declare namespace App {
@@ -245,6 +246,10 @@ export declare namespace App {
 
 		/** Application version */
 		version?: string
+
+		openapi?: OpenAPIConfig
+
+		kb?: any // TODO: add Knowledge Base Config
 
 		/** Yao version */
 		yao?: {

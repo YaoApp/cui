@@ -10,6 +10,7 @@ import { local } from '@yaoapp/storex'
 
 import type { AvatarFullConfig } from 'react-nice-avatar'
 import type { App, LocaleMessages } from '@/types'
+import { OpenAPI, OpenAPIConfig } from '@/openapi'
 
 @singleton()
 export default class GlobalModel {
@@ -21,6 +22,8 @@ export default class GlobalModel {
 	connectors = {} as App.Connectors
 	locale_messages = {} as LocaleMessages
 	app_info = {} as App.Info
+	openapi = {} as OpenAPIConfig
+	kb = {} as any // TODO: add Knowledge Base Config
 	user = (local.user || {}) as App.User
 	menus = (local.menus || { items: [], setting: {}, quick: [] }) as App.Menus
 	menu = (local.menu || []) as Array<App.Menu>
@@ -62,8 +65,14 @@ export default class GlobalModel {
 
 		this.app_info = res
 
+		// OpenAPI Config
+
 		// API Prefix
 		window.$app.api_prefix = res.apiPrefix || '__yao'
+
+		// OpenAPI Config
+		window.$app.openapi = res.openapi ? new OpenAPI(res.openapi) : new OpenAPI({ baseURL: '/v1' })
+		window.$app.kb = res.kb || {}
 
 		// Storage
 		local.remote_cache = res.optional?.remoteCache ?? true

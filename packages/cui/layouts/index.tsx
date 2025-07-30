@@ -26,9 +26,9 @@ const Index = () => {
 	const is_auth = pathname === '/auth'
 
 	// For OAuth login
-	const is_auth_login = pathname === '/auth/login'
-	const is_auth_login_totp = pathname === '/auth/login/totp'
-	const is_auth_login_sms = pathname === '/auth/login/sms'
+	const is_auth_signin = pathname === '/auth/signin'
+	const is_auth_signin_totp = pathname === '/auth/signin/totp'
+	const is_auth_signin_sms = pathname === '/auth/signin/sms'
 	const is_auth_logout = pathname === '/auth/logout'
 	const is_auth_back = pathname === '/auth/back'
 	const is_auth_consent = pathname === '/auth/consent'
@@ -66,10 +66,10 @@ const Index = () => {
 	const renderMainContent = () => {
 		// OAuth login
 		if (
-			is_auth_login ||
+			is_auth_signin ||
 			is_auth_consent ||
-			is_auth_login_totp ||
-			is_auth_login_sms ||
+			is_auth_signin_totp ||
+			is_auth_signin_sms ||
 			is_auth_back ||
 			is_auth_logout
 		) {
