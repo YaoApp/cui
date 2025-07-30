@@ -47,12 +47,22 @@ export interface ResLogin {
 // New types for enhanced login page
 export interface ThirdPartyProvider {
 	id: string
-	name: string
-	icon: string
-	url: string
-	enabled: boolean
-	color?: string
+	title: string
+	logo?: string
+	color: string
 	textColor?: string
+	client_id: string
+	scopes: string[]
+	endpoints: {
+		authorization: string
+		token: string
+		user_info: string
+	}
+	mapping?: {
+		avatar?: string
+		email?: string
+		name?: string
+	}
 }
 
 export interface LoginConfig {

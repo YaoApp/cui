@@ -20,7 +20,7 @@ const SocialLogin = ({ providers, onProviderClick, loading }: IPropsEnhancedThir
 			setClickedProvider(provider.id)
 			await onProviderClick(provider)
 		} catch (error) {
-			message.error(`Failed to authenticate with ${provider.name}`)
+			message.error(`Failed to authenticate with ${provider.title}`)
 		} finally {
 			setClickedProvider(null)
 		}
@@ -47,15 +47,15 @@ const SocialLogin = ({ providers, onProviderClick, loading }: IPropsEnhancedThir
 						size='large'
 						shape='round'
 						loading={clickedProvider === provider.id}
-						disabled={loading || !provider.enabled}
+						disabled={loading}
 						onClick={() => handleProviderClick(provider)}
 						icon={
-							provider.icon &&
+							provider.logo &&
 							!clickedProvider && (
 								<img
 									className={styles.providerIcon}
-									src={provider.icon}
-									alt={provider.name}
+									src={provider.logo}
+									alt={provider.title}
 									onError={(e) => {
 										e.currentTarget.style.display = 'none'
 									}}
@@ -63,14 +63,12 @@ const SocialLogin = ({ providers, onProviderClick, loading }: IPropsEnhancedThir
 							)
 						}
 						style={{
-							backgroundColor: provider.color || 'transparent',
-							borderColor: provider.color || 'var(--color_border)',
-							color: provider.textColor || 'var(--color_text)'
+							backgroundColor: provider.color || 'var(--color_main)',
+							borderColor: provider.color || 'var(--color_main)',
+							color: provider.textColor || '#ffffff'
 						}}
 					>
-						<span className={styles.providerName}>
-							{messages.login.third_party.continue_with} {provider.name}
-						</span>
+						<span className={styles.providerName}>{provider.title}</span>
 					</Button>
 				))}
 			</div>

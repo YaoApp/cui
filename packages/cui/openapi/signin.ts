@@ -6,26 +6,64 @@ import { ApiResponse, ErrorResponse } from './types'
  */
 export interface SigninProvider {
 	id: string
-	name: string
-	type: 'oauth' | 'oidc'
-	authorization_url: string
+	title: string
+	logo?: string
+	color: string
+	textColor?: string
 	client_id: string
-	scope?: string
-	redirect_uri?: string
-	icon?: string
-	enabled: boolean
+	scopes: string[]
+	endpoints: {
+		authorization: string
+		token: string
+		user_info: string
+	}
+	mapping?: {
+		avatar?: string
+		email?: string
+		name?: string
+	}
 }
 
 /**
  * Signin configuration response
  */
 export interface SigninConfig {
-	providers: SigninProvider[]
-	password_enabled: boolean
-	registration_enabled: boolean
-	captcha_enabled: boolean
-	locale: string
-	locales: string[]
+	title: string
+	description: string
+	success_url: string
+	failure_url: string
+	form: {
+		username: {
+			placeholder: string
+			fields: string[]
+		}
+		password: {
+			placeholder: string
+		}
+		captcha: {
+			type: 'image' | 'turnstile'
+			options?: {
+				secret?: string
+				sitekey?: string
+			}
+		}
+		forgot_password_link: boolean
+		remember_me: boolean
+		register_link: string
+		terms_of_service_link: string
+		privacy_policy_link: string
+	}
+	token: {
+		expires_in: string
+		remember_me_expires_in: string
+	}
+	third_party: {
+		register: {
+			auto: boolean
+			role: string
+		}
+		providers: SigninProvider[]
+	}
 }
 
 /**
@@ -133,7 +171,7 @@ export class Signin {
 			throw new Error(`Failed to get signin config: ${config.error.error_description}`)
 		}
 
-		const provider = config.data?.providers.find((p) => p.id === providerId)
+		const provider = config.data?.third_party?.providers.find((p) => p.id === providerId)
 		if (!provider) {
 			throw new Error(`OAuth provider "${providerId}" not found`)
 		}
@@ -141,12 +179,11 @@ export class Signin {
 		const params = new URLSearchParams({
 			client_id: provider.client_id,
 			response_type: 'code',
-			redirect_uri: redirectUri || provider.redirect_uri || window.location.origin + '/auth/callback',
-			state: state || this.GenerateOAuthState(),
-			scope: scope || provider.scope || 'openid profile email'
+			redirect_uri: redirectUri || window.location.origin + '/auth/callback',
+			state: state || this.GenerateOAuthState()
 		})
 
-		return `${provider.authorization_url}?${params.toString()}`
+		return `${provider.endpoints.authorization}?${params.toString()}`
 	}
 
 	/**

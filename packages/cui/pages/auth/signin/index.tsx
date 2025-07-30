@@ -5,18 +5,28 @@ import { useAsyncEffect } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
-import { loginMockService } from '@/services/loginMock'
 import { SocialLogin, Settings, AuthInput, AuthButton } from '../components'
 import AuthLayout from '../components/AuthLayout'
 import Captcha from '../components/Captcha'
-import { FormValues, LoginConfig, ThirdPartyProvider } from '@/pages/login/types'
+import { FormValues } from '@/pages/login/types'
 import styles from './index.less'
-import { Signin } from '@/openapi'
+import { Signin, SigninConfig, SigninProvider } from '@/openapi'
+
+// 浏览器语言检测工具函数
+const getBrowserLanguage = (): string => {
+	// 获取浏览器首选语言
+	const browserLang = navigator.language || navigator.languages?.[0] || 'en'
+
+	return browserLang
+}
 
 const ResponsiveLogin = () => {
 	const messages = useIntl()
 	const global = useGlobal()
-	const locale = getLocale()
+
+	// 使用浏览器语言作为默认语言，fallback到当前locale
+	const browserLang = getBrowserLanguage()
+	const currentLocale = getLocale() || browserLang
 
 	const [loading, setLoading] = useState(false)
 	const [formData, setFormData] = useState({
@@ -26,28 +36,30 @@ const ResponsiveLogin = () => {
 		captcha: '',
 		remember_me: false
 	})
-	const [config, setConfig] = useState<LoginConfig | null>(null)
-	const [providers, setProviders] = useState<ThirdPartyProvider[]>([])
+	const [config, setConfig] = useState<SigninConfig | null>(null)
 
-	// Load configuration
+	// Load configuration using real API
 	useAsyncEffect(async () => {
 		try {
-			const [configRes, providersRes] = await Promise.all([
-				loginMockService.getLoginConfig(),
-				loginMockService.getThirdPartyProviders()
-			])
-
-			if (configRes.success && configRes.data) {
-				setConfig(configRes.data)
+			if (!window.$app?.openapi) {
+				console.error('OpenAPI not initialized')
+				return
 			}
 
-			if (providersRes.success && providersRes.data) {
-				setProviders(providersRes.data)
+			const signin = new Signin(window.$app.openapi)
+			const configRes = await signin.GetConfig(currentLocale)
+
+			if (!signin.IsError(configRes) && configRes.data) {
+				setConfig(configRes.data)
+			} else {
+				console.error('Failed to load signin config:', configRes.error || 'Unknown error')
+				message.error('Failed to load configuration')
 			}
 		} catch (error) {
 			console.error('Failed to load configuration:', error)
+			message.error('Failed to load configuration')
 		}
-	}, [])
+	}, [currentLocale, global.app_info])
 
 	// Form validation
 	const isFormValid = formData.mobile.trim() !== '' && formData.password.trim() !== ''
@@ -76,18 +88,30 @@ const ResponsiveLogin = () => {
 
 		setLoading(true)
 		try {
-			const result = await loginMockService.login({
-				mobile: formData.mobile,
+			if (!window.$app?.openapi) {
+				message.error('API not initialized')
+				return
+			}
+
+			const signin = new Signin(window.$app.openapi)
+			const result = await signin.SigninWithPassword({
+				username: formData.mobile,
 				password: formData.password,
-				code: formData.code,
-				locale: locale
+				remember: formData.remember_me,
+				captcha_code: formData.captcha || undefined,
+				captcha_id: undefined // TODO: 如果需要验证码ID，需要从验证码组件获取
 			})
 
-			if (result.success) {
+			if (!signin.IsError(result) && result.data) {
 				message.success('Login successful!')
 				console.log('Login successful:', result.data)
+
+				// TODO: 处理登录成功后的逻辑，如跳转、存储token等
+				// 这里可能需要根据具体业务逻辑调用全局状态更新方法
 			} else {
-				message.error(result.message || 'Login failed')
+				const errorMsg = result.error?.error_description || 'Login failed'
+				message.error(errorMsg)
+				console.error('Login error:', result.error)
 			}
 		} catch (error) {
 			message.error('Login failed')
@@ -97,16 +121,26 @@ const ResponsiveLogin = () => {
 		}
 	}
 
-	const handleThirdPartyClick = async (provider: ThirdPartyProvider) => {
+	const handleThirdPartyClick = async (provider: SigninProvider) => {
 		try {
-			const response = await loginMockService.handleThirdPartyAuth(provider.id)
-			if (response.success && response.data?.url) {
-				window.location.href = response.data.url
-			} else {
-				message.error(`Failed to authenticate with ${provider.name}`)
+			if (!window.$app?.openapi) {
+				message.error('API not initialized')
+				return
 			}
+
+			const signin = new Signin(window.$app.openapi)
+			const authUrl = await signin.GetOAuthAuthorizationUrl(
+				provider.id,
+				undefined, // 使用默认重定向URI
+				undefined, // 自动生成state
+				undefined // 使用默认scope
+			)
+
+			// 跳转到OAuth授权页面
+			window.location.href = authUrl
 		} catch (error) {
-			message.error(`Error connecting to ${provider.name}`)
+			console.error(`OAuth error for ${provider.title}:`, error)
+			message.error(`Error connecting to ${provider.title}`)
 		}
 	}
 
@@ -120,15 +154,9 @@ const ResponsiveLogin = () => {
 		)
 	}
 
-	// Tests
-	const sigin = new Signin(window.$app.openapi)
-	sigin.GetConfig()
-		.then((res) => console.log('Page Config', res.data))
-		.catch((err) => console.error('Page Config Error', err))
-
 	return (
 		<AuthLayout
-			logo={config.page?.logo || '/api/__yao/app/icons/app.png'}
+			logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>
@@ -137,17 +165,17 @@ const ResponsiveLogin = () => {
 				<div className={styles.loginCard}>
 					{/* Title Section */}
 					<div className={styles.titleSection}>
-						<h1 className={styles.appTitle}>{config.page?.title || 'Auth'}</h1>
+						<h1 className={styles.appTitle}>{config.title || 'Auth'}</h1>
 						<p className={styles.appSubtitle}>
-							{config.page?.subtitle || 'Please sign in to continue'}
+							{config.description || 'Please sign in to continue'}
 						</p>
 					</div>
 
 					{/* Third Party Login */}
-					{providers.length > 0 && (
+					{config.third_party?.providers && config.third_party.providers.length > 0 && (
 						<div className={styles.socialSection}>
 							<SocialLogin
-								providers={providers}
+								providers={config.third_party.providers}
 								onProviderClick={handleThirdPartyClick}
 								loading={loading}
 							/>
@@ -158,7 +186,10 @@ const ResponsiveLogin = () => {
 					<form className={styles.loginForm} onSubmit={handleSubmit}>
 						<AuthInput
 							id='mobile'
-							placeholder={messages.login.form.username_placeholder}
+							placeholder={
+								config.form?.username?.placeholder ||
+								messages.login.form.username_placeholder
+							}
 							prefix='person-outline'
 							value={formData.mobile}
 							onChange={handleInputChange('mobile')}
@@ -168,7 +199,10 @@ const ResponsiveLogin = () => {
 
 						<AuthInput.Password
 							id='password'
-							placeholder={messages.login.form.password_placeholder}
+							placeholder={
+								config.form?.password?.placeholder ||
+								messages.login.form.password_placeholder
+							}
 							prefix='lock-outline'
 							value={formData.password}
 							onChange={handleInputChange('password')}
@@ -176,11 +210,11 @@ const ResponsiveLogin = () => {
 						/>
 
 						{/* Captcha Field - Conditional based on config */}
-						{config.captcha.enabled && (
+						{config.form?.captcha && (
 							<Captcha
-								type={config.captcha.type}
-								endpoint={config.captcha.endpoint}
-								siteKey={config.captcha.siteKey}
+								type={config.form.captcha.type === 'turnstile' ? 'cloudflare' : 'image'}
+								endpoint='/api/captcha'
+								siteKey={config.form.captcha.options?.sitekey || ''}
 								value={formData.captcha}
 								onChange={handleCaptchaChange}
 								onCaptchaVerified={handleCaptchaChange}
@@ -188,17 +222,21 @@ const ResponsiveLogin = () => {
 						)}
 
 						<div className={styles.formOptions}>
-							<label className={styles.rememberCheckbox}>
-								<input
-									type='checkbox'
-									checked={formData.remember_me}
-									onChange={handleInputChange('remember_me')}
-								/>
-								<span>{messages.login.form.remember_me}</span>
-							</label>
-							<a href='#' className={styles.forgotLink}>
-								{messages.login.form.forgot_password}
-							</a>
+							{config.form?.remember_me && (
+								<label className={styles.rememberCheckbox}>
+									<input
+										type='checkbox'
+										checked={formData.remember_me}
+										onChange={handleInputChange('remember_me')}
+									/>
+									<span>{messages.login.form.remember_me}</span>
+								</label>
+							)}
+							{config.form?.forgot_password_link && (
+								<a href='#' className={styles.forgotLink}>
+									{messages.login.form.forgot_password}
+								</a>
+							)}
 						</div>
 
 						<AuthButton
@@ -212,36 +250,53 @@ const ResponsiveLogin = () => {
 						</AuthButton>
 
 						{/* Register Link */}
-						<div className={styles.registerSection}>
-							<span className={styles.noAccount}>{messages.login.form.no_account}</span>
-							<a href='#' className={styles.registerLink}>
-								{messages.login.form.register}
-							</a>
-						</div>
+						{config.form?.register_link && (
+							<div className={styles.registerSection}>
+								<span className={styles.noAccount}>
+									{messages.login.form.no_account}
+								</span>
+								<a
+									href={config.form.register_link}
+									className={styles.registerLink}
+									target='_blank'
+									rel='noopener noreferrer'
+								>
+									{messages.login.form.register}
+								</a>
+							</div>
+						)}
 
 						{/* Terms Agreement */}
-						<div className={styles.termsSection}>
-							<p className={styles.termsText}>
-								{messages.login.terms.agreement}{' '}
-								<a
-									href='#'
-									className={styles.termsLink}
-									target='_blank'
-									rel='noopener noreferrer'
-								>
-									{messages.login.terms.terms}
-								</a>{' '}
-								{messages.login.terms.and}{' '}
-								<a
-									href='#'
-									className={styles.termsLink}
-									target='_blank'
-									rel='noopener noreferrer'
-								>
-									{messages.login.terms.privacy}
-								</a>
-							</p>
-						</div>
+						{(config.form?.terms_of_service_link || config.form?.privacy_policy_link) && (
+							<div className={styles.termsSection}>
+								<p className={styles.termsText}>
+									{messages.login.terms.agreement}{' '}
+									{config.form.terms_of_service_link && (
+										<a
+											href={config.form.terms_of_service_link}
+											className={styles.termsLink}
+											target='_blank'
+											rel='noopener noreferrer'
+										>
+											{messages.login.terms.terms}
+										</a>
+									)}
+									{config.form.terms_of_service_link &&
+										config.form.privacy_policy_link &&
+										' ' + messages.login.terms.and + ' '}
+									{config.form.privacy_policy_link && (
+										<a
+											href={config.form.privacy_policy_link}
+											className={styles.termsLink}
+											target='_blank'
+											rel='noopener noreferrer'
+										>
+											{messages.login.terms.privacy}
+										</a>
+									)}
+								</p>
+							</div>
+						)}
 					</form>
 				</div>
 			</div>
