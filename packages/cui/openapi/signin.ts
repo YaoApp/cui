@@ -9,19 +9,9 @@ export interface SigninProvider {
 	title: string
 	logo?: string
 	color: string
-	textColor?: string
+	text_color?: string
 	client_id: string
-	scopes: string[]
-	endpoints: {
-		authorization: string
-		token: string
-		user_info: string
-	}
-	mapping?: {
-		avatar?: string
-		email?: string
-		name?: string
-	}
+	response_mode?: string
 }
 
 /**
@@ -151,7 +141,7 @@ export class Signin {
 	/**
 	 * Get OAuth authorization URL
 	 */
-	async GetOAuthAuthorizationUrl(id: string, redirectUri?: string, state?: string): Promise<string> {
+	async GetOAuthAuthorizationUrl(id: string, redirectUri?: string): Promise<string> {
 		if (!redirectUri || redirectUri == '') {
 			const origin = window.location.origin
 			const pathname = window.location.pathname
@@ -171,19 +161,19 @@ export class Signin {
 	}
 
 	/**
-	 * Generate secure random state for OAuth
+	 * Auth back
+	 * @param id - The provider ID
+	 * @param params - The parameters
+	 * @returns The response
 	 */
-	GenerateOAuthState(): string {
-		const array = new Uint8Array(32)
-		crypto.getRandomValues(array)
-		return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('')
-	}
-
-	/**
-	 * Verify OAuth state parameter
-	 */
-	VerifyOAuthState(receivedState: string, expectedState: string): boolean {
-		return receivedState === expectedState
+	async AuthBack(id: string, params: { code: string; state: string }): Promise<ApiResponse<void>> {
+		console.log('AuthBack', id, params)
+		// TODO: Implement AuthBack
+		return {
+			status: 200,
+			headers: new Headers(),
+			data: undefined
+		}
 	}
 
 	/**

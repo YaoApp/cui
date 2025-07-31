@@ -65,7 +65,7 @@ const SocialLogin = ({ providers, onProviderClick, loading }: IPropsEnhancedThir
 						style={{
 							backgroundColor: provider.color || 'var(--color_main)',
 							borderColor: provider.color || 'var(--color_main)',
-							color: provider.textColor || '#ffffff'
+							color: provider.text_color || '#ffffff'
 						}}
 					>
 						<span className={styles.providerName}>{provider.title}</span>

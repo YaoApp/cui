@@ -50,19 +50,8 @@ export interface ThirdPartyProvider {
 	title: string
 	logo?: string
 	color: string
-	textColor?: string
-	client_id: string
-	scopes: string[]
-	endpoints: {
-		authorization: string
-		token: string
-		user_info: string
-	}
-	mapping?: {
-		avatar?: string
-		email?: string
-		name?: string
-	}
+	text_color?: string
+	response_mode?: string
 }
 
 export interface LoginConfig {
