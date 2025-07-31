@@ -192,12 +192,7 @@ const ResponsiveLogin = () => {
 			}
 
 			const signin = new Signin(window.$app.openapi)
-			const authUrl = await signin.GetOAuthAuthorizationUrl(
-				provider.id,
-				undefined, // 使用默认重定向URI
-				undefined, // 自动生成state
-				undefined // 使用默认scope
-			)
+			const authUrl = await signin.GetOAuthAuthorizationUrl(provider.id)
 
 			// 跳转到OAuth授权页面
 			window.location.href = authUrl

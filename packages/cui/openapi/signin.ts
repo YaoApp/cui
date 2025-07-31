@@ -95,6 +95,11 @@ export interface SigninResponse {
 	csrf_token?: string
 }
 
+export interface OAuthAuthorizationURLResponse {
+	authorization_url: string
+	state: string
+}
+
 /**
  * OAuth callback parameters
  */
@@ -144,46 +149,25 @@ export class Signin {
 	}
 
 	/**
-	 * Handle OAuth callback (third-party)
-	 */
-	async HandleOAuthCallback(providerId: string, params: OAuthCallback): Promise<ApiResponse<SigninResponse>> {
-		const response = await this.api.Post<SigninResponse>(`/signin/oauth/${providerId}/callback`, params)
-
-		// Auto-handle CSRF token for cross-origin scenarios
-		if (!this.IsError(response) && response.data?.csrf_token) {
-			this.api.SetCSRFToken(response.data.csrf_token)
-		}
-
-		return response
-	}
-
-	/**
 	 * Get OAuth authorization URL
 	 */
-	async GetOAuthAuthorizationUrl(
-		providerId: string,
-		redirectUri?: string,
-		state?: string,
-		scope?: string
-	): Promise<string> {
-		const config = await this.GetConfig()
-		if (this.IsError(config)) {
-			throw new Error(`Failed to get signin config: ${config.error.error_description}`)
+	async GetOAuthAuthorizationUrl(id: string, redirectUri?: string, state?: string): Promise<string> {
+		if (!redirectUri || redirectUri == '') {
+			const origin = window.location.origin
+			const pathname = window.location.pathname
+			const firstPath = pathname?.split('/')?.[1] || ''
+			redirectUri = origin + `/${firstPath}/auth/back/${id}`
 		}
 
-		const provider = config.data?.third_party?.providers.find((p) => p.id === providerId)
-		if (!provider) {
-			throw new Error(`OAuth provider "${providerId}" not found`)
-		}
-
-		const params = new URLSearchParams({
-			client_id: provider.client_id,
-			response_type: 'code',
-			redirect_uri: redirectUri || window.location.origin + '/auth/callback',
-			state: state || this.GenerateOAuthState()
+		const response = await this.api.Get<OAuthAuthorizationURLResponse>(`/signin/oauth/${id}/authorize`, {
+			redirect_uri: redirectUri
 		})
 
-		return `${provider.endpoints.authorization}?${params.toString()}`
+		if (this.IsError(response)) {
+			throw new Error(response.error.error_description)
+		}
+
+		return response.data?.authorization_url || ''
 	}
 
 	/**

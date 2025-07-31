@@ -30,7 +30,7 @@ const Index = () => {
 	const is_auth_signin_totp = pathname === '/auth/signin/totp'
 	const is_auth_signin_sms = pathname === '/auth/signin/sms'
 	const is_auth_logout = pathname === '/auth/logout'
-	const is_auth_back = pathname === '/auth/back'
+	const is_auth_back = pathname.startsWith('/auth/back/')
 	const is_auth_consent = pathname === '/auth/consent'
 
 	useLayoutEffect(() => {
@@ -73,7 +73,6 @@ const Index = () => {
 			is_auth_back ||
 			is_auth_logout
 		) {
-			console.log('pathname', pathname, 'OAuth login')
 			return <Outlet />
 		}
 

@@ -182,8 +182,13 @@ export class OpenAPI {
 		return apiResponse
 	}
 
-	async Get<T = any>(path: string, headersInit: HeadersInit = {}): Promise<ApiResponse<T>> {
+	async Get<T = any>(
+		path: string,
+		params: Record<string, string> = {},
+		headersInit: HeadersInit = {}
+	): Promise<ApiResponse<T>> {
 		const headerBuilder = headers(headersInit)
+		params = params || {}
 
 		// Add authentication token
 		const token = await this.AccessToken()
@@ -193,11 +198,9 @@ export class OpenAPI {
 
 		// Add CSRF token for security
 		this.addCSRFToken(headerBuilder)
-
-		const response = await fetch(`${this.config.baseURL}${path}`, {
+		const response = await fetch(`${this.config.baseURL}${path}?${new URLSearchParams(params).toString()}`, {
 			method: 'GET',
 			headers: headerBuilder.toHeaders(),
-			// Include HttpOnly cookies automatically for authentication
 			credentials: 'include'
 		})
 
