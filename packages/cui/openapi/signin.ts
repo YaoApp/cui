@@ -120,8 +120,7 @@ export class Signin {
 	 * Get signin configuration
 	 */
 	async GetConfig(locale?: string): Promise<ApiResponse<SigninConfig>> {
-		const query = locale ? `?locale=${encodeURIComponent(locale)}` : ''
-		return this.api.Get<SigninConfig>(`/signin${query}`)
+		return this.api.Get<SigninConfig>(`/signin`, { locale: locale || '' })
 	}
 
 	/**
