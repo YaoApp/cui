@@ -10,7 +10,7 @@ import AuthLayout from '../components/AuthLayout'
 import Captcha from '../components/Captcha'
 import { FormValues } from '@/pages/login/types'
 import styles from './index.less'
-import { Signin, SigninConfig, SigninProvider } from '@/openapi'
+import { Signin, SigninConfig, SigninProvider, Captcha as CaptchaAPI } from '@/openapi'
 
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
@@ -37,6 +37,11 @@ const ResponsiveLogin = () => {
 		remember_me: false
 	})
 	const [config, setConfig] = useState<SigninConfig | null>(null)
+	const [captchaData, setCaptchaData] = useState<{
+		id: string
+		image: string
+	} | null>(null)
+	const [captchaLoading, setCaptchaLoading] = useState(false)
 
 	// Load configuration using real API
 	useAsyncEffect(async () => {
@@ -60,6 +65,53 @@ const ResponsiveLogin = () => {
 			message.error('Failed to load configuration')
 		}
 	}, [currentLocale, global.app_info])
+
+	// Load captcha data for image/audio captcha
+	const loadCaptcha = async (type: 'image' | 'audio' = 'image') => {
+		if (captchaLoading) {
+			return
+		}
+
+		try {
+			if (!window.$app?.openapi) {
+				console.error('OpenAPI not initialized')
+				return
+			}
+
+			setCaptchaLoading(true)
+
+			const captchaAPI = new CaptchaAPI(window.$app.openapi)
+			let response
+
+			if (type === 'image') {
+				response = await captchaAPI.GetImageCaptcha()
+			} else {
+				response = await captchaAPI.GetAudioCaptcha()
+			}
+
+			if (!captchaAPI.IsError(response) && response.data) {
+				setCaptchaData({
+					id: response.data.id,
+					image: response.data.data
+				})
+			} else {
+				console.error('Failed to load captcha:', response.error)
+				message.error('Failed to load captcha')
+			}
+		} catch (error) {
+			console.error('Failed to load captcha:', error)
+			message.error('Failed to load captcha')
+		} finally {
+			setCaptchaLoading(false)
+		}
+	}
+
+	// Load captcha when needed (image/audio type)
+	useAsyncEffect(async () => {
+		if (config?.form?.captcha && config.form.captcha.type === 'image' && !captchaData) {
+			await loadCaptcha('image')
+		}
+	}, [config?.form?.captcha?.type])
 
 	// Form validation
 	const isFormValid = formData.mobile.trim() !== '' && formData.password.trim() !== ''
@@ -99,7 +151,7 @@ const ResponsiveLogin = () => {
 				password: formData.password,
 				remember: formData.remember_me,
 				captcha_code: formData.captcha || undefined,
-				captcha_id: undefined // TODO: 如果需要验证码ID，需要从验证码组件获取
+				captcha_id: captchaData?.id || undefined
 			})
 
 			if (!signin.IsError(result) && result.data) {
@@ -213,11 +265,12 @@ const ResponsiveLogin = () => {
 						{config.form?.captcha && (
 							<Captcha
 								type={config.form.captcha.type === 'turnstile' ? 'cloudflare' : 'image'}
-								endpoint='/api/captcha'
+								endpoint={captchaData?.image || ''}
 								siteKey={config.form.captcha.options?.sitekey || ''}
 								value={formData.captcha}
 								onChange={handleCaptchaChange}
 								onCaptchaVerified={handleCaptchaChange}
+								onRefresh={() => loadCaptcha('image')}
 							/>
 						)}
 

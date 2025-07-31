@@ -2,85 +2,139 @@
 
 .captchaContainer {
 	margin-bottom: 16px;
+	position: relative;
 
-	.imageCaptcha {
-		position: relative;
+	&.imageType {
+		display: flex;
+		align-items: stretch;
+		background-color: var(--color_bg_nav);
+		border: 1px solid var(--color_border);
+		border-radius: calc(var(--radius) * 2);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		min-height: 46px; // 恢复到合理的最小高度
+		box-sizing: border-box;
+		width: 100%; // 填满父容器
+		overflow: hidden; // 防止子元素溢出
 
-		.captchaImageWrap {
-			position: absolute;
-			right: 0;
-			top: 0;
-			height: 100%;
+		&:hover {
+			background-color: var(--color_bg_hover);
+			border-color: var(--color_main);
+			transform: translateY(-1px);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+			.inputSection .inputPrefix {
+				color: var(--color_main);
+			}
+		}
+
+		&.focused {
+			background-color: var(--color_bg_nav);
+			border-color: var(--color_main);
+			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.2), 0 4px 12px rgba(51, 113, 252, 0.15);
+			transform: translateY(-2px);
+
+			.inputSection .inputPrefix {
+				color: var(--color_main);
+			}
+
+			.inputSection .input::placeholder {
+				color: var(--color_text_light);
+			}
+		}
+
+		.inputSection {
+			flex: 1; // 占用剩余空间
 			display: flex;
 			align-items: center;
-			gap: 8px;
-			padding: 0 14px;
-			z-index: 2;
+			padding: 12px 14px;
+			border-right: 1px solid var(--color_border); // 分割线
+			min-width: 0; // 防止flex子元素撑开父容器
+
+			.inputPrefix {
+				display: flex;
+				align-items: center;
+				margin-right: 10px;
+				color: var(--color_text_grey);
+				font-size: 14px;
+				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			}
+
+			.input {
+				flex: 1;
+				border: none;
+				outline: none;
+				background: transparent;
+				font-size: 15px;
+				color: var(--color_text);
+				line-height: 1.5;
+				min-width: 0;
+
+				&::placeholder {
+					color: var(--color_placeholder);
+					font-weight: 400;
+				}
+
+				&:disabled {
+					color: var(--color_text_grey);
+					cursor: not-allowed;
+				}
+			}
+		}
+
+		.captchaSection {
+			display: flex;
+			align-items: center; // 垂直居中
+			justify-content: center; // 水平居中
+			width: 120px; // 固定宽度
+			flex-shrink: 0; // 不被压缩
+			flex-grow: 0; // 不扩展
+			padding: 4px; // 添加小的内边距
+			box-sizing: border-box;
 
 			.captchaImage {
-				height: 32px;
-				width: auto;
+				width: 100%; // 填满容器宽度
+				height: 100%; // 填满容器高度
 				border-radius: calc(var(--radius) * 0.6);
 				cursor: pointer;
 				transition: all 0.3s ease;
+				object-fit: cover; // 保持图片比例并填满
+				display: block;
 
 				&:hover {
 					opacity: 0.8;
 				}
 			}
-
-			.refreshBtn {
-				width: 24px;
-				height: 24px;
-				border: none;
-				background: none;
-				color: var(--color_text_grey);
-				cursor: pointer;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				border-radius: calc(var(--radius) * 0.5);
-				transition: all 0.3s ease;
-
-				&:hover {
-					background: var(--color_bg_hover);
-					color: var(--color_main);
-				}
-
-				&:disabled {
-					opacity: 0.5;
-					cursor: not-allowed;
-				}
-			}
 		}
 	}
 
-	.cloudflareWidget {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		min-height: 65px;
-
-		.loadingState {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			color: var(--color_text_grey);
-			font-size: 14px;
-
-			span {
-				animation: pulse 1.5s ease-in-out infinite;
-			}
-		}
-
-		.turnstileContainer {
-			width: 100%;
+	&.cloudflareType {
+		.cloudflareWidget {
 			display: flex;
 			justify-content: center;
+			align-items: center;
+			min-height: 65px;
 
-			// Ensure Turnstile widget fits properly
-			:global(.cf-turnstile) {
-				max-width: 100%;
+			.loadingState {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				color: var(--color_text_grey);
+				font-size: 14px;
+
+				span {
+					animation: pulse 1.5s ease-in-out infinite;
+				}
+			}
+
+			.turnstileContainer {
+				width: 100%;
+				display: flex;
+				justify-content: center;
+
+				// Ensure Turnstile widget fits properly
+				:global(.cf-turnstile) {
+					max-width: 100%;
+				}
 			}
 		}
 	}
@@ -91,32 +145,53 @@
 	.captchaContainer {
 		margin-bottom: 14px;
 
-		.imageCaptcha {
-			.captchaImageWrap {
-				padding: 0 12px;
+		&.imageType {
+			min-height: 42px; // 恢复移动端合理的容器高度
+			border-radius: var(--radius);
 
-				.captchaImage {
-					height: 28px;
+			.inputSection {
+				padding: 10px 12px;
+				border-right: 1px solid var(--color_border); // 移动端分割线也移到输入区域右侧
+
+				.inputPrefix {
+					font-size: 16px;
+					margin-right: 10px;
 				}
 
-				.refreshBtn {
-					width: 20px;
-					height: 20px;
+				.input {
+					font-size: 16px;
+				}
+			}
+
+			.captchaSection {
+				width: 100px; // 移动端固定宽度，稍小于桌面端
+				flex-shrink: 0; // 不被压缩
+				padding: 3px; // 添加小的内边距
+				margin-right: 3px; // 移动端右边距稍小
+				align-items: center; // 垂直居中
+				justify-content: center; // 水平居中
+
+				.captchaImage {
+					width: 100%; // 填满容器宽度
+					height: 100%; // 填满容器高度
+					object-fit: cover; // 保持图片比例并填满
 				}
 			}
 		}
 
-		.cloudflareWidget {
-			min-height: 60px;
+		&.cloudflareType {
+			.cloudflareWidget {
+				min-height: 60px;
 
-			.loadingState {
-				font-size: 13px;
-			}
+				.loadingState {
+					font-size: 13px;
+				}
 
-			.turnstileContainer {
-				:global(.cf-turnstile) {
-					transform: scale(0.9);
-					transform-origin: center;
+				.turnstileContainer {
+					:global(.cf-turnstile) {
+						transform: scale(0.9);
+						transform-origin: center;
+					}
 				}
 			}
 		}
@@ -137,9 +212,56 @@
 /* Dark theme support */
 [data-theme='dark'] {
 	.captchaContainer {
-		.cloudflareWidget {
-			.loadingState {
-				color: rgba(255, 255, 255, 0.7);
+		&.imageType {
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			backdrop-filter: blur(10px);
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.08);
+				border-color: rgba(69, 128, 255, 0.4);
+				box-shadow: 0 2px 8px rgba(69, 128, 255, 0.15);
+			}
+
+			&.focused {
+				background: rgba(255, 255, 255, 0.08);
+				border-color: rgba(69, 128, 255, 0.6);
+				box-shadow: 0 0 0 2px rgba(69, 128, 255, 0.25), 0 4px 12px rgba(69, 128, 255, 0.2),
+					inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+				.inputSection .inputPrefix {
+					color: rgba(69, 128, 255, 0.9);
+				}
+
+				.inputSection .input::placeholder {
+					color: rgba(255, 255, 255, 0.5);
+				}
+			}
+
+			.inputSection {
+				.inputPrefix {
+					color: rgba(255, 255, 255, 0.6);
+				}
+
+				.input {
+					color: rgba(255, 255, 255, 0.95);
+
+					&::placeholder {
+						color: rgba(255, 255, 255, 0.4);
+					}
+				}
+			}
+
+			.captchaSection {
+				border-left-color: rgba(255, 255, 255, 0.12);
+			}
+		}
+
+		&.cloudflareType {
+			.cloudflareWidget {
+				.loadingState {
+					color: rgba(255, 255, 255, 0.7);
+				}
 			}
 		}
 	}

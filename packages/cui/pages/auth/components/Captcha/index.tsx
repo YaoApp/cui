@@ -32,15 +32,28 @@ interface CaptchaProps {
 	value: string
 	onChange: (value: string) => void
 	onCaptchaVerified?: (token: string) => void
+	onRefresh?: () => void | Promise<void>
 }
 
-const Captcha: React.FC<CaptchaProps> = ({ type, endpoint, siteKey, value, onChange, onCaptchaVerified }) => {
+const Captcha: React.FC<CaptchaProps> = ({
+	type,
+	endpoint,
+	siteKey,
+	value,
+	onChange,
+	onCaptchaVerified,
+	onRefresh
+}) => {
 	const messages = useIntl()
 	const [captchaImage, setCaptchaImage] = useState<string>('')
 	const [loading, setLoading] = useState(false)
+	const [focused, setFocused] = useState(false)
 	const [turnstileLoaded, setTurnstileLoaded] = useState(false)
 	const turnstileRef = useRef<HTMLDivElement>(null)
 	const widgetIdRef = useRef<string>('')
+
+	const handleFocus = () => setFocused(true)
+	const handleBlur = () => setFocused(false)
 
 	// Load Cloudflare Turnstile script
 	const loadTurnstileScript = () => {
@@ -87,13 +100,18 @@ const Captcha: React.FC<CaptchaProps> = ({ type, endpoint, siteKey, value, onCha
 
 	// Load image captcha
 	const loadImageCaptcha = async () => {
-		if (type !== 'image' || !endpoint) return
+		if (type !== 'image') return
 
 		setLoading(true)
 		try {
-			// Mock image captcha URL
-			const timestamp = Date.now()
-			setCaptchaImage(`${endpoint}?t=${timestamp}`)
+			if (onRefresh) {
+				// Use the provided onRefresh callback for API-based captcha
+				await onRefresh()
+			} else if (endpoint) {
+				// Fallback to original behavior for endpoint-based captcha
+				const timestamp = Date.now()
+				setCaptchaImage(`${endpoint}?t=${timestamp}`)
+			}
 		} catch (error) {
 			console.error('Failed to load captcha:', error)
 		} finally {
@@ -104,10 +122,11 @@ const Captcha: React.FC<CaptchaProps> = ({ type, endpoint, siteKey, value, onCha
 	useEffect(() => {
 		if (type === 'cloudflare') {
 			loadTurnstileScript()
-		} else if (type === 'image') {
+		} else if (type === 'image' && !onRefresh && endpoint) {
+			// Only auto-load for traditional endpoint-based captcha, not API-based
 			loadImageCaptcha()
 		}
-	}, [type, endpoint])
+	}, [type, onRefresh])
 
 	useEffect(() => {
 		if (type === 'cloudflare' && turnstileLoaded && window.turnstile) {
@@ -132,7 +151,7 @@ const Captcha: React.FC<CaptchaProps> = ({ type, endpoint, siteKey, value, onCha
 
 	if (type === 'cloudflare') {
 		return (
-			<div className={styles.captchaContainer}>
+			<div className={`${styles.captchaContainer} ${styles.cloudflareType}`}>
 				<div className={styles.cloudflareWidget}>
 					{!turnstileLoaded ? (
 						<div className={styles.loadingState}>
@@ -149,33 +168,30 @@ const Captcha: React.FC<CaptchaProps> = ({ type, endpoint, siteKey, value, onCha
 
 	if (type === 'image') {
 		return (
-			<div className={styles.captchaContainer}>
-				<div className={styles.imageCaptcha}>
-					<AuthInput
+			<div className={`${styles.captchaContainer} ${styles.imageType} ${focused ? styles.focused : ''}`}>
+				<div className={styles.inputSection}>
+					<div className={styles.inputPrefix}>
+						<Icon name='shield-outline' />
+					</div>
+					<input
 						type='text'
 						placeholder={messages.login.form.captcha_placeholder}
 						value={value}
 						onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
-						prefix='verified_user'
+						onFocus={handleFocus}
+						onBlur={handleBlur}
+						className={styles.input}
 					/>
-					<div className={styles.captchaImageWrap}>
-						{captchaImage && (
-							<img
-								src={captchaImage}
-								alt='Captcha'
-								className={styles.captchaImage}
-								onClick={loadImageCaptcha}
-							/>
-						)}
-						<button
-							type='button'
-							className={styles.refreshBtn}
+				</div>
+				<div className={styles.captchaSection}>
+					{(endpoint || captchaImage) && (
+						<img
+							src={endpoint || captchaImage}
+							alt='Captcha'
+							className={styles.captchaImage}
 							onClick={loadImageCaptcha}
-							disabled={loading}
-						>
-							<Icon name='refresh' />
-						</button>
-					</div>
+						/>
+					)}
 				</div>
 			</div>
 		)

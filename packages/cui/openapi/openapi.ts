@@ -563,3 +563,4 @@ export class OpenAPI {
 
 export default OpenAPI
 export { Signin } from './signin'
+export { Captcha } from './captcha'
