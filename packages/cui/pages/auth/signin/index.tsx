@@ -16,8 +16,18 @@ import { Signin, SigninConfig, SigninProvider, Captcha as CaptchaAPI } from '@/o
 const getBrowserLanguage = (): string => {
 	// 获取浏览器首选语言
 	const browserLang = navigator.language || navigator.languages?.[0] || 'en'
-
 	return browserLang
+}
+
+// 语言标准化函数 - 将浏览器语言映射到应用支持的语言
+const normalizeLocale = (locale: string): string => {
+	if (locale.startsWith('zh')) {
+		return 'zh-CN'
+	}
+	if (locale.startsWith('en')) {
+		return 'en-US'
+	}
+	return locale
 }
 
 const ResponsiveLogin = () => {
@@ -26,7 +36,8 @@ const ResponsiveLogin = () => {
 
 	// 使用浏览器语言作为默认语言，fallback到当前locale
 	const browserLang = getBrowserLanguage()
-	const currentLocale = getLocale() || browserLang
+	const rawLocale = getLocale() || browserLang
+	const currentLocale = normalizeLocale(rawLocale)
 
 	const [loading, setLoading] = useState(false)
 	const [formData, setFormData] = useState({
