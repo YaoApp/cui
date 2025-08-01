@@ -6,16 +6,10 @@ import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
 import AuthLayout from '../components/AuthLayout'
 import styles from './index.less'
+import { OAuthCallbackParams, Signin } from '@/openapi'
 
-// OAuth回调参数接口
-interface OAuthCallbackParams {
-	code?: string
-	state?: string
-	error?: string
-	error_description?: string
-	provider?: string
-	[key: string]: any
-}
+// Required parameters for OAuth callback
+const requiredParams = ['code', 'state', 'provider']
 
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
@@ -44,16 +38,21 @@ const AuthBack = () => {
 	const currentLocale = normalizeLocale(rawLocale)
 
 	const [loading, setLoading] = useState(true)
-	const [oauthParams, setOauthParams] = useState<OAuthCallbackParams>({})
+	const [oauthParams, setOauthParams] = useState<OAuthCallbackParams>({
+		code: '',
+		state: '',
+		provider: ''
+	})
 	const [error, setError] = useState<string>('')
 
 	// 解析URL参数
 	const parseURLParams = (): OAuthCallbackParams => {
-		const params: OAuthCallbackParams = {}
+		const params: OAuthCallbackParams = {
+			code: '',
+			state: '',
+			provider: ''
+		}
 		const urlParams = new URLSearchParams(window.location.search)
-
-		// 常见的OAuth参数
-		const oauthParamKeys = ['code', 'state', 'error', 'error_description', 'provider']
 
 		// 解析所有URL参数
 		urlParams.forEach((value, key) => {
@@ -74,6 +73,13 @@ const AuthBack = () => {
 	// 初始化页面
 	useEffect(() => {
 		const initAuthBack = async () => {
+			if (!window.$app?.openapi) {
+				console.error('OpenAPI not initialized')
+				message.error('OpenAPI not initialized')
+				return
+			}
+
+			const signin = new Signin(window.$app.openapi)
 			try {
 				setLoading(true)
 
@@ -91,21 +97,31 @@ const AuthBack = () => {
 				}
 
 				// 检查必要参数
-				if (!params.code) {
-					const errorMsg = 'Missing authorization code'
+				for (const param of requiredParams) {
+					if (!params[param] || params[param] === '') {
+						const errorMsg = `Missing required parameter: ${param}`
+						setError(errorMsg)
+						message.error(errorMsg)
+						setLoading(false)
+						return
+					}
+				}
+
+				// AuthBack Signin
+				const signinRes = await signin.AuthBack(params.provider, params)
+				if (signin.IsError(signinRes)) {
+					const errorMsg = signinRes.error.error_description || 'OAuth authentication failed'
 					setError(errorMsg)
 					message.error(errorMsg)
 					setLoading(false)
 					return
 				}
 
-				console.log('OAuth callback initialized successfully:', params)
-
-				// 这里后续会调用AuthBack API
-				// TODO: 调用 AuthBack API 获取 JWT
+				// Redirect to success URL
+				console.log('AuthBack success:', signinRes.data)
 			} catch (error) {
 				console.error('Failed to initialize auth back:', error)
-				const errorMsg = 'Failed to process OAuth callback'
+				const errorMsg = error instanceof Error ? error.message : 'Failed to process OAuth callback'
 				setError(errorMsg)
 				message.error(errorMsg)
 			} finally {

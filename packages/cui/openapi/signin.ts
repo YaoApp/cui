@@ -88,14 +88,32 @@ export interface SigninResponse {
 export interface OAuthAuthorizationURLResponse {
 	authorization_url: string
 	state: string
+	error?: string
+	error_description?: string
 }
 
-/**
- * OAuth callback parameters
- */
-export interface OAuthCallback {
+// OAuth callback request
+export interface OAuthCallbackParams {
 	code: string
 	state: string
+	provider: string
+	error?: string
+	error_description?: string
+	[key: string]: any
+}
+
+export interface OAuthCallbackResponse {
+	access_token?: string
+	refresh_token?: string
+	expires_in?: number
+	user?: {
+		id: string
+		username: string
+		email?: string
+		name?: string
+		avatar?: string
+		roles?: string[]
+	}
 	error?: string
 	error_description?: string
 }
@@ -165,14 +183,14 @@ export class Signin {
 	 * @param params - The parameters
 	 * @returns The response
 	 */
-	async AuthBack(id: string, params: { code: string; state: string }): Promise<ApiResponse<void>> {
-		console.log('AuthBack', id, params)
-		// TODO: Implement AuthBack
-		return {
-			status: 200,
-			headers: new Headers(),
-			data: undefined
+	async AuthBack(id: string, params: OAuthCallbackParams): Promise<ApiResponse<OAuthCallbackResponse>> {
+		const response = await this.api.Post<OAuthCallbackResponse>(`/signin/authback/${id}`, params)
+		if (this.IsError(response)) {
+			throw new Error(
+				response.error.error_description || response.error.error || 'OAuth authentication failed'
+			)
 		}
+		return response
 	}
 
 	/**

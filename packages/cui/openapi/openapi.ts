@@ -190,6 +190,11 @@ export class OpenAPI {
 		const headerBuilder = headers(headersInit)
 		params = params || {}
 
+		// Add Content-Type header if not set
+		if (!headerBuilder.has('Content-Type')) {
+			headerBuilder.set('Content-Type', 'application/json')
+		}
+
 		// Add authentication token
 		const token = await this.AccessToken()
 		if (token) {
@@ -209,6 +214,11 @@ export class OpenAPI {
 
 	async Post<T = any>(path: string, payload: any, headersInit: HeadersInit = {}): Promise<ApiResponse<T>> {
 		const headerBuilder = headers(headersInit)
+
+		// Add Content-Type header if not set
+		if (!headerBuilder.has('Content-Type')) {
+			headerBuilder.set('Content-Type', 'application/json')
+		}
 
 		// Add authentication token
 		const token = await this.AccessToken()
@@ -238,6 +248,11 @@ export class OpenAPI {
 	async Put<T = any>(path: string, payload: any, headersInit: HeadersInit = {}): Promise<ApiResponse<T>> {
 		const headerBuilder = headers(headersInit)
 
+		// Add Content-Type header if not set
+		if (!headerBuilder.has('Content-Type')) {
+			headerBuilder.set('Content-Type', 'application/json')
+		}
+
 		// Add authentication token
 		const token = await this.AccessToken()
 		if (token) {
@@ -265,6 +280,11 @@ export class OpenAPI {
 
 	async Delete<T = any>(path: string, headersInit: HeadersInit = {}): Promise<ApiResponse<T>> {
 		const headerBuilder = headers(headersInit)
+
+		// Add Content-Type header if not set
+		if (!headerBuilder.has('Content-Type')) {
+			headerBuilder.set('Content-Type', 'application/json')
+		}
 
 		// Add authentication token
 		const token = await this.AccessToken()
