@@ -39,6 +39,7 @@ const AuthBack = () => {
 
 	const [loading, setLoading] = useState(true)
 	const [oauthParams, setOauthParams] = useState<OAuthCallbackParams>({
+		locale: currentLocale,
 		code: '',
 		state: '',
 		provider: ''
@@ -48,6 +49,7 @@ const AuthBack = () => {
 	// 解析URL参数
 	const parseURLParams = (): OAuthCallbackParams => {
 		const params: OAuthCallbackParams = {
+			locale: currentLocale,
 			code: '',
 			state: '',
 			provider: ''
@@ -55,9 +57,7 @@ const AuthBack = () => {
 		const urlParams = new URLSearchParams(window.location.search)
 
 		// 解析所有URL参数
-		urlParams.forEach((value, key) => {
-			params[key] = value
-		})
+		urlParams.forEach((value, key) => (params[key] = value))
 
 		// 从路径中提取provider信息（如果有的话）
 		const pathSegments = window.location.pathname.split('/')

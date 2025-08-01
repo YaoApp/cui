@@ -94,6 +94,7 @@ export interface OAuthAuthorizationURLResponse {
 
 // OAuth callback request
 export interface OAuthCallbackParams {
+	locale: string
 	code: string
 	state: string
 	provider: string
