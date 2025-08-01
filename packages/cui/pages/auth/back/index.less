@@ -51,7 +51,7 @@
 			}
 
 			.appTitleError {
-				color: var(--color_error);
+				color: var(--color_danger);
 			}
 
 			.appSubtitle {
@@ -59,6 +59,17 @@
 				color: var(--color_text_light);
 				margin: 0;
 				line-height: 1.5;
+			}
+
+			.appSubtitleError {
+				color: var(--color_danger);
+				background-color: var(--color_danger_bg);
+				padding: 12px 16px;
+				border-radius: var(--radius);
+				border: 1px solid var(--color_danger);
+				border-opacity: 0.2;
+				margin-top: 8px;
+				font-weight: 500;
 			}
 		}
 
@@ -84,6 +95,18 @@
 
 				&:active {
 					transform: translateY(0);
+				}
+			}
+
+			.backButtonError {
+				background-color: var(--color_bg_hover);
+				color: var(--color_text);
+				border: 1px solid var(--color_border);
+
+				&:hover {
+					background-color: var(--color_bg_active);
+					transform: translateY(-1px);
+					box-shadow: var(--shadow);
 				}
 			}
 		}
@@ -138,11 +161,17 @@
 			}
 
 			.appTitleError {
-				color: rgba(239, 68, 68, 0.9);
+				color: var(--color_danger);
 			}
 
 			.appSubtitle {
 				color: rgba(255, 255, 255, 0.65);
+			}
+
+			.appSubtitleError {
+				color: var(--color_danger);
+				background-color: var(--color_danger_bg);
+				border-color: var(--color_danger);
 			}
 		}
 
@@ -155,6 +184,17 @@
 				&:hover {
 					background: linear-gradient(135deg, #5a8fff 0%, #4580ff 100%);
 					box-shadow: 0 4px 16px rgba(69, 128, 255, 0.35);
+				}
+			}
+
+			.backButtonError {
+				background: var(--color_bg_hover);
+				color: var(--color_text);
+				border: 1px solid var(--color_border);
+
+				&:hover {
+					background: var(--color_bg_active);
+					box-shadow: var(--shadow);
 				}
 			}
 		}

@@ -162,11 +162,14 @@ const AuthBack = () => {
 					<h1 className={`${styles.appTitle} ${styles.appTitleError}`}>
 						{currentLocale.startsWith('zh') ? '验证失败' : 'Authentication Failed'}
 					</h1>
-					<p className={styles.appSubtitle}>{error}</p>
+					<p className={`${styles.appSubtitle} ${styles.appSubtitleError}`}>{error}</p>
 				</div>
 
 				<div className={styles.authbackActions}>
-					<button className={styles.backButton} onClick={() => window.history.back()}>
+					<button
+						className={`${styles.backButton} ${styles.backButtonError}`}
+						onClick={() => window.history.back()}
+					>
 						{currentLocale.startsWith('zh') ? '返回' : 'Go Back'}
 					</button>
 				</div>

@@ -185,7 +185,7 @@ export class Signin {
 	 * @returns The response
 	 */
 	async AuthBack(id: string, params: OAuthCallbackParams): Promise<ApiResponse<OAuthCallbackResponse>> {
-		const response = await this.api.Post<OAuthCallbackResponse>(`/signin/authback/${id}`, params)
+		const response = await this.api.Post<OAuthCallbackResponse>(`/signin/oauth/${id}/authback`, params)
 		if (this.IsError(response)) {
 			throw new Error(
 				response.error.error_description || response.error.error || 'OAuth authentication failed'
