@@ -5,6 +5,32 @@ import { useIntl } from '@/hooks'
 import styles from './index.less'
 import type { IPropsEnhancedThirdPartyLogin, ThirdPartyProvider } from '@/pages/login/types'
 
+// 检测 SVG 图标的辅助函数
+const isSvgIcon = (logoUrl: string): boolean => {
+	return logoUrl.toLowerCase().includes('.svg') || logoUrl.startsWith('data:image/svg+xml')
+}
+
+// 将颜色转换为 CSS filter，用于 SVG 图标颜色匹配
+const getColorFilter = (textColor: string): string => {
+	// 处理常见的颜色值
+	const color = textColor.toLowerCase().trim()
+
+	// 白色 - 适用于深色背景
+	if (color === '#ffffff' || color === '#fff' || color === 'white') {
+		return 'brightness(0) saturate(100%) invert(1)'
+	}
+
+	// 黑色 - 适用于浅色背景
+	if (color === '#000000' || color === '#000' || color === 'black') {
+		return 'brightness(0) saturate(100%) invert(0)'
+	}
+
+	// 对于其他颜色，使用通用的转换方法
+	// 先将图标变为黑色，然后反转来匹配亮色文字
+	// 这适用于大部分场景，特别是单色 SVG 图标
+	return 'brightness(0) saturate(100%) invert(1)'
+}
+
 const SocialLogin = ({ providers, onProviderClick, loading }: IPropsEnhancedThirdPartyLogin) => {
 	const messages = useIntl()
 	const [clickedProvider, setClickedProvider] = useState<string | null>(null)
@@ -58,6 +84,12 @@ const SocialLogin = ({ providers, onProviderClick, loading }: IPropsEnhancedThir
 									alt={provider.title}
 									onError={(e) => {
 										e.currentTarget.style.display = 'none'
+									}}
+									style={{
+										// 如果是 SVG，使用 filter 来匹配文字颜色
+										filter: isSvgIcon(provider.logo)
+											? getColorFilter(provider.text_color || '#ffffff')
+											: undefined
 									}}
 								/>
 							)

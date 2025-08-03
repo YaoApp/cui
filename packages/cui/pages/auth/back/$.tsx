@@ -39,7 +39,6 @@ const AuthBack = () => {
 
 	const [loading, setLoading] = useState(true)
 	const [oauthParams, setOauthParams] = useState<OAuthCallbackParams>({
-		locale: currentLocale,
 		code: '',
 		state: '',
 		provider: ''
@@ -49,7 +48,6 @@ const AuthBack = () => {
 	// 解析URL参数
 	const parseURLParams = (): OAuthCallbackParams => {
 		const params: OAuthCallbackParams = {
-			locale: currentLocale,
 			code: '',
 			state: '',
 			provider: ''

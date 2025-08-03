@@ -22,6 +22,7 @@ export const proxy = {
 	'/dashboard': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/docs': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/tools': { target: 'http://127.0.0.1:5099', changeOrigin: true },
+	'/brands': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/admin': { target: 'http://127.0.0.1:5099', changeOrigin: true }
 }
 
