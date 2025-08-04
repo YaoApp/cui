@@ -82,6 +82,8 @@ export interface SigninResponse {
 		name?: string
 		avatar?: string
 		roles?: string[]
+		scope?: string
+		features?: object
 	}
 	csrf_token?: string
 }
@@ -122,6 +124,10 @@ export interface OAuthAuthResult {
 	authenticated_at: number
 	/** ID token expiration timestamp */
 	expires_at?: number
+	/** Available scope */
+	scope?: string
+	/** Additional features */
+	features?: object
 }
 
 /**
@@ -186,6 +192,10 @@ export interface UserInfo {
 	client_id?: string
 	/** Token ID (mapped from jti claim) - unique identifier for this JWT */
 	token_id?: string
+	/** User's available scope */
+	scope?: string
+	/** User's features */
+	features?: object
 	/** Additional custom claims */
 	[key: string]: any
 }

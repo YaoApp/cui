@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { message } from 'antd'
-import { getLocale } from '@umijs/max'
+import { message, Button, Avatar } from 'antd'
+import { getLocale, history } from '@umijs/max'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
 import AuthLayout from '../components/AuthLayout'
 import styles from './index.less'
-import { OAuthAuthbackParams, Signin } from '@/openapi'
+import { OAuthAuthbackParams, Signin, UserInfo, OAuthAuthResult } from '@/openapi'
 
 // Required parameters for OAuth callback
 const requiredParams = ['code', 'state', 'provider']
@@ -38,6 +38,9 @@ const AuthBack = () => {
 	const currentLocale = normalizeLocale(rawLocale)
 
 	const [loading, setLoading] = useState(true)
+	const [success, setSuccess] = useState(false)
+	const [authResult, setAuthResult] = useState<OAuthAuthResult | null>(null)
+	const [countdown, setCountdown] = useState(20)
 	const [oauthParams, setOauthParams] = useState<OAuthAuthbackParams>({
 		code: '',
 		state: '',
@@ -109,8 +112,19 @@ const AuthBack = () => {
 					return
 				}
 
-				// Redirect to success URL
+				// Login successful
 				console.log('AuthBack success:', signinRes.data)
+
+				// Save user info to global state
+				if (signinRes.data?.user) {
+					console.log('userInfo', signinRes.data.user)
+					global.setUserInfo(signinRes.data.user)
+				}
+
+				// Set success state
+				setAuthResult(signinRes.data || null)
+				setLoading(false)
+				setSuccess(true)
 			} catch (error) {
 				console.error('Failed to initialize auth back:', error)
 				const errorMsg = error instanceof Error ? error.message : 'Failed to process OAuth callback'
@@ -123,6 +137,24 @@ const AuthBack = () => {
 
 		initAuthBack()
 	}, [window.$app?.openapi])
+
+	// 倒计时跳转逻辑
+	useEffect(() => {
+		if (success && countdown > 0) {
+			const timer = setTimeout(() => {
+				setCountdown(countdown - 1)
+			}, 1000)
+			return () => clearTimeout(timer)
+		} else if (success && countdown === 0) {
+			// 跳转到 /helloworld
+			history.push('/auth/helloworld')
+		}
+	}, [success, countdown])
+
+	// 手动跳转
+	const handleNavigate = () => {
+		history.push('/auth/helloworld')
+	}
 
 	// 渲染加载状态
 	const renderLoading = () => (
@@ -141,6 +173,56 @@ const AuthBack = () => {
 
 				<div className={styles.loadingContainer}>
 					<div className={styles.loadingSpinner}></div>
+				</div>
+			</div>
+		</div>
+	)
+
+	// 渲染成功状态
+	const renderSuccess = () => (
+		<div className={styles.loginContainer}>
+			<div className={styles.loginCard}>
+				<div className={styles.titleSection}>
+					<h1 className={styles.appTitle}>
+						{currentLocale.startsWith('zh') ? '登录成功！' : 'Login Successful!'}
+					</h1>
+					<p className={styles.appSubtitle}>
+						{currentLocale.startsWith('zh')
+							? '欢迎回来，正在为您准备工作空间...'
+							: 'Welcome back! Preparing your workspace...'}
+					</p>
+				</div>
+
+				{authResult?.user && (
+					<div className={styles.userInfoSection}>
+						<Avatar size={64} src={authResult.user.picture} className={styles.userAvatar}>
+							{authResult.user.name?.[0]?.toUpperCase() || 'U'}
+						</Avatar>
+						<div className={styles.userDetails}>
+							<h3 className={styles.userName}>
+								{authResult.user.name || authResult.user.user_id}
+							</h3>
+							<p className={styles.userProvider}>
+								{currentLocale.startsWith('zh') ? '通过' : 'via'} {oauthParams.provider}
+							</p>
+						</div>
+					</div>
+				)}
+
+				<div className={styles.authbackActions}>
+					<p className={styles.countdownText}>
+						{currentLocale.startsWith('zh')
+							? `${countdown} 秒后自动跳转...`
+							: `Redirecting in ${countdown} seconds...`}
+					</p>
+					<Button
+						type='primary'
+						size='large'
+						onClick={handleNavigate}
+						className={styles.continueButton}
+					>
+						{currentLocale.startsWith('zh') ? '立即进入' : 'Continue Now'}
+					</Button>
 				</div>
 			</div>
 		</div>
@@ -175,7 +257,7 @@ const AuthBack = () => {
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>
-			{error ? renderError() : renderLoading()}
+			{error ? renderError() : success ? renderSuccess() : renderLoading()}
 		</AuthLayout>
 	)
 }

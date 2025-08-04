@@ -32,6 +32,7 @@ const Index = () => {
 	const is_auth_logout = pathname === '/auth/logout'
 	const is_auth_back = pathname.startsWith('/auth/back/')
 	const is_auth_consent = pathname === '/auth/consent'
+	const is_auth_helloworld = pathname === '/auth/helloworld'
 
 	useLayoutEffect(() => {
 		window.$global = global
@@ -71,7 +72,8 @@ const Index = () => {
 			is_auth_signin_totp ||
 			is_auth_signin_sms ||
 			is_auth_back ||
-			is_auth_logout
+			is_auth_logout ||
+			is_auth_helloworld
 		) {
 			return <Outlet />
 		}
