@@ -6,7 +6,7 @@ import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
 import AuthLayout from '../components/AuthLayout'
 import styles from './index.less'
-import { OAuthCallbackParams, Signin } from '@/openapi'
+import { OAuthAuthbackParams, Signin } from '@/openapi'
 
 // Required parameters for OAuth callback
 const requiredParams = ['code', 'state', 'provider']
@@ -38,7 +38,7 @@ const AuthBack = () => {
 	const currentLocale = normalizeLocale(rawLocale)
 
 	const [loading, setLoading] = useState(true)
-	const [oauthParams, setOauthParams] = useState<OAuthCallbackParams>({
+	const [oauthParams, setOauthParams] = useState<OAuthAuthbackParams>({
 		code: '',
 		state: '',
 		provider: ''
@@ -46,12 +46,8 @@ const AuthBack = () => {
 	const [error, setError] = useState<string>('')
 
 	// 解析URL参数
-	const parseURLParams = (): OAuthCallbackParams => {
-		const params: OAuthCallbackParams = {
-			code: '',
-			state: '',
-			provider: ''
-		}
+	const parseURLParams = (): OAuthAuthbackParams => {
+		const params: OAuthAuthbackParams = { code: '', state: '', provider: '' }
 		const urlParams = new URLSearchParams(window.location.search)
 
 		// 解析所有URL参数

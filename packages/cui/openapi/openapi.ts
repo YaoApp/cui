@@ -1,4 +1,4 @@
-import { OpenAPIConfig, ApiResponse, ErrorResponse, FileUploadResponse } from './types'
+import { OpenAPIConfig, ApiResponse, ErrorResponse, FileUploadResponse, JWKs } from './types'
 import { HeaderBuilder, headers } from './headers'
 
 /**
@@ -180,6 +180,14 @@ export class OpenAPI {
 		}
 
 		return apiResponse
+	}
+
+	/**
+	 * Get JWKs
+	 * @returns The JWKs
+	 */
+	async GetJWKs(): Promise<ApiResponse<JWKs>> {
+		return this.Get<JWKs>('/oauth/jwks')
 	}
 
 	async Get<T = any>(

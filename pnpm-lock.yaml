@@ -175,6 +175,9 @@ importers:
       gantt-task-react:
         specifier: ^0.3.9
         version: 0.3.9(react@18.2.0)
+      jose:
+        specifier: ^6.0.12
+        version: 6.0.12
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
@@ -12803,6 +12806,10 @@ packages:
       - supports-color
       - ts-node
     dev: true
+
+  /jose@6.0.12:
+    resolution: {integrity: sha512-T8xypXs8CpmiIi78k0E+Lk7T2zlK4zDyg+o1CZ4AkOHgDg98ogdP2BeZ61lTFKFyoEwJ9RgAgN+SdM3iPgNonQ==}
+    dev: false
 
   /js-cookie@2.2.1:
     resolution: {integrity: sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==}
