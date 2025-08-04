@@ -72,8 +72,6 @@ const AuthBack = () => {
 	useEffect(() => {
 		const initAuthBack = async () => {
 			if (!window.$app?.openapi) {
-				console.error('OpenAPI not initialized')
-				message.error('OpenAPI not initialized')
 				return
 			}
 
@@ -128,7 +126,7 @@ const AuthBack = () => {
 		}
 
 		initAuthBack()
-	}, [])
+	}, [window.$app?.openapi])
 
 	// 渲染加载状态
 	const renderLoading = () => (
