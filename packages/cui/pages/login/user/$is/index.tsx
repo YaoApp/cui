@@ -14,6 +14,11 @@ const Index = () => {
 	useAsyncEffect(async () => {
 		await window.$app.Event.emit('app/getAppInfo')
 
+		// Redirect to the openapi auth page
+		if (x.global.app_info.openapi?.baseURL != '') {
+			return history.push('/auth/signin')
+		}
+
 		if (!x.global.app_info.login?.user) return history.push('/login/admin')
 
 		x.user_type = 'user'
