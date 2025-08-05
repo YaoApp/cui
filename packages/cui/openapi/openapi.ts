@@ -192,26 +192,26 @@ export class OpenAPI {
 
 	async Get<T = any>(
 		path: string,
-		params: Record<string, string> = {},
+		query: Record<string, string> = {},
 		headersInit: HeadersInit = {}
 	): Promise<ApiResponse<T>> {
 		const headerBuilder = headers(headersInit)
-		params = params || {}
+		query = query || {}
 
 		// Add Content-Type header if not set
 		if (!headerBuilder.has('Content-Type')) {
 			headerBuilder.set('Content-Type', 'application/json')
 		}
 
-		// Add authentication token
-		const token = await this.AccessToken()
-		if (token) {
-			headerBuilder.set('Authorization', `Bearer ${token}`)
-		}
+		// Use server-side cookie authentication instead of client-side
+		// const token = await this.AccessToken()
+		// if (token) {
+		// 	headerBuilder.set('Authorization', `Bearer ${token}`)
+		// }
 
 		// Add CSRF token for security
 		this.addCSRFToken(headerBuilder)
-		const response = await fetch(`${this.config.baseURL}${path}?${new URLSearchParams(params).toString()}`, {
+		const response = await fetch(`${this.config.baseURL}${path}?${new URLSearchParams(query).toString()}`, {
 			method: 'GET',
 			headers: headerBuilder.toHeaders(),
 			credentials: 'include'
@@ -228,11 +228,11 @@ export class OpenAPI {
 			headerBuilder.set('Content-Type', 'application/json')
 		}
 
-		// Add authentication token
-		const token = await this.AccessToken()
-		if (token) {
-			headerBuilder.set('Authorization', `Bearer ${token}`)
-		}
+		// Add authentication token - use server-side cookie authentication instead of client-side
+		// const token = await this.AccessToken()
+		// if (token) {
+		// 	headerBuilder.set('Authorization', `Bearer ${token}`)
+		// }
 
 		// Add CSRF token for double cookie pattern security
 		this.addCSRFToken(headerBuilder)
@@ -261,11 +261,11 @@ export class OpenAPI {
 			headerBuilder.set('Content-Type', 'application/json')
 		}
 
-		// Add authentication token
-		const token = await this.AccessToken()
-		if (token) {
-			headerBuilder.set('Authorization', `Bearer ${token}`)
-		}
+		// Add authentication token - use server-side cookie authentication instead of client-side
+		// const token = await this.AccessToken()
+		// if (token) {
+		// 	headerBuilder.set('Authorization', `Bearer ${token}`)
+		// }
 
 		// Add CSRF token for security
 		this.addCSRFToken(headerBuilder)
@@ -294,11 +294,11 @@ export class OpenAPI {
 			headerBuilder.set('Content-Type', 'application/json')
 		}
 
-		// Add authentication token
-		const token = await this.AccessToken()
-		if (token) {
-			headerBuilder.set('Authorization', `Bearer ${token}`)
-		}
+		// Add authentication token - use server-side cookie authentication instead of client-side
+		// const token = await this.AccessToken()
+		// if (token) {
+		// 	headerBuilder.set('Authorization', `Bearer ${token}`)
+		// }
 
 		// Add CSRF token for security
 		this.addCSRFToken(headerBuilder)
@@ -320,11 +320,11 @@ export class OpenAPI {
 	): Promise<ApiResponse<T>> {
 		const headerBuilder = headers(headersInit)
 
-		// Add authentication token
-		const token = await this.AccessToken()
-		if (token) {
-			headerBuilder.set('Authorization', `Bearer ${token}`)
-		}
+		// Add authentication token - use server-side cookie authentication instead of client-side
+		// const token = await this.AccessToken()
+		// if (token) {
+		// 	headerBuilder.set('Authorization', `Bearer ${token}`)
+		// }
 
 		// Add CSRF token for security
 		this.addCSRFToken(headerBuilder)

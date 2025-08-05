@@ -1,0 +1,94 @@
+@import '@/styles/preset/vars.less';
+
+.jsonHighlight {
+	background: var(--color_bg_menu);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	padding: 12px;
+	font-size: 12px;
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	white-space: pre-wrap;
+	overflow-x: auto;
+	margin: 0;
+	line-height: 1.5;
+	max-height: 200px;
+	overflow-y: auto;
+	color: var(--color_text);
+
+	.key {
+		color: #d73a49; // Red for keys
+		font-weight: 500;
+	}
+
+	.string {
+		color: #032f62; // Dark blue for strings
+	}
+
+	.number {
+		color: #005cc5; // Blue for numbers
+	}
+
+	.boolean {
+		color: #e36209; // Orange for booleans
+	}
+
+	.null {
+		color: #6f42c1; // Purple for null
+		font-style: italic;
+	}
+
+	.bracket,
+	.brace {
+		color: var(--color_text);
+		font-weight: 600;
+	}
+
+	.comma,
+	.colon {
+		color: var(--color_text_light);
+	}
+
+	.indent {
+		color: transparent;
+		user-select: none;
+	}
+}
+
+/* Dark theme support */
+[data-theme='dark'] {
+	.jsonHighlight {
+		background: rgba(0, 0, 0, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.85);
+
+		.key {
+			color: #ff7b72; // Light red for keys in dark mode
+		}
+
+		.string {
+			color: #a5d6ff; // Light blue for strings in dark mode
+		}
+
+		.number {
+			color: #79c0ff; // Light blue for numbers in dark mode
+		}
+
+		.boolean {
+			color: #ffa657; // Light orange for booleans in dark mode
+		}
+
+		.null {
+			color: #d2a8ff; // Light purple for null in dark mode
+		}
+
+		.bracket,
+		.brace {
+			color: rgba(255, 255, 255, 0.9);
+		}
+
+		.comma,
+		.colon {
+			color: rgba(255, 255, 255, 0.6);
+		}
+	}
+}
