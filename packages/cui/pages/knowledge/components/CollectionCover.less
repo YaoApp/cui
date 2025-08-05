@@ -1,0 +1,50 @@
+.coverContainer {
+	width: 100%;
+	height: 200px;
+	border-radius: 8px 8px 0 0;
+	overflow: hidden;
+	position: relative;
+}
+
+.coverImage {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.2s ease;
+
+	&:hover {
+		transform: scale(1.02);
+	}
+}
+
+.nameCover {
+	background-color: #3a3a3a !important;
+	background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px) !important;
+	background-size: 32px 32px !important;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+
+	// Dark mode adaptation
+	[data-theme='dark'] & {
+		background-color: #2a2a2a !important;
+		background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px) !important;
+	}
+}
+
+.nameText {
+	color: white;
+	font-size: 16px;
+	font-weight: 400;
+	text-align: center;
+	padding: 0 20px;
+	line-height: 1.5;
+	word-break: break-word;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+}

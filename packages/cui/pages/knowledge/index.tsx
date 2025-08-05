@@ -1,118 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button, Input, Spin, message, Tooltip } from 'antd'
+import { Button, Input, Spin, message, Tooltip, Popconfirm } from 'antd'
 import { SearchOutlined, DeleteOutlined } from '@ant-design/icons'
 import { history, getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import { CollectionCover } from './components'
 import styles from './index.less'
-import { KnowledgeBase } from './types'
-
-// 模拟请求延迟
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
-// 模拟数据
-const mockKnowledgeBases: KnowledgeBase[] = [
-	{
-		id: '1',
-		collection_id: 'kb_001',
-		name: 'AI技术资料库',
-		description: '收集了关于人工智能、机器学习、深度学习等相关技术文档和研究论文',
-		uid: 'user123',
-		public: true,
-		readonly: false,
-		system: false,
-		sort: 1,
-		cover: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=200&fit=crop',
-		document_count: 128,
-		created_at: '2024-01-15T10:30:00Z',
-		updated_at: '2024-01-20T14:22:00Z'
-	},
-	{
-		id: '2',
-		collection_id: 'kb_002',
-		name: '产品设计指南',
-		description: '产品设计相关的最佳实践、用户体验设计原则和案例分析',
-		uid: 'user456',
-		public: false,
-		readonly: false,
-		system: false,
-		sort: 2,
-		cover: 'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=400&h=200&fit=crop',
-		document_count: 67,
-		created_at: '2024-01-10T09:15:00Z',
-		updated_at: '2024-01-18T16:45:00Z'
-	},
-	{
-		id: '3',
-		collection_id: 'kb_003',
-		name: '法律法规文档',
-		description: '企业运营相关的法律法规、合规要求和政策解读文档',
-		uid: 'user789',
-		public: true,
-		readonly: true,
-		system: true,
-		sort: 3,
-		cover: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=200&fit=crop',
-		document_count: 245,
-		created_at: '2024-01-05T11:20:00Z',
-		updated_at: '2024-01-19T13:10:00Z'
-	},
-	{
-		id: '4',
-		collection_id: 'kb_004',
-		name: '技术开发手册',
-		description: '前端、后端开发技术栈文档、最佳实践和代码规范',
-		uid: 'user101',
-		public: false,
-		readonly: false,
-		system: false,
-		sort: 4,
-		cover: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop',
-		document_count: 89,
-		created_at: '2024-01-12T15:30:00Z',
-		updated_at: '2024-01-21T09:55:00Z'
-	},
-	{
-		id: '5',
-		collection_id: 'kb_005',
-		name: '市场分析报告',
-		description: '行业趋势分析、竞品调研、市场数据统计和商业洞察',
-		uid: 'user202',
-		public: true,
-		readonly: false,
-		system: false,
-		sort: 5,
-		cover: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop',
-		document_count: 156,
-		created_at: '2024-01-08T14:45:00Z',
-		updated_at: '2024-01-17T11:30:00Z'
-	}
-]
-
-// 模拟API请求
-const mockFetchKnowledgeBases = async (searchText = '', page = 1, pageSize = 12): Promise<KnowledgeBase[]> => {
-	await delay(300) // 模拟300ms延迟
-
-	let filteredData = mockKnowledgeBases
-
-	if (searchText.trim()) {
-		const keyword = searchText.toLowerCase()
-		filteredData = mockKnowledgeBases.filter(
-			(kb) => kb.name.toLowerCase().includes(keyword) || kb.description.toLowerCase().includes(keyword)
-		)
-	}
-
-	// 模拟分页
-	const startIndex = (page - 1) * pageSize
-	const endIndex = startIndex + pageSize
-	return filteredData.slice(startIndex, endIndex)
-}
-
-// 模拟删除API
-const mockDeleteKnowledgeBase = async (id: string): Promise<void> => {
-	await delay(300)
-	// 实际应该调用后端API
-	console.log('Delete knowledge base:', id)
-}
+import { KB, Collection } from '@/openapi'
 
 const Index = () => {
 	const locale = getLocale()
@@ -122,31 +15,64 @@ const Index = () => {
 	const [search, setSearch] = useState('')
 	const [searchText, setSearchText] = useState('')
 	const [page, setPage] = useState(1)
-	const [data, setData] = useState<KnowledgeBase[]>([])
+	const [data, setData] = useState<Collection[]>([])
 	const containerRef = useRef<HTMLDivElement>(null)
-	const [hasMore, setHasMore] = useState(true)
+	const [hasMore, setHasMore] = useState(false) // Disable pagination for now
 
 	// 加载数据
 	const loadData = async (reset = false) => {
-		// 如果是重置加载（初始加载或搜索），则允许执行；否则检查 loading 和 hasMore 状态
-		if (!reset && (loading || !hasMore)) return
+		// 如果是重置加载（初始加载或搜索），则允许执行；否则检查 loading 状态
+		if (!reset && loading) return
+
+		if (!window.$app?.openapi) {
+			console.error('OpenAPI not available')
+			return
+		}
 
 		setLoading(true)
 		try {
-			const newPage = reset ? 1 : page
-			const response = await mockFetchKnowledgeBases(searchText, newPage, 12)
+			const kb = new KB(window.$app.openapi)
 
-			if (reset) {
-				setData(response)
-			} else {
-				setData((prevData) => [...prevData, ...response])
+			// Build filter for search
+			const filter: Record<string, string> = {}
+			if (searchText.trim()) {
+				// Add search filter - this may need backend support
+				filter.search = searchText.trim()
 			}
 
-			setPage(newPage + 1)
-			setHasMore(response.length === 12)
+			const response = await kb.GetCollections({ filter })
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load collections')
+			}
+
+			// Use Collections directly
+			let collections: Collection[] = []
+			if (response.data) {
+				collections = response.data
+
+				// Client-side search filtering if backend doesn't support it
+				if (searchText.trim()) {
+					const keyword = searchText.toLowerCase()
+					collections = collections.filter(
+						(collection) =>
+							collection.metadata.name?.toLowerCase().includes(keyword) ||
+							collection.metadata.description?.toLowerCase().includes(keyword)
+					)
+				}
+			}
+
+			if (reset) {
+				setData(collections)
+			} else {
+				setData((prevData) => [...prevData, ...collections])
+			}
+
+			// For now, assume no pagination until backend supports it
+			setHasMore(false)
 		} catch (error) {
-			console.error(is_cn ? '加载知识库失败:' : 'Failed to load knowledge bases:', error)
-			message.error(is_cn ? '加载知识库失败' : 'Failed to load knowledge bases')
+			console.error(is_cn ? '加载集合失败:' : 'Failed to load collections:', error)
+			message.error(is_cn ? '加载集合失败' : 'Failed to load collections')
 		} finally {
 			setLoading(false)
 		}
@@ -186,36 +112,50 @@ const Index = () => {
 		}
 	}
 
-	const handleCardClick = (knowledgeBase: KnowledgeBase) => {
-		history.push(`/knowledge/detail/${knowledgeBase.collection_id}`)
+	const handleCardClick = (collection: Collection) => {
+		history.push(`/knowledge/detail/${collection.id}`)
 	}
 
 	const handleCreate = () => {
-		// TODO: 实现创建知识库功能
-		message.info(is_cn ? '创建功能开发中...' : 'Create feature coming soon...')
+		history.push('/knowledge/create')
 	}
 
-	const handleDelete = async (e: React.MouseEvent, knowledgeBase: KnowledgeBase) => {
-		e.stopPropagation() // 阻止卡片点击事件
+	const handleDelete = async (collection: Collection) => {
+		if (!window.$app?.openapi) {
+			console.error('OpenAPI not available')
+			message.error(is_cn ? '系统未就绪' : 'System not ready')
+			return
+		}
 
 		try {
-			await mockDeleteKnowledgeBase(knowledgeBase.id)
-			setData((prevData) => prevData.filter((kb) => kb.id !== knowledgeBase.id))
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.RemoveCollection(collection.id)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to delete collection')
+			}
+
+			// Remove from local state
+			setData((prevData) => prevData.filter((item) => item.id !== collection.id))
 			message.success(is_cn ? '删除成功' : 'Deleted successfully')
 		} catch (error) {
 			console.error('Delete failed:', error)
-			message.error(is_cn ? '删除失败' : 'Delete failed')
+			const errorMsg = error instanceof Error ? error.message : is_cn ? '删除失败' : 'Delete failed'
+			message.error(errorMsg)
 		}
 	}
 
-	// 渲染知识库卡片
-	const renderKnowledgeBaseCard = (knowledgeBase: KnowledgeBase) => {
+	// 渲染集合卡片
+	const renderCollectionCard = (collection: Collection) => {
 		return (
-			<div key={knowledgeBase.id} className={styles.gridItem}>
-				<div className={styles.knowledgeCard} onClick={() => handleCardClick(knowledgeBase)}>
-					<div className={styles.cardCover}>
-						<img src={knowledgeBase.cover} alt={knowledgeBase.name} />
-					</div>
+			<div key={collection.id} className={styles.gridItem}>
+				<div className={styles.knowledgeCard} onClick={() => handleCardClick(collection)}>
+					<CollectionCover
+						cover={collection.metadata.cover}
+						name={collection.metadata.name}
+						description={collection.metadata.description}
+						className={styles.cardCover}
+					/>
 
 					<div className={styles.cardContent}>
 						<div className={styles.cardHeader}>
@@ -226,12 +166,14 @@ const Index = () => {
 										size={18}
 										style={{ color: 'var(--color_text)' }}
 									/>
-									<h3 className={styles.cardTitle}>{knowledgeBase.name}</h3>
+									<h3 className={styles.cardTitle}>
+										{collection.metadata.name || 'Untitled'}
+									</h3>
 								</div>
 							</div>
 							<div className={styles.cardHeaderRight}>
 								<div className={styles.statusIcons}>
-									{knowledgeBase.public && (
+									{collection.metadata.__yao_public_read && (
 										<Tooltip title={is_cn ? '公开' : 'Public'}>
 											<span className={styles.statusIcon}>
 												<Icon
@@ -242,7 +184,7 @@ const Index = () => {
 											</span>
 										</Tooltip>
 									)}
-									{knowledgeBase.readonly && (
+									{collection.metadata.readonly && (
 										<Tooltip title={is_cn ? '只读' : 'Readonly'}>
 											<span className={styles.statusIcon}>
 												<Icon
@@ -253,7 +195,7 @@ const Index = () => {
 											</span>
 										</Tooltip>
 									)}
-									{knowledgeBase.system && (
+									{collection.metadata.system && (
 										<Tooltip title={is_cn ? '系统内建' : 'Built-in'}>
 											<span className={styles.statusIcon}>
 												<Icon
@@ -268,28 +210,44 @@ const Index = () => {
 							</div>
 						</div>
 
-						<p className={styles.cardDescription}>{knowledgeBase.description}</p>
-
 						<div className={styles.cardFooter}>
 							<div className={styles.documentCount}>
 								<Icon name='material-description' size={16} />
 								<span>
-									{knowledgeBase.document_count} {is_cn ? '个文档' : 'documents'}
+									{collection.metadata.document_count || 0}{' '}
+									{is_cn ? '个文档' : 'documents'}
 								</span>
 							</div>
 							<div className={styles.updateTime}>
 								{is_cn ? '更新于' : 'Updated'}{' '}
-								{new Date(knowledgeBase.updated_at).toLocaleDateString()}
+								{new Date(
+									collection.metadata.updated_at || new Date()
+								).toLocaleDateString()}
 							</div>
-							{/* 只有非只读的知识库才显示删除按钮 */}
-							{!knowledgeBase.readonly && (
-								<div
-									className={styles.deleteBtn}
-									onClick={(e) => handleDelete(e, knowledgeBase)}
-									title={is_cn ? '删除' : 'Delete'}
+							{/* 只有非只读的集合才显示删除按钮 */}
+							{!collection.metadata.readonly && (
+								<Popconfirm
+									title={
+										is_cn
+											? '确定要删除这个集合吗？删除后将无法恢复！'
+											: 'Are you sure to delete this collection? This action cannot be undone!'
+									}
+									onConfirm={(e) => {
+										e?.stopPropagation()
+										handleDelete(collection)
+									}}
+									onCancel={(e) => e?.stopPropagation()}
+									okText={is_cn ? '确认' : 'Confirm'}
+									cancelText={is_cn ? '取消' : 'Cancel'}
 								>
-									<DeleteOutlined />
-								</div>
+									<div
+										className={styles.deleteBtn}
+										onClick={(e) => e.stopPropagation()}
+										title={is_cn ? '删除' : 'Delete'}
+									>
+										<DeleteOutlined />
+									</div>
+								</Popconfirm>
 							)}
 						</div>
 					</div>
@@ -308,7 +266,7 @@ const Index = () => {
 							size={24}
 							style={{ color: 'var(--color_page_title)' }}
 						/>
-						<h1 className={styles.title}>{is_cn ? '知识库' : 'Knowledge Base'}</h1>
+						<h1 className={styles.title}>{is_cn ? '集合' : 'Collections'}</h1>
 					</div>
 					<div className={styles.createIcon} onClick={handleCreate}>
 						<Icon name='material-add' size={24} />
@@ -319,7 +277,7 @@ const Index = () => {
 					<Input
 						size='large'
 						prefix={<SearchOutlined />}
-						placeholder={is_cn ? '搜索知识库...' : 'Search knowledge base...'}
+						placeholder={is_cn ? '搜索集合...' : 'Search collections...'}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						onKeyPress={handleKeyPress}
@@ -339,11 +297,11 @@ const Index = () => {
 						<div className={styles.emptyTitle}>
 							{searchText
 								? is_cn
-									? '未找到匹配的知识库'
-									: 'No matching knowledge bases found'
+									? '未找到匹配的集合'
+									: 'No matching collections found'
 								: is_cn
-								? '暂无知识库'
-								: 'No knowledge bases'}
+								? '暂无集合'
+								: 'No collections'}
 						</div>
 						<div className={styles.emptyDescription}>
 							{searchText
@@ -351,12 +309,12 @@ const Index = () => {
 									? '尝试调整搜索关键词'
 									: 'Try adjusting your search keywords'
 								: is_cn
-								? '创建您的第一个知识库开始吧'
-								: 'Create your first knowledge base to get started'}
+								? '创建您的第一个集合开始吧'
+								: 'Create your first collection to get started'}
 						</div>
 					</div>
 				) : (
-					<div className={styles.grid}>{data.map(renderKnowledgeBaseCard)}</div>
+					<div className={styles.grid}>{data.map(renderCollectionCard)}</div>
 				)}
 
 				{loading && (
