@@ -359,7 +359,7 @@ export declare namespace App {
 
 	interface User {
 		email: string
-		id: number
+		id: number | string
 		avatar?: string
 		mobile?: any
 		name: string

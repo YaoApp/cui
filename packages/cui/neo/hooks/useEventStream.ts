@@ -11,6 +11,7 @@ import type { App } from '@/types'
 type Args = { api: string; studio?: boolean }
 
 export default ({ api, studio }: Args) => {
+	studio = false
 	const event_source = useRef<EventSource>()
 	const [messages, setMessages] = useState<Array<App.ChatInfo>>([])
 	const [loading, setLoading] = useState(false)

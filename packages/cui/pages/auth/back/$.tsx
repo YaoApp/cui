@@ -7,6 +7,7 @@ import { useIntl } from '@/hooks'
 import AuthLayout from '../components/AuthLayout'
 import styles from './index.less'
 import { OAuthAuthbackParams, Signin, UserInfo, OAuthAuthResult } from '@/openapi'
+import { AfterLogin } from '../auth'
 
 // Required parameters for OAuth callback
 const requiredParams = ['code', 'state', 'provider']
@@ -29,7 +30,6 @@ const normalizeLocale = (locale: string): string => {
 }
 
 const AuthBack = () => {
-	const messages = useIntl()
 	const global = useGlobal()
 
 	// 语言设置
@@ -39,6 +39,7 @@ const AuthBack = () => {
 
 	const [loading, setLoading] = useState(true)
 	const [success, setSuccess] = useState(false)
+	const [entry, setEntry] = useState<string>('')
 	const [authResult, setAuthResult] = useState<OAuthAuthResult | null>(null)
 	const [countdown, setCountdown] = useState(20)
 	const [oauthParams, setOauthParams] = useState<OAuthAuthbackParams>({
@@ -113,16 +114,37 @@ const AuthBack = () => {
 				}
 
 				// Login successful
-				console.log('AuthBack success:', signinRes.data)
+				// console.log('AuthBack success:', signinRes.data)
 
 				// Save user info to global state
 				if (signinRes.data?.user) {
-					console.log('userInfo', signinRes.data.user)
+					// console.log('userInfo', signinRes.data.user)
 					global.setUserInfo(signinRes.data.user)
 				}
 
 				// Set success state
 				setAuthResult(signinRes.data || null)
+
+				// After Login
+				try {
+					const config = await signin.GetConfig(currentLocale)
+					if (signin.IsError(config)) {
+						throw new Error(config.error.error_description || 'Failed to get config')
+					}
+
+					const entry = await AfterLogin(global, {
+						user: signinRes.data?.user || ({} as UserInfo),
+						entry: config.data?.success_url || '',
+						logout_redirect: config.data?.logout_redirect || '/'
+					})
+					setEntry(entry)
+				} catch (error) {
+					console.error('Failed to setup user info:', error)
+					message.error('Failed to setup user info, please try again')
+					setError('Failed to setup user info, please try again')
+					return
+				}
+
 				setLoading(false)
 				setSuccess(true)
 			} catch (error) {
@@ -147,13 +169,13 @@ const AuthBack = () => {
 			return () => clearTimeout(timer)
 		} else if (success && countdown === 0) {
 			// 跳转到 /helloworld
-			history.push('/auth/helloworld')
+			history.push(entry || '/auth/helloworld')
 		}
 	}, [success, countdown])
 
 	// 手动跳转
 	const handleNavigate = () => {
-		history.push('/auth/helloworld')
+		history.push(entry || '/auth/helloworld')
 	}
 
 	// 渲染加载状态

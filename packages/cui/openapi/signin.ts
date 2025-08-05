@@ -22,7 +22,8 @@ export interface SigninConfig {
 	title: string
 	description: string
 	success_url: string
-	failure_url: string
+	failure_url?: string
+	logout_redirect?: string
 	form: {
 		username: {
 			placeholder: string
@@ -128,6 +129,12 @@ export interface OAuthAuthResult {
 	scope?: string
 	/** Additional features */
 	features?: object
+
+	/** Entry */
+	redirect_url?: string
+
+	/** Logout redirect */
+	logout_redirect?: string
 }
 
 /**
