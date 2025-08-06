@@ -1,4 +1,4 @@
-import { OpenAPIConfig, ApiResponse, ErrorResponse, FileUploadResponse, JWKs } from './types'
+import { OpenAPIConfig, ApiResponse, ErrorResponse, JWKs } from './types'
 import { HeaderBuilder, headers } from './headers'
 
 /**
@@ -98,7 +98,7 @@ import { HeaderBuilder, headers } from './headers'
  * const formData = new FormData()
  * formData.append('file', fileInput.files[0])
  * formData.append('metadata', JSON.stringify({ category: 'documents' }))
- * const uploadResponse = await api.Upload<FileUploadResponse>('/upload', formData)
+ * const uploadResponse = await api.Upload<any>('/upload', formData)
  *
  * // Custom headers
  * const customResponse = await api.Get<any>('/endpoint', {
@@ -313,11 +313,7 @@ export class OpenAPI {
 		return this.handleResponse<T>(response)
 	}
 
-	async Upload<T = FileUploadResponse>(
-		path: string,
-		formData: FormData,
-		headersInit: HeadersInit = {}
-	): Promise<ApiResponse<T>> {
+	async Upload<T = any>(path: string, formData: FormData, headersInit: HeadersInit = {}): Promise<ApiResponse<T>> {
 		const headerBuilder = headers(headersInit)
 
 		// Add authentication token - use server-side cookie authentication instead of client-side

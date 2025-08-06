@@ -38,33 +38,129 @@ export interface ApiResponse<T = any> {
 }
 
 /**
- * File upload response structure
+ * File upload request options
  */
-export interface FileUploadResponse {
-	file_id: string
-	filename: string
-	size: number
-	content_type: string
-	url?: string
-	metadata?: Record<string, any>
+export interface FileUploadOptions {
+	/** Uploader ID (default: __yao.attachment) */
+	uploaderID?: string
+	/** Original filename (optional, will use file.name if not provided) */
+	originalFilename?: string
+	/** File groups for directory structure */
+	groups?: string[]
+	/** Client ID */
+	clientId?: string
+	/** OpenID */
+	openId?: string
+	/** Enable gzip compression */
+	gzip?: boolean
+	/** Enable image compression */
+	compressImage?: boolean
+	/** Image compression size */
+	compressSize?: number
+	/** Custom path for the file */
+	path?: string
+	/** Enable chunked upload */
+	chunked?: boolean
+	/** Chunk size in bytes (default: 2MB) */
+	chunkSize?: number
 }
 
 /**
- * File list response structure
+ * File list request options
+ */
+export interface FileListOptions {
+	/** Uploader ID (default: __yao.attachment) */
+	uploaderID?: string
+	/** Page number (default: 1) */
+	page?: number
+	/** Page size (default: 20, max: 100) */
+	pageSize?: number
+	/** File status filter */
+	status?: string
+	/** Content type filter */
+	contentType?: string
+	/** Name filter (supports wildcard) */
+	name?: string
+	/** Order by field (default: "created_at desc") */
+	orderBy?: string
+	/** Select specific fields */
+	select?: string[]
+}
+
+/**
+ * File information structure
+ */
+export interface FileInfo {
+	/** File ID */
+	id: string
+	/** Original filename */
+	filename: string
+	/** File size in bytes */
+	size: number
+	/** Content type */
+	contentType: string
+	/** File status */
+	status: string
+	/** Upload timestamp */
+	createdAt: string
+	/** Update timestamp */
+	updatedAt: string
+	/** File URL (if available) */
+	url?: string
+	/** File path */
+	path?: string
+	/** Additional metadata */
+	metadata?: Record<string, any>
+	/** Uploader ID */
+	uploader?: string
+	/** Groups */
+	groups?: string[]
+	/** Client ID */
+	clientId?: string
+	/** OpenID */
+	openId?: string
+}
+
+/**
+ * File list response
  */
 export interface FileListResponse {
-	files: Array<{
-		file_id: string
-		filename: string
-		size: number
-		content_type: string
-		created_at: string
-		metadata?: Record<string, any>
-	}>
+	/** File list */
+	data: FileInfo[]
+	/** Total count */
 	total: number
-	page?: number
-	per_page?: number
+	/** Current page */
+	page: number
+	/** Page size */
+	pageSize: number
+	/** Total pages */
+	totalPages: number
 }
+
+/**
+ * File exists response
+ */
+export interface FileExistsResponse {
+	/** Whether file exists */
+	exists: boolean
+	/** File ID */
+	fileId: string
+}
+
+/**
+ * File delete response
+ */
+export interface FileDeleteResponse {
+	/** Success message */
+	message: string
+	/** File ID */
+	fileId: string
+}
+
+/**
+ * File upload progress callback
+ */
+export type UploadProgressCallback = (progress: { loaded: number; total: number; percentage: number }) => void
 
 /**
  * Authorization server metadata (OpenID Connect Discovery)
