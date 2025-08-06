@@ -6,6 +6,8 @@ import type { UploadProps } from 'antd'
 import Icon from '@/widgets/Icon'
 import DocumentModal from '../document'
 import styles from './index.less'
+import { useGlobal } from '@/context/app'
+import { toJS } from 'mobx'
 
 const { TextArea } = Input
 
@@ -103,6 +105,13 @@ const KnowledgeDetail = () => {
 	const id = params['*'] || ''
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+	const global = useGlobal()
+
+	const { kb } = global.app_info || {}
+	console.log('Knowledge Base Config')
+	console.log('--------------------------------')
+	console.log(JSON.stringify(kb, null, 2))
+	console.log('--------------------------------')
 
 	const [loading, setLoading] = useState(true)
 	const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase | null>(null)

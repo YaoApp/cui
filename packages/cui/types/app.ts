@@ -240,6 +240,77 @@ export declare namespace App {
 		}>
 	}
 
+	/**
+	 * Knowledge Base Configuration
+	 */
+	type KBConfig = {
+		/** Available features based on current configuration */
+		features: KBFeatures
+		/** Text splitting providers (Required - at least one) */
+		chunkings: string[]
+		/** Text vectorization providers (Required - at least one) */
+		embeddings: string[]
+		/** File processing converters (Optional) */
+		converters: string[]
+		/** Entity and relationship extractors (Optional) */
+		extractors: string[]
+		/** File fetchers (Optional) */
+		fetchers: string[]
+		/** Search providers (Optional) */
+		searchers: string[]
+		/** Reranking providers (Optional) */
+		rerankers: string[]
+		/** Voting providers (Optional) */
+		votes: string[]
+		/** Weighting providers (Optional) */
+		weights: string[]
+		/** Scoring providers (Optional) */
+		scores: string[]
+		/** File uploader configuration (Default: "__yao.attachment") */
+		uploader: string
+	}
+
+	/**
+	 * Knowledge Base Features - represents available features based on current configuration
+	 */
+	type KBFeatures = {
+		// Core features
+		/** Graph database support (neo4j) */
+		GraphDatabase: boolean
+		/** PDF text extraction capability */
+		PDFProcessing: boolean
+		/** Video/audio processing capability (ffmpeg) */
+		VideoProcessing: boolean
+
+		// File format support (based on converters)
+		/** Plain text files support (.txt, .md) */
+		PlainText: boolean
+		/** Office documents support (.docx, .pptx, .xlsx) */
+		OfficeDocuments: boolean
+		/** Text recognition from images and PDFs (OCR) */
+		OCRProcessing: boolean
+		/** Audio transcription capability */
+		AudioTranscript: boolean
+		/** Image content analysis capability */
+		ImageAnalysis: boolean
+
+		// Advanced features
+		/** Entity and relationship extraction */
+		EntityExtraction: boolean
+		/** Web URL fetching capability */
+		WebFetching: boolean
+		/** Custom search providers support */
+		CustomSearch: boolean
+		/** Search result reranking capability */
+		ResultReranking: boolean
+		/** Segment voting system */
+		SegmentVoting: boolean
+		/** Segment weighting system */
+		SegmentWeighting: boolean
+		/** Segment scoring system */
+		SegmentScoring: boolean
+	}
+
 	interface Info {
 		/** Application Name */
 		name: string
@@ -249,7 +320,7 @@ export declare namespace App {
 
 		openapi?: OpenAPIConfig
 
-		kb?: any // TODO: add Knowledge Base Config
+		kb?: KBConfig
 
 		/** Yao version */
 		yao?: {
