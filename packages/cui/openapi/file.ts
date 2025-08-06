@@ -24,9 +24,11 @@ import { nanoid } from 'nanoid'
  */
 export class FileAPI {
 	private api: OpenAPI
+	private defaultUploader: string
 
-	constructor(api: OpenAPI) {
+	constructor(api: OpenAPI, defaultUploader?: string) {
 		this.api = api
+		this.defaultUploader = defaultUploader || '__yao.attachment'
 	}
 
 	// ===== File Upload =====
@@ -43,7 +45,7 @@ export class FileAPI {
 		options: FileUploadOptions = {},
 		onProgress?: UploadProgressCallback
 	): Promise<ApiResponse<FileInfo>> {
-		const uploaderID = options.uploaderID || '__yao.attachment'
+		const uploaderID = this.getUploaderID(options.uploaderID)
 
 		// Determine if we should use chunked upload
 		const shouldUseChunked = options.chunked || file.size > (options.chunkSize || 2 * 1024 * 1024)
@@ -130,7 +132,7 @@ export class FileAPI {
 	 * @returns Promise<ApiResponse<FileListResponse>>
 	 */
 	async List(options: FileListOptions = {}): Promise<ApiResponse<FileListResponse>> {
-		const uploaderID = options.uploaderID || '__yao.attachment'
+		const uploaderID = this.getUploaderID(options.uploaderID)
 
 		const params: Record<string, string> = {}
 
@@ -176,7 +178,7 @@ export class FileAPI {
 			throw new Error('File ID is required')
 		}
 
-		const actualUploaderID = uploaderID || '__yao.attachment'
+		const actualUploaderID = this.getUploaderID(uploaderID)
 		return this.api.Get<FileInfo>(`/files/${actualUploaderID}/${encodeURIComponent(fileID)}`)
 	}
 
@@ -191,7 +193,7 @@ export class FileAPI {
 			throw new Error('File ID is required')
 		}
 
-		const actualUploaderID = uploaderID || '__yao.attachment'
+		const actualUploaderID = this.getUploaderID(uploaderID)
 		return this.api.Delete<FileDeleteResponse>(`/files/${actualUploaderID}/${encodeURIComponent(fileID)}`)
 	}
 
@@ -249,7 +251,7 @@ export class FileAPI {
 			throw new Error('File ID is required')
 		}
 
-		const actualUploaderID = uploaderID || '__yao.attachment'
+		const actualUploaderID = this.getUploaderID(uploaderID)
 		return this.api.Get<FileExistsResponse>(`/files/${actualUploaderID}/${encodeURIComponent(fileID)}/exists`)
 	}
 
@@ -259,7 +261,7 @@ export class FileAPI {
 	 * @returns Object compatible with Ant Design Upload props
 	 */
 	UploadProps(options: FileUploadOptions = {}) {
-		const uploaderID = options.uploaderID || '__yao.attachment'
+		const uploaderID = this.getUploaderID(options.uploaderID)
 		return {
 			name: 'file',
 			action: `${this.getBaseURL()}/files/${uploaderID}`,
@@ -337,6 +339,13 @@ export class FileAPI {
 	}
 
 	// ===== Private Methods =====
+
+	/**
+	 * Get uploader ID with priority: options > constructor default > fallback default
+	 */
+	private getUploaderID(optionsUploader?: string): string {
+		return optionsUploader || this.defaultUploader
+	}
 
 	/**
 	 * Upload file using chunked upload
@@ -623,7 +632,7 @@ export class FileAPI {
 			throw new Error('File ID is required')
 		}
 
-		const actualUploaderID = uploaderID || '__yao.attachment'
+		const actualUploaderID = this.getUploaderID(uploaderID)
 		return `${this.getBaseURL()}/files/${actualUploaderID}/${encodeURIComponent(fileID)}/content`
 	}
 

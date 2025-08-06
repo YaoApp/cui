@@ -1,0 +1,284 @@
+:global(.ant-modal-wrap) {
+	.configModal {
+		:global(.ant-modal-content) {
+			overflow: hidden;
+			border-radius: 8px !important;
+		}
+
+		:global(.ant-modal-header) {
+			border-bottom: 1px solid var(--color_border_2);
+			padding: 16px 24px;
+			border-radius: 8px 8px 0 0 !important;
+		}
+
+		:global(.ant-modal-body),
+		:global(.xgen-modal-body) {
+			padding: 0;
+			background: var(--color_bg_menu) !important;
+			border-radius: 0 0 8px 8px !important;
+		}
+
+		// 强制覆盖xgen-card的圆角
+		:global(.xgen-card) {
+			border-radius: 0 0 8px 8px !important;
+		}
+
+		:global(.xgen-card-bordered) {
+			border-radius: 0 0 8px 8px !important;
+		}
+
+		:global(.xgen-card-small) {
+			border-radius: 0 0 8px 8px !important;
+		}
+
+		:global(.xgen-card-body) {
+			border-radius: 0 0 8px 8px !important;
+		}
+	}
+}
+
+.configModal {
+	:global(.ant-modal-content) {
+		overflow: hidden;
+		border-radius: 8px !important;
+	}
+
+	:global(.ant-modal-header) {
+		border-bottom: 1px solid var(--color_border_2);
+		padding: 16px 24px;
+		border-radius: 8px 8px 0 0 !important;
+	}
+
+	:global(.ant-modal-body),
+	:global(.xgen-modal-body) {
+		padding: 0;
+		background: var(--color_bg_menu) !important;
+		border-radius: 0 0 8px 8px !important;
+	}
+}
+
+.modalHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+}
+
+.modalTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 16px;
+	font-weight: 500;
+	color: var(--color_text);
+}
+
+.modalActions {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+
+.configForm {
+	.ant-form-item {
+		margin-bottom: 18px;
+	}
+
+	.ant-form-item-label > label {
+		font-weight: 500;
+		font-size: 13px;
+		color: var(--color_text);
+	}
+
+	.ant-input,
+	.ant-input-affix-wrapper {
+		font-size: 13px;
+	}
+
+	.ant-input::placeholder {
+		font-size: 13px;
+	}
+}
+
+.editableSection {
+	background: var(--color_bg_menu);
+	border: none;
+	border-radius: 0 0 8px 8px !important;
+
+	:global(.xgen-card) {
+		border-radius: 0 0 8px 8px !important;
+	}
+
+	:global(.xgen-card-bordered) {
+		border-radius: 0 0 8px 8px !important;
+	}
+
+	:global(.xgen-card-small) {
+		border-radius: 0 0 8px 8px !important;
+	}
+
+	.ant-card-body,
+	:global(.xgen-card-body) {
+		padding: 32px 32px 16px 32px;
+		border-radius: 0 0 8px 8px !important;
+	}
+}
+
+.readonlySection {
+	background: var(--color_bg_menu);
+	border: none;
+	border-radius: 0 0 8px 8px !important;
+
+	:global(.xgen-card) {
+		border-radius: 0 0 8px 8px !important;
+	}
+
+	:global(.xgen-card-bordered) {
+		border-radius: 0 0 8px 8px !important;
+	}
+
+	:global(.xgen-card-small) {
+		border-radius: 0 0 8px 8px !important;
+	}
+
+	.ant-card-body,
+	:global(.xgen-card-body) {
+		padding: 16px 32px 16px 32px;
+		border-radius: 0 0 8px 8px !important;
+	}
+}
+
+.sectionHeader {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 20px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--color_border);
+}
+
+.sectionTitle {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--color_text);
+}
+
+.vectorConfigSection {
+	background: var(--color_bg_menu);
+	border: none;
+	border-radius: 0 0 8px 8px !important;
+
+	:global(.xgen-card) {
+		border-radius: 0 0 8px 8px !important;
+	}
+
+	:global(.xgen-card-bordered) {
+		border-radius: 0 0 8px 8px !important;
+	}
+
+	:global(.xgen-card-small) {
+		border-radius: 0 0 8px 8px !important;
+	}
+
+	.ant-card-body,
+	:global(.xgen-card-body) {
+		padding: 16px 32px 32px 32px;
+		border-radius: 0 0 8px 8px !important;
+	}
+}
+
+.infoGrid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 12px;
+}
+
+.infoItem {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	background: var(--color_bg_1);
+	border-radius: 4px;
+	border: 1px solid var(--color_border_3);
+
+	.ant-space {
+		flex-shrink: 0;
+	}
+}
+
+.infoLabel {
+	font-size: 13px;
+	color: var(--color_text_3);
+	font-weight: 500;
+	min-width: 80px;
+}
+
+.infoValue {
+	font-size: 13px;
+	color: var(--color_text);
+	font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+	text-align: right;
+	flex: 1;
+	margin-left: 12px;
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.configModal {
+		.ant-modal {
+			margin: 0;
+			max-width: 100vw;
+		}
+
+		.ant-modal-content {
+			border-radius: 0;
+		}
+	}
+
+	.infoGrid {
+		grid-template-columns: 1fr;
+	}
+
+	.infoItem {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+	}
+
+	.infoValue {
+		text-align: left;
+		margin-left: 0;
+	}
+
+	.modalActions {
+		flex-direction: column;
+		gap: 8px;
+
+		.ant-btn {
+			width: auto;
+			font-size: 12px;
+			padding: 0 8px;
+		}
+	}
+}
+
+// 暗色主题适配
+[data-theme='dark'] {
+	.configModal {
+		:global(.ant-modal-body),
+		:global(.xgen-modal-body) {
+			background: var(--color_bg_menu) !important;
+		}
+	}
+
+	.readonlySection {
+		background: var(--color_bg_menu);
+		border-color: var(--color_border_2);
+	}
+
+	.infoItem {
+		background: var(--color_bg_2);
+		border-color: var(--color_border_2);
+	}
+}

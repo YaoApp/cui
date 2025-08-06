@@ -1,26 +1,26 @@
 import { useEffect, useState } from 'react'
 import { useParams, history, getLocale } from '@umijs/max'
 import { Spin, Button, message, Input, Upload, Empty, Badge, Select, Tooltip } from 'antd'
-import { ArrowLeftOutlined, UploadOutlined, LinkOutlined, FileTextOutlined, SearchOutlined } from '@ant-design/icons'
+import {
+	ArrowLeftOutlined,
+	UploadOutlined,
+	LinkOutlined,
+	FileTextOutlined,
+	SearchOutlined,
+	SettingOutlined
+} from '@ant-design/icons'
 import type { UploadProps } from 'antd'
 import Icon from '@/widgets/Icon'
 import DocumentModal from '../document'
+import CollectionConfigModal from '../config'
 import styles from './index.less'
 import { useGlobal } from '@/context/app'
 import { toJS } from 'mobx'
+import { KB, FileAPI, Collection } from '@/openapi'
 
 const { TextArea } = Input
 
-// 类型定义
-interface KnowledgeBase {
-	id: string
-	name: string
-	description: string
-	created_at: string
-	updated_at: string
-	document_count: number
-	total_chunks: number
-}
+// 类型定义 - 使用Collection类型统一集合概念
 
 interface Seed {
 	id: string
@@ -34,19 +34,19 @@ interface Seed {
 	cover?: string
 }
 
-// Mock API 函数
-const mockFetchKnowledgeBase = async (id: string): Promise<KnowledgeBase> => {
-	await new Promise((resolve) => setTimeout(resolve, 300))
-
-	return {
-		id,
-		name: 'New Knowledge Base',
-		description: 'Your personal knowledge base for better AI generation',
-		created_at: '2024-01-15T10:30:00Z',
-		updated_at: '2024-01-20T14:20:00Z',
-		document_count: 5,
-		total_chunks: 31
+// API 对象初始化
+const initializeAPIs = (kbConfig?: any) => {
+	if (!window.$app?.openapi) {
+		throw new Error('OpenAPI not available')
 	}
+
+	const kb = new KB(window.$app.openapi)
+
+	// 从kb配置中读取uploader信息，如果没有则使用默认值
+	const defaultUploader = kbConfig?.uploader || kbConfig?.file?.uploader
+	const fileapi = new FileAPI(window.$app.openapi, defaultUploader)
+
+	return { kb, fileapi }
 }
 
 const mockFetchSeeds = async (id: string): Promise<Seed[]> => {
@@ -107,14 +107,14 @@ const KnowledgeDetail = () => {
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
 
-	const { kb } = global.app_info || {}
-	console.log('Knowledge Base Config')
+	const { kb: kbConfig } = global.app_info || {}
+	console.log('Collection Config')
 	console.log('--------------------------------')
-	console.log(JSON.stringify(kb, null, 2))
+	console.log(JSON.stringify(kbConfig, null, 2))
 	console.log('--------------------------------')
 
 	const [loading, setLoading] = useState(true)
-	const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase | null>(null)
+	const [collection, setCollection] = useState<Collection | null>(null)
 	const [seeds, setSeeds] = useState<Seed[]>([])
 	const [textInput, setTextInput] = useState('')
 	const [urlInput, setUrlInput] = useState('')
@@ -125,6 +125,7 @@ const KnowledgeDetail = () => {
 	// 模态窗状态
 	const [modalVisible, setModalVisible] = useState(false)
 	const [selectedDocument, setSelectedDocument] = useState<{ collectionId: string; docid: string } | null>(null)
+	const [configModalVisible, setConfigModalVisible] = useState(false)
 
 	// 可用标签
 	const availableTags = [
@@ -171,14 +172,31 @@ const KnowledgeDetail = () => {
 		return iconMap[type] || 'material-help_outline'
 	}
 
-	// 加载知识库详情
-	const loadKnowledgeBase = async () => {
+	// 加载集合详情
+	const loadCollection = async () => {
 		try {
 			setLoading(true)
-			const data = await mockFetchKnowledgeBase(id)
-			setKnowledgeBase(data)
+			const { kb } = initializeAPIs(kbConfig)
+
+			// 获取所有集合，然后找到对应的集合
+			const response = await kb.GetCollections()
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load collections')
+			}
+
+			// 从集合列表中找到对应ID的集合
+			const collection = response.data?.find((c) => c.id === id)
+			if (!collection) {
+				throw new Error(is_cn ? '未找到指定的集合' : 'Collection not found')
+			}
+
+			setCollection(collection)
 		} catch (error) {
-			message.error(is_cn ? '加载知识库失败' : 'Failed to load knowledge base')
+			console.error('Load collection failed:', error)
+			const errorMsg =
+				error instanceof Error ? error.message : is_cn ? '加载集合失败' : 'Failed to load collection'
+			message.error(errorMsg)
 		} finally {
 			setLoading(false)
 		}
@@ -197,7 +215,7 @@ const KnowledgeDetail = () => {
 	// 初始化加载
 	useEffect(() => {
 		if (id) {
-			loadKnowledgeBase()
+			loadCollection()
 			loadSeeds()
 		}
 	}, [id])
@@ -266,6 +284,16 @@ const KnowledgeDetail = () => {
 		setModalVisible(true)
 	}
 
+	const handleConfigCollection = () => {
+		// 打开配置弹窗
+		setConfigModalVisible(true)
+	}
+
+	const handleConfigUpdate = (updatedCollection: Collection) => {
+		// 更新本地状态
+		setCollection(updatedCollection)
+	}
+
 	const handleViewSeedDocument = (seed: Seed) => {
 		// 根据seed ID生成doc_id，实际项目中应该使用真实的文档ID
 		const docid = `doc_${seed.id.padStart(3, '0')}`
@@ -308,10 +336,10 @@ const KnowledgeDetail = () => {
 		)
 	}
 
-	if (!knowledgeBase) {
+	if (!collection) {
 		return (
 			<div className={styles.error}>
-				<Empty description={is_cn ? '知识库不存在' : 'Knowledge base not found'} />
+				<Empty description={is_cn ? '集合不存在' : 'Collection not found'} />
 			</div>
 		)
 	}
@@ -329,22 +357,20 @@ const KnowledgeDetail = () => {
 					/>
 					<div className={styles.titleInfo}>
 						<div className={styles.titleWithBadge}>
-							<h1 className={styles.title}>{knowledgeBase.name}</h1>
+							<h1 className={styles.title}>{collection.metadata.name}</h1>
 							<span className={styles.documentCount}>
 								{is_cn
-									? `${knowledgeBase.document_count} 个文档`
-									: `${knowledgeBase.document_count} documents`}
+									? `${collection.metadata.document_count || 0} 个文档`
+									: `${collection.metadata.document_count || 0} documents`}
 							</span>
 						</div>
-						<p className={styles.subtitle}>{knowledgeBase.description}</p>
+						<p className={styles.subtitle}>{collection.metadata.description}</p>
 					</div>
 				</div>
 				<div className={styles.headerRight}>
-					<Tooltip
-						title={is_cn ? '查看知识库中的文档详情' : 'View document details in knowledge base'}
-					>
-						<Button type='default' onClick={handleViewDocuments} icon={<FileTextOutlined />}>
-							{is_cn ? '查看文档' : 'View Documents'}
+					<Tooltip title={is_cn ? '配置集合参数' : 'Configure collection settings'}>
+						<Button type='default' onClick={handleConfigCollection} icon={<SettingOutlined />}>
+							{is_cn ? '配置' : 'Settings'}
 						</Button>
 					</Tooltip>
 				</div>
@@ -379,8 +405,8 @@ const KnowledgeDetail = () => {
 						<TextArea
 							placeholder={
 								is_cn
-									? '粘贴文本 - 请在此输入文本内容，上传到知识库'
-									: 'Paste Text - Type or paste text here to upload to this knowledge base'
+									? '粘贴文本 - 请在此输入文本内容，上传到集合'
+									: 'Paste Text - Type or paste text here to upload to this collection'
 							}
 							value={textInput}
 							onChange={(e) => setTextInput(e.target.value)}
@@ -574,6 +600,14 @@ const KnowledgeDetail = () => {
 					docid={selectedDocument.docid}
 				/>
 			)}
+
+			{/* 集合配置模态窗 */}
+			<CollectionConfigModal
+				visible={configModalVisible}
+				onClose={() => setConfigModalVisible(false)}
+				collection={collection}
+				onUpdate={handleConfigUpdate}
+			/>
 		</div>
 	)
 }
