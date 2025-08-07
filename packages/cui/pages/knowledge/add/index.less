@@ -1,0 +1,477 @@
+.addDocumentModal {
+	:global(.ant-modal-content) {
+		border-radius: var(--radius);
+		overflow: hidden;
+		box-shadow: var(--shadow);
+	}
+
+	:global(.ant-modal-header) {
+		padding: 0;
+		border-bottom: none;
+		background: transparent;
+	}
+
+	:global(.ant-modal-body) {
+		padding: 0;
+	}
+
+	:global(.ant-modal-footer) {
+		border-top: 1px solid var(--color_border);
+		padding: 16px 20px;
+		margin-top: 0;
+		background: var(--color_bg_nav);
+		border-radius: 0 0 var(--radius) var(--radius);
+		min-height: 72px;
+	}
+
+	:global(.xgen-modal-header) {
+		padding: 0 !important;
+		border-bottom: none !important;
+		background: transparent !important;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0 !important;
+	}
+}
+
+.modalHeader {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_bg_nav);
+	height: 56px;
+	border-radius: var(--radius) var(--radius) 0 0;
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-shrink: 0;
+		z-index: 1;
+		color: var(--color_title);
+	}
+
+	.modalTitle {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--color_title);
+		margin: 0;
+	}
+
+	.tabs {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		background: var(--color_bg_nav_tabs);
+		border-radius: 20px;
+		padding: 4px;
+		z-index: 2;
+	}
+
+	.tabItem {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 16px;
+		border-radius: 14px;
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--color_text_grey);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		min-width: 68px;
+		justify-content: center;
+
+		:global(.xgen-icon) {
+			color: inherit;
+		}
+
+		&:hover {
+			color: var(--color_text);
+			background: var(--color_bg_hover);
+		}
+
+		&.tabItemActive {
+			color: var(--color_text);
+			background: var(--color_bg_menu);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		}
+	}
+
+	.closeButton {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border-radius: var(--radius);
+		cursor: pointer;
+		color: var(--color_text_grey);
+		transition: all 0.2s ease;
+		flex-shrink: 0;
+		z-index: 1;
+
+		&:hover {
+			background: var(--color_bg_hover);
+			color: var(--color_text);
+		}
+
+		&:active {
+			background: var(--color_bg_active);
+		}
+	}
+
+	// 响应式处理：当空间不足时，让tabs降级到左侧布局
+	@media (max-width: 900px) {
+		.tabs {
+			position: static;
+			transform: none;
+			order: 2;
+			margin-left: 16px;
+		}
+
+		.titleSection {
+			order: 1;
+		}
+
+		.closeButton {
+			order: 3;
+		}
+	}
+}
+
+.modalContent {
+	background: var(--color_bg_menu);
+	border-radius: 0 0 var(--radius) var(--radius);
+	display: flex;
+	flex-direction: column;
+}
+
+.modalFooter {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+}
+
+// 基本选项卡样式
+.basicTab {
+	padding: 24px;
+	max-height: calc(100vh - 200px);
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color_text_grey);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_border_soft);
+		border-radius: 3px;
+	}
+
+	.previewSection {
+		margin-bottom: 32px;
+
+		.sectionTitle {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 16px;
+			font-size: 14px;
+			font-weight: 600;
+			color: var(--color_text_primary);
+		}
+
+		.previewContent {
+			border: 1px solid var(--color_border_light);
+			border-radius: 8px;
+			overflow: hidden;
+		}
+	}
+
+	.optionsSection {
+		.sectionTitle {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 16px;
+			font-size: 14px;
+			font-weight: 600;
+			color: var(--color_text_primary);
+		}
+
+		.optionItem {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 16px 0;
+			border-bottom: 1px solid var(--color_border_light);
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			.optionLabel {
+				flex: 1;
+				margin-right: 16px;
+
+				.label {
+					font-size: 14px;
+					font-weight: 500;
+					color: var(--color_text_primary);
+					margin-bottom: 4px;
+				}
+
+				.description {
+					font-size: 12px;
+					color: var(--color_text_secondary);
+				}
+			}
+
+			.optionControl {
+				flex-shrink: 0;
+			}
+		}
+	}
+}
+
+// 高级选项卡样式
+.advancedTab {
+	padding: 24px;
+	max-height: calc(100vh - 200px);
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color_text_grey);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_border_soft);
+		border-radius: 3px;
+	}
+
+	.configSection {
+		margin-bottom: 24px;
+
+		.sectionTitle {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 16px;
+			font-size: 14px;
+			font-weight: 600;
+			color: var(--color_text_primary);
+		}
+
+		.configGrid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 16px;
+		}
+
+		.configItem {
+			padding: 16px;
+			border: 1px solid var(--color_border_light);
+			border-radius: 8px;
+			background-color: var(--color_bg_light);
+
+			.configLabel {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color_text_primary);
+				margin-bottom: 8px;
+			}
+
+			.configDescription {
+				font-size: 12px;
+				color: var(--color_text_secondary);
+				margin-bottom: 12px;
+			}
+		}
+	}
+}
+
+// 预览组件样式
+.filePreview {
+	padding: 20px;
+	background-color: var(--color_bg_light);
+
+	.fileInfo {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 16px;
+
+		.fileIcon {
+			width: 40px;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background-color: var(--color_main_light);
+			border-radius: 8px;
+			color: var(--color_main);
+		}
+
+		.fileDetails {
+			flex: 1;
+
+			.fileName {
+				font-size: 14px;
+				font-weight: 600;
+				color: var(--color_text_primary);
+				margin-bottom: 4px;
+			}
+
+			.fileSize {
+				font-size: 12px;
+				color: var(--color_text_secondary);
+			}
+		}
+	}
+
+	.fileContent {
+		.contentLabel {
+			font-size: 13px;
+			font-weight: 500;
+			color: var(--color_text_primary);
+			margin-bottom: 8px;
+		}
+
+		.contentPreview {
+			background-color: var(--color_bg_white);
+			border: 1px solid var(--color_border_light);
+			border-radius: 6px;
+			padding: 12px;
+			font-size: 13px;
+			color: var(--color_text_secondary);
+			max-height: 200px;
+			overflow-y: auto;
+		}
+	}
+}
+
+.textPreview {
+	padding: 20px;
+	background-color: var(--color_bg_light);
+
+	.textInfo {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 16px;
+
+		.textIcon {
+			color: var(--color_main);
+		}
+
+		.textTitle {
+			font-size: 14px;
+			font-weight: 600;
+			color: var(--color_text_primary);
+		}
+
+		.textLength {
+			font-size: 12px;
+			color: var(--color_text_secondary);
+		}
+	}
+
+	.textContent {
+		.ant-input {
+			font-size: 13px;
+			line-height: 1.6;
+		}
+
+		:global(.ant-input) {
+			&::-webkit-scrollbar {
+				width: 6px;
+				height: 6px;
+			}
+
+			&::-webkit-scrollbar-thumb {
+				background: var(--color_border);
+				border-radius: 3px;
+
+				&:hover {
+					background: var(--color_text_grey);
+				}
+			}
+
+			&::-webkit-scrollbar-track {
+				background: var(--color_border_soft);
+				border-radius: 3px;
+			}
+		}
+	}
+}
+
+.urlPreview {
+	background-color: var(--color_bg_light);
+
+	.urlInfo {
+		padding: 20px;
+		border-bottom: 1px solid var(--color_border_light);
+
+		.urlHeader {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 12px;
+
+			.urlIcon {
+				color: var(--color_main);
+			}
+
+			.urlTitle {
+				font-size: 14px;
+				font-weight: 600;
+				color: var(--color_text_primary);
+			}
+		}
+
+		.urlInput {
+			margin-bottom: 8px;
+		}
+
+		.urlStatus {
+			font-size: 12px;
+			color: var(--color_text_secondary);
+		}
+	}
+
+	.urlFrame {
+		height: 300px;
+		border: none;
+		width: 100%;
+		background-color: var(--color_bg_white);
+	}
+}

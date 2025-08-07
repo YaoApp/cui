@@ -13,6 +13,7 @@ import type { UploadProps } from 'antd'
 import Icon from '@/widgets/Icon'
 import DocumentModal from '../document'
 import CollectionConfigModal from '../config'
+import AddDocumentModal, { AddDocumentData } from '../add'
 import styles from './index.less'
 import { useGlobal } from '@/context/app'
 import { toJS } from 'mobx'
@@ -126,6 +127,8 @@ const KnowledgeDetail = () => {
 	const [modalVisible, setModalVisible] = useState(false)
 	const [selectedDocument, setSelectedDocument] = useState<{ collectionId: string; docid: string } | null>(null)
 	const [configModalVisible, setConfigModalVisible] = useState(false)
+	const [addDocumentModalVisible, setAddDocumentModalVisible] = useState(false)
+	const [addDocumentData, setAddDocumentData] = useState<AddDocumentData | null>(null)
 
 	// 可用标签
 	const availableTags = [
@@ -223,17 +226,21 @@ const KnowledgeDetail = () => {
 	// 上传文件
 	const uploadProps: UploadProps = {
 		name: 'file',
-		multiple: true,
-		action: '/api/upload',
+		multiple: false,
 		showUploadList: false,
-		onChange(info) {
-			const { status } = info.file
-			if (status === 'done') {
-				message.success(`${info.file.name} ${is_cn ? '上传成功' : 'uploaded successfully'}`)
-				loadSeeds()
-			} else if (status === 'error') {
-				message.error(`${info.file.name} ${is_cn ? '上传失败' : 'upload failed'}`)
+		beforeUpload: (file) => {
+			// 不执行实际上传，而是打开添加弹窗
+			const documentData: AddDocumentData = {
+				type: 'file',
+				content: {
+					file,
+					name: file.name,
+					size: file.size
+				}
 			}
+			setAddDocumentData(documentData)
+			setAddDocumentModalVisible(true)
+			return false // 阻止默认上传行为
 		}
 	}
 
@@ -243,9 +250,15 @@ const KnowledgeDetail = () => {
 			message.warning(is_cn ? '请输入文本内容' : 'Please enter text content')
 			return
 		}
-		message.success(is_cn ? '文本添加成功' : 'Text added successfully')
-		setTextInput('')
-		loadSeeds()
+
+		const documentData: AddDocumentData = {
+			type: 'text',
+			content: {
+				content: textInput
+			}
+		}
+		setAddDocumentData(documentData)
+		setAddDocumentModalVisible(true)
 	}
 
 	// 添加URL
@@ -254,9 +267,16 @@ const KnowledgeDetail = () => {
 			message.warning(is_cn ? '请输入URL地址' : 'Please enter URL')
 			return
 		}
-		message.success(is_cn ? 'URL添加成功' : 'URL added successfully')
-		setUrlInput('')
-		loadSeeds()
+
+		const documentData: AddDocumentData = {
+			type: 'url',
+			content: {
+				url: urlInput,
+				title: undefined
+			}
+		}
+		setAddDocumentData(documentData)
+		setAddDocumentModalVisible(true)
 	}
 
 	// 标签切换
@@ -287,6 +307,34 @@ const KnowledgeDetail = () => {
 	const handleConfigCollection = () => {
 		// 打开配置弹窗
 		setConfigModalVisible(true)
+	}
+
+	// 处理添加文档确认
+	const handleAddDocumentConfirm = (data: AddDocumentData, options: any) => {
+		console.log('Adding document:', data, options)
+
+		// TODO: 实际的添加逻辑
+		message.success(is_cn ? '文档添加成功' : 'Document added successfully')
+
+		// 清理输入
+		if (data.type === 'text') {
+			setTextInput('')
+		} else if (data.type === 'url') {
+			setUrlInput('')
+		}
+
+		// 关闭弹窗
+		setAddDocumentModalVisible(false)
+		setAddDocumentData(null)
+
+		// 重新加载数据
+		loadSeeds()
+	}
+
+	// 处理添加文档取消
+	const handleAddDocumentCancel = () => {
+		setAddDocumentModalVisible(false)
+		setAddDocumentData(null)
 	}
 
 	const handleConfigUpdate = (updatedCollection: Collection) => {
@@ -607,6 +655,14 @@ const KnowledgeDetail = () => {
 				onClose={() => setConfigModalVisible(false)}
 				collection={collection}
 				onUpdate={handleConfigUpdate}
+			/>
+
+			{/* 添加文档模态窗 */}
+			<AddDocumentModal
+				visible={addDocumentModalVisible}
+				onClose={handleAddDocumentCancel}
+				onConfirm={handleAddDocumentConfirm}
+				data={addDocumentData}
 			/>
 		</div>
 	)
