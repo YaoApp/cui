@@ -52,10 +52,16 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 				updated_at: new Date().toISOString()
 			}
 
-			// TODO: 这里应该调用实际的更新API
-			// const response = await kb.UpdateCollection(collection.id, { metadata: updatedMetadata })
+			// 调用实际的更新API
+			const response = await kb.UpdateCollectionMetadata(collection.id, {
+				metadata: updatedMetadata
+			})
 
-			// 模拟API调用成功
+			if (response.error) {
+				throw new Error(response.error.error_description || (is_cn ? '更新失败' : 'Update failed'))
+			}
+
+			// API调用成功，更新本地状态
 			const updatedCollection: Collection = {
 				...collection,
 				metadata: updatedMetadata

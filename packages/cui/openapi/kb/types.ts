@@ -47,6 +47,10 @@ export interface GetCollectionsRequest {
 	filter?: Record<string, string>
 }
 
+export interface UpdateCollectionMetadataRequest {
+	metadata: Record<string, any>
+}
+
 // API response types
 export interface CreateCollectionResponse {
 	message: string
@@ -62,4 +66,9 @@ export interface RemoveCollectionResponse {
 export interface CollectionExistsResponse {
 	collection_id: string
 	exists: boolean
+}
+
+export interface UpdateCollectionMetadataResponse {
+	message: string
+	collection_id: string
 }

@@ -6,7 +6,9 @@ import {
 	CreateCollectionResponse,
 	RemoveCollectionResponse,
 	CollectionExistsResponse,
-	GetCollectionsRequest
+	GetCollectionsRequest,
+	UpdateCollectionMetadataRequest,
+	UpdateCollectionMetadataResponse
 } from './types'
 
 /**
@@ -48,5 +50,15 @@ export class KB {
 	async GetCollections(request?: GetCollectionsRequest): Promise<ApiResponse<Collection[]>> {
 		const params = request?.filter || {}
 		return this.api.Get<Collection[]>('/kb/collections', params)
+	}
+
+	/**
+	 * Update collection metadata
+	 */
+	async UpdateCollectionMetadata(
+		collectionID: string,
+		request: UpdateCollectionMetadataRequest
+	): Promise<ApiResponse<UpdateCollectionMetadataResponse>> {
+		return this.api.Put<UpdateCollectionMetadataResponse>(`/kb/collections/${collectionID}/metadata`, request)
 	}
 }
