@@ -5,10 +5,23 @@
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	background: var(--color_neo_bg_content);
+	background: transparent;
 	border-radius: 0;
 	overflow: hidden;
 	position: relative;
+	box-sizing: border-box;
+
+	// 最大化状态样式
+	&.maximized {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		z-index: 9999;
+		background: rgba(0, 0, 0, 0.9);
+		border-radius: 0;
+	}
 
 	// 开发阶段的调试样式
 	&.debug {
@@ -172,6 +185,337 @@
 			font-size: 32px;
 			margin-bottom: 8px;
 			color: var(--color_neo_icon_muted);
+		}
+	}
+
+	// 统一的内容区域 - 在这层处理滚动条
+	.content {
+		flex: 1;
+		min-height: 0;
+		overflow: auto;
+		box-sizing: border-box;
+
+		// 使用与系统一致的滚动条样式
+		&::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--color_text_grey);
+			}
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--color_border_soft);
+			border-radius: 3px;
+		}
+	}
+
+	// 工具栏样式 - 相对于 FileViewer 外层容器定位
+	.toolbar {
+		position: absolute;
+		bottom: 12px;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 1000;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		background: rgba(255, 255, 255, 0.95);
+		backdrop-filter: blur(8px);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 8px;
+		padding: 6px 10px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		opacity: 0.8;
+		transition: opacity 0.2s ease;
+		pointer-events: auto;
+
+		&:hover {
+			opacity: 1;
+		}
+
+		.languageTag {
+			color: var(--color_text);
+			font-size: 11px;
+			padding: 2px 6px;
+			border-radius: 4px;
+			background: var(--color_bg_hover);
+			margin-right: 2px;
+			font-weight: 500;
+		}
+
+		:global(.ant-btn) {
+			color: var(--color_text_light);
+			border: none;
+			background: transparent;
+			width: 24px;
+			height: 24px;
+			border-radius: 4px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 14px;
+			transition: all 0.2s ease;
+
+			&:hover {
+				background: var(--color_bg_hover);
+				color: var(--color_main);
+				transform: scale(1.1);
+			}
+
+			&:focus {
+				background: var(--color_bg_hover);
+				color: var(--color_main);
+			}
+
+			&:active {
+				transform: scale(0.95);
+			}
+		}
+	}
+
+	// 暗色主题下的工具栏样式
+	[data-theme='dark'] & {
+		.toolbar {
+			background: rgba(47, 47, 52, 0.9);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+
+			.languageTag {
+				background: var(--color_bg_hover);
+				color: var(--color_text);
+			}
+		}
+	}
+
+	// 音频容器样式
+	.audioContainer {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 20px;
+		padding: 40px 20px;
+		width: 100%;
+		max-width: 400px;
+
+		.audioIcon {
+			font-size: 48px;
+			color: var(--color_text_grey);
+		}
+
+		audio {
+			width: 100%;
+		}
+	}
+
+	// 文本内容样式
+	.loading {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		color: var(--color_text_grey);
+	}
+
+	.codeBlock {
+		margin: 0;
+		padding: 16px;
+		background: var(--color_bg_menu); // 与图片viewer背景一致
+		border: none;
+		font-size: 13px;
+		line-height: 1.5;
+		color: var(--color_text);
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		width: 100%;
+		min-height: 100%;
+		box-sizing: border-box;
+		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+		display: block;
+
+		code {
+			background: transparent;
+			padding: 0;
+			font-family: inherit;
+			font-size: inherit;
+			word-wrap: break-word;
+			display: block;
+		}
+
+		// 语法高亮样式
+		:global(.syntax-comment) {
+			color: #6a737d;
+			font-style: italic;
+		}
+
+		:global(.syntax-string) {
+			color: #032f62;
+		}
+
+		:global(.syntax-keyword) {
+			color: #d73a49;
+			font-weight: 600;
+		}
+
+		:global(.syntax-boolean) {
+			color: #005cc5;
+		}
+
+		:global(.syntax-number) {
+			color: #005cc5;
+		}
+
+		:global(.syntax-property) {
+			color: #6f42c1;
+		}
+
+		:global(.syntax-color) {
+			color: #e36209;
+		}
+
+		:global(.syntax-tag) {
+			color: #22863a;
+		}
+
+		:global(.syntax-attribute) {
+			color: #6f42c1;
+		}
+
+		:global(.syntax-heading) {
+			color: #24292e;
+			font-weight: 600;
+		}
+
+		:global(.syntax-bold) {
+			font-weight: 600;
+		}
+
+		:global(.syntax-italic) {
+			font-style: italic;
+		}
+
+		:global(.syntax-code) {
+			background: rgba(175, 184, 193, 0.2);
+			padding: 2px 4px;
+			border-radius: 3px;
+			font-family: inherit;
+		}
+
+		:global(.syntax-code-block) {
+			background: rgba(175, 184, 193, 0.2);
+			padding: 8px;
+			border-radius: 6px;
+			display: block;
+			margin: 8px 0;
+		}
+
+		:global(.syntax-list-marker) {
+			color: #d73a49;
+			font-weight: 600;
+		}
+	}
+
+	// 暗色主题下的语法高亮
+	[data-theme='dark'] & {
+		.codeBlock {
+			:global(.syntax-comment) {
+				color: #8b949e;
+			}
+
+			:global(.syntax-string) {
+				color: #a5d6ff;
+			}
+
+			:global(.syntax-keyword) {
+				color: #ff7b72;
+			}
+
+			:global(.syntax-boolean) {
+				color: #79c0ff;
+			}
+
+			:global(.syntax-number) {
+				color: #79c0ff;
+			}
+
+			:global(.syntax-property) {
+				color: #d2a8ff;
+			}
+
+			:global(.syntax-color) {
+				color: #ffa657;
+			}
+
+			:global(.syntax-tag) {
+				color: #7ee787;
+			}
+
+			:global(.syntax-attribute) {
+				color: #d2a8ff;
+			}
+
+			:global(.syntax-heading) {
+				color: #f0f6fc;
+			}
+
+			:global(.syntax-code) {
+				background: rgba(110, 118, 129, 0.4);
+			}
+
+			:global(.syntax-code-block) {
+				background: rgba(110, 118, 129, 0.4);
+			}
+
+			:global(.syntax-list-marker) {
+				color: #ff7b72;
+			}
+		}
+	}
+
+	// Unsupported viewer styles
+	.unsupportedContainer {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 40px 20px;
+		text-align: center;
+		gap: 20px;
+
+		.fileIcon {
+			font-size: 64px;
+			color: var(--color_text_grey);
+		}
+
+		.fileInfo {
+			.fileName {
+				font-size: 16px;
+				font-weight: 500;
+				color: var(--color_text);
+				margin-bottom: 4px;
+			}
+
+			.fileSize {
+				font-size: 14px;
+				color: var(--color_text_grey);
+				margin-bottom: 8px;
+			}
+
+			.unsupportedText {
+				font-size: 14px;
+				color: var(--color_text_light);
+			}
+		}
+
+		.actions {
+			margin-top: 16px;
 		}
 	}
 }

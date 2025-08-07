@@ -385,8 +385,8 @@
 			padding: 12px;
 			font-size: 13px;
 			color: var(--color_text_secondary);
-			max-height: 200px;
-			overflow-y: auto;
+			height: 200px; // 改为固定高度，让 FileViewer 内部处理滚动
+			overflow: hidden; // 防止双重滚动条
 		}
 	}
 }

@@ -3,6 +3,7 @@ import { getLocale } from '@umijs/max'
 import { Uploader } from '../../../components'
 import { SwapOutlined } from '@ant-design/icons'
 import { getFileTypeIcon } from '@/assets/icons'
+import FileViewer from '@/components/view/FileViewer'
 import styles from '../../index.less'
 
 interface FilePreviewProps {
@@ -63,9 +64,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ data, onFileChange }) => {
 			<div className={styles.fileContent}>
 				<div className={styles.contentLabel}>{is_cn ? '文件内容预览' : 'File Content Preview'}</div>
 				<div className={styles.contentPreview}>
-					{is_cn
-						? '文件内容将在处理后显示。支持的格式包括 PDF、Word、Excel、PowerPoint、文本文件等。'
-						: 'File content will be displayed after processing. Supported formats include PDF, Word, Excel, PowerPoint, text files, etc.'}
+					<FileViewer file={data.file} showMaximize={true} />
 				</div>
 			</div>
 		</div>

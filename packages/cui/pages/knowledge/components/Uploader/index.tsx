@@ -32,10 +32,11 @@ const Uploader: React.FC<UploaderProps> = ({
 		if (!kbConfig?.features) {
 			// 默认支持基础文件类型
 			return {
-				acceptTypes: '.txt,.md,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx',
+				acceptTypes:
+					'.txt,.md,.json,.js,.ts,.html,.css,.py,.java,.cpp,.go,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx',
 				formatHint: is_cn
-					? '支持 TXT、PDF、Word、Excel、PowerPoint 等格式'
-					: 'Support TXT, PDF, Word, Excel, PowerPoint and other formats'
+					? '支持文本、代码、PDF、Word、Excel、PowerPoint 等格式'
+					: 'Support text, code, PDF, Word, Excel, PowerPoint and other formats'
 			}
 		}
 
@@ -45,8 +46,47 @@ const Uploader: React.FC<UploaderProps> = ({
 
 		// 基础文本文件
 		if (features.PlainText) {
-			supportedTypes.push('.txt', '.md')
-			supportedNames.push(is_cn ? 'TXT' : 'TXT', is_cn ? 'Markdown' : 'Markdown')
+			supportedTypes.push(
+				'.txt',
+				'.md',
+				'.json',
+				'.xml',
+				'.csv',
+				'.log',
+				// 代码文件
+				'.js',
+				'.jsx',
+				'.ts',
+				'.tsx',
+				'.vue',
+				'.html',
+				'.css',
+				'.scss',
+				'.less',
+				'.py',
+				'.java',
+				'.cpp',
+				'.c',
+				'.h',
+				'.go',
+				'.rs',
+				'.php',
+				'.rb',
+				'.sh',
+				'.sql',
+				'.yaml',
+				'.yml',
+				'.toml',
+				'.ini',
+				'.conf',
+				'.env'
+			)
+			supportedNames.push(
+				is_cn ? '文本文件' : 'Text Files',
+				is_cn ? '代码文件' : 'Code Files',
+				is_cn ? 'JSON/XML' : 'JSON/XML',
+				is_cn ? '配置文件' : 'Config Files'
+			)
 		}
 
 		// PDF 处理
@@ -85,8 +125,8 @@ const Uploader: React.FC<UploaderProps> = ({
 
 		// 如果没有任何特性支持，使用默认配置
 		if (supportedTypes.length === 0) {
-			supportedTypes.push('.txt', '.md', '.pdf')
-			supportedNames.push('TXT', 'PDF')
+			supportedTypes.push('.txt', '.md', '.json', '.js', '.ts', '.html', '.css', '.py', '.pdf')
+			supportedNames.push(is_cn ? '文本文件' : 'Text Files', is_cn ? '代码文件' : 'Code Files', 'PDF')
 		}
 
 		const hint = is_cn
