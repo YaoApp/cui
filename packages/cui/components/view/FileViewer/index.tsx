@@ -14,6 +14,8 @@ import Video from './viewers/Video'
 import Audio from './viewers/Audio'
 import Text from './viewers/Text'
 import Pdf from './viewers/Pdf'
+import Docx from './viewers/Docx'
+
 import Unsupported from './viewers/Unsupported'
 
 interface IProps extends Component.PropsViewComponent {
@@ -95,6 +97,10 @@ const Index = (props: IProps) => {
 			if (contentType.startsWith('audio/')) return 'audio'
 			if (contentType.startsWith('text/')) return 'text'
 			if (contentType === 'application/pdf') return 'pdf'
+			if (contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+				return 'docx'
+			if (contentType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
+				return 'pptx'
 		}
 
 		const fileName = getFileName()
@@ -114,6 +120,10 @@ const Index = (props: IProps) => {
 
 		// PDF extensions
 		if (extension === 'pdf') return 'pdf'
+
+		// Office document extensions
+		if (extension === 'docx') return 'docx'
+		if (extension === 'pptx') return 'pptx'
 
 		// Text extensions
 		const textExts = [
@@ -229,6 +239,8 @@ const Index = (props: IProps) => {
 				return <Text {...viewerProps} language={getLanguage(fileName)} />
 			case 'pdf':
 				return <Pdf {...viewerProps} />
+			case 'docx':
+				return <Docx {...viewerProps} />
 			default:
 				return <Unsupported {...viewerProps} />
 		}

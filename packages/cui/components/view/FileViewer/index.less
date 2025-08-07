@@ -362,6 +362,87 @@
 		}
 	}
 
+	// DOCX 容器样式
+	.docxContainer {
+		width: 100%;
+		height: 100%;
+		background: var(--color_bg_menu);
+	}
+
+	.docxWrapper {
+		width: 100%;
+		height: 100%;
+		padding: 20px;
+		overflow: auto;
+		box-sizing: border-box;
+
+		// 使用与系统一致的滚动条样式
+		&::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--color_text_grey);
+			}
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--color_border_soft);
+			border-radius: 3px;
+		}
+	}
+
+	// DOCX 内容样式
+	:global(.docx-wrapper) {
+		font-family: var(--font_family);
+		line-height: 1.6;
+		color: var(--color_text);
+
+		p {
+			margin: 8px 0;
+		}
+
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6 {
+			color: var(--color_text_primary);
+			margin: 16px 0 8px 0;
+		}
+
+		table {
+			border-collapse: collapse;
+			width: 100%;
+			margin: 16px 0;
+
+			th,
+			td {
+				border: 1px solid var(--color_border);
+				padding: 8px;
+				text-align: left;
+			}
+
+			th {
+				background: var(--color_bg_hover);
+				font-weight: 600;
+			}
+		}
+	}
+
+	// 暗色主题下的Office文档样式
+	[data-theme='dark'] & {
+		.docxContainer {
+			background: var(--color_bg_menu);
+		}
+	}
+
 	// 音频容器样式
 	.audioContainer {
 		display: flex;
