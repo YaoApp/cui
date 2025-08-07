@@ -293,6 +293,75 @@
 		}
 	}
 
+	// PDF 容器样式
+	.pdfContainer {
+		width: 100%;
+		height: 100%;
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		background: var(--color_bg_menu);
+	}
+
+	.pdfViewer {
+		flex: 1;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+		background: #f5f5f5;
+
+		iframe {
+			display: block;
+		}
+	}
+
+	.pdfFallback {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		padding: 40px 20px;
+		text-align: center;
+		background: var(--color_bg_menu);
+	}
+
+	.pdfIcon {
+		font-size: 48px;
+		color: var(--color_text_secondary);
+		margin-bottom: 16px;
+	}
+
+	.pdfInfo {
+		max-width: 300px;
+	}
+
+	.pdfTitle {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--color_text_primary);
+		margin-bottom: 8px;
+		word-break: break-word;
+	}
+
+	.pdfMessage {
+		font-size: 14px;
+		color: var(--color_text_secondary);
+		line-height: 1.5;
+		margin-bottom: 16px;
+	}
+
+	// 暗色主题下的PDF样式
+	[data-theme='dark'] & {
+		.pdfViewer {
+			background: #2f2f34;
+		}
+
+		.pdfFallback {
+			background: var(--color_bg_menu);
+		}
+	}
+
 	// 音频容器样式
 	.audioContainer {
 		display: flex;

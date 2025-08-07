@@ -3,7 +3,7 @@ import { GetPreviewURL } from '@/components/edit/Upload/request/storages/utils'
 import { getToken } from '@/knife'
 import { useMemo, useState } from 'react'
 import { Button } from 'antd'
-import { FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons'
+import { FullscreenOutlined, FullscreenExitOutlined, DownloadOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import clsx from 'clsx'
 import styles from './index.less'
@@ -13,6 +13,7 @@ import Image from './viewers/Image'
 import Video from './viewers/Video'
 import Audio from './viewers/Audio'
 import Text from './viewers/Text'
+import Pdf from './viewers/Pdf'
 import Unsupported from './viewers/Unsupported'
 
 interface IProps extends Component.PropsViewComponent {
@@ -93,6 +94,7 @@ const Index = (props: IProps) => {
 			if (contentType.startsWith('video/')) return 'video'
 			if (contentType.startsWith('audio/')) return 'audio'
 			if (contentType.startsWith('text/')) return 'text'
+			if (contentType === 'application/pdf') return 'pdf'
 		}
 
 		const fileName = getFileName()
@@ -109,6 +111,9 @@ const Index = (props: IProps) => {
 		// Audio extensions
 		const audioExts = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a', 'wma']
 		if (audioExts.includes(extension)) return 'audio'
+
+		// PDF extensions
+		if (extension === 'pdf') return 'pdf'
 
 		// Text extensions
 		const textExts = [
@@ -222,6 +227,8 @@ const Index = (props: IProps) => {
 				return <Audio {...viewerProps} />
 			case 'text':
 				return <Text {...viewerProps} language={getLanguage(fileName)} />
+			case 'pdf':
+				return <Pdf {...viewerProps} />
 			default:
 				return <Unsupported {...viewerProps} />
 		}
@@ -237,6 +244,23 @@ const Index = (props: IProps) => {
 				<div className={styles.toolbar}>
 					{fileType === 'text' && (
 						<span className={styles.languageTag}>{getLanguage(fileName)}</span>
+					)}
+					{/* 统一的下载按钮 - 所有文件类型都支持 */}
+					{fileSource && fileName && (
+						<Button
+							type='text'
+							size='small'
+							icon={<DownloadOutlined />}
+							onClick={() => {
+								const link = document.createElement('a')
+								link.href = fileSource
+								link.download = fileName
+								document.body.appendChild(link)
+								link.click()
+								document.body.removeChild(link)
+							}}
+							title={is_cn ? '下载文件' : 'Download File'}
+						/>
 					)}
 					<Button
 						type='text'
