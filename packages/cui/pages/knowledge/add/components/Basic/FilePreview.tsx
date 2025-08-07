@@ -1,8 +1,8 @@
 import React from 'react'
 import { getLocale } from '@umijs/max'
-import Icon from '@/widgets/Icon'
 import { Uploader } from '../../../components'
 import { SwapOutlined } from '@ant-design/icons'
+import { getFileTypeIcon } from '@/assets/icons'
 import styles from '../../index.less'
 
 interface FilePreviewProps {
@@ -26,29 +26,6 @@ const FilePreview: React.FC<FilePreviewProps> = ({ data, onFileChange }) => {
 		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 	}
 
-	const getFileIcon = (fileName: string): string => {
-		const ext = fileName.split('.').pop()?.toLowerCase()
-		switch (ext) {
-			case 'pdf':
-				return 'material-picture_as_pdf'
-			case 'doc':
-			case 'docx':
-				return 'material-description'
-			case 'xls':
-			case 'xlsx':
-				return 'material-table_chart'
-			case 'ppt':
-			case 'pptx':
-				return 'material-slideshow'
-			case 'txt':
-				return 'material-text_snippet'
-			case 'md':
-				return 'material-article'
-			default:
-				return 'material-insert_drive_file'
-		}
-	}
-
 	// 处理文件更换
 	const handleFileReplace = (file: File) => {
 		if (onFileChange) {
@@ -61,7 +38,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ data, onFileChange }) => {
 		<div className={styles.filePreview}>
 			<div className={styles.fileInfo}>
 				<div className={styles.fileIcon}>
-					<Icon name={getFileIcon(data.name)} size={20} />
+					<img src={getFileTypeIcon(data.name)} alt='file icon' style={{ width: 32, height: 32 }} />
 				</div>
 				<div className={styles.fileDetails}>
 					<div className={styles.fileName}>{data.name}</div>
