@@ -1,0 +1,67 @@
+.uploadArea {
+	border: 2px dashed #d9d9d9;
+	border-radius: 8px;
+	background-color: #fafafa;
+	transition: all 0.3s ease;
+
+	&:hover {
+		border-color: #1890ff;
+		background-color: #f0f8ff;
+	}
+
+	.ant-upload-drag-icon {
+		margin-bottom: 16px;
+
+		.anticon {
+			font-size: 48px;
+			color: #1890ff;
+		}
+	}
+
+	.ant-upload-text {
+		margin-bottom: 8px;
+		font-size: 16px;
+		font-weight: 500;
+		color: rgba(0, 0, 0, 0.85);
+	}
+
+	.ant-upload-hint {
+		font-size: 14px;
+		color: rgba(0, 0, 0, 0.45);
+	}
+
+	// Dark mode adaptation
+	[data-theme='dark'] & {
+		border-color: #434343;
+		background-color: #1f1f1f;
+
+		&:hover {
+			border-color: #177ddc;
+			background-color: #111b26;
+		}
+
+		.ant-upload-text {
+			color: rgba(255, 255, 255, 0.85);
+		}
+
+		.ant-upload-hint {
+			color: rgba(255, 255, 255, 0.45);
+		}
+
+		.ant-upload-drag-icon .anticon {
+			color: #177ddc;
+		}
+	}
+}
+
+.formatHint {
+	margin-top: 8px;
+	font-size: 12px;
+	color: rgba(0, 0, 0, 0.45);
+	text-align: center;
+
+	// Dark mode adaptation
+	[data-theme='dark'] & {
+		color: rgba(255, 255, 255, 0.45);
+	}
+}

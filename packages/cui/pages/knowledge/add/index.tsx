@@ -34,6 +34,9 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 		defaultValue: 'basic'
 	})
 
+	// 当前编辑的数据（支持文件更换等操作）
+	const [currentData, setCurrentData] = useState<AddDocumentData | null>(data)
+
 	// 存储配置选项
 	const [options, setOptions] = useState<any>({
 		splitMode: 'auto',
@@ -42,7 +45,12 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 		// 更多配置项...
 	})
 
-	if (!data) return null
+	// 当传入的 data 变化时，更新 currentData
+	React.useEffect(() => {
+		setCurrentData(data)
+	}, [data])
+
+	if (!data || !currentData) return null
 
 	const tabs = [
 		{
@@ -65,18 +73,38 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 		setOptions({ ...options, ...newOptions })
 	}
 
+	const handleDataChange = (newData: AddDocumentData) => {
+		setCurrentData(newData)
+	}
+
 	const handleConfirm = () => {
-		onConfirm(data, options)
+		onConfirm(currentData, options)
 	}
 
 	const renderContent = () => {
 		switch (activeTab) {
 			case 'basic':
-				return <BasicTab data={data} options={options} onOptionsChange={handleOptionsChange} />
+				return (
+					<BasicTab
+						data={currentData}
+						options={options}
+						onOptionsChange={handleOptionsChange}
+						onDataChange={handleDataChange}
+					/>
+				)
 			case 'advanced':
-				return <AdvancedTab data={data} options={options} onOptionsChange={handleOptionsChange} />
+				return (
+					<AdvancedTab data={currentData} options={options} onOptionsChange={handleOptionsChange} />
+				)
 			default:
-				return <BasicTab data={data} options={options} onOptionsChange={handleOptionsChange} />
+				return (
+					<BasicTab
+						data={currentData}
+						options={options}
+						onOptionsChange={handleOptionsChange}
+						onDataChange={handleDataChange}
+					/>
+				)
 		}
 	}
 
@@ -86,7 +114,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 			text: is_cn ? '文本' : 'Text',
 			url: is_cn ? 'URL' : 'URL'
 		}
-		const typeLabel = typeLabels[data.type] || ''
+		const typeLabel = typeLabels[currentData.type] || ''
 		if (collectionName) {
 			return is_cn ? `添加${typeLabel}到「${collectionName}」` : `Add ${typeLabel} to "${collectionName}"`
 		}

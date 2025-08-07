@@ -1,6 +1,8 @@
 import React from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import { Uploader } from '../../../components'
+import { SwapOutlined } from '@ant-design/icons'
 import styles from '../../index.less'
 
 interface FilePreviewProps {
@@ -9,9 +11,10 @@ interface FilePreviewProps {
 		name: string
 		size: number
 	}
+	onFileChange?: (file: File) => void
 }
 
-const FilePreview: React.FC<FilePreviewProps> = ({ data }) => {
+const FilePreview: React.FC<FilePreviewProps> = ({ data, onFileChange }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -46,6 +49,14 @@ const FilePreview: React.FC<FilePreviewProps> = ({ data }) => {
 		}
 	}
 
+	// 处理文件更换
+	const handleFileReplace = (file: File) => {
+		if (onFileChange) {
+			onFileChange(file)
+		}
+		return false // 阻止默认上传行为
+	}
+
 	return (
 		<div className={styles.filePreview}>
 			<div className={styles.fileInfo}>
@@ -58,6 +69,18 @@ const FilePreview: React.FC<FilePreviewProps> = ({ data }) => {
 						{formatFileSize(data.size)} • {is_cn ? '已选择' : 'Selected'}
 					</div>
 				</div>
+				{onFileChange && (
+					<div className={styles.fileActions}>
+						<Uploader
+							mode='button'
+							buttonText={is_cn ? '更换文件' : 'Replace File'}
+							buttonIcon={<SwapOutlined />}
+							beforeUpload={handleFileReplace}
+							showUploadList={false}
+							showFormatHint={false}
+						/>
+					</div>
+				)}
 			</div>
 
 			<div className={styles.fileContent}>

@@ -12,9 +12,10 @@ interface BasicTabProps {
 	data: AddDocumentData
 	options: any
 	onOptionsChange: (options: any) => void
+	onDataChange?: (data: AddDocumentData) => void
 }
 
-const BasicTab: React.FC<BasicTabProps> = ({ data, options, onOptionsChange }) => {
+const BasicTab: React.FC<BasicTabProps> = ({ data, options, onOptionsChange, onDataChange }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -39,7 +40,7 @@ const BasicTab: React.FC<BasicTabProps> = ({ data, options, onOptionsChange }) =
 	const renderPreview = () => {
 		switch (data.type) {
 			case 'file':
-				return <FilePreview data={data.content} />
+				return <FilePreview data={data.content} onFileChange={handleFileChange} />
 			case 'text':
 				return <TextPreview data={data.content} />
 			case 'url':
@@ -63,6 +64,21 @@ const BasicTab: React.FC<BasicTabProps> = ({ data, options, onOptionsChange }) =
 
 	const handleAutoIndexChange = (checked: boolean) => {
 		onOptionsChange({ autoIndex: checked })
+	}
+
+	// 处理文件更换
+	const handleFileChange = (file: File) => {
+		if (onDataChange && data.type === 'file') {
+			const newData: AddDocumentData = {
+				...data,
+				content: {
+					file,
+					name: file.name,
+					size: file.size
+				}
+			}
+			onDataChange(newData)
+		}
 	}
 
 	return (

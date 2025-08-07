@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, history, getLocale } from '@umijs/max'
-import { Spin, Button, message, Input, Upload, Empty, Badge, Select, Tooltip } from 'antd'
+import { Spin, Button, message, Input, Empty, Badge, Select, Tooltip } from 'antd'
 import {
 	ArrowLeftOutlined,
 	UploadOutlined,
@@ -9,11 +9,12 @@ import {
 	SearchOutlined,
 	SettingOutlined
 } from '@ant-design/icons'
-import type { UploadProps } from 'antd'
+
 import Icon from '@/widgets/Icon'
 import DocumentModal from '../document'
 import CollectionConfigModal from '../config'
 import AddDocumentModal, { AddDocumentData } from '../add'
+import { Uploader } from '../components'
 import styles from './index.less'
 import { useGlobal } from '@/context/app'
 import { toJS } from 'mobx'
@@ -199,25 +200,20 @@ const KnowledgeDetail = () => {
 		}
 	}, [id])
 
-	// 上传文件
-	const uploadProps: UploadProps = {
-		name: 'file',
-		multiple: false,
-		showUploadList: false,
-		beforeUpload: (file) => {
-			// 不执行实际上传，而是打开添加弹窗
-			const documentData: AddDocumentData = {
-				type: 'file',
-				content: {
-					file,
-					name: file.name,
-					size: file.size
-				}
+	// 上传文件处理
+	const handleFileUpload = (file: File) => {
+		// 不执行实际上传，而是打开添加弹窗
+		const documentData: AddDocumentData = {
+			type: 'file',
+			content: {
+				file,
+				name: file.name,
+				size: file.size
 			}
-			setAddDocumentData(documentData)
-			setAddDocumentModalVisible(true)
-			return false // 阻止默认上传行为
 		}
+		setAddDocumentData(documentData)
+		setAddDocumentModalVisible(true)
+		return false // 阻止默认上传行为
 	}
 
 	// 添加文本
@@ -405,21 +401,14 @@ const KnowledgeDetail = () => {
 				{/* 文件上传区域 */}
 				<div className={styles.fileInputArea}>
 					<div className={styles.inputContent}>
-						<Upload.Dragger {...uploadProps} className={styles.uploadArea}>
-							<p className='ant-upload-drag-icon'>
-								<UploadOutlined />
-							</p>
-							<p className='ant-upload-text'>
-								{is_cn
-									? '上传文件 - 点击或拖拽文件到此区域上传'
-									: 'Upload File - Click or drag file to this area to upload'}
-							</p>
-							<p className='ant-upload-hint'>
-								{is_cn
-									? '支持 PDF、Word、Excel、TXT 等格式'
-									: 'Support PDF, Word, Excel, TXT and other formats'}
-							</p>
-						</Upload.Dragger>
+						<Uploader
+							mode='dragger'
+							name='file'
+							multiple={false}
+							showUploadList={false}
+							beforeUpload={handleFileUpload}
+							className={styles.uploadArea}
+						/>
 					</div>
 				</div>
 

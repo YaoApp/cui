@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from './CollectionCover.less'
+import styles from './index.less'
 
 interface CollectionCoverProps {
 	cover?: string
@@ -12,11 +12,7 @@ const CollectionCover: React.FC<CollectionCoverProps> = ({ cover, name, descript
 	if (cover) {
 		return (
 			<div className={`${styles.coverContainer} ${className || ''}`}>
-				<img
-					src={cover}
-					alt={name || 'Collection'}
-					className={styles.coverImage}
-				/>
+				<img src={cover} alt={name || 'Collection'} className={styles.coverImage} />
 			</div>
 		)
 	}
@@ -24,9 +20,7 @@ const CollectionCover: React.FC<CollectionCoverProps> = ({ cover, name, descript
 	// Fallback: show description with dark background
 	return (
 		<div className={`${styles.coverContainer} ${styles.nameCover} ${className || ''}`}>
-			<div className={styles.nameText}>
-				{description || name || 'No description'}
-			</div>
+			<div className={styles.nameText}>{description || name || 'No description'}</div>
 		</div>
 	)
 }
