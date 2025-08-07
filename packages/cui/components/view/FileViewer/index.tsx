@@ -15,6 +15,7 @@ import Audio from './viewers/Audio'
 import Text from './viewers/Text'
 import Pdf from './viewers/Pdf'
 import Docx from './viewers/Docx'
+import Pptx from './viewers/Pptx'
 
 import Unsupported from './viewers/Unsupported'
 
@@ -241,6 +242,8 @@ const Index = (props: IProps) => {
 				return <Pdf {...viewerProps} />
 			case 'docx':
 				return <Docx {...viewerProps} />
+			case 'pptx':
+				return <Pptx {...viewerProps} />
 			default:
 				return <Unsupported {...viewerProps} />
 		}
