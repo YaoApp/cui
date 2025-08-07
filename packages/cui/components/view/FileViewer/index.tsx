@@ -1,7 +1,7 @@
 import type { Component } from '@/types'
 import { GetPreviewURL } from '@/components/edit/Upload/request/storages/utils'
 import { getToken } from '@/knife'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from 'antd'
 import { FullscreenOutlined, FullscreenExitOutlined, DownloadOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
@@ -170,6 +170,24 @@ const Index = (props: IProps) => {
 	const handleMaximize = () => {
 		setMaximized(!maximized)
 	}
+
+	// When maximized, handle Escape to exit maximize and prevent modal close
+	useEffect(() => {
+		if (!maximized) return
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === 'Escape' || event.code === 'Escape') {
+				event.preventDefault()
+				event.stopPropagation()
+				setMaximized(false)
+			}
+		}
+
+		window.addEventListener('keydown', handleKeyDown, true)
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown, true)
+		}
+	}, [maximized])
 
 	// Return empty state if no file
 	if (!fileSource && !file) {
