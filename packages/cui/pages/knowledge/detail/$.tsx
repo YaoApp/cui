@@ -121,7 +121,6 @@ const KnowledgeDetail = () => {
 	const [urlInput, setUrlInput] = useState('')
 	const [searchText, setSearchText] = useState('')
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
-	const [splitMode, setSplitMode] = useState<'fixed' | 'smart'>('smart')
 
 	// 模态窗状态
 	const [modalVisible, setModalVisible] = useState(false)
@@ -141,29 +140,6 @@ const KnowledgeDetail = () => {
 		{ key: 'operations', label: is_cn ? '运营' : 'operations' },
 		{ key: 'compliance', label: is_cn ? '合规' : 'compliance' }
 	]
-
-	// 分段模式选项
-	const splitModeOptions = [
-		{
-			value: 'fixed',
-			label: is_cn ? '固定长度' : 'Fixed Length',
-			description: is_cn
-				? '按固定长度分割，快速处理，但可能会打破语义段落完整性'
-				: 'Split by fixed length, fast processing, but may break semantic paragraph integrity'
-		},
-		{
-			value: 'smart',
-			label: is_cn ? '智能分割' : 'Smart Split',
-			description: is_cn
-				? '按语义分割内容，借助LLM智能分析，保持语义完整性，但处理速度较慢'
-				: 'Split content by semantics, using LLM intelligent analysis, maintains semantic integrity, but slower processing'
-		}
-	]
-
-	// 获取当前模式的描述
-	const getCurrentModeDescription = () => {
-		return splitModeOptions.find((option) => option.value === splitMode)?.description || ''
-	}
 
 	// 获取文件类型图标
 	const getTypeIcon = (type: string): string => {
@@ -501,21 +477,8 @@ const KnowledgeDetail = () => {
 					</div>
 				</div>
 
-				{/* 分段模式选择 */}
-				<div className={styles.modeToggle}>
-					<span className={styles.modeLabel}>{is_cn ? '分段模式:' : 'Split Mode:'}</span>
-					<Select
-						value={splitMode}
-						onChange={setSplitMode}
-						className={styles.modeSelector}
-						size='small'
-						options={splitModeOptions.map((option) => ({
-							value: option.value,
-							label: option.label
-						}))}
-					/>
-					<span className={styles.modeDesc}>{getCurrentModeDescription()}</span>
-				</div>
+				{/* 分割线 */}
+				<div className={styles.divider}></div>
 			</div>
 
 			{/* 搜索和标签过滤区域 */}
@@ -663,6 +626,7 @@ const KnowledgeDetail = () => {
 				onClose={handleAddDocumentCancel}
 				onConfirm={handleAddDocumentConfirm}
 				data={addDocumentData}
+				collectionName={collection?.metadata?.name}
 			/>
 		</div>
 	)

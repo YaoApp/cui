@@ -143,31 +143,12 @@
 		}
 	}
 
-	/* 分段模式选择 - 跨越三列 */
-	.modeToggle {
+	/* 分割线 - 跨越三列 */
+	.divider {
 		grid-column: 1 / -1;
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		font-size: 12px;
-		margin-top: 4px;
-
-		.modeLabel {
-			color: var(--color_neo_text_primary);
-			font-weight: 600;
-		}
-
-		.modeSelector {
-			min-width: 120px;
-			font-size: 12px;
-		}
-
-		.modeDesc {
-			color: var(--color_neo_text_secondary);
-			font-size: 10px;
-			margin-left: 8px;
-			flex: 1;
-		}
+		height: 1px;
+		background: var(--color_border_light);
+		margin: 16px 0 8px 0;
 	}
 
 	.textInputArea {

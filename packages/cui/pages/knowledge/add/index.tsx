@@ -20,11 +20,12 @@ interface AddDocumentModalProps {
 	onClose: () => void
 	onConfirm: (data: AddDocumentData, options: any) => void
 	data: AddDocumentData | null
+	collectionName?: string
 }
 
 type TabType = 'basic' | 'advanced'
 
-const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, onConfirm, data }) => {
+const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, onConfirm, data, collectionName }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -86,6 +87,9 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 			url: is_cn ? 'URL' : 'URL'
 		}
 		const typeLabel = typeLabels[data.type] || ''
+		if (collectionName) {
+			return is_cn ? `添加${typeLabel}到「${collectionName}」` : `Add ${typeLabel} to "${collectionName}"`
+		}
 		return is_cn ? `添加${typeLabel}到知识库` : `Add ${typeLabel} to Knowledge Base`
 	}
 
