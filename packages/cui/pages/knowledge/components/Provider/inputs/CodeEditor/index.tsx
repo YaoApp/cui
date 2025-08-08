@@ -1,14 +1,8 @@
 import React from 'react'
-import { PropertySchema, PropertyValue } from '../../types'
-
-interface Props {
-	schema: PropertySchema
-	value: PropertyValue
-	onChange: (v: PropertyValue) => void
-}
+import { InputComponentProps } from '../../types'
 
 // Minimal placeholder using textarea; can be replaced with Monaco/Ace.
-export default function CodeEditor({ value, onChange }: Props) {
+export default function CodeEditor({ value, onChange }: InputComponentProps) {
 	return (
 		<textarea
 			value={typeof value === 'string' ? value : ''}

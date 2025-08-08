@@ -19,6 +19,28 @@ export interface EnumOption {
 }
 
 /**
+ * OptionGroup represents a group of related options with a group label.
+ */
+export interface OptionGroup {
+	/** Group label displayed as section header */
+	groupLabel: string
+	/** Array of options within this group */
+	options: EnumOption[]
+}
+
+/**
+ * Common props interface for all input components
+ */
+export interface InputComponentProps {
+	/** The property schema definition */
+	schema: PropertySchema
+	/** Current field value */
+	value: PropertyValue
+	/** Value change handler */
+	onChange: (v: PropertyValue) => void
+}
+
+/**
  * A selectable preset (option) for a provider (e.g., a chunking or embedding preset).
  * The `properties` payload contains the runtime values that map to the provider's schema fields.
  */
@@ -65,8 +87,8 @@ export interface PropertySchema {
 	description?: string
 	/** Default value applied when undefined */
 	default?: unknown
-	/** Enumerated options for select-like inputs */
-	enum?: EnumOption[]
+	/** Enumerated options for select-like inputs (can be flat options or grouped options) */
+	enum?: (EnumOption | OptionGroup)[]
 
 	// Validation
 	/** Whether the field is required */

@@ -1,13 +1,7 @@
 import React from 'react'
-import { PropertySchema, PropertyValue } from '../../types'
+import { InputComponentProps } from '../../types'
 
-interface Props {
-	schema: PropertySchema
-	value: PropertyValue
-	onChange: (v: PropertyValue) => void
-}
-
-export default function Switch({ value, onChange }: Props) {
+export default function Switch({ value, onChange }: InputComponentProps) {
 	const checked = Boolean(value)
 	return <input type='checkbox' checked={checked} onChange={(e) => onChange(e.target.checked)} />
 }

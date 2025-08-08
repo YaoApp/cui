@@ -1,13 +1,7 @@
 import React from 'react'
-import { PropertySchema, PropertyValue } from '../../types'
+import { InputComponentProps } from '../../types'
 
-interface Props {
-	schema: PropertySchema
-	value: PropertyValue
-	onChange: (v: PropertyValue) => void
-}
-
-export default function TextArea({ value, onChange }: Props) {
+export default function TextArea({ value, onChange }: InputComponentProps) {
 	return (
 		<textarea
 			value={typeof value === 'string' ? value : ''}

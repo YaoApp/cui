@@ -303,7 +303,7 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 		onValueChange: (v: PropertyValue) => void
 	) => {
 		const Comp = ps.component ? componentMap[ps.component] : TextInput
-		return <Comp schema={ps} value={val} onChange={onValueChange} options={ps.enum} />
+		return <Comp schema={ps} value={val} onChange={onValueChange} />
 	}
 
 	const renderChildField = (childKey: string, childPs: PropertySchema, parentKey: string) => {
@@ -334,19 +334,16 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 					</div>
 					<div className={styles.selectorControl}>
 						<SelectInput
-							schema={
-								{
-									type: 'string',
-									title: 'Provider',
-									enum: summaries.map((s) => ({
-										label: s.title || s.id,
-										value: s.id
-									}))
-								} as any
-							}
+							schema={{
+								type: 'string',
+								title: 'Provider',
+								enum: summaries.map((s) => ({
+									label: s.title || s.id,
+									value: s.id
+								}))
+							}}
 							value={selectedId || ''}
 							onChange={(id: any) => setSelectedId(String(id))}
-							options={summaries.map((s) => ({ label: s.title || s.id, value: s.id }))}
 						/>
 					</div>
 				</div>

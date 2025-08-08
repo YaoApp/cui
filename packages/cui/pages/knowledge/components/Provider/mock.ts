@@ -214,9 +214,37 @@ const semanticSchema: ProviderSchema = {
 					default: '',
 					component: 'Select',
 					enum: [
-						{ label: 'OpenAI GPT-4o Mini', value: 'openai.gpt-4o-mini' },
-						{ label: 'OpenAI GPT-4o', value: 'openai.gpt-4o' },
-						{ label: 'Deepseek V3', value: 'deepseek.v3' }
+						{
+							groupLabel: 'OpenAI Models',
+							options: [
+								{
+									label: 'GPT-4o Mini',
+									value: 'openai.gpt-4o-mini',
+									description: 'Fast and cost-effective, best for most use cases',
+									default: true
+								},
+								{
+									label: 'GPT-4o',
+									value: 'openai.gpt-4o',
+									description: 'Highest quality AI splitting for complex documents'
+								}
+							]
+						},
+						{
+							groupLabel: 'Alternative Models',
+							options: [
+								{
+									label: 'Deepseek V3',
+									value: 'deepseek.v3',
+									description: 'Cost-effective alternative with good performance'
+								},
+								{
+									label: 'Claude 3.5 Sonnet',
+									value: 'anthropic.claude-3-5-sonnet',
+									description: 'Excellent reasoning and context understanding'
+								}
+							]
+						}
 					],
 					width: 'half',
 					order: 1
