@@ -277,9 +277,12 @@ const Index = (props: IProps) => {
 			{/* 统一的工具栏 - 根据条件显示 */}
 			{showMaximize && fileType !== 'unsupported' && (
 				<div className={styles.toolbar}>
-					{fileType === 'text' && (
-						<span className={styles.languageTag}>{getLanguage(fileName)}</span>
-					)}
+					{/* 显示语言/扩展名标签，保持统一风格 */}
+					<span className={styles.languageTag}>
+						{fileType === 'text'
+							? getLanguage(fileName)
+							: getFileExtension(fileName) || fileType}
+					</span>
 					{/* 统一的下载按钮 - 所有文件类型都支持 */}
 					{fileSource && fileName && (
 						<Button
