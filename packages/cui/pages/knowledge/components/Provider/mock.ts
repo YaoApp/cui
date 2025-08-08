@@ -624,6 +624,40 @@ const testSchema: ProviderSchema = {
 			order: 12
 		},
 
+		// CheckboxGroup 组件 - 多选
+		features: {
+			type: 'array',
+			title: 'Enabled Features',
+			description: 'Select multiple features to enable.',
+			default: ['caching', 'logging'],
+			component: 'CheckboxGroup',
+			enum: [
+				{ label: 'Caching', value: 'caching', description: 'Enable result caching' },
+				{ label: 'Logging', value: 'logging', description: 'Enable detailed logging' },
+				{ label: 'Monitoring', value: 'monitoring', description: 'Enable performance monitoring' },
+				{ label: 'Auto Retry', value: 'retry', description: 'Automatically retry failed requests' }
+			],
+			width: 'full',
+			order: 12.5
+		},
+
+		// RadioGroup 组件 - 单选
+		priority_level: {
+			type: 'string',
+			title: 'Priority Level',
+			description: 'Select processing priority level.',
+			default: 'normal',
+			component: 'RadioGroup',
+			enum: [
+				{ label: 'Low', value: 'low', description: 'Background processing' },
+				{ label: 'Normal', value: 'normal', description: 'Standard processing speed' },
+				{ label: 'High', value: 'high', description: 'Faster processing with more resources' },
+				{ label: 'Critical', value: 'critical', description: 'Highest priority processing' }
+			],
+			width: 'half',
+			order: 12.7
+		},
+
 		// Nested Object 组件
 		advanced_settings: {
 			type: 'object',

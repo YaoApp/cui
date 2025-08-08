@@ -14,7 +14,7 @@ export default function InputPassword({ schema, value, onChange }: InputComponen
 	}
 
 	return (
-		<div className={styles.passwordContainer}>
+		<div className={styles.passwordContainer} data-1p-ignore data-lpignore data-form-type='other'>
 			<input
 				className={styles.passwordInput}
 				type={showPassword ? 'text' : 'password'}
@@ -25,6 +25,8 @@ export default function InputPassword({ schema, value, onChange }: InputComponen
 				readOnly={schema.readOnly}
 				minLength={schema.minLength}
 				maxLength={schema.maxLength}
+				autoComplete='new-password'
+				data-form-type='other'
 			/>
 			<button
 				type='button'

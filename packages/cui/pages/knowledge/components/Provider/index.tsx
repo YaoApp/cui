@@ -18,6 +18,8 @@ import ToggleSwitch from './inputs/Switch/index'
 import SelectInput from './inputs/Select/index'
 import TextAreaInput from './inputs/TextArea/index'
 import CodeEditorInput from './inputs/CodeEditor/index'
+import CheckboxGroupInput from './inputs/CheckboxGroup/index'
+import RadioGroupInput from './inputs/RadioGroup/index'
 import NestedContainer from './inputs/Nested/index'
 import ItemsContainer from './inputs/Items/index'
 
@@ -39,8 +41,8 @@ const componentMap: Record<InputComponent, React.ComponentType<any>> = {
 	InputNumber: NumberInput,
 	InputPassword: PasswordInput,
 	Switch: ToggleSwitch,
-	CheckboxGroup: SelectInput, // placeholder
-	RadioGroup: SelectInput, // placeholder
+	CheckboxGroup: CheckboxGroupInput,
+	RadioGroup: RadioGroupInput,
 	Slider: NumberInput, // placeholder
 	Group: NestedContainer, // placeholder
 	Select: SelectInput,
@@ -274,7 +276,11 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 		}
 
 		// Primitive field
-		const isTextArea = ps.component === 'TextArea' || ps.component === 'CodeEditor'
+		const isTextArea =
+			ps.component === 'TextArea' ||
+			ps.component === 'CodeEditor' ||
+			ps.component === 'CheckboxGroup' ||
+			ps.component === 'RadioGroup'
 		const fieldClass = isTextArea ? `${styles.configField} ${styles.fullWidth}` : styles.configField
 		const isRequired = parentSchema?.required?.includes(name) || false
 
