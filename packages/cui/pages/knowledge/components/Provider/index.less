@@ -1,0 +1,452 @@
+.providerConfigurator {
+	.providerContainer {
+		background: var(--color_bg_light);
+		border: 1px solid var(--color_border_light);
+		border-radius: 8px;
+		padding: 16px;
+
+		.providerSelector {
+			display: grid;
+			grid-template-columns: 1fr 220px;
+			gap: 12px;
+			align-items: center;
+			padding: 0 0 12px 0;
+			border-bottom: 1px solid var(--color_border_light);
+			margin-bottom: 20px;
+
+			.selectorLabel {
+				display: flex;
+				flex-direction: column;
+
+				.labelName {
+					font-size: 14px;
+					font-weight: 500;
+					color: var(--color_text_primary);
+					margin-bottom: 4px;
+				}
+
+				.labelDescription {
+					font-size: 12px;
+					color: var(--color_text_secondary);
+				}
+			}
+
+			.selectorControl {
+				flex-shrink: 0;
+				display: flex;
+				justify-content: flex-end;
+
+				select {
+					width: 220px;
+					cursor: pointer;
+				}
+			}
+		}
+	}
+
+	.configForm {
+		padding-left: 16px; // Add indentation for hierarchy
+
+		.configField {
+			display: grid;
+			grid-template-columns: 1fr 220px; // Right side fixed width, left side flexible
+			gap: 12px;
+			align-items: center;
+			padding: 8px 0; // Consistent spacing
+			border-bottom: 1px solid var(--color_border_soft);
+			min-height: 40px; // Ensure consistent row height
+
+			// Special layout for text areas and code editors
+			&.fullWidth {
+				grid-template-columns: 1fr;
+				grid-template-rows: auto auto;
+				align-items: start;
+				gap: 8px;
+
+				.fieldLabel {
+					grid-row: 1;
+				}
+
+				.fieldControl {
+					grid-row: 2;
+					justify-content: stretch;
+
+					textarea,
+					.codeEditor {
+						width: 100%;
+						min-height: 120px;
+					}
+				}
+			}
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			.fieldLabel {
+				display: flex;
+				flex-direction: column;
+
+				.labelName {
+					font-size: 13px; // Smaller than main selector
+					font-weight: 500;
+					color: var(--color_text_primary);
+					margin-bottom: 3px;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+
+				.labelDescription {
+					font-size: 11px; // Smaller description
+					color: var(--color_text_secondary);
+					line-height: 1.4;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+			}
+
+			.fieldControl {
+				flex-shrink: 0;
+				display: flex;
+				justify-content: flex-end;
+
+				input,
+				select,
+				textarea {
+					width: 100%;
+					padding: 8px 12px;
+					border: 1px solid var(--color_border);
+					border-radius: 6px;
+					font-size: 13px;
+					color: var(--color_text);
+					background-color: var(--color_bg_white);
+					transition: all 0.2s ease;
+
+					&:focus {
+						outline: none;
+						border-color: var(--color_main);
+						box-shadow: 0 0 0 2px var(--color_main_light);
+					}
+
+					&:hover {
+						border-color: var(--color_main_light);
+					}
+
+					&[type='number'] {
+						width: 160px;
+					}
+
+					&[type='checkbox'] {
+						width: auto;
+						margin: 0;
+					}
+				}
+
+				select {
+					width: 220px;
+					cursor: pointer;
+				}
+
+				textarea {
+					resize: vertical;
+					font-family: inherit;
+
+					&.codeEditor {
+						font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+						font-size: 12px;
+						line-height: 1.4;
+					}
+				}
+			}
+		}
+
+		.nestedField {
+			padding: 10px 0;
+			border-bottom: 1px solid var(--color_border_soft);
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			.nestedTitle {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color_text_primary);
+				margin-bottom: 4px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.nestedDescription {
+				font-size: 11px;
+				color: var(--color_text_secondary);
+				margin-bottom: 12px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.nestedContainer {
+				margin-left: 24px; // Simple indentation for nested fields
+
+				.nestedForm {
+					display: grid;
+					gap: 8px; // Tighter spacing for nested items
+
+					.nestedFieldRow {
+						display: grid;
+						grid-template-columns: 1fr 220px; // Same width as main fields
+						gap: 12px;
+						align-items: center;
+						padding: 8px 0;
+						min-height: 40px; // Same height as main fields
+						border-bottom: 1px solid var(--color_border_soft);
+
+						// Special layout for text areas and code editors in nested fields
+						&.fullWidth {
+							grid-template-columns: 1fr;
+							grid-template-rows: auto auto;
+							align-items: start;
+							gap: 8px;
+
+							.nestedFieldLabel {
+								grid-row: 1;
+							}
+
+							.nestedFieldControl {
+								grid-row: 2;
+								justify-content: stretch;
+
+								textarea,
+								.codeEditor {
+									width: 100%;
+									min-height: 120px;
+								}
+							}
+						}
+
+						&:last-child {
+							border-bottom: none;
+						}
+
+						.nestedFieldLabel {
+							display: flex;
+							flex-direction: column;
+
+							.labelName {
+								font-size: 13px; // Same as main fields
+								font-weight: 500;
+								color: var(--color_text_primary);
+								margin-bottom: 3px; // Same as main fields
+								white-space: nowrap;
+								overflow: hidden;
+								text-overflow: ellipsis;
+							}
+
+							.labelDescription {
+								font-size: 11px; // Same as main fields
+								color: var(--color_text_secondary);
+								line-height: 1.4; // Same as main fields
+								white-space: nowrap;
+								overflow: hidden;
+								text-overflow: ellipsis;
+							}
+						}
+
+						.nestedFieldControl {
+							display: flex;
+							justify-content: flex-end;
+
+							input,
+							select,
+							textarea {
+								width: 100%;
+								padding: 8px 12px; // Same as main fields
+								border: 1px solid var(--color_border);
+								border-radius: 6px;
+								font-size: 13px; // Same as main fields
+								color: var(--color_text);
+								background-color: var(--color_bg_white);
+								transition: all 0.2s ease;
+
+								&:focus {
+									outline: none;
+									border-color: var(--color_main);
+									box-shadow: 0 0 0 2px var(--color_main_light);
+								}
+
+								&:hover {
+									border-color: var(--color_main_light);
+								}
+
+								&[type='number'] {
+									width: 160px;
+								}
+
+								&[type='checkbox'] {
+									width: auto;
+									margin: 0;
+								}
+							}
+
+							select {
+								width: 220px;
+								cursor: pointer;
+							}
+
+							textarea {
+								resize: vertical;
+								font-family: inherit;
+
+								&.codeEditor {
+									font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+									font-size: 12px;
+									line-height: 1.4;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		.arrayField {
+			grid-column: 1 / -1;
+
+			.arrayTitle {
+				font-size: 14px;
+				font-weight: 500;
+				color: var(--color_text_primary);
+				margin-bottom: 6px;
+			}
+
+			.arrayDescription {
+				font-size: 12px;
+				color: var(--color_text_secondary);
+				margin-bottom: 12px;
+			}
+
+			.arrayContainer {
+				border: 1px solid var(--color_border_light);
+				border-radius: 8px;
+				padding: 16px;
+				background-color: var(--color_bg_light);
+
+				.arrayItems {
+					display: grid;
+					gap: 12px;
+					margin-bottom: 12px;
+
+					.arrayItem {
+						display: grid;
+						grid-template-columns: 200px 1fr auto;
+						gap: 12px;
+						align-items: start;
+						padding: 12px;
+						border: 1px solid var(--color_border);
+						border-radius: 6px;
+						background-color: var(--color_bg_white);
+
+						.arrayItemLabel {
+							display: flex;
+							flex-direction: column;
+
+							.labelName {
+								font-size: 13px;
+								font-weight: 500;
+								color: var(--color_text_primary);
+								margin-bottom: 2px;
+							}
+
+							.labelDescription {
+								font-size: 11px;
+								color: var(--color_text_secondary);
+							}
+						}
+
+						.arrayItemControl {
+							input,
+							select,
+							textarea {
+								font-size: 12px;
+								padding: 6px 10px;
+							}
+						}
+
+						.arrayItemActions {
+							display: flex;
+							align-items: center;
+
+							.removeButton {
+								padding: 4px 8px;
+								border: 1px solid var(--color_border);
+								border-radius: 4px;
+								background-color: var(--color_bg_white);
+								color: var(--color_text_secondary);
+								font-size: 12px;
+								cursor: pointer;
+								transition: all 0.2s ease;
+
+								&:hover {
+									background-color: var(--color_bg_hover);
+									color: var(--color_text);
+									border-color: var(--color_main_light);
+								}
+
+								&:active {
+									background-color: var(--color_bg_active);
+								}
+							}
+						}
+					}
+				}
+
+				.arrayActions {
+					display: flex;
+					justify-content: flex-start;
+
+					.addButton {
+						padding: 6px 12px;
+						border: 1px dashed var(--color_border);
+						border-radius: 6px;
+						background-color: transparent;
+						color: var(--color_main);
+						font-size: 12px;
+						cursor: pointer;
+						transition: all 0.2s ease;
+
+						&:hover {
+							background-color: var(--color_main_light);
+							border-color: var(--color_main);
+						}
+
+						&:active {
+							background-color: var(--color_main);
+							color: var(--color_bg_white);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.loadingState {
+		padding: 20px;
+		text-align: center;
+		color: var(--color_text_secondary);
+		font-size: 13px;
+	}
+
+	.emptyState {
+		padding: 20px;
+		text-align: center;
+		color: var(--color_text_secondary);
+		font-size: 13px;
+		border: 1px dashed var(--color_border);
+		border-radius: 8px;
+		background-color: var(--color_bg_light);
+	}
+}
