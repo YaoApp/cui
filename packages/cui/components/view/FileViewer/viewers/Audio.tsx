@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react'
-import { SoundOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import styles from '../index.less'
 
@@ -22,9 +21,6 @@ const AudioComponent: React.FC<AudioProps> = ({ src, file, contentType, fileName
 
 	return (
 		<div className={styles.audioContainer}>
-			<div className={styles.audioIcon}>
-				<SoundOutlined />
-			</div>
 			<audio src={fileSource} controls style={{ width: '100%' }} preload='metadata'>
 				{is_cn ? '您的浏览器不支持音频播放' : 'Your browser does not support audio playback'}
 			</audio>

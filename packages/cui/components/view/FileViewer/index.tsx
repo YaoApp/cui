@@ -135,6 +135,7 @@ const Index = (props: IProps) => {
 			'cfg',
 			'csv',
 			'json',
+			'jsonc',
 			'yaml',
 			'yml',
 			'xml',
@@ -223,12 +224,13 @@ const Index = (props: IProps) => {
 			html: 'html',
 			xml: 'xml',
 			json: 'json',
+			jsonc: 'jsonc',
+			yao: 'yao',
 			yaml: 'yaml',
 			yml: 'yaml',
 			md: 'markdown',
 			txt: 'text',
-			log: 'text',
-			yao: 'yaml'
+			log: 'text'
 		}
 		return extensionMap[extension] || 'text'
 	}

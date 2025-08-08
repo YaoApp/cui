@@ -33,7 +33,7 @@ const Uploader: React.FC<UploaderProps> = ({
 			// 默认支持基础文件类型
 			return {
 				acceptTypes:
-					'.txt,.md,.json,.js,.ts,.html,.css,.py,.java,.cpp,.go,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx',
+					'.txt,.md,.json,.js,.ts,.html,.css,.py,.java,.cpp,.go,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.yao',
 				formatHint: is_cn
 					? '支持文本、代码、PDF、Word、Excel、PowerPoint 等格式'
 					: 'Support text, code, PDF, Word, Excel, PowerPoint and other formats'
@@ -79,7 +79,8 @@ const Uploader: React.FC<UploaderProps> = ({
 				'.toml',
 				'.ini',
 				'.conf',
-				'.env'
+				'.env',
+				'.yao'
 			)
 			supportedNames.push(
 				is_cn ? '文本文件' : 'Text Files',

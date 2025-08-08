@@ -13,7 +13,7 @@ import { getLocale } from '@umijs/max'
 interface ICustom {
 	value: string
 	disabled?: boolean
-	language?: 'json' | 'javascript' | 'typescript' | 'yaml' | 'html' | 'css' | 'sql' | 'markdown'
+	language?: 'json' | 'jsonc' | 'javascript' | 'typescript' | 'yaml' | 'html' | 'css' | 'sql' | 'markdown'
 	hideLineNumbers?: boolean
 	height?: number | string
 
@@ -119,6 +119,18 @@ const Custom = window.$app.memo((props: ICustom) => {
 		})
 
 		monaco.editor.setTheme(theme)
+
+		// Enable JSON diagnostics to accept comments when language is jsonc
+		if (language === 'jsonc') {
+			try {
+				// @ts-ignore - Monaco ambient types
+				monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+					validate: true,
+					allowComments: true,
+					schemas: []
+				})
+			} catch {}
+		}
 
 		// fix select all when the editor is loaded
 		editor.onDidChangeModelContent(() => {
