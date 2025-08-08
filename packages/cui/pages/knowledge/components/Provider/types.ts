@@ -167,7 +167,7 @@ export interface ProviderAndSchemaResponse {
 export type InputComponent =
 	| 'Input'
 	| 'InputNumber'
-	| 'InputPasword'
+	| 'InputPassword'
 	| 'Switch'
 	| 'CheckboxGroup'
 	| 'RadioGroup'

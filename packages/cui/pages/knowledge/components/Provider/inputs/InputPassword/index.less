@@ -1,0 +1,89 @@
+.passwordContainer {
+	position: relative;
+	width: 100%;
+}
+
+.passwordInput {
+	/* 提高CSS特异性以覆盖全局样式 */
+	box-sizing: border-box !important;
+	width: 100%;
+	height: var(--base_height);
+	padding: 0 44px 0 12px;
+	font-size: var(--fontsize);
+	color: var(--color_text);
+	background: var(--color_bg_menu) !important;
+	border: 1px solid var(--color_border) !important;
+	border-radius: var(--radius);
+	outline: none;
+	transition: all 0.2s ease;
+
+	&::placeholder {
+		color: var(--color_placeholder);
+	}
+
+	&:hover:not(:disabled):not(:read-only) {
+		border-color: var(--color_main_hover, #4580ff) !important;
+		background-color: var(--color_bg_hover, #f5f5f5) !important;
+	}
+
+	&:focus {
+		background-color: var(--color_bg_menu) !important;
+		border-color: var(--color_main, #3371fc) !important;
+		box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+	}
+
+	&:disabled {
+		background: var(--color_bg);
+		border-color: var(--color_border_light);
+		color: var(--color_text_grey);
+		cursor: not-allowed;
+		opacity: 0.6;
+	}
+
+	&:read-only {
+		background: var(--color_bg);
+		border-color: var(--color_border_light);
+		cursor: default;
+	}
+}
+
+.toggleButton {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--color_text_grey);
+	border-radius: 4px;
+	transition: all 0.2s ease;
+	outline: none;
+
+	&:hover:not(:disabled) {
+		background: var(--color_bg_hover);
+		color: var(--color_text);
+	}
+
+	&:focus {
+		background: var(--color_bg_hover);
+		color: var(--color_text);
+		box-shadow: 0 0 0 2px rgba(var(--r), var(--g), var(--b), 0.1);
+	}
+
+	&:disabled {
+		cursor: not-allowed;
+		opacity: 0.4;
+	}
+
+	svg {
+		width: 16px;
+		height: 16px;
+		stroke-width: 1.5;
+	}
+}

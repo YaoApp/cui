@@ -13,6 +13,7 @@ import styles from './index.less'
 // Input components (placeholders) mapped by component name
 import TextInput from './inputs/Input/index'
 import NumberInput from './inputs/InputNumber/index'
+import PasswordInput from './inputs/InputPassword/index'
 import ToggleSwitch from './inputs/Switch/index'
 import SelectInput from './inputs/Select/index'
 import TextAreaInput from './inputs/TextArea/index'
@@ -36,7 +37,7 @@ export interface ProviderConfiguratorProps {
 const componentMap: Record<InputComponent, React.ComponentType<any>> = {
 	Input: TextInput,
 	InputNumber: NumberInput,
-	InputPasword: TextInput, // fallback to Input
+	InputPassword: PasswordInput,
 	Switch: ToggleSwitch,
 	CheckboxGroup: SelectInput, // placeholder
 	RadioGroup: SelectInput, // placeholder

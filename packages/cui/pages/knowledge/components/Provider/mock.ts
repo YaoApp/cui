@@ -66,6 +66,25 @@ const structuredSchema: ProviderSchema = {
 			width: 'half',
 			order: 3
 		},
+		separator: {
+			type: 'string',
+			title: 'Custom Separator',
+			description: 'Custom separator pattern (regex supported).',
+			default: '',
+			placeholder: 'e.g. \\n\\n, ---',
+			component: 'Input',
+			width: 'half',
+			order: 4
+		},
+		enable_debug: {
+			type: 'boolean',
+			title: 'Enable Debug Mode',
+			description: 'Output detailed chunking information for debugging.',
+			default: false,
+			component: 'Switch',
+			width: 'half',
+			order: 5
+		},
 		size_multiplier: {
 			type: 'integer',
 			title: 'Size Multiplier',
@@ -75,7 +94,7 @@ const structuredSchema: ProviderSchema = {
 			maximum: 10,
 			component: 'InputNumber',
 			width: 'half',
-			order: 4
+			order: 6
 		},
 		max_concurrent: {
 			type: 'integer',
@@ -86,7 +105,36 @@ const structuredSchema: ProviderSchema = {
 			maximum: 100,
 			component: 'InputNumber',
 			width: 'half',
-			order: 5
+			order: 7
+		},
+		api_key: {
+			type: 'string',
+			title: 'API Key',
+			description: 'Optional API key for enhanced processing.',
+			default: '',
+			placeholder: 'Enter your API key',
+			component: 'InputPassword',
+			width: 'full',
+			order: 8
+		},
+		custom_rules: {
+			type: 'string',
+			title: 'Custom Rules',
+			description: 'Advanced chunking rules in JSON format.',
+			default: '{\n  "preserve_tables": true,\n  "merge_short_lines": false\n}',
+			component: 'CodeEditor',
+			width: 'full',
+			order: 9
+		},
+		notes: {
+			type: 'string',
+			title: 'Processing Notes',
+			description: 'Additional notes or instructions for processing.',
+			default: '',
+			placeholder: 'Enter any special instructions...',
+			component: 'TextArea',
+			width: 'full',
+			order: 10
 		}
 	}
 }
@@ -363,6 +411,9 @@ export async function fetchProviderAndSchema(id: string): Promise<ProviderAndSch
 	if (id === '__yao.semantic') {
 		return { provider: semanticProvider, schema: semanticSchema }
 	}
+	if (id === '__yao.test') {
+		return { provider: testProvider, schema: testSchema }
+	}
 
 	// Fallback: default to semantic when unknown id is provided
 	return { provider: semanticProvider, schema: semanticSchema }
@@ -379,10 +430,252 @@ export async function fetchProviderSchemaSummaries(type: string): Promise<Provid
 	if (type === 'chunkings') {
 		return [
 			{ id: structuredSchema.id, title: structuredSchema.title, description: structuredSchema.description },
-			{ id: semanticSchema.id, title: semanticSchema.title, description: semanticSchema.description }
+			{ id: semanticSchema.id, title: semanticSchema.title, description: semanticSchema.description },
+			{ id: testSchema.id, title: testSchema.title, description: testSchema.description }
 		]
 	}
 
 	// Unknown types return empty array
 	return []
+}
+
+// 测试 Provider - 展示所有组件类型
+const testProvider: Provider = {
+	id: '__yao.test',
+	label: 'Component Test Suite',
+	description: 'Test all available input components',
+	options: [
+		{
+			label: 'Default Configuration',
+			value: 'default',
+			default: true,
+			description: 'Test configuration with sample values',
+			properties: {}
+		}
+	]
+}
+
+const testSchema: ProviderSchema = {
+	id: '__yao.test',
+	title: 'Component Test Suite',
+	description: 'Comprehensive test of all available input components for development and testing.',
+	required: ['required_text', 'required_number'],
+	properties: {
+		// Text Input 组件
+		required_text: {
+			type: 'string',
+			title: 'Required Text Input',
+			description: 'A required text input field.',
+			default: '',
+			placeholder: 'Enter required text...',
+			component: 'Input',
+			width: 'half',
+			order: 1
+		},
+		optional_text: {
+			type: 'string',
+			title: 'Optional Text Input',
+			description: 'An optional text input with validation.',
+			default: 'Default value',
+			placeholder: 'Enter optional text...',
+			minLength: 3,
+			maxLength: 50,
+			pattern: '^[A-Za-z0-9\\s]+$',
+			component: 'Input',
+			width: 'half',
+			order: 2
+		},
+
+		// Number Input 组件
+		required_number: {
+			type: 'integer',
+			title: 'Required Number',
+			description: 'A required integer input with constraints.',
+			default: 100,
+			minimum: 1,
+			maximum: 1000,
+			component: 'InputNumber',
+			width: 'half',
+			order: 3
+		},
+		float_number: {
+			type: 'number',
+			title: 'Float Number',
+			description: 'A floating-point number input.',
+			default: 3.14,
+			minimum: 0.1,
+			maximum: 999.99,
+			component: 'InputNumber',
+			width: 'half',
+			order: 4
+		},
+
+		// Password Input 组件
+		password_field: {
+			type: 'string',
+			title: 'Password Field',
+			description: 'A password input with toggle visibility.',
+			default: '',
+			placeholder: 'Enter password...',
+			minLength: 8,
+			component: 'InputPassword',
+			width: 'half',
+			order: 5
+		},
+		api_secret: {
+			type: 'string',
+			title: 'API Secret',
+			description: 'Secret key for API authentication.',
+			default: '',
+			placeholder: 'sk-...',
+			component: 'InputPassword',
+			width: 'half',
+			order: 6
+		},
+
+		// Switch 组件
+		enable_feature: {
+			type: 'boolean',
+			title: 'Enable Feature',
+			description: 'Toggle to enable or disable this feature.',
+			default: true,
+			component: 'Switch',
+			width: 'half',
+			order: 7
+		},
+		debug_mode: {
+			type: 'boolean',
+			title: 'Debug Mode',
+			description: 'Enable verbose logging and debugging.',
+			default: false,
+			component: 'Switch',
+			width: 'half',
+			order: 8
+		},
+
+		// Select 组件 - 简单选项
+		simple_select: {
+			type: 'string',
+			title: 'Simple Select',
+			description: 'A dropdown with simple options.',
+			default: 'medium',
+			component: 'Select',
+			enum: [
+				{ label: 'Small', value: 'small', description: 'Small size option' },
+				{ label: 'Medium', value: 'medium', description: 'Medium size option', default: true },
+				{ label: 'Large', value: 'large', description: 'Large size option' }
+			],
+			width: 'half',
+			order: 9
+		},
+
+		// Select 组件 - 分组选项
+		grouped_select: {
+			type: 'string',
+			title: 'Grouped Select',
+			description: 'A dropdown with grouped options.',
+			default: 'gpt-4o-mini',
+			component: 'Select',
+			enum: [
+				{
+					groupLabel: 'OpenAI Models',
+					options: [
+						{
+							label: 'GPT-4o Mini',
+							value: 'gpt-4o-mini',
+							description: 'Fast and efficient',
+							default: true
+						},
+						{ label: 'GPT-4o', value: 'gpt-4o', description: 'Most capable model' }
+					]
+				},
+				{
+					groupLabel: 'Alternative Models',
+					options: [
+						{ label: 'Claude 3.5', value: 'claude-3.5', description: 'Anthropic model' },
+						{ label: 'Gemini Pro', value: 'gemini-pro', description: 'Google model' }
+					]
+				}
+			],
+			width: 'half',
+			order: 10
+		},
+
+		// TextArea 组件
+		description_field: {
+			type: 'string',
+			title: 'Description',
+			description: 'Multi-line text input for descriptions.',
+			default: 'Enter your description here...\nMultiple lines are supported.',
+			placeholder: 'Write a detailed description...',
+			component: 'TextArea',
+			width: 'full',
+			order: 11
+		},
+
+		// CodeEditor 组件
+		json_config: {
+			type: 'string',
+			title: 'JSON Configuration',
+			description: 'JSON configuration editor with syntax highlighting.',
+			default: '{\n  "timeout": 30000,\n  "retries": 3,\n  "cache": true\n}',
+			component: 'CodeEditor',
+			width: 'full',
+			order: 12
+		},
+
+		// Nested Object 组件
+		advanced_settings: {
+			type: 'object',
+			title: 'Advanced Settings',
+			description: 'Optional advanced configuration settings.',
+			component: 'Nested',
+			order: 13,
+			required: false,
+			requiredFields: ['timeout', 'max_retries'],
+			properties: {
+				timeout: {
+					type: 'integer',
+					title: 'Timeout (ms)',
+					description: 'Request timeout in milliseconds.',
+					default: 30000,
+					minimum: 1000,
+					maximum: 300000,
+					component: 'InputNumber',
+					width: 'half',
+					order: 1
+				},
+				max_retries: {
+					type: 'integer',
+					title: 'Max Retries',
+					description: 'Maximum number of retry attempts.',
+					default: 3,
+					minimum: 0,
+					maximum: 10,
+					component: 'InputNumber',
+					width: 'half',
+					order: 2
+				},
+				enable_cache: {
+					type: 'boolean',
+					title: 'Enable Cache',
+					description: 'Cache responses to improve performance.',
+					default: true,
+					component: 'Switch',
+					width: 'half',
+					order: 3
+				},
+				cache_key: {
+					type: 'string',
+					title: 'Cache Key',
+					description: 'Custom cache key prefix (optional).',
+					default: '',
+					placeholder: 'e.g. myapp_cache_',
+					component: 'Input',
+					width: 'half',
+					order: 4
+				}
+			}
+		}
+	}
 }
