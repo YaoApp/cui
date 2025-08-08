@@ -157,7 +157,7 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 		return <div className={styles.emptyState}>No providers available</div>
 	}
 
-	const renderField = (name: string, ps: PropertySchema, path: string[] = []) => {
+	const renderField = (name: string, ps: PropertySchema, path: string[] = [], parentSchema?: ProviderSchema) => {
 		const Comp = ps.component ? componentMap[ps.component] : TextInput
 		const key = [...path, name].join('.')
 		const currentValue = (values as any)[name]
@@ -165,11 +165,14 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 		if (ps.type === 'object' && ps.properties) {
 			// Render nested object
 			const entries = Object.entries(ps.properties).sort((a, b) => (a[1].order || 0) - (b[1].order || 0))
+			const isNestedObjectRequired = ps.required || false
+
 			return (
 				<div key={key} className={styles.nestedField}>
 					{ps.title && (
 						<div className={styles.nestedTitle} title={ps.title}>
 							{ps.title}
+							{isNestedObjectRequired && <span className={styles.requiredMark}>*</span>}
 						</div>
 					)}
 					{ps.description && (
@@ -186,6 +189,8 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 								const nestedFieldClass = isNestedTextArea
 									? `${styles.nestedFieldRow} ${styles.fullWidth}`
 									: styles.nestedFieldRow
+								// For nested fields, check if it's in the parent's requiredFields array
+								const isChildRequired = ps.requiredFields?.includes(childKey) || false
 
 								return (
 									<div key={`${key}.${childKey}`} className={nestedFieldClass}>
@@ -195,6 +200,11 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 												title={childPs.title || childKey}
 											>
 												{childPs.title || childKey}
+												{isChildRequired && (
+													<span className={styles.requiredMark}>
+														*
+													</span>
+												)}
 											</div>
 											{childPs.description && (
 												<div
@@ -265,12 +275,14 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 		// Primitive field
 		const isTextArea = ps.component === 'TextArea' || ps.component === 'CodeEditor'
 		const fieldClass = isTextArea ? `${styles.configField} ${styles.fullWidth}` : styles.configField
+		const isRequired = parentSchema?.required?.includes(name) || false
 
 		return (
 			<div key={key} className={fieldClass}>
 				<div className={styles.fieldLabel}>
 					<div className={styles.labelName} title={ps.title || name}>
 						{ps.title || name}
+						{isRequired && <span className={styles.requiredMark}>*</span>}
 					</div>
 					{ps.description && (
 						<div className={styles.labelDescription} title={ps.description}>
@@ -345,7 +357,7 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 						{loadingDetail ? (
 							<div className={styles.loadingState}>Loading configuration...</div>
 						) : (
-							orderedEntries.map(([name, ps]) => renderField(name, ps))
+							orderedEntries.map(([name, ps]) => renderField(name, ps, [], schema))
 						)}
 					</div>
 				)}

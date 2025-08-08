@@ -204,6 +204,8 @@ const semanticSchema: ProviderSchema = {
 			description: 'Advanced options for semantic model calls.',
 			component: 'Nested',
 			order: 6,
+			required: false, // 对象本身可选
+			requiredFields: ['connector', 'context_size'], // 但如果填写，这些字段必填
 			properties: {
 				connector: {
 					type: 'string',
@@ -279,6 +281,44 @@ const semanticSchema: ProviderSchema = {
 					component: 'InputNumber',
 					width: 'half',
 					order: 7
+				}
+			}
+		},
+		user_profile: {
+			type: 'object',
+			title: 'User Profile',
+			description: 'User identification information for personalized chunking.',
+			component: 'Nested',
+			order: 7,
+			required: true, // 对象本身必填
+			requiredFields: ['first_name'], // first_name 必填，last_name 可选
+			properties: {
+				first_name: {
+					type: 'string',
+					title: 'First Name',
+					description: 'User first name for personalization.',
+					default: '',
+					component: 'Input',
+					width: 'half',
+					order: 1
+				},
+				last_name: {
+					type: 'string',
+					title: 'Last Name',
+					description: 'User last name (optional).',
+					default: '',
+					component: 'Input',
+					width: 'half',
+					order: 2
+				},
+				email: {
+					type: 'string',
+					title: 'Email',
+					description: 'Contact email for notifications.',
+					default: '',
+					component: 'Input',
+					width: 'full',
+					order: 3
 				}
 			}
 		}

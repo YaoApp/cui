@@ -71,6 +71,8 @@ export interface PropertySchema {
 	// Validation
 	/** Whether the field is required */
 	required?: boolean
+	/** For object types: names of nested properties that are required when the object is provided */
+	requiredFields?: string[]
 	/** Minimum length for string values */
 	minLength?: number
 	/** Maximum length for string values */
