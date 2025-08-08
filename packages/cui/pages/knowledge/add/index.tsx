@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Modal, Button } from 'antd'
 import { useLocalStorageState } from 'ahooks'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import BasicTab from './components/Basic'
+import BasicTab, { BasicTabRef } from './components/Basic'
 import AdvancedTab from './components/Advanced'
 import styles from './index.less'
 
@@ -45,6 +45,9 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 		// 更多配置项...
 	})
 
+	// Basic tab ref for validation
+	const basicTabRef = useRef<BasicTabRef>(null)
+
 	// 当传入的 data 变化时，更新 currentData
 	React.useEffect(() => {
 		setCurrentData(data)
@@ -78,6 +81,17 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 	}
 
 	const handleConfirm = () => {
+		// 如果是 basic tab，先验证 Provider 配置
+		if (activeTab === 'basic') {
+			const isProviderValid = basicTabRef.current?.validateProviderConfig()
+			if (!isProviderValid) {
+				console.log('Provider 配置验证失败，请检查必填项')
+				// 这里可以添加 toast 提示或其他用户提示
+				return
+			}
+			console.log('Provider 配置验证通过')
+		}
+
 		onConfirm(currentData, options)
 	}
 
@@ -86,6 +100,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 			case 'basic':
 				return (
 					<BasicTab
+						ref={basicTabRef}
 						data={currentData}
 						options={options}
 						onOptionsChange={handleOptionsChange}
@@ -99,6 +114,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 			default:
 				return (
 					<BasicTab
+						ref={basicTabRef}
 						data={currentData}
 						options={options}
 						onOptionsChange={handleOptionsChange}

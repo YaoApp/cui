@@ -486,6 +486,24 @@ const testSchema: ProviderSchema = {
 			order: 2
 		},
 
+		// Input 组件 - 带验证的测试用例
+		email_field: {
+			type: 'string',
+			title: 'Email Address',
+			description: 'A required email input with pattern validation.',
+			default: '',
+			placeholder: 'user@example.com',
+			required: true,
+			pattern: '^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$',
+			component: 'Input',
+			width: 'half',
+			order: 2.5,
+			errorMessages: {
+				required: 'Email address is required',
+				pattern: 'Please enter a valid email address'
+			}
+		},
+
 		// Number Input 组件
 		required_number: {
 			type: 'integer',
@@ -494,9 +512,15 @@ const testSchema: ProviderSchema = {
 			default: 100,
 			minimum: 1,
 			maximum: 1000,
+			required: true,
 			component: 'InputNumber',
 			width: 'half',
-			order: 3
+			order: 3,
+			errorMessages: {
+				required: 'Please enter a number',
+				minimum: 'Value must be at least {min}',
+				maximum: 'Value cannot exceed {max}'
+			}
 		},
 		float_number: {
 			type: 'number',
@@ -518,9 +542,16 @@ const testSchema: ProviderSchema = {
 			default: '',
 			placeholder: 'Enter password...',
 			minLength: 8,
+			maxLength: 128,
+			required: true,
 			component: 'InputPassword',
 			width: 'half',
-			order: 5
+			order: 5,
+			errorMessages: {
+				required: 'Password is required for authentication',
+				minLength: 'Password must be at least {min} characters for security',
+				maxLength: 'Password cannot exceed {max} characters'
+			}
 		},
 		api_secret: {
 			type: 'string',
@@ -613,6 +644,26 @@ const testSchema: ProviderSchema = {
 			order: 11
 		},
 
+		// TextArea 组件 - 带验证的测试用例
+		required_description: {
+			type: 'string',
+			title: 'Required Description',
+			description: 'A required multi-line text field with length constraints.',
+			default: '',
+			placeholder: 'Please provide a detailed description...',
+			minLength: 20,
+			maxLength: 500,
+			required: true,
+			component: 'TextArea',
+			width: 'full',
+			order: 11.5,
+			errorMessages: {
+				required: 'Description is required',
+				minLength: 'Description must be at least {min} characters long',
+				maxLength: 'Description cannot exceed {max} characters'
+			}
+		},
+
 		// CodeEditor 组件
 		json_config: {
 			type: 'string',
@@ -622,6 +673,24 @@ const testSchema: ProviderSchema = {
 			component: 'CodeEditor',
 			width: 'full',
 			order: 12
+		},
+
+		// CodeEditor 组件 - 带验证的测试用例
+		required_script: {
+			type: 'string',
+			title: 'Required Script',
+			description: 'A required code editor field for custom scripts.',
+			default: '',
+			placeholder: 'Enter your script here...',
+			minLength: 10,
+			required: true,
+			component: 'CodeEditor',
+			width: 'full',
+			order: 12.5,
+			errorMessages: {
+				required: 'Script code is required',
+				minLength: 'Script must be at least {min} characters long'
+			}
 		},
 
 		// CheckboxGroup 组件 - 多选

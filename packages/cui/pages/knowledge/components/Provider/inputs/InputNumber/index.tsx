@@ -1,12 +1,14 @@
 import React from 'react'
 import { InputComponentProps } from '../../types'
+import ErrorMessage from '../ErrorMessage'
 import styles from './index.less'
+import commonStyles from '../common.less'
 
-export default function InputNumber({ schema, value, onChange }: InputComponentProps) {
+export default function InputNumber({ schema, value, onChange, error, hasError }: InputComponentProps) {
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const val = e.target.value
 		if (val === '') {
-			onChange(undefined)
+			onChange('')
 		} else {
 			const numValue = schema.type === 'integer' ? parseInt(val, 10) : parseFloat(val)
 			if (!isNaN(numValue)) {
@@ -35,20 +37,24 @@ export default function InputNumber({ schema, value, onChange }: InputComponentP
 	}
 
 	const numValue = typeof value === 'number' ? value : ''
+	const inputClass = `${styles.inputNumber} ${hasError ? commonStyles.error : ''}`
 
 	return (
-		<input
-			className={styles.inputNumber}
-			type='number'
-			value={numValue}
-			onChange={handleChange}
-			onBlur={handleBlur}
-			placeholder={schema.placeholder}
-			disabled={schema.disabled}
-			readOnly={schema.readOnly}
-			min={schema.minimum}
-			max={schema.maximum}
-			step={schema.type === 'integer' ? 1 : 'any'}
-		/>
+		<div className={commonStyles.inputContainer}>
+			<input
+				className={inputClass}
+				type='number'
+				value={numValue}
+				onChange={handleChange}
+				onBlur={handleBlur}
+				placeholder={schema.placeholder}
+				disabled={schema.disabled}
+				readOnly={schema.readOnly}
+				min={schema.minimum}
+				max={schema.maximum}
+				step={schema.type === 'integer' ? 1 : 'any'}
+			/>
+			<ErrorMessage message={error} show={hasError} />
+		</div>
 	)
 }

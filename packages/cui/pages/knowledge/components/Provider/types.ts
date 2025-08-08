@@ -38,6 +38,10 @@ export interface InputComponentProps {
 	value: PropertyValue
 	/** Value change handler */
 	onChange: (v: PropertyValue) => void
+	/** Error message to display (if any) */
+	error?: string
+	/** Whether the field is in error state */
+	hasError?: boolean
 }
 
 /**
@@ -105,6 +109,16 @@ export interface PropertySchema {
 	minimum?: number
 	/** Maximum numeric value (inclusive) */
 	maximum?: number
+	/** Error message templates with variable interpolation support */
+	errorMessages?: {
+		required?: string
+		minLength?: string
+		maxLength?: string
+		pattern?: string
+		minimum?: string
+		maximum?: string
+		custom?: string
+	}
 
 	// UI Configuration
 	/** Input component to render from `@inputs/` */

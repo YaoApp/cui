@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { InputComponentProps } from '../../types'
+import ErrorMessage from '../ErrorMessage'
 import styles from './index.less'
+import commonStyles from '../common.less'
 
 // Monaco Editor imports
 let Editor: any = null
@@ -20,7 +22,7 @@ const loadMonacoEditor = async () => {
 	}
 }
 
-export default function CodeEditor({ schema, value, onChange }: InputComponentProps) {
+export default function CodeEditor({ schema, value, onChange, error, hasError }: InputComponentProps) {
 	const [editorState, setEditorState] = useState<{
 		loaded: boolean
 		component: any
@@ -171,49 +173,58 @@ export default function CodeEditor({ schema, value, onChange }: InputComponentPr
 
 	// If Monaco Editor failed to load, use textarea fallback
 	if (!editorState.loaded || !editorState.component) {
+		const textareaClass = `${styles.textareaFallback} ${hasError ? commonStyles.error : ''}`
 		return (
-			<textarea
-				className={styles.textareaFallback}
-				value={stringValue}
-				onChange={handleTextareaChange}
-				placeholder={schema.placeholder || 'Enter code...'}
-				disabled={schema.disabled}
-				readOnly={schema.readOnly}
-			/>
+			<div className={commonStyles.inputContainer}>
+				<textarea
+					className={textareaClass}
+					value={stringValue}
+					onChange={handleTextareaChange}
+					placeholder={schema.placeholder || 'Enter code...'}
+					disabled={schema.disabled}
+					readOnly={schema.readOnly}
+				/>
+				<ErrorMessage message={error} show={hasError} />
+			</div>
 		)
 	}
 
 	const MonacoEditor = editorState.component
 
+	const editorContainerClass = `${styles.codeEditor} ${hasError ? commonStyles.error : ''}`
+
 	return (
-		<div className={styles.codeEditor}>
-			<MonacoEditor
-				className={styles.editor}
-				width='100%'
-				height='100%'
-				language={language === 'jsonc' ? 'json' : language}
-				theme={theme}
-				value={stringValue}
-				onChange={handleChange}
-				options={{
-					readOnly: schema.readOnly || schema.disabled,
-					wordWrap: 'on',
-					formatOnPaste: true,
-					formatOnType: true,
-					renderLineHighlight: 'none',
-					smoothScrolling: true,
-					padding: { top: 15 },
-					lineNumbersMinChars: 3,
-					minimap: { enabled: false },
-					lineNumbers: 'on',
-					scrollbar: {
-						verticalScrollbarSize: 8,
-						horizontalSliderSize: 8,
-						useShadows: false
-					}
-				}}
-				editorDidMount={editorDidMount}
-			/>
+		<div className={commonStyles.inputContainer}>
+			<div className={editorContainerClass}>
+				<MonacoEditor
+					className={styles.editor}
+					width='100%'
+					height='100%'
+					language={language === 'jsonc' ? 'json' : language}
+					theme={theme}
+					value={stringValue}
+					onChange={handleChange}
+					options={{
+						readOnly: schema.readOnly || schema.disabled,
+						wordWrap: 'on',
+						formatOnPaste: true,
+						formatOnType: true,
+						renderLineHighlight: 'none',
+						smoothScrolling: true,
+						padding: { top: 15 },
+						lineNumbersMinChars: 3,
+						minimap: { enabled: false },
+						lineNumbers: 'on',
+						scrollbar: {
+							verticalScrollbarSize: 8,
+							horizontalSliderSize: 8,
+							useShadows: false
+						}
+					}}
+					editorDidMount={editorDidMount}
+				/>
+			</div>
+			<ErrorMessage message={error} show={hasError} />
 		</div>
 	)
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, forwardRef, useImperativeHandle } from 'react'
 import {
 	ProviderAndSchemaResponse,
 	ProviderSchema,
@@ -8,6 +8,7 @@ import {
 	InputComponent
 } from './types'
 import { fetchProviderAndSchema, fetchProviderSchemaSummaries } from './mock'
+import { validateField } from './inputs/validation'
 import styles from './index.less'
 
 // Input components (placeholders) mapped by component name
@@ -34,6 +35,10 @@ export interface ProviderConfiguratorProps {
 	onChange?: (next: { id: string; properties: Values }) => void
 	// Optional className for outer container
 	className?: string
+}
+
+export interface ProviderConfiguratorRef {
+	validateAllFields: () => boolean
 }
 
 const componentMap: Record<InputComponent, React.ComponentType<any>> = {
@@ -85,13 +90,14 @@ function mergeDefaultsFromSchema(schema: ProviderSchema, base: Values = {}): Val
 	return next
 }
 
-export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
+const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfiguratorProps>((props, ref) => {
 	const { type = 'chunkings', value, onChange, className } = props
 	const [summaries, setSummaries] = useState<ProviderSchemaSummary[]>([])
 	const [selectedId, setSelectedId] = useState<string | undefined>(value?.id)
 	const [schema, setSchema] = useState<ProviderSchema | undefined>(undefined)
 	const [providerResp, setProviderResp] = useState<ProviderAndSchemaResponse | undefined>(undefined)
 	const [values, setValues] = useState<Values>(value?.properties || {})
+	const [showValidation, setShowValidation] = useState(false)
 	const [loadingList, setLoadingList] = useState(false)
 	const [loadingDetail, setLoadingDetail] = useState(false)
 
@@ -144,7 +150,31 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 			if (selectedId) onChange?.({ id: selectedId, properties: next })
 			return next
 		})
+		// 在字段值改变时启用验证显示
+		setShowValidation(true)
 	}
+
+	// 外部可调用的验证函数
+	const validateAllFields = () => {
+		setShowValidation(true)
+		// 可以返回验证结果
+		if (!schema) return true
+
+		const entries = Object.entries(schema.properties || {})
+		for (const [name, ps] of entries) {
+			const val = values[name]
+			const result = validateField(ps, val)
+			if (!result.isValid) {
+				return false
+			}
+		}
+		return true
+	}
+
+	// 暴露给外部的方法
+	useImperativeHandle(ref, () => ({
+		validateAllFields
+	}))
 
 	const orderedEntries = useMemo(() => {
 		const entries = Object.entries(schema?.properties || {}) as [string, PropertySchema][]
@@ -310,7 +340,20 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 		onValueChange: (v: PropertyValue) => void
 	) => {
 		const Comp = ps.component ? componentMap[ps.component] : TextInput
-		return <Comp schema={ps} value={val} onChange={onValueChange} />
+
+		// Validate the current value, but only show error if showValidation is true
+		const validationResult = validateField(ps, val)
+		const shouldShowError = showValidation && !validationResult.isValid
+
+		return (
+			<Comp
+				schema={ps}
+				value={val}
+				onChange={onValueChange}
+				error={shouldShowError ? validationResult.error : undefined}
+				hasError={shouldShowError}
+			/>
+		)
 	}
 
 	const renderChildField = (childKey: string, childPs: PropertySchema, parentKey: string) => {
@@ -368,4 +411,6 @@ export default function ProviderConfigurator(props: ProviderConfiguratorProps) {
 			</div>
 		</div>
 	)
-}
+})
+
+export default ProviderConfigurator

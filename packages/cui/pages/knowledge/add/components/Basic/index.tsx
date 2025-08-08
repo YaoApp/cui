@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef, useImperativeHandle, useRef } from 'react'
 import { Switch } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
@@ -6,7 +6,7 @@ import FilePreview from './FilePreview'
 import TextPreview from './TextPreview'
 import UrlPreview from './UrlPreview'
 import { AddDocumentData } from '../../index'
-import ProviderConfigurator from '../../../components/Provider'
+import ProviderConfigurator, { ProviderConfiguratorRef } from '../../../components/Provider'
 import styles from '../../index.less'
 
 interface BasicTabProps {
@@ -16,9 +16,21 @@ interface BasicTabProps {
 	onDataChange?: (data: AddDocumentData) => void
 }
 
-const BasicTab: React.FC<BasicTabProps> = ({ data, options, onOptionsChange, onDataChange }) => {
+export interface BasicTabRef {
+	validateProviderConfig: () => boolean
+}
+
+const BasicTab = forwardRef<BasicTabRef, BasicTabProps>(({ data, options, onOptionsChange, onDataChange }, ref) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+	const providerRef = useRef<ProviderConfiguratorRef>(null)
+
+	// 暴露给父组件的方法
+	useImperativeHandle(ref, () => ({
+		validateProviderConfig: () => {
+			return providerRef.current?.validateAllFields() || false
+		}
+	}))
 
 	const renderPreview = () => {
 		switch (data.type) {
@@ -71,6 +83,7 @@ const BasicTab: React.FC<BasicTabProps> = ({ data, options, onOptionsChange, onD
 				</div>
 
 				<ProviderConfigurator
+					ref={providerRef}
 					type='chunkings'
 					value={{
 						id: options?.chunkingProviderId,
@@ -86,6 +99,6 @@ const BasicTab: React.FC<BasicTabProps> = ({ data, options, onOptionsChange, onD
 			</div>
 		</div>
 	)
-}
+})
 
 export default BasicTab
