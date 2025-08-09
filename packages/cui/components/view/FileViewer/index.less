@@ -575,8 +575,24 @@
 		}
 	}
 
+	// 纯文本查看器专用样式
+	.textViewer {
+		background: #f9f7f0 !important; // 精确匹配截图的米白色背景
+		color: #1a1a1a !important; // 更深的文字颜色，增强对比度
+		font-size: 14px !important; // 14px字体大小
+		line-height: 1.7 !important; // 增加行高，提升阅读体验
+	}
+
 	// 暗色主题下的语法高亮
 	[data-theme='dark'] & {
+		// 暗模式下纯文本查看器样式
+		.textViewer {
+			background: #2c2419 !important; // 深暖色背景，与浅黄呼应
+			color: #e2e8f0 !important; // 浅色文字，暗模式标准
+			font-size: 14px !important; // 14px字体大小
+			line-height: 1.7 !important; // 增加行高，提升阅读体验
+		}
+
 		.codeBlock {
 			:global(.syntax-comment) {
 				color: #8b949e;

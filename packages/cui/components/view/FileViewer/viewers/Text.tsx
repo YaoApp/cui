@@ -308,7 +308,7 @@ const TextComponent: React.FC<TextProps> = ({ src, file, contentType, fileName, 
 	}
 
 	return (
-		<pre className={clsx(styles.codeBlock, `language-${language || 'text'}`)}>
+		<pre className={clsx(styles.codeBlock, `language-${language || 'text'}`, styles.textViewer)}>
 			<code
 				dangerouslySetInnerHTML={{
 					__html: highlightedContent
