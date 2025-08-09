@@ -72,3 +72,21 @@ export interface UpdateCollectionMetadataResponse {
 	message: string
 	collection_id: string
 }
+
+// ===== Provider Management Types =====
+
+// Re-export provider types from the Provider component
+export type { Provider, ProviderSchema } from '../../pages/knowledge/components/Provider/types'
+
+// Provider API request types
+export interface GetProvidersRequest {
+	providerType: string
+	ids?: string // comma-separated list of provider IDs to filter
+	locale?: string // locale for internationalization, defaults to 'en'
+}
+
+export interface GetProviderSchemaRequest {
+	providerType: string
+	providerID: string
+	locale?: string // locale for internationalization, defaults to 'en'
+}

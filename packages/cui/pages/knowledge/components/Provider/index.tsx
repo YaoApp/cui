@@ -5,7 +5,8 @@ import {
 	ProviderSchemaSummary,
 	PropertySchema,
 	PropertyValue,
-	InputComponent
+	InputComponent,
+	Provider
 } from './types'
 import { fetchProviderAndSchema, fetchProviderSchemaSummaries } from './mock'
 import { validateField } from './inputs/validation'
@@ -23,8 +24,70 @@ import CheckboxGroupInput from './inputs/CheckboxGroup/index'
 import RadioGroupInput from './inputs/RadioGroup/index'
 import NestedContainer from './inputs/Nested/index'
 import ItemsContainer from './inputs/Items/index'
+import { KB } from '@/openapi'
+import { getLocale } from '@umijs/max'
 
 type Values = Record<string, PropertyValue>
+
+// Utility function to group providers by category
+interface GroupedProvider {
+	id: string
+	title: string
+	description: string
+	group?: string
+	options?: Array<{ label: string; value: string; description: string }>
+}
+
+interface ProviderGroup {
+	groupLabel: string
+	providers: GroupedProvider[]
+}
+
+function groupProviders(
+	summaries: ProviderSchemaSummary[],
+	providers: Provider[] = []
+): ProviderGroup[] | GroupedProvider[] {
+	// Create a map for quick provider lookup
+	const providerMap = new Map<string, Provider>()
+	providers.forEach((p) => providerMap.set(p.id, p))
+
+	// Enhance summaries with provider details
+	const enhancedProviders: GroupedProvider[] = summaries.map((summary) => {
+		const provider = providerMap.get(summary.id)
+		return {
+			id: summary.id,
+			title: summary.title || summary.id,
+			description: summary.description || '',
+			group: provider?.label || 'Default', // Use provider label as group name
+			options: provider?.options?.map((opt: any) => ({
+				label: opt.label,
+				value: opt.value,
+				description: opt.description
+			}))
+		}
+	})
+
+	// Group by category
+	const groups = new Map<string, GroupedProvider[]>()
+	enhancedProviders.forEach((provider) => {
+		const groupName = provider.group || 'Default'
+		if (!groups.has(groupName)) {
+			groups.set(groupName, [])
+		}
+		groups.get(groupName)!.push(provider)
+	})
+
+	// If only one group, return flat array
+	if (groups.size <= 1) {
+		return enhancedProviders
+	}
+
+	// Return grouped array
+	return Array.from(groups.entries()).map(([groupLabel, providers]) => ({
+		groupLabel,
+		providers
+	}))
+}
 
 export interface ProviderConfiguratorProps {
 	// Currently only 'chunkings' is used, but the API allows other types
@@ -35,6 +98,11 @@ export interface ProviderConfiguratorProps {
 	onChange?: (next: { id: string; properties: Values }) => void
 	// Optional className for outer container
 	className?: string
+	// Configurable labels for the provider selector
+	labels?: {
+		name: string
+		description: string
+	}
 }
 
 export interface ProviderConfiguratorRef {
@@ -91,8 +159,10 @@ function mergeDefaultsFromSchema(schema: ProviderSchema, base: Values = {}): Val
 }
 
 const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfiguratorProps>((props, ref) => {
-	const { type = 'chunkings', value, onChange, className } = props
+	const { type = 'chunkings', value, onChange, className, labels } = props
 	const [summaries, setSummaries] = useState<ProviderSchemaSummary[]>([])
+	const [providers, setProviders] = useState<Provider[]>([])
+	const [groupedProviders, setGroupedProviders] = useState<ProviderGroup[] | GroupedProvider[]>([])
 	const [selectedId, setSelectedId] = useState<string | undefined>(value?.id)
 	const [schema, setSchema] = useState<ProviderSchema | undefined>(undefined)
 	const [providerResp, setProviderResp] = useState<ProviderAndSchemaResponse | undefined>(undefined)
@@ -101,47 +171,123 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 	const [loadingList, setLoadingList] = useState(false)
 	const [loadingDetail, setLoadingDetail] = useState(false)
 
+	const locale = getLocale()
+	const is_cn = locale === 'zh-CN'
 	// Fetch summaries on mount
 	useEffect(() => {
+		// Check if openapi is ready
+		if (!window.$app?.openapi) {
+			console.warn('window.$app.openapi is not ready yet')
+			return
+		}
+
+		const kb = new KB(window.$app.openapi)
 		let ignore = false
 		setLoadingList(true)
-		fetchProviderSchemaSummaries(type)
-			.then((list) => {
-				if (ignore) return
+
+		// Get providers using real API
+		kb.GetProviders({ providerType: type, locale })
+			.then((response) => {
+				if (ignore || !response.data) return
+
+				// Store full provider data
+				setProviders(response.data)
+
+				// Convert providers to summaries format
+				const list = response.data.map((provider) => ({
+					id: provider.id,
+					title: provider.label,
+					description: provider.description
+				}))
+
 				setSummaries(list)
+
+				// Create grouped providers
+				const grouped = groupProviders(list, response.data)
+				setGroupedProviders(grouped)
+
 				if (!selectedId && list.length > 0) {
 					setSelectedId(list[0].id)
 				}
 			})
+			.catch((error) => {
+				if (!ignore) {
+					console.error('Failed to fetch providers:', error)
+					// Fallback to mock data for development
+					fetchProviderSchemaSummaries(type).then((list) => {
+						if (ignore) return
+						setSummaries(list)
+						if (!selectedId && list.length > 0) {
+							setSelectedId(list[0].id)
+						}
+					})
+				}
+			})
 			.finally(() => !ignore && setLoadingList(false))
+
 		return () => {
 			ignore = true
 		}
-	}, [type])
+	}, [type, selectedId])
 
 	// Fetch details when selectedId changes
 	useEffect(() => {
-		if (!selectedId) return
+		if (!selectedId || !window.$app?.openapi) return
+
+		const kb = new KB(window.$app.openapi)
 		let ignore = false
 		setLoadingDetail(true)
-		fetchProviderAndSchema(selectedId)
-			.then((resp) => {
-				if (ignore) return
+
+		// Get provider schema using real API
+		kb.GetProviderSchema({ providerType: type, providerID: selectedId, locale })
+			.then((response) => {
+				if (ignore || !response.data) return
+
+				// Find the corresponding provider data
+				const provider = providers.find((p) => p.id === selectedId)
+				if (!provider || !response.data) return
+
+				const resp = {
+					provider,
+					schema: response.data
+				}
+
 				setProviderResp(resp)
-				setSchema(resp.schema)
+				setSchema(response.data)
 
 				// Initialize values from provider default option and schema defaults
-				const defaultOption = resp.provider.options.find((o) => o.default) || resp.provider.options[0]
+				const defaultOption = provider.options.find((o: any) => o.default) || provider.options[0]
 				const baseValues: Values = defaultOption?.properties ? { ...defaultOption.properties } : {}
-				const merged = mergeDefaultsFromSchema(resp.schema, baseValues)
+				const merged = mergeDefaultsFromSchema(response.data, baseValues)
 				setValues((prev) => ({ ...merged, ...prev }))
 				onChange?.({ id: selectedId, properties: { ...merged, ...values } })
+			})
+			.catch((error) => {
+				if (!ignore) {
+					console.error('Failed to fetch provider schema:', error)
+					// Fallback to mock data for development
+					fetchProviderAndSchema(selectedId).then((resp) => {
+						if (ignore) return
+						setProviderResp(resp)
+						setSchema(resp.schema)
+
+						// Initialize values from provider default option and schema defaults
+						const defaultOption =
+							resp.provider.options.find((o) => o.default) || resp.provider.options[0]
+						const baseValues: Values = defaultOption?.properties
+							? { ...defaultOption.properties }
+							: {}
+						const merged = mergeDefaultsFromSchema(resp.schema, baseValues)
+						setValues((prev) => ({ ...merged, ...prev }))
+						onChange?.({ id: selectedId, properties: { ...merged, ...values } })
+					})
+				}
 			})
 			.finally(() => !ignore && setLoadingDetail(false))
 		return () => {
 			ignore = true
 		}
-	}, [selectedId])
+	}, [selectedId, type, providers])
 
 	// Handle value change
 	const updateField = (key: string, newValue: PropertyValue) => {
@@ -180,6 +326,38 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 		const entries = Object.entries(schema?.properties || {}) as [string, PropertySchema][]
 		return entries.sort((a, b) => (a[1].order || 0) - (b[1].order || 0))
 	}, [schema])
+
+	// Create select options from grouped providers
+	const createSelectOptions = () => {
+		if (Array.isArray(groupedProviders) && groupedProviders.length > 0) {
+			// Check if it's a flat array (single group) or grouped array
+			if ('groupLabel' in groupedProviders[0]) {
+				// Grouped format
+				return (groupedProviders as ProviderGroup[]).map((group) => ({
+					groupLabel: group.groupLabel,
+					options: group.providers.map((provider) => ({
+						label: `${provider.title}`,
+						value: provider.id,
+						description: provider.description
+					}))
+				}))
+			} else {
+				// Flat format (single group)
+				return (groupedProviders as GroupedProvider[]).map((provider) => ({
+					label: `${provider.title}`,
+					value: provider.id,
+					description: provider.description
+				}))
+			}
+		}
+
+		// Fallback to summaries
+		return summaries.map((s) => ({
+			label: s.title || s.id,
+			value: s.id,
+			description: s.description
+		}))
+	}
 
 	// Loading states
 	if (loadingList) {
@@ -379,18 +557,17 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 				{/* Provider selector */}
 				<div className={styles.providerSelector}>
 					<div className={styles.selectorLabel}>
-						<div className={styles.labelName}>Chunking Provider</div>
-						<div className={styles.labelDescription}>Choose the chunking algorithm</div>
+						<div className={styles.labelName}>{labels?.name || 'Provider'}</div>
+						<div className={styles.labelDescription}>
+							{labels?.description || 'Choose a provider'}
+						</div>
 					</div>
 					<div className={styles.selectorControl}>
 						<SelectInput
 							schema={{
 								type: 'string',
 								title: 'Provider',
-								enum: summaries.map((s) => ({
-									label: s.title || s.id,
-									value: s.id
-								}))
+								enum: createSelectOptions()
 							}}
 							value={selectedId || ''}
 							onChange={(id: any) => setSelectedId(String(id))}

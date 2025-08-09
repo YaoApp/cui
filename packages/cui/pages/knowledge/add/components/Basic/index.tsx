@@ -84,7 +84,7 @@ const BasicTab = forwardRef<BasicTabRef, BasicTabProps>(({ data, options, onOpti
 
 				<ProviderConfigurator
 					ref={providerRef}
-					type='chunkings'
+					type='chunking'
 					value={{
 						id: options?.chunkingProviderId,
 						properties: options?.chunkingProperties
@@ -95,6 +95,12 @@ const BasicTab = forwardRef<BasicTabRef, BasicTabProps>(({ data, options, onOpti
 							chunkingProperties: v.properties
 						})
 					}
+					labels={{
+						name: is_cn ? '文档分割方式' : 'Document Splitting',
+						description: is_cn
+							? '选择如何将长文档分成小段落'
+							: 'Choose how to break long documents into smaller sections'
+					}}
 				/>
 			</div>
 		</div>

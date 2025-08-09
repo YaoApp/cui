@@ -8,7 +8,11 @@ import {
 	CollectionExistsResponse,
 	GetCollectionsRequest,
 	UpdateCollectionMetadataRequest,
-	UpdateCollectionMetadataResponse
+	UpdateCollectionMetadataResponse,
+	Provider,
+	ProviderSchema,
+	GetProvidersRequest,
+	GetProviderSchemaRequest
 } from './types'
 
 /**
@@ -60,5 +64,37 @@ export class KB {
 		request: UpdateCollectionMetadataRequest
 	): Promise<ApiResponse<UpdateCollectionMetadataResponse>> {
 		return this.api.Put<UpdateCollectionMetadataResponse>(`/kb/collections/${collectionID}/metadata`, request)
+	}
+
+	// ===== Provider Management =====
+
+	/**
+	 * Get providers by type
+	 */
+	async GetProviders(request: GetProvidersRequest): Promise<ApiResponse<Provider[]>> {
+		const params: Record<string, string> = {}
+		if (request.ids) {
+			params.ids = request.ids
+		}
+		if (request.locale) {
+			params.locale = request.locale
+		}
+
+		return this.api.Get<Provider[]>(`/kb/providers/${request.providerType}`, params)
+	}
+
+	/**
+	 * Get provider schema
+	 */
+	async GetProviderSchema(request: GetProviderSchemaRequest): Promise<ApiResponse<ProviderSchema>> {
+		const params: Record<string, string> = {}
+		if (request.locale) {
+			params.locale = request.locale
+		}
+
+		return this.api.Get<ProviderSchema>(
+			`/kb/providers/${request.providerType}/${request.providerID}/schema`,
+			params
+		)
 	}
 }
