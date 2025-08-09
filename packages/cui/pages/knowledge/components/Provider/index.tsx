@@ -35,6 +35,9 @@ interface GroupedProvider {
 	title: string
 	description: string
 	group?: string
+	providerId?: string // Original provider ID
+	optionValue?: string // Option value if this represents an option
+	properties?: any // Option properties
 	options?: Array<{ label: string; value: string; description: string }>
 }
 
@@ -51,35 +54,48 @@ function groupProviders(
 	const providerMap = new Map<string, Provider>()
 	providers.forEach((p) => providerMap.set(p.id, p))
 
-	// Enhance summaries with provider details
-	const enhancedProviders: GroupedProvider[] = summaries.map((summary) => {
-		const provider = providerMap.get(summary.id)
-		return {
-			id: summary.id,
-			title: summary.title || summary.id,
-			description: summary.description || '',
-			group: provider?.label || 'Default', // Use provider label as group name
-			options: provider?.options?.map((opt: any) => ({
-				label: opt.label,
-				value: opt.value,
-				description: opt.description
-			}))
-		}
-	})
-
-	// Group by category
+	// Create groups based on provider configurations
 	const groups = new Map<string, GroupedProvider[]>()
-	enhancedProviders.forEach((provider) => {
-		const groupName = provider.group || 'Default'
-		if (!groups.has(groupName)) {
-			groups.set(groupName, [])
+
+	summaries.forEach((summary) => {
+		const provider = providerMap.get(summary.id)
+		const groupName = summary.title || summary.id // Use summary title as group name
+
+		if (provider?.options && Array.isArray(provider.options)) {
+			// Each option becomes a separate provider choice
+			const optionProviders: GroupedProvider[] = provider.options.map((opt: any) => ({
+				id: `${summary.id}.${opt.value}`, // Unique ID combining provider ID and option value
+				title: opt.label,
+				description: opt.description,
+				group: groupName,
+				// Store the original provider ID and option value for later use
+				providerId: summary.id,
+				optionValue: opt.value,
+				properties: opt.properties || {}
+			}))
+
+			groups.set(groupName, optionProviders)
+		} else {
+			// Fallback for providers without options
+			const singleProvider: GroupedProvider = {
+				id: summary.id,
+				title: summary.title || summary.id,
+				description: summary.description || '',
+				group: groupName,
+				providerId: summary.id
+			}
+
+			if (!groups.has(groupName)) {
+				groups.set(groupName, [])
+			}
+			groups.get(groupName)!.push(singleProvider)
 		}
-		groups.get(groupName)!.push(provider)
 	})
 
 	// If only one group, return flat array
 	if (groups.size <= 1) {
-		return enhancedProviders
+		const allProviders = Array.from(groups.values()).flat()
+		return allProviders
 	}
 
 	// Return grouped array
@@ -167,6 +183,7 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 	const [schema, setSchema] = useState<ProviderSchema | undefined>(undefined)
 	const [providerResp, setProviderResp] = useState<ProviderAndSchemaResponse | undefined>(undefined)
 	const [values, setValues] = useState<Values>(value?.properties || {})
+	const [isInitialLoad, setIsInitialLoad] = useState(true)
 	const [showValidation, setShowValidation] = useState(false)
 	const [loadingList, setLoadingList] = useState(false)
 	const [loadingDetail, setLoadingDetail] = useState(false)
@@ -206,8 +223,21 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 				const grouped = groupProviders(list, response.data)
 				setGroupedProviders(grouped)
 
-				if (!selectedId && list.length > 0) {
-					setSelectedId(list[0].id)
+				// Set default selection to first available option
+				if (!selectedId && grouped.length > 0) {
+					if ('groupLabel' in grouped[0]) {
+						// Grouped format - select first option from first group
+						const firstGroup = grouped[0] as ProviderGroup
+						if (firstGroup.providers.length > 0) {
+							setSelectedId(firstGroup.providers[0].id)
+						}
+					} else {
+						// Flat format - select first provider
+						const flatProviders = grouped as GroupedProvider[]
+						if (flatProviders.length > 0) {
+							setSelectedId(flatProviders[0].id)
+						}
+					}
 				}
 			})
 			.catch((error) => {
@@ -238,13 +268,30 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 		let ignore = false
 		setLoadingDetail(true)
 
-		// Get provider schema using real API
-		kb.GetProviderSchema({ providerType: type, providerID: selectedId, locale })
+		// Extract provider ID and option value from selectedId
+		// selectedId format: "providerId.optionValue" or just "providerId"
+		// Note: providerId itself may contain dots (e.g., "__yao.structured")
+		let providerId: string
+		let optionValue: string | undefined
+
+		// Find the provider ID by checking against known providers
+		const matchingProvider = providers.find((p) => selectedId.startsWith(p.id + '.'))
+		if (matchingProvider) {
+			providerId = matchingProvider.id
+			optionValue = selectedId.substring(matchingProvider.id.length + 1)
+		} else {
+			// If no matching provider with option, assume it's just the provider ID
+			providerId = selectedId
+			optionValue = undefined
+		}
+
+		// Get provider schema using real API (use original provider ID)
+		kb.GetProviderSchema({ providerType: type, providerID: providerId, locale })
 			.then((response) => {
 				if (ignore || !response.data) return
 
 				// Find the corresponding provider data
-				const provider = providers.find((p) => p.id === selectedId)
+				const provider = providers.find((p) => p.id === providerId)
 				if (!provider || !response.data) return
 
 				const resp = {
@@ -255,35 +302,83 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 				setProviderResp(resp)
 				setSchema(response.data)
 
-				// Initialize values from provider default option and schema defaults
-				const defaultOption = provider.options.find((o: any) => o.default) || provider.options[0]
-				const baseValues: Values = defaultOption?.properties ? { ...defaultOption.properties } : {}
+				// Find the selected option or default option
+				let selectedOption = optionValue
+					? provider.options?.find((opt: any) => opt.value === optionValue)
+					: provider.options?.find((opt: any) => opt.default === true)
+
+				// Fallback to first option if no default and no specific selection
+				if (!selectedOption && provider.options && provider.options.length > 0) {
+					selectedOption = provider.options[0]
+				}
+
+				const baseValues: Values = selectedOption?.properties ? { ...selectedOption.properties } : {}
 				const merged = mergeDefaultsFromSchema(response.data, baseValues)
-				setValues((prev) => ({ ...merged, ...prev }))
-				onChange?.({ id: selectedId, properties: { ...merged, ...values } })
+
+				if (isInitialLoad) {
+					// On initial load, preserve existing user values but fill in missing defaults
+					setValues((prev) => ({ ...merged, ...prev }))
+					onChange?.({ id: selectedId, properties: { ...merged, ...values } })
+				} else {
+					// When switching options, use new defaults to replace old values
+					setValues(merged)
+					onChange?.({ id: selectedId, properties: merged })
+				}
 			})
 			.catch((error) => {
 				if (!ignore) {
 					console.error('Failed to fetch provider schema:', error)
 					// Fallback to mock data for development
-					fetchProviderAndSchema(selectedId).then((resp) => {
+					// Use the same logic to extract provider ID and option value
+					let fallbackProviderId: string
+					let fallbackOptionValue: string | undefined
+					const fallbackMatchingProvider = providers.find((p) => selectedId.startsWith(p.id + '.'))
+					if (fallbackMatchingProvider) {
+						fallbackProviderId = fallbackMatchingProvider.id
+						fallbackOptionValue = selectedId.substring(fallbackMatchingProvider.id.length + 1)
+					} else {
+						fallbackProviderId = selectedId
+						fallbackOptionValue = undefined
+					}
+
+					fetchProviderAndSchema(fallbackProviderId).then((resp) => {
 						if (ignore) return
 						setProviderResp(resp)
 						setSchema(resp.schema)
 
-						// Initialize values from provider default option and schema defaults
-						const defaultOption =
-							resp.provider.options.find((o) => o.default) || resp.provider.options[0]
-						const baseValues: Values = defaultOption?.properties
-							? { ...defaultOption.properties }
+						// Find the selected option or default option
+						const provider = providers.find((p) => p.id === fallbackProviderId)
+						let selectedOption = fallbackOptionValue
+							? provider?.options?.find((opt: any) => opt.value === fallbackOptionValue)
+							: provider?.options?.find((opt: any) => opt.default === true)
+
+						if (!selectedOption && provider?.options && provider.options.length > 0) {
+							selectedOption = provider.options[0]
+						}
+
+						const baseValues: Values = selectedOption?.properties
+							? { ...selectedOption.properties }
 							: {}
 						const merged = mergeDefaultsFromSchema(resp.schema, baseValues)
-						setValues((prev) => ({ ...merged, ...prev }))
-						onChange?.({ id: selectedId, properties: { ...merged, ...values } })
+
+						if (isInitialLoad) {
+							// On initial load, preserve existing user values but fill in missing defaults
+							setValues((prev) => ({ ...merged, ...prev }))
+							onChange?.({ id: selectedId, properties: { ...merged, ...values } })
+						} else {
+							// When switching options, use new defaults to replace old values
+							setValues(merged)
+							onChange?.({ id: selectedId, properties: merged })
+						}
 					})
 				}
 			})
-			.finally(() => !ignore && setLoadingDetail(false))
+			.finally(() => {
+				if (!ignore) {
+					setLoadingDetail(false)
+					setIsInitialLoad(false) // Mark initial load as complete
+				}
+			})
 		return () => {
 			ignore = true
 		}
@@ -570,7 +665,10 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 								enum: createSelectOptions()
 							}}
 							value={selectedId || ''}
-							onChange={(id: any) => setSelectedId(String(id))}
+							onChange={(id: any) => {
+								setSelectedId(String(id))
+								setIsInitialLoad(false) // Mark as not initial load when user changes selection
+							}}
 						/>
 					</div>
 				</div>
