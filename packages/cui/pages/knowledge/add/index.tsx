@@ -4,7 +4,7 @@ import { useLocalStorageState } from 'ahooks'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import BasicTab, { BasicTabRef } from './components/Basic'
-import AdvancedTab from './components/Advanced'
+import AdvancedTab, { AdvancedTabRef } from './components/Advanced'
 import styles from './index.less'
 
 export interface AddDocumentData {
@@ -45,15 +45,17 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 		// 更多配置项...
 	})
 
-	// Basic tab ref for validation
+	// Tab refs for validation
 	const basicTabRef = useRef<BasicTabRef>(null)
+	const advancedTabRef = useRef<AdvancedTabRef>(null)
 
 	// 当传入的 data 变化时，更新 currentData
 	React.useEffect(() => {
 		setCurrentData(data)
 	}, [data])
 
-	if (!data || !currentData) return null
+	// 如果没有数据，直接返回空
+	if (!data) return null
 
 	const tabs = [
 		{
@@ -81,21 +83,32 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 	}
 
 	const handleConfirm = () => {
-		// 如果是 basic tab，先验证 Provider 配置
+		// 根据当前tab验证 Provider 配置
+		let isProviderValid = false
 		if (activeTab === 'basic') {
-			const isProviderValid = basicTabRef.current?.validateProviderConfig()
-			if (!isProviderValid) {
-				console.log('Provider 配置验证失败，请检查必填项')
-				// 这里可以添加 toast 提示或其他用户提示
-				return
-			}
-			console.log('Provider 配置验证通过')
+			isProviderValid = basicTabRef.current?.validateProviderConfig() || false
+		} else if (activeTab === 'advanced') {
+			isProviderValid = advancedTabRef.current?.validateProviderConfig() || false
 		}
 
-		onConfirm(currentData, options)
+		if (!isProviderValid) {
+			console.log('Provider 配置验证失败，请检查必填项')
+			// 这里可以添加 toast 提示或其他用户提示
+			return
+		}
+		console.log('Provider 配置验证通过')
+
+		if (currentData) {
+			onConfirm(currentData, options)
+		}
 	}
 
 	const renderContent = () => {
+		// 如果currentData为null，显示加载状态
+		if (!currentData) {
+			return <div>Loading...</div>
+		}
+
 		switch (activeTab) {
 			case 'basic':
 				return (
@@ -109,7 +122,12 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 				)
 			case 'advanced':
 				return (
-					<AdvancedTab data={currentData} options={options} onOptionsChange={handleOptionsChange} />
+					<AdvancedTab
+						ref={advancedTabRef}
+						data={currentData}
+						options={options}
+						onOptionsChange={handleOptionsChange}
+					/>
 				)
 			default:
 				return (
@@ -125,6 +143,8 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({ visible, onClose, o
 	}
 
 	const getModalTitle = () => {
+		if (!currentData) return ''
+
 		const typeLabels = {
 			file: is_cn ? '文件' : 'File',
 			text: is_cn ? '文本' : 'Text',
