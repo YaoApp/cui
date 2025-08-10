@@ -362,4 +362,17 @@
 		border-radius: 8px;
 		background-color: var(--color_bg_light);
 	}
+
+	// Simple mode styles
+	&.simpleMode {
+		.providerContainer {
+			.providerSelector {
+				// Remove bottom border and margin in simple mode
+				border-bottom: none;
+				margin-bottom: 0;
+				// Remove extra padding since container already has 16px padding
+				padding: 0;
+			}
+		}
+	}
 }

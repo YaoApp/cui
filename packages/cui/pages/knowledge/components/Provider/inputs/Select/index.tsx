@@ -11,6 +11,7 @@ interface GroupedOption {
 export default function Select({ value, onChange, schema }: InputComponentProps) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [highlightedIndex, setHighlightedIndex] = useState(-1)
+	const [isDropup, setIsDropup] = useState(false)
 	const selectRef = useRef<HTMLDivElement>(null)
 	const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -40,6 +41,43 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 	// 找到当前选中的选项
 	const selectedOption = flatOptions.find((opt) => opt.value === value) || null
 
+	// 找到最近的滚动容器
+	const findScrollContainer = (element: HTMLElement): HTMLElement => {
+		let parent = element.parentElement
+		while (parent) {
+			const style = window.getComputedStyle(parent)
+			if (
+				style.overflow === 'auto' ||
+				style.overflow === 'scroll' ||
+				style.overflowY === 'auto' ||
+				style.overflowY === 'scroll'
+			) {
+				return parent
+			}
+			parent = parent.parentElement
+		}
+		return document.documentElement
+	}
+
+	// 检测下拉框应该向上还是向下弹出
+	const checkDropdownPosition = () => {
+		if (!selectRef.current) return false
+
+		const selectRect = selectRef.current.getBoundingClientRect()
+		const scrollContainer = findScrollContainer(selectRef.current)
+		const containerRect = scrollContainer.getBoundingClientRect()
+
+		const dropdownHeight = 240 // 与 CSS 中的 max-height 保持一致
+		const buffer = 20 // 添加一些缓冲区
+
+		// 计算相对于滚动容器的可用空间
+		const spaceBelow = containerRect.bottom - selectRect.bottom - buffer
+		const spaceAbove = selectRect.top - containerRect.top - buffer
+
+		// 如果下方空间不足以显示完整下拉框，且上方有足够空间，则向上弹出
+		return spaceBelow < dropdownHeight && spaceAbove >= dropdownHeight
+	}
+
 	// 获取默认选项
 	const getDefaultOption = (): GroupedOption | null => {
 		// 从 schema.default 获取默认值
@@ -56,6 +94,18 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 		onChange(option.value)
 		setIsOpen(false)
 		setHighlightedIndex(-1)
+		setIsDropup(false)
+	}
+
+	// 打开下拉框
+	const openDropdown = () => {
+		// 使用 setTimeout 确保在下一个事件循环中进行位置检测
+		// 这样可以确保 DOM 已经完全更新
+		setTimeout(() => {
+			const shouldDropup = checkDropdownPosition()
+			setIsDropup(shouldDropup)
+		}, 0)
+		setIsOpen(true)
 	}
 
 	// 处理键盘事件
@@ -63,7 +113,7 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 		if (!isOpen) {
 			if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
 				e.preventDefault()
-				setIsOpen(true)
+				openDropdown()
 				setHighlightedIndex(0)
 			}
 			return
@@ -73,6 +123,7 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 			case 'Escape':
 				setIsOpen(false)
 				setHighlightedIndex(-1)
+				setIsDropup(false)
 				break
 			case 'ArrowDown':
 				e.preventDefault()
@@ -97,12 +148,31 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 			if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
 				setIsOpen(false)
 				setHighlightedIndex(-1)
+				setIsDropup(false)
 			}
 		}
 
 		document.addEventListener('mousedown', handleClickOutside)
 		return () => document.removeEventListener('mousedown', handleClickOutside)
 	}, [])
+
+	// 监听窗口大小变化和滚动，重新检测位置
+	useEffect(() => {
+		if (!isOpen) return
+
+		const handleReposition = () => {
+			const shouldDropup = checkDropdownPosition()
+			setIsDropup(shouldDropup)
+		}
+
+		window.addEventListener('resize', handleReposition)
+		window.addEventListener('scroll', handleReposition, true)
+
+		return () => {
+			window.removeEventListener('resize', handleReposition)
+			window.removeEventListener('scroll', handleReposition, true)
+		}
+	}, [isOpen])
 
 	// 如果没有选中值且有默认选项，设置默认值
 	useEffect(() => {
@@ -122,7 +192,7 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 			tabIndex={0}
 		>
 			{/* 选择框主体 */}
-			<div className={styles.selectTrigger} onClick={() => setIsOpen(!isOpen)}>
+			<div className={styles.selectTrigger} onClick={() => (isOpen ? setIsOpen(false) : openDropdown())}>
 				<div className={styles.selectedContent}>
 					{selectedOption ? (
 						<>
@@ -152,7 +222,7 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 
 			{/* 下拉选项 */}
 			{isOpen && (
-				<div ref={dropdownRef} className={styles.dropdown}>
+				<div ref={dropdownRef} className={`${styles.dropdown} ${isDropup ? styles.dropup : ''}`}>
 					{processedOptions.map((item, index) => {
 						if ('groupLabel' in item) {
 							// 渲染分组

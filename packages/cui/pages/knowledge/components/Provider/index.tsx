@@ -176,6 +176,8 @@ export interface ProviderConfiguratorProps {
 		name: string
 		description: string
 	}
+	// Display mode: 'simple' only shows provider selector, 'detailed' shows full configuration
+	mode?: 'simple' | 'detailed'
 }
 
 export interface ProviderConfiguratorRef {
@@ -232,7 +234,7 @@ function mergeDefaultsFromSchema(schema: ProviderSchema, base: Values = {}): Val
 }
 
 const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfiguratorProps>((props, ref) => {
-	const { type = 'chunkings', value, onChange, className, labels } = props
+	const { type = 'chunking', value, onChange, className, labels, mode = 'simple' } = props
 	const [summaries, setSummaries] = useState<ProviderSchemaSummary[]>([])
 	const [providers, setProviders] = useState<Provider[]>([])
 	const [groupedProviders, setGroupedProviders] = useState<ProviderGroup[] | GroupedProvider[]>([])
@@ -694,7 +696,11 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 	}
 
 	return (
-		<div className={`${styles.providerConfigurator} ${className || ''}`}>
+		<div
+			className={`${styles.providerConfigurator} ${className || ''} ${
+				mode === 'simple' ? styles.simpleMode : ''
+			}`}
+		>
 			{/* Provider container with selector and config */}
 			<div className={styles.providerContainer}>
 				{/* Provider selector */}
@@ -721,8 +727,8 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 					</div>
 				</div>
 
-				{/* Details form */}
-				{schema && (
+				{/* Details form - only show in detailed mode */}
+				{mode === 'detailed' && schema && (
 					<div className={styles.configForm}>
 						{loadingDetail ? (
 							<div className={styles.loadingState}>Loading configuration...</div>

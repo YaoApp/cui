@@ -86,14 +86,54 @@
 		border: 1px solid var(--color_border, #e6e6e6);
 		border-radius: 6px;
 		box-shadow: var(--shadow, 0 0 30px rgba(0, 0, 0, 0.081));
-		max-height: 300px;
+		max-height: 240px;
 		overflow-y: auto;
 		animation: slideDown 0.15s ease-out;
+
+		// 滚动条样式，与其他组件保持一致
+		&::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--color_text_grey);
+			}
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--color_border_soft);
+			border-radius: 3px;
+		}
 
 		@keyframes slideDown {
 			from {
 				opacity: 0;
 				transform: translateY(-8px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		// 支持向上弹出的动画
+		&.dropup {
+			top: auto;
+			bottom: 100%;
+			margin-top: 0;
+			margin-bottom: 4px;
+			animation: slideUp 0.15s ease-out;
+		}
+
+		@keyframes slideUp {
+			from {
+				opacity: 0;
+				transform: translateY(8px);
 			}
 			to {
 				opacity: 1;
