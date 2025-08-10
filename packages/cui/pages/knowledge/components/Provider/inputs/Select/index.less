@@ -76,10 +76,7 @@
 	}
 
 	.dropdown {
-		position: absolute;
-		top: 100%;
-		left: 0;
-		right: 0;
+		position: fixed;
 		z-index: 1000;
 		margin-top: 4px;
 		background-color: var(--color_bg_menu);
@@ -123,8 +120,6 @@
 
 		// 支持向上弹出的动画
 		&.dropup {
-			top: auto;
-			bottom: 100%;
 			margin-top: 0;
 			margin-bottom: 4px;
 			animation: slideUp 0.15s ease-out;

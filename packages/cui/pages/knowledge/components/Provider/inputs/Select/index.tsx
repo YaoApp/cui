@@ -12,6 +12,7 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 	const [isOpen, setIsOpen] = useState(false)
 	const [highlightedIndex, setHighlightedIndex] = useState(-1)
 	const [isDropup, setIsDropup] = useState(false)
+	const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
 	const selectRef = useRef<HTMLDivElement>(null)
 	const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -59,9 +60,9 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 		return document.documentElement
 	}
 
-	// 检测下拉框应该向上还是向下弹出
-	const checkDropdownPosition = () => {
-		if (!selectRef.current) return false
+	// 检测下拉框应该向上还是向下弹出，并计算位置
+	const calculateDropdownPosition = () => {
+		if (!selectRef.current) return { shouldDropup: false, position: { top: 0, left: 0, width: 0 } }
 
 		const selectRect = selectRef.current.getBoundingClientRect()
 		const scrollContainer = findScrollContainer(selectRef.current)
@@ -74,8 +75,19 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 		const spaceBelow = containerRect.bottom - selectRect.bottom - buffer
 		const spaceAbove = selectRect.top - containerRect.top - buffer
 
-		// 如果下方空间不足以显示完整下拉框，且上方有足够空间，则向上弹出
-		return spaceBelow < dropdownHeight && spaceAbove >= dropdownHeight
+		// 确定是否向上弹出
+		const shouldDropup = spaceBelow < dropdownHeight && spaceAbove >= dropdownHeight
+
+		// 计算下拉框的位置
+		const position = {
+			left: selectRect.left,
+			width: selectRect.width,
+			top: shouldDropup
+				? selectRect.top - 4 // 向上弹出时，在选择框上方
+				: selectRect.bottom + 4 // 向下弹出时，在选择框下方
+		}
+
+		return { shouldDropup, position }
 	}
 
 	// 获取默认选项
@@ -99,12 +111,10 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 
 	// 打开下拉框
 	const openDropdown = () => {
-		// 使用 setTimeout 确保在下一个事件循环中进行位置检测
-		// 这样可以确保 DOM 已经完全更新
-		setTimeout(() => {
-			const shouldDropup = checkDropdownPosition()
-			setIsDropup(shouldDropup)
-		}, 0)
+		// 在显示下拉框之前先计算位置，避免布局闪烁
+		const { shouldDropup, position } = calculateDropdownPosition()
+		setIsDropup(shouldDropup)
+		setDropdownPosition(position)
 		setIsOpen(true)
 	}
 
@@ -161,8 +171,9 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 		if (!isOpen) return
 
 		const handleReposition = () => {
-			const shouldDropup = checkDropdownPosition()
+			const { shouldDropup, position } = calculateDropdownPosition()
 			setIsDropup(shouldDropup)
+			setDropdownPosition(position)
 		}
 
 		window.addEventListener('resize', handleReposition)
@@ -222,7 +233,15 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 
 			{/* 下拉选项 */}
 			{isOpen && (
-				<div ref={dropdownRef} className={`${styles.dropdown} ${isDropup ? styles.dropup : ''}`}>
+				<div
+					ref={dropdownRef}
+					className={`${styles.dropdown} ${isDropup ? styles.dropup : ''}`}
+					style={{
+						top: isDropup ? dropdownPosition.top - 240 : dropdownPosition.top, // 向上时减去下拉框高度
+						left: dropdownPosition.left,
+						width: dropdownPosition.width
+					}}
+				>
 					{processedOptions.map((item, index) => {
 						if ('groupLabel' in item) {
 							// 渲染分组
