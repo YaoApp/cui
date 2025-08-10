@@ -105,6 +105,63 @@ function groupProviders(
 	}))
 }
 
+// Helper function to check if a value represents true
+function isTrue(value: any): boolean {
+	return value === true || value === 1 || value === '1' || value === 'true'
+}
+
+// Find the default selection based on provider and option defaults
+function findDefaultSelection(grouped: ProviderGroup[] | GroupedProvider[], providers: Provider[]): string | null {
+	const providerMap = new Map<string, Provider>()
+	providers.forEach((p) => providerMap.set(p.id, p))
+
+	// First, look for a provider with default=true
+	const defaultProvider = providers.find((p) => isTrue(p.default))
+
+	if (defaultProvider) {
+		// If provider has default=true, check if it has options with defaults
+		if (defaultProvider.options && Array.isArray(defaultProvider.options)) {
+			const defaultOption = defaultProvider.options.find((opt: any) => isTrue(opt.default))
+			if (defaultOption) {
+				return `${defaultProvider.id}|${defaultOption.value}`
+			}
+			// If no default option, use first option
+			if (defaultProvider.options.length > 0) {
+				return `${defaultProvider.id}|${defaultProvider.options[0].value}`
+			}
+		}
+		// If provider has no options, just return provider id
+		return defaultProvider.id
+	}
+
+	// If no provider has default=true, look for any option with default=true
+	for (const provider of providers) {
+		if (provider.options && Array.isArray(provider.options)) {
+			const defaultOption = provider.options.find((opt: any) => isTrue(opt.default))
+			if (defaultOption) {
+				return `${provider.id}|${defaultOption.value}`
+			}
+		}
+	}
+
+	// Fallback to first available option
+	if ('groupLabel' in grouped[0]) {
+		// Grouped format - select first option from first group
+		const firstGroup = grouped[0] as ProviderGroup
+		if (firstGroup.providers.length > 0) {
+			return firstGroup.providers[0].id
+		}
+	} else {
+		// Flat format - select first provider
+		const flatProviders = grouped as GroupedProvider[]
+		if (flatProviders.length > 0) {
+			return flatProviders[0].id
+		}
+	}
+
+	return null
+}
+
 export interface ProviderConfiguratorProps {
 	// Currently only 'chunkings' is used, but the API allows other types
 	type?: string
@@ -223,20 +280,11 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 				const grouped = groupProviders(list, response.data)
 				setGroupedProviders(grouped)
 
-				// Set default selection to first available option
+				// Set default selection based on provider and option defaults
 				if (!selectedId && grouped.length > 0) {
-					if ('groupLabel' in grouped[0]) {
-						// Grouped format - select first option from first group
-						const firstGroup = grouped[0] as ProviderGroup
-						if (firstGroup.providers.length > 0) {
-							setSelectedId(firstGroup.providers[0].id)
-						}
-					} else {
-						// Flat format - select first provider
-						const flatProviders = grouped as GroupedProvider[]
-						if (flatProviders.length > 0) {
-							setSelectedId(flatProviders[0].id)
-						}
+					const defaultSelection = findDefaultSelection(grouped, response.data)
+					if (defaultSelection) {
+						setSelectedId(defaultSelection)
 					}
 				}
 			})
