@@ -64,7 +64,7 @@ function groupProviders(
 		if (provider?.options && Array.isArray(provider.options)) {
 			// Each option becomes a separate provider choice
 			const optionProviders: GroupedProvider[] = provider.options.map((opt: any) => ({
-				id: `${summary.id}.${opt.value}`, // Unique ID combining provider ID and option value
+				id: `${summary.id}|${opt.value}`, // Unique ID combining provider ID and option value using | separator
 				title: opt.label,
 				description: opt.description,
 				group: groupName,
@@ -258,7 +258,7 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 		return () => {
 			ignore = true
 		}
-	}, [type, selectedId])
+	}, [type])
 
 	// Fetch details when selectedId changes
 	useEffect(() => {
@@ -269,18 +269,18 @@ const ProviderConfigurator = forwardRef<ProviderConfiguratorRef, ProviderConfigu
 		setLoadingDetail(true)
 
 		// Extract provider ID and option value from selectedId
-		// selectedId format: "providerId.optionValue" or just "providerId"
-		// Note: providerId itself may contain dots (e.g., "__yao.structured")
+		// selectedId format: "providerId|optionValue" or just "providerId"
+		// Using | separator to avoid conflicts with provider IDs that contain dots
 		let providerId: string
 		let optionValue: string | undefined
 
-		// Find the provider ID by checking against known providers
-		const matchingProvider = providers.find((p) => selectedId.startsWith(p.id + '.'))
-		if (matchingProvider) {
-			providerId = matchingProvider.id
-			optionValue = selectedId.substring(matchingProvider.id.length + 1)
+		// Check if selectedId contains the | separator
+		const separatorIndex = selectedId.indexOf('|')
+		if (separatorIndex !== -1) {
+			providerId = selectedId.substring(0, separatorIndex)
+			optionValue = selectedId.substring(separatorIndex + 1)
 		} else {
-			// If no matching provider with option, assume it's just the provider ID
+			// If no separator found, assume it's just the provider ID
 			providerId = selectedId
 			optionValue = undefined
 		}
