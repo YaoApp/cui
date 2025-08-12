@@ -6,6 +6,7 @@ import { history, getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { KB } from '@/openapi'
 import type { CreateCollectionRequest, CollectionConfig } from '@/openapi/kb/types'
+import ProviderSelect from '../components/Provider/Select'
 import styles from './index.less'
 
 const { TextArea } = Input
@@ -16,6 +17,8 @@ const CreateCollection = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [loading, setLoading] = useState(false)
+	const [selectedEmbedding, setSelectedEmbedding] = useState<string>('')
+	const [embeddingDimension, setEmbeddingDimension] = useState<number>(1536)
 
 	// Distance metrics options
 	const distanceOptions = [
@@ -51,9 +54,22 @@ const CreateCollection = () => {
 			const nanoid = customAlphabet('abcdefghjkmnpqrstuvwxyz23456789', 16)
 			const generatedId = nanoid()
 
+			// Parse embedding provider and option from selectedEmbedding
+			// Format: "providerId|optionValue"
+			let embeddingProvider = selectedEmbedding
+			let embeddingOption = ''
+
+			if (selectedEmbedding.includes('|')) {
+				const [providerId, optionValue] = selectedEmbedding.split('|')
+				embeddingProvider = providerId
+				embeddingOption = optionValue
+			}
+
 			// Prepare the request data
 			const config: CollectionConfig = {
-				dimension: values.dimension,
+				embedding_provider: embeddingProvider,
+				embedding_option: embeddingOption,
+				locale: locale,
 				distance: values.distance,
 				index_type: values.index_type
 			}
@@ -158,7 +174,6 @@ const CreateCollection = () => {
 						initialValues={{
 							distance: 'cosine',
 							index_type: 'hnsw',
-							dimension: 1536,
 							m: 16,
 							ef_construction: 200,
 							ef_search: 64,
@@ -212,15 +227,15 @@ const CreateCollection = () => {
 							</h3>
 
 							<Form.Item
-								name='dimension'
+								name='embedding_provider'
 								label={
 									<span>
-										{is_cn ? '向量维度' : 'Vector Dimension'}
+										{is_cn ? '向量化模型' : 'Embedding Model'}
 										<Tooltip
 											title={
 												is_cn
-													? '向量的维度大小，如OpenAI embeddings为1536'
-													: 'Vector dimension size, e.g., 1536 for OpenAI embeddings'
+													? '选择用于文本向量化的模型，不同模型有不同的维度和性能特点'
+													: 'Choose the model for text vectorization. Different models have different dimensions and performance characteristics'
 											}
 										>
 											<InfoCircleOutlined
@@ -235,19 +250,21 @@ const CreateCollection = () => {
 								rules={[
 									{
 										required: true,
-										message: is_cn ? '请输入向量维度' : 'Please enter dimension'
-									},
-									{
-										type: 'number',
-										min: 1,
-										max: 4096,
 										message: is_cn
-											? '维度必须在1-4096之间'
-											: 'Dimension must be between 1-4096'
+											? '请选择向量化模型'
+											: 'Please select embedding model'
 									}
 								]}
 							>
-								<InputNumber style={{ width: '100%' }} placeholder='1536' />
+								<ProviderSelect
+									type='embedding'
+									value={selectedEmbedding}
+									onChange={(value) => {
+										setSelectedEmbedding(value)
+										form.setFieldsValue({ embedding_provider: value })
+									}}
+									placeholder={is_cn ? '选择向量化模型' : 'Select embedding model'}
+								/>
 							</Form.Item>
 
 							<Form.Item

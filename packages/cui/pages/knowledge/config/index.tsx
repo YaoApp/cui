@@ -6,6 +6,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { KB, Collection } from '@/openapi'
 import Tag from '@/neo/components/AIChat/Tag'
+import { useProviderInfo } from '../components/Provider/hooks/useProviderInfo'
 import styles from './index.less'
 
 const { TextArea } = Input
@@ -22,10 +23,22 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [loading, setLoading] = useState(false)
+	const [selectedEmbedding, setSelectedEmbedding] = useState<string>('')
+
+	// 使用provider信息hook
+	const { getProviderInfo, loading: providerLoading } = useProviderInfo('embedding')
 
 	// 初始化表单数据
 	useEffect(() => {
 		if (visible && collection) {
+			// 从metadata中读取原始的embedding provider信息
+			const embeddingProvider = (collection.metadata.__embedding_provider as string) || ''
+			const embeddingOption = (collection.metadata.__embedding_option as string) || ''
+			const embeddingValue =
+				embeddingProvider && embeddingOption ? `${embeddingProvider}|${embeddingOption}` : ''
+
+			setSelectedEmbedding(embeddingValue)
+
 			form.setFieldsValue({
 				name: collection.metadata.name,
 				description: collection.metadata.description
@@ -217,12 +230,33 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 								{is_cn ? '向量配置' : 'Vector Configuration'}
 							</span>
 						</div>
+
 						<div className={styles.infoGrid}>
+							{/* Embedding Provider 显示 */}
 							<div className={styles.infoItem}>
 								<span className={styles.infoLabel}>
-									{is_cn ? '维度' : 'Dimension'}:
+									{is_cn ? '向量化模型' : 'Embedding Model'}:
 								</span>
-								<span className={styles.infoValue}>{collection.config.dimension}</span>
+								<span className={styles.infoValue}>
+									{(() => {
+										if (providerLoading) {
+											return is_cn ? '加载中...' : 'Loading...'
+										}
+
+										if (!selectedEmbedding) {
+											return is_cn
+												? '未配置向量化模型'
+												: 'No embedding model configured'
+										}
+
+										const providerInfo = getProviderInfo(selectedEmbedding)
+										if (providerInfo) {
+											return providerInfo.title
+										}
+
+										return is_cn ? '未知模型' : 'Unknown model'
+									})()}
+								</span>
 							</div>
 							<div className={styles.infoItem}>
 								<span className={styles.infoLabel}>

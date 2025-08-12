@@ -23,10 +23,18 @@ export interface CollectionMetadata {
 
 // Base collection config structure
 export interface CollectionConfig {
-	dimension: number
+	embedding_provider: string
+	embedding_option: string
+	locale?: string
 	distance: string
 	index_type: string
-	[key: string]: any // Additional config parameters
+	// Additional HNSW parameters
+	m?: number
+	ef_construction?: number
+	ef_search?: number
+	// Additional IVF parameters
+	num_lists?: number
+	num_probes?: number
 }
 
 // Collection data structure (maps to backend GetCollections response)
