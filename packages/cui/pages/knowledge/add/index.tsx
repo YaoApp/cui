@@ -266,8 +266,12 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 			message.error(errorMsg)
 		} finally {
 			setProcessing(false)
-			setUploadProgress(0)
 			setCurrentStep('')
+
+			// 延迟重置uploadProgress，让CSS动画完整执行（1.8s）
+			setTimeout(() => {
+				setUploadProgress(0)
+			}, 2000)
 		}
 	}
 

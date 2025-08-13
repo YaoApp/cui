@@ -236,6 +236,8 @@
 				background-color: var(--color_border);
 				border-radius: 3px 3px 0 0;
 				overflow: hidden;
+				opacity: 1;
+				transition: opacity 0.3s ease;
 
 				&::before {
 					content: '';
@@ -245,14 +247,39 @@
 					height: 100%;
 					background-color: var(--color_primary);
 					border-radius: 3px 3px 0 0;
-					transition: width 0.3s ease;
+					transition: width 0.3s ease, background-color 0.3s ease;
 					width: var(--progress-width, 0%);
+				}
+
+				// 上传完成后的成功状态：绿色 + 100%宽度 + 停留1.5s
+				&[data-status='success'] {
+					&::before {
+						background-color: var(--color_success);
+						width: 100% !important; // 强制100%，不管CSS变量是什么
+					}
+
+					// 1.5s后开始淡出
+					animation: progressSuccess 1.8s ease forwards;
 				}
 
 				// 隐藏原始的Progress组件
 				:global(.xgen-progress),
 				:global(.ant-progress) {
 					display: none !important;
+				}
+			}
+
+			// 成功状态的动画：1.5s停留 + 0.3s淡出
+			@keyframes progressSuccess {
+				0% {
+					opacity: 1;
+				}
+				83.33% {
+					// 1.5s / 1.8s = 83.33%
+					opacity: 1;
+				}
+				100% {
+					opacity: 0;
 				}
 			}
 			overflow: hidden;

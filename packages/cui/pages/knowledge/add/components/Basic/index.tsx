@@ -85,9 +85,12 @@ const BasicTab = forwardRef<BasicTabRef, BasicTabProps>(
 						<span>{is_cn ? '内容预览' : 'Content Preview'}</span>
 					</div>
 					<div className={styles.previewContent}>
-						{processing && data.type === 'file' && (
+						{(processing || uploadProgress === 100) && data.type === 'file' && (
 							<div
 								className={styles.progressSection}
+								data-status={
+									uploadProgress === 100 && !processing ? 'success' : 'active'
+								}
 								style={
 									{
 										'--progress-width': `${uploadProgress}%`
