@@ -252,8 +252,8 @@ export declare namespace App {
 		embeddings: string[]
 		/** File processing converters (Optional) */
 		converters: string[]
-		/** Entity and relationship extractors (Optional) */
-		extractors: string[]
+		/** Entity and relationship extractions (Optional) */
+		extractions: string[]
 		/** File fetchers (Optional) */
 		fetchers: string[]
 		/** Search providers (Optional) */

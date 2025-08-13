@@ -32,7 +32,7 @@ const ProviderConfigs = forwardRef<ProviderConfigsRef, ProviderConfigsProps>(
 		const converterRef = useRef<ProviderConfiguratorRef>(null)
 		const fetcherRef = useRef<ProviderConfiguratorRef>(null)
 		const chunkingRef = useRef<ProviderConfiguratorRef>(null)
-		const extractorRef = useRef<ProviderConfiguratorRef>(null)
+		const extractionRef = useRef<ProviderConfiguratorRef>(null)
 
 		// 暴露验证方法
 		useImperativeHandle(ref, () => ({
@@ -49,9 +49,9 @@ const ProviderConfigs = forwardRef<ProviderConfigsRef, ProviderConfigsProps>(
 				// 所有类型都需要验证chunking
 				results.push(chunkingRef.current?.validateAllFields() || false)
 
-				// 如果支持图谱提取，验证extractor
+				// 如果支持图谱提取，验证extraction
 				if (kbConfig?.features?.GraphDatabase) {
-					results.push(extractorRef.current?.validateAllFields() || false)
+					results.push(extractionRef.current?.validateAllFields() || false)
 				}
 
 				return results.every((result) => result)
@@ -149,23 +149,23 @@ const ProviderConfigs = forwardRef<ProviderConfigsRef, ProviderConfigsProps>(
 				</div>
 			)
 
-			// 3. 如果支持图谱数据库：extractor (图谱提取)
+			// 3. 如果支持图谱数据库：extraction (图谱提取)
 			if (kbConfig?.features?.GraphDatabase) {
 				configs.push(
-					<div key='extractor' className={styles.optionsSection}>
+					<div key='extraction' className={styles.optionsSection}>
 						<ProviderConfigurator
-							ref={extractorRef}
-							type='extractor'
+							ref={extractionRef}
+							type='extraction'
 							mode={mode}
 							value={{
-								id: options?.extractorProviderId,
-								properties: options?.extractorProperties
+								id: options?.extractionProviderId,
+								properties: options?.extractionProperties
 							}}
 							onChange={(v) =>
 								onOptionsChange({
 									...options,
-									extractorProviderId: v.id,
-									extractorProperties: v.properties
+									extractionProviderId: v.id,
+									extractionProperties: v.properties
 								})
 							}
 							labels={{

@@ -352,9 +352,9 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 		}
 
 		const extractionConfig = buildProviderConfig(
-			finalOptions.extractorProviderId,
-			finalOptions.extractorProperties,
-			'extractor'
+			finalOptions.extractionProviderId,
+			finalOptions.extractionProperties,
+			'extraction'
 		)
 		if (extractionConfig) {
 			request.extraction = extractionConfig
@@ -402,9 +402,9 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 
 		// 添加可选的provider配置（遵从表单数据，有什么传什么）
 		const extractionConfig = buildProviderConfig(
-			finalOptions.extractorProviderId,
-			finalOptions.extractorProperties,
-			'extractor'
+			finalOptions.extractionProviderId,
+			finalOptions.extractionProperties,
+			'extraction'
 		)
 		if (extractionConfig) {
 			request.extraction = extractionConfig
@@ -457,9 +457,9 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 		}
 
 		const extractionConfig = buildProviderConfig(
-			finalOptions.extractorProviderId,
-			finalOptions.extractorProperties,
-			'extractor'
+			finalOptions.extractionProviderId,
+			finalOptions.extractionProperties,
+			'extraction'
 		)
 		if (extractionConfig) {
 			request.extraction = extractionConfig
