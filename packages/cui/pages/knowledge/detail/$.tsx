@@ -282,11 +282,10 @@ const KnowledgeDetail = () => {
 	}
 
 	// 处理添加文档确认
-	const handleAddDocumentConfirm = (data: AddDocumentData, options: any) => {
-		console.log('Adding document:', data, options)
+	const handleAddDocumentConfirm = (data: AddDocumentData, options: any, jobId: string) => {
+		console.log('Adding document:', data, options, 'Job ID:', jobId)
 
-		// TODO: 实际的添加逻辑
-		message.success(is_cn ? '文档添加成功' : 'Document added successfully')
+		message.success(is_cn ? '文档处理已开始' : 'Document processing started')
 
 		// 清理输入
 		if (data.type === 'text') {
@@ -295,9 +294,16 @@ const KnowledgeDetail = () => {
 			setUrlInput('')
 		}
 
-		// 关闭弹窗
+		// 关闭添加弹窗
 		setAddDocumentModalVisible(false)
 		setAddDocumentData(null)
+
+		// 打开文档详情弹窗，使用jobId作为docid
+		setSelectedDocument({
+			collectionId: id,
+			docid: jobId
+		})
+		setModalVisible(true)
 
 		// 重新加载数据
 		loadSeeds()
@@ -616,6 +622,7 @@ const KnowledgeDetail = () => {
 				onConfirm={handleAddDocumentConfirm}
 				data={addDocumentData}
 				collectionName={collection?.metadata?.name}
+				collection={collection}
 			/>
 		</div>
 	)

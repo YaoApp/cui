@@ -128,6 +128,20 @@
 		&:active {
 			background: var(--color_bg_active);
 		}
+
+		&.disabled {
+			cursor: not-allowed;
+			opacity: 0.5;
+
+			&:hover {
+				background: transparent;
+				color: var(--color_text_grey);
+			}
+
+			&:active {
+				background: transparent;
+			}
+		}
 	}
 
 	// 响应式处理：当空间不足时，让tabs降级到左侧布局
@@ -150,6 +164,7 @@
 }
 
 .modalContent {
+	position: relative;
 	background: var(--color_bg_menu);
 	border-radius: 0 0 var(--radius) var(--radius);
 	display: flex;
@@ -158,8 +173,14 @@
 
 .modalFooter {
 	display: flex;
-	justify-content: flex-end;
-	gap: 12px;
+	flex-direction: column;
+	gap: 16px;
+
+	.footerButtons {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+	}
 }
 
 // 基本选项卡样式
@@ -201,8 +222,39 @@
 		}
 
 		.previewContent {
+			position: relative;
 			border: 1px solid var(--color_border_light);
 			border-radius: 8px;
+
+			.progressSection {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				z-index: 10;
+				height: 6px;
+				background-color: var(--color_border);
+				border-radius: 3px 3px 0 0;
+				overflow: hidden;
+
+				&::before {
+					content: '';
+					position: absolute;
+					top: 0;
+					left: 0;
+					height: 100%;
+					background-color: var(--color_primary);
+					border-radius: 3px 3px 0 0;
+					transition: width 0.3s ease;
+					width: var(--progress-width, 0%);
+				}
+
+				// 隐藏原始的Progress组件
+				:global(.xgen-progress),
+				:global(.ant-progress) {
+					display: none !important;
+				}
+			}
 			overflow: hidden;
 		}
 	}

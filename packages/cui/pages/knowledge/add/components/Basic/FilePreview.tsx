@@ -1,5 +1,6 @@
 import React from 'react'
 import { getLocale } from '@umijs/max'
+import { Progress } from 'antd'
 import { Uploader } from '../../../components'
 import { SwapOutlined } from '@ant-design/icons'
 import { getFileTypeIcon } from '@/assets/icons'
@@ -13,9 +14,11 @@ interface FilePreviewProps {
 		size: number
 	}
 	onFileChange?: (file: File) => void
+	processing?: boolean
+	uploadProgress?: number
 }
 
-const FilePreview: React.FC<FilePreviewProps> = ({ data, onFileChange }) => {
+const FilePreview: React.FC<FilePreviewProps> = ({ data, onFileChange, processing = false, uploadProgress = 0 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 

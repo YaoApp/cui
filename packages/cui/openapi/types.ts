@@ -92,23 +92,23 @@ export interface FileListOptions {
  */
 export interface FileInfo {
 	/** File ID */
-	id: string
+	file_id: string
+	/** User provided path/filename */
+	user_path: string
+	/** Server file path */
+	path: string
+	/** File size in bytes */
+	bytes: number
+	/** Upload timestamp (Unix timestamp) */
+	created_at: number
 	/** Original filename */
 	filename: string
-	/** File size in bytes */
-	size: number
 	/** Content type */
-	contentType: string
+	content_type: string
 	/** File status */
 	status: string
-	/** Upload timestamp */
-	createdAt: string
-	/** Update timestamp */
-	updatedAt: string
 	/** File URL (if available) */
 	url?: string
-	/** File path */
-	path?: string
 	/** Additional metadata */
 	metadata?: Record<string, any>
 	/** Uploader ID */

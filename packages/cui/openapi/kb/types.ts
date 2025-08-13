@@ -98,3 +98,59 @@ export interface GetProviderSchemaRequest {
 	providerID: string
 	locale?: string // locale for internationalization, defaults to 'en'
 }
+
+// ===== Document Management Types =====
+
+// Provider configuration for document operations
+export interface ProviderConfig {
+	provider_id: string
+	option_id?: string
+	option?: Record<string, any>
+}
+
+// Base request for document upsert operations
+export interface BaseUpsertRequest {
+	collection_id: string
+	locale?: string
+	chunking: ProviderConfig
+	embedding: ProviderConfig
+	extraction?: ProviderConfig
+	fetcher?: ProviderConfig
+	converter?: ProviderConfig
+	doc_id?: string
+	metadata?: Record<string, any>
+}
+
+// Document management request types
+export interface AddFileRequest extends BaseUpsertRequest {
+	file_id: string
+	uploader?: string
+}
+
+export interface AddTextRequest extends BaseUpsertRequest {
+	text: string
+}
+
+export interface AddURLRequest extends BaseUpsertRequest {
+	url: string
+}
+
+// Document management response types
+export interface AddDocumentResponse {
+	message: string
+	collection_id: string
+	doc_id: string
+}
+
+export interface AddFileResponse extends AddDocumentResponse {
+	file_id: string
+}
+
+export interface AddURLResponse extends AddDocumentResponse {
+	url: string
+}
+
+// Async operation response
+export interface AsyncOperationResponse {
+	job_id: string
+}

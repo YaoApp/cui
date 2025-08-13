@@ -97,7 +97,7 @@ export class FileAPI {
 		}
 
 		// Use standard upload method
-		return this.api.Upload<FileInfo>(`/files/${uploaderID}`, formData)
+		return this.api.Upload<FileInfo>(`/file/${uploaderID}`, formData)
 	}
 
 	/**
@@ -164,7 +164,7 @@ export class FileAPI {
 			params.select = options.select.join(',')
 		}
 
-		return this.api.Get<FileListResponse>(`/files/${uploaderID}`, params)
+		return this.api.Get<FileListResponse>(`/file/${uploaderID}`, params)
 	}
 
 	/**
@@ -179,7 +179,7 @@ export class FileAPI {
 		}
 
 		const actualUploaderID = this.getUploaderID(uploaderID)
-		return this.api.Get<FileInfo>(`/files/${actualUploaderID}/${encodeURIComponent(fileID)}`)
+		return this.api.Get<FileInfo>(`/file/${actualUploaderID}/${encodeURIComponent(fileID)}`)
 	}
 
 	/**
@@ -194,7 +194,7 @@ export class FileAPI {
 		}
 
 		const actualUploaderID = this.getUploaderID(uploaderID)
-		return this.api.Delete<FileDeleteResponse>(`/files/${actualUploaderID}/${encodeURIComponent(fileID)}`)
+		return this.api.Delete<FileDeleteResponse>(`/file/${actualUploaderID}/${encodeURIComponent(fileID)}`)
 	}
 
 	/**
@@ -252,7 +252,7 @@ export class FileAPI {
 		}
 
 		const actualUploaderID = this.getUploaderID(uploaderID)
-		return this.api.Get<FileExistsResponse>(`/files/${actualUploaderID}/${encodeURIComponent(fileID)}/exists`)
+		return this.api.Get<FileExistsResponse>(`/file/${actualUploaderID}/${encodeURIComponent(fileID)}/exists`)
 	}
 
 	/**
@@ -264,7 +264,7 @@ export class FileAPI {
 		const uploaderID = this.getUploaderID(options.uploaderID)
 		return {
 			name: 'file',
-			action: `${this.getBaseURL()}/files/${uploaderID}`,
+			action: `${this.getBaseURL()}/file/${uploaderID}`,
 			method: 'POST' as const,
 			withCredentials: true,
 			data: {
@@ -492,7 +492,7 @@ export class FileAPI {
 			})
 
 			// Set up request
-			xhr.open('POST', `${this.getBaseURL()}/files/${uploaderID}`)
+			xhr.open('POST', `${this.getBaseURL()}/file/${uploaderID}`)
 
 			// Set chunked upload headers
 			xhr.setRequestHeader('Content-Sync', 'true')
@@ -580,7 +580,7 @@ export class FileAPI {
 			})
 
 			// Set up request
-			xhr.open('POST', `${this.getBaseURL()}/files/${uploaderID}`)
+			xhr.open('POST', `${this.getBaseURL()}/file/${uploaderID}`)
 
 			// Add CSRF token if available
 			const csrfToken = this.getCSRFToken()
@@ -633,7 +633,7 @@ export class FileAPI {
 		}
 
 		const actualUploaderID = this.getUploaderID(uploaderID)
-		return `${this.getBaseURL()}/files/${actualUploaderID}/${encodeURIComponent(fileID)}/content`
+		return `${this.getBaseURL()}/file/${actualUploaderID}/${encodeURIComponent(fileID)}/content`
 	}
 
 	/**

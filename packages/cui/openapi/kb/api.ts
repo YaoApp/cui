@@ -12,7 +12,14 @@ import {
 	Provider,
 	ProviderSchema,
 	GetProvidersRequest,
-	GetProviderSchemaRequest
+	GetProviderSchemaRequest,
+	AddFileRequest,
+	AddTextRequest,
+	AddURLRequest,
+	AddFileResponse,
+	AddDocumentResponse,
+	AddURLResponse,
+	AsyncOperationResponse
 } from './types'
 
 /**
@@ -64,6 +71,35 @@ export class KB {
 		request: UpdateCollectionMetadataRequest
 	): Promise<ApiResponse<UpdateCollectionMetadataResponse>> {
 		return this.api.Put<UpdateCollectionMetadataResponse>(`/kb/collections/${collectionID}/metadata`, request)
+	}
+
+	// ===== Document Management =====
+
+	/**
+	 * Add file to collection asynchronously
+	 */
+	async AddFileAsync(collectionID: string, request: AddFileRequest): Promise<ApiResponse<AsyncOperationResponse>> {
+		return this.api.Post<AsyncOperationResponse>(
+			`/kb/collections/${collectionID}/documents/file/async`,
+			request
+		)
+	}
+
+	/**
+	 * Add text to collection asynchronously
+	 */
+	async AddTextAsync(collectionID: string, request: AddTextRequest): Promise<ApiResponse<AsyncOperationResponse>> {
+		return this.api.Post<AsyncOperationResponse>(
+			`/kb/collections/${collectionID}/documents/text/async`,
+			request
+		)
+	}
+
+	/**
+	 * Add URL to collection asynchronously
+	 */
+	async AddURLAsync(collectionID: string, request: AddURLRequest): Promise<ApiResponse<AsyncOperationResponse>> {
+		return this.api.Post<AsyncOperationResponse>(`/kb/collections/${collectionID}/documents/url/async`, request)
 	}
 
 	// ===== Provider Management =====
