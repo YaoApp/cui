@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, history, getLocale } from '@umijs/max'
 import { Spin, Button, message, Input, Empty, Badge, Select, Tooltip, Popconfirm } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
@@ -69,6 +69,10 @@ const KnowledgeDetail = () => {
 	const [pageSize] = useState(10)
 	const [hasMore, setHasMore] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
+
+	// 自动刷新状态
+	const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false)
+	const autoRefreshTimerRef = useRef<NodeJS.Timeout | null>(null)
 
 	// 模态窗状态
 	const [modalVisible, setModalVisible] = useState(false)
@@ -162,6 +166,16 @@ const KnowledgeDetail = () => {
 
 			// 检查是否还有更多数据
 			setHasMore(data.length < total)
+
+			// 根据接口数据判断是否需要自动刷新
+			const needAutoRefresh = hasPendingDocuments(data)
+			if (needAutoRefresh && !autoRefreshEnabled) {
+				console.log('Found pending documents, starting auto refresh')
+				startAutoRefresh()
+			} else if (!needAutoRefresh && autoRefreshEnabled) {
+				console.log('No pending documents, stopping auto refresh')
+				stopAutoRefresh()
+			}
 		} catch (error) {
 			console.error('Load documents failed:', error)
 			message.error(is_cn ? '加载文档数据失败' : 'Failed to load documents')
@@ -198,6 +212,42 @@ const KnowledgeDetail = () => {
 		if (e.key === 'Enter') {
 			handleSearch()
 		}
+	}
+
+	// 检查是否有处理中的文档
+	const hasPendingDocuments = (docs: Document[]) => {
+		return docs.some(
+			(doc) =>
+				doc.status === 'pending' ||
+				doc.status === 'converting' ||
+				doc.status === 'chunking' ||
+				doc.status === 'extracting' ||
+				doc.status === 'embedding' ||
+				doc.status === 'storing'
+		)
+	}
+
+	// 启动自动刷新
+	const startAutoRefresh = () => {
+		if (autoRefreshTimerRef.current) {
+			clearInterval(autoRefreshTimerRef.current)
+		}
+
+		autoRefreshTimerRef.current = setInterval(() => {
+			console.log('Auto refreshing documents...')
+			loadDocuments()
+		}, 15000) // 15秒刷新一次
+
+		setAutoRefreshEnabled(true)
+	}
+
+	// 停止自动刷新
+	const stopAutoRefresh = () => {
+		if (autoRefreshTimerRef.current) {
+			clearInterval(autoRefreshTimerRef.current)
+			autoRefreshTimerRef.current = null
+		}
+		setAutoRefreshEnabled(false)
 	}
 
 	// 初始化加载
@@ -245,6 +295,7 @@ const KnowledgeDetail = () => {
 			const total = response.data?.total || 0
 
 			// 追加数据
+			const newDocuments = [...documents, ...data]
 			setDocuments((prev) => [...prev, ...data])
 			setFilteredDocuments((prev) => [...prev, ...data])
 			setTotalDocuments(total)
@@ -252,6 +303,16 @@ const KnowledgeDetail = () => {
 			// 检查是否还有更多数据
 			const loadedCount = documents.length + data.length
 			setHasMore(loadedCount < total)
+
+			// 根据所有文档数据判断是否需要自动刷新
+			const needAutoRefresh = hasPendingDocuments(newDocuments)
+			if (needAutoRefresh && !autoRefreshEnabled) {
+				console.log('Found pending documents in loaded data, starting auto refresh')
+				startAutoRefresh()
+			} else if (!needAutoRefresh && autoRefreshEnabled) {
+				console.log('No pending documents in all data, stopping auto refresh')
+				stopAutoRefresh()
+			}
 		} catch (error) {
 			console.error('Load more documents failed:', error)
 			message.error(is_cn ? '加载更多文档失败' : 'Failed to load more documents')
@@ -294,6 +355,15 @@ const KnowledgeDetail = () => {
 			loadDocuments()
 		}
 	}, [id])
+
+	// 组件卸载时清理定时器
+	useEffect(() => {
+		return () => {
+			if (autoRefreshTimerRef.current) {
+				clearInterval(autoRefreshTimerRef.current)
+			}
+		}
+	}, [])
 
 	// 上传文件处理
 	const handleFileUpload = (file: File) => {
