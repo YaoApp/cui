@@ -155,3 +155,94 @@ export interface AsyncOperationResponse {
 	job_id: string
 	doc_id: string
 }
+
+// ===== Document List Types =====
+
+// Document status enum
+export type DocumentStatus =
+	| 'pending'
+	| 'converting'
+	| 'chunking'
+	| 'extracting'
+	| 'embedding'
+	| 'storing'
+	| 'completed'
+	| 'maintenance'
+	| 'restoring'
+	| 'error'
+
+// Document type enum
+export type DocumentType = 'file' | 'text' | 'url'
+
+// Document data structure
+export interface Document {
+	id: number
+	document_id: string
+	collection_id: string
+	name: string
+	description?: string
+	cover?: string
+	tags?: any
+	type: DocumentType
+	size: number
+	segment_count: number
+	status: DocumentStatus
+	locale?: string
+	job_id?: string
+	uploader_id?: string
+	system?: boolean
+	sort?: number
+
+	// File-specific fields
+	file_name?: string
+	file_path?: string
+	file_mime_type?: string
+
+	// URL-specific fields
+	url?: string
+	url_title?: string
+
+	// Content fields
+	text_content?: string
+
+	// Provider configuration fields
+	converter_provider_id?: string
+	converter_option_id?: string
+	converter_properties?: any
+	fetcher_provider_id?: string
+	fetcher_option_id?: string
+	fetcher_properties?: any
+	chunking_provider_id?: string
+	chunking_option_id?: string
+	chunking_properties?: any
+	extraction_provider_id?: string
+	extraction_option_id?: string
+	extraction_properties?: any
+
+	// Timestamps
+	processed_at?: string
+	error_message?: string
+	created_at: string
+	updated_at: string
+}
+
+// Document list request parameters
+export interface ListDocumentsRequest {
+	page?: number
+	pagesize?: number
+	select?: string // comma-separated field names
+	keywords?: string
+	tag?: string
+	collection_id?: string
+	status?: string // comma-separated status values
+	status_not?: string // comma-separated status values to exclude
+	sort?: string // comma-separated sort fields with direction (e.g., "created_at desc,name asc")
+}
+
+// Document list response (matches Model.Paginate format)
+export interface ListDocumentsResponse {
+	data: Document[]
+	total: number
+	page: number
+	pagesize: number
+}

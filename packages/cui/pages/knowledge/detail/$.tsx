@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, history, getLocale } from '@umijs/max'
-import { Spin, Button, message, Input, Empty, Badge, Select, Tooltip } from 'antd'
+import { Spin, Button, message, Input, Empty, Badge, Select, Tooltip, Popconfirm } from 'antd'
+import { DeleteOutlined } from '@ant-design/icons'
 import {
 	ArrowLeftOutlined,
 	UploadOutlined,
@@ -14,27 +15,15 @@ import Icon from '@/widgets/Icon'
 import DocumentModal from '../document'
 import CollectionConfigModal from '../config'
 import AddDocumentModal, { AddDocumentData } from '../add'
-import { Uploader } from '../components'
+import { Uploader, DocumentCover, Pagination } from '../components'
 import styles from './index.less'
 import { useGlobal } from '@/context/app'
 import { toJS } from 'mobx'
-import { KB, FileAPI, Collection } from '@/openapi'
+import { KB, FileAPI, Collection, Document, ListDocumentsRequest } from '@/openapi'
 
 const { TextArea } = Input
 
 // 类型定义 - 使用Collection类型统一集合概念
-
-interface Seed {
-	id: string
-	title: string
-	content: string
-	tags: string[]
-	seeds_count: number
-	type: 'text' | 'file' | 'url'
-	status: 'active' | 'processing'
-	created_at: string
-	cover?: string
-}
 
 // API 对象初始化
 const initializeAPIs = (kbConfig?: any) => {
@@ -49,57 +38,6 @@ const initializeAPIs = (kbConfig?: any) => {
 	const fileapi = new FileAPI(window.$app.openapi, defaultUploader)
 
 	return { kb, fileapi }
-}
-
-const mockFetchSeeds = async (id: string): Promise<Seed[]> => {
-	await new Promise((resolve) => setTimeout(resolve, 300))
-
-	return [
-		{
-			id: '1',
-			title: 'AWS Marketplace Homepage',
-			content: 'Discover, deploy, and manage software solutions for the cloud. Browse our extensive catalog...',
-			tags: ['technology', 'product'],
-			seeds_count: 3,
-			type: 'url',
-			status: 'active',
-			created_at: '2024-01-18T09:15:00Z',
-			cover: 'https://picsum.photos/200/280?random=1'
-		},
-		{
-			id: '2',
-			title: '山海经',
-			content: '山海经是中国古代重要的神话地理著作，记载了大量的神话传说、地理信息和奇异生物...',
-			tags: ['legal', 'compliance'],
-			seeds_count: 4,
-			type: 'file',
-			status: 'active',
-			created_at: '2024-01-17T14:30:00Z',
-			cover: 'https://picsum.photos/200/280?random=2'
-		},
-		{
-			id: '3',
-			title: '数据架构设计',
-			content: '现代数据架构需要考虑可扩展性、性能、安全性等多个维度。云原生架构提供了...',
-			tags: ['technology', 'operations'],
-			seeds_count: 1,
-			type: 'text',
-			status: 'processing',
-			created_at: '2024-01-19T16:45:00Z'
-			// 处理中的文档没有cover，会显示占位图
-		},
-		{
-			id: '4',
-			title: '智能清洁设备用户说明',
-			content: '本产品为智能清洁设备，具备自动识别、深度清洁等功能。Google Chrome用户可以...',
-			tags: ['product', 'marketing'],
-			seeds_count: 31,
-			type: 'file',
-			status: 'active',
-			created_at: '2024-01-16T11:20:00Z',
-			cover: 'https://picsum.photos/200/280?random=4'
-		}
-	]
 }
 
 const KnowledgeDetail = () => {
@@ -117,11 +55,20 @@ const KnowledgeDetail = () => {
 
 	const [loading, setLoading] = useState(true)
 	const [collection, setCollection] = useState<Collection | null>(null)
-	const [seeds, setSeeds] = useState<Seed[]>([])
+	const [documents, setDocuments] = useState<Document[]>([])
+	const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([])
 	const [textInput, setTextInput] = useState('')
 	const [urlInput, setUrlInput] = useState('')
 	const [searchText, setSearchText] = useState('')
-	const [selectedTags, setSelectedTags] = useState<string[]>([])
+	const [searchKeywords, setSearchKeywords] = useState('') // 实际用于搜索的关键词
+	const [sortBy, setSortBy] = useState('created_at desc') // 排序方式
+
+	// 滚动分页状态
+	const [currentPage, setCurrentPage] = useState(1)
+	const [totalDocuments, setTotalDocuments] = useState(0)
+	const [pageSize] = useState(10)
+	const [hasMore, setHasMore] = useState(true)
+	const [loadingMore, setLoadingMore] = useState(false)
 
 	// 模态窗状态
 	const [modalVisible, setModalVisible] = useState(false)
@@ -130,16 +77,18 @@ const KnowledgeDetail = () => {
 	const [addDocumentModalVisible, setAddDocumentModalVisible] = useState(false)
 	const [addDocumentData, setAddDocumentData] = useState<AddDocumentData | null>(null)
 
-	// 可用标签
-	const availableTags = [
-		{ key: 'legal', label: is_cn ? '法律' : 'legal' },
-		{ key: 'finance', label: is_cn ? '财务' : 'finance' },
-		{ key: 'technology', label: is_cn ? '技术' : 'technology' },
-		{ key: 'marketing', label: is_cn ? '市场' : 'marketing' },
-		{ key: 'hr', label: is_cn ? '人事' : 'hr' },
-		{ key: 'product', label: is_cn ? '产品' : 'product' },
-		{ key: 'operations', label: is_cn ? '运营' : 'operations' },
-		{ key: 'compliance', label: is_cn ? '合规' : 'compliance' }
+	// 可用排序方式
+	const availableSorts = [
+		{ key: 'created_at desc', label: is_cn ? '创建时间 (最新)' : 'Created (Newest)' },
+		{ key: 'created_at asc', label: is_cn ? '创建时间 (最旧)' : 'Created (Oldest)' },
+		{ key: 'updated_at desc', label: is_cn ? '更新时间 (最新)' : 'Updated (Newest)' },
+		{ key: 'updated_at asc', label: is_cn ? '更新时间 (最旧)' : 'Updated (Oldest)' },
+		{ key: 'name asc', label: is_cn ? '名称 (A-Z)' : 'Name (A-Z)' },
+		{ key: 'name desc', label: is_cn ? '名称 (Z-A)' : 'Name (Z-A)' },
+		{ key: 'size desc', label: is_cn ? '文件大小 (大到小)' : 'Size (Large to Small)' },
+		{ key: 'size asc', label: is_cn ? '文件大小 (小到大)' : 'Size (Small to Large)' },
+		{ key: 'segment_count desc', label: is_cn ? '片段数量 (多到少)' : 'Segments (More to Less)' },
+		{ key: 'segment_count asc', label: is_cn ? '片段数量 (少到多)' : 'Segments (Less to More)' }
 	]
 
 	// 获取文件类型图标
@@ -182,13 +131,72 @@ const KnowledgeDetail = () => {
 		}
 	}
 
-	// 加载种子数据
-	const loadSeeds = async () => {
+	// 加载文档数据
+	// Load document data - 初始加载
+	const loadDocuments = async () => {
 		try {
-			const data = await mockFetchSeeds(id)
-			setSeeds(data)
+			const { kb } = initializeAPIs(kbConfig)
+
+			const request: ListDocumentsRequest = {
+				collection_id: id,
+				sort: sortBy,
+				page: 1,
+				pagesize: pageSize,
+				...(searchKeywords && { keywords: searchKeywords })
+			}
+
+			const response = await kb.ListDocuments(request)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load documents')
+			}
+
+			const data = response.data?.data || []
+			const total = response.data?.total || 0
+
+			// 重新加载模式：替换数据
+			setDocuments(data)
+			setFilteredDocuments(data)
+			setCurrentPage(1)
+			setTotalDocuments(total)
+
+			// 检查是否还有更多数据
+			setHasMore(data.length < total)
 		} catch (error) {
-			message.error(is_cn ? '加载种子数据失败' : 'Failed to load seeds')
+			console.error('Load documents failed:', error)
+			message.error(is_cn ? '加载文档数据失败' : 'Failed to load documents')
+		}
+	}
+
+	// 执行搜索
+	const handleSearch = () => {
+		setSearchKeywords(searchText.trim())
+		setCurrentPage(1)
+		setHasMore(true)
+		loadDocuments()
+	}
+
+	// 处理排序变化
+	const handleSortChange = (newSort: string) => {
+		setSortBy(newSort)
+		setCurrentPage(1)
+		setHasMore(true)
+		loadDocuments()
+	}
+
+	// 清空搜索
+	const handleClearSearch = () => {
+		setSearchText('')
+		setSearchKeywords('')
+		setCurrentPage(1)
+		setHasMore(true)
+		loadDocuments()
+	}
+
+	// 处理回车键搜索
+	const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter') {
+			handleSearch()
 		}
 	}
 
@@ -196,7 +204,94 @@ const KnowledgeDetail = () => {
 	useEffect(() => {
 		if (id) {
 			loadCollection()
-			loadSeeds()
+			loadDocuments()
+		}
+	}, [id])
+
+	// 搜索关键词或排序变化时重新加载数据
+	useEffect(() => {
+		if (id) {
+			loadDocuments()
+		}
+	}, [searchKeywords, sortBy])
+
+	// 加载更多数据的函数
+	const loadMoreDocuments = async () => {
+		if (!hasMore || loadingMore) return
+
+		const nextPage = currentPage + 1
+		setCurrentPage(nextPage)
+
+		try {
+			setLoadingMore(true)
+
+			const { kb } = initializeAPIs(kbConfig)
+
+			const request: ListDocumentsRequest = {
+				collection_id: id,
+				sort: sortBy,
+				page: nextPage,
+				pagesize: pageSize,
+				...(searchKeywords && { keywords: searchKeywords })
+			}
+
+			const response = await kb.ListDocuments(request)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load documents')
+			}
+
+			const data = response.data?.data || []
+			const total = response.data?.total || 0
+
+			// 追加数据
+			setDocuments((prev) => [...prev, ...data])
+			setFilteredDocuments((prev) => [...prev, ...data])
+			setTotalDocuments(total)
+
+			// 检查是否还有更多数据
+			const loadedCount = documents.length + data.length
+			setHasMore(loadedCount < total)
+		} catch (error) {
+			console.error('Load more documents failed:', error)
+			message.error(is_cn ? '加载更多文档失败' : 'Failed to load more documents')
+		} finally {
+			setLoadingMore(false)
+		}
+	}
+
+	// Intersection Observer 监听滚动触发器
+	useEffect(() => {
+		if (!hasMore || loadingMore || filteredDocuments.length === 0) return
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const triggerEntry = entries[0]
+				if (triggerEntry.isIntersecting) {
+					loadMoreDocuments()
+				}
+			},
+			{
+				threshold: 0.1, // 当10%的元素可见时触发
+				rootMargin: '50px' // 提前50px开始加载
+			}
+		)
+
+		// 观察滚动触发器元素
+		const scrollTrigger = document.getElementById('scroll-trigger')
+		if (scrollTrigger) {
+			observer.observe(scrollTrigger)
+		}
+
+		return () => {
+			observer.disconnect()
+		}
+	}, [filteredDocuments, hasMore, loadingMore])
+
+	// 页面初始化时加载文档
+	useEffect(() => {
+		if (id) {
+			loadDocuments()
 		}
 	}, [id])
 
@@ -251,17 +346,6 @@ const KnowledgeDetail = () => {
 		setAddDocumentModalVisible(true)
 	}
 
-	// 标签切换
-	const toggleTag = (tag: string) => {
-		setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
-	}
-
-	// 搜索处理
-	const handleSearch = (value: string) => {
-		setSearchText(value)
-		// TODO: 实现搜索过滤逻辑
-	}
-
 	// 返回上一页
 	const handleBack = () => {
 		history.push('/knowledge')
@@ -298,15 +382,17 @@ const KnowledgeDetail = () => {
 		setAddDocumentModalVisible(false)
 		setAddDocumentData(null)
 
+		// 刷新文档列表以显示新添加的文档
+		setTimeout(() => {
+			loadDocuments()
+		}, 1000) // 延迟1秒后刷新，给服务器一点处理时间
+
 		// 打开文档详情弹窗，使用jobId作为docid
 		setSelectedDocument({
 			collectionId: id,
 			docid: jobId
 		})
 		setModalVisible(true)
-
-		// 重新加载数据
-		loadSeeds()
 	}
 
 	// 处理添加文档取消
@@ -320,39 +406,29 @@ const KnowledgeDetail = () => {
 		setCollection(updatedCollection)
 	}
 
-	const handleViewSeedDocument = (seed: Seed) => {
-		// 根据seed ID生成doc_id，实际项目中应该使用真实的文档ID
-		const docid = `doc_${seed.id.padStart(3, '0')}`
+	const handleViewDocument = (document: Document) => {
 		setSelectedDocument({
 			collectionId: id,
-			docid: docid
+			docid: document.document_id
 		})
 		setModalVisible(true)
 	}
 
-	// 过滤种子数据
-	const filteredSeeds = seeds.filter((seed) => {
-		// 搜索过滤
-		if (searchText.trim()) {
-			const keyword = searchText.toLowerCase()
-			const matchesTitle = seed.title.toLowerCase().includes(keyword)
-			const matchesContent = seed.content.toLowerCase().includes(keyword)
-			const matchesTags = seed.tags.some((tag) => tag.toLowerCase().includes(keyword))
-			if (!matchesTitle && !matchesContent && !matchesTags) {
-				return false
-			}
-		}
+	// 删除文档
+	const handleDeleteDocument = async (document: Document) => {
+		// TODO: 实现实际的删除逻辑
+		try {
+			// 暂时的空函数，显示成功消息
+			await new Promise((resolve) => setTimeout(resolve, 300))
 
-		// 标签过滤
-		if (selectedTags.length > 0) {
-			const hasMatchingTag = seed.tags.some((tag) => selectedTags.includes(tag))
-			if (!hasMatchingTag) {
-				return false
-			}
-		}
+			message.success(is_cn ? '文档删除成功' : 'Document deleted successfully')
 
-		return true
-	})
+			// 从本地状态中移除文档
+			setDocuments((prev) => prev.filter((doc) => doc.id !== document.id))
+		} catch (error) {
+			message.error(is_cn ? '删除失败' : 'Failed to delete document')
+		}
+	}
 
 	if (loading) {
 		return (
@@ -476,120 +552,212 @@ const KnowledgeDetail = () => {
 				<div className={styles.divider}></div>
 			</div>
 
-			{/* 搜索和标签过滤区域 */}
+			{/* 搜索和排序区域 */}
 			<div className={styles.filterSection}>
 				<div className={styles.searchArea}>
 					<Input
-						placeholder={
-							is_cn
-								? '输入关键词、文件类型等...'
-								: 'Input keywords, file types to search...'
-						}
-						prefix={<SearchOutlined />}
+						placeholder={is_cn ? '输入关键词进行搜索...' : 'Input keywords to search...'}
 						value={searchText}
-						onChange={(e) => handleSearch(e.target.value)}
+						onChange={(e) => {
+							const value = e.target.value
+							setSearchText(value)
+							if (!value) {
+								handleClearSearch()
+							}
+						}}
+						onKeyPress={handleSearchKeyPress}
+						prefix={<SearchOutlined />}
 						className={styles.searchInput}
 						size='large'
 						allowClear
 					/>
+					<Button
+						type='primary'
+						icon={<SearchOutlined />}
+						onClick={handleSearch}
+						className={styles.searchButton}
+						size='large'
+					>
+						{is_cn ? '搜索' : 'Search'}
+					</Button>
 				</div>
-				<div className={styles.tagsArea}>
-					<div className={styles.tagsList}>
-						{availableTags.map((tag) => (
-							<Button
-								key={tag.key}
-								type={selectedTags.includes(tag.key) ? 'primary' : 'default'}
-								size='small'
-								className={styles.tagButton}
-								onClick={() => toggleTag(tag.key)}
-							>
-								#{tag.label}
-							</Button>
+				<div className={styles.sortArea}>
+					<span className={styles.sortLabel}>{is_cn ? '排序:' : 'Sort:'}</span>
+					<Select
+						value={sortBy}
+						onChange={handleSortChange}
+						className={styles.sortSelect}
+						size='middle'
+					>
+						{availableSorts.map((sort) => (
+							<Select.Option key={sort.key} value={sort.key}>
+								{sort.label}
+							</Select.Option>
 						))}
-					</div>
+					</Select>
 				</div>
 			</div>
 
-			{/* 种子卡片展示区域 */}
-			<div className={styles.seedsSection}>
-				{filteredSeeds.length > 0 ? (
-					<div className={styles.seedsGrid}>
-						{filteredSeeds.map((seed) => (
+			{/* 文档卡片展示区域 */}
+			<div className={styles.documentsSection}>
+				{filteredDocuments.length > 0 ? (
+					<div className={styles.documentsGrid}>
+						{filteredDocuments.map((document) => (
 							<div
-								key={seed.id}
-								className={styles.seedCard}
-								onClick={() => handleViewSeedDocument(seed)}
+								key={document.id}
+								className={`${styles.documentCard} document-card`}
+								onClick={() => handleViewDocument(document)}
 							>
 								<div className={styles.cardHeader}>
 									<div className={styles.cardHeaderLeft}>
 										<div className={styles.cardTitleWithIcon}>
-											<Icon name={getTypeIcon(seed.type)} size={16} />
-											<h3 className={styles.cardTitle}>{seed.title}</h3>
-											<span className={styles.seedsCount}>
-												<Tooltip
-													title={
-														is_cn
-															? `${seed.seeds_count} 个知识片段`
-															: `${seed.seeds_count} Knowledge Chunks`
-													}
-													placement='top'
-												>
-													<span className={styles.seedsCountNumber}>
-														{seed.seeds_count}
-													</span>
-												</Tooltip>
-											</span>
+											<Icon name={getTypeIcon(document.type)} size={16} />
+											<h3 className={styles.cardTitle}>{document.name}</h3>
 										</div>
 									</div>
+									<Tooltip
+										title={
+											document.status === 'completed'
+												? is_cn
+													? '已完成'
+													: 'Completed'
+												: document.status === 'error'
+												? is_cn
+													? '错误'
+													: 'Error'
+												: document.status === 'maintenance'
+												? is_cn
+													? '维护中'
+													: 'Maintenance'
+												: document.status === 'restoring'
+												? is_cn
+													? '恢复中'
+													: 'Restoring'
+												: is_cn
+												? '处理中'
+												: 'Processing'
+										}
+										placement='topRight'
+									>
+										<Badge
+											status={
+												document.status === 'completed'
+													? 'success'
+													: document.status === 'error'
+													? 'error'
+													: document.status === 'maintenance' ||
+													  document.status === 'restoring'
+													? 'warning'
+													: 'processing'
+											}
+											className={styles.statusBadge}
+										/>
+									</Tooltip>
 								</div>
 								<div className={styles.cardContent}>
-									{seed.cover ? (
-										<img
-											src={seed.cover}
-											alt={seed.title}
-											className={styles.cardCover}
-										/>
-									) : (
-										<div className={styles.cardCoverPlaceholder}>
-											<Icon
-												name={
-													seed.status === 'processing'
-														? 'material-psychology'
-														: 'material-image'
-												}
-												size={48}
-											/>
-											<span>
-												{seed.status === 'processing'
-													? is_cn
-														? '智能处理中...'
-														: 'AI Processing...'
-													: is_cn
-													? '暂无预览'
-													: 'No Preview'}
-											</span>
-										</div>
-									)}
+									<DocumentCover
+										cover={document.cover}
+										name={document.name}
+										description={document.description}
+										status={document.status}
+										errorMessage={document.error_message}
+									/>
 								</div>
 								<div className={styles.cardFooter}>
-									<div className={styles.seedTags}>
-										{seed.tags.map((tag) => (
-											<div key={tag} className={styles.infoItem}>
-												<Icon name='material-tag' size={10} />
-												<span>#{tag}</span>
+									<div className={styles.documentInfo}>
+										<div className={styles.leftInfo}>
+											<div className={styles.infoItem}>
+												<Icon name='material-grid_view' size={10} />
+												<span>
+													<Tooltip
+														title={
+															is_cn
+																? `${document.segment_count} 个知识片段`
+																: `${document.segment_count} Knowledge Chunks`
+														}
+														placement='top'
+													>
+														{document.segment_count}
+													</Tooltip>
+												</span>
 											</div>
-										))}
+											<div className={styles.infoItem}>
+												<Icon
+													name='material-insert_drive_file'
+													size={10}
+												/>
+												<span>
+													{(document.size / 1024).toFixed(1)}KB
+												</span>
+											</div>
+										</div>
+										<div className={styles.rightInfo}>
+											<div className={styles.infoItem}>
+												<Icon name='material-schedule' size={10} />
+												<span>
+													{new Date(
+														document.created_at
+													).toLocaleDateString()}
+												</span>
+											</div>
+											<Popconfirm
+												title={
+													is_cn
+														? '确定要删除这个文档吗？删除后将无法恢复！'
+														: 'Are you sure to delete this document? This action cannot be undone!'
+												}
+												onConfirm={(e) => {
+													e?.stopPropagation()
+													handleDeleteDocument(document)
+												}}
+												onCancel={(e) => e?.stopPropagation()}
+												okText={is_cn ? '确认' : 'Confirm'}
+												cancelText={is_cn ? '取消' : 'Cancel'}
+											>
+												<div
+													className={styles.deleteButton}
+													onClick={(e) => e.stopPropagation()}
+													title={is_cn ? '删除' : 'Delete'}
+												>
+													<DeleteOutlined />
+												</div>
+											</Popconfirm>
+										</div>
 									</div>
 								</div>
 							</div>
 						))}
 					</div>
 				) : (
-					<div className={styles.emptySeeds}>
+					<div className={styles.emptyDocuments}>
 						<Empty
-							description={is_cn ? '暂无内容种子' : 'No content seeds'}
+							description={is_cn ? '暂无文档' : 'No documents'}
 							image={Empty.PRESENTED_IMAGE_SIMPLE}
 						/>
+					</div>
+				)}
+
+				{/* 滚动加载触发器 - 隐藏的观察目标 */}
+				{hasMore && filteredDocuments.length > 0 && (
+					<div id='scroll-trigger' className={styles.scrollTrigger}></div>
+				)}
+
+				{/* 加载更多指示器 */}
+				{loadingMore && (
+					<div className={styles.loadingMore}>
+						<Spin size='small' />
+						<span>{is_cn ? '加载更多文档...' : 'Loading more documents...'}</span>
+					</div>
+				)}
+
+				{/* 没有更多数据的提示 */}
+				{!hasMore && filteredDocuments.length > 0 && (
+					<div className={styles.noMoreData}>
+						<div className={styles.divider}>
+							<span className={styles.dividerText}>
+								{is_cn ? '已加载全部' : 'All loaded'}
+							</span>
+						</div>
 					</div>
 				)}
 			</div>

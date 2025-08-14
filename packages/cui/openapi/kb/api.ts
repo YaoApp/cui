@@ -19,7 +19,10 @@ import {
 	AddFileResponse,
 	AddDocumentResponse,
 	AddURLResponse,
-	AsyncOperationResponse
+	AsyncOperationResponse,
+	Document,
+	ListDocumentsRequest,
+	ListDocumentsResponse
 } from './types'
 
 /**
@@ -100,6 +103,45 @@ export class KB {
 	 */
 	async AddURLAsync(collectionID: string, request: AddURLRequest): Promise<ApiResponse<AsyncOperationResponse>> {
 		return this.api.Post<AsyncOperationResponse>(`/kb/collections/${collectionID}/documents/url/async`, request)
+	}
+
+	/**
+	 * List documents with pagination and filtering
+	 */
+	async ListDocuments(request?: ListDocumentsRequest): Promise<ApiResponse<ListDocumentsResponse>> {
+		const params: Record<string, string> = {}
+
+		if (request) {
+			if (request.page !== undefined) {
+				params.page = request.page.toString()
+			}
+			if (request.pagesize !== undefined) {
+				params.pagesize = request.pagesize.toString()
+			}
+			if (request.select) {
+				params.select = request.select
+			}
+			if (request.keywords) {
+				params.keywords = request.keywords
+			}
+			if (request.tag) {
+				params.tag = request.tag
+			}
+			if (request.collection_id) {
+				params.collection_id = request.collection_id
+			}
+			if (request.status) {
+				params.status = request.status
+			}
+			if (request.status_not) {
+				params.status_not = request.status_not
+			}
+			if (request.sort) {
+				params.sort = request.sort
+			}
+		}
+
+		return this.api.Get<ListDocumentsResponse>('/kb/documents', params)
 	}
 
 	// ===== Provider Management =====

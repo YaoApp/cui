@@ -1,0 +1,65 @@
+// 简洁分页组件样式
+.paginationContainer {
+	margin-top: 32px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	justify-content: center; // 居中对齐
+
+	.paginationButton {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		height: 32px;
+		padding: 0 12px;
+		border-radius: 6px;
+		font-size: 13px;
+		font-weight: 500;
+		transition: all 0.2s ease;
+
+		&:disabled {
+			color: var(--color_neo_text_tertiary);
+			cursor: not-allowed;
+		}
+
+		&:not(:disabled):hover {
+			background: var(--color_neo_bg_field_hover);
+			color: var(--color_main);
+		}
+	}
+
+	.pageNumbers {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+
+		.pageNumberButton {
+			width: 32px;
+			height: 32px;
+			padding: 0;
+			border-radius: 6px;
+			font-size: 13px;
+			font-weight: 500;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.2s ease;
+
+			&:hover {
+				background: var(--color_neo_bg_field_hover);
+				color: var(--color_main);
+			}
+
+			&.ant-btn-primary {
+				background: var(--color_main);
+				border-color: var(--color_main);
+				color: white;
+
+				&:hover {
+					background: var(--color_main_hover);
+					border-color: var(--color_main_hover);
+				}
+			}
+		}
+	}
+}

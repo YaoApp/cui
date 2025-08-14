@@ -1,0 +1,245 @@
+// DocumentCover 样式 - 填满父容器
+.documentCoverContainer {
+	width: 100%;
+	height: 100%; // 填满父容器高度
+	border-radius: 0; // 不设圆角，由父容器控制
+	overflow: hidden;
+	position: relative;
+}
+
+.coverImage {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.2s ease;
+
+	&:hover {
+		transform: scale(1.02);
+	}
+}
+
+// 使用原始detail页面的cardCoverPlaceholder样式
+.cardCoverPlaceholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	width: 100%;
+	background: linear-gradient(
+		135deg,
+		var(--color_neo_bg_field) 0%,
+		var(--color_neo_bg_content) 50%,
+		var(--color_neo_bg_field) 100%
+	);
+	background-size: 200% 200%;
+	position: relative;
+	overflow: hidden;
+	border-radius: 0;
+
+	// 现代渐变动画背景
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(45deg, transparent 30%, rgba(51, 113, 252, 0.08) 50%, transparent 70%);
+		animation: shimmer 2.5s ease-in-out infinite;
+		transform: translateX(-100%);
+	}
+
+	// 微妙的边框光效
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(90deg, transparent, rgba(51, 113, 252, 0.12), transparent);
+		background-size: 200% 100%;
+		animation: borderGlow 3s ease-in-out infinite;
+		pointer-events: none;
+	}
+
+	:global(.Icon),
+	:global(.xgen-icon),
+	:global(.Icon.material) {
+		color: var(--color_neo_icon_muted) !important;
+		font-size: 48px !important;
+		margin-bottom: 12px !important;
+		opacity: 0.8 !important;
+		z-index: 1 !important;
+		position: relative !important;
+
+		&[data-icon='material-psychology'] {
+			color: var(--color_main) !important;
+			animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite !important;
+			opacity: 0.9 !important;
+		}
+
+		&[data-icon='material-image'] {
+			color: var(--color_neo_text_tertiary) !important;
+			animation: pulse 2s ease-in-out infinite !important;
+			opacity: 0.6 !important;
+		}
+
+		&[data-icon='material-error_outline'] {
+			color: var(--color_danger) !important;
+			opacity: 0.9 !important;
+		}
+
+		&[data-icon='material-build'] {
+			color: #ffa726 !important;
+			animation: pulse 2s ease-in-out infinite !important;
+			opacity: 0.9 !important;
+		}
+	}
+
+	span {
+		font-size: 12px;
+		color: var(--color_neo_text_secondary);
+		font-weight: 600;
+		text-align: center;
+		line-height: 1.4;
+		letter-spacing: 0.02em;
+		position: relative;
+		z-index: 1;
+		margin-top: 4px;
+		padding: 0 12px;
+		word-break: break-word;
+		overflow: hidden;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		max-height: 54px;
+	}
+}
+
+// 错误状态 - 红色背景
+.errorState {
+	background: linear-gradient(
+		135deg,
+		var(--color_danger_bg) 0%,
+		#fff1f0 50%,
+		var(--color_danger_bg) 100%
+	) !important;
+
+	// 移除动画效果
+	&::before,
+	&::after {
+		display: none !important;
+	}
+
+	.errorMessage {
+		color: var(--color_danger) !important;
+		font-size: 12px !important;
+		font-weight: 500 !important;
+		text-align: center !important;
+		line-height: 1.3 !important;
+		padding: 12px !important;
+		word-break: break-word !important;
+		overflow-wrap: break-word !important;
+
+		// 多行文本截断
+		display: -webkit-box !important;
+		-webkit-line-clamp: 4 !important; // 最多显示4行
+		-webkit-box-orient: vertical !important;
+		overflow: hidden !important;
+
+		// 确保有足够高度显示4行
+		max-height: calc(1.3em * 4 + 24px) !important; // 4行高度 + padding
+
+		// 鼠标悬停效果
+		cursor: help !important;
+		transition: opacity 0.2s ease !important;
+
+		&:hover {
+			opacity: 0.8 !important;
+		}
+	}
+}
+
+// 原始动画效果
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 0.8;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.02);
+	}
+}
+
+@keyframes glow {
+	0%,
+	100% {
+		filter: drop-shadow(0 0 8px rgba(51, 113, 252, 0.3));
+	}
+	50% {
+		filter: drop-shadow(0 0 16px rgba(51, 113, 252, 0.5));
+	}
+}
+
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes borderGlow {
+	0%,
+	100% {
+		background-position: 0% 50%;
+		opacity: 0.3;
+	}
+	50% {
+		background-position: 100% 50%;
+		opacity: 0.6;
+	}
+}
+
+// 文本封面 - 与 CollectionCover 有差异
+.textCover {
+	// 使用更浅的背景色，体现层级关系
+	background-color: #f8f9fa !important;
+	background-image: linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px) !important;
+	background-size: 24px 24px !important; // 比 CollectionCover 的 32px 更小
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+
+	// Dark mode adaptation
+	[data-theme='dark'] & {
+		background-color: #1f1f1f !important;
+		background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) !important;
+	}
+}
+
+.textContent {
+	color: #666666;
+	font-size: 14px; // 比 CollectionCover 的 16px 更小
+	font-weight: 400;
+	text-align: center;
+	padding: 0 16px; // 比 CollectionCover 的 20px 更小
+	line-height: 1.4;
+	word-break: break-word;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 4; // 比 CollectionCover 的 3 行更多
+	-webkit-box-orient: vertical;
+
+	[data-theme='dark'] & {
+		color: #cccccc;
+	}
+}
