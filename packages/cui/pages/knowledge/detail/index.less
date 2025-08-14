@@ -855,21 +855,31 @@
 					color: white;
 					cursor: pointer;
 					opacity: 0; // 默认隐藏
-					transform: scale(0.8);
-					transition: all 0.2s ease;
+					transform: translateY(-50%) scale(0.8);
+					transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 					font-size: 10px;
 					position: absolute;
 					right: 0;
 					top: 50%;
-					transform: translateY(-50%) scale(0.8);
+					box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
 					&:hover {
-						background: var(--color_danger);
-						transform: translateY(-50%) scale(1);
+						transform: translateY(-50%) scale(1.1); // 更明显的缩放
+						box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); // 加深阴影
+					}
+
+					&:active {
+						transform: translateY(-50%) scale(0.95);
+						transition: all 0.1s ease;
 					}
 
 					:global(.anticon) {
 						font-size: 10px;
+						transition: transform 0.2s ease;
+					}
+
+					&:hover :global(.anticon) {
+						transform: scale(1.1);
 					}
 				}
 			}
