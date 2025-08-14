@@ -153,4 +153,5 @@ export interface AddURLResponse extends AddDocumentResponse {
 // Async operation response
 export interface AsyncOperationResponse {
 	job_id: string
+	doc_id: string
 }

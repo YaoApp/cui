@@ -21,7 +21,7 @@ export interface AddDocumentData {
 interface AddDocumentModalProps {
 	visible: boolean
 	onClose: () => void
-	onConfirm: (data: AddDocumentData, options: any, jobId: string) => void
+	onConfirm: (data: AddDocumentData, options: any, docId: string) => void
 	data: AddDocumentData | null
 	collectionName?: string
 	collection: any // Collection对象，包含embedding配置
@@ -236,14 +236,14 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 			const defaultUploader = kbConfig?.uploader || '__yao.attachment'
 			const fileapi = new FileAPI(window.$app.openapi, defaultUploader)
 
-			let jobId = ''
+			let docId = ''
 
 			// 获取最终配置
 			const finalOptions = getFinalOptions()
 
 			// 根据文档类型处理
 			if (currentData.type === 'file') {
-				jobId = await handleFileUpload(
+				docId = await handleFileUpload(
 					kb,
 					fileapi,
 					currentData,
@@ -252,13 +252,15 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 					defaultUploader
 				)
 			} else if (currentData.type === 'text') {
-				jobId = await handleTextUpload(kb, currentData, collection, finalOptions)
+				docId = await handleTextUpload(kb, currentData, collection, finalOptions)
 			} else if (currentData.type === 'url') {
-				jobId = await handleURLUpload(kb, currentData, collection, finalOptions)
+				docId = await handleURLUpload(kb, currentData, collection, finalOptions)
+			} else {
+				throw new Error('Unknown document type')
 			}
 
 			// 成功后调用onConfirm回调
-			onConfirm(currentData, finalOptions, jobId)
+			onConfirm(currentData, finalOptions, docId)
 		} catch (error) {
 			console.error('Document processing failed:', error)
 			const errorMsg =
@@ -367,7 +369,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 			throw new Error(addResponse.error?.error_description || 'Failed to add file to collection')
 		}
 
-		return addResponse.data?.job_id || ''
+		return addResponse.data?.doc_id || ''
 	}
 
 	// 处理文本上传
@@ -418,7 +420,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 			throw new Error(addResponse.error?.error_description || 'Failed to add text to collection')
 		}
 
-		return addResponse.data?.job_id || ''
+		return addResponse.data?.doc_id || ''
 	}
 
 	// 处理URL上传
@@ -473,7 +475,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 			throw new Error(addResponse.error?.error_description || 'Failed to add URL to collection')
 		}
 
-		return addResponse.data?.job_id || ''
+		return addResponse.data?.doc_id || ''
 	}
 
 	const renderContent = () => {
