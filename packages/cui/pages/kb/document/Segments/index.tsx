@@ -25,7 +25,8 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
 	const [sortBy, setSortBy] = useState<string>('default')
-	const [limit] = useState(20) // 每次加载的数量
+	const [filterByDepth, setFilterByDepth] = useState<string>('all')
+	const [limit] = useState(500) // 每次加载的数量
 	const [scrollId, setScrollId] = useState<string>('')
 	const [detailVisible, setDetailVisible] = useState(false)
 	const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
@@ -71,20 +72,7 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 				include_relationships: false
 			}
 
-			// 添加排序参数
-			if (sortBy !== 'default') {
-				switch (sortBy) {
-					case 'recall':
-						request.order_by = 'recall_count:desc'
-						break
-					case 'weight':
-						request.order_by = 'weight:desc'
-						break
-					case 'votes':
-						request.order_by = 'vote:desc'
-						break
-				}
-			}
+			// 后端排序功能暂时不支持，在前端实现排序
 
 			// 调用API获取segments数据
 			const kb = new KB(window.$app.openapi)
@@ -136,12 +124,20 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 		if (docid) {
 			loadSegments(true)
 		}
-	}, [docid, collectionId, sortBy])
+	}, [docid, collectionId]) // 移除 sortBy 依赖，排序在前端处理
 
 	// Intersection Observer 监听滚动触发器
 	useEffect(() => {
-		// 只在没有搜索时启用无限滚动
-		if (!hasMore || loadingMore || data.length === 0 || searchText.trim()) {
+		// 只在没有搜索且为默认排序时启用无限滚动
+		// 前端排序/过滤时禁用无限滚动，因为只对已加载数据有效
+		if (
+			!hasMore ||
+			loadingMore ||
+			data.length === 0 ||
+			searchText.trim() ||
+			sortBy !== 'default' ||
+			filterByDepth !== 'all'
+		) {
 			return
 		}
 
@@ -179,7 +175,7 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 		return () => {
 			clearTimeout(timeoutId)
 		}
-	}, [hasMore, loadingMore, searchText, data.length]) // 添加data.length依赖，确保数据更新后重新绑定Observer
+	}, [hasMore, loadingMore, searchText, data.length, sortBy, filterByDepth]) // 添加排序和过滤依赖，确保条件变化时重新评估无限滚动
 
 	// 搜索处理
 	const handleSearch = () => {
@@ -222,24 +218,137 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 		setSelectedSegment(null)
 	}
 
-	// 过滤segments (搜索在前端进行简单过滤)
+	// 过滤和排序segments (搜索、层级过滤和排序都在前端进行)
 	const getFilteredSegments = () => {
+		let segments = data
+
+		// 搜索过滤
 		if (searchText.trim()) {
 			const keyword = searchText.toLowerCase()
-			return data.filter(
+			segments = segments.filter(
 				(segment) =>
 					segment.text.toLowerCase().includes(keyword) ||
 					(segment.metadata && JSON.stringify(segment.metadata).toLowerCase().includes(keyword))
 			)
 		}
-		return data
+
+		// 层级过滤
+		if (filterByDepth !== 'all') {
+			const targetDepth = parseInt(filterByDepth)
+			segments = segments.filter((segment) => segment.metadata?.chunk_details?.depth === targetDepth)
+		}
+
+		// 前端排序
+		if (sortBy !== 'default') {
+			segments = [...segments].sort((a, b) => {
+				switch (sortBy) {
+					case 'recall':
+						// 按召回次数排序 (假设存储在 metadata 中)
+						const recallA = (a.metadata?.recall_count as number) || 0
+						const recallB = (b.metadata?.recall_count as number) || 0
+						return recallB - recallA // 降序
+					case 'weight':
+						// 按权重排序
+						const weightA = a.weight || 0
+						const weightB = b.weight || 0
+						return weightB - weightA // 降序
+					case 'votes':
+						// 按投票数排序
+						const voteA = a.vote || 0
+						const voteB = b.vote || 0
+						return voteB - voteA // 降序
+					case 'structure':
+						// 按文档结构排序：先按 depth (1, 2, 3...)，再按 index (0, 1, 2...)
+						const depthA =
+							a.metadata?.chunk_details?.depth !== undefined
+								? (a.metadata.chunk_details.depth as number)
+								: 999
+						const depthB =
+							b.metadata?.chunk_details?.depth !== undefined
+								? (b.metadata.chunk_details.depth as number)
+								: 999
+						const indexA =
+							a.metadata?.chunk_details?.index !== undefined
+								? (a.metadata.chunk_details.index as number)
+								: 999
+						const indexB =
+							b.metadata?.chunk_details?.index !== undefined
+								? (b.metadata.chunk_details.index as number)
+								: 999
+
+						// 先按深度升序排序
+						if (depthA !== depthB) {
+							return depthA - depthB
+						}
+						// 深度相同时按索引升序排序
+						return indexA - indexB
+					default:
+						return 0
+				}
+			})
+		}
+
+		return segments
 	}
 
 	const filteredSegments = getFilteredSegments()
 
-	// 截取文本显示
-	const truncateText = (text: string, maxLength: number = 150) => {
-		if (text.length <= maxLength) return text
+	// 渲染分段位置信息的独立模块
+	const renderSegmentPosition = (chunkDetails: any) => {
+		if (!chunkDetails) return null
+
+		// 优先检查是否有 text_position，有则按 text 类型处理
+		if (chunkDetails.text_position) {
+			const { start_line, end_line, start_index, end_index } = chunkDetails.text_position
+			const length = end_index - start_index
+			return (
+				<span
+					style={{
+						fontSize: '10px',
+						color: '#999',
+						display: 'flex',
+						alignItems: 'center',
+						gap: '2px'
+					}}
+				>
+					<Icon name='material-location_on' size={10} />
+					{is_cn ? '行' : 'Lines'}:{' '}
+					{start_line === end_line ? start_line : `${start_line}~${end_line}`}
+					<span style={{ marginLeft: '6px' }}>
+						{is_cn ? '长度' : 'Length'}: {length}
+					</span>
+				</span>
+			)
+		}
+
+		// 其他类型的处理
+		const { type } = chunkDetails
+		if (type && type !== 'text') {
+			return (
+				<span style={{ fontSize: '12px', color: '#999' }}>
+					{is_cn ? '类型' : 'Type'}: {type}
+				</span>
+			)
+		}
+
+		return null
+	}
+
+	// 截取文本显示 - 确保显示固定行数
+	const truncateText = (text: string, maxLines: number = 3) => {
+		// 估算每行大约50个字符（根据实际卡片宽度调整）
+		const charactersPerLine = 50
+		const maxLength = maxLines * charactersPerLine
+
+		if (text.length <= maxLength) {
+			// 如果文本较短，用换行符补齐到3行的高度
+			const lines = text.split('\n')
+			if (lines.length < maxLines) {
+				// 添加空行来保持一致的高度
+				return text + '\n'.repeat(maxLines - lines.length)
+			}
+			return text
+		}
 		return text.substring(0, maxLength) + '...'
 	}
 
@@ -249,8 +358,29 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 			<div key={key || segment.id} className={styles.chunkCard} onClick={() => handleOpenDetail(segment)}>
 				<div className={styles.cardHeader}>
 					<div className={styles.chunkMeta}>
-						<span className={styles.chunkNumber}>#{segment.id}</span>
-						<span className={styles.textLength}>{segment.text.length}</span>
+						<span
+							className={styles.chunkNumber}
+							style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+						>
+							{segment.metadata?.chunk_details?.depth !== undefined &&
+							segment.metadata?.chunk_details?.index !== undefined ? (
+								<>
+									<span
+										style={{
+											display: 'flex',
+											alignItems: 'center',
+											gap: '2px'
+										}}
+									>
+										<Icon name='material-account_tree' size={10} />
+										{segment.metadata.chunk_details.depth}
+									</span>
+									<span>#{segment.metadata.chunk_details.index + 1}</span>
+								</>
+							) : (
+								`#${segment.id.slice(-8)}`
+							)}
+						</span>
 					</div>
 					<div className={styles.weightRecall}>
 						{segment.weight !== undefined && (
@@ -267,17 +397,31 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 				</div>
 
 				<div className={styles.cardContent}>
-					<p className={styles.chunkText}>{truncateText(segment.text)}</p>
+					<p
+						className={styles.chunkText}
+						style={{
+							display: '-webkit-box',
+							WebkitBoxOrient: 'vertical',
+							WebkitLineClamp: 3,
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+							lineHeight: '1.4',
+							minHeight: '4.2em', // 3行 × 1.4行高 = 4.2em
+							maxHeight: '4.2em'
+						}}
+					>
+						{segment.text}
+					</p>
 				</div>
 
 				<div className={styles.cardFooter}>
 					<div className={styles.chunkInfo}>
-						{segment.metadata && (
-							<div className={styles.infoItem}>
-								<Icon name='material-info' size={12} />
-								<span>{is_cn ? '元数据' : 'Metadata'}</span>
-							</div>
-						)}
+						{segment.metadata?.chunk_details &&
+							renderSegmentPosition(segment.metadata.chunk_details) && (
+								<div className={styles.infoItem}>
+									{renderSegmentPosition(segment.metadata.chunk_details)}
+								</div>
+							)}
 					</div>
 
 					<div className={styles.voteActions}>
@@ -396,16 +540,40 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 						allowClear
 					/>
 					<Select
-						value={sortBy}
+						value={filterByDepth}
 						onChange={(value) => {
-							setSortBy(value)
-							// 排序时重新加载数据
+							setFilterByDepth(value)
+							// 选择特定层级时自动切换到文档结构排序
+							if (value !== 'all') {
+								setSortBy('structure')
+							}
 						}}
 						size='small'
 						className={styles.sortSelect}
-						style={{ width: 120 }}
+						style={{ width: 100 }}
+					>
+						<Select.Option value='all'>{is_cn ? '全部层级' : 'All Levels'}</Select.Option>
+						<Select.Option value='1'>{is_cn ? '第1层' : 'Level 1'}</Select.Option>
+						<Select.Option value='2'>{is_cn ? '第2层' : 'Level 2'}</Select.Option>
+						<Select.Option value='3'>{is_cn ? '第3层' : 'Level 3'}</Select.Option>
+					</Select>
+					<Select
+						value={sortBy}
+						onChange={(value) => {
+							setSortBy(value)
+							// 切换回默认排序时，同时重置层级过滤，恢复无限滚动
+							if (value === 'default') {
+								setFilterByDepth('all')
+							}
+						}}
+						size='small'
+						className={styles.sortSelect}
+						style={{ width: 160 }}
 					>
 						<Select.Option value='default'>{is_cn ? '默认排序' : 'Default'}</Select.Option>
+						<Select.Option value='structure'>
+							{is_cn ? '文档结构' : 'Document Structure'}
+						</Select.Option>
 						<Select.Option value='recall'>{is_cn ? '召回次数' : 'Recall Count'}</Select.Option>
 						<Select.Option value='weight'>{is_cn ? '权重' : 'Weight'}</Select.Option>
 						<Select.Option value='votes'>{is_cn ? '投票' : 'Votes'}</Select.Option>
