@@ -296,3 +296,25 @@ export interface ListSegmentsResponse {
 	has_more: boolean // Whether there are more pages
 	next_offset: number // Offset for next page
 }
+
+// Scroll segments request (iterator-style pagination)
+export interface ScrollSegmentsRequest {
+	limit?: number // Number of segments per batch (default: 100)
+	scroll_id?: string // Scroll ID for continuing pagination
+	order_by?: string // Comma-separated fields to order by (score, weight, vote, created_at, etc.)
+	fields?: string // Comma-separated specific fields to retrieve
+	include_nodes?: boolean // Whether to include graph nodes
+	include_relationships?: boolean // Whether to include graph relationships
+	include_metadata?: boolean // Whether to include segment metadata (default: true)
+	// Filter parameters
+	score?: number
+	weight?: number
+	vote?: number
+}
+
+// Scroll segments response (matches backend SegmentScrollResult)
+export interface ScrollSegmentsResponse {
+	segments: Segment[]
+	scroll_id?: string // ID for next scroll request
+	has_more: boolean // Whether there are more results
+}

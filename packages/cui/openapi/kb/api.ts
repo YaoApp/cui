@@ -23,7 +23,9 @@ import {
 	GetDocumentResponse,
 	Segment,
 	ListSegmentsRequest,
-	ListSegmentsResponse
+	ListSegmentsResponse,
+	ScrollSegmentsRequest,
+	ScrollSegmentsResponse
 } from './types'
 
 /**
@@ -161,17 +163,20 @@ export class KB {
 	// ===== Segment Management =====
 
 	/**
-	 * List segments of a document with pagination
+	 * Scroll segments with iterator-style pagination (recommended for large datasets)
 	 */
-	async ListSegments(docID: string, request?: ListSegmentsRequest): Promise<ApiResponse<ListSegmentsResponse>> {
+	async ScrollSegments(
+		docID: string,
+		request?: ScrollSegmentsRequest
+	): Promise<ApiResponse<ScrollSegmentsResponse>> {
 		const params: Record<string, string> = {}
 
 		if (request) {
 			if (request.limit !== undefined) {
 				params.limit = request.limit.toString()
 			}
-			if (request.offset !== undefined) {
-				params.offset = request.offset.toString()
+			if (request.scroll_id) {
+				params.scroll_id = request.scroll_id
 			}
 			if (request.order_by) {
 				params.order_by = request.order_by
@@ -200,7 +205,7 @@ export class KB {
 			}
 		}
 
-		return this.api.Get<ListSegmentsResponse>(`/kb/documents/${docID}/segments`, params)
+		return this.api.Get<ScrollSegmentsResponse>(`/kb/documents/${docID}/segments`, params)
 	}
 
 	// ===== Provider Management =====

@@ -4,7 +4,7 @@ import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { KB } from '@/openapi'
-import { Segment, ListSegmentsRequest } from '@/openapi/kb/types'
+import { Segment, ScrollSegmentsRequest } from '@/openapi/kb/types'
 import SegmentDetail from './detail'
 import styles from '../Layout/index.less'
 
@@ -23,83 +23,132 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 	const [search, setSearch] = useState('')
 	const [searchText, setSearchText] = useState('')
 	const [loading, setLoading] = useState(true)
+	const [loadingMore, setLoadingMore] = useState(false)
 	const [sortBy, setSortBy] = useState<string>('default')
-	const [currentPage, setCurrentPage] = useState(1)
-	const [pageSize, setPageSize] = useState(12)
+	const [limit] = useState(20) // 每次加载的数量
+	const [scrollId, setScrollId] = useState<string>('')
 	const [detailVisible, setDetailVisible] = useState(false)
 	const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
-	const [total, setTotal] = useState(0)
 	const [hasMore, setHasMore] = useState(false)
 
-	// 根据文档ID加载segments数据
-	useEffect(() => {
-		const loadSegments = async () => {
-			if (!window.$app?.openapi) {
-				console.error('OpenAPI not available')
-				message.error(is_cn ? '系统未就绪' : 'System not ready')
-				return
-			}
+	// 根据文档ID加载segments数据 (初始加载)
+	const loadSegments = async (reset: boolean = false) => {
+		if (!window.$app?.openapi) {
+			console.error('OpenAPI not available')
+			message.error(is_cn ? '系统未就绪' : 'System not ready')
+			return
+		}
 
-			try {
+		try {
+			if (reset) {
 				setLoading(true)
-
-				// 构建API请求参数
-				const request: ListSegmentsRequest = {
-					limit: pageSize,
-					offset: (currentPage - 1) * pageSize,
-					include_metadata: true,
-					include_nodes: false,
-					include_relationships: false
-				}
-
-				// 添加排序参数
-				if (sortBy !== 'default') {
-					switch (sortBy) {
-						case 'recall':
-							request.order_by = 'recall_count desc'
-							break
-						case 'weight':
-							request.order_by = 'weight desc'
-							break
-						case 'votes':
-							request.order_by = 'vote desc'
-							break
-					}
-				}
-
-				// 调用API获取segments数据
-				const kb = new KB(window.$app.openapi)
-				const response = await kb.ListSegments(docid, request)
-
-				if (window.$app.openapi.IsError(response)) {
-					throw new Error(response.error?.error_description || 'Failed to fetch segments')
-				}
-
-				if (response.data) {
-					setData(response.data.segments || [])
-					setTotal(response.data.total || 0)
-					setHasMore(response.data.has_more || false)
-				}
-			} catch (error: any) {
-				console.error('Failed to load segments:', error)
-				message.error(is_cn ? '加载分段数据失败' : 'Failed to load segments')
 				setData([])
-				setTotal(0)
-				setHasMore(false)
-			} finally {
-				setLoading(false)
+				setScrollId('')
+			} else {
+				setLoadingMore(true)
 			}
+
+			// 构建API请求参数
+			const request: ScrollSegmentsRequest = {
+				limit: limit,
+				scroll_id: reset ? undefined : scrollId,
+				include_metadata: true,
+				include_nodes: false,
+				include_relationships: false
+			}
+
+			// 添加排序参数
+			if (sortBy !== 'default') {
+				switch (sortBy) {
+					case 'recall':
+						request.order_by = 'recall_count:desc'
+						break
+					case 'weight':
+						request.order_by = 'weight:desc'
+						break
+					case 'votes':
+						request.order_by = 'vote:desc'
+						break
+				}
+			}
+
+			// 调用API获取segments数据
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.ScrollSegments(docid, request)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to fetch segments')
+			}
+
+			if (response.data) {
+				const newSegments = response.data.segments || []
+				if (reset) {
+					setData(newSegments)
+				} else {
+					setData((prevData) => [...prevData, ...newSegments])
+				}
+				setScrollId(response.data.scroll_id || '')
+				setHasMore(response.data.has_more || false)
+			}
+		} catch (error: any) {
+			console.error('Failed to load segments:', error)
+			message.error(is_cn ? '加载分段数据失败' : 'Failed to load segments')
+			if (reset) {
+				setData([])
+				setHasMore(false)
+			}
+		} finally {
+			setLoading(false)
+			setLoadingMore(false)
+		}
+	}
+
+	// 加载更多segments数据
+	const loadMoreSegments = async () => {
+		if (!hasMore || loadingMore) return
+		await loadSegments(false)
+	}
+
+	// 初始加载和重置加载
+	useEffect(() => {
+		if (docid) {
+			loadSegments(true)
+		}
+	}, [docid, collectionId, sortBy])
+
+	// Intersection Observer 监听滚动触发器
+	useEffect(() => {
+		if (!hasMore || loadingMore || data.length === 0) return
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const triggerEntry = entries[0]
+				if (triggerEntry.isIntersecting) {
+					loadMoreSegments()
+				}
+			},
+			{
+				threshold: 0.1, // 当10%的元素可见时触发
+				rootMargin: '50px' // 提前50px开始加载
+			}
+		)
+
+		// 观察滚动触发器元素
+		const scrollTrigger = document.getElementById('segments-scroll-trigger')
+		if (scrollTrigger) {
+			observer.observe(scrollTrigger)
 		}
 
-		if (docid) {
-			loadSegments()
+		return () => {
+			observer.disconnect()
 		}
-	}, [docid, collectionId, currentPage, pageSize, sortBy, is_cn])
+	}, [data, hasMore, loadingMore])
 
 	// 搜索处理
 	const handleSearch = () => {
 		setSearchText(search)
-		setCurrentPage(1) // 搜索时重置到第一页
+		// 搜索时重新加载数据
+		loadSegments(true)
 	}
 
 	const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -150,52 +199,6 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 	}
 
 	const filteredSegments = getFilteredSegments()
-
-	// 处理分页变化
-	const handlePageChange = (page: number) => {
-		setCurrentPage(page)
-	}
-
-	const handlePageSizeChange = (size: number) => {
-		setPageSize(size)
-		setCurrentPage(1) // 改变每页条数时重置到第一页
-	}
-
-	// 计算总页数 (基于API返回的总数)
-	const totalPages = Math.ceil(total / pageSize)
-
-	// 生成页码数组
-	const getPageNumbers = () => {
-		const pages: number[] = []
-		const maxPagesToShow = 5
-
-		if (totalPages <= maxPagesToShow) {
-			// 总页数不超过5页，显示所有页码
-			for (let i = 1; i <= totalPages; i++) {
-				pages.push(i)
-			}
-		} else {
-			// 总页数超过5页，智能显示页码
-			if (currentPage <= 3) {
-				// 当前页在前3页，显示 1,2,3,4,5
-				for (let i = 1; i <= 5; i++) {
-					pages.push(i)
-				}
-			} else if (currentPage >= totalPages - 2) {
-				// 当前页在后3页，显示后5页
-				for (let i = totalPages - 4; i <= totalPages; i++) {
-					pages.push(i)
-				}
-			} else {
-				// 当前页在中间，显示当前页前后2页
-				for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-					pages.push(i)
-				}
-			}
-		}
-
-		return pages
-	}
 
 	// 截取文本显示
 	const truncateText = (text: string, maxLength: number = 150) => {
@@ -289,43 +292,17 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 		return (
 			<>
 				<div className={styles.chunksGrid}>{filteredSegments.map(renderSegmentCard)}</div>
-				{totalPages > 1 && (
-					<div className={styles.paginationContainer}>
-						{/* 分页控件 */}
-						<div className={styles.paginationControls}>
-							{/* 上一页 */}
-							<Button
-								size='small'
-								disabled={currentPage === 1}
-								onClick={() => handlePageChange(currentPage - 1)}
-								className={styles.paginationButton}
-							>
-								<Icon name='material-chevron_left' size={14} />
-							</Button>
 
-							{/* 页码 */}
-							{getPageNumbers().map((pageNum) => (
-								<Button
-									key={pageNum}
-									size='small'
-									type={currentPage === pageNum ? 'primary' : 'default'}
-									onClick={() => handlePageChange(pageNum)}
-									className={styles.paginationButton}
-								>
-									{pageNum}
-								</Button>
-							))}
+				{/* 滚动加载触发器 - 隐藏的观察目标 */}
+				{hasMore && filteredSegments.length > 0 && (
+					<div id='segments-scroll-trigger' className={styles.scrollTrigger}></div>
+				)}
 
-							{/* 下一页 */}
-							<Button
-								size='small'
-								disabled={currentPage === totalPages}
-								onClick={() => handlePageChange(currentPage + 1)}
-								className={styles.paginationButton}
-							>
-								<Icon name='material-chevron_right' size={14} />
-							</Button>
-						</div>
+				{/* 加载更多指示器 */}
+				{loadingMore && (
+					<div className={styles.loadingMore}>
+						<Icon name='material-hourglass_empty' size={16} />
+						<span>{is_cn ? '加载更多分段...' : 'Loading more segments...'}</span>
 					</div>
 				)}
 			</>
@@ -338,9 +315,10 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 				<div className={styles.headerTitle}>
 					<Icon name='material-list' size={14} />
 					<h3>{is_cn ? '内容分段' : 'Content Segments'}</h3>
-					{total > 0 && (
+					{data.length > 0 && (
 						<span className={styles.countBadge}>
-							{data.length}/{total}
+							{data.length}
+							{hasMore ? '+' : ''}
 						</span>
 					)}
 				</div>
@@ -385,7 +363,7 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 						value={sortBy}
 						onChange={(value) => {
 							setSortBy(value)
-							setCurrentPage(1) // 排序时重置到第一页
+							// 排序时重新加载数据
 						}}
 						size='small'
 						className={styles.sortSelect}
