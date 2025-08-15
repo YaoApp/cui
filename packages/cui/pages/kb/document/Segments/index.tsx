@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button, Tooltip, Input, message, Select } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
@@ -31,6 +31,10 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 	const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
 	const [hasMore, setHasMore] = useState(false)
 
+	// 使用 ref 来防止重复请求和跟踪最新的 scrollId
+	const isLoadingRef = useRef(false)
+	const scrollIdRef = useRef<string>('')
+
 	// 根据文档ID加载segments数据 (初始加载)
 	const loadSegments = async (reset: boolean = false) => {
 		if (!window.$app?.openapi) {
@@ -39,19 +43,29 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 			return
 		}
 
+		// 防止重复请求
+		if (!reset && isLoadingRef.current) {
+			return
+		}
+
 		try {
 			if (reset) {
 				setLoading(true)
 				setData([])
 				setScrollId('')
+				scrollIdRef.current = '' // 重置 ref 中的 scrollId
+				isLoadingRef.current = false // 重置时清除加载标记
 			} else {
 				setLoadingMore(true)
+				isLoadingRef.current = true // 设置加载标记
 			}
 
-			// 构建API请求参数
+			// 构建API请求参数，使用 ref 中的最新值
+			const currentScrollId = reset ? undefined : scrollIdRef.current
+
 			const request: ScrollSegmentsRequest = {
 				limit: limit,
-				scroll_id: reset ? undefined : scrollId,
+				scroll_id: currentScrollId,
 				include_metadata: true,
 				include_nodes: false,
 				include_relationships: false
@@ -82,12 +96,17 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 
 			if (response.data) {
 				const newSegments = response.data.segments || []
+
 				if (reset) {
 					setData(newSegments)
 				} else {
 					setData((prevData) => [...prevData, ...newSegments])
 				}
-				setScrollId(response.data.scroll_id || '')
+
+				// 同时更新 state 和 ref，确保下次请求能使用最新的 scrollId
+				const newScrollId = response.data.scroll_id || ''
+				setScrollId(newScrollId)
+				scrollIdRef.current = newScrollId // 立即更新 ref
 				setHasMore(response.data.has_more || false)
 			}
 		} catch (error: any) {
@@ -100,12 +119,15 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 		} finally {
 			setLoading(false)
 			setLoadingMore(false)
+			isLoadingRef.current = false // 清除加载标记
 		}
 	}
 
 	// 加载更多segments数据
 	const loadMoreSegments = async () => {
-		if (!hasMore || loadingMore) return
+		if (!hasMore || loadingMore) {
+			return
+		}
 		await loadSegments(false)
 	}
 
@@ -118,31 +140,46 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 
 	// Intersection Observer 监听滚动触发器
 	useEffect(() => {
-		if (!hasMore || loadingMore || data.length === 0) return
-
-		const observer = new IntersectionObserver(
-			(entries) => {
-				const triggerEntry = entries[0]
-				if (triggerEntry.isIntersecting) {
-					loadMoreSegments()
-				}
-			},
-			{
-				threshold: 0.1, // 当10%的元素可见时触发
-				rootMargin: '50px' // 提前50px开始加载
-			}
-		)
-
-		// 观察滚动触发器元素
-		const scrollTrigger = document.getElementById('segments-scroll-trigger')
-		if (scrollTrigger) {
-			observer.observe(scrollTrigger)
+		// 只在没有搜索时启用无限滚动
+		if (!hasMore || loadingMore || data.length === 0 || searchText.trim()) {
+			return
 		}
+
+		// 添加延迟确保DOM元素已经渲染
+		const timeoutId = setTimeout(() => {
+			const observer = new IntersectionObserver(
+				(entries) => {
+					const triggerEntry = entries[0]
+					if (triggerEntry.isIntersecting && hasMore && !loadingMore && !isLoadingRef.current) {
+						// 立即断开观察器，防止重复触发
+						observer.disconnect()
+						loadMoreSegments()
+					}
+				},
+				{
+					threshold: 0.1, // 当10%的最后一个卡片可见时触发
+					rootMargin: '100px' // 提前100px开始加载，确保在不同显示区域都能正常触发
+				}
+			)
+
+			// 直接观察最后一个卡片元素，而不是单独的触发器
+			const allCards = document.querySelectorAll('[class*="chunkCard"]')
+			const lastCard = allCards[allCards.length - 1] as HTMLElement
+
+			if (lastCard && data.length > 0) {
+				observer.observe(lastCard)
+			}
+
+			// 清理函数保存observer引用
+			return () => {
+				observer.disconnect()
+			}
+		}, 100)
 
 		return () => {
-			observer.disconnect()
+			clearTimeout(timeoutId)
 		}
-	}, [data, hasMore, loadingMore])
+	}, [hasMore, loadingMore, searchText, data.length]) // 添加data.length依赖，确保数据更新后重新绑定Observer
 
 	// 搜索处理
 	const handleSearch = () => {
@@ -207,9 +244,9 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 	}
 
 	// 渲染segment卡片
-	const renderSegmentCard = (segment: Segment) => {
+	const renderSegmentCard = (segment: Segment, key?: string) => {
 		return (
-			<div key={segment.id} className={styles.chunkCard} onClick={() => handleOpenDetail(segment)}>
+			<div key={key || segment.id} className={styles.chunkCard} onClick={() => handleOpenDetail(segment)}>
 				<div className={styles.cardHeader}>
 					<div className={styles.chunkMeta}>
 						<span className={styles.chunkNumber}>#{segment.id}</span>
@@ -291,12 +328,11 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 
 		return (
 			<>
-				<div className={styles.chunksGrid}>{filteredSegments.map(renderSegmentCard)}</div>
+				<div className={styles.chunksGrid}>
+					{filteredSegments.map((segment) => renderSegmentCard(segment, segment.id))}
+				</div>
 
-				{/* 滚动加载触发器 - 隐藏的观察目标 */}
-				{hasMore && filteredSegments.length > 0 && (
-					<div id='segments-scroll-trigger' className={styles.scrollTrigger}></div>
-				)}
+				{/* 不再需要单独的触发器，直接观察最后一个卡片 */}
 
 				{/* 加载更多指示器 */}
 				{loadingMore && (
