@@ -26,10 +26,6 @@ const Original: React.FC<OriginalProps> = ({
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
-	// 根据 docid 和 collectionId 构建文档路径
-	const documentPath = `/documents/${collectionId}/${docid}`
-	const previewURL = `/api/preview/${collectionId}/${docid}`
-
 	return (
 		<div className={layoutStyles.panelContent}>
 			<div className={layoutStyles.panelHeader}>
@@ -87,13 +83,12 @@ const Original: React.FC<OriginalProps> = ({
 					) : document?.type === 'text' ? (
 						// Text 类型：使用 FileViewer 的文本预览功能
 						<FileViewer
-							__value={documentPath}
+							__value={`/documents/${collectionId}/${docid}`}
 							__namespace=''
 							__primary=''
 							__type='view'
 							__bind=''
 							__name={`${collectionId}-${docid}`}
-							previewURL={previewURL}
 							onSave={() => {}}
 							style={{ width: '100%', height: '100%' }}
 							content={document?.text_content}
@@ -102,13 +97,12 @@ const Original: React.FC<OriginalProps> = ({
 					) : (
 						// File 类型：使用 FileViewer 的文件预览功能
 						<FileViewer
-							__value={documentPath}
+							// __value={documentPath}
 							__namespace=''
 							__primary=''
 							__type='view'
 							__bind=''
 							__name={`${collectionId}-${docid}`}
-							previewURL={previewURL}
 							onSave={() => {}}
 							style={{ width: '100%', height: '100%' }}
 							fileID={document?.file_id}
