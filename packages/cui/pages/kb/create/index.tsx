@@ -111,7 +111,7 @@ const CreateCollection = () => {
 			}
 
 			message.success(is_cn ? '集合创建成功' : 'Collection created successfully')
-			history.push('/knowledge')
+			history.push('/kb')
 		} catch (error) {
 			console.error('Create collection failed:', error)
 			const errorMsg = error instanceof Error ? error.message : is_cn ? '创建失败' : 'Create failed'
@@ -122,7 +122,7 @@ const CreateCollection = () => {
 	}
 
 	const handleBack = () => {
-		history.push('/knowledge')
+		history.push('/kb')
 	}
 
 	return (
@@ -131,7 +131,7 @@ const CreateCollection = () => {
 				<Breadcrumb>
 					<Breadcrumb.Item>
 						<a
-							href='/knowledge'
+							href='/kb'
 							onClick={(e) => {
 								e.preventDefault()
 								handleBack()

@@ -40,7 +40,7 @@ const initializeAPIs = (kbConfig?: any) => {
 	return { kb, fileapi }
 }
 
-const KnowledgeDetail = () => {
+const CollectionDetail = () => {
 	const params = useParams<{ '*': string }>()
 	const id = params['*'] || ''
 	const locale = getLocale()
@@ -418,7 +418,7 @@ const KnowledgeDetail = () => {
 
 	// 返回上一页
 	const handleBack = () => {
-		history.push('/knowledge')
+		history.push('/kb')
 	}
 
 	const handleViewDocuments = () => {
@@ -866,4 +866,4 @@ const KnowledgeDetail = () => {
 	)
 }
 
-export default KnowledgeDetail
+export default CollectionDetail

@@ -7,7 +7,7 @@ import { CollectionCover } from './components'
 import styles from './index.less'
 import { KB, Collection } from '@/openapi'
 
-const Index = () => {
+const Collections = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -113,11 +113,11 @@ const Index = () => {
 	}
 
 	const handleCardClick = (collection: Collection) => {
-		history.push(`/knowledge/detail/${collection.id}`)
+		history.push(`/kb/detail/${collection.id}`)
 	}
 
 	const handleCreate = () => {
-		history.push('/knowledge/create')
+		history.push('/kb/create')
 	}
 
 	const handleDelete = async (collection: Collection) => {
@@ -328,4 +328,4 @@ const Index = () => {
 	)
 }
 
-export default Index
+export default Collections

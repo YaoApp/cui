@@ -1,5 +1,6 @@
 import React from 'react'
 import { Tooltip } from 'antd'
+import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
 import { DocumentStatus } from '@/openapi/kb/types'
@@ -14,6 +15,9 @@ interface DocumentCoverProps {
 }
 
 const DocumentCover: React.FC<DocumentCoverProps> = ({ cover, name, description, status, errorMessage, className }) => {
+	const locale = getLocale()
+	const is_cn = locale === 'zh-CN'
+
 	// 处理中状态 - 使用原始样式（有动画）
 	if (
 		status === 'pending' ||
@@ -27,7 +31,7 @@ const DocumentCover: React.FC<DocumentCoverProps> = ({ cover, name, description,
 			<div className={`${styles.documentCoverContainer} ${className || ''}`}>
 				<div className={styles.cardCoverPlaceholder}>
 					<Icon name='material-psychology' size={48} />
-					<span>智能处理中...</span>
+					<span>{is_cn ? '智能处理中...' : 'Processing...'}</span>
 				</div>
 			</div>
 		)
@@ -35,7 +39,7 @@ const DocumentCover: React.FC<DocumentCoverProps> = ({ cover, name, description,
 
 	// 错误状态 - 直接显示错误信息，不要图标
 	if (status === 'error') {
-		const fullErrorMessage = errorMessage || '处理失败'
+		const fullErrorMessage = errorMessage || (is_cn ? '处理失败' : 'Processing failed')
 
 		return (
 			<div className={`${styles.documentCoverContainer} ${className || ''}`}>
@@ -54,7 +58,15 @@ const DocumentCover: React.FC<DocumentCoverProps> = ({ cover, name, description,
 			<div className={`${styles.documentCoverContainer} ${className || ''}`}>
 				<div className={styles.cardCoverPlaceholder}>
 					<Icon name='material-build' size={48} />
-					<span>{status === 'maintenance' ? '维护中' : '恢复中'}</span>
+					<span>
+						{status === 'maintenance'
+							? is_cn
+								? '维护中'
+								: 'Under maintenance'
+							: is_cn
+							? '恢复中'
+							: 'Restoring'}
+					</span>
 				</div>
 			</div>
 		)

@@ -322,14 +322,14 @@ const Header: FC<HeaderProps> = ({
 				</div>
 
 				<div className='header_right'>
-					<Tooltip title={is_cn ? '当前任务' : 'Current Task'}>
+					<Tooltip title={is_cn ? '当前任务' : 'Current Jobs'}>
 						<Button
 							type='text'
 							className='header_icon_btn header_task_btn'
-							onClick={() => navigate('/tasks')}
+							onClick={() => navigate('/jobs')}
 						>
 							<div className='header_task_content'>
-								<span className='header_task_text'>{is_cn ? '任务' : 'Tasks'}</span>
+								<span className='header_task_text'>{is_cn ? '任务' : 'Jobs'}</span>
 								<span className='header_task_number'>2</span>
 							</div>
 						</Button>
@@ -349,7 +349,7 @@ const Header: FC<HeaderProps> = ({
 							type='text'
 							className='header_icon_btn'
 							icon={<Icon name='material-library_books' size={14} />}
-							onClick={() => navigate('/knowledge')}
+							onClick={() => navigate('/kb')}
 						/>
 					</Tooltip>
 
