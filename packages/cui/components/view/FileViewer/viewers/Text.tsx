@@ -79,12 +79,13 @@ const getSyntaxHighlighting = (text: string, language: string): string => {
 interface TextProps {
 	src?: string
 	file?: File
+	content?: string // 新增：直接传递文本内容
 	contentType?: string
 	fileName?: string
 	language?: string
 }
 
-const TextComponent: React.FC<TextProps> = ({ src, file, contentType, fileName, language }) => {
+const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, fileName, language }) => {
 	// 统一处理文件源
 	const fileSource = useMemo(() => {
 		if (src) return src
@@ -222,6 +223,14 @@ const TextComponent: React.FC<TextProps> = ({ src, file, contentType, fileName, 
 	}, [textContent, language])
 
 	useEffect(() => {
+		// 如果直接传递了内容，使用传递的内容
+		if (content !== undefined) {
+			setTextContent(content)
+			setLoading(false)
+			return
+		}
+
+		// 否则从文件源加载内容
 		if (!fileSource) return
 		setLoading(true)
 		fetch(fileSource)
@@ -243,7 +252,7 @@ const TextComponent: React.FC<TextProps> = ({ src, file, contentType, fileName, 
 				setTextContent(is_cn ? '加载文件内容失败' : 'Failed to load file content')
 				setLoading(false)
 			})
-	}, [fileSource, is_cn])
+	}, [fileSource, content, is_cn])
 
 	const editorDidMount: EditorDidMount = (editor, monaco) => {
 		editorRef.current = editor

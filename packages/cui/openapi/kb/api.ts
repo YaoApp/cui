@@ -16,13 +16,11 @@ import {
 	AddFileRequest,
 	AddTextRequest,
 	AddURLRequest,
-	AddFileResponse,
-	AddDocumentResponse,
-	AddURLResponse,
 	AsyncOperationResponse,
-	Document,
 	ListDocumentsRequest,
-	ListDocumentsResponse
+	ListDocumentsResponse,
+	GetDocumentRequest,
+	GetDocumentResponse
 } from './types'
 
 /**
@@ -142,6 +140,19 @@ export class KB {
 		}
 
 		return this.api.Get<ListDocumentsResponse>('/kb/documents', params)
+	}
+
+	/**
+	 * Get document details by document ID
+	 */
+	async GetDocument(docID: string, request?: GetDocumentRequest): Promise<ApiResponse<GetDocumentResponse>> {
+		const params: Record<string, string> = {}
+
+		if (request?.select) {
+			params.select = request.select
+		}
+
+		return this.api.Get<GetDocumentResponse>(`/kb/documents/${docID}`, params)
 	}
 
 	// ===== Provider Management =====

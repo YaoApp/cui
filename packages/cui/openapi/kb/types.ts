@@ -194,8 +194,8 @@ export interface Document {
 	sort?: number
 
 	// File-specific fields
+	file_id?: string
 	file_name?: string
-	file_path?: string
 	file_mime_type?: string
 
 	// URL-specific fields
@@ -246,3 +246,13 @@ export interface ListDocumentsResponse {
 	page: number
 	pagesize: number
 }
+
+// ===== Get Document Types =====
+
+// Get document request parameters
+export interface GetDocumentRequest {
+	select?: string // comma-separated field names
+}
+
+// Get document response (single document)
+export type GetDocumentResponse = Document

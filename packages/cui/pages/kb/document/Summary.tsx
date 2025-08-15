@@ -11,18 +11,18 @@ import {
 	QuestionCircleOutlined
 } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
-import { Document } from '../types'
+import { Document } from '@/openapi'
+import { getFileTypeIcon } from '@/assets/icons'
 import styles from './index.less'
 
 interface SummaryProps {
 	visible: boolean
 	isClosing: boolean
 	document: Document | null
-	fileType: { label: string; color: string }
 	popoverRef: React.RefObject<HTMLDivElement>
 }
 
-const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, fileType, popoverRef }) => {
+const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, popoverRef }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -81,9 +81,11 @@ const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, fileTyp
 			{/* Card Header */}
 			<div className={styles.popoverHeader}>
 				<div className={styles.headerContent}>
-					<div className={styles.fileIcon} style={{ backgroundColor: fileType.color }}>
-						{fileType.label}
-					</div>
+					<img
+						src={getFileTypeIcon(document?.name || '')}
+						alt='file icon'
+						style={{ width: 20, height: 20 }}
+					/>
 					<div className={styles.fileName}>{document?.name}</div>
 				</div>
 			</div>
@@ -97,22 +99,22 @@ const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, fileTyp
 
 				<div className={styles.metaInfo}>
 					<UserOutlined />
-					作者: {document?.uid}
+					作者: {document?.uploader_id || 'Unknown'}
 				</div>
 
 				<div className={styles.metaInfo}>
 					<DatabaseOutlined />
-					所属集合: {document?.knowledge_base_name}
+					所属集合: {document?.collection_id}
 				</div>
 
 				<div className={styles.metaInfo}>
 					<FileTextOutlined />
-					切片数量: {document?.chunk_count || 0}
+					切片数量: {document?.segment_count || 0}
 				</div>
 
 				<div className={styles.metaInfo}>
 					<HddOutlined />
-					文件大小: {formatFileSize(document?.file_size || 0)}
+					文件大小: {formatFileSize(document?.size || 0)}
 				</div>
 
 				<div className={`${styles.metaInfo} ${styles[`status-${document?.status || 'ready'}`] || ''}`}>

@@ -3,8 +3,10 @@ import { Modal, Button, Spin, message, Tag, Tooltip } from 'antd'
 
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import { KnowledgeBase, Document } from '../types'
-import { mockFetchKnowledgeBase, mockFetchDocument, mockFetchDocumentContent } from './mockData'
+import { KnowledgeBase } from '../types'
+import { mockFetchKnowledgeBase, mockFetchDocumentContent } from './mockData'
+import { KB, Document } from '@/openapi'
+import { getFileTypeIcon } from '@/assets/icons'
 import Summary from './Summary'
 import Layout from './Layout'
 import Original from './Original'
@@ -78,10 +80,19 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 
 	const loadDocument = async () => {
 		try {
-			const doc = await mockFetchDocument(docid)
-			setDocument(doc)
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.GetDocument(docid)
+
+			if (window.$app.openapi.IsError(response)) {
+				console.error('Failed to load document:', response.error)
+				message.error(is_cn ? '加载文档失败' : 'Failed to load document')
+				return
+			}
+
+			setDocument(response.data || null)
 		} catch (error) {
 			console.error('Failed to load document:', error)
+			message.error(is_cn ? '加载文档失败' : 'Failed to load document')
 		}
 	}
 
@@ -104,19 +115,6 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 			loadData()
 		}
 	}, [visible, collectionId, docid])
-
-	const getFileType = (filename: string) => {
-		const extension = filename.split('.').pop()?.toLowerCase()
-		const typeMap: { [key: string]: { label: string; color: string } } = {
-			pdf: { label: 'PDF', color: '#ff4d4f' },
-			doc: { label: 'DOC', color: '#1890ff' },
-			docx: { label: 'DOCX', color: '#1890ff' },
-			txt: { label: 'TXT', color: '#52c41a' },
-			md: { label: 'MD', color: '#722ed1' },
-			html: { label: 'HTML', color: '#fa8c16' }
-		}
-		return typeMap[extension || ''] || { label: 'FILE', color: '#8c8c8c' }
-	}
 
 	if (loading) {
 		return (
@@ -148,8 +146,6 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 		)
 	}
 
-	const fileType = getFileType(document?.name || '')
-
 	return (
 		<Modal
 			open={visible}
@@ -175,13 +171,13 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 				{/* 头部导航 */}
 				<div className={styles.header} style={{ position: 'relative' }}>
 					<div className={styles.headerLeft}>
-						<div className={styles.titleInfo}>
-							<div className={styles.titleWithBadge}>
-								<h1 className={styles.title}>{document?.name}</h1>
-								<Tag color={fileType.color} className={styles.fileTypeTag}>
-									{fileType.label}
-								</Tag>
-							</div>
+						<div style={{ display: 'flex', alignItems: 'center' }}>
+							<img
+								src={getFileTypeIcon(document?.name || '')}
+								alt='file icon'
+								style={{ width: 24, height: 24, marginRight: 8 }}
+							/>
+							<h1 className={styles.title}>{document?.name}</h1>
 						</div>
 					</div>
 					<div className={styles.headerRight}>
@@ -250,7 +246,6 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 					visible={showMetadata}
 					isClosing={isClosing}
 					document={document}
-					fileType={fileType}
 					popoverRef={popoverRef}
 				/>
 
@@ -261,6 +256,7 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 						ChunksComponent={Chunks}
 						docid={docid}
 						collectionId={collectionId}
+						document={document}
 					/>
 				</div>
 			</div>

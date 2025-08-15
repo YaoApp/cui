@@ -10,6 +10,7 @@ interface ContentLayoutProps {
 	ChunksComponent: React.ComponentType<any>
 	docid: string
 	collectionId: string
+	document?: any
 }
 
 type ViewMode = 'dual' | 'left' | 'right'
@@ -19,7 +20,8 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
 	OriginalComponent,
 	ChunksComponent,
 	docid,
-	collectionId
+	collectionId,
+	document
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -59,13 +61,13 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
 
 	useEffect(() => {
 		if (isDragging) {
-			document.addEventListener('mousemove', handleMouseMove)
-			document.addEventListener('mouseup', handleMouseUp)
+			window.document.addEventListener('mousemove', handleMouseMove)
+			window.document.addEventListener('mouseup', handleMouseUp)
 		}
 
 		return () => {
-			document.removeEventListener('mousemove', handleMouseMove)
-			document.removeEventListener('mouseup', handleMouseUp)
+			window.document.removeEventListener('mousemove', handleMouseMove)
+			window.document.removeEventListener('mouseup', handleMouseUp)
 		}
 	}, [isDragging, handleMouseMove, handleMouseUp])
 
@@ -103,6 +105,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
 					onRestoreDualPanels={restoreDualPanels}
 					docid={docid}
 					collectionId={collectionId}
+					document={document}
 				/>
 			</div>
 
