@@ -10,7 +10,7 @@ import { getFileTypeIcon } from '@/assets/icons'
 import Summary from './Summary'
 import Layout from './Layout'
 import Original from './Original'
-import Chunks from './Chunks'
+import Segments from './Segments'
 import styles from './index.less'
 
 interface DocumentModalProps {
@@ -253,7 +253,7 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 				<div className={styles.content}>
 					<Layout
 						OriginalComponent={Original}
-						ChunksComponent={Chunks}
+						SegmentsComponent={Segments}
 						docid={docid}
 						collectionId={collectionId}
 						document={document}

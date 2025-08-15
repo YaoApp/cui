@@ -20,7 +20,10 @@ import {
 	ListDocumentsRequest,
 	ListDocumentsResponse,
 	GetDocumentRequest,
-	GetDocumentResponse
+	GetDocumentResponse,
+	Segment,
+	ListSegmentsRequest,
+	ListSegmentsResponse
 } from './types'
 
 /**
@@ -153,6 +156,51 @@ export class KB {
 		}
 
 		return this.api.Get<GetDocumentResponse>(`/kb/documents/${docID}`, params)
+	}
+
+	// ===== Segment Management =====
+
+	/**
+	 * List segments of a document with pagination
+	 */
+	async ListSegments(docID: string, request?: ListSegmentsRequest): Promise<ApiResponse<ListSegmentsResponse>> {
+		const params: Record<string, string> = {}
+
+		if (request) {
+			if (request.limit !== undefined) {
+				params.limit = request.limit.toString()
+			}
+			if (request.offset !== undefined) {
+				params.offset = request.offset.toString()
+			}
+			if (request.order_by) {
+				params.order_by = request.order_by
+			}
+			if (request.fields) {
+				params.fields = request.fields
+			}
+			if (request.include_nodes !== undefined) {
+				params.include_nodes = request.include_nodes.toString()
+			}
+			if (request.include_relationships !== undefined) {
+				params.include_relationships = request.include_relationships.toString()
+			}
+			if (request.include_metadata !== undefined) {
+				params.include_metadata = request.include_metadata.toString()
+			}
+			// Filter parameters
+			if (request.score !== undefined) {
+				params.score = request.score.toString()
+			}
+			if (request.weight !== undefined) {
+				params.weight = request.weight.toString()
+			}
+			if (request.vote !== undefined) {
+				params.vote = request.vote.toString()
+			}
+		}
+
+		return this.api.Get<ListSegmentsResponse>(`/kb/documents/${docID}/segments`, params)
 	}
 
 	// ===== Provider Management =====

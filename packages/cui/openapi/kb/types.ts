@@ -256,3 +256,43 @@ export interface GetDocumentRequest {
 
 // Get document response (single document)
 export type GetDocumentResponse = Document
+
+// ===== Segment Management Types =====
+
+// Segment data structure (matches backend GraphRag Segment type)
+export interface Segment {
+	id: string
+	text: string
+	metadata?: Record<string, any>
+	score?: number
+	weight?: number
+	vote?: number
+	created_at?: string
+	updated_at?: string
+	// Graph-related fields
+	nodes?: any[]
+	relationships?: any[]
+}
+
+// List segments request parameters
+export interface ListSegmentsRequest {
+	limit?: number // Number of segments per page (default: 100)
+	offset?: number // Offset for pagination (default: 0)
+	order_by?: string // Comma-separated fields to order by
+	fields?: string // Comma-separated specific fields to retrieve
+	include_nodes?: boolean // Whether to include graph nodes
+	include_relationships?: boolean // Whether to include graph relationships
+	include_metadata?: boolean // Whether to include segment metadata (default: true)
+	// Filter parameters
+	score?: number
+	weight?: number
+	vote?: number
+}
+
+// Paginated segments response (matches backend PaginatedSegmentsResult)
+export interface ListSegmentsResponse {
+	segments: Segment[]
+	total: number // Total number of matching segments
+	has_more: boolean // Whether there are more pages
+	next_offset: number // Offset for next page
+}

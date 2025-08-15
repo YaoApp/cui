@@ -7,7 +7,7 @@ import styles from './index.less'
 interface ContentLayoutProps {
 	className?: string
 	OriginalComponent: React.ComponentType<any>
-	ChunksComponent: React.ComponentType<any>
+	SegmentsComponent: React.ComponentType<any>
 	docid: string
 	collectionId: string
 	document?: any
@@ -18,7 +18,7 @@ type ViewMode = 'dual' | 'left' | 'right'
 const ContentLayout: React.FC<ContentLayoutProps> = ({
 	className,
 	OriginalComponent,
-	ChunksComponent,
+	SegmentsComponent,
 	docid,
 	collectionId,
 	document
@@ -131,7 +131,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
 							: `${100 - splitPosition}%`
 				}}
 			>
-				<ChunksComponent
+				<SegmentsComponent
 					viewMode={viewMode}
 					onHideLeftPanel={hideLeftPanel}
 					onRestoreDualPanels={restoreDualPanels}
