@@ -8,7 +8,7 @@
 	font-size: 13px;
 	line-height: 1.6;
 	padding: 16px;
-	background: var(--color_neo_bg_card);
+	background: var(--color_neo_bg_content); // 与只读模式保持一致
 	color: var(--color_neo_text_primary);
 	transition: all 0.2s ease;
 
@@ -41,9 +41,9 @@
 		}
 	}
 
-	// 只读状态 - 保持与编辑模式相同的交互效果
+	// 只读状态 - 使用淡一点的背景色区分
 	&.readOnly {
-		background: var(--color_neo_bg_card);
+		background: var(--color_neo_bg_content); // 比 card 稍微深一点，比 field 淡很多
 		color: var(--color_neo_text_primary);
 		cursor: text; // 允许文本选择
 
