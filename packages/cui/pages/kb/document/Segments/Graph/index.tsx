@@ -4,6 +4,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
 import { KB } from '@/openapi'
+import GraphVisualization from './GraphVisualization'
 import styles from '../detail.less'
 import localStyles from './index.less'
 
@@ -13,6 +14,7 @@ interface EntityNode {
 	id: string
 	name: string
 	type: 'person' | 'organization' | 'location' | 'concept' | 'event' | 'object'
+	level?: number // 1-3 级别
 	properties?: Record<string, any>
 }
 
@@ -65,26 +67,57 @@ const GraphView: React.FC<GraphViewProps> = ({ segmentData, onDataLoad }) => {
 	const [extracting, setExtracting] = useState(false)
 	const [graphData, setGraphData] = useState<GraphData | null>(null)
 
-	// 模拟图谱数据
+	// 模拟图谱数据 - 三级层次结构
 	const mockGraphData: GraphData = {
 		id: segmentData.id,
-		entity_count: 6,
-		relation_count: 5,
+		entity_count: 12,
+		relation_count: 14,
 		graph_data: {
 			nodes: [
-				{ id: '1', name: '机器学习', type: 'concept', properties: { category: 'AI技术' } },
-				{ id: '2', name: '深度学习', type: 'concept', properties: { category: 'AI技术' } },
-				{ id: '3', name: '神经网络', type: 'concept', properties: { category: '算法' } },
-				{ id: '4', name: 'OpenAI', type: 'organization', properties: { founded: '2015' } },
-				{ id: '5', name: 'GPT模型', type: 'concept', properties: { type: '语言模型' } },
-				{ id: '6', name: '自然语言处理', type: 'concept', properties: { domain: 'NLP' } }
+				// 第一级 - 核心概念
+				{ id: '1', name: '人工智能', type: 'concept', level: 1, properties: { category: '核心领域' } },
+				{ id: '2', name: '机器学习', type: 'concept', level: 1, properties: { category: 'AI技术' } },
+				{ id: '3', name: 'OpenAI', type: 'organization', level: 1, properties: { founded: '2015' } },
+
+				// 第二级 - 子领域
+				{ id: '4', name: '深度学习', type: 'concept', level: 2, properties: { category: 'ML子领域' } },
+				{ id: '5', name: '自然语言处理', type: 'concept', level: 2, properties: { domain: 'NLP' } },
+				{ id: '6', name: '计算机视觉', type: 'concept', level: 2, properties: { domain: 'CV' } },
+				{ id: '7', name: 'GPT系列', type: 'concept', level: 2, properties: { type: '语言模型' } },
+
+				// 第三级 - 具体技术
+				{ id: '8', name: '神经网络', type: 'concept', level: 3, properties: { category: '算法' } },
+				{
+					id: '9',
+					name: 'Transformer',
+					type: 'concept',
+					level: 3,
+					properties: { architecture: '注意力机制' }
+				},
+				{ id: '10', name: 'GPT-4', type: 'object', level: 3, properties: { version: '4.0' } },
+				{ id: '11', name: 'CNN', type: 'concept', level: 3, properties: { type: '卷积网络' } },
+				{ id: '12', name: 'RNN', type: 'concept', level: 3, properties: { type: '循环网络' } }
 			],
 			edges: [
+				// 第一级关系
 				{ id: 'e1', source: '2', target: '1', relation: '属于', weight: 0.9 },
-				{ id: 'e2', source: '3', target: '2', relation: '基础', weight: 0.8 },
-				{ id: 'e3', source: '4', target: '5', relation: '开发', weight: 0.95 },
-				{ id: 'e4', source: '5', target: '6', relation: '应用于', weight: 0.85 },
-				{ id: 'e5', source: '5', target: '2', relation: '基于', weight: 0.9 }
+				{ id: 'e2', source: '3', target: '1', relation: '推动', weight: 0.85 },
+
+				// 第二级关系
+				{ id: 'e3', source: '4', target: '2', relation: '是', weight: 0.95 },
+				{ id: 'e4', source: '5', target: '2', relation: '属于', weight: 0.9 },
+				{ id: 'e5', source: '6', target: '2', relation: '属于', weight: 0.9 },
+				{ id: 'e6', source: '7', target: '3', relation: '开发于', weight: 0.95 },
+				{ id: 'e7', source: '7', target: '5', relation: '应用于', weight: 0.85 },
+
+				// 第三级关系
+				{ id: 'e8', source: '8', target: '4', relation: '基础', weight: 0.9 },
+				{ id: 'e9', source: '9', target: '4', relation: '核心技术', weight: 0.95 },
+				{ id: 'e10', source: '10', target: '7', relation: '最新版本', weight: 1.0 },
+				{ id: 'e11', source: '10', target: '9', relation: '基于', weight: 0.9 },
+				{ id: 'e12', source: '11', target: '6', relation: '用于', weight: 0.85 },
+				{ id: 'e13', source: '12', target: '5', relation: '用于', weight: 0.8 },
+				{ id: 'e14', source: '11', target: '8', relation: '类型', weight: 0.7 }
 			]
 		},
 		metadata: segmentData.metadata
@@ -207,18 +240,11 @@ const GraphView: React.FC<GraphViewProps> = ({ segmentData, onDataLoad }) => {
 						</div>
 					) : (
 						<div className={localStyles.graphContent}>
-							{/* 图谱可视化区域 - 待集成可视化库 */}
-							<div className={localStyles.graphPlaceholder}>
-								<Icon name='material-account_tree' size={48} />
-								<Text type='secondary'>
-									{is_cn ? '图谱可视化区域' : 'Graph Visualization Area'}
-								</Text>
-								<Text type='secondary' style={{ fontSize: 12, marginTop: 8 }}>
-									{is_cn
-										? `${graphData.entity_count} 个实体，${graphData.relation_count} 个关系`
-										: `${graphData.entity_count} entities, ${graphData.relation_count} relations`}
-								</Text>
-							</div>
+							{/* 图谱可视化组件 */}
+							<GraphVisualization
+								nodes={graphData.graph_data.nodes}
+								edges={graphData.graph_data.edges}
+							/>
 						</div>
 					)}
 				</div>

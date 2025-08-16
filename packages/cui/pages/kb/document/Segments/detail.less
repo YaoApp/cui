@@ -143,10 +143,12 @@
 .modalContent {
 	min-height: 500px;
 	max-height: calc(100vh - 280px);
-	height: 600px;
+	height: calc(100vh - 280px); // 使用动态高度而不是固定高度
 	overflow: hidden;
 	background: var(--color_bg_menu);
 	border-radius: 0 0 var(--radius) var(--radius);
+	display: flex; // 添加 flex 布局
+	flex-direction: column; // 垂直排列
 }
 
 .modalFooter {

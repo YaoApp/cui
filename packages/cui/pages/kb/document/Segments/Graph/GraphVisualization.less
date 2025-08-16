@@ -1,0 +1,142 @@
+.graphVisualization {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	background: var(--color_neo_bg_content);
+	overflow: hidden;
+	// 移除 border-radius 和其他可能影响显示区域的样式
+	// 使用负边距进一步扩展显示区域
+	margin: -1px;
+}
+
+.graphContainer {
+	width: calc(100% + 2px);
+	height: calc(100% + 2px);
+	// 确保没有内边距影响显示区域
+	padding: 0;
+	margin: 0;
+	// 使用负定位进一步扩展
+	position: relative;
+	left: -1px;
+	top: -1px;
+
+	// X6 样式覆盖
+	:global(.x6-graph) {
+		width: 100% !important;
+		height: 100% !important;
+	}
+
+	:global(.x6-graph-svg) {
+		background: transparent !important;
+		width: 100% !important;
+		height: 100% !important;
+	}
+
+	:global(.x6-graph-grid) {
+		opacity: 0.3;
+	}
+
+	// 节点样式
+	:global(.x6-node) {
+		cursor: pointer;
+		// 移除过渡动画以提高拖拽性能
+		// transition: all 0.2s ease;
+
+		// 使用阴影和透明度变化，不改变尺寸
+		&:hover {
+			filter: brightness(1.1);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+		}
+
+		// 拖拽时禁用 hover 效果
+		&.x6-node-dragging {
+			filter: none !important;
+			box-shadow: none !important;
+		}
+	}
+
+	// 边样式
+	:global(.x6-edge) {
+		cursor: pointer;
+
+		&:hover {
+			:global(.x6-edge-path) {
+				stroke: var(--color_primary) !important;
+			}
+		}
+	}
+
+	// 选中状态
+	:global(.x6-node-selected) {
+		:global(.x6-node-body) {
+			stroke: var(--color_primary) !important;
+			stroke-width: 3px !important;
+		}
+	}
+
+	// 标签样式
+	:global(.x6-edge-label) {
+		:global(rect) {
+			fill: var(--color_neo_bg_card) !important;
+			stroke: var(--color_neo_border_card) !important;
+		}
+
+		:global(text) {
+			fill: var(--color_neo_text_secondary) !important;
+		}
+	}
+
+	// 自定义滚动条样式
+	&::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_neo_icon_muted);
+		border-radius: 4px;
+
+		&:hover {
+			background: var(--color_neo_text_secondary);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+.emptyGraph {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 200px;
+	color: var(--color_neo_text_secondary);
+}
+
+.loadingOverlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.8);
+	backdrop-filter: blur(2px);
+	z-index: 1000;
+
+	[data-theme='dark'] & {
+		background: rgba(0, 0, 0, 0.8);
+	}
+}
+
+// 深色模式适配
+[data-theme='dark'] {
+	.graphVisualization {
+		:global(.x6-graph-grid) {
+			opacity: 0.2;
+		}
+	}
+}

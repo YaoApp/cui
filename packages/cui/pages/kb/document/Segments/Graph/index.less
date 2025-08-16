@@ -88,6 +88,7 @@
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+	min-height: 0; // 确保 flex 子元素可以缩小
 	// 移除所有内边距，让图谱完全铺满
 }
 
@@ -97,6 +98,9 @@
 	flex-direction: column;
 	background: var(--color_neo_bg_content); // 与 Editor 保持一致的背景色
 	transition: all 0.2s ease;
+	min-height: 0; // 确保 flex 子元素可以缩小
+	padding: 0; // 确保没有内边距
+	margin: 0; // 确保没有外边距
 
 	&:hover {
 		background: var(--color_neo_bg_field_hover);
@@ -129,10 +133,13 @@
 
 // 图谱内容区域
 .graphContent {
-	height: 100%;
+	flex: 1; // 改为 flex: 1 而不是固定高度
 	position: relative;
 	display: flex;
 	flex-direction: column;
+	min-height: 0; // 确保可以缩小
+	padding: 0; // 确保没有内边距
+	margin: 0; // 确保没有外边距
 }
 
 // 图谱占位区域
