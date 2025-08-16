@@ -22,7 +22,7 @@ const ScoreFormula: React.FC<ScoreFormulaProps> = ({ chunkId }) => {
 		lengthScore: 0.87,
 		frequencyScore: 0.9,
 		voteScore: 0.85,
-		recallScore: 0.93,
+		hitScore: 0.93,
 		parameters: {
 			semanticWeight: 0.4,
 			keywordWeight: 0.2,
@@ -30,7 +30,7 @@ const ScoreFormula: React.FC<ScoreFormulaProps> = ({ chunkId }) => {
 			lengthWeight: 0.1,
 			frequencyWeight: 0.05,
 			voteWeight: 0.05,
-			recallWeight: 0.05
+			hitWeight: 0.05
 		}
 	}
 
@@ -76,9 +76,9 @@ const ScoreFormula: React.FC<ScoreFormulaProps> = ({ chunkId }) => {
 			score: scoreData.frequencyScore,
 			weight: scoreData.parameters.frequencyWeight,
 			formula: is_cn
-				? 'log(1 + recall_frequency) / log(max_frequency)'
-				: 'log(1 + recall_frequency) / log(max_frequency)',
-			description: is_cn ? '基于召回频率的对数归一化得分' : 'Log-normalized score based on recall frequency'
+				? 'log(1 + hit_frequency) / log(max_frequency)'
+				: 'log(1 + hit_frequency) / log(max_frequency)',
+			description: is_cn ? '基于命中频率的对数归一化得分' : 'Log-normalized score based on hit frequency'
 		},
 		{
 			title: is_cn ? '用户投票得分' : 'User Vote Score',
@@ -90,11 +90,11 @@ const ScoreFormula: React.FC<ScoreFormulaProps> = ({ chunkId }) => {
 			description: is_cn ? '基于用户投票的得分' : 'Score based on user votes'
 		},
 		{
-			title: is_cn ? '召回成功率得分' : 'Recall Success Score',
-			score: scoreData.recallScore,
-			weight: scoreData.parameters.recallWeight,
-			formula: is_cn ? 'successful_recalls / total_recalls' : 'successful_recalls / total_recalls',
-			description: is_cn ? '基于召回成功率的得分' : 'Score based on recall success rate'
+			title: is_cn ? '命中成功率得分' : 'Hit Success Score',
+			score: scoreData.hitScore,
+			weight: scoreData.parameters.hitWeight,
+			formula: is_cn ? 'successful_hits / total_hits' : 'successful_hits / total_hits',
+			description: is_cn ? '基于命中成功率的得分' : 'Score based on hit success rate'
 		}
 	]
 
@@ -220,7 +220,7 @@ const ScoreFormula: React.FC<ScoreFormulaProps> = ({ chunkId }) => {
 								lengthWeight: is_cn ? '长度归一化' : 'Length Normalization',
 								frequencyWeight: is_cn ? '频率得分' : 'Frequency Score',
 								voteWeight: is_cn ? '用户投票' : 'User Vote',
-								recallWeight: is_cn ? '召回成功率' : 'Recall Success'
+								hitWeight: is_cn ? '命中成功率' : 'Hit Success'
 							}
 
 							return (
@@ -271,8 +271,8 @@ const ScoreFormula: React.FC<ScoreFormulaProps> = ({ chunkId }) => {
 							</li>
 							<li>
 								{is_cn
-									? '用户行为（投票、召回）提供额外的质量信号'
-									: 'User behavior (votes, recalls) provides additional quality signals'}
+									? '用户行为（投票、命中）提供额外的质量信号'
+									: 'User behavior (votes, hits) provides additional quality signals'}
 							</li>
 							<li>
 								{is_cn

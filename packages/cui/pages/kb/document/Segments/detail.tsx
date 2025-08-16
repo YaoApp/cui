@@ -4,6 +4,7 @@ import { useLocalStorageState } from 'ahooks'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { Segment } from '@/openapi/kb/types'
+import Editor from './Editor'
 import styles from './detail.less'
 
 interface SegmentDetailProps {
@@ -12,7 +13,7 @@ interface SegmentDetailProps {
 	segmentData: Segment | null
 }
 
-type TabType = 'editor' | 'graph' | 'parents' | 'recall' | 'vote' | 'score'
+type TabType = 'editor' | 'graph' | 'parents' | 'hits' | 'vote' | 'score'
 
 const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segmentData }) => {
 	const locale = getLocale()
@@ -42,8 +43,8 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 			icon: 'material-device_hub'
 		},
 		{
-			key: 'recall' as TabType,
-			label: is_cn ? '召回' : 'Recall',
+			key: 'hits' as TabType,
+			label: is_cn ? '命中' : 'Hits',
 			icon: 'material-history'
 		},
 		{
@@ -70,46 +71,21 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 	const renderContent = () => {
 		switch (activeTab) {
 			case 'editor':
-				return (
-					<div style={{ padding: '20px' }}>
-						<h3>Segment Content</h3>
-						<div style={{ marginBottom: '16px' }}>
-							<strong>ID:</strong> {segmentData.id}
-						</div>
-						<div style={{ marginBottom: '16px' }}>
-							<strong>Text:</strong>
-						</div>
-						<div
-							style={{
-								padding: '12px',
-								border: '1px solid #d9d9d9',
-								borderRadius: '6px',
-								whiteSpace: 'pre-wrap',
-								backgroundColor: '#fafafa'
-							}}
-						>
-							{segmentData.text}
-						</div>
-						{segmentData.metadata && (
-							<>
-								<div style={{ marginTop: '16px', marginBottom: '8px' }}>
-									<strong>Metadata:</strong>
-								</div>
-								<pre
-									style={{
-										padding: '12px',
-										border: '1px solid #d9d9d9',
-										borderRadius: '6px',
-										backgroundColor: '#fafafa',
-										fontSize: '12px'
-									}}
-								>
-									{JSON.stringify(segmentData.metadata, null, 2)}
-								</pre>
-							</>
-						)}
-					</div>
-				)
+				// 适配 Segment 数据到 Editor 组件需要的 ChunkData 格式
+				const chunkData = {
+					id: segmentData.id,
+					text: segmentData.text || '',
+					weight: segmentData.weight || 1.0,
+					hit_count: segmentData.metadata?.hit_count || 0,
+					upvotes: segmentData.vote && segmentData.vote > 0 ? segmentData.vote : 0,
+					downvotes: segmentData.vote && segmentData.vote < 0 ? Math.abs(segmentData.vote) : 0,
+					text_length: segmentData.text?.length || 0,
+					max_length: 8000, // 默认最大长度
+					score: segmentData.score || 0, // 添加评分
+					metadata: segmentData.metadata // 传递完整的 metadata
+				}
+
+				return <Editor chunkData={chunkData} onSave={handleSave} />
 			case 'graph':
 				return (
 					<div style={{ padding: '20px', textAlign: 'center' }}>
@@ -126,11 +102,11 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 						<p style={{ color: '#999' }}>Coming soon...</p>
 					</div>
 				)
-			case 'recall':
+			case 'hits':
 				return (
 					<div style={{ padding: '20px', textAlign: 'center' }}>
 						<Icon name='material-history' size={48} />
-						<p>Recall history for segment: {segmentData.id}</p>
+						<p>Hit history for segment: {segmentData.id}</p>
 						<p style={{ color: '#999' }}>Coming soon...</p>
 					</div>
 				)
@@ -166,9 +142,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 				<div className={styles.modalHeader}>
 					<div className={styles.titleSection}>
 						<Icon name='material-description' size={16} />
-						<span className={styles.modalTitle}>
-							{is_cn ? 'Segment 详情' : 'Segment Details'}
-						</span>
+						<span className={styles.modalTitle}>{is_cn ? '分段详情' : 'Segment Details'}</span>
 					</div>
 					<div className={styles.tabs}>
 						{tabs.map((tab) => (

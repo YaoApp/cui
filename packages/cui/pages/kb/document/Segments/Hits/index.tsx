@@ -6,7 +6,7 @@ import Icon from '@/widgets/Icon'
 import styles from '../detail.less'
 import localStyles from './index.less'
 
-interface RecallRecord {
+interface HitRecord {
 	id: string
 	query: string
 	rank: number
@@ -15,32 +15,32 @@ interface RecallRecord {
 	source: string
 }
 
-interface RecallListProps {
+interface HitListProps {
 	chunkId: string
 }
 
-const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
+const HitList: React.FC<HitListProps> = ({ chunkId }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const [data, setData] = useState<RecallRecord[]>([])
+	const [data, setData] = useState<HitRecord[]>([])
 	const [loading, setLoading] = useState(true)
 	const [currentPage, setCurrentPage] = useState(1)
 	const pageSize = 10
 
 	useEffect(() => {
-		loadRecallData()
+		loadHitData()
 	}, [chunkId])
 
-	const loadRecallData = async () => {
+	const loadHitData = async () => {
 		try {
 			setLoading(true)
 			// 模拟加载时间
 			await new Promise((resolve) => setTimeout(resolve, 500))
 
-			// 模拟召回数据
-			const mockData: RecallRecord[] = [
+			// 模拟命中数据
+			const mockData: HitRecord[] = [
 				{
-					id: 'recall_1',
+					id: 'hit_1',
 					query: '系统架构设计',
 					rank: 1,
 					timestamp: '2024-01-15 14:32:15',
@@ -48,15 +48,15 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 					source: 'user_search'
 				},
 				{
-					id: 'recall_2',
+					id: 'hit_2',
 					query: '数据处理流程',
 					rank: 3,
 					timestamp: '2024-01-15 13:28:42',
 					score: 0.87,
-					source: 'auto_recall'
+					source: 'auto_hit'
 				},
 				{
-					id: 'recall_3',
+					id: 'hit_3',
 					query: '用户界面设计原则',
 					rank: 2,
 					timestamp: '2024-01-15 12:15:30',
@@ -64,7 +64,7 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 					source: 'user_search'
 				},
 				{
-					id: 'recall_4',
+					id: 'hit_4',
 					query: '安全性要求',
 					rank: 5,
 					timestamp: '2024-01-15 11:45:18',
@@ -72,7 +72,7 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 					source: 'related_query'
 				},
 				{
-					id: 'recall_5',
+					id: 'hit_5',
 					query: 'API接口文档',
 					rank: 1,
 					timestamp: '2024-01-15 10:30:25',
@@ -80,15 +80,15 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 					source: 'user_search'
 				},
 				{
-					id: 'recall_6',
+					id: 'hit_6',
 					query: '系统部署方案',
 					rank: 4,
 					timestamp: '2024-01-15 09:22:10',
 					score: 0.82,
-					source: 'auto_recall'
+					source: 'auto_hit'
 				},
 				{
-					id: 'recall_7',
+					id: 'hit_7',
 					query: '数据库优化策略',
 					rank: 2,
 					timestamp: '2024-01-14 16:45:33',
@@ -96,7 +96,7 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 					source: 'user_search'
 				},
 				{
-					id: 'recall_8',
+					id: 'hit_8',
 					query: '性能监控',
 					rank: 6,
 					timestamp: '2024-01-14 15:12:45',
@@ -107,7 +107,7 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 
 			setData(mockData)
 		} catch (error) {
-			message.error(is_cn ? '加载召回数据失败' : 'Failed to load recall data')
+			message.error(is_cn ? '加载命中数据失败' : 'Failed to load hit data')
 		} finally {
 			setLoading(false)
 		}
@@ -129,7 +129,7 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 		switch (source) {
 			case 'user_search':
 				return 'blue'
-			case 'auto_recall':
+			case 'auto_hit':
 				return 'green'
 			case 'related_query':
 				return 'orange'
@@ -142,8 +142,8 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 		switch (source) {
 			case 'user_search':
 				return is_cn ? '用户搜索' : 'User Search'
-			case 'auto_recall':
-				return is_cn ? '自动召回' : 'Auto Recall'
+			case 'auto_hit':
+				return is_cn ? '自动命中' : 'Auto Hit'
 			case 'related_query':
 				return is_cn ? '相关查询' : 'Related Query'
 			default:
@@ -197,11 +197,9 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 			title: is_cn ? '操作' : 'Actions',
 			key: 'actions',
 			width: '10%',
-			render: (_: any, record: RecallRecord) => (
+			render: (_: any, record: HitRecord) => (
 				<Popconfirm
-					title={
-						is_cn ? '确定要删除这条召回记录吗？' : 'Are you sure to delete this recall record?'
-					}
+					title={is_cn ? '确定要删除这条命中记录吗？' : 'Are you sure to delete this hit record?'}
 					onConfirm={() => handleDelete(record.id)}
 					okText={is_cn ? '确定' : 'OK'}
 					cancelText={is_cn ? '取消' : 'Cancel'}
@@ -223,7 +221,7 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 			<div className={styles.tabHeader}>
 				<div className={styles.tabTitle}>
 					<Icon name='material-history' size={16} />
-					<span>{is_cn ? '召回记录' : 'Recall Records'}</span>
+					<span>{is_cn ? '命中记录' : 'Hit Records'}</span>
 					<span className={styles.recordCount}>({data.length})</span>
 				</div>
 			</div>
@@ -253,4 +251,4 @@ const RecallList: React.FC<RecallListProps> = ({ chunkId }) => {
 	)
 }
 
-export default RecallList
+export default HitList

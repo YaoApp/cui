@@ -1,0 +1,108 @@
+.customTextArea {
+	width: 100%;
+	height: 100%;
+	border: none;
+	outline: none;
+	resize: none;
+	font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 1.6;
+	padding: 16px;
+	background: var(--color_neo_bg_card);
+	color: var(--color_neo_text_primary);
+	transition: all 0.2s ease;
+
+	// 移除默认的圆角
+	border-radius: 0;
+
+	// 占位符样式
+	&::placeholder {
+		color: var(--color_neo_text_secondary);
+		opacity: 0.6;
+	}
+
+	// 悬停状态（所有模式都生效）
+	&:hover {
+		background: var(--color_neo_bg_field_hover);
+	}
+
+	// 聚焦状态
+	&.focused {
+		background: var(--color_neo_bg_field);
+		color: var(--color_neo_text_primary);
+
+		&::placeholder {
+			opacity: 0.4;
+		}
+
+		// 聚焦状态下的悬停效果
+		&:hover {
+			background: var(--color_neo_bg_field_hover);
+		}
+	}
+
+	// 只读状态 - 保持与编辑模式相同的交互效果
+	&.readOnly {
+		background: var(--color_neo_bg_card);
+		color: var(--color_neo_text_primary);
+		cursor: text; // 允许文本选择
+
+		&:hover {
+			background: var(--color_neo_bg_field_hover);
+		}
+
+		&.focused {
+			background: var(--color_neo_bg_field);
+
+			// 只读且聚焦状态下的悬停效果
+			&:hover {
+				background: var(--color_neo_bg_field_hover);
+			}
+		}
+	}
+
+	// 滚动条样式
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_neo_icon_muted);
+		border-radius: 4px;
+
+		&:hover {
+			background: var(--color_neo_text_secondary);
+		}
+	}
+
+	// Firefox 滚动条
+	scrollbar-width: thin;
+	scrollbar-color: var(--color_neo_icon_muted) transparent;
+}
+
+// 深色模式下的特殊处理
+[data-theme='dark'] .customTextArea {
+	// 在深色模式下，聚焦时的背景色稍微明亮一些
+	&.focused {
+		background: var(--color_neo_bg_field);
+
+		// 深色模式下聚焦状态的悬停效果
+		&:hover {
+			background: var(--color_neo_bg_field_hover);
+		}
+	}
+
+	// 只读模式下的聚焦效果与编辑模式保持一致
+	&.readOnly.focused {
+		background: var(--color_neo_bg_field);
+
+		// 深色模式下只读聚焦状态的悬停效果
+		&:hover {
+			background: var(--color_neo_bg_field_hover);
+		}
+	}
+}

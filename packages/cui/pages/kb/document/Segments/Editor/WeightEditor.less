@@ -1,0 +1,175 @@
+.weightEditor {
+	position: relative;
+	display: inline-block;
+}
+
+.weightValue {
+	display: inline-flex;
+	align-items: center;
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--color_main); /* 默认使用主色，与 Score 和 Hits 一致 */
+	padding: 2px 6px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	user-select: none;
+	position: relative; /* 为编辑图标的绝对定位提供参考 */
+
+	&.hovered {
+		background: var(--color_neo_bg_field_hover);
+		color: var(--color_main);
+		padding-right: 20px; /* 为编辑图标预留空间 */
+	}
+
+	&.disabled {
+		cursor: default;
+		opacity: 0.6;
+		color: var(--color_neo_text_primary); /* 禁用时恢复普通颜色 */
+	}
+}
+
+.editIcon {
+	position: absolute;
+	top: 50%;
+	right: 4px; /* 放在背景内，右侧留点边距 */
+	transform: translateY(-50%);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	color: var(--color_main);
+	pointer-events: none; /* 防止图标阻挡点击事件 */
+
+	&.visible {
+		opacity: 1;
+	}
+}
+
+.editTooltip {
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	margin-top: 8px;
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: var(--radius);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	min-width: 120px;
+	padding: 8px;
+}
+
+.tooltipArrow {
+	position: absolute;
+	top: -6px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-bottom: 6px solid var(--color_neo_bg_card);
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: 1px;
+		left: -6px;
+		width: 0;
+		height: 0;
+		border-left: 6px solid transparent;
+		border-right: 6px solid transparent;
+		border-bottom: 6px solid var(--color_neo_border_card);
+	}
+}
+
+.inputWrapper {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.weightInput {
+	flex: 1;
+	border: 1px solid var(--color_neo_border_field);
+	border-radius: 4px;
+	padding: 4px 8px;
+	font-size: 12px;
+	background: var(--color_neo_bg_field);
+	color: var(--color_neo_text_primary);
+	outline: none;
+	transition: all 0.2s ease;
+	width: 60px;
+
+	&:focus {
+		border-color: var(--color_main);
+		box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+	}
+
+	&::-webkit-outer-spin-button,
+	&::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	&[type='number'] {
+		-moz-appearance: textfield;
+	}
+}
+
+.actions {
+	display: flex;
+	gap: 4px;
+}
+
+.saveButton,
+.cancelButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		transform: scale(1.1);
+	}
+}
+
+.saveButton {
+	background: var(--color_success);
+	color: white;
+
+	&:hover {
+		background: var(--color_success);
+		opacity: 0.8;
+	}
+}
+
+.cancelButton {
+	background: var(--color_danger);
+	color: white;
+
+	&:hover {
+		background: var(--color_danger);
+		opacity: 0.8;
+	}
+}
+
+// 深色模式适配
+[data-theme='dark'] {
+	.editTooltip {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	}
+
+	.tooltipArrow {
+		border-bottom-color: var(--color_neo_bg_card);
+
+		&::before {
+			border-bottom-color: var(--color_neo_border_card);
+		}
+	}
+}
