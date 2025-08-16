@@ -9,6 +9,20 @@
 	overflow: hidden;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
+	// sortSelect 样式覆盖 - 统一高度为36px
+	.sortSelect {
+		:global(.xgen-select-selector) {
+			height: 36px !important;
+			min-height: 36px !important;
+			max-height: 36px !important;
+			padding: 6px 24px 6px 12px !important;
+			line-height: 1 !important;
+			box-sizing: border-box !important;
+			display: flex !important;
+			align-items: center !important;
+		}
+	}
+
 	// 左栏
 	.leftPanel {
 		display: flex;
@@ -244,10 +258,14 @@
 		flex: 1;
 
 		:global(.ant-input) {
+			height: 36px !important;
+			min-height: 36px !important;
+			max-height: 36px !important;
 			font-size: 12px;
 			border-radius: 4px;
 			border: 1px solid var(--color_neo_border_field);
 			background: var(--color_neo_bg_field);
+			padding: 8px 11px !important;
 
 			&:hover {
 				border-color: var(--color_neo_border_field_hover);
@@ -264,49 +282,31 @@
 	.sortSelect {
 		font-size: 12px !important;
 
-		:global(.xgen-select),
-		:global(.ant-select) {
+		// 最强制的选择器
+		:global(.ant-select),
+		:global(.xgen-select) {
+			height: 36px !important;
 			font-size: 12px !important;
-		}
 
-		:global(.ant-select-selector),
-		:global(.xgen-select .ant-select-selector) {
-			height: 28px !important;
-			font-size: 12px !important;
-			border-radius: 4px;
-			border: 1px solid var(--color_neo_border_field);
-			background: transparent !important;
-			padding: 0 24px 0 12px !important;
-			display: flex !important;
-			align-items: center !important;
-
-			&:hover {
-				border-color: var(--color_neo_border_field_hover);
+			.ant-select-selector {
+				height: 36px !important;
+				min-height: 36px !important;
+				max-height: 36px !important;
+				font-size: 12px !important;
+				border-radius: 4px !important;
+				border: 1px solid var(--color_neo_border_field) !important;
 				background: transparent !important;
+				padding: 6px 24px 6px 12px !important;
+				display: flex !important;
+				align-items: center !important;
+				line-height: 1 !important;
+				box-sizing: border-box !important;
+
+				&:hover {
+					border-color: var(--color_neo_border_field_hover) !important;
+					background: transparent !important;
+				}
 			}
-		}
-
-		:global(.ant-select-focused .ant-select-selector),
-		:global(.xgen-select-focused .ant-select-selector) {
-			border-color: var(--color_main) !important;
-			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1) !important;
-			background: transparent !important;
-		}
-
-		:global(.ant-select-selection-item),
-		:global(.xgen-select .ant-select-selection-item) {
-			line-height: 1 !important;
-			color: var(--color_neo_text_primary);
-			font-weight: 500;
-			padding: 0 !important;
-			font-size: 12px !important;
-		}
-
-		:global(.ant-select-arrow),
-		:global(.xgen-select .ant-select-arrow) {
-			color: var(--color_neo_text_secondary);
-			right: 8px;
-			margin-top: 0 !important;
 		}
 	}
 
@@ -512,30 +512,21 @@
 				}
 			}
 
-			.weightRecall {
+			.metaInfo {
 				display: flex;
-				gap: 6px;
+				gap: 8px;
 				align-items: center;
+				flex-wrap: wrap;
 
-				.weight,
-				.recall {
+				.metaItem {
 					font-size: 10px;
-					padding: 2px 6px;
-					border-radius: 3px;
-					border: 1px solid;
+					color: #999;
 					white-space: nowrap;
-				}
 
-				.weight {
-					color: var(--color_warning);
-					border-color: var(--color_warning);
-					background: var(--color_warning_bg);
-				}
-
-				.recall {
-					color: var(--color_info);
-					border-color: var(--color_info);
-					background: var(--color_info_bg);
+					.metaNumber {
+						color: var(--color_main);
+						font-weight: 500;
+					}
 				}
 			}
 		}

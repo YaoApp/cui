@@ -292,14 +292,20 @@ const Segments: React.FC<SegmentsProps> = ({
 	}
 
 	// 投票处理
-	const handleVote = (segmentId: string, type: 'up' | 'down') => {
+	const handleVote = (segmentId: string, type: 'good' | 'bad') => {
 		// TODO: 实现真实的投票API调用
 		setData((prevData) =>
 			prevData.map((segment) =>
 				segment.id === segmentId
 					? {
 							...segment,
-							vote: type === 'up' ? (segment.vote || 0) + 1 : (segment.vote || 0) - 1
+							metadata: {
+								...segment.metadata,
+								[type === 'good' ? 'vote_good' : 'vote_bad']:
+									((segment.metadata?.[
+										type === 'good' ? 'vote_good' : 'vote_bad'
+									] as number) || 0) + 1
+							}
 					  }
 					: segment
 			)
@@ -343,21 +349,26 @@ const Segments: React.FC<SegmentsProps> = ({
 		if (sortBy !== 'default') {
 			segments = [...segments].sort((a, b) => {
 				switch (sortBy) {
-					case 'recall':
-						// 按召回次数排序 (假设存储在 metadata 中)
-						const recallA = (a.metadata?.recall_count as number) || 0
-						const recallB = (b.metadata?.recall_count as number) || 0
-						return recallB - recallA // 降序
+					case 'hit':
+						// 按命中次数排序 (假设存储在 metadata 中)
+						const hitA = (a.metadata?.hit_count as number) || 0
+						const hitB = (b.metadata?.hit_count as number) || 0
+						return hitB - hitA // 降序
 					case 'weight':
 						// 按权重排序
 						const weightA = a.weight || 0
 						const weightB = b.weight || 0
 						return weightB - weightA // 降序
-					case 'votes':
-						// 按投票数排序
-						const voteA = a.vote || 0
-						const voteB = b.vote || 0
-						return voteB - voteA // 降序
+					case 'votes_good':
+						// 按好评数排序
+						const voteGoodA = (a.metadata?.vote_good as number) || 0
+						const voteGoodB = (b.metadata?.vote_good as number) || 0
+						return voteGoodB - voteGoodA // 降序
+					case 'votes_bad':
+						// 按差评数排序
+						const voteBadA = (a.metadata?.vote_bad as number) || 0
+						const voteBadB = (b.metadata?.vote_bad as number) || 0
+						return voteBadB - voteBadA // 降序
 					case 'structure':
 						// 按文档结构排序：先按 depth (1, 2, 3...)，再按 index (0, 1, 2...)
 						const depthA =
@@ -483,17 +494,23 @@ const Segments: React.FC<SegmentsProps> = ({
 							)}
 						</span>
 					</div>
-					<div className={styles.weightRecall}>
-						{segment.weight !== undefined && (
-							<span className={styles.weight}>
-								{is_cn ? '权重' : 'Weight'}: {segment.weight.toFixed(1)}
+					<div className={styles.metaInfo}>
+						<span className={styles.metaItem}>
+							{is_cn ? '权重' : 'Weight'}{' '}
+							<span className={styles.metaNumber}>
+								{segment.weight?.toFixed(1) || '0.0'}
 							</span>
-						)}
-						{segment.score !== undefined && (
-							<span className={styles.recall}>
-								{is_cn ? '评分' : 'Score'}: {segment.score.toFixed(2)}
+						</span>
+						<span className={styles.metaItem}>
+							{is_cn ? '评分' : 'Score'}{' '}
+							<span className={styles.metaNumber}>
+								{segment.score?.toFixed(2) || '0.00'}
 							</span>
-						)}
+						</span>
+						<span className={styles.metaItem}>
+							{is_cn ? '命中' : 'Hits'}{' '}
+							<span className={styles.metaNumber}>{segment.metadata?.hit_count || 0}</span>
+						</span>
 					</div>
 				</div>
 
@@ -530,11 +547,21 @@ const Segments: React.FC<SegmentsProps> = ({
 							className={styles.voteButton}
 							onClick={(e) => {
 								e.stopPropagation()
-								handleVote(segment.id, 'up')
+								handleVote(segment.id, 'good')
 							}}
 						>
 							<Icon name='material-thumb_up' size={14} />
-							<span>{segment.vote || 0}</span>
+							<span>{segment.metadata?.vote_good || 0}</span>
+						</button>
+						<button
+							className={styles.voteButton}
+							onClick={(e) => {
+								e.stopPropagation()
+								handleVote(segment.id, 'bad')
+							}}
+						>
+							<Icon name='material-thumb_down' size={14} />
+							<span>{segment.metadata?.vote_bad || 0}</span>
 						</button>
 					</div>
 				</div>
@@ -655,7 +682,7 @@ const Segments: React.FC<SegmentsProps> = ({
 							}}
 							size='small'
 							className={styles.sortSelect}
-							style={{ width: 100 }}
+							style={{ width: 120 }}
 						>
 							<Select.Option value='all'>{is_cn ? '全部层级' : 'All Levels'}</Select.Option>
 							<Select.Option value='1'>{is_cn ? '第1层' : 'Level 1'}</Select.Option>
@@ -673,7 +700,7 @@ const Segments: React.FC<SegmentsProps> = ({
 							}}
 							size='small'
 							className={styles.sortSelect}
-							style={{ width: 160 }}
+							style={{ width: 180 }}
 						>
 							<Select.Option value='default'>
 								{is_cn ? '默认排序' : 'Default'}
@@ -681,11 +708,16 @@ const Segments: React.FC<SegmentsProps> = ({
 							<Select.Option value='structure'>
 								{is_cn ? '文档结构' : 'Document Structure'}
 							</Select.Option>
-							<Select.Option value='recall'>
-								{is_cn ? '召回次数' : 'Recall Count'}
+							<Select.Option value='hit'>{is_cn ? '最多命中' : 'Most Hits'}</Select.Option>
+							<Select.Option value='weight'>
+								{is_cn ? '最高权重' : 'Highest Weight'}
 							</Select.Option>
-							<Select.Option value='weight'>{is_cn ? '权重' : 'Weight'}</Select.Option>
-							<Select.Option value='votes'>{is_cn ? '投票' : 'Votes'}</Select.Option>
+							<Select.Option value='votes_good'>
+								{is_cn ? '好评优先' : 'Good Votes First'}
+							</Select.Option>
+							<Select.Option value='votes_bad'>
+								{is_cn ? '差评优先' : 'Bad Votes First'}
+							</Select.Option>
 						</Select>
 						<Button
 							type='primary'
