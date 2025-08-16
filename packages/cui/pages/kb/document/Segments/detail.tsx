@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import { Modal, Button } from 'antd'
 import { useLocalStorageState } from 'ahooks'
 import { getLocale } from '@umijs/max'
+import { useGlobal } from '@/context/app'
 import Icon from '@/widgets/Icon'
 import { Segment } from '@/openapi/kb/types'
 import Editor from './Editor'
+import GraphView from './Graph'
 import styles from './detail.less'
 
 interface SegmentDetailProps {
@@ -18,6 +20,8 @@ type TabType = 'editor' | 'graph' | 'parents' | 'hits' | 'vote' | 'score'
 const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segmentData }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+	const global = useGlobal()
+	const { kb: kbConfig } = global.app_info || {}
 
 	// 记住用户上次选择的tab
 	const [activeTab, setActiveTab] = useLocalStorageState<TabType>('segment-detail-tab', {
@@ -26,17 +30,29 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 
 	if (!segmentData) return null
 
+	// 判断是否显示图谱卡片：L1级别的切片 且 知识库配置支持图谱
+	const shouldShowGraph = () => {
+		const isL1Segment = segmentData.metadata?.chunk_details?.depth === 1
+		const hasGraphFeature = kbConfig?.features?.GraphDatabase === true
+		return isL1Segment && hasGraphFeature
+	}
+
 	const tabs = [
 		{
 			key: 'editor' as TabType,
 			label: is_cn ? '内容' : 'Content',
 			icon: 'material-edit_note'
 		},
-		{
-			key: 'graph' as TabType,
-			label: is_cn ? '图谱' : 'Graph',
-			icon: 'material-account_tree'
-		},
+		// 只有满足条件时才显示图谱卡片
+		...(shouldShowGraph()
+			? [
+					{
+						key: 'graph' as TabType,
+						label: is_cn ? '图谱' : 'Graph',
+						icon: 'material-account_tree'
+					}
+			  ]
+			: []),
 		{
 			key: 'parents' as TabType,
 			label: is_cn ? '层级' : 'Hierarchy',
@@ -87,13 +103,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 
 				return <Editor chunkData={chunkData} onSave={handleSave} />
 			case 'graph':
-				return (
-					<div style={{ padding: '20px', textAlign: 'center' }}>
-						<Icon name='material-account_tree' size={48} />
-						<p>Knowledge Graph for segment: {segmentData.id}</p>
-						<p style={{ color: '#999' }}>Coming soon...</p>
-					</div>
-				)
+				return <GraphView segmentData={segmentData} />
 			case 'parents':
 				return (
 					<div style={{ padding: '20px', textAlign: 'center' }}>
