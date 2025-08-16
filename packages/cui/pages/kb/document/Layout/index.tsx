@@ -137,6 +137,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
 					onRestoreDualPanels={restoreDualPanels}
 					docid={docid}
 					collectionId={collectionId}
+					document={document}
 				/>
 			</div>
 		</div>

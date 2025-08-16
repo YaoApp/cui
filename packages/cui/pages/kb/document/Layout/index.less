@@ -98,6 +98,7 @@
 		overflow-y: auto;
 		min-height: 0;
 		background: var(--color_neo_bg_content);
+		position: relative; // 为处理中状态提供定位上下文
 
 		// 为原始文档视图保持无滚动（FileViewer内部处理）
 		&:has(.documentViewer) {
@@ -641,6 +642,177 @@
 // 全局用户选择禁用（拖拽时）
 .contentLayout.dragging * {
 	user-select: none;
+}
+
+// 分段区域处理中状态样式
+.processingContainer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	background: var(--color_neo_bg_content);
+	overflow: hidden;
+	z-index: 100; // 确保覆盖搜索栏等元素
+
+	// 背景动效 - 与 DocumentCover 一致
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(51, 113, 252, 0.05), transparent);
+		animation: shimmer 3s ease-in-out infinite;
+		pointer-events: none;
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(90deg, transparent, rgba(51, 113, 252, 0.12), transparent);
+		background-size: 200% 100%;
+		animation: borderGlow 3s ease-in-out infinite;
+		pointer-events: none;
+	}
+
+	:global(.Icon),
+	:global(.xgen-icon),
+	:global(.Icon.material) {
+		color: var(--color_neo_icon_muted) !important;
+		font-size: 48px !important;
+		margin-bottom: 12px !important;
+		opacity: 0.8 !important;
+		z-index: 1 !important;
+		position: relative !important;
+
+		&[data-icon='material-psychology'] {
+			color: var(--color_main) !important;
+			animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite !important;
+			opacity: 0.9 !important;
+		}
+
+		&[data-icon='material-error_outline'] {
+			color: var(--color_danger) !important;
+			opacity: 0.9 !important;
+		}
+	}
+
+	// 处理中状态的图标样式
+	&:not(.errorState) :global(.Icon.material) {
+		color: var(--color_main) !important;
+		animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite !important;
+		opacity: 0.9 !important;
+	}
+
+	// 错误状态的图标样式
+	&.errorState :global(.Icon.material) {
+		color: var(--color_danger) !important;
+		opacity: 0.9 !important;
+		animation: none !important;
+	}
+
+	// 错误状态特殊样式
+	&.errorState {
+		background: linear-gradient(
+			135deg,
+			var(--color_danger_bg) 0%,
+			var(--color_neo_bg_content) 50%,
+			var(--color_danger_bg) 100%
+		) !important;
+
+		// 移除处理中的动画效果
+		&::before,
+		&::after {
+			display: none !important;
+		}
+	}
+}
+
+.processingText {
+	font-size: 14px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	margin: 0;
+	z-index: 1;
+	position: relative;
+}
+
+// 错误消息样式
+.errorMessage {
+	color: var(--color_danger) !important;
+	font-size: 12px !important;
+	font-weight: 500 !important;
+	text-align: center !important;
+	line-height: 1.3 !important;
+	padding: 12px !important;
+	word-break: break-word !important;
+	overflow-wrap: break-word !important;
+	z-index: 1;
+	position: relative;
+
+	// 多行文本截断
+	display: -webkit-box !important;
+	-webkit-line-clamp: 4 !important; // 最多显示4行
+	-webkit-box-orient: vertical !important;
+	overflow: hidden !important;
+
+	// 确保有足够高度显示4行
+	max-height: calc(1.3em * 4 + 24px) !important; // 4行高度 + padding
+}
+
+// 动画效果 - 与 DocumentCover 一致
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 0.8;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.02);
+	}
+}
+
+@keyframes glow {
+	0%,
+	100% {
+		filter: drop-shadow(0 0 8px rgba(51, 113, 252, 0.3));
+	}
+	50% {
+		filter: drop-shadow(0 0 16px rgba(51, 113, 252, 0.5));
+	}
+}
+
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes borderGlow {
+	0%,
+	100% {
+		background-position: 0% 50%;
+		opacity: 0.3;
+	}
+	50% {
+		background-position: 100% 50%;
+		opacity: 0.6;
+	}
 }
 
 // 暗色主题下的特殊样式调整

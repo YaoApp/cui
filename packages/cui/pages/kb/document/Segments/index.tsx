@@ -14,9 +14,17 @@ interface SegmentsProps {
 	onRestoreDualPanels: () => void
 	docid: string
 	collectionId: string
+	document?: any // 文档对象，包含状态信息
 }
 
-const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestoreDualPanels, docid, collectionId }) => {
+const Segments: React.FC<SegmentsProps> = ({
+	viewMode,
+	onHideLeftPanel,
+	onRestoreDualPanels,
+	docid,
+	collectionId,
+	document
+}) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [data, setData] = useState<Segment[]>([])
@@ -32,9 +40,78 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 	const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
 	const [hasMore, setHasMore] = useState(false)
 
+	// 文档状态相关状态
+	const [currentDocument, setCurrentDocument] = useState(document)
+	const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false)
+	const autoRefreshTimerRef = useRef<NodeJS.Timeout | null>(null)
+
 	// 使用 ref 来防止重复请求和跟踪最新的 scrollId
 	const isLoadingRef = useRef(false)
 	const scrollIdRef = useRef<string>('')
+
+	// 检查是否为处理中状态
+	const isProcessing = (status?: string) => {
+		return (
+			status === 'pending' ||
+			status === 'converting' ||
+			status === 'chunking' ||
+			status === 'extracting' ||
+			status === 'embedding' ||
+			status === 'storing'
+		)
+	}
+
+	// 获取文档详情
+	const loadDocumentStatus = async () => {
+		try {
+			if (!window.$app?.openapi) return
+
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.GetDocument(docid)
+
+			if (window.$app.openapi.IsError(response)) {
+				console.error('Failed to load document status:', response.error)
+				return
+			}
+
+			const updatedDocument = response.data
+			setCurrentDocument(updatedDocument)
+
+			// 如果文档状态变为完成，停止自动刷新并加载分段
+			if (updatedDocument?.status === 'completed' && isProcessing(currentDocument?.status)) {
+				console.log('Document processing completed, stopping auto refresh')
+				stopAutoRefresh()
+				loadSegments(true) // 重新加载分段数据
+			}
+
+			return updatedDocument
+		} catch (error) {
+			console.error('Load document status failed:', error)
+		}
+	}
+
+	// 启动自动刷新
+	const startAutoRefresh = () => {
+		if (autoRefreshTimerRef.current) {
+			clearInterval(autoRefreshTimerRef.current)
+		}
+
+		autoRefreshTimerRef.current = setInterval(() => {
+			console.log('Auto refreshing document status...')
+			loadDocumentStatus()
+		}, 15000) // 15秒刷新一次
+
+		setAutoRefreshEnabled(true)
+	}
+
+	// 停止自动刷新
+	const stopAutoRefresh = () => {
+		if (autoRefreshTimerRef.current) {
+			clearInterval(autoRefreshTimerRef.current)
+			autoRefreshTimerRef.current = null
+		}
+		setAutoRefreshEnabled(false)
+	}
 
 	// 根据文档ID加载segments数据 (初始加载)
 	const loadSegments = async (reset: boolean = false) => {
@@ -176,6 +253,30 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 			clearTimeout(timeoutId)
 		}
 	}, [hasMore, loadingMore, searchText, data.length, sortBy, filterByDepth]) // 添加排序和过滤依赖，确保条件变化时重新评估无限滚动
+
+	// 文档状态初始化和自动刷新
+	useEffect(() => {
+		// 更新当前文档状态
+		setCurrentDocument(document)
+
+		// 如果文档处于处理中状态，启动自动刷新
+		if (document && isProcessing(document.status)) {
+			console.log('Document is processing, starting auto refresh')
+			startAutoRefresh()
+		} else {
+			// 如果文档已完成或不是处理状态，停止自动刷新
+			stopAutoRefresh()
+		}
+	}, [document])
+
+	// 组件卸载时清理定时器
+	useEffect(() => {
+		return () => {
+			if (autoRefreshTimerRef.current) {
+				clearInterval(autoRefreshTimerRef.current)
+			}
+		}
+	}, [])
 
 	// 搜索处理
 	const handleSearch = () => {
@@ -527,69 +628,101 @@ const Segments: React.FC<SegmentsProps> = ({ viewMode, onHideLeftPanel, onRestor
 				</div>
 			</div>
 
-			{/* 搜索器 */}
-			<div className={styles.searchSection}>
-				<div className={styles.searchWrapper}>
-					<Input
-						className={styles.searchInput}
-						placeholder={is_cn ? '搜索分段内容...' : 'Search segments...'}
-						prefix={<SearchOutlined />}
-						value={search}
-						onChange={(e) => setSearch(e.target.value)}
-						onKeyPress={handleKeyPress}
-						allowClear
-					/>
-					<Select
-						value={filterByDepth}
-						onChange={(value) => {
-							setFilterByDepth(value)
-							// 选择特定层级时自动切换到文档结构排序
-							if (value !== 'all') {
-								setSortBy('structure')
-							}
-						}}
-						size='small'
-						className={styles.sortSelect}
-						style={{ width: 100 }}
-					>
-						<Select.Option value='all'>{is_cn ? '全部层级' : 'All Levels'}</Select.Option>
-						<Select.Option value='1'>{is_cn ? '第1层' : 'Level 1'}</Select.Option>
-						<Select.Option value='2'>{is_cn ? '第2层' : 'Level 2'}</Select.Option>
-						<Select.Option value='3'>{is_cn ? '第3层' : 'Level 3'}</Select.Option>
-					</Select>
-					<Select
-						value={sortBy}
-						onChange={(value) => {
-							setSortBy(value)
-							// 切换回默认排序时，同时重置层级过滤，恢复无限滚动
-							if (value === 'default') {
-								setFilterByDepth('all')
-							}
-						}}
-						size='small'
-						className={styles.sortSelect}
-						style={{ width: 160 }}
-					>
-						<Select.Option value='default'>{is_cn ? '默认排序' : 'Default'}</Select.Option>
-						<Select.Option value='structure'>
-							{is_cn ? '文档结构' : 'Document Structure'}
-						</Select.Option>
-						<Select.Option value='recall'>{is_cn ? '召回次数' : 'Recall Count'}</Select.Option>
-						<Select.Option value='weight'>{is_cn ? '权重' : 'Weight'}</Select.Option>
-						<Select.Option value='votes'>{is_cn ? '投票' : 'Votes'}</Select.Option>
-					</Select>
-					<Button
-						type='primary'
-						size='small'
-						onClick={handleSearch}
-						className={styles.searchButton}
-					>
-						{is_cn ? '搜索' : 'Search'}
-					</Button>
+			{/* 搜索器 - 处理中状态时隐藏 */}
+			{!(
+				currentDocument &&
+				(isProcessing(currentDocument.status) || currentDocument.status === 'error')
+			) && (
+				<div className={styles.searchSection}>
+					<div className={styles.searchWrapper}>
+						<Input
+							className={styles.searchInput}
+							placeholder={is_cn ? '搜索分段内容...' : 'Search segments...'}
+							prefix={<SearchOutlined />}
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+							onKeyPress={handleKeyPress}
+							allowClear
+						/>
+						<Select
+							value={filterByDepth}
+							onChange={(value) => {
+								setFilterByDepth(value)
+								// 选择特定层级时自动切换到文档结构排序
+								if (value !== 'all') {
+									setSortBy('structure')
+								}
+							}}
+							size='small'
+							className={styles.sortSelect}
+							style={{ width: 100 }}
+						>
+							<Select.Option value='all'>{is_cn ? '全部层级' : 'All Levels'}</Select.Option>
+							<Select.Option value='1'>{is_cn ? '第1层' : 'Level 1'}</Select.Option>
+							<Select.Option value='2'>{is_cn ? '第2层' : 'Level 2'}</Select.Option>
+							<Select.Option value='3'>{is_cn ? '第3层' : 'Level 3'}</Select.Option>
+						</Select>
+						<Select
+							value={sortBy}
+							onChange={(value) => {
+								setSortBy(value)
+								// 切换回默认排序时，同时重置层级过滤，恢复无限滚动
+								if (value === 'default') {
+									setFilterByDepth('all')
+								}
+							}}
+							size='small'
+							className={styles.sortSelect}
+							style={{ width: 160 }}
+						>
+							<Select.Option value='default'>
+								{is_cn ? '默认排序' : 'Default'}
+							</Select.Option>
+							<Select.Option value='structure'>
+								{is_cn ? '文档结构' : 'Document Structure'}
+							</Select.Option>
+							<Select.Option value='recall'>
+								{is_cn ? '召回次数' : 'Recall Count'}
+							</Select.Option>
+							<Select.Option value='weight'>{is_cn ? '权重' : 'Weight'}</Select.Option>
+							<Select.Option value='votes'>{is_cn ? '投票' : 'Votes'}</Select.Option>
+						</Select>
+						<Button
+							type='primary'
+							size='small'
+							onClick={handleSearch}
+							className={styles.searchButton}
+						>
+							{is_cn ? '搜索' : 'Search'}
+						</Button>
+					</div>
 				</div>
-			</div>
+			)}
 
-			<div className={styles.scrollableContent}>{renderContent()}</div>
+			<div className={styles.scrollableContent}>
+				{/* 处理中状态覆盖层 */}
+				{currentDocument && isProcessing(currentDocument.status) && (
+					<div className={styles.processingContainer}>
+						<Icon name='material-psychology' size={48} />
+						<span className={styles.processingText}>
+							{is_cn ? '智能处理中...' : 'Processing...'}
+						</span>
+					</div>
+				)}
+
+				{/* 错误状态覆盖层 */}
+				{currentDocument && currentDocument.status === 'error' && (
+					<div className={`${styles.processingContainer} ${styles.errorState}`}>
+						<Icon name='material-error_outline' size={48} />
+						<div className={styles.errorMessage}>
+							{currentDocument.error_message || (is_cn ? '处理失败' : 'Processing failed')}
+						</div>
+					</div>
+				)}
+
+				{/* 正常内容 */}
+				{renderContent()}
+			</div>
 
 			{/* 详情模态窗口 */}
 			<SegmentDetail visible={detailVisible} onClose={handleCloseDetail} segmentData={selectedSegment} />
