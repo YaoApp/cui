@@ -2,9 +2,30 @@ import React, { useEffect, useRef, useState } from 'react'
 import * as echarts from 'echarts'
 import { getLocale } from '@umijs/max'
 import { Typography } from 'antd'
+import vars from '@/styles/preset/vars'
 import styles from './GraphVisualization.less'
 
 const { Text } = Typography
+
+// 获取主题相关颜色
+const getThemeColors = () => {
+	const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+	const theme = isDark ? vars.dark : vars.light
+
+	return {
+		// 主色 - 实体节点颜色
+		primary: theme.color_primary,
+		// 文本颜色 - 实体标签
+		textPrimary: theme.color_text,
+		textSecondary: theme.color_text_grey,
+		// 背景颜色 - 关系标签背景
+		bgCard: theme.color_bg_menu,
+		// 边框颜色 - 关系标签边框
+		borderCard: theme.color_border,
+		// 连线颜色
+		lineColor: theme.color_text_grey
+	}
+}
 
 interface EntityNode {
 	id: string
@@ -38,6 +59,8 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 
 	// 转换数据为 ECharts Graph 格式
 	const transformDataForECharts = () => {
+		const themeColors = getThemeColors()
+
 		// 转换节点数据
 		const chartNodes = nodes.map((node) => {
 			const level = node.level || 1
@@ -57,12 +80,12 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 					show: true,
 					fontSize: size.fontSize,
 					fontWeight: 500,
-					color: '#3371fc' // 使用主色
+					color: themeColors.primary // 使用主题主色
 				},
 				itemStyle: {
-					borderColor: '#3371fc',
+					borderColor: themeColors.primary,
 					borderWidth: 1.5,
-					color: '#ffffff'
+					color: themeColors.bgCard // 使用主题背景色
 				},
 				// 存储原始数据
 				originalData: node
@@ -78,16 +101,16 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 				name: edge.relation, // 这是显示在连线上的文字
 				value: edge.weight, // 使用权重作为数值
 				lineStyle: {
-					color: '#6c757d',
+					color: themeColors.lineColor,
 					width: Math.max(0.8, edge.weight * 1.5),
 					curveness: 0.2 // 曲线效果
 				},
 				label: {
 					show: true,
 					fontSize: 9,
-					color: '#6c757d',
-					backgroundColor: '#ffffff',
-					borderColor: '#e9ecef',
+					color: themeColors.textSecondary,
+					backgroundColor: themeColors.bgCard,
+					borderColor: themeColors.borderCard,
 					borderWidth: 0.5,
 					borderRadius: 3,
 					padding: [2, 4],
@@ -150,6 +173,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 
 		const { width, height } = dimensions
 		const { nodes: chartNodes, links: chartLinks } = transformDataForECharts()
+		const themeColors = getThemeColors()
 
 		// 创建 ECharts 实例
 		const chart = echarts.init(containerRef.current, undefined, {
@@ -175,9 +199,9 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 					data: chartNodes,
 					links: chartLinks,
 					categories: [
-						{ name: 'Level 1', itemStyle: { color: '#3371fc' } },
-						{ name: 'Level 2', itemStyle: { color: '#3371fc' } },
-						{ name: 'Level 3', itemStyle: { color: '#3371fc' } }
+						{ name: 'Level 1', itemStyle: { color: themeColors.primary } },
+						{ name: 'Level 2', itemStyle: { color: themeColors.primary } },
+						{ name: 'Level 3', itemStyle: { color: themeColors.primary } }
 					],
 					roam: true, // 启用缩放和平移
 					draggable: true, // 启用拖拽
@@ -203,9 +227,9 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 					edgeLabel: {
 						show: true,
 						fontSize: 9,
-						color: '#6c757d',
-						backgroundColor: '#ffffff',
-						borderColor: '#e9ecef',
+						color: themeColors.textSecondary,
+						backgroundColor: themeColors.bgCard,
+						borderColor: themeColors.borderCard,
 						borderWidth: 0.5,
 						borderRadius: 3,
 						padding: [2, 4],

@@ -3,10 +3,20 @@
 	width: 100%;
 	height: 100%;
 	background: var(--color_neo_bg_content);
+	// 添加微妙的网格背景，参考 DocumentCover 的效果
+	background-image: linear-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+	background-size: 28px 28px; // 更大的网格间距
 	overflow: hidden;
 	// 移除 border-radius 和其他可能影响显示区域的样式
 	// 使用负边距进一步扩展显示区域
 	margin: -1px;
+
+	// Dark mode adaptation - 深色模式下使用稍深的网格
+	[data-theme='dark'] & {
+		background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+	}
 }
 
 .graphContainer {

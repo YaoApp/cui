@@ -49,19 +49,19 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 					{
 						key: 'graph' as TabType,
 						label: is_cn ? '图谱' : 'Graph',
-						icon: 'material-account_tree'
+						icon: 'material-hub' // 网络中心节点，更好地表达图谱概念
 					}
 			  ]
 			: []),
 		{
 			key: 'parents' as TabType,
 			label: is_cn ? '层级' : 'Hierarchy',
-			icon: 'material-device_hub'
+			icon: 'material-account_tree' // 树形结构，表示层级关系
 		},
 		{
 			key: 'hits' as TabType,
 			label: is_cn ? '命中' : 'Hits',
-			icon: 'material-history'
+			icon: 'material-target' // 目标/靶心，更好地表达"命中"概念
 		},
 		{
 			key: 'vote' as TabType,
@@ -70,8 +70,8 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 		},
 		{
 			key: 'score' as TabType,
-			label: is_cn ? '得分' : 'Score',
-			icon: 'material-calculate'
+			label: is_cn ? '评分' : 'Score',
+			icon: 'material-star' // 星级评分，更好地表达"评分"概念
 		}
 	]
 
@@ -131,9 +131,13 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 			case 'score':
 				return (
 					<div style={{ padding: '20px', textAlign: 'center' }}>
-						<Icon name='material-functions' size={48} />
-						<p>Score formula for segment: {segmentData.id}</p>
-						<p style={{ color: '#999' }}>Coming soon...</p>
+						<Icon name='material-star' size={48} />
+						<p>
+							{is_cn
+								? `分段评分详情: ${segmentData.id}`
+								: `Score details for segment: ${segmentData.id}`}
+						</p>
+						<p style={{ color: '#999' }}>{is_cn ? '即将推出...' : 'Coming soon...'}</p>
 					</div>
 				)
 			default:

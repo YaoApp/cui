@@ -217,7 +217,7 @@ const GraphView: React.FC<GraphViewProps> = ({ segmentData, onDataLoad }) => {
 						onClick={handleReExtract}
 						loading={extracting}
 					>
-						<Icon name='material-auto_fix_high' size={14} />
+						<Icon name='material-auto_fix_high' size={12} />
 						<span>{is_cn ? '重新提取' : 'Re-extract'}</span>
 					</Button>
 				</div>
