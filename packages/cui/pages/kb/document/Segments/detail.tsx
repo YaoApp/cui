@@ -7,6 +7,9 @@ import { Segment } from '@/openapi/kb/types'
 import Editor from './Editor'
 import GraphView from './Graph'
 import ParentsView from './Parents'
+import HitsView from './Hits'
+import ScoreView from './Score'
+import VoteView from './Vote'
 import styles from './detail.less'
 
 interface SegmentDetailProps {
@@ -123,33 +126,11 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 			case 'parents':
 				return <ParentsView segmentData={segmentData} />
 			case 'hits':
-				return (
-					<div style={{ padding: '20px', textAlign: 'center' }}>
-						<Icon name='material-history' size={48} />
-						<p>Hit history for segment: {segmentData.id}</p>
-						<p style={{ color: '#999' }}>Coming soon...</p>
-					</div>
-				)
+				return <HitsView segmentData={segmentData} />
 			case 'vote':
-				return (
-					<div style={{ padding: '20px', textAlign: 'center' }}>
-						<Icon name='material-thumb_up' size={48} />
-						<p>Vote details for segment: {segmentData.id}</p>
-						<p style={{ color: '#999' }}>Coming soon...</p>
-					</div>
-				)
+				return <VoteView segmentData={segmentData} />
 			case 'score':
-				return (
-					<div style={{ padding: '20px', textAlign: 'center' }}>
-						<Icon name='material-star' size={48} />
-						<p>
-							{is_cn
-								? `分段评分详情: ${segmentData.id}`
-								: `Score details for segment: ${segmentData.id}`}
-						</p>
-						<p style={{ color: '#999' }}>{is_cn ? '即将推出...' : 'Coming soon...'}</p>
-					</div>
-				)
+				return <ScoreView segmentData={segmentData} />
 			default:
 				return (
 					<div style={{ padding: '20px' }}>

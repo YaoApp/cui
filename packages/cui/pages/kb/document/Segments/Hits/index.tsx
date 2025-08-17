@@ -1,254 +1,124 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Button, Popconfirm, message, Tag } from 'antd'
-import { DeleteOutlined } from '@ant-design/icons'
+import { Spin, Typography } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+
+import { Segment } from '@/openapi/kb/types'
 import styles from '../detail.less'
 import localStyles from './index.less'
 
-interface HitRecord {
-	id: string
-	query: string
-	rank: number
-	timestamp: string
-	score: number
-	source: string
+const { Text } = Typography
+
+interface HitsData {
+	totalHits: number
+	hitsByScenario: {
+		[key: string]: number
+	}
 }
 
-interface HitListProps {
-	chunkId: string
+interface HitsViewProps {
+	segmentData: Segment
 }
 
-const HitList: React.FC<HitListProps> = ({ chunkId }) => {
+const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const [data, setData] = useState<HitRecord[]>([])
+	const [hitsData, setHitsData] = useState<HitsData | null>(null)
 	const [loading, setLoading] = useState(true)
-	const [currentPage, setCurrentPage] = useState(1)
-	const pageSize = 10
 
 	useEffect(() => {
-		loadHitData()
-	}, [chunkId])
+		loadHitsData()
+	}, [segmentData.id])
 
-	const loadHitData = async () => {
+	const loadHitsData = async () => {
 		try {
 			setLoading(true)
-			// 模拟加载时间
-			await new Promise((resolve) => setTimeout(resolve, 500))
+			// 模拟API请求延时
+			await new Promise((resolve) => setTimeout(resolve, 100))
 
 			// 模拟命中数据
-			const mockData: HitRecord[] = [
-				{
-					id: 'hit_1',
-					query: '系统架构设计',
-					rank: 1,
-					timestamp: '2024-01-15 14:32:15',
-					score: 0.95,
-					source: 'user_search'
-				},
-				{
-					id: 'hit_2',
-					query: '数据处理流程',
-					rank: 3,
-					timestamp: '2024-01-15 13:28:42',
-					score: 0.87,
-					source: 'auto_hit'
-				},
-				{
-					id: 'hit_3',
-					query: '用户界面设计原则',
-					rank: 2,
-					timestamp: '2024-01-15 12:15:30',
-					score: 0.91,
-					source: 'user_search'
-				},
-				{
-					id: 'hit_4',
-					query: '安全性要求',
-					rank: 5,
-					timestamp: '2024-01-15 11:45:18',
-					score: 0.78,
-					source: 'related_query'
-				},
-				{
-					id: 'hit_5',
-					query: 'API接口文档',
-					rank: 1,
-					timestamp: '2024-01-15 10:30:25',
-					score: 0.96,
-					source: 'user_search'
-				},
-				{
-					id: 'hit_6',
-					query: '系统部署方案',
-					rank: 4,
-					timestamp: '2024-01-15 09:22:10',
-					score: 0.82,
-					source: 'auto_hit'
-				},
-				{
-					id: 'hit_7',
-					query: '数据库优化策略',
-					rank: 2,
-					timestamp: '2024-01-14 16:45:33',
-					score: 0.89,
-					source: 'user_search'
-				},
-				{
-					id: 'hit_8',
-					query: '性能监控',
-					rank: 6,
-					timestamp: '2024-01-14 15:12:45',
-					score: 0.75,
-					source: 'related_query'
+			const mockData: HitsData = {
+				totalHits: 156,
+				hitsByScenario: {
+					智能问答: 89,
+					文档检索: 45,
+					知识推荐: 22
 				}
-			]
+			}
 
-			setData(mockData)
+			setHitsData(mockData)
 		} catch (error) {
-			message.error(is_cn ? '加载命中数据失败' : 'Failed to load hit data')
+			console.error('Failed to load hits data:', error)
 		} finally {
 			setLoading(false)
 		}
 	}
 
-	const handleDelete = async (id: string) => {
-		try {
-			// 模拟删除请求
-			await new Promise((resolve) => setTimeout(resolve, 300))
-
-			setData((prev) => prev.filter((item) => item.id !== id))
-			message.success(is_cn ? '删除成功' : 'Deleted successfully')
-		} catch (error) {
-			message.error(is_cn ? '删除失败' : 'Failed to delete')
-		}
-	}
-
-	const getSourceColor = (source: string) => {
-		switch (source) {
-			case 'user_search':
-				return 'blue'
-			case 'auto_hit':
-				return 'green'
-			case 'related_query':
-				return 'orange'
-			default:
-				return 'default'
-		}
-	}
-
-	const getSourceLabel = (source: string) => {
-		switch (source) {
-			case 'user_search':
-				return is_cn ? '用户搜索' : 'User Search'
-			case 'auto_hit':
-				return is_cn ? '自动命中' : 'Auto Hit'
-			case 'related_query':
-				return is_cn ? '相关查询' : 'Related Query'
-			default:
-				return source
-		}
-	}
-
-	const columns = [
-		{
-			title: is_cn ? '查询内容' : 'Query',
-			dataIndex: 'query',
-			key: 'query',
-			width: '30%',
-			render: (text: string) => (
-				<div className={styles.queryText} title={text}>
-					{text}
-				</div>
-			)
-		},
-		{
-			title: is_cn ? '排名' : 'Rank',
-			dataIndex: 'rank',
-			key: 'rank',
-			width: '8%',
-			render: (rank: number) => (
-				<Tag color={rank <= 3 ? 'success' : rank <= 5 ? 'warning' : 'default'}>#{rank}</Tag>
-			)
-		},
-		{
-			title: is_cn ? '得分' : 'Score',
-			dataIndex: 'score',
-			key: 'score',
-			width: '10%',
-			render: (score: number) => <span className={styles.scoreValue}>{(score * 100).toFixed(1)}%</span>
-		},
-		{
-			title: is_cn ? '来源' : 'Source',
-			dataIndex: 'source',
-			key: 'source',
-			width: '12%',
-			render: (source: string) => <Tag color={getSourceColor(source)}>{getSourceLabel(source)}</Tag>
-		},
-		{
-			title: is_cn ? '时间' : 'Time',
-			dataIndex: 'timestamp',
-			key: 'timestamp',
-			width: '20%',
-			render: (timestamp: string) => <span className={styles.timestamp}>{timestamp}</span>
-		},
-		{
-			title: is_cn ? '操作' : 'Actions',
-			key: 'actions',
-			width: '10%',
-			render: (_: any, record: HitRecord) => (
-				<Popconfirm
-					title={is_cn ? '确定要删除这条命中记录吗？' : 'Are you sure to delete this hit record?'}
-					onConfirm={() => handleDelete(record.id)}
-					okText={is_cn ? '确定' : 'OK'}
-					cancelText={is_cn ? '取消' : 'Cancel'}
-				>
-					<Button
-						type='text'
-						size='small'
-						danger
-						icon={<DeleteOutlined />}
-						className={styles.deleteButton}
-					/>
-				</Popconfirm>
-			)
-		}
-	]
-
 	return (
 		<div className={styles.tabContent}>
-			<div className={styles.tabHeader}>
-				<div className={styles.tabTitle}>
-					<Icon name='material-history' size={16} />
-					<span>{is_cn ? '命中记录' : 'Hit Records'}</span>
-					<span className={styles.recordCount}>({data.length})</span>
+			{/* Header - 与Editor一致的结构 */}
+			<div className={`${styles.tabHeader} ${localStyles.cardHeader}`}>
+				<div className={localStyles.chunkMeta}>
+					<span className={localStyles.chunkNumber}>
+						{segmentData.metadata?.chunk_details?.depth !== undefined &&
+						segmentData.metadata?.chunk_details?.index !== undefined ? (
+							<>
+								<span className={localStyles.levelInfo}>
+									<Icon name='material-account_tree' size={10} />
+									{segmentData.metadata.chunk_details.depth}
+								</span>
+								<span>#{segmentData.metadata.chunk_details.index + 1}</span>
+							</>
+						) : (
+							`#${segmentData.id.slice(-8)}`
+						)}
+					</span>
+				</div>
+				<div className={localStyles.metaInfo}>
+					<span className={localStyles.metaItem}>
+						{is_cn ? '总命中' : 'Total Hits'}{' '}
+						<span className={localStyles.metaNumber}>{hitsData?.totalHits || 0}</span>
+					</span>
+					<span className={localStyles.metaItem}>
+						{is_cn ? '场景数' : 'Scenarios'}{' '}
+						<span className={localStyles.metaNumber}>
+							{Object.keys(hitsData?.hitsByScenario || {}).length}
+						</span>
+					</span>
 				</div>
 			</div>
 
-			<div className={styles.tableContainer}>
-				<Table
-					columns={columns}
-					dataSource={data}
-					rowKey='id'
-					loading={loading}
-					pagination={{
-						current: currentPage,
-						pageSize: pageSize,
-						total: data.length,
-						onChange: setCurrentPage,
-						showSizeChanger: false,
-						showQuickJumper: true,
-						showTotal: (total, range) =>
-							is_cn
-								? `第 ${range[0]}-${range[1]} 条，共 ${total} 条`
-								: `${range[0]}-${range[1]} of ${total} items`
-					}}
-					size='small'
-				/>
+			{/* Body - 内容区域暂时留空 */}
+			<div className={localStyles.hitsBody}>
+				<div className={localStyles.hitsSection}>
+					{loading ? (
+						<div className={localStyles.loadingState}>
+							<Icon name='material-hourglass_empty' size={32} />
+							<Text>{is_cn ? '加载命中数据中...' : 'Loading hits data...'}</Text>
+						</div>
+					) : !hitsData ? (
+						<div className={localStyles.emptyState}>
+							<Icon name='material-target' size={48} />
+							<Text type='secondary'>
+								{is_cn ? '暂无命中数据' : 'No hits data available'}
+							</Text>
+						</div>
+					) : (
+						<div className={localStyles.contentPlaceholder}>
+							<Text type='secondary'>
+								{is_cn
+									? '命中详情内容待实现...'
+									: 'Hits details content coming soon...'}
+							</Text>
+						</div>
+					)}
+				</div>
 			</div>
+
+			{/* Footer - 暂时留空 */}
+			<div className={localStyles.hitsFooter}>{/* 后续可添加操作按钮或其他信息 */}</div>
 		</div>
 	)
 }
 
-export default HitList
+export default HitsView

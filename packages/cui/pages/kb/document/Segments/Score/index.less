@@ -1,188 +1,150 @@
-// 得分公式组件样式
+// Score组件样式 - 与Editor组件保持一致的视觉风格
 
-.scoreFormulaContainer {
-	padding: 20px;
-	overflow: auto;
+// 加载状态容器
+.loadingContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 200px;
+}
+
+// 空状态容器
+.emptyContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 200px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+
+	:global(.Icon) {
+		color: var(--color_neo_icon_muted);
+	}
+}
+
+// 卡片头部样式（与Editor一致）
+.cardHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	background: var(--color_neo_bg_header);
+	border-bottom: 1px solid var(--color_neo_border_header);
+}
+
+// 与Editor完全一致的样式
+.chunkMeta {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+
+	.chunkNumber {
+		padding: 4px 8px;
+		background: var(--color_neo_bg_selected);
+		color: var(--color_main);
+		font-size: 12px; // 从 10px 增加到 12px
+		border-radius: 4px;
+		font-weight: 600;
+		border: 1px solid var(--color_neo_border_selected);
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.levelInfo {
+		display: flex;
+		align-items: center;
+		gap: 3px;
+	}
+}
+
+.metaInfo {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	flex-wrap: wrap;
+
+	.metaItem {
+		font-size: 12px;
+		color: #666;
+		white-space: nowrap;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+
+		.metaNumber {
+			color: var(--color_main);
+			font-weight: 600;
+			font-size: 13px;
+		}
+	}
+}
+
+// 主体内容区域
+.scoreBody {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background: var(--color_neo_bg_content);
+}
+
+.scoreSection {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.contentPlaceholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	height: 100%;
+	padding: 40px;
+}
 
-	.finalScoreCard {
-		margin-bottom: 20px;
+// 加载状态
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px;
+}
 
-		:global(.ant-card-head) {
-			border-bottom: 1px solid var(--color_border);
-			background: var(--color_bg_nav);
-		}
+// 空状态
+.emptyState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px;
+}
 
-		:global(.ant-card-body) {
-			background: var(--color_bg_menu);
-		}
-	}
+// 底部区域
+.scoreFooter {
+	display: flex;
+	align-items: center;
+	padding: 12px 20px;
+	background: var(--color_neo_bg_header);
+	border-top: 1px solid var(--color_neo_border_header);
+	flex-shrink: 0;
+}
 
-	.finalScoreContent {
-		text-align: center;
-
-		.scoreValue {
-			margin-bottom: 16px;
-
-			.scoreNumber {
-				font-size: 32px;
-				font-weight: bold;
-				color: var(--color_primary);
-				margin-right: 12px;
-			}
-
-			.scoreTag {
-				font-size: 12px;
-				vertical-align: middle;
-			}
-		}
-
-		.formulaText {
-			text-align: left;
-			color: var(--color_text);
-
-			.formula {
-				background: var(--color_bg_nav);
-				padding: 8px 12px;
-				border-radius: var(--radius);
-				font-family: 'Courier New', monospace;
-				font-size: 14px;
-				color: var(--color_primary);
-				display: block;
-				margin-top: 8px;
-			}
-		}
-	}
-
-	.scoreComponents {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-		gap: 16px;
-		margin-bottom: 20px;
-	}
-
-	.componentCard {
-		:global(.ant-card-head) {
-			border-bottom: 1px solid var(--color_border);
-			background: var(--color_bg_nav);
-		}
-
-		:global(.ant-card-body) {
-			background: var(--color_bg_menu);
-		}
-
-		.componentTitle {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			color: var(--color_title);
-			font-weight: 500;
-
-			.componentScore {
-				display: flex;
-				align-items: center;
-				gap: 8px;
-			}
-
-			.weightText {
-				font-size: 11px;
-				color: var(--color_text_grey);
-			}
-		}
-
-		.componentFormula {
-			background: var(--color_bg_nav);
-			padding: 4px 8px;
-			border-radius: 4px;
-			font-family: 'Courier New', monospace;
-			font-size: 12px;
-			color: var(--color_primary);
-		}
-
-		.contribution {
-			font-weight: 500;
-			color: var(--color_success);
-		}
-	}
-
-	.weightConfig {
-		.weightItem {
-			display: flex;
-			align-items: center;
-			gap: 12px;
-			margin-bottom: 12px;
-
-			.weightLabel {
-				min-width: 100px;
-				font-size: 12px;
-				color: var(--color_text);
-			}
-
-			.weightBar {
-				flex: 1;
-				height: 8px;
-				background: var(--color_bg_nav);
-				border-radius: 4px;
-				overflow: hidden;
-
-				.weightFill {
-					height: 100%;
-					background: linear-gradient(90deg, var(--color_primary), var(--color_success));
-					transition: width 0.3s ease;
-				}
-			}
-
-			.weightValue {
-				min-width: 40px;
-				text-align: right;
-				font-size: 12px;
-				color: var(--color_text);
-				font-weight: 500;
-			}
-		}
-	}
-
-	.explanationCard {
-		:global(.ant-card-head) {
-			border-bottom: 1px solid var(--color_border);
-			background: var(--color_bg_nav);
-		}
-
-		:global(.ant-card-body) {
-			background: var(--color_bg_menu);
-		}
-
-		.explanationContent {
-			.explanationList {
-				margin: 0;
-				padding-left: 16px;
-
-				li {
-					color: var(--color_text);
-					font-size: 12px;
-					line-height: 1.6;
-					margin-bottom: 8px;
-
-					&:last-child {
-						margin-bottom: 0;
-					}
-				}
-			}
-		}
-	}
-
-	:global(.ant-descriptions-item-label) {
-		color: var(--color_text_grey);
-		font-weight: 500;
-	}
-
-	:global(.ant-descriptions-item-content) {
-		color: var(--color_text);
-	}
-
-	:global(.ant-divider) {
-		border-color: var(--color_border);
-		color: var(--color_text_grey);
-		font-weight: 500;
+// 深色模式适配
+[data-theme='dark'] {
+	.loadingState,
+	.emptyState,
+	.contentPlaceholder {
+		color: var(--color_neo_text_secondary);
 	}
 }
