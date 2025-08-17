@@ -1,0 +1,297 @@
+// ParentsViewer 组件样式 - 与 Editor 组件保持一致的视觉风格
+
+.parentsViewer {
+	display: flex;
+	height: 100%;
+	gap: 0; // 移除间距
+	padding: 0; // 移除外边距，直接在背景上展示
+	background: transparent; // 透明背景
+}
+
+// 左侧层级菜单区域
+.menuSection {
+	width: 360px;
+	min-width: 360px;
+	display: flex;
+	flex-direction: column;
+	background: var(--color_neo_bg_field_hover);
+	border: none;
+	border-radius: 0;
+	overflow: hidden;
+	padding: 12px 0;
+}
+
+.menuSectionHeader {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: transparent;
+	border-bottom: 1px solid var(--color_neo_border_divider);
+	margin-bottom: 8px;
+
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_neo_text_secondary);
+
+	.count {
+		color: var(--color_neo_text_secondary);
+		font-size: 11px;
+		margin-left: auto;
+	}
+}
+
+.menuContainer {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0;
+}
+
+// 菜单项样式
+.menuItem {
+	padding: 6px 0;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border-left: 2px solid transparent;
+
+	&:hover {
+		.textContent {
+			color: var(--color_main);
+		}
+	}
+
+	&.selected {
+		border-left-color: var(--color_main);
+
+		.textContent {
+			color: var(--color_main);
+			font-weight: 500;
+		}
+
+		.levelIndex {
+			font-weight: 700;
+		}
+	}
+}
+
+// 菜单项内容
+.menuItemContent {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	overflow: hidden;
+	min-width: 0;
+}
+
+.levelIndex {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--color_main);
+	flex-shrink: 0; // 不收缩
+	min-width: fit-content;
+}
+
+.textContent {
+	font-size: 12px;
+	color: var(--color_neo_text_primary);
+	line-height: 1.4;
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	transition: color 0.2s ease;
+	min-width: 0;
+}
+
+.currentIndicator {
+	color: var(--color_main) !important;
+	flex-shrink: 0;
+
+	// 确保Icon组件内部元素也使用主色
+	:global(.Icon) {
+		color: var(--color_main) !important;
+	}
+}
+
+// 右侧内容展示区域
+.contentSection {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	height: 100%; // 确保填满高度
+	overflow: hidden; // 防止溢出
+}
+
+.segmentCard {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	padding: 0; // 移除所有内边距
+	background: var(--color_neo_bg_content); // 整体使用content背景
+	border-radius: 0;
+	margin: 0;
+}
+
+// 分段头部信息 - 添加下边框作为分割线
+.segmentHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px; // 只有内容有左右内边距
+	margin-bottom: 0;
+	border-bottom: 1px solid var(--color_neo_border_header); // 分割线延伸到边缘
+}
+
+.segmentMeta {
+	display: flex;
+	align-items: center;
+	gap: 6px; // 减小间距
+}
+
+.levelIndexInfo {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	background: var(--color_neo_bg_selected);
+	color: var(--color_main);
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-size: 10px;
+	font-weight: 600;
+	border: 1px solid var(--color_neo_border_selected);
+}
+
+.segmentStats {
+	display: flex;
+	align-items: center;
+	gap: 12px; // 减小间距
+}
+
+.statItem {
+	font-size: 11px; // 减小字体，与 Editor 的 metaItem 一致
+	color: var(--color_neo_text_secondary);
+}
+
+// 分段内容
+.segmentContent {
+	flex: 1;
+	padding: 16px; // 内容区域的内边距
+	margin: 0;
+}
+
+.segmentText {
+	margin: 0 !important;
+	padding: 0 !important;
+	color: var(--color_neo_text_primary);
+	font-size: 13px;
+	line-height: 1.6; // 与Editor的CustomTextArea一致
+	white-space: pre-wrap;
+	word-break: break-word;
+	font-family: 'Consolas', 'Monaco', 'Courier New', monospace; // 与Editor一致
+}
+
+// 分段元信息 - 添加上边框作为分割线
+.segmentFooter {
+	border-top: 1px solid var(--color_neo_border_header); // 分割线延伸到边缘
+	padding: 16px; // 内容有左右内边距
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.metaRow {
+	display: flex;
+	align-items: center;
+	gap: 6px; // 减小间距
+}
+
+.metaLabel {
+	min-width: 60px; // 减小宽度
+	font-size: 10px; // 减小字体，与 Editor 的 positionInfo 一致
+	color: var(--color_neo_text_secondary);
+}
+
+.metaValue {
+	font-size: 10px; // 减小字体
+	color: var(--color_neo_text_primary);
+}
+
+// 空状态
+.emptyState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+
+	:global(.Icon) {
+		color: var(--color_neo_icon_muted);
+	}
+}
+
+// 深色模式适配
+[data-theme='dark'] {
+	.parentsViewer {
+		background: transparent;
+	}
+
+	.menuSection {
+		background: var(--color_neo_bg_field_hover);
+	}
+
+	.menuSectionHeader {
+		background: transparent;
+		border-color: var(--color_neo_border_divider);
+	}
+
+	.segmentCard {
+		background: var(--color_neo_bg_content);
+	}
+
+	.menuItem {
+		&:hover {
+			.textContent {
+				color: var(--color_main);
+			}
+		}
+
+		&.selected {
+			border-left-color: var(--color_main);
+
+			.textContent {
+				color: var(--color_main);
+				font-weight: 500;
+			}
+
+			.levelIndex {
+				font-weight: 700;
+			}
+		}
+	}
+}
+
+// 自定义滚动条 - 更细的滚动条
+.menuContainer {
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_neo_border_card);
+		border-radius: 2px;
+		transition: background 0.2s ease;
+
+		&:hover {
+			background: var(--color_neo_text_secondary);
+		}
+	}
+}
