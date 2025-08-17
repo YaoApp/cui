@@ -1,214 +1,135 @@
+// Parents 组件样式，与 Editor/Graph 保持一致的结构和风格
+
+// 卡片头部样式（与 Editor/Graph 一致）
+.cardHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px; // 与 Editor/Graph 保持一致的 padding
+	background: var(--color_neo_bg_header);
+	border-bottom: 1px solid var(--color_neo_border_header);
+}
+
+.chunkMeta {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.chunkNumber {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	background: var(--color_neo_bg_selected);
+	color: var(--color_main);
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	border: 1px solid var(--color_neo_border_selected);
+}
+
+.levelInfo {
+	display: flex;
+	align-items: center;
+	gap: 3px;
+}
+
+// 主体区域
 .parentsBody {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	padding: 16px 20px;
+	min-height: 0; // 确保 flex 子元素可以缩小
 }
 
-.actionSection {
+.parentsSection {
+	flex: 1;
 	display: flex;
-	gap: 8px;
-	align-items: center;
+	flex-direction: column;
+	background: var(--color_neo_bg_content); // 与 Graph 保持一致的背景色
+	transition: all 0.2s ease;
+	min-height: 0; // 确保 flex 子元素可以缩小
+
+	&:hover {
+		background: var(--color_neo_bg_field_hover);
+	}
 }
 
+// 加载状态
 .loadingState {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	height: 300px;
-	gap: 12px;
-	color: var(--color_text_grey);
-}
-
-.contentArea {
-	flex: 1;
-	display: grid;
-	grid-template-columns: 1fr 300px;
-	gap: 20px;
-	min-height: 0;
-
-	@media (max-width: 1200px) {
-		grid-template-columns: 1fr;
-		grid-template-rows: auto 1fr;
-	}
-}
-
-.treeSection {
-	background: var(--color_bg_card);
-	border: 1px solid var(--color_border);
-	border-radius: var(--radius);
-	padding: 16px;
-	overflow-y: auto;
-
-	&::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: var(--color_border);
-		border-radius: 3px;
-
-		&:hover {
-			background: var(--color_text_grey);
-		}
-	}
-
-	&::-webkit-scrollbar-track {
-		background: var(--color_border_soft);
-		border-radius: 3px;
-	}
-}
-
-.sectionTitle {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	margin: 0 0 16px 0;
-	font-size: 14px;
-	font-weight: 500;
-	color: var(--color_title);
-}
-
-.chunkTree {
-	:global(.ant-tree-node-content-wrapper) {
-		width: 100%;
-	}
-
-	:global(.ant-tree-treenode) {
-		padding: 0;
-		margin-bottom: 8px;
-	}
-
-	:global(.ant-tree-switcher) {
-		background: transparent;
-		line-height: 24px;
-	}
-}
-
-.treeNode {
-	width: 100%;
-	padding: 12px;
-	background: var(--color_bg_input);
-	border: 1px solid var(--color_border);
-	border-radius: var(--radius);
-	cursor: pointer;
-	transition: all 0.2s ease;
-	margin-bottom: 8px;
-
-	&:hover {
-		background: var(--color_bg_hover);
-		border-color: var(--color_border_hover);
-	}
-
-	&.currentChunk {
-		background: var(--color_bg_selected);
-		border-color: var(--color_primary);
-		box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
-	}
-}
-
-.nodeHeader {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-bottom: 8px;
-}
-
-.nodeContent {
-	margin-bottom: 8px;
-	line-height: 1.5;
-}
-
-.nodeFooter {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-}
-
-.detailView {
-	background: var(--color_bg_card);
-	border: 1px solid var(--color_border);
-	border-radius: var(--radius);
-	padding: 16px;
-	overflow-y: auto;
-	max-height: 100%;
-
-	&::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: var(--color_border);
-		border-radius: 3px;
-
-		&:hover {
-			background: var(--color_text_grey);
-		}
-	}
-
-	&::-webkit-scrollbar-track {
-		background: var(--color_border_soft);
-		border-radius: 3px;
-	}
-}
-
-.detailTitle {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	margin: 0 0 12px 0;
-	font-size: 14px;
-	font-weight: 500;
-	color: var(--color_title);
-}
-
-.detailMeta {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-bottom: 12px;
-}
-
-.metaItem {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-}
-
-.detailContent {
-	background: var(--color_bg_input);
-	border: 1px solid var(--color_border);
-	border-radius: var(--radius);
-	padding: 12px;
-	margin-bottom: 12px;
-}
-
-// 保留旧的样式用于兼容性
-.parentsView {
-	padding: 20px;
-	background: var(--color_bg_menu);
 	height: 100%;
-	overflow-y: auto;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px;
+}
+
+// 空状态
+.emptyState {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px;
+}
 
-	&::-webkit-scrollbar {
-		width: 6px;
+// 父级分段内容区域
+.parentsContent {
+	flex: 1; // 改为 flex: 1 而不是固定高度
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	min-height: 0; // 确保可以缩小
+	padding: 0; // 确保没有内边距
+	margin: 0; // 确保没有外边距
+}
+
+// 占位内容区域
+.placeholderContent {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px;
+	text-align: center;
+
+	:global(.Icon) {
+		color: var(--color_neo_icon_muted);
+		margin-bottom: 8px;
 	}
+}
 
-	&::-webkit-scrollbar-thumb {
-		background: var(--color_border);
-		border-radius: 3px;
+// 图标样式统一
+:global(.Icon) {
+	color: var(--color_neo_icon_muted);
 
+	&[data-icon='material-account_tree'] {
+		color: var(--color_main);
+	}
+}
+
+// 深色模式适配
+[data-theme='dark'] {
+	.parentsSection {
 		&:hover {
-			background: var(--color_text_grey);
+			background: var(--color_neo_bg_field_hover);
 		}
 	}
 
-	&::-webkit-scrollbar-track {
-		background: var(--color_border_soft);
-		border-radius: 3px;
+	.loadingState,
+	.emptyState,
+	.placeholderContent {
+		color: var(--color_neo_text_secondary);
 	}
 }

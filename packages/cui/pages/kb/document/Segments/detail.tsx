@@ -6,6 +6,7 @@ import Icon from '@/widgets/Icon'
 import { Segment } from '@/openapi/kb/types'
 import Editor from './Editor'
 import GraphView from './Graph'
+import ParentsView from './Parents'
 import styles from './detail.less'
 
 interface SegmentDetailProps {
@@ -41,6 +42,12 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 		return isL1Segment && hasGraphFeature
 	}
 
+	// 判断是否显示层级卡片：Level > 1 的分段
+	const shouldShowParents = () => {
+		const depth = segmentData.metadata?.chunk_details?.depth
+		return depth !== undefined && depth > 1
+	}
+
 	const tabs = [
 		{
 			key: 'editor' as TabType,
@@ -57,11 +64,16 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 					}
 			  ]
 			: []),
-		{
-			key: 'parents' as TabType,
-			label: is_cn ? '层级' : 'Hierarchy',
-			icon: 'material-account_tree' // 树形结构，表示层级关系
-		},
+		// 只有 Level > 1 时才显示层级卡片
+		...(shouldShowParents()
+			? [
+					{
+						key: 'parents' as TabType,
+						label: is_cn ? '层级' : 'Hierarchy',
+						icon: 'material-account_tree' // 树形结构，表示层级关系
+					}
+			  ]
+			: []),
 		{
 			key: 'hits' as TabType,
 			label: is_cn ? '命中' : 'Hits',
@@ -109,13 +121,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 			case 'graph':
 				return <GraphView segmentData={segmentData} />
 			case 'parents':
-				return (
-					<div style={{ padding: '20px', textAlign: 'center' }}>
-						<Icon name='material-device_hub' size={48} />
-						<p>Parent relationships for segment: {segmentData.id}</p>
-						<p style={{ color: '#999' }}>Coming soon...</p>
-					</div>
-				)
+				return <ParentsView segmentData={segmentData} />
 			case 'hits':
 				return (
 					<div style={{ padding: '20px', textAlign: 'center' }}>
