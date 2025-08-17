@@ -114,14 +114,41 @@ const ParentsViewer: React.FC<ParentsViewerProps> = ({ parentsData, currentSegme
 			<div className={localStyles.contentSection}>
 				{selectedSegment ? (
 					<div className={localStyles.segmentCard}>
-						{/* 分段头部信息 */}
+						{/* 分段头部信息 - 面包屑显示层级 */}
 						<div className={localStyles.segmentHeader}>
-							<div className={localStyles.segmentMeta}>
-								<span className={localStyles.levelIndexInfo}>
-									<Icon name='material-account_tree' size={10} />L
-									{selectedSegment.metadata?.chunk_details?.depth || 0}.
-									{(selectedSegment.metadata?.chunk_details?.index || 0) + 1}
-								</span>
+							<div className={localStyles.breadcrumbPath}>
+								{menuData.map((segment, index) => {
+									const depth = segment.metadata?.chunk_details?.depth || 0
+									const segmentIndex = segment.metadata?.chunk_details?.index || 0
+									const isSelected = segment.id === selectedSegment.id
+									const isLast = index === menuData.length - 1
+
+									return (
+										<div
+											key={segment.id}
+											className={localStyles.breadcrumbItem}
+										>
+											<span
+												className={`${localStyles.levelIndexInfo} ${
+													isSelected ? localStyles.current : ''
+												}`}
+												onClick={() => handleMenuItemClick(segment)}
+											>
+												<Icon name='material-account_tree' size={10} />L
+												{depth}.{segmentIndex + 1}
+											</span>
+											{!isLast && (
+												<Icon
+													name='material-chevron_right'
+													size={12}
+													className={
+														localStyles.breadcrumbSeparator
+													}
+												/>
+											)}
+										</div>
+									)
+								})}
 							</div>
 							<div className={localStyles.segmentStats}>
 								<span className={localStyles.statItem}>

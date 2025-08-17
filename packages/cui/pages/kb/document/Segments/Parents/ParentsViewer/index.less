@@ -144,15 +144,29 @@
 	border-bottom: 1px solid var(--color_neo_border_header); // 分割线延伸到边缘
 }
 
-.segmentMeta {
+// 面包屑路径
+.breadcrumbPath {
 	display: flex;
 	align-items: center;
-	gap: 6px; // 减小间距
+	gap: 8px;
+	flex: 1;
+}
+
+.breadcrumbItem {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.breadcrumbSeparator {
+	color: var(--color_neo_text_secondary);
+	flex-shrink: 0;
 }
 
 .levelIndexInfo {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: 3px;
 	background: var(--color_neo_bg_selected);
 	color: var(--color_main);
@@ -161,6 +175,36 @@
 	font-size: 10px;
 	font-weight: 600;
 	border: 1px solid var(--color_neo_border_selected);
+	cursor: pointer;
+	transition: background-color 0.2s ease, border-color 0.2s ease;
+
+	// 确保图标颜色与文字颜色一致
+	:global(.Icon) {
+		color: inherit !important;
+		display: flex;
+		align-items: center;
+	}
+
+	&:hover {
+		background: var(--color_neo_bg_field_hover);
+
+		// hover时图标颜色与文字颜色一致
+		:global(.Icon) {
+			color: inherit !important;
+		}
+	}
+
+	&.current {
+		background: var(--color_main);
+		color: white;
+		border-color: var(--color_main);
+		font-weight: 700;
+
+		// 当前状态下图标颜色与文字颜色一致
+		:global(.Icon) {
+			color: inherit !important;
+		}
+	}
 }
 
 .segmentStats {
