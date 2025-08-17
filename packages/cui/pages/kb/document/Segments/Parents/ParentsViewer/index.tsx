@@ -9,15 +9,19 @@ const { Text, Title, Paragraph } = Typography
 
 interface ParentsViewerProps {
 	parentsData: Segment[]
-	currentSegment: Segment // 添加当前分段参数
+	currentSegment: Segment
+	selectedSegment: Segment
+	onSegmentSelect: (segment: Segment) => void
 }
 
-const ParentsViewer: React.FC<ParentsViewerProps> = ({ parentsData, currentSegment }) => {
+const ParentsViewer: React.FC<ParentsViewerProps> = ({
+	parentsData,
+	currentSegment,
+	selectedSegment,
+	onSegmentSelect
+}) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-
-	// 默认选中当前分段
-	const [selectedSegment, setSelectedSegment] = useState<Segment | null>(currentSegment)
 
 	// 构建层级菜单数据
 	const buildMenuData = () => {
@@ -34,7 +38,7 @@ const ParentsViewer: React.FC<ParentsViewerProps> = ({ parentsData, currentSegme
 	const menuData = buildMenuData()
 
 	const handleMenuItemClick = (segment: Segment) => {
-		setSelectedSegment(segment)
+		onSegmentSelect(segment)
 	}
 
 	const formatDate = (dateString?: string) => {
@@ -114,64 +118,6 @@ const ParentsViewer: React.FC<ParentsViewerProps> = ({ parentsData, currentSegme
 			<div className={localStyles.contentSection}>
 				{selectedSegment ? (
 					<div className={localStyles.segmentCard}>
-						{/* 分段头部信息 - 面包屑显示层级 */}
-						<div className={localStyles.segmentHeader}>
-							<div className={localStyles.breadcrumbPath}>
-								{menuData.map((segment, index) => {
-									const depth = segment.metadata?.chunk_details?.depth || 0
-									const segmentIndex = segment.metadata?.chunk_details?.index || 0
-									const isSelected = segment.id === selectedSegment.id
-									const isLast = index === menuData.length - 1
-
-									return (
-										<div
-											key={segment.id}
-											className={localStyles.breadcrumbItem}
-										>
-											<span
-												className={`${localStyles.levelIndexInfo} ${
-													isSelected ? localStyles.current : ''
-												}`}
-												onClick={() => handleMenuItemClick(segment)}
-											>
-												<Icon name='material-account_tree' size={10} />L
-												{depth}.{segmentIndex + 1}
-											</span>
-											{!isLast && (
-												<Icon
-													name='material-chevron_right'
-													size={12}
-													className={
-														localStyles.breadcrumbSeparator
-													}
-												/>
-											)}
-										</div>
-									)
-								})}
-							</div>
-							<div className={localStyles.segmentStats}>
-								<span className={localStyles.statItem}>
-									{is_cn ? '权重' : 'Weight'}{' '}
-									<Text strong style={{ color: 'var(--color_main)' }}>
-										{selectedSegment.weight?.toFixed(2) || '0.00'}
-									</Text>
-								</span>
-								<span className={localStyles.statItem}>
-									{is_cn ? '评分' : 'Score'}{' '}
-									<Text strong style={{ color: 'var(--color_main)' }}>
-										{selectedSegment.score?.toFixed(1) || '0.0'}
-									</Text>
-								</span>
-								<span className={localStyles.statItem}>
-									{is_cn ? '投票' : 'Votes'}{' '}
-									<Text strong style={{ color: 'var(--color_main)' }}>
-										{selectedSegment.vote || 0}
-									</Text>
-								</span>
-							</div>
-						</div>
-
 						{/* 分段内容 */}
 						<div className={localStyles.segmentContent}>
 							<Paragraph className={localStyles.segmentText}>

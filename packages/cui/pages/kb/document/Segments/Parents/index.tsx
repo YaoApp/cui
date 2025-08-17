@@ -25,6 +25,7 @@ const ParentsView: React.FC<ParentsViewProps> = ({ segmentData }) => {
 
 	const [loading, setLoading] = useState(true)
 	const [parentsData, setParentsData] = useState<ParentsData | null>(null)
+	const [selectedSegment, setSelectedSegment] = useState<Segment>(segmentData)
 
 	// 模拟加载父级分段数据
 	const loadParentsData = async () => {
@@ -129,7 +130,61 @@ const ParentsView: React.FC<ParentsViewProps> = ({ segmentData }) => {
 						)}
 					</span>
 				</div>
-				{/* 没有中间指标和操作按钮 */}
+
+				{/* 面包屑导航 - 显示所有层级（父级+当前） */}
+				{parentsData && parentsData.parents.length > 0 && (
+					<div className={localStyles.breadcrumbPath}>
+						{[...parentsData.parents, segmentData].map((segment, index) => {
+							const depth = segment.metadata?.chunk_details?.depth || 0
+							const segmentIndex = segment.metadata?.chunk_details?.index || 0
+							const isSelected = segment.id === selectedSegment.id
+							const isLast = index === parentsData.parents.length
+
+							return (
+								<div key={segment.id} className={localStyles.breadcrumbItem}>
+									<span
+										className={`${localStyles.levelIndexInfo} ${
+											isSelected ? localStyles.current : ''
+										}`}
+										onClick={() => setSelectedSegment(segment)}
+									>
+										<Icon name='material-account_tree' size={10} />L{depth}.
+										{segmentIndex + 1}
+									</span>
+									{!isLast && (
+										<Icon
+											name='material-chevron_right'
+											size={12}
+											className={localStyles.breadcrumbSeparator}
+										/>
+									)}
+								</div>
+							)
+						})}
+					</div>
+				)}
+
+				{/* 统计信息 */}
+				<div className={localStyles.metaInfo}>
+					<span className={localStyles.metaItem}>
+						{is_cn ? '权重' : 'Weight'}{' '}
+						<span className={localStyles.metaNumber}>
+							{selectedSegment.weight?.toFixed(2) || '0.00'}
+						</span>
+					</span>
+					<span className={localStyles.metaItem}>
+						{is_cn ? '评分' : 'Score'}{' '}
+						<span className={localStyles.metaNumber}>
+							{selectedSegment.score?.toFixed(2) || '0.00'}
+						</span>
+					</span>
+					<span className={localStyles.metaItem}>
+						{is_cn ? '命中' : 'Hits'}{' '}
+						<span className={localStyles.metaNumber}>
+							{selectedSegment.metadata?.hits || 0}
+						</span>
+					</span>
+				</div>
 			</div>
 
 			{/* Body - 内容区域暂时留空，背景色与 Graph 一致 */}
@@ -137,7 +192,7 @@ const ParentsView: React.FC<ParentsViewProps> = ({ segmentData }) => {
 				<div className={localStyles.parentsSection}>
 					{loading ? (
 						<div className={localStyles.loadingState}>
-							<Icon name='material-hourglass_empty' size={48} />
+							<Icon name='material-hourglass_empty' size={32} />
 							<Text>{is_cn ? '加载父级分段中...' : 'Loading parent segments...'}</Text>
 						</div>
 					) : parentsData && parentsData.parents.length > 0 ? (
@@ -145,6 +200,8 @@ const ParentsView: React.FC<ParentsViewProps> = ({ segmentData }) => {
 							<ParentsViewer
 								parentsData={parentsData.parents}
 								currentSegment={segmentData}
+								selectedSegment={selectedSegment}
+								onSegmentSelect={setSelectedSegment}
 							/>
 						</div>
 					) : (
