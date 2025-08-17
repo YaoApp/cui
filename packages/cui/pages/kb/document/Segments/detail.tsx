@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Modal, Button } from 'antd'
-import { useLocalStorageState } from 'ahooks'
 import { getLocale } from '@umijs/max'
 import { useGlobal } from '@/context/app'
 import Icon from '@/widgets/Icon'
@@ -23,10 +22,15 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 	const global = useGlobal()
 	const { kb: kbConfig } = global.app_info || {}
 
-	// 记住用户上次选择的tab
-	const [activeTab, setActiveTab] = useLocalStorageState<TabType>('segment-detail-tab', {
-		defaultValue: 'editor'
-	})
+	// 记住用户上次选择的tab，但每次弹窗打开时重置为内容tab
+	const [activeTab, setActiveTab] = useState<TabType>('editor')
+
+	// 每次弹窗打开时重置为内容tab
+	useEffect(() => {
+		if (visible) {
+			setActiveTab('editor')
+		}
+	}, [visible])
 
 	if (!segmentData) return null
 
