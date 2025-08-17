@@ -32,9 +32,11 @@
 	border-radius: 4px !important;
 	transition: all 0.2s ease !important;
 
-	:global(.anticon) {
+	:global(.anticon),
+	:global(.Icon) {
 		display: flex;
 		align-items: center;
+		color: inherit !important;
 	}
 
 	span {
@@ -93,6 +95,11 @@
 		display: flex;
 		align-items: center;
 		gap: 3px;
+
+		// 确保图标颜色与文字颜色一致
+		:global(.Icon) {
+			color: inherit !important;
+		}
 	}
 }
 

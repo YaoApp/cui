@@ -33,6 +33,11 @@
 	display: flex;
 	align-items: center;
 	gap: 3px;
+
+	// 确保图标颜色与文字颜色一致
+	:global(.Icon) {
+		color: inherit !important;
+	}
 }
 
 .metaInfo {
@@ -73,8 +78,17 @@
 	font-size: 12px !important;
 	font-weight: 500 !important;
 
+	// 确保图标颜色与文字颜色一致
+	:global(.Icon) {
+		color: inherit !important;
+	}
+
 	&:hover {
 		transform: scale(1.02);
+
+		:global(.Icon) {
+			color: inherit !important;
+		}
 	}
 
 	&:active {
