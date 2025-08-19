@@ -4,12 +4,24 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 
 import { Segment } from '@/openapi/kb/types'
+import ScoreVisualization from './ScoreVisualization'
 import styles from '../detail.less'
 import localStyles from './index.less'
 
 const { Text } = Typography
 
+interface ScoreStep {
+	id: string
+	name: string
+	value: number
+	weight: number
+	weighted_value: number
+	description: string
+}
+
 interface ScoreData {
+	final_score: number
+	steps: ScoreStep[]
 	formula: string
 	description: string
 }
@@ -36,6 +48,47 @@ const ScoreView: React.FC<ScoreViewProps> = ({ segmentData }) => {
 
 			// 模拟评分计算公式数据
 			const mockData: ScoreData = {
+				final_score: 8.6,
+				steps: [
+					{
+						id: 'relevance',
+						name: is_cn ? '相关性' : 'Relevance',
+						value: 9.2,
+						weight: 0.4,
+						weighted_value: 3.68,
+						description: is_cn
+							? '内容与查询的相关程度'
+							: 'How relevant the content is to the query'
+					},
+					{
+						id: 'quality',
+						name: is_cn ? '质量' : 'Quality',
+						value: 8.5,
+						weight: 0.3,
+						weighted_value: 2.55,
+						description: is_cn
+							? '内容的整体质量评估'
+							: 'Overall quality assessment of the content'
+					},
+					{
+						id: 'freshness',
+						name: is_cn ? '时效性' : 'Freshness',
+						value: 7.8,
+						weight: 0.2,
+						weighted_value: 1.56,
+						description: is_cn
+							? '内容的时效性和新鲜度'
+							: 'Timeliness and freshness of the content'
+					},
+					{
+						id: 'authority',
+						name: is_cn ? '权威性' : 'Authority',
+						value: 8.1,
+						weight: 0.1,
+						weighted_value: 0.81,
+						description: is_cn ? '内容来源的权威性' : 'Authority of the content source'
+					}
+				],
 				formula: 'Score = (Relevance × 0.4) + (Quality × 0.3) + (Freshness × 0.2) + (Authority × 0.1)',
 				description: is_cn
 					? '综合评分基于相关性、质量、时效性和权威性四个维度计算'
@@ -52,7 +105,7 @@ const ScoreView: React.FC<ScoreViewProps> = ({ segmentData }) => {
 
 	return (
 		<div className={styles.tabContent}>
-			{/* Header - 与Editor一致的结构 */}
+			{/* Header - 与其他组件一致的结构 */}
 			<div className={`${styles.tabHeader} ${localStyles.cardHeader}`}>
 				<div className={localStyles.chunkMeta}>
 					<span className={localStyles.chunkNumber}>
@@ -72,21 +125,25 @@ const ScoreView: React.FC<ScoreViewProps> = ({ segmentData }) => {
 				</div>
 				<div className={localStyles.metaInfo}>
 					<span className={localStyles.metaItem}>
-						{is_cn ? '计算公式' : 'Formula'}{' '}
-						<span className={localStyles.metaNumber} style={{ fontFamily: 'monospace' }}>
-							{scoreData?.formula || 'N/A'}
+						{is_cn ? '综合评分' : 'Score'}{' '}
+						<span className={localStyles.metaNumber}>
+							{loading ? '--' : scoreData?.final_score?.toFixed(2) || 'N/A'}
 						</span>
+					</span>
+					<span className={localStyles.metaItem}>
+						{is_cn ? '维度数' : 'Dimensions'}{' '}
+						<span className={localStyles.metaNumber}>{scoreData?.steps?.length || 0}</span>
 					</span>
 				</div>
 			</div>
 
-			{/* Body - 内容区域暂时留空 */}
+			{/* Body - 与Graph组件一致的结构 */}
 			<div className={localStyles.scoreBody}>
 				<div className={localStyles.scoreSection}>
 					{loading ? (
 						<div className={localStyles.loadingState}>
 							<Icon name='material-hourglass_empty' size={32} />
-							<Text>{is_cn ? '加载评分数据中...' : 'Loading score data...'}</Text>
+							<Text>{is_cn ? '正在加载评分数据...' : 'Loading score data...'}</Text>
 						</div>
 					) : !scoreData ? (
 						<div className={localStyles.emptyState}>
@@ -96,19 +153,16 @@ const ScoreView: React.FC<ScoreViewProps> = ({ segmentData }) => {
 							</Text>
 						</div>
 					) : (
-						<div className={localStyles.contentPlaceholder}>
-							<Text type='secondary'>
-								{is_cn
-									? '评分详情内容待实现...'
-									: 'Score details content coming soon...'}
-							</Text>
+						<div className={localStyles.scoreContent}>
+							{/* 评分可视化组件 */}
+							<ScoreVisualization
+								steps={scoreData.steps}
+								finalScore={scoreData.final_score}
+							/>
 						</div>
 					)}
 				</div>
 			</div>
-
-			{/* Footer - 暂时留空 */}
-			<div className={localStyles.scoreFooter}>{/* 后续可添加操作按钮或其他信息 */}</div>
 		</div>
 	)
 }
