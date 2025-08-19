@@ -76,12 +76,13 @@ export interface HitRecord {
 
 export interface VoteRecord {
 	id: string
-	type: 'up' | 'down'
-	reason?: string
+	scenario: string
+	source: string
+	query: string
+	context: any
+	positive_votes: number // 好评数
+	negative_votes: number // 差评数
 	created_at: string
-	user_id?: string
-	query?: string
-	segment_id?: string
 	metadata?: Record<string, any>
 }
 

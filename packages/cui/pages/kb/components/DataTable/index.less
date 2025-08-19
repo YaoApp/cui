@@ -47,7 +47,7 @@
 		.ant-select-selector {
 			height: 32px !important;
 			border-radius: 6px !important;
-			border: 1px solid var(--color_border) !important;
+			border: 1px solid var(--color_neo_border_field) !important;
 			background: var(--color_bg_menu) !important;
 			transition: all 0.2s ease !important;
 
@@ -58,7 +58,7 @@
 
 		&.ant-select-focused .ant-select-selector {
 			border-color: var(--color_main) !important;
-			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1) !important;
+			box-shadow: 0 0 0 2px rgba(var(--r), var(--g), var(--b), 0.1) !important;
 		}
 
 		.ant-select-selection-placeholder {
@@ -69,7 +69,7 @@
 	:global(.ant-input) {
 		height: 32px !important;
 		border-radius: 6px !important;
-		border: 1px solid var(--color_border) !important;
+		border: 1px solid var(--color_neo_border_field) !important;
 		background: var(--color_bg_menu) !important;
 		transition: all 0.2s ease !important;
 
@@ -79,7 +79,7 @@
 
 		&:focus {
 			border-color: var(--color_main) !important;
-			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1) !important;
+			box-shadow: 0 0 0 2px rgba(var(--r), var(--g), var(--b), 0.1) !important;
 		}
 
 		&::placeholder {
@@ -115,7 +115,7 @@
 	flex-direction: column;
 	overflow: hidden;
 	background: var(--color_neo_bg_header);
-	border: 1px solid var(--color_border);
+	border: 1px solid var(--color_neo_border_card);
 	border-radius: 6px;
 
 	// 去掉表格操作按钮的边框
@@ -139,8 +139,8 @@
 // 表头样式
 .tableHeader {
 	display: flex;
-	background: var(--color_bg_nav);
-	border-bottom: 1px solid var(--color_border); // 添加下边框分隔表头和内容
+	background: var(--color_neo_bg_header);
+	border-bottom: 1px solid var(--color_neo_border_header); // 添加下边框分隔表头和内容
 	flex-shrink: 0;
 	min-width: 100%; // 最小宽度为容器宽度
 	width: fit-content; // 宽度适配内容，可以超出容器
@@ -161,8 +161,8 @@
 	padding: 12px 16px;
 	font-weight: 500;
 	font-size: 12px;
-	color: var(--color_text);
-	border-right: 1px solid var(--color_border);
+	color: var(--color_neo_text_primary);
+	border-right: 1px solid var(--color_neo_border_card);
 	display: flex;
 	align-items: center;
 	white-space: nowrap;
@@ -192,12 +192,12 @@
 	}
 
 	&::-webkit-scrollbar-thumb {
-		background: var(--color_border);
+		background: var(--color_neo_border_card);
 		border-radius: 4px;
 		border: 2px solid var(--color_neo_bg_content); // 关键：边框确保在macOS上可见
 
 		&:hover {
-			background: var(--color_text_grey);
+			background: var(--color_neo_text_secondary);
 		}
 	}
 
@@ -208,21 +208,30 @@
 
 	// Firefox 滚动条
 	scrollbar-width: thin;
-	scrollbar-color: var(--color_border) var(--color_neo_bg_content);
+	scrollbar-color: var(--color_neo_border_card) var(--color_neo_bg_content);
 }
 
 // 表格行样式
 .tableRow {
 	display: flex;
-	border-bottom: 1px solid var(--color_border);
+	border-bottom: 1px solid var(--color_neo_border_card);
 	min-height: 48px;
 	min-width: 100%; // 最小宽度为容器宽度
 	width: fit-content; // 宽度适配内容，可以超出容器
 	transition: background-color 0.2s;
 	align-items: stretch; // 让所有单元格高度一致，适应最高的单元格
 
+	// 交替色（斑马纹）
+	&:nth-child(even) {
+		background: var(--color_neo_bg_field);
+	}
+
+	&:nth-child(odd) {
+		background: var(--color_neo_bg_card);
+	}
+
 	&:hover {
-		background: var(--color_bg_hover);
+		background: var(--color_neo_bg_hover) !important;
 	}
 
 	&:last-child {
@@ -233,8 +242,8 @@
 .bodyCell {
 	padding: 8px 16px;
 	font-size: 12px;
-	color: var(--color_text);
-	border-right: 1px solid var(--color_border);
+	color: var(--color_neo_text_primary);
+	border-right: 1px solid var(--color_neo_border_card);
 	display: flex;
 	align-items: flex-start; // 改为顶部对齐，支持多行文本
 	white-space: pre-wrap; // 支持换行和保留空格
@@ -286,7 +295,7 @@
 	justify-content: center;
 	align-items: center;
 	padding: 16px;
-	border-top: 1px solid var(--color_border);
+	border-top: 1px solid var(--color_neo_border_card);
 	background: var(--color_bg_layout);
 }
 
@@ -352,40 +361,52 @@
 
 // 深色模式适配
 [data-theme='dark'] {
-	.dataTableContainer {
-		background: var(--color_neo_bg_content);
-	}
-
 	.customTable {
-		background: var(--color_neo_bg_content);
-		border-color: var(--color_neo_border);
+		background: var(--color_neo_bg_card);
+		border-color: var(--color_neo_border_card);
 	}
 
-	.tableRow:hover {
-		background: var(--color_neo_bg_hover) !important;
+	.tableRow {
+		// 深色模式下的交替色
+		&:nth-child(even) {
+			background: var(--color_neo_bg_field);
+		}
+
+		&:nth-child(odd) {
+			background: var(--color_neo_bg_card);
+		}
+
+		&:hover {
+			background: var(--color_bg_hover) !important;
+		}
+	}
+
+	.tableHeader {
+		background: var(--color_neo_bg_header);
+		border-color: var(--color_neo_border_header);
 	}
 
 	.headerCell {
-		background: var(--color_neo_bg_header);
-		border-color: var(--color_neo_border);
-		color: var(--color_neo_text);
+		border-color: var(--color_neo_border_card);
+		color: var(--color_neo_text_primary);
 	}
 
 	.bodyCell {
-		border-color: var(--color_neo_border);
-		color: var(--color_neo_text);
+		border-color: var(--color_neo_border_card);
+		color: var(--color_neo_text_primary);
 	}
 
 	.tableBody {
 		&::-webkit-scrollbar-track {
-			background: rgba(255, 255, 255, 0.05);
+			background: var(--color_neo_bg_content);
 		}
 
 		&::-webkit-scrollbar-thumb {
-			background: rgba(255, 255, 255, 0.2);
+			background: var(--color_neo_border_card);
+			border: 2px solid var(--color_neo_bg_content);
 
 			&:hover {
-				background: rgba(255, 255, 255, 0.3);
+				background: var(--color_neo_text_secondary);
 			}
 		}
 	}
