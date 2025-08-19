@@ -94,6 +94,16 @@
 	flex-direction: column;
 	overflow: hidden;
 	background: var(--color_neo_bg_content);
+	min-height: 0; // 确保 flex 子元素可以缩小
+	position: relative; // 为滚动提供定位上下文
+
+	// 确保表格组件占满剩余空间
+	> div {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden; // 防止内容溢出
+	}
 }
 
 .hitsSection {
@@ -145,11 +155,124 @@
 	flex-shrink: 0;
 }
 
+// 表格内容样式
+.scenarioTag {
+	padding: 2px 8px;
+	background: var(--color_neo_bg_selected);
+	color: var(--color_main);
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 500;
+	border: 1px solid var(--color_neo_border_selected);
+}
+
+.sourceText {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	background: var(--color_neo_bg_code);
+	padding: 2px 6px;
+	border-radius: 4px;
+}
+
+.queryText {
+	font-size: 12px;
+	color: var(--color_neo_text_primary);
+	line-height: 1.4;
+}
+
+.timestamp {
+	font-size: 11px;
+	color: var(--color_neo_text_tertiary);
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.contextCode {
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	font-size: 10px;
+	line-height: 1.3;
+	max-height: 120px;
+	overflow-y: auto;
+	background: var(--color_neo_bg_code);
+	border: 1px solid var(--color_neo_border);
+	border-radius: 4px;
+	padding: 8px;
+
+	pre {
+		margin: 0;
+		padding: 0;
+		background: transparent;
+		border: none;
+		font-family: inherit;
+		font-size: inherit;
+		line-height: inherit;
+		color: var(--color_neo_text_secondary);
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+
+		// JSON 语法高亮 - 使用项目主题变量
+		:global(.json-key) {
+			color: var(--color_main);
+			font-weight: 500;
+		}
+
+		:global(.json-string) {
+			color: var(--color_success);
+		}
+
+		:global(.json-number) {
+			color: var(--color_warning);
+		}
+
+		:global(.json-boolean) {
+			color: var(--color_danger);
+		}
+
+		:global(.json-null) {
+			color: var(--color_text_grey);
+		}
+	}
+
+	// 滚动条样式
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 2px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
 // 深色模式适配
 [data-theme='dark'] {
 	.loadingState,
 	.emptyState,
 	.contentPlaceholder {
 		color: var(--color_neo_text_secondary);
+	}
+
+	.scenarioTag {
+		background: var(--color_neo_bg_selected);
+		border-color: var(--color_neo_border_selected);
+	}
+
+	.sourceText {
+		background: var(--color_neo_bg_code);
+		color: var(--color_neo_text_secondary);
+	}
+
+	.contextCode {
+		background: var(--color_neo_bg_code);
+		border-color: var(--color_neo_border);
+
+		pre {
+			color: var(--color_neo_text_secondary);
+		}
 	}
 }

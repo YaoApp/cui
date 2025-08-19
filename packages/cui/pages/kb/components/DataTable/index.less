@@ -1,0 +1,392 @@
+// DataTable 组件样式 - 纯手写表格
+
+.dataTableContainer {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+// 筛选器容器
+.filtersContainer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 4px 8px 12px 4px; // 减小左边距，加大下边距
+	flex-shrink: 0;
+	gap: 8px;
+	min-height: 48px; // 减少最小高度，与表头一致
+
+	// 强制覆盖全局样式
+	* {
+		box-sizing: border-box;
+	}
+}
+
+.filtersLeft {
+	display: flex;
+	align-items: center;
+	gap: 12px; // 适中的间距，保证focus光晕不重叠
+	flex: 1;
+	min-width: 0;
+
+	// 搜索按钮样式
+	.searchButton {
+		height: 32px !important;
+		padding: 0 16px !important;
+		font-size: 14px !important;
+		border-radius: 6px !important;
+		transition: all 0.2s ease !important;
+	}
+
+	// 确保筛选器组件高度一致并美化样式
+	:global(.ant-select) {
+		height: 32px !important;
+		border-radius: 6px !important;
+
+		.ant-select-selector {
+			height: 32px !important;
+			border-radius: 6px !important;
+			border: 1px solid var(--color_border) !important;
+			background: var(--color_bg_menu) !important;
+			transition: all 0.2s ease !important;
+
+			&:hover {
+				border-color: var(--color_main) !important;
+			}
+		}
+
+		&.ant-select-focused .ant-select-selector {
+			border-color: var(--color_main) !important;
+			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1) !important;
+		}
+
+		.ant-select-selection-placeholder {
+			color: var(--color_text_grey) !important;
+		}
+	}
+
+	:global(.ant-input) {
+		height: 32px !important;
+		border-radius: 6px !important;
+		border: 1px solid var(--color_border) !important;
+		background: var(--color_bg_menu) !important;
+		transition: all 0.2s ease !important;
+
+		&:hover {
+			border-color: var(--color_main) !important;
+		}
+
+		&:focus {
+			border-color: var(--color_main) !important;
+			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1) !important;
+		}
+
+		&::placeholder {
+			color: var(--color_text_grey) !important;
+		}
+	}
+}
+
+.filtersRight {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.filterItem {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.totalText {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary) !important;
+	white-space: nowrap;
+	line-height: 32px; // 与输入框高度对齐
+}
+
+// 自定义表格样式
+.customTable {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background: var(--color_neo_bg_header);
+	border: 1px solid var(--color_border);
+	border-radius: 6px;
+
+	// 去掉表格操作按钮的边框
+	:global(.ant-btn) {
+		border: none !important;
+		box-shadow: none !important;
+
+		&:hover,
+		&:focus {
+			border: none !important;
+			box-shadow: none !important;
+		}
+
+		&:active {
+			border: none !important;
+			box-shadow: none !important;
+		}
+	}
+}
+
+// 表头样式
+.tableHeader {
+	display: flex;
+	background: var(--color_bg_nav);
+	border-bottom: 1px solid var(--color_border); // 添加下边框分隔表头和内容
+	flex-shrink: 0;
+	min-width: 100%; // 最小宽度为容器宽度
+	width: fit-content; // 宽度适配内容，可以超出容器
+	height: 48px; // 固定表头高度
+	overflow-x: auto; // 支持横向滚动
+	overflow-y: hidden; // 隐藏纵向滚动
+
+	// 隐藏表头的滚动条
+	&::-webkit-scrollbar {
+		display: none;
+	}
+
+	// Firefox 隐藏滚动条
+	scrollbar-width: none;
+}
+
+.headerCell {
+	padding: 12px 16px;
+	font-weight: 500;
+	font-size: 12px;
+	color: var(--color_text);
+	border-right: 1px solid var(--color_border);
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+	flex-shrink: 0; // 防止压缩
+	height: 48px; // 固定表头高度
+	overflow: hidden; // 隐藏溢出内容
+	text-overflow: ellipsis; // 文字截断显示省略号
+	min-width: 80px; // 设置最小宽度，与表体单元格一致
+
+	&:last-child {
+		border-right: none;
+	}
+}
+
+// 表体样式 - 关键的滚动区域
+.tableBody {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: auto;
+	min-height: 0;
+	height: 400px;
+
+	// 使用与框架一致的滚动条样式（参考 Layout/index.less）
+	&::-webkit-scrollbar {
+		width: 12px;
+		height: 12px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 4px;
+		border: 2px solid var(--color_neo_bg_content); // 关键：边框确保在macOS上可见
+
+		&:hover {
+			background: var(--color_text_grey);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_neo_bg_content);
+		border-radius: 4px;
+	}
+
+	// Firefox 滚动条
+	scrollbar-width: thin;
+	scrollbar-color: var(--color_border) var(--color_neo_bg_content);
+}
+
+// 表格行样式
+.tableRow {
+	display: flex;
+	border-bottom: 1px solid var(--color_border);
+	min-height: 48px;
+	min-width: 100%; // 最小宽度为容器宽度
+	width: fit-content; // 宽度适配内容，可以超出容器
+	transition: background-color 0.2s;
+	align-items: stretch; // 让所有单元格高度一致，适应最高的单元格
+
+	&:hover {
+		background: var(--color_bg_hover);
+	}
+
+	&:last-child {
+		border-bottom: none;
+	}
+}
+
+.bodyCell {
+	padding: 8px 16px;
+	font-size: 12px;
+	color: var(--color_text);
+	border-right: 1px solid var(--color_border);
+	display: flex;
+	align-items: flex-start; // 改为顶部对齐，支持多行文本
+	white-space: pre-wrap; // 支持换行和保留空格
+	word-wrap: break-word; // 长单词自动换行
+	word-break: break-all; // 必要时在任意字符处换行
+	line-height: 1.4; // 增加行高，提升多行文本可读性
+	flex-shrink: 0; // 防止压缩
+	min-height: 48px; // 确保最小高度与行高一致
+	min-width: 80px; // 设置最小宽度，确保有足够内容宽度
+
+	&:last-child {
+		border-right: none;
+	}
+}
+
+// 空状态容器
+.emptyContainer {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 200px;
+	padding: 40px;
+
+	// 修复空状态图片样式
+	:global(.xgen-empty-image) {
+		height: 48px !important; // 进一步减少高度到48px，更紧凑
+		margin-bottom: 4px !important; // 减少下边距从8px到4px
+	}
+
+	// 修复空状态文字颜色
+	:global(.xgen-empty-description) {
+		color: var(--color_text_grey) !important; // 使用更淡的文字颜色
+		opacity: 0.7; // 进一步降低透明度
+	}
+}
+
+// 加载状态
+.loadingContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 300px;
+	gap: 16px;
+}
+
+.loadingMore {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 16px;
+	border-top: 1px solid var(--color_border);
+	background: var(--color_bg_layout);
+}
+
+// 操作按钮样式
+.dangerButton {
+	&:hover {
+		color: var(--color_error) !important;
+		background: var(--color_error_bg) !important;
+		border-color: var(--color_error) !important;
+	}
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.filtersContainer {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+		padding: 8px 12px;
+	}
+
+	.filtersLeft {
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.filtersRight {
+		justify-content: center;
+	}
+
+	.headerCell,
+	.bodyCell {
+		padding: 6px 8px;
+		font-size: 11px;
+	}
+}
+
+// 紧凑模式
+.customTable.compact {
+	.headerCell,
+	.bodyCell {
+		padding: 4px 8px;
+		font-size: 11px;
+	}
+
+	.tableRow {
+		min-height: 36px;
+	}
+}
+
+// 大尺寸模式
+.customTable.large {
+	.headerCell,
+	.bodyCell {
+		padding: 12px 16px;
+		font-size: 13px;
+	}
+
+	.tableRow {
+		min-height: 56px;
+	}
+}
+
+// 深色模式适配
+[data-theme='dark'] {
+	.dataTableContainer {
+		background: var(--color_neo_bg_content);
+	}
+
+	.customTable {
+		background: var(--color_neo_bg_content);
+		border-color: var(--color_neo_border);
+	}
+
+	.tableRow:hover {
+		background: var(--color_neo_bg_hover) !important;
+	}
+
+	.headerCell {
+		background: var(--color_neo_bg_header);
+		border-color: var(--color_neo_border);
+		color: var(--color_neo_text);
+	}
+
+	.bodyCell {
+		border-color: var(--color_neo_border);
+		color: var(--color_neo_text);
+	}
+
+	.tableBody {
+		&::-webkit-scrollbar-track {
+			background: rgba(255, 255, 255, 0.05);
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.2);
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.3);
+			}
+		}
+	}
+}

@@ -61,3 +61,36 @@ export interface Chunk {
 	created_at: string
 	updated_at: string
 }
+
+// KB 相关的记录类型定义
+export interface HitRecord {
+	id: string
+	scenario: string
+	source: string
+	context: any
+	created_at: string
+	query?: string
+	score?: number
+	metadata?: Record<string, any>
+}
+
+export interface VoteRecord {
+	id: string
+	type: 'up' | 'down'
+	reason?: string
+	created_at: string
+	user_id?: string
+	query?: string
+	segment_id?: string
+	metadata?: Record<string, any>
+}
+
+export interface LogRecord {
+	id: string
+	level: 'info' | 'warn' | 'error' | 'debug'
+	message: string
+	created_at: string
+	user_id?: string
+	action?: string
+	metadata?: Record<string, any>
+}
