@@ -23,8 +23,8 @@ export interface CollectionMetadata {
 
 // Base collection config structure
 export interface CollectionConfig {
-	embedding_provider: string
-	embedding_option: string
+	embedding_provider_id: string
+	embedding_option_id: string
 	locale?: string
 	distance: string
 	index_type: string
@@ -108,11 +108,21 @@ export interface ProviderConfig {
 	option?: Record<string, any>
 }
 
+// 简化的集合信息，用于向下传递
+export interface CollectionInfo {
+	id: string
+	name: string
+	description?: string
+	// Embedding provider 配置
+	embedding_provider: string
+	embedding_option: string
+}
+
 // Base request for document upsert operations
 export interface BaseUpsertRequest {
 	collection_id: string
 	locale?: string
-	chunking: ProviderConfig
+	chunking?: ProviderConfig
 	embedding: ProviderConfig
 	extraction?: ProviderConfig
 	fetcher?: ProviderConfig
@@ -317,4 +327,92 @@ export interface ScrollSegmentsResponse {
 	segments: Segment[]
 	scroll_id?: string // ID for next scroll request
 	has_more: boolean // Whether there are more results
+}
+
+// ===== Segment Operations Types =====
+
+// Segment text structure for adding/updating segments
+export interface SegmentText {
+	id?: string
+	text: string
+}
+
+// Segment vote structure
+export interface SegmentVote {
+	id: string
+	vote?: number
+}
+
+// Segment score structure
+export interface SegmentScore {
+	id: string
+	score?: number
+}
+
+// Segment weight structure
+export interface SegmentWeight {
+	id: string
+	weight?: number
+}
+
+// Update segments request
+export interface UpdateSegmentsRequest {
+	segment_texts: SegmentText[]
+}
+
+// Update segments response
+export interface UpdateSegmentsResponse {
+	message: string
+	updated_count: number
+	segments_count: number
+}
+
+// Remove segments response
+export interface RemoveSegmentsResponse {
+	message: string
+	segment_ids: string[]
+	removed_count: number
+}
+
+// Remove segments by document ID response
+export interface RemoveSegmentsByDocIDResponse {
+	message: string
+	doc_id: string
+	removed_count: number
+}
+
+// Update vote request
+export interface UpdateVoteRequest {
+	segments: SegmentVote[]
+}
+
+// Update vote response
+export interface UpdateVoteResponse {
+	message: string
+	segments: SegmentVote[]
+	updated_count: number
+}
+
+// Update score request
+export interface UpdateScoreRequest {
+	segments: SegmentScore[]
+}
+
+// Update score response
+export interface UpdateScoreResponse {
+	message: string
+	segments: SegmentScore[]
+	updated_count: number
+}
+
+// Update weight request
+export interface UpdateWeightRequest {
+	segments: SegmentWeight[]
+}
+
+// Update weight response
+export interface UpdateWeightResponse {
+	message: string
+	segments: SegmentWeight[]
+	updated_count: number
 }

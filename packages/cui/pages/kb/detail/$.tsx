@@ -19,7 +19,7 @@ import { Uploader, DocumentCover, Pagination } from '../components'
 import styles from './index.less'
 import { useGlobal } from '@/context/app'
 import { toJS } from 'mobx'
-import { KB, FileAPI, Collection, Document, ListDocumentsRequest } from '@/openapi'
+import { KB, FileAPI, Collection, Document, ListDocumentsRequest, CollectionInfo } from '@/openapi'
 
 const { TextArea } = Input
 
@@ -38,6 +38,17 @@ const initializeAPIs = (kbConfig?: any) => {
 	const fileapi = new FileAPI(window.$app.openapi, defaultUploader)
 
 	return { kb, fileapi }
+}
+
+// 从完整的集合数据中提取简化信息
+const extractCollectionInfo = (collection: Collection): CollectionInfo => {
+	return {
+		id: collection.id,
+		name: collection.metadata.name || 'Untitled',
+		description: collection.metadata.description,
+		embedding_provider: collection.metadata.__embedding_provider || 'default',
+		embedding_option: collection.metadata.__embedding_option || ''
+	}
 }
 
 const CollectionDetail = () => {
@@ -111,20 +122,18 @@ const CollectionDetail = () => {
 			setLoading(true)
 			const { kb } = initializeAPIs(kbConfig)
 
-			// 获取所有集合，然后找到对应的集合
-			const response = await kb.GetCollections()
+			// 直接根据ID获取集合详情
+			const response = await kb.GetCollection(id)
 
 			if (window.$app.openapi.IsError(response)) {
-				throw new Error(response.error?.error_description || 'Failed to load collections')
+				throw new Error(response.error?.error_description || 'Failed to load collection')
 			}
 
-			// 从集合列表中找到对应ID的集合
-			const collection = response.data?.find((c) => c.id === id)
-			if (!collection) {
+			if (!response.data) {
 				throw new Error(is_cn ? '未找到指定的集合' : 'Collection not found')
 			}
 
-			setCollection(collection)
+			setCollection(response.data)
 		} catch (error) {
 			console.error('Load collection failed:', error)
 			const errorMsg =
@@ -833,7 +842,7 @@ const CollectionDetail = () => {
 			</div>
 
 			{/* 文档详情模态窗 */}
-			{selectedDocument && (
+			{selectedDocument && collection && (
 				<DocumentModal
 					visible={modalVisible}
 					onClose={() => {
@@ -842,6 +851,7 @@ const CollectionDetail = () => {
 					}}
 					collectionId={selectedDocument.collectionId}
 					docid={selectedDocument.docid}
+					collectionInfo={extractCollectionInfo(collection)}
 				/>
 			)}
 

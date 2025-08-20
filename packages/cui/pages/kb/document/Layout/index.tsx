@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { Button, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import { CollectionInfo } from '@/openapi'
 import styles from './index.less'
 
 interface ContentLayoutProps {
@@ -10,6 +11,7 @@ interface ContentLayoutProps {
 	SegmentsComponent: React.ComponentType<any>
 	docid: string
 	collectionId: string
+	collectionInfo: CollectionInfo
 	document?: any
 }
 
@@ -21,6 +23,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
 	SegmentsComponent,
 	docid,
 	collectionId,
+	collectionInfo,
 	document
 }) => {
 	const locale = getLocale()
@@ -105,6 +108,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
 					onRestoreDualPanels={restoreDualPanels}
 					docid={docid}
 					collectionId={collectionId}
+					collectionInfo={collectionInfo}
 					document={document}
 				/>
 			</div>
@@ -137,6 +141,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
 					onRestoreDualPanels={restoreDualPanels}
 					docid={docid}
 					collectionId={collectionId}
+					collectionInfo={collectionInfo}
 					document={document}
 				/>
 			</div>

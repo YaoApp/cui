@@ -25,7 +25,13 @@ import {
 	ListSegmentsRequest,
 	ListSegmentsResponse,
 	ScrollSegmentsRequest,
-	ScrollSegmentsResponse
+	ScrollSegmentsResponse,
+	UpdateSegmentsRequest,
+	UpdateSegmentsResponse,
+	RemoveSegmentsResponse,
+	RemoveSegmentsByDocIDResponse,
+	UpdateWeightRequest,
+	UpdateWeightResponse
 } from './types'
 
 /**
@@ -59,6 +65,13 @@ export class KB {
 	 */
 	async CollectionExists(collectionID: string): Promise<ApiResponse<CollectionExistsResponse>> {
 		return this.api.Get<CollectionExistsResponse>(`/kb/collections/${collectionID}/exists`)
+	}
+
+	/**
+	 * Get collection by ID
+	 */
+	async GetCollection(collectionID: string): Promise<ApiResponse<Collection>> {
+		return this.api.Get<Collection>(`/kb/collections/${collectionID}`)
 	}
 
 	/**
@@ -206,6 +219,40 @@ export class KB {
 		}
 
 		return this.api.Get<ScrollSegmentsResponse>(`/kb/documents/${docID}/segments`, params)
+	}
+
+	/**
+	 * Update segments manually
+	 */
+	async UpdateSegments(
+		docID: string,
+		request: UpdateSegmentsRequest
+	): Promise<ApiResponse<UpdateSegmentsResponse>> {
+		return this.api.Put<UpdateSegmentsResponse>(`/kb/documents/${docID}/segments`, request)
+	}
+
+	/**
+	 * Remove segments by IDs
+	 */
+	async RemoveSegments(segmentIDs: string[]): Promise<ApiResponse<RemoveSegmentsResponse>> {
+		const queryParams = new URLSearchParams({
+			segment_ids: segmentIDs.join(',')
+		})
+		return this.api.Delete<RemoveSegmentsResponse>(`/kb/segments?${queryParams.toString()}`)
+	}
+
+	/**
+	 * Remove all segments of a document
+	 */
+	async RemoveSegmentsByDocID(docID: string): Promise<ApiResponse<RemoveSegmentsByDocIDResponse>> {
+		return this.api.Delete<RemoveSegmentsByDocIDResponse>(`/kb/documents/${docID}/segments`)
+	}
+
+	/**
+	 * Update weights for segments
+	 */
+	async UpdateWeight(request: UpdateWeightRequest): Promise<ApiResponse<UpdateWeightResponse>> {
+		return this.api.Put<UpdateWeightResponse>('/kb/segments/weight', request)
 	}
 
 	// ===== Provider Management =====

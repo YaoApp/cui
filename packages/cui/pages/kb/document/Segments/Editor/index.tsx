@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { Button, Tag, Typography, message } from 'antd'
+import { Button, Tag, Typography, message, Popconfirm } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import CustomTextArea from './CustomTextArea'
 import WeightEditor from './WeightEditor'
+import { KB, UpdateSegmentsRequest, UpdateWeightRequest, CollectionInfo } from '@/openapi'
 import styles from '../detail.less'
 import localStyles from './index.less'
 
@@ -30,10 +31,13 @@ interface ChunkData {
 
 interface ChunkEditorProps {
 	chunkData: ChunkData
+	collectionInfo: CollectionInfo
+	docID: string // 文档ID，用于API调用
 	onSave: (updatedData: Partial<ChunkData>) => void
+	onDelete?: () => void // 删除回调
 }
 
-const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, onSave }) => {
+const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, docID, onSave, onDelete }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -42,6 +46,20 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, onSave }) => {
 	const [editedWeight, setEditedWeight] = useState(chunkData.weight)
 
 	const netVotes = chunkData.upvotes - chunkData.downvotes
+
+	// Embedding配置处理函数（使用简化的集合信息）
+	const buildEmbeddingConfig = (collectionInfo: CollectionInfo) => {
+		const config: any = {
+			provider_id: collectionInfo.embedding_provider
+		}
+
+		// 如果有embedding_option，添加option_id
+		if (collectionInfo.embedding_option) {
+			config.option_id = collectionInfo.embedding_option
+		}
+
+		return config
+	}
 
 	// 投票处理
 	const handleVote = (type: 'good' | 'bad') => {
@@ -79,23 +97,97 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, onSave }) => {
 		return null
 	}
 
-	const handleSave = () => {
-		const trimmedText = editedText.trim()
-		const updatedData: Partial<ChunkData> = {
-			text: trimmedText,
-			weight: editedWeight,
-			text_length: trimmedText.length
+	const handleSave = async (e?: React.MouseEvent) => {
+		if (!window.$app?.openapi) {
+			message.error(is_cn ? '系统未就绪' : 'System not ready')
+			return
 		}
 
-		onSave(updatedData)
-		setIsEditing(false)
-		message.success(is_cn ? '保存成功' : 'Saved successfully')
+		const trimmedText = editedText.trim()
+		if (!trimmedText) {
+			message.error(is_cn ? '文本内容不能为空' : 'Text content cannot be empty')
+			return
+		}
+
+		try {
+			const kb = new KB(window.$app.openapi)
+
+			// 构建简化的 UpdateSegmentsRequest，只传递 segment_texts
+			const updateTextRequest: UpdateSegmentsRequest = {
+				segment_texts: [
+					{
+						id: chunkData.id,
+						text: trimmedText
+					}
+				]
+			}
+
+			const response = await kb.UpdateSegments(docID, updateTextRequest)
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to update text')
+			}
+
+			// 更新本地状态（权重由 handleWeightChange 单独处理）
+			const updatedData: Partial<ChunkData> = {
+				text: trimmedText,
+				text_length: trimmedText.length
+			}
+
+			onSave(updatedData)
+			setIsEditing(false)
+			message.success(is_cn ? '保存成功' : 'Saved successfully')
+
+			// 移除按钮焦点，防止卡在hover状态
+			if (e?.currentTarget) {
+				;(e.currentTarget as HTMLElement).blur()
+			}
+		} catch (error) {
+			console.error('Save failed:', error)
+			const errorMsg = error instanceof Error ? error.message : is_cn ? '保存失败' : 'Save failed'
+			message.error(errorMsg)
+		}
 	}
 
 	const handleCancel = () => {
 		setEditedText(chunkData.text?.trim() || '')
 		setEditedWeight(chunkData.weight)
 		setIsEditing(false)
+	}
+
+	// 权重变化处理 - 立即调用API更新
+	const handleWeightChange = async (newWeight: number) => {
+		if (!window.$app?.openapi) {
+			message.error(is_cn ? '系统未就绪' : 'System not ready')
+			return
+		}
+
+		try {
+			const kb = new KB(window.$app.openapi)
+			const updateWeightRequest: UpdateWeightRequest = {
+				segments: [
+					{
+						id: chunkData.id,
+						weight: newWeight
+					}
+				]
+			}
+
+			const response = await kb.UpdateWeight(updateWeightRequest)
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to update weight')
+			}
+
+			// 更新本地状态
+			setEditedWeight(newWeight)
+
+			// 通知父组件
+			onSave({ weight: newWeight })
+		} catch (error) {
+			console.error('Weight update failed:', error)
+			const errorMsg =
+				error instanceof Error ? error.message : is_cn ? '权重更新失败' : 'Weight update failed'
+			message.error(errorMsg)
+		}
 	}
 
 	return (
@@ -121,7 +213,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, onSave }) => {
 				<div className={localStyles.metaInfo}>
 					<span className={localStyles.metaItem}>
 						{is_cn ? '权重' : 'Weight'}{' '}
-						<WeightEditor value={editedWeight} onChange={setEditedWeight} disabled={false} />
+						<WeightEditor value={editedWeight} onChange={handleWeightChange} disabled={false} />
 					</span>
 					<span className={localStyles.metaItem}>
 						{is_cn ? '评分' : 'Score'}{' '}
@@ -135,36 +227,93 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, onSave }) => {
 					</span>
 				</div>
 				<div className={localStyles.actionSection}>
-					{!isEditing ? (
-						<Button
-							type='primary'
-							size='small'
-							className={localStyles.editButton}
-							onClick={() => setIsEditing(true)}
-						>
-							<Icon name='material-edit' size={14} />
-							<span>{is_cn ? '编辑' : 'Edit'}</span>
-						</Button>
-					) : (
-						<div className={localStyles.editActions}>
+					{/* 编辑状态下的悬浮按钮 */}
+					{isEditing && (
+						<div className={localStyles.floatingLeftButtons}>
 							<Button
 								size='small'
-								className={localStyles.cancelButton}
+								className={localStyles.cancelActionButton}
 								onClick={handleCancel}
 							>
 								<Icon name='material-close' size={14} />
 								<span>{is_cn ? '取消' : 'Cancel'}</span>
 							</Button>
-							<Button
-								type='primary'
-								size='small'
-								className={localStyles.saveButton}
-								onClick={handleSave}
+							<Popconfirm
+								title={
+									is_cn
+										? '确定要删除这个片段吗？删除后将无法恢复！'
+										: 'Are you sure to delete this segment? This action cannot be undone!'
+								}
+								onConfirm={async () => {
+									if (!window.$app?.openapi) {
+										message.error(is_cn ? '系统未就绪' : 'System not ready')
+										return
+									}
+
+									try {
+										const kb = new KB(window.$app.openapi)
+										const response = await kb.RemoveSegments([chunkData.id])
+
+										if (window.$app.openapi.IsError(response)) {
+											throw new Error(
+												response.error?.error_description ||
+													'Failed to delete segment'
+											)
+										}
+
+										message.success(is_cn ? '删除成功' : 'Deleted successfully')
+
+										// 调用删除回调
+										if (onDelete) {
+											onDelete()
+										}
+									} catch (error) {
+										console.error('Delete failed:', error)
+										const errorMsg =
+											error instanceof Error
+												? error.message
+												: is_cn
+												? '删除失败'
+												: 'Delete failed'
+										message.error(errorMsg)
+									}
+								}}
+								okText={is_cn ? '确认' : 'Confirm'}
+								cancelText={is_cn ? '取消' : 'Cancel'}
 							>
-								<Icon name='material-check' size={14} />
-								<span>{is_cn ? '保存' : 'Save'}</span>
-							</Button>
+								<Button size='small' className={localStyles.deleteButton}>
+									<Icon name='material-delete' size={14} />
+									<span>{is_cn ? '删除' : 'Delete'}</span>
+								</Button>
+							</Popconfirm>
 						</div>
+					)}
+
+					{/* 主按钮 - Edit/Save */}
+					{!isEditing ? (
+						<Button
+							type='primary'
+							size='small'
+							className={localStyles.editButton}
+							onClick={(e) => {
+								setIsEditing(true)
+								// 移除按钮焦点，防止卡在hover状态
+								e.currentTarget.blur()
+							}}
+						>
+							<Icon name='material-edit' size={14} />
+							<span>{is_cn ? '编辑' : 'Edit'}</span>
+						</Button>
+					) : (
+						<Button
+							type='primary'
+							size='small'
+							className={localStyles.saveButton}
+							onClick={handleSave}
+						>
+							<Icon name='material-check' size={14} />
+							<span>{is_cn ? '保存' : 'Save'}</span>
+						</Button>
 					)}
 				</div>
 			</div>

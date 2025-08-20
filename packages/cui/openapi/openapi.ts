@@ -286,7 +286,7 @@ export class OpenAPI {
 		return this.handleResponse<T>(response)
 	}
 
-	async Delete<T = any>(path: string, headersInit: HeadersInit = {}): Promise<ApiResponse<T>> {
+	async Delete<T = any>(path: string, headersInit: HeadersInit = {}, payload?: any): Promise<ApiResponse<T>> {
 		const headerBuilder = headers(headersInit)
 
 		// Add Content-Type header if not set
@@ -303,12 +303,19 @@ export class OpenAPI {
 		// Add CSRF token for security
 		this.addCSRFToken(headerBuilder)
 
-		const response = await fetch(`${this.config.baseURL}${path}`, {
+		const requestOptions: RequestInit = {
 			method: 'DELETE',
 			headers: headerBuilder.toHeaders(),
 			// Include HttpOnly cookies automatically for authentication
 			credentials: 'include'
-		})
+		}
+
+		// Add body if payload is provided
+		if (payload !== undefined) {
+			requestOptions.body = JSON.stringify(payload)
+		}
+
+		const response = await fetch(`${this.config.baseURL}${path}`, requestOptions)
 
 		return this.handleResponse<T>(response)
 	}

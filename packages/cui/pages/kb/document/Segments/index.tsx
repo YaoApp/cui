@@ -3,7 +3,7 @@ import { Button, Tooltip, Input, message, Select } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import { KB } from '@/openapi'
+import { KB, CollectionInfo } from '@/openapi'
 import { Segment, ScrollSegmentsRequest } from '@/openapi/kb/types'
 import SegmentDetail from './detail'
 import styles from '../Layout/index.less'
@@ -14,6 +14,7 @@ interface SegmentsProps {
 	onRestoreDualPanels: () => void
 	docid: string
 	collectionId: string
+	collectionInfo: CollectionInfo
 	document?: any // 文档对象，包含状态信息
 }
 
@@ -23,6 +24,7 @@ const Segments: React.FC<SegmentsProps> = ({
 	onRestoreDualPanels,
 	docid,
 	collectionId,
+	collectionInfo,
 	document
 }) => {
 	const locale = getLocale()
@@ -38,6 +40,7 @@ const Segments: React.FC<SegmentsProps> = ({
 	const [scrollId, setScrollId] = useState<string>('')
 	const [detailVisible, setDetailVisible] = useState(false)
 	const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
+
 	const [hasMore, setHasMore] = useState(false)
 
 	// 文档状态相关状态
@@ -268,6 +271,12 @@ const Segments: React.FC<SegmentsProps> = ({
 			stopAutoRefresh()
 		}
 	}, [document])
+
+	// 组件初始化
+	useEffect(() => {
+		// 加载初始数据
+		loadSegments(true)
+	}, [collectionId, docid])
 
 	// 组件卸载时清理定时器
 	useEffect(() => {
@@ -757,7 +766,13 @@ const Segments: React.FC<SegmentsProps> = ({
 			</div>
 
 			{/* 详情模态窗口 */}
-			<SegmentDetail visible={detailVisible} onClose={handleCloseDetail} segmentData={selectedSegment} />
+			<SegmentDetail
+				visible={detailVisible}
+				onClose={handleCloseDetail}
+				segmentData={selectedSegment}
+				collectionInfo={collectionInfo}
+				docID={docid}
+			/>
 		</div>
 	)
 }

@@ -67,8 +67,8 @@ const CreateCollection = () => {
 
 			// Prepare the request data
 			const config: CollectionConfig = {
-				embedding_provider: embeddingProvider,
-				embedding_option: embeddingOption,
+				embedding_provider_id: embeddingProvider,
+				embedding_option_id: embeddingOption,
 				locale: locale,
 				distance: values.distance,
 				index_type: values.index_type

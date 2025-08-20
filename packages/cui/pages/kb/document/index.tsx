@@ -5,7 +5,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { KnowledgeBase } from '../types'
 import { mockFetchKnowledgeBase, mockFetchDocumentContent } from './mockData'
-import { KB, Document } from '@/openapi'
+import { KB, Document, CollectionInfo } from '@/openapi'
 import { getFileTypeIcon } from '@/assets/icons'
 import Summary from './Summary'
 import Layout from './Layout'
@@ -18,9 +18,10 @@ interface DocumentModalProps {
 	onClose: () => void
 	collectionId: string
 	docid: string
+	collectionInfo: CollectionInfo
 }
 
-const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collectionId, docid }) => {
+const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collectionId, docid, collectionInfo }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -256,6 +257,7 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 						SegmentsComponent={Segments}
 						docid={docid}
 						collectionId={collectionId}
+						collectionInfo={collectionInfo}
 						document={document}
 					/>
 				</div>

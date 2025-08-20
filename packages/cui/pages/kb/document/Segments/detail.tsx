@@ -3,7 +3,7 @@ import { Modal, Button } from 'antd'
 import { getLocale } from '@umijs/max'
 import { useGlobal } from '@/context/app'
 import Icon from '@/widgets/Icon'
-import { Segment } from '@/openapi/kb/types'
+import { Segment, CollectionInfo } from '@/openapi/kb/types'
 import Editor from './Editor'
 import GraphView from './Graph'
 import ParentsView from './Parents'
@@ -16,11 +16,13 @@ interface SegmentDetailProps {
 	visible: boolean
 	onClose: () => void
 	segmentData: Segment | null
+	collectionInfo: CollectionInfo
+	docID: string
 }
 
 type TabType = 'editor' | 'graph' | 'parents' | 'hits' | 'vote' | 'score'
 
-const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segmentData }) => {
+const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segmentData, collectionInfo, docID }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
@@ -120,7 +122,14 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 					metadata: segmentData.metadata // 传递完整的 metadata
 				}
 
-				return <Editor chunkData={chunkData} onSave={handleSave} />
+				return (
+					<Editor
+						chunkData={chunkData}
+						collectionInfo={collectionInfo}
+						docID={docID}
+						onSave={handleSave}
+					/>
+				)
 			case 'graph':
 				return <GraphView segmentData={segmentData} />
 			case 'parents':
