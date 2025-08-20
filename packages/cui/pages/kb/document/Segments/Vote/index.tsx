@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Typography, Button, message, Tooltip } from 'antd'
+import { Typography, Button, message, Tooltip, Modal } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 
@@ -177,6 +177,26 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 		setSelectedRecord(null)
 	}
 
+	// 处理删除
+	const handleDelete = async (record: VoteRecord) => {
+		try {
+			// TODO: 实现实际的删除 API 调用
+			console.log('Deleting vote record:', record)
+
+			// 模拟删除操作
+			await new Promise((resolve) => setTimeout(resolve, 500))
+
+			// 从本地状态中移除
+			setTableData((prevData) => prevData.filter((item) => item.id !== record.id))
+			setPagination((prev) => ({ ...prev, total: prev.total - 1 }))
+
+			message.success(is_cn ? '删除成功' : 'Deleted successfully')
+		} catch (error) {
+			console.error('Delete failed:', error)
+			message.error(is_cn ? '删除失败' : 'Delete failed')
+		}
+	}
+
 	// 定义操作按钮
 	const actions: TableAction<VoteRecord>[] = [
 		{
@@ -193,8 +213,17 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 			icon: <Icon name='material-delete' size={14} />,
 			type: 'text',
 			onClick: (record) => {
-				console.log('Delete vote:', record)
-				// TODO: 删除确认
+				// 使用 Modal.confirm 来显示确认对话框
+				Modal.confirm({
+					title: is_cn ? '确认删除' : 'Confirm Delete',
+					content: is_cn
+						? '确定要删除这条投票记录吗？删除后将无法恢复！'
+						: 'Are you sure to delete this vote record? This action cannot be undone!',
+					okText: is_cn ? '确认' : 'Confirm',
+					cancelText: is_cn ? '取消' : 'Cancel',
+					okType: 'danger',
+					onOk: () => handleDelete(record)
+				})
 			}
 		}
 	]
