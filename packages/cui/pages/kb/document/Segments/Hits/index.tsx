@@ -4,8 +4,9 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 
 import { Segment } from '@/openapi/kb/types'
-import { DataTable } from '@/pages/kb/components'
+import { DataTable, DetailModal } from '@/pages/kb/components'
 import { TableColumn, TableFilter, TableAction } from '@/pages/kb/components/DataTable/types'
+import { DetailModalProps, DetailSection } from '@/pages/kb/components/DetailModal/types'
 import { HitRecord } from '@/pages/kb/types'
 import { mockListHits, ListHitsRequest } from './mockData'
 import styles from '../detail.less'
@@ -57,6 +58,8 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 	const [filters, setFilters] = useState<Record<string, any>>({})
 	const [hasMore, setHasMore] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
+	const [detailVisible, setDetailVisible] = useState(false)
+	const [selectedRecord, setSelectedRecord] = useState<HitRecord | null>(null)
 
 	useEffect(() => {
 		loadHitsData()
@@ -237,6 +240,18 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 		}
 	]
 
+	// 打开详情弹窗
+	const handleViewDetails = (record: HitRecord) => {
+		setSelectedRecord(record)
+		setDetailVisible(true)
+	}
+
+	// 关闭详情弹窗
+	const handleCloseDetails = () => {
+		setDetailVisible(false)
+		setSelectedRecord(null)
+	}
+
 	// 定义操作按钮
 	const actions: TableAction<HitRecord>[] = [
 		{
@@ -244,8 +259,7 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 			label: is_cn ? '查看详情' : 'View Details',
 			icon: <Icon name='material-visibility' size={14} />,
 			onClick: (record) => {
-				console.log('View hit details:', record)
-				// TODO: 打开详情弹窗
+				handleViewDetails(record)
 			}
 		},
 		{
@@ -266,6 +280,75 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 		setHasMore(true) // 重置加载状态
 		loadTableData({ keywords: value })
 	}
+
+	// 配置详情弹窗的字段
+	const detailSections: DetailSection[] = [
+		{
+			title: is_cn ? '基本信息' : 'Basic Information',
+			fields: [
+				{
+					key: 'id',
+					label: 'ID',
+					value: selectedRecord?.id,
+					span: 12,
+					copyable: true
+				},
+				{
+					key: 'scenario',
+					label: is_cn ? '场景' : 'Scenario',
+					value: selectedRecord?.scenario,
+					span: 12,
+					type: 'tag'
+				},
+				{
+					key: 'source',
+					label: is_cn ? '来源' : 'Source',
+					value: selectedRecord?.source,
+					span: 12,
+					type: 'tag'
+				},
+				{
+					key: 'created_at',
+					label: is_cn ? '创建时间' : 'Created At',
+					value: selectedRecord?.created_at,
+					span: 12,
+					type: 'time'
+				}
+			]
+		},
+		{
+			title: is_cn ? '查询信息' : 'Query Information',
+			fields: [
+				{
+					key: 'query',
+					label: is_cn ? '查询内容' : 'Query',
+					value: selectedRecord?.query,
+					span: 24,
+					copyable: true
+				},
+				{
+					key: 'score',
+					label: is_cn ? '匹配得分' : 'Match Score',
+					value: selectedRecord?.score,
+					span: 12,
+					render: (value) => (value ? `${(value * 100).toFixed(2)}%` : '-')
+				}
+			]
+		},
+		{
+			title: 'Context',
+			collapsible: true,
+			fields: [
+				{
+					key: 'context',
+					label: 'Context Data',
+					value: selectedRecord?.context,
+					span: 24,
+					type: 'json'
+				}
+			]
+		}
+	]
 
 	return (
 		<div className={styles.tabContent}>
@@ -322,6 +405,17 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 					loadingMore={loadingMore} // 加载状态
 				/>
 			</div>
+
+			{/* 详情弹窗 */}
+			<DetailModal<HitRecord>
+				visible={detailVisible}
+				onClose={handleCloseDetails}
+				title={is_cn ? '命中记录详情' : 'Hit Record Details'}
+				data={selectedRecord}
+				sections={detailSections}
+				width='60%'
+				size='middle'
+			/>
 		</div>
 	)
 }

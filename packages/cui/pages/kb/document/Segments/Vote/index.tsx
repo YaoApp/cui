@@ -5,8 +5,9 @@ import Icon from '@/widgets/Icon'
 
 import { Segment } from '@/openapi/kb/types'
 import { VoteRecord } from '@/pages/kb/types'
-import { DataTable } from '@/pages/kb/components'
+import { DataTable, DetailModal } from '@/pages/kb/components'
 import { TableColumn, TableFilter, TableAction } from '@/pages/kb/components/DataTable/types'
+import { DetailSection } from '@/pages/kb/components/DetailModal/types'
 import { mockListVotes, ListVotesRequest } from './mockData'
 import styles from '../detail.less'
 import localStyles from './index.less'
@@ -44,6 +45,10 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 		pageSize: 10,
 		total: 0
 	})
+
+	// 详情弹窗状态
+	const [detailVisible, setDetailVisible] = useState(false)
+	const [selectedRecord, setSelectedRecord] = useState<VoteRecord | null>(null)
 
 	// JSON代码高亮组件
 	const JSONCode: React.FC<{ data: any }> = ({ data }) => {
@@ -138,7 +143,10 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 				{ label: is_cn ? '知识推荐' : 'Knowledge Recommendation', value: '知识推荐' },
 				{ label: is_cn ? '内容生成' : 'Content Generation', value: '内容生成' },
 				{ label: is_cn ? '数据分析' : 'Data Analysis', value: '数据分析' }
-			]
+			],
+			onChange: (value) => {
+				handleFilter({ scenario: value })
+			}
 		},
 		{
 			key: 'source',
@@ -150,9 +158,24 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 				{ label: 'Mobile App', value: 'mobile_app' },
 				{ label: 'Slack Bot', value: 'slack_bot' },
 				{ label: 'Email Assistant', value: 'email_assistant' }
-			]
+			],
+			onChange: (value) => {
+				handleFilter({ source: value })
+			}
 		}
 	]
+
+	// 打开详情弹窗
+	const handleViewDetails = (record: VoteRecord) => {
+		setSelectedRecord(record)
+		setDetailVisible(true)
+	}
+
+	// 关闭详情弹窗
+	const handleCloseDetails = () => {
+		setDetailVisible(false)
+		setSelectedRecord(null)
+	}
 
 	// 定义操作按钮
 	const actions: TableAction<VoteRecord>[] = [
@@ -161,8 +184,7 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 			label: is_cn ? '查看详情' : 'View Details',
 			icon: <Icon name='material-visibility' size={14} />,
 			onClick: (record) => {
-				console.log('View vote details:', record)
-				// TODO: 打开详情弹窗
+				handleViewDetails(record)
 			}
 		},
 		{
@@ -321,6 +343,95 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 		}
 	}
 
+	// 配置详情弹窗的字段
+	const detailSections: DetailSection[] = [
+		{
+			title: is_cn ? '基本信息' : 'Basic Information',
+			fields: [
+				{
+					key: 'id',
+					label: 'ID',
+					value: selectedRecord?.id,
+					span: 12,
+					copyable: true
+				},
+				{
+					key: 'scenario',
+					label: is_cn ? '场景' : 'Scenario',
+					value: selectedRecord?.scenario,
+					span: 12,
+					type: 'tag'
+				},
+				{
+					key: 'source',
+					label: is_cn ? '来源' : 'Source',
+					value: selectedRecord?.source,
+					span: 12,
+					type: 'tag'
+				},
+				{
+					key: 'created_at',
+					label: is_cn ? '创建时间' : 'Created At',
+					value: selectedRecord?.created_at,
+					span: 12,
+					type: 'time'
+				}
+			]
+		},
+		{
+			title: is_cn ? '查询信息' : 'Query Information',
+			fields: [
+				{
+					key: 'query',
+					label: is_cn ? '查询内容' : 'Query',
+					value: selectedRecord?.query,
+					span: 24,
+					copyable: true
+				}
+			]
+		},
+		{
+			title: is_cn ? '投票统计' : 'Vote Statistics',
+			fields: [
+				{
+					key: 'positive_votes',
+					label: is_cn ? '好评数' : 'Positive Votes',
+					value: selectedRecord?.positive_votes,
+					span: 12,
+					render: (value) => (
+						<span style={{ color: 'var(--color_success)', fontWeight: 'bold' }}>
+							{value || 0}
+						</span>
+					)
+				},
+				{
+					key: 'negative_votes',
+					label: is_cn ? '差评数' : 'Negative Votes',
+					value: selectedRecord?.negative_votes,
+					span: 12,
+					render: (value) => (
+						<span style={{ color: 'var(--color_error)', fontWeight: 'bold' }}>
+							{value || 0}
+						</span>
+					)
+				}
+			]
+		},
+		{
+			title: 'Context',
+			collapsible: true,
+			fields: [
+				{
+					key: 'context',
+					label: 'Context Data',
+					value: selectedRecord?.context,
+					span: 24,
+					type: 'json'
+				}
+			]
+		}
+	]
+
 	// 初始化数据
 	useEffect(() => {
 		loadVoteData()
@@ -386,7 +497,6 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 					filters={tableFilters}
 					searchPlaceholder={is_cn ? '搜索查询内容...' : 'Search queries...'}
 					onSearch={handleSearch}
-					onFilter={handleFilter}
 					actions={actions}
 					size='small'
 					scroll={{ x: 'max-content' }}
@@ -395,6 +505,17 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 					loadingMore={loadingMore}
 				/>
 			</div>
+
+			{/* 详情弹窗 */}
+			<DetailModal<VoteRecord>
+				visible={detailVisible}
+				onClose={handleCloseDetails}
+				title={is_cn ? '投票记录详情' : 'Vote Record Details'}
+				data={selectedRecord}
+				sections={detailSections}
+				width='60%'
+				size='middle'
+			/>
 		</div>
 	)
 }

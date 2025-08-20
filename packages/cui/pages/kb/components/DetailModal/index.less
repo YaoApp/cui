@@ -1,0 +1,491 @@
+// 详情弹窗组件样式 - 与 DataTable 风格保持一致
+
+.detailModal {
+	// 确保模态窗有足够高的层级
+	z-index: 1000;
+
+	// 模态框样式与 DocumentModal 保持一致
+	:global(.ant-modal-content) {
+		border-radius: 12px;
+		overflow: hidden;
+		background: var(--color_neo_bg_card);
+		border: 1px solid var(--color_neo_border_card);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+	}
+
+	:global(.ant-modal-body) {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+		overflow: hidden;
+		height: 100%;
+		position: relative;
+	}
+}
+
+.modalContent {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+// 头部导航 - 完全参照 DocumentModal 的实现
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 24px;
+	border-bottom: 1px solid var(--color_border_light);
+	background: var(--color_bg_container);
+	position: relative;
+	z-index: 1;
+}
+
+.headerLeft {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--color_text);
+	line-height: 1.4;
+}
+
+.headerRight {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.headerButton,
+.closeButton {
+	padding: 4px;
+	height: 28px;
+	width: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color_text_grey);
+	transition: all 0.2s ease;
+	background: transparent !important;
+
+	&:hover {
+		color: var(--color_main);
+		transform: scale(1.1);
+	}
+}
+
+// 内容区域样式 - 参照 DocumentModal
+.content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	position: relative;
+	z-index: 1;
+}
+
+// 模态框主体
+.modalBody {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px;
+
+	// 使用与 DataTable 一致的滚动条样式
+	&::-webkit-scrollbar {
+		width: 12px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_neo_border_card);
+		border-radius: 4px;
+		border: 2px solid var(--color_neo_bg_card);
+
+		&:hover {
+			background: var(--color_neo_text_secondary);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_neo_bg_card);
+		border-radius: 4px;
+	}
+
+	// Firefox 滚动条
+	scrollbar-width: thin;
+	scrollbar-color: var(--color_neo_border_card) var(--color_neo_bg_card);
+}
+
+// 模态框底部样式已移除，操作按钮现在在头部
+
+// 内容区域
+.sectionsContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.section {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.sectionTitle {
+	padding: 12px 16px;
+	background: var(--color_neo_bg_header);
+	border-bottom: 1px solid var(--color_neo_border_header);
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.sectionContent {
+	padding: 16px;
+}
+
+// 可折叠区域样式
+.sectionCollapse {
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 8px;
+	background: var(--color_neo_bg_card);
+
+	:global(.ant-collapse-item) {
+		border: none;
+
+		&:last-child {
+			border-radius: 0 0 8px 8px;
+		}
+	}
+
+	:global(.ant-collapse-header) {
+		padding: 12px 16px;
+		background: var(--color_neo_bg_header);
+		border-bottom: 1px solid var(--color_neo_border_header);
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+
+		&:hover {
+			background: var(--color_neo_bg_field_hover);
+		}
+	}
+
+	:global(.ant-collapse-content) {
+		border: none;
+		background: var(--color_neo_bg_card);
+	}
+
+	:global(.ant-collapse-content-box) {
+		padding: 16px;
+	}
+}
+
+// 字段样式
+.fieldItem {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.fieldLabel {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_neo_text_secondary);
+	line-height: 1.4;
+}
+
+.fieldValue {
+	font-size: 13px;
+	color: var(--color_neo_text_primary);
+	line-height: 1.5;
+	min-height: 20px;
+	display: flex;
+	align-items: flex-start;
+	word-break: break-all;
+}
+
+// 字段标签样式
+.fieldTag {
+	font-size: 11px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: none;
+	background: var(--color_neo_bg_selected);
+	color: var(--color_main);
+	font-weight: 500;
+}
+
+// 可复制文本样式
+.copyableText {
+	margin: 0 !important;
+
+	:global(.ant-typography-copy) {
+		color: var(--color_neo_text_secondary);
+		margin-left: 8px;
+
+		&:hover {
+			color: var(--color_main);
+		}
+	}
+}
+
+// JSON 代码样式 - 与 Hits 组件保持一致
+.jsonCode {
+	background: var(--color_neo_bg_field);
+	border: 1px solid var(--color_neo_border_field);
+	border-radius: 6px;
+	padding: 12px;
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	font-size: 11px;
+	line-height: 1.4;
+	max-height: 200px;
+	overflow-y: auto;
+
+	pre {
+		margin: 0;
+		color: var(--color_neo_text_primary);
+
+		:global(.json-key) {
+			color: var(--color_main);
+			font-weight: 500;
+		}
+
+		:global(.json-string) {
+			color: #28a745;
+		}
+
+		:global(.json-number) {
+			color: #fd7e14;
+		}
+
+		:global(.json-boolean) {
+			color: #6f42c1;
+		}
+
+		:global(.json-null) {
+			color: #6c757d;
+		}
+	}
+
+	// 滚动条样式
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_neo_border_card);
+		border-radius: 4px;
+
+		&:hover {
+			background: var(--color_neo_text_secondary);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_neo_bg_field);
+		border-radius: 4px;
+	}
+}
+
+// 自定义内容区域
+.customContent {
+	// 继承父容器样式，不添加额外样式
+}
+
+// 加载状态
+.loadingContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 200px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+}
+
+// 空状态
+.emptyContainer {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 200px;
+	color: var(--color_neo_text_secondary);
+}
+
+// 尺寸变体
+.small {
+	:global(.ant-modal-header) {
+		.modalHeader {
+			padding: 12px 16px;
+		}
+
+		.modalTitle {
+			font-size: 14px;
+		}
+	}
+
+	.modalBody {
+		padding: 16px;
+	}
+
+	:global(.ant-modal-footer) {
+		padding: 12px 16px;
+	}
+
+	.fieldLabel {
+		font-size: 11px;
+	}
+
+	.fieldValue {
+		font-size: 12px;
+	}
+}
+
+.large {
+	:global(.ant-modal-header) {
+		.modalHeader {
+			padding: 20px 24px;
+		}
+
+		.modalTitle {
+			font-size: 18px;
+		}
+	}
+
+	.modalBody {
+		padding: 24px;
+	}
+
+	:global(.ant-modal-footer) {
+		padding: 20px 24px;
+	}
+
+	.fieldLabel {
+		font-size: 13px;
+	}
+
+	.fieldValue {
+		font-size: 14px;
+	}
+}
+
+// 深色模式适配
+[data-theme='dark'] {
+	.detailModal {
+		:global(.ant-modal-content) {
+			background: var(--color_neo_bg_card);
+			border-color: var(--color_neo_border_card);
+		}
+
+		:global(.ant-modal-body) {
+			background: var(--color_neo_bg_card);
+		}
+	}
+
+	.header {
+		background: var(--color_bg_container);
+		border-color: var(--color_border_light);
+	}
+
+	.title {
+		color: var(--color_text);
+	}
+
+	.section {
+		background: var(--color_neo_bg_card);
+		border-color: var(--color_neo_border_card);
+	}
+
+	.sectionTitle {
+		background: var(--color_neo_bg_header);
+		border-color: var(--color_neo_border_header);
+		color: var(--color_neo_text_primary);
+	}
+
+	.sectionCollapse {
+		background: var(--color_neo_bg_card);
+		border-color: var(--color_neo_border_card);
+
+		:global(.ant-collapse-header) {
+			background: var(--color_neo_bg_header);
+			border-color: var(--color_neo_border_header);
+			color: var(--color_neo_text_primary);
+
+			&:hover {
+				background: var(--color_neo_bg_field_hover);
+			}
+		}
+
+		:global(.ant-collapse-content) {
+			background: var(--color_neo_bg_card);
+		}
+	}
+
+	.fieldLabel {
+		color: var(--color_neo_text_secondary);
+	}
+
+	.fieldValue {
+		color: var(--color_neo_text_primary);
+	}
+
+	.jsonCode {
+		background: var(--color_neo_bg_field);
+		border-color: var(--color_neo_border_field);
+
+		pre {
+			color: var(--color_neo_text_primary);
+
+			:global(.json-string) {
+				color: #20c997;
+			}
+
+			:global(.json-number) {
+				color: #fd7e14;
+			}
+
+			:global(.json-boolean) {
+				color: #6f42c1;
+			}
+
+			:global(.json-null) {
+				color: var(--color_neo_text_secondary);
+			}
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_neo_border_card);
+
+			&:hover {
+				background: var(--color_neo_text_secondary);
+			}
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--color_neo_bg_field);
+		}
+	}
+
+	.modalBody {
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_neo_border_card);
+			border: 2px solid var(--color_neo_bg_card);
+
+			&:hover {
+				background: var(--color_neo_text_secondary);
+			}
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--color_neo_bg_card);
+		}
+	}
+}
