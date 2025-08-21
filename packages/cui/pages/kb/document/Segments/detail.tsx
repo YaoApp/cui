@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Modal, Button } from 'antd'
+import { Modal, Button, Spin, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import { useGlobal } from '@/context/app'
 import Icon from '@/widgets/Icon'
 import { Segment, CollectionInfo } from '@/openapi/kb/types'
+import { KB } from '@/openapi'
 import Editor from './Editor'
 import GraphView from './Graph'
 import ParentsView from './Parents'
@@ -15,33 +16,68 @@ import styles from './detail.less'
 interface SegmentDetailProps {
 	visible: boolean
 	onClose: () => void
-	segmentData: Segment | null
+	segmentId: string | null
 	collectionInfo: CollectionInfo
 	docID: string
 }
 
 type TabType = 'editor' | 'graph' | 'parents' | 'hits' | 'vote' | 'score'
 
-const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segmentData, collectionInfo, docID }) => {
+const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segmentId, collectionInfo, docID }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
 	const { kb: kbConfig } = global.app_info || {}
 
-	// 记住用户上次选择的tab，但每次弹窗打开时重置为内容tab
+	// 状态管理
+	const [loading, setLoading] = useState(false)
+	const [segmentData, setSegmentData] = useState<Segment | null>(null)
 	const [activeTab, setActiveTab] = useState<TabType>('editor')
 
-	// 每次弹窗打开时重置为内容tab
+	// 加载segment数据
+	const loadSegmentData = async () => {
+		if (!segmentId || !docID) return
+
+		setLoading(true)
+		try {
+			if (window.$app?.openapi) {
+				const kb = new KB(window.$app.openapi)
+				const response = await kb.GetSegment(docID, segmentId)
+
+				if (!window.$app.openapi.IsError(response) && response.data) {
+					setSegmentData(response.data.segment)
+				} else {
+					message.error(is_cn ? '获取分段详情失败' : 'Failed to load segment details')
+				}
+			}
+		} catch (error) {
+			console.error('Error loading segment data:', error)
+			message.error(is_cn ? '获取分段详情失败' : 'Failed to load segment details')
+		} finally {
+			setLoading(false)
+		}
+	}
+
+	// 弹窗打开时加载数据并重置tab
 	useEffect(() => {
-		if (visible) {
+		if (visible && segmentId) {
 			setActiveTab('editor')
+			loadSegmentData()
+		}
+	}, [visible, segmentId, docID])
+
+	// 弹窗关闭时清理数据
+	useEffect(() => {
+		if (!visible) {
+			setSegmentData(null)
 		}
 	}, [visible])
 
-	if (!segmentData) return null
+	if (!segmentId) return null
 
 	// 判断是否显示图谱卡片：L1级别的切片 且 知识库配置支持图谱
 	const shouldShowGraph = () => {
+		if (!segmentData) return false
 		const isL1Segment = segmentData.metadata?.chunk_details?.depth === 1
 		const hasGraphFeature = kbConfig?.features?.GraphDatabase === true
 		return isL1Segment && hasGraphFeature
@@ -49,6 +85,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 
 	// 判断是否显示层级卡片：Level > 1 的分段
 	const shouldShowParents = () => {
+		if (!segmentData) return false
 		const depth = segmentData.metadata?.chunk_details?.depth
 		return depth !== undefined && depth > 1
 	}
@@ -106,6 +143,47 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 	}
 
 	const renderContent = () => {
+		// 加载状态
+		if (loading) {
+			return (
+				<div
+					style={{
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+						height: '400px'
+					}}
+				>
+					<Spin size='large' tip={is_cn ? '加载中...' : 'Loading...'} />
+				</div>
+			)
+		}
+
+		// 数据未加载或加载失败
+		if (!segmentData) {
+			return (
+				<div
+					style={{
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+						height: '400px'
+					}}
+				>
+					<div style={{ textAlign: 'center' }}>
+						<Icon
+							name='material-error_outline'
+							size={48}
+							style={{ color: '#ccc', marginBottom: '16px' }}
+						/>
+						<div style={{ color: '#999' }}>
+							{is_cn ? '分段数据加载失败' : 'Failed to load segment data'}
+						</div>
+					</div>
+				</div>
+			)
+		}
+
 		switch (activeTab) {
 			case 'editor':
 				// 适配 Segment 数据到 Editor 组件需要的 ChunkData 格式
@@ -156,7 +234,14 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 				<div className={styles.modalHeader}>
 					<div className={styles.titleSection}>
 						<Icon name='material-description' size={16} />
-						<span className={styles.modalTitle}>{is_cn ? '分段详情' : 'Segment Details'}</span>
+						<span className={styles.modalTitle}>
+							{is_cn ? '分段详情' : 'Segment Details'}
+							{segmentId && (
+								<span style={{ marginLeft: '8px', fontSize: '12px', opacity: 0.7 }}>
+									({segmentId})
+								</span>
+							)}
+						</span>
 					</div>
 					<div className={styles.tabs}>
 						{tabs.map((tab) => (

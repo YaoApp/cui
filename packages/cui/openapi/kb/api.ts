@@ -22,6 +22,7 @@ import {
 	GetDocumentRequest,
 	GetDocumentResponse,
 	Segment,
+	GetSegmentResponse,
 	ListSegmentsRequest,
 	ListSegmentsResponse,
 	ScrollSegmentsRequest,
@@ -174,6 +175,13 @@ export class KB {
 	}
 
 	// ===== Segment Management =====
+
+	/**
+	 * Get a single segment by ID
+	 */
+	async GetSegment(docID: string, segmentID: string): Promise<ApiResponse<GetSegmentResponse>> {
+		return this.api.Get<GetSegmentResponse>(`/kb/documents/${docID}/segments/${segmentID}`)
+	}
 
 	/**
 	 * Scroll segments with iterator-style pagination (recommended for large datasets)

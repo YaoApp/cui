@@ -331,6 +331,13 @@ export interface ScrollSegmentsResponse {
 
 // ===== Segment Operations Types =====
 
+// Get segment response
+export interface GetSegmentResponse {
+	segment: Segment
+	doc_id: string
+	segment_id: string
+}
+
 // Segment text structure for adding/updating segments
 export interface SegmentText {
 	id?: string

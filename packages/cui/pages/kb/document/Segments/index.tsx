@@ -39,7 +39,7 @@ const Segments: React.FC<SegmentsProps> = ({
 	const [limit] = useState(500) // 每次加载的数量
 	const [scrollId, setScrollId] = useState<string>('')
 	const [detailVisible, setDetailVisible] = useState(false)
-	const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
+	const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null)
 
 	const [hasMore, setHasMore] = useState(false)
 
@@ -324,14 +324,14 @@ const Segments: React.FC<SegmentsProps> = ({
 
 	// 打开详情模态窗口
 	const handleOpenDetail = (segment: Segment) => {
-		setSelectedSegment(segment)
+		setSelectedSegmentId(segment.id)
 		setDetailVisible(true)
 	}
 
 	// 关闭详情模态窗口
 	const handleCloseDetail = () => {
 		setDetailVisible(false)
-		setSelectedSegment(null)
+		setSelectedSegmentId(null)
 	}
 
 	// 过滤和排序segments (搜索、层级过滤和排序都在前端进行)
@@ -769,7 +769,7 @@ const Segments: React.FC<SegmentsProps> = ({
 			<SegmentDetail
 				visible={detailVisible}
 				onClose={handleCloseDetail}
-				segmentData={selectedSegment}
+				segmentId={selectedSegmentId}
 				collectionInfo={collectionInfo}
 				docID={docid}
 			/>
