@@ -44,6 +44,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 	const [isEditing, setIsEditing] = useState(false)
 	const [editedText, setEditedText] = useState(chunkData.text?.trim() || '')
 	const [editedWeight, setEditedWeight] = useState(chunkData.weight)
+	const [isSaving, setIsSaving] = useState(false)
 
 	const netVotes = chunkData.upvotes - chunkData.downvotes
 
@@ -109,6 +110,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 			return
 		}
 
+		setIsSaving(true)
 		try {
 			const kb = new KB(window.$app.openapi)
 
@@ -145,6 +147,8 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 			console.error('Save failed:', error)
 			const errorMsg = error instanceof Error ? error.message : is_cn ? '保存失败' : 'Save failed'
 			message.error(errorMsg)
+		} finally {
+			setIsSaving(false)
 		}
 	}
 
@@ -310,9 +314,19 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 							size='small'
 							className={localStyles.saveButton}
 							onClick={handleSave}
+							loading={isSaving}
+							disabled={isSaving}
 						>
-							<Icon name='material-check' size={14} />
-							<span>{is_cn ? '保存' : 'Save'}</span>
+							{!isSaving && <Icon name='material-check' size={14} />}
+							<span>
+								{isSaving
+									? is_cn
+										? '保存中...'
+										: 'Saving...'
+									: is_cn
+									? '保存'
+									: 'Save'}
+							</span>
 						</Button>
 					)}
 				</div>

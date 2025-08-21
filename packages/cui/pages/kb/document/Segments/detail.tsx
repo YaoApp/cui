@@ -138,8 +138,14 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 	}
 
 	const handleSave = (updatedData: Partial<Segment>) => {
-		// TODO: 实现保存功能
-		console.log('Save segment data:', updatedData)
+		// 更新本地 segment 数据
+		if (segmentData) {
+			setSegmentData({
+				...segmentData,
+				...updatedData
+			})
+		}
+		console.log('Segment data updated:', updatedData)
 	}
 
 	const renderContent = () => {
