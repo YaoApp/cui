@@ -12,155 +12,41 @@
 	align-items: center;
 	flex-shrink: 0;
 	justify-content: flex-end; // 按钮右对齐
+	width: 120px; // 给按钮区域固定宽度，确保不影响中间布局
 }
 
 .floatingLeftButtons {
 	position: absolute;
-	right: 100%; // 定位到主按钮左侧
-	top: 0;
+	right: 0; // 右对齐
+	top: 50%; // 垂直居中
+	transform: translateY(-50%); // 精确居中对齐
 	display: flex;
 	gap: 8px;
 	align-items: center;
-	margin-right: 8px; // 与主按钮保持间距
-	animation: slideInFromLeft 0.2s ease-out;
+	animation: slideInFromRight 0.2s ease-out;
+	z-index: 10; // 确保浮动按钮在主按钮之上
+	width: 100%; // 占满按钮区域
+	justify-content: flex-end; // 内部按钮右对齐
+	height: 28px; // 与按钮高度一致，确保垂直对齐
 }
 
-@keyframes slideInFromLeft {
+@keyframes slideInFromRight {
 	from {
 		opacity: 0;
-		transform: translateX(-10px);
+		transform: translateY(-50%) translateX(10px);
 	}
 	to {
 		opacity: 1;
-		transform: translateX(0);
+		transform: translateY(-50%) translateX(0);
 	}
 }
 
-// 按钮样式统一
+// 所有按钮自适应宽度
 .editButton,
 .saveButton,
 .cancelActionButton,
 .deleteButton {
-	display: flex !important;
-	align-items: center !important;
-	gap: 4px !important;
-	font-size: 12px !important;
-	height: 28px !important;
-	padding: 0 12px !important;
-	border-radius: 4px !important;
-	transition: all 0.2s ease !important;
-
-	:global(.anticon),
-	:global(.Icon) {
-		display: flex;
-		align-items: center;
-		color: inherit !important;
-	}
-
-	span {
-		display: flex;
-		align-items: center;
-	}
-}
-
-// 确保 Edit 和 Save 按钮有完全相同的宽度
-.editButton,
-.saveButton {
-	width: 76px !important; // 固定宽度，确保Edit和Save完全一致
-	min-width: 76px !important;
-	max-width: 76px !important;
-	justify-content: center !important; // 内容居中对齐
-
-	// 重置焦点状态，防止点击后卡在hover状态
-	&:focus,
-	&:focus-visible {
-		outline: none !important;
-		box-shadow: none !important;
-		background: var(--color_primary) !important;
-		border-color: var(--color_primary) !important;
-	}
-}
-
-// 删除按钮样式 - 使用危险色，提高优先级
-.floatingLeftButtons .deleteButton,
-.deleteButton.ant-btn {
-	background: var(--color_danger) !important;
-	border-color: var(--color_danger) !important;
-	color: white !important;
-	box-shadow: none !important;
-
-	&:hover {
-		background: var(--color_danger) !important;
-		border-color: var(--color_danger) !important;
-		color: white !important;
-		opacity: 0.9 !important;
-		transform: scale(1.02) !important;
-		box-shadow: none !important;
-	}
-
-	&:focus,
-	&:focus-visible,
-	&:active {
-		outline: none !important;
-		box-shadow: none !important;
-		background: var(--color_danger) !important;
-		border-color: var(--color_danger) !important;
-		color: white !important;
-	}
-}
-
-// 取消按钮样式 - 使用新的样式名避免冲突，完全复制删除按钮的模式
-.floatingLeftButtons .cancelActionButton,
-.cancelActionButton.ant-btn {
-	background: var(--color_bg_hover) !important;
-	border-color: var(--color_border) !important;
-	color: var(--color_text) !important;
-	box-shadow: none !important;
-
-	&:hover {
-		background: var(--color_bg_active) !important;
-		border-color: var(--color_border) !important;
-		color: var(--color_text) !important;
-		opacity: 0.9 !important;
-		transform: scale(1.02) !important;
-		box-shadow: none !important;
-	}
-
-	&:focus,
-	&:focus-visible,
-	&:active {
-		outline: none !important;
-		box-shadow: none !important;
-		background: var(--color_bg_hover) !important;
-		border-color: var(--color_border) !important;
-		color: var(--color_text) !important;
-	}
-}
-
-// 统一的 hover 动画效果 - 最高优先级
-.floatingLeftButtons .cancelActionButton:hover,
-.cancelActionButton.ant-btn:hover,
-.floatingLeftButtons .deleteButton:hover,
-.deleteButton.ant-btn:hover,
-.actionSection .editButton:hover,
-.actionSection .saveButton:hover {
-	transform: scale(1.02) !important;
-	transition: all 0.2s ease !important;
-}
-
-// 备用选择器，确保所有按钮都有动画
-.editButton:hover,
-.saveButton:hover,
-.deleteButton:hover,
-.cancelActionButton:hover {
-	transform: scale(1.02) !important;
-}
-
-// 强制覆盖 Ant Design 的 hover 效果
-.ant-btn.cancelActionButton:hover,
-.ant-btn.deleteButton:hover {
-	transform: scale(1.02) !important;
-	transition: all 0.2s ease !important;
+	min-width: fit-content;
 }
 
 // WeightEditor 组件样式在独立的 WeightEditor.less 文件中

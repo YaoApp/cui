@@ -1,0 +1,231 @@
+@import '../../../../styles/preset/vars.less';
+
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	border: 1px solid;
+	border-radius: 4px; // 减小圆角，使用固定4px而不是 var(--radius) 6px
+	cursor: pointer;
+	font-size: var(--fontsize);
+	font-weight: 400;
+	line-height: 1;
+	outline: none;
+	transition: all 0.2s ease;
+	white-space: nowrap;
+	user-select: none;
+	position: relative;
+
+	&:focus {
+		outline: none;
+	}
+
+	// Sizes
+	&.small {
+		height: 28px;
+		padding: 0 12px; // 增加 padding 让按钮看起来更舒适
+		font-size: 12px;
+	}
+
+	&.medium {
+		height: 32px;
+		padding: 0 16px; // 增加 padding
+		font-size: var(--fontsize);
+	}
+
+	&.large {
+		height: var(--base_height);
+		padding: 0 20px; // 增加 padding
+		font-size: 16px;
+	}
+
+	// Default type
+	&.default {
+		background: var(--color_bg_hover);
+		border-color: var(--color_border_soft);
+		color: var(--color_text);
+
+		// 确保图标颜色跟随文字颜色
+		:global(.Icon) {
+			color: inherit;
+		}
+
+		&:hover:not(.disabled):not(.loading) {
+			background: var(--color_bg_active);
+			border-color: var(--color_bg_active);
+			color: var(--color_text);
+			transform: scale(1.02);
+
+			:global(.Icon) {
+				color: inherit;
+			}
+		}
+
+		&:active:not(.disabled):not(.loading) {
+			background: var(--color_bg_active);
+			border-color: var(--color_bg_active);
+			color: var(--color_text);
+			transform: scale(0.98);
+
+			:global(.Icon) {
+				color: inherit;
+			}
+		}
+	}
+
+	// Primary type
+	&.primary {
+		background: var(--color_primary);
+		border-color: var(--color_primary);
+		color: #ffffff;
+
+		// 确保图标颜色跟随文字颜色
+		:global(.Icon) {
+			color: inherit;
+		}
+
+		&:hover:not(.disabled):not(.loading) {
+			background: var(--color_main_hover);
+			border-color: var(--color_main_hover);
+			transform: scale(1.02);
+
+			:global(.Icon) {
+				color: inherit;
+			}
+		}
+
+		&:active:not(.disabled):not(.loading) {
+			background: var(--color_main_active);
+			border-color: var(--color_main_active);
+			transform: scale(0.98);
+
+			:global(.Icon) {
+				color: inherit;
+			}
+		}
+	}
+
+	// Danger type
+	&.danger {
+		background: var(--color_danger);
+		border-color: var(--color_danger);
+		color: #ffffff;
+
+		// 确保图标颜色跟随文字颜色
+		:global(.Icon) {
+			color: inherit;
+		}
+
+		&:hover:not(.disabled):not(.loading) {
+			background: color-mix(in srgb, var(--color_danger) 85%, white 15%); // 危险色混合白色变亮
+			border-color: color-mix(in srgb, var(--color_danger) 85%, white 15%);
+			transform: scale(1.02);
+
+			:global(.Icon) {
+				color: inherit;
+			}
+		}
+
+		&:active:not(.disabled):not(.loading) {
+			background: color-mix(in srgb, var(--color_danger) 85%, black 15%); // 危险色混合黑色变暗
+			border-color: color-mix(in srgb, var(--color_danger) 85%, black 15%);
+			transform: scale(0.98);
+
+			:global(.Icon) {
+				color: inherit;
+			}
+		}
+	}
+
+	// Disabled state
+	&.disabled {
+		background: var(--color_bg_hover) !important;
+		border-color: var(--color_border_soft) !important;
+		color: rgba(0, 0, 0, 0.25) !important;
+		cursor: not-allowed !important;
+		transform: none !important;
+		box-shadow: none !important;
+
+		.text {
+			color: rgba(0, 0, 0, 0.25) !important;
+		}
+
+		:global(.Icon) {
+			color: rgba(0, 0, 0, 0.25) !important;
+		}
+	}
+
+	// Loading state
+	&.loading {
+		cursor: not-allowed;
+	}
+
+	.text {
+		display: inline-block;
+	}
+
+	.loadingIcon {
+		animation: spin 1s linear infinite;
+	}
+}
+
+// Loading animation
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+// Dark theme support
+[data-theme='dark'] {
+	.button {
+		&.default {
+			background: var(--color_bg_hover);
+			border-color: var(--color_border_soft);
+			color: var(--color_text);
+
+			// 确保图标颜色跟随文字颜色
+			:global(.Icon) {
+				color: inherit;
+			}
+
+			&:hover:not(.disabled):not(.loading) {
+				background: var(--color_bg_active);
+				border-color: var(--color_bg_active);
+				color: var(--color_text);
+
+				:global(.Icon) {
+					color: inherit;
+				}
+			}
+
+			&:active:not(.disabled):not(.loading) {
+				background: var(--color_bg_active);
+				border-color: var(--color_bg_active);
+				color: var(--color_text);
+
+				:global(.Icon) {
+					color: inherit;
+				}
+			}
+		}
+
+		&.disabled {
+			background: var(--color_bg_hover) !important;
+			border-color: var(--color_border_soft) !important;
+			color: rgba(255, 255, 255, 0.25) !important;
+
+			.text {
+				color: rgba(255, 255, 255, 0.25) !important;
+			}
+
+			:global(.Icon) {
+				color: rgba(255, 255, 255, 0.25) !important;
+			}
+		}
+	}
+}

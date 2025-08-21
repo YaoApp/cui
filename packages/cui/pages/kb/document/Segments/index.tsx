@@ -772,6 +772,7 @@ const Segments: React.FC<SegmentsProps> = ({
 				segmentId={selectedSegmentId}
 				collectionInfo={collectionInfo}
 				docID={docid}
+				onDataUpdated={() => loadSegments(true)} // 数据更新后刷新列表
 			/>
 		</div>
 	)

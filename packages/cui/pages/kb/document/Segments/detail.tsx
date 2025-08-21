@@ -19,11 +19,19 @@ interface SegmentDetailProps {
 	segmentId: string | null
 	collectionInfo: CollectionInfo
 	docID: string
+	onDataUpdated?: () => void // 数据更新回调，用于刷新列表
 }
 
 type TabType = 'editor' | 'graph' | 'parents' | 'hits' | 'vote' | 'score'
 
-const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segmentId, collectionInfo, docID }) => {
+const SegmentDetail: React.FC<SegmentDetailProps> = ({
+	visible,
+	onClose,
+	segmentId,
+	collectionInfo,
+	docID,
+	onDataUpdated
+}) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
@@ -33,6 +41,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 	const [loading, setLoading] = useState(false)
 	const [segmentData, setSegmentData] = useState<Segment | null>(null)
 	const [activeTab, setActiveTab] = useState<TabType>('editor')
+	const [isSaving, setIsSaving] = useState(false)
 
 	// 加载segment数据
 	const loadSegmentData = async () => {
@@ -145,6 +154,10 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 				...updatedData
 			})
 		}
+		// 触发列表数据刷新
+		if (onDataUpdated) {
+			onDataUpdated()
+		}
 		console.log('Segment data updated:', updatedData)
 	}
 
@@ -212,6 +225,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 						collectionInfo={collectionInfo}
 						docID={docID}
 						onSave={handleSave}
+						onSavingStateChange={setIsSaving}
 					/>
 				)
 			case 'graph':
@@ -263,18 +277,25 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ visible, onClose, segment
 							</div>
 						))}
 					</div>
-					<div className={styles.closeButton} onClick={onClose}>
+					<div
+						className={styles.closeButton}
+						onClick={isSaving ? undefined : onClose}
+						style={{
+							cursor: isSaving ? 'not-allowed' : 'pointer',
+							opacity: isSaving ? 0.5 : 1
+						}}
+					>
 						<Icon name='material-close' size={16} />
 					</div>
 				</div>
 			}
 			open={visible}
-			onCancel={onClose}
+			onCancel={isSaving ? undefined : onClose}
 			footer={null}
 			width={1200}
 			destroyOnClose
 			closable={false}
-			maskClosable={true}
+			maskClosable={!isSaving}
 			className={styles.chunkDetailModal}
 		>
 			<div className={styles.modalContent}>{renderContent()}</div>

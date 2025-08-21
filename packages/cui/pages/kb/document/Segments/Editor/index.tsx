@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { Button, Tag, Typography, message, Popconfirm } from 'antd'
+import { Tag, Typography, message, Popconfirm } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import CustomTextArea from './CustomTextArea'
 import WeightEditor from './WeightEditor'
+import { Button } from '../../../components'
 import { KB, UpdateSegmentsRequest, UpdateWeightRequest, CollectionInfo } from '@/openapi'
 import styles from '../detail.less'
 import localStyles from './index.less'
@@ -35,9 +36,17 @@ interface ChunkEditorProps {
 	docID: string // 文档ID，用于API调用
 	onSave: (updatedData: Partial<ChunkData>) => void
 	onDelete?: () => void // 删除回调
+	onSavingStateChange?: (isSaving: boolean) => void // 保存状态变化回调
 }
 
-const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, docID, onSave, onDelete }) => {
+const ChunkEditor: React.FC<ChunkEditorProps> = ({
+	chunkData,
+	collectionInfo,
+	docID,
+	onSave,
+	onDelete,
+	onSavingStateChange
+}) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -47,20 +56,6 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 	const [isSaving, setIsSaving] = useState(false)
 
 	const netVotes = chunkData.upvotes - chunkData.downvotes
-
-	// Embedding配置处理函数（使用简化的集合信息）
-	const buildEmbeddingConfig = (collectionInfo: CollectionInfo) => {
-		const config: any = {
-			provider_id: collectionInfo.embedding_provider
-		}
-
-		// 如果有embedding_option，添加option_id
-		if (collectionInfo.embedding_option) {
-			config.option_id = collectionInfo.embedding_option
-		}
-
-		return config
-	}
 
 	// 投票处理
 	const handleVote = (type: 'good' | 'bad') => {
@@ -111,6 +106,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 		}
 
 		setIsSaving(true)
+		onSavingStateChange?.(true) // 通知父组件保存开始
 		try {
 			const kb = new KB(window.$app.openapi)
 
@@ -149,6 +145,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 			message.error(errorMsg)
 		} finally {
 			setIsSaving(false)
+			onSavingStateChange?.(false) // 通知父组件保存结束
 		}
 	}
 
@@ -238,9 +235,10 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 								size='small'
 								className={localStyles.cancelActionButton}
 								onClick={handleCancel}
+								disabled={isSaving}
+								icon={<Icon name='material-close' size={12} />}
 							>
-								<Icon name='material-close' size={14} />
-								<span>{is_cn ? '取消' : 'Cancel'}</span>
+								{is_cn ? '取消' : 'Cancel'}
 							</Button>
 							<Popconfirm
 								title={
@@ -248,6 +246,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 										? '确定要删除这个片段吗？删除后将无法恢复！'
 										: 'Are you sure to delete this segment? This action cannot be undone!'
 								}
+								open={isSaving ? false : undefined}
 								onConfirm={async () => {
 									if (!window.$app?.openapi) {
 										message.error(is_cn ? '系统未就绪' : 'System not ready')
@@ -285,48 +284,45 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunkData, collectionInfo, do
 								okText={is_cn ? '确认' : 'Confirm'}
 								cancelText={is_cn ? '取消' : 'Cancel'}
 							>
-								<Button size='small' className={localStyles.deleteButton}>
-									<Icon name='material-delete' size={14} />
-									<span>{is_cn ? '删除' : 'Delete'}</span>
+								<Button
+									type='danger'
+									size='small'
+									className={localStyles.deleteButton}
+									disabled={isSaving}
+									icon={<Icon name='material-delete' size={12} />}
+								>
+									{is_cn ? '删除' : 'Delete'}
 								</Button>
 							</Popconfirm>
+							<Button
+								type='primary'
+								size='small'
+								className={localStyles.saveButton}
+								onClick={handleSave}
+								disabled={isSaving}
+								loading={isSaving}
+								loadingIcon='material-refresh'
+								icon={!isSaving ? <Icon name='material-save' size={12} /> : undefined}
+							>
+								{is_cn ? '保存' : 'Save'}
+							</Button>
 						</div>
 					)}
 
-					{/* 主按钮 - Edit/Save */}
-					{!isEditing ? (
+					{/* 主按钮 - 只在非编辑状态显示 Edit 按钮 */}
+					{!isEditing && (
 						<Button
 							type='primary'
 							size='small'
 							className={localStyles.editButton}
-							onClick={(e) => {
+							onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
 								setIsEditing(true)
 								// 移除按钮焦点，防止卡在hover状态
 								e.currentTarget.blur()
 							}}
+							icon={<Icon name='material-edit' size={12} />}
 						>
-							<Icon name='material-edit' size={14} />
-							<span>{is_cn ? '编辑' : 'Edit'}</span>
-						</Button>
-					) : (
-						<Button
-							type='primary'
-							size='small'
-							className={localStyles.saveButton}
-							onClick={handleSave}
-							loading={isSaving}
-							disabled={isSaving}
-						>
-							{!isSaving && <Icon name='material-check' size={14} />}
-							<span>
-								{isSaving
-									? is_cn
-										? '保存中...'
-										: 'Saving...'
-									: is_cn
-									? '保存'
-									: 'Save'}
-							</span>
+							{is_cn ? '编辑' : 'Edit'}
 						</Button>
 					)}
 				</div>
