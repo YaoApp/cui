@@ -242,11 +242,11 @@ export class KB {
 	/**
 	 * Remove segments by IDs
 	 */
-	async RemoveSegments(segmentIDs: string[]): Promise<ApiResponse<RemoveSegmentsResponse>> {
+	async RemoveSegments(docID: string, segmentIDs: string[]): Promise<ApiResponse<RemoveSegmentsResponse>> {
 		const queryParams = new URLSearchParams({
 			segment_ids: segmentIDs.join(',')
 		})
-		return this.api.Delete<RemoveSegmentsResponse>(`/kb/segments?${queryParams.toString()}`)
+		return this.api.Delete<RemoveSegmentsResponse>(`/kb/documents/${docID}/segments?${queryParams.toString()}`)
 	}
 
 	/**

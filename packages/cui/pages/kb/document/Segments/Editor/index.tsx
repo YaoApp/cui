@@ -255,7 +255,9 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 
 									try {
 										const kb = new KB(window.$app.openapi)
-										const response = await kb.RemoveSegments([chunkData.id])
+										const response = await kb.RemoveSegments(docID, [
+											chunkData.id
+										])
 
 										if (window.$app.openapi.IsError(response)) {
 											throw new Error(

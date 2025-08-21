@@ -214,7 +214,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 					upvotes: segmentData.vote && segmentData.vote > 0 ? segmentData.vote : 0,
 					downvotes: segmentData.vote && segmentData.vote < 0 ? Math.abs(segmentData.vote) : 0,
 					text_length: segmentData.text?.length || 0,
-					max_length: 8000, // 默认最大长度
+					max_length: 2000, // 默认最大长度
 					score: segmentData.score || 0, // 添加评分
 					metadata: segmentData.metadata // 传递完整的 metadata
 				}
@@ -226,6 +226,13 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 						docID={docID}
 						onSave={handleSave}
 						onSavingStateChange={setIsSaving}
+						onDelete={() => {
+							// 删除成功后关闭弹窗并刷新列表
+							onClose()
+							if (onDataUpdated) {
+								onDataUpdated()
+							}
+						}}
 					/>
 				)
 			case 'graph':
@@ -254,14 +261,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 				<div className={styles.modalHeader}>
 					<div className={styles.titleSection}>
 						<Icon name='material-description' size={16} />
-						<span className={styles.modalTitle}>
-							{is_cn ? '分段详情' : 'Segment Details'}
-							{segmentId && (
-								<span style={{ marginLeft: '8px', fontSize: '12px', opacity: 0.7 }}>
-									({segmentId})
-								</span>
-							)}
-						</span>
+						<span className={styles.modalTitle}>{is_cn ? '分段详情' : 'Segment Details'}</span>
 					</div>
 					<div className={styles.tabs}>
 						{tabs.map((tab) => (
