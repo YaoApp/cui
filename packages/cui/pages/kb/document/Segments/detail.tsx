@@ -209,7 +209,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 				const chunkData = {
 					id: segmentData.id,
 					text: segmentData.text || '',
-					weight: segmentData.weight || 1.0,
+					weight: segmentData.weight || 0,
 					hit_count: segmentData.metadata?.hit_count || 0,
 					upvotes: segmentData.vote && segmentData.vote > 0 ? segmentData.vote : 0,
 					downvotes: segmentData.vote && segmentData.vote < 0 ? Math.abs(segmentData.vote) : 0,

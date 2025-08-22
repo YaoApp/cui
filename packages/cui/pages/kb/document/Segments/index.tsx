@@ -506,9 +506,7 @@ const Segments: React.FC<SegmentsProps> = ({
 					<div className={styles.metaInfo}>
 						<span className={styles.metaItem}>
 							{is_cn ? '权重' : 'Weight'}{' '}
-							<span className={styles.metaNumber}>
-								{segment.weight?.toFixed(1) || '0.0'}
-							</span>
+							<span className={styles.metaNumber}>{(segment.weight || 0).toFixed(2)}</span>
 						</span>
 						<span className={styles.metaItem}>
 							{is_cn ? '评分' : 'Score'}{' '}

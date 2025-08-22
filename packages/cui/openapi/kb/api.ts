@@ -32,7 +32,23 @@ import {
 	RemoveSegmentsResponse,
 	RemoveSegmentsByDocIDResponse,
 	UpdateWeightRequest,
-	UpdateWeightResponse
+	UpdateWeightResponse,
+	UpdateWeightsRequest,
+	UpdateWeightsResponse,
+	UpdateScoresRequest,
+	UpdateScoresResponse,
+	ScrollVotesRequest,
+	VoteScrollResult,
+	GetVoteResponse,
+	AddVotesRequest,
+	AddVotesResponse,
+	RemoveVotesResponse,
+	ScrollHitsRequest,
+	HitScrollResult,
+	GetHitResponse,
+	AddHitsRequest,
+	AddHitsResponse,
+	RemoveHitsResponse
 } from './types'
 
 /**
@@ -257,10 +273,148 @@ export class KB {
 	}
 
 	/**
-	 * Update weights for segments
+	 * Update weights for segments (single segment weight update)
+	 * @deprecated Use UpdateWeights for batch updates
 	 */
 	async UpdateWeight(request: UpdateWeightRequest): Promise<ApiResponse<UpdateWeightResponse>> {
 		return this.api.Put<UpdateWeightResponse>('/kb/segments/weight', request)
+	}
+
+	/**
+	 * Update weights for multiple segments in batch
+	 */
+	async UpdateWeights(docID: string, request: UpdateWeightsRequest): Promise<ApiResponse<UpdateWeightsResponse>> {
+		return this.api.Put<UpdateWeightsResponse>(`/kb/documents/${docID}/segments/weights`, request)
+	}
+
+	/**
+	 * Update scores for multiple segments in batch
+	 */
+	async UpdateScores(docID: string, request: UpdateScoresRequest): Promise<ApiResponse<UpdateScoresResponse>> {
+		return this.api.Put<UpdateScoresResponse>(`/kb/documents/${docID}/segments/scores`, request)
+	}
+
+	// ===== Vote Management =====
+
+	/**
+	 * Scroll votes for a specific segment with pagination
+	 */
+	async ScrollVotes(
+		docID: string,
+		segmentID: string,
+		request?: ScrollVotesRequest
+	): Promise<ApiResponse<VoteScrollResult>> {
+		const params: Record<string, string> = {}
+
+		if (request) {
+			if (request.limit !== undefined) {
+				params.limit = request.limit.toString()
+			}
+			if (request.scroll_id) {
+				params.scroll_id = request.scroll_id
+			}
+			if (request.vote_type) {
+				params.vote_type = request.vote_type
+			}
+			if (request.source) {
+				params.source = request.source
+			}
+			if (request.scenario) {
+				params.scenario = request.scenario
+			}
+		}
+
+		return this.api.Get<VoteScrollResult>(`/kb/documents/${docID}/segments/${segmentID}/votes`, params)
+	}
+
+	/**
+	 * Get a specific vote by ID
+	 */
+	async GetVote(docID: string, segmentID: string, voteID: string): Promise<ApiResponse<GetVoteResponse>> {
+		return this.api.Get<GetVoteResponse>(`/kb/documents/${docID}/segments/${segmentID}/votes/${voteID}`)
+	}
+
+	/**
+	 * Add votes to a segment
+	 */
+	async AddVotes(
+		docID: string,
+		segmentID: string,
+		request: AddVotesRequest
+	): Promise<ApiResponse<AddVotesResponse>> {
+		return this.api.Post<AddVotesResponse>(`/kb/documents/${docID}/segments/${segmentID}/votes`, request)
+	}
+
+	/**
+	 * Remove votes from a segment
+	 */
+	async RemoveVotes(
+		docID: string,
+		segmentID: string,
+		voteIDs: string[]
+	): Promise<ApiResponse<RemoveVotesResponse>> {
+		const queryParams = new URLSearchParams({
+			vote_ids: voteIDs.join(',')
+		})
+		return this.api.Delete<RemoveVotesResponse>(
+			`/kb/documents/${docID}/segments/${segmentID}/votes?${queryParams.toString()}`
+		)
+	}
+
+	// ===== Hit Management =====
+
+	/**
+	 * Scroll hits for a specific segment with pagination
+	 */
+	async ScrollHits(
+		docID: string,
+		segmentID: string,
+		request?: ScrollHitsRequest
+	): Promise<ApiResponse<HitScrollResult>> {
+		const params: Record<string, string> = {}
+
+		if (request) {
+			if (request.limit !== undefined) {
+				params.limit = request.limit.toString()
+			}
+			if (request.scroll_id) {
+				params.scroll_id = request.scroll_id
+			}
+			if (request.source) {
+				params.source = request.source
+			}
+			if (request.scenario) {
+				params.scenario = request.scenario
+			}
+		}
+
+		return this.api.Get<HitScrollResult>(`/kb/documents/${docID}/segments/${segmentID}/hits`, params)
+	}
+
+	/**
+	 * Get a specific hit by ID
+	 */
+	async GetHit(docID: string, segmentID: string, hitID: string): Promise<ApiResponse<GetHitResponse>> {
+		return this.api.Get<GetHitResponse>(`/kb/documents/${docID}/segments/${segmentID}/hits/${hitID}`)
+	}
+
+	/**
+	 * Add hits to a segment
+	 */
+	async AddHits(docID: string, segmentID: string, request: AddHitsRequest): Promise<ApiResponse<AddHitsResponse>> {
+		return this.api.Post<AddHitsResponse>(`/kb/documents/${docID}/segments/${segmentID}/hits`, request)
+	}
+
+	/**
+	 * Remove hits from a segment
+	 */
+	async RemoveHits(docID: string, segmentID: string, hitIDs: string[]): Promise<ApiResponse<RemoveHitsResponse>> {
+		const queryParams = new URLSearchParams({
+			hit_ids: hitIDs.join(',')
+		})
+		return this.api.Delete<RemoveHitsResponse>(
+			`/kb/documents/${docID}/segments/${segmentID}/hits?${queryParams.toString()}`
+		)
 	}
 
 	// ===== Provider Management =====

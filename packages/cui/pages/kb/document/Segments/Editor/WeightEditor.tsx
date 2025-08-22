@@ -15,7 +15,7 @@ const WeightEditor: React.FC<WeightEditorProps> = ({ value, onChange, disabled =
 	const is_cn = locale === 'zh-CN'
 
 	const [isEditing, setIsEditing] = useState(false)
-	const [editValue, setEditValue] = useState(value.toString())
+	const [editValue, setEditValue] = useState((value || 0).toString())
 	const [isHovered, setIsHovered] = useState(false)
 	const inputRef = useRef<HTMLInputElement>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -44,7 +44,7 @@ const WeightEditor: React.FC<WeightEditorProps> = ({ value, onChange, disabled =
 
 	const handleClick = () => {
 		// 始终可以点击，不检查 disabled 状态
-		setEditValue(value.toString())
+		setEditValue((value || 0).toString())
 		setIsEditing(true)
 	}
 
@@ -66,7 +66,7 @@ const WeightEditor: React.FC<WeightEditorProps> = ({ value, onChange, disabled =
 	}
 
 	const handleCancel = () => {
-		setEditValue(value.toString())
+		setEditValue((value || 0).toString())
 		setIsEditing(false)
 	}
 
@@ -91,7 +91,7 @@ const WeightEditor: React.FC<WeightEditorProps> = ({ value, onChange, disabled =
 		>
 			{/* 显示值 */}
 			<span className={`${styles.weightValue} ${isHovered ? styles.hovered : ''}`} onClick={handleClick}>
-				{value.toFixed(2)}
+				{(value || 0).toFixed(2)}
 				<Icon
 					name='material-edit'
 					size={10}

@@ -36,7 +36,7 @@
 	transform: translateY(-50%);
 	opacity: 0;
 	transition: opacity 0.2s ease;
-	color: var(--color_main);
+	color: inherit; /* 跟随父元素颜色，与按钮图标保持一致 */
 	pointer-events: none; /* 防止图标阻挡点击事件 */
 
 	&.visible {
@@ -143,9 +143,18 @@
 	background: var(--color_success);
 	color: white;
 
+	/* 确保图标颜色跟随文字颜色 */
+	:global(.Icon) {
+		color: inherit;
+	}
+
 	&:hover {
 		background: var(--color_success);
 		opacity: 0.8;
+
+		:global(.Icon) {
+			color: inherit;
+		}
 	}
 }
 
@@ -153,9 +162,18 @@
 	background: var(--color_danger);
 	color: white;
 
+	/* 确保图标颜色跟随文字颜色 */
+	:global(.Icon) {
+		color: inherit;
+	}
+
 	&:hover {
 		background: var(--color_danger);
 		opacity: 0.8;
+
+		:global(.Icon) {
+			color: inherit;
+		}
 	}
 }
 

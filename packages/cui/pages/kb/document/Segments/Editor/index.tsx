@@ -5,7 +5,7 @@ import Icon from '@/widgets/Icon'
 import CustomTextArea from './CustomTextArea'
 import WeightEditor from './WeightEditor'
 import { Button } from '../../../components'
-import { KB, UpdateSegmentsRequest, UpdateWeightRequest, CollectionInfo } from '@/openapi'
+import { KB, UpdateSegmentsRequest, UpdateWeightRequest, UpdateWeightsRequest, CollectionInfo } from '@/openapi'
 import styles from '../detail.less'
 import localStyles from './index.less'
 
@@ -164,8 +164,8 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 
 		try {
 			const kb = new KB(window.$app.openapi)
-			const updateWeightRequest: UpdateWeightRequest = {
-				segments: [
+			const updateWeightsRequest: UpdateWeightsRequest = {
+				weights: [
 					{
 						id: chunkData.id,
 						weight: newWeight
@@ -173,7 +173,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 				]
 			}
 
-			const response = await kb.UpdateWeight(updateWeightRequest)
+			const response = await kb.UpdateWeights(docID, updateWeightsRequest)
 			if (window.$app.openapi.IsError(response)) {
 				throw new Error(response.error?.error_description || 'Failed to update weight')
 			}
