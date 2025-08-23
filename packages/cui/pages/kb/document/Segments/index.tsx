@@ -359,9 +359,9 @@ const Segments: React.FC<SegmentsProps> = ({
 			segments = [...segments].sort((a, b) => {
 				switch (sortBy) {
 					case 'hit':
-						// 按命中次数排序 (假设存储在 metadata 中)
-						const hitA = (a.metadata?.hit_count as number) || 0
-						const hitB = (b.metadata?.hit_count as number) || 0
+						// 按命中次数排序
+						const hitA = (a.hit as number) || 0
+						const hitB = (b.hit as number) || 0
 						return hitB - hitA // 降序
 					case 'weight':
 						// 按权重排序
@@ -516,7 +516,7 @@ const Segments: React.FC<SegmentsProps> = ({
 						</span>
 						<span className={styles.metaItem}>
 							{is_cn ? '命中' : 'Hits'}{' '}
-							<span className={styles.metaNumber}>{segment.metadata?.hit_count || 0}</span>
+							<span className={styles.metaNumber}>{segment.hit || 0}</span>
 						</span>
 					</div>
 				</div>

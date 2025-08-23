@@ -12,22 +12,24 @@ import localStyles from './index.less'
 const { Text } = Typography
 
 interface ChunkData {
+	// Backend Segment fields
 	id: string
 	text: string
 	weight: number
-	hit_count: number
-	upvotes: number
-	downvotes: number
-	text_length: number
-	max_length: number
-	score?: number
-	metadata?: {
+	score: number
+	hit: number
+	positive: number // Positive vote count (backend field)
+	negative: number // Negative vote count (backend field)
+	metadata: Record<string, any> & {
 		chunk_details?: {
 			depth?: number
 			index?: number
 		}
-		hit_count?: number
 	}
+
+	// Frontend-specific fields for UI
+	text_length: number
+	max_length: number
 }
 
 interface ChunkEditorProps {
@@ -55,7 +57,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 	const [editedWeight, setEditedWeight] = useState(chunkData.weight)
 	const [isSaving, setIsSaving] = useState(false)
 
-	const netVotes = chunkData.upvotes - chunkData.downvotes
+	const netVotes = chunkData.positive - chunkData.negative
 
 	// 投票处理
 	const handleVote = (type: 'good' | 'bad') => {
@@ -224,7 +226,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 					</span>
 					<span className={localStyles.metaItem}>
 						{is_cn ? '命中' : 'Hits'}{' '}
-						<span className={localStyles.metaNumber}>{chunkData.hit_count || 0}</span>
+						<span className={localStyles.metaNumber}>{chunkData.hit || 0}</span>
 					</span>
 				</div>
 				<div className={localStyles.actionSection}>
@@ -360,11 +362,11 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 				<div className={localStyles.textVoteActions}>
 					<button className={localStyles.voteButton} onClick={() => handleVote('good')}>
 						<Icon name='material-thumb_up' size={12} />
-						<span>{chunkData.upvotes}</span>
+						<span>{chunkData.positive}</span>
 					</button>
 					<button className={localStyles.voteButton} onClick={() => handleVote('bad')}>
 						<Icon name='material-thumb_down' size={12} />
-						<span>{chunkData.downvotes}</span>
+						<span>{chunkData.negative}</span>
 					</button>
 				</div>
 			</div>

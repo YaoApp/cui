@@ -201,16 +201,19 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 			case 'editor':
 				// 适配 Segment 数据到 Editor 组件需要的 ChunkData 格式
 				const chunkData = {
+					// Backend Segment fields
 					id: segmentData.id,
 					text: segmentData.text || '',
 					weight: segmentData.weight || 0,
-					hit_count: segmentData.metadata?.hit_count || 0,
-					upvotes: segmentData.vote && segmentData.vote > 0 ? segmentData.vote : 0,
-					downvotes: segmentData.vote && segmentData.vote < 0 ? Math.abs(segmentData.vote) : 0,
+					score: segmentData.score || 0,
+					hit: segmentData.hit || 0,
+					positive: segmentData.positive || 0,
+					negative: segmentData.negative || 0,
+					metadata: segmentData.metadata || {},
+
+					// Frontend-specific fields for UI
 					text_length: segmentData.text?.length || 0,
-					max_length: 2000, // 默认最大长度
-					score: segmentData.score || 0, // 添加评分
-					metadata: segmentData.metadata // 传递完整的 metadata
+					max_length: 2000 // 默认最大长度
 				}
 
 				return (

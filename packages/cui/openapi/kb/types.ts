@@ -271,17 +271,23 @@ export type GetDocumentResponse = Document
 
 // Segment data structure (matches backend GraphRag Segment type)
 export interface Segment {
+	collection_id: string
+	document_id: string
 	id: string
 	text: string
-	metadata?: Record<string, any>
-	score?: number
-	weight?: number
-	vote?: number
-	created_at?: string
-	updated_at?: string
-	// Graph-related fields
-	nodes?: any[]
-	relationships?: any[]
+	nodes: any[] // GraphNode array
+	relationships: any[] // GraphRelationship array
+	parents: string[]
+	children: string[]
+	metadata: Record<string, any>
+	created_at: string
+	updated_at: string
+	version: number
+	weight: number
+	score: number
+	positive: number // Positive vote count
+	negative: number // Negative vote count
+	hit: number // Hit count for the segment
 }
 
 // List segments request parameters
@@ -342,12 +348,6 @@ export interface GetSegmentResponse {
 export interface SegmentText {
 	id?: string
 	text: string
-}
-
-// Segment vote structure
-export interface SegmentVote {
-	id: string
-	vote?: number
 }
 
 // Segment score structure
