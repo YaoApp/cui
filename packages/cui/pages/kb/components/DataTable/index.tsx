@@ -90,16 +90,15 @@ function DataTable<T extends Record<string, any>>({
 						{actions
 							.filter((action) => (action.visible ? action.visible(record) : true))
 							.map((action) => (
-								<Tooltip key={action.key} title={action.label}>
-									<ActionButton
-										icon={action.icon}
-										iconSize={14}
-										title={action.label}
-										disabled={action.disabled ? action.disabled(record) : false}
-										onClick={() => action.onClick?.(record, index)}
-										danger={action.key === 'delete'}
-									/>
-								</Tooltip>
+								<ActionButton
+									key={action.key}
+									icon={action.icon}
+									iconSize={14}
+									title={action.label}
+									disabled={action.disabled ? action.disabled(record) : false}
+									onClick={() => action.onClick?.(record, index)}
+									danger={action.key === 'delete'}
+								/>
 							))}
 					</Space>
 				)

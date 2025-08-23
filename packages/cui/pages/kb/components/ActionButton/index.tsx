@@ -1,4 +1,5 @@
 import React from 'react'
+import { Tooltip } from 'antd'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
 
@@ -60,18 +61,18 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 		return icon
 	}
 
-	return (
-		<button
-			type='button'
-			className={buttonClass}
-			onClick={handleClick}
-			disabled={disabled}
-			title={title}
-			style={style}
-		>
+	const buttonElement = (
+		<button type='button' className={buttonClass} onClick={handleClick} disabled={disabled} style={style}>
 			{renderIcon()}
 		</button>
 	)
+
+	// 如果有title，使用Tooltip包装；否则直接返回按钮
+	if (title) {
+		return <Tooltip title={title}>{buttonElement}</Tooltip>
+	}
+
+	return buttonElement
 }
 
 export default ActionButton

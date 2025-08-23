@@ -12,9 +12,17 @@
 	transition: all 0.2s ease;
 	color: var(--color_neo_text_secondary);
 
-	// 默认hover效果 - 只保留放大效果
+	// 默认hover效果 - 放大并变成主色
 	&:hover:not(.disabled) {
-		transform: scale(1.1);
+		transform: scale(1.15);
+		color: var(--color_main);
+
+		// 确保图标颜色跟随
+		:global(.Icon),
+		:global(.anticon),
+		:global(.xgen-icon) {
+			color: inherit;
+		}
 	}
 
 	// 点击效果
@@ -30,7 +38,7 @@
 		box-shadow: none !important;
 	}
 
-	// 图标居中
+	// 图标居中和颜色继承
 	:global(.Icon),
 	:global(.anticon),
 	:global(.xgen-icon) {
@@ -39,24 +47,44 @@
 		justify-content: center;
 		line-height: 1;
 		margin: 0;
+		color: inherit; // 继承父元素颜色
 	}
 }
 
 // 按钮类型样式
-.actionButton.default {
-	// 默认样式已在基础样式中定义
-}
 
 .actionButton.primary {
 	background: var(--color_main);
 	color: white;
 
-	// primary类型只保留放大效果，不改变背景色
+	// primary类型hover效果 - 放大并保持白色文字
+	&:hover:not(.disabled) {
+		transform: scale(1.15);
+		color: white;
+
+		// 确保图标颜色跟随
+		:global(.Icon),
+		:global(.anticon),
+		:global(.xgen-icon) {
+			color: inherit;
+		}
+	}
 }
 
 .actionButton.danger,
 .actionButton.default.danger {
-	// danger类型只保留放大效果，不改变颜色
+	// danger类型hover效果 - 放大并变成危险色
+	&:hover:not(.disabled) {
+		transform: scale(1.15);
+		color: var(--color_danger);
+
+		// 确保图标颜色跟随
+		:global(.Icon),
+		:global(.anticon),
+		:global(.xgen-icon) {
+			color: inherit;
+		}
+	}
 }
 
 // 深色模式适配
@@ -64,18 +92,51 @@
 	.actionButton {
 		color: var(--color_neo_text_secondary);
 
-		// 深色模式也只保留放大效果，不改变背景和颜色
+		// 深色模式下hover效果 - 放大并变成主色
+		&:hover:not(.disabled) {
+			transform: scale(1.15);
+			color: var(--color_main);
+
+			// 确保图标颜色跟随
+			:global(.Icon),
+			:global(.anticon),
+			:global(.xgen-icon) {
+				color: inherit;
+			}
+		}
 	}
 
 	.actionButton.primary {
 		background: var(--color_main);
 		color: white;
 
-		// primary类型在深色模式下也只保留放大效果
+		// primary类型在深色模式下hover效果 - 放大并保持白色文字
+		&:hover:not(.disabled) {
+			transform: scale(1.15);
+			color: white;
+
+			// 确保图标颜色跟随
+			:global(.Icon),
+			:global(.anticon),
+			:global(.xgen-icon) {
+				color: inherit;
+			}
+		}
 	}
 
 	.actionButton.danger,
 	.actionButton.default.danger {
-		// danger类型在深色模式下也只保留放大效果
+		// danger类型在深色模式下hover效果 - 放大并变成危险色
+		&:hover:not(.disabled) {
+			transform: scale(1.15);
+			color: var(--color_danger);
+
+			// 确保图标颜色跟随
+			:global(.Icon),
+			:global(.anticon),
+			:global(.xgen-icon) {
+				color: inherit;
+			}
+		}
 	}
 }
