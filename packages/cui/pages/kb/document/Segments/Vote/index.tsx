@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react'
-import { Typography, Button, message, Tooltip, Modal } from 'antd'
+import { Typography, Button, Tooltip, Modal, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 
-import { Segment } from '@/openapi/kb/types'
-import { VoteRecord } from '@/pages/kb/types'
+import {
+	Segment,
+	SegmentVote,
+	SegmentReaction,
+	ScrollVotesRequest,
+	VoteType,
+	AddVotesRequest
+} from '@/openapi/kb/types'
+import { KB } from '@/openapi'
 import { DataTable, DetailModal } from '@/pages/kb/components'
 import { TableColumn, TableFilter, TableAction } from '@/pages/kb/components/DataTable/types'
 import { DetailSection } from '@/pages/kb/components/DetailModal/types'
-import { mockListVotes, ListVotesRequest } from './mockData'
 import styles from '../detail.less'
 import localStyles from './index.less'
 
@@ -25,127 +31,244 @@ interface VoteData {
 
 interface VoteViewProps {
 	segmentData: Segment
+	docID: string
 }
 
-const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
+const VoteView: React.FC<VoteViewProps> = ({ segmentData, docID }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-
-	// Vote统计数据
 	const [voteData, setVoteData] = useState<VoteData | null>(null)
-	const [loadingStats, setLoadingStats] = useState(true)
-
-	// 表格数据状态
-	const [tableData, setTableData] = useState<VoteRecord[]>([])
-	const [loading, setLoading] = useState(false)
-	const [loadingMore, setLoadingMore] = useState(false)
-	const [hasMore, setHasMore] = useState(true)
+	const [loading, setLoading] = useState(true)
+	const [tableData, setTableData] = useState<SegmentVote[]>([])
 	const [pagination, setPagination] = useState({
 		current: 1,
 		pageSize: 10,
 		total: 0
 	})
-
-	// 详情弹窗状态
+	const [filters, setFilters] = useState<Record<string, any>>({})
+	const [hasMore, setHasMore] = useState(true)
+	const [loadingMore, setLoadingMore] = useState(false)
 	const [detailVisible, setDetailVisible] = useState(false)
-	const [selectedRecord, setSelectedRecord] = useState<VoteRecord | null>(null)
+	const [selectedRecord, setSelectedRecord] = useState<SegmentVote | null>(null)
+	const [detailLoading, setDetailLoading] = useState(false)
+	const [addingTestData, setAddingTestData] = useState(false)
+	const [scrollId, setScrollId] = useState<string | undefined>(undefined)
 
-	// JSON代码高亮组件
-	const JSONCode: React.FC<{ data: any }> = ({ data }) => {
-		const jsonString = JSON.stringify(data, null, 2)
+	useEffect(() => {
+		loadVoteData()
+		loadTableData()
+	}, [segmentData.id])
 
-		// 使用正则表达式进行简单的语法高亮
-		const highlightedJSON = jsonString
-			.replace(/"([^"]+)":/g, '<span class="json-key">"$1":</span>')
-			.replace(/:\s*"([^"]*)"/g, ': <span class="json-string">"$1"</span>')
-			.replace(/:\s*(\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
-			.replace(/:\s*(true|false)/g, ': <span class="json-boolean">$1</span>')
-			.replace(/:\s*(null)/g, ': <span class="json-null">$1</span>')
+	// 生成随机测试数据
+	const generateTestData = (): AddVotesRequest => {
+		const scenarios = ['智能问答', '文档检索', '知识推荐']
+		const sources = ['web_chat', 'api_call', 'mobile_app', 'slack_bot', 'discord_bot', 'vscode_extension']
+		const queries = [
+			'如何使用这个功能？',
+			'这个API的参数是什么？',
+			'有什么最佳实践吗？',
+			'如何解决这个错误？',
+			'有相关的文档吗？',
+			'这个配置如何设置？',
+			'性能优化建议',
+			'安全注意事项',
+			'版本兼容性问题',
+			'部署流程说明'
+		]
+		const candidates = [
+			'根据文档内容，这个功能可以通过...',
+			'API参数包括：id, name, options...',
+			'最佳实践建议：1. 确保数据验证 2. 使用缓存...',
+			'错误解决方案：检查配置文件和权限设置',
+			'相关文档链接：https://docs.example.com',
+			'配置步骤：1. 编辑配置文件 2. 重启服务...'
+		]
 
-		return (
-			<div className={localStyles.contextCode}>
-				<pre dangerouslySetInnerHTML={{ __html: highlightedJSON }} />
-			</div>
-		)
+		const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
+		const getRandomContext = () => ({
+			user_id: `user_${Math.random().toString(36).substr(2, 9)}`,
+			session_id: `session_${Math.random().toString(36).substr(2, 9)}`,
+			timestamp: new Date().toISOString(),
+			metadata: {
+				ip: `192.168.1.${Math.floor(Math.random() * 255)}`,
+				user_agent: 'Mozilla/5.0 (compatible; TestBot/1.0)',
+				language: Math.random() > 0.5 ? 'zh-CN' : 'en-US'
+			}
+		})
+
+		// 生成 1-3 个测试 vote 记录
+		const voteCount = Math.floor(Math.random() * 3) + 1
+		const testVotes: SegmentVote[] = []
+
+		for (let i = 0; i < voteCount; i++) {
+			const voteType: VoteType = Math.random() > 0.7 ? 'negative' : 'positive' // 70% positive, 30% negative
+			testVotes.push({
+				id: segmentData.id,
+				vote_id: `test_vote_${Date.now()}_${i}`,
+				vote: voteType,
+				source: getRandomItem(sources),
+				scenario: getRandomItem(scenarios),
+				query: getRandomItem(queries),
+				candidate: getRandomItem(candidates),
+				context: getRandomContext()
+			})
+		}
+
+		const defaultReaction: SegmentReaction = {
+			source: 'test_system',
+			scenario: '测试数据生成',
+			query: '批量测试数据添加',
+			context: {
+				test: true,
+				generated_at: new Date().toISOString(),
+				batch_id: `batch_${Date.now()}`
+			}
+		}
+
+		return {
+			segments: testVotes,
+			default_reaction: defaultReaction
+		}
 	}
 
-	// 表格列定义
-	const columns: TableColumn<VoteRecord>[] = [
+	// 添加测试数据
+	const handleAddTestData = async () => {
+		if (!window.$app?.openapi) {
+			message.error(is_cn ? '系统未就绪' : 'System not ready')
+			return
+		}
+
+		try {
+			setAddingTestData(true)
+
+			// 生成测试数据
+			const testData = generateTestData()
+
+			// 调用 AddVotes API
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.AddVotes(docID, segmentData.id, testData)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to add test data')
+			}
+
+			// 显示成功信息
+			const result = response.data
+			message.success(is_cn ? '测试数据添加成功！' : 'Test data added successfully!')
+
+			// 刷新数据
+			loadVoteData()
+			loadTableData()
+		} catch (error) {
+			console.error('Failed to add test data:', error)
+			const errorMsg =
+				error instanceof Error ? error.message : is_cn ? '添加测试数据失败' : 'Failed to add test data'
+			message.error({
+				content: (
+					<div>
+						<div style={{ fontWeight: 'bold', marginBottom: 4 }}>
+							{is_cn ? '添加失败' : 'Add Failed'}
+						</div>
+						<div style={{ fontSize: '12px', color: '#666' }}>{errorMsg}</div>
+					</div>
+				),
+				duration: 8
+			})
+		} finally {
+			setAddingTestData(false)
+		}
+	}
+
+	// 定义表格列（设置合理的宽度）
+	const columns: TableColumn<SegmentVote>[] = [
+		{
+			key: 'vote_id',
+			title: is_cn ? '投票ID' : 'Vote ID',
+			dataIndex: 'vote_id',
+			width: 100,
+			render: (vote_id: string) => (
+				<span className={localStyles.voteId}>{vote_id ? vote_id.slice(-8) : '-'}</span>
+			)
+		},
+		{
+			key: 'vote',
+			title: is_cn ? '投票' : 'Voting',
+			dataIndex: 'vote',
+			width: 120,
+			render: (vote: VoteType) => (
+				<span className={vote === 'positive' ? localStyles.positiveVote : localStyles.negativeVote}>
+					<Icon
+						name={vote === 'positive' ? 'material-thumb_up' : 'material-thumb_down'}
+						size={12}
+					/>
+					{vote === 'positive' ? (is_cn ? '有用' : 'Useful') : is_cn ? '没用' : 'Useless'}
+				</span>
+			)
+		},
 		{
 			key: 'scenario',
 			title: is_cn ? '场景' : 'Scenario',
 			dataIndex: 'scenario',
 			width: 120,
-			render: (scenario: string) => <span className={localStyles.scenarioTag}>{scenario}</span>
+			render: (scenario: string) => <span className={localStyles.scenarioTag}>{scenario || '-'}</span>
 		},
 		{
 			key: 'source',
 			title: is_cn ? '来源' : 'Source',
 			dataIndex: 'source',
-			width: 140,
-			render: (source: string) => <span className={localStyles.sourceText}>{source}</span>
+			width: 160,
+			render: (source: string) => <span className={localStyles.sourceText}>{source || '-'}</span>
 		},
 		{
 			key: 'query',
-			title: is_cn ? '查询' : 'Query',
+			title: is_cn ? '查询内容' : 'Query',
 			dataIndex: 'query',
-			width: 250,
+			width: 350,
 			ellipsis: true,
 			render: (query: string) => (
 				<Tooltip title={query}>
 					<span className={localStyles.queryText}>{query || '-'}</span>
 				</Tooltip>
 			)
-		},
-		{
-			title: is_cn ? '上下文' : 'Context',
-			dataIndex: 'context',
-			key: 'context',
-			width: 300,
-			render: (value: any) => <JSONCode data={value} />
-		},
-		{
-			title: is_cn ? '好评' : 'Positive',
-			dataIndex: 'positive_votes',
-			key: 'positive_votes',
-			width: 80,
-			render: (value: number) => <span className={styles.positiveVotes}>{value}</span>
-		},
-		{
-			title: is_cn ? '差评' : 'Negative',
-			dataIndex: 'negative_votes',
-			key: 'negative_votes',
-			width: 80,
-			render: (value: number) => <span className={styles.negativeVotes}>{value}</span>
-		},
-		{
-			key: 'created_at',
-			title: is_cn ? '创建时间' : 'Created At',
-			dataIndex: 'created_at',
-			width: 180,
-			render: (date: string) => (
-				<span className={localStyles.timestamp}>
-					{new Date(date).toLocaleString(is_cn ? 'zh-CN' : 'en-US')}
-				</span>
-			)
 		}
 	]
 
-	// 表格筛选器定义
+	// 定义筛选器
 	const tableFilters: TableFilter[] = [
+		{
+			key: 'vote_type',
+			label: is_cn ? '投票类型' : 'Vote Type',
+			type: 'select',
+			options: [
+				{ label: is_cn ? '全部' : 'All', value: '' },
+				{ label: is_cn ? '有用' : 'Useful', value: 'positive' },
+				{ label: is_cn ? '没用' : 'Useless', value: 'negative' }
+			],
+			onChange: (value) => {
+				const newFilters = { ...filters }
+				if (value) {
+					newFilters.vote_type = value
+				} else {
+					delete newFilters.vote_type
+				}
+				setFilters(newFilters)
+				setHasMore(true) // 重置加载状态
+				loadTableData(undefined, false, newFilters) // 传递更新后的过滤器
+			}
+		},
 		{
 			key: 'scenario',
 			label: is_cn ? '场景' : 'Scenario',
 			type: 'select',
 			options: [
-				{ label: is_cn ? '智能问答' : 'Smart Q&A', value: '智能问答' },
+				{ label: is_cn ? '智能问答' : 'Q&A', value: '智能问答' },
 				{ label: is_cn ? '文档检索' : 'Document Search', value: '文档检索' },
-				{ label: is_cn ? '知识推荐' : 'Knowledge Recommendation', value: '知识推荐' },
-				{ label: is_cn ? '内容生成' : 'Content Generation', value: '内容生成' },
-				{ label: is_cn ? '数据分析' : 'Data Analysis', value: '数据分析' }
+				{ label: is_cn ? '知识推荐' : 'Recommendation', value: '知识推荐' }
 			],
 			onChange: (value) => {
-				handleFilter({ scenario: value })
+				setFilters((prev) => ({ ...prev, scenario: value }))
+				setHasMore(true) // 重置加载状态
+				loadTableData({ scenario: value })
 			}
 		},
 		{
@@ -157,18 +280,47 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 				{ label: 'API Call', value: 'api_call' },
 				{ label: 'Mobile App', value: 'mobile_app' },
 				{ label: 'Slack Bot', value: 'slack_bot' },
-				{ label: 'Email Assistant', value: 'email_assistant' }
+				{ label: 'Discord Bot', value: 'discord_bot' },
+				{ label: 'VS Code', value: 'vscode_extension' }
 			],
 			onChange: (value) => {
-				handleFilter({ source: value })
+				setFilters((prev) => ({ ...prev, source: value }))
+				setHasMore(true) // 重置加载状态
+				loadTableData({ source: value })
 			}
 		}
 	]
 
 	// 打开详情弹窗
-	const handleViewDetails = (record: VoteRecord) => {
-		setSelectedRecord(record)
+	const handleViewDetails = async (record: SegmentVote) => {
+		if (!record.vote_id || !window.$app?.openapi) {
+			message.error(is_cn ? '无法获取详情信息' : 'Cannot get detail information')
+			return
+		}
+
 		setDetailVisible(true)
+		setDetailLoading(true)
+		setSelectedRecord(record) // 先设置基本信息，避免弹窗空白
+
+		try {
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.GetVote(docID, segmentData.id, record.vote_id)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to get vote details')
+			}
+
+			// 更新为完整的详情数据
+			if (response.data) {
+				setSelectedRecord(response.data.vote)
+			}
+		} catch (error) {
+			console.error('Failed to load vote details:', error)
+			message.error(is_cn ? '获取详情失败' : 'Failed to load details')
+			// 保持使用列表中的基本数据
+		} finally {
+			setDetailLoading(false)
+		}
 	}
 
 	// 关闭详情弹窗
@@ -178,27 +330,57 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 	}
 
 	// 处理删除
-	const handleDelete = async (record: VoteRecord) => {
-		try {
-			// TODO: 实现实际的删除 API 调用
-			console.log('Deleting vote record:', record)
+	const handleDelete = async (record: SegmentVote) => {
+		if (!record.vote_id || !window.$app?.openapi) {
+			message.error(is_cn ? '无法删除记录' : 'Cannot delete record')
+			return
+		}
 
-			// 模拟删除操作
-			await new Promise((resolve) => setTimeout(resolve, 500))
+		try {
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.RemoveVotes(docID, segmentData.id, [record.vote_id])
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to delete vote record')
+			}
 
 			// 从本地状态中移除
-			setTableData((prevData) => prevData.filter((item) => item.id !== record.id))
+			setTableData((prevData) => prevData.filter((item) => item.vote_id !== record.vote_id))
 			setPagination((prev) => ({ ...prev, total: prev.total - 1 }))
 
-			message.success(is_cn ? '删除成功' : 'Deleted successfully')
+			// 更新统计数据
+			setVoteData((prev) => {
+				if (!prev) return prev
+				const newTotal = Math.max(0, prev.totalVotes - 1)
+				const isPositive = record.vote === 'positive'
+				const newPositive = isPositive ? Math.max(0, prev.positiveVotes - 1) : prev.positiveVotes
+				const newNegative = !isPositive ? Math.max(0, prev.negativeVotes - 1) : prev.negativeVotes
+				const newScenarioCounts = { ...prev.votesByScenario }
+				if (record.scenario && newScenarioCounts[record.scenario]) {
+					newScenarioCounts[record.scenario] = Math.max(0, newScenarioCounts[record.scenario] - 1)
+					if (newScenarioCounts[record.scenario] === 0) {
+						delete newScenarioCounts[record.scenario]
+					}
+				}
+				return {
+					totalVotes: newTotal,
+					positiveVotes: newPositive,
+					negativeVotes: newNegative,
+					votesByScenario: newScenarioCounts
+				}
+			})
+
+			const result = response.data
+			message.success(is_cn ? '删除成功！' : 'Deleted successfully!')
 		} catch (error) {
 			console.error('Delete failed:', error)
-			message.error(is_cn ? '删除失败' : 'Delete failed')
+			const errorMsg = error instanceof Error ? error.message : is_cn ? '删除失败' : 'Delete failed'
+			message.error(errorMsg)
 		}
 	}
 
 	// 定义操作按钮
-	const actions: TableAction<VoteRecord>[] = [
+	const actions: TableAction<SegmentVote>[] = [
 		{
 			key: 'view',
 			label: is_cn ? '查看详情' : 'View Details',
@@ -228,148 +410,131 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 		}
 	]
 
-	// 加载Vote统计数据
 	const loadVoteData = async () => {
-		try {
-			setLoadingStats(true)
-			// 模拟API请求延时
-			await new Promise((resolve) => setTimeout(resolve, 100))
-
-			// 模拟Vote统计数据
-			const mockStats: VoteData = {
-				totalVotes: 1250,
-				positiveVotes: 980,
-				negativeVotes: 270,
-				votesByScenario: {
-					智能问答: 450,
-					文档检索: 320,
-					知识推荐: 280,
-					内容生成: 150,
-					数据分析: 50
-				}
-			}
-
-			setVoteData(mockStats)
-		} catch (error) {
-			console.error('Failed to load vote stats:', error)
-		} finally {
-			setLoadingStats(false)
-		}
+		// 初始统计数据将在 loadTableData 中更新
+		setVoteData({
+			totalVotes: 0,
+			positiveVotes: 0,
+			negativeVotes: 0,
+			votesByScenario: {}
+		})
 	}
 
-	// 加载表格数据
-	const loadTableData = async (isLoadMore = false) => {
+	const loadTableData = async (
+		params?: Partial<ScrollVotesRequest>,
+		isLoadMore = false,
+		customFilters?: Record<string, any>
+	) => {
+		if (!window.$app?.openapi) {
+			console.error('OpenAPI not available')
+			return
+		}
+
 		try {
-			if (isLoadMore) {
-				setLoadingMore(true)
-			} else {
+			if (!isLoadMore) {
 				setLoading(true)
+				setTableData([]) // 重新搜索时清空数据
+				setScrollId(undefined) // 重置滚动ID
+			} else {
+				setLoadingMore(true)
 			}
 
-			const currentPage = isLoadMore ? pagination.current + 1 : 1
-			const request: ListVotesRequest = {
-				page: currentPage,
-				pagesize: pagination.pageSize
+			const request: ScrollVotesRequest = {
+				limit: 10, // 每次加载10条
+				scroll_id: isLoadMore ? scrollId : undefined,
+				...params
 			}
 
-			const response = await mockListVotes(request)
+			// 使用传入的 customFilters 或当前的 filters 状态
+			const activeFilters = customFilters || filters
+
+			// 只有当 filters 中有有效值时才添加到请求中
+			Object.keys(activeFilters).forEach((key) => {
+				const value = activeFilters[key]
+				if (value !== undefined && value !== null && value !== '') {
+					request[key] = value
+				}
+			})
+
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.ScrollVotes(docID, segmentData.id, request)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load votes data')
+			}
+
+			const result = response.data
+
+			if (!result) {
+				throw new Error('No data received from API')
+			}
+
+			// 处理 votes 可能为 null 的情况
+			const votes = result.votes ?? []
 
 			if (isLoadMore) {
 				// 追加数据
-				setTableData((prevData) => [...prevData, ...response.data])
-				setPagination((prev) => ({
-					...prev,
-					current: currentPage
-				}))
+				setTableData((prev) => [...prev, ...votes])
 			} else {
-				// 重置数据
-				setTableData(response.data)
-				setPagination((prev) => ({
-					...prev,
-					current: 1,
-					total: response.total
-				}))
+				// 替换数据
+				setTableData(votes)
 			}
 
-			// 计算是否还有更多数据
-			const totalPages = Math.ceil(response.total / request.pagesize!)
-			setHasMore(currentPage < totalPages)
-		} catch (error) {
-			console.error('加载投票数据失败:', error)
-			message.error(is_cn ? '加载数据失败' : 'Failed to load data')
-		} finally {
-			if (isLoadMore) {
-				setLoadingMore(false)
-			} else {
-				setLoading(false)
+			// 更新分页信息
+			setPagination((prev) => ({
+				...prev,
+				total: result.total || 0
+			}))
+
+			// 更新滚动状态
+			setScrollId(result.next_cursor)
+			setHasMore(result.has_more)
+
+			// 更新统计数据
+			if (!isLoadMore && result.total !== undefined) {
+				// 计算场景统计和投票类型统计
+				const scenarioCounts: Record<string, number> = {}
+				let positiveCount = 0
+				let negativeCount = 0
+
+				votes.forEach((vote) => {
+					if (vote.scenario) {
+						scenarioCounts[vote.scenario] = (scenarioCounts[vote.scenario] || 0) + 1
+					}
+					if (vote.vote === 'positive') {
+						positiveCount++
+					} else if (vote.vote === 'negative') {
+						negativeCount++
+					}
+				})
+
+				setVoteData({
+					totalVotes: result.total || 0,
+					positiveVotes: positiveCount,
+					negativeVotes: negativeCount,
+					votesByScenario: scenarioCounts
+				})
 			}
+		} catch (error) {
+			console.error('Failed to load votes table data:', error)
+			message.error(is_cn ? '加载投票数据失败' : 'Failed to load votes data')
+		} finally {
+			setLoading(false)
+			setLoadingMore(false)
 		}
 	}
 
-	// 处理加载更多
+	// 加载更多数据
 	const handleLoadMore = () => {
 		if (!loadingMore && hasMore) {
-			loadTableData(true)
+			loadTableData(undefined, true)
 		}
 	}
 
-	// 处理搜索
-	const handleSearch = async (searchValue: string) => {
-		try {
-			setLoading(true)
-			const request: ListVotesRequest = {
-				page: 1,
-				pagesize: pagination.pageSize,
-				query: searchValue
-			}
-
-			const response = await mockListVotes(request)
-
-			setTableData(response.data)
-			setPagination((prev) => ({
-				...prev,
-				current: 1,
-				total: response.total
-			}))
-
-			const totalPages = Math.ceil(response.total / request.pagesize!)
-			setHasMore(1 < totalPages)
-		} catch (error) {
-			console.error('搜索失败:', error)
-			message.error(is_cn ? '搜索失败' : 'Search failed')
-		} finally {
-			setLoading(false)
-		}
-	}
-
-	// 处理筛选
-	const handleFilter = async (filters: Record<string, any>) => {
-		try {
-			setLoading(true)
-			const request: ListVotesRequest = {
-				page: 1,
-				pagesize: pagination.pageSize,
-				scenario: filters.scenario,
-				source: filters.source
-			}
-
-			const response = await mockListVotes(request)
-
-			setTableData(response.data)
-			setPagination((prev) => ({
-				...prev,
-				current: 1,
-				total: response.total
-			}))
-
-			const totalPages = Math.ceil(response.total / request.pagesize!)
-			setHasMore(1 < totalPages)
-		} catch (error) {
-			console.error('筛选失败:', error)
-			message.error(is_cn ? '筛选失败' : 'Filter failed')
-		} finally {
-			setLoading(false)
-		}
+	// 处理搜索 - ScrollVotes API 暂不支持关键字搜索
+	const handleSearch = (value: string) => {
+		// ScrollVotesRequest 不支持 keywords 参数，暂时保留函数以备后续扩展
+		console.log('Search not supported in ScrollVotes API:', value)
 	}
 
 	// 配置详情弹窗的字段
@@ -379,10 +544,46 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 			fields: [
 				{
 					key: 'id',
-					label: 'ID',
+					label: is_cn ? '段落ID' : 'Segment ID',
 					value: selectedRecord?.id,
 					span: 12,
 					copyable: true
+				},
+				{
+					key: 'vote_id',
+					label: is_cn ? '投票ID' : 'Vote ID',
+					value: selectedRecord?.vote_id,
+					span: 12,
+					copyable: true
+				},
+				{
+					key: 'vote',
+					label: is_cn ? '投票' : 'Voting',
+					value: selectedRecord?.vote,
+					span: 12,
+					render: (value: VoteType) => (
+						<span
+							className={
+								value === 'positive'
+									? localStyles.positiveVote
+									: localStyles.negativeVote
+							}
+						>
+							<Icon
+								name={
+									value === 'positive' ? 'material-thumb_up' : 'material-thumb_down'
+								}
+								size={12}
+							/>
+							{value === 'positive'
+								? is_cn
+									? '有用'
+									: 'Useful'
+								: is_cn
+								? '没用'
+								: 'Useless'}
+						</span>
+					)
 				},
 				{
 					key: 'scenario',
@@ -399,11 +600,11 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 					type: 'tag'
 				},
 				{
-					key: 'created_at',
-					label: is_cn ? '创建时间' : 'Created At',
-					value: selectedRecord?.created_at,
+					key: 'hit_id',
+					label: is_cn ? '关联命中ID' : 'Associated Hit ID',
+					value: selectedRecord?.hit_id,
 					span: 12,
-					type: 'time'
+					copyable: true
 				}
 			]
 		},
@@ -416,33 +617,13 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 					value: selectedRecord?.query,
 					span: 24,
 					copyable: true
-				}
-			]
-		},
-		{
-			title: is_cn ? '投票统计' : 'Vote Statistics',
-			fields: [
-				{
-					key: 'positive_votes',
-					label: is_cn ? '好评数' : 'Positive Votes',
-					value: selectedRecord?.positive_votes,
-					span: 12,
-					render: (value) => (
-						<span style={{ color: 'var(--color_success)', fontWeight: 'bold' }}>
-							{value || 0}
-						</span>
-					)
 				},
 				{
-					key: 'negative_votes',
-					label: is_cn ? '差评数' : 'Negative Votes',
-					value: selectedRecord?.negative_votes,
-					span: 12,
-					render: (value) => (
-						<span style={{ color: 'var(--color_error)', fontWeight: 'bold' }}>
-							{value || 0}
-						</span>
-					)
+					key: 'candidate',
+					label: is_cn ? '候选答案' : 'Candidate',
+					value: selectedRecord?.candidate,
+					span: 24,
+					copyable: true
 				}
 			]
 		},
@@ -452,7 +633,7 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 			fields: [
 				{
 					key: 'context',
-					label: 'Context Data',
+					label: is_cn ? '上下文数据' : 'Context Data',
 					value: selectedRecord?.context,
 					span: 24,
 					type: 'json'
@@ -489,14 +670,14 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 				</div>
 				<div className={localStyles.metaInfo}>
 					<span className={localStyles.metaItem}>
-						{is_cn ? '好评' : 'Positive'}{' '}
+						{is_cn ? '有用' : 'Useful'}{' '}
 						<span className={localStyles.metaNumber} style={{ color: 'var(--color_success)' }}>
 							{voteData?.positiveVotes || 0}
 						</span>
 					</span>
 					<span className={localStyles.metaItem}>
-						{is_cn ? '差评' : 'Negative'}{' '}
-						<span className={localStyles.metaNumber} style={{ color: 'var(--color_error)' }}>
+						{is_cn ? '没用' : 'Useless'}{' '}
+						<span className={localStyles.metaNumber} style={{ color: 'var(--color_danger)' }}>
 							{voteData?.negativeVotes || 0}
 						</span>
 					</span>
@@ -515,35 +696,57 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData }) => {
 
 			{/* Body - 表格内容 */}
 			<div className={styles.tableContainer}>
-				<DataTable<VoteRecord>
-					data={tableData}
-					columns={columns}
-					loading={loading}
-					total={pagination.total}
-					columnWidthPreset='normal'
-					autoFitColumns={true}
-					pagination={false}
-					filters={tableFilters}
-					searchPlaceholder={is_cn ? '搜索查询内容...' : 'Search queries...'}
-					onSearch={handleSearch}
-					actions={actions}
-					size='small'
-					scroll={{ x: 'max-content' }}
-					hasMore={hasMore}
-					onLoadMore={handleLoadMore}
-					loadingMore={loadingMore}
-				/>
+				{loading ? (
+					<div className={localStyles.loadingState}>
+						<Icon name='material-hourglass_empty' size={32} />
+						<Text>{is_cn ? '正在加载投票记录...' : 'Loading vote records...'}</Text>
+					</div>
+				) : (
+					<DataTable<SegmentVote>
+						data={tableData}
+						columns={columns}
+						loading={false} // 不使用DataTable内置的loading
+						total={pagination.total} // 传递总记录数
+						columnWidthPreset='normal' // 使用预设的列宽配置
+						autoFitColumns={true} // 自动适应容器宽度
+						pagination={false} // 禁用分页器，使用滚动
+						filters={tableFilters}
+						rowKey={(record, index) => record.vote_id || `${record.id}-${index}`}
+						// searchPlaceholder={is_cn ? '搜索查询内容...' : 'Search queries...'}
+						// onSearch={handleSearch}
+						extraActions={
+							<Button
+								type='primary'
+								ghost
+								size='small'
+								loading={addingTestData}
+								onClick={handleAddTestData}
+								icon={<Icon name='material-add_circle' size={14} />}
+							>
+								{is_cn ? '添加测试数据' : 'Add Test Data'}
+							</Button>
+						}
+						actions={actions}
+						size='small'
+						scroll={{ x: 'max-content' }} // 只设置水平滚动，垂直滚动由CSS控制
+						hasMore={hasMore} // 是否还有更多数据
+						onLoadMore={handleLoadMore} // 加载更多回调
+						loadingMore={loadingMore} // 加载状态
+					/>
+				)}
 			</div>
 
 			{/* 详情弹窗 */}
-			<DetailModal<VoteRecord>
+			<DetailModal<SegmentVote>
 				visible={detailVisible}
 				onClose={handleCloseDetails}
 				title={is_cn ? '投票记录详情' : 'Vote Record Details'}
 				data={selectedRecord}
 				sections={detailSections}
 				width='60%'
+				height='90vh'
 				size='middle'
+				loading={detailLoading}
 			/>
 		</div>
 	)

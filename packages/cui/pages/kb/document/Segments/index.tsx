@@ -300,27 +300,7 @@ const Segments: React.FC<SegmentsProps> = ({
 		}
 	}
 
-	// 投票处理
-	const handleVote = (segmentId: string, type: 'good' | 'bad') => {
-		// TODO: 实现真实的投票API调用
-		setData((prevData) =>
-			prevData.map((segment) =>
-				segment.id === segmentId
-					? {
-							...segment,
-							metadata: {
-								...segment.metadata,
-								[type === 'good' ? 'vote_good' : 'vote_bad']:
-									((segment.metadata?.[
-										type === 'good' ? 'vote_good' : 'vote_bad'
-									] as number) || 0) + 1
-							}
-					  }
-					: segment
-			)
-		)
-		message.success(is_cn ? '投票成功' : 'Vote submitted')
-	}
+	// 投票数据仅用于展示，不再提供点击功能
 
 	// 打开详情模态窗口
 	const handleOpenDetail = (segment: Segment) => {
@@ -370,13 +350,13 @@ const Segments: React.FC<SegmentsProps> = ({
 						return weightB - weightA // 降序
 					case 'votes_good':
 						// 按好评数排序
-						const voteGoodA = (a.metadata?.vote_good as number) || 0
-						const voteGoodB = (b.metadata?.vote_good as number) || 0
+						const voteGoodA = a.positive || 0
+						const voteGoodB = b.positive || 0
 						return voteGoodB - voteGoodA // 降序
 					case 'votes_bad':
 						// 按差评数排序
-						const voteBadA = (a.metadata?.vote_bad as number) || 0
-						const voteBadB = (b.metadata?.vote_bad as number) || 0
+						const voteBadA = a.negative || 0
+						const voteBadB = b.negative || 0
 						return voteBadB - voteBadA // 降序
 					case 'structure':
 						// 按文档结构排序：先按 depth (1, 2, 3...)，再按 index (0, 1, 2...)
@@ -550,26 +530,14 @@ const Segments: React.FC<SegmentsProps> = ({
 					</div>
 
 					<div className={styles.voteActions}>
-						<button
-							className={styles.voteButton}
-							onClick={(e) => {
-								e.stopPropagation()
-								handleVote(segment.id, 'good')
-							}}
-						>
+						<div className={styles.voteDisplay}>
 							<Icon name='material-thumb_up' size={14} />
-							<span>{segment.metadata?.vote_good || 0}</span>
-						</button>
-						<button
-							className={styles.voteButton}
-							onClick={(e) => {
-								e.stopPropagation()
-								handleVote(segment.id, 'bad')
-							}}
-						>
+							<span>{segment.positive || 0}</span>
+						</div>
+						<div className={styles.voteDisplay}>
 							<Icon name='material-thumb_down' size={14} />
-							<span>{segment.metadata?.vote_bad || 0}</span>
-						</button>
+							<span>{segment.negative || 0}</span>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -720,10 +688,10 @@ const Segments: React.FC<SegmentsProps> = ({
 								{is_cn ? '最高权重' : 'Highest Weight'}
 							</Select.Option>
 							<Select.Option value='votes_good'>
-								{is_cn ? '好评优先' : 'Good Votes First'}
+								{is_cn ? '有用优先' : 'Useful First'}
 							</Select.Option>
 							<Select.Option value='votes_bad'>
-								{is_cn ? '差评优先' : 'Bad Votes First'}
+								{is_cn ? '没用优先' : 'Useless First'}
 							</Select.Option>
 						</Select>
 						<Button

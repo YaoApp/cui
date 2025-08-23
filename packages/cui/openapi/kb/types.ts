@@ -469,6 +469,7 @@ export interface SegmentVote {
 	id: string // Segment ID
 	vote_id?: string // Unique vote ID
 	vote: VoteType // Vote type
+	hit_id?: string // Optional: Hit ID to associate the vote with a specific hit
 	source?: string
 	scenario?: string
 	query?: string

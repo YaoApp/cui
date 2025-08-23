@@ -239,7 +239,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 			case 'hits':
 				return <HitsView segmentData={segmentData} docID={docID} />
 			case 'vote':
-				return <VoteView segmentData={segmentData} />
+				return <VoteView segmentData={segmentData} docID={docID} />
 			case 'score':
 				return <ScoreView segmentData={segmentData} />
 			default:

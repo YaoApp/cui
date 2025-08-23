@@ -63,15 +63,18 @@
 	}
 }
 
-// 场景标签样式（与Hits完全一致）
+// 场景标签样式 - 与详情页 fieldTag 完全一致
 .scenarioTag {
-	padding: 2px 8px;
+	font-size: 11px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: none;
 	background: var(--color_neo_bg_selected);
 	color: var(--color_main);
-	border-radius: 12px;
-	font-size: 11px;
 	font-weight: 500;
-	border: 1px solid var(--color_neo_border_selected);
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
 }
 
 // 来源文本样式（与Hits完全一致）
@@ -98,94 +101,69 @@
 	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 }
 
-// 好评数样式
-.positiveVotes {
-	color: var(--color_success);
-	font-weight: 600;
-	font-size: 13px;
-	display: flex;
-	align-items: center;
-	gap: 4px;
-
-	&::before {
-		content: '👍';
-		font-size: 12px;
-	}
-}
-
-// 差评数样式
-.negativeVotes {
-	color: var(--color_error);
-	font-weight: 600;
-	font-size: 13px;
-	display: flex;
-	align-items: center;
-	gap: 4px;
-
-	&::before {
-		content: '👎';
-		font-size: 12px;
-	}
-}
-
-// Context JSON代码样式（与Hits完全一致）
-.contextCode {
+// 投票ID样式（与Hits的hitId一致）
+.voteId {
 	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-	font-size: 10px;
-	line-height: 1.3;
-	max-height: 120px;
-	overflow-y: auto;
-	padding: 8px;
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	background: var(--color_neo_bg_field);
+	padding: 2px 6px;
+	border-radius: 3px;
+	border: 1px solid var(--color_neo_border_field);
+}
 
-	pre {
-		margin: 0;
-		padding: 0;
-		background: transparent;
-		border: none;
-		font-family: inherit;
-		font-size: inherit;
-		line-height: inherit;
-		color: var(--color_neo_text_secondary);
-		white-space: pre-wrap;
-		word-wrap: break-word;
-		overflow-wrap: break-word;
+// 有用标签样式 - 与详情页 fieldTag 完全一致
+.positiveVote {
+	font-size: 11px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: none;
+	background: var(--color_neo_bg_selected);
+	color: var(--color_success);
+	font-weight: 500;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	white-space: nowrap;
 
-		// JSON 语法高亮 - 使用项目主题变量
-		:global(.json-key) {
-			color: var(--color_main);
-			font-weight: 500;
-		}
-
-		:global(.json-string) {
-			color: var(--color_success);
-		}
-
-		:global(.json-number) {
-			color: var(--color_warning);
-		}
-
-		:global(.json-boolean) {
-			color: var(--color_danger);
-		}
-
-		:global(.json-null) {
-			color: var(--color_text_grey);
-		}
+	// 确保图标颜色与文字颜色一致
+	:global(.Icon) {
+		color: inherit !important;
 	}
+}
 
-	// 滚动条样式
-	&::-webkit-scrollbar {
-		width: 4px;
-	}
+// 无用标签样式 - 与详情页 fieldTag 完全一致
+.negativeVote {
+	font-size: 11px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: none;
+	background: var(--color_neo_bg_selected);
+	color: var(--color_danger);
+	font-weight: 500;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	white-space: nowrap;
 
-	&::-webkit-scrollbar-thumb {
-		background: var(--color_border);
-		border-radius: 2px;
+	// 确保图标颜色与文字颜色一致
+	:global(.Icon) {
+		color: inherit !important;
 	}
+}
 
-	&::-webkit-scrollbar-track {
-		background: transparent;
-	}
+// 加载状态 - 与 Hits 保持一致
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	min-height: 300px; // 确保有足够高度进行居中
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px;
+	text-align: center; // 确保文字居中
 }
 
 // 深色模式适配（与Hits完全一致）

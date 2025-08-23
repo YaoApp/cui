@@ -59,11 +59,7 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 
 	const netVotes = chunkData.positive - chunkData.negative
 
-	// 投票处理
-	const handleVote = (type: 'good' | 'bad') => {
-		// TODO: 实现真实的投票API调用
-		message.success(is_cn ? '投票成功' : 'Vote submitted')
-	}
+	// 投票数据仅用于展示，不再提供点击功能
 
 	// 渲染位置信息
 	const renderPositionInfo = (chunkDetails: any) => {
@@ -360,14 +356,14 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 						renderPositionInfo(chunkData.metadata.chunk_details)}
 				</div>
 				<div className={localStyles.textVoteActions}>
-					<button className={localStyles.voteButton} onClick={() => handleVote('good')}>
+					<div className={localStyles.voteDisplay}>
 						<Icon name='material-thumb_up' size={12} />
 						<span>{chunkData.positive}</span>
-					</button>
-					<button className={localStyles.voteButton} onClick={() => handleVote('bad')}>
+					</div>
+					<div className={localStyles.voteDisplay}>
 						<Icon name='material-thumb_down' size={12} />
 						<span>{chunkData.negative}</span>
-					</button>
+					</div>
 				</div>
 			</div>
 		</div>

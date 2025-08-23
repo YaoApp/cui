@@ -590,7 +590,8 @@
 				flex-shrink: 0;
 			}
 
-			.voteButton {
+			// 投票展示样式 - 仅用于显示，无交互功能
+			.voteDisplay {
 				display: flex;
 				align-items: center;
 				gap: 4px;
@@ -600,25 +601,21 @@
 				border-radius: 4px;
 				font-size: 11px;
 				color: var(--color_neo_text_secondary);
-				cursor: pointer;
-				transition: all 0.2s ease;
 
-				&:hover {
-					background: var(--color_neo_bg_field_hover);
-					border-color: var(--color_neo_border_field_hover);
-					transform: scale(1.05);
-				}
-
-				&:first-child:hover {
+				&:first-child {
 					color: var(--color_success);
-					border-color: var(--color_success);
-					background: var(--color_success_bg);
+
+					:global(.Icon) {
+						color: var(--color_success);
+					}
 				}
 
-				&:last-child:hover {
+				&:last-child {
 					color: var(--color_danger);
-					border-color: var(--color_danger);
-					background: var(--color_danger_bg);
+
+					:global(.Icon) {
+						color: var(--color_danger);
+					}
 				}
 
 				i {
