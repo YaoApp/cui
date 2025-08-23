@@ -20,6 +20,7 @@ interface SegmentDetailProps {
 	collectionInfo: CollectionInfo
 	docID: string
 	onDataUpdated?: () => void // 数据更新回调，用于刷新列表
+	initialTab?: TabType // 初始显示的标签页
 }
 
 type TabType = 'editor' | 'graph' | 'parents' | 'hits' | 'vote' | 'score'
@@ -30,7 +31,8 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 	segmentId,
 	collectionInfo,
 	docID,
-	onDataUpdated
+	onDataUpdated,
+	initialTab
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -67,13 +69,13 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 		}
 	}
 
-	// 弹窗打开时加载数据并重置tab
+	// 弹窗打开时加载数据并设置初始tab
 	useEffect(() => {
 		if (visible && segmentId) {
-			setActiveTab('editor')
+			setActiveTab(initialTab || 'editor')
 			loadSegmentData()
 		}
-	}, [visible, segmentId, docID])
+	}, [visible, segmentId, docID, initialTab])
 
 	// 弹窗关闭时清理数据
 	useEffect(() => {
@@ -223,6 +225,10 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 						docID={docID}
 						onSave={handleSave}
 						onSavingStateChange={setIsSaving}
+						onTabSwitch={(tabType) => {
+							// 切换到指定的标签页
+							setActiveTab(tabType)
+						}}
 						onDelete={() => {
 							// 删除成功后关闭弹窗并刷新列表
 							onClose()
@@ -241,7 +247,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 			case 'vote':
 				return <VoteView segmentData={segmentData} docID={docID} />
 			case 'score':
-				return <ScoreView segmentData={segmentData} />
+				return <ScoreView segmentData={segmentData} docID={docID} />
 			default:
 				return (
 					<div style={{ padding: '20px' }}>

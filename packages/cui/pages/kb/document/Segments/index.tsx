@@ -348,6 +348,11 @@ const Segments: React.FC<SegmentsProps> = ({
 						const weightA = a.weight || 0
 						const weightB = b.weight || 0
 						return weightB - weightA // 降序
+					case 'score':
+						// 按评分排序
+						const scoreA = a.score || 0
+						const scoreB = b.score || 0
+						return scoreB - scoreA // 降序
 					case 'votes_good':
 						// 按好评数排序
 						const voteGoodA = a.positive || 0
@@ -686,6 +691,9 @@ const Segments: React.FC<SegmentsProps> = ({
 							<Select.Option value='hit'>{is_cn ? '最多命中' : 'Most Hits'}</Select.Option>
 							<Select.Option value='weight'>
 								{is_cn ? '最高权重' : 'Highest Weight'}
+							</Select.Option>
+							<Select.Option value='score'>
+								{is_cn ? '最高评分' : 'Highest Score'}
 							</Select.Option>
 							<Select.Option value='votes_good'>
 								{is_cn ? '有用优先' : 'Useful First'}

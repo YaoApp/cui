@@ -285,6 +285,7 @@ export interface Segment {
 	version: number
 	weight: number
 	score: number
+	score_dimensions?: Record<string, number>
 	positive: number // Positive vote count
 	negative: number // Negative vote count
 	hit: number // Hit count for the segment
@@ -354,6 +355,7 @@ export interface SegmentText {
 export interface SegmentScore {
 	id: string
 	score?: number
+	dimensions?: Record<string, number>
 }
 
 // Segment weight structure

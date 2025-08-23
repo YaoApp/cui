@@ -110,6 +110,53 @@
 			font-weight: 600; // 从 500 增加到 600
 			font-size: 13px; // 数字部分稍大一些
 		}
+
+		.voteStats {
+			display: flex;
+			gap: 6px;
+			align-items: center;
+
+			.voteGood,
+			.voteBad {
+				display: flex;
+				align-items: center;
+				gap: 2px;
+				font-size: 11px;
+				font-weight: 500;
+			}
+
+			.voteGood {
+				color: #52c41a; // 绿色，表示正面投票
+			}
+
+			.voteBad {
+				color: #ff4d4f; // 红色，表示负面投票
+			}
+		}
+	}
+
+	// 可点击的统计项 hover 效果
+	.clickableMetaItem {
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border-radius: 4px;
+		padding: 2px 4px;
+		margin: -2px -4px;
+
+		&:hover {
+			background-color: rgba(24, 144, 255, 0.08);
+			color: var(--color_main);
+
+			.metaNumber {
+				color: var(--color_main);
+				font-weight: 700;
+			}
+		}
+
+		&:active {
+			background-color: rgba(24, 144, 255, 0.12);
+			transform: scale(0.98);
+		}
 	}
 }
 
@@ -195,6 +242,29 @@
 .textVoteActions {
 	display: flex;
 	gap: 6px;
+}
+
+// 可点击的投票区域 hover 效果
+.clickableVoteActions {
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border-radius: 4px;
+	padding: 4px 6px;
+	margin: -4px -6px;
+
+	&:hover {
+		background-color: rgba(24, 144, 255, 0.08);
+
+		.voteDisplay {
+			color: var(--color_main);
+			font-weight: 600;
+		}
+	}
+
+	&:active {
+		background-color: rgba(24, 144, 255, 0.12);
+		transform: scale(0.98);
+	}
 }
 
 .textEditor {

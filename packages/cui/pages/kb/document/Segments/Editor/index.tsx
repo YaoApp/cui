@@ -39,6 +39,7 @@ interface ChunkEditorProps {
 	onSave: (updatedData: Partial<ChunkData>) => void
 	onDelete?: () => void // 删除回调
 	onSavingStateChange?: (isSaving: boolean) => void // 保存状态变化回调
+	onTabSwitch?: (tabType: 'score' | 'hits' | 'vote') => void // 切换标签页回调
 }
 
 const ChunkEditor: React.FC<ChunkEditorProps> = ({
@@ -47,7 +48,8 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 	docID,
 	onSave,
 	onDelete,
-	onSavingStateChange
+	onSavingStateChange,
+	onTabSwitch
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -214,13 +216,23 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 						{is_cn ? '权重' : 'Weight'}{' '}
 						<WeightEditor value={editedWeight} onChange={handleWeightChange} disabled={false} />
 					</span>
-					<span className={localStyles.metaItem}>
+					<span
+						className={`${localStyles.metaItem} ${
+							onTabSwitch ? localStyles.clickableMetaItem : ''
+						}`}
+						onClick={() => onTabSwitch?.('score')}
+					>
 						{is_cn ? '评分' : 'Score'}{' '}
 						<span className={localStyles.metaNumber}>
 							{chunkData.score?.toFixed(2) || '0.00'}
 						</span>
 					</span>
-					<span className={localStyles.metaItem}>
+					<span
+						className={`${localStyles.metaItem} ${
+							onTabSwitch ? localStyles.clickableMetaItem : ''
+						}`}
+						onClick={() => onTabSwitch?.('hits')}
+					>
 						{is_cn ? '命中' : 'Hits'}{' '}
 						<span className={localStyles.metaNumber}>{chunkData.hit || 0}</span>
 					</span>
@@ -355,7 +367,12 @@ const ChunkEditor: React.FC<ChunkEditorProps> = ({
 					{chunkData.metadata?.chunk_details &&
 						renderPositionInfo(chunkData.metadata.chunk_details)}
 				</div>
-				<div className={localStyles.textVoteActions}>
+				<div
+					className={`${localStyles.textVoteActions} ${
+						onTabSwitch ? localStyles.clickableVoteActions : ''
+					}`}
+					onClick={() => onTabSwitch?.('vote')}
+				>
 					<div className={localStyles.voteDisplay}>
 						<Icon name='material-thumb_up' size={12} />
 						<span>{chunkData.positive}</span>
