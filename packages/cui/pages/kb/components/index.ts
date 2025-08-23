@@ -1,5 +1,7 @@
 export { default as Button } from './Button'
 export type { ButtonProps, ButtonType, ButtonSize } from './Button'
+export { default as ActionButton } from './ActionButton'
+export type { ActionButtonProps } from './ActionButton'
 export { default as DetailModal } from './DetailModal'
 export { default as DataTable } from './DataTable'
 export { default as Pagination } from './Pagination'

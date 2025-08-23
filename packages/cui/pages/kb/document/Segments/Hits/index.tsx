@@ -3,35 +3,15 @@ import { Typography, Button, Tooltip, Modal, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 
-import { Segment } from '@/openapi/kb/types'
+import { Segment, AddHitsRequest, SegmentHit, SegmentReaction, ScrollHitsRequest } from '@/openapi/kb/types'
+import { KB } from '@/openapi'
 import { DataTable, DetailModal } from '@/pages/kb/components'
 import { TableColumn, TableFilter, TableAction } from '@/pages/kb/components/DataTable/types'
-import { DetailModalProps, DetailSection } from '@/pages/kb/components/DetailModal/types'
-import { HitRecord } from '@/pages/kb/types'
-import { mockListHits, ListHitsRequest } from './mockData'
+import { DetailSection } from '@/pages/kb/components/DetailModal/types'
 import styles from '../detail.less'
 import localStyles from './index.less'
 
 const { Text } = Typography
-
-// 简化的 JSON 高亮渲染组件
-const JSONCode: React.FC<{ data: any }> = ({ data }) => {
-	const jsonString = JSON.stringify(data, null, 2)
-
-	// 使用正则表达式进行简单的语法高亮
-	const highlightedJSON = jsonString
-		.replace(/"([^"]+)":/g, '<span class="json-key">"$1":</span>')
-		.replace(/:\s*"([^"]*)"/g, ': <span class="json-string">"$1"</span>')
-		.replace(/:\s*(\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
-		.replace(/:\s*(true|false)/g, ': <span class="json-boolean">$1</span>')
-		.replace(/:\s*(null)/g, ': <span class="json-null">$1</span>')
-
-	return (
-		<div className={localStyles.contextCode}>
-			<pre dangerouslySetInnerHTML={{ __html: highlightedJSON }} />
-		</div>
-	)
-}
 
 interface HitsData {
 	totalHits: number
@@ -42,14 +22,15 @@ interface HitsData {
 
 interface HitsViewProps {
 	segmentData: Segment
+	docID: string
 }
 
-const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
+const HitsView: React.FC<HitsViewProps> = ({ segmentData, docID }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [hitsData, setHitsData] = useState<HitsData | null>(null)
 	const [loading, setLoading] = useState(true)
-	const [tableData, setTableData] = useState<HitRecord[]>([])
+	const [tableData, setTableData] = useState<SegmentHit[]>([])
 	const [pagination, setPagination] = useState({
 		current: 1,
 		pageSize: 10,
@@ -59,89 +40,216 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 	const [hasMore, setHasMore] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
 	const [detailVisible, setDetailVisible] = useState(false)
-	const [selectedRecord, setSelectedRecord] = useState<HitRecord | null>(null)
+	const [selectedRecord, setSelectedRecord] = useState<SegmentHit | null>(null)
+	const [detailLoading, setDetailLoading] = useState(false)
+	const [addingTestData, setAddingTestData] = useState(false)
+	const [scrollId, setScrollId] = useState<string | undefined>(undefined)
 
 	useEffect(() => {
 		loadHitsData()
 		loadTableData()
 	}, [segmentData.id])
 
-	const loadHitsData = async () => {
-		try {
-			setLoading(true)
-			// 模拟API请求延时
-			await new Promise((resolve) => setTimeout(resolve, 100))
+	// 生成随机测试数据
+	const generateTestData = (): AddHitsRequest => {
+		const scenarios = ['智能问答', '文档检索', '知识推荐']
+		const sources = ['web_chat', 'api_call', 'mobile_app', 'slack_bot', 'discord_bot', 'vscode_extension']
+		const queries = [
+			'如何使用这个功能？',
+			'这个API的参数是什么？',
+			'有什么最佳实践吗？',
+			'如何解决这个错误？',
+			'有相关的文档吗？',
+			'这个配置如何设置？',
+			'性能优化建议',
+			'安全注意事项',
+			'版本兼容性问题',
+			'部署流程说明'
+		]
+		const candidates = [
+			'根据文档内容，这个功能可以通过...',
+			'API参数包括：id, name, options...',
+			'最佳实践建议：1. 确保数据验证 2. 使用缓存...',
+			'错误解决方案：检查配置文件和权限设置',
+			'相关文档链接：https://docs.example.com',
+			'配置步骤：1. 编辑配置文件 2. 重启服务...'
+		]
 
-			// 模拟命中数据
-			const mockData: HitsData = {
-				totalHits: 30, // 更新为实际的数据量
-				hitsByScenario: {
-					智能问答: 12,
-					文档检索: 11,
-					知识推荐: 7
-				}
+		const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
+		const getRandomContext = () => ({
+			user_id: `user_${Math.random().toString(36).substr(2, 9)}`,
+			session_id: `session_${Math.random().toString(36).substr(2, 9)}`,
+			timestamp: new Date().toISOString(),
+			metadata: {
+				ip: `192.168.1.${Math.floor(Math.random() * 255)}`,
+				user_agent: 'Mozilla/5.0 (compatible; TestBot/1.0)',
+				language: Math.random() > 0.5 ? 'zh-CN' : 'en-US'
 			}
+		})
 
-			setHitsData(mockData)
-		} catch (error) {
-			console.error('Failed to load hits data:', error)
-		} finally {
-			setLoading(false)
+		// 生成 1-3 个测试 hit 记录
+		const hitCount = Math.floor(Math.random() * 3) + 1
+		const testHits: SegmentHit[] = []
+
+		for (let i = 0; i < hitCount; i++) {
+			testHits.push({
+				id: segmentData.id,
+				hit_id: `test_hit_${Date.now()}_${i}`,
+				source: getRandomItem(sources),
+				scenario: getRandomItem(scenarios),
+				query: getRandomItem(queries),
+				candidate: getRandomItem(candidates),
+				context: getRandomContext()
+			})
+		}
+
+		const defaultReaction: SegmentReaction = {
+			source: 'test_system',
+			scenario: '测试数据生成',
+			query: '批量测试数据添加',
+			context: {
+				test: true,
+				generated_at: new Date().toISOString(),
+				batch_id: `batch_${Date.now()}`
+			}
+		}
+
+		return {
+			segments: testHits,
+			default_reaction: defaultReaction
 		}
 	}
 
-	const loadTableData = async (params?: Partial<ListHitsRequest>, isLoadMore = false) => {
+	// 添加测试数据
+	const handleAddTestData = async () => {
+		if (!window.$app?.openapi) {
+			message.error(is_cn ? '系统未就绪' : 'System not ready')
+			return
+		}
+
+		try {
+			setAddingTestData(true)
+
+			// 生成测试数据
+			const testData = generateTestData()
+
+			// 调用 AddHits API
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.AddHits(docID, segmentData.id, testData)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to add test data')
+			}
+
+			// 显示成功信息
+			const result = response.data
+			message.success(is_cn ? '测试数据添加成功！' : 'Test data added successfully!')
+
+			// 刷新数据
+			loadHitsData()
+			loadTableData()
+		} catch (error) {
+			console.error('Failed to add test data:', error)
+			const errorMsg =
+				error instanceof Error ? error.message : is_cn ? '添加测试数据失败' : 'Failed to add test data'
+			message.error({
+				content: (
+					<div>
+						<div style={{ fontWeight: 'bold', marginBottom: 4 }}>
+							{is_cn ? '添加失败' : 'Add Failed'}
+						</div>
+						<div style={{ fontSize: '12px', color: '#666' }}>{errorMsg}</div>
+					</div>
+				),
+				duration: 8
+			})
+		} finally {
+			setAddingTestData(false)
+		}
+	}
+
+	const loadHitsData = async () => {
+		// 初始统计数据将在 loadTableData 中更新
+		setHitsData({
+			totalHits: 0,
+			hitsByScenario: {}
+		})
+	}
+
+	const loadTableData = async (params?: Partial<ScrollHitsRequest>, isLoadMore = false) => {
+		if (!window.$app?.openapi) {
+			console.error('OpenAPI not available')
+			return
+		}
+
 		try {
 			if (!isLoadMore) {
 				setLoading(true)
 				setTableData([]) // 重新搜索时清空数据
-				setPagination((prev) => ({ ...prev, current: 1 }))
+				setScrollId(undefined) // 重置滚动ID
 			} else {
 				setLoadingMore(true)
 			}
 
-			const currentPage = isLoadMore ? pagination.current + 1 : 1
-			const request: ListHitsRequest = {
-				page: currentPage,
-				pagesize: 10, // 每页10条
+			const request: ScrollHitsRequest = {
+				limit: 10, // 每次加载10条
+				scroll_id: isLoadMore ? scrollId : undefined,
 				...filters,
 				...params
 			}
 
-			const response = await mockListHits(request)
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.ScrollHits(docID, segmentData.id, request)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load hits data')
+			}
+
+			const result = response.data
+
+			if (!result) {
+				throw new Error('No data received from API')
+			}
+
+			// 处理 hits 可能为 null 的情况
+			const hits = result.hits ?? []
 
 			if (isLoadMore) {
 				// 追加数据
-				setTableData((prev) => [...prev, ...response.data])
-				setPagination((prev) => ({
-					...prev,
-					current: currentPage,
-					total: response.total
-				}))
+				setTableData((prev) => [...prev, ...hits])
 			} else {
 				// 替换数据
-				setTableData(response.data)
-				setPagination((prev) => ({
-					...prev,
-					total: response.total,
-					current: 1
-				}))
+				setTableData(hits)
 			}
 
-			// 检查是否还有更多数据 - 计算总页数
-			const totalPages = Math.ceil(response.total / request.pagesize!)
-			setHasMore(currentPage < totalPages)
+			// 更新分页信息
+			setPagination((prev) => ({
+				...prev,
+				total: result.total || 0
+			}))
 
-			console.log('📋 Hits Data Debug:', {
-				currentPage,
-				totalPages,
-				total: response.total,
-				pagesize: request.pagesize,
-				dataLength: response.data.length,
-				hasMore: currentPage < totalPages
-			})
+			// 更新滚动状态
+			setScrollId(result.next_cursor)
+			setHasMore(result.has_more)
+
+			// 更新统计数据
+			if (!isLoadMore && result.total !== undefined) {
+				// 计算场景统计
+				const scenarioCounts: Record<string, number> = {}
+				hits.forEach((hit) => {
+					if (hit.scenario) {
+						scenarioCounts[hit.scenario] = (scenarioCounts[hit.scenario] || 0) + 1
+					}
+				})
+
+				setHitsData({
+					totalHits: result.total || 0,
+					hitsByScenario: scenarioCounts
+				})
+			}
 		} catch (error) {
 			console.error('Failed to load hits table data:', error)
+			message.error(is_cn ? '加载命中数据失败' : 'Failed to load hits data')
 		} finally {
 			setLoading(false)
 			setLoadingMore(false)
@@ -156,49 +264,40 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 	}
 
 	// 定义表格列（设置合理的宽度）
-	const columns: TableColumn<HitRecord>[] = [
+	const columns: TableColumn<SegmentHit>[] = [
+		{
+			key: 'hit_id',
+			title: is_cn ? '命中ID' : 'Hit ID',
+			dataIndex: 'hit_id',
+			width: 120,
+			render: (hit_id: string) => (
+				<span className={localStyles.hitId}>{hit_id ? hit_id.slice(-8) : '-'}</span>
+			)
+		},
 		{
 			key: 'scenario',
 			title: is_cn ? '场景' : 'Scenario',
 			dataIndex: 'scenario',
 			width: 120,
-			render: (scenario: string) => <span className={localStyles.scenarioTag}>{scenario}</span>
+			render: (scenario: string) => <span className={localStyles.scenarioTag}>{scenario || '-'}</span>
 		},
 		{
 			key: 'source',
 			title: is_cn ? '来源' : 'Source',
 			dataIndex: 'source',
-			width: 140,
-			render: (source: string) => <span className={localStyles.sourceText}>{source}</span>
+			width: 180,
+			render: (source: string) => <span className={localStyles.sourceText}>{source || '-'}</span>
 		},
 		{
 			key: 'query',
 			title: is_cn ? '查询内容' : 'Query',
 			dataIndex: 'query',
-			width: 250,
+			width: 400,
 			ellipsis: true,
 			render: (query: string) => (
 				<Tooltip title={query}>
 					<span className={localStyles.queryText}>{query || '-'}</span>
 				</Tooltip>
-			)
-		},
-		{
-			key: 'context',
-			title: 'Context',
-			dataIndex: 'context',
-			width: 300,
-			render: (context: any) => <JSONCode data={context} />
-		},
-		{
-			key: 'created_at',
-			title: is_cn ? '创建时间' : 'Created At',
-			dataIndex: 'created_at',
-			width: 180,
-			render: (date: string) => (
-				<span className={localStyles.timestamp}>
-					{new Date(date).toLocaleString(is_cn ? 'zh-CN' : 'en-US')}
-				</span>
 			)
 		}
 	]
@@ -241,9 +340,35 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 	]
 
 	// 打开详情弹窗
-	const handleViewDetails = (record: HitRecord) => {
-		setSelectedRecord(record)
+	const handleViewDetails = async (record: SegmentHit) => {
+		if (!record.hit_id || !window.$app?.openapi) {
+			message.error(is_cn ? '无法获取详情信息' : 'Cannot get detail information')
+			return
+		}
+
 		setDetailVisible(true)
+		setDetailLoading(true)
+		setSelectedRecord(record) // 先设置基本信息，避免弹窗空白
+
+		try {
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.GetHit(docID, segmentData.id, record.hit_id)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to get hit details')
+			}
+
+			// 更新为完整的详情数据
+			if (response.data) {
+				setSelectedRecord(response.data.hit)
+			}
+		} catch (error) {
+			console.error('Failed to load hit details:', error)
+			message.error(is_cn ? '获取详情失败' : 'Failed to load details')
+			// 保持使用列表中的基本数据
+		} finally {
+			setDetailLoading(false)
+		}
 	}
 
 	// 关闭详情弹窗
@@ -253,27 +378,52 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 	}
 
 	// 处理删除
-	const handleDelete = async (record: HitRecord) => {
-		try {
-			// TODO: 实现实际的删除 API 调用
-			console.log('Deleting hit record:', record)
+	const handleDelete = async (record: SegmentHit) => {
+		if (!record.hit_id || !window.$app?.openapi) {
+			message.error(is_cn ? '无法删除记录' : 'Cannot delete record')
+			return
+		}
 
-			// 模拟删除操作
-			await new Promise((resolve) => setTimeout(resolve, 500))
+		try {
+			const kb = new KB(window.$app.openapi)
+			const response = await kb.RemoveHits(docID, segmentData.id, [record.hit_id])
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to delete hit record')
+			}
 
 			// 从本地状态中移除
-			setTableData((prevData) => prevData.filter((item) => item.id !== record.id))
+			setTableData((prevData) => prevData.filter((item) => item.hit_id !== record.hit_id))
 			setPagination((prev) => ({ ...prev, total: prev.total - 1 }))
 
-			message.success(is_cn ? '删除成功' : 'Deleted successfully')
+			// 更新统计数据
+			setHitsData((prev) => {
+				if (!prev) return prev
+				const newTotal = Math.max(0, prev.totalHits - 1)
+				const newScenarioCounts = { ...prev.hitsByScenario }
+				if (record.scenario && newScenarioCounts[record.scenario]) {
+					newScenarioCounts[record.scenario] = Math.max(0, newScenarioCounts[record.scenario] - 1)
+					if (newScenarioCounts[record.scenario] === 0) {
+						delete newScenarioCounts[record.scenario]
+					}
+				}
+				return {
+					totalHits: newTotal,
+					hitsByScenario: newScenarioCounts
+				}
+			})
+
+			const result = response.data
+			message.success(is_cn ? '删除成功！' : 'Deleted successfully!')
 		} catch (error) {
 			console.error('Delete failed:', error)
-			message.error(is_cn ? '删除失败' : 'Delete failed')
+			const errorMsg = error instanceof Error ? error.message : is_cn ? '删除失败' : 'Delete failed'
+			message.error(errorMsg)
 		}
 	}
 
 	// 定义操作按钮
-	const actions: TableAction<HitRecord>[] = [
+	const actions: TableAction<SegmentHit>[] = [
 		{
 			key: 'view',
 			label: is_cn ? '查看详情' : 'View Details',
@@ -303,11 +453,10 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 		}
 	]
 
-	// 处理搜索
+	// 处理搜索 - ScrollHits API 暂不支持关键字搜索
 	const handleSearch = (value: string) => {
-		setFilters((prev) => ({ ...prev, keywords: value }))
-		setHasMore(true) // 重置加载状态
-		loadTableData({ keywords: value })
+		// ScrollHitsRequest 不支持 keywords 参数，暂时保留函数以备后续扩展
+		console.log('Search not supported in ScrollHits API:', value)
 	}
 
 	// 配置详情弹窗的字段
@@ -317,8 +466,15 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 			fields: [
 				{
 					key: 'id',
-					label: 'ID',
+					label: is_cn ? '段落ID' : 'Segment ID',
 					value: selectedRecord?.id,
+					span: 12,
+					copyable: true
+				},
+				{
+					key: 'hit_id',
+					label: is_cn ? '命中ID' : 'Hit ID',
+					value: selectedRecord?.hit_id,
 					span: 12,
 					copyable: true
 				},
@@ -335,13 +491,6 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 					value: selectedRecord?.source,
 					span: 12,
 					type: 'tag'
-				},
-				{
-					key: 'created_at',
-					label: is_cn ? '创建时间' : 'Created At',
-					value: selectedRecord?.created_at,
-					span: 12,
-					type: 'time'
 				}
 			]
 		},
@@ -356,11 +505,11 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 					copyable: true
 				},
 				{
-					key: 'score',
-					label: is_cn ? '匹配得分' : 'Match Score',
-					value: selectedRecord?.score,
-					span: 12,
-					render: (value) => (value ? `${(value * 100).toFixed(2)}%` : '-')
+					key: 'candidate',
+					label: is_cn ? '候选答案' : 'Candidate',
+					value: selectedRecord?.candidate,
+					span: 24,
+					copyable: true
 				}
 			]
 		},
@@ -370,7 +519,7 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 			fields: [
 				{
 					key: 'context',
-					label: 'Context Data',
+					label: is_cn ? '上下文数据' : 'Context Data',
 					value: selectedRecord?.context,
 					span: 24,
 					type: 'json'
@@ -415,35 +564,57 @@ const HitsView: React.FC<HitsViewProps> = ({ segmentData }) => {
 
 			{/* Body - 表格内容 */}
 			<div className={styles.tableContainer}>
-				<DataTable<HitRecord>
-					data={tableData}
-					columns={columns}
-					loading={loading}
-					total={pagination.total} // 传递总记录数
-					columnWidthPreset='normal' // 使用预设的列宽配置
-					autoFitColumns={true} // 自动适应容器宽度
-					pagination={false} // 禁用分页器，使用滚动
-					filters={tableFilters}
-					searchPlaceholder={is_cn ? '搜索查询内容...' : 'Search queries...'}
-					onSearch={handleSearch}
-					actions={actions}
-					size='small'
-					scroll={{ x: 'max-content' }} // 只设置水平滚动，垂直滚动由CSS控制
-					hasMore={hasMore} // 是否还有更多数据
-					onLoadMore={handleLoadMore} // 加载更多回调
-					loadingMore={loadingMore} // 加载状态
-				/>
+				{loading ? (
+					<div className={localStyles.loadingState}>
+						<Icon name='material-hourglass_empty' size={32} />
+						<Text>{is_cn ? '正在加载命中记录...' : 'Loading hit records...'}</Text>
+					</div>
+				) : (
+					<DataTable<SegmentHit>
+						data={tableData}
+						columns={columns}
+						loading={false} // 不使用DataTable内置的loading
+						total={pagination.total} // 传递总记录数
+						columnWidthPreset='normal' // 使用预设的列宽配置
+						autoFitColumns={true} // 自动适应容器宽度
+						pagination={false} // 禁用分页器，使用滚动
+						filters={tableFilters}
+						rowKey={(record, index) => record.hit_id || `${record.id}-${index}`}
+						// searchPlaceholder={is_cn ? '搜索查询内容...' : 'Search queries...'}
+						// onSearch={handleSearch}
+						extraActions={
+							<Button
+								type='primary'
+								ghost
+								size='small'
+								loading={addingTestData}
+								onClick={handleAddTestData}
+								icon={<Icon name='material-add_circle' size={14} />}
+							>
+								{is_cn ? '添加测试数据' : 'Add Test Data'}
+							</Button>
+						}
+						actions={actions}
+						size='small'
+						scroll={{ x: 'max-content' }} // 只设置水平滚动，垂直滚动由CSS控制
+						hasMore={hasMore} // 是否还有更多数据
+						onLoadMore={handleLoadMore} // 加载更多回调
+						loadingMore={loadingMore} // 加载状态
+					/>
+				)}
 			</div>
 
 			{/* 详情弹窗 */}
-			<DetailModal<HitRecord>
+			<DetailModal<SegmentHit>
 				visible={detailVisible}
 				onClose={handleCloseDetails}
 				title={is_cn ? '命中记录详情' : 'Hit Record Details'}
 				data={selectedRecord}
 				sections={detailSections}
 				width='60%'
+				height='90vh'
 				size='middle'
+				loading={detailLoading}
 			/>
 		</div>
 	)

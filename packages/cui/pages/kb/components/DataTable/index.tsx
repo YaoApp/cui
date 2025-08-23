@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { Input, Select, Button, Space, Typography, Tooltip, Empty, Spin } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import ActionButton from '../ActionButton'
 import { DataTableProps, TableFilter, DEFAULT_COLUMN_WIDTHS, ColumnWidthConfig } from './types'
 import styles from './index.less'
 
@@ -20,15 +21,32 @@ function DataTable<T extends Record<string, any>>({
 	filters,
 	searchPlaceholder,
 	onSearch,
+	extraActions,
 	actions = [],
 	emptyText,
 	size = 'middle',
 	columnWidths,
 	columnWidthPreset = 'normal',
-	autoFitColumns = false
+	autoFitColumns = false,
+	rowKey
 }: DataTableProps<T>) {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+
+	// 将 null 转换为空数组，空值是正常的业务状态
+	const safeData = data ?? []
+
+	// 获取行的唯一key
+	const getRowKey = (record: T, index: number): string => {
+		if (typeof rowKey === 'function') {
+			return rowKey(record, index)
+		}
+		if (typeof rowKey === 'string') {
+			return record[rowKey] || `row-${index}`
+		}
+		// 默认使用 id 字段，如果没有则使用索引
+		return record.id || `row-${index}`
+	}
 
 	const [searchValue, setSearchValue] = useState('')
 	const [filterValues, setFilterValues] = useState<Record<string, any>>({})
@@ -73,13 +91,13 @@ function DataTable<T extends Record<string, any>>({
 							.filter((action) => (action.visible ? action.visible(record) : true))
 							.map((action) => (
 								<Tooltip key={action.key} title={action.label}>
-									<Button
-										type={action.type || 'text'}
-										size='small'
+									<ActionButton
 										icon={action.icon}
+										iconSize={14}
+										title={action.label}
 										disabled={action.disabled ? action.disabled(record) : false}
 										onClick={() => action.onClick?.(record, index)}
-										danger={action.type === 'text' && action.key === 'delete'}
+										danger={action.key === 'delete'}
 									/>
 								</Tooltip>
 							))}
@@ -104,7 +122,7 @@ function DataTable<T extends Record<string, any>>({
 
 	// 使用 Intersection Observer 监听最后一行的可见性
 	useEffect(() => {
-		if (!hasMore || !onLoadMore || loadingMore || data.length === 0) return
+		if (!hasMore || !onLoadMore || loadingMore || safeData.length === 0) return
 
 		let observer: IntersectionObserver | null = null
 
@@ -148,7 +166,7 @@ function DataTable<T extends Record<string, any>>({
 				observer.disconnect()
 			}
 		}
-	}, [hasMore, onLoadMore, loadingMore, data.length])
+	}, [hasMore, onLoadMore, loadingMore, safeData.length])
 
 	// 同步表头和表体的横向滚动
 	useEffect(() => {
@@ -177,7 +195,7 @@ function DataTable<T extends Record<string, any>>({
 		return () => {
 			tableBody.removeEventListener('scroll', handleScroll)
 		}
-	}, [data.length])
+	}, [safeData.length])
 
 	// 处理搜索
 	const handleSearch = (value: string) => {
@@ -250,8 +268,11 @@ function DataTable<T extends Record<string, any>>({
 					)}
 				</div>
 				<div className={styles.filtersRight}>
+					{extraActions && <div className={styles.extraActions}>{extraActions}</div>}
 					<Text type='secondary' className={styles.totalText}>
-						{is_cn ? `共 ${total || data.length} 条` : `Total ${total || data.length} items`}
+						{is_cn
+							? `共 ${total || safeData.length} 条`
+							: `Total ${total || safeData.length} items`}
 					</Text>
 				</div>
 			</div>
@@ -274,12 +295,12 @@ function DataTable<T extends Record<string, any>>({
 		/>
 	)
 
-	if (loading && data.length === 0) {
+	if (loading && safeData.length === 0) {
 		return (
 			<div className={styles.dataTableContainer}>
 				{renderFilters()}
 				<div className={styles.loadingContainer}>
-					<Spin size='large' />
+					<Icon name='material-hourglass_empty' size={32} />
 					<Text type='secondary'>{is_cn ? '加载中...' : 'Loading...'}</Text>
 				</div>
 			</div>
@@ -311,11 +332,11 @@ function DataTable<T extends Record<string, any>>({
 
 				{/* 表体 */}
 				<div className={styles.tableBody} ref={tableBodyRef}>
-					{data.length === 0 ? (
+					{safeData.length === 0 ? (
 						<div className={styles.emptyContainer}>{customEmpty}</div>
 					) : (
-						data.map((record, rowIndex) => (
-							<div key={record.id || rowIndex} className={styles.tableRow}>
+						safeData.map((record, rowIndex) => (
+							<div key={getRowKey(record, rowIndex)} className={styles.tableRow}>
 								{enhancedColumns.map((column) => (
 									<div
 										key={column.key}

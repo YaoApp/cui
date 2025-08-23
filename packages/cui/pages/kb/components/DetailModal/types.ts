@@ -34,6 +34,7 @@ export interface DetailModalProps<T = any> {
 	onClose: () => void
 	title?: string
 	width?: number | string
+	height?: number | string
 
 	// 数据相关
 	data: T | null

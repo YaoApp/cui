@@ -110,19 +110,39 @@
 .moreButton,
 .fullscreenButton,
 .closeButton {
-	padding: 4px;
-	height: 28px;
-	width: 28px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	padding: 0 !important;
+	height: 28px !important;
+	width: 28px !important;
+	min-width: 28px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
 	color: var(--color_text_grey);
 	transition: all 0.2s ease;
 	background: transparent !important;
+	border: none !important;
+	border-radius: 4px !important;
+	line-height: 1 !important;
+
+	// 确保图标完全居中
+	:global(.anticon),
+	:global(.Icon),
+	:global(.xgen-icon) {
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		line-height: 1 !important;
+		margin: 0 !important;
+	}
 
 	&:hover {
 		color: var(--color_main);
 		transform: scale(1.1);
+		background: var(--color_bg_hover) !important;
+	}
+
+	&:focus {
+		box-shadow: none !important;
 	}
 
 	&.active {

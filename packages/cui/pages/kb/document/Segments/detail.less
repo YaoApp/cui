@@ -1,18 +1,30 @@
 .chunkDetailModal {
+	// 确保模态窗有足够高的层级
+	z-index: 1000;
+
 	:global(.ant-modal-content) {
-		border-radius: var(--radius);
+		height: 90vh;
+		display: flex;
+		flex-direction: column;
+		border-radius: 12px;
 		overflow: hidden;
-		box-shadow: var(--shadow);
+		position: relative;
+	}
+
+	:global(.ant-modal-body) {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+		overflow: hidden;
+		height: 100%;
+		position: relative;
 	}
 
 	:global(.ant-modal-header) {
 		padding: 0;
 		border-bottom: none;
 		background: transparent;
-	}
-
-	:global(.ant-modal-body) {
-		padding: 0;
 	}
 
 	:global(.xgen-modal-header) {
@@ -99,25 +111,54 @@
 	}
 
 	.closeButton {
+		padding: 0;
+		height: 28px;
+		width: 28px;
+		min-width: 28px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 24px;
-		height: 24px;
-		border-radius: var(--radius);
-		cursor: pointer;
 		color: var(--color_text_grey);
 		transition: all 0.2s ease;
+		background: transparent;
+		border: none;
+		border-radius: 4px;
+		line-height: 1;
+		cursor: pointer;
 		flex-shrink: 0;
 		z-index: 1;
 
+		// 确保图标完全居中
+		:global(.anticon),
+		:global(.Icon),
+		:global(.xgen-icon) {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			line-height: 1;
+			margin: 0;
+		}
+
 		&:hover {
+			color: var(--color_main);
+			transform: scale(1.1);
 			background: var(--color_bg_hover);
-			color: var(--color_text);
 		}
 
 		&:active {
 			background: var(--color_bg_active);
+			transform: scale(1.05);
+		}
+
+		// 禁用状态样式
+		&[style*='not-allowed'] {
+			cursor: not-allowed;
+
+			&:hover {
+				transform: none;
+				background: transparent;
+				color: var(--color_text_grey);
+			}
 		}
 	}
 
@@ -141,14 +182,11 @@
 }
 
 .modalContent {
-	min-height: 500px;
-	max-height: calc(100vh - 280px);
-	height: calc(100vh - 280px); // 使用动态高度而不是固定高度
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 	overflow: hidden;
-	background: var(--color_bg_menu);
-	border-radius: 0 0 var(--radius) var(--radius);
-	display: flex; // 添加 flex 布局
-	flex-direction: column; // 垂直排列
+	border-radius: 0 0 12px 12px;
 }
 
 .modalFooter {
@@ -191,13 +229,42 @@
 	}
 }
 
-// 通用Tab内容样式
+// 通用Tab内容样式 - 匹配DocumentModal的contentTabs样式
 .tabContent {
 	height: 100%;
-	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	background: var(--color_bg_menu);
+	border-radius: 0 0 12px 12px;
+
+	// 内容区域应该能滚动，类似DocumentModal的.ant-tabs-tabpane
+	overflow: auto;
+
+	// 强制显示滚动条样式，覆盖全局隐藏
+	&::-webkit-scrollbar {
+		width: 12px !important;
+		height: 12px !important;
+		display: block !important;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border) !important;
+		border-radius: 4px !important;
+		border: 2px solid var(--color_bg_menu) !important;
+
+		&:hover {
+			background: var(--color_text_grey) !important;
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_bg_menu) !important;
+		border-radius: 4px !important;
+	}
+
+	// Firefox 滚动条
+	scrollbar-width: thin !important;
+	scrollbar-color: var(--color_border) var(--color_bg_menu) !important;
 }
 
 .tabHeader {
@@ -231,6 +298,32 @@
 	flex: 1;
 	overflow: auto;
 	padding: 16px 20px;
+
+	// 强制显示滚动条样式，覆盖全局隐藏
+	&::-webkit-scrollbar {
+		width: 12px !important;
+		height: 12px !important;
+		display: block !important;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border) !important;
+		border-radius: 4px !important;
+		border: 2px solid var(--color_bg_menu) !important;
+
+		&:hover {
+			background: var(--color_text_grey) !important;
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_bg_menu) !important;
+		border-radius: 4px !important;
+	}
+
+	// Firefox 滚动条
+	scrollbar-width: thin !important;
+	scrollbar-color: var(--color_border) var(--color_bg_menu) !important;
 
 	:global(.ant-table) {
 		background: transparent;
@@ -299,4 +392,18 @@
 	gap: 8px;
 	color: var(--color_title);
 	font-weight: 500;
+}
+
+// 加载状态 - 与 Graph、Parents、Hits 保持一致
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	min-height: 300px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px;
+	text-align: center;
 }

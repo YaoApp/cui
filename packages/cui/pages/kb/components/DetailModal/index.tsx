@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Modal, Button, Tooltip, Typography, Tag, Spin, Space, Collapse, Row, Col, message } from 'antd'
+import { Modal, Button, Tooltip, Typography, Tag, Space, Collapse, Row, Col, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { DetailModalProps, DetailField, DetailSection } from './types'
@@ -67,7 +67,8 @@ function DetailModal<T extends Record<string, any>>({
 	visible,
 	onClose,
 	title,
-	width = '80%',
+	width = '90%',
+	height,
 	data,
 	loading = false,
 	sections = [],
@@ -123,10 +124,16 @@ function DetailModal<T extends Record<string, any>>({
 			<Row gutter={[16, 12]}>
 				{fields.map((field) => (
 					<Col key={field.key} span={field.span || 12}>
-						<div className={styles.fieldItem}>
-							<div className={styles.fieldLabel}>{field.label}</div>
-							<div className={styles.fieldValue}>{renderFieldValue(field, data)}</div>
-						</div>
+						{field.type === 'json' ? (
+							// JSON类型直接显示内容，不显示Label和边框
+							<div className={styles.jsonFieldItem}>{renderFieldValue(field, data)}</div>
+						) : (
+							// 其他类型显示Label和边框
+							<div className={styles.fieldItem}>
+								<div className={styles.fieldLabel}>{field.label}</div>
+								<div className={styles.fieldValue}>{renderFieldValue(field, data)}</div>
+							</div>
+						)}
 					</Col>
 				))}
 			</Row>
@@ -138,7 +145,7 @@ function DetailModal<T extends Record<string, any>>({
 		if (loading) {
 			return (
 				<div className={styles.loadingContainer}>
-					<Spin size='large' />
+					<Icon name='material-hourglass_empty' size={32} />
 					<Text type='secondary'>{is_cn ? '加载中...' : 'Loading...'}</Text>
 				</div>
 			)
@@ -200,6 +207,20 @@ function DetailModal<T extends Record<string, any>>({
 		)
 	}
 
+	// 计算弹窗样式 - 自适应内容高度，但限制最大高度
+	const modalStyle: React.CSSProperties = {
+		top: '5vh',
+		paddingBottom: 0,
+		maxWidth: 'none',
+		maxHeight: '90vh' // 设置Modal最大高度
+	}
+
+	const modalBodyStyle: React.CSSProperties = {
+		padding: 0,
+		overflow: 'hidden',
+		...bodyStyle
+	}
+
 	return (
 		<Modal
 			open={visible}
@@ -208,10 +229,8 @@ function DetailModal<T extends Record<string, any>>({
 			width={width}
 			footer={null}
 			className={`${styles.detailModal} ${styles[size]}`}
-			bodyStyle={{
-				padding: 0,
-				...bodyStyle
-			}}
+			style={modalStyle}
+			bodyStyle={modalBodyStyle}
 			closable={false}
 			destroyOnClose
 		>

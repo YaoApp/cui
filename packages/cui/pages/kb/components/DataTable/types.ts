@@ -79,10 +79,11 @@ export interface TableAction<T = any> {
 
 export interface DataTableProps<T = any> {
 	// 数据相关
-	data: T[]
+	data: T[] | null
 	columns: TableColumn<T>[]
 	loading?: boolean
 	total?: number // 总记录数
+	rowKey?: string | ((record: T, index: number) => string) // 行的唯一标识符
 
 	// 列宽配置
 	columnWidths?: ColumnWidthConfig
@@ -106,6 +107,7 @@ export interface DataTableProps<T = any> {
 	filters?: TableFilter[]
 	searchPlaceholder?: string
 	onSearch?: (value: string) => void
+	extraActions?: React.ReactNode // 额外的操作按钮
 
 	// 操作相关
 	actions?: TableAction<T>[]

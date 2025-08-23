@@ -1,0 +1,81 @@
+// ActionButton 组件样式
+.actionButton {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	color: var(--color_neo_text_secondary);
+
+	// 默认hover效果 - 只保留放大效果
+	&:hover:not(.disabled) {
+		transform: scale(1.1);
+	}
+
+	// 点击效果
+	&:active:not(.disabled) {
+		transform: scale(0.95);
+	}
+
+	// 禁用状态
+	&.disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+		transform: none !important;
+		box-shadow: none !important;
+	}
+
+	// 图标居中
+	:global(.Icon),
+	:global(.anticon),
+	:global(.xgen-icon) {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		line-height: 1;
+		margin: 0;
+	}
+}
+
+// 按钮类型样式
+.actionButton.default {
+	// 默认样式已在基础样式中定义
+}
+
+.actionButton.primary {
+	background: var(--color_main);
+	color: white;
+
+	// primary类型只保留放大效果，不改变背景色
+}
+
+.actionButton.danger,
+.actionButton.default.danger {
+	// danger类型只保留放大效果，不改变颜色
+}
+
+// 深色模式适配
+[data-theme='dark'] {
+	.actionButton {
+		color: var(--color_neo_text_secondary);
+
+		// 深色模式也只保留放大效果，不改变背景和颜色
+	}
+
+	.actionButton.primary {
+		background: var(--color_main);
+		color: white;
+
+		// primary类型在深色模式下也只保留放大效果
+	}
+
+	.actionButton.danger,
+	.actionButton.default.danger {
+		// danger类型在深色模式下也只保留放大效果
+	}
+}

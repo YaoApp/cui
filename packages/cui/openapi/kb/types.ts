@@ -509,7 +509,7 @@ export interface VoteScrollResult {
 
 // Hit scroll result
 export interface HitScrollResult {
-	hits: SegmentHit[]
+	hits: SegmentHit[] | null
 	next_cursor?: string
 	has_more: boolean
 	total?: number

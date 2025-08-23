@@ -93,6 +93,12 @@
 	align-items: center;
 	gap: 8px;
 	flex-shrink: 0;
+
+	.extraActions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
 }
 
 .filterItem {
@@ -234,9 +240,7 @@
 		background: var(--color_neo_bg_hover) !important;
 	}
 
-	&:last-child {
-		border-bottom: none;
-	}
+	// 保持所有行都有底部边框，包括最后一行
 }
 
 .bodyCell {
@@ -245,7 +249,7 @@
 	color: var(--color_neo_text_primary);
 	border-right: 1px solid var(--color_neo_border_card);
 	display: flex;
-	align-items: flex-start; // 改为顶部对齐，支持多行文本
+	align-items: center; // 垂直居中对齐
 	white-space: pre-wrap; // 支持换行和保留空格
 	word-wrap: break-word; // 长单词自动换行
 	word-break: break-all; // 必要时在任意字符处换行
@@ -299,7 +303,7 @@
 	background: var(--color_bg_layout);
 }
 
-// 操作按钮样式
+// 危险按钮特殊样式
 .dangerButton {
 	&:hover {
 		color: var(--color_error) !important;

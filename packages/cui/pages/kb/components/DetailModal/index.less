@@ -4,13 +4,14 @@
 	// 确保模态窗有足够高的层级
 	z-index: 1000;
 
-	// 模态框样式与 DocumentModal 保持一致
+	// 完全复制文档列表页的模态框样式
 	:global(.ant-modal-content) {
+		height: 90vh;
+		display: flex;
+		flex-direction: column;
 		border-radius: 12px;
 		overflow: hidden;
-		background: var(--color_neo_bg_card);
-		border: 1px solid var(--color_neo_border_card);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+		position: relative;
 	}
 
 	:global(.ant-modal-body) {
@@ -25,10 +26,11 @@
 }
 
 .modalContent {
-	height: 100%;
+	max-height: 90vh;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+	border-radius: 0 0 12px 12px;
 }
 
 // 头部导航 - 完全参照 DocumentModal 的实现
@@ -65,23 +67,43 @@
 
 .headerButton,
 .closeButton {
-	padding: 4px;
-	height: 28px;
-	width: 28px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	padding: 0 !important;
+	height: 28px !important;
+	width: 28px !important;
+	min-width: 28px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
 	color: var(--color_text_grey);
 	transition: all 0.2s ease;
 	background: transparent !important;
+	border: none !important;
+	border-radius: 4px !important;
+	line-height: 1 !important;
+
+	// 确保图标完全居中
+	:global(.anticon),
+	:global(.Icon),
+	:global(.xgen-icon) {
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		line-height: 1 !important;
+		margin: 0 !important;
+	}
 
 	&:hover {
 		color: var(--color_main);
 		transform: scale(1.1);
+		background: var(--color_bg_hover) !important;
+	}
+
+	&:focus {
+		box-shadow: none !important;
 	}
 }
 
-// 内容区域样式 - 参照 DocumentModal
+// 内容区域样式 - 自适应高度
 .content {
 	flex: 1;
 	display: flex;
@@ -89,37 +111,39 @@
 	overflow: hidden;
 	position: relative;
 	z-index: 1;
+	border-radius: 0 0 12px 12px;
+	min-height: 0;
 }
 
-// 模态框主体
+// 模态框主体 - 自适应内容高度，完全复制 scrollableContent 的滚动条实现
 .modalBody {
 	flex: 1;
 	overflow-y: auto;
+	min-height: 0;
+	max-height: calc(90vh - 60px); // 减去header高度，确保滚动条正确显示
 	padding: 20px;
+	background: var(--color_neo_bg_content);
+	position: relative;
 
-	// 使用与 DataTable 一致的滚动条样式
+	// 自定义滚动条样式（与 scrollableContent 保持一致）
 	&::-webkit-scrollbar {
 		width: 12px;
 	}
 
 	&::-webkit-scrollbar-thumb {
-		background: var(--color_neo_border_card);
+		background: var(--color_border);
 		border-radius: 4px;
-		border: 2px solid var(--color_neo_bg_card);
+		border: 2px solid var(--color_neo_bg_content);
 
 		&:hover {
-			background: var(--color_neo_text_secondary);
+			background: var(--color_text_grey);
 		}
 	}
 
 	&::-webkit-scrollbar-track {
-		background: var(--color_neo_bg_card);
+		background: var(--color_neo_bg_content);
 		border-radius: 4px;
 	}
-
-	// Firefox 滚动条
-	scrollbar-width: thin;
-	scrollbar-color: var(--color_neo_border_card) var(--color_neo_bg_card);
 }
 
 // 模态框底部样式已移除，操作按钮现在在头部
@@ -151,40 +175,93 @@
 	padding: 16px;
 }
 
-// 可折叠区域样式
+// 可折叠区域样式 - 完全模拟普通section的结构和样式
 .sectionCollapse {
+	// 模拟.section的外层容器样式
+	background: var(--color_neo_bg_card);
 	border: 1px solid var(--color_neo_border_card);
 	border-radius: 8px;
-	background: var(--color_neo_bg_card);
+	overflow: hidden;
 
+	// 重置Collapse组件的默认样式
+	:global(.xgen-collapse),
+	:global(.ant-collapse) {
+		background: transparent !important;
+		border: none !important;
+		border-radius: 0 !important;
+	}
+
+	:global(.xgen-collapse-item),
 	:global(.ant-collapse-item) {
-		border: none;
+		border: none !important;
+		border-radius: 0 !important;
+		background: transparent !important;
 
 		&:last-child {
-			border-radius: 0 0 8px 8px;
+			border-radius: 0 !important;
+		}
+
+		// 激活状态不要额外样式
+		&.xgen-collapse-item-active,
+		&.ant-collapse-item-active {
+			border-color: transparent !important;
 		}
 	}
 
+	// xgen-collapse-header完全复制.sectionTitle样式
+	:global(.xgen-collapse-header),
 	:global(.ant-collapse-header) {
-		padding: 12px 16px;
-		background: var(--color_neo_bg_header);
-		border-bottom: 1px solid var(--color_neo_border_header);
-		font-size: 14px;
-		font-weight: 600;
-		color: var(--color_neo_text_primary);
+		// 完全复制.sectionTitle的每一个样式属性
+		padding: 12px 16px !important;
+		background: var(--color_neo_bg_header) !important;
+		border-bottom: 1px solid var(--color_neo_border_header) !important;
+		font-size: 14px !important;
+		font-weight: 600 !important;
+		color: var(--color_neo_text_primary) !important;
+		border-radius: 0 !important;
+		margin: 0 !important;
+		line-height: 1.4 !important;
+		border-top: none !important;
+		border-left: none !important;
+		border-right: none !important;
 
 		&:hover {
-			background: var(--color_neo_bg_field_hover);
+			background: var(--color_neo_bg_field_hover) !important;
+		}
+
+		&:focus {
+			background: var(--color_neo_bg_header) !important;
+		}
+
+		// 折叠箭头样式
+		:global(.xgen-collapse-arrow),
+		:global(.ant-collapse-arrow) {
+			color: var(--color_neo_text_secondary) !important;
+			font-size: 12px !important;
+		}
+
+		// header文本样式
+		:global(.xgen-collapse-header-text),
+		:global(.ant-collapse-header-text) {
+			color: inherit !important;
+			font-size: inherit !important;
+			font-weight: inherit !important;
 		}
 	}
 
+	// xgen-collapse-content完全模拟.sectionContent
+	:global(.xgen-collapse-content),
 	:global(.ant-collapse-content) {
-		border: none;
-		background: var(--color_neo_bg_card);
-	}
+		border: none !important;
+		background: var(--color_neo_bg_card) !important;
+		border-radius: 0 !important;
 
-	:global(.ant-collapse-content-box) {
-		padding: 16px;
+		// xgen-collapse-content-box完全复制.sectionContent样式
+		:global(.xgen-collapse-content-box),
+		:global(.ant-collapse-content-box) {
+			padding: 16px !important;
+			background: transparent !important;
+		}
 	}
 }
 
@@ -210,6 +287,12 @@
 	display: flex;
 	align-items: flex-start;
 	word-break: break-all;
+}
+
+// JSON字段专用样式 - 无边框无背景，直接显示内容
+.jsonFieldItem {
+	// 不设置任何背景、边框或内边距，让JSON内容直接显示
+	display: block;
 }
 
 // 字段标签样式
@@ -300,15 +383,14 @@
 	// 继承父容器样式，不添加额外样式
 }
 
-// 加载状态
+// 加载状态 - 与 DataTable 保持一致
 .loadingContainer {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	min-height: 200px;
-	gap: 12px;
-	color: var(--color_neo_text_secondary);
+	height: 300px;
+	gap: 16px;
 }
 
 // 空状态
@@ -414,18 +496,34 @@
 		background: var(--color_neo_bg_card);
 		border-color: var(--color_neo_border_card);
 
+		:global(.xgen-collapse-header),
 		:global(.ant-collapse-header) {
-			background: var(--color_neo_bg_header);
-			border-color: var(--color_neo_border_header);
-			color: var(--color_neo_text_primary);
+			background: var(--color_neo_bg_header) !important;
+			border-color: var(--color_neo_border_header) !important;
+			color: var(--color_neo_text_primary) !important;
 
 			&:hover {
-				background: var(--color_neo_bg_field_hover);
+				background: var(--color_neo_bg_field_hover) !important;
+			}
+
+			&:focus {
+				background: var(--color_neo_bg_header) !important;
+			}
+
+			:global(.xgen-collapse-arrow),
+			:global(.ant-collapse-arrow) {
+				color: var(--color_neo_text_secondary) !important;
+			}
+
+			:global(.xgen-collapse-header-text),
+			:global(.ant-collapse-header-text) {
+				color: inherit !important;
 			}
 		}
 
+		:global(.xgen-collapse-content),
 		:global(.ant-collapse-content) {
-			background: var(--color_neo_bg_card);
+			background: var(--color_neo_bg_card) !important;
 		}
 	}
 
@@ -475,17 +573,22 @@
 	}
 
 	.modalBody {
+		// 深色模式下的滚动条样式（与 scrollableContent 保持一致）
+		&::-webkit-scrollbar {
+			width: 12px;
+		}
+
 		&::-webkit-scrollbar-thumb {
-			background: var(--color_neo_border_card);
-			border: 2px solid var(--color_neo_bg_card);
+			background: var(--color_border);
+			border: 2px solid var(--color_neo_bg_content);
 
 			&:hover {
-				background: var(--color_neo_text_secondary);
+				background: var(--color_text_grey);
 			}
 		}
 
 		&::-webkit-scrollbar-track {
-			background: var(--color_neo_bg_card);
+			background: var(--color_neo_bg_content);
 		}
 	}
 }

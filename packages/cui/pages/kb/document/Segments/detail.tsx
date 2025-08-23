@@ -8,7 +8,7 @@ import { KB } from '@/openapi'
 import Editor from './Editor'
 import GraphView from './Graph'
 import ParentsView from './Parents'
-import HitsView from './Hits'
+import HitsView from './Hits/index'
 import ScoreView from './Score'
 import VoteView from './Vote'
 import styles from './detail.less'
@@ -162,18 +162,12 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 	}
 
 	const renderContent = () => {
-		// 加载状态
+		// 加载状态 - 与 Graph、Parents、Hits 保持一致
 		if (loading) {
 			return (
-				<div
-					style={{
-						display: 'flex',
-						justifyContent: 'center',
-						alignItems: 'center',
-						height: '400px'
-					}}
-				>
-					<Spin size='large' tip={is_cn ? '加载中...' : 'Loading...'} />
+				<div className={styles.loadingState}>
+					<Icon name='material-hourglass_empty' size={32} />
+					<span>{is_cn ? '正在加载分段详情...' : 'Loading segment details...'}</span>
 				</div>
 			)
 		}
@@ -240,7 +234,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 			case 'parents':
 				return <ParentsView segmentData={segmentData} />
 			case 'hits':
-				return <HitsView segmentData={segmentData} />
+				return <HitsView segmentData={segmentData} docID={docID} />
 			case 'vote':
 				return <VoteView segmentData={segmentData} />
 			case 'score':
@@ -292,7 +286,17 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 			open={visible}
 			onCancel={isSaving ? undefined : onClose}
 			footer={null}
-			width={1200}
+			width='90%'
+			style={{
+				top: '5vh',
+				paddingBottom: 0,
+				maxWidth: 'none'
+			}}
+			bodyStyle={{
+				padding: 0,
+				height: 'calc(90vh - 56px)',
+				overflow: 'hidden'
+			}}
 			destroyOnClose
 			closable={false}
 			maskClosable={!isSaving}
