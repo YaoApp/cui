@@ -163,12 +163,6 @@ const ParentsViewer: React.FC<ParentsViewerProps> = ({
 						const isCurrentSegment = segment.id === currentSegment.id
 						const isSelected = selectedSegment?.id === segment.id
 						const isParentSegment = parentsData.some((parent) => parent.id === segment.id)
-						const hasHighlight =
-							isParentSegment &&
-							currentSegment.text &&
-							segment.text
-								.toLowerCase()
-								.includes(currentSegment.text.substring(0, 20).toLowerCase())
 
 						return (
 							<div
@@ -188,18 +182,6 @@ const ParentsViewer: React.FC<ParentsViewerProps> = ({
 											name='material-radio_button_checked'
 											size={10}
 											className={localStyles.currentIndicator}
-										/>
-									)}
-									{hasHighlight && !isCurrentSegment && (
-										<Icon
-											name='material-highlight'
-											size={10}
-											className={localStyles.highlightIndicator}
-											title={
-												is_cn
-													? '包含当前段落内容'
-													: 'Contains current segment content'
-											}
 										/>
 									)}
 									<span className={localStyles.levelIndex}>
