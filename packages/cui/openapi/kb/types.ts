@@ -345,6 +345,25 @@ export interface GetSegmentResponse {
 	segment_id: string
 }
 
+// SegmentTree represents a hierarchical tree structure of segment parents
+export interface SegmentTree {
+	segment: Segment
+	parent?: SegmentTree
+	depth: number
+}
+
+// Get segment parents request
+export interface GetSegmentParentsRequest {
+	include_metadata?: boolean // Whether to include segment metadata (default: true)
+}
+
+// Get segment parents response
+export interface GetSegmentParentsResponse {
+	tree: SegmentTree
+	doc_id: string
+	segment_id: string
+}
+
 // Segment text structure for adding/updating segments
 export interface SegmentText {
 	id?: string

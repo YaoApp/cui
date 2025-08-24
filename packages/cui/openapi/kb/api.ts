@@ -23,6 +23,8 @@ import {
 	GetDocumentResponse,
 	Segment,
 	GetSegmentResponse,
+	GetSegmentParentsRequest,
+	GetSegmentParentsResponse,
 	ListSegmentsRequest,
 	ListSegmentsResponse,
 	ScrollSegmentsRequest,
@@ -197,6 +199,28 @@ export class KB {
 	 */
 	async GetSegment(docID: string, segmentID: string): Promise<ApiResponse<GetSegmentResponse>> {
 		return this.api.Get<GetSegmentResponse>(`/kb/documents/${docID}/segments/${segmentID}`)
+	}
+
+	/**
+	 * Get parent segments for a specific segment
+	 */
+	async GetSegmentParents(
+		docID: string,
+		segmentID: string,
+		request?: GetSegmentParentsRequest
+	): Promise<ApiResponse<GetSegmentParentsResponse>> {
+		const params: Record<string, string> = {}
+
+		if (request) {
+			if (request.include_metadata !== undefined) {
+				params.include_metadata = request.include_metadata.toString()
+			}
+		}
+
+		return this.api.Get<GetSegmentParentsResponse>(
+			`/kb/documents/${docID}/segments/${segmentID}/parents`,
+			params
+		)
 	}
 
 	/**

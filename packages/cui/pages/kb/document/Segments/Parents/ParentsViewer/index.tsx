@@ -72,7 +72,7 @@ const ParentsViewer: React.FC<ParentsViewerProps> = ({
 				<div className={localStyles.menuSectionHeader}>
 					<Icon name='material-account_tree' size={16} />
 					<Text strong>{is_cn ? '上下文层级' : 'Context Hierarchy'}</Text>
-					<span className={localStyles.count}>({parentsData.length})</span>
+					<span className={localStyles.count}>({parentsData.length + 1})</span>
 				</div>
 				<div className={localStyles.menuContainer}>
 					{menuData.map((segment) => {
@@ -140,7 +140,25 @@ const ParentsViewer: React.FC<ParentsViewerProps> = ({
 									{is_cn ? '命中次数' : 'Hit Count'}:
 								</Text>
 								<Text className={localStyles.metaValue}>
-									{selectedSegment.metadata?.hit_count || 0}
+									{selectedSegment.hit || 0}
+								</Text>
+							</div>
+							<div className={localStyles.metaRow}>
+								<Text type='secondary' className={localStyles.metaLabel}>
+									{is_cn ? '投票统计' : 'Votes'}:
+								</Text>
+								<Text className={localStyles.metaValue}>
+									+{selectedSegment.positive || 0} / -
+									{selectedSegment.negative || 0}
+								</Text>
+							</div>
+							<div className={localStyles.metaRow}>
+								<Text type='secondary' className={localStyles.metaLabel}>
+									{is_cn ? '权重评分' : 'Weight/Score'}:
+								</Text>
+								<Text className={localStyles.metaValue}>
+									{selectedSegment.weight?.toFixed(2) || '0.00'} /{' '}
+									{selectedSegment.score?.toFixed(2) || '0.00'}
 								</Text>
 							</div>
 							<div className={localStyles.metaRow}>
