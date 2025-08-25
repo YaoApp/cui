@@ -239,7 +239,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({
 					/>
 				)
 			case 'graph':
-				return <GraphView segmentData={segmentData} />
+				return <GraphView segmentData={segmentData} docID={docID} />
 			case 'parents':
 				return <ParentsView segmentData={segmentData} />
 			case 'hits':

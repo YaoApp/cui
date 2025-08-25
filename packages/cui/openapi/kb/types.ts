@@ -617,3 +617,64 @@ export interface GetHitResponse {
 	segment_id: string
 	hit_id: string
 }
+
+// ===== Segment Graph Management Types =====
+
+// Graph node structure (entity)
+export interface GraphNode {
+	id: string
+	labels: string[]
+	properties?: Record<string, any>
+}
+
+// Graph relationship structure
+export interface GraphRelationship {
+	id: string
+	type: string
+	start_node: string
+	end_node: string
+	properties?: Record<string, any>
+}
+
+// Segment graph response (GET /documents/:docID/segments/:segmentID/graph)
+export interface SegmentGraphResponse {
+	doc_id: string
+	segment_id: string
+	entities?: GraphNode[]
+	entities_count?: number
+	relationships?: GraphRelationship[]
+	relationships_count?: number
+}
+
+// Segment entities response (GET /documents/:docID/segments/:segmentID/entities)
+export interface SegmentEntitiesResponse {
+	doc_id: string
+	segment_id: string
+	entities: GraphNode[]
+	entities_count: number
+}
+
+// Segment relationships response (GET /documents/:docID/segments/:segmentID/relationships)
+export interface SegmentRelationshipsResponse {
+	doc_id: string
+	segment_id: string
+	relationships: GraphRelationship[]
+	relationships_count: number
+}
+
+// Extract segment graph request (POST /documents/:docID/segments/:segmentID/extract)
+export interface ExtractSegmentGraphRequest {
+	// Extraction options can be added here as needed
+	// For now, keeping it simple with optional properties
+	[key: string]: any
+}
+
+// Extract segment graph response (POST /documents/:docID/segments/:segmentID/extract)
+export interface ExtractSegmentGraphResponse {
+	message: string
+	doc_id: string
+	segment_id: string
+	entities_count: number
+	relationships_count: number
+	extraction_model?: string
+}

@@ -145,6 +145,22 @@
 	padding: 40px;
 }
 
+// 提取状态
+.extractingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 12px;
+	color: var(--color_neo_text_primary);
+	padding: 40px;
+
+	.anticon {
+		animation: pulse 2s infinite;
+	}
+}
+
 // 图谱内容区域
 .graphContent {
 	flex: 1; // 改为 flex: 1 而不是固定高度
@@ -186,6 +202,7 @@
 [data-theme='dark'] {
 	.loadingState,
 	.emptyState,
+	.extractingState,
 	.graphPlaceholder {
 		color: var(--color_neo_text_secondary);
 	}

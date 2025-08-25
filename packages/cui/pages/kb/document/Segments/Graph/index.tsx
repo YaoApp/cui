@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Tag, Typography, message } from 'antd'
+import { Tag, Typography, message, Popconfirm } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
+import { Button } from '../../../components'
 import { KB } from '@/openapi'
+import type { GraphNode as APIGraphNode, GraphRelationship as APIGraphRelationship } from '@/openapi/kb/types'
 import GraphVisualization from './GraphVisualization'
 import styles from '../detail.less'
 import localStyles from './index.less'
@@ -54,10 +56,11 @@ interface GraphViewProps {
 			}
 		}
 	}
+	docID: string
 	onDataLoad?: (data: GraphData) => void
 }
 
-const GraphView: React.FC<GraphViewProps> = ({ segmentData, onDataLoad }) => {
+const GraphView: React.FC<GraphViewProps> = ({ segmentData, docID, onDataLoad }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
@@ -67,60 +70,61 @@ const GraphView: React.FC<GraphViewProps> = ({ segmentData, onDataLoad }) => {
 	const [extracting, setExtracting] = useState(false)
 	const [graphData, setGraphData] = useState<GraphData | null>(null)
 
-	// 模拟图谱数据 - 三级层次结构
-	const mockGraphData: GraphData = {
-		id: segmentData.id,
-		entity_count: 12,
-		relation_count: 14,
-		graph_data: {
-			nodes: [
-				// 第一级 - 核心概念
-				{ id: '1', name: '人工智能', type: 'concept', level: 1, properties: { category: '核心领域' } },
-				{ id: '2', name: '机器学习', type: 'concept', level: 1, properties: { category: 'AI技术' } },
-				{ id: '3', name: 'OpenAI', type: 'organization', level: 1, properties: { founded: '2015' } },
+	// 数据转换函数：将 API 返回的数据转换为组件需要的格式
+	const transformAPIDataToGraphData = (apiData: {
+		entities?: APIGraphNode[]
+		relationships?: APIGraphRelationship[]
+		entities_count?: number
+		relationships_count?: number
+	}): GraphData => {
+		// 转换实体节点
+		const nodes: EntityNode[] = (apiData.entities || []).map((entity, index) => {
+			// 从 labels 中推断实体类型
+			const getEntityType = (labels: string[]): EntityNode['type'] => {
+				const label = labels[0]?.toLowerCase() || ''
+				if (label.includes('person') || label.includes('人')) return 'person'
+				if (label.includes('organization') || label.includes('组织') || label.includes('公司'))
+					return 'organization'
+				if (label.includes('location') || label.includes('地点') || label.includes('位置'))
+					return 'location'
+				if (label.includes('event') || label.includes('事件')) return 'event'
+				if (label.includes('object') || label.includes('物品')) return 'object'
+				return 'concept'
+			}
 
-				// 第二级 - 子领域
-				{ id: '4', name: '深度学习', type: 'concept', level: 2, properties: { category: 'ML子领域' } },
-				{ id: '5', name: '自然语言处理', type: 'concept', level: 2, properties: { domain: 'NLP' } },
-				{ id: '6', name: '计算机视觉', type: 'concept', level: 2, properties: { domain: 'CV' } },
-				{ id: '7', name: 'GPT系列', type: 'concept', level: 2, properties: { type: '语言模型' } },
+			// 从 properties 中获取名称，如果没有则使用 ID
+			const getName = (properties: Record<string, any> | undefined): string => {
+				return properties?.name || properties?.title || properties?.label || entity.id
+			}
 
-				// 第三级 - 具体技术
-				{ id: '8', name: '神经网络', type: 'concept', level: 3, properties: { category: '算法' } },
-				{
-					id: '9',
-					name: 'Transformer',
-					type: 'concept',
-					level: 3,
-					properties: { architecture: '注意力机制' }
-				},
-				{ id: '10', name: 'GPT-4', type: 'object', level: 3, properties: { version: '4.0' } },
-				{ id: '11', name: 'CNN', type: 'concept', level: 3, properties: { type: '卷积网络' } },
-				{ id: '12', name: 'RNN', type: 'concept', level: 3, properties: { type: '循环网络' } }
-			],
-			edges: [
-				// 第一级关系
-				{ id: 'e1', source: '2', target: '1', relation: '属于', weight: 0.9 },
-				{ id: 'e2', source: '3', target: '1', relation: '推动', weight: 0.85 },
+			return {
+				id: entity.id,
+				name: getName(entity.properties),
+				type: getEntityType(entity.labels),
+				level: 1, // 默认级别，可以后续根据算法优化
+				properties: entity.properties || {}
+			}
+		})
 
-				// 第二级关系
-				{ id: 'e3', source: '4', target: '2', relation: '是', weight: 0.95 },
-				{ id: 'e4', source: '5', target: '2', relation: '属于', weight: 0.9 },
-				{ id: 'e5', source: '6', target: '2', relation: '属于', weight: 0.9 },
-				{ id: 'e6', source: '7', target: '3', relation: '开发于', weight: 0.95 },
-				{ id: 'e7', source: '7', target: '5', relation: '应用于', weight: 0.85 },
+		// 转换关系边
+		const edges: RelationEdge[] = (apiData.relationships || []).map((relationship, index) => ({
+			id: relationship.id,
+			source: relationship.start_node,
+			target: relationship.end_node,
+			relation: relationship.type,
+			weight: 1.0 // 默认权重，可以后续从 properties 中获取
+		}))
 
-				// 第三级关系
-				{ id: 'e8', source: '8', target: '4', relation: '基础', weight: 0.9 },
-				{ id: 'e9', source: '9', target: '4', relation: '核心技术', weight: 0.95 },
-				{ id: 'e10', source: '10', target: '7', relation: '最新版本', weight: 1.0 },
-				{ id: 'e11', source: '10', target: '9', relation: '基于', weight: 0.9 },
-				{ id: 'e12', source: '11', target: '6', relation: '用于', weight: 0.85 },
-				{ id: 'e13', source: '12', target: '5', relation: '用于', weight: 0.8 },
-				{ id: 'e14', source: '11', target: '8', relation: '类型', weight: 0.7 }
-			]
-		},
-		metadata: segmentData.metadata
+		return {
+			id: segmentData.id,
+			entity_count: apiData.entities_count || nodes.length,
+			relation_count: apiData.relationships_count || edges.length,
+			graph_data: {
+				nodes,
+				edges
+			},
+			metadata: segmentData.metadata
+		}
 	}
 
 	useEffect(() => {
@@ -130,24 +134,38 @@ const GraphView: React.FC<GraphViewProps> = ({ segmentData, onDataLoad }) => {
 	const loadGraphData = async () => {
 		setLoading(true)
 		try {
-			// TODO: 实际的 API 调用
-			// if (window.$app?.openapi) {
-			// 	const kb = new KB(window.$app.openapi)
-			// 	const response = await kb.GetSegmentGraph(segmentData.id)
-			// 	if (!window.$app.openapi.IsError(response) && response.data) {
-			// 		setGraphData(response.data)
-			// 		onDataLoad?.(response.data)
-			// 		return
-			// 	}
-			// }
+			// 使用真实的 API 调用
+			if (window.$app?.openapi) {
+				const kb = new KB(window.$app.openapi)
+				const response = await kb.GetSegmentGraph(docID, segmentData.id, {
+					include_entities: true,
+					include_relationships: true
+				})
 
-			// 模拟 API 调用延迟
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-			setGraphData(mockGraphData)
-			onDataLoad?.(mockGraphData)
+				if (!window.$app.openapi.IsError(response) && response.data) {
+					const transformedData = transformAPIDataToGraphData(response.data)
+					setGraphData(transformedData)
+					onDataLoad?.(transformedData)
+					return
+				} else if (window.$app.openapi.IsError(response)) {
+					console.error('API Error:', response)
+					// 如果是 404 或者没有数据，显示空状态
+					if (response.status === 404 || response.error?.error_description?.includes('not found')) {
+						setGraphData(null)
+						return
+					}
+					throw new Error(response.error?.error_description || 'API request failed')
+				}
+			}
+
+			// 如果没有 API 连接，设置为空状态
+			console.warn('No API connection available')
+			setGraphData(null)
 		} catch (error) {
 			console.error('Failed to load graph data:', error)
 			message.error(is_cn ? '加载图谱数据失败' : 'Failed to load graph data')
+			// 设置为 null 以显示空状态
+			setGraphData(null)
 		} finally {
 			setLoading(false)
 		}
@@ -155,28 +173,42 @@ const GraphView: React.FC<GraphViewProps> = ({ segmentData, onDataLoad }) => {
 
 	const handleReExtract = async () => {
 		setExtracting(true)
-		try {
-			// TODO: 实际的重新提取 API 调用
-			// if (window.$app?.openapi) {
-			// 	const kb = new KB(window.$app.openapi)
-			// 	const response = await kb.ReExtractSegmentGraph(segmentData.id)
-			// 	if (!window.$app.openapi.IsError(response)) {
-			// 		message.success(is_cn ? '重新提取成功' : 'Re-extraction successful')
-			// 		await loadGraphData()
-			// 		return
-			// 	}
-			// }
+		// 清空当前图数据，显示加载状态
+		setGraphData(null)
 
-			// 模拟重新提取
-			await new Promise((resolve) => setTimeout(resolve, 2000))
-			message.success(is_cn ? '重新提取成功' : 'Re-extraction successful')
-			await loadGraphData()
+		try {
+			// 使用真实的重新提取 API 调用
+			if (window.$app?.openapi) {
+				const kb = new KB(window.$app.openapi)
+				const response = await kb.ExtractSegmentGraph(docID, segmentData.id)
+
+				if (!window.$app.openapi.IsError(response) && response.data) {
+					message.success(is_cn ? '重新提取成功' : 'Re-extraction successful')
+					await loadGraphData()
+					return
+				} else if (window.$app.openapi.IsError(response)) {
+					console.error('Re-extract API Error:', response)
+					throw new Error(response.error?.error_description || 'Re-extraction failed')
+				}
+			}
+
+			// 如果没有 API 连接，显示错误信息
+			console.warn('No API connection available')
+			throw new Error('API connection not available')
 		} catch (error) {
 			console.error('Failed to re-extract graph:', error)
 			message.error(is_cn ? '重新提取失败' : 'Failed to re-extract graph')
+			// 重新加载当前数据
+			await loadGraphData()
 		} finally {
 			setExtracting(false)
 		}
+	}
+
+	const handleConfirmReExtract = () => {
+		// 立即执行异步操作，不等待完成
+		handleReExtract()
+		// 返回 undefined 让 Popconfirm 立即关闭
 	}
 
 	return (
@@ -210,32 +242,72 @@ const GraphView: React.FC<GraphViewProps> = ({ segmentData, onDataLoad }) => {
 					</span>
 				</div>
 				<div className={localStyles.actionSection}>
-					<Button
-						type='primary'
-						size='small'
-						className={localStyles.extractButton}
-						onClick={handleReExtract}
-						loading={extracting}
+					<Popconfirm
+						title={
+							is_cn
+								? '确定要重新提取知识图谱吗？这将重新分析文本并生成实体关系。'
+								: 'Are you sure to re-extract the knowledge graph? This will re-analyze the text and generate entities and relationships.'
+						}
+						onConfirm={handleConfirmReExtract}
+						okText={is_cn ? '确定' : 'Yes'}
+						cancelText={is_cn ? '取消' : 'Cancel'}
+						disabled={extracting}
 					>
-						<Icon name='material-auto_fix_high' size={12} />
-						<span>{is_cn ? '重新提取' : 'Re-extract'}</span>
-					</Button>
+						<Button
+							type='primary'
+							size='small'
+							className={localStyles.extractButton}
+							disabled={extracting}
+							loading={extracting}
+							loadingIcon='material-refresh'
+							icon={
+								!extracting ? (
+									<Icon name='material-auto_fix_high' size={12} />
+								) : undefined
+							}
+						>
+							{is_cn ? '重新提取' : 'Re-extract'}
+						</Button>
+					</Popconfirm>
 				</div>
 			</div>
 
 			{/* Body - 图谱展示区域 */}
 			<div className={localStyles.graphBody}>
 				<div className={localStyles.graphSection}>
-					{loading ? (
+					{extracting ? (
+						<div className={localStyles.extractingState}>
+							<Icon
+								name='material-auto_fix_high'
+								size={32}
+								style={{ marginBottom: '16px' }}
+							/>
+							<Text>
+								{is_cn
+									? '正在重新提取实体和关系...'
+									: 'Re-extracting entities and relationships...'}
+							</Text>
+							<Text type='secondary' style={{ fontSize: '12px', marginTop: '8px' }}>
+								{is_cn
+									? '请稍候，此过程可能需要一些时间'
+									: 'Please wait, this may take a while'}
+							</Text>
+						</div>
+					) : loading ? (
 						<div className={localStyles.loadingState}>
 							<Icon name='material-hourglass_empty' size={32} />
 							<Text>{is_cn ? '正在加载知识图谱...' : 'Loading knowledge graph...'}</Text>
 						</div>
-					) : !graphData ? (
+					) : !graphData || (graphData.entity_count === 0 && graphData.relation_count === 0) ? (
 						<div className={localStyles.emptyState}>
 							<Icon name='material-account_tree' size={48} />
 							<Text type='secondary'>
 								{is_cn ? '暂无图谱数据' : 'No graph data available'}
+							</Text>
+							<Text type='secondary' style={{ fontSize: '12px', marginTop: '8px' }}>
+								{is_cn
+									? '点击"重新提取"按钮生成知识图谱'
+									: 'Click "Re-extract" to generate knowledge graph'}
 							</Text>
 						</div>
 					) : (

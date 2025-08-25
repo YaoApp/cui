@@ -33,6 +33,11 @@ import {
 	UpdateSegmentsResponse,
 	RemoveSegmentsResponse,
 	RemoveSegmentsByDocIDResponse,
+	SegmentGraphResponse,
+	SegmentEntitiesResponse,
+	SegmentRelationshipsResponse,
+	ExtractSegmentGraphRequest,
+	ExtractSegmentGraphResponse,
 	UpdateWeightRequest,
 	UpdateWeightResponse,
 	UpdateWeightsRequest,
@@ -294,6 +299,78 @@ export class KB {
 	 */
 	async RemoveSegmentsByDocID(docID: string): Promise<ApiResponse<RemoveSegmentsByDocIDResponse>> {
 		return this.api.Delete<RemoveSegmentsByDocIDResponse>(`/kb/documents/${docID}/segments`)
+	}
+
+	// ===== Segment Graph Management =====
+
+	/**
+	 * Get segment graph information (entities and relationships)
+	 */
+	async GetSegmentGraph(
+		docID: string,
+		segmentID: string,
+		options?: {
+			include_entities?: boolean
+			include_relationships?: boolean
+		}
+	): Promise<ApiResponse<SegmentGraphResponse>> {
+		const params: Record<string, string> = {}
+
+		if (options?.include_entities !== undefined) {
+			params.include_entities = options.include_entities.toString()
+		}
+		if (options?.include_relationships !== undefined) {
+			params.include_relationships = options.include_relationships.toString()
+		}
+
+		return this.api.Get<SegmentGraphResponse>(`/kb/documents/${docID}/segments/${segmentID}/graph`, params)
+	}
+
+	/**
+	 * Get segment entities
+	 */
+	async GetSegmentEntities(docID: string, segmentID: string): Promise<ApiResponse<SegmentEntitiesResponse>> {
+		return this.api.Get<SegmentEntitiesResponse>(`/kb/documents/${docID}/segments/${segmentID}/entities`)
+	}
+
+	/**
+	 * Get segment relationships
+	 */
+	async GetSegmentRelationships(
+		docID: string,
+		segmentID: string
+	): Promise<ApiResponse<SegmentRelationshipsResponse>> {
+		return this.api.Get<SegmentRelationshipsResponse>(
+			`/kb/documents/${docID}/segments/${segmentID}/relationships`
+		)
+	}
+
+	/**
+	 * Extract segment graph (synchronous) - re-extract entities and relationships
+	 */
+	async ExtractSegmentGraph(
+		docID: string,
+		segmentID: string,
+		options?: ExtractSegmentGraphRequest
+	): Promise<ApiResponse<ExtractSegmentGraphResponse>> {
+		return this.api.Post<ExtractSegmentGraphResponse>(
+			`/kb/documents/${docID}/segments/${segmentID}/extract`,
+			options || {}
+		)
+	}
+
+	/**
+	 * Extract segment graph (asynchronous) - re-extract entities and relationships
+	 */
+	async ExtractSegmentGraphAsync(
+		docID: string,
+		segmentID: string,
+		options?: ExtractSegmentGraphRequest
+	): Promise<ApiResponse<AsyncOperationResponse>> {
+		return this.api.Post<AsyncOperationResponse>(
+			`/kb/documents/${docID}/segments/${segmentID}/extract/async`,
+			options || {}
+		)
 	}
 
 	/**
