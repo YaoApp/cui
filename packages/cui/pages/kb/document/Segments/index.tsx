@@ -221,49 +221,73 @@ const Segments: React.FC<SegmentsProps> = ({
 			return
 		}
 
-		// 添加延迟确保DOM元素已经渲染
-		const timeoutId = setTimeout(() => {
-			// 检查是否在浏览器环境中，并确保必要的 DOM 方法可用
-			if (
-				typeof window === 'undefined' ||
-				!document ||
-				typeof document.querySelectorAll !== 'function' ||
-				typeof IntersectionObserver === 'undefined'
-			) {
-				return
-			}
+		// 检查是否在浏览器环境中
+		if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+			return
+		}
 
-			const observer = new IntersectionObserver(
-				(entries) => {
-					const triggerEntry = entries[0]
-					if (triggerEntry.isIntersecting && hasMore && !loadingMore && !isLoadingRef.current) {
-						// 立即断开观察器，防止重复触发
-						observer.disconnect()
-						loadMoreSegments()
-					}
-				},
-				{
-					threshold: 0.1, // 当10%的最后一个卡片可见时触发
-					rootMargin: '100px' // 提前100px开始加载，确保在不同显示区域都能正常触发
+		let observer: IntersectionObserver | null = null
+		let rafId: number | null = null
+
+		// 设置观察器的函数
+		const setupObserver = () => {
+			try {
+				// 使用 window.document 确保获取真正的 DOM document 对象
+				const workingDocument = window.document
+				if (!workingDocument || typeof workingDocument.querySelectorAll !== 'function') {
+					rafId = requestAnimationFrame(setupObserver)
+					return
 				}
-			)
 
-			// 直接观察最后一个卡片元素，而不是单独的触发器
-			const allCards = document.querySelectorAll('[class*="chunkCard"]')
-			const lastCard = allCards[allCards.length - 1] as HTMLElement
+				// 查找最后一个卡片元素
+				const allCards = workingDocument.querySelectorAll('[class*="chunkCard"]')
+				const lastCard = allCards[allCards.length - 1] as HTMLElement
 
-			if (lastCard && data.length > 0) {
+				if (!lastCard || data.length === 0) {
+					// 如果没有找到卡片，使用 requestAnimationFrame 重试
+					rafId = requestAnimationFrame(setupObserver)
+					return
+				}
+
+				// 创建观察器
+				observer = new IntersectionObserver(
+					(entries) => {
+						const triggerEntry = entries[0]
+						if (
+							triggerEntry.isIntersecting &&
+							hasMore &&
+							!loadingMore &&
+							!isLoadingRef.current
+						) {
+							// 立即断开观察器，防止重复触发
+							observer?.disconnect()
+							loadMoreSegments()
+						}
+					},
+					{
+						threshold: 0.1, // 当10%的最后一个卡片可见时触发
+						rootMargin: '100px' // 提前100px开始加载，确保在不同显示区域都能正常触发
+					}
+				)
+
+				// 开始观察最后一个卡片
 				observer.observe(lastCard)
+			} catch (error) {
+				console.warn('Failed to setup intersection observer:', error)
 			}
+		}
 
-			// 清理函数保存observer引用
-			return () => {
+		// 使用 requestAnimationFrame 确保 DOM 渲染完成后执行
+		rafId = requestAnimationFrame(setupObserver)
+
+		// 清理函数
+		return () => {
+			if (observer) {
 				observer.disconnect()
 			}
-		}, 100)
-
-		return () => {
-			clearTimeout(timeoutId)
+			if (rafId) {
+				cancelAnimationFrame(rafId)
+			}
 		}
 	}, [hasMore, loadingMore, searchText, data.length, sortBy, filterByDepth]) // 添加排序和过滤依赖，确保条件变化时重新评估无限滚动
 
