@@ -223,6 +223,16 @@ const Segments: React.FC<SegmentsProps> = ({
 
 		// 添加延迟确保DOM元素已经渲染
 		const timeoutId = setTimeout(() => {
+			// 检查是否在浏览器环境中，并确保必要的 DOM 方法可用
+			if (
+				typeof window === 'undefined' ||
+				!document ||
+				typeof document.querySelectorAll !== 'function' ||
+				typeof IntersectionObserver === 'undefined'
+			) {
+				return
+			}
+
 			const observer = new IntersectionObserver(
 				(entries) => {
 					const triggerEntry = entries[0]
