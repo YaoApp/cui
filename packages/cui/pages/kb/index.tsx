@@ -5,7 +5,7 @@ import { history, getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { CollectionCover } from './components'
 import styles from './index.less'
-import { KB, Collection } from '@/openapi'
+import { KB, DatabaseCollection, ListCollectionsRequest } from '@/openapi'
 
 const Collections = () => {
 	const locale = getLocale()
@@ -13,68 +13,99 @@ const Collections = () => {
 
 	const [loading, setLoading] = useState(true)
 	const [search, setSearch] = useState('')
-	const [searchText, setSearchText] = useState('')
-	const [page, setPage] = useState(1)
-	const [data, setData] = useState<Collection[]>([])
+	const [searchKeywords, setSearchKeywords] = useState('') // 实际用于搜索的关键词
+	const [sortBy, setSortBy] = useState('created_at desc') // 排序方式
+	const [data, setData] = useState<DatabaseCollection[]>([])
 	const containerRef = useRef<HTMLDivElement>(null)
-	const [hasMore, setHasMore] = useState(false) // Disable pagination for now
 
-	// 加载数据
-	const loadData = async (reset = false) => {
-		// 如果是重置加载（初始加载或搜索），则允许执行；否则检查 loading 状态
-		if (!reset && loading) return
+	// 分页状态
+	const [currentPage, setCurrentPage] = useState(1)
+	const [totalCollections, setTotalCollections] = useState(0)
+	const [pageSize] = useState(20)
+	const [hasMore, setHasMore] = useState(true)
+	const [loadingMore, setLoadingMore] = useState(false)
 
+	// 加载数据 - 初始加载
+	const loadData = async () => {
 		if (!window.$app?.openapi) {
 			console.error('OpenAPI not available')
 			return
 		}
 
-		setLoading(true)
 		try {
+			setLoading(true)
 			const kb = new KB(window.$app.openapi)
 
-			// Build filter for search
-			const filter: Record<string, string> = {}
-			if (searchText.trim()) {
-				// Add search filter - this may need backend support
-				filter.search = searchText.trim()
+			const request: ListCollectionsRequest = {
+				sort: sortBy,
+				page: 1,
+				pagesize: pageSize,
+				...(searchKeywords && { keywords: searchKeywords })
 			}
 
-			const response = await kb.GetCollections({ filter })
+			const response = await kb.ListCollections(request)
 
 			if (window.$app.openapi.IsError(response)) {
 				throw new Error(response.error?.error_description || 'Failed to load collections')
 			}
 
-			// Use Collections directly
-			let collections: Collection[] = []
-			if (response.data) {
-				collections = response.data
+			const collections = Array.isArray(response.data?.data) ? response.data.data : []
+			const total = typeof response.data?.total === 'number' ? response.data.total : 0
 
-				// Client-side search filtering if backend doesn't support it
-				if (searchText.trim()) {
-					const keyword = searchText.toLowerCase()
-					collections = collections.filter(
-						(collection) =>
-							collection.metadata.name?.toLowerCase().includes(keyword) ||
-							collection.metadata.description?.toLowerCase().includes(keyword)
-					)
-				}
-			}
+			// 重新加载模式：替换数据
+			setData(collections)
+			setCurrentPage(1)
+			setTotalCollections(total)
 
-			if (reset) {
-				setData(collections)
-			} else {
-				setData((prevData) => [...prevData, ...collections])
-			}
-
-			// For now, assume no pagination until backend supports it
-			setHasMore(false)
+			// 检查是否还有更多数据
+			setHasMore(collections.length < total)
 		} catch (error) {
 			console.error(is_cn ? '加载集合失败:' : 'Failed to load collections:', error)
 			message.error(is_cn ? '加载集合失败' : 'Failed to load collections')
 		} finally {
 			setLoading(false)
+		}
+	}
+
+	// 加载更多数据
+	const loadMoreData = async () => {
+		if (!hasMore || loadingMore) return
+
+		const nextPage = currentPage + 1
+		setCurrentPage(nextPage)
+
+		try {
+			setLoadingMore(true)
+			const kb = new KB(window.$app.openapi)
+
+			const request: ListCollectionsRequest = {
+				sort: sortBy,
+				page: nextPage,
+				pagesize: pageSize,
+				...(searchKeywords && { keywords: searchKeywords })
+			}
+
+			const response = await kb.ListCollections(request)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load collections')
+			}
+
+			const collections = Array.isArray(response.data?.data) ? response.data.data : []
+			const total = typeof response.data?.total === 'number' ? response.data.total : 0
+
+			// 追加数据
+			setData((prev) => (Array.isArray(prev) ? [...prev, ...collections] : collections))
+			setTotalCollections(total)
+
+			// 检查是否还有更多数据
+			const loadedCount = data.length + collections.length
+			setHasMore(loadedCount < total)
+		} catch (error) {
+			console.error('Load more collections failed:', error)
+			message.error(is_cn ? '加载更多集合失败' : 'Failed to load more collections')
+		} finally {
+			setLoadingMore(false)
 		}
 	}
 
@@ -85,25 +116,36 @@ const Collections = () => {
 
 		const handleScroll = () => {
 			const { scrollTop, scrollHeight, clientHeight } = container
-			if (scrollHeight - scrollTop - clientHeight < 50 && !loading && hasMore) {
-				loadData()
+			if (scrollHeight - scrollTop - clientHeight < 50 && !loadingMore && hasMore) {
+				loadMoreData()
 			}
 		}
 
 		container.addEventListener('scroll', handleScroll)
 		return () => container.removeEventListener('scroll', handleScroll)
-	}, [loading, hasMore, data])
+	}, [loadingMore, hasMore, data])
 
-	// 初始加载和搜索变化时重新加载
+	// 初始加载
 	useEffect(() => {
-		setData([])
-		setPage(1)
-		setHasMore(true)
-		loadData(true)
-	}, [searchText])
+		loadData()
+	}, [])
+
+	// 搜索关键词或排序变化时重新加载数据
+	useEffect(() => {
+		loadData()
+	}, [searchKeywords, sortBy])
 
 	const handleSearch = () => {
-		setSearchText(search)
+		setSearchKeywords(search.trim())
+	}
+
+	const handleClearSearch = () => {
+		setSearch('')
+		setSearchKeywords('')
+	}
+
+	const handleSortChange = (newSort: string) => {
+		setSortBy(newSort)
 	}
 
 	const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -112,15 +154,20 @@ const Collections = () => {
 		}
 	}
 
-	const handleCardClick = (collection: Collection) => {
-		history.push(`/kb/detail/${collection.id}`)
+	const handleCardClick = (collection: DatabaseCollection) => {
+		if (collection?.collection_id) {
+			history.push(`/kb/detail/${collection.collection_id}`)
+		} else {
+			console.error('Collection ID is missing:', collection)
+			message.error(is_cn ? '集合信息异常' : 'Collection information error')
+		}
 	}
 
 	const handleCreate = () => {
 		history.push('/kb/create')
 	}
 
-	const handleDelete = async (collection: Collection) => {
+	const handleDelete = async (collection: DatabaseCollection) => {
 		if (!window.$app?.openapi) {
 			console.error('OpenAPI not available')
 			message.error(is_cn ? '系统未就绪' : 'System not ready')
@@ -129,14 +176,14 @@ const Collections = () => {
 
 		try {
 			const kb = new KB(window.$app.openapi)
-			const response = await kb.RemoveCollection(collection.id)
+			const response = await kb.RemoveCollection(collection.collection_id)
 
 			if (window.$app.openapi.IsError(response)) {
 				throw new Error(response.error?.error_description || 'Failed to delete collection')
 			}
 
 			// Remove from local state
-			setData((prevData) => prevData.filter((item) => item.id !== collection.id))
+			setData((prevData) => prevData.filter((item) => item.collection_id !== collection.collection_id))
 			message.success(is_cn ? '删除成功' : 'Deleted successfully')
 		} catch (error) {
 			console.error('Delete failed:', error)
@@ -146,14 +193,14 @@ const Collections = () => {
 	}
 
 	// 渲染集合卡片
-	const renderCollectionCard = (collection: Collection) => {
+	const renderCollectionCard = (collection: DatabaseCollection) => {
 		return (
-			<div key={collection.id} className={styles.gridItem}>
+			<div key={collection.collection_id} className={styles.gridItem}>
 				<div className={styles.knowledgeCard} onClick={() => handleCardClick(collection)}>
 					<CollectionCover
-						cover={collection.metadata.cover}
-						name={collection.metadata.name}
-						description={collection.metadata.description}
+						cover={collection.cover}
+						name={collection.name}
+						description={collection.description}
 						className={styles.cardCover}
 					/>
 
@@ -167,13 +214,13 @@ const Collections = () => {
 										style={{ color: 'var(--color_text)' }}
 									/>
 									<h3 className={styles.cardTitle}>
-										{collection.metadata.name || 'Untitled'}
+										{collection.name || 'Untitled'}
 									</h3>
 								</div>
 							</div>
 							<div className={styles.cardHeaderRight}>
 								<div className={styles.statusIcons}>
-									{collection.metadata.__yao_public_read && (
+									{Boolean(collection.__yao_public_read) && (
 										<Tooltip title={is_cn ? '公开' : 'Public'}>
 											<span className={styles.statusIcon}>
 												<Icon
@@ -184,24 +231,24 @@ const Collections = () => {
 											</span>
 										</Tooltip>
 									)}
-									{collection.metadata.readonly && (
-										<Tooltip title={is_cn ? '只读' : 'Readonly'}>
-											<span className={styles.statusIcon}>
-												<Icon
-													name='material-lock'
-													size={16}
-													color='#faad14'
-												/>
-											</span>
-										</Tooltip>
-									)}
-									{collection.metadata.system && (
+									{Boolean(collection.system) && (
 										<Tooltip title={is_cn ? '系统内建' : 'Built-in'}>
 											<span className={styles.statusIcon}>
 												<Icon
 													name='material-verified'
 													size={16}
 													color='#b37feb'
+												/>
+											</span>
+										</Tooltip>
+									)}
+									{Boolean(collection.readonly) && (
+										<Tooltip title={is_cn ? '只读' : 'Readonly'}>
+											<span className={styles.statusIcon}>
+												<Icon
+													name='material-lock'
+													size={16}
+													color='#faad14'
 												/>
 											</span>
 										</Tooltip>
@@ -214,18 +261,15 @@ const Collections = () => {
 							<div className={styles.documentCount}>
 								<Icon name='material-description' size={16} />
 								<span>
-									{collection.metadata.document_count || 0}{' '}
-									{is_cn ? '个文档' : 'documents'}
+									{collection.document_count || 0} {is_cn ? '个文档' : 'documents'}
 								</span>
 							</div>
 							<div className={styles.updateTime}>
 								{is_cn ? '更新于' : 'Updated'}{' '}
-								{new Date(
-									collection.metadata.updated_at || new Date()
-								).toLocaleDateString()}
+								{new Date(collection.updated_at || new Date()).toLocaleDateString()}
 							</div>
-							{/* 只有非只读的集合才显示删除按钮 */}
-							{!collection.metadata.readonly && (
+							{/* 只读集合不显示删除按钮 */}
+							{!collection.readonly && (
 								<Popconfirm
 									title={
 										is_cn
@@ -279,7 +323,13 @@ const Collections = () => {
 						prefix={<SearchOutlined />}
 						placeholder={is_cn ? '搜索集合...' : 'Search collections...'}
 						value={search}
-						onChange={(e) => setSearch(e.target.value)}
+						onChange={(e) => {
+							const value = e.target.value
+							setSearch(value)
+							if (!value) {
+								handleClearSearch()
+							}
+						}}
 						onKeyPress={handleKeyPress}
 						className={styles.search}
 						allowClear
@@ -295,7 +345,7 @@ const Collections = () => {
 					<div className={styles.empty}>
 						<Icon name='material-folder_off' size={64} />
 						<div className={styles.emptyTitle}>
-							{searchText
+							{searchKeywords
 								? is_cn
 									? '未找到匹配的集合'
 									: 'No matching collections found'
@@ -304,7 +354,7 @@ const Collections = () => {
 								: 'No collections'}
 						</div>
 						<div className={styles.emptyDescription}>
-							{searchText
+							{searchKeywords
 								? is_cn
 									? '尝试调整搜索关键词'
 									: 'Try adjusting your search keywords'
@@ -314,13 +364,33 @@ const Collections = () => {
 						</div>
 					</div>
 				) : (
-					<div className={styles.grid}>{data.map(renderCollectionCard)}</div>
+					<div className={styles.grid}>
+						{Array.isArray(data) ? data.map(renderCollectionCard) : null}
+					</div>
 				)}
 
-				{loading && (
+				{/* 加载更多指示器 */}
+				{loadingMore && (
+					<div className={styles.loading}>
+						<Spin />
+						<span style={{ marginLeft: 8 }}>
+							{is_cn ? '加载更多集合...' : 'Loading more collections...'}
+						</span>
+					</div>
+				)}
+
+				{/* 初始加载指示器 */}
+				{loading && data.length === 0 && (
 					<div className={styles.loading}>
 						<Spin />
 						<span style={{ marginLeft: 8 }}>{is_cn ? '加载中...' : 'Loading...'}</span>
+					</div>
+				)}
+
+				{/* 没有更多数据的提示 */}
+				{!hasMore && data.length > 0 && (
+					<div className={styles.loading}>
+						<span>{is_cn ? '已加载全部集合' : 'All collections loaded'}</span>
 					</div>
 				)}
 			</div>

@@ -7,6 +7,8 @@ import {
 	RemoveCollectionResponse,
 	CollectionExistsResponse,
 	GetCollectionsRequest,
+	ListCollectionsRequest,
+	ListCollectionsResponse,
 	UpdateCollectionMetadataRequest,
 	UpdateCollectionMetadataResponse,
 	Provider,
@@ -100,7 +102,44 @@ export class KB {
 	}
 
 	/**
-	 * Get collections list
+	 * List collections with pagination
+	 */
+	async ListCollections(request?: ListCollectionsRequest): Promise<ApiResponse<ListCollectionsResponse>> {
+		const params: Record<string, string> = {}
+
+		if (request) {
+			if (request.page !== undefined) {
+				params.page = request.page.toString()
+			}
+			if (request.pagesize !== undefined) {
+				params.pagesize = request.pagesize.toString()
+			}
+			if (request.select) {
+				params.select = request.select
+			}
+			if (request.keywords) {
+				params.keywords = request.keywords
+			}
+			if (request.status) {
+				params.status = request.status
+			}
+			if (request.system !== undefined) {
+				params.system = request.system.toString()
+			}
+			if (request.embedding_provider_id) {
+				params.embedding_provider_id = request.embedding_provider_id
+			}
+			if (request.sort) {
+				params.sort = request.sort
+			}
+		}
+
+		return this.api.Get<ListCollectionsResponse>('/kb/collections', params)
+	}
+
+	/**
+	 * Get collections list (deprecated - use ListCollections instead)
+	 * @deprecated Use ListCollections for better pagination support
 	 */
 	async GetCollections(request?: GetCollectionsRequest): Promise<ApiResponse<Collection[]>> {
 		const params = request?.filter || {}
