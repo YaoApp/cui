@@ -77,43 +77,90 @@ const GraphView: React.FC<GraphViewProps> = ({ segmentData, docID, onDataLoad })
 		entities_count?: number
 		relationships_count?: number
 	}): GraphData => {
-		// 转换实体节点
-		const nodes: EntityNode[] = (apiData.entities || []).map((entity, index) => {
-			// 从 labels 中推断实体类型
-			const getEntityType = (labels: string[]): EntityNode['type'] => {
-				const label = labels[0]?.toLowerCase() || ''
-				if (label.includes('person') || label.includes('人')) return 'person'
-				if (label.includes('organization') || label.includes('组织') || label.includes('公司'))
-					return 'organization'
-				if (label.includes('location') || label.includes('地点') || label.includes('位置'))
-					return 'location'
-				if (label.includes('event') || label.includes('事件')) return 'event'
-				if (label.includes('object') || label.includes('物品')) return 'object'
-				return 'concept'
-			}
+		// 安全地转换实体节点
+		const nodes: EntityNode[] = []
+		const nodeIds = new Set<string>()
 
-			// 从 properties 中获取名称，如果没有则使用 ID
-			const getName = (properties: Record<string, any> | undefined): string => {
-				return properties?.name || properties?.title || properties?.label || entity.id
-			}
+		if (Array.isArray(apiData.entities)) {
+			apiData.entities.forEach((entity) => {
+				if (!entity || !entity.id) {
+					console.warn('Invalid entity data:', entity)
+					return
+				}
 
-			return {
-				id: entity.id,
-				name: getName(entity.properties),
-				type: getEntityType(entity.labels),
-				level: 1, // 默认级别，可以后续根据算法优化
-				properties: entity.properties || {}
-			}
+				// 避免重复节点
+				if (nodeIds.has(entity.id)) {
+					console.warn('Duplicate entity ID:', entity.id)
+					return
+				}
+				nodeIds.add(entity.id)
+
+				// 从 labels 中推断实体类型
+				const getEntityType = (labels: string[]): EntityNode['type'] => {
+					const label = labels?.[0]?.toLowerCase() || ''
+					if (label.includes('person') || label.includes('人')) return 'person'
+					if (label.includes('organization') || label.includes('组织') || label.includes('公司'))
+						return 'organization'
+					if (label.includes('location') || label.includes('地点') || label.includes('位置'))
+						return 'location'
+					if (label.includes('event') || label.includes('事件')) return 'event'
+					if (label.includes('object') || label.includes('物品')) return 'object'
+					return 'concept'
+				}
+
+				// 从 properties 中获取名称，如果没有则使用 ID
+				const getName = (properties: Record<string, any> | undefined): string => {
+					return properties?.name || properties?.title || properties?.label || entity.id
+				}
+
+				nodes.push({
+					id: entity.id,
+					name: getName(entity.properties),
+					type: getEntityType(entity.labels || []),
+					level: 1, // 默认级别，可以后续根据算法优化
+					properties: entity.properties || {}
+				})
+			})
+		}
+
+		// 安全地转换关系边，只保留有效的边
+		const edges: RelationEdge[] = []
+		if (Array.isArray(apiData.relationships)) {
+			apiData.relationships.forEach((relationship) => {
+				if (!relationship || !relationship.id || !relationship.start_node || !relationship.end_node) {
+					console.warn('Invalid relationship data:', relationship)
+					return
+				}
+
+				// 检查源节点和目标节点是否存在
+				if (!nodeIds.has(relationship.start_node)) {
+					console.warn(
+						`Relationship source node not found: ${relationship.start_node}`,
+						relationship
+					)
+					return
+				}
+				if (!nodeIds.has(relationship.end_node)) {
+					console.warn(`Relationship target node not found: ${relationship.end_node}`, relationship)
+					return
+				}
+
+				edges.push({
+					id: relationship.id,
+					source: relationship.start_node,
+					target: relationship.end_node,
+					relation: relationship.type || 'unknown',
+					weight: 1.0 // 默认权重，可以后续从 properties 中获取
+				})
+			})
+		}
+
+		console.log('Transformed graph data:', {
+			originalEntities: apiData.entities?.length || 0,
+			validNodes: nodes.length,
+			originalRelationships: apiData.relationships?.length || 0,
+			validEdges: edges.length
 		})
-
-		// 转换关系边
-		const edges: RelationEdge[] = (apiData.relationships || []).map((relationship, index) => ({
-			id: relationship.id,
-			source: relationship.start_node,
-			target: relationship.end_node,
-			relation: relationship.type,
-			weight: 1.0 // 默认权重，可以后续从 properties 中获取
-		}))
 
 		return {
 			id: segmentData.id,

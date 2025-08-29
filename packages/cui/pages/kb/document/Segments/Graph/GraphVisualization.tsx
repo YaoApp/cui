@@ -61,8 +61,26 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 	const transformDataForECharts = () => {
 		const themeColors = getThemeColors()
 
+		// 数据验证和清理
+		if (!Array.isArray(nodes) || !Array.isArray(edges)) {
+			console.warn('Invalid nodes or edges data:', { nodes, edges })
+			return { nodes: [], links: [] }
+		}
+
+		// 去重节点 - 使用 Map 来确保 ID 唯一
+		const nodeMap = new Map<string, EntityNode>()
+		nodes.forEach((node) => {
+			if (node && node.id && node.name) {
+				nodeMap.set(node.id, node)
+			}
+		})
+		const uniqueNodes = Array.from(nodeMap.values())
+
+		// 创建节点ID集合用于验证边
+		const nodeIds = new Set(uniqueNodes.map((node) => node.id))
+
 		// 转换节点数据
-		const chartNodes = nodes.map((node) => {
+		const chartNodes = uniqueNodes.map((node) => {
 			const level = node.level || 1
 			const sizeMap = {
 				1: { symbolSize: 80, fontSize: 15 }, // L1 最大 - 从60增加到80
@@ -92,17 +110,34 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 			}
 		})
 
-		// 转换边数据
-		const chartLinks = edges.map((edge) => {
+		// 过滤和转换边数据 - 只保留有效的边
+		const validEdges = edges.filter((edge) => {
+			if (!edge || !edge.id || !edge.source || !edge.target) {
+				console.warn('Invalid edge data:', edge)
+				return false
+			}
+			// 检查源节点和目标节点是否存在
+			if (!nodeIds.has(edge.source)) {
+				console.warn(`Edge source node not found: ${edge.source}`, edge)
+				return false
+			}
+			if (!nodeIds.has(edge.target)) {
+				console.warn(`Edge target node not found: ${edge.target}`, edge)
+				return false
+			}
+			return true
+		})
+
+		const chartLinks = validEdges.map((edge) => {
 			return {
 				id: edge.id,
 				source: edge.source,
 				target: edge.target,
-				name: edge.relation, // 这是显示在连线上的文字
-				value: edge.weight, // 使用权重作为数值
+				name: edge.relation || 'unknown', // 这是显示在连线上的文字
+				value: edge.weight || 1, // 使用权重作为数值
 				lineStyle: {
 					color: themeColors.lineColor,
-					width: Math.max(0.8, edge.weight * 1.5),
+					width: Math.max(0.8, (edge.weight || 1) * 1.5),
 					curveness: 0.2 // 曲线效果
 				},
 				label: {
@@ -119,6 +154,13 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 				// 存储原始数据
 				originalData: edge
 			}
+		})
+
+		console.log('Transformed data:', {
+			originalNodes: nodes.length,
+			uniqueNodes: chartNodes.length,
+			originalEdges: edges.length,
+			validEdges: chartLinks.length
 		})
 
 		return { nodes: chartNodes, links: chartLinks }
@@ -172,106 +214,123 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ nodes, edges, c
 		}
 
 		const { width, height } = dimensions
-		const { nodes: chartNodes, links: chartLinks } = transformDataForECharts()
-		const themeColors = getThemeColors()
 
-		// 创建 ECharts 实例
-		const chart = echarts.init(containerRef.current, undefined, {
-			width,
-			height,
-			renderer: 'canvas', // 使用 canvas 渲染器以提高性能
-			devicePixelRatio: window.devicePixelRatio || 1
-		})
+		try {
+			const { nodes: chartNodes, links: chartLinks } = transformDataForECharts()
 
-		chartRef.current = chart
+			// 如果没有有效的节点数据，不进行渲染
+			if (!chartNodes.length) {
+				console.warn('No valid nodes to render')
+				setLoading(false)
+				return
+			}
 
-		// 配置图谱选项
-		const option: echarts.EChartsOption = {
-			backgroundColor: 'transparent',
-			animationDuration: 300,
-			animationEasingUpdate: 'quinticInOut',
-			// 确保没有任何内置边距
-			graphic: [],
-			series: [
-				{
-					type: 'graph',
-					layout: 'force',
-					data: chartNodes,
-					links: chartLinks,
-					categories: [
-						{ name: 'Level 1', itemStyle: { color: themeColors.primary } },
-						{ name: 'Level 2', itemStyle: { color: themeColors.primary } },
-						{ name: 'Level 3', itemStyle: { color: themeColors.primary } }
-					],
-					roam: true, // 启用缩放和平移
-					draggable: true, // 启用拖拽
-					focusNodeAdjacency: true, // 鼠标悬停时高亮相邻节点
-					// 让图表充满整个区域 - 使用负值进一步扩展
-					left: -10,
-					right: -10,
-					top: -10,
-					bottom: -10,
-					force: {
-						// 力导向布局配置 - 节点增大后需要更多空间
-						repulsion: [250, 400], // 进一步增加节点间斥力，适应更大的节点
-						gravity: 0.015, // 进一步减少向中心的引力
-						edgeLength: [100, 180], // 增加边的长度，给更大的节点更多空间
-						layoutAnimation: true,
-						friction: 0.6 // 增加摩擦力，让布局更稳定
-					},
-					label: {
-						show: true,
-						position: 'inside',
-						formatter: '{b}' // 显示节点名称
-					},
-					edgeLabel: {
-						show: true,
-						fontSize: 9,
-						color: themeColors.textSecondary,
-						backgroundColor: themeColors.bgCard,
-						borderColor: themeColors.borderCard,
-						borderWidth: 0.5,
-						borderRadius: 3,
-						padding: [2, 4],
-						formatter: (params: any) => params.data.name // 显示边的关系名称
-					},
-					lineStyle: {
-						opacity: 0.7,
-						curveness: 0.2
-					},
-					emphasis: {
-						focus: 'adjacency',
-						lineStyle: {
-							width: 3,
-							opacity: 1
+			const themeColors = getThemeColors()
+
+			// 创建 ECharts 实例
+			const chart = echarts.init(containerRef.current, undefined, {
+				width,
+				height,
+				renderer: 'canvas', // 使用 canvas 渲染器以提高性能
+				devicePixelRatio: window.devicePixelRatio || 1
+			})
+
+			chartRef.current = chart
+
+			// 配置图谱选项
+			const option: echarts.EChartsOption = {
+				backgroundColor: 'transparent',
+				animationDuration: 300,
+				animationEasingUpdate: 'quinticInOut',
+				// 确保没有任何内置边距
+				graphic: [],
+				series: [
+					{
+						type: 'graph',
+						layout: 'force',
+						data: chartNodes,
+						links: chartLinks,
+						categories: [
+							{ name: 'Level 1', itemStyle: { color: themeColors.primary } },
+							{ name: 'Level 2', itemStyle: { color: themeColors.primary } },
+							{ name: 'Level 3', itemStyle: { color: themeColors.primary } }
+						],
+						roam: true, // 启用缩放和平移
+						draggable: true, // 启用拖拽
+						focusNodeAdjacency: true, // 鼠标悬停时高亮相邻节点
+						// 让图表充满整个区域 - 使用负值进一步扩展
+						left: -10,
+						right: -10,
+						top: -10,
+						bottom: -10,
+						force: {
+							// 力导向布局配置 - 节点增大后需要更多空间
+							repulsion: [250, 400], // 进一步增加节点间斥力，适应更大的节点
+							gravity: 0.015, // 进一步减少向中心的引力
+							edgeLength: [100, 180], // 增加边的长度，给更大的节点更多空间
+							layoutAnimation: true,
+							friction: 0.6 // 增加摩擦力，让布局更稳定
 						},
-						itemStyle: {
-							borderWidth: 3
+						label: {
+							show: true,
+							position: 'inside',
+							formatter: '{b}' // 显示节点名称
+						},
+						edgeLabel: {
+							show: true,
+							fontSize: 9,
+							color: themeColors.textSecondary,
+							backgroundColor: themeColors.bgCard,
+							borderColor: themeColors.borderCard,
+							borderWidth: 0.5,
+							borderRadius: 3,
+							padding: [2, 4],
+							formatter: (params: any) => params.data.name // 显示边的关系名称
+						},
+						lineStyle: {
+							opacity: 0.7,
+							curveness: 0.2
+						},
+						emphasis: {
+							focus: 'adjacency',
+							lineStyle: {
+								width: 3,
+								opacity: 1
+							},
+							itemStyle: {
+								borderWidth: 3
+							}
 						}
 					}
-				}
-			]
-		}
-
-		// 设置配置并渲染
-		chart.setOption(option)
-
-		// 添加交互事件
-		chart.on('click', (params) => {
-			if (params.dataType === 'node') {
-				const nodeData = params.data as any
-				console.log('Node clicked:', nodeData.originalData)
-			} else if (params.dataType === 'edge') {
-				const edgeData = params.data as any
-				console.log('Edge clicked:', edgeData.originalData)
+				]
 			}
-		})
 
-		// 图表渲染完成
-		setLoading(false)
+			// 设置配置并渲染
+			chart.setOption(option)
 
-		return () => {
-			chart.dispose()
+			// 添加交互事件
+			chart.on('click', (params) => {
+				if (params.dataType === 'node') {
+					const nodeData = params.data as any
+					console.log('Node clicked:', nodeData.originalData)
+				} else if (params.dataType === 'edge') {
+					const edgeData = params.data as any
+					console.log('Edge clicked:', edgeData.originalData)
+				}
+			})
+
+			// 图表渲染完成
+			setLoading(false)
+
+			return () => {
+				if (chart && !chart.isDisposed()) {
+					chart.dispose()
+				}
+			}
+		} catch (error) {
+			console.error('Error initializing ECharts graph:', error)
+			setLoading(false)
+			// 可以在这里设置一个错误状态来显示错误信息
 		}
 	}, [nodes, edges, dimensions])
 
