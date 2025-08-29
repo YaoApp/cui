@@ -495,17 +495,39 @@ const CollectionDetail = () => {
 
 	// 删除文档
 	const handleDeleteDocument = async (document: Document) => {
-		// TODO: 实现实际的删除逻辑
 		try {
-			// 暂时的空函数，显示成功消息
-			await new Promise((resolve) => setTimeout(resolve, 300))
+			const { kb } = initializeAPIs(kbConfig)
 
-			message.success(is_cn ? '文档删除成功' : 'Document deleted successfully')
+			// 调用删除文档 API
+			const response = await kb.RemoveDocs([document.document_id])
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to delete document')
+			}
+
+			const { deleted_count = 0, requested_count = 1 } = response.data || {}
+
+			if (deleted_count === 0) {
+				message.warning(is_cn ? '文档未找到或已被删除' : 'Document not found or already deleted')
+			} else {
+				message.success(
+					is_cn
+						? `文档删除成功 (${deleted_count}/${requested_count})`
+						: `Document deleted successfully (${deleted_count}/${requested_count})`
+				)
+			}
 
 			// 从本地状态中移除文档
-			setDocuments((prev) => prev.filter((doc) => doc.id !== document.id))
+			setDocuments((prev) => prev.filter((doc) => doc.document_id !== document.document_id))
+			setFilteredDocuments((prev) => prev.filter((doc) => doc.document_id !== document.document_id))
+
+			// 更新总数
+			setTotalDocuments((prev) => prev - deleted_count)
 		} catch (error) {
-			message.error(is_cn ? '删除失败' : 'Failed to delete document')
+			console.error('Delete document failed:', error)
+			const errorMsg =
+				error instanceof Error ? error.message : is_cn ? '删除失败' : 'Failed to delete document'
+			message.error(errorMsg)
 		}
 	}
 

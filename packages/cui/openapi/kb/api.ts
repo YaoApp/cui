@@ -21,6 +21,7 @@ import {
 	ListDocumentsResponse,
 	GetDocumentRequest,
 	GetDocumentResponse,
+	RemoveDocsResponse,
 	Segment,
 	GetSegmentResponse,
 	GetSegmentParentsRequest,
@@ -195,6 +196,16 @@ export class KB {
 		}
 
 		return this.api.Get<GetDocumentResponse>(`/kb/documents/${docID}`, params)
+	}
+
+	/**
+	 * Remove documents by IDs
+	 */
+	async RemoveDocs(documentIDs: string[]): Promise<ApiResponse<RemoveDocsResponse>> {
+		const queryParams = new URLSearchParams({
+			document_ids: documentIDs.join(',')
+		})
+		return this.api.Delete<RemoveDocsResponse>(`/kb/documents?${queryParams.toString()}`)
 	}
 
 	// ===== Segment Management =====

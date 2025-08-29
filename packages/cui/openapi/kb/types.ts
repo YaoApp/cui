@@ -267,6 +267,14 @@ export interface GetDocumentRequest {
 // Get document response (single document)
 export type GetDocumentResponse = Document
 
+// Remove documents response
+export interface RemoveDocsResponse {
+	message: string
+	deleted_count: number
+	requested_count: number
+	db_deleted_count: number
+}
+
 // ===== Segment Management Types =====
 
 // Segment data structure (matches backend GraphRag Segment type)
