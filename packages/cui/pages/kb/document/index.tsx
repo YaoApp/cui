@@ -8,6 +8,7 @@ import { mockFetchKnowledgeBase, mockFetchDocumentContent } from './mockData'
 import { KB, Document, CollectionInfo } from '@/openapi'
 import { getFileTypeIcon } from '@/assets/icons'
 import Summary from './Summary'
+import Actions from './Actions'
 import Layout from './Layout'
 import Original from './Original'
 import Segments from './Segments'
@@ -19,9 +20,17 @@ interface DocumentModalProps {
 	collectionId: string
 	docid: string
 	collectionInfo: CollectionInfo
+	onDocumentDeleted?: () => void
 }
 
-const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collectionId, docid, collectionInfo }) => {
+const DocumentModal: React.FC<DocumentModalProps> = ({
+	visible,
+	onClose,
+	collectionId,
+	docid,
+	collectionInfo,
+	onDocumentDeleted
+}) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -224,13 +233,20 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 								className={styles.fullscreenButton}
 							/>
 						</Tooltip>
-						<Tooltip title={is_cn ? '更多操作' : 'More Actions'}>
-							<Button
-								type='text'
-								icon={<Icon name='material-more_vert' size={16} />}
-								className={styles.moreButton}
-							/>
-						</Tooltip>
+						<Actions
+							document={document}
+							collectionInfo={collectionInfo}
+							onDocumentDeleted={() => {
+								// 通知父页面刷新文档列表
+								onDocumentDeleted?.()
+								// 关闭弹窗
+								onClose()
+							}}
+							onDocumentUpdated={() => {
+								// 重新加载文档数据
+								loadDocument()
+							}}
+						/>
 						<Tooltip title={is_cn ? '关闭' : 'Close'}>
 							<Button
 								type='text'
@@ -247,6 +263,7 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ visible, onClose, collect
 					visible={showMetadata}
 					isClosing={isClosing}
 					document={document}
+					collectionInfo={collectionInfo}
 					popoverRef={popoverRef}
 				/>
 

@@ -11,7 +11,7 @@ import {
 	QuestionCircleOutlined
 } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
-import { Document } from '@/openapi'
+import { Document, CollectionInfo } from '@/openapi'
 import { getFileTypeIcon } from '@/assets/icons'
 import styles from './index.less'
 
@@ -19,10 +19,11 @@ interface SummaryProps {
 	visible: boolean
 	isClosing: boolean
 	document: Document | null
+	collectionInfo: CollectionInfo | null
 	popoverRef: React.RefObject<HTMLDivElement>
 }
 
-const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, popoverRef }) => {
+const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, collectionInfo, popoverRef }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -31,25 +32,55 @@ const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, popover
 		const statusMap: {
 			[key: string]: { icon: React.ReactNode; color: string; label: string }
 		} = {
-			ready: {
-				icon: <CheckCircleOutlined />,
-				color: 'var(--color_success)',
-				label: is_cn ? '就绪' : 'Ready'
+			pending: {
+				icon: <ClockCircleOutlined />,
+				color: 'var(--color_text_grey)',
+				label: is_cn ? '待处理' : 'Pending'
 			},
-			processing: {
+			converting: {
 				icon: <LoadingOutlined />,
 				color: 'var(--color_warning)',
-				label: is_cn ? '处理中' : 'Processing'
+				label: is_cn ? '转换中' : 'Converting'
 			},
-			failed: {
-				icon: <CloseCircleOutlined />,
-				color: 'var(--color_danger)',
-				label: is_cn ? '失败' : 'Failed'
+			chunking: {
+				icon: <LoadingOutlined />,
+				color: 'var(--color_warning)',
+				label: is_cn ? '分块中' : 'Chunking'
 			},
-			indexing: {
+			extracting: {
 				icon: <LoadingOutlined />,
 				color: 'var(--color_info)',
-				label: is_cn ? '索引中' : 'Indexing'
+				label: is_cn ? '提取中' : 'Extracting'
+			},
+			embedding: {
+				icon: <LoadingOutlined />,
+				color: 'var(--color_info)',
+				label: is_cn ? '嵌入中' : 'Embedding'
+			},
+			storing: {
+				icon: <LoadingOutlined />,
+				color: 'var(--color_info)',
+				label: is_cn ? '存储中' : 'Storing'
+			},
+			completed: {
+				icon: <CheckCircleOutlined />,
+				color: 'var(--color_success)',
+				label: is_cn ? '已完成' : 'Completed'
+			},
+			maintenance: {
+				icon: <QuestionCircleOutlined />,
+				color: 'var(--color_warning)',
+				label: is_cn ? '维护中' : 'Maintenance'
+			},
+			restoring: {
+				icon: <LoadingOutlined />,
+				color: 'var(--color_warning)',
+				label: is_cn ? '恢复中' : 'Restoring'
+			},
+			error: {
+				icon: <CloseCircleOutlined />,
+				color: 'var(--color_danger)',
+				label: is_cn ? '错误' : 'Error'
 			}
 		}
 		return (
@@ -97,14 +128,14 @@ const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, popover
 					更新时间: {new Date(document?.updated_at || '').toLocaleString('zh-CN')}
 				</div>
 
-				<div className={styles.metaInfo}>
+				{/* <div className={styles.metaInfo}>
 					<UserOutlined />
 					作者: {document?.uploader_id || 'Unknown'}
-				</div>
+				</div> */}
 
 				<div className={styles.metaInfo}>
 					<DatabaseOutlined />
-					所属集合: {document?.collection_id}
+					所属集合: {collectionInfo?.name || document?.collection_id}
 				</div>
 
 				<div className={styles.metaInfo}>
@@ -117,9 +148,16 @@ const Summary: React.FC<SummaryProps> = ({ visible, isClosing, document, popover
 					文件大小: {formatFileSize(document?.size || 0)}
 				</div>
 
-				<div className={`${styles.metaInfo} ${styles[`status-${document?.status || 'ready'}`] || ''}`}>
-					{getDocumentStatus(document?.status || 'ready').icon}
-					文档状态: {getDocumentStatus(document?.status || 'ready').label}
+				<div
+					className={`${styles.metaInfo} ${
+						styles[`status-${document?.status || 'pending'}`] || ''
+					}`}
+				>
+					{getDocumentStatus(document?.status || 'pending').icon}
+					文档状态:{' '}
+					<span style={{ color: getDocumentStatus(document?.status || 'pending').color }}>
+						{getDocumentStatus(document?.status || 'pending').label}
+					</span>
 				</div>
 
 				{document?.description && <div className={styles.description}>{document.description}</div>}

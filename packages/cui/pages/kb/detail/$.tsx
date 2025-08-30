@@ -874,6 +874,10 @@ const CollectionDetail = () => {
 					collectionId={selectedDocument.collectionId}
 					docid={selectedDocument.docid}
 					collectionInfo={extractCollectionInfo(collection)}
+					onDocumentDeleted={() => {
+						// 刷新文档列表
+						loadDocuments()
+					}}
 				/>
 			)}
 
