@@ -61,12 +61,6 @@ const Index = () => {
 		return colorMap[status] || 'var(--color_text_grey)'
 	}
 
-	// 获取分类图标
-	const getCategoryIcon = (categoryId?: string): string => {
-		// 默认图标
-		return 'material-work'
-	}
-
 	// 格式化时间
 	const formatTime = (timestamp: string): string => {
 		const date = new Date(timestamp)
@@ -378,7 +372,14 @@ const Index = () => {
 						}`}
 						onClick={() => handleCategoryClick(category.category_id)}
 					>
-						<Icon name={category.icon || getCategoryIcon(category.category_id)} size={16} />
+						<Icon
+							name={
+								category.category_id === 'running' || category.category_id === 'all'
+									? category.icon || 'material-work'
+									: 'material-local_offer'
+							}
+							size={16}
+						/>
 						<span className={styles.categoryName}>{category.name}</span>
 					</div>
 				))}
@@ -393,7 +394,16 @@ const Index = () => {
 				<div className={styles.cardHeader}>
 					<div className={styles.cardHeaderLeft}>
 						<div className={styles.cardTitleWithIcon}>
-							<Icon name={job.icon || getCategoryIcon(job.category_id)} size={16} />
+							<Icon
+								name={
+									job.icon
+										? job.icon.startsWith('material-')
+											? job.icon
+											: `material-${job.icon}`
+										: 'material-work'
+								}
+								size={16}
+							/>
 							<h3 className={styles.cardTitle}>{job.name}</h3>
 						</div>
 						<div className={styles.cardStatus}>

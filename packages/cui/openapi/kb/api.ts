@@ -16,8 +16,12 @@ import {
 	GetProvidersRequest,
 	GetProviderSchemaRequest,
 	AddFileRequest,
+	AddFileResponse,
 	AddTextRequest,
+	AddTextResponse,
 	AddURLRequest,
+	AddURLResponse,
+	JobOptions,
 	AsyncOperationResponse,
 	ListDocumentsRequest,
 	ListDocumentsResponse,
@@ -157,6 +161,27 @@ export class KB {
 	}
 
 	// ===== Document Management =====
+
+	/**
+	 * Add file to collection synchronously
+	 */
+	async AddFile(collectionID: string, request: AddFileRequest): Promise<ApiResponse<AddFileResponse>> {
+		return this.api.Post<AddFileResponse>(`/kb/collections/${collectionID}/documents/file`, request)
+	}
+
+	/**
+	 * Add text to collection synchronously
+	 */
+	async AddText(collectionID: string, request: AddTextRequest): Promise<ApiResponse<AddTextResponse>> {
+		return this.api.Post<AddTextResponse>(`/kb/collections/${collectionID}/documents/text`, request)
+	}
+
+	/**
+	 * Add URL to collection synchronously
+	 */
+	async AddURL(collectionID: string, request: AddURLRequest): Promise<ApiResponse<AddURLResponse>> {
+		return this.api.Post<AddURLResponse>(`/kb/collections/${collectionID}/documents/url`, request)
+	}
 
 	/**
 	 * Add file to collection asynchronously

@@ -343,6 +343,20 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 				file_path: uploadResponse.data?.path,
 				user_path: uploadResponse.data?.user_path,
 				uploader_file_id: fileId
+			},
+			job: {
+				name: is_cn
+					? `处理文件「${uploadResponse.data?.filename || file.name}」`
+					: `Process File "${uploadResponse.data?.filename || file.name}"`,
+				description: is_cn
+					? `正在将文件「${uploadResponse.data?.filename || file.name}」添加到知识库「${
+							collectionName || collection.metadata?.name || collection.id
+					  }」，包括文档解析、分块和向量化处理`
+					: `Processing file "${uploadResponse.data?.filename || file.name}" for knowledge base "${
+							collectionName || collection.metadata?.name || collection.id
+					  }", including document parsing, chunking and vectorization`,
+				icon: 'description',
+				category: is_cn ? '知识库' : 'Knowledge Base'
 			}
 		}
 
@@ -402,6 +416,20 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 				type: 'text',
 				length: data.content.content.length,
 				created_at: new Date().toISOString()
+			},
+			job: {
+				name: is_cn ? `处理文本内容` : `Process Text Content`,
+				description: is_cn
+					? `正在将文本内容（${data.content.content.length} 字符）添加到知识库「${
+							collectionName || collection.metadata?.name || collection.id
+					  }」，包括文本分块和向量化处理`
+					: `Processing text content (${
+							data.content.content.length
+					  } characters) for knowledge base "${
+							collectionName || collection.metadata?.name || collection.id
+					  }", including text chunking and vectorization`,
+				icon: 'article',
+				category: is_cn ? '知识库' : 'Knowledge Base'
 			}
 		}
 
@@ -448,6 +476,20 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 				source_url: data.content.url,
 				title: data.content.title,
 				fetched_at: new Date().toISOString()
+			},
+			job: {
+				name: is_cn
+					? `抓取网页「${data.content.title || data.content.url}」`
+					: `Fetch Web Page "${data.content.title || data.content.url}"`,
+				description: is_cn
+					? `正在抓取网页「${data.content.url}」并添加到知识库「${
+							collectionName || collection.metadata?.name || collection.id
+					  }」，包括网页内容获取、解析、分块和向量化处理`
+					: `Fetching web page "${data.content.url}" for knowledge base "${
+							collectionName || collection.metadata?.name || collection.id
+					  }", including content extraction, parsing, chunking and vectorization`,
+				icon: 'language',
+				category: is_cn ? '知识库' : 'Knowledge Base'
 			}
 		}
 

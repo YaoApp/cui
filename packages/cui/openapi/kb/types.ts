@@ -232,6 +232,14 @@ export interface CollectionInfo {
 	embedding_option: string
 }
 
+// Job options for async operations
+export interface JobOptions {
+	name?: string // Job name (optional, defaults will be used)
+	description?: string // Job description (optional, defaults will be used)
+	icon?: string // Job icon (optional, Material Icon name)
+	category?: string // Job category (optional, defaults will be used)
+}
+
 // Base request for document upsert operations
 export interface BaseUpsertRequest {
 	collection_id: string
@@ -243,6 +251,7 @@ export interface BaseUpsertRequest {
 	converter?: ProviderConfig
 	doc_id?: string
 	metadata?: Record<string, any>
+	job?: JobOptions // Job options for async operations
 }
 
 // Document management request types
@@ -268,6 +277,10 @@ export interface AddDocumentResponse {
 
 export interface AddFileResponse extends AddDocumentResponse {
 	file_id: string
+}
+
+export interface AddTextResponse extends AddDocumentResponse {
+	// No additional fields needed for text response
 }
 
 export interface AddURLResponse extends AddDocumentResponse {
