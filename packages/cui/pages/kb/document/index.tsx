@@ -121,6 +121,9 @@ const DocumentModal: React.FC<DocumentModalProps> = ({
 				setLoading(true)
 				await Promise.all([loadKnowledgeBase(), loadDocument(), loadDocumentContent()])
 				setLoading(false)
+
+				// 刷新运行中的Jobs数量，确保Header显示一致
+				window.$app?.Event?.emit('app/refreshJobsCount')
 			}
 			loadData()
 		}

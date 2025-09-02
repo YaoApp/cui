@@ -128,6 +128,9 @@ const Collections = () => {
 	// 初始加载
 	useEffect(() => {
 		loadData()
+
+		// 刷新运行中的Jobs数量，确保Header显示一致
+		window.$app?.Event?.emit('app/refreshJobsCount')
 	}, [])
 
 	// 搜索关键词或排序变化时重新加载数据

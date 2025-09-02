@@ -2,12 +2,12 @@ import { useEffect } from 'react'
 import { Button, Spin, Tag, Timeline, Card, Row, Col, Statistic } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import { Task, TaskLog } from './types'
+import { Job } from '@/openapi'
 import styles from './TaskDetail.less'
 
 interface TaskDetailProps {
-	task: Task
-	taskDetail: Task | null
+	task: Job
+	taskDetail: Job | null
 	loading: boolean
 	onRefresh: () => void
 }

@@ -1,7 +1,7 @@
 import { Button, Dropdown, Tooltip } from 'antd'
 import { FC, useState, useEffect, useRef } from 'react'
-import { container } from 'tsyringe'
-import { GlobalModel } from '@/context/app'
+import { observer } from 'mobx-react-lite'
+import { useGlobal } from '@/context/app'
 import Icon from '@/widgets/Icon'
 import clsx from 'clsx'
 import './header.less'
@@ -25,7 +25,7 @@ const Header: FC<HeaderProps> = ({
 	currentPageName = '',
 	onBackToNormal
 }) => {
-	const global = container.resolve(GlobalModel)
+	const global = useGlobal()
 	const current_path = useLocation().pathname
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -322,7 +322,7 @@ const Header: FC<HeaderProps> = ({
 				</div>
 
 				<div className='header_right'>
-					<Tooltip title={is_cn ? '当前任务' : 'Current Jobs'}>
+					<Tooltip title={is_cn ? '作业' : 'Jobs'}>
 						<Button
 							type='text'
 							className='header_icon_btn header_task_btn'
@@ -330,7 +330,13 @@ const Header: FC<HeaderProps> = ({
 						>
 							<div className='header_task_content'>
 								<span className='header_task_text'>{is_cn ? '任务' : 'Jobs'}</span>
-								<span className='header_task_number'>2</span>
+								<span
+									className={`header_task_number ${
+										global.runningJobsCount > 0 ? 'has-jobs' : ''
+									}`}
+								>
+									{global.runningJobsCount}
+								</span>
 							</div>
 						</Button>
 					</Tooltip>
@@ -403,4 +409,4 @@ const Header: FC<HeaderProps> = ({
 	)
 }
 
-export default Header
+export default observer(Header)

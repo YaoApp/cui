@@ -10,7 +10,7 @@ import { local } from '@yaoapp/storex'
 
 import type { AvatarFullConfig } from 'react-nice-avatar'
 import type { App, LocaleMessages } from '@/types'
-import { OpenAPI, OpenAPIConfig, UserInfo } from '@/openapi'
+import { OpenAPI, OpenAPIConfig, UserInfo, JobAPI } from '@/openapi'
 
 @singleton()
 export default class GlobalModel {
@@ -43,6 +43,10 @@ export default class GlobalModel {
 	// Global Neo Context
 	neo: App.Neo = { assistant_id: undefined, chat_id: undefined, placeholder: undefined }
 	dataCache: Record<string, any> = {}
+
+	// Jobs status
+	runningJobsCount: number = 0
+	private jobsCountTimer: NodeJS.Timeout | null = null
 
 	constructor(private service: Service, public stack: Stack) {
 		makeAutoObservable(this, {}, { autoBind: true })
@@ -267,6 +271,44 @@ export default class GlobalModel {
 		this.visible_log_window = visible
 	}
 
+	async refreshJobsCount() {
+		try {
+			if (!window.$app?.openapi) return
+
+			const jobAPI = new JobAPI(window.$app.openapi)
+			const response = await jobAPI.GetStats()
+
+			if (!window.$app.openapi.IsError(response)) {
+				this.runningJobsCount = response.data?.running_jobs || 0
+			}
+		} catch (error) {
+			console.error('Failed to refresh jobs count:', error)
+		}
+	}
+
+	// 启动定时刷新Jobs数量（每5分钟）
+	startJobsCountTimer() {
+		if (this.jobsCountTimer) {
+			clearInterval(this.jobsCountTimer)
+		}
+
+		// 立即刷新一次
+		this.refreshJobsCount()
+
+		// 设置定时器，每5分钟刷新一次
+		this.jobsCountTimer = setInterval(() => {
+			this.refreshJobsCount()
+		}, 5 * 60 * 1000) // 5分钟 = 300,000毫秒
+	}
+
+	// 停止定时刷新
+	stopJobsCountTimer() {
+		if (this.jobsCountTimer) {
+			clearInterval(this.jobsCountTimer)
+			this.jobsCountTimer = null
+		}
+	}
+
 	updateMenuStatus(itemkey_or_pathname: string) {
 		const { hit, current_nav, paths, keys } = getCurrentMenuIndexs(
 			itemkey_or_pathname,
@@ -310,11 +352,19 @@ export default class GlobalModel {
 		window.$app.Event.on('app/getAppInfo', this.getAppInfo)
 		window.$app.Event.on('app/getUserMenu', this.getUserMenu)
 		window.$app.Event.on('app/updateMenuStatus', this.updateMenuStatus)
+		window.$app.Event.on('app/refreshJobsCount', this.refreshJobsCount)
+
+		// 启动Jobs数量定时刷新
+		this.startJobsCountTimer()
 	}
 
 	off() {
 		window.$app.Event.off('app/getAppInfo', this.getAppInfo)
 		window.$app.Event.off('app/getUserMenu', this.getUserMenu)
 		window.$app.Event.off('app/updateMenuStatus', this.updateMenuStatus)
+		window.$app.Event.off('app/refreshJobsCount', this.refreshJobsCount)
+
+		// 停止Jobs数量定时刷新
+		this.stopJobsCountTimer()
 	}
 }

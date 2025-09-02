@@ -85,6 +85,8 @@ const Segments: React.FC<SegmentsProps> = ({
 				console.log('Document processing completed, stopping auto refresh')
 				stopAutoRefresh()
 				loadSegments(true) // 重新加载分段数据
+				// 文档处理完成，刷新Jobs数量
+				window.$app?.Event?.emit('app/refreshJobsCount')
 			}
 
 			return updatedDocument
@@ -102,6 +104,8 @@ const Segments: React.FC<SegmentsProps> = ({
 		autoRefreshTimerRef.current = setInterval(() => {
 			console.log('Auto refreshing document status...')
 			loadDocumentStatus()
+			// 同时刷新Jobs数量，因为文档处理状态可能发生变化
+			window.$app?.Event?.emit('app/refreshJobsCount')
 		}, 15000) // 15秒刷新一次
 
 		setAutoRefreshEnabled(true)

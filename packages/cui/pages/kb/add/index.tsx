@@ -261,6 +261,9 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 
 			// 成功后调用onConfirm回调
 			onConfirm(currentData, finalOptions, docId)
+
+			// 刷新运行中的Jobs数量
+			window.$app?.Event?.emit('app/refreshJobsCount')
 		} catch (error) {
 			console.error('Document processing failed:', error)
 			const errorMsg =

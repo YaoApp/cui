@@ -1,17 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button, Input, Spin, Modal, message } from 'antd'
-import {
-	SearchOutlined,
-	ClockCircleOutlined,
-	PlayCircleOutlined,
-	CheckCircleOutlined,
-	CloseCircleOutlined
-} from '@ant-design/icons'
+import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import TaskDetail from './TaskDetail'
-import { ListResponse, Task, Catgory, TaskLog } from './types'
-import { mockFetchTasks, mockFetchTaskDetail } from './mockData'
+import { JobAPI, Job, Category, ListJobsRequest } from '@/openapi'
 import styles from './index.less'
 
 const Index = () => {
@@ -20,51 +13,58 @@ const Index = () => {
 
 	const [loading, setLoading] = useState(true)
 	const [search, setSearch] = useState('')
-	const [searchText, setSearchText] = useState('')
-	const [activeCategory, setActiveCategory] = useState('all')
-	const [tasks, setTasks] = useState<Task[]>([])
-	const [categories, setCategories] = useState<Catgory[]>([])
-	const [allCategories, setAllCategories] = useState<Catgory[]>([])
+	const [searchKeywords, setSearchKeywords] = useState('') // 实际用于搜索的关键词
+	const [activeCategory, setActiveCategory] = useState('running') // 默认显示运行中的任务
+	const [jobs, setJobs] = useState<Job[]>([])
+	const [categories, setCategories] = useState<Category[]>([])
+	const [allCategories, setAllCategories] = useState<Category[]>([])
 	const [total, setTotal] = useState(0)
 	const containerRef = useRef<HTMLDivElement>(null)
 
+	// 分页状态
+	const [currentPage, setCurrentPage] = useState(1)
+	const [pageSize] = useState(20)
+	const [hasMore, setHasMore] = useState(true)
+	const [loadingMore, setLoadingMore] = useState(false)
+
 	// 详情弹窗状态
 	const [detailModalVisible, setDetailModalVisible] = useState(false)
-	const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-	const [taskDetail, setTaskDetail] = useState<Task | null>(null)
+	const [selectedJob, setSelectedJob] = useState<Job | null>(null)
+	const [jobDetail, setJobDetail] = useState<Job | null>(null)
 	const [detailLoading, setDetailLoading] = useState(false)
 
-	// 获取任务状态图标
-	const getTaskStatusIcon = (status: string): string => {
+	// 获取 Job 状态图标
+	const getJobStatusIcon = (status: string): string => {
 		const iconMap: Record<string, string> = {
-			pending: 'material-schedule',
+			draft: 'material-edit',
+			ready: 'material-schedule',
 			running: 'material-play_circle',
 			completed: 'material-check_circle',
-			failed: 'material-error_outline'
+			failed: 'material-error_outline',
+			disabled: 'material-pause_circle',
+			deleted: 'material-delete'
 		}
 		return iconMap[status] || 'material-help_outline'
 	}
 
-	// 获取任务状态颜色
-	const getTaskStatusColor = (status: string): string => {
+	// 获取 Job 状态颜色
+	const getJobStatusColor = (status: string): string => {
 		const colorMap: Record<string, string> = {
-			pending: 'var(--color_warning)',
+			draft: 'var(--color_text_grey)',
+			ready: 'var(--color_warning)',
 			running: 'var(--color_main)',
 			completed: 'var(--color_success)',
-			failed: 'var(--color_error)'
+			failed: 'var(--color_error)',
+			disabled: 'var(--color_text_grey)',
+			deleted: 'var(--color_text_grey)'
 		}
 		return colorMap[status] || 'var(--color_text_grey)'
 	}
 
 	// 获取分类图标
-	const getCategoryIcon = (category: string): string => {
-		const iconMap: Record<string, string> = {
-			assistant: 'material-assistant',
-			knowledge: 'material-menu_book',
-			workflow: 'material-account_tree',
-			schedule: 'material-schedule'
-		}
-		return iconMap[category] || 'material-folder'
+	const getCategoryIcon = (categoryId?: string): string => {
+		// 默认图标
+		return 'material-work'
 	}
 
 	// 格式化时间
@@ -87,12 +87,12 @@ const Index = () => {
 		}
 	}
 
-	// 计算任务运行时间
-	const getTaskDuration = (task: Task): string => {
-		if (!task.started_at) return '-'
+	// 计算 Job 运行时间
+	const getJobDuration = (job: Job): string => {
+		if (!job.last_run_at) return '-'
 
-		const startTime = new Date(task.started_at).getTime()
-		const endTime = task.ended_at ? new Date(task.ended_at).getTime() : new Date().getTime()
+		const startTime = new Date(job.last_run_at).getTime()
+		const endTime = new Date().getTime()
 		const duration = endTime - startTime
 
 		const seconds = Math.floor(duration / 1000)
@@ -108,80 +108,237 @@ const Index = () => {
 		}
 	}
 
-	// 加载任务列表
-	const loadTasks = async () => {
-		setLoading(true)
-		try {
-			const response = await mockFetchTasks()
-			if ('tasks' in response) {
-				setTasks(response.tasks)
-				setCategories(response.categories)
-				setTotal(response.total)
+	// 加载 Job 数据 - 初始加载
+	const loadData = async () => {
+		if (!window.$app?.openapi) {
+			console.error('OpenAPI not available')
+			return
+		}
 
-				// 添加"全部"分类
-				const allCategory: Catgory = {
-					id: 'all',
-					name: is_cn ? '全部' : 'All',
-					icon: 'material-apps',
-					description: is_cn ? '显示所有任务' : 'Show all tasks',
-					sort: 0
-				}
-				setAllCategories([allCategory, ...response.categories])
-			} else {
-				message.error(response.message)
+		try {
+			setLoading(true)
+			const jobAPI = new JobAPI(window.$app.openapi)
+
+			// 构建请求参数
+			const request: ListJobsRequest = {
+				page: 1,
+				pagesize: pageSize,
+				...(searchKeywords && { keywords: searchKeywords })
 			}
+
+			// 如果是运行中的特殊分类
+			if (activeCategory === 'running') {
+				request.status = 'running'
+			} else if (activeCategory !== 'all') {
+				request.category_id = activeCategory
+			}
+
+			const response = await jobAPI.ListJobs(request)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load jobs')
+			}
+
+			const jobsData = Array.isArray(response.data?.data) ? response.data.data : []
+			const totalJobs = typeof response.data?.total === 'number' ? response.data.total : 0
+
+			// 重新加载模式：替换数据
+			setJobs(jobsData)
+			setCurrentPage(1)
+			setTotal(totalJobs)
+
+			// 检查是否还有更多数据
+			setHasMore(jobsData.length < totalJobs)
 		} catch (error) {
-			console.error('Failed to load tasks:', error)
-			message.error(is_cn ? '加载任务失败' : 'Failed to load tasks')
+			console.error(is_cn ? '加载 Job 失败:' : 'Failed to load jobs:', error)
+			message.error(is_cn ? '加载 Job 失败' : 'Failed to load jobs')
 		} finally {
 			setLoading(false)
 		}
 	}
 
-	// 加载任务详情
-	const loadTaskDetail = async (taskId: string) => {
+	// 加载更多数据
+	const loadMoreData = async () => {
+		if (!hasMore || loadingMore) return
+
+		const nextPage = currentPage + 1
+		setCurrentPage(nextPage)
+
+		try {
+			setLoadingMore(true)
+			const jobAPI = new JobAPI(window.$app.openapi)
+
+			const request: ListJobsRequest = {
+				page: nextPage,
+				pagesize: pageSize,
+				...(searchKeywords && { keywords: searchKeywords })
+			}
+
+			// 如果是运行中的特殊分类
+			if (activeCategory === 'running') {
+				request.status = 'running'
+			} else if (activeCategory !== 'all') {
+				request.category_id = activeCategory
+			}
+
+			const response = await jobAPI.ListJobs(request)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load jobs')
+			}
+
+			const jobsData = Array.isArray(response.data?.data) ? response.data.data : []
+			const totalJobs = typeof response.data?.total === 'number' ? response.data.total : 0
+
+			// 追加数据
+			setJobs((prev) => (Array.isArray(prev) ? [...prev, ...jobsData] : jobsData))
+			setTotal(totalJobs)
+
+			// 检查是否还有更多数据
+			const loadedCount = jobs.length + jobsData.length
+			setHasMore(loadedCount < totalJobs)
+		} catch (error) {
+			console.error('Load more jobs failed:', error)
+			message.error(is_cn ? '加载更多 Job 失败' : 'Failed to load more jobs')
+		} finally {
+			setLoadingMore(false)
+		}
+	}
+
+	// 加载 Job 详情
+	const loadJobDetail = async (jobId: string) => {
 		setDetailLoading(true)
 		try {
-			const response = await mockFetchTaskDetail(taskId)
-			if ('id' in response) {
-				setTaskDetail(response)
-			} else {
-				message.error(response.message)
+			const jobAPI = new JobAPI(window.$app.openapi)
+			const response = await jobAPI.GetJob(jobId)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load job detail')
 			}
+
+			setJobDetail(response.data!)
 		} catch (error) {
-			console.error('Failed to load task detail:', error)
-			message.error(is_cn ? '加载任务详情失败' : 'Failed to load task detail')
+			console.error('Failed to load job detail:', error)
+			message.error(is_cn ? '加载 Job 详情失败' : 'Failed to load job detail')
 		} finally {
 			setDetailLoading(false)
 		}
 	}
 
-	// 定时更新任务列表
+	// 加载分类数据和统计信息
+	const loadCategories = async () => {
+		if (!window.$app?.openapi) return
+
+		try {
+			const jobAPI = new JobAPI(window.$app.openapi)
+
+			// 并行加载分类和所有 jobs 数据
+			const [categoriesResponse, allJobsResponse] = await Promise.all([
+				jobAPI.ListCategories(),
+				jobAPI.ListJobs({ page: 1, pagesize: 1000 }) // 获取所有 jobs 用于统计
+			])
+
+			if (window.$app.openapi.IsError(categoriesResponse)) {
+				console.warn('Failed to load categories:', categoriesResponse.error)
+				return
+			}
+
+			const categoriesData = Array.isArray(categoriesResponse.data?.data)
+				? categoriesResponse.data.data
+				: []
+			setCategories(categoriesData)
+
+			// 获取所有 jobs 用于统计
+			let allJobs: Job[] = []
+			if (!window.$app.openapi.IsError(allJobsResponse)) {
+				allJobs = Array.isArray(allJobsResponse.data?.data) ? allJobsResponse.data.data : []
+			}
+
+			// 统计运行中的 jobs
+			const runningJobsCount = allJobs.filter((job) => job.status === 'running').length
+			const totalJobsCount = allJobs.length
+
+			// 构建所有分类列表（包含特殊分类）
+			const runningCategory: Category = {
+				id: 0,
+				category_id: 'running',
+				name: is_cn ? `运行中 (${runningJobsCount})` : `Running (${runningJobsCount})`,
+				icon: 'material-play_circle',
+				description: is_cn ? '当前正在运行的 Job' : 'Currently running jobs',
+				sort: -1,
+				system: true,
+				enabled: true,
+				readonly: true,
+				created_at: new Date().toISOString(),
+				updated_at: new Date().toISOString()
+			}
+
+			const allCategory: Category = {
+				id: 0,
+				category_id: 'all',
+				name: is_cn ? `全部 (${totalJobsCount})` : `All (${totalJobsCount})`,
+				icon: 'material-apps',
+				description: is_cn ? '显示所有 Job' : 'Show all jobs',
+				sort: 0,
+				system: true,
+				enabled: true,
+				readonly: true,
+				created_at: new Date().toISOString(),
+				updated_at: new Date().toISOString()
+			}
+
+			// 为每个分类添加统计数量
+			const categoriesWithCount = categoriesData.map((category) => ({
+				...category,
+				name: `${category.name} (${
+					allJobs.filter((job) => job.category_id === category.category_id).length
+				})`
+			}))
+
+			setAllCategories([runningCategory, allCategory, ...categoriesWithCount])
+		} catch (error) {
+			console.error('Failed to load categories:', error)
+		}
+	}
+
+	// 处理滚动加载
 	useEffect(() => {
-		loadTasks()
-		const interval = setInterval(loadTasks, 120000) // 每120秒更新
-		return () => clearInterval(interval)
+		const container = containerRef.current
+		if (!container) return
+
+		const handleScroll = () => {
+			const { scrollTop, scrollHeight, clientHeight } = container
+			if (scrollHeight - scrollTop - clientHeight < 50 && !loadingMore && hasMore) {
+				loadMoreData()
+			}
+		}
+
+		container.addEventListener('scroll', handleScroll)
+		return () => container.removeEventListener('scroll', handleScroll)
+	}, [loadingMore, hasMore, jobs])
+
+	// 初始加载
+	useEffect(() => {
+		loadCategories()
+		loadData()
+
+		// 刷新运行中的Jobs数量，确保Header显示一致
+		window.$app?.Event?.emit('app/refreshJobsCount')
 	}, [])
 
-	// 过滤任务
-	const filteredTasks = tasks.filter((task) => {
-		// 分类过滤
-		if (activeCategory !== 'all' && task.category !== activeCategory) {
-			return false
-		}
-
-		// 搜索过滤
-		if (searchText.trim()) {
-			const keyword = searchText.toLowerCase()
-			return task.name.toLowerCase().includes(keyword) || task.description.toLowerCase().includes(keyword)
-		}
-
-		return true
-	})
+	// 搜索关键词或分类变化时重新加载数据
+	useEffect(() => {
+		loadData()
+	}, [searchKeywords, activeCategory])
 
 	// 搜索处理
 	const handleSearch = () => {
-		setSearchText(search)
+		setSearchKeywords(search.trim())
+	}
+
+	const handleClearSearch = () => {
+		setSearch('')
+		setSearchKeywords('')
 	}
 
 	const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -190,11 +347,11 @@ const Index = () => {
 		}
 	}
 
-	// 任务卡片点击
-	const handleTaskClick = (task: Task) => {
-		setSelectedTask(task)
+	// Job 卡片点击
+	const handleJobClick = (job: Job) => {
+		setSelectedJob(job)
 		setDetailModalVisible(true)
-		loadTaskDetail(task.id)
+		loadJobDetail(job.job_id)
 	}
 
 	// 分类点击
@@ -205,76 +362,70 @@ const Index = () => {
 	// 关闭详情弹窗
 	const handleCloseDetail = () => {
 		setDetailModalVisible(false)
-		setSelectedTask(null)
-		setTaskDetail(null)
+		setSelectedJob(null)
+		setJobDetail(null)
 	}
 
 	// 渲染分类列表
 	const renderCategories = () => {
-		// 只显示有任务的分类
-		const categoriesWithTasks = allCategories.filter((category) => {
-			if (category.id === 'all') return true
-			return tasks.some((task) => task.category === category.id)
-		})
-
 		return (
 			<div className={styles.categoriesList}>
-				{categoriesWithTasks.map((category) => (
+				{allCategories.map((category) => (
 					<div
-						key={category.id}
+						key={category.category_id}
 						className={`${styles.categoryItem} ${
-							activeCategory === category.id ? styles.active : ''
+							activeCategory === category.category_id ? styles.active : ''
 						}`}
-						onClick={() => handleCategoryClick(category.id)}
+						onClick={() => handleCategoryClick(category.category_id)}
 					>
-						<Icon name={category.icon || getCategoryIcon(category.id)} size={16} />
+						<Icon name={category.icon || getCategoryIcon(category.category_id)} size={16} />
 						<span className={styles.categoryName}>{category.name}</span>
-						<span className={styles.categoryCount}>
-							{category.id === 'all'
-								? total
-								: tasks.filter((t) => t.category === category.id).length}
-						</span>
 					</div>
 				))}
 			</div>
 		)
 	}
 
-	// 渲染任务卡片
-	const renderTaskCard = (task: Task) => {
+	// 渲染 Job 卡片
+	const renderJobCard = (job: Job) => {
 		return (
-			<div key={task.id} className={styles.taskCard} onClick={() => handleTaskClick(task)}>
+			<div key={job.job_id} className={styles.taskCard} onClick={() => handleJobClick(job)}>
 				<div className={styles.cardHeader}>
 					<div className={styles.cardHeaderLeft}>
 						<div className={styles.cardTitleWithIcon}>
-							<Icon name={task.icon || getCategoryIcon(task.category)} size={16} />
-							<h3 className={styles.cardTitle}>{task.name}</h3>
+							<Icon name={job.icon || getCategoryIcon(job.category_id)} size={16} />
+							<h3 className={styles.cardTitle}>{job.name}</h3>
 						</div>
 						<div className={styles.cardStatus}>
 							<Icon
-								name={getTaskStatusIcon(task.status)}
+								name={getJobStatusIcon(job.status)}
 								size={14}
-								style={{ color: getTaskStatusColor(task.status) }}
+								style={{ color: getJobStatusColor(job.status) }}
 							/>
 							<span
 								className={styles.statusText}
-								style={{ color: getTaskStatusColor(task.status) }}
+								style={{ color: getJobStatusColor(job.status) }}
 							>
 								{is_cn
 									? {
-											pending: '等待中',
+											draft: '草稿',
+											ready: '就绪',
 											running: '运行中',
 											completed: '已完成',
-											failed: '失败'
-									  }[task.status] || task.status
-									: task.status}
+											failed: '失败',
+											disabled: '已禁用',
+											deleted: '已删除'
+									  }[job.status] || job.status
+									: job.status}
 							</span>
 						</div>
 					</div>
 				</div>
 
 				<div className={styles.cardContent}>
-					<p className={styles.cardDescription}>{task.description}</p>
+					<p className={styles.cardDescription}>
+						{job.description || (is_cn ? '无描述' : 'No description')}
+					</p>
 				</div>
 
 				<div className={styles.cardFooter}>
@@ -282,14 +433,14 @@ const Index = () => {
 						<div className={styles.infoItem}>
 							<Icon name='material-schedule' size={12} />
 							<span>
-								{is_cn ? '创建时间' : 'Created'}: {formatTime(task.created_at)}
+								{is_cn ? '创建时间' : 'Created'}: {formatTime(job.created_at)}
 							</span>
 						</div>
-						{task.started_at && (
+						{job.last_run_at && (
 							<div className={styles.infoItem}>
 								<Icon name='material-timer' size={12} />
 								<span>
-									{is_cn ? '运行时间' : 'Duration'}: {getTaskDuration(task)}
+									{is_cn ? '最后运行' : 'Last run'}: {formatTime(job.last_run_at)}
 								</span>
 							</div>
 						)}
@@ -299,45 +450,65 @@ const Index = () => {
 		)
 	}
 
-	// 渲染任务列表
-	const renderTasks = () => {
-		if (loading) {
+	// 渲染 Job 列表
+	const renderJobs = () => {
+		if (loading && jobs.length === 0) {
 			return (
 				<div className={styles.loading}>
 					<Spin size='large' />
+					<span style={{ marginLeft: 8 }}>{is_cn ? '加载中...' : 'Loading...'}</span>
 				</div>
 			)
 		}
 
-		if (total === 0) {
+		if (jobs.length === 0 && !loading) {
 			return (
 				<div className={styles.emptyState}>
-					<Icon name='material-assignment' size={64} />
-					<div className={styles.emptyTitle}>{is_cn ? '暂无任务' : 'No Tasks'}</div>
-					<div className={styles.emptyDescription}>
-						{is_cn ? '还没有任何任务' : 'No tasks available'}
-					</div>
-				</div>
-			)
-		}
-
-		if (filteredTasks.length === 0) {
-			return (
-				<div className={styles.emptyState}>
-					<Icon name='material-search_off' size={64} />
+					<Icon name='material-work' size={64} />
 					<div className={styles.emptyTitle}>
-						{is_cn ? '未找到匹配的任务' : 'No Matching Tasks'}
+						{searchKeywords
+							? is_cn
+								? '未找到匹配的 Job'
+								: 'No matching jobs found'
+							: is_cn
+							? '暂无 Job'
+							: 'No Jobs'}
 					</div>
 					<div className={styles.emptyDescription}>
-						{is_cn
-							? '请尝试修改搜索条件或选择其他分类'
-							: 'Try adjusting your search or select a different category'}
+						{searchKeywords
+							? is_cn
+								? '尝试调整搜索关键词或选择其他分类'
+								: 'Try adjusting your search keywords or select a different category'
+							: is_cn
+							? '还没有任何 Job'
+							: 'No jobs available'}
 					</div>
 				</div>
 			)
 		}
 
-		return <div className={styles.tasksGrid}>{filteredTasks.map(renderTaskCard)}</div>
+		return (
+			<>
+				<div className={styles.tasksGrid}>{jobs.map(renderJobCard)}</div>
+
+				{/* 加载更多指示器 */}
+				{loadingMore && (
+					<div className={styles.loading}>
+						<Spin />
+						<span style={{ marginLeft: 8 }}>
+							{is_cn ? '加载更多 Job...' : 'Loading more jobs...'}
+						</span>
+					</div>
+				)}
+
+				{/* 没有更多数据的提示 */}
+				{!hasMore && jobs.length > 0 && (
+					<div className={styles.loading}>
+						<span>{is_cn ? '已加载全部 Job' : 'All jobs loaded'}</span>
+					</div>
+				)}
+			</>
+		)
 	}
 
 	return (
@@ -345,12 +516,8 @@ const Index = () => {
 			<div className={styles.header}>
 				<div className={styles.titleContainer}>
 					<div className={styles.titleWithIcon}>
-						<Icon
-							name='material-assignment'
-							size={24}
-							style={{ color: 'var(--color_page_title)' }}
-						/>
-						<h1 className={styles.title}>{is_cn ? '当前任务' : 'Current Tasks'}</h1>
+						<Icon name='material-work' size={24} style={{ color: 'var(--color_page_title)' }} />
+						<h1 className={styles.title}>{is_cn ? '作业' : 'Jobs'}</h1>
 					</div>
 				</div>
 
@@ -358,10 +525,16 @@ const Index = () => {
 					<Input
 						size='large'
 						className={styles.search}
-						placeholder={is_cn ? '搜索任务...' : 'Search tasks...'}
+						placeholder={is_cn ? '搜索 Job...' : 'Search jobs...'}
 						prefix={<SearchOutlined />}
 						value={search}
-						onChange={(e) => setSearch(e.target.value)}
+						onChange={(e) => {
+							const value = e.target.value
+							setSearch(value)
+							if (!value) {
+								handleClearSearch()
+							}
+						}}
 						onKeyPress={handleKeyPress}
 						allowClear
 					/>
@@ -371,17 +544,17 @@ const Index = () => {
 				</div>
 			</div>
 
-			<div className={styles.content}>
+			<div className={styles.content} ref={containerRef}>
 				<div className={styles.sidebar}>{renderCategories()}</div>
-				<div className={styles.main}>{renderTasks()}</div>
+				<div className={styles.main}>{renderJobs()}</div>
 			</div>
 
-			{/* 任务详情弹窗 */}
+			{/* Job 详情弹窗 */}
 			<Modal
 				title={
 					<div className={styles.modalTitle}>
-						<Icon name='material-assignment' size={18} />
-						<span>{is_cn ? '任务详情' : 'Task Details'}</span>
+						<Icon name='material-work' size={18} />
+						<span>{is_cn ? 'Job 详情' : 'Job Details'}</span>
 					</div>
 				}
 				open={detailModalVisible}
@@ -390,12 +563,12 @@ const Index = () => {
 				width={800}
 				className={styles.detailModal}
 			>
-				{selectedTask && (
+				{selectedJob && (
 					<TaskDetail
-						task={selectedTask}
-						taskDetail={taskDetail}
+						task={selectedJob}
+						taskDetail={jobDetail}
 						loading={detailLoading}
-						onRefresh={() => loadTaskDetail(selectedTask.id)}
+						onRefresh={() => loadJobDetail(selectedJob.job_id)}
 					/>
 				)}
 			</Modal>

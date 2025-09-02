@@ -59,10 +59,10 @@ const CollectionDetail = () => {
 	const global = useGlobal()
 
 	const { kb: kbConfig } = global.app_info || {}
-	console.log('Collection Config')
-	console.log('--------------------------------')
-	console.log(JSON.stringify(kbConfig, null, 2))
-	console.log('--------------------------------')
+	// console.log('Collection Config')
+	// console.log('--------------------------------')
+	// console.log(JSON.stringify(kbConfig, null, 2))
+	// console.log('--------------------------------')
 
 	const [loading, setLoading] = useState(true)
 	const [collection, setCollection] = useState<Collection | null>(null)
@@ -245,6 +245,8 @@ const CollectionDetail = () => {
 		autoRefreshTimerRef.current = setInterval(() => {
 			console.log('Auto refreshing documents...')
 			loadDocuments()
+			// 同时刷新Jobs数量，因为文档处理状态可能发生变化
+			window.$app?.Event?.emit('app/refreshJobsCount')
 		}, 15000) // 15秒刷新一次
 
 		setAutoRefreshEnabled(true)
