@@ -3,7 +3,7 @@ import { Button, Input, Spin, Modal, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import TaskDetail from './TaskDetail'
+import Detail from './Detail'
 import { JobAPI, Job, Category, ListJobsRequest } from '@/openapi'
 import styles from './index.less'
 
@@ -456,7 +456,7 @@ const Index = () => {
 						<Icon
 							name={
 								category.category_id === 'running' || category.category_id === 'all'
-									? category.icon || 'material-work'
+									? category.icon || 'material-assignment'
 									: 'material-local_offer'
 							}
 							size={16}
@@ -481,7 +481,7 @@ const Index = () => {
 										? job.icon.startsWith('material-')
 											? job.icon
 											: `material-${job.icon}`
-										: 'material-work'
+										: 'material-assignment'
 								}
 								size={16}
 							/>
@@ -564,7 +564,7 @@ const Index = () => {
 		if (jobs.length === 0 && !loading) {
 			return (
 				<div className={styles.emptyState}>
-					<Icon name='material-work' size={64} />
+					<Icon name='material-assignment' size={64} />
 					<div className={styles.emptyTitle}>
 						{searchKeywords
 							? is_cn
@@ -616,7 +616,11 @@ const Index = () => {
 			<div className={styles.header}>
 				<div className={styles.titleContainer}>
 					<div className={styles.titleWithIcon}>
-						<Icon name='material-work' size={24} style={{ color: 'var(--color_page_title)' }} />
+						<Icon
+							name='material-assignment'
+							size={24}
+							style={{ color: 'var(--color_page_title)' }}
+						/>
 						<h1 className={styles.title}>{is_cn ? '作业' : 'Jobs'}</h1>
 					</div>
 				</div>
@@ -650,28 +654,16 @@ const Index = () => {
 			</div>
 
 			{/* Job 详情弹窗 */}
-			<Modal
-				title={
-					<div className={styles.modalTitle}>
-						<Icon name='material-work' size={18} />
-						<span>{is_cn ? '作业详情' : 'Job Details'}</span>
-					</div>
-				}
-				open={detailModalVisible}
-				onCancel={handleCloseDetail}
-				footer={null}
-				width={800}
-				className={styles.detailModal}
-			>
-				{selectedJob && (
-					<TaskDetail
-						task={selectedJob}
-						taskDetail={jobDetail}
-						loading={detailLoading}
-						onRefresh={() => loadJobDetail(selectedJob.job_id)}
-					/>
-				)}
-			</Modal>
+			{selectedJob && (
+				<Detail
+					visible={detailModalVisible}
+					onClose={handleCloseDetail}
+					task={selectedJob}
+					taskDetail={jobDetail}
+					loading={detailLoading}
+					onRefresh={() => loadJobDetail(selectedJob.job_id)}
+				/>
+			)}
 		</div>
 	)
 }

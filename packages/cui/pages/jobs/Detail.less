@@ -1,0 +1,248 @@
+// Status styles - consistent with list page
+.cardStatus {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+
+	.statusText {
+		font-size: 12px;
+		font-weight: 500;
+	}
+}
+
+// Modal styles - consistent with detail.tsx
+.taskDetailModal {
+	:global(.xgen-modal-header) {
+		padding: 0;
+		border-bottom: none;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0;
+	}
+
+	:global(.xgen-modal-content) {
+		border-radius: 8px;
+		overflow: hidden;
+	}
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_bg_white);
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.modalTitle {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--color_text);
+		margin: 0;
+	}
+
+	.closeButton {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s;
+		color: var(--color_text_grey);
+
+		&:hover {
+			background: var(--color_bg);
+			color: var(--color_text);
+		}
+	}
+}
+
+.modalContent {
+	height: 100%;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.taskDetail {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow: hidden;
+
+	// 统一字体大小 - 与Hits页面保持一致
+	font-size: 12px;
+
+	// 基本信息区域 - 扁平化布局
+	.basicInfo {
+		padding: 16px 20px;
+		background: var(--color_bg_white);
+		border-bottom: 1px solid var(--color_border);
+
+		.statsRow {
+			margin-bottom: 12px;
+		}
+
+		.statItem {
+			.statLabel {
+				font-size: 11px;
+				color: var(--color_text_grey);
+				margin-bottom: 4px;
+				line-height: 1.2;
+			}
+
+			.statValue {
+				font-size: 12px;
+				color: var(--color_text);
+				font-weight: 500;
+				line-height: 1.3;
+				word-break: break-all;
+			}
+		}
+
+		.descriptionRow {
+			margin-top: 16px;
+		}
+	}
+
+	// 日志字段 - 字段样式布局
+	.logsField {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		padding: 16px 20px 20px;
+
+		.logsFieldHeader {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 8px;
+
+			.refreshButton {
+				font-size: 11px;
+				height: 24px;
+				padding: 0 8px;
+				display: flex;
+				align-items: center;
+				gap: 2px;
+			}
+		}
+
+		.logsFieldContent {
+			flex: 1;
+			min-height: 0;
+			overflow: hidden;
+		}
+	}
+
+	// 表格容器样式
+	.tableContainer {
+		height: 100%;
+		overflow: hidden;
+	}
+
+	// 加载状态 - 与Hits页面保持一致
+	.loadingState {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 200px;
+		gap: 12px;
+		color: var(--color_neo_text_secondary);
+		padding: 40px;
+		text-align: center;
+	}
+
+	// 空状态 - 与Hits页面保持一致
+	.emptyState {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 200px;
+		gap: 12px;
+		color: var(--color_neo_text_secondary);
+		padding: 40px;
+		text-align: center;
+
+		.emptyTitle {
+			font-weight: 500;
+			margin-bottom: 4px;
+		}
+
+		.emptyDescription {
+			font-size: 11px;
+			color: var(--color_neo_text_tertiary);
+		}
+	}
+
+	// 日志表格样式 - 与Hits页面保持一致
+	.timestamp {
+		font-size: 11px;
+		color: var(--color_neo_text_tertiary);
+		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	}
+
+	.logLevel {
+		font-size: 11px;
+		padding: 2px 6px;
+		border-radius: 4px;
+		border: none;
+		background: var(--color_neo_bg_selected);
+		font-weight: 500;
+	}
+
+	.logMessage {
+		font-size: 12px;
+		color: var(--color_neo_text_primary);
+		line-height: 1.4;
+	}
+
+	.sourceText {
+		font-size: 11px;
+		color: var(--color_neo_text_secondary);
+		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+		background: var(--color_neo_bg_field);
+		padding: 2px 6px;
+		border-radius: 4px;
+	}
+
+	.logCount {
+		font-size: 11px;
+		color: var(--color_neo_text_secondary);
+		margin-left: 8px;
+	}
+}
+
+// 自定义滚动条样式
+.taskDetail::-webkit-scrollbar,
+.logsTimeline::-webkit-scrollbar {
+	width: 6px;
+}
+
+.taskDetail::-webkit-scrollbar-track,
+.logsTimeline::-webkit-scrollbar-track {
+	background: var(--color_bg);
+	border-radius: 3px;
+}
+
+.taskDetail::-webkit-scrollbar-thumb,
+.logsTimeline::-webkit-scrollbar-thumb {
+	background: var(--color_border);
+	border-radius: 3px;
+
+	&:hover {
+		background: var(--color_text_grey);
+	}
+}
