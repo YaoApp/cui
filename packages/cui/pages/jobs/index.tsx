@@ -144,8 +144,8 @@ const Index = () => {
 			// 检查是否还有更多数据
 			setHasMore(jobsData.length < totalJobs)
 		} catch (error) {
-			console.error(is_cn ? '加载 Job 失败:' : 'Failed to load jobs:', error)
-			message.error(is_cn ? '加载 Job 失败' : 'Failed to load jobs')
+			console.error(is_cn ? '加载作业失败:' : 'Failed to load jobs:', error)
+			message.error(is_cn ? '加载作业失败' : 'Failed to load jobs')
 		} finally {
 			setLoading(false)
 		}
@@ -193,7 +193,7 @@ const Index = () => {
 			setHasMore(loadedCount < totalJobs)
 		} catch (error) {
 			console.error('Load more jobs failed:', error)
-			message.error(is_cn ? '加载更多 Job 失败' : 'Failed to load more jobs')
+			message.error(is_cn ? '加载更多作业失败' : 'Failed to load more jobs')
 		} finally {
 			setLoadingMore(false)
 		}
@@ -213,7 +213,7 @@ const Index = () => {
 			setJobDetail(response.data!)
 		} catch (error) {
 			console.error('Failed to load job detail:', error)
-			message.error(is_cn ? '加载 Job 详情失败' : 'Failed to load job detail')
+			message.error(is_cn ? '加载作业详情失败' : 'Failed to load job detail')
 		} finally {
 			setDetailLoading(false)
 		}
@@ -258,7 +258,7 @@ const Index = () => {
 				category_id: 'running',
 				name: is_cn ? `运行中 (${runningJobsCount})` : `Running (${runningJobsCount})`,
 				icon: 'material-play_circle',
-				description: is_cn ? '当前正在运行的 Job' : 'Currently running jobs',
+				description: is_cn ? '当前正在运行的作业' : 'Currently running jobs',
 				sort: -1,
 				system: true,
 				enabled: true,
@@ -272,7 +272,7 @@ const Index = () => {
 				category_id: 'all',
 				name: is_cn ? `全部 (${totalJobsCount})` : `All (${totalJobsCount})`,
 				icon: 'material-apps',
-				description: is_cn ? '显示所有 Job' : 'Show all jobs',
+				description: is_cn ? '显示所有作业' : 'Show all jobs',
 				sort: 0,
 				system: true,
 				enabled: true,
@@ -316,7 +316,7 @@ const Index = () => {
 		loadCategories()
 		loadData()
 
-		// 刷新运行中的Jobs数量，确保Header显示一致
+		// 刷新运行中的作业数量，确保Header显示一致
 		window.$app?.Event?.emit('app/refreshJobsCount')
 	}, [])
 
@@ -324,6 +324,77 @@ const Index = () => {
 	useEffect(() => {
 		loadData()
 	}, [searchKeywords, activeCategory])
+
+	// Intersection Observer 监听滚动触发器 - 参考知识库分段页面的实现
+	useEffect(() => {
+		if (!hasMore || loadingMore || jobs.length === 0) {
+			return
+		}
+
+		// 检查是否在浏览器环境中
+		if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+			return
+		}
+
+		let observer: IntersectionObserver | null = null
+		let rafId: number | null = null
+
+		// 设置观察器的函数
+		const setupObserver = () => {
+			try {
+				// 使用 window.document 确保获取真正的 DOM document 对象
+				const workingDocument = window.document
+				if (!workingDocument || typeof workingDocument.querySelectorAll !== 'function') {
+					rafId = requestAnimationFrame(setupObserver)
+					return
+				}
+
+				// 查找最后一个任务卡片元素
+				const allCards = workingDocument.querySelectorAll('[class*="taskCard"]')
+				const lastCard = allCards[allCards.length - 1] as HTMLElement
+
+				if (!lastCard || jobs.length === 0) {
+					// 如果没有找到卡片，使用 requestAnimationFrame 重试
+					rafId = requestAnimationFrame(setupObserver)
+					return
+				}
+
+				// 创建观察器
+				observer = new IntersectionObserver(
+					(entries) => {
+						const triggerEntry = entries[0]
+						if (triggerEntry.isIntersecting && hasMore && !loadingMore) {
+							// 立即断开观察器，防止重复触发
+							observer?.disconnect()
+							loadMoreData()
+						}
+					},
+					{
+						threshold: 0.1, // 当10%的最后一个卡片可见时触发
+						rootMargin: '100px' // 提前100px开始加载
+					}
+				)
+
+				// 开始观察最后一个卡片
+				observer.observe(lastCard)
+			} catch (error) {
+				console.warn('Failed to setup intersection observer:', error)
+			}
+		}
+
+		// 使用 requestAnimationFrame 确保 DOM 渲染完成后执行
+		rafId = requestAnimationFrame(setupObserver)
+
+		// 清理函数
+		return () => {
+			if (observer) {
+				observer.disconnect()
+			}
+			if (rafId) {
+				cancelAnimationFrame(rafId)
+			}
+		}
+	}, [hasMore, loadingMore, jobs.length])
 
 	// 搜索处理
 	const handleSearch = () => {
@@ -478,10 +549,10 @@ const Index = () => {
 					<div className={styles.emptyTitle}>
 						{searchKeywords
 							? is_cn
-								? '未找到匹配的 Job'
+								? '未找到匹配的作业'
 								: 'No matching jobs found'
 							: is_cn
-							? '暂无 Job'
+							? '暂无作业'
 							: 'No Jobs'}
 					</div>
 					<div className={styles.emptyDescription}>
@@ -490,7 +561,7 @@ const Index = () => {
 								? '尝试调整搜索关键词或选择其他分类'
 								: 'Try adjusting your search keywords or select a different category'
 							: is_cn
-							? '还没有任何 Job'
+							? '还没有任何作业'
 							: 'No jobs available'}
 					</div>
 				</div>
@@ -506,7 +577,7 @@ const Index = () => {
 					<div className={styles.loading}>
 						<Spin />
 						<span style={{ marginLeft: 8 }}>
-							{is_cn ? '加载更多 Job...' : 'Loading more jobs...'}
+							{is_cn ? '加载更多作业...' : 'Loading more jobs...'}
 						</span>
 					</div>
 				)}
@@ -514,7 +585,7 @@ const Index = () => {
 				{/* 没有更多数据的提示 */}
 				{!hasMore && jobs.length > 0 && (
 					<div className={styles.loading}>
-						<span>{is_cn ? '已加载全部 Job' : 'All jobs loaded'}</span>
+						<span>{is_cn ? '已加载全部作业' : 'All jobs loaded'}</span>
 					</div>
 				)}
 			</>
@@ -535,7 +606,7 @@ const Index = () => {
 					<Input
 						size='large'
 						className={styles.search}
-						placeholder={is_cn ? '搜索 Job...' : 'Search jobs...'}
+						placeholder={is_cn ? '搜索作业...' : 'Search jobs...'}
 						prefix={<SearchOutlined />}
 						value={search}
 						onChange={(e) => {
@@ -564,7 +635,7 @@ const Index = () => {
 				title={
 					<div className={styles.modalTitle}>
 						<Icon name='material-work' size={18} />
-						<span>{is_cn ? 'Job 详情' : 'Job Details'}</span>
+						<span>{is_cn ? '作业详情' : 'Job Details'}</span>
 					</div>
 				}
 				open={detailModalVisible}

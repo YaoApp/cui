@@ -329,7 +329,7 @@ const Header: FC<HeaderProps> = ({
 							onClick={() => navigate('/jobs')}
 						>
 							<div className='header_task_content'>
-								<span className='header_task_text'>{is_cn ? '任务' : 'Jobs'}</span>
+								<span className='header_task_text'>{is_cn ? '作业' : 'Jobs'}</span>
 								<span
 									className={`header_task_number ${
 										global.runningJobsCount > 0 ? 'has-jobs' : ''
