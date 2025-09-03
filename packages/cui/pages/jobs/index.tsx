@@ -86,7 +86,8 @@ const Index = () => {
 		if (!job.last_run_at) return '-'
 
 		const startTime = new Date(job.last_run_at).getTime()
-		const endTime = new Date().getTime()
+		// 对于 Once 类型的Job，使用 updated_at 作为结束时间，如果为null则使用当前时间
+		const endTime = job.updated_at ? new Date(job.updated_at).getTime() : new Date().getTime()
 		const duration = endTime - startTime
 
 		const seconds = Math.floor(duration / 1000)
@@ -517,7 +518,16 @@ const Index = () => {
 								{is_cn ? '创建时间' : 'Created'}: {formatTime(job.created_at)}
 							</span>
 						</div>
-						{job.last_run_at && (
+						{/* 根据 schedule_type 显示不同的时间信息 */}
+						{job.schedule_type === 'once' && job.last_run_at && (
+							<div className={styles.infoItem}>
+								<Icon name='material-timer' size={12} />
+								<span>
+									{is_cn ? '运行时长' : 'Duration'}: {getJobDuration(job)}
+								</span>
+							</div>
+						)}
+						{job.schedule_type === 'cron' && job.last_run_at && (
 							<div className={styles.infoItem}>
 								<Icon name='material-timer' size={12} />
 								<span>
