@@ -86,8 +86,17 @@ const Index = () => {
 		if (!job.last_run_at) return '-'
 
 		const startTime = new Date(job.last_run_at).getTime()
-		// 对于 Once 类型的Job，使用 updated_at 作为结束时间，如果为null则使用当前时间
-		const endTime = job.updated_at ? new Date(job.updated_at).getTime() : new Date().getTime()
+		let endTime: number
+
+		// 根据Job状态决定结束时间
+		if (job.status === 'running') {
+			// 运行中的Job：使用当前时间（显示实时运行时长）
+			endTime = new Date().getTime()
+		} else {
+			// 已完成/失败/停止的Job：使用updated_at（显示实际运行时长）
+			endTime = job.updated_at ? new Date(job.updated_at).getTime() : new Date().getTime()
+		}
+
 		const duration = endTime - startTime
 
 		const seconds = Math.floor(duration / 1000)
