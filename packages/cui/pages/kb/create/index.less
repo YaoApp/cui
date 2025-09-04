@@ -148,7 +148,7 @@
 		font-size: 14px;
 
 		&.ant-form-item-required::before {
-			color: var(--color_error);
+			color: var(--color_danger);
 		}
 	}
 
@@ -260,19 +260,19 @@
 	:global(.ant-input),
 	:global(.ant-input-number),
 	:global(.ant-select-selector) {
-		border-color: var(--color_error);
+		border-color: var(--color_danger);
 
 		&:hover,
 		&:focus,
 		&.ant-input-focused {
-			border-color: var(--color_error);
+			border-color: var(--color_danger);
 			box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
 		}
 	}
 }
 
 :global(.ant-form-item-explain-error) {
-	color: var(--color_error);
+	color: var(--color_danger);
 	font-size: 12px;
 }
 

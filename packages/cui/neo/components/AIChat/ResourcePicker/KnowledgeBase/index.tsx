@@ -44,7 +44,7 @@ const KnowledgeBase = (props: ResourceChildProps) => {
 			uploaded: 'var(--color_main)',
 			indexing: 'var(--color_warning)',
 			indexed: 'var(--color_success)',
-			upload_failed: 'var(--color_error)',
+			upload_failed: 'var(--color_danger)',
 			index_failed: 'var(--color_warning)'
 		}
 		return colorMap[status] || 'var(--color_text_grey)'

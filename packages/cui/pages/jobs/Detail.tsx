@@ -88,7 +88,7 @@ const Detail: React.FC<DetailProps> = ({ visible, onClose, task, taskDetail, loa
 	const getLogLevelColor = (level: string): string => {
 		const colorMap: Record<string, string> = {
 			info: 'var(--color_main)',
-			error: 'var(--color_error)',
+			error: 'var(--color_danger)',
 			warning: 'var(--color_warning)',
 			retry: 'var(--color_warning)'
 		}
@@ -158,7 +158,7 @@ const Detail: React.FC<DetailProps> = ({ visible, onClose, task, taskDetail, loa
 			ready: 'var(--color_warning)',
 			running: 'var(--color_main)',
 			completed: 'var(--color_success)',
-			failed: 'var(--color_error)',
+			failed: 'var(--color_danger)',
 			disabled: 'var(--color_text_grey)',
 			deleted: 'var(--color_text_grey)'
 		}

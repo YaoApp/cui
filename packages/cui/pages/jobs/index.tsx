@@ -54,7 +54,7 @@ const Index = () => {
 			ready: 'var(--color_warning)',
 			running: 'var(--color_main)',
 			completed: 'var(--color_success)',
-			failed: 'var(--color_error)',
+			failed: 'var(--color_danger)',
 			disabled: 'var(--color_text_grey)',
 			deleted: 'var(--color_text_grey)'
 		}
