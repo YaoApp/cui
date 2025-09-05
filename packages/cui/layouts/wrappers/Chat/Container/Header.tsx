@@ -359,12 +359,12 @@ const Header: FC<HeaderProps> = ({
 						/>
 					</Tooltip>
 
-					<Tooltip title={is_cn ? '我的账号' : 'My Account'}>
+					<Tooltip title={is_cn ? '设置' : 'Settings'}>
 						<Button
 							type='text'
 							className='header_icon_btn'
-							icon={<Icon name='material-person_pin_circle' size={16} />}
-							onClick={() => navigate('/setting')}
+							icon={<Icon name='material-settings' size={16} />}
+							onClick={() => navigate('/settings')}
 						/>
 					</Tooltip>
 

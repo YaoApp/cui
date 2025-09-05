@@ -1,0 +1,237 @@
+.apiSdk {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+.header {
+	flex-shrink: 0;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 24px;
+	gap: 16px;
+
+	div {
+		flex: 1;
+	}
+
+	h2 {
+		margin: 0 0 8px 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+	}
+
+	:global(.ant-btn-primary) {
+		background: var(--color_main);
+		border-color: var(--color_main);
+		border-radius: 6px;
+		height: 40px;
+		padding: 0 20px;
+		font-weight: 500;
+
+		&:hover {
+			background: var(--color_main_hover);
+			border-color: var(--color_main_hover);
+		}
+	}
+}
+
+.card {
+	flex: 1;
+	overflow: hidden;
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+	:global(.ant-card-body) {
+		padding: 0;
+		height: 100%;
+		overflow: auto;
+
+		// 滚动条样式，参考 Segments 组件
+		&::-webkit-scrollbar {
+			width: 12px !important;
+			height: 12px !important;
+			display: block !important;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border) !important;
+			border-radius: 4px !important;
+			border: 2px solid var(--color_bg_menu) !important;
+
+			&:hover {
+				background: var(--color_text_grey) !important;
+			}
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--color_bg_menu) !important;
+			border-radius: 4px !important;
+		}
+
+		// Firefox 滚动条
+		scrollbar-width: thin !important;
+		scrollbar-color: var(--color_border) var(--color_bg_menu) !important;
+	}
+
+	:global(.ant-table) {
+		background: transparent;
+
+		.ant-table-thead > tr > th {
+			background: var(--color_neo_bg_header);
+			border-bottom: 1px solid var(--color_neo_border_header);
+			color: var(--color_neo_text_secondary);
+			font-weight: 600;
+			font-size: 12px;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.ant-table-tbody > tr > td {
+			border-bottom: 1px solid var(--color_neo_border_field);
+			color: var(--color_neo_text_primary);
+			padding: 16px;
+		}
+
+		.ant-table-tbody > tr:hover > td {
+			background: var(--color_neo_bg_field);
+		}
+
+		.ant-empty-description {
+			color: var(--color_neo_text_secondary);
+		}
+	}
+}
+
+.keyCell {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+
+	.keyText {
+		background: var(--color_neo_bg_field);
+		border: 1px solid var(--color_neo_border_field);
+		border-radius: 4px;
+		padding: 4px 8px;
+		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+		font-size: 12px;
+		color: var(--color_neo_text_primary);
+		flex: 1;
+		min-width: 0;
+	}
+
+	:global(.ant-btn-text) {
+		color: var(--color_neo_text_secondary);
+
+		&:hover {
+			color: var(--color_main);
+			background: var(--color_neo_bg_field_hover);
+		}
+	}
+}
+
+.modal {
+	:global(.ant-modal-content) {
+		background: var(--color_neo_bg_card);
+		border-radius: 12px;
+	}
+
+	:global(.ant-modal-header) {
+		background: var(--color_neo_bg_header);
+		border-bottom: 1px solid var(--color_neo_border_header);
+		border-radius: 12px 12px 0 0;
+
+		.ant-modal-title {
+			color: var(--color_neo_text_primary);
+			font-weight: 600;
+		}
+	}
+
+	:global(.ant-modal-body) {
+		padding: 24px;
+	}
+
+	:global(.ant-form-item-label > label) {
+		color: var(--color_neo_text_primary);
+		font-weight: 500;
+	}
+
+	:global(.ant-input) {
+		background: var(--color_neo_bg_field);
+		border: 1px solid var(--color_neo_border_field);
+		border-radius: 6px;
+		color: var(--color_neo_text_primary);
+
+		&:hover {
+			background: var(--color_neo_bg_field_hover);
+			border-color: var(--color_neo_border_field_hover);
+		}
+
+		&:focus {
+			background: var(--color_neo_bg_card);
+			border-color: var(--color_main);
+			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+		}
+
+		&::placeholder {
+			color: var(--color_neo_text_secondary);
+		}
+	}
+}
+
+.actions {
+	margin-bottom: 0;
+	margin-top: 24px;
+
+	:global(.ant-btn) {
+		border-radius: 6px;
+		height: 36px;
+		padding: 0 16px;
+		font-weight: 500;
+	}
+
+	:global(.ant-btn-primary) {
+		background: var(--color_main);
+		border-color: var(--color_main);
+
+		&:hover {
+			background: var(--color_main_hover);
+			border-color: var(--color_main_hover);
+		}
+	}
+}
+
+@media (max-width: 768px) {
+	.header {
+		flex-direction: column;
+		align-items: stretch;
+
+		h2 {
+			font-size: 20px;
+		}
+	}
+
+	.keyCell {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+
+		.keyText {
+			word-break: break-all;
+		}
+	}
+}

@@ -1,0 +1,158 @@
+.container {
+	padding: 24px;
+	height: calc(100vh - 100px); // 减去顶部导航栏高度（调整为100px）
+	max-height: calc(100vh - 100px);
+	display: flex;
+	flex-direction: column;
+	max-width: var(--max_width);
+	margin: 0 auto;
+	width: 100%;
+	box-sizing: border-box;
+	overflow: hidden; // 防止页面级别滚动
+}
+
+.header {
+	margin-bottom: 32px;
+	flex-shrink: 0; // 防止header被压缩
+
+	.title {
+		h1 {
+			margin: 0 0 8px 0;
+			font-size: 28px;
+			font-weight: 600;
+			color: var(--color_page_title);
+		}
+
+		p {
+			margin: 0;
+			font-size: 16px;
+			color: var(--color_text_grey);
+			line-height: 1.5;
+		}
+	}
+}
+
+.content {
+	flex: 1;
+	display: flex;
+	gap: 32px;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.main {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.comingSoon {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	padding: 48px 24px;
+	margin-top: 24px;
+
+	.icon {
+		font-size: 48px;
+		margin-bottom: 24px;
+	}
+
+	h3 {
+		margin: 0 0 16px 0;
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+	}
+}
+
+// 响应式设计
+@media (max-width: 1200px) {
+	.container {
+		max-width: 100%;
+		padding: 20px;
+	}
+
+	.content {
+		flex-direction: column;
+		gap: 24px;
+	}
+
+	.main {
+		padding: 0;
+	}
+}
+
+@media (max-width: 768px) {
+	.container {
+		padding: 16px;
+		height: 100vh;
+		overflow: hidden;
+	}
+
+	.header {
+		margin-bottom: 24px;
+
+		.title {
+			h1 {
+				font-size: 24px;
+			}
+
+			p {
+				font-size: 14px;
+			}
+		}
+	}
+
+	.content {
+		gap: 20px;
+	}
+
+	.comingSoon {
+		height: 300px;
+		padding: 32px 16px;
+
+		.icon {
+			font-size: 36px;
+			margin-bottom: 16px;
+		}
+
+		h3 {
+			font-size: 18px;
+		}
+	}
+}
+
+// 滚动条样式
+.main::-webkit-scrollbar {
+	width: 6px;
+}
+
+.main::-webkit-scrollbar-track {
+	background: var(--color_neo_bg_field);
+	border-radius: 3px;
+}
+
+.main::-webkit-scrollbar-thumb {
+	background: var(--color_neo_border_field);
+	border-radius: 3px;
+
+	&:hover {
+		background: var(--color_neo_border_hover);
+	}
+}
