@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, Form, Input, Button, Avatar, Upload, message, Spin } from 'antd'
 import { getLocale } from '@umijs/max'
-import { mockApi, User } from '../mockData'
+import { mockApi, User } from '../../mockData'
 import styles from './index.less'
 
 const Profile = () => {

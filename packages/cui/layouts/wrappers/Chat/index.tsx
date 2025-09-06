@@ -55,12 +55,37 @@ const getResponsiveWidths = () => {
 
 const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 	const global = container.resolve(GlobalModel)
-	const [sidebarVisible, setSidebarVisible] = useState(false)
-	const [sidebarWidth, setSidebarWidth] = useState(getResponsiveWidths().default)
+
+	// Use global state for sidebar management
+	const sidebarVisible = global.sidebar_visible
+	const sidebarWidth = global.sidebar_width
+	const isMaximized = global.sidebar_maximized
+
 	const [isAnimating, setIsAnimating] = useState(false)
 	const [responsiveWidths, setResponsiveWidths] = useState(getResponsiveWidths())
-	const [isMaximized, setIsMaximized] = useState(false)
 	const [previousWidth, setPreviousWidth] = useState(DEFAULT_WIDTH)
+
+	const handleSetSidebarVisible = useCallback(
+		(visible: boolean, maximize?: boolean, forceNormal?: boolean) => {
+			if (visible && maximize) {
+				// 要求最大化显示
+				if (!isMaximized) {
+					setPreviousWidth(sidebarWidth)
+					global.updateSidebarState(visible, true, getMaximizedWidth())
+				} else {
+					global.setSidebarVisible(visible)
+				}
+			} else if (visible && forceNormal) {
+				// 强制以正常模式显示，使用默认宽度
+				const defaultWidth = getResponsiveWidths().default
+				global.updateSidebarState(visible, false, defaultWidth)
+			} else {
+				// 默认行为：只设置可见性，保持当前最大化状态
+				global.setSidebarVisible(visible)
+			}
+		},
+		[isMaximized, sidebarWidth, global, previousWidth]
+	)
 	const [temporaryLink, setTemporaryLink] = useState<string>()
 	const [isTemporaryView, setIsTemporaryView] = useState(false)
 	const [currentPageName, setCurrentPageName] = useState<string>()
@@ -73,14 +98,23 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 	}
 	const navigate = useNavigate()
 
+	// Initialize sidebar width if not set
+	useEffect(() => {
+		if (global.sidebar_width === 400) {
+			// Default value, might need initialization
+			const responsiveWidth = getResponsiveWidths().default
+			global.setSidebarWidth(responsiveWidth)
+		}
+	}, [global])
+
 	// Raise Event
 	useEffect(() => {
 		const handleToggleSidebar = () => {
 			if (sidebarVisible) {
-				setSidebarVisible(false)
+				handleSetSidebarVisible(false)
 				return
 			}
-			setSidebarVisible(true)
+			handleSetSidebarVisible(true)
 		}
 
 		const handleOpenSidebar = (detail: any) => {
@@ -99,11 +133,11 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 				}
 			}
 
-			setSidebarVisible(true)
+			handleSetSidebarVisible(true)
 		}
 
 		const handleCloseSidebar = () => {
-			setSidebarVisible(false)
+			handleSetSidebarVisible(false)
 		}
 
 		window.$app.Event.on('app/toggleSidebar', handleToggleSidebar)
@@ -115,7 +149,7 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 			window.$app.Event.off('app/openSidebar', handleOpenSidebar)
 			window.$app.Event.off('app/closeSidebar', handleCloseSidebar)
 		}
-	}, [])
+	}, [sidebarVisible, handleSetSidebarVisible, navigate])
 
 	// Listen for window resize events
 	useEffect(() => {
@@ -124,19 +158,20 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 			setResponsiveWidths(newWidths)
 			// Adjust width to nearest valid value if current width is out of range
 			if (!isMaximized) {
-				setSidebarWidth((prev) => {
-					if (prev < newWidths.min) return newWidths.min
-					if (prev > newWidths.max) return newWidths.max
-					return prev
-				})
+				const currentWidth = global.sidebar_width
+				if (currentWidth < newWidths.min) {
+					global.setSidebarWidth(newWidths.min)
+				} else if (currentWidth > newWidths.max) {
+					global.setSidebarWidth(newWidths.max)
+				}
 			} else {
-				setSidebarWidth(getMaximizedWidth())
+				global.setSidebarWidth(getMaximizedWidth())
 			}
 		}
 
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
-	}, [isMaximized])
+	}, [isMaximized, global])
 
 	const handleToggleLayout = () => {
 		global.setLayout('Admin')
@@ -149,12 +184,12 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 			setIsTemporaryView(true)
 			setCurrentPageName(title || tempLink)
 			if (!sidebarVisible) {
-				setSidebarVisible(true)
+				handleSetSidebarVisible(true)
 			}
 		} else {
 			// 如果没有传入链接，则只是简单地打开侧边栏
 			if (!sidebarVisible) {
-				setSidebarVisible(true)
+				handleSetSidebarVisible(true)
 			}
 		}
 		setTimeout(() => setIsAnimating(false), 300)
@@ -162,7 +197,7 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 
 	const closeSidebar = () => {
 		setIsAnimating(true)
-		setSidebarVisible(false)
+		handleSetSidebarVisible(false)
 		// 如果是临时视图，清除相关状态
 		if (isTemporaryView) {
 			handleBackToNormal()
@@ -180,12 +215,11 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 		e.stopPropagation()
 		setIsAnimating(true)
 		if (isMaximized) {
-			setSidebarWidth(previousWidth)
+			global.updateSidebarState(undefined, false, previousWidth)
 		} else {
 			setPreviousWidth(sidebarWidth)
-			setSidebarWidth(getMaximizedWidth())
+			global.updateSidebarState(undefined, true, getMaximizedWidth())
 		}
-		setIsMaximized(!isMaximized)
 		setTimeout(() => setIsAnimating(false), 300)
 	}
 
@@ -203,7 +237,7 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 					Math.max(startWidth + delta, responsiveWidths.min),
 					responsiveWidths.max
 				)
-				setSidebarWidth(newWidth)
+				global.setSidebarWidth(newWidth)
 			}
 
 			const handleMouseUp = () => {
@@ -214,7 +248,7 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 			document.addEventListener('mousemove', handleMouseMove)
 			document.addEventListener('mouseup', handleMouseUp)
 		},
-		[sidebarWidth, responsiveWidths, isMaximized]
+		[sidebarWidth, responsiveWidths, isMaximized, global]
 	)
 
 	return (
@@ -237,7 +271,7 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 
 			<Menu
 				sidebarVisible={sidebarVisible}
-				setSidebarVisible={setSidebarVisible}
+				setSidebarVisible={handleSetSidebarVisible}
 				openSidebar={openSidebar}
 				closeSidebar={closeSidebar}
 			/>
@@ -253,7 +287,7 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 					<Button
 						type='text'
 						icon={<Icon name='material-chevron_left' size={16} color='var(--color_text)' />}
-						onClick={() => setSidebarVisible(true)}
+						onClick={() => handleSetSidebarVisible(true)}
 						className='maximize-btn sidebar-toggle-btn'
 						style={{
 							position: 'fixed',

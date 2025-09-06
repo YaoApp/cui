@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { container } from 'tsyringe'
 import { GlobalModel } from '@/context/app'
 import { Tooltip } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@umijs/max'
 import clsx from 'clsx'
 import './menu.less'
 import { Icon } from '@/widgets'
@@ -12,7 +12,7 @@ import ReactNiceAvatar from 'react-nice-avatar'
 
 interface Props {
 	sidebarVisible?: boolean
-	setSidebarVisible?: (visible: boolean) => void
+	setSidebarVisible?: (visible: boolean, maximize?: boolean, forceNormal?: boolean) => void
 	closeSidebar?: () => void
 	openSidebar?: (temporaryLink?: string, title?: string) => void
 }
@@ -33,9 +33,14 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 		return null
 	}
 
-	const NavigateTo = (path: string) => {
+	const NavigateTo = (path: string, maximize?: boolean) => {
 		navigate(path)
-		setSidebarVisible?.(true)
+		if (maximize !== undefined) {
+			setSidebarVisible?.(true, maximize)
+		} else {
+			// 默认情况下，普通导航应该以正常模式打开侧边栏
+			setSidebarVisible?.(true, false, true)
+		}
 	}
 
 	const handleNavChange = (menu: App.Menu) => {
@@ -43,7 +48,7 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 			setCurrentNav(0)
 			return
 		} else if (menu.path === 'open:sidebar') {
-			setSidebarVisible?.(true)
+			setSidebarVisible?.(true, false, true) // visible=true, maximize=false, forceNormal=true
 			return
 		}
 
@@ -88,7 +93,7 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 				</div>
 
 				<Tooltip title={getUserDisplayInfo()} placement='right'>
-					<div className='menu-avatar' onClick={() => NavigateTo('/setting')}>
+					<div className='menu-avatar' onClick={() => NavigateTo('/settings/profile', true)}>
 						<ReactNiceAvatar
 							className='avatar'
 							style={{ width: 32, height: 32 }}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, Statistic, Progress, Spin, Row, Col } from 'antd'
 import { getLocale } from '@umijs/max'
-import { mockApi, UsageStats } from '../mockData'
+import { mockApi, UsageStats } from '../../mockData'
 import styles from './index.less'
 
 const Usage = () => {

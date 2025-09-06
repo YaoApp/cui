@@ -90,10 +90,10 @@ export const mockMenuItems: MenuItem[] = [
 	},
 	{
 		id: '2',
-		key: 'api-sdk',
+		key: 'api-keys',
 		name: { 'zh-CN': 'API Keys', 'en-US': 'API Keys' },
 		icon: 'material-vpn_key',
-		path: '/settings/api-sdk',
+		path: '/settings/api-keys',
 		group: 'profile',
 		order: 2
 	},

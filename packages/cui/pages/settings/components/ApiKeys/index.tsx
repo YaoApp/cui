@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react'
 import { Card, Table, Button, Modal, Form, Input, message, Spin, Tag, Space, Popconfirm } from 'antd'
 import { CopyOutlined, EyeOutlined, EyeInvisibleOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
-import { mockApi, ApiKey } from '../mockData'
+import { mockApi, ApiKey } from '../../mockData'
 import styles from './index.less'
 
-const ApiSdk = () => {
+const ApiKeys = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [form] = Form.useForm()
@@ -158,11 +158,11 @@ const ApiSdk = () => {
 	]
 
 	return (
-		<div className={styles.apiSdk}>
+		<div className={styles.apiKeys}>
 			<div className={styles.header}>
 				<div>
-					<h2>{is_cn ? 'API SDK' : 'API SDK'}</h2>
-					<p>{is_cn ? '管理您的API密钥和SDK集成' : 'Manage your API keys and SDK integrations'}</p>
+					<h2>{is_cn ? 'API Keys' : 'API Keys'}</h2>
+					<p>{is_cn ? '管理您的API密钥' : 'Manage your API keys'}</p>
 				</div>
 				<Button type='primary' icon={<PlusOutlined />} onClick={() => setModalVisible(true)}>
 					{is_cn ? '创建API密钥' : 'Create API Key'}
@@ -222,4 +222,4 @@ const ApiSdk = () => {
 	)
 }
 
-export default ApiSdk
+export default ApiKeys

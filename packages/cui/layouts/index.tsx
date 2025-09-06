@@ -51,7 +51,23 @@ const Index = () => {
 		global.visible_menu = true
 		global.hide_nav = search.indexOf('__hidemenu=1') !== -1
 		global.stack.reset()
-	}, [pathname])
+
+		// 基于路由的侧边栏控制
+		if (global.layout === 'Chat') {
+			if (pathname === '/chat') {
+				// /chat 路由：不打开侧边栏
+				global.setSidebarVisible(false)
+			} else if (pathname.startsWith('/settings/')) {
+				// /settings/* 路由：最大化侧边栏
+				global.updateSidebarState(true, true, window.innerWidth - 40)
+			} else if (pathname !== '/' && !is_login && !is_auth) {
+				// 其他路由：显示默认宽度侧边栏
+				const screenWidth = window.innerWidth
+				const defaultWidth = Math.min(screenWidth * 0.618, screenWidth - 320)
+				global.updateSidebarState(true, false, defaultWidth)
+			}
+		}
+	}, [pathname, global.layout])
 
 	const props_helmet: IPropsHelmet = {
 		theme: global.theme,

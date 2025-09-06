@@ -38,6 +38,11 @@ export default class GlobalModel {
 	hide_nav: boolean = false
 	visible_log_window: boolean = false
 
+	// Sidebar state management
+	sidebar_visible: boolean = (local.sidebar_visible || false) as boolean
+	sidebar_maximized: boolean = (local.sidebar_maximized || false) as boolean
+	sidebar_width: number = (local.sidebar_width || 400) as number
+
 	developer = {} as App.Developer
 
 	// Global Neo Context
@@ -271,6 +276,28 @@ export default class GlobalModel {
 		this.visible_log_window = visible
 	}
 
+	setSidebarVisible(visible: boolean) {
+		this.sidebar_visible = visible
+		local.sidebar_visible = visible
+	}
+
+	setSidebarMaximized(maximized: boolean) {
+		this.sidebar_maximized = maximized
+		local.sidebar_maximized = maximized
+	}
+
+	setSidebarWidth(width: number) {
+		this.sidebar_width = width
+		local.sidebar_width = width
+	}
+
+	// Combined method for updating sidebar state
+	updateSidebarState(visible?: boolean, maximized?: boolean, width?: number) {
+		if (visible !== undefined) this.setSidebarVisible(visible)
+		if (maximized !== undefined) this.setSidebarMaximized(maximized)
+		if (width !== undefined) this.setSidebarWidth(width)
+	}
+
 	async refreshJobsCount() {
 		try {
 			if (!window.$app?.openapi) return
@@ -345,6 +372,18 @@ export default class GlobalModel {
 		reaction(
 			() => this.menu_selected_keys,
 			(v) => (local.menu_selected_keys = v)
+		)
+		reaction(
+			() => this.sidebar_visible,
+			(v) => (local.sidebar_visible = v)
+		)
+		reaction(
+			() => this.sidebar_maximized,
+			(v) => (local.sidebar_maximized = v)
+		)
+		reaction(
+			() => this.sidebar_width,
+			(v) => (local.sidebar_width = v)
 		)
 	}
 
