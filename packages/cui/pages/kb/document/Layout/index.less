@@ -679,40 +679,41 @@
 		pointer-events: none;
 	}
 
+	// 限制图标样式仅在处理容器内生效
 	:global(.Icon),
 	:global(.xgen-icon),
 	:global(.Icon.material) {
-		color: var(--color_neo_icon_muted) !important;
-		font-size: 48px !important;
-		margin-bottom: 12px !important;
-		opacity: 0.8 !important;
-		z-index: 1 !important;
-		position: relative !important;
+		color: var(--color_neo_icon_muted);
+		font-size: 48px;
+		margin-bottom: 12px;
+		opacity: 0.8;
+		z-index: 1;
+		position: relative;
 
 		&[data-icon='material-psychology'] {
-			color: var(--color_main) !important;
-			animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite !important;
-			opacity: 0.9 !important;
+			color: var(--color_main);
+			animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite;
+			opacity: 0.9;
 		}
 
 		&[data-icon='material-error_outline'] {
-			color: var(--color_danger) !important;
-			opacity: 0.9 !important;
+			color: var(--color_danger);
+			opacity: 0.9;
 		}
 	}
 
 	// 处理中状态的图标样式
 	&:not(.errorState) :global(.Icon.material) {
-		color: var(--color_main) !important;
-		animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite !important;
-		opacity: 0.9 !important;
+		color: var(--color_main);
+		animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite;
+		opacity: 0.9;
 	}
 
 	// 错误状态的图标样式
 	&.errorState :global(.Icon.material) {
-		color: var(--color_danger) !important;
-		opacity: 0.9 !important;
-		animation: none !important;
+		color: var(--color_danger);
+		opacity: 0.9;
+		animation: none;
 	}
 
 	// 错误状态特殊样式

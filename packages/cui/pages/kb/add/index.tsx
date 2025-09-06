@@ -586,7 +586,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 			title={
 				<div className={styles.modalHeader}>
 					<div className={styles.titleSection}>
-						<Icon name='material-add_circle_outline' size={16} />
+						<Icon name='material-add_circle_outline' size={16} className={styles.titleIcon} />
 						<span className={styles.modalTitle}>{getModalTitle()}</span>
 					</div>
 					<div className={styles.tabs}>
@@ -598,7 +598,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 								}`}
 								onClick={() => handleTabChange(tab.key)}
 							>
-								<Icon name={tab.icon} size={12} />
+								<Icon name={tab.icon} size={12} className={styles.tabIcon} />
 								<span>{tab.label}</span>
 							</div>
 						))}
@@ -607,7 +607,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 						className={`${styles.closeButton} ${processing ? styles.disabled : ''}`}
 						onClick={processing ? undefined : onClose}
 					>
-						<Icon name='material-close' size={16} />
+						<Icon name='material-close' size={16} className={styles.closeIcon} />
 					</div>
 				</div>
 			}

@@ -143,7 +143,15 @@ const Menu = ({ active, onChange }: MenuProps) => {
 												}`}
 												onClick={() => onChange(item.key)}
 											>
-												<Icon name={item.icon} size={16} />
+												<Icon
+													name={item.icon}
+													size={16}
+													className={
+														active === item.key
+															? styles.menuIconActive
+															: styles.menuIcon
+													}
+												/>
 												<span className={styles.text}>
 													{item.name[is_cn ? 'zh-CN' : 'en-US']}
 												</span>
@@ -182,6 +190,7 @@ const Menu = ({ active, onChange }: MenuProps) => {
 												: 'material-light_mode'
 										}
 										size={14}
+										className={styles.footerIcon}
 									/>
 								</div>
 							</Tooltip>
@@ -214,7 +223,11 @@ const Menu = ({ active, onChange }: MenuProps) => {
 									placement='top'
 								>
 									<div className={styles.languageButton}>
-										<Icon name='material-public' size={14} />
+										<Icon
+											name='material-public'
+											size={14}
+											className={styles.footerIcon}
+										/>
 										<span className={styles.languageText}>
 											{is_cn ? '中' : 'EN'}
 										</span>
@@ -226,7 +239,7 @@ const Menu = ({ active, onChange }: MenuProps) => {
 						{/* 右侧：退出按钮 */}
 						<Tooltip title={is_cn ? '退出' : 'Exit'} placement='top'>
 							<div className={styles.logoutButton} onClick={clearStorage}>
-								<Icon name='material-logout' size={14} />
+								<Icon name='material-logout' size={14} className={styles.footerIcon} />
 							</div>
 						</Tooltip>
 					</div>

@@ -460,6 +460,7 @@ const Index = () => {
 									: 'material-local_offer'
 							}
 							size={16}
+							className={styles.cardIcon}
 						/>
 						<span className={styles.categoryName}>{category.name}</span>
 					</div>
@@ -484,6 +485,7 @@ const Index = () => {
 										: 'material-assignment'
 								}
 								size={16}
+								className={styles.cardIcon}
 							/>
 							<h3 className={styles.cardTitle}>{job.name}</h3>
 						</div>
@@ -522,7 +524,7 @@ const Index = () => {
 				<div className={styles.cardFooter}>
 					<div className={styles.taskInfo}>
 						<div className={styles.infoItem}>
-							<Icon name='material-schedule' size={12} />
+							<Icon name='material-schedule' size={12} className={styles.infoIcon} />
 							<span>
 								{is_cn ? '创建时间' : 'Created'}: {formatTime(job.created_at)}
 							</span>
@@ -530,7 +532,7 @@ const Index = () => {
 						{/* 根据 schedule_type 显示不同的时间信息 */}
 						{job.schedule_type === 'once' && job.last_run_at && (
 							<div className={styles.infoItem}>
-								<Icon name='material-timer' size={12} />
+								<Icon name='material-timer' size={12} className={styles.infoIcon} />
 								<span>
 									{is_cn ? '运行时长' : 'Duration'}: {getJobDuration(job)}
 								</span>
@@ -538,7 +540,7 @@ const Index = () => {
 						)}
 						{job.schedule_type === 'cron' && job.last_run_at && (
 							<div className={styles.infoItem}>
-								<Icon name='material-timer' size={12} />
+								<Icon name='material-timer' size={12} className={styles.infoIcon} />
 								<span>
 									{is_cn ? '最后运行' : 'Last run'}: {formatTime(job.last_run_at)}
 								</span>
@@ -564,7 +566,7 @@ const Index = () => {
 		if (jobs.length === 0 && !loading) {
 			return (
 				<div className={styles.emptyState}>
-					<Icon name='material-assignment' size={64} />
+					<Icon name='material-assignment' size={64} className={styles.emptyIcon} />
 					<div className={styles.emptyTitle}>
 						{searchKeywords
 							? is_cn

@@ -159,11 +159,14 @@
 				font-weight: 500;
 			}
 
+			:global(.Icon),
 			:global(.xgen-icon) {
 				color: var(--color_main);
 			}
 		}
 
+		:global(.Icon),
+		:global(.Icon),
 		:global(.xgen-icon) {
 			flex-shrink: 0;
 			color: var(--color_neo_icon_muted);
@@ -178,6 +181,21 @@
 			line-height: 1.4;
 		}
 	}
+}
+
+// 菜单图标样式类
+.menuIcon {
+	color: var(--color_neo_icon_muted);
+	transition: color 0.2s ease;
+}
+
+.menuIconActive {
+	color: var(--color_main);
+}
+
+.footerIcon {
+	color: var(--color_neo_text_secondary);
+	transition: all 0.2s ease;
 }
 
 // 响应式设计
@@ -300,12 +318,14 @@
 			&:hover {
 				color: var(--color_neo_text_primary);
 
+				:global(.Icon),
 				:global(.xgen-icon) {
 					transform: scale(1.15);
 				}
 			}
 
 			&:active {
+				:global(.Icon),
 				:global(.xgen-icon) {
 					transform: scale(0.95);
 				}
@@ -335,6 +355,7 @@
 			&:hover {
 				color: var(--color_neo_text_primary);
 
+				:global(.Icon),
 				:global(.xgen-icon) {
 					transform: scale(1.15);
 				}
@@ -345,6 +366,7 @@
 			}
 
 			&:active {
+				:global(.Icon),
 				:global(.xgen-icon) {
 					transform: scale(0.95);
 				}
@@ -379,12 +401,14 @@
 			&:hover {
 				color: var(--color_neo_text_primary);
 
+				:global(.Icon),
 				:global(.xgen-icon) {
 					transform: scale(1.15);
 				}
 			}
 
 			&:active {
+				:global(.Icon),
 				:global(.xgen-icon) {
 					transform: scale(0.95);
 				}

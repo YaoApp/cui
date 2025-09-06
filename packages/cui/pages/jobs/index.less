@@ -116,6 +116,10 @@
 				.categoryCount {
 					color: var(--color_main);
 				}
+
+				:global(.Icon) {
+					color: var(--color_main);
+				}
 			}
 
 			.categoryName {
@@ -226,11 +230,6 @@
 				gap: 8px;
 				margin-bottom: 8px;
 
-				:global(.xgen-icon) {
-					color: var(--color_neo_text_secondary);
-					flex-shrink: 0;
-				}
-
 				.cardTitle {
 					margin: 0;
 					font-size: 14px;
@@ -304,12 +303,6 @@
 					background: var(--color_neo_bg_field_hover);
 					border-color: var(--color_neo_border_field_hover);
 					transform: translateY(-1px);
-				}
-
-				:global(.xgen-icon) {
-					color: var(--color_neo_text_secondary);
-					font-size: 10px;
-					flex-shrink: 0;
 				}
 
 				span {
@@ -427,4 +420,29 @@
 	&:hover {
 		background: var(--color_text_grey);
 	}
+}
+
+// Icon 样式类
+.cardIcon {
+	color: var(--color_neo_icon_muted);
+	flex-shrink: 0;
+	transition: color 0.2s ease;
+}
+
+.infoIcon {
+	color: var(--color_neo_text_secondary);
+	font-size: 10px;
+	flex-shrink: 0;
+}
+
+.emptyIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.actionIcon {
+	color: var(--color_neo_text_secondary);
+}
+
+.loadingIcon {
+	color: var(--color_neo_icon_muted);
 }

@@ -487,11 +487,6 @@
 					align-items: center;
 					gap: 6px;
 
-					:global(.xgen-icon) {
-						color: var(--color_neo_text_secondary);
-						flex-shrink: 0;
-					}
-
 					.cardTitle {
 						margin: 0;
 						font-size: 12px;
@@ -721,26 +716,27 @@
 					pointer-events: none;
 				}
 
+				// 限制图标样式只在当前占位符内生效
 				:global(.Icon),
 				:global(.xgen-icon),
 				:global(.Icon.material) {
-					color: var(--color_neo_icon_muted) !important;
-					font-size: 48px !important;
-					margin-bottom: 12px !important;
-					opacity: 0.8 !important;
-					z-index: 1 !important;
-					position: relative !important;
+					color: var(--color_neo_icon_muted);
+					font-size: 48px;
+					margin-bottom: 12px;
+					opacity: 0.8;
+					z-index: 1;
+					position: relative;
 
 					&[data-icon='material-psychology'] {
-						color: var(--color_main) !important;
-						animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite !important;
-						opacity: 0.9 !important;
+						color: var(--color_main);
+						animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite;
+						opacity: 0.9;
 					}
 
 					&[data-icon='material-image'] {
-						color: var(--color_neo_text_tertiary) !important;
-						animation: pulse 2s ease-in-out infinite !important;
-						opacity: 0.6 !important;
+						color: var(--color_neo_text_tertiary);
+						animation: pulse 2s ease-in-out infinite;
+						opacity: 0.6;
 					}
 				}
 
@@ -832,11 +828,6 @@
 					gap: 4px;
 					font-size: 10px;
 					color: var(--color_neo_text_tertiary);
-
-					:global(.xgen-icon) {
-						color: var(--color_neo_text_quaternary);
-						flex-shrink: 0;
-					}
 
 					span {
 						white-space: nowrap;
@@ -1176,4 +1167,15 @@
 	50% {
 		filter: drop-shadow(0 0 16px rgba(51, 113, 252, 0.6));
 	}
+}
+
+// Icon 样式类
+.cardTitleIcon {
+	color: var(--color_neo_icon_muted);
+	flex-shrink: 0;
+}
+
+.infoIcon {
+	color: var(--color_neo_text_secondary);
+	flex-shrink: 0;
 }

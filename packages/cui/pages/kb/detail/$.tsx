@@ -714,7 +714,11 @@ const CollectionDetail = () => {
 								<div className={styles.cardHeader}>
 									<div className={styles.cardHeaderLeft}>
 										<div className={styles.cardTitleWithIcon}>
-											<Icon name={getTypeIcon(document.type)} size={16} />
+											<Icon
+												name={getTypeIcon(document.type)}
+												size={16}
+												className={styles.cardTitleIcon}
+											/>
 											<h3 className={styles.cardTitle}>{document.name}</h3>
 										</div>
 									</div>
@@ -770,7 +774,11 @@ const CollectionDetail = () => {
 									<div className={styles.documentInfo}>
 										<div className={styles.leftInfo}>
 											<div className={styles.infoItem}>
-												<Icon name='material-grid_view' size={10} />
+												<Icon
+													name='material-grid_view'
+													size={10}
+													className={styles.infoIcon}
+												/>
 												<span>
 													<Tooltip
 														title={
@@ -796,7 +804,11 @@ const CollectionDetail = () => {
 										</div>
 										<div className={styles.rightInfo}>
 											<div className={styles.infoItem}>
-												<Icon name='material-schedule' size={10} />
+												<Icon
+													name='material-schedule'
+													size={10}
+													className={styles.infoIcon}
+												/>
 												<span>
 													{new Date(
 														document.created_at

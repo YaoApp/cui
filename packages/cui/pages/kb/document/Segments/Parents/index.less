@@ -199,8 +199,8 @@
 	}
 }
 
-// 图标样式统一
-:global(.Icon) {
+// 图标样式统一 - 仅在当前组件范围内生效
+.parentsContent :global(.Icon) {
 	color: var(--color_neo_icon_muted);
 
 	&[data-icon='material-account_tree'] {

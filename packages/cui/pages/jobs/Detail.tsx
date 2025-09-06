@@ -297,7 +297,7 @@ const Detail: React.FC<DetailProps> = ({ visible, onClose, task, taskDetail, loa
 					</div>
 					<Button
 						type='text'
-						icon={<Icon name='material-refresh' size={11} />}
+						icon={<Icon name='material-refresh' size={11} className={styles.actionIcon} />}
 						onClick={() => {
 							onRefresh()
 							loadJobLogs()
@@ -313,12 +313,16 @@ const Detail: React.FC<DetailProps> = ({ visible, onClose, task, taskDetail, loa
 				<div className={styles.logsFieldContent}>
 					{logsLoading ? (
 						<div className={styles.loadingState}>
-							<Icon name='material-hourglass_empty' size={32} />
+							<Icon
+								name='material-hourglass_empty'
+								size={32}
+								className={styles.loadingIcon}
+							/>
 							<Text>{is_cn ? '正在加载日志...' : 'Loading logs...'}</Text>
 						</div>
 					) : logs.length === 0 ? (
 						<div className={styles.emptyState}>
-							<Icon name='material-description' size={48} />
+							<Icon name='material-description' size={48} className={styles.emptyIcon} />
 							<div className={styles.emptyTitle}>{is_cn ? '暂无日志' : 'No Logs'}</div>
 							<div className={styles.emptyDescription}>
 								{is_cn
@@ -352,13 +356,13 @@ const Detail: React.FC<DetailProps> = ({ visible, onClose, task, taskDetail, loa
 			title={
 				<div className={styles.modalHeader}>
 					<div className={styles.titleSection}>
-						<Icon name='material-assignment' size={16} />
+						<Icon name='material-assignment' size={16} className={styles.titleIcon} />
 						<span className={styles.modalTitle}>
 							{(currentJobDetail || task).name || (currentJobDetail || task).job_id}
 						</span>
 					</div>
 					<div className={styles.closeButton} onClick={onClose}>
-						<Icon name='material-close' size={16} />
+						<Icon name='material-close' size={16} className={styles.closeIcon} />
 					</div>
 				</div>
 			}
