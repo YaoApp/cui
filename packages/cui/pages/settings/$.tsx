@@ -4,7 +4,7 @@ import Menu from './components/Menu'
 import Profile from './components/Profile'
 import ApiKeys from './components/ApiKeys'
 import Usage from './components/Usage'
-import { mockApi, MenuItem } from './mockData'
+import { mockApi, MenuItem, MenuGroup } from './mockData'
 import styles from './index.less'
 
 // 临时组件，用于显示其他页面
@@ -45,7 +45,9 @@ const Settings = () => {
 	useEffect(() => {
 		const loadMenuData = async () => {
 			try {
-				const items = await mockApi.getMenuItems()
+				const groups = await mockApi.getMenuGroups()
+				// 从分组数据中提取所有菜单项
+				const items: MenuItem[] = groups.flatMap((group) => group.items)
 				setMenuItems(items)
 
 				// 根据菜单数据动态创建组件映射

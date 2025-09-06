@@ -6,6 +6,28 @@
 	flex-direction: column;
 	padding: 0;
 	overflow: hidden;
+
+	// 默认状态：所有滚动条都隐藏
+	.menuContent,
+	.scrollableContent {
+		&::-webkit-scrollbar-thumb {
+			background: transparent !important;
+		}
+	}
+
+	// 鼠标悬停整个菜单区域时显示所有滚动条
+	&:hover {
+		.menuContent,
+		.scrollableContent {
+			&::-webkit-scrollbar-thumb {
+				background: var(--color_border_light) !important;
+
+				&:hover {
+					background: var(--color_dot) !important;
+				}
+			}
+		}
+	}
 }
 
 .menuContent {
@@ -14,6 +36,21 @@
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+
+	// 滚动条基础样式（响应式时使用）
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		transition: background 0.2s ease;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
 }
 
 // 可滚动的菜单区域
@@ -24,20 +61,17 @@
 	flex-direction: column;
 	gap: 16px;
 	padding-right: 8px;
+	transition: all 0.2s ease;
 
-	// 平衡的滚动条样式
+	// 滚动条基础样式
 	&::-webkit-scrollbar {
 		width: 6px;
 		height: 6px;
 	}
 
 	&::-webkit-scrollbar-thumb {
-		background: var(--color_border_light);
 		border-radius: 3px;
-
-		&:hover {
-			background: var(--color_dot);
-		}
+		transition: background 0.2s ease;
 	}
 
 	&::-webkit-scrollbar-track {

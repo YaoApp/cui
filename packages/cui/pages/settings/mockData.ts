@@ -20,8 +20,16 @@ export interface MenuItem {
 	}
 	icon: string
 	path: string
-	group: 'profile' | 'plan' | 'connectors' | 'mcp' | 'security' | 'support'
+}
+
+export interface MenuGroup {
+	key: string
+	name: {
+		'zh-CN': string
+		'en-US': string
+	}
 	order: number
+	items: MenuItem[]
 }
 
 export interface ApiKey {
@@ -65,6 +73,178 @@ export interface Invoice {
 	download_url?: string
 }
 
+// Mock menu groups with items
+export const mockMenuGroups: MenuGroup[] = [
+	{
+		key: 'profile',
+		name: { 'zh-CN': '账户设置', 'en-US': 'Account' },
+		order: 1,
+		items: [
+			{
+				id: '1',
+				key: 'profile',
+				name: { 'zh-CN': '个人资料', 'en-US': 'Profile' },
+				icon: 'material-person',
+				path: '/settings/profile'
+			},
+			{
+				id: '2',
+				key: 'api-keys',
+				name: { 'zh-CN': 'API Keys', 'en-US': 'API Keys' },
+				icon: 'material-vpn_key',
+				path: '/settings/api-keys'
+			},
+			{
+				id: '2a',
+				key: 'team',
+				name: { 'zh-CN': '团队', 'en-US': 'Team' },
+				icon: 'material-group',
+				path: '/settings/team'
+			},
+			{
+				id: '2b',
+				key: 'advanced',
+				name: { 'zh-CN': '偏好设置', 'en-US': 'Preferences' },
+				icon: 'material-settings',
+				path: '/settings/advanced'
+			}
+		]
+	},
+	{
+		key: 'plan',
+		name: { 'zh-CN': '套餐计划', 'en-US': 'Plan' },
+		order: 2,
+		items: [
+			{
+				id: '3',
+				key: 'plans',
+				name: { 'zh-CN': '套餐与价格', 'en-US': 'Plans & Pricing' },
+				icon: 'material-workspace_premium',
+				path: '/settings/plans'
+			},
+			{
+				id: '4',
+				key: 'subscription',
+				name: { 'zh-CN': '订阅管理', 'en-US': 'Subscription' },
+				icon: 'material-card_membership',
+				path: '/settings/subscription'
+			},
+			{
+				id: '5',
+				key: 'usage',
+				name: { 'zh-CN': '使用统计', 'en-US': 'Usage' },
+				icon: 'material-analytics',
+				path: '/settings/usage'
+			},
+			{
+				id: '6',
+				key: 'billing',
+				name: { 'zh-CN': '付款和发票', 'en-US': 'Payment & Invoices' },
+				icon: 'material-receipt',
+				path: '/settings/billing'
+			}
+		]
+	},
+	{
+		key: 'marketing',
+		name: { 'zh-CN': '邀请奖励', 'en-US': 'Referrals' },
+		order: 3,
+		items: [
+			{
+				id: '7',
+				key: 'referral-codes',
+				name: { 'zh-CN': '邀请码', 'en-US': 'Invite Code' },
+				icon: 'material-qr_code',
+				path: '/settings/referral-codes'
+			},
+			{
+				id: '8',
+				key: 'referral-list',
+				name: { 'zh-CN': '邀请记录', 'en-US': 'Commissions' },
+				icon: 'material-people_outline',
+				path: '/settings/referral-list'
+			}
+		]
+	},
+	{
+		key: 'integrations',
+		name: { 'zh-CN': '第三方服务', 'en-US': 'Integrations' },
+		order: 4,
+		items: [
+			{
+				id: '9',
+				key: 'llm-providers',
+				name: { 'zh-CN': 'LLM 提供商', 'en-US': 'LLM Providers' },
+				icon: 'material-psychology',
+				path: '/settings/llm-providers'
+			},
+			{
+				id: '10',
+				key: 'stripe-integration',
+				name: { 'zh-CN': 'Stripe 集成', 'en-US': 'Stripe Integration' },
+				icon: 'material-payment',
+				path: '/settings/stripe-integration'
+			},
+			{
+				id: '11',
+				key: 'mcp-servers',
+				name: { 'zh-CN': 'MCP 服务器', 'en-US': 'MCP Servers' },
+				icon: 'material-dns',
+				path: '/settings/mcp-servers'
+			}
+		]
+	},
+	{
+		key: 'security',
+		name: { 'zh-CN': '安全设置', 'en-US': 'Security' },
+		order: 5,
+		items: [
+			{
+				id: '12',
+				key: 'security',
+				name: { 'zh-CN': '账号安全', 'en-US': 'Account Security' },
+				icon: 'material-security',
+				path: '/settings/security'
+			},
+			{
+				id: '13',
+				key: 'privacy',
+				name: { 'zh-CN': '隐私设置', 'en-US': 'Privacy' },
+				icon: 'material-privacy_tip',
+				path: '/settings/privacy'
+			},
+			{
+				id: '14',
+				key: 'audit-logs',
+				name: { 'zh-CN': '审计日志', 'en-US': 'Audit Logs' },
+				icon: 'material-history',
+				path: '/settings/audit-logs'
+			}
+		]
+	},
+	{
+		key: 'support',
+		name: { 'zh-CN': '帮助支持', 'en-US': 'Support' },
+		order: 6,
+		items: [
+			{
+				id: '15',
+				key: 'docs',
+				name: { 'zh-CN': '文档', 'en-US': 'Documentation' },
+				icon: 'material-description',
+				path: '/settings/docs'
+			},
+			{
+				id: '16',
+				key: 'contact',
+				name: { 'zh-CN': '联系支持', 'en-US': 'Contact Support' },
+				icon: 'material-contact_support',
+				path: '/settings/contact'
+			}
+		]
+	}
+]
+
 // Mock user data
 export const mockUser: User = {
 	id: '1',
@@ -76,150 +256,6 @@ export const mockUser: User = {
 	created_at: '2024-01-01T00:00:00Z',
 	updated_at: '2024-01-15T10:30:00Z'
 }
-
-// Mock menu items
-export const mockMenuItems: MenuItem[] = [
-	{
-		id: '1',
-		key: 'profile',
-		name: { 'zh-CN': '个人资料', 'en-US': 'Profile' },
-		icon: 'material-person',
-		path: '/settings/profile',
-		group: 'profile',
-		order: 1
-	},
-	{
-		id: '2',
-		key: 'api-keys',
-		name: { 'zh-CN': 'API Keys', 'en-US': 'API Keys' },
-		icon: 'material-vpn_key',
-		path: '/settings/api-keys',
-		group: 'profile',
-		order: 2
-	},
-	{
-		id: '2a',
-		key: 'team',
-		name: { 'zh-CN': '团队', 'en-US': 'Team' },
-		icon: 'material-group',
-		path: '/settings/team',
-		group: 'profile',
-		order: 2.1
-	},
-	{
-		id: '2b',
-		key: 'advanced',
-		name: { 'zh-CN': '高级', 'en-US': 'Advanced' },
-		icon: 'material-settings',
-		path: '/settings/advanced',
-		group: 'profile',
-		order: 2.2
-	},
-	// Plan 分组
-	{
-		id: '3',
-		key: 'plans',
-		name: { 'zh-CN': '套餐与价格', 'en-US': 'Plans & Pricing' },
-		icon: 'material-workspace_premium',
-		path: '/settings/plans',
-		group: 'plan',
-		order: 3
-	},
-	{
-		id: '4',
-		key: 'subscription',
-		name: { 'zh-CN': '订阅管理', 'en-US': 'Subscription' },
-		icon: 'material-card_membership',
-		path: '/settings/subscription',
-		group: 'plan',
-		order: 4
-	},
-	{
-		id: '5',
-		key: 'usage',
-		name: { 'zh-CN': '使用统计', 'en-US': 'Usage' },
-		icon: 'material-analytics',
-		path: '/settings/usage',
-		group: 'plan',
-		order: 5
-	},
-	{
-		id: '6',
-		key: 'billing',
-		name: { 'zh-CN': '付款和发票', 'en-US': 'Payment & Invoices' },
-		icon: 'material-receipt',
-		path: '/settings/billing',
-		group: 'plan',
-		order: 6
-	},
-	// Connectors 分组
-	{
-		id: '7',
-		key: 'connectors',
-		name: { 'zh-CN': '连接器', 'en-US': 'Connectors' },
-		icon: 'material-cable',
-		path: '/settings/connectors',
-		group: 'connectors',
-		order: 7
-	},
-	// MCP 分组
-	{
-		id: '8',
-		key: 'mcp-servers',
-		name: { 'zh-CN': 'MCP 服务器', 'en-US': 'MCP Servers' },
-		icon: 'material-dns',
-		path: '/settings/mcp-servers',
-		group: 'mcp',
-		order: 8
-	},
-	// Security 分组
-	{
-		id: '9',
-		key: 'security',
-		name: { 'zh-CN': '账号安全', 'en-US': 'Account Security' },
-		icon: 'material-security',
-		path: '/settings/security',
-		group: 'security',
-		order: 9
-	},
-	{
-		id: '10',
-		key: 'privacy',
-		name: { 'zh-CN': '隐私设置', 'en-US': 'Privacy' },
-		icon: 'material-privacy_tip',
-		path: '/settings/privacy',
-		group: 'security',
-		order: 10
-	},
-	{
-		id: '11',
-		key: 'audit-logs',
-		name: { 'zh-CN': '审计日志', 'en-US': 'Audit Logs' },
-		icon: 'material-history',
-		path: '/settings/audit-logs',
-		group: 'security',
-		order: 11
-	},
-	// Support 分组
-	{
-		id: '12',
-		key: 'docs',
-		name: { 'zh-CN': '文档', 'en-US': 'Documentation' },
-		icon: 'material-description',
-		path: '/settings/docs',
-		group: 'support',
-		order: 12
-	},
-	{
-		id: '13',
-		key: 'contact',
-		name: { 'zh-CN': '联系', 'en-US': 'Contact' },
-		icon: 'material-contact_support',
-		path: '/settings/contact',
-		group: 'support',
-		order: 13
-	}
-]
 
 // Mock API keys
 export const mockApiKeys: ApiKey[] = [
@@ -299,9 +335,9 @@ export const mockApi = {
 		})
 	},
 
-	getMenuItems: (): Promise<MenuItem[]> => {
+	getMenuGroups: (): Promise<MenuGroup[]> => {
 		return new Promise((resolve) => {
-			setTimeout(() => resolve(mockMenuItems), 200)
+			setTimeout(() => resolve(mockMenuGroups), 200)
 		})
 	},
 

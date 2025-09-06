@@ -6,7 +6,7 @@ import { useMemoizedFn } from 'ahooks'
 import { local } from '@yaoapp/storex'
 import { difference } from 'lodash-es'
 import Icon from '@/widgets/Icon'
-import { mockApi, MenuItem, User } from '../../mockData'
+import { mockApi, MenuItem, MenuGroup, User } from '../../mockData'
 import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
 import styles from './index.less'
@@ -24,7 +24,7 @@ const Menu = ({ active, onChange }: MenuProps) => {
 
 	const [loading, setLoading] = useState(true)
 	const [user, setUser] = useState<User | null>(null)
-	const [items, setItems] = useState<MenuItem[]>([])
+	const [groups, setGroups] = useState<MenuGroup[]>([])
 
 	// 清除存储和退出登录
 	const clearStorage = useMemoizedFn(() => {
@@ -62,9 +62,9 @@ const Menu = ({ active, onChange }: MenuProps) => {
 		const loadData = async () => {
 			try {
 				setLoading(true)
-				const [userData, menuData] = await Promise.all([mockApi.getUser(), mockApi.getMenuItems()])
+				const [userData, groupsData] = await Promise.all([mockApi.getUser(), mockApi.getMenuGroups()])
 				setUser(userData)
-				setItems(menuData)
+				setGroups(groupsData)
 			} catch (error) {
 				console.error('Failed to load settings data:', error)
 			} finally {
@@ -75,22 +75,7 @@ const Menu = ({ active, onChange }: MenuProps) => {
 		loadData()
 	}, [])
 
-	const grouped = items.reduce((groups, item) => {
-		if (!groups[item.group]) {
-			groups[item.group] = []
-		}
-		groups[item.group].push(item)
-		return groups
-	}, {} as Record<string, MenuItem[]>)
-
-	const groupTitles = {
-		profile: is_cn ? '账户设置' : 'Account',
-		plan: is_cn ? '套餐计划' : 'Plan',
-		connectors: is_cn ? '连接器' : 'Connectors',
-		mcp: 'MCP',
-		security: is_cn ? '安全设置' : 'Security',
-		support: is_cn ? '帮助支持' : 'Support'
-	}
+	// 数据已经是分组结构，不需要额外处理
 
 	if (loading) {
 		return (
@@ -120,43 +105,37 @@ const Menu = ({ active, onChange }: MenuProps) => {
 						</div>
 					)}
 
-					{Object.entries(grouped)
-						.sort(([, itemsA], [, itemsB]) => {
-							// 根据每个分组内最小的order值来排序分组
-							const minOrderA = Math.min(...itemsA.map((item) => item.order))
-							const minOrderB = Math.min(...itemsB.map((item) => item.order))
-							return minOrderA - minOrderB
-						})
-						.map(([group, groupItems]) => (
-							<div key={group} className={styles.group}>
+					{groups
+						.sort((a, b) => a.order - b.order)
+						.filter((group) => group.items.length > 0) // 只显示有菜单项的分组
+						.map((group) => (
+							<div key={group.key} className={styles.group}>
 								<div className={styles.title}>
-									{groupTitles[group as keyof typeof groupTitles]}
+									{group.name[is_cn ? 'zh-CN' : 'en-US']}
 								</div>
 								<div className={styles.items}>
-									{groupItems
-										.sort((a, b) => a.order - b.order)
-										.map((item) => (
-											<div
-												key={item.key}
-												className={`${styles.item} ${
-													active === item.key ? styles.active : ''
-												}`}
-												onClick={() => onChange(item.key)}
-											>
-												<Icon
-													name={item.icon}
-													size={16}
-													className={
-														active === item.key
-															? styles.menuIconActive
-															: styles.menuIcon
-													}
-												/>
-												<span className={styles.text}>
-													{item.name[is_cn ? 'zh-CN' : 'en-US']}
-												</span>
-											</div>
-										))}
+									{group.items.map((item) => (
+										<div
+											key={item.key}
+											className={`${styles.item} ${
+												active === item.key ? styles.active : ''
+											}`}
+											onClick={() => onChange(item.key)}
+										>
+											<Icon
+												name={item.icon}
+												size={16}
+												className={
+													active === item.key
+														? styles.menuIconActive
+														: styles.menuIcon
+												}
+											/>
+											<span className={styles.text}>
+												{item.name[is_cn ? 'zh-CN' : 'en-US']}
+											</span>
+										</div>
+									))}
 								</div>
 							</div>
 						))}
