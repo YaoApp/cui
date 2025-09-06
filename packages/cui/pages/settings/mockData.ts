@@ -139,7 +139,7 @@ export const mockMenuGroups: MenuGroup[] = [
 			{
 				id: '6',
 				key: 'billing',
-				name: { 'zh-CN': '付款和发票', 'en-US': 'Payment & Invoices' },
+				name: { 'zh-CN': '账单发票', 'en-US': 'Billing & Invoices' },
 				icon: 'material-receipt',
 				path: '/settings/billing'
 			}
