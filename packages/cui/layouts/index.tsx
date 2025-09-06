@@ -21,6 +21,7 @@ import type { IPropsHelmet, IPropsLoginWrapper } from './types'
 const Index = () => {
 	const messages = useIntl()
 	const [global] = useState(() => container.resolve(GlobalModel))
+	const [isInitialLoad, setIsInitialLoad] = useState(true)
 	const { pathname, search } = useLocation()
 	const is_login = pathname.indexOf('/login/') !== -1 || pathname === '/'
 	const is_auth = pathname === '/auth'
@@ -52,8 +53,8 @@ const Index = () => {
 		global.hide_nav = search.indexOf('__hidemenu=1') !== -1
 		global.stack.reset()
 
-		// 基于路由的侧边栏控制
-		if (global.layout === 'Chat') {
+		// 基于路由的侧边栏控制 - 仅在首次加载时生效
+		if (isInitialLoad && global.layout === 'Chat') {
 			if (pathname === '/chat') {
 				// /chat 路由：不打开侧边栏
 				global.setSidebarVisible(false)
@@ -66,8 +67,10 @@ const Index = () => {
 				const defaultWidth = Math.min(screenWidth * 0.618, screenWidth - 320)
 				global.updateSidebarState(true, false, defaultWidth)
 			}
+			// 标记首次加载已完成
+			setIsInitialLoad(false)
 		}
-	}, [pathname, global.layout])
+	}, [pathname, global.layout, isInitialLoad])
 
 	const props_helmet: IPropsHelmet = {
 		theme: global.theme,

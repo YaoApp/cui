@@ -100,12 +100,16 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 
 	// Initialize sidebar width if not set
 	useEffect(() => {
+		const responsiveWidth = getResponsiveWidths().default
 		if (global.sidebar_width === 400) {
 			// Default value, might need initialization
-			const responsiveWidth = getResponsiveWidths().default
 			global.setSidebarWidth(responsiveWidth)
 		}
-	}, [global])
+		// 初始化 previousWidth 为合理的默认值
+		if (previousWidth === DEFAULT_WIDTH) {
+			setPreviousWidth(responsiveWidth)
+		}
+	}, [global, previousWidth])
 
 	// Raise Event
 	useEffect(() => {
@@ -215,7 +219,12 @@ const ChatWrapper: FC<PropsWithChildren> = ({ children }) => {
 		e.stopPropagation()
 		setIsAnimating(true)
 		if (isMaximized) {
-			global.updateSidebarState(undefined, false, previousWidth)
+			// 从最大化切换到正常大小，使用合理的宽度
+			const normalWidth =
+				previousWidth > 0 && previousWidth !== DEFAULT_WIDTH
+					? previousWidth
+					: getResponsiveWidths().default
+			global.updateSidebarState(undefined, false, normalWidth)
 		} else {
 			setPreviousWidth(sidebarWidth)
 			global.updateSidebarState(undefined, true, getMaximizedWidth())
