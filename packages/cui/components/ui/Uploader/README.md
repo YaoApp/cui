@@ -15,7 +15,7 @@
 ### 基本用法
 
 ```tsx
-import { Uploader } from '../components'
+import { Uploader } from '@/components/ui'
 
 // 拖拽模式（默认）
 <Uploader
@@ -34,7 +34,7 @@ import { Uploader } from '../components'
 ### 高级用法
 
 ```tsx
-import { Uploader } from '../components'
+import { Uploader } from '@/components/ui'
 import { UploadOutlined } from '@ant-design/icons'
 
 <Uploader

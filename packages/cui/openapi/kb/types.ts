@@ -198,7 +198,7 @@ export interface UpdateCollectionMetadataResponse {
 // ===== Provider Management Types =====
 
 // Re-export provider types from the Provider component
-export type { Provider, ProviderSchema } from '../../pages/kb/components/Provider/types'
+export type { Provider, ProviderSchema } from '../../components/ui/Provider/types'
 
 // Provider API request types
 export interface GetProvidersRequest {

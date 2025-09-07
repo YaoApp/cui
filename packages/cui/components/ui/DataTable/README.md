@@ -63,7 +63,7 @@ DataTable 组件支持灵活的列宽配置，不再需要在列定义中硬编�
 
 ```tsx
 import { DataTable } from '@/pages/kb/components'
-import { TableColumn } from '@/pages/kb/components/DataTable/types'
+import { TableColumn } from '@/components/ui/DataTable/types'
 
 const columns: TableColumn<MyRecord>[] = [
   {

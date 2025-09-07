@@ -6,7 +6,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { KB, Collection } from '@/openapi'
 import Tag from '@/neo/components/AIChat/Tag'
-import { useProviderInfo } from '../components/Provider/hooks/useProviderInfo'
+import { useProviderInfo } from '@/components/ui/Provider/hooks/useProviderInfo'
 import styles from './index.less'
 
 const { TextArea } = Input

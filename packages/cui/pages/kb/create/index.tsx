@@ -6,7 +6,7 @@ import { history, getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { KB } from '@/openapi'
 import type { CreateCollectionRequest, CollectionConfig } from '@/openapi/kb/types'
-import ProviderSelect from '../components/Provider/Select'
+import ProviderSelect from '@/components/ui/Provider/Select'
 import styles from './index.less'
 
 const { TextArea } = Input

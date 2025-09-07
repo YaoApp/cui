@@ -1,11 +1,14 @@
-export { default as Button } from './Button'
-export type { ButtonProps, ButtonType, ButtonSize } from './Button'
-export { default as ActionButton } from './ActionButton'
-export type { ActionButtonProps } from './ActionButton'
+// Migrated components - now available from @/components/ui
+export { Button, ActionButton, DataTable, Pagination, Provider, Uploader } from '@/components/ui'
+export type {
+	ButtonProps,
+	ButtonType,
+	ButtonSize,
+	ActionButtonProps,
+	UploaderProps,
+	UploaderMode
+} from '@/components/ui'
+
 export { default as DetailModal } from './DetailModal'
-export { default as DataTable } from './DataTable'
-export { default as Pagination } from './Pagination'
 export { default as DocumentCover } from './DocumentCover'
-export { default as Provider } from './Provider'
-export { default as Uploader } from './Uploader'
 export { default as CollectionCover } from './CollectionCover'

@@ -12,8 +12,9 @@ import {
 	AddVotesRequest
 } from '@/openapi/kb/types'
 import { KB } from '@/openapi'
-import { DataTable, DetailModal } from '@/pages/kb/components'
-import { TableColumn, TableFilter, TableAction } from '@/pages/kb/components/DataTable/types'
+import { DataTable } from '@/components/ui'
+import { DetailModal } from '@/pages/kb/components'
+import { TableColumn, TableFilter, TableAction } from '@/components/ui/DataTable/types'
 import { DetailSection } from '@/pages/kb/components/DetailModal/types'
 import styles from '../detail.less'
 import localStyles from './index.less'
@@ -452,7 +453,7 @@ const VoteView: React.FC<VoteViewProps> = ({ segmentData, docID }) => {
 			Object.keys(activeFilters).forEach((key) => {
 				const value = activeFilters[key]
 				if (value !== undefined && value !== null && value !== '') {
-					request[key] = value
+					;(request as any)[key] = value
 				}
 			})
 

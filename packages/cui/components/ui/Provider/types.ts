@@ -176,7 +176,7 @@ export interface ProviderAndSchemaResponse {
 
 /**
  * Available UI input components under `@inputs/`.
- * Keep in sync with the folders in `cui/pages/knowledge/components/Provider/inputs`.
+ * Keep in sync with the folders in `cui/components/ui/inputs`.
  */
 export type InputComponent =
 	| 'Input'

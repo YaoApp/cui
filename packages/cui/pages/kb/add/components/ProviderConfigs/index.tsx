@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react'
 import { getLocale } from '@umijs/max'
 import { useGlobal } from '@/context/app'
-import ProviderConfigurator, { ProviderConfiguratorRef } from '../../../components/Provider'
+import ProviderConfigurator, { ProviderConfiguratorRef } from '@/components/ui/Provider'
 import styles from '../../index.less'
 
 export interface ProviderConfigsRef {

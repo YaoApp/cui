@@ -4,7 +4,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { Job, Execution, Log, JobAPI } from '@/openapi'
 import { DataTable } from '@/pages/kb/components'
-import { TableColumn, TableAction } from '@/pages/kb/components/DataTable/types'
+import { TableColumn, TableAction } from '@/components/ui/DataTable/types'
 import styles from './Detail.less'
 
 const { Text } = Typography
