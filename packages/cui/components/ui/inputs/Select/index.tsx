@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { EnumOption, OptionGroup, PropertySchema, PropertyValue, InputComponentProps } from '../../types'
+import { EnumOption, OptionGroup, PropertySchema, PropertyValue, InputComponentProps } from '../types'
 import styles from './index.less'
 
 interface GroupedOption {
@@ -13,8 +13,10 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 	const [highlightedIndex, setHighlightedIndex] = useState(-1)
 	const [isDropup, setIsDropup] = useState(false)
 	const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
+	const [searchTerm, setSearchTerm] = useState('')
 	const selectRef = useRef<HTMLDivElement>(null)
 	const dropdownRef = useRef<HTMLDivElement>(null)
+	const searchInputRef = useRef<HTMLInputElement>(null)
 
 	// 从 schema.enum 获取选项数据
 	const options = schema.enum || []
@@ -38,6 +40,40 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 			flatOptions.push(item)
 		}
 	})
+
+	// 搜索过滤选项
+	const filteredFlatOptions =
+		schema.searchable && searchTerm
+			? flatOptions.filter(
+					(option) =>
+						option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+						option.value.toLowerCase().includes(searchTerm.toLowerCase())
+			  )
+			: flatOptions
+
+	// 重新构建过滤后的分组选项
+	const filteredProcessedOptions =
+		schema.searchable && searchTerm
+			? (processedOptions
+					.map((item) => {
+						if ('groupLabel' in item) {
+							const filteredGroupOptions = item.options.filter(
+								(option) =>
+									option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+									option.value.toLowerCase().includes(searchTerm.toLowerCase())
+							)
+							return filteredGroupOptions.length > 0
+								? { ...item, options: filteredGroupOptions }
+								: null
+						} else {
+							return item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+								item.value.toLowerCase().includes(searchTerm.toLowerCase())
+								? item
+								: null
+						}
+					})
+					.filter(Boolean) as (GroupedOption | OptionGroup)[])
+			: processedOptions
 
 	// 找到当前选中的选项
 	const selectedOption = flatOptions.find((opt) => opt.value === value) || null
@@ -103,10 +139,11 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 
 	// 处理选项选择
 	const handleSelect = (option: GroupedOption) => {
-		onChange(option.value)
+		onChange?.(option.value)
 		setIsOpen(false)
 		setHighlightedIndex(-1)
 		setIsDropup(false)
+		setSearchTerm('')
 	}
 
 	// 打开下拉框
@@ -137,16 +174,16 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 				break
 			case 'ArrowDown':
 				e.preventDefault()
-				setHighlightedIndex((prev) => (prev < flatOptions.length - 1 ? prev + 1 : 0))
+				setHighlightedIndex((prev) => (prev < filteredFlatOptions.length - 1 ? prev + 1 : 0))
 				break
 			case 'ArrowUp':
 				e.preventDefault()
-				setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : flatOptions.length - 1))
+				setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : filteredFlatOptions.length - 1))
 				break
 			case 'Enter':
 				e.preventDefault()
-				if (highlightedIndex >= 0 && flatOptions[highlightedIndex]) {
-					handleSelect(flatOptions[highlightedIndex])
+				if (highlightedIndex >= 0 && filteredFlatOptions[highlightedIndex]) {
+					handleSelect(filteredFlatOptions[highlightedIndex])
 				}
 				break
 		}
@@ -159,12 +196,22 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 				setIsOpen(false)
 				setHighlightedIndex(-1)
 				setIsDropup(false)
+				setSearchTerm('')
 			}
 		}
 
 		document.addEventListener('mousedown', handleClickOutside)
 		return () => document.removeEventListener('mousedown', handleClickOutside)
 	}, [])
+
+	// 聚焦搜索输入框
+	useEffect(() => {
+		if (isOpen && schema.searchable && searchInputRef.current) {
+			setTimeout(() => {
+				searchInputRef.current?.focus()
+			}, 100)
+		}
+	}, [isOpen, schema.searchable])
 
 	// 监听窗口大小变化和滚动，重新检测位置
 	useEffect(() => {
@@ -190,10 +237,10 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 		if (!selectedOption && flatOptions.length > 0) {
 			const defaultOpt = getDefaultOption()
 			if (defaultOpt) {
-				onChange(defaultOpt.value)
+				onChange?.(defaultOpt.value)
 			}
 		}
-	}, [flatOptions.length])
+	}, [flatOptions.length, onChange])
 
 	return (
 		<div
@@ -242,14 +289,42 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 						width: dropdownPosition.width
 					}}
 				>
-					{processedOptions.map((item, index) => {
+					{/* 搜索输入框 */}
+					{schema.searchable && (
+						<div className={styles.searchContainer}>
+							<input
+								ref={searchInputRef}
+								type='text'
+								className={styles.searchInput}
+								placeholder='搜索...'
+								value={searchTerm}
+								onChange={(e) => {
+									setSearchTerm(e.target.value)
+									setHighlightedIndex(0)
+								}}
+								onKeyDown={(e) => {
+									if (
+										e.key === 'ArrowDown' ||
+										e.key === 'ArrowUp' ||
+										e.key === 'Enter'
+									) {
+										e.preventDefault()
+										handleKeyDown(e)
+									}
+								}}
+								onClick={(e) => e.stopPropagation()}
+							/>
+						</div>
+					)}
+
+					{filteredProcessedOptions.map((item, index) => {
 						if ('groupLabel' in item) {
 							// 渲染分组
 							return (
 								<div key={`group-${index}`} className={styles.optionGroup}>
 									<div className={styles.groupLabel}>{item.groupLabel}</div>
 									{item.options.map((option, optIndex) => {
-										const flatIndex = flatOptions.findIndex(
+										const flatIndex = filteredFlatOptions.findIndex(
 											(opt) => opt.value === option.value
 										)
 										const isHighlighted = flatIndex === highlightedIndex
@@ -287,7 +362,9 @@ export default function Select({ value, onChange, schema }: InputComponentProps)
 							)
 						} else {
 							// 渲染普通选项
-							const flatIndex = flatOptions.findIndex((opt) => opt.value === item.value)
+							const flatIndex = filteredFlatOptions.findIndex(
+								(opt) => opt.value === item.value
+							)
 							const isHighlighted = flatIndex === highlightedIndex
 							const isSelected = item.value === value
 

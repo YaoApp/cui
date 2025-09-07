@@ -1,128 +1,88 @@
 .radioGroup {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
+	display: flex !important;
+	gap: 16px !important;
+	flex-wrap: wrap !important;
+	background: transparent !important;
+	border: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
 
-	.optionGroup {
-		flex: 1 1 100%; /* 占据整行 */
+.radioOption {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	cursor: pointer !important;
+	user-select: none !important;
+	padding: 8px 12px !important;
+	border: 1px solid var(--color_border) !important;
+	border-radius: 6px !important;
+	transition: border-color 0.2s ease !important;
+	background: transparent !important;
+	min-width: 80px !important;
+	justify-content: center !important;
+	box-sizing: border-box !important;
 
-		.groupLabel {
-			font-size: 12px;
-			font-weight: 600;
-			color: var(--color_text_light);
-			margin-bottom: 8px;
-			padding-left: 4px;
-		}
-
-		/* 组内选项使用flexbox包装布局 */
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-
-		.option {
-			flex: 0 0 auto;
-			min-width: 200px; /* 设置最小宽度，但允许内容决定实际宽度 */
-		}
+	&:hover:not(.disabled) {
+		border-color: var(--color_main) !important;
+		background: transparent !important;
 	}
 
-	.option {
-		/* 提高CSS特异性以覆盖全局样式 */
-		display: flex !important;
-		align-items: center !important;
-		flex: 0 0 auto !important;
-		min-width: 200px !important; /* 设置最小宽度，但允许内容决定实际宽度 */
-		gap: 8px !important;
-		padding: 8px 12px !important;
-		border: 1px solid var(--color_border) !important;
-		border-radius: var(--radius) !important;
-		background: var(--color_bg_menu) !important;
-		cursor: pointer !important;
-		transition: all 0.2s ease !important;
-		box-sizing: border-box !important;
+	&.selected {
+		border-color: var(--color_main) !important;
+		background: transparent !important;
+	}
 
-		&:focus-visible {
-			outline: none !important;
-			border-color: var(--color_main, #3371fc) !important;
-			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1) !important;
-		}
+	&.disabled {
+		cursor: not-allowed !important;
+		opacity: 0.6 !important;
+		border-color: var(--color_border_light) !important;
+		background: transparent !important;
+	}
+}
 
-		&.selected {
-			border-color: var(--color_main, #3371fc) !important;
-			background-color: var(--color_bg_menu) !important;
-		}
+.radioCircle {
+	width: 16px !important;
+	height: 16px !important;
+	border: 1px solid var(--color_border) !important;
+	border-radius: 50% !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	flex-shrink: 0 !important;
+	background: transparent !important;
+	transition: border-color 0.2s ease !important;
+	box-sizing: border-box !important;
 
-		&:hover:not(.disabled):not(.selected) {
-			border-color: var(--color_main_hover, #4580ff) !important;
-			background-color: var(--color_bg_hover, #f5f5f5) !important;
-		}
+	.radioOption.selected & {
+		border-color: var(--color_main) !important;
+		background: transparent !important;
+	}
 
-		&.selected:hover:not(.disabled) {
-			border-color: var(--color_main, #3371fc) !important;
-			background-color: var(--color_bg_menu) !important;
-		}
+	.radioOption:hover:not(.disabled) & {
+		border-color: var(--color_main) !important;
+		background: transparent !important;
+	}
 
-		&.disabled {
-			background: var(--color_bg) !important;
-			border-color: var(--color_border_light) !important;
-			cursor: not-allowed !important;
-			opacity: 0.6 !important;
-		}
+	.radioOption.disabled & {
+		border-color: var(--color_border_light) !important;
+		background: transparent !important;
+	}
+}
 
-		.radio {
-			flex-shrink: 0;
+.radioDot {
+	width: 8px !important;
+	height: 8px !important;
+	border-radius: 50% !important;
+	background: var(--color_main) !important;
+}
 
-			.radioInner {
-				width: 16px !important;
-				height: 16px !important;
-				border: 1px solid var(--color_border) !important;
-				border-radius: 50% !important;
-				background: var(--color_bg_menu) !important;
-				display: flex !important;
-				align-items: center !important;
-				justify-content: center !important;
-				transition: all 0.2s ease !important;
-				box-sizing: border-box !important;
+.radioLabel {
+	font-size: 13px !important;
+	color: var(--color_text) !important;
+	line-height: 1 !important;
 
-				&.selected {
-					background: var(--color_bg_menu) !important;
-					border-color: var(--color_main, #3371fc) !important;
-				}
-
-				.radioDot {
-					width: 8px !important;
-					height: 8px !important;
-					border-radius: 50% !important;
-					background: var(--color_main, #3371fc) !important;
-				}
-			}
-		}
-
-		.optionContent {
-			flex: 1;
-			min-width: 0;
-
-			.optionLabel {
-				font-size: 13px !important;
-				font-weight: 500 !important;
-				color: var(--color_text) !important;
-				line-height: 1.4 !important;
-			}
-
-			.optionDescription {
-				font-size: 11px !important;
-				color: var(--color_text_secondary, var(--color_text_grey)) !important;
-				line-height: 1.3 !important;
-				margin-top: 2px !important;
-			}
-		}
-
-		// 隐藏原生 radio
-		input[type='radio'] {
-			position: absolute !important;
-			opacity: 0 !important;
-			width: 0 !important;
-			height: 0 !important;
-			pointer-events: none !important;
-		}
+	.radioOption.disabled & {
+		color: var(--color_text_light) !important;
 	}
 }

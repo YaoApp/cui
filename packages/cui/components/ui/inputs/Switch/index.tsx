@@ -1,5 +1,5 @@
 import React from 'react'
-import { InputComponentProps } from '../../types'
+import { InputComponentProps } from '../types'
 import styles from './index.less'
 
 export default function Switch({ schema, value, onChange }: InputComponentProps) {

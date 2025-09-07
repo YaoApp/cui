@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { InputComponentProps } from '../../types'
+import { InputComponentProps } from '../types'
 import ErrorMessage from '../ErrorMessage'
 import styles from './index.less'
 import commonStyles from '../common.less'

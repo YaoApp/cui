@@ -1,5 +1,5 @@
 import React from 'react'
-import { PropertySchema, PropertyValue } from '../../types'
+import { PropertySchema, PropertyValue } from '../types'
 
 interface Props {
 	schema: PropertySchema

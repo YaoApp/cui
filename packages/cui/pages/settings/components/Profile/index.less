@@ -18,7 +18,16 @@
 
 .header {
 	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	margin-bottom: 24px;
+	gap: 16px;
+}
+
+.headerContent {
+	flex: 1;
+	min-width: 0;
 
 	h2 {
 		margin: 0 0 8px 0;
@@ -35,139 +44,258 @@
 	}
 }
 
-.card {
+.headerActions {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.panel {
 	flex: 1;
-	overflow: auto;
+	min-height: 0;
 	background: var(--color_neo_bg_card);
 	border: 1px solid var(--color_neo_border_card);
 	border-radius: 12px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
 
-	:global(.ant-card-body) {
-		padding: 32px;
+	// 默认状态：滚动条隐藏
+	.panelContent::-webkit-scrollbar-thumb {
+		background: transparent !important;
 	}
 
-	// 滚动条样式，参考 Segments 组件
+	// 鼠标悬停Panel时显示滚动条（与Menu组件一致）
+	&:hover {
+		.panelContent::-webkit-scrollbar-thumb {
+			background: var(--color_border_light) !important;
+
+			&:hover {
+				background: var(--color_dot) !important;
+			}
+		}
+	}
+}
+
+.panelContent {
+	flex: 1;
+	overflow: auto;
+	padding: 40px;
+	width: 100%;
+
+	// 滚动条基础样式
 	&::-webkit-scrollbar {
-		width: 12px !important;
-		height: 12px !important;
-		display: block !important;
+		width: 6px;
+		height: 6px;
 	}
 
 	&::-webkit-scrollbar-thumb {
-		background: var(--color_border) !important;
-		border-radius: 4px !important;
-		border: 2px solid var(--color_bg_menu) !important;
-
-		&:hover {
-			background: var(--color_text_grey) !important;
-		}
+		border-radius: 3px;
+		transition: background 0.2s ease;
 	}
 
 	&::-webkit-scrollbar-track {
-		background: var(--color_bg_menu) !important;
-		border-radius: 4px !important;
-	}
-
-	// Firefox 滚动条
-	scrollbar-width: thin !important;
-	scrollbar-color: var(--color_border) var(--color_bg_menu) !important;
-}
-
-.form {
-	max-width: 480px;
-
-	:global(.ant-form-item-label > label) {
-		font-weight: 500;
-		color: var(--color_neo_text_primary);
-	}
-
-	:global(.ant-input) {
-		background: var(--color_neo_bg_field);
-		border: 1px solid var(--color_neo_border_field);
-		border-radius: 6px;
-		padding: 8px 12px;
-		font-size: 14px;
-		color: var(--color_neo_text_primary);
-
-		&:hover {
-			background: var(--color_neo_bg_field_hover);
-			border-color: var(--color_neo_border_field_hover);
-		}
-
-		&:focus,
-		&:focus-within {
-			background: var(--color_neo_bg_card);
-			border-color: var(--color_main);
-			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
-		}
-
-		&:disabled {
-			background: var(--color_neo_bg_field);
-			border-color: var(--color_neo_border_field);
-			color: var(--color_neo_text_secondary);
-			cursor: not-allowed;
-		}
-
-		&::placeholder {
-			color: var(--color_neo_text_secondary);
-		}
+		background: transparent;
 	}
 }
 
+// Avatar Section - 居中头像设计
 .avatarSection {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 12px;
-	margin-bottom: 32px;
-	padding: 24px;
-	background: var(--color_neo_bg_field);
-	border-radius: 8px;
-	border: 1px solid var(--color_neo_border_field);
+	margin: 0 auto 40px auto;
+	padding-bottom: 40px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	max-width: 500px;
+}
 
-	.avatar {
-		border: 3px solid var(--color_neo_bg_card);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+// Fields Container - 字段列表
+.fieldsContainer {
+	flex: 1;
+	max-width: 500px;
+	margin: 0 auto;
+}
+
+.fieldItem {
+	display: flex;
+	align-items: center;
+	padding: 20px 0;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	transition: all 0.2s ease;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&:hover {
+		background: var(--color_neo_bg_field);
+		margin: 0 -20px;
+		padding: 20px;
+		border-radius: 8px;
 	}
 }
 
-.actions {
-	margin-top: 32px;
-	margin-bottom: 0;
+.fieldIcon {
+	flex-shrink: 0;
+	width: 40px;
+	height: 40px;
+	border-radius: 8px;
+	background: var(--color_neo_bg_field);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 16px;
+	color: var(--color_neo_text_secondary);
+	transition: all 0.2s ease;
 
-	:global(.ant-btn-primary) {
-		background: var(--color_main);
-		border-color: var(--color_main);
-		border-radius: 6px;
-		height: 40px;
-		padding: 0 24px;
-		font-weight: 500;
+	.fieldItem:hover & {
+		background: var(--color_neo_bg_card);
+		color: var(--color_main);
+	}
+}
+
+.fieldContent {
+	flex: 1;
+	min-width: 0;
+}
+
+.fieldLabel {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_neo_text_secondary);
+	margin-bottom: 4px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.fieldValue {
+	font-size: 16px;
+	font-weight: 400;
+	color: var(--color_neo_text_primary);
+	line-height: 1.5;
+}
+
+.websiteLink {
+	color: var(--color_main);
+	text-decoration: none;
+	transition: all 0.2s ease;
+
+	&:hover {
+		color: var(--color_main_hover);
+		text-decoration: underline;
+	}
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 16px;
+	}
+
+	.headerActions {
+		align-self: stretch;
+		justify-content: flex-end;
+	}
+
+	.panelContent {
+		padding: 24px;
+	}
+
+	.avatarImage,
+	.avatarPlaceholder {
+		width: 80px;
+		height: 80px;
+		font-size: 28px;
+	}
+
+	.fieldItem {
+		padding: 16px 0;
 
 		&:hover {
-			background: var(--color_main_hover);
-			border-color: var(--color_main_hover);
+			margin: 0 -16px;
+			padding: 16px;
 		}
+	}
 
-		&:active {
-			background: var(--color_main_active);
-			border-color: var(--color_main_active);
-		}
+	.fieldIcon {
+		width: 36px;
+		height: 36px;
+		margin-right: 12px;
 	}
 }
 
-@media (max-width: 768px) {
-	.card {
-		:global(.ant-card-body) {
-			padding: 20px;
-		}
-	}
-
-	.form {
-		max-width: none;
+@media (max-width: 480px) {
+	.panelContent {
+		padding: 20px;
 	}
 
 	.avatarSection {
-		padding: 16px;
+		margin-bottom: 32px;
+		padding-bottom: 32px;
+	}
+
+	.avatarImage,
+	.avatarPlaceholder {
+		width: 70px;
+		height: 70px;
+		font-size: 24px;
+	}
+
+	.fieldItem {
+		padding: 12px 0;
+
+		&:hover {
+			margin: 0 -12px;
+			padding: 12px;
+		}
+	}
+
+	.fieldIcon {
+		width: 32px;
+		height: 32px;
+		margin-right: 10px;
+	}
+
+	.fieldLabel {
+		font-size: 12px;
+	}
+
+	.fieldValue {
+		font-size: 15px;
+	}
+
+	.headerContent {
+		h2 {
+			font-size: 20px;
+		}
+
+		p {
+			font-size: 13px;
+		}
+	}
+}
+
+// 覆盖Form.Item的背景色样式
+.fieldsContainer {
+	// 去除Form.Item容器的背景色
+	:global(.xgen-form-item) {
+		background: transparent !important;
+
+		:global(.xgen-form-item-control) {
+			background: transparent !important;
+
+			:global(.xgen-form-item-control-input) {
+				background: transparent !important;
+
+				:global(.xgen-form-item-control-input-content) {
+					background: transparent !important;
+				}
+			}
+		}
 	}
 }

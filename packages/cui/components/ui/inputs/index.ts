@@ -10,6 +10,7 @@ export { default as CheckboxGroup } from './CheckboxGroup'
 export { default as RadioGroup } from './RadioGroup'
 export { default as Nested } from './Nested'
 export { default as Items } from './Items'
+export { default as Avatar } from './Avatar'
 
 // Utilities
 export { validateField } from './validation'

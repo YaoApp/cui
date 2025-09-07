@@ -5,6 +5,10 @@ export interface User {
 	name: string
 	email: string
 	avatar?: string
+	picture?: string
+	gender?: string
+	zoneinfo?: string
+	website?: string
 	role: string
 	plan: string
 	created_at: string

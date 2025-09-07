@@ -258,3 +258,32 @@
 		}
 	}
 }
+
+// 搜索容器样式
+.searchContainer {
+	padding: 8px;
+	border-bottom: 1px solid var(--color_border_light);
+	background: var(--color_bg_menu);
+}
+
+.searchInput {
+	width: 100%;
+	height: 32px;
+	padding: 6px 12px;
+	border: 1px solid var(--color_border);
+	border-radius: 4px;
+	background: var(--color_bg_menu);
+	font-size: 13px;
+	color: var(--color_text);
+	outline: none;
+	transition: all 0.2s ease;
+
+	&::placeholder {
+		color: var(--color_text_light);
+	}
+
+	&:focus {
+		border-color: var(--color_main);
+		box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+	}
+}

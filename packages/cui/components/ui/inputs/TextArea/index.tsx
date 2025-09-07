@@ -1,5 +1,5 @@
 import React from 'react'
-import { InputComponentProps } from '../../types'
+import { InputComponentProps } from '../types'
 import ErrorMessage from '../ErrorMessage'
 import styles from './index.less'
 import commonStyles from '../common.less'
@@ -22,7 +22,7 @@ export default function TextArea({ schema, value, onChange, error, hasError }: I
 				readOnly={schema.readOnly}
 				minLength={schema.minLength}
 				maxLength={schema.maxLength}
-				rows={6}
+				rows={schema.rows || 6}
 			/>
 			<ErrorMessage message={error} show={hasError} />
 		</div>

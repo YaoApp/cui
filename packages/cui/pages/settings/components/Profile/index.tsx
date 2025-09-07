@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Card, Form, Input, Button, Avatar, Upload, message, Spin } from 'antd'
+import { Form, message, Spin } from 'antd'
 import { getLocale } from '@umijs/max'
 import { mockApi, User } from '../../mockData'
+import ActionButton from '@/components/ui/ActionButton'
+import Button from '@/components/ui/Button'
+import Icon from '@/widgets/Icon'
+import { Input, Select, TextArea, Avatar, RadioGroup } from '@/components/ui/inputs'
+import { timezoneOptions } from '@/constants/timezones'
 import styles from './index.less'
 
 const Profile = () => {
@@ -11,6 +16,7 @@ const Profile = () => {
 
 	const [loading, setLoading] = useState(true)
 	const [saving, setSaving] = useState(false)
+	const [editing, setEditing] = useState(false)
 	const [user, setUser] = useState<User | null>(null)
 
 	useEffect(() => {
@@ -36,12 +42,24 @@ const Profile = () => {
 			setSaving(true)
 			// Mock save
 			await new Promise((resolve) => setTimeout(resolve, 1000))
+			setUser({ ...user, ...values })
+			setEditing(false)
 			message.success(is_cn ? '保存成功' : 'Saved successfully')
 		} catch (error) {
 			message.error(is_cn ? '保存失败' : 'Save failed')
 		} finally {
 			setSaving(false)
 		}
+	}
+
+	const handleEdit = () => {
+		setEditing(true)
+	}
+
+	const handleCancel = () => {
+		form.resetFields()
+		if (user) form.setFieldsValue(user)
+		setEditing(false)
 	}
 
 	if (loading) {
@@ -53,67 +71,300 @@ const Profile = () => {
 		)
 	}
 
+	// Gender options
+	const genderOptions = [
+		{ label: is_cn ? '男' : 'Male', value: 'male' },
+		{ label: is_cn ? '女' : 'Female', value: 'female' }
+	]
+
+	// Locale options
+	const localeOptions = [
+		{ label: 'English (US)', value: 'en-US' },
+		{ label: '中文 (简体)', value: 'zh-CN' },
+		{ label: 'English (UK)', value: 'en-GB' },
+		{ label: 'Français', value: 'fr-FR' },
+		{ label: 'Deutsch', value: 'de-DE' },
+		{ label: '日本語', value: 'ja-JP' },
+		{ label: '한국어', value: 'ko-KR' }
+	]
+
 	return (
 		<div className={styles.profile}>
 			<div className={styles.header}>
-				<h2>{is_cn ? '个人资料' : 'Profile'}</h2>
-				<p>
-					{is_cn
-						? '管理您的个人信息和账户设置'
-						: 'Manage your personal information and account settings'}
-				</p>
+				<div className={styles.headerContent}>
+					<h2>{is_cn ? '个人资料' : 'Profile'}</h2>
+					<p>
+						{is_cn
+							? '管理您的个人信息和账户设置'
+							: 'Manage your personal information and account settings'}
+					</p>
+				</div>
+				<div className={styles.headerActions}>
+					{editing ? (
+						<>
+							<Button
+								type='primary'
+								size='small'
+								icon={<Icon name='icon-check' size={12} />}
+								onClick={() => form.submit()}
+								loading={saving}
+							>
+								{is_cn ? '保存' : 'Save'}
+							</Button>
+							<Button
+								size='small'
+								icon={<Icon name='icon-x' size={12} />}
+								onClick={handleCancel}
+								disabled={saving}
+							>
+								{is_cn ? '取消' : 'Cancel'}
+							</Button>
+						</>
+					) : (
+						<Button
+							size='small'
+							icon={<Icon name='icon-edit-2' size={12} />}
+							onClick={handleEdit}
+						>
+							{is_cn ? '编辑' : 'Edit'}
+						</Button>
+					)}
+				</div>
 			</div>
 
-			<Card className={styles.card}>
-				<Form form={form} layout='vertical' onFinish={handleSave} className={styles.form}>
+			<div className={styles.panel}>
+				<div className={styles.panelContent}>
+					{/* Avatar Section - Always Centered */}
 					<div className={styles.avatarSection}>
-						<Avatar src={user?.avatar} size={80} className={styles.avatar}>
-							{user?.name?.charAt(0)?.toUpperCase() || 'U'}
-						</Avatar>
-						<Upload
-							accept='image/*'
-							showUploadList={false}
-							beforeUpload={() => {
-								message.info(is_cn ? '头像上传功能开发中' : 'Avatar upload coming soon')
-								return false
+						<Avatar
+							schema={{
+								type: 'string',
+								variant: 'large',
+								userName: user?.name || '',
+								placeholder: is_cn ? '更换头像' : 'Change Avatar',
+								readOnly: !editing
 							}}
-						>
-							<Button type='link' size='small'>
-								{is_cn ? '更换头像' : 'Change Avatar'}
-							</Button>
-						</Upload>
+							value={user?.picture}
+							onChange={(value) => {
+								form.setFieldsValue({ picture: value })
+							}}
+							error=''
+							hasError={false}
+						/>
 					</div>
 
-					<Form.Item
-						name='name'
-						label={is_cn ? '姓名' : 'Name'}
-						rules={[{ required: true, message: is_cn ? '请输入姓名' : 'Please enter name' }]}
-					>
-						<Input placeholder={is_cn ? '请输入姓名' : 'Enter your name'} />
-					</Form.Item>
+					{/* Profile Fields */}
+					<Form form={form} onFinish={handleSave}>
+						<div className={styles.fieldsContainer}>
+							{/* Username/Name Field */}
+							<div className={styles.fieldItem}>
+								<div className={styles.fieldIcon}>
+									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
+										<path
+											d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'
+											stroke='currentColor'
+											strokeWidth='2'
+											strokeLinecap='round'
+											strokeLinejoin='round'
+										/>
+										<circle
+											cx='12'
+											cy='7'
+											r='4'
+											stroke='currentColor'
+											strokeWidth='2'
+											strokeLinecap='round'
+											strokeLinejoin='round'
+										/>
+									</svg>
+								</div>
+								<div className={styles.fieldContent}>
+									<div className={styles.fieldLabel}>{is_cn ? '姓名' : 'Name'}</div>
+									{editing ? (
+										<Form.Item name='name' style={{ margin: 0 }}>
+											<Input
+												schema={{
+													type: 'string',
+													placeholder: is_cn
+														? '请输入姓名'
+														: 'Enter your name'
+												}}
+												error=''
+												hasError={false}
+											/>
+										</Form.Item>
+									) : (
+										<div className={styles.fieldValue}>{user?.name || '-'}</div>
+									)}
+								</div>
+							</div>
 
-					<Form.Item
-						name='email'
-						label={is_cn ? '邮箱' : 'Email'}
-						rules={[
-							{ required: true, message: is_cn ? '请输入邮箱' : 'Please enter email' },
-							{ type: 'email', message: is_cn ? '邮箱格式不正确' : 'Invalid email format' }
-						]}
-					>
-						<Input placeholder={is_cn ? '请输入邮箱' : 'Enter your email'} />
-					</Form.Item>
+							{/* Gender Field */}
+							<div className={styles.fieldItem}>
+								<div className={styles.fieldIcon}>
+									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
+										<circle
+											cx='9'
+											cy='9'
+											r='2'
+											stroke='currentColor'
+											strokeWidth='2'
+										/>
+										<path
+											d='M9 12c2.5 0 4 1.5 4 3v2H5v-2c0-1.5 1.5-3 4-3Z'
+											stroke='currentColor'
+											strokeWidth='2'
+										/>
+										<circle
+											cx='15'
+											cy='9'
+											r='2'
+											stroke='currentColor'
+											strokeWidth='2'
+										/>
+										<path
+											d='M15 12c2.5 0 4 1.5 4 3v2h-8v-2c0-1.5 1.5-3 4-3Z'
+											stroke='currentColor'
+											strokeWidth='2'
+										/>
+									</svg>
+								</div>
+								<div className={styles.fieldContent}>
+									<div className={styles.fieldLabel}>
+										{is_cn ? '性别' : 'Gender'}
+									</div>
+									{editing ? (
+										<Form.Item name='gender' style={{ margin: 0 }}>
+											<RadioGroup
+												schema={{
+													type: 'string',
+													enum: genderOptions,
+													allowClear: true
+												}}
+												error=''
+												hasError={false}
+											/>
+										</Form.Item>
+									) : (
+										<div className={styles.fieldValue}>
+											{genderOptions.find((g) => g.value === user?.gender)
+												?.label || '-'}
+										</div>
+									)}
+								</div>
+							</div>
 
-					<Form.Item name='role' label={is_cn ? '角色' : 'Role'}>
-						<Input disabled />
-					</Form.Item>
+							{/* Timezone Field */}
+							<div className={styles.fieldItem}>
+								<div className={styles.fieldIcon}>
+									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
+										<circle
+											cx='12'
+											cy='12'
+											r='10'
+											stroke='currentColor'
+											strokeWidth='2'
+										/>
+										<polyline
+											points='12,6 12,12 16,14'
+											stroke='currentColor'
+											strokeWidth='2'
+										/>
+									</svg>
+								</div>
+								<div className={styles.fieldContent}>
+									<div className={styles.fieldLabel}>
+										{is_cn ? '时区' : 'Timezone'}
+									</div>
+									{editing ? (
+										<Form.Item name='zoneinfo' style={{ margin: 0 }}>
+											<Select
+												schema={{
+													type: 'string',
+													enum: timezoneOptions,
+													placeholder: is_cn
+														? '选择时区'
+														: 'Select timezone',
+													searchable: true
+												}}
+												error=''
+												hasError={false}
+											/>
+										</Form.Item>
+									) : (
+										<div className={styles.fieldValue}>
+											{timezoneOptions.find(
+												(tz) => tz.value === user?.zoneinfo
+											)?.label ||
+												user?.zoneinfo ||
+												'-'}
+										</div>
+									)}
+								</div>
+							</div>
 
-					<Form.Item className={styles.actions}>
-						<Button type='primary' htmlType='submit' loading={saving}>
-							{is_cn ? '保存' : 'Save'}
-						</Button>
-					</Form.Item>
-				</Form>
-			</Card>
+							{/* Website Field */}
+							<div className={styles.fieldItem}>
+								<div className={styles.fieldIcon}>
+									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
+										<path
+											d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'
+											stroke='currentColor'
+											strokeWidth='2'
+											strokeLinecap='round'
+											strokeLinejoin='round'
+										/>
+										<path
+											d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'
+											stroke='currentColor'
+											strokeWidth='2'
+											strokeLinecap='round'
+											strokeLinejoin='round'
+										/>
+									</svg>
+								</div>
+								<div className={styles.fieldContent}>
+									<div className={styles.fieldLabel}>
+										{is_cn ? '网站' : 'Website'}
+									</div>
+									{editing ? (
+										<Form.Item name='website' style={{ margin: 0 }}>
+											<Input
+												schema={{
+													type: 'string',
+													placeholder: is_cn
+														? '请输入网站地址'
+														: 'Enter your website URL'
+												}}
+												error=''
+												hasError={false}
+											/>
+										</Form.Item>
+									) : (
+										<div className={styles.fieldValue}>
+											{user?.website ? (
+												<a
+													href={user.website}
+													target='_blank'
+													rel='noopener noreferrer'
+													className={styles.websiteLink}
+												>
+													{user.website}
+												</a>
+											) : (
+												'-'
+											)}
+										</div>
+									)}
+								</div>
+							</div>
+
+							{/* Hidden picture field */}
+							<Form.Item name='picture' style={{ display: 'none' }} />
+						</div>
+					</Form>
+				</div>
+			</div>
 		</div>
 	)
 }
