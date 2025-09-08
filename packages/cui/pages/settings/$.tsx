@@ -3,6 +3,7 @@ import { getLocale, useParams, useNavigate } from '@umijs/max'
 import Menu from './components/Menu'
 import Profile from './components/Profile'
 import ApiKeys from './components/ApiKeys'
+import Team from './components/Team'
 import Usage from './components/Usage'
 import { mockApi, MenuItem, MenuGroup } from './mockData'
 import styles from './index.less'
@@ -32,6 +33,7 @@ const Settings = () => {
 		() => ({
 			profile: Profile,
 			'api-keys': ApiKeys,
+			team: Team,
 			usage: Usage
 			// 其他组件可以在这里注册，未注册的会显示 ComingSoon
 		}),

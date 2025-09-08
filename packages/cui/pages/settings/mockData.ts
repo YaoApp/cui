@@ -77,6 +77,39 @@ export interface Invoice {
 	download_url?: string
 }
 
+export interface TeamMember {
+	id: string
+	name: string
+	email: string
+	avatar?: string
+	role: 'owner' | 'admin' | 'member'
+	status: 'active' | 'pending' | 'suspended'
+	joined_at: string
+	last_active?: string
+}
+
+export interface Team {
+	id: string
+	name: string
+	description?: string
+	avatar?: string
+	created_at: string
+	updated_at: string
+	member_count: number
+	invite_link: string
+	invite_link_enabled: boolean
+}
+
+export interface TeamInvitation {
+	id: string
+	email: string
+	role: 'admin' | 'member'
+	invited_by: string
+	invited_at: string
+	expires_at: string
+	status: 'pending' | 'expired' | 'cancelled'
+}
+
 // Mock menu groups with items
 export const mockMenuGroups: MenuGroup[] = [
 	{
@@ -377,6 +410,187 @@ export const mockInvoices: Invoice[] = [
 	}
 ]
 
+// Mock team data
+export const mockTeam: Team = {
+	id: '1',
+	name: 'Yao Team',
+	description: '我们的开发团队，专注于构建优秀的产品',
+	avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=YT&backgroundColor=4f46e5&textColor=ffffff',
+	created_at: '2024-01-01T00:00:00Z',
+	updated_at: '2024-01-15T10:30:00Z',
+	member_count: 12,
+	invite_link: 'https://app.example.com/team/invite/abc123def456',
+	invite_link_enabled: true
+}
+
+// Mock team members
+export const mockTeamMembers: TeamMember[] = [
+	{
+		id: '1',
+		name: 'Alex Chen',
+		email: 'alex@example.com',
+		avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=b6e3f4',
+		role: 'owner',
+		status: 'active',
+		joined_at: '2024-01-01T00:00:00Z',
+		last_active: '2024-01-20T14:30:00Z'
+	},
+	{
+		id: '2',
+		name: 'Sarah Wilson',
+		email: 'sarah@example.com',
+		avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah&backgroundColor=fde68a',
+		role: 'admin',
+		status: 'active',
+		joined_at: '2024-01-02T09:15:00Z',
+		last_active: '2024-01-20T11:45:00Z'
+	},
+	{
+		id: '3',
+		name: 'David Kim',
+		email: 'david@example.com',
+		avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David&backgroundColor=c7d2fe',
+		role: 'admin',
+		status: 'active',
+		joined_at: '2024-01-05T16:20:00Z',
+		last_active: '2024-01-19T18:30:00Z'
+	},
+	{
+		id: '4',
+		name: 'Emily Rodriguez',
+		email: 'emily@example.com',
+		avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emily&backgroundColor=fecaca',
+		role: 'member',
+		status: 'active',
+		joined_at: '2024-01-10T10:45:00Z',
+		last_active: '2024-01-20T09:15:00Z'
+	},
+	{
+		id: '5',
+		name: 'James Thompson',
+		email: 'james@example.com',
+		role: 'member',
+		status: 'active',
+		joined_at: '2024-01-18T14:00:00Z',
+		last_active: '2024-01-19T11:20:00Z'
+	},
+	{
+		id: '6',
+		name: 'Maria Garcia',
+		email: 'maria@example.com',
+		avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria&backgroundColor=d8b4fe',
+		role: 'member',
+		status: 'active',
+		joined_at: '2024-01-12T08:30:00Z',
+		last_active: '2024-01-20T15:45:00Z'
+	},
+	{
+		id: '7',
+		name: 'Robert Brown',
+		email: 'robert@example.com',
+		role: 'member',
+		status: 'pending',
+		joined_at: '2024-01-19T12:15:00Z'
+	},
+	{
+		id: '8',
+		name: 'Jennifer Lee',
+		email: 'jennifer@example.com',
+		avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jennifer&backgroundColor=bbf7d0',
+		role: 'member',
+		status: 'active',
+		joined_at: '2024-01-08T14:20:00Z',
+		last_active: '2024-01-20T10:30:00Z'
+	},
+	{
+		id: '9',
+		name: 'Michael Johnson',
+		email: 'michael@example.com',
+		avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Michael&backgroundColor=fed7aa',
+		role: 'admin',
+		status: 'active',
+		joined_at: '2024-01-06T11:30:00Z',
+		last_active: '2024-01-20T16:45:00Z'
+	},
+	{
+		id: '10',
+		name: 'Lisa Anderson',
+		email: 'lisa@example.com',
+		role: 'member',
+		status: 'active',
+		joined_at: '2024-01-14T09:20:00Z',
+		last_active: '2024-01-19T14:15:00Z'
+	},
+	{
+		id: '11',
+		name: 'Tom Wilson',
+		email: 'tom@example.com',
+		avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Tom&backgroundColor=fef3c7',
+		role: 'member',
+		status: 'pending',
+		joined_at: '2024-01-20T08:45:00Z'
+	},
+	{
+		id: '12',
+		name: 'Anna Martinez',
+		email: 'anna@example.com',
+		avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Anna&backgroundColor=e0e7ff',
+		role: 'member',
+		status: 'active',
+		joined_at: '2024-01-11T15:10:00Z',
+		last_active: '2024-01-20T12:20:00Z'
+	}
+]
+
+// Mock team invitations
+export const mockTeamInvitations: TeamInvitation[] = [
+	{
+		id: '1',
+		email: 'alice.johnson@example.com',
+		role: 'member',
+		invited_by: 'Alex Chen',
+		invited_at: '2024-01-19T10:30:00Z',
+		expires_at: '2024-01-26T10:30:00Z',
+		status: 'pending'
+	},
+	{
+		id: '2',
+		email: 'bob.smith@example.com',
+		role: 'admin',
+		invited_by: 'Sarah Wilson',
+		invited_at: '2024-01-18T15:20:00Z',
+		expires_at: '2024-01-25T15:20:00Z',
+		status: 'pending'
+	},
+	{
+		id: '3',
+		email: 'carol.davis@example.com',
+		role: 'member',
+		invited_by: 'David Kim',
+		invited_at: '2024-01-20T09:15:00Z',
+		expires_at: '2024-01-27T09:15:00Z',
+		status: 'pending'
+	},
+	{
+		id: '4',
+		email: 'peter.zhang@example.com',
+		role: 'admin',
+		invited_by: 'Alex Chen',
+		invited_at: '2024-01-20T14:30:00Z',
+		expires_at: '2024-01-27T14:30:00Z',
+		status: 'pending'
+	},
+	{
+		id: '5',
+		email: 'linda.wang@example.com',
+		role: 'member',
+		invited_by: 'Sarah Wilson',
+		invited_at: '2024-01-20T16:45:00Z',
+		expires_at: '2024-01-27T16:45:00Z',
+		status: 'pending'
+	}
+]
+
 // Mock API function to simulate data fetching
 export const mockApi = {
 	getUser: (): Promise<User> => {
@@ -412,6 +626,33 @@ export const mockApi = {
 	getInvoices: (): Promise<Invoice[]> => {
 		return new Promise((resolve) => {
 			setTimeout(() => resolve(mockInvoices), 300)
+		})
+	},
+
+	getTeamMembers: (): Promise<TeamMember[]> => {
+		return new Promise((resolve) => {
+			setTimeout(() => resolve(mockTeamMembers), 300)
+		})
+	},
+
+	getTeamInvitations: (): Promise<TeamInvitation[]> => {
+		return new Promise((resolve) => {
+			setTimeout(() => resolve(mockTeamInvitations), 300)
+		})
+	},
+
+	getTeam: (): Promise<Team> => {
+		return new Promise((resolve, reject) => {
+			// 模拟没有团队的情况，返回 reject 来触发创建团队界面
+			setTimeout(() => {
+				// 可以通过这个变量控制是否有团队
+				const hasTeam = false // 设置为 true 来显示正常团队界面，false 来测试创建团队界面
+				if (hasTeam) {
+					resolve(mockTeam)
+				} else {
+					reject(new Error('Team not found'))
+				}
+			}, 300)
 		})
 	}
 }
