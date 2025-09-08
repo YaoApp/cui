@@ -241,7 +241,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0;
-	padding: 0 20px 20px 20px;
+	padding: 0 32px 20px 32px; // 增加左右边距从20px到32px
 	min-height: 0;
 
 	// 滚动条基础样式（与Profile组件一致）
@@ -275,8 +275,8 @@
 
 	&:hover {
 		background: var(--color_neo_bg_field);
-		margin: 0 -20px;
-		padding: 16px 20px;
+		margin: 0 -32px; // 调整悬停时的负边距以匹配新的padding
+		padding: 16px 32px;
 		border-radius: 8px;
 		border-bottom: 1px solid transparent;
 
@@ -313,8 +313,8 @@
 
 		.keyText {
 			flex: 1;
-			background: var(--color_bg);
-			border: 1px solid var(--color_border);
+			background: var(--color_neo_bg_field); // 使用更合适的浅色背景
+			border: 1px solid var(--color_neo_border_field);
 			border-radius: 4px;
 			padding: 8px 12px;
 			font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -394,8 +394,8 @@
 	width: 100%;
 
 	.keyText {
-		background: var(--color_bg);
-		border: 1px solid var(--color_border);
+		background: var(--color_neo_bg_field); // 使用更合适的浅色背景
+		border: 1px solid var(--color_neo_border_field);
 		border-radius: 4px;
 		padding: 6px 8px;
 		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -605,13 +605,13 @@
 	}
 
 	.keysSection {
-		padding: 0 16px 16px 16px;
+		padding: 0 24px 16px 24px; // 响应式时也增加边距
 	}
 
 	.keyCard {
 		&:hover {
-			margin: 0 -16px;
-			padding: 16px;
+			margin: 0 -24px; // 调整响应式悬停时的负边距
+			padding: 16px 24px;
 		}
 	}
 
