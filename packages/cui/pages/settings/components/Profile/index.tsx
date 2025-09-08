@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Form, message, Spin } from 'antd'
+import { Form, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import { mockApi, User } from '../../mockData'
 import ActionButton from '@/components/ui/ActionButton'
@@ -64,9 +64,29 @@ const Profile = () => {
 
 	if (loading) {
 		return (
-			<div className={styles.loading}>
-				<Spin size='large' />
-				<span>{is_cn ? '加载中...' : 'Loading...'}</span>
+			<div className={styles.profile}>
+				<div className={styles.header}>
+					<div className={styles.headerContent}>
+						<h2>{is_cn ? '个人资料' : 'Profile'}</h2>
+						<p>
+							{is_cn
+								? '管理您的个人信息和账户设置'
+								: 'Manage your personal information and account settings'}
+						</p>
+					</div>
+				</div>
+				<div className={styles.panel}>
+					<div className={styles.panelContent}>
+						<div className={styles.loadingState}>
+							<Icon
+								name='material-hourglass_empty'
+								size={32}
+								className={styles.loadingIcon}
+							/>
+							<span>{is_cn ? '加载中...' : 'Loading...'}</span>
+						</div>
+					</div>
+				</div>
 			</div>
 		)
 	}
@@ -204,28 +224,27 @@ const Profile = () => {
 								<div className={styles.fieldIcon}>
 									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
 										<circle
-											cx='9'
-											cy='9'
-											r='2'
+											cx='12'
+											cy='8'
+											r='3'
 											stroke='currentColor'
 											strokeWidth='2'
+											strokeLinecap='round'
+											strokeLinejoin='round'
 										/>
 										<path
-											d='M9 12c2.5 0 4 1.5 4 3v2H5v-2c0-1.5 1.5-3 4-3Z'
+											d='M12 14v7'
 											stroke='currentColor'
 											strokeWidth='2'
-										/>
-										<circle
-											cx='15'
-											cy='9'
-											r='2'
-											stroke='currentColor'
-											strokeWidth='2'
+											strokeLinecap='round'
+											strokeLinejoin='round'
 										/>
 										<path
-											d='M15 12c2.5 0 4 1.5 4 3v2h-8v-2c0-1.5 1.5-3 4-3Z'
+											d='M15 17l-6 0'
 											stroke='currentColor'
 											strokeWidth='2'
+											strokeLinecap='round'
+											strokeLinejoin='round'
 										/>
 									</svg>
 								</div>
@@ -303,7 +322,7 @@ const Profile = () => {
 								</div>
 							</div>
 
-							{/* Website Field */}
+							{/* Link Field */}
 							<div className={styles.fieldItem}>
 								<div className={styles.fieldIcon}>
 									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
@@ -324,17 +343,15 @@ const Profile = () => {
 									</svg>
 								</div>
 								<div className={styles.fieldContent}>
-									<div className={styles.fieldLabel}>
-										{is_cn ? '网站' : 'Website'}
-									</div>
+									<div className={styles.fieldLabel}>{is_cn ? '链接' : 'Link'}</div>
 									{editing ? (
 										<Form.Item name='website' style={{ margin: 0 }}>
 											<Input
 												schema={{
 													type: 'string',
 													placeholder: is_cn
-														? '请输入网站地址'
-														: 'Enter your website URL'
+														? '请输入链接地址'
+														: 'Enter your link URL'
 												}}
 												error=''
 												hasError={false}

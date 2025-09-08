@@ -277,6 +277,52 @@ export const mockApiKeys: ApiKey[] = [
 		key: 'sk-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy',
 		created_at: '2024-01-10T00:00:00Z',
 		status: 'active'
+	},
+	{
+		id: '3',
+		name: 'Staging Environment Key',
+		key: 'sk-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+		created_at: '2024-01-05T00:00:00Z',
+		last_used_at: '2024-01-14T08:15:00Z',
+		status: 'active'
+	},
+	{
+		id: '4',
+		name: 'Testing API Key',
+		key: 'sk-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+		created_at: '2024-01-12T00:00:00Z',
+		status: 'active'
+	},
+	{
+		id: '5',
+		name: 'Integration Key',
+		key: 'sk-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+		created_at: '2024-01-08T00:00:00Z',
+		last_used_at: '2024-01-13T16:45:00Z',
+		status: 'active'
+	},
+	{
+		id: '6',
+		name: 'Analytics Key',
+		key: 'sk-ccccccccccccccccccccccccccccccccc',
+		created_at: '2024-01-03T00:00:00Z',
+		last_used_at: '2024-01-12T12:30:00Z',
+		status: 'disabled'
+	},
+	{
+		id: '7',
+		name: 'Mobile App Key',
+		key: 'sk-ddddddddddddddddddddddddddddddddd',
+		created_at: '2024-01-07T00:00:00Z',
+		status: 'active'
+	},
+	{
+		id: '8',
+		name: 'Webhook Integration',
+		key: 'sk-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+		created_at: '2024-01-11T00:00:00Z',
+		last_used_at: '2024-01-15T09:20:00Z',
+		status: 'active'
 	}
 ]
 
