@@ -557,7 +557,7 @@ const Team = () => {
 				</div>
 			</div>
 
-			{/* 团队成员列表部分 */}
+			{/* 团队成员和邀请列表部分 */}
 			<div className={styles.membersPanel}>
 				<div className={styles.sectionHeader}>
 					<div className={styles.sectionInfo}>
@@ -567,9 +567,9 @@ const Team = () => {
 						<p>{is_cn ? '管理团队成员的权限和状态' : 'Manage member permissions and status'}</p>
 					</div>
 				</div>
-				<div className={styles.sectionDivider} />
 
-				<div className={styles.membersSection}>
+				<div className={styles.unifiedMembersList}>
+					{/* 团队成员列表 */}
 					{members.map((member) => (
 						<div key={member.id} className={styles.memberCard}>
 							<div className={styles.memberInfo}>
@@ -633,27 +633,15 @@ const Team = () => {
 							</div>
 						</div>
 					))}
-				</div>
 
-				{/* 待处理邀请 */}
-				{invitations.length > 0 && (
-					<>
-						<div className={styles.sectionHeader}>
-							<div className={styles.sectionInfo}>
-								<h4>
-									{is_cn ? '待处理邀请' : 'Pending Invitations'} (
-									{invitations.length})
-								</h4>
-								<p>
-									{is_cn
-										? '等待接受的团队邀请'
-										: 'Team invitations waiting to be accepted'}
-								</p>
+					{/* 待处理邀请 */}
+					{invitations.length > 0 && (
+						<>
+							<div className={styles.sectionSeparator}>
+								<h5 className={styles.separatorTitle}>
+									{is_cn ? '待处理邀请' : 'Pending Invitations'}
+								</h5>
 							</div>
-						</div>
-						<div className={styles.sectionDivider} />
-
-						<div className={styles.invitationsSection}>
 							{invitations.map((invitation) => (
 								<div key={invitation.id} className={styles.invitationCard}>
 									<div className={styles.invitationInfo}>
@@ -711,9 +699,9 @@ const Team = () => {
 									</div>
 								</div>
 							))}
-						</div>
-					</>
-				)}
+						</>
+					)}
+				</div>
 			</div>
 
 			{/* 邀请成员弹窗 */}
