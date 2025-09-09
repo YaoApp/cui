@@ -57,7 +57,7 @@ const Plans = () => {
 			price: {},
 			credits: {
 				monthly: 1000,
-				description: { 'zh-CN': '每月免费额度', 'en-US': 'Free monthly credits' }
+				description: { 'zh-CN': '每月赠送 1,000 点数', 'en-US': 'Free monthly credits' }
 			},
 			features: [
 				{
@@ -99,7 +99,7 @@ const Plans = () => {
 			},
 			credits: {
 				monthly: 10000,
-				description: { 'zh-CN': '每月高额度', 'en-US': 'High monthly credits' }
+				description: { 'zh-CN': '每月 10,000 点数', 'en-US': 'High monthly credits' }
 			},
 			features: [
 				{
@@ -138,7 +138,7 @@ const Plans = () => {
 			price: {},
 			credits: {
 				monthly: 200000,
-				description: { 'zh-CN': '企业级额度', 'en-US': 'Enterprise credits' }
+				description: { 'zh-CN': '企业级大量点数', 'en-US': 'Enterprise credits' }
 			},
 			features: [
 				{

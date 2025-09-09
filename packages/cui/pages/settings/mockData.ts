@@ -59,6 +59,21 @@ export interface Subscription {
 
 export type PlanType = 'free' | 'pro' | 'enterprise' | 'selfhosting'
 
+export interface CreditsInfo {
+	monthly: {
+		used: number
+		limit: number
+		reset_date: string // Next reset date
+	}
+	purchased: {
+		used: number
+		balance: number
+		expiry_date?: string // Long expiry date
+	}
+	total_used: number
+	total_available: number
+}
+
 export interface PlanData {
 	type: PlanType
 	name: {
@@ -69,8 +84,8 @@ export interface PlanData {
 	billing_cycle?: 'monthly' | 'yearly'
 	current_period_start?: string
 	current_period_end?: string
-	credits_used: number
-	credits_limit: number
+	next_billing_date?: string // Next billing/reset date
+	credits: CreditsInfo
 }
 
 export interface UsageStats {
@@ -221,6 +236,13 @@ export const mockMenuGroups: MenuGroup[] = [
 				name: { 'zh-CN': '个人资料', 'en-US': 'Profile' },
 				icon: 'material-person',
 				path: '/settings/profile'
+			},
+			{
+				id: '1a',
+				key: 'balance',
+				name: { 'zh-CN': '账户余额', 'en-US': 'Account Balance' },
+				icon: 'material-account_balance_wallet',
+				path: '/settings/balance'
 			},
 			{
 				id: '2',
@@ -799,15 +821,38 @@ export const mockApi = {
 	getCurrentPlan: (): Promise<PlanData> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
+				const nextMonth = new Date()
+				nextMonth.setMonth(nextMonth.getMonth() + 1)
+				nextMonth.setDate(1)
+
+				const purchasedExpiry = new Date()
+				purchasedExpiry.setFullYear(purchasedExpiry.getFullYear() + 1)
+
 				const mockPlan: PlanData = {
-					type: 'free',
+					type: 'pro',
 					name: {
-						'zh-CN': '免费版',
-						'en-US': 'Free Plan'
+						'zh-CN': 'Pro 版',
+						'en-US': 'Pro Plan'
 					},
 					status: 'active',
-					credits_used: 250,
-					credits_limit: 1000
+					billing_cycle: 'monthly',
+					current_period_start: '2024-01-01T00:00:00Z',
+					current_period_end: '2024-02-01T00:00:00Z',
+					next_billing_date: nextMonth.toISOString(),
+					credits: {
+						monthly: {
+							used: 7500,
+							limit: 10000,
+							reset_date: nextMonth.toISOString()
+						},
+						purchased: {
+							used: 1000,
+							balance: 4000,
+							expiry_date: purchasedExpiry.toISOString()
+						},
+						total_used: 8500,
+						total_available: 14000 // monthly.limit + purchased.balance
+					}
 				}
 				resolve(mockPlan)
 			}, 300)

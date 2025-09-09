@@ -1,0 +1,606 @@
+.subscription {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+// 加载状态 - 与其他组件保持完全一致
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 160px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 20px;
+	text-align: center;
+
+	span {
+		font-size: 12px;
+	}
+}
+
+.loadingIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+// 错误状态
+.errorState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 160px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 20px;
+	text-align: center;
+
+	span {
+		font-size: 12px;
+	}
+}
+
+.errorIcon {
+	color: var(--color_danger);
+}
+
+.header {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 24px;
+	gap: 16px;
+}
+
+.headerContent {
+	flex: 1;
+	min-width: 0;
+
+	h2 {
+		margin: 0 0 8px 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+	}
+}
+
+.headerActions {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.panel {
+	flex: 1;
+	min-height: 0;
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+
+	// 滚动条始终显示
+	.panelContent::-webkit-scrollbar-thumb {
+		background: var(--color_border_light) !important;
+
+		&:hover {
+			background: var(--color_dot) !important;
+		}
+	}
+}
+
+.panelContent {
+	flex: 1;
+	overflow: auto;
+	padding: 32px;
+	width: 100%;
+
+	// 滚动条基础样式
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		transition: background 0.2s ease;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+// 内容区域部分
+.section {
+	margin-bottom: 32px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.sectionHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
+
+	h3 {
+		margin: 0;
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+}
+
+// Removed .usageLink styles since button now uses default type
+
+// 当前套餐卡片
+.planCard {
+	background: var(--color_neo_bg_field);
+	border: 1px solid var(--color_neo_border_field);
+	border-radius: 12px;
+	padding: 24px;
+}
+
+.planInfo {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.planMain {
+	flex: 1;
+	min-width: 0;
+}
+
+.planName {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	margin-bottom: 8px;
+}
+
+.planStatus {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.statusIcon {
+	&.active {
+		color: var(--color_success);
+	}
+
+	&.cancelled,
+	&.expired {
+		color: var(--color_danger);
+	}
+}
+
+.statusText {
+	font-size: 14px;
+	font-weight: 500;
+
+	&.active {
+		color: var(--color_success);
+	}
+
+	&.cancelled,
+	&.expired {
+		color: var(--color_danger);
+	}
+}
+
+.planActions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.planPeriod {
+	padding-top: 16px;
+	border-top: 1px solid var(--color_neo_border_field);
+}
+
+.periodInfo {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	color: var(--color_neo_text_secondary);
+}
+
+.periodIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+// Credits 使用情况卡片
+.usageCard {
+	background: var(--color_neo_bg_field);
+	border: 1px solid var(--color_neo_border_field);
+	border-radius: 12px;
+	padding: 24px;
+}
+
+.usageHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 20px;
+	gap: 16px;
+}
+
+.usageStats {
+	display: flex;
+	align-items: baseline;
+	gap: 12px;
+	flex: 1;
+	min-width: 0;
+}
+
+.usageCurrent,
+.usageLimit {
+	display: flex;
+	align-items: baseline;
+	gap: 4px;
+}
+
+.usageNumber {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	line-height: 1;
+}
+
+.usageUnit {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.usageDivider {
+	font-size: 20px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 300;
+	margin: 0 4px;
+}
+
+.usagePercentage {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--color_main);
+	flex-shrink: 0;
+}
+
+// 进度条
+.progressContainer {
+	margin-bottom: 16px;
+}
+
+.progressBar {
+	width: 100%;
+	height: 8px;
+	background: var(--color_neo_border_field);
+	border-radius: 4px;
+	overflow: hidden;
+	position: relative;
+}
+
+.progressFill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--color_main), var(--color_main_hover));
+	border-radius: 4px;
+	transition: width 0.3s ease;
+}
+
+// 使用警告
+.usageWarning {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	padding: 12px 16px;
+	background: var(--color_warning_bg);
+	border: 1px solid var(--color_warning);
+	border-radius: 8px;
+	font-size: 13px;
+	line-height: 1.4;
+	color: var(--color_neo_text_primary);
+}
+
+.warningIcon {
+	color: var(--color_warning);
+	flex-shrink: 0;
+	margin-top: 1px;
+}
+
+// Credits 分解显示 - 统一设计
+.creditsBreakdown {
+	margin-top: 16px;
+}
+
+.breakdownContainer {
+	background: var(--color_neo_bg_field);
+	border: 1px solid var(--color_neo_border_field);
+	border-radius: 12px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+}
+
+.breakdownSection {
+	display: flex;
+	flex-direction: column;
+}
+
+.sectionHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 12px;
+	gap: 12px;
+}
+
+.sectionTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.sectionIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.sectionMeta {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+.sectionContent {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.creditsDisplay {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+}
+
+.creditsUsed,
+.creditsLimit,
+.creditsBalance {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	line-height: 1;
+}
+
+.creditsDivider {
+	font-size: 16px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 300;
+}
+
+.creditsLabel {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-left: 4px;
+}
+
+.progressWrapper {
+	.progressBar {
+		height: 6px;
+	}
+}
+
+.monthlyProgress {
+	background: linear-gradient(90deg, var(--color_main), var(--color_main_hover));
+}
+
+.usedInfo {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	margin-top: 4px;
+}
+
+.breakdownSeparator {
+	height: 1px;
+	background: var(--color_neo_border_field);
+	margin: 20px 0;
+	position: relative;
+
+	&::before {
+		content: '';
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 6px;
+		height: 6px;
+		background: var(--color_neo_border_field);
+		border-radius: 50%;
+	}
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 16px;
+	}
+
+	.headerActions {
+		align-self: center;
+	}
+
+	.panelContent {
+		padding: 24px;
+	}
+
+	.planInfo {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 16px;
+	}
+
+	.planActions {
+		justify-content: flex-end;
+	}
+
+	.usageHeader {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
+	}
+
+	.usageStats {
+		justify-content: center;
+	}
+
+	.usagePercentage {
+		align-self: center;
+		font-size: 16px;
+	}
+
+	.sectionHeader {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+
+		h3 {
+			font-size: 16px;
+		}
+	}
+
+	// Removed usageLink styles
+
+	.breakdownContainer {
+		padding: 16px;
+	}
+
+	.sectionHeader {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+	}
+
+	.sectionTitle {
+		justify-content: center;
+	}
+
+	.sectionMeta {
+		text-align: center;
+	}
+}
+
+@media (max-width: 480px) {
+	.panelContent {
+		padding: 20px;
+	}
+
+	.planCard,
+	.usageCard {
+		padding: 20px;
+	}
+
+	.planName {
+		font-size: 18px;
+	}
+
+	.usageNumber {
+		font-size: 20px;
+	}
+
+	.usagePercentage {
+		font-size: 14px;
+	}
+
+	.headerContent {
+		h2 {
+			font-size: 20px;
+		}
+
+		p {
+			font-size: 13px;
+		}
+	}
+
+	.planActions {
+		gap: 6px;
+	}
+
+	.usageWarning {
+		padding: 10px 12px;
+		font-size: 12px;
+	}
+
+	.breakdownContainer {
+		padding: 14px;
+	}
+
+	.creditsUsed,
+	.creditsLimit,
+	.creditsBalance {
+		font-size: 16px;
+	}
+
+	.sectionTitle {
+		font-size: 13px;
+	}
+}
+
+// 高对比度主题支持
+@media (prefers-contrast: high) {
+	.progressBar {
+		border: 1px solid var(--color_neo_border_card);
+	}
+
+	.progressFill {
+		background: var(--color_main);
+	}
+
+	.planCard,
+	.usageCard,
+	.breakdownContainer {
+		border-width: 2px;
+	}
+}
+
+// 减少动画偏好支持
+@media (prefers-reduced-motion: reduce) {
+	.progressFill {
+		transition: none;
+	}
+}
