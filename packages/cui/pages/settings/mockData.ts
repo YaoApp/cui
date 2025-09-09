@@ -57,6 +57,22 @@ export interface Subscription {
 	monthly_cost: number
 }
 
+export type PlanType = 'free' | 'pro' | 'enterprise' | 'selfhosting'
+
+export interface PlanData {
+	type: PlanType
+	name: {
+		'zh-CN': string
+		'en-US': string
+	}
+	status: 'active' | 'cancelled' | 'expired'
+	billing_cycle?: 'monthly' | 'yearly'
+	current_period_start?: string
+	current_period_end?: string
+	credits_used: number
+	credits_limit: number
+}
+
 export interface UsageStats {
 	current_month: {
 		requests: number
@@ -777,6 +793,24 @@ export const mockApi = {
 				Object.assign(mockPreferencesDataCache, data)
 				resolve(mockPreferencesDataCache)
 			}, 500)
+		})
+	},
+
+	getCurrentPlan: (): Promise<PlanData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const mockPlan: PlanData = {
+					type: 'free',
+					name: {
+						'zh-CN': '免费版',
+						'en-US': 'Free Plan'
+					},
+					status: 'active',
+					credits_used: 250,
+					credits_limit: 1000
+				}
+				resolve(mockPlan)
+			}, 300)
 		})
 	}
 }

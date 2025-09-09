@@ -1,0 +1,574 @@
+.plans {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+// 加载状态 - 与其他组件保持完全一致
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 160px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 20px;
+	text-align: center;
+
+	span {
+		font-size: 12px;
+	}
+}
+
+.loadingIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.header {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 24px;
+	gap: 16px;
+}
+
+.headerContent {
+	flex: 1;
+	min-width: 0;
+
+	h2 {
+		margin: 0 0 8px 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+	}
+}
+
+.headerActions {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+// 计费周期切换按钮
+.billingToggle {
+	display: flex;
+	background: var(--color_neo_bg_field);
+	border: 1px solid var(--color_neo_border_field);
+	border-radius: 8px;
+	padding: 2px;
+	position: relative;
+}
+
+.toggleButton {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 8px 16px;
+	border: none;
+	background: transparent;
+	color: var(--color_neo_text_secondary);
+	font-size: 13px;
+	font-weight: 500;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	white-space: nowrap;
+
+	&:hover {
+		color: var(--color_neo_text_primary);
+	}
+
+	&.active {
+		background: var(--color_neo_bg_card);
+		color: var(--color_neo_text_primary);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+	}
+}
+
+.discountBadge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 6px;
+	background: var(--color_success);
+	color: white;
+	font-size: 10px;
+	font-weight: 600;
+	border-radius: 4px;
+	margin-left: 4px;
+}
+
+.panel {
+	flex: 1;
+	min-height: 0;
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+
+	// 滚动条始终显示
+	.panelContent::-webkit-scrollbar-thumb {
+		background: var(--color_border_light) !important;
+
+		&:hover {
+			background: var(--color_dot) !important;
+		}
+	}
+}
+
+.panelContent {
+	flex: 1;
+	overflow: auto;
+	padding: 40px;
+	width: 100%;
+
+	// 滚动条基础样式
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		transition: background 0.2s ease;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+// 套餐网格布局
+.plansGrid {
+	display: grid;
+	grid-template-columns: 1fr 1fr; // 固定两列布局
+	gap: 24px;
+	width: 100%;
+}
+
+// 套餐卡片
+.planCard {
+	position: relative;
+	background: var(--color_neo_bg_card);
+	border: 2px solid var(--color_neo_border_card);
+	border-radius: 16px;
+	padding: 32px 24px 24px;
+	transition: all 0.3s ease;
+	display: flex;
+	flex-direction: column;
+	min-height: 500px;
+
+	&:hover {
+		border-color: var(--color_neo_border_hover);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+		transform: translateY(-2px);
+	}
+
+	&.popularPlan {
+		border-color: var(--color_main);
+		box-shadow: 0 4px 16px rgba(51, 113, 252, 0.15);
+
+		&:hover {
+			border-color: var(--color_main_hover);
+			box-shadow: 0 8px 32px rgba(51, 113, 252, 0.25);
+		}
+	}
+
+	&.currentPlan {
+		border-color: var(--color_success);
+
+		&:hover {
+			border-color: var(--color_success);
+		}
+	}
+}
+
+// 推荐标签
+.popularBadge {
+	position: absolute;
+	top: -1px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 16px;
+	background: var(--color_main);
+	color: white;
+	font-size: 12px;
+	font-weight: 600;
+	border-radius: 0 0 8px 8px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+// 当前套餐标签
+.currentBadge {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	background: var(--color_success);
+	color: white;
+	font-size: 11px;
+	font-weight: 500;
+	border-radius: 12px;
+}
+
+.planHeader {
+	margin-bottom: 24px;
+	text-align: center;
+}
+
+.planName {
+	margin: 0 0 8px 0;
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+}
+
+.planDescription {
+	margin: 0;
+	font-size: 14px;
+	color: var(--color_neo_text_secondary);
+	line-height: 1.5;
+}
+
+// 价格显示 - 固定高度确保卡片高度一致
+.planPricing {
+	margin-bottom: 24px;
+	text-align: center;
+	height: 100px; // 固定高度
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.priceDisplay {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px; // 减小间距
+	width: 100%;
+}
+
+.currentPrice {
+	display: flex;
+	align-items: baseline;
+	gap: 4px;
+	justify-content: center;
+}
+
+.priceAmount {
+	font-size: 32px; // 稍微减小字体
+	font-weight: 800;
+	color: var(--color_neo_text_primary);
+	line-height: 1;
+}
+
+.pricePeriod {
+	font-size: 14px; // 减小字体
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+.originalPrice {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px; // 减小间距
+	font-size: 12px; // 减小字体
+	height: 18px; // 固定高度
+	margin-top: 2px;
+}
+
+.strikethrough {
+	text-decoration: line-through;
+	color: var(--color_neo_text_secondary);
+}
+
+.discount {
+	padding: 1px 4px; // 减小内边距
+	background: var(--color_success);
+	color: white;
+	font-size: 9px; // 减小字体
+	font-weight: 600;
+	border-radius: 3px;
+}
+
+.yearlyInfo {
+	font-size: 11px; // 减小字体
+	color: var(--color_neo_text_secondary);
+	height: 16px; // 固定高度
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 4px;
+}
+
+.rangeInfo {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	height: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 4px;
+	font-style: italic;
+}
+
+.freePrice {
+	font-size: 28px; // 减小字体与付费套餐保持平衡
+	font-weight: 800;
+	color: var(--color_neo_text_primary);
+	line-height: 1;
+}
+
+// 额度显示
+.planCredits {
+	margin-bottom: 32px;
+	text-align: center;
+	padding: 16px;
+	background: var(--color_neo_bg_field);
+	border-radius: 12px;
+	border: 1px solid var(--color_neo_border_field);
+}
+
+.creditsAmount {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--color_main);
+	margin-bottom: 4px;
+}
+
+.creditsDescription {
+	font-size: 13px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+// 功能列表
+.planFeatures {
+	flex: 1;
+	margin-bottom: 24px;
+}
+
+.featureItem {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 0;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.featureIcon {
+	flex-shrink: 0;
+	border-radius: 50%;
+	padding: 2px;
+
+	&.included {
+		color: var(--color_success);
+		background: var(--color_success_bg);
+	}
+
+	&.excluded {
+		color: var(--color_neo_text_secondary);
+		background: var(--color_neo_bg_field);
+	}
+}
+
+.featureName {
+	color: var(--color_neo_text_primary);
+	font-weight: 500;
+}
+
+// 套餐按钮
+.planAction {
+	margin-top: auto;
+}
+
+.planButton {
+	width: 100%;
+	height: 48px;
+	font-size: 15px;
+	font-weight: 600;
+	border-radius: 12px;
+	transition: all 0.2s ease;
+
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 16px;
+	}
+
+	.headerActions {
+		align-self: center;
+	}
+
+	.panelContent {
+		padding: 24px;
+	}
+
+	.plansGrid {
+		grid-template-columns: 1fr;
+		gap: 20px;
+	}
+
+	.planCard {
+		padding: 24px 20px 20px;
+		min-height: 450px;
+	}
+
+	.planName {
+		font-size: 20px;
+	}
+
+	.planPricing {
+		height: 90px; // 移动端稍微减小高度
+	}
+
+	.priceAmount {
+		font-size: 26px; // 移动端减小字体
+	}
+
+	.pricePeriod {
+		font-size: 12px;
+	}
+
+	.originalPrice {
+		font-size: 11px;
+		height: 16px;
+	}
+
+	.yearlyInfo {
+		font-size: 10px;
+		height: 14px;
+	}
+
+	.freePrice {
+		font-size: 24px;
+	}
+
+	.billingToggle {
+		width: 100%;
+	}
+
+	.toggleButton {
+		flex: 1;
+		justify-content: center;
+	}
+}
+
+@media (max-width: 480px) {
+	.panelContent {
+		padding: 20px;
+	}
+
+	.planCard {
+		padding: 20px 16px 16px;
+		min-height: 400px;
+	}
+
+	.planName {
+		font-size: 18px;
+	}
+
+	.planPricing {
+		height: 80px; // 小屏幕进一步减小高度
+	}
+
+	.priceAmount {
+		font-size: 22px; // 小屏幕减小字体
+	}
+
+	.pricePeriod {
+		font-size: 11px;
+	}
+
+	.originalPrice {
+		font-size: 10px;
+		height: 14px;
+	}
+
+	.yearlyInfo {
+		font-size: 9px;
+		height: 12px;
+	}
+
+	.freePrice {
+		font-size: 20px;
+	}
+
+	.creditsAmount {
+		font-size: 18px;
+	}
+
+	.headerContent {
+		h2 {
+			font-size: 20px;
+		}
+
+		p {
+			font-size: 13px;
+		}
+	}
+
+	.toggleButton {
+		padding: 6px 12px;
+		font-size: 12px;
+	}
+
+	.discountBadge {
+		font-size: 9px;
+		padding: 1px 4px;
+	}
+}
+
+// 特殊状态样式
+.planCard.currentPlan .planButton {
+	background: var(--color_neo_bg_field) !important;
+	border-color: var(--color_neo_border_field) !important;
+	color: var(--color_neo_text_secondary) !important;
+	cursor: not-allowed;
+
+	&:hover {
+		background: var(--color_neo_bg_field) !important;
+		border-color: var(--color_neo_border_field) !important;
+	}
+}
+
+// 加载按钮状态
+.planButton:global(.ant-btn-loading) {
+	.planButton::before {
+		display: none;
+	}
+}
