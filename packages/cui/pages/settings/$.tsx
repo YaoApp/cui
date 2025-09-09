@@ -5,6 +5,7 @@ import Profile from './components/Profile'
 import ApiKeys from './components/ApiKeys'
 import Team from './components/Team'
 import Usage from './components/Usage'
+import Preferences from './components/Preferences'
 import { mockApi, MenuItem, MenuGroup } from './mockData'
 import styles from './index.less'
 
@@ -34,7 +35,8 @@ const Settings = () => {
 			profile: Profile,
 			'api-keys': ApiKeys,
 			team: Team,
-			usage: Usage
+			usage: Usage,
+			preferences: Preferences
 			// 其他组件可以在这里注册，未注册的会显示 ComingSoon
 		}),
 		[]

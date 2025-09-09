@@ -1,4 +1,5 @@
 // Mock data for settings page - remove when API is ready
+import { ProviderSchema, PropertyValue } from '@/components/ui/Provider/types'
 
 export interface User {
 	id: string
@@ -110,6 +111,87 @@ export interface TeamInvitation {
 	status: 'pending' | 'expired' | 'cancelled'
 }
 
+export type PreferencesData = Record<string, PropertyValue>
+
+// Generate internationalized preferences schema
+const generatePreferencesSchema = (locale: string = 'en-US'): ProviderSchema => {
+	const isZhCN = locale === 'zh-CN'
+
+	return {
+		id: 'preferences',
+		title: isZhCN ? '偏好设置' : 'Preferences',
+		description: isZhCN
+			? '管理您的个人偏好和界面设置'
+			: 'Manage your personal preferences and interface settings',
+		properties: {
+			language: {
+				type: 'string',
+				title: isZhCN ? '语言' : 'Language',
+				description: isZhCN ? '选择界面显示语言' : 'Select your preferred language for the interface',
+				component: 'Select',
+				enum: [
+					{
+						label: isZhCN ? '跟随浏览器' : 'Follow Browser',
+						value: 'auto',
+						description: isZhCN ? '使用浏览器语言偏好' : 'Use browser language preference'
+					},
+					{
+						label: '中文',
+						value: 'zh-CN',
+						description: '简体中文'
+					},
+					{
+						label: 'English',
+						value: 'en-US',
+						description: 'English (United States)'
+					}
+				],
+				default: 'auto',
+				required: true,
+				order: 1
+			},
+			theme: {
+				type: 'string',
+				title: isZhCN ? '主题' : 'Theme',
+				description: isZhCN ? '选择您喜欢的颜色主题' : 'Choose your preferred color theme',
+				component: 'RadioGroup',
+				enum: [
+					{
+						label: isZhCN ? '浅色' : 'Light',
+						value: 'light',
+						description: isZhCN ? '明亮的浅色主题' : 'Light theme with bright colors'
+					},
+					{
+						label: isZhCN ? '深色' : 'Dark',
+						value: 'dark',
+						description: isZhCN ? '柔和的深色主题' : 'Dark theme with muted colors'
+					},
+					{
+						label: isZhCN ? '跟随系统' : 'Follow System',
+						value: 'auto',
+						description: isZhCN ? '跟随系统主题偏好' : 'Follow system theme preference'
+					}
+				],
+				default: 'auto',
+				required: true,
+				order: 2
+			},
+			emailSubscription: {
+				type: 'boolean',
+				title: isZhCN ? '邮件订阅' : 'Email Subscription',
+				description: isZhCN
+					? '接收产品更新和新闻通讯邮件'
+					: 'Receive product updates and newsletters via email',
+				component: 'Switch',
+				default: true,
+				required: false,
+				order: 3
+			}
+		},
+		required: ['language', 'theme']
+	}
+}
+
 // Mock menu groups with items
 export const mockMenuGroups: MenuGroup[] = [
 	{
@@ -140,10 +222,10 @@ export const mockMenuGroups: MenuGroup[] = [
 			},
 			{
 				id: '2b',
-				key: 'advanced',
+				key: 'preferences',
 				name: { 'zh-CN': '偏好设置', 'en-US': 'Preferences' },
 				icon: 'material-settings',
-				path: '/settings/advanced'
+				path: '/settings/preferences'
 			}
 		]
 	},
@@ -591,6 +673,16 @@ export const mockTeamInvitations: TeamInvitation[] = [
 	}
 ]
 
+// Mock preferences data - with default "auto" language preference
+const generateMockPreferencesData = (): PreferencesData => ({
+	language: 'auto', // Default to "Follow Browser" option
+	theme: 'auto',
+	emailSubscription: true
+})
+
+// Static reference for updates (will be initialized dynamically)
+let mockPreferencesDataCache: PreferencesData | null = null
+
 // Mock API function to simulate data fetching
 export const mockApi = {
 	getUser: (): Promise<User> => {
@@ -653,6 +745,38 @@ export const mockApi = {
 					reject(new Error('Team not found'))
 				}
 			}, 300)
+		})
+	},
+
+	getPreferencesSchema: (locale: string = 'en-US'): Promise<ProviderSchema> => {
+		return new Promise((resolve) => {
+			setTimeout(() => resolve(generatePreferencesSchema(locale)), 200)
+		})
+	},
+
+	getPreferencesData: (): Promise<PreferencesData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				// Initialize cache if not exists
+				if (!mockPreferencesDataCache) {
+					mockPreferencesDataCache = generateMockPreferencesData()
+				}
+				resolve(mockPreferencesDataCache)
+			}, 200)
+		})
+	},
+
+	updatePreferencesData: (data: PreferencesData): Promise<PreferencesData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				// Initialize cache if not exists
+				if (!mockPreferencesDataCache) {
+					mockPreferencesDataCache = generateMockPreferencesData()
+				}
+				// Update cached data
+				Object.assign(mockPreferencesDataCache, data)
+				resolve(mockPreferencesDataCache)
+			}, 500)
 		})
 	}
 }

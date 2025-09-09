@@ -1,0 +1,381 @@
+// Setting component styles
+.setting {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.configForm {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.configField {
+	display: grid;
+	grid-template-columns: 1fr 220px; // Left side flexible, right side fixed width
+	gap: 12px;
+	align-items: center;
+	padding: 16px 0; // Generous spacing for optimal visual separation
+	border-bottom: 1px solid var(--color_border_light);
+	min-height: 56px; // Increased height to accommodate larger padding
+
+	// Special layout for text areas and code editors
+	&.fullWidth {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto;
+		align-items: start;
+		gap: 8px;
+
+		.fieldLabel {
+			grid-row: 1;
+		}
+
+		.fieldControl {
+			grid-row: 2;
+			justify-content: stretch;
+
+			textarea,
+			.codeEditor {
+				width: 100%;
+				min-height: 120px;
+			}
+		}
+	}
+
+	&:last-child {
+		border-bottom: none;
+	}
+}
+
+.fieldLabel {
+	display: flex;
+	flex-direction: column;
+
+	.labelName {
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--color_text_primary);
+		margin-bottom: 3px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		.requiredMark {
+			color: var(--color_danger, #ff4d4f);
+			margin-left: 4px;
+			font-weight: 600;
+		}
+	}
+
+	.labelDescription {
+		font-size: 11px;
+		color: var(--color_text_secondary);
+		line-height: 1.4;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+.fieldControl {
+	flex-shrink: 0;
+	display: flex;
+	justify-content: flex-end;
+}
+
+// Nested fields
+.nestedField {
+	padding: 10px 0;
+	border-bottom: 1px solid var(--color_border_light);
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	.nestedTitle {
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--color_text_primary);
+		margin-bottom: 4px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		.requiredMark {
+			color: var(--color_danger, #ff4d4f);
+			margin-left: 4px;
+			font-weight: 600;
+		}
+	}
+
+	.nestedDescription {
+		font-size: 11px;
+		color: var(--color_text_secondary);
+		margin-bottom: 12px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.nestedContainer {
+		margin-left: 24px; // Simple indentation for nested fields
+
+		.nestedForm {
+			display: grid;
+			gap: 8px; // Tighter spacing for nested items
+
+			.nestedFieldRow {
+				display: grid;
+				grid-template-columns: 1fr 220px; // Same width as main fields
+				gap: 12px;
+				align-items: center;
+				padding: 16px 0;
+				min-height: 56px; // Same height as main fields
+				border-bottom: 1px solid var(--color_border_light);
+
+				&.fullWidth {
+					grid-template-columns: 1fr;
+					grid-template-rows: auto auto;
+					align-items: start;
+					gap: 8px;
+
+					.nestedFieldLabel {
+						grid-row: 1;
+					}
+
+					.nestedFieldControl {
+						grid-row: 2;
+						justify-content: stretch;
+
+						textarea,
+						.codeEditor {
+							width: 100%;
+							min-height: 120px;
+						}
+					}
+				}
+
+				&:last-child {
+					border-bottom: none;
+				}
+
+				.nestedFieldLabel {
+					display: flex;
+					flex-direction: column;
+
+					.labelName {
+						font-size: 13px;
+						font-weight: 500;
+						color: var(--color_text_primary);
+						margin-bottom: 3px;
+						white-space: nowrap;
+						overflow: hidden;
+						text-overflow: ellipsis;
+
+						.requiredMark {
+							color: var(--color_danger, #ff4d4f);
+							margin-left: 4px;
+							font-weight: 600;
+						}
+					}
+
+					.labelDescription {
+						font-size: 11px;
+						color: var(--color_text_secondary);
+						line-height: 1.4;
+						white-space: nowrap;
+						overflow: hidden;
+						text-overflow: ellipsis;
+					}
+				}
+
+				.nestedFieldControl {
+					display: flex;
+					justify-content: flex-end;
+				}
+			}
+		}
+	}
+}
+
+// Array fields
+.arrayField {
+	grid-column: 1 / -1;
+
+	.arrayTitle {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--color_text_primary);
+		margin-bottom: 6px;
+	}
+
+	.arrayDescription {
+		font-size: 12px;
+		color: var(--color_text_secondary);
+		margin-bottom: 12px;
+	}
+
+	.arrayContainer {
+		border: 1px solid var(--color_border_light);
+		border-radius: 8px;
+		padding: 16px;
+		background-color: var(--color_bg_light);
+
+		.arrayItems {
+			display: grid;
+			gap: 12px;
+			margin-bottom: 12px;
+
+			.arrayItem {
+				display: grid;
+				grid-template-columns: 200px 1fr auto;
+				gap: 12px;
+				align-items: start;
+				padding: 12px;
+				border: 1px solid var(--color_border);
+				border-radius: 6px;
+				background-color: var(--color_bg_white);
+
+				.arrayItemLabel {
+					display: flex;
+					flex-direction: column;
+
+					.labelName {
+						font-size: 13px;
+						font-weight: 500;
+						color: var(--color_text_primary);
+						margin-bottom: 2px;
+					}
+
+					.labelDescription {
+						font-size: 11px;
+						color: var(--color_text_secondary);
+					}
+				}
+
+				.arrayItemActions {
+					display: flex;
+					align-items: center;
+
+					.removeButton {
+						padding: 4px 8px;
+						border: 1px solid var(--color_border);
+						border-radius: 4px;
+						background-color: var(--color_bg_white);
+						color: var(--color_text_secondary);
+						font-size: 12px;
+						cursor: pointer;
+						transition: all 0.2s ease;
+
+						&:hover {
+							background-color: var(--color_bg_hover);
+							color: var(--color_text);
+							border-color: var(--color_main_light);
+						}
+
+						&:active {
+							background-color: var(--color_bg_active);
+						}
+					}
+				}
+			}
+		}
+
+		.arrayActions {
+			display: flex;
+			justify-content: flex-start;
+
+			.addButton {
+				padding: 6px 12px;
+				border: 1px dashed var(--color_border);
+				border-radius: 6px;
+				background-color: transparent;
+				color: var(--color_main);
+				font-size: 12px;
+				cursor: pointer;
+				transition: all 0.2s ease;
+
+				&:hover {
+					background-color: var(--color_main_light);
+					border-color: var(--color_main);
+				}
+
+				&:active {
+					background-color: var(--color_main);
+					color: var(--color_bg_white);
+				}
+			}
+		}
+	}
+}
+
+// Responsive design
+@media (max-width: 768px) {
+	.configField {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto;
+		align-items: start;
+		gap: 8px;
+
+		.fieldLabel {
+			grid-row: 1;
+		}
+
+		.fieldControl {
+			grid-row: 2;
+			justify-content: stretch;
+		}
+
+		&.fullWidth {
+			// Already has the right layout for mobile
+		}
+	}
+
+	.nestedContainer {
+		margin-left: 12px; // Reduce indentation on mobile
+
+		.nestedForm {
+			.nestedFieldRow {
+				grid-template-columns: 1fr;
+				grid-template-rows: auto auto;
+				align-items: start;
+				gap: 8px;
+
+				.nestedFieldLabel {
+					grid-row: 1;
+				}
+
+				.nestedFieldControl {
+					grid-row: 2;
+					justify-content: stretch;
+				}
+			}
+		}
+	}
+
+	.arrayField {
+		.arrayContainer {
+			padding: 12px;
+
+			.arrayItem {
+				grid-template-columns: 1fr;
+				grid-template-rows: auto auto auto;
+				gap: 8px;
+
+				.arrayItemLabel {
+					grid-row: 1;
+				}
+
+				.arrayItemControl {
+					grid-row: 2;
+				}
+
+				.arrayItemActions {
+					grid-row: 3;
+					justify-content: flex-end;
+				}
+			}
+		}
+	}
+}

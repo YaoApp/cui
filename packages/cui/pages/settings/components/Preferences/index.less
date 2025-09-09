@@ -1,0 +1,169 @@
+// 主容器 - 与其他设置页面保持一致
+.preferences {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	font-size: 12px; // 统一字体大小
+}
+
+// 页面头部 - 与其他设置页面保持一致
+.header {
+	flex-shrink: 0;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 20px;
+	gap: 16px;
+
+	.headerContent {
+		flex: 1;
+	}
+
+	.headerActions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	h2 {
+		margin: 0 0 6px 0;
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--color_text);
+		line-height: 1.3;
+	}
+
+	p {
+		margin: 0;
+		font-size: 12px;
+		color: var(--color_text_grey);
+		line-height: 1.4;
+	}
+}
+
+// 设置面板 - 与 ApiKeys 等组件保持一致的 Panel 样式
+.panel {
+	flex: 1;
+	min-height: 0;
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+
+	// 默认状态：滚动条隐藏
+	.panelContent::-webkit-scrollbar-thumb {
+		background: transparent !important;
+	}
+
+	// 鼠标悬停Panel时显示滚动条（与Profile组件一致）
+	&:hover {
+		.panelContent::-webkit-scrollbar-thumb {
+			background: var(--color_border_light) !important;
+
+			&:hover {
+				background: var(--color_dot) !important;
+			}
+		}
+	}
+}
+
+// Panel 内容区域 - 与其他组件保持一致的内边距
+.panelContent {
+	flex: 1;
+	overflow: auto;
+	padding: 0 32px 20px 32px; // 与 ApiKeys、Team 组件保持一致
+
+	// 滚动条基础样式
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		transition: background 0.2s ease;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+// Setting 组件样式调整
+.setting {
+	// 让 Setting 组件完全响应上层容器的宽度
+	width: 100%;
+	padding-top: 20px; // 添加顶部间距，与其他组件保持一致
+}
+
+// 加载状态
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 200px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	text-align: center;
+
+	span {
+		font-size: 12px;
+	}
+}
+
+.loadingIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+// 错误状态
+.errorState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 200px;
+	gap: 12px;
+	color: var(--color_danger);
+	text-align: center;
+
+	span {
+		font-size: 12px;
+	}
+}
+
+.errorIcon {
+	color: var(--color_danger);
+}
+
+// 响应式样式
+@media (max-width: 768px) {
+	.header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
+
+		.headerContent h2 {
+			font-size: 18px;
+		}
+
+		.headerActions {
+			justify-content: flex-start;
+		}
+	}
+
+	.panelContent {
+		padding: 24px 20px;
+	}
+
+	.setting {
+		// 在移动设备上保持 100% 宽度
+		width: 100%;
+	}
+}
