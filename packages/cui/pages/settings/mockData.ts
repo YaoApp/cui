@@ -59,17 +59,35 @@ export interface Subscription {
 
 export type PlanType = 'free' | 'pro' | 'enterprise' | 'selfhosting'
 
+// 点数包类型
+export type CreditPackageType = 'purchased' | 'reward' | 'referral' | 'promotion' | 'gift'
+
+// 单个点数包
+export interface CreditPackage {
+	id: string
+	type: CreditPackageType
+	name: {
+		'zh-CN': string
+		'en-US': string
+	}
+	original_amount: number // 原始数量
+	used: number // 已使用
+	balance: number // 剩余
+	expiry_date: string // 有效期
+	created_at: string // 获得时间
+	description?: {
+		'zh-CN': string
+		'en-US': string
+	}
+}
+
 export interface CreditsInfo {
 	monthly: {
 		used: number
 		limit: number
 		reset_date: string // Next reset date
 	}
-	purchased: {
-		used: number
-		balance: number
-		expiry_date?: string // Long expiry date
-	}
+	packages: CreditPackage[] // 额外点数包列表
 	total_used: number
 	total_available: number
 }
@@ -825,8 +843,49 @@ export const mockApi = {
 				nextMonth.setMonth(nextMonth.getMonth() + 1)
 				nextMonth.setDate(1)
 
-				const purchasedExpiry = new Date()
-				purchasedExpiry.setFullYear(purchasedExpiry.getFullYear() + 1)
+				// 创建不同类型的点数包
+				const now = new Date()
+				const packages: CreditPackage[] = [
+					{
+						id: 'pkg-001',
+						type: 'purchased',
+						name: { 'zh-CN': '充值点数', 'en-US': 'Purchased Credits' },
+						original_amount: 5000,
+						used: 1000,
+						balance: 4000,
+						expiry_date: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1年后
+						created_at: '2024-01-15T10:30:00Z',
+						description: { 'zh-CN': '通过在线支付获得', 'en-US': 'Obtained via online payment' }
+					},
+					{
+						id: 'pkg-002',
+						type: 'referral',
+						name: { 'zh-CN': '邀请奖励', 'en-US': 'Referral Reward' },
+						original_amount: 2000,
+						used: 500,
+						balance: 1500,
+						expiry_date: new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString(), // 6个月后
+						created_at: '2024-02-01T14:20:00Z',
+						description: {
+							'zh-CN': '成功邀请好友获得',
+							'en-US': 'Earned by successful referrals'
+						}
+					},
+					{
+						id: 'pkg-003',
+						type: 'promotion',
+						name: { 'zh-CN': '新年活动赠送', 'en-US': 'New Year Promotion' },
+						original_amount: 1000,
+						used: 0,
+						balance: 1000,
+						expiry_date: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 3个月后
+						created_at: '2024-01-01T00:00:00Z',
+						description: { 'zh-CN': '新年活动限时赠送', 'en-US': 'Limited-time New Year gift' }
+					}
+				]
+
+				const totalPackageBalance = packages.reduce((sum, pkg) => sum + pkg.balance, 0)
+				const totalPackageUsed = packages.reduce((sum, pkg) => sum + pkg.used, 0)
 
 				const mockPlan: PlanData = {
 					type: 'pro',
@@ -845,13 +904,9 @@ export const mockApi = {
 							limit: 10000,
 							reset_date: nextMonth.toISOString()
 						},
-						purchased: {
-							used: 1000,
-							balance: 4000,
-							expiry_date: purchasedExpiry.toISOString()
-						},
-						total_used: 8500,
-						total_available: 14000 // monthly.limit + purchased.balance
+						packages: packages,
+						total_used: 7500 + totalPackageUsed, // 月度使用 + 额外包使用
+						total_available: 10000 + totalPackageBalance // 月度额度 + 额外包余额
 					}
 				}
 				resolve(mockPlan)

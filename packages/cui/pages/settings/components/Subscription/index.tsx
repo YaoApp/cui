@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getLocale } from '@umijs/max'
 import { message } from 'antd'
-import { mockApi, PlanData, CreditsInfo } from '../../mockData'
+import { mockApi, PlanData, CreditsInfo, CreditPackage, CreditPackageType } from '../../mockData'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
@@ -105,11 +105,22 @@ const Subscription = () => {
 		return Math.min((planData.credits.monthly.used / planData.credits.monthly.limit) * 100, 100)
 	}
 
-	// Calculate purchased credits usage percentage
-	const getPurchasedUsagePercentage = () => {
-		if (!planData || planData.credits.purchased.balance === 0) return 0
-		const totalPurchased = planData.credits.purchased.used + planData.credits.purchased.balance
-		return Math.min((planData.credits.purchased.used / totalPurchased) * 100, 100)
+	// Calculate total extra packages balance and used
+	const getTotalPackagesBalance = () => {
+		if (!planData) return 0
+		return planData.credits.packages.reduce((sum, pkg) => sum + pkg.balance, 0)
+	}
+
+	const getTotalPackagesUsed = () => {
+		if (!planData) return 0
+		return planData.credits.packages.reduce((sum, pkg) => sum + pkg.used, 0)
+	}
+
+	// Handle view extra credits details
+	const handleViewExtraCredits = () => {
+		message.info(is_cn ? '即将跳转到点数详情页面' : 'Redirecting to credits details page')
+		// In real implementation, redirect to detailed credits page
+		// window.location.href = '/settings/credits-details'
 	}
 
 	// Format credits number
@@ -365,53 +376,71 @@ const Subscription = () => {
 									</div>
 								</div>
 
-								{/* Separator */}
-								{planData.credits.purchased.balance > 0 && (
-									<div className={styles.breakdownSeparator}></div>
-								)}
+								{/* Extra Credits Section - Unified Display */}
+								{getTotalPackagesBalance() > 0 && (
+									<>
+										{/* Separator */}
+										<div className={styles.breakdownSeparator}></div>
 
-								{/* Purchased Credits Section */}
-								{planData.credits.purchased.balance > 0 && (
-									<div className={styles.breakdownSection}>
-										<div className={styles.sectionHeader}>
-											<div className={styles.sectionTitle}>
-												<Icon
-													name='material-account_balance_wallet'
-													size={16}
-													className={styles.sectionIcon}
-												/>
-												<span>
-													{is_cn ? '购买点数' : 'Purchased Credits'}
-												</span>
-											</div>
-											<div className={styles.sectionMeta}>
-												{is_cn ? '有效期至 ' : 'Valid until '}
-												{new Date(
-													planData.credits.purchased.expiry_date!
-												).toLocaleDateString()}
-											</div>
-										</div>
-										<div className={styles.sectionContent}>
-											<div className={styles.creditsDisplay}>
-												<span className={styles.creditsBalance}>
-													{formatCredits(
-														planData.credits.purchased.balance
-													)}
-												</span>
-												<span className={styles.creditsLabel}>
-													{is_cn ? '余额' : 'Balance'}
-												</span>
-											</div>
-											{planData.credits.purchased.used > 0 && (
-												<div className={styles.usedInfo}>
-													{is_cn ? '已使用 ' : 'Used: '}
-													{formatCredits(
-														planData.credits.purchased.used
-													)}
+										{/* Unified Extra Credits Section */}
+										<div className={styles.breakdownSection}>
+											<div className={styles.sectionHeader}>
+												<div className={styles.sectionTitle}>
+													<Icon
+														name='material-stars'
+														size={16}
+														className={styles.sectionIcon}
+													/>
+													<span>
+														{is_cn
+															? '额外点数'
+															: 'Extra Credits'}
+													</span>
 												</div>
-											)}
+												<div className={styles.sectionActions}>
+													<button
+														className={styles.detailsLink}
+														onClick={handleViewExtraCredits}
+													>
+														<Icon
+															name='material-info'
+															size={14}
+														/>
+														<span>
+															{is_cn
+																? '查看详情'
+																: 'View Details'}
+														</span>
+													</button>
+												</div>
+											</div>
+											<div className={styles.sectionContent}>
+												<div className={styles.creditsDisplay}>
+													<span className={styles.creditsBalance}>
+														{formatCredits(
+															getTotalPackagesBalance()
+														)}
+													</span>
+													<span className={styles.creditsLabel}>
+														{is_cn ? '可用余额' : 'Available'}
+													</span>
+												</div>
+												{getTotalPackagesUsed() > 0 && (
+													<div className={styles.usedInfo}>
+														{is_cn ? '已使用 ' : 'Used: '}
+														{formatCredits(
+															getTotalPackagesUsed()
+														)}
+													</div>
+												)}
+												<div className={styles.extraCreditsHint}>
+													{is_cn
+														? '包含充值、奖励、活动赠送等多种来源'
+														: 'Includes purchases, rewards, promotions and more'}
+												</div>
+											</div>
 										</div>
-									</div>
+									</>
 								)}
 							</div>
 						</div>
