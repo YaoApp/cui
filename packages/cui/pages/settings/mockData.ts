@@ -62,6 +62,35 @@ export type PlanType = 'free' | 'pro' | 'enterprise' | 'selfhosting'
 // 点数包类型
 export type CreditPackageType = 'purchased' | 'reward' | 'referral' | 'promotion' | 'gift'
 
+// 充值记录相关类型
+export type TopUpMethod = 'stripe' | 'card_code' | 'bank_transfer' | 'alipay' | 'wechat'
+export type TopUpStatus = 'completed' | 'pending' | 'failed' | 'cancelled'
+
+export interface TopUpRecord {
+	id: string
+	amount: number // 充值金额（美元）
+	credits: number // 获得点数
+	method: TopUpMethod
+	status: TopUpStatus
+	expiry_date: string // 点数有效期
+	created_at: string
+	completed_at?: string
+	transaction_id?: string
+	card_code?: string // 如果是点卡充值，记录卡号（脱敏）
+	notes?: string
+}
+
+export interface BalanceInfo {
+	total_credits: number // 总点数余额
+	monthly_credits: {
+		used: number
+		limit: number
+		reset_date: string
+	}
+	extra_credits: CreditPackage[] // 额外点数包
+	pending_credits: number // 待到账点数
+}
+
 // 单个点数包
 export interface CreditPackage {
 	id: string
@@ -910,6 +939,250 @@ export const mockApi = {
 					}
 				}
 				resolve(mockPlan)
+			}, 300)
+		})
+	},
+
+	getBalanceInfo: (): Promise<BalanceInfo> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const nextMonth = new Date()
+				nextMonth.setMonth(nextMonth.getMonth() + 1)
+				nextMonth.setDate(1)
+
+				// 创建不同类型的点数包
+				const now = new Date()
+				const packages: CreditPackage[] = [
+					{
+						id: 'pkg-001',
+						type: 'purchased',
+						name: { 'zh-CN': '充值点数', 'en-US': 'Purchased Credits' },
+						original_amount: 5000,
+						used: 1000,
+						balance: 4000,
+						expiry_date: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-15T10:30:00Z',
+						description: { 'zh-CN': '通过在线支付获得', 'en-US': 'Obtained via online payment' }
+					},
+					{
+						id: 'pkg-002',
+						type: 'referral',
+						name: { 'zh-CN': '邀请奖励', 'en-US': 'Referral Reward' },
+						original_amount: 2000,
+						used: 500,
+						balance: 1500,
+						expiry_date: new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-02-01T14:20:00Z',
+						description: {
+							'zh-CN': '成功邀请好友获得',
+							'en-US': 'Earned by successful referrals'
+						}
+					},
+					{
+						id: 'pkg-003',
+						type: 'promotion',
+						name: { 'zh-CN': '新年活动赠送', 'en-US': 'New Year Promotion' },
+						original_amount: 1000,
+						used: 0,
+						balance: 1000,
+						expiry_date: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-01T00:00:00Z',
+						description: { 'zh-CN': '新年活动限时赠送', 'en-US': 'Limited-time New Year gift' }
+					}
+				]
+
+				const totalPackageBalance = packages.reduce((sum, pkg) => sum + pkg.balance, 0)
+
+				const balanceInfo: BalanceInfo = {
+					total_credits: 12500, // 10000 (monthly) + 6500 (extra packages)
+					monthly_credits: {
+						used: 2500,
+						limit: 10000,
+						reset_date: nextMonth.toISOString()
+					},
+					extra_credits: packages,
+					pending_credits: 500 // 待到账点数
+				}
+
+				resolve(balanceInfo)
+			}, 300)
+		})
+	},
+
+	getTopUpRecords: (
+		page: number = 1,
+		limit: number = 20
+	): Promise<{ records: TopUpRecord[]; total: number; hasMore: boolean }> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				// 模拟充值记录数据 - 包含更多类型
+				const allRecords: TopUpRecord[] = [
+					// 邀请奖励
+					{
+						id: 'reward-001',
+						amount: 0,
+						credits: 1000,
+						method: 'stripe', // 系统奖励也用stripe表示
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-25T09:15:00Z',
+						completed_at: '2024-01-25T09:15:00Z',
+						notes: '邀请好友奖励 - Referral Bonus'
+					},
+					{
+						id: 'reward-002',
+						amount: 0,
+						credits: 500,
+						method: 'stripe',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-22T16:20:00Z',
+						completed_at: '2024-01-22T16:20:00Z',
+						notes: '新用户注册奖励 - Welcome Bonus'
+					},
+					// 活动奖励
+					{
+						id: 'reward-003',
+						amount: 0,
+						credits: 2000,
+						method: 'stripe',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-20T12:00:00Z',
+						completed_at: '2024-01-20T12:00:00Z',
+						notes: '春节活动奖励 - New Year Event Bonus'
+					},
+					// 推广奖励
+					{
+						id: 'reward-004',
+						amount: 0,
+						credits: 800,
+						method: 'stripe',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-18T10:30:00Z',
+						completed_at: '2024-01-18T10:30:00Z',
+						notes: '社交媒体分享奖励 - Social Media Bonus'
+					},
+					// 任务完成奖励
+					{
+						id: 'reward-005',
+						amount: 0,
+						credits: 300,
+						method: 'stripe',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-16T15:45:00Z',
+						completed_at: '2024-01-16T15:45:00Z',
+						notes: '每日任务完成奖励 - Daily Task Bonus'
+					},
+					{
+						id: 'top-001',
+						amount: 50.0,
+						credits: 5000,
+						method: 'stripe',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-15T10:30:00Z',
+						completed_at: '2024-01-15T10:32:15Z',
+						transaction_id: 'pi_1234567890abcdef',
+						notes: 'Standard credit package'
+					},
+					{
+						id: 'top-002',
+						amount: 20.0,
+						credits: 2000,
+						method: 'card_code',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-10T14:20:00Z',
+						completed_at: '2024-01-10T14:21:30Z',
+						card_code: 'CARD-****-****-5678',
+						notes: 'Redeemed gift card'
+					},
+					{
+						id: 'top-003',
+						amount: 100.0,
+						credits: 10000,
+						method: 'stripe',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-05T09:15:00Z',
+						completed_at: '2024-01-05T09:17:45Z',
+						transaction_id: 'pi_abcdef1234567890',
+						notes: 'Premium credit package with bonus'
+					},
+					{
+						id: 'top-004',
+						amount: 30.0,
+						credits: 3000,
+						method: 'alipay',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-02T16:45:00Z',
+						completed_at: '2024-01-02T16:46:20Z',
+						transaction_id: '2024010216453000001',
+						notes: 'Alipay payment'
+					},
+					{
+						id: 'top-005',
+						amount: 25.0,
+						credits: 2500,
+						method: 'stripe',
+						status: 'pending',
+						expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-20T08:30:00Z',
+						transaction_id: 'pi_pending123456789',
+						notes: 'Payment processing'
+					},
+					{
+						id: 'top-006',
+						amount: 15.0,
+						credits: 1500,
+						method: 'card_code',
+						status: 'failed',
+						expiry_date: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-18T12:15:00Z',
+						card_code: 'CARD-****-****-1234',
+						notes: 'Invalid or expired card code'
+					},
+					{
+						id: 'top-007',
+						amount: 75.0,
+						credits: 7500,
+						method: 'wechat',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2023-12-28T20:10:00Z',
+						completed_at: '2023-12-28T20:11:45Z',
+						transaction_id: 'wx_20231228201045001',
+						notes: 'WeChat Pay transaction'
+					},
+					{
+						id: 'top-008',
+						amount: 40.0,
+						credits: 4000,
+						method: 'stripe',
+						status: 'completed',
+						expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2023-12-20T11:30:00Z',
+						completed_at: '2023-12-20T11:32:10Z',
+						transaction_id: 'pi_completed987654321',
+						notes: 'Holiday special offer'
+					}
+				]
+
+				// 分页逻辑
+				const startIndex = (page - 1) * limit
+				const endIndex = startIndex + limit
+				const records = allRecords.slice(startIndex, endIndex)
+				const hasMore = endIndex < allRecords.length
+
+				resolve({
+					records,
+					total: allRecords.length,
+					hasMore
+				})
 			}, 300)
 		})
 	}

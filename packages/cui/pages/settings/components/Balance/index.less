@@ -1,206 +1,711 @@
 @import '@/styles/preset/vars.less';
 
 .balance {
-	width: 100%;
-	height: 100%;
+	flex: 1;
+	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	background-color: var(--color_bg_2);
+	height: 100%;
+}
 
-	// Header section
-	.header {
-		padding: var(--padding_lg) var(--padding_lg) var(--padding_md);
-		background-color: var(--color_bg_1);
-		border-bottom: 1px solid var(--color_border_2);
+// 加载状态
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	color: var(--color_neo_text_secondary);
+	padding: 60px 20px;
+	text-align: center;
 
-		.headerContent {
-			max-width: 1200px;
-			margin: 0 auto;
-
-			h2 {
-				margin: 0 0 var(--margin_xs) 0;
-				font-size: var(--font_size_xl);
-				font-weight: 600;
-				color: var(--color_text_1);
-			}
-
-			p {
-				margin: 0;
-				font-size: var(--font_size_base);
-				color: var(--color_text_2);
-				line-height: 1.5;
-			}
-		}
+	.loadingIcon {
+		color: var(--color_neo_icon_muted);
 	}
 
-	// Main panel
-	.panel {
-		flex: 1;
-		padding: var(--padding_lg);
-		overflow-y: auto;
-
-		.panelContent {
-			max-width: 1200px;
-			margin: 0 auto;
-			height: 100%;
-		}
-	}
-
-	// Coming Soon section
-	.comingSoon {
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 400px;
-
-		.comingSoonContent {
-			text-align: center;
-			max-width: 500px;
-			padding: var(--padding_xl);
-
-			.comingSoonIcon {
-				color: var(--color_text_3);
-				margin-bottom: var(--margin_lg);
-				opacity: 0.8;
-			}
-
-			.comingSoonTitle {
-				margin: 0 0 var(--margin_md) 0;
-				font-size: var(--font_size_xxl);
-				font-weight: 600;
-				color: var(--color_text_1);
-			}
-
-			.comingSoonDescription {
-				margin: 0 0 var(--margin_xl) 0;
-				font-size: var(--font_size_lg);
-				color: var(--color_text_2);
-				line-height: 1.6;
-			}
-
-			.comingSoonFeatures {
-				display: flex;
-				flex-direction: column;
-				gap: var(--margin_md);
-				align-items: flex-start;
-				text-align: left;
-
-				.featureItem {
-					display: flex;
-					align-items: center;
-					gap: var(--margin_sm);
-					padding: var(--padding_sm) var(--padding_md);
-					background-color: var(--color_bg_1);
-					border: 1px solid var(--color_border_2);
-					border-radius: var(--border_radius_base);
-					width: 100%;
-					transition: all 0.2s ease;
-
-					&:hover {
-						border-color: var(--color_border_3);
-						background-color: var(--color_bg_2);
-					}
-
-					:global(.anticon) {
-						color: var(--color_main);
-						flex-shrink: 0;
-					}
-
-					span {
-						font-size: var(--font_size_base);
-						color: var(--color_text_1);
-						font-weight: 500;
-					}
-				}
-			}
-		}
+	span {
+		font-size: 14px;
 	}
 }
 
-// Loading and error states
-.loadingState,
+// 错误状态
 .errorState {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	height: 300px;
-	gap: var(--margin_md);
+	gap: 16px;
+	color: var(--color_neo_text_secondary);
+	padding: 20px;
+	text-align: center;
 
-	.loadingIcon,
-	.errorIcon {
-		color: var(--color_text_3);
+	span {
+		font-size: 12px;
+	}
+}
+
+.errorIcon {
+	color: var(--color_danger);
+}
+
+// 空状态
+.emptyState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px 20px;
+	text-align: center;
+
+	:global(.Icon) {
+		color: var(--color_neo_icon_muted);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+	}
+}
+
+.header {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 24px;
+	gap: 16px;
+}
+
+.headerContent {
+	flex: 1;
+	min-width: 0;
+
+	h2 {
+		margin: 0 0 8px 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+	}
+}
+
+.headerActions {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+// 内容垂直堆叠布局
+.contentStack {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	padding: 0;
+	overflow: hidden; // 防止内容溢出
+}
+
+// 余额展示区 - 两个余额块并排 - 固定高度
+.balanceSection {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+	flex-shrink: 0; // 防止被压缩
+}
+
+// 卡片基础样式
+.balanceCard,
+.usageCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden; // 确保圆角正确显示
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0; // 防止被压缩
+	// 移除 hover 效果和 transition
+}
+
+// usageCard 的样式已在上面的 .balanceCard, .usageCard 中定义
+
+// 使用情况头部 - 参考Subscription样式
+.usageHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	background: var(--color_neo_bg_header);
+	border-radius: 12px 12px 0 0; // 只有顶部圆角
+}
+
+.sectionTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.sectionIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.sectionMeta {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+// 使用情况内容 - 参考Subscription样式
+.sectionContent {
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px; // 减少间距
+	border-radius: 0 0 12px 12px; // 只有底部圆角
+}
+
+// 卡片头部
+.cardHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	background: var(--color_neo_bg_header);
+	flex-shrink: 0;
+
+	h3 {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+}
+
+.cardTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.cardIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+// 卡片内容
+.cardContent {
+	padding: 16px;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+
+	// 历史记录卡片的内容需要滚动
+	.historyCard & {
+		overflow: hidden;
+		padding: 0;
+	}
+}
+
+// 余额显示样式
+.balanceDisplay {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 16px;
+}
+
+.balanceNumber {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	line-height: 1;
+}
+
+.balanceLabel {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	text-align: center;
+}
+
+// 点数显示样式 - 重构版本
+.creditsDisplay {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	margin-bottom: 8px; // 减少与进度条的间距
+}
+
+// 使用量和限额区块
+.usedSection,
+.limitSection {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.usedLabel,
+.limitLabel {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.creditsUsed,
+.creditsLimit {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	line-height: 1;
+}
+
+.creditsDivider {
+	font-size: 16px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 300;
+}
+
+// 进度条容器 - 参考Subscription
+.progressWrapper {
+	.progressBar {
+		height: 6px;
+	}
+}
+
+.progressBar {
+	width: 100%;
+	height: 8px;
+	background: var(--color_neo_border_field);
+	border-radius: 4px;
+	overflow: hidden;
+	position: relative;
+}
+
+.progressFill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--color_main), var(--color_main_hover));
+	border-radius: 4px;
+	transition: width 0.3s ease;
+}
+
+.monthlyProgress {
+	background: linear-gradient(90deg, var(--color_main), var(--color_main_hover));
+}
+
+// 使用情况样式 (保持向后兼容)
+.resetInfo {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+.usageStats {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	margin-bottom: 12px;
+}
+
+.usageUsed,
+.usageLimit {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	line-height: 1;
+}
+
+.usageDivider {
+	font-size: 16px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 300;
+}
+
+// 历史记录部分样式 - 占用剩余空间
+.historySection {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	flex: 1; // 占用剩余空间
+	min-height: 0; // 允许收缩
+	overflow: hidden; // 防止溢出
+}
+
+.historyHeader {
+	flex-shrink: 0; // 防止标题被压缩
+	h3 {
+		margin: 0;
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+		line-height: 1.4;
+	}
+}
+
+// 表格相关样式
+.methodCell {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.methodName {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+	line-height: 1.2;
+}
+
+.methodDescription {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	line-height: 1.2;
+}
+
+.creditsAmount {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.expiryDate {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+// 状态标签样式 - Scenario风格
+.statusTag {
+	font-size: 11px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: none;
+	font-weight: 500;
+	line-height: 1.2;
+	white-space: nowrap;
+	display: inline-block;
+}
+
+.statusCompleted {
+	background: var(--color_neo_bg_success);
+	color: var(--color_success);
+}
+
+.statusPending {
+	background: var(--color_neo_bg_warning);
+	color: var(--color_warning);
+}
+
+.statusFailed {
+	background: var(--color_neo_bg_danger);
+	color: var(--color_danger);
+}
+
+.statusCancelled {
+	background: var(--color_neo_bg_field);
+	color: var(--color_neo_text_secondary);
+}
+
+// 充值模态框样式 - 重构版本
+.topUpModal {
+	:global(.ant-modal-header) {
+		padding: 16px 20px;
+		border-bottom: 1px solid var(--color_neo_border_field);
+		background: var(--color_neo_bg_header);
+	}
+
+	:global(.ant-modal-body) {
+		padding: 24px 20px;
+	}
+
+	:global(.ant-modal-content) {
+		border-radius: 12px;
+		overflow: hidden;
+		border: 1px solid var(--color_neo_border_card);
+	}
+}
+
+// 模态框内容
+.modalContent {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+// 区块样式
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.sectionLabel {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_neo_text_primary);
+
+	.required {
+		color: var(--color_error);
+		margin-left: 4px;
+	}
+}
+
+// 支付方式网格
+.paymentMethodGrid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+}
+
+.paymentMethod {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 16px;
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	background: var(--color_neo_bg_card);
+
+	&:hover {
+		border-color: var(--color_neo_border_hover);
+		background: var(--color_neo_bg_hover);
+	}
+
+	&.selected {
+		border-color: var(--color_main);
+		background: var(--color_main);
+		color: white;
+
+		:global(.Icon) {
+			color: white;
+		}
 	}
 
 	span {
-		font-size: var(--font_size_base);
-		color: var(--color_text_2);
+		font-size: 14px;
+		font-weight: 500;
 	}
 }
 
-// Responsive design
+.paymentMethodSection {
+	margin-bottom: 24px;
+}
+
+// 金额选择网格布局 - 重构版本
+.amountGrid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+	width: 100%;
+}
+
+// 金额选项样式 - 重构版本
+.amountOption {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	padding: 16px 12px;
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	background: var(--color_neo_bg_card);
+	height: 70px; // 固定高度，确保所有选项一致
+	text-align: center;
+
+	&:hover {
+		border-color: var(--color_neo_border_hover);
+		background: var(--color_neo_bg_hover);
+	}
+
+	&.selected {
+		border-color: var(--color_main);
+		background: var(--color_main);
+		color: white;
+
+		.price {
+			color: white;
+		}
+
+		.credits {
+			color: rgba(255, 255, 255, 0.9);
+		}
+	}
+}
+
+// 自定义输入框
+.customInput {
+	margin-top: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+// 自定义金额预览
+.customPreview {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 13px;
+	color: var(--color_neo_text_secondary);
+	padding: 8px 12px;
+	background: var(--color_neo_bg_field);
+	border-radius: 6px;
+	border: 1px solid var(--color_neo_border_field);
+}
+
+.previewCredits {
+	font-weight: 600;
+	color: var(--color_main);
+}
+
+// 点卡输入框
+.cardCodeInput {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+// 点卡预览
+.cardPreview {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	padding: 8px 12px;
+	border-radius: 6px;
+	border: 1px solid;
+
+	&.valid {
+		background: var(--color_success_bg);
+		border-color: var(--color_success);
+		color: var(--color_success_text);
+	}
+
+	&.invalid {
+		background: var(--color_error_bg);
+		border-color: var(--color_error);
+		color: var(--color_error_text);
+	}
+}
+
+.validIcon {
+	color: var(--color_success);
+}
+
+.invalidIcon {
+	color: var(--color_error);
+}
+
+// 操作按钮
+.actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	padding-top: 8px;
+	border-top: 1px solid var(--color_neo_border_field);
+	margin-top: 8px;
+}
+
+.price {
+	font-size: 16px;
+	font-weight: 600;
+	color: inherit;
+}
+
+.credits {
+	font-size: 12px;
+	color: inherit; // 跟随按钮状态颜色
+	opacity: 0.9; // 稍微降低透明度但保持可读性
+}
+
+// 旧样式已删除，使用新的重构版本
+
+.cardCodeSection {
+	margin-bottom: 24px;
+}
+
+.submitSection {
+	margin-top: 32px;
+	padding-top: 20px;
+	border-top: 1px solid var(--color_neo_border_field);
+}
+
+// 响应式设计
+@media (max-width: 1024px) {
+	.balanceSection {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+
+	.balanceDisplay {
+		padding: 20px 16px;
+	}
+
+	.balanceNumber {
+		font-size: 20px;
+	}
+
+	.cardContent {
+		padding: 16px;
+	}
+
+	.cardHeader {
+		padding: 12px 16px;
+
+		h3 {
+			font-size: 14px;
+		}
+	}
+}
+
 @media (max-width: 768px) {
-	.balance {
-		.header {
-			padding: var(--padding_md);
-
-			.headerContent {
-				h2 {
-					font-size: var(--font_size_lg);
-				}
-
-				p {
-					font-size: var(--font_size_sm);
-				}
-			}
-		}
-
-		.panel {
-			padding: var(--padding_md);
-		}
-
-		.comingSoon {
-			.comingSoonContent {
-				padding: var(--padding_md);
-
-				.comingSoonTitle {
-					font-size: var(--font_size_xl);
-				}
-
-				.comingSoonDescription {
-					font-size: var(--font_size_base);
-				}
-
-				.comingSoonFeatures {
-					.featureItem {
-						padding: var(--padding_xs) var(--padding_sm);
-
-						span {
-							font-size: var(--font_size_sm);
-						}
-					}
-				}
-			}
-		}
+	.header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
 	}
-}
 
-// High contrast mode support
-@media (prefers-contrast: high) {
-	.balance {
-		.comingSoon {
-			.comingSoonContent {
-				.comingSoonFeatures {
-					.featureItem {
-						border-color: var(--color_text_3);
+	.headerActions {
+		justify-content: center;
+	}
 
-						&:hover {
-							border-color: var(--color_text_1);
-						}
-					}
-				}
-			}
-		}
+	.balanceCard {
+		padding: 16px;
+	}
+
+	.balanceNumber {
+		font-size: 18px;
+	}
+
+	.cardContent {
+		padding: 12px;
 	}
 }
