@@ -4,6 +4,7 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	overflow: hidden; // 防止内容溢出
 }
 
 // 加载状态 - 与其他组件保持完全一致
@@ -111,32 +112,15 @@
 	margin-left: 4px;
 }
 
-.panel {
+// 内容垂直堆叠布局 - 支持滚动，采用与 Subscription 一致的样式
+.contentStack {
 	flex: 1;
-	min-height: 0;
-	background: var(--color_neo_bg_card);
-	border: 1px solid var(--color_neo_border_card);
-	border-radius: 12px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-	overflow: hidden;
 	display: flex;
 	flex-direction: column;
-
-	// 滚动条始终显示
-	.panelContent::-webkit-scrollbar-thumb {
-		background: var(--color_border_light) !important;
-
-		&:hover {
-			background: var(--color_dot) !important;
-		}
-	}
-}
-
-.panelContent {
-	flex: 1;
-	overflow: auto;
-	padding: 40px;
-	width: 100%;
+	gap: 24px;
+	padding: 0;
+	overflow: auto; // 支持滚动
+	min-height: 0; // 允许收缩
 
 	// 滚动条基础样式
 	&::-webkit-scrollbar {
@@ -147,10 +131,20 @@
 	&::-webkit-scrollbar-thumb {
 		border-radius: 3px;
 		transition: background 0.2s ease;
+		background: transparent; // 默认透明
 	}
 
 	&::-webkit-scrollbar-track {
 		background: transparent;
+	}
+
+	// 鼠标悬停时显示滚动条
+	.plans:hover &::-webkit-scrollbar-thumb {
+		background: var(--color_border_light);
+
+		&:hover {
+			background: var(--color_dot);
+		}
 	}
 }
 
@@ -158,8 +152,10 @@
 .plansGrid {
 	display: grid;
 	grid-template-columns: 1fr 1fr; // 固定两列布局
-	gap: 24px;
+	gap: 40px; // 进一步增加卡片间距
 	width: 100%;
+	padding: 40px; // 添加内边距
+	flex-shrink: 0; // 防止被压缩
 }
 
 // 套餐卡片
@@ -173,6 +169,7 @@
 	display: flex;
 	flex-direction: column;
 	min-height: 500px;
+	flex-shrink: 0; // 防止被压缩
 
 	&:hover {
 		border-color: var(--color_neo_border_hover);
@@ -434,13 +431,10 @@
 		align-self: center;
 	}
 
-	.panelContent {
-		padding: 24px;
-	}
-
 	.plansGrid {
 		grid-template-columns: 1fr;
-		gap: 20px;
+		gap: 32px; // 移动端进一步增加间距
+		padding: 24px; // 移动端减小内边距
 	}
 
 	.planCard {
@@ -489,8 +483,8 @@
 }
 
 @media (max-width: 480px) {
-	.panelContent {
-		padding: 20px;
+	.plansGrid {
+		padding: 20px; // 小屏幕进一步减小内边距
 	}
 
 	.planCard {
@@ -570,5 +564,31 @@
 .planButton:global(.ant-btn-loading) {
 	.planButton::before {
 		display: none;
+	}
+}
+
+// 高对比度主题支持
+@media (prefers-contrast: high) {
+	.planCard {
+		border-width: 3px; // 增加边框宽度以提高对比度
+	}
+}
+
+// 减少动画偏好支持
+@media (prefers-reduced-motion: reduce) {
+	.planCard {
+		transition: none;
+
+		&:hover {
+			transform: none;
+		}
+	}
+
+	.toggleButton {
+		transition: none;
+	}
+
+	.progressFill {
+		transition: none;
 	}
 }

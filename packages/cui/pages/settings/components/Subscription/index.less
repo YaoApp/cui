@@ -4,6 +4,7 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	overflow: hidden; // 防止内容溢出
 }
 
 // 加载状态 - 与其他组件保持完全一致
@@ -83,32 +84,15 @@
 	gap: 8px;
 }
 
-.panel {
+// 内容垂直堆叠布局 - 支持滚动
+.contentStack {
 	flex: 1;
-	min-height: 0;
-	background: var(--color_neo_bg_card);
-	border: 1px solid var(--color_neo_border_card);
-	border-radius: 12px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-	overflow: hidden;
 	display: flex;
 	flex-direction: column;
-
-	// 滚动条始终显示
-	.panelContent::-webkit-scrollbar-thumb {
-		background: var(--color_border_light) !important;
-
-		&:hover {
-			background: var(--color_dot) !important;
-		}
-	}
-}
-
-.panelContent {
-	flex: 1;
-	overflow: auto;
-	padding: 32px;
-	width: 100%;
+	gap: 24px;
+	padding: 0;
+	overflow: auto; // 支持滚动
+	min-height: 0; // 允许收缩
 
 	// 滚动条基础样式
 	&::-webkit-scrollbar {
@@ -119,70 +103,132 @@
 	&::-webkit-scrollbar-thumb {
 		border-radius: 3px;
 		transition: background 0.2s ease;
+		background: transparent; // 默认透明
 	}
 
 	&::-webkit-scrollbar-track {
 		background: transparent;
 	}
-}
 
-// 内容区域部分
-.section {
-	margin-bottom: 32px;
+	// 鼠标悬停时显示滚动条
+	.subscription:hover &::-webkit-scrollbar-thumb {
+		background: var(--color_border_light);
 
-	&:last-child {
-		margin-bottom: 0;
+		&:hover {
+			background: var(--color_dot);
+		}
 	}
 }
 
-.sectionHeader {
+// 套餐展示区 - 两个卡片并排
+.planSection {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+	flex-shrink: 0; // 防止被压缩
+}
+
+// 卡片基础样式 - 采用与 Balance 相同的样式
+.planCard,
+.usageOverviewCard,
+.monthlyUsageCard,
+.extraCreditsCard,
+.warningCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden; // 确保圆角正确显示
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0; // 防止被压缩
+}
+
+// 卡片头部 - 采用与 Balance 相同的样式
+.cardHeader {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-bottom: 16px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	background: var(--color_neo_bg_header);
+	flex-shrink: 0;
 
 	h3 {
 		margin: 0;
-		font-size: 18px;
+		font-size: 14px;
 		font-weight: 600;
 		color: var(--color_neo_text_primary);
 	}
 }
 
-// Removed .usageLink styles since button now uses default type
-
-// 当前套餐卡片
-.planCard {
-	background: var(--color_neo_bg_field);
-	border: 1px solid var(--color_neo_border_field);
-	border-radius: 12px;
-	padding: 24px;
+.cardTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
 }
 
-.planInfo {
+.cardIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.cardMeta {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+.cardActions {
+	display: flex;
+	align-items: center;
+}
+
+// 卡片内容
+.cardContent {
+	padding: 16px;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+
+	// 为使用情况卡片提供垂直居中支持
+	.usageOverviewCard & {
+		justify-content: center;
+	}
+}
+
+// 套餐显示样式
+.planDisplay {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.planNameWithStatus {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px;
-	margin-bottom: 16px;
-}
-
-.planMain {
-	flex: 1;
-	min-width: 0;
+	gap: 12px;
 }
 
 .planName {
-	font-size: 20px;
+	font-size: 18px;
 	font-weight: 700;
 	color: var(--color_neo_text_primary);
-	margin-bottom: 8px;
+	line-height: 1.2;
+	flex: 1;
 }
 
 .planStatus {
 	display: flex;
 	align-items: center;
 	gap: 6px;
+	flex-shrink: 0;
 }
 
 .statusIcon {
@@ -210,93 +256,181 @@
 	}
 }
 
-.planActions {
+.billingInfo {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	flex-shrink: 0;
-}
-
-.planPeriod {
-	padding-top: 16px;
-	border-top: 1px solid var(--color_neo_border_field);
-}
-
-.periodInfo {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-size: 14px;
+	font-size: 13px;
 	color: var(--color_neo_text_secondary);
+	padding: 8px 12px;
+	background: var(--color_neo_bg_field);
+	border-radius: 6px;
+	margin-bottom: 12px;
 }
 
-.periodIcon {
+.billingIcon {
 	color: var(--color_neo_icon_muted);
 }
 
-// Credits 使用情况卡片
-.usageCard {
-	background: var(--color_neo_bg_field);
-	border: 1px solid var(--color_neo_border_field);
-	border-radius: 12px;
-	padding: 24px;
+// 移除 planActions 样式，因为按钮已移到头部
+
+// 总体使用情况概览卡片 - 左右布局
+.usageOverviewDisplay {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 16px;
+	min-height: 100px; // 增加最小高度以适应更大的环状图
+	padding: 0;
 }
 
-.usageHeader {
+// 图表容器
+.chartContainer {
+	position: relative;
+	width: 90px;
+	height: 90px;
+	flex-shrink: 0; // 防止图表被压缩
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 20px;
-	gap: 16px;
+	justify-content: center;
 }
 
-.usageStats {
-	display: flex;
-	align-items: baseline;
-	gap: 12px;
-	flex: 1;
-	min-width: 0;
+.usageChart {
+	width: 100%;
+	height: 100%;
 }
 
-.usageCurrent,
-.usageLimit {
+// 图表中心的数字和标签
+.chartCenter {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 	display: flex;
-	align-items: baseline;
-	gap: 4px;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
 }
 
 .usageNumber {
-	font-size: 24px;
+	font-size: 16px;
 	font-weight: 700;
-	color: var(--color_neo_text_primary);
+	color: var(--color_main);
 	line-height: 1;
 }
 
-.usageUnit {
-	font-size: 12px;
+.usageLabel {
+	font-size: 8px;
 	color: var(--color_neo_text_secondary);
 	font-weight: 500;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 }
 
-.usageDivider {
-	font-size: 20px;
+// 统计数据列容器
+.usageStatsColumn {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 12px; // 增加上下间距
+	min-width: 0; // 允许收缩
+}
+
+// 额外点数信息样式 - 与主要统计数据结构一致
+.extraCreditsInfo {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--color_neo_bg_field);
+	border-radius: 6px;
+}
+
+.extraIcon {
+	color: var(--color_main);
+	flex-shrink: 0;
+}
+
+.extraCreditsItem {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.extraNumber {
+	font-size: 12px; // 保持原来的较小尺寸
+	font-weight: 600;
+	color: var(--color_neo_text_primary); // 与主要数字颜色一致
+	line-height: 1;
+}
+
+.extraLabel {
+	font-size: 9px; // 相应调整标签大小
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.usageStatsRow {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	justify-content: flex-start; // 左对齐
+}
+
+// 保留原有的 usageStats 样式用于其他地方
+.usageStats {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	flex: 1;
+	justify-content: center;
+}
+
+.statItem {
+	display: flex;
+	align-items: baseline;
+	gap: 4px;
+}
+
+.statNumber {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+	line-height: 1;
+}
+
+.statLabel {
+	font-size: 10px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.statDivider {
+	font-size: 14px;
 	color: var(--color_neo_text_secondary);
 	font-weight: 300;
 	margin: 0 4px;
 }
 
-.usagePercentage {
-	font-size: 18px;
-	font-weight: 600;
-	color: var(--color_main);
-	flex-shrink: 0;
+// 保留原有的 usageDisplay 样式用于其他地方
+.usageDisplay {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 16px;
 }
 
-// 进度条
-.progressContainer {
-	margin-bottom: 16px;
+// 进度条容器 - 参考Balance
+.progressWrapper {
+	.progressBar {
+		height: 6px;
+	}
 }
 
 .progressBar {
@@ -315,87 +449,37 @@
 	transition: width 0.3s ease;
 }
 
-// 使用警告
-.usageWarning {
-	display: flex;
-	align-items: flex-start;
-	gap: 8px;
-	padding: 12px 16px;
-	background: var(--color_warning_bg);
-	border: 1px solid var(--color_warning);
-	border-radius: 8px;
-	font-size: 13px;
-	line-height: 1.4;
-	color: var(--color_neo_text_primary);
+.monthlyProgress {
+	background: linear-gradient(90deg, var(--color_main), var(--color_main_hover));
 }
 
-.warningIcon {
-	color: var(--color_warning);
-	flex-shrink: 0;
-	margin-top: 1px;
-}
-
-// Credits 分解显示 - 统一设计
-.creditsBreakdown {
-	margin-top: 16px;
-}
-
-.breakdownContainer {
-	background: var(--color_neo_bg_field);
-	border: 1px solid var(--color_neo_border_field);
-	border-radius: 12px;
-	padding: 20px;
-	display: flex;
-	flex-direction: column;
-}
-
-.breakdownSection {
-	display: flex;
-	flex-direction: column;
-}
-
-.sectionHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 12px;
-	gap: 12px;
-}
-
-.sectionTitle {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-size: 14px;
-	font-weight: 600;
-	color: var(--color_neo_text_primary);
-}
-
-.sectionIcon {
-	color: var(--color_neo_icon_muted);
-}
-
-.sectionMeta {
-	font-size: 12px;
-	color: var(--color_neo_text_secondary);
-	font-weight: 500;
-}
-
-.sectionContent {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-}
-
+// 月度使用情况样式 - 参考Balance
 .creditsDisplay {
 	display: flex;
 	align-items: baseline;
 	gap: 6px;
+	margin-bottom: 8px; // 减少与进度条的间距
+}
+
+// 使用量和限额区块
+.usedSection,
+.limitSection {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.usedLabel,
+.limitLabel {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
 }
 
 .creditsUsed,
-.creditsLimit,
-.creditsBalance {
+.creditsLimit {
 	font-size: 18px;
 	font-weight: 700;
 	color: var(--color_neo_text_primary);
@@ -408,43 +492,49 @@
 	font-weight: 300;
 }
 
-.creditsLabel {
+// 额外点数显示样式 - 简化布局，垂直居中
+.extraCreditsDisplay {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 100px; // 增加高度，提供更多上下边距
+	padding: 16px 0; // 增加上下边距
+	text-align: center;
+}
+
+.creditsBalance {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	line-height: 1;
+}
+
+.creditsBalanceLabel {
 	font-size: 11px;
 	color: var(--color_neo_text_secondary);
 	font-weight: 500;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
-	margin-left: 4px;
 }
 
-.progressWrapper {
-	.progressBar {
-		height: 6px;
-	}
-}
-
-.monthlyProgress {
-	background: linear-gradient(90deg, var(--color_main), var(--color_main_hover));
-}
-
+// 简化使用信息显示
 .usedInfo {
-	font-size: 11px;
+	font-size: 12px;
 	color: var(--color_neo_text_secondary);
 	font-weight: 500;
-	margin-top: 4px;
+	margin-top: 2px;
 }
 
-.packageDescription {
-	font-size: 10px;
+.extraCreditsHint {
+	font-size: 11px;
 	color: var(--color_neo_text_tertiary);
+	opacity: 0.7;
+	line-height: 1.3;
 	margin-top: 4px;
-	font-style: italic;
-	opacity: 0.8;
-}
-
-.sectionActions {
-	display: flex;
-	align-items: center;
+	white-space: nowrap; // 防止折行
+	max-width: none; // 移除宽度限制，允许文字正常显示
 }
 
 .detailsLink {
@@ -470,127 +560,162 @@
 	}
 }
 
-.extraCreditsHint {
-	font-size: 10px;
-	color: var(--color_neo_text_tertiary);
-	margin-top: 6px;
-	opacity: 0.7;
+// 警告卡片样式
+.warningCard {
+	background: var(--color_warning_bg);
+	border: 1px solid var(--color_warning);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.warningContent {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 16px;
+}
+
+.warningIcon {
+	color: var(--color_warning);
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+.warningText {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.warningTitle {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+	line-height: 1.2;
+}
+
+.warningMessage {
+	font-size: 13px;
 	line-height: 1.4;
+	color: var(--color_neo_text_primary);
 }
 
-.breakdownSeparator {
-	height: 1px;
-	background: var(--color_neo_border_field);
-	margin: 20px 0;
-	position: relative;
-
-	&::before {
-		content: '';
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-		width: 6px;
-		height: 6px;
-		background: var(--color_neo_border_field);
-		border-radius: 50%;
-	}
-}
-
-// 响应式设计
-@media (max-width: 768px) {
-	.header {
-		flex-direction: column;
-		align-items: stretch;
+// 响应式设计 - 采用与 Balance 相同的响应式策略
+@media (max-width: 1024px) {
+	.planSection {
+		grid-template-columns: 1fr;
 		gap: 16px;
 	}
 
-	.headerActions {
-		align-self: center;
-	}
-
-	.panelContent {
-		padding: 24px;
-	}
-
-	.planInfo {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 16px;
-	}
-
-	.planActions {
-		justify-content: flex-end;
-	}
-
-	.usageHeader {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 12px;
-	}
-
-	.usageStats {
-		justify-content: center;
-	}
-
-	.usagePercentage {
-		align-self: center;
-		font-size: 16px;
-	}
-
-	.sectionHeader {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 8px;
-
-		h3 {
-			font-size: 16px;
-		}
-	}
-
-	// Removed usageLink styles
-
-	.breakdownContainer {
-		padding: 16px;
-	}
-
-	.sectionHeader {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 8px;
-	}
-
-	.sectionTitle {
-		justify-content: center;
-	}
-
-	.sectionMeta {
-		text-align: center;
-	}
-}
-
-@media (max-width: 480px) {
-	.panelContent {
-		padding: 20px;
-	}
-
-	.planCard,
-	.usageCard {
-		padding: 20px;
-	}
-
-	.planName {
-		font-size: 18px;
+	.usageDisplay {
+		margin-bottom: 12px;
 	}
 
 	.usageNumber {
 		font-size: 20px;
 	}
 
-	.usagePercentage {
+	.cardContent {
+		padding: 16px;
+	}
+
+	.cardHeader {
+		padding: 12px 16px;
+
+		h3 {
+			font-size: 14px;
+		}
+	}
+}
+
+@media (max-width: 768px) {
+	.header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
+	}
+
+	.headerActions {
+		justify-content: center;
+	}
+
+	.planNameWithStatus {
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.planDisplay {
+		text-align: center;
+	}
+
+	.usageOverviewDisplay {
+		flex-direction: column;
+		gap: 12px;
+		min-height: auto;
+		text-align: center;
+	}
+
+	.usageStatsColumn {
+		width: 100%;
+		align-items: center;
+	}
+
+	.extraCreditsInfo {
+		justify-content: center;
+	}
+
+	.chartContainer {
+		width: 80px;
+		height: 80px;
+	}
+
+	.usageNumber {
 		font-size: 14px;
 	}
 
+	.usageLabel {
+		font-size: 7px;
+	}
+
+	.usageStatsRow {
+		justify-content: center;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.statDivider {
+		display: none;
+	}
+
+	.usageStats {
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.creditsDisplay {
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.creditsDivider {
+		display: none;
+	}
+
+	.warningContent {
+		padding: 14px;
+	}
+
+	.cardContent {
+		padding: 12px;
+	}
+}
+
+@media (max-width: 480px) {
 	.headerContent {
 		h2 {
 			font-size: 20px;
@@ -601,27 +726,52 @@
 		}
 	}
 
-	.planActions {
-		gap: 6px;
+	.planName {
+		font-size: 16px;
 	}
 
-	.usageWarning {
-		padding: 10px 12px;
-		font-size: 12px;
+	.chartContainer {
+		width: 55px;
+		height: 55px;
 	}
 
-	.breakdownContainer {
-		padding: 14px;
+	.usageNumber {
+		font-size: 9px;
 	}
 
+	.usageLabel {
+		font-size: 4px;
+	}
+
+	.statNumber,
 	.creditsUsed,
 	.creditsLimit,
 	.creditsBalance {
 		font-size: 16px;
 	}
 
-	.sectionTitle {
+	.cardHeader {
+		padding: 10px 12px;
+
+		h3 {
+			font-size: 13px;
+		}
+	}
+
+	.cardContent {
+		padding: 12px;
+	}
+
+	.warningContent {
+		padding: 12px;
+	}
+
+	.warningTitle {
 		font-size: 13px;
+	}
+
+	.warningMessage {
+		font-size: 12px;
 	}
 }
 
@@ -636,8 +786,10 @@
 	}
 
 	.planCard,
-	.usageCard,
-	.breakdownContainer {
+	.usageOverviewCard,
+	.monthlyUsageCard,
+	.extraCreditsCard,
+	.warningCard {
 		border-width: 2px;
 	}
 }

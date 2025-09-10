@@ -399,11 +399,7 @@ const Balance: React.FC = () => {
 					<div className={styles.balanceCard}>
 						<div className={styles.cardHeader}>
 							<div className={styles.cardTitle}>
-								<Icon
-									name='material-add_circle'
-									size={16}
-									className={styles.cardIcon}
-								/>
+								<Icon name='material-stars' size={16} className={styles.cardIcon} />
 								<h3>{is_cn ? '额外点数' : 'Extra Credits'}</h3>
 							</div>
 						</div>

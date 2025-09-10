@@ -444,16 +444,10 @@ const Plans = () => {
 						<p>{is_cn ? '选择适合您需求的套餐计划' : 'Choose the plan that fits your needs'}</p>
 					</div>
 				</div>
-				<div className={styles.panel}>
-					<div className={styles.panelContent}>
-						<div className={styles.loadingState}>
-							<Icon
-								name='material-hourglass_empty'
-								size={32}
-								className={styles.loadingIcon}
-							/>
-							<span>{is_cn ? '加载中...' : 'Loading...'}</span>
-						</div>
+				<div className={styles.contentStack}>
+					<div className={styles.loadingState}>
+						<Icon name='material-hourglass_empty' size={32} className={styles.loadingIcon} />
+						<span>{is_cn ? '加载中...' : 'Loading...'}</span>
 					</div>
 				</div>
 			</div>
@@ -490,10 +484,9 @@ const Plans = () => {
 				</div>
 			</div>
 
-			<div className={styles.panel}>
-				<div className={styles.panelContent}>
-					<div className={styles.plansGrid}>{plans.map((plan) => renderPlanCard(plan))}</div>
-				</div>
+			{/* Content Stack - 采用与 Subscription 一致的布局 */}
+			<div className={styles.contentStack}>
+				<div className={styles.plansGrid}>{plans.map((plan) => renderPlanCard(plan))}</div>
 			</div>
 		</div>
 	)

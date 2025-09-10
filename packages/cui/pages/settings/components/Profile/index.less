@@ -4,6 +4,7 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	overflow: hidden; // 防止内容溢出
 }
 
 // 加载状态 - 与ApiKeys组件保持完全一致
@@ -78,7 +79,7 @@
 		background: transparent !important;
 	}
 
-	// 鼠标悬停Panel时显示滚动条（与Menu组件一致）
+	// 鼠标悬停Panel时显示滚动条
 	&:hover {
 		.panelContent::-webkit-scrollbar-thumb {
 			background: var(--color_border_light) !important;

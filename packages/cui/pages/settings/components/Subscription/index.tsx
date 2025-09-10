@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getLocale } from '@umijs/max'
 import { message } from 'antd'
+import * as echarts from 'echarts'
 import { mockApi, PlanData, CreditsInfo, CreditPackage, CreditPackageType } from '../../mockData'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
@@ -13,6 +14,8 @@ const Subscription = () => {
 	const [loading, setLoading] = useState(true)
 	const [planData, setPlanData] = useState<PlanData | null>(null)
 	const [upgrading, setUpgrading] = useState(false)
+	const chartRef = useRef<HTMLDivElement>(null)
+	const chartInstance = useRef<echarts.ECharts | null>(null)
 
 	// Load current plan data
 	useEffect(() => {
@@ -131,6 +134,78 @@ const Subscription = () => {
 		return credits.toLocaleString()
 	}
 
+	// Initialize usage chart
+	const initUsageChart = () => {
+		if (!chartRef.current || !planData) return
+
+		// Dispose existing chart
+		if (chartInstance.current) {
+			chartInstance.current.dispose()
+		}
+
+		// Create new chart instance
+		const chart = echarts.init(chartRef.current)
+		chartInstance.current = chart
+
+		const usagePercentage = getUsagePercentage()
+		const remainingPercentage = 100 - usagePercentage
+
+		const option = {
+			series: [
+				{
+					type: 'pie',
+					radius: ['65%', '80%'], // 减小环的粗细，让环更细
+					center: ['50%', '50%'],
+					avoidLabelOverlap: false,
+					silent: true, // 禁用交互
+					label: {
+						show: false
+					},
+					labelLine: {
+						show: false
+					},
+					data: [
+						{
+							value: usagePercentage,
+							name: is_cn ? '已使用' : 'Used',
+							itemStyle: {
+								color: '#3371FC' // 使用主题蓝色
+							}
+						},
+						{
+							value: remainingPercentage,
+							name: is_cn ? '剩余' : 'Remaining',
+							itemStyle: {
+								color: 'rgba(51, 113, 252, 0.1)' // 浅蓝色背景
+							}
+						}
+					]
+				}
+			]
+		}
+
+		chart.setOption(option)
+
+		// Handle resize
+		const handleResize = () => {
+			chart.resize()
+		}
+		window.addEventListener('resize', handleResize)
+
+		return () => {
+			window.removeEventListener('resize', handleResize)
+			chart.dispose()
+		}
+	}
+
+	// Initialize chart when data is ready
+	useEffect(() => {
+		if (planData && chartRef.current) {
+			const cleanup = initUsageChart()
+			return cleanup
+		}
+	}, [planData, is_cn])
+
 	if (loading) {
 		return (
 			<div className={styles.subscription}>
@@ -193,35 +268,47 @@ const Subscription = () => {
 					<h2>{is_cn ? '订阅管理' : 'Subscription'}</h2>
 					<p>{is_cn ? '管理您的订阅计划和使用情况' : 'Manage your subscription plan and usage'}</p>
 				</div>
-				{/* Remove header actions - upgrade button moved to plan card */}
+				<div className={styles.headerActions}>
+					<Button
+						type='primary'
+						icon={<Icon name='material-upgrade' size={14} />}
+						onClick={handleUpgrade}
+						loading={upgrading}
+					>
+						{is_cn ? '升级套餐' : 'Upgrade Plan'}
+					</Button>
+				</div>
 			</div>
 
-			{/* Content Panel */}
-			<div className={styles.panel}>
-				<div className={styles.panelContent}>
-					{/* Current Plan Section */}
-					<div className={styles.section}>
-						<div className={styles.sectionHeader}>
-							<h3>{is_cn ? '当前套餐' : 'Current Plan'}</h3>
+			{/* Content Stack */}
+			<div className={styles.contentStack}>
+				{/* Plan and Status Cards Section */}
+				<div className={styles.planSection}>
+					{/* Current Plan Card */}
+					<div className={styles.planCard}>
+						<div className={styles.cardHeader}>
+							<div className={styles.cardTitle}>
+								<Icon
+									name='material-workspace_premium'
+									size={16}
+									className={styles.cardIcon}
+								/>
+								<h3>{is_cn ? '当前套餐' : 'Current Plan'}</h3>
+							</div>
+							<div className={styles.cardActions}>
+								<button className={styles.detailsLink} onClick={handleViewDetails}>
+									<Icon name='material-info' size={14} />
+									<span>{is_cn ? '查看详情' : 'View Details'}</span>
+								</button>
+							</div>
 						</div>
-						<div className={styles.planCard}>
-							<div className={styles.planInfo}>
-								<div className={styles.planMain}>
+						<div className={styles.cardContent}>
+							<div className={styles.planDisplay}>
+								<div className={styles.planNameWithStatus}>
 									<div className={styles.planName}>
 										{getPlanDisplayName(planData.type)}
 									</div>
 									<div className={styles.planStatus}>
-										<Icon
-											name={
-												planData.status === 'active'
-													? 'material-check_circle'
-													: 'material-error'
-											}
-											size={14}
-											className={`${styles.statusIcon} ${
-												styles[planData.status]
-											}`}
-										/>
 										<span
 											className={`${styles.statusText} ${
 												styles[planData.status]
@@ -231,221 +318,162 @@ const Subscription = () => {
 										</span>
 									</div>
 								</div>
-								<div className={styles.planActions}>
-									<Button
-										type='default'
-										icon={<Icon name='material-info' size={14} />}
-										onClick={handleViewDetails}
-									>
-										{is_cn ? '查看详情' : 'View Details'}
-									</Button>
-									<Button
-										type='default'
-										icon={<Icon name='material-upgrade' size={14} />}
-										onClick={handleUpgrade}
-										loading={upgrading}
-									>
-										{is_cn ? '升级套餐' : 'Upgrade Plan'}
-									</Button>
-								</div>
 							</div>
 							{planData.next_billing_date && (
-								<div className={styles.planPeriod}>
-									<div className={styles.periodInfo}>
-										<Icon
-											name='material-event'
-											size={16}
-											className={styles.periodIcon}
-										/>
-										<span>
-											{is_cn ? '续费：' : 'Renewal: '}
-											{new Date(
-												planData.next_billing_date
-											).toLocaleDateString()}
-										</span>
-									</div>
-								</div>
-							)}
-						</div>
-					</div>
-
-					{/* Credits Usage Section */}
-					<div className={styles.section}>
-						<div className={styles.sectionHeader}>
-							<h3>{is_cn ? '点数使用情况' : 'Credits Usage'}</h3>
-							<Button
-								type='default'
-								icon={<Icon name='material-analytics' size={14} />}
-								onClick={handleViewUsage}
-							>
-								{is_cn ? '详细统计' : 'View Details'}
-							</Button>
-						</div>
-
-						{/* Total Usage Overview */}
-						<div className={styles.usageCard}>
-							<div className={styles.usageHeader}>
-								<div className={styles.usageStats}>
-									<div className={styles.usageCurrent}>
-										<span className={styles.usageNumber}>
-											{formatCredits(planData.credits.total_used)}
-										</span>
-										<span className={styles.usageUnit}>
-											{is_cn ? '已使用' : 'Used'}
-										</span>
-									</div>
-									<div className={styles.usageDivider}>/</div>
-									<div className={styles.usageLimit}>
-										<span className={styles.usageNumber}>
-											{formatCredits(planData.credits.total_available)}
-										</span>
-										<span className={styles.usageUnit}>
-											{is_cn ? '总点数' : 'Total'}
-										</span>
-									</div>
-								</div>
-								<div className={styles.usagePercentage}>
-									{getUsagePercentage().toFixed(1)}%
-								</div>
-							</div>
-							<div className={styles.progressContainer}>
-								<div className={styles.progressBar}>
-									<div
-										className={styles.progressFill}
-										style={{ width: `${getUsagePercentage()}%` }}
-									/>
-								</div>
-							</div>
-							{getUsagePercentage() > 80 && (
-								<div className={styles.usageWarning}>
+								<div className={styles.billingInfo}>
 									<Icon
-										name='material-warning'
+										name='material-event'
 										size={16}
-										className={styles.warningIcon}
+										className={styles.billingIcon}
 									/>
 									<span>
-										{is_cn
-											? '您的点数已使用超过 80%，建议升级套餐或购买更多点数'
-											: 'Your credits usage is over 80%. Consider upgrading your plan or purchasing additional credits.'}
+										{is_cn ? '续费：' : 'Renewal: '}
+										{new Date(planData.next_billing_date).toLocaleDateString()}
 									</span>
 								</div>
 							)}
 						</div>
+					</div>
 
-						{/* Credits Breakdown - Unified Design */}
-						<div className={styles.creditsBreakdown}>
-							<div className={styles.breakdownContainer}>
-								{/* Monthly Credits Section */}
-								<div className={styles.breakdownSection}>
-									<div className={styles.sectionHeader}>
-										<div className={styles.sectionTitle}>
-											<Icon
-												name='material-autorenew'
-												size={16}
-												className={styles.sectionIcon}
-											/>
-											<span>{is_cn ? '月度点数' : 'Monthly Credits'}</span>
+					{/* Total Usage Card */}
+					<div className={styles.usageOverviewCard}>
+						<div className={styles.cardHeader}>
+							<div className={styles.cardTitle}>
+								<Icon
+									name='material-donut_large'
+									size={16}
+									className={styles.cardIcon}
+								/>
+								<h3>{is_cn ? '总体使用情况' : 'Overall Usage'}</h3>
+							</div>
+							<div className={styles.cardActions}>
+								<button className={styles.detailsLink} onClick={handleViewUsage}>
+									<Icon name='material-info' size={14} />
+									<span>{is_cn ? '查看详情' : 'View Details'}</span>
+								</button>
+							</div>
+						</div>
+						<div className={styles.cardContent}>
+							<div className={styles.usageOverviewDisplay}>
+								<div className={styles.chartContainer}>
+									<div ref={chartRef} className={styles.usageChart}></div>
+									<div className={styles.chartCenter}>
+										<div className={styles.usageNumber}>
+											{getUsagePercentage().toFixed(1)}%
 										</div>
-										<div className={styles.sectionMeta}>
-											{is_cn ? '重置于 ' : 'Resets on '}
-											{new Date(
-												planData.credits.monthly.reset_date
-											).toLocaleDateString()}
-										</div>
-									</div>
-									<div className={styles.sectionContent}>
-										<div className={styles.creditsDisplay}>
-											<span className={styles.creditsUsed}>
-												{formatCredits(planData.credits.monthly.used)}
-											</span>
-											<span className={styles.creditsDivider}>/</span>
-											<span className={styles.creditsLimit}>
-												{formatCredits(planData.credits.monthly.limit)}
-											</span>
-										</div>
-										<div className={styles.progressWrapper}>
-											<div className={styles.progressBar}>
-												<div
-													className={`${styles.progressFill} ${styles.monthlyProgress}`}
-													style={{
-														width: `${getMonthlyUsagePercentage()}%`
-													}}
-												/>
-											</div>
+										<div className={styles.usageLabel}>
+											{is_cn ? '已使用' : 'Used'}
 										</div>
 									</div>
 								</div>
-
-								{/* Extra Credits Section - Unified Display */}
-								{getTotalPackagesBalance() > 0 && (
-									<>
-										{/* Separator */}
-										<div className={styles.breakdownSeparator}></div>
-
-										{/* Unified Extra Credits Section */}
-										<div className={styles.breakdownSection}>
-											<div className={styles.sectionHeader}>
-												<div className={styles.sectionTitle}>
-													<Icon
-														name='material-stars'
-														size={16}
-														className={styles.sectionIcon}
-													/>
-													<span>
-														{is_cn
-															? '额外点数'
-															: 'Extra Credits'}
-													</span>
-												</div>
-												<div className={styles.sectionActions}>
-													<button
-														className={styles.detailsLink}
-														onClick={handleViewExtraCredits}
-													>
-														<Icon
-															name='material-info'
-															size={14}
-														/>
-														<span>
-															{is_cn
-																? '查看详情'
-																: 'View Details'}
-														</span>
-													</button>
-												</div>
-											</div>
-											<div className={styles.sectionContent}>
-												<div className={styles.creditsDisplay}>
-													<span className={styles.creditsBalance}>
-														{formatCredits(
-															getTotalPackagesBalance()
-														)}
-													</span>
-													<span className={styles.creditsLabel}>
-														{is_cn ? '可用余额' : 'Available'}
-													</span>
-												</div>
-												{getTotalPackagesUsed() > 0 && (
-													<div className={styles.usedInfo}>
-														{is_cn ? '已使用 ' : 'Used: '}
-														{formatCredits(
-															getTotalPackagesUsed()
-														)}
-													</div>
+								<div className={styles.usageStatsColumn}>
+									<div className={styles.usageStatsRow}>
+										<div className={styles.statItem}>
+											<span className={styles.statNumber}>
+												{formatCredits(planData.credits.total_used)}
+											</span>
+											<span className={styles.statLabel}>
+												{is_cn ? '已使用' : 'Used'}
+											</span>
+										</div>
+										<div className={styles.statDivider}>/</div>
+										<div className={styles.statItem}>
+											<span className={styles.statNumber}>
+												{formatCredits(
+													planData.credits.total_available
 												)}
-												<div className={styles.extraCreditsHint}>
+											</span>
+											<span className={styles.statLabel}>
+												{is_cn ? '总计' : 'Total'}
+											</span>
+										</div>
+									</div>
+									{getTotalPackagesBalance() > 0 && (
+										<div className={styles.extraCreditsInfo}>
+											<Icon
+												name='material-stars'
+												size={12}
+												className={styles.extraIcon}
+											/>
+											<div className={styles.extraCreditsItem}>
+												<span className={styles.extraNumber}>
+													{formatCredits(getTotalPackagesBalance())}
+												</span>
+												<span className={styles.extraLabel}>
 													{is_cn
-														? '包含充值、奖励、活动赠送等多种来源'
-														: 'Includes purchases, rewards, promotions and more'}
-												</div>
+														? '额外点数余额'
+														: 'Extra Credits Balance'}
+												</span>
 											</div>
 										</div>
-									</>
-								)}
+									)}
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
+
+				{/* Monthly Usage Card */}
+				<div className={styles.monthlyUsageCard}>
+					<div className={styles.cardHeader}>
+						<div className={styles.cardTitle}>
+							<Icon name='material-autorenew' size={16} className={styles.cardIcon} />
+							<h3>{is_cn ? '月度使用情况' : 'Monthly Usage'}</h3>
+						</div>
+						<div className={styles.cardMeta}>
+							{is_cn ? '重置于 ' : 'Resets on '}
+							{new Date(planData.credits.monthly.reset_date).toLocaleDateString()}
+						</div>
+					</div>
+					<div className={styles.cardContent}>
+						<div className={styles.creditsDisplay}>
+							<div className={styles.usedSection}>
+								<span className={styles.creditsUsed}>
+									{formatCredits(planData.credits.monthly.used)}
+								</span>
+								<span className={styles.usedLabel}>{is_cn ? '已使用' : 'Used'}</span>
+							</div>
+							<span className={styles.creditsDivider}>/</span>
+							<div className={styles.limitSection}>
+								<span className={styles.creditsLimit}>
+									{formatCredits(planData.credits.monthly.limit)}
+								</span>
+								<span className={styles.limitLabel}>
+									{is_cn ? '月度限额' : 'Monthly Limit'}
+								</span>
+							</div>
+						</div>
+						<div className={styles.progressWrapper}>
+							<div className={styles.progressBar}>
+								<div
+									className={`${styles.progressFill} ${styles.monthlyProgress}`}
+									style={{
+										width: `${getMonthlyUsagePercentage()}%`
+									}}
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{/* Usage Warning */}
+				{getUsagePercentage() > 80 && (
+					<div className={styles.warningCard}>
+						<div className={styles.warningContent}>
+							<Icon name='material-warning' size={20} className={styles.warningIcon} />
+							<div className={styles.warningText}>
+								<div className={styles.warningTitle}>
+									{is_cn ? '点数使用警告' : 'Credits Usage Warning'}
+								</div>
+								<div className={styles.warningMessage}>
+									{is_cn
+										? '您的点数已使用超过 80%，建议升级套餐或购买更多点数'
+										: 'Your credits usage is over 80%. Consider upgrading your plan or purchasing additional credits.'}
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	)
