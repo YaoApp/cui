@@ -140,12 +140,24 @@ export interface UsageStats {
 		requests: number
 		requests_limit: number
 		cost: number
+		monthly_quota_used: number
+		monthly_quota_limit: number
+		extra_credits_used: number
+		tokens_used: number
 	}
 	last_30_days: Array<{
 		date: string
 		requests: number
 		cost: number
 	}>
+}
+
+export interface UsageRecord {
+	id: string
+	date: string
+	requests: number
+	cost: number
+	tokens: number
 }
 
 export interface Invoice {
@@ -287,7 +299,7 @@ export const mockMenuGroups: MenuGroup[] = [
 			{
 				id: '1a',
 				key: 'balance',
-				name: { 'zh-CN': '账户余额', 'en-US': 'Account Balance' },
+				name: { 'zh-CN': '账户余额', 'en-US': 'Balance' },
 				icon: 'material-account_balance_wallet',
 				path: '/settings/balance'
 			},
@@ -543,7 +555,11 @@ export const mockUsageStats: UsageStats = {
 	current_month: {
 		requests: 2500,
 		requests_limit: 10000,
-		cost: 29.99
+		cost: 29.99,
+		monthly_quota_used: 1800,
+		monthly_quota_limit: 2000,
+		extra_credits_used: 700,
+		tokens_used: 125000
 	},
 	last_30_days: Array.from({ length: 30 }, (_, i) => ({
 		date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -1182,6 +1198,44 @@ export const mockApi = {
 					records,
 					total: allRecords.length,
 					hasMore
+				})
+			}, 300)
+		})
+	},
+
+	// 获取使用记录（分页）
+	getUsageRecords: (page: number = 1, limit: number = 20): Promise<{ records: UsageRecord[]; total: number }> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				// 生成 30 天的使用记录
+				const records: UsageRecord[] = []
+				const now = new Date()
+
+				for (let i = 29; i >= 0; i--) {
+					const date = new Date(now)
+					date.setDate(date.getDate() - i)
+
+					const baseRequests = Math.floor(Math.random() * 1000) + 100
+					const tokens = baseRequests * (Math.random() * 1000 + 500)
+					const cost = baseRequests * 0.002 + tokens * 0.000001
+
+					records.push({
+						id: `usage-${i}-${Date.now()}`,
+						date: date.toISOString().split('T')[0],
+						requests: baseRequests,
+						cost: Number(cost.toFixed(3)),
+						tokens: Math.floor(tokens)
+					})
+				}
+
+				// 分页逻辑
+				const startIndex = (page - 1) * limit
+				const endIndex = startIndex + limit
+				const paginatedRecords = records.slice(startIndex, endIndex)
+
+				resolve({
+					records: paginatedRecords,
+					total: records.length
 				})
 			}, 300)
 		})

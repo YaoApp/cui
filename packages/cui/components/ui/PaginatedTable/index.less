@@ -1,0 +1,379 @@
+@import '@/styles/preset/vars.less';
+
+.paginatedTableContainer {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.loadingContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	padding: 60px 20px;
+	text-align: center;
+}
+
+.customTable {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 8px;
+	overflow: hidden;
+	background: var(--color_neo_bg_card);
+	// 移除 flex: 1 和 min-height: 0，让表格自然展开
+}
+
+.tableHeader {
+	display: flex;
+	background: var(--color_neo_bg_header);
+	border-bottom: 1px solid var(--color_neo_border_header);
+	flex-shrink: 0;
+	overflow-x: hidden;
+}
+
+.headerCell {
+	padding: 12px 16px;
+	font-weight: 500; // 与 DataTable 一致
+	font-size: 12px; // 与 DataTable 一致
+	color: var(--color_neo_text_primary);
+	border-right: 1px solid var(--color_neo_border_card); // 与 DataTable 一致
+	flex-shrink: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: flex;
+	align-items: center;
+	min-height: 48px; // 与 DataTable 一致
+
+	&:last-child {
+		border-right: none;
+	}
+}
+
+.tableBody {
+	overflow-y: hidden; // 移除 Y 轴滚动，因为使用分页
+	overflow-x: auto; // 保留 X 轴滚动以支持宽表格
+	position: relative;
+	// 移除 flex: 1 和 min-height: 0，让表格自然展开显示所有数据
+
+	// 只保留 X 轴滚动条样式
+	&::-webkit-scrollbar {
+		width: 0 !important; // 隐藏垂直滚动条
+		height: 8px !important; // 水平滚动条高度
+		display: block !important;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_neo_border_card) !important;
+		border-radius: 4px !important;
+		border: 1px solid var(--color_neo_bg_content) !important;
+
+		&:hover {
+			background: var(--color_neo_text_secondary) !important;
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_neo_bg_content) !important;
+		border-radius: 4px !important;
+	}
+
+	// Firefox 滚动条
+	scrollbar-width: thin !important;
+	scrollbar-color: var(--color_neo_border_card) var(--color_neo_bg_content) !important;
+}
+
+.tableRow {
+	display: flex;
+	border-bottom: 1px solid var(--color_neo_border_card);
+	min-height: 48px;
+	transition: background-color 0.2s;
+	align-items: stretch;
+
+	// 交替色（斑马纹）- 与 DataTable 一致
+	&:nth-child(even) {
+		background: var(--color_neo_bg_field);
+	}
+
+	&:nth-child(odd) {
+		background: var(--color_neo_bg_card);
+	}
+
+	&:hover {
+		background: var(--color_neo_bg_hover) !important;
+	}
+}
+
+.bodyCell {
+	padding: 8px 16px; // 与 DataTable 一致
+	font-size: 12px; // 与 DataTable 一致
+	color: var(--color_neo_text_primary);
+	border-right: 1px solid var(--color_neo_border_card); // 与 DataTable 一致
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	min-height: 48px; // 与 DataTable 一致
+	word-break: break-word;
+	overflow-wrap: break-word;
+
+	&:last-child {
+		border-right: none;
+	}
+}
+
+.actionsCell {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	justify-content: center;
+}
+
+.emptyContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 20px;
+	text-align: center;
+	color: var(--color_neo_text_secondary);
+
+	:global(.Icon) {
+		color: var(--color_neo_icon_muted);
+		margin-bottom: 16px;
+	}
+}
+
+.loadingOverlay {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px;
+	background: var(--color_neo_bg_field);
+	border-top: 1px solid var(--color_neo_border_field);
+}
+
+.paginationContainer {
+	padding: 12px 0; // 增加上下内边距，左右不要
+	display: flex;
+	justify-content: space-between; // 改为两端对齐
+	align-items: center;
+	flex-shrink: 0;
+	border-top: 1px solid var(--color_neo_border_card);
+
+	.paginationInfo {
+		color: var(--color_neo_text_secondary);
+		font-size: 11px;
+		font-weight: 400;
+		line-height: 24px; // 与按钮高度对齐
+	}
+
+	.paginationControls {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		.pageSizeSelector {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+
+			.sizeLabel {
+				color: var(--color_neo_text_secondary);
+				font-size: 11px;
+				font-weight: 400;
+				line-height: 24px; // 与按钮高度对齐
+			}
+
+			.customSelect {
+				position: relative;
+				display: inline-block;
+
+				.selectButton {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					min-width: 45px;
+					height: 24px;
+					padding: 0 6px;
+					border: 1px solid var(--color_neo_border_field);
+					border-radius: 3px;
+					background: var(--color_neo_bg_card);
+					color: var(--color_neo_text_secondary);
+					font-size: 11px;
+					font-weight: 400;
+					cursor: pointer;
+					transition: all 0.2s ease;
+
+					&:hover {
+						border-color: var(--color_neo_border_selected);
+						background: var(--color_neo_bg_selected);
+						color: var(--color_main);
+					}
+
+					&.open {
+						border-color: var(--color_neo_border_selected);
+						background: var(--color_neo_bg_selected);
+						color: var(--color_main);
+						box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+					}
+				}
+
+				.selectDropdown {
+					position: absolute;
+					left: 0;
+					right: 0;
+					z-index: 1000;
+					border: 1px solid var(--color_neo_border_field);
+					border-radius: 3px;
+					background: var(--color_neo_bg_card);
+					box-shadow: var(--shadow);
+					overflow: hidden;
+
+					// 默认向下弹出
+					&.down {
+						top: 100%;
+						margin-top: 2px;
+					}
+
+					// 向上弹出
+					&.up {
+						bottom: 100%;
+						margin-bottom: 2px;
+					}
+
+					.selectOption {
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						height: 24px;
+						padding: 0 6px;
+						color: var(--color_neo_text_secondary);
+						font-size: 11px;
+						cursor: pointer;
+						transition: all 0.2s ease;
+
+						&:hover {
+							background: var(--color_neo_bg_selected);
+							color: var(--color_main);
+						}
+
+						&.selected {
+							background: var(--color_main);
+							color: white;
+						}
+					}
+				}
+			}
+		}
+
+		.pageNavigation {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+
+			.navIcon {
+				color: var(--color_text_light);
+				cursor: pointer;
+				transition: color 0.2s ease;
+				padding: 4px;
+
+				&:hover:not(.disabled) {
+					color: var(--color_main);
+				}
+
+				&.disabled {
+					color: var(--color_neo_icon_muted);
+					cursor: not-allowed;
+					opacity: 0.6;
+
+					&:hover {
+						color: var(--color_neo_icon_muted);
+					}
+				}
+			}
+
+			.navButton {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 20px; // 固定宽度，确保所有按钮一样大
+				height: 20px;
+				padding: 0; // 移除内边距
+				border: 1px solid var(--color_neo_border_field);
+				border-radius: 3px;
+				background: var(--color_neo_bg_card);
+				color: var(--color_neo_text_secondary);
+				font-size: 10px;
+				font-weight: 400;
+				cursor: pointer;
+				transition: all 0.2s ease;
+
+				&:hover:not(.disabled) {
+					border-color: var(--color_neo_border_selected);
+					color: var(--color_main);
+					background: var(--color_neo_bg_selected);
+				}
+
+				&.active {
+					border-color: var(--color_main);
+					background: var(--color_main);
+					color: white;
+
+					&:hover {
+						border-color: var(--color_main);
+						background: var(--color_main);
+						color: white;
+					}
+				}
+
+				&.disabled {
+					border-color: var(--color_neo_border_field);
+					background: var(--color_neo_bg_field);
+					color: var(--color_neo_icon_muted);
+					cursor: not-allowed;
+					opacity: 0.5;
+
+					&:hover {
+						border-color: var(--color_neo_border_field);
+						background: var(--color_neo_bg_field);
+						color: var(--color_neo_icon_muted);
+					}
+				}
+			}
+
+			.pageEllipsis {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 20px; // 固定宽度，与页码按钮保持一致
+				height: 20px;
+				color: var(--color_neo_icon_muted);
+				font-size: 10px;
+				cursor: default;
+			}
+		}
+	}
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.paginationContainer {
+		padding: 12px;
+	}
+
+	.headerCell,
+	.bodyCell {
+		padding: 8px 12px;
+		font-size: 12px;
+	}
+
+	.emptyContainer {
+		padding: 40px 16px;
+	}
+}

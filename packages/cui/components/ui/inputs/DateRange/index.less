@@ -1,0 +1,237 @@
+@import '../common.less';
+
+.dateRange {
+	position: relative;
+	display: inline-block;
+	width: 100%;
+
+	&.small {
+		.trigger {
+			padding: 0 12px;
+			font-size: 12px;
+			height: 32px; // 与Button默认medium一致
+		}
+	}
+
+	&.default {
+		.trigger {
+			padding: 0 16px;
+			font-size: 13px;
+			height: 32px; // 与Button medium一致
+		}
+	}
+
+	&.large {
+		.trigger {
+			padding: 0 20px;
+			font-size: 14px;
+			height: 38px; // 与Button large一致 (var(--base_height))
+		}
+	}
+
+	&.disabled {
+		.trigger {
+			background: var(--color_bg) !important;
+			border-color: var(--color_border_light) !important;
+			color: var(--color_text_grey) !important;
+			cursor: not-allowed !important;
+			opacity: 0.6 !important;
+		}
+	}
+}
+
+.trigger {
+	.baseInput();
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+	user-select: none;
+
+	&:hover:not(.disabled) {
+		border-color: var(--color_main_hover, #4580ff) !important;
+		background-color: var(--color_bg_hover, #f5f5f5) !important;
+	}
+}
+
+.open .trigger {
+	border-color: var(--color_main, #3371fc) !important;
+	box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1) !important;
+}
+
+.content {
+	flex: 1;
+	overflow: hidden;
+}
+
+.value {
+	color: var(--color_text);
+	font-weight: 400;
+}
+
+.placeholder {
+	color: var(--color_placeholder, #727272);
+}
+
+.arrow {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color_text_grey);
+	transition: transform 0.2s ease;
+	margin-left: 8px;
+	flex-shrink: 0;
+
+	&.arrowUp {
+		transform: rotate(180deg);
+	}
+}
+
+.dropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	z-index: 1000;
+	margin-top: 4px;
+	background: var(--color_bg_menu);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	max-height: 320px;
+	min-width: 280px; // 设置最小宽度，确保Custom Range不被截断
+	width: max-content; // 根据内容自动调整宽度
+
+	&.dropup {
+		top: auto;
+		bottom: 100%;
+		margin-top: 0;
+		margin-bottom: 4px;
+	}
+}
+
+.presets {
+	padding: 8px 0;
+	border-bottom: 1px solid var(--color_border_light);
+}
+
+.presetsLabel {
+	padding: 4px 12px 8px;
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--color_text_grey);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.presetItem {
+	padding: 6px 12px;
+	font-size: 13px;
+	color: var(--color_text);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+
+	&:hover {
+		background: var(--color_bg_hover);
+		color: var(--color_main);
+	}
+}
+
+.customRange {
+	padding: 12px;
+}
+
+.customLabel {
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--color_text_grey);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 8px;
+}
+
+.dateInputs {
+	display: flex;
+	gap: 8px;
+}
+
+.dateField {
+	flex: 1;
+
+	label {
+		display: block;
+		font-size: 11px;
+		color: var(--color_text_grey);
+		margin-bottom: 4px;
+		font-weight: 400;
+	}
+}
+
+.dateInput {
+	.baseInput();
+	width: 100%;
+	padding: 6px 8px;
+	font-size: 12px;
+	height: auto;
+
+	&::-webkit-calendar-picker-indicator {
+		opacity: 0.7;
+		cursor: pointer;
+		padding: 2px;
+		border-radius: 2px;
+		transition: all 0.2s ease;
+
+		&:hover {
+			opacity: 1;
+			background: var(--color_bg_hover);
+		}
+
+		&:active {
+			transform: scale(0.95);
+		}
+	}
+
+	// 确保日期输入在所有浏览器中都可以点击
+	&::-webkit-inner-spin-button,
+	&::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	// Firefox 样式
+	&::-moz-focus-inner {
+		border: 0;
+	}
+}
+
+// Dark mode support
+[data-theme='dark'] {
+	.dropdown {
+		background: var(--color_bg_menu);
+		border-color: var(--color_border);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	}
+
+	.presets {
+		border-bottom-color: var(--color_border_light);
+	}
+
+	.presetItem:hover {
+		background: var(--color_bg_hover);
+	}
+}
+
+// Responsive design
+@media (max-width: 768px) {
+	.dropdown {
+		left: -8px;
+		right: -8px;
+		margin-left: 0;
+		margin-right: 0;
+	}
+
+	.dateInputs {
+		flex-direction: column;
+		gap: 8px;
+	}
+}

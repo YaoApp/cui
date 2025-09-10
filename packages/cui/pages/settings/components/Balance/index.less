@@ -6,6 +6,7 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	overflow: hidden; // 防止内容溢出
 }
 
 // 加载状态
@@ -111,7 +112,32 @@
 	flex-direction: column;
 	gap: 24px;
 	padding: 0;
-	overflow: hidden; // 防止内容溢出
+	overflow: auto; // 支持滚动
+	min-height: 0; // 允许收缩
+
+	// 滚动条基础样式 - 与 Usage 一致
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: transparent;
+		border-radius: 3px;
+		transition: background-color 0.2s ease;
+	}
+
+	// 鼠标悬停时显示滚动条
+	.balance:hover &::-webkit-scrollbar-thumb {
+		background-color: var(--color_border_light);
+
+		&:hover {
+			background-color: var(--color_dot);
+		}
+	}
 }
 
 // 余额展示区 - 两个余额块并排 - 固定高度
@@ -343,14 +369,12 @@
 	font-weight: 300;
 }
 
-// 历史记录部分样式 - 占用剩余空间
+// 历史记录部分样式
 .historySection {
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
-	flex: 1; // 占用剩余空间
-	min-height: 0; // 允许收缩
-	overflow: hidden; // 防止溢出
+	flex-shrink: 0; // 防止被压缩，让表格完整显示
 }
 
 .historyHeader {

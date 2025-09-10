@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Modal, Form, Space, Input, Button as AntdButton, Tooltip, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import { Button, DataTable } from '@/components/ui'
-import { TableColumn, TableAction } from '@/components/ui/DataTable/types'
+import { Button, PaginatedTable } from '@/components/ui'
+import type { PaginatedTableProps, TableColumn, TableAction } from '@/components/ui'
 import { mockApi } from '../../mockData'
 import type { BalanceInfo, TopUpRecord, TopUpMethod, TopUpStatus } from '../../mockData'
 import styles from './index.less'
@@ -18,10 +18,9 @@ const Balance: React.FC = () => {
 	const [topUpRecords, setTopUpRecords] = useState<TopUpRecord[]>([])
 	const [loading, setLoading] = useState(true)
 	const [recordsLoading, setRecordsLoading] = useState(true)
-	const [recordsLoadingMore, setRecordsLoadingMore] = useState(false)
-	const [recordsHasMore, setRecordsHasMore] = useState(true)
 	const [recordsTotal, setRecordsTotal] = useState(0)
 	const [currentPage, setCurrentPage] = useState(1)
+	const [pageSize, setPageSize] = useState(10)
 
 	// 充值模态框状态
 	const [topUpModalVisible, setTopUpModalVisible] = useState(false)
@@ -55,40 +54,32 @@ const Balance: React.FC = () => {
 	}, [])
 
 	// 加载充值记录
-	const loadTopUpRecords = useCallback(async (page: number = 1, append: boolean = false) => {
-		try {
-			if (append) {
-				setRecordsLoadingMore(true)
-			} else {
+	const loadTopUpRecords = useCallback(
+		async (page: number = 1, size: number = pageSize) => {
+			try {
 				setRecordsLoading(true)
-				setTopUpRecords([])
-			}
-
-			const response = await mockApi.getTopUpRecords(page, 20)
-
-			if (append) {
-				setTopUpRecords((prev) => [...prev, ...response.records])
-			} else {
+				const response = await mockApi.getTopUpRecords(page, size)
 				setTopUpRecords(response.records)
+				setRecordsTotal(response.total)
+				setCurrentPage(page)
+			} catch (error) {
+				console.error('Failed to load top-up records:', error)
+			} finally {
+				setRecordsLoading(false)
 			}
+		},
+		[pageSize]
+	)
 
-			setRecordsTotal(response.total)
-			setRecordsHasMore(response.hasMore)
+	// 处理分页变化
+	const handlePageChange = useCallback(
+		(page: number, size: number) => {
 			setCurrentPage(page)
-		} catch (error) {
-			console.error('Failed to load top-up records:', error)
-		} finally {
-			setRecordsLoading(false)
-			setRecordsLoadingMore(false)
-		}
-	}, [])
-
-	// 加载更多记录
-	const handleLoadMore = useCallback(() => {
-		if (recordsHasMore && !recordsLoadingMore) {
-			loadTopUpRecords(currentPage + 1, true)
-		}
-	}, [currentPage, recordsHasMore, recordsLoadingMore, loadTopUpRecords])
+			setPageSize(size)
+			loadTopUpRecords(page, size)
+		},
+		[loadTopUpRecords]
+	)
 
 	// 充值处理
 	// 验证点卡
@@ -183,7 +174,7 @@ const Balance: React.FC = () => {
 
 			// 刷新数据
 			await loadBalanceInfo()
-			await loadTopUpRecords(1, false)
+			await loadTopUpRecords(1, pageSize)
 
 			handleModalClose()
 		} catch (error) {
@@ -206,7 +197,7 @@ const Balance: React.FC = () => {
 	// 初始化数据 - 只运行一次
 	useEffect(() => {
 		loadBalanceInfo()
-		loadTopUpRecords()
+		loadTopUpRecords(1, pageSize)
 	}, []) // 空依赖数组，只运行一次
 
 	// 获取充值方式显示名称和描述
@@ -350,7 +341,7 @@ const Balance: React.FC = () => {
 			key: 'view',
 			label: is_cn ? '查看详情' : 'View Details',
 			icon: <Icon name='material-visibility' size={14} />,
-			onClick: (record) => {
+			onClick: (record: TopUpRecord) => {
 				console.log('View record:', record)
 			}
 		}
@@ -503,15 +494,19 @@ const Balance: React.FC = () => {
 					<div className={styles.historyHeader}>
 						<h3>{is_cn ? '充值历史记录' : 'Top-up History'}</h3>
 					</div>
-					<DataTable
+					<PaginatedTable
 						data={topUpRecords}
 						columns={columns}
 						actions={actions}
 						loading={recordsLoading}
-						loadingMore={recordsLoadingMore}
-						hasMore={recordsHasMore}
-						onLoadMore={handleLoadMore}
 						total={recordsTotal}
+						current={currentPage}
+						pageSize={pageSize}
+						onPageChange={handlePageChange}
+						size='small'
+						showQuickJumper={false}
+						showSizeChanger={true}
+						showTotal={true}
 						emptyText={
 							<div className={styles.emptyState}>
 								<Icon name='material-receipt' size={48} />
