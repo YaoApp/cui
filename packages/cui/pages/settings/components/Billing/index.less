@@ -1,0 +1,569 @@
+@import '@/styles/preset/vars.less';
+
+.billing {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden; // 防止内容溢出
+}
+
+// 加载状态 - 与其他组件保持完全一致
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 160px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 20px;
+	text-align: center;
+
+	span {
+		font-size: 12px;
+	}
+}
+
+.loadingIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+// 错误状态
+.errorState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 160px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 20px;
+	text-align: center;
+
+	span {
+		font-size: 12px;
+	}
+}
+
+.errorIcon {
+	color: var(--color_danger);
+}
+
+.header {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 24px;
+	gap: 16px;
+}
+
+.headerContent {
+	flex: 1;
+	min-width: 0;
+
+	h2 {
+		margin: 0 0 8px 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+	}
+}
+
+.headerActions {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+// 内容垂直堆叠布局 - 支持滚动
+.contentStack {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	padding: 0;
+	overflow: auto; // 支持滚动
+	min-height: 0; // 允许收缩
+
+	// 滚动条基础样式
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		transition: background 0.2s ease;
+		background: transparent; // 默认透明
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	// 鼠标悬停时显示滚动条
+	.billing:hover &::-webkit-scrollbar-thumb {
+		background: var(--color_border_light);
+
+		&:hover {
+			background: var(--color_dot);
+		}
+	}
+}
+
+// 卡片基础样式 - 采用与 Subscription 相同的样式
+.planCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden; // 确保圆角正确显示
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0; // 防止被压缩
+}
+
+// 卡片头部 - 采用与 Subscription 相同的样式
+.cardHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	background: var(--color_neo_bg_header);
+	flex-shrink: 0;
+
+	h3 {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+}
+
+.cardTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.cardIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.cardActions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.detailsLink {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	background: none;
+	border: none;
+	color: var(--color_main);
+	font-size: 12px;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background-color: var(--color_main_hover_bg);
+		color: var(--color_main_hover);
+	}
+
+	span {
+		font-weight: 500;
+	}
+
+	// 退款链接特别样式 - 看起来像禁用但实际可点击
+	&.refundLink {
+		color: var(--color_neo_text_secondary);
+		opacity: 0.6;
+		cursor: pointer; // 保持可点击
+
+		&:hover {
+			background-color: rgba(0, 0, 0, 0.04);
+			color: var(--color_neo_text_tertiary);
+			opacity: 0.8;
+		}
+
+		:global(.Icon) {
+			color: inherit;
+		}
+
+		span {
+			color: inherit;
+		}
+	}
+}
+
+// 卡片内容
+.cardContent {
+	padding: 16px;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+// 套餐显示样式 - 参考 Subscription
+.planDisplay {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.planNameWithStatus {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.planName {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	line-height: 1.2;
+	flex: 1;
+}
+
+.planPeriod {
+	font-size: 14px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	margin-top: 4px;
+}
+
+.usageMessage {
+	text-align: center;
+	color: var(--color_neo_text_secondary);
+	font-size: 14px;
+	margin: 40px 0;
+	padding: 20px;
+}
+
+.monthSelectWrapper {
+	min-width: 160px;
+
+	// 自定义 Select 组件样式
+	:global(.Select) {
+		background: var(--color_neo_bg_card);
+		border: 1px solid var(--color_neo_border_field);
+		border-radius: 6px;
+		font-size: 14px;
+		color: var(--color_neo_text_primary);
+
+		&:hover {
+			border-color: var(--color_neo_border_hover);
+		}
+
+		&:focus-within {
+			border-color: var(--color_main);
+			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+		}
+	}
+}
+
+.upcomingInvoice {
+	margin: 24px 0;
+}
+
+.invoiceHeader {
+	margin-bottom: 8px;
+}
+
+.invoiceDate {
+	font-size: 14px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+.invoiceAmount {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.amount {
+	font-size: 32px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+}
+
+.totalAmount {
+	font-size: 16px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+.usageTable {
+	border-top: 1px solid var(--color_neo_border_field);
+	padding-top: 16px;
+	margin-top: 24px;
+}
+
+.tableHeader {
+	display: grid;
+	grid-template-columns: 1fr 100px 80px 100px;
+	gap: 16px;
+	padding: 12px 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color_neo_text_secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.subtotal {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 16px 0;
+	border-top: 1px solid var(--color_neo_border_field);
+	margin-top: 16px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.detailsLink {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	background: none;
+	border: none;
+	color: var(--color_main);
+	font-size: 12px;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background-color: var(--color_main_hover_bg);
+		color: var(--color_main_hover);
+	}
+
+	span {
+		font-weight: 500;
+	}
+}
+
+// 发票部分样式
+.invoicesSection {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	flex-shrink: 0; // 防止被压缩，让表格完整显示
+}
+
+.invoicesHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-shrink: 0; // 防止标题被压缩
+
+	h3 {
+		margin: 0;
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+		line-height: 1.4;
+	}
+}
+
+// 表格相关样式 - 与其他组件保持一致
+.invoiceNumber {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--color_main);
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.description {
+	font-size: 12px;
+	color: var(--color_neo_text_primary);
+}
+
+.amount {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+// 状态样式
+.status {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-size: 10px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.statusPaid {
+	background: var(--color_success_bg);
+	color: var(--color_success);
+}
+
+.statusPending {
+	background: var(--color_warning_bg);
+	color: var(--color_warning);
+}
+
+.statusFailed {
+	background: var(--color_danger_bg);
+	color: var(--color_danger);
+}
+
+.statusRefunded {
+	background: var(--color_info_bg);
+	color: var(--color_info);
+}
+
+// 空状态样式
+.emptyState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px 20px;
+	text-align: center;
+
+	:global(.Icon) {
+		color: var(--color_neo_icon_muted);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+	}
+}
+
+// 面板样式（用于加载和错误状态）
+.panel {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+}
+
+.panelContent {
+	padding: 16px;
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
+	}
+
+	.headerActions {
+		justify-content: center;
+	}
+
+	.summarySection {
+		padding: 16px;
+	}
+
+	.summaryHeader {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+
+		h3 {
+			text-align: center;
+			font-size: 20px;
+		}
+	}
+
+	.summaryPeriod {
+		text-align: center;
+	}
+
+	.tableHeader {
+		grid-template-columns: 1fr 80px 60px 80px;
+		gap: 8px;
+		font-size: 11px;
+	}
+
+	.amount {
+		font-size: 24px;
+	}
+
+	.totalAmount {
+		font-size: 14px;
+	}
+}
+
+@media (max-width: 480px) {
+	.headerContent {
+		h2 {
+			font-size: 20px;
+		}
+	}
+
+	.summarySection {
+		padding: 12px;
+	}
+
+	.summaryHeader h3 {
+		font-size: 18px;
+	}
+
+	.amount {
+		font-size: 20px;
+	}
+
+	.totalAmount {
+		font-size: 12px;
+	}
+
+	.tableHeader {
+		font-size: 10px;
+		gap: 4px;
+	}
+}
+
+// 高对比度主题支持
+@media (prefers-contrast: high) {
+	.summarySection,
+	.panel {
+		border-width: 2px;
+	}
+}
+
+// 减少动画偏好支持
+@media (prefers-reduced-motion: reduce) {
+	.detailsLink {
+		transition: none;
+	}
+}

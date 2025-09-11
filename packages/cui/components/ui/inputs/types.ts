@@ -148,4 +148,6 @@ export interface InputComponentProps {
 	error?: string
 	/** Whether the field is in error state */
 	hasError?: boolean
+	/** Size of the input component */
+	size?: 'small' | 'medium' | 'large'
 }

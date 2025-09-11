@@ -160,12 +160,52 @@ export interface UsageRecord {
 	tokens: number
 }
 
+// Billing 相关类型定义
+export interface PaymentMethod {
+	id: string
+	type: 'card' | 'bank_account'
+	brand?: string // visa, mastercard, amex, etc.
+	last4?: string
+	exp_month?: number
+	exp_year?: number
+}
+
+export interface BillingAddress {
+	line1: string
+	line2?: string
+	city: string
+	state: string
+	postal_code: string
+	country: string
+}
+
+export interface CurrentPlan {
+	id: string
+	name: string
+	amount: number // 金额（分为单位）
+	currency: string
+	interval: 'month' | 'year'
+}
+
+export interface BillingData {
+	customer_id: string
+	current_plan: CurrentPlan
+	next_billing_date?: string
+	payment_method?: PaymentMethod
+	billing_address?: BillingAddress
+}
+
+export type InvoiceStatus = 'paid' | 'pending' | 'failed' | 'refunded'
+
 export interface Invoice {
 	id: string
+	invoice_number: string
 	date: string
-	amount: number
-	status: 'paid' | 'pending' | 'failed'
-	download_url?: string
+	description: string
+	amount: number // 金额（分为单位）
+	currency: string
+	status: InvoiceStatus
+	pdf_url?: string | null
 }
 
 export interface TeamMember {
@@ -568,31 +608,6 @@ export const mockUsageStats: UsageStats = {
 	}))
 }
 
-// Mock invoices
-export const mockInvoices: Invoice[] = [
-	{
-		id: '1',
-		date: '2024-01-01T00:00:00Z',
-		amount: 29.99,
-		status: 'paid',
-		download_url: '#'
-	},
-	{
-		id: '2',
-		date: '2023-12-01T00:00:00Z',
-		amount: 29.99,
-		status: 'paid',
-		download_url: '#'
-	},
-	{
-		id: '3',
-		date: '2023-11-01T00:00:00Z',
-		amount: 29.99,
-		status: 'paid',
-		download_url: '#'
-	}
-]
-
 // Mock team data
 export const mockTeam: Team = {
 	id: '1',
@@ -813,12 +828,6 @@ export const mockApi = {
 	getUsageStats: (): Promise<UsageStats> => {
 		return new Promise((resolve) => {
 			setTimeout(() => resolve(mockUsageStats), 400)
-		})
-	},
-
-	getInvoices: (): Promise<Invoice[]> => {
-		return new Promise((resolve) => {
-			setTimeout(() => resolve(mockInvoices), 300)
 		})
 	},
 
@@ -1237,6 +1246,123 @@ export const mockApi = {
 					records: paginatedRecords,
 					total: records.length
 				})
+			}, 300)
+		})
+	},
+
+	// 获取账单数据
+	getBillingData: (): Promise<BillingData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const billingData: BillingData = {
+					customer_id: 'cus_stripe123456789',
+					current_plan: {
+						id: 'price_pro_monthly',
+						name: 'Pro Plan',
+						amount: 2000, // $20.00 in cents
+						currency: 'USD',
+						interval: 'month'
+					},
+					next_billing_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+					payment_method: {
+						id: 'pm_stripe987654321',
+						type: 'card',
+						brand: 'visa',
+						last4: '4242',
+						exp_month: 12,
+						exp_year: 2025
+					},
+					billing_address: {
+						line1: '123 Main Street',
+						line2: 'Apt 4B',
+						city: 'San Francisco',
+						state: 'CA',
+						postal_code: '94105',
+						country: 'United States'
+					}
+				}
+				resolve(billingData)
+			}, 300)
+		})
+	},
+
+	// 获取发票列表
+	getInvoices: (): Promise<Invoice[]> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const invoices: Invoice[] = [
+					{
+						id: 'in_stripe001',
+						invoice_number: 'INV-2024-001',
+						date: '2024-01-15T00:00:00Z',
+						description: 'Pro Plan - January 2024',
+						amount: 2000,
+						currency: 'USD',
+						status: 'paid',
+						pdf_url: 'https://stripe.com/invoices/inv_stripe001.pdf'
+					},
+					{
+						id: 'in_stripe002',
+						invoice_number: 'INV-2023-012',
+						date: '2023-12-15T00:00:00Z',
+						description: 'Pro Plan - December 2023',
+						amount: 2000,
+						currency: 'USD',
+						status: 'paid',
+						pdf_url: 'https://stripe.com/invoices/inv_stripe002.pdf'
+					},
+					{
+						id: 'in_stripe003',
+						invoice_number: 'INV-2023-011',
+						date: '2023-11-15T00:00:00Z',
+						description: 'Pro Plan - November 2023',
+						amount: 2000,
+						currency: 'USD',
+						status: 'paid',
+						pdf_url: 'https://stripe.com/invoices/inv_stripe003.pdf'
+					},
+					{
+						id: 'in_stripe004',
+						invoice_number: 'INV-2023-010',
+						date: '2023-10-15T00:00:00Z',
+						description: 'Pro Plan - October 2023',
+						amount: 2000,
+						currency: 'USD',
+						status: 'paid',
+						pdf_url: 'https://stripe.com/invoices/inv_stripe004.pdf'
+					},
+					{
+						id: 'in_stripe005',
+						invoice_number: 'INV-2023-009',
+						date: '2023-09-15T00:00:00Z',
+						description: 'Pro Plan - September 2023 + Extra Credits',
+						amount: 2500,
+						currency: 'USD',
+						status: 'paid',
+						pdf_url: 'https://stripe.com/invoices/inv_stripe005.pdf'
+					},
+					{
+						id: 'in_stripe006',
+						invoice_number: 'INV-2023-008',
+						date: '2023-08-15T00:00:00Z',
+						description: 'Pro Plan - August 2023',
+						amount: 2000,
+						currency: 'USD',
+						status: 'refunded',
+						pdf_url: 'https://stripe.com/invoices/inv_stripe006.pdf'
+					},
+					{
+						id: 'in_stripe007',
+						invoice_number: 'INV-2024-002',
+						date: '2024-01-20T00:00:00Z',
+						description: 'Extra Credits Purchase',
+						amount: 5000,
+						currency: 'USD',
+						status: 'pending',
+						pdf_url: null
+					}
+				]
+				resolve(invoices)
 			}, 300)
 		})
 	}

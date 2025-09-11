@@ -35,9 +35,11 @@ export interface PaginatedTableProps<T = any> {
 	showSizeChanger?: boolean
 	showQuickJumper?: boolean
 	showTotal?: boolean
+	showPagination?: boolean // 新增：控制是否显示分页
 
 	// 操作相关
 	actions?: TableAction<T>[]
+	actionsTitle?: string // 自定义操作列标题
 
 	// 样式相关
 	size?: 'small' | 'middle' | 'large'

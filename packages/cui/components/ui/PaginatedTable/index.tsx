@@ -20,7 +20,9 @@ function PaginatedTable<T extends Record<string, any>>({
 	showSizeChanger = true,
 	showQuickJumper = false,
 	showTotal = true,
+	showPagination = true,
 	actions = [],
+	actionsTitle,
 	emptyText,
 	size = 'middle',
 	rowKey
@@ -51,7 +53,7 @@ function PaginatedTable<T extends Record<string, any>>({
 		if (actions.length > 0) {
 			cols.push({
 				key: 'actions',
-				title: is_cn ? '操作' : 'Actions',
+				title: actionsTitle || (is_cn ? '操作' : 'Actions'),
 				dataIndex: 'actions',
 				width: Math.max(100, actions.length * 40),
 				align: 'center' as const,
@@ -225,7 +227,7 @@ function PaginatedTable<T extends Record<string, any>>({
 			</div>
 
 			{/* 自定义分页器 */}
-			{total > 0 && (
+			{showPagination && total > 0 && (
 				<div className={styles.paginationContainer}>
 					{/* 分页信息 */}
 					<div className={styles.paginationInfo}>
