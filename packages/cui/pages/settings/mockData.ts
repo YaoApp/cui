@@ -408,10 +408,10 @@ export const mockMenuGroups: MenuGroup[] = [
 		items: [
 			{
 				id: '7',
-				key: 'referral-codes',
+				key: 'invite',
 				name: { 'zh-CN': '邀请码', 'en-US': 'Invite Code' },
 				icon: 'material-qr_code',
-				path: '/settings/referral-codes'
+				path: '/settings/invite'
 			},
 			{
 				id: '8',

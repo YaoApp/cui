@@ -1,0 +1,907 @@
+@import '@/styles/preset/vars.less';
+
+.invite {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden; // 防止内容溢出
+}
+
+// 加载状态
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	color: var(--color_neo_text_secondary);
+	padding: 60px 20px;
+	text-align: center;
+
+	.loadingIcon {
+		color: var(--color_neo_icon_muted);
+	}
+
+	span {
+		font-size: 14px;
+	}
+}
+
+// 错误状态
+.errorState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	color: var(--color_neo_text_secondary);
+	padding: 60px 20px;
+	text-align: center;
+
+	span {
+		font-size: 14px;
+	}
+}
+
+.errorIcon {
+	color: var(--color_danger);
+}
+
+.header {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 24px;
+	gap: 16px;
+}
+
+.headerContent {
+	flex: 1;
+	min-width: 0;
+
+	h2 {
+		margin: 0 0 8px 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+	}
+}
+
+.headerActions {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+// 临时切换开关样式
+.tempToggle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--color_neo_bg_field);
+	border: 1px solid var(--color_neo_border_field);
+	border-radius: 6px;
+	font-size: 12px;
+}
+
+.toggleLabel {
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+// 内容垂直堆叠布局
+.contentStack {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	padding: 0;
+	overflow: auto; // 支持滚动
+	min-height: 0; // 允许收缩
+
+	// 滚动条基础样式 - 与其他组件一致
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: transparent;
+		border-radius: 3px;
+		transition: background-color 0.2s ease;
+	}
+
+	// 鼠标悬停时显示滚动条
+	.invite:hover &::-webkit-scrollbar-thumb {
+		background-color: var(--color_border_light);
+
+		&:hover {
+			background-color: var(--color_dot);
+		}
+	}
+}
+
+// ========== S1: 邀请码呈现 ==========
+.inviteCodeCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+	position: relative;
+
+	// Influencer 高级样式
+	&.influencerMode {
+		background: linear-gradient(135deg, #fef7cd 0%, #fff9e6 50%, #ffffff 100%);
+		border: 2px solid #f59e0b;
+		box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 3px;
+			background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+		}
+
+		.cardHeader {
+			background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+			border-bottom: 1px solid #f3d078;
+
+			.cardTitle h3 {
+				background: linear-gradient(90deg, #92400e, #d97706);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				font-weight: 700;
+			}
+
+			.cardIcon {
+				color: #f59e0b;
+			}
+		}
+
+		// Dark mode 优化
+		[data-theme='dark'] & {
+			background: linear-gradient(
+				135deg,
+				rgba(245, 158, 11, 0.15) 0%,
+				rgba(251, 191, 36, 0.1) 50%,
+				var(--color_neo_bg_card) 100%
+			);
+			border: 2px solid #fbbf24;
+			box-shadow: 0 4px 20px rgba(251, 191, 36, 0.25);
+
+			&::before {
+				background: linear-gradient(90deg, #fbbf24 0%, #fcd34d 50%, #fbbf24 100%);
+			}
+
+			.cardHeader {
+				background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(251, 191, 36, 0.15) 100%);
+				border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+
+				.cardTitle h3 {
+					background: linear-gradient(90deg, #fbbf24, #fcd34d);
+					-webkit-background-clip: text;
+					-webkit-text-fill-color: transparent;
+					background-clip: text;
+				}
+
+				.cardIcon {
+					color: #fbbf24;
+				}
+			}
+		}
+	}
+}
+
+.cardHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	background: var(--color_neo_bg_header);
+	flex-shrink: 0;
+
+	h3 {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+}
+
+.cardTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.cardIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.cardActions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.detailsLink {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	background: none;
+	border: none;
+	color: var(--color_main);
+	font-size: 12px;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background-color: var(--color_main_hover_bg);
+		color: var(--color_main_hover);
+	}
+
+	span {
+		font-weight: 500;
+	}
+}
+
+// Influencer 认证徽章
+.influencerBadge {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	background: linear-gradient(135deg, #f59e0b, #d97706);
+	color: white;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 12px;
+	border-radius: 20px;
+	box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+
+	span {
+		font-weight: 600;
+	}
+
+	// Dark mode 优化
+	[data-theme='dark'] & {
+		background: linear-gradient(135deg, #fbbf24, #f59e0b);
+		box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+	}
+}
+
+.applicationStatus {
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	background: var(--color_neo_bg_field);
+	color: var(--color_neo_text_secondary);
+
+	&.statusPending {
+		background: var(--color_warning_bg);
+		color: var(--color_warning);
+	}
+
+	&.statusApproved {
+		background: var(--color_success_bg);
+		color: var(--color_success);
+	}
+
+	&.statusRejected {
+		background: var(--color_danger_bg);
+		color: var(--color_danger);
+	}
+}
+
+.cardContent {
+	padding: 16px;
+	flex: 1;
+}
+
+.inviteCodeDisplay {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.codeSection {
+	flex: 1;
+	min-width: 0;
+}
+
+.codeValue {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	letter-spacing: 1px;
+	margin-bottom: 4px;
+}
+
+.codeUrl {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	word-break: break-all;
+}
+
+.codeActions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+// ========== S2: 邀请收益 ==========
+.earningsSection {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	flex-shrink: 0;
+}
+
+.sectionTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+
+	h3 {
+		margin: 0;
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+		flex: 1;
+	}
+}
+
+.sectionIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.sectionMeta {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+	background: var(--color_neo_bg_field);
+	padding: 4px 8px;
+	border-radius: 4px;
+}
+
+.earningsGrid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.earningsCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+
+	// Influencer 模式下的高级样式
+	&.influencerMode {
+		background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #ffffff 100%);
+		border: 2px solid #0ea5e9;
+		box-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 3px;
+			background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 50%, #0ea5e9 100%);
+		}
+
+		.earningsHeader {
+			background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+			border-bottom: 1px solid #7dd3fc;
+
+			.earningsType {
+				background: linear-gradient(90deg, #0c4a6e, #0369a1);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				font-weight: 700;
+			}
+
+			.earningsIcon {
+				color: #0ea5e9;
+			}
+		}
+
+		.earningsAmount {
+			background: linear-gradient(90deg, #0c4a6e, #0369a1);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		// Dark mode 优化
+		[data-theme='dark'] & {
+			background: linear-gradient(
+				135deg,
+				rgba(14, 165, 233, 0.15) 0%,
+				rgba(56, 189, 248, 0.1) 50%,
+				var(--color_neo_bg_card) 100%
+			);
+			border: 2px solid #38bdf8;
+			box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25);
+
+			&::before {
+				background: linear-gradient(90deg, #38bdf8 0%, #7dd3fc 50%, #38bdf8 100%);
+			}
+
+			.earningsHeader {
+				background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(56, 189, 248, 0.15) 100%);
+				border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+
+				.earningsType {
+					background: linear-gradient(90deg, #38bdf8, #7dd3fc);
+					-webkit-background-clip: text;
+					-webkit-text-fill-color: transparent;
+					background-clip: text;
+				}
+
+				.earningsIcon {
+					color: #38bdf8;
+				}
+			}
+
+			.earningsAmount {
+				background: linear-gradient(90deg, #38bdf8, #7dd3fc);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+		}
+	}
+
+	// Commission 卡片特殊样式
+	&.commissionCard.influencerMode {
+		background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #ffffff 100%);
+		border: 2px solid #10b981;
+		box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+
+		&::before {
+			background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #10b981 100%);
+		}
+
+		.earningsHeader {
+			background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+			border-bottom: 1px solid #86efac;
+
+			.earningsType {
+				background: linear-gradient(90deg, #064e3b, #047857);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+
+			.earningsIcon {
+				color: #10b981;
+			}
+		}
+
+		.earningsAmount {
+			background: linear-gradient(90deg, #064e3b, #047857);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		// Dark mode 优化
+		[data-theme='dark'] & {
+			background: linear-gradient(
+				135deg,
+				rgba(16, 185, 129, 0.15) 0%,
+				rgba(52, 211, 153, 0.1) 50%,
+				var(--color_neo_bg_card) 100%
+			);
+			border: 2px solid #34d399;
+			box-shadow: 0 4px 20px rgba(52, 211, 153, 0.25);
+
+			&::before {
+				background: linear-gradient(90deg, #34d399 0%, #6ee7b7 50%, #34d399 100%);
+			}
+
+			.earningsHeader {
+				background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.15) 100%);
+				border-bottom: 1px solid rgba(52, 211, 153, 0.3);
+
+				.earningsType {
+					background: linear-gradient(90deg, #34d399, #6ee7b7);
+					-webkit-background-clip: text;
+					-webkit-text-fill-color: transparent;
+					background-clip: text;
+				}
+
+				.earningsIcon {
+					color: #34d399;
+				}
+			}
+
+			.earningsAmount {
+				background: linear-gradient(90deg, #34d399, #6ee7b7);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+		}
+	}
+}
+
+.earningsHeader {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	background: var(--color_neo_bg_header);
+}
+
+.earningsIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.earningsType {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.earningsContent {
+	padding: 16px;
+	flex: 1;
+}
+
+.earningsAmount {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	margin-bottom: 4px;
+	line-height: 1.2;
+}
+
+.earningsLabel {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	margin-bottom: 8px;
+	font-weight: 500;
+}
+
+.earningsDetail {
+	font-size: 12px;
+	color: var(--color_neo_text_tertiary);
+	line-height: 1.4;
+}
+
+.rewardAmount {
+	color: var(--color_main);
+	font-weight: 600;
+	margin-left: 4px;
+}
+
+.commissionRate {
+	color: var(--color_main);
+	font-weight: 700;
+	font-size: 13px;
+}
+
+.noCommission {
+	color: var(--color_neo_text_secondary);
+	font-style: italic;
+}
+
+// ========== S3: 被邀请人收益 ==========
+.inviteeSection {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	flex-shrink: 0;
+}
+
+.inviteeGrid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 16px;
+}
+
+.inviteeSingleCard {
+	.inviteeCard {
+		width: 100%;
+	}
+}
+
+.inviteeCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+
+	// Influencer 模式下的高级样式
+	&.influencerMode {
+		background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 50%, #ffffff 100%);
+		border: 2px solid #c084fc;
+		box-shadow: 0 4px 20px rgba(192, 132, 252, 0.15);
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 3px;
+			background: linear-gradient(90deg, #c084fc 0%, #d8b4fe 50%, #c084fc 100%);
+		}
+
+		.inviteeHeader {
+			background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%);
+			border-bottom: 1px solid #ddd6fe;
+
+			.inviteeType {
+				background: linear-gradient(90deg, #581c87, #7c3aed);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				font-weight: 700;
+			}
+
+			.inviteeIcon {
+				color: #c084fc;
+			}
+		}
+
+		.inviteeAmount {
+			background: linear-gradient(90deg, #581c87, #7c3aed);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		// Dark mode 优化
+		[data-theme='dark'] & {
+			background: linear-gradient(
+				135deg,
+				rgba(192, 132, 252, 0.15) 0%,
+				rgba(216, 180, 254, 0.1) 50%,
+				var(--color_neo_bg_card) 100%
+			);
+			border: 2px solid #d8b4fe;
+			box-shadow: 0 4px 20px rgba(216, 180, 254, 0.25);
+
+			&::before {
+				background: linear-gradient(90deg, #d8b4fe 0%, #e9d5ff 50%, #d8b4fe 100%);
+			}
+
+			.inviteeHeader {
+				background: linear-gradient(
+					135deg,
+					rgba(192, 132, 252, 0.2) 0%,
+					rgba(216, 180, 254, 0.15) 100%
+				);
+				border-bottom: 1px solid rgba(216, 180, 254, 0.3);
+
+				.inviteeType {
+					background: linear-gradient(90deg, #d8b4fe, #e9d5ff);
+					-webkit-background-clip: text;
+					-webkit-text-fill-color: transparent;
+					background-clip: text;
+				}
+
+				.inviteeIcon {
+					color: #d8b4fe;
+				}
+			}
+
+			.inviteeAmount {
+				background: linear-gradient(90deg, #d8b4fe, #e9d5ff);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+		}
+	}
+}
+
+.inviteeHeader {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	background: var(--color_neo_bg_header);
+}
+
+.inviteeIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.inviteeType {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.inviteeContent {
+	padding: 16px;
+	flex: 1;
+}
+
+.inviteeCount,
+.inviteeAmount {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	margin-bottom: 4px;
+	line-height: 1.2;
+}
+
+.inviteeLabel {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	margin-bottom: 8px;
+	font-weight: 500;
+}
+
+.inviteeDetail {
+	font-size: 12px;
+	color: var(--color_neo_text_tertiary);
+	line-height: 1.4;
+}
+
+.bonusAmount {
+	color: var(--color_main);
+	font-weight: 600;
+}
+
+// ========== 申请模态框 ==========
+.applicationModal {
+	.ant-modal-header {
+		border-bottom: 1px solid var(--color_neo_border_field);
+		background: var(--color_neo_bg_header);
+	}
+
+	.ant-modal-body {
+		padding: 20px;
+	}
+}
+
+.modalContent {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.modalDescription {
+	font-size: 14px;
+	color: var(--color_neo_text_secondary);
+	line-height: 1.5;
+	padding: 12px 16px;
+	background: var(--color_neo_bg_field);
+	border-radius: 8px;
+	border-left: 3px solid var(--color_main);
+}
+
+.applicationForm {
+	.ant-form-item {
+		margin-bottom: 16px;
+	}
+
+	.ant-form-item-label > label {
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	.ant-input,
+	.ant-input:focus {
+		background: var(--color_neo_bg_field);
+		border: 1px solid var(--color_neo_border_field);
+
+		&:hover {
+			border-color: var(--color_neo_border_hover);
+		}
+
+		&:focus {
+			border-color: var(--color_main);
+			box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+		}
+	}
+}
+
+.modalActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	padding-top: 16px;
+	border-top: 1px solid var(--color_neo_border_field);
+}
+
+// ========== 响应式设计 ==========
+@media (max-width: 768px) {
+	.earningsGrid {
+		grid-template-columns: 1fr;
+	}
+
+	.inviteeGrid {
+		grid-template-columns: 1fr;
+	}
+
+	.inviteCodeDisplay {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.codeActions {
+		width: 100%;
+		justify-content: flex-end;
+	}
+
+	.tempToggle {
+		display: none; // 在小屏幕上隐藏临时切换开关
+	}
+}
+
+@media (max-width: 480px) {
+	.header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.headerActions {
+		width: 100%;
+		justify-content: flex-end;
+	}
+
+	.cardHeader {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+
+	.cardActions {
+		align-self: flex-end;
+	}
+}
