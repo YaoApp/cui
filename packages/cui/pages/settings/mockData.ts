@@ -415,10 +415,10 @@ export const mockMenuGroups: MenuGroup[] = [
 			},
 			{
 				id: '8',
-				key: 'referral-list',
+				key: 'commissions',
 				name: { 'zh-CN': '邀请记录', 'en-US': 'Commissions' },
 				icon: 'material-people_outline',
-				path: '/settings/referral-list'
+				path: '/settings/commissions'
 			}
 		]
 	},

@@ -11,6 +11,7 @@ import Subscription from './components/Subscription'
 import Balance from './components/Balance'
 import Billing from './components/Billing'
 import Invite from './components/Invite'
+import Commissions from './components/Commissions'
 import { mockApi, MenuItem, MenuGroup } from './mockData'
 import styles from './index.less'
 
@@ -46,7 +47,8 @@ const Settings = () => {
 			subscription: Subscription,
 			balance: Balance,
 			billing: Billing,
-			invite: Invite
+			invite: Invite,
+			commissions: Commissions
 			// 其他组件可以在这里注册，未注册的会显示 ComingSoon
 		}),
 		[]

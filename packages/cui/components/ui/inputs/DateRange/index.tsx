@@ -19,6 +19,7 @@ export interface DateRangeProps {
 	format?: string
 	size?: 'small' | 'default' | 'large'
 	className?: string
+	placement?: 'bottomLeft' | 'bottomRight' | 'topLeft' | 'topRight' | 'auto'
 }
 
 export default function DateRange({
@@ -28,12 +29,14 @@ export default function DateRange({
 	disabled = false,
 	presets = [],
 	size = 'default',
-	className = ''
+	className = '',
+	placement = 'auto'
 }: DateRangeProps) {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [isOpen, setIsOpen] = useState(false)
 	const [isDropup, setIsDropup] = useState(false)
+	const [alignRight, setAlignRight] = useState(false)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -62,15 +65,48 @@ export default function DateRange({
 
 	// 计算下拉框位置
 	const calculateDropdownPosition = () => {
-		if (!containerRef.current) return false
+		if (!containerRef.current) return { dropup: false, alignRight: false }
 
 		const rect = containerRef.current.getBoundingClientRect()
 		const viewportHeight = window.innerHeight
+		const viewportWidth = window.innerWidth
 		const dropdownHeight = 280
+		const dropdownWidth = 320
 		const spaceBelow = viewportHeight - rect.bottom
 		const spaceAbove = rect.top
+		const spaceRight = viewportWidth - rect.left
+		const spaceLeft = rect.right
 
-		return spaceBelow < dropdownHeight && spaceAbove > spaceBelow
+		let dropup = false
+		let alignRight = false
+
+		// 根据 placement 属性决定位置
+		switch (placement) {
+			case 'topLeft':
+				dropup = true
+				alignRight = false
+				break
+			case 'topRight':
+				dropup = true
+				alignRight = true
+				break
+			case 'bottomLeft':
+				dropup = false
+				alignRight = false
+				break
+			case 'bottomRight':
+				dropup = false
+				alignRight = true
+				break
+			case 'auto':
+			default:
+				// 自动计算最佳位置
+				dropup = spaceBelow < dropdownHeight && spaceAbove > spaceBelow
+				alignRight = spaceRight < dropdownWidth && spaceLeft > spaceRight
+				break
+		}
+
+		return { dropup, alignRight }
 	}
 
 	// 格式化日期显示
@@ -150,7 +186,9 @@ export default function DateRange({
 		if (disabled) return
 
 		if (!isOpen) {
-			setIsDropup(calculateDropdownPosition())
+			const position = calculateDropdownPosition()
+			setIsDropup(position.dropup)
+			setAlignRight(position.alignRight)
 		}
 		setIsOpen(!isOpen)
 	}
@@ -184,7 +222,12 @@ export default function DateRange({
 
 			{/* 下拉面板 */}
 			{isOpen && (
-				<div ref={dropdownRef} className={`${styles.dropdown} ${isDropup ? styles.dropup : ''}`}>
+				<div
+					ref={dropdownRef}
+					className={`${styles.dropdown} ${isDropup ? styles.dropup : ''} ${
+						alignRight ? styles.alignRight : ''
+					}`}
+				>
 					{/* 预设选项 */}
 					{finalPresets.length > 0 && (
 						<div className={styles.presets}>

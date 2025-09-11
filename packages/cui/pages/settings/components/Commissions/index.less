@@ -1,0 +1,384 @@
+@import '@/styles/preset/vars.less';
+
+.commissions {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden; // 防止内容溢出
+}
+
+// 加载状态
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	color: var(--color_neo_text_secondary);
+	padding: 60px 20px;
+	text-align: center;
+
+	.loadingIcon {
+		color: var(--color_neo_icon_muted);
+	}
+
+	span {
+		font-size: 14px;
+	}
+}
+
+// 错误状态
+.errorState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	color: var(--color_neo_text_secondary);
+	padding: 60px 20px;
+	text-align: center;
+
+	span {
+		font-size: 14px;
+	}
+}
+
+// 空状态
+.emptyState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px 20px;
+	text-align: center;
+
+	:global(.Icon) {
+		color: var(--color_neo_icon_muted);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+	}
+}
+
+.header {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 24px;
+	gap: 16px;
+}
+
+.headerContent {
+	flex: 1;
+	min-width: 0;
+
+	h2 {
+		margin: 0 0 8px 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+	}
+}
+
+.headerActions {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+// 内容垂直堆叠布局 - 支持滚动（与 Usage 一致）
+.contentStack {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	padding: 0;
+	overflow: auto; // 支持滚动
+	min-height: 0; // 允许收缩
+
+	// 滚动条基础样式 - 与 Usage 一致
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		transition: background 0.2s ease;
+		background: transparent; // 默认透明
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	// 鼠标悬停时显示滚动条 - 与 Usage 完全一致
+	.commissions:hover &::-webkit-scrollbar-thumb {
+		background: var(--color_border_light);
+
+		&:hover {
+			background: var(--color_dot);
+		}
+	}
+}
+
+// ========== S1: 统计部分 ==========
+.statsSection {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+	flex-shrink: 0; // 防止被压缩
+}
+
+.statsCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+}
+
+.cardHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	background: var(--color_neo_bg_header);
+	flex-shrink: 0;
+
+	h3 {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+}
+
+// 详情链接样式 - 与 Invite 组件一致
+.detailsLink {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	background: none;
+	border: none;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_main);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-decoration: none;
+	white-space: nowrap;
+
+	&:hover {
+		background: var(--color_bg_hover);
+		color: var(--color_main_hover);
+		text-decoration: none;
+	}
+
+	&:active {
+		background: var(--color_bg_active);
+		color: var(--color_main_active);
+	}
+
+	:global(.Icon) {
+		color: inherit;
+	}
+
+	span {
+		color: inherit;
+	}
+}
+
+.cardTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.cardIcon {
+	color: var(--color_neo_icon_muted);
+}
+
+.cardContent {
+	padding: 16px;
+	flex: 1;
+}
+
+.statsDisplay {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.mainAmount {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--color_neo_text_primary);
+	line-height: 1.2;
+}
+
+.mainLabel {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	font-weight: 500;
+}
+
+.subAmount {
+	font-size: 12px;
+	color: var(--color_neo_text_tertiary);
+	margin-top: 4px;
+}
+
+.monthlyAmount {
+	color: var(--color_main);
+	font-weight: 600;
+}
+
+// Commission 卡片特殊样式
+.commissionCard {
+	.cardIcon {
+		color: var(--color_success);
+	}
+
+	.mainAmount {
+		color: var(--color_success);
+	}
+}
+
+// ========== S2: 记录列表 ==========
+.recordsSection {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	flex-shrink: 0; // 防止被压缩，让表格完整显示
+}
+
+// 状态标签
+.statusTag {
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 11px;
+	font-weight: 500;
+	text-align: center;
+	min-width: 60px;
+	display: inline-block;
+}
+
+.statusCompleted {
+	background: var(--color_success_bg);
+	color: var(--color_success);
+}
+
+.statusPending {
+	background: var(--color_warning_bg);
+	color: var(--color_warning);
+}
+
+.statusFailed {
+	background: var(--color_danger_bg);
+	color: var(--color_danger);
+}
+
+// 类型标签
+.typeTag {
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-size: 10px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.typeCredits {
+	background: var(--color_info_bg);
+	color: var(--color_info);
+}
+
+.typeCommission {
+	background: var(--color_success_bg);
+	color: var(--color_success);
+}
+
+// 表格内容样式
+.description {
+	color: var(--color_neo_text_primary);
+	font-size: 13px;
+}
+
+.inviteeName {
+	color: var(--color_neo_text_secondary);
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.amount {
+	font-weight: 600;
+	font-size: 13px;
+}
+
+.creditsAmount {
+	color: var(--color_info);
+}
+
+.commissionAmount {
+	color: var(--color_success);
+}
+
+// Actions 列优化 - 使用默认计算宽度
+:global(.ant-table-thead > tr > th:last-child),
+:global(.ant-table-tbody > tr > td:last-child) {
+	width: 80px !important;
+	min-width: 80px !important;
+	max-width: 80px !important;
+}
+
+// ========== 响应式设计 ==========
+@media (max-width: 768px) {
+	.statsSection {
+		grid-template-columns: 1fr;
+	}
+
+	.header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+}
+
+@media (max-width: 480px) {
+	.cardHeader {
+		padding: 10px 12px;
+	}
+
+	.cardContent {
+		padding: 12px;
+	}
+
+	.mainAmount {
+		font-size: 20px;
+	}
+}
