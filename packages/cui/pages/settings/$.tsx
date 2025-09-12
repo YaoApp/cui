@@ -12,6 +12,7 @@ import Balance from './components/Balance'
 import Billing from './components/Billing'
 import Invite from './components/Invite'
 import Commissions from './components/Commissions'
+import LLMProviders from './components/LLMProviders'
 import { mockApi, MenuItem, MenuGroup } from './mockData'
 import styles from './index.less'
 
@@ -48,7 +49,8 @@ const Settings = () => {
 			balance: Balance,
 			billing: Billing,
 			invite: Invite,
-			commissions: Commissions
+			commissions: Commissions,
+			'llm-providers': LLMProviders
 			// 其他组件可以在这里注册，未注册的会显示 ComingSoon
 		}),
 		[]

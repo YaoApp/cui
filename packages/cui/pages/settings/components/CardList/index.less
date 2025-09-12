@@ -1,0 +1,104 @@
+@import '@/styles/preset/vars.less';
+
+.cardList {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	// 不设置 overflow，让父容器处理滚动
+}
+
+// 加载状态
+.loadingContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	color: var(--color_neo_text_secondary);
+	padding: 60px 20px;
+	text-align: center;
+
+	p {
+		margin: 0;
+		font-size: 14px;
+	}
+}
+
+// 加载图标动画
+.loadingIcon {
+	animation: rotate 2s linear infinite;
+	color: var(--color_neo_icon_muted);
+}
+
+@keyframes rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+// 空状态
+.emptyState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 40px 20px;
+	text-align: center;
+
+	:global(.Icon) {
+		color: var(--color_neo_icon_muted);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+	}
+}
+
+// 卡片网格 - 与 Subscription 的网格布局一致
+.cardGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+	gap: 24px;
+	padding: 0;
+}
+
+.cardWrapper {
+	// 基础包装器样式，具体卡片样式由外部定义
+}
+
+// 加载更多指示器
+.loadingMore {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px;
+	color: var(--color_neo_text_secondary);
+	font-size: 14px;
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.cardGrid {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+}
+
+@media (max-width: 480px) {
+	.cardGrid {
+		gap: 8px;
+	}
+
+	.loadingContainer,
+	.emptyState {
+		padding: 40px 16px;
+	}
+}
