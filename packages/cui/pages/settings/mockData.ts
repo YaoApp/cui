@@ -436,10 +436,10 @@ export const mockMenuGroups: MenuGroup[] = [
 			},
 			{
 				id: '10',
-				key: 'stripe-integration',
-				name: { 'zh-CN': 'Stripe 集成', 'en-US': 'Stripe Integration' },
+				key: 'stripe',
+				name: { 'zh-CN': 'Stripe', 'en-US': 'Stripe' },
 				icon: 'material-payment',
-				path: '/settings/stripe-integration'
+				path: '/settings/stripe'
 			},
 			{
 				id: '11',

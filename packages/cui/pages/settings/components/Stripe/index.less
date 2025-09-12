@@ -1,53 +1,42 @@
-@import '@/styles/preset/vars.less';
+// Stripe 页面样式 - 基于 LLMProviders 样式
 
-// 主容器 - 与 Preferences 保持一致
-.llmProviders {
-	flex: 1;
-	min-width: 0;
+.stripe {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	overflow: hidden;
-	font-size: 12px; // 统一字体大小
+	min-height: 0;
 }
 
-// 页面头部 - 与 Preferences 保持一致
+// 页面头部
 .header {
-	flex-shrink: 0;
 	display: flex;
+	align-items: center;
 	justify-content: space-between;
-	align-items: flex-start;
-	margin-bottom: 20px;
+	margin-bottom: 24px;
 	margin-right: 12px; // 为按钮 hover 效果留出空间
-	gap: 16px;
-
-	.headerContent {
-		flex: 1;
-	}
-
-	.headerActions {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-	}
-
-	h2 {
-		margin: 0 0 6px 0;
-		font-size: 20px;
-		font-weight: 600;
-		color: var(--color_text);
-		line-height: 1.3;
-	}
-
-	p {
-		margin: 0;
-		font-size: 12px;
-		color: var(--color_text_grey);
-		line-height: 1.4;
-	}
+	flex-shrink: 0;
 }
 
-// 内容垂直堆叠布局 - 与 Subscription 保持一致
+.headerContent {
+	flex: 1;
+}
+
+.title {
+	font-size: 24px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+	margin: 0 0 8px 0;
+	line-height: 1.3;
+}
+
+.subtitle {
+	font-size: 14px;
+	color: var(--color_neo_text_secondary);
+	margin: 0;
+	line-height: 1.4;
+}
+
+// 内容垂直堆叠布局 - 与 LLMProviders 保持一致
 .contentStack {
 	flex: 1;
 	display: flex;
@@ -73,8 +62,8 @@
 		background: transparent;
 	}
 
-	// 鼠标悬停时显示滚动条 - 与 Subscription/Usage 完全一致
-	.llmProviders:hover &::-webkit-scrollbar-thumb {
+	// 鼠标悬停时显示滚动条 - 与 LLMProviders 完全一致
+	.stripe:hover &::-webkit-scrollbar-thumb {
 		background: var(--color_border_light);
 
 		&:hover {
@@ -83,12 +72,12 @@
 	}
 }
 
-// 提供商卡片样式 - 与 Subscription 保持完全一致
-.providerCardWrapper {
+// 配置卡片样式 - 与 LLMProviders 完全一致
+.configCardWrapper {
 	// 卡片包装器样式由 CardList 控制
 }
 
-.providerCard {
+.configCard {
 	background: var(--color_neo_bg_card);
 	border: 1px solid var(--color_neo_border_card);
 	border-radius: 12px;
@@ -97,7 +86,7 @@
 	display: flex;
 	flex-direction: column;
 	flex-shrink: 0;
-	// 固定高度确保一致性 - 增加高度以容纳两行描述
+	// 固定高度确保一致性
 	height: 160px;
 	min-height: 160px;
 	max-height: 160px;
@@ -110,7 +99,7 @@
 	}
 }
 
-// 卡片头部 - 与 Subscription 完全一致
+// 卡片头部
 .cardHeader {
 	display: flex;
 	align-items: center;
@@ -141,7 +130,7 @@
 	color: var(--color_neo_icon_muted);
 }
 
-.providerLabel {
+.configLabel {
 	margin: 0;
 	font-size: 14px;
 	font-weight: 600;
@@ -175,7 +164,7 @@
 	}
 }
 
-// 卡片内容 - 与 Subscription 一致
+// 卡片内容
 .cardContent {
 	padding: 16px;
 	flex: 1;
@@ -185,7 +174,7 @@
 	position: relative;
 }
 
-.providerDescription {
+.configDescription {
 	margin: 0;
 	font-size: 14px;
 	color: var(--color_neo_text_secondary);
@@ -199,12 +188,12 @@
 	-webkit-box-orient: vertical;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	// 确保两行的固定高度 - 增加高度以实际显示两行
+	// 确保两行的固定高度
 	height: 63px; // 14px * 1.5 * 3 = 63px (给足空间显示两行)
 	max-height: 63px;
 }
 
-.modelTag {
+.keyTag {
 	position: absolute;
 	bottom: 16px;
 	right: 16px;
@@ -227,47 +216,29 @@
 		gap: 12px;
 	}
 
-	.headerActions {
-		justify-content: center;
+	.title {
+		font-size: 20px;
 	}
 
-	.headerContent {
-		h2 {
-			font-size: 20px;
-		}
-	}
-
-	.cardHeader {
-		padding: 12px;
-	}
-
-	.cardContent {
-		padding: 12px;
-	}
-
-	.providerLabel {
-		font-size: 14px;
+	.contentStack {
+		gap: 16px;
 	}
 }
 
 @media (max-width: 480px) {
-	.cardHeader {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 8px;
+	.header {
+		margin-bottom: 16px;
 	}
 
-	.cardActions {
-		align-self: flex-end;
+	.title {
+		font-size: 18px;
 	}
 
-	.detailItem {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 4px;
+	.subtitle {
+		font-size: 13px;
 	}
 
-	.detailLabel {
-		min-width: auto;
+	.contentStack {
+		gap: 12px;
 	}
 }

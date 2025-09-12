@@ -13,6 +13,8 @@ import Billing from './components/Billing'
 import Invite from './components/Invite'
 import Commissions from './components/Commissions'
 import LLMProviders from './components/LLMProviders'
+import Stripe from './components/Stripe'
+import MCPServers from './components/MCPServers'
 import { mockApi, MenuItem, MenuGroup } from './mockData'
 import styles from './index.less'
 
@@ -50,7 +52,9 @@ const Settings = () => {
 			billing: Billing,
 			invite: Invite,
 			commissions: Commissions,
-			'llm-providers': LLMProviders
+			'llm-providers': LLMProviders,
+			stripe: Stripe,
+			'mcp-servers': MCPServers
 			// 其他组件可以在这里注册，未注册的会显示 ComingSoon
 		}),
 		[]
