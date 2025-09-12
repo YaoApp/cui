@@ -436,17 +436,17 @@ export const mockMenuGroups: MenuGroup[] = [
 			},
 			{
 				id: '10',
-				key: 'stripe',
-				name: { 'zh-CN': 'Stripe', 'en-US': 'Stripe' },
-				icon: 'material-payment',
-				path: '/settings/stripe'
-			},
-			{
-				id: '11',
 				key: 'mcp-servers',
 				name: { 'zh-CN': 'MCP 服务器', 'en-US': 'MCP Servers' },
 				icon: 'material-dns',
 				path: '/settings/mcp-servers'
+			},
+			{
+				id: '11',
+				key: 'stripe',
+				name: { 'zh-CN': 'Stripe', 'en-US': 'Stripe' },
+				icon: 'material-payment',
+				path: '/settings/stripe'
 			}
 		]
 	},
