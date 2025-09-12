@@ -1,0 +1,138 @@
+@import '../../../../styles/preset/vars.less';
+
+.security {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden; // 防止内容溢出
+
+	.header {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 24px;
+		gap: 16px;
+
+		.headerContent {
+			flex: 1;
+			min-width: 0;
+
+			h2 {
+				margin: 0 0 8px 0;
+				font-size: 24px;
+				font-weight: 600;
+				color: var(--color_neo_text_primary);
+			}
+
+			p {
+				margin: 0;
+				font-size: 14px;
+				color: var(--color_neo_text_secondary);
+				line-height: 1.5;
+			}
+		}
+
+		.headerActions {
+			flex-shrink: 0;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+	}
+
+	// 加载状态 - 与 Plans/Usage 组件保持一致
+	.loadingState {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 160px;
+		gap: 12px;
+		color: var(--color_neo_text_secondary);
+		padding: 20px;
+		text-align: center;
+
+		span {
+			font-size: 12px;
+		}
+	}
+
+	.loadingIcon {
+		color: var(--color_neo_icon_muted);
+	}
+
+	// 错误状态
+	.errorState {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 160px;
+		gap: 12px;
+		color: var(--color_neo_text_secondary);
+		padding: 20px;
+		text-align: center;
+
+		span {
+			font-size: 12px;
+		}
+	}
+
+	.errorIcon {
+		color: var(--color_neo_icon_muted);
+	}
+}
+
+// 内容垂直堆叠布局 - 支持滚动（与 Usage 完全一致）
+.contentStack {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	padding: 0;
+	overflow: auto; // 支持滚动
+	min-height: 0; // 允许收缩
+
+	// 滚动条基础样式 - 与 Usage 一致
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		transition: background 0.2s ease;
+		background: transparent; // 默认透明
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	// 鼠标悬停时显示滚动条 - 与 Usage 完全一致
+	.security:hover &::-webkit-scrollbar-thumb {
+		background: var(--color_border_light);
+
+		&:hover {
+			background: var(--color_dot);
+		}
+	}
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.security {
+		.header {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 16px;
+
+			.headerActions {
+				justify-content: flex-end;
+			}
+		}
+	}
+}

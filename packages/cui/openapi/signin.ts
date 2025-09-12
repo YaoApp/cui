@@ -7,6 +7,7 @@ import * as jose from 'jose'
  */
 export interface SigninProvider {
 	id: string
+	label: string
 	title: string
 	logo?: string
 	color: string

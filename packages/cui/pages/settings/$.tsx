@@ -15,6 +15,7 @@ import Commissions from './components/Commissions'
 import LLMProviders from './components/LLMProviders'
 import Stripe from './components/Stripe'
 import MCPServers from './components/MCPServers'
+import Security from './components/Security'
 import { mockApi, MenuItem, MenuGroup } from './mockData'
 import styles from './index.less'
 
@@ -54,7 +55,8 @@ const Settings = () => {
 			commissions: Commissions,
 			'llm-providers': LLMProviders,
 			stripe: Stripe,
-			'mcp-servers': MCPServers
+			'mcp-servers': MCPServers,
+			security: Security
 			// 其他组件可以在这里注册，未注册的会显示 ComingSoon
 		}),
 		[]

@@ -1,0 +1,214 @@
+@import '../../../../../styles/preset/vars.less';
+
+.oauthProvidersCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+
+	.cardHeader {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--color_neo_border_field);
+		background: var(--color_neo_bg_header);
+		flex-shrink: 0;
+
+		.cardTitle {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+
+			.cardIcon {
+				color: var(--color_neo_icon_muted);
+			}
+
+			h3 {
+				margin: 0;
+				font-size: 14px;
+				font-weight: 600;
+				color: var(--color_neo_text_primary);
+			}
+		}
+
+		.cardActions {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+	}
+
+	.cardContent {
+		padding: 24px;
+	}
+
+	// 提供商列表样式
+	.providersList {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.providerItem {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		align-items: center;
+		gap: 16px;
+		padding: 16px 0;
+
+		&:not(:last-child) {
+			border-bottom: 1px solid var(--color_neo_border_card);
+		}
+
+		&:first-child {
+			padding-top: 0;
+		}
+
+		&:last-child {
+			padding-bottom: 0;
+		}
+	}
+
+	// 左侧品牌信息区域样式
+	.providerInfo {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		flex-shrink: 0;
+	}
+
+	// LOGO 区域样式
+	.providerLogo {
+		width: 48px;
+		height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 12px;
+		flex-shrink: 0;
+
+		img {
+			width: 24px;
+			height: 24px;
+			object-fit: contain;
+		}
+	}
+
+	// 品牌名称样式
+	.providerName {
+		font-size: 16px;
+		font-weight: 700;
+		color: var(--color_neo_text_primary);
+		white-space: nowrap;
+	}
+
+	// 右侧内容区域样式
+	.providerContent {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 44px;
+
+		.connectedInfo {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			width: 100%;
+		}
+
+		.notConnectedInfo {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			width: 100%;
+		}
+	}
+
+	// 加载状态
+	.loadingState {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		padding: 40px 20px;
+		color: var(--color_neo_text_secondary);
+		text-align: center;
+
+		span {
+			font-size: 14px;
+		}
+	}
+
+	// 空状态
+	.emptyState {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		padding: 40px 20px;
+		color: var(--color_neo_text_secondary);
+		text-align: center;
+
+		.emptyIcon {
+			color: var(--color_neo_icon_muted);
+			margin-bottom: 16px;
+			opacity: 0.6;
+		}
+
+		.emptyTitle {
+			font-size: 16px;
+			font-weight: 500;
+			color: var(--color_neo_text_primary);
+			margin-bottom: 8px;
+		}
+
+		.emptyDescription {
+			font-size: 14px;
+			color: var(--color_neo_text_secondary);
+			line-height: 1.4;
+			max-width: 300px;
+		}
+
+		p {
+			margin: 0;
+			font-size: 14px;
+		}
+	}
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.oauthProvidersCard {
+		.providerItem {
+			flex-direction: column;
+			gap: 12px;
+			align-items: stretch;
+
+			.providerInfo {
+				width: 100%; // 移动端占满宽度
+				justify-content: flex-start;
+			}
+
+			.providerContent {
+				.connectedInfo,
+				.notConnectedInfo {
+					flex-direction: column;
+					align-items: stretch;
+					gap: 12px;
+
+					.connectedStatus {
+						align-items: flex-start;
+					}
+				}
+			}
+		}
+	}
+}

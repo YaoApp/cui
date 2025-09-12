@@ -16,6 +16,42 @@ export interface User {
 	updated_at: string
 }
 
+// 安全相关数据类型
+export interface ContactInfo {
+	email?: string
+	phone?: string
+	email_verified: boolean
+	phone_verified: boolean
+}
+
+export interface OAuthProvider {
+	provider: string
+	provider_id: string
+	email?: string
+	name?: string
+	avatar?: string
+	connected_at: string
+}
+
+export interface TwoFactorMethod {
+	type: 'sms' | 'totp'
+	enabled: boolean
+	phone?: string // for SMS
+	secret?: string // for TOTP (base32 encoded)
+	backup_codes?: string[] // backup codes for TOTP
+	enabled_at?: string
+}
+
+export interface SecurityData {
+	contact: ContactInfo
+	oauthProviders: OAuthProvider[]
+	twoFactor: {
+		enabled: boolean
+		primary_method?: 'sms' | 'totp'
+		methods: TwoFactorMethod[]
+	}
+}
+
 export interface MenuItem {
 	id: string
 	key: string
@@ -1363,6 +1399,58 @@ export const mockApi = {
 					}
 				]
 				resolve(invoices)
+			}, 300)
+		})
+	},
+
+	// 获取安全信息
+	getSecurityData: (): Promise<SecurityData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const securityData: SecurityData = {
+					contact: {
+						email: 'user@example.com',
+						phone: '+1234567890',
+						email_verified: true,
+						phone_verified: false
+					},
+					oauthProviders: [
+						{
+							provider: 'google',
+							provider_id: 'google_123456789',
+							email: 'user@gmail.com',
+							name: 'John Doe',
+							avatar: 'https://lh3.googleusercontent.com/a/default-user',
+							connected_at: '2024-01-15T10:30:00Z'
+						},
+						{
+							provider: 'github',
+							provider_id: 'github_987654321',
+							email: 'user@example.com',
+							name: 'johndoe',
+							avatar: 'https://avatars.githubusercontent.com/u/123456?v=4',
+							connected_at: '2024-02-20T14:45:00Z'
+						}
+					],
+					twoFactor: {
+						enabled: false,
+						primary_method: undefined,
+						methods: [
+							{
+								type: 'sms',
+								enabled: false,
+								phone: '+1234567890'
+							},
+							{
+								type: 'totp',
+								enabled: false,
+								secret: undefined,
+								backup_codes: undefined
+							}
+						]
+					}
+				}
+				resolve(securityData)
 			}, 300)
 		})
 	}

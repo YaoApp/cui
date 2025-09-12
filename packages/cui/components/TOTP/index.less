@@ -1,0 +1,206 @@
+@import '../../styles/preset/vars.less';
+
+.totpModal {
+	.ant-modal-body {
+		padding: 24px;
+	}
+}
+
+.totpSetup {
+	.setupStep,
+	.verifyStep,
+	.backupStep {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+	}
+
+	.stepHeader {
+		text-align: center;
+
+		.stepIcon {
+			color: var(--color_main);
+			margin-bottom: 12px;
+		}
+
+		.stepTitle {
+			font-size: 18px;
+			font-weight: 600;
+			color: var(--color_neo_text_primary);
+			margin-bottom: 8px;
+		}
+
+		.stepDescription {
+			font-size: 14px;
+			color: var(--color_neo_text_secondary);
+			line-height: 1.5;
+			max-width: 400px;
+			margin: 0 auto;
+		}
+	}
+
+	.qrCodeContainer {
+		display: flex;
+		justify-content: center;
+		padding: 20px;
+		background: var(--color_neo_bg_field);
+		border: 1px solid var(--color_neo_border_field);
+		border-radius: var(--radius);
+
+		.qrCodePlaceholder {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 16px;
+			text-align: center;
+
+			svg {
+				color: var(--color_main);
+				opacity: 0.8;
+			}
+
+			.qrCodeText {
+				font-size: 14px;
+				color: var(--color_neo_text_secondary);
+				max-width: 300px;
+			}
+
+			.qrCodeUrl {
+				padding: 8px 12px;
+				background: var(--color_bg);
+				border: 1px solid var(--color_border);
+				border-radius: 4px;
+				max-width: 100%;
+				overflow-x: auto;
+
+				code {
+					font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+					font-size: 11px;
+					color: var(--color_neo_text_tertiary);
+					word-break: break-all;
+				}
+			}
+		}
+	}
+
+	.manualEntry {
+		.manualTitle {
+			font-size: 14px;
+			font-weight: 500;
+			color: var(--color_neo_text_primary);
+			margin-bottom: 8px;
+			text-align: center;
+		}
+
+		.secretCode {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			justify-content: center;
+			padding: 12px;
+			background: var(--color_neo_bg_field);
+			border: 1px solid var(--color_neo_border_field);
+			border-radius: var(--radius);
+
+			code {
+				font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+				font-size: 14px;
+				color: var(--color_neo_text_primary);
+				background: none;
+				border: none;
+				letter-spacing: 1px;
+			}
+		}
+	}
+
+	.verificationForm {
+		display: flex;
+		justify-content: center;
+
+		:global(.cui-input) {
+			max-width: 200px;
+			text-align: center;
+			font-size: 18px;
+			font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+			letter-spacing: 2px;
+		}
+	}
+
+	.backupCodes {
+		.codesGrid {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 12px;
+			margin-bottom: 16px;
+
+			.backupCode {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 12px;
+				background: var(--color_neo_bg_field);
+				border: 1px solid var(--color_neo_border_field);
+				border-radius: var(--radius);
+
+				code {
+					font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+					font-size: 14px;
+					color: var(--color_neo_text_primary);
+					background: none;
+					border: none;
+					letter-spacing: 1px;
+				}
+			}
+		}
+
+		.backupActions {
+			display: flex;
+			justify-content: center;
+			gap: 12px;
+		}
+	}
+
+	.warning {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px;
+		background: var(--color_warning_bg);
+		border: 1px solid var(--color_warning);
+		border-radius: var(--radius);
+		color: var(--color_warning);
+		font-size: 13px;
+		line-height: 1.4;
+
+		svg {
+			flex-shrink: 0;
+		}
+	}
+
+	.stepActions {
+		display: flex;
+		justify-content: center;
+		gap: 12px;
+		padding-top: 8px;
+	}
+}
+
+// 响应式设计
+@media (max-width: 480px) {
+	.totpSetup {
+		.backupCodes {
+			.codesGrid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		.stepActions {
+			flex-direction: column;
+			align-items: stretch;
+
+			button {
+				width: 100%;
+			}
+		}
+	}
+}

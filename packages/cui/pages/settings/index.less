@@ -45,7 +45,7 @@
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	overflow: hidden;
+	// overflow: hidden; // 注释掉，让子组件控制滚动
 }
 
 .comingSoon {
@@ -138,21 +138,21 @@
 	}
 }
 
-// 滚动条样式
-.main::-webkit-scrollbar {
-	width: 6px;
-}
+// 滚动条样式 - 已移至子组件内部处理
+// .main::-webkit-scrollbar {
+// 	width: 6px;
+// }
 
-.main::-webkit-scrollbar-track {
-	background: var(--color_neo_bg_field);
-	border-radius: 3px;
-}
+// .main::-webkit-scrollbar-track {
+// 	background: var(--color_neo_bg_field);
+// 	border-radius: 3px;
+// }
 
-.main::-webkit-scrollbar-thumb {
-	background: var(--color_neo_border_field);
-	border-radius: 3px;
+// .main::-webkit-scrollbar-thumb {
+// 	background: var(--color_neo_border_field);
+// 	border-radius: 3px;
 
-	&:hover {
-		background: var(--color_neo_border_hover);
-	}
-}
+// 	&:hover {
+// 		background: var(--color_neo_border_hover);
+// 	}
+// }
