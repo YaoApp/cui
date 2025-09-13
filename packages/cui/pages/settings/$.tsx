@@ -17,6 +17,7 @@ import LLMProviders from './components/LLMProviders'
 import Stripe from './components/Stripe'
 import MCPServers from './components/MCPServers'
 import Security from './components/Security'
+import AuditLogs from './components/AuditLogs'
 import { mockApi, MenuItem, MenuGroup } from './mockData'
 import styles from './index.less'
 
@@ -58,7 +59,8 @@ const Settings = () => {
 			'llm-providers': LLMProviders,
 			stripe: Stripe,
 			'mcp-servers': MCPServers,
-			security: Security
+			security: Security,
+			'audit-logs': AuditLogs
 			// 其他组件可以在这里注册，未注册的会显示 ComingSoon
 		}),
 		[]

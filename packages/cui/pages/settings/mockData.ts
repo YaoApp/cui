@@ -280,6 +280,33 @@ export interface TeamInvitation {
 export type PreferencesData = Record<string, PropertyValue>
 export type PrivacyData = Record<string, PropertyValue>
 
+// Audit log types based on audit.mod.yao
+export interface AuditLog {
+	id: string
+	event_id?: string
+	operation: string
+	category?: 'authentication' | 'authorization' | 'data' | 'system'
+	severity: 'low' | 'medium' | 'high' | 'critical'
+	user_id: string
+	user_name?: string
+	session_id?: string
+	client_ip?: string
+	user_agent?: string
+	target_resource?: string
+	resource_type?: string
+	source?: string
+	application?: string
+	success: boolean
+	error_message?: string
+	created_at: string
+	updated_at: string
+}
+
+export interface AuditLogResponse {
+	records: AuditLog[]
+	total: number
+}
+
 // Generate internationalized preferences schema
 const generatePreferencesSchema = (locale: string = 'en-US'): ProviderSchema => {
 	const isZhCN = locale === 'zh-CN'
@@ -889,6 +916,80 @@ const generateMockPrivacyData = (): PrivacyData => ({
 	thirdPartySharing: true // Default to allow third-party sharing
 })
 
+// Generate mock audit logs data
+const generateMockAuditLogs = (page: number = 1, size: number = 20): AuditLogResponse => {
+	const operations = ['login', 'logout', 'create', 'update', 'delete', 'view', 'export', 'import', 'backup']
+	const categories: AuditLog['category'][] = ['authentication', 'authorization', 'data', 'system']
+	const severities: AuditLog['severity'][] = ['low', 'medium', 'high', 'critical']
+	const sources = ['UI', 'API', 'CLI', 'system']
+	const applications = ['CUI', 'YAO', 'Admin Panel', 'API Gateway']
+	const resourceTypes = ['user', 'file', 'table', 'config', 'api', 'model']
+
+	const userAgents = [
+		'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+		'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+		'YAO-CLI/1.0.0',
+		'API-Client/2.1.0'
+	]
+
+	const users = [
+		{ id: '1', name: 'John Doe' },
+		{ id: '2', name: 'Jane Smith' },
+		{ id: '3', name: 'Admin User' },
+		{ id: '4', name: 'System' }
+	]
+
+	const total = 1247 // Mock total count
+	const records: AuditLog[] = []
+
+	for (let i = 0; i < size; i++) {
+		const recordIndex = (page - 1) * size + i + 1
+		if (recordIndex > total) break
+
+		const user = users[Math.floor(Math.random() * users.length)]
+		const operation = operations[Math.floor(Math.random() * operations.length)]
+		const category = categories[Math.floor(Math.random() * categories.length)]
+		const severity = severities[Math.floor(Math.random() * severities.length)]
+		const success = Math.random() > 0.1 // 90% success rate
+		const source = sources[Math.floor(Math.random() * sources.length)]
+		const application = applications[Math.floor(Math.random() * applications.length)]
+		const resourceType = resourceTypes[Math.floor(Math.random() * resourceTypes.length)]
+
+		// Generate timestamp (recent logs)
+		const daysAgo = Math.floor(Math.random() * 30)
+		const hoursAgo = Math.floor(Math.random() * 24)
+		const minutesAgo = Math.floor(Math.random() * 60)
+		const timestamp = new Date(
+			Date.now() - daysAgo * 24 * 60 * 60 * 1000 - hoursAgo * 60 * 60 * 1000 - minutesAgo * 60 * 1000
+		)
+
+		const record: AuditLog = {
+			id: `audit_${recordIndex.toString().padStart(4, '0')}`,
+			event_id: `evt_${Math.random().toString(36).substr(2, 9)}`,
+			operation,
+			category,
+			severity,
+			user_id: user.id,
+			user_name: user.name,
+			session_id: `sess_${Math.random().toString(36).substr(2, 12)}`,
+			client_ip: `192.168.1.${Math.floor(Math.random() * 254) + 1}`,
+			user_agent: userAgents[Math.floor(Math.random() * userAgents.length)],
+			target_resource: `/${resourceType}s/${Math.floor(Math.random() * 1000) + 1}`,
+			resource_type: resourceType,
+			source,
+			application,
+			success,
+			error_message: success ? undefined : `Failed to ${operation} ${resourceType}: Permission denied`,
+			created_at: timestamp.toISOString(),
+			updated_at: timestamp.toISOString()
+		}
+
+		records.push(record)
+	}
+
+	return { records, total }
+}
+
 // Static reference for updates (will be initialized dynamically)
 let mockPreferencesDataCache: PreferencesData | null = null
 let mockPrivacyDataCache: PrivacyData | null = null
@@ -1013,6 +1114,15 @@ export const mockApi = {
 				Object.assign(mockPrivacyDataCache, data)
 				resolve(mockPrivacyDataCache)
 			}, 500)
+		})
+	},
+
+	getAuditLogs: (page: number = 1, size: number = 20): Promise<AuditLogResponse> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const data = generateMockAuditLogs(page, size)
+				resolve(data)
+			}, 300)
 		})
 	},
 
