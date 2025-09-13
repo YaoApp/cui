@@ -6,6 +6,7 @@ import ApiKeys from './components/ApiKeys'
 import Team from './components/Team'
 import Usage from './components/Usage'
 import Preferences from './components/Preferences'
+import Privacy from './components/Privacy'
 import Plans from './components/Plans'
 import Subscription from './components/Subscription'
 import Balance from './components/Balance'
@@ -47,6 +48,7 @@ const Settings = () => {
 			team: Team,
 			usage: Usage,
 			preferences: Preferences,
+			privacy: Privacy,
 			plans: Plans,
 			subscription: Subscription,
 			balance: Balance,

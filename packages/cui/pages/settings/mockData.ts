@@ -278,6 +278,7 @@ export interface TeamInvitation {
 }
 
 export type PreferencesData = Record<string, PropertyValue>
+export type PrivacyData = Record<string, PropertyValue>
 
 // Generate internationalized preferences schema
 const generatePreferencesSchema = (locale: string = 'en-US'): ProviderSchema => {
@@ -355,6 +356,55 @@ const generatePreferencesSchema = (locale: string = 'en-US'): ProviderSchema => 
 			}
 		},
 		required: ['language', 'theme']
+	}
+}
+
+// Generate internationalized privacy schema
+const generatePrivacySchema = (locale: string = 'en-US'): ProviderSchema => {
+	const isZhCN = locale === 'zh-CN'
+
+	return {
+		id: 'privacy',
+		title: isZhCN ? '隐私设置' : 'Privacy Settings',
+		description: isZhCN
+			? '管理您的隐私偏好和数据使用设置'
+			: 'Manage your privacy preferences and data usage settings',
+		properties: {
+			policyNotifications: {
+				type: 'boolean',
+				title: isZhCN ? '政策变更通知' : 'Policy Change Notifications',
+				description: isZhCN
+					? '接收隐私政策变更、安全漏洞、共享政策变动等重要通知'
+					: 'Receive important notifications about privacy policy changes, security vulnerabilities, and sharing policy updates',
+				component: 'Switch',
+				default: true,
+				required: false,
+				order: 1
+			},
+			dataCollection: {
+				type: 'boolean',
+				title: isZhCN ? '数据收集许可' : 'Data Collection Permission',
+				description: isZhCN
+					? '允许收集使用行为、错误日志等数据以改善产品体验'
+					: 'Allow collection of usage behavior, error logs, and other data to improve product experience',
+				component: 'Switch',
+				default: true,
+				required: false,
+				order: 2
+			},
+			thirdPartySharing: {
+				type: 'boolean',
+				title: isZhCN ? '第三方数据共享' : 'Third-Party Data Sharing',
+				description: isZhCN
+					? '同意把部分数据分享给第三方（例如集成服务、合作伙伴等）'
+					: 'Consent to share some data with third parties (such as integration services, partners, etc.)',
+				component: 'Switch',
+				default: true,
+				required: false,
+				order: 3
+			}
+		},
+		required: []
 	}
 }
 
@@ -832,8 +882,16 @@ const generateMockPreferencesData = (): PreferencesData => ({
 	emailSubscription: true
 })
 
+// Mock privacy data - with default privacy settings (all enabled by default)
+const generateMockPrivacyData = (): PrivacyData => ({
+	policyNotifications: true, // Default to allow policy notifications
+	dataCollection: true, // Default to allow data collection
+	thirdPartySharing: true // Default to allow third-party sharing
+})
+
 // Static reference for updates (will be initialized dynamically)
 let mockPreferencesDataCache: PreferencesData | null = null
+let mockPrivacyDataCache: PrivacyData | null = null
 
 // Mock API function to simulate data fetching
 export const mockApi = {
@@ -922,6 +980,38 @@ export const mockApi = {
 				// Update cached data
 				Object.assign(mockPreferencesDataCache, data)
 				resolve(mockPreferencesDataCache)
+			}, 500)
+		})
+	},
+
+	getPrivacySchema: (locale: string = 'en-US'): Promise<ProviderSchema> => {
+		return new Promise((resolve) => {
+			setTimeout(() => resolve(generatePrivacySchema(locale)), 200)
+		})
+	},
+
+	getPrivacyData: (): Promise<PrivacyData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				// Initialize cache if not exists
+				if (!mockPrivacyDataCache) {
+					mockPrivacyDataCache = generateMockPrivacyData()
+				}
+				resolve(mockPrivacyDataCache)
+			}, 200)
+		})
+	},
+
+	updatePrivacyData: (data: PrivacyData): Promise<PrivacyData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				// Initialize cache if not exists
+				if (!mockPrivacyDataCache) {
+					mockPrivacyDataCache = generateMockPrivacyData()
+				}
+				// Update cached data
+				Object.assign(mockPrivacyDataCache, data)
+				resolve(mockPrivacyDataCache)
 			}, 500)
 		})
 	},
