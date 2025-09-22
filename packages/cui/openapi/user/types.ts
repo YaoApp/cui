@@ -109,7 +109,12 @@ export interface OAuthAuthbackParams {
 }
 
 export interface OAuthAuthbackResponse {
+	session_id?: string
 	id_token?: string
+	access_token?: string
+	refresh_token?: string
+	expires_in?: number
+	refresh_token_expires_in?: number
 	error?: string
 	error_description?: string
 }
