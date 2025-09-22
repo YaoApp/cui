@@ -227,6 +227,7 @@ const AuthBack = () => {
 							<p className={styles.userProvider}>
 								{currentLocale.startsWith('zh') ? '通过' : 'via'} {oauthParams.provider}
 							</p>
+							<p> {authResult.user.mfa_enabled ? 'MFA 已启用' : 'MFA 未启用'}</p>
 						</div>
 					</div>
 				)}

@@ -1,6 +1,3 @@
-import { JWK, RSAKey, ECKey } from '../types'
-import * as jose from 'jose'
-
 // ===== Authentication Types (migrated from signin.ts) =====
 
 /**
@@ -78,6 +75,7 @@ export interface SigninResponse {
 	access_token?: string
 	refresh_token?: string
 	expires_in?: number
+	mfa_enabled?: boolean
 	user?: {
 		id: string
 		username: string
@@ -115,6 +113,7 @@ export interface OAuthAuthbackResponse {
 	refresh_token?: string
 	expires_in?: number
 	refresh_token_expires_in?: number
+	mfa_enabled?: boolean
 	error?: string
 	error_description?: string
 }

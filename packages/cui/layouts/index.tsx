@@ -53,12 +53,17 @@ const Index = () => {
 		global.hide_nav = search.indexOf('__hidemenu=1') !== -1
 		global.stack.reset()
 
+		// Chat Layout
+		if (global.layout === 'Chat') {
+			console.log(pathname)
+			if (pathname === '/chat' || pathname === '/chat/') {
+				global.setSidebarVisible(false)
+			}
+		}
+
 		// 基于路由的侧边栏控制 - 仅在首次加载时生效
 		if (isInitialLoad && global.layout === 'Chat') {
-			if (pathname === '/chat') {
-				// /chat 路由：不打开侧边栏
-				global.setSidebarVisible(false)
-			} else if (pathname.startsWith('/settings/')) {
+			if (pathname.startsWith('/settings/')) {
 				// /settings/* 路由：最大化侧边栏
 				global.updateSidebarState(true, true, window.innerWidth - 40)
 			} else if (pathname !== '/' && !is_login && !is_auth) {
