@@ -6,7 +6,7 @@ import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
 import AuthLayout from '../components/AuthLayout'
 import styles from './index.less'
-import { OAuthAuthbackParams, Signin, UserInfo, OAuthAuthResult } from '@/openapi'
+import { OAuthAuthbackParams, User, UserInfo, OAuthAuthResult } from '@/openapi'
 import { AfterLogin } from '../auth'
 
 // Required parameters for OAuth callback
@@ -75,7 +75,7 @@ const AuthBack = () => {
 				return
 			}
 
-			const signin = new Signin(window.$app.openapi)
+			const user = new User(window.$app.openapi)
 			try {
 				setLoading(true)
 
@@ -104,9 +104,9 @@ const AuthBack = () => {
 				}
 
 				// AuthBack Signin
-				const signinRes = await signin.AuthBack(params.provider, params)
-				if (signin.IsError(signinRes)) {
-					const errorMsg = signinRes.error.error_description || 'OAuth authentication failed'
+				const signinRes = await user.auth.OAuthCallback(params.provider, params)
+				if (user.IsError(signinRes)) {
+					const errorMsg = signinRes.error?.error_description || 'OAuth authentication failed'
 					setError(errorMsg)
 					message.error(errorMsg)
 					setLoading(false)
@@ -127,9 +127,9 @@ const AuthBack = () => {
 
 				// After Login
 				try {
-					const config = await signin.GetConfig(currentLocale)
-					if (signin.IsError(config)) {
-						throw new Error(config.error.error_description || 'Failed to get config')
+					const config = await user.auth.GetLoginConfig(currentLocale)
+					if (user.IsError(config)) {
+						throw new Error(config.error?.error_description || 'Failed to get config')
 					}
 
 					const entry = await AfterLogin(global, {

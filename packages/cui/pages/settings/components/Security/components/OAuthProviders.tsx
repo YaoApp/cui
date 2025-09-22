@@ -4,7 +4,7 @@ import { message, Modal } from 'antd'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
 import { OAuthProvider, SecurityData } from '../../../mockData'
-import { Signin, SigninProvider } from '@/openapi'
+import { User, SigninProvider } from '@/openapi'
 import styles from './OAuthProviders.less'
 
 interface OAuthProvidersProps {
@@ -34,10 +34,10 @@ const OAuthProviders: React.FC<OAuthProvidersProps> = ({ data, onUpdate }) => {
 				}
 
 				setProvidersLoading(true)
-				const signin = new Signin(window.$app.openapi)
-				const configRes = await signin.GetConfig(locale)
+				const user = new User(window.$app.openapi)
+				const configRes = await user.auth.GetLoginConfig(locale)
 
-				if (!signin.IsError(configRes) && configRes.data?.third_party?.providers) {
+				if (!user.IsError(configRes) && configRes.data?.third_party?.providers) {
 					setAvailableProviders(configRes.data.third_party.providers)
 				}
 			} catch (error) {
@@ -75,8 +75,8 @@ const OAuthProviders: React.FC<OAuthProvidersProps> = ({ data, onUpdate }) => {
 			}
 
 			setConnectingProvider(provider.id)
-			const signin = new Signin(window.$app.openapi)
-			const authUrl = await signin.GetOAuthAuthorizationUrl(provider.id)
+			const user = new User(window.$app.openapi)
+			const authUrl = await user.auth.GetOAuthAuthorizationUrl(provider.id)
 
 			// 在新窗口中打开OAuth授权页面
 			const popup = window.open(authUrl, 'oauth-popup', 'width=600,height=700,scrollbars=yes,resizable=yes')

@@ -1,7 +1,7 @@
 import { GlobalModel } from '@/context/app'
 import type { App } from '@/types'
 import { findIndex } from 'lodash-es'
-import type { UserInfo } from '@/openapi/signin'
+import type { UserInfo } from '@/openapi/user/types'
 import { getPath } from '@/utils'
 import { local } from '@yaoapp/storex'
 import { history } from '@umijs/max'

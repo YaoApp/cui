@@ -10,7 +10,8 @@ import AuthLayout from '../components/AuthLayout'
 import Captcha from '../components/Captcha'
 import { FormValues } from '@/pages/login/types'
 import styles from './index.less'
-import { Signin, SigninConfig, SigninProvider, Captcha as CaptchaAPI } from '@/openapi'
+import { User } from '@/openapi/user'
+import { SigninConfig, SigninProvider } from '@/openapi/user/types'
 
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
@@ -62,10 +63,10 @@ const ResponsiveLogin = () => {
 				return
 			}
 
-			const signin = new Signin(window.$app.openapi)
-			const configRes = await signin.GetConfig(currentLocale)
+			const user = new User(window.$app.openapi)
+			const configRes = await user.auth.GetLoginConfig(currentLocale)
 
-			if (!signin.IsError(configRes) && configRes.data) {
+			if (!user.IsError(configRes) && configRes.data) {
 				setConfig(configRes.data)
 			} else {
 				console.error('Failed to load signin config:', configRes.error || 'Unknown error')
@@ -77,8 +78,8 @@ const ResponsiveLogin = () => {
 		}
 	}, [currentLocale, global.app_info])
 
-	// Load captcha data for image/audio captcha
-	const loadCaptcha = async (type: 'image' | 'audio' = 'image') => {
+	// Load captcha data for image captcha
+	const loadCaptcha = async (refresh?: boolean) => {
 		if (captchaLoading) {
 			return
 		}
@@ -91,19 +92,19 @@ const ResponsiveLogin = () => {
 
 			setCaptchaLoading(true)
 
-			const captchaAPI = new CaptchaAPI(window.$app.openapi)
+			const user = new User(window.$app.openapi)
 			let response
 
-			if (type === 'image') {
-				response = await captchaAPI.GetImageCaptcha()
+			if (refresh && captchaData?.id) {
+				response = await user.auth.RefreshCaptcha(captchaData.id)
 			} else {
-				response = await captchaAPI.GetAudioCaptcha()
+				response = await user.auth.GetCaptcha()
 			}
 
-			if (!captchaAPI.IsError(response) && response.data) {
+			if (!user.IsError(response) && response.data) {
 				setCaptchaData({
-					id: response.data.id,
-					image: response.data.data
+					id: response.data.captcha_id,
+					image: response.data.captcha_image
 				})
 			} else {
 				console.error('Failed to load captcha:', response.error)
@@ -117,12 +118,12 @@ const ResponsiveLogin = () => {
 		}
 	}
 
-	// Load captcha when needed (image/audio type)
+	// Load captcha when needed (only for image type)
 	useAsyncEffect(async () => {
 		if (config?.form?.captcha && config.form.captcha.type === 'image' && !captchaData) {
-			await loadCaptcha('image')
+			await loadCaptcha()
 		}
-	}, [config?.form?.captcha?.type])
+	}, [config?.form?.captcha?.type, captchaData])
 
 	// Form validation
 	const isFormValid = formData.mobile.trim() !== '' && formData.password.trim() !== ''
@@ -156,8 +157,8 @@ const ResponsiveLogin = () => {
 				return
 			}
 
-			const signin = new Signin(window.$app.openapi)
-			const result = await signin.SigninWithPassword({
+			const user = new User(window.$app.openapi)
+			const result = await user.auth.Login({
 				username: formData.mobile,
 				password: formData.password,
 				remember: formData.remember_me,
@@ -165,7 +166,7 @@ const ResponsiveLogin = () => {
 				captcha_id: captchaData?.id || undefined
 			})
 
-			if (!signin.IsError(result) && result.data) {
+			if (!user.IsError(result) && result.data) {
 				message.success('Login successful!')
 				console.log('Login successful:', result.data)
 
@@ -191,8 +192,8 @@ const ResponsiveLogin = () => {
 				return
 			}
 
-			const signin = new Signin(window.$app.openapi)
-			const authUrl = await signin.GetOAuthAuthorizationUrl(provider.id)
+			const user = new User(window.$app.openapi)
+			const authUrl = await user.auth.GetOAuthAuthorizationUrl(provider.id)
 
 			// 跳转到OAuth授权页面
 			window.location.href = authUrl
@@ -276,7 +277,7 @@ const ResponsiveLogin = () => {
 								value={formData.captcha}
 								onChange={handleCaptchaChange}
 								onCaptchaVerified={handleCaptchaChange}
-								onRefresh={() => loadCaptcha('image')}
+								onRefresh={() => loadCaptcha(true)}
 							/>
 						)}
 

@@ -596,5 +596,5 @@ export class OpenAPI {
 }
 
 export default OpenAPI
-export { Signin } from './signin'
+// Signin module has been migrated to User module
 export { Captcha } from './captcha'
