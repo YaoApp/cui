@@ -5,6 +5,8 @@ import { mockApi, Team as TeamType, TeamMember, TeamInvitation } from '../../moc
 import { Button } from '@/components/ui'
 import { Input, Select, Avatar } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
+import { User } from '@/openapi/user'
+import { UserTeam, CreateTeamRequest, UserTeamDetail } from '@/openapi/user/types'
 import styles from './index.less'
 
 const Team = () => {
@@ -13,7 +15,8 @@ const Team = () => {
 	const [form] = Form.useForm()
 
 	const [loading, setLoading] = useState(true)
-	const [team, setTeam] = useState<TeamType | null>(null)
+	const [team, setTeam] = useState<UserTeamDetail | null>(null)
+	const [apiClient, setApiClient] = useState<User | null>(null)
 	const [members, setMembers] = useState<TeamMember[]>([])
 	const [invitations, setInvitations] = useState<TeamInvitation[]>([])
 	const [inviteModalVisible, setInviteModalVisible] = useState(false)
@@ -25,22 +28,65 @@ const Team = () => {
 	const [generatingLink, setGeneratingLink] = useState(false)
 
 	useEffect(() => {
+		const initializeAPI = () => {
+			if (window.$app?.openapi) {
+				const client = new User(window.$app.openapi)
+				setApiClient(client)
+			} else {
+				console.error('OpenAPI not initialized')
+				message.error(is_cn ? 'API未初始化' : 'API not initialized')
+			}
+		}
+
+		initializeAPI()
+	}, [])
+
+	useEffect(() => {
 		const loadTeamData = async () => {
+			if (!apiClient) return
+
 			try {
 				setLoading(true)
-				// 先尝试获取团队信息
-				const teamData = await mockApi.getTeam().catch(() => null)
-				setTeam(teamData)
+				// 先尝试获取用户的团队列表
+				const teamsResponse = await apiClient.teams.GetTeams({ page: 1, pagesize: 1 })
 
-				// 如果有团队，再加载成员和邀请数据
-				if (teamData) {
-					const [membersData, invitationsData] = await Promise.all([
-						mockApi.getTeamMembers(),
-						mockApi.getTeamInvitations()
-					])
-					setMembers(membersData)
-					setInvitations(invitationsData)
-					teamForm.setFieldsValue(teamData)
+				if (apiClient.IsError(teamsResponse)) {
+					console.error('Failed to load teams:', teamsResponse.error)
+					// 如果获取失败，可能是还没有团队，不显示错误
+					setTeam(null)
+				} else {
+					const teamsData = teamsResponse.data
+					if (teamsData && teamsData.data && teamsData.data.length > 0) {
+						// 用户已有团队，获取第一个团队的详细信息
+						const firstTeam = teamsData.data[0]
+						const teamDetailResponse = await apiClient.teams.GetTeam(firstTeam.team_id)
+
+						if (!apiClient.IsError(teamDetailResponse) && teamDetailResponse.data) {
+							setTeam(teamDetailResponse.data)
+							teamForm.setFieldsValue({
+								name: teamDetailResponse.data.name,
+								description: teamDetailResponse.data.description
+							})
+
+							// TODO: 加载成员和邀请数据（后续实现）
+							// const [membersData, invitationsData] = await Promise.all([
+							//     apiClient.teams.GetTeamMembers(firstTeam.team_id),
+							//     apiClient.teams.GetTeamInvitations(firstTeam.team_id)
+							// ])
+							// setMembers(membersData)
+							// setInvitations(invitationsData)
+						} else {
+							console.error('Failed to load team details:', teamDetailResponse.error)
+							// 使用基本信息构造UserTeamDetail类型
+							setTeam({
+								...firstTeam,
+								settings: undefined
+							})
+						}
+					} else {
+						// 用户还没有团队
+						setTeam(null)
+					}
 				}
 			} catch (error) {
 				console.error('Failed to load team data:', error)
@@ -50,8 +96,10 @@ const Team = () => {
 			}
 		}
 
-		loadTeamData()
-	}, [is_cn, teamForm])
+		if (apiClient) {
+			loadTeamData()
+		}
+	}, [apiClient, is_cn, teamForm])
 
 	const handleInviteMember = async (values: { email: string; role: string }) => {
 		try {
@@ -79,103 +127,74 @@ const Team = () => {
 	}
 
 	const handleCreateTeam = async (values: { name: string; description?: string }) => {
+		if (!apiClient) {
+			message.error(is_cn ? 'API未初始化' : 'API not initialized')
+			return
+		}
+
 		try {
 			setLoading(true)
-			// Mock create team
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-			const newTeam: TeamType = {
-				id: '1',
+
+			// 创建团队请求数据
+			const createTeamRequest: CreateTeamRequest = {
 				name: values.name,
-				description: values.description,
-				created_at: new Date().toISOString(),
-				updated_at: new Date().toISOString(),
-				member_count: 1,
-				invite_link: '',
-				invite_link_enabled: false
+				description: values.description || undefined
 			}
-			// 更新团队成员数量
-			newTeam.member_count = 5 // 包括owner在内的初始成员数量
-			setTeam(newTeam)
 
-			// 创建团队后，自动添加一些初始成员
-			const initialMembers: TeamMember[] = [
-				{
-					id: '1',
-					name: 'Alex Chen',
-					email: 'alex@example.com',
-					role: 'owner',
-					status: 'active',
-					joined_at: new Date().toISOString(),
-					last_active: new Date().toISOString()
-				},
-				{
-					id: '2',
-					name: 'Sarah Wilson',
-					email: 'sarah@example.com',
-					avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah&backgroundColor=fde68a',
-					role: 'admin',
-					status: 'active',
-					joined_at: new Date().toISOString(),
-					last_active: new Date().toISOString()
-				},
-				{
-					id: '3',
-					name: 'David Kim',
-					email: 'david@example.com',
-					avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David&backgroundColor=c7d2fe',
-					role: 'member',
-					status: 'active',
-					joined_at: new Date().toISOString(),
-					last_active: new Date().toISOString()
-				},
-				{
-					id: '4',
-					name: 'Emily Rodriguez',
-					email: 'emily@example.com',
-					avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emily&backgroundColor=fecaca',
-					role: 'member',
-					status: 'active',
-					joined_at: new Date().toISOString(),
-					last_active: new Date().toISOString()
-				},
-				{
-					id: '5',
-					name: 'James Thompson',
-					email: 'james@example.com',
-					role: 'member',
-					status: 'pending',
-					joined_at: new Date().toISOString()
+			// 调用真实的团队创建API
+			const createResponse = await apiClient.teams.CreateTeam(createTeamRequest)
+
+			if (apiClient.IsError(createResponse)) {
+				console.error('Failed to create team:', createResponse.error)
+				const errorMsg =
+					createResponse.error?.error_description || createResponse.error?.error || 'Unknown error'
+				message.error(is_cn ? `创建团队失败: ${errorMsg}` : `Failed to create team: ${errorMsg}`)
+				return
+			}
+
+			const newTeam = createResponse.data
+			if (newTeam) {
+				// 获取团队详细信息
+				const teamDetailResponse = await apiClient.teams.GetTeam(newTeam.team_id)
+
+				if (!apiClient.IsError(teamDetailResponse) && teamDetailResponse.data) {
+					setTeam(teamDetailResponse.data)
+					teamForm.setFieldsValue({
+						name: teamDetailResponse.data.name,
+						description: teamDetailResponse.data.description
+					})
+				} else {
+					// 如果获取详情失败，使用基本信息构造UserTeamDetail类型
+					setTeam({
+						...newTeam,
+						settings: undefined
+					})
+					teamForm.setFieldsValue({
+						name: newTeam.name,
+						description: newTeam.description
+					})
 				}
-			]
 
-			// 同时添加一些待处理邀请
-			const initialInvitations: TeamInvitation[] = [
-				{
-					id: '1',
-					email: 'alice.johnson@example.com',
-					role: 'member',
-					invited_by: 'Alex Chen',
-					invited_at: new Date().toISOString(),
-					expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7天后过期
-					status: 'pending'
-				},
-				{
-					id: '2',
-					email: 'bob.smith@example.com',
-					role: 'admin',
-					invited_by: 'Alex Chen',
-					invited_at: new Date().toISOString(),
-					expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-					status: 'pending'
-				}
-			]
+				// TODO: 后续实现成员和邀请管理
+				// 现在先使用mock数据来保持界面完整性
+				const initialMembers: TeamMember[] = [
+					{
+						id: '1',
+						name: 'Team Owner',
+						email: 'owner@example.com',
+						role: 'owner',
+						status: 'active',
+						joined_at: new Date().toISOString(),
+						last_active: new Date().toISOString()
+					}
+				]
+				setMembers(initialMembers)
+				setInvitations([])
 
-			setMembers(initialMembers)
-			setInvitations(initialInvitations)
-			message.success(
-				is_cn ? '团队创建成功，已添加初始成员' : 'Team created successfully with initial members'
-			)
+				message.success(is_cn ? '团队创建成功' : 'Team created successfully')
+			}
 		} catch (error) {
+			console.error('Error creating team:', error)
 			message.error(is_cn ? '创建团队失败' : 'Failed to create team')
 		} finally {
 			setLoading(false)
@@ -183,14 +202,45 @@ const Team = () => {
 	}
 
 	const handleUpdateTeam = async (values: { name: string; description?: string; avatar?: string }) => {
+		if (!apiClient || !team) {
+			message.error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
+			return
+		}
+
 		try {
 			setUpdatingTeam(true)
-			// Mock update
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-			setTeam((prev) => (prev ? { ...prev, ...values, updated_at: new Date().toISOString() } : null))
-			setEditingTeam(false) // 保存后返回展示状态
-			message.success(is_cn ? '团队信息已更新' : 'Team information updated')
+
+			// 构建更新请求数据
+			const updateTeamRequest = {
+				name: values.name,
+				description: values.description || undefined
+				// TODO: 后续支持avatar更新
+			}
+
+			// 调用真实的团队更新API
+			const updateResponse = await apiClient.teams.UpdateTeam(team.team_id, updateTeamRequest)
+
+			if (apiClient.IsError(updateResponse)) {
+				console.error('Failed to update team:', updateResponse.error)
+				const errorMsg =
+					updateResponse.error?.error_description || updateResponse.error?.error || 'Unknown error'
+				message.error(is_cn ? `更新团队失败: ${errorMsg}` : `Failed to update team: ${errorMsg}`)
+				return
+			}
+
+			const updatedTeam = updateResponse.data
+			if (updatedTeam) {
+				// 构造UserTeamDetail类型
+				const updatedTeamDetail: UserTeamDetail = {
+					...updatedTeam,
+					settings: team?.settings
+				}
+				setTeam(updatedTeamDetail)
+				setEditingTeam(false) // 保存后返回展示状态
+				message.success(is_cn ? '团队信息已更新' : 'Team information updated')
+			}
 		} catch (error) {
+			console.error('Error updating team:', error)
 			message.error(is_cn ? '更新团队信息失败' : 'Failed to update team information')
 		} finally {
 			setUpdatingTeam(false)
@@ -367,9 +417,16 @@ const Team = () => {
 										/>
 									</Form.Item>
 									<div className={styles.createTeamActions}>
-										<Button type='primary' htmlType='submit' loading={loading}>
+										<button
+											type='submit'
+											className='ant-btn ant-btn-primary'
+											disabled={loading}
+										>
+											{loading && (
+												<span className='ant-btn-loading-icon'></span>
+											)}
 											{is_cn ? '创建团队' : 'Create Team'}
-										</Button>
+										</button>
 									</div>
 								</Form>
 							</div>
@@ -458,7 +515,7 @@ const Team = () => {
 										placeholder: is_cn ? '更换团队头像' : 'Change Team Avatar',
 										readOnly: false
 									}}
-									value={team?.avatar}
+									value={undefined}
 									onChange={(value) => {
 										teamForm.setFieldsValue({ avatar: value })
 									}}
@@ -526,13 +583,9 @@ const Team = () => {
 					) : (
 						<div className={styles.teamHeader}>
 							<div className={styles.teamAvatar}>
-								{team?.avatar ? (
-									<img src={team.avatar} alt={team.name} />
-								) : (
-									<div className={styles.avatarPlaceholder}>
-										<Icon name='material-group' size={24} />
-									</div>
-								)}
+								<div className={styles.avatarPlaceholder}>
+									<Icon name='material-group' size={24} />
+								</div>
 							</div>
 							<div className={styles.teamInfo}>
 								<h3 className={styles.teamName}>{team?.name}</h3>
@@ -541,7 +594,7 @@ const Team = () => {
 								</p>
 								<div className={styles.teamMeta}>
 									<span>
-										{team?.member_count} {is_cn ? '名成员' : 'members'}
+										{members.length} {is_cn ? '名成员' : 'members'}
 									</span>
 									<span>•</span>
 									<span>
@@ -609,7 +662,7 @@ const Team = () => {
 							<div className={styles.memberActions}>
 								{member.role !== 'owner' && (
 									<Button
-										type='text'
+										type='default'
 										size='small'
 										className={styles.actionButton}
 										onClick={() => {
@@ -671,7 +724,7 @@ const Team = () => {
 									</div>
 									<div className={styles.invitationActions}>
 										<Button
-											type='text'
+											type='default'
 											size='small'
 											className={styles.actionButton}
 											onClick={() => {

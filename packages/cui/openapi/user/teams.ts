@@ -1,9 +1,10 @@
 import { OpenAPI } from '../openapi'
 import { ApiResponse } from '../types'
-import { UserTeam } from './types'
+import { UserTeam, UserTeamDetail, CreateTeamRequest, UpdateTeamRequest, TeamListResponse } from './types'
 
 /**
  * User Team Management API
+ * Provides CRUD operations for user teams
  */
 export class UserTeams {
 	constructor(private api: OpenAPI) {}
@@ -11,138 +12,60 @@ export class UserTeams {
 	// ===== Team CRUD =====
 
 	/**
-	 * Get user teams
+	 * Get user teams with pagination and filtering
+	 * @param options Query parameters for pagination and filtering
 	 */
-	async GetTeams(): Promise<ApiResponse<UserTeam[]>> {
-		return this.api.Get<UserTeam[]>('/user/teams')
+	async GetTeams(options?: {
+		page?: number
+		pagesize?: number
+		status?: string
+		name?: string
+	}): Promise<ApiResponse<TeamListResponse>> {
+		const params = new URLSearchParams()
+		if (options?.page) params.append('page', options.page.toString())
+		if (options?.pagesize) params.append('pagesize', options.pagesize.toString())
+		if (options?.status) params.append('status', options.status)
+		if (options?.name) params.append('name', options.name)
+
+		const queryString = params.toString()
+		const url = queryString ? `/user/teams?${queryString}` : '/user/teams'
+
+		return this.api.Get<TeamListResponse>(url)
 	}
 
 	/**
-	 * Get user team details
+	 * Get user team details by team_id
+	 * @param teamId Team ID to retrieve
 	 */
-	async GetTeam(teamId: string): Promise<ApiResponse<UserTeam>> {
-		return this.api.Get<UserTeam>(`/user/teams/${teamId}`)
+	async GetTeam(teamId: string): Promise<ApiResponse<UserTeamDetail>> {
+		return this.api.Get<UserTeamDetail>(`/user/teams/${teamId}`)
 	}
 
 	/**
-	 * Create user team
+	 * Create a new user team
+	 * @param team Team data to create
 	 */
-	async CreateTeam(team: Partial<UserTeam>): Promise<ApiResponse<UserTeam>> {
+	async CreateTeam(team: CreateTeamRequest): Promise<ApiResponse<UserTeam>> {
 		return this.api.Post<UserTeam>('/user/teams', team)
 	}
 
 	/**
-	 * Update user team
+	 * Update user team by team_id
+	 * @param teamId Team ID to update
+	 * @param team Updated team data
 	 */
-	async UpdateTeam(teamId: string, team: Partial<UserTeam>): Promise<ApiResponse<UserTeam>> {
+	async UpdateTeam(teamId: string, team: UpdateTeamRequest): Promise<ApiResponse<UserTeam>> {
 		return this.api.Put<UserTeam>(`/user/teams/${teamId}`, team)
 	}
 
 	/**
-	 * Delete user team
+	 * Delete user team by team_id
+	 * @param teamId Team ID to delete
 	 */
 	async DeleteTeam(teamId: string): Promise<ApiResponse<{ message: string }>> {
 		return this.api.Delete<{ message: string }>(`/user/teams/${teamId}`)
 	}
 
-	// ===== Member Management =====
-
-	/**
-	 * Get team members
-	 */
-	async GetTeamMembers(teamId: string): Promise<ApiResponse<any[]>> {
-		return this.api.Get<any[]>(`/user/teams/${teamId}/members`)
-	}
-
-	/**
-	 * Get team member details
-	 */
-	async GetTeamMember(teamId: string, memberId: string): Promise<ApiResponse<any>> {
-		return this.api.Get<any>(`/user/teams/${teamId}/members/${memberId}`)
-	}
-
-	/**
-	 * Add member directly (for bots/system)
-	 */
-	async AddMemberDirect(teamId: string, member: any): Promise<ApiResponse<any>> {
-		return this.api.Post<any>(`/user/teams/${teamId}/members/direct`, member)
-	}
-
-	/**
-	 * Update team member
-	 */
-	async UpdateTeamMember(teamId: string, memberId: string, member: any): Promise<ApiResponse<any>> {
-		return this.api.Put<any>(`/user/teams/${teamId}/members/${memberId}`, member)
-	}
-
-	/**
-	 * Remove team member
-	 */
-	async RemoveTeamMember(teamId: string, memberId: string): Promise<ApiResponse<{ message: string }>> {
-		return this.api.Delete<{ message: string }>(`/user/teams/${teamId}/members/${memberId}`)
-	}
-
-	// ===== Invitation Management =====
-
-	/**
-	 * Send team invitation
-	 */
-	async SendInvitation(teamId: string, invitation: {
-		email: string
-		role?: string
-		message?: string
-	}): Promise<ApiResponse<{ invitation_id: string; message: string }>> {
-		return this.api.Post<{ invitation_id: string; message: string }>(`/user/teams/${teamId}/invitations`, invitation)
-	}
-
-	/**
-	 * Get team invitations
-	 */
-	async GetInvitations(teamId: string): Promise<ApiResponse<any[]>> {
-		return this.api.Get<any[]>(`/user/teams/${teamId}/invitations`)
-	}
-
-	/**
-	 * Get invitation details
-	 */
-	async GetInvitation(teamId: string, invitationId: string): Promise<ApiResponse<any>> {
-		return this.api.Get<any>(`/user/teams/${teamId}/invitations/${invitationId}`)
-	}
-
-	/**
-	 * Resend invitation
-	 */
-	async ResendInvitation(teamId: string, invitationId: string): Promise<ApiResponse<{ message: string }>> {
-		return this.api.Put<{ message: string }>(`/user/teams/${teamId}/invitations/${invitationId}/resend`, {})
-	}
-
-	/**
-	 * Cancel invitation
-	 */
-	async CancelInvitation(teamId: string, invitationId: string): Promise<ApiResponse<{ message: string }>> {
-		return this.api.Delete<{ message: string }>(`/user/teams/${teamId}/invitations/${invitationId}`)
-	}
-
-	// ===== Invitation Response (Cross-module) =====
-
-	/**
-	 * Get invitation info by token (public)
-	 */
-	async GetInvitationByToken(token: string): Promise<ApiResponse<any>> {
-		return this.api.Get<any>(`/user/invitations/${token}`)
-	}
-
-	/**
-	 * Accept invitation (requires login)
-	 */
-	async AcceptInvitation(token: string): Promise<ApiResponse<{ message: string }>> {
-		return this.api.Post<{ message: string }>(`/user/invitations/${token}/accept`, {})
-	}
-
-	/**
-	 * Decline invitation (public)
-	 */
-	async DeclineInvitation(token: string): Promise<ApiResponse<{ message: string }>> {
-		return this.api.Post<{ message: string }>(`/user/invitations/${token}/decline`, {})
-	}
+	// TODO: Member Management APIs - To be implemented
+	// TODO: Invitation Management APIs - To be implemented
 }

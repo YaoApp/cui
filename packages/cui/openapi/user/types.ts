@@ -294,11 +294,61 @@ export interface UserCredits {
 	last_updated?: string
 }
 
+// ===== Team Management Types =====
+
+/**
+ * Team response from API
+ */
 export interface UserTeam {
-	id: string
+	id: number
+	team_id: string
 	name: string
-	role: string
-	permissions?: string[]
+	description?: string
+	owner_id: string
+	status: string
+	is_verified: boolean
+	verified_by?: string
+	verified_at?: string
+	created_at: string
+	updated_at: string
+}
+
+/**
+ * Team detail response with additional settings
+ */
+export interface UserTeamDetail extends UserTeam {
+	settings?: Record<string, any>
+}
+
+/**
+ * Request payload for creating a team
+ */
+export interface CreateTeamRequest {
+	name: string
+	description?: string
+	settings?: Record<string, any>
+}
+
+/**
+ * Request payload for updating a team
+ */
+export interface UpdateTeamRequest {
+	name?: string
+	description?: string
+	settings?: Record<string, any>
+}
+
+/**
+ * Paginated list response for teams
+ */
+export interface TeamListResponse {
+	data: UserTeam[]
+	total: number
+	page: number
+	pagesize: number
+	pagecnt: number
+	next: number
+	prev: number
 }
 
 export interface UserAPIKey {
