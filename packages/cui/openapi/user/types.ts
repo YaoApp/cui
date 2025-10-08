@@ -317,7 +317,7 @@ export interface UserTeam {
  * Team detail response with additional settings
  */
 export interface UserTeamDetail extends UserTeam {
-	settings?: Record<string, any>
+	settings?: TeamSettings
 }
 
 /**
@@ -326,7 +326,7 @@ export interface UserTeamDetail extends UserTeam {
 export interface CreateTeamRequest {
 	name: string
 	description?: string
-	settings?: Record<string, any>
+	settings?: TeamSettings
 }
 
 /**
@@ -335,7 +335,7 @@ export interface CreateTeamRequest {
 export interface UpdateTeamRequest {
 	name?: string
 	description?: string
-	settings?: Record<string, any>
+	settings?: TeamSettings
 }
 
 /**
@@ -359,4 +359,182 @@ export interface UserAPIKey {
 	expires_at?: string
 	created_at: string
 	last_used?: string
+}
+
+// ===== Team Configuration Types =====
+
+/**
+ * Team role configuration
+ */
+export interface TeamRole {
+	role_id: string
+	label: string
+	description: string
+}
+
+/**
+ * Invitation configuration
+ */
+export interface InviteConfig {
+	channel?: string
+	expiry?: string
+	templates?: Record<string, string>
+}
+
+/**
+ * Team configuration response (public endpoint)
+ */
+export interface TeamConfig {
+	roles?: TeamRole[]
+	invite?: InviteConfig
+}
+
+// ===== Settings Types =====
+
+/**
+ * Team-specific settings
+ */
+export interface TeamSettings {
+	/** Team UI theme (e.g., "light", "dark") */
+	theme?: string
+	/** Team visibility (e.g., "public", "private") */
+	visibility?: string
+}
+
+/**
+ * Member-specific settings
+ */
+export interface MemberSettings {
+	/** Whether to receive notifications */
+	notifications?: boolean
+	/** Custom permissions (e.g., ["read", "write"]) */
+	permissions?: string[]
+}
+
+/**
+ * Invitation-specific settings
+ */
+export interface InvitationSettings {
+	/** Whether to send invitation email */
+	send_email?: boolean
+	/** Locale for email template */
+	locale?: string
+}
+
+// ===== Team Member Management Types =====
+
+/**
+ * Team member response from API
+ */
+export interface TeamMember {
+	id: number
+	team_id: string
+	user_id: string
+	member_type: string
+	role_id: string
+	status: string
+	invited_by?: string
+	invited_at?: string
+	joined_at?: string
+	last_activity?: string
+	settings?: MemberSettings
+	created_at: string
+	updated_at: string
+}
+
+/**
+ * Team member detail response with additional user info
+ */
+export interface TeamMemberDetail extends TeamMember {
+	user_info?: Record<string, any>
+}
+
+/**
+ * Request payload for adding a team member directly
+ */
+export interface CreateMemberRequest {
+	user_id: string
+	member_type?: string // "user" or "robot"
+	role_id: string
+	settings?: MemberSettings
+}
+
+/**
+ * Request payload for updating a team member
+ */
+export interface UpdateMemberRequest {
+	role_id?: string
+	status?: string
+	settings?: MemberSettings
+	last_activity?: string
+}
+
+/**
+ * Paginated list response for team members
+ */
+export interface MemberListResponse {
+	data: TeamMember[]
+	total: number
+	page: number
+	pagesize: number
+	pagecnt: number
+	next: number
+	prev: number
+}
+
+// ===== Team Invitation Management Types =====
+
+/**
+ * Team invitation response from API
+ */
+export interface TeamInvitation {
+	id: number
+	team_id: string
+	user_id: string
+	member_type: string
+	role_id: string
+	status: string
+	invited_by: string
+	invited_at: string
+	invitation_token?: string
+	invitation_expires_at?: string
+	message?: string
+	settings?: InvitationSettings
+	created_at: string
+	updated_at: string
+}
+
+/**
+ * Team invitation detail response with additional info
+ */
+export interface TeamInvitationDetail extends TeamInvitation {
+	user_info?: Record<string, any>
+	team_info?: Record<string, any>
+}
+
+/**
+ * Request payload for creating a team invitation
+ */
+export interface CreateInvitationRequest {
+	user_id?: string // Optional for unregistered users
+	email?: string // Email address (if not provided, will be read from user profile when user_id is provided)
+	member_type?: string // "user" or "robot"
+	role_id: string
+	message?: string
+	expiry?: string // Custom expiry duration (e.g., "1d", "8h"), defaults to team config
+	send_email?: boolean // Whether to send email (defaults to false)
+	settings?: InvitationSettings
+}
+
+/**
+ * Paginated list response for team invitations
+ */
+export interface InvitationListResponse {
+	data: TeamInvitation[]
+	total: number
+	page: number
+	pagesize: number
+	pagecnt: number
+	next: number
+	prev: number
 }
