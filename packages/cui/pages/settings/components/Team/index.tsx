@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react'
 import { Form, message, Modal } from 'antd'
 import { getLocale } from '@umijs/max'
-import { mockApi, Team as TeamType, TeamMember, TeamInvitation } from '../../mockData'
 import { Button } from '@/components/ui'
 import { Input, Select, Avatar } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import { User } from '@/openapi/user'
-import { UserTeam, CreateTeamRequest, UserTeamDetail } from '@/openapi/user/types'
+import {
+	UserTeam,
+	CreateTeamRequest,
+	UserTeamDetail,
+	TeamMember,
+	TeamInvitation,
+	TeamConfig,
+	TeamRole
+} from '@/openapi/user/types'
 import styles from './index.less'
 
 const Team = () => {
@@ -15,8 +22,10 @@ const Team = () => {
 	const [form] = Form.useForm()
 
 	const [loading, setLoading] = useState(true)
+	const [configLoading, setConfigLoading] = useState(true)
 	const [team, setTeam] = useState<UserTeamDetail | null>(null)
 	const [apiClient, setApiClient] = useState<User | null>(null)
+	const [config, setConfig] = useState<TeamConfig | null>(null)
 	const [members, setMembers] = useState<TeamMember[]>([])
 	const [invitations, setInvitations] = useState<TeamInvitation[]>([])
 	const [inviteModalVisible, setInviteModalVisible] = useState(false)
@@ -26,20 +35,42 @@ const Team = () => {
 	const [teamForm] = Form.useForm()
 	const [inviteLink, setInviteLink] = useState('')
 	const [generatingLink, setGeneratingLink] = useState(false)
+	const [linkRole, setLinkRole] = useState<string>('') // State for link generation role
 
 	useEffect(() => {
-		const initializeAPI = () => {
+		const initializeAPI = async () => {
 			if (window.$app?.openapi) {
 				const client = new User(window.$app.openapi)
 				setApiClient(client)
+
+				// Load team configuration
+				try {
+					setConfigLoading(true)
+					const configResponse = await client.teams.GetConfig(locale)
+					if (!client.IsError(configResponse) && configResponse.data) {
+						setConfig(configResponse.data)
+						// Set default role for link generation
+						const defaultRoleId =
+							configResponse.data.roles?.find((role) => role.default)?.role_id ||
+							'team_member'
+						setLinkRole(defaultRoleId)
+					} else {
+						console.error('Failed to load team config:', configResponse.error)
+					}
+				} catch (error) {
+					console.error('Failed to load team config:', error)
+				} finally {
+					setConfigLoading(false)
+				}
 			} else {
 				console.error('OpenAPI not initialized')
 				message.error(is_cn ? 'API未初始化' : 'API not initialized')
+				setConfigLoading(false)
 			}
 		}
 
 		initializeAPI()
-	}, [])
+	}, [locale, is_cn])
 
 	useEffect(() => {
 		const loadTeamData = async () => {
@@ -54,6 +85,8 @@ const Team = () => {
 					console.error('Failed to load teams:', teamsResponse.error)
 					// 如果获取失败，可能是还没有团队，不显示错误
 					setTeam(null)
+					setMembers([])
+					setInvitations([])
 				} else {
 					const teamsData = teamsResponse.data
 					if (teamsData && teamsData.data && teamsData.data.length > 0) {
@@ -68,13 +101,44 @@ const Team = () => {
 								description: teamDetailResponse.data.description
 							})
 
-							// TODO: 加载成员和邀请数据（后续实现）
-							// const [membersData, invitationsData] = await Promise.all([
-							//     apiClient.teams.GetTeamMembers(firstTeam.team_id),
-							//     apiClient.teams.GetTeamInvitations(firstTeam.team_id)
-							// ])
-							// setMembers(membersData)
-							// setInvitations(invitationsData)
+							// 加载成员和邀请数据
+							try {
+								const [membersResponse, invitationsResponse] = await Promise.all([
+									apiClient.teams.GetMembers(firstTeam.team_id, {
+										page: 1,
+										pagesize: 100
+									}),
+									apiClient.teams.GetInvitations(firstTeam.team_id, {
+										page: 1,
+										pagesize: 100,
+										status: 'pending'
+									})
+								])
+
+								if (!apiClient.IsError(membersResponse) && membersResponse.data) {
+									setMembers(membersResponse.data.data || [])
+								} else {
+									console.error('Failed to load members:', membersResponse.error)
+									setMembers([])
+								}
+
+								if (
+									!apiClient.IsError(invitationsResponse) &&
+									invitationsResponse.data
+								) {
+									setInvitations(invitationsResponse.data.data || [])
+								} else {
+									console.error(
+										'Failed to load invitations:',
+										invitationsResponse.error
+									)
+									setInvitations([])
+								}
+							} catch (error) {
+								console.error('Failed to load members/invitations:', error)
+								setMembers([])
+								setInvitations([])
+							}
 						} else {
 							console.error('Failed to load team details:', teamDetailResponse.error)
 							// 使用基本信息构造UserTeamDetail类型
@@ -82,10 +146,14 @@ const Team = () => {
 								...firstTeam,
 								settings: undefined
 							})
+							setMembers([])
+							setInvitations([])
 						}
 					} else {
 						// 用户还没有团队
 						setTeam(null)
+						setMembers([])
+						setInvitations([])
 					}
 				}
 			} catch (error) {
@@ -102,24 +170,40 @@ const Team = () => {
 	}, [apiClient, is_cn, teamForm])
 
 	const handleInviteMember = async (values: { email: string; role: string }) => {
+		if (!apiClient || !team) {
+			message.error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
+			return
+		}
+
 		try {
 			setInviting(true)
-			// Mock invite
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-			const newInvitation: TeamInvitation = {
-				id: Date.now().toString(),
+
+			// 创建邀请请求，使用配置中的过期时间
+			const invitationRequest = {
 				email: values.email,
-				role: values.role as 'admin' | 'member',
-				invited_by: 'Max Zhang',
-				invited_at: new Date().toISOString(),
-				expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-				status: 'pending'
+				role_id: values.role,
+				send_email: true, // 发送邀请邮件
+				expiry: config?.invite?.expiry // 使用配置中的过期时间
 			}
-			setInvitations((prev) => [...prev, newInvitation])
-			setInviteModalVisible(false)
-			form.resetFields()
-			message.success(is_cn ? '邀请发送成功' : 'Invitation sent successfully')
+
+			const response = await apiClient.teams.CreateInvitation(team.team_id, invitationRequest)
+
+			if (apiClient.IsError(response)) {
+				console.error('Failed to create invitation:', response.error)
+				const errorMsg = response.error?.error_description || response.error?.error || 'Unknown error'
+				message.error(is_cn ? `邀请发送失败: ${errorMsg}` : `Failed to send invitation: ${errorMsg}`)
+				return
+			}
+
+			const newInvitation = response.data
+			if (newInvitation) {
+				setInvitations((prev) => [...prev, newInvitation])
+				setInviteModalVisible(false)
+				form.resetFields()
+				message.success(is_cn ? '邀请发送成功' : 'Invitation sent successfully')
+			}
 		} catch (error) {
+			console.error('Error sending invitation:', error)
 			message.error(is_cn ? '邀请发送失败' : 'Failed to send invitation')
 		} finally {
 			setInviting(false)
@@ -175,21 +259,33 @@ const Team = () => {
 					})
 				}
 
-				// TODO: 后续实现成员和邀请管理
-				// 现在先使用mock数据来保持界面完整性
-				const initialMembers: TeamMember[] = [
-					{
-						id: '1',
-						name: 'Team Owner',
-						email: 'owner@example.com',
-						role: 'owner',
-						status: 'active',
-						joined_at: new Date().toISOString(),
-						last_active: new Date().toISOString()
+				// 加载成员和邀请数据
+				try {
+					const [membersResponse, invitationsResponse] = await Promise.all([
+						apiClient.teams.GetMembers(newTeam.team_id, { page: 1, pagesize: 100 }),
+						apiClient.teams.GetInvitations(newTeam.team_id, {
+							page: 1,
+							pagesize: 100,
+							status: 'pending'
+						})
+					])
+
+					if (!apiClient.IsError(membersResponse) && membersResponse.data) {
+						setMembers(membersResponse.data.data || [])
+					} else {
+						setMembers([])
 					}
-				]
-				setMembers(initialMembers)
-				setInvitations([])
+
+					if (!apiClient.IsError(invitationsResponse) && invitationsResponse.data) {
+						setInvitations(invitationsResponse.data.data || [])
+					} else {
+						setInvitations([])
+					}
+				} catch (error) {
+					console.error('Failed to load members/invitations:', error)
+					setMembers([])
+					setInvitations([])
+				}
 
 				message.success(is_cn ? '团队创建成功' : 'Team created successfully')
 			}
@@ -247,17 +343,75 @@ const Team = () => {
 		}
 	}
 
+	// 解析过期时间字符串（如 "7d", "168h", "10080m"）为友好的显示文本
+	const parseExpiryText = (expiry?: string): string => {
+		if (!expiry) return is_cn ? '7天' : '7 days' // 默认值
+
+		// 解析时间单位
+		const match = expiry.match(/^(\d+)([dhms])$/)
+		if (!match) return expiry
+
+		const value = parseInt(match[1])
+		const unit = match[2]
+
+		switch (unit) {
+			case 'd':
+				return is_cn ? `${value}天` : `${value} day${value > 1 ? 's' : ''}`
+			case 'h':
+				return is_cn ? `${value}小时` : `${value} hour${value > 1 ? 's' : ''}`
+			case 'm':
+				return is_cn ? `${value}分钟` : `${value} minute${value > 1 ? 's' : ''}`
+			case 's':
+				return is_cn ? `${value}秒` : `${value} second${value > 1 ? 's' : ''}`
+			default:
+				return expiry
+		}
+	}
+
 	const handleGenerateInviteLink = async (role: string) => {
+		if (!apiClient || !team) {
+			message.error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
+			return
+		}
+
 		try {
 			setGeneratingLink(true)
-			// Mock generate invite link
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-			const newLink = `https://app.example.com/team/invite/${Math.random()
-				.toString(36)
-				.substring(2, 15)}?role=${role}`
-			setInviteLink(newLink)
-			message.success(is_cn ? '邀请链接已生成' : 'Invite link generated')
+
+			// 创建通用邀请链接（不指定 email 和 user_id）
+			const invitationRequest = {
+				role_id: role,
+				send_email: false, // 不发送邮件，只生成链接
+				expiry: config?.invite?.expiry // 使用配置中的过期时间
+			}
+
+			const response = await apiClient.teams.CreateInvitation(team.team_id, invitationRequest)
+
+			if (apiClient.IsError(response)) {
+				console.error('Failed to generate invite link:', response.error)
+				const errorMsg = response.error?.error_description || response.error?.error || 'Unknown error'
+				message.error(
+					is_cn ? `生成邀请链接失败: ${errorMsg}` : `Failed to generate invite link: ${errorMsg}`
+				)
+				return
+			}
+
+			const invitation = response.data
+			if (invitation && invitation.invitation_token) {
+				// 构建邀请链接
+				// 使用配置中的 base_url，如果为空则使用当前域名
+				const baseUrl = config?.invite?.base_url || window.location.origin
+				const inviteUrl = `${baseUrl}/invitations/${invitation.invitation_token}`
+				setInviteLink(inviteUrl)
+				message.success(is_cn ? '邀请链接已生成' : 'Invite link generated')
+			} else {
+				message.error(
+					is_cn
+						? '生成邀请链接失败：未返回令牌'
+						: 'Failed to generate invite link: no token returned'
+				)
+			}
 		} catch (error) {
+			console.error('Error generating invite link:', error)
 			message.error(is_cn ? '生成邀请链接失败' : 'Failed to generate invite link')
 		} finally {
 			setGeneratingLink(false)
@@ -273,29 +427,64 @@ const Team = () => {
 	}
 
 	const handleRemoveMember = async (memberId: string) => {
+		if (!apiClient || !team) {
+			message.error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
+			return
+		}
+
 		try {
-			// Mock remove
-			await new Promise((resolve) => setTimeout(resolve, 500))
-			setMembers((prev) => prev.filter((member) => member.id !== memberId))
+			const response = await apiClient.teams.DeleteMember(team.team_id, memberId)
+
+			if (apiClient.IsError(response)) {
+				console.error('Failed to remove member:', response.error)
+				const errorMsg = response.error?.error_description || response.error?.error || 'Unknown error'
+				message.error(is_cn ? `移除成员失败: ${errorMsg}` : `Failed to remove member: ${errorMsg}`)
+				return
+			}
+
+			setMembers((prev) => prev.filter((member) => member.id.toString() !== memberId))
 			message.success(is_cn ? '成员已移除' : 'Member removed')
 		} catch (error) {
+			console.error('Error removing member:', error)
 			message.error(is_cn ? '移除成员失败' : 'Failed to remove member')
 		}
 	}
 
 	const handleCancelInvitation = async (invitationId: string) => {
+		if (!apiClient || !team) {
+			message.error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
+			return
+		}
+
 		try {
-			// Mock cancel
-			await new Promise((resolve) => setTimeout(resolve, 500))
-			setInvitations((prev) => prev.filter((inv) => inv.id !== invitationId))
+			const response = await apiClient.teams.DeleteInvitation(team.team_id, invitationId)
+
+			if (apiClient.IsError(response)) {
+				console.error('Failed to cancel invitation:', response.error)
+				const errorMsg = response.error?.error_description || response.error?.error || 'Unknown error'
+				message.error(is_cn ? `取消邀请失败: ${errorMsg}` : `Failed to cancel invitation: ${errorMsg}`)
+				return
+			}
+
+			setInvitations((prev) => prev.filter((inv) => inv.id.toString() !== invitationId))
 			message.success(is_cn ? '邀请已取消' : 'Invitation cancelled')
 		} catch (error) {
+			console.error('Error cancelling invitation:', error)
 			message.error(is_cn ? '取消邀请失败' : 'Failed to cancel invitation')
 		}
 	}
 
-	const getRoleDisplayName = (role: string) => {
-		switch (role) {
+	const getRoleDisplayName = (roleId: string) => {
+		// 从 config 中查找角色名称
+		if (config?.roles) {
+			const role = config.roles.find((r) => r.role_id === roleId)
+			if (role) {
+				return role.label
+			}
+		}
+
+		// 如果没有配置，使用默认名称
+		switch (roleId) {
 			case 'owner':
 				return is_cn ? '所有者' : 'Owner'
 			case 'admin':
@@ -303,7 +492,7 @@ const Team = () => {
 			case 'member':
 				return is_cn ? '成员' : 'Member'
 			default:
-				return role
+				return roleId
 		}
 	}
 
@@ -320,10 +509,17 @@ const Team = () => {
 		}
 	}
 
-	const roleOptions = [
-		{ label: is_cn ? '成员' : 'Member', value: 'member' },
-		{ label: is_cn ? '管理员' : 'Admin', value: 'admin' }
-	]
+	// 从配置中获取角色选项（过滤掉隐藏的角色）
+	const roleOptions =
+		config?.roles
+			?.filter((role) => !role.hidden)
+			.map((role) => ({
+				label: role.label,
+				value: role.role_id
+			})) || []
+
+	// 获取默认角色
+	const defaultRole = config?.roles?.find((role) => role.default)?.role_id || 'team_member'
 
 	if (loading) {
 		return (
@@ -420,9 +616,9 @@ const Team = () => {
 										<button
 											type='submit'
 											className='ant-btn ant-btn-primary'
-											disabled={loading}
+											disabled={loading || configLoading}
 										>
-											{loading && (
+											{(loading || configLoading) && (
 												<span className='ant-btn-loading-icon'></span>
 											)}
 											{is_cn ? '创建团队' : 'Create Team'}
@@ -454,7 +650,7 @@ const Team = () => {
 						size='small'
 						icon={<Icon name='material-person_add' size={12} />}
 						onClick={() => setInviteModalVisible(true)}
-						disabled={!team}
+						disabled={!team || loading || configLoading}
 					>
 						{is_cn ? '邀请成员' : 'Invite Member'}
 					</Button>
@@ -474,6 +670,7 @@ const Team = () => {
 									icon={<Icon name='icon-check' size={12} />}
 									onClick={() => teamForm.submit()}
 									loading={updatingTeam}
+									disabled={updatingTeam}
 								>
 									{is_cn ? '保存' : 'Save'}
 								</Button>
@@ -484,6 +681,7 @@ const Team = () => {
 										setEditingTeam(false)
 										teamForm.setFieldsValue(team)
 									}}
+									disabled={updatingTeam}
 								>
 									{is_cn ? '取消' : 'Cancel'}
 								</Button>
@@ -497,6 +695,7 @@ const Team = () => {
 									teamForm.setFieldsValue(team)
 									setEditingTeam(true)
 								}}
+								disabled={loading || configLoading}
 							>
 								{is_cn ? '编辑' : 'Edit'}
 							</Button>
@@ -623,69 +822,87 @@ const Team = () => {
 
 				<div className={styles.unifiedMembersList}>
 					{/* 团队成员列表 */}
-					{members.map((member) => (
-						<div key={member.id} className={styles.memberCard}>
-							<div className={styles.memberInfo}>
-								<div className={styles.memberAvatar}>
-									{member.avatar ? (
-										<img src={member.avatar} alt={member.name} />
-									) : (
-										<div className={styles.avatarPlaceholder}>
-											{member.name.charAt(0).toUpperCase()}
-										</div>
-									)}
-								</div>
-								<div className={styles.memberDetails}>
-									<div className={styles.memberName}>{member.name}</div>
-									<div className={styles.memberEmail}>{member.email}</div>
-									<div className={styles.memberMeta}>
-										<span className={styles.memberRole} data-role={member.role}>
-											{getRoleDisplayName(member.role)}
-										</span>
-										<span
-											className={styles.memberStatus}
-											data-status={member.status}
-										>
-											{getStatusDisplayName(member.status)}
-										</span>
-										{member.last_active && (
-											<span className={styles.memberLastActive}>
-												{is_cn ? '最后活跃：' : 'Last active: '}
-												{new Date(
-													member.last_active
-												).toLocaleDateString()}
-											</span>
+					{members.map((member) => {
+						// 尝试从 user_info 获取用户信息（如果是 TeamMemberDetail）
+						const memberDetail = member as any
+						const userName =
+							memberDetail.user_info?.name ||
+							member.user_id ||
+							(is_cn ? '未知用户' : 'Unknown User')
+						const userEmail = memberDetail.user_info?.email || ''
+						const userAvatar = memberDetail.user_info?.avatar
+
+						return (
+							<div key={member.id} className={styles.memberCard}>
+								<div className={styles.memberInfo}>
+									<div className={styles.memberAvatar}>
+										{userAvatar ? (
+											<img src={userAvatar} alt={userName} />
+										) : (
+											<div className={styles.avatarPlaceholder}>
+												{userName?.charAt(0)?.toUpperCase() || 'U'}
+											</div>
 										)}
 									</div>
+									<div className={styles.memberDetails}>
+										<div className={styles.memberName}>{userName}</div>
+										<div className={styles.memberEmail}>{userEmail}</div>
+										<div className={styles.memberMeta}>
+											<span
+												className={styles.memberRole}
+												data-role={member.role_id}
+											>
+												{getRoleDisplayName(member.role_id)}
+											</span>
+											<span
+												className={styles.memberStatus}
+												data-status={member.status}
+											>
+												{getStatusDisplayName(member.status)}
+											</span>
+											{member.last_activity && (
+												<span className={styles.memberLastActive}>
+													{is_cn ? '最后活跃：' : 'Last active: '}
+													{new Date(
+														member.last_activity
+													).toLocaleDateString()}
+												</span>
+											)}
+										</div>
+									</div>
+								</div>
+								<div className={styles.memberActions}>
+									{/* 不允许移除 owner 角色的成员 */}
+									{member.role_id !== 'team_owner' && (
+										<Button
+											type='default'
+											size='small'
+											className={styles.actionButton}
+											onClick={() => {
+												Modal.confirm({
+													title: is_cn
+														? '确认移除成员'
+														: 'Confirm Remove Member',
+													content: is_cn
+														? `确定要移除 ${userName} 吗？`
+														: `Are you sure to remove ${userName}?`,
+													okText: is_cn ? '移除' : 'Remove',
+													cancelText: is_cn ? '取消' : 'Cancel',
+													okType: 'danger',
+													onOk: () =>
+														handleRemoveMember(
+															member.id.toString()
+														)
+												})
+											}}
+										>
+											{is_cn ? '移除' : 'Remove'}
+										</Button>
+									)}
 								</div>
 							</div>
-							<div className={styles.memberActions}>
-								{member.role !== 'owner' && (
-									<Button
-										type='default'
-										size='small'
-										className={styles.actionButton}
-										onClick={() => {
-											Modal.confirm({
-												title: is_cn
-													? '确认移除成员'
-													: 'Confirm Remove Member',
-												content: is_cn
-													? `确定要移除 ${member.name} 吗？`
-													: `Are you sure to remove ${member.name}?`,
-												okText: is_cn ? '移除' : 'Remove',
-												cancelText: is_cn ? '取消' : 'Cancel',
-												okType: 'danger',
-												onOk: () => handleRemoveMember(member.id)
-											})
-										}}
-									>
-										{is_cn ? '移除' : 'Remove'}
-									</Button>
-								)}
-							</div>
-						</div>
-					))}
+						)
+					})}
 
 					{/* 待处理邀请 */}
 					{invitations.length > 0 && (
@@ -695,63 +912,80 @@ const Team = () => {
 									{is_cn ? '待处理邀请' : 'Pending Invitations'}
 								</h5>
 							</div>
-							{invitations.map((invitation) => (
-								<div key={invitation.id} className={styles.invitationCard}>
-									<div className={styles.invitationInfo}>
-										<div className={styles.invitationAvatar}>
-											<Icon name='material-mail_outline' size={20} />
+							{invitations.map((invitation) => {
+								// 尝试从 user_info 获取用户信息（如果是 TeamInvitationDetail）
+								const invitationDetail = invitation as any
+								const displayText =
+									invitationDetail.user_info?.email ||
+									invitationDetail.user_info?.name ||
+									invitation.user_id
+
+								return (
+									<div key={invitation.id} className={styles.invitationCard}>
+										<div className={styles.invitationInfo}>
+											<div className={styles.invitationAvatar}>
+												<Icon name='material-mail_outline' size={20} />
+											</div>
+											<div className={styles.invitationDetails}>
+												<div className={styles.invitationEmail}>
+													{displayText}
+												</div>
+												<div className={styles.invitationMeta}>
+													<span className={styles.invitationRole}>
+														{getRoleDisplayName(
+															invitation.role_id
+														)}
+													</span>
+													<span>
+														{is_cn
+															? '邀请人：'
+															: 'Invited by: '}
+														{invitation.invited_by}
+													</span>
+													{invitation.invitation_expires_at && (
+														<span>
+															{is_cn
+																? '过期时间：'
+																: 'Expires: '}
+															{new Date(
+																invitation.invitation_expires_at
+															).toLocaleDateString()}
+														</span>
+													)}
+												</div>
+											</div>
 										</div>
-										<div className={styles.invitationDetails}>
-											<div className={styles.invitationEmail}>
-												{invitation.email}
-											</div>
-											<div className={styles.invitationMeta}>
-												<span className={styles.invitationRole}>
-													{getRoleDisplayName(invitation.role)}
-												</span>
-												<span>
-													{is_cn ? '邀请人：' : 'Invited by: '}
-													{invitation.invited_by}
-												</span>
-												<span>
-													{is_cn ? '过期时间：' : 'Expires: '}
-													{new Date(
-														invitation.expires_at
-													).toLocaleDateString()}
-												</span>
-											</div>
+										<div className={styles.invitationActions}>
+											<Button
+												type='default'
+												size='small'
+												className={styles.actionButton}
+												onClick={() => {
+													Modal.confirm({
+														title: is_cn
+															? '确认取消邀请'
+															: 'Confirm Cancel Invitation',
+														content: is_cn
+															? `确定要取消对 ${displayText} 的邀请吗？`
+															: `Are you sure to cancel the invitation to ${displayText}?`,
+														okText: is_cn
+															? '取消邀请'
+															: 'Cancel Invitation',
+														cancelText: is_cn ? '保留' : 'Keep',
+														okType: 'danger',
+														onOk: () =>
+															handleCancelInvitation(
+																invitation.id.toString()
+															)
+													})
+												}}
+											>
+												{is_cn ? '取消' : 'Cancel'}
+											</Button>
 										</div>
 									</div>
-									<div className={styles.invitationActions}>
-										<Button
-											type='default'
-											size='small'
-											className={styles.actionButton}
-											onClick={() => {
-												Modal.confirm({
-													title: is_cn
-														? '确认取消邀请'
-														: 'Confirm Cancel Invitation',
-													content: is_cn
-														? `确定要取消对 ${invitation.email} 的邀请吗？`
-														: `Are you sure to cancel the invitation to ${invitation.email}?`,
-													okText: is_cn
-														? '取消邀请'
-														: 'Cancel Invitation',
-													cancelText: is_cn ? '保留' : 'Keep',
-													okType: 'danger',
-													onOk: () =>
-														handleCancelInvitation(
-															invitation.id
-														)
-												})
-											}}
-										>
-											{is_cn ? '取消' : 'Cancel'}
-										</Button>
-									</div>
-								</div>
-							))}
+								)
+							})}
 						</>
 					)}
 				</div>
@@ -828,7 +1062,7 @@ const Team = () => {
 								<Form.Item
 									name='role'
 									label={is_cn ? '角色权限' : 'Role'}
-									initialValue='member'
+									initialValue={defaultRole}
 									rules={[
 										{
 											required: true,
@@ -853,7 +1087,7 @@ const Team = () => {
 									<button
 										type='submit'
 										className={styles.submitButton}
-										disabled={inviting}
+										disabled={inviting || configLoading}
 									>
 										{inviting && (
 											<Icon
@@ -888,19 +1122,16 @@ const Team = () => {
 										enum: roleOptions,
 										placeholder: is_cn ? '选择角色权限' : 'Select role'
 									}}
-									value={form.getFieldValue('role') || 'member'}
-									onChange={(value) => form.setFieldsValue({ role: value })}
+									value={linkRole || defaultRole}
+									onChange={(value) => setLinkRole(value as string)}
 									error=''
 									hasError={false}
 								/>
 								<Button
 									type='primary'
-									onClick={() =>
-										handleGenerateInviteLink(
-											form.getFieldValue('role') || 'member'
-										)
-									}
+									onClick={() => handleGenerateInviteLink(linkRole || defaultRole)}
 									loading={generatingLink}
+									disabled={generatingLink || configLoading}
 									icon={<Icon name='material-link' size={14} />}
 								>
 									{is_cn ? '生成链接' : 'Generate Link'}
@@ -915,8 +1146,12 @@ const Team = () => {
 									<div className={styles.linkFooter}>
 										<p className={styles.linkNote}>
 											{is_cn
-												? '此链接将在7天后过期'
-												: 'This link will expire in 7 days'}
+												? `此链接将在${parseExpiryText(
+														config?.invite?.expiry
+												  )}后过期`
+												: `This link will expire in ${parseExpiryText(
+														config?.invite?.expiry
+												  )}`}
 										</p>
 										<div className={styles.linkActions}>
 											<Button

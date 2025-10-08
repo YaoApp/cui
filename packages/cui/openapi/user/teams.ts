@@ -25,10 +25,10 @@ import {
 export class UserTeams {
 	constructor(private api: OpenAPI) {}
 
-	// ===== Public Endpoints =====
+	// ===== Team Configuration =====
 
 	/**
-	 * Get team configuration (public endpoint, no authentication required)
+	 * Get team configuration (requires authentication)
 	 * @param locale Optional locale for localized configuration (defaults to "en")
 	 */
 	async GetConfig(locale?: string): Promise<ApiResponse<TeamConfig>> {

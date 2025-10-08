@@ -370,6 +370,8 @@ export interface TeamRole {
 	role_id: string
 	label: string
 	description: string
+	default?: boolean // Whether this role is the default role
+	hidden?: boolean // Whether this role is hidden from UI
 }
 
 /**
@@ -378,6 +380,7 @@ export interface TeamRole {
 export interface InviteConfig {
 	channel?: string
 	expiry?: string
+	base_url?: string // Base URL for invitation links
 	templates?: Record<string, string>
 }
 
