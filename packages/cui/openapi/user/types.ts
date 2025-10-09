@@ -492,6 +492,7 @@ export interface MemberListResponse {
  */
 export interface TeamInvitation {
 	id: number
+	invitation_id?: string // Business key for invitation
 	team_id: string
 	user_id: string
 	member_type: string
@@ -500,6 +501,7 @@ export interface TeamInvitation {
 	invited_by: string
 	invited_at: string
 	invitation_token?: string
+	invitation_link?: string // Full invitation link (constructed by backend)
 	invitation_expires_at?: string
 	message?: string
 	settings?: InvitationSettings
@@ -526,6 +528,7 @@ export interface CreateInvitationRequest {
 	message?: string
 	expiry?: string // Custom expiry duration (e.g., "1d", "8h"), defaults to team config
 	send_email?: boolean // Whether to send email (defaults to false)
+	locale?: string // Language code for email template (e.g., "zh-CN", "en")
 	settings?: InvitationSettings
 }
 

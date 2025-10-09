@@ -183,7 +183,8 @@ const Team = () => {
 				email: values.email,
 				role_id: values.role,
 				send_email: true, // 发送邀请邮件
-				expiry: config?.invite?.expiry // 使用配置中的过期时间
+				expiry: config?.invite?.expiry, // 使用配置中的过期时间
+				locale: locale // 指定语言，用于发送对应语言的邮件模板
 			}
 
 			const response = await apiClient.teams.CreateInvitation(team.team_id, invitationRequest)
@@ -381,7 +382,8 @@ const Team = () => {
 			const invitationRequest = {
 				role_id: role,
 				send_email: false, // 不发送邮件，只生成链接
-				expiry: config?.invite?.expiry // 使用配置中的过期时间
+				expiry: config?.invite?.expiry, // 使用配置中的过期时间
+				locale: locale // 指定语言，保持数据一致性
 			}
 
 			const response = await apiClient.teams.CreateInvitation(team.team_id, invitationRequest)
@@ -396,18 +398,15 @@ const Team = () => {
 			}
 
 			const invitation = response.data
-			if (invitation && invitation.invitation_token) {
-				// 构建邀请链接
-				// 使用配置中的 base_url，如果为空则使用当前域名
-				const baseUrl = config?.invite?.base_url || window.location.origin
-				const inviteUrl = `${baseUrl}/invitations/${invitation.invitation_token}`
-				setInviteLink(inviteUrl)
+			if (invitation && invitation.invitation_link) {
+				// 直接使用后端返回的完整邀请链接
+				setInviteLink(invitation.invitation_link)
 				message.success(is_cn ? '邀请链接已生成' : 'Invite link generated')
 			} else {
 				message.error(
 					is_cn
-						? '生成邀请链接失败：未返回令牌'
-						: 'Failed to generate invite link: no token returned'
+						? '生成邀请链接失败：未返回链接'
+						: 'Failed to generate invite link: no link returned'
 				)
 			}
 		} catch (error) {
