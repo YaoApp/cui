@@ -1,0 +1,522 @@
+@import '@/styles/preset/vars.less';
+
+/* Mock controls - remove in production */
+.mockControls {
+	position: fixed;
+	top: 80px;
+	right: 20px;
+	z-index: 1000;
+	background: var(--color_bg_menu);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	padding: 12px 16px;
+	box-shadow: var(--shadow);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+
+	> div {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 12px;
+		color: var(--color_text_light);
+	}
+}
+
+.loadingContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 0;
+	min-height: 200px;
+}
+
+.loadingSpinner {
+	width: 40px;
+	height: 40px;
+	border: 3px solid var(--color_border);
+	border-top: 3px solid var(--color_main);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+.loadingText {
+	margin-top: 16px;
+	font-size: 14px;
+	color: var(--color_text_light);
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.inviteContainer {
+	width: 100%;
+	max-width: 520px;
+	padding: 20px;
+}
+
+.inviteCard {
+	background: var(--color_bg_menu);
+	border-radius: calc(var(--radius) * 3);
+	padding: 40px;
+	box-shadow: var(--shadow);
+	border: 1px solid var(--color_border);
+}
+
+/* Title Section - matching signin page */
+.titleSection {
+	text-align: center;
+	margin-bottom: 28px;
+}
+
+.inviteTitle {
+	font-size: 24px; /* matches signin appTitle */
+	font-weight: 600;
+	color: var(--color_text);
+	margin: 0 0 8px 0;
+	letter-spacing: -0.01em;
+}
+
+.inviteSubtitle {
+	font-size: 15px; /* matches signin appSubtitle */
+	color: var(--color_text_light);
+	margin: 0;
+	line-height: 1.5;
+}
+
+.inviterHighlight {
+	color: var(--color_text);
+	font-weight: 500;
+	font-size: inherit; /* 继承 subtitle 的 15px */
+}
+
+.teamHighlight {
+	color: var(--color_main);
+	font-weight: 600;
+	font-size: inherit; /* 继承 subtitle 的 15px */
+}
+
+/* Team Section */
+.teamSection {
+	margin-bottom: 28px;
+	padding: 24px;
+	background: var(--color_bg_nav);
+	border: 1px solid var(--color_border);
+	border-radius: calc(var(--radius) * 2);
+}
+
+.teamHeader {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+}
+
+.teamAvatar {
+	flex-shrink: 0;
+	width: 64px;
+	height: 64px;
+	border-radius: calc(var(--radius) * 2);
+	overflow: hidden;
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+.avatarPlaceholder {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--color_main);
+	color: white;
+	font-size: 24px;
+	font-weight: 600;
+}
+
+.teamInfo {
+	flex: 1;
+	min-width: 0;
+}
+
+.teamName {
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--color_text);
+	margin: 0 0 6px 0;
+}
+
+.teamDescription {
+	font-size: 14px;
+	color: var(--color_text_light);
+	margin: 0;
+	line-height: 1.5;
+}
+
+/* Details Section */
+.detailsSection {
+	margin-bottom: 28px;
+	padding: 16px 0;
+	border-top: 1px solid var(--color_border);
+	border-bottom: 1px solid var(--color_border);
+}
+
+.detailItem {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 0;
+
+	&:not(:last-child) {
+		margin-bottom: 4px;
+	}
+}
+
+.detailIcon {
+	flex-shrink: 0;
+	color: var(--color_main);
+}
+
+.detailContent {
+	flex: 1;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+}
+
+.detailLabel {
+	font-size: 14px;
+	color: var(--color_text_light);
+}
+
+.detailValue {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_text);
+}
+
+/* Action Section */
+.actionSection {
+	margin-top: 28px;
+}
+
+.loginPrompt {
+	text-align: center;
+	font-size: 14px;
+	color: var(--color_text_light);
+	margin: 0 0 20px 0;
+}
+
+.authButtons {
+	display: flex;
+	gap: 12px;
+
+	.loginButton,
+	.registerButton {
+		flex: 1;
+	}
+}
+
+.acceptButton {
+	width: 100%;
+	height: 44px;
+	font-size: 15px;
+	font-weight: 500;
+}
+
+.switchAccountSection {
+	text-align: center;
+	margin-top: 16px;
+	font-size: 14px;
+}
+
+.switchAccountText {
+	color: var(--color_text_grey);
+	margin-right: 4px;
+}
+
+.switchAccountLink {
+	color: var(--color_main);
+	text-decoration: none;
+	font-weight: 500;
+	transition: all 0.3s ease;
+
+	&:hover {
+		color: var(--color_main_hover);
+		text-decoration: underline;
+	}
+}
+
+/* Expired Section */
+.expiredSection {
+	text-align: center;
+	padding: 20px 0;
+}
+
+.expiredIcon {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 24px;
+	color: var(--color_text_grey);
+	opacity: 0.5;
+}
+
+.expiredTitle {
+	font-size: 24px;
+	font-weight: 600;
+	color: var(--color_text);
+	margin: 0 0 12px 0;
+}
+
+.expiredDescription {
+	font-size: 15px;
+	color: var(--color_text_light);
+	margin: 0 0 32px 0;
+	line-height: 1.6;
+}
+
+.expiredDetails {
+	background: var(--color_bg_hover);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	padding: 20px;
+	margin-bottom: 28px;
+	text-align: left;
+}
+
+.detailRow {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 0;
+
+	&:not(:last-child) {
+		border-bottom: 1px solid var(--color_border);
+	}
+}
+
+.expiredActions {
+	.backButton {
+		height: 44px;
+		padding: 0 32px;
+		font-size: 15px;
+	}
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+	.mockControls {
+		top: 60px;
+		right: 10px;
+		padding: 8px 12px;
+		font-size: 11px;
+	}
+
+	.inviteContainer {
+		max-width: 100%;
+		padding: 16px;
+	}
+
+	.inviteCard {
+		padding: 24px;
+	}
+
+	.inviteTitle {
+		font-size: 20px;
+	}
+
+	.inviteSubtitle {
+		font-size: 14px;
+	}
+
+	.teamSection {
+		padding: 20px;
+	}
+
+	.teamHeader {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.teamInfo {
+		text-align: center;
+	}
+
+	.teamAvatar {
+		width: 56px;
+		height: 56px;
+	}
+
+	.teamName {
+		font-size: 18px;
+	}
+
+	.teamDescription {
+		font-size: 13px;
+	}
+
+	.detailsSection {
+		padding: 12px 0;
+	}
+
+	.detailItem {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+	}
+
+	.detailContent {
+		width: 100%;
+		padding-left: 30px;
+	}
+
+	.detailLabel,
+	.detailValue {
+		font-size: 13px;
+	}
+
+	.loginPrompt {
+		font-size: 13px;
+	}
+
+	.switchAccountSection {
+		font-size: 13px;
+	}
+
+	.authButtons {
+		flex-direction: column;
+
+		.loginButton,
+		.registerButton {
+			width: 100%;
+		}
+	}
+
+	.expiredTitle {
+		font-size: 20px;
+	}
+
+	.expiredDescription {
+		font-size: 14px;
+	}
+}
+
+/* Dark theme support */
+[data-theme='dark'] {
+	.inviteCard {
+		background: rgba(26, 29, 41, 0.85);
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+	}
+
+	.inviteTitle {
+		color: rgba(255, 255, 255, 0.95);
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	}
+
+	.inviteSubtitle {
+		color: rgba(255, 255, 255, 0.65);
+	}
+
+	.teamSection {
+		background: rgba(31, 35, 48, 0.6);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.teamName {
+		color: rgba(255, 255, 255, 0.95);
+	}
+
+	.teamDescription {
+		color: rgba(255, 255, 255, 0.6);
+	}
+
+	.inviterHighlight {
+		color: rgba(255, 255, 255, 0.95);
+	}
+
+	.teamHighlight {
+		color: rgba(69, 128, 255, 1);
+	}
+
+	.detailsSection {
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	}
+
+	.detailIcon {
+		color: rgba(69, 128, 255, 0.9);
+	}
+
+	.detailLabel {
+		color: rgba(255, 255, 255, 0.6);
+	}
+
+	.detailValue {
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.loginPrompt {
+		color: rgba(255, 255, 255, 0.65);
+	}
+
+	.switchAccountText {
+		color: rgba(255, 255, 255, 0.5);
+	}
+
+	.switchAccountLink {
+		color: rgba(69, 128, 255, 0.9);
+
+		&:hover {
+			color: rgba(90, 143, 255, 1);
+			text-shadow: 0 0 8px rgba(69, 128, 255, 0.3);
+		}
+	}
+
+	.expiredIcon {
+		color: rgba(255, 255, 255, 0.4);
+	}
+
+	.expiredTitle {
+		color: rgba(255, 255, 255, 0.95);
+	}
+
+	.expiredDescription {
+		color: rgba(255, 255, 255, 0.65);
+	}
+
+	.expiredDetails {
+		background: rgba(31, 35, 48, 0.6);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.detailRow {
+		&:not(:last-child) {
+			border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		}
+	}
+
+	.mockControls {
+		background: rgba(26, 29, 41, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+		> div {
+			color: rgba(255, 255, 255, 0.6);
+		}
+	}
+}
