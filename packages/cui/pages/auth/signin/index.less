@@ -72,7 +72,32 @@
 		}
 
 		.socialSection {
-			margin-bottom: 32px;
+			margin-top: 24px;
+			margin-bottom: 24px;
+		}
+
+		/* Terms Section - 独立样式，可用于form内外 */
+		.termsSection {
+			text-align: center;
+			margin-top: 20px;
+
+			.termsText {
+				font-size: 12px;
+				color: var(--color_text_grey);
+				line-height: 1.4;
+				margin: 0;
+
+				.termsLink {
+					color: var(--color_main);
+					text-decoration: none;
+					transition: all 0.3s ease;
+
+					&:hover {
+						color: var(--color_main_hover);
+						text-decoration: underline;
+					}
+				}
+			}
 		}
 
 		.loginForm {
@@ -178,30 +203,6 @@
 					&:hover {
 						color: var(--color_main_hover);
 						text-decoration: underline;
-					}
-				}
-			}
-
-			/* Terms Section */
-			.termsSection {
-				text-align: center;
-				margin-top: 16px;
-
-				.termsText {
-					font-size: 12px;
-					color: var(--color_text_grey);
-					line-height: 1.4;
-					margin: 0;
-
-					.termsLink {
-						color: var(--color_main);
-						text-decoration: none;
-						transition: all 0.3s ease;
-
-						&:hover {
-							color: var(--color_main_hover);
-							text-decoration: underline;
-						}
 					}
 				}
 			}
@@ -336,11 +337,13 @@
 					font-size: 13px;
 					margin: 16px 0;
 				}
+			}
 
-				.termsSection {
-					.termsText {
-						font-size: 11px;
-					}
+			.termsSection {
+				margin-top: 16px;
+
+				.termsText {
+					font-size: 11px;
 				}
 			}
 		}

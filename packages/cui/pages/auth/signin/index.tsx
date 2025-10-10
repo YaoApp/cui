@@ -13,6 +13,22 @@ import styles from './index.less'
 import { User } from '@/openapi/user'
 import { SigninConfig, SigninProvider } from '@/openapi/user/types'
 
+// Cookie 工具函数
+const setCookie = (name: string, value: string, days: number = 7) => {
+	const expires = new Date()
+	expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
+	document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
+}
+
+const deleteCookie = (name: string) => {
+	document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`
+}
+
+const getUrlParam = (name: string): string | null => {
+	const urlParams = new URLSearchParams(window.location.search)
+	return urlParams.get(name)
+}
+
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
 	// 获取浏览器首选语言
@@ -54,6 +70,17 @@ const ResponsiveLogin = () => {
 		image: string
 	} | null>(null)
 	const [captchaLoading, setCaptchaLoading] = useState(false)
+
+	// 处理 redirect 参数
+	useAsyncEffect(async () => {
+		const redirectParam = getUrlParam('redirect')
+		if (redirectParam && redirectParam.trim() !== '') {
+			setCookie('login_redirect', redirectParam)
+		} else {
+			// 如果 redirect 未设置或为空，删除 Cookie
+			deleteCookie('login_redirect')
+		}
+	}, [])
 
 	// Load configuration using real API
 	useAsyncEffect(async () => {
@@ -230,17 +257,6 @@ const ResponsiveLogin = () => {
 						</p>
 					</div>
 
-					{/* Third Party Login */}
-					{config.third_party?.providers && config.third_party.providers.length > 0 && (
-						<div className={styles.socialSection}>
-							<SocialLogin
-								providers={config.third_party.providers}
-								onProviderClick={handleThirdPartyClick}
-								loading={loading}
-							/>
-						</div>
-					)}
-
 					{/* Login Form */}
 					<form className={styles.loginForm} onSubmit={handleSubmit}>
 						<AuthInput
@@ -325,39 +341,50 @@ const ResponsiveLogin = () => {
 								</a>
 							</div>
 						)}
-
-						{/* Terms Agreement */}
-						{(config.form?.terms_of_service_link || config.form?.privacy_policy_link) && (
-							<div className={styles.termsSection}>
-								<p className={styles.termsText}>
-									{messages.login.terms.agreement}{' '}
-									{config.form.terms_of_service_link && (
-										<a
-											href={config.form.terms_of_service_link}
-											className={styles.termsLink}
-											target='_blank'
-											rel='noopener noreferrer'
-										>
-											{messages.login.terms.terms}
-										</a>
-									)}
-									{config.form.terms_of_service_link &&
-										config.form.privacy_policy_link &&
-										' ' + messages.login.terms.and + ' '}
-									{config.form.privacy_policy_link && (
-										<a
-											href={config.form.privacy_policy_link}
-											className={styles.termsLink}
-											target='_blank'
-											rel='noopener noreferrer'
-										>
-											{messages.login.terms.privacy}
-										</a>
-									)}
-								</p>
-							</div>
-						)}
 					</form>
+
+					{/* Third Party Login */}
+					{config.third_party?.providers && config.third_party.providers.length > 0 && (
+						<div className={styles.socialSection}>
+							<SocialLogin
+								providers={config.third_party.providers}
+								onProviderClick={handleThirdPartyClick}
+								loading={loading}
+							/>
+						</div>
+					)}
+
+					{/* Terms Agreement */}
+					{(config.form?.terms_of_service_link || config.form?.privacy_policy_link) && (
+						<div className={styles.termsSection}>
+							<p className={styles.termsText}>
+								{messages.login.terms.agreement}{' '}
+								{config.form.terms_of_service_link && (
+									<a
+										href={config.form.terms_of_service_link}
+										className={styles.termsLink}
+										target='_blank'
+										rel='noopener noreferrer'
+									>
+										{messages.login.terms.terms}
+									</a>
+								)}
+								{config.form.terms_of_service_link &&
+									config.form.privacy_policy_link &&
+									' ' + messages.login.terms.and + ' '}
+								{config.form.privacy_policy_link && (
+									<a
+										href={config.form.privacy_policy_link}
+										className={styles.termsLink}
+										target='_blank'
+										rel='noopener noreferrer'
+									>
+										{messages.login.terms.privacy}
+									</a>
+								)}
+							</p>
+						</div>
+					)}
 				</div>
 			</div>
 		</AuthLayout>
