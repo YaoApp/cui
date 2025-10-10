@@ -128,8 +128,6 @@ export interface OAuthAuthbackResponse {
 	expires_in?: number
 	refresh_token_expires_in?: number
 	mfa_enabled?: boolean
-	mfa_token?: string
-	mfa_token_expires_in?: number
 	status?: LoginStatus
 	error?: string
 	error_description?: string
@@ -163,10 +161,11 @@ export interface OAuthAuthResult {
 
 	/** Session ID (for MFA or team selection) */
 	session_id?: string
-	/** MFA token (when MFA is required) */
-	mfa_token?: string
-	/** MFA token expiration (when MFA is required) */
-	mfa_token_expires_in?: number
+
+	access_token?: string
+	expires_in?: number | number
+	refresh_token?: string
+	refresh_token_expires_in?: number
 }
 
 /**

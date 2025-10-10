@@ -83,13 +83,15 @@ export class UserAuth {
 			status,
 			provider: id,
 			authenticated_at: Math.floor(Date.now() / 1000),
-			session_id: response.data?.session_id
+			session_id: response.data?.session_id,
+			access_token: response.data?.access_token,
+			expires_in: response.data?.expires_in,
+			refresh_token: response.data?.refresh_token,
+			refresh_token_expires_in: response.data?.refresh_token_expires_in
 		}
 
 		// Handle MFA required
 		if (status === LoginStatus.MFARequired) {
-			authResult.mfa_token = response.data?.mfa_token
-			authResult.mfa_token_expires_in = response.data?.mfa_token_expires_in
 			return {
 				status: response.status,
 				headers: response.headers,
