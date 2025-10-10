@@ -10,7 +10,8 @@ import {
 	OAuthAuthbackResponse,
 	OAuthAuthResult,
 	UserInfo,
-	CaptchaResponse
+	CaptchaResponse,
+	LoginStatus
 } from './types'
 
 /**
@@ -69,26 +70,46 @@ export class UserAuth {
 	async OAuthCallback(id: string, params: OAuthAuthbackParams): Promise<ApiResponse<OAuthAuthResult>> {
 		const response = await this.api.Post<OAuthAuthbackResponse>(`/user/oauth/${id}/callback`, params)
 		if (this.IsError(response)) {
-			// For MFA required, return the error response instead of throwing
-			if (response.error.error === 'mfa_required') {
-				return response as any
-			}
-
 			throw new Error(
 				response.error.error_description || response.error.error || 'OAuth authentication failed'
 			)
 		}
 
-		// Validate the ID Token and extract user information
-		const userInfo = await this.ValidateIDToken(response.data?.id_token || '')
+		// Check login status
+		const status = response.data?.status || LoginStatus.Success
 
-		// Construct complete authentication result
+		// Base authentication result
 		const authResult: OAuthAuthResult = {
-			user: userInfo,
+			status,
 			provider: id,
 			authenticated_at: Math.floor(Date.now() / 1000),
-			expires_at: userInfo.exp
+			session_id: response.data?.session_id
 		}
+
+		// Handle MFA required
+		if (status === LoginStatus.MFARequired) {
+			authResult.mfa_token = response.data?.mfa_token
+			authResult.mfa_token_expires_in = response.data?.mfa_token_expires_in
+			return {
+				status: response.status,
+				headers: response.headers,
+				data: authResult
+			}
+		}
+
+		// Handle team selection required
+		if (status === LoginStatus.TeamSelectionRequired) {
+			return {
+				status: response.status,
+				headers: response.headers,
+				data: authResult
+			}
+		}
+
+		// Normal login success - validate the ID Token
+		const userInfo = await this.ValidateIDToken(response.data?.id_token || '')
+		authResult.user = userInfo
+		authResult.expires_at = userInfo.exp
 
 		return {
 			status: response.status,

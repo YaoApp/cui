@@ -1,6 +1,15 @@
 // ===== Authentication Types (migrated from signin.ts) =====
 
 /**
+ * Login status enum
+ */
+export enum LoginStatus {
+	Success = 'ok',
+	MFARequired = 'mfa_required',
+	TeamSelectionRequired = 'team_selection_required'
+}
+
+/**
  * OAuth provider configuration
  */
 export interface SigninProvider {
@@ -75,7 +84,12 @@ export interface SigninResponse {
 	access_token?: string
 	refresh_token?: string
 	expires_in?: number
+	refresh_token_expires_in?: number
 	mfa_enabled?: boolean
+	mfa_token?: string
+	mfa_token_expires_in?: number
+	session_id?: string
+	status?: LoginStatus
 	user?: {
 		id: string
 		username: string
@@ -114,6 +128,9 @@ export interface OAuthAuthbackResponse {
 	expires_in?: number
 	refresh_token_expires_in?: number
 	mfa_enabled?: boolean
+	mfa_token?: string
+	mfa_token_expires_in?: number
+	status?: LoginStatus
 	error?: string
 	error_description?: string
 }
@@ -123,8 +140,10 @@ export interface OAuthAuthbackResponse {
  * Contains validated user info and authentication metadata
  */
 export interface OAuthAuthResult {
-	/** Validated user information from ID token */
-	user: UserInfo
+	/** Login status */
+	status: LoginStatus
+	/** Validated user information from ID token (only available when status is Success) */
+	user?: UserInfo
 	/** OAuth provider identifier */
 	provider?: string
 	/** Authentication timestamp */
@@ -141,6 +160,13 @@ export interface OAuthAuthResult {
 
 	/** Logout redirect */
 	logout_redirect?: string
+
+	/** Session ID (for MFA or team selection) */
+	session_id?: string
+	/** MFA token (when MFA is required) */
+	mfa_token?: string
+	/** MFA token expiration (when MFA is required) */
+	mfa_token_expires_in?: number
 }
 
 /**

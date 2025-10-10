@@ -6,7 +6,7 @@ import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
 import AuthLayout from '../components/AuthLayout'
 import styles from './index.less'
-import { OAuthAuthbackParams, User, UserInfo, OAuthAuthResult } from '@/openapi'
+import { OAuthAuthbackParams, User, UserInfo, OAuthAuthResult, LoginStatus } from '@/openapi'
 import { AfterLogin } from '../auth'
 
 // Required parameters for OAuth callback
@@ -107,13 +107,6 @@ const AuthBack = () => {
 				const signinRes = await user.auth.OAuthCallback(params.provider, params)
 
 				if (user.IsError(signinRes)) {
-					// Check if MFA is required
-					if (signinRes.error?.error === 'mfa_required') {
-						// Redirect to MFA verification page
-						history.push('/auth/signin/mfa')
-						return
-					}
-
 					const errorMsg = signinRes.error?.error_description || 'OAuth authentication failed'
 					setError(errorMsg)
 					message.error(errorMsg)
@@ -121,7 +114,22 @@ const AuthBack = () => {
 					return
 				}
 
-				// Login successful
+				// Check login status and handle accordingly
+				const status = signinRes.data?.status
+
+				// Handle MFA required
+				if (status === LoginStatus.MFARequired) {
+					history.push('/auth/signin/mfa')
+					return
+				}
+
+				// Handle team selection required
+				if (status === LoginStatus.TeamSelectionRequired) {
+					history.push('/team/select')
+					return
+				}
+
+				// Login successful (status === LoginStatus.Success)
 				// console.log('AuthBack success:', signinRes.data)
 
 				// Save user info to global state

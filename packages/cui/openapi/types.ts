@@ -14,6 +14,11 @@ export interface ErrorResponse {
 	error: string
 	error_description?: string
 	error_uri?: string
+	// Additional fields for extended error information
+	session_id?: string
+	mfa_token?: string
+	mfa_token_expires_in?: number
+	[key: string]: any
 }
 
 /**

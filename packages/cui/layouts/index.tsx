@@ -28,7 +28,8 @@ const STANDALONE_PAGES = new Map([
 	['auth_back', '/auth/back/'],
 	['auth_consent', '/auth/consent'],
 	['auth_helloworld', '/auth/helloworld'],
-	// Team invitation pages
+	// Team pages
+	['team_select', '/team/select'],
 	['team_invite', '/team/invite/']
 ])
 
