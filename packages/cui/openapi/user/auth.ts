@@ -69,6 +69,11 @@ export class UserAuth {
 	async OAuthCallback(id: string, params: OAuthAuthbackParams): Promise<ApiResponse<OAuthAuthResult>> {
 		const response = await this.api.Post<OAuthAuthbackResponse>(`/user/oauth/${id}/callback`, params)
 		if (this.IsError(response)) {
+			// For MFA required, return the error response instead of throwing
+			if (response.error.error === 'mfa_required') {
+				return response as any
+			}
+
 			throw new Error(
 				response.error.error_description || response.error.error || 'OAuth authentication failed'
 			)

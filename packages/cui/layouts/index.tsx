@@ -22,7 +22,7 @@ import type { IPropsHelmet, IPropsLoginWrapper } from './types'
 const STANDALONE_PAGES = new Map([
 	// OAuth authentication pages
 	['auth_signin', '/auth/signin'],
-	['auth_signin_totp', '/auth/signin/totp'],
+	['auth_signin_mfa', '/auth/signin/mfa'],
 	['auth_signin_sms', '/auth/signin/sms'],
 	['auth_logout', '/auth/logout'],
 	['auth_back', '/auth/back/'],

@@ -105,7 +105,15 @@ const AuthBack = () => {
 
 				// AuthBack Signin
 				const signinRes = await user.auth.OAuthCallback(params.provider, params)
+
 				if (user.IsError(signinRes)) {
+					// Check if MFA is required
+					if (signinRes.error?.error === 'mfa_required') {
+						// Redirect to MFA verification page
+						history.push('/auth/signin/mfa')
+						return
+					}
+
 					const errorMsg = signinRes.error?.error_description || 'OAuth authentication failed'
 					setError(errorMsg)
 					message.error(errorMsg)
@@ -161,17 +169,17 @@ const AuthBack = () => {
 	}, [window.$app?.openapi])
 
 	// 倒计时跳转逻辑
-	useEffect(() => {
-		if (success && countdown > 0) {
-			const timer = setTimeout(() => {
-				setCountdown(countdown - 1)
-			}, 1000)
-			return () => clearTimeout(timer)
-		} else if (success && countdown === 0) {
-			// 跳转到 /helloworld
-			history.push(entry || '/auth/helloworld')
-		}
-	}, [success, countdown])
+	// useEffect(() => {
+	// 	if (success && countdown > 0) {
+	// 		const timer = setTimeout(() => {
+	// 			setCountdown(countdown - 1)
+	// 		}, 1000)
+	// 		return () => clearTimeout(timer)
+	// 	} else if (success && countdown === 0) {
+	// 		// 跳转到 /helloworld
+	// 		history.push(entry || '/auth/helloworld')
+	// 	}
+	// }, [success, countdown])
 
 	// 手动跳转
 	const handleNavigate = () => {
