@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { message, Button, Avatar, Switch } from 'antd'
+import { message, Button } from 'antd'
 import { getLocale, history } from '@umijs/max'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
@@ -7,6 +7,7 @@ import AuthLayout from '../../auth/components/AuthLayout'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
 import { User } from '@/openapi/user'
+import type { PublicInvitationResponse } from '@/openapi/user/types'
 
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
@@ -25,32 +26,6 @@ const normalizeLocale = (locale: string): string => {
 	return locale
 }
 
-// Mock data for development
-const mockTeamData = {
-	team: {
-		team_id: 'team_001',
-		name: 'Design Studio',
-		description: 'A collaborative workspace for creative professionals',
-		avatar: undefined, // Will show placeholder
-		created_at: '2025-01-15T08:00:00Z'
-	},
-	inviter: {
-		user_id: 'user_001',
-		name: 'Sarah Chen',
-		email: 'sarah.chen@example.com',
-		avatar: undefined // Will show placeholder
-	},
-	invitation: {
-		invitation_id: 'inv_039408925187',
-		token: 'mkx8tq7Ud1vqez5TKQMAqiotcegQacSc_y5pTW1s7jo',
-		role_id: 'team_member',
-		role_label: 'Member',
-		created_at: '2025-10-01T10:00:00Z',
-		expires_at: '2028-10-01T10:00:00Z', // Valid until 2028
-		status: 'pending'
-	}
-}
-
 const TeamInvite = () => {
 	const global = useGlobal()
 
@@ -61,35 +36,83 @@ const TeamInvite = () => {
 	const is_cn = currentLocale.startsWith('zh')
 
 	const [loading, setLoading] = useState(true)
+	const [error, setError] = useState<string>('')
+	const [invitationData, setInvitationData] = useState<PublicInvitationResponse | null>(null)
 	const [invitationId, setInvitationId] = useState<string>('')
 	const [token, setToken] = useState<string>('')
 
-	// Mock toggles for development
-	const [mockIsLoggedIn, setMockIsLoggedIn] = useState(false)
-	const [mockIsExpired, setMockIsExpired] = useState(false)
+	// Check if user is logged in (you may need to adjust this based on your auth implementation)
+	const isLoggedIn = !!global.user
 
-	// Parse URL parameters
+	// Fetch invitation data
 	useEffect(() => {
-		const pathSegments = window.location.pathname.split('/')
-		const inviteIndex = pathSegments.findIndex((segment) => segment === 'invite')
-		if (inviteIndex !== -1 && pathSegments[inviteIndex + 1] && pathSegments[inviteIndex + 2]) {
-			setInvitationId(pathSegments[inviteIndex + 1])
-			setToken(pathSegments[inviteIndex + 2])
+		const fetchInvitation = async () => {
+			try {
+				// Parse URL parameters
+				const pathSegments = window.location.pathname.split('/')
+				const inviteIndex = pathSegments.findIndex((segment) => segment === 'invite')
+
+				if (inviteIndex === -1 || !pathSegments[inviteIndex + 1]) {
+					setError(is_cn ? '无效的邀请链接' : 'Invalid invitation link')
+					setLoading(false)
+					return
+				}
+
+				const invId = pathSegments[inviteIndex + 1]
+				const invToken = pathSegments[inviteIndex + 2] || ''
+
+				setInvitationId(invId)
+				setToken(invToken)
+
+				// Check if openapi is available
+				if (!window.$app?.openapi) {
+					console.warn('OpenAPI not initialized yet, retrying...')
+					// Retry after a short delay
+					setTimeout(fetchInvitation, 100)
+					return
+				}
+
+				// Call API to get invitation details
+				const user = new User(window.$app.openapi)
+				const response = await user.teams.GetPublicInvitation(invId, currentLocale)
+
+				if (response.status === 200 && response.data) {
+					setInvitationData(response.data)
+				} else {
+					setError(
+						response.error?.error_description ||
+							response.error?.error ||
+							(is_cn ? '获取邀请信息失败' : 'Failed to load invitation')
+					)
+				}
+			} catch (err: any) {
+				console.error('Failed to fetch invitation:', err)
+				setError(err.message || (is_cn ? '获取邀请信息失败' : 'Failed to load invitation'))
+			} finally {
+				setLoading(false)
+			}
 		}
 
-		// Simulate loading
-		setTimeout(() => {
-			setLoading(false)
-		}, 500)
-	}, [])
+		// Reset loading state when locale changes
+		setLoading(true)
+		setError('')
+		fetchInvitation()
+	}, [currentLocale])
 
 	// Check if invitation is expired
-	const isExpired = mockIsExpired || new Date(mockTeamData.invitation.expires_at) < new Date()
+	const isExpired =
+		!invitationData ||
+		invitationData.status !== 'pending' ||
+		(invitationData.invitation_expires_at && new Date(invitationData.invitation_expires_at) < new Date())
 
 	// Calculate remaining time
 	const getRemainingTime = () => {
+		if (!invitationData?.invitation_expires_at) {
+			return is_cn ? '无期限' : 'No expiry'
+		}
+
 		const now = new Date()
-		const expiresAt = new Date(mockTeamData.invitation.expires_at)
+		const expiresAt = new Date(invitationData.invitation_expires_at)
 		const diff = expiresAt.getTime() - now.getTime()
 
 		if (diff <= 0) {
@@ -157,6 +180,50 @@ const TeamInvite = () => {
 		)
 	}
 
+	// Render error state
+	if (error) {
+		return (
+			<AuthLayout
+				logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+				theme={global.theme}
+				onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
+			>
+				<div className={styles.inviteContainer}>
+					<div className={styles.inviteCard}>
+						<div className={styles.expiredSection}>
+							<div className={styles.expiredIcon}>
+								<Icon name='material-error_outline' size={64} />
+							</div>
+							<h1 className={styles.expiredTitle}>
+								{is_cn ? '加载失败' : 'Failed to Load'}
+							</h1>
+							<p className={styles.expiredDescription}>{error}</p>
+
+							<div className={styles.expiredActions}>
+								<Button
+									type='default'
+									size='large'
+									onClick={() => window.location.reload()}
+									className={styles.backButton}
+								>
+									{is_cn ? '重试' : 'Retry'}
+								</Button>
+								<Button
+									type='default'
+									size='large'
+									onClick={() => history.push('/')}
+									className={styles.backButton}
+								>
+									{is_cn ? '返回首页' : 'Back to Home'}
+								</Button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</AuthLayout>
+		)
+	}
+
 	// Render expired state
 	if (isExpired) {
 		return (
@@ -165,12 +232,6 @@ const TeamInvite = () => {
 				theme={global.theme}
 				onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 			>
-				{/* Mock toggle - remove in production */}
-				<div className={styles.mockControls}>
-					<span>{is_cn ? '模拟过期状态：' : 'Mock Expired:'}</span>
-					<Switch checked={mockIsExpired} onChange={setMockIsExpired} size='small' />
-				</div>
-
 				<div className={styles.inviteContainer}>
 					<div className={styles.inviteCard}>
 						<div className={styles.expiredSection}>
@@ -186,26 +247,30 @@ const TeamInvite = () => {
 									: 'This invitation link has expired. Please contact the team administrator for a new invitation.'}
 							</p>
 
-							<div className={styles.expiredDetails}>
-								<div className={styles.detailRow}>
-									<span className={styles.detailLabel}>
-										{is_cn ? '团队名称：' : 'Team:'}
-									</span>
-									<span className={styles.detailValue}>
-										{mockTeamData.team.name}
-									</span>
+							{invitationData && (
+								<div className={styles.expiredDetails}>
+									<div className={styles.detailRow}>
+										<span className={styles.detailLabel}>
+											{is_cn ? '团队名称：' : 'Team:'}
+										</span>
+										<span className={styles.detailValue}>
+											{invitationData.team_name}
+										</span>
+									</div>
+									{invitationData.invitation_expires_at && (
+										<div className={styles.detailRow}>
+											<span className={styles.detailLabel}>
+												{is_cn ? '过期时间：' : 'Expired on:'}
+											</span>
+											<span className={styles.detailValue}>
+												{new Date(
+													invitationData.invitation_expires_at
+												).toLocaleString(currentLocale)}
+											</span>
+										</div>
+									)}
 								</div>
-								<div className={styles.detailRow}>
-									<span className={styles.detailLabel}>
-										{is_cn ? '过期时间：' : 'Expired on:'}
-									</span>
-									<span className={styles.detailValue}>
-										{new Date(
-											mockTeamData.invitation.expires_at
-										).toLocaleString(currentLocale)}
-									</span>
-								</div>
-							</div>
+							)}
 
 							<div className={styles.expiredActions}>
 								<Button
@@ -225,24 +290,16 @@ const TeamInvite = () => {
 	}
 
 	// Render active invitation
+	if (!invitationData) {
+		return null
+	}
+
 	return (
 		<AuthLayout
 			logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>
-			{/* Mock toggles - remove in production */}
-			<div className={styles.mockControls}>
-				<div>
-					<span>{is_cn ? '模拟登录状态：' : 'Mock Login:'}</span>
-					<Switch checked={mockIsLoggedIn} onChange={setMockIsLoggedIn} size='small' />
-				</div>
-				<div>
-					<span>{is_cn ? '模拟过期状态：' : 'Mock Expired:'}</span>
-					<Switch checked={mockIsExpired} onChange={setMockIsExpired} size='small' />
-				</div>
-			</div>
-
 			<div className={styles.inviteContainer}>
 				<div className={styles.inviteCard}>
 					{/* Title Section */}
@@ -251,22 +308,30 @@ const TeamInvite = () => {
 						<p className={styles.inviteSubtitle}>
 							{is_cn ? (
 								<>
-									<span className={styles.inviterHighlight}>
-										{mockTeamData.inviter.name}
-									</span>{' '}
-									邀请你加入{' '}
+									{invitationData.inviter_info?.name && (
+										<>
+											<span className={styles.inviterHighlight}>
+												{invitationData.inviter_info.name}
+											</span>{' '}
+											邀请你加入{' '}
+										</>
+									)}
 									<span className={styles.teamHighlight}>
-										{mockTeamData.team.name}
+										{invitationData.team_name}
 									</span>
 								</>
 							) : (
 								<>
-									<span className={styles.inviterHighlight}>
-										{mockTeamData.inviter.name}
-									</span>{' '}
-									invited you to join{' '}
+									{invitationData.inviter_info?.name && (
+										<>
+											<span className={styles.inviterHighlight}>
+												{invitationData.inviter_info.name}
+											</span>{' '}
+											invited you to join{' '}
+										</>
+									)}
 									<span className={styles.teamHighlight}>
-										{mockTeamData.team.name}
+										{invitationData.team_name}
 									</span>
 								</>
 							)}
@@ -277,10 +342,10 @@ const TeamInvite = () => {
 					<div className={styles.teamSection}>
 						<div className={styles.teamHeader}>
 							<div className={styles.teamAvatar}>
-								{mockTeamData.team.avatar ? (
+								{invitationData.team_logo ? (
 									<img
-										src={mockTeamData.team.avatar}
-										alt={mockTeamData.team.name}
+										src={invitationData.team_logo}
+										alt={invitationData.team_name}
 									/>
 								) : (
 									<div className={styles.avatarPlaceholder}>
@@ -289,52 +354,85 @@ const TeamInvite = () => {
 								)}
 							</div>
 							<div className={styles.teamInfo}>
-								<h2 className={styles.teamName}>{mockTeamData.team.name}</h2>
-								<p className={styles.teamDescription}>
-									{mockTeamData.team.description}
-								</p>
+								<h2 className={styles.teamName}>{invitationData.team_name}</h2>
+								{invitationData.team_description && (
+									<p className={styles.teamDescription}>
+										{invitationData.team_description}
+									</p>
+								)}
 							</div>
 						</div>
 					</div>
 
 					{/* Invitation Details */}
 					<div className={styles.detailsSection}>
-						<div className={styles.detailItem}>
-							<Icon name='material-badge' size={18} className={styles.detailIcon} />
-							<div className={styles.detailContent}>
-								<span className={styles.detailLabel}>{is_cn ? '角色' : 'Role'}</span>
-								<span className={styles.detailValue}>
-									{mockTeamData.invitation.role_label}
-								</span>
+						{invitationData.role_label && (
+							<div className={styles.detailItem}>
+								<Icon name='material-badge' size={18} className={styles.detailIcon} />
+								<div className={styles.detailContent}>
+									<span className={styles.detailLabel}>
+										{is_cn ? '角色' : 'Role'}
+									</span>
+									<span className={styles.detailValue}>
+										{invitationData.role_label}
+									</span>
+								</div>
 							</div>
-						</div>
-						<div className={styles.detailItem}>
-							<Icon name='material-schedule' size={18} className={styles.detailIcon} />
-							<div className={styles.detailContent}>
-								<span className={styles.detailLabel}>
-									{is_cn ? '剩余有效期' : 'Expires in'}
-								</span>
-								<span className={styles.detailValue}>{getRemainingTime()}</span>
+						)}
+						{invitationData.invitation_expires_at && (
+							<>
+								<div className={styles.detailItem}>
+									<Icon
+										name='material-schedule'
+										size={18}
+										className={styles.detailIcon}
+									/>
+									<div className={styles.detailContent}>
+										<span className={styles.detailLabel}>
+											{is_cn ? '剩余有效期' : 'Expires in'}
+										</span>
+										<span className={styles.detailValue}>
+											{getRemainingTime()}
+										</span>
+									</div>
+								</div>
+								<div className={styles.detailItem}>
+									<Icon
+										name='material-event'
+										size={18}
+										className={styles.detailIcon}
+									/>
+									<div className={styles.detailContent}>
+										<span className={styles.detailLabel}>
+											{is_cn ? '过期时间' : 'Expiry date'}
+										</span>
+										<span className={styles.detailValue}>
+											{new Date(
+												invitationData.invitation_expires_at
+											).toLocaleString(currentLocale)}
+										</span>
+									</div>
+								</div>
+							</>
+						)}
+						{invitationData.message && (
+							<div className={styles.detailItem}>
+								<Icon name='material-message' size={18} className={styles.detailIcon} />
+								<div className={styles.detailContent}>
+									<span className={styles.detailLabel}>
+										{is_cn ? '留言' : 'Message'}
+									</span>
+									<span className={styles.detailValue}>
+										{invitationData.message}
+									</span>
+								</div>
 							</div>
-						</div>
-						<div className={styles.detailItem}>
-							<Icon name='material-event' size={18} className={styles.detailIcon} />
-							<div className={styles.detailContent}>
-								<span className={styles.detailLabel}>
-									{is_cn ? '过期时间' : 'Expiry date'}
-								</span>
-								<span className={styles.detailValue}>
-									{new Date(mockTeamData.invitation.expires_at).toLocaleString(
-										currentLocale
-									)}
-								</span>
-							</div>
-						</div>
+						)}
 					</div>
 
 					{/* Action Section */}
 					<div className={styles.actionSection}>
-						{mockIsLoggedIn ? (
+						{isLoggedIn ? (
 							<>
 								<Button
 									type='primary'

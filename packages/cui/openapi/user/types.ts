@@ -544,3 +544,28 @@ export interface InvitationListResponse {
 	next: number
 	prev: number
 }
+
+/**
+ * Inviter's public information
+ */
+export interface InviterInfo {
+	name?: string
+	picture: string
+}
+
+/**
+ * Public invitation response (for invitation recipients)
+ * This type excludes sensitive information like tokens, database IDs, and timestamps
+ */
+export interface PublicInvitationResponse {
+	invitation_id: string
+	team_name: string
+	team_logo: string
+	team_description: string
+	role_label?: string
+	status: string
+	invited_at: string
+	invitation_expires_at?: string
+	message?: string
+	inviter_info?: InviterInfo
+}

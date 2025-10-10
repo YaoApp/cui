@@ -15,7 +15,8 @@ import {
 	TeamInvitationDetail,
 	CreateInvitationRequest,
 	InvitationListResponse,
-	TeamConfig
+	TeamConfig,
+	PublicInvitationResponse
 } from './types'
 
 /**
@@ -168,7 +169,22 @@ export class UserTeams {
 	// ===== Team Invitation Management =====
 
 	/**
-	 * Get team invitations with pagination and filtering
+	 * Get public invitation details (no authentication required)
+	 * This is for invitation recipients to view invitation details
+	 * @param invitationId Invitation ID to retrieve
+	 * @param locale Optional locale for localized role labels (e.g., "zh-CN", "en")
+	 */
+	async GetPublicInvitation(invitationId: string, locale?: string): Promise<ApiResponse<PublicInvitationResponse>> {
+		const query: Record<string, string> = {}
+		if (locale) {
+			query.locale = locale
+		}
+
+		return this.api.Get<PublicInvitationResponse>(`/user/teams/invitations/${invitationId}`, query)
+	}
+
+	/**
+	 * Get team invitations with pagination and filtering (requires authentication)
 	 * @param teamId Team ID to get invitations from
 	 * @param options Query parameters for pagination and filtering
 	 */
@@ -194,7 +210,7 @@ export class UserTeams {
 	}
 
 	/**
-	 * Get team invitation details by invitation_id
+	 * Get team invitation details by invitation_id (requires authentication, for team admins)
 	 * @param teamId Team ID
 	 * @param invitationId Invitation ID to retrieve
 	 */
