@@ -78,7 +78,9 @@ const TeamInvite = () => {
 
 				if (response.status === 200 && response.data) {
 					setInvitationData(response.data)
+					setError('') // Clear any previous errors
 				} else {
+					setInvitationData(null) // Clear data on error
 					setError(
 						response.error?.error_description ||
 							response.error?.error ||
@@ -87,23 +89,25 @@ const TeamInvite = () => {
 				}
 			} catch (err: any) {
 				console.error('Failed to fetch invitation:', err)
+				setInvitationData(null) // Clear data on error
 				setError(err.message || (is_cn ? '获取邀请信息失败' : 'Failed to load invitation'))
 			} finally {
 				setLoading(false)
 			}
 		}
 
-		// Reset loading state when locale changes
+		// Reset states when locale changes
 		setLoading(true)
 		setError('')
+		// Don't clear invitationData here to avoid flashing expired state
 		fetchInvitation()
 	}, [currentLocale])
 
-	// Check if invitation is expired
+	// Check if invitation is expired (only check when data is available)
 	const isExpired =
-		!invitationData ||
-		invitationData.status !== 'pending' ||
-		(invitationData.invitation_expires_at && new Date(invitationData.invitation_expires_at) < new Date())
+		invitationData &&
+		(invitationData.status !== 'pending' ||
+			(invitationData.invitation_expires_at && new Date(invitationData.invitation_expires_at) < new Date()))
 
 	// Calculate remaining time
 	const getRemainingTime = () => {
@@ -289,7 +293,8 @@ const TeamInvite = () => {
 		)
 	}
 
-	// Render active invitation
+	// Render active invitation (at this point: loading is false, no error, check if expired or show invitation)
+	// Safety check: if no data, don't render (shouldn't happen as we should have error)
 	if (!invitationData) {
 		return null
 	}
