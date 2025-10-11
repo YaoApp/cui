@@ -1,0 +1,136 @@
+@import '@/styles/preset/vars.less';
+
+.teamCard {
+	position: relative;
+	padding: 14px 16px;
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	background: var(--color_bg_hover);
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	display: flex;
+	align-items: center;
+	gap: 14px;
+
+	&:hover {
+		border-color: var(--color_main);
+		box-shadow: 0 2px 8px rgba(51, 113, 252, 0.15);
+	}
+
+	&.teamCardSelected {
+		border-color: var(--color_main);
+		background: var(--color_bg_menu);
+		box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.15), inset 0 0 0 1px var(--color_main);
+	}
+
+	.teamLogoWrapper {
+		flex-shrink: 0;
+
+		.teamLogo {
+			background: var(--color_main);
+			color: white;
+			font-weight: 600;
+			font-size: 18px;
+		}
+	}
+
+	.teamInfo {
+		flex: 1;
+		min-width: 0;
+
+		.teamHeader {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 4px;
+
+			.teamName {
+				font-size: 14px;
+				font-weight: 600;
+				color: var(--color_text);
+				margin: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.ownerBadge {
+				flex-shrink: 0;
+				font-size: 10px;
+				font-weight: 500;
+				color: var(--color_danger);
+				background: rgba(230, 41, 101, 0.1);
+				padding: 2px 6px;
+				border-radius: calc(var(--radius));
+			}
+		}
+
+		.teamDescription {
+			font-size: 12px;
+			color: var(--color_text_light);
+			margin: 0;
+			line-height: 1.5;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	.teamRole {
+		flex-shrink: 0;
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--color_main);
+		padding: 3px 10px;
+		border-radius: calc(var(--radius));
+		background: rgba(51, 113, 252, 0.1);
+	}
+}
+
+/* Dark theme support */
+[data-theme='dark'] {
+	.teamCard {
+		background: rgba(31, 35, 48, 0.5);
+		border-color: rgba(255, 255, 255, 0.1);
+
+		&:hover {
+			background: rgba(31, 35, 48, 0.7);
+			border-color: #4580ff;
+			box-shadow: 0 2px 8px rgba(69, 128, 255, 0.2);
+		}
+
+		&.teamCardSelected {
+			background: rgba(31, 35, 48, 0.8);
+			border-color: #4580ff;
+			box-shadow: 0 0 0 3px rgba(69, 128, 255, 0.15);
+		}
+
+		.teamLogoWrapper {
+			.teamLogo {
+				background: linear-gradient(135deg, #4580ff 0%, #3371fc 100%);
+			}
+		}
+
+		.teamInfo {
+			.teamHeader {
+				.teamName {
+					color: rgba(255, 255, 255, 0.95);
+				}
+
+				.ownerBadge {
+					color: var(--color_danger);
+					background: rgba(230, 41, 101, 0.15);
+				}
+			}
+
+			.teamDescription {
+				color: rgba(255, 255, 255, 0.65);
+			}
+		}
+
+		.teamRole {
+			color: #4580ff;
+			background: rgba(69, 128, 255, 0.15);
+		}
+	}
+}

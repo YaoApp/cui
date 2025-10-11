@@ -2,7 +2,7 @@
 
 .teamSelectContainer {
 	width: 100%;
-	max-width: 720px;
+	max-width: 540px;
 	padding: 20px;
 
 	.teamSelectCard {
@@ -32,90 +32,82 @@
 			}
 		}
 
+		.loadingContainer {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 60px 20px;
+
+			.loadingText {
+				margin-top: 16px;
+				font-size: 14px;
+				color: var(--color_text_light);
+			}
+		}
+
+		.errorContainer {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 60px 20px;
+			text-align: center;
+
+			.errorIcon {
+				font-size: 48px;
+				margin-bottom: 16px;
+			}
+
+			.errorMessage {
+				font-size: 14px;
+				color: var(--color_text);
+				margin: 0 0 24px 0;
+				max-width: 400px;
+			}
+
+			.errorActions {
+				display: flex;
+				gap: 12px;
+
+				button {
+					min-width: 120px;
+				}
+			}
+		}
+
 		.teamsGrid {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-			gap: 16px;
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
 			margin-bottom: 32px;
+		}
 
-			.teamCard {
-				padding: 20px;
-				border: 2px solid var(--color_border);
-				border-radius: var(--radius);
-				background: var(--color_bg_hover);
-				cursor: pointer;
-				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		.divider {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin: 24px 0;
 
-				&:hover {
-					border-color: var(--color_main);
-					background: var(--color_bg_menu);
-					transform: translateY(-2px);
-					box-shadow: 0 4px 12px rgba(51, 113, 252, 0.15);
+			.dividerLine {
+				flex: 1;
+				height: 1px;
+				background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.06), transparent);
+
+				&:first-child {
+					background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.06));
 				}
 
-				&.teamCardSelected {
-					border-color: var(--color_main);
-					background: var(--color_bg_menu);
-					box-shadow: 0 0 0 3px rgba(51, 113, 252, 0.1);
+				&:last-child {
+					background: linear-gradient(to left, transparent, rgba(0, 0, 0, 0.06));
 				}
+			}
 
-				.teamCardHeader {
-					display: flex;
-					align-items: center;
-					margin-bottom: 12px;
-
-					.teamLogo {
-						background: var(--color_main);
-						color: white;
-						font-weight: 600;
-						flex-shrink: 0;
-					}
-
-					.teamInfo {
-						margin-left: 12px;
-						flex: 1;
-						min-width: 0;
-
-						.teamName {
-							font-size: 16px;
-							font-weight: 600;
-							color: var(--color_text);
-							margin: 0 0 2px 0;
-							overflow: hidden;
-							text-overflow: ellipsis;
-							white-space: nowrap;
-						}
-
-						.teamRole {
-							font-size: 13px;
-							color: var(--color_text_light);
-							margin: 0;
-						}
-					}
-				}
-
-				.teamDescription {
-					font-size: 14px;
-					color: var(--color_text_light);
-					margin: 0 0 12px 0;
-					line-height: 1.5;
-					display: -webkit-box;
-					-webkit-line-clamp: 2;
-					-webkit-box-orient: vertical;
-					overflow: hidden;
-				}
-
-				.teamMeta {
-					display: flex;
-					align-items: center;
-					padding-top: 12px;
-					border-top: 1px solid var(--color_border);
-
-					.teamMembers {
-						font-size: 13px;
-						color: var(--color_text_grey);
-					}
-				}
+			.dividerText {
+				padding: 0 16px;
+				font-size: 13px;
+				color: rgba(0, 0, 0, 0.45);
+				white-space: nowrap;
 			}
 		}
 
@@ -163,33 +155,7 @@
 			}
 
 			.teamsGrid {
-				grid-template-columns: 1fr;
-				gap: 12px;
-
-				.teamCard {
-					padding: 16px;
-
-					.teamCardHeader {
-						.teamLogo {
-							width: 40px;
-							height: 40px;
-						}
-
-						.teamInfo {
-							.teamName {
-								font-size: 15px;
-							}
-
-							.teamRole {
-								font-size: 12px;
-							}
-						}
-					}
-
-					.teamDescription {
-						font-size: 13px;
-					}
-				}
+				gap: 10px;
 			}
 		}
 	}
@@ -215,50 +181,27 @@
 			}
 		}
 
-		.teamsGrid {
-			.teamCard {
-				background: rgba(31, 35, 48, 0.5);
-				border-color: rgba(255, 255, 255, 0.1);
+		.errorContainer {
+			.errorMessage {
+				color: rgba(255, 255, 255, 0.85);
+			}
+		}
 
-				&:hover {
-					background: rgba(31, 35, 48, 0.7);
-					border-color: #4580ff;
-					box-shadow: 0 4px 12px rgba(69, 128, 255, 0.2);
+		.divider {
+			.dividerLine {
+				background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
+
+				&:first-child {
+					background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15));
 				}
 
-				&.teamCardSelected {
-					background: rgba(31, 35, 48, 0.8);
-					border-color: #4580ff;
-					box-shadow: 0 0 0 3px rgba(69, 128, 255, 0.15);
+				&:last-child {
+					background: linear-gradient(to left, transparent, rgba(255, 255, 255, 0.15));
 				}
+			}
 
-				.teamCardHeader {
-					.teamLogo {
-						background: linear-gradient(135deg, #4580ff 0%, #3371fc 100%);
-					}
-
-					.teamInfo {
-						.teamName {
-							color: rgba(255, 255, 255, 0.95);
-						}
-
-						.teamRole {
-							color: rgba(255, 255, 255, 0.6);
-						}
-					}
-				}
-
-				.teamDescription {
-					color: rgba(255, 255, 255, 0.65);
-				}
-
-				.teamMeta {
-					border-top-color: rgba(255, 255, 255, 0.1);
-
-					.teamMembers {
-						color: rgba(255, 255, 255, 0.5);
-					}
-				}
+			.dividerText {
+				color: rgba(255, 255, 255, 0.65);
 			}
 		}
 	}

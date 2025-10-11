@@ -45,25 +45,11 @@ export class UserTeams {
 	// ===== Team CRUD =====
 
 	/**
-	 * Get user teams with pagination and filtering
-	 * @param options Query parameters for pagination and filtering
+	 * Get all user teams (all teams where the user is a member)
+	 * Returns a simple list with role information for each team
 	 */
-	async GetTeams(options?: {
-		page?: number
-		pagesize?: number
-		status?: string
-		name?: string
-	}): Promise<ApiResponse<TeamListResponse>> {
-		const params = new URLSearchParams()
-		if (options?.page) params.append('page', options.page.toString())
-		if (options?.pagesize) params.append('pagesize', options.pagesize.toString())
-		if (options?.status) params.append('status', options.status)
-		if (options?.name) params.append('name', options.name)
-
-		const queryString = params.toString()
-		const url = queryString ? `/user/teams?${queryString}` : '/user/teams'
-
-		return this.api.Get<TeamListResponse>(url)
+	async GetTeams(): Promise<ApiResponse<TeamListResponse>> {
+		return this.api.Get<TeamListResponse>('/user/teams')
 	}
 
 	/**

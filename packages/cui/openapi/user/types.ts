@@ -328,21 +328,42 @@ export interface UserTeam {
 	id: number
 	team_id: string
 	name: string
+	display_name?: string
 	description?: string
+	website?: string
+	logo?: string
 	owner_id: string
 	status: string
+	type_id?: string
+	type?: string
 	is_verified: boolean
 	verified_by?: string
 	verified_at?: string
 	created_at: string
 	updated_at: string
+	role_id?: string // User's role in the team (returned by GetTeams)
+	is_owner?: boolean // Whether the current user is the owner of this team
 }
 
 /**
- * Team detail response with additional settings
+ * Team detail response with additional settings and contact information
  */
 export interface UserTeamDetail extends UserTeam {
+	contact_email?: string
+	contact_phone?: string
+	team_code?: string
+	team_code_type?: string
+	address?: string
+	street_address?: string
+	city?: string
+	state_province?: string
+	postal_code?: string
+	country?: string
+	country_name?: string
+	region?: string
+	zoneinfo?: string
 	settings?: TeamSettings
+	metadata?: Record<string, any>
 }
 
 /**
@@ -364,17 +385,10 @@ export interface UpdateTeamRequest {
 }
 
 /**
- * Paginated list response for teams
+ * Team list response (simple array, no pagination)
+ * Returns all teams where the user is a member, including role information
  */
-export interface TeamListResponse {
-	data: UserTeam[]
-	total: number
-	page: number
-	pagesize: number
-	pagecnt: number
-	next: number
-	prev: number
-}
+export type TeamListResponse = UserTeam[]
 
 export interface UserAPIKey {
 	id: string
