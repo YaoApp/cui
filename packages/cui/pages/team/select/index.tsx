@@ -7,7 +7,16 @@ import { User } from '@/openapi/user'
 import { UserTeam, TeamConfig } from '@/openapi/user/types'
 import AuthLayout from '../../auth/components/AuthLayout'
 import TeamCard from './components/TeamCard'
+import { AfterLogin } from '../../auth/auth'
 import styles from './index.less'
+
+// Cookie 工具函数
+const getCookie = (name: string): string | null => {
+	const value = `; ${document.cookie}`
+	const parts = value.split(`; ${name}=`)
+	if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+	return null
+}
 
 // Browser language detection utility
 const getBrowserLanguage = (): string => {
@@ -191,31 +200,62 @@ const TeamSelect = () => {
 
 		setLoading(true)
 		try {
-			// Handle personal account
+			if (!window.$app?.openapi) {
+				message.error('API not initialized')
+				return
+			}
+
+			const user = new User(window.$app.openapi)
+
+			// 调用 SelectTeam API (对于 personal 和 team 都调用)
+			const response = await user.teams.SelectTeam({ team_id: teamId })
+
+			if (user.IsError(response)) {
+				const errorMsg = response.error?.error_description || 'Failed to select team'
+				message.error(errorMsg)
+				console.error('SelectTeam error:', response.error)
+				return
+			}
+
+			// 选择成功
 			if (teamId === 'personal') {
 				sessionStorage.removeItem('selected_team_id')
 				sessionStorage.removeItem('selected_team')
 				message.success(
 					currentLocale.startsWith('zh') ? '已切换到个人账号' : 'Switched to personal account'
 				)
-				setTimeout(() => {
-					history.push('/auth/helloworld')
-				}, 500)
-				return
+			} else {
+				const selectedTeam = teams.find((t) => t.team_id === teamId)
+				if (selectedTeam) {
+					sessionStorage.setItem('selected_team_id', teamId)
+					sessionStorage.setItem('selected_team', JSON.stringify(selectedTeam))
+				}
+				message.success(currentLocale.startsWith('zh') ? '团队选择成功' : 'Team selected successfully')
 			}
 
-			// Handle team selection
-			const selectedTeam = teams.find((t) => t.team_id === teamId)
-			if (selectedTeam) {
-				// Store selected team in session storage or context
-				sessionStorage.setItem('selected_team_id', teamId)
-				sessionStorage.setItem('selected_team', JSON.stringify(selectedTeam))
+			// 设置用户状态并跳转（user info 已由 SelectTeam 方法自动解析）
+			try {
+				// 读取 cookie 中预设的跳转地址
+				const loginRedirect = getCookie('login_redirect') || '/auth/helloworld'
+				const logoutRedirect = getCookie('logout_redirect') || '/'
 
-				message.success(currentLocale.startsWith('zh') ? '团队选择成功' : 'Team selected successfully')
+				// 调用 AfterLogin 设置用户信息、菜单等状态
+				await AfterLogin(global, {
+					user: response.data?.user || ({} as any),
+					entry: loginRedirect,
+					logout_redirect: logoutRedirect
+				})
 
-				// Redirect to dashboard or entry page
+				// 跳转到目标页面
 				setTimeout(() => {
-					history.push('/auth/helloworld')
+					window.location.href = loginRedirect
+				}, 500)
+			} catch (error) {
+				console.error('Failed to setup after login:', error)
+				// 即使 AfterLogin 失败，也继续跳转
+				const loginRedirect = getCookie('login_redirect') || '/auth/helloworld'
+				setTimeout(() => {
+					window.location.href = loginRedirect
 				}, 500)
 			}
 		} catch (error) {

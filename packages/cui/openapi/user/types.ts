@@ -384,6 +384,30 @@ export interface UpdateTeamRequest {
 }
 
 /**
+ * Request payload for selecting a team
+ */
+export interface SelectTeamRequest {
+	team_id: string
+}
+
+/**
+ * Response for team selection (returns new tokens with team_id)
+ */
+export interface SelectTeamResponse {
+	user_id: string
+	subject: string
+	access_token: string
+	id_token: string
+	refresh_token: string
+	expires_in: number
+	refresh_token_expires_in: number
+	token_type: string
+	scope: string
+	status: LoginStatus
+	user?: UserInfo
+}
+
+/**
  * Team list response (simple array, no pagination)
  * Returns all teams where the user is a member, including role information
  */

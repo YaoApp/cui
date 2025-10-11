@@ -28,7 +28,7 @@ export class User {
 		this.account = new UserAccountAPI(api)
 		this.mfa = new UserMFA(api)
 		this.preferences = new UserPreferencesAPI(api)
-		this.teams = new UserTeams(api)
+		this.teams = new UserTeams(api, this.auth)
 		this.subscription = new UserSubscriptionAPI(api)
 		this.credits = new UserCreditsAPI(api)
 	}

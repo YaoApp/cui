@@ -1,10 +1,13 @@
 import { OpenAPI } from '../openapi'
 import { ApiResponse } from '../types'
+import { UserAuth } from './auth'
 import {
 	UserTeam,
 	UserTeamDetail,
 	CreateTeamRequest,
 	UpdateTeamRequest,
+	SelectTeamRequest,
+	SelectTeamResponse,
 	TeamListResponse,
 	TeamMember,
 	TeamMemberDetail,
@@ -24,7 +27,7 @@ import {
  * Provides CRUD operations for user teams
  */
 export class UserTeams {
-	constructor(private api: OpenAPI) {}
+	constructor(private api: OpenAPI, private auth: UserAuth) {}
 
 	// ===== Team Configuration =====
 
@@ -83,6 +86,33 @@ export class UserTeams {
 	 */
 	async DeleteTeam(teamId: string): Promise<ApiResponse<{ message: string }>> {
 		return this.api.Delete<{ message: string }>(`/user/teams/${teamId}`)
+	}
+
+	/**
+	 * Select a team and get new tokens with team_id embedded
+	 * This endpoint requires a temporary token with team_selection scope
+	 * Returns new access_token, id_token, and refresh_token with team_id claim
+	 * The ID token is automatically validated and user information is included in the response
+	 * @param request Team selection request containing team_id
+	 */
+	async SelectTeam(request: SelectTeamRequest): Promise<ApiResponse<SelectTeamResponse>> {
+		const response = await this.api.Post<SelectTeamResponse>('/user/teams/select', request)
+		if (this.api.IsError(response)) {
+			return response
+		}
+
+		// Validate ID Token and extract user information (similar to OAuthCallback)
+		const userInfo = await this.auth.ValidateIDToken(response.data?.id_token || '')
+
+		// Return response with user info embedded
+		return {
+			status: response.status,
+			headers: response.headers,
+			data: {
+				...response.data!,
+				user: userInfo
+			}
+		}
 	}
 
 	// ===== Team Member Management =====

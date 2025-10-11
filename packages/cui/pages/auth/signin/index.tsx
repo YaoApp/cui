@@ -71,16 +71,24 @@ const ResponsiveLogin = () => {
 	} | null>(null)
 	const [captchaLoading, setCaptchaLoading] = useState(false)
 
-	// 处理 redirect 参数
+	// 处理 redirect 参数 - 设置登录后的跳转地址和登出跳转地址
 	useAsyncEffect(async () => {
 		const redirectParam = getUrlParam('redirect')
 		if (redirectParam && redirectParam.trim() !== '') {
+			// 如果 URL 有 redirect 参数，使用它
 			setCookie('login_redirect', redirectParam)
 		} else {
-			// 如果 redirect 未设置或为空，删除 Cookie
-			deleteCookie('login_redirect')
+			// 如果没有 redirect 参数，等待 config 加载后使用 success_url 作为默认值
+			if (config?.success_url) {
+				setCookie('login_redirect', config.success_url)
+			}
 		}
-	}, [])
+
+		// 设置 logout_redirect
+		if (config?.logout_redirect) {
+			setCookie('logout_redirect', config.logout_redirect)
+		}
+	}, [config?.success_url, config?.logout_redirect])
 
 	// Load configuration using real API
 	useAsyncEffect(async () => {

@@ -12,6 +12,14 @@ import { AfterLogin } from '../auth'
 // Required parameters for OAuth callback
 const requiredParams = ['code', 'state', 'provider']
 
+// Cookie 工具函数
+const getCookie = (name: string): string | null => {
+	const value = `; ${document.cookie}`
+	const parts = value.split(`; ${name}=`)
+	if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+	return null
+}
+
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
 	const browserLang = navigator.language || navigator.languages?.[0] || 'en'
@@ -141,19 +149,24 @@ const AuthBack = () => {
 				// Set success state
 				setAuthResult(signinRes.data || null)
 
-				// After Login
+				// After Login - 直接读取 cookie 中预设的跳转地址
 				try {
-					const config = await user.auth.GetLoginConfig(currentLocale)
-					if (user.IsError(config)) {
-						throw new Error(config.error?.error_description || 'Failed to get config')
-					}
+					// 读取 cookie 中预设的跳转地址
+					const loginRedirect = getCookie('login_redirect') || '/auth/helloworld'
+					const logoutRedirect = getCookie('logout_redirect') || '/'
 
 					const entry = await AfterLogin(global, {
 						user: signinRes.data?.user || ({} as UserInfo),
-						entry: config.data?.success_url || '',
-						logout_redirect: config.data?.logout_redirect || '/'
+						entry: loginRedirect,
+						logout_redirect: logoutRedirect
 					})
 					setEntry(entry)
+
+					// 直接跳转
+					message.success('Login successful! Redirecting...')
+					setTimeout(() => {
+						window.location.href = loginRedirect
+					}, 500)
 				} catch (error) {
 					console.error('Failed to setup user info:', error)
 					message.error('Failed to setup user info, please try again')
