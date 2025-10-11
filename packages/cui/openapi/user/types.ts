@@ -325,7 +325,6 @@ export interface UserCredits {
  * Team response from API
  */
 export interface UserTeam {
-	id: number
 	team_id: string
 	name: string
 	display_name?: string

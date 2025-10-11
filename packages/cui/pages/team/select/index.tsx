@@ -43,7 +43,6 @@ const TeamSelect = () => {
 
 	// Personal account option (always first)
 	const personalWorkspace: UserTeam = {
-		id: 0,
 		team_id: 'personal',
 		name: currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account',
 		display_name: currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account',
