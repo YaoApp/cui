@@ -41,12 +41,12 @@ const TeamSelect = () => {
 	const [error, setError] = useState<string>('')
 	const [config, setConfig] = useState<TeamConfig | null>(null)
 
-	// Personal workspace option (always first)
+	// Personal account option (always first)
 	const personalWorkspace: UserTeam = {
 		id: 0,
 		team_id: 'personal',
-		name: currentLocale.startsWith('zh') ? '我的工作空间' : 'My Workspace',
-		display_name: currentLocale.startsWith('zh') ? '我的工作空间' : 'My Workspace',
+		name: currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account',
+		display_name: currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account',
 		description: currentLocale.startsWith('zh') ? '使用个人账号访问' : 'Access with personal account',
 		owner_id: '',
 		status: 'active',
@@ -186,18 +186,18 @@ const TeamSelect = () => {
 
 	const handleSelectTeam = async (teamId: string) => {
 		if (!teamId) {
-			message.warning(currentLocale.startsWith('zh') ? '请选择一个工作空间' : 'Please select a workspace')
+			message.warning(currentLocale.startsWith('zh') ? '请选择一个账号' : 'Please select an account')
 			return
 		}
 
 		setLoading(true)
 		try {
-			// Handle personal workspace
+			// Handle personal account
 			if (teamId === 'personal') {
 				sessionStorage.removeItem('selected_team_id')
 				sessionStorage.removeItem('selected_team')
 				message.success(
-					currentLocale.startsWith('zh') ? '已切换到我的工作空间' : 'Switched to my workspace'
+					currentLocale.startsWith('zh') ? '已切换到个人账号' : 'Switched to personal account'
 				)
 				setTimeout(() => {
 					history.push('/auth/helloworld')
@@ -255,12 +255,12 @@ const TeamSelect = () => {
 				<div className={styles.teamSelectCard}>
 					<div className={styles.titleSection}>
 						<h1 className={styles.appTitle}>
-							{currentLocale.startsWith('zh') ? '选择工作空间' : 'Select Workspace'}
+							{currentLocale.startsWith('zh') ? '选择账号' : 'Select Account'}
 						</h1>
 						<p className={styles.appSubtitle}>
 							{currentLocale.startsWith('zh')
-								? '请选择要访问的团队或个人工作空间'
-								: 'Please select the team or personal workspace you want to access'}
+								? '请选择要访问的团队账号或个人账号'
+								: 'Please select the team account or personal account you want to access'}
 						</p>
 					</div>
 
