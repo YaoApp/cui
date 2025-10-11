@@ -57,8 +57,30 @@ const TeamSelect = () => {
 	}
 
 	useEffect(() => {
-		fetchConfig()
-		fetchTeams()
+		// Wait for openapi to be initialized
+		const initAndFetch = async () => {
+			// Check if openapi is initialized
+			if (!window.$app?.openapi) {
+				// Wait for app initialization
+				await window.$app?.Event?.emit('app/getAppInfo')
+
+				// Double check after waiting
+				if (!window.$app?.openapi) {
+					const errorMsg = currentLocale.startsWith('zh')
+						? 'OpenAPI 未初始化'
+						: 'OpenAPI not initialized'
+					setError(errorMsg)
+					setFetching(false)
+					return
+				}
+			}
+
+			// Now safe to fetch data
+			await fetchConfig()
+			await fetchTeams()
+		}
+
+		initAndFetch()
 	}, [])
 
 	const fetchConfig = async () => {
