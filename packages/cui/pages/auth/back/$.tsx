@@ -112,7 +112,9 @@ const AuthBack = () => {
 				}
 
 				// AuthBack Signin
-				const signinRes = await user.auth.OAuthCallback(params.provider, params)
+				// Add locale to params before sending
+				const authParams = { ...params, locale: currentLocale }
+				const signinRes = await user.auth.OAuthCallback(params.provider, authParams)
 
 				if (user.IsError(signinRes)) {
 					const errorMsg = signinRes.error?.error_description || 'OAuth authentication failed'
