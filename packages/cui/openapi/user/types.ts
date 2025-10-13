@@ -234,8 +234,34 @@ export interface UserInfo {
 	scope?: string
 	/** User's features */
 	features?: object
+	/** Yao tenant ID */
+	'yao:tenant_id'?: string
+	/** Yao team ID */
+	'yao:team_id'?: string
+	/** Yao team information */
+	'yao:team'?: TeamInfo
+	/** Whether the user is the owner of the team */
+	'yao:is_owner'?: boolean
 	/** Additional custom claims */
 	[key: string]: any
+}
+
+/**
+ * Team information
+ */
+export interface TeamInfo {
+	/** Team identifier */
+	team_id?: string
+	/** Team logo URL */
+	logo?: string
+	/** Team name */
+	name?: string
+	/** Team owner user ID */
+	owner_id?: string
+	/** Team description */
+	description?: string
+	/** Timestamp when team was last updated */
+	updated_at?: number
 }
 
 /**
