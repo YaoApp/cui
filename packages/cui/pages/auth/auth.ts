@@ -52,6 +52,18 @@ export const AfterLogin = async (global: GlobalModel, data: AuthData): Promise<s
 		user.is_owner = data.user['yao:is_owner']
 	}
 
+	// Add user type information if present
+	if (data.user['yao:type_id']) {
+		user.type_id = data.user['yao:type_id']
+	}
+	if (data.user['yao:type']) {
+		user.user_type = {
+			type_id: data.user['yao:type'].type_id,
+			name: data.user['yao:type'].name,
+			locale: data.user['yao:type'].locale
+		}
+	}
+
 	// Get App Menus
 	await window.$app.Event.emit('app/getUserMenu')
 

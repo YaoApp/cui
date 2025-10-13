@@ -109,7 +109,7 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		margin-bottom: 2px;
+		margin-bottom: 6px;
 		overflow: hidden;
 	}
 
@@ -117,29 +117,50 @@
 		font-size: 14px;
 		font-weight: 500;
 		color: var(--color_neo_text_primary);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		flex: 1;
+		min-width: 0;
+
+		.teamSeparator {
+			color: var(--color_neo_text_secondary);
+			font-weight: 400;
+			flex-shrink: 0;
+		}
+
+		.teamName {
+			color: var(--color_primary);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 	}
 
-	.plan {
+	.tags {
+		display: flex;
+		align-items: center;
+		gap: 8px;
 		font-size: 11px;
 		color: var(--color_neo_text_secondary);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		opacity: 0.8;
-		flex-shrink: 1;
-		min-width: 0;
-	}
 
-	.email {
-		font-size: 12px;
-		color: var(--color_neo_text_secondary);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		.tagItem {
+			display: inline-flex;
+			align-items: center;
+			gap: 3px;
+			white-space: nowrap;
+
+			:global(.Icon),
+			:global(.xgen-icon) {
+				color: var(--color_neo_icon_muted);
+				flex-shrink: 0;
+			}
+
+			> span {
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
 	}
 }
 

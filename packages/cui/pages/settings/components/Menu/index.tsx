@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Avatar, Button, Spin, Tooltip, Radio, Divider, Select, Dropdown } from 'antd'
 import { getLocale, setLocale, history } from '@umijs/max'
 import { observer } from 'mobx-react-lite'
@@ -6,6 +6,8 @@ import { useMemoizedFn } from 'ahooks'
 import { local } from '@yaoapp/storex'
 import { difference } from 'lodash-es'
 import Icon from '@/widgets/Icon'
+import UserAvatar from '@/widgets/UserAvatar'
+import { GetCurrentUser } from '@/pages/auth/auth'
 import { mockApi, MenuItem, MenuGroup, User } from '../../mockData'
 import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
@@ -23,8 +25,15 @@ const Menu = ({ active, onChange }: MenuProps) => {
 	const messages = useIntl()
 
 	const [loading, setLoading] = useState(true)
-	const [user, setUser] = useState<User | null>(null)
 	const [groups, setGroups] = useState<MenuGroup[]>([])
+
+	// Get current user from auth
+	const currentUser = useMemo(() => GetCurrentUser(), [])
+
+	// Determine if user is in team context
+	const isTeam = useMemo(() => {
+		return !!(currentUser?.team_id && currentUser?.team)
+	}, [currentUser])
 
 	// 清除存储和退出登录
 	const clearStorage = useMemoizedFn(() => {
@@ -62,8 +71,7 @@ const Menu = ({ active, onChange }: MenuProps) => {
 		const loadData = async () => {
 			try {
 				setLoading(true)
-				const [userData, groupsData] = await Promise.all([mockApi.getUser(), mockApi.getMenuGroups()])
-				setUser(userData)
+				const groupsData = await mockApi.getMenuGroups()
 				setGroups(groupsData)
 			} catch (error) {
 				console.error('Failed to load settings data:', error)
@@ -90,18 +98,56 @@ const Menu = ({ active, onChange }: MenuProps) => {
 			<div className={styles.menuContent}>
 				{/* 可滚动的菜单区域 */}
 				<div className={styles.scrollableContent}>
-					{user && (
+					{currentUser && (
 						<div className={styles.user}>
-							<Avatar src={user.avatar} size={32} className={styles.avatar}>
-								{user.name?.charAt(0)?.toUpperCase() || 'U'}
-							</Avatar>
+							<UserAvatar size={42} showCard={false} user={currentUser} />
 							<div className={styles.info}>
 								<div className={styles.firstLine}>
-									<span className={styles.name}>{user.name}</span>
-									<span className={styles.plan}>{user.plan}</span>
+									<span className={styles.name}>
+										{isTeam && currentUser.team?.name ? (
+											<>
+												{currentUser.name}
+												<span className={styles.teamSeparator}>@</span>
+												<span className={styles.teamName}>
+													{currentUser.team.name}
+												</span>
+											</>
+										) : (
+											currentUser.name
+										)}
+									</span>
 								</div>
-								<div className={styles.email}>
-									{user.team?.name || user.mobile || 'Personal Account'}
+								<div className={styles.tags}>
+									<span className={styles.tagItem}>
+										<Icon
+											name={isTeam ? 'material-group' : 'material-person'}
+											size={12}
+										/>
+										<span>
+											{isTeam
+												? is_cn
+													? '团队账号'
+													: 'Team'
+												: is_cn
+												? '个人账号'
+												: 'Personal'}
+										</span>
+									</span>
+									{currentUser.is_owner && (
+										<span className={styles.tagItem}>
+											<Icon name='material-star' size={12} />
+											<span>{is_cn ? '所有者' : 'Owner'}</span>
+										</span>
+									)}
+									{currentUser.user_type && (
+										<span className={styles.tagItem}>
+											<Icon name='material-local_offer' size={12} />
+											<span>
+												{currentUser.user_type.name ||
+													currentUser.type_id}
+											</span>
+										</span>
+									)}
 								</div>
 							</div>
 						</div>

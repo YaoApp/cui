@@ -79,7 +79,7 @@ const Team = () => {
 			try {
 				setLoading(true)
 				// 先尝试获取用户的团队列表
-				const teamsResponse = await apiClient.teams.GetTeams({ page: 1, pagesize: 1 })
+				const teamsResponse = await apiClient.teams.GetTeams()
 
 				if (apiClient.IsError(teamsResponse)) {
 					console.error('Failed to load teams:', teamsResponse.error)
@@ -89,9 +89,9 @@ const Team = () => {
 					setInvitations([])
 				} else {
 					const teamsData = teamsResponse.data
-					if (teamsData && teamsData.data && teamsData.data.length > 0) {
+					if (teamsData && teamsData.length > 0) {
 						// 用户已有团队，获取第一个团队的详细信息
-						const firstTeam = teamsData.data[0]
+						const firstTeam = teamsData[0]
 						const teamDetailResponse = await apiClient.teams.GetTeam(firstTeam.team_id)
 
 						if (!apiClient.IsError(teamDetailResponse) && teamDetailResponse.data) {
@@ -223,7 +223,8 @@ const Team = () => {
 			// 创建团队请求数据
 			const createTeamRequest: CreateTeamRequest = {
 				name: values.name,
-				description: values.description || undefined
+				description: values.description || undefined,
+				locale: locale // 传递 locale 以便后端使用正确的配置
 			}
 
 			// 调用真实的团队创建API

@@ -49,7 +49,6 @@ const AuthBack = () => {
 	const [success, setSuccess] = useState(false)
 	const [entry, setEntry] = useState<string>('')
 	const [authResult, setAuthResult] = useState<OAuthAuthResult | null>(null)
-	const [countdown, setCountdown] = useState(20)
 	const [oauthParams, setOauthParams] = useState<OAuthAuthbackParams>({
 		code: '',
 		state: '',
@@ -140,10 +139,10 @@ const AuthBack = () => {
 				}
 
 				// Login successful (status === LoginStatus.Success)
-				// console.log('AuthBack success:', signinRes.data)
-
 				// Set success state for UI display
 				setAuthResult(signinRes.data || null)
+				setSuccess(true)
+				setLoading(false)
 
 				// After Login - 直接读取 cookie 中预设的跳转地址
 				try {
@@ -159,8 +158,12 @@ const AuthBack = () => {
 					})
 					setEntry(entry)
 
-					// 直接跳转
-					message.success('Login successful! Redirecting...')
+					// 立即跳转
+					message.success(
+						currentLocale.startsWith('zh')
+							? '登录成功！正在跳转...'
+							: 'Login successful! Redirecting...'
+					)
 					setTimeout(() => {
 						window.location.href = loginRedirect
 					}, 500)
@@ -168,11 +171,10 @@ const AuthBack = () => {
 					console.error('Failed to setup user info:', error)
 					message.error('Failed to setup user info, please try again')
 					setError('Failed to setup user info, please try again')
+					setLoading(false)
+					setSuccess(false)
 					return
 				}
-
-				setLoading(false)
-				setSuccess(true)
 			} catch (error) {
 				console.error('Failed to initialize auth back:', error)
 				const errorMsg = error instanceof Error ? error.message : 'Failed to process OAuth callback'
@@ -185,24 +187,6 @@ const AuthBack = () => {
 
 		initAuthBack()
 	}, [window.$app?.openapi])
-
-	// 倒计时跳转逻辑
-	// useEffect(() => {
-	// 	if (success && countdown > 0) {
-	// 		const timer = setTimeout(() => {
-	// 			setCountdown(countdown - 1)
-	// 		}, 1000)
-	// 		return () => clearTimeout(timer)
-	// 	} else if (success && countdown === 0) {
-	// 		// 跳转到 /helloworld
-	// 		history.push(entry || '/auth/helloworld')
-	// 	}
-	// }, [success, countdown])
-
-	// 手动跳转
-	const handleNavigate = () => {
-		history.push(entry || '/auth/helloworld')
-	}
 
 	// 渲染加载状态
 	const renderLoading = () => (
@@ -253,7 +237,6 @@ const AuthBack = () => {
 							<p className={styles.userProvider}>
 								{currentLocale.startsWith('zh') ? '通过' : 'via'} {oauthParams.provider}
 							</p>
-							<p> {authResult.user.mfa_enabled ? 'MFA 已启用' : 'MFA 未启用'}</p>
 						</div>
 					</div>
 				)}
@@ -261,17 +244,9 @@ const AuthBack = () => {
 				<div className={styles.authbackActions}>
 					<p className={styles.countdownText}>
 						{currentLocale.startsWith('zh')
-							? `${countdown} 秒后自动跳转...`
-							: `Redirecting in ${countdown} seconds...`}
+							? '正在为您准备工作空间...'
+							: 'Preparing your workspace...'}
 					</p>
-					<Button
-						type='primary'
-						size='large'
-						onClick={handleNavigate}
-						className={styles.continueButton}
-					>
-						{currentLocale.startsWith('zh') ? '立即进入' : 'Continue Now'}
-					</Button>
 				</div>
 			</div>
 		</div>

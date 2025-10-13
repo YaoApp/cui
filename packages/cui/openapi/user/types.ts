@@ -242,6 +242,10 @@ export interface UserInfo {
 	'yao:team'?: TeamInfo
 	/** Whether the user is the owner of the team */
 	'yao:is_owner'?: boolean
+	/** Yao user type ID */
+	'yao:type_id'?: string
+	/** Yao user type information */
+	'yao:type'?: TypeInfo
 	/** Additional custom claims */
 	[key: string]: any
 }
@@ -262,6 +266,18 @@ export interface TeamInfo {
 	description?: string
 	/** Timestamp when team was last updated */
 	updated_at?: number
+}
+
+/**
+ * User type information
+ */
+export interface TypeInfo {
+	/** User type identifier */
+	type_id?: string
+	/** User type name */
+	name?: string
+	/** User type locale */
+	locale?: string
 }
 
 /**
@@ -398,6 +414,7 @@ export interface CreateTeamRequest {
 	name: string
 	description?: string
 	settings?: TeamSettings
+	locale?: string // Locale for default team configuration (e.g., type)
 }
 
 /**

@@ -445,6 +445,13 @@ export declare namespace App {
 			description?: string
 		}
 		is_owner?: boolean
+		// User type information
+		type_id?: string
+		user_type?: {
+			type_id?: string
+			name?: string
+			locale?: string
+		}
 	}
 
 	interface Menu {

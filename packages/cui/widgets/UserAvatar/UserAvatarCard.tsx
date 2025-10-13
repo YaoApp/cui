@@ -1,10 +1,13 @@
 import { FC, useState } from 'react'
 import { Divider } from 'antd'
+import { getLocale } from '@umijs/max'
 import { Icon } from '@/widgets'
 import type { UserAvatarCardProps } from './types'
 import './styles.less'
 
 const UserAvatarCard: FC<UserAvatarCardProps> = ({ user, isTeam, className }) => {
+	const locale = getLocale()
+	const is_cn = locale === 'zh-CN'
 	const [avatarError, setAvatarError] = useState(false)
 	const [teamLogoError, setTeamLogoError] = useState(false)
 
@@ -67,24 +70,41 @@ const UserAvatarCard: FC<UserAvatarCardProps> = ({ user, isTeam, className }) =>
 
 				{/* User Info */}
 				<div className='user-avatar-card-content'>
-					<div className='user-avatar-card-name'>{user.name}</div>
-					<div className='user-avatar-card-badge'>
-						{isTeam ? (
+					<div className='user-avatar-card-name'>
+						{isTeam && user.team?.name ? (
 							<>
-								<Icon name='people-outline' size={14} />
-								<span>{user.team?.name}</span>
-								{user.is_owner && (
-									<span className='owner-badge'>
-										<Icon name='star' size={12} />
-										Owner
-									</span>
-								)}
+								<span>{user.name}</span>
+								<span className='team-separator'>@</span>
+								<span className='team-name'>{user.team.name}</span>
 							</>
 						) : (
-							<>
-								<Icon name='person-outline' size={14} />
-								<span>Personal Account</span>
-							</>
+							<span>{user.name}</span>
+						)}
+					</div>
+					<div className='user-avatar-card-tags'>
+						<span className='tag-item'>
+							<Icon name={isTeam ? 'material-group' : 'material-person'} size={14} />
+							<span>
+								{isTeam
+									? is_cn
+										? '团队账号'
+										: 'Team Account'
+									: is_cn
+									? '个人账号'
+									: 'Personal Account'}
+							</span>
+						</span>
+						{user.is_owner && (
+							<span className='tag-item'>
+								<Icon name='material-star' size={14} />
+								<span>{is_cn ? '所有者' : 'Owner'}</span>
+							</span>
+						)}
+						{user.user_type && (
+							<span className='tag-item'>
+								<Icon name='material-local_offer' size={14} />
+								<span>{user.user_type.name || user.type_id}</span>
+							</span>
 						)}
 					</div>
 				</div>
@@ -92,17 +112,17 @@ const UserAvatarCard: FC<UserAvatarCardProps> = ({ user, isTeam, className }) =>
 
 			{(user.mobile || (isTeam && user.tenant_id)) && (
 				<>
-					<Divider style={{ margin: '8px 0' }} />
+					<Divider style={{ margin: '6px 0' }} />
 					<div className='user-avatar-card-info'>
 						{user.mobile && (
 							<div className='info-item'>
-								<span className='label'>Mobile:</span>
+								<span className='label'>{is_cn ? '手机：' : 'Mobile:'}</span>
 								<span className='value'>{user.mobile}</span>
 							</div>
 						)}
 						{isTeam && user.tenant_id && (
 							<div className='info-item'>
-								<span className='label'>Tenant:</span>
+								<span className='label'>{is_cn ? '租户：' : 'Tenant:'}</span>
 								<span className='value'>{user.tenant_id}</span>
 							</div>
 						)}
