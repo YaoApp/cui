@@ -100,7 +100,9 @@ const Menu = ({ active, onChange }: MenuProps) => {
 									<span className={styles.name}>{user.name}</span>
 									<span className={styles.plan}>{user.plan}</span>
 								</div>
-								<div className={styles.email}>{user.email}</div>
+								<div className={styles.email}>
+									{user.team?.name || user.mobile || 'Personal Account'}
+								</div>
 							</div>
 						</div>
 					)}

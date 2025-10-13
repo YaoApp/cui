@@ -71,7 +71,9 @@ const Index = (props: IPropsMenu) => {
 				>
 					<Logo {...props_logo}></Logo>
 					<div className='title'> {nav_props?.app_info?.name} </div>
-					<div className='sub_title'>{nav_props?.user?.mobile || nav_props?.user?.email}</div>
+					<div className='sub_title'>
+						{nav_props?.user?.team?.name || nav_props?.user?.mobile || 'Personal'}
+					</div>
 				</Link>
 
 				<div className='menu_wrap w_100'>

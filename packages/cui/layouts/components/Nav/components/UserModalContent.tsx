@@ -50,7 +50,9 @@ const Index = (props: IPropsUserModalContent) => {
 				{Avatar}
 				<div className='info flex flex_column'>
 					<span className='user_name'>{user.name}</span>
-					<span className='user_account'>{user.email || user.mobile}</span>
+					<span className='user_account'>
+						{user.team?.name || user.mobile || 'Personal Account'}
+					</span>
 				</div>
 			</div>
 			<div className='btn_wrap w_100 border_box'>

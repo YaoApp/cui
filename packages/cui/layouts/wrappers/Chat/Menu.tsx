@@ -6,9 +6,8 @@ import { Tooltip } from 'antd'
 import { useNavigate } from '@umijs/max'
 import clsx from 'clsx'
 import './menu.less'
-import { Icon } from '@/widgets'
+import { Icon, UserAvatar } from '@/widgets'
 import { App } from '@/types'
-import ReactNiceAvatar from 'react-nice-avatar'
 
 interface Props {
 	sidebarVisible?: boolean
@@ -22,12 +21,6 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 	const [currentNav, setCurrentNav] = useState(0)
 	const quick_items = global.menus?.quick || []
 	const navigate = useNavigate()
-
-	const getUserDisplayInfo = () => {
-		const user = global.user || {}
-		const { name, mobile, email } = user
-		return name || mobile || email || 'User'
-	}
 
 	if (quick_items.length == 0) {
 		return null
@@ -92,15 +85,13 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 					))}
 				</div>
 
-				<Tooltip title={getUserDisplayInfo()} placement='right'>
-					<div className='menu-avatar' onClick={() => NavigateTo('/settings/profile', true)}>
-						<ReactNiceAvatar
-							className='avatar'
-							style={{ width: 32, height: 32 }}
-							{...global.avatar}
-						/>
-					</div>
-				</Tooltip>
+				<div className='menu-avatar'>
+					<UserAvatar
+						size={32}
+						showCard={true}
+						onClick={() => NavigateTo('/settings/profile', true)}
+					/>
+				</div>
 			</div>
 		</div>
 	)

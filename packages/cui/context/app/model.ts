@@ -265,7 +265,6 @@ export default class GlobalModel {
 				scope: userInfo.scope,
 				features: userInfo.features
 			}
-			console.log('persistentUserInfo', persistentUserInfo)
 			local.userInfo = persistentUserInfo
 		} else {
 			local.userInfo = null

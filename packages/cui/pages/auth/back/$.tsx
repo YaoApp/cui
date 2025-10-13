@@ -140,13 +140,7 @@ const AuthBack = () => {
 				// Login successful (status === LoginStatus.Success)
 				// console.log('AuthBack success:', signinRes.data)
 
-				// Save user info to global state
-				if (signinRes.data?.user) {
-					// console.log('userInfo', signinRes.data.user)
-					global.setUserInfo(signinRes.data.user)
-				}
-
-				// Set success state
+				// Set success state for UI display
 				setAuthResult(signinRes.data || null)
 
 				// After Login - 直接读取 cookie 中预设的跳转地址
@@ -155,6 +149,7 @@ const AuthBack = () => {
 					const loginRedirect = getCookie('login_redirect') || '/auth/helloworld'
 					const logoutRedirect = getCookie('logout_redirect') || '/'
 
+					// AfterLogin will handle all user info setup (global.setUserInfo, global.user, local.user, etc.)
 					const entry = await AfterLogin(global, {
 						user: signinRes.data?.user || ({} as UserInfo),
 						entry: loginRedirect,

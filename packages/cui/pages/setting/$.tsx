@@ -100,7 +100,9 @@ const Index = () => {
 							{Avatar}
 							<div className='info flex flex_column' style={{ marginLeft: 10 }}>
 								<span className='user_name'>{user.name}</span>
-								<span className='user_account'>{user.email || user.mobile}</span>
+								<span className='user_account'>
+									{user.team?.name || user.mobile || 'Personal Account'}
+								</span>
 							</div>
 						</div>
 					</span>
