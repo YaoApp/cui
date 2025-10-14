@@ -73,10 +73,17 @@ const TeamInvite = () => {
 				if (!user.IsError(configRes) && configRes.data) {
 					setConfig(configRes.data)
 
-					// Set invite_redirect cookie with system default success_url
-					// This is separate from login_redirect to avoid being overwritten when user goes to login page
-					if (configRes.data.success_url) {
-						setCookie('invite_redirect', configRes.data.success_url)
+					// Handle redirect parameter - set invite_redirect cookie
+					// Priority: URL redirect param > config success_url
+					const redirectParam = getUrlParam('redirect')
+					if (redirectParam && redirectParam.trim() !== '') {
+						// If URL has redirect parameter, use it
+						setCookie('invite_redirect', redirectParam)
+					} else {
+						// If no redirect parameter, use config success_url as default
+						if (configRes.data.success_url) {
+							setCookie('invite_redirect', configRes.data.success_url)
+						}
 					}
 
 					// Also set logout_redirect
@@ -196,6 +203,11 @@ const TeamInvite = () => {
 		const expires = new Date()
 		expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
 		document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
+	}
+
+	const getUrlParam = (name: string): string | null => {
+		const urlParams = new URLSearchParams(window.location.search)
+		return urlParams.get(name)
 	}
 
 	// Handle accept invitation
