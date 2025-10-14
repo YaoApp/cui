@@ -488,13 +488,13 @@ const TeamInvite = () => {
 												forcePersonal={true}
 											/>
 											<div className={styles.currentUserText}>
+												<div className={styles.currentUserName}>
+													{currentUser?.name}
+												</div>
 												<div className={styles.currentUserLabel}>
 													{is_cn
 														? '当前登录账号'
 														: 'Current Account'}
-												</div>
-												<div className={styles.currentUserName}>
-													{currentUser?.name}
 												</div>
 											</div>
 										</div>
