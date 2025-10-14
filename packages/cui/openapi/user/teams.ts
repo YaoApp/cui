@@ -19,7 +19,8 @@ import {
 	CreateInvitationRequest,
 	InvitationListResponse,
 	TeamConfig,
-	PublicInvitationResponse
+	PublicInvitationResponse,
+	AcceptInvitationRequest
 } from './types'
 
 /**
@@ -262,5 +263,39 @@ export class UserTeams {
 	 */
 	async DeleteInvitation(teamId: string, invitationId: string): Promise<ApiResponse<{ message: string }>> {
 		return this.api.Delete<{ message: string }>(`/user/teams/${teamId}/invitations/${invitationId}`)
+	}
+
+	/**
+	 * Accept team invitation and login to the team
+	 * This endpoint accepts an invitation and automatically logs the user into the team
+	 * Returns new access_token, id_token, and refresh_token with team_id claim (same as SelectTeam)
+	 * The ID token is automatically validated and user information is included in the response
+	 * @param invitationId Invitation ID to accept
+	 * @param request Request containing the invitation token
+	 */
+	async AcceptInvitation(
+		invitationId: string,
+		request: AcceptInvitationRequest
+	): Promise<ApiResponse<SelectTeamResponse>> {
+		const response = await this.api.Post<SelectTeamResponse>(
+			`/user/teams/invitations/${invitationId}/accept`,
+			request
+		)
+		if (this.api.IsError(response)) {
+			return response
+		}
+
+		// Validate ID Token and extract user information (similar to SelectTeam)
+		const userInfo = await this.auth.ValidateIDToken(response.data?.id_token || '')
+
+		// Return response with user info embedded
+		return {
+			status: response.status,
+			headers: response.headers,
+			data: {
+				...response.data!,
+				user: userInfo
+			}
+		}
 	}
 }

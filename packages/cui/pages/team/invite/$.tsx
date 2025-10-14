@@ -8,8 +8,8 @@ import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
 import styles from './index.less'
 import { User } from '@/openapi/user'
-import type { PublicInvitationResponse } from '@/openapi/user/types'
-import { GetCurrentUser, IsLoggedIn } from '../../auth/auth'
+import type { PublicInvitationResponse, SigninConfig } from '@/openapi/user/types'
+import { GetCurrentUser, IsLoggedIn, AfterLogin } from '../../auth/auth'
 
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
@@ -38,10 +38,12 @@ const TeamInvite = () => {
 	const is_cn = currentLocale.startsWith('zh')
 
 	const [loading, setLoading] = useState(true)
+	const [accepting, setAccepting] = useState(false)
 	const [error, setError] = useState<string>('')
 	const [invitationData, setInvitationData] = useState<PublicInvitationResponse | null>(null)
 	const [invitationId, setInvitationId] = useState<string>('')
 	const [token, setToken] = useState<string>('')
+	const [config, setConfig] = useState<SigninConfig | null>(null)
 
 	// Check if user is logged in using auth module
 	const isLoggedIn = IsLoggedIn()
@@ -54,6 +56,43 @@ const TeamInvite = () => {
 		}
 		return currentUser.id === invitationData.inviter_info.user_id
 	}, [currentUser, invitationData])
+
+	// Load login configuration to get success_url
+	useEffect(() => {
+		const fetchConfig = async () => {
+			try {
+				if (!window.$app?.openapi) {
+					console.warn('OpenAPI not initialized yet, retrying...')
+					setTimeout(fetchConfig, 100)
+					return
+				}
+
+				const user = new User(window.$app.openapi)
+				const configRes = await user.auth.GetLoginConfig(currentLocale)
+
+				if (!user.IsError(configRes) && configRes.data) {
+					setConfig(configRes.data)
+
+					// Set invite_redirect cookie with system default success_url
+					// This is separate from login_redirect to avoid being overwritten when user goes to login page
+					if (configRes.data.success_url) {
+						setCookie('invite_redirect', configRes.data.success_url)
+					}
+
+					// Also set logout_redirect
+					if (configRes.data.logout_redirect) {
+						setCookie('logout_redirect', configRes.data.logout_redirect)
+					}
+				} else {
+					console.warn('Failed to load signin config, will use default redirect')
+				}
+			} catch (error) {
+				console.warn('Failed to load configuration:', error)
+			}
+		}
+
+		fetchConfig()
+	}, [currentLocale])
 
 	// Fetch invitation data
 	useEffect(() => {
@@ -145,12 +184,83 @@ const TeamInvite = () => {
 		return is_cn ? `${hours} 小时` : `${hours} hour${hours > 1 ? 's' : ''}`
 	}
 
+	// Cookie 工具函数
+	const getCookie = (name: string): string | null => {
+		const value = `; ${document.cookie}`
+		const parts = value.split(`; ${name}=`)
+		if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+		return null
+	}
+
+	const setCookie = (name: string, value: string, days: number = 7) => {
+		const expires = new Date()
+		expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
+		document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
+	}
+
 	// Handle accept invitation
 	const handleAcceptInvitation = async () => {
-		// TODO: API call to accept invitation
-		// const user = new User(window.$app.openapi)
-		// const response = await user.teams.AcceptInvitation(invitationId, token)
-		message.success(is_cn ? '已接受邀请' : 'Invitation accepted')
+		if (!invitationId || !token) {
+			message.error(is_cn ? '邀请信息无效' : 'Invalid invitation')
+			return
+		}
+
+		setAccepting(true)
+		try {
+			if (!window.$app?.openapi) {
+				message.error('API not initialized')
+				return
+			}
+
+			const user = new User(window.$app.openapi)
+
+			// Call AcceptInvitation API
+			const response = await user.teams.AcceptInvitation(invitationId, { token })
+
+			if (user.IsError(response)) {
+				const errorMsg =
+					response.error?.error_description ||
+					response.error?.error ||
+					'Failed to accept invitation'
+				message.error(errorMsg)
+				console.error('AcceptInvitation error:', response.error)
+				return
+			}
+
+			message.success(is_cn ? '邀请已接受' : 'Invitation accepted')
+
+			// Setup user state and navigate (similar to team select logic)
+			try {
+				// Read redirect URLs from cookies (use invite_redirect instead of login_redirect)
+				// invite_redirect is set when the page loads and won't be overwritten if user goes to login
+				const inviteRedirect = getCookie('invite_redirect') || config?.success_url || '/auth/helloworld'
+				const logoutRedirect = getCookie('logout_redirect') || config?.logout_redirect || '/'
+
+				// Call AfterLogin to setup user information, menus, etc.
+				await AfterLogin(global, {
+					user: response.data?.user || ({} as any),
+					entry: inviteRedirect,
+					logout_redirect: logoutRedirect
+				})
+
+				// Navigate to target page
+				setTimeout(() => {
+					window.location.href = inviteRedirect
+				}, 500)
+			} catch (error) {
+				console.error('Failed to setup after login:', error)
+				// Even if AfterLogin fails, continue to navigate
+				const inviteRedirect = getCookie('invite_redirect') || config?.success_url || '/auth/helloworld'
+				setTimeout(() => {
+					window.location.href = inviteRedirect
+				}, 500)
+			}
+		} catch (error: any) {
+			console.error('Failed to accept invitation:', error)
+			message.error(error.message || (is_cn ? '接受邀请失败' : 'Failed to accept invitation'))
+		} finally {
+			setAccepting(false)
+		}
 	}
 
 	// Handle login
@@ -504,6 +614,8 @@ const TeamInvite = () => {
 										size='large'
 										onClick={handleAcceptInvitation}
 										className={styles.acceptButton}
+										disabled={accepting}
+										loading={accepting}
 										block
 									>
 										{is_cn ? '接受邀请' : 'Accept Invitation'}

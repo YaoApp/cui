@@ -492,6 +492,13 @@ export interface SelectTeamResponse {
 }
 
 /**
+ * Request for accepting team invitation
+ */
+export interface AcceptInvitationRequest {
+	token: string
+}
+
+/**
  * Team list response (simple array, no pagination)
  * Returns all teams where the user is a member, including role information
  */
