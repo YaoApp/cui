@@ -234,6 +234,8 @@ export interface UserInfo {
 	scope?: string
 	/** User's features */
 	features?: object
+	/** Yao user ID (original user ID) */
+	'yao:user_id'?: string
 	/** Yao tenant ID */
 	'yao:tenant_id'?: string
 	/** Yao team ID */
@@ -313,15 +315,54 @@ export interface CaptchaResponse {
 }
 
 // ===== User Management Types =====
+/**
+ * User Profile (OIDC UserInfo)
+ * Returned by GET /api/__yao/user/profile
+ */
 export interface UserProfile {
-	id: string
-	username: string
-	email?: string
-	name?: string
-	avatar?: string
-	roles?: string[]
-	scope?: string
-	features?: object
+	/** OIDC Standard Claims */
+	sub: string // Subject identifier (required)
+	name?: string // Full name
+	given_name?: string // Given name(s) or first name(s)
+	family_name?: string // Surname(s) or last name(s)
+	middle_name?: string // Middle name(s)
+	nickname?: string // Casual name
+	preferred_username?: string // Shorthand name
+	profile?: string // Profile page URL
+	picture?: string // Profile picture URL
+	website?: string // Web page or blog URL
+	email?: string // Email address
+	email_verified?: boolean // Email verification status
+	gender?: string // Gender
+	birthdate?: string // Birthday (YYYY-MM-DD format)
+	zoneinfo?: string // Time zone info
+	locale?: string // Locale (language-country)
+	phone_number?: string // Phone number
+	phone_number_verified?: boolean // Phone verification status
+	updated_at?: number // Time of last update (seconds since epoch)
+
+	/** OIDC Address Claim */
+	address?: {
+		formatted?: string
+		street_address?: string
+		locality?: string
+		region?: string
+		postal_code?: string
+		country?: string
+	}
+
+	/** Yao Custom Claims */
+	'yao:user_id'?: string // Yao user ID (original user ID)
+	'yao:tenant_id'?: string // Yao tenant ID
+	'yao:team_id'?: string // Yao team ID
+	'yao:team'?: {
+		team_id?: string
+		name?: string
+		logo?: string
+		description?: string
+		owner_id?: string
+	}
+	'yao:is_owner'?: boolean // Is owner of current team
 }
 
 export interface UserPreferences {
@@ -654,6 +695,7 @@ export interface InvitationListResponse {
  * Inviter's public information
  */
 export interface InviterInfo {
+	user_id: string
 	name?: string
 	picture: string
 }

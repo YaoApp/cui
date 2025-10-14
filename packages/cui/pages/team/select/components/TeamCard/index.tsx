@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Avatar, Tooltip } from 'antd'
-import { UserTeam } from '@/openapi/user/types'
+import { UserTeam, UserProfile } from '@/openapi/user/types'
+import { App } from '@/types'
+import UserAvatar from '@/widgets/UserAvatar'
 import styles from './index.less'
 
 export interface TeamCardProps {
@@ -9,9 +11,22 @@ export interface TeamCardProps {
 	roleLabel: string
 	ownerLabel: string
 	onClick: () => void
+	/** User profile for personal account avatar */
+	userProfile?: UserProfile | null
 }
 
-const TeamCard: React.FC<TeamCardProps> = ({ team, selected, roleLabel, ownerLabel, onClick }) => {
+const TeamCard: React.FC<TeamCardProps> = ({ team, selected, roleLabel, ownerLabel, onClick, userProfile }) => {
+	// Convert UserProfile to App.User format for UserAvatar component
+	const personalUser = useMemo<App.User | null>(() => {
+		if (!userProfile || team.team_id !== 'personal') return null
+		return {
+			id: userProfile['yao:user_id'] || userProfile.sub || '',
+			name: userProfile.name || '',
+			avatar: userProfile.picture || '',
+			type: 'user'
+		}
+	}, [userProfile, team.team_id])
+
 	return (
 		<Tooltip
 			title={team.description || null}
@@ -20,11 +35,15 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, selected, roleLabel, ownerLab
 			overlayStyle={{ maxWidth: '400px' }}
 		>
 			<div className={`${styles.teamCard} ${selected ? styles.teamCardSelected : ''}`} onClick={onClick}>
-				{/* Team Logo */}
+				{/* Avatar/Logo */}
 				<div className={styles.teamLogoWrapper}>
-					<Avatar size={40} src={team.logo} className={styles.teamLogo}>
-						{!team.logo && (team.display_name || team.name)[0].toUpperCase()}
-					</Avatar>
+					{team.team_id === 'personal' && personalUser ? (
+						<UserAvatar user={personalUser} size={40} showCard={false} forcePersonal={true} />
+					) : (
+						<Avatar size={40} src={team.logo} className={styles.teamLogo}>
+							{!team.logo && (team.display_name || team.name)[0].toUpperCase()}
+						</Avatar>
+					)}
 				</div>
 
 				{/* Team Info */}

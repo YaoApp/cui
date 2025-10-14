@@ -259,6 +259,76 @@
 	}
 }
 
+/* Self-Invite Notice */
+.selfInviteNotice {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px 20px;
+	background: var(--color_warning_bg);
+	border: 1px solid var(--color_warning);
+	border-radius: var(--radius);
+	margin-bottom: 20px;
+}
+
+.noticeIcon {
+	flex-shrink: 0;
+	color: var(--color_warning);
+}
+
+.noticeText {
+	font-size: 14px;
+	color: var(--color_text);
+	margin: 0;
+	line-height: 1.5;
+}
+
+.switchAccountOnly {
+	margin-top: 0;
+}
+
+.switchAccountButton {
+	height: 44px;
+	font-size: 15px;
+	font-weight: 500;
+}
+
+/* Current User Section */
+.currentUserSection {
+	margin-bottom: 20px;
+}
+
+.currentUserInfo {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 16px 20px;
+	background: var(--color_bg_nav);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+}
+
+.currentUserText {
+	flex: 1;
+	min-width: 0;
+}
+
+.currentUserLabel {
+	font-size: 12px;
+	color: var(--color_text_grey);
+	margin-bottom: 4px;
+}
+
+.currentUserName {
+	font-size: 15px;
+	font-weight: 500;
+	color: var(--color_text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 /* Expired Section */
 .expiredSection {
 	text-align: center;
@@ -404,6 +474,28 @@
 		}
 	}
 
+	.selfInviteNotice {
+		padding: 12px 16px;
+		gap: 6px;
+	}
+
+	.noticeText {
+		font-size: 13px;
+	}
+
+	.currentUserInfo {
+		padding: 12px 16px;
+		gap: 10px;
+	}
+
+	.currentUserLabel {
+		font-size: 11px;
+	}
+
+	.currentUserName {
+		font-size: 14px;
+	}
+
 	.expiredTitle {
 		font-size: 20px;
 	}
@@ -485,6 +577,32 @@
 			color: rgba(90, 143, 255, 1);
 			text-shadow: 0 0 8px rgba(69, 128, 255, 0.3);
 		}
+	}
+
+	.selfInviteNotice {
+		background: rgba(250, 173, 20, 0.15);
+		border: 1px solid rgba(250, 173, 20, 0.5);
+	}
+
+	.noticeIcon {
+		color: rgba(250, 173, 20, 0.9);
+	}
+
+	.noticeText {
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.currentUserInfo {
+		background: rgba(31, 35, 48, 0.6);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.currentUserLabel {
+		color: rgba(255, 255, 255, 0.5);
+	}
+
+	.currentUserName {
+		color: rgba(255, 255, 255, 0.9);
 	}
 
 	.expiredIcon {

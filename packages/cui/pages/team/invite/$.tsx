@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { message, Button } from 'antd'
 import { getLocale, history } from '@umijs/max'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import AuthLayout from '../../auth/components/AuthLayout'
 import Icon from '@/widgets/Icon'
+import UserAvatar from '@/widgets/UserAvatar'
 import styles from './index.less'
 import { User } from '@/openapi/user'
 import type { PublicInvitationResponse } from '@/openapi/user/types'
+import { GetCurrentUser, IsLoggedIn } from '../../auth/auth'
 
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
@@ -41,8 +43,17 @@ const TeamInvite = () => {
 	const [invitationId, setInvitationId] = useState<string>('')
 	const [token, setToken] = useState<string>('')
 
-	// Check if user is logged in (you may need to adjust this based on your auth implementation)
-	const isLoggedIn = !!global.user
+	// Check if user is logged in using auth module
+	const isLoggedIn = IsLoggedIn()
+	const currentUser = GetCurrentUser()
+
+	// Check if current user is the inviter
+	const isInviterSelf = useMemo(() => {
+		if (!currentUser || !invitationData?.inviter_info) {
+			return false
+		}
+		return currentUser.id === invitationData.inviter_info.user_id
+	}, [currentUser, invitationData])
 
 	// Fetch invitation data
 	useEffect(() => {
@@ -438,32 +449,82 @@ const TeamInvite = () => {
 					{/* Action Section */}
 					<div className={styles.actionSection}>
 						{isLoggedIn ? (
-							<>
-								<Button
-									type='primary'
-									size='large'
-									onClick={handleAcceptInvitation}
-									className={styles.acceptButton}
-									block
-								>
-									{is_cn ? '接受邀请' : 'Accept Invitation'}
-								</Button>
-								<div className={styles.switchAccountSection}>
-									<span className={styles.switchAccountText}>
-										{is_cn ? '不是您的账号？' : 'Not your account?'}
-									</span>
-									<a
-										href='#'
-										className={styles.switchAccountLink}
-										onClick={(e) => {
-											e.preventDefault()
-											handleSwitchAccount()
-										}}
+							isInviterSelf ? (
+								// User is the inviter - cannot invite themselves
+								<>
+									<div className={styles.selfInviteNotice}>
+										<Icon
+											name='material-warning'
+											size={20}
+											className={styles.noticeIcon}
+										/>
+										<p className={styles.noticeText}>
+											{is_cn
+												? '您不能邀请自己加入团队'
+												: 'You cannot invite yourself to join the team'}
+										</p>
+									</div>
+									<div className={styles.switchAccountOnly}>
+										<Button
+											type='default'
+											size='large'
+											onClick={handleSwitchAccount}
+											className={styles.switchAccountButton}
+											block
+										>
+											{is_cn ? '切换账号' : 'Switch Account'}
+										</Button>
+									</div>
+								</>
+							) : (
+								// User is not the inviter - show avatar and accept button
+								<>
+									<div className={styles.currentUserSection}>
+										<div className={styles.currentUserInfo}>
+											<UserAvatar
+												user={currentUser!}
+												size={48}
+												showCard={false}
+												forcePersonal={true}
+											/>
+											<div className={styles.currentUserText}>
+												<div className={styles.currentUserLabel}>
+													{is_cn
+														? '当前登录账号'
+														: 'Current Account'}
+												</div>
+												<div className={styles.currentUserName}>
+													{currentUser?.name}
+												</div>
+											</div>
+										</div>
+									</div>
+									<Button
+										type='primary'
+										size='large'
+										onClick={handleAcceptInvitation}
+										className={styles.acceptButton}
+										block
 									>
-										{is_cn ? '切换账号' : 'Switch Account'}
-									</a>
-								</div>
-							</>
+										{is_cn ? '接受邀请' : 'Accept Invitation'}
+									</Button>
+									<div className={styles.switchAccountSection}>
+										<span className={styles.switchAccountText}>
+											{is_cn ? '不是您的账号？' : 'Not your account?'}
+										</span>
+										<a
+											href='#'
+											className={styles.switchAccountLink}
+											onClick={(e) => {
+												e.preventDefault()
+												handleSwitchAccount()
+											}}
+										>
+											{is_cn ? '切换账号' : 'Switch Account'}
+										</a>
+									</div>
+								</>
+							)
 						) : (
 							<>
 								<p className={styles.loginPrompt}>

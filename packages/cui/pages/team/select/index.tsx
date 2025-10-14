@@ -4,7 +4,7 @@ import { getLocale, history } from '@umijs/max'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import { User } from '@/openapi/user'
-import { UserTeam, TeamConfig } from '@/openapi/user/types'
+import { UserTeam, TeamConfig, UserProfile } from '@/openapi/user/types'
 import AuthLayout from '../../auth/components/AuthLayout'
 import TeamCard from './components/TeamCard'
 import { AfterLogin } from '../../auth/auth'
@@ -49,14 +49,16 @@ const TeamSelect = () => {
 	const [teams, setTeams] = useState<UserTeam[]>([])
 	const [error, setError] = useState<string>('')
 	const [config, setConfig] = useState<TeamConfig | null>(null)
+	const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
 
-	// Personal account option (always first)
+	// Personal account option (always first) - use real user profile data
 	const personalWorkspace: UserTeam = {
 		team_id: 'personal',
-		name: currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account',
-		display_name: currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account',
+		name: userProfile?.name || (currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account'),
+		display_name: userProfile?.name || (currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account'),
 		description: currentLocale.startsWith('zh') ? '使用个人账号访问' : 'Access with personal account',
-		owner_id: '',
+		owner_id: userProfile?.['yao:user_id'] || '',
+		logo: userProfile?.picture,
 		status: 'active',
 		is_verified: false,
 		created_at: '',
@@ -84,12 +86,39 @@ const TeamSelect = () => {
 			}
 
 			// Now safe to fetch data
+			await fetchUserProfile()
 			await fetchConfig()
 			await fetchTeams()
 		}
 
 		initAndFetch()
 	}, [])
+
+	const fetchUserProfile = async () => {
+		try {
+			if (!window.$app?.openapi) {
+				console.error('OpenAPI not initialized for profile')
+				return
+			}
+
+			const user = new User(window.$app.openapi)
+			const response = await user.profile.GetProfile()
+
+			if (!user.IsError(response) && response.data) {
+				setUserProfile(response.data)
+				console.log('User profile loaded:', {
+					name: response.data.name,
+					picture: response.data.picture,
+					user_id: response.data['yao:user_id']
+				})
+			} else {
+				console.warn('Failed to load user profile:', response.error)
+			}
+		} catch (error) {
+			console.error('Failed to fetch user profile:', error)
+			// Don't show error to user, personal account will use default name
+		}
+	}
 
 	const fetchConfig = async () => {
 		try {
@@ -336,6 +365,7 @@ const TeamSelect = () => {
 									roleLabel=''
 									ownerLabel={currentLocale.startsWith('zh') ? '所有者' : 'Owner'}
 									onClick={() => setSelectedTeamId('personal')}
+									userProfile={userProfile}
 								/>
 
 								{/* Divider */}

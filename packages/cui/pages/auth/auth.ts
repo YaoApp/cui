@@ -25,8 +25,9 @@ export const AfterLogin = async (global: GlobalModel, data: AuthData): Promise<s
 	global.setUserInfo(data.user)
 
 	// Convert OIDC UserInfo to App.User format
+	// Use yao:user_id (original user ID) if available, otherwise fall back to user_id
 	const user: App.User = {
-		id: data.user.user_id || '',
+		id: data.user['yao:user_id'] || data.user.user_id || '',
 		name: data.user.name || '',
 		avatar: data.user.picture || '',
 		type: 'user'

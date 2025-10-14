@@ -10,7 +10,8 @@ const UserAvatar: FC<UserAvatarProps> = ({
 	className = '',
 	style = {},
 	onClick,
-	user: propUser
+	user: propUser,
+	forcePersonal = false
 }) => {
 	// Get user from props or auth info
 	const user = useMemo(() => {
@@ -22,9 +23,11 @@ const UserAvatar: FC<UserAvatarProps> = ({
 	const [teamLogoError, setTeamLogoError] = useState(false)
 
 	// Determine if user is in team context
+	// If forcePersonal is true, ignore team context
 	const isTeam = useMemo(() => {
+		if (forcePersonal) return false
 		return !!(user?.team_id && user?.team)
-	}, [user])
+	}, [user, forcePersonal])
 
 	if (!user) {
 		// Fallback avatar if no user

@@ -13,6 +13,8 @@ export interface UserAvatarProps {
 	onClick?: () => void
 	/** User data (optional, will use auth info if not provided) */
 	user?: App.User
+	/** Force personal avatar only (ignore team context). Default: false */
+	forcePersonal?: boolean
 }
 
 export interface UserAvatarCardProps {
