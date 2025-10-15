@@ -1,4 +1,4 @@
-// ===== Authentication Types (migrated from signin.ts) =====
+// ===== Authentication Types =====
 
 /**
  * Login status enum
@@ -21,86 +21,6 @@ export interface SigninProvider {
 	text_color?: string
 	client_id: string
 	response_mode?: string
-}
-
-/**
- * Signin configuration response
- */
-export interface SigninConfig {
-	title: string
-	description: string
-	success_url: string
-	failure_url?: string
-	logout_redirect?: string
-	form: {
-		username: {
-			placeholder: string
-			fields: string[]
-		}
-		password: {
-			placeholder: string
-		}
-		captcha: {
-			type: 'image' | 'turnstile'
-			options?: {
-				secret?: string
-				sitekey?: string
-			}
-		}
-		forgot_password_link: boolean
-		remember_me: boolean
-		register_link: string
-		terms_of_service_link: string
-		privacy_policy_link: string
-	}
-	token: {
-		expires_in: string
-		remember_me_expires_in: string
-	}
-	third_party: {
-		register: {
-			auto: boolean
-			role: string
-		}
-		providers: SigninProvider[]
-	}
-}
-
-/**
- * Signin request payload
- */
-export interface SigninRequest {
-	username: string
-	password: string
-	remember?: boolean
-	captcha_code?: string
-	captcha_id?: string
-}
-
-/**
- * Signin response data
- */
-export interface SigninResponse {
-	access_token?: string
-	refresh_token?: string
-	expires_in?: number
-	refresh_token_expires_in?: number
-	mfa_enabled?: boolean
-	mfa_token?: string
-	mfa_token_expires_in?: number
-	session_id?: string
-	status?: LoginStatus
-	user?: {
-		id: string
-		username: string
-		email?: string
-		name?: string
-		avatar?: string
-		roles?: string[]
-		scope?: string
-		features?: object
-	}
-	csrf_token?: string
 }
 
 export interface OAuthAuthorizationURLResponse {

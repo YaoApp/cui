@@ -128,7 +128,7 @@ const AuthBack = () => {
 
 				// Handle MFA required
 				if (status === LoginStatus.MFARequired) {
-					history.push('/auth/signin/mfa')
+					history.push('/auth/entry/mfa')
 					return
 				}
 

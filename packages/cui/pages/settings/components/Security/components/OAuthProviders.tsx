@@ -35,7 +35,7 @@ const OAuthProviders: React.FC<OAuthProvidersProps> = ({ data, onUpdate }) => {
 
 				setProvidersLoading(true)
 				const user = new User(window.$app.openapi)
-				const configRes = await user.auth.GetLoginConfig(locale)
+				const configRes = await user.auth.GetEntryConfig(locale)
 
 				if (!user.IsError(configRes) && configRes.data?.third_party?.providers) {
 					setAvailableProviders(configRes.data.third_party.providers)

@@ -8,7 +8,7 @@ import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
 import styles from './index.less'
 import { User } from '@/openapi/user'
-import type { PublicInvitationResponse, SigninConfig } from '@/openapi/user/types'
+import type { PublicInvitationResponse, EntryConfig } from '@/openapi/user/types'
 import { GetCurrentUser, IsLoggedIn, AfterLogin } from '../../auth/auth'
 
 // 浏览器语言检测工具函数
@@ -43,7 +43,7 @@ const TeamInvite = () => {
 	const [invitationData, setInvitationData] = useState<PublicInvitationResponse | null>(null)
 	const [invitationId, setInvitationId] = useState<string>('')
 	const [token, setToken] = useState<string>('')
-	const [config, setConfig] = useState<SigninConfig | null>(null)
+	const [config, setConfig] = useState<EntryConfig | null>(null)
 
 	// Check if user is logged in using auth module
 	const isLoggedIn = IsLoggedIn()
@@ -68,7 +68,7 @@ const TeamInvite = () => {
 				}
 
 				const user = new User(window.$app.openapi)
-				const configRes = await user.auth.GetLoginConfig(currentLocale)
+				const configRes = await user.auth.GetEntryConfig(currentLocale)
 
 				if (!user.IsError(configRes) && configRes.data) {
 					setConfig(configRes.data)

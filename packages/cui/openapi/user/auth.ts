@@ -2,9 +2,6 @@ import { OpenAPI } from '../openapi'
 import { ApiResponse, ErrorResponse, JWK } from '../types'
 import * as jose from 'jose'
 import {
-	SigninConfig,
-	SigninRequest,
-	SigninResponse,
 	EntryRequest,
 	EntryResponse,
 	EntryConfig,
@@ -23,27 +20,6 @@ import {
  */
 export class UserAuth {
 	constructor(private api: OpenAPI) {}
-
-	/**
-	 * Get login configuration
-	 */
-	async GetLoginConfig(locale?: string): Promise<ApiResponse<SigninConfig>> {
-		return this.api.Get<SigninConfig>(`/user/login`, { locale: locale || '' })
-	}
-
-	/**
-	 * Login with username and password
-	 */
-	async Login(credentials: SigninRequest): Promise<ApiResponse<SigninResponse>> {
-		const response = await this.api.Post<SigninResponse>('/user/login', credentials)
-
-		// Auto-handle CSRF token for cross-origin scenarios
-		if (!this.IsError(response) && response.data?.csrf_token) {
-			this.api.SetCSRFToken(response.data.csrf_token)
-		}
-
-		return response
-	}
 
 	/**
 	 * Get unified auth entry configuration
@@ -298,10 +274,10 @@ export class UserAuth {
 	}
 
 	/**
-	 * Get captcha image for login
+	 * Get captcha image for entry (login/register)
 	 */
 	async GetCaptcha(): Promise<ApiResponse<CaptchaResponse>> {
-		return this.api.Get<CaptchaResponse>('/user/login/captcha')
+		return this.api.Get<CaptchaResponse>('/user/entry/captcha')
 	}
 
 	/**
@@ -309,7 +285,7 @@ export class UserAuth {
 	 */
 	async RefreshCaptcha(captchaId?: string): Promise<ApiResponse<CaptchaResponse>> {
 		const query = captchaId ? `?refresh=${encodeURIComponent(captchaId)}` : ''
-		return this.api.Get<CaptchaResponse>(`/user/login/captcha${query}`)
+		return this.api.Get<CaptchaResponse>(`/user/entry/captcha${query}`)
 	}
 
 	/**

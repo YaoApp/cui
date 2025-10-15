@@ -22,9 +22,7 @@ import type { IPropsHelmet, IPropsLoginWrapper } from './types'
 const STANDALONE_PAGES = new Map([
 	// OAuth authentication pages
 	['auth_entry', '/auth/entry'], // Unified login/register entry point
-	['auth_signin', '/auth/signin'],
-	['auth_signin_mfa', '/auth/signin/mfa'],
-	['auth_signin_sms', '/auth/signin/sms'],
+	['auth_entry_mfa', '/auth/entry/mfa'], // MFA verification
 	['auth_logout', '/auth/logout'],
 	['auth_back', '/auth/back/'],
 	['auth_consent', '/auth/consent'],

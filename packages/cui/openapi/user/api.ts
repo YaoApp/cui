@@ -36,19 +36,19 @@ export class User {
 	// ===== Convenience Methods (Backward Compatibility) =====
 
 	/**
-	 * Get login configuration
-	 * @deprecated Use auth.GetLoginConfig() instead
+	 * Get entry configuration (unified login + register)
+	 * @deprecated Use auth.GetEntryConfig() instead
 	 */
 	async GetConfig(locale?: string) {
-		return this.auth.GetLoginConfig(locale)
+		return this.auth.GetEntryConfig(locale)
 	}
 
 	/**
-	 * Login with username and password
-	 * @deprecated Use auth.Login() instead
+	 * Unified auth entry (login/register)
+	 * @deprecated Use auth.Entry() instead
 	 */
 	async SigninWithPassword(credentials: any) {
-		return this.auth.Login(credentials)
+		return this.auth.Entry(credentials)
 	}
 
 	/**
