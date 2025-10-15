@@ -278,21 +278,21 @@ const TeamInvite = () => {
 	// Handle login
 	const handleLogin = () => {
 		const returnUrl = encodeURIComponent(window.location.pathname)
-		history.push(`/auth/signin?redirect=${returnUrl}`)
+		history.push(`/auth/entry?redirect=${returnUrl}`)
 	}
 
 	// Handle register
 	const handleRegister = () => {
 		const returnUrl = encodeURIComponent(window.location.pathname)
 		// TODO: Update with actual register URL
-		history.push(`/auth/signup?redirect=${returnUrl}`)
+		history.push(`/auth/entry?redirect=${returnUrl}`)
 	}
 
 	// Handle switch account
 	const handleSwitchAccount = () => {
 		// TODO: Implement logout and redirect to login
 		const returnUrl = encodeURIComponent(window.location.pathname)
-		history.push(`/auth/signin?redirect=${returnUrl}`)
+		history.push(`/auth/entry?redirect=${returnUrl}`)
 	}
 
 	// Render loading state

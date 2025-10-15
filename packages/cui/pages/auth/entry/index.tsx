@@ -66,16 +66,16 @@ const AuthEntry = () => {
 	} | null>(null)
 	const [captchaLoading, setCaptchaLoading] = useState(false)
 
-	// 处理 redirect 参数 - 设置注册后的跳转地址
+	// 处理 redirect 参数 - 设置登录后的跳转地址
 	useAsyncEffect(async () => {
 		const redirectParam = getUrlParam('redirect')
 		if (redirectParam && redirectParam.trim() !== '') {
 			// 如果 URL 有 redirect 参数，使用它
-			setCookie('register_redirect', redirectParam)
+			setCookie('login_redirect', redirectParam)
 		} else {
 			// 如果没有 redirect 参数，等待 config 加载后使用 success_url 作为默认值
 			if (config?.success_url) {
-				setCookie('register_redirect', config.success_url)
+				setCookie('login_redirect', config.success_url)
 			}
 		}
 	}, [config?.success_url])

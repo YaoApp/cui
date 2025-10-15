@@ -183,7 +183,7 @@ const TeamSelect = () => {
 					// Unauthorized or Forbidden - redirect to signin
 					message.error(currentLocale.startsWith('zh') ? '请先登录' : 'Please sign in first')
 					setTimeout(() => {
-						history.push('/auth/signin')
+						history.push('/auth/entry')
 					}, 1000)
 					return
 				}
@@ -349,7 +349,7 @@ const TeamSelect = () => {
 								<Button type='primary' onClick={() => fetchTeams()}>
 									{currentLocale.startsWith('zh') ? '重试' : 'Retry'}
 								</Button>
-								<Button onClick={() => history.push('/auth/signin')}>
+								<Button onClick={() => history.push('/auth/entry')}>
 									{currentLocale.startsWith('zh') ? '返回登录' : 'Back to Login'}
 								</Button>
 							</div>
@@ -410,7 +410,7 @@ const TeamSelect = () => {
 								<Button
 									type='default'
 									size='large'
-									onClick={() => history.push('/auth/signin')}
+									onClick={() => history.push('/auth/entry')}
 									disabled={loading}
 									className={styles.backButton}
 								>
