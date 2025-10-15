@@ -297,8 +297,24 @@ export default class GlobalModel {
 		if (width !== undefined) this.setSidebarWidth(width)
 	}
 
+	/**
+	 * Check if user is logged in (simplified version from auth.ts)
+	 * @returns true if user is logged in, false otherwise
+	 */
+	private isLoggedIn(): boolean {
+		try {
+			const user = local.user as App.User | undefined
+			return !!(user && user.id && user.name)
+		} catch (error) {
+			return false
+		}
+	}
+
 	async refreshJobsCount() {
 		try {
+			// Only refresh if user is logged in
+			if (!this.isLoggedIn()) return
+
 			if (!window.$app?.openapi) return
 
 			const jobAPI = new JobAPI(window.$app.openapi)

@@ -65,6 +65,7 @@ const AuthEntry = () => {
 		image: string
 	} | null>(null)
 	const [captchaLoading, setCaptchaLoading] = useState(false)
+	const [captchaReady, setCaptchaReady] = useState(false) // 标记验证码是否已准备好（CF）或已输入（图片）
 
 	// 处理 redirect 参数 - 设置登录后的跳转地址
 	useAsyncEffect(async () => {
@@ -143,21 +144,41 @@ const AuthEntry = () => {
 		}
 	}
 
-	// Load captcha when needed (only for image type)
-	useAsyncEffect(async () => {
-		if (config?.form?.captcha && config.form.captcha.type === 'image' && !captchaData) {
-			await loadCaptcha()
-		}
-	}, [config?.form?.captcha?.type, captchaData])
-
 	// Form validation
 	const isFormValid = formData.email.trim() !== '' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
 
 	const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFormData((prev) => ({
-			...prev,
-			[field]: e.target.value
-		}))
+		const newValue = e.target.value
+
+		// 当用户输入email时，根据有效性处理验证码
+		if (field === 'email') {
+			const isValidEmail = newValue.trim() !== '' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newValue)
+			if (isValidEmail) {
+				// Email有效，更新email值
+				setFormData((prev) => ({
+					...prev,
+					[field]: newValue
+				}))
+				// 加载图片验证码（CF验证码会自动显示）
+				if (config?.form?.captcha && config.form.captcha.type === 'image' && !captchaData) {
+					loadCaptcha()
+				}
+			} else {
+				// Email无效，重置验证码状态
+				setFormData((prev) => ({
+					...prev,
+					[field]: newValue,
+					captcha: ''
+				}))
+				setCaptchaReady(false)
+			}
+		} else {
+			// 其他字段正常更新
+			setFormData((prev) => ({
+				...prev,
+				[field]: newValue
+			}))
+		}
 	}
 
 	const handleCaptchaChange = (value: string) => {
@@ -165,6 +186,8 @@ const AuthEntry = () => {
 			...prev,
 			captcha: value
 		}))
+		// 标记验证码已输入/验证通过
+		setCaptchaReady(value.trim() !== '')
 	}
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -286,15 +309,14 @@ const AuthEntry = () => {
 							type='email'
 						/>
 
-						{/* Captcha Field - Conditional based on config */}
-						{config.form?.captcha && (
+						{/* Captcha Field - 只在email有效时显示 */}
+						{config.form?.captcha && isFormValid && (
 							<Captcha
-								type={config.form.captcha.type === 'turnstile' ? 'cloudflare' : 'image'}
-								endpoint={captchaData?.image || ''}
-								siteKey={config.form.captcha.options?.sitekey || ''}
+								config={config.form.captcha}
 								value={formData.captcha}
 								onChange={handleCaptchaChange}
 								onCaptchaVerified={handleCaptchaChange}
+								captchaImage={captchaData?.image}
 								onRefresh={() => loadCaptcha(true)}
 							/>
 						)}
@@ -302,7 +324,7 @@ const AuthEntry = () => {
 						<AuthButton
 							type='primary'
 							loading={loading}
-							disabled={!isFormValid || loading}
+							disabled={!isFormValid || loading || (config?.form?.captcha && !captchaReady)}
 							fullWidth
 							onClick={handleSubmit}
 						>

@@ -25,43 +25,71 @@ declare global {
 	}
 }
 
+interface CaptchaConfig {
+	type: 'image' | 'turnstile'
+	options?: {
+		sitekey?: string
+		[key: string]: any
+	}
+}
+
 interface CaptchaProps {
-	type: 'image' | 'text' | 'cloudflare'
-	endpoint?: string
-	siteKey?: string
+	config: CaptchaConfig
 	value: string
 	onChange: (value: string) => void
 	onCaptchaVerified?: (token: string) => void
+	// 以下 props 用于图片验证码
+	captchaImage?: string
 	onRefresh?: () => void | Promise<void>
 }
 
-const Captcha: React.FC<CaptchaProps> = ({
-	type,
-	endpoint,
-	siteKey,
-	value,
-	onChange,
-	onCaptchaVerified,
-	onRefresh
-}) => {
+const Captcha: React.FC<CaptchaProps> = ({ config, value, onChange, onCaptchaVerified, captchaImage, onRefresh }) => {
+	// 根据配置自动判断验证码类型
+	const type = config.type === 'turnstile' ? 'cloudflare' : config.type
+	const siteKey = config.options?.sitekey || ''
 	const messages = useIntl()
-	const [captchaImage, setCaptchaImage] = useState<string>('')
 	const [loading, setLoading] = useState(false)
 	const [focused, setFocused] = useState(false)
 	const [turnstileLoaded, setTurnstileLoaded] = useState(false)
 	const turnstileRef = useRef<HTMLDivElement>(null)
 	const widgetIdRef = useRef<string>('')
+	const checkIntervalRef = useRef<NodeJS.Timeout | null>(null)
+	const checkTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
 	const handleFocus = () => setFocused(true)
 	const handleBlur = () => setFocused(false)
 
 	// Load Cloudflare Turnstile script
 	const loadTurnstileScript = () => {
-		if (document.querySelector('script[src*="turnstile"]')) {
+		// 如果 window.turnstile 已经存在，说明脚本已完全加载
+		if (window.turnstile) {
 			setTurnstileLoaded(true)
 			return
 		}
 
+		// 检查脚本标签是否存在
+		const existingScript = document.querySelector('script[src*="turnstile"]')
+		if (existingScript) {
+			// 脚本标签存在但 window.turnstile 还不存在，说明脚本正在加载
+			// 监听 window.turnstile 何时可用
+			checkIntervalRef.current = setInterval(() => {
+				if (window.turnstile) {
+					if (checkIntervalRef.current) clearInterval(checkIntervalRef.current)
+					if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current)
+					setTurnstileLoaded(true)
+				}
+			}, 100)
+			// 设置超时以防止无限等待
+			checkTimeoutRef.current = setTimeout(() => {
+				if (checkIntervalRef.current) clearInterval(checkIntervalRef.current)
+				if (!window.turnstile) {
+					console.error('Turnstile script loaded but window.turnstile not available')
+				}
+			}, 10000)
+			return
+		}
+
+		// 脚本不存在，创建并加载
 		const script = document.createElement('script')
 		script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
 		script.async = true
@@ -100,18 +128,11 @@ const Captcha: React.FC<CaptchaProps> = ({
 
 	// Load image captcha
 	const loadImageCaptcha = async () => {
-		if (type !== 'image') return
+		if (type !== 'image' || !onRefresh) return
 
 		setLoading(true)
 		try {
-			if (onRefresh) {
-				// Use the provided onRefresh callback for API-based captcha
-				await onRefresh()
-			} else if (endpoint) {
-				// Fallback to original behavior for endpoint-based captcha
-				const timestamp = Date.now()
-				setCaptchaImage(`${endpoint}?t=${timestamp}`)
-			}
+			await onRefresh()
 		} catch (error) {
 			console.error('Failed to load captcha:', error)
 		} finally {
@@ -122,11 +143,9 @@ const Captcha: React.FC<CaptchaProps> = ({
 	useEffect(() => {
 		if (type === 'cloudflare') {
 			loadTurnstileScript()
-		} else if (type === 'image' && !onRefresh && endpoint) {
-			// Only auto-load for traditional endpoint-based captcha, not API-based
-			loadImageCaptcha()
 		}
-	}, [type, onRefresh])
+		// 图片验证码不再自动加载，由外部控制
+	}, [type])
 
 	useEffect(() => {
 		if (type === 'cloudflare' && turnstileLoaded && window.turnstile) {
@@ -139,6 +158,14 @@ const Captcha: React.FC<CaptchaProps> = ({
 	// Cleanup on unmount
 	useEffect(() => {
 		return () => {
+			// 清理定时器
+			if (checkIntervalRef.current) {
+				clearInterval(checkIntervalRef.current)
+			}
+			if (checkTimeoutRef.current) {
+				clearTimeout(checkTimeoutRef.current)
+			}
+			// 清理 Turnstile widget
 			if (widgetIdRef.current && window.turnstile) {
 				try {
 					window.turnstile.remove(widgetIdRef.current)
@@ -184,9 +211,9 @@ const Captcha: React.FC<CaptchaProps> = ({
 					/>
 				</div>
 				<div className={styles.captchaSection}>
-					{(endpoint || captchaImage) && (
+					{captchaImage && (
 						<img
-							src={endpoint || captchaImage}
+							src={captchaImage}
 							alt='Captcha'
 							className={styles.captchaImage}
 							onClick={loadImageCaptcha}
