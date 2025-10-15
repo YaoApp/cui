@@ -5,6 +5,9 @@ import {
 	SigninConfig,
 	SigninRequest,
 	SigninResponse,
+	EntryRequest,
+	EntryResponse,
+	EntryConfig,
 	OAuthAuthorizationURLResponse,
 	OAuthAuthbackParams,
 	OAuthAuthbackResponse,
@@ -40,6 +43,21 @@ export class UserAuth {
 		}
 
 		return response
+	}
+
+	/**
+	 * Get unified auth entry configuration
+	 */
+	async GetEntryConfig(locale?: string): Promise<ApiResponse<EntryConfig>> {
+		return this.api.Get<EntryConfig>(`/user/entry`, { locale: locale || '' })
+	}
+
+	/**
+	 * Unified auth entry (login/register)
+	 * Backend determines whether this is login or register based on email existence
+	 */
+	async Entry(data: EntryRequest): Promise<ApiResponse<EntryResponse>> {
+		return this.api.Post<EntryResponse>('/user/entry', data)
 	}
 
 	/**

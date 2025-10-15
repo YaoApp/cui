@@ -314,6 +314,73 @@ export interface CaptchaResponse {
 	expires_in?: number // Captcha expiration time in seconds
 }
 
+/**
+ * Entry configuration response (unified login + register)
+ */
+export interface EntryConfig {
+	title: string
+	description: string
+	success_url: string
+	failure_url?: string
+	logout_redirect?: string
+	auto_login?: boolean
+	role?: string
+	type?: string
+	form?: {
+		username?: {
+			placeholder: string
+			fields: string[]
+		}
+		password?: {
+			placeholder: string
+		}
+		captcha?: {
+			type: 'image' | 'turnstile'
+			options?: {
+				secret?: string
+				sitekey?: string
+			}
+		}
+		remember_me?: boolean
+		forgot_password_link?: boolean
+		terms_of_service_link?: string
+		privacy_policy_link?: string
+	}
+	token?: {
+		expires_in?: string
+		remember_me_expires_in?: string
+	}
+	messenger?: {
+		channel?: string
+		templates?: Record<string, string>
+	}
+	invite_required?: boolean
+	third_party?: {
+		providers: SigninProvider[]
+	}
+}
+
+/**
+ * Entry request payload (unified login/register)
+ */
+export interface EntryRequest {
+	email: string
+	captcha_code?: string
+	captcha_id?: string
+	locale?: string
+}
+
+/**
+ * Entry response data (unified login/register)
+ */
+export interface EntryResponse {
+	success: boolean
+	message: string
+	verification_required: boolean
+	email: string
+	next_step?: string
+}
+
 // ===== User Management Types =====
 /**
  * User Profile (OIDC UserInfo)

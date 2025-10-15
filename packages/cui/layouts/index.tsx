@@ -21,6 +21,7 @@ import type { IPropsHelmet, IPropsLoginWrapper } from './types'
 // Standalone pages that render without wrappers (OAuth, invitations, etc.)
 const STANDALONE_PAGES = new Map([
 	// OAuth authentication pages
+	['auth_entry', '/auth/entry'], // Unified login/register entry point
 	['auth_signin', '/auth/signin'],
 	['auth_signin_mfa', '/auth/signin/mfa'],
 	['auth_signin_sms', '/auth/signin/sms'],
