@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
-import { message } from 'antd'
+import { message, Checkbox, notification } from 'antd'
 import { getLocale } from '@umijs/max'
 import { useAsyncEffect } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
-import { SocialLogin, Settings, AuthInput, AuthButton } from '../components'
+import { SocialLogin, Settings, AuthInput, AuthButton, OtpInput } from '../components'
 import AuthLayout from '../components/AuthLayout'
 import Captcha from '../components/Captcha'
 import styles from './index.less'
 import { User } from '@/openapi/user'
-import { EntryConfig, SigninProvider } from '@/openapi/user/types'
+import { EntryConfig, SigninProvider, EntryVerificationStatus } from '@/openapi/user/types'
 
 // Note: This is the unified auth entry point
 // Backend will determine if user is logging in or registering based on email existence
@@ -55,9 +55,12 @@ const AuthEntry = () => {
 	const currentLocale = normalizeLocale(rawLocale)
 
 	const [loading, setLoading] = useState(false)
+	const [verifying, setVerifying] = useState(false)
 	const [formData, setFormData] = useState({
 		email: '',
-		captcha: ''
+		captcha: '',
+		password: '',
+		verificationCode: ''
 	})
 	const [config, setConfig] = useState<EntryConfig | null>(null)
 	const [captchaData, setCaptchaData] = useState<{
@@ -66,6 +69,13 @@ const AuthEntry = () => {
 	} | null>(null)
 	const [captchaLoading, setCaptchaLoading] = useState(false)
 	const [captchaReady, setCaptchaReady] = useState(false) // 标记验证码是否已准备好（CF）或已输入（图片）
+
+	// Entry verification state
+	const [verificationStatus, setVerificationStatus] = useState<EntryVerificationStatus | null>(null)
+	const [isEmailVerified, setIsEmailVerified] = useState(false)
+	const [accessToken, setAccessToken] = useState<string>('')
+	const [rememberMe, setRememberMe] = useState(false)
+	const [otpInputFocused, setOtpInputFocused] = useState(false)
 
 	// 处理 redirect 参数 - 设置登录后的跳转地址
 	useAsyncEffect(async () => {
@@ -190,12 +200,139 @@ const AuthEntry = () => {
 		setCaptchaReady(value.trim() !== '')
 	}
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	// Verify email and determine if it's login or register
+	const handleVerifyEmail = async (e: React.FormEvent) => {
 		e.preventDefault()
 
 		if (!isFormValid) {
 			message.warning('Please enter a valid email address')
 			return
+		}
+
+		// Check captcha requirement
+		if (config?.form?.captcha && !captchaReady) {
+			message.warning('Please complete the captcha verification')
+			return
+		}
+
+		setVerifying(true)
+		try {
+			if (!window.$app?.openapi) {
+				message.error('API not initialized')
+				return
+			}
+
+			const user = new User(window.$app.openapi)
+			const result = await user.auth.EntryVerify({
+				username: formData.email,
+				captcha_id: captchaData?.id || undefined,
+				captcha: formData.captcha || undefined,
+				locale: currentLocale
+			})
+
+			if (!user.IsError(result) && result.data) {
+				// Store access token for next step
+				setAccessToken(result.data.access_token)
+				setVerificationStatus(result.data.status)
+				setIsEmailVerified(true)
+
+				if (result.data.status === EntryVerificationStatus.Register && result.data.verification_sent) {
+					notification.success({
+						message: currentLocale === 'zh-CN' ? '验证码已发送' : 'Verification Code Sent',
+						description:
+							currentLocale === 'zh-CN'
+								? '验证码已发送到您的邮箱，请查收'
+								: 'A verification code has been sent to your email. Please check your inbox.',
+						placement: 'topRight',
+						duration: 8 // 8秒后自动关闭
+					})
+				}
+			} else {
+				const errorMsg = result.error?.error_description || 'Failed to verify email'
+				message.error(errorMsg)
+				console.error('Entry verify error:', result.error)
+
+				// Refresh captcha on error
+				if (config?.form?.captcha && config.form.captcha.type === 'image') {
+					await loadCaptcha(true)
+				}
+			}
+		} catch (error) {
+			message.error('Failed to verify email')
+			console.error('Entry verify error:', error)
+		} finally {
+			setVerifying(false)
+		}
+	}
+
+	// Resend verification code for registration
+	const handleResendCode = async () => {
+		if (!window.$app?.openapi) {
+			throw new Error('API not initialized')
+		}
+
+		const user = new User(window.$app.openapi)
+		const result = await user.auth.EntryVerify({
+			username: formData.email,
+			locale: currentLocale
+		})
+
+		if (!user.IsError(result) && result.data) {
+			if (result.data.verification_sent) {
+				notification.success({
+					message: currentLocale === 'zh-CN' ? '验证码已重发' : 'Verification Code Resent',
+					description:
+						currentLocale === 'zh-CN'
+							? '验证码已重新发送到您的邮箱，请查收'
+							: 'A new verification code has been sent to your email. Please check your inbox.',
+					placement: 'topRight',
+					duration: 8
+				})
+			}
+		} else {
+			throw new Error(result.error?.error_description || 'Failed to resend verification code')
+		}
+	}
+
+	// Handle back to email input
+	const handleBackToEmail = () => {
+		setIsEmailVerified(false)
+		setVerificationStatus(null)
+		setAccessToken('')
+		setFormData((prev) => ({
+			...prev,
+			password: '',
+			verificationCode: '',
+			captcha: ''
+		}))
+		setCaptchaReady(false)
+
+		// Reload captcha if needed
+		if (config?.form?.captcha && config.form.captcha.type === 'image') {
+			loadCaptcha(true)
+		} else {
+			setCaptchaData(null)
+		}
+	}
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
+
+		// Validate based on verification status
+		if (verificationStatus === EntryVerificationStatus.Login) {
+			if (!formData.password) {
+				message.warning('Please enter your password')
+				return
+			}
+		} else if (verificationStatus === EntryVerificationStatus.Register) {
+			if (!formData.password) {
+				message.warning('Please enter your password')
+				return
+			}
+			if (!formData.verificationCode) {
+				message.warning('Please enter the verification code')
+				return
+			}
 		}
 
 		setLoading(true)
@@ -206,43 +343,22 @@ const AuthEntry = () => {
 			}
 
 			const user = new User(window.$app.openapi)
-			const result = await user.auth.Entry({
+
+			// TODO: Implement actual login/register API calls here
+			// For now, this is a placeholder
+			console.log('Submitting form:', {
 				email: formData.email,
-				captcha_code: formData.captcha || undefined,
-				captcha_id: captchaData?.id || undefined,
-				locale: currentLocale
+				password: formData.password,
+				verificationCode: formData.verificationCode,
+				rememberMe,
+				status: verificationStatus,
+				accessToken
 			})
 
-			if (!user.IsError(result) && result.data) {
-				message.success(result.data.message || 'Success! Please check your email.')
-				console.log('Entry successful:', result.data)
-
-				// 如果需要邮箱验证，显示提示信息
-				if (result.data.verification_required) {
-					message.info('A verification email has been sent to your inbox.')
-				}
-
-				// 根据返回的 next_step 或 success_url 进行跳转
-				if (result.data.next_step) {
-					window.location.href = result.data.next_step
-				} else if (config?.success_url) {
-					setTimeout(() => {
-						window.location.href = config.success_url
-					}, 2000)
-				}
-			} else {
-				const errorMsg = result.error?.error_description || 'Failed to continue'
-				message.error(errorMsg)
-				console.error('Entry error:', result.error)
-
-				// 刷新验证码
-				if (config?.form?.captcha && config.form.captcha.type === 'image') {
-					await loadCaptcha(true)
-				}
-			}
+			message.success('Login/Register logic not yet implemented')
 		} catch (error) {
-			message.error('Failed to continue')
-			console.error('Entry error:', error)
+			message.error('Failed to submit')
+			console.error('Submit error:', error)
 		} finally {
 			setLoading(false)
 		}
@@ -294,23 +410,39 @@ const AuthEntry = () => {
 					</div>
 
 					{/* Entry Form */}
-					<form className={styles.entryForm} onSubmit={handleSubmit}>
-						<AuthInput
-							id='email'
-							placeholder={
-								config.form?.username?.placeholder ||
-								messages.entry?.form?.email_placeholder ||
-								'Enter your email address'
-							}
-							prefix='mail-outline'
-							value={formData.email}
-							onChange={handleInputChange('email')}
-							autoComplete='email'
-							type='email'
-						/>
+					<form
+						className={styles.entryForm}
+						onSubmit={isEmailVerified ? handleSubmit : handleVerifyEmail}
+					>
+						{/* Email Input - readonly after verification */}
+						<div className={styles.emailInputWrapper}>
+							<AuthInput
+								id='email'
+								placeholder={
+									config.form?.username?.placeholder ||
+									messages.entry?.form?.email_placeholder ||
+									'Enter your email address'
+								}
+								prefix='material-mail_outline'
+								value={formData.email}
+								onChange={handleInputChange('email')}
+								autoComplete='email'
+								type='email'
+								disabled={isEmailVerified}
+							/>
+							{isEmailVerified && (
+								<AuthButton
+									type='link'
+									onClick={handleBackToEmail}
+									className={styles.changeEmailButton}
+								>
+									{currentLocale === 'zh-CN' ? '修改' : 'Change'}
+								</AuthButton>
+							)}
+						</div>
 
-						{/* Captcha Field - 只在email有效时显示 */}
-						{config.form?.captcha && isFormValid && (
+						{/* Captcha Field - 只在email有效且未验证时显示 */}
+						{!isEmailVerified && config.form?.captcha && isFormValid && (
 							<Captcha
 								config={config.form.captcha}
 								value={formData.captcha}
@@ -321,16 +453,103 @@ const AuthEntry = () => {
 							/>
 						)}
 
+						{/* Password Input - only show after email verification */}
+						{isEmailVerified && (
+							<AuthInput.Password
+								id='password'
+								placeholder={
+									config.form?.password?.placeholder || 'Enter your password'
+								}
+								prefix='material-lock'
+								value={formData.password}
+								onChange={handleInputChange('password')}
+								autoComplete={
+									verificationStatus === EntryVerificationStatus.Login
+										? 'current-password'
+										: 'new-password'
+								}
+							/>
+						)}
+
+						{/* Verification Code Input - only show for registration */}
+						{isEmailVerified && verificationStatus === EntryVerificationStatus.Register && (
+							<div className={styles.otpWrapper}>
+								<OtpInput
+									value={formData.verificationCode}
+									onChange={(value) =>
+										setFormData((prev) => ({
+											...prev,
+											verificationCode: value
+										}))
+									}
+									onResend={handleResendCode}
+									placeholder={currentLocale === 'zh-CN' ? '验证码' : 'Code'}
+									resendText={currentLocale === 'zh-CN' ? '重发' : 'Resend'}
+									sendingText={
+										currentLocale === 'zh-CN' ? '发送中...' : 'Sending...'
+									}
+									resendInText={currentLocale === 'zh-CN' ? '{0}秒' : '{0}s'}
+									interval={60}
+									onFocus={() => setOtpInputFocused(true)}
+									onBlur={() => setOtpInputFocused(false)}
+								/>
+								{otpInputFocused && (
+									<div className={styles.otpHelper}>
+										{currentLocale === 'zh-CN'
+											? '💡 请查收您的邮箱获取验证码'
+											: '💡 Please check your email for the verification code'}
+									</div>
+								)}
+							</div>
+						)}
+
+						{/* Remember Me & Forgot Password - only show for login */}
+						{isEmailVerified && verificationStatus === EntryVerificationStatus.Login && (
+							<div className={styles.loginOptions}>
+								{config.form?.remember_me && (
+									<Checkbox
+										checked={rememberMe}
+										onChange={(e) => setRememberMe(e.target.checked)}
+									>
+										Remember me
+									</Checkbox>
+								)}
+								{config.form?.forgot_password_link && (
+									<a
+										href='/auth/forgot-password'
+										className={styles.forgotPasswordLink}
+									>
+										Forgot password?
+									</a>
+								)}
+							</div>
+						)}
+
 						<AuthButton
 							type='primary'
-							loading={loading}
-							disabled={!isFormValid || loading || (config?.form?.captcha && !captchaReady)}
+							loading={loading || verifying}
+							disabled={
+								loading ||
+								verifying ||
+								!isFormValid ||
+								(!isEmailVerified && config?.form?.captcha && !captchaReady)
+							}
 							fullWidth
-							onClick={handleSubmit}
+							onClick={isEmailVerified ? handleSubmit : handleVerifyEmail}
 						>
-							{loading
-								? messages.entry?.form?.loading || 'Processing...'
-								: messages.entry?.form?.continue_button || 'Continue'}
+							{loading || verifying
+								? messages.entry?.form?.loading ||
+								  (currentLocale === 'zh-CN' ? '处理中...' : 'Processing...')
+								: isEmailVerified
+								? verificationStatus === EntryVerificationStatus.Login
+									? currentLocale === 'zh-CN'
+										? '登录'
+										: 'Log In'
+									: currentLocale === 'zh-CN'
+									? '注册'
+									: 'Sign Up'
+								: messages.entry?.form?.continue_button ||
+								  (currentLocale === 'zh-CN' ? '继续' : 'Continue')}
 						</AuthButton>
 					</form>
 

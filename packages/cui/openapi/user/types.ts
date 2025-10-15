@@ -301,6 +301,37 @@ export interface EntryResponse {
 	next_step?: string
 }
 
+/**
+ * Entry verification status enum
+ */
+export enum EntryVerificationStatus {
+	Login = 'login',
+	Register = 'register'
+}
+
+/**
+ * Entry verify request payload
+ */
+export interface EntryVerifyRequest {
+	username: string // Email or mobile
+	captcha_id?: string
+	captcha?: string
+	locale?: string
+}
+
+/**
+ * Entry verify response data
+ */
+export interface EntryVerifyResponse {
+	status: EntryVerificationStatus // "login" or "register"
+	access_token: string // Temporary token for next step
+	expires_in: number // Token expiration in seconds
+	token_type: string // Token type (Bearer)
+	scope: string // Token scope
+	user_exists: boolean // Whether user exists
+	verification_sent?: boolean // Whether verification code was sent (for register)
+}
+
 // ===== User Management Types =====
 /**
  * User Profile (OIDC UserInfo)

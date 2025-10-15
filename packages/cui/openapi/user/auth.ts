@@ -5,6 +5,8 @@ import {
 	EntryRequest,
 	EntryResponse,
 	EntryConfig,
+	EntryVerifyRequest,
+	EntryVerifyResponse,
 	OAuthAuthorizationURLResponse,
 	OAuthAuthbackParams,
 	OAuthAuthbackResponse,
@@ -34,6 +36,15 @@ export class UserAuth {
 	 */
 	async Entry(data: EntryRequest): Promise<ApiResponse<EntryResponse>> {
 		return this.api.Post<EntryResponse>('/user/entry', data)
+	}
+
+	/**
+	 * Verify entry (login/register)
+	 * Checks if username exists and determines whether this is login or registration
+	 * For registration: sends verification code automatically
+	 */
+	async EntryVerify(data: EntryVerifyRequest): Promise<ApiResponse<EntryVerifyResponse>> {
+		return this.api.Post<EntryVerifyResponse>('/user/entry/verify', data)
 	}
 
 	/**
