@@ -241,6 +241,7 @@ export interface CaptchaResponse {
 export interface InvitePageConfig {
 	title?: string // Page title for invite code verification
 	description?: string // Description text for invite code page
+	placeholder?: string // Placeholder text for invite code input
 	apply_link?: string // Optional link to apply for invitation code
 }
 

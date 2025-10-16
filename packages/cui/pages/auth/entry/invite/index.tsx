@@ -138,8 +138,9 @@ const InviteVerification = () => {
 	const pageDescription =
 		inviteConfig?.description ||
 		(currentLocale.startsWith('zh')
-			? '当前为公测阶段，需要官方邀请码才能使用本平台'
-			: 'We are currently in beta testing. An official invitation code is required to access the platform.')
+			? '当前为公测阶段，需要官方邀请码才能使用'
+			: 'We are currently in beta testing. An official invitation code is required.')
+	const placeholder = inviteConfig?.placeholder || (currentLocale.startsWith('zh') ? '邀请码' : 'Invitation Code')
 	const applyLink = inviteConfig?.apply_link
 
 	return (
@@ -161,9 +162,7 @@ const InviteVerification = () => {
 						<form className={styles.loginForm} onSubmit={handleSubmit}>
 							<AuthInput
 								id='invite-code'
-								placeholder={
-									currentLocale.startsWith('zh') ? '邀请码' : 'Invitation Code'
-								}
+								placeholder={placeholder}
 								prefix='card-giftcard-outline'
 								value={inviteCode}
 								onChange={handleInputChange}
