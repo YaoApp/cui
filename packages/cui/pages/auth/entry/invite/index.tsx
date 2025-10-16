@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { message } from 'antd'
 import { getLocale, history } from '@umijs/max'
 import { observer } from 'mobx-react-lite'
@@ -7,7 +7,7 @@ import { useIntl } from '@/hooks'
 import { AuthInput, AuthButton } from '../../components'
 import AuthLayout from '../../components/AuthLayout'
 import styles from './index.less'
-import { User, UserInfo, LoginStatus } from '@/openapi'
+import { User, UserInfo, LoginStatus, EntryConfig } from '@/openapi'
 import { AfterLogin } from '../../auth'
 
 // Cookie 工具函数
@@ -46,6 +46,24 @@ const InviteVerification = () => {
 
 	const [loading, setLoading] = useState(false)
 	const [inviteCode, setInviteCode] = useState('')
+	const [config, setConfig] = useState<EntryConfig | null>(null)
+
+	// Load entry config
+	useEffect(() => {
+		const loadConfig = async () => {
+			try {
+				if (!window.$app?.openapi) return
+				const user = new User(window.$app.openapi)
+				const response = await user.auth.GetEntryConfig(currentLocale)
+				if (response.data) {
+					setConfig(response.data)
+				}
+			} catch (error) {
+				console.error('Failed to load entry config:', error)
+			}
+		}
+		loadConfig()
+	}, [currentLocale])
 
 	// Form validation
 	const isFormValid = inviteCode.trim() !== '' && inviteCode.length >= 6
@@ -110,9 +128,19 @@ const InviteVerification = () => {
 	}
 
 	const handleBack = () => {
-		// Go back to login page
+		// Go back to entry page to switch account
 		history.push('/auth/entry')
 	}
+
+	// Get invite config from entry config
+	const inviteConfig = config?.invite
+	const pageTitle = inviteConfig?.title || (currentLocale.startsWith('zh') ? '输入邀请码' : 'Enter Invitation Code')
+	const pageDescription =
+		inviteConfig?.description ||
+		(currentLocale.startsWith('zh')
+			? '当前为公测阶段，需要官方邀请码才能使用本平台'
+			: 'We are currently in beta testing. An official invitation code is required to access the platform.')
+	const applyLink = inviteConfig?.apply_link
 
 	return (
 		<AuthLayout
@@ -125,16 +153,8 @@ const InviteVerification = () => {
 					<div className={styles.loginCard}>
 						{/* Title Section */}
 						<div className={styles.titleSection}>
-							<h1 className={styles.appTitle}>
-								{currentLocale.startsWith('zh')
-									? '验证邀请码'
-									: 'Verify Invitation Code'}
-							</h1>
-							<p className={styles.appSubtitle}>
-								{currentLocale.startsWith('zh')
-									? '请输入您收到的邀请码以完成注册'
-									: 'Please enter the invitation code you received to complete registration'}
-							</p>
+							<h1 className={styles.appTitle}>{pageTitle}</h1>
+							<p className={styles.appSubtitle}>{pageDescription}</p>
 						</div>
 
 						{/* Invite Form */}
@@ -144,7 +164,7 @@ const InviteVerification = () => {
 								placeholder={
 									currentLocale.startsWith('zh') ? '邀请码' : 'Invitation Code'
 								}
-								prefix='mail-outline'
+								prefix='card-giftcard-outline'
 								value={inviteCode}
 								onChange={handleInputChange}
 								autoComplete='off'
@@ -160,37 +180,49 @@ const InviteVerification = () => {
 							>
 								{loading
 									? currentLocale.startsWith('zh')
-										? '验证中...'
-										: 'Verifying...'
+										? '正在处理...'
+										: 'Processing...'
 									: currentLocale.startsWith('zh')
-									? '验证'
-									: 'Verify'}
+									? '继续'
+									: 'Continue'}
 							</AuthButton>
 						</form>
 
 						{/* Help Text */}
 						<div className={styles.termsSection}>
+							{applyLink && (
+								<p className={styles.termsText}>
+									{currentLocale.startsWith('zh') ? (
+										<>
+											没有邀请码？{' '}
+											<a
+												href={applyLink}
+												target='_blank'
+												rel='noopener noreferrer'
+												className={styles.termsLink}
+											>
+												申请邀请码
+											</a>
+										</>
+									) : (
+										<>
+											Don't have an invitation code?{' '}
+											<a
+												href={applyLink}
+												target='_blank'
+												rel='noopener noreferrer'
+												className={styles.termsLink}
+											>
+												Apply for one
+											</a>
+										</>
+									)}
+								</p>
+							)}
 							<p className={styles.termsText}>
-								{currentLocale.startsWith('zh')
-									? '邀请码已发送到您的邮箱，请查收'
-									: 'The invitation code has been sent to your email'}
-							</p>
-							<p className={styles.termsText}>
-								{currentLocale.startsWith('zh') ? (
-									<>
-										没有收到邀请码？{' '}
-										<a onClick={handleBack} className={styles.termsLink}>
-											返回登录
-										</a>
-									</>
-								) : (
-									<>
-										Didn't receive the code?{' '}
-										<a onClick={handleBack} className={styles.termsLink}>
-											Back to Login
-										</a>
-									</>
-								)}
+								<a onClick={handleBack} className={styles.termsLink}>
+									{currentLocale.startsWith('zh') ? '切换账号' : 'Switch Account'}
+								</a>
 							</p>
 						</div>
 					</div>

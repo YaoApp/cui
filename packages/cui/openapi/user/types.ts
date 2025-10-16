@@ -236,6 +236,15 @@ export interface CaptchaResponse {
 }
 
 /**
+ * Invitation code page configuration
+ */
+export interface InvitePageConfig {
+	title?: string // Page title for invite code verification
+	description?: string // Description text for invite code page
+	apply_link?: string // Optional link to apply for invitation code
+}
+
+/**
  * Entry configuration response (unified login + register)
  */
 export interface EntryConfig {
@@ -276,6 +285,7 @@ export interface EntryConfig {
 		templates?: Record<string, string>
 	}
 	invite_required?: boolean
+	invite?: InvitePageConfig
 	third_party?: {
 		providers: SigninProvider[]
 	}
