@@ -74,6 +74,26 @@ const InviteVerification = () => {
 		setInviteCode(value)
 	}
 
+	// Get access token from URL or sessionStorage
+	const getAccessToken = (): string | null => {
+		// Try to get from URL parameters first
+		const urlParams = new URLSearchParams(window.location.search)
+		const urlToken = urlParams.get('token')
+		if (urlToken) {
+			// Store in sessionStorage for future use
+			sessionStorage.setItem('invite_access_token', urlToken)
+			return urlToken
+		}
+
+		// Try sessionStorage
+		const storedToken = sessionStorage.getItem('invite_access_token')
+		if (storedToken) {
+			return storedToken
+		}
+
+		return null
+	}
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
@@ -81,6 +101,20 @@ const InviteVerification = () => {
 			message.warning(
 				currentLocale.startsWith('zh') ? '请输入有效的邀请码' : 'Please enter a valid invitation code'
 			)
+			return
+		}
+
+		// Get access token
+		const accessToken = getAccessToken()
+		if (!accessToken) {
+			message.error(
+				currentLocale.startsWith('zh')
+					? '缺少访问令牌，请重新登录'
+					: 'Missing access token, please login again'
+			)
+			setTimeout(() => {
+				history.push('/auth/entry')
+			}, 1500)
 			return
 		}
 
@@ -93,28 +127,75 @@ const InviteVerification = () => {
 
 			const user = new User(window.$app.openapi)
 
-			// TODO: Call invite verification API
-			// const result = await user.auth.VerifyInvite({
-			// 	code: inviteCode
-			// })
+			// Call invite verification API
+			const result = await user.auth.VerifyInvite(inviteCode, accessToken)
 
-			// Placeholder for now
-			console.log('Verifying invite code:', inviteCode)
+			if (user.IsError(result)) {
+				const errorMsg = result.error?.error_description || 'Invitation verification failed'
+				message.error(errorMsg)
+				return
+			}
 
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1000))
+			// Clear the temporary token
+			sessionStorage.removeItem('invite_access_token')
 
-			// Simulate successful verification
-			message.success(currentLocale.startsWith('zh') ? '邀请码验证成功！' : 'Invitation code verified!')
+			// Handle different login statuses
+			const status = result.data?.status || LoginStatus.Success
 
-			// After successful invite verification, the backend should return new tokens
-			// Then we need to validate the ID token and setup user session
+			// Handle MFA required
+			if (status === LoginStatus.MFARequired) {
+				message.success(
+					currentLocale.startsWith('zh') ? '邀请码验证成功！' : 'Invitation code verified!'
+				)
+				history.push('/auth/entry/mfa')
+				return
+			}
 
-			// For now, redirect to entry page
-			// TODO: Replace with actual token handling logic
-			setTimeout(() => {
-				history.push('/auth/helloworld')
-			}, 500)
+			// Handle team selection required
+			if (status === LoginStatus.TeamSelectionRequired) {
+				message.success(
+					currentLocale.startsWith('zh') ? '邀请码验证成功！' : 'Invitation code verified!'
+				)
+				history.push('/team/select')
+				return
+			}
+
+			// Verification successful - validate ID token and setup user
+			if (result.data?.id_token) {
+				const userInfo = await user.auth.ValidateIDToken(result.data.id_token)
+
+				// Get redirect URLs from cookies
+				const loginRedirect = getCookie('login_redirect') || config?.success_url || '/auth/helloworld'
+				const logoutRedirect = getCookie('logout_redirect') || '/'
+
+				// Setup user info using AfterLogin
+				await AfterLogin(global, {
+					user: userInfo,
+					entry: loginRedirect,
+					logout_redirect: logoutRedirect
+				})
+
+				message.success(
+					currentLocale.startsWith('zh')
+						? '邀请码验证成功，欢迎使用！'
+						: 'Invitation verified successfully, welcome!'
+				)
+
+				// Redirect to entry page
+				setTimeout(() => {
+					window.location.href = loginRedirect
+				}, 500)
+			} else {
+				// No ID token returned (unexpected)
+				message.error(
+					currentLocale.startsWith('zh')
+						? '验证成功但未收到登录凭证，请重新登录'
+						: 'Verification successful but login credentials not received, please login again'
+				)
+				setTimeout(() => {
+					history.push('/auth/entry')
+				}, 1500)
+			}
 		} catch (error) {
 			message.error(
 				currentLocale.startsWith('zh')

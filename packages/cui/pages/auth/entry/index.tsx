@@ -403,6 +403,10 @@ const AuthEntry = () => {
 
 				// Handle invite verification required
 				if (status === LoginStatus.InviteVerification) {
+					// Store temporary access token for invite verification
+					if (loginResult.data?.access_token) {
+						sessionStorage.setItem('invite_access_token', loginResult.data.access_token)
+					}
 					history.push('/auth/entry/invite')
 					return
 				}
@@ -455,6 +459,10 @@ const AuthEntry = () => {
 
 				// Handle invite verification required (check first, before checking id_token)
 				if (status === LoginStatus.InviteVerification) {
+					// Store temporary access token for invite verification
+					if (registerResult.data?.access_token) {
+						sessionStorage.setItem('invite_access_token', registerResult.data.access_token)
+					}
 					message.success(
 						registerResult.data?.message ||
 							(currentLocale === 'zh-CN'

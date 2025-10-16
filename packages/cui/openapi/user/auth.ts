@@ -77,6 +77,23 @@ export class UserAuth {
 	}
 
 	/**
+	 * Verify and redeem invitation code
+	 * Requires temporary access token with invite_verification scope
+	 * After successful verification, returns full login tokens
+	 */
+	async VerifyInvite(invitationCode: string, accessToken: string): Promise<ApiResponse<EntryAuthResponse>> {
+		return this.api.Post<EntryAuthResponse>(
+			'/user/entry/invite/verify',
+			{
+				invitation_code: invitationCode
+			},
+			{
+				Authorization: `Bearer ${accessToken}`
+			}
+		)
+	}
+
+	/**
 	 * Get OAuth authorization URL
 	 */
 	async GetOAuthAuthorizationUrl(id: string, redirectUri?: string): Promise<string> {
