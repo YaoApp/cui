@@ -281,10 +281,6 @@ export interface EntryConfig {
 		expires_in?: string
 		remember_me_expires_in?: string
 	}
-	messenger?: {
-		channel?: string
-		templates?: Record<string, string>
-	}
 	invite_required?: boolean
 	invite?: InvitePageConfig
 	third_party?: {
