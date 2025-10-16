@@ -7,6 +7,9 @@ import {
 	EntryConfig,
 	EntryVerifyRequest,
 	EntryVerifyResponse,
+	EntryRegisterRequest,
+	EntryLoginRequest,
+	EntryAuthResponse,
 	OAuthAuthorizationURLResponse,
 	OAuthAuthbackParams,
 	OAuthAuthbackResponse,
@@ -45,6 +48,26 @@ export class UserAuth {
 	 */
 	async EntryVerify(data: EntryVerifyRequest): Promise<ApiResponse<EntryVerifyResponse>> {
 		return this.api.Post<EntryVerifyResponse>('/user/entry/verify', data)
+	}
+
+	/**
+	 * Register a new user
+	 * Requires temporary access token from EntryVerify
+	 */
+	async EntryRegister(data: EntryRegisterRequest, accessToken: string): Promise<ApiResponse<EntryAuthResponse>> {
+		return this.api.Post<EntryAuthResponse>('/user/entry/register', data, {
+			Authorization: `Bearer ${accessToken}`
+		})
+	}
+
+	/**
+	 * Login with username and password
+	 * Requires temporary access token from EntryVerify
+	 */
+	async EntryLogin(data: EntryLoginRequest, accessToken: string): Promise<ApiResponse<EntryAuthResponse>> {
+		return this.api.Post<EntryAuthResponse>('/user/entry/login', data, {
+			Authorization: `Bearer ${accessToken}`
+		})
 	}
 
 	/**
@@ -106,6 +129,15 @@ export class UserAuth {
 
 		// Handle team selection required
 		if (status === LoginStatus.TeamSelectionRequired) {
+			return {
+				status: response.status,
+				headers: response.headers,
+				data: authResult
+			}
+		}
+
+		// Handle invite verification required
+		if (status === LoginStatus.InviteVerification) {
 			return {
 				status: response.status,
 				headers: response.headers,

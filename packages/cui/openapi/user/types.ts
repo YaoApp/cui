@@ -6,7 +6,8 @@
 export enum LoginStatus {
 	Success = 'ok',
 	MFARequired = 'mfa_required',
-	TeamSelectionRequired = 'team_selection_required'
+	TeamSelectionRequired = 'team_selection_required',
+	InviteVerification = 'invite_verification_required'
 }
 
 /**
@@ -330,6 +331,43 @@ export interface EntryVerifyResponse {
 	scope: string // Token scope
 	user_exists: boolean // Whether user exists
 	verification_sent?: boolean // Whether verification code was sent (for register)
+	otp_id?: string // OTP ID for verification code (for register)
+}
+
+/**
+ * Entry register request payload
+ */
+export interface EntryRegisterRequest {
+	name?: string // User's display name (optional)
+	password: string
+	confirm_password?: string
+	otp_id?: string // OTP ID from entry verify response
+	verification_code?: string // Verification code from email/SMS
+	locale?: string
+}
+
+/**
+ * Entry login request payload
+ */
+export interface EntryLoginRequest {
+	password: string
+	locale?: string
+}
+
+/**
+ * Entry login/register response data
+ */
+export interface EntryAuthResponse {
+	user_id?: string // User ID (optional, for registration)
+	message?: string // Success message (optional, for registration)
+	session_id?: string
+	id_token?: string
+	access_token?: string
+	refresh_token?: string
+	expires_in?: number
+	refresh_token_expires_in?: number
+	mfa_enabled?: boolean
+	status?: LoginStatus
 }
 
 // ===== User Management Types =====

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { message, Checkbox, notification } from 'antd'
-import { getLocale } from '@umijs/max'
+import { getLocale, history } from '@umijs/max'
 import { useAsyncEffect } from 'ahooks'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
@@ -10,7 +10,8 @@ import AuthLayout from '../components/AuthLayout'
 import Captcha from '../components/Captcha'
 import styles from './index.less'
 import { User } from '@/openapi/user'
-import { EntryConfig, SigninProvider, EntryVerificationStatus } from '@/openapi/user/types'
+import { EntryConfig, SigninProvider, EntryVerificationStatus, LoginStatus } from '@/openapi/user/types'
+import { AfterLogin } from '../auth'
 
 // Note: This is the unified auth entry point
 // Backend will determine if user is logging in or registering based on email existence
@@ -60,6 +61,7 @@ const AuthEntry = () => {
 		email: '',
 		captcha: '',
 		password: '',
+		confirmPassword: '',
 		verificationCode: ''
 	})
 	const [config, setConfig] = useState<EntryConfig | null>(null)
@@ -74,6 +76,7 @@ const AuthEntry = () => {
 	const [verificationStatus, setVerificationStatus] = useState<EntryVerificationStatus | null>(null)
 	const [isEmailVerified, setIsEmailVerified] = useState(false)
 	const [accessToken, setAccessToken] = useState<string>('')
+	const [otpId, setOtpId] = useState<string>('')
 	const [rememberMe, setRememberMe] = useState(false)
 	const [otpInputFocused, setOtpInputFocused] = useState(false)
 
@@ -231,10 +234,15 @@ const AuthEntry = () => {
 			})
 
 			if (!user.IsError(result) && result.data) {
-				// Store access token for next step
+				// Store access token and otp_id for next step
 				setAccessToken(result.data.access_token)
 				setVerificationStatus(result.data.status)
 				setIsEmailVerified(true)
+
+				// Store OTP ID if provided
+				if (result.data.otp_id) {
+					setOtpId(result.data.otp_id)
+				}
 
 				if (result.data.status === EntryVerificationStatus.Register && result.data.verification_sent) {
 					notification.success({
@@ -294,14 +302,24 @@ const AuthEntry = () => {
 		}
 	}
 
+	// Cookie 工具函数
+	const getCookie = (name: string): string | null => {
+		const value = `; ${document.cookie}`
+		const parts = value.split(`; ${name}=`)
+		if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+		return null
+	}
+
 	// Handle back to email input
 	const handleBackToEmail = () => {
 		setIsEmailVerified(false)
 		setVerificationStatus(null)
 		setAccessToken('')
+		setOtpId('')
 		setFormData((prev) => ({
 			...prev,
 			password: '',
+			confirmPassword: '',
 			verificationCode: '',
 			captcha: ''
 		}))
@@ -329,6 +347,14 @@ const AuthEntry = () => {
 				message.warning('Please enter your password')
 				return
 			}
+			if (!formData.confirmPassword) {
+				message.warning(currentLocale === 'zh-CN' ? '请确认您的密码' : 'Please confirm your password')
+				return
+			}
+			if (formData.password !== formData.confirmPassword) {
+				message.warning(currentLocale === 'zh-CN' ? '两次输入的密码不一致' : 'Passwords do not match')
+				return
+			}
 			if (!formData.verificationCode) {
 				message.warning('Please enter the verification code')
 				return
@@ -344,18 +370,154 @@ const AuthEntry = () => {
 
 			const user = new User(window.$app.openapi)
 
-			// TODO: Implement actual login/register API calls here
-			// For now, this is a placeholder
-			console.log('Submitting form:', {
-				email: formData.email,
-				password: formData.password,
-				verificationCode: formData.verificationCode,
-				rememberMe,
-				status: verificationStatus,
-				accessToken
-			})
+			// Handle login
+			if (verificationStatus === EntryVerificationStatus.Login) {
+				const loginResult = await user.auth.EntryLogin(
+					{
+						password: formData.password,
+						locale: currentLocale
+					},
+					accessToken
+				)
 
-			message.success('Login/Register logic not yet implemented')
+				if (user.IsError(loginResult)) {
+					const errorMsg = loginResult.error?.error_description || 'Login failed'
+					message.error(errorMsg)
+					return
+				}
+
+				// Handle different login statuses
+				const status = loginResult.data?.status || LoginStatus.Success
+
+				// Handle MFA required
+				if (status === LoginStatus.MFARequired) {
+					history.push('/auth/entry/mfa')
+					return
+				}
+
+				// Handle team selection required
+				if (status === LoginStatus.TeamSelectionRequired) {
+					history.push('/team/select')
+					return
+				}
+
+				// Handle invite verification required
+				if (status === LoginStatus.InviteVerification) {
+					history.push('/auth/entry/invite')
+					return
+				}
+
+				// Login successful - validate ID token and setup user
+				if (loginResult.data?.id_token) {
+					const userInfo = await user.auth.ValidateIDToken(loginResult.data.id_token)
+
+					// Get redirect URLs from cookies
+					const loginRedirect =
+						getCookie('login_redirect') || config?.success_url || '/auth/helloworld'
+					const logoutRedirect = getCookie('logout_redirect') || '/'
+
+					// Setup user info using AfterLogin
+					const entry = await AfterLogin(global, {
+						user: userInfo,
+						entry: loginRedirect,
+						logout_redirect: logoutRedirect
+					})
+
+					message.success(currentLocale === 'zh-CN' ? '登录成功！' : 'Login successful!')
+
+					// Redirect to entry page
+					setTimeout(() => {
+						window.location.href = loginRedirect
+					}, 500)
+				}
+			}
+			// Handle registration
+			else if (verificationStatus === EntryVerificationStatus.Register) {
+				const registerResult = await user.auth.EntryRegister(
+					{
+						password: formData.password,
+						confirm_password: formData.confirmPassword,
+						otp_id: otpId,
+						verification_code: formData.verificationCode,
+						locale: currentLocale
+					},
+					accessToken
+				)
+
+				if (user.IsError(registerResult)) {
+					const errorMsg = registerResult.error?.error_description || 'Registration failed'
+					message.error(errorMsg)
+					return
+				}
+
+				// Handle different registration outcomes
+				const status = registerResult.data?.status
+
+				// Handle invite verification required (check first, before checking id_token)
+				if (status === LoginStatus.InviteVerification) {
+					message.success(
+						registerResult.data?.message ||
+							(currentLocale === 'zh-CN'
+								? '注册成功！请验证邀请码'
+								: 'Registration successful! Please verify invitation code.')
+					)
+					history.push('/auth/entry/invite')
+					return
+				}
+
+				// Handle MFA required (unlikely for new user but possible)
+				if (status === LoginStatus.MFARequired) {
+					history.push('/auth/entry/mfa')
+					return
+				}
+
+				// Handle team selection required
+				if (status === LoginStatus.TeamSelectionRequired) {
+					history.push('/team/select')
+					return
+				}
+
+				// If auto_login is false or no id_token, show success message
+				if (!status || !registerResult.data?.id_token) {
+					message.success(
+						registerResult.data?.message ||
+							(currentLocale === 'zh-CN' ? '注册成功！' : 'Registration successful!')
+					)
+					// Redirect to entry page to login
+					setTimeout(() => {
+						history.push('/auth/entry')
+					}, 1500)
+					return
+				}
+
+				// Auto-login successful - validate ID token and setup user
+				if (registerResult.data?.id_token) {
+					const userInfo = await user.auth.ValidateIDToken(registerResult.data.id_token)
+
+					// Get redirect URLs from cookies
+					const loginRedirect =
+						getCookie('login_redirect') || config?.success_url || '/auth/helloworld'
+					const logoutRedirect = getCookie('logout_redirect') || '/'
+
+					// Setup user info using AfterLogin
+					await AfterLogin(global, {
+						user: userInfo,
+						entry: loginRedirect,
+						logout_redirect: logoutRedirect
+					})
+
+					message.success(
+						currentLocale === 'zh-CN'
+							? '注册并登录成功！'
+							: 'Registration and login successful!'
+					)
+
+					// Redirect to entry page
+					setTimeout(() => {
+						window.location.href = loginRedirect
+					}, 500)
+				}
+			}
 		} catch (error) {
 			message.error('Failed to submit')
 			console.error('Submit error:', error)
@@ -455,20 +617,40 @@ const AuthEntry = () => {
 
 						{/* Password Input - only show after email verification */}
 						{isEmailVerified && (
-							<AuthInput.Password
-								id='password'
-								placeholder={
-									config.form?.password?.placeholder || 'Enter your password'
-								}
-								prefix='material-lock'
-								value={formData.password}
-								onChange={handleInputChange('password')}
-								autoComplete={
-									verificationStatus === EntryVerificationStatus.Login
-										? 'current-password'
-										: 'new-password'
-								}
-							/>
+							<>
+								<AuthInput.Password
+									id='password'
+									placeholder={
+										config.form?.password?.placeholder ||
+										(currentLocale === 'zh-CN'
+											? '输入密码'
+											: 'Enter your password')
+									}
+									prefix='material-lock'
+									value={formData.password}
+									onChange={handleInputChange('password')}
+									autoComplete={
+										verificationStatus === EntryVerificationStatus.Login
+											? 'current-password'
+											: 'new-password'
+									}
+								/>
+								{/* Confirm Password - only show for registration */}
+								{verificationStatus === EntryVerificationStatus.Register && (
+									<AuthInput.Password
+										id='confirm-password'
+										placeholder={
+											currentLocale === 'zh-CN'
+												? '确认密码'
+												: 'Confirm your password'
+										}
+										prefix='material-lock'
+										value={formData.confirmPassword}
+										onChange={handleInputChange('confirmPassword')}
+										autoComplete='new-password'
+									/>
+								)}
+							</>
 						)}
 
 						{/* Verification Code Input - only show for registration */}
