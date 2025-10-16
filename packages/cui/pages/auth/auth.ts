@@ -139,3 +139,23 @@ export const ClearAuthInfo = (): void => {
 		console.error('Failed to clear auth info:', error)
 	}
 }
+
+/**
+ * Handle post-logout cleanup
+ * Clears user info from global state and local storage
+ */
+export const AfterLogout = (global: GlobalModel): void => {
+	try {
+		// Clear user info from global state
+		global.setUserInfo(null)
+
+		// Clear user info from local storage
+		ClearAuthInfo()
+
+		// Clear menus
+		global.menus = { items: [], setting: [], quick: [] }
+		global.menu = []
+	} catch (error) {
+		console.error('Failed to handle post-logout cleanup:', error)
+	}
+}

@@ -36,7 +36,23 @@ const Menu = ({ active, onChange }: MenuProps) => {
 	}, [currentUser])
 
 	// 清除存储和退出登录
-	const clearStorage = useMemoizedFn(() => {
+	const clearStorage = useMemoizedFn(async () => {
+		try {
+			// Call server logout endpoint to revoke tokens
+			if (window.$app?.openapi) {
+				const { User } = await import('@/openapi/user')
+				const user = new User(window.$app.openapi)
+				await user.auth.Logout(true)
+			}
+		} catch (error) {
+			console.error('Server logout failed:', error)
+			// Continue with local cleanup even if server logout fails
+		}
+
+		// Clear user info from local storage and global state
+		const { AfterLogout } = await import('@/pages/auth/auth')
+		AfterLogout(global)
+
 		if (!local.logout_redirect) {
 			history.push(local.login_url || '/')
 		}

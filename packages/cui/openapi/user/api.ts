@@ -44,14 +44,6 @@ export class User {
 	}
 
 	/**
-	 * Unified auth entry (login/register)
-	 * @deprecated Use auth.Entry() instead
-	 */
-	async SigninWithPassword(credentials: any) {
-		return this.auth.Entry(credentials)
-	}
-
-	/**
 	 * Get OAuth authorization URL
 	 * @deprecated Use auth.GetOAuthAuthorizationUrl() instead
 	 */

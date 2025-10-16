@@ -2,8 +2,6 @@ import { OpenAPI } from '../openapi'
 import { ApiResponse, ErrorResponse, JWK } from '../types'
 import * as jose from 'jose'
 import {
-	EntryRequest,
-	EntryResponse,
 	EntryConfig,
 	EntryVerifyRequest,
 	EntryVerifyResponse,
@@ -32,14 +30,6 @@ export class UserAuth {
 	 */
 	async GetEntryConfig(locale?: string): Promise<ApiResponse<EntryConfig>> {
 		return this.api.Get<EntryConfig>(`/user/entry`, { locale: locale || '' })
-	}
-
-	/**
-	 * Unified auth entry (login/register)
-	 * Backend determines whether this is login or register based on email existence
-	 */
-	async Entry(data: EntryRequest): Promise<ApiResponse<EntryResponse>> {
-		return this.api.Post<EntryResponse>('/user/entry', data)
 	}
 
 	/**
