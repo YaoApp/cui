@@ -355,6 +355,14 @@ export interface EntryLoginRequest {
 }
 
 /**
+ * Entry send OTP response
+ */
+export interface EntrySendOTPResponse {
+	otp_id: string
+	expires_in?: number
+}
+
+/**
  * Entry login/register response data
  */
 export interface EntryAuthResponse {

@@ -10,6 +10,7 @@ import {
 	EntryRegisterRequest,
 	EntryLoginRequest,
 	EntryAuthResponse,
+	EntrySendOTPResponse,
 	OAuthAuthorizationURLResponse,
 	OAuthAuthbackParams,
 	OAuthAuthbackResponse,
@@ -68,6 +69,21 @@ export class UserAuth {
 		return this.api.Post<EntryAuthResponse>('/user/entry/login', data, {
 			Authorization: `Bearer ${accessToken}`
 		})
+	}
+
+	/**
+	 * Resend OTP verification code
+	 * Requires temporary access token from EntryVerify
+	 */
+	async SendOTP(accessToken: string, locale?: string): Promise<ApiResponse<EntrySendOTPResponse>> {
+		const url = locale ? `/user/entry/otp?locale=${encodeURIComponent(locale)}` : '/user/entry/otp'
+		return this.api.Post<EntrySendOTPResponse>(
+			url,
+			{},
+			{
+				Authorization: `Bearer ${accessToken}`
+			}
+		)
 	}
 
 	/**

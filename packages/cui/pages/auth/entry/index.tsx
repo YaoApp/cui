@@ -280,23 +280,23 @@ const AuthEntry = () => {
 		}
 
 		const user = new User(window.$app.openapi)
-		const result = await user.auth.EntryVerify({
-			username: formData.email,
-			locale: currentLocale
-		})
+		const result = await user.auth.SendOTP(accessToken, currentLocale)
 
 		if (!user.IsError(result) && result.data) {
-			if (result.data.verification_sent) {
-				notification.success({
-					message: currentLocale === 'zh-CN' ? '验证码已重发' : 'Verification Code Resent',
-					description:
-						currentLocale === 'zh-CN'
-							? '验证码已重新发送到您的邮箱，请查收'
-							: 'A new verification code has been sent to your email. Please check your inbox.',
-					placement: 'topRight',
-					duration: 8
-				})
+			// Update OTP ID with the new one
+			if (result.data.otp_id) {
+				setOtpId(result.data.otp_id)
 			}
+
+			notification.success({
+				message: currentLocale === 'zh-CN' ? '验证码已重发' : 'Verification Code Resent',
+				description:
+					currentLocale === 'zh-CN'
+						? '验证码已重新发送到您的邮箱，请查收'
+						: 'A new verification code has been sent to your email. Please check your inbox.',
+				placement: 'topRight',
+				duration: 8
+			})
 		} else {
 			throw new Error(result.error?.error_description || 'Failed to resend verification code')
 		}
