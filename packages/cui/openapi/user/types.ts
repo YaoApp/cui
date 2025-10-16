@@ -243,6 +243,8 @@ export interface InvitePageConfig {
 	description?: string // Description text for invite code page
 	placeholder?: string // Placeholder text for invite code input
 	apply_link?: string // Optional link to apply for invitation code
+	apply_prompt?: string // Prompt text before apply link (e.g., "Don't have an invitation code?")
+	apply_text?: string // Text for apply link (e.g., "Apply for invitation code")
 }
 
 /**

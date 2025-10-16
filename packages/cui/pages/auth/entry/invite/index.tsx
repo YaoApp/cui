@@ -142,6 +142,10 @@ const InviteVerification = () => {
 			: 'We are currently in beta testing. An official invitation code is required.')
 	const placeholder = inviteConfig?.placeholder || (currentLocale.startsWith('zh') ? '邀请码' : 'Invitation Code')
 	const applyLink = inviteConfig?.apply_link
+	const applyPrompt =
+		inviteConfig?.apply_prompt ||
+		(currentLocale.startsWith('zh') ? '没有邀请码？' : "Don't have an invitation code?")
+	const applyText = inviteConfig?.apply_text || (currentLocale.startsWith('zh') ? '申请邀请码' : 'Apply for one')
 
 	return (
 		<AuthLayout
@@ -191,31 +195,15 @@ const InviteVerification = () => {
 						<div className={styles.termsSection}>
 							{applyLink && (
 								<p className={styles.termsText}>
-									{currentLocale.startsWith('zh') ? (
-										<>
-											没有邀请码？{' '}
-											<a
-												href={applyLink}
-												target='_blank'
-												rel='noopener noreferrer'
-												className={styles.termsLink}
-											>
-												申请邀请码
-											</a>
-										</>
-									) : (
-										<>
-											Don't have an invitation code?{' '}
-											<a
-												href={applyLink}
-												target='_blank'
-												rel='noopener noreferrer'
-												className={styles.termsLink}
-											>
-												Apply for one
-											</a>
-										</>
-									)}
+									{applyPrompt}{' '}
+									<a
+										href={applyLink}
+										target='_blank'
+										rel='noopener noreferrer'
+										className={styles.termsLink}
+									>
+										{applyText}
+									</a>
 								</p>
 							)}
 							<p className={styles.termsText}>
