@@ -360,6 +360,7 @@ export interface EntryRegisterRequest {
  */
 export interface EntryLoginRequest {
 	password: string
+	remember_me?: boolean
 	locale?: string
 }
 

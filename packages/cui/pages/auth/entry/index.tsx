@@ -375,6 +375,7 @@ const AuthEntry = () => {
 				const loginResult = await user.auth.EntryLogin(
 					{
 						password: formData.password,
+						remember_me: rememberMe,
 						locale: currentLocale
 					},
 					accessToken
