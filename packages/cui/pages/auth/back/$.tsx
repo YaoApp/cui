@@ -138,6 +138,16 @@ const AuthBack = () => {
 					return
 				}
 
+				// Handle invite verification required
+				if (status === LoginStatus.InviteVerification) {
+					// Store temporary access token for invite verification
+					if (signinRes.data?.access_token) {
+						sessionStorage.setItem('invite_access_token', signinRes.data.access_token)
+					}
+					history.push('/auth/entry/invite')
+					return
+				}
+
 				// Login successful (status === LoginStatus.Success)
 				// Set success state for UI display
 				setAuthResult(signinRes.data || null)
