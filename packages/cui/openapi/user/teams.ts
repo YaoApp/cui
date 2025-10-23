@@ -57,6 +57,14 @@ export class UserTeams {
 	}
 
 	/**
+	 * Get current user's team
+	 * Returns 404 if the user doesn't have a team
+	 */
+	async GetCurrentTeam(): Promise<ApiResponse<UserTeamDetail>> {
+		return this.api.Get<UserTeamDetail>('/user/teams/current')
+	}
+
+	/**
 	 * Get user team details by team_id
 	 * @param teamId Team ID to retrieve
 	 */

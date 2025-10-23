@@ -78,80 +78,60 @@ const Team = () => {
 
 			try {
 				setLoading(true)
-				// 先尝试获取用户的团队列表
-				const teamsResponse = await apiClient.teams.GetTeams()
+				// 直接获取当前用户的团队
+				const teamResponse = await apiClient.teams.GetCurrentTeam()
 
-				if (apiClient.IsError(teamsResponse)) {
-					console.error('Failed to load teams:', teamsResponse.error)
-					// 如果获取失败，可能是还没有团队，不显示错误
-					setTeam(null)
-					setMembers([])
-					setInvitations([])
-				} else {
-					const teamsData = teamsResponse.data
-					if (teamsData && teamsData.length > 0) {
-						// 用户已有团队，获取第一个团队的详细信息
-						const firstTeam = teamsData[0]
-						const teamDetailResponse = await apiClient.teams.GetTeam(firstTeam.team_id)
-
-						if (!apiClient.IsError(teamDetailResponse) && teamDetailResponse.data) {
-							setTeam(teamDetailResponse.data)
-							teamForm.setFieldsValue({
-								name: teamDetailResponse.data.name,
-								description: teamDetailResponse.data.description
-							})
-
-							// 加载成员和邀请数据
-							try {
-								const [membersResponse, invitationsResponse] = await Promise.all([
-									apiClient.teams.GetMembers(firstTeam.team_id, {
-										page: 1,
-										pagesize: 100
-									}),
-									apiClient.teams.GetInvitations(firstTeam.team_id, {
-										page: 1,
-										pagesize: 100,
-										status: 'pending'
-									})
-								])
-
-								if (!apiClient.IsError(membersResponse) && membersResponse.data) {
-									setMembers(membersResponse.data.data || [])
-								} else {
-									console.error('Failed to load members:', membersResponse.error)
-									setMembers([])
-								}
-
-								if (
-									!apiClient.IsError(invitationsResponse) &&
-									invitationsResponse.data
-								) {
-									setInvitations(invitationsResponse.data.data || [])
-								} else {
-									console.error(
-										'Failed to load invitations:',
-										invitationsResponse.error
-									)
-									setInvitations([])
-								}
-							} catch (error) {
-								console.error('Failed to load members/invitations:', error)
-								setMembers([])
-								setInvitations([])
-							}
-						} else {
-							console.error('Failed to load team details:', teamDetailResponse.error)
-							// 使用基本信息构造UserTeamDetail类型
-							setTeam({
-								...firstTeam,
-								settings: undefined
-							})
-							setMembers([])
-							setInvitations([])
-						}
-					} else {
+				// 如果返回 404，说明用户还没有团队
+				if (apiClient.IsError(teamResponse)) {
+					if (teamResponse.status === 404) {
 						// 用户还没有团队
 						setTeam(null)
+						setMembers([])
+						setInvitations([])
+					} else {
+						console.error('Failed to load current team:', teamResponse.error)
+						message.error(is_cn ? '加载团队信息失败' : 'Failed to load team data')
+						setTeam(null)
+						setMembers([])
+						setInvitations([])
+					}
+				} else if (teamResponse.data) {
+					// 用户已有团队，设置团队信息
+					setTeam(teamResponse.data)
+					teamForm.setFieldsValue({
+						name: teamResponse.data.name,
+						description: teamResponse.data.description
+					})
+
+					// 加载成员和邀请数据
+					try {
+						const [membersResponse, invitationsResponse] = await Promise.all([
+							apiClient.teams.GetMembers(teamResponse.data.team_id, {
+								page: 1,
+								pagesize: 100
+							}),
+							apiClient.teams.GetInvitations(teamResponse.data.team_id, {
+								page: 1,
+								pagesize: 100,
+								status: 'pending'
+							})
+						])
+
+						if (!apiClient.IsError(membersResponse) && membersResponse.data) {
+							setMembers(membersResponse.data.data || [])
+						} else {
+							console.error('Failed to load members:', membersResponse.error)
+							setMembers([])
+						}
+
+						if (!apiClient.IsError(invitationsResponse) && invitationsResponse.data) {
+							setInvitations(invitationsResponse.data.data || [])
+						} else {
+							console.error('Failed to load invitations:', invitationsResponse.error)
+							setInvitations([])
+						}
+					} catch (error) {
+						console.error('Failed to load members/invitations:', error)
 						setMembers([])
 						setInvitations([])
 					}
