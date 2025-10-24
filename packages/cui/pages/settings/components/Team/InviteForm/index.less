@@ -1,0 +1,263 @@
+// 弹窗样式
+.inviteModal {
+	:global(.xgen-modal-header) {
+		padding: 0;
+		border-bottom: none;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0;
+	}
+
+	:global(.xgen-modal-content) {
+		border-radius: 8px;
+		overflow: hidden;
+	}
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_bg_white);
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.modalTitle {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--color_text);
+		margin: 0;
+	}
+
+	.closeButton {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s;
+		color: var(--color_text_grey);
+
+		&:hover {
+			background: var(--color_bg);
+			color: var(--color_text);
+		}
+	}
+
+	.titleIcon {
+		color: var(--color_neo_text_secondary);
+	}
+
+	.closeIcon {
+		color: var(--color_neo_text_secondary);
+	}
+}
+
+.modalContent {
+	padding: 20px;
+
+	:global(.ant-form-item-label > label) {
+		color: var(--color_text);
+		font-weight: 500;
+		font-size: 12px;
+	}
+
+	:global(.ant-form-item) {
+		align-items: center;
+	}
+
+	// 去除Form.Item容器的背景色
+	:global(.xgen-form-item) {
+		background: transparent !important;
+
+		:global(.xgen-form-item-control) {
+			background: transparent !important;
+
+			:global(.xgen-form-item-control-input) {
+				background: transparent !important;
+
+				:global(.xgen-form-item-control-input-content) {
+					background: transparent !important;
+				}
+			}
+		}
+	}
+
+	.modalActions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 8px;
+		margin-top: 20px;
+		padding-top: 16px;
+		border-top: 1px solid var(--color_border);
+	}
+
+	.submitButton {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 6px 16px;
+		border: none;
+		border-radius: 6px;
+		background: var(--color_main);
+		color: white;
+		font-size: 12px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s;
+		line-height: 1.4;
+
+		&:hover:not(:disabled) {
+			background: var(--color_main_hover);
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+
+		.buttonLoadingIcon {
+			animation: spin 1s linear infinite;
+		}
+	}
+
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+}
+
+// 邀请弹窗新样式
+.inviteOptions {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+.inviteSection {
+	h5 {
+		margin: 0 0 12px 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color_text);
+	}
+}
+
+.emailInviteActions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 16px;
+}
+
+.divider {
+	position: relative;
+	text-align: center;
+	margin: 8px 0;
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: var(--color_border_light);
+	}
+
+	span {
+		background: var(--color_neo_bg_card);
+		padding: 0 16px;
+		font-size: 12px;
+		color: var(--color_text_grey);
+		position: relative;
+		z-index: 1;
+	}
+}
+
+.linkDescription {
+	margin: 0 0 16px 0;
+	font-size: 12px;
+	color: var(--color_text_grey);
+	line-height: 1.4;
+}
+
+.linkGenerate {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	margin-bottom: 16px;
+
+	> div:first-child {
+		flex: 1;
+	}
+}
+
+.generatedLink {
+	margin-top: 16px;
+}
+
+.linkDisplay {
+	margin-bottom: 8px;
+
+	.linkText {
+		width: 100%;
+		background: var(--color_bg);
+		border: 1px solid var(--color_border);
+		border-radius: 6px;
+		padding: 12px;
+		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+		font-size: 11px;
+		color: var(--color_text);
+		line-height: 1.4;
+		word-break: break-all;
+		display: block;
+	}
+}
+
+.linkFooter {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 8px;
+}
+
+.linkNote {
+	margin: 0;
+	font-size: 11px;
+	color: var(--color_text_grey);
+	font-style: italic;
+	line-height: 1.4;
+	flex: 1;
+}
+
+.linkActions {
+	display: flex;
+	gap: 6px;
+	flex-shrink: 0;
+}
+
+// 响应式样式
+@media (max-width: 768px) {
+	.modalContent {
+		padding: 16px;
+	}
+}
+
+@media (max-width: 480px) {
+	.modalContent {
+		padding: 12px;
+	}
+}

@@ -1,0 +1,132 @@
+// 团队编辑样式 - 完全模仿 Profile 组件
+.editTeamContainer {
+	padding: 40px;
+	width: 100%;
+}
+
+// Avatar Section - 居中头像设计（与 Profile 一致）
+.avatarSection {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: 0 auto 40px auto;
+	padding-bottom: 40px;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	max-width: 500px;
+}
+
+// Fields Container - 字段列表（与 Profile 一致）
+.fieldsContainer {
+	flex: 1;
+	max-width: 500px;
+	margin: 0 auto;
+}
+
+.fieldItem {
+	display: flex;
+	align-items: center;
+	padding: 20px 0;
+	border-bottom: 1px solid var(--color_neo_border_field);
+	transition: all 0.2s ease;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&:hover {
+		background: var(--color_neo_bg_field);
+		margin: 0 -20px;
+		padding: 20px;
+		border-radius: 8px;
+	}
+}
+
+.fieldIcon {
+	flex-shrink: 0;
+	width: 40px;
+	height: 40px;
+	border-radius: 8px;
+	background: var(--color_neo_bg_field);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 16px;
+	color: var(--color_neo_text_secondary);
+	transition: all 0.2s ease;
+
+	.fieldItem:hover & {
+		background: var(--color_neo_bg_card);
+		color: var(--color_main);
+	}
+}
+
+.fieldContent {
+	flex: 1;
+	min-width: 0;
+}
+
+.fieldLabel {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_neo_text_secondary);
+	margin-bottom: 4px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+// 响应式样式
+@media (max-width: 768px) {
+	.editTeamContainer {
+		padding: 24px;
+	}
+
+	.avatarSection {
+		margin-bottom: 32px;
+		padding-bottom: 32px;
+	}
+
+	.fieldItem {
+		padding: 16px 0;
+
+		&:hover {
+			margin: 0 -16px;
+			padding: 16px;
+		}
+	}
+
+	.fieldIcon {
+		width: 36px;
+		height: 36px;
+		margin-right: 12px;
+	}
+}
+
+@media (max-width: 480px) {
+	.editTeamContainer {
+		padding: 20px;
+	}
+
+	.avatarSection {
+		margin-bottom: 24px;
+		padding-bottom: 24px;
+	}
+
+	.fieldItem {
+		padding: 12px 0;
+
+		&:hover {
+			margin: 0 -12px;
+			padding: 12px;
+		}
+	}
+
+	.fieldIcon {
+		width: 32px;
+		height: 32px;
+		margin-right: 10px;
+	}
+
+	.fieldLabel {
+		font-size: 12px;
+	}
+}

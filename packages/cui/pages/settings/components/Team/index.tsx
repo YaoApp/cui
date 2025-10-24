@@ -1,19 +1,15 @@
 import { useState, useEffect } from 'react'
-import { Form, message, Modal } from 'antd'
+import { Form, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import { Button } from '@/components/ui'
-import { Input, Select, Avatar } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import { User } from '@/openapi/user'
-import {
-	UserTeam,
-	CreateTeamRequest,
-	UserTeamDetail,
-	TeamMember,
-	TeamInvitation,
-	TeamConfig,
-	TeamRole
-} from '@/openapi/user/types'
+import { CreateTeamRequest, UserTeamDetail, TeamMember, TeamInvitation, TeamConfig } from '@/openapi/user/types'
+import MemberList from './MemberList'
+import InvitationList from './InvitationList'
+import InviteForm from './InviteForm'
+import TeamEditForm from './TeamEditForm'
+import CreateTeamForm from './CreateTeamForm'
 import styles from './index.less'
 
 const Team = () => {
@@ -35,7 +31,6 @@ const Team = () => {
 	const [teamForm] = Form.useForm()
 	const [inviteLink, setInviteLink] = useState('')
 	const [generatingLink, setGeneratingLink] = useState(false)
-	const [linkRole, setLinkRole] = useState<string>('') // State for link generation role
 
 	useEffect(() => {
 		const initializeAPI = async () => {
@@ -49,11 +44,6 @@ const Team = () => {
 					const configResponse = await client.teams.GetConfig(locale)
 					if (!client.IsError(configResponse) && configResponse.data) {
 						setConfig(configResponse.data)
-						// Set default role for link generation
-						const defaultRoleId =
-							configResponse.data.roles?.find((role) => role.default)?.role_id ||
-							'team_member'
-						setLinkRole(defaultRoleId)
 					} else {
 						console.error('Failed to load team config:', configResponse.error)
 					}
@@ -137,8 +127,9 @@ const Team = () => {
 					}
 				}
 			} catch (error) {
+				// 只记录错误到控制台，不显示用户消息
+				// 因为 404（用户没有团队）已经在上面正确处理了
 				console.error('Failed to load team data:', error)
-				message.error(is_cn ? '加载团队信息失败' : 'Failed to load team data')
 			} finally {
 				setLoading(false)
 			}
@@ -325,31 +316,6 @@ const Team = () => {
 		}
 	}
 
-	// 解析过期时间字符串（如 "7d", "168h", "10080m"）为友好的显示文本
-	const parseExpiryText = (expiry?: string): string => {
-		if (!expiry) return is_cn ? '7天' : '7 days' // 默认值
-
-		// 解析时间单位
-		const match = expiry.match(/^(\d+)([dhms])$/)
-		if (!match) return expiry
-
-		const value = parseInt(match[1])
-		const unit = match[2]
-
-		switch (unit) {
-			case 'd':
-				return is_cn ? `${value}天` : `${value} day${value > 1 ? 's' : ''}`
-			case 'h':
-				return is_cn ? `${value}小时` : `${value} hour${value > 1 ? 's' : ''}`
-			case 'm':
-				return is_cn ? `${value}分钟` : `${value} minute${value > 1 ? 's' : ''}`
-			case 's':
-				return is_cn ? `${value}秒` : `${value} second${value > 1 ? 's' : ''}`
-			default:
-				return expiry
-		}
-	}
-
 	const handleGenerateInviteLink = async (role: string) => {
 		if (!apiClient || !team) {
 			message.error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
@@ -395,14 +361,6 @@ const Team = () => {
 			message.error(is_cn ? '生成邀请链接失败' : 'Failed to generate invite link')
 		} finally {
 			setGeneratingLink(false)
-		}
-	}
-
-	const copyInviteLink = () => {
-		if (inviteLink) {
-			navigator.clipboard.writeText(inviteLink).then(() => {
-				message.success(is_cn ? '邀请链接已复制到剪贴板' : 'Invite link copied to clipboard')
-			})
 		}
 	}
 
@@ -489,18 +447,6 @@ const Team = () => {
 		}
 	}
 
-	// 从配置中获取角色选项（过滤掉隐藏的角色）
-	const roleOptions =
-		config?.roles
-			?.filter((role) => !role.hidden)
-			.map((role) => ({
-				label: role.label,
-				value: role.role_id
-			})) || []
-
-	// 获取默认角色
-	const defaultRole = config?.roles?.find((role) => role.default)?.role_id || 'team_member'
-
 	if (loading) {
 		return (
 			<div className={styles.team}>
@@ -534,81 +480,12 @@ const Team = () => {
 	if (!loading && !team) {
 		return (
 			<div className={styles.team}>
-				<div className={styles.promptPanel}>
-					<div className={styles.promptContainer}>
-						<div className={styles.promptContent}>
-							<div className={styles.promptIcon}>
-								<Icon name='material-group_add' size={48} />
-							</div>
-							<h3 className={styles.promptTitle}>
-								{is_cn ? '创建您的团队' : 'Create Your Team'}
-							</h3>
-							<p className={styles.promptDescription}>
-								{is_cn
-									? '设置团队名称和简介，开始与他人协作'
-									: 'Set up your team name and description to start collaborating'}
-							</p>
-							<div className={styles.promptActions}>
-								<Form
-									onFinish={handleCreateTeam}
-									layout='vertical'
-									className={styles.createTeamForm}
-								>
-									<Form.Item
-										name='name'
-										label={is_cn ? '团队名称' : 'Team Name'}
-										rules={[
-											{
-												required: true,
-												message: is_cn
-													? '请输入团队名称'
-													: 'Please enter team name'
-											}
-										]}
-									>
-										<Input
-											schema={{
-												type: 'string',
-												placeholder: is_cn
-													? '请输入团队名称'
-													: 'Enter team name'
-											}}
-											error=''
-											hasError={false}
-										/>
-									</Form.Item>
-									<Form.Item
-										name='description'
-										label={is_cn ? '团队简介' : 'Team Description'}
-									>
-										<Input
-											schema={{
-												type: 'string',
-												placeholder: is_cn
-													? '请输入团队简介'
-													: 'Enter team description'
-											}}
-											error=''
-											hasError={false}
-										/>
-									</Form.Item>
-									<div className={styles.createTeamActions}>
-										<button
-											type='submit'
-											className='ant-btn ant-btn-primary'
-											disabled={loading || configLoading}
-										>
-											{(loading || configLoading) && (
-												<span className='ant-btn-loading-icon'></span>
-											)}
-											{is_cn ? '创建团队' : 'Create Team'}
-										</button>
-									</div>
-								</Form>
-							</div>
-						</div>
-					</div>
-				</div>
+				<CreateTeamForm
+					onFinish={handleCreateTeam}
+					loading={loading}
+					configLoading={configLoading}
+					is_cn={is_cn}
+				/>
 			</div>
 		)
 	}
@@ -683,82 +560,12 @@ const Team = () => {
 					</div>
 
 					{editingTeam ? (
-						<div className={styles.editTeamContainer}>
-							{/* Avatar Section - Always Centered */}
-							<div className={styles.avatarSection}>
-								<Avatar
-									schema={{
-										type: 'string',
-										variant: 'large',
-										userName: team?.name || '',
-										placeholder: is_cn ? '更换团队头像' : 'Change Team Avatar',
-										readOnly: false
-									}}
-									value={undefined}
-									onChange={(value) => {
-										teamForm.setFieldsValue({ avatar: value })
-									}}
-									error=''
-									hasError={false}
-								/>
-							</div>
-
-							{/* Profile Fields */}
-							<Form form={teamForm} onFinish={handleUpdateTeam}>
-								<div className={styles.fieldsContainer}>
-									{/* Team Name Field */}
-									<div className={styles.fieldItem}>
-										<div className={styles.fieldIcon}>
-											<Icon name='material-group' size={20} />
-										</div>
-										<div className={styles.fieldContent}>
-											<div className={styles.fieldLabel}>
-												{is_cn ? '团队名称' : 'Team Name'}
-											</div>
-											<Form.Item name='name' style={{ margin: 0 }}>
-												<Input
-													schema={{
-														type: 'string',
-														placeholder: is_cn
-															? '请输入团队名称'
-															: 'Enter team name'
-													}}
-													error=''
-													hasError={false}
-												/>
-											</Form.Item>
-										</div>
-									</div>
-
-									{/* Team Description Field */}
-									<div className={styles.fieldItem}>
-										<div className={styles.fieldIcon}>
-											<Icon name='material-description' size={20} />
-										</div>
-										<div className={styles.fieldContent}>
-											<div className={styles.fieldLabel}>
-												{is_cn ? '团队简介' : 'Team Description'}
-											</div>
-											<Form.Item name='description' style={{ margin: 0 }}>
-												<Input
-													schema={{
-														type: 'string',
-														placeholder: is_cn
-															? '请输入团队简介'
-															: 'Enter team description'
-													}}
-													error=''
-													hasError={false}
-												/>
-											</Form.Item>
-										</div>
-									</div>
-
-									{/* Hidden avatar field */}
-									<Form.Item name='avatar' style={{ display: 'none' }} />
-								</div>
-							</Form>
-						</div>
+						<TeamEditForm
+							form={teamForm}
+							team={team}
+							onFinish={handleUpdateTeam}
+							is_cn={is_cn}
+						/>
 					) : (
 						<div className={styles.teamHeader}>
 							<div className={styles.teamAvatar}>
@@ -802,373 +609,39 @@ const Team = () => {
 
 				<div className={styles.unifiedMembersList}>
 					{/* 团队成员列表 */}
-					{members.map((member) => {
-						// 尝试从 user_info 获取用户信息（如果是 TeamMemberDetail）
-						const memberDetail = member as any
-						const userName =
-							memberDetail.user_info?.name ||
-							member.user_id ||
-							(is_cn ? '未知用户' : 'Unknown User')
-						const userEmail = memberDetail.user_info?.email || ''
-						const userAvatar = memberDetail.user_info?.avatar
-
-						return (
-							<div key={member.id} className={styles.memberCard}>
-								<div className={styles.memberInfo}>
-									<div className={styles.memberAvatar}>
-										{userAvatar ? (
-											<img src={userAvatar} alt={userName} />
-										) : (
-											<div className={styles.avatarPlaceholder}>
-												{userName?.charAt(0)?.toUpperCase() || 'U'}
-											</div>
-										)}
-									</div>
-									<div className={styles.memberDetails}>
-										<div className={styles.memberName}>{userName}</div>
-										<div className={styles.memberEmail}>{userEmail}</div>
-										<div className={styles.memberMeta}>
-											<span
-												className={styles.memberRole}
-												data-role={member.role_id}
-											>
-												{getRoleDisplayName(member.role_id)}
-											</span>
-											<span
-												className={styles.memberStatus}
-												data-status={member.status}
-											>
-												{getStatusDisplayName(member.status)}
-											</span>
-											{member.last_activity && (
-												<span className={styles.memberLastActive}>
-													{is_cn ? '最后活跃：' : 'Last active: '}
-													{new Date(
-														member.last_activity
-													).toLocaleDateString()}
-												</span>
-											)}
-										</div>
-									</div>
-								</div>
-								<div className={styles.memberActions}>
-									{/* 不允许移除 owner 角色的成员 */}
-									{member.role_id !== 'team_owner' && (
-										<Button
-											type='default'
-											size='small'
-											className={styles.actionButton}
-											onClick={() => {
-												Modal.confirm({
-													title: is_cn
-														? '确认移除成员'
-														: 'Confirm Remove Member',
-													content: is_cn
-														? `确定要移除 ${userName} 吗？`
-														: `Are you sure to remove ${userName}?`,
-													okText: is_cn ? '移除' : 'Remove',
-													cancelText: is_cn ? '取消' : 'Cancel',
-													okType: 'danger',
-													onOk: () =>
-														handleRemoveMember(
-															member.id.toString()
-														)
-												})
-											}}
-										>
-											{is_cn ? '移除' : 'Remove'}
-										</Button>
-									)}
-								</div>
-							</div>
-						)
-					})}
+					<MemberList
+						members={members}
+						is_cn={is_cn}
+						getRoleDisplayName={getRoleDisplayName}
+						getStatusDisplayName={getStatusDisplayName}
+						onRemoveMember={handleRemoveMember}
+					/>
 
 					{/* 待处理邀请 */}
-					{invitations.length > 0 && (
-						<>
-							<div className={styles.sectionSeparator}>
-								<h5 className={styles.separatorTitle}>
-									{is_cn ? '待处理邀请' : 'Pending Invitations'}
-								</h5>
-							</div>
-							{invitations.map((invitation) => {
-								// 尝试从 user_info 获取用户信息（如果是 TeamInvitationDetail）
-								const invitationDetail = invitation as any
-								const displayText =
-									invitationDetail.user_info?.email ||
-									invitationDetail.user_info?.name ||
-									invitation.user_id
-
-								return (
-									<div key={invitation.id} className={styles.invitationCard}>
-										<div className={styles.invitationInfo}>
-											<div className={styles.invitationAvatar}>
-												<Icon name='material-mail_outline' size={20} />
-											</div>
-											<div className={styles.invitationDetails}>
-												<div className={styles.invitationEmail}>
-													{displayText}
-												</div>
-												<div className={styles.invitationMeta}>
-													<span className={styles.invitationRole}>
-														{getRoleDisplayName(
-															invitation.role_id
-														)}
-													</span>
-													<span>
-														{is_cn
-															? '邀请人：'
-															: 'Invited by: '}
-														{invitation.invited_by}
-													</span>
-													{invitation.invitation_expires_at && (
-														<span>
-															{is_cn
-																? '过期时间：'
-																: 'Expires: '}
-															{new Date(
-																invitation.invitation_expires_at
-															).toLocaleDateString()}
-														</span>
-													)}
-												</div>
-											</div>
-										</div>
-										<div className={styles.invitationActions}>
-											<Button
-												type='default'
-												size='small'
-												className={styles.actionButton}
-												onClick={() => {
-													Modal.confirm({
-														title: is_cn
-															? '确认取消邀请'
-															: 'Confirm Cancel Invitation',
-														content: is_cn
-															? `确定要取消对 ${displayText} 的邀请吗？`
-															: `Are you sure to cancel the invitation to ${displayText}?`,
-														okText: is_cn
-															? '取消邀请'
-															: 'Cancel Invitation',
-														cancelText: is_cn ? '保留' : 'Keep',
-														okType: 'danger',
-														onOk: () =>
-															handleCancelInvitation(
-																invitation.id.toString()
-															)
-													})
-												}}
-											>
-												{is_cn ? '取消' : 'Cancel'}
-											</Button>
-										</div>
-									</div>
-								)
-							})}
-						</>
-					)}
+					<InvitationList
+						invitations={invitations}
+						is_cn={is_cn}
+						getRoleDisplayName={getRoleDisplayName}
+						onCancelInvitation={handleCancelInvitation}
+					/>
 				</div>
 			</div>
 
 			{/* 邀请成员弹窗 */}
-			<Modal
-				title={
-					<div className={styles.modalHeader}>
-						<div className={styles.titleSection}>
-							<Icon name='material-person_add' size={16} className={styles.titleIcon} />
-							<span className={styles.modalTitle}>
-								{is_cn ? '邀请团队成员' : 'Invite Team Member'}
-							</span>
-						</div>
-						<div
-							className={styles.closeButton}
-							onClick={() => {
-								setInviteModalVisible(false)
-								form.resetFields()
-							}}
-						>
-							<Icon name='material-close' size={16} className={styles.closeIcon} />
-						</div>
-					</div>
-				}
-				open={inviteModalVisible}
-				onCancel={() => {
-					setInviteModalVisible(false)
-					form.resetFields()
-				}}
-				footer={null}
-				width={480}
-				className={styles.inviteModal}
-				destroyOnClose
-				closable={false}
-			>
-				<div className={styles.modalContent}>
-					<div className={styles.inviteOptions}>
-						{/* 邮箱邀请方式 */}
-						<div className={styles.inviteSection}>
-							<h5>{is_cn ? '通过邮箱邀请' : 'Invite by Email'}</h5>
-							<Form form={form} layout='vertical' onFinish={handleInviteMember}>
-								<Form.Item
-									name='email'
-									label={is_cn ? '邮箱地址' : 'Email Address'}
-									rules={[
-										{
-											required: true,
-											message: is_cn
-												? '请输入邮箱地址'
-												: 'Please enter email address'
-										},
-										{
-											type: 'email',
-											message: is_cn
-												? '请输入有效的邮箱地址'
-												: 'Please enter a valid email address'
-										}
-									]}
-								>
-									<Input
-										schema={{
-											type: 'string',
-											placeholder: is_cn
-												? '请输入邮箱地址'
-												: 'Enter email address'
-										}}
-										error=''
-										hasError={false}
-									/>
-								</Form.Item>
-
-								<Form.Item
-									name='role'
-									label={is_cn ? '角色权限' : 'Role'}
-									initialValue={defaultRole}
-									rules={[
-										{
-											required: true,
-											message: is_cn
-												? '请选择角色权限'
-												: 'Please select role'
-										}
-									]}
-								>
-									<Select
-										schema={{
-											type: 'string',
-											enum: roleOptions,
-											placeholder: is_cn ? '选择角色权限' : 'Select role'
-										}}
-										error=''
-										hasError={false}
-									/>
-								</Form.Item>
-
-								<div className={styles.emailInviteActions}>
-									<button
-										type='submit'
-										className={styles.submitButton}
-										disabled={inviting || configLoading}
-									>
-										{inviting && (
-											<Icon
-												name='material-refresh'
-												size={12}
-												className={styles.buttonLoadingIcon}
-											/>
-										)}
-										{is_cn ? '发送邀请' : 'Send Invitation'}
-									</button>
-								</div>
-							</Form>
-						</div>
-
-						<div className={styles.divider}>
-							<span>{is_cn ? '或' : 'OR'}</span>
-						</div>
-
-						{/* 邀请链接方式 */}
-						<div className={styles.inviteSection}>
-							<h5>{is_cn ? '生成邀请链接' : 'Generate Invite Link'}</h5>
-							<p className={styles.linkDescription}>
-								{is_cn
-									? '生成一个邀请链接，可以分享给多个人使用'
-									: 'Generate an invite link that can be shared with multiple people'}
-							</p>
-
-							<div className={styles.linkGenerate}>
-								<Select
-									schema={{
-										type: 'string',
-										enum: roleOptions,
-										placeholder: is_cn ? '选择角色权限' : 'Select role'
-									}}
-									value={linkRole || defaultRole}
-									onChange={(value) => setLinkRole(value as string)}
-									error=''
-									hasError={false}
-								/>
-								<Button
-									type='primary'
-									onClick={() => handleGenerateInviteLink(linkRole || defaultRole)}
-									loading={generatingLink}
-									disabled={generatingLink || configLoading}
-									icon={<Icon name='material-link' size={14} />}
-								>
-									{is_cn ? '生成链接' : 'Generate Link'}
-								</Button>
-							</div>
-
-							{inviteLink && (
-								<div className={styles.generatedLink}>
-									<div className={styles.linkDisplay}>
-										<code className={styles.linkText}>{inviteLink}</code>
-									</div>
-									<div className={styles.linkFooter}>
-										<p className={styles.linkNote}>
-											{is_cn
-												? `此链接将在${parseExpiryText(
-														config?.invite?.expiry
-												  )}后过期`
-												: `This link will expire in ${parseExpiryText(
-														config?.invite?.expiry
-												  )}`}
-										</p>
-										<div className={styles.linkActions}>
-											<Button
-												type='default'
-												size='small'
-												onClick={copyInviteLink}
-											>
-												{is_cn ? '复制' : 'Copy'}
-											</Button>
-											<Button
-												type='default'
-												size='small'
-												onClick={() => setInviteLink('')}
-											>
-												{is_cn ? '取消' : 'Cancel'}
-											</Button>
-										</div>
-									</div>
-								</div>
-							)}
-						</div>
-					</div>
-
-					<div className={styles.modalActions}>
-						<Button
-							onClick={() => {
-								setInviteModalVisible(false)
-								form.resetFields()
-								setInviteLink('')
-							}}
-							disabled={inviting || generatingLink}
-						>
-							{is_cn ? '关闭' : 'Close'}
-						</Button>
-					</div>
-				</div>
-			</Modal>
+			<InviteForm
+				visible={inviteModalVisible}
+				onClose={() => setInviteModalVisible(false)}
+				onInvite={handleInviteMember}
+				onGenerateLink={handleGenerateInviteLink}
+				inviteLink={inviteLink}
+				setInviteLink={setInviteLink}
+				generatingLink={generatingLink}
+				inviting={inviting}
+				config={config}
+				configLoading={configLoading}
+				is_cn={is_cn}
+				locale={locale}
+			/>
 		</div>
 	)
 }
