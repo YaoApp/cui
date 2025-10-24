@@ -10,7 +10,7 @@ import InvitationList from './InvitationList'
 import InviteForm from './InviteForm'
 import TeamEditForm from './TeamEditForm'
 import CreateTeamForm from './CreateTeamForm'
-import AddAIForm, { AIMemberValues } from './AddAIForm'
+import AddAIMemberWizard, { AIMemberValues } from './AddAIMemberWizard'
 import styles from './index.less'
 
 const Team = () => {
@@ -681,8 +681,8 @@ const Team = () => {
 				locale={locale}
 			/>
 
-			{/* 添加 AI 成员弹窗 */}
-			<AddAIForm
+			{/* 添加 AI 成员向导 */}
+			<AddAIMemberWizard
 				visible={addAIModalVisible}
 				onClose={() => setAddAIModalVisible(false)}
 				onAdd={handleAddAIMember}

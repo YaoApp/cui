@@ -1,0 +1,495 @@
+// AI 成员向导样式
+.wizardModal {
+	:global(.xgen-modal-header) {
+		padding: 0;
+		border-bottom: none;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0;
+		max-height: 70vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+
+		// 滚动条样式
+		&::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--color_neo_text_grey);
+			}
+		}
+	}
+
+	:global(.xgen-modal-footer) {
+		padding: 0;
+		border-top: none;
+		background: transparent;
+	}
+
+	:global(.xgen-modal-content) {
+		border-radius: 8px;
+		overflow: hidden;
+	}
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.modalTitle {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--color_text);
+		margin: 0;
+	}
+
+	.closeButton {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s;
+		color: var(--color_text_grey);
+
+		&:hover {
+			background: var(--color_bg);
+			color: var(--color_text);
+		}
+	}
+
+	.titleIcon {
+		color: var(--color_neo_text_secondary);
+	}
+
+	.closeIcon {
+		color: var(--color_neo_text_secondary);
+	}
+}
+
+.wizardContent {
+	display: flex;
+	flex-direction: column;
+	min-height: 400px;
+}
+
+.stepsContainer {
+	padding: 12px 20px;
+	background: var(--color_neo_bg_card);
+	border-bottom: 1px solid var(--color_border);
+}
+
+.customSteps {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0;
+}
+
+.stepItem {
+	display: flex;
+	align-items: center;
+	position: relative;
+
+	.stepIcon {
+		width: 22px;
+		height: 22px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 12px;
+		font-weight: 500;
+		background: var(--color_bg);
+		border: 1px solid var(--color_border);
+		color: var(--color_text_grey);
+		flex-shrink: 0;
+		transition: all 0.2s;
+	}
+
+	.stepTitle {
+		font-size: 12px;
+		color: var(--color_text_grey);
+		margin-left: 8px;
+		white-space: nowrap;
+		transition: all 0.2s;
+	}
+
+	.stepLine {
+		width: 50px;
+		height: 1px;
+		background: var(--color_border);
+		margin: 0 16px;
+		transition: all 0.2s;
+	}
+
+	&.stepActive {
+		.stepIcon {
+			background: var(--color_primary);
+			border-color: var(--color_primary);
+			color: #fff;
+		}
+
+		.stepTitle {
+			color: var(--color_text);
+			font-weight: 500;
+		}
+	}
+
+	&.stepCompleted {
+		.stepIcon {
+			background: var(--color_primary);
+			border-color: var(--color_primary);
+			color: #fff;
+			font-size: 11px;
+		}
+
+		.stepTitle {
+			color: var(--color_text);
+		}
+
+		.stepLine {
+			background: var(--color_primary);
+		}
+	}
+}
+
+.stepContent {
+	flex: 1;
+	padding: 20px 24px;
+	min-height: 260px;
+}
+
+.formItem {
+	margin-bottom: 24px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.emailInput {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+
+	> :first-child {
+		flex: 1;
+		min-width: 0;
+	}
+
+	> :last-child {
+		flex: 0 0 200px;
+	}
+}
+
+.emailAt {
+	font-size: 14px;
+	color: var(--color_text);
+	flex-shrink: 0;
+	padding-top: 8px; // 与输入框内容对齐
+}
+
+.formLabel {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	color: var(--color_text);
+	font-weight: 500;
+	font-size: 12px;
+	margin-bottom: 8px;
+}
+
+.labelWithAction {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+	position: relative;
+
+	.formLabel {
+		margin-bottom: 0;
+	}
+}
+
+.generateContainer {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 100px;
+	justify-content: flex-end;
+	height: 100%;
+}
+
+.generatingText {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_text_grey);
+	white-space: nowrap;
+	line-height: 1;
+}
+
+.generateButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	cursor: pointer;
+	flex-shrink: 0;
+
+	&:hover:not(.disabled) {
+		.generateIcon {
+			color: var(--color_primary);
+		}
+	}
+
+	&.disabled {
+		cursor: not-allowed;
+
+		.generateIcon {
+			color: var(--color_border);
+		}
+	}
+}
+
+.generateIcon {
+	color: var(--color_text_grey);
+	transition: color 0.2s;
+}
+
+.helpIconWrapper {
+	display: inline-flex;
+	align-items: center;
+	cursor: help;
+}
+
+.helpIcon {
+	color: var(--color_text_grey);
+	cursor: help;
+}
+
+.required {
+	color: var(--color_error, #ff4d4f);
+	margin-right: 2px;
+}
+
+// 移除 stepHeader 样式
+// .stepHeader {
+// 	text-align: center;
+// 	margin-bottom: 24px;
+
+// 	.stepIcon {
+// 		display: inline-flex;
+// 		align-items: center;
+// 		justify-content: center;
+// 		width: 48px;
+// 		height: 48px;
+// 		border-radius: 50%;
+// 		background: var(--color_primary_bg);
+// 		color: var(--color_primary);
+// 		margin-bottom: 12px;
+// 	}
+
+// 	.stepTitle {
+// 		font-size: 16px;
+// 		font-weight: 600;
+// 		color: var(--color_text);
+// 		margin: 0 0 6px 0;
+// 	}
+
+// 	.stepDesc {
+// 		font-size: 12px;
+// 		color: var(--color_text_grey);
+// 		margin: 0;
+// 		line-height: 1.5;
+// 	}
+// }
+
+// 两列布局
+.formRowTwo {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.formItemHalf {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+// 三列布局（用于高级选项）
+.formRowThree {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.formItemThird {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+.wizardFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 18px;
+	border-top: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+
+	.footerLeft {
+		display: flex;
+		gap: 10px;
+	}
+
+	.footerRight {
+		display: flex;
+		gap: 10px;
+	}
+
+	:global(.ant-btn) {
+		font-size: 12px;
+		height: 32px;
+		padding: 4px 15px;
+	}
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.wizardContent {
+		min-height: 300px;
+	}
+
+	.stepsContainer {
+		padding: 10px 12px;
+	}
+
+	.customSteps {
+		.stepItem {
+			.stepTitle {
+				font-size: 10px;
+			}
+
+			.stepIcon {
+				width: 16px;
+				height: 16px;
+				font-size: 9px;
+			}
+
+			.stepLine {
+				width: 30px;
+				margin: 0 8px;
+			}
+		}
+	}
+
+	.stepContent {
+		padding: 16px 12px;
+		min-height: 240px;
+	}
+
+	.formRowTwo {
+		flex-direction: column;
+		gap: 0;
+
+		.formItemHalf {
+			margin-bottom: 24px;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	.formRowThree {
+		flex-direction: column;
+		gap: 12px;
+
+		.formItemThird {
+			margin-bottom: 0;
+		}
+	}
+
+	.customSteps {
+		.stepItem {
+			.stepTitle {
+				display: none;
+			}
+
+			.stepIcon {
+				width: 16px;
+				height: 16px;
+				font-size: 9px;
+			}
+
+			.stepLine {
+				width: 20px;
+				margin: 0 6px;
+			}
+		}
+	}
+
+	.formRow {
+		flex-direction: column;
+		gap: 0;
+	}
+}
+
+@media (max-width: 480px) {
+	.wizardModal {
+		:global(.xgen-modal-body) {
+			max-height: 60vh;
+		}
+	}
+
+	.stepContent {
+		padding: 12px;
+		min-height: 200px;
+	}
+
+	.formRowTwo {
+		flex-direction: column;
+		gap: 0;
+
+		.formItemHalf {
+			margin-bottom: 24px;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	.formRowThree {
+		flex-direction: column;
+		gap: 12px;
+
+		.formItemThird {
+			margin-bottom: 0;
+		}
+	}
+}

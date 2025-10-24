@@ -101,18 +101,16 @@ export default function Select({ value, onChange, schema, size = 'medium' }: Inp
 		if (!selectRef.current) return { shouldDropup: false, position: { top: 0, left: 0, width: 0 } }
 
 		const selectRect = selectRef.current.getBoundingClientRect()
-		const scrollContainer = findScrollContainer(selectRef.current)
-		const containerRect = scrollContainer.getBoundingClientRect()
-
 		const dropdownHeight = 240 // 与 CSS 中的 max-height 保持一致
 		const buffer = 20 // 添加一些缓冲区
 
-		// 计算相对于滚动容器的可用空间
-		const spaceBelow = containerRect.bottom - selectRect.bottom - buffer
-		const spaceAbove = selectRect.top - containerRect.top - buffer
+		// 计算相对于视口的可用空间
+		const viewportHeight = window.innerHeight
+		const spaceBelow = viewportHeight - selectRect.bottom - buffer
+		const spaceAbove = selectRect.top - buffer
 
-		// 确定是否向上弹出
-		const shouldDropup = spaceBelow < dropdownHeight && spaceAbove >= dropdownHeight
+		// 确定是否向上弹出（优先向下）
+		const shouldDropup = spaceBelow < 150 && spaceAbove > dropdownHeight
 
 		// 计算下拉框的位置
 		const position = {
