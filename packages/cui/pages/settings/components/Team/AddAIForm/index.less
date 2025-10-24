@@ -1,0 +1,259 @@
+// AI 成员弹窗样式 - 与 InviteForm 保持一致
+.addAIModal {
+	:global(.xgen-modal-header) {
+		padding: 0;
+		border-bottom: none;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0;
+		max-height: 60vh;
+		overflow-y: auto;
+
+		// 滚动条样式
+		&::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--color_neo_text_grey);
+			}
+		}
+	}
+
+	:global(.xgen-modal-footer) {
+		padding: 16px 20px;
+		border-top: 1px solid var(--color_border);
+		background: var(--color_neo_bg_card);
+	}
+
+	:global(.xgen-modal-content) {
+		border-radius: 8px;
+		overflow: hidden;
+	}
+}
+
+.modalFooter {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.modalTitle {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--color_text);
+		margin: 0;
+	}
+
+	.closeButton {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s;
+		color: var(--color_text_grey);
+
+		&:hover {
+			background: var(--color_bg);
+			color: var(--color_text);
+		}
+	}
+
+	.titleIcon {
+		color: var(--color_neo_text_secondary);
+	}
+
+	.closeIcon {
+		color: var(--color_neo_text_secondary);
+	}
+}
+
+.modalContent {
+	padding: 20px;
+
+	:global(.ant-form-item-label > label) {
+		color: var(--color_text);
+		font-weight: 500;
+		font-size: 12px;
+	}
+
+	:global(.ant-form-item) {
+		align-items: center;
+		margin-bottom: 16px;
+	}
+
+	// 去除Form.Item容器的背景色
+	:global(.xgen-form-item) {
+		background: transparent !important;
+
+		:global(.xgen-form-item-control) {
+			background: transparent !important;
+
+			:global(.xgen-form-item-control-input) {
+				background: transparent !important;
+
+				:global(.xgen-form-item-control-input-content) {
+					background: transparent !important;
+				}
+			}
+		}
+	}
+
+	// 操作按钮已移至 Modal Footer
+	// .modalActions {
+	// 	display: flex;
+	// 	justify-content: flex-end;
+	// 	gap: 8px;
+	// 	margin-top: 24px;
+	// 	padding-top: 16px;
+	// 	border-top: 1px solid var(--color_border);
+	// }
+}
+
+.formSection {
+	margin-bottom: 24px;
+
+	&:last-of-type {
+		margin-bottom: 0;
+	}
+
+	.sectionTitle {
+		margin: 0 0 16px 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color_text);
+		padding-bottom: 8px;
+		border-bottom: 1px solid var(--color_border_light);
+	}
+}
+
+// 表单行布局 - 两列
+.formRow {
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+
+	.formItemHalf {
+		flex: 1;
+		margin-bottom: 16px;
+	}
+}
+
+// 表单行布局 - 三列
+.formRowThree {
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+
+	.formItemThird {
+		flex: 1;
+		margin-bottom: 16px;
+	}
+}
+
+// CheckboxGroup 样式优化 - 4列布局
+.modalContent {
+	:global(.checkboxGroup) {
+		.option {
+			flex: 0 0 calc(25% - 6px) !important; // 4列布局
+			min-width: 0 !important;
+			max-width: calc(25% - 6px) !important;
+		}
+	}
+}
+
+// 响应式样式
+@media (max-width: 768px) {
+	.modalContent {
+		padding: 16px;
+		max-height: 60vh;
+
+		// 小屏幕改为2列
+		:global(.checkboxGroup) {
+			.option {
+				flex: 0 0 calc(50% - 4px) !important;
+				max-width: calc(50% - 4px) !important;
+			}
+		}
+	}
+
+	.formSection {
+		margin-bottom: 20px;
+
+		.sectionTitle {
+			font-size: 13px;
+			margin-bottom: 12px;
+		}
+	}
+
+	.formRow {
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.formRowThree {
+		flex-direction: column;
+		gap: 0;
+	}
+}
+
+@media (max-width: 480px) {
+	.modalContent {
+		padding: 12px;
+		max-height: 50vh;
+
+		// 更小屏幕改为单列
+		:global(.checkboxGroup) {
+			.option {
+				flex: 0 0 100% !important;
+				max-width: 100% !important;
+			}
+		}
+	}
+
+	.formSection {
+		margin-bottom: 16px;
+
+		.sectionTitle {
+			font-size: 12px;
+			margin-bottom: 10px;
+		}
+	}
+
+	.formRow {
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.formRowThree {
+		flex-direction: column;
+		gap: 0;
+	}
+}

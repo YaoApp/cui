@@ -10,6 +10,7 @@ import InvitationList from './InvitationList'
 import InviteForm from './InviteForm'
 import TeamEditForm from './TeamEditForm'
 import CreateTeamForm from './CreateTeamForm'
+import AddAIForm, { AIMemberValues } from './AddAIForm'
 import styles from './index.less'
 
 const Team = () => {
@@ -26,6 +27,8 @@ const Team = () => {
 	const [invitations, setInvitations] = useState<TeamInvitation[]>([])
 	const [inviteModalVisible, setInviteModalVisible] = useState(false)
 	const [inviting, setInviting] = useState(false)
+	const [addAIModalVisible, setAddAIModalVisible] = useState(false)
+	const [addingAI, setAddingAI] = useState(false)
 	const [editingTeam, setEditingTeam] = useState(false)
 	const [updatingTeam, setUpdatingTeam] = useState(false)
 	const [teamForm] = Form.useForm()
@@ -447,6 +450,32 @@ const Team = () => {
 		}
 	}
 
+	const handleAddAIMember = async (values: AIMemberValues) => {
+		if (!apiClient || !team) {
+			message.error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
+			return
+		}
+
+		try {
+			setAddingAI(true)
+
+			// Mock 添加 AI 成员 - 后续对接真实 API
+			await new Promise((resolve) => setTimeout(resolve, 1000))
+
+			// 模拟成功添加
+			console.log('Adding AI member:', values)
+			message.success(is_cn ? 'AI 成员添加成功' : 'AI member added successfully')
+
+			// 刷新成员列表
+			// TODO: 后续对接真实 API 后，重新加载成员列表
+		} catch (error) {
+			console.error('Error adding AI member:', error)
+			message.error(is_cn ? '添加 AI 成员失败' : 'Failed to add AI member')
+		} finally {
+			setAddingAI(false)
+		}
+	}
+
 	if (loading) {
 		return (
 			<div className={styles.team}>
@@ -502,6 +531,15 @@ const Team = () => {
 					</p>
 				</div>
 				<div className={styles.headerActions}>
+					<Button
+						type='primary'
+						size='small'
+						icon={<Icon name='material-psychology' size={12} />}
+						onClick={() => setAddAIModalVisible(true)}
+						disabled={!team || loading || configLoading}
+					>
+						{is_cn ? '添加 AI 成员' : 'Add AI Member'}
+					</Button>
 					<Button
 						type='primary'
 						size='small'
@@ -641,6 +679,18 @@ const Team = () => {
 				configLoading={configLoading}
 				is_cn={is_cn}
 				locale={locale}
+			/>
+
+			{/* 添加 AI 成员弹窗 */}
+			<AddAIForm
+				visible={addAIModalVisible}
+				onClose={() => setAddAIModalVisible(false)}
+				onAdd={handleAddAIMember}
+				config={config}
+				configLoading={configLoading}
+				adding={addingAI}
+				members={members}
+				is_cn={is_cn}
 			/>
 		</div>
 	)
