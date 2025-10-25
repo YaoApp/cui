@@ -612,10 +612,43 @@ export interface InviteConfig {
 }
 
 /**
- * Team configuration response (public endpoint)
+ * Robot email domain configuration
+ */
+export interface RobotEmailDomain {
+	name?: string
+	messenger?: string
+	domain?: string
+	prefix_min_length?: number
+	prefix_max_length?: number
+	reserved_words?: string[]
+}
+
+/**
+ * Robot default settings
+ */
+export interface RobotDefaults {
+	llm?: string
+	autonomous_mode?: boolean
+	cost_limit?: number
+}
+
+/**
+ * Robot (AI Member) configuration
+ */
+export interface RobotConfig {
+	roles?: string[]
+	email_domains?: RobotEmailDomain[]
+	defaults?: RobotDefaults
+}
+
+/**
+ * Team configuration
  */
 export interface TeamConfig {
+	type?: string
+	role?: string
 	roles?: TeamRole[]
+	robot?: RobotConfig
 	invite?: InviteConfig
 }
 
