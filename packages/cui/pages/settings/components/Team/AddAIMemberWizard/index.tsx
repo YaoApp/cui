@@ -80,11 +80,14 @@ const AddAIMemberWizard = ({
 	const [mcpLoading, setMCPLoading] = useState(false)
 	const [llmProviders, setLLMProviders] = useState<LLMProvider[]>([])
 	const [llmLoading, setLLMLoading] = useState(false)
+	const [userMembers, setUserMembers] = useState<any[]>([])
+	const [userMembersLoading, setUserMembersLoading] = useState(false)
 
 	// Use refs to track if data has been loaded to avoid infinite loops
 	const agentsLoadedRef = useRef(false)
 	const mcpLoadedRef = useRef(false)
 	const llmLoadedRef = useRef(false)
+	const userMembersLoadedRef = useRef(false)
 
 	// Update form defaults when config changes
 	useEffect(() => {
@@ -175,6 +178,45 @@ const AddAIMemberWizard = ({
 		}
 	}, [currentStep, visible])
 
+	// Load user members when modal opens (for direct manager selection)
+	useEffect(() => {
+		if (visible && teamId && window.$app?.openapi && !userMembersLoadedRef.current && !userMembersLoading) {
+			userMembersLoadedRef.current = true
+			setUserMembersLoading(true)
+
+			const openapi = window.$app.openapi
+			const auth = new UserAuth(openapi)
+			const teamsAPI = new UserTeams(openapi, auth)
+
+			teamsAPI
+				.GetMembers(teamId, {
+					member_type: 'user', // Only get human members
+					status: 'active', // Only get active members
+					fields: ['member_id', 'display_name', 'email', 'member_type', 'status', 'user_id'] // Only request necessary fields
+				})
+				.then((response) => {
+					console.log('User members loaded:', response)
+					if (response?.data?.data && Array.isArray(response.data.data)) {
+						setUserMembers(response.data.data)
+					}
+				})
+				.catch((error) => {
+					console.error('Failed to load user members:', error)
+					userMembersLoadedRef.current = false // Allow retry on error
+				})
+				.finally(() => {
+					setUserMembersLoading(false)
+				})
+		}
+	}, [visible, teamId])
+
+	// Reset loaded flag when modal closes
+	useEffect(() => {
+		if (!visible) {
+			userMembersLoadedRef.current = false
+		}
+	}, [visible])
+
 	// Email domains from config
 	const emailDomains =
 		config?.robot?.email_domains?.map((domain) => ({
@@ -208,17 +250,16 @@ const AddAIMemberWizard = ({
 				value: role.role_id
 			})) || []
 
-	// 成员选项（用于汇报上级）
-	const memberOptions = members
-		.filter((member) => member.role_id !== 'team_owner' && member.id)
+	// 成员选项（用于汇报上级）- 只显示人类成员
+	const memberOptions = userMembers
+		.filter((member) => member.member_type === 'user' && member.status === 'active')
 		.map((member) => {
-			const memberDetail = member as any
 			const userName =
-				memberDetail.user_info?.name || member.user_id || (is_cn ? '未知用户' : 'Unknown User')
-			const userEmail = memberDetail.user_info?.email || ''
+				member.display_name || member.email || member.user_id || (is_cn ? '未知用户' : 'Unknown User')
+			const userEmail = member.email || ''
 			return {
 				label: userEmail ? `${userName} (${userEmail})` : userName,
-				value: member.id?.toString() || member.user_id || ''
+				value: member.member_id || member.user_id || ''
 			}
 		})
 
