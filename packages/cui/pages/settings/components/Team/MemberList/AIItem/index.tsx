@@ -63,7 +63,7 @@ const AIItem = ({ member, is_cn, getRoleDisplayName, onRemove, onEdit }: AIItemP
 							{getRoleDisplayName(member.role_id)}
 						</span>
 						<span className={styles.aiBadge}>
-							<Icon name='material-smart_toy' size={12} />
+							<Icon name='material-psychology' size={12} />
 							AI
 						</span>
 					</div>
