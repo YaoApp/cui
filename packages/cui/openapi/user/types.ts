@@ -688,27 +688,52 @@ export interface InvitationSettings {
 
 /**
  * Team member response from API
+ * Based on DefaultMemberFields
  */
 export interface TeamMember {
-	id: number
+	member_id: string // Global unique member identifier
 	team_id: string
-	user_id: string
-	member_type: string
+	user_id: string | null // null for robot members
+	member_type: string // "user" | "robot"
+	display_name: string | null
+	bio: string | null
+	avatar: string | null
+	email: string | null
 	role_id: string
-	status: string
-	invited_by?: string
-	invited_at?: string
-	joined_at?: string
-	last_activity?: string
-	settings?: MemberSettings
+	is_owner: number | boolean // 0/1 or boolean
+	status: string // "pending" | "active" | "inactive" | "suspended"
+	invitation_id: string | null
+	invited_by: string | null
+	invited_at: string | null
+	joined_at: string | null
+	invitation_token: string | null
+	invitation_expires_at: string | null
+	last_active_at: string | null
+	login_count: number | null
 	created_at: string
-	updated_at: string
+	updated_at: string | null
 }
 
 /**
- * Team member detail response with additional user info
+ * Team member detail response with additional fields
+ * Based on DefaultMemberDetailFields
  */
 export interface TeamMemberDetail extends TeamMember {
+	// Robot-specific fields (only for robot members)
+	system_prompt?: string | null
+	manager_id?: string | null
+	robot_config?: Record<string, any> | null
+	agents?: string[] | null
+	mcp_servers?: string[] | null
+	language_model?: string | null
+	cost_limit?: number | null
+	autonomous_mode?: boolean | null
+	last_robot_activity?: string | null
+	robot_status?: string | null // "idle" | "working" | "paused" | "error" | "maintenance"
+	notes?: string | null
+	metadata?: Record<string, any> | null
+
+	// Additional user info (joined from user table)
 	user_info?: Record<string, any>
 }
 
@@ -737,6 +762,30 @@ export interface UpdateMemberRequest {
 	status?: string
 	settings?: MemberSettings
 	last_activity?: string
+}
+
+/**
+ * Query options for listing team members
+ */
+export interface MemberListOptions {
+	/** Page number (default: 1) */
+	page?: number
+	/** Page size (default: 20, max: 100) */
+	pagesize?: number
+	/** Filter by status: pending, active, inactive, suspended */
+	status?: string
+	/** Filter by member type: user, robot */
+	member_type?: string
+	/** Filter by role ID */
+	role_id?: string
+	/** Filter by email (exact match) */
+	email?: string
+	/** Filter by display name (like match) */
+	display_name?: string
+	/** Sort order: "field_name [asc|desc]" (e.g., "created_at desc", "joined_at asc"). Direction is optional, defaults to desc */
+	order?: string
+	/** Array of fields to return (e.g., ["id", "user_id", "member_type", "role_id"]) */
+	fields?: string[]
 }
 
 /**

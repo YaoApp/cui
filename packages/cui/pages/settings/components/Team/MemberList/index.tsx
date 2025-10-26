@@ -1,30 +1,86 @@
 import { TeamMember } from '@/openapi/user/types'
-import MemberItem from '../MemberItem'
+import UserItem from './UserItem'
+import AIItem from './AIItem'
+import InviteItem from './InviteItem'
 import styles from './index.less'
 
 interface MemberListProps {
 	members: TeamMember[]
 	is_cn: boolean
 	getRoleDisplayName: (roleId: string) => string
-	getStatusDisplayName: (status: string) => string
 	onRemoveMember: (memberId: string) => void
+	onEditAIMember?: (memberId: string) => void
+	onResendInvitation?: (invitationId: string) => void
+	baseInviteURL?: string
 }
 
-const MemberList = ({ members, is_cn, getRoleDisplayName, getStatusDisplayName, onRemoveMember }: MemberListProps) => {
-	return (
-		<div className={styles.memberList}>
-			{members.map((member) => (
-				<MemberItem
-					key={member.id}
+const MemberList = ({
+	members,
+	is_cn,
+	getRoleDisplayName,
+	onRemoveMember,
+	onEditAIMember,
+	onResendInvitation,
+	baseInviteURL
+}: MemberListProps) => {
+	const renderMember = (member: TeamMember) => {
+		// AI member (check before pending to handle robot invitations correctly)
+		if (member.member_type === 'robot') {
+			// If robot is pending invitation, still show as InviteItem
+			if (member.status === 'pending' && member.invitation_id) {
+				return (
+					<InviteItem
+						key={member.member_id}
+						member={member}
+						is_cn={is_cn}
+						getRoleDisplayName={getRoleDisplayName}
+						onRemove={onRemoveMember}
+						onResend={onResendInvitation}
+						baseInviteURL={baseInviteURL}
+					/>
+				)
+			}
+			// Active/inactive robot member
+			return (
+				<AIItem
+					key={member.member_id}
 					member={member}
 					is_cn={is_cn}
 					getRoleDisplayName={getRoleDisplayName}
-					getStatusDisplayName={getStatusDisplayName}
 					onRemove={onRemoveMember}
+					onEdit={onEditAIMember}
 				/>
-			))}
-		</div>
-	)
+			)
+		}
+
+		// User pending invitation
+		if (member.status === 'pending' && member.invitation_id) {
+			return (
+				<InviteItem
+					key={member.member_id}
+					member={member}
+					is_cn={is_cn}
+					getRoleDisplayName={getRoleDisplayName}
+					onRemove={onRemoveMember}
+					onResend={onResendInvitation}
+					baseInviteURL={baseInviteURL}
+				/>
+			)
+		}
+
+		// User member
+		return (
+			<UserItem
+				key={member.member_id}
+				member={member}
+				is_cn={is_cn}
+				getRoleDisplayName={getRoleDisplayName}
+				onRemove={onRemoveMember}
+			/>
+		)
+	}
+
+	return <div className={styles.memberList}>{members.map(renderMember)}</div>
 }
 
 export default MemberList

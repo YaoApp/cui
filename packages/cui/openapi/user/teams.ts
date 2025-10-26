@@ -13,6 +13,7 @@ import {
 	TeamMemberDetail,
 	CreateRobotMemberRequest,
 	UpdateMemberRequest,
+	MemberListOptions,
 	MemberListResponse,
 	TeamInvitation,
 	TeamInvitationDetail,
@@ -127,27 +128,26 @@ export class UserTeams {
 	// ===== Team Member Management =====
 
 	/**
-	 * Get team members with pagination and filtering
+	 * Get team members with pagination, filtering, sorting, and field selection
 	 * @param teamId Team ID to get members from
-	 * @param options Query parameters for pagination and filtering
+	 * @param options Query options for listing members
 	 */
-	async GetMembers(
-		teamId: string,
-		options?: {
-			page?: number
-			pagesize?: number
-			status?: string
+	async GetMembers(teamId: string, options?: MemberListOptions): Promise<ApiResponse<MemberListResponse>> {
+		const params: Record<string, string> = {}
+
+		if (options?.page) params.page = options.page.toString()
+		if (options?.pagesize) params.pagesize = options.pagesize.toString()
+		if (options?.status) params.status = options.status
+		if (options?.member_type) params.member_type = options.member_type
+		if (options?.role_id) params.role_id = options.role_id
+		if (options?.email) params.email = options.email
+		if (options?.display_name) params.display_name = options.display_name
+		if (options?.order) params.order = options.order
+		if (options?.fields && options.fields.length > 0) {
+			params.fields = options.fields.join(',')
 		}
-	): Promise<ApiResponse<MemberListResponse>> {
-		const params = new URLSearchParams()
-		if (options?.page) params.append('page', options.page.toString())
-		if (options?.pagesize) params.append('pagesize', options.pagesize.toString())
-		if (options?.status) params.append('status', options.status)
 
-		const queryString = params.toString()
-		const url = queryString ? `/user/teams/${teamId}/members?${queryString}` : `/user/teams/${teamId}/members`
-
-		return this.api.Get<MemberListResponse>(url)
+		return this.api.Get<MemberListResponse>(`/user/teams/${teamId}/members`, params)
 	}
 
 	/**

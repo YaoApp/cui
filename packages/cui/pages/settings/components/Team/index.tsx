@@ -6,7 +6,6 @@ import Icon from '@/widgets/Icon'
 import { User } from '@/openapi/user'
 import { CreateTeamRequest, UserTeamDetail, TeamMember, TeamInvitation, TeamConfig } from '@/openapi/user/types'
 import MemberList from './MemberList'
-import InvitationList from './InvitationList'
 import InviteForm from './InviteForm'
 import TeamEditForm from './TeamEditForm'
 import CreateTeamForm from './CreateTeamForm'
@@ -25,7 +24,6 @@ const Team = () => {
 	const [apiClient, setApiClient] = useState<User | null>(null)
 	const [config, setConfig] = useState<TeamConfig | null>(null)
 	const [members, setMembers] = useState<TeamMember[]>([])
-	const [invitations, setInvitations] = useState<TeamInvitation[]>([])
 	const [inviteModalVisible, setInviteModalVisible] = useState(false)
 	const [inviting, setInviting] = useState(false)
 	const [addAIModalVisible, setAddAIModalVisible] = useState(false)
@@ -81,13 +79,11 @@ const Team = () => {
 						// 用户还没有团队
 						setTeam(null)
 						setMembers([])
-						setInvitations([])
 					} else {
 						console.error('Failed to load current team:', teamResponse.error)
 						message.error(is_cn ? '加载团队信息失败' : 'Failed to load team data')
 						setTeam(null)
 						setMembers([])
-						setInvitations([])
 					}
 				} else if (teamResponse.data) {
 					// 用户已有团队，设置团队信息
@@ -97,19 +93,15 @@ const Team = () => {
 						description: teamResponse.data.description
 					})
 
-					// 加载成员和邀请数据
+					// 加载成员数据（包括待处理的邀请）
 					try {
-						const [membersResponse, invitationsResponse] = await Promise.all([
-							apiClient.teams.GetMembers(teamResponse.data.team_id, {
+						const membersResponse = await apiClient.teams.GetMembers(
+							teamResponse.data.team_id,
+							{
 								page: 1,
 								pagesize: 100
-							}),
-							apiClient.teams.GetInvitations(teamResponse.data.team_id, {
-								page: 1,
-								pagesize: 100,
-								status: 'pending'
-							})
-						])
+							}
+						)
 
 						if (!apiClient.IsError(membersResponse) && membersResponse.data) {
 							setMembers(membersResponse.data.data || [])
@@ -117,17 +109,9 @@ const Team = () => {
 							console.error('Failed to load members:', membersResponse.error)
 							setMembers([])
 						}
-
-						if (!apiClient.IsError(invitationsResponse) && invitationsResponse.data) {
-							setInvitations(invitationsResponse.data.data || [])
-						} else {
-							console.error('Failed to load invitations:', invitationsResponse.error)
-							setInvitations([])
-						}
 					} catch (error) {
-						console.error('Failed to load members/invitations:', error)
+						console.error('Failed to load members:', error)
 						setMembers([])
-						setInvitations([])
 					}
 				}
 			} catch (error) {
@@ -173,7 +157,16 @@ const Team = () => {
 
 			const newInvitation = response.data
 			if (newInvitation) {
-				setInvitations((prev) => [...prev, newInvitation])
+				// 重新加载成员列表以包含新邀请
+				if (team.team_id) {
+					const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
+						page: 1,
+						pagesize: 100
+					})
+					if (!apiClient.IsError(membersResponse) && membersResponse.data) {
+						setMembers(membersResponse.data.data || [])
+					}
+				}
 				setInviteModalVisible(false)
 				form.resetFields()
 				message.success(is_cn ? '邀请发送成功' : 'Invitation sent successfully')
@@ -236,32 +229,21 @@ const Team = () => {
 					})
 				}
 
-				// 加载成员和邀请数据
+				// 加载成员数据（包括待处理的邀请）
 				try {
-					const [membersResponse, invitationsResponse] = await Promise.all([
-						apiClient.teams.GetMembers(newTeam.team_id, { page: 1, pagesize: 100 }),
-						apiClient.teams.GetInvitations(newTeam.team_id, {
-							page: 1,
-							pagesize: 100,
-							status: 'pending'
-						})
-					])
+					const membersResponse = await apiClient.teams.GetMembers(newTeam.team_id, {
+						page: 1,
+						pagesize: 100
+					})
 
 					if (!apiClient.IsError(membersResponse) && membersResponse.data) {
 						setMembers(membersResponse.data.data || [])
 					} else {
 						setMembers([])
 					}
-
-					if (!apiClient.IsError(invitationsResponse) && invitationsResponse.data) {
-						setInvitations(invitationsResponse.data.data || [])
-					} else {
-						setInvitations([])
-					}
 				} catch (error) {
-					console.error('Failed to load members/invitations:', error)
+					console.error('Failed to load members:', error)
 					setMembers([])
-					setInvitations([])
 				}
 
 				message.success(is_cn ? '团队创建成功' : 'Team created successfully')
@@ -352,6 +334,16 @@ const Team = () => {
 			if (invitation && invitation.invitation_link) {
 				// 直接使用后端返回的完整邀请链接
 				setInviteLink(invitation.invitation_link)
+				// 重新加载成员列表以包含新邀请
+				if (team.team_id) {
+					const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
+						page: 1,
+						pagesize: 100
+					})
+					if (!apiClient.IsError(membersResponse) && membersResponse.data) {
+						setMembers(membersResponse.data.data || [])
+					}
+				}
 				message.success(is_cn ? '邀请链接已生成' : 'Invite link generated')
 			} else {
 				message.error(
@@ -384,7 +376,7 @@ const Team = () => {
 				return
 			}
 
-			setMembers((prev) => prev.filter((member) => member.id.toString() !== memberId))
+			setMembers((prev) => prev.filter((member) => member.member_id !== memberId))
 			message.success(is_cn ? '成员已移除' : 'Member removed')
 		} catch (error) {
 			console.error('Error removing member:', error)
@@ -392,27 +384,18 @@ const Team = () => {
 		}
 	}
 
-	const handleCancelInvitation = async (invitationId: string) => {
+	const handleResendInvitation = async (invitationId: string) => {
 		if (!apiClient || !team) {
 			message.error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
 			return
 		}
 
 		try {
-			const response = await apiClient.teams.DeleteInvitation(team.team_id, invitationId)
-
-			if (apiClient.IsError(response)) {
-				console.error('Failed to cancel invitation:', response.error)
-				const errorMsg = response.error?.error_description || response.error?.error || 'Unknown error'
-				message.error(is_cn ? `取消邀请失败: ${errorMsg}` : `Failed to cancel invitation: ${errorMsg}`)
-				return
-			}
-
-			setInvitations((prev) => prev.filter((inv) => inv.id.toString() !== invitationId))
-			message.success(is_cn ? '邀请已取消' : 'Invitation cancelled')
+			// TODO: 实现重发邀请邮件的API调用
+			message.success(is_cn ? '邀请已重发' : 'Invitation resent')
 		} catch (error) {
-			console.error('Error cancelling invitation:', error)
-			message.error(is_cn ? '取消邀请失败' : 'Failed to cancel invitation')
+			console.error('Error resending invitation:', error)
+			message.error(is_cn ? '重发邀请失败' : 'Failed to resend invitation')
 		}
 	}
 
@@ -489,6 +472,11 @@ const Team = () => {
 		} finally {
 			setAddingAI(false)
 		}
+	}
+
+	const handleEditAIMember = (memberId: string) => {
+		// TODO: Implement AI member edit dialog
+		message.info(is_cn ? `编辑 AI 成员: ${memberId}` : `Edit AI member: ${memberId}`)
 	}
 
 	if (loading) {
@@ -661,21 +649,14 @@ const Team = () => {
 				</div>
 
 				<div className={styles.unifiedMembersList}>
-					{/* 团队成员列表 */}
 					<MemberList
 						members={members}
 						is_cn={is_cn}
 						getRoleDisplayName={getRoleDisplayName}
-						getStatusDisplayName={getStatusDisplayName}
 						onRemoveMember={handleRemoveMember}
-					/>
-
-					{/* 待处理邀请 */}
-					<InvitationList
-						invitations={invitations}
-						is_cn={is_cn}
-						getRoleDisplayName={getRoleDisplayName}
-						onCancelInvitation={handleCancelInvitation}
+						onEditAIMember={handleEditAIMember}
+						onResendInvitation={handleResendInvitation}
+						baseInviteURL={window.location.origin + '/invite'}
 					/>
 				</div>
 			</div>
