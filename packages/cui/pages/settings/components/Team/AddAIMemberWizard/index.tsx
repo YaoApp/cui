@@ -10,6 +10,9 @@ import { LLMProvider } from '@/openapi/llm/types'
 import { Agent } from '@/openapi/agent/api'
 import { MCP } from '@/openapi/mcp/api'
 import { LLM } from '@/openapi/llm/api'
+import { OpenAPI } from '@/openapi/openapi'
+import { UserAuth } from '@/openapi/user/auth'
+import { UserTeams } from '@/openapi/user/teams'
 import styles from './index.less'
 import commonStyles from '@/components/ui/inputs/common.less'
 
@@ -22,6 +25,7 @@ interface AddAIMemberWizardProps {
 	adding: boolean
 	members: any[]
 	is_cn: boolean
+	teamId?: string
 }
 
 export interface AIMemberValues {
@@ -46,7 +50,8 @@ const AddAIMemberWizard = ({
 	configLoading,
 	adding,
 	members,
-	is_cn
+	is_cn,
+	teamId
 }: AddAIMemberWizardProps) => {
 	// Get default values from config
 	const defaultLLM = config?.robot?.defaults?.llm || 'gpt-4-turbo'
@@ -250,6 +255,10 @@ const AddAIMemberWizard = ({
 				if (!emailPrefix.trim()) {
 					newErrors.email = is_cn ? '请输入邮箱前缀' : 'Please enter email prefix'
 				}
+				// 如果已经有邮箱错误（通过 onBlur 检查得到的），保留该错误
+				if (errors.email && emailPrefix.trim()) {
+					newErrors.email = errors.email
+				}
 				if (!formValues.role) {
 					newErrors.role = is_cn ? '请选择角色' : 'Please select a role'
 				}
@@ -301,6 +310,55 @@ const AddAIMemberWizard = ({
 				delete newErrors[field]
 				return newErrors
 			})
+		}
+	}
+
+	const handleEmailBlur = async () => {
+		// 只有当邮箱前缀不为空时才检查
+		if (!emailPrefix.trim()) {
+			return
+		}
+
+		// 需要 teamId 才能检查
+		if (!teamId) {
+			return
+		}
+
+		// 需要 window.$app?.openapi 才能调用 API
+		if (!window.$app?.openapi) {
+			console.warn('OpenAPI not initialized')
+			return
+		}
+
+		const fullEmail = emailPrefix + emailDomain
+
+		try {
+			const openapi = new OpenAPI(window.$app.openapi.config)
+			const auth = new UserAuth(openapi)
+			const userTeams = new UserTeams(openapi, auth)
+			const response = await userTeams.CheckMemberEmail(teamId, fullEmail)
+
+			if (openapi.IsError(response)) {
+				// API 错误，不显示为邮箱错误
+				console.error('Failed to check email:', response)
+				return
+			}
+
+			if (response.data?.exists) {
+				setErrors((prev) => ({
+					...prev,
+					email: is_cn ? '该邮箱已被使用' : 'This email is already in use'
+				}))
+			} else {
+				// 清除邮箱错误（如果有的话）
+				setErrors((prev) => {
+					const newErrors = { ...prev }
+					delete newErrors.email
+					return newErrors
+				})
+			}
+		} catch (error) {
+			console.error('Failed to check email:', error)
 		}
 	}
 
@@ -393,6 +451,7 @@ In your work, you should maintain a professional, efficient, and responsible att
 											})
 										}
 									}}
+									onBlur={handleEmailBlur}
 									schema={{
 										type: 'string',
 										placeholder: is_cn ? '请输入邮箱前缀' : 'Enter email prefix'
@@ -403,7 +462,22 @@ In your work, you should maintain a professional, efficient, and responsible att
 								<span className={styles.emailAt}>@</span>
 								<Select
 									value={emailDomain}
-									onChange={(value) => setEmailDomain(String(value))}
+									onChange={(value) => {
+										setEmailDomain(String(value))
+										// 清除邮箱错误（如果有的话）
+										if (errors.email) {
+											setErrors((prev) => {
+												const newErrors = { ...prev }
+												delete newErrors.email
+												return newErrors
+											})
+										}
+										// 当域名改变时，如果已有邮箱前缀，重新检查
+										if (emailPrefix.trim()) {
+											// 延迟执行，确保 emailDomain 已更新
+											setTimeout(handleEmailBlur, 100)
+										}
+									}}
 									schema={{
 										type: 'string',
 										enum: emailDomains,
@@ -736,7 +810,11 @@ In your work, you should maintain a professional, efficient, and responsible att
 						</Button>
 					)}
 					{currentStep < steps.length - 1 ? (
-						<Button type='primary' onClick={handleNext} disabled={adding}>
+						<Button
+							type='primary'
+							onClick={handleNext}
+							disabled={adding || (currentStep === 0 && !!errors.email)}
+						>
 							{is_cn ? '下一步' : 'Next'}
 						</Button>
 					) : (

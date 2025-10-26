@@ -706,6 +706,7 @@ const Team = () => {
 				adding={addingAI}
 				members={members}
 				is_cn={is_cn}
+				teamId={team?.team_id}
 			/>
 		</div>
 	)

@@ -144,6 +144,8 @@ export interface InputComponentProps {
 	value?: PropertyValue
 	/** Value change handler */
 	onChange?: (v: PropertyValue) => void
+	/** Blur event handler (called when input loses focus) */
+	onBlur?: () => void
 	/** Error message to display (if any) */
 	error?: string
 	/** Whether the field is in error state */

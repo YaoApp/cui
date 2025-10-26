@@ -151,6 +151,24 @@ export class UserTeams {
 	}
 
 	/**
+	 * Check if email exists in team
+	 * @param teamId Team ID
+	 * @param email Email to check
+	 */
+	async CheckMemberEmail(
+		teamId: string,
+		email: string
+	): Promise<ApiResponse<{ exists: boolean; email: string; team_id: string }>> {
+		const query: Record<string, string> = {
+			email: email
+		}
+		return this.api.Get<{ exists: boolean; email: string; team_id: string }>(
+			`/user/teams/${teamId}/members/check`,
+			query
+		)
+	}
+
+	/**
 	 * Get team member details by member_id
 	 * @param teamId Team ID
 	 * @param memberId Member ID to retrieve

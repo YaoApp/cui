@@ -4,9 +4,13 @@ import ErrorMessage from '../ErrorMessage'
 import styles from './index.less'
 import commonStyles from '../common.less'
 
-export default function Input({ schema, value, onChange, error, hasError }: InputComponentProps) {
+export default function Input({ schema, value, onChange, onBlur, error, hasError }: InputComponentProps) {
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		onChange(e.target.value)
+		onChange?.(e.target.value)
+	}
+
+	const handleBlur = () => {
+		onBlur?.()
 	}
 
 	const inputClass = `${styles.input} ${hasError ? commonStyles.error : ''}`
@@ -18,6 +22,7 @@ export default function Input({ schema, value, onChange, error, hasError }: Inpu
 				type='text'
 				value={String(value || '')}
 				onChange={handleChange}
+				onBlur={handleBlur}
 				placeholder={schema.placeholder}
 				disabled={schema.disabled}
 				readOnly={schema.readOnly}
