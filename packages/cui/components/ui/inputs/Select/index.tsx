@@ -8,7 +8,11 @@ interface GroupedOption {
 	description?: string
 }
 
-export default function Select({ value, onChange, schema, size = 'medium' }: InputComponentProps) {
+interface SelectProps extends InputComponentProps {
+	tabIndex?: number
+}
+
+export default function Select({ value, onChange, schema, size = 'medium', tabIndex = 0 }: SelectProps) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [highlightedIndex, setHighlightedIndex] = useState(-1)
 	const [isDropup, setIsDropup] = useState(false)
@@ -245,7 +249,7 @@ export default function Select({ value, onChange, schema, size = 'medium' }: Inp
 			ref={selectRef}
 			className={`${styles.select} ${styles[size]} ${isOpen ? styles.open : ''}`}
 			onKeyDown={handleKeyDown}
-			tabIndex={0}
+			tabIndex={tabIndex}
 		>
 			{/* 选择框主体 */}
 			<div className={styles.selectTrigger} onClick={() => (isOpen ? setIsOpen(false) : openDropdown())}>

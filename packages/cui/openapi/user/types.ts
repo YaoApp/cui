@@ -713,13 +713,20 @@ export interface TeamMemberDetail extends TeamMember {
 }
 
 /**
- * Request payload for adding a team member directly
+ * Request payload for creating a robot member
  */
-export interface CreateMemberRequest {
-	user_id: string
-	member_type?: string // "user" or "robot"
-	role_id: string
-	settings?: MemberSettings
+export interface CreateRobotMemberRequest {
+	name: string // Display name
+	email: string // Email address
+	bio?: string // Bio/description
+	role: string // Role ID
+	report_to?: string // Direct manager user ID
+	prompt: string // Identity & role prompt (system_prompt)
+	llm?: string // Language model (e.g., "gpt-4")
+	agents?: string[] // Accessible agents
+	mcp_tools?: string[] // MCP servers/tools
+	autonomous_mode?: string // "enabled" or "disabled"
+	cost_limit?: number // Monthly cost limit in USD
 }
 
 /**

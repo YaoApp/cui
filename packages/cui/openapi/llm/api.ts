@@ -5,7 +5,7 @@ import type { LLMProvider, LLMProviderListResponse } from './types'
  * LLM API - OAuth protected LLM provider management
  * Provides access to LLM provider functionality
  */
-export class LLMAPI {
+export class LLM {
 	constructor(private api: OpenAPI) {}
 
 	/**
@@ -13,9 +13,9 @@ export class LLMAPI {
 	 * @returns LLM provider list response
 	 */
 	async ListProviders(): Promise<LLMProvider[]> {
-		const response = await this.api.Get<LLMProviderListResponse>('/llm/providers')
-		const data = this.api.GetData(response) as LLMProviderListResponse
-		return data?.data || []
+		const response = await this.api.Get<LLMProvider[]>('/llm/providers')
+		const data = this.api.GetData(response) as LLMProvider[]
+		return data || []
 	}
 
 	/**

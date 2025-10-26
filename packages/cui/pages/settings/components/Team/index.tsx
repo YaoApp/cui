@@ -10,7 +10,8 @@ import InvitationList from './InvitationList'
 import InviteForm from './InviteForm'
 import TeamEditForm from './TeamEditForm'
 import CreateTeamForm from './CreateTeamForm'
-import AddAIMemberWizard, { AIMemberValues } from './AddAIMemberWizard'
+import AddAIMemberWizard from './AddAIMemberWizard'
+import type { AIMemberValues } from './AddAIMemberWizard'
 import styles from './index.less'
 
 const Team = () => {
@@ -459,18 +460,32 @@ const Team = () => {
 		try {
 			setAddingAI(true)
 
-			// Mock 添加 AI 成员 - 后续对接真实 API
-			await new Promise((resolve) => setTimeout(resolve, 1000))
+			// Call real API to create robot member
+			const response = await apiClient.teams.CreateRobotMember(team.team_id, values)
 
-			// 模拟成功添加
-			console.log('Adding AI member:', values)
+			if (apiClient.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to create robot member')
+			}
+
 			message.success(is_cn ? 'AI 成员添加成功' : 'AI member added successfully')
 
-			// 刷新成员列表
-			// TODO: 后续对接真实 API 后，重新加载成员列表
-		} catch (error) {
+			// Reload members list
+			if (team.team_id) {
+				const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
+					page: 1,
+					pagesize: 100
+				})
+				if (!apiClient.IsError(membersResponse) && membersResponse.data?.data) {
+					setMembers(membersResponse.data.data)
+				}
+			}
+		} catch (error: any) {
 			console.error('Error adding AI member:', error)
-			message.error(is_cn ? '添加 AI 成员失败' : 'Failed to add AI member')
+			message.error(
+				is_cn
+					? `添加 AI 成员失败: ${error.message || '未知错误'}`
+					: `Failed to add AI member: ${error.message || 'Unknown error'}`
+			)
 		} finally {
 			setAddingAI(false)
 		}

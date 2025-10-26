@@ -15,7 +15,7 @@ import type {
  * Agent API - OAuth protected agent (assistant) management
  * Provides access to all agent-related functionality
  */
-export class AgentAPI {
+export class Agent {
 	constructor(private api: OpenAPI) {}
 
 	/**

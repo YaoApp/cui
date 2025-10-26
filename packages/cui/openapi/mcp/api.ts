@@ -5,7 +5,7 @@ import type { MCPServer, MCPServerListResponse } from './types'
  * MCP API - OAuth protected MCP server management
  * Provides access to MCP server functionality
  */
-export class MCPAPI {
+export class MCP {
 	constructor(private api: OpenAPI) {}
 
 	/**
@@ -13,9 +13,9 @@ export class MCPAPI {
 	 * @returns MCP server list response
 	 */
 	async ListServers(): Promise<MCPServer[]> {
-		const response = await this.api.Get<MCPServerListResponse>('/mcp/servers')
-		const data = this.api.GetData(response) as MCPServerListResponse
-		return data?.data || []
+		const response = await this.api.Get<MCPServer[]>('/mcp/servers')
+		const data = this.api.GetData(response) as MCPServer[]
+		return data || []
 	}
 
 	/**

@@ -11,7 +11,7 @@ import {
 	TeamListResponse,
 	TeamMember,
 	TeamMemberDetail,
-	CreateMemberRequest,
+	CreateRobotMemberRequest,
 	UpdateMemberRequest,
 	MemberListResponse,
 	TeamInvitation,
@@ -160,12 +160,15 @@ export class UserTeams {
 	}
 
 	/**
-	 * Add a new team member directly (without invitation)
-	 * @param teamId Team ID to add member to
-	 * @param member Member data to create
+	 * Create a new robot member for the team
+	 * @param teamId Team ID to add robot member to
+	 * @param robot Robot member data to create
 	 */
-	async CreateMember(teamId: string, member: CreateMemberRequest): Promise<ApiResponse<TeamMember>> {
-		return this.api.Post<TeamMember>(`/user/teams/${teamId}/members`, member)
+	async CreateRobotMember(
+		teamId: string,
+		robot: CreateRobotMemberRequest
+	): Promise<ApiResponse<{ member_id: number }>> {
+		return this.api.Post<{ member_id: number }>(`/user/teams/${teamId}/members/robots`, robot)
 	}
 
 	/**

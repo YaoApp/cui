@@ -1,9 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Modal, Tooltip } from 'antd'
 import { Button } from '@/components/ui'
 import { Input, Select, TextArea, CheckboxGroup, RadioGroup, InputNumber } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import { TeamConfig } from '@/openapi/user/types'
+import { Agent as AgentType } from '@/openapi/agent/types'
+import { MCPServer } from '@/openapi/mcp/types'
+import { LLMProvider } from '@/openapi/llm/types'
+import { Agent } from '@/openapi/agent/api'
+import { MCP } from '@/openapi/mcp/api'
+import { LLM } from '@/openapi/llm/api'
 import styles from './index.less'
 import commonStyles from '@/components/ui/inputs/common.less'
 
@@ -42,48 +48,152 @@ const AddAIMemberWizard = ({
 	members,
 	is_cn
 }: AddAIMemberWizardProps) => {
+	// Get default values from config
+	const defaultLLM = config?.robot?.defaults?.llm || 'gpt-4-turbo'
+	const defaultAutonomousMode = config?.robot?.defaults?.autonomous_mode ? 'enabled' : 'disabled'
+	const defaultCostLimit = config?.robot?.defaults?.cost_limit || 100
+	const defaultEmailDomain = config?.robot?.email_domains?.[0]?.domain
+		? `@${config.robot.email_domains[0].domain}`
+		: '@example.com'
+
 	const [currentStep, setCurrentStep] = useState(0)
 	const [formValues, setFormValues] = useState<Partial<AIMemberValues>>({
 		role: config?.roles?.find((role) => role.default)?.role_id || 'team_member',
-		llm: 'gpt-4-turbo',
-		autonomous_mode: 'enabled',
-		cost_limit: 100
+		llm: defaultLLM,
+		autonomous_mode: defaultAutonomousMode,
+		cost_limit: defaultCostLimit
 	})
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [generatingPrompt, setGeneratingPrompt] = useState(false)
 	const [emailPrefix, setEmailPrefix] = useState('')
-	const [emailDomain, setEmailDomain] = useState('@example.com')
+	const [emailDomain, setEmailDomain] = useState(defaultEmailDomain)
 
-	// Mock 邮箱域名列表 - 后续从配置读取
-	const emailDomains = [
-		{ label: 'example.com', value: '@example.com' },
-		{ label: 'company.com', value: '@company.com' },
-		{ label: 'yaoapp.com', value: '@yaoapp.com' }
-	]
+	// API data states
+	const [agents, setAgents] = useState<AgentType[]>([])
+	const [agentsLoading, setAgentsLoading] = useState(false)
+	const [mcpServers, setMCPServers] = useState<MCPServer[]>([])
+	const [mcpLoading, setMCPLoading] = useState(false)
+	const [llmProviders, setLLMProviders] = useState<LLMProvider[]>([])
+	const [llmLoading, setLLMLoading] = useState(false)
 
-	// Mock 数据 - 后续对接后端
-	const mockLLMs = [
-		{ label: 'GPT-4 Turbo', value: 'gpt-4-turbo' },
-		{ label: 'GPT-4', value: 'gpt-4' },
-		{ label: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo' },
-		{ label: 'Claude 3 Opus', value: 'claude-3-opus' },
-		{ label: 'Claude 3 Sonnet', value: 'claude-3-sonnet' }
-	]
-	const mockAgents = [
-		{ label: is_cn ? '数据分析助手' : 'Data Analysis Assistant', value: 'data-analyst' },
-		{ label: is_cn ? '代码审查助手' : 'Code Review Assistant', value: 'code-reviewer' },
-		{ label: is_cn ? '文档生成助手' : 'Documentation Assistant', value: 'doc-generator' },
-		{ label: is_cn ? '测试助手' : 'Testing Assistant', value: 'tester' },
-		{ label: is_cn ? '项目管理助手' : 'Project Manager', value: 'project-manager' }
-	]
-	const mockMCPTools = [
-		{ label: is_cn ? '文件系统访问' : 'File System Access', value: 'filesystem' },
-		{ label: is_cn ? '数据库查询' : 'Database Query', value: 'database' },
-		{ label: is_cn ? 'API调用' : 'API Call', value: 'api' },
-		{ label: is_cn ? 'Git操作' : 'Git Operations', value: 'git' },
-		{ label: is_cn ? '终端命令' : 'Terminal Command', value: 'terminal' },
-		{ label: is_cn ? '网络搜索' : 'Web Search', value: 'web-search' }
-	]
+	// Use refs to track if data has been loaded to avoid infinite loops
+	const agentsLoadedRef = useRef(false)
+	const mcpLoadedRef = useRef(false)
+	const llmLoadedRef = useRef(false)
+
+	// Update form defaults when config changes
+	useEffect(() => {
+		if (config) {
+			setFormValues((prev) => ({
+				...prev,
+				role: config.roles?.find((role) => role.default)?.role_id || prev.role,
+				llm: config.robot?.defaults?.llm || prev.llm,
+				autonomous_mode: config.robot?.defaults?.autonomous_mode ? 'enabled' : 'disabled',
+				cost_limit: config.robot?.defaults?.cost_limit || prev.cost_limit
+			}))
+
+			if (config.robot?.email_domains?.[0]?.domain) {
+				setEmailDomain(`@${config.robot.email_domains[0].domain}`)
+			}
+		}
+	}, [config])
+
+	// Load API data when user navigates to step 3 (AI Settings)
+	useEffect(() => {
+		if (currentStep === 2 && visible && window.$app?.openapi) {
+			const openapi = window.$app.openapi
+
+			// Initialize API instances
+			const agentAPI = new Agent(openapi)
+			const mcpAPI = new MCP(openapi)
+			const llmAPI = new LLM(openapi)
+
+			// Load agents - only once
+			if (!agentsLoadedRef.current && !agentsLoading) {
+				agentsLoadedRef.current = true
+				setAgentsLoading(true)
+				agentAPI
+					.List({})
+					.then((response) => {
+						console.log('Agents loaded:', response)
+						if (response?.data) {
+							setAgents(response.data)
+						}
+					})
+					.catch((error) => {
+						console.error('Failed to load agents:', error)
+						agentsLoadedRef.current = false // Allow retry on error
+					})
+					.finally(() => {
+						setAgentsLoading(false)
+					})
+			}
+
+			// Load MCP servers - only once
+			if (!mcpLoadedRef.current && !mcpLoading) {
+				mcpLoadedRef.current = true
+				setMCPLoading(true)
+				mcpAPI.ListServers()
+					.then((servers) => {
+						console.log('MCP servers loaded:', servers)
+						if (servers) {
+							setMCPServers(servers)
+						}
+					})
+					.catch((error) => {
+						console.error('Failed to load MCP servers:', error)
+						mcpLoadedRef.current = false // Allow retry on error
+					})
+					.finally(() => {
+						setMCPLoading(false)
+					})
+			}
+
+			// Load LLM providers - only once
+			if (!llmLoadedRef.current && !llmLoading) {
+				llmLoadedRef.current = true
+				setLLMLoading(true)
+				llmAPI.ListProviders()
+					.then((providers) => {
+						if (providers && Array.isArray(providers)) {
+							setLLMProviders(providers)
+						}
+					})
+					.catch((error) => {
+						console.error('Failed to load LLM providers:', error)
+						llmLoadedRef.current = false // Allow retry on error
+					})
+					.finally(() => {
+						setLLMLoading(false)
+					})
+			}
+		}
+	}, [currentStep, visible])
+
+	// Email domains from config
+	const emailDomains =
+		config?.robot?.email_domains?.map((domain) => ({
+			label: domain.domain || '',
+			value: `@${domain.domain || ''}`
+		})) || []
+
+	// Transform LLM providers to select options
+	const llmOptions = (llmProviders || []).map((provider) => ({
+		label: provider.label,
+		value: provider.value
+	}))
+
+	// Transform agents to select options
+	const agentOptions = (agents || []).map((agent) => ({
+		label: agent.name,
+		value: agent.assistant_id
+	}))
+
+	// Transform MCP servers to select options
+	const mcpOptions = (mcpServers || []).map((server) => ({
+		label: server.label || server.name,
+		value: server.value || server.name
+	}))
 
 	const roleOptions =
 		config?.roles
@@ -110,14 +220,22 @@ const AddAIMemberWizard = ({
 	const handleClose = () => {
 		setFormValues({
 			role: config?.roles?.find((role) => role.default)?.role_id || 'team_member',
-			llm: 'gpt-4-turbo',
-			autonomous_mode: 'enabled',
-			cost_limit: 100
+			llm: defaultLLM,
+			autonomous_mode: defaultAutonomousMode,
+			cost_limit: defaultCostLimit
 		})
 		setErrors({})
 		setCurrentStep(0)
 		setEmailPrefix('')
-		setEmailDomain('@example.com')
+		setEmailDomain(defaultEmailDomain)
+		// Reset API data
+		setAgents([])
+		setMCPServers([])
+		setLLMProviders([])
+		// Reset loaded refs
+		agentsLoadedRef.current = false
+		mcpLoadedRef.current = false
+		llmLoadedRef.current = false
 		onClose()
 	}
 
@@ -142,9 +260,7 @@ const AddAIMemberWizard = ({
 				}
 				break
 			case 2:
-				if (!formValues.llm) {
-					newErrors.llm = is_cn ? '请选择语言模型' : 'Please select language model'
-				}
+				// LLM is optional, no validation needed
 				break
 		}
 
@@ -268,7 +384,7 @@ In your work, you should maintain a professional, efficient, and responsible att
 								<Input
 									value={emailPrefix}
 									onChange={(value) => {
-										setEmailPrefix(value)
+										setEmailPrefix(String(value))
 										if (errors.email) {
 											setErrors((prev) => {
 												const newErrors = { ...prev }
@@ -287,7 +403,7 @@ In your work, you should maintain a professional, efficient, and responsible att
 								<span className={styles.emailAt}>@</span>
 								<Select
 									value={emailDomain}
-									onChange={(value) => setEmailDomain(value)}
+									onChange={(value) => setEmailDomain(String(value))}
 									schema={{
 										type: 'string',
 										enum: emailDomains,
@@ -295,6 +411,7 @@ In your work, you should maintain a professional, efficient, and responsible att
 									}}
 									error=''
 									hasError={false}
+									tabIndex={-1}
 								/>
 							</div>
 							{errors.email && (
@@ -460,25 +577,32 @@ In your work, you should maintain a professional, efficient, and responsible att
 				return (
 					<div className={styles.stepContent}>
 						<div className={styles.formRowThree}>
-							<div className={styles.formItemThird}>
-								<label className={styles.formLabel}>
-									{is_cn ? '语言模型' : 'Language Model'}
-									<span className={styles.required}>*</span>
-								</label>
-								<Select
-									value={formValues.llm}
-									onChange={(value) => handleFieldChange('llm', value)}
-									schema={{
-										type: 'string',
-										enum: mockLLMs,
-										placeholder: is_cn
-											? '选择语言模型'
-											: 'Select language model'
-									}}
-									error={errors.llm || ''}
-									hasError={!!errors.llm}
-								/>
-							</div>
+							{/* Only show LLM selector if there are providers available */}
+							{llmOptions.length > 0 && (
+								<div className={styles.formItemThird}>
+									<label className={styles.formLabel}>
+										{is_cn ? '语言模型' : 'Language Model'}
+										{llmLoading && (
+											<span className={styles.loadingHint}>
+												{is_cn ? ' (加载中...)' : ' (Loading...)'}
+											</span>
+										)}
+									</label>
+									<Select
+										value={formValues.llm}
+										onChange={(value) => handleFieldChange('llm', value)}
+										schema={{
+											type: 'string',
+											enum: llmOptions,
+											placeholder: is_cn
+												? '选择语言模型'
+												: 'Select language model'
+										}}
+										error={errors.llm || ''}
+										hasError={!!errors.llm}
+									/>
+								</div>
+							)}
 
 							<div className={styles.formItemThird}>
 								<label className={styles.formLabel}>
@@ -491,9 +615,7 @@ In your work, you should maintain a professional, efficient, and responsible att
 										type: 'number',
 										placeholder: is_cn
 											? '设置每月消费上限'
-											: 'Set monthly cost limit',
-										min: 0,
-										max: 10000
+											: 'Set monthly cost limit'
 									}}
 									error=''
 									hasError={false}
@@ -544,37 +666,53 @@ In your work, you should maintain a professional, efficient, and responsible att
 							</div>
 						</div>
 
-						<div className={styles.formItem}>
-							<label className={styles.formLabel}>
-								{is_cn ? '可访问的智能体' : 'Accessible Agents'}
-							</label>
-							<CheckboxGroup
-								value={formValues.agents}
-								onChange={(value) => handleFieldChange('agents', value)}
-								schema={{
-									type: 'array',
-									enum: mockAgents
-								}}
-								error=''
-								hasError={false}
-							/>
-						</div>
+						{/* Only show Agents selector if there are agents available */}
+						{agentOptions.length > 0 && (
+							<div className={styles.formItem}>
+								<label className={styles.formLabel}>
+									{is_cn ? '可访问的智能体' : 'Accessible Agents'}
+									{agentsLoading && (
+										<span className={styles.loadingHint}>
+											{is_cn ? ' (加载中...)' : ' (Loading...)'}
+										</span>
+									)}
+								</label>
+								<CheckboxGroup
+									value={formValues.agents}
+									onChange={(value) => handleFieldChange('agents', value)}
+									schema={{
+										type: 'array',
+										enum: agentOptions
+									}}
+									error=''
+									hasError={false}
+								/>
+							</div>
+						)}
 
-						<div className={styles.formItem}>
-							<label className={styles.formLabel}>
-								{is_cn ? '可使用的工具' : 'Available Tools'}
-							</label>
-							<CheckboxGroup
-								value={formValues.mcp_tools}
-								onChange={(value) => handleFieldChange('mcp_tools', value)}
-								schema={{
-									type: 'array',
-									enum: mockMCPTools
-								}}
-								error=''
-								hasError={false}
-							/>
-						</div>
+						{/* Only show Tools selector if there are MCP servers available */}
+						{mcpOptions.length > 0 && (
+							<div className={styles.formItem}>
+								<label className={styles.formLabel}>
+									{is_cn ? '可使用的工具' : 'Available Tools'}
+									{mcpLoading && (
+										<span className={styles.loadingHint}>
+											{is_cn ? ' (加载中...)' : ' (Loading...)'}
+										</span>
+									)}
+								</label>
+								<CheckboxGroup
+									value={formValues.mcp_tools}
+									onChange={(value) => handleFieldChange('mcp_tools', value)}
+									schema={{
+										type: 'array',
+										enum: mcpOptions
+									}}
+									error=''
+									hasError={false}
+								/>
+							</div>
+						)}
 					</div>
 				)
 
