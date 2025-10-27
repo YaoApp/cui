@@ -699,6 +699,7 @@ export interface TeamMember {
 	bio: string | null
 	avatar: string | null
 	email: string | null
+	robot_email: string | null // Globally unique email for robot members
 	role_id: string
 	is_owner: number | boolean // 0/1 or boolean
 	status: string // "pending" | "active" | "inactive" | "suspended"
@@ -722,6 +723,8 @@ export interface TeamMemberDetail extends TeamMember {
 	// Robot-specific fields (only for robot members)
 	system_prompt?: string | null
 	manager_id?: string | null
+	authorized_senders?: string[] | null // Whitelist of emails authorized to send commands to this robot
+	email_filter_rules?: string[] | null // Email filtering rules (supports regex patterns)
 	robot_config?: Record<string, any> | null
 	agents?: string[] | null
 	mcp_servers?: string[] | null
@@ -742,7 +745,10 @@ export interface TeamMemberDetail extends TeamMember {
  */
 export interface CreateRobotMemberRequest {
 	name: string // Display name
-	email: string // Email address
+	email?: string // Email address for display (optional)
+	robot_email: string // Robot's globally unique email address (required)
+	authorized_senders?: string[] // Whitelist of emails authorized to send commands to this robot
+	email_filter_rules?: string[] // Email filtering rules (supports regex patterns)
 	bio?: string // Bio/description
 	role: string // Role ID
 	report_to?: string // Direct manager user ID
@@ -770,6 +776,10 @@ export interface UpdateMemberRequest {
 export interface UpdateRobotMemberRequest {
 	name?: string // Display name
 	bio?: string // Bio/description
+	email?: string // Email address for display (optional)
+	robot_email?: string // Robot's globally unique email address
+	authorized_senders?: string[] // Whitelist of emails authorized to send commands to this robot
+	email_filter_rules?: string[] // Email filtering rules (supports regex patterns)
 	role?: string // Role ID
 	report_to?: string // Direct manager user ID
 	prompt?: string // Identity & role prompt (system_prompt)

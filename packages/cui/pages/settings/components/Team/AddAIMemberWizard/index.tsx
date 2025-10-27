@@ -30,7 +30,8 @@ interface AddAIMemberWizardProps {
 
 export interface AIMemberValues {
 	name: string
-	email: string
+	email?: string // Display-only email for robot (optional)
+	robot_email: string // Globally unique robot email (required)
 	bio?: string
 	role: string
 	report_to?: string
@@ -332,9 +333,10 @@ const AddAIMemberWizard = ({
 	const handleSubmit = async () => {
 		if (validateStep(currentStep)) {
 			try {
-				// 组合完整邮箱地址
+				// 组合完整邮箱地址 - robot_email 是必填的
 				const fullEmail = emailPrefix + emailDomain
-				await onAdd({ ...formValues, email: fullEmail } as AIMemberValues)
+				// 只设置 robot_email（全局唯一），不自动补充 email
+				await onAdd({ ...formValues, robot_email: fullEmail } as AIMemberValues)
 				handleClose()
 			} catch (error) {
 				console.error('Submit failed:', error)
@@ -377,18 +379,19 @@ const AddAIMemberWizard = ({
 			const openapi = new OpenAPI(window.$app.openapi.config)
 			const auth = new UserAuth(openapi)
 			const userTeams = new UserTeams(openapi, auth)
-			const response = await userTeams.CheckMemberEmail(teamId, fullEmail)
+			// 使用新的 CheckRobotEmail 方法检查全局唯一性
+			const response = await userTeams.CheckRobotEmail(teamId, fullEmail)
 
 			if (openapi.IsError(response)) {
 				// API 错误，不显示为邮箱错误
-				console.error('Failed to check email:', response)
+				console.error('Failed to check robot email:', response)
 				return
 			}
 
 			if (response.data?.exists) {
 				setErrors((prev) => ({
 					...prev,
-					email: is_cn ? '该邮箱已被使用' : 'This email is already in use'
+					email: is_cn ? '该机器人邮箱已被使用' : 'This robot email is already in use'
 				}))
 			} else {
 				// 清除邮箱错误（如果有的话）
@@ -399,7 +402,7 @@ const AddAIMemberWizard = ({
 				})
 			}
 		} catch (error) {
-			console.error('Failed to check email:', error)
+			console.error('Failed to check robot email:', error)
 		}
 	}
 
@@ -890,6 +893,8 @@ In your work, you should maintain a professional, efficient, and responsible att
 			className={styles.wizardModal}
 			destroyOnClose
 			closable={false}
+			maskClosable={false}
+			keyboard={false}
 		>
 			<div className={styles.wizardContent}>
 				<div className={styles.stepsContainer}>

@@ -31,7 +31,8 @@ interface EditAIMemberProps {
 
 export interface AIMemberValues {
 	name: string
-	email: string
+	email?: string // Display-only email for robot (optional)
+	robot_email: string // Globally unique robot email (required)
 	bio?: string
 	role: string
 	report_to?: string
@@ -99,12 +100,15 @@ const EditAIMember = ({
 
 				const memberDetail = response.data as any
 
-				// 拆分邮箱为前缀和域名
-				const email = memberDetail.email || ''
-				const atIndex = email.indexOf('@')
+				// Debug: 打印数据结构以便调试
+				console.log('Loading member detail:', { memberDetail })
+
+				// 拆分机器人邮箱为前缀和域名（机器人必须使用 robot_email 字段）
+				const robotEmail = memberDetail.robot_email || ''
+				const atIndex = robotEmail.indexOf('@')
 				if (atIndex > 0) {
-					setEmailPrefix(email.substring(0, atIndex))
-					setEmailDomain(`@${email.substring(atIndex + 1)}`)
+					setEmailPrefix(robotEmail.substring(0, atIndex))
+					setEmailDomain(`@${robotEmail.substring(atIndex + 1)}`)
 				} else {
 					setEmailPrefix('')
 					setEmailDomain(
@@ -114,12 +118,10 @@ const EditAIMember = ({
 					)
 				}
 
-				// Debug: 打印数据结构以便调试
-				console.log('Loading member detail:', { memberDetail })
-
 				setFormValues({
 					name: memberDetail.display_name || '',
-					email: memberDetail.email || '',
+					robot_email: memberDetail.robot_email || '', // Use robot_email as the primary field
+					email: memberDetail.email || '', // Display-only email (optional)
 					bio: memberDetail.bio || '',
 					role: memberDetail.role_id || '',
 					report_to: memberDetail.manager_id || '',
@@ -328,9 +330,13 @@ const EditAIMember = ({
 	const handleSubmit = async () => {
 		if (validateForm() && member) {
 			try {
-				// 组合完整邮箱地址
+				// 组合完整邮箱地址 - robot_email 是必填的
 				const fullEmail = emailPrefix + emailDomain
-				await onUpdate(member.member_id, { ...formValues, email: fullEmail } as AIMemberValues)
+				// 只设置 robot_email（全局唯一），不自动补充 email
+				await onUpdate(member.member_id, {
+					...formValues,
+					robot_email: fullEmail
+				} as AIMemberValues)
 				handleClose()
 			} catch (error) {
 				console.error('Submit failed:', error)
@@ -368,8 +374,8 @@ const EditAIMember = ({
 
 		const fullEmail = emailPrefix + emailDomain
 
-		// 如果邮箱没有改变，不需要检查
-		if (fullEmail === member?.email) {
+		// 如果机器人邮箱没有改变，不需要检查（机器人只使用 robot_email）
+		if (fullEmail === member?.robot_email) {
 			return
 		}
 
@@ -377,18 +383,19 @@ const EditAIMember = ({
 			const openapi = new OpenAPI(window.$app.openapi.config)
 			const auth = new UserAuth(openapi)
 			const userTeams = new UserTeams(openapi, auth)
-			const response = await userTeams.CheckMemberEmail(teamId, fullEmail)
+			// 使用新的 CheckRobotEmail 方法检查全局唯一性
+			const response = await userTeams.CheckRobotEmail(teamId, fullEmail)
 
 			if (openapi.IsError(response)) {
 				// API 错误，不显示为邮箱错误
-				console.error('Failed to check email:', response)
+				console.error('Failed to check robot email:', response)
 				return
 			}
 
 			if (response.data?.exists) {
 				setErrors((prev) => ({
 					...prev,
-					email: is_cn ? '该邮箱已被使用' : 'This email is already in use'
+					email: is_cn ? '该机器人邮箱已被使用' : 'This robot email is already in use'
 				}))
 			} else {
 				// 清除邮箱错误（如果有的话）
@@ -399,7 +406,7 @@ const EditAIMember = ({
 				})
 			}
 		} catch (error) {
-			console.error('Failed to check email:', error)
+			console.error('Failed to check robot email:', error)
 		}
 	}
 
@@ -797,6 +804,8 @@ const EditAIMember = ({
 			className={styles.editModal}
 			destroyOnClose
 			closable={false}
+			maskClosable={false}
+			keyboard={false}
 		>
 			<div className={styles.modalContent}>
 				<div className={styles.tabsContainer}>

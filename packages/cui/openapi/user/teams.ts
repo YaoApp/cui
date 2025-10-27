@@ -152,19 +152,19 @@ export class UserTeams {
 	}
 
 	/**
-	 * Check if email exists in team
-	 * @param teamId Team ID
-	 * @param email Email to check
+	 * Check if robot email exists globally
+	 * @param teamId Team ID (for access control)
+	 * @param robotEmail Robot email to check
 	 */
-	async CheckMemberEmail(
+	async CheckRobotEmail(
 		teamId: string,
-		email: string
-	): Promise<ApiResponse<{ exists: boolean; email: string; team_id: string }>> {
+		robotEmail: string
+	): Promise<ApiResponse<{ exists: boolean; robot_email: string }>> {
 		const query: Record<string, string> = {
-			email: email
+			robot_email: robotEmail
 		}
-		return this.api.Get<{ exists: boolean; email: string; team_id: string }>(
-			`/user/teams/${teamId}/members/check`,
+		return this.api.Get<{ exists: boolean; robot_email: string }>(
+			`/user/teams/${teamId}/members/check-robot-email`,
 			query
 		)
 	}

@@ -115,6 +115,8 @@ const InviteForm = ({
 			className={styles.inviteModal}
 			destroyOnClose
 			closable={false}
+			maskClosable={false}
+			keyboard={false}
 		>
 			<div className={styles.modalContent}>
 				<div className={styles.inviteOptions}>

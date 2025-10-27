@@ -39,6 +39,9 @@ const AIItem = ({ member, is_cn, getRoleDisplayName, onRemove, onEdit }: AIItemP
 		name: displayName
 	} as any
 
+	// AI members use robot_email (globally unique), fallback to email for display
+	const robotEmail = member.robot_email || member.email
+
 	return (
 		<div className={styles.memberCard}>
 			<div className={styles.memberInfo}>
@@ -48,10 +51,10 @@ const AIItem = ({ member, is_cn, getRoleDisplayName, onRemove, onEdit }: AIItemP
 				<div className={styles.memberDetails}>
 					<div className={styles.memberName}>
 						{displayName}
-						{member.email && (
-							<Tooltip title={member.email}>
+						{robotEmail && (
+							<Tooltip title={robotEmail}>
 								<a
-									href={`mailto:${member.email}`}
+									href={`mailto:${robotEmail}`}
 									className={styles.emailIcon}
 									onClick={(e) => e.stopPropagation()}
 								>

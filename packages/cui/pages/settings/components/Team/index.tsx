@@ -498,6 +498,8 @@ const Team = () => {
 			// Call real API to update robot member
 			const response = await apiClient.teams.UpdateRobotMember(team.team_id, memberId, {
 				name: values.name,
+				robot_email: values.robot_email, // Globally unique robot email (required)
+				email: values.email, // Display-only email (optional)
 				bio: values.bio,
 				role: values.role,
 				report_to: values.report_to,
