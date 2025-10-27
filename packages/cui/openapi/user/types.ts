@@ -528,6 +528,7 @@ export interface UserTeamDetail extends UserTeam {
 export interface CreateTeamRequest {
 	name: string
 	description?: string
+	logo?: string // Team logo URL or file ID
 	settings?: TeamSettings
 	locale?: string // Locale for default team configuration (e.g., type)
 }
@@ -538,6 +539,7 @@ export interface CreateTeamRequest {
 export interface UpdateTeamRequest {
 	name?: string
 	description?: string
+	logo?: string
 	settings?: TeamSettings
 }
 

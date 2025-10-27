@@ -3,6 +3,7 @@ import { Form, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
+import UserAvatar from '@/widgets/UserAvatar'
 import { User } from '@/openapi/user'
 import { CreateTeamRequest, UserTeamDetail, TeamMember, TeamInvitation, TeamConfig } from '@/openapi/user/types'
 import MemberList from './MemberList'
@@ -94,7 +95,8 @@ const Team = () => {
 					setTeam(teamResponse.data)
 					teamForm.setFieldsValue({
 						name: teamResponse.data.name,
-						description: teamResponse.data.description
+						description: teamResponse.data.description,
+						avatar: teamResponse.data.logo
 					})
 
 					// 加载成员数据（包括待处理的邀请）
@@ -219,7 +221,8 @@ const Team = () => {
 					setTeam(teamDetailResponse.data)
 					teamForm.setFieldsValue({
 						name: teamDetailResponse.data.name,
-						description: teamDetailResponse.data.description
+						description: teamDetailResponse.data.description,
+						avatar: teamDetailResponse.data.logo
 					})
 				} else {
 					// 如果获取详情失败，使用基本信息构造UserTeamDetail类型
@@ -229,7 +232,8 @@ const Team = () => {
 					})
 					teamForm.setFieldsValue({
 						name: newTeam.name,
-						description: newTeam.description
+						description: newTeam.description,
+						avatar: newTeam.logo
 					})
 				}
 
@@ -272,8 +276,8 @@ const Team = () => {
 			// 构建更新请求数据
 			const updateTeamRequest = {
 				name: values.name,
-				description: values.description || undefined
-				// TODO: 后续支持avatar更新
+				description: values.description || undefined,
+				logo: values.avatar || undefined // avatar 字段映射到 logo
 			}
 
 			// 调用真实的团队更新API
@@ -584,6 +588,42 @@ const Team = () => {
 		}
 	}
 
+	/**
+	 * 更新团队头像
+	 * @param avatar - 头像地址（wrapper 格式，如 __yao.attachment://file123）
+	 * @param fileId - 文件 ID
+	 */
+	const handleUpdateTeamAvatar = async (avatar: string, fileId: string) => {
+		if (!apiClient || !team) {
+			throw new Error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
+		}
+
+		try {
+			// Call API to update team logo (avatar is in wrapper format: {uploaderID}://{fileID})
+			const response = await apiClient.teams.UpdateTeam(team.team_id, {
+				logo: avatar
+			})
+
+			if (apiClient.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to update team logo')
+			}
+
+			// Update local team state
+			if (response.data) {
+				setTeam((prevTeam) => ({
+					...prevTeam!,
+					logo: avatar
+				}))
+			}
+
+			message.success(is_cn ? '团队头像更新成功' : 'Team avatar updated successfully')
+		} catch (error: any) {
+			console.error('Error updating team avatar:', error)
+			message.error(is_cn ? '团队头像更新失败' : 'Failed to update team avatar')
+			throw error
+		}
+	}
+
 	if (loading) {
 		return (
 			<div className={styles.team}>
@@ -682,7 +722,11 @@ const Team = () => {
 									icon={<Icon name='icon-x' size={12} />}
 									onClick={() => {
 										setEditingTeam(false)
-										teamForm.setFieldsValue(team)
+										teamForm.setFieldsValue({
+											name: team?.name,
+											description: team?.description,
+											avatar: team?.logo
+										})
 									}}
 									disabled={updatingTeam}
 								>
@@ -695,7 +739,11 @@ const Team = () => {
 								size='small'
 								icon={<Icon name='material-edit' size={12} />}
 								onClick={() => {
-									teamForm.setFieldsValue(team)
+									teamForm.setFieldsValue({
+										name: team?.name,
+										description: team?.description,
+										avatar: team?.logo
+									})
 									setEditingTeam(true)
 								}}
 								disabled={loading || configLoading}
@@ -711,13 +759,27 @@ const Team = () => {
 							team={team}
 							onFinish={handleUpdateTeam}
 							is_cn={is_cn}
+							uploader={config?.uploader || '__yao.attachment'}
+							avatarAgent={config?.avatar_agent}
 						/>
 					) : (
 						<div className={styles.teamHeader}>
 							<div className={styles.teamAvatar}>
-								<div className={styles.avatarPlaceholder}>
-									<Icon name='material-group' size={24} />
-								</div>
+								<UserAvatar
+									size='xl'
+									shape='square'
+									borderRadius={12}
+									user={{
+										id: team?.team_id || '',
+										type: 'team' as const,
+										avatar: team?.logo,
+										name: team?.name || 'Team'
+									}}
+									forcePersonal={true}
+									uploader={config?.uploader || '__yao.attachment'}
+									avatarAgent={config?.avatar_agent}
+									onUploadSuccess={handleUpdateTeamAvatar}
+								/>
 							</div>
 							<div className={styles.teamInfo}>
 								<h3 className={styles.teamName}>{team?.name}</h3>

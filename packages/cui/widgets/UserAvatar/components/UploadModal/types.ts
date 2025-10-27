@@ -9,6 +9,8 @@ export interface UploadModalProps {
 	uploader?: string
 	/** Avatar agent ID for AI generation (optional) */
 	avatarAgent?: string
+	/** Modal title (optional, defaults based on locale) */
+	modalTitle?: string
 }
 
 export interface UploadedFile {

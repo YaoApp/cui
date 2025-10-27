@@ -13,10 +13,12 @@ const UploadModal: React.FC<UploadModalProps> = ({
 	onClose,
 	onSuccess,
 	uploader = '__yao.attachment',
-	avatarAgent
+	avatarAgent,
+	modalTitle
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+	const defaultTitle = is_cn ? '设置头像' : 'Set Avatar'
 
 	const [activeTab, setActiveTab] = useState('upload')
 	const [confirming, setConfirming] = useState(false)
@@ -67,7 +69,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
 				<div className={styles.modalHeader}>
 					<div className={styles.titleSection}>
 						<Icon name='material-account_circle' size={18} className={styles.titleIcon} />
-						<span className={styles.modalTitle}>{is_cn ? '设置头像' : 'Set Avatar'}</span>
+						<span className={styles.modalTitle}>{modalTitle || defaultTitle}</span>
 					</div>
 					<div className={styles.closeButton} onClick={onClose}>
 						<Icon name='material-close' size={18} className={styles.closeIcon} />

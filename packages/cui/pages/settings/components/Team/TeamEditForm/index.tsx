@@ -1,6 +1,7 @@
 import { Form, FormInstance } from 'antd'
-import { Input, Avatar } from '@/components/ui/inputs'
+import { Input } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
+import UserAvatar from '@/widgets/UserAvatar'
 import { UserTeamDetail } from '@/openapi/user/types'
 import styles from './index.less'
 
@@ -9,27 +10,47 @@ interface TeamEditFormProps {
 	team: UserTeamDetail | null
 	onFinish: (values: { name: string; description?: string; avatar?: string }) => Promise<void>
 	is_cn: boolean
+	uploader?: string
+	avatarAgent?: string
 }
 
-const TeamEditForm = ({ form, team, onFinish, is_cn }: TeamEditFormProps) => {
+const TeamEditForm = ({
+	form,
+	team,
+	onFinish,
+	is_cn,
+	uploader = '__yao.attachment',
+	avatarAgent
+}: TeamEditFormProps) => {
+	// 监听表单的 avatar 字段变化
+	const formAvatar = Form.useWatch('avatar', form)
+
+	const handleAvatarUploadSuccess = (avatarWrapper: string, fileId: string) => {
+		// avatarWrapper 是 wrapper 格式，如 __yao.attachment://file123
+		form.setFieldsValue({ avatar: avatarWrapper })
+	}
+
 	return (
 		<div className={styles.editTeamContainer}>
 			{/* Avatar Section - Always Centered */}
 			<div className={styles.avatarSection}>
-				<Avatar
-					schema={{
-						type: 'string',
-						variant: 'large',
-						userName: team?.name || '',
-						placeholder: is_cn ? '更换团队头像' : 'Change Team Avatar',
-						readOnly: false
+				<UserAvatar
+					mode='form'
+					size='xl'
+					shape='square'
+					borderRadius={12}
+					buttonText={is_cn ? '更换团队头像' : 'Change Team Avatar'}
+					modalTitle={is_cn ? '设置团队头像' : 'Set Team Avatar'}
+					user={{
+						id: team?.team_id || '',
+						type: 'team',
+						name: team?.name || '',
+						avatar: formAvatar || team?.logo // 优先使用表单字段的值
 					}}
-					value={undefined}
-					onChange={(value) => {
-						form.setFieldsValue({ avatar: value })
-					}}
-					error=''
-					hasError={false}
+					forcePersonal={true}
+					uploader={uploader}
+					avatarAgent={avatarAgent}
+					onUploadSuccess={handleAvatarUploadSuccess}
 				/>
 			</div>
 
