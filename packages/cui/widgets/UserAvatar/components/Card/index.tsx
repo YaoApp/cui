@@ -2,20 +2,20 @@ import { FC, useState } from 'react'
 import { Divider } from 'antd'
 import { getLocale } from '@umijs/max'
 import { Icon } from '@/widgets'
-import type { UserAvatarCardProps } from './types'
-import './styles.less'
+import type { CardProps } from './types'
+import './index.less'
 
-const UserAvatarCard: FC<UserAvatarCardProps> = ({ user, isTeam, className }) => {
+const Card: FC<CardProps> = ({ user, isTeam, className }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [avatarError, setAvatarError] = useState(false)
 	const [teamLogoError, setTeamLogoError] = useState(false)
 
 	return (
-		<div className={`user-avatar-card ${className || ''}`}>
-			<div className='user-avatar-card-header'>
+		<div className={`avatar-card ${className || ''}`}>
+			<div className='avatar-card-header'>
 				{/* Large Avatar */}
-				<div className='user-avatar-card-avatar'>
+				<div className='avatar-card-avatar'>
 					{isTeam && user.team ? (
 						<div className='avatar-team'>
 							<div className='avatar-team-logo'>
@@ -69,8 +69,8 @@ const UserAvatarCard: FC<UserAvatarCardProps> = ({ user, isTeam, className }) =>
 				</div>
 
 				{/* User Info */}
-				<div className='user-avatar-card-content'>
-					<div className='user-avatar-card-name'>
+				<div className='avatar-card-content'>
+					<div className='avatar-card-name'>
 						{isTeam && user.team?.name ? (
 							<>
 								<span>{user.name}</span>
@@ -81,7 +81,7 @@ const UserAvatarCard: FC<UserAvatarCardProps> = ({ user, isTeam, className }) =>
 							<span>{user.name}</span>
 						)}
 					</div>
-					<div className='user-avatar-card-tags'>
+					<div className='avatar-card-tags'>
 						<span className='tag-item'>
 							<Icon name={isTeam ? 'material-group' : 'material-person'} size={14} />
 							<span>
@@ -113,7 +113,7 @@ const UserAvatarCard: FC<UserAvatarCardProps> = ({ user, isTeam, className }) =>
 			{(user.mobile || (isTeam && user.tenant_id)) && (
 				<>
 					<Divider style={{ margin: '6px 0' }} />
-					<div className='user-avatar-card-info'>
+					<div className='avatar-card-info'>
 						{user.mobile && (
 							<div className='info-item'>
 								<span className='label'>{is_cn ? '手机：' : 'Mobile:'}</span>
@@ -133,4 +133,5 @@ const UserAvatarCard: FC<UserAvatarCardProps> = ({ user, isTeam, className }) =>
 	)
 }
 
-export default UserAvatarCard
+export default Card
+

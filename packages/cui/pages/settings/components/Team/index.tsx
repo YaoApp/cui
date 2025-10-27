@@ -542,6 +542,48 @@ const Team = () => {
 		}
 	}
 
+	/**
+	 * 更新 AI 成员头像
+	 * @param memberId - 成员 ID
+	 * @param avatar - 头像地址（wrapper 格式，如 __yao.attachment://file123）
+	 */
+	const handleUpdateAvatar = async (memberId: string, avatar: string) => {
+		if (!apiClient || !team) {
+			throw new Error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
+		}
+
+		try {
+			// Find the member to verify it's a robot member
+			const member = members.find((m) => m.member_id === memberId)
+			if (!member || member.member_type !== 'robot') {
+				throw new Error(is_cn ? '成员不存在或不是 AI 成员' : 'Member not found or not an AI member')
+			}
+
+			// Call API to update only avatar (avatar is in wrapper format: {uploaderID}://{fileID})
+			const response = await apiClient.teams.UpdateRobotMember(team.team_id, memberId, {
+				avatar: avatar
+			})
+
+			if (apiClient.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to update avatar')
+			}
+
+			// Reload members list to reflect the change
+			if (team.team_id) {
+				const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
+					page: 1,
+					pagesize: 100
+				})
+				if (!apiClient.IsError(membersResponse) && membersResponse.data?.data) {
+					setMembers(membersResponse.data.data)
+				}
+			}
+		} catch (error: any) {
+			console.error('Error updating avatar:', error)
+			throw error
+		}
+	}
+
 	if (loading) {
 		return (
 			<div className={styles.team}>
@@ -720,6 +762,9 @@ const Team = () => {
 						onEditAIMember={handleEditAIMember}
 						onResendInvitation={handleResendInvitation}
 						baseInviteURL={window.location.origin + '/invite'}
+						uploader={config?.uploader || '__yao.attachment'}
+						avatarAgent={config?.avatar_agent}
+						onAvatarUpdate={handleUpdateAvatar}
 					/>
 				</div>
 			</div>

@@ -12,6 +12,9 @@ interface MemberListProps {
 	onEditAIMember?: (memberId: string) => void
 	onResendInvitation?: (invitationId: string) => void
 	baseInviteURL?: string
+	uploader?: string
+	avatarAgent?: string
+	onAvatarUpdate?: (memberId: string, avatar: string) => Promise<void>
 }
 
 const MemberList = ({
@@ -21,7 +24,10 @@ const MemberList = ({
 	onRemoveMember,
 	onEditAIMember,
 	onResendInvitation,
-	baseInviteURL
+	baseInviteURL,
+	uploader,
+	avatarAgent,
+	onAvatarUpdate
 }: MemberListProps) => {
 	const renderMember = (member: TeamMember) => {
 		// AI member (check before pending to handle robot invitations correctly)
@@ -49,6 +55,9 @@ const MemberList = ({
 					getRoleDisplayName={getRoleDisplayName}
 					onRemove={onRemoveMember}
 					onEdit={onEditAIMember}
+					uploader={uploader}
+					avatarAgent={avatarAgent}
+					onAvatarUpdate={onAvatarUpdate}
 				/>
 			)
 		}

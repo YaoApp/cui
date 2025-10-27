@@ -1,0 +1,125 @@
+// AI 头像生成器样式
+.generator {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	min-height: 320px;
+}
+
+.generatorContent {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 200px;
+	border: 2px dashed var(--color_border);
+	border-radius: 8px;
+	background: var(--color_bg_card);
+}
+
+.preview {
+	position: relative;
+	width: 160px;
+	height: 160px;
+	border-radius: 16px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.previewActions {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: rgba(0, 0, 0, 0.75);
+		color: white;
+		padding: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		font-size: 12px;
+		opacity: 0;
+		transition: opacity 0.3s;
+	}
+
+	&:hover .previewActions {
+		opacity: 1;
+	}
+}
+
+.generationPlaceholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	color: var(--color_text_grey);
+	text-align: center;
+	padding: 20px;
+
+	.placeholderText {
+		margin: 12px 0 6px;
+		font-size: 14px;
+		color: var(--color_text);
+	}
+
+	.placeholderHint {
+		margin: 0;
+		font-size: 12px;
+		color: var(--color_text_grey);
+	}
+}
+
+.generatorForm {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+// 表单项 - 与 EditAIMember 保持一致
+.formItem {
+	display: flex;
+	flex-direction: column;
+}
+
+.formLabel {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	color: var(--color_text);
+	font-weight: 500;
+	font-size: 12px;
+	margin-bottom: 8px;
+}
+
+.required {
+	color: var(--color_error, #ff4d4f);
+	margin-right: 2px;
+}
+
+.fieldHint {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--color_text_grey);
+	margin-top: 8px;
+	padding: 8px 12px;
+	background: color-mix(in srgb, var(--color_primary) 5%, var(--color_bg_card));
+	border-radius: 4px;
+	border: 1px solid color-mix(in srgb, var(--color_primary) 20%, transparent);
+}
+
+.generateButtonWrapper {
+	display: flex;
+	justify-content: center;
+	padding-top: 8px;
+
+	:global(.ant-btn) {
+		min-width: 140px;
+	}
+}

@@ -1,4 +1,4 @@
-import { Modal, Tooltip } from 'antd'
+import { Modal, Tooltip, message } from 'antd'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
@@ -11,9 +11,21 @@ interface AIItemProps {
 	getRoleDisplayName: (roleId: string) => string
 	onRemove: (memberId: string) => void
 	onEdit?: (memberId: string) => void
+	uploader?: string
+	avatarAgent?: string
+	onAvatarUpdate?: (memberId: string, avatar: string) => Promise<void>
 }
 
-const AIItem = ({ member, is_cn, getRoleDisplayName, onRemove, onEdit }: AIItemProps) => {
+const AIItem = ({
+	member,
+	is_cn,
+	getRoleDisplayName,
+	onRemove,
+	onEdit,
+	uploader,
+	avatarAgent,
+	onAvatarUpdate
+}: AIItemProps) => {
 	const displayName = member.display_name || (is_cn ? 'AI 助手' : 'AI Assistant')
 
 	const handleRemoveClick = () => {
@@ -33,6 +45,19 @@ const AIItem = ({ member, is_cn, getRoleDisplayName, onRemove, onEdit }: AIItemP
 		}
 	}
 
+	const handleAvatarUploadSuccess = async (avatarWrapper: string, fileId: string) => {
+		if (onAvatarUpdate) {
+			try {
+				// avatarWrapper 是 wrapper 格式，如 __yao.attachment://file123
+				await onAvatarUpdate(member.member_id, avatarWrapper)
+				message.success(is_cn ? '头像更新成功' : 'Avatar updated successfully')
+			} catch (error) {
+				console.error('Failed to update avatar:', error)
+				message.error(is_cn ? '头像更新失败' : 'Failed to update avatar')
+			}
+		}
+	}
+
 	// 构造一个兼容 UserAvatar 的用户对象
 	const avatarUser = {
 		avatar: member.avatar || undefined,
@@ -46,7 +71,14 @@ const AIItem = ({ member, is_cn, getRoleDisplayName, onRemove, onEdit }: AIItemP
 		<div className={styles.memberCard}>
 			<div className={styles.memberInfo}>
 				<div className={styles.memberAvatar}>
-					<UserAvatar user={avatarUser} size={44} forcePersonal={true} />
+					<UserAvatar
+						user={avatarUser}
+						size={44}
+						forcePersonal={true}
+						uploader={uploader}
+						avatarAgent={avatarAgent}
+						onUploadSuccess={onAvatarUpdate ? handleAvatarUploadSuccess : undefined}
+					/>
 				</div>
 				<div className={styles.memberDetails}>
 					<div className={styles.memberName}>

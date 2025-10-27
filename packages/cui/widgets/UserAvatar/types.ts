@@ -15,13 +15,10 @@ export interface UserAvatarProps {
 	user?: App.User
 	/** Force personal avatar only (ignore team context). Default: false */
 	forcePersonal?: boolean
-}
-
-export interface UserAvatarCardProps {
-	/** User data */
-	user: App.User
-	/** Whether the user is in a team context */
-	isTeam: boolean
-	/** Custom class name */
-	className?: string
+	/** Uploader ID for avatar upload (optional, enables upload modal) */
+	uploader?: string
+	/** Avatar agent ID for AI generation (optional) */
+	avatarAgent?: string
+	/** Upload success callback */
+	onUploadSuccess?: (fileId: string, fileUrl: string) => void
 }

@@ -650,6 +650,8 @@ export interface TeamConfig {
 	roles?: TeamRole[]
 	robot?: RobotConfig
 	invite?: InviteConfig
+	uploader?: string // Uploader for avatar and attachments (default: __yao.attachment)
+	avatar_agent?: string // Agent ID for avatar generation (optional)
 }
 
 // ===== Settings Types =====
@@ -745,6 +747,7 @@ export interface TeamMemberDetail extends TeamMember {
  */
 export interface CreateRobotMemberRequest {
 	name: string // Display name
+	avatar?: string // Avatar URL or file ID
 	email?: string // Email address for display (optional)
 	robot_email: string // Robot's globally unique email address (required)
 	authorized_senders?: string[] // Whitelist of emails authorized to send commands to this robot
@@ -775,6 +778,7 @@ export interface UpdateMemberRequest {
  */
 export interface UpdateRobotMemberRequest {
 	name?: string // Display name
+	avatar?: string // Avatar URL or file ID
 	bio?: string // Bio/description
 	email?: string // Email address for display (optional)
 	robot_email?: string // Robot's globally unique email address

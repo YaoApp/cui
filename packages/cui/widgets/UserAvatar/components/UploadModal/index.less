@@ -1,0 +1,153 @@
+// 头像上传模态窗样式
+.uploadModal {
+	:global(.xgen-modal-header) {
+		padding: 0;
+		border-bottom: none;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0;
+		overflow: hidden;
+	}
+
+	:global(.xgen-modal-footer) {
+		padding: 0;
+		border-top: none;
+		background: transparent;
+	}
+
+	:global(.xgen-modal-content) {
+		border-radius: 8px;
+		overflow: hidden;
+	}
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		.titleIcon {
+			color: var(--color_neo_text_secondary);
+		}
+
+		.modalTitle {
+			font-size: 15px;
+			font-weight: 600;
+			color: var(--color_text);
+		}
+	}
+
+	.closeButton {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s;
+		color: var(--color_text_grey);
+
+		&:hover {
+			background: var(--color_bg);
+			color: var(--color_text);
+		}
+
+		.closeIcon {
+			color: var(--color_neo_text_secondary);
+		}
+	}
+}
+
+.modalContent {
+	display: flex;
+	flex-direction: column;
+	min-height: 360px;
+}
+
+// 胶囊式 Tab 切换
+.tabsContainer {
+	display: flex;
+	justify-content: center;
+	padding: 16px 20px;
+	flex-shrink: 0;
+	background: var(--color_neo_bg_card);
+	border-bottom: 1px solid var(--color_border);
+
+	.tabsNav {
+		display: inline-flex;
+		align-items: center;
+		background: color-mix(in srgb, var(--color_border) 70%, transparent);
+		padding: 3px;
+		border-radius: 6px;
+		gap: 4px;
+
+		.tabItem {
+			padding: 5px 16px;
+			font-size: 12px;
+			font-weight: 500;
+			color: color-mix(in srgb, var(--color_text) 70%, var(--color_text_grey));
+			background: transparent;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			transition: all 0.3s;
+			user-select: none;
+			white-space: nowrap;
+			display: flex;
+			align-items: center;
+
+			&:hover {
+				color: var(--color_main);
+			}
+
+			&.tabActive {
+				background: var(--color_bg_menu);
+				color: var(--color_main);
+				text-shadow: 0 0 0.5px currentColor;
+			}
+		}
+	}
+}
+
+.tabsContent {
+	flex: 1;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	padding: 20px 24px;
+}
+
+.modalFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 18px;
+	border-top: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+
+	.footerLeft {
+		display: flex;
+		gap: 10px;
+	}
+
+	.footerRight {
+		display: flex;
+		gap: 10px;
+	}
+
+	:global(.ant-btn) {
+		font-size: 12px;
+		height: 32px;
+		padding: 4px 15px;
+	}
+}
