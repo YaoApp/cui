@@ -765,6 +765,22 @@ export interface UpdateMemberRequest {
 }
 
 /**
+ * Request payload for updating a robot member
+ */
+export interface UpdateRobotMemberRequest {
+	name?: string // Display name
+	bio?: string // Bio/description
+	role?: string // Role ID
+	report_to?: string // Direct manager user ID
+	prompt?: string // Identity & role prompt (system_prompt)
+	llm?: string // Language model (e.g., "gpt-4")
+	agents?: string[] // Accessible agents
+	mcp_tools?: string[] // MCP servers/tools
+	autonomous_mode?: string // "enabled" or "disabled"
+	cost_limit?: number // Monthly cost limit in USD
+}
+
+/**
  * Query options for listing team members
  */
 export interface MemberListOptions {

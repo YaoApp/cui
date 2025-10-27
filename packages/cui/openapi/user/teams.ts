@@ -13,6 +13,7 @@ import {
 	TeamMemberDetail,
 	CreateRobotMemberRequest,
 	UpdateMemberRequest,
+	UpdateRobotMemberRequest,
 	MemberListOptions,
 	MemberListResponse,
 	TeamInvitation,
@@ -201,6 +202,20 @@ export class UserTeams {
 		member: UpdateMemberRequest
 	): Promise<ApiResponse<TeamMember>> {
 		return this.api.Put<TeamMember>(`/user/teams/${teamId}/members/${memberId}`, member)
+	}
+
+	/**
+	 * Update robot member by member_id
+	 * @param teamId Team ID
+	 * @param memberId Member ID to update
+	 * @param robot Updated robot member data
+	 */
+	async UpdateRobotMember(
+		teamId: string,
+		memberId: string,
+		robot: UpdateRobotMemberRequest
+	): Promise<ApiResponse<TeamMember>> {
+		return this.api.Put<TeamMember>(`/user/teams/${teamId}/members/robots/${memberId}`, robot)
 	}
 
 	/**

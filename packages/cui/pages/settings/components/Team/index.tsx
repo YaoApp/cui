@@ -10,6 +10,7 @@ import InviteForm from './InviteForm'
 import TeamEditForm from './TeamEditForm'
 import CreateTeamForm from './CreateTeamForm'
 import AddAIMemberWizard from './AddAIMemberWizard'
+import EditAIMember from './EditAIMember'
 import type { AIMemberValues } from './AddAIMemberWizard'
 import styles from './index.less'
 
@@ -28,6 +29,9 @@ const Team = () => {
 	const [inviting, setInviting] = useState(false)
 	const [addAIModalVisible, setAddAIModalVisible] = useState(false)
 	const [addingAI, setAddingAI] = useState(false)
+	const [editAIModalVisible, setEditAIModalVisible] = useState(false)
+	const [editingAIMember, setEditingAIMember] = useState<TeamMember | null>(null)
+	const [updatingAI, setUpdatingAI] = useState(false)
 	const [editingTeam, setEditingTeam] = useState(false)
 	const [updatingTeam, setUpdatingTeam] = useState(false)
 	const [teamForm] = Form.useForm()
@@ -475,8 +479,65 @@ const Team = () => {
 	}
 
 	const handleEditAIMember = (memberId: string) => {
-		// TODO: Implement AI member edit dialog
-		message.info(is_cn ? `编辑 AI 成员: ${memberId}` : `Edit AI member: ${memberId}`)
+		const member = members.find((m) => m.member_id === memberId)
+		if (member) {
+			setEditingAIMember(member)
+			setEditAIModalVisible(true)
+		}
+	}
+
+	const handleUpdateAIMember = async (memberId: string, values: AIMemberValues) => {
+		if (!apiClient || !team) {
+			message.error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
+			return
+		}
+
+		try {
+			setUpdatingAI(true)
+
+			// Call real API to update robot member
+			const response = await apiClient.teams.UpdateRobotMember(team.team_id, memberId, {
+				name: values.name,
+				bio: values.bio,
+				role: values.role,
+				report_to: values.report_to,
+				prompt: values.prompt,
+				llm: values.llm,
+				agents: values.agents,
+				mcp_tools: values.mcp_tools,
+				autonomous_mode: values.autonomous_mode,
+				cost_limit: values.cost_limit
+			})
+
+			if (apiClient.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to update robot member')
+			}
+
+			message.success(is_cn ? 'AI 成员更新成功' : 'AI member updated successfully')
+
+			// Reload members list
+			if (team.team_id) {
+				const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
+					page: 1,
+					pagesize: 100
+				})
+				if (!apiClient.IsError(membersResponse) && membersResponse.data?.data) {
+					setMembers(membersResponse.data.data)
+				}
+			}
+
+			setEditAIModalVisible(false)
+			setEditingAIMember(null)
+		} catch (error: any) {
+			console.error('Error updating AI member:', error)
+			message.error(
+				is_cn
+					? `更新 AI 成员失败: ${error.message || '未知错误'}`
+					: `Failed to update AI member: ${error.message || 'Unknown error'}`
+			)
+		} finally {
+			setUpdatingAI(false)
+		}
 	}
 
 	if (loading) {
@@ -685,6 +746,23 @@ const Team = () => {
 				config={config}
 				configLoading={configLoading}
 				adding={addingAI}
+				members={members}
+				is_cn={is_cn}
+				teamId={team?.team_id}
+			/>
+
+			{/* 编辑 AI 成员 */}
+			<EditAIMember
+				visible={editAIModalVisible}
+				onClose={() => {
+					setEditAIModalVisible(false)
+					setEditingAIMember(null)
+				}}
+				onUpdate={handleUpdateAIMember}
+				member={editingAIMember}
+				config={config}
+				configLoading={configLoading}
+				updating={updatingAI}
 				members={members}
 				is_cn={is_cn}
 				teamId={team?.team_id}

@@ -1,0 +1,357 @@
+// AI 成员编辑弹窗样式
+.editModal {
+	:global(.xgen-modal-header) {
+		padding: 0;
+		border-bottom: none;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0;
+		max-height: 70vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+
+		// 滚动条样式
+		&::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--color_neo_text_grey);
+			}
+		}
+	}
+
+	:global(.xgen-modal-footer) {
+		padding: 0;
+		border-top: none;
+		background: transparent;
+	}
+
+	:global(.xgen-modal-content) {
+		border-radius: 8px;
+		overflow: hidden;
+	}
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.modalTitle {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--color_text);
+		margin: 0;
+	}
+
+	.closeButton {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s;
+		color: var(--color_text_grey);
+
+		&:hover {
+			background: var(--color_bg);
+			color: var(--color_text);
+		}
+	}
+
+	.titleIcon {
+		color: var(--color_neo_text_secondary);
+	}
+
+	.closeIcon {
+		color: var(--color_neo_text_secondary);
+	}
+}
+
+.modalContent {
+	display: flex;
+	flex-direction: column;
+	min-height: 400px;
+}
+
+// 自定义胶囊 Tab 切换
+.tabsContainer {
+	display: flex;
+	justify-content: center;
+	padding: 12px 20px;
+	flex-shrink: 0;
+	background: var(--color_neo_bg_card);
+	border-bottom: 1px solid var(--color_border);
+}
+
+.tabsNav {
+	display: inline-flex;
+	align-items: center;
+	background: color-mix(in srgb, var(--color_border) 70%, transparent);
+	padding: 3px;
+	border-radius: 6px;
+	gap: 4px;
+}
+
+.tabItem {
+	padding: 5px 16px;
+	font-size: 12px;
+	font-weight: 500;
+	color: color-mix(in srgb, var(--color_text) 70%, var(--color_text_grey));
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.3s;
+	user-select: none;
+	white-space: nowrap;
+
+	&:hover {
+		color: var(--color_main);
+	}
+
+	&.tabActive {
+		background: var(--color_bg_menu);
+		color: var(--color_main);
+		text-shadow: 0 0 0.5px currentColor;
+	}
+}
+
+.tabsContent {
+	flex: 1;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.tabContent {
+	padding: 20px 24px;
+	min-height: 320px;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color_neo_text_grey);
+		}
+	}
+}
+
+.formItem {
+	margin-bottom: 24px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.emailInput {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+
+	> :first-child {
+		flex: 1;
+		min-width: 0;
+	}
+
+	> :last-child {
+		flex: 0 0 200px;
+	}
+}
+
+.emailAt {
+	font-size: 14px;
+	color: var(--color_text);
+	flex-shrink: 0;
+	padding-top: 8px; // 与输入框内容对齐
+}
+
+.formLabel {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	color: var(--color_text);
+	font-weight: 500;
+	font-size: 12px;
+	margin-bottom: 8px;
+}
+
+.required {
+	color: var(--color_error, #ff4d4f);
+	margin-right: 2px;
+}
+
+.helpIconWrapper {
+	display: inline-flex;
+	align-items: center;
+	cursor: help;
+}
+
+.helpIcon {
+	color: var(--color_text_grey);
+	cursor: help;
+}
+
+.fieldHint {
+	font-size: 12px;
+	color: var(--color_text_grey);
+	margin-top: 6px;
+}
+
+.loadingHint {
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--color_text_grey);
+}
+
+// 两列布局
+.formRowTwo {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.formItemHalf {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+// 三列布局
+.formRowThree {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.formItemThird {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+.modalFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 18px;
+	border-top: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+
+	.footerLeft {
+		display: flex;
+		gap: 10px;
+	}
+
+	.footerRight {
+		display: flex;
+		gap: 10px;
+	}
+
+	:global(.ant-btn) {
+		font-size: 12px;
+		height: 32px;
+		padding: 4px 15px;
+	}
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+	.modalContent {
+		min-height: 300px;
+	}
+
+	.tabContent {
+		padding: 16px 12px;
+		min-height: 240px;
+	}
+
+	.formRowTwo {
+		flex-direction: column;
+		gap: 0;
+
+		.formItemHalf {
+			margin-bottom: 24px;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	.formRowThree {
+		flex-direction: column;
+		gap: 12px;
+
+		.formItemThird {
+			margin-bottom: 0;
+		}
+	}
+}
+
+@media (max-width: 480px) {
+	.editModal {
+		:global(.xgen-modal-body) {
+			max-height: 60vh;
+		}
+	}
+
+	.tabContent {
+		padding: 12px;
+		min-height: 200px;
+	}
+
+	.formRowTwo {
+		flex-direction: column;
+		gap: 0;
+
+		.formItemHalf {
+			margin-bottom: 24px;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	.formRowThree {
+		flex-direction: column;
+		gap: 12px;
+
+		.formItemThird {
+			margin-bottom: 0;
+		}
+	}
+}
