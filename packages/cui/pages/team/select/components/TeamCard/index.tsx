@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Avatar, Tooltip } from 'antd'
+import { Tooltip } from 'antd'
 import { UserTeam, UserProfile } from '@/openapi/user/types'
 import { App } from '@/types'
 import UserAvatar from '@/widgets/UserAvatar'
@@ -16,7 +16,7 @@ export interface TeamCardProps {
 }
 
 const TeamCard: React.FC<TeamCardProps> = ({ team, selected, roleLabel, ownerLabel, onClick, userProfile }) => {
-	// Convert UserProfile to App.User format for UserAvatar component
+	// Convert UserProfile to App.User format for UserAvatar component (personal account)
 	const personalUser = useMemo<App.User | null>(() => {
 		if (!userProfile || team.team_id !== 'personal') return null
 		return {
@@ -26,6 +26,17 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, selected, roleLabel, ownerLab
 			type: 'user'
 		}
 	}, [userProfile, team.team_id])
+
+	// Convert UserTeam to App.User format for UserAvatar component (team account)
+	const teamUser = useMemo<App.User | null>(() => {
+		if (team.team_id === 'personal') return null
+		return {
+			id: team.team_id,
+			name: team.display_name || team.name,
+			avatar: team.logo,
+			type: 'team' as const
+		}
+	}, [team])
 
 	return (
 		<Tooltip
@@ -39,11 +50,15 @@ const TeamCard: React.FC<TeamCardProps> = ({ team, selected, roleLabel, ownerLab
 				<div className={styles.teamLogoWrapper}>
 					{team.team_id === 'personal' && personalUser ? (
 						<UserAvatar user={personalUser} size={40} showCard={false} forcePersonal={true} />
-					) : (
-						<Avatar size={40} src={team.logo} className={styles.teamLogo}>
-							{!team.logo && (team.display_name || team.name)[0].toUpperCase()}
-						</Avatar>
-					)}
+					) : teamUser ? (
+						<UserAvatar
+							user={teamUser}
+							size={40}
+							showCard={false}
+							forcePersonal={true}
+							shape='circle'
+						/>
+					) : null}
 				</div>
 
 				{/* Team Info */}
