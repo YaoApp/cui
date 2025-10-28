@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Form, message } from 'antd'
 import { getLocale } from '@umijs/max'
+import { useGlobal } from '@/context/app'
+import { local } from '@yaoapp/storex'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
@@ -19,6 +21,7 @@ const Team = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [form] = Form.useForm()
+	const global = useGlobal()
 
 	const [loading, setLoading] = useState(true)
 	const [configLoading, setConfigLoading] = useState(true)
@@ -300,6 +303,39 @@ const Team = () => {
 				}
 				setTeam(updatedTeamDetail)
 				setEditingTeam(false) // 保存后返回展示状态
+
+				// Update global user info if user is part of this team
+				if (global.user && global.user.team_id === updatedTeam.team_id) {
+					// Update App.User in global state and localStorage
+					global.user = {
+						...global.user,
+						team: {
+							...global.user.team,
+							team_id: updatedTeam.team_id,
+							name: updatedTeam.name,
+							logo: updatedTeam.logo,
+							description: updatedTeam.description,
+							owner_id: updatedTeam.owner_id
+						}
+					}
+					local.user = global.user
+
+					// Update UserInfo (OIDC format) in global state
+					if (global.userInfo && global.userInfo['yao:team']) {
+						global.setUserInfo({
+							...global.userInfo,
+							'yao:team': {
+								...global.userInfo['yao:team'],
+								team_id: updatedTeam.team_id,
+								name: updatedTeam.name,
+								logo: updatedTeam.logo,
+								description: updatedTeam.description,
+								owner_id: updatedTeam.owner_id
+							}
+						})
+					}
+				}
+
 				message.success(is_cn ? '团队信息已更新' : 'Team information updated')
 			}
 		} catch (error) {
