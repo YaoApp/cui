@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Form, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import { GetCurrentUser, IsTeamMember } from '@/pages/auth/auth'
+import { useGlobal } from '@/context/app'
+import { local } from '@yaoapp/storex'
 import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
 import { Input, RadioGroup } from '@/components/ui/inputs'
@@ -27,6 +29,7 @@ const Profile = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [form] = Form.useForm()
+	const global = useGlobal()
 
 	const [loading, setLoading] = useState(true)
 	const [saving, setSaving] = useState(false)
@@ -173,6 +176,37 @@ const Profile = () => {
 				}
 
 				setProfileData(values as MemberProfile)
+
+				// Update global user info for team members
+				const memberValues = values as MemberProfile
+				if (global.user) {
+					// Update App.User in global state and localStorage
+					global.user = {
+						...global.user,
+						member: {
+							...global.user.member,
+							display_name: memberValues.display_name,
+							bio: memberValues.bio,
+							avatar: memberValues.avatar,
+							email: memberValues.email
+						}
+					}
+					local.user = global.user
+				}
+
+				// Update UserInfo (OIDC format) in global state
+				if (global.userInfo) {
+					global.setUserInfo({
+						...global.userInfo,
+						'yao:member': {
+							member_id: global.userInfo['yao:member']?.member_id || '',
+							display_name: memberValues.display_name,
+							bio: memberValues.bio,
+							avatar: memberValues.avatar,
+							email: memberValues.email
+						}
+					})
+				}
 			} else {
 				// Update personal profile
 				const response = await apiClient.profile.UpdateProfile(values as PersonalProfile)
@@ -182,6 +216,29 @@ const Profile = () => {
 				}
 
 				setProfileData(values as PersonalProfile)
+
+				// Update global user info for personal users
+				const personalValues = values as PersonalProfile
+				if (global.user) {
+					// Update App.User in global state and localStorage
+					global.user = {
+						...global.user,
+						name: personalValues.name || global.user.name,
+						avatar: personalValues.picture || global.user.avatar
+					}
+					local.user = global.user
+				}
+
+				// Update UserInfo (OIDC format) in global state
+				if (global.userInfo) {
+					global.setUserInfo({
+						...global.userInfo,
+						name: personalValues.name,
+						gender: personalValues.gender,
+						website: personalValues.website,
+						picture: personalValues.picture
+					})
+				}
 			}
 
 			setEditing(false)

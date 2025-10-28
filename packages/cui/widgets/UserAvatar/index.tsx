@@ -79,10 +79,17 @@ const UserAvatar: FC<UserAvatarProps> = ({
 
 			return {
 				id: String(currentUser.id || ''),
-				avatar: currentUser.avatar,
-				name: currentUser.name,
-				email: (currentUser as any).email,
-				bio: (currentUser as any).bio,
+				// 团队上下文中优先使用成员头像，否则使用用户头像
+				avatar: isInTeamContext ? currentUser.member?.avatar || currentUser.avatar : currentUser.avatar,
+				// 团队上下文中优先使用成员昵称，否则使用用户名
+				name: isInTeamContext ? currentUser.member?.display_name || currentUser.name : currentUser.name,
+				// 团队上下文中优先使用成员邮箱和简介
+				email: isInTeamContext
+					? currentUser.member?.email || (currentUser as any).email
+					: (currentUser as any).email,
+				bio: isInTeamContext
+					? currentUser.member?.bio || (currentUser as any).bio
+					: (currentUser as any).bio,
 				// 角色信息：优先显示 user_type
 				role_id: currentUser.type_id,
 				role_name: currentUser.user_type?.name || currentUser.type_id,

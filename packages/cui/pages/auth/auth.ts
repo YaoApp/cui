@@ -65,6 +65,17 @@ export const AfterLogin = async (global: GlobalModel, data: AuthData): Promise<s
 		}
 	}
 
+	// Add member profile information if present (for team context)
+	if (data.user['yao:member']) {
+		user.member = {
+			member_id: data.user['yao:member'].member_id,
+			display_name: data.user['yao:member'].display_name,
+			bio: data.user['yao:member'].bio,
+			avatar: data.user['yao:member'].avatar,
+			email: data.user['yao:member'].email
+		}
+	}
+
 	// Get App Menus
 	await window.$app.Event.emit('app/getUserMenu')
 

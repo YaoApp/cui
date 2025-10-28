@@ -120,13 +120,39 @@ const Menu = ({ active, onChange }: MenuProps) => {
 								size={42}
 								showCard={false}
 								// displayType='auto' 会自动判断是否显示组合模式
+								data={
+									isTeam
+										? {
+												id: String(currentUser.id),
+												name:
+													currentUser.member?.display_name ||
+													currentUser.name,
+												avatar:
+													currentUser.member?.avatar ||
+													currentUser.avatar,
+												team:
+													currentUser.team &&
+													currentUser.team.team_id
+														? {
+																team_id: currentUser
+																	.team.team_id,
+																logo: currentUser.team
+																	.logo,
+																name: currentUser.team
+																	.name
+														  }
+														: undefined
+										  }
+										: undefined
+								}
 							/>
 							<div className={styles.info}>
 								<div className={styles.firstLine}>
 									<span className={styles.name}>
 										{isTeam && currentUser.team?.name ? (
 											<>
-												{currentUser.name}
+												{currentUser.member?.display_name ||
+													currentUser.name}
 												<span className={styles.teamSeparator}>@</span>
 												<span className={styles.teamName}>
 													{currentUser.team.name}

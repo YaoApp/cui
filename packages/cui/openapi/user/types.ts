@@ -169,6 +169,8 @@ export interface UserInfo {
 	'yao:type_id'?: string
 	/** Yao user type information */
 	'yao:type'?: TypeInfo
+	/** Yao member profile information (for team context) */
+	'yao:member'?: MemberInfo
 	/** Additional custom claims */
 	[key: string]: any
 }
@@ -201,6 +203,22 @@ export interface TypeInfo {
 	name?: string
 	/** User type locale */
 	locale?: string
+}
+
+/**
+ * Member profile information (for team context)
+ */
+export interface MemberInfo {
+	/** Member's unique identifier in team */
+	member_id?: string
+	/** Member's display name in team */
+	display_name?: string
+	/** Member's bio in team */
+	bio?: string
+	/** Member's avatar in team */
+	avatar?: string
+	/** Member's email in team */
+	email?: string
 }
 
 /**

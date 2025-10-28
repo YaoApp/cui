@@ -452,6 +452,14 @@ export declare namespace App {
 			name?: string
 			locale?: string
 		}
+		// Member profile information (for team context)
+		member?: {
+			member_id?: string
+			display_name?: string
+			bio?: string
+			avatar?: string
+			email?: string
+		}
 	}
 
 	interface Menu {

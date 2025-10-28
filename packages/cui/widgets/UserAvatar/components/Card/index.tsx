@@ -183,22 +183,16 @@ const Card: FC<CardProps> = ({ data, isCombined, className }) => {
 				<div className='avatar-card-footer'>
 					{/* 附加信息（如果有的话） */}
 					<div className='avatar-card-info'>
-						{data.email && (
-							<div className='info-item'>
-								<span className='label'>{is_cn ? '邮箱：' : 'Email:'}</span>
+						{/* Bio/Email 区域：优先显示 Email，其次 Bio，都没有显示 "No bio" */}
+						<div className='info-item bio-item'>
+							{data.email ? (
 								<span className='value'>{data.email}</span>
-							</div>
-						)}
-						{data.bio ? (
-							<div className='info-item'>
-								<span className='label'>{is_cn ? '简介：' : 'Bio:'}</span>
+							) : data.bio ? (
 								<span className='value'>{data.bio}</span>
-							</div>
-						) : (
-							<div className='info-item'>
+							) : (
 								<span className='value no-bio'>{is_cn ? '无介绍' : 'No bio'}</span>
-							</div>
-						)}
+							)}
+						</div>
 						{data.joined_at && (
 							<div className='info-item'>
 								<span className='label'>{is_cn ? '加入时间：' : 'Joined:'}</span>
