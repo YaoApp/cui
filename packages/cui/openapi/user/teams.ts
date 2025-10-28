@@ -13,6 +13,7 @@ import {
 	TeamMemberDetail,
 	CreateRobotMemberRequest,
 	UpdateMemberRequest,
+	UpdateMemberProfileRequest,
 	UpdateRobotMemberRequest,
 	MemberListOptions,
 	MemberListResponse,
@@ -191,7 +192,8 @@ export class UserTeams {
 	}
 
 	/**
-	 * Update team member by member_id
+	 * Update team member by member_id (admin operation)
+	 * Updates management fields like role_id and status
 	 * @param teamId Team ID
 	 * @param memberId Member ID to update
 	 * @param member Updated member data
@@ -200,8 +202,26 @@ export class UserTeams {
 		teamId: string,
 		memberId: string,
 		member: UpdateMemberRequest
-	): Promise<ApiResponse<TeamMember>> {
-		return this.api.Put<TeamMember>(`/user/teams/${teamId}/members/${memberId}`, member)
+	): Promise<ApiResponse<{ message: string }>> {
+		return this.api.Put<{ message: string }>(`/user/teams/${teamId}/members/${memberId}`, member)
+	}
+
+	/**
+	 * Update member profile (self-update only)
+	 * Allows members to update their own profile fields (display_name, bio, avatar, email)
+	 * @param teamId Team ID
+	 * @param userId User ID (must be the authenticated user's ID)
+	 * @param profile Updated profile data
+	 */
+	async UpdateMemberProfile(
+		teamId: string,
+		userId: string,
+		profile: UpdateMemberProfileRequest
+	): Promise<ApiResponse<{ user_id: string; message: string }>> {
+		return this.api.Put<{ user_id: string; message: string }>(
+			`/user/teams/${teamId}/members/${userId}/profile`,
+			profile
+		)
 	}
 
 	/**
@@ -214,8 +234,8 @@ export class UserTeams {
 		teamId: string,
 		memberId: string,
 		robot: UpdateRobotMemberRequest
-	): Promise<ApiResponse<TeamMember>> {
-		return this.api.Put<TeamMember>(`/user/teams/${teamId}/members/robots/${memberId}`, robot)
+	): Promise<ApiResponse<{ message: string }>> {
+		return this.api.Put<{ message: string }>(`/user/teams/${teamId}/members/robots/${memberId}`, robot)
 	}
 
 	/**

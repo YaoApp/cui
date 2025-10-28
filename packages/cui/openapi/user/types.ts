@@ -439,6 +439,34 @@ export interface UserProfile {
 	'yao:is_owner'?: boolean // Is owner of current team
 }
 
+/**
+ * Request payload for updating user profile
+ * Only profile-related fields can be updated (no preferred_username, email, phone_number)
+ */
+export interface UpdateProfileRequest {
+	name?: string // Full name
+	given_name?: string // Given name(s) or first name(s)
+	family_name?: string // Surname(s) or last name(s)
+	middle_name?: string // Middle name(s)
+	nickname?: string // Casual name
+	profile?: string // Profile page URL
+	picture?: string // Profile picture URL
+	website?: string // Web page or blog URL
+	gender?: string // Gender
+	birthdate?: string // Birthday (YYYY-MM-DD format)
+	zoneinfo?: string // Time zone info
+	locale?: string // Locale (language-country)
+	address?: {
+		formatted?: string
+		street_address?: string
+		locality?: string
+		region?: string
+		postal_code?: string
+		country?: string
+	}
+	preferences?: UserPreferences // User preferences
+}
+
 export interface UserPreferences {
 	theme?: 'light' | 'dark'
 	language?: string
@@ -794,6 +822,17 @@ export interface UpdateRobotMemberRequest {
 	mcp_tools?: string[] // MCP servers/tools
 	autonomous_mode?: string // "enabled" or "disabled"
 	cost_limit?: number // Monthly cost limit in USD
+}
+
+/**
+ * Request payload for updating member profile (self-update only)
+ * Only allows updating profile-related fields
+ */
+export interface UpdateMemberProfileRequest {
+	display_name?: string // Member display name
+	bio?: string // Member bio/description
+	avatar?: string // Avatar URL or file ID
+	email?: string // Email address (for display only)
 }
 
 /**
