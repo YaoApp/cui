@@ -11,8 +11,6 @@ interface AIItemProps {
 	getRoleDisplayName: (roleId: string) => string
 	onRemove: (memberId: string) => void
 	onEdit?: (memberId: string) => void
-	uploader?: string
-	avatarAgent?: string
 	onAvatarUpdate?: (memberId: string, avatar: string) => Promise<void>
 }
 
@@ -22,8 +20,6 @@ const AIItem = ({
 	getRoleDisplayName,
 	onRemove,
 	onEdit,
-	uploader,
-	avatarAgent,
 	onAvatarUpdate
 }: AIItemProps) => {
 	const displayName = member.display_name || (is_cn ? 'AI 助手' : 'AI Assistant')
@@ -80,8 +76,6 @@ const AIItem = ({
 						}}
 						size={44}
 						displayType='avatar'
-						uploader={uploader}
-						avatarAgent={avatarAgent}
 						onUploadSuccess={onAvatarUpdate ? handleAvatarUploadSuccess : undefined}
 					/>
 				</div>

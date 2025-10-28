@@ -698,8 +698,6 @@ export interface TeamConfig {
 	roles?: TeamRole[]
 	robot?: RobotConfig
 	invite?: InviteConfig
-	uploader?: string // Uploader for avatar and attachments (default: __yao.attachment)
-	avatar_agent?: string // Agent ID for avatar generation (optional)
 }
 
 // ===== Settings Types =====

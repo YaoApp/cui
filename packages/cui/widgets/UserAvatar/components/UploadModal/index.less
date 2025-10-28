@@ -71,7 +71,18 @@
 .modalContent {
 	display: flex;
 	flex-direction: column;
-	min-height: 360px;
+	min-height: 320px; // With tabs
+}
+
+// Compact mode when no tabs (no avatarAgent)
+.uploadModalCompact {
+	.modalContent {
+		min-height: 280px;
+	}
+
+	.tabsContent {
+		padding: 24px; // Consistent padding on all sides when no tabs
+	}
 }
 
 // 胶囊式 Tab 切换
@@ -124,7 +135,7 @@
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
-	padding: 20px 24px;
+	padding: 20px 24px; // Consistent padding: 20px vertical, 24px horizontal
 }
 
 .modalFooter {

@@ -12,8 +12,6 @@ interface MemberListProps {
 	onEditAIMember?: (memberId: string) => void
 	onResendInvitation?: (invitationId: string) => void
 	baseInviteURL?: string
-	uploader?: string
-	avatarAgent?: string
 	onAvatarUpdate?: (memberId: string, avatar: string) => Promise<void>
 }
 
@@ -25,8 +23,6 @@ const MemberList = ({
 	onEditAIMember,
 	onResendInvitation,
 	baseInviteURL,
-	uploader,
-	avatarAgent,
 	onAvatarUpdate
 }: MemberListProps) => {
 	const renderMember = (member: TeamMember) => {
@@ -55,8 +51,6 @@ const MemberList = ({
 					getRoleDisplayName={getRoleDisplayName}
 					onRemove={onRemoveMember}
 					onEdit={onEditAIMember}
-					uploader={uploader}
-					avatarAgent={avatarAgent}
 					onAvatarUpdate={onAvatarUpdate}
 				/>
 			)

@@ -759,8 +759,6 @@ const Team = () => {
 							team={team}
 							onFinish={handleUpdateTeam}
 							is_cn={is_cn}
-							uploader={config?.uploader || '__yao.attachment'}
-							avatarAgent={config?.avatar_agent}
 						/>
 					) : (
 						<div className={styles.teamHeader}>
@@ -775,8 +773,6 @@ const Team = () => {
 										avatar: team?.logo,
 										name: team?.name || 'Team'
 									}}
-									uploader={config?.uploader || '__yao.attachment'}
-									avatarAgent={config?.avatar_agent}
 									onUploadSuccess={handleUpdateTeamAvatar}
 								/>
 							</div>
@@ -823,8 +819,6 @@ const Team = () => {
 						onEditAIMember={handleEditAIMember}
 						onResendInvitation={handleResendInvitation}
 						baseInviteURL={window.location.origin + '/invite'}
-						uploader={config?.uploader || '__yao.attachment'}
-						avatarAgent={config?.avatar_agent}
 						onAvatarUpdate={handleUpdateAvatar}
 					/>
 				</div>

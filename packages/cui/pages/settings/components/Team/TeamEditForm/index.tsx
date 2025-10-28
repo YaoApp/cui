@@ -10,18 +10,9 @@ interface TeamEditFormProps {
 	team: UserTeamDetail | null
 	onFinish: (values: { name: string; description?: string; avatar?: string }) => Promise<void>
 	is_cn: boolean
-	uploader?: string
-	avatarAgent?: string
 }
 
-const TeamEditForm = ({
-	form,
-	team,
-	onFinish,
-	is_cn,
-	uploader = '__yao.attachment',
-	avatarAgent
-}: TeamEditFormProps) => {
+const TeamEditForm = ({ form, team, onFinish, is_cn }: TeamEditFormProps) => {
 	// 监听表单的 avatar 字段变化
 	const formAvatar = Form.useWatch('avatar', form)
 
@@ -47,8 +38,6 @@ const TeamEditForm = ({
 						name: team?.name || '',
 						avatar: formAvatar || team?.logo // 优先使用表单字段的值
 					}}
-					uploader={uploader}
-					avatarAgent={avatarAgent}
 					onUploadSuccess={handleAvatarUploadSuccess}
 				/>
 			</div>

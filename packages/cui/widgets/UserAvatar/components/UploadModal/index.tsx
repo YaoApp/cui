@@ -20,6 +20,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
 	const is_cn = locale === 'zh-CN'
 	const defaultTitle = is_cn ? '设置头像' : 'Set Avatar'
 
+	// If no avatarAgent is configured, always use 'upload' tab
 	const [activeTab, setActiveTab] = useState('upload')
 	const [confirming, setConfirming] = useState(false)
 
@@ -80,26 +81,26 @@ const UploadModal: React.FC<UploadModalProps> = ({
 			onCancel={onClose}
 			footer={renderFooter()}
 			width={520}
-			className={styles.uploadModal}
+			className={`${styles.uploadModal} ${!avatarAgent ? styles.uploadModalCompact : ''}`}
 			destroyOnClose
 			closable={false}
 			maskClosable={false}
 			keyboard={false}
 		>
 			<div className={styles.modalContent}>
-				{/* Tabs */}
-				<div className={styles.tabsContainer}>
-					<div className={styles.tabsNav}>
-						<button
-							className={`${styles.tabItem} ${
-								activeTab === 'upload' ? styles.tabActive : ''
-							}`}
-							onClick={() => setActiveTab('upload')}
-						>
-							<Icon name='material-upload' size={14} style={{ marginRight: 4 }} />
-							{is_cn ? '上传' : 'Upload'}
-						</button>
-						{avatarAgent && (
+				{/* Tabs - only show if avatarAgent is configured */}
+				{avatarAgent && (
+					<div className={styles.tabsContainer}>
+						<div className={styles.tabsNav}>
+							<button
+								className={`${styles.tabItem} ${
+									activeTab === 'upload' ? styles.tabActive : ''
+								}`}
+								onClick={() => setActiveTab('upload')}
+							>
+								<Icon name='material-upload' size={14} style={{ marginRight: 4 }} />
+								{is_cn ? '上传' : 'Upload'}
+							</button>
 							<button
 								className={`${styles.tabItem} ${
 									activeTab === 'generate' ? styles.tabActive : ''
@@ -113,16 +114,16 @@ const UploadModal: React.FC<UploadModalProps> = ({
 								/>
 								{is_cn ? 'AI 生成' : 'AI Generate'}
 							</button>
-						)}
+						</div>
 					</div>
-				</div>
+				)}
 
 				{/* Tab Content */}
 				<div className={styles.tabsContent}>
 					{activeTab === 'upload' && (
 						<Uploader ref={uploaderRef} uploader={uploader} onSuccess={handleSuccess} />
 					)}
-					{activeTab === 'generate' && (
+					{activeTab === 'generate' && avatarAgent && (
 						<Generator ref={generatorRef} avatarAgent={avatarAgent} onSuccess={handleSuccess} />
 					)}
 				</div>

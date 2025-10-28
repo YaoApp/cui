@@ -9,6 +9,17 @@ import UploadModal from './components/UploadModal'
 import type { UserAvatarProps, AvatarData } from './types'
 import './styles.less'
 
+// Get avatar config from app info
+const getAvatarConfig = () => {
+	try {
+		const appInfo = window.$global?.app_info
+		return appInfo?.optional?.avatar || {}
+	} catch (error) {
+		console.warn('Failed to get avatar config from app info:', error)
+		return {}
+	}
+}
+
 // 标准尺寸映射
 const SIZE_MAP: Record<string, number> = {
 	sm: 32,
@@ -30,12 +41,19 @@ const UserAvatar: FC<UserAvatarProps> = ({
 	style = {},
 	onClick,
 	data: propData,
-	uploader,
-	avatarAgent,
+	uploader: propUploader,
+	avatarAgent: propAvatarAgent,
 	onUploadSuccess
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+
+	// Get avatar config with priority: props > app.yao config > default
+	const avatarConfig = useMemo(() => getAvatarConfig(), [])
+
+	// Priority: external props > app.yao config > default value
+	const uploader = propUploader !== undefined ? propUploader : avatarConfig.uploader || '__yao.attachment'
+	const avatarAgent = propAvatarAgent !== undefined ? propAvatarAgent : avatarConfig.agent
 
 	// 计算实际尺寸
 	const actualSize = useMemo(() => {
