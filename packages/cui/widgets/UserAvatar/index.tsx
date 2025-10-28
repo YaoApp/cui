@@ -6,7 +6,7 @@ import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
 import Card from './components/Card'
 import UploadModal from './components/UploadModal'
-import type { UserAvatarProps, AvatarSize } from './types'
+import type { UserAvatarProps, AvatarData } from './types'
 import './styles.less'
 
 // 标准尺寸映射
@@ -21,6 +21,7 @@ const UserAvatar: FC<UserAvatarProps> = ({
 	size = 'md',
 	shape = 'circle',
 	borderRadius,
+	displayType = 'auto', // 默认自动判断
 	mode = 'default',
 	buttonText,
 	modalTitle,
@@ -28,8 +29,7 @@ const UserAvatar: FC<UserAvatarProps> = ({
 	className = '',
 	style = {},
 	onClick,
-	user: propUser,
-	forcePersonal = false,
+	data: propData,
 	uploader,
 	avatarAgent,
 	onUploadSuccess
@@ -66,35 +66,55 @@ const UserAvatar: FC<UserAvatarProps> = ({
 	const [avatarError, setAvatarError] = useState(false)
 	const [teamLogoError, setTeamLogoError] = useState(false)
 
-	const user = useMemo(() => {
-		if (propUser) {
-			return propUser
+	// 获取头像数据
+	const data = useMemo((): AvatarData | null => {
+		if (propData) {
+			return propData
 		}
+		// Fallback to current user from auth
 		const currentUser = GetCurrentUser()
 		if (currentUser) {
+			// 判断是否在团队上下文中
+			const isInTeamContext = !!(currentUser.team_id && currentUser.team)
+
 			return {
-				id: currentUser.id || '',
-				type: currentUser.type as 'user' | 'team',
+				id: String(currentUser.id || ''),
 				avatar: currentUser.avatar,
 				name: currentUser.name,
-				team: currentUser.team
-					? {
-							team_id: currentUser.team.team_id,
-							logo: currentUser.team.logo,
-							name: currentUser.team.name
-					  }
-					: undefined
+				email: (currentUser as any).email,
+				bio: (currentUser as any).bio,
+				// 角色信息：优先显示 user_type
+				role_id: currentUser.type_id,
+				role_name: currentUser.user_type?.name || currentUser.type_id,
+				is_owner: !!currentUser.is_owner,
+				// 成员类型：根据上下文判断
+				member_type: isInTeamContext ? 'user' : undefined,
+				team:
+					currentUser.team && currentUser.team.team_id
+						? {
+								team_id: currentUser.team.team_id,
+								logo: currentUser.team.logo,
+								name: currentUser.team.name
+						  }
+						: undefined
 			}
 		}
 		return null
-	}, [propUser])
+	}, [propData, is_cn])
 
-	const isTeam = useMemo(() => {
-		if (forcePersonal) {
-			return false
+	// 判断是否显示组合模式（团队logo + 用户头像）
+	const isCombinedDisplay = useMemo(() => {
+		if (displayType === 'auto') {
+			// auto 模式：根据是否有 team 数据自动判断
+			return data?.team !== undefined
 		}
-		return user?.type === 'team' && user.team !== undefined
-	}, [user, forcePersonal])
+		if (displayType === 'combined') {
+			// combined 模式：强制显示组合（需要有 team 数据）
+			return data?.team !== undefined
+		}
+		// avatar 模式：强制只显示头像
+		return false
+	}, [displayType, data])
 
 	// Handle avatar click
 	const handleAvatarClick = () => {
@@ -112,8 +132,8 @@ const UserAvatar: FC<UserAvatarProps> = ({
 		}
 	}
 
-	if (!user) {
-		// Fallback avatar if no user
+	if (!data) {
+		// Fallback avatar if no data
 		return (
 			<div className={`user-avatar-wrapper ${className}`} style={style} onClick={onClick}>
 				<div
@@ -128,65 +148,79 @@ const UserAvatar: FC<UserAvatarProps> = ({
 
 	const renderAvatar = () => {
 		// 转换 wrapper 格式的头像 URL
-		const avatarUrl = user.avatar ? ResolveFileURL(user.avatar) : null
-		const teamLogoUrl = user.team?.logo ? ResolveFileURL(user.team.logo) : null
+		const avatarUrl = data.avatar ? ResolveFileURL(data.avatar) : null
+		const teamLogoUrl = data.team?.logo ? ResolveFileURL(data.team.logo) : null
 
 		// 判断是否应该显示 placeholder（既没有图片也没有文字）
-		const showPlaceholder = !avatarUrl && !user.name
+		const showPlaceholder = !avatarUrl && !data.name
 
-		if (isTeam && user.team) {
-			// Team Avatar: Team Logo + User Avatar
-			const showTeamPlaceholder = !teamLogoUrl && !user.team.name
+		if (isCombinedDisplay && data.team) {
+			// Combined Display: Team Logo + User Avatar
+			const showTeamPlaceholder = !teamLogoUrl && !data.team.name
 			return (
 				<div
-					className='user-avatar user-avatar-team'
+					className='user-avatar user-avatar-combined'
 					style={{
 						width: actualSize,
 						height: actualSize,
 						borderRadius: actualBorderRadius,
-						overflow: 'hidden'
+						overflow: 'visible' // 允许用户头像超出边界
 					}}
 				>
-					{/* Team Logo Background */}
-					<div className='team-logo-wrapper'>
-						{!teamLogoError && teamLogoUrl ? (
-							<img
-								src={teamLogoUrl}
-								alt={user.team.name || 'Team'}
-								className='team-logo-img'
-								referrerPolicy='no-referrer'
-								crossOrigin='anonymous'
-								onError={() => {
-									console.warn('Team logo failed to load, showing fallback')
-									setTeamLogoError(true)
-								}}
-							/>
-						) : showTeamPlaceholder ? (
-							<div className='team-logo-placeholder'>
-								<Icon name='material-account_circle' size={actualSize * 0.5} />
-							</div>
-						) : (
-							<div className='team-logo-text' style={{ fontSize: textFontSize }}>
-								{user.team.name?.[0]?.toUpperCase() || 'T'}
-							</div>
-						)}
+					{/* 团队 Logo 的裁切容器 */}
+					<div
+						style={{
+							position: 'absolute',
+							width: '100%',
+							height: '100%',
+							borderRadius: actualBorderRadius,
+							overflow: 'hidden' // 只裁切团队 logo
+						}}
+					>
+						{/* Team Logo Background */}
+						<div className='team-logo-wrapper'>
+							{!teamLogoError && teamLogoUrl ? (
+								<img
+									src={teamLogoUrl}
+									alt={data.team.name || 'Team'}
+									className='team-logo-img'
+									referrerPolicy='no-referrer'
+									crossOrigin='anonymous'
+									onError={() => {
+										console.warn('Team logo failed to load, showing fallback')
+										setTeamLogoError(true)
+									}}
+								/>
+							) : showTeamPlaceholder ? (
+								<div className='team-logo-placeholder'>
+									<Icon name='material-account_circle' size={actualSize * 0.5} />
+								</div>
+							) : (
+								<div className='team-logo-text' style={{ fontSize: textFontSize }}>
+									{data.team.name?.[0]?.toUpperCase() || 'T'}
+								</div>
+							)}
+						</div>
 					</div>
 
-					{/* User Avatar Overlay */}
+					{/* User Avatar Overlay - 独立显示，不受团队 logo 容器影响 */}
 					<div
 						className='user-avatar-overlay'
 						style={{
 							width: actualSize * 0.5,
 							height: actualSize * 0.5,
+							// 向外延伸，独立于父容器，不受父容器圆角影响
+							bottom: '-2px',
+							right: '-2px',
 							borderRadius:
-								shape === 'circle' ? '50%' : `${Math.min(actualSize * 0.08, 6)}px`,
-							overflow: 'hidden'
+								shape === 'circle' ? '50%' : `${Math.min(actualSize * 0.1, 8)}px`,
+							overflow: 'hidden' // 头像本身保持圆角裁切
 						}}
 					>
 						{!avatarError && avatarUrl ? (
 							<img
 								src={avatarUrl}
-								alt={user.name || 'User'}
+								alt={data.name || 'User'}
 								className='user-avatar-img'
 								referrerPolicy='no-referrer'
 								crossOrigin='anonymous'
@@ -200,18 +234,18 @@ const UserAvatar: FC<UserAvatarProps> = ({
 								<Icon name='material-account_circle' size={actualSize * 0.25} />
 							</div>
 						) : (
-							<div className='user-avatar-text' style={{ fontSize: textFontSize }}>
-								{user.name?.[0]?.toUpperCase() || 'U'}
+							<div className='user-avatar-text' style={{ fontSize: textFontSize * 0.5 }}>
+								{data.name?.[0]?.toUpperCase() || 'U'}
 							</div>
 						)}
 					</div>
 				</div>
 			)
 		} else {
-			// Personal Avatar: Only User Avatar
+			// Avatar Only Display
 			return (
 				<div
-					className='user-avatar user-avatar-personal'
+					className='user-avatar user-avatar-single'
 					style={{
 						width: actualSize,
 						height: actualSize,
@@ -222,7 +256,7 @@ const UserAvatar: FC<UserAvatarProps> = ({
 					{!avatarError && avatarUrl ? (
 						<img
 							src={avatarUrl}
-							alt={user.name || 'User'}
+							alt={data.name || 'Avatar'}
 							className='user-avatar-img'
 							referrerPolicy='no-referrer'
 							crossOrigin='anonymous'
@@ -240,7 +274,7 @@ const UserAvatar: FC<UserAvatarProps> = ({
 						</div>
 					) : (
 						<div className='user-avatar-text' style={{ fontSize: textFontSize }}>
-							{user.name?.[0]?.toUpperCase() || 'U'}
+							{data.name?.[0]?.toUpperCase() || 'U'}
 						</div>
 					)}
 				</div>
@@ -298,7 +332,7 @@ const UserAvatar: FC<UserAvatarProps> = ({
 
 				{showCard && (
 					<div className='user-avatar-card-wrapper'>
-						<Card user={user} isTeam={isTeam} />
+						<Card data={data} isCombined={isCombinedDisplay} />
 					</div>
 				)}
 			</div>

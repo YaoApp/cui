@@ -170,7 +170,7 @@
 	&-tags {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 6px;
 		font-size: 12px;
 		color: var(--color_text_grey);
 		margin-bottom: 6px;
@@ -194,10 +194,20 @@
 		}
 	}
 
+	&-footer {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end; // 靠右对齐
+		gap: 12px;
+		min-height: 32px;
+	}
+
 	&-info {
 		display: flex;
 		flex-direction: column;
 		gap: 6px;
+		flex: 1;
+		margin-right: auto; // 信息推到最左边
 
 		.info-item {
 			display: flex;
@@ -218,8 +228,52 @@
 				word-break: break-all;
 				flex: 1;
 				margin-left: 8px;
+
+				&.no-bio {
+					color: var(--color_text_grey);
+					font-style: italic;
+					text-align: left;
+					margin-left: 0;
+				}
+			}
+		}
+	}
+
+	&-actions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-shrink: 0;
+
+		.action-button {
+			width: 28px;
+			height: 28px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 6px;
+			cursor: pointer;
+			transition: all 0.2s;
+			color: var(--color_text_grey);
+			background: transparent;
+
+			&:hover {
+				background: var(--color_bg_grey);
+			}
+
+			i {
+				font-size: 14px;
+			}
+
+			&.settings-button:hover {
+				background: var(--color_primary_bg);
+				color: var(--color_primary);
+			}
+
+			&.logout-button:hover {
+				background: var(--color_danger_bg);
+				color: var(--color_danger);
 			}
 		}
 	}
 }
-

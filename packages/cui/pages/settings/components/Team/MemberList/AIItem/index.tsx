@@ -58,23 +58,28 @@ const AIItem = ({
 		}
 	}
 
-	// 构造一个兼容 UserAvatar 的用户对象
-	const avatarUser = {
-		avatar: member.avatar || undefined,
-		name: displayName
-	} as any
-
 	// AI members use robot_email (globally unique), fallback to email for display
 	const robotEmail = member.robot_email || member.email
+	const isOwner = member.is_owner === 1 || member.is_owner === true
 
 	return (
 		<div className={styles.memberCard}>
 			<div className={styles.memberInfo}>
 				<div className={styles.memberAvatar}>
 					<UserAvatar
-						user={avatarUser}
+						data={{
+							id: member.member_id,
+							avatar: member.avatar || undefined,
+							name: displayName,
+							email: robotEmail || undefined,
+							bio: member.bio || undefined,
+							role_id: member.role_id,
+							role_name: getRoleDisplayName(member.role_id),
+							is_owner: isOwner,
+							member_type: 'robot'
+						}}
 						size={44}
-						forcePersonal={true}
+						displayType='avatar'
 						uploader={uploader}
 						avatarAgent={avatarAgent}
 						onUploadSuccess={onAvatarUpdate ? handleAvatarUploadSuccess : undefined}

@@ -769,13 +769,12 @@ const Team = () => {
 									size='xl'
 									shape='square'
 									borderRadius={12}
-									user={{
+									displayType='avatar'
+									data={{
 										id: team?.team_id || '',
-										type: 'team' as const,
 										avatar: team?.logo,
 										name: team?.name || 'Team'
 									}}
-									forcePersonal={true}
 									uploader={config?.uploader || '__yao.attachment'}
 									avatarAgent={config?.avatar_agent}
 									onUploadSuccess={handleUpdateTeamAvatar}

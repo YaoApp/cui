@@ -1,10 +1,10 @@
-import type { App } from '@/types'
+import type { AvatarData } from '../../types'
 
 export interface CardProps {
-	/** User data */
-	user: App.User
-	/** Whether the user is in a team context */
-	isTeam: boolean
+	/** Avatar data */
+	data: AvatarData
+	/** Whether to show combined display (team + user) */
+	isCombined: boolean
 	/** Custom class name */
 	className?: string
 }

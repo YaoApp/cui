@@ -116,7 +116,11 @@ const Menu = ({ active, onChange }: MenuProps) => {
 				<div className={styles.scrollableContent}>
 					{currentUser && (
 						<div className={styles.user}>
-							<UserAvatar size={42} showCard={false} user={currentUser} />
+							<UserAvatar
+								size={42}
+								showCard={false}
+								// displayType='auto' 会自动判断是否显示组合模式
+							/>
 							<div className={styles.info}>
 								<div className={styles.firstLine}>
 									<span className={styles.name}>
@@ -142,10 +146,10 @@ const Menu = ({ active, onChange }: MenuProps) => {
 										<span>
 											{isTeam
 												? is_cn
-													? '团队账号'
+													? '团队'
 													: 'Team'
 												: is_cn
-												? '个人账号'
+												? '个人'
 												: 'Personal'}
 										</span>
 									</span>

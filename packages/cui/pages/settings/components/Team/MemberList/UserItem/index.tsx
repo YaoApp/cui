@@ -27,17 +27,25 @@ const UserItem = ({ member, is_cn, getRoleDisplayName, onRemove }: UserItemProps
 		})
 	}
 
-	// 构造一个兼容 UserAvatar 的用户对象
-	const avatarUser = {
-		avatar: member.avatar || undefined,
-		name: displayName
-	} as any
-
 	return (
 		<div className={styles.memberCard}>
 			<div className={styles.memberInfo}>
 				<div className={styles.memberAvatar}>
-					<UserAvatar user={avatarUser} size={44} forcePersonal={true} />
+					<UserAvatar
+						data={{
+							id: member.member_id,
+							avatar: member.avatar || undefined,
+							name: displayName,
+							email: member.email || undefined,
+							bio: member.bio || undefined,
+							role_id: member.role_id,
+							role_name: getRoleDisplayName(member.role_id),
+							is_owner: isOwner,
+							member_type: 'user'
+						}}
+						size={44}
+						displayType='avatar'
+					/>
 				</div>
 				<div className={styles.memberDetails}>
 					<div className={styles.memberName}>

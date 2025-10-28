@@ -39,15 +39,14 @@ const TeamEditForm = ({
 					size='xl'
 					shape='square'
 					borderRadius={12}
+					displayType='avatar'
 					buttonText={is_cn ? '更换团队头像' : 'Change Team Avatar'}
 					modalTitle={is_cn ? '设置团队头像' : 'Set Team Avatar'}
-					user={{
+					data={{
 						id: team?.team_id || '',
-						type: 'team',
 						name: team?.name || '',
 						avatar: formAvatar || team?.logo // 优先使用表单字段的值
 					}}
-					forcePersonal={true}
 					uploader={uploader}
 					avatarAgent={avatarAgent}
 					onUploadSuccess={handleAvatarUploadSuccess}
