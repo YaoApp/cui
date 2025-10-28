@@ -127,6 +127,17 @@ export const GetCurrentUser = (): App.User | null => {
 }
 
 /**
+ * Check if current user is a team member
+ * @returns true if user is part of a team, false otherwise
+ */
+export const IsTeamMember = (): boolean => {
+	const user = GetCurrentUser()
+	if (!user) return false
+	// User is a team member if they have team_id and team information
+	return !!(user.team_id && user.team)
+}
+
+/**
  * Clear authentication information (logout)
  */
 export const ClearAuthInfo = (): void => {

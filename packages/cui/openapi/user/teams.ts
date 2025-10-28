@@ -207,6 +207,21 @@ export class UserTeams {
 	}
 
 	/**
+	 * Get member profile (self-read only)
+	 * Allows members to read their own profile fields (display_name, bio, avatar, email)
+	 * @param teamId Team ID
+	 * @param userId User ID (must be the authenticated user's ID)
+	 */
+	async GetMemberProfile(
+		teamId: string,
+		userId: string
+	): Promise<ApiResponse<UpdateMemberProfileRequest & { user_id: string; team_id: string }>> {
+		return this.api.Get<UpdateMemberProfileRequest & { user_id: string; team_id: string }>(
+			`/user/teams/${teamId}/members/${userId}/profile`
+		)
+	}
+
+	/**
 	 * Update member profile (self-update only)
 	 * Allows members to update their own profile fields (display_name, bio, avatar, email)
 	 * @param teamId Team ID

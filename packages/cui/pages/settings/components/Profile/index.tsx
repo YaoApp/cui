@@ -1,13 +1,27 @@
 import { useState, useEffect } from 'react'
 import { Form, message } from 'antd'
 import { getLocale } from '@umijs/max'
-import { mockApi, User } from '../../mockData'
-import ActionButton from '@/components/ui/ActionButton'
-import Button from '@/components/ui/Button'
+import { GetCurrentUser, IsTeamMember } from '@/pages/auth/auth'
 import Icon from '@/widgets/Icon'
-import { Input, Select, TextArea, Avatar, RadioGroup } from '@/components/ui/inputs'
-import { timezoneOptions } from '@/constants/timezones'
+import UserAvatar from '@/widgets/UserAvatar'
+import { Input, RadioGroup } from '@/components/ui/inputs'
+import Button from '@/components/ui/Button'
+import { User } from '@/openapi/user'
 import styles from './index.less'
+
+interface PersonalProfile {
+	name?: string
+	gender?: string
+	website?: string
+	picture?: string
+}
+
+interface MemberProfile {
+	display_name?: string
+	bio?: string
+	avatar?: string
+	email?: string
+}
 
 const Profile = () => {
 	const locale = getLocale()
@@ -17,35 +31,163 @@ const Profile = () => {
 	const [loading, setLoading] = useState(true)
 	const [saving, setSaving] = useState(false)
 	const [editing, setEditing] = useState(false)
-	const [user, setUser] = useState<User | null>(null)
+	const [isTeamMember, setIsTeamMember] = useState(false)
+	const [profileData, setProfileData] = useState<PersonalProfile | MemberProfile | null>(null)
+	const [teamId, setTeamId] = useState<string | undefined>(undefined)
+	const [userId, setUserId] = useState<string | undefined>(undefined)
+	const [apiClient, setApiClient] = useState<User | null>(null)
 
+	// 监听表单的头像字段变化
+	const formAvatar = Form.useWatch('avatar', form)
+	const formPicture = Form.useWatch('picture', form)
+
+	// Initialize API client
 	useEffect(() => {
-		const loadUser = async () => {
+		const initializeAPI = async () => {
+			if (window.$app?.openapi) {
+				const client = new User(window.$app.openapi)
+				setApiClient(client)
+			} else {
+				console.error('OpenAPI not initialized')
+				message.error(is_cn ? 'API未初始化' : 'API not initialized')
+			}
+		}
+
+		initializeAPI()
+	}, [is_cn])
+
+	// Load profile data
+	useEffect(() => {
+		const loadProfile = async () => {
+			if (!apiClient) return
+
 			try {
 				setLoading(true)
-				const userData = await mockApi.getUser()
-				setUser(userData)
-				form.setFieldsValue(userData)
+
+				// Check if user is a team member
+				const currentUser = GetCurrentUser()
+				if (!currentUser) {
+					message.error(is_cn ? '未登录' : 'Not logged in')
+					return
+				}
+
+				const isMember = IsTeamMember()
+				setIsTeamMember(isMember)
+				setUserId(String(currentUser.id))
+
+				if (isMember) {
+					// Load team member profile
+					setTeamId(currentUser.team_id)
+					console.log('Loading member profile for:', {
+						teamId: currentUser.team_id,
+						userId: String(currentUser.id)
+					})
+
+					const response = await apiClient.teams.GetMemberProfile(
+						currentUser.team_id!,
+						String(currentUser.id)
+					)
+
+					console.log('Member profile response:', response)
+
+					if (apiClient.IsError(response)) {
+						console.error('Member profile error:', response)
+						throw new Error(
+							`Failed to load member profile: ${
+								response.error?.error_description || 'Unknown error'
+							}`
+						)
+					}
+
+					const memberProfile: MemberProfile = {
+						display_name: response.data?.display_name || '',
+						bio: response.data?.bio || '',
+						avatar: response.data?.avatar || '',
+						email: response.data?.email || ''
+					}
+
+					setProfileData(memberProfile)
+					form.setFieldsValue(memberProfile)
+				} else {
+					// Load personal profile
+					console.log('Loading personal profile for user:', currentUser.id)
+
+					const response = await apiClient.profile.GetProfile()
+
+					console.log('Personal profile response:', response)
+
+					if (apiClient.IsError(response)) {
+						console.error('Personal profile error:', response)
+						throw new Error(
+							`Failed to load profile: ${
+								response.error?.error_description || 'Unknown error'
+							}`
+						)
+					}
+
+					const personalProfile: PersonalProfile = {
+						name: response.data?.name || '',
+						gender: response.data?.gender || '',
+						website: response.data?.website || '',
+						picture: response.data?.picture || ''
+					}
+
+					setProfileData(personalProfile)
+					form.setFieldsValue(personalProfile)
+				}
 			} catch (error) {
-				console.error('Failed to load user data:', error)
-				message.error(is_cn ? '加载用户信息失败' : 'Failed to load user data')
+				console.error('Failed to load profile data:', error)
+				const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+				message.error(
+					is_cn
+						? `加载个人资料失败: ${errorMessage}`
+						: `Failed to load profile data: ${errorMessage}`
+				)
 			} finally {
 				setLoading(false)
 			}
 		}
 
-		loadUser()
-	}, [form, is_cn])
+		loadProfile()
+	}, [apiClient, form, is_cn])
 
-	const handleSave = async (values: any) => {
+	const handleSave = async (values: PersonalProfile | MemberProfile) => {
+		if (!apiClient) {
+			message.error(is_cn ? 'API未初始化' : 'API not initialized')
+			return
+		}
+
 		try {
 			setSaving(true)
-			// Mock save
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-			setUser({ ...user, ...values })
+
+			if (isTeamMember && teamId && userId) {
+				// Update team member profile
+				const response = await apiClient.teams.UpdateMemberProfile(
+					teamId,
+					userId,
+					values as MemberProfile
+				)
+
+				if (apiClient.IsError(response)) {
+					throw new Error('Failed to update member profile')
+				}
+
+				setProfileData(values as MemberProfile)
+			} else {
+				// Update personal profile
+				const response = await apiClient.profile.UpdateProfile(values as PersonalProfile)
+
+				if (apiClient.IsError(response)) {
+					throw new Error('Failed to update profile')
+				}
+
+				setProfileData(values as PersonalProfile)
+			}
+
 			setEditing(false)
 			message.success(is_cn ? '保存成功' : 'Saved successfully')
 		} catch (error) {
+			console.error('Failed to save profile:', error)
 			message.error(is_cn ? '保存失败' : 'Save failed')
 		} finally {
 			setSaving(false)
@@ -58,8 +200,18 @@ const Profile = () => {
 
 	const handleCancel = () => {
 		form.resetFields()
-		if (user) form.setFieldsValue(user)
+		if (profileData) form.setFieldsValue(profileData)
 		setEditing(false)
+	}
+
+	const handleAvatarUploadSuccess = (avatarWrapper: string, fileId: string) => {
+		// avatarWrapper 是 wrapper 格式，如 __yao.attachment://file123
+		// Update the appropriate field based on user type
+		if (isTeamMember) {
+			form.setFieldsValue({ avatar: avatarWrapper })
+		} else {
+			form.setFieldsValue({ picture: avatarWrapper })
+		}
 	}
 
 	if (loading) {
@@ -91,22 +243,27 @@ const Profile = () => {
 		)
 	}
 
-	// Gender options
-	const genderOptions = [
-		{ label: is_cn ? '男' : 'Male', value: 'male' },
-		{ label: is_cn ? '女' : 'Female', value: 'female' }
-	]
-
-	// Locale options
-	const localeOptions = [
-		{ label: 'English (US)', value: 'en-US' },
-		{ label: '中文 (简体)', value: 'zh-CN' },
-		{ label: 'English (UK)', value: 'en-GB' },
-		{ label: 'Français', value: 'fr-FR' },
-		{ label: 'Deutsch', value: 'de-DE' },
-		{ label: '日本語', value: 'ja-JP' },
-		{ label: '한국어', value: 'ko-KR' }
-	]
+	// Get current user for avatar display
+	const currentUser = GetCurrentUser()
+	const avatarData = currentUser
+		? {
+				id: String(currentUser.id),
+				name: isTeamMember
+					? (profileData as MemberProfile)?.display_name || currentUser.name
+					: (profileData as PersonalProfile)?.name || currentUser.name,
+				avatar: isTeamMember
+					? formAvatar || (profileData as MemberProfile)?.avatar || currentUser.avatar
+					: formPicture || (profileData as PersonalProfile)?.picture || currentUser.avatar,
+				team:
+					currentUser.team && currentUser.team.team_id
+						? {
+								team_id: currentUser.team.team_id,
+								logo: currentUser.team.logo,
+								name: currentUser.team.name
+						  }
+						: undefined
+		  }
+		: undefined
 
 	return (
 		<div className={styles.profile}>
@@ -115,7 +272,11 @@ const Profile = () => {
 					<h2>{is_cn ? '个人资料' : 'Profile'}</h2>
 					<p>
 						{is_cn
-							? '管理您的个人信息和账户设置'
+							? isTeamMember
+								? '管理您的团队成员资料'
+								: '管理您的个人信息和账户设置'
+							: isTeamMember
+							? 'Manage your team member profile'
 							: 'Manage your personal information and account settings'}
 					</p>
 				</div>
@@ -156,228 +317,273 @@ const Profile = () => {
 				<div className={styles.panelContent}>
 					{/* Avatar Section - Always Centered */}
 					<div className={styles.avatarSection}>
-						<Avatar
-							schema={{
-								type: 'string',
-								variant: 'large',
-								userName: user?.name || '',
-								placeholder: is_cn ? '更换头像' : 'Change Avatar',
-								readOnly: !editing
-							}}
-							value={user?.picture}
-							onChange={(value) => {
-								form.setFieldsValue({ picture: value })
-							}}
-							error=''
-							hasError={false}
+						<UserAvatar
+							mode={editing ? 'form' : 'default'}
+							size='xl'
+							shape='circle'
+							displayType='avatar'
+							buttonText={is_cn ? '更换头像' : 'Change Avatar'}
+							modalTitle={is_cn ? '设置头像' : 'Set Avatar'}
+							data={avatarData}
+							uploader={editing ? '__yao.attachment' : undefined}
+							onUploadSuccess={editing ? handleAvatarUploadSuccess : undefined}
 						/>
 					</div>
 
 					{/* Profile Fields */}
 					<Form form={form} onFinish={handleSave}>
 						<div className={styles.fieldsContainer}>
-							{/* Username/Name Field */}
-							<div className={styles.fieldItem}>
-								<div className={styles.fieldIcon}>
-									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
-										<path
-											d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'
-											stroke='currentColor'
-											strokeWidth='2'
-											strokeLinecap='round'
-											strokeLinejoin='round'
-										/>
-										<circle
-											cx='12'
-											cy='7'
-											r='4'
-											stroke='currentColor'
-											strokeWidth='2'
-											strokeLinecap='round'
-											strokeLinejoin='round'
-										/>
-									</svg>
-								</div>
-								<div className={styles.fieldContent}>
-									<div className={styles.fieldLabel}>{is_cn ? '姓名' : 'Name'}</div>
-									{editing ? (
-										<Form.Item name='name' style={{ margin: 0 }}>
-											<Input
-												schema={{
-													type: 'string',
-													placeholder: is_cn
-														? '请输入姓名'
-														: 'Enter your name'
-												}}
-												error=''
-												hasError={false}
-											/>
-										</Form.Item>
-									) : (
-										<div className={styles.fieldValue}>{user?.name || '-'}</div>
-									)}
-								</div>
-							</div>
-
-							{/* Gender Field */}
-							<div className={styles.fieldItem}>
-								<div className={styles.fieldIcon}>
-									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
-										<circle
-											cx='12'
-											cy='8'
-											r='3'
-											stroke='currentColor'
-											strokeWidth='2'
-											strokeLinecap='round'
-											strokeLinejoin='round'
-										/>
-										<path
-											d='M12 14v7'
-											stroke='currentColor'
-											strokeWidth='2'
-											strokeLinecap='round'
-											strokeLinejoin='round'
-										/>
-										<path
-											d='M15 17l-6 0'
-											stroke='currentColor'
-											strokeWidth='2'
-											strokeLinecap='round'
-											strokeLinejoin='round'
-										/>
-									</svg>
-								</div>
-								<div className={styles.fieldContent}>
-									<div className={styles.fieldLabel}>
-										{is_cn ? '性别' : 'Gender'}
-									</div>
-									{editing ? (
-										<Form.Item name='gender' style={{ margin: 0 }}>
-											<RadioGroup
-												schema={{
-													type: 'string',
-													enum: genderOptions,
-													allowClear: true
-												}}
-												error=''
-												hasError={false}
-											/>
-										</Form.Item>
-									) : (
-										<div className={styles.fieldValue}>
-											{genderOptions.find((g) => g.value === user?.gender)
-												?.label || '-'}
+							{isTeamMember ? (
+								<>
+									{/* Team Member Fields */}
+									{/* Display Name Field */}
+									<div className={styles.fieldItem}>
+										<div className={styles.fieldIcon}>
+											<Icon name='material-person' size={20} />
 										</div>
-									)}
-								</div>
-							</div>
-
-							{/* Timezone Field */}
-							<div className={styles.fieldItem}>
-								<div className={styles.fieldIcon}>
-									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
-										<circle
-											cx='12'
-											cy='12'
-											r='10'
-											stroke='currentColor'
-											strokeWidth='2'
-										/>
-										<polyline
-											points='12,6 12,12 16,14'
-											stroke='currentColor'
-											strokeWidth='2'
-										/>
-									</svg>
-								</div>
-								<div className={styles.fieldContent}>
-									<div className={styles.fieldLabel}>
-										{is_cn ? '时区' : 'Timezone'}
-									</div>
-									{editing ? (
-										<Form.Item name='zoneinfo' style={{ margin: 0 }}>
-											<Select
-												schema={{
-													type: 'string',
-													enum: timezoneOptions,
-													placeholder: is_cn
-														? '选择时区'
-														: 'Select timezone',
-													searchable: true
-												}}
-												error=''
-												hasError={false}
-											/>
-										</Form.Item>
-									) : (
-										<div className={styles.fieldValue}>
-											{timezoneOptions.find(
-												(tz) => tz.value === user?.zoneinfo
-											)?.label ||
-												user?.zoneinfo ||
-												'-'}
-										</div>
-									)}
-								</div>
-							</div>
-
-							{/* Link Field */}
-							<div className={styles.fieldItem}>
-								<div className={styles.fieldIcon}>
-									<svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
-										<path
-											d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'
-											stroke='currentColor'
-											strokeWidth='2'
-											strokeLinecap='round'
-											strokeLinejoin='round'
-										/>
-										<path
-											d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'
-											stroke='currentColor'
-											strokeWidth='2'
-											strokeLinecap='round'
-											strokeLinejoin='round'
-										/>
-									</svg>
-								</div>
-								<div className={styles.fieldContent}>
-									<div className={styles.fieldLabel}>{is_cn ? '链接' : 'Link'}</div>
-									{editing ? (
-										<Form.Item name='website' style={{ margin: 0 }}>
-											<Input
-												schema={{
-													type: 'string',
-													placeholder: is_cn
-														? '请输入链接地址'
-														: 'Enter your link URL'
-												}}
-												error=''
-												hasError={false}
-											/>
-										</Form.Item>
-									) : (
-										<div className={styles.fieldValue}>
-											{user?.website ? (
-												<a
-													href={user.website}
-													target='_blank'
-													rel='noopener noreferrer'
-													className={styles.websiteLink}
+										<div className={styles.fieldContent}>
+											<div className={styles.fieldLabel}>
+												{is_cn ? '团队昵称' : 'Team Nickname'}
+											</div>
+											{editing ? (
+												<Form.Item
+													name='display_name'
+													style={{ margin: 0 }}
 												>
-													{user.website}
-												</a>
+													<Input
+														schema={{
+															type: 'string',
+															placeholder: is_cn
+																? '请输入你在团队中的昵称'
+																: 'Enter your nickname in this team'
+														}}
+														error=''
+														hasError={false}
+													/>
+												</Form.Item>
 											) : (
-												'-'
+												<div className={styles.fieldValue}>
+													{(profileData as MemberProfile)
+														?.display_name || '-'}
+												</div>
 											)}
 										</div>
-									)}
-								</div>
-							</div>
+									</div>
 
-							{/* Hidden picture field */}
-							<Form.Item name='picture' style={{ display: 'none' }} />
+									{/* Email Field */}
+									<div className={styles.fieldItem}>
+										<div className={styles.fieldIcon}>
+											<Icon name='material-email' size={20} />
+										</div>
+										<div className={styles.fieldContent}>
+											<div className={styles.fieldLabel}>
+												{is_cn ? '邮箱' : 'Email'}
+											</div>
+											{editing ? (
+												<Form.Item name='email' style={{ margin: 0 }}>
+													<Input
+														schema={{
+															type: 'string',
+															placeholder: is_cn
+																? '请输入邮箱'
+																: 'Enter your email'
+														}}
+														error=''
+														hasError={false}
+													/>
+												</Form.Item>
+											) : (
+												<div className={styles.fieldValue}>
+													{(profileData as MemberProfile)?.email ||
+														'-'}
+												</div>
+											)}
+										</div>
+									</div>
+
+									{/* Bio Field */}
+									<div className={styles.fieldItem}>
+										<div className={styles.fieldIcon}>
+											<Icon name='material-description' size={20} />
+										</div>
+										<div className={styles.fieldContent}>
+											<div className={styles.fieldLabel}>
+												{is_cn ? '简介' : 'Bio'}
+											</div>
+											{editing ? (
+												<Form.Item name='bio' style={{ margin: 0 }}>
+													<Input
+														schema={{
+															type: 'string',
+															placeholder: is_cn
+																? '请输入简介'
+																: 'Enter your bio'
+														}}
+														error=''
+														hasError={false}
+													/>
+												</Form.Item>
+											) : (
+												<div className={styles.fieldValue}>
+													{(profileData as MemberProfile)?.bio ||
+														'-'}
+												</div>
+											)}
+										</div>
+									</div>
+
+									{/* Hidden avatar field */}
+									<Form.Item name='avatar' style={{ display: 'none' }} />
+								</>
+							) : (
+								<>
+									{/* Personal User Fields */}
+									{/* Name Field */}
+									<div className={styles.fieldItem}>
+										<div className={styles.fieldIcon}>
+											<Icon name='material-person' size={20} />
+										</div>
+										<div className={styles.fieldContent}>
+											<div className={styles.fieldLabel}>
+												{is_cn ? '姓名' : 'Name'}
+											</div>
+											{editing ? (
+												<Form.Item name='name' style={{ margin: 0 }}>
+													<Input
+														schema={{
+															type: 'string',
+															placeholder: is_cn
+																? '请输入姓名'
+																: 'Enter your name'
+														}}
+														error=''
+														hasError={false}
+													/>
+												</Form.Item>
+											) : (
+												<div className={styles.fieldValue}>
+													{(profileData as PersonalProfile)?.name ||
+														'-'}
+												</div>
+											)}
+										</div>
+									</div>
+
+									{/* Gender Field */}
+									<div className={styles.fieldItem}>
+										<div className={styles.fieldIcon}>
+											<Icon name='material-wc' size={20} />
+										</div>
+										<div className={styles.fieldContent}>
+											<div className={styles.fieldLabel}>
+												{is_cn ? '性别' : 'Gender'}
+											</div>
+											{editing ? (
+												<Form.Item name='gender' style={{ margin: 0 }}>
+													<RadioGroup
+														schema={{
+															type: 'string',
+															enum: [
+																{
+																	label: is_cn
+																		? '男'
+																		: 'Male',
+																	value: 'male'
+																},
+																{
+																	label: is_cn
+																		? '女'
+																		: 'Female',
+																	value: 'female'
+																},
+																{
+																	label: is_cn
+																		? '其他'
+																		: 'Other',
+																	value: 'other'
+																}
+															],
+															allowClear: true
+														}}
+														error=''
+														hasError={false}
+													/>
+												</Form.Item>
+											) : (
+												<div className={styles.fieldValue}>
+													{(() => {
+														const gender = (
+															profileData as PersonalProfile
+														)?.gender
+														if (gender === 'male')
+															return is_cn ? '男' : 'Male'
+														if (gender === 'female')
+															return is_cn ? '女' : 'Female'
+														if (gender === 'other')
+															return is_cn
+																? '其他'
+																: 'Other'
+														return '-'
+													})()}
+												</div>
+											)}
+										</div>
+									</div>
+
+									{/* Link Field */}
+									<div className={styles.fieldItem}>
+										<div className={styles.fieldIcon}>
+											<Icon name='material-link' size={20} />
+										</div>
+										<div className={styles.fieldContent}>
+											<div className={styles.fieldLabel}>
+												{is_cn ? '链接' : 'Link'}
+											</div>
+											{editing ? (
+												<Form.Item name='website' style={{ margin: 0 }}>
+													<Input
+														schema={{
+															type: 'string',
+															placeholder: is_cn
+																? '请输入链接地址'
+																: 'Enter your link URL'
+														}}
+														error=''
+														hasError={false}
+													/>
+												</Form.Item>
+											) : (
+												<div className={styles.fieldValue}>
+													{(profileData as PersonalProfile)
+														?.website ? (
+														<a
+															href={
+																(
+																	profileData as PersonalProfile
+																).website
+															}
+															target='_blank'
+															rel='noopener noreferrer'
+															className={styles.websiteLink}
+														>
+															{
+																(
+																	profileData as PersonalProfile
+																).website
+															}
+														</a>
+													) : (
+														'-'
+													)}
+												</div>
+											)}
+										</div>
+									</div>
+
+									{/* Hidden picture field */}
+									<Form.Item name='picture' style={{ display: 'none' }} />
+								</>
+							)}
 						</div>
 					</Form>
 				</div>
