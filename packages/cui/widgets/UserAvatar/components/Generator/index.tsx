@@ -9,7 +9,7 @@ import type { GeneratorProps } from './types'
 import styles from './index.less'
 import commonStyles from '@/components/ui/inputs/common.less'
 
-const Generator = forwardRef<any, GeneratorProps>(({ avatarAgent, onSuccess }, ref) => {
+const Generator = forwardRef<any, GeneratorProps>(({ avatarAgent, onSuccess, onImageGenerate }, ref) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -46,6 +46,11 @@ const Generator = forwardRef<any, GeneratorProps>(({ avatarAgent, onSuccess }, r
 
 			setPreviewUrl(mockImageUrl)
 			setGeneratedFileId(mockFileId)
+
+			// Notify parent about image generation
+			if (onImageGenerate) {
+				onImageGenerate(true)
+			}
 
 			message.success(is_cn ? '生成成功！请确认使用' : 'Generated successfully! Please confirm to use')
 		} catch (error) {

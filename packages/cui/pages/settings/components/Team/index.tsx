@@ -108,7 +108,8 @@ const Team = () => {
 							teamResponse.data.team_id,
 							{
 								page: 1,
-								pagesize: 100
+								pagesize: 100,
+								locale: locale
 							}
 						)
 
@@ -170,7 +171,8 @@ const Team = () => {
 				if (team.team_id) {
 					const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
 						page: 1,
-						pagesize: 100
+						pagesize: 100,
+						locale: locale
 					})
 					if (!apiClient.IsError(membersResponse) && membersResponse.data) {
 						setMembers(membersResponse.data.data || [])
@@ -244,7 +246,8 @@ const Team = () => {
 				try {
 					const membersResponse = await apiClient.teams.GetMembers(newTeam.team_id, {
 						page: 1,
-						pagesize: 100
+						pagesize: 100,
+						locale: locale
 					})
 
 					if (!apiClient.IsError(membersResponse) && membersResponse.data) {
@@ -382,7 +385,8 @@ const Team = () => {
 				if (team.team_id) {
 					const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
 						page: 1,
-						pagesize: 100
+						pagesize: 100,
+						locale: locale
 					})
 					if (!apiClient.IsError(membersResponse) && membersResponse.data) {
 						setMembers(membersResponse.data.data || [])
@@ -435,11 +439,19 @@ const Team = () => {
 		}
 
 		try {
-			// TODO: 实现重发邀请邮件的API调用
-			message.success(is_cn ? '邀请已重发' : 'Invitation resent')
+			const response = await apiClient.teams.ResendInvitation(team.team_id, invitationId, locale)
+
+			if (apiClient.IsError(response)) {
+				console.error('Failed to resend invitation:', response.error)
+				const errorMsg = response.error?.error_description || response.error?.error || 'Unknown error'
+				message.error(is_cn ? `重发邀请失败: ${errorMsg}` : `Failed to resend invitation: ${errorMsg}`)
+				return
+			}
+
+			message.success(is_cn ? '邀请邮件已重新发送' : 'Invitation email resent successfully')
 		} catch (error) {
 			console.error('Error resending invitation:', error)
-			message.error(is_cn ? '重发邀请失败' : 'Failed to resend invitation')
+			message.error(is_cn ? '重发邮请失败' : 'Failed to resend invitation')
 		}
 	}
 
@@ -500,7 +512,8 @@ const Team = () => {
 			if (team.team_id) {
 				const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
 					page: 1,
-					pagesize: 100
+					pagesize: 100,
+					locale: locale
 				})
 				if (!apiClient.IsError(membersResponse) && membersResponse.data?.data) {
 					setMembers(membersResponse.data.data)
@@ -561,7 +574,8 @@ const Team = () => {
 			if (team.team_id) {
 				const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
 					page: 1,
-					pagesize: 100
+					pagesize: 100,
+					locale: locale
 				})
 				if (!apiClient.IsError(membersResponse) && membersResponse.data?.data) {
 					setMembers(membersResponse.data.data)
@@ -612,7 +626,8 @@ const Team = () => {
 			if (team.team_id) {
 				const membersResponse = await apiClient.teams.GetMembers(team.team_id, {
 					page: 1,
-					pagesize: 100
+					pagesize: 100,
+					locale: locale
 				})
 				if (!apiClient.IsError(membersResponse) && membersResponse.data?.data) {
 					setMembers(membersResponse.data.data)

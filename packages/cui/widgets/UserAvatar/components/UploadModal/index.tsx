@@ -23,9 +23,21 @@ const UploadModal: React.FC<UploadModalProps> = ({
 	// If no avatarAgent is configured, always use 'upload' tab
 	const [activeTab, setActiveTab] = useState('upload')
 	const [confirming, setConfirming] = useState(false)
+	const [hasUploadedImage, setHasUploadedImage] = useState(false)
+	const [hasGeneratedImage, setHasGeneratedImage] = useState(false)
 
 	const uploaderRef = useRef<any>(null)
 	const generatorRef = useRef<any>(null)
+
+	// Reset states when modal visibility changes
+	React.useEffect(() => {
+		if (!visible) {
+			setActiveTab('upload')
+			setHasUploadedImage(false)
+			setHasGeneratedImage(false)
+			setConfirming(false)
+		}
+	}, [visible])
 
 	const handleConfirm = async () => {
 		try {
@@ -49,6 +61,10 @@ const UploadModal: React.FC<UploadModalProps> = ({
 	}
 
 	const renderFooter = () => {
+		// Determine if confirm button should be disabled
+		const isConfirmDisabled =
+			activeTab === 'upload' ? !hasUploadedImage : activeTab === 'generate' ? !hasGeneratedImage : true
+
 		return (
 			<div className={styles.modalFooter}>
 				<div className={styles.footerLeft}></div>
@@ -56,7 +72,13 @@ const UploadModal: React.FC<UploadModalProps> = ({
 					<Button size='small' onClick={onClose} disabled={confirming}>
 						{is_cn ? '取消' : 'Cancel'}
 					</Button>
-					<Button type='primary' size='small' onClick={handleConfirm} loading={confirming}>
+					<Button
+						type='primary'
+						size='small'
+						onClick={handleConfirm}
+						loading={confirming}
+						disabled={isConfirmDisabled}
+					>
 						{is_cn ? '确定' : 'Confirm'}
 					</Button>
 				</div>
@@ -121,10 +143,20 @@ const UploadModal: React.FC<UploadModalProps> = ({
 				{/* Tab Content */}
 				<div className={styles.tabsContent}>
 					{activeTab === 'upload' && (
-						<Uploader ref={uploaderRef} uploader={uploader} onSuccess={handleSuccess} />
+						<Uploader
+							ref={uploaderRef}
+							uploader={uploader}
+							onSuccess={handleSuccess}
+							onImageSelect={(hasImage) => setHasUploadedImage(hasImage)}
+						/>
 					)}
 					{activeTab === 'generate' && avatarAgent && (
-						<Generator ref={generatorRef} avatarAgent={avatarAgent} onSuccess={handleSuccess} />
+						<Generator
+							ref={generatorRef}
+							avatarAgent={avatarAgent}
+							onSuccess={handleSuccess}
+							onImageGenerate={(hasImage) => setHasGeneratedImage(hasImage)}
+						/>
 					)}
 				</div>
 			</div>

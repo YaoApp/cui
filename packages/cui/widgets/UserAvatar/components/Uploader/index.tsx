@@ -8,7 +8,7 @@ import type { UploaderProps } from './types'
 import type { RcFile } from 'antd/es/upload/interface'
 import './index.less'
 
-const Uploader = forwardRef<any, UploaderProps>(({ uploader, onSuccess }, ref) => {
+const Uploader = forwardRef<any, UploaderProps>(({ uploader, onSuccess, onImageSelect }, ref) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -40,6 +40,11 @@ const Uploader = forwardRef<any, UploaderProps>(({ uploader, onSuccess }, ref) =
 		}
 		reader.readAsDataURL(file)
 		setSelectedFile(file)
+
+		// Notify parent about image selection
+		if (onImageSelect) {
+			onImageSelect(true)
+		}
 
 		return false // Prevent default upload behavior
 	}

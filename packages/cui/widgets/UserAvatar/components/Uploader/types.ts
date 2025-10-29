@@ -3,6 +3,8 @@ export interface UploaderProps {
 	uploader: string
 	/** Upload success callback */
 	onSuccess: (fileId: string, fileUrl: string) => void
+	/** Image select callback to notify parent about image selection state */
+	onImageSelect?: (hasImage: boolean) => void
 }
 
 export interface UploadedFile {
@@ -14,4 +16,3 @@ export interface UploadedFile {
 	content_type: string
 	created_at: number
 }
-

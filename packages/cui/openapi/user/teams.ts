@@ -148,6 +148,7 @@ export class UserTeams {
 		if (options?.fields && options.fields.length > 0) {
 			params.fields = options.fields.join(',')
 		}
+		if (options?.locale) params.locale = options.locale
 
 		return this.api.Get<MemberListResponse>(`/user/teams/${teamId}/members`, params)
 	}
@@ -330,9 +331,20 @@ export class UserTeams {
 	 * Resend team invitation by invitation_id
 	 * @param teamId Team ID
 	 * @param invitationId Invitation ID to resend
+	 * @param locale Optional locale for email template (defaults to "en")
 	 */
-	async ResendInvitation(teamId: string, invitationId: string): Promise<ApiResponse<{ message: string }>> {
-		return this.api.Put<{ message: string }>(`/user/teams/${teamId}/invitations/${invitationId}/resend`, {})
+	async ResendInvitation(
+		teamId: string,
+		invitationId: string,
+		locale?: string
+	): Promise<ApiResponse<{ message: string }>> {
+		const payload: Record<string, string> = {}
+		if (locale) payload.locale = locale
+
+		return this.api.Put<{ message: string }>(
+			`/user/teams/${teamId}/invitations/${invitationId}/resend`,
+			payload
+		)
 	}
 
 	/**
