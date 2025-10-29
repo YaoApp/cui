@@ -8,7 +8,7 @@ interface MemberListProps {
 	members: TeamMember[]
 	is_cn: boolean
 	getRoleDisplayName: (roleId: string) => string
-	onRemoveMember: (memberId: string) => void
+	onRemoveMember?: (memberId: string) => void
 	onEditAIMember?: (memberId: string) => void
 	onResendInvitation?: (invitationId: string) => void
 	baseInviteURL?: string

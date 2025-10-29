@@ -99,6 +99,18 @@ export class User {
 		return this.auth.RefreshCaptcha(captchaId)
 	}
 
+	// ===== Features API =====
+
+	/**
+	 * Get user features with cache support
+	 * Stores features in local storage (same as user profile)
+	 * @param domain Optional domain filter (e.g., "user", "user/team")
+	 */
+	async GetFeatures(domain?: string) {
+		const params = domain ? { domain } : undefined
+		return this.api.Get<Record<string, boolean>>('/user/features', params)
+	}
+
 	/**
 	 * Helper: Check if response contains an error
 	 */

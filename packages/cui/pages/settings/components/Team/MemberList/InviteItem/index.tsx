@@ -8,7 +8,7 @@ interface InviteItemProps {
 	member: TeamMember
 	is_cn: boolean
 	getRoleDisplayName: (roleId: string) => string
-	onRemove: (memberId: string) => void
+	onRemove?: (memberId: string) => void
 	onResend?: (invitationId: string) => void
 	baseInviteURL?: string
 }
@@ -54,6 +54,8 @@ const InviteItem = ({ member, is_cn, getRoleDisplayName, onRemove, onResend, bas
 	const expiryInfo = getExpiryInfo()
 
 	const handleRemoveClick = () => {
+		if (!onRemove) return
+
 		Modal.confirm({
 			title: is_cn ? '确认移除邀请' : 'Confirm Remove Invitation',
 			content: is_cn
@@ -132,18 +134,20 @@ const InviteItem = ({ member, is_cn, getRoleDisplayName, onRemove, onResend, bas
 						</span>
 					</Tooltip>
 				)}
-				{!isExpired && invitationLink && (
-					<Tooltip title={is_cn ? '复制链接' : 'Copy link'}>
-						<span className={styles.actionIcon} onClick={handleCopyClick}>
-							<Icon name='material-content_copy' size={16} />
-						</span>
-					</Tooltip>
-				)}
+			{!isExpired && invitationLink && (
+				<Tooltip title={is_cn ? '复制链接' : 'Copy link'}>
+					<span className={styles.actionIcon} onClick={handleCopyClick}>
+						<Icon name='material-content_copy' size={16} />
+					</span>
+				</Tooltip>
+			)}
+			{onRemove && (
 				<Tooltip title={is_cn ? '移除' : 'Remove'}>
 					<span className={styles.actionIcon} onClick={handleRemoveClick}>
 						<Icon name='material-close' size={16} />
 					</span>
 				</Tooltip>
+			)}
 			</div>
 		</div>
 	)

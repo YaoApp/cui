@@ -26,6 +26,7 @@ export default class GlobalModel {
 	kb = {} as any // TODO: add Knowledge Base Config
 	user = (local.user || {}) as App.User
 	userInfo = (local.userInfo || null) as UserInfo | null
+	features = (local.features || {}) as Record<string, Record<string, boolean>>
 	menus = (local.menus || { items: [], setting: {}, quick: [] }) as App.Menus
 	menu = (local.menu || []) as Array<App.Menu>
 
@@ -269,6 +270,16 @@ export default class GlobalModel {
 		} else {
 			local.userInfo = null
 		}
+	}
+
+	setFeatures(domain: string, features: Record<string, boolean>) {
+		this.features[domain] = features
+		local.features = this.features
+	}
+
+	clearFeatures() {
+		this.features = {}
+		local.features = {}
 	}
 
 	setVisibleLogWindow(visible: boolean) {

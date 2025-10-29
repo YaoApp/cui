@@ -8,6 +8,7 @@ import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
 import { User } from '@/openapi/user'
 import { CreateTeamRequest, UserTeamDetail, TeamMember, TeamInvitation, TeamConfig } from '@/openapi/user/types'
+import { Can } from '@/pages/auth/auth'
 import MemberList from './MemberList'
 import InviteForm from './InviteForm'
 import TeamEditForm from './TeamEditForm'
@@ -16,6 +17,16 @@ import AddAIMemberWizard from './AddAIMemberWizard'
 import EditAIMember from './EditAIMember'
 import type { AIMemberValues } from './AddAIMemberWizard'
 import styles from './index.less'
+
+// Team feature permissions domain and feature keys
+const TEAM_DOMAIN = 'user/team'
+const TEAM_FEATURES = {
+	EDIT: 'team:edit',
+	INVITE: 'team:member:invite',
+	ROBOT_CREATE: 'team:member:robot:create',
+	ROBOT_EDIT: 'team:member:robot:edit',
+	MEMBER_REMOVE: 'team:member:remove'
+} as const
 
 const Team = () => {
 	const locale = getLocale()
@@ -42,23 +53,49 @@ const Team = () => {
 	const [inviteLink, setInviteLink] = useState('')
 	const [generatingLink, setGeneratingLink] = useState(false)
 
+	// Team permissions state
+	const [permissions, setPermissions] = useState({
+		canEditTeam: false,
+		canInviteMembers: false,
+		canCreateRobot: false,
+		canEditRobot: false,
+		canRemoveMembers: false
+	})
+
 	useEffect(() => {
 		const initializeAPI = async () => {
 			if (window.$app?.openapi) {
 				const client = new User(window.$app.openapi)
 				setApiClient(client)
 
-				// Load team configuration
 				try {
 					setConfigLoading(true)
-					const configResponse = await client.teams.GetConfig(locale)
+
+					// Load team configuration and permissions in parallel
+					const [configResponse, features] = await Promise.all([
+						client.teams.GetConfig(locale),
+						Can(Object.values(TEAM_FEATURES), TEAM_DOMAIN)
+					])
+
+					// Handle config response
 					if (!client.IsError(configResponse) && configResponse.data) {
 						setConfig(configResponse.data)
 					} else {
 						console.error('Failed to load team config:', configResponse.error)
 					}
+
+					// Handle permissions
+					if (typeof features === 'object') {
+						setPermissions({
+							canEditTeam: features[TEAM_FEATURES.EDIT] || false,
+							canInviteMembers: features[TEAM_FEATURES.INVITE] || false,
+							canCreateRobot: features[TEAM_FEATURES.ROBOT_CREATE] || false,
+							canEditRobot: features[TEAM_FEATURES.ROBOT_EDIT] || false,
+							canRemoveMembers: features[TEAM_FEATURES.MEMBER_REMOVE] || false
+						})
+					}
 				} catch (error) {
-					console.error('Failed to load team config:', error)
+					console.error('Failed to load team config or permissions:', error)
 				} finally {
 					setConfigLoading(false)
 				}
@@ -730,24 +767,28 @@ const Team = () => {
 					</p>
 				</div>
 				<div className={styles.headerActions}>
-					<Button
-						type='primary'
-						size='small'
-						icon={<Icon name='material-psychology' size={12} />}
-						onClick={() => setAddAIModalVisible(true)}
-						disabled={!team || loading || configLoading}
-					>
-						{is_cn ? '添加 AI 成员' : 'Add AI Member'}
-					</Button>
-					<Button
-						type='primary'
-						size='small'
-						icon={<Icon name='material-person_add' size={12} />}
-						onClick={() => setInviteModalVisible(true)}
-						disabled={!team || loading || configLoading}
-					>
-						{is_cn ? '邀请成员' : 'Invite Member'}
-					</Button>
+					{permissions.canCreateRobot && (
+						<Button
+							type='primary'
+							size='small'
+							icon={<Icon name='material-psychology' size={12} />}
+							onClick={() => setAddAIModalVisible(true)}
+							disabled={!team || loading || configLoading}
+						>
+							{is_cn ? '添加 AI 成员' : 'Add AI Member'}
+						</Button>
+					)}
+					{permissions.canInviteMembers && (
+						<Button
+							type='primary'
+							size='small'
+							icon={<Icon name='material-person_add' size={12} />}
+							onClick={() => setInviteModalVisible(true)}
+							disabled={!team || loading || configLoading}
+						>
+							{is_cn ? '邀请成员' : 'Invite Member'}
+						</Button>
+					)}
 				</div>
 			</div>
 
@@ -755,54 +796,56 @@ const Team = () => {
 			<div className={styles.teamInfoPanel}>
 				<div className={styles.teamInfoSection}>
 					{/* 编辑按钮区域 */}
-					<div className={styles.editActions}>
-						{editingTeam ? (
-							<>
+					{permissions.canEditTeam && (
+						<div className={styles.editActions}>
+							{editingTeam ? (
+								<>
+									<Button
+										type='primary'
+										size='small'
+										icon={<Icon name='icon-check' size={12} />}
+										onClick={() => teamForm.submit()}
+										loading={updatingTeam}
+										disabled={updatingTeam}
+									>
+										{is_cn ? '保存' : 'Save'}
+									</Button>
+									<Button
+										size='small'
+										icon={<Icon name='icon-x' size={12} />}
+										onClick={() => {
+											setEditingTeam(false)
+											teamForm.setFieldsValue({
+												name: team?.name,
+												description: team?.description,
+												avatar: team?.logo
+											})
+										}}
+										disabled={updatingTeam}
+									>
+										{is_cn ? '取消' : 'Cancel'}
+									</Button>
+								</>
+							) : (
 								<Button
-									type='primary'
+									type='default'
 									size='small'
-									icon={<Icon name='icon-check' size={12} />}
-									onClick={() => teamForm.submit()}
-									loading={updatingTeam}
-									disabled={updatingTeam}
-								>
-									{is_cn ? '保存' : 'Save'}
-								</Button>
-								<Button
-									size='small'
-									icon={<Icon name='icon-x' size={12} />}
+									icon={<Icon name='material-edit' size={12} />}
 									onClick={() => {
-										setEditingTeam(false)
 										teamForm.setFieldsValue({
 											name: team?.name,
 											description: team?.description,
 											avatar: team?.logo
 										})
+										setEditingTeam(true)
 									}}
-									disabled={updatingTeam}
+									disabled={loading || configLoading}
 								>
-									{is_cn ? '取消' : 'Cancel'}
+									{is_cn ? '编辑' : 'Edit'}
 								</Button>
-							</>
-						) : (
-							<Button
-								type='default'
-								size='small'
-								icon={<Icon name='material-edit' size={12} />}
-								onClick={() => {
-									teamForm.setFieldsValue({
-										name: team?.name,
-										description: team?.description,
-										avatar: team?.logo
-									})
-									setEditingTeam(true)
-								}}
-								disabled={loading || configLoading}
-							>
-								{is_cn ? '编辑' : 'Edit'}
-							</Button>
-						)}
-					</div>
+							)}
+						</div>
+					)}
 
 					{editingTeam ? (
 						<TeamEditForm
@@ -824,7 +867,9 @@ const Team = () => {
 										avatar: team?.logo,
 										name: team?.name || 'Team'
 									}}
-									onUploadSuccess={handleUpdateTeamAvatar}
+									onUploadSuccess={
+										permissions.canEditTeam ? handleUpdateTeamAvatar : undefined
+									}
 								/>
 							</div>
 							<div className={styles.teamInfo}>
@@ -866,9 +911,11 @@ const Team = () => {
 						members={members}
 						is_cn={is_cn}
 						getRoleDisplayName={getRoleDisplayName}
-						onRemoveMember={handleRemoveMember}
-						onEditAIMember={handleEditAIMember}
-						onResendInvitation={handleResendInvitation}
+						onRemoveMember={permissions.canRemoveMembers ? handleRemoveMember : undefined}
+						onEditAIMember={permissions.canEditRobot ? handleEditAIMember : undefined}
+						onResendInvitation={
+							permissions.canInviteMembers ? handleResendInvitation : undefined
+						}
 						baseInviteURL={window.location.origin + '/invite'}
 						onAvatarUpdate={handleUpdateAvatar}
 					/>

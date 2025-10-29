@@ -2,6 +2,7 @@ import { GlobalModel } from '@/context/app'
 import type { App } from '@/types'
 import { findIndex } from 'lodash-es'
 import type { UserInfo } from '@/openapi/user/types'
+import { User } from '@/openapi/user'
 import { getPath } from '@/utils'
 import { local } from '@yaoapp/storex'
 import { history } from '@umijs/max'
@@ -171,6 +172,9 @@ export const AfterLogout = (global: GlobalModel): void => {
 		// Clear user info from global state
 		global.setUserInfo(null)
 
+		// Clear features cache (all domains)
+		global.clearFeatures()
+
 		// Clear user info from local storage
 		ClearAuthInfo()
 
@@ -179,5 +183,63 @@ export const AfterLogout = (global: GlobalModel): void => {
 		global.menu = []
 	} catch (error) {
 		console.error('Failed to handle post-logout cleanup:', error)
+	}
+}
+
+/**
+ * Check if user has specific feature(s)
+ * Uses cached features, fetches by domain if not available
+ * @param feature Feature key(s) - single string or array of strings
+ * @param domain Domain to fetch (e.g., "user", "user/team", "kb")
+ * @returns For single feature: boolean. For multiple features: Record<string, boolean>
+ *
+ * @example
+ * // Single feature
+ * const canEdit = await Can("profile:write", "user")
+ *
+ * // Multiple features (batch)
+ * const permissions = await Can(["profile:write", "profile:delete", "team:create"], "user")
+ * // Returns: { "profile:write": true, "profile:delete": false, "team:create": true }
+ */
+export const Can = async (feature: string | string[], domain: string): Promise<boolean | Record<string, boolean>> => {
+	try {
+		// Get global model
+		const global = window.$global
+
+		// Check cache for this domain
+		let features = global?.features?.[domain]
+
+		// Fetch if no cache for this domain
+		if (!features) {
+			if (!window.$app?.openapi) {
+				console.error('OpenAPI not initialized')
+				return Array.isArray(feature) ? {} : false
+			}
+
+			const client = new User(window.$app.openapi)
+			const response = await client.GetFeatures(domain)
+
+			if (client.IsError(response) || !response?.data) {
+				return Array.isArray(feature) ? {} : false
+			}
+
+			features = response.data
+			global?.setFeatures(domain, features)
+		}
+
+		// Handle single feature
+		if (typeof feature === 'string') {
+			return !!features && features[feature] === true
+		}
+
+		// Handle multiple features (batch)
+		const result: Record<string, boolean> = {}
+		for (const key of feature) {
+			result[key] = !!features && features[key] === true
+		}
+		return result
+	} catch (error) {
+		console.error('Failed to check feature:', error)
+		return Array.isArray(feature) ? {} : false
 	}
 }

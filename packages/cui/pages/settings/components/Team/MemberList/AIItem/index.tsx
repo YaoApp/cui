@@ -9,7 +9,7 @@ interface AIItemProps {
 	member: TeamMember
 	is_cn: boolean
 	getRoleDisplayName: (roleId: string) => string
-	onRemove: (memberId: string) => void
+	onRemove?: (memberId: string) => void
 	onEdit?: (memberId: string) => void
 	onAvatarUpdate?: (memberId: string, avatar: string) => Promise<void>
 }
@@ -25,6 +25,8 @@ const AIItem = ({
 	const displayName = member.display_name || (is_cn ? 'AI 助手' : 'AI Assistant')
 
 	const handleRemoveClick = () => {
+		if (!onRemove) return
+
 		Modal.confirm({
 			title: is_cn ? '确认移除 AI 成员' : 'Confirm Remove AI Member',
 			content: is_cn ? `确定要移除 ${displayName} 吗？` : `Are you sure to remove ${displayName}?`,
@@ -112,11 +114,13 @@ const AIItem = ({
 						</span>
 					</Tooltip>
 				)}
-				<Tooltip title={is_cn ? '移除' : 'Remove'}>
-					<span className={styles.actionIcon} onClick={handleRemoveClick}>
-						<Icon name='material-close' size={16} />
-					</span>
-				</Tooltip>
+				{onRemove && (
+					<Tooltip title={is_cn ? '移除' : 'Remove'}>
+						<span className={styles.actionIcon} onClick={handleRemoveClick}>
+							<Icon name='material-close' size={16} />
+						</span>
+					</Tooltip>
+				)}
 			</div>
 		</div>
 	)

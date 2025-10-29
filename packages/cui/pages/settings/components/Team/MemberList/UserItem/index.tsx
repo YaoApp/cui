@@ -9,7 +9,7 @@ interface UserItemProps {
 	member: TeamMember
 	is_cn: boolean
 	getRoleDisplayName: (roleId: string) => string
-	onRemove: (memberId: string) => void
+	onRemove?: (memberId: string) => void
 }
 
 const UserItem = ({ member, is_cn, getRoleDisplayName, onRemove }: UserItemProps) => {
@@ -17,6 +17,8 @@ const UserItem = ({ member, is_cn, getRoleDisplayName, onRemove }: UserItemProps
 	const isOwner = member.is_owner === 1 || member.is_owner === true
 
 	const handleRemoveClick = () => {
+		if (!onRemove) return
+
 		Modal.confirm({
 			title: is_cn ? '确认移除成员' : 'Confirm Remove Member',
 			content: is_cn ? `确定要移除 ${displayName} 吗？` : `Are you sure to remove ${displayName}?`,
@@ -69,7 +71,7 @@ const UserItem = ({ member, is_cn, getRoleDisplayName, onRemove }: UserItemProps
 				</div>
 			</div>
 			<div className={styles.memberActions}>
-				{!isOwner && (
+				{!isOwner && onRemove && (
 					<Tooltip title={is_cn ? '移除' : 'Remove'}>
 						<span className={styles.actionIcon} onClick={handleRemoveClick}>
 							<Icon name='material-close' size={16} />
