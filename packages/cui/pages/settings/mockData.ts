@@ -449,148 +449,148 @@ export const mockMenuGroups: MenuGroup[] = [
 				icon: 'material-person',
 				path: '/settings/profile'
 			},
-			{
-				id: '1a',
-				key: 'balance',
-				name: { 'zh-CN': '账户余额', 'en-US': 'Balance' },
-				icon: 'material-account_balance_wallet',
-				path: '/settings/balance'
-			},
-			{
-				id: '2',
-				key: 'api-keys',
-				name: { 'zh-CN': 'API Keys', 'en-US': 'API Keys' },
-				icon: 'material-vpn_key',
-				path: '/settings/api-keys'
-			},
+			// {
+			// 	id: '1a',
+			// 	key: 'balance',
+			// 	name: { 'zh-CN': '账户余额', 'en-US': 'Balance' },
+			// 	icon: 'material-account_balance_wallet',
+			// 	path: '/settings/balance'
+			// },
+			// {
+			// 	id: '2',
+			// 	key: 'api-keys',
+			// 	name: { 'zh-CN': 'API Keys', 'en-US': 'API Keys' },
+			// 	icon: 'material-vpn_key',
+			// 	path: '/settings/api-keys'
+			// },
 			{
 				id: '2a',
 				key: 'team',
 				name: { 'zh-CN': '团队', 'en-US': 'Team' },
 				icon: 'material-group',
 				path: '/settings/team'
-			},
-			{
-				id: '2b',
-				key: 'preferences',
-				name: { 'zh-CN': '偏好设置', 'en-US': 'Preferences' },
-				icon: 'material-settings',
-				path: '/settings/preferences'
 			}
+			// {
+			// 	id: '2b',
+			// 	key: 'preferences',
+			// 	name: { 'zh-CN': '偏好设置', 'en-US': 'Preferences' },
+			// 	icon: 'material-settings',
+			// 	path: '/settings/preferences'
+			// }
 		]
 	},
-	{
-		key: 'plan',
-		name: { 'zh-CN': '套餐计划', 'en-US': 'Plan' },
-		order: 2,
-		items: [
-			{
-				id: '3',
-				key: 'plans',
-				name: { 'zh-CN': '套餐与价格', 'en-US': 'Plans & Pricing' },
-				icon: 'material-workspace_premium',
-				path: '/settings/plans'
-			},
-			{
-				id: '4',
-				key: 'subscription',
-				name: { 'zh-CN': '订阅管理', 'en-US': 'Subscription' },
-				icon: 'material-card_membership',
-				path: '/settings/subscription'
-			},
-			{
-				id: '5',
-				key: 'usage',
-				name: { 'zh-CN': '使用统计', 'en-US': 'Usage' },
-				icon: 'material-analytics',
-				path: '/settings/usage'
-			},
-			{
-				id: '6',
-				key: 'billing',
-				name: { 'zh-CN': '账单发票', 'en-US': 'Billing & Invoices' },
-				icon: 'material-receipt',
-				path: '/settings/billing'
-			}
-		]
-	},
-	{
-		key: 'marketing',
-		name: { 'zh-CN': '邀请奖励', 'en-US': 'Referrals' },
-		order: 3,
-		items: [
-			{
-				id: '7',
-				key: 'invite',
-				name: { 'zh-CN': '邀请码', 'en-US': 'Invite Code' },
-				icon: 'material-qr_code',
-				path: '/settings/invite'
-			},
-			{
-				id: '8',
-				key: 'commissions',
-				name: { 'zh-CN': '邀请记录', 'en-US': 'Commissions' },
-				icon: 'material-people_outline',
-				path: '/settings/commissions'
-			}
-		]
-	},
-	{
-		key: 'integrations',
-		name: { 'zh-CN': '第三方服务', 'en-US': 'Integrations' },
-		order: 4,
-		items: [
-			{
-				id: '9',
-				key: 'llm-providers',
-				name: { 'zh-CN': 'LLM 提供商', 'en-US': 'LLM Providers' },
-				icon: 'material-psychology',
-				path: '/settings/llm-providers'
-			},
-			{
-				id: '10',
-				key: 'mcp-servers',
-				name: { 'zh-CN': 'MCP 服务器', 'en-US': 'MCP Servers' },
-				icon: 'material-dns',
-				path: '/settings/mcp-servers'
-			},
-			{
-				id: '11',
-				key: 'stripe',
-				name: { 'zh-CN': 'Stripe', 'en-US': 'Stripe' },
-				icon: 'material-payment',
-				path: '/settings/stripe'
-			}
-		]
-	},
-	{
-		key: 'security',
-		name: { 'zh-CN': '安全设置', 'en-US': 'Security' },
-		order: 5,
-		items: [
-			{
-				id: '12',
-				key: 'security',
-				name: { 'zh-CN': '账号安全', 'en-US': 'Account Security' },
-				icon: 'material-security',
-				path: '/settings/security'
-			},
-			{
-				id: '13',
-				key: 'privacy',
-				name: { 'zh-CN': '隐私设置', 'en-US': 'Privacy' },
-				icon: 'material-privacy_tip',
-				path: '/settings/privacy'
-			},
-			{
-				id: '14',
-				key: 'audit-logs',
-				name: { 'zh-CN': '审计日志', 'en-US': 'Audit Logs' },
-				icon: 'material-history',
-				path: '/settings/audit-logs'
-			}
-		]
-	},
+	// {
+	// 	key: 'plan',
+	// 	name: { 'zh-CN': '套餐计划', 'en-US': 'Plan' },
+	// 	order: 2,
+	// 	items: [
+	// 		{
+	// 			id: '3',
+	// 			key: 'plans',
+	// 			name: { 'zh-CN': '套餐与价格', 'en-US': 'Plans & Pricing' },
+	// 			icon: 'material-workspace_premium',
+	// 			path: '/settings/plans'
+	// 		},
+	// 		{
+	// 			id: '4',
+	// 			key: 'subscription',
+	// 			name: { 'zh-CN': '订阅管理', 'en-US': 'Subscription' },
+	// 			icon: 'material-card_membership',
+	// 			path: '/settings/subscription'
+	// 		},
+	// 		{
+	// 			id: '5',
+	// 			key: 'usage',
+	// 			name: { 'zh-CN': '使用统计', 'en-US': 'Usage' },
+	// 			icon: 'material-analytics',
+	// 			path: '/settings/usage'
+	// 		},
+	// 		{
+	// 			id: '6',
+	// 			key: 'billing',
+	// 			name: { 'zh-CN': '账单发票', 'en-US': 'Billing & Invoices' },
+	// 			icon: 'material-receipt',
+	// 			path: '/settings/billing'
+	// 		}
+	// 	]
+	// },
+	// {
+	// 	key: 'marketing',
+	// 	name: { 'zh-CN': '邀请奖励', 'en-US': 'Referrals' },
+	// 	order: 3,
+	// 	items: [
+	// 		{
+	// 			id: '7',
+	// 			key: 'invite',
+	// 			name: { 'zh-CN': '邀请码', 'en-US': 'Invite Code' },
+	// 			icon: 'material-qr_code',
+	// 			path: '/settings/invite'
+	// 		},
+	// 		{
+	// 			id: '8',
+	// 			key: 'commissions',
+	// 			name: { 'zh-CN': '邀请记录', 'en-US': 'Commissions' },
+	// 			icon: 'material-people_outline',
+	// 			path: '/settings/commissions'
+	// 		}
+	// 	]
+	// },
+	// {
+	// 	key: 'integrations',
+	// 	name: { 'zh-CN': '第三方服务', 'en-US': 'Integrations' },
+	// 	order: 4,
+	// 	items: [
+	// 		{
+	// 			id: '9',
+	// 			key: 'llm-providers',
+	// 			name: { 'zh-CN': 'LLM 提供商', 'en-US': 'LLM Providers' },
+	// 			icon: 'material-psychology',
+	// 			path: '/settings/llm-providers'
+	// 		},
+	// 		{
+	// 			id: '10',
+	// 			key: 'mcp-servers',
+	// 			name: { 'zh-CN': 'MCP 服务器', 'en-US': 'MCP Servers' },
+	// 			icon: 'material-dns',
+	// 			path: '/settings/mcp-servers'
+	// 		},
+	// 		{
+	// 			id: '11',
+	// 			key: 'stripe',
+	// 			name: { 'zh-CN': 'Stripe', 'en-US': 'Stripe' },
+	// 			icon: 'material-payment',
+	// 			path: '/settings/stripe'
+	// 		}
+	// 	]
+	// },
+	// {
+	// 	key: 'security',
+	// 	name: { 'zh-CN': '安全设置', 'en-US': 'Security' },
+	// 	order: 5,
+	// 	items: [
+	// 		{
+	// 			id: '12',
+	// 			key: 'security',
+	// 			name: { 'zh-CN': '账号安全', 'en-US': 'Account Security' },
+	// 			icon: 'material-security',
+	// 			path: '/settings/security'
+	// 		},
+	// 		{
+	// 			id: '13',
+	// 			key: 'privacy',
+	// 			name: { 'zh-CN': '隐私设置', 'en-US': 'Privacy' },
+	// 			icon: 'material-privacy_tip',
+	// 			path: '/settings/privacy'
+	// 		},
+	// 		{
+	// 			id: '14',
+	// 			key: 'audit-logs',
+	// 			name: { 'zh-CN': '审计日志', 'en-US': 'Audit Logs' },
+	// 			icon: 'material-history',
+	// 			path: '/settings/audit-logs'
+	// 		}
+	// 	]
+	// },
 	{
 		key: 'support',
 		name: { 'zh-CN': '帮助支持', 'en-US': 'Support' },
@@ -601,14 +601,21 @@ export const mockMenuGroups: MenuGroup[] = [
 				key: 'docs',
 				name: { 'zh-CN': '文档', 'en-US': 'Documentation' },
 				icon: 'material-description',
-				path: '/settings/docs'
+				path: 'https://yaobots.com/docs'
 			},
 			{
 				id: '16',
-				key: 'contact',
-				name: { 'zh-CN': '联系支持', 'en-US': 'Contact Support' },
-				icon: 'material-contact_support',
-				path: '/settings/contact'
+				key: 'discord',
+				name: { 'zh-CN': '加入 Discord', 'en-US': 'Join Discord' },
+				icon: 'material-forum',
+				path: 'https://discord.gg/BkMR2NUsjU'
+			},
+			{
+				id: '17',
+				key: 'twitter',
+				name: { 'zh-CN': '关注 X', 'en-US': 'Follow on X' },
+				icon: 'material-tag',
+				path: 'https://x.com/YaoApp'
 			}
 		]
 	}

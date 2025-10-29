@@ -18,6 +18,11 @@ interface MenuProps {
 	onChange: (key: string) => void
 }
 
+// Helper function to check if a path is an external URL
+const isExternalUrl = (path: string): boolean => {
+	return path.startsWith('http://') || path.startsWith('https://')
+}
+
 const Menu = ({ active, onChange }: MenuProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -208,28 +213,48 @@ const Menu = ({ active, onChange }: MenuProps) => {
 									{group.name[is_cn ? 'zh-CN' : 'en-US']}
 								</div>
 								<div className={styles.items}>
-									{group.items.map((item) => (
-										<div
-											key={item.key}
-											className={`${styles.item} ${
-												active === item.key ? styles.active : ''
-											}`}
-											onClick={() => onChange(item.key)}
-										>
-											<Icon
-												name={item.icon}
-												size={16}
-												className={
-													active === item.key
-														? styles.menuIconActive
-														: styles.menuIcon
-												}
-											/>
-											<span className={styles.text}>
-												{item.name[is_cn ? 'zh-CN' : 'en-US']}
-											</span>
-										</div>
-									))}
+									{group.items.map((item) => {
+										const isExternal = isExternalUrl(item.path)
+										return (
+											<div
+												key={item.key}
+												className={`${styles.item} ${
+													active === item.key ? styles.active : ''
+												}`}
+												onClick={() => {
+													if (isExternal) {
+														window.open(
+															item.path,
+															'_blank',
+															'noopener,noreferrer'
+														)
+													} else {
+														onChange(item.key)
+													}
+												}}
+											>
+												<Icon
+													name={item.icon}
+													size={16}
+													className={
+														active === item.key
+															? styles.menuIconActive
+															: styles.menuIcon
+													}
+												/>
+												<span className={styles.text}>
+													{item.name[is_cn ? 'zh-CN' : 'en-US']}
+												</span>
+												{isExternal && (
+													<Icon
+														name='material-open_in_new'
+														size={12}
+														className={styles.externalIcon}
+													/>
+												)}
+											</div>
+										)
+									})}
 								</div>
 							</div>
 						))}
