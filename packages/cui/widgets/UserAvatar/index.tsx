@@ -37,6 +37,8 @@ const UserAvatar: FC<UserAvatarProps> = ({
 	buttonText,
 	modalTitle,
 	showCard = false,
+	cardPlacement = 'right',
+	cardAlign = 'center',
 	className = '',
 	style = {},
 	onClick,
@@ -350,13 +352,17 @@ const UserAvatar: FC<UserAvatarProps> = ({
 				<div
 					className='user-avatar-wrapper'
 					onClick={handleAvatarClick}
-					style={{ cursor: (uploader && onUploadSuccess) || onClick ? 'pointer' : 'default' }}
+					style={{
+						cursor: (uploader && onUploadSuccess) || onClick || showCard ? 'pointer' : 'default'
+					}}
 				>
 					{renderAvatar()}
 				</div>
 
 				{showCard && (
-					<div className='user-avatar-card-wrapper'>
+					<div
+						className={`user-avatar-card-wrapper user-avatar-card-wrapper-${cardPlacement} user-avatar-card-align-${cardAlign}`}
+					>
 						<Card data={data} isCombined={isCombinedDisplay} />
 					</div>
 				)}

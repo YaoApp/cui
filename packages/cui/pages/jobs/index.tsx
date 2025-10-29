@@ -154,8 +154,8 @@ const Index = () => {
 			// 检查是否还有更多数据
 			setHasMore(jobsData.length < totalJobs)
 		} catch (error) {
-			console.error(is_cn ? '加载作业失败:' : 'Failed to load jobs:', error)
-			message.error(is_cn ? '加载作业失败' : 'Failed to load jobs')
+			console.error(is_cn ? '加载任务失败:' : 'Failed to load tasks:', error)
+			message.error(is_cn ? '加载任务失败' : 'Failed to load tasks')
 		} finally {
 			setLoading(false)
 		}
@@ -202,8 +202,8 @@ const Index = () => {
 			const loadedCount = jobs.length + jobsData.length
 			setHasMore(loadedCount < totalJobs)
 		} catch (error) {
-			console.error('Load more jobs failed:', error)
-			message.error(is_cn ? '加载更多作业失败' : 'Failed to load more jobs')
+			console.error('Load more tasks failed:', error)
+			message.error(is_cn ? '加载更多任务失败' : 'Failed to load more tasks')
 		} finally {
 			setLoadingMore(false)
 		}
@@ -223,7 +223,7 @@ const Index = () => {
 			setJobDetail(response.data!)
 		} catch (error) {
 			console.error('Failed to load job detail:', error)
-			message.error(is_cn ? '加载作业详情失败' : 'Failed to load job detail')
+			message.error(is_cn ? '加载任务详情失败' : 'Failed to load task detail')
 		} finally {
 			setDetailLoading(false)
 		}
@@ -268,7 +268,7 @@ const Index = () => {
 				category_id: 'running',
 				name: is_cn ? `运行中 (${runningJobsCount})` : `Running (${runningJobsCount})`,
 				icon: 'material-play_circle',
-				description: is_cn ? '当前正在运行的作业' : 'Currently running jobs',
+				description: is_cn ? '当前正在运行的任务' : 'Currently running tasks',
 				sort: -1,
 				system: true,
 				enabled: true,
@@ -282,7 +282,7 @@ const Index = () => {
 				category_id: 'all',
 				name: is_cn ? `全部 (${totalJobsCount})` : `All (${totalJobsCount})`,
 				icon: 'material-apps',
-				description: is_cn ? '显示所有作业' : 'Show all jobs',
+				description: is_cn ? '显示所有任务' : 'Show all tasks',
 				sort: 0,
 				system: true,
 				enabled: true,
@@ -326,7 +326,7 @@ const Index = () => {
 		loadCategories()
 		loadData()
 
-		// 刷新运行中的作业数量，确保Header显示一致
+		// 刷新运行中的任务数量，确保Header显示一致
 		window.$app?.Event?.emit('app/refreshJobsCount')
 	}, [])
 
@@ -566,15 +566,15 @@ const Index = () => {
 		if (jobs.length === 0 && !loading) {
 			return (
 				<div className={styles.emptyState}>
-					<Icon name='material-assignment' size={64} className={styles.emptyIcon} />
+					<Icon name='material-monitor_heart' size={64} className={styles.emptyIcon} />
 					<div className={styles.emptyTitle}>
 						{searchKeywords
 							? is_cn
-								? '未找到匹配的作业'
-								: 'No matching jobs found'
+								? '未找到匹配的任务'
+								: 'No matching tasks found'
 							: is_cn
-							? '暂无作业'
-							: 'No Jobs'}
+							? '暂无任务'
+							: 'No Tasks'}
 					</div>
 					<div className={styles.emptyDescription}>
 						{searchKeywords
@@ -582,8 +582,8 @@ const Index = () => {
 								? '尝试调整搜索关键词或选择其他分类'
 								: 'Try adjusting your search keywords or select a different category'
 							: is_cn
-							? '还没有任何作业'
-							: 'No jobs available'}
+							? '还没有任何任务'
+							: 'No tasks available'}
 					</div>
 				</div>
 			)
@@ -598,7 +598,7 @@ const Index = () => {
 					<div className={styles.loading}>
 						<Spin />
 						<span style={{ marginLeft: 8 }}>
-							{is_cn ? '加载更多作业...' : 'Loading more jobs...'}
+							{is_cn ? '加载更多任务...' : 'Loading more tasks...'}
 						</span>
 					</div>
 				)}
@@ -606,7 +606,7 @@ const Index = () => {
 				{/* 没有更多数据的提示 */}
 				{!hasMore && jobs.length > 0 && (
 					<div className={styles.loading}>
-						<span>{is_cn ? '已加载全部作业' : 'All jobs loaded'}</span>
+						<span>{is_cn ? '已加载全部任务' : 'All tasks loaded'}</span>
 					</div>
 				)}
 			</>
@@ -619,11 +619,11 @@ const Index = () => {
 				<div className={styles.titleContainer}>
 					<div className={styles.titleWithIcon}>
 						<Icon
-							name='material-assignment'
+							name='material-monitor_heart'
 							size={24}
 							style={{ color: 'var(--color_page_title)' }}
 						/>
-						<h1 className={styles.title}>{is_cn ? '作业' : 'Jobs'}</h1>
+						<h1 className={styles.title}>{is_cn ? '活动监视器' : 'Activity Monitor'}</h1>
 					</div>
 				</div>
 
@@ -631,7 +631,7 @@ const Index = () => {
 					<Input
 						size='large'
 						className={styles.search}
-						placeholder={is_cn ? '搜索作业...' : 'Search jobs...'}
+						placeholder={is_cn ? '搜索任务...' : 'Search tasks...'}
 						prefix={<SearchOutlined />}
 						value={search}
 						onChange={(e) => {
@@ -645,7 +645,7 @@ const Index = () => {
 						allowClear
 					/>
 					<Button type='primary' size='large' onClick={handleSearch}>
-						{is_cn ? '搜索' : 'Search'}
+						{is_cn ? '搜索任务' : 'Search Tasks'}
 					</Button>
 				</div>
 			</div>

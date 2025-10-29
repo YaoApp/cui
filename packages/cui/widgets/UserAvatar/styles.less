@@ -3,6 +3,7 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	z-index: 1;
 
 	.user-avatar-wrapper {
 		display: inline-flex;
@@ -18,35 +19,162 @@
 		}
 	}
 
+	// 当 hover 时提升整个容器的 z-index
+	&:hover {
+		z-index: 10;
+	}
+
 	.user-avatar-card-wrapper {
 		position: absolute;
-		left: calc(100% + 12px);
-		top: 50%;
-		transform: translateY(-50%);
 		opacity: 0;
 		visibility: hidden;
 		pointer-events: none;
 		transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.15s,
 			visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
-		z-index: 1000;
+		z-index: 10;
 		white-space: nowrap;
-
-		// 创建一个不可见的桥接区域，连接头像和卡片
-		&::before {
-			content: '';
-			position: absolute;
-			right: 100%;
-			top: 0;
-			bottom: 0;
-			width: 12px; // 桥接宽度等于间距
-			background: transparent;
-		}
 
 		// 鼠标移到卡片上时保持显示
 		&:hover {
 			opacity: 1;
 			visibility: visible;
 			pointer-events: auto;
+		}
+
+		// Right placement (default)
+		&-right {
+			left: calc(100% + 12px);
+
+			&::before {
+				content: '';
+				position: absolute;
+				right: 100%;
+				top: 0;
+				bottom: 0;
+				width: 12px;
+				background: transparent;
+			}
+
+			// Default: center align
+			&.user-avatar-card-align-center {
+				top: 50%;
+				transform: translateY(-50%);
+			}
+
+			// Start align (top)
+			&.user-avatar-card-align-start {
+				top: 0;
+				transform: none;
+			}
+
+			// End align (bottom)
+			&.user-avatar-card-align-end {
+				bottom: 0;
+				top: auto;
+				transform: none;
+			}
+		}
+
+		// Bottom placement
+		&-bottom {
+			top: calc(100% + 12px);
+
+			&::before {
+				content: '';
+				position: absolute;
+				bottom: 100%;
+				left: 0;
+				right: 0;
+				height: 12px;
+				background: transparent;
+			}
+
+			// Default: center align
+			&.user-avatar-card-align-center {
+				left: 50%;
+				transform: translateX(-50%);
+			}
+
+			// Start align (left)
+			&.user-avatar-card-align-start {
+				left: 0;
+				transform: none;
+			}
+
+			// End align (right)
+			&.user-avatar-card-align-end {
+				right: 0;
+				left: auto;
+				transform: none;
+			}
+		}
+
+		// Top placement
+		&-top {
+			bottom: calc(100% + 12px);
+
+			&::before {
+				content: '';
+				position: absolute;
+				top: 100%;
+				left: 0;
+				right: 0;
+				height: 12px;
+				background: transparent;
+			}
+
+			// Default: center align
+			&.user-avatar-card-align-center {
+				left: 50%;
+				transform: translateX(-50%);
+			}
+
+			// Start align (left)
+			&.user-avatar-card-align-start {
+				left: 0;
+				transform: none;
+			}
+
+			// End align (right)
+			&.user-avatar-card-align-end {
+				right: 0;
+				left: auto;
+				transform: none;
+			}
+		}
+
+		// Left placement
+		&-left {
+			right: calc(100% + 12px);
+
+			&::before {
+				content: '';
+				position: absolute;
+				left: 100%;
+				top: 0;
+				bottom: 0;
+				width: 12px;
+				background: transparent;
+			}
+
+			// Default: center align
+			&.user-avatar-card-align-center {
+				top: 50%;
+				transform: translateY(-50%);
+			}
+
+			// Start align (top)
+			&.user-avatar-card-align-start {
+				top: 0;
+				transform: none;
+			}
+
+			// End align (bottom)
+			&.user-avatar-card-align-end {
+				bottom: 0;
+				top: auto;
+				transform: none;
+			}
 		}
 	}
 

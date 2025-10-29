@@ -31,6 +31,23 @@ export type AvatarMode = 'default' | 'form'
 export type AvatarDisplayType = 'auto' | 'avatar' | 'combined'
 
 /**
+ * 用户卡片位置
+ * - right: 右侧显示 (默认)
+ * - bottom: 底部显示
+ * - top: 顶部显示
+ * - left: 左侧显示
+ */
+export type CardPlacement = 'right' | 'bottom' | 'top' | 'left'
+
+/**
+ * 用户卡片对齐方式
+ * - center: 居中对齐 (默认)
+ * - start: 起始对齐（对于 bottom/top 是左对齐，对于 left/right 是顶部对齐）
+ * - end: 结束对齐（对于 bottom/top 是右对齐，对于 left/right 是底部对齐）
+ */
+export type CardAlign = 'center' | 'start' | 'end'
+
+/**
  * 团队信息
  */
 export interface TeamInfo {
@@ -203,6 +220,25 @@ export interface UserAvatarProps {
 	 * @default false
 	 */
 	showCard?: boolean
+
+	/**
+	 * 用户卡片显示位置
+	 * - 'right': 右侧显示 (默认)
+	 * - 'bottom': 底部显示
+	 * - 'top': 顶部显示
+	 * - 'left': 左侧显示
+	 * @default 'right'
+	 */
+	cardPlacement?: CardPlacement
+
+	/**
+	 * 用户卡片对齐方式
+	 * - 'center': 居中对齐 (默认)
+	 * - 'start': 起始对齐（bottom/top 时左对齐，left/right 时顶部对齐）
+	 * - 'end': 结束对齐（bottom/top 时右对齐，left/right 时底部对齐）
+	 * @default 'center'
+	 */
+	cardAlign?: CardAlign
 
 	// ========== 数据相关 ==========
 

@@ -3,6 +3,7 @@ import { FC, useState, useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import Icon from '@/widgets/Icon'
+import UserAvatar from '@/widgets/UserAvatar'
 import clsx from 'clsx'
 import './header.less'
 import { App } from '@/types'
@@ -79,17 +80,17 @@ const Header: FC<HeaderProps> = ({
 			// Calculate available width
 			const headerWidth = header.getBoundingClientRect().width
 			const headerRightWidth = headerRight.getBoundingClientRect().width
-			const logo = header.querySelector('.header_logo') as HTMLElement
+			const userAvatar = header.querySelector('.header_user_avatar') as HTMLElement
 			const createNew = header.querySelector('.header_current_function') as HTMLElement
 
-			if (!logo || !createNew) return
+			if (!userAvatar || !createNew) return
 
 			// Add some buffer for padding and spacing
 			const BUFFER_SPACE = 80
-			const logoWidth = logo.getBoundingClientRect().width
+			const userAvatarWidth = userAvatar.getBoundingClientRect().width
 			const createNewWidth = createNew.getBoundingClientRect().width
 
-			const usedWidth = headerRightWidth + logoWidth + createNewWidth + BUFFER_SPACE
+			const usedWidth = headerRightWidth + userAvatarWidth + createNewWidth + BUFFER_SPACE
 
 			const availableWidth = headerWidth - usedWidth
 			const moreMenuWidth = 48
@@ -182,9 +183,15 @@ const Header: FC<HeaderProps> = ({
 		return (
 			<div className='header_normal'>
 				<div className='header_left'>
-					{/* Logo */}
-					<div className='header_logo'>
-						<img src={global.app_info?.logo} alt='Logo' />
+					{/* User Avatar */}
+					<div className='header_user_avatar'>
+						<UserAvatar
+							size={32}
+							showCard={true}
+							cardPlacement='bottom'
+							cardAlign='start'
+							onClick={() => navigate('/settings/profile')}
+						/>
 					</div>
 
 					{/* Common Functions */}
@@ -233,7 +240,13 @@ const Header: FC<HeaderProps> = ({
 								}`}
 								size={15}
 							/>
-							<span>{activeFunction ? activeFunction.name : 'Quick Launch'}</span>
+							<span>
+								{activeFunction
+									? activeFunction.name
+									: is_cn
+									? '快捷启动'
+									: 'Quick Launch'}
+							</span>
 						</div>
 					</Dropdown>
 
@@ -322,14 +335,16 @@ const Header: FC<HeaderProps> = ({
 				</div>
 
 				<div className='header_right'>
-					<Tooltip title={is_cn ? '作业' : 'Jobs'}>
+					<Tooltip title={is_cn ? '活动监视器' : 'Activity Monitor'}>
 						<Button
 							type='text'
 							className='header_icon_btn header_task_btn'
 							onClick={() => navigate('/jobs')}
 						>
 							<div className='header_task_content'>
-								<span className='header_task_text'>{is_cn ? '作业' : 'Jobs'}</span>
+								<span className='header_task_text'>
+									{is_cn ? '活动监视器' : 'Activity Monitor'}
+								</span>
 								<span
 									className={`header_task_number ${
 										global.runningJobsCount > 0 ? 'has-jobs' : ''
@@ -356,15 +371,6 @@ const Header: FC<HeaderProps> = ({
 							className='header_icon_btn'
 							icon={<Icon name='material-library_books' size={14} />}
 							onClick={() => navigate('/kb')}
-						/>
-					</Tooltip>
-
-					<Tooltip title={is_cn ? '设置' : 'Settings'}>
-						<Button
-							type='text'
-							className='header_icon_btn'
-							icon={<Icon name='material-settings' size={16} />}
-							onClick={() => navigate('/settings')}
 						/>
 					</Tooltip>
 
