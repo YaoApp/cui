@@ -22,6 +22,9 @@ export type AuthInfo = {
 }
 
 export const AfterLogin = async (global: GlobalModel, data: AuthData): Promise<string> => {
+	// Clear features cache (all domains) to ensure fresh permissions
+	global.clearFeatures()
+
 	// Store full OIDC UserInfo to global state
 	global.setUserInfo(data.user)
 
