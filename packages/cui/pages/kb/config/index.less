@@ -1,76 +1,66 @@
-:global(.ant-modal-wrap) {
-	.configModal {
-		:global(.ant-modal-content) {
-			overflow: hidden;
-			border-radius: 8px !important;
-		}
-
-		:global(.ant-modal-header) {
-			border-bottom: 1px solid var(--color_border_2);
-			padding: 16px 24px;
-			border-radius: 8px 8px 0 0 !important;
-		}
-
-		:global(.ant-modal-body),
-		:global(.xgen-modal-body) {
-			padding: 0;
-			background: var(--color_bg_menu) !important;
-			border-radius: 0 0 8px 8px !important;
-		}
-
-		// 强制覆盖xgen-card的圆角
-		:global(.xgen-card) {
-			border-radius: 0 0 8px 8px !important;
-		}
-
-		:global(.xgen-card-bordered) {
-			border-radius: 0 0 8px 8px !important;
-		}
-
-		:global(.xgen-card-small) {
-			border-radius: 0 0 8px 8px !important;
-		}
-
-		:global(.xgen-card-body) {
-			border-radius: 0 0 8px 8px !important;
-		}
-	}
-}
-
+// 弹窗样式
 .configModal {
-	:global(.ant-modal-content) {
-		overflow: hidden;
-		border-radius: 8px !important;
+	:global(.xgen-modal-header) {
+		padding: 0;
+		border-bottom: none;
 	}
 
-	:global(.ant-modal-header) {
-		border-bottom: 1px solid var(--color_border_2);
-		padding: 16px 24px;
-		border-radius: 8px 8px 0 0 !important;
-	}
-
-	:global(.ant-modal-body),
 	:global(.xgen-modal-body) {
 		padding: 0;
-		background: var(--color_bg_menu) !important;
-		border-radius: 0 0 8px 8px !important;
+		max-height: 70vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+
+		// 滚动条样式
+		&::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--color_dot);
+			}
+		}
+	}
+
+	:global(.xgen-modal-content) {
+		border-radius: 8px;
+		overflow: hidden;
 	}
 }
 
 .modalHeader {
 	display: flex;
+	align-items: center;
 	justify-content: space-between;
-	align-items: center;
-	width: 100%;
-}
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
 
-.modalTitle {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-size: 16px;
-	font-weight: 500;
-	color: var(--color_text);
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.modalTitle {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--color_text);
+		margin: 0;
+	}
+
+	.titleIcon {
+		color: var(--color_neo_text_secondary);
+	}
 }
 
 .modalActions {
@@ -79,7 +69,9 @@
 	align-items: center;
 }
 
-.configForm {
+.modalContent {
+	padding: 20px;
+	
 	.ant-form-item {
 		margin-bottom: 18px;
 	}
@@ -98,63 +90,69 @@
 	.ant-input::placeholder {
 		font-size: 13px;
 	}
+
+	// Custom input components
+	.formItem {
+		margin-bottom: 20px;
+		width: 100%;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.formLabel {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		margin-bottom: 8px;
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--color_text);
+
+		.required {
+			color: var(--color_danger);
+			margin-left: 2px;
+		}
+	}
+}
+
+.section {
+	margin-bottom: 24px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
 }
 
 .editableSection {
-	background: var(--color_bg_menu);
-	border: none;
-	border-radius: 0 0 8px 8px !important;
-
-	:global(.xgen-card) {
-		border-radius: 0 0 8px 8px !important;
-	}
-
-	:global(.xgen-card-bordered) {
-		border-radius: 0 0 8px 8px !important;
-	}
-
-	:global(.xgen-card-small) {
-		border-radius: 0 0 8px 8px !important;
-	}
-
-	.ant-card-body,
-	:global(.xgen-card-body) {
-		padding: 32px 32px 16px 32px;
-		border-radius: 0 0 8px 8px !important;
-	}
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_border_light);
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 16px;
 }
 
 .readonlySection {
-	background: var(--color_bg_menu);
-	border: none;
-	border-radius: 0 0 8px 8px !important;
-
-	:global(.xgen-card) {
-		border-radius: 0 0 8px 8px !important;
-	}
-
-	:global(.xgen-card-bordered) {
-		border-radius: 0 0 8px 8px !important;
-	}
-
-	:global(.xgen-card-small) {
-		border-radius: 0 0 8px 8px !important;
-	}
-
-	.ant-card-body,
-	:global(.xgen-card-body) {
-		padding: 16px 32px 16px 32px;
-		border-radius: 0 0 8px 8px !important;
-	}
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_border_light);
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 16px;
 }
 
 .sectionHeader {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	margin-bottom: 20px;
-	padding-bottom: 8px;
-	border-bottom: 1px solid var(--color_border);
+	margin-bottom: 16px;
+
+	h5 {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color_text);
+	}
 }
 
 .sectionTitle {
@@ -164,27 +162,11 @@
 }
 
 .vectorConfigSection {
-	background: var(--color_bg_menu);
-	border: none;
-	border-radius: 0 0 8px 8px !important;
-
-	:global(.xgen-card) {
-		border-radius: 0 0 8px 8px !important;
-	}
-
-	:global(.xgen-card-bordered) {
-		border-radius: 0 0 8px 8px !important;
-	}
-
-	:global(.xgen-card-small) {
-		border-radius: 0 0 8px 8px !important;
-	}
-
-	.ant-card-body,
-	:global(.xgen-card-body) {
-		padding: 16px 32px 32px 32px;
-		border-radius: 0 0 8px 8px !important;
-	}
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_border_light);
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 0;
 }
 
 .infoGrid {

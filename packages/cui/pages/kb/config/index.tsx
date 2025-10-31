@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Modal, Button, Form, Input, message, Card, Space } from 'antd'
+import { Modal, Button, message, Space, Tooltip } from 'antd'
 import { InfoCircleOutlined } from '@ant-design/icons'
 
 import { getLocale } from '@umijs/max'
@@ -7,9 +7,10 @@ import Icon from '@/widgets/Icon'
 import { KB, Collection } from '@/openapi'
 import Tag from '@/neo/components/AIChat/Tag'
 import { useProviderInfo } from '@/components/ui/Provider/hooks/useProviderInfo'
+import { IsTeamMember } from '@/pages/auth/auth'
+import { Input, TextArea, RadioGroup } from '@/components/ui/inputs'
+import type { PropertySchema } from '@/components/ui/inputs/types'
 import styles from './index.less'
-
-const { TextArea } = Input
 
 interface CollectionConfigModalProps {
 	visible: boolean
@@ -19,14 +20,32 @@ interface CollectionConfigModalProps {
 }
 
 const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, onClose, collection, onUpdate }) => {
-	const [form] = Form.useForm()
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [loading, setLoading] = useState(false)
 	const [selectedEmbedding, setSelectedEmbedding] = useState<string>('')
+	const isTeamMember = IsTeamMember()
+
+	// Form state
+	const [formValues, setFormValues] = useState({
+		name: '',
+		description: '',
+		share: 'team' as 'private' | 'team'
+	})
+	const [errors, setErrors] = useState<{ name?: string; description?: string }>({})
 
 	// 使用provider信息hook
 	const { getProviderInfo, loading: providerLoading } = useProviderInfo('embedding')
+
+	// Share visibility options
+	const shareSchema: PropertySchema = {
+		type: 'string',
+		component: 'RadioGroup',
+		enum: [
+			{ value: 'team', label: is_cn ? '团队成员可见' : 'Visible to team members' },
+			{ value: 'private', label: is_cn ? '仅自己可见' : 'Private (only me)' }
+		]
+	}
 
 	// 初始化表单数据
 	useEffect(() => {
@@ -39,15 +58,44 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 
 			setSelectedEmbedding(embeddingValue)
 
-			form.setFieldsValue({
-				name: collection.metadata.name,
-				description: collection.metadata.description
+			setFormValues({
+				name: collection.metadata.name || '',
+				description: collection.metadata.description || '',
+				share: collection.metadata.share || 'team'
+			})
+			setErrors({})
+		}
+	}, [visible, collection])
+
+	const handleFieldChange = (field: keyof typeof formValues, value: any) => {
+		setFormValues((prev) => ({ ...prev, [field]: value }))
+		// Clear error when field changes
+		if (errors[field as keyof typeof errors]) {
+			setErrors((prev) => {
+				const newErrors = { ...prev }
+				delete newErrors[field as keyof typeof errors]
+				return newErrors
 			})
 		}
-	}, [visible, collection, form])
+	}
+
+	const validateForm = (): boolean => {
+		const newErrors: { name?: string; description?: string } = {}
+
+		if (!formValues.name.trim()) {
+			newErrors.name = is_cn ? '请输入集合名称' : 'Please enter collection name'
+		}
+
+		setErrors(newErrors)
+		return Object.keys(newErrors).length === 0
+	}
 
 	// 处理表单提交
-	const handleSubmit = async (values: any) => {
+	const handleSubmit = async () => {
+		if (!validateForm()) {
+			return
+		}
+
 		if (!collection || !window.$app?.openapi) {
 			message.error(is_cn ? '系统未就绪' : 'System not ready')
 			return
@@ -60,8 +108,9 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 			// 更新集合元数据
 			const updatedMetadata = {
 				...collection.metadata,
-				name: values.name,
-				description: values.description || '',
+				name: formValues.name,
+				description: formValues.description || '',
+				share: formValues.share,
 				updated_at: new Date().toISOString()
 			}
 
@@ -93,7 +142,8 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 	}
 
 	const handleCancel = () => {
-		form.resetFields()
+		setFormValues({ name: '', description: '', share: 'team' })
+		setErrors({})
 		onClose()
 	}
 
@@ -105,13 +155,15 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 		<Modal
 			title={
 				<div className={styles.modalHeader}>
-					<div className={styles.modalTitle}>
-						<Icon name='material-settings' size={20} />
-						<span>{is_cn ? '集合配置' : 'Collection Settings'}</span>
+					<div className={styles.titleSection}>
+						<Icon name='material-settings' size={18} className={styles.titleIcon} />
+						<span className={styles.modalTitle}>
+							{is_cn ? '集合配置' : 'Collection Settings'}
+						</span>
 					</div>
 					<div className={styles.modalActions}>
 						<Button onClick={handleCancel}>{is_cn ? '取消' : 'Cancel'}</Button>
-						<Button type='primary' onClick={() => form.submit()} loading={loading}>
+						<Button type='primary' onClick={handleSubmit} loading={loading}>
 							{is_cn ? '更新' : 'Update'}
 						</Button>
 					</div>
@@ -124,48 +176,81 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 			closable={false}
 			className={styles.configModal}
 		>
-			<Form form={form} layout='vertical' onFinish={handleSubmit} className={styles.configForm}>
+			<div className={styles.modalContent}>
 				{/* 基本信息表单 */}
-				<Card size='small' className={styles.editableSection}>
+				<div className={styles.editableSection}>
 					<div className={styles.sectionHeader}>
 						<Icon name='material-info' size={16} />
-						<span className={styles.sectionTitle}>
-							{is_cn ? '基本信息' : 'Basic Information'}
-						</span>
+						<h5>{is_cn ? '基本信息' : 'Basic Information'}</h5>
 					</div>
 
-					<Form.Item
-						name='name'
-						label={is_cn ? '集合名称' : 'Collection Name'}
-						rules={[
-							{
-								required: true,
-								message: is_cn ? '请输入集合名称' : 'Please enter collection name'
-							}
-						]}
-					>
-						<Input placeholder={is_cn ? '输入集合显示名称' : 'Enter collection display name'} />
-					</Form.Item>
-
-					<Form.Item name='description' label={is_cn ? '描述' : 'Description'}>
-						<TextArea
-							rows={3}
-							placeholder={
-								is_cn
-									? '输入集合描述（可选）'
-									: 'Enter collection description (optional)'
-							}
+					<div className={styles.formItem}>
+						<label className={styles.formLabel}>
+							{is_cn ? '集合名称' : 'Collection Name'}
+							<span className={styles.required}>*</span>
+						</label>
+						<Input
+							schema={{
+								type: 'string',
+								placeholder: is_cn
+									? '输入集合显示名称'
+									: 'Enter collection display name'
+							}}
+							value={formValues.name}
+							onChange={(value) => handleFieldChange('name', value)}
+							error={errors.name}
+							hasError={!!errors.name}
 						/>
-					</Form.Item>
-				</Card>
+					</div>
+
+					<div className={styles.formItem}>
+						<label className={styles.formLabel}>{is_cn ? '描述' : 'Description'}</label>
+						<TextArea
+							schema={{
+								type: 'string',
+								placeholder: is_cn
+									? '输入集合描述（可选）'
+									: 'Enter collection description (optional)',
+								rows: 3
+							}}
+							value={formValues.description}
+							onChange={(value) => handleFieldChange('description', value)}
+						/>
+					</div>
+
+					{/* Share Visibility - Only show for team members */}
+					{isTeamMember && (
+						<div className={styles.formItem}>
+							<label className={styles.formLabel}>
+								{is_cn ? '可见范围' : 'Visibility'}
+								<Tooltip
+									title={
+										is_cn
+											? '选择集合的可见范围：私有（仅自己可见）或团队（团队成员可见）'
+											: 'Choose collection visibility: Private (only you) or Team (all team members)'
+									}
+								>
+									<InfoCircleOutlined
+										style={{ marginLeft: 4, color: 'var(--color_text_grey)' }}
+									/>
+								</Tooltip>
+							</label>
+							<RadioGroup
+								schema={shareSchema}
+								value={formValues.share}
+								onChange={(value) =>
+									handleFieldChange('share', value as 'private' | 'team')
+								}
+							/>
+						</div>
+					)}
+				</div>
 
 				{/* 只读信息展示 */}
-				<Card size='small' className={styles.readonlySection}>
+				<div className={styles.readonlySection}>
 					<div className={styles.sectionHeader}>
 						<Icon name='material-info' size={16} />
-						<span className={styles.sectionTitle}>
-							{is_cn ? '集合信息' : 'Collection Information'}
-						</span>
+						<h5>{is_cn ? '集合信息' : 'Collection Information'}</h5>
 					</div>
 
 					<div className={styles.infoGrid}>
@@ -219,16 +304,14 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 							</span>
 						</div>
 					</div>
-				</Card>
+				</div>
 
 				{/* 配置参数 */}
 				{collection.config && (
-					<Card size='small' className={styles.vectorConfigSection}>
+					<div className={styles.vectorConfigSection}>
 						<div className={styles.sectionHeader}>
 							<Icon name='material-tune' size={16} />
-							<span className={styles.sectionTitle}>
-								{is_cn ? '向量配置' : 'Vector Configuration'}
-							</span>
+							<h5>{is_cn ? '向量配置' : 'Vector Configuration'}</h5>
 						</div>
 
 						<div className={styles.infoGrid}>
@@ -271,9 +354,9 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 								<span className={styles.infoValue}>{collection.config.index_type}</span>
 							</div>
 						</div>
-					</Card>
+					</div>
 				)}
-			</Form>
+			</div>
 		</Modal>
 	)
 }

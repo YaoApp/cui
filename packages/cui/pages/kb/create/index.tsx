@@ -1,46 +1,127 @@
 import { useState } from 'react'
 import { customAlphabet } from 'nanoid'
-import { Button, Input, Form, Select, InputNumber, Card, message, Tooltip, Breadcrumb } from 'antd'
+import { Button, Card, message, Breadcrumb, Tooltip } from 'antd'
 import { ArrowLeftOutlined, ArrowRightOutlined, InfoCircleOutlined } from '@ant-design/icons'
 import { history, getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { KB } from '@/openapi'
 import type { CreateCollectionRequest, CollectionConfig } from '@/openapi/kb/types'
 import ProviderSelect from '@/components/ui/Provider/Select'
+import { IsTeamMember } from '@/pages/auth/auth'
+import { Input, TextArea, Select, InputNumber, RadioGroup } from '@/components/ui/inputs'
+import type { PropertySchema } from '@/components/ui/inputs/types'
 import styles from './index.less'
 
-const { TextArea } = Input
-const { Option } = Select
+interface FormValues {
+	name: string
+	description: string
+	share: string
+	distance: string
+	index_type: string
+	m: number
+	ef_construction: number
+	ef_search: number
+	num_lists: number
+	num_probes: number
+}
 
 const CreateCollection = () => {
-	const [form] = Form.useForm()
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [loading, setLoading] = useState(false)
 	const [selectedEmbedding, setSelectedEmbedding] = useState<string>('')
-	const [embeddingDimension, setEmbeddingDimension] = useState<number>(1536)
+	const isTeamMember = IsTeamMember()
+
+	// Form state
+	const [formValues, setFormValues] = useState<FormValues>({
+		name: '',
+		description: '',
+		share: 'team',
+		distance: 'cosine',
+		index_type: 'hnsw',
+		m: 16,
+		ef_construction: 200,
+		ef_search: 64,
+		num_lists: 100,
+		num_probes: 10
+	})
+
+	// Form errors
+	const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({})
 
 	// Distance metrics options
-	const distanceOptions = [
-		{
-			value: 'cosine',
-			label: is_cn ? '余弦距离 (推荐，适合文本向量)' : 'Cosine Distance (Recommended for text vectors)'
-		},
-		{
-			value: 'euclidean',
-			label: is_cn ? '欧几里得距离 (适合图像向量)' : 'Euclidean Distance (Good for image vectors)'
-		},
-		{ value: 'dot', label: is_cn ? '点积 (计算最快)' : 'Dot Product (Fastest computation)' }
-	]
+	const distanceSchema: PropertySchema = {
+		type: 'string',
+		component: 'Select',
+		enum: [
+			{
+				value: 'cosine',
+				label: is_cn
+					? '余弦距离 (推荐，适合文本向量)'
+					: 'Cosine Distance (Recommended for text vectors)'
+			},
+			{
+				value: 'euclidean',
+				label: is_cn ? '欧几里得距离 (适合图像向量)' : 'Euclidean Distance (Good for image vectors)'
+			},
+			{ value: 'dot', label: is_cn ? '点积 (计算最快)' : 'Dot Product (Fastest computation)' }
+		]
+	}
 
 	// Index type options
-	const indexTypeOptions = [
-		{ value: 'hnsw', label: is_cn ? 'HNSW (适合大多数场景)' : 'HNSW (For most cases)' },
-		{ value: 'ivf', label: is_cn ? 'IVF (适合大规模数据)' : 'IVF (For large datasets)' },
-		{ value: 'flat', label: is_cn ? 'Flat (适合小数据集)' : 'Flat (For small datasets)' }
-	]
+	const indexTypeSchema: PropertySchema = {
+		type: 'string',
+		component: 'Select',
+		enum: [
+			{ value: 'hnsw', label: is_cn ? 'HNSW (适合大多数场景)' : 'HNSW (For most cases)' },
+			{ value: 'ivf', label: is_cn ? 'IVF (适合大规模数据)' : 'IVF (For large datasets)' },
+			{ value: 'flat', label: is_cn ? 'Flat (适合小数据集)' : 'Flat (For small datasets)' }
+		]
+	}
 
-	const handleSubmit = async (values: any) => {
+	// Share visibility options
+	const shareSchema: PropertySchema = {
+		type: 'string',
+		component: 'RadioGroup',
+		enum: [
+			{ value: 'team', label: is_cn ? '团队成员可见' : 'Visible to team members' },
+			{ value: 'private', label: is_cn ? '仅自己可见' : 'Private (only me)' }
+		]
+	}
+
+	const handleFieldChange = (field: keyof FormValues, value: any) => {
+		setFormValues((prev) => ({ ...prev, [field]: value }))
+		// Clear error when field changes
+		if (errors[field]) {
+			setErrors((prev) => {
+				const newErrors = { ...prev }
+				delete newErrors[field]
+				return newErrors
+			})
+		}
+	}
+
+	const validateForm = (): boolean => {
+		const newErrors: Partial<Record<keyof FormValues, string>> = {}
+
+		if (!formValues.name.trim()) {
+			newErrors.name = is_cn ? '请输入集合名称' : 'Please enter collection name'
+		}
+
+		if (!selectedEmbedding) {
+			message.error(is_cn ? '请选择向量化模型' : 'Please select embedding model')
+			return false
+		}
+
+		setErrors(newErrors)
+		return Object.keys(newErrors).length === 0
+	}
+
+	const handleSubmit = async () => {
+		if (!validateForm()) {
+			return
+		}
+
 		if (!window.$app?.openapi) {
 			message.error(is_cn ? '系统未就绪' : 'System not ready')
 			return
@@ -50,12 +131,11 @@ const CreateCollection = () => {
 		try {
 			const kb = new KB(window.$app.openapi)
 
-			// Generate unique ID based on name
+			// Generate unique ID
 			const nanoid = customAlphabet('abcdefghjkmnpqrstuvwxyz23456789', 16)
 			const generatedId = nanoid()
 
 			// Parse embedding provider and option from selectedEmbedding
-			// Format: "providerId|optionValue"
 			let embeddingProvider = selectedEmbedding
 			let embeddingOption = ''
 
@@ -70,32 +150,33 @@ const CreateCollection = () => {
 				embedding_provider_id: embeddingProvider,
 				embedding_option_id: embeddingOption,
 				locale: locale,
-				distance: values.distance,
-				index_type: values.index_type
+				distance: formValues.distance,
+				index_type: formValues.index_type
 			}
 
 			// Add optional HNSW parameters if index type is HNSW
-			if (values.index_type === 'hnsw') {
-				if (values.m) config.m = values.m
-				if (values.ef_construction) config.ef_construction = values.ef_construction
-				if (values.ef_search) config.ef_search = values.ef_search
+			if (formValues.index_type === 'hnsw') {
+				if (formValues.m) config.m = formValues.m
+				if (formValues.ef_construction) config.ef_construction = formValues.ef_construction
+				if (formValues.ef_search) config.ef_search = formValues.ef_search
 			}
 
 			// Add optional IVF parameters if index type is IVF
-			if (values.index_type === 'ivf') {
-				if (values.num_lists) config.num_lists = values.num_lists
-				if (values.num_probes) config.num_probes = values.num_probes
+			if (formValues.index_type === 'ivf') {
+				if (formValues.num_lists) config.num_lists = formValues.num_lists
+				if (formValues.num_probes) config.num_probes = formValues.num_probes
 			}
 
 			const request: CreateCollectionRequest = {
 				id: generatedId,
 				config,
 				metadata: {
-					name: values.name,
-					description: values.description || '',
+					name: formValues.name,
+					description: formValues.description || '',
 					uid: '', // Will be set by backend
-					readonly: false,
-					system: false,
+					preset: false,
+					public: false,
+					share: (formValues.share as 'private' | 'team') || 'team', // Default to team if not specified
 					sort: 0,
 					cover: '',
 					document_count: 0,
@@ -157,30 +238,12 @@ const CreateCollection = () => {
 				<Card className={styles.formCard}>
 					<div className={styles.formHeader}>
 						<h2 className={styles.formTitle}>{is_cn ? '新建集合' : 'New Collection'}</h2>
-						<Button
-							type='primary'
-							onClick={() => form.submit()}
-							htmlType='submit'
-							loading={loading}
-						>
+						<Button type='primary' onClick={handleSubmit} loading={loading}>
 							{is_cn ? '创建' : 'Create'} <ArrowRightOutlined />
 						</Button>
 					</div>
-					<Form
-						form={form}
-						layout='vertical'
-						onFinish={handleSubmit}
-						className={styles.form}
-						initialValues={{
-							distance: 'cosine',
-							index_type: 'hnsw',
-							m: 16,
-							ef_construction: 200,
-							ef_search: 64,
-							num_lists: 100,
-							num_probes: 10
-						}}
-					>
+
+					<div className={styles.form}>
 						{/* Basic Information */}
 						<div className={styles.section}>
 							<h3 className={styles.sectionTitle}>
@@ -188,54 +251,52 @@ const CreateCollection = () => {
 								{is_cn ? '基本信息' : 'Basic Information'}
 							</h3>
 
-							<Form.Item
-								name='name'
-								label={is_cn ? '集合名称' : 'Collection Name'}
-								rules={[
-									{
-										required: true,
-										message: is_cn
-											? '请输入集合名称'
-											: 'Please enter collection name'
-									}
-								]}
-							>
+							<div className={styles.formItem}>
+								<label className={styles.formLabel}>
+									{is_cn ? '集合名称' : 'Collection Name'}
+									<span className={styles.required}>*</span>
+								</label>
 								<Input
-									placeholder={
-										is_cn ? '输入集合显示名称' : 'Enter collection display name'
-									}
+									schema={{
+										type: 'string',
+										placeholder: is_cn
+											? '输入集合显示名称'
+											: 'Enter collection display name'
+									}}
+									value={formValues.name}
+									onChange={(value) => handleFieldChange('name', value)}
+									error={errors.name}
+									hasError={!!errors.name}
 								/>
-							</Form.Item>
+							</div>
 
-							<Form.Item name='description' label={is_cn ? '描述' : 'Description'}>
+							<div className={styles.formItem}>
+								<label className={styles.formLabel}>
+									{is_cn ? '描述' : 'Description'}
+								</label>
 								<TextArea
-									rows={3}
-									placeholder={
-										is_cn
+									schema={{
+										type: 'string',
+										placeholder: is_cn
 											? '输入集合描述（可选）'
-											: 'Enter collection description (optional)'
-									}
+											: 'Enter collection description (optional)',
+										rows: 3
+									}}
+									value={formValues.description}
+									onChange={(value) => handleFieldChange('description', value)}
 								/>
-							</Form.Item>
-						</div>
+							</div>
 
-						{/* Vector Configuration */}
-						<div className={styles.section}>
-							<h3 className={styles.sectionTitle}>
-								<Icon name='material-settings' size={18} />
-								{is_cn ? '向量配置' : 'Vector Configuration'}
-							</h3>
-
-							<Form.Item
-								name='embedding_provider'
-								label={
-									<span>
-										{is_cn ? '向量化模型' : 'Embedding Model'}
+							{/* Share Visibility - Only show for team members */}
+							{isTeamMember && (
+								<div className={styles.formItem}>
+									<label className={styles.formLabel}>
+										{is_cn ? '可见范围' : 'Visibility'}
 										<Tooltip
 											title={
 												is_cn
-													? '选择用于文本向量化的模型，不同模型有不同的维度和性能特点'
-													: 'Choose the model for text vectorization. Different models have different dimensions and performance characteristics'
+													? '选择集合的可见范围：私有（仅自己可见）或团队（团队成员可见）'
+													: 'Choose collection visibility: Private (only you) or Team (all team members)'
 											}
 										>
 											<InfoCircleOutlined
@@ -245,33 +306,55 @@ const CreateCollection = () => {
 												}}
 											/>
 										</Tooltip>
-									</span>
-								}
-								rules={[
-									{
-										required: true,
-										message: is_cn
-											? '请选择向量化模型'
-											: 'Please select embedding model'
-									}
-								]}
-							>
+									</label>
+									<RadioGroup
+										schema={shareSchema}
+										value={formValues.share}
+										onChange={(value) => handleFieldChange('share', value)}
+									/>
+								</div>
+							)}
+						</div>
+
+						{/* Vector Configuration */}
+						<div className={styles.section}>
+							<h3 className={styles.sectionTitle}>
+								<Icon name='material-settings' size={18} />
+								{is_cn ? '向量配置' : 'Vector Configuration'}
+							</h3>
+
+							<div className={styles.formItem}>
+								<label className={styles.formLabel}>
+									{is_cn ? '向量化模型' : 'Embedding Model'}
+									<span className={styles.required}>*</span>
+									<Tooltip
+										title={
+											is_cn
+												? '选择用于文本向量化的模型，不同模型有不同的维度和性能特点'
+												: 'Choose the model for text vectorization. Different models have different dimensions and performance characteristics'
+										}
+									>
+										<InfoCircleOutlined
+											style={{
+												marginLeft: 4,
+												color: 'var(--color_text_grey)'
+											}}
+										/>
+									</Tooltip>
+								</label>
 								<ProviderSelect
 									type='embedding'
 									value={selectedEmbedding}
-									onChange={(value) => {
-										setSelectedEmbedding(value)
-										form.setFieldsValue({ embedding_provider: value })
-									}}
+									onChange={(value) => setSelectedEmbedding(value)}
 									placeholder={is_cn ? '选择向量化模型' : 'Select embedding model'}
 								/>
-							</Form.Item>
+							</div>
 
-							<Form.Item
-								name='distance'
-								label={
-									<span>
+							<div className={styles.formRow}>
+								<div className={styles.formItem}>
+									<label className={styles.formLabel}>
 										{is_cn ? '距离度量' : 'Distance Metric'}
+										<span className={styles.required}>*</span>
 										<Tooltip
 											title={
 												is_cn
@@ -286,35 +369,18 @@ const CreateCollection = () => {
 												}}
 											/>
 										</Tooltip>
-									</span>
-								}
-								rules={[
-									{
-										required: true,
-										message: is_cn
-											? '请选择距离度量'
-											: 'Please select distance metric'
-									}
-								]}
-							>
-								<Select
-									placeholder={
-										is_cn ? '选择距离度量方法' : 'Select distance metric'
-									}
-								>
-									{distanceOptions.map((option) => (
-										<Option key={option.value} value={option.value}>
-											{option.label}
-										</Option>
-									))}
-								</Select>
-							</Form.Item>
+									</label>
+									<Select
+										schema={distanceSchema}
+										value={formValues.distance}
+										onChange={(value) => handleFieldChange('distance', value)}
+									/>
+								</div>
 
-							<Form.Item
-								name='index_type'
-								label={
-									<span>
+								<div className={styles.formItem}>
+									<label className={styles.formLabel}>
 										{is_cn ? '索引类型' : 'Index Type'}
+										<span className={styles.required}>*</span>
 										<Tooltip
 											title={
 												is_cn
@@ -329,217 +395,196 @@ const CreateCollection = () => {
 												}}
 											/>
 										</Tooltip>
-									</span>
-								}
-								rules={[
-									{
-										required: true,
-										message: is_cn
-											? '请选择索引类型'
-											: 'Please select index type'
-									}
-								]}
-							>
-								<Select placeholder={is_cn ? '选择索引类型' : 'Select index type'}>
-									{indexTypeOptions.map((option) => (
-										<Option key={option.value} value={option.value}>
-											{option.label}
-										</Option>
-									))}
-								</Select>
-							</Form.Item>
+									</label>
+									<Select
+										schema={indexTypeSchema}
+										value={formValues.index_type}
+										onChange={(value) => handleFieldChange('index_type', value)}
+									/>
+								</div>
+							</div>
 						</div>
 
-						{/* Advanced Configuration */}
-						<Form.Item
-							noStyle
-							shouldUpdate={(prevValues, currentValues) =>
-								prevValues.index_type !== currentValues.index_type
-							}
-						>
-							{({ getFieldValue }) => {
-								const indexType = getFieldValue('index_type')
+						{/* Advanced Configuration - HNSW */}
+						{formValues.index_type === 'hnsw' && (
+							<div className={styles.section}>
+								<h3 className={styles.sectionTitle}>
+									<Icon name='material-tune' size={18} />
+									{is_cn ? 'HNSW 参数' : 'HNSW Parameters'}
+								</h3>
 
-								if (indexType === 'hnsw') {
-									return (
-										<div className={styles.section}>
-											<h3 className={styles.sectionTitle}>
-												<Icon name='material-tune' size={18} />
-												{is_cn ? 'HNSW 参数' : 'HNSW Parameters'}
-											</h3>
-
-											<Form.Item
-												name='m'
-												label={
-													<span>
-														M {is_cn ? '参数' : 'Parameter'}
-														<Tooltip
-															title={
-																is_cn
-																	? '每个节点的双向链接数量，建议16'
-																	: 'Number of bidirectional links for each node, recommended 16'
-															}
-														>
-															<InfoCircleOutlined
-																style={{
-																	marginLeft: 4,
-																	color: 'var(--color_text_grey)'
-																}}
-															/>
-														</Tooltip>
-													</span>
+								<div className={styles.formRow}>
+									<div className={styles.formItem}>
+										<label className={styles.formLabel}>
+											M {is_cn ? '参数' : 'Parameter'}
+											<Tooltip
+												title={
+													is_cn
+														? '每个节点的双向链接数量，建议16'
+														: 'Number of bidirectional links for each node, recommended 16'
 												}
 											>
-												<InputNumber
-													style={{ width: '100%' }}
-													min={4}
-													max={64}
-													placeholder='16'
+												<InfoCircleOutlined
+													style={{
+														marginLeft: 4,
+														color: 'var(--color_text_grey)'
+													}}
 												/>
-											</Form.Item>
+											</Tooltip>
+										</label>
+										<InputNumber
+											schema={{
+												type: 'integer',
+												minimum: 4,
+												maximum: 64,
+												placeholder: '16'
+											}}
+											value={formValues.m}
+											onChange={(value) => handleFieldChange('m', value)}
+										/>
+									</div>
 
-											<Form.Item
-												name='ef_construction'
-												label={
-													<span>
-														EF Construction
-														<Tooltip
-															title={
-																is_cn
-																	? '构建时动态候选列表大小，建议200'
-																	: 'Size of dynamic candidate list during construction, recommended 200'
-															}
-														>
-															<InfoCircleOutlined
-																style={{
-																	marginLeft: 4,
-																	color: 'var(--color_text_grey)'
-																}}
-															/>
-														</Tooltip>
-													</span>
+									<div className={styles.formItem}>
+										<label className={styles.formLabel}>
+											EF Construction
+											<Tooltip
+												title={
+													is_cn
+														? '构建时动态候选列表大小，建议200'
+														: 'Size of dynamic candidate list during construction, recommended 200'
 												}
 											>
-												<InputNumber
-													style={{ width: '100%' }}
-													min={16}
-													max={512}
-													placeholder='200'
+												<InfoCircleOutlined
+													style={{
+														marginLeft: 4,
+														color: 'var(--color_text_grey)'
+													}}
 												/>
-											</Form.Item>
+											</Tooltip>
+										</label>
+										<InputNumber
+											schema={{
+												type: 'integer',
+												minimum: 16,
+												maximum: 512,
+												placeholder: '200'
+											}}
+											value={formValues.ef_construction}
+											onChange={(value) =>
+												handleFieldChange('ef_construction', value)
+											}
+										/>
+									</div>
+								</div>
 
-											<Form.Item
-												name='ef_search'
-												label={
-													<span>
-														EF Search
-														<Tooltip
-															title={
-																is_cn
-																	? '搜索时动态候选列表大小，建议64'
-																	: 'Size of dynamic candidate list during search, recommended 64'
-															}
-														>
-															<InfoCircleOutlined
-																style={{
-																	marginLeft: 4,
-																	color: 'var(--color_text_grey)'
-																}}
-															/>
-														</Tooltip>
-													</span>
+								<div className={styles.formItem}>
+									<label className={styles.formLabel}>
+										EF Search
+										<Tooltip
+											title={
+												is_cn
+													? '搜索时动态候选列表大小，建议64'
+													: 'Size of dynamic candidate list during search, recommended 64'
+											}
+										>
+											<InfoCircleOutlined
+												style={{
+													marginLeft: 4,
+													color: 'var(--color_text_grey)'
+												}}
+											/>
+										</Tooltip>
+									</label>
+									<InputNumber
+										schema={{
+											type: 'integer',
+											minimum: 16,
+											maximum: 512,
+											placeholder: '64'
+										}}
+										value={formValues.ef_search}
+										onChange={(value) => handleFieldChange('ef_search', value)}
+									/>
+								</div>
+							</div>
+						)}
+
+						{/* Advanced Configuration - IVF */}
+						{formValues.index_type === 'ivf' && (
+							<div className={styles.section}>
+								<h3 className={styles.sectionTitle}>
+									<Icon name='material-tune' size={18} />
+									{is_cn ? 'IVF 参数' : 'IVF Parameters'}
+								</h3>
+
+								<div className={styles.formRow}>
+									<div className={styles.formItem}>
+										<label className={styles.formLabel}>
+											{is_cn ? '聚类数量' : 'Number of Lists'}
+											<Tooltip
+												title={
+													is_cn
+														? '聚类的数量，建议100'
+														: 'Number of clusters, recommended 100'
 												}
 											>
-												<InputNumber
-													style={{ width: '100%' }}
-													min={16}
-													max={512}
-													placeholder='64'
+												<InfoCircleOutlined
+													style={{
+														marginLeft: 4,
+														color: 'var(--color_text_grey)'
+													}}
 												/>
-											</Form.Item>
-										</div>
-									)
-								}
+											</Tooltip>
+										</label>
+										<InputNumber
+											schema={{
+												type: 'integer',
+												minimum: 1,
+												maximum: 1000,
+												placeholder: '100'
+											}}
+											value={formValues.num_lists}
+											onChange={(value) =>
+												handleFieldChange('num_lists', value)
+											}
+										/>
+									</div>
 
-								if (indexType === 'ivf') {
-									return (
-										<div className={styles.section}>
-											<h3 className={styles.sectionTitle}>
-												<Icon name='material-tune' size={18} />
-												{is_cn ? 'IVF 参数' : 'IVF Parameters'}
-											</h3>
-
-											<Form.Item
-												name='num_lists'
-												label={
-													<span>
-														{is_cn
-															? '聚类数量'
-															: 'Number of Lists'}
-														<Tooltip
-															title={
-																is_cn
-																	? '聚类的数量，建议100'
-																	: 'Number of clusters, recommended 100'
-															}
-														>
-															<InfoCircleOutlined
-																style={{
-																	marginLeft: 4,
-																	color: 'var(--color_text_grey)'
-																}}
-															/>
-														</Tooltip>
-													</span>
+									<div className={styles.formItem}>
+										<label className={styles.formLabel}>
+											{is_cn ? '搜索聚类数' : 'Number of Probes'}
+											<Tooltip
+												title={
+													is_cn
+														? '搜索时要探索的聚类数量，建议10'
+														: 'Number of clusters to search, recommended 10'
 												}
 											>
-												<InputNumber
-													style={{ width: '100%' }}
-													min={1}
-													max={1000}
-													placeholder='100'
+												<InfoCircleOutlined
+													style={{
+														marginLeft: 4,
+														color: 'var(--color_text_grey)'
+													}}
 												/>
-											</Form.Item>
-
-											<Form.Item
-												name='num_probes'
-												label={
-													<span>
-														{is_cn
-															? '搜索聚类数'
-															: 'Number of Probes'}
-														<Tooltip
-															title={
-																is_cn
-																	? '搜索时要探索的聚类数量，建议10'
-																	: 'Number of clusters to search, recommended 10'
-															}
-														>
-															<InfoCircleOutlined
-																style={{
-																	marginLeft: 4,
-																	color: 'var(--color_text_grey)'
-																}}
-															/>
-														</Tooltip>
-													</span>
-												}
-											>
-												<InputNumber
-													style={{ width: '100%' }}
-													min={1}
-													max={100}
-													placeholder='10'
-												/>
-											</Form.Item>
-										</div>
-									)
-								}
-
-								return null
-							}}
-						</Form.Item>
-					</Form>
+											</Tooltip>
+										</label>
+										<InputNumber
+											schema={{
+												type: 'integer',
+												minimum: 1,
+												maximum: 100,
+												placeholder: '10'
+											}}
+											value={formValues.num_probes}
+											onChange={(value) =>
+												handleFieldChange('num_probes', value)
+											}
+										/>
+									</div>
+								</div>
+							</div>
+						)}
+					</div>
 				</Card>
 			</div>
 		</div>

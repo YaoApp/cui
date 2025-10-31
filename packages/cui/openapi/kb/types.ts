@@ -3,8 +3,9 @@ export interface CollectionMetadata {
 	name: string
 	description: string
 	uid: string
-	readonly: boolean
-	system: boolean
+	preset: boolean // Whether this is a preset collection
+	public: boolean // Whether this collection is shared across all teams in the platform
+	share: 'private' | 'team' // Collection sharing scope (private: only owner, team: all team members)
 	sort: number
 	cover: string
 	document_count: number
@@ -15,9 +16,6 @@ export interface CollectionMetadata {
 	__yao_updated_by?: string // Updated By User ID
 	__yao_team_id?: string // Team ID
 	__yao_tenant_id?: string // Tenant ID
-	__yao_public_read?: boolean // Public Read Permission
-	__yao_public_write?: boolean // Public Write Permission
-	__yao_inherit_from?: string // Inherit Permission From Parent Resource ID
 	[key: string]: any // Additional fields
 }
 
