@@ -12,9 +12,24 @@ export const env = process.env.NODE_ENV as 'development' | 'production'
 
 export const base = `/${process.env.BASE}/`
 
+// SSE代理配置函数，支持流式传输
+const createSSEProxy = (target: string) => ({
+	target,
+	changeOrigin: true,
+	ws: true,
+	onProxyRes: (proxyRes: any, req: any, res: any) => {
+		// 禁用代理响应缓冲，实现SSE流式传输
+		if (req.headers.accept?.includes('text/event-stream')) {
+			proxyRes.headers['Cache-Control'] = 'no-cache, no-transform'
+			proxyRes.headers['Connection'] = 'keep-alive'
+			proxyRes.headers['X-Accel-Buffering'] = 'no'
+		}
+	}
+})
+
 export const proxy = {
-	'/v1': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/api': { target: 'http://127.0.0.1:5099', changeOrigin: true },
+	'/v1': createSSEProxy('http://127.0.0.1:5099'),
+	'/api': createSSEProxy('http://127.0.0.1:5099'),
 	'/components': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/assets': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/iframe': { target: 'http://127.0.0.1:5099', changeOrigin: true },
