@@ -71,14 +71,6 @@ export class FileAPI {
 			formData.append('groups', options.groups.join(','))
 		}
 
-		if (options.clientId) {
-			formData.append('client_id', options.clientId)
-		}
-
-		if (options.openId) {
-			formData.append('openid', options.openId)
-		}
-
 		if (options.gzip) {
 			formData.append('gzip', 'true')
 		}
@@ -89,6 +81,14 @@ export class FileAPI {
 
 		if (options.compressSize) {
 			formData.append('compress_size', options.compressSize.toString())
+		}
+
+		if (options.public !== undefined) {
+			formData.append('public', options.public ? 'true' : 'false')
+		}
+
+		if (options.share) {
+			formData.append('share', options.share)
 		}
 
 		// Use custom upload method with progress tracking if callback provided
@@ -271,11 +271,11 @@ export class FileAPI {
 				...(options.originalFilename && { original_filename: options.originalFilename }),
 				...(options.path && { path: options.path }),
 				...(options.groups && { groups: options.groups.join(',') }),
-				...(options.clientId && { client_id: options.clientId }),
-				...(options.openId && { openid: options.openId }),
 				...(options.gzip && { gzip: 'true' }),
 				...(options.compressImage && { compress_image: 'true' }),
-				...(options.compressSize && { compress_size: options.compressSize.toString() })
+				...(options.compressSize && { compress_size: options.compressSize.toString() }),
+				...(options.public !== undefined && { public: options.public ? 'true' : 'false' }),
+				...(options.share && { share: options.share })
 			},
 			headers: {
 				...(this.getCSRFToken() && { 'X-CSRF-Token': this.getCSRFToken() })
@@ -375,7 +375,7 @@ export class FileAPI {
 			const formData = new FormData()
 			formData.append('file', chunkBlob)
 
-			// Add options to form data (only on first chunk)
+			// Add options to form data (only on first chunk to reduce payload size)
 			if (chunkIndex === 0) {
 				if (options.originalFilename || file.name) {
 					formData.append('original_filename', options.originalFilename || file.name)
@@ -389,14 +389,6 @@ export class FileAPI {
 					formData.append('groups', options.groups.join(','))
 				}
 
-				if (options.clientId) {
-					formData.append('client_id', options.clientId)
-				}
-
-				if (options.openId) {
-					formData.append('openid', options.openId)
-				}
-
 				if (options.gzip) {
 					formData.append('gzip', 'true')
 				}
@@ -407,6 +399,14 @@ export class FileAPI {
 
 				if (options.compressSize) {
 					formData.append('compress_size', options.compressSize.toString())
+				}
+
+				if (options.public !== undefined) {
+					formData.append('public', options.public ? 'true' : 'false')
+				}
+
+				if (options.share) {
+					formData.append('share', options.share)
 				}
 			}
 

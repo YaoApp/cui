@@ -261,7 +261,7 @@ const Profile = () => {
 		setEditing(false)
 	}
 
-	const handleAvatarUploadSuccess = (avatarWrapper: string, fileId: string) => {
+	const handleAvatarUploadSuccess = (fileId: string, avatarWrapper: string) => {
 		// avatarWrapper 是 wrapper 格式，如 __yao.attachment://file123
 		// Update the appropriate field based on user type
 		if (isTeamMember) {

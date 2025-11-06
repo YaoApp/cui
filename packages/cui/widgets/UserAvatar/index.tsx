@@ -85,6 +85,8 @@ const UserAvatar: FC<UserAvatarProps> = ({
 	const [uploadModalVisible, setUploadModalVisible] = useState(false)
 	const [avatarError, setAvatarError] = useState(false)
 	const [teamLogoError, setTeamLogoError] = useState(false)
+	// 为每个 UserAvatar 实例生成唯一标识
+	const instanceId = useMemo(() => `avatar-${Date.now()}-${Math.random()}`, [])
 
 	// 获取头像数据
 	const data = useMemo((): AvatarData | null => {
@@ -333,6 +335,7 @@ const UserAvatar: FC<UserAvatarProps> = ({
 
 				{uploader && onUploadSuccess && (
 					<UploadModal
+						key={instanceId}
 						visible={uploadModalVisible}
 						onClose={() => setUploadModalVisible(false)}
 						onSuccess={handleUploadSuccess}
@@ -370,6 +373,7 @@ const UserAvatar: FC<UserAvatarProps> = ({
 
 			{uploader && onUploadSuccess && (
 				<UploadModal
+					key={instanceId}
 					visible={uploadModalVisible}
 					onClose={() => setUploadModalVisible(false)}
 					onSuccess={handleUploadSuccess}

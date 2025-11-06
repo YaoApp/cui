@@ -16,7 +16,7 @@ const TeamEditForm = ({ form, team, onFinish, is_cn }: TeamEditFormProps) => {
 	// 监听表单的 avatar 字段变化
 	const formAvatar = Form.useWatch('avatar', form)
 
-	const handleAvatarUploadSuccess = (avatarWrapper: string, fileId: string) => {
+	const handleAvatarUploadSuccess = (fileId: string, avatarWrapper: string) => {
 		// avatarWrapper 是 wrapper 格式，如 __yao.attachment://file123
 		form.setFieldsValue({ avatar: avatarWrapper })
 	}

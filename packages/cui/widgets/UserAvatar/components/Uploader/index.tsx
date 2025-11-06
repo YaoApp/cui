@@ -17,6 +17,8 @@ const Uploader = forwardRef<any, UploaderProps>(({ uploader, onSuccess, onImageS
 	const [previewUrl, setPreviewUrl] = useState<string>('')
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
 	const fileInputRef = useRef<HTMLInputElement>(null)
+	// 生成唯一 key，确保每次组件挂载时都是全新实例
+	const uploadKeyRef = useRef(`upload-${Date.now()}-${Math.random()}`)
 
 	const handleFileSelect = (file: RcFile) => {
 		// Validate file type
@@ -66,7 +68,8 @@ const Uploader = forwardRef<any, UploaderProps>(({ uploader, onSuccess, onImageS
 					uploaderID: uploader,
 					originalFilename: file.name,
 					compressImage: true, // 启用图片压缩
-					compressSize: 512 // 压缩后最大尺寸 512px
+					compressSize: 512, // 压缩后最大尺寸 512px
+					public: true // 头像需要公开访问
 				},
 				(progress) => {
 					setUploadProgress(progress.percentage)
@@ -89,7 +92,7 @@ const Uploader = forwardRef<any, UploaderProps>(({ uploader, onSuccess, onImageS
 
 			message.success(is_cn ? '上传成功' : 'Upload successful')
 			// 传递 wrapper 格式和 fileId
-			onSuccess(fileWrapper, fileId)
+			onSuccess && onSuccess(fileId, fileWrapper)
 		} catch (error) {
 			console.error('Avatar upload failed:', error)
 			const errorMsg = error instanceof Error ? error.message : is_cn ? '上传失败' : 'Upload failed'
@@ -117,6 +120,7 @@ const Uploader = forwardRef<any, UploaderProps>(({ uploader, onSuccess, onImageS
 	return (
 		<div className='uploader'>
 			<Upload.Dragger
+				key={uploadKeyRef.current}
 				beforeUpload={handleFileSelect}
 				showUploadList={false}
 				accept='image/*'

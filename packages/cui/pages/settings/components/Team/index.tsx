@@ -681,7 +681,7 @@ const Team = () => {
 	 * @param avatar - 头像地址（wrapper 格式，如 __yao.attachment://file123）
 	 * @param fileId - 文件 ID
 	 */
-	const handleUpdateTeamAvatar = async (avatar: string, fileId: string) => {
+	const handleUpdateTeamAvatar = async (fileId: string, avatar: string) => {
 		if (!apiClient || !team) {
 			throw new Error(is_cn ? 'API未初始化或团队不存在' : 'API not initialized or team does not exist')
 		}

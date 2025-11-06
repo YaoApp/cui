@@ -14,14 +14,7 @@ interface AIItemProps {
 	onAvatarUpdate?: (memberId: string, avatar: string) => Promise<void>
 }
 
-const AIItem = ({
-	member,
-	is_cn,
-	getRoleDisplayName,
-	onRemove,
-	onEdit,
-	onAvatarUpdate
-}: AIItemProps) => {
+const AIItem = ({ member, is_cn, getRoleDisplayName, onRemove, onEdit, onAvatarUpdate }: AIItemProps) => {
 	const displayName = member.display_name || (is_cn ? 'AI 助手' : 'AI Assistant')
 
 	const handleRemoveClick = () => {
@@ -43,7 +36,7 @@ const AIItem = ({
 		}
 	}
 
-	const handleAvatarUploadSuccess = async (avatarWrapper: string, fileId: string) => {
+	const handleAvatarUploadSuccess = async (fileId: string, avatarWrapper: string) => {
 		if (onAvatarUpdate) {
 			try {
 				// avatarWrapper 是 wrapper 格式，如 __yao.attachment://file123

@@ -293,12 +293,15 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 
 		setCurrentStep(is_cn ? '正在上传文件...' : 'Uploading file...')
 
-		// 1. 上传文件
+		// 1. 上传文件 - 根据 Collection 的 share 设置文件共享类型
+		const collectionShare = collection.metadata?.share as 'private' | 'team' | undefined
 		const uploadResponse = await fileapi.Upload(
 			file,
 			{
 				uploaderID: uploader,
-				originalFilename: file.name
+				originalFilename: file.name,
+				// 根据 Collection 的共享设置来决定文件的共享类型
+				share: collectionShare === 'team' ? 'team' : 'private'
 			},
 			(progress) => {
 				setUploadProgress(progress.percentage)

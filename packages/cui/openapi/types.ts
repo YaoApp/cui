@@ -52,10 +52,6 @@ export interface FileUploadOptions {
 	originalFilename?: string
 	/** File groups for directory structure */
 	groups?: string[]
-	/** Client ID */
-	clientId?: string
-	/** OpenID */
-	openId?: string
 	/** Enable gzip compression */
 	gzip?: boolean
 	/** Enable image compression */
@@ -68,6 +64,10 @@ export interface FileUploadOptions {
 	chunked?: boolean
 	/** Chunk size in bytes (default: 2MB) */
 	chunkSize?: number
+	/** Whether this attachment is shared across all teams */
+	public?: boolean
+	/** Attachment sharing scope: "private" or "team" (default: "private") */
+	share?: 'private' | 'team'
 }
 
 /**
@@ -120,10 +120,10 @@ export interface FileInfo {
 	uploader?: string
 	/** Groups */
 	groups?: string[]
-	/** Client ID */
-	clientId?: string
-	/** OpenID */
-	openId?: string
+	/** Whether this attachment is shared across all teams */
+	public?: boolean
+	/** Attachment sharing scope: "private" or "team" */
+	share?: 'private' | 'team'
 }
 
 /**
