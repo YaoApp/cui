@@ -121,7 +121,7 @@ const AddAIMemberWizard = ({
 			if (!agentsLoadedRef.current && !agentsLoading) {
 				agentsLoadedRef.current = true
 				setAgentsLoading(true)
-				agentAPI
+				agentAPI.assistants
 					.List({})
 					.then((response) => {
 						console.log('Agents loaded:', response)
@@ -233,7 +233,7 @@ const AddAIMemberWizard = ({
 
 	// Transform agents to select options
 	const agentOptions = (agents || []).map((agent) => ({
-		label: agent.name,
+		label: agent.name || agent.assistant_id,
 		value: agent.assistant_id
 	}))
 

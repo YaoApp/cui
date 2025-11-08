@@ -1,6 +1,7 @@
 /**
  * Agent (Assistant) API Types
  * Provides types for agent management functionality
+ * Aligned with backend: yao/agent/store/types/types.go
  */
 
 /**
@@ -17,7 +18,7 @@ export interface AgentFilter {
 	connector?: string
 	/** Filter by agent ID */
 	assistant_id?: string
-	/** Filter by agent IDs */
+	/** Filter by multiple agent IDs */
 	assistant_ids?: string[]
 	/** Filter by mentionable status */
 	mentionable?: boolean
@@ -36,62 +37,157 @@ export interface AgentFilter {
 }
 
 /**
- * Agent data structure
+ * Prompt structure for AI conversations
+ */
+export interface Prompt {
+	/** Role (e.g., "system", "user", "assistant") */
+	role: string
+	/** Prompt content */
+	content: string
+	/** Optional prompt name */
+	name?: string
+}
+
+/**
+ * Knowledge Base configuration
+ */
+export interface KnowledgeBase {
+	/** Knowledge base collection IDs */
+	collections?: string[]
+	/** Additional options for knowledge base */
+	options?: Record<string, any>
+}
+
+/**
+ * MCP Servers configuration
+ */
+export interface MCPServers {
+	/** MCP server IDs */
+	servers?: string[]
+	/** Additional options for MCP servers */
+	options?: Record<string, any>
+}
+
+/**
+ * Workflow configuration
+ */
+export interface Workflow {
+	/** Workflow IDs */
+	workflows?: string[]
+	/** Additional workflow options */
+	options?: Record<string, any>
+}
+
+/**
+ * Tool configuration
+ */
+export interface Tool {
+	/** Tool type */
+	type?: string
+	/** Tool name */
+	name: string
+	/** Tool description */
+	description?: string
+	/** Tool parameters */
+	parameters?: Record<string, any>
+}
+
+/**
+ * Tool Calls configuration
+ */
+export interface ToolCalls {
+	/** List of available tools */
+	tools?: Tool[]
+	/** Tool-related prompts */
+	prompts?: Prompt[]
+}
+
+/**
+ * Assistant placeholder for UI
+ */
+export interface Placeholder {
+	/** Placeholder title */
+	title?: string
+	/** Placeholder description */
+	description?: string
+	/** Placeholder prompt suggestions */
+	prompts?: string[]
+}
+
+/**
+ * Agent (Assistant) data structure
  */
 export interface Agent {
-	/** Agent ID */
+	/** Assistant ID */
 	assistant_id: string
-	/** Agent name */
-	name: string
-	/** Agent type (e.g., "chat", "flow") */
-	type: string
-	/** Agent description */
-	description?: string
-	/** Agent tags */
-	tags?: string[]
-	/** Whether the agent can be mentioned */
-	mentionable?: boolean
-	/** Whether the agent is automated */
-	automated?: boolean
-	/** Whether the agent is built-in */
-	built_in?: boolean
-	/** Agent avatar URL */
+	/** Assistant type (default: "assistant") */
+	type?: string
+	/** Assistant name */
+	name?: string
+	/** Assistant avatar URL */
 	avatar?: string
-	/** Agent connector */
-	connector?: string
-	/** Agent prompt */
-	prompt?: string
-	/** Agent options */
+	/** AI Connector ID */
+	connector: string
+	/** Assistant path */
+	path?: string
+	/** Whether this is a built-in assistant */
+	built_in?: boolean
+	/** Sort order */
+	sort?: number
+	/** Assistant description */
+	description?: string
+	/** Assistant tags */
+	tags?: string[]
+	/** Whether this assistant is readonly */
+	readonly?: boolean
+	/** Whether this assistant is shared across all teams */
+	public?: boolean
+	/** Sharing scope (private/team) */
+	share?: string
+	/** Whether this assistant can be mentioned */
+	mentionable?: boolean
+	/** Whether this assistant is automated */
+	automated?: boolean
+	/** AI Options */
 	options?: Record<string, any>
-	/** Agent flows */
-	flows?: any[]
-	/** Agent APIs */
-	apis?: any[]
-	/** Creation timestamp */
-	created_at?: number
-	/** Last update timestamp */
-	updated_at?: number
-	/** Additional fields */
-	[key: string]: any
+	/** AI Prompts */
+	prompts?: Prompt[]
+	/** Knowledge base configuration */
+	kb?: KnowledgeBase
+	/** MCP servers configuration */
+	mcp?: MCPServers
+	/** Assistant tools */
+	tools?: ToolCalls
+	/** Workflow configuration */
+	workflow?: Workflow
+	/** Assistant placeholder */
+	placeholder?: Placeholder
+	/** Localized content (locale -> content mapping) */
+	locales?: Record<string, any>
+	/** Creation timestamp (Unix timestamp) */
+	created_at: number
+	/** Last update timestamp (Unix timestamp) */
+	updated_at: number
 }
 
 /**
  * Agent list response
+ * Aligned with backend: yao/agent/store/types/AssistantList
  */
 export interface AgentListResponse {
 	/** List of agents */
 	data: Agent[]
-	/** Current page number */
+	/** Current page number (1-based) */
 	page: number
 	/** Items per page */
 	pagesize: number
 	/** Total number of pages */
-	pagecnt: number
-	/** Next page number */
+	pagecount: number
+	/** Next page number (0 if no next page) */
 	next: number
-	/** Previous page number */
+	/** Previous page number (0 if no previous page) */
 	prev: number
-	/** Total number of agents */
+	/** Total number of agents across all pages */
 	total: number
 }
 
@@ -107,34 +203,50 @@ export interface AgentDetailResponse {
  * Agent save request
  */
 export interface AgentSaveRequest {
-	/** Agent ID (for update) */
+	/** Assistant ID (for update) */
 	assistant_id?: string
-	/** Agent name */
-	name: string
-	/** Agent type */
+	/** Assistant type */
 	type?: string
-	/** Agent description */
-	description?: string
-	/** Agent tags */
-	tags?: string[]
-	/** Whether the agent can be mentioned */
-	mentionable?: boolean
-	/** Whether the agent is automated */
-	automated?: boolean
-	/** Agent avatar URL */
+	/** Assistant name */
+	name?: string
+	/** Assistant avatar URL */
 	avatar?: string
-	/** Agent connector */
+	/** AI Connector ID */
 	connector?: string
-	/** Agent prompt */
-	prompt?: string
-	/** Agent options */
+	/** Assistant path */
+	path?: string
+	/** Sort order */
+	sort?: number
+	/** Assistant description */
+	description?: string
+	/** Assistant tags */
+	tags?: string[]
+	/** Whether this assistant is readonly */
+	readonly?: boolean
+	/** Whether this assistant is shared across all teams */
+	public?: boolean
+	/** Sharing scope (private/team) */
+	share?: string
+	/** Whether this assistant can be mentioned */
+	mentionable?: boolean
+	/** Whether this assistant is automated */
+	automated?: boolean
+	/** AI Options */
 	options?: Record<string, any>
-	/** Agent flows */
-	flows?: any[]
-	/** Agent APIs */
-	apis?: any[]
-	/** Additional fields */
-	[key: string]: any
+	/** AI Prompts */
+	prompts?: Prompt[]
+	/** Knowledge base configuration */
+	kb?: KnowledgeBase
+	/** MCP servers configuration */
+	mcp?: MCPServers
+	/** Assistant tools */
+	tools?: ToolCalls
+	/** Workflow configuration */
+	workflow?: Workflow
+	/** Assistant placeholder */
+	placeholder?: Placeholder
+	/** Localized content (locale -> content mapping) */
+	locales?: Record<string, any>
 }
 
 /**
@@ -158,7 +270,7 @@ export interface AgentDeleteResponse {
 }
 
 /**
- * Agent tag
+ * Agent tag structure
  */
 export interface AgentTag {
 	/** Tag value */

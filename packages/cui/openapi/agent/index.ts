@@ -1,3 +1,5 @@
 export * from './types'
-export * from './api'
-
+export { Agent } from './api'
+export { AgentAssistants } from './assistants'
+export { AgentTags } from './tags'
+export { AgentCall } from './call'

@@ -154,7 +154,7 @@ const EditAIMember = ({
 			if (!agentsLoadedRef.current && !agentsLoading) {
 				agentsLoadedRef.current = true
 				setAgentsLoading(true)
-				agentAPI
+				agentAPI.assistants
 					.List({})
 					.then((response) => {
 						if (response?.data) {
@@ -265,7 +265,7 @@ const EditAIMember = ({
 	}))
 
 	const agentOptions = (agents || []).map((agent) => ({
-		label: agent.name,
+		label: agent.name || agent.assistant_id,
 		value: agent.assistant_id
 	}))
 
