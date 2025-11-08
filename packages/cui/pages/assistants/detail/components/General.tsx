@@ -44,8 +44,7 @@ export default function General({ form }: GeneralProps) {
 					throw new Error(response.error?.error_description || 'Failed to load tags')
 				}
 
-				const tagsResponse = window.$app.openapi.GetData(response)
-				const tagsData = tagsResponse?.data
+				const tagsData = window.$app.openapi.GetData(response)
 
 				if (Array.isArray(tagsData)) {
 					// If response is an array of strings

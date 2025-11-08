@@ -111,17 +111,12 @@ const AssistantDetail = () => {
 					return
 				}
 
-				let data = window.$app.openapi.GetData(response)
+				const data = window.$app.openapi.GetData(response)
 
 				if (!data) {
 					message.error(is_cn ? '未找到智能体' : 'Assistant not found')
 					history.push('/assistants')
 					return
-				}
-
-				// If data is wrapped in another 'data' property, unwrap it
-				if (data.data && typeof data.data === 'object') {
-					data = data.data
 				}
 
 				// Ensure built_in and readonly are properly processed as boolean values
