@@ -1,10 +1,12 @@
 import { FC } from 'react'
-import { Avatar, Button, Tooltip } from 'antd'
+import { Tooltip } from 'antd'
+import { Button } from '@/components/ui'
 import { App } from '@/types'
 import Tag from './Tag'
 import styles from './Card.less'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import UserAvatar from '@/widgets/UserAvatar'
 import { useGlobal } from '@/context/app'
 interface Props {
 	/** Assistant data */
@@ -42,7 +44,16 @@ const Card: FC<Props> = ({ data, onClick, onChatClick }) => {
 	return (
 		<div className={styles.card} onClick={() => onClick?.(data)}>
 			<div className={styles.header}>
-				<Avatar src={data.avatar} size={48} />
+				<UserAvatar
+					size={48}
+					shape='circle'
+					displayType='avatar'
+					data={{
+						id: data.assistant_id,
+						name: data.name,
+						avatar: data.avatar
+					}}
+				/>
 				<div className={styles.info}>
 					<div className={styles.name}>{data.name}</div>
 					<div className={styles.type}>
