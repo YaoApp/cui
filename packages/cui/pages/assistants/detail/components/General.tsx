@@ -1,12 +1,12 @@
-import { Form, Radio, Input, Select, Tag as AntTag, Popconfirm, Button } from 'antd'
+import { Form, Radio, Input, Select, Tag as AntTag, Popconfirm, Button, message } from 'antd'
 import type { FormInstance } from 'antd'
 import { getLocale } from '@umijs/max'
 import { useEffect, useState } from 'react'
 import styles from '../index.less'
-import useAIChat from '@/neo/hooks/useAIChat'
 import { useGlobal } from '@/context/app'
 import ChatPlaceholder from './ChatPlaceholder'
 import { DeleteOutlined } from '@ant-design/icons'
+import { Agent } from '@/openapi/agent'
 
 const { TextArea } = Input
 const { Option } = Select
@@ -22,21 +22,44 @@ export default function General({ form }: GeneralProps) {
 	const [tags, setTags] = useState<string[]>([])
 	const [inputVisible, setInputVisible] = useState(false)
 	const [inputValue, setInputValue] = useState('')
-	const { getAssistantTags } = useAIChat({})
 	const global = useGlobal()
 	const { connectors } = global
 
-	// 从 API 获取标签列表
+	// Load tags using Agent API
 	useEffect(() => {
-		const fetchTags = async () => {
+		const loadTags = async () => {
+			if (!window.$app?.openapi) {
+				console.error('OpenAPI not available')
+				return
+			}
+
 			try {
-				const response = await getAssistantTags()
-				if (Array.isArray(response)) {
-					setTags(response)
+				const agent = new Agent(window.$app.openapi)
+				const response = await agent.tags.List({
+					locale: is_cn ? 'zh-cn' : 'en-us',
+					type: 'assistant'
+				})
+
+				if (window.$app.openapi.IsError(response)) {
+					throw new Error(response.error?.error_description || 'Failed to load tags')
+				}
+
+				const tagsResponse = window.$app.openapi.GetData(response)
+				const tagsData = tagsResponse?.data
+
+				if (Array.isArray(tagsData)) {
+					// If response is an array of strings
+					if (typeof tagsData[0] === 'string') {
+						setTags(tagsData)
+					}
+					// If response is an array of objects with value property
+					else if (tagsData[0] && typeof tagsData[0] === 'object' && 'value' in tagsData[0]) {
+						setTags(tagsData.map((tag: any) => tag.value))
+					}
 				}
 			} catch (error) {
-				console.error('Failed to fetch tags:', error)
-				// 如果 API 调用失败，使用默认标签
+				console.error(is_cn ? '加载智能体标签失败:' : 'Failed to load assistant tags:', error)
+				// Fallback to default tags
 				setTags([
 					'coding',
 					'writing',
@@ -50,8 +73,9 @@ export default function General({ form }: GeneralProps) {
 				])
 			}
 		}
-		fetchTags()
-	}, [])
+
+		loadTags()
+	}, [is_cn])
 
 	const handleClose = (removedTag: string) => {
 		if (readonly) return

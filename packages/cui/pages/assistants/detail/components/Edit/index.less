@@ -1,0 +1,91 @@
+.editContainer {
+	height: 100%;
+
+	:global {
+		.xgen-tabs-card.xgen-tabs-top {
+			> .xgen-tabs-nav .xgen-tabs-tab,
+			> div > .xgen-tabs-nav .xgen-tabs-tab {
+				padding: 5px 16px;
+				margin: 0 !important;
+				border: none !important;
+				border-radius: 4px;
+				transition: all 0.3s;
+				color: color-mix(in srgb, var(--color_text) 70%, var(--color_text_grey));
+				background: transparent !important;
+				font-size: 13px;
+
+				.xgen-tabs-tab-btn {
+					font-size: 13px;
+				}
+
+				+ .xgen-tabs-tab {
+					margin-left: 4px !important;
+				}
+
+				&:hover {
+					color: var(--color_main);
+					.xgen-tabs-tab-btn {
+						color: var(--color_main);
+					}
+				}
+
+				&.xgen-tabs-tab-active {
+					background: var(--color_bg_menu) !important;
+					color: var(--color_main) !important;
+
+					.xgen-tabs-tab-btn {
+						color: var(--color_main) !important;
+					}
+				}
+			}
+		}
+
+		.xgen-tabs {
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			padding: 0 24px 24px;
+
+			.xgen-tabs-nav {
+				padding-top: 24px;
+				margin-bottom: 24px;
+				flex-shrink: 0;
+				&::before {
+					display: none;
+				}
+
+				.xgen-tabs-nav-wrap {
+					display: flex;
+					justify-content: center;
+				}
+
+				.xgen-tabs-nav-list {
+					background: color-mix(in srgb, var(--color_border) 70%, transparent);
+					padding: 3px;
+					border-radius: 6px;
+				}
+
+				.xgen-tabs-nav-operations {
+					display: none !important;
+				}
+			}
+
+			.xgen-tabs-content {
+				flex: 1;
+				padding-top: 0;
+				background: transparent;
+				height: 100%;
+				overflow: hidden;
+
+				.xgen-tabs-tabpane {
+					height: 100%;
+				}
+			}
+		}
+	}
+}
+
+.editTabs {
+	height: 100%;
+}
+

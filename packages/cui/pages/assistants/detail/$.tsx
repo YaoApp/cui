@@ -1,21 +1,16 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, history, getLocale } from '@umijs/max'
-import { Spin, Form, Button, Space, message, Avatar, Upload, Tabs, Tooltip, Breadcrumb, Popconfirm } from 'antd'
-import { ArrowLeftOutlined, SaveOutlined, CameraOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons'
-import type { UploadChangeParam } from 'antd/es/upload'
-import type { UploadFile } from 'antd/es/upload/interface'
+import { Spin, Form, message, Tabs, Tooltip, Breadcrumb } from 'antd'
+import { Button } from '@/components/ui'
 import { App } from '@/types'
-import useAIChat from '@/neo/hooks/useAIChat'
 import Tag from '@/neo/components/AIChat/Tag'
 import Icon from '@/widgets/Icon'
-import General from './components/General'
-import Files from './components/Files'
-// import Workflow from './components/Workflow'
-// import Script from './components/Script'
-import Tools from './components/Tools'
-import Prompts from './components/Prompts'
+import UserAvatar from '@/widgets/UserAvatar'
+import View from './components/View'
+import Edit from './components/Edit'
 import styles from './index.less'
 import { useGlobal } from '@/context/app'
+import { Agent } from '@/openapi/agent'
 
 interface Message {
 	role: 'system' | 'user' | 'assistant' | 'developer'
@@ -32,42 +27,51 @@ const AssistantDetail = () => {
 	const { default_assistant, connectors } = global
 
 	const [loading, setLoading] = useState(true)
+	const [editing, setEditing] = useState(false)
+	const [saving, setSaving] = useState(false)
 	const [form] = Form.useForm()
 	const [avatarUrl, setAvatarUrl] = useState<string>('')
-	const [files, setFiles] = useState<UploadFile[]>([])
-	const [code, setCode] = useState<string>('')
+	const [assistantData, setAssistantData] = useState<App.Assistant | null>(null)
 	const [prompts, setPrompts] = useState<Message[]>([])
 	const [options, setOptions] = useState<{ key: string; value: string }[]>([])
-	const aiChatRef = useRef<any>(null)
-	const { findAssistant, saveAssistant, deleteAssistant } = useAIChat({})
 	const fetchedRef = useRef(false)
 	const previousIdRef = useRef<string>('')
+	const [apiClient, setApiClient] = useState<Agent | null>(null)
 
-	// Initialize aiChatRef immediately
-	if (!aiChatRef.current) {
-		aiChatRef.current = { findAssistant, saveAssistant, deleteAssistant }
-	}
+	// Get values directly from assistantData state - no Form.useWatch to avoid Ant Design bugs
+	const name = assistantData?.name || ''
+	const automated = assistantData?.automated === true // Only true if explicitly set to true
+	const readonly = assistantData?.readonly === true
+	const built_in = assistantData?.built_in === true
+	const mentionable = assistantData?.mentionable === true
+	const connector = assistantData?.connector || ''
+	const tags = assistantData?.tags || []
+	const description = assistantData?.description || ''
 
-	// Use Form.useWatch to monitor form values
-	const name = Form.useWatch('name', form)
-	const automated = Form.useWatch('automated', form)
-	const readonly = Form.useWatch('readonly', form)
-	const built_in = Form.useWatch('built_in', form)
-	const mentionable = Form.useWatch('mentionable', form)
-	const connector = Form.useWatch('connector', form)
-	const tags = Form.useWatch('tags', form)
-	const description = Form.useWatch('description', form)
-
+	// Initialize API client
 	useEffect(() => {
-		aiChatRef.current = { findAssistant, saveAssistant, deleteAssistant }
-	}, [findAssistant, saveAssistant, deleteAssistant])
+		const initializeAPI = async () => {
+			if (window.$app?.openapi) {
+				const client = new Agent(window.$app.openapi)
+				setApiClient(client)
+			} else {
+				console.error('OpenAPI not initialized')
+				message.error(is_cn ? 'API未初始化' : 'API not initialized')
+			}
+		}
+
+		initializeAPI()
+	}, [is_cn])
 
 	// Add event listener for delete action
 	useEffect(() => {
 		const handleDelete = async () => {
-			if (readonly) return
+			if (readonly || !apiClient) return
 			try {
-				await aiChatRef.current.deleteAssistant(id)
+				const response = await apiClient.assistants.Delete(id)
+				if (window.$app.openapi.IsError(response)) {
+					throw new Error(response.error?.error_description || 'Failed to delete assistant')
+				}
 				message.success(is_cn ? '智能体删除成功' : 'Assistant deleted successfully')
 				fetchedRef.current = false
 				previousIdRef.current = ''
@@ -81,18 +85,12 @@ const AssistantDetail = () => {
 		return () => {
 			window.$app.Event.off('assistant/delete', handleDelete)
 		}
-	}, [id, readonly, is_cn])
+	}, [id, readonly, is_cn, apiClient])
 
 	useEffect(() => {
-		// If the ID hasn't changed, don't refetch
-		if (previousIdRef.current === id && fetchedRef.current) {
-			return
-		}
-
-		// Update the previous ID ref
-		previousIdRef.current = id
-
 		const fetchAssistant = async () => {
+			if (!apiClient) return
+
 			setLoading(true)
 
 			try {
@@ -102,12 +100,28 @@ const AssistantDetail = () => {
 					return
 				}
 
-				const data = await aiChatRef.current.findAssistant(id)
+				// For view mode (not editing), pass locale to get translated values
+				// For edit mode, don't pass locale to get raw values
+				const locale_param = !editing ? (is_cn ? 'zh-cn' : 'en-us') : undefined
+				const response = await apiClient.assistants.Get(id, locale_param)
+
+				if (window.$app.openapi.IsError(response)) {
+					message.error(is_cn ? '未找到智能体' : 'Assistant not found')
+					history.push('/assistants')
+					return
+				}
+
+				let data = window.$app.openapi.GetData(response)
 
 				if (!data) {
 					message.error(is_cn ? '未找到智能体' : 'Assistant not found')
 					history.push('/assistants')
 					return
+				}
+
+				// If data is wrapped in another 'data' property, unwrap it
+				if (data.data && typeof data.data === 'object') {
+					data = data.data
 				}
 
 				// Ensure built_in and readonly are properly processed as boolean values
@@ -119,16 +133,35 @@ const AssistantDetail = () => {
 					data.readonly = Boolean(data.readonly)
 				}
 
-				form.setFieldsValue(data)
+				// Extract options from either 'option' or 'options' field
+				const optionsData = data.option || data.options || {}
+
+				setAssistantData(data)
 				setAvatarUrl(data.avatar || '')
-				setCode(data.option?.code || '// Your assistant code here\n')
 				setPrompts(data.prompts || [])
 				setOptions(
-					Object.entries(data.option || {}).map(([key, value]) => ({
+					Object.entries(optionsData).map(([key, value]) => ({
 						key,
 						value: String(value)
 					}))
 				)
+
+				// Set form values explicitly with all fields
+				form.setFieldsValue({
+					assistant_id: data.assistant_id,
+					name: data.name,
+					description: data.description,
+					tags: data.tags,
+					connector: data.connector,
+					automated: data.automated,
+					mentionable: data.mentionable,
+					built_in: data.built_in,
+					readonly: data.readonly,
+					placeholder: data.placeholder,
+					avatar: data.avatar,
+					type: data.type
+				})
+
 				fetchedRef.current = true
 			} catch (error) {
 				message.error(is_cn ? '加载智能体数据失败' : 'Failed to load assistant data')
@@ -137,24 +170,21 @@ const AssistantDetail = () => {
 			setLoading(false)
 		}
 
-		if (id && aiChatRef.current) {
+		// Refetch when id, editing mode, or apiClient changes
+		if (id && apiClient) {
+			// If ID changed, reset fetchedRef
+			if (previousIdRef.current !== id) {
+				fetchedRef.current = false
+				previousIdRef.current = id
+			}
 			fetchAssistant()
 		}
-	}, [id, is_cn]) // Add is_cn to dependencies
+	}, [id, is_cn, apiClient, editing]) // Include editing to refetch when mode changes
 
-	const handleAvatarChange = async (info: UploadChangeParam) => {
-		if (readonly) return // 如果是只读模式，不允许修改
-
-		const { status, response } = info.file
-
-		if (status === 'done') {
-			const newAvatarUrl = response?.url || `https://api.dicebear.com/7.x/bottts/svg?seed=${Date.now()}`
-			setAvatarUrl(newAvatarUrl)
-			form.setFieldValue('avatar', newAvatarUrl)
-			message.success(is_cn ? '头像更新成功' : 'Avatar updated successfully')
-		} else if (status === 'error') {
-			message.error(is_cn ? '头像更新失败' : 'Failed to update avatar')
-		}
+	const handleAvatarUploadSuccess = (fileId: string, avatarWrapper: string) => {
+		// avatarWrapper is in format: __yao.attachment://file123
+		setAvatarUrl(avatarWrapper)
+		form.setFieldValue('avatar', avatarWrapper)
 	}
 
 	const handleBack = () => {
@@ -164,10 +194,33 @@ const AssistantDetail = () => {
 		history.push('/assistants')
 	}
 
+	const handleEdit = () => {
+		setEditing(true)
+	}
+
+	const handleCancel = () => {
+		// Refetch data when canceling to restore original values
+		fetchedRef.current = false
+		setEditing(false)
+	}
+
+	const handleFormChange = () => {
+		// Update assistantData when form values change in edit mode
+		if (editing) {
+			const formValues = form.getFieldsValue()
+			setAssistantData((prev) => ({
+				...prev,
+				...formValues
+			}))
+		}
+	}
+
 	const handleSubmit = async (values: App.Assistant) => {
-		if (readonly) return // 如果是只读模式，不允许修改
+		if (readonly || !apiClient) return
 
 		try {
+			setSaving(true)
+
 			// Ensure built_in and readonly are properly processed as boolean values
 			if (values.built_in !== undefined) {
 				values.built_in = Boolean(values.built_in)
@@ -183,111 +236,52 @@ const AssistantDetail = () => {
 				assistant_id: id,
 				type: 'assistant',
 				prompts: prompts || [],
-				options: Object.fromEntries(options.map(({ key, value }) => [key, value])) || {}
+				option: Object.fromEntries(options.map(({ key, value }) => [key, value])) || {}
 			}
 
-			await aiChatRef.current.saveAssistant(assistantData)
+			const response = await apiClient.assistants.Save(assistantData)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to save assistant')
+			}
+
 			message.success(is_cn ? '智能体更新成功' : 'Assistant updated successfully')
+			setEditing(false)
+
+			// Refetch data to get the updated version
+			fetchedRef.current = false
 		} catch (error) {
 			message.error(is_cn ? '更新智能体失败' : 'Failed to update assistant')
+		} finally {
+			setSaving(false)
 		}
 	}
 
-	const handleSaveCode = () => {
-		if (readonly) return // 如果是只读模式，不允许修改
-
-		form.validateFields()
-			.then(async (values) => {
-				try {
-					const assistantData = {
-						...values,
-						assistant_id: id,
-						type: 'assistant',
-						prompts: prompts || [],
-						options: Object.fromEntries(options.map(({ key, value }) => [key, value])) || {}
-					}
-
-					await aiChatRef.current.saveAssistant(assistantData)
-					message.success(is_cn ? '代码保存成功' : 'Code saved successfully')
-				} catch (error) {
-					message.error(is_cn ? '保存代码失败' : 'Failed to save code')
-				}
-			})
-			.catch(() => {
-				// Form validation failed
-			})
-	}
-
-	// Handle chat button click without triggering the card click
+	// Handle chat button click to trigger new chat event
 	const handleChatClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
 
-		// Get current form values
-		const formValues = form.getFieldsValue()
 		const options: App.NewChatOptions = {
 			assistant: {
 				assistant_id: id,
-				assistant_name: formValues.name,
+				assistant_name: name || '',
 				assistant_avatar: avatarUrl,
 				assistant_deleteable: id !== default_assistant.assistant_id
 			},
-			placeholder: formValues.placeholder || undefined
+			placeholder: assistantData?.placeholder || undefined
 		}
 
 		// Trigger the new chat event
 		window.$app.Event.emit('app/neoNewChat', options)
 	}
 
-	if (loading) {
+	if (loading || !assistantData) {
 		return (
 			<div className={styles.loading}>
 				<Spin size='large' />
 			</div>
 		)
 	}
-
-	const items = [
-		{
-			key: 'general',
-			label: is_cn ? '基本信息' : 'General',
-			children: <General form={form} />
-		},
-		{
-			key: 'prompts',
-			label: is_cn ? '提示词' : 'Prompts',
-			children: (
-				<Prompts value={prompts} options={options} onChange={setPrompts} onOptionsChange={setOptions} />
-			)
-		}
-		/** 暂时注释掉 Files
-		{
-			key: 'files',
-			label: is_cn ? '文件' : 'Files',
-			children: <Files files={files} onFilesChange={setFiles} />
-		}
-		*/
-		/* 暂时注释掉 Workflow
-		{
-			key: 'workflow',
-			label: is_cn ? '工作流' : 'Workflow',
-			children: <Workflow />
-		},
-		*/
-		/** 暂时注释掉 Tools
-		{
-			key: 'tools',
-			label: is_cn ? '工具' : 'Tools',
-			children: <Tools />
-		}
-		*/
-		/* 暂时注释掉 Script
-		{
-			key: 'script',
-			label: is_cn ? '脚本' : 'Script',
-			children: <Script code={code} onChange={setCode} onSave={handleSaveCode} />
-		}
-		*/
-	]
 
 	return (
 		<div className={styles.container}>
@@ -308,10 +302,10 @@ const AssistantDetail = () => {
 				</Breadcrumb>
 				<Button
 					className={styles.backButton}
-					icon={<ArrowLeftOutlined style={{ fontSize: '12px' }} />}
-					type='text'
+					icon={<Icon name='icon-arrow-left' size={12} />}
+					type='default'
+					size='small'
 					onClick={handleBack}
-					title={is_cn ? '返回' : 'Back'}
 				>
 					{is_cn ? '返回' : 'Back'}
 				</Button>
@@ -319,28 +313,17 @@ const AssistantDetail = () => {
 			<div className={styles.header}>
 				<div className={styles.headerContent}>
 					<div className={styles.headerMain}>
-						<Upload
-							accept='image/*'
-							showUploadList={false}
-							onChange={handleAvatarChange}
-							customRequest={({ onSuccess }) => {
-								setTimeout(() => {
-									onSuccess?.({
-										url: `https://api.dicebear.com/7.x/bottts/svg?seed=${Date.now()}`
-									})
-								}, 500)
+						<UserAvatar
+							size='xl'
+							shape='circle'
+							displayType='avatar'
+							data={{
+								id: id,
+								name: name || '',
+								avatar: avatarUrl
 							}}
-							disabled={readonly}
-						>
-							<div className={styles.avatarUpload}>
-								<Avatar size={64} src={avatarUrl} />
-								{!readonly && (
-									<div className={styles.avatarOverlay}>
-										<CameraOutlined />
-									</div>
-								)}
-							</div>
-						</Upload>
+							onUploadSuccess={editing && !readonly ? handleAvatarUploadSuccess : undefined}
+						/>
 						<div className={styles.headerInfo}>
 							<h1 style={{ whiteSpace: 'nowrap' }}>{name}</h1>
 							<div className={styles.tags}>
@@ -358,31 +341,33 @@ const AssistantDetail = () => {
 						</div>
 						<div className={styles.headerMeta}>
 							{connector && (
-								<div className={styles.connector}>{connectors.mapping[connector]}</div>
+								<div className={styles.connector}>
+									{connectors?.mapping?.[connector] || connector}
+								</div>
 							)}
 							<div className={styles.statusIcons}>
-								{built_in && (
+								{built_in === true && (
 									<Tooltip title={is_cn ? '系统内建' : 'Built-in'}>
 										<span className={styles.statusIcon}>
 											<Icon name='icon-package' size={16} color='#b37feb' />
 										</span>
 									</Tooltip>
 								)}
-								{!built_in && readonly && (
+								{!built_in && readonly === true && (
 									<Tooltip title={is_cn ? '只读' : 'Readonly'}>
 										<span className={styles.statusIcon}>
 											<Icon name='icon-lock' size={16} color='#faad14' />
 										</span>
 									</Tooltip>
 								)}
-								{mentionable == true && (
+								{mentionable === true && (
 									<Tooltip title={is_cn ? '可提及' : 'Mentionable'}>
 										<span className={styles.statusIcon}>
 											<Icon name='icon-at-sign' size={16} color='#52c41a' />
 										</span>
 									</Tooltip>
 								)}
-								{automated == true && (
+								{automated === true && (
 									<Tooltip title={is_cn ? '自动化' : 'Automated'}>
 										<span className={styles.statusIcon}>
 											<Icon name='icon-cpu' size={16} color='#1890ff' />
@@ -397,43 +382,72 @@ const AssistantDetail = () => {
 					<div className={styles.leftButton}>
 						<Button
 							type='primary'
-							icon={<MessageOutlined style={{ fontSize: '14px' }} />}
+							size='small'
+							icon={<Icon name='icon-message-circle' size={14} />}
 							onClick={handleChatClick}
 						>
 							{is_cn ? '聊天' : 'Chat'}
 						</Button>
 					</div>
-					{!readonly && (
-						<div className={styles.rightButton}>
-							<Button
-								type='primary'
-								icon={<SaveOutlined style={{ fontSize: '14px' }} />}
-								onClick={() => {
-									form.validateFields()
-										.then((values) => {
-											handleSubmit(values)
-										})
-										.catch((errorInfo) => {
-											console.log('Validation failed:', errorInfo)
-										})
-								}}
-							>
-								{is_cn ? '保存' : 'Save'}
-							</Button>
-						</div>
-					)}
+					<div className={styles.rightButton}>
+						{editing ? (
+							<div className={styles.buttonGroup}>
+								<Button
+									type='primary'
+									size='small'
+									icon={<Icon name='icon-save' size={14} />}
+									onClick={() => {
+										form.validateFields()
+											.then((values) => {
+												handleSubmit(values)
+											})
+											.catch((errorInfo) => {
+												console.log('Validation failed:', errorInfo)
+											})
+									}}
+									loading={saving}
+								>
+									{is_cn ? '保存' : 'Save'}
+								</Button>
+								<Button
+									type='default'
+									size='small'
+									icon={<Icon name='icon-x' size={14} />}
+									onClick={handleCancel}
+									disabled={saving}
+								>
+									{is_cn ? '取消' : 'Cancel'}
+								</Button>
+							</div>
+						) : (
+							!readonly && (
+								<Button
+									type='default'
+									size='small'
+									icon={<Icon name='icon-edit' size={14} />}
+									onClick={handleEdit}
+								>
+									{is_cn ? '编辑' : 'Edit'}
+								</Button>
+							)
+						)}
+					</div>
 				</div>
 			</div>
 
 			<div className={styles.content}>
-				<Form form={form} className={styles.form}>
-					<Tabs
-						items={items}
-						defaultActiveKey='general'
-						className={styles.tabs}
-						size='large'
-						type='card'
-					/>
+				<Form form={form} onFinish={handleSubmit} onValuesChange={handleFormChange}>
+					{editing ? (
+						<Edit
+							form={form}
+							prompts={prompts}
+							options={options}
+							onPromptsChange={setPrompts}
+							onOptionsChange={setOptions}
+						/>
+					) : (
+						<View data={assistantData} connectors={connectors} />
+					)}
 				</Form>
 			</div>
 		</div>

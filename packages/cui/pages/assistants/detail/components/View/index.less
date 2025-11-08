@@ -1,0 +1,269 @@
+.viewContainer {
+	height: 100%;
+
+	:global {
+		.xgen-tabs-card.xgen-tabs-top {
+			> .xgen-tabs-nav .xgen-tabs-tab,
+			> div > .xgen-tabs-nav .xgen-tabs-tab {
+				padding: 5px 16px;
+				margin: 0 !important;
+				border: none !important;
+				border-radius: 4px;
+				transition: all 0.3s;
+				color: color-mix(in srgb, var(--color_text) 70%, var(--color_text_grey));
+				background: transparent !important;
+				font-size: 13px;
+
+				.xgen-tabs-tab-btn {
+					font-size: 13px;
+				}
+
+				+ .xgen-tabs-tab {
+					margin-left: 4px !important;
+				}
+
+				&:hover {
+					color: var(--color_main);
+					.xgen-tabs-tab-btn {
+						color: var(--color_main);
+					}
+				}
+
+				&.xgen-tabs-tab-active {
+					background: var(--color_bg_menu) !important;
+					color: var(--color_main) !important;
+
+					.xgen-tabs-tab-btn {
+						color: var(--color_main) !important;
+					}
+				}
+			}
+		}
+
+		.xgen-tabs {
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			padding: 0 24px 24px;
+
+			.xgen-tabs-nav {
+				padding-top: 24px;
+				margin-bottom: 24px;
+				flex-shrink: 0;
+				&::before {
+					display: none;
+				}
+
+				.xgen-tabs-nav-wrap {
+					display: flex;
+					justify-content: center;
+				}
+
+				.xgen-tabs-nav-list {
+					background: color-mix(in srgb, var(--color_border) 70%, transparent);
+					padding: 3px;
+					border-radius: 6px;
+				}
+
+				.xgen-tabs-nav-operations {
+					display: none !important;
+				}
+			}
+
+			.xgen-tabs-content {
+				flex: 1;
+				padding-top: 0;
+				background: transparent;
+				height: 100%;
+				overflow: hidden;
+
+				.xgen-tabs-tabpane {
+					height: 100%;
+				}
+			}
+		}
+	}
+}
+
+.viewTabs {
+	height: 100%;
+}
+
+.viewSection {
+	height: 100%;
+	max-width: 720px;
+	margin: 0 auto;
+	padding: 0 24px 24px;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color_text_grey);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_border_soft);
+		border-radius: 3px;
+	}
+}
+
+.fieldGroup {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+.fieldRow {
+	display: flex;
+	gap: 24px;
+
+	.fieldItem {
+		flex: 1;
+	}
+}
+
+.fieldItem {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.fieldLabel {
+	font-size: 15px;
+	font-weight: 500;
+	color: var(--color_text);
+}
+
+.fieldValue {
+	font-size: 14px;
+	color: var(--color_text);
+	padding: 8px 0;
+	line-height: 1.5;
+}
+
+.emptyValue {
+	color: var(--color_text_grey);
+}
+
+.tagsDisplay {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.statusBadge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 12px;
+	background: var(--color_bg_nav);
+	border-radius: 4px;
+	font-size: 13px;
+}
+
+.placeholderDisplay {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 12px;
+	background: var(--color_bg_nav);
+	border-radius: 8px;
+}
+
+.placeholderItem {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.placeholderKey {
+	font-weight: 500;
+	color: var(--color_text_grey);
+	font-size: 13px;
+}
+
+.promptsList {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-top: 4px;
+}
+
+.promptChip {
+	padding: 6px 12px;
+	background: var(--color_bg);
+	border-radius: 4px;
+	font-size: 13px;
+	color: var(--color_text);
+}
+
+.messagesList {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.messageItem {
+	padding: 12px;
+	background: var(--color_bg_nav);
+	border-radius: 8px;
+	border: 1px solid var(--color_border);
+}
+
+.messageHeader {
+	margin-bottom: 8px;
+}
+
+.messageRole {
+	display: inline-block;
+	padding: 2px 8px;
+	background: var(--color_bg);
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_main);
+}
+
+.messageContent {
+	font-size: 14px;
+	color: var(--color_text);
+	white-space: pre-wrap;
+	word-break: break-word;
+	line-height: 1.6;
+}
+
+.optionsList {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.optionItem {
+	display: flex;
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--color_bg_nav);
+	border-radius: 6px;
+	font-size: 13px;
+}
+
+.optionKey {
+	font-weight: 500;
+	color: var(--color_text_grey);
+	min-width: 100px;
+}
+
+.optionValue {
+	color: var(--color_text);
+	word-break: break-all;
+}
+
