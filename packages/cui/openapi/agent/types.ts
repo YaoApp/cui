@@ -200,11 +200,59 @@ export interface AgentDetailResponse {
 }
 
 /**
- * Agent save request
+ * Assistant create request
+ * Required fields: name, type, connector
  */
-export interface AgentSaveRequest {
-	/** Assistant ID (for update) */
-	assistant_id?: string
+export interface AssistantCreateRequest {
+	/** Assistant type (required) */
+	type: string
+	/** Assistant name (required) */
+	name: string
+	/** AI Connector ID (required) */
+	connector: string
+	/** Assistant avatar URL */
+	avatar?: string
+	/** Assistant path */
+	path?: string
+	/** Sort order */
+	sort?: number
+	/** Assistant description */
+	description?: string
+	/** Assistant tags */
+	tags?: string[]
+	/** Whether this assistant is readonly */
+	readonly?: boolean
+	/** Whether this assistant is shared across all teams */
+	public?: boolean
+	/** Sharing scope (private/team) */
+	share?: string
+	/** Whether this assistant can be mentioned */
+	mentionable?: boolean
+	/** Whether this assistant is automated */
+	automated?: boolean
+	/** AI Options */
+	options?: Record<string, any>
+	/** AI Prompts */
+	prompts?: Prompt[]
+	/** Knowledge base configuration */
+	kb?: KnowledgeBase
+	/** MCP servers configuration */
+	mcp?: MCPServers
+	/** Assistant tools */
+	tools?: ToolCalls
+	/** Workflow configuration */
+	workflow?: Workflow
+	/** Assistant placeholder */
+	placeholder?: Placeholder
+	/** Localized content (locale -> content mapping) */
+	locales?: Record<string, any>
+}
+
+/**
+ * Assistant update request
+ * All fields are optional for partial updates
+ */
+export interface AssistantUpdateRequest {
 	/** Assistant type */
 	type?: string
 	/** Assistant name */
@@ -250,13 +298,21 @@ export interface AgentSaveRequest {
 }
 
 /**
- * Agent save response
+ * Agent create response
+ * Backend returns only the assistant_id after successful creation
  */
-export interface AgentSaveResponse {
-	/** Status message */
-	message: string
-	/** Saved agent data */
-	data: Agent
+export interface AgentCreateResponse {
+	/** Assistant ID of the created assistant */
+	assistant_id: string
+}
+
+/**
+ * Agent update response
+ * Backend returns only the assistant_id after successful update
+ */
+export interface AgentUpdateResponse {
+	/** Assistant ID of the updated assistant */
+	assistant_id: string
 }
 
 /**

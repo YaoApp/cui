@@ -5,8 +5,10 @@ import type {
 	AgentFilter,
 	AgentListResponse,
 	AgentDetailResponse,
-	AgentSaveRequest,
-	AgentSaveResponse,
+	AssistantCreateRequest,
+	AssistantUpdateRequest,
+	AgentCreateResponse,
+	AgentUpdateResponse,
 	AgentDeleteResponse
 } from './types'
 
@@ -70,12 +72,22 @@ export class AgentAssistants {
 	}
 
 	/**
-	 * Create or update an agent
-	 * @param data - Agent data
-	 * @returns Agent save response
+	 * Create a new assistant
+	 * @param data - Assistant data (name, type, connector are required)
+	 * @returns Assistant creation response with assistant_id
 	 */
-	async Save(data: AgentSaveRequest): Promise<ApiResponse<AgentSaveResponse>> {
-		return this.api.Post<AgentSaveResponse>('/agent/assistants', data)
+	async Create(data: AssistantCreateRequest): Promise<ApiResponse<AgentCreateResponse>> {
+		return this.api.Post<AgentCreateResponse>('/agent/assistants', data)
+	}
+
+	/**
+	 * Update an existing assistant
+	 * @param id - Assistant ID
+	 * @param data - Assistant data to update (all fields optional for partial update)
+	 * @returns Assistant update response with assistant_id
+	 */
+	async Update(id: string, data: AssistantUpdateRequest): Promise<ApiResponse<AgentUpdateResponse>> {
+		return this.api.Put<AgentUpdateResponse>(`/agent/assistants/${id}`, data)
 	}
 
 	/**
