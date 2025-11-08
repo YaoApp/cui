@@ -1,4 +1,6 @@
 import { OpenAPI } from '../openapi'
+import { ApiResponse } from '../types'
+import { BuildURL } from '../lib/utils'
 import type {
 	AgentFilter,
 	AgentListResponse,
@@ -20,7 +22,7 @@ export class AgentAssistants {
 	 * @param filter - Filter options
 	 * @returns Agent list response
 	 */
-	async List(filter?: AgentFilter): Promise<AgentListResponse> {
+	async List(filter?: AgentFilter): Promise<ApiResponse<AgentListResponse>> {
 		const params = new URLSearchParams()
 
 		if (filter) {
@@ -51,11 +53,7 @@ export class AgentAssistants {
 			if (filter.locale) params.append('locale', filter.locale)
 		}
 
-		const query = params.toString()
-		const url = `/agent/assistants${query ? `?${query}` : ''}`
-
-		const response = await this.api.Get<AgentListResponse>(url)
-		return this.api.GetData(response) as AgentListResponse
+		return this.api.Get<AgentListResponse>(BuildURL('/agent/assistants', params))
 	}
 
 	/**
@@ -64,15 +62,11 @@ export class AgentAssistants {
 	 * @param locale - Optional locale for translations
 	 * @returns Agent detail response
 	 */
-	async Get(id: string, locale?: string): Promise<AgentDetailResponse> {
+	async Get(id: string, locale?: string): Promise<ApiResponse<AgentDetailResponse>> {
 		const params = new URLSearchParams()
 		if (locale) params.append('locale', locale)
 
-		const query = params.toString()
-		const url = `/agent/assistants/${id}${query ? `?${query}` : ''}`
-
-		const response = await this.api.Get<AgentDetailResponse>(url)
-		return this.api.GetData(response) as AgentDetailResponse
+		return this.api.Get<AgentDetailResponse>(BuildURL(`/agent/assistants/${id}`, params))
 	}
 
 	/**
@@ -80,9 +74,8 @@ export class AgentAssistants {
 	 * @param data - Agent data
 	 * @returns Agent save response
 	 */
-	async Save(data: AgentSaveRequest): Promise<AgentSaveResponse> {
-		const response = await this.api.Post<AgentSaveResponse>('/agent/assistants', data)
-		return this.api.GetData(response) as AgentSaveResponse
+	async Save(data: AgentSaveRequest): Promise<ApiResponse<AgentSaveResponse>> {
+		return this.api.Post<AgentSaveResponse>('/agent/assistants', data)
 	}
 
 	/**
@@ -90,9 +83,7 @@ export class AgentAssistants {
 	 * @param id - Agent ID
 	 * @returns Agent delete response
 	 */
-	async Delete(id: string): Promise<AgentDeleteResponse> {
-		const response = await this.api.Delete<AgentDeleteResponse>(`/agent/assistants/${id}`)
-		return this.api.GetData(response) as AgentDeleteResponse
+	async Delete(id: string): Promise<ApiResponse<AgentDeleteResponse>> {
+		return this.api.Delete<AgentDeleteResponse>(`/agent/assistants/${id}`)
 	}
 }
-

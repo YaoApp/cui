@@ -211,7 +211,16 @@ export class OpenAPI {
 
 		// Add CSRF token for security
 		this.addCSRFToken(headerBuilder)
-		const response = await fetch(`${this.config.baseURL}${path}?${new URLSearchParams(query).toString()}`, {
+
+		// Build URL with query parameters
+		// If path already contains '?', append with '&', otherwise use '?'
+		const queryString = new URLSearchParams(query).toString()
+		let url = `${this.config.baseURL}${path}`
+		if (queryString) {
+			url += path.includes('?') ? `&${queryString}` : `?${queryString}`
+		}
+
+		const response = await fetch(url, {
 			method: 'GET',
 			headers: headerBuilder.toHeaders(),
 			credentials: 'include'

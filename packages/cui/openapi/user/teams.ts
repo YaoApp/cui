@@ -1,5 +1,6 @@
 import { OpenAPI } from '../openapi'
 import { ApiResponse } from '../types'
+import { BuildURL } from '../lib/utils'
 import { UserAuth } from './auth'
 import {
 	UserTeam,
@@ -43,10 +44,7 @@ export class UserTeams {
 		const params = new URLSearchParams()
 		if (locale) params.append('locale', locale)
 
-		const queryString = params.toString()
-		const url = queryString ? `/user/teams/config?${queryString}` : '/user/teams/config'
-
-		return this.api.Get<TeamConfig>(url)
+		return this.api.Get<TeamConfig>(BuildURL('/user/teams/config', params))
 	}
 
 	// ===== Team CRUD =====
@@ -298,12 +296,7 @@ export class UserTeams {
 		if (options?.pagesize) params.append('pagesize', options.pagesize.toString())
 		if (options?.status) params.append('status', options.status)
 
-		const queryString = params.toString()
-		const url = queryString
-			? `/user/teams/${teamId}/invitations?${queryString}`
-			: `/user/teams/${teamId}/invitations`
-
-		return this.api.Get<InvitationListResponse>(url)
+		return this.api.Get<InvitationListResponse>(BuildURL(`/user/teams/${teamId}/invitations`, params))
 	}
 
 	/**

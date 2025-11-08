@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button, Input, Spin, Tabs } from 'antd'
+import { Button, Input, Spin, Tabs, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { history, getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Card from '@/neo/components/AIChat/Card'
-import useAIChat from '@/neo/hooks/useAIChat'
+import { Agent } from '@/openapi/agent'
+import type { AgentFilter } from '@/openapi/agent'
 import { App } from '@/types'
 import styles from './index.less'
 
@@ -36,32 +37,48 @@ const Index = () => {
 	const [search, setSearch] = useState('')
 	const [searchText, setSearchText] = useState('')
 	const [activeType, setActiveType] = useState('all')
-	const [page, setPage] = useState(1)
+	const [currentPage, setCurrentPage] = useState(1)
+	const [totalAssistants, setTotalAssistants] = useState(0)
+	const [pageSize] = useState(12)
 	const [data, setData] = useState<App.Assistant[]>([])
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [hasMore, setHasMore] = useState(true)
+	const [loadingMore, setLoadingMore] = useState(false)
 	const [tags, setTags] = useState<{ key: string; label: string }[]>([
 		{ key: 'all', label: is_cn ? '全部' : 'All' }
 	])
 	const [tagsLoading, setTagsLoading] = useState(true)
 
-	const { getAssistants, getAssistantTags } = useAIChat({})
-
 	// Load tags
 	useEffect(() => {
 		const loadTags = async () => {
-			try {
-				const response = await getAssistantTags()
+			if (!window.$app?.openapi) {
+				console.error('OpenAPI not available')
+				return
+			}
 
-				// Transform the string array into the required format
+			try {
+				const agent = new Agent(window.$app.openapi)
+				const response = await agent.tags.List({
+					locale: is_cn ? 'zh-cn' : 'en-us',
+					type: 'assistant'
+				})
+
+				if (window.$app.openapi.IsError(response)) {
+					throw new Error(response.error?.error_description || 'Failed to load tags')
+				}
+
+				// Transform the response into the required format
 				let formattedTags: { key: string; value: string; label: string }[] = [
 					{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }
 				]
 
-				if (Array.isArray(response)) {
+				const tagsResponse = window.$app.openapi.GetData(response)
+				const tagsData = tagsResponse?.data
+				if (Array.isArray(tagsData)) {
 					// If response is an array of strings, transform each string into an object
-					if (typeof response[0] === 'string') {
-						const tagObjects = response.map((tag: string) => ({
+					if (typeof tagsData[0] === 'string') {
+						const tagObjects = tagsData.map((tag: string) => ({
 							key: tag,
 							value: tag,
 							label: tag
@@ -72,9 +89,9 @@ const Index = () => {
 						]
 					}
 					// If response is already an array of objects with key and label, use it directly
-					else if (response[0] && typeof response[0] === 'object' && 'value' in response[0]) {
+					else if (tagsData[0] && typeof tagsData[0] === 'object' && 'value' in tagsData[0]) {
 						formattedTags = [{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }]
-						response.forEach((tag: any) => {
+						tagsData.forEach((tag: any) => {
 							formattedTags.push({
 								key: tag.value,
 								value: tag.value,
@@ -87,6 +104,7 @@ const Index = () => {
 				setTags(formattedTags)
 			} catch (error) {
 				console.error(is_cn ? '加载智能体标签失败:' : 'Failed to load assistant tags:', error)
+				message.error(is_cn ? '加载智能体标签失败' : 'Failed to load assistant tags')
 			} finally {
 				setTagsLoading(false)
 			}
@@ -95,24 +113,59 @@ const Index = () => {
 		loadTags()
 	}, [is_cn])
 
-	// Load data with pagination and filtering
-	const loadData = async (reset = false) => {
-		if (loading || (!hasMore && !reset)) return
+	// Load data - initial load
+	const loadData = async () => {
+		if (!window.$app?.openapi) {
+			console.error('OpenAPI not available')
+			return
+		}
 
-		setLoading(true)
 		try {
-			const newPage = reset ? 1 : page
-			const response = await getAssistants({
-				keywords: searchText,
-				page: newPage,
-				pagesize: 12,
-				tags: activeType !== 'all' ? [activeType] : undefined
-			})
+			setLoading(true)
+			const agent = new Agent(window.$app.openapi)
 
-			let newData = Array.isArray(response) ? response : response?.data || []
+			const filter: AgentFilter = {
+				locale: is_cn ? 'zh-cn' : 'en-us',
+				type: 'assistant',
+				page: 1,
+				pagesize: pageSize,
+				select: [
+					'assistant_id',
+					'built_in',
+					'automated',
+					'avatar',
+					'connector',
+					'description',
+					'mentionable',
+					'placeholder',
+					'name',
+					'readonly',
+					'sort',
+					'tags',
+					'created_at'
+				]
+			}
+
+			if (searchText) {
+				filter.keywords = searchText
+			}
+
+			if (activeType !== 'all') {
+				filter.tags = [activeType]
+			}
+
+			const response = await agent.assistants.List(filter)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load assistants')
+			}
+
+			const listResponse = window.$app.openapi.GetData(response)
+			let newData = Array.isArray(listResponse?.data) ? listResponse.data : []
+			const total = typeof listResponse?.total === 'number' ? listResponse.total : 0
 
 			// Add default placeholder for assistants that don't have one
-			newData = newData.map((assistant) => {
+			newData = newData.map((assistant: App.Assistant) => {
 				if (!assistant.placeholder || Object.keys(assistant.placeholder).length === 0) {
 					return {
 						...assistant,
@@ -122,22 +175,99 @@ const Index = () => {
 				return assistant
 			})
 
-			if (reset) {
-				setData(newData)
-			} else {
-				setData((prevData) => [...prevData, ...newData])
-			}
+			// Reset mode: replace data
+			setData(newData)
+			setCurrentPage(1)
+			setTotalAssistants(total)
 
-			setPage(newPage + 1)
-			setHasMore(
-				Array.isArray(response)
-					? newData.length === 12
-					: newData.length > 0 && newPage < (response?.pagecnt || 1)
-			)
+			// Check if there's more data
+			setHasMore(newData.length < total)
 		} catch (error) {
 			console.error(is_cn ? '加载智能体失败:' : 'Failed to load assistants:', error)
+			message.error(is_cn ? '加载智能体失败' : 'Failed to load assistants')
 		} finally {
 			setLoading(false)
+		}
+	}
+
+	// Load more data
+	const loadMoreData = async () => {
+		if (!hasMore || loadingMore) return
+
+		const nextPage = currentPage + 1
+		setCurrentPage(nextPage)
+
+		if (!window.$app?.openapi) {
+			console.error('OpenAPI not available')
+			return
+		}
+
+		try {
+			setLoadingMore(true)
+			const agent = new Agent(window.$app.openapi)
+
+			const filter: AgentFilter = {
+				locale: is_cn ? 'zh-cn' : 'en-us',
+				type: 'assistant',
+				page: nextPage,
+				pagesize: pageSize,
+				select: [
+					'assistant_id',
+					'built_in',
+					'automated',
+					'avatar',
+					'connector',
+					'description',
+					'mentionable',
+					'placeholder',
+					'name',
+					'readonly',
+					'sort',
+					'tags',
+					'created_at'
+				]
+			}
+
+			if (searchText) {
+				filter.keywords = searchText
+			}
+
+			if (activeType !== 'all') {
+				filter.tags = [activeType]
+			}
+
+			const response = await agent.assistants.List(filter)
+
+			if (window.$app.openapi.IsError(response)) {
+				throw new Error(response.error?.error_description || 'Failed to load assistants')
+			}
+
+			const listResponse = window.$app.openapi.GetData(response)
+			let newData = Array.isArray(listResponse?.data) ? listResponse.data : []
+			const total = typeof listResponse?.total === 'number' ? listResponse.total : 0
+
+			// Add default placeholder for assistants that don't have one
+			newData = newData.map((assistant: App.Assistant) => {
+				if (!assistant.placeholder || Object.keys(assistant.placeholder).length === 0) {
+					return {
+						...assistant,
+						placeholder: generateDefaultPlaceholder(assistant, is_cn)
+					}
+				}
+				return assistant
+			})
+
+			// Append data
+			setData((prev) => (Array.isArray(prev) ? [...prev, ...newData] : newData))
+			setTotalAssistants(total)
+
+			// Check if there's more data
+			setHasMore(data.length + newData.length < total)
+		} catch (error) {
+			console.error(is_cn ? '加载更多智能体失败:' : 'Failed to load more assistants:', error)
+			message.error(is_cn ? '加载更多智能体失败' : 'Failed to load more assistants')
+		} finally {
+			setLoadingMore(false)
 		}
 	}
 
@@ -148,21 +278,21 @@ const Index = () => {
 
 		const handleScroll = () => {
 			const { scrollTop, scrollHeight, clientHeight } = container
-			if (scrollHeight - scrollTop - clientHeight < 50 && !loading && hasMore) {
-				loadData()
+			if (scrollHeight - scrollTop - clientHeight < 50 && !loadingMore && hasMore) {
+				loadMoreData()
 			}
 		}
 
 		container.addEventListener('scroll', handleScroll)
 		return () => container.removeEventListener('scroll', handleScroll)
-	}, [loading, hasMore, data])
+	}, [loadingMore, hasMore, data])
 
 	// Initial load and reload on filter change
 	useEffect(() => {
 		setData([])
-		setPage(1)
+		setCurrentPage(1)
 		setHasMore(true)
-		loadData(true)
+		loadData()
 	}, [searchText, activeType])
 
 	const handleSearch = () => {
@@ -268,7 +398,7 @@ const Index = () => {
 							</div>
 						)}
 
-						{loading && data.length > 0 && (
+						{loadingMore && data.length > 0 && (
 							<div className={styles.loading}>
 								<Spin />
 							</div>

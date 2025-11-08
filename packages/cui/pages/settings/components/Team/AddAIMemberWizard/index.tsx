@@ -125,8 +125,14 @@ const AddAIMemberWizard = ({
 					.List({})
 					.then((response) => {
 						console.log('Agents loaded:', response)
-						if (response?.data) {
-							setAgents(response.data)
+						if (openapi.IsError(response)) {
+							console.error('Failed to load agents:', response.error)
+							agentsLoadedRef.current = false // Allow retry on error
+							return
+						}
+						const data = openapi.GetData(response)
+						if (data?.data) {
+							setAgents(data.data)
 						}
 					})
 					.catch((error) => {

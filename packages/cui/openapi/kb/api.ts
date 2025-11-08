@@ -1,5 +1,6 @@
 import OpenAPI from '../openapi'
 import { ApiResponse } from '../types'
+import { BuildURL } from '../lib/utils'
 import {
 	Collection,
 	CreateCollectionRequest,
@@ -269,7 +270,7 @@ export class KB {
 		const queryParams = new URLSearchParams({
 			document_ids: documentIDs.join(',')
 		})
-		return this.api.Delete<RemoveDocsResponse>(`/kb/documents?${queryParams.toString()}`)
+		return this.api.Delete<RemoveDocsResponse>(BuildURL('/kb/documents', queryParams))
 	}
 
 	// ===== Segment Management =====
@@ -366,7 +367,7 @@ export class KB {
 		const queryParams = new URLSearchParams({
 			segment_ids: segmentIDs.join(',')
 		})
-		return this.api.Delete<RemoveSegmentsResponse>(`/kb/documents/${docID}/segments?${queryParams.toString()}`)
+		return this.api.Delete<RemoveSegmentsResponse>(BuildURL(`/kb/documents/${docID}/segments`, queryParams))
 	}
 
 	/**
@@ -533,7 +534,7 @@ export class KB {
 			vote_ids: voteIDs.join(',')
 		})
 		return this.api.Delete<RemoveVotesResponse>(
-			`/kb/documents/${docID}/segments/${segmentID}/votes?${queryParams.toString()}`
+			BuildURL(`/kb/documents/${docID}/segments/${segmentID}/votes`, queryParams)
 		)
 	}
 
@@ -589,7 +590,7 @@ export class KB {
 			hit_ids: hitIDs.join(',')
 		})
 		return this.api.Delete<RemoveHitsResponse>(
-			`/kb/documents/${docID}/segments/${segmentID}/hits?${queryParams.toString()}`
+			BuildURL(`/kb/documents/${docID}/segments/${segmentID}/hits`, queryParams)
 		)
 	}
 

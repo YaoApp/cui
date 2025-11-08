@@ -1,4 +1,5 @@
 import { OpenAPI } from '../openapi'
+import { ApiResponse } from '../types'
 import type { AgentCallRequest, AgentCallResponse } from './types'
 
 /**
@@ -14,9 +15,8 @@ export class AgentCall {
 	 * @param request - Call request with API name and payload
 	 * @returns Agent call response
 	 */
-	async Execute(id: string, request: AgentCallRequest): Promise<AgentCallResponse> {
-		const response = await this.api.Post<AgentCallResponse>(`/agent/assistants/${id}/call`, request)
-		return this.api.GetData(response) as AgentCallResponse
+	async Execute(id: string, request: AgentCallRequest): Promise<ApiResponse<AgentCallResponse>> {
+		return this.api.Post<AgentCallResponse>(`/agent/assistants/${id}/call`, request)
 	}
 }
 

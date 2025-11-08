@@ -1,5 +1,6 @@
 import { OpenAPI } from '../openapi'
 import { ApiResponse, ErrorResponse, JWK } from '../types'
+import { BuildURL } from '../lib/utils'
 import * as jose from 'jose'
 import {
 	EntryConfig,
@@ -66,9 +67,11 @@ export class UserAuth {
 	 * Requires temporary access token from EntryVerify
 	 */
 	async SendOTP(accessToken: string, locale?: string): Promise<ApiResponse<EntrySendOTPResponse>> {
-		const url = locale ? `/user/entry/otp?locale=${encodeURIComponent(locale)}` : '/user/entry/otp'
+		const params = new URLSearchParams()
+		if (locale) params.append('locale', locale)
+
 		return this.api.Post<EntrySendOTPResponse>(
-			url,
+			BuildURL('/user/entry/otp', params),
 			{},
 			{
 				Authorization: `Bearer ${accessToken}`

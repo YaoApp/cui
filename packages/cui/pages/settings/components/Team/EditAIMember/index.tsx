@@ -150,25 +150,31 @@ const EditAIMember = ({
 			const mcpAPI = new MCP(openapi)
 			const llmAPI = new LLM(openapi)
 
-			// Load agents
-			if (!agentsLoadedRef.current && !agentsLoading) {
-				agentsLoadedRef.current = true
-				setAgentsLoading(true)
-				agentAPI.assistants
-					.List({})
-					.then((response) => {
-						if (response?.data) {
-							setAgents(response.data)
-						}
-					})
-					.catch((error) => {
-						console.error('Failed to load agents:', error)
+		// Load agents
+		if (!agentsLoadedRef.current && !agentsLoading) {
+			agentsLoadedRef.current = true
+			setAgentsLoading(true)
+			agentAPI.assistants
+				.List({})
+				.then((response) => {
+					if (openapi.IsError(response)) {
+						console.error('Failed to load agents:', response.error)
 						agentsLoadedRef.current = false
-					})
-					.finally(() => {
-						setAgentsLoading(false)
-					})
-			}
+						return
+					}
+					const data = openapi.GetData(response)
+					if (data?.data) {
+						setAgents(data.data)
+					}
+				})
+				.catch((error) => {
+					console.error('Failed to load agents:', error)
+					agentsLoadedRef.current = false
+				})
+				.finally(() => {
+					setAgentsLoading(false)
+				})
+		}
 
 			// Load MCP servers
 			if (!mcpLoadedRef.current && !mcpLoading) {

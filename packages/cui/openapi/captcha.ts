@@ -1,5 +1,6 @@
 import { OpenAPI } from './openapi'
 import { ApiResponse, ErrorResponse } from './types'
+import { BuildURL } from './lib/utils'
 
 /**
  * Captcha options for generating captcha
@@ -41,8 +42,7 @@ export class Captcha {
 			})
 		}
 
-		const query = params.toString() ? `?${params.toString()}` : ''
-		return this.api.Get<CaptchaResponse>(`/captcha/image${query}`)
+		return this.api.Get<CaptchaResponse>(BuildURL('/captcha/image', params))
 	}
 
 	/**
@@ -59,8 +59,7 @@ export class Captcha {
 			})
 		}
 
-		const query = params.toString() ? `?${params.toString()}` : ''
-		return this.api.Get<CaptchaResponse>(`/captcha/audio${query}`)
+		return this.api.Get<CaptchaResponse>(BuildURL('/captcha/audio', params))
 	}
 
 	/**
