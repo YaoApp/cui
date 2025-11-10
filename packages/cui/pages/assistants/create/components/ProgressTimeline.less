@@ -300,114 +300,6 @@
 	border-top: 1px solid var(--color_border_light);
 }
 
-.editButton {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 10px 24px;
-	font-size: 14px;
-	font-weight: 500;
-	color: var(--color_text);
-	background: var(--color_bg_hover);
-	border: 1px solid var(--color_border);
-	border-radius: 8px;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	outline: none;
-
-	:global {
-		.Icon,
-		.icon {
-			color: var(--color_text) !important;
-		}
-	}
-
-	&:hover {
-		background: var(--color_bg_active);
-		border-color: var(--color_primary);
-		color: var(--color_primary);
-		transform: translateY(-1px);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-
-		:global {
-			.Icon,
-			.icon {
-				color: var(--color_primary) !important;
-			}
-		}
-	}
-
-	&:active {
-		transform: translateY(0);
-	}
-}
-
-.stopButton {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 10px 24px;
-	font-size: 14px;
-	font-weight: 500;
-	color: var(--color_bg_menu);
-	background: var(--color_danger);
-	border: none;
-	border-radius: 8px;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	outline: none;
-
-	:global {
-		.Icon,
-		.icon {
-			color: var(--color_bg_menu) !important;
-		}
-	}
-
-	&:hover {
-		background: color-mix(in srgb, var(--color_danger) 85%, black);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
-	}
-
-	&:active {
-		transform: translateY(0);
-	}
-}
-
-.retryButton {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 10px 24px;
-	font-size: 14px;
-	font-weight: 500;
-	color: var(--color_bg_menu);
-	background: var(--color_primary);
-	border: none;
-	border-radius: 8px;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	outline: none;
-
-	:global {
-		.Icon,
-		.icon {
-			color: var(--color_bg_menu) !important;
-		}
-	}
-
-	&:hover {
-		background: var(--color_main);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(51, 113, 252, 0.3);
-	}
-
-	&:active {
-		transform: translateY(0);
-	}
-}
-
 // Responsive
 @media (max-width: 768px) {
 	.timeline {
@@ -488,12 +380,5 @@
 	.timelineFooter {
 		padding: 16px 16px 20px;
 		gap: 10px;
-	}
-
-	.stopButton,
-	.editButton,
-	.retryButton {
-		padding: 8px 20px;
-		font-size: 13px;
 	}
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import Icon from '@/widgets/Icon'
+import { Button } from '@/components/ui'
 import styles from './ProgressTimeline.less'
 
 export interface TimelineStep {
@@ -21,7 +22,16 @@ interface ProgressTimelineProps {
 	onStop?: () => void
 }
 
-const ProgressTimeline = ({ steps, is_cn, hasError = false, isGenerating = false, requirement, onRetry, onEditPrompt, onStop }: ProgressTimelineProps) => {
+const ProgressTimeline = ({
+	steps,
+	is_cn,
+	hasError = false,
+	isGenerating = false,
+	requirement,
+	onRetry,
+	onEditPrompt,
+	onStop
+}: ProgressTimelineProps) => {
 	const [visibleSteps, setVisibleSteps] = useState<string[]>([])
 	const timelineStepsRef = useRef<HTMLDivElement>(null)
 
@@ -61,16 +71,15 @@ const ProgressTimeline = ({ steps, is_cn, hasError = false, isGenerating = false
 	return (
 		<div className={styles.timeline}>
 			<div className={`${styles.timelineHeader} ${hasError ? styles.hasError : ''}`}>
-				<Icon 
-					name='material-psychology' 
-					size={24} 
-					className={styles.headerIcon}
-				/>
+				<Icon name='material-psychology' size={24} className={styles.headerIcon} />
 				<h3 className={styles.timelineTitle}>
-					{hasError 
-						? (is_cn ? '创建失败' : 'Creation Failed')
-						: (is_cn ? 'AI 正在创建智能体...' : 'AI is creating assistant...')
-					}
+					{hasError
+						? is_cn
+							? '创建失败'
+							: 'Creation Failed'
+						: is_cn
+						? 'AI 正在创建智能体...'
+						: 'AI is creating assistant...'}
 				</h3>
 			</div>
 
@@ -80,9 +89,7 @@ const ProgressTimeline = ({ steps, is_cn, hasError = false, isGenerating = false
 						<Icon name='material-description' size={16} />
 						<span>{is_cn ? '需求描述' : 'Requirements'}</span>
 					</div>
-					<div className={styles.requirementContent}>
-						{requirement}
-					</div>
+					<div className={styles.requirementContent}>{requirement}</div>
 				</div>
 			)}
 
@@ -94,9 +101,9 @@ const ProgressTimeline = ({ steps, is_cn, hasError = false, isGenerating = false
 					return (
 						<div
 							key={step.id}
-							className={`${styles.timelineStep} ${
-								isVisible ? styles.visible : ''
-							} ${styles[step.status]}`}
+							className={`${styles.timelineStep} ${isVisible ? styles.visible : ''} ${
+								styles[step.status]
+							}`}
 						>
 							<div className={styles.stepLine}>
 								<div className={styles.stepIconWrapper}>{getStepIcon(step.status)}</div>
@@ -121,10 +128,14 @@ const ProgressTimeline = ({ steps, is_cn, hasError = false, isGenerating = false
 			{/* Show stop button when generating */}
 			{isGenerating && onStop && (
 				<div className={styles.timelineFooter}>
-					<button className={styles.stopButton} onClick={onStop}>
-						<Icon name='material-stop' size={18} />
-						<span>{is_cn ? '停止' : 'Stop'}</span>
-					</button>
+					<Button
+						type='danger'
+						size='medium'
+						onClick={onStop}
+						icon={<Icon name='material-stop' size={18} />}
+					>
+						{is_cn ? '停止' : 'Stop'}
+					</Button>
 				</div>
 			)}
 
@@ -132,16 +143,23 @@ const ProgressTimeline = ({ steps, is_cn, hasError = false, isGenerating = false
 			{hasError && (onRetry || onEditPrompt) && (
 				<div className={styles.timelineFooter}>
 					{onRetry && (
-						<button className={styles.retryButton} onClick={onRetry}>
-							<Icon name='material-refresh' size={18} />
-							<span>{is_cn ? '重试' : 'Retry'}</span>
-						</button>
+						<Button
+							type='primary'
+							size='medium'
+							onClick={onRetry}
+							icon={<Icon name='material-refresh' size={18} />}
+						>
+							{is_cn ? '重试' : 'Retry'}
+						</Button>
 					)}
 					{onEditPrompt && (
-						<button className={styles.editButton} onClick={onEditPrompt}>
-							<Icon name='material-edit' size={18} />
-							<span>{is_cn ? '修改需求' : 'Edit Requirements'}</span>
-						</button>
+						<Button
+							size='medium'
+							onClick={onEditPrompt}
+							icon={<Icon name='material-edit' size={18} />}
+						>
+							{is_cn ? '修改需求' : 'Edit Requirements'}
+						</Button>
 					)}
 				</div>
 			)}
@@ -150,4 +168,3 @@ const ProgressTimeline = ({ steps, is_cn, hasError = false, isGenerating = false
 }
 
 export default ProgressTimeline
-
