@@ -89,6 +89,68 @@
 	width: 100%;
 }
 
+.shareField {
+	display: flex;
+	gap: 12px;
+	margin-top: 20px;
+}
+
+.shareOption {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 14px;
+	background: transparent;
+	border: none;
+	border-radius: 6px;
+	font-size: 13px;
+	color: var(--color_text);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	outline: none;
+	white-space: nowrap;
+
+	&:hover:not(:disabled) {
+		background: var(--color_bg_hover);
+	}
+
+	&.active {
+		background: var(--color_bg_hover);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+.radioCircle {
+	width: 16px;
+	height: 16px;
+	border: 2px solid var(--color_text_light);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition: all 0.2s ease;
+
+	.shareOption:hover & {
+		border-color: var(--color_text_light);
+	}
+
+	.active & {
+		border-color: var(--color_primary);
+	}
+}
+
+.radioDot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--color_primary);
+}
+
 .timelineSection {
 	display: flex;
 	align-items: center;
@@ -179,6 +241,27 @@
 	.heroDesc {
 		font-size: 14px;
 		margin-bottom: 24px;
+	}
+
+	.shareField {
+		margin-top: 16px;
+		gap: 10px;
+	}
+
+	.shareOption {
+		padding: 7px 12px;
+		font-size: 12px;
+		gap: 7px;
+	}
+
+	.radioCircle {
+		width: 14px;
+		height: 14px;
+	}
+
+	.radioDot {
+		width: 7px;
+		height: 7px;
 	}
 
 	.timelineSection {

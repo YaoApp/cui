@@ -10,6 +10,7 @@ import { Agent } from '@/openapi/agent/api'
 import { MCP } from '@/openapi/mcp/api'
 import useAIChat from '@/neo/hooks/useAIChat'
 import { useGlobal } from '@/context/app'
+import { IsTeamMember } from '@/pages/auth/auth'
 import ProgressTimeline, { TimelineStep } from './components/ProgressTimeline'
 import AssistantPreview from './components/AssistantPreview'
 import styles from './index.less'
@@ -22,6 +23,7 @@ interface AssistantConfig {
 	agents?: string[]
 	mcp_tools?: string[]
 	tags?: string[]
+	share?: 'private' | 'team'
 }
 
 const AssistantCreate = () => {
@@ -30,6 +32,7 @@ const AssistantCreate = () => {
 	const global = useGlobal()
 	const { connectors } = global
 	const { saveAssistant } = useAIChat({})
+	const isTeamMember = IsTeamMember()
 
 	// Wizard state
 	const [currentStep, setCurrentStep] = useState(0)
@@ -47,7 +50,8 @@ const AssistantCreate = () => {
 		prompt: '',
 		agents: [],
 		mcp_tools: [],
-		tags: []
+		tags: [],
+		share: 'team'
 	})
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [creating, setCreating] = useState(false)
@@ -501,6 +505,38 @@ const AssistantCreate = () => {
 								error=''
 								hasError={false}
 							/>
+							
+							{/* Share Visibility - Only show for team members */}
+							{isTeamMember && (
+								<div className={styles.shareField}>
+									<button
+										type='button'
+										className={`${styles.shareOption} ${
+											config.share === 'team' ? styles.active : ''
+										}`}
+										onClick={() => setConfig((prev) => ({ ...prev, share: 'team' }))}
+										disabled={generating}
+									>
+										<span className={styles.radioCircle}>
+											{config.share === 'team' && <span className={styles.radioDot} />}
+										</span>
+										<span>{is_cn ? '团队成员可见' : 'Visible to team members'}</span>
+									</button>
+									<button
+										type='button'
+										className={`${styles.shareOption} ${
+											config.share === 'private' ? styles.active : ''
+										}`}
+										onClick={() => setConfig((prev) => ({ ...prev, share: 'private' }))}
+										disabled={generating}
+									>
+										<span className={styles.radioCircle}>
+											{config.share === 'private' && <span className={styles.radioDot} />}
+										</span>
+										<span>{is_cn ? '仅自己可见' : 'Private (only me)'}</span>
+									</button>
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
