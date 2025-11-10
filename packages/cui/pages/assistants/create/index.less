@@ -1,144 +1,227 @@
-/* Import styles from detail page */
-@import '../detail/index.less';
-
-/* Styles specific to create page */
-.simpleFormContainer {
-	background: var(--color_bg_menu);
-	border-radius: 12px;
-	padding: 0; /* Remove padding to allow header to extend to edges */
-	width: 100%; /* Match the breadcrumb width */
+.container {
+	width: 100%;
+	max-width: 1200px;
 	margin: 0 auto;
+	padding: 24px;
+}
+
+.breadcrumbContainer {
+	margin-bottom: 24px;
+
+	:global {
+		.xgen-breadcrumb {
+			font-size: 14px;
+		}
+
+		.xgen-breadcrumb-link {
+			color: var(--color_text_grey);
+			transition: color 0.2s;
+
+			&:hover {
+				color: var(--color_primary);
+			}
+		}
+
+		.xgen-breadcrumb-separator {
+			color: var(--color_text_grey);
+		}
+	}
+}
+
+.wizardContainer {
+	background: var(--color_bg_menu);
+	border-radius: 8px;
+	border: 1px solid var(--color_border);
+	overflow: hidden;
+}
+
+.wizardHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+}
+
+.titleSection {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.pageTitle {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--color_text);
+	margin: 0;
+}
+
+.heroSection {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 80px 24px 40px;
+}
+
+.heroContent {
+	width: 100%;
+	max-width: 800px;
+	text-align: center;
+}
+
+.heroTitle {
+	font-size: 36px;
+	font-weight: 700;
+	color: var(--color_text);
+	margin: 0 0 12px 0;
+	line-height: 1.2;
+}
+
+.heroDesc {
+	font-size: 15px;
+	color: var(--color_text_grey);
+	margin: 0 0 32px 0;
+	line-height: 1.5;
+}
+
+.chatBoxWrapper {
+	width: 100%;
+}
+
+.timelineSection {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 80px 24px 40px;
+	min-height: 400px;
+}
+
+.stepContent {
+	padding: 32px 24px;
+	min-height: 400px;
+	display: flex;
+	flex-direction: column;
 }
 
 .formContent {
-	width: 100%;
-	margin: 0 auto;
-}
-
-.formHeader {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 16px; /* Equal padding on all sides */
-	width: 100%;
-	border-bottom: 1px solid var(--color_border_soft); /* Add border to create title bar effect */
-
-	button {
-		display: flex;
-		align-items: center;
-
-		:global {
-			.anticon {
-				margin-left: 8px;
-				font-size: 14px;
-			}
-		}
-	}
-}
-
-.formTitle {
-	font-size: 20px;
-	font-weight: 600;
-	color: var(--color_text);
-	margin: 0; /* Remove default margin */
-}
-
-/* Form styles */
-.form {
-	width: 100%;
-	padding: 24px 36px; /* Increased left and right padding */
 	max-width: 800px;
 	margin: 0 auto;
-
-	:global {
-		.xgen-form-item {
-			width: 100%;
-		}
-
-		.xgen-form-item-control-input,
-		.xgen-form-item-control-input-content {
-			width: 100%;
-		}
-
-		/* Ensure the textarea and other inputs have proper width */
-		.xgen-input,
-		.xgen-input-textarea,
-		.xgen-select {
-			width: 100%;
-		}
-	}
+	width: 100%;
 }
 
-.promptsSection {
-	margin-top: 24px;
+.formItem {
 	margin-bottom: 24px;
-	width: 100%;
 
-	h3 {
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.formLabel {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	color: var(--color_text);
+	font-weight: 500;
+	font-size: 13px;
+	margin-bottom: 8px;
+}
+
+.required {
+	color: var(--color_danger);
+	margin-right: 2px;
+}
+
+.loadingHint {
+	font-size: 12px;
+	color: var(--color_text_grey);
+	font-weight: 400;
+}
+
+.wizardFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 24px;
+	border-top: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+}
+
+.footerLeft {
+	display: flex;
+	gap: 10px;
+}
+
+.footerRight {
+	display: flex;
+	gap: 10px;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+	.container {
+		padding: 16px;
+	}
+
+	.wizardHeader {
+		padding: 16px;
+	}
+
+	.heroSection {
+		padding: 60px 16px 32px;
+	}
+
+	.heroTitle {
+		font-size: 28px;
+	}
+
+	.heroDesc {
+		font-size: 14px;
+		margin-bottom: 24px;
+	}
+
+	.timelineSection {
+		padding: 60px 16px 32px;
+		min-height: 350px;
+	}
+
+	.stepContent {
+		padding: 24px 16px;
+		min-height: 300px;
+	}
+
+	.wizardFooter {
+		padding: 12px 16px;
+	}
+}
+
+@media (max-width: 480px) {
+	.heroSection {
+		padding: 48px 12px 24px;
+	}
+
+	.heroTitle {
+		font-size: 24px;
+	}
+
+	.heroDesc {
+		font-size: 13px;
+		margin-bottom: 20px;
+	}
+
+	.timelineSection {
+		padding: 48px 12px 24px;
+		min-height: 300px;
+	}
+
+	.pageTitle {
 		font-size: 16px;
-		font-weight: 600;
-		margin-bottom: 16px;
-		color: var(--color_text);
+	}
+
+	.stepContent {
+		padding: 20px 12px;
+		min-height: 250px;
 	}
 }
 
-.promptsContainer {
-	width: 100%;
-	display: block;
-
-	/* Ensure the prompts component takes full width */
-	:global {
-		.xgen-form-item {
-			width: 100%;
-		}
-
-		.xgen-form-item-control-input,
-		.xgen-form-item-control-input-content {
-			width: 100%;
-		}
-
-		/* Ensure the textarea and other inputs have proper width */
-		.xgen-input,
-		.xgen-input-textarea,
-		.xgen-select {
-			width: 100%;
-		}
-	}
-}
-
-.placeholderSection {
-	margin-top: 24px;
-	margin-bottom: 24px;
-	width: 100%;
-
-	h3 {
-		font-size: 16px;
-		font-weight: 600;
-		margin-bottom: 16px;
-		color: var(--color_text);
-	}
-}
-
-.placeholderContainer {
-	width: 100%;
-	display: block;
-
-	/* Ensure the placeholder component takes full width */
-	:global {
-		.xgen-form-item {
-			width: 100%;
-		}
-
-		.xgen-form-item-control-input,
-		.xgen-form-item-control-input-content {
-			width: 100%;
-		}
-
-		/* Ensure the textarea and other inputs have proper width */
-		.xgen-input,
-		.xgen-input-textarea,
-		.xgen-select {
-			width: 100%;
-		}
-	}
-}

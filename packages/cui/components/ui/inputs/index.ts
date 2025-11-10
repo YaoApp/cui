@@ -12,6 +12,7 @@ export { default as Nested } from './Nested'
 export { default as Items } from './Items'
 export { default as Avatar } from './Avatar'
 export { default as DateRange } from './DateRange'
+export { default as ChatBox } from './ChatBox'
 
 // Utilities
 export { validateField } from './validation'
@@ -19,3 +20,4 @@ export { default as ErrorMessage } from './ErrorMessage'
 
 // Types
 export type { DateRangeValue, DateRangeProps } from './DateRange'
+export type { ChatBoxProps, ChatBoxFile } from './ChatBox'

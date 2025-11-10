@@ -1,0 +1,499 @@
+.timeline {
+	width: 100%;
+	max-width: 600px;
+	max-height: calc(100vh - 240px);
+	margin: 0 auto;
+	background: var(--color_bg_menu);
+	border-radius: 12px;
+	border: 1px solid var(--color_border);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.timelineHeader {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 24px 32px 20px;
+	border-bottom: 1px solid var(--color_border_light);
+
+	.headerIcon {
+		color: var(--color_primary) !important;
+	}
+
+	&.hasError {
+		.headerIcon {
+			color: var(--color_danger) !important;
+		}
+
+		.timelineTitle {
+			color: var(--color_danger);
+		}
+	}
+}
+
+.timelineTitle {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--color_text);
+	margin: 0;
+}
+
+.requirementSection {
+	flex-shrink: 0;
+	padding: 16px 32px;
+	background: var(--color_bg_hover);
+	border-bottom: 1px solid var(--color_border_light);
+}
+
+.requirementLabel {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_text_grey);
+	margin-bottom: 8px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+
+	:global {
+		.Icon,
+		.icon {
+			color: var(--color_text_grey) !important;
+		}
+	}
+}
+
+.requirementContent {
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--color_text_grey);
+	max-height: 80px;
+	overflow-y: auto;
+	white-space: pre-wrap;
+	word-break: break-word;
+
+	// 滚动条样式
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 2px;
+
+		&:hover {
+			background: var(--color_text_grey);
+		}
+	}
+}
+
+.timelineSteps {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: 24px 32px 32px;
+
+	// 滚动条样式
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border_light);
+		border-radius: 3px;
+		transition: background 0.2s ease;
+
+		&:hover {
+			background: var(--color_dot);
+		}
+	}
+}
+
+.timelineStep {
+	display: flex;
+	gap: 16px;
+	opacity: 0;
+	transform: translateX(-20px);
+	transition: all 0.4s ease;
+
+	&.visible {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+.stepLine {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.stepIconWrapper {
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: var(--color_bg_hover);
+	flex-shrink: 0;
+	transition: all 0.3s ease;
+
+	:global {
+		.icon {
+			color: var(--color_text_grey);
+			transition: color 0.3s ease;
+		}
+	}
+
+	.dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: var(--color_border);
+		transition: background 0.3s ease;
+	}
+}
+
+.connector {
+	width: 2px;
+	height: 40px;
+	background: var(--color_border_light);
+	transition: background 0.3s ease;
+}
+
+.stepContent {
+	flex: 1;
+	padding: 4px 0 40px 0;
+}
+
+.stepTitle {
+	font-size: 15px;
+	font-weight: 500;
+	margin-bottom: 4px;
+	line-height: 1.4;
+}
+
+// Default title color
+.timelineStep {
+	.stepTitle {
+		color: var(--color_text);
+	}
+
+	// Completed steps show in success color
+	&.completed .stepTitle {
+		color: #00c853;
+	}
+
+	// Error steps show in danger color
+	&.error .stepTitle {
+		color: var(--color_danger);
+	}
+}
+
+.stepDescription {
+	font-size: 13px;
+	color: var(--color_text_grey);
+	line-height: 1.5;
+	margin-top: 4px;
+}
+
+.stepTime {
+	font-size: 11px;
+	color: var(--color_text_grey);
+	margin-top: 6px;
+	opacity: 0.7;
+}
+
+// Status-specific styles
+.timelineStep {
+	&.completed {
+		.stepIconWrapper {
+			background: color-mix(in srgb, #00c853 10%, transparent);
+
+			:global {
+				.Icon,
+				.icon {
+					color: #00c853 !important;
+				}
+			}
+		}
+
+		.connector {
+			background: #00c853;
+		}
+	}
+
+	&.loading {
+		.stepIconWrapper {
+			background: var(--color_info_bg);
+
+			:global {
+				.Icon,
+				.icon {
+					color: var(--color_primary) !important;
+				}
+			}
+		}
+
+		.connector {
+			background: var(--color_primary);
+			opacity: 0.3;
+		}
+	}
+
+	&.error {
+		.stepIconWrapper {
+			background: var(--color_danger_bg);
+
+			:global {
+				.Icon,
+				.icon {
+					color: var(--color_danger) !important;
+				}
+			}
+		}
+	}
+}
+
+.spinner {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.timelineFooter {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 20px 32px 24px;
+	border-top: 1px solid var(--color_border_light);
+}
+
+.editButton {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 24px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_text);
+	background: var(--color_bg_hover);
+	border: 1px solid var(--color_border);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	outline: none;
+
+	:global {
+		.Icon,
+		.icon {
+			color: var(--color_text) !important;
+		}
+	}
+
+	&:hover {
+		background: var(--color_bg_active);
+		border-color: var(--color_primary);
+		color: var(--color_primary);
+		transform: translateY(-1px);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+		:global {
+			.Icon,
+			.icon {
+				color: var(--color_primary) !important;
+			}
+		}
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+}
+
+.stopButton {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 24px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_bg_menu);
+	background: var(--color_danger);
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	outline: none;
+
+	:global {
+		.Icon,
+		.icon {
+			color: var(--color_bg_menu) !important;
+		}
+	}
+
+	&:hover {
+		background: color-mix(in srgb, var(--color_danger) 85%, black);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+}
+
+.retryButton {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 24px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_bg_menu);
+	background: var(--color_primary);
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	outline: none;
+
+	:global {
+		.Icon,
+		.icon {
+			color: var(--color_bg_menu) !important;
+		}
+	}
+
+	&:hover {
+		background: var(--color_main);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(51, 113, 252, 0.3);
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+}
+
+// Responsive
+@media (max-width: 768px) {
+	.timeline {
+		max-height: calc(100vh - 160px);
+	}
+
+	.timelineHeader {
+		padding: 20px 20px 16px;
+	}
+
+	.requirementSection {
+		padding: 12px 20px;
+	}
+
+	.requirementContent {
+		font-size: 13px;
+		max-height: 70px;
+	}
+
+	.timelineSteps {
+		padding: 20px 20px 24px;
+	}
+
+	.timelineTitle {
+		font-size: 16px;
+	}
+
+	.stepTitle {
+		font-size: 14px;
+	}
+
+	.stepDescription {
+		font-size: 12px;
+	}
+
+	.connector {
+		height: 32px;
+	}
+}
+
+@media (max-width: 480px) {
+	.timeline {
+		max-height: calc(100vh - 120px);
+	}
+
+	.timelineHeader {
+		padding: 16px 16px 12px;
+	}
+
+	.requirementSection {
+		padding: 12px 16px;
+	}
+
+	.requirementContent {
+		font-size: 12px;
+		max-height: 60px;
+	}
+
+	.timelineSteps {
+		padding: 16px 16px 20px;
+	}
+
+	.stepIconWrapper {
+		width: 28px;
+		height: 28px;
+
+		:global {
+			.icon {
+				font-size: 18px;
+			}
+		}
+	}
+
+	.stepContent {
+		padding-bottom: 32px;
+	}
+
+	.timelineFooter {
+		padding: 16px 16px 20px;
+		gap: 10px;
+	}
+
+	.stopButton,
+	.editButton,
+	.retryButton {
+		padding: 8px 20px;
+		font-size: 13px;
+	}
+}

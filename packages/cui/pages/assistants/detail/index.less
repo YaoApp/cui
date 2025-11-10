@@ -230,6 +230,26 @@
 	border-radius: 12px;
 	margin-top: 16px;
 
+	// 滚动条基础样式
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border_light);
+		border-radius: 3px;
+		transition: background 0.2s ease;
+
+		&:hover {
+			background: var(--color_dot);
+		}
+	}
+
 	:global {
 		.xgen-tabs-card.xgen-tabs-top {
 			> .xgen-tabs-nav .xgen-tabs-tab,
@@ -339,23 +359,24 @@
 	padding: 0 24px 24px;
 	overflow-y: auto;
 
+	// 滚动条基础样式
 	&::-webkit-scrollbar {
 		width: 6px;
 		height: 6px;
 	}
 
-	&::-webkit-scrollbar-thumb {
-		background: var(--color_border);
-		border-radius: 3px;
-
-		&:hover {
-			background: var(--color_text_grey);
-		}
+	&::-webkit-scrollbar-track {
+		background: transparent;
 	}
 
-	&::-webkit-scrollbar-track {
-		background: var(--color_border_soft);
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border_light);
 		border-radius: 3px;
+		transition: background 0.2s ease;
+
+		&:hover {
+			background: var(--color_dot);
+		}
 	}
 
 	:global {
@@ -842,23 +863,24 @@
 	flex: 1;
 	overflow-y: auto;
 
+	// 滚动条基础样式
 	&::-webkit-scrollbar {
 		width: 6px;
 		height: 6px;
 	}
 
-	&::-webkit-scrollbar-thumb {
-		background: var(--color_border);
-		border-radius: 3px;
-
-		&:hover {
-			background: var(--color_text_grey);
-		}
+	&::-webkit-scrollbar-track {
+		background: transparent;
 	}
 
-	&::-webkit-scrollbar-track {
-		background: var(--color_border_soft);
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border_light);
 		border-radius: 3px;
+		transition: background 0.2s ease;
+
+		&:hover {
+			background: var(--color_dot);
+		}
 	}
 }
 
