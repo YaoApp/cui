@@ -71,16 +71,28 @@ const ProgressTimeline = ({
 	return (
 		<div className={styles.timeline}>
 			<div className={`${styles.timelineHeader} ${hasError ? styles.hasError : ''}`}>
-				<Icon name='material-psychology' size={24} className={styles.headerIcon} />
-				<h3 className={styles.timelineTitle}>
-					{hasError
-						? is_cn
-							? '创建失败'
-							: 'Creation Failed'
-						: is_cn
-						? 'AI 正在创建智能体...'
-						: 'AI is creating assistant...'}
-				</h3>
+				<div className={styles.headerLeft}>
+					<Icon name='material-psychology' size={24} className={styles.headerIcon} />
+					<h3 className={styles.timelineTitle}>
+						{hasError
+							? is_cn
+								? '创建失败'
+								: 'Creation Failed'
+							: is_cn
+							? 'AI 正在创建智能体...'
+							: 'AI is creating assistant...'}
+					</h3>
+				</div>
+				{isGenerating && onStop && (
+					<Button
+						type='danger'
+						size='medium'
+						onClick={onStop}
+						icon={<Icon name='material-stop' size={16} />}
+					>
+						{is_cn ? '停止' : 'Stop'}
+					</Button>
+				)}
 			</div>
 
 			{requirement && (
@@ -124,20 +136,6 @@ const ProgressTimeline = ({
 					)
 				})}
 			</div>
-
-			{/* Show stop button when generating */}
-			{isGenerating && onStop && (
-				<div className={styles.timelineFooter}>
-					<Button
-						type='danger'
-						size='medium'
-						onClick={onStop}
-						icon={<Icon name='material-stop' size={18} />}
-					>
-						{is_cn ? '停止' : 'Stop'}
-					</Button>
-				</div>
-			)}
 
 			{/* Show retry and edit buttons when error */}
 			{hasError && (onRetry || onEditPrompt) && (
