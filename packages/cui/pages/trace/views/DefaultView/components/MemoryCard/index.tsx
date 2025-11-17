@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { memo, useState, useEffect, useRef } from 'react'
 import { Modal } from 'antd'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
@@ -16,6 +16,7 @@ interface MemoryCardData {
 interface MemoryCardProps {
 	data: MemoryCardData
 	onClick?: () => void
+	isUpdating?: boolean // 标记是否正在更新
 }
 
 const getTypeIcon = (type: MemoryType): string => {
@@ -51,10 +52,22 @@ const getTypeColor = (type: MemoryType): string => {
 	return colorMap[type] || '#757575'
 }
 
-const MemoryCard: React.FC<MemoryCardProps> = ({ data, onClick }) => {
+const MemoryCard: React.FC<MemoryCardProps> = ({ data, onClick, isUpdating = false }) => {
 	const is_cn = true // 暂时硬编码，稍后从父组件传入
 	const [isHovered, setIsHovered] = useState(false)
 	const [isModalOpen, setIsModalOpen] = useState(false)
+	const [countChanged, setCountChanged] = useState(false)
+	const prevCountRef = useRef(data.count)
+
+	// 检测 count 变化，触发动画
+	useEffect(() => {
+		if (prevCountRef.current !== undefined && data.count !== prevCountRef.current) {
+			setCountChanged(true)
+			const timer = setTimeout(() => setCountChanged(false), 400)
+			return () => clearTimeout(timer)
+		}
+		prevCountRef.current = data.count
+	}, [data.count])
 
 	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
@@ -71,7 +84,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ data, onClick }) => {
 	return (
 		<>
 			<div 
-				className={styles.memoryCardWrapper}
+				className={`${styles.memoryCardWrapper} ${isUpdating ? styles.updating : ''}`}
 				onMouseEnter={() => setIsHovered(true)}
 				onMouseLeave={() => setIsHovered(false)}
 			>
@@ -79,7 +92,9 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ data, onClick }) => {
 					<Icon name={getTypeIcon(data.type)} size={14} style={{ color: getTypeColor(data.type) }} />
 					<span className={styles.typeLabel}>{getTypeLabel(data.type, is_cn)}</span>
 					{data.count !== undefined && data.count > 0 && (
-						<span className={styles.count}>{data.count}</span>
+						<span className={`${styles.count} ${countChanged ? styles.changed : ''}`}>
+							{data.count}
+						</span>
 					)}
 				</div>
 

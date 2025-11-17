@@ -87,6 +87,7 @@ const FlowContent: React.FC<{
 	const [memoryData, setMemoryData] = useState<MockMemory[]>([])
 	const [layoutedNodes, setLayoutedNodes] = useState<Node[]>([])
 	const [layoutedEdges, setLayoutedEdges] = useState<Edge[]>([])
+	const [updatingMemoryIds, setUpdatingMemoryIds] = useState<Set<string>>(new Set())
 
 	const onNodesChange = useCallback(() => {}, [])
 	const onEdgesChange = useCallback(() => {}, [])
@@ -119,8 +120,10 @@ const FlowContent: React.FC<{
 					setRawNodes((prev) => {
 						const existing = prev.find((n) => n.id === event.data.node!.id)
 						if (existing) {
-							// 更新现有节点
-							return prev.map((n) => (n.id === event.data.node!.id ? newNode : n))
+							// 更新现有节点（保留 position）
+							return prev.map((n) =>
+								n.id === event.data.node!.id ? { ...newNode, position: n.position } : n
+							)
 						} else {
 							// 添加新节点
 							return [...prev, newNode]
@@ -142,7 +145,8 @@ const FlowContent: React.FC<{
 						newNodes.forEach((newNode) => {
 							const index = updated.findIndex((n) => n.id === newNode.id)
 							if (index >= 0) {
-								updated[index] = newNode
+								// 保留 position
+								updated[index] = { ...newNode, position: updated[index].position }
 							} else {
 								updated.push(newNode)
 							}
@@ -263,8 +267,12 @@ const FlowContent: React.FC<{
 			case 'memory_update':
 				// 更新 Memory（支持单个和批量）
 				if (event.data.memory) {
+					const memId = event.data.memory.id
+					// 标记为正在更新
+					setUpdatingMemoryIds((prev) => new Set(prev).add(memId))
+					
 					setMemoryData((prev) => {
-						const index = prev.findIndex((m) => m.id === event.data.memory!.id)
+						const index = prev.findIndex((m) => m.id === memId)
 						if (index >= 0) {
 							// 更新现有 Memory
 							const updated = [...prev]
@@ -275,9 +283,26 @@ const FlowContent: React.FC<{
 							return [...prev, event.data.memory!]
 						}
 					})
+					
+					// 500ms 后移除更新标记
+					setTimeout(() => {
+						setUpdatingMemoryIds((prev) => {
+							const next = new Set(prev)
+							next.delete(memId)
+							return next
+						})
+					}, 500)
 				}
 				
 				if (event.data.memories && event.data.memories.length > 0) {
+					const memIds = event.data.memories.map((m) => m.id)
+					// 标记为正在更新
+					setUpdatingMemoryIds((prev) => {
+						const next = new Set(prev)
+						memIds.forEach((id) => next.add(id))
+						return next
+					})
+					
 					setMemoryData((prev) => {
 						const updated = [...prev]
 						event.data.memories!.forEach((newMemory) => {
@@ -290,6 +315,15 @@ const FlowContent: React.FC<{
 						})
 						return updated
 					})
+					
+					// 500ms 后移除更新标记
+					setTimeout(() => {
+						setUpdatingMemoryIds((prev) => {
+							const next = new Set(prev)
+							memIds.forEach((id) => next.delete(id))
+							return next
+						})
+					}, 500)
 				}
 				break
 
@@ -383,6 +417,7 @@ const FlowContent: React.FC<{
 							// 最多保留 3 条 items 用于悬停卡片显示
 							items: memory.items.slice(0, 3)
 						}}
+						isUpdating={updatingMemoryIds.has(memory.id)}
 						onClick={() => console.log('Memory clicked:', memory.id)}
 					/>
 				))}
