@@ -370,8 +370,8 @@ const FlowContent: React.FC<{
 					{ minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
 				)
 
-				// 为顶部预留空间给 Memory Cards（4个卡片大约需要 60-70px）
-				const topOffset = 150 // 增加顶部偏移，让 Start 节点在上方
+				// 为顶部预留空间给 Memory Cards
+				const topOffset = 70 // Memory Cards 预留空间
 				const viewport = containerRef.current
 				if (!viewport) return
 
