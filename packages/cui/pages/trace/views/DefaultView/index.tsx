@@ -11,6 +11,7 @@ import ReactFlow, {
 	useReactFlow,
 	MarkerType
 } from 'reactflow'
+import { getLocale } from '@umijs/max'
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
 import TraceNode from './components/TraceNode'
@@ -250,6 +251,8 @@ const FlowContent: React.FC<{
 	const reactFlowInstance = useReactFlow()
 	const onNodesChange = useCallback(() => {}, [])
 	const onEdgesChange = useCallback(() => {}, [])
+	const locale = getLocale()
+	const is_cn = locale === 'zh-CN'
 
 	// 使用 dagre 自动布局计算节点位置
 	const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => getLayoutedElements(rawNodes, rawEdges), [])
@@ -327,12 +330,20 @@ const FlowContent: React.FC<{
 				maxZoom={1.5}
 			>
 				<Background variant={BackgroundVariant.Dots} gap={28} size={1} />
-				<Controls />
+				<Controls position='bottom-right' showZoom={true} showFitView={false} showInteractive={false} />
 				<Panel position='top-right'>
 					<div className={styles.toolbar}>
-						<button className={styles.modeBtn} onClick={onSwitchMode}>
-							Developer Mode
-						</button>
+						<div className={styles.modeSwitch}>
+							<button
+								className={`${styles.modeBtn} ${styles.active}`}
+								onClick={onSwitchMode}
+							>
+								{is_cn ? '默认' : 'Default'}
+							</button>
+							<button className={styles.modeBtn} onClick={onSwitchMode}>
+								{is_cn ? '开发者' : 'Developer'}
+							</button>
+						</div>
 					</div>
 				</Panel>
 			</ReactFlow>

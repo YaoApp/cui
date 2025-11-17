@@ -18,12 +18,26 @@
 			// ReactFlow 自带的背景已经处理
 		}
 
-		// 控制面板样式
-		.react-flow__controls {
+		// 控制面板样式 - 使用更高的优先级
+		.react-flow__controls.react-flow__controls {
+			position: fixed !important;
+			bottom: 20px !important;
+			right: 20px !important;
+			top: unset !important;
+			left: unset !important;
+			z-index: 999;
+			transform: none !important;
+
 			button {
 				background: var(--color_bg_menu);
 				border: 1px solid var(--color_border);
 				color: var(--color_text);
+				width: 24px;
+				height: 24px;
+				padding: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
 
 				&:hover {
 					background: var(--color_bg_hover);
@@ -31,6 +45,8 @@
 
 				svg {
 					fill: var(--color_text);
+					width: 8px;
+					height: 8px;
 				}
 			}
 		}
@@ -91,35 +107,52 @@
 }
 
 .toolbar {
-	padding: 12px;
-	background: var(--color_bg_menu);
+	padding: 2px;
+	background: var(--color_bg);
 	border: 1px solid var(--color_border);
-	border-radius: var(--radius);
+	border-radius: 5px;
 	box-shadow: var(--shadow);
 }
 
-.modeBtn {
+.modeSwitch {
 	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 8px 16px;
-	background: var(--color_main);
-	color: white;
+	gap: 0;
+	background: var(--color_bg);
+	border-radius: 3px;
+	padding: 2px;
+	position: relative;
+}
+
+.modeBtn {
+	flex: 1;
+	padding: 3px 10px;
+	background: transparent;
+	color: var(--color_text_grey);
 	border: none;
-	border-radius: var(--radius);
-	font-size: 14px;
+	border-radius: 3px;
+	font-size: 11px;
 	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.2s ease;
+	white-space: nowrap;
+	position: relative;
+	z-index: 1;
 
 	&:hover {
-		background: var(--color_main_hover);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(51, 113, 252, 0.3);
+		color: var(--color_text);
 	}
 
-	&:active {
-		transform: translateY(0);
+	&.active {
+		background: var(--color_bg_menu);
+		color: var(--color_text);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+		font-weight: 600;
+	}
+
+	// Dark mode
+	[data-theme='dark'] &.active {
+		background: var(--color_bg_light);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 	}
 }
 

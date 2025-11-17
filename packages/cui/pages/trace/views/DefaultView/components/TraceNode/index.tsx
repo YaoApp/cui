@@ -1,5 +1,6 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { Handle, Position, NodeProps } from 'reactflow'
+import { Modal } from 'antd'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
 
@@ -13,6 +14,14 @@ interface TraceNodeData {
 }
 
 const TraceNode = ({ data }: NodeProps<TraceNodeData>) => {
+	const [isModalOpen, setIsModalOpen] = useState(false)
+
+	// 打开模态窗
+	const handleNodeClick = (e: React.MouseEvent) => {
+		e.stopPropagation()
+		setIsModalOpen(true)
+	}
+
 	// 获取节点类型图标
 	const getTypeIcon = (type: string): string => {
 		const iconMap: Record<string, string> = {
@@ -46,8 +55,9 @@ const TraceNode = ({ data }: NodeProps<TraceNodeData>) => {
 	}
 
 	return (
-		<div className={`${styles.traceNode} ${styles[data.status]}`}>
-			<Handle type="target" position={Position.Top} className={styles.handle} />
+		<>
+			<div className={`${styles.traceNode} ${styles[data.status]}`} onClick={handleNodeClick}>
+				<Handle type="target" position={Position.Top} className={styles.handle} />
 			
 			{/* 节点头部 - 类型 */}
 			<div className={styles.nodeHeader}>
@@ -84,8 +94,25 @@ const TraceNode = ({ data }: NodeProps<TraceNodeData>) => {
 				)}
 			</div>
 
-			<Handle type="source" position={Position.Bottom} className={styles.handle} />
-		</div>
+				<Handle type="source" position={Position.Bottom} className={styles.handle} />
+			</div>
+
+			{/* 节点详情模态窗 */}
+			<Modal
+				title={`${data.label} - ${data.type}`}
+				open={isModalOpen}
+				onCancel={() => setIsModalOpen(false)}
+				footer={null}
+				width={600}
+			>
+				<div>
+					<p><strong>Status:</strong> {data.status}</p>
+					<p><strong>Description:</strong> {data.description || '-'}</p>
+					<p><strong>Duration:</strong> {formatDuration(data.duration)}</p>
+					{data.error && <p style={{ color: 'red' }}><strong>Error:</strong> {data.error}</p>}
+				</div>
+			</Modal>
+		</>
 	)
 }
 
