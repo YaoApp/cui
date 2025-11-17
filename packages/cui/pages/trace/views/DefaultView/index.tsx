@@ -382,11 +382,8 @@ const FlowContent: React.FC<{
 				const contentWidth = bounds.maxX - bounds.minX
 				const contentHeight = bounds.maxY - bounds.minY
 
-				// 计算缩放比例（考虑顶部偏移）
-				const availableHeight = height - topOffset
-				const scaleX = width / (contentWidth + 200) // 左右留 padding
-				const scaleY = availableHeight / (contentHeight + 100) // 上下留 padding
-				const scale = Math.min(scaleX, scaleY, ZOOM_LEVEL)
+				// 固定缩放比例，不自动调整
+				const scale = ZOOM_LEVEL
 
 				// 计算居中位置（水平居中，垂直靠上）
 				const x = (width - contentWidth * scale) / 2 - bounds.minX * scale
