@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useMemo } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactFlow, {
 	Background,
 	Controls,
@@ -16,6 +16,7 @@ import dagre from 'dagre'
 import 'reactflow/dist/style.css'
 import TraceNode from './components/TraceNode'
 import MemoryCard from './components/MemoryCard'
+import { MockSSEConnection, SSEEvent, MockMemory } from '../../utils/sse'
 import styles from './index.less'
 
 interface DefaultViewProps {
@@ -34,6 +35,8 @@ const nodeTypes: NodeTypes = {
 
 // 使用 dagre 自动布局
 const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
+	if (nodes.length === 0) return { nodes: [], edges: [] }
+
 	const dagreGraph = new dagre.graphlib.Graph()
 	;(dagreGraph as any).setDefaultEdgeLabel(() => ({}))
 	dagreGraph.setGraph({
@@ -67,231 +70,6 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
 	return { nodes: layoutedNodes, edges }
 }
 
-// 原始节点数据（不含位置，由 dagre 自动计算）
-const rawNodes: Node[] = [
-	{
-		id: 'start',
-		type: 'traceNode',
-		position: { x: 0, y: 0 },
-		data: {
-			label: 'Start',
-			description: '开始执行',
-			type: 'start',
-			status: 'success',
-			duration: 10
-		}
-	},
-	{
-		id: 'search-1',
-		type: 'traceNode',
-		position: { x: 0, y: 180 },
-		data: {
-			label: 'Search Data',
-			description: '检索相关数据',
-			type: 'search',
-			status: 'success',
-			duration: 1200
-		}
-	},
-	{
-		id: 'query-1',
-		type: 'traceNode',
-		position: { x: -190, y: 360 },
-		data: {
-			label: 'Query Database',
-			description: '查询产品信息',
-			type: 'query',
-			status: 'success',
-			duration: 850
-		}
-	},
-	{
-		id: 'query-2',
-		type: 'traceNode',
-		position: { x: 190, y: 360 },
-		data: {
-			label: 'Query Specs',
-			description: '查询规格参数',
-			type: 'query',
-			status: 'running',
-			duration: undefined
-		}
-	},
-	{
-		id: 'query-3',
-		type: 'traceNode',
-		position: { x: 380, y: 360 },
-		data: {
-			label: 'Query Cache',
-			description: '查询缓存失败',
-			type: 'query',
-			status: 'error',
-			duration: 150,
-			error: 'Connection timeout'
-		}
-	},
-	{
-		id: 'llm-1',
-		type: 'traceNode',
-		position: { x: 0, y: 540 },
-		data: {
-			label: 'LLM Processing',
-			description: '大模型推理分析',
-			type: 'llm',
-			status: 'pending',
-			duration: undefined
-		}
-	},
-	{
-		id: 'format-1',
-		type: 'traceNode',
-		position: { x: 0, y: 720 },
-		data: {
-			label: 'Format Result',
-			description: '整理输出格式',
-			type: 'format',
-			status: 'pending',
-			duration: undefined
-		}
-	},
-	{
-		id: 'complete',
-		type: 'traceNode',
-		position: { x: 0, y: 900 },
-		data: {
-			label: 'Complete',
-			description: '执行完成',
-			type: 'complete',
-			status: 'pending',
-			duration: undefined
-		}
-	}
-]
-
-const rawEdges: Edge[] = [
-	{
-		id: 'e-start-search',
-		source: 'start',
-		target: 'search-1',
-		type: 'default',
-		animated: false,
-		style: { stroke: 'var(--color_success)', strokeWidth: 2 },
-		markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color_success)', width: 8, height: 8 }
-	},
-	{
-		id: 'e-search-query1',
-		source: 'search-1',
-		target: 'query-1',
-		type: 'default',
-		animated: false,
-		style: { stroke: 'var(--color_success)', strokeWidth: 2 },
-		markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color_success)', width: 8, height: 8 }
-	},
-	{
-		id: 'e-search-query2',
-		source: 'search-1',
-		target: 'query-2',
-		type: 'default',
-		animated: true,
-		style: { stroke: 'var(--color_main)', strokeWidth: 2 },
-		markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color_main)', width: 8, height: 8 }
-	},
-	{
-		id: 'e-search-query3',
-		source: 'search-1',
-		target: 'query-3',
-		type: 'default',
-		animated: false,
-		style: { stroke: 'var(--color_danger)', strokeWidth: 2 },
-		markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color_danger)', width: 8, height: 8 }
-	},
-	{
-		id: 'e-query1-llm',
-		source: 'query-1',
-		target: 'llm-1',
-		type: 'default',
-		animated: false,
-		style: { stroke: 'var(--color_border)', strokeWidth: 2 },
-		markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color_border)', width: 8, height: 8 }
-	},
-	{
-		id: 'e-query2-llm',
-		source: 'query-2',
-		target: 'llm-1',
-		type: 'default',
-		animated: false,
-		style: { stroke: 'var(--color_border)', strokeWidth: 2 },
-		markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color_border)', width: 8, height: 8 }
-	},
-	{
-		id: 'e-llm-format',
-		source: 'llm-1',
-		target: 'format-1',
-		type: 'default',
-		animated: false,
-		style: { stroke: 'var(--color_border)', strokeWidth: 2 },
-		markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color_border)', width: 8, height: 8 }
-	},
-	{
-		id: 'e-format-complete',
-		source: 'format-1',
-		target: 'complete',
-		type: 'default',
-		animated: false,
-		style: { stroke: 'var(--color_border)', strokeWidth: 2 },
-		markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color_border)', width: 8, height: 8 }
-	}
-]
-
-// Mock Memory 数据 - 模拟产品详情页开发场景
-const mockMemoryData = [
-	{
-		id: 'mem-1',
-		type: 'context' as const,
-		title: '当前任务上下文',
-		content: '正在开发电商平台的产品详情页面，需要实现规格参数展示、SKU 选择器、价格计算、库存查询、购物车联动等核心功能模块',
-		count: 3,
-		items: [
-			'正在开发电商平台的产品详情页面，需要实现规格参数展示、SKU 选择器、价格计算等核心功能',
-			'用户需求包括：支持多规格组合选择（颜色/尺寸/版本），实时库存状态展示，动态价格计算',
-			'技术栈使用 React + TypeScript + Ant Design，需要考虑移动端适配和性能优化'
-		]
-	},
-	{
-		id: 'mem-2',
-		type: 'intent' as const,
-		title: '开发意图分析',
-		content: '实现用户可交互的 SKU 选择组件，支持多规格组合（颜色、尺寸、版本），动态计算价格和库存状态，优化移动端触控体验',
-		count: 1,
-		items: ['核心目标：构建高性能、用户体验良好的 SKU 选择交互组件，支持复杂规格组合场景']
-	},
-	{
-		id: 'mem-3',
-		type: 'knowledge' as const,
-		title: '相关技术文档',
-		content: 'React Hooks 最佳实践、SKU 算法实现方案、Ant Design 表单组件文档、商品数据结构设计规范、库存服务 API 接口文档',
-		count: 5,
-		items: [
-			'React Hooks 最佳实践：使用 useMemo 优化 SKU 计算性能，useCallback 避免不必要的重渲染',
-			'SKU 算法实现方案：基于笛卡尔积生成所有规格组合，使用哈希表快速查找库存状态',
-			'Ant Design 表单组件文档：Radio.Group 用于单选规格，Checkbox.Group 用于多选场景',
-			'商品数据结构设计规范：包含 spuId、skuList、priceRange、stockStatus 等核心字段',
-			'库存服务 API 接口文档：GET /api/stock/check 实时查询库存，支持批量查询和缓存策略'
-		]
-	},
-	{
-		id: 'mem-4',
-		type: 'history' as const,
-		title: '历史开发记录',
-		content: '上周完成了商品列表页的筛选功能和分页加载，本周聚焦详情页开发，团队反馈需要优化图片懒加载和首屏渲染性能',
-		count: 2,
-		items: [
-			'上周完成：商品列表页筛选功能（价格区间、品牌、分类），虚拟滚动实现长列表优化',
-			'本周计划：产品详情页 SKU 选择器开发，图片懒加载优化，首屏 LCP 性能提升至 2 秒内'
-		]
-	}
-]
-
 // 内部组件用于访问 ReactFlow 实例
 const FlowContent: React.FC<{
 	traceId: string
@@ -299,18 +77,243 @@ const FlowContent: React.FC<{
 }> = ({ traceId, onSwitchMode }) => {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const reactFlowInstance = useReactFlow()
-	const onNodesChange = useCallback(() => {}, [])
-	const onEdgesChange = useCallback(() => {}, [])
+	const sseConnectionRef = useRef<MockSSEConnection | null>(null)
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
-	// 使用 dagre 自动布局计算节点位置
-	const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => getLayoutedElements(rawNodes, rawEdges), [])
+	// 动态状态：节点、边、记忆数据
+	const [rawNodes, setRawNodes] = useState<Node[]>([])
+	const [rawEdges, setRawEdges] = useState<Edge[]>([])
+	const [memoryData, setMemoryData] = useState<MockMemory[]>([])
+	const [layoutedNodes, setLayoutedNodes] = useState<Node[]>([])
+	const [layoutedEdges, setLayoutedEdges] = useState<Edge[]>([])
+
+	const onNodesChange = useCallback(() => {}, [])
+	const onEdgesChange = useCallback(() => {}, [])
+
+	// 当 rawNodes 或 rawEdges 变化时，重新计算布局
+	useEffect(() => {
+		if (rawNodes.length > 0) {
+			const { nodes, edges } = getLayoutedElements(rawNodes, rawEdges)
+			setLayoutedNodes(nodes)
+			setLayoutedEdges(edges)
+		}
+	}, [rawNodes, rawEdges])
+
+	// SSE 事件处理
+	const handleSSEEvent = useCallback((event: SSEEvent) => {
+		console.log('📡 SSE Event:', event.type, event.data)
+
+		switch (event.type) {
+			case 'node_start':
+			case 'node_complete':
+				// 处理单个节点
+				if (event.data.node) {
+					const newNode: Node = {
+						id: event.data.node.id,
+						type: 'traceNode',
+						position: { x: 0, y: 0 }, // dagre 会重新计算
+						data: event.data.node.data
+					}
+
+					setRawNodes((prev) => {
+						const existing = prev.find((n) => n.id === event.data.node!.id)
+						if (existing) {
+							// 更新现有节点
+							return prev.map((n) => (n.id === event.data.node!.id ? newNode : n))
+						} else {
+							// 添加新节点
+							return [...prev, newNode]
+						}
+					})
+				}
+
+				// 处理批量节点（并发场景）
+				if (event.data.nodes && event.data.nodes.length > 0) {
+					const newNodes: Node[] = event.data.nodes.map((nodeData) => ({
+						id: nodeData.id,
+						type: 'traceNode',
+						position: { x: 0, y: 0 },
+						data: nodeData.data
+					}))
+
+					setRawNodes((prev) => {
+						const updated = [...prev]
+						newNodes.forEach((newNode) => {
+							const index = updated.findIndex((n) => n.id === newNode.id)
+							if (index >= 0) {
+								updated[index] = newNode
+							} else {
+								updated.push(newNode)
+							}
+						})
+						return updated
+					})
+				}
+
+				// 处理单个边
+				if (event.data.edge) {
+					const newEdge: Edge = {
+						...event.data.edge,
+						type: 'default',
+						markerEnd: {
+							...event.data.edge.markerEnd,
+							type: MarkerType.ArrowClosed
+						}
+					}
+
+					setRawEdges((prev) => {
+						const existing = prev.find((e) => e.id === newEdge.id)
+						if (existing) {
+							// 更新现有边
+							return prev.map((e) => (e.id === newEdge.id ? newEdge : e))
+						} else {
+							// 添加新边
+							return [...prev, newEdge]
+						}
+					})
+				}
+
+				// 处理批量边（并发场景）
+				if (event.data.edges && event.data.edges.length > 0) {
+					const newEdges: Edge[] = event.data.edges.map((edgeData) => ({
+						...edgeData,
+						type: 'default',
+						markerEnd: {
+							...edgeData.markerEnd,
+							type: MarkerType.ArrowClosed
+						}
+					}))
+
+					setRawEdges((prev) => {
+						const updated = [...prev]
+						newEdges.forEach((newEdge) => {
+							const index = updated.findIndex((e) => e.id === newEdge.id)
+							if (index >= 0) {
+								updated[index] = newEdge
+							} else {
+								updated.push(newEdge)
+							}
+						})
+						return updated
+					})
+				}
+				break
+
+			case 'node_update':
+				// 处理单个边更新
+				if (event.data.edge) {
+					const updatedEdge: Edge = {
+						...event.data.edge,
+						type: 'default',
+						markerEnd: {
+							...event.data.edge.markerEnd,
+							type: MarkerType.ArrowClosed
+						}
+					}
+
+					setRawEdges((prev) => {
+						const existing = prev.find((e) => e.id === updatedEdge.id)
+						if (existing) {
+							return prev.map((e) => (e.id === updatedEdge.id ? updatedEdge : e))
+						} else {
+							return [...prev, updatedEdge]
+						}
+					})
+				}
+
+				// 处理批量边更新
+				if (event.data.edges && event.data.edges.length > 0) {
+					const updatedEdges: Edge[] = event.data.edges.map((edgeData) => ({
+						...edgeData,
+						type: 'default',
+						markerEnd: {
+							...edgeData.markerEnd,
+							type: MarkerType.ArrowClosed
+						}
+					}))
+
+					setRawEdges((prev) => {
+						const updated = [...prev]
+						updatedEdges.forEach((updatedEdge) => {
+							const index = updated.findIndex((e) => e.id === updatedEdge.id)
+							if (index >= 0) {
+								updated[index] = updatedEdge
+							} else {
+								updated.push(updatedEdge)
+							}
+						})
+						return updated
+					})
+				}
+				break
+
+			case 'memory_add':
+				// 处理单个 Memory
+				if (event.data.memory) {
+					setMemoryData((prev) => [...prev, event.data.memory!])
+				}
+				
+				// 处理批量 Memory（并发场景）
+				if (event.data.memories && event.data.memories.length > 0) {
+					setMemoryData((prev) => [...prev, ...event.data.memories!])
+				}
+				break
+
+			case 'memory_update':
+				// 更新 Memory（支持单个和批量）
+				if (event.data.memory) {
+					setMemoryData((prev) => {
+						const index = prev.findIndex((m) => m.id === event.data.memory!.id)
+						if (index >= 0) {
+							// 更新现有 Memory
+							const updated = [...prev]
+							updated[index] = event.data.memory!
+							return updated
+						} else {
+							// 如果不存在，则添加（兜底逻辑）
+							return [...prev, event.data.memory!]
+						}
+					})
+				}
+				
+				if (event.data.memories && event.data.memories.length > 0) {
+					setMemoryData((prev) => {
+						const updated = [...prev]
+						event.data.memories!.forEach((newMemory) => {
+							const index = updated.findIndex((m) => m.id === newMemory.id)
+							if (index >= 0) {
+								updated[index] = newMemory
+							} else {
+								updated.push(newMemory)
+							}
+						})
+						return updated
+					})
+				}
+				break
+
+			case 'complete':
+				console.log('✅ SSE Complete')
+				break
+		}
+	}, [])
+
+	// 初始化 SSE 连接
+	useEffect(() => {
+		const connection = new MockSSEConnection()
+		sseConnectionRef.current = connection
+		connection.connect(handleSSEEvent)
+
+		return () => {
+			connection.disconnect()
+		}
+	}, [handleSSEEvent])
 
 	// 监听容器尺寸变化，重新调整视图
 	useEffect(() => {
 		const resizeObserver = new ResizeObserver(() => {
-			// 延迟执行 fitView，确保 DOM 已更新
+			// 延迟执行，确保 DOM 已更新
 			setTimeout(() => {
 				const nodes = reactFlowInstance.getNodes()
 				if (nodes.length === 0) return
@@ -334,7 +337,7 @@ const FlowContent: React.FC<{
 				)
 
 				// 为顶部预留空间给 Memory Cards（4个卡片大约需要 60-70px）
-				const topOffset = 70
+				const topOffset = 150 // 增加顶部偏移，让 Start 节点在上方
 				const viewport = containerRef.current
 				if (!viewport) return
 
@@ -351,9 +354,9 @@ const FlowContent: React.FC<{
 				const scaleY = availableHeight / (contentHeight + 100) // 上下留 padding
 				const scale = Math.min(scaleX, scaleY, ZOOM_LEVEL)
 
-				// 计算居中位置
+				// 计算居中位置（水平居中，垂直靠上）
 				const x = (width - contentWidth * scale) / 2 - bounds.minX * scale
-				const y = topOffset + (availableHeight - contentHeight * scale) / 2 - bounds.minY * scale
+				const y = topOffset - bounds.minY * scale + 20 // 垂直靠上，距离 Memory Cards 20px
 
 				reactFlowInstance.setViewport({ x, y, zoom: scale })
 			}, 10)
@@ -366,16 +369,20 @@ const FlowContent: React.FC<{
 		return () => {
 			resizeObserver.disconnect()
 		}
-	}, [reactFlowInstance])
+	}, [reactFlowInstance, layoutedNodes])
 
 	return (
 		<div ref={containerRef} className={styles.container}>
 			{/* Memory Cards 区域 */}
 			<div className={styles.memorySection}>
-				{mockMemoryData.map((memory) => (
+				{memoryData.map((memory) => (
 					<MemoryCard
 						key={memory.id}
-						data={memory}
+						data={{
+							...memory,
+							// 最多保留 3 条 items 用于悬停卡片显示
+							items: memory.items.slice(0, 3)
+						}}
 						onClick={() => console.log('Memory clicked:', memory.id)}
 					/>
 				))}

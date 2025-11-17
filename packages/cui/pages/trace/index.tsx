@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from '@umijs/max'
-import DefaultView from './views/DefaultView'
+import DefaultView from './views/DefaultView/index'
 import DeveloperView from './views/DeveloperView'
 import { ViewMode } from './types'
 import styles from './index.less'
@@ -12,7 +12,7 @@ const Trace = () => {
 	const [viewMode, setViewMode] = useState<ViewMode>('default')
 
 	const handleSwitchMode = () => {
-		setViewMode(prev => (prev === 'default' ? 'developer' : 'default'))
+		setViewMode((prev) => (prev === 'default' ? 'developer' : 'default'))
 	}
 
 	// 给父级 content_wrapper 添加特殊类名，去掉 padding
@@ -42,4 +42,3 @@ const Trace = () => {
 }
 
 export default Trace
-
