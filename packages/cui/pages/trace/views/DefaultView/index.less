@@ -1,0 +1,673 @@
+.container {
+	position: relative;
+	width: 100%;
+	height: 100vh;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+
+	// ReactFlow 容器样式覆盖
+	:global {
+		.react-flow {
+			width: 100%;
+			height: 100%;
+			background: var(--color_bg);
+		}
+
+		.react-flow__background {
+			// ReactFlow 自带的背景已经处理
+		}
+
+		// 控制面板样式
+		.react-flow__controls {
+			button {
+				background: var(--color_bg_menu);
+				border: 1px solid var(--color_border);
+				color: var(--color_text);
+
+				&:hover {
+					background: var(--color_bg_hover);
+				}
+
+				svg {
+					fill: var(--color_text);
+				}
+			}
+		}
+
+		// 边的样式
+		.react-flow__edge {
+			&-path {
+				stroke: var(--color_border);
+				stroke-width: 2.5px;
+				stroke-linecap: round;
+				transition: stroke 0.3s ease;
+			}
+
+			// 选中状态
+			&.selected .react-flow__edge-path {
+				stroke: var(--color_main);
+				stroke-width: 3px;
+			}
+
+			// 动画状态（正在执行的连接）
+			&.animated .react-flow__edge-path {
+				stroke: var(--color_main);
+				stroke-width: 2.5px;
+				stroke-dasharray: 5;
+				animation: dashdraw 0.5s linear infinite;
+			}
+
+			// Hover 状态
+			&:hover .react-flow__edge-path {
+				stroke: var(--color_text);
+			}
+		}
+
+		// 连接线动画
+		@keyframes dashdraw {
+			from {
+				stroke-dashoffset: 10;
+			}
+			to {
+				stroke-dashoffset: 0;
+			}
+		}
+
+		// 箭头标记样式
+		.react-flow__edge-marker {
+			fill: var(--color_border);
+			transition: fill 0.3s ease;
+		}
+
+		.react-flow__edge.selected .react-flow__edge-marker {
+			fill: var(--color_main);
+		}
+
+		.react-flow__edge.animated .react-flow__edge-marker {
+			fill: var(--color_main);
+		}
+	}
+}
+
+.toolbar {
+	padding: 12px;
+	background: var(--color_bg_menu);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+}
+
+.modeBtn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	background: var(--color_main);
+	color: white;
+	border: none;
+	border-radius: var(--radius);
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: var(--color_main_hover);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(51, 113, 252, 0.3);
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 24px;
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+
+		.title {
+			margin: 0;
+			font-size: 20px;
+			font-weight: 600;
+			color: var(--color_page_title);
+		}
+
+		.traceId {
+			font-size: 12px;
+			color: var(--color_text_grey);
+			font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+		}
+	}
+
+	.actions {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+
+		.modeToggle {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 16px;
+			border-radius: var(--radius);
+			background: var(--color_bg_menu);
+			border: 1px solid var(--color_border);
+			cursor: pointer;
+			transition: all 0.2s;
+			font-size: 14px;
+			color: var(--color_text);
+
+			&:hover {
+				background: var(--color_bg_hover);
+				border-color: var(--color_main);
+				color: var(--color_main);
+			}
+		}
+	}
+}
+
+.content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	min-height: 0;
+	overflow: hidden;
+}
+
+// Memory Panel (上部)
+.memoryPanel {
+	flex-shrink: 0;
+	background: var(--color_bg_menu);
+	border-radius: var(--radius);
+	border: 1px solid var(--color_border);
+	overflow: hidden;
+
+	.memoryHeader {
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--color_border);
+		background: var(--color_bg_nav);
+
+		.memoryTitle {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			font-weight: 500;
+			color: var(--color_text);
+
+			.memoryCount {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				min-width: 20px;
+				height: 20px;
+				padding: 0 6px;
+				border-radius: 10px;
+				background: var(--color_main);
+				color: white;
+				font-size: 11px;
+				font-weight: 600;
+			}
+		}
+	}
+
+	.memoryScroll {
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 16px;
+
+		&::-webkit-scrollbar {
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--color_bg);
+			border-radius: 3px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--color_text_grey);
+			}
+		}
+	}
+
+	.memoryCards {
+		display: flex;
+		gap: 12px;
+		min-width: min-content;
+	}
+
+	.memoryCard {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		min-width: 120px;
+		padding: 16px;
+		border-radius: var(--radius);
+		background: var(--color_bg_menu);
+		border: 1px solid var(--color_border);
+		cursor: pointer;
+		transition: all 0.2s;
+
+		.cardIcon {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background: var(--color_bg);
+			color: var(--color_main);
+			transition: all 0.2s;
+		}
+
+		.cardInfo {
+			text-align: center;
+
+			.cardLabel {
+				font-size: 12px;
+				color: var(--color_text_grey);
+				margin-bottom: 4px;
+			}
+
+			.cardCount {
+				font-size: 18px;
+				font-weight: 600;
+				color: var(--color_text);
+			}
+		}
+
+		.cardBadge {
+			position: absolute;
+			top: 12px;
+			right: 12px;
+			color: var(--color_success);
+			animation: pulse 2s infinite;
+		}
+
+		&:hover:not(.disabled) {
+			background: var(--color_bg_hover);
+			border-color: var(--color_main);
+			transform: translateY(-2px);
+			box-shadow: var(--shadow);
+
+			.cardIcon {
+				background: var(--color_main);
+				color: white;
+			}
+		}
+
+		&.disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+
+			.cardIcon {
+				color: var(--color_text_grey);
+			}
+		}
+	}
+}
+
+// Flow Panel (下部)
+.flowPanel {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	background: var(--color_bg_menu);
+	border-radius: var(--radius);
+	border: 1px solid var(--color_border);
+	overflow: hidden;
+	min-height: 0;
+
+	.flowHeader {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--color_border);
+		background: var(--color_bg_nav);
+
+		.flowTitle {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			font-weight: 500;
+			color: var(--color_text);
+		}
+
+		.flowStatus {
+			.statusText {
+				font-size: 12px;
+				color: var(--color_text_grey);
+			}
+		}
+	}
+
+	.flowScroll {
+		flex: 1;
+		overflow-y: auto;
+		overflow-x: hidden;
+		padding: 16px;
+		min-height: 0;
+
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: var(--color_bg);
+			border-radius: 3px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_border);
+			border-radius: 3px;
+
+			&:hover {
+				background: var(--color_text_grey);
+			}
+		}
+	}
+
+	.flowContent {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.loadingState {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 200px;
+		gap: 12px;
+		color: var(--color_text_grey);
+	}
+}
+
+// Flow Node Styles
+.nodeWrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.nodeCard {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 12px 16px;
+	border-radius: var(--radius);
+	background: var(--color_bg_menu);
+	border: 1px solid var(--color_border);
+	cursor: pointer;
+	transition: all 0.2s;
+
+	.nodeIcon {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: var(--color_bg);
+	}
+
+	.nodeContent {
+		flex: 1;
+		min-width: 0;
+
+		.nodeName {
+			font-size: 14px;
+			font-weight: 500;
+			color: var(--color_text);
+			margin-bottom: 4px;
+		}
+
+		.nodeDescription {
+			font-size: 12px;
+			color: var(--color_text_grey);
+			margin-bottom: 6px;
+		}
+
+		.nodeMeta {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+
+			.nodeDuration {
+				font-size: 11px;
+				color: var(--color_text_grey);
+				font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+			}
+		}
+	}
+
+	&:hover {
+		background: var(--color_bg_hover);
+		border-color: var(--color_main);
+		transform: translateX(4px);
+	}
+
+	&.pending {
+		.nodeIcon {
+			color: var(--color_text_grey);
+		}
+	}
+
+	&.running {
+		border-color: var(--color_main);
+		background: rgba(51, 113, 252, 0.05);
+
+		.nodeIcon {
+			background: var(--color_main);
+			color: white;
+		}
+	}
+
+	&.success {
+		.nodeIcon {
+			background: var(--color_success);
+			color: white;
+		}
+	}
+
+	&.error {
+		.nodeIcon {
+			background: var(--color_danger);
+			color: white;
+		}
+	}
+}
+
+.nodeChildren {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-left: 24px;
+	padding-left: 24px;
+	border-left: 2px solid var(--color_border);
+
+	&.parallel {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 12px;
+		border-left: none;
+		margin-left: 0;
+		padding-left: 0;
+
+		.nodeWrapper {
+			flex: 1;
+			min-width: 200px;
+		}
+	}
+}
+
+// Modal Styles
+.modalHeader {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	color: var(--color_text);
+}
+
+.memoryModalContent {
+	max-height: 60vh;
+	overflow-y: auto;
+	padding: 16px;
+
+	.memoryItem {
+		padding: 12px;
+		margin-bottom: 12px;
+		border-radius: var(--radius);
+		background: var(--color_bg);
+		border: 1px solid var(--color_border);
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+
+		.memoryItemHeader {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 8px;
+
+			.memoryItemTitle {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color_text);
+			}
+
+			.memoryItemTime {
+				font-size: 11px;
+				color: var(--color_text_grey);
+				font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+			}
+		}
+
+		.memoryItemContent {
+			font-size: 12px;
+			color: var(--color_text);
+			line-height: 1.5;
+			white-space: pre-wrap;
+			word-break: break-word;
+		}
+	}
+}
+
+.nodeModalContent {
+	max-height: 70vh;
+	overflow-y: auto;
+	padding: 16px;
+
+	.nodeDetailSection {
+		margin-bottom: 16px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+
+		.sectionTitle {
+			font-size: 13px;
+			font-weight: 500;
+			color: var(--color_text);
+			margin-bottom: 8px;
+			padding-bottom: 6px;
+			border-bottom: 1px solid var(--color_border);
+		}
+
+		.sectionContent {
+			.detailRow {
+				display: flex;
+				align-items: flex-start;
+				gap: 12px;
+				margin-bottom: 8px;
+				font-size: 12px;
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+
+				.detailLabel {
+					flex-shrink: 0;
+					min-width: 80px;
+					color: var(--color_text_grey);
+					font-weight: 500;
+				}
+
+				.detailValue {
+					flex: 1;
+					color: var(--color_text);
+					word-break: break-word;
+				}
+			}
+
+			.codeBlock {
+				margin: 0;
+				padding: 12px;
+				border-radius: var(--radius);
+				background: var(--color_bg);
+				border: 1px solid var(--color_border);
+				font-size: 11px;
+				font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+				color: var(--color_text);
+				overflow-x: auto;
+				line-height: 1.5;
+			}
+
+			.logLine {
+				font-size: 11px;
+				font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+				color: var(--color_text);
+				padding: 4px 0;
+				line-height: 1.5;
+			}
+		}
+	}
+}
+
+// Animations
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+
+.spinning {
+	animation: spin 1s linear infinite;
+}
+
