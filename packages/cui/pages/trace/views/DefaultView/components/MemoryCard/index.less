@@ -1,0 +1,165 @@
+@import '@/styles/preset/vars.less';
+
+.memoryCardWrapper {
+	position: relative;
+	display: inline-block;
+}
+
+.memoryCard {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	background: rgba(255, 255, 255, 0.5);
+	border: 1px solid rgba(0, 0, 0, 0.06);
+	border-radius: 20px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	backdrop-filter: blur(10px);
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.8);
+		border-color: rgba(0, 0, 0, 0.1);
+		transform: translateY(-1px);
+	}
+
+	// Dark mode
+	[data-theme='dark'] & {
+		background: rgba(0, 0, 0, 0.2);
+		border-color: rgba(255, 255, 255, 0.1);
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.3);
+			border-color: rgba(255, 255, 255, 0.15);
+		}
+	}
+}
+
+.typeLabel {
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--color_text);
+	opacity: 0.7;
+}
+
+.count {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--color_text);
+	opacity: 0.8;
+}
+
+// 悬停卡片
+.hoverCard {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	min-width: 280px;
+	max-width: 320px;
+	background: var(--color_bg_menu);
+	border: 1px solid var(--color_border);
+	border-radius: 8px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+	z-index: 100;
+	animation: fadeIn 0.2s ease;
+
+	// 填补卡片与悬停卡片之间的空隙，防止鼠标移动时卡片消失
+	&::before {
+		content: '';
+		position: absolute;
+		top: -8px;
+		left: 0;
+		right: 0;
+		height: 8px;
+		background: transparent;
+	}
+
+	// Dark mode
+	[data-theme='dark'] & {
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+	}
+}
+
+.hoverCardHeader {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_bg);
+	border-radius: 8px 8px 0 0;
+
+	.hoverCardTitle {
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--color_text_grey);
+		flex: 1;
+	}
+}
+
+.hoverCardContent {
+	padding: 8px 12px;
+	max-height: 200px;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 2px;
+
+		&:hover {
+			background: var(--color_text_grey);
+		}
+	}
+}
+
+.summaryItem {
+	padding: 4px 0;
+	font-size: 11px;
+	line-height: 1.4;
+	color: var(--color_text_grey);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+
+	&:not(:last-child) {
+		border-bottom: 1px solid var(--color_border_soft);
+	}
+}
+
+.hoverCardFooter {
+	padding: 8px 12px;
+	border-top: 1px solid var(--color_border);
+	background: var(--color_bg);
+	border-radius: 0 0 8px 8px;
+	font-size: 11px;
+	color: var(--color_text_grey);
+	text-align: center;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		color: var(--color_main);
+		background: var(--color_bg_hover);
+	}
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+

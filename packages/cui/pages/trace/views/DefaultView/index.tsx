@@ -15,6 +15,7 @@ import { getLocale } from '@umijs/max'
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
 import TraceNode from './components/TraceNode'
+import MemoryCard from './components/MemoryCard'
 import styles from './index.less'
 
 interface DefaultViewProps {
@@ -242,6 +243,55 @@ const rawEdges: Edge[] = [
 	}
 ]
 
+// Mock Memory 数据 - 模拟产品详情页开发场景
+const mockMemoryData = [
+	{
+		id: 'mem-1',
+		type: 'context' as const,
+		title: '当前任务上下文',
+		content: '正在开发电商平台的产品详情页面，需要实现规格参数展示、SKU 选择器、价格计算、库存查询、购物车联动等核心功能模块',
+		count: 3,
+		items: [
+			'正在开发电商平台的产品详情页面，需要实现规格参数展示、SKU 选择器、价格计算等核心功能',
+			'用户需求包括：支持多规格组合选择（颜色/尺寸/版本），实时库存状态展示，动态价格计算',
+			'技术栈使用 React + TypeScript + Ant Design，需要考虑移动端适配和性能优化'
+		]
+	},
+	{
+		id: 'mem-2',
+		type: 'intent' as const,
+		title: '开发意图分析',
+		content: '实现用户可交互的 SKU 选择组件，支持多规格组合（颜色、尺寸、版本），动态计算价格和库存状态，优化移动端触控体验',
+		count: 1,
+		items: ['核心目标：构建高性能、用户体验良好的 SKU 选择交互组件，支持复杂规格组合场景']
+	},
+	{
+		id: 'mem-3',
+		type: 'knowledge' as const,
+		title: '相关技术文档',
+		content: 'React Hooks 最佳实践、SKU 算法实现方案、Ant Design 表单组件文档、商品数据结构设计规范、库存服务 API 接口文档',
+		count: 5,
+		items: [
+			'React Hooks 最佳实践：使用 useMemo 优化 SKU 计算性能，useCallback 避免不必要的重渲染',
+			'SKU 算法实现方案：基于笛卡尔积生成所有规格组合，使用哈希表快速查找库存状态',
+			'Ant Design 表单组件文档：Radio.Group 用于单选规格，Checkbox.Group 用于多选场景',
+			'商品数据结构设计规范：包含 spuId、skuList、priceRange、stockStatus 等核心字段',
+			'库存服务 API 接口文档：GET /api/stock/check 实时查询库存，支持批量查询和缓存策略'
+		]
+	},
+	{
+		id: 'mem-4',
+		type: 'history' as const,
+		title: '历史开发记录',
+		content: '上周完成了商品列表页的筛选功能和分页加载，本周聚焦详情页开发，团队反馈需要优化图片懒加载和首屏渲染性能',
+		count: 2,
+		items: [
+			'上周完成：商品列表页筛选功能（价格区间、品牌、分类），虚拟滚动实现长列表优化',
+			'本周计划：产品详情页 SKU 选择器开发，图片懒加载优化，首屏 LCP 性能提升至 2 秒内'
+		]
+	}
+]
+
 // 内部组件用于访问 ReactFlow 实例
 const FlowContent: React.FC<{
 	traceId: string
@@ -283,8 +333,8 @@ const FlowContent: React.FC<{
 					{ minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
 				)
 
-				// 为顶部预留 150px 空间
-				const topOffset = 150
+				// 为顶部预留空间给 Memory Cards（4个卡片大约需要 60-70px）
+				const topOffset = 70
 				const viewport = containerRef.current
 				if (!viewport) return
 
@@ -320,6 +370,17 @@ const FlowContent: React.FC<{
 
 	return (
 		<div ref={containerRef} className={styles.container}>
+			{/* Memory Cards 区域 */}
+			<div className={styles.memorySection}>
+				{mockMemoryData.map((memory) => (
+					<MemoryCard
+						key={memory.id}
+						data={memory}
+						onClick={() => console.log('Memory clicked:', memory.id)}
+					/>
+				))}
+			</div>
+
 			<ReactFlow
 				nodes={layoutedNodes}
 				edges={layoutedEdges}

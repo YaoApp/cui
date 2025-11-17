@@ -5,7 +5,24 @@
 	padding: 0;
 	margin: 0;
 	overflow: hidden;
+}
 
+.memorySection {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	right: 20px;
+	display: flex;
+	gap: 12px;
+	z-index: 5;
+	pointer-events: none;
+
+	> * {
+		pointer-events: auto;
+	}
+}
+
+.container {
 	// ReactFlow 容器样式覆盖
 	:global {
 		.react-flow {
