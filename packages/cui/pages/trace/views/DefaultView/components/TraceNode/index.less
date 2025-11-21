@@ -114,6 +114,9 @@
 	color: var(--color_text);
 	margin-bottom: 3px;
 	line-height: 1.3;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .nodeDescription {
@@ -155,6 +158,90 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	font-weight: 500;
+}
+
+.latestLog {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	color: var(--color_text_grey);
+	font-size: 10px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+	
+	.typing {
+		color: var(--color_success);
+		animation: blink 1s infinite;
+	}
+}
+
+// Log Popover Styles
+.logPopover {
+	min-width: 280px;
+	max-width: 320px;
+}
+
+.logTitle {
+	padding: 4px 8px; // 减小内边距
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--color_text);
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_bg_nav);
+	border-radius: 4px 4px 0 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.logList {
+	max-height: 300px;
+	overflow-y: auto;
+	padding: 4px; // 从 8px 减小到 4px
+	display: flex;
+	flex-direction: column;
+	gap: 2px; // 从 4px 减小到 2px
+}
+
+.logItem {
+	display: flex;
+	align-items: flex-start;
+	gap: 4px; // 从 6px 减小到 4px
+	padding: 2px 3px; // 从 3px 4px 减小到 2px 3px
+	font-size: 10px;
+	font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+	line-height: 1.3;
+	
+	&:hover {
+		background: var(--color_bg_hover);
+		border-radius: 3px;
+	}
+}
+
+.logTime {
+	color: var(--color_text_grey);
+	flex-shrink: 0;
+}
+
+.logLevel {
+	flex-shrink: 0;
+	font-weight: 600;
+	
+	&.info { color: var(--color_info); }
+	&.warn { color: var(--color_warning); }
+	&.error { color: var(--color_danger); }
+	&.debug { color: var(--color_text_grey); }
+}
+
+.logMessage {
+	flex: 1;
+	color: var(--color_text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 // Handle 样式
@@ -215,6 +302,11 @@
 	}
 }
 
+@keyframes blink {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0; }
+}
+
 // 节点淡入动画
 @keyframes traceNodeFadeIn {
 	0% {
@@ -224,5 +316,3 @@
 		opacity: 1;
 	}
 }
-
-

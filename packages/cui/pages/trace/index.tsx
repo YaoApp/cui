@@ -6,8 +6,9 @@ import { ViewMode } from './types'
 import styles from './index.less'
 
 const Trace = () => {
-	const params = useParams<{ id: string }>()
-	const traceId = params.id || 'default'
+	const params = useParams()
+	// Support both named parameter :id and catch-all parameter * (for $.tsx)
+	const traceId = params.id || params['*']
 
 	const [viewMode, setViewMode] = useState<ViewMode>('default')
 
@@ -35,7 +36,7 @@ const Trace = () => {
 			{viewMode === 'default' ? (
 				<DefaultView traceId={traceId} onSwitchMode={handleSwitchMode} />
 			) : (
-				<DeveloperView traceId={traceId} onSwitchMode={handleSwitchMode} />
+				<DeveloperView traceId={traceId || ''} onSwitchMode={handleSwitchMode} />
 			)}
 		</div>
 	)
