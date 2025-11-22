@@ -1328,16 +1328,85 @@ chat.streamCompletion({
 
 ### Request
 
+The request uses TypeScript discriminated unions to enforce that either `assistant_id` OR `model` must be provided:
+
 ```typescript
-interface ChatCompletionRequest {
-    assistant_id: string            // Required: Assistant ID
+// Base fields shared by both variants
+interface ChatCompletionRequestBase {
     messages: ChatMessage[]         // Required: Chat messages
     chat_id?: string                // Optional: Chat ID (auto-generated if not provided)
-    model?: string                  // Optional: Model ID
     options?: ChatCompletionOptions // Optional: Advanced options
     metadata?: Record<string, any>  // Optional: Custom metadata
 }
 
+// Option 1: With assistant_id (recommended)
+interface ChatCompletionRequestWithAssistant extends ChatCompletionRequestBase {
+    assistant_id: string  // Required: Direct assistant reference
+    model?: string        // Optional: For OpenAI compatibility
+}
+
+// Option 2: With model only (OpenAI compatibility)
+interface ChatCompletionRequestWithModel extends ChatCompletionRequestBase {
+    assistant_id?: string // Optional: Takes priority if provided
+    model: string         // Required: Format *-yao_assistantID
+}
+
+// Union type - must be one or the other
+type ChatCompletionRequest = 
+    | ChatCompletionRequestWithAssistant 
+    | ChatCompletionRequestWithModel
+```
+
+**Usage Examples:**
+
+```typescript
+// ✅ Valid: With assistant_id (recommended)
+const request1: ChatCompletionRequest = {
+    assistant_id: 'my-assistant',
+    messages: [{ role: 'user', content: 'Hi' }]
+}
+
+// ✅ Valid: With model (OpenAI compatibility)
+const request2: ChatCompletionRequest = {
+    model: 'gpt-4o-yao_myassistant',
+    messages: [{ role: 'user', content: 'Hi' }]
+}
+
+// ✅ Valid: Both provided (assistant_id takes priority)
+const request3: ChatCompletionRequest = {
+    assistant_id: 'my-assistant',
+    model: 'gpt-4o',
+    messages: [{ role: 'user', content: 'Hi' }]
+}
+
+// ❌ Invalid: Neither provided (TypeScript error)
+const request4: ChatCompletionRequest = {
+    messages: [{ role: 'user', content: 'Hi' }]
+}
+```
+
+**Field Details:**
+
+- **`assistant_id`** - Direct assistant reference (recommended):
+  - Direct ID: `"my-assistant"`
+  - Recommended for Yao applications
+  - Takes priority if both fields are provided
+
+- **`model`** - OpenAI compatibility mode:
+  - Format: `[prefix-]modelName-yao_assistantID`
+  - Backend extracts assistant_id (splits by `-yao_` and takes last part)
+  - Examples:
+    - `"gpt-4o-yao_myassistant"` → extracts `"myassistant"`
+    - `"claude-3-sonnet-yao_chatbot"` → extracts `"chatbot"`
+  - Use for OpenAI-compatible clients
+
+**Parameter Resolution Priority** (backend):
+  1. Query parameter `?assistant_id=xxx`
+  2. Header `X-Yao-Assistant: xxx`
+  3. Request body `assistant_id` field
+  4. Extract from `model` field (part after `-yao_`)
+
+```typescript
 interface ChatCompletionOptions {
     temperature?: number
     max_tokens?: number
