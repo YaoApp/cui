@@ -538,14 +538,15 @@ const request2: ChatCompletionRequest = {
   - `model`: OpenAI-compatible model identifier with format `*-yao_assistantID`
 
 **Optional Fields:**
-- `chat_id`: Continue existing chat session
-  - **Optional**: Can be omitted for automatic conversation detection
-  - **Auto-detection**: Backend automatically indexes conversations by message history
+- `chat_id`: Links messages in the same conversation for context continuity
+  - **Recommended**: Generate on frontend (any unique string with 8+ characters)
+    - Best performance - avoids backend hash computation
+    - Examples: nanoid, UUID, timestamp-based ID
+  - **Fallback**: Backend auto-detection (omit `chat_id`)
     - Matches previous messages (excluding assistant responses) via SHA256 hash
     - Same message history → Same `chat_id` (conversation continuation)
     - New message history → New `chat_id` (new conversation)
-  - **Frontend can generate**: Any unique string with 8+ characters
-  - **Purpose**: Links messages in the same conversation for context continuity
+    - Use only for stateless clients without ID management capability
 - `options`: OpenAI-compatible parameters (temperature, max_tokens, etc.)
 - `metadata`: Custom metadata object
 
