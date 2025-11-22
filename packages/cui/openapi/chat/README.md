@@ -19,7 +19,7 @@ OpenAPI client for Yao Chat Completions with streaming support.
 import { OpenAPI, Chat } from '@yao/cui/openapi'
 
 // Initialize
-const api = new OpenAPI({ baseURL: '/api/__yao/openapi/v1' })
+const api = new OpenAPI({ baseURL: '/v1' })
 const chat = new Chat(api)
 
 // Stream chat completion
@@ -83,6 +83,72 @@ chat.streamCompletion(
     (chunk) => { /* ... */ }
 )
 ```
+
+### Using Model ID Instead of Assistant ID (OpenAI Compatibility)
+
+For OpenAI API compatibility, you can use `model` field instead of `assistant_id`. The backend extracts the assistant ID from the model string using the format: `*-yao_assistantID`
+
+```typescript
+chat.streamCompletion(
+    {
+        // Model format: [prefix-]modelName-yao_assistantID
+        model: 'gpt-4o-yao_myassistant',  // Backend extracts "myassistant"
+        messages: [
+            { role: 'user', content: 'Hello!' }
+        ]
+    },
+    (chunk) => { /* ... */ }
+)
+
+// More examples:
+// "claude-3-sonnet-yao_chatbot" → assistant_id: "chatbot"
+// "gpt-4-turbo-yao_support_agent" → assistant_id: "support_agent"
+```
+
+> **Note**: The backend splits the model string by `-yao_` and takes the last part as the assistant_id.
+
+## Request Parameters
+
+### ChatCompletionRequest
+
+The request object uses TypeScript discriminated unions to enforce that either `assistant_id` or `model` must be provided:
+
+```typescript
+// Option 1: With assistant_id (recommended for Yao apps)
+const request1: ChatCompletionRequest = {
+    assistant_id: 'my-assistant',  // Direct assistant reference
+    messages: [{ role: 'user', content: 'Hi' }],
+    model?: 'gpt-4o',  // Optional: for OpenAI compatibility
+    chat_id?: 'chat-123',
+    options?: { temperature: 0.7 },
+    metadata?: { custom: 'data' }
+}
+
+// Option 2: With model only (OpenAI compatibility mode)
+const request2: ChatCompletionRequest = {
+    model: 'gpt-4o-yao_myassistant',  // Model with embedded assistant_id
+    messages: [{ role: 'user', content: 'Hi' }],
+    assistant_id?: 'fallback',  // Optional: takes priority if provided
+    chat_id?: 'chat-123',
+    options?: { temperature: 0.7 }
+}
+```
+
+**Required Fields:**
+- `messages`: Array of chat messages
+- `assistant_id` OR `model`: At least one must be provided
+  - `assistant_id`: Direct assistant reference (recommended)
+  - `model`: OpenAI-compatible model identifier with format `*-yao_assistantID`
+
+**Optional Fields:**
+- `chat_id`: Continue existing chat (auto-generated if not provided)
+- `options`: OpenAI-compatible parameters (temperature, max_tokens, etc.)
+- `metadata`: Custom metadata object
+
+**Priority Order (backend extraction):**
+1. Query parameter `assistant_id`
+2. Header `X-Yao-Assistant`
+3. Extract from `model` field (splits by `-yao_` and takes last part)
 
 ### Delta Merging Example
 
