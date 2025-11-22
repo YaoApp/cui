@@ -841,7 +841,7 @@ function applyDelta(msgId: string, msg: Message): any {
     return state
 }
 
-// Usage in streaming with delta handling
+// Usage in streaming with delta handling and type changes
 chat.streamCompletion(
     {
         assistant_id: 'my-assistant',
@@ -856,7 +856,31 @@ chat.streamCompletion(
         
         const msgId = chunk.id || `msg-${Date.now()}`
         
-        // Merge delta into state
+        // Handle type change: backend corrected the message type
+        if (chunk.type_change) {
+            // In streaming, backend may not know final type until enough data is received
+            // Examples: loading → text, text → image, loading → error
+            // Clear old state and re-render with correct component type
+            messageStates.delete(msgId)
+            const element = renderMessage(chunk, chunk.props || {})
+            element.id = `msg-${msgId}`
+            
+            const existing = document.getElementById(`msg-${msgId}`)
+            if (existing) {
+                // Replace with new component type
+                existing.replaceWith(element)
+            } else {
+                container.appendChild(element)
+            }
+            
+            // Store new state for future deltas
+            if (chunk.props) {
+                messageStates.set(msgId, { ...chunk.props })
+            }
+            return
+        }
+        
+        // Normal delta handling
         const mergedProps = applyDelta(msgId, chunk)
         
         // Render with merged state
@@ -885,9 +909,18 @@ chat.streamCompletion(
 
 1. **State Management**: Use `messageStates` Map to cache merged props for each message ID
 2. **Delta Merging**: Call `applyDelta()` to merge incremental updates before rendering
-3. **Visual Feedback**: Add `.streaming` class during delta updates, `.complete` when done
-4. **Content Types**: Handle both simple text streaming and complex structured updates
-5. **Cleanup**: Remove state from cache when `done: true` is received
+3. **Type Change Handling**: When `type_change: true`, clear old state and re-render with new component type
+   - **Why type changes occur**: In streaming, the backend may not know the final message type until enough data is received or processing is complete
+   - **Common scenarios**:
+     - `loading` → `text`: Started with loading indicator, now determined it's text output
+     - `loading` → `image`: Processing complete, result is an image
+     - `loading` → `error`: Processing failed during execution
+     - `text` → `image`: Initially thought it's text, but generated an image
+     - `text` → `video`: Content generation resulted in a video
+   - **How to handle**: Clear old component state, replace with new component type's renderer
+4. **Visual Feedback**: Add `.streaming` class during delta updates, `.complete` when done
+5. **Content Types**: Handle both simple text streaming and complex structured updates
+6. **Cleanup**: Remove state from cache when `done: true` is received
 
 ## Message Types
 
