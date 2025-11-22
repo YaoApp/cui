@@ -47,19 +47,7 @@ const abort = chat.streamCompletion(
 ### With Chat History
 
 ```typescript
-// Option 1: Use existing chat_id (from previous response or saved state)
-chat.streamCompletion(
-    {
-        assistant_id: 'my-assistant',
-        chat_id: 'existing-chat-123',  // Continue this chat
-        messages: [
-            { role: 'user', content: 'What did we discuss before?' }
-        ]
-    },
-    (chunk) => { /* ... */ }
-)
-
-// Option 2: Generate chat_id on frontend (for new conversations)
+// Option 1: Generate chat_id on frontend (RECOMMENDED - avoids backend overhead)
 // Requirements: Unique string with 8+ characters
 import { nanoid } from 'nanoid'
 
@@ -67,49 +55,50 @@ const chatId = nanoid() // e.g., "V1StGXR8_Z5jdHi6B"
 // Or use any unique ID generator: UUID, timestamp-based, etc.
 // const chatId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
+// First message in conversation
 chat.streamCompletion(
     {
         assistant_id: 'my-assistant',
         chat_id: chatId,  // Use frontend-generated ID
         messages: [
-            { role: 'user', content: 'Start new conversation' }
+            { role: 'user', content: 'Hello' }
         ]
     },
     (chunk) => { /* ... */ }
 )
 
-// Option 3: Let backend auto-detect (omit chat_id) - RECOMMENDED
-// Backend automatically detects conversation continuation by message history
+// Continue conversation - use same chat_id
 chat.streamCompletion(
     {
         assistant_id: 'my-assistant',
-        // No chat_id - backend auto-detects via message matching
+        chat_id: chatId,  // Same ID for continuation
+        messages: [
+            { role: 'user', content: 'Hello' },
+            { role: 'assistant', content: 'Hi! How can I help?' },
+            { role: 'user', content: 'Tell me a joke' }
+        ]
+    },
+    (chunk) => { /* ... */ }
+)
+
+// Option 2: Let backend auto-detect (omit chat_id)
+// Note: This triggers hash computation on backend - use only for stateless clients
+chat.streamCompletion(
+    {
+        assistant_id: 'my-assistant',
+        // No chat_id - backend computes hash and matches conversation
         messages: [
             { role: 'user', content: 'Hello' }
         ]
     },
     (chunk) => {
-        // Extract chat_id from stream_start event
+        // Extract backend-generated chat_id from stream_start event
         if (chunk.type === 'event' && chunk.props.event === 'stream_start') {
             const chatId = chunk.props.data?.chat_id
-            console.log('Backend detected/generated chat_id:', chatId)
-            // Save this for display/tracking (optional - backend handles continuation automatically)
+            console.log('Backend generated chat_id:', chatId)
+            // Save this for subsequent requests to avoid re-computation
         }
     }
-)
-
-// Continue conversation - just send full message history, backend auto-matches
-chat.streamCompletion(
-    {
-        assistant_id: 'my-assistant',
-        messages: [
-            { role: 'user', content: 'Hello' },                    // Previous message
-            { role: 'assistant', content: 'Hi! How can I help?' }, // Previous response
-            { role: 'user', content: 'Tell me a joke' }           // New message
-        ]
-        // Backend matches first 2 messages → returns same chat_id automatically
-    },
-    (chunk) => { /* ... */ }
 )
 ```
 
@@ -579,7 +568,7 @@ const request2: ChatCompletionRequest = {
 
 > **Note**: 
 > - The frontend uses HTTP headers (`X-Yao-Assistant` and `X-Yao-Chat`) to send these parameters.
-> - **Recommendation**: Omit `chat_id` and let backend auto-detect for seamless conversation continuation.
+> - **Recommendation**: Generate `chat_id` on frontend to avoid backend hash computation overhead. Auto-detection is a fallback for clients without state management.
 
 ### Delta Merging Example
 
