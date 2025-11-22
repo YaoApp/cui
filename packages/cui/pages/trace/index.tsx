@@ -8,7 +8,9 @@ import styles from './index.less'
 const Trace = () => {
 	const params = useParams()
 	// Support both named parameter :id and catch-all parameter * (for $.tsx)
-	const traceId = params.id || params['*']
+	// Extract traceId from path like "20251122778299550263/view" -> "20251122778299550263"
+	const rawPath = params.id || params['*']
+	const traceId = rawPath?.split('/')[0]
 
 	const [viewMode, setViewMode] = useState<ViewMode>('default')
 

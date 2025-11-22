@@ -35,6 +35,11 @@ const STANDALONE_PAGES = new Map([
 
 // Check if current path matches any standalone page
 const isStandalonePage = (pathname: string): boolean => {
+	// Check for trace view mode: /trace/{id}/view
+	if (pathname.startsWith('/trace/') && pathname.endsWith('/view')) {
+		return true
+	}
+
 	return Array.from(STANDALONE_PAGES.values()).some((route) => {
 		// For routes ending with '/', use startsWith (e.g., /auth/back/, /team/invite/)
 		if (route.endsWith('/')) {
