@@ -1443,6 +1443,100 @@ interface ChatCompletionOptions {
 }
 ```
 
+### ChatMessage (Request Input)
+
+```typescript
+// Message role in conversation
+type MessageRole = 'developer' | 'system' | 'user' | 'assistant' | 'tool'
+
+// Content part types for multimodal messages
+type ContentPartType = 'text' | 'image_url' | 'input_audio' | 'file'
+
+// Content part structures
+interface ContentPart {
+    type: ContentPartType
+    text?: string                // For type="text"
+    image_url?: {                // For type="image_url"
+        url: string              // URL or uploader_id://file_id
+        detail?: 'auto' | 'low' | 'high'
+    }
+    input_audio?: {              // For type="input_audio"
+        data: string             // Wrapper format: uploader_id://file_id
+        format: string           // Audio format (e.g., "wav", "mp3")
+    }
+    file?: {                     // For type="file" (backend support coming soon)
+        url: string              // Wrapper format: uploader_id://file_id
+        filename?: string
+        mime_type?: string
+    }
+}
+
+// Chat message in conversation
+interface ChatMessage {
+    role: MessageRole
+    content?: string | ContentPart[]  // String or multimodal array
+    name?: string                     // Optional participant name
+    
+    // Tool message specific
+    tool_call_id?: string            // Required for tool messages
+    
+    // Assistant message specific
+    tool_calls?: ToolCall[]          // Tool calls made by assistant
+    refusal?: string                 // Refusal message
+}
+
+// Tool call structure
+interface ToolCall {
+    id: string
+    type: 'function'
+    function: {
+        name: string
+        arguments?: string           // JSON string
+    }
+}
+```
+
+**Usage Examples:**
+
+```typescript
+// Simple text message
+const textMsg: ChatMessage = {
+    role: 'user',
+    content: 'Hello!'
+}
+
+// Multimodal message with image
+const imageMsg: ChatMessage = {
+    role: 'user',
+    content: [
+        { type: 'text', text: 'What is in this image?' },
+        {
+            type: 'image_url',
+            image_url: {
+                url: '__yao.attachment://abc123',  // File wrapper
+                detail: 'high'
+            }
+        }
+    ]
+}
+
+// Message with uploaded file
+const fileMsg: ChatMessage = {
+    role: 'user',
+    content: [
+        { type: 'text', text: 'Analyze this document' },
+        {
+            type: 'file',
+            file: {
+                url: '__yao.attachment://xyz789',
+                filename: 'report.pdf',
+                mime_type: 'application/pdf'
+            }
+        }
+    ]
+}
+```
+
 ### Message (Universal DSL)
 
 ```typescript
