@@ -36,16 +36,8 @@ export class Chat {
 		// @ts-ignore
 		const baseURL = this.api.config.baseURL
 
-		// Build URL with assistant_id
-		const url = `${baseURL}/chat/${request.assistant_id}/completions`
-
-		// Build query parameters
-		const queryParams = new URLSearchParams()
-		if (request.chat_id) {
-			queryParams.set('chat_id', request.chat_id)
-		}
-
-		const fullUrl = queryParams.toString() ? `${url}?${queryParams}` : url
+		// Build URL
+		const url = `${baseURL}/chat/completions`
 
 		// Create AbortController for cancellation
 		const abortController = new AbortController()
@@ -53,8 +45,19 @@ export class Chat {
 		// Convert to internal format (set stream: true)
 		const internalRequest = this.buildInternalRequest(request, true)
 
+		// Extract assistant_id (either from assistant_id field or model field)
+		const assistantId = 'assistant_id' in request ? request.assistant_id : undefined
+
 		// Start the stream
-		this.startStream(fullUrl, internalRequest, onEvent, onError, abortController).catch((error) => {
+		this.startStream(
+			url,
+			internalRequest,
+			assistantId,
+			request.chat_id,
+			onEvent,
+			onError,
+			abortController
+		).catch((error) => {
 			onError?.(error)
 		})
 
@@ -85,13 +88,10 @@ export class Chat {
 			internal.stream = true
 		}
 
-		// Add metadata (merge chat_id if provided)
-		if (request.metadata || request.chat_id) {
+		// Add metadata (without chat_id, as it's sent via header)
+		if (request.metadata) {
 			internal.metadata = {
 				...request.metadata
-			}
-			if (request.chat_id) {
-				internal.metadata.chat_id = request.chat_id
 			}
 		}
 
@@ -103,20 +103,35 @@ export class Chat {
 	 */
 	private async startStream(
 		url: string,
-		request: ChatCompletionRequest,
+		request: any,
+		assistantId: string | undefined,
+		chatId: string | undefined,
 		onEvent: StreamCallback,
 		onError: ((error: Error) => void) | undefined,
 		abortController: AbortController
 	): Promise<void> {
 		try {
+			// Build headers
+			const headers: Record<string, string> = {
+				'Content-Type': 'application/json',
+				Accept: 'text/event-stream',
+				'X-Yao-Accept': 'cui-web' // Fixed accept header for CUI format
+			}
+
+			// Add assistant_id to header if provided
+			if (assistantId) {
+				headers['X-Yao-Assistant'] = assistantId
+			}
+
+			// Add chat_id to header if provided
+			if (chatId) {
+				headers['X-Yao-Chat'] = chatId
+			}
+
 			// Make POST request with streaming enabled
 			const response = await fetch(url, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Accept: 'text/event-stream',
-					'X-Yao-Accept': 'cui-web' // Fixed accept header for CUI format
-				},
+				headers,
 				body: JSON.stringify(request),
 				credentials: 'include', // Include cookies for authentication
 				signal: abortController.signal

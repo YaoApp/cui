@@ -500,10 +500,19 @@ const request2: ChatCompletionRequest = {
 - `options`: OpenAI-compatible parameters (temperature, max_tokens, etc.)
 - `metadata`: Custom metadata object
 
-**Priority Order (backend extraction):**
-1. Query parameter `assistant_id`
-2. Header `X-Yao-Assistant`
+**Backend Parameter Extraction Priority:**
+
+`assistant_id`:
+1. Query parameter `?assistant_id=xxx`
+2. HTTP Header `X-Yao-Assistant: xxx`
 3. Extract from `model` field (splits by `-yao_` and takes last part)
+
+`chat_id`:
+1. HTTP Header `X-Yao-Chat: xxx`
+2. Query parameter `?chat_id=xxx`
+3. Request body `metadata.chat_id`
+
+> **Note**: The frontend uses HTTP headers (`X-Yao-Assistant` and `X-Yao-Chat`) to send these parameters.
 
 ### Delta Merging Example
 
@@ -1337,10 +1346,12 @@ type ChatCompletionRequest =
 
 The API automatically handles parameter routing:
 
-1. **`assistant_id`** → URL path: `/chat/:assistant_id/completions`
-2. **`chat_id`** → Query parameter: `?chat_id=xxx` (if provided)
-3. **`options`** → Merged into request body
-4. **`metadata`** → Request body metadata field
+1. **URL**: `/chat/completions` (fixed endpoint)
+2. **`assistant_id`** → HTTP header: `X-Yao-Assistant: xxx` (if provided in request)
+3. **`chat_id`** → HTTP header: `X-Yao-Chat: xxx` (if provided)
+4. **`model`** → Request body (used for `assistant_id` extraction if header not provided)
+5. **`options`** → Merged into request body
+6. **`metadata`** → Request body metadata field
 
 ### Examples
 
