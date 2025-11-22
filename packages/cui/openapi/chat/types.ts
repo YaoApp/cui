@@ -134,11 +134,12 @@ export interface GroupToolCallInfo {
  * Stream start event data
  */
 export interface StreamStartData {
-	request_id: string
-	timestamp: number
-	chat_id: string
-	trace_id: string
-	assistant?: AssistantInfo
+	context_id: string // Context ID for the response
+	request_id: string // Unique identifier for this request
+	timestamp: number // Unix timestamp (milliseconds) when stream started
+	chat_id: string // Chat ID being used
+	trace_id: string // Trace ID for debugging
+	assistant?: AssistantInfo // Assistant information
 }
 
 /**

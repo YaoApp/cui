@@ -1037,6 +1037,7 @@ const streamStartEvent: EventMessage = {
         event: EventType.STREAM_START,
         message: 'Stream started',
         data: {
+            context_id: 'ctx-abc123',
             request_id: 'req-123',
             timestamp: 1234567890,
             chat_id: 'chat-456',
