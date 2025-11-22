@@ -47,14 +47,67 @@ const abort = chat.streamCompletion(
 ### With Chat History
 
 ```typescript
-// Continue existing chat
-chat.StreamCompletion(
+// Option 1: Use existing chat_id (from previous response or saved state)
+chat.streamCompletion(
     {
         assistant_id: 'my-assistant',
         chat_id: 'existing-chat-123',  // Continue this chat
         messages: [
             { role: 'user', content: 'What did we discuss before?' }
         ]
+    },
+    (chunk) => { /* ... */ }
+)
+
+// Option 2: Generate chat_id on frontend (for new conversations)
+// Requirements: Unique string with 8+ characters
+import { nanoid } from 'nanoid'
+
+const chatId = nanoid() // e.g., "V1StGXR8_Z5jdHi6B"
+// Or use any unique ID generator: UUID, timestamp-based, etc.
+// const chatId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+chat.streamCompletion(
+    {
+        assistant_id: 'my-assistant',
+        chat_id: chatId,  // Use frontend-generated ID
+        messages: [
+            { role: 'user', content: 'Start new conversation' }
+        ]
+    },
+    (chunk) => { /* ... */ }
+)
+
+// Option 3: Let backend auto-detect (omit chat_id) - RECOMMENDED
+// Backend automatically detects conversation continuation by message history
+chat.streamCompletion(
+    {
+        assistant_id: 'my-assistant',
+        // No chat_id - backend auto-detects via message matching
+        messages: [
+            { role: 'user', content: 'Hello' }
+        ]
+    },
+    (chunk) => {
+        // Extract chat_id from stream_start event
+        if (chunk.type === 'event' && chunk.props.event === 'stream_start') {
+            const chatId = chunk.props.data?.chat_id
+            console.log('Backend detected/generated chat_id:', chatId)
+            // Save this for display/tracking (optional - backend handles continuation automatically)
+        }
+    }
+)
+
+// Continue conversation - just send full message history, backend auto-matches
+chat.streamCompletion(
+    {
+        assistant_id: 'my-assistant',
+        messages: [
+            { role: 'user', content: 'Hello' },                    // Previous message
+            { role: 'assistant', content: 'Hi! How can I help?' }, // Previous response
+            { role: 'user', content: 'Tell me a joke' }           // New message
+        ]
+        // Backend matches first 2 messages → returns same chat_id automatically
     },
     (chunk) => { /* ... */ }
 )
@@ -496,7 +549,14 @@ const request2: ChatCompletionRequest = {
   - `model`: OpenAI-compatible model identifier with format `*-yao_assistantID`
 
 **Optional Fields:**
-- `chat_id`: Continue existing chat (auto-generated if not provided)
+- `chat_id`: Continue existing chat session
+  - **Optional**: Can be omitted for automatic conversation detection
+  - **Auto-detection**: Backend automatically indexes conversations by message history
+    - Matches previous messages (excluding assistant responses) via SHA256 hash
+    - Same message history → Same `chat_id` (conversation continuation)
+    - New message history → New `chat_id` (new conversation)
+  - **Frontend can generate**: Any unique string with 8+ characters
+  - **Purpose**: Links messages in the same conversation for context continuity
 - `options`: OpenAI-compatible parameters (temperature, max_tokens, etc.)
 - `metadata`: Custom metadata object
 
@@ -511,8 +571,15 @@ const request2: ChatCompletionRequest = {
 1. HTTP Header `X-Yao-Chat: xxx`
 2. Query parameter `?chat_id=xxx`
 3. Request body `metadata.chat_id`
+4. **Auto-detect from message history** (智能会话检测)
+   - Hashes non-assistant messages (system, developer, user, tool)
+   - Matches against cached conversations (7-day TTL)
+   - Same history → Same `chat_id` (continuation)
+   - New history → Generate new `chat_id`
 
-> **Note**: The frontend uses HTTP headers (`X-Yao-Assistant` and `X-Yao-Chat`) to send these parameters.
+> **Note**: 
+> - The frontend uses HTTP headers (`X-Yao-Assistant` and `X-Yao-Chat`) to send these parameters.
+> - **Recommendation**: Omit `chat_id` and let backend auto-detect for seamless conversation continuation.
 
 ### Delta Merging Example
 
