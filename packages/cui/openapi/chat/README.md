@@ -568,10 +568,10 @@ const request2: ChatCompletionRequest = {
 3. Extract from `model` field (splits by `-yao_` and takes last part)
 
 `chat_id`:
-1. HTTP Header `X-Yao-Chat: xxx`
-2. Query parameter `?chat_id=xxx`
+1. Query parameter `?chat_id=xxx`
+2. HTTP Header `X-Yao-Chat: xxx`
 3. Request body `metadata.chat_id`
-4. **Auto-detect from message history** (智能会话检测)
+4. **Auto-detect from message history**
    - Hashes non-assistant messages (system, developer, user, tool)
    - Matches against cached conversations (7-day TTL)
    - Same history → Same `chat_id` (continuation)
