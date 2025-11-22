@@ -343,7 +343,7 @@ export type MessageRole = 'developer' | 'system' | 'user' | 'assistant' | 'tool'
 /**
  * Content part type for multimodal messages
  */
-export type ContentPartType = 'text' | 'image_url' | 'input_audio'
+export type ContentPartType = 'text' | 'image_url' | 'input_audio' | 'file'
 
 /**
  * Image detail level for image processing
@@ -367,6 +367,16 @@ export interface InputAudio {
 }
 
 /**
+ * File attachment in message content
+ * Note: Backend support for this type is planned for future release
+ */
+export interface FileAttachment {
+	url: string // URL of the file or base64 encoded file data
+	filename?: string // Original filename
+	mime_type?: string // MIME type (e.g., "application/pdf", "text/plain")
+}
+
+/**
  * Content part for multimodal messages
  * Used when content is an array instead of a simple string
  */
@@ -375,6 +385,7 @@ export interface ContentPart {
 	text?: string // For type="text": the text content
 	image_url?: ImageURL // For type="image_url": the image URL
 	input_audio?: InputAudio // For type="input_audio": the input audio data
+	file?: FileAttachment // For type="file": file attachment (backend support coming soon)
 }
 
 /**

@@ -84,6 +84,361 @@ chat.streamCompletion(
 )
 ```
 
+### Multimodal Messages (Vision, Audio)
+
+Send images and audio along with text using multimodal content:
+
+```typescript
+// Vision: Analyze an image
+chat.streamCompletion(
+    {
+        assistant_id: 'vision-assistant',
+        messages: [
+            {
+                role: 'user',
+                content: [
+                    {
+                        type: 'text',
+                        text: 'What is in this image?'
+                    },
+                    {
+                        type: 'image_url',
+                        image_url: {
+                            url: 'https://example.com/photo.jpg',
+                            detail: 'high'  // 'auto' | 'low' | 'high'
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    (chunk) => { /* ... */ }
+)
+
+// Base64 encoded image
+chat.streamCompletion(
+    {
+        assistant_id: 'vision-assistant',
+        messages: [
+            {
+                role: 'user',
+                content: [
+                    { type: 'text', text: 'Describe this diagram' },
+                    {
+                        type: 'image_url',
+                        image_url: {
+                            url: 'data:image/jpeg;base64,/9j/4AAQSkZJRg...',
+                            detail: 'auto'
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    (chunk) => { /* ... */ }
+)
+
+// Audio input
+chat.streamCompletion(
+    {
+        assistant_id: 'audio-assistant',
+        messages: [
+            {
+                role: 'user',
+                content: [
+                    {
+                        type: 'input_audio',
+                        input_audio: {
+                            data: 'base64_encoded_audio_data',
+                            format: 'wav'  // 'wav', 'mp3', etc.
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    (chunk) => { /* ... */ }
+)
+
+// Multiple images in one message
+chat.streamCompletion(
+    {
+        assistant_id: 'vision-assistant',
+        messages: [
+            {
+                role: 'user',
+                content: [
+                    { type: 'text', text: 'Compare these two images' },
+                    {
+                        type: 'image_url',
+                        image_url: { url: 'https://example.com/image1.jpg' }
+                    },
+                    {
+                        type: 'image_url',
+                        image_url: { url: 'https://example.com/image2.jpg' }
+                    }
+                ]
+            }
+        ]
+    },
+    (chunk) => { /* ... */ }
+)
+
+// File attachment (backend support coming soon)
+chat.streamCompletion(
+    {
+        assistant_id: 'document-assistant',
+        messages: [
+            {
+                role: 'user',
+                content: [
+                    { type: 'text', text: 'Analyze this PDF document' },
+                    {
+                        type: 'file',
+                        file: {
+                            url: 'https://example.com/document.pdf',
+                            filename: 'report.pdf',
+                            mime_type: 'application/pdf'
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    (chunk) => { /* ... */ }
+)
+```
+
+> **Note**: The `file` content type is currently supported in frontend types but backend implementation is planned for a future release.
+
+### File Upload Integration
+
+Complete example showing how to upload files (images, audio, documents) using FileAPI and then send to Chat API:
+
+```typescript
+import { OpenAPI, Chat, FileAPI } from '@yao/cui/openapi'
+import { CreateFileWrapper, ResolveFileURL } from '@/utils/fileWrapper'
+
+const api = new OpenAPI({ baseURL: '/v1' })
+const chat = new Chat(api)
+
+// Upload an image and send to chat
+async function uploadAndSendImage(file: File, userMessage: string) {
+    try {
+        // 1. Upload file using FileAPI
+        const fileapi = new FileAPI(api, '__yao.attachment')
+        
+        const uploadResponse = await fileapi.Upload(
+            file,
+            {
+                uploaderID: '__yao.attachment',
+                originalFilename: file.name,
+                compressImage: true,      // Enable image compression
+                compressSize: 1024,       // Max size 1024px
+                public: true              // Public access for sharing
+            },
+            (progress) => {
+                console.log(`Upload progress: ${progress.percentage}%`)
+            }
+        )
+
+        if (api.IsError(uploadResponse)) {
+            throw new Error(uploadResponse.error?.error_description || 'Upload failed')
+        }
+
+        const fileId = uploadResponse.data?.file_id
+        const fileUrl = uploadResponse.data?.user_path || uploadResponse.data?.path
+        
+        if (!fileId) {
+            throw new Error('File ID not returned from upload')
+        }
+
+        // 2. Create file wrapper: uploader_id://file_id
+        const fileWrapper = CreateFileWrapper('__yao.attachment', fileId)
+        // fileWrapper format: "__yao.attachment://abc123"
+
+        // 3. Send to chat with file wrapper URL (no need to resolve)
+        chat.streamCompletion(
+            {
+                assistant_id: 'vision-assistant',
+                messages: [
+                    {
+                        role: 'user',
+                        content: [
+                            { type: 'text', text: userMessage },
+                            {
+                                type: 'image_url',
+                                image_url: {
+                                    url: fileWrapper,  // Use wrapper directly
+                                    detail: 'high'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            (chunk) => {
+                console.log('Response:', chunk)
+            },
+            (error) => {
+                console.error('Chat error:', error)
+            }
+        )
+
+        return { fileId, fileWrapper }
+    } catch (error) {
+        console.error('Upload or chat error:', error)
+        throw error
+    }
+}
+
+// Upload audio and send to chat
+async function uploadAndSendAudio(audioFile: File, instructions: string) {
+    try {
+        const fileapi = new FileAPI(api, '__yao.attachment')
+        
+        const uploadResponse = await fileapi.Upload(
+            audioFile,
+            {
+                uploaderID: '__yao.attachment',
+                originalFilename: audioFile.name,
+                public: true
+            },
+            (progress) => console.log(`Upload: ${progress.percentage}%`)
+        )
+
+        if (api.IsError(uploadResponse)) {
+            throw new Error('Audio upload failed')
+        }
+
+        const fileId = uploadResponse.data?.file_id
+        if (!fileId) throw new Error('No file ID returned')
+
+        // Create file wrapper for audio
+        const fileWrapper = CreateFileWrapper('__yao.attachment', fileId)
+        const format = audioFile.name.split('.').pop() || 'wav'
+
+        chat.streamCompletion(
+            {
+                assistant_id: 'audio-assistant',
+                messages: [
+                    {
+                        role: 'user',
+                        content: [
+                            {
+                                type: 'input_audio',
+                                input_audio: {
+                                    data: fileWrapper,  // Use wrapper directly, not base64
+                                    format: format
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            (chunk) => console.log('Response:', chunk)
+        )
+
+        return { fileId, fileWrapper }
+    } catch (error) {
+        console.error('Audio upload error:', error)
+        throw error
+    }
+}
+
+// Upload PDF document and send to chat
+async function uploadAndSendPDF(pdfFile: File, question: string) {
+    try {
+        const fileapi = new FileAPI(api, '__yao.attachment')
+        
+        const uploadResponse = await fileapi.Upload(
+            pdfFile,
+            {
+                uploaderID: '__yao.attachment',
+                originalFilename: pdfFile.name,
+                public: false  // Documents may contain sensitive data
+            },
+            (progress) => console.log(`Upload: ${progress.percentage}%`)
+        )
+
+        if (api.IsError(uploadResponse)) {
+            throw new Error('PDF upload failed')
+        }
+
+        const fileId = uploadResponse.data?.file_id
+        if (!fileId) throw new Error('No file ID returned')
+
+        // Create file wrapper
+        const fileWrapper = CreateFileWrapper('__yao.attachment', fileId)
+
+        chat.streamCompletion(
+            {
+                assistant_id: 'document-assistant',
+                messages: [
+                    {
+                        role: 'user',
+                        content: [
+                            { type: 'text', text: question },
+                            {
+                                type: 'file',
+                                file: {
+                                    url: fileWrapper,
+                                    filename: pdfFile.name,
+                                    mime_type: 'application/pdf'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            (chunk) => console.log('Response:', chunk)
+        )
+
+        return { fileId, fileWrapper }
+    } catch (error) {
+        console.error('PDF upload error:', error)
+        throw error
+    }
+}
+
+// Usage examples
+const imageInput = document.querySelector('#image-input')
+imageInput?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (file) {
+        await uploadAndSendImage(file, 'Describe this image')
+    }
+})
+
+const pdfInput = document.querySelector('#pdf-input')
+pdfInput?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (file) {
+        await uploadAndSendPDF(file, 'Summarize this document')
+    }
+})
+```
+
+**Key Points:**
+
+1. **Upload First**: Use `FileAPI.Upload()` to upload files to the server
+2. **Get File ID**: Extract `file_id` from upload response
+3. **Create Wrapper**: Use `CreateFileWrapper(uploaderID, fileId)` to create wrapper format (`uploader_id://file_id`)
+4. **Use Wrapper Directly**: Pass the wrapper string directly to `url`, `data`, or `file` fields - no need to resolve or convert to base64
+5. **Backend Handles It**: Backend automatically resolves the wrapper format to actual file paths
+6. **Compression**: Enable `compressImage` for images to reduce size and improve performance
+
+**Wrapper Format:**
+```typescript
+const fileWrapper = CreateFileWrapper('__yao.attachment', 'abc123')
+// Result: "__yao.attachment://abc123"
+
+// Use directly in all ContentPart types:
+// - image_url.url: "__yao.attachment://abc123"
+// - input_audio.data: "__yao.attachment://abc123"
+// - file.url: "__yao.attachment://abc123"
+```
+
 ### Using Model ID Instead of Assistant ID (OpenAI Compatibility)
 
 For OpenAI API compatibility, you can use `model` field instead of `assistant_id`. The backend extracts the assistant ID from the model string using the format: `*-yao_assistantID`
