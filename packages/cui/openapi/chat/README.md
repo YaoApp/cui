@@ -1298,28 +1298,40 @@ chat.StreamCompletion({ ... }, (chunk) => {
 
 ### User-Friendly Request Structure
 
+The request structure requires **either `assistant_id` or `model`** (or both). This is enforced via TypeScript discriminated union:
+
 ```typescript
-interface ChatCompletionRequest {
-    // Core fields (always needed)
+// Option 1: Use assistant_id directly (recommended)
+interface ChatCompletionRequestWithAssistant {
     assistant_id: string        // Required: Which assistant to use
     messages: ChatMessage[]     // Required: Chat messages
-
-    // Common optional fields
-    chat_id?: string           // Optional: Continue existing chat (auto-generated if not provided)
-    model?: string             // Optional: Model ID
-
-    // Advanced options (optional)
-    options?: {
-        temperature?: number
-        max_tokens?: number
-        stream?: boolean
-        // ... other OpenAI-compatible parameters
-    }
-
-    // Custom data (optional)
+    chat_id?: string           // Optional: Continue existing chat
+    model?: string             // Optional: Can provide model additionally
+    options?: ChatCompletionOptions
     metadata?: Record<string, any>
 }
+
+// Option 2: Use model with embedded assistant_id (OpenAI compatibility)
+interface ChatCompletionRequestWithModel {
+    model: string              // Required: Model ID (format: *-yao_assistantID)
+    messages: ChatMessage[]     // Required: Chat messages
+    chat_id?: string           // Optional: Continue existing chat
+    assistant_id?: string      // Optional: Can provide assistant_id additionally
+    options?: ChatCompletionOptions
+    metadata?: Record<string, any>
+}
+
+// Final type is a union - at least one of assistant_id or model must be provided
+type ChatCompletionRequest = 
+    | ChatCompletionRequestWithAssistant 
+    | ChatCompletionRequestWithModel
 ```
+
+**Key Points:**
+- **At least one required**: Must provide either `assistant_id` or `model` (or both)
+- **Backend priority**: If both are provided, `assistant_id` takes precedence
+- **Model format**: When using `model`, format is `*-yao_assistantID` (e.g., `gpt-4o-yao_myassistant`)
+- **TypeScript enforcement**: Compiler ensures you provide at least one
 
 ### How It Works
 
