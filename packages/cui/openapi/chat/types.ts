@@ -607,3 +607,31 @@ export type StreamChunk = Message
  * Callback for streaming events
  */
 export type StreamCallback = (chunk: StreamChunk) => void
+
+// ============================================================================
+// Append Messages Types (Pre-input support)
+// ============================================================================
+
+/**
+ * Interrupt type for appending messages
+ */
+export type InterruptType = 'graceful' | 'force'
+
+/**
+ * Request for appending messages to running completion
+ */
+export interface AppendMessagesRequest {
+	type: InterruptType // Interrupt type: "graceful" (wait for current step) or "force" (immediate)
+	messages: ChatMessage[] // New messages to append
+	metadata?: Record<string, any> // Optional metadata
+}
+
+/**
+ * Response from append messages API
+ */
+export interface AppendMessagesResponse {
+	message: string // Success message
+	context_id: string // Context ID that was interrupted
+	type: InterruptType // Interrupt type that was used
+	timestamp: number // Timestamp when the interrupt was processed
+}

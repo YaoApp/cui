@@ -44,6 +44,69 @@ const abort = chat.streamCompletion(
 // abort()
 ```
 
+### Append Messages (Pre-input Support)
+
+The `AppendMessages` API allows users to send new messages while the AI is still generating a response. This is useful for implementing "type-ahead" or interrupt functionality where users can add follow-up questions without waiting for the current response to complete.
+
+```typescript
+import { OpenAPI, Chat } from '@yao/cui/openapi'
+
+const api = new OpenAPI({ baseURL: '/v1' })
+const chat = new Chat(api)
+
+// Step 1: Start streaming and capture context_id
+let contextId: string
+
+const abort = chat.StreamCompletion(
+    {
+        assistant_id: 'my-assistant',
+        messages: [
+            { role: 'user', content: 'Explain quantum computing in detail' }
+        ]
+    },
+    (chunk) => {
+        // Capture context_id from stream_start event
+        if (chunk.type === 'event' && chunk.props?.event === 'stream_start') {
+            contextId = chunk.props.data.context_id
+            console.log('Context ID:', contextId)
+        }
+        
+        // Handle other chunks
+        console.log(chunk)
+    }
+)
+
+// Step 2: User sends a new message while AI is still responding
+// This will append the new message to the conversation
+setTimeout(async () => {
+    try {
+        const response = await chat.AppendMessages(
+            contextId,
+            [
+                { role: 'user', content: 'Wait, can you also explain quantum entanglement?' }
+            ],
+            'graceful' // or 'force'
+        )
+        
+        console.log('Message appended:', response)
+    } catch (error) {
+        console.error('Failed to append message:', error)
+    }
+}, 2000) // Append after 2 seconds
+```
+
+**Interrupt Types:**
+
+- **`graceful`** (default): Waits for the current step to complete before handling the interrupt
+  - Best for most scenarios
+  - Allows the AI to finish its current thought before processing new input
+  - Example: User adds a follow-up question
+
+- **`force`**: Immediately cancels the current operation and processes the interrupt
+  - Use when immediate interruption is needed
+  - Stops LLM streaming and other operations immediately
+  - Example: User realizes the question was wrong and wants to stop
+
 ### With Chat History
 
 ```typescript

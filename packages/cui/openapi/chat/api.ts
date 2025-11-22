@@ -1,5 +1,13 @@
 import { OpenAPI } from '../openapi'
-import { ChatCompletionRequest, ChatCompletionResponse, StreamChunk, StreamCallback } from './types'
+import {
+	ChatCompletionRequest,
+	ChatCompletionResponse,
+	StreamChunk,
+	StreamCallback,
+	ChatMessage,
+	AppendMessagesResponse,
+	InterruptType
+} from './types'
 
 export class Chat {
 	constructor(private api: OpenAPI) {}
@@ -197,6 +205,79 @@ export class Chat {
 				return
 			}
 			throw error
+		}
+	}
+
+	/**
+	 * Append messages to a running completion (pre-input support)
+	 * POST /chat/completions/:context_id/append
+	 *
+	 * This allows users to send new messages while the AI is still generating a response.
+	 * Useful for implementing "type-ahead" or interrupt functionality.
+	 *
+	 * @example
+	 * ```typescript
+	 * // Start streaming
+	 * let contextId: string
+	 * const abort = chat.StreamCompletion(request, (chunk) => {
+	 *   // Capture context_id from stream_start event
+	 *   if (chunk.type === 'event' && chunk.props?.event === 'stream_start') {
+	 *     contextId = chunk.props.data.context_id
+	 *   }
+	 * })
+	 *
+	 * // User sends a new message while AI is still responding
+	 * await chat.AppendMessages(
+	 *   contextId,
+	 *   [{ role: 'user', content: 'Wait, I have another question...' }],
+	 *   'graceful' // or 'force' to interrupt immediately
+	 * )
+	 * ```
+	 *
+	 * @param contextId - The context ID of the running completion (from stream_start event)
+	 * @param messages - New messages to append
+	 * @param type - Interrupt type: "graceful" (wait for current step) or "force" (immediate)
+	 * @param metadata - Optional metadata
+	 * @returns Promise with append result
+	 */
+	async AppendMessages(
+		contextId: string,
+		messages: ChatMessage[],
+		type: InterruptType = 'graceful',
+		metadata?: Record<string, any>
+	): Promise<AppendMessagesResponse> {
+		// Access private config to get baseURL
+		// @ts-ignore
+		const baseURL = this.api.config.baseURL
+
+		// Build URL
+		const url = `${baseURL}/chat/completions/${contextId}/append`
+
+		// Build request body
+		const body = {
+			type,
+			messages,
+			metadata
+		}
+
+		try {
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(body),
+				credentials: 'include' // Include cookies for authentication
+			})
+
+			if (!response.ok) {
+				const errorText = await response.text()
+				throw new Error(`HTTP ${response.status}: ${errorText}`)
+			}
+
+			return await response.json()
+		} catch (error) {
+			throw error instanceof Error ? error : new Error('Failed to append messages')
 		}
 	}
 }
