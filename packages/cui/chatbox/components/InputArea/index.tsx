@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Tooltip, Dropdown, Menu, message } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
+import { Database, Sparkle, UploadSimple } from 'phosphor-react'
 import Icon from '../../../widgets/Icon'
 import { FileAPI } from '../../../openapi'
 import { CreateFileWrapper } from '@/utils/fileWrapper' // Assuming this util exists or we implement wrapper creation inline
@@ -9,6 +10,7 @@ import type { IInputAreaProps } from '../../types'
 import type { ChatMessage } from '../../../openapi'
 import styles from './index.less'
 import AgentTag from './AgentTag'
+import ResourcePicker from '../AIChat/ResourcePicker'
 
 // Mock Data
 const MOCK_AGENT = {
@@ -81,6 +83,7 @@ const InputArea = (props: IInputAreaProps) => {
 	// State
 	const [attachments, setAttachments] = useState<Attachment[]>([])
 	const [agent, setAgent] = useState(propAssistant || MOCK_AGENT)
+	const [resourcePickerVisible, setResourcePickerVisible] = useState(false)
 
 	useEffect(() => {
 		if (propAssistant) {
@@ -486,15 +489,24 @@ const InputArea = (props: IInputAreaProps) => {
 		)
 	}
 
+	const handlePageClick = () => {
+		if (!currentPage) return
+		// Navigate to the current page
+		const fullUrl = window.location.origin + currentPage
+		window.open(fullUrl, '_blank')
+	}
+
 	const renderContextRow = () => (
 		<div className={styles.contextRow}>
 			<div className={styles.leftTags}>{agent && <AgentTag agent={agent} />}</div>
 			<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
 				{currentPage && (
-					<div className={clsx(styles.tag, styles.pageTag)}>
-						<Icon name='material-link' size={12} />
-						<span>{currentPage}</span>
-					</div>
+					<Tooltip title={is_cn ? '打开页面' : 'Open page'}>
+						<div className={clsx(styles.tag, styles.pageTag)} onClick={handlePageClick}>
+							<Icon name='material-link' size={12} />
+							<span>{currentPage}</span>
+						</div>
+					</Tooltip>
 				)}
 				{renderModelSelector()}
 			</div>
@@ -569,13 +581,22 @@ const InputArea = (props: IInputAreaProps) => {
 		)
 	}
 
+	const handleOpenResourcePicker = () => {
+		if (loading) return
+		setResourcePickerVisible(true)
+	}
+
+	const handleCloseResourcePicker = () => {
+		setResourcePickerVisible(false)
+	}
+
 	const renderToolbar = () => {
 		return (
 			<div className={styles.toolbar}>
 				<div className={styles.leftTools}>
-					<Tooltip title={is_cn ? '上传附件' : 'Attach files'}>
+					<Tooltip title={is_cn ? '上传文件' : 'Upload File'}>
 						<div className={styles.toolBtn} onClick={() => fileInputRef.current?.click()}>
-							<Icon name='material-attach_file' size={18} />
+							<UploadSimple size={14} />
 						</div>
 					</Tooltip>
 					<input
@@ -585,6 +606,15 @@ const InputArea = (props: IInputAreaProps) => {
 						onChange={handleFileSelect}
 						multiple
 					/>
+
+					<Tooltip title={is_cn ? '添加数据' : 'Add Data'}>
+						<div
+							className={clsx(styles.toolBtn, loading && styles.disabled)}
+							onClick={handleOpenResourcePicker}
+						>
+							<Database size={14} />
+						</div>
+					</Tooltip>
 
 					<Tooltip
 						title={
@@ -604,7 +634,7 @@ const InputArea = (props: IInputAreaProps) => {
 								// TODO: Optimize logic
 							}}
 						>
-							<Icon name='material-auto_awesome' size={16} />
+							<Sparkle size={14} />
 						</div>
 					</Tooltip>
 				</div>
@@ -652,54 +682,61 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	return (
-		<div
-			className={clsx(styles.container, styles[mode], isAnimating && styles.animating, className)}
-			style={style}
-		>
-			<div className={styles.content}>
-				{mode === 'placeholder' && renderPlaceholder()}
+		<>
+			<div
+				className={clsx(styles.container, styles[mode], isAnimating && styles.animating, className)}
+				style={style}
+			>
+				<div className={styles.content}>
+					{mode === 'placeholder' && renderPlaceholder()}
 
-				<div
-					className={styles.publishBox}
-					onDragOver={handleDragOver}
-					onDragLeave={handleDragLeave}
-					onDrop={handleDrop}
-				>
-					{isDragOver && (
-						<div className={styles.dragOverlay}>
-							<span>{is_cn ? '拖拽文件或项目到这里' : 'Drop files or items here'}</span>
+					<div
+						className={styles.publishBox}
+						onDragOver={handleDragOver}
+						onDragLeave={handleDragLeave}
+						onDrop={handleDrop}
+					>
+						{isDragOver && (
+							<div className={styles.dragOverlay}>
+								<span>
+									{is_cn ? '拖拽文件或项目到这里' : 'Drop files or items here'}
+								</span>
+							</div>
+						)}
+
+						{renderContextRow()}
+
+						<div className={styles.inputWrapper}>
+							{renderAttachments()}
+							<div
+								className={styles.editor}
+								ref={editorRef}
+								contentEditable={!disabled && !loading}
+								onInput={handleInput}
+								onKeyDown={handleKeyDown}
+								onPaste={handlePaste}
+								data-placeholder={
+									mode === 'placeholder'
+										? is_cn
+											? '输入消息...'
+											: 'Type a message...'
+										: is_cn
+										? '输入消息，使用 @ 呼叫智能体'
+										: 'Type a message, use @ to mention agent'
+								}
+							/>
+							{renderSendButton()}
+							{renderMentions()}
 						</div>
-					)}
 
-					{renderContextRow()}
-
-					<div className={styles.inputWrapper}>
-						{renderAttachments()}
-						<div
-							className={styles.editor}
-							ref={editorRef}
-							contentEditable={!disabled && !loading}
-							onInput={handleInput}
-							onKeyDown={handleKeyDown}
-							onPaste={handlePaste}
-							data-placeholder={
-								mode === 'placeholder'
-									? is_cn
-										? '输入消息...'
-										: 'Type a message...'
-									: is_cn
-									? '输入消息，使用 @ 呼叫智能体'
-									: 'Type a message, use @ to mention agent'
-							}
-						/>
-						{renderSendButton()}
-						{renderMentions()}
+						{renderToolbar()}
 					</div>
-
-					{renderToolbar()}
 				</div>
 			</div>
-		</div>
+
+			{/* Resource Picker Modal */}
+			<ResourcePicker visible={resourcePickerVisible} onClose={handleCloseResourcePicker} />
+		</>
 	)
 }
 

@@ -146,9 +146,9 @@ const Index = () => {
 
 		if (global.layout === 'Chat') {
 			return (
-				<ChatWrapper>
+				<ChatboxWrapper>
 					<Outlet />
-				</ChatWrapper>
+				</ChatboxWrapper>
 			)
 		}
 
