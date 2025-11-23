@@ -15,6 +15,7 @@ import LoginWrapper from './wrappers/Login'
 import AuthWrapper from './wrappers/Auth'
 import AdminWrapper from './wrappers/Admin'
 import ChatWrapper from './wrappers/Chat'
+import ChatboxWrapper from './wrappers/Chatbox'
 
 import type { IPropsHelmet, IPropsLoginWrapper } from './types'
 
@@ -80,7 +81,7 @@ const Index = () => {
 		// Chat Layout
 		if (global.layout === 'Chat') {
 			console.log(pathname)
-			if (pathname === '/chat' || pathname === '/chat/') {
+			if (pathname === '/chat' || pathname === '/chat/' || pathname.startsWith('/chatdev')) {
 				global.setSidebarVisible(false)
 			}
 		}
@@ -135,6 +136,14 @@ const Index = () => {
 		}
 
 		if (global.layout === 'Chat') {
+			if (pathname.startsWith('/chatdev')) {
+				return (
+					<ChatboxWrapper>
+						<Outlet />
+					</ChatboxWrapper>
+				)
+			}
+
 			return (
 				<ChatWrapper>
 					<Outlet />

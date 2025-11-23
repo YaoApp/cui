@@ -1,0 +1,120 @@
+.chatbox-main-menu {
+	position: fixed;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 64px;
+	background: var(--color_bg_menu);
+	border-right: 1px solid var(--color_border_light);
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	padding: 4px 0 16px;
+	transition: all 0.3s ease;
+
+	// 确保没有 hidden 样式
+	&.hidden {
+		// transform: translateX(-100%);
+		// opacity: 0;
+	}
+
+	.menu-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		height: 100%;
+	}
+
+	.menu-logo {
+		width: 52px;
+		height: 52px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		margin-bottom: 0;
+		border-radius: var(--radius);
+
+		&:hover {
+			background: var(--color_bg_hover);
+		}
+
+		img {
+			width: 40px;
+			height: 40px;
+			object-fit: contain;
+		}
+	}
+
+	.menu-items {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		width: 100%;
+		flex: 1;
+		padding: 0 8px;
+		overflow-y: auto;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+
+	.menu-item {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 40px;
+		width: 40px;
+		cursor: pointer;
+		border-radius: var(--radius);
+		color: var(--color_text);
+		transition: all 0.2s ease;
+		margin: 0 auto;
+
+		&:hover {
+			background: var(--color_bg_hover);
+			.menu-icon i {
+				color: var(--color_main);
+			}
+		}
+
+		&.active {
+			color: var(--color_main);
+			background: var(--color_chatbox_bg_selected);
+			.menu-icon i {
+				color: var(--color_main);
+			}
+		}
+
+		.menu-icon {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			i {
+				color: var(--color_text_grey);
+				transition: all 0.2s ease;
+			}
+		}
+	}
+
+	.menu-avatar {
+		margin-top: auto;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		border-radius: var(--radius);
+		margin: 16px auto 0;
+		transition: all 0.2s ease;
+
+		&:hover {
+			background: var(--color_bg_hover);
+		}
+	}
+}

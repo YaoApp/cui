@@ -8,7 +8,6 @@ import Loading from '../../components/Loading'
 import Container from '../../components/Container'
 import Nav from '../../components/Nav'
 import Menu from '../../components/Menu'
-import Neo from '../../../chatbox'
 import NeoSidebar from '../../../chatbox/components/Sidebar'
 import ContainerColumnOne from '../../components/ColumnOne/Container'
 import MenuColumnOne from '../../components/ColumnOne/Menu'
@@ -105,8 +104,6 @@ const AdminWrapper: FC<PropsWithChildren> = ({ children }) => {
 					</div>
 				</Then>
 			</If>
-
-			<Neo {...props_neo}></Neo>
 		</Fragment>
 	)
 }

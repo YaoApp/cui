@@ -1,0 +1,18 @@
+.container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--color_chatbox_bg_content);
+	color: var(--color_chatbox_text_primary);
+	transition: padding 0.3s ease;
+}
+
+.smallScreen {
+	padding: 0 !important;
+}
+
+// 隐藏滚动条但保留功能 (如果是 webkit)
+.container::-webkit-scrollbar {
+	display: none;
+}
