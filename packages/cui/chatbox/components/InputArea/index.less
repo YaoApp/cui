@@ -122,6 +122,15 @@
 				justify-content: center;
 				font-size: 10px;
 				font-weight: 500;
+				flex-shrink: 0;
+				overflow: hidden; // Ensure content is clipped
+
+				img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+					display: block; // Remove extra space
+				}
 			}
 
 			.closeTag {
@@ -185,28 +194,71 @@
 			.attachmentItem {
 				display: flex;
 				align-items: center;
-				gap: 6px;
-				padding: 6px 10px;
+				gap: 8px;
+				padding: 4px 8px; // Reduced padding
 				background: var(--color_chatbox_bg_field);
 				border: 1px solid var(--color_chatbox_border_field);
 				border-radius: 8px;
-				font-size: 13px;
+				font-size: 12px; // Reduced font size
 				color: var(--color_text);
-				max-width: 200px;
+				max-width: 200px; // Reduced max width
+				position: relative;
 
-				.fileName {
+				// Image Thumbnail
+				.thumbnail {
+					width: 24px; // Reduced size
+					height: 24px; // Reduced size
+					border-radius: 4px;
+					background-size: cover;
+					background-position: center;
+					background-color: var(--color_bg_hover);
+					// border: 1px solid var(--color_border_light); // Removed border
+				}
+
+				.fileIcon {
+					color: var(--color_primary);
+					// No border for icon
+				}
+
+				.fileInfo {
+					display: flex;
+					flex-direction: column;
 					overflow: hidden;
-					text-overflow: ellipsis;
-					white-space: nowrap;
+					max-width: 140px; // Reduced width
+
+					.fileName {
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: nowrap;
+						font-weight: 500;
+						font-size: 12px; // Reduced font size
+					}
+
+					.uploading {
+						font-size: 10px;
+						color: var(--color_warning);
+					}
+
+					.error {
+						font-size: 10px;
+						color: var(--color_danger);
+					}
 				}
 
 				.removeBtn {
+					margin-left: auto;
 					cursor: pointer;
 					color: var(--color_text_grey);
+					width: 16px; // Reduced size
+					height: 16px; // Reduced size
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					border-radius: 50%;
 					transition: all 0.2s;
 					&:hover {
+						background: rgba(0,0,0,0.05);
 						color: var(--color_danger);
-						transform: scale(1.2); // Scale animation
 					}
 				}
 			}

@@ -5,7 +5,7 @@ import styles from './index.less'
 const Index = () => {
     const { sessions, loadHistory, currentChatId } = useChatContext()
 
-    return (
+	return (
         <div className={styles._local} style={{ padding: 12 }}>
             <h3 style={{ padding: '0 4px', marginBottom: 8 }}>Recent Chats</h3>
             <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -29,8 +29,8 @@ const Index = () => {
                     </div>
                 ))}
             </div>
-        </div>
-    )
+		</div>
+	)
 }
 
 export default Index

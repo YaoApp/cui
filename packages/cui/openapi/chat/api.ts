@@ -56,6 +56,8 @@ export class Chat {
 		// Extract assistant_id (either from assistant_id field or model field)
 		const assistantId = 'assistant_id' in request ? request.assistant_id : undefined
 
+		// console.log('[Chat API] Starting stream...', { url, assistantId, chatId: request.chat_id })
+
 		// Start the stream
 		this.startStream(
 			url,
@@ -136,6 +138,8 @@ export class Chat {
 				headers['X-Yao-Chat'] = chatId
 			}
 
+			// console.log('[Chat API] Fetching:', url, { headers, body: request })
+
 			// Make POST request with streaming enabled
 			const response = await fetch(url, {
 				method: 'POST',
@@ -144,6 +148,8 @@ export class Chat {
 				credentials: 'include', // Include cookies for authentication
 				signal: abortController.signal
 			})
+
+			// console.log('[Chat API] Response status:', response.status, response.statusText)
 
 			if (!response.ok) {
 				throw new Error(`HTTP ${response.status}: ${response.statusText}`)
@@ -166,7 +172,9 @@ export class Chat {
 				}
 
 				// Decode chunk and add to buffer
-				buffer += decoder.decode(value, { stream: true })
+				const chunkText = decoder.decode(value, { stream: true })
+				// console.log('[Chat API] Received chunk:', chunkText.length, 'bytes')
+				buffer += chunkText
 
 				// Process complete SSE messages
 				const lines = buffer.split('\n')
@@ -195,7 +203,11 @@ export class Chat {
 						const chunk = JSON.parse(data) as StreamChunk
 						onEvent(chunk)
 					} catch (parseError) {
-						console.warn('Failed to parse SSE data:', data, parseError)
+						console.warn(
+							'[Chat API] Failed to parse SSE data:',
+							data.substring(0, 100),
+							parseError
+						)
 					}
 				}
 			}

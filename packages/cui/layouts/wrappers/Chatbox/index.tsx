@@ -264,15 +264,15 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	)
 
 	return (
-		<ChatProvider assistantId="neo">
+		<ChatProvider>
 			<div
-				className={clsx(
+			className={clsx(
 					'chatbox-wrapper',
-					sidebarVisible && 'with-sidebar',
-					isAnimating && 'animating',
-					isMaximized && 'maximized'
-				)}
-			>
+				sidebarVisible && 'with-sidebar',
+				isAnimating && 'animating',
+				isMaximized && 'maximized'
+			)}
+		>
 			<Menu
 				sidebarVisible={sidebarVisible}
 				setSidebarVisible={handleSetSidebarVisible}
@@ -284,7 +284,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 				style={{
 					marginLeft: '64px',
 					width:
-						sidebarVisible && !isMaximized
+					sidebarVisible && !isMaximized
 							? `calc(100% - 64px - ${sidebarWidth}px)`
 							: `calc(100% - 64px)`
 				}}
@@ -359,7 +359,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 				</div>
 			</div>
 			{isMaximized && sidebarVisible && <div className='sidebar-overlay' onClick={handleToggleMaximize} />}
-			</div>
+		</div>
 		</ChatProvider>
 	)
 }

@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Tooltip, Dropdown, Menu } from 'antd'
+import { Tooltip, Dropdown, Menu, message } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
 import Icon from '../../../widgets/Icon'
+import { FileAPI } from '../../../openapi'
+import { CreateFileWrapper } from '@/utils/fileWrapper' // Assuming this util exists or we implement wrapper creation inline
 import type { IInputAreaProps } from '../../types'
 import type { ChatMessage } from '../../../openapi'
 import styles from './index.less'
+import AgentTag from './AgentTag'
 
 // Mock Data
 const MOCK_AGENT = {
@@ -27,18 +30,37 @@ const MOCK_MODELS = [
 	{ label: 'Llama 3 70B', value: 'llama-3-70b' }
 ]
 
-const MOCK_ATTACHMENTS = [
-	{ id: '1', name: 'report.pdf', type: 'file' },
-	{ id: '2', name: 'screenshot.png', type: 'image' }
-]
 const MOCK_MENTIONS = [
 	{ id: 'neo', name: 'Neo', avatar: 'N' },
 	{ id: 'translate', name: 'Translator', avatar: 'T' },
 	{ id: 'code', name: 'Code Assistant', avatar: 'C' }
 ]
 
+interface Attachment {
+	id: string
+	file: File
+	name: string
+	type: 'image' | 'file'
+	previewUrl?: string
+	uploading: boolean
+	fileId?: string
+	wrapper?: string
+	error?: string
+}
+
 const InputArea = (props: IInputAreaProps) => {
-	const { mode, onSend, loading, disabled, className, style, chatId, draft, onChange } = props
+	const {
+		mode,
+		onSend,
+		loading,
+		disabled,
+		className,
+		style,
+		chatId,
+		draft,
+		onChange,
+		assistant: propAssistant
+	} = props
 	const [isAnimating, setIsAnimating] = useState(false)
 	const [isDragOver, setIsDragOver] = useState(false)
 	const [showMentions, setShowMentions] = useState(false)
@@ -52,12 +74,22 @@ const InputArea = (props: IInputAreaProps) => {
 	const [currentPage, setCurrentPage] = useState('')
 
 	const editorRef = useRef<HTMLDivElement>(null)
+	const fileInputRef = useRef<HTMLInputElement>(null)
 	// Store selection range to restore focus after UI interactions
 	const lastRangeRef = useRef<Range | null>(null)
 
-	// Mock State
-	const [attachments, setAttachments] = useState<any[]>([])
-	const [agent, setAgent] = useState(MOCK_AGENT)
+	// State
+	const [attachments, setAttachments] = useState<Attachment[]>([])
+	const [agent, setAgent] = useState(propAssistant || MOCK_AGENT)
+
+	useEffect(() => {
+		if (propAssistant) {
+			setAgent(propAssistant)
+			if (propAssistant.defaultModel) {
+				setCurrentModel(propAssistant.defaultModel)
+			}
+		}
+	}, [propAssistant])
 
 	// Reset animating state after transition
 	useEffect(() => {
@@ -71,8 +103,6 @@ const InputArea = (props: IInputAreaProps) => {
 	useEffect(() => {
 		if (editorRef.current) {
 			const newContent = draft || ''
-			// Only update if content is different to avoid cursor jumping if we were typing
-			// But this effect runs on chatId change, so it's safe to replace.
 			if (editorRef.current.innerText !== newContent) {
 				editorRef.current.innerText = newContent
 				setIsEmpty(!newContent.trim())
@@ -81,6 +111,16 @@ const InputArea = (props: IInputAreaProps) => {
 		// Reset attachments for new chat/tab (TODO: Support attachment drafts?)
 		setAttachments([])
 	}, [chatId]) // draft is not in deps to avoid loop while typing, we only restore on chatId change
+
+	// When loading changes from true to false (request completed), ensure UI state is correct
+	useEffect(() => {
+		if (!loading && editorRef.current) {
+			// Check if editor is actually empty after request completes
+			const content = editorRef.current.textContent || ''
+			const hasTags = editorRef.current.querySelectorAll(`.${styles.mentionTag}`).length > 0
+			setIsEmpty(!content.trim() && !hasTags)
+		}
+	}, [loading])
 
 	// Update Current Page
 	useEffect(() => {
@@ -123,15 +163,9 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 
 		// If triggered by '@', we need to replace the keyword.
-		// Ideally we should track the start position of '@'.
-		// For robust implementation, we can just insert at cursor.
-		// Users can delete the '@' manually if needed, or we refine logic to find '@'.
-		// Let's try to find '@' immediately before cursor if it exists.
 		if (range.startOffset > 0 && range.startContainer.nodeType === Node.TEXT_NODE) {
 			const textBefore = range.startContainer.textContent || ''
 			// Simple check: if char before cursor is '@', delete it.
-			// Or if we have a keyword, delete keyword length + 1.
-			// Here we assume simple insertion for simplicity.
 		}
 
 		// Create Tag Element
@@ -163,6 +197,61 @@ const InputArea = (props: IInputAreaProps) => {
 		handleInput() // Update empty state
 	}
 
+	const handleUpload = async (files: File[]) => {
+		if (!window.$app?.openapi) {
+			message.error('OpenAPI not initialized')
+			return
+		}
+
+		const uploaderID = '__yao.attachment'
+		const fileApi = new FileAPI(window.$app.openapi, uploaderID)
+
+		// 1. Create attachment placeholders
+		const newAttachments: Attachment[] = files.map((file) => ({
+			id: Math.random().toString(36).substring(7),
+			file,
+			name: file.name,
+			type: file.type.startsWith('image/') ? 'image' : 'file',
+			previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+			uploading: true
+		}))
+
+		setAttachments((prev) => [...prev, ...newAttachments])
+
+		// 2. Upload each file
+		for (const att of newAttachments) {
+			try {
+				const res = await fileApi.Upload(att.file, {
+					uploaderID,
+					originalFilename: att.name,
+					compressImage: att.type === 'image',
+					public: true // Chat attachments usually public for access
+				})
+
+				if (window.$app.openapi.IsError(res) || !res.data?.file_id) {
+					throw new Error(res.error?.error_description || 'Upload failed')
+				}
+
+				const fileId = res.data.file_id
+				const wrapper = `${uploaderID}://${fileId}`
+
+				setAttachments((prev) =>
+					prev.map((p) => (p.id === att.id ? { ...p, uploading: false, fileId, wrapper } : p))
+				)
+			} catch (err) {
+				console.error('Upload error:', err)
+				setAttachments((prev) =>
+					prev.map((p) =>
+						p.id === att.id
+							? { ...p, uploading: false, error: is_cn ? '上传失败' : 'Upload failed' }
+							: p
+					)
+				)
+				message.error(`${att.name}: ${is_cn ? '上传失败' : 'Upload failed'}`)
+			}
+		}
+	}
+
 	// --- Handlers ---
 
 	const handleInput = () => {
@@ -189,11 +278,6 @@ const InputArea = (props: IInputAreaProps) => {
 			if (charBefore === '@') {
 				saveSelection() // Save range when @ is detected
 				setShowMentions(true)
-			} else {
-				// Basic logic: hide if not typing after @
-				// For full implementation, we need to track if we are inside a "mention sequence"
-				// Here we just close if not immediately @
-				// setShowMentions(false)
 			}
 		} else {
 			setShowMentions(false)
@@ -205,11 +289,46 @@ const InputArea = (props: IInputAreaProps) => {
 		const text = editorRef.current.innerText
 		const hasTags = editorRef.current.querySelectorAll(`.${styles.mentionTag}`).length > 0
 
-		if (!text.trim() && !hasTags && attachments.length === 0) return
+		// Filter out attachments that are still uploading or failed
+		const validAttachments = attachments.filter((att) => !att.uploading && !att.error && att.wrapper)
+
+		if (!text.trim() && !hasTags && validAttachments.length === 0) return
+
+		// Construct Content
+		let content: ChatMessage['content']
+		if (validAttachments.length > 0) {
+			// Multimodal content
+			const parts: any[] = []
+			if (text.trim()) {
+				parts.push({ type: 'text', text: text })
+			}
+			validAttachments.forEach((att) => {
+				if (att.type === 'image') {
+					parts.push({
+						type: 'image_url',
+						image_url: {
+							url: att.wrapper,
+							detail: 'auto'
+						}
+					})
+				} else {
+					parts.push({
+						type: 'file',
+						file: {
+							url: att.wrapper,
+							filename: att.name
+						}
+					})
+				}
+			})
+			content = parts
+		} else {
+			content = text // Plain text
+		}
 
 		const message: ChatMessage = {
 			role: 'user',
-			content: text // Send plain text representation
+			content
 		}
 
 		if (mode === 'placeholder') {
@@ -245,20 +364,23 @@ const InputArea = (props: IInputAreaProps) => {
 	const handlePaste = (e: React.ClipboardEvent) => {
 		e.preventDefault()
 		const text = e.clipboardData.getData('text/plain')
-		document.execCommand('insertText', false, text)
+		if (text) {
+			document.execCommand('insertText', false, text)
+		}
 
 		// Check for files
 		const items = e.clipboardData.items
+		const files: File[] = []
 		for (const item of items) {
 			if (item.kind === 'file') {
 				const file = item.getAsFile()
 				if (file) {
-					setAttachments((prev) => [
-						...prev,
-						{ name: file.name, type: file.type.startsWith('image') ? 'image' : 'file' }
-					])
+					files.push(file)
 				}
 			}
+		}
+		if (files.length > 0) {
+			handleUpload(files)
 		}
 	}
 
@@ -279,20 +401,23 @@ const InputArea = (props: IInputAreaProps) => {
 
 		// Check for files
 		if (e.dataTransfer.files.length > 0) {
-			const newFiles = Array.from(e.dataTransfer.files).map((f) => ({
-				name: f.name,
-				type: f.type.startsWith('image') ? 'image' : 'file'
-			}))
-			setAttachments((prev) => [...prev, ...newFiles])
+			handleUpload(Array.from(e.dataTransfer.files))
 		}
 
 		// Check for custom protocol (Mock)
 		const customData = e.dataTransfer.getData('application/x-yao-item')
 		if (customData) {
-			// Insert as Tag at drop position?
-			// Drag event doesn't set selection automatically in contentEditable in all browsers correctly for custom data.
-			// We simply insert at end or current selection for now.
 			insertTag('Dropped Item', 'item-id', 'mention')
+		}
+	}
+
+	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (e.target.files && e.target.files.length > 0) {
+			handleUpload(Array.from(e.target.files))
+		}
+		// Clear input so same file can be selected again
+		if (fileInputRef.current) {
+			fileInputRef.current.value = ''
 		}
 	}
 
@@ -305,14 +430,20 @@ const InputArea = (props: IInputAreaProps) => {
 	)
 
 	const renderModelSelector = () => {
-		if (!agent?.allowModelSelection) return null
+		// Temporary fix: Show selector even if agent doesn't strictly allow it, or if it's missing
+		// This is because mock data might be missing the flag, or real data logic is different.
+		// In production, use agent?.allowModelSelection
+		// if (!agent?.allowModelSelection) return null
+
+		// Check if we have models to show. If not, maybe show a loading state or just the default
+		const models = MOCK_MODELS // In future, fetch from API based on agent
 
 		const menu = (
 			<Menu
 				onClick={({ key }) => setCurrentModel(key)}
 				selectedKeys={[currentModel]}
 				style={{ minWidth: 140 }}
-				items={MOCK_MODELS.map((m) => ({
+				items={models.map((m) => ({
 					key: m.value,
 					label: (
 						<div
@@ -343,7 +474,7 @@ const InputArea = (props: IInputAreaProps) => {
 			/>
 		)
 
-		const currentLabel = MOCK_MODELS.find((m) => m.value === currentModel)?.label || currentModel
+		const currentLabel = models.find((m) => m.value === currentModel)?.label || currentModel
 
 		return (
 			<Dropdown overlay={menu} trigger={['click']} placement='bottomRight'>
@@ -357,28 +488,16 @@ const InputArea = (props: IInputAreaProps) => {
 
 	const renderContextRow = () => (
 		<div className={styles.contextRow}>
-			<div className={styles.leftTags}>
-				{agent && (
-					<div className={styles.tag}>
-						<div className={styles.tagAvatar}>
-							{agent.avatar && agent.avatar.length > 2 ? (
-								<img src={agent.avatar} alt={agent.name} />
-							) : (
-								agent.avatar || agent.name[0]
-							)}
-						</div>
-						<span>{agent.name}</span>
-						{/* No close button for Agent */}
-					</div>
-				)}
+			<div className={styles.leftTags}>{agent && <AgentTag agent={agent} />}</div>
+			<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
 				{currentPage && (
 					<div className={clsx(styles.tag, styles.pageTag)}>
 						<Icon name='material-link' size={12} />
 						<span>{currentPage}</span>
 					</div>
 				)}
+				{renderModelSelector()}
 			</div>
-			{renderModelSelector()}
 		</div>
 	)
 
@@ -386,18 +505,46 @@ const InputArea = (props: IInputAreaProps) => {
 		if (attachments.length === 0) return null
 		return (
 			<div className={styles.attachmentList}>
-				{attachments.map((att, idx) => (
-					<div key={idx} className={styles.attachmentItem}>
-						<Icon
-							name={att.type === 'image' ? 'material-image' : 'material-description'}
-							size={14}
-						/>
-						<span className={styles.fileName}>{att.name}</span>
+				{attachments.map((att) => (
+					<div key={att.id} className={styles.attachmentItem}>
+						{att.type === 'image' && att.previewUrl ? (
+							<Tooltip
+								title={
+									<img
+										src={att.previewUrl}
+										alt='preview'
+										style={{
+											maxWidth: 200,
+											maxHeight: 200,
+											objectFit: 'contain'
+										}}
+									/>
+								}
+								color='#fff'
+								overlayInnerStyle={{ padding: 4 }}
+							>
+								<div
+									className={styles.thumbnail}
+									style={{ backgroundImage: `url(${att.previewUrl})` }}
+								/>
+							</Tooltip>
+						) : (
+							<Icon name='material-description' size={20} className={styles.fileIcon} />
+						)}
+						<div className={styles.fileInfo}>
+							<span className={styles.fileName}>{att.name}</span>
+							{att.uploading && (
+								<span className={styles.uploading}>
+									{is_cn ? '上传中...' : 'Uploading...'}
+								</span>
+							)}
+							{att.error && <span className={styles.error}>{att.error}</span>}
+						</div>
 						<span
 							className={styles.removeBtn}
-							onClick={() => setAttachments((prev) => prev.filter((_, i) => i !== idx))}
+							onClick={() => setAttachments((prev) => prev.filter((p) => p.id !== att.id))}
 						>
-							×
+							<Icon name='material-close' size={14} />
 						</span>
 					</div>
 				))}
@@ -407,7 +554,9 @@ const InputArea = (props: IInputAreaProps) => {
 
 	const renderSendButton = () => {
 		const showStop = loading
-		const canSend = !isEmpty || attachments.length > 0
+		// Enable send if not empty, or has attachments that are ready
+		const hasReadyAttachments = attachments.some((att) => !att.uploading && !att.error)
+		const canSend = !isEmpty || hasReadyAttachments
 
 		return (
 			<button
@@ -424,16 +573,19 @@ const InputArea = (props: IInputAreaProps) => {
 		return (
 			<div className={styles.toolbar}>
 				<div className={styles.leftTools}>
-					<Tooltip title={is_cn ? '上传文件' : 'Upload File'}>
-						<div className={styles.toolBtn}>
-							<Icon name='material-upload_file' size={16} />
+					<Tooltip title={is_cn ? '上传附件' : 'Attach files'}>
+						<div className={styles.toolBtn} onClick={() => fileInputRef.current?.click()}>
+							<Icon name='material-attach_file' size={18} />
 						</div>
 					</Tooltip>
-					<Tooltip title={is_cn ? '添加数据' : 'Add Data'}>
-						<div className={styles.toolBtn}>
-							<Icon name='material-dataset' size={16} />
-						</div>
-					</Tooltip>
+					<input
+						type='file'
+						ref={fileInputRef}
+						style={{ display: 'none' }}
+						onChange={handleFileSelect}
+						multiple
+					/>
+
 					<Tooltip
 						title={
 							!isEmpty
@@ -476,12 +628,8 @@ const InputArea = (props: IInputAreaProps) => {
 						onClick={() => {
 							// Try to remove the '@' that triggered this
 							if (lastRangeRef.current) {
-								// This is tricky without precise tracking.
-								// We just insert the tag for now.
-								// Deleting the '@' robustly requires tracking its node and offset.
 								const range = lastRangeRef.current
 								if (range.startOffset > 0 && range.startContainer.textContent) {
-									// Check char before
 									const char =
 										range.startContainer.textContent[range.startOffset - 1]
 									if (char === '@') {

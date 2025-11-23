@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { nanoid } from 'nanoid'
+import { getLocale } from '@umijs/max'
+import { useGlobal } from '@/context/app'
 import { Chat } from '../../openapi'
+import { Agent } from '../../openapi/agent'
 import type { Message, ChatMessage } from '../../openapi'
 import type { IChatSession, ChatTab } from '../types'
 import { applyDelta, clearMessageCache } from '../utils/delta'
@@ -19,6 +22,7 @@ export interface UseChatReturn {
 	currentChatId?: string
 	loading: boolean
 	streaming: boolean
+	assistant?: any // Added assistant info
 
 	// Tab State
 	tabs: ChatTab[]
@@ -33,7 +37,7 @@ export interface UseChatReturn {
 	abort: () => void
 	reset: () => void
 	loadHistory: (chatId: string) => Promise<void>
-	createNewChat: () => void
+	createNewChat: (assistantId?: string) => void
 
 	// Tab Actions
 	activateTab: (chatId: string) => void
@@ -41,7 +45,13 @@ export interface UseChatReturn {
 }
 
 export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
-	const { assistantId } = options
+	const { assistantId: propAssistantId } = options
+	const global = useGlobal()
+	
+	// Determine effective assistant ID for *defaults*
+	// 1. Prop
+	// 2. Global default assistant
+	const defaultAssistantId = propAssistantId || global.default_assistant?.assistant_id
 
 	// Chat States Map: chatId -> messages
 	const [chatStates, setChatStates] = useState<Record<string, Message[]>>({})
@@ -56,6 +66,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const [sessions, setSessions] = useState<IChatSession[]>([])
 	const [loading, setLoading] = useState(false)
 	const [streaming, setStreaming] = useState(false)
+	const [assistant, setAssistant] = useState<any>(null) // Assistant info
 
 	const [chatClient, setChatClient] = useState<Chat | null>(null)
 	const abortHandleRef = useRef<(() => void) | null>(null)
@@ -64,6 +75,10 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const messages = activeTabId ? chatStates[activeTabId] || [] : []
 	// currentChatId is activeTabId
 	const currentChatId = activeTabId || undefined
+
+	// Get current assistant ID from active tab
+	const activeTab = tabs.find(t => t.chatId === activeTabId)
+	const currentAssistantId = activeTab?.assistantId || defaultAssistantId
 
 	// Get current draft
 	const inputDraft = activeTabId ? inputDrafts[activeTabId] || '' : ''
@@ -89,6 +104,36 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		getRecentChats().then(setSessions)
 	}, [])
 
+	// Fetch Assistant Info
+	useEffect(() => {
+		// If we have a currentAssistantId, fetch it.
+		// If not (e.g. new chat without inherited ID), we might fallback to default or wait.
+		if (!window.$app?.openapi) return
+
+		const fetchId = currentAssistantId
+
+		const fetchAssistant = async () => {
+			if (!fetchId) return // Don't fetch if no ID
+
+			const agentClient = new Agent(window.$app.openapi)
+			try {
+				// Use 'zh-cn' or 'en-us' based on locale if needed, but api usually handles it or returns raw
+				const locale = getLocale() || 'en-us'
+				const res = await agentClient.assistants.Get(fetchId, locale)
+				if (!window.$app.openapi.IsError(res)) {
+					const data = window.$app.openapi.GetData(res)
+					// Filter necessary info
+					const { assistant_id, name, avatar, description, built_in, connector, type, public: isPublic, readonly } = data
+					setAssistant({ assistant_id, name, avatar, description, built_in, connector, type, public: isPublic, readonly })
+				}
+			} catch (err) {
+				console.error('Failed to fetch assistant info:', err)
+			}
+		}
+		
+		fetchAssistant()
+	}, [currentAssistantId])
+
 	// Helper to update messages for a specific chat ID
 	const updateMessages = useCallback((chatId: string, updater: (prev: Message[]) => Message[]) => {
 		setChatStates((prev) => ({
@@ -102,13 +147,23 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		async (inputMsg: ChatMessage) => {
 			// If no active tab, create one automatically
 			let targetTabId = activeTabId
+			let targetAssistantId = currentAssistantId
+
 			if (!targetTabId) {
 				const newId = nanoid()
-				const newTab: ChatTab = { chatId: newId, title: 'New Chat' }
+				// Use default assistant ID for auto-created tab
+				targetAssistantId = defaultAssistantId
+				const newTab: ChatTab = { chatId: newId, title: 'New Chat', assistantId: targetAssistantId }
 				setTabs((prev) => [...prev, newTab])
 				setChatStates((prev) => ({ ...prev, [newId]: [] }))
 				setActiveTabId(newId)
 				targetTabId = newId
+			} else {
+				// Use existing tab's assistant
+				const tab = tabs.find(t => t.chatId === targetTabId)
+				if (tab && tab.assistantId) {
+					targetAssistantId = tab.assistantId
+				}
 			}
 
 			// Clear draft
@@ -134,10 +189,16 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 			try {
 				// 2. Start Streaming
+				if (!targetAssistantId) {
+					console.error('Assistant ID is missing')
+					setStreaming(false)
+					return
+				}
+
 				const abortFn = chatClient.StreamCompletion(
 					{
-						assistant_id: assistantId || 'neo',
-						chat_id: targetTabId,
+						assistant_id: targetAssistantId,
+						chat_id: targetTabId, // Always pass chat_id (generated by frontend)
 						messages: [inputMsg]
 					},
 					(chunk: Message) => {
@@ -193,6 +254,10 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 						if (chunk.done) {
 							clearMessageCache(msgId)
+							// Also end streaming when we receive the final done message
+							// This is a fallback in case stream_end event is missed
+							setStreaming(false)
+							abortHandleRef.current = null
 						}
 					},
 					(error: any) => {
@@ -215,7 +280,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				setStreaming(false)
 			}
 		},
-		[chatClient, assistantId, activeTabId, updateMessages]
+		[chatClient, defaultAssistantId, currentAssistantId, activeTabId, updateMessages, tabs]
 	)
 
 	const abort = useCallback(() => {
@@ -242,7 +307,12 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			}
 
 			// Open new tab
-			const newTab: ChatTab = { chatId, title: 'Loading...' }
+			// For history loading, we might need to fetch the assistant ID from the session details
+			// For now, we assume default or try to get it from sessions list
+			const session = sessions.find(s => s.chat_id === chatId)
+			const historyAssistantId = session?.assistant_id || defaultAssistantId
+
+			const newTab: ChatTab = { chatId, title: 'Loading...', assistantId: historyAssistantId }
 			setTabs((prev) => [...prev, newTab])
 			setActiveTabId(chatId)
 			setLoading(true)
@@ -253,7 +323,6 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				setChatStates((prev) => ({ ...prev, [chatId]: history }))
 
 				// Update title based on history? (Mock: use session title)
-				const session = sessions.find((s) => s.chat_id === chatId)
 				if (session) {
 					setTabs((prev) =>
 						prev.map((t) => (t.chatId === chatId ? { ...t, title: session.title } : t))
@@ -265,17 +334,31 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				setLoading(false)
 			}
 		},
-		[tabs, sessions]
+		[tabs, sessions, defaultAssistantId]
 	)
 
-	const createNewChat = useCallback(() => {
+	const createNewChat = useCallback((arg?: string | any) => {
+		// Check if arg is a string (assistantId), otherwise treat as event/empty
+		const assistantId = typeof arg === 'string' ? arg : undefined
+
 		const newId = nanoid()
-		const newTab: ChatTab = { chatId: newId, title: 'New Chat' }
+		
+		// Inherit from active tab if no assistant ID provided
+		let targetAssistantId = assistantId
+		if (!targetAssistantId) {
+			const currentTab = tabs.find(t => t.chatId === activeTabId)
+			targetAssistantId = currentTab?.assistantId
+		}
+		
+		// Fallback to default
+		targetAssistantId = targetAssistantId || defaultAssistantId
+		
+		const newTab: ChatTab = { chatId: newId, title: 'New Chat', assistantId: targetAssistantId }
 		setTabs((prev) => [...prev, newTab])
 		setChatStates((prev) => ({ ...prev, [newId]: [] }))
 		setActiveTabId(newId)
 		clearMessageCache()
-	}, [])
+	}, [defaultAssistantId, tabs, activeTabId])
 
 	const activateTab = useCallback((chatId: string) => {
 		setActiveTabId(chatId)
@@ -320,6 +403,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		currentChatId,
 		loading,
 		streaming,
+		assistant, // Export assistant info
 		tabs,
 		activeTabId,
 		inputDraft,

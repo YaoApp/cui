@@ -19,6 +19,7 @@ export interface IChatSession {
 export interface ChatTab {
 	chatId: string // 'new' | chat_id
 	title: string
+	assistantId?: string // Added assistantId
 }
 
 /**
@@ -58,6 +59,15 @@ export interface IInputAreaProps {
 	draft?: string
 	/** Callback for input change */
 	onChange?: (value: string) => void
+	/** Assistant Info */
+	assistant?: {
+		name: string
+		id: string
+		avatar?: string
+		description?: string
+		allowModelSelection?: boolean
+		defaultModel?: string
+	}
 	className?: string
 	style?: React.CSSProperties
 }

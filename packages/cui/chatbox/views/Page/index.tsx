@@ -27,7 +27,8 @@ const Page = (props: IPageProps) => {
 		activateTab,
 		closeTab,
 		inputDraft,
-		updateInputDraft
+		updateInputDraft,
+		assistant
 	} = useChatContext()
 
 	// Determine mode
@@ -76,6 +77,7 @@ const Page = (props: IPageProps) => {
 				chatId={activeTabId}
 				draft={inputDraft}
 				onChange={updateInputDraft}
+				assistant={assistant}
 			/>
 		</div>
 	)
