@@ -53,6 +53,14 @@ const Page = (props: IPageProps) => {
 					activeTabId={activeTabId}
 					onTabChange={activateTab}
 					onTabClose={closeTab}
+					onHistoryClick={() => {
+						// TODO: Toggle sidebar or show history modal
+						console.log('History clicked')
+					}}
+					onSettingsClick={() => {
+						// TODO: Show settings dropdown
+						console.log('Settings clicked')
+					}}
 				/>
 			)}
 

@@ -87,5 +87,9 @@ export interface IHeaderProps {
 	onTabClose?: (id: string) => void
 	/** 新建会话回调 */
 	onNewChat?: () => void
+	/** 历史记录回调 */
+	onHistoryClick?: () => void
+	/** 设置/更多回调 */
+	onSettingsClick?: () => void
 	className?: string
 }
