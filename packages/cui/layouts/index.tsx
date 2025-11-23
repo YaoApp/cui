@@ -135,15 +135,16 @@ const Index = () => {
 			)
 		}
 
-		if (global.layout === 'Chat') {
-			if (pathname.startsWith('/chatdev')) {
-				return (
-					<ChatboxWrapper>
-						<Outlet />
-					</ChatboxWrapper>
-				)
-			}
+		// Force ChatboxWrapper for /chatdev route regardless of global.layout
+		if (pathname.startsWith('/chatdev')) {
+			return (
+				<ChatboxWrapper>
+					<Outlet />
+				</ChatboxWrapper>
+			)
+		}
 
+		if (global.layout === 'Chat') {
 			return (
 				<ChatWrapper>
 					<Outlet />

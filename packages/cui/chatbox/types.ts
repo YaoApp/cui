@@ -52,6 +52,12 @@ export interface IInputAreaProps {
 	onAbort?: () => void
 	/** 附件上传器 ID (可选) */
 	uploader?: string
+	/** 当前会话 ID (用于重置输入框) */
+	chatId?: string
+	/** Draft content */
+	draft?: string
+	/** Callback for input change */
+	onChange?: (value: string) => void
 	className?: string
 	style?: React.CSSProperties
 }

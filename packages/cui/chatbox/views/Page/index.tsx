@@ -25,16 +25,16 @@ const Page = (props: IPageProps) => {
 		tabs,
 		activeTabId,
 		activateTab,
-		closeTab
+		closeTab,
+		inputDraft,
+		updateInputDraft
 	} = useChatContext()
 
 	// Determine mode
 	// Placeholder mode if:
 	// 1. No tabs
-	// 2. OR Active tab is New Chat (starts with 'new'), no messages, and NOT loading history
-	// regardless of how many tabs are open.
-	const isPlaceholderMode =
-		tabs.length === 0 || (!!activeTabId && activeTabId.startsWith('new') && messages.length === 0 && !loading)
+	// 2. OR Active tab has no messages and is NOT loading history
+	const isPlaceholderMode = tabs.length === 0 || (messages.length === 0 && !loading)
 
 	const inputMode = isPlaceholderMode ? 'placeholder' : 'normal'
 
@@ -68,7 +68,15 @@ const Page = (props: IPageProps) => {
 			{!isPlaceholderMode && <MessageList messages={messages} loading={loading} streaming={streaming} />}
 
 			{/* Input Area */}
-			<InputArea mode={inputMode} onSend={sendMessage} loading={streaming} onAbort={abort} />
+			<InputArea
+				mode={inputMode}
+				onSend={sendMessage}
+				loading={streaming}
+				onAbort={abort}
+				chatId={activeTabId}
+				draft={inputDraft}
+				onChange={updateInputDraft}
+			/>
 		</div>
 	)
 }

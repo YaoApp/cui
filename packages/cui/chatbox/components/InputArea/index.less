@@ -1,78 +1,427 @@
 .container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    // transition: all 0.3s ease; // Remove default transition
-    padding: 0 20px 20px;
-    border-top: 1px solid transparent; // Consistent border to prevent animation artifacts
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	padding: 0 20px 20px;
+	border-top: 1px solid transparent; // Consistent border
 
-    &.animating {
-        transition: all 0.3s ease;
-    }
+	&.animating {
+		transition: all 0.3s ease;
+	}
 
-    &.placeholder {
-        flex: 1;
-        align-items: center;
-        padding-bottom: 20vh; // Visual centering adjustment
-        
-        .inputWrapper {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-    }
+	// Common Publish Box Styles
+	.publishBox {
+		background: var(--color_chatbox_bg_card);
+		border: 1px solid var(--color_chatbox_border_card);
+		border-radius: 16px;
+		padding: 12px 16px 8px;
+		position: relative;
+		transition: border-color 0.2s, box-shadow 0.2s;
 
-    &.normal {
-        flex-shrink: 0;
-        padding-top: 10px;
-    }
+		// Default Shadow (Normal Mode)
+		box-shadow: 0 -2px 10px var(--color_border_soft);
 
-    .content {
-        width: 100%;
-        max-width: 800px; // Max width for input area
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
+		&:focus-within {
+			border-color: var(--color_chatbox_border_hover);
+			box-shadow: 0 2px 8px var(--color_border_light);
+		}
+	}
 
-    .placeholderHint {
-        text-align: center;
-        color: var(--color_text_primary);
-        h3 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-    }
+	// Placeholder Mode Specifics
+	&.placeholder {
+		flex: 1;
+		align-items: center;
+		padding-bottom: 20vh;
 
-    .inputWrapper {
-        display: flex;
-        gap: 10px;
-        background: var(--color_bg_card);
-        border: 1px solid var(--color_border);
-        border-radius: 12px;
-        padding: 8px;
-        align-items: flex-end;
-        transition: box-shadow 0.2s;
+		.publishBox {
+			// Adjust shadow for centered element
+			box-shadow: 0 4px 12px var(--color_border_light);
 
-        &:focus-within {
-            border-color: var(--color_primary);
-            box-shadow: 0 0 0 2px rgba(var(--color_primary_rgb), 0.1);
-        }
-    }
+			&:focus-within {
+				box-shadow: 0 4px 16px var(--color_border_light);
+			}
 
-    .textarea {
-        flex: 1;
-        border: none !important;
-        box-shadow: none !important;
-        background: transparent;
-        resize: none;
-        padding: 4px 0;
-        
-        &:focus {
-            box-shadow: none;
-        }
-    }
+			// .toolbar {
+			// 	display: none; // Show toolbar in placeholder mode as requested
+			// }
+		}
 
-    .sendBtn {
-        border-radius: 8px;
-    }
+		.placeholderHint {
+			text-align: center;
+			color: var(--color_chatbox_text_primary);
+			margin-bottom: 24px;
+
+			h3 {
+				font-size: 24px;
+				font-weight: 600;
+				margin-bottom: 8px;
+			}
+		}
+	}
+
+	// Normal Mode Specifics
+	&.normal {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 50;
+		// .publishBox uses default common styles
+	}
+
+	.content {
+		width: 100%;
+		max-width: 800px;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+		position: relative;
+	}
+
+	// --- New Structure Styles ---
+
+	.contextRow {
+		display: flex;
+		align-items: center;
+		justify-content: space-between; // Push items apart
+		margin-bottom: 8px;
+		padding: 0 4px;
+
+		.leftTags {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.tag {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			padding: 4px 8px;
+			background: var(--color_bg_hover);
+			border-radius: 6px;
+			font-size: 12px;
+			color: var(--color_text);
+			cursor: default;
+			user-select: none;
+			transition: all 0.2s;
+
+			// &:hover {
+			// 	background: var(--color_bg_active); // Removed hover background
+			// }
+
+			.tagAvatar {
+				width: 16px;
+				height: 16px;
+				border-radius: 50%;
+				object-fit: cover;
+				background: var(--color_primary); // Fallback
+				color: #fff;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 10px;
+				font-weight: 500;
+			}
+
+			.closeTag {
+				cursor: pointer;
+				opacity: 0.6;
+				transition: transform 0.2s;
+				&:hover {
+					opacity: 1;
+					transform: scale(1.2); // Scale animation
+				}
+			}
+		}
+
+		.pageTag {
+			color: var(--color_primary);
+			background: var(--color_info_bg);
+
+			&:hover {
+				background: var(--color_info_bg); // Keep consistent
+				opacity: 0.9;
+			}
+		}
+
+		.modelSelector {
+			display: flex;
+			align-items: center;
+			gap: 4px;
+			padding: 4px 8px;
+			border-radius: 6px;
+			cursor: pointer;
+			transition: background 0.2s;
+			color: var(--color_chatbox_text_secondary);
+			font-size: 12px;
+			user-select: none;
+
+			&:hover {
+				background: var(--color_bg_hover);
+				color: var(--color_text);
+			}
+
+			.modelName {
+				font-weight: 500;
+			}
+		}
+	}
+
+	.inputWrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		position: relative;
+		// No background/border here, handled by .publishBox
+
+		// Attachments Preview
+		.attachmentList {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-bottom: 4px;
+
+			.attachmentItem {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				padding: 6px 10px;
+				background: var(--color_chatbox_bg_field);
+				border: 1px solid var(--color_chatbox_border_field);
+				border-radius: 8px;
+				font-size: 13px;
+				color: var(--color_text);
+				max-width: 200px;
+
+				.fileName {
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+
+				.removeBtn {
+					cursor: pointer;
+					color: var(--color_text_grey);
+					transition: all 0.2s;
+					&:hover {
+						color: var(--color_danger);
+						transform: scale(1.2); // Scale animation
+					}
+				}
+			}
+		}
+
+		.editor {
+			width: 100%;
+			outline: none;
+			padding: 0;
+			// Right padding to avoid overlap with send button
+			padding-right: 44px; // Increased slightly for larger button
+			font-size: 14px;
+			line-height: 1.6;
+			color: var(--color_text);
+			white-space: pre-wrap;
+			word-break: break-word;
+			overflow-y: auto;
+			max-height: 200px; // Limit height
+			min-height: 72px; // 3 lines minimum height
+
+			&:empty::before {
+				content: attr(data-placeholder);
+				color: var(--color_text_grey);
+				pointer-events: none;
+				display: block; /* For Firefox */
+			}
+		}
+
+		.sendBtn {
+			position: absolute;
+			right: 0;
+			bottom: 0;
+			width: 36px; // Increased from 32px
+			height: 36px; // Increased from 32px
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 8px;
+			background: transparent; // Removed background
+			color: var(--color_chatbox_text_secondary); // Default color
+			border: none;
+			cursor: pointer;
+			transition: all 0.2s;
+			z-index: 10;
+
+			// Active state (when not disabled)
+			&:not(:disabled) {
+				color: var(--color_primary); // Active color
+			}
+
+			&:hover {
+				background: transparent; // No background on hover
+				transform: scale(1.1); // Scale animation
+			}
+
+			&:disabled {
+				background: transparent;
+				opacity: 0.5; // Reduce opacity for disabled state
+				color: var(--color_chatbox_text_secondary);
+				cursor: not-allowed;
+				transform: none; // No scale
+
+				&:hover {
+					background: transparent;
+				}
+			}
+		}
+	}
+
+	.mentionTag {
+		display: inline-flex;
+		align-items: center;
+		background: var(--color_info_bg); // Light primary bg
+		border-radius: 4px;
+		padding: 0 4px;
+		color: var(--color_primary);
+		margin: 0 2px;
+		font-weight: 500;
+		cursor: default;
+		user-select: none;
+		font-size: 13px;
+		vertical-align: middle;
+	}
+
+	.toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: 8px;
+		padding-top: 8px;
+		border-top: 1px solid var(--color_border_light);
+
+		.leftTools {
+			display: flex;
+			gap: 2px; // Reduced gap
+		}
+
+		.toolBtn {
+			width: 26px; // Reduced size
+			height: 26px; // Reduced size
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 6px;
+			color: var(--color_chatbox_text_secondary);
+			cursor: pointer;
+			transition: all 0.2s;
+
+			&:hover {
+				background: transparent; // Removed background
+				color: var(--color_primary);
+				transform: scale(1.1); // Scale animation
+			}
+
+			&.active {
+				color: var(--color_primary);
+			}
+
+			&.disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+				pointer-events: none;
+
+				&:hover {
+					background: transparent;
+					color: var(--color_chatbox_text_secondary);
+					transform: none;
+				}
+			}
+		}
+
+		.rightTools {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+
+			.hintText {
+				font-size: 12px;
+				color: var(--color_text_grey);
+				opacity: 0.8;
+			}
+		}
+	}
+
+	// Mention / Autocomplete Popup
+	.mentionList {
+		position: absolute;
+		bottom: 100%;
+		left: 0;
+		margin-bottom: 8px;
+		background: var(--color_chatbox_bg_card);
+		border: 1px solid var(--color_chatbox_border_card);
+		box-shadow: var(--shadow);
+		border-radius: 8px;
+		padding: 4px;
+		min-width: 200px;
+		z-index: 100;
+		max-height: 240px;
+		overflow-y: auto;
+
+		.mentionItem {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 12px;
+			border-radius: 4px;
+			cursor: pointer;
+			transition: background 0.2s;
+
+			&:hover,
+			&.selected {
+				background: var(--color_chatbox_bg_selected);
+			}
+
+			.mentionAvatar {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: var(--color_primary);
+				color: #fff;
+				font-size: 10px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.mentionName {
+				font-size: 13px;
+				color: var(--color_text);
+			}
+		}
+	}
+
+	// Drag Overlay
+	.dragOverlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: var(--color_info_bg);
+		border: 2px dashed var(--color_primary);
+		border-radius: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 50;
+		pointer-events: none; // Allow drops to pass through logically, but visual is overlay
+
+		span {
+			color: var(--color_primary);
+			font-weight: 500;
+			background: var(--color_chatbox_bg_card);
+			padding: 8px 16px;
+			border-radius: 20px;
+		}
+	}
 }

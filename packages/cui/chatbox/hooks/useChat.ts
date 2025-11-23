@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { nanoid } from 'nanoid'
 import { Chat } from '../../openapi'
 import type { Message, ChatMessage } from '../../openapi'
 import type { IChatSession, ChatTab } from '../types'
@@ -23,6 +24,10 @@ export interface UseChatReturn {
 	tabs: ChatTab[]
 	activeTabId: string
 
+	// Draft State
+	inputDraft: string
+	updateInputDraft: (content: string) => void
+
 	// Actions
 	sendMessage: (message: ChatMessage) => Promise<void>
 	abort: () => void
@@ -35,8 +40,6 @@ export interface UseChatReturn {
 	closeTab: (chatId: string) => void
 }
 
-const NEW_CHAT_ID = 'new'
-
 export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const { assistantId } = options
 
@@ -47,6 +50,9 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const [tabs, setTabs] = useState<ChatTab[]>([])
 	const [activeTabId, setActiveTabId] = useState<string>('')
 
+	// Input Drafts Map: chatId -> draft content
+	const [inputDrafts, setInputDrafts] = useState<Record<string, string>>({})
+
 	const [sessions, setSessions] = useState<IChatSession[]>([])
 	const [loading, setLoading] = useState(false)
 	const [streaming, setStreaming] = useState(false)
@@ -56,8 +62,20 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 	// Derived messages for active tab
 	const messages = activeTabId ? chatStates[activeTabId] || [] : []
-	// currentChatId is activeTabId unless it's a temp 'new' id which maps to undefined for API
-	const currentChatId = activeTabId && activeTabId.startsWith('new') ? undefined : activeTabId
+	// currentChatId is activeTabId
+	const currentChatId = activeTabId || undefined
+
+	// Get current draft
+	const inputDraft = activeTabId ? inputDrafts[activeTabId] || '' : ''
+
+	// Update draft for active tab
+	const updateInputDraft = useCallback((content: string) => {
+		if (!activeTabId) return
+		setInputDrafts((prev) => ({
+			...prev,
+			[activeTabId]: content
+		}))
+	}, [activeTabId])
 
 	// Initialize Chat Client
 	useEffect(() => {
@@ -69,9 +87,6 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 		// Load sessions
 		getRecentChats().then(setSessions)
-
-		// TODO: Restore last session logic here if needed
-		// For now, we start with no tabs to show the placeholder state initially.
 	}, [])
 
 	// Helper to update messages for a specific chat ID
@@ -85,18 +100,19 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	// Send Message
 	const sendMessage = useCallback(
 		async (inputMsg: ChatMessage) => {
-			// If no active tab, create one automatically?
-			// Or assume UI handles creation before calling sendMessage?
-			// Let's auto-create a new chat if no tab is active
+			// If no active tab, create one automatically
 			let targetTabId = activeTabId
 			if (!targetTabId) {
-				const newId = `new-${Date.now()}`
+				const newId = nanoid()
 				const newTab: ChatTab = { chatId: newId, title: 'New Chat' }
 				setTabs((prev) => [...prev, newTab])
 				setChatStates((prev) => ({ ...prev, [newId]: [] }))
 				setActiveTabId(newId)
 				targetTabId = newId
 			}
+
+			// Clear draft
+			setInputDrafts((prev) => ({ ...prev, [targetTabId]: '' }))
 
 			if (!chatClient) {
 				console.error('Chat client not initialized')
@@ -121,23 +137,14 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				const abortFn = chatClient.StreamCompletion(
 					{
 						assistant_id: assistantId || 'neo',
-						chat_id: targetTabId.startsWith('new') ? undefined : targetTabId, // Use targetTabId derived above
+						chat_id: targetTabId,
 						messages: [inputMsg]
 					},
 					(chunk: Message) => {
 						// Handle Chunk
 
-						// Event handling: Check for real chat_id
+						// Event handling
 						if (chunk.type === 'event') {
-							if (
-								chunk.props?.event === 'stream_start' &&
-								chunk.props.data?.chat_id &&
-								targetTabId.startsWith('new')
-							) {
-								// const realChatId = chunk.props.data.chat_id
-								// TODO: Implement ID swapping logic
-							}
-
 							if (chunk.props?.event === 'stream_end') {
 								setStreaming(false)
 								abortHandleRef.current = null
@@ -208,7 +215,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				setStreaming(false)
 			}
 		},
-		[chatClient, assistantId, activeTabId, updateMessages] // Removed currentChatId from deps as it's derived inside
+		[chatClient, assistantId, activeTabId, updateMessages]
 	)
 
 	const abort = useCallback(() => {
@@ -262,7 +269,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	)
 
 	const createNewChat = useCallback(() => {
-		const newId = `new-${Date.now()}`
+		const newId = nanoid()
 		const newTab: ChatTab = { chatId: newId, title: 'New Chat' }
 		setTabs((prev) => [...prev, newTab])
 		setChatStates((prev) => ({ ...prev, [newId]: [] }))
@@ -297,6 +304,12 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				delete newState[chatId]
 				return newState
 			})
+			// Clean up drafts
+			setInputDrafts((prev) => {
+				const newState = { ...prev }
+				delete newState[chatId]
+				return newState
+			})
 		},
 		[activeTabId]
 	)
@@ -309,6 +322,8 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		streaming,
 		tabs,
 		activeTabId,
+		inputDraft,
+		updateInputDraft,
 		sendMessage,
 		abort,
 		reset,
