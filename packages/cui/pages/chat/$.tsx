@@ -5,7 +5,7 @@ import { useGlobal } from '@/context/app'
 
 import styles from './index.less'
 import { IPropsNeo } from '@/layouts/types'
-import NeoPage from '@/neo/components/Page'
+import NeoPage from '@/chatbox/components/Page'
 
 const Index = () => {
 	const global = useGlobal()

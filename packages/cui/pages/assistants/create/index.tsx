@@ -8,7 +8,7 @@ import { Agent as AgentType } from '@/openapi/agent/types'
 import { MCPServer } from '@/openapi/mcp/types'
 import { Agent } from '@/openapi/agent/api'
 import { MCP } from '@/openapi/mcp/api'
-import useAIChat from '@/neo/hooks/useAIChat'
+import useAIChat from '@/chatbox/hooks/useAIChat'
 import { useGlobal } from '@/context/app'
 import { IsTeamMember } from '@/pages/auth/auth'
 import ProgressTimeline, { TimelineStep } from './components/ProgressTimeline'
@@ -93,8 +93,7 @@ const AssistantCreate = () => {
 			// Load MCP servers
 			const mcpAPI = new MCP(openapi)
 			setMCPLoading(true)
-			mcpAPI
-				.ListServers()
+			mcpAPI.ListServers()
 				.then((servers) => {
 					if (servers) {
 						setMCPServers(servers)
@@ -126,7 +125,7 @@ const AssistantCreate = () => {
 	): Promise<AssistantConfig> => {
 		// TODO: Replace with actual SSE API call
 		// Example: const eventSource = new EventSource('/api/assistant/create')
-		
+
 		const steps: Array<{ id: string; title: string; description?: string; delay: number }> = [
 			{
 				id: 'analyze',
@@ -143,7 +142,9 @@ const AssistantCreate = () => {
 			{
 				id: 'generate_prompt',
 				title: is_cn ? '生成提示词' : 'Generating prompts',
-				description: is_cn ? '根据需求定制系统提示词' : 'Customizing system prompts based on requirements',
+				description: is_cn
+					? '根据需求定制系统提示词'
+					: 'Customizing system prompts based on requirements',
 				delay: 1200
 			},
 			{
@@ -172,7 +173,7 @@ const AssistantCreate = () => {
 			}
 
 			const step = steps[i]
-			
+
 			// Set current step to loading
 			setTimelineSteps((prev) => [
 				...prev.filter((s) => s.id !== step.id),
@@ -188,7 +189,7 @@ const AssistantCreate = () => {
 			// Wait with abort support
 			await new Promise((resolve, reject) => {
 				const timer = setTimeout(resolve, step.delay)
-				
+
 				// Listen for abort signal
 				if (signal) {
 					signal.addEventListener('abort', () => {
@@ -208,14 +209,14 @@ const AssistantCreate = () => {
 				setTimelineSteps((prev) =>
 					prev.map((s) =>
 						s.id === step.id
-							? { 
-								...s, 
-								status: 'error', 
-								timestamp: Date.now(),
-								description: is_cn 
-									? '创建过程中发生错误，请重试' 
-									: 'An error occurred during creation, please retry'
-							}
+							? {
+									...s,
+									status: 'error',
+									timestamp: Date.now(),
+									description: is_cn
+										? '创建过程中发生错误，请重试'
+										: 'An error occurred during creation, please retry'
+							  }
 							: s
 					)
 				)
@@ -224,24 +225,20 @@ const AssistantCreate = () => {
 
 			// Mark step as completed
 			setTimelineSteps((prev) =>
-				prev.map((s) =>
-					s.id === step.id
-						? { ...s, status: 'completed', timestamp: Date.now() }
-						: s
-				)
+				prev.map((s) => (s.id === step.id ? { ...s, status: 'completed', timestamp: Date.now() } : s))
 			)
 		}
 
 		const defaultConnector = Object.keys(connectors.mapping || {})[0] || 'gpt-4-turbo'
 
 		// Mock: randomly select some agents and tools (TODO: replace with AI selection)
-		const selectedAgents = agents.length > 0 
-			? agents.slice(0, Math.min(2, agents.length)).map(a => a.assistant_id)
-			: []
-		
-		const selectedTools = mcpServers.length > 0
-			? mcpServers.slice(0, Math.min(3, mcpServers.length)).map(s => s.value || s.name)
-			: []
+		const selectedAgents =
+			agents.length > 0 ? agents.slice(0, Math.min(2, agents.length)).map((a) => a.assistant_id) : []
+
+		const selectedTools =
+			mcpServers.length > 0
+				? mcpServers.slice(0, Math.min(3, mcpServers.length)).map((s) => s.value || s.name)
+				: []
 
 		return {
 			name: is_cn ? '智能助手' : 'Smart Assistant',
@@ -268,20 +265,20 @@ const AssistantCreate = () => {
 		setHasError(false)
 		setCurrentStep(0.5) // Intermediate step for timeline
 		setLastRequirement({ msg, files })
-		
+
 		try {
 			const generatedConfig = await generateConfig(msg, files, controller.signal)
-			
+
 			// Check if aborted
 			if (controller.signal.aborted) {
 				return
 			}
 
 			setConfig(generatedConfig)
-			
+
 			// Automatically create the assistant
 			await handleCreate()
-			
+
 			// Small delay before showing preview
 			await new Promise((resolve) => setTimeout(resolve, 500))
 			setCurrentStep(1)
@@ -291,7 +288,7 @@ const AssistantCreate = () => {
 				console.log('Request aborted by user')
 				return
 			}
-			
+
 			console.error('Failed to generate:', error)
 			setHasError(true)
 			// Don't reset to step 0, stay on timeline view to show error
@@ -318,7 +315,7 @@ const AssistantCreate = () => {
 		if (abortController) {
 			abortController.abort()
 		}
-		
+
 		setGenerating(false)
 		setCurrentStep(0)
 		setTimelineSteps([])
@@ -371,10 +368,9 @@ const AssistantCreate = () => {
 				],
 				placeholder: {
 					title: is_cn ? '新对话' : 'New Chat',
-					description:
-						is_cn
-							? `你好，我是${config.name}，${config.description}`
-							: `Hello, I'm ${config.name}, ${config.description}`
+					description: is_cn
+						? `你好，我是${config.name}，${config.description}`
+						: `Hello, I'm ${config.name}, ${config.description}`
 				}
 			}
 
@@ -441,7 +437,6 @@ const AssistantCreate = () => {
 		value: key
 	}))
 
-
 	return (
 		<div className={styles.container}>
 			<div className={styles.breadcrumbContainer}>
@@ -463,9 +458,9 @@ const AssistantCreate = () => {
 
 			{currentStep === 0.5 ? (
 				<div className={styles.timelineSection}>
-					<ProgressTimeline 
-						steps={timelineSteps} 
-						is_cn={is_cn} 
+					<ProgressTimeline
+						steps={timelineSteps}
+						is_cn={is_cn}
 						hasError={hasError}
 						isGenerating={generating}
 						requirement={lastRequirement?.msg}
@@ -477,9 +472,7 @@ const AssistantCreate = () => {
 			) : currentStep === 0 ? (
 				<div className={styles.heroSection}>
 					<div className={styles.heroContent}>
-						<h1 className={styles.heroTitle}>
-							{is_cn ? '创建智能体' : 'Create Assistant'}
-						</h1>
+						<h1 className={styles.heroTitle}>{is_cn ? '创建智能体' : 'Create Assistant'}</h1>
 						<p className={styles.heroDesc}>
 							{is_cn
 								? '描述你的需求，AI 将为你创建智能体'
@@ -505,7 +498,7 @@ const AssistantCreate = () => {
 								error=''
 								hasError={false}
 							/>
-							
+
 							{/* Share Visibility - Only show for team members */}
 							{isTeamMember && (
 								<div className={styles.shareField}>
@@ -514,24 +507,34 @@ const AssistantCreate = () => {
 										className={`${styles.shareOption} ${
 											config.share === 'team' ? styles.active : ''
 										}`}
-										onClick={() => setConfig((prev) => ({ ...prev, share: 'team' }))}
+										onClick={() =>
+											setConfig((prev) => ({ ...prev, share: 'team' }))
+										}
 										disabled={generating}
 									>
 										<span className={styles.radioCircle}>
-											{config.share === 'team' && <span className={styles.radioDot} />}
+											{config.share === 'team' && (
+												<span className={styles.radioDot} />
+											)}
 										</span>
-										<span>{is_cn ? '团队成员可见' : 'Visible to team members'}</span>
+										<span>
+											{is_cn ? '团队成员可见' : 'Visible to team members'}
+										</span>
 									</button>
 									<button
 										type='button'
 										className={`${styles.shareOption} ${
 											config.share === 'private' ? styles.active : ''
 										}`}
-										onClick={() => setConfig((prev) => ({ ...prev, share: 'private' }))}
+										onClick={() =>
+											setConfig((prev) => ({ ...prev, share: 'private' }))
+										}
 										disabled={generating}
 									>
 										<span className={styles.radioCircle}>
-											{config.share === 'private' && <span className={styles.radioDot} />}
+											{config.share === 'private' && (
+												<span className={styles.radioDot} />
+											)}
 										</span>
 										<span>{is_cn ? '仅自己可见' : 'Private (only me)'}</span>
 									</button>
@@ -569,4 +572,3 @@ const AssistantCreate = () => {
 }
 
 export default AssistantCreate
-

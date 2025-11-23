@@ -3,7 +3,7 @@ import { Button, Input, Spin, Tabs, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { history, getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import Card from '@/neo/components/AIChat/Card'
+import Card from '@/chatbox/components/AIChat/Card'
 import { Agent } from '@/openapi/agent'
 import type { AgentFilter } from '@/openapi/agent'
 import { App } from '@/types'
@@ -68,37 +68,37 @@ const Index = () => {
 					throw new Error(response.error?.error_description || 'Failed to load tags')
 				}
 
-			// Transform the response into the required format
-			let formattedTags: { key: string; value: string; label: string }[] = [
-				{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }
-			]
+				// Transform the response into the required format
+				let formattedTags: { key: string; value: string; label: string }[] = [
+					{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }
+				]
 
-			const tagsData = window.$app.openapi.GetData(response)
-			if (Array.isArray(tagsData)) {
-				// If response is an array of strings, transform each string into an object
-				if (typeof tagsData[0] === 'string') {
-					const tagObjects = tagsData.map((tag: string) => ({
-						key: tag,
-						value: tag,
-						label: tag
-					}))
-					formattedTags = [
-						{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' },
-						...tagObjects
-					]
-				}
-				// If response is already an array of objects with key and label, use it directly
-				else if (tagsData[0] && typeof tagsData[0] === 'object' && 'value' in tagsData[0]) {
-					formattedTags = [{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }]
-					tagsData.forEach((tag: any) => {
-						formattedTags.push({
-							key: tag.value,
-							value: tag.value,
-							label: tag.label
+				const tagsData = window.$app.openapi.GetData(response)
+				if (Array.isArray(tagsData)) {
+					// If response is an array of strings, transform each string into an object
+					if (typeof tagsData[0] === 'string') {
+						const tagObjects = tagsData.map((tag: string) => ({
+							key: tag,
+							value: tag,
+							label: tag
+						}))
+						formattedTags = [
+							{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' },
+							...tagObjects
+						]
+					}
+					// If response is already an array of objects with key and label, use it directly
+					else if (tagsData[0] && typeof tagsData[0] === 'object' && 'value' in tagsData[0]) {
+						formattedTags = [{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }]
+						tagsData.forEach((tag: any) => {
+							formattedTags.push({
+								key: tag.value,
+								value: tag.value,
+								label: tag.label
+							})
 						})
-					})
+					}
 				}
-			}
 
 				setTags(formattedTags)
 			} catch (error) {
