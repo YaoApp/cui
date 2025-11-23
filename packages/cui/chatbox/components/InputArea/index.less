@@ -1,0 +1,78 @@
+.container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    // transition: all 0.3s ease; // Remove default transition
+    padding: 0 20px 20px;
+    border-top: 1px solid transparent; // Consistent border to prevent animation artifacts
+
+    &.animating {
+        transition: all 0.3s ease;
+    }
+
+    &.placeholder {
+        flex: 1;
+        align-items: center;
+        padding-bottom: 20vh; // Visual centering adjustment
+        
+        .inputWrapper {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    &.normal {
+        flex-shrink: 0;
+        padding-top: 10px;
+    }
+
+    .content {
+        width: 100%;
+        max-width: 800px; // Max width for input area
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .placeholderHint {
+        text-align: center;
+        color: var(--color_text_primary);
+        h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+    }
+
+    .inputWrapper {
+        display: flex;
+        gap: 10px;
+        background: var(--color_bg_card);
+        border: 1px solid var(--color_border);
+        border-radius: 12px;
+        padding: 8px;
+        align-items: flex-end;
+        transition: box-shadow 0.2s;
+
+        &:focus-within {
+            border-color: var(--color_primary);
+            box-shadow: 0 0 0 2px rgba(var(--color_primary_rgb), 0.1);
+        }
+    }
+
+    .textarea {
+        flex: 1;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent;
+        resize: none;
+        padding: 4px 0;
+        
+        &:focus {
+            box-shadow: none;
+        }
+    }
+
+    .sendBtn {
+        border-radius: 8px;
+    }
+}

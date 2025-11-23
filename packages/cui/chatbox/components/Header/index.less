@@ -1,0 +1,112 @@
+.container {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; // Distribute space
+    padding: 0 8px;
+    border-bottom: 1px solid var(--color_border_light);
+    background: var(--color_chatbox_bg_header, var(--color_bg_nav));
+    width: 100%;
+    flex-shrink: 0;
+    user-select: none;
+
+    .singleTitle {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--color_text);
+        padding: 0 8px;
+    }
+
+    .tabs {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        padding-top: 4px; // Chrome style tabs sit on bottom
+        overflow-x: auto;
+        
+        .tab {
+            display: flex;
+            align-items: center;
+            height: 32px;
+            padding: 0 12px;
+            margin-right: 4px;
+            border-radius: 8px 8px 0 0;
+            background: transparent;
+            color: var(--color_text_secondary);
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+            max-width: 160px;
+            min-width: 80px;
+            position: relative;
+
+            &:hover {
+                background: var(--color_bg_hover);
+            }
+
+            &.active {
+                background: var(--color_chatbox_bg_content); // Connect with content
+                color: var(--color_text);
+                font-weight: 500;
+                position: relative;
+                
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -1px;
+                    left: 0;
+                    right: 0;
+                    height: 1px;
+                    background: var(--color_chatbox_bg_content); // Cover border
+                }
+            }
+
+            .tabTitle {
+                flex: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .closeIcon {
+                margin-left: 8px;
+                opacity: 0;
+                width: 16px;
+                height: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                
+                &:hover {
+                    background: rgba(0,0,0,0.1);
+                }
+            }
+
+            &:hover .closeIcon {
+                opacity: 1;
+            }
+        }
+
+        .addTab {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--color_text_secondary);
+            
+            &:hover {
+                background: var(--color_bg_hover);
+            }
+        }
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        padding: 0 8px;
+    }
+}

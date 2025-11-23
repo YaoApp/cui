@@ -10,6 +10,7 @@ import Menu from './Menu'
 import Container from './Container/index'
 import { NEO_PAGE_BREAKPOINT, NEO_PAGE_PADDING } from '@/chatbox/components/Page'
 import { Page } from '@/chatbox' // Import new Page component
+import { ChatProvider } from '@/chatbox/context'
 import './style.less'
 import { useNavigate } from '@umijs/max'
 import Icon from '@/widgets/Icon'
@@ -263,14 +264,15 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	)
 
 	return (
-		<div
-			className={clsx(
-				'chatbox-wrapper',
-				sidebarVisible && 'with-sidebar',
-				isAnimating && 'animating',
-				isMaximized && 'maximized'
-			)}
-		>
+		<ChatProvider assistantId="neo">
+			<div
+				className={clsx(
+					'chatbox-wrapper',
+					sidebarVisible && 'with-sidebar',
+					isAnimating && 'animating',
+					isMaximized && 'maximized'
+				)}
+			>
 			<Menu
 				sidebarVisible={sidebarVisible}
 				setSidebarVisible={handleSetSidebarVisible}
@@ -357,7 +359,8 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 				</div>
 			</div>
 			{isMaximized && sidebarVisible && <div className='sidebar-overlay' onClick={handleToggleMaximize} />}
-		</div>
+			</div>
+		</ChatProvider>
 	)
 }
 
