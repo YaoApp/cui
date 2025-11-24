@@ -2,7 +2,7 @@ import React from 'react'
 import styles from './index.less'
 import MessageList from '../MessageList'
 import InputArea from '../InputArea'
-import type { Message, ChatMessage } from '../../openapi'
+import type { Message, ChatMessage } from '../../../openapi'
 import type { QueuedMessage } from '../../hooks/useChat'
 
 export interface IChatboxProps {
@@ -47,7 +47,7 @@ export interface IChatboxProps {
  * Chatbox 组件 - 独立的聊天实例
  * 包含 MessageList 和 InputArea
  * 每个 Tab 对应一个 Chatbox 实例
- * 
+ *
  * 重要：InputArea 的状态完全由其内部管理（通过 editorRef）
  * 当 chatId 变化时，InputArea 会自动重置（清空输入）
  */
@@ -77,13 +77,7 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 	return (
 		<div className={`${styles.chatbox} ${className || ''}`} style={style}>
 			{/* Message List - 只在非占位符模式下显示 */}
-			{!isPlaceholderMode && (
-				<MessageList 
-					messages={messages} 
-					loading={loading} 
-					streaming={streaming} 
-				/>
-			)}
+			{!isPlaceholderMode && <MessageList messages={messages} loading={loading} streaming={streaming} />}
 
 			{/* Input Area - 始终显示，状态由其内部管理 */}
 			<InputArea
@@ -104,4 +98,3 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 }
 
 export default Chatbox
-

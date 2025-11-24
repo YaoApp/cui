@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styles from './index.less'
 import type { IChatProps } from '../../types'
 import { useChatContext } from '../../context'
 import Chatbox from '../../components/Chatbox'
 import Header from '../../components/Header'
+import { useGlobal } from '@/context/app'
+import type { App } from '@/types'
 
 // Map local props to type
 interface IPageProps extends IChatProps {
@@ -18,6 +20,8 @@ interface IPageProps extends IChatProps {
  */
 const Page = (props: IPageProps) => {
 	const { title, headerMode = 'tabs' } = props
+
+	const global = useGlobal()
 
 	const {
 		messages,
@@ -50,6 +54,32 @@ const Page = (props: IPageProps) => {
 	// 当 activeTabId 为空时，Chatbox 会显示 Placeholder 模式
 	// 用户可以直接输入开始新对话（sendMessage 会自动创建 tab）
 	const showChatbox = true
+
+	// Register global event listener for creating new chat with assistant
+	useEffect(() => {
+		const handleNewChatWithAssistant = (assistantId?: string) => {
+			// If sidebar is maximized, switch to normal mode to show chat window
+			// Sidebar will stay open but won't block the chat area
+			if (global.sidebar_maximized) {
+				window.$app.Event.emit('app/openSidebar', { forceNormal: true })
+			}
+
+			// Create new chat with specified assistant ID
+			createNewChat(assistantId)
+		}
+
+		// Register event
+		if (window.$app?.Event) {
+			window.$app.Event.on('chat/newWithAssistant', handleNewChatWithAssistant)
+		}
+
+		// Cleanup
+		return () => {
+			if (window.$app?.Event) {
+				window.$app.Event.off('chat/newWithAssistant', handleNewChatWithAssistant)
+			}
+		}
+	}, [createNewChat, global])
 
 	return (
 		<div className={styles.container}>

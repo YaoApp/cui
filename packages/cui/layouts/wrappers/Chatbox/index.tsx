@@ -138,6 +138,12 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 					setIsTemporaryView(true)
 					navigate(detail.url)
 				}
+
+				// Support forceNormal parameter to exit maximized mode
+				if (detail.forceNormal) {
+					handleSetSidebarVisible(true, false, true)
+					return
+				}
 			}
 
 			handleSetSidebarVisible(true)
@@ -266,100 +272,108 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	return (
 		<ChatProvider>
 			<div
-			className={clsx(
+				className={clsx(
 					'chatbox-wrapper',
-				sidebarVisible && 'with-sidebar',
-				isAnimating && 'animating',
-				isMaximized && 'maximized'
-			)}
-		>
-			<Menu
-				sidebarVisible={sidebarVisible}
-				setSidebarVisible={handleSetSidebarVisible}
-				openSidebar={openSidebar}
-				closeSidebar={closeSidebar}
-			/>
-			<div
-				className='chat-content'
-				style={{
-					marginLeft: '64px',
-					width:
-					sidebarVisible && !isMaximized
-							? `calc(100% - 64px - ${sidebarWidth}px)`
-							: `calc(100% - 64px)`
-				}}
-			>
-				{!sidebarVisible && (
-					<Button
-						type='text'
-						icon={<Icon name='material-chevron_left' size={16} color='var(--color_text)' />}
-						onClick={() => handleSetSidebarVisible(true)}
-						className='maximize-btn sidebar-toggle-btn'
-						style={{
-							position: 'fixed',
-							right: '0',
-							top: '50%',
-							transform: 'translateY(-50%)',
-							zIndex: 10,
-							width: '12px',
-							height: '24px',
-							padding: 0,
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							borderRadius: '2px',
-							backgroundColor: 'var(--color_bg_active)',
-							color: 'var(--color_text)',
-							transition: 'all 0.2s',
-							cursor: 'pointer',
-							border: 'none'
-						}}
-					/>
+					sidebarVisible && 'with-sidebar',
+					isAnimating && 'animating',
+					isMaximized && 'maximized'
 				)}
+			>
+				<Menu
+					sidebarVisible={sidebarVisible}
+					setSidebarVisible={handleSetSidebarVisible}
+					openSidebar={openSidebar}
+					closeSidebar={closeSidebar}
+				/>
 				<div
-					className={clsx(['w_100 border_box flex flex_column'])}
+					className='chat-content'
 					style={{
-						margin: '0 auto',
-						height: '100%',
-						padding: 0
+						marginLeft: '64px',
+						width:
+							sidebarVisible && !isMaximized
+								? `calc(100% - 64px - ${sidebarWidth}px)`
+								: `calc(100% - 64px)`
 					}}
 				>
-					{/* 使用新的 Page 组件 */}
-					<Page {...props_neo} title='Neo AI' />
-				</div>
-			</div>
-			<div
-				className={clsx('chat-sidebar', !sidebarVisible && 'hidden', isAnimating && 'animating')}
-				style={{
-					width: sidebarWidth,
-					...(isMaximized ? { position: 'fixed', right: 0 } : undefined)
-				}}
-			>
-				<div className='resize-handle' onMouseDown={handleResizeStart}>
-					<Button
-						type='text'
-						className='maximize-btn'
-						onClick={handleToggleMaximize}
-						icon={isMaximized ? <RightOutlined /> : <LeftOutlined />}
-					/>
-				</div>
-				<div className='sidebar-content'>
-					<Container
-						isMaximized={isMaximized}
-						openSidebar={openSidebar}
-						closeSidebar={closeSidebar}
-						temporaryLink={temporaryLink}
-						currentPageName={currentPageName}
-						isTemporaryView={isTemporaryView}
-						onBackToNormal={handleBackToNormal}
+					{!sidebarVisible && (
+						<Button
+							type='text'
+							icon={
+								<Icon
+									name='material-chevron_left'
+									size={16}
+									color='var(--color_text)'
+								/>
+							}
+							onClick={() => handleSetSidebarVisible(true)}
+							className='maximize-btn sidebar-toggle-btn'
+							style={{
+								position: 'fixed',
+								right: '0',
+								top: '50%',
+								transform: 'translateY(-50%)',
+								zIndex: 10,
+								width: '12px',
+								height: '24px',
+								padding: 0,
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								borderRadius: '2px',
+								backgroundColor: 'var(--color_bg_active)',
+								color: 'var(--color_text)',
+								transition: 'all 0.2s',
+								cursor: 'pointer',
+								border: 'none'
+							}}
+						/>
+					)}
+					<div
+						className={clsx(['w_100 border_box flex flex_column'])}
+						style={{
+							margin: '0 auto',
+							height: '100%',
+							padding: 0
+						}}
 					>
-						{/* 这里放 children (业务路由内容) */}
-						{children}
-					</Container>
+						{/* 使用新的 Page 组件 */}
+						<Page {...props_neo} title='Neo AI' />
+					</div>
 				</div>
+				<div
+					className={clsx('chat-sidebar', !sidebarVisible && 'hidden', isAnimating && 'animating')}
+					style={{
+						width: sidebarWidth,
+						...(isMaximized ? { position: 'fixed', right: 0 } : undefined)
+					}}
+				>
+					<div className='resize-handle' onMouseDown={handleResizeStart}>
+						<Button
+							type='text'
+							className='maximize-btn'
+							onClick={handleToggleMaximize}
+							icon={isMaximized ? <RightOutlined /> : <LeftOutlined />}
+						/>
+					</div>
+					<div className='sidebar-content'>
+						<Container
+							isMaximized={isMaximized}
+							openSidebar={openSidebar}
+							closeSidebar={closeSidebar}
+							temporaryLink={temporaryLink}
+							currentPageName={currentPageName}
+							isTemporaryView={isTemporaryView}
+							onBackToNormal={handleBackToNormal}
+						>
+							{/* 这里放 children (业务路由内容) */}
+							{children}
+						</Container>
+					</div>
+				</div>
+				{isMaximized && sidebarVisible && (
+					<div className='sidebar-overlay' onClick={handleToggleMaximize} />
+				)}
 			</div>
-			{isMaximized && sidebarVisible && <div className='sidebar-overlay' onClick={handleToggleMaximize} />}
-		</div>
 		</ChatProvider>
 	)
 }

@@ -256,18 +256,8 @@ const AssistantDetail = () => {
 	const handleChatClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
 
-		const options: App.NewChatOptions = {
-			assistant: {
-				assistant_id: id,
-				assistant_name: name || '',
-				assistant_avatar: avatarUrl,
-				assistant_deleteable: id !== default_assistant.assistant_id
-			},
-			placeholder: assistantData?.placeholder || undefined
-		}
-
-		// Trigger the new chat event
-		window.$app.Event.emit('app/neoNewChat', options)
+		// Trigger the new chat event with assistant ID
+		window.$app.Event.emit('chat/newWithAssistant', id)
 	}
 
 	if (loading || !assistantData) {
