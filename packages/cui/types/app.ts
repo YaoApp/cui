@@ -101,6 +101,27 @@ export declare namespace App {
 		mapping: Record<string, string>
 	}
 
+	/**
+	 * Agent uses configuration
+	 * Specifies which agent to use for specific system tasks
+	 */
+	interface AgentUses {
+		/** Default agent ID */
+		default?: string
+		/** Agent ID for generating chat titles */
+		title?: string
+		/** Agent ID for generating prompts */
+		prompt?: string
+		/** Agent ID for vision tasks */
+		vision?: string
+		/** Agent ID for search tasks */
+		search?: string
+		/** Agent ID for fetch tasks */
+		fetch?: string
+		/** Additional agent mappings */
+		[key: string]: string | undefined
+	}
+
 	interface AssistantFilter {
 		keywords?: string
 		tags?: string[]
@@ -366,10 +387,15 @@ export declare namespace App {
 		/** Application mode */
 		mode?: 'development' | 'production' | 'test'
 
-		/** default assistant */
+		/** Agent configuration */
 		agent?: {
+			/** Default assistant summary */
 			default?: AssistantSummary
+			/** Agent uses mapping - specifies which agent to use for title generation, prompt generation, etc. */
+			uses?: AgentUses
+			/** @deprecated No longer provided by API, use separate endpoint */
 			connectors?: Array<{ label: string; value: string }>
+			/** @deprecated No longer provided by API */
 			storages?: AgentStorages
 		}
 

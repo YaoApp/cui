@@ -58,6 +58,8 @@ export interface UseChatReturn {
 export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const { assistantId: propAssistantId } = options
 	const global = useGlobal()
+	const locale = getLocale()
+	const is_cn = locale === 'zh-CN'
 
 	// Determine effective assistant ID for *defaults*
 	// 1. Prop
@@ -76,6 +78,16 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	// Loading/Streaming States Map: chatId -> boolean
 	const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({})
 	const [streamingStates, setStreamingStates] = useState<Record<string, boolean>>({})
+
+	// Sync streaming state to tabs
+	useEffect(() => {
+		setTabs((prevTabs) =>
+			prevTabs.map((tab) => ({
+				...tab,
+				streaming: streamingStates[tab.chatId] || false
+			}))
+		)
+	}, [streamingStates])
 
 	// Message Queue State Map: chatId -> queue
 	const [messageQueues, setMessageQueues] = useState<Record<string, QueuedMessage[]>>({})
@@ -204,6 +216,94 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			}
 		},
 		[chatClient, updateMessages]
+	)
+
+	// Generate chat title using title agent
+	const generateChatTitle = useCallback(
+		async (targetTabId: string, currentMessages: Message[]) => {
+			// Check if title agent is configured
+			const titleAgentId = global.agent_uses?.title
+			if (!titleAgentId || !chatClient) {
+				return
+			}
+
+			// Mark as generated to prevent duplicate calls
+			titleGeneratedRef.current[targetTabId] = true
+
+			try {
+				// Extract conversation content for title generation
+				const conversationText = currentMessages
+					.filter((msg) => msg.type === 'text' && msg.props?.content)
+					.map((msg) => msg.props?.content || '')
+					.join('\n')
+					.slice(0, 500) // Limit length
+
+				if (!conversationText) {
+					return
+				}
+
+				let generatedTitle = ''
+
+				// Get current locale
+				const locale = getLocale() || 'en-us'
+				const languageHint = locale.startsWith('zh')
+					? 'Please generate the title in Chinese.'
+					: 'Please generate the title in English.'
+
+				// Call title agent with skip history and trace
+				chatClient.StreamCompletion(
+					{
+						assistant_id: titleAgentId,
+						messages: [
+							{
+								role: 'user',
+								content: `Generate a short title for this conversation. ${languageHint}\n\nConversation:\n${conversationText}`
+							}
+						],
+						skip: {
+							history: true, // Don't save title generation to history
+							trace: true // Don't show trace for this utility call
+						}
+					},
+					(chunk: Message) => {
+						// Accumulate title text and update in real-time
+						if (chunk.type === 'text' && chunk.props?.content) {
+							if (chunk.delta) {
+								generatedTitle += chunk.props.content
+							} else {
+								generatedTitle = chunk.props.content
+							}
+
+							// Real-time update: Update tab title as we receive chunks
+							const currentTitle = generatedTitle.trim().slice(0, 50)
+							if (currentTitle) {
+								setTabs((prev) =>
+									prev.map((t) =>
+										t.chatId === targetTabId ? { ...t, title: currentTitle } : t
+									)
+								)
+							}
+						}
+
+						// Final cleanup when generation is complete
+						if (chunk.done && generatedTitle) {
+							const finalTitle = generatedTitle.trim().slice(0, 50) // Limit title length
+							setTabs((prev) =>
+								prev.map((t) =>
+									t.chatId === targetTabId ? { ...t, title: finalTitle } : t
+								)
+							)
+						}
+					},
+					(error: any) => {
+						console.error('Failed to generate title:', error)
+					}
+				)
+			} catch (err) {
+				console.error('Error generating chat title:', err)
+			}
+		},
+		[chatClient, global.agent_uses]
 	)
 
 	// Start a new stream with multiple messages (for stream_end queue processing)
@@ -367,6 +467,9 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	// Store context_id for each active chat
 	const contextIdsRef = useRef<Record<string, string>>({})
 
+	// Track if title has been generated for each chat
+	const titleGeneratedRef = useRef<Record<string, boolean>>({})
+
 	// Send Message
 	const sendMessage = useCallback(
 		async (inputMsg: ChatMessage) => {
@@ -378,7 +481,11 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				const newId = nanoid()
 				// Use default assistant ID for auto-created tab
 				targetAssistantId = defaultAssistantId
-				const newTab: ChatTab = { chatId: newId, title: 'New Chat', assistantId: targetAssistantId }
+				const newTab: ChatTab = {
+					chatId: newId,
+					title: is_cn ? '新对话' : 'New Chat',
+					assistantId: targetAssistantId
+				}
 				setTabs((prev) => [...prev, newTab])
 				setChatStates((prev) => ({ ...prev, [newId]: [] }))
 				setActiveTabId(newId)
@@ -524,13 +631,28 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 						updateMessages(targetTabId, (prev) => {
 							const index = prev.findIndex((m) => m.id === msgId)
+							let newMessages: Message[]
 							if (index !== -1) {
 								const newArr = [...prev]
 								newArr[index] = updatedMessage
-								return newArr
+								newMessages = newArr
 							} else {
-								return [...prev, updatedMessage]
+								newMessages = [...prev, updatedMessage]
 							}
+
+							// Check if this is the first completion right when message is added
+							if (chunk.done) {
+								const isFirstCompletion =
+									newMessages.length === 2 &&
+									!titleGeneratedRef.current[targetTabId]
+
+								if (isFirstCompletion) {
+									// Call with the updated messages array directly
+									generateChatTitle(targetTabId, newMessages)
+								}
+							}
+
+							return newMessages
 						})
 
 						if (chunk.done) {
@@ -637,7 +759,11 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			// Fallback to default
 			targetAssistantId = targetAssistantId || defaultAssistantId
 
-			const newTab: ChatTab = { chatId: newId, title: 'New Chat', assistantId: targetAssistantId }
+			const newTab: ChatTab = {
+				chatId: newId,
+				title: is_cn ? '新对话' : 'New Chat',
+				assistantId: targetAssistantId
+			}
 			setTabs((prev) => [...prev, newTab])
 			setChatStates((prev) => ({ ...prev, [newId]: [] }))
 			setActiveTabId(newId)
@@ -695,6 +821,10 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			// Clean up context_id
 			if (contextIdsRef.current[chatId]) {
 				delete contextIdsRef.current[chatId]
+			}
+			// Clean up title generation flag
+			if (titleGeneratedRef.current[chatId]) {
+				delete titleGeneratedRef.current[chatId]
 			}
 		},
 		[activeTabId]

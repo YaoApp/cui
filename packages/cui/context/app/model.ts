@@ -18,9 +18,12 @@ export default class GlobalModel {
 	theme: App.Theme = 'light'
 	avatar = {} as AvatarFullConfig
 	default_assistant = {} as App.AssistantSummary
-	agent_storages = {} as App.AgentStorages
-	connectors = {} as App.Connectors
+	agent_uses = {} as App.AgentUses
 	locale_messages = {} as LocaleMessages
+
+	// Deprecated fields (kept for backward compatibility)
+	agent_storages = {} as App.AgentStorages // Deprecated: No longer provided by API
+	connectors = {} as App.Connectors // Deprecated: Use separate API endpoint instead
 	app_info = {} as App.Info
 	openapi = {} as OpenAPIConfig
 	kb = {} as any // TODO: add Knowledge Base Config
@@ -96,11 +99,13 @@ export default class GlobalModel {
 		// Default Assistant
 		this.setDefaultAssistant(res.agent?.default || {})
 
-		// Agent Storages
-		this.setAgentStorages(res.agent?.storages || {})
+		// Agent Uses (new in API)
+		this.setAgentUses(res.agent?.uses || {})
 
-		// Connectors
-		this.setConnectors(res.agent?.connectors || [])
+		// Legacy fields (deprecated, no longer provided by API)
+		// Keep the setters for backward compatibility but don't process from API response
+		// this.setAgentStorages(res.agent?.storages || {})
+		// this.setConnectors(res.agent?.connectors || [])
 
 		// Developer
 		this.setDeveloper(res.developer || {})
@@ -187,6 +192,11 @@ export default class GlobalModel {
 	setAgentStorages(storages: App.AgentStorages) {
 		this.agent_storages = storages
 		local.agent_storages = storages
+	}
+
+	setAgentUses(uses: App.AgentUses) {
+		this.agent_uses = uses
+		local.agent_uses = uses
 	}
 
 	setDeveloper(developer: App.Developer) {

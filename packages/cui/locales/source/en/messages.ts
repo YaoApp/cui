@@ -10,6 +10,9 @@ export default {
 				loading: 'deleting...',
 				success: 'deleted'
 			}
+		},
+		chat: {
+			newChat: 'New Chat'
 		}
 	}
 }

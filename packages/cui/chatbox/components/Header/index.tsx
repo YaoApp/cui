@@ -70,6 +70,9 @@ const Header = (props: IHeaderProps) => {
 								onClick={() => onTabChange?.(tab.chatId)}
 								title={tab.title}
 							>
+								{tab.streaming && (
+									<span className={styles.streamingIndicator} />
+								)}
 								<span className={styles.tabTitle}>{tab.title}</span>
 								<span
 									className={styles.closeIcon}

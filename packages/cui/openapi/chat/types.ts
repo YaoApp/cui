@@ -437,6 +437,16 @@ export interface ToolCall {
  * Chat Completion Request (User-friendly API)
  */
 /**
+ * Skip configuration for internal operations
+ * Used to skip saving chat history or trace logs for system calls
+ * (e.g., title generation, prompt generation)
+ */
+export interface Skip {
+	history?: boolean // Skip saving chat history (for title/prompt generation)
+	trace?: boolean // Skip trace logging
+}
+
+/**
  * Base request fields shared by all variants
  */
 interface ChatCompletionRequestBase {
@@ -444,6 +454,7 @@ interface ChatCompletionRequestBase {
 	chat_id?: string // Chat ID (auto-generated if not provided)
 	options?: ChatCompletionOptions // Advanced OpenAI-compatible options
 	metadata?: Record<string, any> // Custom metadata
+	skip?: Skip // Skip configuration (history, trace, etc.)
 }
 
 /**

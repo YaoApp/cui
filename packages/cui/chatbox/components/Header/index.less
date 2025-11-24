@@ -54,6 +54,27 @@
 			position: relative;
 			flex-shrink: 0;
 
+			.streamingIndicator {
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: #ff8800;
+				margin-right: 6px;
+				flex-shrink: 0;
+				animation: breathe 1.5s ease-in-out infinite;
+			}
+
+			@keyframes breathe {
+				0%, 100% {
+					opacity: 1;
+					transform: scale(1);
+				}
+				50% {
+					opacity: 0.4;
+					transform: scale(0.8);
+				}
+			}
+
 			&:hover {
 				background: var(--color_bg_active); // Match active background
 				.closeIcon {

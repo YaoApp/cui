@@ -117,6 +117,11 @@ export class Chat {
 			internal.stream = true
 		}
 
+		// Add skip configuration
+		if (request.skip) {
+			internal.skip = request.skip
+		}
+
 		// Add metadata (without chat_id, as it's sent via header)
 		if (request.metadata) {
 			internal.metadata = {

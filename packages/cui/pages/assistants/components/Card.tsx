@@ -12,18 +12,20 @@ import { useGlobal } from '@/context/app'
 interface Props {
 	/** Assistant data */
 	data: App.Assistant
+	/** Connector mapping from LLM providers (value -> label) */
+	connectorMapping?: Record<string, string>
 	/** Click handler for the card */
 	onClick?: (assistant: App.Assistant) => void
 	/** Chat button click handler */
 	onChatClick?: (assistant: App.Assistant) => void
 }
 
-const Card: FC<Props> = ({ data, onClick, onChatClick }) => {
+const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) => {
 	// Get current locale using the same method as in useAIChat.ts
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
-	const { default_assistant, connectors } = global
+	const { default_assistant } = global
 
 	// Handle chat button click without triggering the card click
 	const handleChatClick = (e: React.MouseEvent) => {
@@ -103,11 +105,11 @@ const Card: FC<Props> = ({ data, onClick, onChatClick }) => {
 						className={styles.chatButton}
 						icon={<Icon name='icon-message-circle' size={14} />}
 					>
-						{is_cn ? '聊天' : 'Chat'}
-					</Button>
-					{data.connector && (
-						<div className={styles.connector}>{connectors.mapping[data.connector]}</div>
-					)}
+				{is_cn ? '聊天' : 'Chat'}
+			</Button>
+			{data.connector && connectorMapping[data.connector] && (
+				<div className={styles.connector}>{connectorMapping[data.connector]}</div>
+			)}
 				</div>
 			</div>
 		</div>

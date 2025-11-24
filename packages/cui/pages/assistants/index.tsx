@@ -7,6 +7,7 @@ import Card from './components/Card'
 import { Agent } from '@/openapi/agent'
 import type { AgentFilter } from '@/openapi/agent'
 import { App } from '@/types'
+import { useLLMProviders } from '@/hooks/useLLMProviders'
 import styles from './index.less'
 
 // Helper function to generate default placeholder data
@@ -48,6 +49,9 @@ const Index = () => {
 		{ key: 'all', label: is_cn ? '全部' : 'All' }
 	])
 	const [tagsLoading, setTagsLoading] = useState(true)
+	
+	// Load LLM providers once for all cards
+	const { mapping: connectorMapping } = useLLMProviders()
 
 	// Load tags
 	useEffect(() => {
@@ -390,6 +394,7 @@ const Index = () => {
 													(is_cn ? '未知' : 'Unknown'),
 												type: item.type || 'assistant'
 											}}
+											connectorMapping={connectorMapping}
 											onClick={handleCardClick}
 										/>
 									</div>

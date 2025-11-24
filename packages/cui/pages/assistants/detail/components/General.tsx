@@ -7,6 +7,7 @@ import { useGlobal } from '@/context/app'
 import ChatPlaceholder from './ChatPlaceholder'
 import { DeleteOutlined } from '@ant-design/icons'
 import { Agent } from '@/openapi/agent'
+import { useLLMProviders } from '@/hooks/useLLMProviders'
 
 const { TextArea } = Input
 const { Option } = Select
@@ -23,7 +24,7 @@ export default function General({ form }: GeneralProps) {
 	const [inputVisible, setInputVisible] = useState(false)
 	const [inputValue, setInputValue] = useState('')
 	const global = useGlobal()
-	const { connectors } = global
+	const { providers, mapping: connectorMapping } = useLLMProviders()
 
 	// Load tags using Agent API
 	useEffect(() => {
@@ -220,16 +221,16 @@ export default function General({ form }: GeneralProps) {
 							: 'Select the AI connector to power this assistant'
 					}
 					showSearch
-					filterOption={(input, option) =>
-						(option?.children as unknown as string).toLowerCase().includes(input.toLowerCase())
-					}
-				>
-					{Object.keys(connectors?.mapping || {}).map((key) => (
-						<Option key={key} value={key}>
-							{connectors.mapping[key]}
-						</Option>
-					))}
-				</Select>
+				filterOption={(input, option) =>
+					(option?.children as unknown as string).toLowerCase().includes(input.toLowerCase())
+				}
+			>
+				{providers.map((provider) => (
+					<Option key={provider.value} value={provider.value}>
+						{provider.label}
+					</Option>
+				))}
+			</Select>
 			</Form.Item>
 
 			<div className='radio-group-container'>

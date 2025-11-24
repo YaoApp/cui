@@ -365,6 +365,131 @@ chat.streamCompletion(
 )
 ```
 
+### Skip Configuration (History & Trace)
+
+For utility operations like title generation or prompt suggestions, you can skip saving chat history and/or trace logs. This is useful when calling agents for non-conversational purposes.
+
+```typescript
+// Example: Generate a title for an existing chat (tool usage)
+chat.StreamCompletion(
+    {
+        assistant_id: 'workers.system.title',
+        messages: [
+            { role: 'user', content: 'Generate a title for: Hello, how are you?' }
+        ],
+        skip: {
+            history: true,  // Don't save to chat history (this is a tool call, not a conversation)
+            trace: false    // Still log trace for debugging
+        }
+    },
+    (chunk) => {
+        if (IsTextMessage(chunk)) {
+            console.log('Generated title:', chunk.props.content)
+        }
+    }
+)
+
+// Example: Generate prompt suggestions (tool usage)
+chat.StreamCompletion(
+    {
+        assistant_id: 'workers.system.prompt',
+        messages: [
+            { role: 'user', content: 'Generate prompts for a coding assistant' }
+        ],
+        skip: {
+            history: true,  // Don't save this tool call to history
+            trace: true     // Also skip trace for performance
+        }
+    },
+    (chunk) => { /* ... */ }
+)
+```
+
+**Skip Configuration (via Request Body):**
+
+The `skip` parameter is sent via request body and is **completely optional**:
+
+```typescript
+interface Skip {
+    history?: boolean  // Optional: Skip saving chat history
+    trace?: boolean    // Optional: Skip trace logging
+}
+
+// In request
+{
+    skip?: Skip  // Optional: If omitted, uses default behavior
+}
+```
+
+**Default Behavior (when `skip` is not provided):**
+- ✅ Chat history **WILL BE SAVED** to database (normal conversation mode)
+- ✅ Trace logs **WILL BE GENERATED** to show agent's working process to users
+
+**Parameters:**
+
+- **`skip.history`** (boolean, optional, default: `false`)
+  - `true`: Skip saving chat history to database
+  - `false` or omitted: Save chat history (default behavior)
+  - Use `true` for: Agents called as tools (title generation, prompt suggestions, vision analysis, etc.)
+  - These are utility calls, not actual conversations
+  - Saves storage space and keeps chat history clean
+  
+- **`skip.trace`** (boolean, optional, default: `false`)
+  - `true`: Skip trace logging
+  - `false` or omitted: Generate trace logs (default behavior)
+  - **What is trace**: Visual representation of agent's working process (tool calls, reasoning steps, data flow) shown to users
+  - Use `true` for: High-frequency tool calls where users don't need to see the working process
+  - Reduces logging overhead and simplifies user experience for utility operations
+
+**Examples:**
+
+```typescript
+// Default: Save history and trace (normal conversation)
+chat.StreamCompletion({
+    assistant_id: 'my-assistant',
+    messages: [{ role: 'user', content: 'Hello' }]
+    // No skip parameter - saves history and trace
+})
+
+// Skip only history (tool call, but keep trace to show working process)
+chat.StreamCompletion({
+    assistant_id: 'workers.system.title',
+    messages: [{ role: 'user', content: 'Generate title' }],
+    skip: {
+        history: true   // Skip history
+        // trace is omitted - defaults to false (will show agent's working process to user)
+    }
+})
+
+// Skip both history and trace (simple utility call, no need to show working process)
+chat.StreamCompletion({
+    assistant_id: 'workers.system.prompt',
+    messages: [{ role: 'user', content: 'Generate prompts' }],
+    skip: {
+        history: true,  // Skip history
+        trace: true     // Skip trace (users don't need to see the working process)
+    }
+})
+```
+
+**When to Use Skip:**
+
+| Scenario | `skip.history` | `skip.trace` | Reason |
+|----------|----------------|--------------|--------|
+| **User conversation** | ❌ `false` | ❌ `false` | Save everything, show agent's working process |
+| **Title generation** | ✅ `true` | ⚠️ Optional | Don't save utility call; trace optional depending on if users want to see how title is generated |
+| **Prompt suggestions** | ✅ `true` | ✅ `true` | Simple utility; users don't need to see working process |
+| **Vision thumbnail** | ✅ `true` | ✅ `true` | Background processing; no need to show trace |
+| **Search queries** | ✅ `true` | ⚠️ Optional | Don't save search calls; trace optional if users want to see search process |
+| **Complex analysis** | ✅ `true` | ❌ `false` | Tool call but keep trace to show working process to users |
+
+**Guidelines:**
+- ✅ `skip.history = true`: Any agent used as a tool (not part of conversation)
+- ✅ `skip.trace = true`: When users don't need to see the agent's working process (simple utilities)
+- ❌ `skip.trace = false`: When users want to understand how the agent works (complex operations, transparency)
+
+**Key Point**: Use `skip` when calling agents **as tools** for utility purposes, not when they're part of the user's conversation flow. Trace is for showing users how the agent works, not just for debugging.
+
 ### Multimodal Messages (Vision, Audio)
 
 Send images and audio along with text using multimodal content:
@@ -788,6 +913,9 @@ const request2: ChatCompletionRequest = {
     - Use only for stateless clients without ID management capability
 - `options`: OpenAI-compatible parameters (temperature, max_tokens, etc.)
 - `metadata`: Custom metadata object
+- `skip`: Skip configuration for tool calls (sent via request body)
+  - `skip.history`: Skip saving chat history (use when calling agents as tools)
+  - `skip.trace`: Skip trace logging (reduces overhead for utility calls)
 
 **Backend Parameter Extraction Priority:**
 

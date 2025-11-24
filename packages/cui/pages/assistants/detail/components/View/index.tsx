@@ -4,6 +4,7 @@ import { App } from '@/types'
 import Tag from '@/chatbox/components/AIChat/Tag'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
+import { useLLMProviders } from '@/hooks/useLLMProviders'
 
 interface Message {
 	role: 'system' | 'user' | 'assistant' | 'developer'
@@ -12,12 +13,13 @@ interface Message {
 
 interface ViewProps {
 	data: App.Assistant
-	connectors: any
+	connectors?: any // Deprecated: kept for backward compatibility
 }
 
 const View = ({ data, connectors }: ViewProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+	const { mapping: connectorMapping } = useLLMProviders()
 
 	const getRoleLabel = (role: string) => {
 		switch (role) {
@@ -64,12 +66,12 @@ const View = ({ data, connectors }: ViewProps) => {
 					<div className={styles.fieldValue}>{data.description || '-'}</div>
 				</div>
 
-				<div className={styles.fieldItem}>
-					<div className={styles.fieldLabel}>{is_cn ? 'AI 连接器' : 'AI Connector'}</div>
-					<div className={styles.fieldValue}>
-						{data.connector ? connectors.mapping[data.connector] || data.connector : '-'}
-					</div>
+			<div className={styles.fieldItem}>
+				<div className={styles.fieldLabel}>{is_cn ? 'AI 连接器' : 'AI Connector'}</div>
+				<div className={styles.fieldValue}>
+					{data.connector ? connectorMapping[data.connector] || data.connector : '-'}
 				</div>
+			</div>
 
 				<div className={styles.fieldRow}>
 					<div className={styles.fieldItem}>

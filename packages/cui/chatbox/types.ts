@@ -21,6 +21,7 @@ export interface ChatTab {
 	chatId: string // 'new' | chat_id
 	title: string
 	assistantId?: string // Added assistantId
+	streaming?: boolean // Is this tab currently streaming
 }
 
 /**

@@ -13,6 +13,7 @@ import { useGlobal } from '@/context/app'
 import { IsTeamMember } from '@/pages/auth/auth'
 import ProgressTimeline, { TimelineStep } from './components/ProgressTimeline'
 import AssistantPreview from './components/AssistantPreview'
+import { useLLMProviders } from '@/hooks/useLLMProviders'
 import styles from './index.less'
 
 interface AssistantConfig {
@@ -30,9 +31,9 @@ const AssistantCreate = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
-	const { connectors } = global
 	const { saveAssistant } = useAIChat({})
 	const isTeamMember = IsTeamMember()
+	const { providers, mapping: connectorMapping } = useLLMProviders()
 
 	// Wizard state
 	const [currentStep, setCurrentStep] = useState(0)
@@ -229,7 +230,7 @@ const AssistantCreate = () => {
 			)
 		}
 
-		const defaultConnector = Object.keys(connectors.mapping || {})[0] || 'gpt-4-turbo'
+		const defaultConnector = providers.length > 0 ? providers[0].value : 'gpt-4-turbo'
 
 		// Mock: randomly select some agents and tools (TODO: replace with AI selection)
 		const selectedAgents =
@@ -432,9 +433,9 @@ const AssistantCreate = () => {
 	}))
 
 	// Connector options
-	const connectorOptions = Object.keys(connectors.mapping || {}).map((key) => ({
-		label: connectors.mapping[key],
-		value: key
+	const connectorOptions = providers.map((provider) => ({
+		label: provider.label,
+		value: provider.value
 	}))
 
 	return (

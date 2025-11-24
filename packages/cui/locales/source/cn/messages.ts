@@ -10,6 +10,9 @@ export default {
 				loading: '删除中...',
 				success: '已删除'
 			}
+		},
+		chat: {
+			newChat: '新对话'
 		}
 	}
 }
