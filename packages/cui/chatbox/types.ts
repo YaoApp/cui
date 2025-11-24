@@ -55,10 +55,6 @@ export interface IInputAreaProps {
 	uploader?: string
 	/** 当前会话 ID (用于重置输入框) */
 	chatId?: string
-	/** Draft content */
-	draft?: string
-	/** Callback for input change */
-	onChange?: (value: string) => void
 	/** Assistant Info */
 	assistant?: {
 		name: string

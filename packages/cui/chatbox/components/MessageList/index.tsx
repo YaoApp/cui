@@ -26,7 +26,7 @@ const MessageList = (props: IMessageListProps) => {
                 return (
                     <div key={msg.id || index} className={clsx(styles.messageRow, role === 'user' ? styles.userRow : styles.aiRow)}>
                         <div className={styles.messageBubble}>
-                            <div className={styles.senderName}>{role === 'user' ? 'You' : 'AI'}</div>
+                            {role !== 'user' && <div className={styles.senderName}>{msg.props?.name || 'AI'}</div>}
                             <div className={styles.messageContent}>
                                 {msg.props?.content || ''}
                                 {msg.delta && <span className={styles.cursor}>▋</span>}

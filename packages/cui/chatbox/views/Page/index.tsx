@@ -2,8 +2,7 @@ import React from 'react'
 import styles from './index.less'
 import type { IChatProps } from '../../types'
 import { useChatContext } from '../../context'
-import InputArea from '../../components/InputArea'
-import MessageList from '../../components/MessageList'
+import Chatbox from '../../components/Chatbox'
 import Header from '../../components/Header'
 
 // Map local props to type
@@ -12,6 +11,11 @@ interface IPageProps extends IChatProps {
 	headerMode?: 'tabs' | 'single' | 'custom'
 }
 
+/**
+ * Page 组件 - 聊天页面容器
+ * 架构: Page -> Header + Chatbox (MessageList + InputArea)
+ * 每个 Tab 对应一个独立的 Chatbox 实例
+ */
 const Page = (props: IPageProps) => {
 	const { title, headerMode = 'tabs' } = props
 
@@ -26,25 +30,26 @@ const Page = (props: IPageProps) => {
 		activeTabId,
 		activateTab,
 		closeTab,
-		inputDraft,
-		updateInputDraft,
 		assistant
 	} = useChatContext()
 
-	// Determine mode
-	// Placeholder mode if:
-	// 1. No tabs
-	// 2. OR Active tab has no messages and is NOT loading history
-	const isPlaceholderMode = tabs.length === 0 || (messages.length === 0 && !loading)
+	// 获取当前活跃 tab 的助手 ID
+	const activeTab = tabs.find((t) => t.chatId === activeTabId)
+	const currentAssistantId = activeTab?.assistantId
 
-	const inputMode = isPlaceholderMode ? 'placeholder' : 'normal'
-
-	// Show header only if there are tabs (in tabs mode) or forced single mode
+	// 显示 Header 的条件：
+	// - tabs 模式：有 tabs 时显示
+	// - single/custom 模式：始终显示
 	const showHeader = headerMode === 'tabs' ? tabs.length > 0 : true
+
+	// Chatbox 始终显示，即使没有 activeTabId
+	// 当 activeTabId 为空时，Chatbox 会显示 Placeholder 模式
+	// 用户可以直接输入开始新对话（sendMessage 会自动创建 tab）
+	const showChatbox = true
 
 	return (
 		<div className={styles.container}>
-			{/* Header */}
+			{/* Header - 管理 tabs 和导航 */}
 			{showHeader && (
 				<Header
 					mode={headerMode}
@@ -65,20 +70,21 @@ const Page = (props: IPageProps) => {
 				/>
 			)}
 
-			{/* Message List - Render unless it's strictly placeholder mode */}
-			{!isPlaceholderMode && <MessageList messages={messages} loading={loading} streaming={streaming} />}
-
-			{/* Input Area */}
-			<InputArea
-				mode={inputMode}
-				onSend={sendMessage}
-				loading={streaming}
-				onAbort={abort}
-				chatId={activeTabId}
-				draft={inputDraft}
-				onChange={updateInputDraft}
-				assistant={assistant}
-			/>
+			{/* Chatbox - 独立的聊天实例，始终显示 */}
+			{/* 当没有 activeTabId 时显示 placeholder 模式 */}
+			{/* InputArea 的状态完全由其内部管理，切换 tab 时会因 chatId 变化而重置 */}
+			{showChatbox && (
+				<Chatbox
+					messages={messages}
+					loading={loading}
+					streaming={streaming}
+					chatId={activeTabId || ''} // 空字符串表示新对话
+					assistantId={currentAssistantId}
+					assistant={assistant}
+					onSend={sendMessage}
+					onAbort={abort}
+				/>
+			)}
 		</div>
 	)
 }

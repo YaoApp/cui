@@ -51,18 +51,7 @@ interface Attachment {
 }
 
 const InputArea = (props: IInputAreaProps) => {
-	const {
-		mode,
-		onSend,
-		loading,
-		disabled,
-		className,
-		style,
-		chatId,
-		draft,
-		onChange,
-		assistant: propAssistant
-	} = props
+	const { mode, onSend, loading, disabled, className, style, chatId, assistant: propAssistant } = props
 	const [isAnimating, setIsAnimating] = useState(false)
 	const [isDragOver, setIsDragOver] = useState(false)
 	const [showMentions, setShowMentions] = useState(false)
@@ -102,18 +91,18 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 	}, [mode, isAnimating])
 
-	// Restore draft when chatId changes (new chat or switch tab)
+	// Reset input when chatId changes (new chat or switch tab)
+	// 每个 tab 的输入框是独立的，切换时清空输入
 	useEffect(() => {
 		if (editorRef.current) {
-			const newContent = draft || ''
-			if (editorRef.current.innerText !== newContent) {
-				editorRef.current.innerText = newContent
-				setIsEmpty(!newContent.trim())
-			}
+			editorRef.current.innerText = ''
+			setIsEmpty(true)
+			// Auto-focus when entering a tab
+			editorRef.current.focus()
 		}
-		// Reset attachments for new chat/tab (TODO: Support attachment drafts?)
+		// Reset attachments for new chat/tab
 		setAttachments([])
-	}, [chatId]) // draft is not in deps to avoid loop while typing, we only restore on chatId change
+	}, [chatId])
 
 	// When loading changes from true to false (request completed), ensure UI state is correct
 	useEffect(() => {
@@ -259,10 +248,6 @@ const InputArea = (props: IInputAreaProps) => {
 
 	const handleInput = () => {
 		if (!editorRef.current) return
-		const text = editorRef.current.innerText
-
-		// Call onChange to update draft
-		onChange?.(text)
 
 		// Check emptiness: text is empty AND no tags
 		const hasTags = editorRef.current.querySelectorAll(`.${styles.mentionTag}`).length > 0
@@ -342,6 +327,8 @@ const InputArea = (props: IInputAreaProps) => {
 			if (editorRef.current) {
 				editorRef.current.innerHTML = ''
 				setIsEmpty(true)
+				// Keep focus on input after sending
+				editorRef.current.focus()
 			}
 			setAttachments([])
 		})
@@ -711,7 +698,7 @@ const InputArea = (props: IInputAreaProps) => {
 							<div
 								className={styles.editor}
 								ref={editorRef}
-								contentEditable={!disabled && !loading}
+								contentEditable={!disabled}
 								onInput={handleInput}
 								onKeyDown={handleKeyDown}
 								onPaste={handlePaste}

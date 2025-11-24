@@ -28,10 +28,6 @@ export interface UseChatReturn {
 	tabs: ChatTab[]
 	activeTabId: string
 
-	// Draft State
-	inputDraft: string
-	updateInputDraft: (content: string) => void
-
 	// Actions
 	sendMessage: (message: ChatMessage) => Promise<void>
 	abort: () => void
@@ -47,7 +43,7 @@ export interface UseChatReturn {
 export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const { assistantId: propAssistantId } = options
 	const global = useGlobal()
-	
+
 	// Determine effective assistant ID for *defaults*
 	// 1. Prop
 	// 2. Global default assistant
@@ -60,37 +56,29 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const [tabs, setTabs] = useState<ChatTab[]>([])
 	const [activeTabId, setActiveTabId] = useState<string>('')
 
-	// Input Drafts Map: chatId -> draft content
-	const [inputDrafts, setInputDrafts] = useState<Record<string, string>>({})
-
 	const [sessions, setSessions] = useState<IChatSession[]>([])
-	const [loading, setLoading] = useState(false)
-	const [streaming, setStreaming] = useState(false)
+
+	// Loading/Streaming States Map: chatId -> boolean
+	const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({})
+	const [streamingStates, setStreamingStates] = useState<Record<string, boolean>>({})
+
 	const [assistant, setAssistant] = useState<any>(null) // Assistant info
 
 	const [chatClient, setChatClient] = useState<Chat | null>(null)
-	const abortHandleRef = useRef<(() => void) | null>(null)
+	// Abort Handles Map: chatId -> abort function
+	const abortHandlesRef = useRef<Record<string, () => void>>({})
 
-	// Derived messages for active tab
+	// Derived states for active tab
 	const messages = activeTabId ? chatStates[activeTabId] || [] : []
+	const loading = activeTabId ? loadingStates[activeTabId] || false : false
+	const streaming = activeTabId ? streamingStates[activeTabId] || false : false
+
 	// currentChatId is activeTabId
 	const currentChatId = activeTabId || undefined
 
 	// Get current assistant ID from active tab
-	const activeTab = tabs.find(t => t.chatId === activeTabId)
+	const activeTab = tabs.find((t) => t.chatId === activeTabId)
 	const currentAssistantId = activeTab?.assistantId || defaultAssistantId
-
-	// Get current draft
-	const inputDraft = activeTabId ? inputDrafts[activeTabId] || '' : ''
-
-	// Update draft for active tab
-	const updateInputDraft = useCallback((content: string) => {
-		if (!activeTabId) return
-		setInputDrafts((prev) => ({
-			...prev,
-			[activeTabId]: content
-		}))
-	}, [activeTabId])
 
 	// Initialize Chat Client
 	useEffect(() => {
@@ -123,14 +111,34 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				if (!window.$app.openapi.IsError(res)) {
 					const data = window.$app.openapi.GetData(res)
 					// Filter necessary info
-					const { assistant_id, name, avatar, description, built_in, connector, type, public: isPublic, readonly } = data
-					setAssistant({ assistant_id, name, avatar, description, built_in, connector, type, public: isPublic, readonly })
+					const {
+						assistant_id,
+						name,
+						avatar,
+						description,
+						built_in,
+						connector,
+						type,
+						public: isPublic,
+						readonly
+					} = data
+					setAssistant({
+						assistant_id,
+						name,
+						avatar,
+						description,
+						built_in,
+						connector,
+						type,
+						public: isPublic,
+						readonly
+					})
 				}
 			} catch (err) {
 				console.error('Failed to fetch assistant info:', err)
 			}
 		}
-		
+
 		fetchAssistant()
 	}, [currentAssistantId])
 
@@ -160,21 +168,19 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				targetTabId = newId
 			} else {
 				// Use existing tab's assistant
-				const tab = tabs.find(t => t.chatId === targetTabId)
+				const tab = tabs.find((t) => t.chatId === targetTabId)
 				if (tab && tab.assistantId) {
 					targetAssistantId = tab.assistantId
 				}
 			}
-
-			// Clear draft
-			setInputDrafts((prev) => ({ ...prev, [targetTabId]: '' }))
 
 			if (!chatClient) {
 				console.error('Chat client not initialized')
 				return
 			}
 
-			setStreaming(true)
+			// Set streaming state for this specific chat
+			setStreamingStates((prev) => ({ ...prev, [targetTabId]: true }))
 
 			// 1. Add User Message locally
 			const userMsg: Message = {
@@ -191,7 +197,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				// 2. Start Streaming
 				if (!targetAssistantId) {
 					console.error('Assistant ID is missing')
-					setStreaming(false)
+					setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
 					return
 				}
 
@@ -207,8 +213,8 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 						// Event handling
 						if (chunk.type === 'event') {
 							if (chunk.props?.event === 'stream_end') {
-								setStreaming(false)
-								abortHandleRef.current = null
+								setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
+								delete abortHandlesRef.current[targetTabId]
 							}
 							return
 						}
@@ -256,13 +262,13 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 							clearMessageCache(msgId)
 							// Also end streaming when we receive the final done message
 							// This is a fallback in case stream_end event is missed
-							setStreaming(false)
-							abortHandleRef.current = null
+							setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
+							delete abortHandlesRef.current[targetTabId]
 						}
 					},
 					(error: any) => {
 						console.error('Stream error:', error)
-						setStreaming(false)
+						setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
 						updateMessages(targetTabId, (prev) => [
 							...prev,
 							{
@@ -270,26 +276,28 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								props: { message: error.message || 'Connection failed' }
 							}
 						])
-						abortHandleRef.current = null
+						delete abortHandlesRef.current[targetTabId]
 					}
 				)
 
-				abortHandleRef.current = abortFn
+				abortHandlesRef.current[targetTabId] = abortFn
 			} catch (err) {
 				console.error('Failed to send message:', err)
-				setStreaming(false)
+				setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
 			}
 		},
 		[chatClient, defaultAssistantId, currentAssistantId, activeTabId, updateMessages, tabs]
 	)
 
 	const abort = useCallback(() => {
-		if (abortHandleRef.current) {
-			abortHandleRef.current()
-			abortHandleRef.current = null
+		if (!activeTabId) return
+		const abortFn = abortHandlesRef.current[activeTabId]
+		if (abortFn) {
+			abortFn()
+			delete abortHandlesRef.current[activeTabId]
 		}
-		setStreaming(false)
-	}, [])
+		setStreamingStates((prev) => ({ ...prev, [activeTabId]: false }))
+	}, [activeTabId])
 
 	const reset = useCallback(() => {
 		if (!activeTabId) return
@@ -309,13 +317,13 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			// Open new tab
 			// For history loading, we might need to fetch the assistant ID from the session details
 			// For now, we assume default or try to get it from sessions list
-			const session = sessions.find(s => s.chat_id === chatId)
+			const session = sessions.find((s) => s.chat_id === chatId)
 			const historyAssistantId = session?.assistant_id || defaultAssistantId
 
 			const newTab: ChatTab = { chatId, title: 'Loading...', assistantId: historyAssistantId }
 			setTabs((prev) => [...prev, newTab])
 			setActiveTabId(chatId)
-			setLoading(true)
+			setLoadingStates((prev) => ({ ...prev, [chatId]: true }))
 
 			try {
 				const history = await getChatHistory(chatId)
@@ -331,34 +339,37 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			} catch (err) {
 				console.error('Failed to load history', err)
 			} finally {
-				setLoading(false)
+				setLoadingStates((prev) => ({ ...prev, [chatId]: false }))
 			}
 		},
 		[tabs, sessions, defaultAssistantId]
 	)
 
-	const createNewChat = useCallback((arg?: string | any) => {
-		// Check if arg is a string (assistantId), otherwise treat as event/empty
-		const assistantId = typeof arg === 'string' ? arg : undefined
+	const createNewChat = useCallback(
+		(arg?: string | any) => {
+			// Check if arg is a string (assistantId), otherwise treat as event/empty
+			const assistantId = typeof arg === 'string' ? arg : undefined
 
-		const newId = nanoid()
-		
-		// Inherit from active tab if no assistant ID provided
-		let targetAssistantId = assistantId
-		if (!targetAssistantId) {
-			const currentTab = tabs.find(t => t.chatId === activeTabId)
-			targetAssistantId = currentTab?.assistantId
-		}
-		
-		// Fallback to default
-		targetAssistantId = targetAssistantId || defaultAssistantId
-		
-		const newTab: ChatTab = { chatId: newId, title: 'New Chat', assistantId: targetAssistantId }
-		setTabs((prev) => [...prev, newTab])
-		setChatStates((prev) => ({ ...prev, [newId]: [] }))
-		setActiveTabId(newId)
-		clearMessageCache()
-	}, [defaultAssistantId, tabs, activeTabId])
+			const newId = nanoid()
+
+			// Inherit from active tab if no assistant ID provided
+			let targetAssistantId = assistantId
+			if (!targetAssistantId) {
+				const currentTab = tabs.find((t) => t.chatId === activeTabId)
+				targetAssistantId = currentTab?.assistantId
+			}
+
+			// Fallback to default
+			targetAssistantId = targetAssistantId || defaultAssistantId
+
+			const newTab: ChatTab = { chatId: newId, title: 'New Chat', assistantId: targetAssistantId }
+			setTabs((prev) => [...prev, newTab])
+			setChatStates((prev) => ({ ...prev, [newId]: [] }))
+			setActiveTabId(newId)
+			clearMessageCache()
+		},
+		[defaultAssistantId, tabs, activeTabId]
+	)
 
 	const activateTab = useCallback((chatId: string) => {
 		setActiveTabId(chatId)
@@ -381,18 +392,26 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				}
 				return newTabs
 			})
-			// Optional: Clean up chatStates for closed tab to save memory
+			// Clean up all states for closed tab to save memory
 			setChatStates((prev) => {
 				const newState = { ...prev }
 				delete newState[chatId]
 				return newState
 			})
-			// Clean up drafts
-			setInputDrafts((prev) => {
+			setLoadingStates((prev) => {
 				const newState = { ...prev }
 				delete newState[chatId]
 				return newState
 			})
+			setStreamingStates((prev) => {
+				const newState = { ...prev }
+				delete newState[chatId]
+				return newState
+			})
+			// Clean up abort handler
+			if (abortHandlesRef.current[chatId]) {
+				delete abortHandlesRef.current[chatId]
+			}
 		},
 		[activeTabId]
 	)
@@ -406,8 +425,6 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		assistant, // Export assistant info
 		tabs,
 		activeTabId,
-		inputDraft,
-		updateInputDraft,
 		sendMessage,
 		abort,
 		reset,

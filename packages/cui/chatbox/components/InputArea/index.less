@@ -12,18 +12,22 @@
 	// Common Publish Box Styles
 	.publishBox {
 		background: var(--color_chatbox_bg_card);
-		border: 1px solid var(--color_chatbox_border_card);
+		// Darker border for better visibility
+		border: 1px solid var(--color_chatbox_border_hover); 
 		border-radius: 16px;
 		padding: 12px 16px 8px;
 		position: relative;
 		transition: border-color 0.2s, box-shadow 0.2s;
 
 		// Default Shadow (Normal Mode)
-		box-shadow: 0 -2px 10px var(--color_border_soft);
+		// Deep shadow to separate white box from white background
+		box-shadow: var(--shadow_float);
 
 		&:focus-within {
-			border-color: var(--color_chatbox_border_hover);
-			box-shadow: 0 2px 8px var(--color_border_light);
+			// Use dedicated focus border color
+			border-color: var(--color_chatbox_border_focus);
+			// Even deeper shadow on focus
+			box-shadow: var(--shadow_float_hover);
 		}
 	}
 
@@ -61,12 +65,9 @@
 
 	// Normal Mode Specifics
 	&.normal {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
+		flex: 0 0 auto; // Don't shrink, don't grow
 		z-index: 50;
-		// .publishBox uses default common styles
+		// Remove absolute positioning
 	}
 
 	.content {
