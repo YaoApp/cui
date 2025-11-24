@@ -107,6 +107,182 @@ setTimeout(async () => {
   - Stops LLM streaming and other operations immediately
   - Example: User realizes the question was wrong and wants to stop
 
+### Stop Streaming (Cancel Without Appending)
+
+To cancel a streaming response without adding new messages (e.g., user clicks a "Stop" button), simply call the `abort()` function returned by `StreamCompletion()`:
+
+```typescript
+import { OpenAPI, Chat } from '@yao/cui/openapi'
+
+const api = new OpenAPI({ baseURL: '/v1' })
+const chat = new Chat(api)
+
+// Start streaming - StreamCompletion returns an abort function
+const abort = chat.StreamCompletion(
+    {
+        assistant_id: 'my-assistant',
+        messages: [
+            { role: 'user', content: 'Write a very long essay about history' }
+        ]
+    },
+    (chunk) => {
+        console.log(chunk)
+    }
+)
+
+// User clicks "Stop" button - call the abort function
+function handleStopButton() {
+    abort() // This cancels both frontend reading AND backend processing
+}
+
+// Bind to stop button
+document.getElementById('stop-btn')?.addEventListener('click', handleStopButton)
+```
+
+**What Happens When You Call `abort()`:**
+
+The `abort()` function automatically handles proper cancellation:
+
+1. **Captures `context_id`**: Internally captures the `context_id` from the `stream_start` event
+2. **Sends cancellation signal**: Calls `AppendMessages(contextId, [], 'force')` to tell the backend to stop
+3. **Stops frontend reading**: Also calls `AbortController.abort()` to stop reading the stream
+
+This is equivalent to manually doing:
+
+```typescript
+// Manual approach (NOT recommended - use abort() instead)
+let contextId: string
+
+const abort = chat.StreamCompletion(
+    { ... },
+    (chunk) => {
+        // Manually capture context_id
+        if (chunk.type === 'event' && chunk.props?.event === 'stream_start') {
+            contextId = chunk.props.data?.context_id
+        }
+    }
+)
+
+function manualStop() {
+    // Manually send force interrupt
+    if (contextId) {
+        chat.AppendMessages(contextId, [], 'force')
+    }
+}
+```
+
+**Why Use `AppendMessages` Instead of Just Calling `abort()`?**
+
+If you only rely on the browser's native `fetch` API with `AbortController`, there's a fundamental limitation with SSE (Server-Sent Events):
+
+**Browser `fetch` API Limitation:**
+- When you call `abort()` on an ongoing `fetch` request with `ReadableStream`, the browser only **stops reading the response**
+- The HTTP connection may remain open, and **the backend does not receive a cancellation signal**
+- The backend LLM continues generating the response, wasting compute resources
+
+**Solution: Use `AppendMessages` for Proper Cancellation**
+
+`StreamCompletion()` is already designed to handle this correctly. It automatically:
+1. Captures the `context_id` from the `stream_start` event
+2. When you call the returned `abort()` function, it:
+   - Sends `AppendMessages(contextId, [], 'force')` to the backend
+   - Also calls `AbortController.abort()` to stop frontend reading
+
+**Benefits:**
+- ✅ **Backend receives signal**: Server immediately cancels LLM processing
+- ✅ **Saves resources**: No wasted computation on unwanted responses
+- ✅ **Proper cleanup**: Backend context is properly cancelled and cleaned up
+- ✅ **Standard pattern**: This is the correct way to cancel SSE streams in browsers
+
+**Note:** If you're implementing your own fetch-based SSE client, you should follow the same pattern: send an explicit cancellation API call (like `AppendMessages`) instead of relying solely on `AbortController`.
+
+**How It Works:**
+
+1. **Frontend**: Sends `POST /chat/completions/:context_id/append` with `type: 'force'` and `messages: []`
+2. **Backend**: Receives the force interrupt signal with no messages
+3. **Cancellation**: Backend immediately cancels the streaming context
+4. **LLM**: Streaming stops and returns with cancellation status
+
+**Key Points:**
+
+- **Empty messages**: `messages: []` indicates pure cancellation without appending
+- **Force type required**: Must use `'force'` interrupt type for cancellation
+- **Context ID needed**: Must capture `context_id` from the `stream_start` event
+- **Immediate effect**: Streaming stops immediately, LLM receives cancellation signal
+- **Best practice**: Always handle the promise rejection in case the context is already completed
+
+**Complete Example with Stop Button:**
+
+```typescript
+import { OpenAPI, Chat } from '@yao/cui/openapi'
+
+const api = new OpenAPI({ baseURL: '/v1' })
+const chat = new Chat(api)
+
+let contextId: string | null = null
+let isStreaming = false
+
+function startChat() {
+    isStreaming = true
+    contextId = null
+    
+    chat.StreamCompletion(
+        {
+            assistant_id: 'my-assistant',
+            messages: [
+                { role: 'user', content: 'Explain artificial intelligence in detail' }
+            ]
+        },
+        (chunk) => {
+            // Capture context_id from stream_start
+            if (chunk.type === 'event' && chunk.props?.event === 'stream_start') {
+                contextId = chunk.props.data?.context_id || null
+                updateStopButton(true) // Enable stop button
+            }
+            
+            // Handle stream_end
+            if (chunk.type === 'event' && chunk.props?.event === 'stream_end') {
+                isStreaming = false
+                updateStopButton(false) // Disable stop button
+            }
+            
+            // Display message
+            displayMessage(chunk)
+        },
+        (error) => {
+            console.error('Stream error:', error)
+            isStreaming = false
+            updateStopButton(false)
+        }
+    )
+}
+
+function stopStreaming() {
+    if (!contextId || !isStreaming) return
+    
+    chat.AppendMessages(contextId, [], 'force')
+        .then(() => {
+            console.log('Stream stopped successfully')
+            isStreaming = false
+            updateStopButton(false)
+        })
+        .catch((error) => {
+            console.error('Failed to stop stream:', error)
+        })
+}
+
+function updateStopButton(enabled: boolean) {
+    const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement
+    if (stopBtn) {
+        stopBtn.disabled = !enabled
+    }
+}
+
+// Event handlers
+document.getElementById('send-btn')?.addEventListener('click', startChat)
+document.getElementById('stop-btn')?.addEventListener('click', stopStreaming)
+```
+
 ### With Chat History
 
 ```typescript
