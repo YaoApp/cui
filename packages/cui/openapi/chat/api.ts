@@ -56,7 +56,17 @@ export class Chat {
 		// Extract assistant_id (either from assistant_id field or model field)
 		const assistantId = 'assistant_id' in request ? request.assistant_id : undefined
 
-		// console.log('[Chat API] Starting stream...', { url, assistantId, chatId: request.chat_id })
+		// Track context_id for cancellation
+		let contextId: string | null = null
+
+		// Wrap onEvent to capture context_id from stream_start
+		const wrappedOnEvent: StreamCallback = (chunk) => {
+			if (chunk.type === 'event' && chunk.props?.event === 'stream_start') {
+				// context_id is in props.data (StreamStartData structure)
+				contextId = chunk.props?.data?.context_id || null
+			}
+			onEvent(chunk)
+		}
 
 		// Start the stream
 		this.startStream(
@@ -64,15 +74,24 @@ export class Chat {
 			internalRequest,
 			assistantId,
 			request.chat_id,
-			onEvent,
+			wrappedOnEvent,
 			onError,
 			abortController
 		).catch((error) => {
 			onError?.(error)
 		})
 
-		// Return abort function
-		return () => abortController.abort()
+		// Return abort function that sends force interrupt signal
+		return () => {
+			// If we have context_id, send force interrupt to backend
+			if (contextId) {
+				this.AppendMessages(contextId, [], 'force').catch((error) => {
+					console.error('[Chat API] Failed to send force interrupt:', error)
+				})
+			}
+			// Also abort the fetch to stop reading
+			abortController.abort()
+		}
 	}
 
 	/**
