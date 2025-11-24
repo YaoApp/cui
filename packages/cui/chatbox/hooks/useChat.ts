@@ -9,6 +9,13 @@ import type { IChatSession, ChatTab } from '../types'
 import { applyDelta, clearMessageCache } from '../utils/delta'
 import { getRecentChats, getChatHistory } from '../services/mock'
 
+export interface QueuedMessage {
+	id: string
+	message: ChatMessage
+	type: 'graceful' | 'force'
+	timestamp: number
+}
+
 export interface UseChatOptions {
 	assistantId?: string
 	chatId?: string
@@ -28,6 +35,9 @@ export interface UseChatReturn {
 	tabs: ChatTab[]
 	activeTabId: string
 
+	// Message Queue State
+	messageQueue: QueuedMessage[]
+
 	// Actions
 	sendMessage: (message: ChatMessage) => Promise<void>
 	abort: () => void
@@ -38,6 +48,11 @@ export interface UseChatReturn {
 	// Tab Actions
 	activateTab: (chatId: string) => void
 	closeTab: (chatId: string) => void
+
+	// Queue Actions
+	queueMessage: (message: ChatMessage, type: 'graceful' | 'force') => void
+	sendQueuedMessage: (queueId: string, asForce?: boolean) => void
+	cancelQueuedMessage: (queueId: string) => void
 }
 
 export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
@@ -62,6 +77,9 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({})
 	const [streamingStates, setStreamingStates] = useState<Record<string, boolean>>({})
 
+	// Message Queue State Map: chatId -> queue
+	const [messageQueues, setMessageQueues] = useState<Record<string, QueuedMessage[]>>({})
+
 	const [assistant, setAssistant] = useState<any>(null) // Assistant info
 
 	const [chatClient, setChatClient] = useState<Chat | null>(null)
@@ -72,6 +90,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const messages = activeTabId ? chatStates[activeTabId] || [] : []
 	const loading = activeTabId ? loadingStates[activeTabId] || false : false
 	const streaming = activeTabId ? streamingStates[activeTabId] || false : false
+	const messageQueue = activeTabId ? messageQueues[activeTabId] || [] : []
 
 	// currentChatId is activeTabId
 	const currentChatId = activeTabId || undefined
@@ -150,6 +169,204 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		}))
 	}, [])
 
+	// Send queued messages using AppendMessages API
+	const appendQueuedMessages = useCallback(
+		async (queuedMessages: ChatMessage[], targetTabId: string, type: 'graceful' | 'force' = 'graceful') => {
+			if (!chatClient) {
+				console.error('Chat client not initialized')
+				return
+			}
+
+			const contextId = contextIdsRef.current[targetTabId]
+			if (!contextId) {
+				console.error('No context_id available for appending messages')
+				return
+			}
+
+			try {
+				// Add all User Messages to UI first
+				const userMessages: Message[] = queuedMessages.map((msg, index) => ({
+					type: 'text',
+					id: `user-${Date.now()}-${index}`,
+					props: {
+						content: typeof msg.content === 'string' ? msg.content : 'Multimodal content'
+					},
+					done: true
+				}))
+				updateMessages(targetTabId, (prev) => [...prev, ...userMessages])
+
+				// Send to backend using AppendMessages API
+				await chatClient.AppendMessages(contextId, queuedMessages, type)
+
+				// Note: Don't clear queue here, wait for backend's queue_processed event
+			} catch (err) {
+				console.error('Failed to append messages:', err)
+			}
+		},
+		[chatClient, updateMessages]
+	)
+
+	// Start a new stream with multiple messages (for stream_end queue processing)
+	const startNewStreamWithMessages = useCallback(
+		async (messages: ChatMessage[], targetTabId: string, targetAssistantId: string) => {
+			if (!chatClient) {
+				console.error('Chat client not initialized')
+				return
+			}
+
+			// Set streaming state
+			setStreamingStates((prev) => ({ ...prev, [targetTabId]: true }))
+
+			// Add all User Messages to UI
+			const userMessages: Message[] = messages.map((msg, index) => ({
+				type: 'text',
+				id: `user-${Date.now()}-${index}`,
+				props: {
+					content: typeof msg.content === 'string' ? msg.content : 'Multimodal content'
+				},
+				done: true
+			}))
+			updateMessages(targetTabId, (prev) => [...prev, ...userMessages])
+
+			try {
+				// Start new stream with all messages
+				const abortFn = chatClient.StreamCompletion(
+					{
+						assistant_id: targetAssistantId,
+						chat_id: targetTabId,
+						messages: messages // Send all queued messages together
+					},
+					(chunk: Message) => {
+						// Same event handling as sendMessage
+						if (chunk.type === 'event') {
+							if (chunk.props?.event === 'stream_start') {
+								const ctxId = chunk.props?.data?.context_id
+								if (ctxId) {
+									contextIdsRef.current[targetTabId] = ctxId
+								}
+							}
+
+							if (chunk.props?.event === 'stream_end') {
+								setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
+								delete abortHandlesRef.current[targetTabId]
+
+								// Check if queue has messages and send them (same as sendMessage)
+								setMessageQueues((prev) => {
+									const queue = prev[targetTabId] || []
+									if (queue.length > 0) {
+										const allMessages = queue.map((q) => q.message)
+
+										// Get assistant ID
+										const tab = tabs.find((t) => t.chatId === targetTabId)
+										const assistantId = tab?.assistantId || defaultAssistantId
+
+										if (assistantId) {
+											// Send all queued messages as a new StreamCompletion
+											setTimeout(() => {
+												startNewStreamWithMessages(
+													allMessages,
+													targetTabId,
+													assistantId
+												)
+											}, 100)
+										} else {
+											console.error(
+												'No assistant ID for sending queued messages'
+											)
+										}
+
+										// Clear queue
+										return {
+											...prev,
+											[targetTabId]: []
+										}
+									}
+									return prev
+								})
+							}
+
+							if (chunk.props?.event === 'queue_processed') {
+								setMessageQueues((prev) => {
+									if (prev[targetTabId] && prev[targetTabId].length > 0) {
+										return {
+											...prev,
+											[targetTabId]: []
+										}
+									}
+									return prev
+								})
+							}
+							return
+						}
+
+						// Type change handling
+						if (chunk.type_change && chunk.id) {
+							clearMessageCache(chunk.id)
+							updateMessages(targetTabId, (prev) => {
+								const index = prev.findIndex((m) => m.id === chunk.id)
+								if (index !== -1) {
+									const newArr = [...prev]
+									newArr[index] = { ...chunk, delta: false, done: false }
+									return newArr
+								}
+								return [...prev, chunk]
+							})
+						}
+
+						const msgId = chunk.id || `ai-response-unknown`
+						const mergedState = applyDelta(msgId, chunk)
+
+						const updatedMessage: Message = {
+							id: msgId,
+							type: mergedState.type,
+							props: mergedState.props,
+							done: chunk.done,
+							delta: chunk.delta
+						}
+
+						updateMessages(targetTabId, (prev) => {
+							const index = prev.findIndex((m) => m.id === msgId)
+							if (index !== -1) {
+								const newArr = [...prev]
+								newArr[index] = updatedMessage
+								return newArr
+							} else {
+								return [...prev, updatedMessage]
+							}
+						})
+
+						if (chunk.done) {
+							clearMessageCache(msgId)
+							setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
+							delete abortHandlesRef.current[targetTabId]
+						}
+					},
+					(error: any) => {
+						console.error('Stream error:', error)
+						setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
+						updateMessages(targetTabId, (prev) => [
+							...prev,
+							{
+								type: 'error',
+								props: { message: error.message || 'Connection failed' }
+							}
+						])
+						delete abortHandlesRef.current[targetTabId]
+					}
+				)
+
+				abortHandlesRef.current[targetTabId] = abortFn
+			} catch (err) {
+				console.error('Failed to start new stream:', err)
+				setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
+			}
+		},
+		[chatClient, updateMessages, tabs, defaultAssistantId]
+	)
+
+	// Store context_id for each active chat
+	const contextIdsRef = useRef<Record<string, string>>({})
+
 	// Send Message
 	const sendMessage = useCallback(
 		async (inputMsg: ChatMessage) => {
@@ -212,9 +429,67 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 						// Event handling
 						if (chunk.type === 'event') {
+							// Capture context_id from stream_start
+							if (chunk.props?.event === 'stream_start') {
+								const ctxId = chunk.props?.data?.context_id
+								if (ctxId) {
+									contextIdsRef.current[targetTabId] = ctxId
+								}
+							}
+
 							if (chunk.props?.event === 'stream_end') {
 								setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
 								delete abortHandlesRef.current[targetTabId]
+
+								// If queue has messages, start a new stream with all queued messages
+								// Use functional update to get latest queue state
+								setMessageQueues((prev) => {
+									const queue = prev[targetTabId] || []
+									if (queue.length > 0) {
+										const allMessages = queue.map((q) => q.message)
+
+										// Get assistant ID
+										const tab = tabs.find((t) => t.chatId === targetTabId)
+										const assistantId = tab?.assistantId || defaultAssistantId
+
+										if (assistantId) {
+											// Send all queued messages as a new StreamCompletion
+											setTimeout(() => {
+												startNewStreamWithMessages(
+													allMessages,
+													targetTabId,
+													assistantId
+												)
+											}, 100)
+										} else {
+											console.error(
+												'No assistant ID for sending queued messages'
+											)
+										}
+
+										// Clear queue
+										return {
+											...prev,
+											[targetTabId]: []
+										}
+									}
+									return prev
+								})
+							}
+
+							// Backend告知队列已处理完成（graceful 模式）
+							if (chunk.props?.event === 'queue_processed') {
+								// Clear the queue UI (only if not already cleared by force mode)
+								setMessageQueues((prev) => {
+									// Only clear if queue still exists (graceful mode)
+									if (prev[targetTabId] && prev[targetTabId].length > 0) {
+										return {
+											...prev,
+											[targetTabId]: []
+										}
+									}
+									return prev
+								})
 							}
 							return
 						}
@@ -408,10 +683,90 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				delete newState[chatId]
 				return newState
 			})
+			setMessageQueues((prev) => {
+				const newState = { ...prev }
+				delete newState[chatId]
+				return newState
+			})
 			// Clean up abort handler
 			if (abortHandlesRef.current[chatId]) {
 				delete abortHandlesRef.current[chatId]
 			}
+			// Clean up context_id
+			if (contextIdsRef.current[chatId]) {
+				delete contextIdsRef.current[chatId]
+			}
+		},
+		[activeTabId]
+	)
+
+	// Queue a message (just add to local queue, will send via AppendMessages later)
+	const queueMessage = useCallback(
+		(message: ChatMessage, type: 'graceful' | 'force' = 'graceful') => {
+			if (!activeTabId) return
+
+			const queuedMsg: QueuedMessage = {
+				id: nanoid(),
+				message,
+				type,
+				timestamp: Date.now()
+			}
+
+			setMessageQueues((prev) => ({
+				...prev,
+				[activeTabId]: [...(prev[activeTabId] || []), queuedMsg]
+			}))
+
+			// Immediately send to backend via AppendMessages (type: graceful)
+			const contextId = contextIdsRef.current[activeTabId]
+			if (contextId && chatClient) {
+				chatClient.AppendMessages(contextId, [message], 'graceful').catch((err) => {
+					console.error('Failed to append message:', err)
+				})
+			}
+		},
+		[activeTabId, chatClient]
+	)
+
+	// Send all queued messages immediately (force mode)
+	const sendQueuedMessage = useCallback(
+		(queueId: string, asForce: boolean = true) => {
+			if (!activeTabId) return
+
+			const queue = messageQueues[activeTabId] || []
+			if (queue.length === 0) return
+
+			const contextId = contextIdsRef.current[activeTabId]
+			if (!contextId) {
+				console.error('No context_id available')
+				return
+			}
+
+			// Extract all messages from queue
+			const allQueuedMessages = queue.map((q) => q.message)
+
+			// Send all queued messages via AppendMessages (force mode)
+			appendQueuedMessages(allQueuedMessages, activeTabId, 'force')
+
+			// Force mode: Clear queue immediately (don't wait for backend event)
+			setMessageQueues((prev) => ({
+				...prev,
+				[activeTabId]: []
+			}))
+		},
+		[activeTabId, messageQueues, appendQueuedMessages]
+	)
+
+	// Cancel a queued message
+	const cancelQueuedMessage = useCallback(
+		(queueId: string) => {
+			if (!activeTabId) return
+
+			setMessageQueues((prev) => {
+				const queue = prev[activeTabId] || []
+				const newQueue = queue.filter((m) => m.id !== queueId)
+				return { ...prev, [activeTabId]: newQueue }
+			})
 		},
 		[activeTabId]
 	)
@@ -425,12 +780,16 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		assistant, // Export assistant info
 		tabs,
 		activeTabId,
+		messageQueue, // Export message queue
 		sendMessage,
 		abort,
 		reset,
 		loadHistory,
 		createNewChat,
 		activateTab,
-		closeTab
+		closeTab,
+		queueMessage,
+		sendQueuedMessage,
+		cancelQueuedMessage
 	}
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Message, ChatMessage } from '../openapi'
+import type { QueuedMessage } from './hooks/useChat'
 
 /**
  * 聊天会话摘要 (用于 Sidebar 列表)
@@ -45,6 +46,8 @@ export interface IInputAreaProps {
 	mode: 'placeholder' | 'normal'
 	/** 是否正在加载/发送中 */
 	loading?: boolean
+	/** 是否正在流式输出中 */
+	streaming?: boolean
 	/** 是否禁用 */
 	disabled?: boolean
 	/** 发送回调 */
@@ -64,6 +67,14 @@ export interface IInputAreaProps {
 		allowModelSelection?: boolean
 		defaultModel?: string
 	}
+	/** Message Queue */
+	messageQueue?: QueuedMessage[]
+	/** Queue message callback */
+	onQueueMessage?: (message: ChatMessage, type: 'graceful' | 'force') => void
+	/** Send queued message callback */
+	onSendQueuedMessage?: (queueId: string, asForce?: boolean) => void
+	/** Cancel queued message callback */
+	onCancelQueuedMessage?: (queueId: string) => void
 	className?: string
 	style?: React.CSSProperties
 }

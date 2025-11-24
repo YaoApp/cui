@@ -2,15 +2,17 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Tooltip, Dropdown, Menu, message } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
-import { Database, Sparkle, UploadSimple } from 'phosphor-react'
+import { Database, Sparkle, UploadSimple, PaperPlaneTilt, Stop } from 'phosphor-react'
 import Icon from '../../../widgets/Icon'
 import { FileAPI } from '../../../openapi'
 import { CreateFileWrapper } from '@/utils/fileWrapper' // Assuming this util exists or we implement wrapper creation inline
 import type { IInputAreaProps } from '../../types'
 import type { ChatMessage } from '../../../openapi'
+import type { QueuedMessage } from '../../hooks/useChat'
 import styles from './index.less'
 import AgentTag from './AgentTag'
 import ResourcePicker from '../AIChat/ResourcePicker'
+import MessageQueue from '../MessageQueue'
 
 // Mock Data
 const MOCK_AGENT = {
@@ -51,7 +53,21 @@ interface Attachment {
 }
 
 const InputArea = (props: IInputAreaProps) => {
-	const { mode, onSend, loading, disabled, className, style, chatId, assistant: propAssistant } = props
+	const { 
+		mode, 
+		onSend, 
+		loading, 
+		disabled, 
+		className, 
+		style, 
+		chatId, 
+		assistant: propAssistant,
+		streaming,
+		messageQueue,
+		onQueueMessage,
+		onSendQueuedMessage,
+		onCancelQueuedMessage
+	} = props
 	const [isAnimating, setIsAnimating] = useState(false)
 	const [isDragOver, setIsDragOver] = useState(false)
 	const [showMentions, setShowMentions] = useState(false)
@@ -272,15 +288,15 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 	}
 
-	const handleSend = () => {
-		if (!editorRef.current) return
+	const constructMessage = (): ChatMessage | null => {
+		if (!editorRef.current) return null
 		const text = editorRef.current.innerText
 		const hasTags = editorRef.current.querySelectorAll(`.${styles.mentionTag}`).length > 0
 
 		// Filter out attachments that are still uploading or failed
 		const validAttachments = attachments.filter((att) => !att.uploading && !att.error && att.wrapper)
 
-		if (!text.trim() && !hasTags && validAttachments.length === 0) return
+		if (!text.trim() && !hasTags && validAttachments.length === 0) return null
 
 		// Construct Content
 		let content: ChatMessage['content']
@@ -314,24 +330,51 @@ const InputArea = (props: IInputAreaProps) => {
 			content = text // Plain text
 		}
 
-		const message: ChatMessage = {
+		return {
 			role: 'user',
 			content
 		}
+	}
+
+	const clearInput = () => {
+		if (editorRef.current) {
+			editorRef.current.innerHTML = ''
+			setIsEmpty(true)
+			editorRef.current.focus()
+		}
+		setAttachments([])
+	}
+
+	const handleSend = () => {
+		const message = constructMessage()
+		if (!message) return
 
 		if (mode === 'placeholder') {
 			setIsAnimating(true)
 		}
 
 		onSend(message).then(() => {
-			if (editorRef.current) {
-				editorRef.current.innerHTML = ''
-				setIsEmpty(true)
-				// Keep focus on input after sending
-				editorRef.current.focus()
-			}
-			setAttachments([])
+			clearInput()
 		})
+	}
+
+	const handleQueueSend = () => {
+		const message = constructMessage()
+		if (!message) {
+			// Input is empty, but we might have queued messages
+			// Send ALL queued messages as force (one request)
+			if (messageQueue && messageQueue.length > 0 && onSendQueuedMessage) {
+				// Just send the first one's id - the hook will handle sending all messages
+				onSendQueuedMessage(messageQueue[0].id, true)
+			}
+			return
+		}
+
+		// Input is not empty, queue the message (graceful mode)
+		if (onQueueMessage) {
+			onQueueMessage(message, 'graceful')
+			clearInput()
+		}
 	}
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -343,7 +386,13 @@ const InputArea = (props: IInputAreaProps) => {
 				return
 			}
 			e.preventDefault()
-			handleSend()
+			
+			// Queue mode: if streaming, queue the message instead of sending
+			if (streaming) {
+				handleQueueSend()
+			} else {
+				handleSend()
+			}
 		}
 
 		if (e.key === 'Escape') {
@@ -559,11 +608,11 @@ const InputArea = (props: IInputAreaProps) => {
 
 		return (
 			<button
-				className={styles.sendBtn}
+				className={clsx(styles.sendBtn, showStop && styles.stopping)}
 				onClick={showStop ? props.onAbort : handleSend}
 				disabled={!showStop && (!canSend || disabled)}
 			>
-				{showStop ? <Icon name='material-stop' size={20} /> : <Icon name='material-send' size={20} />}
+				{showStop ? <Stop size={16} weight="regular" /> : <PaperPlaneTilt size={16} />}
 			</button>
 		)
 	}
@@ -677,8 +726,22 @@ const InputArea = (props: IInputAreaProps) => {
 				<div className={styles.content}>
 					{mode === 'placeholder' && renderPlaceholder()}
 
+					{/* Message Queue - positioned above InputArea */}
+					{messageQueue && messageQueue.length > 0 && onCancelQueuedMessage && onSendQueuedMessage && (
+						<MessageQueue
+							queue={messageQueue}
+							onCancel={onCancelQueuedMessage}
+							onSendNow={(id) => onSendQueuedMessage(id, true)}
+							onSendAll={() => onSendQueuedMessage(undefined, true)}
+							className={styles.messageQueue}
+						/>
+					)}
+
 					<div
-						className={styles.publishBox}
+						className={clsx(
+							styles.publishBox,
+							messageQueue && messageQueue.length > 0 && styles.hasQueue
+						)}
 						onDragOver={handleDragOver}
 						onDragLeave={handleDragLeave}
 						onDrop={handleDrop}
@@ -707,6 +770,14 @@ const InputArea = (props: IInputAreaProps) => {
 										? is_cn
 											? '输入消息...'
 											: 'Type a message...'
+										: streaming
+										? is_cn
+											? messageQueue && messageQueue.length > 0
+												? '继续输入（回车键排队）或空回车立即发送队列'
+												: '可继续输入（回车键排队，空回车立即发送）'
+											: messageQueue && messageQueue.length > 0
+											? 'Continue typing (Enter to queue, empty Enter to send now)'
+											: 'Continue typing (Enter to queue, empty Enter to send)'
 										: is_cn
 										? '输入消息，使用 @ 呼叫智能体'
 										: 'Type a message, use @ to mention agent'

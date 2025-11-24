@@ -9,6 +9,11 @@
 		transition: all 0.3s ease;
 	}
 
+	// Message Queue positioned above InputArea
+	.messageQueue {
+		// MessageQueue is independent, no border connection needed
+	}
+
 	// Common Publish Box Styles
 	.publishBox {
 		background: var(--color_chatbox_bg_card);
@@ -28,6 +33,11 @@
 			border-color: var(--color_chatbox_border_focus);
 			// Even deeper shadow on focus
 			box-shadow: var(--shadow_float_hover);
+		}
+
+		// When there's a queue above, keep normal style (no connection)
+		&.hasQueue {
+			// Keep normal border-radius and border
 		}
 	}
 
@@ -269,8 +279,7 @@
 			width: 100%;
 			outline: none;
 			padding: 0;
-			// Right padding to avoid overlap with send button
-			padding-right: 44px; // Increased slightly for larger button
+			// No extra right padding, text can fill the full width
 			font-size: 14px;
 			line-height: 1.6;
 			color: var(--color_text);
@@ -290,40 +299,61 @@
 
 		.sendBtn {
 			position: absolute;
-			right: 0;
+			right: 0; // Stay on top of text area
 			bottom: 0;
-			width: 36px; // Increased from 32px
-			height: 36px; // Increased from 32px
+			width: 30px; // Compact button
+			height: 30px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			border-radius: 8px;
-			background: transparent; // Removed background
-			color: var(--color_chatbox_text_secondary); // Default color
-			border: none;
+			border-radius: 50%; // Circular
+			background: rgba(108, 117, 125, 0.04); // Much lighter
+			backdrop-filter: blur(8px); // Glassmorphism effect
+			color: var(--color_chatbox_text_secondary);
+			border: 1px solid rgba(108, 117, 125, 0.08);
 			cursor: pointer;
 			transition: all 0.2s;
-			z-index: 10;
+			z-index: 10; // Float above text
 
-			// Active state (when not disabled)
+			// Active state (when not disabled) - use primary color background
 			&:not(:disabled) {
-				color: var(--color_primary); // Active color
+				color: var(--color_primary);
+				background: rgba(51, 113, 252, 0.06); // Lighter primary color
+				border-color: rgba(51, 113, 252, 0.1);
+			}
+
+			// Stop state (streaming) - use warning color background with breathing animation
+			&.stopping {
+				color: var(--color_warning);
+				background: rgba(250, 173, 20, 0.08); // Lighter warning color
+				border-color: rgba(250, 173, 20, 0.12);
+				animation: breathing 2s ease-in-out infinite;
 			}
 
 			&:hover {
-				background: transparent; // No background on hover
 				transform: scale(1.1); // Scale animation
+				
+				// Increase opacity on hover
+				&:not(:disabled):not(.stopping) {
+					background: rgba(51, 113, 252, 0.1);
+					border-color: rgba(51, 113, 252, 0.15);
+				}
+				
+				&.stopping {
+					background: rgba(250, 173, 20, 0.12);
+					border-color: rgba(250, 173, 20, 0.18);
+				}
 			}
 
 			&:disabled {
-				background: transparent;
-				opacity: 0.5; // Reduce opacity for disabled state
+				background: rgba(108, 117, 125, 0.03); // Very light when disabled
+				opacity: 0.6;
 				color: var(--color_chatbox_text_secondary);
 				cursor: not-allowed;
 				transform: none; // No scale
 
 				&:hover {
-					background: transparent;
+					background: rgba(108, 117, 125, 0.03);
 				}
 			}
 		}
@@ -475,6 +505,58 @@
 			background: var(--color_chatbox_bg_card);
 			padding: 8px 16px;
 			border-radius: 20px;
+		}
+	}
+}
+
+// Breathing animation for stop button
+@keyframes breathing {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+
+// Dark mode styles for send button
+[data-theme='dark'] {
+	.inputArea {
+		.sendBtn {
+			background: rgba(160, 160, 160, 0.05); // Lighter for dark mode
+			border-color: rgba(160, 160, 160, 0.08);
+
+			// Active state - primary color
+			&:not(:disabled) {
+				background: rgba(69, 128, 255, 0.08); // Lighter primary color
+				border-color: rgba(69, 128, 255, 0.12);
+			}
+
+			// Stop state - warning color
+			&.stopping {
+				background: rgba(250, 173, 20, 0.1);
+				border-color: rgba(250, 173, 20, 0.15);
+			}
+
+			&:hover {
+				&:not(:disabled):not(.stopping) {
+					background: rgba(69, 128, 255, 0.12);
+					border-color: rgba(69, 128, 255, 0.18);
+				}
+				
+				&.stopping {
+					background: rgba(250, 173, 20, 0.15);
+					border-color: rgba(250, 173, 20, 0.22);
+				}
+			}
+
+			&:disabled {
+				background: rgba(160, 160, 160, 0.03);
+
+				&:hover {
+					background: rgba(160, 160, 160, 0.03);
+				}
+			}
 		}
 	}
 }

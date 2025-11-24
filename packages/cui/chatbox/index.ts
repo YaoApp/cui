@@ -17,3 +17,5 @@ export type {
 	IMessageListProps,
 	IHeaderProps
 } from './types'
+
+export type { QueuedMessage } from './hooks/useChat'

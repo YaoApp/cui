@@ -30,7 +30,11 @@ const Page = (props: IPageProps) => {
 		activeTabId,
 		activateTab,
 		closeTab,
-		assistant
+		assistant,
+		messageQueue,
+		queueMessage,
+		sendQueuedMessage,
+		cancelQueuedMessage
 	} = useChatContext()
 
 	// 获取当前活跃 tab 的助手 ID
@@ -81,8 +85,12 @@ const Page = (props: IPageProps) => {
 					chatId={activeTabId || ''} // 空字符串表示新对话
 					assistantId={currentAssistantId}
 					assistant={assistant}
+					messageQueue={messageQueue}
 					onSend={sendMessage}
 					onAbort={abort}
+					onQueueMessage={queueMessage}
+					onSendQueuedMessage={sendQueuedMessage}
+					onCancelQueuedMessage={cancelQueuedMessage}
 				/>
 			)}
 		</div>
