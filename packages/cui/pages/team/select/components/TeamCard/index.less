@@ -18,9 +18,10 @@
 	}
 
 	&.teamCardSelected {
-		border-color: var(--color_main);
-		background: var(--color_bg_menu);
-		box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.15), inset 0 0 0 1px var(--color_main);
+		border-color: var(--color_primary);
+		background: var(--color_neo_bg_selected);
+		// Double border effect for selected state + subtle shadow
+		box-shadow: 0 0 0 1px var(--color_primary), 0 4px 12px rgba(51, 113, 252, 0.12);
 	}
 
 	.teamLogoWrapper {
