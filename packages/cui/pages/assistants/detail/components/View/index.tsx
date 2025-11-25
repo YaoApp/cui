@@ -1,7 +1,7 @@
-import { Tabs, Spin } from 'antd'
+import { Tabs } from 'antd'
 import { getLocale } from '@umijs/max'
 import { App } from '@/types'
-import Tag from '@/chatbox/components/AIChat/Tag'
+import Tag from '../../../components/Tag'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
 import { useLLMProviders } from '@/hooks/useLLMProviders'
@@ -66,12 +66,12 @@ const View = ({ data, connectors }: ViewProps) => {
 					<div className={styles.fieldValue}>{data.description || '-'}</div>
 				</div>
 
-			<div className={styles.fieldItem}>
-				<div className={styles.fieldLabel}>{is_cn ? 'AI 连接器' : 'AI Connector'}</div>
-				<div className={styles.fieldValue}>
-					{data.connector ? connectorMapping[data.connector] || data.connector : '-'}
+				<div className={styles.fieldItem}>
+					<div className={styles.fieldLabel}>{is_cn ? 'AI 连接器' : 'AI Connector'}</div>
+					<div className={styles.fieldValue}>
+						{data.connector ? connectorMapping[data.connector] || data.connector : '-'}
+					</div>
 				</div>
-			</div>
 
 				<div className={styles.fieldRow}>
 					<div className={styles.fieldItem}>

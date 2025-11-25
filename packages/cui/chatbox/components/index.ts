@@ -1,4 +1,3 @@
-export { default as ChatItem } from './ChatItem'
 export { default as Chatbox } from './Chatbox'
 export { default as Header } from './Header'
 export { default as InputArea } from './InputArea'

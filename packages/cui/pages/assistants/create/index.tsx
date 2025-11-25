@@ -8,7 +8,6 @@ import { Agent as AgentType } from '@/openapi/agent/types'
 import { MCPServer } from '@/openapi/mcp/types'
 import { Agent } from '@/openapi/agent/api'
 import { MCP } from '@/openapi/mcp/api'
-import useAIChat from '@/chatbox/hooks/useAIChat'
 import { useGlobal } from '@/context/app'
 import { IsTeamMember } from '@/pages/auth/auth'
 import ProgressTimeline, { TimelineStep } from './components/ProgressTimeline'
@@ -31,7 +30,7 @@ const AssistantCreate = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
-	const { saveAssistant } = useAIChat({})
+	//sconst { saveAssistant } = useChat({})
 	const isTeamMember = IsTeamMember()
 	const { providers, mapping: connectorMapping } = useLLMProviders()
 
@@ -375,6 +374,7 @@ const AssistantCreate = () => {
 				}
 			}
 
+			// @ts-ignores
 			const result = await saveAssistant(assistantData)
 
 			if (result && result.assistant_id) {

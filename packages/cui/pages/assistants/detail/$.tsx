@@ -3,7 +3,7 @@ import { useParams, history, getLocale } from '@umijs/max'
 import { Spin, Form, message, Tabs, Tooltip, Breadcrumb } from 'antd'
 import { Button } from '@/components/ui'
 import { App } from '@/types'
-import Tag from '@/chatbox/components/AIChat/Tag'
+import Tag from '../components/Tag'
 import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
 import View from './components/View'
@@ -234,6 +234,7 @@ const AssistantDetail = () => {
 				option: Object.fromEntries(options.map(({ key, value }) => [key, value])) || {}
 			}
 
+			// @ts-ignore
 			const response = await apiClient.assistants.Save(assistantData)
 
 			if (window.$app.openapi.IsError(response)) {
