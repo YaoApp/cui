@@ -16,7 +16,7 @@ import { isValidUrl } from '@/utils'
 import DefaultHeader from './Header'
 import MentionTextArea from './MentionTextArea'
 import Assistant from './Assistant'
-import ResourcePicker from './ResourcePicker'
+import ResourcePicker from '../ResourcePicker'
 import { local } from '@yaoapp/storex'
 
 interface AIChatProps {
