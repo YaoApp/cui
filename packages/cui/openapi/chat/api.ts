@@ -4,7 +4,7 @@ import {
 	ChatCompletionResponse,
 	StreamChunk,
 	StreamCallback,
-	ChatMessage,
+	UserMessage,
 	AppendMessagesResponse,
 	InterruptType
 } from './types'
@@ -278,7 +278,7 @@ export class Chat {
 	 */
 	async AppendMessages(
 		contextId: string,
-		messages: ChatMessage[],
+		messages: UserMessage[],
 		type: InterruptType = 'graceful',
 		metadata?: Record<string, any>
 	): Promise<AppendMessagesResponse> {

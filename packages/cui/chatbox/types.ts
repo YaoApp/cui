@@ -1,14 +1,14 @@
 import React from 'react'
-import type { Message, ChatMessage, ChatCompletionRequest } from '../openapi'
+import type { Message, UserMessage, ChatCompletionRequest } from '../openapi'
 import type { QueuedMessage } from './hooks/useChat'
 
 /**
  * Send Message Request
  * Uses ChatCompletionRequest but omits assistant_id and chat_id which are controlled by useChat
- * Single message version (messages is a tuple of one ChatMessage)
+ * Single message version (messages is a tuple of one UserMessage)
  */
 export type SendMessageRequest = Omit<ChatCompletionRequest, 'assistant_id' | 'chat_id'> & {
-	messages: [ChatMessage]
+	messages: [UserMessage]
 }
 
 /**
@@ -80,7 +80,7 @@ export interface IInputAreaProps {
 	/** Message Queue */
 	messageQueue?: QueuedMessage[]
 	/** Queue message callback */
-	onQueueMessage?: (message: ChatMessage, type: 'graceful' | 'force') => void
+	onQueueMessage?: (message: UserMessage, type: 'graceful' | 'force') => void
 	/** Send queued message callback - queueId is ignored, always sends all messages */
 	onSendQueuedMessage?: (queueId?: string, asForce?: boolean) => void
 	/** Cancel queued message callback */

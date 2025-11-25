@@ -4,14 +4,14 @@ import { getLocale } from '@umijs/max'
 import { useGlobal } from '@/context/app'
 import { Chat } from '../../openapi'
 import { Agent } from '../../openapi/agent'
-import type { Message, ChatMessage } from '../../openapi'
+import type { Message, UserMessage } from '../../openapi'
 import type { IChatSession, ChatTab, SendMessageRequest } from '../types'
 import { applyDelta, clearMessageCache } from '../utils/delta'
 import { getRecentChats, getChatHistory } from '../services/mock'
 
 export interface QueuedMessage {
 	id: string
-	message: ChatMessage
+	message: UserMessage
 	type: 'graceful' | 'force'
 	timestamp: number
 }
@@ -50,7 +50,7 @@ export interface UseChatReturn {
 	closeTab: (chatId: string) => void
 
 	// Queue Actions
-	queueMessage: (message: ChatMessage, type: 'graceful' | 'force') => void
+	queueMessage: (message: UserMessage, type: 'graceful' | 'force') => void
 	sendQueuedMessage: (queueId?: string, asForce?: boolean) => void
 	cancelQueuedMessage: (queueId: string) => void
 }
@@ -183,7 +183,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 	// Send queued messages using AppendMessages API
 	const appendQueuedMessages = useCallback(
-		async (queuedMessages: ChatMessage[], targetTabId: string, type: 'graceful' | 'force' = 'graceful') => {
+		async (queuedMessages: UserMessage[], targetTabId: string, type: 'graceful' | 'force' = 'graceful') => {
 			if (!chatClient) {
 				console.error('Chat client not initialized')
 				return
@@ -310,7 +310,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 	// Start a new stream with multiple messages (for stream_end queue processing)
 	const startNewStreamWithMessages = useCallback(
-		async (messages: ChatMessage[], targetTabId: string, targetAssistantId: string) => {
+		async (messages: UserMessage[], targetTabId: string, targetAssistantId: string) => {
 			if (!chatClient) {
 				console.error('Chat client not initialized')
 				return
@@ -844,7 +844,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 	// Queue a message (just add to local queue, will send via AppendMessages later)
 	const queueMessage = useCallback(
-		(message: ChatMessage, type: 'graceful' | 'force' = 'graceful') => {
+		(message: UserMessage, type: 'graceful' | 'force' = 'graceful') => {
 			if (!activeTabId) return
 
 			const queuedMsg: QueuedMessage = {

@@ -5,10 +5,8 @@ import { getLocale, useLocation } from '@umijs/max'
 import { Database, Sparkle, UploadSimple, PaperPlaneTilt, Stop } from 'phosphor-react'
 import Icon from '../../../widgets/Icon'
 import { FileAPI } from '../../../openapi'
-import { CreateFileWrapper } from '@/utils/fileWrapper' // Assuming this util exists or we implement wrapper creation inline
 import type { IInputAreaProps } from '../../types'
-import type { ChatMessage } from '../../../openapi'
-import type { QueuedMessage } from '../../hooks/useChat'
+import type { UserMessage } from '../../../openapi'
 import { useLLMProviders } from '@/hooks/useLLMProviders'
 import { useGlobal } from '@/context/app'
 import styles from './index.less'
@@ -300,7 +298,7 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 	}
 
-	const constructMessage = (): ChatMessage | null => {
+	const constructMessage = (): UserMessage | null => {
 		if (!editorRef.current) return null
 		const text = editorRef.current.innerText
 		const hasTags = editorRef.current.querySelectorAll(`.${styles.mentionTag}`).length > 0
@@ -311,7 +309,7 @@ const InputArea = (props: IInputAreaProps) => {
 		if (!text.trim() && !hasTags && validAttachments.length === 0) return null
 
 		// Construct Content
-		let content: ChatMessage['content']
+		let content: UserMessage['content']
 		if (validAttachments.length > 0) {
 			// Multimodal content
 			const parts: any[] = []

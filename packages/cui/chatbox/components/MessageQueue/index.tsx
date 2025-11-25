@@ -1,12 +1,12 @@
 import React from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '../../../widgets/Icon'
-import type { ChatMessage } from '../../../openapi'
+import type { UserMessage } from '../../../openapi'
 import styles from './index.less'
 
 export interface QueuedMessage {
 	id: string
-	message: ChatMessage
+	message: UserMessage
 	type: 'graceful' | 'force'
 	timestamp: number
 }
@@ -25,7 +25,7 @@ const MessageQueue: React.FC<IMessageQueueProps> = ({ queue, onCancel, onSendNow
 
 	if (queue.length === 0) return null
 
-	const getMessagePreview = (msg: ChatMessage): string => {
+	const getMessagePreview = (msg: UserMessage): string => {
 		if (typeof msg.content === 'string') {
 			return msg.content.length > 50 ? msg.content.substring(0, 50) + '...' : msg.content
 		}
