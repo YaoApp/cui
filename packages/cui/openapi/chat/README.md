@@ -23,7 +23,7 @@ const api = new OpenAPI({ baseURL: '/v1' })
 const chat = new Chat(api)
 
 // Stream chat completion
-const abort = chat.streamCompletion(
+const abort = chat.StreamCompletion(
     {
         assistant_id: 'my-assistant',
         messages: [
@@ -295,7 +295,7 @@ const chatId = nanoid() // e.g., "V1StGXR8_Z5jdHi6B"
 // const chatId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
 // First message in conversation
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'my-assistant',
         chat_id: chatId,  // Use frontend-generated ID
@@ -307,14 +307,13 @@ chat.streamCompletion(
 )
 
 // Continue conversation - use same chat_id
-chat.streamCompletion(
+// Note: Backend manages history, frontend only sends current user input
+chat.StreamCompletion(
     {
         assistant_id: 'my-assistant',
         chat_id: chatId,  // Same ID for continuation
         messages: [
-            { role: 'user', content: 'Hello' },
-            { role: 'assistant', content: 'Hi! How can I help?' },
-            { role: 'user', content: 'Tell me a joke' }
+            { role: 'user', content: 'Tell me a joke' }  // Only send new user input
         ]
     },
     (chunk) => { /* ... */ }
@@ -322,7 +321,7 @@ chat.streamCompletion(
 
 // Option 2: Let backend auto-detect (omit chat_id)
 // Note: This triggers hash computation on backend - use only for stateless clients
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'my-assistant',
         // No chat_id - backend computes hash and matches conversation
@@ -344,7 +343,7 @@ chat.streamCompletion(
 ### With Advanced Options
 
 ```typescript
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'my-assistant',
         chat_id: 'chat-123',
@@ -496,7 +495,7 @@ Send images and audio along with text using multimodal content:
 
 ```typescript
 // Vision: Analyze an image
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'vision-assistant',
         messages: [
@@ -522,7 +521,7 @@ chat.streamCompletion(
 )
 
 // Base64 encoded image
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'vision-assistant',
         messages: [
@@ -545,7 +544,7 @@ chat.streamCompletion(
 )
 
 // Audio input
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'audio-assistant',
         messages: [
@@ -567,7 +566,7 @@ chat.streamCompletion(
 )
 
 // Multiple images in one message
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'vision-assistant',
         messages: [
@@ -591,7 +590,7 @@ chat.streamCompletion(
 )
 
 // File attachment (backend support coming soon)
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'document-assistant',
         messages: [
@@ -664,7 +663,7 @@ async function uploadAndSendImage(file: File, userMessage: string) {
         // fileWrapper format: "__yao.attachment://abc123"
 
         // 3. Send to chat with file wrapper URL (no need to resolve)
-        chat.streamCompletion(
+        chat.StreamCompletion(
             {
                 assistant_id: 'vision-assistant',
                 messages: [
@@ -724,7 +723,7 @@ async function uploadAndSendAudio(audioFile: File, instructions: string) {
         const fileWrapper = CreateFileWrapper('__yao.attachment', fileId)
         const format = audioFile.name.split('.').pop() || 'wav'
 
-        chat.streamCompletion(
+        chat.StreamCompletion(
             {
                 assistant_id: 'audio-assistant',
                 messages: [
@@ -777,7 +776,7 @@ async function uploadAndSendPDF(pdfFile: File, question: string) {
         // Create file wrapper
         const fileWrapper = CreateFileWrapper('__yao.attachment', fileId)
 
-        chat.streamCompletion(
+        chat.StreamCompletion(
             {
                 assistant_id: 'document-assistant',
                 messages: [
@@ -850,7 +849,7 @@ const fileWrapper = CreateFileWrapper('__yao.attachment', 'abc123')
 For OpenAI API compatibility, you can use `model` field instead of `assistant_id`. The backend extracts the assistant ID from the model string using the format: `*-yao_assistantID`
 
 ```typescript
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         // Model format: [prefix-]modelName-yao_assistantID
         model: 'gpt-4o-yao_myassistant',  // Backend extracts "myassistant"
@@ -1088,7 +1087,7 @@ function deepMerge(target: any, source: any): any {
 }
 
 // Usage
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'my-assistant',
         messages: [{ role: 'user', content: 'Tell me a story' }]
@@ -1782,20 +1781,20 @@ The API automatically handles parameter routing:
 
 ```typescript
 // Simple request
-chat.streamCompletion({
+chat.StreamCompletion({
     assistant_id: 'my-assistant',
     messages: [{ role: 'user', content: 'Hi' }]
 })
 
-// With chat history
-chat.streamCompletion({
+// With chat history (backend loads history using chat_id)
+chat.StreamCompletion({
     assistant_id: 'my-assistant',
     chat_id: 'chat-123',
     messages: [{ role: 'user', content: 'Continue our discussion' }]
 })
 
 // With advanced options
-chat.streamCompletion({
+chat.StreamCompletion({
     assistant_id: 'my-assistant',
     messages: [{ role: 'user', content: 'Write code' }],
     options: {
@@ -1814,7 +1813,7 @@ The request uses TypeScript discriminated unions to enforce that either `assista
 ```typescript
 // Base fields shared by both variants
 interface ChatCompletionRequestBase {
-    messages: ChatMessage[]         // Required: Chat messages
+    messages: UserMessage[]         // Required: User input messages
     chat_id?: string                // Optional: Chat ID (auto-generated if not provided)
     options?: ChatCompletionOptions // Optional: Advanced options
     metadata?: Record<string, any>  // Optional: Custom metadata
@@ -1924,11 +1923,13 @@ interface ChatCompletionOptions {
 }
 ```
 
-### ChatMessage (Request Input)
+### UserMessage (Request Input)
+
+Frontend sends user input messages to backend. Backend manages conversation history.
 
 ```typescript
-// Message role in conversation
-type MessageRole = 'developer' | 'system' | 'user' | 'assistant' | 'tool'
+// User message role - roles that frontend can send
+type UserMessageRole = 'user' | 'system' | 'developer'
 
 // Content part types for multimodal messages
 type ContentPartType = 'text' | 'image_url' | 'input_audio' | 'file'
@@ -1952,28 +1953,11 @@ interface ContentPart {
     }
 }
 
-// Chat message in conversation
-interface ChatMessage {
-    role: MessageRole
-    content?: string | ContentPart[]  // String or multimodal array
-    name?: string                     // Optional participant name
-    
-    // Tool message specific
-    tool_call_id?: string            // Required for tool messages
-    
-    // Assistant message specific
-    tool_calls?: ToolCall[]          // Tool calls made by assistant
-    refusal?: string                 // Refusal message
-}
-
-// Tool call structure
-interface ToolCall {
-    id: string
-    type: 'function'
-    function: {
-        name: string
-        arguments?: string           // JSON string
-    }
+// User input message
+interface UserMessage {
+    role: UserMessageRole        // Frontend typically sends 'user'
+    content: string | ContentPart[]  // String or multimodal array
+    name?: string                // Optional participant name
 }
 ```
 
@@ -1981,13 +1965,13 @@ interface ToolCall {
 
 ```typescript
 // Simple text message
-const textMsg: ChatMessage = {
+const textMsg: UserMessage = {
     role: 'user',
     content: 'Hello!'
 }
 
 // Multimodal message with image
-const imageMsg: ChatMessage = {
+const imageMsg: UserMessage = {
     role: 'user',
     content: [
         { type: 'text', text: 'What is in this image?' },
@@ -2002,7 +1986,7 @@ const imageMsg: ChatMessage = {
 }
 
 // Message with uploaded file
-const fileMsg: ChatMessage = {
+const fileMsg: UserMessage = {
     role: 'user',
     content: [
         { type: 'text', text: 'Analyze this document' },
@@ -2017,6 +2001,13 @@ const fileMsg: ChatMessage = {
     ]
 }
 ```
+
+**Key Points:**
+
+- ✅ Frontend sends **only the current user input**, not full conversation history
+- ✅ Backend manages conversation history using `chat_id`
+- ✅ Role is typically `'user'` (99% of cases)
+- ✅ `'system'` and `'developer'` roles are for advanced usage
 
 ### Message (Universal DSL)
 
