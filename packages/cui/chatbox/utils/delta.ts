@@ -11,7 +11,9 @@ export function applyDelta(msgId: string, chunk: Message, cache = messageCache):
 	// Get or initialize message state
 	let current = cache.get(msgId)
 	if (!current) {
-		current = { type: chunk.type, props: { ...chunk.props } } // Copy initial props
+		// Initialize with empty props for delta messages
+		// Props will be populated by the delta merge logic below
+		current = { type: chunk.type, props: {} }
 		cache.set(msgId, current)
 	}
 
