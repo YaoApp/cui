@@ -1274,7 +1274,7 @@ function applyDelta(msgId: string, msg: Message): any {
 }
 
 // Usage in streaming with delta handling and type changes
-chat.streamCompletion(
+chat.StreamCompletion(
     {
         assistant_id: 'my-assistant',
         messages: [{ role: 'user', content: 'Explain quantum computing' }]
@@ -1523,7 +1523,7 @@ import {
     IsStreamEndEvent 
 } from '@yao/cui/openapi'
 
-chat.streamCompletion({ 
+chat.StreamCompletion({ 
     assistant_id: 'my-assistant', 
     messages: [{ role: 'user', content: 'Hello' }] 
 }, (chunk) => {
