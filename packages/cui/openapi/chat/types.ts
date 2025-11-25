@@ -18,6 +18,7 @@
 export const MessageType = {
 	// Content types
 	TEXT: 'text',
+	USER_INPUT: 'user_input', // User input message (frontend display)
 	THINKING: 'thinking',
 	LOADING: 'loading',
 	TOOL_CALL: 'tool_call',
@@ -56,6 +57,16 @@ export type EventTypeValue = (typeof EventType)[keyof typeof EventType]
  */
 export interface TextProps {
 	content: string // Supports Markdown
+}
+
+/**
+ * User input message props
+ * Displayed when user sends a message (before backend processes it)
+ */
+export interface UserInputProps {
+	content: string | ContentPart[] // User input content (text or multimodal)
+	role?: UserMessageRole // User role (default: 'user')
+	name?: string // Optional participant name
 }
 
 /**
@@ -278,6 +289,7 @@ interface BaseMessage {
  * Typed messages for built-in types with proper props autocomplete
  */
 export type TextMessage = BaseMessage & { type: typeof MessageType.TEXT; props: TextProps }
+export type UserInputMessage = BaseMessage & { type: typeof MessageType.USER_INPUT; props: UserInputProps }
 export type ThinkingMessage = BaseMessage & { type: typeof MessageType.THINKING; props: ThinkingProps }
 export type LoadingMessage = BaseMessage & { type: typeof MessageType.LOADING; props: LoadingProps }
 export type ToolCallMessage = BaseMessage & { type: typeof MessageType.TOOL_CALL; props: ToolCallProps }
@@ -293,6 +305,7 @@ export type EventMessage = BaseMessage & { type: typeof MessageType.EVENT; props
  */
 export type BuiltinMessage =
 	| TextMessage
+	| UserInputMessage
 	| ThinkingMessage
 	| LoadingMessage
 	| ToolCallMessage

@@ -5,6 +5,7 @@ import {
 	MessageTypeValue,
 	EventType,
 	TextMessage,
+	UserInputMessage,
 	ThinkingMessage,
 	LoadingMessage,
 	ToolCallMessage,
@@ -28,6 +29,10 @@ import {
 
 export function IsTextMessage(msg: Message): msg is TextMessage {
 	return msg.type === MessageType.TEXT
+}
+
+export function IsUserInputMessage(msg: Message): msg is UserInputMessage {
+	return msg.type === MessageType.USER_INPUT
 }
 
 export function IsThinkingMessage(msg: Message): msg is ThinkingMessage {
@@ -76,9 +81,7 @@ export function IsBuiltinMessage(msg: Message): msg is BuiltinMessage {
 /**
  * Event type guards - narrow down EventMessage to specific event types
  */
-export function IsStreamStartEvent(
-	msg: EventMessage
-): msg is EventMessage & { props: StreamStartEventProps } {
+export function IsStreamStartEvent(msg: EventMessage): msg is EventMessage & { props: StreamStartEventProps } {
 	return msg.props.event === EventType.STREAM_START
 }
 

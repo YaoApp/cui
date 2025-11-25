@@ -196,12 +196,14 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			}
 
 			try {
-				// Add all User Messages to UI first
+				// Add all User Messages to UI first (convert UserMessage to Message format)
 				const userMessages: Message[] = queuedMessages.map((msg, index) => ({
-					type: 'text',
+					type: 'user_input',
 					id: `user-${Date.now()}-${index}`,
 					props: {
-						content: typeof msg.content === 'string' ? msg.content : 'Multimodal content'
+						content: msg.content,
+						role: msg.role,
+						name: msg.name
 					},
 					done: true
 				}))
@@ -319,12 +321,14 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			// Set streaming state
 			setStreamingStates((prev) => ({ ...prev, [targetTabId]: true }))
 
-			// Add all User Messages to UI
+			// Add all User Messages to UI (convert UserMessage to Message format)
 			const userMessages: Message[] = messages.map((msg, index) => ({
-				type: 'text',
+				type: 'user_input',
 				id: `user-${Date.now()}-${index}`,
 				props: {
-					content: typeof msg.content === 'string' ? msg.content : 'Multimodal content'
+					content: msg.content,
+					role: msg.role,
+					name: msg.name
 				},
 				done: true
 			}))
@@ -509,12 +513,14 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			// Set streaming state for this specific chat
 			setStreamingStates((prev) => ({ ...prev, [targetTabId]: true }))
 
-			// 1. Add User Message locally
+			// 1. Add User Message locally (convert UserMessage to Message format for display)
 			const userMsg: Message = {
-				type: 'text',
+				type: 'user_input',
 				id: `user-${Date.now()}`,
 				props: {
-					content: typeof inputMsg.content === 'string' ? inputMsg.content : 'Multimodal content'
+					content: inputMsg.content,
+					role: inputMsg.role,
+					name: inputMsg.name
 				},
 				done: true
 			}

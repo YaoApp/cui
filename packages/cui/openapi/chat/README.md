@@ -1151,7 +1151,27 @@ import {
 const messageStates = new Map<string, any>()
 
 function renderMessage(msg: Message, mergedProps: any): HTMLElement {
-    // Text message - render as markdown
+    // User input message - render as user bubble
+    if (IsUserInputMessage(msg)) {
+        const div = document.createElement('div')
+        div.className = 'message-user'
+        
+        // Handle multimodal content
+        let contentHTML = ''
+        if (typeof mergedProps.content === 'string') {
+            contentHTML = mergedProps.content
+        } else {
+            // Render multimodal parts (text, images, etc.)
+            contentHTML = renderMultimodalContent(mergedProps.content)
+        }
+        
+        div.innerHTML = `
+            <div class="user-bubble">${contentHTML}</div>
+        `
+        return div
+    }
+    
+    // Text message - render as markdown (AI response)
     if (IsTextMessage(msg)) {
         const div = document.createElement('div')
         div.className = 'message-text'
@@ -1356,13 +1376,14 @@ chat.StreamCompletion(
 
 ## Message Types
 
-The Chat API uses a universal message DSL that supports 10 built-in types and unlimited custom types.
+The Chat API uses a universal message DSL that supports 11 built-in types and unlimited custom types.
 
 ### Built-in Types
 
 | Type | Constant | Props | Description |
 |------|----------|-------|-------------|
-| `text` | `MessageType.TEXT` | `TextProps` | Text or Markdown content |
+| `user_input` | `MessageType.USER_INPUT` | `UserInputProps` | User input message (frontend display) |
+| `text` | `MessageType.TEXT` | `TextProps` | Text or Markdown content (AI responses) |
 | `thinking` | `MessageType.THINKING` | `ThinkingProps` | Reasoning process (e.g., o1 models) |
 | `loading` | `MessageType.LOADING` | `LoadingProps` | Loading indicator |
 | `tool_call` | `MessageType.TOOL_CALL` | `ToolCallProps` | Function/tool call |
@@ -2009,6 +2030,33 @@ const fileMsg: UserMessage = {
 - ✅ Role is typically `'user'` (99% of cases)
 - ✅ `'system'` and `'developer'` roles are for advanced usage
 
+**Data Flow - User Input to Display:**
+
+```
+1. User types in InputArea
+   ↓
+2. Frontend builds UserMessage
+   { role: 'user', content: 'Hello' }
+   ↓
+3. Convert to Message for display
+   { type: 'user_input', props: { content: 'Hello', role: 'user' } }
+   ↓
+4. Display in UI (MessageList)
+   Shows as user message bubble
+   ↓
+5. Send UserMessage to backend
+   Backend processes and returns AI response
+   ↓
+6. Display AI response
+   { type: 'text', props: { content: 'Hi! How can I help?' } }
+```
+
+**Key Distinction:**
+
+- **`UserMessage`**: API request format (what you send to backend)
+- **`Message` with `type: 'user_input'`**: UI display format (what you show in MessageList)
+- Frontend automatically converts `UserMessage` → `Message` for display
+
 ### Message (Universal DSL)
 
 ```typescript
@@ -2046,8 +2094,14 @@ interface Message {
 ### Built-in Props Types
 
 ```typescript
+interface UserInputProps {
+    content: string | ContentPart[] // User input (text or multimodal)
+    role?: UserMessageRole          // User role ('user' | 'system' | 'developer')
+    name?: string                   // Optional participant name
+}
+
 interface TextProps {
-    content: string                 // Supports Markdown
+    content: string                 // Supports Markdown (AI responses)
 }
 
 interface ThinkingProps {
@@ -2119,18 +2173,25 @@ interface EventProps {
 import { 
     IsBuiltinMessage,
     IsTextMessage,
+    IsUserInputMessage,
     IsErrorMessage 
 } from '@yao/cui/openapi'
 
 // Check if built-in type
 if (IsBuiltinMessage(msg)) {
-    // msg is one of the 10 built-in types
+    // msg is one of the 11 built-in types
 }
 
 // Specific type checking with type narrowing
 if (IsTextMessage(msg)) {
     // TypeScript knows msg.props is TextProps
     console.log(msg.props.content)
+}
+
+if (IsUserInputMessage(msg)) {
+    // TypeScript knows msg.props is UserInputProps
+    console.log('User said:', msg.props.content)
+    console.log('Role:', msg.props.role)
 }
 
 if (IsErrorMessage(msg)) {
