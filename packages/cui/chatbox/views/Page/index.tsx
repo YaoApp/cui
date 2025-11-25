@@ -17,33 +17,17 @@ interface IPageProps extends IChatProps {
  * Page 组件 - 聊天页面容器
  * 架构: Page -> Header + Chatbox (MessageList + InputArea)
  * 每个 Tab 对应一个独立的 Chatbox 实例
+ *
+ * 优化后：Page 只关注页面级别的布局和全局事件
+ * Chatbox 内部自行管理聊天业务逻辑，通过 Context 获取状态
  */
 const Page = (props: IPageProps) => {
 	const { title, headerMode = 'tabs' } = props
 
 	const global = useGlobal()
 
-	const {
-		messages,
-		sendMessage,
-		loading,
-		streaming,
-		abort,
-		createNewChat,
-		tabs,
-		activeTabId,
-		activateTab,
-		closeTab,
-		assistant,
-		messageQueue,
-		queueMessage,
-		sendQueuedMessage,
-		cancelQueuedMessage
-	} = useChatContext()
-
-	// 获取当前活跃 tab 的助手 ID
-	const activeTab = tabs.find((t) => t.chatId === activeTabId)
-	const currentAssistantId = activeTab?.assistantId
+	// Page 只需要关注 Header 相关的状态和方法
+	const { createNewChat, tabs, activeTabId, activateTab, closeTab } = useChatContext()
 
 	// 显示 Header 的条件：
 	// - tabs 模式：有 tabs 时显示
@@ -107,22 +91,8 @@ const Page = (props: IPageProps) => {
 			{/* Chatbox - 独立的聊天实例，始终显示 */}
 			{/* 当没有 activeTabId 时显示 placeholder 模式 */}
 			{/* InputArea 的状态完全由其内部管理，切换 tab 时会因 chatId 变化而重置 */}
-			{showChatbox && (
-				<Chatbox
-					messages={messages}
-					loading={loading}
-					streaming={streaming}
-					chatId={activeTabId || ''} // 空字符串表示新对话
-					assistantId={currentAssistantId}
-					assistant={assistant}
-					messageQueue={messageQueue}
-					onSend={sendMessage}
-					onAbort={abort}
-					onQueueMessage={queueMessage}
-					onSendQueuedMessage={sendQueuedMessage}
-					onCancelQueuedMessage={cancelQueuedMessage}
-				/>
-			)}
+			{/* Chatbox 内部直接从 Context 获取状态，无需通过 props 传递 */}
+			{showChatbox && <Chatbox />}
 		</div>
 	)
 }

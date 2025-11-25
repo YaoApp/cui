@@ -2,42 +2,9 @@ import React from 'react'
 import styles from './index.less'
 import MessageList from '../MessageList'
 import InputArea from '../InputArea'
-import type { Message, ChatMessage } from '../../../openapi'
-import type { QueuedMessage } from '../../hooks/useChat'
-import type { SendMessageRequest } from '../../types'
+import { useChatContext } from '../../context'
 
 export interface IChatboxProps {
-	/** 消息列表 */
-	messages: Message[]
-	/** 是否正在加载历史 */
-	loading?: boolean
-	/** 是否正在流式输出 */
-	streaming?: boolean
-	/** 当前会话 ID */
-	chatId: string
-	/** 当前助手 ID */
-	assistantId?: string
-	/** 助手信息 */
-	assistant?: {
-		name: string
-		id: string
-		avatar?: string
-		description?: string
-		allowModelSelection?: boolean
-		defaultModel?: string
-	}
-	/** 消息队列 */
-	messageQueue?: QueuedMessage[]
-	/** 发送消息回调 */
-	onSend: (request: SendMessageRequest) => Promise<void>
-	/** 取消/停止生成回调 */
-	onAbort?: () => void
-	/** 队列消息回调 */
-	onQueueMessage?: (message: ChatMessage, type: 'graceful' | 'force') => void
-	/** 发送队列消息回调 */
-	onSendQueuedMessage?: (queueId?: string, asForce?: boolean) => void
-	/** 取消队列消息回调 */
-	onCancelQueuedMessage?: (queueId: string) => void
 	/** 样式类名 */
 	className?: string
 	/** 内联样式 */
@@ -49,26 +16,29 @@ export interface IChatboxProps {
  * 包含 MessageList 和 InputArea
  * 每个 Tab 对应一个 Chatbox 实例
  *
+ * 优化：直接从 Context 获取状态和方法，减少 props drilling
+ * Page 组件不再需要关注 Chatbox 内部的业务逻辑
+ *
  * 重要：InputArea 的状态完全由其内部管理（通过 editorRef）
  * 当 chatId 变化时，InputArea 会自动重置（清空输入）
  */
 const Chatbox: React.FC<IChatboxProps> = (props) => {
+	const { className, style } = props
+
+	// 直接从 Context 获取所需的状态和方法
 	const {
 		messages,
 		loading,
 		streaming,
-		chatId,
-		assistantId,
+		activeTabId,
 		assistant,
 		messageQueue,
-		onSend,
-		onAbort,
-		onQueueMessage,
-		onSendQueuedMessage,
-		onCancelQueuedMessage,
-		className,
-		style
-	} = props
+		sendMessage,
+		abort,
+		queueMessage,
+		sendQueuedMessage,
+		cancelQueuedMessage
+	} = useChatContext()
 
 	// 判断是否为占位符模式
 	// 当消息列表为空且不在加载历史时，显示占位符模式
@@ -83,16 +53,16 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 			{/* Input Area - 始终显示，状态由其内部管理 */}
 			<InputArea
 				mode={inputMode}
-				onSend={onSend}
+				onSend={sendMessage}
 				loading={streaming}
 				streaming={streaming}
-				onAbort={onAbort}
-				chatId={chatId}
+				onAbort={abort}
+				chatId={activeTabId || ''}
 				assistant={assistant}
 				messageQueue={messageQueue}
-				onQueueMessage={onQueueMessage}
-				onSendQueuedMessage={onSendQueuedMessage}
-				onCancelQueuedMessage={onCancelQueuedMessage}
+				onQueueMessage={queueMessage}
+				onSendQueuedMessage={sendQueuedMessage}
+				onCancelQueuedMessage={cancelQueuedMessage}
 			/>
 		</div>
 	)
