@@ -1,0 +1,57 @@
+// Tool Button - 与原来的 .toolBtn 样式保持一致
+.toolButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	margin: 0; // 移除默认边距
+	border: none;
+	background: transparent;
+	color: var(--color_chatbox_text_secondary);
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s;
+	flex-shrink: 0; // 防止收缩
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+
+	// 图标颜色继承
+	svg {
+		color: inherit;
+	}
+
+	&:hover:not(.disabled) {
+		background: transparent; // 保持透明背景
+		color: var(--color_primary);
+		transform: scale(1.1); // 缩放动画
+	}
+
+	&:active:not(.disabled) {
+		transform: scale(1.05);
+	}
+
+	&.active {
+		color: var(--color_warning);
+		animation: breathe 2s ease-in-out infinite;
+	}
+
+	&.disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+}
+
+// Breathing animation for active state - opacity pulsing
+@keyframes breathe {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+}

@@ -4,6 +4,7 @@ import MessageList from '../MessageList'
 import InputArea from '../InputArea'
 import type { Message, ChatMessage } from '../../../openapi'
 import type { QueuedMessage } from '../../hooks/useChat'
+import type { SendMessageRequest } from '../../types'
 
 export interface IChatboxProps {
 	/** 消息列表 */
@@ -28,13 +29,13 @@ export interface IChatboxProps {
 	/** 消息队列 */
 	messageQueue?: QueuedMessage[]
 	/** 发送消息回调 */
-	onSend: (message: ChatMessage) => Promise<void>
+	onSend: (request: SendMessageRequest) => Promise<void>
 	/** 取消/停止生成回调 */
 	onAbort?: () => void
 	/** 队列消息回调 */
 	onQueueMessage?: (message: ChatMessage, type: 'graceful' | 'force') => void
 	/** 发送队列消息回调 */
-	onSendQueuedMessage?: (queueId: string, asForce?: boolean) => void
+	onSendQueuedMessage?: (queueId?: string, asForce?: boolean) => void
 	/** 取消队列消息回调 */
 	onCancelQueuedMessage?: (queueId: string) => void
 	/** 样式类名 */

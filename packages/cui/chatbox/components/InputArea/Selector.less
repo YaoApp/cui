@@ -1,0 +1,314 @@
+// Container
+.selectorContainer {
+	position: relative;
+	display: inline-block;
+	z-index: 1; // 确保容器有正确的层级
+}
+
+// Tooltip 已移至独立的 Tooltip 组件
+
+// Selector Button Base
+.selectorButton {
+	display: inline-flex;
+	align-items: center;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	transition: all 0.2s;
+	font-family: inherit;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+
+	&.disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.selectorIcon {
+		flex-shrink: 0;
+		user-select: none;
+	}
+
+	.selectorLabel {
+		font-size: 12px;
+		line-height: 1;
+		user-select: none;
+	}
+
+	.arrow {
+		transition: transform 0.2s;
+		flex-shrink: 0;
+		user-select: none;
+	}
+
+	&.open .arrow {
+		transform: rotate(180deg);
+	}
+}
+
+// Tag variant - 胶囊样式
+.tag {
+	gap: 6px;
+	padding: 4px 10px;
+	background: var(--color_chatbox_bg_field);
+	border: 1px solid var(--color_chatbox_border_field);
+	border-radius: 16px; // 圆形胶囊
+
+	&:hover:not(.disabled) {
+		background: var(--color_chatbox_bg_field_hover);
+		border-color: var(--color_chatbox_border_field_hover);
+	}
+
+	&.open {
+		background: var(--color_chatbox_bg_field_hover);
+		border-color: var(--color_chatbox_border_field_hover);
+	}
+
+	.selectorIcon {
+		color: var(--color_chatbox_text_secondary);
+	}
+
+	.selectorLabel {
+		color: var(--color_chatbox_text_primary);
+	}
+
+	.arrow {
+		color: var(--color_chatbox_text_secondary);
+	}
+
+	&:hover:not(.disabled) {
+		.selectorIcon,
+		.arrow {
+			color: var(--color_chatbox_text_primary);
+		}
+	}
+}
+
+// Normal variant - 普通文本按钮样式
+.normal {
+	gap: 4px;
+	padding: 4px 8px;
+	border-radius: 6px;
+
+	&:hover:not(.disabled) {
+		background: var(--color_chatbox_bg_field);
+	}
+
+	&.open {
+		background: var(--color_chatbox_bg_field);
+	}
+
+	.selectorIcon {
+		color: var(--color_chatbox_text_secondary);
+	}
+
+	.selectorLabel {
+		color: var(--color_chatbox_text_secondary);
+	}
+
+	.arrow {
+		color: var(--color_chatbox_text_secondary);
+	}
+
+	&:hover:not(.disabled) {
+		.selectorLabel,
+		.selectorIcon,
+		.arrow {
+			color: var(--color_chatbox_text_primary);
+		}
+	}
+}
+
+// Dropdown menu - 参考图2的样式
+.dropdown {
+	position: absolute;
+	left: 0;
+	// width 通过内联样式设置，支持 auto 或固定值
+	max-height: 320px !important; // 增加高度容纳搜索框
+	padding: 4px;
+	background: var(--color_chatbox_bg_card);
+	border: 1px solid var(--color_chatbox_border_card);
+	border-radius: 8px;
+	box-shadow: var(--shadow_float);
+	overflow: hidden; // 改为 hidden，让内部元素处理滚动
+	z-index: 9999; // 提高层级，确保在最上层
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	user-select: none; // 禁止选中文本
+	-webkit-user-select: none; // Safari
+	-moz-user-select: none; // Firefox
+	-ms-user-select: none; // IE/Edge
+}
+
+// 显示在下方（默认）
+.dropdownBottom {
+	top: calc(100% + 6px);
+	animation: slideDown 0.2s ease;
+}
+
+// 显示在上方
+.dropdownTop {
+	bottom: calc(100% + 6px);
+	animation: slideUp 0.2s ease;
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+// Search Box
+.searchBox {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 8px;
+	margin-bottom: 4px;
+	background: var(--color_chatbox_bg_field);
+	border: 1px solid var(--color_chatbox_border_field);
+	border-radius: 6px;
+	flex-shrink: 0; // 不缩小
+	width: 100%; // 固定宽度
+	box-sizing: border-box; // 包含 padding 和 border
+
+	.searchIcon {
+		color: var(--color_chatbox_text_secondary);
+		flex-shrink: 0;
+		width: 16px; // 固定图标宽度
+	}
+
+	.searchInput {
+		flex: 1;
+		min-width: 0; // 允许缩小
+		border: none;
+		background: transparent;
+		outline: none;
+		font-size: 12px;
+		color: var(--color_chatbox_text_primary);
+		padding: 0;
+
+		&::placeholder {
+			color: var(--color_chatbox_text_secondary);
+		}
+	}
+
+	.clearIcon {
+		color: var(--color_chatbox_text_secondary);
+		cursor: pointer;
+		flex-shrink: 0;
+		width: 14px; // 固定图标宽度
+		transition: color 0.2s;
+		opacity: 0.6;
+
+		&:hover {
+			color: var(--color_chatbox_text_primary);
+			opacity: 1;
+		}
+	}
+}
+
+// Options List - 可滚动区域
+.optionsList {
+	overflow-y: auto !important; // 强制显示滚动条
+	overflow-x: hidden;
+	max-height: 240px; // 减去搜索框高度后的剩余空间
+	flex: 1;
+	min-height: 0; // 重要：允许 flex 子元素缩小
+}
+
+// 滚动条样式 - 分离出来确保应用
+.optionsList::-webkit-scrollbar {
+	width: 8px;
+}
+
+.optionsList::-webkit-scrollbar-track {
+	background: transparent;
+	margin: 4px 0;
+}
+
+.optionsList::-webkit-scrollbar-thumb {
+	background: var(--color_scrollbar_thumb);
+	border-radius: 4px;
+	border: 2px solid var(--color_chatbox_bg_card);
+}
+
+.optionsList::-webkit-scrollbar-thumb:hover {
+	background: var(--color_text_grey);
+}
+
+.optionsList::-webkit-scrollbar-thumb:active {
+	background: var(--color_text_light);
+}
+
+// Menu item - 参考图2的菜单项样式
+.menuItem {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 12px;
+	min-height: 36px;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background 0.2s;
+	user-select: none; // 禁止选中文本
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+
+	&:hover {
+		background: var(--color_chatbox_bg_field);
+	}
+
+	&.selected {
+		background: var(--color_chatbox_bg_selected);
+	}
+
+	.menuIcon {
+		color: var(--color_chatbox_text_secondary);
+		flex-shrink: 0;
+	}
+
+	.menuLabel {
+		flex: 1;
+		font-size: 13px;
+		color: var(--color_chatbox_text_primary);
+		line-height: 20px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis; // 文本过长时显示省略号
+	}
+
+	.checkIcon {
+		color: var(--color_primary);
+		flex-shrink: 0;
+		margin-left: auto;
+	}
+}
+
+// Empty State
+.emptyState {
+	padding: 16px 12px;
+	text-align: center;
+	font-size: 12px;
+	color: var(--color_chatbox_text_secondary);
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Tooltip, Dropdown, Menu, message } from 'antd'
+import { message, Tooltip as AntTooltip } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
 import { Database, Sparkle, UploadSimple, PaperPlaneTilt, Stop } from 'phosphor-react'
@@ -9,10 +9,14 @@ import { CreateFileWrapper } from '@/utils/fileWrapper' // Assuming this util ex
 import type { IInputAreaProps } from '../../types'
 import type { ChatMessage } from '../../../openapi'
 import type { QueuedMessage } from '../../hooks/useChat'
+import { useLLMProviders } from '@/hooks/useLLMProviders'
+import { useGlobal } from '@/context/app'
 import styles from './index.less'
 import AgentTag from './AgentTag'
 import ResourcePicker from '../AIChat/ResourcePicker'
 import MessageQueue from '../MessageQueue'
+import Selector from './Selector'
+import ToolButton from './ToolButton'
 
 // Mock Data
 const MOCK_AGENT = {
@@ -53,14 +57,14 @@ interface Attachment {
 }
 
 const InputArea = (props: IInputAreaProps) => {
-	const { 
-		mode, 
-		onSend, 
-		loading, 
-		disabled, 
-		className, 
-		style, 
-		chatId, 
+	const {
+		mode,
+		onSend,
+		loading,
+		disabled,
+		className,
+		style,
+		chatId,
 		assistant: propAssistant,
 		streaming,
 		messageQueue,
@@ -73,6 +77,14 @@ const InputArea = (props: IInputAreaProps) => {
 	const [showMentions, setShowMentions] = useState(false)
 	const [isEmpty, setIsEmpty] = useState(true)
 	const [currentModel, setCurrentModel] = useState(MOCK_AGENT.defaultModel)
+	const [chatMode, setChatMode] = useState<'chat' | 'task'>('task')
+	const [isOptimizing, setIsOptimizing] = useState(false) // 优化提示词状态
+
+	// Load LLM providers/models from API
+	const { providers: llmProviders, loading: llmLoading } = useLLMProviders()
+
+	// Get global config
+	const global = useGlobal()
 
 	// Localization & Routing
 	const locale = getLocale()
@@ -336,6 +348,24 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 	}
 
+	// Helper function to focus editor and move cursor to end
+	const focusEditor = () => {
+		if (!editorRef.current) return
+
+		// Direct focus first
+		editorRef.current.focus()
+
+		// Then set cursor to end
+		const selection = window.getSelection()
+		if (selection && editorRef.current.childNodes.length > 0) {
+			const range = document.createRange()
+			range.selectNodeContents(editorRef.current)
+			range.collapse(false) // Collapse to end
+			selection.removeAllRanges()
+			selection.addRange(range)
+		}
+	}
+
 	const clearInput = () => {
 		if (editorRef.current) {
 			editorRef.current.innerHTML = ''
@@ -353,7 +383,15 @@ const InputArea = (props: IInputAreaProps) => {
 			setIsAnimating(true)
 		}
 
-		onSend(message).then(() => {
+		// Construct ChatCompletionRequest
+		onSend({
+			messages: [message],
+			model: currentModel, // User selected model
+			metadata: {
+				mode: chatMode,
+				page: currentPage || undefined
+			}
+		}).then(() => {
 			clearInput()
 		})
 	}
@@ -377,6 +415,106 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 	}
 
+	// Handle prompt optimization - 直接在 InputArea 内部调用 Chat API
+	const handleOptimizePrompt = async () => {
+		if (isEmpty || !editorRef.current || isOptimizing) return
+
+		const currentText = editorRef.current.innerText.trim()
+		if (!currentText) return
+
+		// Check if we have the necessary dependencies
+		if (!window.$app?.openapi) {
+			console.warn('OpenAPI not initialized')
+			return
+		}
+
+		const promptAgentId = global?.agent_uses?.prompt
+		if (!promptAgentId) {
+			console.warn('Prompt optimization agent not configured in global.agent_uses.prompt')
+			return
+		}
+
+		// Lock the input
+		setIsOptimizing(true)
+
+		try {
+			const chatClient = new (await import('../../../openapi')).Chat(window.$app.openapi)
+			let optimizedPrompt = ''
+
+			// Language hint
+			const languageHint = is_cn ? '请用中文优化提示词。' : 'Please optimize the prompt in English.'
+
+			// Stream optimization
+			chatClient.StreamCompletion(
+				{
+					assistant_id: promptAgentId,
+					messages: [
+						{
+							role: 'user',
+							content: `Optimize and improve this prompt to be more clear, specific, and effective. ${languageHint}\n\nOriginal prompt:\n${currentText}`
+						}
+					],
+					model: currentModel, // Use current selected model
+					skip: {
+						history: true, // Don't save to history
+						trace: true // Don't show trace
+					},
+					metadata: {
+						mode: chatMode,
+						page: currentPage || undefined
+					}
+				},
+				(chunk) => {
+					// Accumulate and update in real-time
+					if (chunk.type === 'text' && chunk.props?.content) {
+						if (chunk.delta) {
+							optimizedPrompt += chunk.props.content
+						} else {
+							optimizedPrompt = chunk.props.content
+						}
+
+						// Real-time update the editor content
+						if (editorRef.current && optimizedPrompt.trim()) {
+							editorRef.current.innerText = optimizedPrompt.trim()
+							// Trigger input event to update isEmpty state
+							const event = new Event('input', { bubbles: true })
+							editorRef.current.dispatchEvent(event)
+
+							// Move cursor to end
+							const range = document.createRange()
+							const sel = window.getSelection()
+							if (sel && editorRef.current.childNodes.length > 0) {
+								range.selectNodeContents(editorRef.current)
+								range.collapse(false)
+								sel.removeAllRanges()
+								sel.addRange(range)
+							}
+						}
+					}
+
+					if (chunk.done) {
+						setIsOptimizing(false)
+						// Focus on editor after optimization completes
+						setTimeout(() => focusEditor(), 0)
+					}
+				},
+				(error) => {
+					console.error('Failed to optimize prompt:', error)
+					message.error(is_cn ? '优化提示词失败' : 'Failed to optimize prompt')
+					setIsOptimizing(false)
+					// Focus on editor even on error
+					setTimeout(() => focusEditor(), 0)
+				}
+			)
+		} catch (error) {
+			console.error('Error optimizing prompt:', error)
+			message.error(is_cn ? '优化提示词失败' : 'Failed to optimize prompt')
+			setIsOptimizing(false)
+			// Focus on editor even on exception
+			setTimeout(() => focusEditor(), 0)
+		}
+	}
+
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			if (showMentions) {
@@ -386,7 +524,7 @@ const InputArea = (props: IInputAreaProps) => {
 				return
 			}
 			e.preventDefault()
-			
+
 			// Queue mode: if streaming, queue the message instead of sending
 			if (streaming) {
 				handleQueueSend()
@@ -468,63 +606,6 @@ const InputArea = (props: IInputAreaProps) => {
 		</div>
 	)
 
-	const renderModelSelector = () => {
-		// Temporary fix: Show selector even if agent doesn't strictly allow it, or if it's missing
-		// This is because mock data might be missing the flag, or real data logic is different.
-		// In production, use agent?.allowModelSelection
-		// if (!agent?.allowModelSelection) return null
-
-		// Check if we have models to show. If not, maybe show a loading state or just the default
-		const models = MOCK_MODELS // In future, fetch from API based on agent
-
-		const menu = (
-			<Menu
-				onClick={({ key }) => setCurrentModel(key)}
-				selectedKeys={[currentModel]}
-				style={{ minWidth: 140 }}
-				items={models.map((m) => ({
-					key: m.value,
-					label: (
-						<div
-							style={{
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								fontSize: '12px',
-								padding: '2px 0'
-							}}
-						>
-							<span style={{ fontWeight: m.value === currentModel ? 500 : 400 }}>
-								{m.label}
-							</span>
-							{m.value === currentModel && (
-								<Icon
-									name='material-check'
-									size={14}
-									style={{
-										color: 'var(--color_primary)',
-										marginLeft: 8
-									}}
-								/>
-							)}
-						</div>
-					)
-				}))}
-			/>
-		)
-
-		const currentLabel = models.find((m) => m.value === currentModel)?.label || currentModel
-
-		return (
-			<Dropdown overlay={menu} trigger={['click']} placement='bottomRight'>
-				<div className={styles.modelSelector}>
-					<span className={styles.modelName}>{currentLabel}</span>
-					<Icon name='material-expand_more' size={16} />
-				</div>
-			</Dropdown>
-		)
-	}
-
 	const handlePageClick = () => {
 		if (!currentPage) return
 		// Navigate to the current page
@@ -537,14 +618,13 @@ const InputArea = (props: IInputAreaProps) => {
 			<div className={styles.leftTags}>{agent && <AgentTag agent={agent} />}</div>
 			<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
 				{currentPage && (
-					<Tooltip title={is_cn ? '打开页面' : 'Open page'}>
+					<AntTooltip title={is_cn ? '打开页面' : 'Open page'}>
 						<div className={clsx(styles.tag, styles.pageTag)} onClick={handlePageClick}>
 							<Icon name='material-link' size={12} />
 							<span>{currentPage}</span>
 						</div>
-					</Tooltip>
+					</AntTooltip>
 				)}
-				{renderModelSelector()}
 			</div>
 		</div>
 	)
@@ -556,7 +636,7 @@ const InputArea = (props: IInputAreaProps) => {
 				{attachments.map((att) => (
 					<div key={att.id} className={styles.attachmentItem}>
 						{att.type === 'image' && att.previewUrl ? (
-							<Tooltip
+							<AntTooltip
 								title={
 									<img
 										src={att.previewUrl}
@@ -575,7 +655,7 @@ const InputArea = (props: IInputAreaProps) => {
 									className={styles.thumbnail}
 									style={{ backgroundImage: `url(${att.previewUrl})` }}
 								/>
-							</Tooltip>
+							</AntTooltip>
 						) : (
 							<Icon name='material-description' size={20} className={styles.fileIcon} />
 						)}
@@ -601,6 +681,11 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	const renderSendButton = () => {
+		// Hide send button when optimizing
+		if (isOptimizing) {
+			return null
+		}
+
 		const showStop = loading
 		// Enable send if not empty, or has attachments that are ready
 		const hasReadyAttachments = attachments.some((att) => !att.uploading && !att.error)
@@ -612,7 +697,7 @@ const InputArea = (props: IInputAreaProps) => {
 				onClick={showStop ? props.onAbort : handleSend}
 				disabled={!showStop && (!canSend || disabled)}
 			>
-				{showStop ? <Stop size={16} weight="regular" /> : <PaperPlaneTilt size={16} />}
+				{showStop ? <Stop size={16} weight='regular' /> : <PaperPlaneTilt size={16} />}
 			</button>
 		)
 	}
@@ -627,14 +712,59 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	const renderToolbar = () => {
+		const modeOptions = [
+			{ label: is_cn ? '聊天' : 'Chat', value: 'chat', icon: 'material-chat_bubble_outline' },
+			{ label: is_cn ? '任务' : 'Task', value: 'task', icon: 'material-rocket_launch' }
+		]
+
+		// Use API data if available, fallback to mock data
+		const modelOptions =
+			llmProviders.length > 0
+				? llmProviders.map((provider) => ({
+						label: provider.label,
+						value: provider.value
+				  }))
+				: MOCK_MODELS.map((m) => ({
+						label: m.label,
+						value: m.value
+				  }))
+
 		return (
 			<div className={styles.toolbar}>
 				<div className={styles.leftTools}>
-					<Tooltip title={is_cn ? '上传文件' : 'Upload File'}>
-						<div className={styles.toolBtn} onClick={() => fileInputRef.current?.click()}>
-							<UploadSimple size={14} />
-						</div>
-					</Tooltip>
+					<Selector
+						value={chatMode}
+						options={modeOptions}
+						onChange={(value) => setChatMode(value as 'chat' | 'task')}
+						variant='tag'
+						tooltip={is_cn ? '切换智能体模式' : 'Switch Agent Mode'}
+						disabled={loading || isOptimizing}
+						searchable={false}
+						dropdownWidth='auto'
+						dropdownMinWidth={120}
+						dropdownMaxWidth={200}
+					/>
+					<Selector
+						value={currentModel}
+						options={modelOptions}
+						onChange={setCurrentModel}
+						variant='normal'
+						tooltip={is_cn ? '切换模型' : 'Switch Model'}
+						disabled={loading || isOptimizing}
+						searchable={true}
+						dropdownWidth='auto'
+						dropdownMinWidth={200}
+						dropdownMaxWidth={320}
+					/>
+				</div>
+				<div className={styles.rightTools}>
+					<ToolButton
+						tooltip={is_cn ? '上传文件' : 'Upload File'}
+						onClick={() => fileInputRef.current?.click()}
+						disabled={isOptimizing}
+					>
+						<UploadSimple size={14} />
+					</ToolButton>
 					<input
 						type='file'
 						ref={fileInputRef}
@@ -643,18 +773,21 @@ const InputArea = (props: IInputAreaProps) => {
 						multiple
 					/>
 
-					<Tooltip title={is_cn ? '添加数据' : 'Add Data'}>
-						<div
-							className={clsx(styles.toolBtn, loading && styles.disabled)}
-							onClick={handleOpenResourcePicker}
-						>
-							<Database size={14} />
-						</div>
-					</Tooltip>
+					<ToolButton
+						tooltip={is_cn ? '添加数据' : 'Add Data'}
+						onClick={handleOpenResourcePicker}
+						disabled={loading || isOptimizing}
+					>
+						<Database size={14} />
+					</ToolButton>
 
-					<Tooltip
-						title={
-							!isEmpty
+					<ToolButton
+						tooltip={
+							isOptimizing
+								? is_cn
+									? '优化中...'
+									: 'Optimizing...'
+								: !isEmpty
 								? is_cn
 									? '优化提示词'
 									: 'Optimize Prompt'
@@ -662,22 +795,12 @@ const InputArea = (props: IInputAreaProps) => {
 								? '请输入内容'
 								: 'Please enter content'
 						}
+						onClick={handleOptimizePrompt}
+						disabled={isEmpty || isOptimizing}
+						active={isOptimizing}
 					>
-						<div
-							className={clsx(styles.toolBtn, isEmpty && styles.disabled)}
-							onClick={() => {
-								if (isEmpty) return
-								// TODO: Optimize logic
-							}}
-						>
-							<Sparkle size={14} />
-						</div>
-					</Tooltip>
-				</div>
-				<div className={styles.rightTools}>
-					<span className={styles.hintText}>
-						{is_cn ? 'Shift + Enter 换行' : 'Shift + Enter for new line'}
-					</span>
+						<Sparkle size={14} />
+					</ToolButton>
 				</div>
 			</div>
 		)
@@ -727,15 +850,18 @@ const InputArea = (props: IInputAreaProps) => {
 					{mode === 'placeholder' && renderPlaceholder()}
 
 					{/* Message Queue - positioned above InputArea */}
-					{messageQueue && messageQueue.length > 0 && onCancelQueuedMessage && onSendQueuedMessage && (
-						<MessageQueue
-							queue={messageQueue}
-							onCancel={onCancelQueuedMessage}
-							onSendNow={(id) => onSendQueuedMessage(id, true)}
-							onSendAll={() => onSendQueuedMessage(undefined, true)}
-							className={styles.messageQueue}
-						/>
-					)}
+					{messageQueue &&
+						messageQueue.length > 0 &&
+						onCancelQueuedMessage &&
+						onSendQueuedMessage && (
+							<MessageQueue
+								queue={messageQueue}
+								onCancel={onCancelQueuedMessage}
+								onSendNow={(id) => onSendQueuedMessage(id, true)}
+								onSendAll={() => onSendQueuedMessage(undefined, true)}
+								className={styles.messageQueue}
+							/>
+						)}
 
 					<div
 						className={clsx(
@@ -761,26 +887,26 @@ const InputArea = (props: IInputAreaProps) => {
 							<div
 								className={styles.editor}
 								ref={editorRef}
-								contentEditable={!disabled}
+								contentEditable={!disabled && !isOptimizing}
 								onInput={handleInput}
 								onKeyDown={handleKeyDown}
 								onPaste={handlePaste}
 								data-placeholder={
 									mode === 'placeholder'
 										? is_cn
-											? '输入消息...'
-											: 'Type a message...'
+											? '输入消息... (Shift + Enter 换行)'
+											: 'Type a message... (Shift + Enter for new line)'
 										: streaming
 										? is_cn
 											? messageQueue && messageQueue.length > 0
-												? '继续输入（回车键排队）或空回车立即发送队列'
-												: '可继续输入（回车键排队，空回车立即发送）'
+												? '继续输入（回车键排队）或空回车立即发送队列 (Shift + Enter 换行)'
+												: '可继续输入（回车键排队，空回车立即发送） (Shift + Enter 换行)'
 											: messageQueue && messageQueue.length > 0
-											? 'Continue typing (Enter to queue, empty Enter to send now)'
-											: 'Continue typing (Enter to queue, empty Enter to send)'
+											? 'Continue typing (Enter to queue, empty Enter to send now, Shift + Enter for new line)'
+											: 'Continue typing (Enter to queue, empty Enter to send, Shift + Enter for new line)'
 										: is_cn
-										? '输入消息，使用 @ 呼叫智能体'
-										: 'Type a message, use @ to mention agent'
+										? '输入消息，使用 @ 呼叫智能体 (Shift + Enter 换行)'
+										: 'Type a message, use @ to mention agent (Shift + Enter for new line)'
 								}
 							/>
 							{renderSendButton()}

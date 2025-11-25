@@ -1,6 +1,15 @@
 import React from 'react'
-import type { Message, ChatMessage } from '../openapi'
+import type { Message, ChatMessage, ChatCompletionRequest } from '../openapi'
 import type { QueuedMessage } from './hooks/useChat'
+
+/**
+ * Send Message Request
+ * Uses ChatCompletionRequest but omits assistant_id and chat_id which are controlled by useChat
+ * Single message version (messages is a tuple of one ChatMessage)
+ */
+export type SendMessageRequest = Omit<ChatCompletionRequest, 'assistant_id' | 'chat_id'> & {
+	messages: [ChatMessage]
+}
 
 /**
  * 聊天会话摘要 (用于 Sidebar 列表)
@@ -51,8 +60,8 @@ export interface IInputAreaProps {
 	streaming?: boolean
 	/** 是否禁用 */
 	disabled?: boolean
-	/** 发送回调 */
-	onSend: (message: ChatMessage) => Promise<void>
+	/** 发送回调 - 接受 ChatCompletionRequest 的部分参数 (assistant_id 和 chat_id 由 useChat 控制) */
+	onSend: (request: SendMessageRequest) => Promise<void>
 	/** 取消/停止生成回调 */
 	onAbort?: () => void
 	/** 附件上传器 ID (可选) */
@@ -72,8 +81,8 @@ export interface IInputAreaProps {
 	messageQueue?: QueuedMessage[]
 	/** Queue message callback */
 	onQueueMessage?: (message: ChatMessage, type: 'graceful' | 'force') => void
-	/** Send queued message callback */
-	onSendQueuedMessage?: (queueId: string, asForce?: boolean) => void
+	/** Send queued message callback - queueId is ignored, always sends all messages */
+	onSendQueuedMessage?: (queueId?: string, asForce?: boolean) => void
 	/** Cancel queued message callback */
 	onCancelQueuedMessage?: (queueId: string) => void
 	className?: string
