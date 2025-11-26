@@ -949,15 +949,15 @@ The Message DSL supports 4 delta actions for incremental updates:
 ```typescript
 import { Message } from '@yao/cui/openapi'
 
-// Message cache for merging deltas
+// Message cache for merging deltas (keyed by group_id)
 const messageCache = new Map<string, any>()
 
-function applyDelta(msgId: string, chunk: Message): any {
-    // Get or initialize message state
-    let current = messageCache.get(msgId)
+function applyDelta(groupId: string, chunk: Message): any {
+    // Get or initialize message state for this group
+    let current = messageCache.get(groupId)
     if (!current) {
         current = { type: chunk.type, props: {} }
-        messageCache.set(msgId, current)
+        messageCache.set(groupId, current)
     }
     
     if (!chunk.delta) {
@@ -1093,16 +1093,21 @@ chat.StreamCompletion(
         messages: [{ role: 'user', content: 'Tell me a story' }]
     },
     (chunk) => {
-        if (chunk.id) {
-            const merged = applyDelta(chunk.id, chunk)
+        // Handle group_end event to clean up cache
+        if (IsEventMessage(chunk) && chunk.props?.event === 'group_end') {
+            const groupId = chunk.props.data?.group_id
+            if (groupId) {
+                messageCache.delete(groupId)
+            }
+            return
+        }
+        
+        // Use group_id to merge delta chunks (all chunks in same group share this ID)
+        if (chunk.group_id) {
+            const merged = applyDelta(chunk.group_id, chunk)
             
             // Update UI with merged state
-            updateMessageUI(chunk.id, merged)
-            
-            // Clean up when done
-            if (chunk.done) {
-                messageCache.delete(chunk.id)
-            }
+            updateMessageUI(chunk.group_id, merged)
         }
     }
 )
@@ -1178,7 +1183,7 @@ function renderMessage(msg: Message, mergedProps: any): HTMLElement {
         div.innerHTML = marked(mergedProps.content || '') // Use markdown parser
         
         // Add streaming indicator for delta messages
-        if (msg.delta && !msg.done) {
+        if (msg.delta) {
             div.classList.add('streaming')
         }
         return div
@@ -1192,7 +1197,7 @@ function renderMessage(msg: Message, mergedProps: any): HTMLElement {
             <div class="thinking-icon">💭</div>
             <div class="thinking-content">${mergedProps.content || ''}</div>
         `
-        if (msg.delta && !msg.done) {
+        if (msg.delta) {
             div.classList.add('streaming')
         }
         return div
@@ -1228,7 +1233,7 @@ function renderMessage(msg: Message, mergedProps: any): HTMLElement {
             <strong>Tool:</strong> ${mergedProps.name || ''}
             ${mergedProps.arguments ? `<code>${mergedProps.arguments}</code>` : ''}
         `
-        if (msg.delta && !msg.done) {
+        if (msg.delta) {
             pre.classList.add('streaming')
         }
         return pre
@@ -1255,20 +1260,20 @@ function renderMessage(msg: Message, mergedProps: any): HTMLElement {
     return div
 }
 
-function applyDelta(msgId: string, msg: Message): any {
-    let state = messageStates.get(msgId)
+function applyDelta(groupId: string, msg: Message): any {
+    let state = messageStates.get(groupId)
     
     if (!msg.delta) {
         // Not a delta, use props directly
         state = { ...msg.props }
-        messageStates.set(msgId, state)
+        messageStates.set(groupId, state)
         return state
     }
     
     // Initialize state if first delta
     if (!state) {
         state = {}
-        messageStates.set(msgId, state)
+        messageStates.set(groupId, state)
     }
     
     // Apply delta based on action
@@ -1303,21 +1308,39 @@ chat.StreamCompletion(
         const container = document.getElementById('messages')
         if (!container) return
         
-        // Skip event messages
+        // Handle group_end event
+        if (IsEventMessage(chunk) && chunk.props?.event === 'group_end') {
+            const groupId = chunk.props.data?.group_id
+            if (groupId) {
+                // Clean up state cache
+                messageStates.delete(groupId)
+                
+                // Remove streaming indicator and mark as complete
+                const element = document.getElementById(`msg-${groupId}`)
+                if (element) {
+                    element.classList.remove('streaming')
+                    element.classList.add('complete')
+                }
+            }
+            return
+        }
+        
+        // Skip other event messages
         if (chunk.type === 'event') return
         
-        const msgId = chunk.id || `msg-${Date.now()}`
+        // Use group_id for merging delta chunks (all chunks in same message share this)
+        const groupId = chunk.group_id || `msg-${Date.now()}`
         
         // Handle type change: backend corrected the message type
         if (chunk.type_change) {
             // In streaming, backend may not know final type until enough data is received
             // Examples: loading → text, text → image, loading → error
             // Clear old state and re-render with correct component type
-            messageStates.delete(msgId)
+            messageStates.delete(groupId)
             const element = renderMessage(chunk, chunk.props || {})
-            element.id = `msg-${msgId}`
+            element.id = `msg-${groupId}`
             
-            const existing = document.getElementById(`msg-${msgId}`)
+            const existing = document.getElementById(`msg-${groupId}`)
             if (existing) {
                 // Replace with new component type
                 existing.replaceWith(element)
@@ -1327,31 +1350,24 @@ chat.StreamCompletion(
             
             // Store new state for future deltas
             if (chunk.props) {
-                messageStates.set(msgId, { ...chunk.props })
+                messageStates.set(groupId, { ...chunk.props })
             }
             return
         }
         
-        // Normal delta handling
-        const mergedProps = applyDelta(msgId, chunk)
+        // Normal delta handling - merge by group_id
+        const mergedProps = applyDelta(groupId, chunk)
         
         // Render with merged state
         const element = renderMessage(chunk, mergedProps)
-        element.id = `msg-${msgId}`
+        element.id = `msg-${groupId}`
         
         // Update or append element
-        const existing = document.getElementById(`msg-${msgId}`)
+        const existing = document.getElementById(`msg-${groupId}`)
         if (existing) {
             existing.replaceWith(element)
         } else {
             container.appendChild(element)
-        }
-        
-        // Clean up state when message is done
-        if (chunk.done) {
-            messageStates.delete(msgId)
-            element.classList.remove('streaming')
-            element.classList.add('complete')
         }
     }
 )
@@ -1359,8 +1375,8 @@ chat.StreamCompletion(
 
 **Key Points for Delta Rendering:**
 
-1. **State Management**: Use `messageStates` Map to cache merged props for each message ID
-2. **Delta Merging**: Call `applyDelta()` to merge incremental updates before rendering
+1. **State Management**: Use `messageStates` Map to cache merged props for each `group_id` (all delta chunks in same message share one `group_id`)
+2. **Delta Merging**: Call `applyDelta(groupId, chunk)` to merge incremental updates before rendering
 3. **Type Change Handling**: When `type_change: true`, clear old state and re-render with new component type
    - **Why type changes occur**: In streaming, the backend may not know the final message type until enough data is received or processing is complete
    - **Common scenarios**:
@@ -1370,9 +1386,9 @@ chat.StreamCompletion(
      - `text` → `image`: Initially thought it's text, but generated an image
      - `text` → `video`: Content generation resulted in a video
    - **How to handle**: Clear old component state, replace with new component type's renderer
-4. **Visual Feedback**: Add `.streaming` class during delta updates, `.complete` when done
+4. **Visual Feedback**: Add `.streaming` class during delta updates, `.complete` when `group_end` event received
 5. **Content Types**: Handle both simple text streaming and complex structured updates
-6. **Cleanup**: Remove state from cache when `done: true` is received
+6. **Cleanup**: Remove state from cache when `group_end` event is received (event data contains `group_id`)
 
 ## Message Types
 
@@ -1575,9 +1591,6 @@ chat.StreamCompletion({
         if (chunk.delta) {
             // Streaming delta
             process.stdout.write(chunk.props.content)
-        } else if (chunk.done) {
-            // Complete message
-            console.log('\nFinal:', chunk.props.content)
         }
         return
     }
@@ -1637,29 +1650,55 @@ function handleMessage(msg: Message) {
 Messages support incremental updates for streaming scenarios:
 
 ```typescript
-// First chunk
+// Group start event
 {
-    id: 'msg_123',
+    type: 'event',
+    props: {
+        event: 'group_start',
+        data: { group_id: 'grp_123', type: 'text' }
+    }
+}
+
+// First chunk (unique chunk ID, shared group_id)
+{
+    id: '1',
+    group_id: 'grp_123',
     type: 'text',
     delta: true,
     props: { content: 'Hello' }
 }
 
-// Subsequent chunks (append to same ID)
+// Second chunk (different chunk ID, same group_id)
 {
-    id: 'msg_123',
+    id: '2',
+    group_id: 'grp_123',
     type: 'text',
     delta: true,
     props: { content: ', world' }
 }
 
-// Final chunk
+// Third chunk (different chunk ID, same group_id)
 {
-    id: 'msg_123',
+    id: '3',
+    group_id: 'grp_123',
     type: 'text',
     delta: true,
-    done: true,
     props: { content: '!' }
+}
+
+// Group end event (signals completion)
+{
+    type: 'event',
+    props: {
+        event: 'group_end',
+        data: {
+            group_id: 'grp_123',
+            type: 'text',
+            status: 'completed',
+            chunk_count: 3,
+            extra: { content: 'Hello, world!' }
+        }
+    }
 }
 ```
 
@@ -1682,7 +1721,7 @@ For complex structured messages:
 
 ## Message Grouping
 
-Related messages are grouped using markers in the Message fields:
+Related messages are grouped using `group_id`. Each message has a unique `id`, but shares the same `group_id` with other messages in the group:
 
 ```typescript
 // Group start (type='event', props.event='group_start')
@@ -1694,17 +1733,17 @@ Related messages are grouped using markers in the Message fields:
     }
 }
 
-// Messages in group
+// Messages in group (each has unique id, but shared group_id)
 {
-    id: 'msg_123',
+    id: '1',              // ← Unique message ID
     type: 'image',
-    group_id: 'grp_001',  // ← Belongs to group
+    group_id: 'grp_001',  // ← Shared group ID
     props: { url: 'photo.jpg', alt: 'Sunset' }
 }
 {
-    id: 'msg_124',
+    id: '2',              // ← Different message ID
     type: 'text',
-    group_id: 'grp_001',  // ← Belongs to group
+    group_id: 'grp_001',  // ← Same group ID
     props: { content: 'Captured at Golden Gate Bridge' }
 }
 
@@ -1713,7 +1752,17 @@ Related messages are grouped using markers in the Message fields:
     type: 'event',
     props: {
         event: 'group_end',
-        data: { group_id: 'grp_001' }
+        message: 'Group completed',
+        data: {
+            group_id: 'grp_001',
+            type: 'text',
+            status: 'completed',
+            chunk_count: 2,
+            duration_ms: 150,
+            extra: {
+                content: 'Complete content of the group'
+            }
+        }
     }
 }
 ```
@@ -2066,9 +2115,8 @@ interface Message {
     props?: Record<string, any>     // Type-specific properties
 
     // Streaming control
-    id?: string                     // Message ID for merging
+    id?: string                     // Unique chunk ID (each delta chunk has its own ID)
     delta?: boolean                 // Incremental update flag
-    done?: boolean                  // Completion flag
 
     // Delta update control
     delta_path?: string             // Update path (e.g., "content", "rows")
@@ -2078,9 +2126,7 @@ interface Message {
     type_change?: boolean           // Type correction flag
 
     // Message grouping
-    group_id?: string               // Group ID
-    group_start?: boolean           // Group start marker
-    group_end?: boolean             // Group end marker
+    group_id?: string               // Group ID for merging delta chunks
 
     // Metadata
     metadata?: {

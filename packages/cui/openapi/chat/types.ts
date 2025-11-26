@@ -261,9 +261,8 @@ interface BaseMessage {
 	props?: Record<string, any>
 
 	// Streaming control
-	id?: string // Message ID for merging in streaming
+	id?: string // Unique chunk ID (each delta chunk has its own ID)
 	delta?: boolean // Whether this is an incremental update
-	done?: boolean // Whether the message is complete
 
 	// Delta update control
 	delta_path?: string // Update path (e.g., "content", "items.0.name")
@@ -273,9 +272,7 @@ interface BaseMessage {
 	type_change?: boolean // Marks this as a type correction
 
 	// Message grouping
-	group_id?: string // Parent message group ID
-	group_start?: boolean // Marks the start of a group
-	group_end?: boolean // Marks the end of a group
+	group_id?: string // Group ID for merging delta chunks (all chunks in same message share this)
 
 	// Metadata
 	metadata?: {
