@@ -351,6 +351,18 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								if (ctxId) {
 									contextIdsRef.current[targetTabId] = ctxId
 								}
+
+								// Open sidebar trace view for task mode
+								const metadata = chunk.props?.data?.metadata
+								const traceId = chunk.props?.data?.trace_id
+								if (metadata?.mode === 'task' && traceId) {
+									if (window.$app?.Event) {
+										window.$app.Event.emit('app/openSidebar', {
+											url: `/trace/${traceId}`,
+											title: 'Trace'
+										})
+									}
+								}
 							}
 
 							if (chunk.props?.event === 'group_end') {
@@ -568,6 +580,18 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								const ctxId = chunk.props?.data?.context_id
 								if (ctxId) {
 									contextIdsRef.current[targetTabId] = ctxId
+								}
+
+								// Open sidebar trace view for task mode
+								const metadata = chunk.props?.data?.metadata
+								const traceId = chunk.props?.data?.trace_id
+								if (metadata?.mode === 'task' && traceId) {
+									if (window.$app?.Event) {
+										window.$app.Event.emit('app/openSidebar', {
+											url: `/trace/${traceId}`,
+											title: 'Trace'
+										})
+									}
 								}
 							}
 
