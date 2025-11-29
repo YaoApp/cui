@@ -99,6 +99,7 @@ const FlowContent: React.FC<{
 	const containerRef = useRef<HTMLDivElement>(null)
 	const reactFlowInstance = useReactFlow()
 	const eventSourceRef = useRef<EventSource | null>(null)
+	const previousTraceIdRef = useRef<string | undefined>(undefined)
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -173,21 +174,34 @@ const FlowContent: React.FC<{
 		}
 	}, [rawNodes, rawEdges])
 
-	// 当 traceId 变化时重置所有数据
+	// 当路由中的 traceId 变化时重置所有数据（只在真正切换到不同的 trace 时清理）
 	useEffect(() => {
 		if (!traceId) return
 
-		console.log('🔄 TraceId changed, resetting all data:', traceId)
-		// 重置所有状态
-		setTraceInfo(null)
-		setRawNodes([])
-		setRawEdges([])
-		setSpaces([])
-		setLayoutedNodes([])
-		setLayoutedEdges([])
-		setUpdatingMemoryIds(new Set())
-		setLoadError(null)
+		const prevId = previousTraceIdRef.current
+
+		// 只在 traceId 真正变化时清理数据（首次加载或相同ID不清理）
+		if (prevId !== undefined && prevId !== traceId) {
+			console.log('🔄 Route changed: TraceId', prevId, '→', traceId, '(resetting data)')
+			// 清理所有状态
+			setTraceInfo(null)
+			setRawNodes([])
+			setRawEdges([])
+			setSpaces([])
+			setLayoutedNodes([])
+			setLayoutedEdges([])
+			setUpdatingMemoryIds(new Set())
+			setLoadError(null)
+		}
+
+		// 记录当前 traceId
+		previousTraceIdRef.current = traceId
 	}, [traceId])
+
+	// Debug: 监控 rawNodes 变化
+	useEffect(() => {
+		console.log('📊 rawNodes changed, count:', rawNodes.length, rawNodes.map((n) => n.id))
+	}, [rawNodes])
 
 	// 初始化 SSE 连接（仅在 traceId 变化时重新连接）
 	useEffect(() => {
@@ -219,11 +233,24 @@ const FlowContent: React.FC<{
 						})
 						break
 
-					case 'node_start':
-						if (event.data.node) {
-							const nodeData = event.data.node as APITraceNode
-							setRawNodes((prev) => {
-								const existing = prev.find((n) => n.id === nodeData.id)
+				case 'node_start':
+					// Handle both single node and parallel nodes
+					const nodesToProcess: APITraceNode[] = []
+					if (event.data.node) {
+						nodesToProcess.push(event.data.node as APITraceNode)
+					}
+					if (event.data.nodes && Array.isArray(event.data.nodes)) {
+						nodesToProcess.push(...(event.data.nodes as APITraceNode[]))
+					}
+
+					if (nodesToProcess.length > 0) {
+						console.log('🔵 Processing', nodesToProcess.length, 'node(s):', nodesToProcess)
+
+						// Process all nodes
+						setRawNodes((prev) => {
+							let updated = [...prev]
+							nodesToProcess.forEach((nodeData) => {
+								const existing = updated.find((n) => n.id === nodeData.id)
 								const data = {
 									label: nodeData.label,
 									type: nodeData.type || 'custom',
@@ -245,16 +272,21 @@ const FlowContent: React.FC<{
 									position: existing?.position || { x: 0, y: 0 },
 									data
 								}
-								return existing
-									? prev.map((n) => (n.id === nodeData.id ? newNode : n))
-									: [...prev, newNode]
+								if (existing) {
+									updated = updated.map((n) => (n.id === nodeData.id ? newNode : n))
+								} else {
+									updated.push(newNode)
+								}
 							})
+							return updated
+						})
 
-							// Create edges
-							if (nodeData.parent_ids && nodeData.parent_ids.length > 0) {
-								setRawEdges((prev) => {
-									const newEdges: Edge[] = []
-									nodeData.parent_ids?.forEach((parentId) => {
+						// Create edges for all nodes
+						setRawEdges((prev) => {
+							const newEdges: Edge[] = []
+							nodesToProcess.forEach((nodeData) => {
+								if (nodeData.parent_ids && nodeData.parent_ids.length > 0) {
+									nodeData.parent_ids.forEach((parentId) => {
 										const edgeId = `${parentId}-${nodeData.id}`
 										if (!prev.find((e) => e.id === edgeId)) {
 											const color = getStatusColor(nodeData.status)
@@ -277,11 +309,12 @@ const FlowContent: React.FC<{
 											})
 										}
 									})
-									return newEdges.length > 0 ? [...prev, ...newEdges] : prev
-								})
-							}
-						}
-						break
+								}
+							})
+							return newEdges.length > 0 ? [...prev, ...newEdges] : prev
+						})
+					}
+					break
 
 					case 'node_complete':
 					case 'node_failed':

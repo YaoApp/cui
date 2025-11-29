@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams } from '@umijs/max'
 import DefaultView from './views/DefaultView/index'
 import DeveloperView from './views/DeveloperView'
@@ -9,8 +9,11 @@ const Trace = () => {
 	const params = useParams()
 	// Support both named parameter :id and catch-all parameter * (for $.tsx)
 	// Extract traceId from path like "20251122778299550263/view" -> "20251122778299550263"
-	const rawPath = params.id || params['*']
-	const traceId = rawPath?.split('/')[0]
+	// Use useMemo to stabilize traceId reference and prevent unnecessary re-renders
+	const traceId = useMemo(() => {
+		const rawPath = params.id || params['*']
+		return rawPath?.split('/')[0]
+	}, [params.id, params['*']])
 
 	const [viewMode, setViewMode] = useState<ViewMode>('default')
 
