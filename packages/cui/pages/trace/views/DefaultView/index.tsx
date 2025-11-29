@@ -173,6 +173,22 @@ const FlowContent: React.FC<{
 		}
 	}, [rawNodes, rawEdges])
 
+	// 当 traceId 变化时重置所有数据
+	useEffect(() => {
+		if (!traceId) return
+
+		console.log('🔄 TraceId changed, resetting all data:', traceId)
+		// 重置所有状态
+		setTraceInfo(null)
+		setRawNodes([])
+		setRawEdges([])
+		setSpaces([])
+		setLayoutedNodes([])
+		setLayoutedEdges([])
+		setUpdatingMemoryIds(new Set())
+		setLoadError(null)
+	}, [traceId])
+
 	// 初始化 SSE 连接（仅在 traceId 变化时重新连接）
 	useEffect(() => {
 		if (!traceId) return
