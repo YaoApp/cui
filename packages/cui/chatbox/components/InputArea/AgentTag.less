@@ -2,14 +2,25 @@
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	padding: 0;
+	padding: 4px 8px 4px 4px;
 	background: transparent;
 	font-size: 13px;
 	color: var(--color_text);
-	cursor: default;
+	cursor: pointer;
 	user-select: none;
 	transition: all 0.2s;
 	font-weight: 500;
+	border-radius: 20px;
+	flex-shrink: 0; // Don't shrink the agent tag
+	max-width: 250px; // Limit maximum width
+
+	&:hover {
+		background: var(--color_bg_hover);
+		
+		.switchIcon {
+			opacity: 1;
+		}
+	}
 
 	.avatar {
 		width: 28px;
@@ -29,5 +40,20 @@
 			object-fit: cover;
 			display: block;
 		}
+	}
+
+	.name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.switchIcon {
+		flex-shrink: 0;
+		opacity: 0;
+		transition: opacity 0.2s;
+		color: var(--color_text_grey);
 	}
 }

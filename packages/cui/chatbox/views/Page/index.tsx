@@ -27,7 +27,14 @@ const Page = (props: IPageProps) => {
 	const global = useGlobal()
 
 	// Page 只需要关注 Header 相关的状态和方法
-	const { createNewChat, tabs, activeTabId, activateTab, closeTab } = useChatContext()
+	const chatContext = useChatContext()
+	
+	// Wait for ChatProvider to be ready
+	if (!chatContext) {
+		return null
+	}
+	
+	const { createNewChat, tabs, activeTabId, activateTab, closeTab } = chatContext
 
 	// 显示 Header 的条件：
 	// - tabs 模式：有 tabs 时显示

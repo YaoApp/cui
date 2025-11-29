@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { message, Tooltip as AntTooltip } from 'antd'
+import { message } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
 import { Database, Sparkle, UploadSimple, PaperPlaneTilt, Stop } from 'phosphor-react'
@@ -15,6 +15,7 @@ import ResourcePicker from '../ResourcePicker'
 import MessageQueue from '../MessageQueue'
 import Selector from './Selector'
 import ToolButton from './ToolButton'
+import Tooltip from './Tooltip'
 
 // Mock Data
 const MOCK_AGENT = {
@@ -99,6 +100,11 @@ const InputArea = (props: IInputAreaProps) => {
 	const [attachments, setAttachments] = useState<Attachment[]>([])
 	const [agent, setAgent] = useState(propAssistant || MOCK_AGENT)
 	const [resourcePickerVisible, setResourcePickerVisible] = useState(false)
+	const contextRowRef = useRef<HTMLDivElement>(null)
+	const [showPageText, setShowPageText] = useState(true)
+	const toolbarRef = useRef<HTMLDivElement>(null)
+	const [showModeText, setShowModeText] = useState(true)
+	const [showModelSelector, setShowModelSelector] = useState(true)
 
 	useEffect(() => {
 		if (propAssistant) {
@@ -606,22 +612,74 @@ const InputArea = (props: IInputAreaProps) => {
 
 	const handlePageClick = () => {
 		if (!currentPage) return
-		// Navigate to the current page
-		const fullUrl = window.location.origin + currentPage
-		window.open(fullUrl, '_blank')
+		// Just open the sidebar, don't navigate
+		if (window.$app?.Event) {
+			window.$app.Event.emit('app/openSidebar', {})
+		}
 	}
 
+	// Monitor container width to toggle page text visibility
+	useEffect(() => {
+		const checkWidth = () => {
+			if (contextRowRef.current) {
+				const width = contextRowRef.current.offsetWidth
+				// Hide page text when container is less than 400px wide
+				setShowPageText(width >= 400)
+			}
+		}
+
+		checkWidth()
+		window.addEventListener('resize', checkWidth)
+		
+		// Use ResizeObserver for more accurate detection
+		const resizeObserver = new ResizeObserver(checkWidth)
+		if (contextRowRef.current) {
+			resizeObserver.observe(contextRowRef.current)
+		}
+
+		return () => {
+			window.removeEventListener('resize', checkWidth)
+			resizeObserver.disconnect()
+		}
+	}, [agent, currentPage])
+
+	// Monitor toolbar width to toggle mode text and model selector visibility
+	useEffect(() => {
+		const checkToolbarWidth = () => {
+			if (toolbarRef.current) {
+				const width = toolbarRef.current.offsetWidth
+				// Hide mode text when toolbar is less than 300px
+				setShowModeText(width >= 300)
+				// Hide model selector when toolbar is less than 450px
+				setShowModelSelector(width >= 450)
+			}
+		}
+
+		checkToolbarWidth()
+		window.addEventListener('resize', checkToolbarWidth)
+		
+		const resizeObserver = new ResizeObserver(checkToolbarWidth)
+		if (toolbarRef.current) {
+			resizeObserver.observe(toolbarRef.current)
+		}
+
+		return () => {
+			window.removeEventListener('resize', checkToolbarWidth)
+			resizeObserver.disconnect()
+		}
+	}, [])
+
 	const renderContextRow = () => (
-		<div className={styles.contextRow}>
+		<div ref={contextRowRef} className={styles.contextRow}>
 			<div className={styles.leftTags}>{agent && <AgentTag agent={agent} />}</div>
-			<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+			<div className={styles.rightTags}>
 				{currentPage && (
-					<AntTooltip title={is_cn ? '打开页面' : 'Open page'}>
+					<Tooltip content={currentPage}>
 						<div className={clsx(styles.tag, styles.pageTag)} onClick={handlePageClick}>
 							<Icon name='material-link' size={12} />
-							<span>{currentPage}</span>
+							{showPageText && <span className={styles.pageTagText}>{currentPage}</span>}
 						</div>
-					</AntTooltip>
+					</Tooltip>
 				)}
 			</div>
 		</div>
@@ -728,7 +786,7 @@ const InputArea = (props: IInputAreaProps) => {
 				  }))
 
 		return (
-			<div className={styles.toolbar}>
+			<div ref={toolbarRef} className={styles.toolbar}>
 				<div className={styles.leftTools}>
 					<Selector
 						value={chatMode}
@@ -741,19 +799,22 @@ const InputArea = (props: IInputAreaProps) => {
 						dropdownWidth='auto'
 						dropdownMinWidth={120}
 						dropdownMaxWidth={200}
+						hideLabel={!showModeText}
 					/>
-					<Selector
-						value={currentModel}
-						options={modelOptions}
-						onChange={setCurrentModel}
-						variant='normal'
-						tooltip={is_cn ? '切换模型' : 'Switch Model'}
-						disabled={loading || isOptimizing}
-						searchable={true}
-						dropdownWidth='auto'
-						dropdownMinWidth={200}
-						dropdownMaxWidth={320}
-					/>
+					{showModelSelector && (
+						<Selector
+							value={currentModel}
+							options={modelOptions}
+							onChange={setCurrentModel}
+							variant='normal'
+							tooltip={is_cn ? '切换模型' : 'Switch Model'}
+							disabled={loading || isOptimizing}
+							searchable={true}
+							dropdownWidth='auto'
+							dropdownMinWidth={200}
+							dropdownMaxWidth={320}
+						/>
+					)}
 				</div>
 				<div className={styles.rightTools}>
 					<ToolButton

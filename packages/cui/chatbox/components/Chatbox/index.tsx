@@ -26,6 +26,13 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 	const { className, style } = props
 
 	// 直接从 Context 获取所需的状态和方法
+	const chatContext = useChatContext()
+	
+	// Wait for ChatProvider to be ready
+	if (!chatContext) {
+		return null
+	}
+	
 	const {
 		messages,
 		loading,
@@ -38,7 +45,7 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 		queueMessage,
 		sendQueuedMessage,
 		cancelQueuedMessage
-	} = useChatContext()
+	} = chatContext
 
 	// 判断是否为占位符模式
 	// 当消息列表为空且不在加载历史时，显示占位符模式

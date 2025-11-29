@@ -3,7 +3,14 @@ import { useChatContext } from '@/chatbox/context'
 import styles from './index.less'
 
 const Index = () => {
-	const { sessions, loadHistory, currentChatId } = useChatContext()
+	const chatContext = useChatContext()
+	
+	// Wait for ChatProvider to be ready
+	if (!chatContext) {
+		return null
+	}
+	
+	const { sessions, loadHistory, currentChatId } = chatContext
 
 	return (
 		<div className={styles._local} style={{ padding: 12 }}>

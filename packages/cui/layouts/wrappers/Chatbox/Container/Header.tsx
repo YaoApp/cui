@@ -28,6 +28,7 @@ const Header: FC<HeaderProps> = ({
 }) => {
 	const global = useGlobal()
 	const current_path = useLocation().pathname
+	const navigate = useNavigate()
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -45,7 +46,6 @@ const Header: FC<HeaderProps> = ({
 	)
 
 	const nav_path = findNavPath(current_path, items)
-	const navigate = useNavigate()
 	const handleNavChange = (menu: App.Menu) => {
 		navigate(menu.path)
 	}
@@ -385,20 +385,29 @@ const Header: FC<HeaderProps> = ({
 		)
 	}
 
+	const handleBack = () => {
+		// Use browser history to go back
+		navigate(-1)
+		// Clean up temporary view state
+		if (onBackToNormal) {
+			onBackToNormal()
+		}
+	}
+
 	const renderTemporaryView = () => (
 		<div className='header_temporary'>
 			<div className='header_left'>
-				<span className='header_current_page'>{currentPageName}</span>
+				<span className='header_current_page'>{currentPageName || (is_cn ? 'Trace' : 'Trace')}</span>
 			</div>
 			<div className='header_right'>
 				<Button
 					type='text'
 					className='header_icon_btn back-btn'
 					style={{ marginRight: '2px', width: 'auto' }}
-					onClick={onBackToNormal}
+					onClick={handleBack}
 				>
 					<Icon name='material-chevron_left' size={16} style={{ marginRight: '0px' }} />
-					<span>Back</span>
+					<span>{is_cn ? '返回' : 'Back'}</span>
 				</Button>
 				<Button
 					type='text'

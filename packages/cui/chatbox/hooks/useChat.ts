@@ -357,9 +357,11 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								const traceId = chunk.props?.data?.trace_id
 								if (metadata?.mode === 'task' && traceId) {
 									if (window.$app?.Event) {
+										const locale = getLocale()
+										const is_cn = locale === 'zh-CN'
 										window.$app.Event.emit('app/openSidebar', {
 											url: `/trace/${traceId}`,
-											title: 'Trace'
+											title: is_cn ? '追踪' : 'Trace'
 										})
 									}
 								}
@@ -587,9 +589,11 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								const traceId = chunk.props?.data?.trace_id
 								if (metadata?.mode === 'task' && traceId) {
 									if (window.$app?.Event) {
+										const locale = getLocale()
+										const is_cn = locale === 'zh-CN'
 										window.$app.Event.emit('app/openSidebar', {
 											url: `/trace/${traceId}`,
-											title: 'Trace'
+											title: is_cn ? '追踪' : 'Trace'
 										})
 									}
 								}

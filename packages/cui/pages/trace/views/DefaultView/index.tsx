@@ -27,7 +27,7 @@ interface DefaultViewProps {
 }
 
 // 节点宽度和高度（需要与 TraceNode 的实际尺寸一致）
-const NODE_WIDTH = 200
+const NODE_WIDTH = 280
 const NODE_HEIGHT = 120
 const ZOOM_LEVEL = 0.9
 

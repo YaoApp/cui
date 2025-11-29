@@ -22,6 +22,7 @@ interface ISelectorProps {
 	dropdownWidth?: number | 'auto' // 下拉菜单宽度：数字(px)或'auto'自适应
 	dropdownMaxWidth?: number // 下拉菜单最大宽度(px)
 	dropdownMinWidth?: number // 下拉菜单最小宽度(px)
+	hideLabel?: boolean // 是否隐藏标签文字，只显示图标
 }
 
 const Selector: React.FC<ISelectorProps> = ({
@@ -35,7 +36,8 @@ const Selector: React.FC<ISelectorProps> = ({
 	searchable = false,
 	dropdownWidth = 'auto',
 	dropdownMaxWidth = 320,
-	dropdownMinWidth = 180
+	dropdownMinWidth = 180,
+	hideLabel = false
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -141,14 +143,14 @@ const Selector: React.FC<ISelectorProps> = ({
 		<button
 			className={`${styles.selectorButton} ${styles[variant]} ${disabled ? styles.disabled : ''} ${
 				isOpen ? styles.open : ''
-			}`}
+			} ${hideLabel ? styles.iconOnly : ''}`}
 			onClick={handleToggle}
 			disabled={disabled}
 		>
 			{currentOption?.icon && (
 				<Icon name={currentOption.icon} size={13} className={styles.selectorIcon} />
 			)}
-			<span className={styles.selectorLabel}>{displayLabel}</span>
+			{!hideLabel && <span className={styles.selectorLabel}>{displayLabel}</span>}
 			<Icon name='material-expand_more' size={14} className={styles.arrow} />
 		</button>
 	)
