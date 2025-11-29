@@ -20,9 +20,6 @@ const MessageList = (props: IMessageListProps) => {
 
 			{!loading &&
 				messages.map((msg, index) => {
-					// Debug Output
-					console.log('Message List: ', msg.type, msg.props)
-
 					const isUser =
 						msg.props?.role === 'user' ||
 						(msg.type === 'text' && index % 2 === 0 && !msg.props?.role) // Fallback logic for mock

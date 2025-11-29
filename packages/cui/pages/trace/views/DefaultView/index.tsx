@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useReducer } from 'react'
 import ReactFlow, {
 	Background,
 	Controls,
@@ -19,6 +19,7 @@ import TraceNode from './components/TraceNode'
 import MemoryCard from './components/MemoryCard'
 import { OpenAPI } from '@/openapi'
 import { TraceAPI, TraceInfo, TraceEvent, TraceNode as APITraceNode, TraceSpace } from '@/openapi/trace'
+import { traceReducer, initialState } from './reducer'
 import styles from './index.less'
 
 interface DefaultViewProps {
@@ -103,15 +104,15 @@ const FlowContent: React.FC<{
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
-	// 动态状态
-	const [traceInfo, setTraceInfo] = useState<TraceInfo | null>(null)
-	const [rawNodes, setRawNodes] = useState<Node[]>([])
-	const [rawEdges, setRawEdges] = useState<Edge[]>([])
-	const [spaces, setSpaces] = useState<TraceSpace[]>([])
+	// 使用 useReducer 管理复杂状态，确保更新的原子性和顺序性
+	const [state, dispatch] = useReducer(traceReducer, initialState)
+
+	// 解构状态以保持向后兼容
+	const { traceInfo, rawNodes, rawEdges, spaces, updatingMemoryIds, loadError } = state
+
+	// 布局状态单独管理（因为它是派生状态）
 	const [layoutedNodes, setLayoutedNodes] = useState<Node[]>([])
 	const [layoutedEdges, setLayoutedEdges] = useState<Edge[]>([])
-	const [updatingMemoryIds, setUpdatingMemoryIds] = useState<Set<string>>(new Set())
-	const [loadError, setLoadError] = useState<string | null>(null)
 
 	// Initialize API
 	// @ts-ignore
@@ -124,7 +125,7 @@ const FlowContent: React.FC<{
 	// 获取 TraceInfo
 	useEffect(() => {
 		if (!traceId) {
-			setLoadError(is_cn ? 'Trace ID 不能为空' : 'Trace ID is required')
+			dispatch({ type: 'SET_LOAD_ERROR', payload: is_cn ? 'Trace ID 不能为空' : 'Trace ID is required' })
 			return
 		}
 
@@ -138,20 +139,17 @@ const FlowContent: React.FC<{
 						res.error?.error_description ||
 						(is_cn ? '获取 Trace 信息失败' : 'Failed to get trace info')
 					console.error('❌ GetInfo error:', errorMsg)
-					setLoadError(errorMsg)
+					dispatch({ type: 'SET_LOAD_ERROR', payload: errorMsg })
 					message.error(errorMsg)
 				} else if (res.data) {
 					console.log('✅ TraceInfo loaded:', res.data)
-					// 不要直接覆盖，而是合并，保留 SSE 可能已经更新的状态
-					setTraceInfo((prev) => {
-						// 如果已经有状态且不是 pending，保留 SSE 更新的状态
-						if (prev && prev.status !== 'pending') {
-							console.log('⚠️ Preserving SSE status:', prev.status)
-							return { ...res.data!, status: prev.status }
-						}
-						return res.data!
+					// 合并保留 SSE 可能已经更新的状态
+					const preserveStatus = traceInfo && traceInfo.status !== 'pending'
+					dispatch({
+						type: 'SET_TRACE_INFO',
+						payload: preserveStatus ? { ...res.data, status: traceInfo.status } : res.data
 					})
-					setLoadError(null)
+					dispatch({ type: 'SET_LOAD_ERROR', payload: null })
 				} else {
 					console.warn('⚠️ GetInfo returned no data')
 				}
@@ -159,18 +157,24 @@ const FlowContent: React.FC<{
 			.catch((err) => {
 				console.error('❌ GetInfo network error:', err)
 				const errorMsg = is_cn ? '网络错误' : 'Network error'
-				setLoadError(errorMsg)
+				dispatch({ type: 'SET_LOAD_ERROR', payload: errorMsg })
 				message.error(errorMsg)
 			})
 	}, [traceId])
 
 	// 当 rawNodes 或 rawEdges 变化时，重新计算布局
 	useEffect(() => {
+		console.log('🔧 Layout update triggered, rawNodes:', rawNodes.length, 'rawEdges:', rawEdges.length)
 		if (rawNodes.length > 0) {
 			// 直接计算布局（不再需要处理 Join 节点）
 			const { nodes, edges } = getLayoutedElements(rawNodes, rawEdges)
+			console.log('✨ Layout calculated, nodes:', nodes.length, 'edges:', edges.length)
 			setLayoutedNodes(nodes)
 			setLayoutedEdges(edges)
+		} else {
+			console.log('⚠️ Skipping layout, no nodes')
+			setLayoutedNodes([])
+			setLayoutedEdges([])
 		}
 	}, [rawNodes, rawEdges])
 
@@ -183,24 +187,31 @@ const FlowContent: React.FC<{
 		// 只在 traceId 真正变化时清理数据（首次加载或相同ID不清理）
 		if (prevId !== undefined && prevId !== traceId) {
 			console.log('🔄 Route changed: TraceId', prevId, '→', traceId, '(resetting data)')
-			// 清理所有状态
-			setTraceInfo(null)
-			setRawNodes([])
-			setRawEdges([])
-			setSpaces([])
+			// 使用 reducer 清理所有状态（原子操作）
+			dispatch({ type: 'RESET_ALL' })
 			setLayoutedNodes([])
 			setLayoutedEdges([])
-			setUpdatingMemoryIds(new Set())
-			setLoadError(null)
 		}
 
 		// 记录当前 traceId
 		previousTraceIdRef.current = traceId
 	}, [traceId])
 
+	// Debug: 监控组件生命周期
+	useEffect(() => {
+		console.log('🎨 DefaultView mounted, traceId:', traceId)
+		return () => {
+			console.log('💀 DefaultView unmounting, traceId:', traceId)
+		}
+	}, [])
+
 	// Debug: 监控 rawNodes 变化
 	useEffect(() => {
-		console.log('📊 rawNodes changed, count:', rawNodes.length, rawNodes.map((n) => n.id))
+		console.log(
+			'📊 rawNodes changed, count:',
+			rawNodes.length,
+			rawNodes.map((n: Node) => n.id)
+		)
 	}, [rawNodes])
 
 	// 初始化 SSE 连接（仅在 traceId 变化时重新连接）
@@ -214,160 +225,84 @@ const FlowContent: React.FC<{
 				switch (event.type) {
 					case 'init':
 						console.log('🎬 Init event received:', event.data)
-						setTraceInfo((prev) => {
-							console.log('Init - Previous traceInfo:', prev)
-							if (prev) {
-								return { ...prev, status: 'running' }
-							} else if (event.data && event.data.trace_id) {
-								// If traceInfo is not loaded yet, create a minimal one
-								return {
-									id: event.data.trace_id,
-									driver: 'unknown',
-									status: 'running',
-									created_at: Date.now(),
-									updated_at: Date.now(),
-									archived: false
-								}
-							}
-							return null
-						})
+						dispatch({ type: 'UPDATE_TRACE_STATUS', payload: 'running' })
 						break
 
-				case 'node_start':
-					// Handle both single node and parallel nodes
-					const nodesToProcess: APITraceNode[] = []
-					if (event.data.node) {
-						nodesToProcess.push(event.data.node as APITraceNode)
-					}
-					if (event.data.nodes && Array.isArray(event.data.nodes)) {
-						nodesToProcess.push(...(event.data.nodes as APITraceNode[]))
-					}
+					case 'node_start':
+						// Handle both single node and parallel nodes
+						const nodesToProcess: APITraceNode[] = []
+						if (event.data.node) {
+							nodesToProcess.push(event.data.node as APITraceNode)
+						}
+						if (event.data.nodes && Array.isArray(event.data.nodes)) {
+							nodesToProcess.push(...(event.data.nodes as APITraceNode[]))
+						}
 
-					if (nodesToProcess.length > 0) {
-						console.log('🔵 Processing', nodesToProcess.length, 'node(s):', nodesToProcess)
+						if (nodesToProcess.length > 0) {
+							console.log(
+								'🔵 Processing',
+								nodesToProcess.length,
+								'node(s):',
+								nodesToProcess
+							)
 
-						// Process all nodes
-						setRawNodes((prev) => {
-							let updated = [...prev]
-							nodesToProcess.forEach((nodeData) => {
-								const existing = updated.find((n) => n.id === nodeData.id)
-								const data = {
-									label: nodeData.label,
-									type: nodeData.type || 'custom',
-									icon: nodeData.icon,
-									status: nodeData.status,
-									description: nodeData.description,
-									start_time: nodeData.start_time,
-									end_time: nodeData.end_time,
-									duration:
-										nodeData.end_time && nodeData.start_time
-											? nodeData.end_time - nodeData.start_time
-											: undefined,
-									error: nodeData.status === 'failed' ? 'Failed' : undefined,
-									logs: existing?.data.logs || []
-								}
-								const newNode: Node = {
-									id: nodeData.id,
-									type: 'traceNode',
-									position: existing?.position || { x: 0, y: 0 },
-									data
-								}
-								if (existing) {
-									updated = updated.map((n) => (n.id === nodeData.id ? newNode : n))
-								} else {
-									updated.push(newNode)
-								}
-							})
-							return updated
-						})
+							// 使用 reducer 处理节点和边（原子操作）
+							dispatch({ type: 'ADD_OR_UPDATE_NODES', payload: { nodes: nodesToProcess } })
 
-						// Create edges for all nodes
-						setRawEdges((prev) => {
+							// 创建边
 							const newEdges: Edge[] = []
 							nodesToProcess.forEach((nodeData) => {
 								if (nodeData.parent_ids && nodeData.parent_ids.length > 0) {
 									nodeData.parent_ids.forEach((parentId) => {
 										const edgeId = `${parentId}-${nodeData.id}`
-										if (!prev.find((e) => e.id === edgeId)) {
-											const color = getStatusColor(nodeData.status)
-											newEdges.push({
-												id: edgeId,
-												source: parentId,
-												target: nodeData.id,
-												type: 'default',
-												style: {
-													stroke: color,
-													strokeWidth: 1.5
-												},
-												markerEnd: {
-													type: MarkerType.ArrowClosed,
-													width: 12,
-													height: 12,
-													color: color
-												},
-												data: { targetStatus: nodeData.status }
-											})
-										}
+										const color = getStatusColor(nodeData.status)
+										newEdges.push({
+											id: edgeId,
+											source: parentId,
+											target: nodeData.id,
+											type: 'default',
+											style: {
+												stroke: color,
+												strokeWidth: 1.5
+											},
+											markerEnd: {
+												type: MarkerType.ArrowClosed,
+												width: 12,
+												height: 12,
+												color: color
+											},
+											data: { targetStatus: nodeData.status }
+										})
 									})
 								}
 							})
-							return newEdges.length > 0 ? [...prev, ...newEdges] : prev
-						})
-					}
-					break
+							if (newEdges.length > 0) {
+								dispatch({ type: 'ADD_EDGES', payload: newEdges })
+							}
+						}
+						break
 
 					case 'node_complete':
 					case 'node_failed':
 						if (event.data && event.data.node_id) {
 							const newStatus = event.data.status
-							setRawNodes((prev) =>
-								prev.map((node) => {
-									if (node.id === event.data.node_id) {
-										const endTime = event.data.end_time || node.data.end_time
-										const startTime = node.data.start_time
-										const duration =
-											endTime && startTime
-												? endTime - startTime
-												: node.data.duration
-										return {
-											...node,
-											data: {
-												...node.data,
-												status: newStatus || node.data.status,
-												end_time: endTime,
-												output: event.data.output || node.data.output,
-												duration
-											}
-										}
-									}
-									return node
-								})
-							)
+							// 使用 reducer 更新节点状态（原子操作）
+							dispatch({
+								type: 'UPDATE_NODE_STATUS',
+								payload: {
+									nodeId: event.data.node_id,
+									status: newStatus,
+									endTime: event.data.end_time,
+									output: event.data.output
+								}
+							})
 
-							// 更新连接到该节点的边的状态
+							// 更新边的状态
 							if (newStatus) {
-								setRawEdges((prev) =>
-									prev.map((edge) => {
-										if (edge.target === event.data.node_id) {
-											const color = getStatusColor(newStatus)
-											return {
-												...edge,
-												style: {
-													stroke: color,
-													strokeWidth: 1.5
-												},
-												markerEnd: {
-													type: MarkerType.ArrowClosed,
-													width: 12,
-													height: 12,
-													color: color
-												},
-												data: { ...edge.data, targetStatus: newStatus }
-											}
-										}
-										return edge
-									})
-								)
+								dispatch({
+									type: 'UPDATE_EDGES_STATUS',
+									payload: { nodeId: event.data.node_id, status: newStatus }
+								})
 							}
 						}
 						break
@@ -381,25 +316,13 @@ const FlowContent: React.FC<{
 								node_id: event.node_id,
 								data: event.data.Data
 							}
-							setRawNodes((prev) =>
-								prev.map((node) =>
-									node.id === event.node_id
-										? {
-												...node,
-												data: {
-													...node.data,
-													logs: [...(node.data.logs || []), log]
-												}
-										  }
-										: node
-								)
-							)
+							dispatch({ type: 'ADD_NODE_LOG', payload: { nodeId: event.node_id, log } })
 						}
 						break
 
 					case 'space_created':
 						if (event.data) {
-							setSpaces((prev) => [...prev, event.data])
+							dispatch({ type: 'ADD_OR_UPDATE_SPACE', payload: event.data })
 						}
 						break
 
@@ -409,25 +332,18 @@ const FlowContent: React.FC<{
 							const spaceId = event.space_id
 							const item = event.data.item
 							if (spaceId && item) {
-								setUpdatingMemoryIds((prev) => new Set(prev).add(spaceId))
-								setSpaces((prev) =>
-									prev.map((space) =>
-										space.id === spaceId
-											? {
-													...space,
-													data: {
-														...(space.data || {}),
-														[item.id]: item.content
-													}
-											  }
-											: space
-									)
-								)
+								dispatch({
+									type: 'SET_UPDATING_MEMORY',
+									payload: { spaceId, isUpdating: true }
+								})
+								dispatch({
+									type: 'UPDATE_SPACE_ITEM',
+									payload: { spaceId, itemId: item.id, content: item.content }
+								})
 								setTimeout(() => {
-									setUpdatingMemoryIds((prev) => {
-										const next = new Set(prev)
-										next.delete(spaceId)
-										return next
+									dispatch({
+										type: 'SET_UPDATING_MEMORY',
+										payload: { spaceId, isUpdating: false }
 									})
 								}, 500)
 							}
@@ -438,23 +354,7 @@ const FlowContent: React.FC<{
 						console.log('🎯 Complete event received:', event.data)
 						if (event.data && event.data.status) {
 							console.log('✅ Updating trace status to:', event.data.status)
-							setTraceInfo((prev) => {
-								console.log('Previous traceInfo:', prev)
-								// 如果 traceInfo 是 null，创建一个基本对象
-								if (!prev) {
-									return {
-										id: event.trace_id || traceId || '',
-										driver: 'unknown',
-										status: event.data.status,
-										created_at: Date.now(),
-										updated_at: Date.now(),
-										archived: false
-									}
-								}
-								const updated = { ...prev, status: event.data.status }
-								console.log('Updated traceInfo:', updated)
-								return updated
-							})
+							dispatch({ type: 'UPDATE_TRACE_STATUS', payload: event.data.status })
 						} else {
 							console.warn('❌ Complete event missing status:', event)
 						}
@@ -559,7 +459,7 @@ const FlowContent: React.FC<{
 
 			{/* Memory Cards 区域 */}
 			<div className={styles.memorySection}>
-				{spaces.map((space) => (
+				{spaces.map((space: TraceSpace) => (
 					<MemoryCard
 						key={space.id}
 						data={{
