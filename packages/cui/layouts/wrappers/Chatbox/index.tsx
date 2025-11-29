@@ -85,9 +85,15 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 					global.setSidebarVisible(visible)
 				}
 			} else if (visible && forceNormal) {
-				// 强制以正常模式显示，使用默认宽度
-				const defaultWidth = getResponsiveWidths().default
-				global.updateSidebarState(visible, false, defaultWidth)
+				// 强制退出最大化模式，但保留用户调整的宽度
+				if (isMaximized) {
+					// 如果当前是最大化，则恢复到之前的宽度
+					const restoreWidth = previousWidth || getResponsiveWidths().default
+					global.updateSidebarState(visible, false, restoreWidth)
+				} else {
+					// 如果当前不是最大化，只设置可见性，保持当前宽度
+					global.setSidebarVisible(visible)
+				}
 			} else {
 				// 默认行为：只设置可见性，保持当前最大化状态
 				global.setSidebarVisible(visible)

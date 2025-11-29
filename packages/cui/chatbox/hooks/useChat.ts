@@ -361,7 +361,8 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 										const is_cn = locale === 'zh-CN'
 										window.$app.Event.emit('app/openSidebar', {
 											url: `/trace/${traceId}`,
-											title: is_cn ? '追踪' : 'Trace'
+											title: is_cn ? '追踪' : 'Trace',
+											forceNormal: true
 										})
 									}
 								}
@@ -593,7 +594,8 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 										const is_cn = locale === 'zh-CN'
 										window.$app.Event.emit('app/openSidebar', {
 											url: `/trace/${traceId}`,
-											title: is_cn ? '追踪' : 'Trace'
+											title: is_cn ? '追踪' : 'Trace',
+											forceNormal: true
 										})
 									}
 								}
