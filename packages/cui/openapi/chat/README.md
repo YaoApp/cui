@@ -949,15 +949,15 @@ The Message DSL supports 4 delta actions for incremental updates:
 ```typescript
 import { Message } from '@yao/cui/openapi'
 
-// Message cache for merging deltas (keyed by group_id)
+// Message cache for merging deltas (keyed by message_id)
 const messageCache = new Map<string, any>()
 
-function applyDelta(groupId: string, chunk: Message): any {
-    // Get or initialize message state for this group
-    let current = messageCache.get(groupId)
+function applyDelta(messageId: string, chunk: Message): any {
+    // Get or initialize message state for this message_id
+    let current = messageCache.get(messageId)
     if (!current) {
         current = { type: chunk.type, props: {} }
-        messageCache.set(groupId, current)
+        messageCache.set(messageId, current)
     }
     
     if (!chunk.delta) {
@@ -1093,21 +1093,21 @@ chat.StreamCompletion(
         messages: [{ role: 'user', content: 'Tell me a story' }]
     },
     (chunk) => {
-        // Handle group_end event to clean up cache
-        if (IsEventMessage(chunk) && chunk.props?.event === 'group_end') {
-            const groupId = chunk.props.data?.group_id
-            if (groupId) {
-                messageCache.delete(groupId)
+        // Handle message_end event to clean up cache
+        if (IsEventMessage(chunk) && chunk.props?.event === 'message_end') {
+            const messageId = chunk.props.data?.message_id
+            if (messageId) {
+                messageCache.delete(messageId)
             }
             return
         }
         
-        // Use group_id to merge delta chunks (all chunks in same group share this ID)
-        if (chunk.group_id) {
-            const merged = applyDelta(chunk.group_id, chunk)
+        // Use message_id to merge delta chunks (all chunks for same message share this ID)
+        if (chunk.message_id) {
+            const merged = applyDelta(chunk.message_id, chunk)
             
             // Update UI with merged state
-            updateMessageUI(chunk.group_id, merged)
+            updateMessageUI(chunk.message_id, merged)
         }
     }
 )
@@ -1117,23 +1117,23 @@ chat.StreamCompletion(
 
 ```typescript
 // Append: Streaming text content (most common)
-{ id: "msg-1", delta: true, delta_action: "append", props: { content: "Hello" } }
-{ id: "msg-1", delta: true, delta_action: "append", props: { content: " world" } }
+{ message_id: "M1", delta: true, delta_action: "append", props: { content: "Hello" } }
+{ message_id: "M1", delta: true, delta_action: "append", props: { content: " world" } }
 // Result: { content: "Hello world" }
 
 // Replace: Update entire field
-{ id: "msg-2", delta: true, delta_action: "replace", delta_path: "status", props: { status: "processing" } }
-{ id: "msg-2", delta: true, delta_action: "replace", delta_path: "status", props: { status: "completed" } }
+{ message_id: "M2", delta: true, delta_action: "replace", delta_path: "status", props: { status: "processing" } }
+{ message_id: "M2", delta: true, delta_action: "replace", delta_path: "status", props: { status: "completed" } }
 // Result: { status: "completed" }
 
 // Merge: Combine objects
-{ id: "msg-3", delta: true, delta_action: "merge", props: { metadata: { step: 1 } } }
-{ id: "msg-3", delta: true, delta_action: "merge", props: { metadata: { progress: 50 } } }
+{ message_id: "M3", delta: true, delta_action: "merge", props: { metadata: { step: 1 } } }
+{ message_id: "M3", delta: true, delta_action: "merge", props: { metadata: { progress: 50 } } }
 // Result: { metadata: { step: 1, progress: 50 } }
 
 // Set: Add new fields
-{ id: "msg-4", delta: true, delta_action: "set", delta_path: "items.0.name", props: { items: [{ name: "Item 1" }] } }
-{ id: "msg-4", delta: true, delta_action: "set", delta_path: "items.1.name", props: { items: [null, { name: "Item 2" }] } }
+{ message_id: "M4", delta: true, delta_action: "set", delta_path: "items.0.name", props: { items: [{ name: "Item 1" }] } }
+{ message_id: "M4", delta: true, delta_action: "set", delta_path: "items.1.name", props: { items: [null, { name: "Item 2" }] } }
 // Result: { items: [{ name: "Item 1" }, { name: "Item 2" }] }
 ```
 
@@ -1152,7 +1152,7 @@ import {
     IsToolCallMessage 
 } from '@yao/cui/openapi'
 
-// Message state cache for delta merging
+// Message state cache for delta merging (keyed by message_id)
 const messageStates = new Map<string, any>()
 
 function renderMessage(msg: Message, mergedProps: any): HTMLElement {
@@ -1260,20 +1260,20 @@ function renderMessage(msg: Message, mergedProps: any): HTMLElement {
     return div
 }
 
-function applyDelta(groupId: string, msg: Message): any {
-    let state = messageStates.get(groupId)
+function applyDelta(messageId: string, msg: Message): any {
+    let state = messageStates.get(messageId)
     
     if (!msg.delta) {
         // Not a delta, use props directly
         state = { ...msg.props }
-        messageStates.set(groupId, state)
+        messageStates.set(messageId, state)
         return state
     }
     
     // Initialize state if first delta
     if (!state) {
         state = {}
-        messageStates.set(groupId, state)
+        messageStates.set(messageId, state)
     }
     
     // Apply delta based on action
@@ -1308,15 +1308,15 @@ chat.StreamCompletion(
         const container = document.getElementById('messages')
         if (!container) return
         
-        // Handle group_end event
-        if (IsEventMessage(chunk) && chunk.props?.event === 'group_end') {
-            const groupId = chunk.props.data?.group_id
-            if (groupId) {
+        // Handle message_end event
+        if (IsEventMessage(chunk) && chunk.props?.event === 'message_end') {
+            const messageId = chunk.props.data?.message_id
+            if (messageId) {
                 // Clean up state cache
-                messageStates.delete(groupId)
+                messageStates.delete(messageId)
                 
                 // Remove streaming indicator and mark as complete
-                const element = document.getElementById(`msg-${groupId}`)
+                const element = document.getElementById(`msg-${messageId}`)
                 if (element) {
                     element.classList.remove('streaming')
                     element.classList.add('complete')
@@ -1328,19 +1328,19 @@ chat.StreamCompletion(
         // Skip other event messages
         if (chunk.type === 'event') return
         
-        // Use group_id for merging delta chunks (all chunks in same message share this)
-        const groupId = chunk.group_id || `msg-${Date.now()}`
+        // Use message_id for merging delta chunks (all chunks for same message share this ID)
+        const messageId = chunk.message_id || `msg-${Date.now()}`
         
         // Handle type change: backend corrected the message type
         if (chunk.type_change) {
             // In streaming, backend may not know final type until enough data is received
             // Examples: loading → text, text → image, loading → error
             // Clear old state and re-render with correct component type
-            messageStates.delete(groupId)
+            messageStates.delete(messageId)
             const element = renderMessage(chunk, chunk.props || {})
-            element.id = `msg-${groupId}`
+            element.id = `msg-${messageId}`
             
-            const existing = document.getElementById(`msg-${groupId}`)
+            const existing = document.getElementById(`msg-${messageId}`)
             if (existing) {
                 // Replace with new component type
                 existing.replaceWith(element)
@@ -1350,20 +1350,20 @@ chat.StreamCompletion(
             
             // Store new state for future deltas
             if (chunk.props) {
-                messageStates.set(groupId, { ...chunk.props })
+                messageStates.set(messageId, { ...chunk.props })
             }
             return
         }
         
-        // Normal delta handling - merge by group_id
-        const mergedProps = applyDelta(groupId, chunk)
+        // Normal delta handling - merge by message_id
+        const mergedProps = applyDelta(messageId, chunk)
         
         // Render with merged state
         const element = renderMessage(chunk, mergedProps)
-        element.id = `msg-${groupId}`
+        element.id = `msg-${messageId}`
         
         // Update or append element
-        const existing = document.getElementById(`msg-${groupId}`)
+        const existing = document.getElementById(`msg-${messageId}`)
         if (existing) {
             existing.replaceWith(element)
         } else {
@@ -1375,8 +1375,8 @@ chat.StreamCompletion(
 
 **Key Points for Delta Rendering:**
 
-1. **State Management**: Use `messageStates` Map to cache merged props for each `group_id` (all delta chunks in same message share one `group_id`)
-2. **Delta Merging**: Call `applyDelta(groupId, chunk)` to merge incremental updates before rendering
+1. **State Management**: Use `messageStates` Map to cache merged props for each `message_id` (all delta chunks for same message share one `message_id`)
+2. **Delta Merging**: Call `applyDelta(messageId, chunk)` to merge incremental updates before rendering
 3. **Type Change Handling**: When `type_change: true`, clear old state and re-render with new component type
    - **Why type changes occur**: In streaming, the backend may not know the final message type until enough data is received or processing is complete
    - **Common scenarios**:
@@ -1386,9 +1386,9 @@ chat.StreamCompletion(
      - `text` → `image`: Initially thought it's text, but generated an image
      - `text` → `video`: Content generation resulted in a video
    - **How to handle**: Clear old component state, replace with new component type's renderer
-4. **Visual Feedback**: Add `.streaming` class during delta updates, `.complete` when `group_end` event received
+4. **Visual Feedback**: Add `.streaming` class during delta updates, `.complete` when `message_end` event received
 5. **Content Types**: Handle both simple text streaming and complex structured updates
-6. **Cleanup**: Remove state from cache when `group_end` event is received (event data contains `group_id`)
+6. **Cleanup**: Remove state from cache when `message_end` event is received (event data contains `message_id`)
 
 ## Message Types
 
@@ -1416,10 +1416,14 @@ Event messages (`type: 'event'`) use standardized event constants in their `prop
 
 | Event | Constant | Data Type | Description |
 |-------|----------|-----------|-------------|
-| `stream_start` | `EventType.STREAM_START` | `StreamStartData` | Stream has started |
-| `stream_end` | `EventType.STREAM_END` | `StreamEndData` | Stream has ended |
-| `group_start` | `EventType.GROUP_START` | `GroupStartData` | Message group has started |
-| `group_end` | `EventType.GROUP_END` | `GroupEndData` | Message group has ended |
+| `stream_start` | `EventType.STREAM_START` | `StreamStartData` | Stream has started (entire request) |
+| `stream_end` | `EventType.STREAM_END` | `StreamEndData` | Stream has ended (entire request) |
+| `message_start` | `EventType.MESSAGE_START` | `MessageStartData` | Message begins (single logical message) |
+| `message_end` | `EventType.MESSAGE_END` | `MessageEndData` | Message ends (single logical message) |
+| `block_start` | `EventType.BLOCK_START` | `BlockStartData` | Block begins (output section/group) |
+| `block_end` | `EventType.BLOCK_END` | `BlockEndData` | Block ends (output section/group) |
+| `thread_start` | `EventType.THREAD_START` | `ThreadStartData` | Thread begins (concurrent stream) |
+| `thread_end` | `EventType.THREAD_END` | `ThreadEndData` | Thread ends (concurrent stream) |
 
 **Event Data Structures:**
 
@@ -1429,11 +1433,21 @@ import {
     EventMessage, 
     StreamStartData,
     StreamEndData,
+    MessageStartData,
+    MessageEndData,
+    BlockStartData,
+    BlockEndData,
+    ThreadStartData,
+    ThreadEndData,
     IsStreamStartEvent,
-    IsStreamEndEvent 
+    IsStreamEndEvent,
+    IsMessageStartEvent,
+    IsMessageEndEvent,
+    IsBlockStartEvent,
+    IsBlockEndEvent
 } from '@yao/cui/openapi'
 
-// Stream start event with typed data
+// Stream start event (entire request begins)
 const streamStartEvent: EventMessage = {
     type: MessageType.EVENT,
     props: {
@@ -1454,13 +1468,15 @@ const streamStartEvent: EventMessage = {
     }
 }
 
-// Stream end event with usage statistics
+// Stream end event (entire request completes)
 const streamEndEvent: EventMessage = {
     type: MessageType.EVENT,
     props: {
         event: EventType.STREAM_END,
         data: {
             request_id: 'req-123',
+            context_id: 'ctx-abc123',
+            trace_id: 'trace-789',
             timestamp: 1234567890,
             duration_ms: 1500,
             status: 'completed',
@@ -1469,6 +1485,104 @@ const streamEndEvent: EventMessage = {
                 completion_tokens: 50,
                 total_tokens: 150
             }
+        }
+    }
+}
+
+// Message start event (single logical message begins)
+const messageStartEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.MESSAGE_START,
+        message: 'Message started',
+        data: {
+            message_id: 'M1',
+            type: 'text',
+            timestamp: 1234567890
+        }
+    }
+}
+
+// Message end event (single logical message completes)
+const messageEndEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.MESSAGE_END,
+        message: 'Message completed',
+        data: {
+            message_id: 'M1',
+            type: 'text',
+            timestamp: 1234567891,
+            duration_ms: 150,
+            chunk_count: 5,
+            status: 'completed',
+            extra: {
+                content: 'Complete message content here'
+            }
+        }
+    }
+}
+
+// Block start event (output section/group begins)
+const blockStartEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.BLOCK_START,
+        message: 'Block started',
+        data: {
+            block_id: 'B1',
+            type: 'llm',
+            timestamp: 1234567890,
+            label: 'Analyzing image'
+        }
+    }
+}
+
+// Block end event (output section/group completes)
+const blockEndEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.BLOCK_END,
+        message: 'Block completed',
+        data: {
+            block_id: 'B1',
+            type: 'llm',
+            timestamp: 1234567895,
+            duration_ms: 5000,
+            message_count: 3,
+            status: 'completed'
+        }
+    }
+}
+
+// Thread start event (concurrent stream begins)
+const threadStartEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.THREAD_START,
+        message: 'Thread started',
+        data: {
+            thread_id: 'T1',
+            type: 'mcp',
+            timestamp: 1234567890,
+            label: 'Parallel search 1'
+        }
+    }
+}
+
+// Thread end event (concurrent stream completes)
+const threadEndEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.THREAD_END,
+        message: 'Thread completed',
+        data: {
+            thread_id: 'T1',
+            type: 'mcp',
+            timestamp: 1234567893,
+            duration_ms: 3000,
+            block_count: 1,
+            status: 'completed'
         }
     }
 }
@@ -1484,6 +1598,31 @@ if (IsEventMessage(msg) && IsStreamEndEvent(msg)) {
     // TypeScript knows msg.props.data is StreamEndData
     console.log(msg.props.data.usage?.total_tokens)
     console.log(msg.props.data.duration_ms)
+}
+
+if (IsEventMessage(msg) && IsMessageStartEvent(msg)) {
+    // TypeScript knows msg.props.data is MessageStartData
+    console.log('Message started:', msg.props.data.message_id)
+    console.log('Type:', msg.props.data.type)
+}
+
+if (IsEventMessage(msg) && IsMessageEndEvent(msg)) {
+    // TypeScript knows msg.props.data is MessageEndData
+    console.log('Message completed:', msg.props.data.message_id)
+    console.log('Chunks:', msg.props.data.chunk_count)
+    console.log('Duration:', msg.props.data.duration_ms, 'ms')
+}
+
+if (IsEventMessage(msg) && IsBlockStartEvent(msg)) {
+    // TypeScript knows msg.props.data is BlockStartData
+    console.log('Block started:', msg.props.data.block_id)
+    console.log('Label:', msg.props.data.label)
+}
+
+if (IsEventMessage(msg) && IsBlockEndEvent(msg)) {
+    // TypeScript knows msg.props.data is BlockEndData
+    console.log('Block completed:', msg.props.data.block_id)
+    console.log('Messages:', msg.props.data.message_count)
 }
 ```
 
@@ -1580,7 +1719,7 @@ chat.StreamCompletion({
             console.log('Duration:', chunk.props.data?.duration_ms, 'ms')
         }
         else {
-            // Other event types (GROUP_START, GROUP_END, custom events)
+            // Other event types (MESSAGE_START, MESSAGE_END, BLOCK_START, BLOCK_END, THREAD_START, THREAD_END, custom events)
             console.log('Event:', chunk.props.event)
         }
         return
@@ -1650,50 +1789,56 @@ function handleMessage(msg: Message) {
 Messages support incremental updates for streaming scenarios:
 
 ```typescript
-// Group start event
+// Message start event
 {
     type: 'event',
     props: {
-        event: 'group_start',
-        data: { group_id: 'grp_123', type: 'text' }
+        event: 'message_start',
+        data: { 
+            message_id: 'M1', 
+            type: 'text',
+            timestamp: 1234567890
+        }
     }
 }
 
-// First chunk (unique chunk ID, shared group_id)
+// First chunk (unique chunk ID, shared message_id)
 {
-    id: '1',
-    group_id: 'grp_123',
+    chunk_id: 'C1',
+    message_id: 'M1',
     type: 'text',
     delta: true,
     props: { content: 'Hello' }
 }
 
-// Second chunk (different chunk ID, same group_id)
+// Second chunk (different chunk ID, same message_id)
 {
-    id: '2',
-    group_id: 'grp_123',
+    chunk_id: 'C2',
+    message_id: 'M1',
     type: 'text',
     delta: true,
     props: { content: ', world' }
 }
 
-// Third chunk (different chunk ID, same group_id)
+// Third chunk (different chunk ID, same message_id)
 {
-    id: '3',
-    group_id: 'grp_123',
+    chunk_id: 'C3',
+    message_id: 'M1',
     type: 'text',
     delta: true,
     props: { content: '!' }
 }
 
-// Group end event (signals completion)
+// Message end event (signals completion)
 {
     type: 'event',
     props: {
-        event: 'group_end',
+        event: 'message_end',
         data: {
-            group_id: 'grp_123',
+            message_id: 'M1',
             type: 'text',
+            timestamp: 1234567891,
+            duration_ms: 150,
             status: 'completed',
             chunk_count: 3,
             extra: { content: 'Hello, world!' }
@@ -1708,7 +1853,8 @@ For complex structured messages:
 
 ```typescript
 {
-    id: 'msg_456',
+    chunk_id: 'C5',
+    message_id: 'M2',
     type: 'table',
     delta: true,
     delta_path: 'rows',          // Which field to update
@@ -1719,80 +1865,185 @@ For complex structured messages:
 }
 ```
 
-## Message Grouping
+## Message Hierarchy
 
-Related messages are grouped using `group_id`. Each message has a unique `id`, but shares the same `group_id` with other messages in the group:
+Messages are organized using a hierarchical structure for complex scenarios:
+
+```
+Agent Stream
+  └─ ThreadID (T1, T2, T3...) - Concurrent streams (optional)
+      └─ BlockID (B1, B2, B3...) - Output sections/groups
+          └─ MessageID (M1, M2, M3...) - Logical messages
+              └─ ChunkID (C1, C2, C3...) - Stream fragments
+```
+
+### Block Grouping Example
+
+Related messages in one output section share the same `block_id`:
 
 ```typescript
-// Group start (type='event', props.event='group_start')
+// Block start event
 {
     type: 'event',
     props: {
-        event: 'group_start',
-        data: { group_id: 'grp_001' }
+        event: 'block_start',
+        data: { 
+            block_id: 'B1',
+            type: 'llm',
+            timestamp: 1234567890,
+            label: 'Analyzing image'
+        }
     }
 }
 
-// Messages in group (each has unique id, but shared group_id)
+// Messages in block (each has unique message_id, shared block_id)
 {
-    id: '1',              // ← Unique message ID
-    type: 'image',
-    group_id: 'grp_001',  // ← Shared group ID
-    props: { url: 'photo.jpg', alt: 'Sunset' }
+    chunk_id: 'C1',
+    message_id: 'M1',     // ← Unique message ID
+    block_id: 'B1',       // ← Shared block ID
+    type: 'thinking',
+    props: { content: 'Let me analyze...' }
 }
 {
-    id: '2',              // ← Different message ID
+    chunk_id: 'C2',
+    message_id: 'M2',     // ← Different message ID
+    block_id: 'B1',       // ← Same block ID
     type: 'text',
-    group_id: 'grp_001',  // ← Same group ID
-    props: { content: 'Captured at Golden Gate Bridge' }
+    props: { content: 'This is a sunset at Golden Gate Bridge' }
 }
 
-// Group end (type='event', props.event='group_end')
+// Block end event
 {
     type: 'event',
     props: {
-        event: 'group_end',
-        message: 'Group completed',
+        event: 'block_end',
+        message: 'Block completed',
         data: {
-            group_id: 'grp_001',
-            type: 'text',
-            status: 'completed',
-            chunk_count: 2,
-            duration_ms: 150,
-            extra: {
-                content: 'Complete content of the group'
-            }
+            block_id: 'B1',
+            type: 'llm',
+            timestamp: 1234567895,
+            duration_ms: 5000,
+            message_count: 2,
+            status: 'completed'
         }
     }
 }
 ```
 
-### Handling Groups
+### Thread Concurrency Example
+
+Parallel operations use different `thread_id` values:
 
 ```typescript
-let currentGroup: Message[] = []
-let inGroup = false
+// Thread start events
+{
+    type: 'event',
+    props: {
+        event: 'thread_start',
+        data: { 
+            thread_id: 'T1',
+            type: 'mcp',
+            label: 'Weather API call'
+        }
+    }
+}
+{
+    type: 'event',
+    props: {
+        event: 'thread_start',
+        data: { 
+            thread_id: 'T2',
+            type: 'mcp',
+            label: 'News API call'
+        }
+    }
+}
+
+// Messages from different threads (may arrive in any order)
+{
+    chunk_id: 'C1',
+    message_id: 'M1',
+    block_id: 'B1',
+    thread_id: 'T1',      // ← Weather thread
+    type: 'text',
+    props: { content: 'Weather: Sunny, 25°C' }
+}
+{
+    chunk_id: 'C2',
+    message_id: 'M2',
+    block_id: 'B1',
+    thread_id: 'T2',      // ← News thread
+    type: 'text',
+    props: { content: 'Latest: Tech summit announced' }
+}
+
+// Thread end events
+{
+    type: 'event',
+    props: {
+        event: 'thread_end',
+        data: {
+            thread_id: 'T1',
+            duration_ms: 1500,
+            block_count: 1,
+            status: 'completed'
+        }
+    }
+}
+```
+
+### Handling Messages and Blocks
+
+```typescript
+const blocks = new Map<string, Message[]>()
+const messages = new Map<string, any>()  // For delta merging
 
 chat.StreamCompletion({ ... }, (chunk) => {
     if (IsEventMessage(chunk)) {
-        if (chunk.props.event === 'group_start') {
-            inGroup = true
-            currentGroup = []
-        } else if (chunk.props.event === 'group_end') {
-            // Process complete group
-            console.log('Group complete:', currentGroup.length, 'messages')
-            renderGroup(currentGroup)
-            inGroup = false
-            currentGroup = []
+        const event = chunk.props.event
+        
+        // Block lifecycle
+        if (event === 'block_start') {
+            const blockId = chunk.props.data?.block_id
+            if (blockId) {
+                blocks.set(blockId, [])
+                console.log('Block started:', blockId)
+            }
+        } else if (event === 'block_end') {
+            const blockId = chunk.props.data?.block_id
+            if (blockId) {
+                const blockMessages = blocks.get(blockId)
+                console.log('Block complete:', blockId, blockMessages?.length, 'messages')
+                renderBlock(blockId, blockMessages)
+                blocks.delete(blockId)
+            }
         }
+        
+        // Message lifecycle
+        else if (event === 'message_start') {
+            const messageId = chunk.props.data?.message_id
+            console.log('Message started:', messageId)
+        } else if (event === 'message_end') {
+            const messageId = chunk.props.data?.message_id
+            if (messageId) {
+                console.log('Message completed:', messageId)
+                messages.delete(messageId)  // Clean up delta cache
+            }
+        }
+        
         return
     }
     
-    if (inGroup) {
-        currentGroup.push(chunk)
-    } else {
-        // Individual message
-        renderMessage(chunk)
+    // Handle message chunks
+    if (chunk.message_id) {
+        // Track in block if block_id is present
+        if (chunk.block_id && blocks.has(chunk.block_id)) {
+            blocks.get(chunk.block_id)!.push(chunk)
+        }
+        
+        // Merge deltas by message_id
+        const merged = applyDelta(chunk.message_id, chunk)
+        renderMessage(chunk.message_id, merged)
     }
 })
 ```
@@ -2114,19 +2365,19 @@ interface Message {
     type: string                    // Message type (built-in or custom)
     props?: Record<string, any>     // Type-specific properties
 
-    // Streaming control
-    id?: string                     // Unique chunk ID (each delta chunk has its own ID)
+    // Hierarchical streaming control
+    chunk_id?: string               // Unique chunk ID (C1, C2, C3...; for dedup/ordering/debug)
+    message_id?: string             // Logical message ID (M1, M2, M3...; delta merge target)
+    block_id?: string               // Block ID (B1, B2, B3...; Agent-level UI section grouping)
+    thread_id?: string              // Thread ID (T1, T2, T3...; for concurrent streams)
+    
+    // Delta control
     delta?: boolean                 // Incremental update flag
-
-    // Delta update control
     delta_path?: string             // Update path (e.g., "content", "rows")
     delta_action?: 'append' | 'replace' | 'merge' | 'set'
 
     // Type correction
-    type_change?: boolean           // Type correction flag
-
-    // Message grouping
-    group_id?: string               // Group ID for merging delta chunks
+    type_change?: boolean           // Type correction flag (re-render with new type)
 
     // Metadata
     metadata?: {
