@@ -42,12 +42,29 @@ export type MessageTypeValue = (typeof MessageType)[keyof typeof MessageType]
 /**
  * Event type constants (for EventProps.event field in TypeEvent messages)
  * These are used in message.props.event when message.type === 'event'
+ *
+ * Hierarchical structure: Stream > Thread > Block > Message > Chunk
+ * - Stream level: overall conversation stream (stream_start, stream_end)
+ * - Thread level: concurrent operations (thread_start, thread_end)
+ * - Block level: logical output sections (block_start, block_end)
+ * - Message level: individual logical messages (message_start, message_end)
  */
 export const EventType = {
+	// Stream level events (Agent layer - overall conversation stream)
 	STREAM_START: 'stream_start',
 	STREAM_END: 'stream_end',
-	GROUP_START: 'group_start',
-	GROUP_END: 'group_end'
+
+	// Thread level events (optional - for concurrent scenarios)
+	THREAD_START: 'thread_start',
+	THREAD_END: 'thread_end',
+
+	// Block level events (Agent layer - logical output sections)
+	BLOCK_START: 'block_start',
+	BLOCK_END: 'block_end',
+
+	// Message level events (LLM layer - individual logical messages)
+	MESSAGE_START: 'message_start',
+	MESSAGE_END: 'message_end'
 } as const
 
 export type EventTypeValue = (typeof EventType)[keyof typeof EventType]
@@ -87,9 +104,10 @@ export interface LoadingProps {
  * Tool call props
  */
 export interface ToolCallProps {
-	id: string
-	name: string
+	id?: string
+	name?: string
 	arguments?: string // JSON string
+	raw?: string // Raw tool call data (streamed incrementally via delta)
 }
 
 /**
@@ -132,9 +150,9 @@ export interface UsageInfo {
 }
 
 /**
- * Tool call information for group events
+ * Tool call information for message events
  */
-export interface GroupToolCallInfo {
+export interface EventToolCallInfo {
 	id: string
 	name: string
 	arguments?: string
@@ -159,39 +177,87 @@ export interface StreamStartData {
  */
 export interface StreamEndData {
 	request_id: string
+	context_id: string // Context ID for the response
+	trace_id?: string // Trace ID for debugging
 	timestamp: number
 	duration_ms: number
 	status: 'completed' | 'error' | 'cancelled'
 	error?: string
-	context_id?: string // Context ID for the response
-	trace_id?: string // Trace ID for debugging
 	usage?: UsageInfo
 	metadata?: Record<string, any>
 }
 
 /**
- * Group start event data
+ * Thread start event data (for concurrent operations)
  */
-export interface GroupStartData {
-	group_id: string
-	type: string // "text" | "thinking" | "tool_call" | "refusal"
-	timestamp: number
-	tool_call?: GroupToolCallInfo
-	extra?: Record<string, any>
+export interface ThreadStartData {
+	thread_id: string // Thread ID (T1, T2, T3...)
+	type: string // Thread type: "agent" | "llm" | "mcp" | "tool"
+	timestamp: number // Unix timestamp when thread started
+	label?: string // Human-readable label (e.g., "Parallel search 1")
+	extra?: Record<string, any> // Additional metadata
 }
 
 /**
- * Group end event data
+ * Thread end event data
  */
-export interface GroupEndData {
-	group_id: string
-	type: string
-	timestamp: number
-	duration_ms: number
-	chunk_count: number
+export interface ThreadEndData {
+	thread_id: string // Thread ID (T1, T2, T3...)
+	type: string // Thread type (same as in thread_start)
+	timestamp: number // Unix timestamp when thread ended
+	duration_ms: number // Duration of this thread in milliseconds
+	block_count: number // Number of blocks in this thread
 	status: 'completed' | 'partial' | 'error'
-	tool_call?: GroupToolCallInfo
-	extra?: Record<string, any>
+	extra?: Record<string, any> // Additional metadata
+}
+
+/**
+ * Block start event data
+ */
+export interface BlockStartData {
+	block_id: string // Block ID (B1, B2, B3...)
+	type: string // Block type: "llm" | "mcp" | "agent" | "tool" | "mixed"
+	timestamp: number // Unix timestamp when block started
+	label?: string // Human-readable label (e.g., "Searching knowledge base")
+	extra?: Record<string, any> // Additional metadata
+}
+
+/**
+ * Block end event data
+ */
+export interface BlockEndData {
+	block_id: string // Block ID (B1, B2, B3...)
+	type: string // Block type (same as in block_start)
+	timestamp: number // Unix timestamp when block ended
+	duration_ms: number // Duration of this block in milliseconds
+	message_count: number // Number of messages in this block
+	status: 'completed' | 'partial' | 'error'
+	extra?: Record<string, any> // Additional metadata
+}
+
+/**
+ * Message start event data
+ */
+export interface MessageStartData {
+	message_id: string // Message ID (M1, M2, M3...)
+	type: string // Message type: "text" | "thinking" | "tool_call" | "refusal"
+	timestamp: number // Unix timestamp when message started
+	tool_call?: EventToolCallInfo // Tool call metadata (if type is "tool_call")
+	extra?: Record<string, any> // Additional metadata
+}
+
+/**
+ * Message end event data
+ */
+export interface MessageEndData {
+	message_id: string // Message ID (M1, M2, M3...)
+	type: string // Message type (same as in message_start)
+	timestamp: number // Unix timestamp when message ended
+	duration_ms: number // Duration of this message in milliseconds
+	chunk_count: number // Number of data chunks in this message
+	status: 'completed' | 'partial' | 'error'
+	tool_call?: EventToolCallInfo // Complete tool call info (if type is "tool_call")
+	extra?: Record<string, any> // Additional metadata (e.g., complete content)
 }
 
 /**
@@ -199,8 +265,16 @@ export interface GroupEndData {
  */
 export type StreamStartEventProps = { event: typeof EventType.STREAM_START; message?: string; data?: StreamStartData }
 export type StreamEndEventProps = { event: typeof EventType.STREAM_END; message?: string; data?: StreamEndData }
-export type GroupStartEventProps = { event: typeof EventType.GROUP_START; message?: string; data?: GroupStartData }
-export type GroupEndEventProps = { event: typeof EventType.GROUP_END; message?: string; data?: GroupEndData }
+export type ThreadStartEventProps = { event: typeof EventType.THREAD_START; message?: string; data?: ThreadStartData }
+export type ThreadEndEventProps = { event: typeof EventType.THREAD_END; message?: string; data?: ThreadEndData }
+export type BlockStartEventProps = { event: typeof EventType.BLOCK_START; message?: string; data?: BlockStartData }
+export type BlockEndEventProps = { event: typeof EventType.BLOCK_END; message?: string; data?: BlockEndData }
+export type MessageStartEventProps = {
+	event: typeof EventType.MESSAGE_START
+	message?: string
+	data?: MessageStartData
+}
+export type MessageEndEventProps = { event: typeof EventType.MESSAGE_END; message?: string; data?: MessageEndData }
 export type CustomEventProps = { event: string; message?: string; data?: Record<string, any> }
 
 /**
@@ -210,8 +284,12 @@ export type CustomEventProps = { event: string; message?: string; data?: Record<
 export type EventProps =
 	| StreamStartEventProps
 	| StreamEndEventProps
-	| GroupStartEventProps
-	| GroupEndEventProps
+	| ThreadStartEventProps
+	| ThreadEndEventProps
+	| BlockStartEventProps
+	| BlockEndEventProps
+	| MessageStartEventProps
+	| MessageEndEventProps
 	| CustomEventProps
 
 /**
@@ -260,19 +338,22 @@ interface BaseMessage {
 	type: string
 	props?: Record<string, any>
 
-	// Streaming control
-	id?: string // Unique chunk ID (each delta chunk has its own ID)
-	delta?: boolean // Whether this is an incremental update
+	// UI management
+	ui_id?: string // Frontend-only unique ID for React key (to prevent key conflicts when message_id repeats across streams)
 
-	// Delta update control
+	// Streaming control - Hierarchical structure for Agent/LLM/MCP streaming
+	chunk_id?: string // Unique chunk ID (auto-generated: C1, C2, C3...; for dedup/ordering/debugging)
+	message_id?: string // Logical message ID (delta merge target; multiple chunks → one message)
+	block_id?: string // Block ID (B1, B2, B3...; Agent-level grouping for UI sections)
+	thread_id?: string // Thread ID (T1, T2, T3...; optional; for concurrent streams)
+
+	// Delta control
+	delta?: boolean // Whether this is an incremental update
 	delta_path?: string // Update path (e.g., "content", "items.0.name")
 	delta_action?: 'append' | 'replace' | 'merge' | 'set' // Update action
 
 	// Type correction
 	type_change?: boolean // Marks this as a type correction
-
-	// Message grouping
-	group_id?: string // Group ID for merging delta chunks (all chunks in same message share this)
 
 	// Metadata
 	metadata?: {

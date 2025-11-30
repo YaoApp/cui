@@ -18,8 +18,12 @@ import {
 	EventProps,
 	StreamStartEventProps,
 	StreamEndEventProps,
-	GroupStartEventProps,
-	GroupEndEventProps
+	ThreadStartEventProps,
+	ThreadEndEventProps,
+	BlockStartEventProps,
+	BlockEndEventProps,
+	MessageStartEventProps,
+	MessageEndEventProps
 } from './types'
 
 /**
@@ -81,6 +85,8 @@ export function IsBuiltinMessage(msg: Message): msg is BuiltinMessage {
 /**
  * Event type guards - narrow down EventMessage to specific event types
  */
+
+// Stream level events
 export function IsStreamStartEvent(msg: EventMessage): msg is EventMessage & { props: StreamStartEventProps } {
 	return msg.props.event === EventType.STREAM_START
 }
@@ -89,10 +95,29 @@ export function IsStreamEndEvent(msg: EventMessage): msg is EventMessage & { pro
 	return msg.props.event === EventType.STREAM_END
 }
 
-export function IsGroupStartEvent(msg: EventMessage): msg is EventMessage & { props: GroupStartEventProps } {
-	return msg.props.event === EventType.GROUP_START
+// Thread level events (concurrent operations)
+export function IsThreadStartEvent(msg: EventMessage): msg is EventMessage & { props: ThreadStartEventProps } {
+	return msg.props.event === EventType.THREAD_START
 }
 
-export function IsGroupEndEvent(msg: EventMessage): msg is EventMessage & { props: GroupEndEventProps } {
-	return msg.props.event === EventType.GROUP_END
+export function IsThreadEndEvent(msg: EventMessage): msg is EventMessage & { props: ThreadEndEventProps } {
+	return msg.props.event === EventType.THREAD_END
+}
+
+// Block level events (output sections)
+export function IsBlockStartEvent(msg: EventMessage): msg is EventMessage & { props: BlockStartEventProps } {
+	return msg.props.event === EventType.BLOCK_START
+}
+
+export function IsBlockEndEvent(msg: EventMessage): msg is EventMessage & { props: BlockEndEventProps } {
+	return msg.props.event === EventType.BLOCK_END
+}
+
+// Message level events (individual logical messages)
+export function IsMessageStartEvent(msg: EventMessage): msg is EventMessage & { props: MessageStartEventProps } {
+	return msg.props.event === EventType.MESSAGE_START
+}
+
+export function IsMessageEndEvent(msg: EventMessage): msg is EventMessage & { props: MessageEndEventProps } {
+	return msg.props.event === EventType.MESSAGE_END
 }

@@ -31,7 +31,7 @@ const abort = chat.StreamCompletion(
         ]
     },
     (chunk) => {
-        // Handle each chunk
+        // Handle each chunk (Message object)
         console.log(chunk)
     },
     (error) => {
@@ -946,11 +946,19 @@ The Message DSL supports 4 delta actions for incremental updates:
 - **`merge`**: Deep merge objects
 - **`set`**: Set new field values
 
+All delta chunks for the same logical message share the same `message_id`. The frontend merges these chunks by `message_id` to build the complete message.
+
+> **⚠️ Important**: Backend may reuse `message_id` values across different streams (e.g., M1, M2, M3 in each new conversation). To prevent conflicts, use a **stream-level namespace** to make `message_id` unique across conversations. See implementation details below.
+
 ```typescript
 import { Message } from '@yao/cui/openapi'
+import { nanoid } from 'nanoid'
 
-// Message cache for merging deltas (keyed by message_id)
+// Message cache for merging deltas (keyed by namespaced message_id)
 const messageCache = new Map<string, any>()
+
+// Stream ID for namespacing message_id (prevents conflicts across different streams)
+let currentStreamId: string = ''
 
 function applyDelta(messageId: string, chunk: Message): any {
     // Get or initialize message state for this message_id
@@ -1086,28 +1094,39 @@ function deepMerge(target: any, source: any): any {
     return result
 }
 
-// Usage
+// Usage with stream-level namespacing
 chat.StreamCompletion(
     {
         assistant_id: 'my-assistant',
         messages: [{ role: 'user', content: 'Tell me a story' }]
     },
     (chunk) => {
+        // Generate unique stream ID on stream_start to namespace message_id
+        if (IsEventMessage(chunk) && chunk.props?.event === 'stream_start') {
+            currentStreamId = nanoid() // Generate unique ID for this stream
+            console.log('New stream started:', currentStreamId)
+            return
+        }
+        
         // Handle message_end event to clean up cache
         if (IsEventMessage(chunk) && chunk.props?.event === 'message_end') {
-            const messageId = chunk.props.data?.message_id
-            if (messageId) {
-                messageCache.delete(messageId)
+            const rawMessageId = chunk.props.data?.message_id
+            if (rawMessageId) {
+                // Use namespaced message_id for cleanup
+                const namespacedId = `${currentStreamId}:${rawMessageId}`
+                messageCache.delete(namespacedId)
             }
             return
         }
         
-        // Use message_id to merge delta chunks (all chunks for same message share this ID)
+        // Use namespaced message_id to merge delta chunks
+        // This prevents M1 from stream 1 conflicting with M1 from stream 2
         if (chunk.message_id) {
-            const merged = applyDelta(chunk.message_id, chunk)
+            const namespacedId = `${currentStreamId}:${chunk.message_id}`
+            const merged = applyDelta(namespacedId, chunk)
             
-            // Update UI with merged state
-            updateMessageUI(chunk.message_id, merged)
+            // Update UI with merged state (use namespaced ID as key)
+            updateMessageUI(namespacedId, merged)
         }
     }
 )
@@ -1136,6 +1155,212 @@ chat.StreamCompletion(
 { message_id: "M4", delta: true, delta_action: "set", delta_path: "items.1.name", props: { items: [null, { name: "Item 2" }] } }
 // Result: { items: [{ name: "Item 1" }, { name: "Item 2" }] }
 ```
+
+### Best Practices for Frontend Implementation
+
+#### 1. Stream-Level Message ID Namespacing
+
+**Problem**: Backend reuses `message_id` values (M1, M2, M3...) across different streams, causing conflicts when rendering multiple conversations.
+
+**Solution**: Generate a unique `streamId` on each `stream_start` event and use it to namespace `message_id`:
+
+```typescript
+import { nanoid } from 'nanoid'
+
+// Track current stream ID
+const streamIdRef = useRef<Record<string, string>>({}) // chatId -> streamId
+
+// On stream_start: Generate new stream ID
+if (chunk.props?.event === 'stream_start') {
+    const streamId = nanoid()
+    streamIdRef.current[chatId] = streamId
+}
+
+// When processing messages: Namespace message_id
+const streamId = streamIdRef.current[chatId] || 'default'
+const namespacedMessageId = `${streamId}:${chunk.message_id}` // e.g., "abc123:M1"
+
+// Use namespacedMessageId for:
+// - Delta cache keys
+// - Message state management
+// - Completed message tracking
+```
+
+#### 2. React Key Generation for Message Lists
+
+**Problem**: Using `message_id` as React key causes rendering conflicts when backend reuses IDs across streams.
+
+**Solution**: Add a frontend-only `ui_id` field for React keys:
+
+```typescript
+// Add ui_id to Message type
+interface BaseMessage {
+    // ... other fields
+    ui_id?: string  // Frontend-only unique ID for React key
+}
+
+// Generate ui_id when creating new messages
+const newMessage: Message = {
+    ui_id: nanoid(),           // ← Unique UI ID for React
+    message_id: namespacedMessageId,  // ← Namespaced for delta merging
+    chunk_id: chunk.chunk_id,
+    type: chunk.type,
+    props: mergedState.props,
+    delta: chunk.delta
+}
+
+// In React component: Use ui_id as key
+{messages.map((msg) => (
+    <MessageItem 
+        key={msg.ui_id || msg.message_id || msg.chunk_id}  // Prefer ui_id
+        message={msg} 
+    />
+))}
+```
+
+**Why This Matters:**
+- `message_id`: For delta merging logic (backend's logical message ID)
+- `ui_id`: For React rendering (frontend's unique UI element ID)
+- Separation prevents key conflicts and ensures correct message ordering
+
+#### 3. Tracking Completed Messages
+
+**Problem**: After `message_end` event, delayed delta chunks may re-enable the streaming cursor.
+
+**Solution**: Track completed messages and force `delta: false` for late chunks:
+
+```typescript
+// Track completed messages
+const completedMessagesRef = useRef<Record<string, boolean>>({})
+
+// On stream_start: Clear completed tracking
+if (chunk.props?.event === 'stream_start') {
+    completedMessagesRef.current = {}
+}
+
+// On message_end: Mark as completed
+if (chunk.props?.event === 'message_end') {
+    const rawMessageId = chunk.props.data?.message_id
+    if (rawMessageId) {
+        const namespacedId = `${streamId}:${rawMessageId}`
+        completedMessagesRef.current[namespacedId] = true
+    }
+}
+
+// When processing deltas: Check if completed
+const isCompleted = completedMessagesRef.current[namespacedMessageId]
+const updatedMessage: Message = {
+    // ... other fields
+    delta: isCompleted ? false : chunk.delta  // Force false if completed
+}
+```
+
+#### 4. Complete Implementation Example
+
+```typescript
+import { nanoid } from 'nanoid'
+import { Message, IsEventMessage } from '@yao/cui/openapi'
+
+function useChat() {
+    const [messages, setMessages] = useState<Message[]>([])
+    const streamIdRef = useRef<string>('')
+    const completedMessagesRef = useRef<Record<string, boolean>>({})
+    
+    const handleChunk = (chunk: Message) => {
+        if (IsEventMessage(chunk)) {
+            // Stream start: Initialize new stream
+            if (chunk.props?.event === 'stream_start') {
+                streamIdRef.current = nanoid()
+                completedMessagesRef.current = {}
+                return
+            }
+            
+            // Message end: Mark completed
+            if (chunk.props?.event === 'message_end') {
+                const rawMessageId = chunk.props.data?.message_id
+                if (rawMessageId) {
+                    const streamId = streamIdRef.current || 'default'
+                    const namespacedId = `${streamId}:${rawMessageId}`
+                    completedMessagesRef.current[namespacedId] = true
+                    
+                    // Update UI to remove streaming indicator
+                    setMessages(prev => prev.map(m => 
+                        m.message_id === namespacedId 
+                            ? { ...m, delta: false }
+                            : m
+                    ))
+                }
+                return
+            }
+        }
+        
+        // Process message chunks
+        if (chunk.message_id) {
+            const streamId = streamIdRef.current || 'default'
+            const namespacedId = `${streamId}:${chunk.message_id}`
+            const isCompleted = completedMessagesRef.current[namespacedId]
+            
+            // Apply delta merging
+            const mergedState = applyDelta(namespacedId, chunk)
+            
+            // Update or create message
+            setMessages(prev => {
+                const index = prev.findIndex(m => m.message_id === namespacedId)
+                
+                if (index !== -1) {
+                    // Update existing: Preserve ui_id
+                    const updated = [...prev]
+                    updated[index] = {
+                        ...updated[index],
+                        message_id: namespacedId,
+                        type: mergedState.type,
+                        props: mergedState.props,
+                        delta: isCompleted ? false : chunk.delta
+                    }
+                    return updated
+                } else {
+                    // Create new: Generate ui_id
+                    const newMessage: Message = {
+                        ui_id: nanoid(),  // ← Unique for React key
+                        message_id: namespacedId,
+                        chunk_id: chunk.chunk_id,
+                        block_id: chunk.block_id,
+                        thread_id: chunk.thread_id,
+                        type: mergedState.type,
+                        props: mergedState.props,
+                        delta: isCompleted ? false : chunk.delta
+                    }
+                    return [...prev, newMessage]
+                }
+            })
+        }
+    }
+    
+    return { messages, handleChunk }
+}
+
+// In React component
+function MessageList({ messages }: { messages: Message[] }) {
+    return (
+        <div>
+            {messages.map((msg) => (
+                <MessageItem 
+                    key={msg.ui_id || msg.message_id || msg.chunk_id}
+                    message={msg}
+                />
+            ))}
+        </div>
+    )
+}
+```
+
+**Key Takeaways:**
+
+1. ✅ **Namespace `message_id`** with stream-level ID to prevent cross-stream conflicts
+2. ✅ **Add `ui_id` field** for React keys to ensure stable rendering
+3. ✅ **Track completed messages** to prevent late deltas from re-enabling streaming cursor
+4. ✅ **Clear state on `stream_start`** to avoid pollution from previous streams
+5. ✅ **Preserve `ui_id` on updates** to maintain React key stability
 
 ### Component Rendering Example
 
@@ -1308,7 +1533,7 @@ chat.StreamCompletion(
         const container = document.getElementById('messages')
         if (!container) return
         
-        // Handle message_end event
+        // Handle message_end event - clean up state cache
         if (IsEventMessage(chunk) && chunk.props?.event === 'message_end') {
             const messageId = chunk.props.data?.message_id
             if (messageId) {
@@ -1328,7 +1553,8 @@ chat.StreamCompletion(
         // Skip other event messages
         if (chunk.type === 'event') return
         
-        // Use message_id for merging delta chunks (all chunks for same message share this ID)
+        // Use message_id for merging delta chunks
+        // All delta chunks for the same logical message share one message_id
         const messageId = chunk.message_id || `msg-${Date.now()}`
         
         // Handle type change: backend corrected the message type
@@ -1412,18 +1638,20 @@ The Chat API uses a universal message DSL that supports 11 built-in types and un
 
 #### Event Types
 
-Event messages (`type: 'event'`) use standardized event constants in their `props.event` field. Each event type has its own structured data format:
+Event messages (`type: 'event'`) use standardized event constants in their `props.event` field. Each event type has its own structured data format.
 
-| Event | Constant | Data Type | Description |
-|-------|----------|-----------|-------------|
-| `stream_start` | `EventType.STREAM_START` | `StreamStartData` | Stream has started (entire request) |
-| `stream_end` | `EventType.STREAM_END` | `StreamEndData` | Stream has ended (entire request) |
-| `message_start` | `EventType.MESSAGE_START` | `MessageStartData` | Message begins (single logical message) |
-| `message_end` | `EventType.MESSAGE_END` | `MessageEndData` | Message ends (single logical message) |
-| `block_start` | `EventType.BLOCK_START` | `BlockStartData` | Block begins (output section/group) |
-| `block_end` | `EventType.BLOCK_END` | `BlockEndData` | Block ends (output section/group) |
-| `thread_start` | `EventType.THREAD_START` | `ThreadStartData` | Thread begins (concurrent stream) |
-| `thread_end` | `EventType.THREAD_END` | `ThreadEndData` | Thread ends (concurrent stream) |
+**Hierarchical Structure:** Stream > Thread > Block > Message > Chunk
+
+| Level | Event | Constant | Data Type | Description |
+|-------|-------|----------|-----------|-------------|
+| **Stream** | `stream_start` | `EventType.STREAM_START` | `StreamStartData` | Overall conversation stream starts |
+| **Stream** | `stream_end` | `EventType.STREAM_END` | `StreamEndData` | Overall conversation stream ends |
+| **Thread** | `thread_start` | `EventType.THREAD_START` | `ThreadStartData` | Concurrent operation thread starts |
+| **Thread** | `thread_end` | `EventType.THREAD_END` | `ThreadEndData` | Concurrent operation thread ends |
+| **Block** | `block_start` | `EventType.BLOCK_START` | `BlockStartData` | Output block/section starts |
+| **Block** | `block_end` | `EventType.BLOCK_END` | `BlockEndData` | Output block/section ends |
+| **Message** | `message_start` | `EventType.MESSAGE_START` | `MessageStartData` | Single logical message starts |
+| **Message** | `message_end` | `EventType.MESSAGE_END` | `MessageEndData` | Single logical message ends |
 
 **Event Data Structures:**
 
@@ -1433,21 +1661,23 @@ import {
     EventMessage, 
     StreamStartData,
     StreamEndData,
-    MessageStartData,
-    MessageEndData,
-    BlockStartData,
-    BlockEndData,
     ThreadStartData,
     ThreadEndData,
+    BlockStartData,
+    BlockEndData,
+    MessageStartData,
+    MessageEndData,
     IsStreamStartEvent,
     IsStreamEndEvent,
-    IsMessageStartEvent,
-    IsMessageEndEvent,
+    IsThreadStartEvent,
+    IsThreadEndEvent,
     IsBlockStartEvent,
-    IsBlockEndEvent
+    IsBlockEndEvent,
+    IsMessageStartEvent,
+    IsMessageEndEvent
 } from '@yao/cui/openapi'
 
-// Stream start event (entire request begins)
+// Stream start event (overall conversation stream begins)
 const streamStartEvent: EventMessage = {
     type: MessageType.EVENT,
     props: {
@@ -1468,7 +1698,7 @@ const streamStartEvent: EventMessage = {
     }
 }
 
-// Stream end event (entire request completes)
+// Stream end event (overall conversation stream completes)
 const streamEndEvent: EventMessage = {
     type: MessageType.EVENT,
     props: {
@@ -1485,6 +1715,70 @@ const streamEndEvent: EventMessage = {
                 completion_tokens: 50,
                 total_tokens: 150
             }
+        }
+    }
+}
+
+// Thread start event (concurrent operation begins)
+const threadStartEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.THREAD_START,
+        message: 'Thread started',
+        data: {
+            thread_id: 'T1',
+            type: 'mcp',
+            timestamp: 1234567890,
+            label: 'Parallel search 1'
+        }
+    }
+}
+
+// Thread end event (concurrent operation completes)
+const threadEndEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.THREAD_END,
+        message: 'Thread completed',
+        data: {
+            thread_id: 'T1',
+            type: 'mcp',
+            timestamp: 1234567893,
+            duration_ms: 3000,
+            block_count: 1,
+            status: 'completed'
+        }
+    }
+}
+
+// Block start event (output block/section begins)
+const blockStartEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.BLOCK_START,
+        message: 'Block started',
+        data: {
+            block_id: 'B1',
+            type: 'llm',
+            timestamp: 1234567890,
+            label: 'Analyzing image'
+        }
+    }
+}
+
+// Block end event (output block/section completes)
+const blockEndEvent: EventMessage = {
+    type: MessageType.EVENT,
+    props: {
+        event: EventType.BLOCK_END,
+        message: 'Block completed',
+        data: {
+            block_id: 'B1',
+            type: 'llm',
+            timestamp: 1234567895,
+            duration_ms: 5000,
+            message_count: 3,
+            status: 'completed'
         }
     }
 }
@@ -1523,106 +1817,54 @@ const messageEndEvent: EventMessage = {
     }
 }
 
-// Block start event (output section/group begins)
-const blockStartEvent: EventMessage = {
-    type: MessageType.EVENT,
-    props: {
-        event: EventType.BLOCK_START,
-        message: 'Block started',
-        data: {
-            block_id: 'B1',
-            type: 'llm',
-            timestamp: 1234567890,
-            label: 'Analyzing image'
-        }
-    }
-}
-
-// Block end event (output section/group completes)
-const blockEndEvent: EventMessage = {
-    type: MessageType.EVENT,
-    props: {
-        event: EventType.BLOCK_END,
-        message: 'Block completed',
-        data: {
-            block_id: 'B1',
-            type: 'llm',
-            timestamp: 1234567895,
-            duration_ms: 5000,
-            message_count: 3,
-            status: 'completed'
-        }
-    }
-}
-
-// Thread start event (concurrent stream begins)
-const threadStartEvent: EventMessage = {
-    type: MessageType.EVENT,
-    props: {
-        event: EventType.THREAD_START,
-        message: 'Thread started',
-        data: {
-            thread_id: 'T1',
-            type: 'mcp',
-            timestamp: 1234567890,
-            label: 'Parallel search 1'
-        }
-    }
-}
-
-// Thread end event (concurrent stream completes)
-const threadEndEvent: EventMessage = {
-    type: MessageType.EVENT,
-    props: {
-        event: EventType.THREAD_END,
-        message: 'Thread completed',
-        data: {
-            thread_id: 'T1',
-            type: 'mcp',
-            timestamp: 1234567893,
-            duration_ms: 3000,
-            block_count: 1,
-            status: 'completed'
-        }
-    }
-}
-
 // Type guards for specific event types
 if (IsEventMessage(msg) && IsStreamStartEvent(msg)) {
     // TypeScript knows msg.props.data is StreamStartData
-    console.log(msg.props.data.assistant?.name)
-    console.log(msg.props.data.request_id)
+    console.log(msg.props.data?.assistant?.name)
+    console.log(msg.props.data?.request_id)
 }
 
 if (IsEventMessage(msg) && IsStreamEndEvent(msg)) {
     // TypeScript knows msg.props.data is StreamEndData
-    console.log(msg.props.data.usage?.total_tokens)
-    console.log(msg.props.data.duration_ms)
+    console.log(msg.props.data?.usage?.total_tokens)
+    console.log(msg.props.data?.duration_ms)
 }
 
-if (IsEventMessage(msg) && IsMessageStartEvent(msg)) {
-    // TypeScript knows msg.props.data is MessageStartData
-    console.log('Message started:', msg.props.data.message_id)
-    console.log('Type:', msg.props.data.type)
+if (IsEventMessage(msg) && IsThreadStartEvent(msg)) {
+    // TypeScript knows msg.props.data is ThreadStartData
+    console.log('Thread started:', msg.props.data?.thread_id)
+    console.log('Label:', msg.props.data?.label)
 }
 
-if (IsEventMessage(msg) && IsMessageEndEvent(msg)) {
-    // TypeScript knows msg.props.data is MessageEndData
-    console.log('Message completed:', msg.props.data.message_id)
-    console.log('Chunks:', msg.props.data.chunk_count)
-    console.log('Duration:', msg.props.data.duration_ms, 'ms')
+if (IsEventMessage(msg) && IsThreadEndEvent(msg)) {
+    // TypeScript knows msg.props.data is ThreadEndData
+    console.log('Thread completed:', msg.props.data?.thread_id)
+    console.log('Blocks:', msg.props.data?.block_count)
 }
 
 if (IsEventMessage(msg) && IsBlockStartEvent(msg)) {
     // TypeScript knows msg.props.data is BlockStartData
-    console.log('Block started:', msg.props.data.block_id)
-    console.log('Label:', msg.props.data.label)
+    console.log('Block started:', msg.props.data?.block_id)
+    console.log('Label:', msg.props.data?.label)
 }
 
 if (IsEventMessage(msg) && IsBlockEndEvent(msg)) {
     // TypeScript knows msg.props.data is BlockEndData
-    console.log('Block completed:', msg.props.data.block_id)
-    console.log('Messages:', msg.props.data.message_count)
+    console.log('Block completed:', msg.props.data?.block_id)
+    console.log('Messages:', msg.props.data?.message_count)
+}
+
+if (IsEventMessage(msg) && IsMessageStartEvent(msg)) {
+    // TypeScript knows msg.props.data is MessageStartData
+    console.log('Message started:', msg.props.data?.message_id)
+    console.log('Type:', msg.props.data?.type)
+}
+
+if (IsEventMessage(msg) && IsMessageEndEvent(msg)) {
+    // TypeScript knows msg.props.data is MessageEndData
+    console.log('Message completed:', msg.props.data?.message_id)
+    console.log('Chunks:', msg.props.data?.chunk_count)
+    console.log('Duration:', msg.props.data?.duration_ms, 'ms')
 }
 ```
 
@@ -1786,10 +2028,10 @@ function handleMessage(msg: Message) {
 
 ## Delta Updates (Streaming)
 
-Messages support incremental updates for streaming scenarios:
+Messages support incremental updates for streaming scenarios. All delta chunks for the same logical message share one `message_id`:
 
 ```typescript
-// Message start event
+// Message start event - marks beginning of a logical message
 {
     type: 'event',
     props: {
@@ -1802,7 +2044,7 @@ Messages support incremental updates for streaming scenarios:
     }
 }
 
-// First chunk (unique chunk ID, shared message_id)
+// First chunk (unique chunk_id, shared message_id)
 {
     chunk_id: 'C1',
     message_id: 'M1',
@@ -1811,7 +2053,7 @@ Messages support incremental updates for streaming scenarios:
     props: { content: 'Hello' }
 }
 
-// Second chunk (different chunk ID, same message_id)
+// Second chunk (different chunk_id, same message_id)
 {
     chunk_id: 'C2',
     message_id: 'M1',
@@ -1820,7 +2062,7 @@ Messages support incremental updates for streaming scenarios:
     props: { content: ', world' }
 }
 
-// Third chunk (different chunk ID, same message_id)
+// Third chunk (different chunk_id, same message_id)
 {
     chunk_id: 'C3',
     message_id: 'M1',
@@ -1829,7 +2071,7 @@ Messages support incremental updates for streaming scenarios:
     props: { content: '!' }
 }
 
-// Message end event (signals completion)
+// Message end event - signals completion, provides full content
 {
     type: 'event',
     props: {
@@ -1839,8 +2081,8 @@ Messages support incremental updates for streaming scenarios:
             type: 'text',
             timestamp: 1234567891,
             duration_ms: 150,
-            status: 'completed',
             chunk_count: 3,
+            status: 'completed',
             extra: { content: 'Hello, world!' }
         }
     }
@@ -1867,19 +2109,28 @@ For complex structured messages:
 
 ## Message Hierarchy
 
-Messages are organized using a hierarchical structure for complex scenarios:
+Messages are organized using a hierarchical structure for complex Agent/LLM/MCP scenarios:
 
 ```
-Agent Stream
+Agent Stream (entire conversation)
   └─ ThreadID (T1, T2, T3...) - Concurrent streams (optional)
-      └─ BlockID (B1, B2, B3...) - Output sections/groups
+      └─ BlockID (B1, B2, B3...) - Output blocks/sections
           └─ MessageID (M1, M2, M3...) - Logical messages
               └─ ChunkID (C1, C2, C3...) - Stream fragments
 ```
 
+**Field Responsibilities:**
+
+| Field | Generated By | Purpose | Example Values |
+|-------|-------------|---------|----------------|
+| `chunk_id` | System (auto) | Deduplication, ordering, debugging | C1, C2, C3 |
+| `message_id` | LLM Provider/Handler | Delta merge target | M1, M2, M3 |
+| `block_id` | Agent Logic | UI block/section rendering | B1, B2, B3 |
+| `thread_id` | Agent Logic | Concurrent stream distinction | T1, T2, T3 |
+
 ### Block Grouping Example
 
-Related messages in one output section share the same `block_id`:
+Related messages in one output section share the same `block_id`. Blocks represent semantic units of work from the Agent's perspective (one LLM call, one MCP call, etc.).
 
 ```typescript
 // Block start event
@@ -1932,7 +2183,7 @@ Related messages in one output section share the same `block_id`:
 
 ### Thread Concurrency Example
 
-Parallel operations use different `thread_id` values:
+Parallel operations use different `thread_id` values to distinguish concurrent streams. Messages from different threads may arrive in any order.
 
 ```typescript
 // Thread start events
@@ -1943,6 +2194,7 @@ Parallel operations use different `thread_id` values:
         data: { 
             thread_id: 'T1',
             type: 'mcp',
+            timestamp: 1234567890,
             label: 'Weather API call'
         }
     }
@@ -1954,6 +2206,7 @@ Parallel operations use different `thread_id` values:
         data: { 
             thread_id: 'T2',
             type: 'mcp',
+            timestamp: 1234567890,
             label: 'News API call'
         }
     }
@@ -1971,7 +2224,7 @@ Parallel operations use different `thread_id` values:
 {
     chunk_id: 'C2',
     message_id: 'M2',
-    block_id: 'B1',
+    block_id: 'B2',
     thread_id: 'T2',      // ← News thread
     type: 'text',
     props: { content: 'Latest: Tech summit announced' }
@@ -1984,7 +2237,23 @@ Parallel operations use different `thread_id` values:
         event: 'thread_end',
         data: {
             thread_id: 'T1',
+            type: 'mcp',
+            timestamp: 1234567891,
             duration_ms: 1500,
+            block_count: 1,
+            status: 'completed'
+        }
+    }
+}
+{
+    type: 'event',
+    props: {
+        event: 'thread_end',
+        data: {
+            thread_id: 'T2',
+            type: 'mcp',
+            timestamp: 1234567892,
+            duration_ms: 2000,
             block_count: 1,
             status: 'completed'
         }
@@ -1996,18 +2265,35 @@ Parallel operations use different `thread_id` values:
 
 ```typescript
 const blocks = new Map<string, Message[]>()
+const threads = new Map<string, Message[]>()
 const messages = new Map<string, any>()  // For delta merging
 
 chat.StreamCompletion({ ... }, (chunk) => {
     if (IsEventMessage(chunk)) {
         const event = chunk.props.event
         
-        // Block lifecycle
-        if (event === 'block_start') {
+        // Thread lifecycle (concurrent operations)
+        if (event === 'thread_start') {
+            const threadId = chunk.props.data?.thread_id
+            if (threadId) {
+                threads.set(threadId, [])
+                console.log('Thread started:', threadId, chunk.props.data?.label)
+            }
+        } else if (event === 'thread_end') {
+            const threadId = chunk.props.data?.thread_id
+            if (threadId) {
+                const threadMessages = threads.get(threadId)
+                console.log('Thread complete:', threadId, threadMessages?.length, 'messages')
+                threads.delete(threadId)
+            }
+        }
+        
+        // Block lifecycle (output sections)
+        else if (event === 'block_start') {
             const blockId = chunk.props.data?.block_id
             if (blockId) {
                 blocks.set(blockId, [])
-                console.log('Block started:', blockId)
+                console.log('Block started:', blockId, chunk.props.data?.label)
             }
         } else if (event === 'block_end') {
             const blockId = chunk.props.data?.block_id
@@ -2019,14 +2305,14 @@ chat.StreamCompletion({ ... }, (chunk) => {
             }
         }
         
-        // Message lifecycle
+        // Message lifecycle (individual logical messages)
         else if (event === 'message_start') {
             const messageId = chunk.props.data?.message_id
-            console.log('Message started:', messageId)
+            console.log('Message started:', messageId, chunk.props.data?.type)
         } else if (event === 'message_end') {
             const messageId = chunk.props.data?.message_id
             if (messageId) {
-                console.log('Message completed:', messageId)
+                console.log('Message completed:', messageId, chunk.props.data?.chunk_count, 'chunks')
                 messages.delete(messageId)  // Clean up delta cache
             }
         }
@@ -2036,6 +2322,11 @@ chat.StreamCompletion({ ... }, (chunk) => {
     
     // Handle message chunks
     if (chunk.message_id) {
+        // Track in thread if thread_id is present
+        if (chunk.thread_id && threads.has(chunk.thread_id)) {
+            threads.get(chunk.thread_id)!.push(chunk)
+        }
+        
         // Track in block if block_id is present
         if (chunk.block_id && blocks.has(chunk.block_id)) {
             blocks.get(chunk.block_id)!.push(chunk)
@@ -2365,9 +2656,12 @@ interface Message {
     type: string                    // Message type (built-in or custom)
     props?: Record<string, any>     // Type-specific properties
 
+    // UI management
+    ui_id?: string                  // Frontend-only unique ID for React key (prevents key conflicts when message_id repeats across streams)
+
     // Hierarchical streaming control
     chunk_id?: string               // Unique chunk ID (C1, C2, C3...; for dedup/ordering/debug)
-    message_id?: string             // Logical message ID (M1, M2, M3...; delta merge target)
+    message_id?: string             // Logical message ID (M1, M2, M3...; delta merge target; NOTE: may repeat across different streams!)
     block_id?: string               // Block ID (B1, B2, B3...; Agent-level UI section grouping)
     thread_id?: string              // Thread ID (T1, T2, T3...; for concurrent streams)
     
@@ -2410,9 +2704,10 @@ interface LoadingProps {
 }
 
 interface ToolCallProps {
-    id: string
-    name: string
+    id?: string
+    name?: string
     arguments?: string              // JSON string
+    raw?: string                    // Raw tool call data (streamed incrementally via delta)
 }
 
 interface ErrorProps {

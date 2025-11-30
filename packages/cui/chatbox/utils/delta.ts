@@ -1,11 +1,17 @@
 import type { Message } from '../../openapi'
 
 // Message cache for merging deltas
-// msgId -> Message Props
+// message_id -> Message Props
+// All delta chunks for the same logical message share one message_id
 const messageCache = new Map<string, any>()
 
 /**
  * Apply delta updates to a message state
+ *
+ * @param msgId - The message_id (same for all delta chunks of one logical message)
+ * @param chunk - The delta chunk received from backend
+ * @param cache - The cache map (default: global messageCache)
+ * @returns Merged message state with accumulated props
  */
 export function applyDelta(msgId: string, chunk: Message, cache = messageCache): any {
 	// Get or initialize message state
@@ -18,9 +24,8 @@ export function applyDelta(msgId: string, chunk: Message, cache = messageCache):
 	}
 
 	if (!chunk.delta) {
-		// Not a delta, use as-is (or merge logic depending on API behavior)
+		// Not a delta, use as-is (complete message)
 		// Usually non-delta chunks replace the props or are standalone
-		// Here we treat it as update
 		current.props = { ...chunk.props }
 		current.type = chunk.type
 		return current
@@ -106,6 +111,12 @@ export function applyDelta(msgId: string, chunk: Message, cache = messageCache):
 	return current
 }
 
+/**
+ * Clear message cache
+ *
+ * @param msgId - Optional message_id to clear specific message cache, or clear all if not provided
+ * @param cache - The cache map (default: global messageCache)
+ */
 export function clearMessageCache(msgId?: string, cache = messageCache) {
 	if (msgId) {
 		cache.delete(msgId)

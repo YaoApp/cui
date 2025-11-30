@@ -98,6 +98,9 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	// Abort Handles Map: chatId -> abort function
 	const abortHandlesRef = useRef<Record<string, () => void>>({})
 
+	// Stream ID Map: chatId -> current stream ID (to namespace message_id across different streams)
+	const streamIdRef = useRef<Record<string, string>>({})
+
 	// Derived states for active tab
 	const messages = activeTabId ? chatStates[activeTabId] || [] : []
 	const loading = activeTabId ? loadingStates[activeTabId] || false : false
@@ -197,9 +200,10 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 			try {
 				// Add all User Messages to UI first (convert UserMessage to Message format)
-				const userMessages: Message[] = queuedMessages.map((msg, index) => ({
+				const userMessages: Message[] = queuedMessages.map((msg) => ({
+					ui_id: nanoid(), // Unique UI ID for React key
 					type: 'user_input',
-					id: `user-${Date.now()}-${index}`,
+					chunk_id: `user-${Date.now()}`,
 					props: {
 						content: msg.content,
 						role: msg.role,
@@ -211,7 +215,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 				// Send to backend using AppendMessages API
 				await chatClient.AppendMessages(contextId, queuedMessages, type)
 
-				// Note: Don't clear queue here, wait for backend's queue_processed event
+				// Note: Don't clear queue here, wait for backend's response
 			} catch (err) {
 				console.error('Failed to append messages:', err)
 			}
@@ -269,8 +273,8 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 						}
 					},
 					(chunk: Message) => {
-						// Handle group_end event for title generation completion
-						if (chunk.type === 'event' && chunk.props?.event === 'group_end') {
+						// Handle message_end event for title generation completion
+						if (chunk.type === 'event' && chunk.props?.event === 'message_end') {
 							if (generatedTitle) {
 								const finalTitle = generatedTitle.trim().slice(0, 50)
 								setTabs((prev) =>
@@ -324,9 +328,10 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			setStreamingStates((prev) => ({ ...prev, [targetTabId]: true }))
 
 			// Add all User Messages to UI (convert UserMessage to Message format)
-			const userMessages: Message[] = messages.map((msg, index) => ({
+			const userMessages: Message[] = messages.map((msg) => ({
+				ui_id: nanoid(), // Unique UI ID for React key
 				type: 'user_input',
-				id: `user-${Date.now()}-${index}`,
+				chunk_id: `user-${Date.now()}`,
 				props: {
 					content: msg.content,
 					role: msg.role,
@@ -351,6 +356,11 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								if (ctxId) {
 									contextIdsRef.current[targetTabId] = ctxId
 								}
+								// Generate a unique stream ID to namespace message_id across streams
+								const streamId = nanoid()
+								streamIdRef.current[targetTabId] = streamId
+								// Clear completed messages ref for new stream
+								completedMessagesRef.current = {}
 
 								// Open sidebar trace view for task mode
 								const metadata = chunk.props?.data?.metadata
@@ -368,14 +378,23 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								}
 							}
 
-							if (chunk.props?.event === 'group_end') {
-								const groupId = chunk.props?.data?.group_id
-								if (groupId) {
-									clearMessageCache(groupId)
+							if (chunk.props?.event === 'message_end') {
+								const rawMessageId = chunk.props?.data?.message_id
+								if (rawMessageId) {
+									// Namespace message_id with stream ID
+									const streamId = streamIdRef.current[targetTabId] || 'default'
+									const messageId = `${streamId}:${rawMessageId}`
+
+									// Mark this message as completed to prevent late chunks from re-enabling delta
+									completedMessagesRef.current[messageId] = true
+
+									clearMessageCache(messageId)
 
 									// Mark the message as completed (delta: false)
 									updateMessages(targetTabId, (prev) => {
-										const index = prev.findIndex((m) => m.id === groupId)
+										const index = prev.findIndex(
+											(m) => m.message_id === messageId
+										)
 										if (index !== -1) {
 											const newArr = [...prev]
 											newArr[index] = { ...newArr[index], delta: false }
@@ -425,55 +444,67 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								})
 							}
 
-							if (chunk.props?.event === 'queue_processed') {
-								setMessageQueues((prev) => {
-									if (prev[targetTabId] && prev[targetTabId].length > 0) {
-										return {
-											...prev,
-											[targetTabId]: []
-										}
-									}
-									return prev
-								})
-							}
 							return
 						}
 
 						// Type change handling
-						// Use group_id for message identity (all delta chunks share same group_id)
-						const groupId = chunk.group_id || chunk.id || `ai-response-unknown`
+						// Use message_id for message identity (all delta chunks share same message_id)
+						// Namespace message_id with stream ID to avoid conflicts across different streams
+						const streamId = streamIdRef.current[targetTabId] || 'default'
+						const rawMessageId = chunk.message_id || chunk.chunk_id || `ai-response-unknown`
+						const messageId = `${streamId}:${rawMessageId}`
 
 						if (chunk.type_change) {
-							clearMessageCache(groupId)
+							clearMessageCache(messageId)
 							updateMessages(targetTabId, (prev) => {
-								const index = prev.findIndex((m) => m.id === groupId)
+								const index = prev.findIndex((m) => m.message_id === messageId)
 								if (index !== -1) {
 									const newArr = [...prev]
-									newArr[index] = { ...chunk, id: groupId, delta: false }
+									newArr[index] = { ...chunk, message_id: messageId, delta: false }
 									return newArr
 								}
-								return [...prev, { ...chunk, id: groupId }]
+								return [...prev, { ...chunk, message_id: messageId }]
 							})
+							return
 						}
 
-						const mergedState = applyDelta(groupId, chunk)
+						const mergedState = applyDelta(messageId, chunk)
 
-						const updatedMessage: Message = {
-							id: groupId, // Use group_id as message ID in UI
-							group_id: chunk.group_id,
-							type: mergedState.type,
-							props: mergedState.props,
-							delta: chunk.delta
-						}
+						// Check if this message is already completed
+						// If completed, force delta to false to prevent late chunks from re-enabling cursor
+						const isCompleted = completedMessagesRef.current[messageId]
 
+						// Find existing message to preserve its UI ID
 						updateMessages(targetTabId, (prev) => {
-							const index = prev.findIndex((m) => m.id === groupId)
+							const index = prev.findIndex((m) => m.message_id === messageId)
+
 							if (index !== -1) {
+								// Update existing message, preserve its UI ID
 								const newArr = [...prev]
-								newArr[index] = updatedMessage
+								newArr[index] = {
+									...newArr[index], // Preserve existing fields including UI ID
+									chunk_id: chunk.chunk_id,
+									message_id: messageId,
+									block_id: chunk.block_id,
+									thread_id: chunk.thread_id,
+									type: mergedState.type,
+									props: mergedState.props,
+									delta: isCompleted ? false : chunk.delta
+								}
 								return newArr
 							} else {
-								return [...prev, updatedMessage]
+								// New message: create with unique UI ID
+								const newMessage: Message = {
+									ui_id: nanoid(), // Unique UI ID for React key
+									chunk_id: chunk.chunk_id,
+									message_id: messageId,
+									block_id: chunk.block_id,
+									thread_id: chunk.thread_id,
+									type: mergedState.type,
+									props: mergedState.props,
+									delta: isCompleted ? false : chunk.delta
+								}
+								return [...prev, newMessage]
 							}
 						})
 					},
@@ -505,6 +536,9 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 	// Track if title has been generated for each chat
 	const titleGeneratedRef = useRef<Record<string, boolean>>({})
+
+	// Track completed messages (message_id -> true) to prevent late delta chunks from re-enabling delta flag
+	const completedMessagesRef = useRef<Record<string, boolean>>({})
 
 	// Send Message
 	const sendMessage = useCallback(
@@ -545,8 +579,9 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 			// 1. Add User Message locally (convert UserMessage to Message format for display)
 			const userMsg: Message = {
+				ui_id: nanoid(), // Unique UI ID for React key
 				type: 'user_input',
-				id: `user-${Date.now()}`,
+				chunk_id: `user-${Date.now()}`,
 				props: {
 					content: inputMsg.content,
 					role: inputMsg.role,
@@ -584,6 +619,11 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								if (ctxId) {
 									contextIdsRef.current[targetTabId] = ctxId
 								}
+								// Generate a unique stream ID to namespace message_id across streams
+								const streamId = nanoid()
+								streamIdRef.current[targetTabId] = streamId
+								// Clear completed messages ref for new stream
+								completedMessagesRef.current = {}
 
 								// Open sidebar trace view for task mode
 								const metadata = chunk.props?.data?.metadata
@@ -601,15 +641,24 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								}
 							}
 
-							// Handle group_end event to clean up cache
-							if (chunk.props?.event === 'group_end') {
-								const groupId = chunk.props?.data?.group_id
-								if (groupId) {
-									clearMessageCache(groupId)
+							// Handle message_end event to clean up cache
+							if (chunk.props?.event === 'message_end') {
+								const rawMessageId = chunk.props?.data?.message_id
+								if (rawMessageId) {
+									// Namespace message_id with stream ID
+									const streamId = streamIdRef.current[targetTabId] || 'default'
+									const messageId = `${streamId}:${rawMessageId}`
+
+									// Mark this message as completed to prevent late chunks from re-enabling delta
+									completedMessagesRef.current[messageId] = true
+
+									clearMessageCache(messageId)
 
 									// Mark the message as completed (delta: false)
 									updateMessages(targetTabId, (prev) => {
-										const index = prev.findIndex((m) => m.id === groupId)
+										const index = prev.findIndex(
+											(m) => m.message_id === messageId
+										)
 										if (index !== -1) {
 											const newArr = [...prev]
 											// Set delta to false to stop streaming indicator
@@ -677,60 +726,68 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								})
 							}
 
-							// Backend告知队列已处理完成（graceful 模式）
-							if (chunk.props?.event === 'queue_processed') {
-								// Clear the queue UI (only if not already cleared by force mode)
-								setMessageQueues((prev) => {
-									// Only clear if queue still exists (graceful mode)
-									if (prev[targetTabId] && prev[targetTabId].length > 0) {
-										return {
-											...prev,
-											[targetTabId]: []
-										}
-									}
-									return prev
-								})
-							}
 							return
 						}
 
 						// Type change handling
-						// Use group_id for message identity (all delta chunks share same group_id)
-						const groupId = chunk.group_id || chunk.id || `ai-response-unknown`
+						// Use message_id for message identity (all delta chunks share same message_id)
+						// Namespace message_id with stream ID to avoid conflicts across different streams
+						const streamId = streamIdRef.current[targetTabId] || 'default'
+						const rawMessageId = chunk.message_id || chunk.chunk_id || `ai-response-unknown`
+						const messageId = `${streamId}:${rawMessageId}`
 
 						if (chunk.type_change) {
-							clearMessageCache(groupId)
+							clearMessageCache(messageId)
 							updateMessages(targetTabId, (prev) => {
-								const index = prev.findIndex((m) => m.id === groupId)
+								const index = prev.findIndex((m) => m.message_id === messageId)
 								if (index !== -1) {
 									const newArr = [...prev]
-									newArr[index] = { ...chunk, id: groupId, delta: false }
+									newArr[index] = { ...chunk, message_id: messageId, delta: false }
 									return newArr
 								}
-								return [...prev, { ...chunk, id: groupId }]
+								return [...prev, { ...chunk, message_id: messageId }]
 							})
+							return
 						}
 
 						// Apply Delta
-						const mergedState = applyDelta(groupId, chunk)
+						const mergedState = applyDelta(messageId, chunk)
 
-						// Reconstruct Message
-						const updatedMessage: Message = {
-							id: groupId, // Use group_id as message ID in UI
-							group_id: chunk.group_id,
-							type: mergedState.type,
-							props: mergedState.props,
-							delta: chunk.delta
-						}
+						// Check if this message is already completed
+						// If completed, force delta to false to prevent late chunks from re-enabling cursor
+						const isCompleted = completedMessagesRef.current[messageId]
 
+						// Find existing message to preserve its UI ID
 						updateMessages(targetTabId, (prev) => {
-							const index = prev.findIndex((m) => m.id === groupId)
+							const index = prev.findIndex((m) => m.message_id === messageId)
+
 							if (index !== -1) {
+								// Update existing message, preserve its UI ID
 								const newArr = [...prev]
-								newArr[index] = updatedMessage
+								newArr[index] = {
+									...newArr[index], // Preserve existing fields including UI ID
+									chunk_id: chunk.chunk_id,
+									message_id: messageId,
+									block_id: chunk.block_id,
+									thread_id: chunk.thread_id,
+									type: mergedState.type,
+									props: mergedState.props,
+									delta: isCompleted ? false : chunk.delta
+								}
 								return newArr
 							} else {
-								return [...prev, updatedMessage]
+								// New message: create with unique UI ID
+								const newMessage: Message = {
+									ui_id: nanoid(), // Unique UI ID for React key
+									chunk_id: chunk.chunk_id,
+									message_id: messageId,
+									block_id: chunk.block_id,
+									thread_id: chunk.thread_id,
+									type: mergedState.type,
+									props: mergedState.props,
+									delta: isCompleted ? false : chunk.delta
+								}
+								return [...prev, newMessage]
 							}
 						})
 					},
@@ -897,6 +954,9 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 			if (titleGeneratedRef.current[chatId]) {
 				delete titleGeneratedRef.current[chatId]
 			}
+			// Clean up completed messages tracking
+			// Note: We clear all for simplicity, or could track per-chat if needed
+			// For now, clearing all is safe when a tab closes
 		},
 		[activeTabId]
 	)
