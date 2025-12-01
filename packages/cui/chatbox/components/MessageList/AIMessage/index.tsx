@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import type { Message } from '../../../../openapi'
 import UserAvatar from '../../../../widgets/UserAvatar'
-import { Loading, Thinking, Text, ToolCall, Action, Image, Audio, Video, Custom } from '../../../messages'
+import { Loading, Thinking, Text, ToolCall, Action, Image, Audio, Video, Custom, Error } from '../../../messages'
 import styles from './index.less'
 
 interface IAIMessageProps {
@@ -32,6 +32,8 @@ const AIMessage = ({ message, loading }: IAIMessageProps) => {
 				return <Text message={message as any} />
 			case 'tool_call':
 				return <ToolCall message={message as any} />
+			case 'error':
+				return <Error message={message as any} />
 			case 'action':
 				return <Action message={message as any} />
 			case 'image':
