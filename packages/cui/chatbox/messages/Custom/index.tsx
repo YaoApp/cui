@@ -7,7 +7,7 @@ interface ICustomProps {
 
 const Custom = ({ message }: ICustomProps) => {
 	return (
-		<div>
+		<div style={{ marginBottom: '24px' }}>
 			{/* TODO: Implement Custom component - fallback for unknown types */}
 			<div style={{ fontFamily: 'monospace', fontSize: '12px' }}>
 				<div style={{ color: '#666', marginBottom: '4px' }}>
@@ -33,4 +33,3 @@ const Custom = ({ message }: ICustomProps) => {
 }
 
 export default Custom
-

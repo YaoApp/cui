@@ -1,0 +1,204 @@
+.inline {
+	background-color: var(--color_bg_field);
+	padding: 3px 6px;
+	border-radius: var(--radius);
+	border: 1px solid var(--color_border_field);
+	font-weight: 500;
+	font-size: 12px;
+	color: var(--color_text);
+}
+
+:global {
+	.language-math {
+		max-width: 100%;
+		.katex {
+			display: inline-block;
+			width: auto;
+			max-width: 100%;
+			word-break: break-word;
+
+			.katex-html {
+				display: none;
+			}
+
+			.hide-tail {
+				overflow: hidden;
+				svg {
+					max-width: 100%;
+				}
+			}
+		}
+	}
+}
+
+.code_block {
+	border-radius: var(--radius);
+	border: 1px solid var(--color_chatbox_border_card);
+	background: var(--color_chatbox_bg_card);
+	margin: 12px 0;
+	:global {
+		.code_header_wrap {
+			height: 37px;
+			padding: 0 18px;
+			border-bottom: 1px solid var(--color_chatbox_border_card);
+			color: var(--color_chatbox_text_primary);
+			background: var(--color_bg_nav);
+			border-radius: var(--radius) var(--radius) 0 0;
+
+			.lang {
+				font-size: 12px;
+				font-weight: 600;
+				color: var(--color_text_light);
+				text-transform: uppercase;
+			}
+
+			.btn_copy {
+				width: 24px;
+				height: 24px;
+				margin-right: -4px;
+				background-color: transparent;
+				border-radius: var(--radius);
+				color: var(--color_chatbox_text_secondary);
+				transition: all 0.2s;
+
+				&:hover {
+					background-color: var(--color_chatbox_bg_field_hover);
+					color: var(--color_chatbox_text_primary);
+				}
+			}
+		}
+
+		.code_content_wrap {
+			display: block;
+			overflow-x: auto;
+			padding: 12px 18px;
+			font-family: 'JetBrains Mono', 'Fira Code', monospace;
+			font-size: 13px;
+			line-height: 1.5;
+
+			&::-webkit-scrollbar {
+				width: 6px;
+				height: 6px;
+			}
+
+			&::-webkit-scrollbar-thumb {
+				background: var(--color_scrollbar_thumb);
+				border-radius: 3px;
+
+				&:hover {
+					background: var(--color_text_grey);
+				}
+			}
+
+			&::-webkit-scrollbar-track {
+				background: transparent;
+				border-radius: 3px;
+			}
+		}
+
+		// Syntax highlighting styles
+		.hljs {
+			color: var(--color_text);
+			background: transparent;
+		}
+
+		.hljs ::selection,
+		.hljs::selection {
+			background-color: var(--color_primary);
+			color: #fff;
+		}
+
+		.hljs-comment {
+			color: var(--color_text_grey);
+		}
+
+		.hljs-tag {
+			color: var(--color_text_light);
+		}
+
+		.hljs-operator,
+		.hljs-punctuation,
+		.hljs-subst {
+			color: var(--color_text);
+		}
+
+		.hljs-operator {
+			opacity: 0.7;
+		}
+
+		.hljs-bullet,
+		.hljs-deletion,
+		.hljs-name,
+		.hljs-selector-tag,
+		.hljs-template-variable,
+		.hljs-variable {
+			color: var(--color_danger);
+		}
+
+		.hljs-attr,
+		.hljs-link,
+		.hljs-literal,
+		.hljs-number,
+		.hljs-symbol,
+		.hljs-variable.constant_ {
+			color: var(--color_warning);
+		}
+
+		.hljs-class .hljs-title,
+		.hljs-title,
+		.hljs-title.class_ {
+			color: var(--color_primary);
+		}
+
+		.hljs-strong {
+			font-weight: 700;
+			color: var(--color_primary);
+		}
+
+		.hljs-addition,
+		.hljs-code,
+		.hljs-string,
+		.hljs-title.class_.inherited__ {
+			color: var(--color_success);
+		}
+
+		.hljs-built_in,
+		.hljs-doctag,
+		.hljs-keyword.hljs-atrule,
+		.hljs-quote,
+		.hljs-regexp {
+			color: var(--color_info);
+		}
+
+		.hljs-attribute,
+		.hljs-function .hljs-title,
+		.hljs-section,
+		.hljs-title.function_,
+		.ruby .hljs-property {
+			color: var(--color_primary);
+		}
+
+		.diff .hljs-meta,
+		.hljs-keyword,
+		.hljs-template-tag,
+		.hljs-type {
+			color: var(--color_danger);
+		}
+
+		.hljs-emphasis {
+			color: var(--color_danger);
+			font-style: italic;
+		}
+
+		.hljs-meta,
+		.hljs-meta .hljs-keyword,
+		.hljs-meta .hljs-string {
+			color: var(--color_warning);
+		}
+
+		.hljs-meta .hljs-keyword,
+		.hljs-meta-keyword {
+			font-weight: 700;
+		}
+	}
+}

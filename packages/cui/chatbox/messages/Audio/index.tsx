@@ -7,7 +7,7 @@ interface IAudioProps {
 
 const Audio = ({ message }: IAudioProps) => {
 	return (
-		<div>
+		<div style={{ marginBottom: '24px' }}>
 			{/* TODO: Implement Audio component */}
 			<audio src={message.props?.url} controls />
 		</div>
@@ -15,4 +15,3 @@ const Audio = ({ message }: IAudioProps) => {
 }
 
 export default Audio
-

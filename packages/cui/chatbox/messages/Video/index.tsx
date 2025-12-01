@@ -7,7 +7,7 @@ interface IVideoProps {
 
 const Video = ({ message }: IVideoProps) => {
 	return (
-		<div>
+		<div style={{ marginBottom: '24px' }}>
 			{/* TODO: Implement Video component */}
 			<video src={message.props?.url} controls />
 		</div>
@@ -15,4 +15,3 @@ const Video = ({ message }: IVideoProps) => {
 }
 
 export default Video
-

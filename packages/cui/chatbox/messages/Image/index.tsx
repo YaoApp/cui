@@ -7,7 +7,7 @@ interface IImageProps {
 
 const Image = ({ message }: IImageProps) => {
 	return (
-		<div>
+		<div style={{ marginBottom: '24px' }}>
 			{/* TODO: Implement Image component */}
 			<img src={message.props?.url} alt={message.props?.alt || 'Image'} />
 		</div>

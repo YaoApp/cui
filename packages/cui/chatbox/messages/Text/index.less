@@ -1,0 +1,209 @@
+._local {
+	margin-bottom: 24px;
+	width: 100%;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--color_text);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+
+	// Paragraphs
+	p {
+		margin: 0 0 12px 0;
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	// Headings
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		color: var(--color_title);
+		font-weight: 600;
+		margin: 24px 0 12px 0;
+		line-height: 1.4;
+
+		&:first-child {
+			margin-top: 0;
+		}
+	}
+
+	h1 {
+		font-size: 1.6em;
+		border-bottom: 1px solid var(--color_border_soft);
+		padding-bottom: 0.3em;
+	}
+	h2 {
+		font-size: 1.4em;
+		border-bottom: 1px solid var(--color_border_soft);
+		padding-bottom: 0.3em;
+	}
+	h3 {
+		font-size: 1.2em;
+	}
+	h4 {
+		font-size: 1.1em;
+	}
+	h5 {
+		font-size: 1em;
+	}
+	h6 {
+		font-size: 0.9em;
+		color: var(--color_text_grey);
+	}
+
+	// Lists
+	ul,
+	ol {
+		padding-left: 24px;
+		margin: 0 0 12px 0;
+
+		li {
+			margin: 4px 0;
+
+			& > p {
+				margin: 0;
+			}
+		}
+	}
+
+	// Links
+	a {
+		color: var(--color_primary);
+		text-decoration: none;
+		border-bottom: 1px solid transparent;
+		transition: border-color 0.2s;
+
+		&:hover {
+			border-bottom-color: var(--color_primary);
+		}
+	}
+
+	// Blockquotes
+	blockquote {
+		margin: 16px 0;
+		padding: 8px 16px;
+		border-left: 4px solid var(--color_border);
+		background: var(--color_bg_hover);
+		color: var(--color_text_secondary);
+		border-radius: 0 var(--radius) var(--radius) 0;
+
+		p {
+			margin: 0;
+		}
+	}
+
+	// Tables Wrapper
+	.table_wrapper {
+		width: 100%;
+		margin: 16px 0;
+		overflow-x: auto;
+
+		&::-webkit-scrollbar {
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--color_scrollbar_thumb);
+			border-radius: 3px;
+		}
+	}
+
+	// Tables - Clean, integrated design
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		border-spacing: 0;
+		font-size: 13px;
+
+		thead {
+			th {
+				padding: 10px 16px;
+				text-align: left;
+				font-weight: 600;
+				color: var(--color_title);
+				background-color: var(--color_bg_nav);
+				border-bottom: 1px solid var(--color_border);
+				white-space: nowrap;
+				vertical-align: middle;
+			}
+		}
+
+		tbody {
+			tr {
+				border-bottom: 1px solid var(--color_border_light);
+				transition: background-color 0.15s ease;
+
+				&:last-child {
+					border-bottom: none;
+				}
+
+				&:hover {
+					background-color: var(--color_bg_hover);
+				}
+
+				td {
+					padding: 10px 16px;
+					text-align: left;
+					color: var(--color_text);
+					vertical-align: middle;
+					line-height: 1.5;
+				}
+			}
+		}
+
+		// First column slightly bolder for readability
+		th:first-child,
+		td:first-child {
+			font-weight: 500;
+		}
+	}
+
+	// Images
+	img {
+		max-width: 100%;
+		height: auto;
+		border-radius: var(--radius);
+		margin: 12px 0;
+		border: 1px solid var(--color_border_soft);
+	}
+
+	// Horizontal Rule
+	hr {
+		height: 1px;
+		background: var(--color_border);
+		border: none;
+		margin: 24px 0;
+	}
+
+	// Task lists - remark-gfm generates li with input[type="checkbox"]
+	li:has(input[type='checkbox']) {
+		list-style: none;
+
+		input[type='checkbox'] {
+			margin-right: 8px;
+			accent-color: var(--color_primary);
+			cursor: pointer;
+		}
+	}
+
+	// Inline Code
+	:not(pre) > code {
+		background-color: var(--color_bg_field);
+		padding: 2px 6px;
+		border-radius: 4px;
+		font-family: 'JetBrains Mono', monospace;
+		font-size: 0.9em;
+		color: var(--color_text);
+		border: 1px solid var(--color_border_field);
+	}
+
+	// Custom newlines - matched with JS style name
+	.newline {
+		margin-bottom: 12px !important;
+	}
+}
