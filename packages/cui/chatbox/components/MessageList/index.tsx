@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react'
 import clsx from 'clsx'
 import type { IMessageListProps } from '../../types'
+import Loading from './Loading'
+import UserMessage from './UserMessage'
+import AIMessage from './AIMessage'
 import styles from './index.less'
 
 const MessageList = (props: IMessageListProps) => {
-	const { messages, loading, className } = props
+	const { messages, loading, className, streaming } = props
 	const bottomRef = useRef<HTMLDivElement>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const lastMessageRef = useRef<HTMLDivElement | null>(null)
@@ -14,9 +17,6 @@ const MessageList = (props: IMessageListProps) => {
 	const handleScroll = () => {
 		if (!containerRef.current) return
 		const { scrollTop, scrollHeight, clientHeight } = containerRef.current
-		// Since we have a large spacer, "at bottom" means we are close to the spacer's top?
-		// No, scrollHeight includes the spacer.
-		// If we just check relative movement, it's safer.
 
 		if (scrollTop < lastScrollTop.current) {
 			shouldAutoScroll.current = false
@@ -46,10 +46,16 @@ const MessageList = (props: IMessageListProps) => {
 		} else if (shouldAutoScroll.current && bottomRef.current) {
 			// AI is typing: Keep content visible
 			// Use 'nearest' to only scroll if the new content pushes the bottom out of view
-			// This prevents forcing the content to the bottom if there is still space
 			bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 		}
 	}, [messages.length, messages[messages.length - 1]?.props?.content])
+
+	// Logic to show loading:
+	// 1. When receiving user message, before first reply arrives -> Show Loading component
+	//    This happens when the last message is from the user and we are streaming (waiting for response).
+	const lastMsg = messages[messages.length - 1]
+	const lastIsUser = lastMsg?.type === 'user_input'
+	const showPendingLoading = lastIsUser && streaming
 
 	return (
 		<div ref={containerRef} className={clsx(styles.container, className)} onScroll={handleScroll}>
@@ -58,64 +64,34 @@ const MessageList = (props: IMessageListProps) => {
 			{!loading &&
 				messages.map((msg, index) => {
 					// Determine if message is from user based on type and role
-					// user_input type is always from user
 					const isUserInput = msg.type === 'user_input'
 					const role = isUserInput ? 'user' : msg.props?.role || 'assistant'
 					const isLast = index === messages.length - 1
 
-					// For debugging: Show type and props for non-text assistant messages
-					const isTextType = msg.type === 'text' || msg.type === 'user_input'
-					const showDebugInfo = role === 'assistant' && !isTextType
+					// Determine if this specific AI message is loading (streaming/generating)
+					// Rule 3: Assistant message shows loading below it until completion (streaming ends)
+					// We use the streaming prop which reflects the global chat state.
+					const isGenerating = streaming && isLast && role !== 'user'
 
 					return (
 						<div
 							key={msg.ui_id || msg.message_id || msg.chunk_id || index}
 							ref={isLast ? lastMessageRef : null}
-							className={clsx(
-								styles.messageRow,
-								role === 'user' ? styles.userRow : styles.aiRow
-							)}
+							className={styles.messageRow} // Re-apply messageRow class for scroll-margin
+							style={{ justifyContent: role === 'user' ? 'flex-end' : 'flex-start' }}
 						>
-							<div className={styles.messageBubble}>
-								{role !== 'user' && (
-									<div className={styles.senderName}>{msg.props?.name || 'AI'}</div>
-								)}
-								<div className={styles.messageContent}>
-									{showDebugInfo ? (
-										// Debug view for non-text assistant messages
-										<div style={{ fontFamily: 'monospace', fontSize: '12px' }}>
-											<div style={{ color: '#666', marginBottom: '4px' }}>
-												<strong>Type:</strong> {msg.type}
-											</div>
-											<div style={{ color: '#666' }}>
-												<strong>Props:</strong>
-											</div>
-											<pre
-												style={{
-													background: '#f5f5f5',
-													padding: '8px',
-													borderRadius: '4px',
-													overflow: 'auto',
-													maxWidth: '100%'
-												}}
-											>
-												{JSON.stringify(msg.props, null, 2)}
-											</pre>
-										</div>
-									) : (
-										// Normal text view
-										<>
-											{msg.props?.content || ''}
-											{msg.delta && (
-												<span className={styles.cursor}>▋</span>
-											)}
-										</>
-									)}
-								</div>
-							</div>
+							{role === 'user' ? (
+								<UserMessage message={msg} isLast={isLast} />
+							) : (
+								<AIMessage message={msg} loading={isGenerating} />
+							)}
 						</div>
 					)
 				})}
+
+			{/* Rule 1: Show separate Loading component if waiting for first reply */}
+			{showPendingLoading && <Loading />}
+
 			<div ref={bottomRef} />
 			<div style={{ height: '85vh', flexShrink: 0 }} />
 		</div>

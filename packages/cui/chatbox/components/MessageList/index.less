@@ -1,66 +1,66 @@
 .container {
-    flex: 1; // Keep flex: 1 to fill available space
-    // height: 100%; // Removed height: 100% as flex: 1 handles it
-    overflow-y: auto;
-    // Increased horizontal padding for better reading experience
-    padding: 24px 32px 60px; 
-    background: var(--color_chatbox_bg_content);
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    align-items: center; // Center the message rows
-    
-    // Fade out effect at the bottom
+	flex: 1; // Keep flex: 1 to fill available space
+	// height: 100%; // Removed height: 100% as flex: 1 handles it
+	overflow-y: auto;
+	// Increased horizontal padding for better reading experience
+	padding: 24px 32px 60px;
+	background: var(--color_chatbox_bg_content);
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	align-items: center; // Center the message rows
+
+	// Fade out effect at the bottom
 	mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
 	-webkit-mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
-    
-    // Custom scrollbar
-    &::-webkit-scrollbar {
-        width: 6px;
-    }
-    &::-webkit-scrollbar-thumb {
+
+	// Custom scrollbar
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-thumb {
 		background-color: var(--color_scrollbar_thumb);
-        border-radius: 3px;
-    }
+		border-radius: 3px;
+	}
 }
 
 .loading {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color_text_grey);
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color_text_grey);
 }
 
 .messageRow {
-    display: flex;
-    width: 100%;
-    // Optimized reading width (was 1200px)
-    max-width: 1000px; 
-    
-    // Add scroll margin to prevent tight sticking to top when scrolling into view
-    scroll-margin-top: 24px;
+	display: flex;
+	width: 100%;
+	// Optimized reading width (was 1200px)
+	max-width: 1000px;
 
-    &.userRow {
-        justify-content: flex-end;
-        .messageBubble {
+	// Add scroll margin to prevent tight sticking to top when scrolling into view
+	scroll-margin-top: 20px;
+
+	&.userRow {
+		justify-content: flex-end;
+		.messageBubble {
 			// Grey background as requested
 			background-color: var(--color_chatbox_bg_field);
 			color: var(--color_chatbox_text_primary); // Use specific primary text color
 			border: 1px solid var(--color_border_light);
-            border-bottom-right-radius: 4px;
+			border-bottom-right-radius: 4px;
 			.senderName {
 				color: var(--color_text_grey);
 			}
-        }
-    }
-    
-    &.aiRow {
-        justify-content: flex-start;
+		}
+	}
+
+	&.aiRow {
+		justify-content: flex-start;
 		width: 100%;
 
-        .messageBubble {
+		.messageBubble {
 			background-color: transparent;
 			color: var(--color_chatbox_text_primary); // Use specific primary text color
 			border: none;
@@ -69,39 +69,39 @@
 			max-width: 100%;
 			width: 100%;
 
-            border-bottom-left-radius: 4px;
+			border-bottom-left-radius: 4px;
 			.senderName {
 				color: var(--color_text_grey);
 			}
-        }
-    }
+		}
+	}
 }
 
 .messageBubble {
-    max-width: 80%;
-    padding: 12px 16px;
-    border-radius: 12px;
-    position: relative;
+	max-width: 80%;
+	padding: 12px 16px;
+	border-radius: 12px;
+	position: relative;
 	line-height: 1.6;
 	font-size: 14px; // Reverted to 14px
 	// box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .senderName {
-    font-size: 12px;
-    margin-bottom: 4px;
-    font-weight: 500;
+	font-size: 12px;
+	margin-bottom: 4px;
+	font-weight: 500;
 }
 
 .messageContent {
-    white-space: pre-wrap;
-    word-break: break-word;
+	white-space: pre-wrap;
+	word-break: break-word;
 }
 
 .cursor {
-    display: inline-block;
-    margin-left: 2px;
-    animation: blink 1s step-end infinite;
+	display: inline-block;
+	margin-left: 2px;
+	animation: blink 1s step-end infinite;
 }
 
 @keyframes blink {

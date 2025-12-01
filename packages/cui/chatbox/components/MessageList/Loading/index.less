@@ -1,0 +1,41 @@
+.loadingRow {
+    display: flex;
+    width: 100%;
+    max-width: 1000px;
+    justify-content: flex-start;
+    scroll-margin-top: 24px;
+    
+    .loadingBubble {
+        padding: 12px 0;
+        color: var(--color_text_grey);
+        display: flex;
+        align-items: center;
+    }
+}
+
+.dot {
+    width: 4px;
+    height: 4px;
+    background-color: currentColor;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 2px;
+    animation: blink 1.4s infinite both;
+}
+
+.dot:nth-child(1) {
+    animation-delay: 0s;
+}
+.dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+.dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0% { opacity: 0.2; }
+    20% { opacity: 1; }
+    100% { opacity: 0.2; }
+}
+
