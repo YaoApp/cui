@@ -2,6 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import type { Message } from '../../../../openapi'
 import UserAvatar from '../../../../widgets/UserAvatar'
+import { Loading, Thinking, Text, ToolCall, Action, Image, Audio, Video, Custom } from '../../../messages'
 import styles from './index.less'
 
 interface IAIMessageProps {
@@ -10,9 +11,6 @@ interface IAIMessageProps {
 }
 
 const AIMessage = ({ message, loading }: IAIMessageProps) => {
-	const isTextType = message.type === 'text' || !message.type
-	const showDebugInfo = !isTextType
-
 	// Get assistant info from message
 	const assistant = (message as any).assistant
 	const avatarData = assistant
@@ -22,6 +20,31 @@ const AIMessage = ({ message, loading }: IAIMessageProps) => {
 				name: assistant.name || 'AI'
 		  }
 		: null
+
+	// Render message content based on type
+	const renderContent = () => {
+		switch (message.type) {
+			case 'loading':
+				return <Loading message={message as any} />
+			case 'thinking':
+				return <Thinking message={message as any} loading={loading} />
+			case 'text':
+				return <Text message={message as any} />
+			case 'tool_call':
+				return <ToolCall message={message as any} />
+			case 'action':
+				return <Action message={message as any} />
+			case 'image':
+				return <Image message={message as any} />
+			case 'audio':
+				return <Audio message={message as any} />
+			case 'video':
+				return <Video message={message as any} />
+			default:
+				// For custom types or unknown types
+				return <Custom message={message as any} />
+		}
+	}
 
 	return (
 		<div className={clsx(styles.aiRow)}>
@@ -35,31 +58,7 @@ const AIMessage = ({ message, loading }: IAIMessageProps) => {
 				)}
 
 				<div className={styles.messageContent}>
-					{showDebugInfo ? (
-						// Debug view for non-text assistant messages
-						<div style={{ fontFamily: 'monospace', fontSize: '12px' }}>
-							<div style={{ color: '#666', marginBottom: '4px' }}>
-								<strong>Type:</strong> {message.type}
-							</div>
-							<div style={{ color: '#666' }}>
-								<strong>Props:</strong>
-							</div>
-							<pre
-								style={{
-									background: '#f5f5f5',
-									padding: '8px',
-									borderRadius: '4px',
-									overflow: 'auto',
-									maxWidth: '100%'
-								}}
-							>
-								{JSON.stringify(message.props, null, 2)}
-							</pre>
-						</div>
-					) : (
-						// Normal text view
-						<>{message.props?.content || ''}</>
-					)}
+					{renderContent()}
 
 					{/* Loading indicator below message content while generating */}
 					{loading && (
