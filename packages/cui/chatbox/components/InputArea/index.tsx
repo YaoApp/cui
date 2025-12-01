@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { message } from 'antd'
+import { message, Tooltip as AntTooltip } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
 import { Database, Sparkle, UploadSimple, PaperPlaneTilt, Stop } from 'phosphor-react'
@@ -442,7 +442,8 @@ const InputArea = (props: IInputAreaProps) => {
 		setIsOptimizing(true)
 
 		try {
-			const chatClient = new (await import('../../../openapi')).Chat(window.$app.openapi)
+			const { Chat, IsEventMessage, IsStreamEndEvent } = await import('../../../openapi')
+			const chatClient = new Chat(window.$app.openapi)
 			let optimizedPrompt = ''
 
 			// Language hint
@@ -469,6 +470,14 @@ const InputArea = (props: IInputAreaProps) => {
 					}
 				},
 				(chunk) => {
+					// Check for stream end event
+					if (IsEventMessage(chunk) && IsStreamEndEvent(chunk)) {
+						setIsOptimizing(false)
+						// Focus on editor after optimization completes
+						setTimeout(() => focusEditor(), 0)
+						return
+					}
+
 					// Accumulate and update in real-time
 					if (chunk.type === 'text' && chunk.props?.content) {
 						if (chunk.delta) {
@@ -494,12 +503,6 @@ const InputArea = (props: IInputAreaProps) => {
 								sel.addRange(range)
 							}
 						}
-					}
-
-					if (chunk.done) {
-						setIsOptimizing(false)
-						// Focus on editor after optimization completes
-						setTimeout(() => focusEditor(), 0)
 					}
 				},
 				(error) => {
@@ -630,7 +633,7 @@ const InputArea = (props: IInputAreaProps) => {
 
 		checkWidth()
 		window.addEventListener('resize', checkWidth)
-		
+
 		// Use ResizeObserver for more accurate detection
 		const resizeObserver = new ResizeObserver(checkWidth)
 		if (contextRowRef.current) {
@@ -657,7 +660,7 @@ const InputArea = (props: IInputAreaProps) => {
 
 		checkToolbarWidth()
 		window.addEventListener('resize', checkToolbarWidth)
-		
+
 		const resizeObserver = new ResizeObserver(checkToolbarWidth)
 		if (toolbarRef.current) {
 			resizeObserver.observe(toolbarRef.current)
