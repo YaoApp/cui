@@ -101,6 +101,13 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	// Stream ID Map: chatId -> current stream ID (to namespace message_id across different streams)
 	const streamIdRef = useRef<Record<string, string>>({})
 
+	// Assistant Info Map: chatId -> assistant info from stream_start
+	const assistantInfoRef = useRef<Record<string, any>>({})
+
+	// Track if we should add assistant info to the next message for each chat
+	// This is set to true when stream_start has a different assistant than the last message
+	const shouldAddAssistantRef = useRef<Record<string, boolean>>({})
+
 	// Derived states for active tab
 	const messages = activeTabId ? chatStates[activeTabId] || [] : []
 	const loading = activeTabId ? loadingStates[activeTabId] || false : false
@@ -356,6 +363,13 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								if (ctxId) {
 									contextIdsRef.current[targetTabId] = ctxId
 								}
+								// Capture assistant info from stream_start
+								const assistantInfo = chunk.props?.data?.assistant
+								if (assistantInfo) {
+									assistantInfoRef.current[targetTabId] = assistantInfo
+									// Set flag to true, will check when creating first message
+									shouldAddAssistantRef.current[targetTabId] = true
+								}
 								// Generate a unique stream ID to namespace message_id across streams
 								const streamId = nanoid()
 								streamIdRef.current[targetTabId] = streamId
@@ -477,12 +491,15 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 						// Find existing message to preserve its UI ID
 						updateMessages(targetTabId, (prev) => {
 							const index = prev.findIndex((m) => m.message_id === messageId)
+							// Get assistant info for this chat
+							const assistantInfo = assistantInfoRef.current[targetTabId]
+							const shouldAdd = shouldAddAssistantRef.current[targetTabId]
 
 							if (index !== -1) {
-								// Update existing message, preserve its UI ID
+								// Update existing message, preserve its UI ID and existing assistant info
 								const newArr = [...prev]
 								newArr[index] = {
-									...newArr[index], // Preserve existing fields including UI ID
+									...newArr[index], // Preserve existing fields including UI ID and assistant
 									chunk_id: chunk.chunk_id,
 									message_id: messageId,
 									block_id: chunk.block_id,
@@ -494,6 +511,26 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								return newArr
 							} else {
 								// New message: create with unique UI ID
+								// Check if we should add assistant info
+								let finalShouldAdd = shouldAdd
+								if (finalShouldAdd && assistantInfo && prev.length > 0) {
+									// Only check the LAST message (immediate previous message)
+									const lastMsg = prev[prev.length - 1]
+									// Only hide avatar if the immediate previous message is an AI message from the same assistant
+									if (lastMsg.type !== 'user_input') {
+										const prevAssistant = (lastMsg as any).assistant
+										if (
+											prevAssistant &&
+											prevAssistant.assistant_id ===
+												assistantInfo.assistant_id
+										) {
+											// Same assistant AND consecutive, don't add info
+											finalShouldAdd = false
+										}
+									}
+									// If last message is user_input, we always show avatar (finalShouldAdd remains true)
+								}
+
 								const newMessage: Message = {
 									ui_id: nanoid(), // Unique UI ID for React key
 									chunk_id: chunk.chunk_id,
@@ -502,7 +539,14 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 									thread_id: chunk.thread_id,
 									type: mergedState.type,
 									props: mergedState.props,
-									delta: isCompleted ? false : chunk.delta
+									delta: isCompleted ? false : chunk.delta,
+									// Add assistant info only if needed
+									...(finalShouldAdd &&
+										assistantInfo && { assistant: assistantInfo })
+								}
+								// Reset the flag after checking for the first message
+								if (shouldAdd) {
+									shouldAddAssistantRef.current[targetTabId] = false
 								}
 								return [...prev, newMessage]
 							}
@@ -618,6 +662,13 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								const ctxId = chunk.props?.data?.context_id
 								if (ctxId) {
 									contextIdsRef.current[targetTabId] = ctxId
+								}
+								// Capture assistant info from stream_start
+								const assistantInfo = chunk.props?.data?.assistant
+								if (assistantInfo) {
+									assistantInfoRef.current[targetTabId] = assistantInfo
+									// Set flag to true, will check when creating first message
+									shouldAddAssistantRef.current[targetTabId] = true
 								}
 								// Generate a unique stream ID to namespace message_id across streams
 								const streamId = nanoid()
@@ -760,12 +811,15 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 						// Find existing message to preserve its UI ID
 						updateMessages(targetTabId, (prev) => {
 							const index = prev.findIndex((m) => m.message_id === messageId)
+							// Get assistant info for this chat
+							const assistantInfo = assistantInfoRef.current[targetTabId]
+							const shouldAdd = shouldAddAssistantRef.current[targetTabId]
 
 							if (index !== -1) {
-								// Update existing message, preserve its UI ID
+								// Update existing message, preserve its UI ID and existing assistant info
 								const newArr = [...prev]
 								newArr[index] = {
-									...newArr[index], // Preserve existing fields including UI ID
+									...newArr[index], // Preserve existing fields including UI ID and assistant
 									chunk_id: chunk.chunk_id,
 									message_id: messageId,
 									block_id: chunk.block_id,
@@ -777,6 +831,26 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 								return newArr
 							} else {
 								// New message: create with unique UI ID
+								// Check if we should add assistant info
+								let finalShouldAdd = shouldAdd
+								if (finalShouldAdd && assistantInfo && prev.length > 0) {
+									// Only check the LAST message (immediate previous message)
+									const lastMsg = prev[prev.length - 1]
+									// Only hide avatar if the immediate previous message is an AI message from the same assistant
+									if (lastMsg.type !== 'user_input') {
+										const prevAssistant = (lastMsg as any).assistant
+										if (
+											prevAssistant &&
+											prevAssistant.assistant_id ===
+												assistantInfo.assistant_id
+										) {
+											// Same assistant AND consecutive, don't add info
+											finalShouldAdd = false
+										}
+									}
+									// If last message is user_input, we always show avatar (finalShouldAdd remains true)
+								}
+
 								const newMessage: Message = {
 									ui_id: nanoid(), // Unique UI ID for React key
 									chunk_id: chunk.chunk_id,
@@ -785,7 +859,14 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 									thread_id: chunk.thread_id,
 									type: mergedState.type,
 									props: mergedState.props,
-									delta: isCompleted ? false : chunk.delta
+									delta: isCompleted ? false : chunk.delta,
+									// Add assistant info only if needed
+									...(finalShouldAdd &&
+										assistantInfo && { assistant: assistantInfo })
+								}
+								// Reset the flag after checking for the first message
+								if (shouldAdd) {
+									shouldAddAssistantRef.current[targetTabId] = false
 								}
 								return [...prev, newMessage]
 							}
