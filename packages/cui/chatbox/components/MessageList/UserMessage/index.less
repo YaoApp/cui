@@ -6,28 +6,163 @@
 	scroll-margin-top: 24px;
 
 	.messageBubble {
-		max-width: 80%;
-		padding: 12px 16px;
-		border-radius: 12px;
-		position: relative;
-		line-height: 1.6;
-		font-size: 14px;
+	max-width: 80%;
+	padding: 12px 16px;
+	border-radius: 12px;
+	position: relative;
+	line-height: 1.6;
+	font-size: 14px;
 
-		background-color: var(--color_chatbox_bg_field);
-		color: var(--color_chatbox_text_primary);
-		border: 1px solid var(--color_border_light);
-		border-bottom-right-radius: 4px;
+	background-color: var(--color_chatbox_bg_field);
+	color: var(--color_chatbox_text_primary);
+	border: 1px solid var(--color_border_light);
+	border-bottom-right-radius: 4px;
 
-		.senderName {
-			font-size: 12px;
-			margin-bottom: 4px;
-			font-weight: 500;
-			color: var(--color_text_grey);
-		}
+	// Use flex column to stack content and attachments nicely
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+
+	.senderName {
+		font-size: 12px;
+		margin-bottom: 4px;
+		font-weight: 500;
+		color: var(--color_text_grey);
 	}
+}
 }
 
 .messageContent {
 	white-space: pre-wrap;
 	word-break: break-word;
 }
+
+.attachmentItem {
+	margin-top: 4px;
+	width: 100%;
+
+	&:first-child {
+		margin-top: 0;
+	}
+}
+
+.fileAttachment {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 12px;
+	// Use a contrasting background for the attachment card within the bubble
+	background-color: var(--color_chatbox_bg_content);
+	border: 1px solid var(--color_chatbox_border_card);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	width: 100%;
+	max-width: 300px;
+	box-sizing: border-box;
+
+	&:hover {
+		border-color: var(--color_primary);
+		box-shadow: var(--shadow_float);
+		transform: translateY(-1px);
+
+		.downloadIcon {
+			color: var(--color_primary);
+			opacity: 1;
+		}
+
+		.fileIconWrapper {
+			color: var(--color_primary);
+			background-color: var(--color_chatbox_bg_selected);
+		}
+	}
+
+	.fileIconWrapper {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 8px;
+		background-color: var(--color_chatbox_bg_field);
+		color: var(--color_chatbox_text_secondary);
+		flex-shrink: 0;
+		transition: all 0.2s ease;
+	}
+
+	.fileInfo {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-width: 0; // Enable text overflow truncation
+		gap: 2px;
+
+		.fileName {
+			font-size: 13px;
+			font-weight: 500;
+			color: var(--color_chatbox_text_primary);
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.fileMeta {
+			font-size: 11px;
+			color: var(--color_chatbox_text_secondary);
+		}
+	}
+
+	.downloadIcon {
+		color: var(--color_chatbox_icon_muted);
+		opacity: 0.5;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+	}
+}
+
+.attachmentImage {
+	max-width: 100%;
+	max-height: 300px;
+	border-radius: 8px;
+	display: block;
+	object-fit: contain;
+	// Add a subtle border for images
+	border: 1px solid var(--color_chatbox_border_field);
+	background-color: var(--color_chatbox_bg_content);
+}
+
+.attachmentPlaceholder,
+.attachmentError {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 120px;
+	width: 100%;
+	padding: 16px;
+	background-color: var(--color_chatbox_bg_content);
+	border: 1px dashed var(--color_chatbox_border_field);
+	border-radius: 8px;
+	font-size: 12px;
+	color: var(--color_chatbox_text_tertiary);
+
+	.iconPlaceholder {
+		color: var(--color_chatbox_icon_muted);
+		opacity: 0.5;
+	}
+
+	.iconError {
+		color: var(--color_danger);
+		opacity: 0.8;
+	}
+}
+
+.attachmentError {
+	border-style: solid;
+	border-color: var(--color_danger_bg);
+	background-color: var(--color_danger_bg);
+	color: var(--color_danger);
+}
+

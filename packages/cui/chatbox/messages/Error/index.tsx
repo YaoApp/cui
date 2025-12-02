@@ -6,17 +6,39 @@ interface IErrorProps {
 	message: {
 		type: 'error'
 		props: {
-			message: string
+			message?: string | any
 			code?: string
-			details?: string
+			details?: string | any
 		}
 	}
+}
+
+// Helper function to safely convert any value to string
+const safeStringify = (value: any): string => {
+	if (value === null || value === undefined) {
+		return ''
+	}
+	if (typeof value === 'string') {
+		return value
+	}
+	if (typeof value === 'object') {
+		try {
+			return JSON.stringify(value, null, 2)
+		} catch (e) {
+			return String(value)
+		}
+	}
+	return String(value)
 }
 
 const Error = ({ message }: IErrorProps) => {
 	const { message: errorMsg, code, details } = message.props || {}
 
-	if (!errorMsg && !code && !details) {
+	const errorMsgStr = safeStringify(errorMsg)
+	const codeStr = typeof code === 'string' ? code : ''
+	const detailsStr = safeStringify(details)
+
+	if (!errorMsgStr && !codeStr && !detailsStr) {
 		return null
 	}
 
@@ -26,11 +48,11 @@ const Error = ({ message }: IErrorProps) => {
 				<div className={styles.icon}>
 					<Icon name='icon-alert-circle' size={16} />
 				</div>
-				{code && <span className={styles.code}>[{code}]</span>}
+				{codeStr && <span className={styles.code}>[{codeStr}]</span>}
 				<span>Error</span>
 			</div>
-			<div className={styles.message}>{errorMsg || 'An unknown error occurred'}</div>
-			{details && <div className={styles.details}>{details}</div>}
+			<div className={styles.message}>{errorMsgStr || 'An unknown error occurred'}</div>
+			{detailsStr && <div className={styles.details}>{detailsStr}</div>}
 		</div>
 	)
 }
