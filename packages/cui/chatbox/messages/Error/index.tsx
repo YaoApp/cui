@@ -21,10 +21,10 @@ const Error = ({ message }: IErrorProps) => {
 	}
 
 	return (
-		<div className={styles.container}>
+		<div className={styles.container} style={{ marginBottom: '24px' }}>
 			<div className={styles.header}>
 				<div className={styles.icon}>
-					<Icon name="icon-alert-circle" size={16} />
+					<Icon name='icon-alert-circle' size={16} />
 				</div>
 				{code && <span className={styles.code}>[{code}]</span>}
 				<span>Error</span>
@@ -36,4 +36,3 @@ const Error = ({ message }: IErrorProps) => {
 }
 
 export default Error
-
