@@ -678,7 +678,7 @@ const InputArea = (props: IInputAreaProps) => {
 				{currentPage && (
 					<Tooltip content={currentPage}>
 						<div className={clsx(styles.tag, styles.pageTag)} onClick={handlePageClick}>
-							<Icon name='material-link' size={12} />
+							<Icon name='material-my_location' size={12} />
 							{showPageText && <span className={styles.pageTagText}>{currentPage}</span>}
 						</div>
 					</Tooltip>
