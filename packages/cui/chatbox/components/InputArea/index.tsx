@@ -7,7 +7,7 @@ import Icon from '../../../widgets/Icon'
 import { FileAPI } from '../../../openapi'
 import type { IInputAreaProps } from '../../types'
 import type { UserMessage } from '../../../openapi'
-import { useLLMProviders } from '@/hooks/useLLMProviders'
+import { useAssistantProviders } from '@/hooks/useAssistantProviders'
 import { useGlobal } from '@/context/app'
 import styles from './index.less'
 import AgentTag from './AgentTag'
@@ -16,26 +16,6 @@ import MessageQueue from '../MessageQueue'
 import Selector from './Selector'
 import ToolButton from './ToolButton'
 import Tooltip from './Tooltip'
-
-// Mock Data
-const MOCK_AGENT = {
-	name: 'Neo',
-	id: 'neo',
-	avatar: 'N',
-	// Simulate capability to select model (future feature)
-	allowModelSelection: true,
-	defaultModel: 'gpt-4o'
-}
-
-const MOCK_MODELS = [
-	{ label: 'GPT-4o', value: 'gpt-4o' },
-	{ label: 'GPT-4 Turbo', value: 'gpt-4-turbo' },
-	{ label: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo' },
-	{ label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet' },
-	{ label: 'Claude 3 Opus', value: 'claude-3-opus' },
-	{ label: 'Gemini 1.5 Pro', value: 'gemini-1-5-pro' },
-	{ label: 'Llama 3 70B', value: 'llama-3-70b' }
-]
 
 const MOCK_MENTIONS = [
 	{ id: 'neo', name: 'Neo', avatar: 'N' },
@@ -75,15 +55,27 @@ const InputArea = (props: IInputAreaProps) => {
 	const [isDragOver, setIsDragOver] = useState(false)
 	const [showMentions, setShowMentions] = useState(false)
 	const [isEmpty, setIsEmpty] = useState(true)
-	const [currentModel, setCurrentModel] = useState(MOCK_AGENT.defaultModel)
+	const [currentModel, setCurrentModel] = useState<string>('')
 	const [chatMode, setChatMode] = useState<'chat' | 'task'>('task')
 	const [isOptimizing, setIsOptimizing] = useState(false) // 优化提示词状态
 
-	// Load LLM providers/models from API
-	const { providers: llmProviders, loading: llmLoading } = useLLMProviders()
-
 	// Get global config
 	const global = useGlobal()
+
+	// Load LLM providers based on assistant configuration
+	const {
+		providers: llmProviders,
+		loading: llmLoading,
+		showSelector,
+		defaultProvider
+	} = useAssistantProviders({
+		assistant: propAssistant
+			? {
+					connector: propAssistant.connector,
+					connector_options: propAssistant.connector_options
+			  }
+			: undefined
+	})
 
 	// Localization & Routing
 	const locale = getLocale()
@@ -98,22 +90,29 @@ const InputArea = (props: IInputAreaProps) => {
 
 	// State
 	const [attachments, setAttachments] = useState<Attachment[]>([])
-	const [agent, setAgent] = useState(propAssistant || MOCK_AGENT)
+	const [agent, setAgent] = useState(propAssistant)
 	const [resourcePickerVisible, setResourcePickerVisible] = useState(false)
 	const contextRowRef = useRef<HTMLDivElement>(null)
 	const [showPageText, setShowPageText] = useState(true)
 	const toolbarRef = useRef<HTMLDivElement>(null)
 	const [showModeText, setShowModeText] = useState(true)
-	const [showModelSelector, setShowModelSelector] = useState(true)
+	const [showModelSelectorResponsive, setShowModelSelectorResponsive] = useState(true) // Responsive layout control
 
 	useEffect(() => {
 		if (propAssistant) {
 			setAgent(propAssistant)
-			if (propAssistant.defaultModel) {
-				setCurrentModel(propAssistant.defaultModel)
+
+			// Set default model from connector
+			if (defaultProvider) {
+				setCurrentModel(defaultProvider)
+			}
+
+			// Set default mode from assistant configuration
+			if (propAssistant.default_mode) {
+				setChatMode(propAssistant.default_mode as 'chat' | 'task')
 			}
 		}
-	}, [propAssistant])
+	}, [propAssistant, defaultProvider])
 
 	// Reset animating state after transition
 	useEffect(() => {
@@ -653,8 +652,8 @@ const InputArea = (props: IInputAreaProps) => {
 				const width = toolbarRef.current.offsetWidth
 				// Hide mode text when toolbar is less than 300px
 				setShowModeText(width >= 300)
-				// Hide model selector when toolbar is less than 450px
-				setShowModelSelector(width >= 450)
+				// Hide model selector when toolbar is less than 450px (responsive layout)
+				setShowModelSelectorResponsive(width >= 450)
 			}
 		}
 
@@ -771,40 +770,49 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	const renderToolbar = () => {
-		const modeOptions = [
+		// Build mode options from assistant configuration
+		const allModeOptions = [
 			{ label: is_cn ? '聊天' : 'Chat', value: 'chat', icon: 'material-chat_bubble_outline' },
 			{ label: is_cn ? '任务' : 'Task', value: 'task', icon: 'material-rocket_launch' }
 		]
 
-		// Use API data if available, fallback to mock data
-		const modelOptions =
-			llmProviders.length > 0
-				? llmProviders.map((provider) => ({
-						label: provider.label,
-						value: provider.value
-				  }))
-				: MOCK_MODELS.map((m) => ({
-						label: m.label,
-						value: m.value
-				  }))
+		// Filter mode options based on assistant's modes configuration
+		const modeOptions =
+			propAssistant?.modes && propAssistant.modes.length > 0
+				? allModeOptions.filter((opt) => propAssistant.modes?.includes(opt.value))
+				: allModeOptions
+
+		// Show mode selector only if there are multiple modes to choose from
+		const showModeSelector = modeOptions.length > 1
+
+		// Build model options from API data
+		const modelOptions = llmProviders.map((provider) => ({
+			label: provider.label,
+			value: provider.value
+		}))
+
+		// Only show search if there are 5 or more options
+		const showModelSearch = modelOptions.length >= 5
 
 		return (
 			<div ref={toolbarRef} className={styles.toolbar}>
 				<div className={styles.leftTools}>
-					<Selector
-						value={chatMode}
-						options={modeOptions}
-						onChange={(value) => setChatMode(value as 'chat' | 'task')}
-						variant='tag'
-						tooltip={is_cn ? '切换智能体模式' : 'Switch Agent Mode'}
-						disabled={loading || isOptimizing}
-						searchable={false}
-						dropdownWidth='auto'
-						dropdownMinWidth={120}
-						dropdownMaxWidth={200}
-						hideLabel={!showModeText}
-					/>
-					{showModelSelector && (
+					{showModeSelector && (
+						<Selector
+							value={chatMode}
+							options={modeOptions}
+							onChange={(value) => setChatMode(value as 'chat' | 'task')}
+							variant='tag'
+							tooltip={is_cn ? '切换智能体模式' : 'Switch Agent Mode'}
+							disabled={loading || isOptimizing}
+							searchable={false}
+							dropdownWidth='auto'
+							dropdownMinWidth={120}
+							dropdownMaxWidth={200}
+							hideLabel={!showModeText}
+						/>
+					)}
+					{showSelector && showModelSelectorResponsive && (
 						<Selector
 							value={currentModel}
 							options={modelOptions}
@@ -812,7 +820,7 @@ const InputArea = (props: IInputAreaProps) => {
 							variant='normal'
 							tooltip={is_cn ? '切换模型' : 'Switch Model'}
 							disabled={loading || isOptimizing}
-							searchable={true}
+							searchable={showModelSearch}
 							dropdownWidth='auto'
 							dropdownMinWidth={200}
 							dropdownMaxWidth={320}

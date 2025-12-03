@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Message, UserMessage, ChatCompletionRequest } from '../openapi'
+import type { Message, UserMessage, ChatCompletionRequest, ConnectorOptions } from '../openapi'
 import type { QueuedMessage } from './hooks/useChat'
 
 /**
@@ -74,6 +74,11 @@ export interface IInputAreaProps {
 		id: string
 		avatar?: string
 		description?: string
+		connector?: string
+		connector_options?: ConnectorOptions
+		modes?: string[]
+		default_mode?: string
+		// Deprecated fields (for backward compatibility)
 		allowModelSelection?: boolean
 		defaultModel?: string
 	}
