@@ -5,6 +5,7 @@ import type {
 	AgentFilter,
 	AgentListResponse,
 	AgentDetailResponse,
+	AgentInfoResponse,
 	AssistantCreateRequest,
 	AssistantUpdateRequest,
 	AgentCreateResponse,
@@ -69,6 +70,20 @@ export class AgentAssistants {
 		if (locale) params.append('locale', locale)
 
 		return this.api.Get<AgentDetailResponse>(BuildURL(`/agent/assistants/${id}`, params))
+	}
+
+	/**
+	 * Get essential agent information for InputArea component
+	 * Returns only the minimal fields needed: id, name, description, connector, connector_options, modes, default_mode
+	 * @param id - Agent ID
+	 * @param locale - Optional locale for translations (default: "en-us")
+	 * @returns Agent info response with essential fields
+	 */
+	async GetInfo(id: string, locale?: string): Promise<ApiResponse<AgentInfoResponse>> {
+		const params = new URLSearchParams()
+		if (locale) params.append('locale', locale)
+
+		return this.api.Get<AgentInfoResponse>(BuildURL(`/agent/assistants/${id}/info`, params))
 	}
 
 	/**

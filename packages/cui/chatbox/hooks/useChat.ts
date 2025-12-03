@@ -133,7 +133,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		getRecentChats().then(setSessions)
 	}, [])
 
-	// Fetch Assistant Info
+	// Fetch Assistant Info using GetInfo API (optimized for InputArea)
 	useEffect(() => {
 		// If we have a currentAssistantId, fetch it.
 		// If not (e.g. new chat without inherited ID), we might fallback to default or wait.
@@ -146,33 +146,25 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 
 			const agentClient = new Agent(window.$app.openapi)
 			try {
-				// Use 'zh-cn' or 'en-us' based on locale if needed, but api usually handles it or returns raw
+				// Use GetInfo API - optimized for InputArea with minimal fields
+				// Returns: id, name, avatar, description, connector, connector_options, modes, default_mode
 				const locale = getLocale() || 'en-us'
-				const res = await agentClient.assistants.Get(fetchId, locale)
+				const res = await agentClient.assistants.GetInfo(fetchId, locale)
 				if (!window.$app.openapi.IsError(res)) {
 					const data = window.$app.openapi.GetData(res)
-					// Filter necessary info
-					const {
-						assistant_id,
-						name,
-						avatar,
-						description,
-						built_in,
-						connector,
-						type,
-						public: isPublic,
-						readonly
-					} = data
+					// GetInfo returns: assistant_id, name, avatar, description, connector, connector_options, modes, default_mode
 					setAssistant({
-						assistant_id,
-						name,
-						avatar,
-						description,
-						built_in,
-						connector,
-						type,
-						public: isPublic,
-						readonly
+						id: data.assistant_id,
+						name: data.name,
+						avatar: data.avatar,
+						description: data.description,
+						connector: data.connector,
+						connector_options: data.connector_options,
+						modes: data.modes,
+						default_mode: data.default_mode,
+						// For backward compatibility with InputArea
+						allowModelSelection: data.connector_options?.optional || false,
+						defaultModel: data.connector // Use connector as default model for now
 					})
 				}
 			} catch (err) {

@@ -59,11 +59,37 @@ export interface KnowledgeBase {
 }
 
 /**
+ * Database configuration
+ */
+export interface Database {
+	/** Database models */
+	models?: string[]
+	/** Additional options for database */
+	options?: Record<string, any>
+}
+
+/**
+ * MCP Server configuration
+ * Supports multiple formats:
+ * - Simple string: "server_id"
+ * - With tools: {"server_id": ["tool1", "tool2"]}
+ * - With resources and tools: {"server_id": {"resources": [...], "tools": [...]}}
+ */
+export interface MCPServerConfig {
+	/** MCP server ID */
+	server_id?: string
+	/** Resources to use (optional) */
+	resources?: string[]
+	/** Tools to use (optional) */
+	tools?: string[]
+}
+
+/**
  * MCP Servers configuration
  */
 export interface MCPServers {
-	/** MCP server IDs */
-	servers?: string[]
+	/** MCP server configurations */
+	servers?: MCPServerConfig[]
 	/** Additional options for MCP servers */
 	options?: Record<string, any>
 }
@@ -115,6 +141,32 @@ export interface Placeholder {
 }
 
 /**
+ * Model capability for filtering connectors
+ */
+export type ModelCapability =
+	| 'vision'
+	| 'audio'
+	| 'tool_calls'
+	| 'reasoning'
+	| 'streaming'
+	| 'json'
+	| 'multimodal'
+	| 'temperature_adjustable'
+
+/**
+ * Connector selection options
+ * Allows defining optional connector selection with filtering capabilities
+ */
+export interface ConnectorOptions {
+	/** Whether connector is optional for user selection */
+	optional?: boolean
+	/** List of available connectors, empty means all connectors are available */
+	connectors?: string[]
+	/** Filter by model capabilities, conditions can be stacked */
+	filters?: ModelCapability[]
+}
+
+/**
  * Agent (Assistant) data structure
  */
 export interface Agent {
@@ -126,8 +178,10 @@ export interface Agent {
 	name?: string
 	/** Assistant avatar URL */
 	avatar?: string
-	/** AI Connector ID */
+	/** AI Connector ID (default connector) */
 	connector: string
+	/** Connector selection options for user to choose from */
+	connector_options?: ConnectorOptions
 	/** Assistant path */
 	path?: string
 	/** Whether this is a built-in assistant */
@@ -138,6 +192,10 @@ export interface Agent {
 	description?: string
 	/** Assistant tags */
 	tags?: string[]
+	/** Supported modes (e.g., ["task", "chat"]), null means all modes are supported */
+	modes?: string[]
+	/** Default mode, can be empty */
+	default_mode?: string
 	/** Whether this assistant is readonly */
 	readonly?: boolean
 	/** Whether this assistant is shared across all teams */
@@ -150,10 +208,16 @@ export interface Agent {
 	automated?: boolean
 	/** AI Options */
 	options?: Record<string, any>
-	/** AI Prompts */
+	/** AI Prompts (default prompts) */
 	prompts?: Prompt[]
+	/** Prompt presets organized by mode (e.g., "chat", "task", etc.) */
+	prompt_presets?: Record<string, Prompt[]>
+	/** Whether to disable global prompts, default is false */
+	disable_global_prompts?: boolean
 	/** Knowledge base configuration */
 	kb?: KnowledgeBase
+	/** Database configuration */
+	db?: Database
 	/** MCP servers configuration */
 	mcp?: MCPServers
 	/** Assistant tools */
@@ -162,8 +226,12 @@ export interface Agent {
 	workflow?: Workflow
 	/** Assistant placeholder */
 	placeholder?: Placeholder
+	/** Hook script source code */
+	source?: string
 	/** Localized content (locale -> content mapping) */
 	locales?: Record<string, any>
+	/** Assistant-specific wrapper configurations for vision, audio, etc. If not set, use global settings */
+	uses?: Record<string, any>
 	/** Creation timestamp (Unix timestamp) */
 	created_at: number
 	/** Last update timestamp (Unix timestamp) */
@@ -200,6 +268,29 @@ export interface AgentDetailResponse {
 }
 
 /**
+ * Agent info response (essential fields for InputArea)
+ * Returns minimal information needed for UI display
+ */
+export interface AgentInfoResponse {
+	/** Assistant ID */
+	assistant_id: string
+	/** Assistant name */
+	name: string
+	/** Assistant avatar URL */
+	avatar: string
+	/** Assistant description (localized) */
+	description: string
+	/** AI Connector ID (default connector) */
+	connector: string
+	/** Connector selection options (optional) */
+	connector_options?: ConnectorOptions
+	/** Supported modes (optional) */
+	modes?: string[]
+	/** Default mode (optional) */
+	default_mode?: string
+}
+
+/**
  * Assistant create request
  * Required fields: name, type, connector
  */
@@ -210,6 +301,8 @@ export interface AssistantCreateRequest {
 	name: string
 	/** AI Connector ID (required) */
 	connector: string
+	/** Connector selection options for user to choose from */
+	connector_options?: ConnectorOptions
 	/** Assistant avatar URL */
 	avatar?: string
 	/** Assistant path */
@@ -220,6 +313,10 @@ export interface AssistantCreateRequest {
 	description?: string
 	/** Assistant tags */
 	tags?: string[]
+	/** Supported modes (e.g., ["task", "chat"]) */
+	modes?: string[]
+	/** Default mode */
+	default_mode?: string
 	/** Whether this assistant is readonly */
 	readonly?: boolean
 	/** Whether this assistant is shared across all teams */
@@ -232,10 +329,16 @@ export interface AssistantCreateRequest {
 	automated?: boolean
 	/** AI Options */
 	options?: Record<string, any>
-	/** AI Prompts */
+	/** AI Prompts (default prompts) */
 	prompts?: Prompt[]
+	/** Prompt presets organized by mode */
+	prompt_presets?: Record<string, Prompt[]>
+	/** Whether to disable global prompts */
+	disable_global_prompts?: boolean
 	/** Knowledge base configuration */
 	kb?: KnowledgeBase
+	/** Database configuration */
+	db?: Database
 	/** MCP servers configuration */
 	mcp?: MCPServers
 	/** Assistant tools */
@@ -244,8 +347,12 @@ export interface AssistantCreateRequest {
 	workflow?: Workflow
 	/** Assistant placeholder */
 	placeholder?: Placeholder
+	/** Hook script source code */
+	source?: string
 	/** Localized content (locale -> content mapping) */
 	locales?: Record<string, any>
+	/** Assistant-specific wrapper configurations */
+	uses?: Record<string, any>
 }
 
 /**
@@ -261,6 +368,8 @@ export interface AssistantUpdateRequest {
 	avatar?: string
 	/** AI Connector ID */
 	connector?: string
+	/** Connector selection options for user to choose from */
+	connector_options?: ConnectorOptions
 	/** Assistant path */
 	path?: string
 	/** Sort order */
@@ -269,6 +378,10 @@ export interface AssistantUpdateRequest {
 	description?: string
 	/** Assistant tags */
 	tags?: string[]
+	/** Supported modes */
+	modes?: string[]
+	/** Default mode */
+	default_mode?: string
 	/** Whether this assistant is readonly */
 	readonly?: boolean
 	/** Whether this assistant is shared across all teams */
@@ -281,10 +394,16 @@ export interface AssistantUpdateRequest {
 	automated?: boolean
 	/** AI Options */
 	options?: Record<string, any>
-	/** AI Prompts */
+	/** AI Prompts (default prompts) */
 	prompts?: Prompt[]
+	/** Prompt presets organized by mode */
+	prompt_presets?: Record<string, Prompt[]>
+	/** Whether to disable global prompts */
+	disable_global_prompts?: boolean
 	/** Knowledge base configuration */
 	kb?: KnowledgeBase
+	/** Database configuration */
+	db?: Database
 	/** MCP servers configuration */
 	mcp?: MCPServers
 	/** Assistant tools */
@@ -293,8 +412,12 @@ export interface AssistantUpdateRequest {
 	workflow?: Workflow
 	/** Assistant placeholder */
 	placeholder?: Placeholder
+	/** Hook script source code */
+	source?: string
 	/** Localized content (locale -> content mapping) */
 	locales?: Record<string, any>
+	/** Assistant-specific wrapper configurations */
+	uses?: Record<string, any>
 }
 
 /**
