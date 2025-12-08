@@ -390,6 +390,7 @@ const InputArea = (props: IInputAreaProps) => {
 		onSend({
 			messages: [message],
 			model: currentModel, // User selected model
+			locale, // Pass user locale for i18n
 			metadata: {
 				mode: chatMode,
 				page: currentPage || undefined
@@ -448,26 +449,27 @@ const InputArea = (props: IInputAreaProps) => {
 			// Language hint
 			const languageHint = is_cn ? '请用中文优化提示词。' : 'Please optimize the prompt in English.'
 
-			// Stream optimization
-			chatClient.StreamCompletion(
-				{
-					assistant_id: promptAgentId,
-					messages: [
-						{
-							role: 'user',
-							content: `Optimize and improve this prompt to be more clear, specific, and effective. ${languageHint}\n\nOriginal prompt:\n${currentText}`
-						}
-					],
-					model: currentModel, // Use current selected model
-					skip: {
-						history: true, // Don't save to history
-						trace: true // Don't show trace
-					},
-					metadata: {
-						mode: chatMode,
-						page: currentPage || undefined
+		// Stream optimization
+		chatClient.StreamCompletion(
+			{
+				assistant_id: promptAgentId,
+				messages: [
+					{
+						role: 'user',
+						content: `Optimize and improve this prompt to be more clear, specific, and effective. ${languageHint}\n\nOriginal prompt:\n${currentText}`
 					}
+				],
+				model: currentModel, // Use current selected model
+				locale, // Pass user locale for i18n
+				skip: {
+					history: true, // Don't save to history
+					trace: true // Don't show trace
 				},
+				metadata: {
+					mode: chatMode,
+					page: currentPage || undefined
+				}
+			},
 				(chunk) => {
 					// Check for stream end event
 					if (IsEventMessage(chunk) && IsStreamEndEvent(chunk)) {

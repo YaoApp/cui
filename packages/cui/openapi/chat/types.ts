@@ -556,6 +556,7 @@ export interface Skip {
 interface ChatCompletionRequestBase {
 	messages: UserMessage[] // User messages (required)
 	chat_id?: string // Chat ID (auto-generated if not provided)
+	locale?: string // User locale (e.g., 'zh-CN', 'en-US') for i18n
 	options?: ChatCompletionOptions // Advanced OpenAI-compatible options
 	metadata?: Record<string, any> // Custom metadata
 	skip?: Skip // Skip configuration (history, trace, etc.)

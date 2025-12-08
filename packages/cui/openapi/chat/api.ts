@@ -80,7 +80,8 @@ export class Chat {
 			request.chat_id,
 			wrappedOnEvent,
 			onError,
-			abortController
+			abortController,
+			request.locale
 		).catch((error) => {
 			onError?.(error)
 		})
@@ -149,7 +150,8 @@ export class Chat {
 		chatId: string | undefined,
 		onEvent: StreamCallback,
 		onError: ((error: Error) => void) | undefined,
-		abortController: AbortController
+		abortController: AbortController,
+		locale?: string
 	): Promise<void> {
 		try {
 			// Build headers
@@ -167,6 +169,12 @@ export class Chat {
 			// Add chat_id to header if provided
 			if (chatId) {
 				headers['X-Yao-Chat'] = chatId
+			}
+
+			// Add locale to header if provided (for i18n support)
+			if (locale) {
+				// Use query parameter for locale (priority 1 in backend GetLocale)
+				url = `${url}?locale=${encodeURIComponent(locale)}`
 			}
 
 			// Make POST request with streaming enabled
