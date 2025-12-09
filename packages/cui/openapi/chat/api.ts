@@ -6,7 +6,13 @@ import {
 	StreamCallback,
 	UserMessage,
 	AppendMessagesResponse,
-	InterruptType
+	InterruptType,
+	ChatSession,
+	ChatSessionFilter,
+	ChatSessionList,
+	UpdateChatRequest,
+	ChatMessageFilter,
+	ChatMessagesResponse
 } from './types'
 
 export class Chat {
@@ -329,5 +335,214 @@ export class Chat {
 		} catch (error) {
 			throw error instanceof Error ? error : new Error('Failed to append messages')
 		}
+	}
+
+	// =========================================================================
+	// Chat Session Management (History)
+	// =========================================================================
+
+	/**
+	 * List chat sessions with pagination and filtering
+	 * GET /chat/sessions
+	 *
+	 * @example
+	 * ```typescript
+	 * // List all active sessions
+	 * const sessions = await chat.ListSessions({ status: 'active' })
+	 *
+	 * // List with time-based grouping
+	 * const grouped = await chat.ListSessions({ group_by: 'time' })
+	 * console.log(grouped.groups) // [{label: "Today", chats: [...]}, ...]
+	 *
+	 * // Filter by assistant
+	 * const filtered = await chat.ListSessions({
+	 *   assistant_id: 'my-assistant',
+	 *   keywords: 'search term'
+	 * })
+	 * ```
+	 *
+	 * @param filter - Optional filter parameters
+	 * @returns Promise with paginated chat session list
+	 */
+	async ListSessions(filter?: ChatSessionFilter): Promise<ChatSessionList> {
+		// @ts-ignore
+		const baseURL = this.api.config.baseURL
+
+		// Build query string
+		const params = new URLSearchParams()
+		if (filter) {
+			if (filter.assistant_id) params.append('assistant_id', filter.assistant_id)
+			if (filter.status) params.append('status', filter.status)
+			if (filter.keywords) params.append('keywords', filter.keywords)
+			if (filter.start_time) params.append('start_time', filter.start_time)
+			if (filter.end_time) params.append('end_time', filter.end_time)
+			if (filter.time_field) params.append('time_field', filter.time_field)
+			if (filter.order_by) params.append('order_by', filter.order_by)
+			if (filter.order) params.append('order', filter.order)
+			if (filter.group_by) params.append('group_by', filter.group_by)
+			if (filter.page) params.append('page', String(filter.page))
+			if (filter.pagesize) params.append('pagesize', String(filter.pagesize))
+		}
+
+		const queryString = params.toString()
+		const url = `${baseURL}/chat/sessions${queryString ? '?' + queryString : ''}`
+
+		const response = await fetch(url, {
+			method: 'GET',
+			credentials: 'include'
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text()
+			throw new Error(`HTTP ${response.status}: ${errorText}`)
+		}
+
+		const result = await response.json()
+		return result.data as ChatSessionList
+	}
+
+	/**
+	 * Get a single chat session by ID
+	 * GET /chat/sessions/:chat_id
+	 *
+	 * @param chatId - The chat session ID
+	 * @returns Promise with chat session details
+	 */
+	async GetSession(chatId: string): Promise<ChatSession> {
+		// @ts-ignore
+		const baseURL = this.api.config.baseURL
+		const url = `${baseURL}/chat/sessions/${chatId}`
+
+		const response = await fetch(url, {
+			method: 'GET',
+			credentials: 'include'
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text()
+			throw new Error(`HTTP ${response.status}: ${errorText}`)
+		}
+
+		const result = await response.json()
+		return result.data as ChatSession
+	}
+
+	/**
+	 * Update a chat session
+	 * PUT /chat/sessions/:chat_id
+	 *
+	 * @example
+	 * ```typescript
+	 * // Update title
+	 * await chat.UpdateSession('chat-123', { title: 'New Title' })
+	 *
+	 * // Archive session
+	 * await chat.UpdateSession('chat-123', { status: 'archived' })
+	 * ```
+	 *
+	 * @param chatId - The chat session ID
+	 * @param updates - Fields to update
+	 * @returns Promise with success message
+	 */
+	async UpdateSession(chatId: string, updates: UpdateChatRequest): Promise<{ message: string; chat_id: string }> {
+		// @ts-ignore
+		const baseURL = this.api.config.baseURL
+		const url = `${baseURL}/chat/sessions/${chatId}`
+
+		const response = await fetch(url, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(updates),
+			credentials: 'include'
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text()
+			throw new Error(`HTTP ${response.status}: ${errorText}`)
+		}
+
+		const result = await response.json()
+		return result.data
+	}
+
+	/**
+	 * Delete a chat session (soft delete)
+	 * DELETE /chat/sessions/:chat_id
+	 *
+	 * @param chatId - The chat session ID
+	 * @returns Promise with success message
+	 */
+	async DeleteSession(chatId: string): Promise<{ message: string; chat_id: string }> {
+		// @ts-ignore
+		const baseURL = this.api.config.baseURL
+		const url = `${baseURL}/chat/sessions/${chatId}`
+
+		const response = await fetch(url, {
+			method: 'DELETE',
+			credentials: 'include'
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text()
+			throw new Error(`HTTP ${response.status}: ${errorText}`)
+		}
+
+		const result = await response.json()
+		return result.data
+	}
+
+	/**
+	 * Get messages for a chat session
+	 * GET /chat/sessions/:chat_id/messages
+	 *
+	 * @example
+	 * ```typescript
+	 * // Get all messages
+	 * const messages = await chat.GetMessages('chat-123')
+	 *
+	 * // Filter by role
+	 * const userMessages = await chat.GetMessages('chat-123', { role: 'user' })
+	 *
+	 * // Paginate
+	 * const page = await chat.GetMessages('chat-123', { limit: 50, offset: 0 })
+	 * ```
+	 *
+	 * @param chatId - The chat session ID
+	 * @param filter - Optional filter parameters
+	 * @returns Promise with messages response
+	 */
+	async GetMessages(chatId: string, filter?: ChatMessageFilter): Promise<ChatMessagesResponse> {
+		// @ts-ignore
+		const baseURL = this.api.config.baseURL
+
+		// Build query string
+		const params = new URLSearchParams()
+		if (filter) {
+			if (filter.request_id) params.append('request_id', filter.request_id)
+			if (filter.role) params.append('role', filter.role)
+			if (filter.block_id) params.append('block_id', filter.block_id)
+			if (filter.thread_id) params.append('thread_id', filter.thread_id)
+			if (filter.type) params.append('type', filter.type)
+			if (filter.limit) params.append('limit', String(filter.limit))
+			if (filter.offset) params.append('offset', String(filter.offset))
+		}
+
+		const queryString = params.toString()
+		const url = `${baseURL}/chat/sessions/${chatId}/messages${queryString ? '?' + queryString : ''}`
+
+		const response = await fetch(url, {
+			method: 'GET',
+			credentials: 'include'
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text()
+			throw new Error(`HTTP ${response.status}: ${errorText}`)
+		}
+
+		const result = await response.json()
+		return result.data as ChatMessagesResponse
 	}
 }

@@ -751,3 +751,130 @@ export interface AppendMessagesResponse {
 	type: InterruptType // Interrupt type that was used
 	timestamp: number // Timestamp when the interrupt was processed
 }
+
+// ============================================================================
+// Chat Session Types (History Management)
+// ============================================================================
+
+/**
+ * Chat session status
+ */
+export type ChatStatus = 'active' | 'archived'
+
+/**
+ * Chat sharing scope
+ */
+export type ChatShare = 'private' | 'team'
+
+/**
+ * Chat session
+ * Represents a conversation session with an assistant
+ */
+export interface ChatSession {
+	chat_id: string
+	title?: string
+	assistant_id: string
+	mode?: string
+	status: ChatStatus
+	public?: boolean // Whether shared across all teams
+	share?: ChatShare // "private" or "team"
+	sort?: number // Sort order for display
+	last_message_at?: string // ISO 8601 datetime
+	metadata?: Record<string, any>
+	created_at: string // ISO 8601 datetime
+	updated_at: string // ISO 8601 datetime
+}
+
+/**
+ * Chat session filter for listing
+ */
+export interface ChatSessionFilter {
+	assistant_id?: string
+	status?: ChatStatus
+	keywords?: string
+	// Time range filter
+	start_time?: string // ISO 8601 datetime
+	end_time?: string // ISO 8601 datetime
+	time_field?: 'created_at' | 'last_message_at'
+	// Sorting
+	order_by?: 'created_at' | 'updated_at' | 'last_message_at'
+	order?: 'asc' | 'desc'
+	// Response format
+	group_by?: 'time' // "time" for time-based groups, empty for flat list
+	// Pagination
+	page?: number
+	pagesize?: number
+}
+
+/**
+ * Time-based group of chat sessions
+ */
+export interface ChatGroup {
+	label: string // "Today", "Yesterday", "This Week", "This Month", "Earlier"
+	key: string // "today", "yesterday", "this_week", "this_month", "earlier"
+	chats: ChatSession[]
+	count: number
+}
+
+/**
+ * Paginated chat session list response
+ */
+export interface ChatSessionList {
+	data: ChatSession[]
+	groups?: ChatGroup[] // Time-based groups (when group_by=time)
+	page: number
+	pagesize: number
+	pagecount: number
+	total: number
+}
+
+/**
+ * Request for updating a chat session
+ */
+export interface UpdateChatRequest {
+	title?: string
+	status?: ChatStatus
+	metadata?: Record<string, any>
+}
+
+/**
+ * Chat message (stored message)
+ * Represents a message stored in the database
+ */
+export interface ChatMessage {
+	message_id: string
+	chat_id: string
+	request_id?: string
+	role: 'user' | 'assistant'
+	type: string // "text", "image", "loading", "tool_call", "retrieval", etc.
+	props: Record<string, any>
+	block_id?: string
+	thread_id?: string
+	assistant_id?: string
+	sequence: number
+	metadata?: Record<string, any>
+	created_at: string // ISO 8601 datetime
+	updated_at: string // ISO 8601 datetime
+}
+
+/**
+ * Message filter for listing messages
+ */
+export interface ChatMessageFilter {
+	request_id?: string
+	role?: 'user' | 'assistant'
+	block_id?: string
+	thread_id?: string
+	type?: string
+	limit?: number
+	offset?: number
+}
+
+/**
+ * Response for getting messages
+ */
+export interface ChatMessagesResponse {
+	chat_id: string
+	messages: ChatMessage[]
+	count: number
+}
