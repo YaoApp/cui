@@ -13,6 +13,27 @@ OpenAPI client for Yao Chat Completions with streaming support.
 - ✅ **Chat History**: Full session management with time-based grouping
 - ✅ **Permission Control**: Integrated with Yao's unified permission system
 
+## API Methods Summary
+
+The `Chat` class provides the following methods:
+
+### Chat Completion
+
+| Method | Description |
+|--------|-------------|
+| `StreamCompletion(request, onEvent, onError?)` | Stream chat completion (SSE via POST). Returns abort function. |
+| `AppendMessages(contextId, messages, type?, metadata?)` | Append messages to running completion (pre-input/interrupt support). |
+
+### Chat Session Management
+
+| Method | Description |
+|--------|-------------|
+| `ListSessions(filter?)` | List chat sessions with pagination, filtering, and time-based grouping. |
+| `GetSession(chatId)` | Get a single chat session by ID. |
+| `UpdateSession(chatId, updates)` | Update chat session (title, status, metadata). |
+| `DeleteSession(chatId)` | Delete a chat session (soft delete). |
+| `GetMessages(chatId, filter?)` | Get messages for a chat session with filtering. |
+
 ## Quick Start
 
 ### Basic Streaming
@@ -2345,27 +2366,6 @@ chat.StreamCompletion({ ... }, (chunk) => {
 })
 ```
 
-## API Methods Summary
-
-The `Chat` class provides the following methods:
-
-### Chat Completion
-
-| Method | Description |
-|--------|-------------|
-| `StreamCompletion(request, onEvent, onError?)` | Stream chat completion (SSE via POST). Returns abort function. |
-| `AppendMessages(contextId, messages, type?, metadata?)` | Append messages to running completion (pre-input/interrupt support). |
-
-### Chat Session Management
-
-| Method | Description |
-|--------|-------------|
-| `ListSessions(filter?)` | List chat sessions with pagination, filtering, and time-based grouping. |
-| `GetSession(chatId)` | Get a single chat session by ID. |
-| `UpdateSession(chatId, updates)` | Update chat session (title, status, metadata). |
-| `DeleteSession(chatId)` | Delete a chat session (soft delete). |
-| `GetMessages(chatId, filter?)` | Get messages for a chat session with filtering. |
-
 ## API Design
 
 ### User-Friendly Request Structure
@@ -2928,7 +2928,7 @@ const chat = new Chat(api)
 const sessions = await chat.ListSessions()
 console.log(sessions.data) // Array of ChatSession
 
-// With pagination
+// With pagination (maintains default sort: last_message_at desc)
 const page2 = await chat.ListSessions({ 
     page: 2, 
     pagesize: 20 
@@ -3048,12 +3048,13 @@ await chat.DeleteSession('chat-123')
 ### Retrieving Chat Messages (History)
 
 ```typescript
-// Get all messages for a chat
+// Get all messages for a chat (sorted by sequence asc - oldest first)
 const messages = await chat.GetMessages('chat-123')
 console.log(messages.messages) // Array of ChatMessage
 console.log(messages.count)    // Total message count
 
-// With pagination
+// With pagination (always sorted by sequence asc)
+// Use offset to skip earlier messages, limit to control page size
 const firstPage = await chat.GetMessages('chat-123', {
     limit: 50,
     offset: 0
@@ -3433,7 +3434,7 @@ interface ChatSessionFilter {
     start_time?: string   // ISO 8601 datetime
     end_time?: string     // ISO 8601 datetime
     time_field?: 'created_at' | 'last_message_at'
-    // Sorting
+    // Sorting (default: last_message_at desc)
     order_by?: 'created_at' | 'updated_at' | 'last_message_at'
     order?: 'asc' | 'desc'
     // Response format
@@ -3478,15 +3479,15 @@ interface ChatMessage {
     updated_at: string    // ISO 8601 datetime
 }
 
-// Message filter
+// Message filter (always sorted by sequence asc - chronological order)
 interface ChatMessageFilter {
     request_id?: string
     role?: 'user' | 'assistant'
     block_id?: string
     thread_id?: string
     type?: string
-    limit?: number
-    offset?: number
+    limit?: number    // Max messages to return (default: 100)
+    offset?: number   // Skip first N messages
 }
 ```
 
