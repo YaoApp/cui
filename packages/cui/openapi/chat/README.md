@@ -6,10 +6,12 @@ OpenAPI client for Yao Chat Completions with streaming support.
 
 - ✅ **Streaming Support**: Real-time SSE (Server-Sent Events) over POST requests
 - ✅ **Type Safety**: Full TypeScript type definitions with discriminated unions
-- ✅ **Built-in Message Types**: 10 standardized message types with defined Props
+- ✅ **Built-in Message Types**: 11 standardized message types with defined Props
 - ✅ **Extensible**: Support for custom message types
 - ✅ **Browser Native**: Uses fetch() and ReadableStream APIs (no Node.js required)
 - ✅ **Cancellable**: Built-in AbortController support
+- ✅ **Chat History**: Full session management with time-based grouping
+- ✅ **Permission Control**: Integrated with Yao's unified permission system
 
 ## Quick Start
 
@@ -910,6 +912,10 @@ const request2: ChatCompletionRequest = {
     - Same message history → Same `chat_id` (conversation continuation)
     - New message history → New `chat_id` (new conversation)
     - Use only for stateless clients without ID management capability
+- `locale`: User locale for i18n support (e.g., `'zh-CN'`, `'en-US'`)
+  - Used for localizing assistant responses and error messages
+  - **Priority**: Query parameter > `Accept-Language` header > `metadata.locale`
+  - Frontend SDK sends via query parameter `?locale=xxx`
 - `options`: OpenAI-compatible parameters (temperature, max_tokens, etc.)
 - `metadata`: Custom metadata object
 - `skip`: Skip configuration for tool calls (sent via request body)
@@ -2339,6 +2345,27 @@ chat.StreamCompletion({ ... }, (chunk) => {
 })
 ```
 
+## API Methods Summary
+
+The `Chat` class provides the following methods:
+
+### Chat Completion
+
+| Method | Description |
+|--------|-------------|
+| `StreamCompletion(request, onEvent, onError?)` | Stream chat completion (SSE via POST). Returns abort function. |
+| `AppendMessages(contextId, messages, type?, metadata?)` | Append messages to running completion (pre-input/interrupt support). |
+
+### Chat Session Management
+
+| Method | Description |
+|--------|-------------|
+| `ListSessions(filter?)` | List chat sessions with pagination, filtering, and time-based grouping. |
+| `GetSession(chatId)` | Get a single chat session by ID. |
+| `UpdateSession(chatId, updates)` | Update chat session (title, status, metadata). |
+| `DeleteSession(chatId)` | Delete a chat session (soft delete). |
+| `GetMessages(chatId, filter?)` | Get messages for a chat session with filtering. |
+
 ## API Design
 
 ### User-Friendly Request Structure
@@ -2879,6 +2906,617 @@ The Chat API automatically sets the `X-Yao-Accept: cui-web` header, which tells 
 - Use CUI output format (universal message DSL)
 - Send messages directly without OpenAI conversion
 - Support all built-in and custom message types
+
+## Chat Session Management (History API)
+
+The Chat API provides endpoints for managing chat sessions and retrieving historical messages. These APIs enable features like:
+
+- Displaying chat history list with time-based grouping
+- Searching and filtering past conversations
+- Resuming previous conversations
+- Managing chat metadata (title, status, etc.)
+
+### Listing Chat Sessions
+
+```typescript
+import { OpenAPI, Chat } from '@yao/cui/openapi'
+
+const api = new OpenAPI({ baseURL: '/v1' })
+const chat = new Chat(api)
+
+// List all active sessions (default: sorted by last_message_at desc)
+const sessions = await chat.ListSessions()
+console.log(sessions.data) // Array of ChatSession
+
+// With pagination
+const page2 = await chat.ListSessions({ 
+    page: 2, 
+    pagesize: 20 
+})
+
+// Filter by assistant
+const assistantChats = await chat.ListSessions({ 
+    assistant_id: 'my-assistant' 
+})
+
+// Search by keywords (searches in title)
+const searchResults = await chat.ListSessions({ 
+    keywords: 'project planning' 
+})
+
+// Filter by status
+const archived = await chat.ListSessions({ 
+    status: 'archived' 
+})
+
+// Time range filter
+const thisWeek = await chat.ListSessions({
+    start_time: '2024-01-01T00:00:00Z',
+    end_time: '2024-01-07T23:59:59Z',
+    time_field: 'last_message_at' // or 'created_at'
+})
+
+// Custom sorting
+const byCreated = await chat.ListSessions({
+    order_by: 'created_at',
+    order: 'asc'
+})
+```
+
+### Time-Based Grouping
+
+For chat list UIs with time-based sections (Today, Yesterday, This Week, etc.):
+
+```typescript
+// Enable time-based grouping
+const grouped = await chat.ListSessions({ 
+    group_by: 'time' 
+})
+
+// Response includes both flat list and grouped data
+console.log(grouped.data)   // All chats in flat array
+console.log(grouped.groups) // Time-based groups
+
+// groups structure:
+// [
+//   { label: "Today", key: "today", chats: [...], count: 5 },
+//   { label: "Yesterday", key: "yesterday", chats: [...], count: 3 },
+//   { label: "This Week", key: "this_week", chats: [...], count: 12 },
+//   { label: "This Month", key: "this_month", chats: [...], count: 8 },
+//   { label: "Earlier", key: "earlier", chats: [...], count: 20 }
+// ]
+
+// Render grouped chat list
+function renderChatList(sessions: ChatSessionList) {
+    if (sessions.groups && sessions.groups.length > 0) {
+        return sessions.groups.map(group => (
+            <div key={group.key}>
+                <h3>{group.label}</h3>
+                {group.chats.map(chat => (
+                    <ChatItem key={chat.chat_id} chat={chat} />
+                ))}
+            </div>
+        ))
+    }
+    
+    // Fallback to flat list
+    return sessions.data.map(chat => (
+        <ChatItem key={chat.chat_id} chat={chat} />
+    ))
+}
+```
+
+### Getting a Single Chat Session
+
+```typescript
+// Get chat details by ID
+const chatSession = await chat.GetSession('chat-123')
+console.log(chatSession.title)
+console.log(chatSession.assistant_id)
+console.log(chatSession.last_message_at)
+```
+
+### Updating Chat Sessions
+
+```typescript
+// Update title (e.g., after auto-generating from first message)
+await chat.UpdateSession('chat-123', { 
+    title: 'Project Planning Discussion' 
+})
+
+// Archive a chat
+await chat.UpdateSession('chat-123', { 
+    status: 'archived' 
+})
+
+// Update with custom metadata
+await chat.UpdateSession('chat-123', {
+    metadata: {
+        pinned: true,
+        category: 'work'
+    }
+})
+```
+
+### Deleting Chat Sessions
+
+```typescript
+// Soft delete a chat (can be recovered)
+await chat.DeleteSession('chat-123')
+```
+
+### Retrieving Chat Messages (History)
+
+```typescript
+// Get all messages for a chat
+const messages = await chat.GetMessages('chat-123')
+console.log(messages.messages) // Array of ChatMessage
+console.log(messages.count)    // Total message count
+
+// With pagination
+const firstPage = await chat.GetMessages('chat-123', {
+    limit: 50,
+    offset: 0
+})
+
+// Filter by role
+const userMessages = await chat.GetMessages('chat-123', { 
+    role: 'user' 
+})
+const assistantMessages = await chat.GetMessages('chat-123', { 
+    role: 'assistant' 
+})
+
+// Filter by message type
+const textOnly = await chat.GetMessages('chat-123', { 
+    type: 'text' 
+})
+const toolCalls = await chat.GetMessages('chat-123', { 
+    type: 'tool_call' 
+})
+
+// Filter by request (all messages from a single request)
+const requestMessages = await chat.GetMessages('chat-123', { 
+    request_id: 'req-456' 
+})
+
+// Filter by block or thread (for complex agent flows)
+const blockMessages = await chat.GetMessages('chat-123', { 
+    block_id: 'B1' 
+})
+const threadMessages = await chat.GetMessages('chat-123', { 
+    thread_id: 'T1' 
+})
+```
+
+### Complete History Integration Example
+
+Here's a complete example showing how to integrate chat history into your application:
+
+```typescript
+import { OpenAPI, Chat, ChatSession, ChatMessage, Message } from '@yao/cui/openapi'
+import { nanoid } from 'nanoid'
+
+const api = new OpenAPI({ baseURL: '/v1' })
+const chat = new Chat(api)
+
+// ============================================================
+// State Management
+// ============================================================
+
+interface ChatState {
+    currentChatId: string | null
+    sessions: ChatSession[]
+    messages: Message[]
+    isLoading: boolean
+}
+
+const state: ChatState = {
+    currentChatId: null,
+    sessions: [],
+    messages: [],
+    isLoading: false
+}
+
+// ============================================================
+// Load Chat History List
+// ============================================================
+
+async function loadChatList() {
+    state.isLoading = true
+    try {
+        const result = await chat.ListSessions({
+            group_by: 'time',
+            pagesize: 50
+        })
+        state.sessions = result.data
+        renderChatList(result)
+    } finally {
+        state.isLoading = false
+    }
+}
+
+// ============================================================
+// Resume a Previous Chat
+// ============================================================
+
+async function resumeChat(chatId: string) {
+    state.currentChatId = chatId
+    state.isLoading = true
+    
+    try {
+        // 1. Load chat session details
+        const session = await chat.GetSession(chatId)
+        
+        // 2. Load historical messages
+        const history = await chat.GetMessages(chatId)
+        
+        // 3. Convert stored messages to display format
+        state.messages = history.messages.map(convertStoredToDisplay)
+        
+        // 4. Render messages
+        renderMessages(state.messages)
+        
+        console.log(`Resumed chat: ${session.title || 'Untitled'}`)
+    } finally {
+        state.isLoading = false
+    }
+}
+
+// Convert stored ChatMessage to display Message format
+function convertStoredToDisplay(stored: ChatMessage): Message {
+    return {
+        ui_id: nanoid(), // Generate unique UI ID for React key
+        message_id: stored.message_id,
+        type: stored.type,
+        props: stored.props,
+        block_id: stored.block_id,
+        thread_id: stored.thread_id,
+        delta: false, // Historical messages are complete
+        metadata: {
+            timestamp: new Date(stored.created_at).getTime()
+        }
+    }
+}
+
+// ============================================================
+// Start New Chat
+// ============================================================
+
+function startNewChat(assistantId: string) {
+    // Generate chat_id on frontend (recommended)
+    state.currentChatId = nanoid()
+    state.messages = []
+    
+    console.log(`Started new chat: ${state.currentChatId}`)
+}
+
+// ============================================================
+// Send Message (with history continuation)
+// ============================================================
+
+async function sendMessage(content: string) {
+    if (!state.currentChatId) {
+        console.error('No chat selected')
+        return
+    }
+    
+    // Add user message to display immediately
+    const userMessage: Message = {
+        ui_id: nanoid(),
+        type: 'user_input',
+        props: { content, role: 'user' },
+        delta: false
+    }
+    state.messages.push(userMessage)
+    renderMessages(state.messages)
+    
+    // Stream completion
+    // Note: Backend manages history using chat_id
+    // Frontend only sends current user input
+    chat.StreamCompletion(
+        {
+            assistant_id: 'my-assistant',
+            chat_id: state.currentChatId,  // Continue this chat
+            messages: [
+                { role: 'user', content }  // Only current input
+            ]
+        },
+        (chunk) => {
+            handleStreamChunk(chunk)
+        },
+        (error) => {
+            console.error('Stream error:', error)
+        }
+    )
+}
+
+// ============================================================
+// Handle Streaming Response
+// ============================================================
+
+let streamId: string = ''
+const completedMessages = new Set<string>()
+
+function handleStreamChunk(chunk: Message) {
+    // Handle stream lifecycle
+    if (chunk.type === 'event') {
+        if (chunk.props?.event === 'stream_start') {
+            streamId = nanoid()
+            completedMessages.clear()
+            return
+        }
+        if (chunk.props?.event === 'message_end') {
+            const msgId = chunk.props.data?.message_id
+            if (msgId) {
+                completedMessages.add(`${streamId}:${msgId}`)
+            }
+            return
+        }
+        if (chunk.props?.event === 'stream_end') {
+            // Optionally refresh chat list to update last_message_at
+            loadChatList()
+            return
+        }
+        return
+    }
+    
+    // Handle content messages
+    if (chunk.message_id) {
+        const namespacedId = `${streamId}:${chunk.message_id}`
+        const isCompleted = completedMessages.has(namespacedId)
+        
+        // Find or create message in state
+        const existingIndex = state.messages.findIndex(
+            m => m.message_id === namespacedId
+        )
+        
+        if (existingIndex >= 0) {
+            // Update existing message (delta merge)
+            state.messages[existingIndex] = {
+                ...state.messages[existingIndex],
+                props: mergeProps(state.messages[existingIndex].props, chunk),
+                delta: isCompleted ? false : chunk.delta
+            }
+        } else {
+            // Add new message
+            state.messages.push({
+                ui_id: nanoid(),
+                message_id: namespacedId,
+                type: chunk.type,
+                props: chunk.props || {},
+                block_id: chunk.block_id,
+                thread_id: chunk.thread_id,
+                delta: isCompleted ? false : chunk.delta
+            })
+        }
+        
+        renderMessages(state.messages)
+    }
+}
+
+// Simple props merging for delta updates
+function mergeProps(existing: any, chunk: Message): any {
+    if (!chunk.delta) return chunk.props
+    
+    const result = { ...existing }
+    const action = chunk.delta_action || 'append'
+    
+    if (action === 'append') {
+        Object.keys(chunk.props || {}).forEach(key => {
+            if (typeof result[key] === 'string' && typeof chunk.props?.[key] === 'string') {
+                result[key] = result[key] + chunk.props[key]
+            } else {
+                result[key] = chunk.props?.[key]
+            }
+        })
+    } else {
+        Object.assign(result, chunk.props)
+    }
+    
+    return result
+}
+
+// ============================================================
+// Auto-Generate Title (after first response)
+// ============================================================
+
+async function autoGenerateTitle(chatId: string, firstUserMessage: string) {
+    // Use a system assistant to generate title
+    // Note: Use skip.history to avoid saving this as chat history
+    let title = ''
+    
+    chat.StreamCompletion(
+        {
+            assistant_id: 'workers.system.title',
+            messages: [
+                { role: 'user', content: `Generate a short title for: ${firstUserMessage}` }
+            ],
+            skip: {
+                history: true,  // Don't save this tool call
+                trace: true     // Skip trace for performance
+            }
+        },
+        (chunk) => {
+            if (chunk.type === 'text' && chunk.props?.content) {
+                title += chunk.props.content
+            }
+        },
+        async () => {
+            // Update chat title
+            if (title) {
+                await chat.UpdateSession(chatId, { title: title.trim() })
+                loadChatList() // Refresh list to show new title
+            }
+        }
+    )
+}
+
+// ============================================================
+// Delete Chat
+// ============================================================
+
+async function deleteChat(chatId: string) {
+    if (confirm('Delete this chat?')) {
+        await chat.DeleteSession(chatId)
+        
+        // If deleting current chat, clear state
+        if (state.currentChatId === chatId) {
+            state.currentChatId = null
+            state.messages = []
+        }
+        
+        // Refresh list
+        loadChatList()
+    }
+}
+
+// ============================================================
+// Archive Chat
+// ============================================================
+
+async function archiveChat(chatId: string) {
+    await chat.UpdateSession(chatId, { status: 'archived' })
+    loadChatList()
+}
+
+// ============================================================
+// Render Functions (placeholder - implement with your UI framework)
+// ============================================================
+
+function renderChatList(sessions: any) {
+    console.log('Render chat list:', sessions)
+}
+
+function renderMessages(messages: Message[]) {
+    console.log('Render messages:', messages.length)
+}
+
+// ============================================================
+// Initialize
+// ============================================================
+
+loadChatList()
+```
+
+### Chat Session Types Reference
+
+```typescript
+// Chat session status
+type ChatStatus = 'active' | 'archived'
+
+// Chat sharing scope
+type ChatShare = 'private' | 'team'
+
+// Chat session object
+interface ChatSession {
+    chat_id: string
+    title?: string
+    assistant_id: string
+    mode?: string
+    status: ChatStatus
+    public?: boolean      // Whether shared across all teams
+    share?: ChatShare     // "private" or "team"
+    sort?: number         // Sort order for display
+    last_message_at?: string  // ISO 8601 datetime
+    metadata?: Record<string, any>
+    created_at: string    // ISO 8601 datetime
+    updated_at: string    // ISO 8601 datetime
+}
+
+// Filter for listing sessions
+interface ChatSessionFilter {
+    assistant_id?: string
+    status?: ChatStatus
+    keywords?: string
+    // Time range filter
+    start_time?: string   // ISO 8601 datetime
+    end_time?: string     // ISO 8601 datetime
+    time_field?: 'created_at' | 'last_message_at'
+    // Sorting
+    order_by?: 'created_at' | 'updated_at' | 'last_message_at'
+    order?: 'asc' | 'desc'
+    // Response format
+    group_by?: 'time'     // "time" for time-based groups
+    // Pagination
+    page?: number
+    pagesize?: number
+}
+
+// Time-based group
+interface ChatGroup {
+    label: string   // "Today", "Yesterday", "This Week", "This Month", "Earlier"
+    key: string     // "today", "yesterday", "this_week", "this_month", "earlier"
+    chats: ChatSession[]
+    count: number
+}
+
+// Paginated response
+interface ChatSessionList {
+    data: ChatSession[]
+    groups?: ChatGroup[]  // Time-based groups (when group_by=time)
+    page: number
+    pagesize: number
+    pagecount: number
+    total: number
+}
+
+// Stored message
+interface ChatMessage {
+    message_id: string
+    chat_id: string
+    request_id?: string
+    role: 'user' | 'assistant'
+    type: string          // "text", "image", "tool_call", "retrieval", etc.
+    props: Record<string, any>
+    block_id?: string
+    thread_id?: string
+    assistant_id?: string
+    sequence: number
+    metadata?: Record<string, any>
+    created_at: string    // ISO 8601 datetime
+    updated_at: string    // ISO 8601 datetime
+}
+
+// Message filter
+interface ChatMessageFilter {
+    request_id?: string
+    role?: 'user' | 'assistant'
+    block_id?: string
+    thread_id?: string
+    type?: string
+    limit?: number
+    offset?: number
+}
+```
+
+### Permission and Access Control
+
+Chat sessions support Yao's unified permission management:
+
+- **Private chats**: Only the creator can access
+- **Team chats**: Team members can access if `share: 'team'`
+- **Public chats**: All users can read if `public: true`
+
+The API automatically applies permission filters based on the authenticated user's credentials:
+
+```typescript
+// Permission is handled automatically by the backend
+// The API returns only chats the user has permission to access
+
+// For admin users (no constraints): sees all chats
+// For team members (TeamOnly): sees own + team shared chats
+// For regular users (OwnerOnly): sees only own chats
+```
+
+### Best Practices
+
+1. **Generate `chat_id` on frontend** - Avoids backend hash computation overhead
+2. **Use time-based grouping** - Better UX for chat list display
+3. **Implement infinite scroll** - Use pagination for large chat histories
+4. **Auto-generate titles** - Use `skip.history: true` for title generation calls
+5. **Handle offline gracefully** - Cache chat list and messages locally
+6. **Namespace `message_id`** - Use stream-level namespace to prevent conflicts
 
 ## See Also
 
