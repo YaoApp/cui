@@ -774,6 +774,7 @@ export interface ChatSession {
 	chat_id: string
 	title?: string
 	assistant_id: string
+	last_connector?: string // Last used connector ID (updated on each message)
 	mode?: string
 	status: ChatStatus
 	public?: boolean // Whether shared across all teams
@@ -851,6 +852,7 @@ export interface ChatMessage {
 	block_id?: string
 	thread_id?: string
 	assistant_id?: string
+	connector?: string // Connector ID used for this message
 	sequence: number
 	metadata?: Record<string, any>
 	created_at: string // ISO 8601 datetime
