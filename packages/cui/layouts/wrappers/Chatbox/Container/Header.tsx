@@ -3,12 +3,12 @@ import { FC, useState, useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import Icon from '@/widgets/Icon'
-import UserAvatar from '@/widgets/UserAvatar'
 import clsx from 'clsx'
 import './header.less'
 import { App } from '@/types'
 import { getLocale, useLocation, useNavigate } from '@umijs/max'
 import { findNavPath } from './Utils'
+import logo_svg from '@/assets/images/logo.svg'
 
 interface HeaderProps {
 	openSidebar: (temporaryLink?: string, title?: string) => void
@@ -80,17 +80,17 @@ const Header: FC<HeaderProps> = ({
 			// Calculate available width
 			const headerWidth = header.getBoundingClientRect().width
 			const headerRightWidth = headerRight.getBoundingClientRect().width
-			const userAvatar = header.querySelector('.header_user_avatar') as HTMLElement
+			const brandElement = header.querySelector('.header_brand') as HTMLElement
 			const createNew = header.querySelector('.header_current_function') as HTMLElement
 
-			if (!userAvatar || !createNew) return
+			if (!brandElement || !createNew) return
 
 			// Add some buffer for padding and spacing
 			const BUFFER_SPACE = 80
-			const userAvatarWidth = userAvatar.getBoundingClientRect().width
+			const brandWidth = brandElement.getBoundingClientRect().width
 			const createNewWidth = createNew.getBoundingClientRect().width
 
-			const usedWidth = headerRightWidth + userAvatarWidth + createNewWidth + BUFFER_SPACE
+			const usedWidth = headerRightWidth + brandWidth + createNewWidth + BUFFER_SPACE
 
 			const availableWidth = headerWidth - usedWidth
 			const moreMenuWidth = 48
@@ -183,15 +183,14 @@ const Header: FC<HeaderProps> = ({
 		return (
 			<div className='header_normal'>
 				<div className='header_left'>
-					{/* User Avatar */}
-					<div className='header_user_avatar'>
-						<UserAvatar
-							size={32}
-							showCard={true}
-							cardPlacement='bottom'
-							cardAlign='start'
-							onClick={() => navigate('/settings/profile')}
+					{/* Brand Logo */}
+					<div className='header_brand'>
+						<img
+							className='header_brand_logo'
+							src={global.app_info?.logo || logo_svg}
+							alt='logo'
 						/>
+						<span className='header_brand_name'>{global.app_info?.name || 'Yao'}</span>
 					</div>
 
 					{/* Common Functions */}

@@ -50,12 +50,26 @@
 	}
 }
 
-.header_user_avatar {
+.header_brand {
 	display: flex;
 	align-items: center;
+	gap: 8px;
 	flex-shrink: 0;
-	position: relative;
-	z-index: 1;
+	padding: 4px 8px;
+	user-select: none;
+
+	.header_brand_logo {
+		width: 24px;
+		height: 24px;
+		object-fit: contain;
+	}
+
+	.header_brand_name {
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color_text);
+		white-space: nowrap;
+	}
 }
 
 .header_current_function {
