@@ -3048,10 +3048,16 @@ await chat.DeleteSession('chat-123')
 ### Retrieving Chat Messages (History)
 
 ```typescript
-// Get all messages for a chat (sorted by sequence asc - oldest first)
+// Get all messages for a chat (sorted by created_at asc, then sequence asc - oldest first)
 const messages = await chat.GetMessages('chat-123')
-console.log(messages.messages) // Array of ChatMessage
-console.log(messages.count)    // Total message count
+console.log(messages.messages)   // Array of ChatMessage
+console.log(messages.count)      // Total message count
+console.log(messages.assistants) // Map of assistant_id -> AssistantInfo (localized)
+
+// With locale parameter for localized assistant info
+// Priority: 1. Query param "locale", 2. Accept-Language header
+const messagesZh = await chat.GetMessages('chat-123', { locale: 'zh-cn' })
+const messagesEn = await chat.GetMessages('chat-123', { locale: 'en-us' })
 
 // With pagination (always sorted by sequence asc)
 // Use offset to skip earlier messages, limit to control page size
@@ -3491,6 +3497,24 @@ interface ChatMessageFilter {
     type?: string
     limit?: number    // Max messages to return (default: 100)
     offset?: number   // Skip first N messages
+    locale?: string   // Locale for assistant info (e.g., "zh-cn", "en-us")
+                      // Falls back to Accept-Language header if not provided
+}
+
+// Assistant info (localized based on locale parameter)
+interface AssistantInfo {
+    assistant_id: string
+    name: string
+    avatar?: string
+    description?: string
+}
+
+// GetMessages response
+interface ChatMessagesResponse {
+    chat_id: string
+    messages: ChatMessage[]
+    count: number
+    assistants?: Record<string, AssistantInfo>  // Map of assistant_id -> AssistantInfo
 }
 ```
 

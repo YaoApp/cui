@@ -871,16 +871,7 @@ export interface ChatMessageFilter {
 	type?: string
 	limit?: number
 	offset?: number
-}
-
-/**
- * Assistant info for display (from GetMessages response)
- */
-export interface AssistantInfo {
-	assistant_id: string
-	name: string
-	avatar?: string
-	description?: string
+	locale?: string // Locale for assistant info (e.g., "zh-cn", "en-us")
 }
 
 /**
