@@ -150,6 +150,8 @@ export interface IHistoryProps {
 	open: boolean
 	/** 当前激活的 tab ID */
 	activeTabId?: string
+	/** 是否使用 overlay 模式（空间不足时覆盖在内容上层） */
+	overlay?: boolean
 	/** 选择会话回调 */
 	onSelect: (chatId: string) => void
 	/** 删除会话回调（同时关闭对应 tab） */

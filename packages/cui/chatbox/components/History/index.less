@@ -1,3 +1,14 @@
+// Backdrop for overlay mode
+.backdrop {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.3);
+	z-index: 99;
+}
+
 .sidebar {
 	width: 0;
 	min-width: 0;
@@ -13,6 +24,16 @@
 		width: 260px;
 		min-width: 260px;
 		border-right: 1px solid var(--color_border_light);
+	}
+
+	// Overlay mode: absolute positioned, above content
+	&.overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		z-index: 100;
+		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
 	}
 }
 

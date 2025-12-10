@@ -21,7 +21,7 @@ const GROUP_LABELS: Record<string, { en: string; cn: string }> = {
  * 从左侧推拉展开，显示分组的历史会话列表
  */
 const History = (props: IHistoryProps) => {
-	const { open, activeTabId, onSelect, onDelete } = props
+	const { open, activeTabId, overlay, onSelect, onDelete, onClose } = props
 
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -167,94 +167,104 @@ const History = (props: IHistoryProps) => {
 	)
 
 	return (
-		<div className={clsx(styles.sidebar, open && styles.open)}>
-			<div className={styles.content}>
-				{/* Header with title */}
-				<div className={styles.header}>
-					<span className={styles.title}>{is_cn ? '历史记录' : 'History'}</span>
-				</div>
+		<>
+			{/* Overlay backdrop - only in overlay mode */}
+			{overlay && open && <div className={styles.backdrop} onClick={onClose} />}
 
-				{/* Search box */}
-				<div className={styles.search}>
-					<Icon name='material-search' size={16} className={styles.searchIcon} />
-					<input
-						type='text'
-						className={styles.searchInput}
-						placeholder={is_cn ? '搜索...' : 'Search...'}
-						value={searchInput}
-						onChange={handleSearchChange}
-					/>
-					{searchInput && (
-						<div className={styles.clearBtn} onClick={handleClearSearch}>
-							<Icon name='material-close' size={14} />
-						</div>
-					)}
-				</div>
+			<div className={clsx(styles.sidebar, open && styles.open, overlay && styles.overlay)}>
+				<div className={styles.content}>
+					{/* Header with title */}
+					<div className={styles.header}>
+						<span className={styles.title}>{is_cn ? '历史记录' : 'History'}</span>
+					</div>
 
-				{/* Session list */}
-				<div className={styles.list}>
-					{loading && <div className={styles.loading}>{is_cn ? '加载中...' : 'Loading...'}</div>}
-
-					{!loading && error && (
-						<div className={styles.error} onClick={fetchSessions}>
-							<span>{error}</span>
-							<Icon name='material-refresh' size={14} className={styles.retryIcon} />
-						</div>
-					)}
-
-					{!loading &&
-						!error &&
-						groups.map((group) => (
-							<div key={group.key} className={styles.group}>
-								<div className={styles.groupLabel}>
-									{getGroupLabel(group.key, group.label)}
-								</div>
-								{group.chats.map((session: ChatSession) => {
-									const title = session.title || (is_cn ? '无标题' : 'Untitled')
-									const isActive = session.chat_id === activeTabId
-									return (
-										<div
-											key={session.chat_id}
-											className={clsx(
-												styles.item,
-												isActive && styles.active
-											)}
-											onClick={() => onSelect(session.chat_id)}
-											title={title}
-										>
-											<span className={styles.itemTitle}>{title}</span>
-											<div
-												className={styles.deleteBtn}
-												onClick={(e) =>
-													handleDelete(e, session.chat_id)
-												}
-												title={is_cn ? '删除' : 'Delete'}
-											>
-												<Icon
-													name='material-delete_outline'
-													size={14}
-												/>
-											</div>
-										</div>
-									)
-								})}
+					{/* Search box */}
+					<div className={styles.search}>
+						<Icon name='material-search' size={16} className={styles.searchIcon} />
+						<input
+							type='text'
+							className={styles.searchInput}
+							placeholder={is_cn ? '搜索...' : 'Search...'}
+							value={searchInput}
+							onChange={handleSearchChange}
+						/>
+						{searchInput && (
+							<div className={styles.clearBtn} onClick={handleClearSearch}>
+								<Icon name='material-close' size={14} />
 							</div>
-						))}
+						)}
+					</div>
 
-					{!loading && !error && groups.length === 0 && (
-						<div className={styles.empty}>
-							{keywords
-								? is_cn
-									? '未找到匹配的会话'
-									: 'No matching chats'
-								: is_cn
-								? '暂无历史记录'
-								: 'No history yet'}
-						</div>
-					)}
+					{/* Session list */}
+					<div className={styles.list}>
+						{loading && (
+							<div className={styles.loading}>{is_cn ? '加载中...' : 'Loading...'}</div>
+						)}
+
+						{!loading && error && (
+							<div className={styles.error} onClick={fetchSessions}>
+								<span>{error}</span>
+								<Icon name='material-refresh' size={14} className={styles.retryIcon} />
+							</div>
+						)}
+
+						{!loading &&
+							!error &&
+							groups.map((group) => (
+								<div key={group.key} className={styles.group}>
+									<div className={styles.groupLabel}>
+										{getGroupLabel(group.key, group.label)}
+									</div>
+									{group.chats.map((session: ChatSession) => {
+										const title =
+											session.title || (is_cn ? '无标题' : 'Untitled')
+										const isActive = session.chat_id === activeTabId
+										return (
+											<div
+												key={session.chat_id}
+												className={clsx(
+													styles.item,
+													isActive && styles.active
+												)}
+												onClick={() => onSelect(session.chat_id)}
+												title={title}
+											>
+												<span className={styles.itemTitle}>
+													{title}
+												</span>
+												<div
+													className={styles.deleteBtn}
+													onClick={(e) =>
+														handleDelete(e, session.chat_id)
+													}
+													title={is_cn ? '删除' : 'Delete'}
+												>
+													<Icon
+														name='material-delete_outline'
+														size={14}
+													/>
+												</div>
+											</div>
+										)
+									})}
+								</div>
+							))}
+
+						{!loading && !error && groups.length === 0 && (
+							<div className={styles.empty}>
+								{keywords
+									? is_cn
+										? '未找到匹配的会话'
+										: 'No matching chats'
+									: is_cn
+									? '暂无历史记录'
+									: 'No history yet'}
+							</div>
+						)}
+					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	)
 }
 
