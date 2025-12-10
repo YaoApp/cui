@@ -8,7 +8,6 @@ import clsx from 'clsx'
 import { IPropsNeo } from '@/layouts/types'
 import Menu from './Menu'
 import Container from './Container/index'
-import { NEO_PAGE_BREAKPOINT, NEO_PAGE_PADDING } from '@/chatbox/components/Page'
 import { Page } from '@/chatbox' // Import new Page component
 import { ChatProvider } from '@/chatbox/context'
 import './style.less'
@@ -145,7 +144,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 					if (detail.title) setCurrentPageName(detail.title || detail.url)
 					setTemporaryLink(detail.url)
 					setIsTemporaryView(true)
-					
+
 					// First temporary view: push to history (preserve previous page)
 					// Subsequent temporary views: replace current (don't stack temporary pages)
 					if (isFirstTemporaryViewRef.current) {
