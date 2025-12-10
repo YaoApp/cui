@@ -775,7 +775,7 @@ export interface ChatSession {
 	title?: string
 	assistant_id: string
 	last_connector?: string // Last used connector ID (updated on each message)
-	mode?: string
+	last_mode?: string // Last used chat mode (updated on each message)
 	status: ChatStatus
 	public?: boolean // Whether shared across all teams
 	share?: ChatShare // "private" or "team"
@@ -853,6 +853,7 @@ export interface ChatMessage {
 	thread_id?: string
 	assistant_id?: string
 	connector?: string // Connector ID used for this message
+	mode?: string // Chat mode used for this message (chat or task)
 	sequence: number
 	metadata?: Record<string, any>
 	created_at: string // ISO 8601 datetime
@@ -873,10 +874,21 @@ export interface ChatMessageFilter {
 }
 
 /**
+ * Assistant info for display (from GetMessages response)
+ */
+export interface AssistantInfo {
+	assistant_id: string
+	name: string
+	avatar?: string
+	description?: string
+}
+
+/**
  * Response for getting messages
  */
 export interface ChatMessagesResponse {
 	chat_id: string
 	messages: ChatMessage[]
 	count: number
+	assistants?: Record<string, AssistantInfo>
 }

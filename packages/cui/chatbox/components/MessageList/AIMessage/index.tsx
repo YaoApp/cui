@@ -11,13 +11,16 @@ interface IAIMessageProps {
 }
 
 const AIMessage = ({ message, loading }: IAIMessageProps) => {
-	// Get assistant info from message
+	// Get assistant info from message props (for history messages) or message.assistant (for streaming)
+	const props = message.props || {}
 	const assistant = (message as any).assistant
-	const avatarData = assistant
+	const hasAssistantInfo = assistant || props.assistant_name || props.assistant_avatar
+
+	const avatarData = hasAssistantInfo
 		? {
-				id: assistant.assistant_id || '',
-				avatar: assistant.avatar,
-				name: assistant.name || 'AI'
+				id: assistant?.assistant_id || '',
+				avatar: assistant?.avatar || props.assistant_avatar,
+				name: assistant?.name || props.assistant_name || 'AI'
 		  }
 		: null
 
@@ -55,7 +58,7 @@ const AIMessage = ({ message, loading }: IAIMessageProps) => {
 				{avatarData && (
 					<div className={styles.messageHeader}>
 						<UserAvatar size='sm' shape='circle' data={avatarData} />
-						<div className={styles.senderName}>{assistant.name || 'AI'}</div>
+						<div className={styles.senderName}>{avatarData.name}</div>
 					</div>
 				)}
 

@@ -21,8 +21,14 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	// Determine effective assistant ID for defaults
 	const defaultAssistantId = propAssistantId || global.default_assistant?.assistant_id
 
-	// Initialize state
-	const [state, actions, refs] = useChatState()
+	// Get user and team info for tabs storage persistence
+	// Use global.user (MobX observable) for reactive updates when user switches
+	// Convert id to string since it can be number | string
+	const userId = global.user?.id != null ? String(global.user.id) : undefined
+	const teamId = global.user?.team_id
+
+	// Initialize state with user/team context for storage persistence
+	const [state, actions, refs] = useChatState({ userId, teamId })
 	const {
 		chatStates,
 		tabs,
@@ -108,6 +114,21 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		defaultAssistantId
 	})
 
+	// Auto-load history when tab is activated
+	// Skip for: newly created tabs (isNew) or already loaded tabs (historyLoaded)
+	useEffect(() => {
+		if (!activeTabId || !chatClient || !activeTab) return
+
+		// Skip if this is a newly created chat
+		if (activeTab.isNew) return
+
+		// Skip if history already loaded
+		if (activeTab.historyLoaded) return
+
+		// Load history for restored tabs
+		loadHistory(activeTabId)
+	}, [activeTabId, chatClient, activeTab, loadHistory])
+
 	// Queue management
 	const { queueMessage, sendQueuedMessage, cancelQueuedMessage } = useQueue({
 		chatClient,
@@ -142,6 +163,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		streaming,
 		assistant,
 		tabs,
+		activeTab,
 		activeTabId,
 		messageQueue,
 		sendMessage,

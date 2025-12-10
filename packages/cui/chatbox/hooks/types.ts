@@ -25,6 +25,7 @@ export interface UseChatReturn {
 
 	// Tab State
 	tabs: ChatTab[]
+	activeTab?: ChatTab
 	activeTabId: string
 
 	// Message Queue State

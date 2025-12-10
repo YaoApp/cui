@@ -28,18 +28,18 @@ const Page = (props: IPageProps) => {
 
 	// Page 只需要关注 Header 相关的状态和方法
 	const chatContext = useChatContext()
-	
+
 	// Wait for ChatProvider to be ready
 	if (!chatContext) {
 		return null
 	}
-	
+
 	const { createNewChat, tabs, activeTabId, activateTab, closeTab } = chatContext
 
 	// 显示 Header 的条件：
-	// - tabs 模式：有 tabs 时显示
-	// - single/custom 模式：始终显示
-	const showHeader = headerMode === 'tabs' ? tabs.length > 0 : true
+	// - single 模式：不显示 tabs header
+	// - tabs/custom 模式：始终显示
+	const showHeader = headerMode !== 'single'
 
 	// Chatbox 始终显示，即使没有 activeTabId
 	// 当 activeTabId 为空时，Chatbox 会显示 Placeholder 模式

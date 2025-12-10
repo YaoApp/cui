@@ -398,7 +398,8 @@ export class Chat {
 		}
 
 		const result = await response.json()
-		return result.data as ChatSessionList
+		// Handle both { data: {...} } and direct response formats
+		return (result.data || result) as ChatSessionList
 	}
 
 	/**
@@ -424,7 +425,8 @@ export class Chat {
 		}
 
 		const result = await response.json()
-		return result.data as ChatSession
+		// Handle both { data: {...} } and direct response formats
+		return (result.data || result) as ChatSession
 	}
 
 	/**
@@ -543,6 +545,7 @@ export class Chat {
 		}
 
 		const result = await response.json()
-		return result.data as ChatMessagesResponse
+		// Handle both { data: {...} } and direct response formats
+		return (result.data || result) as ChatMessagesResponse
 	}
 }

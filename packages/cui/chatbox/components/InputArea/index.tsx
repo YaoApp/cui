@@ -49,7 +49,9 @@ const InputArea = (props: IInputAreaProps) => {
 		messageQueue,
 		onQueueMessage,
 		onSendQueuedMessage,
-		onCancelQueuedMessage
+		onCancelQueuedMessage,
+		initialModel,
+		initialChatMode
 	} = props
 	const [isAnimating, setIsAnimating] = useState(false)
 	const [isDragOver, setIsDragOver] = useState(false)
@@ -102,17 +104,21 @@ const InputArea = (props: IInputAreaProps) => {
 		if (propAssistant) {
 			setAgent(propAssistant)
 
-			// Set default model from connector
-			if (defaultProvider) {
+			// Priority: initialModel (from session history) > defaultProvider (from assistant config)
+			if (initialModel) {
+				setCurrentModel(initialModel)
+			} else if (defaultProvider) {
 				setCurrentModel(defaultProvider)
 			}
 
-			// Set default mode from assistant configuration
-			if (propAssistant.default_mode) {
+			// Priority: initialChatMode (from session history) > default_mode (from assistant config)
+			if (initialChatMode) {
+				setChatMode(initialChatMode)
+			} else if (propAssistant.default_mode) {
 				setChatMode(propAssistant.default_mode as 'chat' | 'task')
 			}
 		}
-	}, [propAssistant, defaultProvider])
+	}, [propAssistant, defaultProvider, initialModel, initialChatMode])
 
 	// Reset animating state after transition
 	useEffect(() => {
@@ -449,27 +455,27 @@ const InputArea = (props: IInputAreaProps) => {
 			// Language hint
 			const languageHint = is_cn ? '请用中文优化提示词。' : 'Please optimize the prompt in English.'
 
-		// Stream optimization
-		chatClient.StreamCompletion(
-			{
-				assistant_id: promptAgentId,
-				messages: [
-					{
-						role: 'user',
-						content: `Optimize and improve this prompt to be more clear, specific, and effective. ${languageHint}\n\nOriginal prompt:\n${currentText}`
+			// Stream optimization
+			chatClient.StreamCompletion(
+				{
+					assistant_id: promptAgentId,
+					messages: [
+						{
+							role: 'user',
+							content: `Optimize and improve this prompt to be more clear, specific, and effective. ${languageHint}\n\nOriginal prompt:\n${currentText}`
+						}
+					],
+					model: currentModel, // Use current selected model
+					locale, // Pass user locale for i18n
+					skip: {
+						history: true, // Don't save to history
+						trace: true // Don't show trace
+					},
+					metadata: {
+						mode: chatMode,
+						page: currentPage || undefined
 					}
-				],
-				model: currentModel, // Use current selected model
-				locale, // Pass user locale for i18n
-				skip: {
-					history: true, // Don't save to history
-					trace: true // Don't show trace
 				},
-				metadata: {
-					mode: chatMode,
-					page: currentPage || undefined
-				}
-			},
 				(chunk) => {
 					// Check for stream end event
 					if (IsEventMessage(chunk) && IsStreamEndEvent(chunk)) {
@@ -845,13 +851,15 @@ const InputArea = (props: IInputAreaProps) => {
 						multiple
 					/>
 
-					<ToolButton
+					{/* 
+					 Use drag & drop to add data source to the chat box. disabled for now.
+					  <ToolButton
 						tooltip={is_cn ? '添加数据' : 'Add Data'}
 						onClick={handleOpenResourcePicker}
 						disabled={loading || isOptimizing}
 					>
 						<Database size={14} />
-					</ToolButton>
+					</ToolButton> */}
 
 					<ToolButton
 						tooltip={

@@ -5,13 +5,46 @@ import type { ChatTab } from '../types'
 import type { QueuedMessage } from './types'
 import type { ChatState, ChatStateActions, ChatRefs } from './state'
 import { clearMessageCache } from './delta'
-import { getChatHistory } from '../services/mock'
+import type { ChatMessage, Message, AssistantInfo } from '../../openapi'
 
 export interface UseTabsOptions {
 	state: ChatState
 	actions: ChatStateActions
 	refs: ChatRefs
 	defaultAssistantId?: string
+}
+
+/**
+ * Convert stored ChatMessage to display Message format
+ * @param stored - ChatMessage from server storage
+ * @param assistants - Map of assistant_id to AssistantInfo for avatar/name lookup
+ * @returns Message for UI display
+ */
+const convertStoredToDisplay = (stored: ChatMessage, assistants?: Record<string, AssistantInfo>): Message => {
+	// Get assistant info if available
+	const assistantInfo = stored.assistant_id && assistants?.[stored.assistant_id]
+
+	return {
+		ui_id: nanoid(), // Generate unique UI ID for React key
+		message_id: stored.message_id,
+		type: stored.type,
+		props: {
+			...stored.props,
+			role: stored.role, // Ensure role is in props for display
+			// Add assistant info to props for rendering
+			...(assistantInfo && {
+				assistant_name: assistantInfo.name,
+				assistant_avatar: assistantInfo.avatar
+			})
+		},
+		block_id: stored.block_id,
+		thread_id: stored.thread_id,
+		delta: false, // Historical messages are complete
+		metadata: {
+			timestamp: new Date(stored.created_at).getTime(),
+			sequence: stored.sequence
+		}
+	}
 }
 
 export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOptions) {
@@ -111,7 +144,8 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 			const newTab: ChatTab = {
 				chatId: newId,
 				title: is_cn ? '新对话' : 'New Chat',
-				assistantId: targetAssistantId
+				assistantId: targetAssistantId,
+				isNew: true // Mark as newly created, not loaded from history
 			}
 			setTabs((prev) => [...prev, newTab])
 			setChatStates((prev) => ({ ...prev, [newId]: [] }))
@@ -123,35 +157,84 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 
 	const loadHistory = useCallback(
 		async (chatId: string) => {
-			if (tabs.find((t) => t.chatId === chatId)) {
+			// If tab already exists, just activate it
+			const existingTab = tabs.find((t) => t.chatId === chatId)
+			if (existingTab) {
 				setActiveTabId(chatId)
-				return
 			}
 
 			const session = sessions.find((s: any) => s.chat_id === chatId)
 			const historyAssistantId = session?.assistant_id || defaultAssistantId
 
-			const newTab: ChatTab = { chatId, title: 'Loading...', assistantId: historyAssistantId }
-			setTabs((prev) => [...prev, newTab])
-			setActiveTabId(chatId)
+			// Create tab if not exists
+			if (!existingTab) {
+				const newTab: ChatTab = {
+					chatId,
+					title: session?.title || 'Loading...',
+					assistantId: historyAssistantId
+				}
+				setTabs((prev) => [...prev, newTab])
+				setActiveTabId(chatId)
+			}
 			setLoadingStates((prev) => ({ ...prev, [chatId]: true }))
 
 			try {
-				const history = await getChatHistory(chatId)
-				setChatStates((prev) => ({ ...prev, [chatId]: history }))
-
-				if (session) {
-					setTabs((prev) =>
-						prev.map((t) => (t.chatId === chatId ? { ...t, title: session.title } : t))
-					)
+				// Use Chat API to fetch messages
+				if (!state.chatClient) {
+					console.warn('Chat client not initialized')
+					setLoadingStates((prev) => ({ ...prev, [chatId]: false }))
+					return
 				}
+
+				// Fetch session details and messages in parallel
+				const [sessionRes, messagesRes] = await Promise.all([
+					state.chatClient.GetSession(chatId).catch(() => null),
+					state.chatClient.GetMessages(chatId)
+				])
+
+				// Convert stored messages to display format with assistant info
+				const displayMessages = messagesRes.messages.map((msg: ChatMessage) =>
+					convertStoredToDisplay(msg, messagesRes.assistants)
+				)
+				setChatStates((prev) => ({ ...prev, [chatId]: displayMessages }))
+
+				// Update tab with session details (title, lastConnector, lastMode, historyLoaded)
+				const title = sessionRes?.title || session?.title || (is_cn ? '历史对话' : 'Chat History')
+				const lastConnector = sessionRes?.last_connector
+				const mode = sessionRes?.last_mode as 'chat' | 'task' | undefined
+				setTabs((prev) =>
+					prev.map((t) =>
+						t.chatId === chatId
+							? {
+									...t,
+									title,
+									historyLoaded: true, // Mark as loaded to prevent duplicate requests
+									...(lastConnector && { lastConnector }),
+									...(mode && { mode })
+							  }
+							: t
+					)
+				)
 			} catch (err) {
 				console.error('Failed to load history', err)
+				// Set empty messages on error, but still mark as loaded to prevent retry loop
+				setChatStates((prev) => ({ ...prev, [chatId]: [] }))
+				setTabs((prev) => prev.map((t) => (t.chatId === chatId ? { ...t, historyLoaded: true } : t)))
 			} finally {
 				setLoadingStates((prev) => ({ ...prev, [chatId]: false }))
 			}
 		},
-		[tabs, sessions, defaultAssistantId, setTabs, setActiveTabId, setLoadingStates, setChatStates]
+		[
+			tabs,
+			sessions,
+			defaultAssistantId,
+			setTabs,
+			setActiveTabId,
+			setLoadingStates,
+			setChatStates,
+			state.chatClient,
+			is_cn
+		]
 	)
 
 	return {

@@ -57,10 +57,15 @@ const Header = (props: IHeaderProps) => {
 
 	return (
 		<div className={clsx(styles.container, className)}>
-			{mode === 'tabs' && tabs && (
+			{mode === 'tabs' && (
 				<div className={styles.leftSection}>
+					{/* History button before tabs */}
+					<div className={styles.historyBtn} onClick={onHistoryClick} title='History'>
+						<Icon name='material-menu' size={18} />
+					</div>
+
 					<div className={styles.tabs} ref={tabsRef} onWheel={handleWheel}>
-						{tabs.map((tab) => (
+						{tabs?.map((tab) => (
 							<div
 								key={tab.chatId}
 								className={clsx(
@@ -70,9 +75,7 @@ const Header = (props: IHeaderProps) => {
 								onClick={() => onTabChange?.(tab.chatId)}
 								title={tab.title}
 							>
-								{tab.streaming && (
-									<span className={styles.streamingIndicator} />
-								)}
+								{tab.streaming && <span className={styles.streamingIndicator} />}
 								<span className={styles.tabTitle}>{tab.title}</span>
 								<span
 									className={styles.closeIcon}
@@ -94,9 +97,6 @@ const Header = (props: IHeaderProps) => {
 			<div className={styles.actions}>
 				<div className={styles.iconBtn} onClick={onNewChat} title='New Chat'>
 					<Icon name='material-add' size={18} />
-				</div>
-				<div className={styles.iconBtn} onClick={onHistoryClick} title='History'>
-					<Icon name='material-history' size={18} />
 				</div>
 				<div className={styles.iconBtn} onClick={onSettingsClick} title='Settings'>
 					<Icon name='material-more_horiz' size={18} />

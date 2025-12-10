@@ -26,11 +26,35 @@
 		align-items: center; // Center tabs vertically
 	}
 
+	.historyBtn {
+		width: 32px;
+		height: 32px;
+		min-width: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: var(--radius);
+		cursor: pointer;
+		color: var(--color_chatbox_text_secondary);
+		margin-left: 8px;
+		margin-right: 4px;
+		transition: all 0.2s;
+
+		&:hover {
+			color: var(--color_primary);
+			transform: scale(1.1);
+		}
+
+		i {
+			color: inherit;
+		}
+	}
+
 	.tabs {
 		display: flex;
 		align-items: center; // Center tabs vertically
 		height: 100%;
-		padding-left: 8px;
+		padding-left: 0;
 		overflow-x: auto;
 		scrollbar-width: none; // Firefox
 		&::-webkit-scrollbar {
@@ -65,7 +89,8 @@
 			}
 
 			@keyframes breathe {
-				0%, 100% {
+				0%,
+				100% {
 					opacity: 1;
 					transform: scale(1);
 				}
@@ -137,18 +162,14 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			border-radius: 6px;
+			border-radius: var(--radius);
 			cursor: pointer;
-			color: var(--color_chatbox_text_secondary); // Use correct variable
+			color: var(--color_chatbox_text_secondary);
 			transition: all 0.2s;
 
 			&:hover {
-				background: rgba(0, 0, 0, 0.05);
-				color: var(--color_text);
-			}
-
-			&:active {
-				background: rgba(0, 0, 0, 0.1);
+				color: var(--color_primary);
+				transform: scale(1.1);
 			}
 
 			i {

@@ -31,6 +31,10 @@ export interface ChatTab {
 	title: string
 	assistantId?: string // Added assistantId
 	streaming?: boolean // Is this tab currently streaming
+	lastConnector?: string // Last used connector/model for this chat
+	mode?: 'chat' | 'task' // Chat mode (chat or task)
+	isNew?: boolean // True if this is a newly created chat, not loaded from history
+	historyLoaded?: boolean // True if history has been loaded from API (prevents duplicate requests)
 }
 
 /**
@@ -82,6 +86,10 @@ export interface IInputAreaProps {
 		allowModelSelection?: boolean
 		defaultModel?: string
 	}
+	/** Initial model/connector from session history */
+	initialModel?: string
+	/** Initial chat mode from session history */
+	initialChatMode?: 'chat' | 'task'
 	/** Message Queue */
 	messageQueue?: QueuedMessage[]
 	/** Queue message callback */

@@ -27,16 +27,17 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 
 	// 直接从 Context 获取所需的状态和方法
 	const chatContext = useChatContext()
-	
+
 	// Wait for ChatProvider to be ready
 	if (!chatContext) {
 		return null
 	}
-	
+
 	const {
 		messages,
 		loading,
 		streaming,
+		activeTab,
 		activeTabId,
 		assistant,
 		messageQueue,
@@ -71,6 +72,8 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 				onAbort={abort}
 				chatId={activeTabId || ''}
 				assistant={assistant}
+				initialModel={activeTab?.lastConnector}
+				initialChatMode={activeTab?.mode}
 				messageQueue={messageQueue}
 				onQueueMessage={queueMessage}
 				onSendQueuedMessage={sendQueuedMessage}
