@@ -75,7 +75,7 @@ function createChunkHandler(
 					const messageId = `${streamId}:${rawMessageId}`
 
 					refs.completedMessages.current[messageId] = true
-					clearMessageCache(messageId)
+					clearMessageCache(targetTabId, messageId)
 
 					updateMessages(targetTabId, (prev) => {
 						const index = prev.findIndex((m) => m.message_id === messageId)
@@ -133,7 +133,7 @@ function createChunkHandler(
 		const messageId = `${streamId}:${rawMessageId}`
 
 		if (chunk.type_change) {
-			clearMessageCache(messageId)
+			clearMessageCache(targetTabId, messageId)
 			updateMessages(targetTabId, (prev) => {
 				const index = prev.findIndex((m) => m.message_id === messageId)
 				if (index !== -1) {
@@ -147,7 +147,7 @@ function createChunkHandler(
 		}
 
 		// Apply Delta
-		const mergedState = applyDelta(messageId, chunk)
+		const mergedState = applyDelta(targetTabId, messageId, chunk)
 		const isCompleted = refs.completedMessages.current[messageId]
 
 		updateMessages(targetTabId, (prev) => {
@@ -410,7 +410,7 @@ export function useStream({
 	const reset = useCallback(() => {
 		if (!activeTabId) return
 		updateMessages(activeTabId, () => [])
-		clearMessageCache()
+		clearMessageCache(activeTabId)
 	}, [activeTabId, updateMessages])
 
 	return {

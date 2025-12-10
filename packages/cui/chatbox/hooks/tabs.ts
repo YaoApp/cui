@@ -150,7 +150,8 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 			setTabs((prev) => [...prev, newTab])
 			setChatStates((prev) => ({ ...prev, [newId]: [] }))
 			setActiveTabId(newId)
-			clearMessageCache()
+			// Clear only the new chat's cache, don't affect other tabs
+			clearMessageCache(newId)
 		},
 		[defaultAssistantId, tabs, activeTabId, is_cn, setTabs, setChatStates, setActiveTabId]
 	)

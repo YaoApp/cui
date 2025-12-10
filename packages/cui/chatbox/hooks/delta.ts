@@ -1,19 +1,32 @@
 import type { Message } from '../../openapi'
 
 // Message cache for merging deltas
-// message_id -> Message Props
-// All delta chunks for the same logical message share one message_id
-const messageCache = new Map<string, any>()
+// Two-level cache: chatId -> (message_id -> Message Props)
+// This ensures each chat tab has its own isolated cache
+const chatCaches = new Map<string, Map<string, any>>()
+
+/**
+ * Get or create a cache for a specific chat
+ */
+function getChatCache(chatId: string): Map<string, any> {
+	let cache = chatCaches.get(chatId)
+	if (!cache) {
+		cache = new Map<string, any>()
+		chatCaches.set(chatId, cache)
+	}
+	return cache
+}
 
 /**
  * Apply delta updates to a message state
  *
+ * @param chatId - The chat ID to scope the cache
  * @param msgId - The message_id (same for all delta chunks of one logical message)
  * @param chunk - The delta chunk received from backend
- * @param cache - The cache map (default: global messageCache)
  * @returns Merged message state with accumulated props
  */
-export function applyDelta(msgId: string, chunk: Message, cache = messageCache): any {
+export function applyDelta(chatId: string, msgId: string, chunk: Message): any {
+	const cache = getChatCache(chatId)
 	// Get or initialize message state
 	let current = cache.get(msgId)
 	if (!current) {
@@ -114,14 +127,18 @@ export function applyDelta(msgId: string, chunk: Message, cache = messageCache):
 /**
  * Clear message cache
  *
- * @param msgId - Optional message_id to clear specific message cache, or clear all if not provided
- * @param cache - The cache map (default: global messageCache)
+ * @param chatId - The chat ID to scope the operation
+ * @param msgId - Optional message_id to clear specific message cache, or clear all messages for the chat if not provided
  */
-export function clearMessageCache(msgId?: string, cache = messageCache) {
+export function clearMessageCache(chatId: string, msgId?: string) {
 	if (msgId) {
-		cache.delete(msgId)
+		const cache = chatCaches.get(chatId)
+		if (cache) {
+			cache.delete(msgId)
+		}
 	} else {
-		cache.clear()
+		// Clear only this chat's cache, not others
+		chatCaches.delete(chatId)
 	}
 }
 
