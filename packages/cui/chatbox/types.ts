@@ -133,9 +133,28 @@ export interface IHeaderProps {
 	onTabClose?: (id: string) => void
 	/** 新建会话回调 */
 	onNewChat?: () => void
+	/** 历史记录是否打开 */
+	historyOpen?: boolean
 	/** 历史记录回调 */
 	onHistoryClick?: () => void
 	/** 设置/更多回调 */
 	onSettingsClick?: () => void
+	className?: string
+}
+
+/**
+ * 历史记录侧边栏组件 Props
+ */
+export interface IHistoryProps {
+	/** 是否打开 */
+	open: boolean
+	/** 当前激活的 tab ID */
+	activeTabId?: string
+	/** 选择会话回调 */
+	onSelect: (chatId: string) => void
+	/** 删除会话回调（同时关闭对应 tab） */
+	onDelete?: (chatId: string) => void
+	/** 关闭回调 */
+	onClose: () => void
 	className?: string
 }

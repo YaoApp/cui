@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import styles from './index.less'
 import type { IChatProps } from '../../types'
 import { useChatContext } from '../../context'
 import Chatbox from '../../components/Chatbox'
 import Header from '../../components/Header'
+import History from '../../components/History'
 import { useGlobal } from '@/context/app'
 import type { App } from '@/types'
 
@@ -15,7 +16,7 @@ interface IPageProps extends IChatProps {
 
 /**
  * Page 组件 - 聊天页面容器
- * 架构: Page -> Header + Chatbox (MessageList + InputArea)
+ * 架构: Page -> History + Header + Chatbox (MessageList + InputArea)
  * 每个 Tab 对应一个独立的 Chatbox 实例
  *
  * 优化后：Page 只关注页面级别的布局和全局事件
@@ -26,6 +27,9 @@ const Page = (props: IPageProps) => {
 
 	const global = useGlobal()
 
+	// History sidebar state
+	const [historyOpen, setHistoryOpen] = useState(false)
+
 	// Page 只需要关注 Header 相关的状态和方法
 	const chatContext = useChatContext()
 
@@ -34,7 +38,21 @@ const Page = (props: IPageProps) => {
 		return null
 	}
 
-	const { createNewChat, tabs, activeTabId, activateTab, closeTab } = chatContext
+	const { createNewChat, tabs, activeTabId, activateTab, closeTab, loadHistory } = chatContext
+
+	// Toggle history sidebar
+	const toggleHistory = useCallback(() => {
+		setHistoryOpen((prev) => !prev)
+	}, [])
+
+	// Handle history item selection
+	// 不自动关闭菜单，让用户自己决定何时关闭
+	const handleHistorySelect = useCallback(
+		(chatId: string) => {
+			loadHistory(chatId)
+		},
+		[loadHistory]
+	)
 
 	// 显示 Header 的条件：
 	// - single 模式：不显示 tabs header
@@ -74,32 +92,39 @@ const Page = (props: IPageProps) => {
 
 	return (
 		<div className={styles.container}>
-			{/* Header - 管理 tabs 和导航 */}
-			{showHeader && (
-				<Header
-					mode={headerMode}
-					title={title || 'New Chat'}
-					onNewChat={createNewChat}
-					tabs={tabs}
-					activeTabId={activeTabId}
-					onTabChange={activateTab}
-					onTabClose={closeTab}
-					onHistoryClick={() => {
-						// TODO: Toggle sidebar or show history modal
-						console.log('History clicked')
-					}}
-					onSettingsClick={() => {
-						// TODO: Show settings dropdown
-						console.log('Settings clicked')
-					}}
-				/>
-			)}
+			{/* History Sidebar - 左侧推拉式历史记录 */}
+			<History
+				open={historyOpen}
+				activeTabId={activeTabId}
+				onSelect={handleHistorySelect}
+				onDelete={closeTab}
+				onClose={() => setHistoryOpen(false)}
+			/>
 
-			{/* Chatbox - 独立的聊天实例，始终显示 */}
-			{/* 当没有 activeTabId 时显示 placeholder 模式 */}
-			{/* InputArea 的状态完全由其内部管理，切换 tab 时会因 chatId 变化而重置 */}
-			{/* Chatbox 内部直接从 Context 获取状态，无需通过 props 传递 */}
-			{showChatbox && <Chatbox />}
+			{/* Main Content Area */}
+			<div className={styles.main}>
+				{/* Header - 管理 tabs 和导航 */}
+				{showHeader && (
+					<Header
+						mode={headerMode}
+						title={title || 'New Chat'}
+						onNewChat={createNewChat}
+						tabs={tabs}
+						activeTabId={activeTabId}
+						onTabChange={activateTab}
+						onTabClose={closeTab}
+						historyOpen={historyOpen}
+						onHistoryClick={toggleHistory}
+						onSettingsClick={() => {
+							// TODO: Show settings dropdown
+							console.log('Settings clicked')
+						}}
+					/>
+				)}
+
+				{/* Chatbox - 独立的聊天实例，始终显示 */}
+				{showChatbox && <Chatbox />}
+			</div>
 		</div>
 	)
 }

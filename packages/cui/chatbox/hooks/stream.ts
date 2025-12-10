@@ -297,7 +297,8 @@ export function useStream({
 				const newTab: ChatTab = {
 					chatId: newId,
 					title: is_cn ? '新对话' : 'New Chat',
-					assistantId: targetAssistantId
+					assistantId: targetAssistantId,
+					isNew: true // Mark as newly created, not loaded from history
 				}
 				setTabs((prev) => [...prev, newTab])
 				setChatStates((prev) => ({ ...prev, [newId]: [] }))

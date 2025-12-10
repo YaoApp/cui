@@ -75,14 +75,22 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 		(chatId: string) => {
 			setTabs((prev) => {
 				const newTabs = prev.filter((t) => t.chatId !== chatId)
-				if (chatId === activeTabId) {
-					if (newTabs.length > 0) {
-						const nextTabId = newTabs[newTabs.length - 1].chatId
-						setActiveTabId(nextTabId)
-					} else {
-						setActiveTabId('')
+				// Use functional update for activeTabId to avoid closure issues
+				setActiveTabId((currentActiveId) => {
+					if (chatId === currentActiveId) {
+						if (newTabs.length > 0) {
+							// Find the index of closed tab and switch to previous tab
+							const closedIndex = prev.findIndex((t) => t.chatId === chatId)
+							// Prefer previous tab, or next if closing first tab
+							const nextIndex = closedIndex > 0 ? closedIndex - 1 : 0
+							return newTabs[nextIndex]?.chatId || newTabs[newTabs.length - 1].chatId
+						} else {
+							// No tabs left - reset to initial empty state
+							return ''
+						}
 					}
-				}
+					return currentActiveId
+				})
 				return newTabs
 			})
 			// Clean up all states for closed tab
@@ -117,16 +125,7 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 				delete refs.titleGenerated.current[chatId]
 			}
 		},
-		[
-			activeTabId,
-			setTabs,
-			setActiveTabId,
-			setChatStates,
-			setLoadingStates,
-			setStreamingStates,
-			setMessageQueues,
-			refs
-		]
+		[setTabs, setActiveTabId, setChatStates, setLoadingStates, setStreamingStates, setMessageQueues, refs]
 	)
 
 	const createNewChat = useCallback(
@@ -184,6 +183,18 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 				if (!state.chatClient) {
 					console.warn('Chat client not initialized')
 					setLoadingStates((prev) => ({ ...prev, [chatId]: false }))
+					// Update tab title to show error
+					setTabs((prev) =>
+						prev.map((t) =>
+							t.chatId === chatId
+								? {
+										...t,
+										title: is_cn ? '加载失败' : 'Load Failed',
+										historyLoaded: true
+								  }
+								: t
+						)
+					)
 					return
 				}
 
@@ -216,11 +227,25 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 							: t
 					)
 				)
-			} catch (err) {
+			} catch (err: any) {
 				console.error('Failed to load history', err)
-				// Set empty messages on error, but still mark as loaded to prevent retry loop
+				// Parse error for better feedback
+				const errMsg = err?.message || ''
+				let errorTitle = is_cn ? '加载失败' : 'Load Failed'
+				if (errMsg.includes('403') || errMsg.includes('Forbidden')) {
+					errorTitle = is_cn ? '无访问权限' : 'Access Denied'
+				} else if (errMsg.includes('401') || errMsg.includes('Unauthorized')) {
+					errorTitle = is_cn ? '请先登录' : 'Please Login'
+				} else if (errMsg.includes('404') || errMsg.includes('Not Found')) {
+					errorTitle = is_cn ? '会话不存在' : 'Chat Not Found'
+				}
+				// Set empty messages on error, update tab title to show error
 				setChatStates((prev) => ({ ...prev, [chatId]: [] }))
-				setTabs((prev) => prev.map((t) => (t.chatId === chatId ? { ...t, historyLoaded: true } : t)))
+				setTabs((prev) =>
+					prev.map((t) =>
+						t.chatId === chatId ? { ...t, title: errorTitle, historyLoaded: true } : t
+					)
+				)
 			} finally {
 				setLoadingStates((prev) => ({ ...prev, [chatId]: false }))
 			}

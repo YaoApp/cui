@@ -102,6 +102,12 @@ export function useTitle({ chatClient, titleAgentId, setTabs, refs }: UseTitleOp
 								// Update title via API
 								chatClient
 									.UpdateSession(targetTabId, { title: finalTitle })
+									.then(() => {
+										// Notify History to refresh after title is saved
+										if (window.$app?.Event) {
+											window.$app.Event.emit('chat/historyRefresh')
+										}
+									})
 									.catch((err) => {
 										console.error('Failed to update chat title via API:', err)
 									})

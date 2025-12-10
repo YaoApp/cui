@@ -14,6 +14,7 @@ const Header = (props: IHeaderProps) => {
 		activeTabId,
 		onTabChange,
 		onTabClose,
+		historyOpen,
 		onHistoryClick,
 		onSettingsClick
 	} = props
@@ -61,7 +62,7 @@ const Header = (props: IHeaderProps) => {
 				<div className={styles.leftSection}>
 					{/* History button before tabs */}
 					<div className={styles.historyBtn} onClick={onHistoryClick} title='History'>
-						<Icon name='material-menu' size={18} />
+						<Icon name={historyOpen ? 'material-menu_open' : 'material-menu'} size={18} />
 					</div>
 
 					<div className={styles.tabs} ref={tabsRef} onWheel={handleWheel}>

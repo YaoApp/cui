@@ -2,12 +2,20 @@
 	width: 100%;
 	height: 100%;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row; // 水平布局：History | Main
 	background-color: var(--color_chatbox_bg_content);
 	color: var(--color_chatbox_text_primary);
-	transition: padding 0.3s ease;
 	position: relative;
-	overflow: hidden; // 防止整个页面滚动
+	overflow: hidden;
+}
+
+// 主内容区域：Header + Chatbox
+.main {
+	flex: 1;
+	min-width: 0; // 允许收缩
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 }
 
 .smallScreen {
