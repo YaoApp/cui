@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback } from 'react'
 import clsx from 'clsx'
 import Icon from '../../../widgets/Icon'
+import TabMenu from '../TabMenu'
 import type { IHeaderProps } from '../../types'
 import styles from './index.less'
 
@@ -14,9 +15,10 @@ const Header = (props: IHeaderProps) => {
 		activeTabId,
 		onTabChange,
 		onTabClose,
+		onCloseOthers,
+		onCloseAll,
 		historyOpen,
-		onHistoryClick,
-		onSettingsClick
+		onHistoryClick
 	} = props
 
 	const tabsRef = useRef<HTMLDivElement>(null)
@@ -99,9 +101,16 @@ const Header = (props: IHeaderProps) => {
 				<div className={styles.iconBtn} onClick={onNewChat} title='New Chat'>
 					<Icon name='material-add' size={18} />
 				</div>
-				<div className={styles.iconBtn} onClick={onSettingsClick} title='Settings'>
-					<Icon name='material-more_horiz' size={18} />
-				</div>
+				{mode === 'tabs' && (
+					<TabMenu
+						onCloseTab={() => activeTabId && onTabClose?.(activeTabId)}
+						onCloseOthers={onCloseOthers}
+						onCloseAll={onCloseAll}
+						disableCloseTab={!activeTabId || (tabs?.length || 0) === 0}
+						disableCloseOthers={(tabs?.length || 0) <= 1}
+						disableCloseAll={(tabs?.length || 0) === 0}
+					/>
+				)}
 			</div>
 		</div>
 	)

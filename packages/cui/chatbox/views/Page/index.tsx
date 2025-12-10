@@ -72,6 +72,22 @@ const Page = (props: IPageProps) => {
 		setHistoryOpen((prev) => !prev)
 	}, [])
 
+	// Close other tabs (keep only the active one)
+	const closeOtherTabs = useCallback(() => {
+		tabs.forEach((tab) => {
+			if (tab.chatId !== activeTabId) {
+				closeTab(tab.chatId)
+			}
+		})
+	}, [tabs, activeTabId, closeTab])
+
+	// Close all tabs
+	const closeAllTabs = useCallback(() => {
+		tabs.forEach((tab) => {
+			closeTab(tab.chatId)
+		})
+	}, [tabs, closeTab])
+
 	// Handle history item selection
 	// overlay 模式下自动关闭，push-pull 模式下保持打开
 	const handleHistorySelect = useCallback(
@@ -144,12 +160,10 @@ const Page = (props: IPageProps) => {
 						activeTabId={activeTabId}
 						onTabChange={activateTab}
 						onTabClose={closeTab}
+						onCloseOthers={closeOtherTabs}
+						onCloseAll={closeAllTabs}
 						historyOpen={historyOpen}
 						onHistoryClick={toggleHistory}
-						onSettingsClick={() => {
-							// TODO: Show settings dropdown
-							console.log('Settings clicked')
-						}}
 					/>
 				)}
 
