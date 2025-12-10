@@ -505,6 +505,13 @@ export declare namespace App {
 		badge?: number
 		dot?: boolean
 		children?: Array<Menu>
+		/**
+		 * Control Chatbox visibility for this menu item
+		 * - undefined: default behavior (show Chatbox) - backward compatible
+		 * - true / 'visible': show Chatbox alongside the page
+		 * - false / 'hidden': hide Chatbox, show page in full screen
+		 */
+		chatbox?: boolean | 'visible' | 'hidden'
 	}
 
 	interface Menus {

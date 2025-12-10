@@ -18,6 +18,8 @@ interface ContainerProps {
 	currentPageName?: string
 	isTemporaryView?: boolean
 	onBackToNormal?: () => void
+	/** Hide chatbox-related UI (brand logo, sidebar controls) */
+	noChatbox?: boolean
 }
 
 const Container: FC<PropsWithChildren<ContainerProps>> = ({
@@ -29,7 +31,8 @@ const Container: FC<PropsWithChildren<ContainerProps>> = ({
 	temporaryLink,
 	currentPageName,
 	isTemporaryView,
-	onBackToNormal
+	onBackToNormal,
+	noChatbox = false
 }) => {
 	const [isMenuVisible, setIsMenuVisible] = useState(true)
 	const contentRef = useRef<HTMLDivElement>(null)
@@ -79,7 +82,7 @@ const Container: FC<PropsWithChildren<ContainerProps>> = ({
 
 	const global = container.resolve(GlobalModel)
 	const menuItems = [...(global.menus?.items || []), ...(global.menus?.setting || [])].filter(
-		(item) => item.path != '/chat'
+		(item) => item.path != '/welcome'
 	)
 
 	const navigate = useNavigate()
@@ -128,7 +131,7 @@ const Container: FC<PropsWithChildren<ContainerProps>> = ({
 	}
 
 	return (
-		<div className='container' style={{ marginLeft: isMaximized ? 0 : 2 }}>
+		<div className='container' style={{ marginLeft: isMaximized || noChatbox ? 0 : 2 }}>
 			<Header
 				openSidebar={openSidebar}
 				closeSidebar={closeSidebar}
@@ -136,6 +139,7 @@ const Container: FC<PropsWithChildren<ContainerProps>> = ({
 				currentPageName={currentPageName}
 				temporaryLink={temporaryLink}
 				onBackToNormal={onBackToNormal}
+				noChatbox={noChatbox}
 			/>
 			<div className='mainContent' ref={mainContentRef}>
 				{showMenu && (

@@ -10,12 +10,64 @@
 	display: flex;
 	flex-direction: column;
 	padding: 4px 0 16px;
-	transition: all 0.3s ease;
+	transition: width 0.3s ease;
 
-	// 确保没有 hidden 样式
-	&.hidden {
-		// transform: translateX(-100%);
-		// opacity: 0;
+	// Expanded mode
+	&.expanded {
+		width: 200px;
+
+		.menu-content {
+			align-items: flex-start;
+		}
+
+		.menu-logo {
+			width: calc(100% - 16px);
+			justify-content: flex-start;
+			padding: 0 12px;
+			gap: 12px;
+			margin: 0 8px;
+
+			img {
+				width: 32px;
+				height: 32px;
+			}
+
+			.menu-brand-name {
+				display: block;
+			}
+		}
+
+		.menu-items {
+			padding: 0 8px;
+		}
+
+		.menu-item-wrapper {
+			width: 100%;
+		}
+
+		.menu-item {
+			width: 100%;
+			justify-content: flex-start;
+			padding: 0 12px;
+			gap: 12px;
+			margin: 0;
+
+			.menu-text {
+				display: block;
+			}
+		}
+
+		.menu-avatar {
+			width: calc(100% - 16px);
+			justify-content: flex-start;
+			padding: 0 12px;
+			gap: 12px;
+			margin: 16px 8px 0;
+
+			.menu-avatar-text {
+				display: block;
+			}
+		}
 	}
 
 	.menu-content {
@@ -33,18 +85,30 @@
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
-		transition: all 0.3s ease;
 		margin-bottom: 0;
 		border-radius: var(--radius);
-
-		&:hover {
-			background: var(--color_bg_hover);
-		}
 
 		img {
 			width: 40px;
 			height: 40px;
 			object-fit: contain;
+			flex-shrink: 0;
+			transition: transform 0.2s ease;
+		}
+
+		&:hover img {
+			transform: scale(1.1);
+		}
+
+		.menu-brand-name {
+			display: none;
+			font-size: 16px;
+			font-weight: 600;
+			color: var(--color_text);
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			user-select: none;
 		}
 	}
 
@@ -93,11 +157,21 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			flex-shrink: 0;
 
 			i {
 				color: var(--color_text_grey);
-				transition: all 0.2s ease;
+				transition: color 0.2s ease;
 			}
+		}
+
+		.menu-text {
+			display: none;
+			color: var(--color_text);
+			font-size: 14px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 	}
 
@@ -111,10 +185,18 @@
 		cursor: pointer;
 		border-radius: var(--radius);
 		margin: 16px auto 0;
-		transition: all 0.2s ease;
 
 		&:hover {
 			background: var(--color_bg_hover);
+		}
+
+		.menu-avatar-text {
+			display: none;
+			font-size: 14px;
+			color: var(--color_text);
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 	}
 }

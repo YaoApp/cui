@@ -1,60 +1,19 @@
-import React from 'react'
-import { useChatContext } from '@/chatbox/context'
-import styles from './index.less'
+import { FC } from 'react'
+import './index.less'
 
-const Index = () => {
-	const chatContext = useChatContext()
-	
-	// Wait for ChatProvider to be ready
-	if (!chatContext) {
-		return null
-	}
-	
-	const { sessions, loadHistory, currentChatId } = chatContext
-
+/**
+ * Chat Welcome Page
+ * This is the default landing page for the chat interface
+ */
+const ChatWelcome: FC = () => {
 	return (
-		<div className={styles._local} style={{ padding: 12 }}>
-			<h3 style={{ padding: '0 4px', marginBottom: 8 }}>Recent Chats</h3>
-			<div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-				{sessions.map((session) => (
-					<div
-						key={session.chat_id}
-						onClick={() => loadHistory(session.chat_id)}
-						style={{
-							padding: '10px 12px',
-							background:
-								currentChatId === session.chat_id
-									? 'var(--color_neo_bg_selected)'
-									: 'var(--color_neo_bg_card)',
-							borderRadius: 8,
-							cursor: 'pointer',
-							border:
-								currentChatId === session.chat_id
-									? '1px solid var(--color_neo_border_selected)'
-									: '1px solid var(--color_neo_border_card)',
-							transition: 'all 0.2s'
-						}}
-					>
-						<div style={{ fontWeight: 500, fontSize: 14, color: 'var(--color_text)' }}>
-							{session.title}
-						</div>
-						<div
-							style={{
-								fontSize: 12,
-								color: 'var(--color_text_grey)',
-								marginTop: 4,
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-								whiteSpace: 'nowrap'
-							}}
-						>
-							{session.last_message}
-						</div>
-					</div>
-				))}
+		<div className='chat-welcome'>
+			<div className='welcome-content'>
+				<h1>Welcome</h1>
+				<p>Start a conversation with the AI assistant</p>
 			</div>
 		</div>
 	)
 }
 
-export default Index
+export default ChatWelcome

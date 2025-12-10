@@ -1,6 +1,6 @@
 import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { FC, PropsWithChildren, useState, useCallback, useEffect, useRef } from 'react'
+import { FC, PropsWithChildren, useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { container } from 'tsyringe'
 import { GlobalModel } from '@/context/app'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
@@ -11,8 +11,92 @@ import Container from './Container/index'
 import { Page } from '@/chatbox' // Import new Page component
 import { ChatProvider } from '@/chatbox/context'
 import './style.less'
-import { useNavigate } from '@umijs/max'
+import { useNavigate, useLocation } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import { App } from '@/types'
+
+/**
+ * Find menu item by path (recursively search through menu tree)
+ */
+const findMenuByPath = (path: string, menus: App.Menu[]): App.Menu | undefined => {
+	for (const menu of menus) {
+		if (menu.path === path || path.startsWith(menu.path + '/')) {
+			return menu
+		}
+		if (menu.children) {
+			const found = findMenuByPath(path, menu.children)
+			if (found) return found
+		}
+	}
+	return undefined
+}
+
+/**
+ * Paths that default to sidebar-only mode (system pages without Chatbox)
+ */
+const SIDEBAR_ONLY_PATHS = ['/settings', '/login', '/register']
+
+/**
+ * Paths that default to chatbox-only mode (entry pages, no sidebar)
+ */
+const CHATBOX_ONLY_PATHS = ['/', '/welcome', '/chat']
+
+/**
+ * Check if path matches any sidebar-only default paths
+ */
+const isSidebarOnlyPath = (path: string): boolean => {
+	for (const prefix of SIDEBAR_ONLY_PATHS) {
+		if (path === prefix || path.startsWith(prefix + '/')) {
+			return true
+		}
+	}
+	return false
+}
+
+/**
+ * Check if path matches any chatbox-only default paths
+ */
+const isChatboxOnlyPath = (path: string): boolean => {
+	return CHATBOX_ONLY_PATHS.includes(path)
+}
+
+/**
+ * Determine display mode for current path and menu
+ * Returns: 'chatbox-only' | 'sidebar-only' | 'both'
+ *
+ * Logic:
+ * - Menu found + chatbox: false / 'hidden': Sidebar only
+ * - Menu found + chatbox: true / 'visible' / undefined: Both (backward compatible)
+ * - Menu not found + known sidebar-only paths (/settings/*): Sidebar only
+ * - Menu not found + known chatbox-only paths (/, /welcome, /chat): Chatbox only
+ * - Menu not found + unknown routes: Both (default, business pages like /trace/*)
+ */
+type DisplayMode = 'chatbox-only' | 'sidebar-only' | 'both'
+
+const getDisplayMode = (path: string, menu: App.Menu | undefined): DisplayMode => {
+	// Menu found: check chatbox configuration
+	if (menu) {
+		const setting = menu.chatbox
+		if (setting === false || setting === 'hidden') {
+			return 'sidebar-only'
+		}
+		// Default: show both (backward compatible)
+		return 'both'
+	}
+
+	// Menu not found: check if it's a known sidebar-only path (system pages)
+	if (isSidebarOnlyPath(path)) {
+		return 'sidebar-only'
+	}
+
+	// Menu not found: check if it's a known chatbox-only path (entry pages)
+	if (isChatboxOnlyPath(path)) {
+		return 'chatbox-only'
+	}
+
+	// Unknown route: default to 'both' (business pages like /trace/*)
+	return 'both'
+}
 
 const MAIN_CONTENT_MIN_WIDTH = 320
 const DEFAULT_WIDTH = 400
@@ -56,6 +140,35 @@ const getResponsiveWidths = () => {
 
 const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	const global = container.resolve(GlobalModel)
+	const location = useLocation()
+	const currentPath = location.pathname
+
+	// Check if app is still loading (menus not yet loaded)
+	const [isInitialLoading, setIsInitialLoading] = useState(true)
+
+	// Get all menu items for chatbox visibility check
+	const allMenuItems = useMemo(() => {
+		const items = global.menus?.items || []
+		const setting = global.menus?.setting || []
+		const quick = global.menus?.quick || []
+		return [...items, ...setting, ...quick]
+	}, [global.menus])
+
+	// Determine display mode based on menu configuration
+	const displayMode = useMemo(() => {
+		const currentMenu = findMenuByPath(currentPath, allMenuItems)
+		return getDisplayMode(currentPath, currentMenu)
+	}, [currentPath, allMenuItems])
+
+	// Handle initial loading state
+	useEffect(() => {
+		// If menus are loaded, hide loading
+		if (allMenuItems.length > 0) {
+			// Small delay for smooth transition
+			const timer = setTimeout(() => setIsInitialLoading(false), 100)
+			return () => clearTimeout(timer)
+		}
+	}, [allMenuItems])
 
 	// Use global state for sidebar management
 	const sidebarVisible = global.sidebar_visible
@@ -65,6 +178,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	const [isAnimating, setIsAnimating] = useState(false)
 	const [responsiveWidths, setResponsiveWidths] = useState(getResponsiveWidths())
 	const [previousWidth, setPreviousWidth] = useState(DEFAULT_WIDTH)
+	const [menuExpanding, setMenuExpanding] = useState(false) // Disable sidebar transition during menu expand/collapse
 
 	const props_neo: IPropsNeo = {
 		stack: global.stack.paths.join('/'),
@@ -104,6 +218,11 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	const [isTemporaryView, setIsTemporaryView] = useState(false)
 	const [currentPageName, setCurrentPageName] = useState<string>()
 	const isFirstTemporaryViewRef = useRef(true) // Track if this is the first temporary view
+
+	// Track if navigation was triggered from menu
+	// When true, use menu's chatbox configuration
+	// When false (default, or triggered from Chatbox/Action), force 'both' mode
+	const [triggeredFromMenu, setTriggeredFromMenu] = useState(false)
 
 	const navigate = useNavigate()
 
@@ -169,14 +288,34 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			handleSetSidebarVisible(false)
 		}
 
+		// Handle menu navigation - mark as triggered from menu
+		const handleMenuNavigation = () => {
+			setTriggeredFromMenu(true)
+		}
+
+		// Handle openSidebar from Chatbox/Action - reset menu trigger flag
+		const wrappedHandleOpenSidebar = (detail: any) => {
+			setTriggeredFromMenu(false) // Not from menu, force 'both' mode
+			handleOpenSidebar(detail)
+		}
+
+		// Handle menu expanding - disable sidebar transition temporarily
+		const handleMenuExpanding = (expanding: boolean) => {
+			setMenuExpanding(expanding)
+		}
+
 		window.$app.Event.on('app/toggleSidebar', handleToggleSidebar)
-		window.$app.Event.on('app/openSidebar', handleOpenSidebar)
+		window.$app.Event.on('app/openSidebar', wrappedHandleOpenSidebar)
 		window.$app.Event.on('app/closeSidebar', handleCloseSidebar)
+		window.$app.Event.on('app/menuNavigation', handleMenuNavigation)
+		window.$app.Event.on('app/menuExpanding', handleMenuExpanding)
 
 		return () => {
 			window.$app.Event.off('app/toggleSidebar', handleToggleSidebar)
-			window.$app.Event.off('app/openSidebar', handleOpenSidebar)
+			window.$app.Event.off('app/openSidebar', wrappedHandleOpenSidebar)
 			window.$app.Event.off('app/closeSidebar', handleCloseSidebar)
+			window.$app.Event.off('app/menuNavigation', handleMenuNavigation)
+			window.$app.Event.off('app/menuExpanding', handleMenuExpanding)
 		}
 	}, [sidebarVisible, handleSetSidebarVisible, navigate])
 
@@ -287,33 +426,109 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		[sidebarWidth, responsiveWidths, isMaximized, global]
 	)
 
+	// Show loading screen while initial data is loading
+	if (isInitialLoading) {
+		return (
+			<div className='chatbox-loading'>
+				<div className='loading-spinner' />
+			</div>
+		)
+	}
+
+	// Determine effective display mode
+	// - SIDEBAR_ONLY_PATHS (e.g., /settings/*): always sidebar-only (system pages)
+	// - Menu triggered: follow menu's chatbox setting
+	// - Chatbox/Action triggered: force 'both' mode (keep chatbox visible)
+	// - chatbox-only routes: always chatbox-only
+	const effectiveDisplayMode = (() => {
+		// System pages: always sidebar-only regardless of trigger source
+		if (isSidebarOnlyPath(currentPath)) {
+			console.log('[ChatboxWrapper] effectiveDisplayMode: sidebar-only (system path)')
+			return 'sidebar-only'
+		}
+		// Menu navigation: follow menu configuration
+		if (triggeredFromMenu) {
+			console.log('[ChatboxWrapper] effectiveDisplayMode:', displayMode, '(from menu)')
+			return displayMode
+		}
+		// Non-menu navigation: default to 'both' unless explicitly chatbox-only
+		const result = displayMode === 'chatbox-only' ? 'chatbox-only' : 'both'
+		console.log('[ChatboxWrapper] effectiveDisplayMode:', result, '(non-menu)')
+		return result
+	})()
+
+	// Debug logging
+	console.log('[ChatboxWrapper] ===== Debug =====')
+	console.log('[ChatboxWrapper] currentPath:', currentPath)
+	console.log('[ChatboxWrapper] displayMode:', displayMode)
+	console.log('[ChatboxWrapper] triggeredFromMenu:', triggeredFromMenu)
+	console.log('[ChatboxWrapper] isTemporaryView:', isTemporaryView)
+	// Debug: find current menu for logging
+	const currentMenuDebug = findMenuByPath(currentPath, allMenuItems)
+	console.log('[ChatboxWrapper] effectiveDisplayMode:', effectiveDisplayMode)
+	console.log(
+		'[ChatboxWrapper] allMenuItems:',
+		allMenuItems.map((m) => m.path)
+	)
+	console.log('[ChatboxWrapper] currentMenu:', currentMenuDebug)
+	console.log('[ChatboxWrapper] showChatbox:', effectiveDisplayMode !== 'sidebar-only')
+	console.log('[ChatboxWrapper] showSidebarArea:', effectiveDisplayMode !== 'chatbox-only')
+	console.log('[ChatboxWrapper] =================')
+
+	// Determine visibility based on display mode
+	// - chatbox-only: only show Chatbox (e.g., /welcome or undefined routes)
+	// - sidebar-only: only show Sidebar with business page (e.g., /settings, chatbox: false)
+	// - both: show both Chatbox and Sidebar (default, backward compatible)
+	const showChatbox = effectiveDisplayMode !== 'sidebar-only'
+	const showSidebarArea = effectiveDisplayMode !== 'chatbox-only'
+
+	// Calculate content width based on mode (using CSS variable for menu width)
+	const getContentWidth = () => {
+		if (!showChatbox) {
+			// Sidebar-only mode: full width for business content
+			return 'calc(100% - var(--menu-width, 64px))'
+		}
+		if (!showSidebarArea) {
+			// Chatbox-only mode: full width for Chatbox
+			return 'calc(100% - var(--menu-width, 64px))'
+		}
+		// Both mode: adjust based on sidebar visibility
+		return sidebarVisible && !isMaximized
+			? `calc(100% - var(--menu-width, 64px) - ${sidebarWidth}px)`
+			: 'calc(100% - var(--menu-width, 64px))'
+	}
+
+	// Always render ChatProvider for Action support (e.g., auto-open sidebar during chat)
 	return (
 		<ChatProvider>
 			<div
 				className={clsx(
 					'chatbox-wrapper',
-					sidebarVisible && 'with-sidebar',
+					effectiveDisplayMode === 'chatbox-only' && 'chatbox-only',
+					effectiveDisplayMode === 'sidebar-only' && 'sidebar-only',
+					sidebarVisible && showSidebarArea && 'with-sidebar',
 					isAnimating && 'animating',
-					isMaximized && 'maximized'
+					isMaximized && 'maximized',
+					menuExpanding && 'no-transition'
 				)}
 			>
 				<Menu
-					sidebarVisible={sidebarVisible}
+					sidebarVisible={sidebarVisible && showSidebarArea}
 					setSidebarVisible={handleSetSidebarVisible}
 					openSidebar={openSidebar}
 					closeSidebar={closeSidebar}
 				/>
+
+				{/* Chatbox area - always rendered but hidden in sidebar-only mode */}
 				<div
-					className='chat-content'
+					className={clsx('chat-content', !showChatbox && 'hidden')}
 					style={{
-						marginLeft: '64px',
-						width:
-							sidebarVisible && !isMaximized
-								? `calc(100% - 64px - ${sidebarWidth}px)`
-								: `calc(100% - 64px)`
+						marginLeft: 'var(--menu-width, 64px)',
+						width: getContentWidth(),
+						display: showChatbox ? undefined : 'none'
 					}}
 				>
-					{!sidebarVisible && (
+					{showSidebarArea && !sidebarVisible && (
 						<Button
 							type='text'
 							icon={
@@ -354,42 +569,71 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 							padding: 0
 						}}
 					>
-						{/* 使用新的 Page 组件 */}
 						<Page {...props_neo} title='Neo AI' />
 					</div>
 				</div>
-				<div
-					className={clsx('chat-sidebar', !sidebarVisible && 'hidden', isAnimating && 'animating')}
-					style={{
-						width: sidebarWidth,
-						...(isMaximized ? { position: 'fixed', right: 0 } : undefined)
-					}}
-				>
-					<div className='resize-handle' onMouseDown={handleResizeStart}>
-						<Button
-							type='text'
-							className='maximize-btn'
-							onClick={handleToggleMaximize}
-							icon={isMaximized ? <RightOutlined /> : <LeftOutlined />}
-						/>
-					</div>
-					<div className='sidebar-content'>
+
+				{/* Sidebar-only mode: full-screen business content */}
+				{!showChatbox && (
+					<div
+						className='full-content'
+						style={{
+							marginLeft: 'var(--menu-width, 64px)',
+							width: 'calc(100% - var(--menu-width, 64px))',
+							height: '100%'
+						}}
+					>
 						<Container
-							isMaximized={isMaximized}
+							isMaximized={false}
 							openSidebar={openSidebar}
 							closeSidebar={closeSidebar}
-							temporaryLink={temporaryLink}
-							currentPageName={currentPageName}
-							isTemporaryView={isTemporaryView}
-							onBackToNormal={handleBackToNormal}
+							noChatbox={true}
 						>
-							{/* 这里放 children (业务路由内容) */}
 							{children}
 						</Container>
 					</div>
-				</div>
-				{isMaximized && sidebarVisible && (
-					<div className='sidebar-overlay' onClick={handleToggleMaximize} />
+				)}
+
+				{/* Sidebar area - only for 'both' mode */}
+				{showSidebarArea && showChatbox && (
+					<>
+						<div
+							className={clsx(
+								'chat-sidebar',
+								!sidebarVisible && 'hidden',
+								isAnimating && 'animating'
+							)}
+							style={{
+								width: sidebarWidth,
+								...(isMaximized ? { position: 'fixed', right: 0 } : undefined)
+							}}
+						>
+							<div className='resize-handle' onMouseDown={handleResizeStart}>
+								<Button
+									type='text'
+									className='maximize-btn'
+									onClick={handleToggleMaximize}
+									icon={isMaximized ? <RightOutlined /> : <LeftOutlined />}
+								/>
+							</div>
+							<div className='sidebar-content'>
+								<Container
+									isMaximized={isMaximized}
+									openSidebar={openSidebar}
+									closeSidebar={closeSidebar}
+									temporaryLink={temporaryLink}
+									currentPageName={currentPageName}
+									isTemporaryView={isTemporaryView}
+									onBackToNormal={handleBackToNormal}
+								>
+									{children}
+								</Container>
+							</div>
+						</div>
+						{isMaximized && sidebarVisible && (
+							<div className='sidebar-overlay' onClick={handleToggleMaximize} />
+						)}
+					</>
 				)}
 			</div>
 		</ChatProvider>

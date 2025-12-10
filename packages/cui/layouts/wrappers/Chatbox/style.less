@@ -4,6 +4,31 @@
 	overflow: hidden;
 	transition: padding-right 0.3s;
 
+	// Disable transitions during menu expand/collapse
+	// This prevents the "jump back and forth" effect on sidebar
+	&.no-transition {
+		.chat-content,
+		.chat-sidebar {
+			transition: none !important;
+		}
+	}
+
+	// Chatbox only mode - no sidebar, Chatbox full width
+	&.chatbox-only {
+		.chat-content {
+			height: 100vh;
+			overflow: auto;
+		}
+	}
+
+	// Sidebar only mode - no Chatbox, business page full screen
+	&.sidebar-only {
+		.full-content {
+			height: 100vh;
+			overflow: auto;
+		}
+	}
+
 	&.with-sidebar {
 		.chat-content {
 			width: calc(100% - var(--sidebar-width));
@@ -82,7 +107,7 @@
 	overflow: hidden;
 	transition: transform 0.3s, box-shadow 0.3s;
 	z-index: 100;
-    box-shadow: none;
+	box-shadow: none;
 
 	&.hidden {
 		transform: translateX(100%);
@@ -179,5 +204,40 @@
 	&:hover {
 		background-color: var(--color_bg_hover) !important;
 		color: var(--color_text_light) !important;
+	}
+}
+
+// Loading screen
+.chatbox-loading {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--color_bg);
+	z-index: 9999;
+	transition: opacity 0.3s ease-out;
+
+	&.fade-out {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.loading-spinner {
+		width: 32px;
+		height: 32px;
+		border: 3px solid var(--color_border);
+		border-top-color: var(--color_main);
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
 	}
 }
