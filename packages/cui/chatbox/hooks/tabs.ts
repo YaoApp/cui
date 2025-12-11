@@ -15,6 +15,53 @@ export interface UseTabsOptions {
 }
 
 /**
+ * Parse tool_call content from stored format to ToolCallProps
+ * Stored format: "[{...delta1}][{...delta2}]..." concatenated JSON arrays
+ * Each delta contains: index, id?, type?, function: { name?, arguments? }
+ * @param content - Raw content string from storage
+ * @returns Parsed ToolCallProps with id, name, arguments
+ */
+const parseToolCallContent = (content: string): { id?: string; name?: string; arguments?: string } => {
+	if (!content) return {}
+
+	try {
+		// Split concatenated JSON arrays: "[...][...]" -> ["[...]", "[...]"]
+		const chunks = content.match(/\[[^\[\]]*\]/g) || []
+
+		let id: string | undefined
+		let name: string | undefined
+		let args = ''
+
+		for (const chunk of chunks) {
+			try {
+				const arr = JSON.parse(chunk)
+				if (Array.isArray(arr) && arr.length > 0) {
+					const item = arr[0]
+					// Extract id from first chunk that has it
+					if (item.id && !id) {
+						id = item.id
+					}
+					// Extract name from function
+					if (item.function?.name && !name) {
+						name = item.function.name
+					}
+					// Accumulate arguments
+					if (item.function?.arguments) {
+						args += item.function.arguments
+					}
+				}
+			} catch {
+				// Skip invalid chunks
+			}
+		}
+
+		return { id, name, arguments: args || undefined }
+	} catch {
+		return {}
+	}
+}
+
+/**
  * Convert stored ChatMessage to display Message format
  * @param stored - ChatMessage from server storage
  * @param assistants - Map of assistant_id to AssistantInfo for avatar/name lookup
@@ -24,27 +71,70 @@ const convertStoredToDisplay = (stored: ChatMessage, assistants?: Record<string,
 	// Get assistant info if available
 	const assistantInfo = stored.assistant_id && assistants?.[stored.assistant_id]
 
+	// Parse tool_call content if needed
+	let props = { ...stored.props, role: stored.role }
+	if (stored.type === 'tool_call' && stored.props?.content) {
+		const toolCallProps = parseToolCallContent(stored.props.content)
+		props = {
+			...props,
+			...toolCallProps
+		}
+	}
+
 	return {
 		ui_id: nanoid(), // Generate unique UI ID for React key
 		message_id: stored.message_id,
 		type: stored.type,
-		props: {
-			...stored.props,
-			role: stored.role, // Ensure role is in props for display
-			// Add assistant info to props for rendering
-			...(assistantInfo && {
-				assistant_name: assistantInfo.name,
-				assistant_avatar: assistantInfo.avatar
-			})
-		},
+		props,
 		block_id: stored.block_id,
 		thread_id: stored.thread_id,
 		delta: false, // Historical messages are complete
 		metadata: {
 			timestamp: new Date(stored.created_at).getTime(),
 			sequence: stored.sequence
-		}
+		},
+		// Add assistant info at message root level (same as streaming messages)
+		...(assistantInfo && {
+			assistant: {
+				assistant_id: stored.assistant_id,
+				name: assistantInfo.name,
+				avatar: assistantInfo.avatar
+			}
+		})
 	}
+}
+
+/**
+ * Process messages to deduplicate consecutive assistant info
+ * Only the first message from an assistant (after user message or different assistant) shows avatar
+ * @param messages - Array of display messages
+ * @returns Processed messages with deduplicated assistant info
+ */
+const deduplicateAssistantInfo = (messages: Message[]): Message[] => {
+	let lastAssistantId: string | undefined = undefined
+
+	return messages.map((msg) => {
+		const msgAssistant = (msg as any).assistant
+
+		// User messages reset the lastAssistantId
+		if (msg.type === 'user_input') {
+			lastAssistantId = undefined
+			return msg
+		}
+
+		// For assistant messages, check if we should show the assistant info
+		if (msgAssistant?.assistant_id) {
+			if (msgAssistant.assistant_id === lastAssistantId) {
+				// Same assistant as previous, remove assistant info
+				const { assistant, ...rest } = msg as any
+				return rest as Message
+			}
+			// Different assistant, keep info and update lastAssistantId
+			lastAssistantId = msgAssistant.assistant_id
+		}
+
+		return msg
+	})
 }
 
 export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOptions) {
@@ -205,13 +295,16 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 				])
 
 				// Convert stored messages to display format with assistant info
-				const displayMessages = messagesRes.messages.map((msg: ChatMessage) =>
+				// Then deduplicate consecutive assistant info
+				const convertedMessages = messagesRes.messages.map((msg: ChatMessage) =>
 					convertStoredToDisplay(msg, messagesRes.assistants)
 				)
+				const displayMessages = deduplicateAssistantInfo(convertedMessages)
 				setChatStates((prev) => ({ ...prev, [chatId]: displayMessages }))
 
-				// Update tab with session details (title, lastConnector, lastMode, historyLoaded)
+				// Update tab with session details (title, assistantId, lastConnector, lastMode, historyLoaded)
 				const title = sessionRes?.title || session?.title || (is_cn ? '历史对话' : 'Chat History')
+				const assistantId = sessionRes?.assistant_id || session?.assistant_id
 				const lastConnector = sessionRes?.last_connector
 				const mode = sessionRes?.last_mode as 'chat' | 'task' | undefined
 				setTabs((prev) =>
@@ -221,6 +314,7 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 									...t,
 									title,
 									historyLoaded: true, // Mark as loaded to prevent duplicate requests
+									...(assistantId && { assistantId }), // Update assistant from session
 									...(lastConnector && { lastConnector }),
 									...(mode && { mode })
 							  }
