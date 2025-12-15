@@ -295,10 +295,11 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 				])
 
 				// Convert stored messages to display format with assistant info
+				// Filter out 'loading' type messages as they are transient states
 				// Then deduplicate consecutive assistant info
-				const convertedMessages = messagesRes.messages.map((msg: ChatMessage) =>
-					convertStoredToDisplay(msg, messagesRes.assistants)
-				)
+				const convertedMessages = messagesRes.messages
+					.filter((msg: ChatMessage) => msg.type !== 'loading')
+					.map((msg: ChatMessage) => convertStoredToDisplay(msg, messagesRes.assistants))
 				const displayMessages = deduplicateAssistantInfo(convertedMessages)
 				setChatStates((prev) => ({ ...prev, [chatId]: displayMessages }))
 
