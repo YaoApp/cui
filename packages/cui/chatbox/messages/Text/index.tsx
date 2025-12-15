@@ -93,10 +93,124 @@ const components = (done?: boolean) => {
 	}
 }
 
+// List of allowed HTML tags that should not be escaped
+const ALLOWED_HTML_TAGS = [
+	'a',
+	'b',
+	'i',
+	'u',
+	's',
+	'em',
+	'strong',
+	'code',
+	'pre',
+	'br',
+	'hr',
+	'p',
+	'div',
+	'span',
+	'ul',
+	'ol',
+	'li',
+	'table',
+	'thead',
+	'tbody',
+	'tr',
+	'th',
+	'td',
+	'img',
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'blockquote',
+	'sup',
+	'sub',
+	'del',
+	'ins',
+	'mark',
+	'abbr',
+	'details',
+	'summary',
+	'figure',
+	'figcaption',
+	'caption',
+	'col',
+	'colgroup'
+]
+
+// Create a regex pattern for allowed tags
+const ALLOWED_TAG_PATTERN = new RegExp(
+	`^<(\\/)?\\s*(${ALLOWED_HTML_TAGS.join('|')})(?:\\s|>|\\/>|$)`,
+	'i'
+)
+
+/**
+ * Escape < that are not part of valid HTML tags
+ * This handles cases like "<3" which would break HTML parsing
+ */
+const escapeInvalidHtmlTags = (text: string): string => {
+	// Match all < characters and check if they start a valid HTML tag
+	return text.replace(/<([^>]*>?)/g, (match, afterBracket) => {
+		const fullMatch = '<' + afterBracket
+		// Check if this looks like a valid HTML tag
+		if (ALLOWED_TAG_PATTERN.test(fullMatch)) {
+			return match // Keep valid HTML tags
+		}
+		// Escape the < for non-valid tags like <3, <-- etc
+		return '&lt;' + afterBracket
+	})
+}
+
+/**
+ * Handle unclosed HTML tags during streaming
+ * This removes incomplete tags at the end of the text to prevent rendering issues
+ */
+const handleUnclosedHtmlTags = (text: string): string => {
+	// Find the last < that might be an unclosed tag
+	let lastOpenBracket = text.lastIndexOf('<')
+
+	while (lastOpenBracket !== -1) {
+		const afterOpen = text.slice(lastOpenBracket)
+
+		// If there's a > after <, check if it's a complete tag
+		const closeIndex = afterOpen.indexOf('>')
+		if (closeIndex !== -1) {
+			// Tag is closed, check if it's a valid opening tag that needs a closing tag
+			const tagContent = afterOpen.slice(1, closeIndex)
+			const tagMatch = tagContent.match(/^([a-zA-Z][a-zA-Z0-9]*)/)?.[1]?.toLowerCase()
+
+			if (tagMatch && ALLOWED_HTML_TAGS.includes(tagMatch)) {
+				// Check if this tag has a matching closing tag
+				const closingTag = `</${tagMatch}>`
+				const textAfterTag = text.slice(lastOpenBracket + closeIndex + 1)
+				if (!textAfterTag.toLowerCase().includes(closingTag)) {
+					// Self-closing tags don't need closing
+					const selfClosingTags = ['br', 'hr', 'img', 'col']
+					if (!selfClosingTags.includes(tagMatch) && !afterOpen.includes('/>')) {
+						// Unclosed tag found, append closing tag
+						return text + closingTag
+					}
+				}
+			}
+			break
+		} else {
+			// No > found after <, this is an incomplete tag during streaming
+			// Remove the incomplete tag part
+			return text.slice(0, lastOpenBracket)
+		}
+	}
+
+	return text
+}
+
 const escape = (text?: string) => {
 	if (!text) return ''
 
 	let result = text
+		// First, escape invalid HTML-like patterns (e.g., <3, <--, etc.)
 		.replace(
 			/\|([^|\n]*[<>][^|\n]*)\|/g,
 			(_, content) => `|${content.replace(/[<>]/g, (match: string) => (match === '<' ? '&lt;' : '&gt;'))}|`
@@ -104,6 +218,12 @@ const escape = (text?: string) => {
 		.replace(/\r/g, '')
 		.replace(/\$\$[\n\r]+/g, '$$\n')
 		.replace(/[\n\r]+\$\$/g, '\n$$')
+
+	// Escape < that are not part of valid HTML tags (handles <3, <--, etc.)
+	result = escapeInvalidHtmlTags(result)
+
+	// Handle unclosed HTML tags during streaming
+	result = handleUnclosedHtmlTags(result)
 
 	// Auto-close unclosed code blocks to prevent MDX parse errors during streaming
 	const codeBlocks = result.match(/```/g) || []
