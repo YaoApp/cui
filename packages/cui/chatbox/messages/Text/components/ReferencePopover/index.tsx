@@ -12,13 +12,7 @@ interface IReferencePopoverProps {
 	onClose: () => void
 }
 
-const ReferencePopover: React.FC<IReferencePopoverProps> = ({
-	requestId,
-	refIndex,
-	refType,
-	anchorEl,
-	onClose
-}) => {
+const ReferencePopover: React.FC<IReferencePopoverProps> = ({ requestId, refIndex, refType, anchorEl, onClose }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -140,6 +134,30 @@ const ReferencePopover: React.FC<IReferencePopoverProps> = ({
 		}
 	}
 
+	/**
+	 * Add tracking parameter to URL
+	 * - If URL has existing 'from' query param, rename it to '__from'
+	 * - Add 'from=yaoagents.com' parameter
+	 */
+	const addTrackingParam = (url: string): string => {
+		try {
+			const urlObj = new URL(url)
+			// If 'from' param exists, rename it to '__from'
+			if (urlObj.searchParams.has('from')) {
+				const originalFrom = urlObj.searchParams.get('from')
+				urlObj.searchParams.delete('from')
+				urlObj.searchParams.set('__from', originalFrom || '')
+			}
+			// Add our tracking param
+			urlObj.searchParams.set('from', 'yaoagents.com')
+			return urlObj.toString()
+		} catch {
+			// If URL parsing fails, fallback to simple append
+			const separator = url.includes('?') ? '&' : '?'
+			return `${url}${separator}from=yaoagents.com`
+		}
+	}
+
 	const content = (
 		<div ref={popoverRef} className={styles.popover}>
 			{loading && <div className={styles.loading}>{is_cn ? '加载中...' : 'Loading...'}</div>}
@@ -166,9 +184,9 @@ const ReferencePopover: React.FC<IReferencePopoverProps> = ({
 
 					{reference.url && (
 						<a
-							href={reference.url}
-							target="_blank"
-							rel="noopener noreferrer"
+							href={addTrackingParam(reference.url)}
+							target='_blank'
+							rel='noopener noreferrer'
 							className={styles.url}
 						>
 							{reference.url}
@@ -183,4 +201,3 @@ const ReferencePopover: React.FC<IReferencePopoverProps> = ({
 }
 
 export default ReferencePopover
-
