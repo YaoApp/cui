@@ -43,6 +43,10 @@ function createChunkHandler(
 				if (ctxId) {
 					refs.contextIds.current[targetTabId] = ctxId
 				}
+				const reqId = chunk.props?.data?.request_id
+				if (reqId) {
+					refs.requestIds.current[targetTabId] = reqId
+				}
 				const assistantInfo = chunk.props?.data?.assistant
 				if (assistantInfo) {
 					refs.assistantInfo.current[targetTabId] = assistantInfo
@@ -155,6 +159,9 @@ function createChunkHandler(
 			const assistantInfo = refs.assistantInfo.current[targetTabId]
 			const shouldAdd = refs.shouldAddAssistant.current[targetTabId]
 
+			// Get current request_id for reference support
+			const requestId = refs.requestIds.current[targetTabId]
+
 			if (index !== -1) {
 				const newArr = [...prev]
 				newArr[index] = {
@@ -165,7 +172,11 @@ function createChunkHandler(
 					thread_id: chunk.thread_id,
 					type: mergedState.type,
 					props: mergedState.props,
-					delta: isCompleted ? false : chunk.delta
+					delta: isCompleted ? false : chunk.delta,
+					metadata: {
+						...newArr[index].metadata,
+						request_id: requestId
+					}
 				}
 				return newArr
 			} else {
@@ -189,6 +200,7 @@ function createChunkHandler(
 					type: mergedState.type,
 					props: mergedState.props,
 					delta: isCompleted ? false : chunk.delta,
+					metadata: { request_id: requestId },
 					...(finalShouldAdd && assistantInfo && { assistant: assistantInfo })
 				}
 				if (shouldAdd) {

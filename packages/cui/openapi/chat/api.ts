@@ -12,7 +12,9 @@ import {
 	ChatSessionList,
 	UpdateChatRequest,
 	ChatMessageFilter,
-	ChatMessagesResponse
+	ChatMessagesResponse,
+	Reference,
+	ReferencesResponse
 } from './types'
 
 export class Chat {
@@ -547,5 +549,84 @@ export class Chat {
 		const result = await response.json()
 		// Handle both { data: {...} } and direct response formats
 		return (result.data || result) as ChatMessagesResponse
+	}
+
+	// =========================================================================
+	// Search References (Citation Support)
+	// =========================================================================
+
+	/**
+	 * Get all search references for a request
+	 * GET /chat/references/:request_id
+	 *
+	 * Returns all search references for citation support.
+	 * References are collected from web search, knowledge base, and database queries.
+	 *
+	 * @example
+	 * ```typescript
+	 * // Get all references for a request
+	 * const refs = await chat.GetReferences('req-123')
+	 * console.log(refs.references) // [{index: 1, type: 'web', title: '...', url: '...'}, ...]
+	 * ```
+	 *
+	 * @param requestId - The request ID (from stream_start event data.request_id)
+	 * @returns Promise with references response
+	 */
+	async GetReferences(requestId: string): Promise<ReferencesResponse> {
+		// @ts-ignore
+		const baseURL = this.api.config.baseURL
+		const url = `${baseURL}/chat/references/${requestId}`
+
+		const response = await fetch(url, {
+			method: 'GET',
+			credentials: 'include'
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text()
+			throw new Error(`HTTP ${response.status}: ${errorText}`)
+		}
+
+		const result = await response.json()
+		// Handle both { data: {...} } and direct response formats
+		return (result.data || result) as ReferencesResponse
+	}
+
+	/**
+	 * Get a single reference by request ID and index
+	 * GET /chat/references/:request_id/:index
+	 *
+	 * Returns a specific reference for citation click handling.
+	 * Index is 1-based (matches citation numbers in text).
+	 *
+	 * @example
+	 * ```typescript
+	 * // Get reference #1 when user clicks [1] citation
+	 * const ref = await chat.GetReference('req-123', 1)
+	 * console.log(ref.title, ref.url) // "Example Page", "https://..."
+	 * ```
+	 *
+	 * @param requestId - The request ID (from stream_start event data.request_id)
+	 * @param index - The reference index (1-based, matches citation number)
+	 * @returns Promise with the reference
+	 */
+	async GetReference(requestId: string, index: number): Promise<Reference> {
+		// @ts-ignore
+		const baseURL = this.api.config.baseURL
+		const url = `${baseURL}/chat/references/${requestId}/${index}`
+
+		const response = await fetch(url, {
+			method: 'GET',
+			credentials: 'include'
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text()
+			throw new Error(`HTTP ${response.status}: ${errorText}`)
+		}
+
+		const result = await response.json()
+		// Handle both { data: {...} } and direct response formats
+		return (result.data || result) as Reference
 	}
 }

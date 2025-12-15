@@ -91,7 +91,8 @@ const convertStoredToDisplay = (stored: ChatMessage, assistants?: Record<string,
 		delta: false, // Historical messages are complete
 		metadata: {
 			timestamp: new Date(stored.created_at).getTime(),
-			sequence: stored.sequence
+			sequence: stored.sequence,
+			request_id: stored.request_id // Include request_id for reference support
 		},
 		// Add assistant info at message root level (same as streaming messages)
 		...(assistantInfo && {

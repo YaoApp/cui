@@ -1,6 +1,6 @@
 import { useAsyncEffect } from 'ahooks'
 import to from 'await-to-js'
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useState, useCallback, useRef, useEffect } from 'react'
 import * as JsxRuntime from 'react/jsx-runtime'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
@@ -13,12 +13,20 @@ import { useMDXComponents } from '@mdx-js/react'
 import styles from './index.less'
 import Code from './components/Code'
 import Mermaid from './components/Mermaid'
+import ReferencePopover from './components/ReferencePopover'
 import Thinking from '../Thinking'
 import ToolCall from '../ToolCall'
 import type { TextMessage, ThinkingMessage, ToolCallMessage } from '../../../openapi'
 
 interface ITextProps {
 	message: TextMessage
+}
+
+interface ReferenceState {
+	requestId: string
+	refIndex: number
+	refType: string
+	anchorEl: HTMLElement | null
 }
 
 const components = (done?: boolean) => {
@@ -290,9 +298,11 @@ const unescape = (text?: string) => {
 const Text = ({ message }: ITextProps) => {
 	const contentText = message.props?.content || ''
 	const [content, setContent] = useState<any>('')
-	// We don't have 'done' status in TextMessage easily, assuming done for now or passing via props if available.
-	// But usually Text message in chatbox might be streaming.
-	// If streaming, we might want to pass that info. For now, let's assume default behavior.
+	const [referenceState, setReferenceState] = useState<ReferenceState | null>(null)
+	const containerRef = useRef<HTMLDivElement>(null)
+
+	// Get request_id from message metadata for reference support
+	const requestId = message.metadata?.request_id || ''
 
 	console.log('[MDX Text] Received message:', {
 		ui_id: message.ui_id,
@@ -303,6 +313,54 @@ const Text = ({ message }: ITextProps) => {
 		content_length: contentText.length,
 		content_preview: contentText.substring(0, 200)
 	})
+
+	// Handle reference link clicks
+	const handleReferenceClick = useCallback(
+		(e: MouseEvent) => {
+			const target = e.target as HTMLElement
+			const refLink = target.closest('a.ref') as HTMLAnchorElement
+
+			if (refLink) {
+				e.preventDefault()
+				e.stopPropagation()
+
+				const refId = refLink.dataset.refId
+				const refType = refLink.dataset.refType || 'web'
+
+				if (refId && requestId) {
+					// Parse the ref index from the refId (e.g., "1", "2", etc.)
+					const refIndex = parseInt(refId, 10)
+
+					if (!isNaN(refIndex)) {
+						setReferenceState({
+							requestId,
+							refIndex,
+							refType,
+							anchorEl: refLink
+						})
+					}
+				}
+			}
+		},
+		[requestId]
+	)
+
+	// Close reference popover
+	const handleCloseReference = useCallback(() => {
+		setReferenceState(null)
+	}, [])
+
+	// Attach click handler to container
+	useEffect(() => {
+		const container = containerRef.current
+		if (!container) return
+
+		container.addEventListener('click', handleReferenceClick as EventListener)
+
+		return () => {
+			container.removeEventListener('click', handleReferenceClick as EventListener)
+		}
+	}, [handleReferenceClick])
 
 	const mdxComponents = useMDXComponents(components())
 
@@ -446,7 +504,22 @@ const Text = ({ message }: ITextProps) => {
 		}
 	}, [contentText])
 
-	return <div className={styles._local}>{content}</div>
+	return (
+		<div ref={containerRef} className={styles._local}>
+			{content}
+
+			{/* Reference Popover */}
+			{referenceState && (
+				<ReferencePopover
+					requestId={referenceState.requestId}
+					refIndex={referenceState.refIndex}
+					refType={referenceState.refType}
+					anchorEl={referenceState.anchorEl}
+					onClose={handleCloseReference}
+				/>
+			)}
+		</div>
+	)
 }
 
 export default window.$app?.memo ? window.$app.memo(Text) : React.memo(Text)

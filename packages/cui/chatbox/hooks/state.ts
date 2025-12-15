@@ -81,6 +81,7 @@ export interface ChatRefs {
 	assistantInfo: React.MutableRefObject<Record<string, any>>
 	shouldAddAssistant: React.MutableRefObject<Record<string, boolean>>
 	contextIds: React.MutableRefObject<Record<string, string>>
+	requestIds: React.MutableRefObject<Record<string, string>>
 	titleGenerated: React.MutableRefObject<Record<string, boolean>>
 	completedMessages: React.MutableRefObject<Record<string, boolean>>
 }
@@ -190,6 +191,7 @@ export function useChatState(options: UseChatStateOptions = {}): [ChatState, Cha
 	const assistantInfoRef = useRef<Record<string, any>>({})
 	const shouldAddAssistantRef = useRef<Record<string, boolean>>({})
 	const contextIdsRef = useRef<Record<string, string>>({})
+	const requestIdsRef = useRef<Record<string, string>>({})
 	const titleGeneratedRef = useRef<Record<string, boolean>>({})
 	const completedMessagesRef = useRef<Record<string, boolean>>({})
 
@@ -238,6 +240,7 @@ export function useChatState(options: UseChatStateOptions = {}): [ChatState, Cha
 			assistantInfo: assistantInfoRef,
 			shouldAddAssistant: shouldAddAssistantRef,
 			contextIds: contextIdsRef,
+			requestIds: requestIdsRef,
 			titleGenerated: titleGeneratedRef,
 			completedMessages: completedMessagesRef
 		}),

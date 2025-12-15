@@ -883,3 +883,30 @@ export interface ChatMessagesResponse {
 	count: number
 	assistants?: Record<string, AssistantInfo>
 }
+
+// ============================================================================
+// Search Reference Types (Citation Support)
+// ============================================================================
+
+/**
+ * Search reference for citation support
+ * Represents a reference from web search, knowledge base, or database
+ */
+export interface Reference {
+	index: number // Global index (1-based, unique within request)
+	type: string // "web" | "kb" | "db"
+	title: string // Reference title
+	url?: string // URL (for web)
+	snippet?: string // Short snippet
+	content?: string // Full content
+	metadata?: Record<string, any>
+}
+
+/**
+ * Response for getting all references for a request
+ */
+export interface ReferencesResponse {
+	request_id: string
+	references: Reference[]
+	total: number
+}
