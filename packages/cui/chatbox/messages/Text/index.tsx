@@ -150,8 +150,54 @@ const ALLOWED_TAG_PATTERN = new RegExp(
 /**
  * Escape < that are not part of valid HTML tags
  * This handles cases like "<3" which would break HTML parsing
+ * Skips content inside code blocks (``` ... ```)
  */
 const escapeInvalidHtmlTags = (text: string): string => {
+	// Split by code blocks to avoid escaping HTML inside them
+	const parts: string[] = []
+	let lastIndex = 0
+	let inCodeBlock = false
+	let codeBlockStart = -1
+
+	// Find all ``` positions
+	const codeBlockRegex = /```/g
+	let match
+
+	while ((match = codeBlockRegex.exec(text)) !== null) {
+		if (!inCodeBlock) {
+			// Entering code block - process the text before it
+			const beforeCode = text.slice(lastIndex, match.index)
+			parts.push(escapeHtmlInText(beforeCode))
+			codeBlockStart = match.index
+			inCodeBlock = true
+		} else {
+			// Exiting code block - keep the code block content as-is
+			const codeBlockContent = text.slice(codeBlockStart, match.index + 3)
+			parts.push(codeBlockContent)
+			lastIndex = match.index + 3
+			inCodeBlock = false
+		}
+	}
+
+	// Handle remaining text
+	if (inCodeBlock) {
+		// Unclosed code block - keep as-is (will be closed later)
+		parts.push(text.slice(codeBlockStart))
+	} else {
+		// Process remaining text outside code blocks
+		const remaining = text.slice(lastIndex)
+		if (remaining) {
+			parts.push(escapeHtmlInText(remaining))
+		}
+	}
+
+	return parts.join('')
+}
+
+/**
+ * Escape < that are not part of valid HTML tags in regular text
+ */
+const escapeHtmlInText = (text: string): string => {
 	// Match all < characters and check if they start a valid HTML tag
 	return text.replace(/<([^>]*>?)/g, (match, afterBracket) => {
 		const fullMatch = '<' + afterBracket
