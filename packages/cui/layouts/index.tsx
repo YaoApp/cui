@@ -80,7 +80,6 @@ const Index = () => {
 
 		// Chat Layout
 		if (global.layout === 'Chat') {
-			console.log(pathname)
 			if (pathname === '/chat' || pathname === '/chat/' || pathname.startsWith('/chatdev')) {
 				global.setSidebarVisible(false)
 			}

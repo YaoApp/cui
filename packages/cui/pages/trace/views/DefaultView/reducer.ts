@@ -56,11 +56,8 @@ const getStatusColor = (status: string): string => {
 
 // Reducer
 export const traceReducer = (state: TraceState, action: TraceAction): TraceState => {
-	console.log('📦 Reducer action:', action.type, 'current nodes:', state.rawNodes.length)
-
 	switch (action.type) {
 		case 'RESET_ALL':
-			console.log('🔄 Reducer: RESET_ALL')
 			return {
 				traceInfo: null,
 				rawNodes: [],
@@ -128,7 +125,6 @@ export const traceReducer = (state: TraceState, action: TraceAction): TraceState
 				}
 			})
 
-			console.log('📊 Reducer: Nodes updated, count:', updatedNodes.length)
 			return { ...state, rawNodes: updatedNodes }
 		}
 

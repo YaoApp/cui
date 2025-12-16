@@ -443,37 +443,15 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	const effectiveDisplayMode = (() => {
 		// System pages: always sidebar-only regardless of trigger source
 		if (isSidebarOnlyPath(currentPath)) {
-			console.log('[ChatboxWrapper] effectiveDisplayMode: sidebar-only (system path)')
 			return 'sidebar-only'
 		}
 		// Menu navigation: follow menu configuration
 		if (triggeredFromMenu) {
-			console.log('[ChatboxWrapper] effectiveDisplayMode:', displayMode, '(from menu)')
 			return displayMode
 		}
 		// Non-menu navigation: default to 'both' unless explicitly chatbox-only
-		const result = displayMode === 'chatbox-only' ? 'chatbox-only' : 'both'
-		console.log('[ChatboxWrapper] effectiveDisplayMode:', result, '(non-menu)')
-		return result
+		return displayMode === 'chatbox-only' ? 'chatbox-only' : 'both'
 	})()
-
-	// Debug logging
-	console.log('[ChatboxWrapper] ===== Debug =====')
-	console.log('[ChatboxWrapper] currentPath:', currentPath)
-	console.log('[ChatboxWrapper] displayMode:', displayMode)
-	console.log('[ChatboxWrapper] triggeredFromMenu:', triggeredFromMenu)
-	console.log('[ChatboxWrapper] isTemporaryView:', isTemporaryView)
-	// Debug: find current menu for logging
-	const currentMenuDebug = findMenuByPath(currentPath, allMenuItems)
-	console.log('[ChatboxWrapper] effectiveDisplayMode:', effectiveDisplayMode)
-	console.log(
-		'[ChatboxWrapper] allMenuItems:',
-		allMenuItems.map((m) => m.path)
-	)
-	console.log('[ChatboxWrapper] currentMenu:', currentMenuDebug)
-	console.log('[ChatboxWrapper] showChatbox:', effectiveDisplayMode !== 'sidebar-only')
-	console.log('[ChatboxWrapper] showSidebarArea:', effectiveDisplayMode !== 'chatbox-only')
-	console.log('[ChatboxWrapper] =================')
 
 	// Determine visibility based on display mode
 	// - chatbox-only: only show Chatbox (e.g., /welcome or undefined routes)

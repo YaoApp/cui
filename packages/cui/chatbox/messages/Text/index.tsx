@@ -301,18 +301,13 @@ const Text = ({ message }: ITextProps) => {
 	const [referenceState, setReferenceState] = useState<ReferenceState | null>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
 
+	// Track last successful render to avoid flashing raw content on parse errors
+	const lastSuccessRef = useRef<{ content: any; text: string }>({ content: '', text: '' })
+	// Track consecutive errors to decide when to show fallback
+	const errorCountRef = useRef(0)
+
 	// Get request_id from message metadata for reference support
 	const requestId = message.metadata?.request_id || ''
-
-	console.log('[MDX Text] Received message:', {
-		ui_id: message.ui_id,
-		chunk_id: message.chunk_id,
-		message_id: message.message_id,
-		type: message.type,
-		delta: message.delta,
-		content_length: contentText.length,
-		content_preview: contentText.substring(0, 200)
-	})
 
 	// Handle reference link clicks
 	const handleReferenceClick = useCallback(
@@ -367,6 +362,8 @@ const Text = ({ message }: ITextProps) => {
 	useAsyncEffect(async () => {
 		if (!contentText) {
 			setContent('')
+			lastSuccessRef.current = { content: '', text: '' }
+			errorCountRef.current = 0
 			return
 		}
 
@@ -483,9 +480,25 @@ const Text = ({ message }: ITextProps) => {
 		)
 
 		if (err) {
-			console.error(`[MDX Text] Parse error: ${err.message || err}`)
-			// Fallback to plain text on error
+			errorCountRef.current++
+
+			// During streaming, keep showing last successful render to avoid flashing
+			// Only show fallback if:
+			// 1. We have no previous successful render, OR
+			// 2. Stream is complete (delta is false) and we've had multiple consecutive errors
+			const isStreaming = message.delta !== false
+			const hasLastSuccess = lastSuccessRef.current.content !== ''
+
+			if (isStreaming && hasLastSuccess) {
+				// Keep showing last successful content during streaming parse errors
+				// This prevents flashing raw markdown during incomplete chunks
+				return
+			}
+
+			if (!hasLastSuccess || errorCountRef.current > 3) {
+				// No previous success or too many errors, show fallback
 			setContent(<div className='whitespace-pre-wrap'>{contentText}</div>)
+			}
 			return
 		}
 
@@ -497,12 +510,26 @@ const Text = ({ message }: ITextProps) => {
 				Fragment,
 				useMDXComponents: () => mdxComponents
 			})
+			// Success! Update content and save as last successful render
 			setContent(Content)
+			lastSuccessRef.current = { content: Content, text: contentText }
+			errorCountRef.current = 0
 		} catch (err) {
-			console.error(`[MDX Text] Run error: ${err}`)
+			errorCountRef.current++
+
+			const isStreaming = message.delta !== false
+			const hasLastSuccess = lastSuccessRef.current.content !== ''
+
+			if (isStreaming && hasLastSuccess) {
+				// Keep showing last successful content during streaming
+				return
+			}
+
+			if (!hasLastSuccess || errorCountRef.current > 3) {
 			setContent(<div className='whitespace-pre-wrap'>{contentText}</div>)
 		}
-	}, [contentText])
+		}
+	}, [contentText, message.delta])
 
 	return (
 		<div ref={containerRef} className={styles._local}>
