@@ -186,30 +186,21 @@
 			}
 		}
 
-		.mermaid-error {
-			background: var(--color_danger_bg);
-			border: 1px solid var(--color_danger);
+		.mermaid-fallback {
+			background: var(--color_chatbox_bg_card);
+			border: 1px solid var(--color_chatbox_border_card);
 			padding: 16px;
 			border-radius: var(--radius);
 			margin: 12px 0;
-			font-size: 12px;
+			font-size: 13px;
+			line-height: 1.5;
+			overflow-x: auto;
 
-			.error-message {
-				color: var(--color_danger);
-				font-weight: 600;
-				margin-bottom: 8px;
-				display: flex;
-				align-items: center;
-				gap: 6px;
-			}
-
-			.error-code {
-				margin: 8px 0 0 0;
-				padding: 8px;
-				background: var(--color_chatbox_bg_field);
-				border-radius: 4px;
-				font-family: monospace;
+			code {
+				font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 				color: var(--color_chatbox_text_primary);
+				white-space: pre-wrap;
+				word-break: break-word;
 			}
 		}
 	}

@@ -40,6 +40,7 @@ const initMermaid = () => {
 		startOnLoad: false,
 		theme: 'base',
 		securityLevel: 'loose',
+		suppressErrorRendering: true, // Prevent mermaid from inserting error elements into DOM
 		fontFamily: 'system-ui, -apple-system, sans-serif',
 		// Pie chart configuration
 		pie: {
@@ -161,11 +162,24 @@ const Mermaid = ({ chart }: Props) => {
 			if (isProcessing) return
 
 			setIsProcessing(true)
+			const id = `mermaid-${Math.random().toString(36).substring(2, 15)}`
+
+			// Helper to clean up mermaid error elements from DOM
+			const cleanupMermaidErrors = () => {
+				// Mermaid 11.x inserts error elements with id like "dmermaid-xxx" at document.body
+				const errorContainer = document.getElementById(`d${id}`)
+				if (errorContainer) {
+					errorContainer.remove()
+				}
+				// Also clean up any orphaned mermaid error SVGs in body
+				document.querySelectorAll('body > div[id^="dmermaid-"]').forEach((el) => {
+					el.remove()
+				})
+			}
+
 			try {
 				// Clean chart content
 				const cleanChart = chart.replace(/[""]/g, '"').replace(/['']/g, "'").trim()
-
-				const id = `mermaid-${Math.random().toString(36).substring(2, 15)}`
 
 				// Render
 				const { svg } = await mermaid.render(id, cleanChart)
@@ -175,6 +189,9 @@ const Mermaid = ({ chart }: Props) => {
 					setHasRenderedSuccessfully(true)
 				}
 			} catch (err: any) {
+				// Clean up any error elements that mermaid inserted into the DOM
+				cleanupMermaidErrors()
+
 				// Only show error if we've never successfully rendered before
 				// This prevents error flashing during streaming
 				if (mounted && !hasRenderedSuccessfully) {
@@ -195,18 +212,13 @@ const Mermaid = ({ chart }: Props) => {
 		}
 	}, [chart, renderKey])
 
+	// When there's an error, show the raw code instead of error message
 	if (error) {
 		return (
 			<div className={styles._local}>
-				<div className='mermaid-error'>
-					<div className='error-message'>
-						<span>⚠️</span>
-						{is_cn ? '图表渲染失败' : 'Failed to render diagram'}
-					</div>
-					<div className='error-detail' style={{ color: 'var(--color_text_light)' }}>
-						{error}
-					</div>
-				</div>
+				<pre className='mermaid-fallback'>
+					<code>{chart}</code>
+				</pre>
 			</div>
 		)
 	}
