@@ -50,18 +50,18 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 	// 初始化表单数据
 	useEffect(() => {
 		if (visible && collection) {
-			// 从metadata中读取原始的embedding provider信息
-			const embeddingProvider = (collection.metadata.__embedding_provider as string) || ''
-			const embeddingOption = (collection.metadata.__embedding_option as string) || ''
+			// 从扁平结构中读取embedding provider信息
+			const embeddingProvider = collection.embedding_provider_id || ''
+			const embeddingOption = collection.embedding_option_id || ''
 			const embeddingValue =
 				embeddingProvider && embeddingOption ? `${embeddingProvider}|${embeddingOption}` : ''
 
 			setSelectedEmbedding(embeddingValue)
 
 			setFormValues({
-				name: collection.metadata.name || '',
-				description: collection.metadata.description || '',
-				share: collection.metadata.share || 'team'
+				name: collection.name || '',
+				description: collection.description || '',
+				share: collection.share || 'team'
 			})
 			setErrors({})
 		}
@@ -106,8 +106,7 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 			const kb = new KB(window.$app.openapi)
 
 			// 更新集合元数据
-			const updatedMetadata = {
-				...collection.metadata,
+			const updateData = {
 				name: formValues.name,
 				description: formValues.description || '',
 				share: formValues.share,
@@ -115,8 +114,8 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 			}
 
 			// 调用实际的更新API
-			const response = await kb.UpdateCollectionMetadata(collection.id, {
-				metadata: updatedMetadata
+			const response = await kb.UpdateCollectionMetadata(collection.id || collection.collection_id, {
+				metadata: updateData
 			})
 
 			if (response.error) {
@@ -126,7 +125,7 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 			// API调用成功，更新本地状态
 			const updatedCollection: Collection = {
 				...collection,
-				metadata: updatedMetadata
+				...updateData
 			}
 
 			message.success(is_cn ? '配置更新成功' : 'Configuration updated successfully')
@@ -258,7 +257,7 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 							<span className={styles.infoLabel}>
 								{is_cn ? '集合ID' : 'Collection ID'}:
 							</span>
-							<span className={styles.infoValue}>{collection.id}</span>
+							<span className={styles.infoValue}>{collection.id || collection.collection_id}</span>
 						</div>
 
 						<div className={styles.infoItem}>
@@ -266,21 +265,25 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 								{is_cn ? '文档数量' : 'Document Count'}:
 							</span>
 							<span className={styles.infoValue}>
-								{collection.metadata.document_count || 0}
+								{collection.document_count || 0}
 							</span>
 						</div>
 
 						<div className={styles.infoItem}>
 							<span className={styles.infoLabel}>{is_cn ? '创建时间' : 'Created At'}:</span>
 							<span className={styles.infoValue}>
-								{new Date(collection.metadata.created_at).toLocaleString()}
+								{collection.created_at
+									? new Date(collection.created_at).toLocaleString()
+									: '-'}
 							</span>
 						</div>
 
 						<div className={styles.infoItem}>
 							<span className={styles.infoLabel}>{is_cn ? '更新时间' : 'Updated At'}:</span>
 							<span className={styles.infoValue}>
-								{new Date(collection.metadata.updated_at).toLocaleString()}
+								{collection.updated_at
+									? new Date(collection.updated_at).toLocaleString()
+									: '-'}
 							</span>
 						</div>
 
@@ -288,16 +291,13 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 							<span className={styles.infoLabel}>{is_cn ? '状态' : 'Status'}:</span>
 							<span className={styles.infoValue}>
 								<Space>
-									{collection.metadata.readonly && (
+									{collection.readonly && (
 										<Tag variant='warning'>{is_cn ? '只读' : 'Readonly'}</Tag>
 									)}
-									{collection.metadata.system && (
+									{collection.system && (
 										<Tag variant='auto'>{is_cn ? '系统内建' : 'System'}</Tag>
 									)}
-									{collection.metadata.__yao_public_read && (
-										<Tag variant='success'>{is_cn ? '公开' : 'Public'}</Tag>
-									)}
-									{!collection.metadata.readonly && !collection.metadata.system && (
+									{!collection.readonly && !collection.system && (
 										<Tag variant='primary'>{is_cn ? '正常' : 'Normal'}</Tag>
 									)}
 								</Space>
@@ -307,7 +307,7 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 				</div>
 
 				{/* 配置参数 */}
-				{collection.config && (
+				{(collection.distance || collection.index_type) && (
 					<div className={styles.vectorConfigSection}>
 						<div className={styles.sectionHeader}>
 							<Icon name='material-tune' size={16} />
@@ -345,13 +345,13 @@ const CollectionConfigModal: React.FC<CollectionConfigModalProps> = ({ visible, 
 								<span className={styles.infoLabel}>
 									{is_cn ? '距离算法' : 'Distance'}:
 								</span>
-								<span className={styles.infoValue}>{collection.config.distance}</span>
+								<span className={styles.infoValue}>{collection.distance}</span>
 							</div>
 							<div className={styles.infoItem}>
 								<span className={styles.infoLabel}>
 									{is_cn ? '索引类型' : 'Index Type'}:
 								</span>
-								<span className={styles.infoValue}>{collection.config.index_type}</span>
+								<span className={styles.infoValue}>{collection.index_type}</span>
 							</div>
 						</div>
 					</div>

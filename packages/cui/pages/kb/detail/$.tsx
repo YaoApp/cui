@@ -43,11 +43,11 @@ const initializeAPIs = (kbConfig?: any) => {
 // 从完整的集合数据中提取简化信息
 const extractCollectionInfo = (collection: Collection): CollectionInfo => {
 	return {
-		id: collection.id,
-		name: collection.metadata.name || 'Untitled',
-		description: collection.metadata.description,
-		embedding_provider: collection.metadata.__embedding_provider || 'default',
-		embedding_option: collection.metadata.__embedding_option || ''
+		id: collection.id || collection.collection_id,
+		name: collection.name || 'Untitled',
+		description: collection.description,
+		embedding_provider_id: collection.embedding_provider_id || 'default',
+		embedding_option_id: collection.embedding_option_id || ''
 	}
 }
 
@@ -562,14 +562,14 @@ const CollectionDetail = () => {
 					/>
 					<div className={styles.titleInfo}>
 						<div className={styles.titleWithBadge}>
-							<h1 className={styles.title}>{collection.metadata.name}</h1>
+							<h1 className={styles.title}>{collection.name || 'Untitled'}</h1>
 							<span className={styles.documentCount}>
 								{is_cn
-									? `${collection.metadata.document_count || 0} 个文档`
-									: `${collection.metadata.document_count || 0} documents`}
+									? `${collection.document_count || 0} 个文档`
+									: `${collection.document_count || 0} documents`}
 							</span>
 						</div>
-						<p className={styles.subtitle}>{collection.metadata.description}</p>
+						<p className={styles.subtitle}>{collection.description}</p>
 					</div>
 				</div>
 				<div className={styles.headerRight}>
@@ -909,7 +909,7 @@ const CollectionDetail = () => {
 				onClose={handleAddDocumentCancel}
 				onConfirm={handleAddDocumentConfirm}
 				data={addDocumentData}
-				collectionName={collection?.metadata?.name}
+				collectionName={collection.name}
 				collection={collection}
 			/>
 		</div>

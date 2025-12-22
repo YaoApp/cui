@@ -5,7 +5,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import BasicTab, { BasicTabRef } from './components/Basic'
 import AdvancedTab, { AdvancedTabRef } from './components/Advanced'
-import { KB, FileAPI } from '@/openapi'
+import { KB, FileAPI, Collection } from '@/openapi'
 import { AddFileRequest, AddTextRequest, AddURLRequest } from '@/openapi/kb/types'
 import { useGlobal } from '@/context/app'
 import styles from './index.less'
@@ -24,7 +24,7 @@ interface AddDocumentModalProps {
 	onConfirm: (data: AddDocumentData, options: any, docId: string) => void
 	data: AddDocumentData | null
 	collectionName?: string
-	collection: any // Collection对象，包含embedding配置
+	collection: Collection | null
 }
 
 type TabType = 'basic' | 'advanced'
@@ -109,12 +109,12 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 	}
 
 	// Embedding配置处理函数（特殊处理，embedding跟Collection绑定）
-	const buildEmbeddingConfig = (collection: any, userProperties?: Record<string, any>) => {
-		// 从metadata中读取embedding配置（分开存储）
-		const embeddingProvider = (collection.metadata.__embedding_provider as string) || 'default'
-		const embeddingOption = (collection.metadata.__embedding_option as string) || ''
+	const buildEmbeddingConfig = (col: Collection, userProperties?: Record<string, any>) => {
+		// 从扁平结构中读取embedding配置
+		const embeddingProvider = col.embedding_provider_id || 'default'
+		const embeddingOption = col.embedding_option_id || ''
 
-		const config: any = {
+		const config: Record<string, any> = {
 			provider_id: embeddingProvider
 		}
 
@@ -131,8 +131,8 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 		return config
 	}
 
-	// 如果没有数据，直接返回空
-	if (!data) return null
+	// 如果没有数据或集合，直接返回空
+	if (!data || !collection) return null
 
 	const tabs = [
 		{
@@ -285,7 +285,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 		kb: KB,
 		fileapi: FileAPI,
 		data: AddDocumentData,
-		collection: any,
+		col: Collection,
 		options: any,
 		uploader: string
 	): Promise<string> => {
@@ -294,14 +294,13 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 		setCurrentStep(is_cn ? '正在上传文件...' : 'Uploading file...')
 
 		// 1. 上传文件 - 根据 Collection 的 share 设置文件共享类型
-		const collectionShare = collection.metadata?.share as 'private' | 'team' | undefined
 		const uploadResponse = await fileapi.Upload(
 			file,
 			{
 				uploaderID: uploader,
 				originalFilename: file.name,
 				// 根据 Collection 的共享设置来决定文件的共享类型
-				share: collectionShare === 'team' ? 'team' : 'private'
+				share: col.share === 'team' ? 'team' : 'private'
 			},
 			(progress) => {
 				setUploadProgress(progress.percentage)
@@ -322,9 +321,10 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 
 		// 2. 构建请求参数
 		const finalOptions = getFinalOptions()
+		const collectionId = col.id || col.collection_id
 
 		const request: AddFileRequest = {
-			collection_id: collection.id,
+			collection_id: collectionId,
 			file_id: fileId,
 			uploader: uploader,
 			locale: locale === 'zh-CN' ? 'zh' : 'en',
@@ -333,7 +333,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 				finalOptions.chunkingProperties,
 				'chunking'
 			)!,
-			embedding: buildEmbeddingConfig(collection, finalOptions.embeddingProperties),
+			embedding: buildEmbeddingConfig(col, finalOptions.embeddingProperties),
 			doc_id: '',
 			metadata: {
 				name: uploadResponse.data?.filename || file.name,
@@ -353,10 +353,10 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 					: `Process File "${uploadResponse.data?.filename || file.name}"`,
 				description: is_cn
 					? `正在将文件「${uploadResponse.data?.filename || file.name}」添加到知识库「${
-							collectionName || collection.metadata?.name || collection.id
+							collectionName || col.name || collectionId
 					  }」，包括文档解析、分块和向量化处理`
 					: `Processing file "${uploadResponse.data?.filename || file.name}" for knowledge base "${
-							collectionName || collection.metadata?.name || collection.id
+							collectionName || col.name || collectionId
 					  }", including document parsing, chunking and vectorization`,
 				icon: 'description',
 				category: is_cn ? '知识库' : 'Knowledge Base'
@@ -383,7 +383,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 		}
 
 		// 3. 调用异步添加接口
-		const addResponse = await kb.AddFileAsync(collection.id, request)
+		const addResponse = await kb.AddFileAsync(collectionId, request)
 
 		if (window.$app.openapi.IsError(addResponse)) {
 			throw new Error(addResponse.error?.error_description || 'Failed to add file to collection')
@@ -396,16 +396,17 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 	const handleTextUpload = async (
 		kb: KB,
 		data: AddDocumentData,
-		collection: any,
+		col: Collection,
 		options: any
 	): Promise<string> => {
 		setCurrentStep(is_cn ? '正在处理文本...' : 'Processing text...')
 		setUploadProgress(50)
 
 		const finalOptions = getFinalOptions()
+		const collectionId = col.id || col.collection_id
 
 		const request: AddTextRequest = {
-			collection_id: collection.id,
+			collection_id: collectionId,
 			text: data.content.content,
 			locale: locale === 'zh-CN' ? 'zh' : 'en',
 			chunking: buildProviderConfig(
@@ -413,7 +414,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 				finalOptions.chunkingProperties,
 				'chunking'
 			)!,
-			embedding: buildEmbeddingConfig(collection, finalOptions.embeddingProperties),
+			embedding: buildEmbeddingConfig(col, finalOptions.embeddingProperties),
 			doc_id: '',
 			metadata: {
 				type: 'text',
@@ -424,12 +425,12 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 				name: is_cn ? `处理文本内容` : `Process Text Content`,
 				description: is_cn
 					? `正在将文本内容（${data.content.content.length} 字符）添加到知识库「${
-							collectionName || collection.metadata?.name || collection.id
+							collectionName || col.name || collectionId
 					  }」，包括文本分块和向量化处理`
 					: `Processing text content (${
 							data.content.content.length
 					  } characters) for knowledge base "${
-							collectionName || collection.metadata?.name || collection.id
+							collectionName || col.name || collectionId
 					  }", including text chunking and vectorization`,
 				icon: 'article',
 				category: is_cn ? '知识库' : 'Knowledge Base'
@@ -448,7 +449,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 
 		setUploadProgress(100)
 
-		const addResponse = await kb.AddTextAsync(collection.id, request)
+		const addResponse = await kb.AddTextAsync(collectionId, request)
 
 		if (window.$app.openapi.IsError(addResponse)) {
 			throw new Error(addResponse.error?.error_description || 'Failed to add text to collection')
@@ -458,14 +459,15 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 	}
 
 	// 处理URL上传
-	const handleURLUpload = async (kb: KB, data: AddDocumentData, collection: any, options: any): Promise<string> => {
+	const handleURLUpload = async (kb: KB, data: AddDocumentData, col: Collection, options: any): Promise<string> => {
 		setCurrentStep(is_cn ? '正在抓取URL内容...' : 'Fetching URL content...')
 		setUploadProgress(50)
 
 		const finalOptions = getFinalOptions()
+		const collectionId = col.id || col.collection_id
 
 		const request: AddURLRequest = {
-			collection_id: collection.id,
+			collection_id: collectionId,
 			url: data.content.url,
 			locale: locale === 'zh-CN' ? 'zh' : 'en',
 			chunking: buildProviderConfig(
@@ -473,7 +475,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 				finalOptions.chunkingProperties,
 				'chunking'
 			)!,
-			embedding: buildEmbeddingConfig(collection, finalOptions.embeddingProperties),
+			embedding: buildEmbeddingConfig(col, finalOptions.embeddingProperties),
 			doc_id: '',
 			metadata: {
 				source_url: data.content.url,
@@ -486,10 +488,10 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 					: `Fetch Web Page "${data.content.title || data.content.url}"`,
 				description: is_cn
 					? `正在抓取网页「${data.content.url}」并添加到知识库「${
-							collectionName || collection.metadata?.name || collection.id
+							collectionName || col.name || collectionId
 					  }」，包括网页内容获取、解析、分块和向量化处理`
 					: `Fetching web page "${data.content.url}" for knowledge base "${
-							collectionName || collection.metadata?.name || collection.id
+							collectionName || col.name || collectionId
 					  }", including content extraction, parsing, chunking and vectorization`,
 				icon: 'language',
 				category: is_cn ? '知识库' : 'Knowledge Base'
@@ -517,7 +519,7 @@ const AddDocumentModal: React.FC<AddDocumentModalProps> = ({
 
 		setUploadProgress(100)
 
-		const addResponse = await kb.AddURLAsync(collection.id, request)
+		const addResponse = await kb.AddURLAsync(collectionId, request)
 
 		if (window.$app.openapi.IsError(addResponse)) {
 			throw new Error(addResponse.error?.error_description || 'Failed to add URL to collection')

@@ -1,45 +1,42 @@
-// Base collection metadata structure
-export interface CollectionMetadata {
+// Collection data structure (flat structure from backend API)
+export interface Collection {
+	id: string
+	collection_id: string
 	name: string
-	description: string
-	uid: string
-	preset: boolean // Whether this is a preset collection
-	public: boolean // Whether this collection is shared across all teams in the platform
-	share: 'private' | 'team' // Collection sharing scope (private: only owner, team: all team members)
-	sort: number
-	cover: string
+	description?: string
+	status: string
+	preset?: number | boolean
+	public?: number | boolean
+	share: 'private' | 'team'
+	sort?: number
+	cover?: string
 	document_count: number
-	created_at: string
-	updated_at: string
-	// Permission fields (consistent with Model resources)
-	__yao_created_by?: string // Created By User ID
-	__yao_updated_by?: string // Updated By User ID
-	__yao_team_id?: string // Team ID
-	__yao_tenant_id?: string // Tenant ID
-	[key: string]: any // Additional fields
-}
-
-// Base collection config structure
-export interface CollectionConfig {
-	embedding_provider_id: string
-	embedding_option_id: string
 	locale?: string
-	distance: string
-	index_type: string
-	// Additional HNSW parameters
+	// Embedding configuration
+	embedding_provider_id?: string
+	embedding_option_id?: string
+	embedding_properties?: Record<string, any>
+	// Vector configuration
+	distance?: string
+	index_type?: string
 	m?: number
 	ef_construction?: number
 	ef_search?: number
-	// Additional IVF parameters
 	num_lists?: number
 	num_probes?: number
-}
-
-// Collection data structure (maps to backend GetCollections response)
-export interface Collection {
-	id: string
-	metadata: CollectionMetadata
-	config?: CollectionConfig
+	// Timestamps
+	created_at: string
+	updated_at: string
+	deleted_at?: string
+	// Permission fields
+	__yao_created_by?: string
+	__yao_updated_by?: string
+	__yao_team_id?: string
+	__yao_tenant_id?: string | null
+	// Additional fields
+	system?: boolean
+	readonly?: boolean
+	[key: string]: any
 }
 
 // Database Collection structure (flat structure from database)
@@ -226,8 +223,8 @@ export interface CollectionInfo {
 	name: string
 	description?: string
 	// Embedding provider 配置
-	embedding_provider: string
-	embedding_option: string
+	embedding_provider_id: string
+	embedding_option_id: string
 }
 
 // Job options for async operations
