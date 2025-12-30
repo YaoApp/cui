@@ -11,10 +11,11 @@ import ReactFlow, {
 	useReactFlow,
 	MarkerType
 } from 'reactflow'
-import { getLocale } from '@umijs/max'
+import { getLocale, history } from '@umijs/max'
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
 import { message, Empty } from 'antd'
+import Icon from '@/widgets/Icon'
 import TraceNode from './components/TraceNode'
 import MemoryCard from './components/MemoryCard'
 import { OpenAPI } from '@/openapi'
@@ -107,6 +108,11 @@ const FlowContent: React.FC<{
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
+	// Trace ID 输入状态
+	const [showIdInput, setShowIdInput] = useState(false)
+	const [inputTraceId, setInputTraceId] = useState('')
+	const inputRef = useRef<HTMLInputElement>(null)
+
 	// 使用 useReducer 管理复杂状态，确保更新的原子性和顺序性
 	const [state, dispatch] = useReducer(traceReducer, initialState)
 
@@ -142,11 +148,19 @@ const FlowContent: React.FC<{
 					dispatch({ type: 'SET_LOAD_ERROR', payload: errorMsg })
 					message.error(errorMsg)
 				} else if (res.data) {
-					// 合并保留 SSE 可能已经更新的状态
-					const preserveStatus = traceInfo && traceInfo.status !== 'pending'
+					const apiStatus = res.data.status
+					const isTerminalStatus = ['completed', 'failed', 'cancelled', 'success', 'error'].includes(apiStatus)
+					
+					// 如果 API 返回终态，直接使用 API 的状态
+					// 如果 API 返回非终态，但 SSE 已经更新为 running，保留 running
+					let finalStatus = apiStatus
+					if (!isTerminalStatus && traceInfo?.status === 'running') {
+						finalStatus = 'running'
+					}
+					
 					dispatch({
 						type: 'SET_TRACE_INFO',
-						payload: preserveStatus ? { ...res.data, status: traceInfo.status } : res.data
+						payload: { ...res.data, status: finalStatus }
 					})
 					dispatch({ type: 'SET_LOAD_ERROR', payload: null })
 				}
@@ -398,6 +412,40 @@ const FlowContent: React.FC<{
 		return () => cancelAnimationFrame(rafId)
 	}, [layoutedNodes.length, reactFlowInstance])
 
+	// 是否正在运行中
+	const isRunning = traceInfo?.status === 'running'
+
+	// 处理点击 Trace ID
+	const handleTraceIdClick = () => {
+		// 运行中不允许切换
+		if (isRunning) return
+
+		setInputTraceId(traceId || '')
+		setShowIdInput(true)
+		setTimeout(() => {
+			inputRef.current?.focus()
+			inputRef.current?.select()
+		}, 100)
+	}
+
+	// 处理提交新的 Trace ID
+	const handleSubmitTraceId = () => {
+		const newId = inputTraceId.trim()
+		if (newId && newId !== traceId) {
+			history.push(`/trace/${newId}`)
+		}
+		setShowIdInput(false)
+	}
+
+	// 处理键盘事件
+	const handleInputKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter') {
+			handleSubmitTraceId()
+		} else if (e.key === 'Escape') {
+			setShowIdInput(false)
+		}
+	}
+
 	if (loadError) {
 		return (
 			<div
@@ -414,7 +462,36 @@ const FlowContent: React.FC<{
 			{/* Trace Info Panel (Top Left) */}
 			<Panel position='top-left' className={styles.infoPanel}>
 				<div className={styles.traceInfoBox}>
-					<div className={styles.traceValue}>{traceId}</div>
+					{showIdInput ? (
+						<div className={styles.traceIdInputWrapper}>
+							<input
+								ref={inputRef}
+								type='text'
+								className={styles.traceIdInput}
+								value={inputTraceId}
+								onChange={(e) => setInputTraceId(e.target.value)}
+								onKeyDown={handleInputKeyDown}
+								onBlur={() => setShowIdInput(false)}
+								placeholder={is_cn ? '输入 Trace ID' : 'Enter Trace ID'}
+							/>
+							<button
+								className={styles.traceIdSubmit}
+								onMouseDown={(e) => {
+									e.preventDefault()
+									handleSubmitTraceId()
+								}}
+							>
+								<Icon name='material-arrow_forward' size={14} />
+							</button>
+						</div>
+					) : (
+						<div
+							className={`${styles.traceValue} ${isRunning ? styles.disabled : ''}`}
+							onClick={handleTraceIdClick}
+						>
+							{traceId}
+						</div>
+					)}
 					{traceInfo && (
 						<div className={`${styles.traceStatus} ${styles[traceInfo.status]}`}>
 							{traceInfo.status.toUpperCase()}
@@ -457,7 +534,8 @@ const FlowContent: React.FC<{
 			>
 				<Background variant={BackgroundVariant.Dots} gap={28} size={1} />
 				<Controls position='bottom-right' showZoom={true} showFitView={false} showInteractive={false} />
-				<Panel position='top-right'>
+				{/* TODO: 暂时隐藏模式切换，后续版本启用 */}
+				<Panel position='top-right' style={{ display: 'none' }}>
 					<div className={styles.toolbar}>
 						<div className={styles.modeSwitch}>
 							<button

@@ -53,6 +53,59 @@
 	color: var(--color_text);
 	font-weight: 500;
 	padding: 3px 10px;
+	cursor: pointer;
+	border-radius: 3px;
+	transition: background 0.2s ease;
+
+	&:hover:not(.disabled) {
+		background: var(--color_bg_hover);
+	}
+
+	&.disabled {
+		cursor: default;
+	}
+}
+
+.traceIdInputWrapper {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 4px 2px 8px;
+}
+
+.traceIdInput {
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	font-size: 11px;
+	color: var(--color_text);
+	font-weight: 500;
+	background: transparent;
+	border: none;
+	outline: none;
+	width: 180px;
+	padding: 2px 0;
+
+	&::placeholder {
+		color: var(--color_text_grey);
+	}
+}
+
+.traceIdSubmit {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 3px;
+	color: var(--color_text_grey);
+	cursor: pointer;
+	transition: transform 0.2s ease;
+
+	&:hover {
+		transform: scale(1.2);
+	}
 }
 
 .traceStatus {

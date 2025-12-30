@@ -1,7 +1,10 @@
-import { memo, useState } from 'react'
+import { memo, useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeProps } from 'reactflow'
-import { Modal, Popover } from 'antd'
+import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import InputPanel from './components/InputPanel'
+import OutputPanel from './components/OutputPanel'
+import LogModal from './components/LogModal'
 import styles from './index.less'
 
 interface TraceLog {
@@ -23,25 +26,51 @@ interface TraceNodeData {
 	logs?: TraceLog[]
 	start_time?: number
 	end_time?: number
+	input?: Record<string, any> | string
+	output?: Record<string, any> | string
 }
 
 const TraceNode = ({ data }: NodeProps<TraceNodeData>) => {
-	const [isModalOpen, setIsModalOpen] = useState(false)
+	const [isHovered, setIsHovered] = useState(false)
+	const [logModalOpen, setLogModalOpen] = useState(false)
+	const leftPanelRef = useRef<HTMLDivElement>(null)
+	const rightPanelRef = useRef<HTMLDivElement>(null)
 
-	// 打开模态窗
-	const handleNodeClick = (e: React.MouseEvent) => {
-		e.stopPropagation()
-		setIsModalOpen(true)
-	}
+	const locale = getLocale()
+	const is_cn = locale === 'zh-CN'
+
+	// 使用原生事件监听器阻止滚轮事件冒泡到 ReactFlow
+	useEffect(() => {
+		const leftPanel = leftPanelRef.current
+		const rightPanel = rightPanelRef.current
+
+		const stopWheelPropagation = (e: WheelEvent) => {
+			e.stopPropagation()
+		}
+
+		// 添加非被动事件监听器
+		if (leftPanel) {
+			leftPanel.addEventListener('wheel', stopWheelPropagation, { passive: false })
+		}
+		if (rightPanel) {
+			rightPanel.addEventListener('wheel', stopWheelPropagation, { passive: false })
+		}
+
+		return () => {
+			if (leftPanel) {
+				leftPanel.removeEventListener('wheel', stopWheelPropagation)
+			}
+			if (rightPanel) {
+				rightPanel.removeEventListener('wheel', stopWheelPropagation)
+			}
+		}
+	}, [])
 
 	// 获取节点类型图标
 	const getTypeIcon = (type: string, icon?: string): string => {
-		// 优先使用后端提供的 icon 字段
 		if (icon) {
 			return `material-${icon}`
 		}
-		
-		// 否则根据 type 从映射表查找
 		const iconMap: Record<string, string> = {
 			start: 'material-play_circle',
 			search: 'material-search',
@@ -73,120 +102,109 @@ const TraceNode = ({ data }: NodeProps<TraceNodeData>) => {
 		return `${(ms / 1000).toFixed(1)}s`
 	}
 
-	// 渲染日志列表
-	const renderLogList = () => {
-		if (!data.logs || data.logs.length === 0) return null
-		// Take top 10 logs
-		const recentLogs = [...data.logs].reverse().slice(0, 10)
-		return (
-			<div className={styles.logPopover}>
-				<div className={styles.logTitle}>{data.label} ({data.logs.length})</div>
-				<div className={styles.logList}>
-					{recentLogs.map((log, idx) => (
-						<div key={idx} className={styles.logItem}>
-							<span className={styles.logTime}>
-								{new Date(log.timestamp).toLocaleTimeString('en-US', { 
-									hour12: false,
-									hour: '2-digit',
-									minute: '2-digit',
-									second: '2-digit'
-								})}
-							</span>
-							<span className={`${styles.logLevel} ${styles[log.level]}`}>
-								[{log.level}]
-							</span>
-							<span className={styles.logMessage}>{log.message}</span>
-						</div>
-					))}
-				</div>
-			</div>
-		)
-	}
-
 	// 获取最新日志
 	const latestLog = data.logs && data.logs.length > 0 ? data.logs[data.logs.length - 1] : null
 
+	// 打开日志弹窗
+	const handleOpenLogs = (e: React.MouseEvent) => {
+		e.stopPropagation()
+		setLogModalOpen(true)
+	}
+
 	return (
 		<>
-			<Popover
-				content={renderLogList()}
-				title={null}
-				trigger='hover'
-				open={data.logs && data.logs.length > 0 ? undefined : false}
-				placement='right'
-				overlayClassName={styles.logOverlay}
+			<div
+				className={styles.nodeWrapper}
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
 			>
-			<div className={`${styles.traceNode} ${styles[data.status]}`} onClick={handleNodeClick}>
+				{/* 左侧 Input Panel */}
+				<div
+					ref={leftPanelRef}
+					className={`${styles.sidePanel} ${styles.leftPanel} ${isHovered ? styles.visible : ''}`}
+				>
+					<InputPanel input={data.input} is_cn={is_cn} />
+				</div>
+
+				{/* 中间节点 */}
+				<div className={`${styles.traceNode} ${styles[data.status]}`}>
 					<Handle type='target' position={Position.Top} className={styles.handle} />
-			
-			{/* 节点头部 - 类型 */}
-			<div className={styles.nodeHeader}>
+
+					{/* 节点头部 - 类型 */}
+					<div className={styles.nodeHeader}>
 						<Icon name={getTypeIcon(data.type, data.icon)} size={12} />
 						<span className={styles.typeLabel}>{data.type.toUpperCase()}</span>
-			</div>
+						{data.logs && data.logs.length > 0 && (
+							<button className={styles.logBtn} onClick={handleOpenLogs}>
+								<Icon name='material-article' size={10} />
+								<span>{data.logs.length}</span>
+							</button>
+						)}
+					</div>
 
-			{/* 节点主体 */}
-			<div className={styles.nodeBody}>
-				<div className={styles.statusIcon}>
-					<Icon
-						name={getStatusIcon(data.status)}
-						size={14}
-						className={data.status === 'running' ? styles.spinning : ''}
-					/>
-				</div>
-				<div className={styles.nodeContent}>
-					<div className={styles.nodeLabel}>{data.label}</div>
-					{data.description && (
-						<div className={styles.nodeDescription}>{data.description}</div>
-					)}
-				</div>
-			</div>
+					{/* 节点主体 */}
+					<div className={styles.nodeBody}>
+						<div className={styles.statusIcon}>
+							<Icon
+								name={getStatusIcon(data.status)}
+								size={14}
+								className={data.status === 'running' ? styles.spinning : ''}
+							/>
+						</div>
+						<div className={styles.nodeContent}>
+							<div className={styles.nodeLabel}>{data.label}</div>
+							{data.description && (
+								<div className={styles.nodeDescription}>{data.description}</div>
+							)}
+						</div>
+					</div>
 
 					{/* 节点底部 - 时长、错误或最新日志 */}
-			<div className={styles.nodeFooter}>
+					<div className={styles.nodeFooter}>
 						{data.status === 'running' && latestLog ? (
 							<div className={styles.latestLog}>
 								<span className={styles.typing}>&gt;</span> {latestLog.message}
 							</div>
 						) : data.error ? (
-					<div className={styles.errorText}>
+							<div className={styles.errorText}>
 								<Icon name='material-warning' size={12} />
-						{data.error}
+								{data.error}
+							</div>
+						) : (
+							<div className={styles.duration}>{formatDuration(data.duration)}</div>
+						)}
 					</div>
-				) : (
-					<div className={styles.duration}>{formatDuration(data.duration)}</div>
+
+					<Handle type='source' position={Position.Bottom} className={styles.handle} />
+				</div>
+
+				{/* 右侧 Output Panel - 仅在有输出或正在运行时显示 */}
+				{(data.output || data.status === 'running') && (
+					<div
+						ref={rightPanelRef}
+						className={`${styles.sidePanel} ${styles.rightPanel} ${
+							isHovered ? styles.visible : ''
+						}`}
+					>
+						<OutputPanel
+							type={data.type}
+							output={data.output}
+							status={data.status}
+							error={data.error}
+							is_cn={is_cn}
+						/>
+					</div>
 				)}
 			</div>
 
-					<Handle type='source' position={Position.Bottom} className={styles.handle} />
-			</div>
-			</Popover>
-
-			{/* 节点详情模态窗 */}
-			<Modal
-				title={`${data.label} - ${data.type}`}
-				open={isModalOpen}
-				onCancel={() => setIsModalOpen(false)}
-				footer={null}
-				width={600}
-			>
-				<div>
-					<p>
-						<strong>Status:</strong> {data.status}
-					</p>
-					<p>
-						<strong>Description:</strong> {data.description || '-'}
-					</p>
-					<p>
-						<strong>Duration:</strong> {formatDuration(data.duration)}
-					</p>
-					{data.error && (
-						<p style={{ color: 'red' }}>
-							<strong>Error:</strong> {data.error}
-						</p>
-					)}
-				</div>
-			</Modal>
+			{/* 日志弹窗 */}
+			<LogModal
+				open={logModalOpen}
+				onClose={() => setLogModalOpen(false)}
+				logs={data.logs || []}
+				title={data.label}
+				is_cn={is_cn}
+			/>
 		</>
 	)
 }

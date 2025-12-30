@@ -1,0 +1,41 @@
+.jsonViewer {
+	margin: 0;
+	padding: 0;
+	font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+	font-size: 11px;
+	line-height: 1.5;
+	white-space: pre-wrap;
+	word-break: break-word;
+	color: var(--color_text);
+	background: transparent;
+
+	code {
+		font-family: inherit;
+	}
+}
+
+// JSON 语法高亮
+.key {
+	color: var(--color_primary);
+}
+
+.string {
+	color: var(--color_success);
+}
+
+.number {
+	color: var(--color_warning);
+}
+
+.boolean {
+	color: var(--color_info);
+}
+
+.null {
+	color: var(--color_text_grey);
+}
+
+.punctuation {
+	color: var(--color_text_grey);
+}
+

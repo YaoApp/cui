@@ -114,6 +114,8 @@ export const traceReducer = (state: TraceState, action: TraceAction): TraceState
 								? nodeData.end_time - nodeData.start_time
 								: undefined,
 						error: nodeData.status === 'failed' ? 'Failed' : undefined,
+						input: nodeData.input,
+						output: nodeData.output,
 						logs: existingNode?.data.logs || []
 					}
 				}
