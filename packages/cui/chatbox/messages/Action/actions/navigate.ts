@@ -2,14 +2,14 @@
  * Navigate Action
  * Open a route in the application sidebar or new window.
  *
- * Page Types:
+ * Route Types:
  * - $dashboard/ : CUI Dashboard pages (direct route navigation, no prefix needed)
  * - /           : SUI pages (loaded via /web/ iframe wrapper)
  * - http(s)://  : External URLs (loaded via iframe in sidebar)
  */
 
 export interface NavigatePayload {
-	pathname: string
+	route: string
 	title?: string
 	query?: Record<string, string>
 	target?: '_self' | '_blank'
@@ -53,15 +53,15 @@ const resolvePath = (pathname: string): { url: string; type: 'dashboard' | 'sui'
  * Execute navigate action
  */
 export const navigate = (payload: NavigatePayload): void => {
-	if (!payload?.pathname) {
-		console.warn('[Action:navigate] Missing pathname in payload')
+	if (!payload?.route) {
+		console.warn('[Action:navigate] Missing route in payload')
 		return
 	}
 
-	const { pathname, title, query, target = '_self' } = payload
+	const { route, title, query, target = '_self' } = payload
 
 	// Resolve path based on type
-	const { url: resolvedUrl, type } = resolvePath(pathname)
+	const { url: resolvedUrl, type } = resolvePath(route)
 
 	// Build full URL with query params
 	const fullUrl = buildUrl(resolvedUrl, query)

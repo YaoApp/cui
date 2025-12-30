@@ -34,7 +34,7 @@ export const proxy = {
 	'/assets': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/iframe': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/ai': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/expense': { target: 'http://127.0.0.1:5099', changeOrigin: true },
+	'/agents': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/docs': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/tools': { target: 'http://127.0.0.1:5099', changeOrigin: true },
 	'/brands': { target: 'http://127.0.0.1:5099', changeOrigin: true },

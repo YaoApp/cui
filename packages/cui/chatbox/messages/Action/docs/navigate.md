@@ -10,14 +10,14 @@ Open a route in the application sidebar or new window.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `pathname` | `string` | ✅ | Target path or URL |
+| `route` | `string` | ✅ | Target route or URL |
 | `title` | `string` | - | Page title (for temporary view mode) |
 | `query` | `Record<string, string>` | - | Query parameters |
 | `target` | `'_self'` \| `'_blank'` | - | Open target: `_self` (sidebar, default), `_blank` (new window) |
 
-## Page Types
+## Route Types
 
-The `pathname` determines the page type and how it will be loaded:
+The `route` determines the page type and how it will be loaded:
 
 | Prefix | Type | Loading Method | Description |
 |--------|------|----------------|-------------|
@@ -46,7 +46,7 @@ When `title` is provided, the page opens as a temporary view:
 {
   name: 'navigate',
   payload: {
-    pathname: '/trace/abc123',
+    route: '/trace/abc123',
     title: 'Trace Details'
   }
 }
@@ -63,7 +63,7 @@ When `title` is not provided, the page opens with system menu:
 {
   name: 'navigate',
   payload: {
-    pathname: '$dashboard/users'
+    route: '$dashboard/users'
   }
 }
 ```
@@ -76,7 +76,7 @@ Opens in a new browser window/tab.
 {
   name: 'navigate',
   payload: {
-    pathname: 'https://docs.example.com',
+    route: 'https://docs.example.com',
     target: '_blank'
   }
 }
@@ -91,7 +91,7 @@ Opens in a new browser window/tab.
 {
   name: 'navigate',
   payload: {
-    pathname: '$dashboard/users'
+    route: '$dashboard/users'
   }
 }
 
@@ -99,7 +99,7 @@ Opens in a new browser window/tab.
 {
   name: 'navigate',
   payload: {
-    pathname: '$dashboard/users/123',
+    route: '$dashboard/users/123',
     title: 'User Details'
   }
 }
@@ -108,7 +108,7 @@ Opens in a new browser window/tab.
 {
   name: 'navigate',
   payload: {
-    pathname: '$dashboard/users',
+    route: '$dashboard/users',
     target: '_blank'
   }
 }
@@ -121,7 +121,7 @@ Opens in a new browser window/tab.
 {
   name: 'navigate',
   payload: {
-    pathname: '/custom/pages/report',
+    route: '/custom/pages/report',
     title: 'Sales Report'
   }
 }
@@ -130,7 +130,7 @@ Opens in a new browser window/tab.
 {
   name: 'navigate',
   payload: {
-    pathname: '/custom/pages/profile'
+    route: '/custom/pages/profile'
   }
 }
 ```
@@ -142,7 +142,7 @@ Opens in a new browser window/tab.
 {
   name: 'navigate',
   payload: {
-    pathname: 'https://docs.example.com/api',
+    route: 'https://docs.example.com/api',
     title: 'API Documentation'
   }
 }
@@ -151,7 +151,7 @@ Opens in a new browser window/tab.
 {
   name: 'navigate',
   payload: {
-    pathname: 'https://docs.example.com/api',
+    route: 'https://docs.example.com/api',
     target: '_blank'
   }
 }
@@ -163,7 +163,7 @@ Opens in a new browser window/tab.
 {
   name: 'navigate',
   payload: {
-    pathname: '$dashboard/orders',
+    route: '$dashboard/orders',
     query: {
       status: 'pending',
       page: '1'
