@@ -63,9 +63,12 @@ function createChunkHandler(
 					if (window.$app?.Event) {
 						const locale = getLocale()
 						const is_cn = locale === 'zh-CN'
+						// Use short trace ID for display (last 8 chars, since trace ID is timestamp-based)
+						const shortTraceId = traceId.length > 8 ? traceId.slice(-8) : traceId
 						window.$app.Event.emit('app/openSidebar', {
 							url: `/trace/${traceId}`,
-							title: is_cn ? '追踪' : 'Trace',
+							title: `${is_cn ? '追踪' : 'Trace'} ${shortTraceId}`,
+							icon: 'material-timeline',
 							forceNormal: true
 						})
 					}

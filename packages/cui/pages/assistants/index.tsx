@@ -290,6 +290,35 @@ const Index = () => {
 		return () => container.removeEventListener('scroll', handleScroll)
 	}, [loadingMore, hasMore, data])
 
+	// Check if we need to load more after data changes (for large screens)
+	// Only triggers once after initial load to fill the viewport
+	useEffect(() => {
+		// Safety checks to prevent infinite loading:
+		// 1. Must have data loaded
+		// 2. Must not be currently loading
+		// 3. Must have more data available
+		// 4. Current data count must be less than total (double check)
+		if (
+			data.length > 0 &&
+			!loading &&
+			!loadingMore &&
+			hasMore &&
+			data.length < totalAssistants
+		) {
+			const container = containerRef.current
+			if (!container) return
+
+			// Use requestAnimationFrame to ensure DOM has updated
+			requestAnimationFrame(() => {
+				const { scrollHeight, clientHeight } = container
+				// Only load more if content doesn't fill the container (no scrollbar)
+				if (scrollHeight <= clientHeight) {
+					loadMoreData()
+				}
+			})
+		}
+	}, [data.length, loading, loadingMore, hasMore, totalAssistants])
+
 	// Initial load and reload on filter change
 	useEffect(() => {
 		setData([])

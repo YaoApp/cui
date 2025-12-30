@@ -1,25 +1,39 @@
 import { FC, PropsWithChildren, useState, useEffect, useRef } from 'react'
-import Icon from '@/widgets/Icon'
 import Header from './Header'
-import Menu, { MenuItem } from './Menu'
+import History from './History'
+import Empty from './Empty'
 import './style.less'
-import { App } from '@/types'
-import { container } from 'tsyringe'
-import { useLocation, useNavigate } from '@umijs/max'
-import { GlobalModel } from '@/context/app'
-import { findNavPath } from './Utils'
+import type { SidebarTab, SidebarHistoryItem } from './types'
 
 interface ContainerProps {
 	openSidebar: (temporaryLink?: string, title?: string) => void
 	closeSidebar: () => void
 	showMenu?: boolean
 	isMaximized?: boolean
+	/** @deprecated Use tabs instead */
 	temporaryLink?: string
+	/** @deprecated Use tabs instead */
 	currentPageName?: string
+	/** @deprecated Use tabs instead */
 	isTemporaryView?: boolean
+	/** @deprecated Use tabs instead */
 	onBackToNormal?: () => void
 	/** Hide chatbox-related UI (brand logo, sidebar controls) */
 	noChatbox?: boolean
+	// New Sidebar Tabs props
+	tabs?: SidebarTab[]
+	activeTabId?: string | null
+	onTabChange?: (tabId: string) => void
+	onTabClose?: (tabId: string) => void
+	onCloseOtherTabs?: () => void
+	onCloseAllTabs?: () => void
+	historyOpen?: boolean
+	historyItems?: SidebarHistoryItem[]
+	onHistoryClick?: () => void
+	onHistoryClose?: () => void
+	onHistorySelect?: (item: SidebarHistoryItem) => void
+	onHistoryDelete?: (url: string) => void
+	onHistoryClear?: () => void
 }
 
 const Container: FC<PropsWithChildren<ContainerProps>> = ({
@@ -27,25 +41,31 @@ const Container: FC<PropsWithChildren<ContainerProps>> = ({
 	isMaximized,
 	openSidebar,
 	closeSidebar,
-	showMenu = true,
-	temporaryLink,
-	currentPageName,
-	isTemporaryView,
-	onBackToNormal,
-	noChatbox = false
+	noChatbox = false,
+	// New Sidebar Tabs props
+	tabs = [],
+	activeTabId,
+	onTabChange,
+	onTabClose,
+	onCloseOtherTabs,
+	onCloseAllTabs,
+	historyOpen = false,
+	historyItems = [],
+	onHistoryClick,
+	onHistoryClose,
+	onHistorySelect,
+	onHistoryDelete,
+	onHistoryClear
 }) => {
-	const [isMenuVisible, setIsMenuVisible] = useState(true)
-	const contentRef = useRef<HTMLDivElement>(null)
 	const mainContentRef = useRef<HTMLDivElement>(null)
-	const [isUserToggled, setIsUserToggled] = useState(false)
+	const [overlayMode, setOverlayMode] = useState(false)
 
+	// Monitor width for overlay mode
 	useEffect(() => {
 		const checkWidth = () => {
 			if (mainContentRef.current) {
-				const totalWidth = mainContentRef.current.getBoundingClientRect().width
-				if (!isUserToggled) {
-					setIsMenuVisible(totalWidth > 960)
-				}
+				const width = mainContentRef.current.getBoundingClientRect().width
+				setOverlayMode(width < 600)
 			}
 		}
 
@@ -59,105 +79,73 @@ const Container: FC<PropsWithChildren<ContainerProps>> = ({
 		return () => {
 			resizeObserver.disconnect()
 		}
-	}, [isUserToggled])
-
-	useEffect(() => {
-		// Register event listener for external menu toggle
-		const handleExternalToggle = () => {
-			setIsUserToggled(true)
-			setIsMenuVisible((prev) => !prev)
-		}
-
-		window.$app.Event.on('app/toggleMenu', handleExternalToggle)
-
-		return () => {
-			window.$app.Event.off('app/toggleMenu', handleExternalToggle)
-		}
 	}, [])
 
-	const toggleMenu = () => {
-		setIsUserToggled(true)
-		setIsMenuVisible((prev) => !prev)
-	}
+	// Get active tab
+	const activeTab = tabs.find((t) => t.id === activeTabId)
 
-	const global = container.resolve(GlobalModel)
-	const menuItems = [...(global.menus?.items || []), ...(global.menus?.setting || [])].filter(
-		(item) => item.path != '/welcome'
-	)
+	// Check if we have any tabs
+	const hasTabs = tabs.length > 0
 
-	const navigate = useNavigate()
-	const current_path = useLocation().pathname
-	const nav_path = findNavPath(current_path, menuItems)
-	const current_menu = menuItems.find((item) => item.path === nav_path)
-	showMenu = (current_menu && current_menu?.children && current_menu?.children?.length > 0) || false
-
-	// Trigger toggleMenu when the menu is toggled
-	window.$app.Event.emit('app/onMenuChange', { isMenuVisible, showMenu })
-
-	useEffect(() => {
-		// Emit menu visibility change event
-		window.$app.Event.emit('app/onMenuChange', { isMenuVisible, showMenu })
-	}, [isMenuVisible])
-
-	let activeId = ''
-	const toMenuItems = (items: App.Menu[], hasParent: boolean = false): MenuItem[] => {
-		return items.map((item, index) => {
-			if (item.path === current_path) {
-				activeId = `${item.path}-${index}`
-			}
-			return {
-				id: `${item.path}-${index}`,
-				name: item.name,
-				icon: typeof item.icon === 'string' ? item.icon : (item.icon as { name: string })?.name,
-				link: item.path,
-				hasParent,
-				children: item.children ? toMenuItems(item.children, true) : undefined
-			}
-		})
-	}
-
-	const items = toMenuItems(current_menu?.children || [])
-	const onSelect = (item: MenuItem) => {
-		if (item.children && item.children.length > 0) {
-			return
-		}
-
-		if (item.link) {
-			navigate(item.link)
-			return
-		}
-
-		console.error('item.link is not defined')
+	// In noChatbox mode (sidebar-only), always show children directly without tabs logic
+	if (noChatbox) {
+		return (
+			<div className='sidebar_container' style={{ marginLeft: 0 }}>
+				{/* No Header in noChatbox mode - full screen content */}
+				<div className='sidebar_main' ref={mainContentRef}>
+					<main className='sidebar_content'>
+						<div className='sidebar_content_wrapper'>{children}</div>
+					</main>
+				</div>
+			</div>
+		)
 	}
 
 	return (
-		<div className='container' style={{ marginLeft: isMaximized || noChatbox ? 0 : 2 }}>
+		<div className='sidebar_container' style={{ marginLeft: isMaximized ? 0 : 2 }}>
 			<Header
 				openSidebar={openSidebar}
 				closeSidebar={closeSidebar}
-				isTemporaryView={isTemporaryView}
-				currentPageName={currentPageName}
-				temporaryLink={temporaryLink}
-				onBackToNormal={onBackToNormal}
 				noChatbox={noChatbox}
+				tabs={tabs}
+				activeTabId={activeTabId}
+				onTabChange={onTabChange}
+				onTabClose={onTabClose}
+				onCloseOtherTabs={onCloseOtherTabs}
+				onCloseAllTabs={onCloseAllTabs}
+				historyOpen={historyOpen}
+				onHistoryClick={onHistoryClick}
+				onHistoryClose={onHistoryClose}
 			/>
-			<div className='mainContent' ref={mainContentRef}>
-				{showMenu && (
-					<Menu
-						items={items}
-						isVisible={isMenuVisible}
-						activeId={activeId}
-						onToggle={toggleMenu}
-						onSelect={onSelect}
-					/>
-				)}
-				<main className='content' ref={contentRef}>
-					<div className='content_wrapper'>{children}</div>
-					{/* {showMenu && !isMenuVisible && (
-						<button className='menu_toggle menu_toggle_open' onClick={toggleMenu}>
-							<Icon name='material-menu' size={14} />
-						</button>
-					)} */}
+
+			<div className='sidebar_main' ref={mainContentRef}>
+				{/* History Panel */}
+				<History
+					open={historyOpen}
+					items={historyItems}
+					onSelect={onHistorySelect || (() => {})}
+					onDelete={onHistoryDelete || (() => {})}
+					onClear={onHistoryClear || (() => {})}
+					onClose={onHistoryClose || (() => {})}
+					overlay={overlayMode}
+				/>
+
+				{/* Content Area - click to close history */}
+				<main
+					className='sidebar_content'
+					onClick={() => {
+						if (historyOpen && onHistoryClose) {
+							onHistoryClose()
+						}
+					}}
+				>
+					{hasTabs ? (
+						// Render tab content - children is the routed page content
+						<div className='sidebar_content_wrapper'>{children}</div>
+					) : (
+						// Empty state when no tabs
+						<Empty />
+					)}
 				</main>
 			</div>
 		</div>

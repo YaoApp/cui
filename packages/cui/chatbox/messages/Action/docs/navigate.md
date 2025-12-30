@@ -12,8 +12,19 @@ Open a route in the application sidebar or new window.
 |-------|------|----------|-------------|
 | `route` | `string` | ✅ | Target route or URL |
 | `title` | `string` | - | Page title (for temporary view mode) |
+| `icon` | `string` | - | Tab icon name (e.g., `material-folder`, `material-settings`). If not provided, defaults based on route type |
 | `query` | `Record<string, string>` | - | Query parameters |
 | `target` | `'_self'` \| `'_blank'` | - | Open target: `_self` (sidebar, default), `_blank` (new window) |
+
+### Default Icons
+
+If `icon` is not provided, a default icon is used based on the route type:
+
+| Route Type | Default Icon |
+|------------|--------------|
+| CUI (`$dashboard/`) | `material-dashboard` |
+| SUI (`/`) | `material-web` |
+| External (`http(s)://`) | `material-open_in_new` |
 
 ## Route Types
 
@@ -47,7 +58,8 @@ When `title` is provided, the page opens as a temporary view:
   name: 'navigate',
   payload: {
     route: '/trace/abc123',
-    title: 'Trace Details'
+    title: 'Trace Details',
+    icon: 'material-timeline'
   }
 }
 ```
@@ -100,7 +112,8 @@ Opens in a new browser window/tab.
   name: 'navigate',
   payload: {
     route: '$dashboard/users/123',
-    title: 'User Details'
+    title: 'User Details',
+    icon: 'material-person'
   }
 }
 
@@ -122,7 +135,8 @@ Opens in a new browser window/tab.
   name: 'navigate',
   payload: {
     route: '/custom/pages/report',
-    title: 'Sales Report'
+    title: 'Sales Report',
+    icon: 'material-bar_chart'
   }
 }
 

@@ -31,12 +31,12 @@
 
 	&.with-sidebar {
 		.chat-content {
-			width: calc(100% - var(--sidebar-width));
+			width: calc(100% - var(--menu-width, 64px) - var(--sidebar-width, 400px));
 		}
 
 		&.maximized {
 			.chat-content {
-				width: 100%;
+				width: calc(100% - var(--menu-width, 64px));
 				position: relative;
 				z-index: 1;
 			}

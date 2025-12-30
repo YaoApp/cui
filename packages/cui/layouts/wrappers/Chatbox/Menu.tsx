@@ -69,18 +69,18 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 	}
 
 	const NavigateTo = (path: string, menu?: App.Menu) => {
-		// Emit event to mark this navigation as triggered from menu
-		window.$app?.Event?.emit('app/menuNavigation', { path, menu })
-
-		navigate(path)
-
-		// Sidebar-only mode: don't open sidebar (page is full screen without Chatbox)
+		// Sidebar-only mode: just navigate (page is full screen without Chatbox)
 		if (menu && isSidebarOnly(menu)) {
+			navigate(path)
 			return
 		}
 
-		// Default: open sidebar in normal mode
-		setSidebarVisible?.(true, false, true)
+		// Default: emit openSidebar event to create a Tab
+		window.$app?.Event?.emit('app/openSidebar', {
+			path,
+			title: menu?.name || path,
+			icon: menu?.icon ? (typeof menu.icon === 'string' ? menu.icon : menu.icon.name) : undefined
+		})
 	}
 
 	const handleNavChange = (menu: App.Menu) => {

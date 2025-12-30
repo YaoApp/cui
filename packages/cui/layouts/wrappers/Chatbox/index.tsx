@@ -5,6 +5,7 @@ import { container } from 'tsyringe'
 import { GlobalModel } from '@/context/app'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 import clsx from 'clsx'
+import { nanoid } from 'nanoid'
 import { IPropsNeo } from '@/layouts/types'
 import Menu from './Menu'
 import Container from './Container/index'
@@ -14,6 +15,35 @@ import './style.less'
 import { useNavigate, useLocation } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { App } from '@/types'
+import type { SidebarTab, SidebarHistoryItem } from './Container/types'
+
+// ============ Sidebar History Storage ============
+const SIDEBAR_HISTORY_KEY = 'sidebar_history'
+const SIDEBAR_HISTORY_MAX = 50
+
+/** Load history from localStorage */
+const loadSidebarHistory = (): SidebarHistoryItem[] => {
+	try {
+		const data = localStorage.getItem(SIDEBAR_HISTORY_KEY)
+		if (data) {
+			return JSON.parse(data)
+		}
+	} catch (e) {
+		console.warn('Failed to load sidebar history:', e)
+	}
+	return []
+}
+
+/** Save history to localStorage */
+const saveSidebarHistory = (items: SidebarHistoryItem[]) => {
+	try {
+		// Limit to max items
+		const limited = items.slice(0, SIDEBAR_HISTORY_MAX)
+		localStorage.setItem(SIDEBAR_HISTORY_KEY, JSON.stringify(limited))
+	} catch (e) {
+		console.warn('Failed to save sidebar history:', e)
+	}
+}
 
 /**
  * Find menu item by path (recursively search through menu tree)
@@ -146,6 +176,163 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	// Check if app is still loading (menus not yet loaded)
 	const [isInitialLoading, setIsInitialLoading] = useState(true)
 
+	// Navigation hook (used by multiple handlers)
+	const navigate = useNavigate()
+
+	// ============ Sidebar Tabs State ============
+	const [sidebarTabs, setSidebarTabs] = useState<SidebarTab[]>([])
+	const [activeSidebarTabId, setActiveSidebarTabId] = useState<string | null>(null)
+	const [sidebarHistoryOpen, setSidebarHistoryOpen] = useState(false)
+	const [sidebarHistory, setSidebarHistory] = useState<SidebarHistoryItem[]>(() => loadSidebarHistory())
+
+	// Get base URL without query string
+	const getBaseUrl = (url: string): string => {
+		try {
+			const urlObj = new URL(url, window.location.origin)
+			return urlObj.pathname
+		} catch {
+			// If URL parsing fails, try simple split
+			return url.split('?')[0]
+		}
+	}
+
+	// Add a new tab (or reuse existing tab with same base URL)
+	const addSidebarTab = useCallback(
+		(url: string, title: string, icon?: string) => {
+			const baseUrl = getBaseUrl(url)
+
+			// Check if a tab with the same base URL already exists
+			const existingTabIndex = sidebarTabs.findIndex((tab) => getBaseUrl(tab.url) === baseUrl)
+
+			if (existingTabIndex !== -1) {
+				// Tab exists - update its URL and activate it
+				const existingTab = sidebarTabs[existingTabIndex]
+				setSidebarTabs((prev) =>
+					prev.map((tab) =>
+						tab.id === existingTab.id
+							? { ...tab, url, title: title || tab.title, timestamp: Date.now() }
+							: tab
+					)
+				)
+				setActiveSidebarTabId(existingTab.id)
+
+				// Update history
+				const historyItem: SidebarHistoryItem = {
+					url,
+					title: title || existingTab.title,
+					icon: icon || existingTab.icon,
+					lastVisited: Date.now()
+				}
+				setSidebarHistory((prev) => {
+					const filtered = prev.filter((item) => getBaseUrl(item.url) !== baseUrl)
+					const updated = [historyItem, ...filtered]
+					saveSidebarHistory(updated)
+					return updated
+				})
+
+				return existingTab.id
+			}
+
+			// No existing tab - create new one
+			const newTab: SidebarTab = {
+				id: nanoid(),
+				url,
+				title,
+				icon,
+				timestamp: Date.now()
+			}
+			setSidebarTabs((prev) => [...prev, newTab])
+			setActiveSidebarTabId(newTab.id)
+
+			// Add to history
+			const historyItem: SidebarHistoryItem = {
+				url,
+				title,
+				icon,
+				lastVisited: Date.now()
+			}
+			setSidebarHistory((prev) => {
+				// Remove existing entry with same base URL, add new one at front
+				const filtered = prev.filter((item) => getBaseUrl(item.url) !== baseUrl)
+				const updated = [historyItem, ...filtered]
+				saveSidebarHistory(updated)
+				return updated
+			})
+
+			return newTab.id
+		},
+		[sidebarTabs]
+	)
+
+	// Remove a tab
+	const removeSidebarTab = useCallback((tabId: string) => {
+		setSidebarTabs((prev) => {
+			const index = prev.findIndex((t) => t.id === tabId)
+			const newTabs = prev.filter((t) => t.id !== tabId)
+
+			// If removing active tab, activate another one
+			setActiveSidebarTabId((currentActive) => {
+				if (currentActive === tabId && newTabs.length > 0) {
+					// Activate the tab at the same index, or the last one
+					const newIndex = Math.min(index, newTabs.length - 1)
+					return newTabs[newIndex].id
+				}
+				if (newTabs.length === 0) {
+					return null
+				}
+				return currentActive
+			})
+
+			return newTabs
+		})
+	}, [])
+
+	// Activate a tab
+	const activateSidebarTab = useCallback((tabId: string) => {
+		setActiveSidebarTabId(tabId)
+	}, [])
+
+	// Close other tabs (keep only the active one)
+	const closeOtherSidebarTabs = useCallback(() => {
+		setSidebarTabs((prev) => {
+			const activeTab = prev.find((t) => t.id === activeSidebarTabId)
+			return activeTab ? [activeTab] : []
+		})
+	}, [activeSidebarTabId])
+
+	// Close all tabs
+	const closeAllSidebarTabs = useCallback(() => {
+		setSidebarTabs([])
+		setActiveSidebarTabId(null)
+	}, [])
+
+	// History handlers
+	const handleSidebarHistorySelect = useCallback(
+		(item: SidebarHistoryItem) => {
+			addSidebarTab(item.url, item.title, item.icon)
+			setSidebarHistoryOpen(false)
+			// Navigate to the URL to update page content
+			navigate(item.url, { replace: true })
+		},
+		[addSidebarTab, navigate]
+	)
+
+	const handleSidebarHistoryDelete = useCallback((url: string) => {
+		setSidebarHistory((prev) => {
+			const updated = prev.filter((item) => item.url !== url)
+			saveSidebarHistory(updated)
+			return updated
+		})
+	}, [])
+
+	const handleSidebarHistoryClear = useCallback(() => {
+		setSidebarHistory([])
+		saveSidebarHistory([])
+	}, [])
+
+	// Initialize tab from current URL on page load/refresh
+	const initializedRef = useRef(false)
+
 	// Get all menu items for chatbox visibility check
 	const allMenuItems = useMemo(() => {
 		const items = global.menus?.items || []
@@ -153,6 +340,55 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		const quick = global.menus?.quick || []
 		return [...items, ...setting, ...quick]
 	}, [global.menus])
+
+	// Initialize tab on page load (wait for menus to be loaded)
+	useEffect(() => {
+		// Only run once on mount, and wait for menus to be loaded
+		if (initializedRef.current) return
+		if (allMenuItems.length === 0) return // Wait for menus
+
+		// Get current URL with search params
+		const fullUrl = location.pathname + location.search
+		const basePath = location.pathname
+
+		// Skip chatbox-only paths (they don't need tabs)
+		if (isChatboxOnlyPath(basePath)) {
+			initializedRef.current = true
+			return
+		}
+
+		// Skip sidebar-only paths (they render full screen without tabs header)
+		if (isSidebarOnlyPath(basePath)) {
+			initializedRef.current = true
+			return
+		}
+
+		// Mark as initialized
+		initializedRef.current = true
+
+		// Find menu item to get proper title and icon
+		const currentMenu = findMenuByPath(basePath, allMenuItems)
+		const title = currentMenu?.name || basePath
+		const icon = currentMenu?.icon
+			? typeof currentMenu.icon === 'string'
+				? currentMenu.icon
+				: currentMenu.icon.name
+			: undefined
+
+		// Create new tab directly (avoid dependency on addSidebarTab)
+		const newTab: SidebarTab = {
+			id: nanoid(),
+			url: fullUrl,
+			title,
+			icon,
+			timestamp: Date.now()
+		}
+		setSidebarTabs([newTab])
+		setActiveSidebarTabId(newTab.id)
+
+		// Make sure sidebar is visible
+		global.setSidebarVisible(true)
+	}, [location.pathname, location.search, global, allMenuItems])
 
 	// Determine display mode based on menu configuration
 	const displayMode = useMemo(() => {
@@ -219,13 +455,6 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	const [currentPageName, setCurrentPageName] = useState<string>()
 	const isFirstTemporaryViewRef = useRef(true) // Track if this is the first temporary view
 
-	// Track if navigation was triggered from menu
-	// When true, use menu's chatbox configuration
-	// When false (default, or triggered from Chatbox/Action), force 'both' mode
-	const [triggeredFromMenu, setTriggeredFromMenu] = useState(false)
-
-	const navigate = useNavigate()
-
 	// Initialize sidebar width if not set
 	useEffect(() => {
 		const responsiveWidth = getResponsiveWidths().default
@@ -251,27 +480,48 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 
 		const handleOpenSidebar = (detail: any) => {
 			if (detail) {
-				// Open Page (normal navigation with history)
-				if (detail.path) {
-					navigate(detail.path)
-					// Reset temporary view tracking when navigating to normal page
-					isFirstTemporaryViewRef.current = true
-				}
+				const url = detail.url || detail.path
+				const title = detail.title || url
 
-				// Open Temporary Link
-				if (detail.url) {
-					if (detail.title) setCurrentPageName(detail.title || detail.url)
-					setTemporaryLink(detail.url)
-					setIsTemporaryView(true)
+				if (url) {
+					// Get base path for checking
+					const basePath = url.split('?')[0]
 
-					// First temporary view: push to history (preserve previous page)
-					// Subsequent temporary views: replace current (don't stack temporary pages)
-					if (isFirstTemporaryViewRef.current) {
-						navigate(detail.url)
-						isFirstTemporaryViewRef.current = false
-					} else {
-						navigate(detail.url, { replace: true })
+					// Skip chatbox-only paths - they should not create tabs
+					// These are chat-related pages that belong to the Chatbox area
+					if (isChatboxOnlyPath(basePath)) {
+						// Just navigate, don't create tab
+						navigate(url)
+						return
 					}
+
+					// Skip sidebar-only paths - they should not create tabs or history
+					// These are system pages (settings, login, etc.) that render full screen
+					if (isSidebarOnlyPath(basePath)) {
+						// Just navigate, don't create tab
+						navigate(url)
+						return
+					}
+
+					// Reset maximized state and width when opening sidebar from menu
+					// This ensures proper layout in 'both' mode
+					if (global.sidebar_maximized) {
+						global.setSidebarMaximized(false)
+					}
+
+					// Reset sidebar width if it's too large (from maximized state)
+					// In 'both' mode, sidebar should not exceed max width (screen - chatbox min - menu)
+					const maxAllowedWidth = getMaxWidth()
+					if (global.sidebar_width > maxAllowedWidth) {
+						const defaultWidth = getResponsiveWidths().default
+						global.setSidebarWidth(defaultWidth)
+					}
+
+					// Create a new Tab (Sidebar Tabs mode)
+					addSidebarTab(url, title, detail.icon)
+
+					// Also navigate for URL sync (replace to avoid history stack)
+					navigate(url, { replace: true })
 				}
 
 				// Support forceNormal parameter to exit maximized mode
@@ -288,36 +538,23 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			handleSetSidebarVisible(false)
 		}
 
-		// Handle menu navigation - mark as triggered from menu
-		const handleMenuNavigation = () => {
-			setTriggeredFromMenu(true)
-		}
-
-		// Handle openSidebar from Chatbox/Action - reset menu trigger flag
-		const wrappedHandleOpenSidebar = (detail: any) => {
-			setTriggeredFromMenu(false) // Not from menu, force 'both' mode
-			handleOpenSidebar(detail)
-		}
-
 		// Handle menu expanding - disable sidebar transition temporarily
 		const handleMenuExpanding = (expanding: boolean) => {
 			setMenuExpanding(expanding)
 		}
 
 		window.$app.Event.on('app/toggleSidebar', handleToggleSidebar)
-		window.$app.Event.on('app/openSidebar', wrappedHandleOpenSidebar)
+		window.$app.Event.on('app/openSidebar', handleOpenSidebar)
 		window.$app.Event.on('app/closeSidebar', handleCloseSidebar)
-		window.$app.Event.on('app/menuNavigation', handleMenuNavigation)
 		window.$app.Event.on('app/menuExpanding', handleMenuExpanding)
 
 		return () => {
 			window.$app.Event.off('app/toggleSidebar', handleToggleSidebar)
-			window.$app.Event.off('app/openSidebar', wrappedHandleOpenSidebar)
+			window.$app.Event.off('app/openSidebar', handleOpenSidebar)
 			window.$app.Event.off('app/closeSidebar', handleCloseSidebar)
-			window.$app.Event.off('app/menuNavigation', handleMenuNavigation)
 			window.$app.Event.off('app/menuExpanding', handleMenuExpanding)
 		}
-	}, [sidebarVisible, handleSetSidebarVisible, navigate])
+	}, [sidebarVisible, handleSetSidebarVisible, navigate, addSidebarTab])
 
 	// Listen for window resize events
 	useEffect(() => {
@@ -437,20 +674,19 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 
 	// Determine effective display mode
 	// - SIDEBAR_ONLY_PATHS (e.g., /settings/*): always sidebar-only (system pages)
-	// - Menu triggered: follow menu's chatbox setting
-	// - Chatbox/Action triggered: force 'both' mode (keep chatbox visible)
-	// - chatbox-only routes: always chatbox-only
+	// - CHATBOX_ONLY_PATHS (e.g., /, /welcome, /chat): always chatbox-only
+	// - Everything else: 'both' mode (Chatbox + Sidebar)
 	const effectiveDisplayMode = (() => {
-		// System pages: always sidebar-only regardless of trigger source
+		// System pages: always sidebar-only
 		if (isSidebarOnlyPath(currentPath)) {
 			return 'sidebar-only'
 		}
-		// Menu navigation: follow menu configuration
-		if (triggeredFromMenu) {
-			return displayMode
+		// Chat pages: always chatbox-only
+		if (isChatboxOnlyPath(currentPath)) {
+			return 'chatbox-only'
 		}
-		// Non-menu navigation: default to 'both' unless explicitly chatbox-only
-		return displayMode === 'chatbox-only' ? 'chatbox-only' : 'both'
+		// Everything else: both mode
+		return 'both'
 	})()
 
 	// Determine visibility based on display mode
@@ -476,6 +712,9 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			: 'calc(100% - var(--menu-width, 64px))'
 	}
 
+	// In 'both' mode, disable maximized state (maximized only works in sidebar-only mode)
+	const effectiveMaximized = effectiveDisplayMode === 'sidebar-only' && isMaximized
+
 	// Always render ChatProvider for Action support (e.g., auto-open sidebar during chat)
 	return (
 		<ChatProvider>
@@ -486,9 +725,14 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 					effectiveDisplayMode === 'sidebar-only' && 'sidebar-only',
 					sidebarVisible && showSidebarArea && 'with-sidebar',
 					isAnimating && 'animating',
-					isMaximized && 'maximized',
+					effectiveMaximized && 'maximized',
 					menuExpanding && 'no-transition'
 				)}
+				style={
+					{
+						'--sidebar-width': `${sidebarWidth}px`
+					} as React.CSSProperties
+				}
 			>
 				<Menu
 					sidebarVisible={sidebarVisible && showSidebarArea}
@@ -566,6 +810,20 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 							openSidebar={openSidebar}
 							closeSidebar={closeSidebar}
 							noChatbox={true}
+							// New Sidebar Tabs props
+							tabs={sidebarTabs}
+							activeTabId={activeSidebarTabId}
+							onTabChange={activateSidebarTab}
+							onTabClose={removeSidebarTab}
+							onCloseOtherTabs={closeOtherSidebarTabs}
+							onCloseAllTabs={closeAllSidebarTabs}
+							historyOpen={sidebarHistoryOpen}
+							historyItems={sidebarHistory}
+							onHistoryClick={() => setSidebarHistoryOpen((prev) => !prev)}
+							onHistoryClose={() => setSidebarHistoryOpen(false)}
+							onHistorySelect={handleSidebarHistorySelect}
+							onHistoryDelete={handleSidebarHistoryDelete}
+							onHistoryClear={handleSidebarHistoryClear}
 						>
 							{children}
 						</Container>
@@ -582,8 +840,8 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 								isAnimating && 'animating'
 							)}
 							style={{
-								width: sidebarWidth,
-								...(isMaximized ? { position: 'fixed', right: 0 } : undefined)
+								width: sidebarWidth
+								// Note: In 'both' mode, sidebar is not maximizable
 							}}
 						>
 							<div className='resize-handle' onMouseDown={handleResizeStart}>
@@ -591,26 +849,39 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 									type='text'
 									className='maximize-btn'
 									onClick={handleToggleMaximize}
-									icon={isMaximized ? <RightOutlined /> : <LeftOutlined />}
+									icon={<LeftOutlined />}
 								/>
 							</div>
 							<div className='sidebar-content'>
 								<Container
-									isMaximized={isMaximized}
+									isMaximized={false}
 									openSidebar={openSidebar}
 									closeSidebar={closeSidebar}
+									// Legacy props (will be removed after full migration)
 									temporaryLink={temporaryLink}
 									currentPageName={currentPageName}
 									isTemporaryView={isTemporaryView}
 									onBackToNormal={handleBackToNormal}
+									// New Sidebar Tabs props
+									tabs={sidebarTabs}
+									activeTabId={activeSidebarTabId}
+									onTabChange={activateSidebarTab}
+									onTabClose={removeSidebarTab}
+									onCloseOtherTabs={closeOtherSidebarTabs}
+									onCloseAllTabs={closeAllSidebarTabs}
+									historyOpen={sidebarHistoryOpen}
+									historyItems={sidebarHistory}
+									onHistoryClick={() => setSidebarHistoryOpen((prev) => !prev)}
+									onHistoryClose={() => setSidebarHistoryOpen(false)}
+									onHistorySelect={handleSidebarHistorySelect}
+									onHistoryDelete={handleSidebarHistoryDelete}
+									onHistoryClear={handleSidebarHistoryClear}
 								>
 									{children}
 								</Container>
 							</div>
 						</div>
-						{isMaximized && sidebarVisible && (
-							<div className='sidebar-overlay' onClick={handleToggleMaximize} />
-						)}
+						{/* No overlay in 'both' mode - maximized only works in sidebar-only mode */}
 					</>
 				)}
 			</div>

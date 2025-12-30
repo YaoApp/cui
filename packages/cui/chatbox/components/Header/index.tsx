@@ -1,7 +1,9 @@
-import React, { useRef, useEffect, useCallback } from 'react'
+import React, { useRef, useEffect, useCallback, useState } from 'react'
 import clsx from 'clsx'
+import { getLocale } from '@umijs/max'
 import Icon from '../../../widgets/Icon'
 import TabMenu from '../TabMenu'
+import TabContextMenu from '../../../widgets/TabContextMenu'
 import type { IHeaderProps } from '../../types'
 import styles from './index.less'
 
@@ -22,6 +24,14 @@ const Header = (props: IHeaderProps) => {
 	} = props
 
 	const tabsRef = useRef<HTMLDivElement>(null)
+	const locale = getLocale()
+	const is_cn = locale === 'zh-CN'
+
+	// Context menu state
+	const [contextMenu, setContextMenu] = useState<{
+		position: { x: number; y: number } | null
+		tabId: string | null
+	}>({ position: null, tabId: null })
 
 	// Helper to scroll active tab into view
 	const scrollToActive = useCallback(() => {
@@ -58,6 +68,36 @@ const Header = (props: IHeaderProps) => {
 		}
 	}
 
+	// Handle tab context menu (right click)
+	const handleTabContextMenu = (e: React.MouseEvent, tabId: string) => {
+		e.preventDefault()
+		e.stopPropagation()
+		setContextMenu({
+			position: { x: e.clientX, y: e.clientY },
+			tabId
+		})
+	}
+
+	// Close context menu
+	const closeContextMenu = useCallback(() => {
+		setContextMenu({ position: null, tabId: null })
+	}, [])
+
+	// Context menu actions
+	const handleContextCloseTab = useCallback(() => {
+		if (contextMenu.tabId) {
+			onTabClose?.(contextMenu.tabId)
+		}
+	}, [contextMenu.tabId, onTabClose])
+
+	const handleContextCloseOthers = useCallback(() => {
+		onCloseOthers?.()
+	}, [onCloseOthers])
+
+	const handleContextCloseAll = useCallback(() => {
+		onCloseAll?.()
+	}, [onCloseAll])
+
 	return (
 		<div className={clsx(styles.container, className)}>
 			{mode === 'tabs' && (
@@ -76,6 +116,7 @@ const Header = (props: IHeaderProps) => {
 									tab.chatId === activeTabId && styles.active
 								)}
 								onClick={() => onTabChange?.(tab.chatId)}
+								onContextMenu={(e) => handleTabContextMenu(e, tab.chatId)}
 								title={tab.title}
 							>
 								{tab.streaming && <span className={styles.streamingIndicator} />}
@@ -112,6 +153,23 @@ const Header = (props: IHeaderProps) => {
 					/>
 				)}
 			</div>
+
+			{/* Tab Context Menu */}
+			<TabContextMenu
+				position={contextMenu.position}
+				onClose={closeContextMenu}
+				onCloseTab={handleContextCloseTab}
+				onCloseOthers={handleContextCloseOthers}
+				onCloseAll={handleContextCloseAll}
+				disableCloseTab={(tabs?.length || 0) === 0}
+				disableCloseOthers={(tabs?.length || 0) <= 1}
+				disableCloseAll={(tabs?.length || 0) === 0}
+				labels={{
+					closeTab: is_cn ? '关闭当前会话' : 'Close Chat',
+					closeOthers: is_cn ? '关闭其他会话' : 'Close Other Chats',
+					closeAll: is_cn ? '关闭全部会话' : 'Close All Chats'
+				}}
+			/>
 		</div>
 	)
 }

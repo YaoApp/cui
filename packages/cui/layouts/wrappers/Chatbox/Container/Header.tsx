@@ -1,433 +1,269 @@
-import { Button, Dropdown, Tooltip } from 'antd'
-import { FC, useState, useEffect, useRef } from 'react'
+import { Tooltip } from 'antd'
+import { FC, useRef, useEffect, useCallback, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import Icon from '@/widgets/Icon'
+import TabContextMenu from '@/widgets/TabContextMenu'
 import clsx from 'clsx'
 import './header.less'
-import { App } from '@/types'
-import { getLocale, useLocation, useNavigate } from '@umijs/max'
-import { findNavPath } from './Utils'
-import logo_svg from '@/assets/images/logo.svg'
+import { getLocale, useNavigate } from '@umijs/max'
+import type { SidebarTab } from './types'
 
 interface HeaderProps {
 	openSidebar: (temporaryLink?: string, title?: string) => void
 	closeSidebar: () => void
+	/** @deprecated Use tabs instead */
 	isTemporaryView?: boolean
+	/** @deprecated Use tabs instead */
 	currentPageName?: string
+	/** @deprecated Use tabs instead */
 	temporaryLink?: string
+	/** @deprecated Use tabs instead */
 	onBackToNormal?: () => void
 	/** Hide chatbox-related UI (brand logo, sidebar controls) */
 	noChatbox?: boolean
+	// New Sidebar Tabs props
+	tabs?: SidebarTab[]
+	activeTabId?: string | null
+	onTabChange?: (tabId: string) => void
+	onTabClose?: (tabId: string) => void
+	onCloseOtherTabs?: () => void
+	onCloseAllTabs?: () => void
+	historyOpen?: boolean
+	onHistoryClick?: () => void
+	onHistoryClose?: () => void
 }
 
 const Header: FC<HeaderProps> = ({
-	openSidebar,
 	closeSidebar,
-	isTemporaryView = false,
-	currentPageName = '',
-	onBackToNormal,
-	noChatbox = false
+	noChatbox = false,
+	// New Sidebar Tabs props
+	tabs = [],
+	activeTabId,
+	onTabChange,
+	onTabClose,
+	onCloseOtherTabs,
+	onCloseAllTabs,
+	historyOpen = false,
+	onHistoryClick,
+	onHistoryClose
 }) => {
 	const global = useGlobal()
-	const current_path = useLocation().pathname
 	const navigate = useNavigate()
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
-	const [activeMenuId, setActiveMenuId] = useState<string>(current_path)
-	const [activeCommonFunctionId, setActiveCommonFunctionId] = useState<string>(current_path)
-	const [visibleMenuItems, setVisibleMenuItems] = useState<number>(3)
-	const menuContainerRef = useRef<HTMLDivElement>(null)
-	const measureContainerRef = useRef<HTMLDivElement>(null)
-	const itemWidthsRef = useRef<number[]>([])
-	const quick_items = (global.menus?.quick || []).filter(
-		(item) => item.path != '/welcome' && item.path != 'open:sidebar'
-	)
-	const items = [...(global.menus?.items || []), ...(global.menus?.setting || [])].filter(
-		(item) => item.path != '/welcome' && item.path != 'open:sidebar'
-	)
+	const tabsRef = useRef<HTMLDivElement>(null)
 
-	const nav_path = findNavPath(current_path, items)
-	const handleNavChange = (menu: App.Menu) => {
-		navigate(menu.path)
-	}
+	// Context menu state
+	const [contextMenu, setContextMenu] = useState<{
+		position: { x: number; y: number } | null
+		tabId: string | null
+	}>({ position: null, tabId: null })
 
+	// Scroll active tab into view
+	const scrollToActive = useCallback(() => {
+		if (tabsRef.current && activeTabId) {
+			const activeTab = tabsRef.current.querySelector(`[data-tab-id="${activeTabId}"]`) as HTMLElement
+			if (activeTab) {
+				activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+			}
+		}
+	}, [activeTabId])
+
+	// Scroll when activeTabId changes
 	useEffect(() => {
-		const container = menuContainerRef.current
-		const measureContainer = measureContainerRef.current
-		if (!container || !measureContainer) return
+		scrollToActive()
+	}, [activeTabId, scrollToActive])
 
-		const measureItemWidths = () => {
-			const measureItems = measureContainer.children
-			const widths: number[] = []
-
-			for (let i = 0; i < measureItems.length; i++) {
-				const item = measureItems[i] as HTMLElement
-				const itemWidth = item.getBoundingClientRect().width + 8 // Add gap
-				widths.push(itemWidth)
-			}
-
-			itemWidthsRef.current = widths
-		}
-
-		const calculateVisibleItems = () => {
-			// Get the header element's width
-			const header = container.closest('.header_container') as HTMLElement
-			if (!header) return
-
-			// Get the header-right width
-			const headerRight = header.querySelector('.header_right') as HTMLElement
-			if (!headerRight) return
-
-			// Calculate available width
-			const headerWidth = header.getBoundingClientRect().width
-			const headerRightWidth = headerRight.getBoundingClientRect().width
-			const brandElement = header.querySelector('.header_brand') as HTMLElement
-			const createNew = header.querySelector('.header_current_function') as HTMLElement
-
-			if (!brandElement || !createNew) return
-
-			// Add some buffer for padding and spacing
-			const BUFFER_SPACE = 80
-			const brandWidth = brandElement.getBoundingClientRect().width
-			const createNewWidth = createNew.getBoundingClientRect().width
-
-			const usedWidth = headerRightWidth + brandWidth + createNewWidth + BUFFER_SPACE
-
-			const availableWidth = headerWidth - usedWidth
-			const moreMenuWidth = 48
-			let currentWidth = 0
-			let count = 0
-
-			// Calculate how many items can fit
-			for (let i = 0; i < itemWidthsRef.current.length; i++) {
-				const itemWidth = itemWidthsRef.current[i]
-				const remainingItems = itemWidthsRef.current.length - (i + 1)
-				const needMoreMenu = remainingItems > 0
-
-				// Add the "More" menu width if there will be hidden items
-				const totalWidthNeeded = currentWidth + itemWidth + (needMoreMenu ? moreMenuWidth : 0)
-
-				if (totalWidthNeeded <= availableWidth) {
-					currentWidth += itemWidth
-					count = i + 1
-				} else {
-					break
-				}
-			}
-
-			// Ensure we show at least one item
-			const finalCount = Math.max(1, Math.min(count, itemWidthsRef.current.length))
-
-			// If we're showing all items except one, show the more menu anyway
-			if (finalCount === itemWidthsRef.current.length - 1) {
-				setVisibleMenuItems(finalCount - 1)
-			} else {
-				setVisibleMenuItems(finalCount)
-			}
-		}
-
-		// Initial measurement and calculation
-		const recalculate = () => {
-			requestAnimationFrame(() => {
-				measureItemWidths()
-				calculateVisibleItems()
-			})
-		}
-
-		recalculate()
-
-		const resizeObserver = new ResizeObserver(recalculate)
-
-		// Observe the header element instead
-		const header = container.closest('.header_container')
-		if (header) {
-			resizeObserver.observe(header)
-		}
-
-		return () => {
-			resizeObserver.disconnect()
-		}
-	}, [isTemporaryView])
-
+	// Observe container resize to keep active tab visible
 	useEffect(() => {
-		// Reset menu state when switching back from temporary view
-		if (!isTemporaryView) {
-			setActiveMenuId('chat') // Or whatever should be the default active menu
-			setActiveCommonFunctionId('')
-		}
-	}, [isTemporaryView])
+		const container = tabsRef.current
+		if (!container) return
 
-	const renderNormalMenu = () => {
-		// Determine visible and hidden items
-		const visibleItems = items.slice(0, visibleMenuItems)
-		const hiddenItems = items.slice(visibleMenuItems)
-		const activeHiddenItem = hiddenItems.find((item) => false)
+		const observer = new ResizeObserver(() => {
+			scrollToActive()
+		})
 
-		// Create the final list of visible items
-		let finalVisibleItems = [...visibleItems]
-		if (activeHiddenItem) {
-			// Replace the last visible item with the active hidden item
-			finalVisibleItems = [...visibleItems.slice(0, -1), activeHiddenItem]
-		}
+		observer.observe(container)
+		return () => observer.disconnect()
+	}, [scrollToActive])
 
-		// Create the list of items for the dropdown
-		const dropdownItems = activeHiddenItem
-			? [
-					...hiddenItems.filter((item) => item.id !== activeHiddenItem.id),
-					visibleItems[visibleItems.length - 1]
-			  ]
-			: hiddenItems
-
-		// Find active common function
-		const activeFunction = quick_items.find((item) => item.path === current_path)
-
-		return (
-			<div className={clsx('header_normal', noChatbox && 'no-chatbox')}>
-				<div className='header_left'>
-					{/* Brand Logo - hidden in no-chatbox mode */}
-					{!noChatbox && (
-						<div className='header_brand'>
-							<img
-								className='header_brand_logo'
-								src={global.app_info?.logo || logo_svg}
-								alt='logo'
-							/>
-							<span className='header_brand_name'>{global.app_info?.name || 'Yao'}</span>
-						</div>
-					)}
-
-					{/* Common Functions */}
-					<Dropdown
-						menu={{
-							items: quick_items.map((item, index) => ({
-								key: `${item.path}_${index}`,
-								label: (
-									<div
-										className={clsx('header_common_function_item', {
-											active: current_path?.startsWith(item.path)
-										})}
-									>
-										{item.icon && (
-											<Icon
-												name={
-													typeof item.icon === 'string'
-														? item.icon
-														: item.icon?.name
-												}
-												size={15}
-											/>
-										)}
-										<span>{item.name}</span>
-									</div>
-								),
-								onClick: () => handleNavChange(item)
-							})),
-							className: 'header_common_functions_dropdown'
-						}}
-						trigger={['hover']}
-					>
-						<div
-							className={clsx('header_current_function', {
-								active: activeFunction && current_path?.startsWith(activeFunction.path)
-							})}
-						>
-							<Icon
-								name={`${
-									(activeFunction &&
-										activeFunction.icon &&
-										(typeof activeFunction.icon === 'string'
-											? activeFunction.icon
-											: activeFunction.icon.name)) ||
-									'material-star'
-								}`}
-								size={15}
-							/>
-							<span>
-								{activeFunction
-									? activeFunction.name
-									: is_cn
-									? '快捷启动'
-									: 'Quick Launch'}
-							</span>
-						</div>
-					</Dropdown>
-
-					{/* Hidden container for measurements */}
-					<div className='header_menu_items_measure' ref={measureContainerRef}>
-						{items.map((item, index) => (
-							<div key={`m_${item.id}_${index}`} className='header_menu_item'>
-								{item.icon && (
-									<Icon
-										name={
-											typeof item.icon === 'string'
-												? item.icon
-												: item.icon?.name
-										}
-										size={15}
-									/>
-								)}
-								<span>{item.name}</span>
-							</div>
-						))}
-					</div>
-
-					{/* Visible menu items */}
-					<div className='header_menu_items' ref={menuContainerRef}>
-						{finalVisibleItems.map((item, index) => (
-							<div
-								key={`v_${item.id}_${index}`}
-								className={clsx('header_menu_item', {
-									active:
-										nav_path?.startsWith(item.path) &&
-										activeFunction?.path != item.path
-								})}
-								onClick={() => handleNavChange(item)}
-							>
-								{item.icon && (
-									<Icon
-										name={
-											typeof item.icon === 'string'
-												? item.icon
-												: item.icon.name
-										}
-										size={15}
-									/>
-								)}
-								<span>{item.name}</span>
-							</div>
-						))}
-						{items.length > visibleMenuItems && (
-							<Dropdown
-								menu={{
-									items: dropdownItems.map((item, index) => ({
-										key: `h_${item.id}_${index}`,
-										label: (
-											<div
-												className={clsx('header_menu_item', {
-													active:
-														nav_path?.startsWith(item.path) &&
-														activeFunction?.path != item.path
-												})}
-											>
-												{item.icon && (
-													<Icon
-														name={
-															typeof item.icon === 'string'
-																? item.icon
-																: item.icon.name
-														}
-														size={15}
-													/>
-												)}
-												<span>{item.name}</span>
-											</div>
-										),
-										onClick: () => handleNavChange(item)
-									})),
-									className: 'header_more_menu_items'
-								}}
-								trigger={['hover']}
-							>
-								<div className='header_more_menu'>
-									<Icon name='material-more_horiz' size={15} />
-								</div>
-							</Dropdown>
-						)}
-					</div>
-				</div>
-
-				{/* Sidebar controls - hidden in no-chatbox mode */}
-				{!noChatbox && (
-					<div className='header_right'>
-						<Tooltip title={is_cn ? '活动监视器' : 'Activity Monitor'}>
-							<Button
-								type='text'
-								className='header_icon_btn header_task_btn'
-								onClick={() => navigate('/jobs')}
-							>
-								<div className='header_task_content'>
-									<span className='header_task_text'>
-										{is_cn ? '活动监视器' : 'Activity Monitor'}
-									</span>
-									<span
-										className={`header_task_number ${
-											global.runningJobsCount > 0 ? 'has-jobs' : ''
-										}`}
-									>
-										{global.runningJobsCount}
-									</span>
-								</div>
-							</Button>
-						</Tooltip>
-
-						<Tooltip title={is_cn ? 'AI 智能体' : 'AI Assistants'}>
-							<Button
-								type='text'
-								className='header_icon_btn'
-								icon={<Icon name='material-assistant' size={14} />}
-								onClick={() => navigate('/assistants')}
-							/>
-						</Tooltip>
-
-						<Tooltip title={is_cn ? '知识库' : 'Knowledge Base'}>
-							<Button
-								type='text'
-								className='header_icon_btn'
-								icon={<Icon name='material-library_books' size={14} />}
-								onClick={() => navigate('/kb')}
-							/>
-						</Tooltip>
-
-						<Button
-							type='text'
-							className='header_icon_btn'
-							icon={<Icon name='material-close' size={16} />}
-							onClick={closeSidebar}
-						/>
-					</div>
-				)}
-			</div>
-		)
-	}
-
-	const handleBack = () => {
-		// Use browser history to go back
-		navigate(-1)
-		// Clean up temporary view state
-		if (onBackToNormal) {
-			onBackToNormal()
+	// Handle mouse wheel for horizontal scrolling
+	const handleWheel = (e: React.WheelEvent) => {
+		if (tabsRef.current) {
+			tabsRef.current.scrollLeft += e.deltaY
 		}
 	}
 
-	const renderTemporaryView = () => (
-		<div className='header_temporary'>
-			<div className='header_left'>
-				<span className='header_current_page'>{currentPageName || (is_cn ? 'Trace' : 'Trace')}</span>
-			</div>
-			<div className='header_right'>
-				<Button
-					type='text'
-					className='header_icon_btn back-btn'
-					style={{ marginRight: '2px', width: 'auto' }}
-					onClick={handleBack}
-				>
-					<Icon name='material-chevron_left' size={16} style={{ marginRight: '0px' }} />
-					<span>{is_cn ? '返回' : 'Back'}</span>
-				</Button>
-				<Button
-					type='text'
-					className='header_icon_btn'
-					icon={<Icon name='material-close' size={16} />}
-					onClick={closeSidebar}
-				/>
-			</div>
-		</div>
-	)
+	// Handle tab click
+	const handleTabClick = (tabId: string) => {
+		// Close history if open
+		if (historyOpen) {
+			onHistoryClose?.()
+		}
+		onTabChange?.(tabId)
+		// Also navigate to the tab's URL for URL sync
+		const tab = tabs.find((t) => t.id === tabId)
+		if (tab) {
+			navigate(tab.url, { replace: true })
+		}
+	}
+
+	// Handle tab close
+	const handleTabClose = (e: React.MouseEvent, tabId: string) => {
+		e.stopPropagation()
+		onTabClose?.(tabId)
+	}
+
+	// Handle tab context menu (right click)
+	const handleTabContextMenu = (e: React.MouseEvent, tabId: string) => {
+		e.preventDefault()
+		e.stopPropagation()
+		setContextMenu({
+			position: { x: e.clientX, y: e.clientY },
+			tabId
+		})
+	}
+
+	// Close context menu
+	const closeContextMenu = useCallback(() => {
+		setContextMenu({ position: null, tabId: null })
+	}, [])
+
+	// Context menu actions
+	const handleContextCloseTab = useCallback(() => {
+		if (contextMenu.tabId) {
+			onTabClose?.(contextMenu.tabId)
+		}
+	}, [contextMenu.tabId, onTabClose])
+
+	const handleContextCloseOthers = useCallback(() => {
+		onCloseOtherTabs?.()
+	}, [onCloseOtherTabs])
+
+	const handleContextCloseAll = useCallback(() => {
+		onCloseAllTabs?.()
+	}, [onCloseAllTabs])
 
 	return (
-		<header className='header_container'>{isTemporaryView ? renderTemporaryView() : renderNormalMenu()}</header>
+		<header className='sidebar_header'>
+			<div className='sidebar_header_left'>
+				{/* History button */}
+				<div
+					className={clsx('sidebar_header_history_btn', historyOpen && 'active')}
+					onClick={onHistoryClick}
+					title={is_cn ? '浏览历史' : 'History'}
+				>
+					<Icon name={historyOpen ? 'material-menu_open' : 'material-menu'} size={18} />
+				</div>
+
+				{/* Tabs */}
+				<div className='sidebar_header_tabs' ref={tabsRef} onWheel={handleWheel}>
+					{tabs.map((tab) => (
+						<div
+							key={tab.id}
+							data-tab-id={tab.id}
+							className={clsx('sidebar_header_tab', tab.id === activeTabId && 'active')}
+							onClick={() => handleTabClick(tab.id)}
+							onContextMenu={(e) => handleTabContextMenu(e, tab.id)}
+							title={tab.title}
+						>
+							{tab.icon && (
+								<Icon name={tab.icon} size={14} className='sidebar_header_tab_icon' />
+							)}
+							<span className='sidebar_header_tab_title'>{tab.title}</span>
+							<span
+								className='sidebar_header_tab_close'
+								onClick={(e) => handleTabClose(e, tab.id)}
+							>
+								<Icon name='material-close' size={14} />
+							</span>
+						</div>
+					))}
+				</div>
+			</div>
+
+			{/* Right actions */}
+			{!noChatbox && (
+				<div className='sidebar_header_right'>
+					<Tooltip title={is_cn ? '活动监视器' : 'Activity Monitor'}>
+						<div
+							className='sidebar_header_task_btn'
+							onClick={() => {
+								window.$app?.Event?.emit('app/openSidebar', {
+									path: '/jobs',
+									title: is_cn ? '活动监视器' : 'Activity Monitor',
+									icon: 'material-monitor_heart'
+								})
+							}}
+						>
+							<span className='sidebar_header_task_text'>
+								{is_cn ? '活动监视器' : 'Activity Monitor'}
+							</span>
+							<span
+								className={clsx(
+									'sidebar_header_task_number',
+									global.runningJobsCount > 0 && 'has-jobs'
+								)}
+							>
+								{global.runningJobsCount}
+							</span>
+						</div>
+					</Tooltip>
+
+					<Tooltip title={is_cn ? 'AI 智能体' : 'AI Assistants'}>
+						<div
+							className='sidebar_header_btn'
+							onClick={() => {
+								window.$app?.Event?.emit('app/openSidebar', {
+									path: '/assistants',
+									title: is_cn ? 'AI 智能体' : 'AI Assistants',
+									icon: 'material-assistant'
+								})
+							}}
+						>
+							<Icon name='material-assistant' size={14} />
+						</div>
+					</Tooltip>
+
+					<Tooltip title={is_cn ? '知识库' : 'Knowledge Base'}>
+						<div
+							className='sidebar_header_btn'
+							onClick={() => {
+								window.$app?.Event?.emit('app/openSidebar', {
+									path: '/kb',
+									title: is_cn ? '知识库' : 'Knowledge Base',
+									icon: 'material-library_books'
+								})
+							}}
+						>
+							<Icon name='material-library_books' size={14} />
+						</div>
+					</Tooltip>
+
+					<div
+						className='sidebar_header_btn'
+						onClick={closeSidebar}
+						title={is_cn ? '关闭' : 'Close'}
+					>
+						<Icon name='material-close' size={16} />
+					</div>
+				</div>
+			)}
+
+			{/* Tab Context Menu */}
+			<TabContextMenu
+				position={contextMenu.position}
+				onClose={closeContextMenu}
+				onCloseTab={handleContextCloseTab}
+				onCloseOthers={handleContextCloseOthers}
+				onCloseAll={handleContextCloseAll}
+				disableCloseTab={tabs.length === 0}
+				disableCloseOthers={tabs.length <= 1}
+				disableCloseAll={tabs.length === 0}
+			/>
+		</header>
 	)
 }
 

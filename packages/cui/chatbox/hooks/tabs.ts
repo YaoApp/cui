@@ -65,11 +65,21 @@ const parseToolCallContent = (content: string): { id?: string; name?: string; ar
  * Convert stored ChatMessage to display Message format
  * @param stored - ChatMessage from server storage
  * @param assistants - Map of assistant_id to AssistantInfo for avatar/name lookup
+ * @param mainAssistantId - Main assistant ID for the chat session (used to replace sub-agent info)
  * @returns Message for UI display
  */
-const convertStoredToDisplay = (stored: ChatMessage, assistants?: Record<string, AssistantInfo>): Message => {
+const convertStoredToDisplay = (
+	stored: ChatMessage,
+	assistants?: Record<string, AssistantInfo>,
+	mainAssistantId?: string
+): Message => {
 	// Get assistant info if available
-	const assistantInfo = stored.assistant_id && assistants?.[stored.assistant_id]
+	let assistantInfo = stored.assistant_id && assistants?.[stored.assistant_id]
+
+	// If message has thread_id, it's from a sub-agent - use the main assistant info instead
+	if (stored.thread_id && mainAssistantId && assistants?.[mainAssistantId]) {
+		assistantInfo = assistants[mainAssistantId]
+	}
 
 	// Parse tool_call content if needed
 	let props = { ...stored.props, role: stored.role }
@@ -80,6 +90,11 @@ const convertStoredToDisplay = (stored: ChatMessage, assistants?: Record<string,
 			...toolCallProps
 		}
 	}
+
+	// Determine which assistant_id to use for the message
+	// If using main assistant info (for sub-agent messages), use main assistant's ID
+	const effectiveAssistantId =
+		stored.thread_id && mainAssistantId ? mainAssistantId : stored.assistant_id
 
 	return {
 		ui_id: nanoid(), // Generate unique UI ID for React key
@@ -97,7 +112,7 @@ const convertStoredToDisplay = (stored: ChatMessage, assistants?: Record<string,
 		// Add assistant info at message root level (same as streaming messages)
 		...(assistantInfo && {
 			assistant: {
-				assistant_id: stored.assistant_id,
+				assistant_id: effectiveAssistantId,
 				name: assistantInfo.name,
 				avatar: assistantInfo.avatar
 			}
@@ -295,12 +310,15 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 					state.chatClient.GetMessages(chatId)
 				])
 
+				// Get main assistant ID from session
+				const mainAssistantId = sessionRes?.assistant_id || session?.assistant_id
+
 				// Convert stored messages to display format with assistant info
-				// Filter out 'loading' type messages as they are transient states
+				// Filter out 'loading' and 'action' type messages (transient states and UI actions)
 				// Then deduplicate consecutive assistant info
 				const convertedMessages = messagesRes.messages
-					.filter((msg: ChatMessage) => msg.type !== 'loading')
-					.map((msg: ChatMessage) => convertStoredToDisplay(msg, messagesRes.assistants))
+					.filter((msg: ChatMessage) => msg.type !== 'loading' && msg.type !== 'action')
+					.map((msg: ChatMessage) => convertStoredToDisplay(msg, messagesRes.assistants, mainAssistantId))
 				const displayMessages = deduplicateAssistantInfo(convertedMessages)
 				setChatStates((prev) => ({ ...prev, [chatId]: displayMessages }))
 

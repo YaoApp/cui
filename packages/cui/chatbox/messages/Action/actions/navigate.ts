@@ -11,6 +11,7 @@
 export interface NavigatePayload {
 	route: string
 	title?: string
+	icon?: string
 	query?: Record<string, string>
 	target?: '_self' | '_blank'
 }
@@ -50,6 +51,22 @@ const resolvePath = (pathname: string): { url: string; type: 'dashboard' | 'sui'
 }
 
 /**
+ * Get default icon based on route type
+ */
+const getDefaultIcon = (type: 'dashboard' | 'sui' | 'external'): string => {
+	switch (type) {
+		case 'dashboard':
+			return 'material-dashboard'
+		case 'sui':
+			return 'material-web'
+		case 'external':
+			return 'material-open_in_new'
+		default:
+			return 'material-article'
+	}
+}
+
+/**
  * Execute navigate action
  */
 export const navigate = (payload: NavigatePayload): void => {
@@ -58,7 +75,7 @@ export const navigate = (payload: NavigatePayload): void => {
 		return
 	}
 
-	const { route, title, query, target = '_self' } = payload
+	const { route, title, icon, query, target = '_self' } = payload
 
 	// Resolve path based on type
 	const { url: resolvedUrl, type } = resolvePath(route)
@@ -78,17 +95,22 @@ export const navigate = (payload: NavigatePayload): void => {
 		return
 	}
 
+	// Get icon (use provided or default based on type)
+	const finalIcon = icon || getDefaultIcon(type)
+
 	// Open in sidebar
 	if (title) {
 		// Temporary view with title (url mode)
 		window.$app?.Event?.emit('app/openSidebar', {
 			url: fullUrl,
-			title
+			title,
+			icon: finalIcon
 		})
 	} else {
 		// Menu navigation with system menu (path mode)
 		window.$app?.Event?.emit('app/openSidebar', {
-			path: fullUrl
+			path: fullUrl,
+			icon: finalIcon
 		})
 	}
 }
