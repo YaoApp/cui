@@ -10,7 +10,8 @@ import { local } from '@yaoapp/storex'
 
 import type { AvatarFullConfig } from 'react-nice-avatar'
 import type { App, LocaleMessages } from '@/types'
-import { OpenAPI, OpenAPIConfig, UserInfo, JobAPI } from '@/openapi'
+import { OpenAPI, OpenAPIConfig, UserInfo, JobAPI, AppAPI } from '@/openapi'
+import { getLocale } from '@umijs/max'
 
 @singleton()
 export default class GlobalModel {
@@ -114,6 +115,23 @@ export default class GlobalModel {
 	}
 
 	async getUserMenu(locale?: string) {
+		// Use OpenAPI if available, otherwise fall back to legacy API
+		if (window.$app?.openapi && this.app_info?.openapi) {
+			try {
+				const appAPI = new AppAPI(window.$app.openapi)
+				const lang = locale || getLocale()?.toLowerCase() || 'en-us'
+				const response = await appAPI.GetMenu(lang)
+				if (!window.$app.openapi.IsError(response) && response.data) {
+					this.setMenus(response.data)
+					return Promise.resolve()
+				}
+				// Fall through to legacy API on error
+			} catch (error) {
+				console.error('Failed to get menu via OpenAPI, falling back to legacy API:', error)
+			}
+		}
+
+		// Legacy API fallback
 		const { res, err } = await this.service.getUserMenu<App.Menus>(locale)
 		if (err) return Promise.reject()
 		this.setMenus(res)

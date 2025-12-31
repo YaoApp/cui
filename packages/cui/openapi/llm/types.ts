@@ -3,19 +3,8 @@
  * Provides types for LLM provider management functionality
  */
 
-/**
- * Model capability for filtering providers
- * Aligned with backend: yao/openapi/llm/llm.go and gou/connector/openai/openai.go
- */
-export type ModelCapability =
-	| 'vision'
-	| 'audio'
-	| 'tool_calls'
-	| 'reasoning'
-	| 'streaming'
-	| 'json'
-	| 'multimodal'
-	| 'temperature_adjustable'
+// Import ModelCapability from agent/types (not re-exported to avoid duplication in index.ts)
+import type { ModelCapability } from '../agent/types'
 
 /**
  * Model capabilities structure
