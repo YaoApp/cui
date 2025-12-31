@@ -456,19 +456,26 @@ export const mockMenuGroups: MenuGroup[] = [
 			// 	icon: 'material-account_balance_wallet',
 			// 	path: '/settings/balance'
 			// },
-			// {
-			// 	id: '2',
-			// 	key: 'api-keys',
-			// 	name: { 'zh-CN': 'API Keys', 'en-US': 'API Keys' },
-			// 	icon: 'material-vpn_key',
-			// 	path: '/settings/api-keys'
-			// },
 			{
 				id: '2a',
 				key: 'team',
-				name: { 'zh-CN': '团队', 'en-US': 'Team' },
+				name: { 'zh-CN': '团队管理', 'en-US': 'Team' },
 				icon: 'material-group',
 				path: '/settings/team'
+			},
+			{
+				id: '2',
+				key: 'api-keys',
+				name: { 'zh-CN': 'API 密钥', 'en-US': 'API Keys' },
+				icon: 'material-vpn_key',
+				path: '/settings/api-keys'
+			},
+			{
+				id: '5',
+				key: 'usage',
+				name: { 'zh-CN': '使用统计', 'en-US': 'Usage' },
+				icon: 'material-data_usage',
+				path: '/settings/usage'
 			}
 			// {
 			// 	id: '2b',
@@ -1011,7 +1018,7 @@ export const mockApi = {
 
 	getMenuGroups: (): Promise<MenuGroup[]> => {
 		return new Promise((resolve) => {
-			setTimeout(() => resolve(mockMenuGroups), 200)
+			resolve(mockMenuGroups)
 		})
 	},
 
