@@ -19,7 +19,22 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onClose, children }) => {
 	const startXRef = useRef(0)
 	const startWidthRef = useRef(0)
 
-	useEffect(() => {
+	const handleResizeStart = (e: React.MouseEvent) => {
+		e.preventDefault()
+		isDraggingRef.current = true
+		startXRef.current = e.clientX
+		startWidthRef.current = width
+
+		// Prevent text selection and interference during drag
+		document.body.style.cursor = 'col-resize'
+		document.body.style.userSelect = 'none'
+		// Add a transparent overlay to prevent iframe/other elements from capturing mouse events
+		const overlay = document.createElement('div')
+		overlay.id = 'sidebar-resize-overlay'
+		overlay.style.cssText =
+			'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;cursor:col-resize;'
+		document.body.appendChild(overlay)
+
 		const handleMouseMove = (e: MouseEvent) => {
 			if (!isDraggingRef.current) return
 
@@ -33,25 +48,19 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onClose, children }) => {
 
 		const handleMouseUp = () => {
 			isDraggingRef.current = false
+			// Cleanup: restore cursor and remove overlay
 			document.body.style.cursor = ''
-		}
-
-		if (isDraggingRef.current) {
-			document.addEventListener('mousemove', handleMouseMove)
-			document.addEventListener('mouseup', handleMouseUp)
-		}
-
-		return () => {
+			document.body.style.userSelect = ''
+			const existingOverlay = document.getElementById('sidebar-resize-overlay')
+			if (existingOverlay) {
+				existingOverlay.remove()
+			}
 			document.removeEventListener('mousemove', handleMouseMove)
 			document.removeEventListener('mouseup', handleMouseUp)
 		}
-	}, [])
 
-	const handleResizeStart = (e: React.MouseEvent) => {
-		e.preventDefault()
-		isDraggingRef.current = true
-		startXRef.current = e.clientX
-		startWidthRef.current = width
+		document.addEventListener('mousemove', handleMouseMove)
+		document.addEventListener('mouseup', handleMouseUp)
 	}
 
 	if (!isOpen) return null

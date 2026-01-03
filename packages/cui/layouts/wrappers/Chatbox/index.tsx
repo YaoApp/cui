@@ -18,13 +18,28 @@ import { App } from '@/types'
 import type { SidebarTab, SidebarHistoryItem } from './Container/types'
 
 // ============ Sidebar History Storage ============
-const SIDEBAR_HISTORY_KEY = 'sidebar_history'
+const SIDEBAR_HISTORY_KEY_PREFIX = 'sidebar_history'
 const SIDEBAR_HISTORY_MAX = 50
 
-/** Load history from localStorage */
-const loadSidebarHistory = (): SidebarHistoryItem[] => {
+/**
+ * Get storage key for sidebar history based on user and team ID
+ * Format: sidebar_history_<user_id>_<team_id> or sidebar_history_<user_id> if no team
+ */
+const getSidebarHistoryKey = (userId?: string | number, teamId?: string): string => {
+	if (!userId) {
+		return SIDEBAR_HISTORY_KEY_PREFIX
+	}
+	if (teamId) {
+		return `${SIDEBAR_HISTORY_KEY_PREFIX}_${userId}_${teamId}`
+	}
+	return `${SIDEBAR_HISTORY_KEY_PREFIX}_${userId}`
+}
+
+/** Load history from localStorage for specific user/team */
+const loadSidebarHistory = (userId?: string | number, teamId?: string): SidebarHistoryItem[] => {
 	try {
-		const data = localStorage.getItem(SIDEBAR_HISTORY_KEY)
+		const key = getSidebarHistoryKey(userId, teamId)
+		const data = localStorage.getItem(key)
 		if (data) {
 			return JSON.parse(data)
 		}
@@ -34,12 +49,13 @@ const loadSidebarHistory = (): SidebarHistoryItem[] => {
 	return []
 }
 
-/** Save history to localStorage */
-const saveSidebarHistory = (items: SidebarHistoryItem[]) => {
+/** Save history to localStorage for specific user/team */
+const saveSidebarHistory = (items: SidebarHistoryItem[], userId?: string | number, teamId?: string) => {
 	try {
+		const key = getSidebarHistoryKey(userId, teamId)
 		// Limit to max items
 		const limited = items.slice(0, SIDEBAR_HISTORY_MAX)
-		localStorage.setItem(SIDEBAR_HISTORY_KEY, JSON.stringify(limited))
+		localStorage.setItem(key, JSON.stringify(limited))
 	} catch (e) {
 		console.warn('Failed to save sidebar history:', e)
 	}
@@ -179,11 +195,24 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	// Navigation hook (used by multiple handlers)
 	const navigate = useNavigate()
 
+	// ============ User Identity for History Storage ============
+	// Get user ID and team ID for history storage isolation
+	const userId = global.user?.id
+	const teamId = global.user?.team_id
+
 	// ============ Sidebar Tabs State ============
 	const [sidebarTabs, setSidebarTabs] = useState<SidebarTab[]>([])
 	const [activeSidebarTabId, setActiveSidebarTabId] = useState<string | null>(null)
 	const [sidebarHistoryOpen, setSidebarHistoryOpen] = useState(false)
-	const [sidebarHistory, setSidebarHistory] = useState<SidebarHistoryItem[]>(() => loadSidebarHistory())
+	const [sidebarHistory, setSidebarHistory] = useState<SidebarHistoryItem[]>(() =>
+		loadSidebarHistory(userId, teamId)
+	)
+
+	// Reload history when user/team changes (e.g., after login or team switch)
+	useEffect(() => {
+		const newHistory = loadSidebarHistory(userId, teamId)
+		setSidebarHistory(newHistory)
+	}, [userId, teamId])
 
 	// Get base URL without query string
 	const getBaseUrl = (url: string): string => {
@@ -226,7 +255,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 				setSidebarHistory((prev) => {
 					const filtered = prev.filter((item) => getBaseUrl(item.url) !== baseUrl)
 					const updated = [historyItem, ...filtered]
-					saveSidebarHistory(updated)
+					saveSidebarHistory(updated, userId, teamId)
 					return updated
 				})
 
@@ -255,13 +284,13 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 				// Remove existing entry with same base URL, add new one at front
 				const filtered = prev.filter((item) => getBaseUrl(item.url) !== baseUrl)
 				const updated = [historyItem, ...filtered]
-				saveSidebarHistory(updated)
+				saveSidebarHistory(updated, userId, teamId)
 				return updated
 			})
 
 			return newTab.id
 		},
-		[sidebarTabs]
+		[sidebarTabs, userId, teamId]
 	)
 
 	// Remove a tab
@@ -317,18 +346,21 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		[addSidebarTab, navigate]
 	)
 
-	const handleSidebarHistoryDelete = useCallback((url: string) => {
-		setSidebarHistory((prev) => {
-			const updated = prev.filter((item) => item.url !== url)
-			saveSidebarHistory(updated)
-			return updated
-		})
-	}, [])
+	const handleSidebarHistoryDelete = useCallback(
+		(url: string) => {
+			setSidebarHistory((prev) => {
+				const updated = prev.filter((item) => item.url !== url)
+				saveSidebarHistory(updated, userId, teamId)
+				return updated
+			})
+		},
+		[userId, teamId]
+	)
 
 	const handleSidebarHistoryClear = useCallback(() => {
 		setSidebarHistory([])
-		saveSidebarHistory([])
-	}, [])
+		saveSidebarHistory([], userId, teamId)
+	}, [userId, teamId])
 
 	// Initialize tab from current URL on page load/refresh
 	const initializedRef = useRef(false)
@@ -638,10 +670,31 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	const handleResizeStart = useCallback(
 		(e: React.MouseEvent<HTMLDivElement>) => {
 			if (isMaximized) return
+
+			// Check if clicked on the maximize button - don't start resize
+			const target = e.target as HTMLElement
+			if (
+				target.closest('.maximize-btn') ||
+				target.closest('button') ||
+				target.tagName === 'BUTTON'
+			) {
+				return
+			}
+
 			e.preventDefault()
 
 			const startX = e.pageX
 			const startWidth = sidebarWidth
+
+			// Prevent text selection and interference during drag
+			document.body.style.cursor = 'col-resize'
+			document.body.style.userSelect = 'none'
+			// Add a transparent overlay to prevent iframe/other elements from capturing mouse events
+			const overlay = document.createElement('div')
+			overlay.id = 'resize-overlay'
+			overlay.style.cssText =
+				'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;cursor:col-resize;'
+			document.body.appendChild(overlay)
 
 			const handleMouseMove = (e: MouseEvent) => {
 				const delta = startX - e.pageX
@@ -653,6 +706,13 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			}
 
 			const handleMouseUp = () => {
+				// Cleanup: restore cursor and remove overlay
+				document.body.style.cursor = ''
+				document.body.style.userSelect = ''
+				const existingOverlay = document.getElementById('resize-overlay')
+				if (existingOverlay) {
+					existingOverlay.remove()
+				}
 				document.removeEventListener('mousemove', handleMouseMove)
 				document.removeEventListener('mouseup', handleMouseUp)
 			}
@@ -849,7 +909,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 									type='text'
 									className='maximize-btn'
 									onClick={handleToggleMaximize}
-									icon={<LeftOutlined />}
+									icon={isMaximized ? <RightOutlined /> : <LeftOutlined />}
 								/>
 							</div>
 							<div className='sidebar-content'>

@@ -3,7 +3,7 @@ import { FC, useRef, useEffect, useCallback, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import Icon from '@/widgets/Icon'
-import TabContextMenu from '@/widgets/TabContextMenu'
+import TabContextMenu, { canOpenInNewWindow, getNewWindowUrl } from '@/widgets/TabContextMenu'
 import clsx from 'clsx'
 import './header.less'
 import { getLocale, useNavigate } from '@umijs/max'
@@ -146,6 +146,22 @@ const Header: FC<HeaderProps> = ({
 		onCloseAllTabs?.()
 	}, [onCloseAllTabs])
 
+	// Open in new window handler
+	const handleContextOpenInNewWindow = useCallback(() => {
+		if (contextMenu.tabId) {
+			const tab = tabs.find((t) => t.id === contextMenu.tabId)
+			if (tab && canOpenInNewWindow(tab.url)) {
+				const newWindowUrl = getNewWindowUrl(tab.url)
+				window.open(newWindowUrl, '_blank')
+			}
+		}
+	}, [contextMenu.tabId, tabs])
+
+	// Check if current context menu tab can be opened in new window
+	const contextTabCanOpenInNewWindow = contextMenu.tabId
+		? canOpenInNewWindow(tabs.find((t) => t.id === contextMenu.tabId)?.url || '')
+		: false
+
 	return (
 		<header className='sidebar_header'>
 			<div className='sidebar_header_left'>
@@ -259,9 +275,11 @@ const Header: FC<HeaderProps> = ({
 				onCloseTab={handleContextCloseTab}
 				onCloseOthers={handleContextCloseOthers}
 				onCloseAll={handleContextCloseAll}
+				onOpenInNewWindow={handleContextOpenInNewWindow}
 				disableCloseTab={tabs.length === 0}
 				disableCloseOthers={tabs.length <= 1}
 				disableCloseAll={tabs.length === 0}
+				showOpenInNewWindow={contextTabCanOpenInNewWindow}
 			/>
 		</header>
 	)

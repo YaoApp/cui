@@ -3,6 +3,46 @@ import Icon from '@/widgets/Icon'
 import { getLocale } from '@umijs/max'
 import './index.less'
 
+/**
+ * Check if a URL can be opened in a new window
+ * - /web/* paths (iframe pages)
+ * - http:// or https:// external links
+ */
+export const canOpenInNewWindow = (url: string): boolean => {
+	if (!url) return false
+	// External http/https links
+	if (url.startsWith('http://') || url.startsWith('https://')) {
+		return true
+	}
+	// /web/* iframe paths
+	if (url.startsWith('/web/') || url === '/web') {
+		return true
+	}
+	return false
+}
+
+/**
+ * Get the actual URL for opening in a new window
+ * - For /web/* paths, remove the /web prefix (e.g., /web/xxx -> /xxx)
+ * - For http/https, return as-is
+ */
+export const getNewWindowUrl = (url: string): string => {
+	if (!url) return ''
+	// External http/https links - open directly
+	if (url.startsWith('http://') || url.startsWith('https://')) {
+		return url
+	}
+	// /web/* iframe paths - remove /web prefix
+	if (url.startsWith('/web/')) {
+		// /web/xxx?query=1 -> /xxx?query=1
+		return url.substring(4) // Remove '/web' (4 characters)
+	}
+	if (url === '/web') {
+		return '/'
+	}
+	return url
+}
+
 export interface TabContextMenuProps {
 	/** Position of the menu */
 	position: { x: number; y: number } | null
@@ -14,17 +54,22 @@ export interface TabContextMenuProps {
 	onCloseOthers?: () => void
 	/** Close all tabs */
 	onCloseAll?: () => void
+	/** Open in new window */
+	onOpenInNewWindow?: () => void
 	/** Disable close tab option */
 	disableCloseTab?: boolean
 	/** Disable close others option */
 	disableCloseOthers?: boolean
 	/** Disable close all option */
 	disableCloseAll?: boolean
+	/** Show open in new window option */
+	showOpenInNewWindow?: boolean
 	/** Custom labels */
 	labels?: {
 		closeTab?: string
 		closeOthers?: string
 		closeAll?: string
+		openInNewWindow?: string
 	}
 }
 
@@ -34,9 +79,11 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 	onCloseTab,
 	onCloseOthers,
 	onCloseAll,
+	onOpenInNewWindow,
 	disableCloseTab = false,
 	disableCloseOthers = false,
 	disableCloseAll = false,
+	showOpenInNewWindow = false,
 	labels
 }) => {
 	const locale = getLocale()
@@ -47,7 +94,8 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 	const defaultLabels = {
 		closeTab: is_cn ? '关闭标签' : 'Close Tab',
 		closeOthers: is_cn ? '关闭其他标签' : 'Close Other Tabs',
-		closeAll: is_cn ? '关闭全部标签' : 'Close All Tabs'
+		closeAll: is_cn ? '关闭全部标签' : 'Close All Tabs',
+		openInNewWindow: is_cn ? '在新窗口打开' : 'Open in New Window'
 	}
 
 	const mergedLabels = { ...defaultLabels, ...labels }
@@ -108,6 +156,11 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 		}
 	}, [disableCloseAll, onCloseAll, onClose])
 
+	const handleOpenInNewWindow = useCallback(() => {
+		onOpenInNewWindow?.()
+		onClose()
+	}, [onOpenInNewWindow, onClose])
+
 	if (!position) return null
 
 	return (
@@ -119,6 +172,15 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 				top: position.y
 			}}
 		>
+			{showOpenInNewWindow && (
+				<>
+					<div className='tab_context_menu_item' onClick={handleOpenInNewWindow}>
+						<Icon name='material-open_in_new' size={14} />
+						<span>{mergedLabels.openInNewWindow}</span>
+					</div>
+					<div className='tab_context_menu_divider' />
+				</>
+			)}
 			<div
 				className={`tab_context_menu_item ${disableCloseTab ? 'disabled' : ''}`}
 				onClick={handleCloseTab}

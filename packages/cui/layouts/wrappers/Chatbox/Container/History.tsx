@@ -2,6 +2,7 @@ import { FC, useMemo } from 'react'
 import clsx from 'clsx'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import { canOpenInNewWindow, getNewWindowUrl } from '@/widgets/TabContextMenu'
 import type { SidebarHistoryItem } from './types'
 import './history.less'
 
@@ -97,6 +98,13 @@ const History: FC<HistoryProps> = ({ open, items, onSelect, onDelete, onClear, o
 		onDelete(url)
 	}
 
+	// Handle open in new window
+	const handleOpenInNewWindow = (e: React.MouseEvent, url: string) => {
+		e.stopPropagation()
+		const newWindowUrl = getNewWindowUrl(url)
+		window.open(newWindowUrl, '_blank')
+	}
+
 	return (
 		<>
 			{/* Overlay backdrop */}
@@ -141,12 +149,29 @@ const History: FC<HistoryProps> = ({ open, items, onSelect, onDelete, onClear, o
 										<span className='sidebar_history_item_title'>
 											{item.title}
 										</span>
-										<div
-											className='sidebar_history_item_delete'
-											onClick={(e) => handleDelete(e, item.url)}
-											title={is_cn ? '删除' : 'Delete'}
-										>
-											<Icon name='material-close' size={14} />
+										<div className='sidebar_history_item_actions'>
+											{canOpenInNewWindow(item.url) && (
+												<div
+													className='sidebar_history_item_action'
+													onClick={(e) =>
+														handleOpenInNewWindow(e, item.url)
+													}
+													title={
+														is_cn
+															? '在新窗口打开'
+															: 'Open in New Window'
+													}
+												>
+													<Icon name='material-open_in_new' size={14} />
+												</div>
+											)}
+											<div
+												className='sidebar_history_item_action'
+												onClick={(e) => handleDelete(e, item.url)}
+												title={is_cn ? '删除' : 'Delete'}
+											>
+												<Icon name='material-close' size={14} />
+											</div>
 										</div>
 									</div>
 								))}
