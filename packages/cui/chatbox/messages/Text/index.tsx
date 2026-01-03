@@ -150,10 +150,7 @@ const ALLOWED_HTML_TAGS = [
 ]
 
 // Create a regex pattern for allowed tags
-const ALLOWED_TAG_PATTERN = new RegExp(
-	`^<(\\/)?\\s*(${ALLOWED_HTML_TAGS.join('|')})(?:\\s|>|\\/>|$)`,
-	'i'
-)
+const ALLOWED_TAG_PATTERN = new RegExp(`^<(\\/)?\\s*(${ALLOWED_HTML_TAGS.join('|')})(?:\\s|>|\\/>|$)`, 'i')
 
 /**
  * Escape < that are not part of valid HTML tags
@@ -307,14 +304,47 @@ const Text = ({ message }: ITextProps) => {
 	const errorCountRef = useRef(0)
 
 	// Get request_id from message metadata for reference support
-	const requestId = message.metadata?.request_id || ''
+	// Note: request_id may be added dynamically by the stream handler
+	const requestId = (message.metadata as Record<string, any>)?.request_id || ''
 
-	// Handle reference link clicks
-	const handleReferenceClick = useCallback(
+	/**
+	 * Add tracking parameter to URL (same logic as ReferencePopover)
+	 * - If URL has existing 'from' query param, rename it to '__from'
+	 * - Add 'from=yaoagents.com' parameter
+	 */
+	const addTrackingParam = useCallback((url: string): string => {
+		try {
+			const urlObj = new URL(url)
+			// If 'from' param exists, rename it to '__from'
+			if (urlObj.searchParams.has('from')) {
+				const originalFrom = urlObj.searchParams.get('from')
+				urlObj.searchParams.delete('from')
+				urlObj.searchParams.set('__from', originalFrom || '')
+			}
+			// Add our tracking param
+			urlObj.searchParams.set('from', 'yaoagents.com')
+			return urlObj.toString()
+		} catch {
+			// If URL parsing fails, fallback to simple append
+			const separator = url.includes('?') ? '&' : '?'
+			return `${url}${separator}from=yaoagents.com`
+		}
+	}, [])
+
+	/**
+	 * Check if URL is an external link (http/https)
+	 */
+	const isExternalLink = useCallback((url: string): boolean => {
+		return url.startsWith('http://') || url.startsWith('https://')
+	}, [])
+
+	// Handle link clicks (reference links and external links)
+	const handleLinkClick = useCallback(
 		(e: MouseEvent) => {
 			const target = e.target as HTMLElement
-			const refLink = target.closest('a.ref') as HTMLAnchorElement
 
+			// First check for reference links (a.ref)
+			const refLink = target.closest('a.ref') as HTMLAnchorElement
 			if (refLink) {
 				e.preventDefault()
 				e.stopPropagation()
@@ -335,9 +365,25 @@ const Text = ({ message }: ITextProps) => {
 						})
 					}
 				}
+				return
+			}
+
+			// Check for regular external links (http/https)
+			const link = target.closest('a') as HTMLAnchorElement
+			if (link) {
+				const href = link.getAttribute('href')
+				if (href && isExternalLink(href)) {
+					e.preventDefault()
+					e.stopPropagation()
+
+					// Add tracking parameter and open in new window
+					// External sites can't be loaded in iframe due to security restrictions
+					const trackedUrl = addTrackingParam(href)
+					window.open(trackedUrl, '_blank', 'noopener,noreferrer')
+				}
 			}
 		},
-		[requestId]
+		[requestId, isExternalLink, addTrackingParam]
 	)
 
 	// Close reference popover
@@ -350,12 +396,12 @@ const Text = ({ message }: ITextProps) => {
 		const container = containerRef.current
 		if (!container) return
 
-		container.addEventListener('click', handleReferenceClick as EventListener)
+		container.addEventListener('click', handleLinkClick as EventListener)
 
 		return () => {
-			container.removeEventListener('click', handleReferenceClick as EventListener)
+			container.removeEventListener('click', handleLinkClick as EventListener)
 		}
-	}, [handleReferenceClick])
+	}, [handleLinkClick])
 
 	const mdxComponents = useMDXComponents(components())
 
@@ -497,7 +543,7 @@ const Text = ({ message }: ITextProps) => {
 
 			if (!hasLastSuccess || errorCountRef.current > 3) {
 				// No previous success or too many errors, show fallback
-			setContent(<div className='whitespace-pre-wrap'>{contentText}</div>)
+				setContent(<div className='whitespace-pre-wrap'>{contentText}</div>)
 			}
 			return
 		}
@@ -526,8 +572,8 @@ const Text = ({ message }: ITextProps) => {
 			}
 
 			if (!hasLastSuccess || errorCountRef.current > 3) {
-			setContent(<div className='whitespace-pre-wrap'>{contentText}</div>)
-		}
+				setContent(<div className='whitespace-pre-wrap'>{contentText}</div>)
+			}
 		}
 	}, [contentText, message.delta])
 

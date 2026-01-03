@@ -135,8 +135,26 @@ const Index = () => {
 					token: getToken()
 				}
 			})
+
+			// Try to get and update title from iframe (for same-origin iframes)
+			try {
+				const iframe = ref.current
+				if (iframe.contentDocument?.title) {
+					const title = iframe.contentDocument.title
+					if (title) {
+						// Emit event to update sidebar tab title
+						window.$app?.Event?.emit('app/updateSidebarTabTitle', {
+							url: pathname + search,
+							title: title
+						})
+					}
+				}
+			} catch {
+				// Cross-origin iframe, can't access title directly
+				// Title will remain as domain name
+			}
 		}
-	}, [loading])
+	}, [loading, pathname, search])
 
 	return (
 		<iframe

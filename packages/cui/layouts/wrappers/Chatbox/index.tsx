@@ -293,6 +293,37 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		[sidebarTabs, userId, teamId]
 	)
 
+	// Update tab title (used by /web pages to update title from iframe)
+	const updateSidebarTabTitle = useCallback(
+		(url: string, title: string) => {
+			if (!title) return
+
+			// Update tab title
+			setSidebarTabs((prev) =>
+				prev.map((tab) => {
+					// Match by URL (partial match for /web/ URLs)
+					if (tab.url === url || tab.url.includes(url) || url.includes(tab.url)) {
+						return { ...tab, title }
+					}
+					return tab
+				})
+			)
+
+			// Also update history
+			setSidebarHistory((prev) => {
+				const updated = prev.map((item) => {
+					if (item.url === url || item.url.includes(url) || url.includes(item.url)) {
+						return { ...item, title }
+					}
+					return item
+				})
+				saveSidebarHistory(updated, userId, teamId)
+				return updated
+			})
+		},
+		[userId, teamId]
+	)
+
 	// Remove a tab
 	const removeSidebarTab = useCallback((tabId: string) => {
 		setSidebarTabs((prev) => {
@@ -575,18 +606,27 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			setMenuExpanding(expanding)
 		}
 
+		// Handle sidebar tab title update (from /web iframe pages)
+		const handleUpdateSidebarTabTitle = (detail: { url: string; title: string }) => {
+			if (detail?.url && detail?.title) {
+				updateSidebarTabTitle(detail.url, detail.title)
+			}
+		}
+
 		window.$app.Event.on('app/toggleSidebar', handleToggleSidebar)
 		window.$app.Event.on('app/openSidebar', handleOpenSidebar)
 		window.$app.Event.on('app/closeSidebar', handleCloseSidebar)
 		window.$app.Event.on('app/menuExpanding', handleMenuExpanding)
+		window.$app.Event.on('app/updateSidebarTabTitle', handleUpdateSidebarTabTitle)
 
 		return () => {
 			window.$app.Event.off('app/toggleSidebar', handleToggleSidebar)
 			window.$app.Event.off('app/openSidebar', handleOpenSidebar)
 			window.$app.Event.off('app/closeSidebar', handleCloseSidebar)
 			window.$app.Event.off('app/menuExpanding', handleMenuExpanding)
+			window.$app.Event.off('app/updateSidebarTabTitle', handleUpdateSidebarTabTitle)
 		}
-	}, [sidebarVisible, handleSetSidebarVisible, navigate, addSidebarTab])
+	}, [sidebarVisible, handleSetSidebarVisible, navigate, addSidebarTab, updateSidebarTabTitle])
 
 	// Listen for window resize events
 	useEffect(() => {
