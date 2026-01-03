@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { getLocale, useLocation } from '@umijs/max'
-import { local, session } from '@yaoapp/storex'
+import { local } from '@yaoapp/storex'
 import { App } from '@/types'
-import { useAction } from '@/actions'
+import { executeAction } from '@/chatbox/messages/Action/actions'
 
 // Define message types
 export interface IframeMessage {
@@ -18,7 +18,7 @@ export const sendMessageToIframe = (iframe: HTMLIFrameElement | null, message: I
 		return
 	}
 
-	// Ignore message if it's not from the same origin`
+	// Ignore message if it's not from the same origin
 	if (iframe.contentWindow.location.origin !== window.location.origin) {
 		console.warn('Message from unauthorized origin:', iframe.contentWindow.location.origin)
 		return
@@ -37,21 +37,12 @@ const Index = () => {
 	const [loading, setLoading] = useState(true)
 	const ref = useRef<HTMLIFrameElement>(null)
 
-	const onAction = useAction()
-
-	const getToken = (): string => {
-		const is_session_token = local.token_storage === 'sessionStorage'
-		const token = is_session_token ? session.token : local.token
-		return token || ''
-	}
-
 	const getTheme = (): App.Theme => {
 		const theme = (local.xgen_theme || 'light') as App.Theme
 		return theme
 	}
 
 	const handlers: Record<string, () => string> = {
-		__token: getToken,
 		__theme: getTheme,
 		__locale: getLocale
 	}
@@ -74,32 +65,27 @@ const Index = () => {
 	useEffect(() => {
 		// Receive message from iframe
 		const handleMessage = (e: MessageEvent) => {
+			// Only accept messages from same origin
+			if (e.origin !== window.location.origin) {
+				console.warn('Message from unauthorized origin:', e.origin)
+				return
+			}
+
 			const data = e.data || {}
 
-			// Handle different message types
+			// Handle action messages using unified Action system
 			if (data.type === 'action') {
-				// action: Array<Action.ActionParams>,
-				const { extra, data_item = {}, action, primary = 'id' } = data.message || data.payload || {}
+				const { name, payload } = data.message || data.payload || {}
+				if (!name) {
+					console.warn('[Web/Iframe] Missing action name in message:', data)
+					return
+				}
+
 				try {
-					onAction({
-						namespace: pathname,
-						primary,
-						data_item,
-						it: { action, title: '', icon: '' },
-						extra
-					})
+					executeAction(name, payload)
 				} catch (err) {
-					console.error('Failed to run action:', err)
-					console.debug('--- Receive message from iframe ---')
-					console.debug(data)
-					console.debug('---')
-					console.debug({
-						namespace: pathname,
-						primary,
-						data_item,
-						it: { action, title: '', icon: '' },
-						extra
-					})
+					console.error('[Web/Iframe] Failed to execute action:', err)
+					console.debug('Action data:', { name, payload })
 				}
 			} else {
 				// Handle other message types
@@ -131,8 +117,7 @@ const Index = () => {
 				type: 'setup',
 				message: {
 					theme: getTheme(),
-					locale: getLocale(),
-					token: getToken()
+					locale: getLocale()
 				}
 			})
 
