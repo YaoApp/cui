@@ -1,5 +1,6 @@
 import React from 'react'
 import Settings from '../Settings'
+import { getDefaultLogoUrl } from '@/services/wellknown'
 import styles from './index.less'
 
 interface AuthHeaderProps {
@@ -8,7 +9,7 @@ interface AuthHeaderProps {
 	onThemeChange?: (theme: 'light' | 'dark') => void
 }
 
-const AuthHeader: React.FC<AuthHeaderProps> = ({ logo = '/api/__yao/app/icons/app.png', theme, onThemeChange }) => {
+const AuthHeader: React.FC<AuthHeaderProps> = ({ logo = getDefaultLogoUrl(), theme, onThemeChange }) => {
 	return (
 		<>
 			{/* App Logo */}

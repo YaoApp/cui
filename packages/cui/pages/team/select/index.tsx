@@ -8,6 +8,7 @@ import { UserTeam, TeamConfig, UserProfile } from '@/openapi/user/types'
 import AuthLayout from '../../auth/components/AuthLayout'
 import TeamCard from './components/TeamCard'
 import { AfterLogin } from '../../auth/auth'
+import { getDefaultLogoUrl } from '@/services/wellknown'
 import styles from './index.less'
 
 // Cookie 工具函数
@@ -315,7 +316,7 @@ const TeamSelect = () => {
 
 	return (
 		<AuthLayout
-			logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+			logo={global.app_info?.logo || getDefaultLogoUrl()}
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>

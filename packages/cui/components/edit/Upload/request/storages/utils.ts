@@ -61,7 +61,8 @@ export function GetPreviewURL(params: PreviewParams): string {
 	// Default preview URL
 	if (!response.path?.startsWith('http') && !response.url && !previewURL && params.api) {
 		let url = typeof params.api === 'string' ? params.api : params.api.api
-		if (url && url.startsWith('/api/__yao') && url.includes('/upload/fields.')) {
+		// Match both /api/__yao and /{baseURL}/__yao patterns
+		if (url && /__yao/.test(url) && url.includes('/upload/fields.')) {
 			url = url
 				.replace('/upload/fields.', '/download/fields.')
 				.replace('.edit.props/api', '')
@@ -115,8 +116,8 @@ export function GetPreviewURL(params: PreviewParams): string {
 }
 
 export function FixPath(path: string, replace: boolean): string {
-	// Old version api support
-	if (replace && path.startsWith('/api/__yao') && path.includes('name=')) {
+	// Old version api support - match both /api/__yao and /{baseURL}/__yao patterns
+	if (replace && /__yao/.test(path) && path.includes('name=')) {
 		return path.split('name=')[1]
 	}
 	return path

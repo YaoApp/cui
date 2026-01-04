@@ -8,6 +8,7 @@ import { AuthInput, AuthButton } from '../../components'
 import AuthLayout from '../../components/AuthLayout'
 import styles from './index.less'
 import { User } from '@/openapi'
+import { getDefaultLogoUrl } from '@/services/wellknown'
 
 // Browser language detection
 const getBrowserLanguage = (): string => {
@@ -98,7 +99,7 @@ const MFAVerification = () => {
 
 	return (
 		<AuthLayout
-			logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+			logo={global.app_info?.logo || getDefaultLogoUrl()}
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>

@@ -9,6 +9,7 @@ import AuthLayout from '../../components/AuthLayout'
 import styles from './index.less'
 import { User, UserInfo, LoginStatus, EntryConfig } from '@/openapi'
 import { AfterLogin } from '../../auth'
+import { getDefaultLogoUrl } from '@/services/wellknown'
 
 // Cookie 工具函数
 const getCookie = (name: string): string | null => {
@@ -230,7 +231,7 @@ const InviteVerification = () => {
 
 	return (
 		<AuthLayout
-			logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+			logo={global.app_info?.logo || getDefaultLogoUrl()}
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>

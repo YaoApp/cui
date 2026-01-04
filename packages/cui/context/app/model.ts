@@ -5,6 +5,7 @@ import { singleton } from 'tsyringe'
 
 import { Stack } from '@/models'
 import Service from '@/services/app'
+import { getYaoMetadata, YaoMetadata } from '@/services/wellknown'
 import { getCurrentMenuIndexs } from '@/utils'
 import { local } from '@yaoapp/storex'
 
@@ -27,6 +28,7 @@ export default class GlobalModel {
 	connectors = {} as App.Connectors // Deprecated: Use separate API endpoint instead
 	app_info = {} as App.Info
 	openapi = {} as OpenAPIConfig
+	yao_metadata = (local.yao_metadata || null) as YaoMetadata | null // Cached well-known metadata
 	kb = {} as any // TODO: add Knowledge Base Config
 	user = (local.user || {}) as App.User
 	userInfo = (local.userInfo || null) as UserInfo | null
@@ -73,20 +75,61 @@ export default class GlobalModel {
 		this.setNeo()
 	}
 
+	/**
+	 * Check if OpenAPI is enabled by fetching /.well-known/yao (synchronous)
+	 * Caches the result for subsequent requests
+	 */
+	checkOpenAPIEnabled(forceRefresh = false) {
+		try {
+			const metadata = getYaoMetadata(forceRefresh)
+			this.yao_metadata = metadata
+			local.yao_metadata = metadata
+		} catch (error) {
+			console.warn('Failed to check OpenAPI status:', error)
+			this.yao_metadata = null
+			local.yao_metadata = null
+		}
+	}
+
+	/**
+	 * Check if OpenAPI mode is active
+	 */
+	get isOpenAPIEnabled(): boolean {
+		return this.yao_metadata !== null && !!this.yao_metadata.openapi
+	}
+
+	/**
+	 * Get the dashboard path from well-known metadata
+	 */
+	get dashboardPath(): string {
+		return this.yao_metadata?.dashboard || '/yao'
+	}
+
 	async getAppInfo() {
+		// First, check if OpenAPI is enabled via /.well-known/yao (synchronous)
+		this.checkOpenAPIEnabled()
+
 		const { res, err } = await this.service.getAppInfo<App.Info>()
 
 		if (err) return Promise.reject()
 
 		this.app_info = res
 
-		// OpenAPI Config
+		// OpenAPI Config - use well-known metadata if available, otherwise fall back to app info
+		if (this.yao_metadata?.openapi) {
+			// OpenAPI is enabled via well-known
+			window.$app.api_prefix = '__yao' // Widgets still use __yao prefix
+			window.$app.openapi = new OpenAPI({ baseURL: this.yao_metadata.openapi })
+		} else if (res.openapi) {
+			// Fall back to app info
+			window.$app.api_prefix = res.apiPrefix || '__yao'
+			window.$app.openapi = new OpenAPI(res.openapi)
+		} else {
+			// Legacy mode
+			window.$app.api_prefix = res.apiPrefix || '__yao'
+			window.$app.openapi = new OpenAPI({ baseURL: '/v1' })
+		}
 
-		// API Prefix
-		window.$app.api_prefix = res.apiPrefix || '__yao'
-
-		// OpenAPI Config
-		window.$app.openapi = res.openapi ? new OpenAPI(res.openapi) : new OpenAPI({ baseURL: '/v1' })
 		window.$app.kb = res.kb || {}
 
 		// Storage

@@ -10,6 +10,7 @@ import styles from './index.less'
 import { User } from '@/openapi/user'
 import type { PublicInvitationResponse, EntryConfig } from '@/openapi/user/types'
 import { GetCurrentUser, IsLoggedIn, AfterLogin } from '../../auth/auth'
+import { getDefaultLogoUrl } from '@/services/wellknown'
 
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
@@ -299,7 +300,7 @@ const TeamInvite = () => {
 	if (loading) {
 		return (
 			<AuthLayout
-				logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+				logo={global.app_info?.logo || getDefaultLogoUrl()}
 				theme={global.theme}
 				onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 			>
@@ -321,7 +322,7 @@ const TeamInvite = () => {
 	if (error) {
 		return (
 			<AuthLayout
-				logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+				logo={global.app_info?.logo || getDefaultLogoUrl()}
 				theme={global.theme}
 				onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 			>
@@ -365,7 +366,7 @@ const TeamInvite = () => {
 	if (isExpired) {
 		return (
 			<AuthLayout
-				logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+				logo={global.app_info?.logo || getDefaultLogoUrl()}
 				theme={global.theme}
 				onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 			>
@@ -434,7 +435,7 @@ const TeamInvite = () => {
 
 	return (
 		<AuthLayout
-			logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+			logo={global.app_info?.logo || getDefaultLogoUrl()}
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>

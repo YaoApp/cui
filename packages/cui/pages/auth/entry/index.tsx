@@ -12,6 +12,7 @@ import styles from './index.less'
 import { User } from '@/openapi/user'
 import { EntryConfig, SigninProvider, EntryVerificationStatus, LoginStatus } from '@/openapi/user/types'
 import { AfterLogin } from '../auth'
+import { getDefaultLogoUrl } from '@/services/wellknown'
 
 // Note: This is the unified auth entry point
 // Backend will determine if user is logging in or registering based on email existence
@@ -565,7 +566,7 @@ const AuthEntry = () => {
 
 	return (
 		<AuthLayout
-			logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+			logo={global.app_info?.logo || getDefaultLogoUrl()}
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>

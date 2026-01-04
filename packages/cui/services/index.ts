@@ -1,4 +1,5 @@
 export * from './utils'
+export * from './wellknown'
 export { default as AppService } from './app'
 export { default as Common } from './common'
 export { default as Table } from './table'

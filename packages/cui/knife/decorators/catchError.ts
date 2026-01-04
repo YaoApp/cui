@@ -2,7 +2,8 @@ export default () => {
 	return (target: unknown, key: string, descriptor: PropertyDescriptor) => {
 		const fn = descriptor.value
 
-		descriptor.value = async (...args: any) => {
+		// Use regular function to preserve 'this' context
+		descriptor.value = async function (...args: any) {
 			let res, err
 
 			try {

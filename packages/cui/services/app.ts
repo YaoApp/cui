@@ -4,6 +4,7 @@ import { injectable } from 'tsyringe'
 
 import { catchError } from '@/knife'
 import { local } from '@yaoapp/storex'
+import { getApiBase } from './wellknown'
 
 import type { Response } from '@/types'
 import { getLocale } from '@umijs/max'
@@ -22,7 +23,10 @@ export default class Index {
 
 		const time = new Date().toLocaleString().replaceAll('/', '-')
 		local.temp_sid = sid
-		return axios.post<{}, Response<Res>>(`/api/__yao/app/setting`, { sid, lang, locale: lang, time })
+
+		// Use OpenAPI base URL if available, otherwise fall back to /api
+		const apiBase = getApiBase()
+		return axios.post<{}, Response<Res>>(`${apiBase}/__yao/app/setting`, { sid, lang, locale: lang, time })
 	}
 
 	@catchError()
@@ -37,6 +41,11 @@ export default class Index {
 				lang = window.navigator.language.toLowerCase()
 			}
 		}
-		return axios.get<{}, Response<Res>>(`/api/${window.$app.api_prefix}/app/menu`, { params: { locale: lang } })
+
+		// Use OpenAPI base URL if available, otherwise fall back to /api
+		const apiBase = getApiBase()
+		return axios.get<{}, Response<Res>>(`${apiBase}/${window.$app.api_prefix}/app/menu`, {
+			params: { locale: lang }
+		})
 	}
 }

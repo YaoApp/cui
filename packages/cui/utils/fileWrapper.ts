@@ -40,17 +40,14 @@ export function ParseFileWrapper(wrapper: string): { uploaderID: string; fileID:
 	}
 }
 
+import { getApiBase } from '@/services/wellknown'
+
 /**
  * 获取 API 基础 URL
- * @returns API 基础 URL，优先从 window.$app.openapi 读取
+ * @returns API 基础 URL，优先从 well-known 配置读取
  */
 function getBaseURL(): string {
-	// 优先从 Global 的 openapi 配置中读取
-	if (typeof window !== 'undefined' && window.$app?.openapi?.config?.baseURL) {
-		return window.$app.openapi.config.baseURL
-	}
-	// 降级为默认值
-	return '/api/v1'
+	return getApiBase()
 }
 
 /**
@@ -98,7 +95,7 @@ export function ContentURLToWrapper(url: string): string | null {
  * @returns 可直接使用的 URL 地址
  *
  * @example
- * ResolveFileURL('__yao.attachment://file123') // => '/api/v1/file/__yao.attachment/file123/content'
+ * ResolveFileURL('__yao.attachment://file123') // => '{baseURL}/file/__yao.attachment/file123/content'
  * ResolveFileURL('https://example.com/avatar.png') // => 'https://example.com/avatar.png'
  * ResolveFileURL('http://example.com/image.jpg') // => 'http://example.com/image.jpg'
  * ResolveFileURL('/static/default.png') // => '/static/default.png'

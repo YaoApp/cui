@@ -2,6 +2,7 @@ import axios from 'axios'
 import { injectable } from 'tsyringe'
 
 import { catchError } from '@/knife'
+import { getApiBase } from '@/services/wellknown'
 
 import type { Response } from '@/types'
 
@@ -10,13 +11,13 @@ export default class Index {
 	@catchError()
 	getCaptcha<Res>(url?: string) {
 		return axios.get<{}, Response<Res>>(
-			url ? url : `/api/${window.$app.api_prefix}/login/admin/captcha?type=digit`
+			url ? url : `${getApiBase()}/${window.$app.api_prefix}/login/admin/captcha?type=digit`
 		)
 	}
 
 	@catchError()
 	login<Req, Res>(data: Req, url?: string) {
-		return axios.post<Req, Response<Res>>(url ? url : `/api/${window.$app.api_prefix}/login/admin`, data)
+		return axios.post<Req, Response<Res>>(url ? url : `${getApiBase()}/${window.$app.api_prefix}/login/admin`, data)
 	}
 
 	@catchError()
@@ -32,6 +33,6 @@ export default class Index {
 	/** autoLogin is just for demo app. */
 	@catchError()
 	autoLogin<Res>() {
-		return axios.get<{}, Response<Res>>(`/api/demo/admin`)
+		return axios.get<{}, Response<Res>>(`${getApiBase()}/demo/admin`)
 	}
 }

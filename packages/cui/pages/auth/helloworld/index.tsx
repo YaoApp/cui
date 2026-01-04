@@ -7,6 +7,7 @@ import AuthLayout from '../components/AuthLayout'
 import styles from './index.less'
 import { HelloWorld as HelloWorldAPI } from '@/openapi'
 import JsonHighlight from './JsonHighlight'
+import { getDefaultLogoUrl } from '@/services/wellknown'
 
 // 浏览器语言检测工具函数
 const getBrowserLanguage = (): string => {
@@ -103,7 +104,7 @@ const HelloWorld = () => {
 
 	return (
 		<AuthLayout
-			logo={global.app_info?.logo || '/api/__yao/app/icons/app.png'}
+			logo={global.app_info?.logo || getDefaultLogoUrl()}
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>
