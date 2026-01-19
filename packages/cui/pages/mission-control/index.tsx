@@ -5,7 +5,14 @@ import { observer } from 'mobx-react-lite'
 import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
 import clsx from 'clsx'
-import { mockRobots, getRobotStats, getActiveExecutions, getRobotDisplayName } from './mock/data'
+import {
+	mockRobots,
+	getRobotStats,
+	getActiveExecutions,
+	getRobotDisplayName,
+	getRecentActivities,
+	type Activity
+} from './mock/data'
 import type { RobotState } from './types'
 import styles from './index.less'
 
@@ -26,6 +33,11 @@ const MissionControl = () => {
 	const [searchKeyword, setSearchKeyword] = useState('')
 	const [filterStatus, setFilterStatus] = useState<RobotState['status'] | 'all'>('all')
 	const filterRef = useRef<HTMLDivElement>(null)
+
+	// Activity feed state
+	const [activities] = useState<Activity[]>(getRecentActivities(10))
+	const [currentActivityIndex, setCurrentActivityIndex] = useState(0)
+	const [showActivityModal, setShowActivityModal] = useState(false)
 
 	// Stats computed from robots
 	const stats = useMemo(() => getRobotStats(robots), [robots])
@@ -145,6 +157,15 @@ const MissionControl = () => {
 		return () => document.removeEventListener('mousedown', handleClickOutside)
 	}, [showFilter])
 
+	// Activity feed auto-rotate
+	useEffect(() => {
+		if (activities.length <= 1) return
+		const timer = setInterval(() => {
+			setCurrentActivityIndex((prev) => (prev + 1) % activities.length)
+		}, 6000) // Rotate every 6 seconds
+		return () => clearInterval(timer)
+	}, [activities.length])
+
 	// Handle station click
 	const handleStationClick = (robot: RobotState) => {
 		// TODO: Open Agent Modal
@@ -188,6 +209,32 @@ const MissionControl = () => {
 		} else {
 			return is_cn ? `${diffMins}分钟后` : `in ${diffMins}m`
 		}
+	}
+
+	// Get activity icon
+	const getActivityIcon = (type: Activity['type']): string => {
+		const icons: Record<Activity['type'], string> = {
+			completed: 'material-check_circle',
+			file: 'material-description',
+			error: 'material-error',
+			started: 'material-play_circle',
+			paused: 'material-pause_circle'
+		}
+		return icons[type]
+	}
+
+	// Format relative time
+	const formatRelativeTime = (timestamp: string): string => {
+		const now = new Date()
+		const time = new Date(timestamp)
+		const diffMs = now.getTime() - time.getTime()
+		const diffMins = Math.floor(diffMs / (1000 * 60))
+		const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+
+		if (diffMins < 1) return is_cn ? '刚刚' : 'Just now'
+		if (diffMins < 60) return is_cn ? `${diffMins}分钟前` : `${diffMins}m ago`
+		if (diffHours < 24) return is_cn ? `${diffHours}小时前` : `${diffHours}h ago`
+		return time.toLocaleDateString(is_cn ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' })
 	}
 
 	// Get progress for working robot
@@ -440,59 +487,147 @@ const MissionControl = () => {
 				</div>
 			</div>
 
-			{/* Content */}
+			{/* Content - outer container with overflow hidden */}
 			<div className={styles.content}>
-				{/* Clock Section */}
-				<div className={styles.clockSection}>
-					<div className={styles.time}>{renderTime()}</div>
-					<div className={styles.date}>{formatDate(currentTime)}</div>
-				</div>
+				{/* scrollArea - inner scrollable container */}
+				<div className={styles.scrollArea}>
+					{/* Clock Section */}
+					<div className={styles.clockSection}>
+						<div className={styles.time}>{renderTime()}</div>
+						<div className={styles.date}>{formatDate(currentTime)}</div>
+					</div>
 
-				{/* Stations Grid */}
-				<div className={styles.stationsSection}>
-					{filteredRobots.length > 0 ? (
-						<div className={styles.stationsGrid}>
-							{filteredRobots.map(renderStation)}
-							{/* Add Agent - only show when no filter active */}
-							{!isFilterActive && (
-								<div className={styles.addStation} onClick={handleAddAgent}>
-									<div className={styles.addCircle}>
-										<Icon name='material-add' size={32} className={styles.addIcon} />
+					{/* Stations Grid */}
+					<div className={styles.stationsSection}>
+						<div className={styles.stationsScrollWrapper}>
+							{filteredRobots.length > 0 ? (
+								<div className={styles.stationsGrid}>
+									{filteredRobots.map(renderStation)}
+									{/* Add Agent - only show when no filter active */}
+									{!isFilterActive && (
+										<div className={styles.addStation} onClick={handleAddAgent}>
+											<div className={styles.addCircle}>
+												<Icon name='material-add' size={32} className={styles.addIcon} />
+											</div>
+											<span className={styles.addText}>
+												{is_cn ? '添加智能体' : 'Add Agent'}
+											</span>
+										</div>
+									)}
+								</div>
+							) : robots.length > 0 ? (
+								<div className={styles.emptyState}>
+									<Icon name='material-search_off' size={80} className={styles.emptyIcon} />
+									<div className={styles.emptyTitle}>
+										{is_cn ? '没有匹配的智能体' : 'No Matching Agents'}
 									</div>
-									<span className={styles.addText}>
-										{is_cn ? '添加智能体' : 'Add Agent'}
-									</span>
+									<div className={styles.emptyDescription}>
+										{is_cn
+											? '尝试调整筛选条件或搜索关键词'
+											: 'Try adjusting your filter or search keyword'}
+									</div>
+									<button className={styles.resetFilterBtn} onClick={resetFilter}>
+										{is_cn ? '重置筛选' : 'Reset Filter'}
+									</button>
+								</div>
+							) : (
+								<div className={styles.emptyState}>
+									<Icon name='material-auto_awesome' size={80} className={styles.emptyIcon} />
+									<div className={styles.emptyTitle}>
+										{is_cn ? '暂无智能体' : 'No Agents Yet'}
+									</div>
+									<div className={styles.emptyDescription}>
+										{is_cn
+											? '添加您的第一个自主智能体，开始自动化工作流程'
+											: 'Add your first autonomous agent to start automating workflows'}
+									</div>
 								</div>
 							)}
 						</div>
-					) : robots.length > 0 ? (
-						<div className={styles.emptyState}>
-							<Icon name='material-search_off' size={80} className={styles.emptyIcon} />
-							<div className={styles.emptyTitle}>
-								{is_cn ? '没有匹配的智能体' : 'No Matching Agents'}
-							</div>
-							<div className={styles.emptyDescription}>
-								{is_cn
-									? '尝试调整筛选条件或搜索关键词'
-									: 'Try adjusting your filter or search keyword'}
-							</div>
-							<button className={styles.resetFilterBtn} onClick={resetFilter}>
-								{is_cn ? '重置筛选' : 'Reset Filter'}
-							</button>
-						</div>
-					) : (
-						<div className={styles.emptyState}>
-							<Icon name='material-auto_awesome' size={80} className={styles.emptyIcon} />
-							<div className={styles.emptyTitle}>{is_cn ? '暂无智能体' : 'No Agents Yet'}</div>
-							<div className={styles.emptyDescription}>
-								{is_cn
-									? '添加您的第一个自主智能体，开始自动化工作流程'
-									: 'Add your first autonomous agent to start automating workflows'}
-							</div>
-						</div>
-					)}
+					</div>
 				</div>
 			</div>
+
+			{/* Activity Feed Banner */}
+			{activities.length > 0 && (
+				<div className={styles.activityBanner} onClick={() => setShowActivityModal(true)}>
+					<div className={styles.activityContent}>
+						<Icon
+							name={getActivityIcon(activities[currentActivityIndex].type)}
+							size={18}
+							className={clsx(styles.activityIcon, styles[activities[currentActivityIndex].type])}
+						/>
+						<span className={styles.activityRobot}>
+							{is_cn
+								? activities[currentActivityIndex].robot_name.cn
+								: activities[currentActivityIndex].robot_name.en}
+						</span>
+						<span className={styles.activityTitle}>
+							{is_cn
+								? activities[currentActivityIndex].title.cn
+								: activities[currentActivityIndex].title.en}
+						</span>
+						<span className={styles.activityTime}>
+							{formatRelativeTime(activities[currentActivityIndex].timestamp)}
+						</span>
+					</div>
+					<div className={styles.activityAction}>
+						<span className={styles.viewAll}>{is_cn ? '查看全部' : 'View All'}</span>
+						<Icon name='material-chevron_right' size={18} />
+					</div>
+				</div>
+			)}
+
+			{/* Activity Modal */}
+			{showActivityModal && (
+				<div className={styles.modalOverlay} onClick={() => setShowActivityModal(false)}>
+					<div className={styles.activityModal} onClick={(e) => e.stopPropagation()}>
+						<div className={styles.modalHeader}>
+							<h3>{is_cn ? '最近动态' : 'Recent Activity'}</h3>
+							<button
+								className={styles.modalClose}
+								onClick={() => setShowActivityModal(false)}
+							>
+								<Icon name='material-close' size={20} />
+							</button>
+						</div>
+						<div className={styles.modalContent}>
+							{activities.map((activity) => (
+								<div key={activity.id} className={styles.activityItem}>
+									<Icon
+										name={getActivityIcon(activity.type)}
+										size={20}
+										className={clsx(styles.activityIcon, styles[activity.type])}
+									/>
+									<div className={styles.activityInfo}>
+										<div className={styles.activityItemTitle}>
+											<span className={styles.robotName}>
+												{is_cn ? activity.robot_name.cn : activity.robot_name.en}
+											</span>
+											<span className={styles.itemTime}>
+												{formatRelativeTime(activity.timestamp)}
+											</span>
+										</div>
+										<div className={styles.activityItemDesc}>
+											{is_cn ? activity.title.cn : activity.title.en}
+										</div>
+										{activity.description && (
+											<div className={styles.activityItemMeta}>
+												{is_cn ? activity.description.cn : activity.description.en}
+											</div>
+										)}
+									</div>
+									{activity.file_id && (
+										<button className={styles.downloadBtn}>
+											<Icon name='material-download' size={18} />
+										</button>
+									)}
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }

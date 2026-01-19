@@ -450,6 +450,73 @@ export const mockResults: ResultFile[] = [
 	}
 ]
 
+// ==================== Activity Feed ====================
+
+export type ActivityType = 'completed' | 'file' | 'error' | 'started' | 'paused'
+
+export interface Activity {
+	id: string
+	type: ActivityType
+	member_id: string
+	robot_name: { en: string; cn: string }
+	title: { en: string; cn: string }
+	description?: { en: string; cn: string }
+	file_id?: string
+	timestamp: string
+}
+
+export const mockActivities: Activity[] = [
+	{
+		id: 'act_001',
+		type: 'completed',
+		member_id: 'robot_001',
+		robot_name: { en: 'SEO Content Specialist', cn: 'SEO内容专员' },
+		title: { en: 'Completed "AI App Development Guide"', cn: '完成了 "AI应用开发指南"' },
+		description: { en: '2500 words, 12 keywords targeted', cn: '2500字，覆盖12个关键词' },
+		timestamp: '2026-01-19T17:02:00Z'
+	},
+	{
+		id: 'act_002',
+		type: 'file',
+		member_id: 'robot_002',
+		robot_name: { en: 'Competitor Monitor', cn: '竞品监控员' },
+		title: { en: 'Generated Pricing Analysis Report', cn: '生成了价格分析报告' },
+		file_id: 'file_003',
+		timestamp: '2026-01-19T16:45:00Z'
+	},
+	{
+		id: 'act_003',
+		type: 'error',
+		member_id: 'robot_003',
+		robot_name: { en: 'Industry Research Analyst', cn: '行业研究分析师' },
+		title: { en: 'Error: arXiv API rate limit', cn: '错误：arXiv API 限流' },
+		description: { en: 'Will retry in next cycle', cn: '将在下一周期重试' },
+		timestamp: '2026-01-19T16:30:00Z'
+	},
+	{
+		id: 'act_004',
+		type: 'completed',
+		member_id: 'robot_005',
+		robot_name: { en: 'Lead Qualification Specialist', cn: '线索资质专员' },
+		title: { en: 'Processed lead: John Smith @ BigCorp', cn: '处理了线索：John Smith @ BigCorp' },
+		description: { en: 'Score: 85/100 (HOT) - Routed to Sales', cn: '评分：85/100（高意向）- 已转销售' },
+		timestamp: '2026-01-19T16:15:00Z'
+	},
+	{
+		id: 'act_005',
+		type: 'started',
+		member_id: 'robot_008',
+		robot_name: { en: 'Social Media Tracker', cn: '社媒追踪器' },
+		title: { en: 'Started brand mention scan', cn: '开始品牌提及扫描' },
+		timestamp: '2026-01-19T16:00:00Z'
+	}
+]
+
+// Get recent activities
+export const getRecentActivities = (limit: number = 10): Activity[] => {
+	return mockActivities.slice(0, limit)
+}
+
 // ==================== Helper Functions ====================
 
 // Get executions for a specific robot

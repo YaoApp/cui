@@ -127,13 +127,12 @@
 .missionControl {
 	--glow-color: var(--color_mission_glow_cyan);
 
-	position: relative;
-	min-height: 100vh;
-	background: linear-gradient(135deg, var(--color_mission_bg_start) 0%, var(--color_mission_bg_end) 100%);
+	position: absolute;
+	inset: 0; // Fill parent completely
 	display: flex;
 	flex-direction: column;
-	overflow-x: hidden;
-	overflow-y: auto;
+	overflow: hidden;
+	background: linear-gradient(135deg, var(--color_mission_bg_start) 0%, var(--color_mission_bg_end) 100%);
 
 	&.fullscreen {
 		position: fixed;
@@ -153,10 +152,16 @@
 		}
 
 		.content {
-			padding-top: 80px;
+			padding-top: 60px;
+		}
+
+		.activityBanner {
+			left: 0;
 		}
 
 		.clockSection {
+			padding: 32px 0 24px;
+
 			.time {
 				font-size: 120px;
 			}
@@ -208,11 +213,47 @@
 	position: relative;
 	z-index: 1;
 	flex: 1;
+	min-height: 0;
+	overflow: hidden; // Important: parent container hidden
 	display: flex;
 	flex-direction: column;
-	padding: 24px;
-	padding-top: 100px; // Space for fixed header
-	overflow: visible;
+	margin-top: 80px; // Space for fixed header
+
+	// Scrollbar visible on hover (like Team)
+	&:hover {
+		.scrollArea::-webkit-scrollbar-thumb {
+			background: rgba(100, 100, 120, 0.4);
+
+			&:hover {
+				background: rgba(100, 100, 120, 0.6);
+			}
+		}
+	}
+}
+
+.scrollArea {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px 24px 80px; // top: small gap, bottom: space for activity banner
+
+	// Scrollbar styles - hidden by default, show on hover
+	&::-webkit-scrollbar {
+		width: 5px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: transparent; // Hidden by default
+		border-radius: 3px;
+		transition: background 0.2s ease;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb:hover {
+		background: rgba(100, 100, 120, 0.7);
+	}
 }
 
 // ==================== Header ====================
@@ -560,8 +601,9 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding: 40px 0 50px;
+	padding: 24px 0 20px;
 	position: relative;
+	flex-shrink: 0; // Don't shrink clock
 
 	// Glow effect behind clock
 	&::before {
@@ -626,9 +668,11 @@
 // ==================== Stations Grid ====================
 
 .stationsSection {
-	flex: 1;
-	overflow: visible;
-	padding: 0 40px 40px;
+	padding: 0 16px 40px;
+}
+
+.stationsScrollWrapper {
+	// No special styles needed, just a wrapper
 }
 
 .stationsGrid {
@@ -637,7 +681,7 @@
 	justify-content: center;
 	align-items: flex-start;
 	gap: 40px;
-	padding: 40px 0;
+	padding: 20px 24px;
 }
 
 // ==================== Station (Creature/Entity Style) ====================
@@ -1070,17 +1114,251 @@
 	}
 }
 
+// ==================== Activity Feed Banner ====================
+
+.activityBanner {
+	position: fixed;
+	bottom: 0;
+	left: var(--menu-width, 64px);
+	right: 0;
+	height: 56px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 32px;
+	background: var(--color_mission_glass_bg);
+	backdrop-filter: blur(20px) saturate(180%);
+	-webkit-backdrop-filter: blur(20px) saturate(180%);
+	border-top: 1px solid var(--color_mission_glass_border);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	z-index: 50;
+
+	&:hover {
+		background: var(--color_mission_glass_hover);
+
+		.viewAll {
+			color: var(--color_mission_accent_cyan);
+		}
+	}
+}
+
+.activityContent {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex: 1;
+	overflow: hidden;
+}
+
+.activityIcon {
+	flex-shrink: 0;
+
+	&.completed {
+		color: var(--color_mission_accent_green);
+	}
+	&.file {
+		color: var(--color_mission_accent_cyan);
+	}
+	&.error {
+		color: var(--color_danger);
+	}
+	&.started {
+		color: var(--color_mission_accent_purple);
+	}
+	&.paused {
+		color: var(--color_mission_text_muted);
+	}
+}
+
+.activityRobot {
+	font-weight: 600;
+	color: var(--color_mission_text);
+	white-space: nowrap;
+}
+
+.activityTitle {
+	color: var(--color_mission_text_secondary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.activityTime {
+	flex-shrink: 0;
+	font-size: 12px;
+	color: var(--color_mission_text_muted);
+	margin-left: auto;
+	padding-left: 16px;
+}
+
+.activityAction {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	color: var(--color_mission_text_muted);
+	flex-shrink: 0;
+	margin-left: 24px;
+}
+
+.viewAll {
+	font-size: 13px;
+	transition: color 0.2s ease;
+}
+
+// ==================== Activity Modal ====================
+
+.modalOverlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(4px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	animation: fade-in-scale 0.2s ease;
+}
+
+.activityModal {
+	width: 90%;
+	max-width: 560px;
+	max-height: 70vh;
+	background: var(--color_mission_glass_bg);
+	backdrop-filter: blur(24px) saturate(180%);
+	-webkit-backdrop-filter: blur(24px) saturate(180%);
+	border: 1px solid var(--color_mission_glass_border);
+	border-radius: 20px;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--color_mission_glass_border);
+
+	h3 {
+		margin: 0;
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--color_mission_text);
+	}
+}
+
+.modalClose {
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	border-radius: 10px;
+	color: var(--color_mission_text_muted);
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: var(--color_mission_card_bg);
+		color: var(--color_mission_text);
+	}
+}
+
+.modalContent {
+	flex: 1;
+	overflow-y: auto;
+	padding: 8px 0;
+}
+
+.activityItem {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	padding: 16px 24px;
+	transition: background 0.2s ease;
+
+	&:hover {
+		background: var(--color_mission_card_bg);
+	}
+
+	.activityIcon {
+		margin-top: 2px;
+	}
+}
+
+.activityInfo {
+	flex: 1;
+	min-width: 0;
+}
+
+.activityItemTitle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 4px;
+}
+
+.robotName {
+	font-weight: 600;
+	color: var(--color_mission_text);
+}
+
+.itemTime {
+	font-size: 12px;
+	color: var(--color_mission_text_muted);
+	flex-shrink: 0;
+}
+
+.activityItemDesc {
+	font-size: 14px;
+	color: var(--color_mission_text_secondary);
+	line-height: 1.5;
+}
+
+.activityItemMeta {
+	font-size: 12px;
+	color: var(--color_mission_text_muted);
+	margin-top: 4px;
+}
+
+.downloadBtn {
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--color_mission_card_bg);
+	border: 1px solid var(--color_mission_card_border);
+	border-radius: 10px;
+	color: var(--color_mission_text_secondary);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+
+	&:hover {
+		border-color: var(--color_mission_accent_cyan);
+		color: var(--color_mission_accent_cyan);
+	}
+}
+
 // ==================== Responsive ====================
 
 @media (max-width: 768px) {
 	.content {
-		padding: 16px;
+		padding: 140px 16px 70px;
 	}
 
 	.header {
 		flex-direction: column;
 		gap: 16px;
 		padding: 16px;
+		left: 0;
 	}
 
 	.stats {
@@ -1089,7 +1367,7 @@
 	}
 
 	.clockSection {
-		padding: 24px 0;
+		padding: 16px 0;
 	}
 
 	.time {
@@ -1097,11 +1375,12 @@
 	}
 
 	.stationsSection {
-		padding: 0 16px 16px;
+		padding: 0 8px 20px;
 	}
 
 	.stationsGrid {
 		gap: 30px;
+		padding: 16px;
 	}
 
 	.station {
@@ -1116,5 +1395,27 @@
 	.creatureBody {
 		width: 50px;
 		height: 50px;
+	}
+
+	.activityBanner {
+		left: 0;
+		padding: 0 16px;
+
+		.activityTime {
+			display: none;
+		}
+
+		.activityAction {
+			margin-left: 12px;
+
+			.viewAll {
+				display: none;
+			}
+		}
+	}
+
+	.activityModal {
+		width: 95%;
+		max-height: 80vh;
 	}
 }
