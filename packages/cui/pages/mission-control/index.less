@@ -1,0 +1,1120 @@
+// Mission Control - Main Page Styles
+// Futuristic / Organic Sci-Fi aesthetic (like magical creatures in a tech space)
+// ONLY use CSS variables from @cui/packages/cui/styles/preset/vars.less
+
+// ==================== Animations ====================
+
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-8px);
+	}
+}
+
+@keyframes pulse-glow {
+	0%,
+	100% {
+		filter: drop-shadow(0 0 20px var(--glow-color)) drop-shadow(0 0 40px var(--glow-color));
+		transform: scale(1);
+	}
+	50% {
+		filter: drop-shadow(0 0 30px var(--glow-color)) drop-shadow(0 0 60px var(--glow-color));
+		transform: scale(1.02);
+	}
+}
+
+@keyframes breathe {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+}
+
+@keyframes orbit {
+	from {
+		transform: rotate(0deg) translateX(60px) rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg) translateX(60px) rotate(-360deg);
+	}
+}
+
+@keyframes energy-flow {
+	0% {
+		stroke-dashoffset: 1000;
+	}
+	100% {
+		stroke-dashoffset: 0;
+	}
+}
+
+@keyframes shimmer {
+	0% {
+		background-position: -200% center;
+	}
+	100% {
+		background-position: 200% center;
+	}
+}
+
+@keyframes fade-in-scale {
+	from {
+		opacity: 0;
+		transform: scale(0.8);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes rotate-slow {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes particle-float {
+	0%,
+	100% {
+		transform: translateY(0) translateX(0);
+		opacity: 0;
+	}
+	10% {
+		opacity: 1;
+	}
+	90% {
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(-100px) translateX(20px);
+		opacity: 0;
+	}
+}
+
+@keyframes ring-pulse {
+	0% {
+		transform: scale(0.8);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1.5);
+		opacity: 0;
+	}
+}
+
+@keyframes status-blink {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+}
+
+// ==================== Main Container ====================
+
+.missionControl {
+	--glow-color: var(--color_mission_glow_cyan);
+
+	position: relative;
+	min-height: 100vh;
+	background: linear-gradient(135deg, var(--color_mission_bg_start) 0%, var(--color_mission_bg_end) 100%);
+	display: flex;
+	flex-direction: column;
+	overflow-x: hidden;
+	overflow-y: auto;
+
+	&.fullscreen {
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
+
+		.header {
+			left: 0; // Full width in fullscreen
+			padding: 12px 32px;
+			opacity: 0;
+			transition: opacity 0.3s ease;
+			z-index: 1001;
+
+			&:hover {
+				opacity: 1;
+			}
+		}
+
+		.content {
+			padding-top: 80px;
+		}
+
+		.clockSection {
+			.time {
+				font-size: 120px;
+			}
+			.date {
+				font-size: 20px;
+			}
+		}
+
+		.station {
+			transform: scale(1.1);
+		}
+	}
+}
+
+// Ambient glow orbs - separate layer
+.ambientGlow {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	overflow: visible;
+
+	.glow1 {
+		position: absolute;
+		width: 60vw;
+		height: 60vw;
+		max-width: 800px;
+		max-height: 800px;
+		background: radial-gradient(circle, var(--color_mission_ambient_1) 0%, transparent 70%);
+		top: 5%;
+		right: 5%;
+		animation: breathe 8s ease-in-out infinite;
+	}
+
+	.glow2 {
+		position: absolute;
+		width: 50vw;
+		height: 50vw;
+		max-width: 700px;
+		max-height: 700px;
+		background: radial-gradient(circle, var(--color_mission_ambient_2) 0%, transparent 70%);
+		bottom: 5%;
+		left: 5%;
+		animation: breathe 10s ease-in-out infinite 2s;
+	}
+}
+
+.content {
+	position: relative;
+	z-index: 1;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 24px;
+	padding-top: 100px; // Space for fixed header
+	overflow: visible;
+}
+
+// ==================== Header ====================
+
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px 40px;
+	background: var(--color_mission_glass_bg);
+	backdrop-filter: blur(20px) saturate(180%);
+	-webkit-backdrop-filter: blur(20px) saturate(180%);
+	border-bottom: 1px solid var(--color_mission_glass_border);
+	transition: all 0.3s ease;
+	position: fixed;
+	top: 0;
+	left: var(--menu-width, 64px);
+	right: 0;
+	z-index: 100;
+}
+
+.logo {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+
+	.logoIcon {
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
+		border-radius: 12px;
+		color: white;
+		box-shadow: 0 0 20px var(--color_mission_glow_cyan);
+	}
+
+	.title {
+		font-size: 16px;
+		font-weight: 600;
+		letter-spacing: 2px;
+		color: var(--color_mission_text);
+		font-family: 'SF Pro Display', -apple-system, sans-serif;
+	}
+}
+
+.stats {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+}
+
+.statItem {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 20px;
+	background: var(--color_mission_glass_bg);
+	backdrop-filter: blur(16px) saturate(180%);
+	-webkit-backdrop-filter: blur(16px) saturate(180%);
+	border: 1px solid var(--color_mission_glass_border);
+	border-radius: 20px;
+	box-shadow: var(--color_mission_glass_shadow);
+	transition: all 0.3s ease;
+
+	&:hover {
+		transform: translateY(-2px);
+		background: var(--color_mission_glass_hover);
+	}
+
+	.statDot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		position: relative;
+
+		&::after {
+			content: '';
+			position: absolute;
+			inset: -3px;
+			border-radius: 50%;
+			background: inherit;
+			opacity: 0.4;
+			animation: breathe 2s ease-in-out infinite;
+		}
+
+		&.working {
+			background: var(--color_mission_accent_green);
+			box-shadow: 0 0 12px var(--color_mission_accent_green);
+		}
+		&.idle {
+			background: var(--color_mission_accent_orange);
+			box-shadow: 0 0 12px var(--color_mission_accent_orange);
+		}
+		&.error {
+			background: var(--color_danger);
+			box-shadow: 0 0 12px var(--color_danger);
+			animation: status-blink 1s ease-in-out infinite;
+		}
+	}
+
+	.statLabel {
+		font-size: 12px;
+		color: var(--color_mission_text_muted);
+		text-transform: uppercase;
+		letter-spacing: 1px;
+	}
+
+	.statValue {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--color_mission_text);
+		font-family: 'SF Mono', monospace;
+	}
+}
+
+.actions {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+
+// ==================== Filter Dropdown ====================
+
+.filterWrapper {
+	position: relative;
+}
+
+.filterBadge {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	width: 8px;
+	height: 8px;
+	background: var(--color_mission_accent_pink);
+	border-radius: 50%;
+	box-shadow: 0 0 8px var(--color_mission_accent_pink);
+}
+
+.filterDropdown {
+	position: absolute;
+	top: calc(100% + 8px);
+	right: 0;
+	width: 280px;
+	background: var(--color_mission_glass_bg);
+	backdrop-filter: blur(20px) saturate(180%);
+	-webkit-backdrop-filter: blur(20px) saturate(180%);
+	border: 1px solid var(--color_mission_glass_border);
+	border-radius: 16px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+	padding: 16px;
+	z-index: 100;
+	animation: fade-in-scale 0.2s ease;
+}
+
+.filterSearch {
+	position: relative;
+	display: flex;
+	align-items: center;
+	background: var(--color_mission_card_bg);
+	border: 1px solid var(--color_mission_card_border);
+	border-radius: 12px;
+	padding: 0 12px;
+	margin-bottom: 16px;
+	transition: all 0.3s ease;
+
+	&:focus-within {
+		border-color: var(--color_mission_accent_cyan);
+		box-shadow: 0 0 12px var(--color_mission_glow_cyan);
+	}
+
+	.searchIcon {
+		color: var(--color_mission_text_muted);
+		flex-shrink: 0;
+	}
+
+	.searchInput {
+		flex: 1;
+		background: transparent;
+		border: none;
+		outline: none;
+		padding: 12px 10px;
+		font-size: 14px;
+		color: var(--color_mission_text);
+
+		&::placeholder {
+			color: var(--color_mission_text_muted);
+		}
+	}
+
+	.clearBtn {
+		width: 20px;
+		height: 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--color_mission_text_muted);
+		border: none;
+		border-radius: 50%;
+		color: var(--color_mission_bg_start);
+		cursor: pointer;
+		opacity: 0.6;
+		transition: all 0.2s ease;
+
+		&:hover {
+			opacity: 1;
+		}
+	}
+}
+
+.filterStatuses {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.statusBtn {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 12px;
+	background: var(--color_mission_card_bg);
+	border: 1px solid var(--color_mission_card_border);
+	border-radius: 10px;
+	font-size: 12px;
+	color: var(--color_mission_text_secondary);
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		border-color: var(--color_mission_text_muted);
+	}
+
+	&.active {
+		background: var(--color_mission_accent_cyan);
+		border-color: var(--color_mission_accent_cyan);
+		color: white;
+
+		.statusCount {
+			background: rgba(255, 255, 255, 0.2);
+			color: white;
+		}
+	}
+
+	// Status-specific active states
+	&.working.active {
+		background: var(--color_mission_accent_green);
+		border-color: var(--color_mission_accent_green);
+	}
+
+	&.idle.active {
+		background: var(--color_mission_accent_cyan);
+		border-color: var(--color_mission_accent_cyan);
+	}
+
+	&.paused.active {
+		background: var(--color_mission_text_muted);
+		border-color: var(--color_mission_text_muted);
+	}
+
+	&.error.active {
+		background: var(--color_danger);
+		border-color: var(--color_danger);
+	}
+
+	&.maintenance.active {
+		background: var(--color_mission_accent_orange);
+		border-color: var(--color_mission_accent_orange);
+	}
+
+	.statusLabel {
+		font-weight: 500;
+	}
+
+	.statusCount {
+		min-width: 20px;
+		height: 18px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--color_mission_card_border);
+		border-radius: 9px;
+		font-size: 11px;
+		font-weight: 600;
+		padding: 0 6px;
+	}
+}
+
+.resetBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	width: 100%;
+	padding: 10px;
+	background: transparent;
+	border: 1px dashed var(--color_mission_card_border);
+	border-radius: 10px;
+	font-size: 12px;
+	color: var(--color_mission_text_muted);
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		border-color: var(--color_mission_accent_cyan);
+		color: var(--color_mission_accent_cyan);
+	}
+}
+
+.actionBtn {
+	width: 44px;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--color_mission_glass_bg);
+	backdrop-filter: blur(16px) saturate(180%);
+	-webkit-backdrop-filter: blur(16px) saturate(180%);
+	border: 1px solid var(--color_mission_glass_border);
+	border-radius: 12px;
+	box-shadow: var(--color_mission_glass_shadow);
+	color: var(--color_mission_text_secondary);
+	cursor: pointer;
+	transition: all 0.3s ease;
+
+	&:hover {
+		color: var(--color_mission_accent_cyan);
+		border-color: var(--color_mission_accent_cyan);
+		box-shadow: 0 0 20px var(--color_mission_glow_cyan);
+	}
+
+	&.active {
+		background: linear-gradient(135deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
+		color: white;
+		border-color: transparent;
+		box-shadow: 0 0 30px var(--color_mission_glow_cyan);
+	}
+}
+
+// ==================== Clock Section ====================
+
+.clockSection {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 40px 0 50px;
+	position: relative;
+
+	// Glow effect behind clock
+	&::before {
+		content: '';
+		position: absolute;
+		width: 400px;
+		height: 150px;
+		background: radial-gradient(ellipse, var(--color_mission_accent_cyan) 0%, transparent 70%);
+		opacity: 0.15;
+		filter: blur(60px);
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		animation: breathe 4s ease-in-out infinite;
+	}
+}
+
+.time {
+	font-size: 88px;
+	font-weight: 100;
+	letter-spacing: 12px;
+	color: var(--color_mission_text);
+	font-family: 'SF Pro Display', -apple-system, sans-serif;
+	text-shadow: 0 0 40px var(--color_mission_glow_cyan), 0 0 80px var(--color_mission_glow_purple);
+	position: relative;
+	display: flex;
+	align-items: center;
+
+	.digit {
+		display: inline-block;
+		min-width: 0.55em;
+		text-align: center;
+		transition: all 0.2s ease;
+
+		&.updated {
+			color: var(--color_mission_accent_cyan);
+			text-shadow: 0 0 20px var(--color_mission_accent_cyan);
+		}
+	}
+
+	.colon {
+		opacity: 0.6;
+		transition: opacity 0.5s ease;
+		margin: 0 8px;
+		color: var(--color_mission_accent_purple);
+
+		&.blink {
+			opacity: 0.2;
+		}
+	}
+}
+
+.date {
+	font-size: 16px;
+	color: var(--color_mission_text_muted);
+	margin-top: 16px;
+	letter-spacing: 3px;
+	text-transform: uppercase;
+	font-weight: 300;
+}
+
+// ==================== Stations Grid ====================
+
+.stationsSection {
+	flex: 1;
+	overflow: visible;
+	padding: 0 40px 40px;
+}
+
+.stationsGrid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 40px;
+	padding: 40px 0;
+}
+
+// ==================== Station (Creature/Entity Style) ====================
+
+.station {
+	position: relative;
+	width: 160px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	cursor: pointer;
+	transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	animation: fade-in-scale 0.6s ease backwards;
+
+	// Stagger animation
+	&:nth-child(1) { animation-delay: 0s; }
+	&:nth-child(2) { animation-delay: 0.08s; }
+	&:nth-child(3) { animation-delay: 0.16s; }
+	&:nth-child(4) { animation-delay: 0.24s; }
+	&:nth-child(5) { animation-delay: 0.32s; }
+	&:nth-child(6) { animation-delay: 0.4s; }
+	&:nth-child(7) { animation-delay: 0.48s; }
+	&:nth-child(8) { animation-delay: 0.56s; }
+	&:nth-child(9) { animation-delay: 0.64s; }
+	&:nth-child(10) { animation-delay: 0.72s; }
+	&:nth-child(11) { animation-delay: 0.8s; }
+	&:nth-child(12) { animation-delay: 0.88s; }
+
+	&:hover {
+		transform: scale(1.08) translateY(-10px);
+
+		.creatureBody {
+			filter: brightness(1.2);
+		}
+
+		.orbitRing {
+			opacity: 1;
+		}
+
+		.aura {
+			transform: scale(1.2);
+			opacity: 0.25;
+		}
+	}
+
+	// Status-based glow colors
+	&.working {
+		--glow-color: var(--color_mission_accent_green);
+		--creature-gradient: linear-gradient(135deg, #10b981 0%, #34d399 50%, #6ee7b7 100%);
+
+		.creature {
+			animation: float 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite;
+		}
+	}
+
+	&.idle {
+		--glow-color: var(--color_mission_accent_cyan);
+		--creature-gradient: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #7dd3fc 100%);
+
+		.creature {
+			animation: float 4s ease-in-out infinite;
+		}
+	}
+
+	&.paused {
+		--glow-color: rgba(156, 163, 175, 0.5);
+		--creature-gradient: linear-gradient(135deg, #6b7280 0%, #9ca3af 50%, #d1d5db 100%);
+		opacity: 0.6;
+
+		.creature {
+			animation: float 6s ease-in-out infinite;
+		}
+	}
+
+	&.error {
+		--glow-color: var(--color_danger);
+		--creature-gradient: linear-gradient(135deg, #ef4444 0%, #f87171 50%, #fca5a5 100%);
+
+		.creature {
+			animation: float 2s ease-in-out infinite;
+		}
+
+		.particles .particle {
+			background: var(--color_danger);
+		}
+	}
+
+	&.maintenance {
+		--glow-color: var(--color_mission_accent_orange);
+		--creature-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%);
+
+		.creature {
+			animation: float 5s ease-in-out infinite;
+		}
+	}
+}
+
+.creatureContainer {
+	position: relative;
+	width: 100px;
+	height: 100px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.aura {
+	position: absolute;
+	width: 140px;
+	height: 140px;
+	border-radius: 50%;
+	background: radial-gradient(circle, var(--glow-color) 0%, transparent 60%);
+	opacity: 0.15;
+	transition: all 0.4s ease;
+	animation: breathe 3s ease-in-out infinite;
+}
+
+.orbitRing {
+	position: absolute;
+	width: 90px;
+	height: 90px;
+	border: 1px solid var(--glow-color);
+	border-radius: 50%;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+	animation: rotate-slow 20s linear infinite;
+
+	&::before {
+		content: '';
+		position: absolute;
+		width: 6px;
+		height: 6px;
+		background: var(--glow-color);
+		border-radius: 50%;
+		top: -3px;
+		left: 50%;
+		transform: translateX(-50%);
+		box-shadow: 0 0 10px var(--glow-color);
+	}
+}
+
+.creature {
+	position: relative;
+	z-index: 2;
+	filter: drop-shadow(0 0 20px var(--glow-color));
+}
+
+.creatureBody {
+	width: 64px;
+	height: 64px;
+	background: var(--creature-gradient);
+	border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	box-shadow: inset 0 -10px 20px var(--color_mission_creature_shadow), 
+	            inset 0 10px 20px var(--color_mission_creature_highlight);
+}
+
+// Eyes container
+.eyes {
+	position: absolute;
+	top: 30%;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	gap: 12px;
+}
+
+.eye {
+	width: 12px;
+	height: 14px;
+	background: white;
+	border-radius: 50%;
+	position: relative;
+	box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.15);
+
+	// Pupil
+	&::after {
+		content: '';
+		position: absolute;
+		width: 5px;
+		height: 6px;
+		background: var(--color_mission_creature_eye);
+		border-radius: 50%;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+}
+
+// Small floating particles around working creatures
+.particles {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+
+	.particle {
+		position: absolute;
+		width: 4px;
+		height: 4px;
+		background: var(--glow-color);
+		border-radius: 50%;
+		animation: particle-float 3s ease-in-out infinite;
+
+		&:nth-child(1) {
+			left: 10%;
+			animation-delay: 0s;
+		}
+		&:nth-child(2) {
+			left: 30%;
+			animation-delay: 0.5s;
+		}
+		&:nth-child(3) {
+			right: 30%;
+			animation-delay: 1s;
+		}
+		&:nth-child(4) {
+			right: 10%;
+			animation-delay: 1.5s;
+		}
+	}
+}
+
+// Concurrent badge (for multiple running tasks)
+.concurrentBadge {
+	position: absolute;
+	top: 5px;
+	right: 15px;
+	min-width: 24px;
+	height: 24px;
+	padding: 0 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, var(--color_mission_accent_purple), var(--color_mission_accent_pink));
+	color: white;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: 700;
+	box-shadow: 0 0 15px var(--color_mission_glow_purple);
+	z-index: 10;
+}
+
+// Station info
+.stationInfo {
+	margin-top: 16px;
+	text-align: center;
+}
+
+.name {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+	margin-bottom: 8px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 160px;
+}
+
+.statusText {
+	font-size: 11px;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+	padding: 4px 12px;
+	border-radius: 10px;
+	display: inline-block;
+
+	&.working {
+		color: var(--color_mission_accent_green);
+		background: rgba(16, 185, 129, 0.15);
+	}
+	&.idle {
+		color: var(--color_mission_accent_cyan);
+		background: rgba(14, 165, 233, 0.15);
+	}
+	&.paused {
+		color: var(--color_mission_text_muted);
+		background: var(--color_mission_card_bg);
+	}
+	&.error {
+		color: var(--color_danger);
+		background: rgba(239, 68, 68, 0.15);
+	}
+	&.maintenance {
+		color: var(--color_mission_accent_orange);
+		background: rgba(245, 158, 11, 0.15);
+	}
+}
+
+.progressRing {
+	position: absolute;
+	width: 90px;
+	height: 90px;
+	transform: rotate(-90deg);
+
+	circle {
+		fill: none;
+		stroke-width: 3;
+		stroke-linecap: round;
+
+		&.bg {
+			stroke: var(--color_mission_ring);
+		}
+
+		&.progress {
+			stroke: var(--glow-color);
+			stroke-dasharray: 283;
+			transition: stroke-dashoffset 0.5s ease;
+			filter: drop-shadow(0 0 6px var(--glow-color));
+		}
+	}
+}
+
+.nextRun {
+	font-size: 10px;
+	color: var(--color_mission_text_muted);
+	margin-top: 6px;
+
+	.nextRunTime {
+		color: var(--color_mission_text_secondary);
+		font-family: 'SF Mono', monospace;
+	}
+}
+
+// ==================== Add Agent Card ====================
+
+.addStation {
+	position: relative;
+	width: 160px; // Match station width
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	cursor: pointer;
+	transition: all 0.4s ease;
+
+	&:hover {
+		transform: scale(1.05);
+
+		.addCircle {
+			border-color: var(--color_mission_accent_cyan);
+			background: var(--color_mission_ambient_2);
+			box-shadow: 0 0 30px var(--color_mission_glow_cyan);
+		}
+
+		.addIcon {
+			color: var(--color_mission_accent_cyan);
+			transform: rotate(90deg);
+		}
+	}
+}
+
+.addCircle {
+	width: 80px;
+	height: 80px;
+	margin-top: 10px; // Align with creature center (creatureContainer is 100px)
+	border: 2px dashed var(--color_mission_card_border);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.4s ease;
+}
+
+.addIcon {
+	color: var(--color_mission_text_muted);
+	transition: all 0.4s ease;
+}
+
+.addText {
+	margin-top: 16px;
+	font-size: 13px;
+	color: var(--color_mission_text_muted);
+	font-weight: 500;
+}
+
+// ==================== Empty State ====================
+
+.emptyState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 100px 20px;
+
+	.emptyIcon {
+		font-size: 80px;
+		margin-bottom: 24px;
+		opacity: 0.3;
+		color: var(--color_mission_accent_purple);
+	}
+
+	.emptyTitle {
+		font-size: 24px;
+		font-weight: 300;
+		color: var(--color_mission_text);
+		margin-bottom: 12px;
+	}
+
+	.emptyDescription {
+		font-size: 14px;
+		max-width: 400px;
+		text-align: center;
+		line-height: 1.8;
+		color: var(--color_mission_text_muted);
+	}
+}
+
+.resetFilterBtn {
+	margin-top: 24px;
+	padding: 12px 24px;
+	background: var(--color_mission_glass_bg);
+	backdrop-filter: blur(16px) saturate(180%);
+	border: 1px solid var(--color_mission_glass_border);
+	border-radius: 12px;
+	font-size: 14px;
+	color: var(--color_mission_text_secondary);
+	cursor: pointer;
+	transition: all 0.3s ease;
+
+	&:hover {
+		border-color: var(--color_mission_accent_cyan);
+		color: var(--color_mission_accent_cyan);
+		box-shadow: 0 0 20px var(--color_mission_glow_cyan);
+	}
+}
+
+// ==================== Responsive ====================
+
+@media (max-width: 768px) {
+	.content {
+		padding: 16px;
+	}
+
+	.header {
+		flex-direction: column;
+		gap: 16px;
+		padding: 16px;
+	}
+
+	.stats {
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
+	.clockSection {
+		padding: 24px 0;
+	}
+
+	.time {
+		font-size: 56px;
+	}
+
+	.stationsSection {
+		padding: 0 16px 16px;
+	}
+
+	.stationsGrid {
+		gap: 30px;
+	}
+
+	.station {
+		width: 120px;
+	}
+
+	.creatureContainer {
+		width: 80px;
+		height: 80px;
+	}
+
+	.creatureBody {
+		width: 50px;
+		height: 50px;
+	}
+}

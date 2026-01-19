@@ -1,0 +1,791 @@
+# Mission Control - Design Document
+
+## 1. Overview
+
+Mission Control is the management interface for Autonomous Robot Agents. It provides a game-like, futuristic UI for monitoring and controlling AI team members.
+
+**Key Characteristics:**
+
+- Futuristic, sci-fi visual style (inspired by space command centers)
+- Full-screen capable (designed for large display walls)
+- Real-time status monitoring with prominent clock display
+- Human intervention capabilities
+- Support for concurrent executions per agent (up to 100 stations per team)
+
+**Design System:** Neo Design System colors from `@cui/styles/preset/vars.less`
+
+**Theme:** Follow system preference (light/dark)
+
+---
+
+## 2. Core Concepts
+
+### 2.1 Station
+
+Each Robot Agent is represented as a "Station" (workstation). A team can have up to 100 stations.
+
+**Station States:**
+
+| State | Color | Animation | Description |
+|-------|-------|-----------|-------------|
+| Working | `--color_success` (#00c853) | Pulse glow | Actively executing tasks |
+| Idle | `--color_warning` (#faad14) | None | Ready, waiting for trigger |
+| Paused | `--color_neo_icon_muted` | None | Manually paused |
+| Error | `--color_danger` (#e62965) | Fast blink | Execution failed |
+| Maintenance | `--color_info` | Rotate | Under configuration |
+
+### 2.2 Execution
+
+A single run of an Agent (P0 → P1 → P2 → P3 → P4 → P5 phases).
+
+- One Agent can have **multiple concurrent executions**
+- Station card shows concurrent count as number (e.g., "×2", "×3")
+- Each execution shows: trigger type, current phase, task progress, ETA
+- Executions can be paused, resumed, or stopped
+
+### 2.3 Phases
+
+| Phase | Name | Description |
+|-------|------|-------------|
+| P0 | Inspiration | Analyze context, generate insights (Clock trigger only) |
+| P1 | Goals | Generate prioritized goals |
+| P2 | Tasks | Split goals into executable tasks |
+| P3 | Run | Execute tasks with validation |
+| P4 | Delivery | Format and deliver results |
+| P5 | Learning | Extract insights for future (async) |
+
+---
+
+## 3. Page Layout
+
+```
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  HEADER (Top Bar)                                                           ┃
+┃  ┌─────────────────────────────────────────────────────────────────────────┐┃
+┃  │ ◉ MISSION CONTROL          Working: 3  Idle: 5  Error: 1             ⛶ │┃
+┃  └─────────────────────────────────────────────────────────────────────────┘┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                             ┃
+┃                         CLOCK (Center, Prominent)                           ┃
+┃                                                                             ┃
+┃                            14:32:45                                         ┃
+┃                         2026-01-19 SUN                                      ┃
+┃                                                                             ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃  STATIONS GRID                                                              ┃
+┃                                                                             ┃
+┃     ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐            ┃
+┃     │ 🟢 ×2   │ │ 🟡      │ │ 🟢 ×1   │ │ ⚫      │ │ 🔴      │  ...       ┃
+┃     │ Sales   │ │ Content │ │ Research│ │ Monitor │ │  Data   │            ┃
+┃     │ Manager │ │ Writer  │ │ Analyst │ │  Bot    │ │ Analyst │            ┃
+┃     │ ████░░  │ │  IDLE   │ │ ███░░░  │ │ PAUSED  │ │  ERROR  │            ┃
+┃     └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘            ┃
+┃                                                                             ┃
+┃     ┌─────────┐ ┌─────────┐ ┌─────────┐                                    ┃
+┃     │ 🟡      │ │ 🟢 ×3   │ │   ➕    │                                    ┃
+┃     │ Report  │ │ Customer│ │   Add   │                                    ┃
+┃     │ Writer  │ │ Service │ │  Agent  │                                    ┃
+┃     │  IDLE   │ │ ██████░ │ │         │                                    ┃
+┃     └─────────┘ └─────────┘ └─────────┘                                    ┃
+┃                                                                             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+```
+
+### 3.1 Header (Top Bar)
+
+| Element | Position | Description |
+|---------|----------|-------------|
+| Logo | Left | "MISSION CONTROL" title with subtle glow |
+| Stats | Center-Right | Quick counts: Working (3), Idle (5), Error (1) |
+| Fullscreen | Right | Toggle fullscreen mode button (⛶) |
+
+### 3.2 Clock (Center, Prominent)
+
+The clock is a **central visual element**, positioned between header and grid.
+
+```
+         14:32:45
+      2026-01-19 SUN
+```
+
+**Design:**
+- Large monospace font (e.g., 48-72px for time)
+- Subtle glow effect matching primary color
+- Updates every second
+- Shows: Time (HH:MM:SS), Date (YYYY-MM-DD), Day of week
+
+**Fullscreen Mode:**
+- Clock becomes even larger
+- Positioned prominently above the grid
+
+### 3.3 Stations Grid
+
+- Responsive grid layout
+- Cards arranged in rows, wrapping as needed
+- "Add Agent" card always at the end
+- Cards have subtle hover effects
+- Working cards have pulse animation on border
+
+---
+
+## 4. Components
+
+### 4.1 Station Card
+
+The primary unit representing one Robot Agent.
+
+```
+┌─────────────────────────────┐
+│  ● ×2                       │  <- Status indicator + concurrent count
+│                             │
+│       👤                    │  <- Avatar/Icon
+│                             │
+│    Sales Manager            │  <- Agent name
+│    Sales Analyst            │  <- Role (subtitle)
+│                             │
+│  ████████░░░░  60%          │  <- Overall progress (if working)
+│  or "IDLE" / "PAUSED"       │  <- Status text (if not working)
+│                             │
+│  Next: 09:00 tomorrow       │  <- Next scheduled run (if idle)
+└─────────────────────────────┘
+```
+
+**Concurrent Executions Display:**
+- Show as number badge: `×2`, `×3`, etc.
+- If only 1 execution, show just the status dot without number
+- Progress bar shows combined/average progress of all executions
+
+**Interactions:**
+- Hover: Elevate with shadow, show border glow
+- Click: Open Agent Modal
+
+**Visual States:**
+
+```less
+// Working state
+.station-card.working {
+  border-color: var(--color_success);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+// Error state  
+.station-card.error {
+  border-color: var(--color_danger);
+  animation: blink 0.8s ease-in-out infinite;
+}
+
+// Idle state
+.station-card.idle {
+  border-color: var(--color_warning);
+}
+
+// Paused state
+.station-card.paused {
+  border-color: var(--color_neo_icon_muted);
+  opacity: 0.7;
+}
+```
+
+### 4.2 Agent Modal
+
+Opens when clicking a station card. Centered modal with backdrop.
+
+**Tabs:**
+
+```
+[Active (2)]  [History]  [Results]  [Config]
+```
+
+| Tab | Content |
+|-----|---------|
+| **Active** | Currently running executions, can intervene/pause/stop |
+| **History** | Past execution records with full details |
+| **Results** | Work outputs and generated files |
+| **Config** | Agent configuration (identity, triggers, resources) |
+
+#### 4.2.1 Active Tab
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  SALES MANAGER                                                   [⚙] [×]   │
+│  Sales Analyst · Clock: 09:00, 14:00, 17:00 daily                          │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  [Active (2)]  [History]  [Results]  [Config]          [+ New Task]  │
+│  ─────────────────────────────────────────────────────────────────────────│
+│                                                                             │
+│  ┌────────────────────────────────────────────────────────────────────┐   │
+│  │ ⏱ Weekly Sales Report              Clock │ P3 Run │ ETA: 4m 32s   │   │
+│  │   ████████████░░░░░░ 3/5 tasks                                     │   │
+│  │   [Intervene] [Pause] [Stop]                             [Detail →]│   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌────────────────────────────────────────────────────────────────────┐   │
+│  │ ⏱ Competitor Alert                 Human │ P2 Tasks │ ETA: 2m 15s │   │
+│  │   ██████░░░░░░░░░░░░ 1/4 tasks                                     │   │
+│  │   [Intervene] [Pause] [Stop]                             [Detail →]│   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 4.2.2 History Tab
+
+```
+┌─ History Tab ────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  Filter: [All] [Completed] [Failed]        Search: [________________] 🔍    │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ ✓ Weekly Sales Report                                                   │ │
+│  │   Jan 19, 09:00 · Clock · Duration: 12m 34s                            │ │
+│  │   Summary: 15 new leads processed, 3 high-priority opportunities       │ │
+│  │   📎 2 attachments                                        [View →]     │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ ✓ Competitor Price Alert                                                │ │
+│  │   Jan 18, 14:25 · Human · Duration: 5m 12s                             │ │
+│  │   Summary: Competitor A cut enterprise price 20%                       │ │
+│  │   📎 1 attachment                                         [View →]     │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ ✗ Data Sync Failed                                                      │ │
+│  │   Jan 18, 09:00 · Clock · Duration: 2m 05s                             │ │
+│  │   Error: Connection timeout to CRM API                                  │ │
+│  │                                                          [View →]     │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  [Load More...]                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 4.2.3 Results Tab
+
+Work outputs from this agent, with direct access to preview and download.
+
+```
+┌─ Results Tab ───────────────────────────────────────────────────────────┐
+│                                                                              │
+│  Filter: [All] [Reports] [Data] [Charts]     Search: [____________] 🔍     │
+│  Sort: [Latest] [Name] [Type]                                               │
+│                                                                              │
+│  ┌──────┬─────────────────────────────────────────────────────────────────┐ │
+│  │ 📄   │ Weekly Sales Report.pdf                                         │ │
+│  │      │ Jan 19, 09:00 · from "Weekly Sales Report" · 2.4 MB             │ │
+│  │      │                                              [Preview] [⬇]     │ │
+│  └──────┴─────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌──────┬─────────────────────────────────────────────────────────────────┐ │
+│  │ 📊   │ Regional_Analysis.xlsx                                          │ │
+│  │      │ Jan 19, 09:00 · from "Weekly Sales Report" · 856 KB             │ │
+│  │      │                                              [Preview] [⬇]     │ │
+│  └──────┴─────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌──────┬─────────────────────────────────────────────────────────────────┐ │
+│  │ 📄   │ Competitor_Alert.pdf                                            │ │
+│  │      │ Jan 18, 14:30 · from "Competitor Price Alert" · 1.1 MB          │ │
+│  │      │                                              [Preview] [⬇]     │ │
+│  └──────┴─────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌──────┬─────────────────────────────────────────────────────────────────┐ │
+│  │ 📊   │ Market_Trends_Q1.xlsx                                           │ │
+│  │      │ Jan 17, 09:00 · from "Monthly Market Analysis" · 3.2 MB         │ │
+│  │      │                                              [Preview] [⬇]     │ │
+│  └──────┴─────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  [Load More...]                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+**File Type Icons:**
+
+| Type | Icon | Extensions |
+|------|------|------------|
+| PDF | 📄 | .pdf |
+| Excel | 📊 | .xlsx, .xls, .csv |
+| Image | 📈 🖼️ | .png, .jpg, .svg |
+| Word | 📝 | .docx, .doc |
+| Text | 📃 | .txt, .md |
+| JSON | 📋 | .json |
+| Archive | 📦 | .zip |
+
+**Preview Behavior:**
+
+| File Type | Preview Action |
+|-----------|----------------|
+| PDF | Embedded PDF viewer or new tab |
+| Image | Lightbox preview |
+| Excel/CSV | Simple table preview (first 100 rows) |
+| Text/MD | Markdown rendered |
+| Other | Direct download |
+
+#### 4.2.4 Config Tab
+
+Agent configuration editing (identity, triggers, resources, delivery settings).
+
+### 4.3 Execution Detail Drawer
+
+Right-side drawer showing complete execution details. Opens when clicking `[View →]` or `[Detail →]`.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  EXECUTION DETAIL                                          [×]  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Weekly Sales Report                                             │
+│  ──────────────────────────────────────────────────────────────│
+│  Status: ✓ Completed                                            │
+│  Trigger: Clock · Jan 19, 2026 09:00                            │
+│  Duration: 12m 34s                                               │
+│                                                                  │
+│  PHASES                                                          │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ P0 Inspiration  ✓  │ 1m 20s │ [Expand]                     │ │
+│  │ P1 Goals        ✓  │ 0m 45s │ [Expand]                     │ │
+│  │ P2 Tasks        ✓  │ 0m 30s │ [Expand]                     │ │
+│  │ P3 Run          ✓  │ 8m 15s │ [Expand]                     │ │
+│  │ P4 Delivery     ✓  │ 1m 44s │ [Expand]                     │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  TASKS (5)                                                       │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ ✓ 1. Analyze sales trends           text-writer   │ 2m 10s │ │
+│  │ ✓ 2. Compare regional performance   data-analyst  │ 1m 45s │ │
+│  │ ✓ 3. Generate insights              text-writer   │ 2m 30s │ │
+│  │ ✓ 4. Create visualizations          chart-gen     │ 1m 20s │ │
+│  │ ✓ 5. Format final report            text-writer   │ 0m 30s │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  DELIVERY                                                        │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ Summary:                                                    │ │
+│  │ 15 new leads processed, 3 high-priority opportunities      │ │
+│  │ identified. Conversion rate improved 5% vs last week.      │ │
+│  │                                                             │ │
+│  │ Report: (expandable markdown content)                       │ │
+│  │                                                             │ │
+│  │ Attachments:                                                │ │
+│  │ 📄 Sales_Report.pdf                              [Download] │ │
+│  │ 📊 Regional_Analysis.xlsx                        [Download] │ │
+│  │                                                             │ │
+│  │ Delivered to:                                               │ │
+│  │ ✓ Email: manager@company.com                               │ │
+│  │ ✓ Webhook: slack.com/webhook/sales                         │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌─────────────────┐  ┌─────────────────┐                       │
+│  │    Re-run       │  │   Re-deliver    │                       │
+│  └─────────────────┘  └─────────────────┘                       │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 4.4 Intervention Drawer
+
+Right-side drawer for human intervention actions.
+
+```
+┌──────────────────────────────────────┐
+│  INTERVENE                      [×]  │
+│  Sales Manager · Execution #1        │
+├──────────────────────────────────────┤
+│                                      │
+│  ACTION TYPE                         │
+│  ○ Add Task                          │
+│  ○ Adjust Goal                       │
+│  ○ Cancel Task                       │
+│  ● Direct Instruction                │
+│                                      │
+│  INSTRUCTION                         │
+│  ┌──────────────────────────────┐   │
+│  │ Also include competitor       │   │
+│  │ pricing comparison in the     │   │
+│  │ report...                     │   │
+│  │                               │   │
+│  └──────────────────────────────┘   │
+│                                      │
+│  PRIORITY                            │
+│  [First] [Next] [Last]               │
+│                                      │
+│  ┌──────────────────────────────┐   │
+│  │         Send Command          │   │
+│  └──────────────────────────────┘   │
+│                                      │
+└──────────────────────────────────────┘
+```
+
+**Action Types:**
+
+| Action | Description |
+|--------|-------------|
+| Add Task | Insert a new task into the execution |
+| Adjust Goal | Modify the current goal |
+| Cancel Task | Cancel a specific task |
+| Direct Instruction | Free-form instruction to agent |
+
+### 4.5 Add Agent Wizard
+
+Modal with step-by-step wizard for creating a new agent.
+
+**Steps:**
+
+1. **Identity**: Name, role, duties, avatar
+2. **Trigger**: Clock schedule / Event types / Human-only
+3. **Resources**: Available agents, MCP servers, KB collections
+4. **Delivery**: Email, webhook, process targets
+5. **Review**: Summary and confirm
+
+---
+
+## 5. Visual Design
+
+### 5.1 Color Palette
+
+Using Neo Design System, following system theme preference:
+
+**Light Theme:**
+```less
+--color_neo_bg_content: #f8f9fa;
+--color_neo_bg_card: #ffffff;
+--color_neo_border_card: #e9ecef;
+--color_neo_text_primary: #212529;
+--color_neo_text_secondary: #6c757d;
+```
+
+**Dark Theme:**
+```less
+--color_neo_bg_content: #1a1b1e;
+--color_neo_bg_card: #25262b;
+--color_neo_border_card: #373a40;
+--color_neo_text_primary: #e9ecef;
+--color_neo_text_secondary: #adb5bd;
+```
+
+**Status Colors (both themes):**
+```less
+--color_success: #00c853;  // Working
+--color_warning: #faad14;  // Idle
+--color_danger: #e62965;   // Error
+--color_info: #4580ff;     // Info/Primary
+```
+
+### 5.2 Typography
+
+**Clock (Center):**
+```less
+font-family: 'JetBrains Mono', 'SF Mono', monospace;
+font-size: 48px;  // Time
+font-size: 16px;  // Date
+font-weight: 300;
+letter-spacing: 2px;
+```
+
+**Title (Mission Control):**
+```less
+font-family: 'JetBrains Mono', 'SF Mono', monospace;
+font-size: 16px;
+font-weight: 600;
+letter-spacing: 2px;
+text-transform: uppercase;
+```
+
+**Card Titles:**
+```less
+font-family: system-ui, -apple-system, sans-serif;
+font-size: 14px;
+font-weight: 500;
+```
+
+**Status Text:**
+```less
+font-family: 'JetBrains Mono', monospace;
+font-size: 11px;
+text-transform: uppercase;
+letter-spacing: 1px;
+```
+
+### 5.3 Animations
+
+**Pulse Glow (Working state):**
+```less
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(0, 200, 83, 0.2);
+  }
+}
+```
+
+**Blink (Error state):**
+```less
+@keyframes blink {
+  0%, 100% {
+    border-color: var(--color_danger);
+  }
+  50% {
+    border-color: transparent;
+  }
+}
+```
+
+**Progress Bar Animation:**
+```less
+@keyframes progress-flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.progress-bar.active {
+  background: linear-gradient(
+    90deg,
+    var(--color_success) 0%,
+    var(--color_info) 50%,
+    var(--color_success) 100%
+  );
+  background-size: 200% 100%;
+  animation: progress-flow 2s linear infinite;
+}
+```
+
+### 5.4 Subtle Effects
+
+- **Card hover**: Slight elevation + border glow
+- **Status indicator**: Soft glow matching status color
+- **Progress changes**: Smooth transitions (0.3s ease)
+- **Modal open/close**: Fade + scale animation (0.2s ease)
+- **Drawer slide**: Slide from right (0.2s ease-out)
+- **Clock**: Subtle glow effect on time digits
+
+---
+
+## 6. Data Flow
+
+### 6.1 Information Hierarchy
+
+```
+Mission Control (Main Page)
+    │
+    └── Station Card (Workstation)
+            │
+            └── Agent Modal (Click to open)
+                    │
+                    ├── Active Tab
+                    │       └── Execution Cards (running tasks)
+                    │               └── Execution Detail Drawer
+                    │
+                    ├── History Tab
+                    │       └── Execution Records (past tasks)
+                    │               └── Execution Detail Drawer
+                    │
+                    ├── Results Tab
+                    │       └── Output List (all results)
+                    │               └── Preview / Download
+                    │
+                    └── Config Tab
+                            └── Agent Configuration Form
+```
+
+### 6.2 Data Relationships
+
+```
+Robot Agent (Station)
+    │
+    ├── Status: idle / working / paused / error
+    ├── Config: triggers, clock, identity, resources, delivery
+    │
+    └── Executions[] (Execution Records)
+            │
+            ├── Active Executions (status: running/pending)
+            │       └── Can intervene / pause / stop
+            │
+            └── History Executions (status: completed/failed/cancelled)
+                    │
+                    └── Execution Detail
+                            ├── Trigger Input (who/what triggered)
+                            ├── P0 Inspiration (if clock trigger)
+                            ├── P1 Goals
+                            ├── P2 Tasks[]
+                            ├── P3 Results[] (per task)
+                            ├── P4 Delivery
+                            │       ├── Summary
+                            │       ├── Body (markdown)
+                            │       ├── Attachments[] → Results Tab
+                            │       └── Channel Results[]
+                            └── P5 Learning (if enabled)
+```
+
+---
+
+## 7. File Structure
+
+```
+pages/mission-control/
+├── index.tsx                    # Main page
+├── index.less                   # Page styles
+├── types.ts                     # TypeScript types
+│
+├── components/
+│   ├── Header/
+│   │   ├── index.tsx
+│   │   ├── index.less
+│   │   └── Stats.tsx            # Status counts
+│   │
+│   ├── Clock/
+│   │   ├── index.tsx            # Prominent center clock
+│   │   └── index.less
+│   │
+│   ├── StationsGrid/
+│   │   ├── index.tsx
+│   │   ├── index.less
+│   │   └── StationCard/
+│   │       ├── index.tsx
+│   │       ├── index.less
+│   │       └── StatusIndicator.tsx
+│   │
+│   ├── AgentModal/
+│   │   ├── index.tsx
+│   │   ├── index.less
+│   │   ├── tabs/
+│   │   │   ├── ActiveTab.tsx
+│   │   │   ├── HistoryTab.tsx
+│   │   │   ├── ResultsTab.tsx
+│   │   │   └── ConfigTab.tsx
+│   │   ├── ExecutionCard.tsx
+│   │   └── FileItem.tsx
+│   │
+│   ├── ExecutionDrawer/
+│   │   ├── index.tsx
+│   │   ├── index.less
+│   │   ├── PhaseList.tsx
+│   │   └── TaskList.tsx
+│   │
+│   ├── InterventionDrawer/
+│   │   ├── index.tsx
+│   │   └── index.less
+│   │
+│   └── AddAgentWizard/
+│       ├── index.tsx
+│       ├── index.less
+│       └── steps/
+│           ├── Identity.tsx
+│           ├── Trigger.tsx
+│           ├── Resources.tsx
+│           ├── Delivery.tsx
+│           └── Review.tsx
+│
+├── hooks/
+│   ├── useRobots.ts             # Fetch robot list
+│   ├── useRobotStatus.ts        # Real-time status (WebSocket)
+│   ├── useExecutions.ts         # Execution history
+│   ├── useResults.ts            # Result files and outputs
+│   └── useClock.ts              # Real-time clock
+│
+└── services/
+    └── api.ts                   # API calls
+```
+
+---
+
+## 8. API Requirements
+
+### 8.1 REST Endpoints
+
+```
+# Robot Management
+GET    /api/robots                    # List all robots
+GET    /api/robots/:id                # Get robot details
+POST   /api/robots                    # Create robot
+PATCH  /api/robots/:id                # Update robot
+DELETE /api/robots/:id                # Delete robot
+
+# Status
+GET    /api/robots/:id/status         # Get runtime status
+
+# Triggers & Control
+POST   /api/robots/:id/trigger        # Manual trigger
+POST   /api/robots/:id/intervene      # Human intervention
+
+# Execution Control
+POST   /api/executions/:id/pause      # Pause execution
+POST   /api/executions/:id/resume     # Resume execution
+POST   /api/executions/:id/stop       # Stop execution
+
+# Execution History
+GET    /api/robots/:id/executions     # List executions
+GET    /api/executions/:id            # Get execution details
+
+# Results
+GET    /api/robots/:id/results        # List all result files
+GET    /api/results/:id               # Get file info
+GET    /api/results/:id/download      # Download file
+GET    /api/results/:id/preview       # Preview file (if supported)
+```
+
+### 8.2 Polling (MVP)
+
+For the initial version, use polling instead of WebSocket:
+
+- **Interval**: 2 minutes (120 seconds)
+- **Endpoint**: `GET /api/robots` with status info
+- **Scope**: Refresh all station statuses
+
+```typescript
+// hooks/useRobots.ts
+const { data, refetch } = useQuery({
+  queryKey: ['robots'],
+  queryFn: fetchRobots,
+  refetchInterval: 120000, // 2 minutes
+});
+```
+
+**Future**: WebSocket for real-time updates (Phase 2)
+
+---
+
+## 9. Responsive Behavior
+
+### 9.1 Breakpoints
+
+| Breakpoint | Grid Columns | Card Size | Clock Size |
+|------------|--------------|-----------|------------|
+| ≥1920px (4K) | 8 | 200px | 72px |
+| ≥1440px | 6 | 180px | 56px |
+| ≥1024px | 4 | 160px | 48px |
+| ≥768px | 3 | 150px | 40px |
+| <768px | 2 | 140px | 32px |
+
+### 9.2 Fullscreen Mode
+
+- Hide browser chrome
+- Maximize grid area
+- Larger clock (centered, prominent)
+- Larger cards and fonts
+- Auto-hide header (show on mouse move to top)
+
+---
+
+## 10. Accessibility
+
+- Keyboard navigation for grid and modals
+- Focus indicators on all interactive elements
+- Screen reader labels for status indicators
+- Color + shape for status differentiation (not color alone)
+- Reduced motion option for animations
+- High contrast mode support
+
+---
+
+## 11. Future Considerations
+
+- 3D visualization mode (Three.js)
+- Sound effects for status changes (optional, user preference)
+- Multi-team view (switch between teams)
+- Mobile companion app
+- Dashboard widgets for embedding
+- Notification preferences per agent

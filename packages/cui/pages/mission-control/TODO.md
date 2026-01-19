@@ -1,0 +1,686 @@
+# Mission Control - Implementation TODO
+
+> Based on DESIGN.md
+> Use Mock data first, then integrate API later
+
+---
+
+## ⚠️ Design Guidelines
+
+### 1. Color System
+
+**ONLY use CSS variables from `@cui/packages/cui/styles/preset/vars.less`**
+
+```less
+// Primary colors
+var(--color_main)       // main brand color
+var(--color_primary)    // primary action color
+
+// Text colors
+var(--color_text)       // primary text
+var(--color_text_grey)  // secondary text
+var(--color_text_light) // light/muted text
+
+// Status colors
+var(--color_success)    // working/completed - green
+var(--color_warning)    // idle/pending - yellow
+var(--color_danger)     // error/failed - red
+var(--color_info)       // info - blue
+
+// Background & borders
+var(--color_bg)         // page background
+var(--color_bg_nav)     // card/panel background
+var(--color_border)     // borders
+var(--color_border_soft)// subtle borders
+
+// Neo Design System (sci-fi feel)
+var(--color_neo_bg)
+var(--color_neo_text)
+var(--color_neo_border)
+```
+
+**DO NOT hardcode colors like `#3b82f6` or `rgba(0,0,0,0.5)`**
+
+### 2. Visual Style - Sci-Fi / Mission Control
+
+This is NOT a typical admin dashboard. Design like a **space mission control center**.
+
+**DO:**
+- Rich animations (pulse, glow, scan lines, data streams)
+- Subtle particle effects or grid backgrounds
+- Glowing borders and status indicators
+- Smooth transitions (300-500ms ease)
+- Skeuomorphic elements (dials, gauges, radar-like displays)
+- Typography with tech/mono feel for data
+- Depth through shadows and layering
+
+**DON'T:**
+- Static flat cards with no life
+- Generic Bootstrap/Ant Design look
+- Boring tables and lists
+- Instant state changes without animation
+
+**Visual References:**
+- NASA Mission Control
+- Sci-fi movie interfaces (Minority Report, Iron Man)
+- Gaming HUDs
+- Real-time monitoring dashboards
+
+**Animation Ideas:**
+- Station cards: breathing glow when working, scan line effect
+- Clock: digit flip animation, subtle pulse on seconds
+- Progress bars: flowing gradient, particle trail
+- Status changes: smooth color transitions with flash
+- Hover: elevation + glow intensify
+- Data updates: fade/slide transitions
+
+---
+
+## Workflow
+
+```
+Phase 1: UI Design with Mock Data
+    │
+    ├── 1.1 Main Page (confirm visual style)
+    │       - Header, Clock, Stations Grid
+    │       - Station Card (all states & animations)
+    │       - Theme, Responsive, Fullscreen
+    │
+    ├── 1.2 Agent Modal (4 Tabs)
+    ├── 1.3 Drawers (Execution Detail, Intervention)
+    └── 1.4 Add Agent Wizard
+    │
+    ▼
+Phase 2: API Integration
+    │
+    ├── 2.1 Robot API
+    ├── 2.2 Execution API
+    ├── 2.3 Results API
+    └── 2.4 Polling (2min refresh)
+```
+
+---
+
+## Phase 1: Static UI with Mock Data
+
+### 1.1 Main Page Layout
+
+> **Goal:** Establish visual style and overall layout. Get approval before continuing.
+
+**Structure:**
+- [ ] Create page structure (`index.tsx`, `index.less`)
+- [ ] Header component
+  - [ ] Logo "MISSION CONTROL" with sci-fi style
+  - [ ] Stats display (Working: X, Idle: X, Error: X)
+  - [ ] Fullscreen toggle button
+- [ ] Clock component (center, prominent)
+  - [ ] Large time display (HH:MM:SS)
+  - [ ] Date and day of week
+  - [ ] Subtle glow effect
+- [ ] Stations Grid container
+  - [ ] Responsive grid layout
+  - [ ] Empty state when no agents
+- [ ] Mock data setup (`mock/data.ts`)
+  - [ ] Sample robots with different statuses
+  - [ ] Sample executions
+  - [ ] Sample results/files
+
+**Station Card:**
+- [ ] Station Card component
+  - [ ] Status indicator (colored dot)
+  - [ ] Concurrent count badge (×2, ×3)
+  - [ ] Agent avatar/icon
+  - [ ] Agent name and role
+  - [ ] Progress bar (if working)
+  - [ ] Status text (IDLE / PAUSED / ERROR)
+  - [ ] Next scheduled run (if idle)
+- [ ] Visual states & animations
+  - [ ] Working: green border + pulse animation
+  - [ ] Idle: yellow border
+  - [ ] Paused: grey border + opacity
+  - [ ] Error: red border + blink animation
+  - [ ] Hover effect (elevation + glow)
+  - [ ] Progress bar flow animation
+- [ ] Click handler (open Agent Modal)
+- [ ] "Add Agent" card (placeholder)
+
+**Visual Design:**
+- [ ] Theme support (light/dark via Neo Design System CSS variables)
+- [ ] Responsive breakpoints
+  - [ ] ≥1920px: 8 columns
+  - [ ] ≥1440px: 6 columns
+  - [ ] ≥1024px: 4 columns
+  - [ ] ≥768px: 3 columns
+  - [ ] <768px: 2 columns
+- [ ] Fullscreen mode
+  - [ ] Toggle button functionality
+  - [ ] Larger clock in fullscreen
+  - [ ] Auto-hide header (show on hover)
+  - [ ] Larger cards and fonts
+- [ ] Animations
+  - [ ] Clock update animation (optional)
+  - [ ] Hover state transitions
+
+**Review Point:** Confirm visual style before proceeding to 1.2
+
+### 1.2 Agent Modal
+
+- [ ] Modal container with backdrop + open/close animation
+- [ ] Modal header
+  - [ ] Agent name and role
+  - [ ] Schedule summary
+  - [ ] Config button [⚙]
+  - [ ] Close button [×]
+- [ ] Tabs navigation + switch transition
+  - [ ] Active (with count badge)
+  - [ ] History
+  - [ ] Results
+  - [ ] Config
+- [ ] Tab: Active
+  - [ ] Execution Card component
+    - [ ] Mission name
+    - [ ] Trigger type badge (Clock/Human/Event)
+    - [ ] Phase indicator (P0-P5)
+    - [ ] Task progress bar
+    - [ ] Control buttons (Intervene, Pause, Stop)
+    - [ ] ETA display
+    - [ ] Detail button
+  - [ ] Empty state (no active executions)
+  - [ ] "+ New Task" button
+- [ ] Tab: History
+  - [ ] Filter buttons (All/Completed/Failed)
+  - [ ] Search input
+  - [ ] Execution list items
+    - [ ] Status icon (✓/✗)
+    - [ ] Execution name
+    - [ ] Date, trigger type, duration
+    - [ ] Summary text
+    - [ ] Attachment count
+    - [ ] View button
+  - [ ] Load more button
+  - [ ] Empty state
+- [ ] Tab: Results
+  - [ ] Filter by type (All/Reports/Data/Charts)
+  - [ ] Sort options (Latest/Name/Type)
+  - [ ] Search input
+  - [ ] File list items
+    - [ ] File type icon (📄📊📈 etc.)
+    - [ ] File name
+    - [ ] Date, source execution, size
+    - [ ] Preview button
+    - [ ] Download button
+  - [ ] Load more button
+  - [ ] Empty state
+- [ ] Tab: Config
+  - [ ] Agent identity display
+  - [ ] Trigger settings display
+  - [ ] Resources display
+  - [ ] Delivery settings display
+  - [ ] Edit button (opens Config Modal)
+
+### 1.3 Drawers
+
+- [ ] Execution Detail Drawer (right side, slide animation)
+  - [ ] Header with title and close button
+  - [ ] Status, trigger, duration info
+  - [ ] Phases list (expandable)
+    - [ ] Phase name, status, duration
+    - [ ] Expand to show phase output
+  - [ ] Tasks list
+    - [ ] Task name, executor, duration
+    - [ ] Status indicator
+  - [ ] Delivery section
+    - [ ] Summary
+    - [ ] Report content (expandable)
+    - [ ] Attachments with download
+    - [ ] Delivery channels status
+  - [ ] Action buttons (Re-run, Re-deliver)
+- [ ] Intervention Drawer (right side, slide animation)
+  - [ ] Header with context info
+  - [ ] Action type radio buttons
+  - [ ] Instruction textarea
+  - [ ] Priority selection (First/Next/Last)
+  - [ ] Send button
+
+### 1.4 Add Agent Wizard
+
+- [ ] Wizard modal container
+- [ ] Step indicator
+- [ ] Step 1: Identity
+  - [ ] Name input
+  - [ ] Role input
+  - [ ] Duties list
+  - [ ] Avatar selection
+- [ ] Step 2: Trigger
+  - [ ] Clock mode selection
+  - [ ] Time/interval configuration
+  - [ ] Event types (if applicable)
+- [ ] Step 3: Resources
+  - [ ] Available agents selection
+  - [ ] MCP servers selection
+  - [ ] KB collections selection
+- [ ] Step 4: Delivery
+  - [ ] Email targets
+  - [ ] Webhook targets
+  - [ ] Process targets
+- [ ] Step 5: Review
+  - [ ] Summary of all settings
+  - [ ] Confirm button
+- [ ] Navigation (Back/Next/Cancel)
+
+---
+
+## Phase 2: API Integration
+
+### 2.1 Robot API
+
+- [ ] `useRobots` hook
+  - [ ] GET /api/robots - list all robots
+  - [ ] Polling: 2 minute interval
+- [ ] `useRobot` hook
+  - [ ] GET /api/robots/:id - single robot
+- [ ] `useRobotStatus` hook
+  - [ ] GET /api/robots/:id/status - runtime status
+- [ ] Robot mutations
+  - [ ] POST /api/robots - create
+  - [ ] PATCH /api/robots/:id - update
+  - [ ] DELETE /api/robots/:id - delete
+
+### 2.2 Execution API
+
+- [ ] `useExecutions` hook
+  - [ ] GET /api/robots/:id/executions - list
+  - [ ] Pagination support
+  - [ ] Filter by status
+- [ ] `useExecution` hook
+  - [ ] GET /api/executions/:id - single execution
+- [ ] Execution mutations
+  - [ ] POST /api/robots/:id/trigger - manual trigger
+  - [ ] POST /api/robots/:id/intervene - intervention
+  - [ ] POST /api/executions/:id/pause
+  - [ ] POST /api/executions/:id/resume
+  - [ ] POST /api/executions/:id/stop
+
+### 2.3 Results API
+
+- [ ] `useResults` hook
+  - [ ] GET /api/robots/:id/results - list all
+  - [ ] Pagination support
+  - [ ] Filter by type
+- [ ] File operations
+  - [ ] GET /api/results/:id - file info
+  - [ ] GET /api/results/:id/preview - preview
+  - [ ] GET /api/results/:id/download - download
+
+### 2.4 Polling Setup
+
+- [ ] Configure 2-minute polling for robot list
+- [ ] Refresh on window focus
+- [ ] Manual refresh button
+- [ ] Loading states
+- [ ] Error handling
+
+---
+
+## Mock Data Structure
+
+Based on `yao/agent/robot/types` and `yao/agent/robot/api`.
+
+```typescript
+// types.ts - aligned with backend types
+
+// RobotStatus (from types/enums.go)
+type RobotStatus = 'idle' | 'working' | 'paused' | 'error' | 'maintenance';
+
+// Phase (from types/enums.go)
+type Phase = 'inspiration' | 'goals' | 'tasks' | 'run' | 'delivery' | 'learning';
+
+// TriggerType (from types/enums.go)
+type TriggerType = 'clock' | 'human' | 'event';
+
+// ExecStatus (from types/enums.go)
+type ExecStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+// TaskStatus (from types/enums.go)
+type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped' | 'cancelled';
+
+// ClockMode (from types/enums.go)
+type ClockMode = 'times' | 'interval' | 'daemon';
+
+// Clock config (from types/config.go)
+interface Clock {
+  mode: ClockMode;
+  times?: string[];  // ["09:00", "14:00"]
+  days?: string[];   // ["Mon", "Tue"] or ["*"]
+  every?: string;    // "30m", "1h"
+  tz?: string;       // "Asia/Shanghai"
+}
+
+// Identity (from types/config.go)
+interface Identity {
+  role: string;
+  duties?: string[];
+  rules?: string[];
+}
+
+// RobotState - from API Status() (api/types.go)
+interface RobotState {
+  member_id: string;
+  team_id: string;
+  display_name: string;
+  status: RobotStatus;
+  running: number;       // current running count
+  max_running: number;   // quota max
+  last_run?: string;     // ISO timestamp
+  next_run?: string;     // ISO timestamp
+  running_ids?: string[]; // execution IDs
+}
+
+// Task (from types/robot.go)
+interface Task {
+  id: string;
+  goal_ref?: string;
+  source: 'auto' | 'human' | 'event';
+  executor_type: 'assistant' | 'mcp' | 'process';
+  executor_id: string;
+  status: TaskStatus;
+  order: number;
+  start_time?: string;
+  end_time?: string;
+}
+
+// CurrentState (from types/robot.go)
+interface CurrentState {
+  task?: Task;
+  task_index: number;
+  progress?: string;  // "2/5 tasks"
+}
+
+// DeliveryAttachment (from types/robot.go)
+interface DeliveryAttachment {
+  title: string;
+  description?: string;
+  task_id?: string;
+  file: string;  // __<uploader>://<fileID>
+}
+
+// DeliveryContent (from types/robot.go)
+interface DeliveryContent {
+  summary: string;
+  body: string;  // markdown
+  attachments?: DeliveryAttachment[];
+}
+
+// Execution (from types/robot.go + api/types.go)
+interface Execution {
+  id: string;
+  member_id: string;
+  team_id: string;
+  trigger_type: TriggerType;
+  start_time: string;
+  end_time?: string;
+  status: ExecStatus;
+  phase: Phase;
+  error?: string;
+  job_id: string;
+  
+  // Phase outputs
+  goals?: { content: string };
+  tasks?: Task[];
+  current?: CurrentState;
+  delivery?: {
+    content?: DeliveryContent;
+    success: boolean;
+    sent_at?: string;
+  };
+}
+```
+
+```typescript
+// mock/data.ts
+
+import { RobotState, Execution } from '../types';
+
+export const mockRobots: RobotState[] = [
+  {
+    member_id: 'robot_001',
+    team_id: 'team_001',
+    display_name: 'Sales Analyst',
+    status: 'working',
+    running: 2,
+    max_running: 3,
+    last_run: '2026-01-19T14:00:00Z',
+    next_run: null,
+    running_ids: ['exec_001', 'exec_002'],
+  },
+  {
+    member_id: 'robot_002',
+    team_id: 'team_001',
+    display_name: 'Content Writer',
+    status: 'idle',
+    running: 0,
+    max_running: 2,
+    last_run: '2026-01-19T09:00:00Z',
+    next_run: '2026-01-20T09:00:00Z',
+    running_ids: [],
+  },
+  {
+    member_id: 'robot_003',
+    team_id: 'team_001',
+    display_name: 'Data Monitor',
+    status: 'error',
+    running: 0,
+    max_running: 2,
+    last_run: '2026-01-19T12:00:00Z',
+    next_run: null,
+    running_ids: [],
+  },
+  {
+    member_id: 'robot_004',
+    team_id: 'team_001',
+    display_name: 'Support Agent',
+    status: 'paused',
+    running: 0,
+    max_running: 2,
+    last_run: '2026-01-18T17:00:00Z',
+    next_run: null,
+    running_ids: [],
+  },
+];
+
+export const mockExecutions: Execution[] = [
+  {
+    id: 'exec_001',
+    member_id: 'robot_001',
+    team_id: 'team_001',
+    trigger_type: 'clock',
+    status: 'running',
+    phase: 'run',
+    start_time: '2026-01-19T14:00:00Z',
+    job_id: 'job_001',
+    current: {
+      task_index: 2,
+      progress: '3/5 tasks',
+    },
+    tasks: [
+      { id: 't1', status: 'completed', order: 0, executor_type: 'assistant', executor_id: 'data-analyst', source: 'auto' },
+      { id: 't2', status: 'completed', order: 1, executor_type: 'mcp', executor_id: 'database', source: 'auto' },
+      { id: 't3', status: 'running', order: 2, executor_type: 'assistant', executor_id: 'report-writer', source: 'auto' },
+      { id: 't4', status: 'pending', order: 3, executor_type: 'process', executor_id: 'charts.Generate', source: 'auto' },
+      { id: 't5', status: 'pending', order: 4, executor_type: 'assistant', executor_id: 'reviewer', source: 'auto' },
+    ],
+  },
+  {
+    id: 'exec_002',
+    member_id: 'robot_001',
+    team_id: 'team_001',
+    trigger_type: 'human',
+    status: 'running',
+    phase: 'tasks',
+    start_time: '2026-01-19T14:30:00Z',
+    job_id: 'job_002',
+    current: {
+      task_index: 0,
+      progress: '0/2 tasks',
+    },
+  },
+  {
+    id: 'exec_003',
+    member_id: 'robot_001',
+    team_id: 'team_001',
+    trigger_type: 'clock',
+    status: 'completed',
+    phase: 'delivery',
+    start_time: '2026-01-19T09:00:00Z',
+    end_time: '2026-01-19T09:12:34Z',
+    job_id: 'job_003',
+    delivery: {
+      content: {
+        summary: 'Daily sales report generated successfully.',
+        body: '## Sales Report\n\nTotal sales: $12,500\nGrowth: +15%\n\n...',
+        attachments: [
+          { title: 'Sales Report.pdf', file: '__attachment://file_001' },
+          { title: 'Sales Data.xlsx', file: '__attachment://file_002' },
+        ],
+      },
+      success: true,
+      sent_at: '2026-01-19T09:12:40Z',
+    },
+  },
+  {
+    id: 'exec_004',
+    member_id: 'robot_003',
+    team_id: 'team_001',
+    trigger_type: 'event',
+    status: 'failed',
+    phase: 'run',
+    start_time: '2026-01-19T12:00:00Z',
+    end_time: '2026-01-19T12:05:23Z',
+    job_id: 'job_004',
+    error: 'Database connection timeout',
+  },
+];
+
+// Robot config for Agent Modal Config Tab
+export const mockRobotConfigs: Record<string, any> = {
+  robot_001: {
+    identity: {
+      role: 'Sales Analyst',
+      duties: [
+        'Generate daily/weekly sales reports',
+        'Analyze sales trends and patterns',
+        'Alert on significant changes',
+      ],
+    },
+    clock: {
+      mode: 'times',
+      times: ['09:00', '14:00', '17:00'],
+      days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      tz: 'Asia/Shanghai',
+    },
+    quota: { max: 3, queue: 10 },
+    resources: {
+      agents: ['data-analyst', 'report-writer', 'reviewer'],
+      mcp: [{ id: 'database', tools: ['query', 'aggregate'] }],
+    },
+    delivery: {
+      email: {
+        enabled: true,
+        targets: [{ to: ['manager@example.com'], template: 'sales-report' }],
+      },
+    },
+  },
+};
+```
+
+---
+
+## File Structure
+
+```
+pages/mission-control/
+├── index.tsx
+├── index.less
+├── types.ts
+├── TODO.md
+├── DESIGN.md
+│
+├── mock/
+│   └── data.ts
+│
+├── components/
+│   ├── Header/
+│   │   ├── index.tsx
+│   │   ├── index.less
+│   │   └── Stats.tsx
+│   │
+│   ├── Clock/
+│   │   ├── index.tsx
+│   │   └── index.less
+│   │
+│   ├── StationsGrid/
+│   │   ├── index.tsx
+│   │   ├── index.less
+│   │   └── StationCard/
+│   │       ├── index.tsx
+│   │       ├── index.less
+│   │       └── StatusIndicator.tsx
+│   │
+│   ├── AgentModal/
+│   │   ├── index.tsx
+│   │   ├── index.less
+│   │   ├── tabs/
+│   │   │   ├── ActiveTab.tsx
+│   │   │   ├── HistoryTab.tsx
+│   │   │   ├── ResultsTab.tsx
+│   │   │   └── ConfigTab.tsx
+│   │   ├── ExecutionCard.tsx
+│   │   └── FileItem.tsx
+│   │
+│   ├── ExecutionDrawer/
+│   │   ├── index.tsx
+│   │   ├── index.less
+│   │   ├── PhaseList.tsx
+│   │   └── TaskList.tsx
+│   │
+│   ├── InterventionDrawer/
+│   │   ├── index.tsx
+│   │   └── index.less
+│   │
+│   └── AddAgentWizard/
+│       ├── index.tsx
+│       ├── index.less
+│       └── steps/
+│           ├── Identity.tsx
+│           ├── Trigger.tsx
+│           ├── Resources.tsx
+│           ├── Delivery.tsx
+│           └── Review.tsx
+│
+├── hooks/
+│   ├── useRobots.ts
+│   ├── useRobot.ts
+│   ├── useExecutions.ts
+│   ├── useResults.ts
+│   └── useClock.ts
+│
+└── services/
+    └── api.ts
+```
+
+---
+
+## Progress Tracking
+
+| Phase | Task | Status |
+|-------|------|--------|
+| 1.1 | Main Page (Header, Clock, Grid, Station Card, Theme, Responsive, Fullscreen) | ⬜ |
+| 1.2 | Agent Modal (4 Tabs) | ⬜ |
+| 1.3 | Drawers (Execution Detail, Intervention) | ⬜ |
+| 1.4 | Add Agent Wizard | ⬜ |
+| 2.1 | Robot API | ⬜ |
+| 2.2 | Execution API | ⬜ |
+| 2.3 | Results API | ⬜ |
+| 2.4 | Polling Setup | ⬜ |
+
+Legend: ⬜ Not started | 🟡 In progress | ✅ Complete
