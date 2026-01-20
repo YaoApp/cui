@@ -207,6 +207,9 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 	// Menu expanded state: false = collapsed (icon only), true = expanded (icon + text)
 	const [expanded, setExpanded] = useState(false)
 
+	// Logo hover state for showing toggle icon
+	const [logoHovered, setLogoHovered] = useState(false)
+
 	// Find all menu keys that should be expanded based on current path
 	const getActiveParentKeys = useCallback(
 		(items: App.Menu[], path: string, parentKeys: string[] = []): string[] => {
@@ -478,8 +481,18 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 	return (
 		<div className={clsx('chatbox-main-menu', expanded && 'expanded')}>
 			<div className='menu-content'>
-				<div className='menu-logo' onClick={handleLogoClick}>
-					<img src={global.app_info?.logo} alt='Logo' />
+				<div
+					className={clsx('menu-logo', logoHovered && 'hovered')}
+					onClick={handleLogoClick}
+					onMouseEnter={() => setLogoHovered(true)}
+					onMouseLeave={() => setLogoHovered(false)}
+				>
+					<div className='menu-logo-content'>
+						<img src={global.app_info?.logo} alt='Logo' />
+						<span className='menu-logo-toggle'>
+							<Icon name='material-dock_to_right' size={32} />
+						</span>
+					</div>
 					{expanded && <span className='menu-brand-name'>{global.app_info?.name || 'Yao'}</span>}
 				</div>
 

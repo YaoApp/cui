@@ -87,7 +87,7 @@ Phase 1: UI Design with Mock Data
     │       - Theme, Responsive, Fullscreen
     │
     ├── 1.2 Agent Modal (4 Tabs)
-    ├── 1.3 Drawers (Execution Detail, Intervention)
+    ├── 1.3 Drawers (Assign Task, Execution Detail, Intervention)
     └── 1.4 Add Agent Wizard
     │
     ▼
@@ -97,6 +97,44 @@ Phase 2: API Integration
     ├── 2.2 Execution API
     ├── 2.3 Results API
     └── 2.4 Polling (2min refresh)
+```
+
+### Complete Interaction Flow (Closed Loop)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  User clicks Station Card                                                   │
+│      ↓                                                                      │
+│  Agent Modal opens (Active Tab)                                             │
+│      ↓                                                                      │
+│  User clicks [📤 Assign Task]                                               │
+│      ↓                                                                      │
+│  Assign Task Drawer slides in                                               │
+│      ↓                                                                      │
+│  User types: "帮我分析竞品最新动态" + Send                                   │
+│      ↓                                                                      │
+│  API: POST /api/robots/:id/trigger (type: human)                            │
+│      ↓                                                                      │
+│  New Execution created (P1 → P2 → P3 → P4 → P5)                             │
+│      ↓                                                                      │
+│  Active Tab shows new Execution card                                        │
+│      ↓                                                                      │
+│  User can: Watch progress / Intervene / Pause / Stop                        │
+│      ↓                                                                      │
+│  Execution completes                                                        │
+│      ↓                                                                      │
+│  History Tab: execution record                                              │
+│  Results Tab: output files                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Assign Task vs Intervene:
+┌─────────────────────┬─────────────────────┐
+│  Assign Task        │  Intervene          │
+├─────────────────────┼─────────────────────┤
+│ Creates NEW exec    │ Modifies EXISTING   │
+│ Like sending email  │ Like replying/edit  │
+│ Modal header button │ Execution card btn  │
+└─────────────────────┴─────────────────────┘
 ```
 
 ---
@@ -182,6 +220,7 @@ Phase 2: API Integration
 - [x] Modal header
   - [x] Agent name (i18n support)
   - [x] Creature avatar (status-based color)
+  - [x] **[🚀] Assign Task button** (icon button + Tooltip)
   - [x] Close button [×]
 - [x] Tabs navigation + switch transition
   - [x] Active (with count badge)
@@ -198,7 +237,6 @@ Phase 2: API Integration
     - [ ] ETA display
     - [ ] Detail button
   - [x] Empty state (no active executions)
-  - [ ] "+ New Task" button
 - [ ] Tab: History
   - [ ] Filter buttons (All/Completed/Failed)
   - [ ] Search input
@@ -232,6 +270,18 @@ Phase 2: API Integration
 
 ### 1.3 Drawers
 
+- [x] **Assign Task Drawer** (slides in from right inside Modal) - Shell complete
+  - [x] Header: "Assign Task" + close button
+  - [x] Message history area (placeholder)
+    - [x] Empty state: "Assign task to [Agent Name]"
+    - [x] Example hint text
+  - [x] Input area (fixed at bottom)
+    - [x] Text input (supports ⌘+Enter to send)
+    - [x] Attachment button [📎] (placeholder)
+    - [x] Send button [📤]
+  - [x] Success state: "✓ Task Assigned"
+  - [ ] Integrate real API: POST /api/robots/:id/trigger
+  - [x] On success: refresh Active Tab (callback ready)
 - [ ] Execution Detail Drawer (right side, slide animation)
   - [ ] Header with title and close button
   - [ ] Status, trigger, duration info

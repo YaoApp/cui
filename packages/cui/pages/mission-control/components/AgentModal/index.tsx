@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Modal } from 'antd'
+import { Modal, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Creature from '@/widgets/Creature'
@@ -9,6 +9,7 @@ import ActiveTab from './tabs/ActiveTab'
 import HistoryTab from './tabs/HistoryTab'
 import ResultsTab from './tabs/ResultsTab'
 import ConfigTab from './tabs/ConfigTab'
+import AssignTaskDrawer from '../AssignTaskDrawer'
 import styles from './index.less'
 
 interface AgentModalProps {
@@ -26,13 +27,26 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 
 	const [activeTab, setActiveTab] = useState<TabType>('active')
 	const [loading, setLoading] = useState(false)
+	const [showAssignDrawer, setShowAssignDrawer] = useState(false)
 
 	// Reset tab when modal opens
 	useEffect(() => {
 		if (visible) {
 			setActiveTab('active')
+			setShowAssignDrawer(false)
 		}
 	}, [visible])
+
+	const handleAssignTask = () => {
+		setShowAssignDrawer(true)
+	}
+
+	const handleTaskAssigned = () => {
+		// Refresh data after task is assigned
+		onDataUpdated?.()
+		// Switch to Active tab to see the new execution
+		setActiveTab('active')
+	}
 
 	if (!robot) return null
 
@@ -97,17 +111,17 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 		<Modal
 			title={
 				<div className={styles.modalHeader}>
-				<div className={styles.titleSection}>
-					<Creature
-						status={robot.status}
-						size='small'
-						animated={false}
-						showAura={false}
-						showRing={false}
-						showGlow={false}
-					/>
-					<span className={styles.modalTitle}>{displayName}</span>
-				</div>
+					<div className={styles.titleSection}>
+						<Creature
+							status={robot.status}
+							size='small'
+							animated={false}
+							showAura={false}
+							showRing={false}
+							showGlow={false}
+						/>
+						<span className={styles.modalTitle}>{displayName}</span>
+					</div>
 					<div className={styles.tabs}>
 						{tabs.map((tab) => (
 							<div
@@ -125,8 +139,15 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 							</div>
 						))}
 					</div>
-					<div className={styles.closeButton} onClick={onClose}>
-						<Icon name='material-close' size={18} />
+					<div className={styles.headerActions}>
+						<Tooltip title={is_cn ? '指派任务' : 'Assign Task'} placement='bottom'>
+							<button className={styles.iconButton} onClick={handleAssignTask}>
+								<Icon name='material-rocket_launch' size={18} />
+							</button>
+						</Tooltip>
+						<button className={styles.iconButton} onClick={onClose}>
+							<Icon name='material-close' size={18} />
+						</button>
 					</div>
 				</div>
 			}
@@ -148,7 +169,17 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 			closable={false}
 			className={styles.agentModal}
 		>
-			<div className={styles.modalContent}>{renderContent()}</div>
+			<div className={styles.modalContent}>
+				{renderContent()}
+
+				{/* Assign Task Drawer - inside modal content */}
+				<AssignTaskDrawer
+					visible={showAssignDrawer}
+					onClose={() => setShowAssignDrawer(false)}
+					robot={robot}
+					onTaskAssigned={handleTaskAssigned}
+				/>
+			</div>
 		</Modal>
 	)
 }

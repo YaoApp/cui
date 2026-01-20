@@ -80,7 +80,7 @@ const findMenuByPath = (path: string, menus: App.Menu[]): App.Menu | undefined =
 /**
  * Paths that default to sidebar-only mode (system pages without Chatbox)
  */
-const SIDEBAR_ONLY_PATHS = ['/settings', '/login', '/register', '/Mission-Control']
+const SIDEBAR_ONLY_PATHS = ['/settings', '/login', '/register', '/mission-control']
 
 /**
  * Paths that default to chatbox-only mode (entry pages, no sidebar)
@@ -88,11 +88,12 @@ const SIDEBAR_ONLY_PATHS = ['/settings', '/login', '/register', '/Mission-Contro
 const CHATBOX_ONLY_PATHS = ['/', '/welcome', '/chat']
 
 /**
- * Check if path matches any sidebar-only default paths
+ * Check if path matches any sidebar-only default paths (case-insensitive)
  */
 const isSidebarOnlyPath = (path: string): boolean => {
+	const lowerPath = path.toLowerCase()
 	for (const prefix of SIDEBAR_ONLY_PATHS) {
-		if (path === prefix || path.startsWith(prefix + '/')) {
+		if (lowerPath === prefix || lowerPath.startsWith(prefix + '/')) {
 			return true
 		}
 	}
@@ -100,10 +101,11 @@ const isSidebarOnlyPath = (path: string): boolean => {
 }
 
 /**
- * Check if path matches any chatbox-only default paths
+ * Check if path matches any chatbox-only default paths (case-insensitive)
  */
 const isChatboxOnlyPath = (path: string): boolean => {
-	return CHATBOX_ONLY_PATHS.includes(path)
+	const lowerPath = path.toLowerCase()
+	return CHATBOX_ONLY_PATHS.includes(lowerPath)
 }
 
 /**

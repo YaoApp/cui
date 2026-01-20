@@ -123,42 +123,34 @@
 		margin-left: -2px;
 	}
 
-	.closeButton {
-		padding: 0;
-		height: 32px;
-		width: 32px;
-		min-width: 32px;
+	.headerActions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		z-index: 1;
+		flex-shrink: 0;
+	}
+
+	.iconButton {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--color_text_grey);
-		transition: all 0.2s ease;
+		width: 32px;
+		height: 32px;
+		padding: 0;
 		background: transparent;
+		color: var(--color_text_grey);
 		border: none;
-		border-radius: 6px;
-		line-height: 1;
 		cursor: pointer;
-		flex-shrink: 0;
-		z-index: 1;
-
-		:global(.anticon),
-		:global(.Icon),
-		:global(.xgen-icon) {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			line-height: 1;
-			margin: 0;
-		}
+		transition: color 0.2s ease, transform 0.2s ease;
 
 		&:hover {
 			color: var(--color_main);
-			transform: scale(1.05);
-			background: var(--color_bg_hover);
+			transform: scale(1.15);
 		}
 
 		&:active {
-			background: var(--color_bg_active);
+			transform: scale(1.05);
 		}
 	}
 
@@ -175,13 +167,15 @@
 			order: 1;
 		}
 
-		.closeButton {
+		.headerActions {
 			order: 3;
 		}
 	}
+
 }
 
 .modalContent {
+	position: relative;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
