@@ -172,22 +172,22 @@ Phase 2: API Integration
 
 **Custom Components Created:**
 - [x] `components/Modal/` - Custom modal with glassmorphism effect
+- [x] `@/widgets/Creature` - Animated blob avatar (global widget)
 
 **Review Point:** Confirm visual style before proceeding to 1.2
 
 ### 1.2 Agent Modal
 
-- [ ] Modal container with backdrop + open/close animation
-- [ ] Modal header
-  - [ ] Agent name and role
-  - [ ] Schedule summary
-  - [ ] Config button [⚙]
-  - [ ] Close button [×]
-- [ ] Tabs navigation + switch transition
-  - [ ] Active (with count badge)
-  - [ ] History
-  - [ ] Results
-  - [ ] Config
+- [x] Modal container with backdrop + open/close animation (using antd Modal)
+- [x] Modal header
+  - [x] Agent name (i18n support)
+  - [x] Creature avatar (status-based color)
+  - [x] Close button [×]
+- [x] Tabs navigation + switch transition
+  - [x] Active (with count badge)
+  - [x] History
+  - [x] Results
+  - [x] Config
 - [ ] Tab: Active
   - [ ] Execution Card component
     - [ ] Mission name
@@ -197,7 +197,7 @@ Phase 2: API Integration
     - [ ] Control buttons (Intervene, Pause, Stop)
     - [ ] ETA display
     - [ ] Detail button
-  - [ ] Empty state (no active executions)
+  - [x] Empty state (no active executions)
   - [ ] "+ New Task" button
 - [ ] Tab: History
   - [ ] Filter buttons (All/Completed/Failed)
@@ -676,7 +676,12 @@ pages/mission-control/
 | 1.1 | Main Page (Header, Clock, Grid, Station Card, Theme, Responsive) | 🟡 In progress (Fullscreen pending) |
 | 1.1 | Activity Banner & Modal | ✅ Complete |
 | 1.1 | Custom Modal Component | ✅ Complete |
-| 1.2 | Agent Modal (4 Tabs) | ⬜ |
+| 1.1 | Creature Widget (`@/widgets/Creature`) | ✅ Complete |
+| 1.2 | Agent Modal - Shell (Header, Tabs) | ✅ Complete |
+| 1.2 | Agent Modal - Active Tab | 🟡 In progress (placeholder done) |
+| 1.2 | Agent Modal - History Tab | ⬜ |
+| 1.2 | Agent Modal - Results Tab | ⬜ |
+| 1.2 | Agent Modal - Config Tab | ⬜ |
 | 1.3 | Drawers (Execution Detail, Intervention) | ⬜ |
 | 1.4 | Add Agent Wizard | ⬜ |
 | 2.1 | Robot API | ⬜ |

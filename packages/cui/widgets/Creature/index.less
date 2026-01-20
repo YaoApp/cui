@@ -1,0 +1,333 @@
+// Creature Widget - Animated blob avatar
+// Matches the creature style in Mission Control
+// Uses Mission Control CSS variables from vars.less
+
+// ==================== Animations ====================
+
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-3px);
+	}
+}
+
+@keyframes breathe {
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 0.15;
+	}
+	50% {
+		transform: scale(1.1);
+		opacity: 0.25;
+	}
+}
+
+@keyframes pulse-glow {
+	0%,
+	100% {
+		filter: drop-shadow(0 0 15px var(--glow-color));
+	}
+	50% {
+		filter: drop-shadow(0 0 25px var(--glow-color));
+	}
+}
+
+@keyframes rotate-slow {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes particle-float {
+	0% {
+		opacity: 0;
+		transform: translateY(0) scale(0);
+	}
+	50% {
+		opacity: 0.8;
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(-15px) scale(1);
+	}
+}
+
+// ==================== Size Variants ====================
+
+.xs {
+	--container-size: 28px;
+	--body-size: 20px;
+	--aura-size: 36px;
+	--ring-size: 26px;
+	--eye-width: 4px;
+	--eye-height: 5px;
+	--eye-gap: 4px;
+	--pupil-size: 2px;
+}
+
+.small {
+	--container-size: 36px;
+	--body-size: 28px;
+	--aura-size: 48px;
+	--ring-size: 34px;
+	--eye-width: 5px;
+	--eye-height: 6px;
+	--eye-gap: 5px;
+	--pupil-size: 2px;
+}
+
+.medium {
+	--container-size: 64px;
+	--body-size: 48px;
+	--aura-size: 80px;
+	--ring-size: 58px;
+	--eye-width: 9px;
+	--eye-height: 11px;
+	--eye-gap: 9px;
+	--pupil-size: 4px;
+}
+
+.large {
+	--container-size: 100px;
+	--body-size: 64px;
+	--aura-size: 140px;
+	--ring-size: 90px;
+	--eye-width: 12px;
+	--eye-height: 14px;
+	--eye-gap: 12px;
+	--pupil-size: 5px;
+}
+
+// ==================== Status Colors ====================
+// Using the exact same gradients as Mission Control
+
+.working {
+	--glow-color: var(--color_mission_accent_green, #10b981);
+	--creature-gradient: linear-gradient(135deg, #10b981 0%, #34d399 50%, #6ee7b7 100%);
+
+	.creature {
+		animation: float 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite;
+	}
+}
+
+.idle {
+	--glow-color: var(--color_mission_accent_cyan, #0ea5e9);
+	--creature-gradient: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #7dd3fc 100%);
+
+	.creature {
+		animation: float 4s ease-in-out infinite;
+	}
+}
+
+.paused {
+	--glow-color: rgba(156, 163, 175, 0.5);
+	--creature-gradient: linear-gradient(135deg, #6b7280 0%, #9ca3af 50%, #d1d5db 100%);
+	opacity: 0.6;
+
+	.creature {
+		animation: float 6s ease-in-out infinite;
+	}
+
+	.aura {
+		animation: none;
+		opacity: 0.1;
+	}
+}
+
+.error {
+	--glow-color: var(--color_danger, #ef4444);
+	--creature-gradient: linear-gradient(135deg, #ef4444 0%, #f87171 50%, #fca5a5 100%);
+
+	.creature {
+		animation: float 2s ease-in-out infinite;
+	}
+
+	.particles span {
+		background: var(--color_danger, #ef4444);
+	}
+}
+
+.maintenance {
+	--glow-color: var(--color_mission_accent_orange, #f59e0b);
+	--creature-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%);
+
+	.creature {
+		animation: float 5s ease-in-out infinite;
+	}
+}
+
+// ==================== Main Container ====================
+
+.creatureContainer {
+	position: relative;
+	width: var(--container-size);
+	height: var(--container-size);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+// ==================== Aura Effect ====================
+
+.aura {
+	position: absolute;
+	width: var(--aura-size);
+	height: var(--aura-size);
+	border-radius: 50%;
+	background: radial-gradient(circle, var(--glow-color) 0%, transparent 60%);
+	opacity: 0.15;
+	animation: breathe 3s ease-in-out infinite;
+	pointer-events: none;
+}
+
+// ==================== Orbit Ring ====================
+
+.orbitRing {
+	position: absolute;
+	width: var(--ring-size);
+	height: var(--ring-size);
+	border: 1px solid var(--glow-color);
+	border-radius: 50%;
+	opacity: 0.3;
+	animation: rotate-slow 20s linear infinite;
+	pointer-events: none;
+
+	&::before {
+		content: '';
+		position: absolute;
+		width: 4px;
+		height: 4px;
+		background: var(--glow-color);
+		border-radius: 50%;
+		top: -2px;
+		left: 50%;
+		transform: translateX(-50%);
+		box-shadow: 0 0 6px var(--glow-color);
+	}
+}
+
+// ==================== Progress Ring ====================
+
+.progressRing {
+	position: absolute;
+	width: var(--ring-size);
+	height: var(--ring-size);
+	transform: rotate(-90deg);
+	pointer-events: none;
+
+	.bg {
+		fill: none;
+		stroke: var(--color_mission_ring, rgba(255, 255, 255, 0.15));
+		stroke-width: 2;
+	}
+
+	.progress {
+		fill: none;
+		stroke: var(--glow-color);
+		stroke-width: 2;
+		stroke-linecap: round;
+		transition: stroke-dasharray 0.5s ease;
+		filter: drop-shadow(0 0 4px var(--glow-color));
+	}
+}
+
+// ==================== The Creature ====================
+
+.creature {
+	position: relative;
+	z-index: 2;
+
+	&:not(.animated) {
+		animation: none !important;
+	}
+}
+
+// Glow effect only when aura is shown (controlled by parent)
+.creatureContainer:not(.noGlow) .creature {
+	filter: drop-shadow(0 0 10px var(--glow-color));
+}
+
+.creatureBody {
+	width: var(--body-size);
+	height: var(--body-size);
+	background: var(--creature-gradient);
+	// Slightly egg-shaped like the original
+	border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: inset 0 -6px 12px var(--color_mission_creature_shadow, rgba(0, 0, 0, 0.3)),
+		inset 0 6px 12px var(--color_mission_creature_highlight, rgba(255, 255, 255, 0.4));
+}
+
+// ==================== Eyes ====================
+
+.eyes {
+	position: absolute;
+	top: 30%;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	gap: var(--eye-gap);
+}
+
+.eye {
+	width: var(--eye-width);
+	height: var(--eye-height);
+	background: white;
+	border-radius: 50%;
+	position: relative;
+	box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.15);
+
+	// Pupil
+	&::after {
+		content: '';
+		position: absolute;
+		width: var(--pupil-size);
+		height: calc(var(--pupil-size) * 1.2);
+		background: var(--color_mission_creature_eye, #1a1a2e);
+		border-radius: 50%;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+}
+
+// ==================== Particles ====================
+
+.particles {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+
+	span {
+		position: absolute;
+		width: 3px;
+		height: 3px;
+		background: var(--glow-color);
+		border-radius: 50%;
+		animation: particle-float 2.5s ease-out infinite;
+
+		&:nth-child(1) {
+			left: 15%;
+			animation-delay: 0s;
+		}
+		&:nth-child(2) {
+			left: 50%;
+			animation-delay: 0.8s;
+		}
+		&:nth-child(3) {
+			left: 85%;
+			animation-delay: 1.6s;
+		}
+	}
+}

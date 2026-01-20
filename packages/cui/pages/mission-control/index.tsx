@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { getLocale } from '@umijs/max'
 import { Tooltip } from 'antd'
 import Modal from './components/Modal'
+import AgentModal from './components/AgentModal'
 import { observer } from 'mobx-react-lite'
 import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
@@ -39,6 +40,10 @@ const MissionControl = () => {
 	const [activities] = useState<Activity[]>(getRecentActivities(10))
 	const [currentActivityIndex, setCurrentActivityIndex] = useState(0)
 	const [showActivityModal, setShowActivityModal] = useState(false)
+
+	// Agent Modal state
+	const [selectedRobot, setSelectedRobot] = useState<RobotState | null>(null)
+	const [showAgentModal, setShowAgentModal] = useState(false)
 
 	// Stats computed from robots
 	const stats = useMemo(() => getRobotStats(robots), [robots])
@@ -169,8 +174,14 @@ const MissionControl = () => {
 
 	// Handle station click
 	const handleStationClick = (robot: RobotState) => {
-		// TODO: Open Agent Modal
-		console.log('Station clicked:', robot)
+		setSelectedRobot(robot)
+		setShowAgentModal(true)
+	}
+
+	// Handle agent modal close
+	const handleAgentModalClose = () => {
+		setShowAgentModal(false)
+		setSelectedRobot(null)
 	}
 
 	// Handle add agent click
@@ -620,6 +631,13 @@ const MissionControl = () => {
 					))}
 				</div>
 			</Modal>
+
+			{/* Agent Modal */}
+			<AgentModal
+				visible={showAgentModal}
+				onClose={handleAgentModalClose}
+				robot={selectedRobot}
+			/>
 		</div>
 	)
 }
