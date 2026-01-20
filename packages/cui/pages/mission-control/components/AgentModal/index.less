@@ -1,3 +1,6 @@
+@import '@/styles/preset/vars.less';
+
+// ==================== Agent Modal ====================
 .agentModal {
 	z-index: 1000;
 
@@ -5,9 +8,12 @@
 		height: 90vh;
 		display: flex;
 		flex-direction: column;
-		border-radius: 12px;
+		border-radius: 16px;
 		overflow: hidden;
 		position: relative;
+		background: var(--color_mission_modal_bg);
+		border: 1px solid var(--color_mission_modal_border);
+		box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
 	}
 
 	:global(.ant-modal-body) {
@@ -37,16 +43,17 @@
 	}
 }
 
+// ==================== Modal Header ====================
 .modalHeader {
 	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 16px 20px;
-	border-bottom: 1px solid var(--color_border);
-	background: var(--color_bg_nav);
+	padding: 14px 20px;
+	border-bottom: 1px solid var(--color_mission_modal_border);
+	background: var(--color_mission_modal_header_bg);
 	height: 56px;
-	border-radius: var(--radius) var(--radius) 0 0;
+	border-radius: 16px 16px 0 0;
 
 	.titleSection {
 		display: flex;
@@ -54,13 +61,12 @@
 		gap: 10px;
 		flex-shrink: 0;
 		z-index: 1;
-		color: var(--color_title);
 	}
 
 	.modalTitle {
-		font-size: 16px;
+		font-size: 15px;
 		font-weight: 600;
-		color: var(--color_title);
+		color: var(--color_mission_text);
 		margin: 0;
 	}
 
@@ -71,62 +77,65 @@
 		transform: translate(-50%, -50%);
 		display: flex;
 		align-items: center;
-		gap: 4px;
-		background: var(--color_bg_nav_tabs);
-		border-radius: 20px;
-		padding: 4px;
+		gap: 2px;
+		background: transparent;
+		border-radius: 14px;
+		padding: 3px;
 		z-index: 2;
 	}
 
 	.tabItem {
 		display: flex;
 		align-items: center;
-		gap: 6px;
-		padding: 6px 16px;
-		border-radius: 16px;
-		font-size: 13px;
+		gap: 5px;
+		padding: 6px 14px;
+		border-radius: 11px;
+		font-size: 12px;
 		font-weight: 500;
-		color: var(--color_text_grey);
+		color: var(--color_mission_text_muted);
 		cursor: pointer;
-		transition: all 0.2s ease;
+		transition: all 0.15s ease;
 		white-space: nowrap;
-		min-width: 80px;
-		justify-content: center;
 
 		:global(.xgen-icon) {
 			color: inherit;
+			font-size: 13px;
 		}
 
 		&:hover {
-			color: var(--color_text);
-			background: var(--color_bg_hover);
+			color: var(--color_mission_text);
+			background: var(--color_mission_glass_hover);
 		}
 
 		&.tabItemActive {
-			color: var(--color_text);
-			background: var(--color_bg_menu);
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+			color: white;
+			background: linear-gradient(135deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
+			box-shadow: 0 2px 8px var(--color_mission_glow_cyan);
+
+			.tabCount {
+				color: white;
+				background: rgba(255, 255, 255, 0.25);
+			}
 		}
 	}
 
 	.tabCount {
 		font-size: 10px;
-		font-weight: 500;
-		color: white;
-		background: var(--color_main);
+		font-weight: 600;
+		color: var(--color_mission_text_secondary);
+		background: var(--color_mission_card_border);
 		padding: 0 5px;
 		border-radius: 8px;
 		min-width: 16px;
 		height: 16px;
 		line-height: 16px;
 		text-align: center;
-		margin-left: -2px;
 	}
 
 	.headerActions {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 6px;
 		z-index: 1;
 		flex-shrink: 0;
 	}
@@ -139,13 +148,14 @@
 		height: 32px;
 		padding: 0;
 		background: transparent;
-		color: var(--color_text_grey);
 		border: none;
+		border-radius: 8px;
+		color: var(--color_mission_text_muted);
 		cursor: pointer;
-		transition: color 0.2s ease, transform 0.2s ease;
+		transition: all 0.15s ease;
 
 		&:hover {
-			color: var(--color_main);
+			color: var(--color_mission_accent_cyan);
 			transform: scale(1.15);
 		}
 
@@ -155,12 +165,14 @@
 	}
 
 	// Responsive
-	@media (max-width: 1000px) {
+	@media (max-width: 900px) {
+		padding: 12px 16px;
+
 		.tabs {
 			position: static;
 			transform: none;
 			order: 2;
-			margin-left: 16px;
+			margin-left: 12px;
 		}
 
 		.titleSection {
@@ -170,18 +182,26 @@
 		.headerActions {
 			order: 3;
 		}
-	}
 
+		.tabItem {
+			padding: 5px 10px;
+
+			span:not(.tabCount) {
+				display: none;
+			}
+		}
+	}
 }
 
+// ==================== Modal Content ====================
 .modalContent {
 	position: relative;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	border-radius: 0 0 12px 12px;
-	background: var(--color_bg_menu);
+	border-radius: 0 0 16px 16px;
+	background: var(--color_mission_modal_content_bg);
 }
 
 .loadingState {
@@ -191,30 +211,30 @@
 	justify-content: center;
 	height: 100%;
 	min-height: 300px;
-	gap: 12px;
-	color: var(--color_text_grey);
+	gap: 16px;
+	color: var(--color_mission_text_muted);
 	padding: 40px;
 	text-align: center;
 }
 
-// Tab content common styles
+// ==================== Tab Content ====================
 .tabContent {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
-	padding: 20px;
+	padding: 24px;
 
 	&::-webkit-scrollbar {
-		width: 8px;
+		width: 6px;
 	}
 
 	&::-webkit-scrollbar-thumb {
-		background: var(--color_border);
-		border-radius: 4px;
+		background: var(--color_mission_ring);
+		border-radius: 3px;
 
 		&:hover {
-			background: var(--color_text_grey);
+			background: var(--color_mission_text_muted);
 		}
 	}
 
@@ -223,26 +243,82 @@
 	}
 }
 
+// ==================== Empty State ====================
 .emptyState {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
 	height: 100%;
 	min-height: 300px;
+	gap: 12px;
+	padding: 15% 40px 40px;
+	text-align: center;
+}
+
+.emptyCircle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--color_mission_card_bg);
+	border: 1px solid var(--color_mission_glass_border);
+	margin-bottom: 4px;
+}
+
+.emptyIcon {
+	opacity: 0.4;
+	color: var(--color_mission_text_muted);
+}
+
+.emptyText {
+	font-size: 15px;
+	font-weight: 500;
+	color: var(--color_mission_text);
+}
+
+.emptyHint {
+	font-size: 13px;
+	color: var(--color_mission_text_muted);
+	max-width: 280px;
+	line-height: 1.5;
+}
+
+.emptyAction {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 16px;
+	padding: 10px 20px;
+	background: linear-gradient(135deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
+	color: white;
+	border: none;
+	border-radius: 10px;
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 4px 12px var(--color_mission_glow_cyan);
+
+	&:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 6px 16px var(--color_mission_glow_cyan);
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+}
+
+// ==================== Execution List (Grid) ====================
+.executionList {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 	gap: 16px;
-	color: var(--color_text_grey);
 
-	.emptyIcon {
-		opacity: 0.5;
-	}
-
-	.emptyText {
-		font-size: 14px;
-	}
-
-	.emptyHint {
-		font-size: 12px;
-		opacity: 0.7;
+	@media (max-width: 800px) {
+		grid-template-columns: 1fr;
 	}
 }

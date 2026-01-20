@@ -1,0 +1,196 @@
+@import '@/styles/preset/vars.less';
+
+// ==================== Animations ====================
+@keyframes flow {
+	0% { transform: translateX(-100%); }
+	100% { transform: translateX(400%); }
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.5; }
+}
+
+// ==================== Card ====================
+.card {
+	background: var(--color_mission_modal_card_bg);
+	border: 1px solid var(--color_mission_modal_card_border);
+	border-radius: 12px;
+	padding: 14px 16px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: var(--color_mission_modal_card_shadow);
+	backdrop-filter: var(--color_mission_modal_card_blur);
+	-webkit-backdrop-filter: var(--color_mission_modal_card_blur);
+
+	&:hover {
+		border-color: var(--color_mission_accent_cyan);
+		box-shadow: var(--color_mission_modal_card_shadow_hover);
+		transform: translateY(-1px);
+
+		.arrow {
+			opacity: 1;
+			color: var(--color_mission_accent_cyan);
+		}
+
+		.actionBtn {
+			opacity: 1;
+		}
+	}
+
+	// Running state - progress bar with flowing light
+	&.running .progressBar {
+		&::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 30%;
+			height: 100%;
+			background: linear-gradient(
+				90deg,
+				transparent,
+				rgba(255, 255, 255, 0.6),
+				transparent
+			);
+			animation: flow 1.5s ease-in-out infinite;
+		}
+	}
+
+	// Paused state
+	&.paused {
+		border-left: 3px solid var(--color_mission_accent_orange);
+		padding-left: 13px;
+
+		.progressFill {
+			background: var(--color_mission_accent_orange);
+		}
+	}
+
+	// Error state
+	&.error {
+		border-left: 3px solid var(--color_danger);
+		padding-left: 13px;
+
+		.task { color: var(--color_danger); }
+		.progressFill {
+			background: var(--color_danger);
+		}
+		.progressBar::after {
+			display: none;
+		}
+	}
+}
+
+// ==================== Header ====================
+.header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 4px;
+}
+
+.statusIcon {
+	flex-shrink: 0;
+	color: var(--color_mission_accent_green);
+	
+	.paused & { color: var(--color_mission_accent_orange); }
+	.error & { color: var(--color_danger); }
+}
+
+.title {
+	flex: 1;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.arrow {
+	flex-shrink: 0;
+	color: var(--color_mission_text_muted);
+	opacity: 0.3;
+	transition: all 0.15s ease;
+}
+
+// ==================== Task ====================
+.task {
+	font-size: 13px;
+	color: var(--color_mission_text_secondary);
+	line-height: 1.4;
+	margin-bottom: 12px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+// ==================== Progress Bar ====================
+.progressBar {
+	position: relative;
+	height: 4px;
+	background: var(--color_mission_ring);
+	border-radius: 2px;
+	overflow: hidden;
+	margin-bottom: 12px;
+}
+
+.progressFill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
+	border-radius: 2px;
+	transition: width 0.3s ease;
+	min-width: 4px; // Always visible even at 0%
+}
+
+// ==================== Footer ====================
+.footer {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.icon {
+	color: var(--color_mission_text_muted);
+}
+
+.meta {
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+}
+
+.dot {
+	color: var(--color_mission_text_muted);
+	opacity: 0.5;
+}
+
+.spacer {
+	flex: 1;
+}
+
+// ==================== Actions ====================
+.actionBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	background: transparent;
+	border: none;
+	border-radius: 6px;
+	color: var(--color_mission_text_muted);
+	cursor: pointer;
+	transition: all 0.15s ease;
+	opacity: 0.5;
+
+	&:hover {
+		opacity: 1;
+		color: var(--color_mission_accent_cyan);
+		transform: scale(1.15);
+	}
+
+	&:active {
+		transform: scale(1.05);
+	}
+}

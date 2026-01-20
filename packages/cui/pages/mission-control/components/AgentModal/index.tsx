@@ -95,7 +95,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 
 		switch (activeTab) {
 			case 'active':
-				return <ActiveTab robot={robot} />
+				return <ActiveTab robot={robot} onAssignTask={handleAssignTask} />
 			case 'history':
 				return <HistoryTab robot={robot} />
 			case 'results':

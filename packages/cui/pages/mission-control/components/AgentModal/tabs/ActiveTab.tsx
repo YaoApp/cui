@@ -1,44 +1,76 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import type { RobotState } from '../../../types'
+import type { RobotState, Execution } from '../../../types'
+import { getActiveExecutions } from '../../../mock/data'
+import ExecutionCard from '../../ExecutionCard'
 import styles from '../index.less'
 
 interface ActiveTabProps {
 	robot: RobotState
+	onAssignTask?: () => void
 }
 
-const ActiveTab: React.FC<ActiveTabProps> = ({ robot }) => {
+const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
-	// Placeholder - TODO: implement execution cards
-	if (robot.running === 0) {
+	// Get active executions for this robot from mock data
+	const activeExecutions = getActiveExecutions(robot.member_id)
+
+	// Handlers
+	const handlePause = useCallback((executionId: string) => {
+		console.log('Pause execution:', executionId)
+		// TODO: API call to pause execution
+	}, [])
+
+	const handleStop = useCallback((executionId: string) => {
+		console.log('Stop execution:', executionId)
+		// TODO: API call to stop execution
+	}, [])
+
+	const handleDetail = useCallback((executionId: string) => {
+		console.log('Show detail for execution:', executionId)
+		// TODO: Open Execution Detail Drawer
+	}, [])
+
+	// Empty state
+	if (activeExecutions.length === 0) {
 		return (
 			<div className={styles.emptyState}>
-				<Icon name='material-hourglass_empty' size={48} className={styles.emptyIcon} />
+				<div className={styles.emptyCircle}>
+					<Icon name='material-inbox' size={32} className={styles.emptyIcon} />
+				</div>
 				<span className={styles.emptyText}>
 					{is_cn ? '当前没有进行中的任务' : 'No active executions'}
 				</span>
 				<span className={styles.emptyHint}>
-					{is_cn ? '可以手动触发新任务或等待定时执行' : 'Trigger a new task or wait for scheduled run'}
+					{is_cn
+						? '智能体空闲中，等待下次触发或手动指派任务'
+						: 'Agent is idle. Waiting for next trigger or task.'}
 				</span>
+				{onAssignTask && (
+					<button className={styles.emptyAction} onClick={onAssignTask}>
+						<Icon name='material-rocket_launch' size={16} />
+						<span>{is_cn ? '指派任务' : 'Assign Task'}</span>
+					</button>
+				)}
 			</div>
 		)
 	}
 
 	return (
 		<div className={styles.tabContent}>
-			<div style={{ padding: '20px', textAlign: 'center', color: 'var(--color_text_grey)' }}>
-				<Icon name='material-construction' size={48} style={{ opacity: 0.5, marginBottom: '16px' }} />
-				<div style={{ fontSize: '14px', marginBottom: '8px' }}>
-					{is_cn ? '进行中 Tab - 开发中' : 'Active Tab - Under Development'}
-				</div>
-				<div style={{ fontSize: '12px', opacity: 0.7 }}>
-					{is_cn 
-						? `当前有 ${robot.running} 个任务正在执行` 
-						: `${robot.running} execution(s) running`}
-				</div>
+			<div className={styles.executionList}>
+				{activeExecutions.map((execution: Execution) => (
+					<ExecutionCard
+						key={execution.id}
+						execution={execution}
+						onPause={handlePause}
+						onStop={handleStop}
+						onDetail={handleDetail}
+					/>
+				))}
 			</div>
 		</div>
 	)

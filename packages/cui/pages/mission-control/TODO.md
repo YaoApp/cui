@@ -37,6 +37,34 @@ var(--color_border_soft)// subtle borders
 var(--color_neo_bg)
 var(--color_neo_text)
 var(--color_neo_border)
+
+// Mission Control Design System (for this page)
+var(--color_mission_bg_start)           // gradient start
+var(--color_mission_bg_end)             // gradient end
+var(--color_mission_text)               // primary text
+var(--color_mission_text_secondary)     // secondary text
+var(--color_mission_text_muted)         // muted text
+var(--color_mission_accent_cyan)        // accent cyan
+var(--color_mission_accent_purple)      // accent purple
+var(--color_mission_accent_green)       // success/running
+var(--color_mission_accent_orange)      // warning/paused
+var(--color_mission_glow_cyan)          // glow effect
+var(--color_mission_card_bg)            // card background
+var(--color_mission_card_border)        // card border
+var(--color_mission_glass_bg)           // glass effect bg
+var(--color_mission_glass_border)       // glass border
+var(--color_mission_ring)               // progress track
+
+// Mission Control Modal (inside AgentModal)
+var(--color_mission_modal_bg)           // modal background
+var(--color_mission_modal_border)       // modal border
+var(--color_mission_modal_header_bg)    // header background
+var(--color_mission_modal_content_bg)   // content area background
+var(--color_mission_modal_card_bg)      // card inside modal
+var(--color_mission_modal_card_border)  // card border
+var(--color_mission_modal_card_shadow)  // card shadow
+var(--color_mission_modal_card_shadow_hover) // card hover shadow
+var(--color_mission_modal_card_blur)    // backdrop blur (dark mode)
 ```
 
 **DO NOT hardcode colors like `#3b82f6` or `rgba(0,0,0,0.5)`**
@@ -227,16 +255,23 @@ Assign Task vs Intervene:
   - [x] History
   - [x] Results
   - [x] Config
-- [ ] Tab: Active
-  - [ ] Execution Card component
-    - [ ] Mission name
-    - [ ] Trigger type badge (Clock/Human/Event)
-    - [ ] Phase indicator (P0-P5)
-    - [ ] Task progress bar
-    - [ ] Control buttons (Intervene, Pause, Stop)
-    - [ ] ETA display
-    - [ ] Detail button
-  - [x] Empty state (no active executions)
+- [x] Tab: Active (Redesigned - simplified view)
+  - [x] Execution Card component
+    - [x] Execution name (from goals or human input)
+    - [x] Current task description (what's happening NOW)
+    - [x] Progress bar with shimmer animation (running state)
+    - [x] Status icon in title (play/pause/error)
+    - [x] Trigger icon + label (🕐 定时/Clock / 👤 手动/Manual / ⚡ 事件/Event)
+    - [x] Dynamic elapsed time (updates every second)
+    - [x] Control buttons: Pause [⏸], Stop [⏹], Detail [→]
+    - [x] Visual states: running (shimmer), paused (orange border), error (red border)
+    - [x] Card quality: shadows, hover effects, light/dark theme support
+  - [x] Empty state with "Assign Task" button (positioned higher)
+  - [x] Mock data: dynamic start_time relative to page load
+  - [x] Grid layout for execution cards
+  - [x] Mission Control themed variables for modal (header, content, card)
+  - [ ] Execution Detail Drawer (on click [→])
+  - [ ] Pause/Stop API integration
 - [ ] Tab: History
   - [ ] Filter buttons (All/Completed/Failed)
   - [ ] Search input
@@ -270,7 +305,7 @@ Assign Task vs Intervene:
 
 ### 1.3 Drawers
 
-- [x] **Assign Task Drawer** (slides in from right inside Modal) - Shell complete
+- [x] **Assign Task Drawer** (slides in from right inside Modal)
   - [x] Header: "Assign Task" + close button
   - [x] Message history area (placeholder)
     - [x] Empty state: "Assign task to [Agent Name]"
@@ -280,6 +315,7 @@ Assign Task vs Intervene:
     - [x] Attachment button [📎] (placeholder)
     - [x] Send button [📤]
   - [x] Success state: "✓ Task Assigned"
+  - [x] Mission Control themed styling
   - [ ] Integrate real API: POST /api/robots/:id/trigger
   - [x] On success: refresh Active Tab (callback ready)
 - [ ] Execution Detail Drawer (right side, slide animation)

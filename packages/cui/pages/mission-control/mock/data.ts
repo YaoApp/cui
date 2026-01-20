@@ -133,9 +133,22 @@ export const mockRobots: RobotState[] = [
 	}
 ]
 
+// ==================== Helper: Dynamic Time ====================
+
+// Base time when module loads - execution times are relative to this
+const MODULE_LOAD_TIME = new Date()
+
+// Generate fixed time relative to module load (for active executions)
+const getRelativeTime = (minutesAgo: number): string => {
+	const time = new Date(MODULE_LOAD_TIME)
+	time.setMinutes(time.getMinutes() - minutesAgo)
+	return time.toISOString()
+}
+
 // ==================== Executions ====================
 
 export const mockExecutions: Execution[] = [
+	// ========== Robot 001: SEO Content Specialist (2 active) ==========
 	{
 		id: 'exec_001',
 		member_id: 'robot_001',
@@ -143,53 +156,20 @@ export const mockExecutions: Execution[] = [
 		trigger_type: 'clock',
 		status: 'running',
 		phase: 'run',
-		start_time: '2026-01-19T18:00:00Z',
+		start_time: getRelativeTime(3), // Started 3 minutes ago
 		job_id: 'job_001',
+		name: { en: 'Evening Content Generation', cn: '晚间内容生成' },
+		current_task_name: { en: 'Writing article on cloud computing trends', cn: '撰写云计算趋势文章' },
 		current: {
 			task_index: 2,
-			progress: '3/5 tasks'
+			progress: '3/5'
 		},
 		tasks: [
-			{
-				id: 't1',
-				status: 'completed',
-				order: 0,
-				executor_type: 'assistant',
-				executor_id: 'keyword-researcher',
-				source: 'auto'
-			},
-			{
-				id: 't2',
-				status: 'completed',
-				order: 1,
-				executor_type: 'mcp',
-				executor_id: 'google-search.trends',
-				source: 'auto'
-			},
-			{
-				id: 't3',
-				status: 'running',
-				order: 2,
-				executor_type: 'assistant',
-				executor_id: 'content-writer',
-				source: 'auto'
-			},
-			{
-				id: 't4',
-				status: 'pending',
-				order: 3,
-				executor_type: 'assistant',
-				executor_id: 'seo-optimizer',
-				source: 'auto'
-			},
-			{
-				id: 't5',
-				status: 'pending',
-				order: 4,
-				executor_type: 'mcp',
-				executor_id: 'cms.publish',
-				source: 'auto'
-			}
+			{ id: 't1', status: 'completed', order: 0, executor_type: 'assistant', executor_id: 'keyword-researcher', source: 'auto' },
+			{ id: 't2', status: 'completed', order: 1, executor_type: 'mcp', executor_id: 'google-search.trends', source: 'auto' },
+			{ id: 't3', status: 'running', order: 2, executor_type: 'assistant', executor_id: 'content-writer', source: 'auto' },
+			{ id: 't4', status: 'pending', order: 3, executor_type: 'assistant', executor_id: 'seo-optimizer', source: 'auto' },
+			{ id: 't5', status: 'pending', order: 4, executor_type: 'mcp', executor_id: 'cms.publish', source: 'auto' }
 		]
 	},
 	{
@@ -199,11 +179,13 @@ export const mockExecutions: Execution[] = [
 		trigger_type: 'human',
 		status: 'running',
 		phase: 'tasks',
-		start_time: '2026-01-19T14:30:00Z',
+		start_time: getRelativeTime(45), // Started 45 minutes ago
 		job_id: 'job_002',
+		name: { en: 'Rewrite Product Page', cn: '重写产品页面' },
+		current_task_name: { en: 'Planning content structure', cn: '规划内容结构' },
 		current: {
 			task_index: 0,
-			progress: '0/2 tasks'
+			progress: '0/3'
 		}
 	},
 	{
@@ -216,6 +198,7 @@ export const mockExecutions: Execution[] = [
 		start_time: '2026-01-19T06:00:00Z',
 		end_time: '2026-01-19T06:12:34Z',
 		job_id: 'job_003',
+		name: { en: 'Morning Content Generation', cn: '晨间内容生成' },
 		delivery: {
 			content: {
 				summary: 'Published SEO article: "Complete Guide to AI App Development" - targeting 12 keywords',
@@ -229,32 +212,8 @@ export const mockExecutions: Execution[] = [
 			sent_at: '2026-01-19T06:12:40Z'
 		}
 	},
-	{
-		id: 'exec_004',
-		member_id: 'robot_003',
-		team_id: 'team_001',
-		trigger_type: 'clock',
-		status: 'failed',
-		phase: 'run',
-		start_time: '2026-01-19T12:00:00Z',
-		end_time: '2026-01-19T12:05:23Z',
-		job_id: 'job_004',
-		error: 'arXiv API rate limit exceeded - will retry in next cycle'
-	},
-	{
-		id: 'exec_005',
-		member_id: 'robot_005',
-		team_id: 'team_001',
-		trigger_type: 'event',
-		status: 'running',
-		phase: 'delivery',
-		start_time: '2026-01-19T15:30:00Z',
-		job_id: 'job_005',
-		current: {
-			task_index: 3,
-			progress: '4/4 tasks'
-		}
-	},
+
+	// ========== Robot 002: Competitor Monitor (0 active, history only) ==========
 	{
 		id: 'exec_006',
 		member_id: 'robot_002',
@@ -265,16 +224,199 @@ export const mockExecutions: Execution[] = [
 		start_time: '2026-01-19T14:00:00Z',
 		end_time: '2026-01-19T14:08:00Z',
 		job_id: 'job_006',
+		name: { en: 'Competitor Price Scan', cn: '竞品价格扫描' },
 		delivery: {
 			content: {
 				summary: '🚨 Competitor A cut enterprise price 20% - review needed',
 				body: '## Competitor Alert\n\nCompetitor A pricing change detected:\n- Enterprise tier: -20%\n- Professional tier: unchanged\n\nRecommendation: Review our pricing strategy',
-				attachments: [
-					{ title: 'Pricing Analysis.pdf', file: '__attachment://file_003' }
-				]
+				attachments: [{ title: 'Pricing Analysis.pdf', file: '__attachment://file_003' }]
 			},
 			success: true,
 			sent_at: '2026-01-19T14:08:10Z'
+		}
+	},
+	{
+		id: 'exec_007',
+		member_id: 'robot_002',
+		team_id: 'team_001',
+		trigger_type: 'clock',
+		status: 'completed',
+		phase: 'delivery',
+		start_time: '2026-01-19T12:00:00Z',
+		end_time: '2026-01-19T12:05:00Z',
+		job_id: 'job_007',
+		name: { en: 'Competitor Website Check', cn: '竞品网站检查' },
+		delivery: {
+			content: {
+				summary: 'No significant changes detected',
+				body: '## Scan Complete\n\nAll monitored competitors checked. No pricing or feature changes detected.',
+				attachments: []
+			},
+			success: true,
+			sent_at: '2026-01-19T12:05:10Z'
+		}
+	},
+
+	// ========== Robot 003: Industry Research Analyst (error state) ==========
+	{
+		id: 'exec_004',
+		member_id: 'robot_003',
+		team_id: 'team_001',
+		trigger_type: 'clock',
+		status: 'failed',
+		phase: 'run',
+		start_time: '2026-01-19T12:00:00Z',
+		end_time: '2026-01-19T12:05:23Z',
+		job_id: 'job_004',
+		name: { en: 'Research Paper Scan', cn: '研究论文扫描' },
+		current_task_name: { en: 'Fetching from arXiv API', cn: '从 arXiv API 获取数据' },
+		error: 'arXiv API rate limit exceeded - will retry in next cycle'
+	},
+	{
+		id: 'exec_010',
+		member_id: 'robot_003',
+		team_id: 'team_001',
+		trigger_type: 'clock',
+		status: 'completed',
+		phase: 'delivery',
+		start_time: '2026-01-19T09:00:00Z',
+		end_time: '2026-01-19T09:30:00Z',
+		job_id: 'job_010',
+		name: { en: 'Weekly Research Digest', cn: '每周研究摘要' },
+		delivery: {
+			content: {
+				summary: 'Compiled 12 relevant papers on LLM advancements',
+				body: '## Weekly Digest\n\n### Key Findings\n- Paper 1: Efficient fine-tuning methods\n- Paper 2: RAG improvements...',
+				attachments: [{ title: 'Industry Insights Weekly.pdf', file: '__attachment://file_005' }]
+			},
+			success: true,
+			sent_at: '2026-01-19T09:30:10Z'
+		}
+	},
+
+	// ========== Robot 004: Sales Research Assistant (paused) ==========
+	{
+		id: 'exec_011',
+		member_id: 'robot_004',
+		team_id: 'team_001',
+		trigger_type: 'human',
+		status: 'cancelled',
+		phase: 'tasks',
+		start_time: '2026-01-18T16:00:00Z',
+		end_time: '2026-01-18T17:00:00Z',
+		job_id: 'job_011',
+		name: { en: 'Research Acme Corp', cn: '研究 Acme 公司' }
+	},
+
+	// ========== Robot 005: Lead Qualification Specialist (1 active) ==========
+	{
+		id: 'exec_005',
+		member_id: 'robot_005',
+		team_id: 'team_001',
+		trigger_type: 'event',
+		status: 'running',
+		phase: 'delivery',
+		start_time: getRelativeTime(8), // Started 8 minutes ago
+		job_id: 'job_005',
+		name: { en: 'Process Lead: Sarah Chen @ TechCorp', cn: '处理线索：陈思雅 @ TechCorp' },
+		current_task_name: { en: 'Sending notification to sales', cn: '发送通知给销售团队' },
+		current: {
+			task_index: 3,
+			progress: '4/4'
+		}
+	},
+	{
+		id: 'exec_012',
+		member_id: 'robot_005',
+		team_id: 'team_001',
+		trigger_type: 'event',
+		status: 'completed',
+		phase: 'delivery',
+		start_time: '2026-01-19T14:00:00Z',
+		end_time: '2026-01-19T14:05:00Z',
+		job_id: 'job_012',
+		name: { en: 'Process Lead: John Smith @ BigCorp', cn: '处理线索：John Smith @ BigCorp' },
+		delivery: {
+			content: {
+				summary: 'Lead scored 85/100 (HOT) - Routed to Sales Team A',
+				body: '## Lead Analysis\n\n**John Smith** - VP Engineering @ BigCorp\n\n### Score: 85/100 (HOT)\n\n- Company size: 500+\n- Budget authority: Yes\n- Timeline: Q1 2026',
+				attachments: [{ title: 'Lead Score Report - BigCorp.pdf', file: '__attachment://file_004' }]
+			},
+			success: true,
+			sent_at: '2026-01-19T14:05:10Z'
+		}
+	},
+
+	// ========== Robot 006: Daily Report Generator (0 active) ==========
+	{
+		id: 'exec_013',
+		member_id: 'robot_006',
+		team_id: 'team_001',
+		trigger_type: 'clock',
+		status: 'completed',
+		phase: 'delivery',
+		start_time: '2026-01-19T13:00:00Z',
+		end_time: '2026-01-19T13:15:00Z',
+		job_id: 'job_013',
+		name: { en: 'Afternoon Sales Report', cn: '下午销售报告' },
+		delivery: {
+			content: {
+				summary: 'Sales up 12% vs yesterday. 5 new deals closed.',
+				body: '## Daily Sales Report\n\n### Summary\n- Total revenue: $45,230\n- New deals: 5\n- Pipeline value: $230,000',
+				attachments: []
+			},
+			success: true,
+			sent_at: '2026-01-19T13:15:10Z'
+		}
+	},
+
+	// ========== Robot 008: Social Media Tracker (3 active) ==========
+	{
+		id: 'exec_008a',
+		member_id: 'robot_008',
+		team_id: 'team_001',
+		trigger_type: 'clock',
+		status: 'running',
+		phase: 'run',
+		start_time: getRelativeTime(12), // Started 12 minutes ago
+		job_id: 'job_008a',
+		name: { en: 'Twitter Brand Scan', cn: 'Twitter 品牌扫描' },
+		current_task_name: { en: 'Analyzing sentiment of 156 mentions', cn: '分析 156 条提及的情感' },
+		current: {
+			task_index: 2,
+			progress: '2/4'
+		}
+	},
+	{
+		id: 'exec_008b',
+		member_id: 'robot_008',
+		team_id: 'team_001',
+		trigger_type: 'clock',
+		status: 'running',
+		phase: 'run',
+		start_time: getRelativeTime(5), // Started 5 minutes ago
+		job_id: 'job_008b',
+		name: { en: 'LinkedIn Trend Analysis', cn: 'LinkedIn 趋势分析' },
+		current_task_name: { en: 'Extracting industry insights', cn: '提取行业洞察' },
+		current: {
+			task_index: 1,
+			progress: '1/3'
+		}
+	},
+	{
+		id: 'exec_008c',
+		member_id: 'robot_008',
+		team_id: 'team_001',
+		trigger_type: 'human',
+		status: 'running',
+		phase: 'goals',
+		start_time: getRelativeTime(0), // Just started
+		job_id: 'job_008c',
+		name: { en: 'Viral Content Analysis', cn: '病毒内容分析' },
+		current_task_name: { en: 'Generating analysis goals', cn: '生成分析目标' },
+		current: {
+			task_index: 0,
+			progress: '0/0'
 		}
 	}
 ]

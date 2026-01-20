@@ -183,6 +183,10 @@ export interface Execution {
 	error?: string
 	job_id: string
 
+	// UI display fields
+	name?: { en: string; cn: string } // Execution name (from goals or human input)
+	current_task_name?: { en: string; cn: string } // What the agent is doing RIGHT NOW
+
 	// Phase outputs
 	goals?: { content: string }
 	tasks?: Task[]
