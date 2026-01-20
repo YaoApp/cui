@@ -184,6 +184,9 @@ export const mockExecutions: Execution[] = [
 		job_id: 'job_001',
 		name: { en: 'Evening Content Generation', cn: '晚间内容生成' },
 		current_task_name: { en: 'Writing article on cloud computing trends', cn: '撰写云计算趋势文章' },
+		goals: {
+			content: '## Content Goals\n\n1. Research trending cloud computing topics for Q1 2026\n2. Generate SEO-optimized article (2000+ words)\n3. Include comparison tables and code examples\n4. Optimize meta description and header structure\n5. Publish to blog with proper schema markup'
+		},
 		current: {
 			task_index: 2,
 			progress: '3/5'
@@ -207,10 +210,18 @@ export const mockExecutions: Execution[] = [
 		job_id: 'job_002',
 		name: { en: 'Rewrite Product Page', cn: '重写产品页面' },
 		current_task_name: { en: 'Planning content structure', cn: '规划内容结构' },
+		goals: {
+			content: '## Rewrite Goals\n\n1. Audit existing product page content\n2. Identify conversion bottlenecks\n3. Rewrite copy with focus on benefits\n4. Add social proof sections\n5. Optimize for mobile reading'
+		},
 		current: {
 			task_index: 0,
 			progress: '0/3'
-		}
+		},
+		tasks: [
+			{ id: 't2_1', status: 'running', order: 0, executor_type: 'assistant', executor_id: 'content-auditor', source: 'human' },
+			{ id: 't2_2', status: 'pending', order: 1, executor_type: 'assistant', executor_id: 'copywriter', source: 'auto' },
+			{ id: 't2_3', status: 'pending', order: 2, executor_type: 'mcp', executor_id: 'cms.update', source: 'auto' }
+		]
 	},
 
 	// ========== Robot 005: Lead Qualification Specialist (1 active) ==========
@@ -225,10 +236,19 @@ export const mockExecutions: Execution[] = [
 		job_id: 'job_005',
 		name: { en: 'Process Lead: Sarah Chen @ TechCorp', cn: '处理线索：陈思雅 @ TechCorp' },
 		current_task_name: { en: 'Sending notification to sales', cn: '发送通知给销售团队' },
+		goals: {
+			content: '## Lead Processing Goals\n\n1. Verify lead contact information\n2. Enrich company data from LinkedIn & Crunchbase\n3. Score lead quality (BANT criteria)\n4. Route to appropriate sales rep based on territory'
+		},
 		current: {
 			task_index: 3,
 			progress: '4/4'
-		}
+		},
+		tasks: [
+			{ id: 't5_1', status: 'completed', order: 0, executor_type: 'assistant', executor_id: 'data-validator', source: 'event' },
+			{ id: 't5_2', status: 'completed', order: 1, executor_type: 'mcp', executor_id: 'linkedin.enrich', source: 'auto' },
+			{ id: 't5_3', status: 'completed', order: 2, executor_type: 'assistant', executor_id: 'lead-scorer', source: 'auto' },
+			{ id: 't5_4', status: 'running', order: 3, executor_type: 'mcp', executor_id: 'slack.notify', source: 'auto' }
+		]
 	},
 
 	// ========== Robot 008: Social Media Tracker (3 active) ==========
@@ -243,10 +263,19 @@ export const mockExecutions: Execution[] = [
 		job_id: 'job_008a',
 		name: { en: 'Twitter Brand Scan', cn: 'Twitter 品牌扫描' },
 		current_task_name: { en: 'Analyzing sentiment of 156 mentions', cn: '分析 156 条提及的情感' },
+		goals: {
+			content: '## Twitter Scan Goals\n\n1. Collect brand mentions from past 24 hours\n2. Classify sentiment (positive/neutral/negative)\n3. Identify influential mentions (>1000 followers)\n4. Generate summary report with alerts'
+		},
 		current: {
 			task_index: 2,
 			progress: '2/4'
-		}
+		},
+		tasks: [
+			{ id: 't8a_1', status: 'completed', order: 0, executor_type: 'mcp', executor_id: 'twitter.search', source: 'auto' },
+			{ id: 't8a_2', status: 'completed', order: 1, executor_type: 'assistant', executor_id: 'tweet-collector', source: 'auto' },
+			{ id: 't8a_3', status: 'running', order: 2, executor_type: 'assistant', executor_id: 'sentiment-analyzer', source: 'auto' },
+			{ id: 't8a_4', status: 'pending', order: 3, executor_type: 'assistant', executor_id: 'report-generator', source: 'auto' }
+		]
 	},
 	{
 		id: 'exec_008b',
@@ -259,22 +288,33 @@ export const mockExecutions: Execution[] = [
 		job_id: 'job_008b',
 		name: { en: 'LinkedIn Trend Analysis', cn: 'LinkedIn 趋势分析' },
 		current_task_name: { en: 'Extracting industry insights', cn: '提取行业洞察' },
+		goals: {
+			content: '## LinkedIn Analysis Goals\n\n1. Scan industry influencer posts\n2. Extract emerging trends and topics\n3. Identify content gaps for our brand'
+		},
 		current: {
 			task_index: 1,
 			progress: '1/3'
-		}
+		},
+		tasks: [
+			{ id: 't8b_1', status: 'completed', order: 0, executor_type: 'mcp', executor_id: 'linkedin.scan', source: 'auto' },
+			{ id: 't8b_2', status: 'running', order: 1, executor_type: 'assistant', executor_id: 'trend-extractor', source: 'auto' },
+			{ id: 't8b_3', status: 'pending', order: 2, executor_type: 'assistant', executor_id: 'gap-analyzer', source: 'auto' }
+		]
 	},
 	{
 		id: 'exec_008c',
 		member_id: 'robot_008',
 		team_id: 'team_001',
 		trigger_type: 'human',
-		status: 'running',
+		status: 'pending',
 		phase: 'goals',
-		start_time: getRelativeTime(0), // Just started
+		start_time: getRelativeTime(1), // Just started
 		job_id: 'job_008c',
 		name: { en: 'Viral Content Analysis', cn: '病毒内容分析' },
 		current_task_name: { en: 'Generating analysis goals', cn: '生成分析目标' },
+		goals: {
+			content: '## Analysis Request\n\nUser requested: "Analyze why competitor X\'s latest post went viral"\n\nGenerating detailed analysis plan...'
+		},
 		current: {
 			task_index: 0,
 			progress: '0/0'
@@ -328,7 +368,15 @@ export const mockExecutions: Execution[] = [
 		end_time: getPastTime(0, 8, 8),
 		job_id: 'job_h002',
 		name: { en: 'Morning Competitor Scan', cn: '晨间竞品扫描' },
+		goals: {
+			content: '## Competitor Scan Goals\n\n1. Check competitor websites for pricing changes\n2. Monitor product announcement pages\n3. Analyze any detected changes\n4. Alert team if significant updates found'
+		},
 		current: { task_index: 2, progress: '3/3' },
+		tasks: [
+			{ id: 'th2_1', status: 'completed', order: 0, executor_type: 'mcp', executor_id: 'web-scraper.pricing', source: 'auto' },
+			{ id: 'th2_2', status: 'completed', order: 1, executor_type: 'assistant', executor_id: 'change-detector', source: 'auto' },
+			{ id: 'th2_3', status: 'completed', order: 2, executor_type: 'mcp', executor_id: 'slack.alert', source: 'auto' }
+		],
 		delivery: {
 			content: {
 				summary: '🚨 Competitor A cut enterprise price 20% - review needed',
@@ -351,8 +399,17 @@ export const mockExecutions: Execution[] = [
 		job_id: 'job_h003',
 		name: { en: 'Research Paper Scan', cn: '研究论文扫描' },
 		current_task_name: { en: 'Fetching from arXiv API', cn: '从 arXiv API 获取数据' },
+		goals: {
+			content: '## Research Goals\n\n1. Scan latest AI/ML papers from arXiv\n2. Filter by relevance score\n3. Extract key findings\n4. Update knowledge base'
+		},
 		current: { task_index: 1, progress: '1/4' },
-		error: 'arXiv API rate limit exceeded - will retry in next cycle'
+		tasks: [
+			{ id: 'th3_1', status: 'completed', order: 0, executor_type: 'assistant', executor_id: 'query-builder', source: 'auto' },
+			{ id: 'th3_2', status: 'failed', order: 1, executor_type: 'mcp', executor_id: 'arxiv.search', source: 'auto' },
+			{ id: 'th3_3', status: 'cancelled', order: 2, executor_type: 'assistant', executor_id: 'paper-analyzer', source: 'auto' },
+			{ id: 'th3_4', status: 'cancelled', order: 3, executor_type: 'mcp', executor_id: 'kb.update', source: 'auto' }
+		],
+		error: 'arXiv API rate limit exceeded (Error 429). The API returned: "Too many requests. Please wait 15 minutes before retrying." This is a temporary issue and will be automatically retried in the next scheduled cycle.'
 	},
 	{
 		id: 'exec_h004',
@@ -365,7 +422,16 @@ export const mockExecutions: Execution[] = [
 		end_time: getPastTime(0, 10, 35),
 		job_id: 'job_h004',
 		name: { en: 'Process Lead: John Smith @ BigCorp', cn: '处理线索：John Smith @ BigCorp' },
+		goals: {
+			content: '## Lead Processing Goals\n\n1. Validate contact information for John Smith\n2. Enrich company data for BigCorp from LinkedIn & Crunchbase\n3. Calculate lead score using BANT criteria\n4. Route to appropriate sales team based on score and territory'
+		},
 		current: { task_index: 3, progress: '4/4' },
+		tasks: [
+			{ id: 'th4_1', status: 'completed', order: 0, executor_type: 'assistant', executor_id: 'data-validator', source: 'event' },
+			{ id: 'th4_2', status: 'completed', order: 1, executor_type: 'mcp', executor_id: 'linkedin.enrich', source: 'auto' },
+			{ id: 'th4_3', status: 'completed', order: 2, executor_type: 'assistant', executor_id: 'lead-scorer', source: 'auto' },
+			{ id: 'th4_4', status: 'completed', order: 3, executor_type: 'mcp', executor_id: 'crm.route', source: 'auto' }
+		],
 		delivery: {
 			content: {
 				summary: 'Lead scored 85/100 (HOT) - Routed to Sales Team A',
@@ -387,7 +453,15 @@ export const mockExecutions: Execution[] = [
 		end_time: getPastTime(0, 9, 15),
 		job_id: 'job_h005',
 		name: { en: 'Morning Sales Report', cn: '晨间销售报告' },
+		goals: {
+			content: '## Report Goals\n\n1. Query sales database for yesterday\'s transactions\n2. Calculate key metrics (revenue, deals, pipeline)\n3. Generate formatted report with charts\n4. Send to sales leadership team'
+		},
 		current: { task_index: 2, progress: '3/3' },
+		tasks: [
+			{ id: 'th5_1', status: 'completed', order: 0, executor_type: 'mcp', executor_id: 'salesforce.query', source: 'auto' },
+			{ id: 'th5_2', status: 'completed', order: 1, executor_type: 'assistant', executor_id: 'report-generator', source: 'auto' },
+			{ id: 'th5_3', status: 'completed', order: 2, executor_type: 'mcp', executor_id: 'email.send', source: 'auto' }
+		],
 		delivery: {
 			content: {
 				summary: 'Sales up 12% vs yesterday. 5 new deals closed.',
@@ -409,7 +483,16 @@ export const mockExecutions: Execution[] = [
 		end_time: getPastTime(0, 7, 20),
 		job_id: 'job_h006',
 		name: { en: 'Morning Social Scan', cn: '晨间社媒扫描' },
+		goals: {
+			content: '## Social Scan Goals\n\n1. Search Twitter for brand mentions in past 24h\n2. Search LinkedIn for company mentions\n3. Analyze sentiment of all mentions\n4. Generate summary report with key insights'
+		},
 		current: { task_index: 3, progress: '4/4' },
+		tasks: [
+			{ id: 'th6_1', status: 'completed', order: 0, executor_type: 'mcp', executor_id: 'twitter.search', source: 'auto' },
+			{ id: 'th6_2', status: 'completed', order: 1, executor_type: 'mcp', executor_id: 'linkedin.search', source: 'auto' },
+			{ id: 'th6_3', status: 'completed', order: 2, executor_type: 'assistant', executor_id: 'sentiment-analyzer', source: 'auto' },
+			{ id: 'th6_4', status: 'completed', order: 3, executor_type: 'assistant', executor_id: 'report-generator', source: 'auto' }
+		],
 		delivery: {
 			content: {
 				summary: '23 brand mentions found, sentiment 78% positive',
@@ -633,8 +716,17 @@ export const mockExecutions: Execution[] = [
 		end_time: getPastTime(2, 12, 3),
 		job_id: 'job_h016',
 		name: { en: 'Research Paper Scan', cn: '研究论文扫描' },
+		goals: {
+			content: '## Research Goals\n\n1. Connect to research paper databases\n2. Scan latest ML/AI publications\n3. Extract key findings and trends\n4. Update internal knowledge base'
+		},
 		current: { task_index: 0, progress: '0/4' },
-		error: 'Network timeout while connecting to research database'
+		tasks: [
+			{ id: 'th16_1', status: 'failed', order: 0, executor_type: 'mcp', executor_id: 'research-db.connect', source: 'auto' },
+			{ id: 'th16_2', status: 'cancelled', order: 1, executor_type: 'mcp', executor_id: 'arxiv.search', source: 'auto' },
+			{ id: 'th16_3', status: 'cancelled', order: 2, executor_type: 'assistant', executor_id: 'paper-analyzer', source: 'auto' },
+			{ id: 'th16_4', status: 'cancelled', order: 3, executor_type: 'mcp', executor_id: 'kb.update', source: 'auto' }
+		],
+		error: 'Network timeout while connecting to research database. Connection to external API failed after 30 seconds. Please check network connectivity and try again.'
 	},
 	{
 		id: 'exec_h017',
@@ -862,8 +954,17 @@ export const mockExecutions: Execution[] = [
 		end_time: getPastTime(4, 15, 2),
 		job_id: 'job_h027',
 		name: { en: 'Process Lead: Unknown Contact', cn: '处理线索：未知联系人' },
+		goals: {
+			content: '## Lead Processing Goals\n\n1. Validate lead contact information\n2. Enrich company data from external sources\n3. Calculate lead score\n4. Route to appropriate sales rep'
+		},
 		current: { task_index: 1, progress: '1/4' },
-		error: 'Invalid email format in lead data'
+		tasks: [
+			{ id: 'th27_1', status: 'completed', order: 0, executor_type: 'assistant', executor_id: 'data-validator', source: 'event' },
+			{ id: 'th27_2', status: 'failed', order: 1, executor_type: 'mcp', executor_id: 'email-verifier', source: 'auto' },
+			{ id: 'th27_3', status: 'cancelled', order: 2, executor_type: 'assistant', executor_id: 'lead-scorer', source: 'auto' },
+			{ id: 'th27_4', status: 'cancelled', order: 3, executor_type: 'mcp', executor_id: 'crm.route', source: 'auto' }
+		],
+		error: 'Invalid email format in lead data. The email "john.doe@@company" contains invalid characters. Please verify the lead source data quality.'
 	},
 	{
 		id: 'exec_h028',
@@ -2107,8 +2208,18 @@ export const mockExecutions: Execution[] = [
 		end_time: getPastTime(9, 18, 5),
 		job_id: 'job_h087',
 		name: { en: 'Evening Content Generation', cn: '晚间内容生成' },
+		goals: {
+			content: '## Content Goals\n\n1. Research trending blockchain topics for Q4 2025\n2. Generate comprehensive guide article (3000+ words)\n3. Include technical diagrams and code examples\n4. Optimize for GEO search patterns\n5. Publish to blog with schema markup'
+		},
 		current: { task_index: 2, progress: '2/5' },
-		error: 'Content generation timeout - article too complex'
+		tasks: [
+			{ id: 'th87_1', status: 'completed', order: 0, executor_type: 'assistant', executor_id: 'keyword-researcher', source: 'auto' },
+			{ id: 'th87_2', status: 'completed', order: 1, executor_type: 'mcp', executor_id: 'google-search.trends', source: 'auto' },
+			{ id: 'th87_3', status: 'failed', order: 2, executor_type: 'assistant', executor_id: 'content-writer', source: 'auto' },
+			{ id: 'th87_4', status: 'cancelled', order: 3, executor_type: 'assistant', executor_id: 'seo-optimizer', source: 'auto' },
+			{ id: 'th87_5', status: 'cancelled', order: 4, executor_type: 'mcp', executor_id: 'cms.publish', source: 'auto' }
+		],
+		error: 'Content generation timeout - article too complex. The content-writer assistant exceeded the 5-minute timeout while processing a highly technical blockchain topic. Consider breaking down complex topics into multiple articles or increasing the timeout limit.'
 	},
 	{
 		id: 'exec_h088',

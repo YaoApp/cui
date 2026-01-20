@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Modal, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Creature from '@/widgets/Creature'
-import type { RobotState } from '../../types'
+import type { RobotState, Execution } from '../../types'
 import { robotNames } from '../../mock/data'
 import ActiveTab from './tabs/ActiveTab'
 import HistoryTab from './tabs/HistoryTab'
 import ResultsTab from './tabs/ResultsTab'
 import ConfigTab from './tabs/ConfigTab'
 import AssignTaskDrawer from '../AssignTaskDrawer'
+import ExecutionDetailDrawer from '../ExecutionDetailDrawer'
 import styles from './index.less'
 
 interface AgentModalProps {
@@ -28,14 +29,30 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 	const [activeTab, setActiveTab] = useState<TabType>('active')
 	const [loading, setLoading] = useState(false)
 	const [showAssignDrawer, setShowAssignDrawer] = useState(false)
+	const [showDetailDrawer, setShowDetailDrawer] = useState(false)
+	const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
 
 	// Reset tab when modal opens
 	useEffect(() => {
 		if (visible) {
 			setActiveTab('active')
 			setShowAssignDrawer(false)
+			setShowDetailDrawer(false)
+			setSelectedExecution(null)
 		}
 	}, [visible])
+
+	// Handle opening execution detail
+	const handleOpenDetail = useCallback((execution: Execution) => {
+		setSelectedExecution(execution)
+		setShowDetailDrawer(true)
+	}, [])
+
+	const handleCloseDetail = useCallback(() => {
+		setShowDetailDrawer(false)
+		// Delay clearing execution to allow animation to complete
+		setTimeout(() => setSelectedExecution(null), 300)
+	}, [])
 
 	const handleAssignTask = () => {
 		setShowAssignDrawer(true)
@@ -95,9 +112,9 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 
 		switch (activeTab) {
 			case 'active':
-				return <ActiveTab robot={robot} onAssignTask={handleAssignTask} />
+				return <ActiveTab robot={robot} onAssignTask={handleAssignTask} onOpenDetail={handleOpenDetail} />
 			case 'history':
-				return <HistoryTab robot={robot} />
+				return <HistoryTab robot={robot} onOpenDetail={handleOpenDetail} />
 			case 'results':
 				return <ResultsTab robot={robot} />
 			case 'config':
@@ -178,6 +195,13 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 					onClose={() => setShowAssignDrawer(false)}
 					robot={robot}
 					onTaskAssigned={handleTaskAssigned}
+				/>
+
+				{/* Execution Detail Drawer - inside modal content */}
+				<ExecutionDetailDrawer
+					visible={showDetailDrawer}
+					onClose={handleCloseDetail}
+					execution={selectedExecution}
 				/>
 			</div>
 		</Modal>

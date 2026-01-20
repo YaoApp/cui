@@ -1,0 +1,845 @@
+@import '@/styles/preset/vars.less';
+
+// ==================== Overlay ====================
+.drawerOverlay {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	display: flex;
+	justify-content: flex-end;
+	z-index: 10;
+	animation: fadeIn 0.15s ease;
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(4px);
+}
+
+// ==================== Panel ====================
+.drawerPanel {
+	width: 580px;
+	max-width: 60%;
+	min-width: 450px;
+	height: 100%;
+	background: linear-gradient(
+		180deg,
+		var(--color_mission_modal_bg) 0%,
+		var(--color_mission_bg_end) 100%
+	);
+	border-left: 1px solid var(--color_mission_glass_border);
+	display: flex;
+	flex-direction: column;
+	animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: -12px 0 40px rgba(0, 0, 0, 0.3);
+	outline: none;
+}
+
+// ==================== Header ====================
+.drawerHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_mission_glass_border);
+	background: var(--color_mission_modal_header_bg);
+	flex-shrink: 0;
+}
+
+.statusBadge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 3px 8px;
+	border-radius: 10px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+	flex-shrink: 0;
+
+	:global(.xgen-icon) {
+		font-size: 12px;
+	}
+
+	&.statusRunning {
+		background: rgba(0, 212, 255, 0.15);
+		color: var(--color_mission_accent_cyan);
+		border: 1px solid rgba(0, 212, 255, 0.3);
+		animation: badgePulse 2s ease-in-out infinite;
+	}
+
+	&.statusPaused {
+		background: rgba(251, 146, 60, 0.15);
+		color: var(--color_mission_accent_orange);
+		border: 1px solid rgba(251, 146, 60, 0.3);
+	}
+
+	&.statusCompleted {
+		background: rgba(34, 197, 94, 0.15);
+		color: var(--color_success);
+		border: 1px solid rgba(34, 197, 94, 0.3);
+	}
+
+	&.statusFailed {
+		background: rgba(239, 68, 68, 0.15);
+		color: var(--color_danger);
+		border: 1px solid rgba(239, 68, 68, 0.3);
+	}
+
+	&.statusCancelled {
+		background: rgba(156, 163, 175, 0.15);
+		color: var(--color_mission_text_muted);
+		border: 1px solid rgba(156, 163, 175, 0.3);
+	}
+}
+
+.executionTitle {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+	line-height: 1.4;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.closeBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 4px;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	color: var(--color_mission_text_muted);
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+
+	&:hover {
+		color: var(--color_mission_accent_cyan);
+		transform: scale(1.15);
+	}
+}
+
+// ==================== Meta Bar ====================
+.metaBar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 20px;
+	background: var(--color_mission_modal_card_bg);
+	border-bottom: 1px solid var(--color_mission_modal_card_border);
+	flex-shrink: 0;
+}
+
+.metaLeft {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.metaItem {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--color_mission_text_muted);
+
+	:global(.xgen-icon) {
+		font-size: 14px;
+		opacity: 0.7;
+	}
+}
+
+.metaDivider {
+	width: 1px;
+	height: 14px;
+	background: var(--color_mission_modal_card_border);
+}
+
+.liveDuration {
+	color: var(--color_mission_accent_cyan);
+	font-variant-numeric: tabular-nums;
+	font-weight: 500;
+}
+
+// ==================== Content ====================
+.drawerContent {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px 24px;
+	min-height: 0;
+
+	// Custom scrollbar
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_mission_ring);
+		border-radius: 4px;
+		border: 2px solid transparent;
+		background-clip: padding-box;
+
+		&:hover {
+			background: var(--color_mission_text_muted);
+			background-clip: padding-box;
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+// ==================== Section ====================
+.section {
+	margin-bottom: 20px;
+	background: var(--color_mission_modal_card_bg);
+	border: 1px solid var(--color_mission_modal_card_border);
+	border-radius: 12px;
+	overflow: hidden;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+
+	&.sectionPrimary {
+		border-color: rgba(0, 212, 255, 0.3);
+		background: linear-gradient(
+			135deg,
+			var(--color_mission_modal_card_bg) 0%,
+			rgba(0, 212, 255, 0.05) 100%
+		);
+	}
+
+	&.sectionError {
+		border-color: rgba(239, 68, 68, 0.3);
+		background: linear-gradient(
+			135deg,
+			var(--color_mission_modal_card_bg) 0%,
+			rgba(239, 68, 68, 0.05) 100%
+		);
+	}
+}
+
+.sectionHeader {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 14px 16px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+	border-bottom: 1px solid var(--color_mission_modal_card_border);
+	cursor: default;
+
+	:global(.xgen-icon) {
+		color: var(--color_mission_accent_cyan);
+		font-size: 16px;
+	}
+}
+
+// ==================== Collapsible ====================
+.collapsible {
+	summary {
+		list-style: none;
+		cursor: pointer;
+		user-select: none;
+
+		&::-webkit-details-marker {
+			display: none;
+		}
+
+		.expandIcon {
+			margin-left: auto;
+			transition: transform 0.2s ease;
+			color: var(--color_mission_text_muted);
+		}
+
+		&:hover {
+			background: var(--color_mission_glass_hover);
+		}
+	}
+
+	&[open] summary .expandIcon {
+		transform: rotate(180deg);
+	}
+}
+
+// ==================== Phase Progress ====================
+.phaseProgress {
+	display: flex;
+	align-items: center;
+	padding: 16px;
+	gap: 4px;
+}
+
+.phaseItem {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	position: relative;
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: 12px;
+		left: 50%;
+		width: 100%;
+		height: 2px;
+		background: var(--color_mission_ring);
+		z-index: 0;
+	}
+
+	&:last-child::after {
+		display: none;
+	}
+
+	&.phasePast {
+		.phaseIndicator {
+			background: var(--color_success);
+			border-color: var(--color_success);
+			color: white;
+		}
+		&::after {
+			background: var(--color_success);
+		}
+	}
+
+	&.phaseCurrent {
+		.phaseIndicator {
+			background: var(--color_mission_accent_cyan);
+			border-color: var(--color_mission_accent_cyan);
+			box-shadow: 0 0 12px var(--color_mission_glow_cyan);
+		}
+		.phaseLabel {
+			color: var(--color_mission_accent_cyan);
+			font-weight: 600;
+		}
+	}
+
+	&.phaseError {
+		.phaseIndicator {
+			background: var(--color_danger);
+			border-color: var(--color_danger);
+			color: white;
+		}
+		.phaseLabel {
+			color: var(--color_danger);
+			font-weight: 600;
+		}
+	}
+
+	&.phaseFuture {
+		.phaseIndicator {
+			// Use solid background to cover the line underneath
+			background: var(--color_mission_modal_content_bg);
+			border-color: var(--color_mission_ring);
+		}
+		.phaseLabel {
+			opacity: 0.5;
+		}
+	}
+}
+
+.phaseIndicator {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	border: 2px solid var(--color_mission_ring);
+	background: var(--color_mission_modal_content_bg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1;
+	transition: all 0.2s ease;
+
+	:global(.xgen-icon) {
+		font-size: 12px;
+	}
+}
+
+.phasePulse {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: white;
+	animation: pulse 1.5s ease-in-out infinite;
+}
+
+.phaseLabel {
+	font-size: 10px;
+	color: var(--color_mission_text_muted);
+	text-align: center;
+	white-space: nowrap;
+}
+
+// ==================== Current Task ====================
+.currentTask {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 16px;
+	font-size: 14px;
+	color: var(--color_mission_text);
+	line-height: 1.5;
+}
+
+.currentTaskPulse {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--color_mission_accent_cyan);
+	flex-shrink: 0;
+	animation: pulse 1.5s ease-in-out infinite;
+	box-shadow: 0 0 8px var(--color_mission_glow_cyan);
+}
+
+.progressInfo {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 0 16px 16px;
+}
+
+.progressBar {
+	flex: 1;
+	height: 6px;
+	background: var(--color_mission_ring);
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.progressFill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
+	border-radius: 3px;
+	transition: width 0.3s ease;
+	position: relative;
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(
+			90deg,
+			transparent,
+			rgba(255, 255, 255, 0.4),
+			transparent
+		);
+		animation: shimmer 1.5s ease-in-out infinite;
+	}
+}
+
+.progressText {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--color_mission_text_muted);
+	font-variant-numeric: tabular-nums;
+}
+
+// ==================== Goals ====================
+.goalsContent {
+	padding: 16px;
+
+	pre {
+		margin: 0;
+		font-family: inherit;
+		font-size: 13px;
+		line-height: 1.6;
+		color: var(--color_mission_text_secondary);
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+}
+
+// ==================== Task List ====================
+.taskList {
+	padding: 12px 16px;
+}
+
+.taskItem {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 12px;
+	margin-bottom: 8px;
+	background: var(--color_mission_modal_content_bg);
+	border-radius: 8px;
+	transition: all 0.15s ease;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+
+	&:hover {
+		background: var(--color_mission_glass_hover);
+	}
+
+	&.taskItemCurrent {
+		background: rgba(0, 212, 255, 0.1);
+		border: 1px solid rgba(0, 212, 255, 0.2);
+	}
+
+	&.taskItemFailed {
+		background: rgba(239, 68, 68, 0.1);
+		border: 1px solid rgba(239, 68, 68, 0.2);
+	}
+}
+
+.taskIcon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+
+	&.taskCompleted {
+		color: var(--color_success);
+	}
+
+	&.taskRunning {
+		color: var(--color_mission_accent_cyan);
+	}
+
+	&.taskFailed {
+		color: var(--color_danger);
+	}
+
+	&.taskSkipped,
+	&.taskCancelled {
+		color: var(--color_mission_text_muted);
+	}
+
+	&.taskPending {
+		color: var(--color_mission_ring);
+	}
+}
+
+.taskInfo {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.taskExecutor {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_mission_text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.taskType {
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+}
+
+.taskRunningIndicator {
+	display: flex;
+	align-items: center;
+}
+
+.taskRunningDot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--color_mission_accent_cyan);
+	animation: pulse 1.5s ease-in-out infinite;
+}
+
+.taskFailedBadge {
+	font-size: 10px;
+	font-weight: 600;
+	color: var(--color_danger);
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+}
+
+// ==================== Results ====================
+.resultSummary {
+	padding: 16px;
+	font-size: 15px;
+	font-weight: 500;
+	color: var(--color_mission_text);
+	line-height: 1.5;
+	border-bottom: 1px solid var(--color_mission_modal_card_border);
+}
+
+.resultBody {
+	padding: 16px;
+	border-bottom: 1px solid var(--color_mission_modal_card_border);
+
+	pre {
+		margin: 0;
+		font-family: inherit;
+		font-size: 13px;
+		line-height: 1.6;
+		color: var(--color_mission_text_secondary);
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+}
+
+.deliverySuccess {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin-left: auto;
+	padding: 3px 8px;
+	background: rgba(34, 197, 94, 0.15);
+	color: var(--color_success);
+	font-size: 10px;
+	font-weight: 600;
+	border-radius: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+}
+
+// ==================== Attachments ====================
+.attachments {
+	padding: 16px;
+}
+
+.attachmentsHeader {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--color_mission_text_muted);
+	margin-bottom: 12px;
+
+	:global(.xgen-icon) {
+		font-size: 14px;
+	}
+}
+
+.attachmentList {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.attachmentItem {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 14px;
+	background: var(--color_mission_modal_content_bg);
+	border: 1px solid var(--color_mission_modal_card_border);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	:global(.xgen-icon) {
+		color: var(--color_mission_accent_cyan);
+		flex-shrink: 0;
+	}
+
+	&:hover {
+		border-color: var(--color_mission_accent_cyan);
+		background: rgba(0, 212, 255, 0.05);
+
+		.attachmentDownload {
+			opacity: 1;
+		}
+	}
+}
+
+.attachmentTitle {
+	flex: 1;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_mission_text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.attachmentDownload {
+	opacity: 0.5;
+	transition: opacity 0.15s ease;
+}
+
+// ==================== Error ====================
+.errorContent {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	padding: 20px 16px;
+}
+
+.errorIcon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border-radius: 12px;
+	background: rgba(239, 68, 68, 0.15);
+	color: var(--color_danger);
+	flex-shrink: 0;
+}
+
+.errorMessage {
+	flex: 1;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--color_mission_text);
+	padding-top: 2px;
+}
+
+// ==================== Cancelled ====================
+.cancelledNotice {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 40px 20px;
+	text-align: center;
+	color: var(--color_mission_text_muted);
+
+	:global(.xgen-icon) {
+		opacity: 0.4;
+	}
+
+	span {
+		font-size: 14px;
+	}
+}
+
+// ==================== Footer ====================
+.drawerFooter {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+	padding: 16px 24px;
+	border-top: 1px solid var(--color_mission_glass_border);
+	background: var(--color_mission_modal_header_bg);
+	flex-shrink: 0;
+}
+
+.actionBtnPrimary,
+.actionBtnSecondary,
+.actionBtnDanger {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 18px;
+	font-size: 13px;
+	font-weight: 600;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	:global(.xgen-icon) {
+		font-size: 16px;
+	}
+}
+
+.actionBtnPrimary {
+	background: linear-gradient(
+		135deg,
+		var(--color_mission_accent_cyan),
+		var(--color_mission_accent_purple)
+	);
+	color: white;
+	border: none;
+	box-shadow: 0 4px 12px var(--color_mission_glow_cyan);
+
+	&:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 6px 20px var(--color_mission_glow_cyan);
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+}
+
+.actionBtnSecondary {
+	background: var(--color_mission_card_bg);
+	color: var(--color_mission_text);
+	border: 1px solid var(--color_mission_card_border);
+
+	&:hover {
+		border-color: var(--color_mission_accent_cyan);
+		color: var(--color_mission_accent_cyan);
+	}
+}
+
+.actionBtnDanger {
+	background: rgba(239, 68, 68, 0.1);
+	color: var(--color_danger);
+	border: 1px solid rgba(239, 68, 68, 0.3);
+
+	&:hover {
+		background: rgba(239, 68, 68, 0.2);
+		border-color: var(--color_danger);
+	}
+}
+
+// ==================== Animations ====================
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.6;
+		transform: scale(0.9);
+	}
+}
+
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes badgePulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4);
+	}
+	50% {
+		box-shadow: 0 0 8px 2px rgba(0, 212, 255, 0.2);
+	}
+}

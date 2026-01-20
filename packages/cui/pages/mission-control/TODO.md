@@ -291,27 +291,40 @@ Assign Task vs Intervene:
   - [x] Mock data: 90+ history executions across all robots
   - [x] Empty state
   - [ ] Time range filter (Last 7 days / Last 30 days / All) - deferred
-- [ ] Execution Detail Drawer (right-side, slides in)
-  - [ ] Drawer container (50% modal width, min 500px)
-  - [ ] Header: title + status badge + close button
-  - [ ] Running state layout:
-    - [ ] Goals section (expanded)
-    - [ ] Tasks list with progress
-    - [ ] Control buttons (Pause/Stop)
-  - [ ] Completed state layout:
-    - [ ] Results section (Summary + Attachments + Delivery status)
-    - [ ] Goals section (collapsed)
-    - [ ] Tasks section (collapsed)
-    - [ ] Action buttons (Re-run/Re-deliver)
-  - [ ] Failed state layout:
-    - [ ] Error section (prominent)
-    - [ ] Goals section (expanded)
-    - [ ] Tasks section (show failure point)
-    - [ ] Retry button
-  - [ ] Collapsible sections (expand/collapse animation)
-  - [ ] Attachment download/preview
-  - [ ] Custom scrollbar
-  - [ ] Accessible from both Active Tab and History Tab
+- [x] Execution Detail Drawer (right-side, slides in) **COMPLETED**
+  - [x] Drawer container (580px width, 60% max, 450px min)
+  - [x] Header: title only + minimal close button (icon only, hover: cyan + scale)
+  - [x] Meta bar: trigger type + start time + live duration | status badge (right aligned)
+  - [x] Running state layout:
+    - [x] Progress indicator (灵感→目标→任务→执行→交付→学习, user-friendly labels)
+    - [x] Current Task section with pulse animation
+    - [x] Progress bar with shimmer effect
+    - [x] Goals section (expanded)
+    - [x] Tasks list with status icons
+    - [x] Control buttons (Pause/Resume/Stop)
+  - [x] Completed state layout:
+    - [x] Results section (Summary + Body + Delivery status badge)
+    - [x] Attachments list with download icons
+    - [x] Goals section (collapsible, default closed)
+    - [x] Tasks section (collapsible, default closed)
+    - [x] Action buttons (Re-run/Download)
+  - [x] Failed state layout:
+    - [x] Error section (prominent with warning icon)
+    - [x] Progress showing failure point (collapsible, default closed)
+    - [x] Goals section (collapsible, default closed)
+    - [x] Tasks section (collapsible, show failure point with red highlight)
+    - [x] Retry button
+  - [x] Cancelled state layout:
+    - [x] Cancelled notice with icon
+    - [x] Re-run button
+  - [x] Collapsible sections (<details>/<summary> with expand icon animation)
+  - [x] Attachment download handler
+  - [x] Custom scrollbar (themed)
+  - [x] Accessible from both Active Tab and History Tab
+  - [x] Slide-in animation (cubic-bezier)
+  - [x] Keyboard support (Escape to close)
+  - [x] Click overlay to close
+  - [x] Mock data: enhanced executions with goals and tasks (active + history)
 - [ ] Tab: Results
   - [ ] Filter by type (All/Reports/Data/Charts)
   - [ ] Sort options (Latest/Name/Type)
@@ -779,8 +792,8 @@ pages/mission-control/
 | 1.2 | Agent Modal - Shell (Header, Tabs) | ✅ Complete |
 | 1.2 | Agent Modal - Active Tab (ExecutionCard) | ✅ Complete |
 | 1.2 | Agent Modal - History Tab | ✅ Complete |
-| 1.2 | Execution Detail Drawer | ⬜ Next |
-| 1.2 | Agent Modal - Results Tab | ⬜ |
+| 1.2 | Execution Detail Drawer | ✅ Complete |
+| 1.2 | Agent Modal - Results Tab | ⬜ Next |
 | 1.2 | Agent Modal - Config Tab | ⬜ |
 | 1.3 | Assign Task Drawer | ✅ Complete |
 | 1.3 | Intervention Drawer | ⬜ |
@@ -794,13 +807,22 @@ Legend: ⬜ Not started | 🟡 In progress | ✅ Complete
 
 ---
 
-## Current Focus: Execution Detail Drawer
+## Current Focus: Results Tab
 
 **Completed:**
 - [x] History Tab - Table layout with filters, search, actions, infinite scroll
+- [x] Execution Detail Drawer - 4 states (running/paused/completed/failed/cancelled)
+  - [x] Running: Progress indicator, current task with pulse, goals, task list, Pause/Stop buttons
+  - [x] Completed: Results summary/body/attachments, collapsible goals/tasks, Re-run/Download buttons
+  - [x] Failed: Error display, collapsible progress/goals/tasks with failure highlight, Retry button
+  - [x] Cancelled: Notice with Re-run button
+  - [x] Live duration counter for running executions
+  - [x] Connected to both Active Tab and History Tab
+  - [x] Slide-in animation, keyboard support, click-overlay-to-close
+  - [x] Enhanced mock data with goals and tasks for all execution states
+  - [x] UI polish: compact header, status badge in meta bar, user-friendly labels
 
 **Next Steps:**
-1. Execution Detail Drawer (3 states: running/completed/failed)
-2. Connect both Active Tab and History Tab to open Drawer
-3. Results Tab
-4. Config Tab
+1. Results Tab (file list, filtering, preview, download)
+2. Config Tab (display settings, edit)
+3. Intervention Drawer

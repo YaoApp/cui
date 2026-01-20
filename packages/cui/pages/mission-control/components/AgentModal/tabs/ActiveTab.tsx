@@ -9,9 +9,10 @@ import styles from '../index.less'
 interface ActiveTabProps {
 	robot: RobotState
 	onAssignTask?: () => void
+	onOpenDetail?: (execution: Execution) => void
 }
 
-const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask }) => {
+const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask, onOpenDetail }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -30,9 +31,11 @@ const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask }) => {
 	}, [])
 
 	const handleDetail = useCallback((executionId: string) => {
-		console.log('Show detail for execution:', executionId)
-		// TODO: Open Execution Detail Drawer
-	}, [])
+		const execution = activeExecutions.find((e: Execution) => e.id === executionId)
+		if (execution && onOpenDetail) {
+			onOpenDetail(execution)
+		}
+	}, [activeExecutions, onOpenDetail])
 
 	// Empty state
 	if (activeExecutions.length === 0) {
