@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import type { Execution } from '../../types'
@@ -9,57 +9,107 @@ interface ExecutionCardProps {
 	onPause?: (id: string) => void
 	onStop?: (id: string) => void
 	onDetail?: (id: string) => void
+	showFullStatus?: boolean // For history: show completed/failed/cancelled status
 }
 
-const ExecutionCard: React.FC<ExecutionCardProps> = ({ execution, onPause, onStop, onDetail }) => {
+const ExecutionCard: React.FC<ExecutionCardProps> = ({ 
+	execution, 
+	onPause, 
+	onStop, 
+	onDetail,
+	showFullStatus = false 
+}) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+
+	// Status flags
+	const isCompleted = execution.status === 'completed'
+	const isFailed = execution.status === 'failed'
+	const isCancelled = execution.status === 'cancelled'
+	const isPaused = execution.status === 'pending'
+	const isRunning = execution.status === 'running'
+	const isFinished = isCompleted || isFailed || isCancelled
 
 	// Get display name
 	const name = execution.name
 		? is_cn ? execution.name.cn : execution.name.en
 		: execution.id
 
-	// Get current task description
-	const currentTask = execution.current_task_name
-		? is_cn ? execution.current_task_name.cn : execution.current_task_name.en
-		: is_cn ? '准备中...' : 'Preparing...'
+	// Get description based on status
+	const getDescription = () => {
+		if (isCompleted && execution.delivery?.content?.summary) {
+			return execution.delivery.content.summary
+		}
+		if (isFailed && execution.error) {
+			return execution.error
+		}
+		if (isCancelled) {
+			return is_cn ? '任务已取消' : 'Task cancelled'
+		}
+		// Running/Pending: show current task
+		return execution.current_task_name
+			? is_cn ? execution.current_task_name.cn : execution.current_task_name.en
+			: is_cn ? '准备中...' : 'Preparing...'
+	}
+
+	const description = getDescription()
 
 	// Calculate progress
 	const progress = execution.current?.progress || '0/0'
 	const [completed, total] = progress.split('/').map(Number)
-	const progressPercent = total > 0 ? (completed / total) * 100 : 0
+	const progressPercent = isCompleted ? 100 : (total > 0 ? (completed / total) * 100 : 0)
 
-	// Dynamic elapsed time - updates every second
+	// Dynamic elapsed time - only for running tasks
 	const [tick, setTick] = useState(0)
 
 	useEffect(() => {
-		const timer = setInterval(() => {
-			setTick(t => t + 1)
-		}, 1000)
-		return () => clearInterval(timer)
-	}, [])
+		// Only tick for running executions
+		if (!isFinished) {
+			const timer = setInterval(() => {
+				setTick(t => t + 1)
+			}, 1000)
+			return () => clearInterval(timer)
+		}
+	}, [isFinished])
 
-	// Calculate elapsed time on each render
-	const calcElapsed = () => {
+	// Calculate elapsed/duration time
+	const timeDisplay = useMemo(() => {
 		const startTime = new Date(execution.start_time)
-		const now = new Date()
-		const elapsedMs = now.getTime() - startTime.getTime()
-		const elapsedSeconds = Math.floor(elapsedMs / 1000)
 		
-		if (elapsedSeconds < 60) {
-			return `${elapsedSeconds}s`
+		if (isFinished && execution.end_time) {
+			// Finished: show duration
+			const endTime = new Date(execution.end_time)
+			const durationMs = endTime.getTime() - startTime.getTime()
+			const durationSeconds = Math.floor(durationMs / 1000)
+			
+			if (durationSeconds < 60) {
+				return `${durationSeconds}s`
+			}
+			const durationMinutes = Math.floor(durationSeconds / 60)
+			if (durationMinutes < 60) {
+				return `${durationMinutes}m ${durationSeconds % 60}s`
+			}
+			const hours = Math.floor(durationMinutes / 60)
+			const mins = durationMinutes % 60
+			return `${hours}h ${mins}m`
+		} else {
+			// Running: show elapsed (dynamic)
+			const now = new Date()
+			const elapsedMs = now.getTime() - startTime.getTime()
+			const elapsedSeconds = Math.floor(elapsedMs / 1000)
+			
+			if (elapsedSeconds < 60) {
+				return `${elapsedSeconds}s`
+			}
+			const elapsedMinutes = Math.floor(elapsedSeconds / 60)
+			if (elapsedMinutes < 60) {
+				return `${elapsedMinutes}m ${elapsedSeconds % 60}s`
+			}
+			const hours = Math.floor(elapsedMinutes / 60)
+			const mins = elapsedMinutes % 60
+			return `${hours}h ${mins}m`
 		}
-		const elapsedMinutes = Math.floor(elapsedSeconds / 60)
-		if (elapsedMinutes < 60) {
-			return `${elapsedMinutes}m ${elapsedSeconds % 60}s`
-		}
-		const hours = Math.floor(elapsedMinutes / 60)
-		const mins = elapsedMinutes % 60
-		return `${hours}h ${mins}m`
-	}
-
-	const elapsed = calcElapsed()
+	}, [execution.start_time, execution.end_time, isFinished, tick])
 
 	// Get trigger info
 	const getTriggerInfo = () => {
@@ -83,19 +133,29 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({ execution, onPause, onSto
 			case 'pending': return styles.paused
 			case 'failed': return styles.error
 			case 'running': return styles.running
+			case 'completed': return styles.completed
+			case 'cancelled': return styles.cancelled
 			default: return ''
 		}
 	}
 
-	const isPaused = execution.status === 'pending'
-	const isError = execution.status === 'failed'
-	const isRunning = execution.status === 'running'
-
 	// Get status icon for title
 	const getStatusIcon = () => {
-		if (isError) return 'material-error'
+		if (isFailed) return 'material-error'
+		if (isCompleted) return 'material-check_circle'
+		if (isCancelled) return 'material-cancel'
 		if (isPaused) return 'material-pause_circle'
 		return 'material-play_circle'  // running
+	}
+
+	// Format date for finished executions
+	const formatDate = (dateStr: string) => {
+		const date = new Date(dateStr)
+		const month = date.getMonth() + 1
+		const day = date.getDate()
+		const hours = date.getHours().toString().padStart(2, '0')
+		const minutes = date.getMinutes().toString().padStart(2, '0')
+		return `${month}/${day} ${hours}:${minutes}`
 	}
 
 	const handleCardClick = () => onDetail?.(execution.id)
@@ -104,6 +164,9 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({ execution, onPause, onSto
 		e.stopPropagation()
 		action()
 	}
+
+	// Show controls only for active executions
+	const showControls = !isFinished && !showFullStatus
 
 	return (
 		<div className={`${styles.card} ${getStatusClass()}`} onClick={handleCardClick}>
@@ -114,9 +177,9 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({ execution, onPause, onSto
 				<Icon name='material-chevron_right' size={18} className={styles.arrow} />
 			</div>
 
-			{/* Task description */}
+			{/* Task/Result description */}
 			<div className={styles.task}>
-				{isError ? (execution.error || 'Error') : currentTask}
+				{description}
 			</div>
 
 			{/* Progress bar */}
@@ -129,13 +192,19 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({ execution, onPause, onSto
 				<Icon name={triggerInfo.icon} size={12} className={styles.icon} />
 				<span className={styles.meta}>{triggerInfo.label}</span>
 				<span className={styles.dot}>·</span>
-				<span className={styles.meta}>{elapsed}</span>
+				{isFinished ? (
+					<>
+						<span className={styles.meta}>{formatDate(execution.start_time)}</span>
+						<span className={styles.dot}>·</span>
+					</>
+				) : null}
+				<span className={styles.meta}>{timeDisplay}</span>
 				<span className={styles.dot}>·</span>
 				<span className={styles.meta}>{progress}</span>
 				
 				<div className={styles.spacer} />
 
-				{!isError && (
+				{showControls && !isFailed && (
 					<>
 						<button
 							className={styles.actionBtn}

@@ -270,20 +270,48 @@ Assign Task vs Intervene:
   - [x] Mock data: dynamic start_time relative to page load
   - [x] Grid layout for execution cards
   - [x] Mission Control themed variables for modal (header, content, card)
-  - [ ] Execution Detail Drawer (on click [→])
   - [ ] Pause/Stop API integration
-- [ ] Tab: History
-  - [ ] Filter buttons (All/Completed/Failed)
-  - [ ] Search input
-  - [ ] Execution list items
-    - [ ] Status icon (✓/✗)
-    - [ ] Execution name
-    - [ ] Date, trigger type, duration
-    - [ ] Summary text
-    - [ ] Attachment count
-    - [ ] View button
-  - [ ] Load more button
-  - [ ] Empty state
+- [x] Tab: History (table layout, not card)
+  - [x] Table layout with columns: Status | Goal | Result | Trigger | Time | Duration | Actions
+  - [x] Scroll container with custom scrollbar
+  - [x] Infinite scroll loading (reference: assistants/index.tsx)
+    - [x] useRef for container
+    - [x] handleScroll: load more when 50px from bottom
+    - [x] hasMore / loadingMore states
+    - [x] Loading indicator at bottom
+    - [x] "All loaded" message when done
+    - [x] Auto-load for large screens (fill viewport before requiring scroll)
+  - [x] Filter pills (All/Running/Completed/Failed/Cancelled)
+  - [x] Search input (custom styled)
+  - [x] Action buttons per row:
+    - [x] Running: Pause + Stop
+    - [x] Completed (with attachments): Download
+    - [x] Failed: Retry
+  - [x] Status-based styling (color-coded icons)
+  - [x] Mock data: 90+ history executions across all robots
+  - [x] Empty state
+  - [ ] Time range filter (Last 7 days / Last 30 days / All) - deferred
+- [ ] Execution Detail Drawer (right-side, slides in)
+  - [ ] Drawer container (50% modal width, min 500px)
+  - [ ] Header: title + status badge + close button
+  - [ ] Running state layout:
+    - [ ] Goals section (expanded)
+    - [ ] Tasks list with progress
+    - [ ] Control buttons (Pause/Stop)
+  - [ ] Completed state layout:
+    - [ ] Results section (Summary + Attachments + Delivery status)
+    - [ ] Goals section (collapsed)
+    - [ ] Tasks section (collapsed)
+    - [ ] Action buttons (Re-run/Re-deliver)
+  - [ ] Failed state layout:
+    - [ ] Error section (prominent)
+    - [ ] Goals section (expanded)
+    - [ ] Tasks section (show failure point)
+    - [ ] Retry button
+  - [ ] Collapsible sections (expand/collapse animation)
+  - [ ] Attachment download/preview
+  - [ ] Custom scrollbar
+  - [ ] Accessible from both Active Tab and History Tab
 - [ ] Tab: Results
   - [ ] Filter by type (All/Reports/Data/Charts)
   - [ ] Sort options (Latest/Name/Type)
@@ -318,21 +346,6 @@ Assign Task vs Intervene:
   - [x] Mission Control themed styling
   - [ ] Integrate real API: POST /api/robots/:id/trigger
   - [x] On success: refresh Active Tab (callback ready)
-- [ ] Execution Detail Drawer (right side, slide animation)
-  - [ ] Header with title and close button
-  - [ ] Status, trigger, duration info
-  - [ ] Phases list (expandable)
-    - [ ] Phase name, status, duration
-    - [ ] Expand to show phase output
-  - [ ] Tasks list
-    - [ ] Task name, executor, duration
-    - [ ] Status indicator
-  - [ ] Delivery section
-    - [ ] Summary
-    - [ ] Report content (expandable)
-    - [ ] Attachments with download
-    - [ ] Delivery channels status
-  - [ ] Action buttons (Re-run, Re-deliver)
 - [ ] Intervention Drawer (right side, slide animation)
   - [ ] Header with context info
   - [ ] Action type radio buttons
@@ -764,11 +777,13 @@ pages/mission-control/
 | 1.1 | Custom Modal Component | ✅ Complete |
 | 1.1 | Creature Widget (`@/widgets/Creature`) | ✅ Complete |
 | 1.2 | Agent Modal - Shell (Header, Tabs) | ✅ Complete |
-| 1.2 | Agent Modal - Active Tab | 🟡 In progress (placeholder done) |
-| 1.2 | Agent Modal - History Tab | ⬜ |
+| 1.2 | Agent Modal - Active Tab (ExecutionCard) | ✅ Complete |
+| 1.2 | Agent Modal - History Tab | ✅ Complete |
+| 1.2 | Execution Detail Drawer | ⬜ Next |
 | 1.2 | Agent Modal - Results Tab | ⬜ |
 | 1.2 | Agent Modal - Config Tab | ⬜ |
-| 1.3 | Drawers (Execution Detail, Intervention) | ⬜ |
+| 1.3 | Assign Task Drawer | ✅ Complete |
+| 1.3 | Intervention Drawer | ⬜ |
 | 1.4 | Add Agent Wizard | ⬜ |
 | 2.1 | Robot API | ⬜ |
 | 2.2 | Execution API | ⬜ |
@@ -776,3 +791,16 @@ pages/mission-control/
 | 2.4 | Polling Setup | ⬜ |
 
 Legend: ⬜ Not started | 🟡 In progress | ✅ Complete
+
+---
+
+## Current Focus: Execution Detail Drawer
+
+**Completed:**
+- [x] History Tab - Table layout with filters, search, actions, infinite scroll
+
+**Next Steps:**
+1. Execution Detail Drawer (3 states: running/completed/failed)
+2. Connect both Active Tab and History Tab to open Drawer
+3. Results Tab
+4. Config Tab

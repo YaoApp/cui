@@ -80,6 +80,33 @@
 			display: none;
 		}
 	}
+
+	// Completed state
+	&.completed {
+		border-left: 3px solid var(--color_success);
+		padding-left: 13px;
+
+		.progressFill {
+			background: var(--color_success);
+		}
+		.progressBar::after {
+			display: none;
+		}
+	}
+
+	// Cancelled state
+	&.cancelled {
+		border-left: 3px solid var(--color_mission_text_muted);
+		padding-left: 13px;
+		opacity: 0.7;
+
+		.progressFill {
+			background: var(--color_mission_text_muted);
+		}
+		.progressBar::after {
+			display: none;
+		}
+	}
 }
 
 // ==================== Header ====================
@@ -96,6 +123,8 @@
 	
 	.paused & { color: var(--color_mission_accent_orange); }
 	.error & { color: var(--color_danger); }
+	.completed & { color: var(--color_success); }
+	.cancelled & { color: var(--color_mission_text_muted); }
 }
 
 .title {
