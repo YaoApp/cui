@@ -4,6 +4,25 @@
 
 import type { RobotState, Execution, RobotConfig, ResultFile } from '../types'
 
+// ==================== Helper: Dynamic Time ====================
+
+// Base time when module loads - execution times are relative to this
+const MODULE_LOAD_TIME = new Date()
+
+// Generate fixed time relative to module load (for active executions)
+const getRelativeTime = (minutesAgo: number): string => {
+	const time = new Date(MODULE_LOAD_TIME)
+	time.setMinutes(time.getMinutes() - minutesAgo)
+	return time.toISOString()
+}
+
+// Generate future time relative to module load (for next_run)
+const getFutureTime = (minutesLater: number): string => {
+	const time = new Date(MODULE_LOAD_TIME)
+	time.setMinutes(time.getMinutes() + minutesLater)
+	return time.toISOString()
+}
+
 // ==================== i18n Name Mapping ====================
 
 export const robotNames: Record<string, { en: string; cn: string }> = {
@@ -50,7 +69,7 @@ export const mockRobots: RobotState[] = [
 		running: 0,
 		max_running: 2,
 		last_run: '2026-01-19T09:00:00Z',
-		next_run: '2026-01-19T16:00:00Z',
+		next_run: getFutureTime(45), // 45 minutes from now
 		running_ids: []
 	},
 	{
@@ -102,7 +121,7 @@ export const mockRobots: RobotState[] = [
 		running: 0,
 		max_running: 3,
 		last_run: '2026-01-19T13:00:00Z',
-		next_run: '2026-01-20T09:00:00Z',
+		next_run: getFutureTime(120), // 2 hours from now
 		running_ids: []
 	},
 	{
@@ -132,18 +151,6 @@ export const mockRobots: RobotState[] = [
 		running_ids: ['exec_008a', 'exec_008b', 'exec_008c']
 	}
 ]
-
-// ==================== Helper: Dynamic Time ====================
-
-// Base time when module loads - execution times are relative to this
-const MODULE_LOAD_TIME = new Date()
-
-// Generate fixed time relative to module load (for active executions)
-const getRelativeTime = (minutesAgo: number): string => {
-	const time = new Date(MODULE_LOAD_TIME)
-	time.setMinutes(time.getMinutes() - minutesAgo)
-	return time.toISOString()
-}
 
 // ==================== Executions ====================
 
