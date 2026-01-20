@@ -108,58 +108,70 @@ Phase 2: API Integration
 > **Goal:** Establish visual style and overall layout. Get approval before continuing.
 
 **Structure:**
-- [ ] Create page structure (`index.tsx`, `index.less`)
-- [ ] Header component
-  - [ ] Logo "MISSION CONTROL" with sci-fi style
-  - [ ] Stats display (Working: X, Idle: X, Error: X)
-  - [ ] Fullscreen toggle button
-- [ ] Clock component (center, prominent)
-  - [ ] Large time display (HH:MM:SS)
-  - [ ] Date and day of week
-  - [ ] Subtle glow effect
-- [ ] Stations Grid container
-  - [ ] Responsive grid layout
-  - [ ] Empty state when no agents
-- [ ] Mock data setup (`mock/data.ts`)
-  - [ ] Sample robots with different statuses
-  - [ ] Sample executions
-  - [ ] Sample results/files
+- [x] Create page structure (`index.tsx`, `index.less`)
+- [x] Header component
+  - [x] Logo "任务指挥中心" with sci-fi style
+  - [x] Stats display (Working: X, Idle: X, Error: X)
+  - [x] Filter dropdown (search by keyword, filter by status)
+  - [x] Fullscreen toggle button
+  - [x] Dark/Light mode toggle
+- [x] Clock component (center, prominent)
+  - [x] Large time display (HH:MM:SS)
+  - [x] Digit flip animation with blur/glow
+  - [x] Blinking colon separator
+- [x] Stations Grid container
+  - [x] Responsive grid layout
+  - [x] Custom scrollbar (hover to show)
+- [x] Mock data setup (`mock/data.ts`)
+  - [x] Sample robots with different statuses
+  - [x] Sample executions
+  - [x] Sample results/files
+  - [x] i18n robot names
+  - [x] Activity records
 
 **Station Card:**
-- [ ] Station Card component
-  - [ ] Status indicator (colored dot)
-  - [ ] Concurrent count badge (×2, ×3)
-  - [ ] Agent avatar/icon
-  - [ ] Agent name and role
-  - [ ] Progress bar (if working)
-  - [ ] Status text (IDLE / PAUSED / ERROR)
-  - [ ] Next scheduled run (if idle)
-- [ ] Visual states & animations
-  - [ ] Working: green border + pulse animation
-  - [ ] Idle: yellow border
-  - [ ] Paused: grey border + opacity
-  - [ ] Error: red border + blink animation
-  - [ ] Hover effect (elevation + glow)
-  - [ ] Progress bar flow animation
+- [x] Station Card component
+  - [x] Creature avatar (animated blob)
+  - [x] Agent name and role
+  - [x] Status text
+  - [x] Progress indicator (if working)
+  - [x] Next scheduled run (if idle)
+- [x] Visual states & animations
+  - [x] Working: green glow + pulse animation
+  - [x] Idle: yellow indicator
+  - [x] Paused: grey + opacity
+  - [x] Error: red + blink animation
+  - [x] Hover effect (elevation + glow)
 - [ ] Click handler (open Agent Modal)
 - [ ] "Add Agent" card (placeholder)
 
+**Activity Banner & Modal:**
+- [x] Fixed activity banner at bottom
+  - [x] Auto-rotating activity display
+  - [x] Click to open full activity modal
+- [x] Activity Modal (custom Modal component)
+  - [x] Glassmorphism effect
+  - [x] Responsive width (65vw, min 400px, max 720px)
+  - [x] Activity list with icons
+  - [x] Download button for file attachments
+  - [x] Custom scrollbar (hover to show)
+
 **Visual Design:**
-- [ ] Theme support (light/dark via Neo Design System CSS variables)
-- [ ] Responsive breakpoints
-  - [ ] ≥1920px: 8 columns
-  - [ ] ≥1440px: 6 columns
-  - [ ] ≥1024px: 4 columns
-  - [ ] ≥768px: 3 columns
-  - [ ] <768px: 2 columns
+- [x] Theme support (light/dark via Mission Control CSS variables)
+- [x] Responsive breakpoints
+  - [x] Grid columns responsive to viewport
 - [ ] Fullscreen mode
   - [ ] Toggle button functionality
   - [ ] Larger clock in fullscreen
   - [ ] Auto-hide header (show on hover)
   - [ ] Larger cards and fonts
-- [ ] Animations
-  - [ ] Clock update animation (optional)
-  - [ ] Hover state transitions
+- [x] Animations
+  - [x] Clock digit flip animation
+  - [x] Hover state transitions
+  - [x] Creature breathing/pulse effects
+
+**Custom Components Created:**
+- [x] `components/Modal/` - Custom modal with glassmorphism effect
 
 **Review Point:** Confirm visual style before proceeding to 1.2
 
@@ -599,34 +611,21 @@ export const mockRobotConfigs: Record<string, any> = {
 
 ```
 pages/mission-control/
-├── index.tsx
-├── index.less
-├── types.ts
+├── index.tsx              ✅ Main page with all components inline
+├── index.less             ✅ All styles (Header, Clock, Grid, Cards, Activity)
+├── types.ts               ✅ TypeScript interfaces
 ├── TODO.md
 ├── DESIGN.md
 │
 ├── mock/
-│   └── data.ts
+│   └── data.ts            ✅ Mock robots, executions, activities with i18n
 │
 ├── components/
-│   ├── Header/
-│   │   ├── index.tsx
-│   │   ├── index.less
-│   │   └── Stats.tsx
-│   │
-│   ├── Clock/
+│   ├── Modal/             ✅ Custom modal with glassmorphism
 │   │   ├── index.tsx
 │   │   └── index.less
 │   │
-│   ├── StationsGrid/
-│   │   ├── index.tsx
-│   │   ├── index.less
-│   │   └── StationCard/
-│   │       ├── index.tsx
-│   │       ├── index.less
-│   │       └── StatusIndicator.tsx
-│   │
-│   ├── AgentModal/
+│   ├── AgentModal/        ⬜ TODO
 │   │   ├── index.tsx
 │   │   ├── index.less
 │   │   ├── tabs/
@@ -637,17 +636,17 @@ pages/mission-control/
 │   │   ├── ExecutionCard.tsx
 │   │   └── FileItem.tsx
 │   │
-│   ├── ExecutionDrawer/
+│   ├── ExecutionDrawer/   ⬜ TODO
 │   │   ├── index.tsx
 │   │   ├── index.less
 │   │   ├── PhaseList.tsx
 │   │   └── TaskList.tsx
 │   │
-│   ├── InterventionDrawer/
+│   ├── InterventionDrawer/ ⬜ TODO
 │   │   ├── index.tsx
 │   │   └── index.less
 │   │
-│   └── AddAgentWizard/
+│   └── AddAgentWizard/    ⬜ TODO
 │       ├── index.tsx
 │       ├── index.less
 │       └── steps/
@@ -657,14 +656,14 @@ pages/mission-control/
 │           ├── Delivery.tsx
 │           └── Review.tsx
 │
-├── hooks/
+├── hooks/                  ⬜ TODO (Phase 2)
 │   ├── useRobots.ts
 │   ├── useRobot.ts
 │   ├── useExecutions.ts
 │   ├── useResults.ts
 │   └── useClock.ts
 │
-└── services/
+└── services/               ⬜ TODO (Phase 2)
     └── api.ts
 ```
 
@@ -674,7 +673,9 @@ pages/mission-control/
 
 | Phase | Task | Status |
 |-------|------|--------|
-| 1.1 | Main Page (Header, Clock, Grid, Station Card, Theme, Responsive, Fullscreen) | ⬜ |
+| 1.1 | Main Page (Header, Clock, Grid, Station Card, Theme, Responsive) | 🟡 In progress (Fullscreen pending) |
+| 1.1 | Activity Banner & Modal | ✅ Complete |
+| 1.1 | Custom Modal Component | ✅ Complete |
 | 1.2 | Agent Modal (4 Tabs) | ⬜ |
 | 1.3 | Drawers (Execution Detail, Intervention) | ⬜ |
 | 1.4 | Add Agent Wizard | ⬜ |

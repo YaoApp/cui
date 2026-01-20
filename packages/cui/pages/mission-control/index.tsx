@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { getLocale } from '@umijs/max'
 import { Tooltip } from 'antd'
+import Modal from './components/Modal'
 import { observer } from 'mobx-react-lite'
 import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
@@ -579,55 +580,46 @@ const MissionControl = () => {
 			)}
 
 			{/* Activity Modal */}
-			{showActivityModal && (
-				<div className={styles.modalOverlay} onClick={() => setShowActivityModal(false)}>
-					<div className={styles.activityModal} onClick={(e) => e.stopPropagation()}>
-						<div className={styles.modalHeader}>
-							<h3>{is_cn ? '最近动态' : 'Recent Activity'}</h3>
-							<button
-								className={styles.modalClose}
-								onClick={() => setShowActivityModal(false)}
-							>
-								<Icon name='material-close' size={20} />
-							</button>
-						</div>
-						<div className={styles.modalContent}>
-							{activities.map((activity) => (
-								<div key={activity.id} className={styles.activityItem}>
-									<Icon
-										name={getActivityIcon(activity.type)}
-										size={20}
-										className={clsx(styles.activityIcon, styles[activity.type])}
-									/>
-									<div className={styles.activityInfo}>
-										<div className={styles.activityItemTitle}>
-											<span className={styles.robotName}>
-												{is_cn ? activity.robot_name.cn : activity.robot_name.en}
-											</span>
-											<span className={styles.itemTime}>
-												{formatRelativeTime(activity.timestamp)}
-											</span>
-										</div>
-										<div className={styles.activityItemDesc}>
-											{is_cn ? activity.title.cn : activity.title.en}
-										</div>
-										{activity.description && (
-											<div className={styles.activityItemMeta}>
-												{is_cn ? activity.description.cn : activity.description.en}
-											</div>
-										)}
-									</div>
+			<Modal
+				open={showActivityModal}
+				onClose={() => setShowActivityModal(false)}
+				title={is_cn ? '最近动态' : 'Recent Activity'}
+			>
+				<div className={styles.modalContent}>
+					{activities.map((activity) => (
+						<div key={activity.id} className={styles.activityItem}>
+							<Icon
+								name={getActivityIcon(activity.type)}
+								size={18}
+								className={clsx(styles.activityIcon, styles[activity.type])}
+							/>
+							<div className={styles.activityInfo}>
+								<div className={styles.activityItemTitle}>
+									<span className={styles.robotName}>
+										{is_cn ? activity.robot_name.cn : activity.robot_name.en}
+									</span>
 									{activity.file_id && (
 										<button className={styles.downloadBtn}>
-											<Icon name='material-download' size={18} />
+											<Icon name='material-download' size={16} />
 										</button>
 									)}
+									<span className={styles.itemTime}>
+										{formatRelativeTime(activity.timestamp)}
+									</span>
 								</div>
-							))}
+								<div className={styles.activityItemDesc}>
+									{is_cn ? activity.title.cn : activity.title.en}
+								</div>
+								{activity.description && (
+									<div className={styles.activityItemMeta}>
+										{is_cn ? activity.description.cn : activity.description.en}
+									</div>
+								)}
+							</div>
 						</div>
-					</div>
+					))}
 				</div>
-			)}
+			</Modal>
 		</div>
 	)
 }

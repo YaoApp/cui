@@ -1,0 +1,122 @@
+.overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.4);
+	backdrop-filter: blur(4px);
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding-top: 18vh;
+	z-index: 1000;
+	animation: fadeIn 0.2s ease;
+}
+
+.modal {
+	background: var(--color_mission_modal_bg);
+	backdrop-filter: blur(20px) saturate(180%);
+	-webkit-backdrop-filter: blur(20px) saturate(180%);
+	border: 1px solid var(--color_mission_modal_border);
+	border-radius: 12px;
+	box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+	display: flex;
+	flex-direction: column;
+	max-height: calc(100vh - 22vh); // Account for padding-top
+	overflow: hidden;
+	animation: scaleIn 0.2s ease;
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border_light);
+	flex-shrink: 0;
+}
+
+.title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--color_text);
+}
+
+.closeBtn {
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	border-radius: 6px;
+	color: var(--color_text_grey);
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: var(--color_bg_hover);
+		color: var(--color_text);
+	}
+}
+
+.body {
+	flex: 1;
+	overflow-y: auto;
+	min-height: 0;
+	max-height: 50vh;
+
+	// Scrollbar - transparent by default
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: transparent;
+		border-radius: 3px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+// Scrollbar visible when hovering on modal
+.modal:hover .body {
+	&::-webkit-scrollbar-thumb {
+		background: rgba(120, 120, 130, 0.4);
+
+		&:hover {
+			background: rgba(120, 120, 130, 0.6);
+		}
+	}
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes scaleIn {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+// Responsive
+@media (max-width: 768px) {
+	.modal {
+		min-width: calc(100vw - 32px) !important;
+		max-width: calc(100vw - 32px) !important;
+		max-height: 80vh;
+	}
+}
