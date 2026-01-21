@@ -346,11 +346,78 @@ export const mockExecutions: Execution[] = [
 		],
 		delivery: {
 			content: {
-				summary: 'Published SEO article: "Complete Guide to AI App Development" - targeting 12 keywords',
-				body: '## Article Published\n\nKeywords: AI app development, build AI apps, AI dev guide...\n\nWord count: 2500\nSections: 8\nFAQ schema: Added for GEO',
+				summary: 'Published SEO article: "Complete Guide to AI App Development" - targeting 12 keywords with comprehensive coverage of modern AI development practices.',
+				body: `# Complete Guide to AI App Development
+
+This comprehensive guide covers everything you need to know about building AI-powered applications in 2024.
+
+## Executive Summary
+
+We analyzed **12 high-value keywords** and created a detailed guide targeting developers and technical decision-makers. The article has been optimized for both search engines and AI-powered search (GEO).
+
+## Keyword Analysis
+
+| Keyword | Monthly Search | Difficulty | Intent |
+|---------|----------------|------------|--------|
+| AI app development | 8,100 | Medium | Informational |
+| build AI apps | 4,400 | Low | Transactional |
+| AI dev guide | 2,900 | Low | Informational |
+| machine learning tutorial | 12,000 | High | Educational |
+| AI integration best practices | 1,200 | Low | Informational |
+
+## Article Structure
+
+The article is organized into **8 main sections**:
+
+1. **Introduction to AI Development** - Overview of the current landscape
+2. **Choosing the Right Framework** - Comparison of popular options
+3. **Data Preparation** - Best practices for training data
+4. **Model Selection** - When to use which type of model
+5. **Integration Patterns** - How to embed AI in existing apps
+6. **Testing & Validation** - Ensuring quality outputs
+7. **Deployment Strategies** - From development to production
+8. **Monitoring & Maintenance** - Keeping your AI healthy
+
+## Technical Highlights
+
+The guide includes practical code examples:
+
+\`\`\`python
+from transformers import pipeline
+
+# Initialize the sentiment analysis pipeline
+classifier = pipeline("sentiment-analysis")
+
+# Analyze customer feedback
+result = classifier("This product exceeded my expectations!")
+print(result)  # [{'label': 'POSITIVE', 'score': 0.9998}]
+\`\`\`
+
+## SEO Optimization Applied
+
+- **Title tag**: Optimized with primary keyword (60 chars)
+- **Meta description**: Compelling CTA with secondary keywords (155 chars)
+- **Header structure**: Proper H1-H6 hierarchy
+- **Internal links**: 8 contextual links to related content
+- **External links**: 5 authoritative sources cited
+
+> **Note**: FAQ schema has been added for Google's "People Also Ask" feature, targeting 6 common questions about AI development.
+
+## Performance Metrics
+
+Based on initial indexing:
+
+- **Estimated monthly traffic**: 2,500 - 3,200 visits
+- **Average time on page**: 4-6 minutes (expected)
+- **Conversion potential**: High (developer audience)
+
+---
+
+*Article published and indexed. Full keyword report and article draft available in attachments.*`,
 				attachments: [
-					{ title: 'SEO Article.md', file: '__attachment://file_001' },
-					{ title: 'Keyword Report.xlsx', file: '__attachment://file_002' }
+					{ title: 'SEO Article.md', file: '__attachment://file_001', description: 'Full article content in Markdown format' },
+					{ title: 'Keyword Report.xlsx', file: '__attachment://file_002', description: 'Detailed keyword analysis with search volumes and competition data' },
+					{ title: 'Content Brief.pdf', file: '__attachment://file_003', description: 'Original content brief and target outline' }
 				]
 			},
 			success: true,
@@ -2781,6 +2848,124 @@ export const simulateApiDelay = (ms: number = 500): Promise<void> => {
 // Get results for a robot
 export const getResultsForRobot = (memberId: string): ResultFile[] => {
 	return mockResults.filter((file) => file.member_id === memberId)
+}
+
+// ==================== Deliveries (for Results Tab) ====================
+
+// Delivery item for Results Tab - extracted from completed executions
+export interface Delivery {
+	id: string // execution_id
+	member_id: string
+	title: { en: string; cn: string }
+	trigger_type: 'clock' | 'human' | 'event'
+	time: string // end_time of execution
+	summary: string
+	body: string
+	attachments: Array<{
+		title: string
+		description?: string
+		file: string
+		size?: number // bytes, for display
+	}>
+}
+
+// Get deliveries for Results Tab (completed executions with delivery content)
+export interface DeliveryQuery {
+	memberId: string
+	page?: number
+	pageSize?: number
+	trigger?: 'all' | 'clock' | 'human' | 'event'
+	keywords?: string
+}
+
+export interface DeliveryResult {
+	data: Delivery[]
+	total: number
+	page: number
+	pageSize: number
+	hasMore: boolean
+}
+
+// Mock file sizes for attachments
+const mockFileSizes: Record<string, number> = {
+	'SEO Article.md': 12400,
+	'Keyword Report.xlsx': 45600,
+	'Pricing Analysis.pdf': 128000,
+	'Lead Score Report.pdf': 89000,
+	'Social Report.pdf': 156000,
+	'Cloud Security Article.md': 15200,
+	'Market Report.pdf': 234000,
+	'Sentiment Analysis.pdf': 112000,
+	'Weekly Summary.pdf': 345000,
+	'Data Export.xlsx': 678000
+}
+
+const getFileSize = (title: string): number => {
+	return mockFileSizes[title] || Math.floor(Math.random() * 200000) + 50000
+}
+
+export const getDeliveriesPaginated = (query: DeliveryQuery): DeliveryResult => {
+	const { memberId, page = 1, pageSize = 10, trigger = 'all', keywords = '' } = query
+
+	// Get completed executions with delivery content
+	let executions = mockExecutions.filter(
+		(exec) =>
+			exec.member_id === memberId &&
+			exec.status === 'completed' &&
+			exec.delivery?.content?.summary
+	)
+
+	// Filter by trigger type
+	if (trigger !== 'all') {
+		executions = executions.filter((exec) => exec.trigger_type === trigger)
+	}
+
+	// Filter by keywords (search in name and summary)
+	if (keywords.trim()) {
+		const kw = keywords.toLowerCase()
+		executions = executions.filter((exec) => {
+			const nameEn = exec.name?.en?.toLowerCase() || ''
+			const nameCn = exec.name?.cn || ''
+			const summary = exec.delivery?.content?.summary?.toLowerCase() || ''
+			return nameEn.includes(kw) || nameCn.includes(kw) || summary.includes(kw)
+		})
+	}
+
+	// Sort by end_time descending (newest first)
+	executions = executions.sort(
+		(a, b) => new Date(b.end_time || b.start_time).getTime() - new Date(a.end_time || a.start_time).getTime()
+	)
+
+	// Convert to Delivery format
+	const deliveries: Delivery[] = executions.map((exec) => ({
+		id: exec.id,
+		member_id: exec.member_id,
+		title: exec.name || { en: exec.id, cn: exec.id },
+		trigger_type: exec.trigger_type,
+		time: exec.end_time || exec.start_time,
+		summary: exec.delivery?.content?.summary || '',
+		body: exec.delivery?.content?.body || '',
+		attachments: (exec.delivery?.content?.attachments || []).map((att) => ({
+			title: att.title,
+			description: att.description,
+			file: att.file,
+			size: getFileSize(att.title)
+		}))
+	}))
+
+	// Paginate
+	const total = deliveries.length
+	const startIndex = (page - 1) * pageSize
+	const endIndex = startIndex + pageSize
+	const data = deliveries.slice(startIndex, endIndex)
+
+	return {
+		data,
+		total,
+		page,
+		pageSize,
+		hasMore: endIndex < total
+	}
 }
 
 // Get config for a robot

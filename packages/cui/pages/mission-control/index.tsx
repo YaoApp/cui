@@ -3,6 +3,7 @@ import { getLocale } from '@umijs/max'
 import { Tooltip } from 'antd'
 import Modal from './components/Modal'
 import AgentModal from './components/AgentModal'
+import ResultDetailModal from './components/ResultDetailModal'
 import { observer } from 'mobx-react-lite'
 import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
@@ -13,7 +14,8 @@ import {
 	getActiveExecutions,
 	getRobotDisplayName,
 	getRecentActivities,
-	type Activity
+	type Activity,
+	type Delivery
 } from './mock/data'
 import type { RobotState } from './types'
 import styles from './index.less'
@@ -44,6 +46,10 @@ const MissionControl = () => {
 	// Agent Modal state
 	const [selectedRobot, setSelectedRobot] = useState<RobotState | null>(null)
 	const [showAgentModal, setShowAgentModal] = useState(false)
+
+	// Result Detail Modal state
+	const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null)
+	const [showResultDetailModal, setShowResultDetailModal] = useState(false)
 
 	// Stats computed from robots
 	const stats = useMemo(() => getRobotStats(robots), [robots])
@@ -637,6 +643,20 @@ const MissionControl = () => {
 				visible={showAgentModal}
 				onClose={handleAgentModalClose}
 				robot={selectedRobot}
+				onOpenResultDetail={(delivery) => {
+					setSelectedDelivery(delivery)
+					setShowResultDetailModal(true)
+				}}
+			/>
+
+			{/* Result Detail Modal */}
+			<ResultDetailModal
+				visible={showResultDetailModal}
+				onClose={() => {
+					setShowResultDetailModal(false)
+					setTimeout(() => setSelectedDelivery(null), 200)
+				}}
+				delivery={selectedDelivery}
 			/>
 		</div>
 	)

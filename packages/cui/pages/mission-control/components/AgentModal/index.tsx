@@ -4,7 +4,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Creature from '@/widgets/Creature'
 import type { RobotState, Execution } from '../../types'
-import { robotNames } from '../../mock/data'
+import { robotNames, type Delivery } from '../../mock/data'
 import ActiveTab from './tabs/ActiveTab'
 import HistoryTab from './tabs/HistoryTab'
 import ResultsTab from './tabs/ResultsTab'
@@ -18,11 +18,12 @@ interface AgentModalProps {
 	onClose: () => void
 	robot: RobotState | null
 	onDataUpdated?: () => void
+	onOpenResultDetail?: (delivery: Delivery) => void
 }
 
 type TabType = 'active' | 'history' | 'results' | 'config'
 
-const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onDataUpdated }) => {
+const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onDataUpdated, onOpenResultDetail }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -86,7 +87,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 		},
 		{
 			key: 'results',
-			label: is_cn ? '产出' : 'Results',
+			label: is_cn ? '成果' : 'Results',
 			icon: 'material-folder_open'
 		},
 		{
@@ -116,7 +117,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 			case 'history':
 				return <HistoryTab robot={robot} onOpenDetail={handleOpenDetail} />
 			case 'results':
-				return <ResultsTab robot={robot} />
+				return <ResultsTab robot={robot} onOpenDetail={onOpenResultDetail} />
 			case 'config':
 				return <ConfigTab robot={robot} />
 			default:

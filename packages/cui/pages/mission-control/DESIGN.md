@@ -399,41 +399,137 @@ useEffect(() => {
 
 #### 4.2.3 Results Tab
 
-Work outputs from this agent, with direct access to preview and download.
+**Deliverables Hub** - where users consume Agent outputs. Focus on content consumption, not process tracking.
+
+**Design Principles:**
+- **User Mindset**: "I want to find/get my results" (consumer, not investigator)
+- **Core Content**: Summary + Body (Markdown) + Attachments (files)
+- **Separation from Execution Detail**: Execution Detail is for tracing process; Results Tab is for consuming outputs
+- **Two-Level Structure**: List (table) → Detail (modal)
+
+---
+
+##### Results List (Table Layout)
+
+High information density for quick scanning and finding. Users can see all deliverables at a glance.
 
 ```
-┌─ Results Tab ───────────────────────────────────────────────────────────┐
+┌─ Results Tab ───────────────────────────────────────────────────────────────┐
 │                                                                              │
-│  Filter: [All] [Reports] [Data] [Charts]     Search: [____________] 🔍     │
-│  Sort: [Latest] [Name] [Type]                                               │
+│  🔍 Search...                              [Trigger ▾] [Time ▾]              │
 │                                                                              │
-│  ┌──────┬─────────────────────────────────────────────────────────────────┐ │
-│  │ 📄   │ Weekly Sales Report.pdf                                         │ │
-│  │      │ Jan 19, 09:00 · from "Weekly Sales Report" · 2.4 MB             │ │
-│  │      │                                              [Preview] [⬇]     │ │
-│  └──────┴─────────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-│  ┌──────┬─────────────────────────────────────────────────────────────────┐ │
-│  │ 📊   │ Regional_Analysis.xlsx                                          │ │
-│  │      │ Jan 19, 09:00 · from "Weekly Sales Report" · 856 KB             │ │
-│  │      │                                              [Preview] [⬇]     │ │
-│  └──────┴─────────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-│  ┌──────┬─────────────────────────────────────────────────────────────────┐ │
-│  │ 📄   │ Competitor_Alert.pdf                                            │ │
-│  │      │ Jan 18, 14:30 · from "Competitor Price Alert" · 1.1 MB          │ │
-│  │      │                                              [Preview] [⬇]     │ │
-│  └──────┴─────────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-│  ┌──────┬─────────────────────────────────────────────────────────────────┐ │
-│  │ 📊   │ Market_Trends_Q1.xlsx                                           │ │
-│  │      │ Jan 17, 09:00 · from "Monthly Market Analysis" · 3.2 MB         │ │
-│  │      │                                              [Preview] [⬇]     │ │
-│  └──────┴─────────────────────────────────────────────────────────────────┘ │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Title                         │ Trigger  │ Time           │ Files │ Action │
+│ ─────────────────────────────────────────────────────────────────────────── │
+│  Morning Sales Report           │ ⏰ Clock │ 01-20 09:15   │  2    │  [⬇]  │  ← click row → modal
+│  Process Lead: John Smith       │ 📨 Event │ 01-20 10:35   │  1    │  [⬇]  │
+│  Weekly Competitor Analysis     │ ⏰ Clock │ 01-19 17:00   │  3    │  [⬇]  │
+│  Urgent: Customer Complaint     │ 👤 Human │ 01-19 14:22   │  1    │  [⬇]  │
+│  Daily Data Summary             │ ⏰ Clock │ 01-19 09:00   │  0    │   -   │  ← no files, no download
+│  New Product Launch Notice      │ ⚡ Event │ 01-18 16:45   │  2    │  [⬇]  │
+│  ...                                                                         │
 │                                                                              │
 │  [Load More...]                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Table Columns:**
+
+| Column | Description |
+|--------|-------------|
+| Title | Delivery title (from execution goal or human input) |
+| Trigger | Trigger type icon + label (⏰ Clock / 👤 Human / ⚡ Event) |
+| Time | Delivery time (MM-DD HH:mm format) |
+| Files | Attachment count (number badge) |
+| Action | Download button [⬇] if has attachments; otherwise empty |
+
+**Interactions:**
+- **Click row** → Open Result Detail Modal
+- **Click [⬇]** → Download attachments (single file: direct download; multiple: zip or dropdown menu)
+- **Hover row** → Highlight effect
+
+**Features:**
+- Search input (filters by title)
+- Trigger type filter dropdown (All / Clock / Human / Event)
+- Time filter dropdown (Last 7 days / Last 30 days / All)
+- Infinite scroll loading (same pattern as History Tab)
+- Empty state with helpful message
+
+---
+
+##### Result Detail Modal
+
+Immersive reading experience for content consumption. Opens when clicking any row in the table.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                         [×] │
+│  Morning Sales Report                                                       │
+│  ⏰ Clock Trigger · 2026-01-20 09:15                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ 📋 Summary                                                           │   │
+│  │                                                                      │   │
+│  │ Sales grew 50% this week with 15 new leads, 3 high-priority          │   │
+│  │ opportunities identified. Competitor launched new product -          │   │
+│  │ recommend monitoring market response.                                │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ 📝 Report                                                            │   │
+│  │                                                                      │   │
+│  │ ## Sales Data                                                        │   │
+│  │                                                                      │   │
+│  │ - New leads: 15 (+50%)                                               │   │
+│  │ - Closed deals: 8                                                    │   │
+│  │ - Total amount: $128,000                                             │   │
+│  │                                                                      │   │
+│  │ ## Key Accounts                                                      │   │
+│  │                                                                      │   │
+│  │ | Account     | Status    | Est. Value |                            │   │
+│  │ |-------------|-----------|------------|                            │   │
+│  │ | ABC Corp    | Following | $50,000    |                            │   │
+│  │ | XYZ Group   | Quoted    | $80,000    |                            │   │
+│  │                                                                      │   │
+│  │ ## Competitor Updates                                                │   │
+│  │                                                                      │   │
+│  │ Competitor A released a new version this week...                     │   │
+│  │                                                                      │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ 📎 Attachments (2)                                                   │   │
+│  │                                                                      │   │
+│  │  ┌─────────────────────┐  ┌─────────────────────┐                   │   │
+│  │  │ 📄 Sales_Report.pdf │  │ 📊 Analysis.xlsx    │                   │   │
+│  │  │    1.2 MB           │  │    856 KB           │                   │   │
+│  │  │ [Preview] [Download]│  │ [Preview] [Download]│                   │   │
+│  │  └─────────────────────┘  └─────────────────────┘                   │   │
+│  │                                                                      │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Modal Sections:**
+
+| Section | Content |
+|---------|---------|
+| Header | Title + Trigger type + Time + Close button |
+| Summary | 1-2 sentence summary from DeliveryContent.summary |
+| Report | Full Markdown content from DeliveryContent.body, rendered |
+| Attachments | File cards with preview/download buttons |
+
+**Attachment Card:**
+
+```
+┌─────────────────────────┐
+│ 📄 filename.pdf         │  ← File type icon + name
+│    1.2 MB               │  ← File size
+│ [Preview] [Download]    │  ← Action buttons
+└─────────────────────────┘
 ```
 
 **File Type Icons:**
@@ -442,7 +538,7 @@ Work outputs from this agent, with direct access to preview and download.
 |------|------|------------|
 | PDF | 📄 | .pdf |
 | Excel | 📊 | .xlsx, .xls, .csv |
-| Image | 📈 🖼️ | .png, .jpg, .svg |
+| Image | 🖼️ | .png, .jpg, .svg |
 | Word | 📝 | .docx, .doc |
 | Text | 📃 | .txt, .md |
 | JSON | 📋 | .json |
@@ -453,10 +549,44 @@ Work outputs from this agent, with direct access to preview and download.
 | File Type | Preview Action |
 |-----------|----------------|
 | PDF | Embedded PDF viewer or new tab |
-| Image | Lightbox preview |
+| Image | Lightbox preview in modal |
 | Excel/CSV | Simple table preview (first 100 rows) |
-| Text/MD | Markdown rendered |
-| Other | Direct download |
+| Text/MD | Rendered in modal |
+| Other | Direct download (no preview) |
+
+---
+
+##### Data Source
+
+Results Tab displays `DeliveryContent` from completed executions:
+
+```typescript
+// From robot/DESIGN.md
+interface DeliveryContent {
+  summary: string;      // Brief 1-2 sentence summary
+  body: string;         // Full markdown report
+  attachments: DeliveryAttachment[];
+}
+
+interface DeliveryAttachment {
+  title: string;        // Human-readable title
+  description?: string; // What this artifact is
+  task_id?: string;     // Which task produced this
+  file: string;         // Wrapper: __<uploader>://<fileID>
+}
+```
+
+**Mapping to UI:**
+
+| API Field | UI Element |
+|-----------|------------|
+| execution.goal | Table: Title |
+| execution.trigger_type | Table: Trigger |
+| execution.end_time | Table: Time |
+| delivery.attachments.length | Table: Files count |
+| delivery.summary | Modal: Summary section |
+| delivery.body | Modal: Report section (Markdown rendered) |
+| delivery.attachments | Modal: Attachments section |
 
 #### 4.2.4 Config Tab
 

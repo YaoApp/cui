@@ -325,18 +325,36 @@ Assign Task vs Intervene:
   - [x] Keyboard support (Escape to close)
   - [x] Click overlay to close
   - [x] Mock data: enhanced executions with goals and tasks (active + history)
-- [ ] Tab: Results
-  - [ ] Filter by type (All/Reports/Data/Charts)
-  - [ ] Sort options (Latest/Name/Type)
-  - [ ] Search input
-  - [ ] File list items
-    - [ ] File type icon (📄📊📈 etc.)
-    - [ ] File name
-    - [ ] Date, source execution, size
-    - [ ] Preview button
-    - [ ] Download button
-  - [ ] Load more button
-  - [ ] Empty state
+- [x] Tab: Results ✅ **COMPLETED**
+  - [x] Results List (Table Layout)
+    - [x] Table structure (Title | Trigger | Time | Attachments | Action)
+    - [x] Search input (filter by title/summary)
+    - [x] Trigger type filter dropdown (All/Clock/Human/Event)
+    - [x] Infinite scroll loading (same pattern as History Tab)
+    - [x] Row click → open Result Detail Modal
+    - [x] Action column: Download button if has attachments
+    - [x] Row hover highlight
+    - [x] Empty state
+    - [x] Mock data: deliveries with summary + body + attachments
+    - [x] Circular badge for attachment count (consistent with list page)
+  - [x] Result Detail Modal (top-level, same level as AgentModal)
+    - [x] Modal container (90vh height, 90% width, same as AgentModal)
+    - [x] Header with tabs: Content | Attachments (with count badge)
+    - [x] Content Tab:
+      - [x] Meta bar (trigger type + time, sticky, matches table header style)
+      - [x] Summary box (card style, cyan left border)
+      - [x] Article content - Markdown rendered (custom renderer)
+        - [x] Headers (h1-h4), tables, code blocks, lists, blockquotes
+        - [x] Inline code, bold/italic, links, horizontal rules
+      - [x] Max-width: min(960px, 90%) for optimal reading
+    - [x] Attachments Tab:
+      - [x] File cards with icon + name + description + size
+      - [x] Preview button (eye icon)
+      - [x] Download button (cyan accent, primary style)
+      - [x] Download All button in header
+    - [x] Custom scrollbar (themed)
+    - [x] Keyboard support (Escape to close)
+    - [x] Light/Dark mode support with consistent colors
 - [ ] Tab: Config
   - [ ] Agent identity display
   - [ ] Trigger settings display
@@ -730,29 +748,37 @@ pages/mission-control/
 ├── DESIGN.md
 │
 ├── mock/
-│   └── data.ts            ✅ Mock robots, executions, activities with i18n
+│   └── data.ts            ✅ Mock robots, executions, deliveries with i18n
 │
 ├── components/
 │   ├── Modal/             ✅ Custom modal with glassmorphism
 │   │   ├── index.tsx
 │   │   └── index.less
 │   │
-│   ├── AgentModal/        ⬜ TODO
+│   ├── AgentModal/        ✅ Agent detail modal with 4 tabs
 │   │   ├── index.tsx
 │   │   ├── index.less
-│   │   ├── tabs/
-│   │   │   ├── ActiveTab.tsx
-│   │   │   ├── HistoryTab.tsx
-│   │   │   ├── ResultsTab.tsx
-│   │   │   └── ConfigTab.tsx
-│   │   ├── ExecutionCard.tsx
-│   │   └── FileItem.tsx
+│   │   └── tabs/
+│   │       ├── ActiveTab.tsx      ✅ Running executions
+│   │       ├── HistoryTab.tsx     ✅ Execution history table
+│   │       ├── ResultsTab.tsx     ✅ Deliverables list
+│   │       └── ConfigTab.tsx      ⬜ TODO
 │   │
-│   ├── ExecutionDrawer/   ⬜ TODO
+│   ├── ExecutionCard/     ✅ Execution status card
 │   │   ├── index.tsx
-│   │   ├── index.less
-│   │   ├── PhaseList.tsx
-│   │   └── TaskList.tsx
+│   │   └── index.less
+│   │
+│   ├── ExecutionDetailDrawer/  ✅ Execution detail (running/completed/failed)
+│   │   ├── index.tsx
+│   │   └── index.less
+│   │
+│   ├── AssignTaskDrawer/  ✅ Human trigger input
+│   │   ├── index.tsx
+│   │   └── index.less
+│   │
+│   ├── ResultDetailModal/ ✅ Deliverable detail (content + attachments)
+│   │   ├── index.tsx
+│   │   └── index.less
 │   │
 │   ├── InterventionDrawer/ ⬜ TODO
 │   │   ├── index.tsx
@@ -793,8 +819,9 @@ pages/mission-control/
 | 1.2 | Agent Modal - Active Tab (ExecutionCard) | ✅ Complete |
 | 1.2 | Agent Modal - History Tab | ✅ Complete |
 | 1.2 | Execution Detail Drawer | ✅ Complete |
-| 1.2 | Agent Modal - Results Tab | ⬜ Next |
-| 1.2 | Agent Modal - Config Tab | ⬜ |
+| 1.2 | Agent Modal - Results Tab | ✅ Complete |
+| 1.2 | Result Detail Modal | ✅ Complete |
+| 1.2 | Agent Modal - Config Tab | ⬜ Next |
 | 1.3 | Assign Task Drawer | ✅ Complete |
 | 1.3 | Intervention Drawer | ⬜ |
 | 1.4 | Add Agent Wizard | ⬜ |
@@ -807,22 +834,29 @@ Legend: ⬜ Not started | 🟡 In progress | ✅ Complete
 
 ---
 
-## Current Focus: Results Tab
+## Current Focus: Config Tab
 
-**Completed:**
-- [x] History Tab - Table layout with filters, search, actions, infinite scroll
-- [x] Execution Detail Drawer - 4 states (running/paused/completed/failed/cancelled)
-  - [x] Running: Progress indicator, current task with pulse, goals, task list, Pause/Stop buttons
-  - [x] Completed: Results summary/body/attachments, collapsible goals/tasks, Re-run/Download buttons
-  - [x] Failed: Error display, collapsible progress/goals/tasks with failure highlight, Retry button
-  - [x] Cancelled: Notice with Re-run button
-  - [x] Live duration counter for running executions
-  - [x] Connected to both Active Tab and History Tab
-  - [x] Slide-in animation, keyboard support, click-overlay-to-close
-  - [x] Enhanced mock data with goals and tasks for all execution states
-  - [x] UI polish: compact header, status badge in meta bar, user-friendly labels
+**Recently Completed:**
+- [x] Results Tab - List + Detail Modal ✅
+  - [x] Table layout with search, trigger filter, infinite scroll
+  - [x] Result Detail Modal (top-level, same as AgentModal)
+    - [x] Tabbed interface: Content | Attachments
+    - [x] Custom Markdown renderer (headers, tables, code blocks, lists, etc.)
+    - [x] Meta bar (sticky, matches table header style)
+    - [x] Summary box (card style)
+    - [x] Attachment cards with preview/download
+    - [x] Light/Dark mode consistent colors
+    - [x] Circular badge for attachment count
 
-**Next Steps:**
-1. Results Tab (file list, filtering, preview, download)
-2. Config Tab (display settings, edit)
-3. Intervention Drawer
+**Next Focus: Config Tab**
+
+Design decisions:
+- Display robot configuration (identity, triggers, resources, delivery)
+- Read-only view with Edit button
+- Edit opens Config Modal (future)
+
+**Pending Items:**
+1. Config Tab (display settings)
+2. Intervention Drawer
+3. Add Agent Wizard
+4. API Integration (Phase 2)
