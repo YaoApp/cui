@@ -11,6 +11,7 @@ interface AdvancedPanelProps {
 	onChange: (field: string, value: any) => void
 	is_cn: boolean
 	autonomousMode?: boolean
+	onDelete?: () => void
 }
 
 // Phase agents - for customizing which AI handles each execution phase
@@ -35,11 +36,16 @@ const LEARN_TYPES = [
 /**
  * AdvancedPanel - Advanced settings (rarely changed)
  */
-const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange, is_cn, autonomousMode = false }) => {
+const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange, is_cn, autonomousMode = false, onDelete }) => {
 	// Additional email recipients
 	const [emailRecipients, setEmailRecipients] = useState<string[]>([])
 	const [newEmail, setNewEmail] = useState('')
 	const [emailError, setEmailError] = useState('')
+	
+	// Delete confirmation
+	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+	const [deleting, setDeleting] = useState(false)
+	const [deleteConfirmName, setDeleteConfirmName] = useState('')
 
 	// Webhook targets (URL + optional secret)
 	const [webhookTargets, setWebhookTargets] = useState<Array<{ url: string; secret?: string }>>([])
@@ -187,6 +193,22 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 		handleFieldChange('delivery.process.targets', newProcesses.map(p => ({ process: p })))
 		if (newProcesses.length === 0) {
 			handleFieldChange('delivery.process.enabled', false)
+		}
+	}
+
+	// Handle delete robot
+	const handleDelete = async () => {
+		setDeleting(true)
+		try {
+			// TODO: Call API to delete
+			console.log('Deleting robot:', robot.member_id)
+			await new Promise(resolve => setTimeout(resolve, 1000))
+			setShowDeleteConfirm(false)
+			onDelete?.()
+		} catch (error) {
+			console.error('Failed to delete:', error)
+		} finally {
+			setDeleting(false)
 		}
 	}
 
@@ -534,6 +556,95 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 						</div>
 					))}
 			</div>
+
+			{/* ==================== Danger Zone ==================== */}
+			<div className={styles.dangerZone}>
+				<div className={styles.dangerZoneTitle}>
+					{is_cn ? '危险区域' : 'Danger Zone'}
+				</div>
+				<div className={styles.dangerZoneContent}>
+					<div className={styles.dangerZoneItem}>
+						<div className={styles.dangerZoneInfo}>
+							<div className={styles.dangerZoneLabel}>
+								{is_cn ? '删除智能体' : 'Delete Agent'}
+							</div>
+							<div className={styles.dangerZoneDesc}>
+								{is_cn 
+									? '删除后所有执行历史和配置将被永久清除，此操作不可撤销'
+									: 'All execution history and configuration will be permanently deleted. This action cannot be undone.'}
+							</div>
+						</div>
+						<button
+							className={styles.dangerButton}
+							onClick={() => setShowDeleteConfirm(true)}
+						>
+							<Icon name='material-delete_outline' size={16} />
+							<span>{is_cn ? '删除' : 'Delete'}</span>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			{/* Delete Confirmation Dialog */}
+			{showDeleteConfirm && (
+				<div className={styles.deleteOverlay} onClick={() => !deleting && setShowDeleteConfirm(false)}>
+					<div className={styles.deleteDialog} onClick={e => e.stopPropagation()}>
+						<div className={styles.deleteDialogIcon}>
+							<Icon name='material-warning' size={32} />
+						</div>
+						<h3 className={styles.deleteDialogTitle}>
+							{is_cn ? '确认删除' : 'Confirm Delete'}
+						</h3>
+						<p className={styles.deleteDialogText}>
+							{is_cn
+								? `此操作不可撤销，所有执行历史和配置将被永久删除。`
+								: `This action cannot be undone. All execution history and configuration will be permanently deleted.`
+							}
+						</p>
+						<div className={styles.deleteDialogInput}>
+							<label>
+								{is_cn
+									? <>请输入 <strong>{robot.display_name}</strong> 以确认删除</>
+									: <>Type <strong>{robot.display_name}</strong> to confirm</>
+								}
+							</label>
+							<input
+								type='text'
+								value={deleteConfirmName}
+								onChange={e => setDeleteConfirmName(e.target.value)}
+								placeholder={robot.display_name}
+								autoFocus
+							/>
+						</div>
+						<div className={styles.deleteDialogActions}>
+							<button
+								className={styles.deleteDialogCancel}
+								onClick={() => {
+									setShowDeleteConfirm(false)
+									setDeleteConfirmName('')
+								}}
+								disabled={deleting}
+							>
+								{is_cn ? '取消' : 'Cancel'}
+							</button>
+							<button
+								className={styles.deleteDialogConfirm}
+								onClick={handleDelete}
+								disabled={deleting || deleteConfirmName !== robot.display_name}
+							>
+								{deleting ? (
+									<>
+										<Icon name='material-hourglass_empty' size={14} />
+										<span>{is_cn ? '删除中...' : 'Deleting...'}</span>
+									</>
+								) : (
+									<span>{is_cn ? '确认删除' : 'Delete'}</span>
+								)}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }

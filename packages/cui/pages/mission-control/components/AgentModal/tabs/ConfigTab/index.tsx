@@ -10,6 +10,7 @@ import styles from './index.less'
 
 interface ConfigTabProps {
 	robot: RobotState
+	onDelete?: () => void
 }
 
 type MenuKey = 'basic' | 'identity' | 'schedule' | 'advanced'
@@ -21,7 +22,7 @@ interface MenuItem {
 	visible?: boolean
 }
 
-const ConfigTab: React.FC<ConfigTabProps> = ({ robot }) => {
+const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -99,7 +100,7 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot }) => {
 			case 'schedule':
 				return <SchedulePanel {...panelProps} />
 			case 'advanced':
-				return <AdvancedPanel {...panelProps} autonomousMode={autonomousMode} />
+				return <AdvancedPanel {...panelProps} autonomousMode={autonomousMode} onDelete={onDelete} />
 			default:
 				return null
 		}

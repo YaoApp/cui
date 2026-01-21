@@ -970,7 +970,8 @@ Add Agent Modal (Create Agent) UI implementation completed with:
 - i18n support (en/zh)
 
 **Pending Items:**
-1. Settings Tab API Integration (useConfigForm hook, save/load)
-2. Guide Execution Drawer API Integration (POST /api/robots/:id/intervene)
-3. Add Agent Modal API Integration (POST /api/robots, refresh grid)
-4. API Integration (Phase 2)
+1. ⬜ Backend API Implementation (see `API.md` for requirements)
+2. Settings Tab API Integration (useConfigForm hook, save/load)
+3. Guide Execution Drawer API Integration (POST /api/robots/:id/intervene)
+4. Add Agent Modal API Integration (POST /api/robots, refresh grid)
+5. API Integration (Phase 2)

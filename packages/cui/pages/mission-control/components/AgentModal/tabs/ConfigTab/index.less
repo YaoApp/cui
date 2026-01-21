@@ -150,6 +150,247 @@
 	}
 }
 
+// ==================== Danger Zone ====================
+.dangerZone {
+	margin-top: 48px;
+	border: 1px solid rgba(255, 77, 79, 0.3);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.dangerZoneTitle {
+	padding: 12px 16px;
+	background: rgba(255, 77, 79, 0.08);
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--color_danger, #ff4d4f);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	border-bottom: 1px solid rgba(255, 77, 79, 0.2);
+}
+
+.dangerZoneContent {
+	padding: 16px;
+}
+
+.dangerZoneItem {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+}
+
+.dangerZoneInfo {
+	flex: 1;
+	min-width: 0;
+}
+
+.dangerZoneLabel {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_text);
+	margin-bottom: 4px;
+}
+
+.dangerZoneDesc {
+	font-size: 12px;
+	color: var(--color_text_grey);
+	line-height: 1.5;
+}
+
+.dangerButton {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	background: transparent;
+	color: var(--color_danger, #ff4d4f);
+	border: 1px solid var(--color_danger, #ff4d4f);
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+
+	:global(.xgen-icon) {
+		font-size: 16px;
+	}
+
+	&:hover {
+		background: var(--color_danger, #ff4d4f);
+		color: white;
+	}
+}
+
+// Delete confirmation dialog
+.deleteOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(4px);
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding-top: 15vh;
+	z-index: 1100;
+	animation: fadeIn 0.15s ease;
+}
+
+.deleteDialog {
+	width: 440px;
+	max-width: 90vw;
+	background: var(--color_mission_modal_content_bg);
+	border: 1px solid var(--color_mission_modal_border);
+	border-radius: 12px;
+	padding: 32px;
+	text-align: center;
+	animation: scaleIn 0.2s ease;
+}
+
+.deleteDialogIcon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	margin: 0 auto 16px;
+	background: rgba(255, 77, 79, 0.1);
+	border-radius: 50%;
+
+	:global(.xgen-icon) {
+		color: var(--color_danger, #ff4d4f);
+	}
+}
+
+.deleteDialogTitle {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+	margin: 0 0 12px;
+}
+
+.deleteDialogText {
+	font-size: 14px;
+	color: var(--color_mission_text_secondary);
+	line-height: 1.6;
+	margin: 0 0 20px;
+}
+
+.deleteDialogInput {
+	text-align: left;
+	margin-bottom: 24px;
+
+	label {
+		display: block;
+		font-size: 13px;
+		color: var(--color_mission_text_secondary);
+		margin-bottom: 8px;
+
+		strong {
+			color: var(--color_mission_text);
+			font-weight: 600;
+		}
+	}
+
+	input {
+		width: 100%;
+		padding: 10px 12px;
+		background: var(--color_mission_glass);
+		border: 1px solid var(--color_mission_modal_border);
+		border-radius: 6px;
+		font-size: 14px;
+		color: var(--color_mission_text);
+		outline: none;
+		transition: border-color 0.15s ease;
+
+		&::placeholder {
+			color: var(--color_mission_text_muted);
+		}
+
+		&:focus {
+			border-color: var(--color_danger, #ff4d4f);
+		}
+	}
+}
+
+.deleteDialogActions {
+	display: flex;
+	gap: 12px;
+	justify-content: center;
+}
+
+.deleteDialogCancel {
+	flex: 1;
+	padding: 10px 24px;
+	background: var(--color_mission_glass);
+	color: var(--color_mission_text);
+	border: 1px solid var(--color_mission_modal_border);
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover:not(:disabled) {
+		background: var(--color_mission_glass_hover);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+.deleteDialogConfirm {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 10px 24px;
+	background: var(--color_danger, #ff4d4f);
+	color: white;
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	:global(.xgen-icon) {
+		font-size: 14px;
+	}
+
+	&:hover:not(:disabled) {
+		background: color-mix(in srgb, var(--color_danger, #ff4d4f) 85%, black);
+	}
+
+	&:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
+	}
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
 // ==================== Shared Panel Styles ====================
 .panelTitle {
 	font-size: 16px;

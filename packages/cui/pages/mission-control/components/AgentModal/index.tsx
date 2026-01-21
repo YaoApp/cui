@@ -151,7 +151,11 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 			case 'results':
 				return <ResultsTab robot={robot} onOpenDetail={onOpenResultDetail} />
 			case 'config':
-				return <ConfigTab robot={robot} />
+				return <ConfigTab robot={robot} onDelete={() => {
+					// Close modal and refresh grid after delete
+					onClose()
+					onDataUpdated?.()
+				}} />
 			default:
 				return null
 		}
