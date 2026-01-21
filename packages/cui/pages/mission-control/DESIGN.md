@@ -1476,17 +1476,113 @@ Right-side drawer for intervening in an **existing** execution. Opens when click
 
 ---
 
-### 4.6 Add Agent Wizard
+### 4.6 Add Agent Modal (Create AI Teammate)
 
-Modal with step-by-step wizard for creating a new agent.
+Single-page modal for quickly creating a new agent. Collects only required fields to get the agent running immediately. Advanced settings can be configured later in Settings Tab.
 
-**Steps:**
+**Design Principles:**
+- **Minimal Required Fields**: Only collect what's necessary to create a working agent
+- **Immediate Usability**: Agent can start working right after creation
+- **Progressive Configuration**: Advanced settings via Settings Tab later
+- **No Multi-Step Wizard**: Single form, all fields visible at once
 
-1. **Identity**: Name, role, duties, avatar
-2. **Trigger**: Clock schedule / Event types / Human-only
-3. **Resources**: Available agents, MCP servers, KB collections
-4. **Delivery**: Email, webhook, process targets
-5. **Review**: Summary and confirm
+**Modal Style:**
+```
+- Width: min(720px, 90vw) - responsive
+- Position: top: 10vh (upper area, comfortable for form filling)
+- Max-height: 80vh (scrollable if needed)
+- Style: Consistent with AgentModal (--color_mission_modal_* variables)
+- Backdrop: Same blur/overlay as other modals
+```
+
+**Required Fields:**
+
+| Field | Source | Description |
+|-------|--------|-------------|
+| `display_name` | `__yao.member` | Agent name (e.g., "Sales Analyst") |
+| `robot_email` | `__yao.member` | Unique identifier + domain select |
+| `manager_id` | `__yao.member` | Direct manager (results sent to them) |
+| `system_prompt` | `__yao.member` | Role & responsibilities (with AI Generate button) |
+| `autonomous_mode` | `__yao.member` | Work mode: Autonomous / On Demand |
+| `agents` | `__yao.member` | At least one AI Assistant selected |
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Create AI Teammate                                                [×]  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─ Basic Info ───────────────────────────────────────────────────────┐ │
+│  │                                                                     │ │
+│  │  Name *                              Email *                        │ │
+│  │  [_________________________]         [__________] @ [domain.com ▾]  │ │
+│  │                                                                     │ │
+│  │  Manager *                           Work Mode *                    │ │
+│  │  [Select manager... ▾]               ◉ Autonomous  ○ On Demand      │ │
+│  │                                                                     │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                         │
+│  ┌─ Identity ─────────────────────────────────────────────────────────┐ │
+│  │                                                                     │ │
+│  │  Role & Responsibilities *                                          │ │
+│  │  [_______________________________________________________________]  │ │
+│  │  [_______________________________________________________________]  │ │
+│  │  [_______________________________________________________________]  │ │
+│  │                                              [Generate with AI ✨]  │ │
+│  │                                                                     │ │
+│  │  AI Assistants * (select at least one)                              │ │
+│  │  [✓] Data Analyst     [✓] Report Writer    [ ] Code Assistant       │ │
+│  │  [ ] Research Agent   [ ] Content Writer   [ ] Customer Service     │ │
+│  │                                                                     │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                    [Cancel]   [Create AI Teammate]      │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Form Sections:**
+
+1. **Basic Info** (two-column layout)
+   - Name: Text input, required
+   - Email: Text input + domain dropdown, required, unique validation
+   - Manager: Select dropdown (from Team API), required
+   - Work Mode: Radio group (Autonomous first, On Demand second)
+
+2. **Identity**
+   - Role & Responsibilities: TextArea (3-4 rows) with AI Generate button
+   - AI Assistants: CheckboxGroup, at least one required
+
+**Behaviors:**
+
+- **Validation**: Show errors inline, disable submit until all required fields filled
+- **Email Uniqueness**: Check on blur, show error if already exists
+- **AI Generate**: Same as Settings Tab, generates prompt based on name/role
+- **Submit**: Create agent via API, close modal, refresh station grid
+- **Cancel**: Close modal, discard changes (confirm if dirty)
+
+**Default Values (from system):**
+- `autonomous_mode`: false (On Demand)
+- `language_model`: System default LLM
+- `cost_limit`: Default budget
+- Other settings: System defaults, editable later in Settings Tab
+
+**i18n Labels:**
+
+| Field | English | Chinese |
+|-------|---------|---------|
+| Modal Title | Create AI Teammate | 创建 AI 队友 |
+| Name | Name | 名称 |
+| Email | Email | 邮箱 |
+| Manager | Manager | 直属主管 |
+| Work Mode | Work Mode | 工作模式 |
+| Autonomous | Autonomous | 自主模式 |
+| On Demand | On Demand | 按需模式 |
+| Role & Responsibilities | Role & Responsibilities | 角色与职责 |
+| AI Assistants | AI Assistants | AI 助手 |
+| Cancel | Cancel | 取消 |
+| Create | Create AI Teammate | 创建 AI 队友 |
 
 ---
 

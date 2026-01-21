@@ -4,6 +4,7 @@ import { Tooltip } from 'antd'
 import Modal from './components/Modal'
 import AgentModal from './components/AgentModal'
 import ResultDetailModal from './components/ResultDetailModal'
+import AddAgentModal from './components/AddAgentModal'
 import { observer } from 'mobx-react-lite'
 import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
@@ -50,6 +51,9 @@ const MissionControl = () => {
 	// Result Detail Modal state
 	const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null)
 	const [showResultDetailModal, setShowResultDetailModal] = useState(false)
+
+	// Add Agent Modal state
+	const [showAddAgentModal, setShowAddAgentModal] = useState(false)
 
 	// Stats computed from robots
 	const stats = useMemo(() => getRobotStats(robots), [robots])
@@ -192,8 +196,18 @@ const MissionControl = () => {
 
 	// Handle add agent click
 	const handleAddAgent = () => {
-		// TODO: Open Add Agent Wizard
-		console.log('Add agent clicked')
+		setShowAddAgentModal(true)
+	}
+
+	// Handle add agent modal close
+	const handleAddAgentModalClose = () => {
+		setShowAddAgentModal(false)
+	}
+
+	// Handle agent created
+	const handleAgentCreated = () => {
+		// TODO: Refresh robot list from API
+		console.log('Agent created, refreshing list...')
 	}
 
 	// Get status text
@@ -657,6 +671,13 @@ const MissionControl = () => {
 					setTimeout(() => setSelectedDelivery(null), 200)
 				}}
 				delivery={selectedDelivery}
+			/>
+
+			{/* Add Agent Modal */}
+			<AddAgentModal
+				visible={showAddAgentModal}
+				onClose={handleAddAgentModalClose}
+				onCreated={handleAgentCreated}
 			/>
 		</div>
 	)

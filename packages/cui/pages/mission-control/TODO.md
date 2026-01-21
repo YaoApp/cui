@@ -447,31 +447,42 @@ Assign Task vs Intervene:
   - [ ] Priority selection (First/Next/Last)
   - [ ] Send button
 
-### 1.4 Add Agent Wizard
+### 1.4 Add Agent Modal (Create Agent)
 
-- [ ] Wizard modal container
-- [ ] Step indicator
-- [ ] Step 1: Identity
-  - [ ] Name input
-  - [ ] Role input
-  - [ ] Duties list
-  - [ ] Avatar selection
-- [ ] Step 2: Trigger
-  - [ ] Clock mode selection
-  - [ ] Time/interval configuration
-  - [ ] Event types (if applicable)
-- [ ] Step 3: Resources
-  - [ ] Available agents selection
-  - [ ] MCP servers selection
-  - [ ] KB collections selection
-- [ ] Step 4: Delivery
-  - [ ] Email targets
-  - [ ] Webhook targets
-  - [ ] Process targets
-- [ ] Step 5: Review
-  - [ ] Summary of all settings
-  - [ ] Confirm button
-- [ ] Navigation (Back/Next/Cancel)
+> Two-step wizard for creating new AI Agents. Only essential fields for immediate setup.
+> Advanced settings can be configured later in Settings Tab.
+
+- [x] Modal container
+  - [x] Width: 880px fixed
+  - [x] Position: top: 10vh (upper area)
+  - [x] Max-height: 80vh with auto height
+  - [x] Style: Consistent with ResultDetailModal (--color_mission_modal_* variables)
+- [x] Two-step wizard with step indicator in header
+  - [x] Step 1: Basic Info → Step 2: Identity
+  - [x] Step indicator shows progress (number/checkmark)
+  - [x] Back/Next navigation
+- [x] Step 1: Basic Info
+  - [x] display_name (Input, required)
+  - [x] robot_email (Input + @ + domain Select, required)
+  - [x] manager_id (Select, required) with hint text
+  - [x] autonomous_mode (RadioGroup: Autonomous / On Demand) with dynamic hint
+- [x] Step 2: Identity
+  - [x] system_prompt (TextArea + AI Generate button, required)
+  - [x] agents (CheckboxGroup, at least one required)
+- [x] Footer with aligned buttons
+  - [x] Step 1: Cancel / Next
+  - [x] Step 2: Back / Create Agent
+  - [x] Buttons aligned with close button position
+- [x] Validation
+  - [x] Step 1: Required fields (name, email, manager)
+  - [x] Step 2: Required fields (system_prompt, agents)
+  - [x] Error messages displayed below fields
+- [x] Behaviors
+  - [x] AI Generate prompt with loading state
+  - [x] Custom discard confirmation dialog (styled, not browser native)
+  - [x] Form dirty check before close
+  - [ ] Submit: Create via API, close modal, refresh grid
+- [x] i18n support (en/zh labels)
 
 ---
 
@@ -854,15 +865,9 @@ pages/mission-control/
 │   │   ├── index.tsx
 │   │   └── index.less
 │   │
-│   └── AddAgentWizard/    ⬜ TODO
+│   └── AddAgentModal/     ✅ Two-step wizard for creating agents
 │       ├── index.tsx
-│       ├── index.less
-│       └── steps/
-│           ├── Identity.tsx
-│           ├── Trigger.tsx
-│           ├── Resources.tsx
-│           ├── Delivery.tsx
-│           └── Review.tsx
+│       └── index.less
 │
 ├── hooks/                  ⬜ TODO (Phase 2)
 │   ├── useRobots.ts
@@ -894,7 +899,7 @@ pages/mission-control/
 | 1.2 | Agent Modal - Settings Tab | ✅ Complete (UI, pending API) |
 | 1.3 | Assign Task Drawer | ✅ Complete |
 | 1.3 | Intervention Drawer | ⬜ |
-| 1.4 | Add Agent Wizard | ⬜ |
+| 1.4 | Add Agent Modal | ✅ Complete (UI, pending API) |
 | 2.1 | Robot API | ⬜ |
 | 2.2 | Execution API | ⬜ |
 | 2.3 | Results API | ⬜ |
@@ -928,8 +933,21 @@ Settings Tab UI implementation completed with:
 - Email/URL validation with error messages
 - Developer Options section at bottom (phase agents, excluding run phase)
 
+**Completed: Add Agent Modal** ✅
+
+Add Agent Modal (Create Agent) UI implementation completed with:
+- Two-step wizard: Basic Info → Identity
+- Step indicator in header with number/checkmark progress
+- Step 1: Name, Email (prefix + domain), Manager, Work Mode (with dynamic hints)
+- Step 2: Role & Responsibilities (with AI Generate), AI Assistants (multi-select)
+- Custom discard confirmation dialog (styled, not browser native)
+- Form validation with error messages
+- Footer buttons aligned with close button
+- Responsive design (880px width, max-height 80vh)
+- i18n support (en/zh)
+
 **Pending Items:**
 1. Settings Tab API Integration (useConfigForm hook, save/load)
 2. Intervention Drawer
-3. Add Agent Wizard
+3. Add Agent Modal API Integration (POST /api/robots, refresh grid)
 4. API Integration (Phase 2)
