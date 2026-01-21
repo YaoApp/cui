@@ -376,15 +376,26 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 											)}
 										</div>
 										<div className={styles.colActions}>
-											{/* Running: Pause + Stop */}
+											{/* Running: Guide + Pause + Stop */}
 											{isRunning && (
 												<>
+													<Tooltip title={is_cn ? '指导执行' : 'Guide'}>
+														<button 
+															className={styles.actionBtn}
+															onClick={(e) => {
+																e.stopPropagation()
+																onOpenDetail?.(exec)
+															}}
+														>
+															<Icon name='material-quickreply' size={14} />
+														</button>
+													</Tooltip>
 													<Tooltip title={is_cn ? '暂停' : 'Pause'}>
 														<button 
 															className={styles.actionBtn}
 															onClick={(e) => handlePause(e, exec)}
 														>
-															<Icon name='material-pause' size={14} />
+															<Icon name='material-pause_circle' size={14} />
 														</button>
 													</Tooltip>
 													<Tooltip title={is_cn ? '停止' : 'Stop'}>
@@ -392,11 +403,13 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 															className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
 															onClick={(e) => handleStop(e, exec)}
 														>
-															<Icon name='material-stop' size={14} />
+															<Icon name='material-stop_circle' size={14} />
 														</button>
 													</Tooltip>
 												</>
 											)}
+
+											{/* Pending (paused): already handled above in isRunning */}
 
 											{/* Completed with attachments: Download */}
 											{isCompleted && hasAttachments(exec) && (

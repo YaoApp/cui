@@ -9,12 +9,14 @@ interface ExecutionDetailDrawerProps {
 	visible: boolean
 	onClose: () => void
 	execution: Execution | null
+	onGuide?: () => void
 }
 
 const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 	visible,
 	onClose,
-	execution
+	execution,
+	onGuide
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -626,25 +628,29 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 
 				{/* Footer Actions */}
 				<div className={styles.drawerFooter}>
-					{isRunning && (
-						<>
-							{execution.status === 'pending' ? (
-								<button className={styles.actionBtnPrimary} onClick={handleResume}>
-									<Icon name='material-play_arrow' size={16} />
-									<span>{is_cn ? '继续' : 'Resume'}</span>
-								</button>
-							) : (
-								<button className={styles.actionBtnSecondary} onClick={handlePause}>
-									<Icon name='material-pause' size={16} />
-									<span>{is_cn ? '暂停' : 'Pause'}</span>
-								</button>
-							)}
-							<button className={styles.actionBtnDanger} onClick={handleStop}>
-								<Icon name='material-stop' size={16} />
-								<span>{is_cn ? '停止' : 'Stop'}</span>
+				{isRunning && (
+					<>
+						<button className={styles.actionBtnPrimary} onClick={onGuide}>
+							<Icon name='material-quickreply' size={16} />
+							<span>{is_cn ? '指导执行' : 'Guide'}</span>
+						</button>
+						{execution.status === 'pending' ? (
+							<button className={styles.actionBtnSecondary} onClick={handleResume}>
+								<Icon name='material-play_arrow' size={16} />
+								<span>{is_cn ? '继续' : 'Resume'}</span>
 							</button>
-						</>
-					)}
+						) : (
+							<button className={styles.actionBtnSecondary} onClick={handlePause}>
+								<Icon name='material-pause' size={16} />
+								<span>{is_cn ? '暂停' : 'Pause'}</span>
+							</button>
+						)}
+						<button className={styles.actionBtnDanger} onClick={handleStop}>
+							<Icon name='material-stop' size={16} />
+							<span>{is_cn ? '停止' : 'Stop'}</span>
+						</button>
+					</>
+				)}
 
 					{isCompleted && (
 						<>

@@ -9,6 +9,7 @@ interface ExecutionCardProps {
 	onPause?: (id: string) => void
 	onStop?: (id: string) => void
 	onDetail?: (id: string) => void
+	onGuide?: (id: string) => void
 	showFullStatus?: boolean // For history: show completed/failed/cancelled status
 }
 
@@ -17,6 +18,7 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({
 	onPause, 
 	onStop, 
 	onDetail,
+	onGuide,
 	showFullStatus = false 
 }) => {
 	const locale = getLocale()
@@ -208,15 +210,24 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({
 					<>
 						<button
 							className={styles.actionBtn}
-							onClick={(e) => handleActionClick(e, () => onPause?.(execution.id))}
+							onClick={(e) => handleActionClick(e, () => onGuide?.(execution.id))}
+							title={is_cn ? '指导执行' : 'Guide Execution'}
 						>
-							<Icon name={isPaused ? 'material-play_arrow' : 'material-pause'} size={14} />
+							<Icon name='material-quickreply' size={14} />
+						</button>
+						<button
+							className={styles.actionBtn}
+							onClick={(e) => handleActionClick(e, () => onPause?.(execution.id))}
+							title={is_cn ? (isPaused ? '继续' : '暂停') : (isPaused ? 'Resume' : 'Pause')}
+						>
+							<Icon name={isPaused ? 'material-play_circle' : 'material-pause_circle'} size={14} />
 						</button>
 						<button
 							className={styles.actionBtn}
 							onClick={(e) => handleActionClick(e, () => onStop?.(execution.id))}
+							title={is_cn ? '停止' : 'Stop'}
 						>
-							<Icon name='material-stop' size={14} />
+							<Icon name='material-stop_circle' size={14} />
 						</button>
 					</>
 				)}

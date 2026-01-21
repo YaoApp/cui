@@ -1,0 +1,746 @@
+@import '@/styles/preset/vars.less';
+
+// ==================== Overlay ====================
+.drawerOverlay {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	display: flex;
+	justify-content: flex-end;
+	z-index: 10;
+	animation: fadeIn 0.15s ease;
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(4px);
+}
+
+// ==================== Panel ====================
+.drawerPanel {
+	width: 580px;
+	max-width: 60%;
+	min-width: 450px;
+	height: 100%;
+	background: linear-gradient(
+		180deg,
+		var(--color_mission_modal_bg) 0%,
+		var(--color_mission_bg_end) 100%
+	);
+	border-left: 1px solid var(--color_mission_glass_border);
+	display: flex;
+	flex-direction: column;
+	animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: -12px 0 40px rgba(0, 0, 0, 0.3);
+	outline: none;
+}
+
+// ==================== Header ====================
+.drawerHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_mission_modal_border);
+	background: var(--color_mission_modal_header_bg);
+	flex-shrink: 0;
+}
+
+.drawerTitle {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+}
+
+.closeBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 4px;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	color: var(--color_mission_text_muted);
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+
+	&:hover:not(:disabled) {
+		color: var(--color_mission_accent_cyan);
+		transform: scale(1.15);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+// ==================== Meta Bar ====================
+.metaBar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 20px;
+	background: var(--color_mission_modal_header_bg);
+	border-bottom: 1px solid var(--color_mission_modal_border);
+	flex-shrink: 0;
+}
+
+.metaLeft {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.metaItem {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--color_mission_text_muted);
+
+	:global(.xgen-icon) {
+		font-size: 14px;
+		opacity: 0.7;
+	}
+}
+
+.metaDivider {
+	width: 1px;
+	height: 14px;
+	background: var(--color_mission_modal_border);
+}
+
+// ==================== Content ====================
+.drawerContent {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background: var(--color_mission_modal_content_bg);
+}
+
+// ==================== Context Panel (Guide Mode) ====================
+.contextPanel {
+	flex-shrink: 0;
+	border-bottom: 1px solid var(--color_mission_modal_border);
+	background: var(--color_mission_modal_card_bg);
+}
+
+.contextHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 16px;
+	cursor: pointer;
+	transition: background 0.15s ease;
+
+	&:hover {
+		background: rgba(0, 212, 255, 0.05);
+	}
+}
+
+.contextHeaderLeft {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_mission_text_secondary);
+
+	:global(.xgen-icon) {
+		opacity: 0.7;
+	}
+}
+
+.contextExpandIcon {
+	color: var(--color_mission_text_muted);
+	transition: transform 0.2s ease;
+}
+
+.contextBody {
+	padding: 0 16px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	max-height: 280px;
+	overflow-y: auto;
+
+	// Custom scrollbar
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_mission_ring);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--color_mission_text_muted);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+.contextSection {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.contextSectionHeader {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--color_mission_text_muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+
+	:global(.xgen-icon) {
+		font-size: 14px;
+		opacity: 0.6;
+	}
+}
+
+.contextSectionCount {
+	margin-left: auto;
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+	font-weight: normal;
+}
+
+// Current Task Card
+.currentTaskCard {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	background: rgba(0, 212, 255, 0.08);
+	border: 1px solid rgba(0, 212, 255, 0.2);
+	border-radius: 8px;
+	font-size: 13px;
+	color: var(--color_mission_text);
+}
+
+.currentTaskPulse {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--color_mission_accent_cyan);
+	animation: pulse 1.5s ease-in-out infinite;
+	flex-shrink: 0;
+}
+
+.currentTaskProgress {
+	margin-left: auto;
+	font-size: 12px;
+	color: var(--color_mission_accent_cyan);
+	font-weight: 500;
+}
+
+// Goals Card
+.goalsCard {
+	padding: 10px 12px;
+	background: var(--color_mission_modal_card_bg);
+	border: 1px solid var(--color_mission_modal_card_border);
+	border-radius: 8px;
+	max-height: 100px;
+	overflow-y: auto;
+
+	pre {
+		margin: 0;
+		font-family: inherit;
+		font-size: 12px;
+		line-height: 1.5;
+		color: var(--color_mission_text_secondary);
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+
+	// Custom scrollbar
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_mission_ring);
+		border-radius: 2px;
+	}
+}
+
+// Task List Card
+.taskListCard {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 8px;
+	background: var(--color_mission_modal_card_bg);
+	border: 1px solid var(--color_mission_modal_card_border);
+	border-radius: 8px;
+}
+
+.taskItem {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	border-radius: 6px;
+	transition: background 0.15s ease;
+
+	&.taskItemCurrent {
+		background: rgba(0, 212, 255, 0.1);
+	}
+}
+
+.taskIcon {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	&.taskCompleted {
+		color: var(--color_success);
+	}
+
+	&.taskRunning {
+		color: var(--color_mission_accent_cyan);
+	}
+
+	&.taskFailed {
+		color: var(--color_danger);
+	}
+
+	&.taskSkipped,
+	&.taskCancelled {
+		color: var(--color_mission_text_muted);
+	}
+
+	&.taskPending {
+		color: var(--color_mission_text_muted);
+		opacity: 0.5;
+	}
+}
+
+.taskName {
+	font-size: 12px;
+	color: var(--color_mission_text_secondary);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+// ==================== Success State ====================
+.successState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 16px;
+	text-align: center;
+	animation: fadeIn 0.3s ease;
+}
+
+.successIcon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--color_success), #10b981);
+	color: white;
+	animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+}
+
+.successTitle {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+}
+
+.successHint {
+	font-size: 13px;
+	color: var(--color_mission_text_muted);
+}
+
+// ==================== Message Area ====================
+.messageArea {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px;
+	min-height: 0;
+
+	// Custom scrollbar
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_mission_ring);
+		border-radius: 4px;
+		border: 2px solid transparent;
+		background-clip: padding-box;
+
+		&:hover {
+			background: var(--color_mission_text_muted);
+			background-clip: padding-box;
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+.emptyMessages {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 16px;
+	text-align: center;
+	padding: 24px;
+	padding-bottom: 120px; // Shift content up
+}
+
+.emptyCreature {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 8px;
+}
+
+.emptyTitle {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+}
+
+.emptyHint {
+	font-size: 13px;
+	color: var(--color_mission_text_muted);
+	max-width: 300px;
+	line-height: 1.6;
+}
+
+// ==================== Message List ====================
+.messageList {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.message {
+	display: flex;
+	gap: 10px;
+	animation: fadeIn 0.2s ease;
+
+	&.messageUser {
+		flex-direction: row-reverse;
+
+		.messageBubble {
+			background: linear-gradient(
+				135deg,
+				var(--color_mission_accent_cyan),
+				var(--color_mission_accent_purple)
+			);
+			color: white;
+			border-radius: 16px 16px 4px 16px;
+		}
+
+		.messageMeta {
+			justify-content: flex-end;
+		}
+	}
+
+	&.messageAssistant {
+		.messageBubble {
+			background: var(--color_mission_modal_card_bg);
+			border: 1px solid var(--color_mission_modal_card_border);
+			color: var(--color_mission_text);
+			border-radius: 16px 16px 16px 4px;
+		}
+	}
+}
+
+.messageAvatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+}
+
+.messageContent {
+	max-width: 80%;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.messageBubble {
+	padding: 12px 16px;
+	font-size: 14px;
+	line-height: 1.6;
+	word-break: break-word;
+
+	&.typing {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 16px 20px;
+	}
+}
+
+.typingDot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--color_mission_text_muted);
+	animation: typingBounce 1.4s ease-in-out infinite;
+
+	&:nth-child(1) {
+		animation-delay: 0s;
+	}
+	&:nth-child(2) {
+		animation-delay: 0.2s;
+	}
+	&:nth-child(3) {
+		animation-delay: 0.4s;
+	}
+}
+
+.messageMeta {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 4px;
+}
+
+.messageTime {
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+	opacity: 0.7;
+}
+
+.messageStatusIcon {
+	color: var(--color_mission_text_muted);
+	opacity: 0.7;
+}
+
+.messageStatusError {
+	color: var(--color_danger);
+}
+
+// ==================== Input Area ====================
+.inputArea {
+	flex-shrink: 0;
+	padding: 16px 20px;
+	border-top: 1px solid var(--color_mission_modal_border);
+	background: var(--color_mission_modal_header_bg);
+}
+
+.inputRow {
+	display: flex;
+	align-items: center;
+	gap: 0;
+	background: var(--color_mission_modal_card_bg);
+	border: 1px solid var(--color_mission_modal_card_border);
+	border-radius: 12px;
+	padding: 8px;
+	transition: all 0.25s ease;
+
+	&:focus-within {
+		border-color: var(--color_mission_accent_cyan);
+		box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+	}
+}
+
+.taskInput {
+	flex: 1;
+	min-height: 36px;
+	max-height: 120px;
+	padding: 6px 0;
+	border: none;
+	background: transparent;
+	color: var(--color_mission_text);
+	font-size: 14px;
+	line-height: 24px;
+	resize: none;
+	outline: none;
+
+	&::placeholder {
+		color: var(--color_mission_text_muted);
+	}
+
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+}
+
+.inputHint {
+	margin-top: 8px;
+	text-align: right;
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+	opacity: 0.6;
+}
+
+// ==================== Attachments ====================
+.attachmentList {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.attachmentItem {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	background: var(--color_mission_modal_card_bg);
+	border: 1px solid var(--color_mission_modal_card_border);
+	border-radius: 8px;
+	font-size: 12px;
+	color: var(--color_mission_text);
+
+	:global(.xgen-icon) {
+		color: var(--color_mission_accent_cyan);
+	}
+}
+
+.attachmentName {
+	max-width: 120px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.attachmentRemove {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2px;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	color: var(--color_mission_text_muted);
+	border-radius: 4px;
+	transition: all 0.15s ease;
+
+	&:hover {
+		color: var(--color_danger);
+	}
+}
+
+// ==================== Action Buttons ====================
+.actionBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	color: var(--color_mission_text_muted);
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+
+	&:hover:not(:disabled) {
+		color: var(--color_mission_accent_cyan);
+		background: rgba(0, 212, 255, 0.1);
+	}
+
+	&:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+}
+
+.sendBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	background: linear-gradient(
+		135deg,
+		var(--color_mission_accent_cyan),
+		var(--color_mission_accent_purple)
+	);
+	color: white;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.25s ease;
+	box-shadow: 0 2px 8px var(--color_mission_glow_cyan);
+	flex-shrink: 0;
+
+	&:hover:not(:disabled) {
+		transform: scale(1.05);
+		box-shadow: 0 4px 16px var(--color_mission_glow_cyan);
+	}
+
+	&.sendBtnDisabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+		box-shadow: none;
+		transform: none;
+	}
+}
+
+// ==================== Animations ====================
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+@keyframes scaleIn {
+	from {
+		transform: scale(0.5);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+@keyframes typingBounce {
+	0%, 60%, 100% {
+		transform: translateY(0);
+		opacity: 0.4;
+	}
+	30% {
+		transform: translateY(-4px);
+		opacity: 1;
+	}
+}

@@ -10,9 +10,10 @@ interface ActiveTabProps {
 	robot: RobotState
 	onAssignTask?: () => void
 	onOpenDetail?: (execution: Execution) => void
+	onOpenGuide?: (execution: Execution) => void
 }
 
-const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask, onOpenDetail }) => {
+const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask, onOpenDetail, onOpenGuide }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -36,6 +37,13 @@ const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask, onOpenDetail
 			onOpenDetail(execution)
 		}
 	}, [activeExecutions, onOpenDetail])
+
+	const handleGuide = useCallback((executionId: string) => {
+		const execution = activeExecutions.find((e: Execution) => e.id === executionId)
+		if (execution && onOpenGuide) {
+			onOpenGuide(execution)
+		}
+	}, [activeExecutions, onOpenGuide])
 
 	// Empty state
 	if (activeExecutions.length === 0) {
@@ -72,6 +80,7 @@ const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask, onOpenDetail
 						onPause={handlePause}
 						onStop={handleStop}
 						onDetail={handleDetail}
+						onGuide={handleGuide}
 					/>
 				))}
 			</div>

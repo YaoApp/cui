@@ -226,7 +226,7 @@ Assign Task vs Intervene:
 - [x] Theme support (light/dark via Mission Control CSS variables)
 - [x] Responsive breakpoints
   - [x] Grid columns responsive to viewport
-- [ ] Fullscreen mode
+- [~] Fullscreen mode (skipped for now)
   - [ ] Toggle button functionality
   - [ ] Larger clock in fullscreen
   - [ ] Auto-hide header (show on hover)
@@ -427,25 +427,46 @@ Assign Task vs Intervene:
 
 ### 1.3 Drawers
 
-- [x] **Assign Task Drawer** (slides in from right inside Modal)
-  - [x] Header: "Assign Task" + close button
-  - [x] Message history area (placeholder)
-    - [x] Empty state: "Assign task to [Agent Name]"
-    - [x] Example hint text
-  - [x] Input area (fixed at bottom)
-    - [x] Text input (supports ⌘+Enter to send)
-    - [x] Attachment button [📎] (placeholder)
-    - [x] Send button [📤]
-  - [x] Success state: "✓ Task Assigned"
-  - [x] Mission Control themed styling
-  - [ ] Integrate real API: POST /api/robots/:id/trigger
-  - [x] On success: refresh Active Tab (callback ready)
-- [ ] Intervention Drawer (right side, slide animation)
-  - [ ] Header with context info
-  - [ ] Action type radio buttons
-  - [ ] Instruction textarea
-  - [ ] Priority selection (First/Next/Last)
-  - [ ] Send button
+- [x] **Assign Task Drawer** (refactored to use ChatDrawer)
+  - [x] Wrapper component around ChatDrawer
+  - [x] Header: "指派任务" / "Assign Task"
+  - [x] Context: Agent name + trigger type (手动触发)
+  - [x] Empty state: "向 {name} 描述任务" / "Describe task to {name}"
+  - [x] Success state: "任务已启动" / "Task Started"
+  - [ ] API integration: POST /api/robots/:id/trigger
+- [x] **Execution Detail Drawer** (slides in from right inside Modal)
+  - [x] Header with execution name + close button
+  - [x] Meta bar: trigger type, start time, duration, status badge
+  - [x] Style updates for consistency
+    - [x] header/metaBar/footer use --color_mission_modal_border
+    - [x] Same background colors as HistoryTab toolbar
+  - [x] Running state: phase progress, current task, goals, task list
+  - [x] Completed state: results with summary/body/attachments
+  - [x] Failed state: error info with retry option
+  - [x] Cancelled state: notice message
+  - [x] Footer actions based on status
+- [x] ChatDrawer (reusable base component)
+  - [x] Shared by AssignTaskDrawer and GuideExecutionDrawer
+  - [x] Props: context, title, emptyState, placeholder, successState
+  - [x] Message list with user/assistant bubbles
+  - [x] Typing indicator animation
+  - [x] Creature avatar for assistant messages and empty state
+  - [x] Attachment support (UI ready)
+  - [x] Auto-resize textarea
+  - [x] Keyboard shortcuts (⌘+Enter, Escape)
+  - [x] Width consistent with ExecutionDetailDrawer (580px, max 60%, min 450px)
+- [x] Guide Execution Drawer (renamed from "Intervention Drawer")
+  - [x] Entry points:
+    - [x] Quickreply icon button on ExecutionCard (running state only)
+    - [x] "指导执行" / "Guide" button in ExecutionDetailDrawer footer
+  - [x] Execution context panel (collapsible, default collapsed)
+    - [x] Current task with progress
+    - [x] Goals content
+    - [x] Task list with status icons
+  - [x] Chat-based interaction (natural language)
+  - [x] Empty state with Creature avatar
+  - [x] Simulated assistant responses based on user intent
+  - [ ] API integration: POST /api/robots/:id/intervene
 
 ### 1.4 Add Agent Modal (Create Agent)
 
@@ -853,15 +874,17 @@ pages/mission-control/
 │   │   ├── index.tsx
 │   │   └── index.less
 │   │
-│   ├── AssignTaskDrawer/  ✅ Human trigger input
-│   │   ├── index.tsx
+│   ├── ChatDrawer/       ✅ Reusable chat drawer base component
+│   │   ├── index.tsx         (shared by AssignTask & GuideExecution)
 │   │   └── index.less
+│   │
+│   ├── AssignTaskDrawer/  ✅ Human trigger input (uses ChatDrawer)
+│   │   └── index.tsx
+│   │
+│   ├── GuideExecutionDrawer/ ✅ Guide running execution (uses ChatDrawer)
+│   │   └── index.tsx
 │   │
 │   ├── ResultDetailModal/ ✅ Deliverable detail (content + attachments)
-│   │   ├── index.tsx
-│   │   └── index.less
-│   │
-│   ├── InterventionDrawer/ ⬜ TODO
 │   │   ├── index.tsx
 │   │   └── index.less
 │   │
@@ -886,7 +909,7 @@ pages/mission-control/
 
 | Phase | Task | Status |
 |-------|------|--------|
-| 1.1 | Main Page (Header, Clock, Grid, Station Card, Theme, Responsive) | 🟡 In progress (Fullscreen pending) |
+| 1.1 | Main Page (Header, Clock, Grid, Station Card, Theme, Responsive) | ✅ Complete |
 | 1.1 | Activity Banner & Modal | ✅ Complete |
 | 1.1 | Custom Modal Component | ✅ Complete |
 | 1.1 | Creature Widget (`@/widgets/Creature`) | ✅ Complete |
@@ -898,7 +921,7 @@ pages/mission-control/
 | 1.2 | Result Detail Modal | ✅ Complete |
 | 1.2 | Agent Modal - Settings Tab | ✅ Complete (UI, pending API) |
 | 1.3 | Assign Task Drawer | ✅ Complete |
-| 1.3 | Intervention Drawer | ⬜ |
+| 1.3 | Guide Execution Drawer | ✅ Complete (UI, pending API) |
 | 1.4 | Add Agent Modal | ✅ Complete (UI, pending API) |
 | 2.1 | Robot API | ⬜ |
 | 2.2 | Execution API | ⬜ |
@@ -948,6 +971,6 @@ Add Agent Modal (Create Agent) UI implementation completed with:
 
 **Pending Items:**
 1. Settings Tab API Integration (useConfigForm hook, save/load)
-2. Intervention Drawer
+2. Guide Execution Drawer API Integration (POST /api/robots/:id/intervene)
 3. Add Agent Modal API Integration (POST /api/robots, refresh grid)
 4. API Integration (Phase 2)

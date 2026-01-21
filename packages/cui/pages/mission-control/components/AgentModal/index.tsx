@@ -11,6 +11,7 @@ import ResultsTab from './tabs/ResultsTab'
 import ConfigTab from './tabs/ConfigTab'
 import AssignTaskDrawer from '../AssignTaskDrawer'
 import ExecutionDetailDrawer from '../ExecutionDetailDrawer'
+import GuideExecutionDrawer from '../GuideExecutionDrawer'
 import styles from './index.less'
 
 interface AgentModalProps {
@@ -31,6 +32,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 	const [loading, setLoading] = useState(false)
 	const [showAssignDrawer, setShowAssignDrawer] = useState(false)
 	const [showDetailDrawer, setShowDetailDrawer] = useState(false)
+	const [showGuideDrawer, setShowGuideDrawer] = useState(false)
 	const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
 
 	// Reset tab when modal opens
@@ -39,6 +41,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 			setActiveTab('active')
 			setShowAssignDrawer(false)
 			setShowDetailDrawer(false)
+			setShowGuideDrawer(false)
 			setSelectedExecution(null)
 		}
 	}, [visible])
@@ -54,6 +57,35 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 		// Delay clearing execution to allow animation to complete
 		setTimeout(() => setSelectedExecution(null), 300)
 	}, [])
+
+	// Handle opening guide drawer
+	const handleOpenGuide = useCallback((execution: Execution) => {
+		setSelectedExecution(execution)
+		setShowDetailDrawer(false) // Close detail drawer if open
+		setShowGuideDrawer(true)
+	}, [])
+
+	const handleCloseGuide = useCallback(() => {
+		setShowGuideDrawer(false)
+		// Delay clearing execution to allow animation to complete
+		setTimeout(() => setSelectedExecution(null), 300)
+	}, [])
+
+	// Handle guide from execution card (need to find execution by ID)
+	const handleGuideFromCard = useCallback((executionId: string, executions: Execution[]) => {
+		const execution = executions.find(e => e.id === executionId)
+		if (execution) {
+			handleOpenGuide(execution)
+		}
+	}, [handleOpenGuide])
+
+	// Handle guide from detail drawer (use selected execution)
+	const handleGuideFromDetail = useCallback(() => {
+		if (selectedExecution) {
+			setShowDetailDrawer(false)
+			setShowGuideDrawer(true)
+		}
+	}, [selectedExecution])
 
 	const handleAssignTask = () => {
 		setShowAssignDrawer(true)
@@ -113,7 +145,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 
 		switch (activeTab) {
 			case 'active':
-				return <ActiveTab robot={robot} onAssignTask={handleAssignTask} onOpenDetail={handleOpenDetail} />
+				return <ActiveTab robot={robot} onAssignTask={handleAssignTask} onOpenDetail={handleOpenDetail} onOpenGuide={handleOpenGuide} />
 			case 'history':
 				return <HistoryTab robot={robot} onOpenDetail={handleOpenDetail} />
 			case 'results':
@@ -203,6 +235,19 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 					visible={showDetailDrawer}
 					onClose={handleCloseDetail}
 					execution={selectedExecution}
+					onGuide={handleGuideFromDetail}
+				/>
+
+				{/* Guide Execution Drawer - inside modal content */}
+				<GuideExecutionDrawer
+					visible={showGuideDrawer}
+					onClose={handleCloseGuide}
+					robot={robot}
+					execution={selectedExecution}
+					onGuidanceSent={() => {
+						// Refresh data after guidance is sent
+						onDataUpdated?.()
+					}}
 				/>
 			</div>
 		</Modal>
