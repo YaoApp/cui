@@ -590,7 +590,584 @@ interface DeliveryAttachment {
 
 #### 4.2.4 Config Tab
 
-Agent configuration editing (identity, triggers, resources, delivery settings).
+Agent configuration editing. Organized by user mental model (not by system structure).
+
+**Design Principles:**
+- **Follow user's mental flow** rather than system data structure
+- **Progressive disclosure**: Basic settings first, advanced settings hidden
+- **Contextual visibility**: Show/hide sections based on dependencies
+- **Left Menu + Right Panel** layout for easy navigation
+- **i18n Support**: All labels support internationalization (en/zh)
+
+---
+
+##### Layout Structure
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│  Config                                                           [Save] │
+├────────────────┬─────────────────────────────────────────────────────────┤
+│                │                                                         │
+│  ● Basic       │   (Right Panel Content)                                 │
+│                │                                                         │
+│    Identity    │                                                         │
+│                │                                                         │
+│    Schedule    │  ← Only visible when autonomous_mode = true             │
+│                │                                                         │
+│  ─────────     │                                                         │
+│                │                                                         │
+│    Advanced    │                                                         │
+│                │                                                         │
+└────────────────┴─────────────────────────────────────────────────────────┘
+```
+
+**Menu Sections:**
+
+| Section | User Question | Visibility |
+|---------|---------------|------------|
+| **Basic** | "Who is this?" | Always |
+| **Identity** | "What does it do? What resources?" | Always |
+| **Schedule** | "When to work? How to notify?" | Only when `autonomous_mode = true` |
+| **Advanced** | "Rarely changed settings" | Always |
+
+---
+
+##### Panel 1: Basic — "Who is this?"
+
+**Fields from `__yao.member` table:**
+
+| UI Label (en) | UI Label (zh) | DB Column | Type | Required | Notes |
+|---------------|---------------|-----------|------|----------|-------|
+| Name | 名称 | `display_name` | string(200) | Yes | |
+| Email | 工作邮箱 | `robot_email` | string(255) | Yes | Globally unique, format: `prefix@domain` |
+| Role | 角色 | `role_id` | string(50) | Yes | Select from `__yao.role` |
+| Description | 简介 | `bio` | text | No | Brief description |
+| Reports To | 汇报给 | `manager_id` | string(255) | No | Select from team members |
+| Work Mode | 工作模式 | `autonomous_mode` | boolean | Yes | Default: false |
+
+**Layout:**
+
+```
+Basic
+───────────────────────────────────────────────────────
+
+Name *
+[Sales Data Analyst]
+
+Email *
+[sales-analyst] @ [company.com ▾]
+
+Role *
+[Data Analyst ▾]
+
+Description
+[Handles daily sales data analysis and reporting]
+
+Reports To
+[Select... ▾]
+
+───────────────────────────────────────────────────────
+
+Work Mode
+
+◉ On Demand — Works when you assign tasks
+○ Scheduled — Runs automatically on a schedule
+```
+
+**Key Behavior:**
+- When `autonomous_mode` switches to `true`, "Schedule" menu item appears
+- When `autonomous_mode` switches to `false`, "Schedule" menu item disappears
+
+---
+
+##### Panel 2: Identity — "What does it do?"
+
+**Fields from `__yao.member` table:**
+
+| UI Label (en) | UI Label (zh) | DB Column | Type | Required | Notes |
+|---------------|---------------|-----------|------|----------|-------|
+| Role & Responsibilities | 职责说明 | `system_prompt` | text | Yes | With AI generate button |
+| AI Model | AI 模型 | `language_model` | string(100) | No | e.g., "gpt-4", "claude-3-opus" |
+| Monthly Budget | 月度预算 | `cost_limit` | decimal(10,2) | No | USD per month |
+| Accessible AI Assistants | 可协作的智能体 | `agents` | json | No | Other AI agents it can work with |
+| Accessible Tools | 可使用的工具 | `mcp_servers` | json | No | Tools it can use |
+
+**Fields from `robot_config.kb`:**
+
+| UI Label (en) | UI Label (zh) | JSON Path | Type | Notes |
+|---------------|---------------|-----------|------|-------|
+| Accessible Knowledge | 可查阅的知识库 | `kb.collections` | string[] | Knowledge base collection IDs |
+
+**Fields from `robot_config.db`:**
+
+| UI Label (en) | UI Label (zh) | JSON Path | Type | Notes |
+|---------------|---------------|-----------|------|-------|
+| Accessible Data | 可访问的数据 | `db.models` | string[] | Database model names |
+
+**Layout:**
+
+```
+Identity
+───────────────────────────────────────────────────────
+
+Role & Responsibilities *                     [✨ Generate]
+(Describe what this teammate does and how it should work)
+┌─────────────────────────────────────────────────────┐
+│ You are a Sales Data Analyst.                        │
+│                                                      │
+│ Your responsibilities:                               │
+│ - Analyze daily sales data and identify trends       │
+│ - Generate weekly sales reports                      │
+│ - Alert the team when metrics drop significantly     │
+└─────────────────────────────────────────────────────┘
+
+───────────────────────────────────────────────────────
+
+Resources
+
+AI Model                      Monthly Budget (USD)
+[GPT-4 Turbo ▾]              [$100        ]
+
+Accessible AI Assistants
+[✓] Report Writer  [✓] Chart Generator  [□] Email Sender
+
+Accessible Tools
+[✓] Database Query  [✓] Web Search  [□] File Manager
+
+Accessible Knowledge
+[✓] Sales KB  [✓] Product Docs  [□] Company Policies
+
+Accessible Data
+[✓] Sales  [✓] Customers  [□] Orders
+```
+
+---
+
+##### Panel 3: Schedule — "When to work?"
+
+**Only visible when `autonomous_mode = true`**
+
+**Fields from `robot_config.clock`:**
+
+| UI Label (en) | UI Label (zh) | JSON Path | Type | Notes |
+|---------------|---------------|-----------|------|-------|
+| (radio options) | (单选项) | `clock.mode` | enum | "times" \| "interval" \| "daemon" |
+| At | 时间 | `clock.times` | string[] | For mode="times": ["09:00", "14:00"] |
+| On | 日期 | `clock.days` | string[] | For mode="times": ["Mon", "Tue"] or ["*"] |
+| Every | 间隔 | `clock.every` | string | For mode="interval": "30m", "1h" |
+| Timezone | 时区 | `clock.tz` | string | e.g., "Asia/Shanghai" |
+
+**Layout:**
+
+```
+Schedule
+───────────────────────────────────────────────────────
+
+When to run?
+
+◉ At Specific Times
+  At [09:00] [14:00] [+ Add]
+  On [Mon][Tue][Wed][Thu][Fri][✓Sat][✓Sun]
+
+○ At Regular Intervals
+  Every [30] [minutes ▾]
+
+○ Continuous
+  Runs non-stop until manually stopped
+
+Timezone [Asia/Shanghai ▾]
+```
+
+**Note:** Results are sent to the manager (Reports To) by default. Additional delivery options (extra recipients, webhook, process) are in Advanced panel.
+
+---
+
+##### Panel 4: Advanced — "Rarely changed settings"
+
+**Fields from `robot_config.delivery`:**
+
+| UI Label (en) | UI Label (zh) | JSON Path | Type | Default | Notes |
+|---------------|---------------|-----------|------|---------|-------|
+| Additional Recipients | 额外收件人 | `delivery.email.targets` | EmailTarget[] | [] | Extra email recipients beyond manager |
+| Webhook | Webhook | `delivery.webhook.enabled` | boolean | false | |
+| Webhook URL | Webhook 地址 | `delivery.webhook.targets` | WebhookTarget[] | [] | `{ url }` |
+| Process | 调用流程 | `delivery.process.enabled` | boolean | false | |
+| Process Name | 流程名称 | `delivery.process.targets` | ProcessTarget[] | [] | `{ process }` |
+
+**Fields from `robot_config.resources.phases`:**
+
+| UI Label (en) | UI Label (zh) | JSON Path | Type | Default | Notes |
+|---------------|---------------|-----------|------|---------|-------|
+| Inspiration Agent | 灵感分析智能体 | `resources.phases.inspiration` | string | `__yao.inspiration` | P0: Analyze context |
+| Goals Agent | 目标规划智能体 | `resources.phases.goals` | string | `__yao.goals` | P1: Generate goals |
+| Tasks Agent | 任务拆解智能体 | `resources.phases.tasks` | string | `__yao.tasks` | P2: Split into tasks |
+| Run Agent | 执行智能体 | `resources.phases.run` | string | `__yao.run` | P3: Execute tasks |
+| Delivery Agent | 交付智能体 | `resources.phases.delivery` | string | `__yao.delivery` | P4: Format & deliver |
+| Learning Agent | 学习智能体 | `resources.phases.learning` | string | `__yao.learning` | P5: Extract insights |
+
+**Fields from `robot_config.quota`:**
+
+| UI Label (en) | UI Label (zh) | JSON Path | Type | Default | Notes |
+|---------------|---------------|-----------|------|---------|-------|
+| Max concurrent | 最大并发 | `quota.max` | int | 2 | Max concurrent executions |
+| Max queue | 最大队列 | `quota.queue` | int | 10 | Max queued tasks |
+| Priority | 优先级 | `quota.priority` | int | 5 | 1-10, higher = more priority |
+
+**Fields from `robot_config.executor`:**
+
+| UI Label (en) | UI Label (zh) | JSON Path | Type | Default | Notes |
+|---------------|---------------|-----------|------|---------|-------|
+| (checkbox) | (复选框) | `executor.mode` | enum | "standard" | "standard" \| "dryrun" |
+| Timeout | 超时 | `executor.max_duration` | string | "30m" | e.g., "30m", "1h" |
+
+**Fields from `robot_config.learn`:**
+
+| UI Label (en) | UI Label (zh) | JSON Path | Type | Default | Notes |
+|---------------|---------------|-----------|------|---------|-------|
+| Learn from experience | 经验学习 | `learn.on` | boolean | false | |
+| Learn | 学习内容 | `learn.types` | string[] | | "execution" \| "feedback" \| "insight" |
+| Keep for | 保留 | `learn.keep` | int | 0 | days, 0 = forever |
+
+**Fields from `robot_config.triggers`:**
+
+| UI Label (en) | UI Label (zh) | JSON Path | Type | Default | Notes |
+|---------------|---------------|-----------|------|---------|-------|
+| Accept ad-hoc tasks | 接受临时任务 | `triggers.intervene.enabled` | boolean | true | |
+| Trigger on events | 事件触发 | `triggers.event.enabled` | boolean | false | |
+
+**Layout:**
+
+```
+Advanced
+───────────────────────────────────────────────────────
+
+Delivery
+(Results are sent to manager by default)
+
+Additional Recipients
+┌─────────────────────────────────────────────┐
+│ team@company.com                       [×] │
+└─────────────────────────────────────────────┘
+[+ Add]
+
+[□] Webhook
+    URL [......................................]
+    
+[□] Process
+    [Select... ▾]
+
+───────────────────────────────────────────────────────
+
+Phase Agents
+(Customize which AI handles each phase, defaults work for most cases)
+
+  Inspiration   [__yao.inspiration ▾]   Analyze context
+  Goals         [__yao.goals ▾]         Generate goals
+  Tasks         [__yao.tasks ▾]         Split into tasks
+  Run           [__yao.run ▾]           Execute tasks
+  Delivery      [__yao.delivery ▾]      Format & deliver
+  Learning      [__yao.learning ▾]      Extract insights
+
+───────────────────────────────────────────────────────
+
+Concurrency
+
+Max concurrent    [2]    tasks
+Max queue         [10]   pending tasks
+Priority          [5]    (1-10)
+Timeout           [30]   minutes per task
+
+───────────────────────────────────────────────────────
+
+Testing
+
+[□] Dry run mode (simulate without executing)
+
+───────────────────────────────────────────────────────
+
+Learning
+
+[✓] Learn from experience
+    Learn: [✓] Execution history  [✓] Feedback  [✓] Insights
+    Keep for [90] days (0 = forever)
+
+───────────────────────────────────────────────────────
+
+Triggers
+
+[✓] Accept ad-hoc tasks
+[□] Trigger on events (webhook / database)
+```
+
+---
+
+##### Complete Data Structure
+
+**`__yao.member` Table Fields (Robot-specific):**
+
+```typescript
+interface MemberRobotFields {
+  // Basic
+  member_id: string           // Global unique ID (readonly)
+  team_id: string             // Team ID (readonly)
+  display_name: string        // Display name
+  bio?: string                // Description
+  avatar?: string             // Avatar URL
+  robot_email: string         // Globally unique email
+  manager_id?: string         // Direct manager member_id
+  
+  // Status
+  status: 'pending' | 'active' | 'inactive' | 'suspended'
+  autonomous_mode: boolean    // Key switch
+  robot_status: 'idle' | 'working' | 'paused' | 'error' | 'maintenance'
+  
+  // Identity & Resources
+  system_prompt?: string      // System prompt
+  language_model?: string     // LLM model name
+  cost_limit?: number         // USD per month
+  agents?: string[]           // Accessible agent IDs
+  mcp_servers?: string[]      // MCP server IDs
+  
+  // Email settings
+  authorized_senders?: string[]     // Whitelist of senders
+  email_filter_rules?: object[]     // Email filter rules
+  
+  // Config
+  robot_config?: RobotConfig  // JSON config (see below)
+}
+```
+
+**`robot_config` JSON Structure (from `types/config.go`):**
+
+```typescript
+interface RobotConfig {
+  // Identity (required)
+  identity: {
+    role: string              // Role description
+    duties?: string[]         // Responsibilities
+    rules?: string[]          // Behavioral rules
+  }
+  
+  // Triggers
+  triggers?: {
+    clock?: { enabled: boolean }
+    intervene?: { enabled: boolean, actions?: string[] }
+    event?: { enabled: boolean }
+  }
+  
+  // Clock schedule
+  clock?: {
+    mode: 'times' | 'interval' | 'daemon'
+    times?: string[]          // ["09:00", "14:00"]
+    days?: string[]           // ["Mon", "Tue"] or ["*"]
+    every?: string            // "30m", "1h"
+    tz?: string               // "Asia/Shanghai"
+    timeout?: string          // "30m"
+  }
+  
+  // Quota
+  quota?: {
+    max?: number              // default: 2
+    queue?: number            // default: 10
+    priority?: number         // default: 5, range: 1-10
+  }
+  
+  // Knowledge & Data
+  kb?: {
+    collections?: string[]    // KB collection IDs
+    options?: object
+  }
+  db?: {
+    models?: string[]         // DB model names
+    options?: object
+  }
+  
+  // Learning
+  learn?: {
+    on: boolean
+    types?: ('execution' | 'feedback' | 'insight')[]
+    keep?: number             // days, 0 = forever
+  }
+  
+  // Resources
+  resources?: {
+    phases?: Record<Phase, string>  // phase -> agent ID
+    agents?: string[]
+    mcp?: { id: string, tools?: string[] }[]
+  }
+  
+  // Delivery
+  delivery?: {
+    email?: {
+      enabled: boolean
+      targets: { to: string[], template?: string, subject?: string }[]
+    }
+    webhook?: {
+      enabled: boolean
+      targets: { url: string, method?: string, headers?: Record<string,string>, secret?: string }[]
+    }
+    process?: {
+      enabled: boolean
+      targets: { process: string, args?: any[] }[]
+    }
+  }
+  
+  // Events
+  events?: {
+    type: 'webhook' | 'database'
+    source: string
+    filter?: object
+  }[]
+  
+  // Executor
+  executor?: {
+    mode?: 'standard' | 'dryrun' | 'sandbox'
+    max_duration?: string     // "30m"
+  }
+}
+```
+
+---
+
+##### Dynamic Menu Logic
+
+```typescript
+const menuItems = useMemo(() => {
+  const items: MenuItem[] = [
+    { key: 'basic', label: t('config.basic'), icon: <UserOutlined /> },
+    { key: 'identity', label: t('config.identity'), icon: <IdcardOutlined /> },
+  ]
+  
+  // Only show "Schedule" when autonomous mode is ON
+  if (formData.autonomous_mode) {
+    items.push({ key: 'schedule', label: t('config.schedule'), icon: <ClockCircleOutlined /> })
+  }
+  
+  items.push({ type: 'divider' })
+  items.push({ key: 'advanced', label: t('config.advanced'), icon: <SettingOutlined /> })
+  
+  return items
+}, [formData.autonomous_mode, t])
+```
+
+---
+
+##### Component Structure
+
+```
+AgentModal/
+├── tabs/
+│   ├── ConfigTab/
+│   │   ├── index.tsx           # Main: left menu + right panel + Save button
+│   │   ├── index.less          # Layout styles (menu, panel container)
+│   │   └── hooks/
+│   │       └── useConfigForm.ts  # Form state, validation, save logic
+│   │
+│   └── ... (other tabs)
+│
+components/
+├── ConfigPanels/               # Shared config panel components
+│   ├── BasicPanel/
+│   │   ├── index.tsx           # Form fields for Basic
+│   │   └── index.less
+│   ├── IdentityPanel/
+│   │   ├── index.tsx           # Form fields for Identity
+│   │   └── index.less
+│   ├── SchedulePanel/
+│   │   ├── index.tsx           # Form fields for Schedule
+│   │   └── index.less
+│   └── AdvancedPanel/
+│       ├── index.tsx           # Form fields for Advanced
+│       └── index.less
+```
+
+**Component Responsibilities:**
+
+| Component | Responsibility |
+|-----------|----------------|
+| `ConfigTab/index.tsx` | Layout (menu + panel), panel switching, Save button, form context provider |
+| `useConfigForm` | Form state (`formData`), `setField()`, `validate()`, `save()`, `loading`, `errors` |
+| `BasicPanel` | Render Basic fields, call `setField()` on change |
+| `IdentityPanel` | Render Identity fields, AI generate button logic |
+| `SchedulePanel` | Render Schedule fields, clock mode switching |
+| `AdvancedPanel` | Render Advanced fields (delivery, quota, learning, triggers) |
+
+**Data Flow:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ConfigTab                                                       │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │  useConfigForm (context)                                     ││
+│  │  - formData: { member fields + robot_config }               ││
+│  │  - setField(path, value)                                    ││
+│  │  - errors: { [path]: string }                               ││
+│  │  - save(): Promise<void>                                    ││
+│  └─────────────────────────────────────────────────────────────┘│
+│                              │                                   │
+│         ┌────────────────────┼────────────────────┐             │
+│         ▼                    ▼                    ▼             │
+│  ┌─────────────┐  ┌─────────────────┐  ┌─────────────────┐     │
+│  │ BasicPanel  │  │ IdentityPanel   │  │ SchedulePanel   │ ... │
+│  │             │  │                 │  │                 │     │
+│  │ useContext  │  │ useContext      │  │ useContext      │     │
+│  │ (formData,  │  │ (formData,      │  │ (formData,      │     │
+│  │  setField)  │  │  setField)      │  │  setField)      │     │
+│  └─────────────┘  └─────────────────┘  └─────────────────┘     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**useConfigForm Hook:**
+
+```typescript
+interface ConfigFormState {
+  // Member table fields
+  display_name: string
+  robot_email: string
+  role_id: string
+  bio: string
+  manager_id: string
+  autonomous_mode: boolean
+  system_prompt: string
+  language_model: string
+  cost_limit: number | null
+  agents: string[]
+  mcp_servers: string[]
+  
+  // robot_config JSON
+  robot_config: {
+    identity?: { role?: string; duties?: string[]; rules?: string[] }
+    clock?: { mode: string; times?: string[]; days?: string[]; every?: string; tz?: string }
+    triggers?: { intervene?: { enabled: boolean }; event?: { enabled: boolean } }
+    quota?: { max?: number; queue?: number; priority?: number }
+    kb?: { collections?: string[] }
+    db?: { models?: string[] }
+    learn?: { on?: boolean; types?: string[]; keep?: number }
+    delivery?: { email?: EmailPreference; webhook?: WebhookPreference; process?: ProcessPreference }
+    executor?: { mode?: string; max_duration?: string }
+  }
+}
+
+interface ConfigFormContext {
+  formData: ConfigFormState
+  setField: (path: string, value: any) => void  // e.g., setField('robot_config.clock.mode', 'times')
+  errors: Record<string, string>
+  loading: boolean
+  saving: boolean
+  save: () => Promise<void>
+}
+```
+
+**Panel Props:**
+
+```typescript
+// Each panel receives context via useContext, no props needed
+// But can accept optional props for customization
+
+interface PanelProps {
+  readonly?: boolean  // For view-only mode
+}
+```
 
 ### 4.3 Execution Detail Drawer
 

@@ -1,0 +1,307 @@
+@import '@/styles/preset/vars.less';
+
+// ==================== Config Tab Layout ====================
+.configTab {
+	display: flex;
+	height: 100%;
+	overflow: hidden;
+}
+
+// ==================== Left Menu Sidebar ====================
+.menuSidebar {
+	width: 180px;
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	background: var(--color_mission_modal_header_bg);
+	border-right: 1px solid var(--color_mission_modal_border);
+}
+
+.menuList {
+	display: flex;
+	flex-direction: column;
+	padding: 16px 12px;
+	gap: 4px;
+}
+
+.menuItem {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_mission_text_muted);
+	cursor: pointer;
+	transition: all 0.15s ease;
+	user-select: none;
+
+	:global(.xgen-icon) {
+		font-size: 16px;
+		color: inherit;
+	}
+
+	&:hover {
+		color: var(--color_mission_text);
+		background: var(--color_mission_glass_hover);
+	}
+
+	&.menuItemActive {
+		color: var(--color_mission_accent_cyan);
+		background: rgba(0, 212, 255, 0.1);
+
+		:global(.xgen-icon) {
+			color: var(--color_mission_accent_cyan);
+		}
+	}
+}
+
+// ==================== Right Panel Container ====================
+.panelContainer {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.panelContent {
+	flex: 1;
+	overflow-y: auto;
+	padding: 24px 32px;
+
+	// Custom scrollbar
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_mission_ring);
+		border-radius: 4px;
+		border: 2px solid var(--color_mission_modal_content_bg);
+
+		&:hover {
+			background: var(--color_mission_text_muted);
+		}
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+.panelFooter {
+	display: flex;
+	justify-content: flex-end;
+	padding: 16px 24px;
+	border-top: 1px solid var(--color_mission_modal_border);
+	background: var(--color_mission_modal_header_bg);
+	flex-shrink: 0;
+}
+
+.saveButton {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 24px;
+	background: linear-gradient(135deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
+	color: white;
+	border: none;
+	border-radius: 8px;
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 4px 12px var(--color_mission_glow_cyan);
+
+	:global(.xgen-icon) {
+		font-size: 16px;
+	}
+
+	&:hover:not(:disabled) {
+		transform: translateY(-1px);
+		box-shadow: 0 6px 16px var(--color_mission_glow_cyan);
+	}
+
+	&:active:not(:disabled) {
+		transform: translateY(0);
+	}
+
+	&.saveButtonDisabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		box-shadow: none;
+	}
+}
+
+// ==================== Shared Panel Styles ====================
+.panelTitle {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+	margin-bottom: 24px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--color_mission_modal_border);
+}
+
+.panelSection {
+	margin-bottom: 32px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.sectionTitle {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color_mission_text_secondary);
+	margin-bottom: 16px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+// ==================== Form Styles ====================
+.formItem {
+	margin-bottom: 20px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.formLabel {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_mission_text);
+	margin-bottom: 8px;
+}
+
+.required {
+	color: var(--color_danger);
+}
+
+.helpIcon {
+	color: var(--color_mission_text_muted);
+	cursor: help;
+
+	&:hover {
+		color: var(--color_mission_text_secondary);
+	}
+}
+
+.formHint {
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+	margin-top: 6px;
+	line-height: 1.4;
+}
+
+// Two column layout
+.formRow {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.formItemHalf {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+// Three column layout
+.formRowThree {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.formItemThird {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+// ==================== Placeholder Styles ====================
+.placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 40px;
+	text-align: center;
+	color: var(--color_mission_text_muted);
+}
+
+.placeholderIcon {
+	opacity: 0.4;
+	margin-bottom: 16px;
+}
+
+.placeholderText {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_mission_text);
+	margin-bottom: 8px;
+}
+
+.placeholderHint {
+	font-size: 12px;
+	color: var(--color_mission_text_muted);
+	max-width: 300px;
+	line-height: 1.5;
+}
+
+// ==================== Responsive ====================
+@media (max-width: 900px) {
+	.menuSidebar {
+		width: 56px;
+	}
+
+	.menuItem {
+		justify-content: center;
+		padding: 10px;
+
+		span {
+			display: none;
+		}
+	}
+
+	.panelContent {
+		padding: 20px;
+	}
+}
+
+@media (max-width: 600px) {
+	.configTab {
+		flex-direction: column;
+	}
+
+	.menuSidebar {
+		width: 100%;
+		border-right: none;
+		border-bottom: 1px solid var(--color_mission_modal_border);
+	}
+
+	.menuList {
+		flex-direction: row;
+		padding: 8px 12px;
+		overflow-x: auto;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+
+	.menuItem {
+		padding: 8px 12px;
+		white-space: nowrap;
+
+		span {
+			display: inline;
+		}
+	}
+}
