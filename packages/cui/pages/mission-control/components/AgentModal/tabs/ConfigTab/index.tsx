@@ -99,7 +99,7 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot }) => {
 			case 'schedule':
 				return <SchedulePanel {...panelProps} />
 			case 'advanced':
-				return <AdvancedPanel {...panelProps} />
+				return <AdvancedPanel {...panelProps} autonomousMode={autonomousMode} />
 			default:
 				return null
 		}

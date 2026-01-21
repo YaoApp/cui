@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { Tooltip } from 'antd'
+import { Input, Select, InputNumber, Switch, CheckboxGroup, InputPassword } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import type { RobotState } from '../../../../../types'
 import styles from '../index.less'
@@ -8,79 +10,530 @@ interface AdvancedPanelProps {
 	formData: Record<string, any>
 	onChange: (field: string, value: any) => void
 	is_cn: boolean
+	autonomousMode?: boolean
 }
+
+// Phase agents - for customizing which AI handles each execution phase
+// inspiration phase is only available in autonomous mode
+// run phase is not configurable (it's a built-in scheduler, not an agent)
+const PHASES = [
+	{ key: 'inspiration', label_en: 'Inspiration', label_cn: '洞察发现', desc_en: 'Discover insights', desc_cn: '发现洞察', default: '__yao.inspiration', autonomousOnly: true },
+	{ key: 'goals', label_en: 'Goals', label_cn: '目标规划', desc_en: 'Generate goals', desc_cn: '生成目标', default: '__yao.goals' },
+	{ key: 'tasks', label_en: 'Tasks', label_cn: '任务拆解', desc_en: 'Split into tasks', desc_cn: '拆分任务', default: '__yao.tasks' },
+	// run phase is omitted - it's a built-in scheduler, not a replaceable agent
+	{ key: 'delivery', label_en: 'Delivery', label_cn: '交付', desc_en: 'Format & deliver', desc_cn: '格式化并交付', default: '__yao.delivery' },
+	{ key: 'learning', label_en: 'Learning', label_cn: '学习', desc_en: 'Extract insights', desc_cn: '提取经验', default: '__yao.learning' }
+]
+
+// Learn types
+const LEARN_TYPES = [
+	{ label: 'Execution history', label_cn: '执行记录', value: 'execution' },
+	{ label: 'Feedback', label_cn: '反馈', value: 'feedback' },
+	{ label: 'Insights', label_cn: '洞察', value: 'insight' }
+]
 
 /**
  * AdvancedPanel - Advanced settings (rarely changed)
- * 
- * Sections:
- * 1. Delivery - Additional email recipients, webhook, process
- * 2. Phase Agents - Customize AI for each execution phase (P0-P5)
- * 3. Concurrency - Max concurrent, queue size, priority, timeout
- * 4. Testing - Dry run mode
- * 5. Learning - Learn from experience settings
- * 6. Triggers - Ad-hoc tasks, event triggers
  */
-const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange, is_cn }) => {
+const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange, is_cn, autonomousMode = false }) => {
+	// Additional email recipients
+	const [emailRecipients, setEmailRecipients] = useState<string[]>([])
+	const [newEmail, setNewEmail] = useState('')
+	const [emailError, setEmailError] = useState('')
+
+	// Webhook targets (URL + optional secret)
+	const [webhookTargets, setWebhookTargets] = useState<Array<{ url: string; secret?: string }>>([])
+	const [newWebhook, setNewWebhook] = useState('')
+	const [newWebhookSecret, setNewWebhookSecret] = useState('')
+	const [webhookError, setWebhookError] = useState('')
+
+	// Yao Processes
+	const [processes, setProcesses] = useState<string[]>([])
+	const [newProcess, setNewProcess] = useState('')
+
+	// Mock agent options for phase selection - TODO: Load from API
+	const [agentOptions, setAgentOptions] = useState<Array<{ label: string; value: string }>>([])
+
+	useEffect(() => {
+		// Mock agent options
+		setAgentOptions([
+			{ label: '__yao.inspiration', value: '__yao.inspiration' },
+			{ label: '__yao.goals', value: '__yao.goals' },
+			{ label: '__yao.tasks', value: '__yao.tasks' },
+			{ label: '__yao.run', value: '__yao.run' },
+			{ label: '__yao.delivery', value: '__yao.delivery' },
+			{ label: '__yao.learning', value: '__yao.learning' },
+			{ label: 'custom-analyst', value: 'custom-analyst' },
+			{ label: 'custom-executor', value: 'custom-executor' }
+		])
+
+		// Initialize email recipients from formData
+		const emailTargets = formData['delivery.email.targets'] || []
+		setEmailRecipients(emailTargets.map((t: any) => t.to?.[0] || t).filter(Boolean))
+
+		// Initialize webhook targets from formData
+		const webhookData = formData['delivery.webhook.targets'] || []
+		setWebhookTargets(webhookData.map((t: any) => ({
+			url: t.url || '',
+			secret: t.secret || ''
+		})).filter((t: any) => t.url))
+
+		// Initialize processes from formData
+		const processTargets = formData['delivery.process.targets'] || []
+		setProcesses(processTargets.map((t: any) => t.process || t).filter(Boolean))
+	}, [])
+
+	// Handle field change
+	const handleFieldChange = (field: string, value: any) => {
+		onChange(field, value)
+	}
+
+	// Email validation
+	const isValidEmail = (email: string): boolean => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		return emailRegex.test(email)
+	}
+
+	// URL validation
+	const isValidUrl = (url: string): boolean => {
+		try {
+			new URL(url)
+			return url.startsWith('http://') || url.startsWith('https://')
+		} catch {
+			return false
+		}
+	}
+
+	// Handle add email recipient
+	const handleAddEmail = () => {
+		const email = newEmail.trim()
+		if (!email) {
+			setEmailError(is_cn ? '请输入邮箱地址' : 'Please enter an email address')
+			return
+		}
+		if (!isValidEmail(email)) {
+			setEmailError(is_cn ? '邮箱格式不正确' : 'Invalid email format')
+			return
+		}
+		if (emailRecipients.includes(email)) {
+			setEmailError(is_cn ? '该邮箱已添加' : 'Email already added')
+			return
+		}
+		const newRecipients = [...emailRecipients, email]
+		setEmailRecipients(newRecipients)
+		handleFieldChange('delivery.email.targets', newRecipients.map(e => ({ to: [e] })))
+		setNewEmail('')
+		setEmailError('')
+	}
+
+	// Handle remove email recipient
+	const handleRemoveEmail = (index: number) => {
+		const newRecipients = emailRecipients.filter((_, i) => i !== index)
+		setEmailRecipients(newRecipients)
+		handleFieldChange('delivery.email.targets', newRecipients.map(e => ({ to: [e] })))
+	}
+
+	// Handle add webhook
+	const handleAddWebhook = () => {
+		const url = newWebhook.trim()
+		if (!url) {
+			setWebhookError(is_cn ? '请输入 Webhook URL' : 'Please enter a Webhook URL')
+			return
+		}
+		if (!isValidUrl(url)) {
+			setWebhookError(is_cn ? 'URL 格式不正确，需以 http:// 或 https:// 开头' : 'Invalid URL, must start with http:// or https://')
+			return
+		}
+		if (webhookTargets.some(t => t.url === url)) {
+			setWebhookError(is_cn ? '该 URL 已添加' : 'URL already added')
+			return
+		}
+		const newTarget = { url, secret: newWebhookSecret.trim() || undefined }
+		const newTargets = [...webhookTargets, newTarget]
+		setWebhookTargets(newTargets)
+		handleFieldChange('delivery.webhook.targets', newTargets.map(t => ({ url: t.url, secret: t.secret })))
+		handleFieldChange('delivery.webhook.enabled', true)
+		setNewWebhook('')
+		setNewWebhookSecret('')
+		setWebhookError('')
+	}
+
+	// Handle remove webhook
+	const handleRemoveWebhook = (index: number) => {
+		const newTargets = webhookTargets.filter((_, i) => i !== index)
+		setWebhookTargets(newTargets)
+		handleFieldChange('delivery.webhook.targets', newTargets.map(t => ({ url: t.url, secret: t.secret })))
+		if (newTargets.length === 0) {
+			handleFieldChange('delivery.webhook.enabled', false)
+		}
+	}
+
+	// Handle add process
+	const handleAddProcess = () => {
+		const process = newProcess.trim()
+		if (!process) return
+		if (processes.includes(process)) return
+		const newProcesses = [...processes, process]
+		setProcesses(newProcesses)
+		handleFieldChange('delivery.process.targets', newProcesses.map(p => ({ process: p })))
+		handleFieldChange('delivery.process.enabled', true)
+		setNewProcess('')
+	}
+
+	// Handle remove process
+	const handleRemoveProcess = (index: number) => {
+		const newProcesses = processes.filter((_, i) => i !== index)
+		setProcesses(newProcesses)
+		handleFieldChange('delivery.process.targets', newProcesses.map(p => ({ process: p })))
+		if (newProcesses.length === 0) {
+			handleFieldChange('delivery.process.enabled', false)
+		}
+	}
+
 	return (
-		<div className={styles.panelSection}>
+		<div className={styles.panelInner}>
 			<div className={styles.panelTitle}>
 				{is_cn ? '高级配置' : 'Advanced Settings'}
 			</div>
 
-			{/* Placeholder - will be replaced with form fields */}
-			<div className={styles.placeholder}>
-				<Icon name='material-tune' size={48} className={styles.placeholderIcon} />
-				<div className={styles.placeholderText}>
-					{is_cn ? '高级配置' : 'Advanced Settings'}
-				</div>
-				<div className={styles.placeholderHint}>
-					{is_cn 
-						? '交付选项、阶段智能体、并发控制、测试模式、学习设置、触发器'
-						: 'Delivery, Phase Agents, Concurrency, Testing, Learning, Triggers'}
+			{/* ==================== Delivery Section ==================== */}
+			<div className={styles.sectionTitle}>
+				{is_cn ? '交付设置' : 'Delivery'}
+			</div>
+			<div className={styles.sectionHint}>
+				{is_cn ? '执行结果默认发送给直属主管' : 'Results are sent to manager by default'}
+			</div>
+
+			{/* Additional Email Recipients */}
+			<div className={styles.formItem}>
+				<label className={styles.formLabel}>
+					{is_cn ? '额外收件人' : 'Additional Recipients'}
+				</label>
+				{emailRecipients.length > 0 && (
+					<div className={styles.tagList}>
+						{emailRecipients.map((email, index) => (
+							<div key={index} className={styles.tag}>
+								<span>{email}</span>
+								<div
+									className={styles.tagRemove}
+									onClick={() => handleRemoveEmail(index)}
+								>
+									<Icon name='material-close' size={12} />
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+				<div className={styles.addItemRow}>
+					<Input
+						value={newEmail}
+						onChange={(value) => {
+							setNewEmail(String(value))
+							if (emailError) setEmailError('')
+						}}
+						schema={{
+							type: 'string',
+							placeholder: is_cn ? '输入邮箱地址' : 'Enter email address'
+						}}
+						error={emailError}
+						hasError={!!emailError}
+					/>
+					<div className={styles.addItemButton} onClick={handleAddEmail}>
+						<Icon name='material-add' size={16} />
+					</div>
 				</div>
 			</div>
 
-			{/* TODO: Implement form fields
-			
-			=== Delivery Section ===
-			Fields from robot_config.delivery:
-			- Additional Recipients (delivery.email.targets) - Email list with add/remove
-			- Webhook (delivery.webhook.enabled + delivery.webhook.targets) - Switch + URL input
-			- Process (delivery.process.enabled + delivery.process.targets) - Switch + Process select
-			
-			=== Phase Agents Section ===
-			Fields from robot_config.resources.phases:
-			- Inspiration Agent (resources.phases.inspiration) - Select, default: __yao.inspiration
-			- Goals Agent (resources.phases.goals) - Select, default: __yao.goals
-			- Tasks Agent (resources.phases.tasks) - Select, default: __yao.tasks
-			- Run Agent (resources.phases.run) - Select, default: __yao.run
-			- Delivery Agent (resources.phases.delivery) - Select, default: __yao.delivery
-			- Learning Agent (resources.phases.learning) - Select, default: __yao.learning
-			
-			=== Concurrency Section ===
-			Fields from robot_config.quota:
-			- Max Concurrent (quota.max) - InputNumber, default: 2
-			- Max Queue (quota.queue) - InputNumber, default: 10
-			- Priority (quota.priority) - InputNumber 1-10, default: 5
-			- Timeout (clock.timeout) - InputNumber in minutes
-			
-			=== Testing Section ===
-			Fields from robot_config.executor:
-			- Dry Run Mode (executor.mode) - Switch for "dryrun"
-			
-			=== Learning Section ===
-			Fields from robot_config.learn:
-			- Learn from Experience (learn.on) - Switch
-			- Learn Types (learn.types) - CheckboxGroup: execution, feedback, insight
-			- Keep For (learn.keep) - InputNumber in days, 0 = forever
-			
-			=== Triggers Section ===
-			Fields from robot_config.triggers:
-			- Accept Ad-hoc Tasks (triggers.intervene.enabled) - Switch
-			- Trigger on Events (triggers.event.enabled) - Switch
-			
-			*/}
+			{/* Webhook */}
+			<div className={styles.formItem}>
+				<label className={styles.formLabel}>Webhook</label>
+				{webhookTargets.length > 0 && (
+					<div className={styles.webhookList}>
+						{webhookTargets.map((target, index) => (
+							<div key={index} className={styles.webhookItem}>
+								<div className={styles.webhookUrl}>
+									<span>{target.url}</span>
+									{target.secret && (
+										<span className={styles.webhookSecretBadge}>
+											<Icon name='material-lock' size={12} />
+											Secret
+										</span>
+									)}
+								</div>
+								<div
+									className={styles.tagRemove}
+									onClick={() => handleRemoveWebhook(index)}
+								>
+									<Icon name='material-close' size={12} />
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+				<div className={styles.webhookInputRow}>
+					<div className={styles.webhookInputs}>
+						<Input
+							value={newWebhook}
+							onChange={(value) => {
+								setNewWebhook(String(value))
+								if (webhookError) setWebhookError('')
+							}}
+							schema={{
+								type: 'string',
+								placeholder: 'https://example.com/webhook'
+							}}
+							error={webhookError}
+							hasError={!!webhookError}
+						/>
+						<InputPassword
+							value={newWebhookSecret}
+							onChange={(value) => setNewWebhookSecret(String(value))}
+							schema={{
+								type: 'string',
+								placeholder: is_cn ? 'Secret（可选）' : 'Secret (optional)'
+							}}
+						/>
+					</div>
+					<div className={styles.addItemButton} onClick={handleAddWebhook}>
+						<Icon name='material-add' size={16} />
+					</div>
+				</div>
+			</div>
+
+			{/* Yao Process */}
+			<div className={styles.formItem}>
+				<label className={styles.formLabel}>Yao Process</label>
+				{processes.length > 0 && (
+					<div className={styles.tagList}>
+						{processes.map((process, index) => (
+							<div key={index} className={styles.tag}>
+								<span className={styles.tagCode}>{process}</span>
+								<div
+									className={styles.tagRemove}
+									onClick={() => handleRemoveProcess(index)}
+								>
+									<Icon name='material-close' size={12} />
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+				<div className={styles.addItemRow}>
+					<Input
+						value={newProcess}
+						onChange={(value) => setNewProcess(String(value))}
+						schema={{
+							type: 'string',
+							placeholder: is_cn ? '如 scripts.notify.Send' : 'e.g. scripts.notify.Send'
+						}}
+					/>
+					<div className={styles.addItemButton} onClick={handleAddProcess}>
+						<Icon name='material-add' size={16} />
+					</div>
+				</div>
+			</div>
+
+			{/* ==================== Concurrency Section ==================== */}
+			<div className={styles.sectionTitle}>
+				{is_cn ? '并发控制' : 'Concurrency'}
+			</div>
+
+			<div className={styles.concurrencyGrid}>
+				{/* Row 1 */}
+				<label className={styles.concurrencyLabel}>
+					{is_cn ? '最大并发' : 'Max concurrent'}
+				</label>
+				<div className={styles.concurrencyInput}>
+					<InputNumber
+						value={formData['quota.max'] ?? 2}
+						onChange={(value) => handleFieldChange('quota.max', value)}
+						schema={{ type: 'integer', minimum: 1, maximum: 10 }}
+					/>
+				</div>
+				<span className={styles.concurrencyUnit}>{is_cn ? '个任务' : 'tasks'}</span>
+
+				<label className={styles.concurrencyLabel}>
+					{is_cn ? '最大队列' : 'Max queue'}
+				</label>
+				<div className={styles.concurrencyInput}>
+					<InputNumber
+						value={formData['quota.queue'] ?? 10}
+						onChange={(value) => handleFieldChange('quota.queue', value)}
+						schema={{ type: 'integer', minimum: 1, maximum: 100 }}
+					/>
+				</div>
+				<span className={styles.concurrencyUnit}>{is_cn ? '个等待' : 'pending'}</span>
+
+				{/* Row 2 */}
+				<label className={styles.concurrencyLabel}>
+					{is_cn ? '优先级' : 'Priority'}
+				</label>
+				<div className={styles.concurrencyInput}>
+					<InputNumber
+						value={formData['quota.priority'] ?? 5}
+						onChange={(value) => handleFieldChange('quota.priority', value)}
+						schema={{ type: 'integer', minimum: 1, maximum: 10 }}
+					/>
+				</div>
+				<span className={styles.concurrencyUnit}>(1-10)</span>
+
+				<label className={styles.concurrencyLabel}>
+					{is_cn ? '超时时间' : 'Timeout'}
+				</label>
+				<div className={styles.concurrencyInput}>
+					<InputNumber
+						value={formData['executor.timeout'] ?? 30}
+						onChange={(value) => handleFieldChange('executor.timeout', value)}
+						schema={{ type: 'integer', minimum: 1 }}
+					/>
+				</div>
+				<span className={styles.concurrencyUnit}>{is_cn ? '分钟' : 'minutes'}</span>
+			</div>
+
+			{/* ==================== Testing Section ==================== */}
+			<div className={styles.sectionTitle}>
+				{is_cn ? '测试' : 'Testing'}
+			</div>
+
+			<div className={styles.formItem}>
+				<div className={styles.switchRow}>
+					<Switch
+						value={formData['executor.mode'] === 'dryrun'}
+						onChange={(value) => handleFieldChange('executor.mode', value ? 'dryrun' : 'standard')}
+						schema={{ type: 'boolean' }}
+					/>
+					<span className={styles.switchLabel}>
+						{is_cn ? '试运行模式' : 'Dry run mode'}
+					</span>
+					<span className={styles.switchHint}>
+						{is_cn ? '（模拟执行，不实际操作）' : '(simulate without executing)'}
+					</span>
+				</div>
+			</div>
+
+			{/* ==================== Learning Section ==================== */}
+			<div className={styles.sectionTitle}>
+				{is_cn ? '学习' : 'Learning'}
+			</div>
+
+			<div className={styles.formItem}>
+				<div className={styles.switchRow}>
+					<Switch
+						value={formData['learn.on'] || false}
+						onChange={(value) => handleFieldChange('learn.on', value)}
+						schema={{ type: 'boolean' }}
+					/>
+					<span className={styles.switchLabel}>
+						{is_cn ? '从经验中学习' : 'Learn from experience'}
+					</span>
+				</div>
+
+				{formData['learn.on'] && (
+					<div className={styles.switchContent}>
+						<div className={styles.learnOptions}>
+							<label className={styles.formLabel}>
+								{is_cn ? '学习内容' : 'Learn from'}
+							</label>
+							<CheckboxGroup
+								value={formData['learn.types'] || ['execution', 'feedback', 'insight']}
+								onChange={(value) => handleFieldChange('learn.types', value)}
+								schema={{
+									type: 'array',
+									enum: LEARN_TYPES.map(t => ({
+										label: is_cn ? t.label_cn : t.label,
+										value: t.value
+									}))
+								}}
+							/>
+						</div>
+
+						<div className={styles.learnKeep}>
+							<label className={styles.formLabel}>
+								{is_cn ? '保留时间' : 'Keep for'}
+							</label>
+							<div className={styles.keepRow}>
+								<InputNumber
+									value={formData['learn.keep'] ?? 90}
+									onChange={(value) => handleFieldChange('learn.keep', value)}
+									schema={{ type: 'integer', minimum: 0 }}
+								/>
+								<span className={styles.keepUnit}>
+									{is_cn ? '天（0 = 永久保留）' : 'days (0 = forever)'}
+								</span>
+							</div>
+						</div>
+					</div>
+				)}
+			</div>
+
+			{/* ==================== Triggers Section ==================== */}
+			<div className={styles.sectionTitle}>
+				{is_cn ? '触发器' : 'Triggers'}
+			</div>
+
+			<div className={styles.formItem}>
+				<div className={styles.switchRow}>
+					<Switch
+						value={formData['triggers.intervene.enabled'] ?? true}
+						onChange={(value) => handleFieldChange('triggers.intervene.enabled', value)}
+						schema={{ type: 'boolean' }}
+					/>
+					<span className={styles.switchLabel}>
+						{is_cn ? '接受临时任务' : 'Accept ad-hoc tasks'}
+					</span>
+				</div>
+			</div>
+
+			<div className={styles.formItem}>
+				<div className={styles.switchRow}>
+					<Switch
+						value={formData['triggers.event.enabled'] || false}
+						onChange={(value) => handleFieldChange('triggers.event.enabled', value)}
+						schema={{ type: 'boolean' }}
+					/>
+					<span className={styles.switchLabel}>
+						{is_cn ? '事件触发' : 'Trigger on events'}
+					</span>
+					<span className={styles.switchHint}>
+						{is_cn ? '（webhook / 数据库）' : '(webhook / database)'}
+					</span>
+				</div>
+			</div>
+
+			{/* ==================== Developer Options Section ==================== */}
+			<div className={styles.sectionTitle}>
+				{is_cn ? '开发者选项' : 'Developer Options'}
+			</div>
+			<div className={styles.sectionHint}>
+				{is_cn 
+					? '自定义各阶段的执行智能体，仅限开发者使用，通常无需修改' 
+					: 'Customize execution agents, for developers only, usually no need to change'}
+			</div>
+
+			<div className={styles.phaseList}>
+				{PHASES
+					.filter(phase => !phase.autonomousOnly || autonomousMode)
+					.map(phase => (
+						<div key={phase.key} className={styles.phaseItem}>
+							<div className={styles.phaseLabel}>
+								{is_cn ? phase.label_cn : phase.label_en}
+							</div>
+							<div className={styles.phaseSelect}>
+								<Select
+									value={formData[`resources.phases.${phase.key}`] || phase.default}
+									onChange={(value) => handleFieldChange(`resources.phases.${phase.key}`, value)}
+									schema={{
+										type: 'string',
+										enum: agentOptions
+									}}
+								/>
+							</div>
+							<div className={styles.phaseDesc}>
+								{is_cn ? phase.desc_cn : phase.desc_en}
+							</div>
+						</div>
+					))}
+			</div>
 		</div>
 	)
 }

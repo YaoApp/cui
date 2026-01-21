@@ -355,58 +355,75 @@ Assign Task vs Intervene:
     - [x] Custom scrollbar (themed)
     - [x] Keyboard support (Escape to close)
     - [x] Light/Dark mode support with consistent colors
-- [ ] Tab: Config (Left Menu + Right Panel Layout)
-  - [ ] Layout structure
-    - [ ] Left menu (vertical nav, 160px width)
-    - [ ] Right panel (scrollable content)
-    - [ ] Save button (fixed top-right)
-  - [ ] Menu items (dynamic based on autonomous_mode)
-    - [ ] Basic (always visible)
-    - [ ] Identity (always visible)
-    - [ ] Schedule (only when autonomous_mode = true)
-    - [ ] Advanced (always visible)
-  - [ ] Panel 1: Basic (from `__yao.member`)
-    - [ ] display_name (Input, required)
-    - [ ] robot_email (Input + domain Select, required, globally unique)
-    - [ ] bio (TextArea)
-    - [ ] manager_id (Select, fetch from Team API)
-    - [ ] autonomous_mode (Radio: Passive / Autonomous)
-  - [ ] Panel 2: Identity (from `__yao.member` + `robot_config`)
-    - [ ] system_prompt (TextArea + AI Generate button, required)
-    - [ ] language_model (Select, fetch from LLM API)
-    - [ ] cost_limit (InputNumber, USD/month)
-    - [ ] agents (CheckboxGroup, fetch from Agent API)
-    - [ ] mcp_servers (CheckboxGroup, fetch from MCP API)
-    - [ ] robot_config.identity.role (Input, required)
-    - [ ] robot_config.identity.duties (TagInput)
-    - [ ] robot_config.kb.collections (CheckboxGroup, fetch from KB API)
-    - [ ] robot_config.db.models (CheckboxGroup, fetch from Model API)
-  - [ ] Panel 3: Schedule (from `robot_config.clock` + `robot_config.delivery`)
-    - [ ] clock.mode (Radio: times / interval / daemon)
-    - [ ] clock.times (TimePicker list, when mode=times)
-    - [ ] clock.days (CheckboxGroup: Mon-Sun, when mode=times)
-    - [ ] clock.every (Input + unit, when mode=interval)
-    - [ ] clock.tz (Select, timezone)
-    - [ ] delivery.email (Switch + EmailTarget list)
-    - [ ] delivery.webhook (Switch + WebhookTarget list)
-    - [ ] delivery.process (Switch + ProcessTarget list)
-  - [ ] Panel 4: Advanced (from `robot_config`)
-    - [ ] clock.timeout (InputNumber, minutes)
-    - [ ] quota.max (InputNumber, default 2)
-    - [ ] quota.queue (InputNumber, default 10)
-    - [ ] quota.priority (InputNumber, 1-10, default 5)
-    - [ ] executor.mode (Radio: standard / dryrun)
-    - [ ] learn.on (Checkbox)
-    - [ ] learn.types (CheckboxGroup: execution/feedback/insight)
-    - [ ] learn.keep (InputNumber, days, 0=forever)
-    - [ ] triggers.intervene.enabled (Checkbox)
-    - [ ] triggers.event.enabled (Checkbox)
-  - [ ] Form state management (useConfigForm hook)
-  - [ ] Save API integration (PATCH member + robot_config)
-  - [ ] Validation (required fields, email uniqueness)
-  - [ ] Loading states
-  - [ ] Error handling
-  - [ ] i18n support (en/zh labels)
+- [x] Tab: Settings (Left Menu + Right Panel Layout) ✅ **COMPLETED**
+  - [x] Layout structure
+    - [x] Left menu (vertical nav, 180px width)
+    - [x] Right panel (scrollable content, max-width 640px centered)
+    - [x] Save button (fixed bottom-right in panel footer)
+  - [x] Menu items (dynamic based on autonomous_mode)
+    - [x] Basic (always visible)
+    - [x] Identity (always visible)
+    - [x] Schedule (only when autonomous_mode = true)
+    - [x] Advanced (always visible)
+  - [x] Panel 1: Basic (from `__yao.member`)
+    - [x] display_name (Input, required)
+    - [x] robot_email (Input + domain Select, required)
+    - [x] role_id (Select, fetch from Role API)
+    - [x] manager_id (Select, fetch from Team API)
+    - [x] bio (TextArea)
+    - [x] autonomous_mode (RadioGroup: 自主模式/Autonomous first, 按需模式/On Demand)
+  - [x] Panel 2: Identity & Resources (from `__yao.member` + `robot_config`)
+    - [x] system_prompt (TextArea + AI Generate button with loading state)
+    - [x] language_model (Select, fetch from LLM API)
+    - [x] cost_limit (InputNumber, monthly budget)
+    - [x] agents (CheckboxGroup, accessible AI assistants)
+    - [x] mcp_servers (CheckboxGroup, accessible tools)
+    - [x] robot_config.kb.collections (CheckboxGroup, accessible knowledge)
+    - [x] robot_config.db.models (CheckboxGroup, accessible data)
+  - [x] Panel 3: Schedule (from `robot_config.clock`)
+    - [x] clock.mode (Custom radio: 定时执行/At Specific Times, 间隔执行/At Regular Intervals, 持续运行/Continuous)
+    - [x] clock.times (TimePicker list with add/remove, when mode=times)
+    - [x] clock.days (Checkbox chips: Mon-Sun, when mode=times)
+    - [x] clock.every + unit (InputNumber + Select, when mode=interval)
+    - [x] clock.tz (Select, timezone)
+    - [x] Note: Results sent to manager by default
+  - [x] Panel 4: Advanced (from `robot_config`)
+    - [x] Delivery section
+      - [x] Additional email recipients (tag list with validation + error hints)
+      - [x] Webhook (multi-target with URL + optional Secret/InputPassword)
+      - [x] Yao Process (multi-target)
+    - [x] Concurrency section (grid layout, aligned)
+      - [x] quota.max (InputNumber)
+      - [x] quota.queue (InputNumber)
+      - [x] quota.priority (InputNumber, 1-10)
+      - [x] executor.timeout (InputNumber, minutes)
+    - [x] Testing section
+      - [x] executor.mode (Switch: dry run mode)
+    - [x] Learning section
+      - [x] learn.on (Switch)
+      - [x] learn.types (CheckboxGroup: execution/feedback/insight, conditional)
+      - [x] learn.keep (InputNumber, days, conditional)
+    - [x] Triggers section
+      - [x] triggers.intervene.enabled (Switch: accept ad-hoc tasks)
+      - [x] triggers.event.enabled (Switch: trigger on events)
+    - [x] Developer Options section (moved to bottom)
+      - [x] Phase agents (5 configurable: inspiration/goals/tasks/delivery/learning)
+      - [x] inspiration only visible when autonomous_mode = true
+      - [x] run phase removed (built-in scheduler, not configurable)
+      - [x] User-friendly labels (洞察发现/Discover insights, etc.)
+  - [x] UI/UX improvements
+    - [x] Tab renamed: Config → Settings (设置)
+    - [x] Form max-width (640px) + centered
+    - [x] Email validation with error messages
+    - [x] Webhook URL validation
+    - [x] Generate button fixed width (no size change on loading)
+    - [x] Concurrency grid aligned (6-column layout)
+  - [ ] Form state management (useConfigForm hook) - TODO
+  - [ ] Save API integration (PATCH member + robot_config) - TODO
+  - [ ] Validation (required fields, email uniqueness) - TODO
+  - [ ] Loading states - TODO
+  - [ ] Error handling - TODO
+  - [x] i18n support (en/zh labels)
 
 ### 1.3 Drawers
 
@@ -808,7 +825,14 @@ pages/mission-control/
 │   │       ├── ActiveTab.tsx      ✅ Running executions
 │   │       ├── HistoryTab.tsx     ✅ Execution history table
 │   │       ├── ResultsTab.tsx     ✅ Deliverables list
-│   │       └── ConfigTab.tsx      ⬜ TODO
+│   │       └── ConfigTab/         ✅ Settings Tab (renamed from Config)
+│   │           ├── index.tsx
+│   │           ├── index.less
+│   │           └── panels/
+│   │               ├── BasicPanel.tsx
+│   │               ├── IdentityPanel.tsx
+│   │               ├── SchedulePanel.tsx
+│   │               └── AdvancedPanel.tsx
 │   │
 │   ├── ExecutionCard/     ✅ Execution status card
 │   │   ├── index.tsx
@@ -867,7 +891,7 @@ pages/mission-control/
 | 1.2 | Execution Detail Drawer | ✅ Complete |
 | 1.2 | Agent Modal - Results Tab | ✅ Complete |
 | 1.2 | Result Detail Modal | ✅ Complete |
-| 1.2 | Agent Modal - Config Tab | ⬜ Next |
+| 1.2 | Agent Modal - Settings Tab | ✅ Complete (UI, pending API) |
 | 1.3 | Assign Task Drawer | ✅ Complete |
 | 1.3 | Intervention Drawer | ⬜ |
 | 1.4 | Add Agent Wizard | ⬜ |
@@ -894,33 +918,18 @@ Legend: ⬜ Not started | 🟡 In progress | ✅ Complete
     - [x] Light/Dark mode consistent colors
     - [x] Circular badge for attachment count
 
-**Next Focus: Config Tab**
+**Completed: Settings Tab** ✅
 
-Design Principles (see DESIGN.md Section 4.2.4):
-- **Follow user's mental flow** rather than system data structure
-- **Progressive disclosure**: Basic settings first, advanced settings hidden
-- **Contextual visibility**: Show/hide sections based on dependencies
-- **Left Menu + Right Panel** layout for easy navigation
-- **Strict backend alignment**: All fields map to `__yao.member` or `robot_config` JSON
-
-Mental Model (4 panels):
-1. **Basic** — "Who is this?" (display_name, robot_email, bio, manager_id, autonomous_mode)
-2. **Identity** — "What does it do?" (system_prompt, language_model, cost_limit, agents, mcp_servers, identity.role, kb, db)
-3. **Schedule** — "When to work?" (clock.*, delivery.*) - only when autonomous_mode=true
-4. **Advanced** — "Rarely changed" (quota.*, executor.*, learn.*, triggers.*)
-
-Key Behaviors:
-- When `autonomous_mode` toggles to `true`, menu shows "Schedule" item
-- When `autonomous_mode` toggles to `false`, menu hides "Schedule" item
-- Clock mode radio controls which sub-fields appear (times vs interval vs daemon)
-- Delivery toggles control sub-form visibility
-
-Data Sources:
-- `__yao.member` table: display_name, robot_email, bio, manager_id, autonomous_mode, system_prompt, language_model, cost_limit, agents, mcp_servers
-- `robot_config` JSON: identity, clock, triggers, quota, kb, db, learn, resources, delivery, executor
+Settings Tab UI implementation completed with:
+- Left Menu + Right Panel layout (180px menu, 640px max content)
+- 4 panels: Basic, Identity & Resources, Schedule, Advanced
+- Dynamic menu (Schedule only visible in autonomous mode)
+- All form fields with i18n labels
+- Email/URL validation with error messages
+- Developer Options section at bottom (phase agents, excluding run phase)
 
 **Pending Items:**
-1. Config Tab (Left Menu + Right Panel)
+1. Settings Tab API Integration (useConfigForm hook, save/load)
 2. Intervention Drawer
 3. Add Agent Wizard
 4. API Integration (Phase 2)

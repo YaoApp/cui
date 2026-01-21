@@ -92,7 +92,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 		},
 		{
 			key: 'config',
-			label: is_cn ? '配置' : 'Config',
+			label: is_cn ? '设置' : 'Settings',
 			icon: 'material-settings'
 		}
 	]
