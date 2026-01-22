@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Modal, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Creature from '@/widgets/Creature'
-import type { RobotState, Execution } from '../../types'
+import { useRobots } from '@/hooks/useRobots'
+import type { RobotState, Execution, RobotStatus } from '../../types'
 import { robotNames, type Delivery } from '../../mock/data'
 import ActiveTab from './tabs/ActiveTab'
 import HistoryTab from './tabs/HistoryTab'
@@ -28,6 +29,9 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
+	// Robot API hook for status refresh
+	const { getRobotStatus } = useRobots()
+
 	const [activeTab, setActiveTab] = useState<TabType>('active')
 	const [loading, setLoading] = useState(false)
 	const [showAssignDrawer, setShowAssignDrawer] = useState(false)
@@ -35,16 +39,66 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 	const [showGuideDrawer, setShowGuideDrawer] = useState(false)
 	const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
 
-	// Reset tab when modal opens
+	// Real-time status state (merged with robot prop)
+	const [robotStatus, setRobotStatus] = useState<{
+		status: RobotStatus
+		running: number
+		max_running: number
+		running_ids?: string[]
+	} | null>(null)
+
+	// Status refresh interval ref
+	const statusIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+	// Refresh robot status from API
+	const refreshStatus = useCallback(async () => {
+		if (!robot) return
+
+		try {
+			const status = await getRobotStatus(robot.member_id)
+			if (status) {
+				setRobotStatus({
+					status: status.status as RobotStatus,
+					running: status.running,
+					max_running: status.max_running,
+					running_ids: status.running_ids
+				})
+			}
+		} catch (err) {
+			console.error('Failed to refresh robot status:', err)
+		}
+	}, [robot, getRobotStatus])
+
+	// Reset tab and start status refresh when modal opens
 	useEffect(() => {
-		if (visible) {
+		if (visible && robot) {
 			setActiveTab('active')
 			setShowAssignDrawer(false)
 			setShowDetailDrawer(false)
 			setShowGuideDrawer(false)
 			setSelectedExecution(null)
+			setRobotStatus(null)
+
+			// Initial status refresh
+			refreshStatus()
+
+			// Start periodic refresh (every 10 seconds)
+			statusIntervalRef.current = setInterval(refreshStatus, 10000)
+		} else {
+			// Clear interval when modal closes
+			if (statusIntervalRef.current) {
+				clearInterval(statusIntervalRef.current)
+				statusIntervalRef.current = null
+			}
 		}
-	}, [visible])
+
+		return () => {
+			if (statusIntervalRef.current) {
+				clearInterval(statusIntervalRef.current)
+				statusIntervalRef.current = null
+			}
+		}
+	}, [visible, robot, refreshStatus])
 
 	// Handle opening execution detail
 	const handleOpenDetail = useCallback((execution: Execution) => {
@@ -100,6 +154,15 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 
 	if (!robot) return null
 
+	// Merge robot prop with real-time status
+	const currentRobot: RobotState = {
+		...robot,
+		status: robotStatus?.status || robot.status,
+		running: robotStatus?.running ?? robot.running,
+		max_running: robotStatus?.max_running ?? robot.max_running,
+		running_ids: robotStatus?.running_ids || robot.running_ids
+	}
+
 	// Get i18n display name
 	const displayName = robotNames[robot.member_id]
 		? (is_cn ? robotNames[robot.member_id].cn : robotNames[robot.member_id].en)
@@ -110,7 +173,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 			key: 'active',
 			label: is_cn ? '进行中' : 'Active',
 			icon: 'material-play_circle',
-			count: robot.running
+			count: currentRobot.running
 		},
 		{
 			key: 'history',
@@ -145,17 +208,26 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 
 		switch (activeTab) {
 			case 'active':
-				return <ActiveTab robot={robot} onAssignTask={handleAssignTask} onOpenDetail={handleOpenDetail} onOpenGuide={handleOpenGuide} />
+				return <ActiveTab robot={currentRobot} onAssignTask={handleAssignTask} onOpenDetail={handleOpenDetail} onOpenGuide={handleOpenGuide} />
 			case 'history':
-				return <HistoryTab robot={robot} onOpenDetail={handleOpenDetail} />
+				return <HistoryTab robot={currentRobot} onOpenDetail={handleOpenDetail} />
 			case 'results':
-				return <ResultsTab robot={robot} onOpenDetail={onOpenResultDetail} />
+				return <ResultsTab robot={currentRobot} onOpenDetail={onOpenResultDetail} />
 			case 'config':
-				return <ConfigTab robot={robot} onDelete={() => {
-					// Close modal and refresh grid after delete
-					onClose()
-					onDataUpdated?.()
-				}} />
+				return <ConfigTab 
+					robot={currentRobot} 
+					onDelete={() => {
+						// Close modal and refresh grid after delete
+						onClose()
+						onDataUpdated?.()
+					}}
+					onUpdated={() => {
+						// Refresh grid data after update
+						onDataUpdated?.()
+						// Also refresh status
+						refreshStatus()
+					}}
+				/>
 			default:
 				return null
 		}
@@ -167,7 +239,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 				<div className={styles.modalHeader}>
 					<div className={styles.titleSection}>
 						<Creature
-							status={robot.status}
+							status={currentRobot.status}
 							size='small'
 							animated={false}
 							showAura={false}
@@ -230,7 +302,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 				<AssignTaskDrawer
 					visible={showAssignDrawer}
 					onClose={() => setShowAssignDrawer(false)}
-					robot={robot}
+					robot={currentRobot}
 					onTaskAssigned={handleTaskAssigned}
 				/>
 
@@ -246,11 +318,13 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 				<GuideExecutionDrawer
 					visible={showGuideDrawer}
 					onClose={handleCloseGuide}
-					robot={robot}
+					robot={currentRobot}
 					execution={selectedExecution}
 					onGuidanceSent={() => {
 						// Refresh data after guidance is sent
 						onDataUpdated?.()
+						// Also refresh status
+						refreshStatus()
 					}}
 				/>
 			</div>

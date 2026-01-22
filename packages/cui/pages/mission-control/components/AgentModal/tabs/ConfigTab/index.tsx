@@ -1,7 +1,19 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { getLocale } from '@umijs/max'
+import { message } from 'antd'
 import Icon from '@/widgets/Icon'
+import { useRobots } from '@/hooks/useRobots'
+import { useGlobal } from '@/context/app'
+import { Agent } from '@/openapi/agent/api'
+import { MCP } from '@/openapi/mcp/api'
+import { UserAuth } from '@/openapi/user/auth'
+import { UserTeams } from '@/openapi/user/teams'
+import type { Agent as AgentType } from '@/openapi/agent/types'
+import type { MCPServer } from '@/openapi/mcp/types'
+import type { TeamConfig } from '@/openapi/user/types'
 import type { RobotState } from '../../../../types'
+import type { Robot, RobotUpdateRequest } from '@/openapi/agent/robot'
+import CreatureLoading from '../../../CreatureLoading'
 import BasicPanel from './panels/BasicPanel'
 import IdentityPanel from './panels/IdentityPanel'
 import SchedulePanel from './panels/SchedulePanel'
@@ -11,6 +23,7 @@ import styles from './index.less'
 interface ConfigTabProps {
 	robot: RobotState
 	onDelete?: () => void
+	onUpdated?: () => void
 }
 
 type MenuKey = 'basic' | 'identity' | 'schedule' | 'advanced'
@@ -22,17 +35,236 @@ interface MenuItem {
 	visible?: boolean
 }
 
-const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete }) => {
+// Context for sharing loaded API data across panels
+export interface ConfigContextData {
+	teamConfig: TeamConfig | null
+	emailDomains: Array<{ label: string; value: string }>
+	managers: Array<{ label: string; value: string }>
+	roles: Array<{ label: string; value: string }>
+	agents: AgentType[]
+	mcpServers: MCPServer[]
+	loading: boolean
+}
+
+const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+	const global = useGlobal()
+
+	// Robot API hook
+	const { getRobot, updateRobot, deleteRobot, error: apiError } = useRobots()
 
 	const [activeMenu, setActiveMenu] = useState<MenuKey>('basic')
 	const [formData, setFormData] = useState<Record<string, any>>({})
+	const [originalData, setOriginalData] = useState<Record<string, any>>({})
 	const [isDirty, setIsDirty] = useState(false)
 	const [saving, setSaving] = useState(false)
+	const [loadingRobot, setLoadingRobot] = useState(false)
 
-	// TODO: Load actual data from robot.config
-	// For now, we use mock data for autonomous_mode
+	// Shared API data state
+	const [configData, setConfigData] = useState<ConfigContextData>({
+		teamConfig: null,
+		emailDomains: [],
+		managers: [],
+		roles: [],
+		agents: [],
+		mcpServers: [],
+		loading: true
+	})
+
+	// Refs to track data loading
+	const robotLoadedRef = useRef(false)
+	const configLoadedRef = useRef(false)
+	const managersLoadedRef = useRef(false)
+	const agentsLoadedRef = useRef(false)
+	const mcpLoadedRef = useRef(false)
+
+	// Get team ID
+	const teamId = global.user?.team_id || global.user?.user_id || ''
+
+	// Load robot details from API
+	const loadRobotDetails = useCallback(async () => {
+		if (!robot?.member_id || robotLoadedRef.current) return
+
+		robotLoadedRef.current = true
+		setLoadingRobot(true)
+
+		try {
+			const robotDetail = await getRobot(robot.member_id)
+			if (robotDetail) {
+				// Parse clock config from robot_config
+				const clock = robotDetail.robot_config?.clock || {}
+				
+				const data: Record<string, any> = {
+					display_name: robotDetail.display_name || '',
+					bio: robotDetail.bio || '',
+					robot_email: robotDetail.robot_email || '',
+					role_id: robotDetail.role_id || '',
+					manager_id: robotDetail.manager_id || '',
+					autonomous_mode: robotDetail.autonomous_mode || false,
+					system_prompt: robotDetail.system_prompt || '',
+					agents: robotDetail.agents || [],
+					mcp_servers: robotDetail.mcp_servers || [],
+					language_model: robotDetail.language_model || '',
+					cost_limit: robotDetail.cost_limit || 100,
+					// Clock configuration
+					'clock.mode': clock.mode || 'times',
+					'clock.times': clock.times || ['09:00'],
+					'clock.days': clock.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+					'clock.every': clock.every || '30m',
+					'clock.tz': clock.tz || 'Asia/Shanghai'
+				}
+				setFormData(data)
+				setOriginalData(data)
+			}
+		} catch (err) {
+			console.error('Failed to load robot details:', err)
+		} finally {
+			setLoadingRobot(false)
+		}
+	}, [robot?.member_id, getRobot])
+
+	// Load team config
+	useEffect(() => {
+		if (!teamId || !window.$app?.openapi || configLoadedRef.current) return
+
+		configLoadedRef.current = true
+
+		const openapi = window.$app.openapi
+		const auth = new UserAuth(openapi)
+		const teamsAPI = new UserTeams(openapi, auth)
+
+		teamsAPI
+			.GetConfig(teamId)
+			.then((response) => {
+				if (!openapi.IsError(response) && response.data) {
+					const config = response.data
+					setConfigData(prev => ({
+						...prev,
+						teamConfig: config,
+						emailDomains: config.robot?.email_domains?.map((d: any) => ({
+							label: d.domain,
+							value: `@${d.domain}`
+						})) || [],
+						roles: config.roles
+							?.filter((r: any) => !r.hidden)
+							.map((r: any) => ({
+								label: r.label,
+								value: r.role_id
+							})) || []
+					}))
+				}
+			})
+			.catch((err) => {
+				console.error('Failed to load team config:', err)
+				configLoadedRef.current = false
+			})
+	}, [teamId])
+
+	// Load managers (human team members)
+	useEffect(() => {
+		if (!teamId || !window.$app?.openapi || managersLoadedRef.current) return
+
+		managersLoadedRef.current = true
+
+		const openapi = window.$app.openapi
+		const auth = new UserAuth(openapi)
+		const teamsAPI = new UserTeams(openapi, auth)
+
+		teamsAPI
+			.GetMembers(teamId, {
+				member_type: 'user',
+				status: 'active',
+				fields: ['member_id', 'display_name', 'email', 'user_id']
+			})
+			.then((response) => {
+				if (response?.data?.data && Array.isArray(response.data.data)) {
+					setConfigData(prev => ({
+						...prev,
+						managers: response.data.data.map((m: any) => {
+							const name = m.display_name || m.email || m.user_id || (is_cn ? '未知' : 'Unknown')
+							const email = m.email || ''
+							return {
+								label: email ? `${name} (${email})` : name,
+								value: m.member_id || m.user_id || ''
+							}
+						})
+					}))
+				}
+			})
+			.catch((err) => {
+				console.error('Failed to load managers:', err)
+				managersLoadedRef.current = false
+			})
+	}, [teamId, is_cn])
+
+	// Load agents
+	useEffect(() => {
+		if (!window.$app?.openapi || agentsLoadedRef.current) return
+
+		agentsLoadedRef.current = true
+
+		const openapi = window.$app.openapi
+		const agentAPI = new Agent(openapi)
+
+		agentAPI.assistants
+			.List({})
+			.then((response) => {
+				if (!openapi.IsError(response)) {
+					const data = openapi.GetData(response)
+					if (data?.data) {
+						setConfigData(prev => ({ ...prev, agents: data.data }))
+					}
+				}
+			})
+			.catch((err) => {
+				console.error('Failed to load agents:', err)
+				agentsLoadedRef.current = false
+			})
+	}, [])
+
+	// Load MCP servers
+	useEffect(() => {
+		if (!window.$app?.openapi || mcpLoadedRef.current) return
+
+		mcpLoadedRef.current = true
+
+		const openapi = window.$app.openapi
+		const mcpAPI = new MCP(openapi)
+
+		mcpAPI
+			.ListServers()
+			.then((servers) => {
+				if (servers) {
+					setConfigData(prev => ({ ...prev, mcpServers: servers }))
+				}
+			})
+			.catch((err) => {
+				console.error('Failed to load MCP servers:', err)
+				mcpLoadedRef.current = false
+			})
+			.finally(() => {
+				setConfigData(prev => ({ ...prev, loading: false }))
+			})
+	}, [])
+
+	// Load robot details on mount
+	useEffect(() => {
+		loadRobotDetails()
+	}, [loadRobotDetails])
+
+	// Reset refs when robot changes
+	useEffect(() => {
+		robotLoadedRef.current = false
+	}, [robot?.member_id])
+
+	// Check if form is dirty
+	useEffect(() => {
+		const dirty = JSON.stringify(formData) !== JSON.stringify(originalData)
+		setIsDirty(dirty)
+	}, [formData, originalData])
+
+	// Current autonomous mode from form data
 	const autonomousMode = formData.autonomous_mode ?? false
 
 	// Menu items - schedule only visible when autonomous_mode is true
@@ -65,19 +297,53 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete }) => {
 	// Handle field change
 	const handleFieldChange = (field: string, value: any) => {
 		setFormData(prev => ({ ...prev, [field]: value }))
-		setIsDirty(true)
 	}
 
 	// Handle save
 	const handleSave = async () => {
+		if (!robot?.member_id || !isDirty) return
+
 		setSaving(true)
 		try {
-			// TODO: Call API to save
-			console.log('Saving config:', formData)
-			await new Promise(resolve => setTimeout(resolve, 1000))
-			setIsDirty(false)
+			// Build robot_config with clock settings
+			const robotConfig: Record<string, any> = {
+				clock: {
+					mode: formData['clock.mode'] || 'times',
+					times: formData['clock.times'] || ['09:00'],
+					days: formData['clock.days'] || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+					every: formData['clock.every'] || '30m',
+					tz: formData['clock.tz'] || 'Asia/Shanghai'
+				}
+			}
+
+			// Build update request
+			const updateData: RobotUpdateRequest = {
+				display_name: formData.display_name,
+				bio: formData.bio,
+				robot_email: formData.robot_email,
+				role_id: formData.role_id,
+				manager_id: formData.manager_id || undefined,
+				autonomous_mode: formData.autonomous_mode,
+				system_prompt: formData.system_prompt,
+				agents: formData.agents?.length > 0 ? formData.agents : undefined,
+				mcp_servers: formData.mcp_servers?.length > 0 ? formData.mcp_servers : undefined,
+				language_model: formData.language_model || undefined,
+				cost_limit: formData.cost_limit,
+				robot_config: robotConfig
+			}
+
+			const result = await updateRobot(robot.member_id, updateData)
+			if (result) {
+				message.success(is_cn ? '保存成功' : 'Saved successfully')
+				setOriginalData({ ...formData })
+				setIsDirty(false)
+				onUpdated?.()
+			} else {
+				message.error(apiError || (is_cn ? '保存失败' : 'Failed to save'))
+			}
 		} catch (error) {
 			console.error('Failed to save:', error)
+			message.error(is_cn ? '保存失败' : 'Failed to save')
 		} finally {
 			setSaving(false)
 		}
@@ -89,7 +355,8 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete }) => {
 			robot,
 			formData,
 			onChange: handleFieldChange,
-			is_cn
+			is_cn,
+			configData
 		}
 
 		switch (activeMenu) {
@@ -127,7 +394,11 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete }) => {
 			{/* Right Panel */}
 			<div className={styles.panelContainer}>
 				<div className={styles.panelContent}>
-					{renderPanel()}
+				{loadingRobot ? (
+					<CreatureLoading size="medium" />
+				) : (
+						renderPanel()
+					)}
 				</div>
 
 				{/* Save Button */}

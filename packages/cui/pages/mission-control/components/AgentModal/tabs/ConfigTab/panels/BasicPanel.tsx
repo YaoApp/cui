@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Tooltip } from 'antd'
-import { Input, Select, TextArea, RadioGroup } from '@/components/ui/inputs'
+import { Input, Select, RadioGroup } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import type { RobotState } from '../../../../../types'
+import type { ConfigContextData } from '../index'
 import styles from '../index.less'
 
 interface BasicPanelProps {
@@ -10,6 +11,7 @@ interface BasicPanelProps {
 	formData: Record<string, any>
 	onChange: (field: string, value: any) => void
 	is_cn: boolean
+	configData?: ConfigContextData
 }
 
 /**
@@ -23,63 +25,28 @@ interface BasicPanelProps {
  * - manager_id: Reports To
  * - autonomous_mode: Work Mode
  */
-const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_cn }) => {
+const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_cn, configData }) => {
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [emailPrefix, setEmailPrefix] = useState('')
-	const [emailDomain, setEmailDomain] = useState('@example.com')
+	const [emailDomain, setEmailDomain] = useState('')
 
-	// TODO: Load from API
-	const [roles, setRoles] = useState<Array<{ label: string; value: string }>>([])
-	const [managers, setManagers] = useState<Array<{ label: string; value: string }>>([])
-	const [emailDomains, setEmailDomains] = useState<Array<{ label: string; value: string }>>([])
-	const [loading, setLoading] = useState(false)
-
-	// Use ref to track if data has been loaded
-	const dataLoadedRef = useRef(false)
-
-	// Initialize form data from robot
+	// Parse email when formData.robot_email changes
 	useEffect(() => {
-		if (robot && !dataLoadedRef.current) {
-			dataLoadedRef.current = true
-			
-			// Parse email
-			const email = robot.description || '' // TODO: Use actual robot_email field
-			const atIndex = email.indexOf('@')
-			if (atIndex > 0) {
-				setEmailPrefix(email.substring(0, atIndex))
-				setEmailDomain(`@${email.substring(atIndex + 1)}`)
-			}
-
-			// TODO: Load actual data from robot config
-			// For now, set mock data
-			onChange('display_name', robot.display_name || '')
-			onChange('bio', robot.description || '')
-			onChange('autonomous_mode', false) // Default to on-demand
+		const email = formData.robot_email || ''
+		const atIndex = email.indexOf('@')
+		if (atIndex > 0) {
+			setEmailPrefix(email.substring(0, atIndex))
+			setEmailDomain(`@${email.substring(atIndex + 1)}`)
+		} else if (configData?.emailDomains?.length) {
+			// Set default domain if available
+			setEmailDomain(configData.emailDomains[0].value)
 		}
-	}, [robot])
+	}, [formData.robot_email, configData?.emailDomains])
 
-	// Mock data - TODO: Replace with API calls
-	useEffect(() => {
-		// Mock roles
-		setRoles([
-			{ label: is_cn ? '团队成员' : 'Team Member', value: 'team_member' },
-			{ label: is_cn ? '开发工程师' : 'Developer', value: 'developer' },
-			{ label: is_cn ? '设计师' : 'Designer', value: 'designer' },
-			{ label: is_cn ? '产品经理' : 'Product Manager', value: 'product_manager' }
-		])
-
-		// Mock managers
-		setManagers([
-			{ label: 'John Smith (john@example.com)', value: 'member_001' },
-			{ label: 'Jane Doe (jane@example.com)', value: 'member_002' }
-		])
-
-		// Mock email domains
-		setEmailDomains([
-			{ label: 'example.com', value: '@example.com' },
-			{ label: 'company.ai', value: '@company.ai' }
-		])
-	}, [is_cn])
+	// Get options from configData
+	const emailDomains = useMemo(() => configData?.emailDomains || [], [configData?.emailDomains])
+	const roles = useMemo(() => configData?.roles || [], [configData?.roles])
+	const managers = useMemo(() => configData?.managers || [], [configData?.managers])
 
 	// Handle field change with error clearing
 	const handleFieldChange = (field: string, value: any) => {
@@ -95,9 +62,10 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 
 	// Handle email prefix change
 	const handleEmailPrefixChange = (value: any) => {
-		setEmailPrefix(String(value))
+		const prefix = String(value)
+		setEmailPrefix(prefix)
 		// Combine and update
-		onChange('robot_email', `${value}${emailDomain}`)
+		onChange('robot_email', `${prefix}${emailDomain}`)
 		if (errors.robot_email) {
 			setErrors(prev => {
 				const newErrors = { ...prev }
@@ -109,8 +77,9 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 
 	// Handle email domain change
 	const handleEmailDomainChange = (value: any) => {
-		setEmailDomain(String(value))
-		onChange('robot_email', `${emailPrefix}${value}`)
+		const domain = String(value)
+		setEmailDomain(domain)
+		onChange('robot_email', `${emailPrefix}${domain}`)
 	}
 
 	return (

@@ -1,0 +1,408 @@
+@import '@/styles/preset/vars.less';
+
+// ==================== Animations ====================
+
+@keyframes float {
+	0%, 100% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-6px);
+	}
+}
+
+@keyframes breathe {
+	0%, 100% {
+		transform: scale(1);
+		opacity: 0.15;
+	}
+	50% {
+		transform: scale(1.15);
+		opacity: 0.25;
+	}
+}
+
+@keyframes pulse-glow {
+	0%, 100% {
+		filter: drop-shadow(0 0 12px var(--glow-color)) drop-shadow(0 0 24px var(--glow-color));
+	}
+	50% {
+		filter: drop-shadow(0 0 18px var(--glow-color)) drop-shadow(0 0 36px var(--glow-color));
+	}
+}
+
+@keyframes orbit {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes particle-rise {
+	0% {
+		transform: translateY(0) scale(1);
+		opacity: 0;
+	}
+	20% {
+		opacity: 0.8;
+	}
+	80% {
+		opacity: 0.6;
+	}
+	100% {
+		transform: translateY(-40px) scale(0.5);
+		opacity: 0;
+	}
+}
+
+@keyframes blink {
+	0%, 45%, 55%, 100% {
+		transform: scaleY(1);
+	}
+	50% {
+		transform: scaleY(0.1);
+	}
+}
+
+@keyframes look-around {
+	0%, 20%, 100% {
+		transform: translateX(0);
+	}
+	30%, 50% {
+		transform: translateX(2px);
+	}
+	60%, 80% {
+		transform: translateX(-2px);
+	}
+}
+
+@keyframes text-shimmer {
+	0% {
+		background-position: -100% center;
+	}
+	100% {
+		background-position: 200% center;
+	}
+}
+
+// ==================== Main Container ====================
+
+.creatureLoading {
+	--glow-color: var(--color_mission_accent_cyan);
+	--creature-gradient: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #7dd3fc 100%);
+	
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	padding: 24px;
+}
+
+// ==================== Size Variants ====================
+
+.small {
+	gap: 10px;
+	padding: 16px;
+	
+	.creatureContainer {
+		width: 48px;
+		height: 48px;
+	}
+	
+	.aura {
+		width: 64px;
+		height: 64px;
+	}
+	
+	.orbitRing {
+		width: 42px;
+		height: 42px;
+		border-width: 1px;
+		
+		&::before {
+			width: 3px;
+			height: 3px;
+			top: -1.5px;
+		}
+	}
+	
+	.creatureBody {
+		width: 28px;
+		height: 28px;
+	}
+	
+	.eyes {
+		gap: 4px;
+	}
+	
+	.eye {
+		width: 6px;
+		height: 7px;
+	}
+	
+	.pupil {
+		width: 3px;
+		height: 4px;
+	}
+	
+	.particle {
+		width: 3px;
+		height: 3px;
+	}
+	
+	.loadingText {
+		font-size: 12px;
+	}
+}
+
+.medium {
+	.creatureContainer {
+		width: 72px;
+		height: 72px;
+	}
+	
+	.aura {
+		width: 100px;
+		height: 100px;
+	}
+	
+	.orbitRing {
+		width: 64px;
+		height: 64px;
+	}
+	
+	.creatureBody {
+		width: 42px;
+		height: 42px;
+	}
+	
+	.eyes {
+		gap: 6px;
+	}
+	
+	.eye {
+		width: 8px;
+		height: 10px;
+	}
+	
+	.pupil {
+		width: 4px;
+		height: 5px;
+	}
+	
+	.particle {
+		width: 4px;
+		height: 4px;
+	}
+	
+	.loadingText {
+		font-size: 13px;
+	}
+}
+
+.large {
+	gap: 20px;
+	padding: 32px;
+	
+	.creatureContainer {
+		width: 100px;
+		height: 100px;
+	}
+	
+	.aura {
+		width: 140px;
+		height: 140px;
+	}
+	
+	.orbitRing {
+		width: 90px;
+		height: 90px;
+		border-width: 1.5px;
+		
+		&::before {
+			width: 6px;
+			height: 6px;
+			top: -3px;
+		}
+	}
+	
+	.creatureBody {
+		width: 56px;
+		height: 56px;
+	}
+	
+	.eyes {
+		gap: 8px;
+	}
+	
+	.eye {
+		width: 10px;
+		height: 12px;
+	}
+	
+	.pupil {
+		width: 5px;
+		height: 6px;
+	}
+	
+	.particle {
+		width: 5px;
+		height: 5px;
+	}
+	
+	.loadingText {
+		font-size: 14px;
+	}
+}
+
+// ==================== Creature Elements ====================
+
+.creatureContainer {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.aura {
+	position: absolute;
+	border-radius: 50%;
+	background: radial-gradient(circle, var(--glow-color) 0%, transparent 60%);
+	animation: breathe 3s ease-in-out infinite;
+	pointer-events: none;
+}
+
+.orbitRing {
+	position: absolute;
+	border: 1px solid var(--glow-color);
+	border-radius: 50%;
+	opacity: 0.4;
+	animation: orbit 8s linear infinite;
+	
+	&::before {
+		content: '';
+		position: absolute;
+		width: 4px;
+		height: 4px;
+		background: var(--glow-color);
+		border-radius: 50%;
+		top: -2px;
+		left: 50%;
+		transform: translateX(-50%);
+		box-shadow: 0 0 8px var(--glow-color);
+	}
+}
+
+.creature {
+	position: relative;
+	z-index: 2;
+	filter: drop-shadow(0 0 12px var(--glow-color));
+	animation: float 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite;
+}
+
+.creatureBody {
+	background: var(--creature-gradient);
+	border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 
+		inset 0 -8px 16px var(--color_mission_creature_shadow, rgba(0, 0, 0, 0.2)), 
+		inset 0 8px 16px var(--color_mission_creature_highlight, rgba(255, 255, 255, 0.3));
+}
+
+.eyes {
+	display: flex;
+	position: absolute;
+	top: 30%;
+}
+
+.eye {
+	background: var(--color_mission_creature_eye_bg, #ffffff);
+	border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	animation: blink 4s ease-in-out infinite;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.pupil {
+	background: var(--color_mission_creature_pupil, #1e293b);
+	border-radius: 50%;
+	animation: look-around 6s ease-in-out infinite;
+	position: relative;
+	
+	&::after {
+		content: '';
+		position: absolute;
+		width: 35%;
+		height: 35%;
+		background: rgba(255, 255, 255, 0.8);
+		border-radius: 50%;
+		top: 15%;
+		right: 15%;
+	}
+}
+
+// ==================== Particles ====================
+
+.particles {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.particle {
+	position: absolute;
+	background: var(--glow-color);
+	border-radius: 50%;
+	opacity: 0;
+	animation: particle-rise 2.5s ease-out infinite;
+	animation-delay: var(--delay, 0s);
+	box-shadow: 0 0 6px var(--glow-color);
+	
+	&:nth-child(1) {
+		left: 20%;
+		bottom: 10%;
+	}
+	
+	&:nth-child(2) {
+		left: 70%;
+		bottom: 15%;
+	}
+	
+	&:nth-child(3) {
+		left: 40%;
+		bottom: 5%;
+	}
+	
+	&:nth-child(4) {
+		left: 85%;
+		bottom: 20%;
+	}
+}
+
+// ==================== Loading Text ====================
+
+.loadingText {
+	color: var(--color_mission_text_muted);
+	font-weight: 500;
+	letter-spacing: 0.5px;
+	background: linear-gradient(
+		90deg, 
+		var(--color_mission_text_muted) 0%,
+		var(--color_mission_accent_cyan) 50%,
+		var(--color_mission_text_muted) 100%
+	);
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	animation: text-shimmer 2s ease-in-out infinite;
+}

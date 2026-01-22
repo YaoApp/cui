@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Tooltip } from 'antd'
+import { Tooltip, message } from 'antd'
 import { Input, Select, InputNumber, Switch, CheckboxGroup, InputPassword } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
+import { useRobots } from '@/hooks/useRobots'
 import type { RobotState } from '../../../../../types'
+import type { ConfigContextData } from '../index'
 import styles from '../index.less'
 
 interface AdvancedPanelProps {
@@ -12,6 +14,7 @@ interface AdvancedPanelProps {
 	is_cn: boolean
 	autonomousMode?: boolean
 	onDelete?: () => void
+	configData?: ConfigContextData
 }
 
 // Phase agents - for customizing which AI handles each execution phase
@@ -36,7 +39,10 @@ const LEARN_TYPES = [
 /**
  * AdvancedPanel - Advanced settings (rarely changed)
  */
-const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange, is_cn, autonomousMode = false, onDelete }) => {
+const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange, is_cn, autonomousMode = false, onDelete, configData }) => {
+	// Robot API hook for delete
+	const { deleteRobot, error: apiError } = useRobots()
+
 	// Additional email recipients
 	const [emailRecipients, setEmailRecipients] = useState<string[]>([])
 	const [newEmail, setNewEmail] = useState('')
@@ -198,15 +204,37 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 
 	// Handle delete robot
 	const handleDelete = async () => {
+		if (!robot?.member_id) return
+
 		setDeleting(true)
 		try {
-			// TODO: Call API to delete
-			console.log('Deleting robot:', robot.member_id)
-			await new Promise(resolve => setTimeout(resolve, 1000))
-			setShowDeleteConfirm(false)
-			onDelete?.()
-		} catch (error) {
+			const result = await deleteRobot(robot.member_id)
+			if (result?.deleted) {
+				message.success(is_cn ? '删除成功' : 'Deleted successfully')
+				setShowDeleteConfirm(false)
+				onDelete?.()
+			} else {
+				// Check for 409 conflict (robot is running)
+				if (apiError?.includes('running') || apiError?.includes('conflict') || apiError?.includes('409')) {
+					message.error(is_cn 
+						? '该智能体正在执行任务，请等待任务完成后再删除' 
+						: 'This agent is currently running tasks. Please wait for tasks to complete before deleting.'
+					)
+				} else {
+					message.error(apiError || (is_cn ? '删除失败' : 'Failed to delete'))
+				}
+			}
+		} catch (error: any) {
 			console.error('Failed to delete:', error)
+			// Handle 409 conflict error
+			if (error?.status === 409 || error?.message?.includes('running')) {
+				message.error(is_cn 
+					? '该智能体正在执行任务，请等待任务完成后再删除' 
+					: 'This agent is currently running tasks. Please wait for tasks to complete before deleting.'
+				)
+			} else {
+				message.error(is_cn ? '删除失败' : 'Failed to delete')
+			}
 		} finally {
 			setDeleting(false)
 		}

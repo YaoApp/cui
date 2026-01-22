@@ -10,6 +10,7 @@ interface SchedulePanelProps {
 	formData: Record<string, any>
 	onChange: (field: string, value: any) => void
 	is_cn: boolean
+	configData?: any
 }
 
 // Days of week options

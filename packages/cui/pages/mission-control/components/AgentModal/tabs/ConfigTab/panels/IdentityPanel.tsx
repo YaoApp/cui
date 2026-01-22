@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Tooltip } from 'antd'
 import { Select, TextArea, InputNumber, CheckboxGroup } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import type { RobotState } from '../../../../../types'
+import type { ConfigContextData } from '../index'
 import styles from '../index.less'
 
 interface IdentityPanelProps {
@@ -10,6 +11,7 @@ interface IdentityPanelProps {
 	formData: Record<string, any>
 	onChange: (field: string, value: any) => void
 	is_cn: boolean
+	configData?: ConfigContextData
 }
 
 /**
@@ -26,77 +28,35 @@ interface IdentityPanelProps {
  * - kb.collections: Accessible Knowledge
  * - db.models: Accessible Data
  */
-const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange, is_cn }) => {
+const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange, is_cn, configData }) => {
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [generatingPrompt, setGeneratingPrompt] = useState(false)
 
-	// API data states - TODO: Load from actual APIs
-	const [llmProviders, setLLMProviders] = useState<Array<{ label: string; value: string }>>([])
-	const [agents, setAgents] = useState<Array<{ label: string; value: string }>>([])
-	const [mcpServers, setMCPServers] = useState<Array<{ label: string; value: string }>>([])
-	const [kbCollections, setKBCollections] = useState<Array<{ label: string; value: string }>>([])
-	const [dbModels, setDBModels] = useState<Array<{ label: string; value: string }>>([])
-	
-	const [loading, setLoading] = useState({
-		llm: false,
-		agents: false,
-		mcp: false,
-		kb: false,
-		db: false
-	})
+	// Get options from configData
+	const agentOptions = useMemo(() => 
+		(configData?.agents || []).map(agent => ({
+			label: agent.name || agent.assistant_id,
+			value: agent.assistant_id
+		})),
+		[configData?.agents]
+	)
 
-	// Use ref to track if data has been loaded
-	const dataLoadedRef = useRef(false)
+	const mcpOptions = useMemo(() =>
+		(configData?.mcpServers || []).map(server => ({
+			label: server.label || server.name,
+			value: server.value || server.name
+		})),
+		[configData?.mcpServers]
+	)
 
-	// Initialize form data from robot
-	useEffect(() => {
-		if (robot && !dataLoadedRef.current) {
-			dataLoadedRef.current = true
-			// TODO: Load actual data from robot config
-		}
-	}, [robot])
-
-	// Mock data - TODO: Replace with API calls
-	useEffect(() => {
-		// Mock LLM providers
-		setLLMProviders([
-			{ label: 'GPT-4 Turbo', value: 'gpt-4-turbo' },
-			{ label: 'GPT-4o', value: 'gpt-4o' },
-			{ label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet' },
-			{ label: 'Claude 3 Opus', value: 'claude-3-opus' }
-		])
-
-		// Mock agents
-		setAgents([
-			{ label: is_cn ? '报告生成器' : 'Report Writer', value: 'report-writer' },
-			{ label: is_cn ? '图表生成器' : 'Chart Generator', value: 'chart-generator' },
-			{ label: is_cn ? '邮件发送器' : 'Email Sender', value: 'email-sender' },
-			{ label: is_cn ? '数据分析师' : 'Data Analyst', value: 'data-analyst' }
-		])
-
-		// Mock MCP servers/tools
-		setMCPServers([
-			{ label: is_cn ? '数据库查询' : 'Database Query', value: 'db-query' },
-			{ label: is_cn ? '网络搜索' : 'Web Search', value: 'web-search' },
-			{ label: is_cn ? '文件管理' : 'File Manager', value: 'file-manager' },
-			{ label: is_cn ? '代码执行' : 'Code Runner', value: 'code-runner' }
-		])
-
-		// Mock KB collections
-		setKBCollections([
-			{ label: is_cn ? '销售知识库' : 'Sales KB', value: 'sales-kb' },
-			{ label: is_cn ? '产品文档' : 'Product Docs', value: 'product-docs' },
-			{ label: is_cn ? '公司政策' : 'Company Policies', value: 'company-policies' }
-		])
-
-		// Mock DB models
-		setDBModels([
-			{ label: is_cn ? '销售数据' : 'Sales', value: 'sales' },
-			{ label: is_cn ? '客户数据' : 'Customers', value: 'customers' },
-			{ label: is_cn ? '订单数据' : 'Orders', value: 'orders' },
-			{ label: is_cn ? '产品数据' : 'Products', value: 'products' }
-		])
-	}, [is_cn])
+	// Mock LLM providers - TODO: Load from LLM API
+	const llmProviders = useMemo(() => [
+		{ label: 'GPT-4 Turbo', value: 'gpt-4-turbo' },
+		{ label: 'GPT-4o', value: 'gpt-4o' },
+		{ label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet' },
+		{ label: 'Claude 3 Opus', value: 'claude-3-opus' },
+		{ label: 'DeepSeek V3', value: 'deepseek-v3' }
+	], [])
 
 	// Handle field change
 	const handleFieldChange = (field: string, value: any) => {
@@ -117,31 +77,30 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 		setGeneratingPrompt(true)
 		try {
 			// TODO: Call AI API to generate prompt
-			await new Promise(resolve => setTimeout(resolve, 5000)) // 5 seconds for demo
+			await new Promise(resolve => setTimeout(resolve, 2000))
 
+			const name = formData.display_name || (is_cn ? '智能体' : 'Agent')
 			const mockPrompt = is_cn
-				? `你是一位专业的销售数据分析师。
+				? `你是 ${name}，一位专业的智能体。
 
 你的主要职责：
-1. 每日分析销售数据，识别趋势和异常
-2. 生成周度和月度销售报告
-3. 当关键指标出现显著变化时及时预警
-4. 为销售策略提供数据支持和建议
+1. 分析数据并生成报告
+2. 提供专业建议和见解
+3. 协助团队完成各项任务
 
 工作原则：
-- 保持数据准确性和客观性
+- 保持专业、准确、高效
 - 主动发现问题并提出解决方案
 - 定期向主管汇报工作进展`
-				: `You are a professional Sales Data Analyst.
+				: `You are ${name}, a professional AI teammate.
 
-Your main responsibilities:
-1. Analyze daily sales data and identify trends and anomalies
-2. Generate weekly and monthly sales reports
-3. Alert the team when key metrics change significantly
-4. Provide data-driven insights for sales strategy
+Your responsibilities:
+1. Analyze data and generate reports
+2. Provide professional advice and insights
+3. Assist the team in completing various tasks
 
 Work principles:
-- Maintain data accuracy and objectivity
+- Be professional, accurate, and efficient
 - Proactively identify issues and propose solutions
 - Regularly report progress to your manager`
 
@@ -185,8 +144,8 @@ Work principles:
 					schema={{
 						type: 'string',
 						placeholder: is_cn
-							? '描述这个智能体的身份、职责和工作方式...\n\n例如：\n你是一位销售数据分析师。\n\n你的主要职责：\n1. 分析每日销售数据\n2. 生成销售报告\n3. 发现异常并预警'
-							: 'Describe this agent\'s role, responsibilities, and how it should work...\n\nExample:\nYou are a Sales Data Analyst.\n\nYour responsibilities:\n1. Analyze daily sales data\n2. Generate sales reports\n3. Identify anomalies and alert',
+							? '描述这个智能体的身份、职责和工作方式...'
+							: 'Describe this agent\'s role, responsibilities, and how it should work...',
 						rows: 10
 					}}
 					error={errors.system_prompt || ''}
@@ -243,7 +202,7 @@ Work principles:
 			</div>
 
 			{/* Accessible AI Assistants */}
-			{agents.length > 0 && (
+			{agentOptions.length > 0 && (
 				<div className={styles.formItem}>
 					<label className={styles.formLabel}>
 						{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
@@ -263,14 +222,14 @@ Work principles:
 						onChange={(value) => handleFieldChange('agents', value)}
 						schema={{
 							type: 'array',
-							enum: agents
+							enum: agentOptions
 						}}
 					/>
 				</div>
 			)}
 
 			{/* Accessible Tools */}
-			{mcpServers.length > 0 && (
+			{mcpOptions.length > 0 && (
 				<div className={styles.formItem}>
 					<label className={styles.formLabel}>
 						{is_cn ? '可使用的工具' : 'Accessible Tools'}
@@ -290,61 +249,7 @@ Work principles:
 						onChange={(value) => handleFieldChange('mcp_servers', value)}
 						schema={{
 							type: 'array',
-							enum: mcpServers
-						}}
-					/>
-				</div>
-			)}
-
-			{/* Accessible Knowledge */}
-			{kbCollections.length > 0 && (
-				<div className={styles.formItem}>
-					<label className={styles.formLabel}>
-						{is_cn ? '可查阅的知识库' : 'Accessible Knowledge'}
-						<Tooltip
-							title={is_cn
-								? '选择该智能体可以查阅的知识库'
-								: 'Select knowledge bases this agent can access'
-							}
-						>
-							<span className={styles.helpIconWrapper}>
-								<Icon name='material-help' size={14} className={styles.helpIcon} />
-							</span>
-						</Tooltip>
-					</label>
-					<CheckboxGroup
-						value={formData['robot_config.kb.collections'] || []}
-						onChange={(value) => handleFieldChange('robot_config.kb.collections', value)}
-						schema={{
-							type: 'array',
-							enum: kbCollections
-						}}
-					/>
-				</div>
-			)}
-
-			{/* Accessible Data */}
-			{dbModels.length > 0 && (
-				<div className={styles.formItem}>
-					<label className={styles.formLabel}>
-						{is_cn ? '可访问的数据' : 'Accessible Data'}
-						<Tooltip
-							title={is_cn
-								? '选择该智能体可以访问的数据表'
-								: 'Select database models this agent can access'
-							}
-						>
-							<span className={styles.helpIconWrapper}>
-								<Icon name='material-help' size={14} className={styles.helpIcon} />
-							</span>
-						</Tooltip>
-					</label>
-					<CheckboxGroup
-						value={formData['robot_config.db.models'] || []}
-						onChange={(value) => handleFieldChange('robot_config.db.models', value)}
-						schema={{
-							type: 'array',
-							enum: dbModels
+							enum: mcpOptions
 						}}
 					/>
 				</div>

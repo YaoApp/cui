@@ -288,7 +288,7 @@
 		justify-content: center;
 		background: linear-gradient(135deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
 		border-radius: 12px;
-		color: white;
+		color: var(--color_mission_button_text);
 		box-shadow: 0 0 20px var(--color_mission_glow_cyan);
 	}
 
@@ -492,11 +492,11 @@
 	&.active {
 		background: var(--color_mission_accent_cyan);
 		border-color: var(--color_mission_accent_cyan);
-		color: white;
+		color: var(--color_mission_button_text);
 
 		.statusCount {
 			background: rgba(255, 255, 255, 0.2);
-			color: white;
+			color: var(--color_mission_button_text);
 		}
 	}
 
@@ -589,7 +589,7 @@
 
 	&.active {
 		background: linear-gradient(135deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
-		color: white;
+		color: var(--color_mission_button_text);
 		border-color: transparent;
 		box-shadow: 0 0 30px var(--color_mission_glow_cyan);
 	}
@@ -921,7 +921,7 @@
 	align-items: center;
 	justify-content: center;
 	background: linear-gradient(135deg, var(--color_mission_accent_purple), var(--color_mission_accent_pink));
-	color: white;
+	color: var(--color_mission_button_text);
 	border-radius: 12px;
 	font-size: 12px;
 	font-weight: 700;
@@ -1092,6 +1092,118 @@
 		text-align: center;
 		line-height: 1.8;
 		color: var(--color_mission_text_muted);
+	}
+
+	.emptyCreateButton {
+		position: relative;
+		margin-top: 32px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 14px 28px;
+		background: linear-gradient(135deg, var(--color_mission_accent_cyan), var(--color_mission_accent_purple));
+		border: none;
+		border-radius: 12px;
+		color: var(--color_mission_button_text);
+		font-size: 15px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: 0 4px 16px var(--color_mission_glow_cyan);
+		overflow: visible;
+
+		// Bubble particles container
+		&::before,
+		&::after {
+			content: '';
+			position: absolute;
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: var(--color_mission_accent_cyan);
+			box-shadow: 0 0 8px var(--color_mission_accent_cyan), 0 0 16px var(--color_mission_glow_cyan);
+			pointer-events: none;
+			opacity: 0;
+			animation: bubble-rise 3s ease-in-out infinite;
+		}
+
+		&::before {
+			left: 20%;
+			bottom: 100%;
+			animation-delay: 0s;
+			background: var(--color_mission_accent_cyan);
+			box-shadow: 0 0 8px var(--color_mission_accent_cyan), 0 0 16px var(--color_mission_glow_cyan);
+		}
+
+		&::after {
+			left: 70%;
+			bottom: 100%;
+			animation-delay: 1.5s;
+			background: var(--color_mission_accent_purple);
+			box-shadow: 0 0 8px var(--color_mission_accent_purple), 0 0 16px var(--color_mission_glow_purple);
+		}
+
+		// Extra bubbles via box-shadow trick on a wrapper
+		.bubbles {
+			position: absolute;
+			inset: 0;
+			pointer-events: none;
+			overflow: visible;
+
+			&::before,
+			&::after {
+				content: '';
+				position: absolute;
+				width: 5px;
+				height: 5px;
+				border-radius: 50%;
+				opacity: 0;
+				animation: bubble-rise 3s ease-in-out infinite;
+			}
+
+			&::before {
+				left: 40%;
+				bottom: 100%;
+				animation-delay: 0.7s;
+				background: var(--color_mission_accent_pink);
+				box-shadow: 0 0 6px var(--color_mission_accent_pink), 0 0 12px rgba(236, 72, 153, 0.4);
+			}
+
+			&::after {
+				left: 85%;
+				bottom: 100%;
+				animation-delay: 2.2s;
+				background: var(--color_mission_accent_cyan);
+				box-shadow: 0 0 6px var(--color_mission_accent_cyan), 0 0 12px var(--color_mission_glow_cyan);
+			}
+		}
+
+		&:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 24px var(--color_mission_glow_cyan);
+		}
+
+		&:active {
+			transform: translateY(0);
+		}
+	}
+}
+
+// Bubble rise animation for empty state button
+@keyframes bubble-rise {
+	0% {
+		transform: translateY(0) scale(1);
+		opacity: 0;
+	}
+	10% {
+		opacity: 0.8;
+	}
+	50% {
+		opacity: 0.6;
+	}
+	100% {
+		transform: translateY(-50px) scale(0.4);
+		opacity: 0;
 	}
 }
 

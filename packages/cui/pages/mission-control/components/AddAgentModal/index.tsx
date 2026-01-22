@@ -1,8 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { Modal } from 'antd'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
+import { Modal, message, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import { Input, Select, TextArea, RadioGroup, CheckboxGroup } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
+import { useRobots } from '@/hooks/useRobots'
+import { useGlobal } from '@/context/app'
+import { Agent } from '@/openapi/agent/api'
+import { MCP } from '@/openapi/mcp/api'
+import { UserAuth } from '@/openapi/user/auth'
+import { UserTeams } from '@/openapi/user/teams'
+import type { Agent as AgentType } from '@/openapi/agent/types'
+import type { MCPServer } from '@/openapi/mcp/types'
+import type { TeamConfig } from '@/openapi/user/types'
 import styles from './index.less'
 
 interface AddAgentModalProps {
@@ -25,10 +34,15 @@ type StepType = 1 | 2
  * Step 2: Identity
  * - system_prompt (Role & Responsibilities)
  * - agents (AI Assistants)
+ * - mcp_servers (MCP Tools)
  */
 const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreated }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+	const global = useGlobal()
+
+	// Robot API hook
+	const { createRobot, error: apiError } = useRobots()
 
 	// Step state
 	const [currentStep, setCurrentStep] = useState<StepType>(1)
@@ -41,7 +55,8 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 		manager_id: '',
 		autonomous_mode: false,
 		system_prompt: '',
-		agents: []
+		agents: [],
+		mcp_servers: []
 	})
 
 	// UI state
@@ -50,27 +65,200 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 	const [generatingPrompt, setGeneratingPrompt] = useState(false)
 	const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
 
-	// Mock data - TODO: Load from API
-	const [emailDomains] = useState([
-		{ label: '@company.com', value: 'company.com' },
-		{ label: '@team.ai', value: 'team.ai' },
-		{ label: '@bot.local', value: 'bot.local' }
-	])
+	// API data state
+	const [teamConfig, setTeamConfig] = useState<TeamConfig | null>(null)
+	const [configLoading, setConfigLoading] = useState(false)
+	const [userMembers, setUserMembers] = useState<any[]>([])
+	const [userMembersLoading, setUserMembersLoading] = useState(false)
+	const [agents, setAgents] = useState<AgentType[]>([])
+	const [agentsLoading, setAgentsLoading] = useState(false)
+	const [mcpServers, setMCPServers] = useState<MCPServer[]>([])
+	const [mcpLoading, setMCPLoading] = useState(false)
 
-	const [managers] = useState([
-		{ label: is_cn ? '张三 (CEO)' : 'John Smith (CEO)', value: 'user_001' },
-		{ label: is_cn ? '李四 (CTO)' : 'Jane Doe (CTO)', value: 'user_002' },
-		{ label: is_cn ? '王五 (VP Sales)' : 'Bob Wilson (VP Sales)', value: 'user_003' }
-	])
+	// Refs to track data loading
+	const configLoadedRef = useRef(false)
+	const userMembersLoadedRef = useRef(false)
+	const agentsLoadedRef = useRef(false)
+	const mcpLoadedRef = useRef(false)
 
-	const [agentOptions] = useState([
-		{ label: is_cn ? '数据分析师' : 'Data Analyst', value: 'data-analyst' },
-		{ label: is_cn ? '报告撰写' : 'Report Writer', value: 'report-writer' },
-		{ label: is_cn ? '代码助手' : 'Code Assistant', value: 'code-assistant' },
-		{ label: is_cn ? '研究助理' : 'Research Agent', value: 'research-agent' },
-		{ label: is_cn ? '内容创作' : 'Content Writer', value: 'content-writer' },
-		{ label: is_cn ? '客户服务' : 'Customer Service', value: 'customer-service' }
-	])
+	// Get team ID
+	const teamId = global.user?.team_id || global.user?.user_id || ''
+
+	// Load team config when modal opens
+	useEffect(() => {
+		if (visible && teamId && window.$app?.openapi && !configLoadedRef.current && !configLoading) {
+			configLoadedRef.current = true
+			setConfigLoading(true)
+
+			const openapi = window.$app.openapi
+			const auth = new UserAuth(openapi)
+			const teamsAPI = new UserTeams(openapi, auth)
+
+			teamsAPI
+				.GetConfig(teamId)
+				.then((response) => {
+					if (openapi.IsError(response)) {
+						console.error('Failed to load team config:', response)
+						configLoadedRef.current = false
+						return
+					}
+					if (response.data) {
+						setTeamConfig(response.data)
+						// Set default email domain
+						if (response.data.robot?.email_domains?.[0]?.domain) {
+							setFormData(prev => ({
+								...prev,
+								robot_email_domain: response.data.robot.email_domains[0].domain
+							}))
+						}
+					}
+				})
+				.catch((error) => {
+					console.error('Failed to load team config:', error)
+					configLoadedRef.current = false
+				})
+				.finally(() => {
+					setConfigLoading(false)
+				})
+		}
+	}, [visible, teamId])
+
+	// Load user members (for manager selection)
+	useEffect(() => {
+		if (visible && teamId && window.$app?.openapi && !userMembersLoadedRef.current && !userMembersLoading) {
+			userMembersLoadedRef.current = true
+			setUserMembersLoading(true)
+
+			const openapi = window.$app.openapi
+			const auth = new UserAuth(openapi)
+			const teamsAPI = new UserTeams(openapi, auth)
+
+			teamsAPI
+				.GetMembers(teamId, {
+					member_type: 'user',
+					status: 'active',
+					fields: ['member_id', 'display_name', 'email', 'member_type', 'status', 'user_id']
+				})
+				.then((response) => {
+					if (response?.data?.data && Array.isArray(response.data.data)) {
+						setUserMembers(response.data.data)
+					}
+				})
+				.catch((error) => {
+					console.error('Failed to load user members:', error)
+					userMembersLoadedRef.current = false
+				})
+				.finally(() => {
+					setUserMembersLoading(false)
+				})
+		}
+	}, [visible, teamId])
+
+	// Load agents when entering step 2
+	useEffect(() => {
+		if (visible && currentStep === 2 && window.$app?.openapi && !agentsLoadedRef.current && !agentsLoading) {
+			agentsLoadedRef.current = true
+			setAgentsLoading(true)
+
+			const openapi = window.$app.openapi
+			const agentAPI = new Agent(openapi)
+
+			agentAPI.assistants
+				.List({})
+				.then((response) => {
+					if (openapi.IsError(response)) {
+						console.error('Failed to load agents:', response.error)
+						agentsLoadedRef.current = false
+						return
+					}
+					const data = openapi.GetData(response)
+					if (data?.data) {
+						setAgents(data.data)
+					}
+				})
+				.catch((error) => {
+					console.error('Failed to load agents:', error)
+					agentsLoadedRef.current = false
+				})
+				.finally(() => {
+					setAgentsLoading(false)
+				})
+		}
+	}, [visible, currentStep])
+
+	// Load MCP servers when entering step 2
+	useEffect(() => {
+		if (visible && currentStep === 2 && window.$app?.openapi && !mcpLoadedRef.current && !mcpLoading) {
+			mcpLoadedRef.current = true
+			setMCPLoading(true)
+
+			const openapi = window.$app.openapi
+			const mcpAPI = new MCP(openapi)
+
+			mcpAPI
+				.ListServers()
+				.then((servers) => {
+					if (servers) {
+						setMCPServers(servers)
+					}
+				})
+				.catch((error) => {
+					console.error('Failed to load MCP servers:', error)
+					mcpLoadedRef.current = false
+				})
+				.finally(() => {
+					setMCPLoading(false)
+				})
+		}
+	}, [visible, currentStep])
+
+	// Reset when modal closes
+	useEffect(() => {
+		if (!visible) {
+			configLoadedRef.current = false
+			userMembersLoadedRef.current = false
+			agentsLoadedRef.current = false
+			mcpLoadedRef.current = false
+		}
+	}, [visible])
+
+	// Email domains from config
+	const emailDomains = useMemo(() => {
+		return teamConfig?.robot?.email_domains?.map((domain) => ({
+			label: `@${domain.domain}`,
+			value: domain.domain || ''
+		})) || []
+	}, [teamConfig])
+
+	// Manager options
+	const managerOptions = useMemo(() => {
+		return userMembers
+			.filter((m) => m.member_type === 'user' && m.status === 'active')
+			.map((m) => {
+				const userName = m.display_name || m.email || m.user_id || (is_cn ? '未知用户' : 'Unknown User')
+				const userEmail = m.email || ''
+				return {
+					label: userEmail ? `${userName} (${userEmail})` : userName,
+					value: m.member_id || m.user_id || ''
+				}
+			})
+	}, [userMembers, is_cn])
+
+	// Agent options
+	const agentOptions = useMemo(() => {
+		return (agents || []).map((agent) => ({
+			label: agent.name || agent.assistant_id,
+			value: agent.assistant_id
+		}))
+	}, [agents])
+
+	// MCP server options
+	const mcpOptions = useMemo(() => {
+		return (mcpServers || []).map((server) => ({
+			label: server.label || server.name,
+			value: server.value || server.name
+		}))
+	}, [mcpServers])
 
 	// Reset form when modal opens
 	useEffect(() => {
@@ -79,17 +267,18 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			setFormData({
 				display_name: '',
 				robot_email_prefix: '',
-				robot_email_domain: emailDomains[0]?.value || '',
+				robot_email_domain: teamConfig?.robot?.email_domains?.[0]?.domain || '',
 				manager_id: '',
 				autonomous_mode: false,
 				system_prompt: '',
-				agents: []
+				agents: [],
+				mcp_servers: []
 			})
 			setErrors({})
 			setSubmitting(false)
 			setGeneratingPrompt(false)
 		}
-	}, [visible])
+	}, [visible, teamConfig])
 
 	// Check if form is dirty
 	const isDirty = useMemo(() => {
@@ -128,8 +317,9 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			newErrors.robot_email_prefix = is_cn ? '邮箱格式不正确' : 'Invalid email format'
 		}
 
-		if (!formData.manager_id) {
-			newErrors.manager_id = is_cn ? '请选择主管' : 'Manager is required'
+		// Keep existing email error if any (from blur check)
+		if (errors.robot_email_prefix && formData.robot_email_prefix?.trim()) {
+			newErrors.robot_email_prefix = errors.robot_email_prefix
 		}
 
 		setErrors(newErrors)
@@ -144,12 +334,49 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			newErrors.system_prompt = is_cn ? '请输入角色与职责' : 'Role & Responsibilities is required'
 		}
 
-		if (!formData.agents?.length) {
-			newErrors.agents = is_cn ? '请至少选择一个可协作的智能体' : 'Select at least one AI Assistant'
-		}
+		// Agents are optional now
+		// if (!formData.agents?.length) {
+		// 	newErrors.agents = is_cn ? '请至少选择一个可协作的智能体' : 'Select at least one AI Assistant'
+		// }
 
 		setErrors(newErrors)
 		return Object.keys(newErrors).length === 0
+	}
+
+	// Handle email blur - check uniqueness
+	const handleEmailBlur = async () => {
+		if (!formData.robot_email_prefix?.trim() || !teamId || !window.$app?.openapi) {
+			return
+		}
+
+		const fullEmail = `${formData.robot_email_prefix}@${formData.robot_email_domain}`
+
+		try {
+			const openapi = window.$app.openapi
+			const auth = new UserAuth(openapi)
+			const teamsAPI = new UserTeams(openapi, auth)
+			const response = await teamsAPI.CheckRobotEmail(teamId, fullEmail)
+
+			if (openapi.IsError(response)) {
+				console.error('Failed to check robot email:', response)
+				return
+			}
+
+			if (response.data?.exists) {
+				setErrors(prev => ({
+					...prev,
+					robot_email_prefix: is_cn ? '该机器人邮箱已被使用' : 'This robot email is already in use'
+				}))
+			} else {
+				setErrors(prev => {
+					const newErrors = { ...prev }
+					delete newErrors.robot_email_prefix
+					return newErrors
+				})
+			}
+		} catch (error) {
+			console.error('Failed to check robot email:', error)
+		}
 	}
 
 	// Handle next step
@@ -191,22 +418,33 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 
 		setSubmitting(true)
 		try {
-			// TODO: Call API to create agent
-			await new Promise(resolve => setTimeout(resolve, 1000))
+			// Generate member_id from email prefix
+			const memberId = formData.robot_email_prefix.toLowerCase().replace(/[^a-z0-9]/g, '-')
 
-			console.log('Creating agent:', {
+			// Call API to create robot
+			const result = await createRobot({
+				member_id: memberId,
+				team_id: teamId,
 				display_name: formData.display_name,
 				robot_email: `${formData.robot_email_prefix}@${formData.robot_email_domain}`,
-				manager_id: formData.manager_id,
+				manager_id: formData.manager_id || undefined,
 				autonomous_mode: formData.autonomous_mode,
 				system_prompt: formData.system_prompt,
-				agents: formData.agents
+				agents: formData.agents?.length > 0 ? formData.agents : undefined,
+				mcp_servers: formData.mcp_servers?.length > 0 ? formData.mcp_servers : undefined,
+				status: 'active',
+				robot_status: 'idle'
 			})
 
-			onCreated?.()
-			onClose()
+			if (result) {
+				onCreated?.()
+				onClose()
+			} else {
+				message.error(apiError || (is_cn ? '创建失败，请重试' : 'Failed to create, please try again'))
+			}
 		} catch (error) {
 			console.error('Failed to create agent:', error)
+			message.error(is_cn ? '创建失败，请重试' : 'Failed to create, please try again')
 		} finally {
 			setSubmitting(false)
 		}
@@ -330,11 +568,24 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 									<label className={styles.formLabel}>
 										{is_cn ? '邮箱' : 'Email'}
 										<span className={styles.required}>*</span>
+										<Tooltip
+											title={
+												is_cn
+													? 'AI 成员可通过此邮箱接收和发送邮件'
+													: 'The AI member can receive and send emails through this address'
+											}
+											placement='top'
+										>
+											<span className={styles.helpIconWrapper}>
+												<Icon name='material-help' size={14} className={styles.helpIcon} />
+											</span>
+										</Tooltip>
 									</label>
 									<div className={styles.emailInput}>
 										<Input
 											value={formData.robot_email_prefix}
 											onChange={(value) => handleFieldChange('robot_email_prefix', value)}
+											onBlur={handleEmailBlur}
 											schema={{
 												type: 'string',
 												placeholder: is_cn ? '邮箱前缀' : 'email prefix'
@@ -345,10 +596,17 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 										<span className={styles.emailAt}>@</span>
 										<Select
 											value={formData.robot_email_domain}
-											onChange={(value) => handleFieldChange('robot_email_domain', value)}
+											onChange={(value) => {
+												handleFieldChange('robot_email_domain', value)
+												// Re-check email when domain changes
+												if (formData.robot_email_prefix?.trim()) {
+													setTimeout(handleEmailBlur, 100)
+												}
+											}}
 											schema={{
 												type: 'string',
-												enum: emailDomains
+												enum: emailDomains,
+												placeholder: is_cn ? '选择域名' : 'Select domain'
 											}}
 										/>
 									</div>
@@ -358,15 +616,31 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 								<div className={styles.formItem}>
 									<label className={styles.formLabel}>
 										{is_cn ? '直属主管' : 'Manager'}
-										<span className={styles.required}>*</span>
+										<Tooltip
+											title={
+												is_cn
+													? 'AI 成员会定期向直接主管发送工作总结和进度报告'
+													: 'AI member will regularly send work summaries and progress reports to the direct manager'
+											}
+											placement='top'
+										>
+											<span className={styles.helpIconWrapper}>
+												<Icon name='material-help' size={14} className={styles.helpIcon} />
+											</span>
+										</Tooltip>
+										{userMembersLoading && (
+											<span className={styles.loadingHint}>
+												{is_cn ? ' (加载中...)' : ' (Loading...)'}
+											</span>
+										)}
 									</label>
 									<Select
 										value={formData.manager_id}
 										onChange={(value) => handleFieldChange('manager_id', value)}
 										schema={{
 											type: 'string',
-											enum: managers,
-											placeholder: is_cn ? '选择主管...' : 'Select manager...'
+											enum: managerOptions,
+											placeholder: is_cn ? '选择主管（可选）' : 'Select manager (optional)'
 										}}
 										error={errors.manager_id}
 										hasError={!!errors.manager_id}
@@ -447,28 +721,50 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 								</div>
 
 								{/* Accessible AI Assistants */}
-								<div className={styles.formItem}>
-									<label className={styles.formLabel}>
-										{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
-										<span className={styles.required}>*</span>
-										<span className={styles.labelHint}>
-											{is_cn ? '（至少选择一个）' : '(select at least one)'}
-										</span>
-									</label>
-									<CheckboxGroup
-										value={formData.agents}
-										onChange={(value) => handleFieldChange('agents', value)}
-										schema={{
-											type: 'array',
-											enum: agentOptions
-										}}
-										error={errors.agents}
-										hasError={!!errors.agents}
-									/>
-									{errors.agents && (
-										<div className={styles.formError}>{errors.agents}</div>
-									)}
-								</div>
+								{agentOptions.length > 0 && (
+									<div className={styles.formItem}>
+										<label className={styles.formLabel}>
+											{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
+											{agentsLoading && (
+												<span className={styles.loadingHint}>
+													{is_cn ? ' (加载中...)' : ' (Loading...)'}
+												</span>
+											)}
+										</label>
+										<CheckboxGroup
+											value={formData.agents}
+											onChange={(value) => handleFieldChange('agents', value)}
+											schema={{
+												type: 'array',
+												enum: agentOptions
+											}}
+											error={errors.agents}
+											hasError={!!errors.agents}
+										/>
+									</div>
+								)}
+
+								{/* MCP Tools */}
+								{mcpOptions.length > 0 && (
+									<div className={styles.formItem}>
+										<label className={styles.formLabel}>
+											{is_cn ? '可使用的工具' : 'Available Tools'}
+											{mcpLoading && (
+												<span className={styles.loadingHint}>
+													{is_cn ? ' (加载中...)' : ' (Loading...)'}
+												</span>
+											)}
+										</label>
+										<CheckboxGroup
+											value={formData.mcp_servers}
+											onChange={(value) => handleFieldChange('mcp_servers', value)}
+											schema={{
+												type: 'array',
+												enum: mcpOptions
+											}}
+										/>
+									</div>
+								)}
 							</div>
 						</div>
 					)}
@@ -481,7 +777,11 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 							<button className={styles.cancelButton} onClick={handleClose}>
 								{is_cn ? '取消' : 'Cancel'}
 							</button>
-							<button className={styles.nextButton} onClick={handleNext}>
+							<button 
+								className={styles.nextButton} 
+								onClick={handleNext}
+								disabled={!!errors.robot_email_prefix}
+							>
 								<span>{is_cn ? '下一步' : 'Next'}</span>
 								<Icon name='material-arrow_forward' size={16} />
 							</button>

@@ -4,6 +4,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import type { RobotState, Execution } from '../../../types'
 import { getHistoryExecutionsPaginated, simulateApiDelay } from '../../../mock/data'
+import CreatureLoading from '../../CreatureLoading'
 import styles from '../index.less'
 
 interface HistoryTabProps {
@@ -298,10 +299,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 			{/* Table content */}
 			<div className={styles.historyContent} ref={containerRef}>
 				{loading ? (
-					<div className={styles.historyLoading}>
-						<Spin />
-						<span>{is_cn ? '加载中...' : 'Loading...'}</span>
-					</div>
+					<CreatureLoading size="medium" />
 				) : executions.length === 0 ? (
 					<div className={styles.historyEmpty}>
 						<Icon name='material-history' size={40} className={styles.historyEmptyIcon} />

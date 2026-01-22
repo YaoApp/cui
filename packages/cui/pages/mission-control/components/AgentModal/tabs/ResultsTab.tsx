@@ -4,6 +4,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import type { RobotState } from '../../../types'
 import { getDeliveriesPaginated, simulateApiDelay, type Delivery } from '../../../mock/data'
+import CreatureLoading from '../../CreatureLoading'
 import styles from '../index.less'
 
 interface ResultsTabProps {
@@ -234,10 +235,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 			{/* Table content */}
 			<div className={styles.resultsContent} ref={containerRef}>
 				{loading ? (
-					<div className={styles.resultsLoading}>
-						<Spin />
-						<span>{is_cn ? '加载中...' : 'Loading...'}</span>
-					</div>
+					<CreatureLoading size="medium" />
 				) : deliveries.length === 0 ? (
 					<div className={styles.resultsEmpty}>
 						<Icon name='material-inventory_2' size={40} className={styles.resultsEmptyIcon} />

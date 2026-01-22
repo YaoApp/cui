@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { getLocale } from '@umijs/max'
-import { Tooltip } from 'antd'
+import { Tooltip, message } from 'antd'
 import Modal from './components/Modal'
 import AgentModal from './components/AgentModal'
 import ResultDetailModal from './components/ResultDetailModal'
@@ -9,6 +9,8 @@ import { observer } from 'mobx-react-lite'
 import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
 import clsx from 'clsx'
+import { useRobots } from '@/hooks/useRobots'
+import type { Robot as ApiRobot, RobotStatusResponse } from '@/openapi/agent/robot'
 import {
 	mockRobots,
 	getRobotStats,
@@ -18,17 +20,46 @@ import {
 	type Activity,
 	type Delivery
 } from './mock/data'
-import type { RobotState } from './types'
+import type { RobotState, RobotStatus } from './types'
 import styles from './index.less'
+
+/**
+ * Convert API Robot to page RobotState format
+ * API returns Robot with robot_status, page uses RobotState with status
+ */
+const convertToRobotState = (robot: ApiRobot, status?: RobotStatusResponse): RobotState => {
+	return {
+		member_id: robot.member_id,
+		team_id: robot.team_id,
+		name: robot.name || robot.member_id,
+		display_name: robot.display_name,
+		description: robot.description || robot.bio,
+		status: (status?.status || robot.robot_status || 'idle') as RobotStatus,
+		running: status?.running || 0,
+		max_running: status?.max_running || 2,
+		last_run: status?.last_run,
+		next_run: status?.next_run,
+		running_ids: status?.running_ids || []
+	}
+}
 
 const MissionControl = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
 
+	// Robot API hook
+	const {
+		loading: robotsLoading,
+		error: robotsError,
+		listRobots,
+		getRobotStatus
+	} = useRobots()
+
 	// State
 	const [isFullscreen, setIsFullscreen] = useState(false)
-	const [robots, setRobots] = useState<RobotState[]>(mockRobots)
+	const [robots, setRobots] = useState<RobotState[]>([])
+	const [robotsInitialized, setRobotsInitialized] = useState(false)
 	const [currentTime, setCurrentTime] = useState(new Date())
 	const [colonBlink, setColonBlink] = useState(false)
 	const [updatedDigits, setUpdatedDigits] = useState<Set<number>>(new Set())
@@ -92,6 +123,47 @@ const MissionControl = () => {
 		if (status === 'all') return robots.length
 		return robots.filter((r) => r.status === status).length
 	}
+
+	// Load robots from API
+	const loadRobots = useCallback(async () => {
+		try {
+			const response = await listRobots()
+			if (response && response.data) {
+				// Fetch status for each robot in parallel
+				const robotsWithStatus = await Promise.all(
+					response.data.map(async (robot) => {
+						const status = await getRobotStatus(robot.member_id)
+						return convertToRobotState(robot, status || undefined)
+					})
+				)
+				setRobots(robotsWithStatus)
+			} else {
+				// Fallback to mock data if API fails
+				console.warn('Failed to load robots from API, using mock data')
+				setRobots(mockRobots)
+			}
+		} catch (err) {
+			console.error('Error loading robots:', err)
+			// Fallback to mock data
+			setRobots(mockRobots)
+		} finally {
+			setRobotsInitialized(true)
+		}
+	}, [listRobots, getRobotStatus])
+
+	// Initial load
+	useEffect(() => {
+		if (!robotsInitialized) {
+			loadRobots()
+		}
+	}, [robotsInitialized, loadRobots])
+
+	// Show error message
+	useEffect(() => {
+		if (robotsError) {
+			message.error(robotsError)
+		}
+	}, [robotsError])
 
 	// Clock update
 	useEffect(() => {
@@ -206,8 +278,9 @@ const MissionControl = () => {
 
 	// Handle agent created
 	const handleAgentCreated = () => {
-		// TODO: Refresh robot list from API
-		console.log('Agent created, refreshing list...')
+		// Refresh robot list from API
+		loadRobots()
+		message.success(is_cn ? '智能体创建成功' : 'Agent created successfully')
 	}
 
 	// Get status text
@@ -362,7 +435,7 @@ const MissionControl = () => {
 
 				{/* Station info */}
 				<div className={styles.stationInfo}>
-					<div className={styles.name}>{getRobotDisplayName(robot.member_id, locale)}</div>
+					<div className={styles.name}>{robot.display_name || robot.name || robot.member_id}</div>
 					<div className={clsx(styles.statusText, styles[robot.status])}>
 						{getStatusText(robot.status)}
 					</div>
@@ -573,6 +646,14 @@ const MissionControl = () => {
 											? '添加您的第一个自主智能体，开始自动化工作流程'
 											: 'Add your first autonomous agent to start automating workflows'}
 									</div>
+									<button
+										className={styles.emptyCreateButton}
+										onClick={handleAddAgent}
+									>
+										<span className={styles.bubbles} />
+										<Icon name='material-add' size={18} />
+										<span>{is_cn ? '创建智能体' : 'Create Agent'}</span>
+									</button>
 								</div>
 							)}
 						</div>
@@ -657,6 +738,7 @@ const MissionControl = () => {
 				visible={showAgentModal}
 				onClose={handleAgentModalClose}
 				robot={selectedRobot}
+				onDataUpdated={loadRobots}
 				onOpenResultDetail={(delivery) => {
 					setSelectedDelivery(delivery)
 					setShowResultDetailModal(true)
