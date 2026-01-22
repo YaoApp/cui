@@ -2,8 +2,12 @@
 
 > Frontend UI is complete. Backend needs to implement the following APIs.
 > Reference: `TODO.md`, `DESIGN.md`, `types.ts`, `mock/data.ts`
+> Backend Implementation: `yao/openapi/agent/robot/`
 
-**Base Path:** `/v1/robots`
+**Base Path:** `/v1/agent/robots`
+
+> **Note:** Robot API is under `/v1/agent/` namespace, consistent with `/v1/agent/assistants`.
+> Robot is a type of Agent (Autonomous Robot Agent).
 
 **File API:** Use existing `@cui/openapi/file.ts` (FileAPI) for attachments
 
@@ -15,31 +19,31 @@
 
 | Category | Endpoint | Description |
 |----------|----------|-------------|
-| Robot | GET /v1/robots | List all robots (main page grid) |
-| Robot | GET /v1/robots/:id | Get robot details with config |
-| Robot | POST /v1/robots | Create robot (Add Agent Modal) |
-| Robot | PUT /v1/robots/:id | Update robot config (Settings Tab) |
-| Robot | DELETE /v1/robots/:id | Delete robot (Advanced Panel) |
-| Execution | GET /v1/robots/:id/executions | List executions (Active/History Tab) |
-| Execution | GET /v1/robots/:id/executions/:exec_id | Get execution details |
-| Execution | POST /v1/robots/:id/trigger | Human trigger - SSE (Assign Task Drawer) |
-| Execution | POST /v1/robots/:id/executions/:exec_id/pause | Pause execution |
-| Execution | POST /v1/robots/:id/executions/:exec_id/resume | Resume execution |
-| Execution | POST /v1/robots/:id/executions/:exec_id/cancel | Cancel execution |
-| Execution | POST /v1/robots/:id/executions/:exec_id/retry | Retry failed execution |
-| Intervention | POST /v1/robots/:id/intervene | Human intervention - SSE (Guide Drawer) |
-| Results | GET /v1/robots/:id/results | List deliverables (Results Tab) |
-| Results | GET /v1/robots/:id/results/:result_id | Get deliverable details |
-| Activity | GET /v1/robots/activities | List activities (Activity Banner/Modal) |
-| SSE | GET /v1/robots/stream | Real-time status updates |
-| SSE | GET /v1/robots/:id/executions/:exec_id/stream | Execution progress stream |
+| Robot | GET /v1/agent/robots | List all robots (main page grid) |
+| Robot | GET /v1/agent/robots/:id | Get robot details with config |
+| Robot | POST /v1/agent/robots | Create robot (Add Agent Modal) |
+| Robot | PUT /v1/agent/robots/:id | Update robot config (Settings Tab) |
+| Robot | DELETE /v1/agent/robots/:id | Delete robot (Advanced Panel) |
+| Execution | GET /v1/agent/robots/:id/executions | List executions (Active/History Tab) |
+| Execution | GET /v1/agent/robots/:id/executions/:exec_id | Get execution details |
+| Execution | POST /v1/agent/robots/:id/trigger | Human trigger - SSE (Assign Task Drawer) |
+| Execution | POST /v1/agent/robots/:id/executions/:exec_id/pause | Pause execution |
+| Execution | POST /v1/agent/robots/:id/executions/:exec_id/resume | Resume execution |
+| Execution | POST /v1/agent/robots/:id/executions/:exec_id/cancel | Cancel execution |
+| Execution | POST /v1/agent/robots/:id/executions/:exec_id/retry | Retry failed execution |
+| Intervention | POST /v1/agent/robots/:id/intervene | Human intervention - SSE (Guide Drawer) |
+| Results | GET /v1/agent/robots/:id/results | List deliverables (Results Tab) |
+| Results | GET /v1/agent/robots/:id/results/:result_id | Get deliverable details |
+| Activity | GET /v1/agent/robots/activities | List activities (Activity Banner/Modal) |
+| SSE | GET /v1/agent/robots/stream | Real-time status updates |
+| SSE | GET /v1/agent/robots/:id/executions/:exec_id/stream | Execution progress stream |
 | File | (existing) | Use `@cui/openapi/file.ts` FileAPI |
 
 ---
 
 ## 1. Robot APIs
 
-### 1.1 GET /v1/robots
+### 1.1 GET /v1/agent/robots
 
 List all robots with status (for main page Station Grid)
 
@@ -71,7 +75,7 @@ List all robots with status (for main page Station Grid)
 }
 ```
 
-### 1.2 GET /v1/robots/:id
+### 1.2 GET /v1/agent/robots/:id
 
 Get robot details with full config (for Settings Tab)
 
@@ -157,7 +161,7 @@ Get robot details with full config (for Settings Tab)
 }
 ```
 
-### 1.3 POST /v1/robots
+### 1.3 POST /v1/agent/robots
 
 Create robot (Add Agent Modal - 2 step wizard)
 
@@ -190,13 +194,13 @@ Create robot (Add Agent Modal - 2 step wizard)
 }
 ```
 
-### 1.4 PUT /v1/robots/:id
+### 1.4 PUT /v1/agent/robots/:id
 
 Update robot config (Settings Tab - Basic/Identity/Schedule/Advanced panels)
 
 **Request:** Same structure as `config` in GET response
 
-### 1.5 DELETE /v1/robots/:id
+### 1.5 DELETE /v1/agent/robots/:id
 
 Delete robot (Advanced Panel - Danger Zone)
 
@@ -212,7 +216,7 @@ Delete robot (Advanced Panel - Danger Zone)
 
 ## 2. Execution APIs
 
-### 2.1 GET /v1/robots/:id/executions
+### 2.1 GET /v1/agent/robots/:id/executions
 
 List executions (Active Tab: running/pending, History Tab: all with filters)
 
@@ -290,7 +294,7 @@ List executions (Active Tab: running/pending, History Tab: all with filters)
 }
 ```
 
-### 2.2 GET /v1/robots/:id/executions/:exec_id
+### 2.2 GET /v1/agent/robots/:id/executions/:exec_id
 
 Get single execution details (Execution Detail Drawer)
 
@@ -302,7 +306,7 @@ Get single execution details (Execution Detail Drawer)
 
 **Response:** Same structure as single item in list response, with full task details
 
-### 2.3 POST /v1/robots/:id/trigger (SSE)
+### 2.3 POST /v1/agent/robots/:id/trigger (SSE)
 
 Human trigger new execution (Assign Task Drawer - chat UI)
 
@@ -339,7 +343,7 @@ event: complete
 data: {"execution_id": "exec_002", "status": "running"}
 ```
 
-### 2.4 POST /v1/robots/:id/executions/:exec_id/pause
+### 2.4 POST /v1/agent/robots/:id/executions/:exec_id/pause
 
 Pause running execution
 
@@ -352,7 +356,7 @@ Pause running execution
 }
 ```
 
-### 2.5 POST /v1/robots/:id/executions/:exec_id/resume
+### 2.5 POST /v1/agent/robots/:id/executions/:exec_id/resume
 
 Resume paused execution
 
@@ -365,7 +369,7 @@ Resume paused execution
 }
 ```
 
-### 2.6 POST /v1/robots/:id/executions/:exec_id/cancel
+### 2.6 POST /v1/agent/robots/:id/executions/:exec_id/cancel
 
 Cancel execution
 
@@ -378,7 +382,7 @@ Cancel execution
 }
 ```
 
-### 2.7 POST /v1/robots/:id/executions/:exec_id/retry
+### 2.7 POST /v1/agent/robots/:id/executions/:exec_id/retry
 
 Retry failed execution (History Tab - failed row action)
 
@@ -395,7 +399,7 @@ Retry failed execution (History Tab - failed row action)
 
 ## 3. Intervention API (SSE)
 
-### 3.1 POST /v1/robots/:id/intervene (SSE)
+### 3.1 POST /v1/agent/robots/:id/intervene (SSE)
 
 Human intervention during execution (Guide Execution Drawer - chat UI)
 
@@ -437,7 +441,7 @@ data: {"success": true, "message": "Task order updated"}
 
 ## 4. Results API
 
-### 4.1 GET /v1/robots/:id/results
+### 4.1 GET /v1/agent/robots/:id/results
 
 List deliverables (Results Tab - table with filters)
 
@@ -474,7 +478,7 @@ List deliverables (Results Tab - table with filters)
 }
 ```
 
-### 4.2 GET /v1/robots/:id/results/:result_id
+### 4.2 GET /v1/agent/robots/:id/results/:result_id
 
 Get deliverable details (Result Detail Modal - Content + Attachments tabs)
 
@@ -530,7 +534,7 @@ const url = `/file/__yao.attachment/${fileId}/content`
 
 ## 5. Activity API
 
-### 5.1 GET /v1/robots/activities
+### 5.1 GET /v1/agent/robots/activities
 
 List recent activities (Activity Banner at bottom + Activity Modal)
 
@@ -575,7 +579,7 @@ List recent activities (Activity Banner at bottom + Activity Modal)
 
 ## 6. Real-time Updates (SSE)
 
-### 6.1 GET /v1/robots/stream
+### 6.1 GET /v1/agent/robots/stream
 
 SSE stream for robot status updates (main page grid real-time updates)
 
@@ -601,7 +605,7 @@ event: activity
 data: {"id": "act_001", "type": "completed", "member_id": "robot_001", ...}
 ```
 
-### 6.2 GET /v1/robots/:id/executions/:exec_id/stream
+### 6.2 GET /v1/agent/robots/:id/executions/:exec_id/stream
 
 SSE stream for single execution progress (Execution Detail Drawer)
 
@@ -772,25 +776,25 @@ interface Activity {
 
 | UI Component | API Endpoints |
 |--------------|---------------|
-| Main Page - Station Grid | GET /v1/robots, SSE /v1/robots/stream |
-| Main Page - Activity Banner | GET /v1/robots/activities (limit=10), SSE activity events |
-| Main Page - Activity Modal | GET /v1/robots/activities (limit=50) |
-| Add Agent Modal | POST /v1/robots |
-| Agent Modal - Active Tab | GET /v1/robots/:id/executions?status=running,pending |
-| Agent Modal - History Tab | GET /v1/robots/:id/executions (with filters) |
-| Agent Modal - Results Tab | GET /v1/robots/:id/results |
-| Agent Modal - Settings Tab | GET/PUT /v1/robots/:id |
-| Execution Card - Pause | POST /v1/robots/:id/executions/:exec_id/pause |
-| Execution Card - Resume | POST /v1/robots/:id/executions/:exec_id/resume |
-| Execution Card - Stop | POST /v1/robots/:id/executions/:exec_id/cancel |
-| Execution Card - Guide | POST /v1/robots/:id/intervene (SSE) |
-| History Tab - Retry | POST /v1/robots/:id/executions/:exec_id/retry |
-| Execution Detail Drawer | GET /v1/robots/:id/executions/:exec_id, SSE stream |
-| Assign Task Drawer | POST /v1/robots/:id/trigger (SSE) |
-| Guide Execution Drawer | POST /v1/robots/:id/intervene (SSE) |
-| Result Detail Modal | GET /v1/robots/:id/results/:result_id |
+| Main Page - Station Grid | GET /v1/agent/robots, SSE /v1/agent/robots/stream |
+| Main Page - Activity Banner | GET /v1/agent/robots/activities (limit=10), SSE activity events |
+| Main Page - Activity Modal | GET /v1/agent/robots/activities (limit=50) |
+| Add Agent Modal | POST /v1/agent/robots |
+| Agent Modal - Active Tab | GET /v1/agent/robots/:id/executions?status=running,pending |
+| Agent Modal - History Tab | GET /v1/agent/robots/:id/executions (with filters) |
+| Agent Modal - Results Tab | GET /v1/agent/robots/:id/results |
+| Agent Modal - Settings Tab | GET/PUT /v1/agent/robots/:id |
+| Execution Card - Pause | POST /v1/agent/robots/:id/executions/:exec_id/pause |
+| Execution Card - Resume | POST /v1/agent/robots/:id/executions/:exec_id/resume |
+| Execution Card - Stop | POST /v1/agent/robots/:id/executions/:exec_id/cancel |
+| Execution Card - Guide | POST /v1/agent/robots/:id/intervene (SSE) |
+| History Tab - Retry | POST /v1/agent/robots/:id/executions/:exec_id/retry |
+| Execution Detail Drawer | GET /v1/agent/robots/:id/executions/:exec_id, SSE stream |
+| Assign Task Drawer | POST /v1/agent/robots/:id/trigger (SSE) |
+| Guide Execution Drawer | POST /v1/agent/robots/:id/intervene (SSE) |
+| Result Detail Modal | GET /v1/agent/robots/:id/results/:result_id |
 | Download Attachment | FileAPI.Download(fileId, '__yao.attachment') |
-| Delete Agent | DELETE /v1/robots/:id |
+| Delete Agent | DELETE /v1/agent/robots/:id |
 
 ---
 
@@ -803,7 +807,7 @@ interface Activity {
 
 2. **File References**: Use format `__yao.attachment://fileID` for attachment file references. Frontend uses existing FileAPI to download.
 
-3. **SSE Endpoints**: `/v1/robots/:id/trigger` and `/v1/robots/:id/intervene` should return SSE streams for chat-like interaction. Other SSE endpoints (`/stream`) are for real-time updates.
+3. **SSE Endpoints**: `/v1/agent/robots/:id/trigger` and `/v1/agent/robots/:id/intervene` should return SSE streams for chat-like interaction. Other SSE endpoints (`/stream`) are for real-time updates.
 
 4. **Pagination**: Use `page` and `pagesize` query params. Return `total`, `page`, `pagesize` in response for infinite scroll.
 
@@ -816,3 +820,5 @@ interface Activity {
    - `run`: Execute tasks
    - `delivery`: Format & deliver results
    - `learning`: Extract insights (async)
+
+7. **Route Namespace**: All robot APIs are under `/v1/agent/robots` namespace, consistent with `/v1/agent/assistants`. Implementation is in `yao/openapi/agent/robot/`.
