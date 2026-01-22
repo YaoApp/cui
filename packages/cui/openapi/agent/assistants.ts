@@ -33,6 +33,9 @@ export class AgentAssistants {
 				params.append('tags', filter.tags.join(','))
 			}
 			if (filter.type) params.append('type', filter.type)
+			if (filter.types && filter.types.length > 0) {
+				params.append('types', filter.types.join(','))
+			}
 			if (filter.keywords) params.append('keywords', filter.keywords)
 			if (filter.connector) params.append('connector', filter.connector)
 			if (filter.assistant_id) params.append('assistant_id', filter.assistant_id)

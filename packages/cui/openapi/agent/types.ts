@@ -10,8 +10,10 @@
 export interface AgentFilter {
 	/** Filter by tags */
 	tags?: string[]
-	/** Filter by type */
+	/** Filter by type (single value) */
 	type?: string
+	/** Filter by types (multiple values, IN query) */
+	types?: string[]
 	/** Search in name and description */
 	keywords?: string
 	/** Filter by connector */

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { Tooltip, message } from 'antd'
 import { Input, Select, InputNumber, Switch, CheckboxGroup, InputPassword } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import { useRobots } from '@/hooks/useRobots'
+import { Agent } from '@/openapi/agent/api'
+import type { Agent as AgentType } from '@/openapi/agent/types'
 import type { RobotState } from '../../../../../types'
 import type { ConfigContextData } from '../index'
 import styles from '../index.less'
@@ -20,13 +22,14 @@ interface AdvancedPanelProps {
 // Phase agents - for customizing which AI handles each execution phase
 // inspiration phase is only available in autonomous mode
 // run phase is not configurable (it's a built-in scheduler, not an agent)
+// Each phase has a corresponding agent type for filtering (e.g., robot-goals, robot-tasks)
 const PHASES = [
-	{ key: 'inspiration', label_en: 'Inspiration', label_cn: '洞察发现', desc_en: 'Discover insights', desc_cn: '发现洞察', default: '__yao.inspiration', autonomousOnly: true },
-	{ key: 'goals', label_en: 'Goals', label_cn: '目标规划', desc_en: 'Generate goals', desc_cn: '生成目标', default: '__yao.goals' },
-	{ key: 'tasks', label_en: 'Tasks', label_cn: '任务拆解', desc_en: 'Split into tasks', desc_cn: '拆分任务', default: '__yao.tasks' },
+	{ key: 'inspiration', label_en: 'Inspiration', label_cn: '洞察发现', desc_en: 'Discover insights', desc_cn: '发现洞察', default: '__yao.inspiration', type: 'robot-inspiration', autonomousOnly: true },
+	{ key: 'goals', label_en: 'Goals', label_cn: '目标规划', desc_en: 'Generate goals', desc_cn: '生成目标', default: '__yao.goals', type: 'robot-goals' },
+	{ key: 'tasks', label_en: 'Tasks', label_cn: '任务拆解', desc_en: 'Split into tasks', desc_cn: '拆分任务', default: '__yao.tasks', type: 'robot-tasks' },
 	// run phase is omitted - it's a built-in scheduler, not a replaceable agent
-	{ key: 'delivery', label_en: 'Delivery', label_cn: '交付', desc_en: 'Format & deliver', desc_cn: '格式化并交付', default: '__yao.delivery' },
-	{ key: 'learning', label_en: 'Learning', label_cn: '学习', desc_en: 'Extract insights', desc_cn: '提取经验', default: '__yao.learning' }
+	{ key: 'delivery', label_en: 'Delivery', label_cn: '交付', desc_en: 'Format & deliver', desc_cn: '格式化并交付', default: '__yao.delivery', type: 'robot-delivery' },
+	{ key: 'learning', label_en: 'Learning', label_cn: '学习', desc_en: 'Extract insights', desc_cn: '提取经验', default: '__yao.learning', type: 'robot-learning' }
 ]
 
 // Learn types
@@ -63,22 +66,68 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 	const [processes, setProcesses] = useState<string[]>([])
 	const [newProcess, setNewProcess] = useState('')
 
-	// Mock agent options for phase selection - TODO: Load from API
-	const [agentOptions, setAgentOptions] = useState<Array<{ label: string; value: string }>>([])
+	// Phase agents loaded from API (keyed by phase type)
+	const [phaseAgents, setPhaseAgents] = useState<Record<string, AgentType[]>>({})
+	const phaseAgentsLoadedRef = useRef(false)
 
-	// Initialize agent options
+	// Load phase-specific agents when component mounts (single query with types IN)
 	useEffect(() => {
-		setAgentOptions([
-			{ label: '__yao.inspiration', value: '__yao.inspiration' },
-			{ label: '__yao.goals', value: '__yao.goals' },
-			{ label: '__yao.tasks', value: '__yao.tasks' },
-			{ label: '__yao.run', value: '__yao.run' },
-			{ label: '__yao.delivery', value: '__yao.delivery' },
-			{ label: '__yao.learning', value: '__yao.learning' },
-			{ label: 'custom-analyst', value: 'custom-analyst' },
-			{ label: 'custom-executor', value: 'custom-executor' }
-		])
+		if (!window.$app?.openapi || phaseAgentsLoadedRef.current) return
+
+		phaseAgentsLoadedRef.current = true
+
+		const openapi = window.$app.openapi
+		const agentAPI = new Agent(openapi)
+
+		// Query all robot phase types in a single request using types (IN query)
+		const phaseTypes = PHASES.map(p => p.type)
+		const uniqueTypes = [...new Set(phaseTypes)]
+
+		agentAPI.assistants
+			.List({ types: uniqueTypes })
+			.then(response => {
+				if (!openapi.IsError(response)) {
+					const data = openapi.GetData(response)
+					const agents = data?.data || []
+					
+					// Group agents by type
+					const agentsByType: Record<string, AgentType[]> = {}
+					uniqueTypes.forEach(type => {
+						agentsByType[type] = agents.filter((a: AgentType) => a.type === type)
+					})
+					setPhaseAgents(agentsByType)
+				}
+			})
+			.catch(err => {
+				console.error('Failed to load phase agents:', err)
+				phaseAgentsLoadedRef.current = false
+			})
 	}, [])
+
+	// Build agent options for each phase
+	// Default system agent (__yao.*) is always first, then agents matching the phase type
+	const getPhaseAgentOptions = useMemo(() => {
+		return (phaseKey: string, phaseType: string, defaultAgent: string) => {
+			// Start with the default system agent
+			const options: Array<{ label: string; value: string }> = [
+				{ label: `${defaultAgent} (${is_cn ? '默认' : 'default'})`, value: defaultAgent }
+			]
+			
+			// Add agents that match the phase type from API query
+			const agents = phaseAgents[phaseType] || []
+			agents.forEach(agent => {
+				// Skip if it's the default agent (already added)
+				if (agent.assistant_id === defaultAgent) return
+				
+				options.push({
+					label: agent.name || agent.assistant_id,
+					value: agent.assistant_id
+				})
+			})
+			
+			return options
+		}
+	}, [phaseAgents, is_cn])
 
 	// Sync local state with formData when it changes
 	useEffect(() => {
@@ -580,7 +629,7 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 									onChange={(value) => handleFieldChange(`resources.phases.${phase.key}`, value)}
 									schema={{
 										type: 'string',
-										enum: agentOptions
+										enum: getPhaseAgentOptions(phase.key, phase.type, phase.default)
 									}}
 								/>
 							</div>
