@@ -92,10 +92,18 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 		try {
 			const robotDetail = await getRobot(robot.member_id)
 			if (robotDetail) {
-				// Parse clock config from robot_config
-				const clock = robotDetail.robot_config?.clock || {}
+				// Parse robot_config sub-objects
+				const robotConfig = robotDetail.robot_config || {}
+				const clock = robotConfig.clock || {}
+				const delivery = robotConfig.delivery || {}
+				const quota = robotConfig.quota || {}
+				const executor = robotConfig.executor || {}
+				const learn = robotConfig.learn || {}
+				const triggers = robotConfig.triggers || {}
+				const resources = robotConfig.resources || {}
 				
 				const data: Record<string, any> = {
+					// Basic fields
 					display_name: robotDetail.display_name || '',
 					bio: robotDetail.bio || '',
 					robot_email: robotDetail.robot_email || '',
@@ -107,12 +115,45 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 					mcp_servers: robotDetail.mcp_servers || [],
 					language_model: robotDetail.language_model || '',
 					cost_limit: robotDetail.cost_limit || 100,
-					// Clock configuration
+					
+					// Clock configuration (Schedule panel)
 					'clock.mode': clock.mode || 'times',
 					'clock.times': clock.times || ['09:00'],
 					'clock.days': clock.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
 					'clock.every': clock.every || '30m',
-					'clock.tz': clock.tz || 'Asia/Shanghai'
+					'clock.tz': clock.tz || 'Asia/Shanghai',
+					
+					// Delivery configuration (Advanced panel)
+					'delivery.email.targets': delivery.email?.targets || [],
+					'delivery.webhook.enabled': delivery.webhook?.enabled || false,
+					'delivery.webhook.targets': delivery.webhook?.targets || [],
+					'delivery.process.enabled': delivery.process?.enabled || false,
+					'delivery.process.targets': delivery.process?.targets || [],
+					
+					// Quota/Concurrency configuration (Advanced panel)
+					'quota.max': quota.max ?? 2,
+					'quota.queue': quota.queue ?? 10,
+					'quota.priority': quota.priority ?? 5,
+					
+					// Executor configuration (Advanced panel)
+					'executor.timeout': executor.timeout ?? 30,
+					'executor.mode': executor.mode || 'standard',
+					
+					// Learning configuration (Advanced panel)
+					'learn.on': learn.on || false,
+					'learn.types': learn.types || ['execution', 'feedback', 'insight'],
+					'learn.keep': learn.keep ?? 90,
+					
+					// Triggers configuration (Advanced panel)
+					'triggers.intervene.enabled': triggers.intervene?.enabled ?? true,
+					'triggers.event.enabled': triggers.event?.enabled || false,
+					
+					// Resources/Phases configuration (Advanced panel - Developer options)
+					'resources.phases.inspiration': resources.phases?.inspiration || '__yao.inspiration',
+					'resources.phases.goals': resources.phases?.goals || '__yao.goals',
+					'resources.phases.tasks': resources.phases?.tasks || '__yao.tasks',
+					'resources.phases.delivery': resources.phases?.delivery || '__yao.delivery',
+					'resources.phases.learning': resources.phases?.learning || '__yao.learning'
 				}
 				setFormData(data)
 				setOriginalData(data)
@@ -305,14 +346,65 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 
 		setSaving(true)
 		try {
-			// Build robot_config with clock settings
+			// Build robot_config with all nested configurations
 			const robotConfig: Record<string, any> = {
+				// Clock/Schedule settings
 				clock: {
 					mode: formData['clock.mode'] || 'times',
 					times: formData['clock.times'] || ['09:00'],
 					days: formData['clock.days'] || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
 					every: formData['clock.every'] || '30m',
 					tz: formData['clock.tz'] || 'Asia/Shanghai'
+				},
+				// Delivery settings
+				delivery: {
+					email: {
+						targets: formData['delivery.email.targets'] || []
+					},
+					webhook: {
+						enabled: formData['delivery.webhook.enabled'] || false,
+						targets: formData['delivery.webhook.targets'] || []
+					},
+					process: {
+						enabled: formData['delivery.process.enabled'] || false,
+						targets: formData['delivery.process.targets'] || []
+					}
+				},
+				// Quota/Concurrency settings
+				quota: {
+					max: formData['quota.max'] ?? 2,
+					queue: formData['quota.queue'] ?? 10,
+					priority: formData['quota.priority'] ?? 5
+				},
+				// Executor settings
+				executor: {
+					timeout: formData['executor.timeout'] ?? 30,
+					mode: formData['executor.mode'] || 'standard'
+				},
+				// Learning settings
+				learn: {
+					on: formData['learn.on'] || false,
+					types: formData['learn.types'] || ['execution', 'feedback', 'insight'],
+					keep: formData['learn.keep'] ?? 90
+				},
+				// Triggers settings
+				triggers: {
+					intervene: {
+						enabled: formData['triggers.intervene.enabled'] ?? true
+					},
+					event: {
+						enabled: formData['triggers.event.enabled'] || false
+					}
+				},
+				// Resources/Phases settings (Developer options)
+				resources: {
+					phases: {
+						inspiration: formData['resources.phases.inspiration'] || '__yao.inspiration',
+						goals: formData['resources.phases.goals'] || '__yao.goals',
+						tasks: formData['resources.phases.tasks'] || '__yao.tasks',
+						delivery: formData['resources.phases.delivery'] || '__yao.delivery',
+						learning: formData['resources.phases.learning'] || '__yao.learning'
+					}
 				}
 			}
 

@@ -66,8 +66,8 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 	// Mock agent options for phase selection - TODO: Load from API
 	const [agentOptions, setAgentOptions] = useState<Array<{ label: string; value: string }>>([])
 
+	// Initialize agent options
 	useEffect(() => {
-		// Mock agent options
 		setAgentOptions([
 			{ label: '__yao.inspiration', value: '__yao.inspiration' },
 			{ label: '__yao.goals', value: '__yao.goals' },
@@ -78,22 +78,28 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 			{ label: 'custom-analyst', value: 'custom-analyst' },
 			{ label: 'custom-executor', value: 'custom-executor' }
 		])
+	}, [])
 
+	// Sync local state with formData when it changes
+	useEffect(() => {
 		// Initialize email recipients from formData
 		const emailTargets = formData['delivery.email.targets'] || []
-		setEmailRecipients(emailTargets.map((t: any) => t.to?.[0] || t).filter(Boolean))
+		const emails = emailTargets.map((t: any) => t.to?.[0] || t).filter(Boolean)
+		setEmailRecipients(emails)
 
 		// Initialize webhook targets from formData
 		const webhookData = formData['delivery.webhook.targets'] || []
-		setWebhookTargets(webhookData.map((t: any) => ({
+		const webhooks = webhookData.map((t: any) => ({
 			url: t.url || '',
 			secret: t.secret || ''
-		})).filter((t: any) => t.url))
+		})).filter((t: any) => t.url)
+		setWebhookTargets(webhooks)
 
 		// Initialize processes from formData
 		const processTargets = formData['delivery.process.targets'] || []
-		setProcesses(processTargets.map((t: any) => t.process || t).filter(Boolean))
-	}, [])
+		const procs = processTargets.map((t: any) => t.process || t).filter(Boolean)
+		setProcesses(procs)
+	}, [formData['delivery.email.targets'], formData['delivery.webhook.targets'], formData['delivery.process.targets']])
 
 	// Handle field change
 	const handleFieldChange = (field: string, value: any) => {

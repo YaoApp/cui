@@ -50,12 +50,21 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 	// Status refresh interval ref
 	const statusIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-	// Refresh robot status from API
+	// Use ref to store robot id to avoid recreating refreshStatus
+	const robotIdRef = useRef<string | null>(null)
+	
+	// Update ref when robot changes
+	useEffect(() => {
+		robotIdRef.current = robot?.member_id || null
+	}, [robot?.member_id])
+
+	// Refresh robot status from API - stable function reference
 	const refreshStatus = useCallback(async () => {
-		if (!robot) return
+		const memberId = robotIdRef.current
+		if (!memberId) return
 
 		try {
-			const status = await getRobotStatus(robot.member_id)
+			const status = await getRobotStatus(memberId)
 			if (status) {
 				setRobotStatus({
 					status: status.status as RobotStatus,
@@ -67,7 +76,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 		} catch (err) {
 			console.error('Failed to refresh robot status:', err)
 		}
-	}, [robot, getRobotStatus])
+	}, [getRobotStatus])
 
 	// Reset tab and start status refresh when modal opens
 	useEffect(() => {
@@ -98,7 +107,7 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 				statusIntervalRef.current = null
 			}
 		}
-	}, [visible, robot, refreshStatus])
+	}, [visible, robot?.member_id, refreshStatus])
 
 	// Handle opening execution detail
 	const handleOpenDetail = useCallback((execution: Execution) => {
@@ -222,10 +231,8 @@ const AgentModal: React.FC<AgentModalProps> = ({ visible, onClose, robot, onData
 						onDataUpdated?.()
 					}}
 					onUpdated={() => {
-						// Refresh grid data after update
+						// Refresh grid data after update (status will refresh on next interval)
 						onDataUpdated?.()
-						// Also refresh status
-						refreshStatus()
 					}}
 				/>
 			default:
