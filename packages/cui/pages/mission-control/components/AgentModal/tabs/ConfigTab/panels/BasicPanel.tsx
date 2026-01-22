@@ -19,7 +19,7 @@ interface BasicPanelProps {
  * 
  * Fields from `__yao.member`:
  * - display_name: Name
- * - robot_email: Email
+ * - robot_email: Email (full email address string, e.g. "robot@ai.yaoagents.com")
  * - role_id: Role
  * - bio: Description
  * - manager_id: Reports To
@@ -27,26 +27,36 @@ interface BasicPanelProps {
  */
 const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_cn, configData }) => {
 	const [errors, setErrors] = useState<Record<string, string>>({})
+	
+	// Local state for email prefix and domain (for UI split display)
 	const [emailPrefix, setEmailPrefix] = useState('')
 	const [emailDomain, setEmailDomain] = useState('')
-
-	// Parse email when formData.robot_email changes
-	useEffect(() => {
-		const email = formData.robot_email || ''
-		const atIndex = email.indexOf('@')
-		if (atIndex > 0) {
-			setEmailPrefix(email.substring(0, atIndex))
-			setEmailDomain(`@${email.substring(atIndex + 1)}`)
-		} else if (configData?.emailDomains?.length) {
-			// Set default domain if available
-			setEmailDomain(configData.emailDomains[0].value)
-		}
-	}, [formData.robot_email, configData?.emailDomains])
 
 	// Get options from configData
 	const emailDomains = useMemo(() => configData?.emailDomains || [], [configData?.emailDomains])
 	const roles = useMemo(() => configData?.roles || [], [configData?.roles])
 	const managers = useMemo(() => configData?.managers || [], [configData?.managers])
+
+	// Parse robot_email into prefix and domain when formData changes
+	useEffect(() => {
+		const email = formData.robot_email || ''
+		const atIndex = email.indexOf('@')
+		if (atIndex > 0) {
+			// Valid email like "robot@ai.yaoagents.com"
+			setEmailPrefix(email.substring(0, atIndex))
+			setEmailDomain(`@${email.substring(atIndex + 1)}`)
+		} else if (atIndex === 0) {
+			// Only domain like "@ai.yaoagents.com" (invalid, clear prefix)
+			setEmailPrefix('')
+			setEmailDomain(email)
+		} else if (email === '') {
+			// Empty email - keep prefix empty, set default domain if available
+			setEmailPrefix('')
+			if (emailDomains.length > 0 && !emailDomain) {
+				setEmailDomain(emailDomains[0].value)
+			}
+		}
+	}, [formData.robot_email, emailDomains])
 
 	// Handle field change with error clearing
 	const handleFieldChange = (field: string, value: any) => {
@@ -60,12 +70,14 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 		}
 	}
 
-	// Handle email prefix change
+	// Handle email prefix change - combine with domain and update formData
 	const handleEmailPrefixChange = (value: any) => {
-		const prefix = String(value)
+		const prefix = String(value || '')
 		setEmailPrefix(prefix)
-		// Combine and update
-		onChange('robot_email', `${prefix}${emailDomain}`)
+		// Only update robot_email if we have both prefix and domain
+		if (prefix && emailDomain) {
+			onChange('robot_email', `${prefix}${emailDomain}`)
+		}
 		if (errors.robot_email) {
 			setErrors(prev => {
 				const newErrors = { ...prev }
@@ -75,11 +87,14 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 		}
 	}
 
-	// Handle email domain change
+	// Handle email domain change - combine with prefix and update formData
 	const handleEmailDomainChange = (value: any) => {
-		const domain = String(value)
+		const domain = String(value || '')
 		setEmailDomain(domain)
-		onChange('robot_email', `${emailPrefix}${domain}`)
+		// Only update robot_email if we have both prefix and domain
+		if (emailPrefix && domain) {
+			onChange('robot_email', `${emailPrefix}${domain}`)
+		}
 	}
 
 	return (

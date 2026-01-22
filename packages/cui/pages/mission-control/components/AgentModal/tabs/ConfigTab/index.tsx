@@ -56,8 +56,6 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 
 	const [activeMenu, setActiveMenu] = useState<MenuKey>('basic')
 	const [formData, setFormData] = useState<Record<string, any>>({})
-	const [originalData, setOriginalData] = useState<Record<string, any>>({})
-	const [isDirty, setIsDirty] = useState(false)
 	const [saving, setSaving] = useState(false)
 	const [loadingRobot, setLoadingRobot] = useState(false)
 
@@ -156,7 +154,6 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 					'resources.phases.learning': resources.phases?.learning || '__yao.learning'
 				}
 				setFormData(data)
-				setOriginalData(data)
 			}
 		} catch (err) {
 			console.error('Failed to load robot details:', err)
@@ -299,12 +296,6 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 		robotLoadedRef.current = false
 	}, [robot?.member_id])
 
-	// Check if form is dirty
-	useEffect(() => {
-		const dirty = JSON.stringify(formData) !== JSON.stringify(originalData)
-		setIsDirty(dirty)
-	}, [formData, originalData])
-
 	// Current autonomous mode from form data
 	const autonomousMode = formData.autonomous_mode ?? false
 
@@ -342,7 +333,7 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 
 	// Handle save
 	const handleSave = async () => {
-		if (!robot?.member_id || !isDirty) return
+		if (!robot?.member_id || saving) return
 
 		setSaving(true)
 		try {
@@ -427,8 +418,6 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 			const result = await updateRobot(robot.member_id, updateData)
 			if (result) {
 				message.success(is_cn ? '保存成功' : 'Saved successfully')
-				setOriginalData({ ...formData })
-				setIsDirty(false)
 				onUpdated?.()
 			} else {
 				message.error(apiError || (is_cn ? '保存失败' : 'Failed to save'))
@@ -496,9 +485,9 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 				{/* Save Button */}
 				<div className={styles.panelFooter}>
 					<button
-						className={`${styles.saveButton} ${!isDirty ? styles.saveButtonDisabled : ''}`}
+						className={`${styles.saveButton} ${saving ? styles.saveButtonDisabled : ''}`}
 						onClick={handleSave}
-						disabled={!isDirty || saving}
+						disabled={saving}
 					>
 						{saving ? (
 							<>
