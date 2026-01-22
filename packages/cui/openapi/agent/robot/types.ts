@@ -136,10 +136,10 @@ export interface RobotListResponse {
  * Robot create request
  */
 export interface RobotCreateRequest {
-	/** Unique robot identifier (required) */
-	member_id: string
-	/** Team ID (required, defaults to user_id for personal users) */
-	team_id: string
+	/** Unique robot identifier (optional, auto-generated if not provided) */
+	member_id?: string
+	/** Team ID (optional, defaults to auth team or user_id for personal users) */
+	team_id?: string
 	/** Display name (required) */
 	display_name: string
 	/** Robot bio/description */

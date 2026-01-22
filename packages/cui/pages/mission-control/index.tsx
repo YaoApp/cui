@@ -12,10 +12,8 @@ import clsx from 'clsx'
 import { useRobots } from '@/hooks/useRobots'
 import type { Robot as ApiRobot, RobotStatusResponse } from '@/openapi/agent/robot'
 import {
-	mockRobots,
 	getRobotStats,
 	getActiveExecutions,
-	getRobotDisplayName,
 	getRecentActivities,
 	type Activity,
 	type Delivery
@@ -138,18 +136,19 @@ const MissionControl = () => {
 				)
 				setRobots(robotsWithStatus)
 			} else {
-				// Fallback to mock data if API fails
-				console.warn('Failed to load robots from API, using mock data')
-				setRobots(mockRobots)
+				// API returned empty response
+				console.error('Failed to load robots from API: empty response')
+				message.error(is_cn ? '加载机器人列表失败' : 'Failed to load robots')
+				setRobots([])
 			}
 		} catch (err) {
 			console.error('Error loading robots:', err)
-			// Fallback to mock data
-			setRobots(mockRobots)
+			message.error(is_cn ? '加载机器人列表失败' : 'Failed to load robots')
+			setRobots([])
 		} finally {
 			setRobotsInitialized(true)
 		}
-	}, [listRobots, getRobotStatus])
+	}, [listRobots, getRobotStatus, is_cn])
 
 	// Initial load
 	useEffect(() => {
