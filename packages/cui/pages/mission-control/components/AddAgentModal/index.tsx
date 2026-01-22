@@ -9,6 +9,7 @@ import { Agent } from '@/openapi/agent/api'
 import { MCP } from '@/openapi/mcp/api'
 import { UserAuth } from '@/openapi/user/auth'
 import { UserTeams } from '@/openapi/user/teams'
+import { Chat, IsEventMessage, IsStreamEndEvent } from '@/openapi'
 import type { Agent as AgentType } from '@/openapi/agent/types'
 import type { MCPServer } from '@/openapi/mcp/types'
 import type { TeamConfig } from '@/openapi/user/types'
@@ -80,6 +81,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 	const userMembersLoadedRef = useRef(false)
 	const agentsLoadedRef = useRef(false)
 	const mcpLoadedRef = useRef(false)
+	const generatedPromptRef = useRef('')
 
 	// Get team ID
 	const teamId = global.user?.team_id || global.user?.user_id || ''
@@ -392,22 +394,88 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 		setErrors({})
 	}
 
-	// Handle AI generate prompt
+	// Handle AI generate prompt - streaming call to robot_prompt agent
 	const handleGeneratePrompt = async () => {
 		if (generatingPrompt) return
 
-		setGeneratingPrompt(true)
-		try {
-			// Mock: Generate based on name
-			await new Promise(resolve => setTimeout(resolve, 1500))
-			
-			const name = formData.display_name || (is_cn ? '智能体' : 'Agent')
-			const mockPrompt = is_cn
-				? `你是 ${name}，一位专业的智能体。\n\n你的主要职责包括：\n- 分析数据并生成报告\n- 提供专业建议和见解\n- 协助团队完成各项任务\n\n请保持专业、准确、高效的工作态度。`
-				: `You are ${name}, a professional AI teammate.\n\nYour primary responsibilities include:\n- Analyze data and generate reports\n- Provide professional advice and insights\n- Assist the team in completing various tasks\n\nPlease maintain a professional, accurate, and efficient work attitude.`
+		// Check if we have the necessary dependencies
+		if (!window.$app?.openapi) {
+			console.warn('OpenAPI not initialized')
+			message.error(is_cn ? 'API 未初始化' : 'API not initialized')
+			return
+		}
 
-			handleFieldChange('system_prompt', mockPrompt)
-		} finally {
+		const robotPromptAgentId = global?.agent_uses?.robot_prompt
+		if (!robotPromptAgentId) {
+			console.warn('Robot prompt agent not configured in global.agent_uses.robot_prompt')
+			message.error(is_cn ? '未配置职责生成助手' : 'Robot prompt agent not configured')
+			return
+		}
+
+		setGeneratingPrompt(true)
+		generatedPromptRef.current = ''
+
+		try {
+			const chatClient = new Chat(window.$app.openapi)
+
+			// Build context from form data
+			const name = formData.display_name || (is_cn ? '智能体' : 'Agent')
+			const currentPrompt = formData.system_prompt || ''
+			
+			// Language hint
+			const languageHint = is_cn ? '请用中文生成。' : 'Please generate in English.'
+
+			// Build user message - if there's existing content, optimize it; otherwise generate new
+			const userMessage = currentPrompt.trim()
+				? `${languageHint}\n\n请优化以下 Robot 的职责说明，使其更加专业、清晰、全面：\n\n名称：${name}\n\n当前职责说明：\n${currentPrompt}`
+				: `${languageHint}\n\n请为名为"${name}"的 Robot 生成一份专业的职责说明（System Prompt）。`
+
+			// Stream generation
+			chatClient.StreamCompletion(
+				{
+					assistant_id: robotPromptAgentId,
+					messages: [
+						{
+							role: 'user',
+							content: userMessage
+						}
+					],
+					locale,
+					skip: {
+						history: true,
+						trace: true
+					}
+				},
+				(chunk) => {
+					// Check for stream end event
+					if (IsEventMessage(chunk) && IsStreamEndEvent(chunk)) {
+						setGeneratingPrompt(false)
+						return
+					}
+
+					// Accumulate and update in real-time
+					if (chunk.type === 'text' && chunk.props?.content) {
+						if (chunk.delta) {
+							generatedPromptRef.current += chunk.props.content
+						} else {
+							generatedPromptRef.current = chunk.props.content
+						}
+
+						// Real-time update the form field
+						if (generatedPromptRef.current.trim()) {
+							handleFieldChange('system_prompt', generatedPromptRef.current.trim())
+						}
+					}
+				},
+				(error) => {
+					console.error('Failed to generate prompt:', error)
+					message.error(is_cn ? '生成职责说明失败' : 'Failed to generate prompt')
+					setGeneratingPrompt(false)
+				}
+			)
+		} catch (error) {
+			console.error('Error generating prompt:', error)
+			message.error(is_cn ? '生成职责说明失败' : 'Failed to generate prompt')
 			setGeneratingPrompt(false)
 		}
 	}

@@ -112,6 +112,8 @@ export declare namespace App {
 		title?: string
 		/** Agent ID for generating prompts */
 		prompt?: string
+		/** Agent ID for generating robot system prompts (responsibilities description) */
+		robot_prompt?: string
 		/** Agent ID for vision tasks */
 		vision?: string
 		/** Agent ID for search tasks */
