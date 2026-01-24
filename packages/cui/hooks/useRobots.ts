@@ -15,7 +15,8 @@ import type {
 	ResultFilter,
 	ResultListResponse,
 	ResultDetail,
-	ActivityListResponse
+	ActivityListResponse,
+	ActivityType
 } from '@/openapi/agent/robot'
 
 /**
@@ -547,7 +548,7 @@ export function useRobots() {
 	 * List activities for the team
 	 */
 	const listActivities = useCallback(
-		async (params?: { limit?: number; since?: string }): Promise<ActivityListResponse | null> => {
+		async (params?: { limit?: number; since?: string; type?: ActivityType }): Promise<ActivityListResponse | null> => {
 			if (!window.$app?.openapi) {
 				setError('OpenAPI not available')
 				return null

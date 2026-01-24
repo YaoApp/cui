@@ -16,7 +16,8 @@ import type {
 	ResultFilter,
 	ResultListResponse,
 	ResultDetail,
-	ActivityListResponse
+	ActivityListResponse,
+	ActivityType
 } from './types'
 
 /**
@@ -189,15 +190,16 @@ export class AgentRobots {
 
 	/**
 	 * List activities for the user's team
-	 * @param params - Optional parameters
+	 * @param params - Optional parameters (limit, since, type)
 	 * @returns Activity list response
 	 */
-	async ListActivities(params?: { limit?: number; since?: string }): Promise<ApiResponse<ActivityListResponse>> {
+	async ListActivities(params?: { limit?: number; since?: string; type?: ActivityType }): Promise<ApiResponse<ActivityListResponse>> {
 		const urlParams = new URLSearchParams()
 
 		if (params) {
 			if (params.limit) urlParams.append('limit', params.limit.toString())
 			if (params.since) urlParams.append('since', params.since)
+			if (params.type) urlParams.append('type', params.type)
 		}
 
 		return this.api.Get<ActivityListResponse>(BuildURL('/agent/robots/activities', urlParams))

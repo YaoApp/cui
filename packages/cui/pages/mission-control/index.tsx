@@ -10,12 +10,10 @@ import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
 import clsx from 'clsx'
 import { useRobots } from '@/hooks/useRobots'
-import type { Robot as ApiRobot, RobotStatusResponse, ResultDetail } from '@/openapi/agent/robot'
+import type { Robot as ApiRobot, RobotStatusResponse, ResultDetail, Activity, ActivityType } from '@/openapi/agent/robot'
 import {
 	getRobotStats,
-	getActiveExecutions,
-	getRecentActivities,
-	type Activity
+	getActiveExecutions
 } from './mock/data'
 import type { RobotState, RobotStatus } from './types'
 import styles from './index.less'
@@ -50,7 +48,9 @@ const MissionControl = () => {
 		loading: robotsLoading,
 		error: robotsError,
 		listRobots,
-		getRobotStatus
+		getRobotStatus,
+		listActivities,
+		getResult
 	} = useRobots()
 
 	// State
@@ -68,7 +68,8 @@ const MissionControl = () => {
 	const filterRef = useRef<HTMLDivElement>(null)
 
 	// Activity feed state
-	const [activities] = useState<Activity[]>(getRecentActivities(10))
+	const [activities, setActivities] = useState<Activity[]>([])
+	const [activitiesLoading, setActivitiesLoading] = useState(true)
 	const [currentActivityIndex, setCurrentActivityIndex] = useState(0)
 	const [showActivityModal, setShowActivityModal] = useState(false)
 
@@ -149,23 +150,50 @@ const MissionControl = () => {
 		}
 	}, [listRobots, getRobotStatus, is_cn])
 
+	// Load activities from API - only show completed executions (with results)
+	const loadActivities = useCallback(async () => {
+		try {
+			setActivitiesLoading(true)
+			// Pass type filter to API to only get completed executions
+			const response = await listActivities({ 
+				limit: 20, 
+				type: 'execution.completed' 
+			})
+			if (response && response.data) {
+				setActivities(response.data)
+				setCurrentActivityIndex(0) // Reset to show latest activity
+			} else {
+				setActivities([])
+				setCurrentActivityIndex(0)
+			}
+		} catch (err) {
+			console.error('Error loading activities:', err)
+			setActivities([])
+			setCurrentActivityIndex(0)
+		} finally {
+			setActivitiesLoading(false)
+		}
+	}, [listActivities])
+
 	// Initial load
 	useEffect(() => {
 		if (!robotsInitialized) {
 			loadRobots()
+			loadActivities()
 		}
-	}, [robotsInitialized, loadRobots])
+	}, [robotsInitialized, loadRobots, loadActivities])
 
-	// Periodic refresh of robot status (every 30 seconds)
+	// Periodic refresh of robot status and activities (every 30 seconds)
 	useEffect(() => {
 		if (!robotsInitialized) return
 
 		const refreshInterval = setInterval(() => {
 			loadRobots()
+			loadActivities()
 		}, 30000) // 30 seconds
 
 		return () => clearInterval(refreshInterval)
-	}, [robotsInitialized, loadRobots])
+	}, [robotsInitialized, loadRobots, loadActivities])
 
 	// Show error message
 	useEffect(() => {
@@ -269,6 +297,21 @@ const MissionControl = () => {
 		setShowAgentModal(true)
 	}
 
+	// Handle activity click - navigate to result detail
+	const handleActivityClick = async (activity: Activity) => {
+		// Get result detail using execution_id
+		try {
+			const resultDetail = await getResult(activity.robot_id, activity.execution_id)
+			if (resultDetail) {
+				// Open result detail modal on top of activity modal
+				setSelectedResult(resultDetail)
+				setShowResultDetailModal(true)
+			}
+		} catch (err) {
+			console.error('Error fetching result detail:', err)
+		}
+	}
+
 	// Handle agent modal close
 	const handleAgentModalClose = () => {
 		setShowAgentModal(false)
@@ -325,16 +368,26 @@ const MissionControl = () => {
 		}
 	}
 
-	// Get activity icon
-	const getActivityIcon = (type: Activity['type']): string => {
-		const icons: Record<Activity['type'], string> = {
-			completed: 'material-check_circle',
-			file: 'material-description',
-			error: 'material-error',
-			started: 'material-play_circle',
-			paused: 'material-pause_circle'
+	// Get activity icon based on API ActivityType
+	const getActivityIcon = (type: ActivityType): string => {
+		const icons: Record<ActivityType, string> = {
+			'execution.started': 'material-play_circle',
+			'execution.completed': 'material-check_circle',
+			'execution.failed': 'material-error',
+			'execution.cancelled': 'material-cancel'
 		}
-		return icons[type]
+		return icons[type] || 'material-info'
+	}
+
+	// Get activity type CSS class for styling
+	const getActivityTypeClass = (type: ActivityType): string => {
+		const classes: Record<ActivityType, string> = {
+			'execution.started': 'started',
+			'execution.completed': 'completed',
+			'execution.failed': 'error',
+			'execution.cancelled': 'paused'
+		}
+		return classes[type] || 'started'
 	}
 
 	// Format relative time
@@ -677,17 +730,13 @@ const MissionControl = () => {
 						<Icon
 							name={getActivityIcon(activities[currentActivityIndex].type)}
 							size={18}
-							className={clsx(styles.activityIcon, styles[activities[currentActivityIndex].type])}
+							className={clsx(styles.activityIcon, styles[getActivityTypeClass(activities[currentActivityIndex].type)])}
 						/>
 						<span className={styles.activityRobot}>
-							{is_cn
-								? activities[currentActivityIndex].robot_name.cn
-								: activities[currentActivityIndex].robot_name.en}
+							{activities[currentActivityIndex].robot_name || activities[currentActivityIndex].robot_id}
 						</span>
 						<span className={styles.activityTitle}>
-							{is_cn
-								? activities[currentActivityIndex].title.cn
-								: activities[currentActivityIndex].title.en}
+							{activities[currentActivityIndex].message}
 						</span>
 						<span className={styles.activityTime}>
 							{formatRelativeTime(activities[currentActivityIndex].timestamp)}
@@ -707,38 +756,44 @@ const MissionControl = () => {
 				title={is_cn ? '最近动态' : 'Recent Activity'}
 			>
 				<div className={styles.modalContent}>
-					{activities.map((activity) => (
-						<div key={activity.id} className={styles.activityItem}>
-							<Icon
-								name={getActivityIcon(activity.type)}
-								size={18}
-								className={clsx(styles.activityIcon, styles[activity.type])}
-							/>
-							<div className={styles.activityInfo}>
-								<div className={styles.activityItemTitle}>
-									<span className={styles.robotName}>
-										{is_cn ? activity.robot_name.cn : activity.robot_name.en}
-									</span>
-									{activity.file_id && (
-										<button className={styles.downloadBtn}>
-											<Icon name='material-download' size={16} />
-										</button>
-									)}
-									<span className={styles.itemTime}>
-										{formatRelativeTime(activity.timestamp)}
-									</span>
-								</div>
-								<div className={styles.activityItemDesc}>
-									{is_cn ? activity.title.cn : activity.title.en}
-								</div>
-								{activity.description && (
-									<div className={styles.activityItemMeta}>
-										{is_cn ? activity.description.cn : activity.description.en}
-									</div>
-								)}
-							</div>
+					{activitiesLoading ? (
+						<div className={styles.activityLoading}>
+							{is_cn ? '加载中...' : 'Loading...'}
 						</div>
-					))}
+					) : activities.length === 0 ? (
+						<div className={styles.activityEmpty}>
+							<Icon name='material-inbox' size={40} />
+							<span>{is_cn ? '暂无动态' : 'No activities yet'}</span>
+						</div>
+					) : (
+						activities.map((activity) => (
+							<div 
+								key={`${activity.execution_id}-${activity.type}`} 
+								className={clsx(styles.activityItem, styles.clickable)}
+								onClick={() => handleActivityClick(activity)}
+							>
+								<Icon
+									name={getActivityIcon(activity.type)}
+									size={18}
+									className={clsx(styles.activityIcon, styles[getActivityTypeClass(activity.type)])}
+								/>
+								<div className={styles.activityInfo}>
+									<div className={styles.activityItemTitle}>
+										<span className={styles.robotName}>
+											{activity.robot_name || activity.robot_id}
+										</span>
+										<span className={styles.itemTime}>
+											{formatRelativeTime(activity.timestamp)}
+										</span>
+									</div>
+									<div className={styles.activityItemDesc}>
+										{activity.message}
+									</div>
+								</div>
+								<Icon name='material-chevron_right' size={18} className={styles.activityItemArrow} />
+							</div>
+						))
+					)}
 				</div>
 			</Modal>
 

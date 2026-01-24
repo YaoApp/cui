@@ -1356,10 +1356,29 @@
 		background: var(--color_mission_card_bg);
 	}
 
+	&.clickable {
+		cursor: pointer;
+
+		&:hover {
+			.activityItemArrow {
+				opacity: 1;
+				transform: translateX(2px);
+			}
+		}
+	}
+
 	.activityIcon {
 		margin-top: 2px;
 		flex-shrink: 0;
 	}
+}
+
+.activityItemArrow {
+	color: var(--color_mission_text_muted);
+	opacity: 0.5;
+	margin-top: 2px;
+	flex-shrink: 0;
+	transition: all 0.2s ease;
 }
 
 .activityInfo {
@@ -1397,6 +1416,30 @@
 	font-size: 11px;
 	color: var(--color_mission_text_muted);
 	margin-top: 3px;
+}
+
+.activityLoading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 40px 20px;
+	color: var(--color_mission_text_muted);
+	font-size: 13px;
+}
+
+.activityEmpty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 40px 20px;
+	color: var(--color_mission_text_muted);
+	font-size: 13px;
+
+	[class*='icon'] {
+		opacity: 0.5;
+	}
 }
 
 .downloadBtn {
