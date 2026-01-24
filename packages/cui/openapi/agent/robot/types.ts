@@ -332,3 +332,125 @@ export interface ExecutionControlResponse {
 	/** Optional message */
 	message?: string
 }
+
+// ==================== Results Types ====================
+
+/**
+ * Result filter options for listing results
+ */
+export interface ResultFilter {
+	/** Filter by trigger type */
+	trigger_type?: TriggerType
+	/** Search keyword in name/summary */
+	keyword?: string
+	/** Page number, starting from 1 */
+	page?: number
+	/** Items per page */
+	pagesize?: number
+}
+
+/**
+ * Result list item (subset of execution)
+ */
+export interface Result {
+	/** Execution/Result ID */
+	id: string
+	/** Robot member ID */
+	member_id: string
+	/** How execution was triggered */
+	trigger_type: TriggerType
+	/** Execution status */
+	status: ExecStatus
+	/** Result name/title */
+	name: string
+	/** Delivery summary */
+	summary: string
+	/** When execution started */
+	start_time: string
+	/** When execution ended */
+	end_time?: string
+	/** Whether result has attachments */
+	has_attachments: boolean
+}
+
+/**
+ * Result detail with full delivery content
+ */
+export interface ResultDetail {
+	/** Execution/Result ID */
+	id: string
+	/** Robot member ID */
+	member_id: string
+	/** How execution was triggered */
+	trigger_type: TriggerType
+	/** Execution status */
+	status: ExecStatus
+	/** Result name/title */
+	name: string
+	/** Full delivery content */
+	delivery?: {
+		content?: {
+			summary?: string
+			body?: string
+			attachments?: Array<{
+				title: string
+				file: string
+				description?: string
+			}>
+		}
+		success?: boolean
+		sent_at?: string
+		request_id?: string
+	}
+	/** When execution started */
+	start_time: string
+	/** When execution ended */
+	end_time?: string
+}
+
+/**
+ * Result list response
+ */
+export interface ResultListResponse {
+	/** List of results */
+	data: Result[]
+	/** Total number of results */
+	total: number
+	/** Current page number */
+	page: number
+	/** Items per page */
+	pagesize: number
+}
+
+// ==================== Activities Types ====================
+
+/**
+ * Activity type values
+ */
+export type ActivityType = 'execution.started' | 'execution.completed' | 'execution.failed' | 'execution.cancelled'
+
+/**
+ * Activity item
+ */
+export interface Activity {
+	/** Activity type */
+	type: ActivityType
+	/** Robot member ID */
+	robot_id: string
+	/** Robot display name */
+	robot_name?: string
+	/** Associated execution ID */
+	execution_id: string
+	/** Activity message */
+	message: string
+	/** When activity occurred */
+	timestamp: string
+}
+
+/**
+ * Activity list response
+ */
+export interface ActivityListResponse {
+	/** List of activities */
+	data: Activity[]
+}

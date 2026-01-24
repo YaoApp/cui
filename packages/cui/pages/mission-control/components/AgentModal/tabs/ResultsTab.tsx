@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Spin, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import useRobots from '@/hooks/useRobots'
 import type { RobotState } from '../../../types'
-import { getDeliveriesPaginated, simulateApiDelay, type Delivery } from '../../../mock/data'
+import type { Result, ResultDetail, TriggerType } from '@/openapi/agent/robot'
 import CreatureLoading from '../../CreatureLoading'
 import styles from '../index.less'
 
 interface ResultsTabProps {
 	robot: RobotState
-	onOpenDetail?: (delivery: Delivery) => void
+	onOpenDetail?: (result: ResultDetail) => void
 }
 
 type TriggerFilter = 'all' | 'clock' | 'human' | 'event'
@@ -18,9 +19,12 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
+	const { listResults, getResult } = useRobots()
+
 	// State
-	const [deliveries, setDeliveries] = useState<Delivery[]>([])
+	const [results, setResults] = useState<Result[]>([])
 	const [loading, setLoading] = useState(true)
+	const [error, setError] = useState<string | null>(null)
 	const [loadingMore, setLoadingMore] = useState(false)
 	const [hasMore, setHasMore] = useState(true)
 	const [total, setTotal] = useState(0)
@@ -33,42 +37,70 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 	const initialFillCheckedRef = useRef(false)
 	const pageSize = 10
 
-	// Load data
+	// Load data from API
 	const loadData = useCallback(async (reset: boolean = false) => {
 		const currentPage = reset ? 1 : page
 
 		if (reset) {
 			setLoading(true)
 			setPage(1)
+			setError(null) // Clear previous error
 		} else {
 			setLoadingMore(true)
 		}
 
-		await simulateApiDelay(300)
-
-		const result = getDeliveriesPaginated({
-			memberId: robot.member_id,
+		// Build filter
+		const filter: { trigger_type?: TriggerType; keyword?: string; page?: number; pagesize?: number } = {
 			page: currentPage,
-			pageSize,
-			trigger: triggerFilter,
-			keywords: searchKeywords
-		})
-
-		if (reset) {
-			setDeliveries(result.data)
-		} else {
-			setDeliveries((prev) => [...prev, ...result.data])
+			pagesize: pageSize
 		}
 
-		setTotal(result.total)
-		setHasMore(result.hasMore)
+		if (triggerFilter !== 'all') {
+			filter.trigger_type = triggerFilter as TriggerType
+		}
+		if (searchKeywords) {
+			filter.keyword = searchKeywords
+		}
+
+		try {
+			const response = await listResults(robot.member_id, filter)
+
+			if (response) {
+				if (reset) {
+					setResults(response.data || [])
+				} else {
+					setResults((prev) => [...prev, ...(response.data || [])])
+				}
+				setTotal(response.total || 0)
+				const loadedCount = reset ? (response.data?.length || 0) : (results.length + (response.data?.length || 0))
+				setHasMore(loadedCount < (response.total || 0))
+				setError(null)
+			} else {
+				// API returned null - likely a permission or network error
+				if (reset) {
+					setResults([])
+					setError(is_cn ? '无法加载成果数据' : 'Failed to load results')
+				}
+				setTotal(0)
+				setHasMore(false)
+			}
+		} catch (err) {
+			if (reset) {
+				setResults([])
+				setError(err instanceof Error ? err.message : (is_cn ? '加载失败' : 'Load failed'))
+			}
+			setTotal(0)
+			setHasMore(false)
+		}
+
 		setLoading(false)
 		setLoadingMore(false)
-	}, [robot.member_id, page, triggerFilter, searchKeywords, pageSize])
+	}, [robot.member_id, page, triggerFilter, searchKeywords, pageSize, listResults, results.length, is_cn])
 
 	// Initial load
 	useEffect(() => {
 		loadData(true)
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [robot.member_id, triggerFilter, searchKeywords])
 
 	// Load more
@@ -83,6 +115,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 		if (page > 1) {
 			loadData(false)
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [page])
 
 	// Scroll handler
@@ -110,11 +143,11 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 	useEffect(() => {
 		if (
 			initialFillCheckedRef.current ||
-			deliveries.length === 0 ||
+			results.length === 0 ||
 			loading ||
 			loadingMore ||
 			!hasMore ||
-			deliveries.length >= total
+			results.length >= total
 		) {
 			return
 		}
@@ -130,7 +163,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 				initialFillCheckedRef.current = true
 			}
 		})
-	}, [deliveries.length, loading, loadingMore, hasMore, total, loadMore])
+	}, [results.length, loading, loadingMore, hasMore, total, loadMore])
 
 	// Handle search
 	const handleSearch = () => {
@@ -148,19 +181,24 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 		setSearchKeywords('')
 	}
 
-	// Handle row click - open detail modal
-	const handleRowClick = (delivery: Delivery) => {
-		onOpenDetail?.(delivery)
+	// Handle row click - load detail and open modal
+	const handleRowClick = async (result: Result) => {
+		if (!onOpenDetail) return
+
+		// Get full result detail
+		const detail = await getResult(robot.member_id, result.id)
+		if (detail) {
+			onOpenDetail(detail)
+		}
 	}
 
 	// Handle download
-	const handleDownload = (e: React.MouseEvent, delivery: Delivery) => {
+	const handleDownload = (e: React.MouseEvent, result: Result) => {
 		e.stopPropagation()
-		if (delivery.attachments.length > 0) {
-			console.log('Download attachments:', delivery.attachments)
-			// TODO: Implement actual download
-			const names = delivery.attachments.map((a) => a.title).join(', ')
-			alert(is_cn ? `下载: ${names}` : `Download: ${names}`)
+		if (result.has_attachments) {
+			console.log('Download attachments for result:', result.id)
+			// TODO: Implement actual download - need to fetch detail first to get attachment URLs
+			alert(is_cn ? '下载功能开发中...' : 'Download feature coming soon...')
 		}
 	}
 
@@ -236,7 +274,23 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 			<div className={styles.resultsContent} ref={containerRef}>
 				{loading ? (
 					<CreatureLoading size="medium" />
-				) : deliveries.length === 0 ? (
+				) : error ? (
+					/* Error state - show error message instead of empty placeholder */
+					<div className={styles.resultsEmpty}>
+						<Icon name='material-error_outline' size={40} className={styles.resultsErrorIcon} />
+						<span className={styles.resultsEmptyText}>
+							{is_cn ? '加载失败' : 'Failed to load'}
+						</span>
+						<span className={styles.resultsEmptyHint}>{error}</span>
+						<button 
+							className={styles.retryBtn}
+							onClick={() => loadData(true)}
+						>
+							<Icon name='material-refresh' size={14} />
+							<span>{is_cn ? '重试' : 'Retry'}</span>
+						</button>
+					</div>
+				) : results.length === 0 ? (
 					<div className={styles.resultsEmpty}>
 						<Icon name='material-inventory_2' size={40} className={styles.resultsEmptyIcon} />
 						<span className={styles.resultsEmptyText}>
@@ -264,44 +318,42 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 
 						{/* Table body */}
 						<div className={styles.resultsTableBody}>
-							{deliveries.map((delivery) => {
-								const goal = is_cn ? delivery.title.cn : delivery.title.en
-								const triggerInfo = getTriggerInfo(delivery.trigger_type)
-								const hasFiles = delivery.attachments.length > 0
+							{results.map((result) => {
+								const triggerInfo = getTriggerInfo(result.trigger_type)
 
 								return (
 									<div
-										key={delivery.id}
+										key={result.id}
 										className={styles.resultsTableRow}
-										onClick={() => handleRowClick(delivery)}
+										onClick={() => handleRowClick(result)}
 									>
-										<div className={styles.colGoal} title={goal}>
-											{goal}
+										<div className={styles.colGoal} title={result.name}>
+											{result.name || '-'}
 										</div>
-										<div className={styles.colSummary} title={delivery.summary}>
-											{delivery.summary}
+										<div className={styles.colSummary} title={result.summary}>
+											{result.summary || '-'}
 										</div>
 										<div className={styles.colTrigger}>
 											<Icon name={triggerInfo.icon} size={14} />
 										</div>
 										<div className={styles.colTime}>
-											{formatDate(delivery.time)}
+											{result.end_time ? formatDate(result.end_time) : '-'}
 										</div>
 										<div className={styles.colFiles}>
-											{hasFiles ? (
+											{result.has_attachments ? (
 												<span className={styles.filesBadge}>
-													{delivery.attachments.length}
+													<Icon name='material-attach_file' size={12} />
 												</span>
 											) : (
 												<span className={styles.noFiles}>-</span>
 											)}
 										</div>
 										<div className={styles.colAction}>
-											{hasFiles && (
+											{result.has_attachments && (
 												<Tooltip title={is_cn ? '下载' : 'Download'}>
 													<button
 														className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
-														onClick={(e) => handleDownload(e, delivery)}
+														onClick={(e) => handleDownload(e, result)}
 													>
 														<Icon name='material-download' size={14} />
 													</button>
@@ -322,7 +374,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 						)}
 
 						{/* All loaded */}
-						{!hasMore && deliveries.length > 0 && (
+						{!hasMore && results.length > 0 && (
 							<div className={styles.resultsAllLoaded}>
 								<span>{is_cn ? `共 ${total} 条成果` : `${total} deliverables total`}</span>
 							</div>

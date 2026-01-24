@@ -10,13 +10,12 @@ import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
 import clsx from 'clsx'
 import { useRobots } from '@/hooks/useRobots'
-import type { Robot as ApiRobot, RobotStatusResponse } from '@/openapi/agent/robot'
+import type { Robot as ApiRobot, RobotStatusResponse, ResultDetail } from '@/openapi/agent/robot'
 import {
 	getRobotStats,
 	getActiveExecutions,
 	getRecentActivities,
-	type Activity,
-	type Delivery
+	type Activity
 } from './mock/data'
 import type { RobotState, RobotStatus } from './types'
 import styles from './index.less'
@@ -78,7 +77,7 @@ const MissionControl = () => {
 	const [showAgentModal, setShowAgentModal] = useState(false)
 
 	// Result Detail Modal state
-	const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null)
+	const [selectedResult, setSelectedResult] = useState<ResultDetail | null>(null)
 	const [showResultDetailModal, setShowResultDetailModal] = useState(false)
 
 	// Add Agent Modal state
@@ -749,8 +748,8 @@ const MissionControl = () => {
 				onClose={handleAgentModalClose}
 				robot={selectedRobot}
 				onDataUpdated={loadRobots}
-				onOpenResultDetail={(delivery) => {
-					setSelectedDelivery(delivery)
+				onOpenResultDetail={(result) => {
+					setSelectedResult(result)
 					setShowResultDetailModal(true)
 				}}
 			/>
@@ -760,9 +759,9 @@ const MissionControl = () => {
 				visible={showResultDetailModal}
 				onClose={() => {
 					setShowResultDetailModal(false)
-					setTimeout(() => setSelectedDelivery(null), 200)
+					setTimeout(() => setSelectedResult(null), 200)
 				}}
-				delivery={selectedDelivery}
+				result={selectedResult}
 			/>
 
 			{/* Add Agent Modal */}

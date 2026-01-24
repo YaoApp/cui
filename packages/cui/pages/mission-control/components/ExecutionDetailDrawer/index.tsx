@@ -85,6 +85,13 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 		}
 	}, [apiError])
 
+	// Load full execution data when drawer opens
+	useEffect(() => {
+		if (!visible) return
+		// Always load full execution data when drawer becomes visible
+		loadExecution()
+	}, [visible, initialExecution?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
 	// Auto-refresh for running executions (every 5 seconds)
 	useEffect(() => {
 		if (!visible || !isRunning) {
@@ -94,9 +101,6 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 			}
 			return
 		}
-
-		// Initial load
-		loadExecution()
 
 		// Set up 5-second auto-refresh for running executions
 		refreshIntervalRef.current = setInterval(loadExecution, 5000)

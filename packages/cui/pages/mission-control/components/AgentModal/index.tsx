@@ -5,7 +5,8 @@ import Icon from '@/widgets/Icon'
 import Creature from '@/widgets/Creature'
 import { useRobots } from '@/hooks/useRobots'
 import type { RobotState, Execution, RobotStatus } from '../../types'
-import { robotNames, type Delivery } from '../../mock/data'
+import type { ResultDetail } from '@/openapi/agent/robot'
+import { robotNames } from '../../mock/data'
 import ActiveTab from './tabs/ActiveTab'
 import HistoryTab from './tabs/HistoryTab'
 import ResultsTab from './tabs/ResultsTab'
@@ -20,7 +21,7 @@ interface AgentModalProps {
 	onClose: () => void
 	robot: RobotState | null
 	onDataUpdated?: () => void
-	onOpenResultDetail?: (delivery: Delivery) => void
+	onOpenResultDetail?: (result: ResultDetail) => void
 }
 
 type TabType = 'active' | 'history' | 'results' | 'config'

@@ -2,13 +2,13 @@ import React, { useState } from 'react'
 import { Modal, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import type { Delivery } from '../../mock/data'
+import type { ResultDetail } from '@/openapi/agent/robot'
 import styles from './index.less'
 
 interface ResultDetailModalProps {
 	visible: boolean
 	onClose: () => void
-	delivery: Delivery | null
+	result: ResultDetail | null
 }
 
 type TabType = 'content' | 'attachments'
@@ -114,7 +114,7 @@ const renderMarkdown = (text: string): string => {
 	return html
 }
 
-const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose, delivery }) => {
+const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose, result }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [activeTab, setActiveTab] = useState<TabType>('content')
@@ -191,19 +191,22 @@ const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose,
 
 	// Handle download all
 	const handleDownloadAll = () => {
-		if (delivery?.attachments && delivery.attachments.length > 0) {
-			const names = delivery.attachments.map((a) => a.title).join(', ')
-			console.log('Download all:', delivery.attachments)
+		const attachments = result?.delivery?.content?.attachments
+		if (attachments && attachments.length > 0) {
+			const names = attachments.map((a) => a.title).join(', ')
+			console.log('Download all:', attachments)
 			alert(is_cn ? `下载全部: ${names}` : `Download all: ${names}`)
 		}
 	}
 
-	if (!delivery) return null
+	if (!result) return null
 
-	const title = is_cn ? delivery.title.cn : delivery.title.en
-	const triggerInfo = getTriggerInfo(delivery.trigger_type)
-	const hasAttachments = delivery.attachments && delivery.attachments.length > 0
-	const attachmentCount = delivery.attachments?.length || 0
+	const delivery = result.delivery
+	const title = result.name || '-'
+	const triggerInfo = getTriggerInfo(result.trigger_type)
+	const attachments = delivery?.content?.attachments || []
+	const hasAttachments = attachments.length > 0
+	const attachmentCount = attachments.length
 
 	// Tab definitions
 	const tabs = [
@@ -280,20 +283,32 @@ const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose,
 							<span className={styles.metaDot}>·</span>
 							<div className={styles.metaItem}>
 								<Icon name='material-schedule' size={14} />
-								<span>{formatFullDate(delivery.time)}</span>
+								<span>{result.end_time ? formatFullDate(result.end_time) : '-'}</span>
 							</div>
 						</div>
 
 						{/* Summary */}
-						<div className={styles.summaryBox}>
-							{delivery.summary}
-						</div>
+						{delivery?.content?.summary && (
+							<div className={styles.summaryBox}>
+								{delivery.content.summary}
+							</div>
+						)}
 
 						{/* Article content */}
-						<article 
-							className={styles.articleContent}
-							dangerouslySetInnerHTML={{ __html: renderMarkdown(delivery.body) }}
-						/>
+						{delivery?.content?.body && (
+							<article 
+								className={styles.articleContent}
+								dangerouslySetInnerHTML={{ __html: renderMarkdown(delivery.content.body) }}
+							/>
+						)}
+
+						{/* No content */}
+						{!delivery?.content?.summary && !delivery?.content?.body && (
+							<div className={styles.emptyContent}>
+								<Icon name='material-article' size={48} />
+								<span>{is_cn ? '暂无内容' : 'No content'}</span>
+							</div>
+						)}
 					</div>
 				)}
 
@@ -311,7 +326,7 @@ const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose,
 									</button>
 								</div>
 								<div className={styles.attachmentList}>
-									{delivery.attachments.map((att, idx) => (
+									{attachments.map((att, idx) => (
 										<div key={idx} className={styles.attachmentCard}>
 											<div className={styles.attachmentIcon}>
 												<Icon name={getFileIcon(att.title)} size={28} />
@@ -321,9 +336,6 @@ const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose,
 												{att.description && (
 													<span className={styles.attachmentDesc}>{att.description}</span>
 												)}
-												<span className={styles.attachmentSize}>
-													{att.size ? formatFileSize(att.size) : '-'}
-												</span>
 											</div>
 											<div className={styles.attachmentActions}>
 												<Tooltip title={is_cn ? '预览' : 'Preview'}>

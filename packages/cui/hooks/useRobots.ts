@@ -11,7 +11,11 @@ import type {
 	ExecutionFilter,
 	ExecutionListResponse,
 	ExecutionResponse,
-	ExecutionControlResponse
+	ExecutionControlResponse,
+	ResultFilter,
+	ResultListResponse,
+	ResultDetail,
+	ActivityListResponse
 } from '@/openapi/agent/robot'
 
 /**
@@ -467,6 +471,112 @@ export function useRobots() {
 		[getAgent]
 	)
 
+	// ==================== Results API Methods ====================
+
+	/**
+	 * List results for a robot (completed executions with delivery content)
+	 */
+	const listResults = useCallback(
+		async (robotId: string, filter?: ResultFilter): Promise<ResultListResponse | null> => {
+			if (!window.$app?.openapi) {
+				setError('OpenAPI not available')
+				return null
+			}
+
+			try {
+				const agent = getAgent()
+				const response = await agent.robots.ListResults(robotId, filter)
+
+				if (window.$app.openapi.IsError(response)) {
+					const errMsg = response.error?.error_description || 'Failed to list results'
+					if (mountedRef.current) {
+						setError(errMsg)
+					}
+					return null
+				}
+
+				return window.$app.openapi.GetData(response) as ResultListResponse
+			} catch (err) {
+				const errMsg = err instanceof Error ? err.message : 'Failed to list results'
+				if (mountedRef.current) {
+					setError(errMsg)
+				}
+				return null
+			}
+		},
+		[getAgent]
+	)
+
+	/**
+	 * Get a single result detail
+	 */
+	const getResult = useCallback(
+		async (robotId: string, resultId: string): Promise<ResultDetail | null> => {
+			if (!window.$app?.openapi) {
+				setError('OpenAPI not available')
+				return null
+			}
+
+			try {
+				const agent = getAgent()
+				const response = await agent.robots.GetResult(robotId, resultId)
+
+				if (window.$app.openapi.IsError(response)) {
+					const errMsg = response.error?.error_description || 'Failed to get result'
+					if (mountedRef.current) {
+						setError(errMsg)
+					}
+					return null
+				}
+
+				return window.$app.openapi.GetData(response) as ResultDetail
+			} catch (err) {
+				const errMsg = err instanceof Error ? err.message : 'Failed to get result'
+				if (mountedRef.current) {
+					setError(errMsg)
+				}
+				return null
+			}
+		},
+		[getAgent]
+	)
+
+	// ==================== Activities API Methods ====================
+
+	/**
+	 * List activities for the team
+	 */
+	const listActivities = useCallback(
+		async (params?: { limit?: number; since?: string }): Promise<ActivityListResponse | null> => {
+			if (!window.$app?.openapi) {
+				setError('OpenAPI not available')
+				return null
+			}
+
+			try {
+				const agent = getAgent()
+				const response = await agent.robots.ListActivities(params)
+
+				if (window.$app.openapi.IsError(response)) {
+					const errMsg = response.error?.error_description || 'Failed to list activities'
+					if (mountedRef.current) {
+						setError(errMsg)
+					}
+					return null
+				}
+
+				return window.$app.openapi.GetData(response) as ActivityListResponse
+			} catch (err) {
+				const errMsg = err instanceof Error ? err.message : 'Failed to list activities'
+				if (mountedRef.current) {
+					setError(errMsg)
+				}
+				return null
+			}
+		},
+		[getAgent]
+	)
+
 	return {
 		// State
 		loading,
@@ -490,7 +600,14 @@ export function useRobots() {
 		getExecution,
 		pauseExecution,
 		resumeExecution,
-		cancelExecution
+		cancelExecution,
+
+		// Results Methods
+		listResults,
+		getResult,
+
+		// Activities Methods
+		listActivities
 	}
 }
 
