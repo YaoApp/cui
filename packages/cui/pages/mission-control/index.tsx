@@ -10,7 +10,7 @@ import Icon from '@/widgets/Icon'
 import { useGlobal } from '@/context/app'
 import clsx from 'clsx'
 import { useRobots } from '@/hooks/useRobots'
-import type { Robot as ApiRobot, RobotStatusResponse, ResultDetail, Activity, ActivityType } from '@/openapi/agent/robot'
+import type { Robot as ApiRobot, ResultDetail, Activity, ActivityType } from '@/openapi/agent/robot'
 import {
 	getRobotStats,
 	getActiveExecutions
@@ -20,21 +20,20 @@ import styles from './index.less'
 
 /**
  * Convert API Robot to page RobotState format
- * API returns Robot with robot_status, page uses RobotState with status
+ * API now returns runtime status directly in list response
  */
-const convertToRobotState = (robot: ApiRobot, status?: RobotStatusResponse): RobotState => {
+const convertToRobotState = (robot: ApiRobot): RobotState => {
 	return {
 		member_id: robot.member_id,
 		team_id: robot.team_id,
 		name: robot.name || robot.member_id,
 		display_name: robot.display_name,
 		description: robot.description || robot.bio,
-		status: (status?.status || robot.robot_status || 'idle') as RobotStatus,
-		running: status?.running || 0,
-		max_running: status?.max_running || 2,
-		last_run: status?.last_run,
-		next_run: status?.next_run,
-		running_ids: status?.running_ids || []
+		status: (robot.robot_status || 'idle') as RobotStatus,
+		running: robot.running || 0,
+		max_running: robot.max_running || 2,
+		last_run: robot.last_run,
+		next_run: robot.next_run
 	}
 }
 
@@ -48,7 +47,6 @@ const MissionControl = () => {
 		loading: robotsLoading,
 		error: robotsError,
 		listRobots,
-		getRobotStatus,
 		listActivities,
 		getResult
 	} = useRobots()
@@ -122,19 +120,14 @@ const MissionControl = () => {
 		return robots.filter((r) => r.status === status).length
 	}
 
-	// Load robots from API
+	// Load robots from API (list now includes runtime status)
 	const loadRobots = useCallback(async () => {
 		try {
 			const response = await listRobots()
 			if (response && response.data) {
-				// Fetch status for each robot in parallel
-				const robotsWithStatus = await Promise.all(
-					response.data.map(async (robot) => {
-						const status = await getRobotStatus(robot.member_id)
-						return convertToRobotState(robot, status || undefined)
-					})
-				)
-				setRobots(robotsWithStatus)
+				// Convert to RobotState format - no need for separate status calls
+				const robotStates = response.data.map(convertToRobotState)
+				setRobots(robotStates)
 			} else {
 				// API returned empty response
 				console.error('Failed to load robots from API: empty response')
@@ -148,7 +141,7 @@ const MissionControl = () => {
 		} finally {
 			setRobotsInitialized(true)
 		}
-	}, [listRobots, getRobotStatus, is_cn])
+	}, [listRobots, is_cn])
 
 	// Load activities from API - only show completed executions (with results)
 	const loadActivities = useCallback(async () => {

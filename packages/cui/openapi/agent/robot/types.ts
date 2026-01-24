@@ -89,6 +89,16 @@ export interface Robot {
 	created_at?: string
 	/** Last update timestamp */
 	updated_at?: string
+
+	// Runtime Status (populated in list view for dashboard)
+	/** Current running executions count */
+	running: number
+	/** Maximum concurrent executions */
+	max_running?: number
+	/** Last run timestamp */
+	last_run?: string
+	/** Next scheduled run timestamp */
+	next_run?: string
 }
 
 /**
