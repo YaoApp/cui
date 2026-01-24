@@ -420,7 +420,9 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 									<div className={styles.taskList}>
 										{execution.tasks.map((task: Task, index: number) => {
 											const taskStatus = getTaskStatusIcon(task.status)
-											const isCurrent = index === execution.current?.task_index
+											// Only show as current if: index matches AND task is actually running
+											const isCurrent = index === execution.current?.task_index && task.status === 'running'
+											const taskTitle = task.description || task.executor_id
 											return (
 												<div
 													key={task.id}
@@ -432,11 +434,11 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 														<Icon name={taskStatus.icon} size={16} />
 													</div>
 													<div className={styles.taskInfo}>
-														<span className={styles.taskExecutor}>
-															{task.executor_id}
+														<span className={styles.taskTitle}>
+															{taskTitle}
 														</span>
-														<span className={styles.taskType}>
-															{task.executor_type}
+														<span className={styles.taskSubtitle}>
+															{task.executor_type}: {task.executor_id}
 														</span>
 													</div>
 													{isCurrent && (
@@ -557,17 +559,18 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 										<div className={styles.taskList}>
 											{execution.tasks.map((task: Task) => {
 												const taskStatus = getTaskStatusIcon(task.status)
+												const taskTitle = task.description || task.executor_id
 												return (
 													<div key={task.id} className={styles.taskItem}>
 														<div className={`${styles.taskIcon} ${taskStatus.class}`}>
 															<Icon name={taskStatus.icon} size={16} />
 														</div>
 														<div className={styles.taskInfo}>
-															<span className={styles.taskExecutor}>
-																{task.executor_id}
+															<span className={styles.taskTitle}>
+																{taskTitle}
 															</span>
-															<span className={styles.taskType}>
-																{task.executor_type}
+															<span className={styles.taskSubtitle}>
+																{task.executor_type}: {task.executor_id}
 															</span>
 														</div>
 													</div>
@@ -674,6 +677,7 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 											{execution.tasks.map((task: Task) => {
 												const taskStatus = getTaskStatusIcon(task.status)
 												const isFailedTask = task.status === 'failed'
+												const taskTitle = task.description || task.executor_id
 												return (
 													<div
 														key={task.id}
@@ -685,11 +689,11 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 															<Icon name={taskStatus.icon} size={16} />
 														</div>
 														<div className={styles.taskInfo}>
-															<span className={styles.taskExecutor}>
-																{task.executor_id}
+															<span className={styles.taskTitle}>
+																{taskTitle}
 															</span>
-															<span className={styles.taskType}>
-																{task.executor_type}
+															<span className={styles.taskSubtitle}>
+																{task.executor_type}: {task.executor_id}
 															</span>
 														</div>
 														{isFailedTask && (

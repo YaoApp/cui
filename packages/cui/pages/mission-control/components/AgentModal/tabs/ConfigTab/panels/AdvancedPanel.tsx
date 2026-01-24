@@ -106,8 +106,9 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 
 	// Build agent options for each phase
 	// Default system agent (__yao.*) is always first, then agents matching the phase type
+	// Also includes current value if not in the list (to preserve saved selection)
 	const getPhaseAgentOptions = useMemo(() => {
-		return (phaseKey: string, phaseType: string, defaultAgent: string) => {
+		return (phaseKey: string, phaseType: string, defaultAgent: string, currentValue?: string) => {
 			// Start with the default system agent
 			const options: Array<{ label: string; value: string }> = [
 				{ label: `${defaultAgent} (${is_cn ? '默认' : 'default'})`, value: defaultAgent }
@@ -124,6 +125,18 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 					value: agent.assistant_id
 				})
 			})
+			
+			// If current value exists and is not in options, add it
+			// This preserves saved values that might not appear in the agent list
+			if (currentValue && currentValue !== defaultAgent) {
+				const exists = options.some(opt => opt.value === currentValue)
+				if (!exists) {
+					options.push({
+						label: currentValue,
+						value: currentValue
+					})
+				}
+			}
 			
 			return options
 		}
@@ -629,7 +642,12 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 									onChange={(value) => handleFieldChange(`resources.phases.${phase.key}`, value)}
 									schema={{
 										type: 'string',
-										enum: getPhaseAgentOptions(phase.key, phase.type, phase.default)
+										enum: getPhaseAgentOptions(
+											phase.key, 
+											phase.type, 
+											phase.default, 
+											formData[`resources.phases.${phase.key}`]
+										)
 									}}
 								/>
 							</div>

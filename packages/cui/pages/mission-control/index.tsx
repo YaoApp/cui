@@ -157,6 +157,17 @@ const MissionControl = () => {
 		}
 	}, [robotsInitialized, loadRobots])
 
+	// Periodic refresh of robot status (every 30 seconds)
+	useEffect(() => {
+		if (!robotsInitialized) return
+
+		const refreshInterval = setInterval(() => {
+			loadRobots()
+		}, 30000) // 30 seconds
+
+		return () => clearInterval(refreshInterval)
+	}, [robotsInitialized, loadRobots])
+
 	// Show error message
 	useEffect(() => {
 		if (robotsError) {

@@ -131,6 +131,7 @@ export interface RobotState {
 // Task (from types/robot.go)
 export interface Task {
 	id: string
+	description?: string // human-readable task description (for UI display)
 	goal_ref?: string
 	source: TaskSource
 	executor_type: ExecutorType
