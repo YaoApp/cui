@@ -13,7 +13,7 @@ export type Phase = 'inspiration' | 'goals' | 'tasks' | 'run' | 'delivery' | 'le
 export type TriggerType = 'clock' | 'human' | 'event'
 
 // ExecStatus (from types/enums.go)
-export type ExecStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+export type ExecStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
 
 // TaskStatus (from types/enums.go)
 export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped' | 'cancelled'
@@ -171,6 +171,7 @@ export interface DeliveryResult {
 }
 
 // Execution (from types/robot.go + api/types.go)
+// Aligned with backend: yao/openapi/agent/robot/types.go ExecutionResponse
 export interface Execution {
 	id: string
 	member_id: string
@@ -181,17 +182,19 @@ export interface Execution {
 	status: ExecStatus
 	phase: Phase
 	error?: string
-	job_id: string
 
-	// UI display fields
-	name?: { en: string; cn: string } // Execution name (from goals or human input)
-	current_task_name?: { en: string; cn: string } // What the agent is doing RIGHT NOW
+	// UI display fields (localized by backend based on locale)
+	name?: string // Execution title
+	current_task_name?: string // Current task description
 
-	// Phase outputs
-	goals?: { content: string }
+	// Phase outputs (optional, included in detail view)
+	inspiration?: any
+	goals?: any
 	tasks?: Task[]
 	current?: CurrentState
+	results?: any
 	delivery?: DeliveryResult
+	input?: any
 }
 
 // ==================== UI Specific Types ====================

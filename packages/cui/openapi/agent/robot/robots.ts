@@ -8,7 +8,11 @@ import type {
 	RobotStatusResponse,
 	RobotCreateRequest,
 	RobotUpdateRequest,
-	RobotDeleteResponse
+	RobotDeleteResponse,
+	ExecutionFilter,
+	ExecutionListResponse,
+	ExecutionResponse,
+	ExecutionControlResponse
 } from './types'
 
 /**
@@ -82,5 +86,67 @@ export class AgentRobots {
 	 */
 	async Delete(id: string): Promise<ApiResponse<RobotDeleteResponse>> {
 		return this.api.Delete<RobotDeleteResponse>(`/agent/robots/${encodeURIComponent(id)}`)
+	}
+
+	// ==================== Execution APIs ====================
+
+	/**
+	 * List executions for a robot with optional filtering and pagination
+	 * @param robotId - Robot member_id
+	 * @param filter - Filter options
+	 * @returns Execution list response
+	 */
+	async ListExecutions(robotId: string, filter?: ExecutionFilter): Promise<ApiResponse<ExecutionListResponse>> {
+		const params = new URLSearchParams()
+
+		if (filter) {
+			if (filter.status) params.append('status', filter.status)
+			if (filter.trigger_type) params.append('trigger_type', filter.trigger_type)
+			if (filter.keyword) params.append('keyword', filter.keyword)
+			if (filter.page) params.append('page', filter.page.toString())
+			if (filter.pagesize) params.append('pagesize', filter.pagesize.toString())
+		}
+
+		return this.api.Get<ExecutionListResponse>(BuildURL(`/agent/robots/${encodeURIComponent(robotId)}/executions`, params))
+	}
+
+	/**
+	 * Get execution details
+	 * @param robotId - Robot member_id
+	 * @param execId - Execution ID
+	 * @returns Execution detail response
+	 */
+	async GetExecution(robotId: string, execId: string): Promise<ApiResponse<ExecutionResponse>> {
+		return this.api.Get<ExecutionResponse>(`/agent/robots/${encodeURIComponent(robotId)}/executions/${encodeURIComponent(execId)}`)
+	}
+
+	/**
+	 * Pause a running execution
+	 * @param robotId - Robot member_id
+	 * @param execId - Execution ID
+	 * @returns Control response
+	 */
+	async PauseExecution(robotId: string, execId: string): Promise<ApiResponse<ExecutionControlResponse>> {
+		return this.api.Post<ExecutionControlResponse>(`/agent/robots/${encodeURIComponent(robotId)}/executions/${encodeURIComponent(execId)}/pause`, {})
+	}
+
+	/**
+	 * Resume a paused execution
+	 * @param robotId - Robot member_id
+	 * @param execId - Execution ID
+	 * @returns Control response
+	 */
+	async ResumeExecution(robotId: string, execId: string): Promise<ApiResponse<ExecutionControlResponse>> {
+		return this.api.Post<ExecutionControlResponse>(`/agent/robots/${encodeURIComponent(robotId)}/executions/${encodeURIComponent(execId)}/resume`, {})
+	}
+
+	/**
+	 * Cancel an execution
+	 * @param robotId - Robot member_id
+	 * @param execId - Execution ID
+	 * @returns Control response
+	 */
+	async CancelExecution(robotId: string, execId: string): Promise<ApiResponse<ExecutionControlResponse>> {
+		return this.api.Post<ExecutionControlResponse>(`/agent/robots/${encodeURIComponent(robotId)}/executions/${encodeURIComponent(execId)}/cancel`, {})
 	}
 }

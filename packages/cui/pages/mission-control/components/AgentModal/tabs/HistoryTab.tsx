@@ -1,11 +1,34 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Spin, Tooltip } from 'antd'
+import { Spin, Tooltip, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import { useRobots } from '@/hooks/useRobots'
 import type { RobotState, Execution } from '../../../types'
-import { getHistoryExecutionsPaginated, simulateApiDelay } from '../../../mock/data'
+import type { ExecutionResponse, ExecStatus } from '@/openapi/agent/robot'
 import CreatureLoading from '../../CreatureLoading'
 import styles from '../index.less'
+
+// Convert API ExecutionResponse to local Execution type
+const toExecution = (exec: ExecutionResponse): Execution => ({
+	id: exec.id,
+	member_id: exec.member_id,
+	team_id: exec.team_id,
+	trigger_type: exec.trigger_type,
+	start_time: exec.start_time,
+	end_time: exec.end_time,
+	status: exec.status,
+	phase: exec.phase,
+	error: exec.error,
+	name: exec.name,
+	current_task_name: exec.current_task_name,
+	inspiration: exec.inspiration,
+	goals: exec.goals,
+	tasks: exec.tasks,
+	current: exec.current,
+	results: exec.results,
+	delivery: exec.delivery,
+	input: exec.input
+})
 
 interface HistoryTabProps {
 	robot: RobotState
@@ -17,6 +40,9 @@ type StatusFilter = 'all' | 'completed' | 'failed' | 'cancelled' | 'running'
 const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+
+	// API hook
+	const { listExecutions, pauseExecution, cancelExecution, error: apiError } = useRobots()
 
 	// State
 	const [executions, setExecutions] = useState<Execution[]>([])
@@ -31,9 +57,17 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 
 	const containerRef = useRef<HTMLDivElement>(null)
 	const initialFillCheckedRef = useRef(false)
+	const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 	const pageSize = 10
 
-	// Load data
+	// Show API error
+	useEffect(() => {
+		if (apiError) {
+			message.error(apiError)
+		}
+	}, [apiError])
+
+	// Load data from API
 	const loadData = useCallback(async (reset: boolean = false) => {
 		const currentPage = reset ? 1 : page
 
@@ -44,31 +78,54 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 			setLoadingMore(true)
 		}
 
-		await simulateApiDelay(300)
-
-		const result = getHistoryExecutionsPaginated({
-			memberId: robot.member_id,
+		// Build API filter
+		const filter: any = {
 			page: currentPage,
-			pageSize,
-			status: statusFilter,
-			keywords: searchKeywords
-		})
-
-		if (reset) {
-			setExecutions(result.data)
-		} else {
-			setExecutions((prev) => [...prev, ...result.data])
+			pagesize: pageSize
+		}
+		if (statusFilter !== 'all') {
+			filter.status = statusFilter as ExecStatus
+		}
+		if (searchKeywords) {
+			filter.keyword = searchKeywords
 		}
 
-		setTotal(result.total)
-		setHasMore(result.hasMore)
+		const result = await listExecutions(robot.member_id, filter)
+
+		if (result) {
+			const converted = result.data.map(toExecution)
+			if (reset) {
+				setExecutions(converted)
+			} else {
+				// Merge with deduplication by id
+				setExecutions((prev) => {
+					const existingIds = new Set(prev.map((e) => e.id))
+					const newItems = converted.filter((e) => !existingIds.has(e.id))
+					return [...prev, ...newItems]
+				})
+			}
+			setTotal(result.total)
+			setHasMore(currentPage * pageSize < result.total)
+		}
+
 		setLoading(false)
 		setLoadingMore(false)
-	}, [robot.member_id, page, statusFilter, searchKeywords, pageSize])
+	}, [robot.member_id, page, statusFilter, searchKeywords, pageSize, listExecutions])
 
-	// Initial load
+	// Initial load and 60-second polling
 	useEffect(() => {
 		loadData(true)
+
+		// Set up 60-second polling for list refresh
+		pollingRef.current = setInterval(() => {
+			loadData(true)
+		}, 60000)
+
+		return () => {
+			if (pollingRef.current) {
+				clearInterval(pollingRef.current)
+			}
+		}
 	}, [robot.member_id, statusFilter, searchKeywords])
 
 	// Load more
@@ -163,16 +220,22 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 	}
 
 	// Action handlers
-	const handlePause = (e: React.MouseEvent, exec: Execution) => {
+	const handlePause = async (e: React.MouseEvent, exec: Execution) => {
 		e.stopPropagation()
-		console.log('Pause execution:', exec.id)
-		// TODO: API call
+		const result = await pauseExecution(robot.member_id, exec.id)
+		if (result?.success) {
+			message.success(is_cn ? '已暂停' : 'Paused')
+			loadData(true) // Refresh list
+		}
 	}
 
-	const handleStop = (e: React.MouseEvent, exec: Execution) => {
+	const handleStop = async (e: React.MouseEvent, exec: Execution) => {
 		e.stopPropagation()
-		console.log('Stop execution:', exec.id)
-		// TODO: API call
+		const result = await cancelExecution(robot.member_id, exec.id)
+		if (result?.success) {
+			message.success(is_cn ? '已停止' : 'Stopped')
+			loadData(true) // Refresh list
+		}
 	}
 
 	const handleDownload = (e: React.MouseEvent, exec: Execution) => {
@@ -326,15 +389,14 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 						<div className={styles.historyTableBody}>
 							{executions.map((exec) => {
 								const statusInfo = getStatusInfo(exec.status)
-								const name = exec.name
-									? (is_cn ? exec.name.cn : exec.name.en)
-									: exec.id
+								// Backend returns localized name/current_task_name strings
+								const name = exec.name || exec.id
 								const result = exec.status === 'completed' && exec.delivery?.content?.summary
 									? exec.delivery.content.summary
 									: exec.status === 'failed' && exec.error
 									? exec.error
 									: exec.status === 'running' && exec.current_task_name
-									? (is_cn ? exec.current_task_name.cn : exec.current_task_name.en)
+									? exec.current_task_name
 									: '-'
 
 								const isRunning = exec.status === 'running' || exec.status === 'pending'

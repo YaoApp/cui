@@ -32,10 +32,8 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({
 	const isRunning = execution.status === 'running'
 	const isFinished = isCompleted || isFailed || isCancelled
 
-	// Get display name
-	const name = execution.name
-		? is_cn ? execution.name.cn : execution.name.en
-		: execution.id
+	// Get display name (backend returns localized string)
+	const name = execution.name || execution.id
 
 	// Get description based on status
 	const getDescription = () => {
@@ -48,10 +46,9 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({
 		if (isCancelled) {
 			return is_cn ? '任务已取消' : 'Task cancelled'
 		}
-		// Running/Pending: show current task
+		// Running/Pending: show current task (backend returns localized string)
 		return execution.current_task_name
-			? is_cn ? execution.current_task_name.cn : execution.current_task_name.en
-			: is_cn ? '准备中...' : 'Preparing...'
+			|| (is_cn ? '准备中...' : 'Preparing...')
 	}
 
 	const description = getDescription()

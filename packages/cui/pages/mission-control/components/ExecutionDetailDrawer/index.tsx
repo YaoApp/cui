@@ -1,32 +1,113 @@
-import React, { useMemo, useState, useEffect } from 'react'
-import { Tooltip } from 'antd'
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react'
+import { Tooltip, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import { useRobots } from '@/hooks/useRobots'
 import type { Execution, Task } from '../../types'
+import type { ExecutionResponse } from '@/openapi/agent/robot'
+import CreatureLoading from '../CreatureLoading'
 import styles from './index.less'
+
+// Convert API ExecutionResponse to local Execution type
+const toExecution = (exec: ExecutionResponse): Execution => ({
+	id: exec.id,
+	member_id: exec.member_id,
+	team_id: exec.team_id,
+	trigger_type: exec.trigger_type,
+	start_time: exec.start_time,
+	end_time: exec.end_time,
+	status: exec.status,
+	phase: exec.phase,
+	error: exec.error,
+	name: exec.name,
+	current_task_name: exec.current_task_name,
+	inspiration: exec.inspiration,
+	goals: exec.goals,
+	tasks: exec.tasks,
+	current: exec.current,
+	results: exec.results,
+	delivery: exec.delivery,
+	input: exec.input
+})
 
 interface ExecutionDetailDrawerProps {
 	visible: boolean
 	onClose: () => void
-	execution: Execution | null
+	execution: Execution | null  // Initial execution data (for ID and member_id)
 	onGuide?: () => void
 }
 
 const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 	visible,
 	onClose,
-	execution,
+	execution: initialExecution,
 	onGuide
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [tick, setTick] = useState(0)
 
+	// API hook
+	const { getExecution, pauseExecution, resumeExecution, cancelExecution, error: apiError } = useRobots()
+
+	// State for execution detail (can be refreshed from API)
+	const [execution, setExecution] = useState<Execution | null>(initialExecution)
+	const [loading, setLoading] = useState(false)
+
+	// Refs for auto-refresh
+	const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+	// Sync initial execution when it changes
+	useEffect(() => {
+		setExecution(initialExecution)
+	}, [initialExecution])
+
+	// Load execution detail from API
+	const loadExecution = useCallback(async () => {
+		if (!initialExecution?.member_id || !initialExecution?.id) return
+
+		const result = await getExecution(initialExecution.member_id, initialExecution.id)
+		if (result) {
+			setExecution(toExecution(result))
+		}
+	}, [initialExecution?.member_id, initialExecution?.id, getExecution])
+
 	// Status flags
 	const isRunning = execution?.status === 'running' || execution?.status === 'pending'
 	const isCompleted = execution?.status === 'completed'
 	const isFailed = execution?.status === 'failed'
 	const isCancelled = execution?.status === 'cancelled'
+
+	// Show API error
+	useEffect(() => {
+		if (apiError) {
+			message.error(apiError)
+		}
+	}, [apiError])
+
+	// Auto-refresh for running executions (every 5 seconds)
+	useEffect(() => {
+		if (!visible || !isRunning) {
+			if (refreshIntervalRef.current) {
+				clearInterval(refreshIntervalRef.current)
+				refreshIntervalRef.current = null
+			}
+			return
+		}
+
+		// Initial load
+		loadExecution()
+
+		// Set up 5-second auto-refresh for running executions
+		refreshIntervalRef.current = setInterval(loadExecution, 5000)
+
+		return () => {
+			if (refreshIntervalRef.current) {
+				clearInterval(refreshIntervalRef.current)
+				refreshIntervalRef.current = null
+			}
+		}
+	}, [visible, isRunning, loadExecution])
 
 	// Tick timer for running executions (updates every second for live duration)
 	useEffect(() => {
@@ -138,29 +219,47 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 	}
 
 	// Action handlers
-	const handlePause = () => {
-		console.log('Pause execution:', execution?.id)
-		// TODO: API call
+	const handlePause = async () => {
+		if (!execution?.member_id || !execution?.id) return
+		setLoading(true)
+		const result = await pauseExecution(execution.member_id, execution.id)
+		if (result?.success) {
+			message.success(is_cn ? '已暂停' : 'Paused')
+			loadExecution()
+		}
+		setLoading(false)
 	}
 
-	const handleResume = () => {
-		console.log('Resume execution:', execution?.id)
-		// TODO: API call
+	const handleResume = async () => {
+		if (!execution?.member_id || !execution?.id) return
+		setLoading(true)
+		const result = await resumeExecution(execution.member_id, execution.id)
+		if (result?.success) {
+			message.success(is_cn ? '已恢复' : 'Resumed')
+			loadExecution()
+		}
+		setLoading(false)
 	}
 
-	const handleStop = () => {
-		console.log('Stop execution:', execution?.id)
-		// TODO: API call
+	const handleStop = async () => {
+		if (!execution?.member_id || !execution?.id) return
+		setLoading(true)
+		const result = await cancelExecution(execution.member_id, execution.id)
+		if (result?.success) {
+			message.success(is_cn ? '已停止' : 'Stopped')
+			loadExecution()
+		}
+		setLoading(false)
 	}
 
 	const handleRetry = () => {
-		console.log('Retry execution:', execution?.id)
-		// TODO: API call
+		// TODO: Implement retry API (Phase 3)
+		message.info(is_cn ? '重试功能开发中' : 'Retry coming soon')
 	}
 
 	const handleRerun = () => {
-		console.log('Re-run execution:', execution?.id)
-		// TODO: API call
+		// TODO: Implement re-run API (Phase 3)
+		message.info(is_cn ? '重新执行功能开发中' : 'Re-run coming soon')
 	}
 
 	const handleDownload = (attachment: { title: string; file: string }) => {
@@ -182,11 +281,8 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 
 	if (!visible || !execution) return null
 
-	const executionName = execution.name
-		? is_cn
-			? execution.name.cn
-			: execution.name.en
-		: execution.id
+	// Backend returns localized name string
+	const executionName = execution.name || execution.id
 
 	return (
 		<div className={styles.drawerOverlay} onClick={handleClose}>
@@ -277,11 +373,7 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 									</div>
 									<div className={styles.currentTask}>
 										<div className={styles.currentTaskPulse} />
-										<span>
-											{is_cn
-												? execution.current_task_name.cn
-												: execution.current_task_name.en}
-										</span>
+										<span>{execution.current_task_name}</span>
 									</div>
 									{execution.current?.progress && (
 										<div className={styles.progressInfo}>

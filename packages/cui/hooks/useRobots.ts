@@ -7,7 +7,11 @@ import type {
 	RobotStatusResponse,
 	RobotCreateRequest,
 	RobotUpdateRequest,
-	RobotDeleteResponse
+	RobotDeleteResponse,
+	ExecutionFilter,
+	ExecutionListResponse,
+	ExecutionResponse,
+	ExecutionControlResponse
 } from '@/openapi/agent/robot'
 
 /**
@@ -291,6 +295,178 @@ export function useRobots() {
 		setError(null)
 	}, [])
 
+	// ==================== Execution API Methods ====================
+
+	/**
+	 * List executions for a robot
+	 */
+	const listExecutions = useCallback(
+		async (robotId: string, filter?: ExecutionFilter): Promise<ExecutionListResponse | null> => {
+			if (!window.$app?.openapi) {
+				setError('OpenAPI not available')
+				return null
+			}
+
+			try {
+				const agent = getAgent()
+				const response = await agent.robots.ListExecutions(robotId, filter)
+
+				if (window.$app.openapi.IsError(response)) {
+					const errMsg = response.error?.error_description || 'Failed to list executions'
+					if (mountedRef.current) {
+						setError(errMsg)
+					}
+					return null
+				}
+
+				return window.$app.openapi.GetData(response) as ExecutionListResponse
+			} catch (err) {
+				const errMsg = err instanceof Error ? err.message : 'Failed to list executions'
+				if (mountedRef.current) {
+					setError(errMsg)
+				}
+				return null
+			}
+		},
+		[getAgent]
+	)
+
+	/**
+	 * Get a single execution
+	 */
+	const getExecution = useCallback(
+		async (robotId: string, execId: string): Promise<ExecutionResponse | null> => {
+			if (!window.$app?.openapi) {
+				setError('OpenAPI not available')
+				return null
+			}
+
+			try {
+				const agent = getAgent()
+				const response = await agent.robots.GetExecution(robotId, execId)
+
+				if (window.$app.openapi.IsError(response)) {
+					const errMsg = response.error?.error_description || 'Failed to get execution'
+					if (mountedRef.current) {
+						setError(errMsg)
+					}
+					return null
+				}
+
+				return window.$app.openapi.GetData(response) as ExecutionResponse
+			} catch (err) {
+				const errMsg = err instanceof Error ? err.message : 'Failed to get execution'
+				if (mountedRef.current) {
+					setError(errMsg)
+				}
+				return null
+			}
+		},
+		[getAgent]
+	)
+
+	/**
+	 * Pause an execution
+	 */
+	const pauseExecution = useCallback(
+		async (robotId: string, execId: string): Promise<ExecutionControlResponse | null> => {
+			if (!window.$app?.openapi) {
+				setError('OpenAPI not available')
+				return null
+			}
+
+			try {
+				const agent = getAgent()
+				const response = await agent.robots.PauseExecution(robotId, execId)
+
+				if (window.$app.openapi.IsError(response)) {
+					const errMsg = response.error?.error_description || 'Failed to pause execution'
+					if (mountedRef.current) {
+						setError(errMsg)
+					}
+					return null
+				}
+
+				return window.$app.openapi.GetData(response) as ExecutionControlResponse
+			} catch (err) {
+				const errMsg = err instanceof Error ? err.message : 'Failed to pause execution'
+				if (mountedRef.current) {
+					setError(errMsg)
+				}
+				return null
+			}
+		},
+		[getAgent]
+	)
+
+	/**
+	 * Resume an execution
+	 */
+	const resumeExecution = useCallback(
+		async (robotId: string, execId: string): Promise<ExecutionControlResponse | null> => {
+			if (!window.$app?.openapi) {
+				setError('OpenAPI not available')
+				return null
+			}
+
+			try {
+				const agent = getAgent()
+				const response = await agent.robots.ResumeExecution(robotId, execId)
+
+				if (window.$app.openapi.IsError(response)) {
+					const errMsg = response.error?.error_description || 'Failed to resume execution'
+					if (mountedRef.current) {
+						setError(errMsg)
+					}
+					return null
+				}
+
+				return window.$app.openapi.GetData(response) as ExecutionControlResponse
+			} catch (err) {
+				const errMsg = err instanceof Error ? err.message : 'Failed to resume execution'
+				if (mountedRef.current) {
+					setError(errMsg)
+				}
+				return null
+			}
+		},
+		[getAgent]
+	)
+
+	/**
+	 * Cancel an execution
+	 */
+	const cancelExecution = useCallback(
+		async (robotId: string, execId: string): Promise<ExecutionControlResponse | null> => {
+			if (!window.$app?.openapi) {
+				setError('OpenAPI not available')
+				return null
+			}
+
+			try {
+				const agent = getAgent()
+				const response = await agent.robots.CancelExecution(robotId, execId)
+
+				if (window.$app.openapi.IsError(response)) {
+					const errMsg = response.error?.error_description || 'Failed to cancel execution'
+					if (mountedRef.current) {
+						setError(errMsg)
+					}
+					return null
+				}
+
+				return window.$app.openapi.GetData(response) as ExecutionControlResponse
+			} catch (err) {
+				const errMsg = err instanceof Error ? err.message : 'Failed to cancel execution'
+				if (mountedRef.current) {
+					setError(errMsg)
+				}
+				return null
+			}
+		},
+		[getAgent]
+	)
+
 	return {
 		// State
 		loading,
@@ -300,14 +476,21 @@ export function useRobots() {
 		pageSize,
 		error,
 
-		// Methods
+		// Robot Methods
 		listRobots,
 		getRobot,
 		getRobotStatus,
 		createRobot,
 		updateRobot,
 		deleteRobot,
-		clearError
+		clearError,
+
+		// Execution Methods
+		listExecutions,
+		getExecution,
+		pauseExecution,
+		resumeExecution,
+		cancelExecution
 	}
 }
 

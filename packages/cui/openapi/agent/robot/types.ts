@@ -226,3 +226,109 @@ export interface RobotDeleteResponse {
 	/** Deletion status */
 	deleted: boolean
 }
+
+// ==================== Execution Types ====================
+
+/**
+ * Execution status values
+ */
+export type ExecStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
+
+/**
+ * Trigger type values
+ */
+export type TriggerType = 'clock' | 'human' | 'event'
+
+/**
+ * Phase values
+ */
+export type Phase = 'inspiration' | 'goals' | 'tasks' | 'run' | 'delivery' | 'learning'
+
+/**
+ * Execution filter options for listing executions
+ */
+export interface ExecutionFilter {
+	/** Filter by execution status */
+	status?: ExecStatus
+	/** Filter by trigger type */
+	trigger_type?: TriggerType
+	/** Search keyword in execution details */
+	keyword?: string
+	/** Page number, starting from 1 */
+	page?: number
+	/** Items per page */
+	pagesize?: number
+}
+
+/**
+ * Execution response from API
+ * Aligned with backend: yao/openapi/agent/robot/types.go ExecutionResponse
+ */
+export interface ExecutionResponse {
+	/** Execution ID */
+	id: string
+	/** Robot member ID */
+	member_id: string
+	/** Team ID */
+	team_id: string
+	/** How execution was triggered */
+	trigger_type: TriggerType
+	/** Current status */
+	status: ExecStatus
+	/** Current phase */
+	phase: Phase
+	/** When execution started */
+	start_time: string
+	/** When execution ended (if completed/failed/cancelled) */
+	end_time?: string
+	/** Error message (if failed) */
+	error?: string
+
+	/** Execution title (localized by backend) */
+	name?: string
+	/** Current task description (localized by backend) */
+	current_task_name?: string
+
+	/** Inspiration phase output */
+	inspiration?: any
+	/** Goals phase output */
+	goals?: any
+	/** Tasks phase output */
+	tasks?: any
+	/** Current execution state */
+	current?: any
+	/** Run phase results */
+	results?: any
+	/** Delivery phase output */
+	delivery?: any
+	/** Trigger input data */
+	input?: any
+}
+
+/**
+ * Execution list response
+ */
+export interface ExecutionListResponse {
+	/** List of executions */
+	data: ExecutionResponse[]
+	/** Total number of executions */
+	total: number
+	/** Current page number */
+	page: number
+	/** Items per page */
+	pagesize: number
+}
+
+/**
+ * Execution control response (pause/resume/cancel)
+ */
+export interface ExecutionControlResponse {
+	/** Execution ID */
+	execution_id: string
+	/** Action performed */
+	action: 'paused' | 'resumed' | 'cancelled'
+	/** Whether action succeeded */
+	success: boolean
+	/** Optional message */
+	message?: string
+}
