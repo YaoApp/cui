@@ -54,8 +54,25 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({
 	const description = getDescription()
 
 	// Calculate progress
-	const progress = execution.current?.progress || '0/0'
-	const [completed, total] = progress.split('/').map(Number)
+	const getProgress = () => {
+		if (execution.current?.progress) {
+			return execution.current.progress
+		}
+		// Fallback: calculate from tasks array when current is cleared (e.g., delivery/learning phase)
+		const tasks = execution.tasks
+		if (tasks && tasks.length > 0) {
+			const completedCount = tasks.filter(t => 
+				t.status === 'completed' || t.status === 'failed' || t.status === 'skipped'
+			).length
+			return `${completedCount}/${tasks.length}`
+		}
+		return '0/0'
+	}
+	const progress = getProgress()
+	// Parse progress string - handle both "4/8" and "4/8 tasks" formats
+	const progressMatch = progress.match(/^(\d+)\/(\d+)/)
+	const completed = progressMatch ? parseInt(progressMatch[1], 10) : 0
+	const total = progressMatch ? parseInt(progressMatch[2], 10) : 0
 	const progressPercent = isCompleted ? 100 : (total > 0 ? (completed / total) * 100 : 0)
 
 	// Dynamic elapsed time - only for running tasks
