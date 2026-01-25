@@ -361,10 +361,11 @@ const Index = () => {
 						/>
 						<h1 className={styles.title}>{is_cn ? 'AI 助手' : 'AI Assistants'}</h1>
 					</div>
-					<div className={styles.createIcon} onClick={handleCreate}>
+					{/* Temporarily hidden - assistants should be installed via Yao commands, only for developers */}
+					{/* <div className={styles.createIcon} onClick={handleCreate}>
 						<Icon name='material-add' size={24} />
 						<span className={styles.createText}>{is_cn ? '创建' : 'Create'}</span>
-					</div>
+					</div> */}
 				</div>
 				<div className={styles.searchWrapper}>
 					<Input
