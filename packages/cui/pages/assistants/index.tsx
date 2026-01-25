@@ -106,8 +106,8 @@ const Index = () => {
 
 				setTags(formattedTags)
 			} catch (error) {
-				console.error(is_cn ? '加载智能体标签失败:' : 'Failed to load assistant tags:', error)
-				message.error(is_cn ? '加载智能体标签失败' : 'Failed to load assistant tags')
+				console.error(is_cn ? '加载助手标签失败:' : 'Failed to load assistant tags:', error)
+				message.error(is_cn ? '加载助手标签失败' : 'Failed to load assistant tags')
 			} finally {
 				setTagsLoading(false)
 			}
@@ -186,8 +186,8 @@ const Index = () => {
 			// Check if there's more data
 			setHasMore(newData.length < total)
 		} catch (error) {
-			console.error(is_cn ? '加载智能体失败:' : 'Failed to load assistants:', error)
-			message.error(is_cn ? '加载智能体失败' : 'Failed to load assistants')
+			console.error(is_cn ? '加载助手失败:' : 'Failed to load assistants:', error)
+			message.error(is_cn ? '加载助手失败' : 'Failed to load assistants')
 		} finally {
 			setLoading(false)
 		}
@@ -267,8 +267,8 @@ const Index = () => {
 			// Check if there's more data
 			setHasMore(data.length + newData.length < total)
 		} catch (error) {
-			console.error(is_cn ? '加载更多智能体失败:' : 'Failed to load more assistants:', error)
-			message.error(is_cn ? '加载更多智能体失败' : 'Failed to load more assistants')
+			console.error(is_cn ? '加载更多助手失败:' : 'Failed to load more assistants:', error)
+			message.error(is_cn ? '加载更多助手失败' : 'Failed to load more assistants')
 		} finally {
 			setLoadingMore(false)
 		}
@@ -359,7 +359,7 @@ const Index = () => {
 							size={24}
 							style={{ color: 'var(--color_page_title)' }}
 						/>
-						<h1 className={styles.title}>{is_cn ? 'AI 智能体' : 'AI Assistants'}</h1>
+						<h1 className={styles.title}>{is_cn ? 'AI 助手' : 'AI Assistants'}</h1>
 					</div>
 					<div className={styles.createIcon} onClick={handleCreate}>
 						<Icon name='material-add' size={24} />
@@ -370,7 +370,7 @@ const Index = () => {
 					<Input
 						size='large'
 						prefix={<SearchOutlined />}
-						placeholder={is_cn ? '搜索 AI 智能体...' : 'Search AI assistants...'}
+						placeholder={is_cn ? '搜索 AI 助手...' : 'Search AI assistants...'}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						onKeyPress={handleKeyPress}

@@ -136,7 +136,7 @@ const AssistantCreate = () => {
 			{
 				id: 'generate_config',
 				title: is_cn ? '生成配置' : 'Generating configuration',
-				description: is_cn ? '创建智能体基础配置' : 'Creating assistant base configuration',
+				description: is_cn ? '创建助手基础配置' : 'Creating assistant base configuration',
 				delay: 1000
 			},
 			{
@@ -150,13 +150,13 @@ const AssistantCreate = () => {
 			{
 				id: 'select_tools',
 				title: is_cn ? '选择工具' : 'Selecting tools',
-				description: is_cn ? '匹配合适的智能体和工具' : 'Matching appropriate agents and tools',
+				description: is_cn ? '匹配合适的助手和工具' : 'Matching appropriate agents and tools',
 				delay: 800
 			},
 			{
 				id: 'complete',
 				title: is_cn ? '完成' : 'Completed',
-				description: is_cn ? '智能体配置已生成' : 'Assistant configuration generated',
+				description: is_cn ? '助手配置已生成' : 'Assistant configuration generated',
 				delay: 500
 			}
 		]
@@ -385,7 +385,7 @@ const AssistantCreate = () => {
 			}
 		} catch (error) {
 			console.error('Error creating assistant:', error)
-			message.error(is_cn ? '创建智能体失败' : 'Failed to create assistant')
+			message.error(is_cn ? '创建助手失败' : 'Failed to create assistant')
 		} finally {
 			setCreating(false)
 		}
@@ -450,10 +450,10 @@ const AssistantCreate = () => {
 								handleBack()
 							}}
 						>
-							{is_cn ? '智能体列表' : 'Assistants'}
+							{is_cn ? '助手列表' : 'Assistants'}
 						</a>
 					</Breadcrumb.Item>
-					<Breadcrumb.Item>{is_cn ? '创建智能体' : 'Create Assistant'}</Breadcrumb.Item>
+					<Breadcrumb.Item>{is_cn ? '创建助手' : 'Create Assistant'}</Breadcrumb.Item>
 				</Breadcrumb>
 			</div>
 
@@ -473,10 +473,10 @@ const AssistantCreate = () => {
 			) : currentStep === 0 ? (
 				<div className={styles.heroSection}>
 					<div className={styles.heroContent}>
-						<h1 className={styles.heroTitle}>{is_cn ? '创建智能体' : 'Create Assistant'}</h1>
+						<h1 className={styles.heroTitle}>{is_cn ? '创建助手' : 'Create Assistant'}</h1>
 						<p className={styles.heroDesc}>
 							{is_cn
-								? '描述你的需求，AI 将为你创建智能体'
+								? '描述你的需求，AI 将为你创建助手'
 								: 'Describe your needs, AI will create an assistant for you'}
 						</p>
 						<div className={styles.chatBoxWrapper}>

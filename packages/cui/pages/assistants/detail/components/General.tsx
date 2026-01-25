@@ -58,7 +58,7 @@ export default function General({ form }: GeneralProps) {
 					}
 				}
 			} catch (error) {
-				console.error(is_cn ? '加载智能体标签失败:' : 'Failed to load assistant tags:', error)
+				console.error(is_cn ? '加载助手标签失败:' : 'Failed to load assistant tags:', error)
 				// Fallback to default tags
 				setTags([
 					'coding',
@@ -129,9 +129,9 @@ export default function General({ form }: GeneralProps) {
 		>
 			<Form.Item
 				name='name'
-				label={is_cn ? '智能体名称' : 'Assistant Name'}
+				label={is_cn ? '助手名称' : 'Assistant Name'}
 				rules={[
-					{ required: true, message: is_cn ? '请输入智能体名称' : 'Please input assistant name' }
+					{ required: true, message: is_cn ? '请输入助手名称' : 'Please input assistant name' }
 				]}
 			>
 				<Input placeholder={is_cn ? '输入一个描述性名称' : 'Enter a descriptive name'} />
@@ -203,7 +203,7 @@ export default function General({ form }: GeneralProps) {
 					autoSize={{ minRows: 4, maxRows: 6 }}
 					placeholder={
 						is_cn
-							? '描述这个智能体能做什么以及如何帮助用户...'
+							? '描述这个助手能做什么以及如何帮助用户...'
 							: 'Describe what this assistant can do and how it can help users...'
 					}
 				/>
@@ -217,7 +217,7 @@ export default function General({ form }: GeneralProps) {
 				<Select
 					placeholder={
 						is_cn
-							? '选择为此智能体提供支持的AI连接器'
+							? '选择为此助手提供支持的AI连接器'
 							: 'Select the AI connector to power this assistant'
 					}
 					showSearch
@@ -270,7 +270,7 @@ export default function General({ form }: GeneralProps) {
 							<>
 								<div>
 									{is_cn
-										? '确定要删除这个智能体吗？'
+										? '确定要删除这个助手吗？'
 										: 'Are you sure you want to delete this assistant?'}
 								</div>
 								<div
@@ -292,7 +292,7 @@ export default function General({ form }: GeneralProps) {
 							type='primary'
 							icon={<DeleteOutlined style={{ fontSize: '14px' }} />}
 						>
-							{is_cn ? '删除智能体' : 'Delete Assistant'}
+							{is_cn ? '删除助手' : 'Delete Assistant'}
 						</Button>
 					</Popconfirm>
 				</Form.Item>

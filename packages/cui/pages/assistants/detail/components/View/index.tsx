@@ -28,7 +28,7 @@ const View = ({ data, connectors }: ViewProps) => {
 			case 'user':
 				return is_cn ? '用户' : 'User'
 			case 'assistant':
-				return is_cn ? '智能体' : 'Assistant'
+				return is_cn ? '助手' : 'Assistant'
 			case 'developer':
 				return is_cn ? '开发者' : 'Developer'
 			default:
@@ -40,7 +40,7 @@ const View = ({ data, connectors }: ViewProps) => {
 		<div className={styles.viewSection}>
 			<div className={styles.fieldGroup}>
 				<div className={styles.fieldItem}>
-					<div className={styles.fieldLabel}>{is_cn ? '智能体名称' : 'Assistant Name'}</div>
+					<div className={styles.fieldLabel}>{is_cn ? '助手名称' : 'Assistant Name'}</div>
 					<div className={styles.fieldValue}>{data.name || '-'}</div>
 				</div>
 

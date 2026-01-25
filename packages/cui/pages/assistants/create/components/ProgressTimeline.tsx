@@ -79,7 +79,7 @@ const ProgressTimeline = ({
 								? '创建失败'
 								: 'Creation Failed'
 							: is_cn
-							? 'AI 正在创建智能体...'
+							? 'AI 正在创建助手...'
 							: 'AI is creating assistant...'}
 					</h3>
 				</div>
