@@ -20,11 +20,6 @@ const Loading = ({ message }: ILoadingProps) => {
 	return (
 		<div className={styles.container}>
 			{text && <span className={styles.loadingText}>{text}</span>}
-			<div className={styles.dots}>
-				<span className={styles.dot}></span>
-				<span className={styles.dot}></span>
-				<span className={styles.dot}></span>
-			</div>
 		</div>
 	)
 }
