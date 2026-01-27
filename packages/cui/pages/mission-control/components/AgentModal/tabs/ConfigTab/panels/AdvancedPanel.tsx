@@ -28,6 +28,7 @@ const PHASES = [
 	{ key: 'goals', label_en: 'Goals', label_cn: '目标规划', desc_en: 'Generate goals', desc_cn: '生成目标', default: '__yao.goals', type: 'robot-goals' },
 	{ key: 'tasks', label_en: 'Tasks', label_cn: '任务拆解', desc_en: 'Split into tasks', desc_cn: '拆分任务', default: '__yao.tasks', type: 'robot-tasks' },
 	// run phase is omitted - it's a built-in scheduler, not a replaceable agent
+	{ key: 'validation', label_en: 'Validation', label_cn: '校验', desc_en: 'Validate results', desc_cn: '校验结果', default: '__yao.validation', type: 'robot-validation' },
 	{ key: 'delivery', label_en: 'Delivery', label_cn: '交付', desc_en: 'Format & deliver', desc_cn: '格式化并交付', default: '__yao.delivery', type: 'robot-delivery' },
 	{ key: 'learning', label_en: 'Learning', label_cn: '学习', desc_en: 'Extract insights', desc_cn: '提取经验', default: '__yao.learning', type: 'robot-learning' }
 ]
