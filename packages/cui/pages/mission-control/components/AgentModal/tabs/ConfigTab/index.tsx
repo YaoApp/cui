@@ -150,6 +150,7 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 					'resources.phases.inspiration': resources.phases?.inspiration || '__yao.inspiration',
 					'resources.phases.goals': resources.phases?.goals || '__yao.goals',
 					'resources.phases.tasks': resources.phases?.tasks || '__yao.tasks',
+					'resources.phases.validation': resources.phases?.validation || '__yao.validation',
 					'resources.phases.delivery': resources.phases?.delivery || '__yao.delivery',
 					'resources.phases.learning': resources.phases?.learning || '__yao.learning'
 				}
@@ -393,6 +394,7 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 						inspiration: formData['resources.phases.inspiration'] || '__yao.inspiration',
 						goals: formData['resources.phases.goals'] || '__yao.goals',
 						tasks: formData['resources.phases.tasks'] || '__yao.tasks',
+						validation: formData['resources.phases.validation'] || '__yao.validation',
 						delivery: formData['resources.phases.delivery'] || '__yao.delivery',
 						learning: formData['resources.phases.learning'] || '__yao.learning'
 					}
