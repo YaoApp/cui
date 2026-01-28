@@ -33,7 +33,7 @@ const toExecution = (exec: ExecutionResponse): Execution => ({
 interface ExecutionDetailDrawerProps {
 	visible: boolean
 	onClose: () => void
-	execution: Execution | null  // Initial execution data (for ID and member_id)
+	execution: Execution | null // Initial execution data (for ID and member_id)
 	onGuide?: () => void
 }
 
@@ -74,6 +74,8 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 
 	// Status flags
 	const isRunning = execution?.status === 'running' || execution?.status === 'pending'
+	const isPaused = execution?.status === 'paused'
+	const isActive = isRunning || isPaused // Active means not finished (running, pending, or paused)
 	const isCompleted = execution?.status === 'completed'
 	const isFailed = execution?.status === 'failed'
 	const isCancelled = execution?.status === 'cancelled'
@@ -147,28 +149,50 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 		return `${hours}h ${minutes % 60}m`
 	}
 
-	// Live duration for running executions
+	// Live duration for active executions (running or paused)
 	const liveDuration = useMemo(() => {
-		if (!execution || !isRunning) return null
+		if (!execution || !isActive) return null
 		// tick dependency ensures re-calculation every second
 		void tick
 		return formatDuration(execution.start_time)
-	}, [execution, isRunning, tick])
+	}, [execution, isActive, tick])
 
 	// Status info
 	const statusInfo = useMemo(() => {
 		if (!execution) return null
 		switch (execution.status) {
 			case 'running':
-				return { icon: 'material-play_circle', label: is_cn ? '进行中' : 'Running', class: styles.statusRunning }
+				return {
+					icon: 'material-play_circle',
+					label: is_cn ? '进行中' : 'Running',
+					class: styles.statusRunning
+				}
 			case 'pending':
-				return { icon: 'material-pause_circle', label: is_cn ? '已暂停' : 'Paused', class: styles.statusPaused }
+				return {
+					icon: 'material-hourglass_empty',
+					label: is_cn ? '等待中' : 'Pending',
+					class: styles.statusPending
+				}
+			case 'paused':
+				return {
+					icon: 'material-pause_circle',
+					label: is_cn ? '已暂停' : 'Paused',
+					class: styles.statusPaused
+				}
 			case 'completed':
-				return { icon: 'material-check_circle', label: is_cn ? '已完成' : 'Completed', class: styles.statusCompleted }
+				return {
+					icon: 'material-check_circle',
+					label: is_cn ? '已完成' : 'Completed',
+					class: styles.statusCompleted
+				}
 			case 'failed':
 				return { icon: 'material-error', label: is_cn ? '失败' : 'Failed', class: styles.statusFailed }
 			case 'cancelled':
-				return { icon: 'material-cancel', label: is_cn ? '已取消' : 'Cancelled', class: styles.statusCancelled }
+				return {
+					icon: 'material-cancel',
+					label: is_cn ? '已取消' : 'Cancelled',
+					class: styles.statusCancelled
+				}
 			default:
 				return { icon: 'material-help', label: execution.status, class: '' }
 		}
@@ -319,7 +343,7 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 						<div className={styles.metaDivider} />
 						<div className={styles.metaItem}>
 							<Icon name='material-timer' size={14} />
-							{isRunning ? (
+							{isActive ? (
 								<span className={styles.liveDuration}>{liveDuration}</span>
 							) : (
 								<span>{formatDuration(execution.start_time, execution.end_time)}</span>
@@ -334,8 +358,8 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 
 				{/* Content - scrollable */}
 				<div className={styles.drawerContent}>
-					{/* ========== RUNNING STATE ========== */}
-					{isRunning && (
+					{/* ========== ACTIVE STATE (Running or Paused) ========== */}
+					{isActive && (
 						<>
 							{/* Phase Progress */}
 							<section className={styles.section}>
@@ -358,10 +382,21 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 												}`}
 											>
 												<div className={styles.phaseIndicator}>
-													{isPast && <Icon name='material-check' size={12} />}
-													{isCurrent && <div className={styles.phasePulse} />}
+													{isPast && (
+														<Icon
+															name='material-check'
+															size={12}
+														/>
+													)}
+													{isCurrent && (
+														<div
+															className={styles.phasePulse}
+														/>
+													)}
 												</div>
-												<span className={styles.phaseLabel}>{phase.label}</span>
+												<span className={styles.phaseLabel}>
+													{phase.label}
+												</span>
 											</div>
 										)
 									})}
@@ -386,8 +421,16 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 													className={styles.progressFill}
 													style={{
 														width: `${
-															(parseInt(execution.current.progress.split('/')[0]) /
-																parseInt(execution.current.progress.split('/')[1])) *
+															(parseInt(
+																execution.current.progress.split(
+																	'/'
+																)[0]
+															) /
+																parseInt(
+																	execution.current.progress.split(
+																		'/'
+																	)[1]
+																)) *
 															100
 														}%`
 													}}
@@ -425,29 +468,51 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 										{execution.tasks.map((task: Task, index: number) => {
 											const taskStatus = getTaskStatusIcon(task.status)
 											// Only show as current if: index matches AND task is actually running
-											const isCurrent = index === execution.current?.task_index && task.status === 'running'
+											const isCurrent =
+												index === execution.current?.task_index &&
+												task.status === 'running'
 											const taskTitle = task.description || task.executor_id
 											return (
 												<div
 													key={task.id}
 													className={`${styles.taskItem} ${
-														isCurrent ? styles.taskItemCurrent : ''
+														isCurrent
+															? styles.taskItemCurrent
+															: ''
 													}`}
 												>
-													<div className={`${styles.taskIcon} ${taskStatus.class}`}>
-														<Icon name={taskStatus.icon} size={16} />
+													<div
+														className={`${styles.taskIcon} ${taskStatus.class}`}
+													>
+														<Icon
+															name={taskStatus.icon}
+															size={16}
+														/>
 													</div>
 													<div className={styles.taskInfo}>
 														<span className={styles.taskTitle}>
 															{taskTitle}
 														</span>
-														<span className={styles.taskSubtitle}>
-															{task.executor_type}: {task.executor_id}
+														<span
+															className={
+																styles.taskSubtitle
+															}
+														>
+															{task.executor_type}:{' '}
+															{task.executor_id}
 														</span>
 													</div>
 													{isCurrent && (
-														<div className={styles.taskRunningIndicator}>
-															<span className={styles.taskRunningDot} />
+														<div
+															className={
+																styles.taskRunningIndicator
+															}
+														>
+															<span
+																className={
+																	styles.taskRunningDot
+																}
+															/>
 														</div>
 													)}
 												</div>
@@ -493,10 +558,17 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 										execution.delivery.content.attachments.length > 0 && (
 											<div className={styles.attachments}>
 												<div className={styles.attachmentsHeader}>
-													<Icon name='material-attach_file' size={14} />
+													<Icon
+														name='material-attach_file'
+														size={14}
+													/>
 													<span>
 														{is_cn ? '附件' : 'Attachments'} (
-														{execution.delivery.content.attachments.length})
+														{
+															execution.delivery.content
+																.attachments.length
+														}
+														)
 													</span>
 												</div>
 												<div className={styles.attachmentList}>
@@ -504,17 +576,32 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 														(attachment, index) => (
 															<div
 																key={index}
-																className={styles.attachmentItem}
-																onClick={() => handleDownload(attachment)}
+																className={
+																	styles.attachmentItem
+																}
+																onClick={() =>
+																	handleDownload(
+																		attachment
+																	)
+																}
 															>
-																<Icon name='material-description' size={16} />
-																<span className={styles.attachmentTitle}>
+																<Icon
+																	name='material-description'
+																	size={16}
+																/>
+																<span
+																	className={
+																		styles.attachmentTitle
+																	}
+																>
 																	{attachment.title}
 																</span>
 																<Icon
 																	name='material-download'
 																	size={14}
-																	className={styles.attachmentDownload}
+																	className={
+																		styles.attachmentDownload
+																	}
 																/>
 															</div>
 														)
@@ -552,7 +639,8 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 										<summary className={styles.sectionHeader}>
 											<Icon name='material-checklist' size={16} />
 											<span>
-												{is_cn ? '任务列表' : 'Task List'} ({execution.tasks.length})
+												{is_cn ? '任务列表' : 'Task List'} (
+												{execution.tasks.length})
 											</span>
 											<Icon
 												name='material-expand_more'
@@ -562,19 +650,39 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 										</summary>
 										<div className={styles.taskList}>
 											{execution.tasks.map((task: Task) => {
-												const taskStatus = getTaskStatusIcon(task.status)
-												const taskTitle = task.description || task.executor_id
+												const taskStatus = getTaskStatusIcon(
+													task.status
+												)
+												const taskTitle =
+													task.description || task.executor_id
 												return (
-													<div key={task.id} className={styles.taskItem}>
-														<div className={`${styles.taskIcon} ${taskStatus.class}`}>
-															<Icon name={taskStatus.icon} size={16} />
+													<div
+														key={task.id}
+														className={styles.taskItem}
+													>
+														<div
+															className={`${styles.taskIcon} ${taskStatus.class}`}
+														>
+															<Icon
+																name={taskStatus.icon}
+																size={16}
+															/>
 														</div>
 														<div className={styles.taskInfo}>
-															<span className={styles.taskTitle}>
+															<span
+																className={
+																	styles.taskTitle
+																}
+															>
 																{taskTitle}
 															</span>
-															<span className={styles.taskSubtitle}>
-																{task.executor_type}: {task.executor_id}
+															<span
+																className={
+																	styles.taskSubtitle
+																}
+															>
+																{task.executor_type}:{' '}
+																{task.executor_id}
 															</span>
 														</div>
 													</div>
@@ -631,10 +739,22 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 													}`}
 												>
 													<div className={styles.phaseIndicator}>
-														{isPast && <Icon name='material-check' size={12} />}
-														{isCurrent && <Icon name='material-close' size={12} />}
+														{isPast && (
+															<Icon
+																name='material-check'
+																size={12}
+															/>
+														)}
+														{isCurrent && (
+															<Icon
+																name='material-close'
+																size={12}
+															/>
+														)}
 													</div>
-													<span className={styles.phaseLabel}>{phase.label}</span>
+													<span className={styles.phaseLabel}>
+														{phase.label}
+													</span>
 												</div>
 											)
 										})}
@@ -669,7 +789,8 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 										<summary className={styles.sectionHeader}>
 											<Icon name='material-checklist' size={16} />
 											<span>
-												{is_cn ? '任务列表' : 'Task List'} ({execution.tasks.length})
+												{is_cn ? '任务列表' : 'Task List'} (
+												{execution.tasks.length})
 											</span>
 											<Icon
 												name='material-expand_more'
@@ -679,30 +800,55 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 										</summary>
 										<div className={styles.taskList}>
 											{execution.tasks.map((task: Task) => {
-												const taskStatus = getTaskStatusIcon(task.status)
+												const taskStatus = getTaskStatusIcon(
+													task.status
+												)
 												const isFailedTask = task.status === 'failed'
-												const taskTitle = task.description || task.executor_id
+												const taskTitle =
+													task.description || task.executor_id
 												return (
 													<div
 														key={task.id}
 														className={`${styles.taskItem} ${
-															isFailedTask ? styles.taskItemFailed : ''
+															isFailedTask
+																? styles.taskItemFailed
+																: ''
 														}`}
 													>
-														<div className={`${styles.taskIcon} ${taskStatus.class}`}>
-															<Icon name={taskStatus.icon} size={16} />
+														<div
+															className={`${styles.taskIcon} ${taskStatus.class}`}
+														>
+															<Icon
+																name={taskStatus.icon}
+																size={16}
+															/>
 														</div>
 														<div className={styles.taskInfo}>
-															<span className={styles.taskTitle}>
+															<span
+																className={
+																	styles.taskTitle
+																}
+															>
 																{taskTitle}
 															</span>
-															<span className={styles.taskSubtitle}>
-																{task.executor_type}: {task.executor_id}
+															<span
+																className={
+																	styles.taskSubtitle
+																}
+															>
+																{task.executor_type}:{' '}
+																{task.executor_id}
 															</span>
 														</div>
 														{isFailedTask && (
-															<span className={styles.taskFailedBadge}>
-																{is_cn ? '失败' : 'Failed'}
+															<span
+																className={
+																	styles.taskFailedBadge
+																}
+															>
+																{is_cn
+																	? '失败'
+																	: 'Failed'}
 															</span>
 														)}
 													</div>
@@ -728,29 +874,29 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 
 				{/* Footer Actions */}
 				<div className={styles.drawerFooter}>
-				{isRunning && (
-					<>
-						<button className={styles.actionBtnPrimary} onClick={onGuide}>
-							<Icon name='material-quickreply' size={16} />
-							<span>{is_cn ? '指导执行' : 'Guide'}</span>
-						</button>
-						{execution.status === 'pending' ? (
-							<button className={styles.actionBtnSecondary} onClick={handleResume}>
-								<Icon name='material-play_arrow' size={16} />
-								<span>{is_cn ? '继续' : 'Resume'}</span>
+					{isActive && (
+						<>
+							<button className={styles.actionBtnPrimary} onClick={onGuide}>
+								<Icon name='material-quickreply' size={16} />
+								<span>{is_cn ? '指导执行' : 'Guide'}</span>
 							</button>
-						) : (
-							<button className={styles.actionBtnSecondary} onClick={handlePause}>
-								<Icon name='material-pause' size={16} />
-								<span>{is_cn ? '暂停' : 'Pause'}</span>
+							{isPaused ? (
+								<button className={styles.actionBtnSecondary} onClick={handleResume}>
+									<Icon name='material-play_arrow' size={16} />
+									<span>{is_cn ? '继续' : 'Resume'}</span>
+								</button>
+							) : (
+								<button className={styles.actionBtnSecondary} onClick={handlePause}>
+									<Icon name='material-pause' size={16} />
+									<span>{is_cn ? '暂停' : 'Pause'}</span>
+								</button>
+							)}
+							<button className={styles.actionBtnDanger} onClick={handleStop}>
+								<Icon name='material-stop' size={16} />
+								<span>{is_cn ? '停止' : 'Stop'}</span>
 							</button>
-						)}
-						<button className={styles.actionBtnDanger} onClick={handleStop}>
-							<Icon name='material-stop' size={16} />
-							<span>{is_cn ? '停止' : 'Stop'}</span>
-						</button>
-					</>
-				)}
+						</>
+					)}
 
 					{isCompleted && (
 						<>
@@ -764,7 +910,9 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 										className={styles.actionBtnPrimary}
 										onClick={() =>
 											execution.delivery?.content?.attachments?.[0] &&
-											handleDownload(execution.delivery.content.attachments[0])
+											handleDownload(
+												execution.delivery.content.attachments[0]
+											)
 										}
 									>
 										<Icon name='material-download' size={16} />

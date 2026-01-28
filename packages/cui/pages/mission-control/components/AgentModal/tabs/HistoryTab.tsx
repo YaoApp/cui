@@ -42,7 +42,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 	const is_cn = locale === 'zh-CN'
 
 	// API hook
-	const { listExecutions, pauseExecution, cancelExecution, error: apiError } = useRobots()
+	const { listExecutions, pauseExecution, resumeExecution, cancelExecution, error: apiError } = useRobots()
 
 	// State
 	const [executions, setExecutions] = useState<Execution[]>([])
@@ -68,49 +68,52 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 	}, [apiError])
 
 	// Load data from API
-	const loadData = useCallback(async (reset: boolean = false) => {
-		const currentPage = reset ? 1 : page
+	const loadData = useCallback(
+		async (reset: boolean = false) => {
+			const currentPage = reset ? 1 : page
 
-		if (reset) {
-			setLoading(true)
-			setPage(1)
-		} else {
-			setLoadingMore(true)
-		}
-
-		// Build API filter
-		const filter: any = {
-			page: currentPage,
-			pagesize: pageSize
-		}
-		if (statusFilter !== 'all') {
-			filter.status = statusFilter as ExecStatus
-		}
-		if (searchKeywords) {
-			filter.keyword = searchKeywords
-		}
-
-		const result = await listExecutions(robot.member_id, filter)
-
-		if (result) {
-			const converted = result.data.map(toExecution)
 			if (reset) {
-				setExecutions(converted)
+				setLoading(true)
+				setPage(1)
 			} else {
-				// Merge with deduplication by id
-				setExecutions((prev) => {
-					const existingIds = new Set(prev.map((e) => e.id))
-					const newItems = converted.filter((e) => !existingIds.has(e.id))
-					return [...prev, ...newItems]
-				})
+				setLoadingMore(true)
 			}
-			setTotal(result.total)
-			setHasMore(currentPage * pageSize < result.total)
-		}
 
-		setLoading(false)
-		setLoadingMore(false)
-	}, [robot.member_id, page, statusFilter, searchKeywords, pageSize, listExecutions])
+			// Build API filter
+			const filter: any = {
+				page: currentPage,
+				pagesize: pageSize
+			}
+			if (statusFilter !== 'all') {
+				filter.status = statusFilter as ExecStatus
+			}
+			if (searchKeywords) {
+				filter.keyword = searchKeywords
+			}
+
+			const result = await listExecutions(robot.member_id, filter)
+
+			if (result) {
+				const converted = result.data.map(toExecution)
+				if (reset) {
+					setExecutions(converted)
+				} else {
+					// Merge with deduplication by id
+					setExecutions((prev) => {
+						const existingIds = new Set(prev.map((e) => e.id))
+						const newItems = converted.filter((e) => !existingIds.has(e.id))
+						return [...prev, ...newItems]
+					})
+				}
+				setTotal(result.total)
+				setHasMore(currentPage * pageSize < result.total)
+			}
+
+			setLoading(false)
+			setLoadingMore(false)
+		},
+		[robot.member_id, page, statusFilter, searchKeywords, pageSize, listExecutions]
+	)
 
 	// Initial load and 60-second polling
 	useEffect(() => {
@@ -229,6 +232,15 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 		}
 	}
 
+	const handleResume = async (e: React.MouseEvent, exec: Execution) => {
+		e.stopPropagation()
+		const result = await resumeExecution(robot.member_id, exec.id)
+		if (result?.success) {
+			message.success(is_cn ? '已继续' : 'Resumed')
+			loadData(true) // Refresh list
+		}
+	}
+
 	const handleStop = async (e: React.MouseEvent, exec: Execution) => {
 		e.stopPropagation()
 		const result = await cancelExecution(robot.member_id, exec.id)
@@ -245,9 +257,10 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 			console.log('Download attachments:', attachments)
 			// TODO: Trigger download
 			// For now, just show what would be downloaded
-			alert(is_cn 
-				? `下载: ${attachments.map(a => a.title).join(', ')}` 
-				: `Download: ${attachments.map(a => a.title).join(', ')}`
+			alert(
+				is_cn
+					? `下载: ${attachments.map((a) => a.title).join(', ')}`
+					: `Download: ${attachments.map((a) => a.title).join(', ')}`
 			)
 		}
 	}
@@ -274,7 +287,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 		const end = new Date(endStr)
 		const durationMs = end.getTime() - start.getTime()
 		const seconds = Math.floor(durationMs / 1000)
-		
+
 		if (seconds < 60) return `${seconds}s`
 		const minutes = Math.floor(seconds / 60)
 		if (minutes < 60) return `${minutes}m ${seconds % 60}s`
@@ -285,15 +298,37 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 	const getStatusInfo = (status: string) => {
 		switch (status) {
 			case 'completed':
-				return { icon: 'material-check_circle', label: is_cn ? '已完成' : 'Completed', class: styles.statusCompleted }
+				return {
+					icon: 'material-check_circle',
+					label: is_cn ? '已完成' : 'Completed',
+					class: styles.statusCompleted
+				}
 			case 'failed':
 				return { icon: 'material-error', label: is_cn ? '失败' : 'Failed', class: styles.statusFailed }
 			case 'cancelled':
-				return { icon: 'material-cancel', label: is_cn ? '已取消' : 'Cancelled', class: styles.statusCancelled }
+				return {
+					icon: 'material-cancel',
+					label: is_cn ? '已取消' : 'Cancelled',
+					class: styles.statusCancelled
+				}
 			case 'running':
-				return { icon: 'material-play_circle', label: is_cn ? '进行中' : 'Running', class: styles.statusRunning }
+				return {
+					icon: 'material-play_circle',
+					label: is_cn ? '进行中' : 'Running',
+					class: styles.statusRunning
+				}
 			case 'pending':
-				return { icon: 'material-pause_circle', label: is_cn ? '已暂停' : 'Paused', class: styles.statusPaused }
+				return {
+					icon: 'material-hourglass_empty',
+					label: is_cn ? '等待中' : 'Pending',
+					class: styles.statusPending
+				}
+			case 'paused':
+				return {
+					icon: 'material-pause_circle',
+					label: is_cn ? '已暂停' : 'Paused',
+					class: styles.statusPaused
+				}
 			default:
 				return { icon: 'material-help', label: status, class: '' }
 		}
@@ -301,10 +336,14 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 
 	const getTriggerIcon = (type: string) => {
 		switch (type) {
-			case 'clock': return 'material-schedule'
-			case 'human': return 'material-person'
-			case 'event': return 'material-bolt'
-			default: return 'material-help_outline'
+			case 'clock':
+				return 'material-schedule'
+			case 'human':
+				return 'material-person'
+			case 'event':
+				return 'material-bolt'
+			default:
+				return 'material-help_outline'
 		}
 	}
 
@@ -331,7 +370,9 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 					{filterOptions.map((opt) => (
 						<button
 							key={opt.value}
-							className={`${styles.filterPill} ${statusFilter === opt.value ? styles.filterPillActive : ''}`}
+							className={`${styles.filterPill} ${
+								statusFilter === opt.value ? styles.filterPillActive : ''
+							}`}
 							onClick={() => setStatusFilter(opt.value)}
 						>
 							<Icon name={opt.icon} size={14} />
@@ -362,14 +403,18 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 			{/* Table content */}
 			<div className={styles.historyContent} ref={containerRef}>
 				{loading ? (
-					<CreatureLoading size="medium" />
+					<CreatureLoading size='medium' />
 				) : executions.length === 0 ? (
 					<div className={styles.historyEmpty}>
 						<Icon name='material-history' size={40} className={styles.historyEmptyIcon} />
 						<span className={styles.historyEmptyText}>
 							{searchKeywords
-								? (is_cn ? '未找到匹配的记录' : 'No matching records')
-								: (is_cn ? '暂无执行历史' : 'No execution history')}
+								? is_cn
+									? '未找到匹配的记录'
+									: 'No matching records'
+								: is_cn
+								? '暂无执行历史'
+								: 'No execution history'}
 						</span>
 					</div>
 				) : (
@@ -391,21 +436,24 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 								const statusInfo = getStatusInfo(exec.status)
 								// Backend returns localized name/current_task_name strings
 								const name = exec.name || exec.id
-								const result = exec.status === 'completed' && exec.delivery?.content?.summary
-									? exec.delivery.content.summary
-									: exec.status === 'failed' && exec.error
-									? exec.error
-									: exec.status === 'running' && exec.current_task_name
-									? exec.current_task_name
-									: '-'
+								const result =
+									exec.status === 'completed' && exec.delivery?.content?.summary
+										? exec.delivery.content.summary
+										: exec.status === 'failed' && exec.error
+										? exec.error
+										: exec.status === 'running' && exec.current_task_name
+										? exec.current_task_name
+										: '-'
 
 								const isRunning = exec.status === 'running' || exec.status === 'pending'
+								const isPaused = exec.status === 'paused'
+								const isActive = isRunning || isPaused
 								const isCompleted = exec.status === 'completed'
 								const isFailed = exec.status === 'failed'
 
 								return (
-									<div 
-										key={exec.id} 
+									<div
+										key={exec.id}
 										className={styles.historyTableRow}
 										onClick={() => handleRowClick(exec)}
 									>
@@ -421,64 +469,126 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 											{result}
 										</div>
 										<div className={styles.colTrigger}>
-											<Icon name={getTriggerIcon(exec.trigger_type)} size={14} />
+											<Icon
+												name={getTriggerIcon(exec.trigger_type)}
+												size={14}
+											/>
 										</div>
 										<div className={styles.colTime}>
 											{formatDate(exec.start_time)}
 										</div>
 										<div className={styles.colDuration}>
-											{isRunning ? (
+											{isActive ? (
 												<span className={styles.runningTime}>
-													{formatDuration(exec.start_time, new Date().toISOString())}
+													{formatDuration(
+														exec.start_time,
+														new Date().toISOString()
+													)}
 												</span>
 											) : (
 												formatDuration(exec.start_time, exec.end_time)
 											)}
 										</div>
 										<div className={styles.colActions}>
-											{/* Running: Guide + Pause + Stop */}
-											{isRunning && (
+											{/* Active (Running or Paused): Guide + Pause/Resume + Stop */}
+											{isActive && (
 												<>
-													<Tooltip title={is_cn ? '指导执行' : 'Guide'}>
-														<button 
+													<Tooltip
+														title={is_cn ? '指导执行' : 'Guide'}
+													>
+														<button
 															className={styles.actionBtn}
 															onClick={(e) => {
 																e.stopPropagation()
 																onOpenDetail?.(exec)
 															}}
 														>
-															<Icon name='material-quickreply' size={14} />
+															<Icon
+																name='material-quickreply'
+																size={14}
+															/>
 														</button>
 													</Tooltip>
-													<Tooltip title={is_cn ? '暂停' : 'Pause'}>
-														<button 
-															className={styles.actionBtn}
-															onClick={(e) => handlePause(e, exec)}
+													{isPaused ? (
+														<Tooltip
+															title={
+																is_cn
+																	? '继续'
+																	: 'Resume'
+															}
 														>
-															<Icon name='material-pause_circle' size={14} />
-														</button>
-													</Tooltip>
+															<button
+																className={
+																	styles.actionBtn
+																}
+																onClick={(e) =>
+																	handleResume(
+																		e,
+																		exec
+																	)
+																}
+															>
+																<Icon
+																	name='material-play_circle'
+																	size={14}
+																/>
+															</button>
+														</Tooltip>
+													) : (
+														<Tooltip
+															title={
+																is_cn ? '暂停' : 'Pause'
+															}
+														>
+															<button
+																className={
+																	styles.actionBtn
+																}
+																onClick={(e) =>
+																	handlePause(
+																		e,
+																		exec
+																	)
+																}
+															>
+																<Icon
+																	name='material-pause_circle'
+																	size={14}
+																/>
+															</button>
+														</Tooltip>
+													)}
 													<Tooltip title={is_cn ? '停止' : 'Stop'}>
-														<button 
+														<button
 															className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
-															onClick={(e) => handleStop(e, exec)}
+															onClick={(e) =>
+																handleStop(e, exec)
+															}
 														>
-															<Icon name='material-stop_circle' size={14} />
+															<Icon
+																name='material-stop_circle'
+																size={14}
+															/>
 														</button>
 													</Tooltip>
 												</>
 											)}
 
-											{/* Pending (paused): already handled above in isRunning */}
-
 											{/* Completed with attachments: Download */}
 											{isCompleted && hasAttachments(exec) && (
-												<Tooltip title={is_cn ? '下载成果' : 'Download'}>
-													<button 
+												<Tooltip
+													title={is_cn ? '下载成果' : 'Download'}
+												>
+													<button
 														className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
-														onClick={(e) => handleDownload(e, exec)}
+														onClick={(e) =>
+															handleDownload(e, exec)
+														}
 													>
-														<Icon name='material-download' size={14} />
+														<Icon
+															name='material-download'
+															size={14}
+														/>
 													</button>
 												</Tooltip>
 											)}
@@ -486,11 +596,16 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 											{/* Failed: Retry */}
 											{isFailed && (
 												<Tooltip title={is_cn ? '重试' : 'Retry'}>
-													<button 
+													<button
 														className={styles.actionBtn}
-														onClick={(e) => handleRetry(e, exec)}
+														onClick={(e) =>
+															handleRetry(e, exec)
+														}
 													>
-														<Icon name='material-refresh' size={14} />
+														<Icon
+															name='material-refresh'
+															size={14}
+														/>
 													</button>
 												</Tooltip>
 											)}

@@ -52,17 +52,17 @@ const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask, onOpenDetail
 	// Polling interval ref
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-	// Load active executions (status = running | pending)
+	// Load active executions (status = running | pending | paused)
 	const loadExecutions = useCallback(async () => {
 		const result = await listExecutions(robot.member_id, {
-			status: 'running' as any, // API will also include pending
+			status: 'running' as any, // API will also include pending and paused
 			pagesize: 50 // Get enough for active list
 		})
 
 		if (result) {
-			// Filter to only running and pending (in case API returns more)
+			// Filter to only running, pending and paused (in case API returns more)
 			const filtered = result.data
-				.filter((e) => e.status === 'running' || e.status === 'pending')
+				.filter((e) => e.status === 'running' || e.status === 'pending' || e.status === 'paused')
 				.map(toExecution)
 			setActiveExecutions(filtered)
 		}
@@ -91,39 +91,51 @@ const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask, onOpenDetail
 	}, [apiError])
 
 	// Handlers
-	const handlePause = useCallback(async (executionId: string) => {
-		const result = await pauseExecution(robot.member_id, executionId)
-		if (result?.success) {
-			message.success(is_cn ? '已暂停' : 'Paused')
-			loadExecutions() // Refresh list
-		}
-	}, [robot.member_id, pauseExecution, loadExecutions, is_cn])
+	const handlePause = useCallback(
+		async (executionId: string) => {
+			const result = await pauseExecution(robot.member_id, executionId)
+			if (result?.success) {
+				message.success(is_cn ? '已暂停' : 'Paused')
+				loadExecutions() // Refresh list
+			}
+		},
+		[robot.member_id, pauseExecution, loadExecutions, is_cn]
+	)
 
-	const handleStop = useCallback(async (executionId: string) => {
-		const result = await cancelExecution(robot.member_id, executionId)
-		if (result?.success) {
-			message.success(is_cn ? '已停止' : 'Stopped')
-			loadExecutions() // Refresh list
-		}
-	}, [robot.member_id, cancelExecution, loadExecutions, is_cn])
+	const handleStop = useCallback(
+		async (executionId: string) => {
+			const result = await cancelExecution(robot.member_id, executionId)
+			if (result?.success) {
+				message.success(is_cn ? '已停止' : 'Stopped')
+				loadExecutions() // Refresh list
+			}
+		},
+		[robot.member_id, cancelExecution, loadExecutions, is_cn]
+	)
 
-	const handleDetail = useCallback((executionId: string) => {
-		const execution = activeExecutions.find((e: Execution) => e.id === executionId)
-		if (execution && onOpenDetail) {
-			onOpenDetail(execution)
-		}
-	}, [activeExecutions, onOpenDetail])
+	const handleDetail = useCallback(
+		(executionId: string) => {
+			const execution = activeExecutions.find((e: Execution) => e.id === executionId)
+			if (execution && onOpenDetail) {
+				onOpenDetail(execution)
+			}
+		},
+		[activeExecutions, onOpenDetail]
+	)
 
-	const handleGuide = useCallback((executionId: string) => {
-		const execution = activeExecutions.find((e: Execution) => e.id === executionId)
-		if (execution && onOpenGuide) {
-			onOpenGuide(execution)
-		}
-	}, [activeExecutions, onOpenGuide])
+	const handleGuide = useCallback(
+		(executionId: string) => {
+			const execution = activeExecutions.find((e: Execution) => e.id === executionId)
+			if (execution && onOpenGuide) {
+				onOpenGuide(execution)
+			}
+		},
+		[activeExecutions, onOpenGuide]
+	)
 
 	// Loading state
 	if (loading) {
-		return <CreatureLoading size="medium" />
+		return <CreatureLoading size='medium' />
 	}
 
 	// Empty state
