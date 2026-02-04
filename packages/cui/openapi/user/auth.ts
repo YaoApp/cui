@@ -185,10 +185,20 @@ export class UserAuth {
 
 	/**
 	 * Validate ID Token using JWK verification
+	 * If crypto.subtle is not available (non-secure context), skip signature verification
+	 * and only decode the JWT payload (trusting the server)
 	 */
 	async ValidateIDToken(idToken: string): Promise<UserInfo> {
 		if (!idToken || idToken.trim() === '') {
 			throw new Error('ID Token is required')
+		}
+
+		// Check if crypto.subtle is available (required for JWT signature verification)
+		// In non-secure contexts (HTTP + non-localhost IP), crypto.subtle is not available
+		// In this case, skip signature verification and trust the server
+		if (typeof window !== 'undefined' && !window.crypto?.subtle) {
+			console.warn('[Auth] crypto.subtle not available, skipping JWT signature verification')
+			return this.decodeJWTWithoutVerification(idToken)
 		}
 
 		// Get JWKs from the server
@@ -268,6 +278,11 @@ export class UserAuth {
 	 */
 	private async jwkToKeyLike(jwk: JWK): Promise<CryptoKey | Uint8Array> {
 		try {
+			// Check if crypto.subtle is available (required for secure contexts)
+			if (typeof window !== 'undefined' && !window.crypto?.subtle) {
+				throw new Error('crypto.subtle is not available. HTTPS or localhost required for JWT verification.')
+			}
+			
 			return await jose.importJWK(jwk as jose.JWK)
 		} catch (error) {
 			throw new Error(`Failed to import JWK: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -285,6 +300,38 @@ export class UserAuth {
 		}
 
 		return compatibilityMap[kty]?.includes(alg) || false
+	}
+
+	/**
+	 * Decode JWT without signature verification (for non-secure contexts)
+	 * WARNING: This should only be used when crypto.subtle is not available
+	 */
+	private decodeJWTWithoutVerification(idToken: string): UserInfo {
+		try {
+			// Decode JWT payload without verification
+			const payload = jose.decodeJwt(idToken)
+
+			// Validate standard JWT claims
+			this.validateJWTClaims(payload)
+
+			// Map standard JWT claims to more user-friendly names
+			payload.user_id = payload.sub || ''
+			delete payload.sub
+
+			if (payload.aud) {
+				payload.client_id = Array.isArray(payload.aud) ? payload.aud[0] : payload.aud
+				delete payload.aud
+			}
+
+			if (payload.jti) {
+				payload.token_id = payload.jti
+				delete payload.jti
+			}
+
+			return payload as UserInfo
+		} catch (error) {
+			throw new Error(`Failed to decode JWT: ${error instanceof Error ? error.message : 'Unknown error'}`)
+		}
 	}
 
 	/**

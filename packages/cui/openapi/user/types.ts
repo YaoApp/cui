@@ -306,6 +306,7 @@ export interface EntryConfig {
 	third_party?: {
 		providers: SigninProvider[]
 	}
+	secure_cookie?: boolean // Whether secure cookie is enabled (for frontend JWT verification)
 }
 
 /**
