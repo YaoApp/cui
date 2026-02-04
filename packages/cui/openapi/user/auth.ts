@@ -336,22 +336,24 @@ export class UserAuth {
 
 	/**
 	 * Validate standard JWT claims
+	 * Clock skew tolerance: 5 minutes (300 seconds) per OIDC spec recommendation
 	 */
 	private validateJWTClaims(payload: jose.JWTPayload): void {
 		const now = Math.floor(Date.now() / 1000)
+		const clockTolerance = 300 // 5 minutes tolerance for clock skew (OIDC standard)
 
-		// Check expiration
-		if (payload.exp !== undefined && payload.exp < now) {
+		// Check expiration (with clock tolerance)
+		if (payload.exp !== undefined && payload.exp < now - clockTolerance) {
 			throw new Error('Token has expired')
 		}
 
-		// Check not before
-		if (payload.nbf !== undefined && payload.nbf > now) {
+		// Check not before (with clock tolerance)
+		if (payload.nbf !== undefined && payload.nbf > now + clockTolerance) {
 			throw new Error('Token not yet valid')
 		}
 
-		// Check issued at (allow some clock skew)
-		if (payload.iat !== undefined && payload.iat > now + 60) {
+		// Check issued at (with clock tolerance)
+		if (payload.iat !== undefined && payload.iat > now + clockTolerance) {
 			throw new Error('Token issued in the future')
 		}
 
