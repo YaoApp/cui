@@ -7,16 +7,20 @@
  * VNC Status response
  */
 export interface VNCStatus {
-	/** VNC service status: ready, starting, not_supported, error */
-	status: 'ready' | 'starting' | 'not_supported' | 'error'
-	/** Container ID */
-	container_id?: string
-	/** VNC port inside container */
-	vnc_port?: number
-	/** WebSocket port inside container */
-	websocket_port?: number
-	/** Error message if status is error */
-	error?: string
+	/** VNC service status: ready, starting, not_supported, unavailable */
+	status: 'ready' | 'starting' | 'not_supported' | 'unavailable'
+	/** Whether VNC is available */
+	available?: boolean
+	/** Sandbox ID */
+	sandbox_id?: string
+	/** Container name */
+	container?: string
+	/** Status message from server */
+	message?: string
+	/** Client URL path */
+	client_url?: string
+	/** WebSocket URL path */
+	websocket_url?: string
 }
 
 /**

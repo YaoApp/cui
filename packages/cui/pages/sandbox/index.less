@@ -1,10 +1,13 @@
 @import (reference) '@/styles/index.less';
 
+// Bottom toolbar height
+@toolbar-height: 44px;
+
 .container {
+	position: absolute;
+	inset: 0;
 	display: flex;
 	flex-direction: column;
-	width: 100%;
-	height: 100vh;
 	background: var(--color_bg);
 	overflow: hidden;
 }
@@ -15,8 +18,9 @@
 	justify-content: space-between;
 	padding: 8px 16px;
 	background: var(--color_bg_nav);
-	border-bottom: 1px solid var(--color_border);
+	border-top: 1px solid var(--color_border);
 	flex-shrink: 0;
+	height: @toolbar-height;
 
 	.title {
 		display: flex;
@@ -50,11 +54,35 @@
 	}
 }
 
+.actionBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	color: var(--color_text_grey);
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: var(--color_bg_hover);
+		color: var(--color_text);
+	}
+}
+
 .screenWrapper {
 	position: relative;
 	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	overflow: hidden;
-	background: #1e1e1e;
+	background: var(--color_bg);
+	min-height: 0;
+	padding: 0 16px;
 }
 
 .screen {
@@ -65,6 +93,7 @@
 .vncScreen {
 	width: 100%;
 	height: 100%;
+	background: var(--color_bg);
 
 	:global {
 		canvas {
@@ -85,20 +114,32 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	background: rgba(30, 30, 30, 0.95);
+	background: var(--color_bg);
 	z-index: 10;
+}
+
+// Status card - unified style matching other pages
+.statusCard {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 	gap: 16px;
+	padding: 32px 48px;
+	background: var(--color_bg_nav);
+	border-radius: 12px;
+	border: 1px solid var(--color_border);
+	box-shadow: var(--shadow);
 }
 
-.statusText {
-	font-size: 16px;
-	color: #fff;
-	margin-top: 16px;
+.statusIcon {
+	font-size: 32px;
+	color: var(--color_main);
 }
 
-.retryText {
+.statusMessage {
 	font-size: 14px;
-	color: #888;
+	color: var(--color_text);
+	text-align: center;
 }
 
 // Mode indicator (for view-only mode)
@@ -108,7 +149,7 @@
 	right: 16px;
 	padding: 4px 12px;
 	background: var(--color_main);
-	color: #fff;
+	color: var(--color_text_contrast);
 	border-radius: 4px;
 	font-size: 12px;
 	z-index: 100;
@@ -121,14 +162,20 @@
 
 // Fullscreen styles
 :fullscreen {
+	.container {
+		position: fixed;
+		inset: 0;
+	}
+
 	.toolbar {
 		position: fixed;
-		top: 0;
+		bottom: 0;
 		left: 0;
 		right: 0;
 		z-index: 100;
 		opacity: 0;
 		transition: opacity 0.3s;
+		border-top: 1px solid var(--color_border);
 
 		&:hover {
 			opacity: 1;
