@@ -1,10 +1,20 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { getLocale, useParams } from '@umijs/max'
-import { Spin, Alert, Button } from 'antd'
-import { ReloadOutlined, ExpandOutlined, CompressOutlined } from '@ant-design/icons'
+import { Spin } from 'antd'
+import { ReloadOutlined, ExpandOutlined, CompressOutlined, LoadingOutlined } from '@ant-design/icons'
 import { VncScreen, VncScreenHandle } from 'react-vnc'
 import { OpenAPI, Sandbox as SandboxAPI } from '@/openapi'
 import styles from './index.less'
+
+// VNC status from backend API
+type VNCStatusType = 'ready' | 'starting' | 'not_supported' | 'unavailable'
+
+// Frontend display status
+type DisplayStatus = 'checking' | 'waiting' | 'connecting' | 'connected' | 'closed'
+
+// Polling intervals
+const POLL_INTERVAL_FAST = 2000 // 2s when waiting for container to start
+const POLL_INTERVAL_SLOW = 10000 // 10s heartbeat when closed/disconnected
 
 const Sandbox = () => {
 	const locale = getLocale()
@@ -16,113 +26,146 @@ const Sandbox = () => {
 	const containerRef = useRef<HTMLDivElement>(null)
 
 	// Initialize API client
-	// Note: Yao OpenAPI uses /v1 as base path, not /api/v1
 	const sandboxAPI = useMemo(() => {
 		const api = new OpenAPI({ baseURL: '/v1' })
 		return new SandboxAPI(api)
 	}, [])
 
-	const [status, setStatus] = useState<'loading' | 'connecting' | 'connected' | 'disconnected' | 'error'>('loading')
-	const [errorMsg, setErrorMsg] = useState('')
+	const [displayStatus, setDisplayStatus] = useState<DisplayStatus>('checking')
 	const [isFullscreen, setIsFullscreen] = useState(false)
-	const [retryCount, setRetryCount] = useState(0)
 	const [wsUrl, setWsUrl] = useState<string | null>(null)
+	const pollRef = useRef<NodeJS.Timeout | null>(null)
+	const heartbeatRef = useRef<NodeJS.Timeout | null>(null)
 
-	const maxRetries = 30
+	// Clear all timers
+	const clearTimers = useCallback(() => {
+		if (pollRef.current) {
+			clearTimeout(pollRef.current)
+			pollRef.current = null
+		}
+		if (heartbeatRef.current) {
+			clearTimeout(heartbeatRef.current)
+			heartbeatRef.current = null
+		}
+	}, [])
 
-	// Check VNC status API
-	const checkStatus = useCallback(async (): Promise<boolean> => {
-		if (!sandboxId) return false
+	// Check VNC status from API
+	const checkStatus = useCallback(async (): Promise<VNCStatusType | null> => {
+		if (!sandboxId) return null
 
 		try {
-			const vncStatus = await sandboxAPI.GetVNCStatus(sandboxId)
-			if (!vncStatus) {
-				return false
-			}
-
-			if (vncStatus.status === 'ready') {
-				return true
-			} else if (vncStatus.status === 'not_supported') {
-				setStatus('error')
-				setErrorMsg(is_cn ? '此 Sandbox 不支持可视化' : 'This sandbox does not support visualization')
-				return false
-			} else if (vncStatus.status === 'error') {
-				setStatus('error')
-				setErrorMsg(vncStatus.error || (is_cn ? '服务错误' : 'Service error'))
-				return false
-			}
-			return false
+			const result = await sandboxAPI.GetVNCStatus(sandboxId)
+			if (!result) return null
+			return result.status
 		} catch (err) {
 			console.error('Status check failed:', err)
-			return false
+			return 'unavailable'
 		}
-	}, [sandboxId, sandboxAPI, is_cn])
+	}, [sandboxId, sandboxAPI])
 
-	// Poll for VNC ready status
+	// Start heartbeat - periodically check if container becomes available
+	const startHeartbeat = useCallback(() => {
+		// Clear existing heartbeat
+		if (heartbeatRef.current) {
+			clearTimeout(heartbeatRef.current)
+			heartbeatRef.current = null
+		}
+
+		const heartbeat = async () => {
+			const status = await checkStatus()
+
+			if (status === 'ready') {
+				// Container is ready now, connect!
+				const url = sandboxAPI.GetVNCWebSocketURL(sandboxId)
+				setWsUrl(url)
+				setDisplayStatus('connecting')
+			} else if (status === 'starting') {
+				// Container is starting, show waiting and poll faster
+				setDisplayStatus('waiting')
+				heartbeatRef.current = setTimeout(heartbeat, POLL_INTERVAL_FAST)
+			} else {
+				// Still unavailable, keep heartbeat going
+				heartbeatRef.current = setTimeout(heartbeat, POLL_INTERVAL_SLOW)
+			}
+		}
+
+		// Start heartbeat
+		heartbeatRef.current = setTimeout(heartbeat, POLL_INTERVAL_SLOW)
+	}, [sandboxId, checkStatus, sandboxAPI])
+
+	// Start initial check and polling
+	const startPolling = useCallback(() => {
+		clearTimers()
+		setDisplayStatus('checking')
+		setWsUrl(null)
+
+		const poll = async (isFirstCheck: boolean = false) => {
+			const status = await checkStatus()
+
+			if (status === 'ready') {
+				// VNC is ready, connect
+				const url = sandboxAPI.GetVNCWebSocketURL(sandboxId)
+				setWsUrl(url)
+				setDisplayStatus('connecting')
+			} else if (status === 'starting') {
+				// Container is starting, show waiting status and continue polling
+				setDisplayStatus('waiting')
+				pollRef.current = setTimeout(() => poll(false), POLL_INTERVAL_FAST)
+			} else if (status === 'unavailable' || status === 'not_supported') {
+				// Container not available
+				if (isFirstCheck) {
+					// First check failed, show closed and start heartbeat
+					setDisplayStatus('closed')
+					startHeartbeat()
+				} else {
+					// Was waiting but now unavailable, show closed
+					setDisplayStatus('closed')
+					startHeartbeat()
+				}
+			} else {
+				// Unknown status, keep polling
+				pollRef.current = setTimeout(() => poll(false), POLL_INTERVAL_FAST)
+			}
+		}
+
+		// Start with first check
+		poll(true)
+	}, [sandboxId, checkStatus, sandboxAPI, clearTimers, startHeartbeat])
+
+	// Initial load and ID change
 	useEffect(() => {
 		if (!sandboxId) return
 
-		let cancelled = false
-		let timeoutId: NodeJS.Timeout
-		let currentRetry = 0
-
-		const poll = async () => {
-			if (cancelled) return
-
-			const ready = await checkStatus()
-			if (cancelled) return
-
-			if (ready) {
-				// Get WebSocket URL from API
-				const url = sandboxAPI.GetVNCWebSocketURL(sandboxId)
-				setWsUrl(url)
-				setStatus('connecting')
-			} else if (status !== 'error' && currentRetry < maxRetries) {
-				currentRetry++
-				setRetryCount(currentRetry)
-				timeoutId = setTimeout(poll, 1000)
-			} else if (status !== 'error') {
-				setStatus('error')
-				setErrorMsg(is_cn ? '连接超时，请稍后重试' : 'Connection timeout, please try again')
-			}
-		}
-
-		setStatus('loading')
-		setRetryCount(0)
-		setWsUrl(null)
-		poll()
+		startPolling()
 
 		return () => {
-			cancelled = true
-			clearTimeout(timeoutId)
+			clearTimers()
 		}
-	}, [sandboxId, checkStatus, sandboxAPI, is_cn])
+	}, [sandboxId, startPolling, clearTimers])
 
 	// Handle VNC events
 	const handleConnect = useCallback(() => {
 		console.log('VNC connected')
-		setStatus('connected')
-		setRetryCount(0)
-	}, [])
+		clearTimers() // Stop any polling when connected
+		setDisplayStatus('connected')
+	}, [clearTimers])
 
-	const handleDisconnect = useCallback(
-		(e: any) => {
-			console.log('VNC disconnected:', e?.detail)
-			setStatus('disconnected')
-			if (e?.detail && !e.detail.clean) {
-				setErrorMsg(is_cn ? '连接已断开' : 'Connection lost')
-			}
-		},
-		[is_cn]
-	)
+	const handleDisconnect = useCallback(() => {
+		console.log('VNC disconnected')
+		setDisplayStatus('closed')
+		setWsUrl(null)
+		// Start heartbeat to check if container becomes available again
+		startHeartbeat()
+	}, [startHeartbeat])
 
 	const handleSecurityFailure = useCallback(
 		(e: any) => {
 			console.error('Security failure:', e?.detail)
-			setStatus('error')
-			setErrorMsg(is_cn ? '安全验证失败' : 'Security verification failed')
+			setDisplayStatus('closed')
+			setWsUrl(null)
+			startHeartbeat()
 		},
-		[is_cn]
+		[startHeartbeat]
 	)
 
 	// Handle fullscreen
@@ -136,25 +179,10 @@ const Sandbox = () => {
 		}
 	}
 
-	// Handle reconnect
+	// Handle manual reconnect
 	const handleReconnect = useCallback(() => {
-		setRetryCount(0)
-		setStatus('loading')
-		setErrorMsg('')
-		setWsUrl(null)
-
-		// Trigger re-poll by resetting state
-		setTimeout(async () => {
-			if (sandboxId) {
-				const ready = await checkStatus()
-				if (ready) {
-					const url = sandboxAPI.GetVNCWebSocketURL(sandboxId)
-					setWsUrl(url)
-					setStatus('connecting')
-				}
-			}
-		}, 100)
-	}, [sandboxId, checkStatus, sandboxAPI])
+		startPolling()
+	}, [startPolling])
 
 	// Listen for fullscreen changes
 	useEffect(() => {
@@ -165,94 +193,48 @@ const Sandbox = () => {
 		return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
 	}, [])
 
+	// Get status message based on display status
+	const getStatusMessage = () => {
+		switch (displayStatus) {
+			case 'checking':
+				return is_cn ? '正在尝试连接...' : 'Trying to connect...'
+			case 'waiting':
+				return is_cn ? '等待准备沙箱环境' : 'Preparing Sandbox environment'
+			case 'connecting':
+				return is_cn ? '正在连接...' : 'Connecting...'
+			case 'closed':
+				return is_cn ? '沙箱已关闭' : 'Sandbox closed'
+			default:
+				return ''
+		}
+	}
+
 	if (!sandboxId) {
 		return (
 			<div className={styles.container}>
-				<Alert
-					type='warning'
-					message={is_cn ? '缺少 Sandbox ID' : 'Missing Sandbox ID'}
-					description={is_cn ? '请在 URL 中提供 Sandbox ID' : 'Please provide Sandbox ID in URL'}
-				/>
+				<div className={styles.overlay}>
+					<div className={styles.statusCard}>
+						<div className={styles.statusMessage}>{is_cn ? '缺少沙箱 ID' : 'Missing Sandbox ID'}</div>
+					</div>
+				</div>
 			</div>
 		)
 	}
 
+	// Show loading spinner for checking/waiting/connecting states
+	const showSpinner = displayStatus === 'checking' || displayStatus === 'waiting' || displayStatus === 'connecting'
+
 	return (
 		<div className={styles.container} ref={containerRef}>
-			{/* Toolbar */}
-			<div className={styles.toolbar}>
-				<div className={styles.title}>
-					<span className={styles.label}>Sandbox</span>
-					<span className={styles.id}>{sandboxId}</span>
-				</div>
-				<div className={styles.actions}>
-					<Button
-						type='text'
-						icon={<ReloadOutlined />}
-						onClick={handleReconnect}
-						title={is_cn ? '重新连接' : 'Reconnect'}
-					/>
-					<Button
-						type='text'
-						icon={isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
-						onClick={toggleFullscreen}
-						title={is_cn ? (isFullscreen ? '退出全屏' : '全屏') : isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-					/>
-				</div>
-			</div>
-
 			{/* Screen */}
 			<div className={styles.screenWrapper}>
-				{/* Loading overlay */}
-				{(status === 'loading' || status === 'connecting') && (
+				{/* Status overlay - show when not connected */}
+				{displayStatus !== 'connected' && (
 					<div className={styles.overlay}>
-						<Spin size='large' />
-						<div className={styles.statusText}>
-							{status === 'loading'
-								? is_cn
-									? '正在连接 Sandbox...'
-									: 'Connecting to Sandbox...'
-								: is_cn
-									? '正在初始化显示...'
-									: 'Initializing display...'}
+						<div className={styles.statusCard}>
+							{showSpinner && <Spin indicator={<LoadingOutlined className={styles.statusIcon} spin />} />}
+							<div className={styles.statusMessage}>{getStatusMessage()}</div>
 						</div>
-						{retryCount > 0 && (
-							<div className={styles.retryText}>
-								{is_cn ? `重试 ${retryCount}/${maxRetries}` : `Retry ${retryCount}/${maxRetries}`}
-							</div>
-						)}
-					</div>
-				)}
-
-				{/* Error overlay */}
-				{status === 'error' && (
-					<div className={styles.overlay}>
-						<Alert
-							type='error'
-							message={is_cn ? '连接失败' : 'Connection Failed'}
-							description={errorMsg}
-							action={
-								<Button size='small' onClick={handleReconnect}>
-									{is_cn ? '重试' : 'Retry'}
-								</Button>
-							}
-						/>
-					</div>
-				)}
-
-				{/* Disconnected overlay */}
-				{status === 'disconnected' && (
-					<div className={styles.overlay}>
-						<Alert
-							type='warning'
-							message={is_cn ? '连接已断开' : 'Disconnected'}
-							description={errorMsg || (is_cn ? 'Sandbox 连接已关闭' : 'Sandbox connection closed')}
-							action={
-								<Button size='small' onClick={handleReconnect}>
-									{is_cn ? '重新连接' : 'Reconnect'}
-								</Button>
-							}
-						/>
 					</div>
 				)}
 
@@ -266,11 +248,6 @@ const Sandbox = () => {
 						viewOnly={false}
 						focusOnClick
 						className={styles.vncScreen}
-						style={{
-							width: '100%',
-							height: '100%',
-							background: '#1e1e1e'
-						}}
 						onConnect={handleConnect}
 						onDisconnect={handleDisconnect}
 						onSecurityFailure={handleSecurityFailure}
@@ -278,6 +255,30 @@ const Sandbox = () => {
 						debug={false}
 					/>
 				)}
+			</div>
+
+			{/* Toolbar - moved to bottom */}
+			<div className={styles.toolbar}>
+				<div className={styles.title}>
+					<span className={styles.label}>{is_cn ? '沙箱' : 'Sandbox'}</span>
+					<span className={styles.id}>{sandboxId}</span>
+				</div>
+				<div className={styles.actions}>
+					<button
+						className={styles.actionBtn}
+						onClick={handleReconnect}
+						title={is_cn ? '重新连接' : 'Reconnect'}
+					>
+						<ReloadOutlined />
+					</button>
+					<button
+						className={styles.actionBtn}
+						onClick={toggleFullscreen}
+						title={is_cn ? (isFullscreen ? '退出全屏' : '全屏') : isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+					>
+						{isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
+					</button>
+				</div>
 			</div>
 		</div>
 	)
