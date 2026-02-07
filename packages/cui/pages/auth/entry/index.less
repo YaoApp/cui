@@ -101,37 +101,19 @@
 		}
 
 		.entryForm {
-			/* Email Input Wrapper */
-			.emailInputWrapper {
-				position: relative;
-				display: flex;
-				align-items: center; // 整体居中对齐
-				gap: 8px; // 减小间距给按钮更多空间
-				min-height: 46px; // 与输入框高度一致
+		/* Change Email Link - 内嵌在 AuthInput suffix 中 */
+		.changeEmailLink {
+			color: var(--color_main);
+			font-size: 13px;
+			cursor: pointer;
+			white-space: nowrap;
+			user-select: none;
+			transition: color 0.2s ease;
 
-				> div:first-child {
-					flex: 1;
-				}
-
-				.changeEmailButton {
-					padding: 4px 8px !important; // 给按钮一些内边距
-					margin-bottom: 16px; // 与 inputWrap 的 margin-bottom 一致
-					height: auto;
-					line-height: 1.2 !important;
-					font-size: 13px !important; // 适中的字体，覆盖 baseButton
-					min-width: 65px; // 与 Resend 按钮宽度一致
-					color: var(--color_main);
-					white-space: nowrap;
-					flex-shrink: 0;
-					display: inline-flex !important;
-					align-items: center;
-					justify-content: center;
-
-					&:hover {
-						color: var(--color_main_hover);
-					}
-				}
+			&:hover {
+				color: var(--color_main_hover);
 			}
+		}
 
 			/* OTP Wrapper */
 			.otpWrapper {
@@ -364,13 +346,11 @@
 		}
 
 		.entryForm {
-			.emailInputWrapper {
-				.changeEmailButton {
-					color: rgba(69, 128, 255, 0.9);
+			.changeEmailLink {
+				color: rgba(69, 128, 255, 0.9);
 
-					&:hover {
-						color: rgba(90, 143, 255, 1);
-					}
+				&:hover {
+					color: rgba(90, 143, 255, 1);
 				}
 			}
 

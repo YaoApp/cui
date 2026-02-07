@@ -586,32 +586,31 @@ const AuthEntry = () => {
 						className={styles.entryForm}
 						onSubmit={isEmailVerified ? handleSubmit : handleVerifyEmail}
 					>
-						{/* Email Input - readonly after verification */}
-						<div className={styles.emailInputWrapper}>
-							<AuthInput
-								id='email'
-								placeholder={
-									config.form?.username?.placeholder ||
-									messages.entry?.form?.email_placeholder ||
-									'Enter your email address'
-								}
-								prefix='material-mail_outline'
-								value={formData.email}
-								onChange={handleInputChange('email')}
-								autoComplete='email'
-								type='email'
-								disabled={isEmailVerified}
-							/>
-							{isEmailVerified && (
-								<AuthButton
-									type='link'
+					{/* Email Input - readonly after verification */}
+					<AuthInput
+						id='email'
+						placeholder={
+							config.form?.username?.placeholder ||
+							messages.entry?.form?.email_placeholder ||
+							'Enter your email address'
+						}
+						prefix='material-mail_outline'
+						value={formData.email}
+						onChange={handleInputChange('email')}
+						autoComplete='email'
+						type='email'
+						disabled={isEmailVerified}
+						suffix={
+							isEmailVerified ? (
+								<span
+									className={styles.changeEmailLink}
 									onClick={handleBackToEmail}
-									className={styles.changeEmailButton}
 								>
 									{currentLocale === 'zh-CN' ? '修改' : 'Change'}
-								</AuthButton>
-							)}
-						</div>
+								</span>
+							) : undefined
+						}
+					/>
 
 						{/* Captcha Field - 只在email有效且未验证时显示 */}
 						{!isEmailVerified && config.form?.captcha && isFormValid && (

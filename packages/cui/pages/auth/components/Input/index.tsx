@@ -10,6 +10,7 @@ interface AuthInputProps {
 	onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
 	onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
 	prefix?: string
+	suffix?: React.ReactNode
 	type?: 'text' | 'email' | 'tel'
 	autoComplete?: string
 	id?: string
@@ -30,6 +31,7 @@ const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>((props, ref) => {
 		onBlur,
 		onFocus,
 		prefix,
+		suffix,
 		type = 'text',
 		autoComplete,
 		id,
@@ -72,6 +74,7 @@ const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>((props, ref) => {
 					className={styles.input}
 					{...rest}
 				/>
+				{suffix && <div className={styles.inputSuffix}>{suffix}</div>}
 			</div>
 		</div>
 	)

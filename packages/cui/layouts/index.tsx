@@ -2,13 +2,13 @@ import '@/styles/index.less'
 
 import { ConfigProvider } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { container } from 'tsyringe'
 
 import { GlobalContext, GlobalModel } from '@/context/app'
 import { useIntl } from '@/hooks'
-import { Outlet, useLocation } from '@umijs/max'
+import { history, Outlet, useLocation } from '@umijs/max'
 
 import Helmet from './components/Helmet'
 import LoginWrapper from './wrappers/Login'
@@ -112,6 +112,13 @@ const Index = () => {
 		user: global.app_info?.login?.user
 	}
 
+	// Redirect legacy login pages to /auth/entry when OpenAPI is enabled
+	useEffect(() => {
+		if (is_login && global.isOpenAPIEnabled) {
+			history.push('/auth/entry')
+		}
+	}, [is_login, global.isOpenAPIEnabled])
+
 	const renderMainContent = () => {
 		// Standalone pages (OAuth, invitations, etc.) - render without wrappers
 		if (is_standalone) {
@@ -119,6 +126,9 @@ const Index = () => {
 		}
 
 		if (is_login) {
+			// When OpenAPI is enabled, don't render the legacy login wrapper
+			if (global.isOpenAPIEnabled) return null
+
 			return (
 				<LoginWrapper {...props_Login_wrapper}>
 					<Outlet />
