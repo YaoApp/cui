@@ -605,10 +605,14 @@ const TeamInvite = () => {
 									<div className={styles.currentUserSection}>
 										<div className={styles.currentUserInfo}>
 											<UserAvatar
-												user={currentUser!}
+												data={{
+													id: String(currentUser!.id || ''),
+													avatar: currentUser!.avatar,
+													name: currentUser!.name
+												}}
 												size={48}
 												showCard={false}
-												forcePersonal={true}
+												displayType='avatar'
 											/>
 											<div className={styles.currentUserText}>
 												<div className={styles.currentUserName}>
