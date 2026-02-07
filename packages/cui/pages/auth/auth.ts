@@ -6,7 +6,6 @@ import { User } from '@/openapi/user'
 import { getPath } from '@/utils'
 import { local } from '@yaoapp/storex'
 import { history } from '@umijs/max'
-import { toJS } from 'mobx'
 
 type AuthData = {
 	user: UserInfo
@@ -137,7 +136,6 @@ export const IsLoggedIn = (): boolean => {
  */
 export const GetCurrentUser = (): App.User | null => {
 	const authInfo = GetAuthInfo()
-	console.log('authInfo', toJS(authInfo))
 	return authInfo !== false ? authInfo.user : null
 }
 

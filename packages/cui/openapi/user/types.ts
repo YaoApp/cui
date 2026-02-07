@@ -171,6 +171,8 @@ export interface UserInfo {
 	'yao:type'?: TypeInfo
 	/** Yao member profile information (for team context) */
 	'yao:member'?: MemberInfo
+	/** Authentication source (password, google, github, etc.) */
+	'yao:auth_source'?: string
 	/** Additional custom claims */
 	[key: string]: any
 }

@@ -87,80 +87,71 @@
 	color: var(--color_text_grey);
 }
 
-.user {
+// 用户/团队信息卡片 — 头像 + 两行文字
+.userSection {
+	position: relative;
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	padding: 12px 16px;
-	margin-bottom: 0px; // 减少与菜单的间距
-	border-radius: 6px;
-	position: relative;
+	gap: 10px;
+	padding: 12px;
+	margin: 0 8px 4px;
+	background: var(--color_border_soft);
+	border: 1px solid var(--color_border_soft);
+	border-radius: 8px;
 }
 
-.avatar {
-	flex-shrink: 0;
+// 右上角角色徽章
+.roleBadge {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	font-size: 10px;
+	line-height: 16px;
+	padding: 0 5px;
+	border-radius: 3px;
+	background: var(--color_border_light);
+	color: var(--color_neo_text_secondary);
+	font-weight: 400;
 }
 
-.info {
+.userInfo {
 	flex: 1;
 	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
 
-	.firstLine {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		margin-bottom: 6px;
+.primaryName {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+	line-height: 20px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	padding-right: 48px; // 为右上角徽章留出空间
+}
+
+.secondaryName {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	line-height: 18px;
+	min-width: 0;
+
+	:global(.Icon),
+	:global(.xgen-icon) {
+		flex-shrink: 0;
+		opacity: 0.6;
+	}
+
+	span {
 		overflow: hidden;
-	}
-
-	.name {
-		font-size: 14px;
-		font-weight: 500;
-		color: var(--color_neo_text_primary);
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		flex: 1;
-		min-width: 0;
-
-		.teamSeparator {
-			color: var(--color_neo_text_secondary);
-			font-weight: 400;
-			flex-shrink: 0;
-		}
-
-		.teamName {
-			color: var(--color_primary);
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-	}
-
-	.tags {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-size: 11px;
-		color: var(--color_neo_text_secondary);
-
-		.tagItem {
-			display: inline-flex;
-			align-items: center;
-			gap: 3px;
-			white-space: nowrap;
-
-			:global(.Icon),
-			:global(.xgen-icon) {
-				color: var(--color_neo_icon_muted);
-				flex-shrink: 0;
-			}
-
-			> span {
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
-		}
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 }
 

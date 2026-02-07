@@ -43,7 +43,15 @@ const TeamEditForm = ({ form, team, onFinish, is_cn }: TeamEditFormProps) => {
 			</div>
 
 			{/* Profile Fields */}
-			<Form form={form} onFinish={onFinish}>
+			<Form
+				form={form}
+				onFinish={onFinish}
+				initialValues={{
+					name: team?.name || '',
+					description: team?.description || '',
+					avatar: team?.logo || ''
+				}}
+			>
 				<div className={styles.fieldsContainer}>
 					{/* Team Name Field */}
 					<div className={styles.fieldItem}>
@@ -89,8 +97,10 @@ const TeamEditForm = ({ form, team, onFinish, is_cn }: TeamEditFormProps) => {
 						</div>
 					</div>
 
-					{/* Hidden avatar field */}
-					<Form.Item name='avatar' style={{ display: 'none' }} />
+				{/* Hidden avatar field */}
+				<Form.Item name='avatar' hidden noStyle>
+					<input type='hidden' />
+				</Form.Item>
 				</div>
 			</Form>
 		</div>

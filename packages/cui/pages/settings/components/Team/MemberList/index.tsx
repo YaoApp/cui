@@ -42,18 +42,17 @@ const MemberList = ({
 					/>
 				)
 			}
-			// Active/inactive robot member
-			return (
-				<AIItem
-					key={member.member_id}
-					member={member}
-					is_cn={is_cn}
-					getRoleDisplayName={getRoleDisplayName}
-					onRemove={onRemoveMember}
-					onEdit={onEditAIMember}
-					onAvatarUpdate={onAvatarUpdate}
-				/>
-			)
+		// Active/inactive robot member
+		// TODO: Re-enable onEdit/onRemove for AI members when moved back from Mission Control
+		return (
+			<AIItem
+				key={member.member_id}
+				member={member}
+				is_cn={is_cn}
+				getRoleDisplayName={getRoleDisplayName}
+				onAvatarUpdate={onAvatarUpdate}
+			/>
+		)
 		}
 
 		// User pending invitation

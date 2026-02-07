@@ -4,7 +4,8 @@ import { Button } from '@/components/ui'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Uploader from '../Uploader'
-import Generator from '../Generator'
+// TODO: Re-enable AI avatar generation when ready
+// import Generator from '../Generator'
 import type { UploadModalProps } from './types'
 import styles from './index.less'
 
@@ -20,21 +21,21 @@ const UploadModal: React.FC<UploadModalProps> = ({
 	const is_cn = locale === 'zh-CN'
 	const defaultTitle = is_cn ? '设置头像' : 'Set Avatar'
 
-	// If no avatarAgent is configured, always use 'upload' tab
-	const [activeTab, setActiveTab] = useState('upload')
 	const [confirming, setConfirming] = useState(false)
 	const [hasUploadedImage, setHasUploadedImage] = useState(false)
-	const [hasGeneratedImage, setHasGeneratedImage] = useState(false)
+	// TODO: Re-enable AI avatar generation when ready
+	// const [hasGeneratedImage, setHasGeneratedImage] = useState(false)
 
 	const uploaderRef = useRef<any>(null)
-	const generatorRef = useRef<any>(null)
+	// TODO: Re-enable AI avatar generation when ready
+	// const generatorRef = useRef<any>(null)
 
 	// Reset states when modal visibility changes
 	React.useEffect(() => {
 		if (!visible) {
-			setActiveTab('upload')
 			setHasUploadedImage(false)
-			setHasGeneratedImage(false)
+			// TODO: Re-enable AI avatar generation when ready
+			// setHasGeneratedImage(false)
 			setConfirming(false)
 		}
 	}, [visible])
@@ -42,12 +43,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
 	const handleConfirm = async () => {
 		try {
 			setConfirming(true)
-
-			if (activeTab === 'upload') {
-				await uploaderRef.current?.handleConfirm()
-			} else if (activeTab === 'generate') {
-				await generatorRef.current?.handleConfirm()
-			}
+			await uploaderRef.current?.handleConfirm()
 		} catch (error) {
 			console.error('Confirm failed:', error)
 		} finally {
@@ -61,10 +57,6 @@ const UploadModal: React.FC<UploadModalProps> = ({
 	}
 
 	const renderFooter = () => {
-		// Determine if confirm button should be disabled
-		const isConfirmDisabled =
-			activeTab === 'upload' ? !hasUploadedImage : activeTab === 'generate' ? !hasGeneratedImage : true
-
 		return (
 			<div className={styles.modalFooter}>
 				<div className={styles.footerLeft}></div>
@@ -77,7 +69,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
 						size='small'
 						onClick={handleConfirm}
 						loading={confirming}
-						disabled={isConfirmDisabled}
+						disabled={!hasUploadedImage}
 					>
 						{is_cn ? '确定' : 'Confirm'}
 					</Button>
@@ -103,31 +95,27 @@ const UploadModal: React.FC<UploadModalProps> = ({
 			onCancel={onClose}
 			footer={renderFooter()}
 			width={520}
-			className={`${styles.uploadModal} ${!avatarAgent ? styles.uploadModalCompact : ''}`}
+			className={`${styles.uploadModal} ${styles.uploadModalCompact}`}
 			destroyOnClose
 			closable={false}
 			maskClosable={false}
 			keyboard={false}
 		>
 			<div className={styles.modalContent}>
-				{/* Tabs - only show if avatarAgent is configured */}
-				{avatarAgent && (
+				{/* TODO: Re-enable AI avatar generation tabs when ready */}
+				{/* {avatarAgent && (
 					<div className={styles.tabsContainer}>
 						<div className={styles.tabsNav}>
 							<button
-								className={`${styles.tabItem} ${
-									activeTab === 'upload' ? styles.tabActive : ''
-								}`}
-								onClick={() => setActiveTab('upload')}
+								className={`${styles.tabItem} ${styles.tabActive}`}
+								onClick={() => {}}
 							>
 								<Icon name='material-upload' size={14} style={{ marginRight: 4 }} />
 								{is_cn ? '上传' : 'Upload'}
 							</button>
 							<button
-								className={`${styles.tabItem} ${
-									activeTab === 'generate' ? styles.tabActive : ''
-								}`}
-								onClick={() => setActiveTab('generate')}
+								className={styles.tabItem}
+								onClick={() => {}}
 							>
 								<Icon
 									name='material-auto_awesome'
@@ -138,26 +126,16 @@ const UploadModal: React.FC<UploadModalProps> = ({
 							</button>
 						</div>
 					</div>
-				)}
+				)} */}
 
-				{/* Tab Content */}
+				{/* Upload Content */}
 				<div className={styles.tabsContent}>
-					{activeTab === 'upload' && (
-						<Uploader
-							ref={uploaderRef}
-							uploader={uploader}
-							onSuccess={handleSuccess}
-							onImageSelect={(hasImage) => setHasUploadedImage(hasImage)}
-						/>
-					)}
-					{activeTab === 'generate' && avatarAgent && (
-						<Generator
-							ref={generatorRef}
-							avatarAgent={avatarAgent}
-							onSuccess={handleSuccess}
-							onImageGenerate={(hasImage) => setHasGeneratedImage(hasImage)}
-						/>
-					)}
+					<Uploader
+						ref={uploaderRef}
+						uploader={uploader}
+						onSuccess={handleSuccess}
+						onImageSelect={(hasImage) => setHasUploadedImage(hasImage)}
+					/>
 				</div>
 			</div>
 		</Modal>

@@ -75,6 +75,17 @@ const Card: FC<CardProps> = ({ data, isCombined, className }) => {
 
 	return (
 		<div className={`avatar-card ${className || ''}`}>
+			{/* 右上角角色徽章 */}
+			{isCombined && (
+				<div className='avatar-card-badge-row'>
+					<span className='avatar-card-badge'>
+						{data.is_owner
+							? (is_cn ? '所有者' : 'Owner')
+							: (is_cn ? '成员' : 'Member')}
+					</span>
+				</div>
+			)}
+
 			<div className='avatar-card-header'>
 				{/* Large Avatar */}
 				<div className='avatar-card-avatar'>
@@ -134,46 +145,17 @@ const Card: FC<CardProps> = ({ data, isCombined, className }) => {
 				<div className='avatar-card-content'>
 					<div className='avatar-card-name'>
 						{isCombined && data.team?.name ? (
-							<>
-								<span>{data.name}</span>
-								<span className='team-separator'>@</span>
-								<span className='team-name'>{data.team.name}</span>
-							</>
+							<span>{data.team.name}</span>
 						) : (
 							<span>{data.name}</span>
 						)}
 					</div>
-					<div className='avatar-card-tags'>
-						{/* 第一个标签：团队/个人 */}
-						<span className='tag-item'>
-							<Icon name={isCombined ? 'material-group' : 'material-person'} size={14} />
-							<span>
-								{isCombined ? (is_cn ? '团队' : 'Team') : is_cn ? '个人' : 'Personal'}
-							</span>
-						</span>
-
-						{/* Owner 标识 */}
-						{data.is_owner && (
-							<>
-								<span className='tag-separator'>•</span>
-								<span className='tag-item'>
-									<Icon name='material-star' size={14} />
-									<span>{is_cn ? '所有者' : 'Owner'}</span>
-								</span>
-							</>
-						)}
-
-						{/* 角色类型（如 Free, Pro 等） */}
-						{data.role_name && (
-							<>
-								<span className='tag-separator'>•</span>
-								<span className='tag-item'>
-									<Icon name='material-local_offer' size={14} />
-									<span>{data.role_name}</span>
-								</span>
-							</>
-						)}
-					</div>
+					{isCombined && (
+						<div className='avatar-card-user'>
+							<Icon name='material-person' size={13} />
+							<span>{data.name}</span>
+						</div>
+					)}
 				</div>
 			</div>
 
