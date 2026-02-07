@@ -456,27 +456,13 @@ export const mockMenuGroups: MenuGroup[] = [
 			// 	icon: 'material-account_balance_wallet',
 			// 	path: '/settings/balance'
 			// },
-			{
-				id: '2a',
-				key: 'team',
-				name: { 'zh-CN': '团队管理', 'en-US': 'Team' },
-				icon: 'material-group',
-				path: '/settings/team'
-			},
-			{
-				id: '2',
-				key: 'api-keys',
-				name: { 'zh-CN': 'API 密钥', 'en-US': 'API Keys' },
-				icon: 'material-vpn_key',
-				path: '/settings/api-keys'
-			},
-			{
-				id: '5',
-				key: 'usage',
-				name: { 'zh-CN': '使用统计', 'en-US': 'Usage' },
-				icon: 'material-data_usage',
-				path: '/settings/usage'
-			}
+		{
+			id: '2a',
+			key: 'team',
+			name: { 'zh-CN': '团队管理', 'en-US': 'Team' },
+			icon: 'material-group',
+			path: '/settings/team'
+		}
 			// {
 			// 	id: '2b',
 			// 	key: 'preferences',
@@ -608,7 +594,7 @@ export const mockMenuGroups: MenuGroup[] = [
 				key: 'docs',
 				name: { 'zh-CN': '文档', 'en-US': 'Documentation' },
 				icon: 'material-description',
-				path: 'https://yaobots.com/docs'
+				path: 'https://yaoapps.com/docs'
 			},
 			{
 				id: '16',

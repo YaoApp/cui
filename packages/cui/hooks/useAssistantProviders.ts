@@ -64,9 +64,7 @@ export function useAssistantProviders(options: UseAssistantProvidersOptions): Us
 				}
 
 				// Fetch providers with capability filters
-				console.log('[useAssistantProviders] Fetching providers with capabilities:', capabilities)
 				const allProviders = await llmAPI.ListProviders({ capabilities })
-				console.log('[useAssistantProviders] Received providers:', allProviders.length)
 
 				if (ignore) return
 
@@ -78,13 +76,6 @@ export function useAssistantProviders(options: UseAssistantProvidersOptions): Us
 				) {
 					const allowedConnectors = new Set(assistant.connector_options.connectors)
 					filteredProviders = allProviders.filter((p) => allowedConnectors.has(p.value))
-
-					console.log('[useAssistantProviders] Connector whitelist filtering:', {
-						whitelist: assistant.connector_options.connectors,
-						beforeCount: allProviders.length,
-						afterCount: filteredProviders.length,
-						filtered: filteredProviders.map((p) => p.value)
-					})
 
 					// If whitelist filtering results in empty list
 					// This means none of the whitelisted connectors meet the capability requirements

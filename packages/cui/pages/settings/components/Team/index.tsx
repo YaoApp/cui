@@ -13,9 +13,10 @@ import MemberList from './MemberList'
 import InviteForm from './InviteForm'
 import TeamEditForm from './TeamEditForm'
 import CreateTeamForm from './CreateTeamForm'
-import AddAIMemberWizard from './AddAIMemberWizard'
-import EditAIMember from './EditAIMember'
-import type { AIMemberValues } from './AddAIMemberWizard'
+// TODO: Re-enable AI member management when moved back from Mission Control
+// import AddAIMemberWizard from './AddAIMemberWizard'
+// import EditAIMember from './EditAIMember'
+// import type { AIMemberValues } from './AddAIMemberWizard'
 import styles from './index.less'
 
 // Team feature permissions domain and feature keys
@@ -31,7 +32,6 @@ const TEAM_FEATURES = {
 const Team = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const [form] = Form.useForm()
 	const global = useGlobal()
 
 	const [loading, setLoading] = useState(true)
@@ -133,11 +133,6 @@ const Team = () => {
 				} else if (teamResponse.data) {
 					// 用户已有团队，设置团队信息
 					setTeam(teamResponse.data)
-					teamForm.setFieldsValue({
-						name: teamResponse.data.name,
-						description: teamResponse.data.description,
-						avatar: teamResponse.data.logo
-					})
 
 					// 加载成员数据（包括待处理的邀请）
 					try {
@@ -173,7 +168,7 @@ const Team = () => {
 		if (apiClient) {
 			loadTeamData()
 		}
-	}, [apiClient, is_cn, teamForm])
+	}, [apiClient, is_cn])
 
 	const handleInviteMember = async (values: { email: string; role: string }) => {
 		if (!apiClient || !team) {
@@ -216,7 +211,6 @@ const Team = () => {
 					}
 				}
 				setInviteModalVisible(false)
-				form.resetFields()
 				message.success(is_cn ? '邀请发送成功' : 'Invitation sent successfully')
 			}
 		} catch (error) {
@@ -261,21 +255,11 @@ const Team = () => {
 
 				if (!apiClient.IsError(teamDetailResponse) && teamDetailResponse.data) {
 					setTeam(teamDetailResponse.data)
-					teamForm.setFieldsValue({
-						name: teamDetailResponse.data.name,
-						description: teamDetailResponse.data.description,
-						avatar: teamDetailResponse.data.logo
-					})
 				} else {
 					// 如果获取详情失败，使用基本信息构造UserTeamDetail类型
 					setTeam({
 						...newTeam,
 						settings: undefined
-					})
-					teamForm.setFieldsValue({
-						name: newTeam.name,
-						description: newTeam.description,
-						avatar: newTeam.logo
 					})
 				}
 
@@ -767,17 +751,7 @@ const Team = () => {
 					</p>
 				</div>
 				<div className={styles.headerActions}>
-					{permissions.canCreateRobot && (
-						<Button
-							type='primary'
-							size='small'
-							icon={<Icon name='material-psychology' size={12} />}
-							onClick={() => setAddAIModalVisible(true)}
-							disabled={!team || loading || configLoading}
-						>
-							{is_cn ? '添加 AI 成员' : 'Add AI Member'}
-						</Button>
-					)}
+					{/* TODO: Re-enable AI member management when moved back from Mission Control */}
 					{permissions.canInviteMembers && (
 						<Button
 							type='primary'
@@ -813,14 +787,7 @@ const Team = () => {
 									<Button
 										size='small'
 										icon={<Icon name='icon-x' size={12} />}
-										onClick={() => {
-											setEditingTeam(false)
-											teamForm.setFieldsValue({
-												name: team?.name,
-												description: team?.description,
-												avatar: team?.logo
-											})
-										}}
+										onClick={() => setEditingTeam(false)}
 										disabled={updatingTeam}
 									>
 										{is_cn ? '取消' : 'Cancel'}
@@ -831,14 +798,7 @@ const Team = () => {
 									type='default'
 									size='small'
 									icon={<Icon name='material-edit' size={12} />}
-									onClick={() => {
-										teamForm.setFieldsValue({
-											name: team?.name,
-											description: team?.description,
-											avatar: team?.logo
-										})
-										setEditingTeam(true)
-									}}
+									onClick={() => setEditingTeam(true)}
 									disabled={loading || configLoading}
 								>
 									{is_cn ? '编辑' : 'Edit'}
@@ -859,8 +819,7 @@ const Team = () => {
 							<div className={styles.teamAvatar}>
 								<UserAvatar
 									size='xl'
-									shape='square'
-									borderRadius={12}
+									shape='circle'
 									displayType='avatar'
 									data={{
 										id: team?.team_id || '',
@@ -907,12 +866,12 @@ const Team = () => {
 				</div>
 
 				<div className={styles.unifiedMembersList}>
+					{/* TODO: Re-enable onEditAIMember when AI member management moved back from Mission Control */}
 					<MemberList
 						members={members}
 						is_cn={is_cn}
 						getRoleDisplayName={getRoleDisplayName}
 						onRemoveMember={permissions.canRemoveMembers ? handleRemoveMember : undefined}
-						onEditAIMember={permissions.canEditRobot ? handleEditAIMember : undefined}
 						onResendInvitation={
 							permissions.canInviteMembers ? handleResendInvitation : undefined
 						}
@@ -938,8 +897,8 @@ const Team = () => {
 				locale={locale}
 			/>
 
-			{/* 添加 AI 成员向导 */}
-			<AddAIMemberWizard
+			{/* TODO: Re-enable AI member management when moved back from Mission Control */}
+			{/* <AddAIMemberWizard
 				visible={addAIModalVisible}
 				onClose={() => setAddAIModalVisible(false)}
 				onAdd={handleAddAIMember}
@@ -951,7 +910,6 @@ const Team = () => {
 				teamId={team?.team_id}
 			/>
 
-			{/* 编辑 AI 成员 */}
 			<EditAIMember
 				visible={editAIModalVisible}
 				onClose={() => {
@@ -966,7 +924,7 @@ const Team = () => {
 				members={members}
 				is_cn={is_cn}
 				teamId={team?.team_id}
-			/>
+			/> */}
 		</div>
 	)
 }

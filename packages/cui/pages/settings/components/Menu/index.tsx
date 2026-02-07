@@ -119,90 +119,53 @@ const Menu = ({ active, onChange }: MenuProps) => {
 			<div className={styles.menuContent}>
 				{/* 可滚动的菜单区域 */}
 				<div className={styles.scrollableContent}>
-					{currentUser && (
-						<div className={styles.user}>
-							<UserAvatar
-								size={42}
-								showCard={false}
-								// displayType='auto' 会自动判断是否显示组合模式
-								data={
-									isTeam
-										? {
-												id: String(currentUser.id),
-												name:
-													currentUser.member?.display_name ||
-													currentUser.name,
-												avatar:
-													currentUser.member?.avatar ||
-													currentUser.avatar,
-												team:
-													currentUser.team &&
-													currentUser.team.team_id
-														? {
-																team_id: currentUser
-																	.team.team_id,
-																logo: currentUser.team
-																	.logo,
-																name: currentUser.team
-																	.name
-														  }
-														: undefined
-										  }
-										: undefined
-								}
-							/>
-							<div className={styles.info}>
-								<div className={styles.firstLine}>
-									<span className={styles.name}>
-										{isTeam && currentUser.team?.name ? (
-											<>
-												{currentUser.member?.display_name ||
-													currentUser.name}
-												<span className={styles.teamSeparator}>@</span>
-												<span className={styles.teamName}>
-													{currentUser.team.name}
-												</span>
-											</>
-										) : (
-											currentUser.name
-										)}
-									</span>
-								</div>
-								<div className={styles.tags}>
-									<span className={styles.tagItem}>
-										<Icon
-											name={isTeam ? 'material-group' : 'material-person'}
-											size={12}
-										/>
-										<span>
-											{isTeam
-												? is_cn
-													? '团队'
-													: 'Team'
-												: is_cn
-												? '个人'
-												: 'Personal'}
-										</span>
-									</span>
-									{currentUser.is_owner && (
-										<span className={styles.tagItem}>
-											<Icon name='material-star' size={12} />
-											<span>{is_cn ? '所有者' : 'Owner'}</span>
-										</span>
-									)}
-									{currentUser.user_type && (
-										<span className={styles.tagItem}>
-											<Icon name='material-local_offer' size={12} />
-											<span>
-												{currentUser.user_type.name ||
-													currentUser.type_id}
-											</span>
-										</span>
-									)}
-								</div>
+				{currentUser && (
+					<div className={styles.userSection}>
+						{isTeam && (
+							<span className={styles.roleBadge}>
+								{currentUser.is_owner
+									? is_cn ? '所有者' : 'Owner'
+									: is_cn ? '成员' : 'Member'}
+							</span>
+						)}
+						<UserAvatar
+							size={36}
+							showCard={false}
+							data={{
+								id: String(currentUser.id),
+								name: isTeam
+									? currentUser.member?.display_name || currentUser.name
+									: currentUser.name,
+								avatar: isTeam
+									? currentUser.member?.avatar || currentUser.avatar
+									: currentUser.avatar,
+								...(isTeam && currentUser.team ? {
+									team: {
+										team_id: currentUser.team.team_id || currentUser.team.id || '',
+										name: currentUser.team.name,
+										logo: currentUser.team.logo
+									}
+								} : {})
+							}}
+						/>
+						<div className={styles.userInfo}>
+							<div className={styles.primaryName}>
+								{isTeam
+									? currentUser.team?.name || currentUser.name
+									: currentUser.name}
 							</div>
+							{isTeam && (
+								<div className={styles.secondaryName}>
+									<Icon name='material-person' size={12} />
+									<span>
+										{currentUser.member?.display_name ||
+											currentUser.name}
+									</span>
+								</div>
+							)}
 						</div>
-					)}
+					</div>
+				)}
 
 					{groups
 						.sort((a, b) => a.order - b.order)

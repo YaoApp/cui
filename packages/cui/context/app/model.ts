@@ -334,8 +334,10 @@ export default class GlobalModel {
 				user_id: userInfo.user_id,
 				name: userInfo.name,
 				picture: userInfo.picture,
+				email: userInfo.email,
 				scope: userInfo.scope,
-				features: userInfo.features
+				features: userInfo.features,
+				'yao:auth_source': userInfo['yao:auth_source']
 			}
 			local.userInfo = persistentUserInfo
 		} else {

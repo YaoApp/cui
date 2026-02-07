@@ -9,6 +9,8 @@ import UserAvatar from '@/widgets/UserAvatar'
 import { Input, RadioGroup } from '@/components/ui/inputs'
 import Button from '@/components/ui/Button'
 import { User } from '@/openapi/user'
+import type { SigninProvider } from '@/openapi/user/types'
+import ChangePasswordModal from './ChangePasswordModal'
 import styles from './index.less'
 
 interface PersonalProfile {
@@ -39,6 +41,8 @@ const Profile = () => {
 	const [teamId, setTeamId] = useState<string | undefined>(undefined)
 	const [userId, setUserId] = useState<string | undefined>(undefined)
 	const [apiClient, setApiClient] = useState<User | null>(null)
+	const [passwordModalVisible, setPasswordModalVisible] = useState(false)
+	const [authProvider, setAuthProvider] = useState<SigninProvider | null>(null)
 
 	// 监听表单的头像字段变化
 	const formAvatar = Form.useWatch('avatar', form)
@@ -58,6 +62,27 @@ const Profile = () => {
 
 		initializeAPI()
 	}, [is_cn])
+
+	// Load auth provider info for third-party login display
+	useEffect(() => {
+		const authSource = global.userInfo?.['yao:auth_source']
+		if (!apiClient || !authSource || authSource === 'password') return
+
+		const loadProvider = async () => {
+			try {
+				const configRes = await apiClient.auth.GetEntryConfig(locale)
+				if (!apiClient.IsError(configRes) && configRes.data?.third_party?.providers) {
+					const provider = configRes.data.third_party.providers.find(
+						(p) => p.id === authSource
+					)
+					if (provider) setAuthProvider(provider)
+				}
+			} catch (error) {
+				console.error('Failed to load auth provider:', error)
+			}
+		}
+		loadProvider()
+	}, [apiClient, locale, global.userInfo])
 
 	// Load profile data
 	useEffect(() => {
@@ -81,20 +106,13 @@ const Profile = () => {
 				if (isMember) {
 					// Load team member profile
 					setTeamId(currentUser.team_id)
-					console.log('Loading member profile for:', {
-						teamId: currentUser.team_id,
-						userId: String(currentUser.id)
-					})
 
 					const response = await apiClient.teams.GetMemberProfile(
 						currentUser.team_id!,
 						String(currentUser.id)
 					)
 
-					console.log('Member profile response:', response)
-
 					if (apiClient.IsError(response)) {
-						console.error('Member profile error:', response)
 						throw new Error(
 							`Failed to load member profile: ${
 								response.error?.error_description || 'Unknown error'
@@ -110,17 +128,11 @@ const Profile = () => {
 					}
 
 					setProfileData(memberProfile)
-					form.setFieldsValue(memberProfile)
 				} else {
 					// Load personal profile
-					console.log('Loading personal profile for user:', currentUser.id)
-
 					const response = await apiClient.profile.GetProfile()
 
-					console.log('Personal profile response:', response)
-
 					if (apiClient.IsError(response)) {
-						console.error('Personal profile error:', response)
 						throw new Error(
 							`Failed to load profile: ${
 								response.error?.error_description || 'Unknown error'
@@ -136,7 +148,6 @@ const Profile = () => {
 					}
 
 					setProfileData(personalProfile)
-					form.setFieldsValue(personalProfile)
 				}
 			} catch (error) {
 				console.error('Failed to load profile data:', error)
@@ -152,7 +163,14 @@ const Profile = () => {
 		}
 
 		loadProfile()
-	}, [apiClient, form, is_cn])
+	}, [apiClient, is_cn])
+
+	// Sync form values after loading completes and Form is mounted
+	useEffect(() => {
+		if (!loading && profileData) {
+			form.setFieldsValue(profileData)
+		}
+	}, [loading, profileData, form])
 
 	const handleSave = async (values: PersonalProfile | MemberProfile) => {
 		if (!apiClient) {
@@ -358,7 +376,18 @@ const Profile = () => {
 								{is_cn ? '取消' : 'Cancel'}
 							</Button>
 						</>
-					) : (
+				) : (
+					<>
+						{/* Only show Change Password for password-registered users */}
+						{global.userInfo?.['yao:auth_source'] === 'password' && (
+							<Button
+								size='small'
+								icon={<Icon name='material-lock' size={12} />}
+								onClick={() => setPasswordModalVisible(true)}
+							>
+								{is_cn ? '修改密码' : 'Change Password'}
+							</Button>
+						)}
 						<Button
 							size='small'
 							icon={<Icon name='icon-edit-2' size={12} />}
@@ -366,7 +395,8 @@ const Profile = () => {
 						>
 							{is_cn ? '编辑' : 'Edit'}
 						</Button>
-					)}
+					</>
+				)}
 				</div>
 			</div>
 
@@ -391,72 +421,107 @@ const Profile = () => {
 					<Form form={form} onFinish={handleSave}>
 						<div className={styles.fieldsContainer}>
 							{isTeamMember ? (
-								<>
-									{/* Team Member Fields */}
-									{/* Display Name Field */}
-									<div className={styles.fieldItem}>
-										<div className={styles.fieldIcon}>
-											<Icon name='material-person' size={20} />
-										</div>
-										<div className={styles.fieldContent}>
-											<div className={styles.fieldLabel}>
-												{is_cn ? '团队昵称' : 'Team Nickname'}
-											</div>
-											{editing ? (
-												<Form.Item
-													name='display_name'
-													style={{ margin: 0 }}
-												>
-													<Input
-														schema={{
-															type: 'string',
-															placeholder: is_cn
-																? '请输入你在团队中的昵称'
-																: 'Enter your nickname in this team'
+							<>
+								{/* Team Member Fields */}
+								{/* Account Field (read-only, for all auth sources) */}
+								{global.userInfo?.['yao:auth_source'] &&
+									global.userInfo?.email && (
+										<div className={styles.fieldItem}>
+											<div className={styles.fieldIcon}>
+												{authProvider?.logo ? (
+													<img
+														src={authProvider.logo}
+														alt={authProvider.label}
+														style={{
+															width: 20,
+															height: 20,
+															objectFit: 'contain',
+															filter: 'brightness(0) saturate(100%) invert(0.6)'
 														}}
-														error=''
-														hasError={false}
 													/>
-												</Form.Item>
-											) : (
-												<div className={styles.fieldValue}>
-													{(profileData as MemberProfile)
-														?.display_name || '-'}
+												) : (
+													<Icon name='material-fingerprint' size={20} />
+												)}
+											</div>
+											<div className={styles.fieldContent}>
+												<div className={styles.fieldLabel}>
+													{authProvider
+														? authProvider.label
+														: is_cn
+														? '账号'
+														: 'Account'}
 												</div>
-											)}
+												<div className={styles.fieldValue}>
+													{global.userInfo.email}
+												</div>
+											</div>
 										</div>
-									</div>
+									)}
 
-									{/* Email Field */}
-									<div className={styles.fieldItem}>
-										<div className={styles.fieldIcon}>
-											<Icon name='material-email' size={20} />
-										</div>
-										<div className={styles.fieldContent}>
-											<div className={styles.fieldLabel}>
-												{is_cn ? '邮箱' : 'Email'}
-											</div>
-											{editing ? (
-												<Form.Item name='email' style={{ margin: 0 }}>
-													<Input
-														schema={{
-															type: 'string',
-															placeholder: is_cn
-																? '请输入邮箱'
-																: 'Enter your email'
-														}}
-														error=''
-														hasError={false}
-													/>
-												</Form.Item>
-											) : (
-												<div className={styles.fieldValue}>
-													{(profileData as MemberProfile)?.email ||
-														'-'}
-												</div>
-											)}
-										</div>
+								{/* Display Name Field */}
+								<div className={styles.fieldItem}>
+									<div className={styles.fieldIcon}>
+										<Icon name='material-person' size={20} />
 									</div>
+									<div className={styles.fieldContent}>
+										<div className={styles.fieldLabel}>
+											{is_cn ? '团队昵称' : 'Team Nickname'}
+										</div>
+										{editing ? (
+											<Form.Item
+												name='display_name'
+												style={{ margin: 0 }}
+											>
+												<Input
+													schema={{
+														type: 'string',
+														placeholder: is_cn
+															? '请输入你在团队中的昵称'
+															: 'Enter your nickname in this team'
+													}}
+													error=''
+													hasError={false}
+												/>
+											</Form.Item>
+										) : (
+											<div className={styles.fieldValue}>
+												{(profileData as MemberProfile)
+													?.display_name || '-'}
+											</div>
+										)}
+									</div>
+								</div>
+
+								{/* Email Field */}
+								<div className={styles.fieldItem}>
+									<div className={styles.fieldIcon}>
+										<Icon name='material-email' size={20} />
+									</div>
+									<div className={styles.fieldContent}>
+										<div className={styles.fieldLabel}>
+											{is_cn ? '邮箱' : 'Email'}
+										</div>
+										{editing ? (
+											<Form.Item name='email' style={{ margin: 0 }}>
+												<Input
+													schema={{
+														type: 'string',
+														placeholder: is_cn
+															? '请输入邮箱'
+															: 'Enter your email'
+													}}
+													error=''
+													hasError={false}
+												/>
+											</Form.Item>
+										) : (
+											<div className={styles.fieldValue}>
+												{(profileData as MemberProfile)?.email ||
+													'-'}
+											</div>
+										)}
+									</div>
+								</div>
 
 									{/* Bio Field */}
 									<div className={styles.fieldItem}>
@@ -490,7 +555,9 @@ const Profile = () => {
 									</div>
 
 									{/* Hidden avatar field */}
-									<Form.Item name='avatar' style={{ display: 'none' }} />
+									<Form.Item name='avatar' hidden noStyle>
+										<input type='hidden' />
+									</Form.Item>
 								</>
 							) : (
 								<>
@@ -638,13 +705,21 @@ const Profile = () => {
 									</div>
 
 									{/* Hidden picture field */}
-									<Form.Item name='picture' style={{ display: 'none' }} />
+									<Form.Item name='picture' hidden noStyle>
+										<input type='hidden' />
+									</Form.Item>
 								</>
 							)}
 						</div>
 					</Form>
 				</div>
 			</div>
+
+			{/* Change Password Modal */}
+			<ChangePasswordModal
+				visible={passwordModalVisible}
+				onClose={() => setPasswordModalVisible(false)}
+			/>
 		</div>
 	)
 }

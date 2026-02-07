@@ -1,0 +1,121 @@
+// Change Password Modal styles
+// Follows the same pattern as UploadModal and AddAIMemberWizard
+.changePasswordModal {
+	:global(.xgen-modal-header) {
+		padding: 0;
+		border-bottom: none;
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0;
+		overflow: hidden;
+	}
+
+	:global(.xgen-modal-footer) {
+		padding: 0;
+		border-top: none;
+		background: transparent;
+	}
+
+	:global(.xgen-modal-content) {
+		border-radius: 8px;
+		overflow: hidden;
+	}
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+
+	.titleSection {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		:global(.Icon),
+		:global(.xgen-icon) {
+			color: var(--color_neo_text_secondary);
+		}
+
+		.modalTitle {
+			font-size: 15px;
+			font-weight: 600;
+			color: var(--color_text);
+		}
+	}
+
+	.closeButton {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s;
+		color: var(--color_text_grey);
+
+		&:hover {
+			background: var(--color_bg);
+			color: var(--color_text);
+		}
+	}
+}
+
+.modalContent {
+	padding: 20px 24px;
+	background: var(--color_neo_bg_content);
+}
+
+.description {
+	margin: 0 0 20px 0;
+	font-size: 13px;
+	color: var(--color_neo_text_secondary);
+	line-height: 1.6;
+}
+
+.fieldsContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.fieldItem {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.fieldLabel {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_neo_text_secondary);
+}
+
+.fieldInput {
+	width: 100%;
+}
+
+.modalFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 18px;
+	border-top: 1px solid var(--color_border);
+	background: var(--color_neo_bg_card);
+
+	.footerRight {
+		display: flex;
+		gap: 10px;
+	}
+
+	:global(.ant-btn) {
+		font-size: 12px;
+		height: 32px;
+		padding: 4px 15px;
+	}
+}
