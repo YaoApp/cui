@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { message, Button, Spin } from 'antd'
 import { getLocale, history } from '@umijs/max'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import { User } from '@/openapi/user'
-import { UserTeam, TeamConfig, UserProfile } from '@/openapi/user/types'
+import { UserTeam, TeamConfig } from '@/openapi/user/types'
 import AuthLayout from '../../auth/components/AuthLayout'
 import TeamCard from './components/TeamCard'
 import { AfterLogin } from '../../auth/auth'
 import { getDefaultLogoUrl } from '@/services/wellknown'
 import styles from './index.less'
 
-// Cookie 工具函数
+// Cookie utility
 const getCookie = (name: string): string | null => {
 	const value = `; ${document.cookie}`
 	const parts = value.split(`; ${name}=`)
@@ -50,22 +50,7 @@ const TeamSelect = () => {
 	const [teams, setTeams] = useState<UserTeam[]>([])
 	const [error, setError] = useState<string>('')
 	const [config, setConfig] = useState<TeamConfig | null>(null)
-	const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
-
-	// Personal account option (always first) - use real user profile data
-	const personalWorkspace: UserTeam = {
-		team_id: 'personal',
-		name: userProfile?.name || (currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account'),
-		display_name: userProfile?.name || (currentLocale.startsWith('zh') ? '个人账号' : 'Personal Account'),
-		description: currentLocale.startsWith('zh') ? '使用个人账号访问' : 'Access with personal account',
-		owner_id: userProfile?.['yao:user_id'] || '',
-		logo: userProfile?.picture,
-		status: 'active',
-		is_verified: false,
-		created_at: '',
-		updated_at: '',
-		is_owner: true
-	}
+	const autoSelectingRef = useRef(false)
 
 	useEffect(() => {
 		// Wait for openapi to be initialized
@@ -87,39 +72,12 @@ const TeamSelect = () => {
 			}
 
 			// Now safe to fetch data
-			await fetchUserProfile()
 			await fetchConfig()
 			await fetchTeams()
 		}
 
 		initAndFetch()
 	}, [])
-
-	const fetchUserProfile = async () => {
-		try {
-			if (!window.$app?.openapi) {
-				console.error('OpenAPI not initialized for profile')
-				return
-			}
-
-			const user = new User(window.$app.openapi)
-			const response = await user.profile.GetProfile()
-
-			if (!user.IsError(response) && response.data) {
-				setUserProfile(response.data)
-				console.log('User profile loaded:', {
-					name: response.data.name,
-					picture: response.data.picture,
-					user_id: response.data['yao:user_id']
-				})
-			} else {
-				console.warn('Failed to load user profile:', response.error)
-			}
-		} catch (error) {
-			console.error('Failed to fetch user profile:', error)
-			// Don't show error to user, personal account will use default name
-		}
-	}
 
 	const fetchConfig = async () => {
 		try {
@@ -193,19 +151,28 @@ const TeamSelect = () => {
 				throw new Error(errorMsg)
 			}
 
-			setTeams(response.data || [])
-			console.log('Teams loaded successfully:', response.data?.length || 0)
+			const teamList = response.data || []
+			setTeams(teamList)
+			console.log('Teams loaded successfully:', teamList.length)
 
-			// If no teams found, redirect to main page
-			if (!response.data || response.data.length === 0) {
-				message.info(
+			// If no teams found, show error
+			if (teamList.length === 0) {
+				setError(
 					currentLocale.startsWith('zh')
-						? '您还没有加入任何团队'
-						: 'You have not joined any team yet'
+						? '您还没有加入任何团队，请联系管理员'
+						: 'You have not joined any team yet. Please contact your administrator.'
 				)
+				return
+			}
+
+			// Auto-select if only one team (defense in depth, backend should also handle this)
+			if (teamList.length === 1 && !autoSelectingRef.current) {
+				autoSelectingRef.current = true
+				// Small delay to ensure state is set before auto-selecting
 				setTimeout(() => {
-					history.push('/auth/helloworld')
-				}, 1500)
+					handleSelectTeam(teamList[0].team_id)
+				}, 100)
+				return
 			}
 		} catch (error: any) {
 			console.error('Failed to fetch teams - Exception:', error)
@@ -224,7 +191,7 @@ const TeamSelect = () => {
 
 	const handleSelectTeam = async (teamId: string) => {
 		if (!teamId) {
-			message.warning(currentLocale.startsWith('zh') ? '请选择一个账号' : 'Please select an account')
+			message.warning(currentLocale.startsWith('zh') ? '请选择一个团队' : 'Please select a team')
 			return
 		}
 
@@ -236,8 +203,6 @@ const TeamSelect = () => {
 			}
 
 			const user = new User(window.$app.openapi)
-
-			// 调用 SelectTeam API (对于 personal 和 team 都调用)
 			const response = await user.teams.SelectTeam({ team_id: teamId })
 
 			if (user.IsError(response)) {
@@ -247,42 +212,29 @@ const TeamSelect = () => {
 				return
 			}
 
-			// 选择成功
-			if (teamId === 'personal') {
-				sessionStorage.removeItem('selected_team_id')
-				sessionStorage.removeItem('selected_team')
-				message.success(
-					currentLocale.startsWith('zh') ? '已切换到个人账号' : 'Switched to personal account'
-				)
-			} else {
-				const selectedTeam = teams.find((t) => t.team_id === teamId)
-				if (selectedTeam) {
-					sessionStorage.setItem('selected_team_id', teamId)
-					sessionStorage.setItem('selected_team', JSON.stringify(selectedTeam))
-				}
-				message.success(currentLocale.startsWith('zh') ? '团队选择成功' : 'Team selected successfully')
+			// Store selected team info
+			const selectedTeam = teams.find((t) => t.team_id === teamId)
+			if (selectedTeam) {
+				sessionStorage.setItem('selected_team_id', teamId)
+				sessionStorage.setItem('selected_team', JSON.stringify(selectedTeam))
 			}
 
-			// 设置用户状态并跳转（user info 已由 SelectTeam 方法自动解析）
+			// Setup user state and redirect
 			try {
-				// 读取 cookie 中预设的跳转地址
 				const loginRedirect = getCookie('login_redirect') || '/auth/helloworld'
 				const logoutRedirect = getCookie('logout_redirect') || '/'
 
-				// 调用 AfterLogin 设置用户信息、菜单等状态
 				await AfterLogin(global, {
 					user: response.data?.user || ({} as any),
 					entry: loginRedirect,
 					logout_redirect: logoutRedirect
 				})
 
-				// 跳转到目标页面
 				setTimeout(() => {
 					window.location.href = loginRedirect
 				}, 500)
 			} catch (error) {
 				console.error('Failed to setup after login:', error)
-				// 即使 AfterLogin 失败，也继续跳转
 				const loginRedirect = getCookie('login_redirect') || '/auth/helloworld'
 				setTimeout(() => {
 					window.location.href = loginRedirect
@@ -321,105 +273,81 @@ const TeamSelect = () => {
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>
 			<div className={styles.teamSelectContainer}>
-				<div className={styles.teamSelectCard}>
-					<div className={styles.titleSection}>
-						<h1 className={styles.appTitle}>
-							{currentLocale.startsWith('zh') ? '选择账号' : 'Select Account'}
-						</h1>
-						<p className={styles.appSubtitle}>
-							{currentLocale.startsWith('zh')
-								? '请选择要访问的团队账号或个人账号'
-								: 'Please select the team account or personal account you want to access'}
+			<div className={styles.teamSelectCard}>
+				<div className={styles.titleSection}>
+					<h1 className={styles.appTitle}>
+						{currentLocale.startsWith('zh') ? '选择团队' : 'Select Team'}
+					</h1>
+					<p className={styles.appSubtitle}>
+						{currentLocale.startsWith('zh')
+							? '请选择要进入的团队'
+							: 'Please select the team you want to enter'}
+					</p>
+				</div>
+
+				{fetching || autoSelectingRef.current ? (
+					<div className={styles.loadingContainer}>
+						<Spin size='large' />
+						<p className={styles.loadingText}>
+							{autoSelectingRef.current
+								? (currentLocale.startsWith('zh') ? '正在进入...' : 'Entering...')
+								: (currentLocale.startsWith('zh') ? '加载团队列表...' : 'Loading teams...')}
 						</p>
 					</div>
-
-					{fetching ? (
-						<div className={styles.loadingContainer}>
-							<Spin size='large' />
-							<p className={styles.loadingText}>
-								{currentLocale.startsWith('zh')
-									? '加载团队列表...'
-									: 'Loading teams...'}
-							</p>
+				) : error ? (
+					<div className={styles.errorContainer}>
+						<div className={styles.errorIcon}>⚠️</div>
+						<p className={styles.errorMessage}>{error}</p>
+						<div className={styles.errorActions}>
+							<Button type='primary' onClick={() => fetchTeams()}>
+								{currentLocale.startsWith('zh') ? '重试' : 'Retry'}
+							</Button>
+							<Button onClick={() => history.push('/auth/entry')}>
+								{currentLocale.startsWith('zh') ? '返回登录' : 'Back to Login'}
+							</Button>
 						</div>
-					) : error ? (
-						<div className={styles.errorContainer}>
-							<div className={styles.errorIcon}>⚠️</div>
-							<p className={styles.errorMessage}>{error}</p>
-							<div className={styles.errorActions}>
-								<Button type='primary' onClick={() => fetchTeams()}>
-									{currentLocale.startsWith('zh') ? '重试' : 'Retry'}
-								</Button>
-								<Button onClick={() => history.push('/auth/entry')}>
-									{currentLocale.startsWith('zh') ? '返回登录' : 'Back to Login'}
-								</Button>
-							</div>
-						</div>
-					) : (
-						<>
-							<div className={styles.teamsGrid}>
-								{/* Personal Workspace - Always First */}
+					</div>
+				) : (
+					<>
+						<div className={styles.teamsGrid}>
+							{/* Team List */}
+							{teams.map((team) => (
 								<TeamCard
-									key='personal'
-									team={personalWorkspace}
-									selected={selectedTeamId === 'personal'}
-									roleLabel=''
-									ownerLabel={currentLocale.startsWith('zh') ? '所有者' : 'Owner'}
-									onClick={() => setSelectedTeamId('personal')}
-									userProfile={userProfile}
+									key={team.team_id}
+									team={team}
+									selected={selectedTeamId === team.team_id}
+									roleLabel={getRoleLabel(team.role_id)}
+									ownerLabel={
+										currentLocale.startsWith('zh') ? '所有者' : 'Owner'
+									}
+									onClick={() => setSelectedTeamId(team.team_id)}
 								/>
+							))}
+						</div>
 
-								{/* Divider */}
-								{teams.length > 0 && (
-									<div className={styles.divider}>
-										<span className={styles.dividerLine}></span>
-										<span className={styles.dividerText}>
-											{currentLocale.startsWith('zh')
-												? '或选择团队'
-												: 'or select team'}
-										</span>
-										<span className={styles.dividerLine}></span>
-									</div>
-								)}
-
-								{/* Team List */}
-								{teams.map((team) => (
-									<TeamCard
-										key={team.team_id}
-										team={team}
-										selected={selectedTeamId === team.team_id}
-										roleLabel={getRoleLabel(team.role_id)}
-										ownerLabel={
-											currentLocale.startsWith('zh') ? '所有者' : 'Owner'
-										}
-										onClick={() => setSelectedTeamId(team.team_id)}
-									/>
-								))}
-							</div>
-
-							<div className={styles.teamSelectActions}>
-								<Button
-									type='primary'
-									size='large'
-									onClick={() => handleSelectTeam(selectedTeamId)}
-									disabled={!selectedTeamId || loading}
-									loading={loading}
-									className={styles.continueButton}
-								>
-									{currentLocale.startsWith('zh') ? '进入' : 'Enter'}
-								</Button>
-								<Button
-									type='default'
-									size='large'
-									onClick={() => history.push('/auth/entry')}
-									disabled={loading}
-									className={styles.backButton}
-								>
-									{currentLocale.startsWith('zh') ? '返回登录' : 'Back to Login'}
-								</Button>
-							</div>
-						</>
-					)}
+						<div className={styles.teamSelectActions}>
+							<Button
+								type='primary'
+								size='large'
+								onClick={() => handleSelectTeam(selectedTeamId)}
+								disabled={!selectedTeamId || loading}
+								loading={loading}
+								className={styles.continueButton}
+							>
+								{currentLocale.startsWith('zh') ? '进入' : 'Enter'}
+							</Button>
+							<Button
+								type='default'
+								size='large'
+								onClick={() => history.push('/auth/entry')}
+								disabled={loading}
+								className={styles.backButton}
+							>
+								{currentLocale.startsWith('zh') ? '返回登录' : 'Back to Login'}
+							</Button>
+						</div>
+					</>
+				)}
 				</div>
 			</div>
 		</AuthLayout>
