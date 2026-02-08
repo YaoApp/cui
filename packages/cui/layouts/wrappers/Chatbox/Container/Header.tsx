@@ -243,20 +243,22 @@ const Header: FC<HeaderProps> = ({
 						</div>
 					</Tooltip>
 
-					<Tooltip title={is_cn ? '知识库' : 'Knowledge Base'}>
-						<div
-							className='sidebar_header_btn'
-							onClick={() => {
-								window.$app?.Event?.emit('app/openSidebar', {
-									path: '/kb',
-									title: is_cn ? '知识库' : 'Knowledge Base',
-									icon: 'material-library_books'
-								})
-							}}
-						>
-							<Icon name='material-library_books' size={14} />
-						</div>
-					</Tooltip>
+					{window.$app?.kb && Object.keys(window.$app.kb).length > 0 && (
+						<Tooltip title={is_cn ? '知识库' : 'Knowledge Base'}>
+							<div
+								className='sidebar_header_btn'
+								onClick={() => {
+									window.$app?.Event?.emit('app/openSidebar', {
+										path: '/kb',
+										title: is_cn ? '知识库' : 'Knowledge Base',
+										icon: 'material-library_books'
+									})
+								}}
+							>
+								<Icon name='material-library_books' size={14} />
+							</div>
+						</Tooltip>
+					)}
 
 					<div
 						className='sidebar_header_btn'
