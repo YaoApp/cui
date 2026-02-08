@@ -538,12 +538,17 @@ const InputArea = (props: IInputAreaProps) => {
 			// }
 			e.preventDefault()
 
-			// Queue mode: if streaming, queue the message instead of sending
+			// TODO: Queue/pre-send feature temporarily disabled, will be enabled in a future version
+			// When streaming, block sending entirely - user must wait for current response to finish
 			if (streaming) {
-				handleQueueSend()
-			} else {
-				handleSend()
+				return
 			}
+			// if (streaming) {
+			// 	handleQueueSend()
+			// } else {
+			// 	handleSend()
+			// }
+			handleSend()
 		}
 
 		// TODO: Mention feature temporarily disabled
@@ -929,8 +934,8 @@ const InputArea = (props: IInputAreaProps) => {
 				<div className={styles.content}>
 					{mode === 'placeholder' && renderPlaceholder()}
 
-					{/* Message Queue - positioned above InputArea */}
-					{messageQueue &&
+					{/* TODO: Queue/pre-send feature temporarily disabled, will be enabled in a future version */}
+					{/* {messageQueue &&
 						messageQueue.length > 0 &&
 						onCancelQueuedMessage &&
 						onSendQueuedMessage && (
@@ -941,12 +946,13 @@ const InputArea = (props: IInputAreaProps) => {
 								onSendAll={() => onSendQueuedMessage(undefined, true)}
 								className={styles.messageQueue}
 							/>
-						)}
+						)} */}
 
 					<div
 						className={clsx(
-							styles.publishBox,
-							messageQueue && messageQueue.length > 0 && styles.hasQueue
+							styles.publishBox
+							// TODO: Queue/pre-send feature temporarily disabled
+							// messageQueue && messageQueue.length > 0 && styles.hasQueue
 						)}
 						onDragOver={handleDragOver}
 						onDragLeave={handleDragLeave}
@@ -967,7 +973,7 @@ const InputArea = (props: IInputAreaProps) => {
 							<div
 								className={styles.editor}
 								ref={editorRef}
-								contentEditable={!disabled && !isOptimizing}
+								contentEditable={!disabled && !isOptimizing && !streaming}
 								onInput={handleInput}
 								onKeyDown={handleKeyDown}
 								onPaste={handlePaste}
@@ -978,12 +984,16 @@ const InputArea = (props: IInputAreaProps) => {
 											: 'Type a message... (Shift + Enter for new line)'
 										: streaming
 										? is_cn
-											? messageQueue && messageQueue.length > 0
-												? '继续输入（回车键排队）或空回车立即发送队列 (Shift + Enter 换行)'
-												: '可继续输入（回车键排队，空回车立即发送） (Shift + Enter 换行)'
-											: messageQueue && messageQueue.length > 0
-											? 'Continue typing (Enter to queue, empty Enter to send now, Shift + Enter for new line)'
-											: 'Continue typing (Enter to queue, empty Enter to send, Shift + Enter for new line)'
+											? '正在响应中，请等待完成后再发送...'
+											: 'Waiting for response to complete...'
+										// TODO: Queue/pre-send feature temporarily disabled
+										// ? is_cn
+										// 	? messageQueue && messageQueue.length > 0
+										// 		? '继续输入（回车键排队）或空回车立即发送队列 (Shift + Enter 换行)'
+										// 		: '可继续输入（回车键排队，空回车立即发送） (Shift + Enter 换行)'
+										// 	: messageQueue && messageQueue.length > 0
+										// 	? 'Continue typing (Enter to queue, empty Enter to send now, Shift + Enter for new line)'
+										// 	: 'Continue typing (Enter to queue, empty Enter to send, Shift + Enter for new line)'
 										: is_cn
 										? '输入消息 (Shift + Enter 换行)'
 										: 'Type a message (Shift + Enter for new line)'
