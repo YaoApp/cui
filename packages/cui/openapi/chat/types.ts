@@ -360,6 +360,7 @@ interface BaseMessage {
 		timestamp?: number // Unix nanoseconds
 		sequence?: number // Message sequence number
 		trace_id?: string // For debugging
+		request_id?: string // Request ID for tracking
 	}
 }
 

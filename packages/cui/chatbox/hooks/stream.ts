@@ -100,6 +100,22 @@ function createChunkHandler(
 				setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
 				delete refs.abortHandles.current[targetTabId]
 
+				// Display error message if stream ended with error status
+				const streamEndData = chunk.props?.data
+				if (streamEndData?.status === 'error' && streamEndData?.error) {
+					updateMessages(targetTabId, (prev) => {
+						const errorMessage = {
+							type: 'error' as const,
+							props: {
+								message: streamEndData.error,
+								code: streamEndData.request_id || undefined,
+								details: undefined
+							}
+						}
+						return [...prev, errorMessage]
+					})
+				}
+
 				// Generate title on first round completion
 				// Title generation logic checks if it's first round internally
 				if (generateChatTitle) {
