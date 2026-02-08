@@ -293,20 +293,19 @@ const InputArea = (props: IInputAreaProps) => {
 		const content = editorRef.current.textContent || ''
 		setIsEmpty(!content.trim() && !hasTags)
 
-		// Check for mention trigger '@'
-		const selection = window.getSelection()
-		if (selection?.focusNode?.nodeType === Node.TEXT_NODE) {
-			const textNode = selection.focusNode
-			const offset = selection.focusOffset
-			const charBefore = textNode.textContent?.slice(offset - 1, offset)
-
-			if (charBefore === '@') {
-				saveSelection() // Save range when @ is detected
-				setShowMentions(true)
-			}
-		} else {
-			setShowMentions(false)
-		}
+		// TODO: Mention feature temporarily disabled, will be enabled in a future version
+		// const selection = window.getSelection()
+		// if (selection?.focusNode?.nodeType === Node.TEXT_NODE) {
+		// 	const textNode = selection.focusNode
+		// 	const offset = selection.focusOffset
+		// 	const charBefore = textNode.textContent?.slice(offset - 1, offset)
+		// 	if (charBefore === '@') {
+		// 		saveSelection()
+		// 		setShowMentions(true)
+		// 	}
+		// } else {
+		// 	setShowMentions(false)
+		// }
 	}
 
 	const constructMessage = (): UserMessage | null => {
@@ -531,12 +530,12 @@ const InputArea = (props: IInputAreaProps) => {
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
-			if (showMentions) {
-				e.preventDefault()
-				// Should select first mention? For now just close
-				setShowMentions(false)
-				return
-			}
+			// TODO: Mention feature temporarily disabled
+			// if (showMentions) {
+			// 	e.preventDefault()
+			// 	setShowMentions(false)
+			// 	return
+			// }
 			e.preventDefault()
 
 			// Queue mode: if streaming, queue the message instead of sending
@@ -547,9 +546,10 @@ const InputArea = (props: IInputAreaProps) => {
 			}
 		}
 
-		if (e.key === 'Escape') {
-			setShowMentions(false)
-		}
+		// TODO: Mention feature temporarily disabled
+		// if (e.key === 'Escape') {
+		// 	setShowMentions(false)
+		// }
 	}
 
 	const handlePaste = (e: React.ClipboardEvent) => {
@@ -985,12 +985,13 @@ const InputArea = (props: IInputAreaProps) => {
 											? 'Continue typing (Enter to queue, empty Enter to send now, Shift + Enter for new line)'
 											: 'Continue typing (Enter to queue, empty Enter to send, Shift + Enter for new line)'
 										: is_cn
-										? '输入消息，使用 @ 呼叫智能体 (Shift + Enter 换行)'
-										: 'Type a message, use @ to mention agent (Shift + Enter for new line)'
+										? '输入消息 (Shift + Enter 换行)'
+										: 'Type a message (Shift + Enter for new line)'
 								}
 							/>
-							{renderSendButton()}
-							{renderMentions()}
+						{renderSendButton()}
+						{/* TODO: Mention feature temporarily disabled */}
+						{/* {renderMentions()} */}
 						</div>
 
 						{renderToolbar()}
