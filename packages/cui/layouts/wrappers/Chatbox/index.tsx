@@ -220,10 +220,11 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	const getBaseUrl = (url: string): string => {
 		try {
 			const urlObj = new URL(url, window.location.origin)
-			return urlObj.pathname
+			// Strip /web prefix so that /web/agents/... and /agents/... match
+			return urlObj.pathname.replace(/^\/web/, '')
 		} catch {
 			// If URL parsing fails, try simple split
-			return url.split('?')[0]
+			return url.split('?')[0].replace(/^\/web/, '')
 		}
 	}
 
@@ -300,11 +301,12 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		(url: string, title: string) => {
 			if (!title) return
 
-			// Update tab title
+			const baseUrl = getBaseUrl(url)
+
+			// Update tab title — match by exact base URL
 			setSidebarTabs((prev) =>
 				prev.map((tab) => {
-					// Match by URL (partial match for /web/ URLs)
-					if (tab.url === url || tab.url.includes(url) || url.includes(tab.url)) {
+					if (getBaseUrl(tab.url) === baseUrl) {
 						return { ...tab, title }
 					}
 					return tab
@@ -314,7 +316,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			// Also update history
 			setSidebarHistory((prev) => {
 				const updated = prev.map((item) => {
-					if (item.url === url || item.url.includes(url) || url.includes(item.url)) {
+					if (getBaseUrl(item.url) === baseUrl) {
 						return { ...item, title }
 					}
 					return item
@@ -324,6 +326,27 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			})
 		},
 		[userId, teamId]
+	)
+
+	// Update active tab's URL and title (for in-iframe sub-navigation)
+	const updateActiveTab = useCallback(
+		(url: string, title: string) => {
+			setActiveSidebarTabId((activeId) => {
+				if (!activeId) return activeId
+
+				setSidebarTabs((prev) =>
+					prev.map((tab) => {
+						if (tab.id === activeId) {
+							return { ...tab, url, title: title || tab.title, timestamp: Date.now() }
+						}
+						return tab
+					})
+				)
+
+				return activeId
+			})
+		},
+		[]
 	)
 
 	// Remove a tab
@@ -615,11 +638,19 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			}
 		}
 
+		// Handle active tab update (for in-iframe sub-navigation)
+		const handleUpdateActiveTab = (detail: { url: string; title: string }) => {
+			if (detail?.url) {
+				updateActiveTab(detail.url, detail.title)
+			}
+		}
+
 		window.$app.Event.on('app/toggleSidebar', handleToggleSidebar)
 		window.$app.Event.on('app/openSidebar', handleOpenSidebar)
 		window.$app.Event.on('app/closeSidebar', handleCloseSidebar)
 		window.$app.Event.on('app/menuExpanding', handleMenuExpanding)
 		window.$app.Event.on('app/updateSidebarTabTitle', handleUpdateSidebarTabTitle)
+		window.$app.Event.on('app/updateActiveTab', handleUpdateActiveTab)
 
 		return () => {
 			window.$app.Event.off('app/toggleSidebar', handleToggleSidebar)
@@ -627,8 +658,9 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			window.$app.Event.off('app/closeSidebar', handleCloseSidebar)
 			window.$app.Event.off('app/menuExpanding', handleMenuExpanding)
 			window.$app.Event.off('app/updateSidebarTabTitle', handleUpdateSidebarTabTitle)
+			window.$app.Event.off('app/updateActiveTab', handleUpdateActiveTab)
 		}
-	}, [sidebarVisible, handleSetSidebarVisible, navigate, addSidebarTab, updateSidebarTabTitle])
+	}, [sidebarVisible, handleSetSidebarVisible, navigate, addSidebarTab, updateSidebarTabTitle, updateActiveTab])
 
 	// Listen for window resize events
 	useEffect(() => {
