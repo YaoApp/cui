@@ -142,13 +142,19 @@ const Index = () => {
 	}, [loading, pathname, search])
 
 	return (
-		<iframe
-			className='w_100 h_100vh'
-			ref={ref}
-			src={src}
-			onLoad={() => setLoading(false)}
-			style={{ backgroundColor: 'var(--color_bg)', border: 'none', display: loading ? 'none' : 'block' }}
-		></iframe>
+		<div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+			<iframe
+				className='w_100 h_100'
+				ref={ref}
+				src={src}
+				onLoad={() => setLoading(false)}
+				style={{
+					backgroundColor: 'var(--color_bg)',
+					border: 'none',
+					display: loading ? 'none' : 'block'
+				}}
+			></iframe>
+		</div>
 	)
 }
 
