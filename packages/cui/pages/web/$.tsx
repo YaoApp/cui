@@ -87,6 +87,29 @@ const Index = () => {
 					console.error('[Web/Iframe] Failed to execute action:', err)
 					console.debug('Action data:', { name, payload })
 				}
+			} else if (data.type === 'title' || data.type === 'updateTab') {
+				// Only handle messages from our own iframe
+				if (!ref.current || e.source !== ref.current.contentWindow) return
+
+				if (data.type === 'title') {
+					// Update this tab's title
+					const title = data.message?.title || data.title
+					if (title) {
+						window.$app?.Event?.emit('app/updateSidebarTabTitle', {
+							url: pathname + search,
+							title: title
+						})
+					}
+				} else {
+					// updateTab: Update current active tab's URL and title (for in-iframe navigation)
+					const { url, title } = data.message || {}
+					if (url) {
+						window.$app?.Event?.emit('app/updateActiveTab', {
+							url,
+							title: title || url
+						})
+					}
+				}
 			} else {
 				// Handle other message types
 				console.debug('Received message from iframe:', data)
