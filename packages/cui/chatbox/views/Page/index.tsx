@@ -119,6 +119,16 @@ const Page = (props: IPageProps) => {
 				window.$app.Event.emit('app/openSidebar', { forceNormal: true })
 			}
 
+			// Check if there's already an empty (isNew) tab with matching assistantId
+			// If so, just activate it instead of creating a duplicate
+			const existingNewTab = tabs.find(
+				(tab) => tab.isNew && (!assistantId || tab.assistantId === assistantId)
+			)
+			if (existingNewTab) {
+				activateTab(existingNewTab.chatId)
+				return
+			}
+
 			// Create new chat with specified assistant ID
 			createNewChat(assistantId)
 		}
@@ -134,7 +144,7 @@ const Page = (props: IPageProps) => {
 				window.$app.Event.off('chat/newWithAssistant', handleNewChatWithAssistant)
 			}
 		}
-	}, [createNewChat, global])
+	}, [createNewChat, activateTab, tabs, global])
 
 	return (
 		<div ref={containerRef} className={styles.container}>
