@@ -187,9 +187,7 @@ const SubMenuPopup: FC<SubMenuPopupProps> = ({ menu, position, onClose, onNaviga
 				)}
 				<span className='submenu-header-text'>{menu.name}</span>
 			</div>
-			<div className='submenu-content'>
-				{menu.children?.map((child) => renderSubMenuItem(child))}
-			</div>
+			<div className='submenu-content'>{menu.children?.map((child) => renderSubMenuItem(child))}</div>
 		</div>
 	)
 }
@@ -464,7 +462,9 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 				<div key={`${index}-${level}`} className='menu-group'>
 					{wrappedContent}
 					<div className='menu-children'>
-						{menu.children!.map((child, childIndex) => renderMenuItem(child, childIndex, level + 1))}
+						{menu.children!.map((child, childIndex) =>
+							renderMenuItem(child, childIndex, level + 1)
+						)}
 					</div>
 				</div>
 			)
@@ -506,7 +506,9 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 					{/* Setting items */}
 					{settingItems.length > 0 && (
 						<div className='menu-settings'>
-							{settingItems.map((menu, index) => renderMenuItem(menu, index + menuItems.length))}
+							{settingItems.map((menu, index) =>
+								renderMenuItem(menu, index + menuItems.length)
+							)}
 						</div>
 					)}
 
