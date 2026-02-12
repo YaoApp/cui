@@ -55,6 +55,10 @@ const Settings = ({ theme, onThemeChange }: SettingsProps) => {
 	}
 
 	const handleLanguageChange = (newLocale: string) => {
+		// Sync locale cookie for SUI server-side rendering BEFORE umi reloads the page.
+		const normalized = newLocale.toLowerCase().replace('_', '-')
+		document.cookie = `locale=${normalized};path=/;max-age=31536000`
+
 		setLocale(newLocale)
 		// 立即更新本地状态，确保UI同步响应（用户选择的语言直接设置，不需要标准化）
 		setCurrentLocale(newLocale)

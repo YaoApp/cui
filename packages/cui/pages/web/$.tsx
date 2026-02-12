@@ -36,6 +36,7 @@ const Index = () => {
 
 	const [loading, setLoading] = useState(true)
 	const ref = useRef<HTMLIFrameElement>(null)
+	const titleSetByIframe = useRef(false)
 
 	const getTheme = (): App.Theme => {
 		const theme = (local.xgen_theme || 'light') as App.Theme
@@ -95,6 +96,7 @@ const Index = () => {
 					// Update this tab's title
 					const title = data.message?.title || data.title
 					if (title) {
+						titleSetByIframe.current = true
 						window.$app?.Event?.emit('app/updateSidebarTabTitle', {
 							url: pathname + search,
 							title: title
@@ -104,6 +106,7 @@ const Index = () => {
 					// updateTab: Update current active tab's URL and title (for in-iframe navigation)
 					const { url, title } = data.message || {}
 					if (url) {
+						titleSetByIframe.current = true
 						window.$app?.Event?.emit('app/updateActiveTab', {
 							url,
 							title: title || url
@@ -112,7 +115,7 @@ const Index = () => {
 				}
 			} else {
 				// Handle other message types
-				console.debug('Received message from iframe:', data)
+				console.info('Received message from iframe:', data)
 			}
 		}
 
@@ -133,7 +136,12 @@ const Index = () => {
 		}
 	}, [])
 
-	// Send initial setup message
+	// Reset title flag when navigating to a new page (pathname/search change)
+	useEffect(() => {
+		titleSetByIframe.current = false
+	}, [pathname, search])
+
+	// Send initial setup message when iframe finishes loading
 	useEffect(() => {
 		if (!loading && ref.current) {
 			sendMessageToIframe(ref.current, {
@@ -144,22 +152,24 @@ const Index = () => {
 				}
 			})
 
-			// Try to get and update title from iframe (for same-origin iframes)
-			try {
-				const iframe = ref.current
-				if (iframe.contentDocument?.title) {
-					const title = iframe.contentDocument.title
-					if (title) {
-						// Emit event to update sidebar tab title
-						window.$app?.Event?.emit('app/updateSidebarTabTitle', {
-							url: pathname + search,
-							title: title
-						})
+			// Fallback: use <title> from iframe document only if the iframe
+			// has not already set the title via postMessage (title/updateTab).
+			// This avoids overwriting an i18n-aware title with a static <title> value.
+			if (!titleSetByIframe.current) {
+				try {
+					const iframe = ref.current
+					if (iframe.contentDocument?.title) {
+						const title = iframe.contentDocument.title
+						if (title) {
+							window.$app?.Event?.emit('app/updateSidebarTabTitle', {
+								url: pathname + search,
+								title: title
+							})
+						}
 					}
+				} catch {
+					// Cross-origin iframe, can't access title directly
 				}
-			} catch {
-				// Cross-origin iframe, can't access title directly
-				// Title will remain as domain name
 			}
 		}
 	}, [loading, pathname, search])

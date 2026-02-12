@@ -85,6 +85,16 @@ const Menu = ({ active, onChange }: MenuProps) => {
 	// 切换语言
 	const changeLocale = async (locale: string) => {
 		await window.$app.Event.emit(`app/getUserMenu`, locale)
+
+		// Sync locale cookie for SUI server-side rendering BEFORE umi reloads the page.
+		// SUI reads the "locale" cookie (lowercase, e.g. "zh-cn") to determine which
+		// locale data to render.  Without this, the first page load after switching
+		// languages would still use the old locale because umi's setLocale only updates
+		// localStorage (umi_locale) and the cookie wouldn't be updated until the iframe's
+		// client-side script runs — which is too late for server-side rendering.
+		const normalized = locale.toLowerCase().replace('_', '-')
+		document.cookie = `locale=${normalized};path=/;max-age=31536000`
+
 		setLocale(locale)
 	}
 

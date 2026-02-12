@@ -80,6 +80,11 @@ const Index = () => {
 	// Change the locale
 	const changeLocale = async (locale: string) => {
 		await window.$app.Event.emit(`app/getUserMenu`, locale)
+
+		// Sync locale cookie for SUI server-side rendering BEFORE umi reloads the page.
+		const normalized = locale.toLowerCase().replace('_', '-')
+		document.cookie = `locale=${normalized};path=/;max-age=31536000`
+
 		setLocale(locale)
 	}
 
