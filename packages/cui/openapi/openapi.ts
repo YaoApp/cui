@@ -138,6 +138,18 @@ export class OpenAPI {
 			headers: response.headers
 		}
 
+		// Invoke onUnauthorized callback for 401 responses
+		if (response.status === 401 && this.config.onUnauthorized) {
+			const suppress = this.config.onUnauthorized(response)
+			if (suppress === true) {
+				apiResponse.error = {
+					error: 'unauthorized',
+					error_description: 'Authentication required'
+				}
+				return apiResponse
+			}
+		}
+
 		try {
 			// Handle different content types
 			const contentType = response.headers.get('content-type') || ''
