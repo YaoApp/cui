@@ -34,7 +34,7 @@ const AIMessage = ({ message, loading }: IAIMessageProps) => {
 			case 'text':
 				return <Text message={message as any} />
 			case 'tool_call':
-				return <ToolCall message={message as any} />
+				return <ToolCall message={message as any} loading={loading} />
 			case 'error':
 				return <Error message={message as any} />
 			case 'action':

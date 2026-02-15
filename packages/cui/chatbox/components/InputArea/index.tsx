@@ -310,21 +310,22 @@ const InputArea = (props: IInputAreaProps) => {
 
 	const constructMessage = (): UserMessage | null => {
 		if (!editorRef.current) return null
-		const text = editorRef.current.innerText
+		const rawText = editorRef.current.innerText
+		const text = rawText.trim()
 		const hasTags = editorRef.current.querySelectorAll(`.${styles.mentionTag}`).length > 0
 
 		// Filter out attachments that are still uploading or failed
 		const validAttachments = attachments.filter((att) => !att.uploading && !att.error && att.wrapper)
 
-		if (!text.trim() && !hasTags && validAttachments.length === 0) return null
+		if (!text && !hasTags && validAttachments.length === 0) return null
 
 		// Construct Content
 		let content: UserMessage['content']
 		if (validAttachments.length > 0) {
 			// Multimodal content
 			const parts: any[] = []
-			if (text.trim()) {
-				parts.push({ type: 'text', text: text })
+			if (text) {
+				parts.push({ type: 'text', text })
 			}
 			validAttachments.forEach((att) => {
 				if (att.type === 'image') {
@@ -347,7 +348,7 @@ const InputArea = (props: IInputAreaProps) => {
 			})
 			content = parts
 		} else {
-			content = text // Plain text
+			content = text // Plain text (already trimmed)
 		}
 
 		return {
