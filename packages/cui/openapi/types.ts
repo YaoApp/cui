@@ -5,6 +5,13 @@ export interface OpenAPIConfig {
 	baseURL: string
 	timeout?: number
 	defaultHeaders?: Record<string, string>
+
+	/**
+	 * Callback invoked when a 401 Unauthorized response is received.
+	 * Use this to redirect to login page or refresh tokens.
+	 * Return `true` to suppress the default error handling for this response.
+	 */
+	onUnauthorized?: (response: Response) => boolean | void
 }
 
 /**

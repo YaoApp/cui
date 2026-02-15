@@ -12,7 +12,8 @@ import { local } from '@yaoapp/storex'
 import type { AvatarFullConfig } from 'react-nice-avatar'
 import type { App, LocaleMessages } from '@/types'
 import { OpenAPI, OpenAPIConfig, UserInfo, JobAPI, AppAPI } from '@/openapi'
-import { getLocale } from '@umijs/max'
+import { getLocale, history } from '@umijs/max'
+import { getPath } from '@/utils'
 
 @singleton()
 export default class GlobalModel {
@@ -115,19 +116,31 @@ export default class GlobalModel {
 
 		this.app_info = res
 
+		// Shared onUnauthorized handler: redirect to login on 401
+		const onUnauthorized = () => {
+			// Skip if already on the login page to prevent redirect loops
+			const currentPath = getPath(history.location.pathname)
+			if (currentPath.startsWith('/auth/entry')) return
+
+			// Use history.push which respects the router base prefix
+			history.push('/auth/entry')
+			return true
+		}
+
 		// OpenAPI Config - use well-known metadata if available, otherwise fall back to app info
 		if (this.yao_metadata?.openapi) {
 			// OpenAPI is enabled via well-known
 			window.$app.api_prefix = '__yao' // Widgets still use __yao prefix
-			window.$app.openapi = new OpenAPI({ baseURL: this.yao_metadata.openapi })
+			window.$app.openapi = new OpenAPI({ baseURL: this.yao_metadata.openapi, onUnauthorized })
 		} else if (res.openapi) {
 			// Fall back to app info
 			window.$app.api_prefix = res.apiPrefix || '__yao'
-			window.$app.openapi = new OpenAPI(res.openapi)
+			const config = typeof res.openapi === 'string' ? { baseURL: res.openapi } : res.openapi
+			window.$app.openapi = new OpenAPI({ ...config, onUnauthorized })
 		} else {
 			// Legacy mode
 			window.$app.api_prefix = res.apiPrefix || '__yao'
-			window.$app.openapi = new OpenAPI({ baseURL: '/v1' })
+			window.$app.openapi = new OpenAPI({ baseURL: '/v1', onUnauthorized })
 		}
 
 		window.$app.kb = res.kb || {}
