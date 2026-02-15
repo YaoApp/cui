@@ -1,62 +1,36 @@
-import React, { useState } from 'react'
-import { getLocale } from '@umijs/max'
-import clsx from 'clsx'
+import React from 'react'
 import type { ToolCallMessage } from '../../../openapi'
 import { Icon } from '@/widgets'
 import styles from './index.less'
 
 interface IToolCallProps {
 	message: ToolCallMessage
+	loading?: boolean
 }
 
-const ToolCall = ({ message }: IToolCallProps) => {
-	const locale = getLocale()
-	const is_cn = locale === 'zh-CN'
-	const [isCollapsed, setIsCollapsed] = useState(true)
+// snake_case → Title Case (e.g. "agents_yao_keeper" → "Agents Yao Keeper")
+const toTitleCase = (s: string) =>
+	s.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 
-	const rawName = message.props?.name || 'Unknown'
+// snake_case → PascalCase (e.g. "save_file" → "SaveFile")
+const toPascalCase = (s: string) =>
+	s.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+
+const ToolCall = ({ message, loading }: IToolCallProps) => {
+	const isStreaming = !!loading
+
+	const rawName = message.props?.name || ''
 	const parts = rawName.split('__')
-	const serverName = parts.length > 1 ? parts[0] : null
-	const toolName = parts.length > 1 ? parts[1] : rawName
+	const serverName = parts.length > 1 ? toTitleCase(parts[0]) : null
+	const toolName = parts.length > 1 ? toPascalCase(parts[1]) : rawName || '...'
 
-	const args = message.props?.arguments || ''
-	// const id = message.props?.id // ID might be useful for debugging but not needed in basic UI
-
-	// Try to pretty print JSON
-	let formattedArgs = args
-	try {
-		if (args) {
-			const parsed = JSON.parse(args)
-			formattedArgs = JSON.stringify(parsed, null, 2)
-		}
-	} catch (e) {
-		// ignore error, use raw string
-	}
-
-	const toggle = () => {
-		setIsCollapsed(!isCollapsed)
-	}
+	const label = serverName ? `${serverName}: ${toolName}` : toolName
+	const textClass = isStreaming ? styles.shimmerText : styles.staticText
 
 	return (
 		<div className={styles.container}>
-			<div className={styles.header} onClick={toggle}>
-				<div className={clsx(styles.icon, !isCollapsed && styles.expanded)}>
-					<Icon name='icon-chevron-right' size={14} />
-				</div>
-				<div className={styles.title}>
-					<span>{is_cn ? '调用工具' : 'Calling Tool'}</span>
-					<div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-						{serverName && (
-							<>
-								<span className={styles.server}>{serverName}</span>
-								<span className={styles.server}>/</span>
-							</>
-						)}
-						<span className={styles.name}>{toolName}</span>
-					</div>
-				</div>
-			</div>
-			{!isCollapsed && <div className={styles.content}>{formattedArgs}</div>}
+			<span className={styles.icon}><Icon name='icon-zap' size={11} /></span>
+			<span className={textClass}>{label}</span>
 		</div>
 	)
 }
