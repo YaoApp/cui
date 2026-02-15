@@ -118,9 +118,11 @@ export default class GlobalModel {
 
 		// Shared onUnauthorized handler: redirect to login on 401
 		const onUnauthorized = () => {
-			// Skip if already on the login page to prevent redirect loops
 			const currentPath = getPath(history.location.pathname)
-			if (currentPath.startsWith('/auth/entry')) return
+
+			// Skip for all auth pages (login, OAuth callback, consent, etc.)
+			// These pages handle their own auth flow and 401 is expected
+			if (currentPath.startsWith('/auth/')) return
 
 			// Use history.push which respects the router base prefix
 			history.push('/auth/entry')
