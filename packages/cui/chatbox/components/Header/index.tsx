@@ -20,7 +20,8 @@ const Header = (props: IHeaderProps) => {
 		onCloseOthers,
 		onCloseAll,
 		historyOpen,
-		onHistoryClick
+		onHistoryClick,
+		onExport
 	} = props
 
 	const tabsRef = useRef<HTMLDivElement>(null)
@@ -147,9 +148,11 @@ const Header = (props: IHeaderProps) => {
 						onCloseTab={() => activeTabId && onTabClose?.(activeTabId)}
 						onCloseOthers={onCloseOthers}
 						onCloseAll={onCloseAll}
+						onExport={onExport}
 						disableCloseTab={!activeTabId || (tabs?.length || 0) === 0}
 						disableCloseOthers={(tabs?.length || 0) <= 1}
 						disableCloseAll={(tabs?.length || 0) === 0}
+						disableExport={!activeTabId || (tabs?.length || 0) === 0}
 					/>
 				)}
 			</div>
@@ -161,13 +164,16 @@ const Header = (props: IHeaderProps) => {
 				onCloseTab={handleContextCloseTab}
 				onCloseOthers={handleContextCloseOthers}
 				onCloseAll={handleContextCloseAll}
+				onExport={onExport}
 				disableCloseTab={(tabs?.length || 0) === 0}
 				disableCloseOthers={(tabs?.length || 0) <= 1}
 				disableCloseAll={(tabs?.length || 0) === 0}
+				disableExport={!activeTabId || (tabs?.length || 0) === 0}
 				labels={{
 					closeTab: is_cn ? '关闭当前会话' : 'Close Chat',
 					closeOthers: is_cn ? '关闭其他会话' : 'Close Other Chats',
-					closeAll: is_cn ? '关闭全部会话' : 'Close All Chats'
+					closeAll: is_cn ? '关闭全部会话' : 'Close All Chats',
+					export: is_cn ? '导出为 Markdown' : 'Export as Markdown'
 				}}
 			/>
 		</div>

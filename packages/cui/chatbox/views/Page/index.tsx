@@ -5,6 +5,7 @@ import { useChatContext } from '../../context'
 import Chatbox from '../../components/Chatbox'
 import Header from '../../components/Header'
 import History from '../../components/History'
+import { exportChatAsMarkdown } from '../../utils/exportMarkdown'
 import { useGlobal } from '@/context/app'
 import type { App } from '@/types'
 
@@ -65,7 +66,7 @@ const Page = (props: IPageProps) => {
 		return null
 	}
 
-	const { createNewChat, tabs, activeTabId, activateTab, closeTab, loadHistory } = chatContext
+	const { createNewChat, tabs, activeTabId, activeTab, activateTab, closeTab, loadHistory, messages, assistant } = chatContext
 
 	// Toggle history sidebar
 	const toggleHistory = useCallback(() => {
@@ -87,6 +88,16 @@ const Page = (props: IPageProps) => {
 			closeTab(tab.chatId)
 		})
 	}, [tabs, closeTab])
+
+	// Export current chat as Markdown
+	const handleExport = useCallback(() => {
+		if (messages && messages.length > 0) {
+			exportChatAsMarkdown(messages, {
+				title: activeTab?.title || 'Chat',
+				assistantName: assistant?.name
+			})
+		}
+	}, [messages, activeTab, assistant])
 
 	// Handle history item selection
 	// overlay 模式下自动关闭，push-pull 模式下保持打开
@@ -174,6 +185,7 @@ const Page = (props: IPageProps) => {
 						onCloseAll={closeAllTabs}
 						historyOpen={historyOpen}
 						onHistoryClick={toggleHistory}
+						onExport={handleExport}
 					/>
 				)}
 

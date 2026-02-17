@@ -141,6 +141,8 @@ export interface IHeaderProps {
 	historyOpen?: boolean
 	/** 历史记录回调 */
 	onHistoryClick?: () => void
+	/** 导出当前会话为 Markdown */
+	onExport?: () => void
 	className?: string
 }
 

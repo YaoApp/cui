@@ -10,16 +10,20 @@ export interface TabMenuProps {
 	onCloseOthers?: () => void
 	/** 关闭全部 Tab */
 	onCloseAll?: () => void
+	/** 导出当前会话为 Markdown */
+	onExport?: () => void
 	/** 是否禁用关闭当前（没有激活 tab 时） */
 	disableCloseTab?: boolean
 	/** 是否禁用关闭其他（只有一个或没有 tab 时） */
 	disableCloseOthers?: boolean
 	/** 是否禁用关闭全部（没有 tab 时） */
 	disableCloseAll?: boolean
+	/** 是否禁用导出（没有消息时） */
+	disableExport?: boolean
 }
 
 const TabMenu: React.FC<TabMenuProps> = (props) => {
-	const { onCloseTab, onCloseOthers, onCloseAll, disableCloseTab, disableCloseOthers, disableCloseAll } = props
+	const { onCloseTab, onCloseOthers, onCloseAll, onExport, disableCloseTab, disableCloseOthers, disableCloseAll, disableExport } = props
 
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -66,6 +70,11 @@ const TabMenu: React.FC<TabMenuProps> = (props) => {
 		setOpen(false)
 	}, [onCloseAll])
 
+	const handleExport = useCallback(() => {
+		onExport?.()
+		setOpen(false)
+	}, [onExport])
+
 	return (
 		<div className={styles.container}>
 			<div ref={buttonRef} className={styles.iconBtn} onClick={handleToggle} title='Menu'>
@@ -95,6 +104,14 @@ const TabMenu: React.FC<TabMenuProps> = (props) => {
 					>
 						<Icon name='material-clear_all' size={14} />
 						<span>{is_cn ? '关闭全部会话' : 'Close All Chats'}</span>
+					</div>
+					<div className={styles.divider} />
+					<div
+						className={`${styles.menuItem} ${disableExport ? styles.disabled : ''}`}
+						onClick={disableExport ? undefined : handleExport}
+					>
+						<Icon name='material-download' size={14} />
+						<span>{is_cn ? '导出为 Markdown' : 'Export as Markdown'}</span>
 					</div>
 				</div>
 			)}
