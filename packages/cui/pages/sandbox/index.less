@@ -82,7 +82,6 @@
 	overflow: hidden;
 	background: var(--color_bg);
 	min-height: 0;
-	padding: 0 16px;
 }
 
 .screen {
@@ -91,17 +90,12 @@
 }
 
 .vncScreen {
-	width: 100%;
+	// Use calc to leave horizontal breathing room while giving noVNC
+	// the real container dimensions for its own scaleViewport math.
+	// Do NOT override the inner canvas size — noVNC manages that itself.
+	width: calc(100% - 32px);
 	height: 100%;
 	background: var(--color_bg);
-
-	:global {
-		canvas {
-			width: 100% !important;
-			height: 100% !important;
-			object-fit: contain;
-		}
-	}
 }
 
 .overlay {
