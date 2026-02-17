@@ -157,6 +157,22 @@ const Header: FC<HeaderProps> = ({
 		}
 	}, [contextMenu.tabId, tabs])
 
+	// Refresh current tab handler
+	const handleContextRefresh = useCallback(() => {
+		if (contextMenu.tabId) {
+			const tab = tabs.find((t) => t.id === contextMenu.tabId)
+			if (tab) {
+				// Activate the tab first if not already active
+				if (tab.id !== activeTabId) {
+					onTabChange?.(tab.id)
+					navigate(tab.url, { replace: true })
+				}
+				// Emit refresh event — $.tsx listens and reloads the iframe
+				window.$app?.Event?.emit('app/refreshTab')
+			}
+		}
+	}, [contextMenu.tabId, tabs, activeTabId, onTabChange, navigate])
+
 	// Check if current context menu tab can be opened in new window
 	const contextTabCanOpenInNewWindow = contextMenu.tabId
 		? canOpenInNewWindow(tabs.find((t) => t.id === contextMenu.tabId)?.url || '')
@@ -278,6 +294,7 @@ const Header: FC<HeaderProps> = ({
 				onCloseOthers={handleContextCloseOthers}
 				onCloseAll={handleContextCloseAll}
 				onOpenInNewWindow={handleContextOpenInNewWindow}
+				onRefresh={handleContextRefresh}
 				disableCloseTab={tabs.length === 0}
 				disableCloseOthers={tabs.length <= 1}
 				disableCloseAll={tabs.length === 0}

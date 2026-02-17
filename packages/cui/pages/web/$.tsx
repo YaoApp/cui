@@ -62,6 +62,28 @@ const Index = () => {
 		}
 	}, [])
 
+	// Listen for tab refresh event — reload the iframe in place
+	useEffect(() => {
+		const handleRefreshTab = () => {
+			if (ref.current?.contentWindow) {
+				try {
+					ref.current.contentWindow.location.reload()
+				} catch {
+					// Fallback: reset src to force reload
+					const iframe = ref.current
+					const currentSrc = iframe.src
+					iframe.src = ''
+					iframe.src = currentSrc
+				}
+			}
+		}
+
+		window.$app?.Event?.on('app/refreshTab', handleRefreshTab)
+		return () => {
+			window.$app?.Event?.off('app/refreshTab', handleRefreshTab)
+		}
+	}, [])
+
 	// Add event listener to receive message from iframe
 	useEffect(() => {
 		// Receive message from iframe
