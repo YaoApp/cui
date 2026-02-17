@@ -645,12 +645,25 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			}
 		}
 
+		// Handle route replace (iframe internal navigation — replace current route in-place)
+		const handleReplaceRoute = (detail: { url: string; title: string }) => {
+			if (!detail?.url) return
+			const { url, title } = detail
+
+			// Update active tab
+			updateActiveTab(url, title)
+
+			// Replace CUI route so address bar, refresh, and metadata.page all stay in sync
+			navigate(url, { replace: true })
+		}
+
 		window.$app.Event.on('app/toggleSidebar', handleToggleSidebar)
 		window.$app.Event.on('app/openSidebar', handleOpenSidebar)
 		window.$app.Event.on('app/closeSidebar', handleCloseSidebar)
 		window.$app.Event.on('app/menuExpanding', handleMenuExpanding)
 		window.$app.Event.on('app/updateSidebarTabTitle', handleUpdateSidebarTabTitle)
 		window.$app.Event.on('app/updateActiveTab', handleUpdateActiveTab)
+		window.$app.Event.on('app/replaceRoute', handleReplaceRoute)
 
 		return () => {
 			window.$app.Event.off('app/toggleSidebar', handleToggleSidebar)
@@ -659,6 +672,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			window.$app.Event.off('app/menuExpanding', handleMenuExpanding)
 			window.$app.Event.off('app/updateSidebarTabTitle', handleUpdateSidebarTabTitle)
 			window.$app.Event.off('app/updateActiveTab', handleUpdateActiveTab)
+			window.$app.Event.off('app/replaceRoute', handleReplaceRoute)
 		}
 	}, [sidebarVisible, handleSetSidebarVisible, navigate, addSidebarTab, updateSidebarTabTitle, updateActiveTab])
 
