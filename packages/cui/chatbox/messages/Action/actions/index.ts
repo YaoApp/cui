@@ -4,11 +4,12 @@
 
 import navigate, { NavigatePayload } from './navigate'
 import navigateBack, { NavigateBackPayload } from './navigate.back'
+import navigateReplace, { NavigateReplacePayload } from './navigate.replace'
 import appMenuReload from './app.menu.reload'
 import { notifySuccess, notifyError, notifyWarning, notifyInfo, NotifyPayload } from './notify'
 import chatNewWithAssistant, { ChatNewWithAssistantPayload } from './chat.newWithAssistant'
 
-export type ActionPayload = NavigatePayload | NavigateBackPayload | NotifyPayload | ChatNewWithAssistantPayload | undefined
+export type ActionPayload = NavigatePayload | NavigateBackPayload | NavigateReplacePayload | NotifyPayload | ChatNewWithAssistantPayload | undefined
 
 export interface ActionHandler {
 	(payload?: any): void
@@ -21,6 +22,7 @@ export const actionHandlers: Record<string, ActionHandler> = {
 	// Navigate
 	navigate,
 	'navigate.back': navigateBack,
+	'navigate.replace': navigateReplace,
 
 	// App
 	'app.menu.reload': appMenuReload,
