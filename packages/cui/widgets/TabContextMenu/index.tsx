@@ -56,6 +56,8 @@ export interface TabContextMenuProps {
 	onCloseAll?: () => void
 	/** Open in new window */
 	onOpenInNewWindow?: () => void
+	/** Refresh current tab */
+	onRefresh?: () => void
 	/** Disable close tab option */
 	disableCloseTab?: boolean
 	/** Disable close others option */
@@ -70,6 +72,7 @@ export interface TabContextMenuProps {
 		closeOthers?: string
 		closeAll?: string
 		openInNewWindow?: string
+		refresh?: string
 	}
 }
 
@@ -80,6 +83,7 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 	onCloseOthers,
 	onCloseAll,
 	onOpenInNewWindow,
+	onRefresh,
 	disableCloseTab = false,
 	disableCloseOthers = false,
 	disableCloseAll = false,
@@ -95,7 +99,8 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 		closeTab: is_cn ? '关闭标签' : 'Close Tab',
 		closeOthers: is_cn ? '关闭其他标签' : 'Close Other Tabs',
 		closeAll: is_cn ? '关闭全部标签' : 'Close All Tabs',
-		openInNewWindow: is_cn ? '在新窗口打开' : 'Open in New Window'
+		openInNewWindow: is_cn ? '在新窗口打开' : 'Open in New Window',
+		refresh: is_cn ? '刷新' : 'Refresh'
 	}
 
 	const mergedLabels = { ...defaultLabels, ...labels }
@@ -161,6 +166,11 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 		onClose()
 	}, [onOpenInNewWindow, onClose])
 
+	const handleRefresh = useCallback(() => {
+		onRefresh?.()
+		onClose()
+	}, [onRefresh, onClose])
+
 	if (!position) return null
 
 	return (
@@ -178,9 +188,13 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 						<Icon name='material-open_in_new' size={14} />
 						<span>{mergedLabels.openInNewWindow}</span>
 					</div>
-					<div className='tab_context_menu_divider' />
 				</>
 			)}
+			<div className='tab_context_menu_item' onClick={handleRefresh}>
+				<Icon name='material-refresh' size={14} />
+				<span>{mergedLabels.refresh}</span>
+			</div>
+			<div className='tab_context_menu_divider' />
 			<div
 				className={`tab_context_menu_item ${disableCloseTab ? 'disabled' : ''}`}
 				onClick={handleCloseTab}

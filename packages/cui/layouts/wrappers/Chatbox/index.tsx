@@ -605,11 +605,18 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 						global.setSidebarWidth(defaultWidth)
 					}
 
-					// Create a new Tab (Sidebar Tabs mode)
-					addSidebarTab(url, title, detail.icon)
+				// Create a new Tab (Sidebar Tabs mode)
+				addSidebarTab(url, title, detail.icon)
 
-					// Also navigate for URL sync (replace to avoid history stack)
-					navigate(url, { replace: true })
+				// Also navigate for URL sync (replace to avoid history stack)
+				navigate(url, { replace: true })
+
+				// If already on the same URL, force-refresh the iframe
+				// (navigate won't change pathname/search, so $.tsx won't reload)
+				const currentFullPath = currentPath + (location.search || '')
+				if (currentFullPath === url) {
+					window.$app?.Event?.emit('app/refreshTab')
+				}
 				}
 
 				// Support forceNormal parameter to exit maximized mode
