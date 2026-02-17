@@ -58,6 +58,8 @@ export interface TabContextMenuProps {
 	onOpenInNewWindow?: () => void
 	/** Refresh current tab */
 	onRefresh?: () => void
+	/** Export current chat as Markdown */
+	onExport?: () => void
 	/** Disable close tab option */
 	disableCloseTab?: boolean
 	/** Disable close others option */
@@ -66,6 +68,8 @@ export interface TabContextMenuProps {
 	disableCloseAll?: boolean
 	/** Show open in new window option */
 	showOpenInNewWindow?: boolean
+	/** Disable export option */
+	disableExport?: boolean
 	/** Custom labels */
 	labels?: {
 		closeTab?: string
@@ -73,6 +77,7 @@ export interface TabContextMenuProps {
 		closeAll?: string
 		openInNewWindow?: string
 		refresh?: string
+		export?: string
 	}
 }
 
@@ -84,10 +89,12 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 	onCloseAll,
 	onOpenInNewWindow,
 	onRefresh,
+	onExport,
 	disableCloseTab = false,
 	disableCloseOthers = false,
 	disableCloseAll = false,
 	showOpenInNewWindow = false,
+	disableExport = false,
 	labels
 }) => {
 	const locale = getLocale()
@@ -100,7 +107,8 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 		closeOthers: is_cn ? '关闭其他标签' : 'Close Other Tabs',
 		closeAll: is_cn ? '关闭全部标签' : 'Close All Tabs',
 		openInNewWindow: is_cn ? '在新窗口打开' : 'Open in New Window',
-		refresh: is_cn ? '刷新' : 'Refresh'
+		refresh: is_cn ? '刷新' : 'Refresh',
+		export: is_cn ? '导出为 Markdown' : 'Export as Markdown'
 	}
 
 	const mergedLabels = { ...defaultLabels, ...labels }
@@ -171,6 +179,13 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 		onClose()
 	}, [onRefresh, onClose])
 
+	const handleExport = useCallback(() => {
+		if (!disableExport) {
+			onExport?.()
+			onClose()
+		}
+	}, [disableExport, onExport, onClose])
+
 	if (!position) return null
 
 	return (
@@ -216,6 +231,14 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 			>
 				<Icon name='material-clear_all' size={14} />
 				<span>{mergedLabels.closeAll}</span>
+			</div>
+			<div className='tab_context_menu_divider' />
+			<div
+				className={`tab_context_menu_item ${disableExport ? 'disabled' : ''}`}
+				onClick={handleExport}
+			>
+				<Icon name='material-download' size={14} />
+				<span>{mergedLabels.export}</span>
 			</div>
 		</div>
 	)
