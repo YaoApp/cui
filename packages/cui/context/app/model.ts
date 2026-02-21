@@ -124,6 +124,9 @@ export default class GlobalModel {
 			// These pages handle their own auth flow and 401 is expected
 			if (currentPath.startsWith('/auth/')) return
 
+			// Skip for OTP verification pages - they handle their own auth flow
+			if (currentPath.startsWith('/v/')) return
+
 			// Use history.push which respects the router base prefix
 			history.push('/auth/entry')
 			return true
