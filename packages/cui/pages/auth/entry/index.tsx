@@ -18,10 +18,8 @@ import { getDefaultLogoUrl } from '@/services/wellknown'
 // Backend will determine if user is logging in or registering based on email existence
 
 // Cookie 工具函数
-const setCookie = (name: string, value: string, days: number = 7) => {
-	const expires = new Date()
-	expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
-	document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
+const setCookie = (name: string, value: string) => {
+	document.cookie = `${name}=${value};path=/;max-age=315360000`
 }
 
 const getUrlParam = (name: string): string | null => {
