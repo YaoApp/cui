@@ -16,19 +16,13 @@
 	.appLogo {
 		width: 48px;
 		height: 48px;
-		border-radius: 12px;
-		background: rgba(255, 255, 255, 0.1);
-		backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.2);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
 		&:hover {
-			background: rgba(255, 255, 255, 0.15);
 			transform: translateY(-1px);
-			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 		}
 
 		img {
@@ -54,7 +48,6 @@
 		.appLogo {
 			width: 40px;
 			height: 40px;
-			border-radius: 10px;
 
 			img {
 				width: 40px;
@@ -64,16 +57,3 @@
 	}
 }
 
-/* Dark theme support */
-[data-theme='dark'] {
-	.logoWrap {
-		.appLogo {
-			background: rgba(255, 255, 255, 0.05);
-			border: 1px solid rgba(255, 255, 255, 0.1);
-
-			&:hover {
-				background: rgba(255, 255, 255, 0.1);
-			}
-		}
-	}
-}

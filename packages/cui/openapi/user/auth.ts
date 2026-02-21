@@ -364,6 +364,14 @@ export class UserAuth {
 	}
 
 	/**
+	 * OTP passwordless login
+	 * Verifies OTP code and establishes session (sets cookies server-side)
+	 */
+	async OTPLogin(code: string, locale?: string): Promise<ApiResponse<{ status: string; redirect: string }>> {
+		return this.api.Post<{ status: string; redirect: string }>('/otp/login', { code, locale: locale || '' })
+	}
+
+	/**
 	 * User logout
 	 */
 	async Logout(serverLogout: boolean = true): Promise<ApiResponse<void>> {

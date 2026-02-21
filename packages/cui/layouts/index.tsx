@@ -31,7 +31,9 @@ const STANDALONE_PAGES = new Map([
 	['auth_helloworld', '/auth/helloworld'],
 	// Team pages
 	['team_select', '/team/select'],
-	['team_invite', '/team/invite/']
+	['team_invite', '/team/invite/'],
+	// OTP verification
+	['otp_verify', '/v/']
 ])
 
 // Check if current path matches any standalone page
