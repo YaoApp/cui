@@ -9,6 +9,8 @@ import { useRobots } from '@/hooks/useRobots'
 import { useGlobal } from '@/context/app'
 import { Agent } from '@/openapi/agent/api'
 import { MCP } from '@/openapi/mcp/api'
+import { LLM } from '@/openapi'
+import type { LLMProvider } from '@/openapi/llm/types'
 import { UserAuth } from '@/openapi/user/auth'
 import { UserTeams } from '@/openapi/user/teams'
 import { Chat, IsEventMessage, IsStreamEndEvent } from '@/openapi'
@@ -77,6 +79,8 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 	const [agentsLoading, setAgentsLoading] = useState(false)
 	const [mcpServers, setMCPServers] = useState<MCPServer[]>([])
 	const [mcpLoading, setMCPLoading] = useState(false)
+	const [llmProviders, setLlmProviders] = useState<LLMProvider[]>([])
+	const [llmLoading, setLlmLoading] = useState(false)
 
 	// Picker visibility state
 	const [agentPickerVisible, setAgentPickerVisible] = useState(false)
@@ -87,10 +91,11 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 	const userMembersLoadedRef = useRef(false)
 	const agentsLoadedRef = useRef(false)
 	const mcpLoadedRef = useRef(false)
+	const llmLoadedRef = useRef(false)
 	const generatedPromptRef = useRef('')
 
 	// Get team ID
-	const teamId = global.user?.team_id || global.user?.user_id || ''
+	const teamId = global.user?.team_id || String(global.user?.id || '')
 
 	// Load team config when modal opens
 	useEffect(() => {
@@ -113,10 +118,11 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 					if (response.data) {
 						setTeamConfig(response.data)
 						// Set default email domain
-						if (response.data.robot?.email_domains?.[0]?.domain) {
+						if (response.data?.robot?.email_domains?.[0]?.domain) {
+							const domain = response.data.robot.email_domains[0].domain
 							setFormData(prev => ({
 								...prev,
-								robot_email_domain: response.data.robot.email_domains[0].domain
+								robot_email_domain: domain
 							}))
 						}
 					}
@@ -220,6 +226,23 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 		}
 	}, [visible, currentStep])
 
+	// Load LLM providers when entering step 2
+	useEffect(() => {
+		if (visible && currentStep === 2 && window.$app?.openapi && !llmLoadedRef.current && !llmLoading) {
+			llmLoadedRef.current = true
+			setLlmLoading(true)
+
+			const llmAPI = new LLM(window.$app.openapi)
+			llmAPI.ListProviders({ capabilities: ['tool_calls'] })
+				.then((providers) => setLlmProviders(providers || []))
+				.catch((err) => {
+					console.error('Failed to load LLM providers:', err)
+					llmLoadedRef.current = false
+				})
+				.finally(() => setLlmLoading(false))
+		}
+	}, [visible, currentStep])
+
 	// Reset when modal closes
 	useEffect(() => {
 		if (!visible) {
@@ -227,6 +250,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			userMembersLoadedRef.current = false
 			agentsLoadedRef.current = false
 			mcpLoadedRef.current = false
+			llmLoadedRef.current = false
 		}
 	}, [visible])
 
@@ -268,6 +292,12 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 		}))
 	}, [mcpServers])
 
+	// LLM provider options
+	const llmOptions = useMemo(() =>
+		llmProviders.map((p) => ({ label: p.label, value: p.value })),
+		[llmProviders]
+	)
+
 	// Selected items as PickerItem[] for AgentPicker value
 	const selectedAgentItems: PickerItem[] = useMemo(() => {
 		return (formData.agents || []).map((id: string) => {
@@ -294,6 +324,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 				manager_id: '',
 				autonomous_mode: false,
 				system_prompt: '',
+				language_model: '',
 				agents: [],
 				mcp_servers: []
 			})
@@ -357,10 +388,9 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			newErrors.system_prompt = is_cn ? '请输入角色与职责' : 'Role & Responsibilities is required'
 		}
 
-		// Agents are optional now
-		// if (!formData.agents?.length) {
-		// 	newErrors.agents = is_cn ? '请至少选择一个可协作的智能体' : 'Select at least one AI Assistant'
-		// }
+		if (!formData.language_model) {
+			newErrors.language_model = is_cn ? '请选择 AI 模型' : 'AI Model is required'
+		}
 
 		setErrors(newErrors)
 		return Object.keys(newErrors).length === 0
@@ -743,13 +773,13 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 										<span className={styles.required}>*</span>
 									</label>
 									<RadioGroup
-										value={formData.autonomous_mode}
-										onChange={(value) => handleFieldChange('autonomous_mode', value)}
+										value={String(formData.autonomous_mode)}
+										onChange={(value) => handleFieldChange('autonomous_mode', value === 'true')}
 										schema={{
-											type: 'boolean',
+											type: 'string',
 											enum: [
-												{ label: is_cn ? '自主模式' : 'Autonomous', value: true },
-												{ label: is_cn ? '按需模式' : 'On Demand', value: false }
+												{ label: is_cn ? '自主模式' : 'Autonomous', value: 'true' },
+												{ label: is_cn ? '按需模式' : 'On Demand', value: 'false' }
 											]
 										}}
 									/>
@@ -806,6 +836,31 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 									/>
 								</div>
 
+								{/* AI Model */}
+								<div className={styles.formItem}>
+									<label className={styles.formLabel}>
+										{is_cn ? 'AI 模型' : 'AI Model'}
+										<span className={styles.required}>*</span>
+										{llmLoading && (
+											<span className={styles.loadingHint}>
+												{is_cn ? ' (加载中...)' : ' (Loading...)'}
+											</span>
+										)}
+									</label>
+									<Select
+										value={formData.language_model}
+										onChange={(value) => handleFieldChange('language_model', value)}
+										schema={{
+											type: 'string',
+											enum: llmOptions,
+											placeholder: is_cn ? '选择 AI 模型' : 'Select AI model',
+											searchable: true
+										}}
+										error={errors.language_model}
+										hasError={!!errors.language_model}
+									/>
+								</div>
+
 								{/* Accessible AI Assistants */}
 								<div className={styles.formItem}>
 									<label className={styles.formLabel}>
@@ -849,6 +904,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 										type='assistant'
 										mode='multiple'
 										value={selectedAgentItems}
+										filter={{ types: ['assistant', 'robot'], automated: true }}
 									/>
 								</div>
 

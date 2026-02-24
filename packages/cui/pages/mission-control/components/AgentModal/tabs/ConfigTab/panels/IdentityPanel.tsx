@@ -1,10 +1,12 @@
-import React, { useState, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { Tooltip, message } from 'antd'
 import { getLocale } from '@umijs/max'
-import { Select, TextArea, InputNumber } from '@/components/ui/inputs'
+import { Select, TextArea } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import AgentPicker from '@/components/AgentPicker'
 import type { PickerItem } from '@/components/AgentPicker/types'
+import { LLM } from '@/openapi'
+import type { LLMProvider } from '@/openapi/llm/types'
 import { useGlobal } from '@/context/app'
 import type { RobotState } from '../../../../../types'
 import type { ConfigContextData } from '../index'
@@ -56,14 +58,26 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 		[configData?.mcpServers]
 	)
 
-	// Mock LLM providers - TODO: Load from LLM API
-	const llmProviders = useMemo(() => [
-		{ label: 'GPT-4 Turbo', value: 'gpt-4-turbo' },
-		{ label: 'GPT-4o', value: 'gpt-4o' },
-		{ label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet' },
-		{ label: 'Claude 3 Opus', value: 'claude-3-opus' },
-		{ label: 'DeepSeek V3', value: 'deepseek-v3' }
-	], [])
+	const [llmProviders, setLlmProviders] = useState<LLMProvider[]>([])
+	const [llmLoading, setLlmLoading] = useState(false)
+	const llmLoadedRef = useRef(false)
+
+	useEffect(() => {
+		if (llmLoadedRef.current || !window.$app?.openapi) return
+		llmLoadedRef.current = true
+		setLlmLoading(true)
+
+		const llmAPI = new LLM(window.$app.openapi)
+		llmAPI.ListProviders({ capabilities: ['tool_calls'] })
+			.then((providers) => setLlmProviders(providers || []))
+			.catch((err) => console.error('Failed to fetch LLM providers:', err))
+			.finally(() => setLlmLoading(false))
+	}, [])
+
+	const llmOptions = useMemo(() =>
+		llmProviders.map((p) => ({ label: p.label, value: p.value })),
+		[llmProviders]
+	)
 
 	const [agentPickerVisible, setAgentPickerVisible] = useState(false)
 	const [mcpPickerVisible, setMcpPickerVisible] = useState(false)
@@ -227,47 +241,34 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 				{is_cn ? '资源配置' : 'Resources'}
 			</div>
 
-			{/* AI Model and Budget */}
-			<div className={styles.formRow}>
-				<div className={styles.formItemHalf}>
-					<label className={styles.formLabel}>
-						{is_cn ? 'AI 模型' : 'AI Model'}
-					</label>
-					<Select
-						value={formData.language_model}
-						onChange={(value) => handleFieldChange('language_model', value)}
-						schema={{
-							type: 'string',
-							enum: llmProviders,
-							placeholder: is_cn ? '选择 AI 模型' : 'Select AI model'
-						}}
-					/>
-				</div>
-
-				<div className={styles.formItemHalf}>
-					<label className={styles.formLabel}>
-						{is_cn ? '月度预算 (USD)' : 'Monthly Budget (USD)'}
-						<Tooltip
-							title={is_cn
-								? '设置该智能体每月可使用的 API 费用上限'
-								: 'Set the monthly API cost limit for this agent'
-							}
-						>
-							<span className={styles.helpIconWrapper}>
-								<Icon name='material-help' size={14} className={styles.helpIcon} />
-							</span>
-						</Tooltip>
-					</label>
-					<InputNumber
-						value={formData.cost_limit}
-						onChange={(value) => handleFieldChange('cost_limit', value)}
-						schema={{
-							type: 'number',
-							placeholder: '100',
-							minimum: 0
-						}}
-					/>
-				</div>
+			{/* AI Model */}
+			<div className={styles.formItem}>
+				<label className={styles.formLabel}>
+					{is_cn ? 'AI 模型' : 'AI Model'}
+					<Tooltip
+						title={is_cn
+							? '仅显示支持工具调用的模型'
+							: 'Only models that support tool calling are shown'
+						}
+					>
+						<span className={styles.helpIconWrapper}>
+							<Icon name='material-help' size={14} className={styles.helpIcon} />
+						</span>
+					</Tooltip>
+					{llmLoading && (
+						<span className={styles.loadingHint}>{is_cn ? ' (加载中...)' : ' (Loading...)'}</span>
+					)}
+				</label>
+				<Select
+					value={formData.language_model}
+					onChange={(value) => handleFieldChange('language_model', value)}
+					schema={{
+						type: 'string',
+						enum: llmOptions,
+						placeholder: is_cn ? '选择 AI 模型' : 'Select AI model',
+						searchable: true
+					}}
+				/>
 			</div>
 
 			{/* Accessible AI Assistants */}
@@ -317,6 +318,7 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 					type='assistant'
 					mode='multiple'
 					value={selectedAgentItems}
+					filter={{ types: ['assistant', 'robot'], automated: true }}
 				/>
 			</div>
 

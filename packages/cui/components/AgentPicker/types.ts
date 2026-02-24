@@ -7,6 +7,16 @@ export interface PickerItem {
 	tools?: string[]
 }
 
+export interface AgentPickerFilter {
+	types?: string[]
+	automated?: boolean
+	mentionable?: boolean
+	built_in?: boolean
+	sandbox?: boolean
+	tags?: string[]
+	connector?: string
+}
+
 export interface AgentPickerProps {
 	visible: boolean
 	onClose: () => void
@@ -16,4 +26,5 @@ export interface AgentPickerProps {
 	value?: PickerItem[]
 	expandTools?: boolean
 	title?: string
+	filter?: AgentPickerFilter
 }
