@@ -28,6 +28,8 @@ export interface AgentFilter {
 	automated?: boolean
 	/** Filter by built-in status */
 	built_in?: boolean
+	/** Filter by sandbox availability */
+	sandbox?: boolean
 	/** Page number, starting from 1 */
 	page?: number
 	/** Items per page */
@@ -192,6 +194,10 @@ export interface Agent {
 	sort?: number
 	/** Assistant description */
 	description?: string
+	/** Capabilities description for Robot orchestration */
+	capabilities?: string
+	/** Whether sandbox is configured (boolean in API response) */
+	sandbox?: boolean
 	/** Assistant tags */
 	tags?: string[]
 	/** Supported modes (e.g., ["task", "chat"]), null means all modes are supported */

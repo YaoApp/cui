@@ -64,6 +64,8 @@ export declare namespace App {
 		readonly?: boolean
 		mentionable?: boolean
 		automated?: boolean
+		capabilities?: string
+		sandbox?: boolean
 		avatar?: string
 		connector?: string
 		[key: string]: any

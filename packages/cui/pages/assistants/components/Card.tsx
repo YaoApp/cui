@@ -27,9 +27,13 @@ const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) 
 	const global = useGlobal()
 	const { default_assistant } = global
 
+	const dockerAvailable = (global.app_info as any)?.tools?.docker?.available === true
+	const chatDisabled = data.sandbox === true && !dockerAvailable
+
 	// Handle chat button click without triggering the card click
 	const handleChatClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
+		if (chatDisabled) return
 
 		// Trigger the new chat event with assistant ID
 		window.$app.Event.emit('chat/newWithAssistant', data.assistant_id)
@@ -80,6 +84,13 @@ const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) 
 									</span>
 								</Tooltip>
 							)}
+							{data.sandbox == true && (
+								<Tooltip title={is_cn ? '沙箱' : 'Sandbox'}>
+									<span className={styles.statusIcon}>
+										<Icon name='icon-codesandbox' size={16} color='#13c2c2' />
+									</span>
+								</Tooltip>
+							)}
 						</div>
 					</div>
 					<div className={styles.tags}>
@@ -98,15 +109,20 @@ const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) 
 			<div className={styles.description}>{data.description}</div>
 			<div className={styles.footer}>
 				<div className={styles.actions}>
-					<Button
-						type='primary'
-						size='small'
-						onClick={handleChatClick}
-						className={styles.chatButton}
-						icon={<Icon name='icon-message-circle' size={14} />}
+					<Tooltip
+						title={chatDisabled ? (is_cn ? '需要启用 Docker 服务' : 'Docker service required') : undefined}
 					>
-				{is_cn ? '聊天' : 'Chat'}
-			</Button>
+						<Button
+							type='primary'
+							size='small'
+							onClick={handleChatClick}
+							disabled={chatDisabled}
+							className={styles.chatButton}
+							icon={<Icon name='icon-message-circle' size={14} />}
+						>
+							{is_cn ? '聊天' : 'Chat'}
+						</Button>
+					</Tooltip>
 			{data.connector && connectorMapping[data.connector] && (
 				<div className={styles.connector}>{connectorMapping[data.connector]}</div>
 			)}

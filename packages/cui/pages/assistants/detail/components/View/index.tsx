@@ -1,15 +1,15 @@
 import { Tabs } from 'antd'
 import { getLocale } from '@umijs/max'
+import { useAsyncEffect } from 'ahooks'
+import { Fragment, useState } from 'react'
+import * as JsxRuntime from 'react/jsx-runtime'
+import remarkGfm from 'remark-gfm'
+import { evaluate } from '@mdx-js/mdx'
 import { App } from '@/types'
 import Tag from '../../../components/Tag'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
 import { useLLMProviders } from '@/hooks/useLLMProviders'
-
-interface Message {
-	role: 'system' | 'user' | 'assistant' | 'developer'
-	content: string
-}
 
 interface ViewProps {
 	data: App.Assistant
@@ -20,21 +20,6 @@ const View = ({ data, connectors }: ViewProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const { mapping: connectorMapping } = useLLMProviders()
-
-	const getRoleLabel = (role: string) => {
-		switch (role) {
-			case 'system':
-				return is_cn ? '系统' : 'System'
-			case 'user':
-				return is_cn ? '用户' : 'User'
-			case 'assistant':
-				return is_cn ? '助手' : 'Assistant'
-			case 'developer':
-				return is_cn ? '开发者' : 'Developer'
-			default:
-				return role
-		}
-	}
 
 	const renderGeneral = () => (
 		<div className={styles.viewSection}>
@@ -159,57 +144,41 @@ const View = ({ data, connectors }: ViewProps) => {
 		</div>
 	)
 
-	const renderPrompts = () => (
+	const MarkdownContent = ({ content }: { content: string }) => {
+		const [rendered, setRendered] = useState<any>(null)
+
+		useAsyncEffect(async () => {
+			if (!content) return
+			try {
+				const { default: Content } = await evaluate(content, {
+					...JsxRuntime,
+					Fragment,
+					format: 'md',
+					remarkPlugins: [remarkGfm],
+					baseUrl: import.meta.url
+				})
+				setRendered(<Content />)
+			} catch {
+				setRendered(<div style={{ whiteSpace: 'pre-wrap' }}>{content}</div>)
+			}
+		}, [content])
+
+		if (!rendered) return <span className={styles.emptyValue}>{is_cn ? '暂无内容' : 'No content'}</span>
+		return <div className={styles.markdownContent}>{rendered}</div>
+	}
+
+	const renderCapabilities = () => (
 		<div className={styles.viewSection}>
 			<div className={styles.fieldGroup}>
 				<div className={styles.fieldItem}>
-					<div className={styles.fieldLabel}>{is_cn ? '消息' : 'Messages'}</div>
 					<div className={styles.fieldValue}>
-						{Array.isArray(data.prompts) && data.prompts.length > 0 ? (
-							<div className={styles.messagesList}>
-								{data.prompts.map((message: Message, index: number) => (
-									<div key={index} className={styles.messageItem}>
-										<div className={styles.messageHeader}>
-											<span className={styles.messageRole}>
-												{getRoleLabel(message.role)}
-											</span>
-										</div>
-										<div className={styles.messageContent}>
-											{message.content}
-										</div>
-									</div>
-								))}
-							</div>
+						{data.capabilities ? (
+							<MarkdownContent content={data.capabilities} />
 						) : (
 							<span className={styles.emptyValue}>
-								{is_cn ? '暂无消息' : 'No messages'}
+								{is_cn ? '暂无能力描述' : 'No capabilities description'}
 							</span>
 						)}
-					</div>
-				</div>
-
-				<div className={styles.fieldItem}>
-					<div className={styles.fieldLabel}>{is_cn ? '选项' : 'Options'}</div>
-					<div className={styles.fieldValue}>
-						{(() => {
-							const optionsData = data.option || data.options || {}
-							return Object.keys(optionsData).length > 0 ? (
-								<div className={styles.optionsList}>
-									{Object.entries(optionsData).map(([key, value]) => (
-										<div key={key} className={styles.optionItem}>
-											<span className={styles.optionKey}>{key}:</span>
-											<span className={styles.optionValue}>
-												{String(value)}
-											</span>
-										</div>
-									))}
-								</div>
-							) : (
-								<span className={styles.emptyValue}>
-									{is_cn ? '暂无选项' : 'No options'}
-								</span>
-							)
-						})()}
 					</div>
 				</div>
 			</div>
@@ -223,9 +192,9 @@ const View = ({ data, connectors }: ViewProps) => {
 			children: renderGeneral()
 		},
 		{
-			key: 'prompts',
-			label: is_cn ? '提示词' : 'Prompts',
-			children: renderPrompts()
+			key: 'capabilities',
+			label: is_cn ? '能力' : 'Capabilities',
+			children: renderCapabilities()
 		}
 	]
 
