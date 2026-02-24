@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { Modal, message, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
-import { Input, Select, TextArea, RadioGroup, CheckboxGroup } from '@/components/ui/inputs'
+import { Input, Select, TextArea, RadioGroup } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
+import AgentPicker from '@/components/AgentPicker'
+import type { PickerItem } from '@/components/AgentPicker/types'
 import { useRobots } from '@/hooks/useRobots'
 import { useGlobal } from '@/context/app'
 import { Agent } from '@/openapi/agent/api'
@@ -75,6 +77,10 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 	const [agentsLoading, setAgentsLoading] = useState(false)
 	const [mcpServers, setMCPServers] = useState<MCPServer[]>([])
 	const [mcpLoading, setMCPLoading] = useState(false)
+
+	// Picker visibility state
+	const [agentPickerVisible, setAgentPickerVisible] = useState(false)
+	const [mcpPickerVisible, setMcpPickerVisible] = useState(false)
 
 	// Refs to track data loading
 	const configLoadedRef = useRef(false)
@@ -261,6 +267,21 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			value: server.value || server.name
 		}))
 	}, [mcpServers])
+
+	// Selected items as PickerItem[] for AgentPicker value
+	const selectedAgentItems: PickerItem[] = useMemo(() => {
+		return (formData.agents || []).map((id: string) => {
+			const agent = agentOptions.find((a) => a.value === id)
+			return { value: id, label: agent?.label || id }
+		})
+	}, [formData.agents, agentOptions])
+
+	const selectedMcpItems: PickerItem[] = useMemo(() => {
+		return (formData.mcp_servers || []).map((id: string) => {
+			const server = mcpOptions.find((s) => s.value === id)
+			return { value: id, label: server?.label || id }
+		})
+	}, [formData.mcp_servers, mcpOptions])
 
 	// Reset form when modal opens
 	useEffect(() => {
@@ -786,50 +807,95 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 								</div>
 
 								{/* Accessible AI Assistants */}
-								{agentOptions.length > 0 && (
-									<div className={styles.formItem}>
-										<label className={styles.formLabel}>
-											{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
-											{agentsLoading && (
-												<span className={styles.loadingHint}>
-													{is_cn ? ' (加载中...)' : ' (Loading...)'}
-												</span>
-											)}
-										</label>
-										<CheckboxGroup
-											value={formData.agents}
-											onChange={(value) => handleFieldChange('agents', value)}
-											schema={{
-												type: 'array',
-												enum: agentOptions
-											}}
-											error={errors.agents}
-											hasError={!!errors.agents}
-										/>
+								<div className={styles.formItem}>
+									<label className={styles.formLabel}>
+										{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
+										{agentsLoading && (
+											<span className={styles.loadingHint}>
+												{is_cn ? ' (加载中...)' : ' (Loading...)'}
+											</span>
+										)}
+									</label>
+									<div className={styles.pickerTrigger}>
+										{selectedAgentItems.length > 0 && (
+											<div className={styles.pickerChips}>
+												{selectedAgentItems.map((item) => (
+													<div key={item.value} className={styles.pickerChip}>
+														<span className={styles.pickerChipLabel}>{item.label}</span>
+														<Icon
+															name='material-close'
+															size={12}
+															className={styles.pickerChipRemove}
+															onClick={() => handleFieldChange('agents', formData.agents.filter((id: string) => id !== item.value))}
+														/>
+													</div>
+												))}
+											</div>
+										)}
+										<button
+											type='button'
+											className={styles.pickerAddButton}
+											onClick={() => setAgentPickerVisible(true)}
+										>
+											<Icon name='material-add' size={14} />
+											<span>{is_cn ? '添加' : 'Add'}</span>
+										</button>
 									</div>
-								)}
+									{errors.agents && <div className={styles.fieldError}>{errors.agents}</div>}
+									<AgentPicker
+										visible={agentPickerVisible}
+										onClose={() => setAgentPickerVisible(false)}
+										onConfirm={(selected) => handleFieldChange('agents', selected.map((s) => s.value))}
+										type='assistant'
+										mode='multiple'
+										value={selectedAgentItems}
+									/>
+								</div>
 
 								{/* MCP Tools */}
-								{mcpOptions.length > 0 && (
-									<div className={styles.formItem}>
-										<label className={styles.formLabel}>
-											{is_cn ? '可使用的工具' : 'Available Tools'}
-											{mcpLoading && (
-												<span className={styles.loadingHint}>
-													{is_cn ? ' (加载中...)' : ' (Loading...)'}
-												</span>
-											)}
-										</label>
-										<CheckboxGroup
-											value={formData.mcp_servers}
-											onChange={(value) => handleFieldChange('mcp_servers', value)}
-											schema={{
-												type: 'array',
-												enum: mcpOptions
-											}}
-										/>
+								<div className={styles.formItem}>
+									<label className={styles.formLabel}>
+										{is_cn ? '可使用的工具' : 'Available Tools'}
+										{mcpLoading && (
+											<span className={styles.loadingHint}>
+												{is_cn ? ' (加载中...)' : ' (Loading...)'}
+											</span>
+										)}
+									</label>
+									<div className={styles.pickerTrigger}>
+										{selectedMcpItems.length > 0 && (
+											<div className={styles.pickerChips}>
+												{selectedMcpItems.map((item) => (
+													<div key={item.value} className={styles.pickerChip}>
+														<span className={styles.pickerChipLabel}>{item.label}</span>
+														<Icon
+															name='material-close'
+															size={12}
+															className={styles.pickerChipRemove}
+															onClick={() => handleFieldChange('mcp_servers', formData.mcp_servers.filter((id: string) => id !== item.value))}
+														/>
+													</div>
+												))}
+											</div>
+										)}
+										<button
+											type='button'
+											className={styles.pickerAddButton}
+											onClick={() => setMcpPickerVisible(true)}
+										>
+											<Icon name='material-add' size={14} />
+											<span>{is_cn ? '添加' : 'Add'}</span>
+										</button>
 									</div>
-								)}
+									<AgentPicker
+										visible={mcpPickerVisible}
+										onClose={() => setMcpPickerVisible(false)}
+										onConfirm={(selected) => handleFieldChange('mcp_servers', selected.map((s) => s.value))}
+										type='mcp'
+										mode='multiple'
+										value={selectedMcpItems}
+									/>
+								</div>
 							</div>
 						</div>
 					)}

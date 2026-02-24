@@ -98,6 +98,8 @@ export interface IInputAreaProps {
 	onSendQueuedMessage?: (queueId?: string, asForce?: boolean) => void
 	/** Cancel queued message callback */
 	onCancelQueuedMessage?: (queueId: string) => void
+	/** Switch assistant callback (used by AgentPicker) */
+	onSwitchAssistant?: (assistantId: string) => void
 	className?: string
 	style?: React.CSSProperties
 }

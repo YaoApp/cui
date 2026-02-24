@@ -51,7 +51,8 @@ const InputArea = (props: IInputAreaProps) => {
 		onSendQueuedMessage,
 		onCancelQueuedMessage,
 		initialModel,
-		initialChatMode
+		initialChatMode,
+		onSwitchAssistant
 	} = props
 	const [isAnimating, setIsAnimating] = useState(false)
 	const [isDragOver, setIsDragOver] = useState(false)
@@ -687,7 +688,7 @@ const InputArea = (props: IInputAreaProps) => {
 
 	const renderContextRow = () => (
 		<div ref={contextRowRef} className={styles.contextRow}>
-			<div className={styles.leftTags}>{agent && <AgentTag agent={agent} />}</div>
+			<div className={styles.leftTags}>{agent && <AgentTag agent={agent} onSwitchAssistant={onSwitchAssistant} />}</div>
 			<div className={styles.rightTags}>
 				{currentPage && (
 					<Tooltip content={currentPage}>

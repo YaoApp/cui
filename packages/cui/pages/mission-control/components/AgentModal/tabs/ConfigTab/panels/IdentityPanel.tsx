@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useRef } from 'react'
 import { Tooltip, message } from 'antd'
 import { getLocale } from '@umijs/max'
-import { Select, TextArea, InputNumber, CheckboxGroup } from '@/components/ui/inputs'
+import { Select, TextArea, InputNumber } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
+import AgentPicker from '@/components/AgentPicker'
+import type { PickerItem } from '@/components/AgentPicker/types'
 import { useGlobal } from '@/context/app'
 import type { RobotState } from '../../../../../types'
 import type { ConfigContextData } from '../index'
@@ -62,6 +64,23 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 		{ label: 'Claude 3 Opus', value: 'claude-3-opus' },
 		{ label: 'DeepSeek V3', value: 'deepseek-v3' }
 	], [])
+
+	const [agentPickerVisible, setAgentPickerVisible] = useState(false)
+	const [mcpPickerVisible, setMcpPickerVisible] = useState(false)
+
+	const selectedAgentItems: PickerItem[] = useMemo(() => {
+		return (formData.agents || []).map((id: string) => {
+			const agent = agentOptions.find((a) => a.value === id)
+			return { value: id, label: agent?.label || id }
+		})
+	}, [formData.agents, agentOptions])
+
+	const selectedMcpItems: PickerItem[] = useMemo(() => {
+		return (formData.mcp_servers || []).map((id: string) => {
+			const server = mcpOptions.find((s) => s.value === id)
+			return { value: id, label: server?.label || id }
+		})
+	}, [formData.mcp_servers, mcpOptions])
 
 	// Handle field change
 	const handleFieldChange = (field: string, value: any) => {
@@ -252,58 +271,104 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 			</div>
 
 			{/* Accessible AI Assistants */}
-			{agentOptions.length > 0 && (
-				<div className={styles.formItem}>
-					<label className={styles.formLabel}>
-						{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
-						<Tooltip
-							title={is_cn
-								? '选择该智能体可以调用协作的其他智能体'
-								: 'Select other agents this agent can work with'
-							}
-						>
-							<span className={styles.helpIconWrapper}>
-								<Icon name='material-help' size={14} className={styles.helpIcon} />
-							</span>
-						</Tooltip>
-					</label>
-					<CheckboxGroup
-						value={formData.agents || []}
-						onChange={(value) => handleFieldChange('agents', value)}
-						schema={{
-							type: 'array',
-							enum: agentOptions
-						}}
-					/>
+			<div className={styles.formItem}>
+				<label className={styles.formLabel}>
+					{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
+					<Tooltip
+						title={is_cn
+							? '选择该智能体可以调用协作的其他智能体'
+							: 'Select other agents this agent can work with'
+						}
+					>
+						<span className={styles.helpIconWrapper}>
+							<Icon name='material-help' size={14} className={styles.helpIcon} />
+						</span>
+					</Tooltip>
+				</label>
+				<div className={styles.pickerTrigger}>
+					{selectedAgentItems.length > 0 && (
+						<div className={styles.pickerChips}>
+							{selectedAgentItems.map((item) => (
+								<div key={item.value} className={styles.pickerChip}>
+									<span className={styles.pickerChipLabel}>{item.label}</span>
+									<Icon
+										name='material-close'
+										size={12}
+										className={styles.pickerChipRemove}
+										onClick={() => handleFieldChange('agents', (formData.agents || []).filter((id: string) => id !== item.value))}
+									/>
+								</div>
+							))}
+						</div>
+					)}
+					<button
+						type='button'
+						className={styles.pickerAddButton}
+						onClick={() => setAgentPickerVisible(true)}
+					>
+						<Icon name='material-add' size={14} />
+						<span>{is_cn ? '添加' : 'Add'}</span>
+					</button>
 				</div>
-			)}
+				<AgentPicker
+					visible={agentPickerVisible}
+					onClose={() => setAgentPickerVisible(false)}
+					onConfirm={(selected) => handleFieldChange('agents', selected.map((s) => s.value))}
+					type='assistant'
+					mode='multiple'
+					value={selectedAgentItems}
+				/>
+			</div>
 
 			{/* Accessible Tools */}
-			{mcpOptions.length > 0 && (
-				<div className={styles.formItem}>
-					<label className={styles.formLabel}>
-						{is_cn ? '可使用的工具' : 'Accessible Tools'}
-						<Tooltip
-							title={is_cn
-								? '选择该智能体可以使用的 MCP 工具'
-								: 'Select MCP tools this agent can use'
-							}
-						>
-							<span className={styles.helpIconWrapper}>
-								<Icon name='material-help' size={14} className={styles.helpIcon} />
-							</span>
-						</Tooltip>
-					</label>
-					<CheckboxGroup
-						value={formData.mcp_servers || []}
-						onChange={(value) => handleFieldChange('mcp_servers', value)}
-						schema={{
-							type: 'array',
-							enum: mcpOptions
-						}}
-					/>
+			<div className={styles.formItem}>
+				<label className={styles.formLabel}>
+					{is_cn ? '可使用的工具' : 'Accessible Tools'}
+					<Tooltip
+						title={is_cn
+							? '选择该智能体可以使用的 MCP 工具'
+							: 'Select MCP tools this agent can use'
+						}
+					>
+						<span className={styles.helpIconWrapper}>
+							<Icon name='material-help' size={14} className={styles.helpIcon} />
+						</span>
+					</Tooltip>
+				</label>
+				<div className={styles.pickerTrigger}>
+					{selectedMcpItems.length > 0 && (
+						<div className={styles.pickerChips}>
+							{selectedMcpItems.map((item) => (
+								<div key={item.value} className={styles.pickerChip}>
+									<span className={styles.pickerChipLabel}>{item.label}</span>
+									<Icon
+										name='material-close'
+										size={12}
+										className={styles.pickerChipRemove}
+										onClick={() => handleFieldChange('mcp_servers', (formData.mcp_servers || []).filter((id: string) => id !== item.value))}
+									/>
+								</div>
+							))}
+						</div>
+					)}
+					<button
+						type='button'
+						className={styles.pickerAddButton}
+						onClick={() => setMcpPickerVisible(true)}
+					>
+						<Icon name='material-add' size={14} />
+						<span>{is_cn ? '添加' : 'Add'}</span>
+					</button>
 				</div>
-			)}
+				<AgentPicker
+					visible={mcpPickerVisible}
+					onClose={() => setMcpPickerVisible(false)}
+					onConfirm={(selected) => handleFieldChange('mcp_servers', selected.map((s) => s.value))}
+					type='mcp'
+					mode='multiple'
+					value={selectedMcpItems}
+				/>
+			</div>
 		</div>
 	)
 }
