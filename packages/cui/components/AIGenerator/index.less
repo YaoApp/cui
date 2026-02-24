@@ -1,0 +1,250 @@
+.aiGenerator {
+	display: inline-flex;
+	align-items: center;
+	position: relative;
+}
+
+.triggerBtn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	min-width: 72px;
+	height: 28px;
+	padding: 0 10px;
+	background: transparent;
+	border: 1px solid var(--color_main);
+	border-radius: 4px;
+	color: var(--color_main);
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.15s ease, opacity 0.15s ease;
+	box-sizing: border-box;
+	white-space: nowrap;
+	user-select: none;
+
+	:global(.xgen-icon) {
+		font-size: 12px;
+	}
+
+	&:hover:not(.disabled) {
+		background: rgba(var(--r), var(--g), var(--b), 0.08);
+	}
+
+	&.disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	&.small {
+		height: 24px;
+		min-width: 60px;
+		padding: 0 8px;
+		font-size: 11px;
+		gap: 3px;
+	}
+}
+
+.generatingBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 28px;
+	min-width: 140px;
+	padding: 0 8px 0 10px;
+	background: var(--color_bg_nav);
+	border: 1px solid var(--color_border);
+	border-radius: 4px;
+	color: var(--color_text);
+	font-size: 12px;
+	cursor: default;
+	white-space: nowrap;
+	user-select: none;
+	overflow: hidden;
+	position: relative;
+
+	&.small {
+		height: 24px;
+		min-width: 120px;
+		font-size: 11px;
+		padding: 0 6px 0 8px;
+		gap: 4px;
+	}
+}
+
+.shimmer {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		rgba(var(--r), var(--g), var(--b), 0.06) 25%,
+		rgba(var(--r), var(--g), var(--b), 0.12) 50%,
+		rgba(var(--r), var(--g), var(--b), 0.06) 75%,
+		transparent 100%
+	);
+	background-size: 200% 100%;
+	animation: shimmerFlow 2s ease-in-out infinite;
+	pointer-events: none;
+	border-radius: inherit;
+}
+
+@keyframes shimmerFlow {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+.genContent {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	position: relative;
+	z-index: 1;
+	flex: 1;
+	min-width: 0;
+}
+
+.sparkle {
+	color: var(--color_main);
+	font-size: 11px;
+	animation: sparkleBreath 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkleBreath {
+	0%,
+	100% {
+		opacity: 0.5;
+		transform: scale(0.9);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.15);
+	}
+}
+
+.tokenCount {
+	color: var(--color_text_grey);
+	font-size: 11px;
+	font-variant-numeric: tabular-nums;
+	min-width: 72px;
+}
+
+.cancelBtn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	border: none;
+	background: transparent;
+	color: var(--color_text_grey);
+	cursor: pointer;
+	padding: 0;
+	border-radius: 2px;
+	flex-shrink: 0;
+
+	&:hover {
+		color: var(--color_danger);
+		background: rgba(255, 77, 79, 0.08);
+	}
+}
+
+// Dropdown panel (below trigger button)
+.dropdown {
+	position: absolute;
+	top: calc(100% + 6px);
+	right: 0;
+	z-index: 1060;
+	width: 360px;
+	background: var(--color_bg_menu);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow_float);
+	animation: dropdownIn 0.15s ease-out;
+}
+
+@keyframes dropdownIn {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.dropdownBody {
+	padding: 12px;
+}
+
+.inputArea {
+	width: 100%;
+	min-height: 80px;
+	max-height: 160px;
+	padding: 8px 10px;
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius);
+	background: var(--color_bg_menu);
+	color: var(--color_text);
+	font-size: 13px;
+	line-height: 1.6;
+	resize: vertical;
+	outline: none;
+	font-family: inherit;
+	transition: border-color 0.2s ease;
+	box-sizing: border-box;
+
+	&:focus {
+		border-color: var(--color_main);
+	}
+
+	&::placeholder {
+		color: var(--color_placeholder);
+	}
+}
+
+.dropdownFooter {
+	display: flex;
+	justify-content: flex-end;
+	padding: 0 12px 10px;
+	gap: 6px;
+}
+
+.submitBtn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	background: var(--color_main);
+	border: none;
+	border-radius: 50%;
+	color: #fff;
+	cursor: pointer;
+	transition: opacity 0.15s ease;
+	flex-shrink: 0;
+
+	&:hover {
+		opacity: 0.85;
+	}
+
+	&:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
+	}
+}
+
+.hintText {
+	display: flex;
+	align-items: center;
+	flex: 1;
+	font-size: 11px;
+	color: var(--color_text_grey);
+}
