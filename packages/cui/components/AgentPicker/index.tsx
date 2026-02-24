@@ -12,7 +12,7 @@ import type { AgentPickerProps, PickerItem } from './types'
 import styles from './index.less'
 
 const AgentPicker = (props: AgentPickerProps) => {
-	const { visible, onClose, onConfirm, type, mode, value, expandTools = false } = props
+	const { visible, onClose, onConfirm, type, mode, value, expandTools = false, filter } = props
 
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -66,7 +66,8 @@ const AgentPicker = (props: AgentPickerProps) => {
 				.List({
 					select: ['assistant_id', 'name', 'avatar', 'description', 'tags', 'connector', 'sandbox', 'built_in'],
 					locale: is_cn ? 'zh-cn' : 'en-us',
-					pagesize: 200
+					pagesize: 200,
+					...filter
 				})
 				.then((res) => {
 					if (!window.$app.openapi.IsError(res)) {
