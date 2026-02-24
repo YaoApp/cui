@@ -51,6 +51,9 @@ export class AgentAssistants {
 			if (filter.built_in !== undefined) {
 				params.append('built_in', filter.built_in.toString())
 			}
+			if (filter.sandbox !== undefined) {
+				params.append('sandbox', filter.sandbox.toString())
+			}
 			if (filter.page) params.append('page', filter.page.toString())
 			if (filter.pagesize) params.append('pagesize', filter.pagesize.toString())
 			if (filter.select && filter.select.length > 0) {

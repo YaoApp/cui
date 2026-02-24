@@ -44,9 +44,13 @@ const AssistantDetail = () => {
 	const readonly = assistantData?.readonly === true
 	const built_in = assistantData?.built_in === true
 	const mentionable = assistantData?.mentionable === true
+	const sandbox = assistantData?.sandbox === true
 	const connector = assistantData?.connector || ''
 	const tags = assistantData?.tags || []
 	const description = assistantData?.description || ''
+
+	const dockerAvailable = (global.app_info as any)?.tools?.docker?.available === true
+	const chatDisabled = sandbox && !dockerAvailable
 
 	// Initialize API client
 	useEffect(() => {
@@ -253,11 +257,9 @@ const AssistantDetail = () => {
 		}
 	}
 
-	// Handle chat button click to trigger new chat event
 	const handleChatClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
-
-		// Trigger the new chat event with assistant ID
+		if (chatDisabled) return
 		window.$app.Event.emit('chat/newWithAssistant', id)
 	}
 
@@ -353,27 +355,39 @@ const AssistantDetail = () => {
 										</span>
 									</Tooltip>
 								)}
-								{automated === true && (
-									<Tooltip title={is_cn ? '自动化' : 'Automated'}>
-										<span className={styles.statusIcon}>
-											<Icon name='icon-cpu' size={16} color='#1890ff' />
-										</span>
-									</Tooltip>
-								)}
+							{automated === true && (
+								<Tooltip title={is_cn ? '自动化' : 'Automated'}>
+									<span className={styles.statusIcon}>
+										<Icon name='icon-cpu' size={16} color='#1890ff' />
+									</span>
+								</Tooltip>
+							)}
+							{sandbox === true && (
+								<Tooltip title={is_cn ? '沙箱' : 'Sandbox'}>
+									<span className={styles.statusIcon}>
+										<Icon name='icon-codesandbox' size={16} color='#13c2c2' />
+									</span>
+								</Tooltip>
+							)}
 							</div>
 						</div>
 					</div>
 				</div>
 				<div className={styles.headerActions}>
 					<div className={styles.leftButton}>
-						<Button
-							type='primary'
-							size='small'
-							icon={<Icon name='icon-message-circle' size={14} />}
-							onClick={handleChatClick}
+						<Tooltip
+							title={chatDisabled ? (is_cn ? '需要启用 Docker 服务' : 'Docker service required') : undefined}
 						>
-							{is_cn ? '聊天' : 'Chat'}
-						</Button>
+							<Button
+								type='primary'
+								size='small'
+								icon={<Icon name='icon-message-circle' size={14} />}
+								onClick={handleChatClick}
+								disabled={chatDisabled}
+							>
+								{is_cn ? '聊天' : 'Chat'}
+							</Button>
+						</Tooltip>
 					</div>
 					<div className={styles.rightButton}>
 						{editing ? (
