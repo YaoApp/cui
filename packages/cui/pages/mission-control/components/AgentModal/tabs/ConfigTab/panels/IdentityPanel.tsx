@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { Tooltip, message } from 'antd'
 import { getLocale } from '@umijs/max'
-import { Select, TextArea } from '@/components/ui/inputs'
+import { Select, MarkdownEditor } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import AgentPicker from '@/components/AgentPicker'
 import type { PickerItem } from '@/components/AgentPicker/types'
@@ -221,19 +221,19 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 						</div>
 					</Tooltip>
 				</div>
-				<TextArea
-					value={formData.system_prompt}
-					onChange={(value) => handleFieldChange('system_prompt', value)}
-					schema={{
-						type: 'string',
-						placeholder: is_cn
-							? '描述这个智能体的身份、职责和工作方式...'
-							: 'Describe this agent\'s role, responsibilities, and how it should work...',
-						rows: 10
-					}}
-					error={errors.system_prompt || ''}
-					hasError={!!errors.system_prompt}
-				/>
+			<MarkdownEditor
+				value={formData.system_prompt}
+				onChange={(value) => handleFieldChange('system_prompt', value)}
+				schema={{
+					type: 'string',
+					placeholder: is_cn
+						? '描述这个智能体的身份、职责和工作方式...'
+						: 'Describe this agent\'s role, responsibilities, and how it should work...',
+					rows: 10
+				}}
+				error={errors.system_prompt || ''}
+				hasError={!!errors.system_prompt}
+			/>
 			</div>
 
 			{/* Section: Resources */}

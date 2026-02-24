@@ -132,6 +132,7 @@ export type InputComponent =
 	| 'Items'
 	| 'TextArea'
 	| 'CodeEditor'
+	| 'MarkdownEditor'
 	| 'Avatar'
 
 /**

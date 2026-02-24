@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { Modal, message, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
-import { Input, Select, TextArea, RadioGroup } from '@/components/ui/inputs'
+import { Input, Select, RadioGroup, MarkdownEditor } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import AgentPicker from '@/components/AgentPicker'
 import type { PickerItem } from '@/components/AgentPicker/types'
@@ -821,18 +821,18 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 											<span>{generatingPrompt ? (is_cn ? '生成中...' : 'Generating...') : (is_cn ? '生成' : 'Generate')}</span>
 										</div>
 									</div>
-									<TextArea
-										value={formData.system_prompt}
-										onChange={(value) => handleFieldChange('system_prompt', value)}
-										schema={{
-											type: 'string',
-											placeholder: is_cn 
-												? '描述智能体的角色定位和主要职责...' 
-												: 'Describe the role and responsibilities of this AI teammate...',
-											rows: 6
-										}}
-										error={errors.system_prompt}
-										hasError={!!errors.system_prompt}
+								<MarkdownEditor
+									value={formData.system_prompt}
+									onChange={(value) => handleFieldChange('system_prompt', value)}
+									schema={{
+										type: 'string',
+										placeholder: is_cn 
+											? '描述智能体的角色定位和主要职责...' 
+											: 'Describe the role and responsibilities of this AI teammate...',
+										rows: 6
+									}}
+									error={errors.system_prompt}
+									hasError={!!errors.system_prompt}
 									/>
 								</div>
 
