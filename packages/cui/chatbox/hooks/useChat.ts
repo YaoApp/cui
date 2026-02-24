@@ -107,7 +107,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	})
 
 	// Tab management
-	const { activateTab, closeTab, createNewChat, loadHistory } = useTabs({
+	const { activateTab, closeTab, createNewChat, loadHistory, updateTabAssistant } = useTabs({
 		state,
 		actions,
 		refs,
@@ -173,6 +173,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		createNewChat,
 		activateTab,
 		closeTab,
+		updateTabAssistant,
 		queueMessage,
 		sendQueuedMessage,
 		cancelQueuedMessage

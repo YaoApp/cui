@@ -377,10 +377,20 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 		]
 	)
 
+	const updateTabAssistant = useCallback(
+		(chatId: string, assistantId: string) => {
+			setTabs((prev) =>
+				prev.map((t) => (t.chatId === chatId ? { ...t, assistantId } : t))
+			)
+		},
+		[setTabs]
+	)
+
 	return {
 		activateTab,
 		closeTab,
 		createNewChat,
-		loadHistory
+		loadHistory,
+		updateTabAssistant
 	}
 }

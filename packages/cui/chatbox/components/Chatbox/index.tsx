@@ -45,7 +45,8 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 		abort,
 		queueMessage,
 		sendQueuedMessage,
-		cancelQueuedMessage
+		cancelQueuedMessage,
+		updateTabAssistant
 	} = chatContext
 
 	// 判断是否为占位符模式
@@ -78,6 +79,7 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 				onQueueMessage={queueMessage}
 				onSendQueuedMessage={sendQueuedMessage}
 				onCancelQueuedMessage={cancelQueuedMessage}
+				onSwitchAssistant={activeTabId ? (assistantId: string) => updateTabAssistant(activeTabId, assistantId) : undefined}
 			/>
 		</div>
 	)
