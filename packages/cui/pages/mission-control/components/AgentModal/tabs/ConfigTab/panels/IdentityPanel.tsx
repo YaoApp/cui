@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { Tooltip, message } from 'antd'
-import { getLocale } from '@umijs/max'
 import { Select, MarkdownEditor } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import AgentPicker from '@/components/AgentPicker'
+import AIGenerator from '@/components/AIGenerator'
 import type { PickerItem } from '@/components/AgentPicker/types'
 import { LLM } from '@/openapi'
 import type { LLMProvider } from '@/openapi/llm/types'
@@ -36,10 +36,7 @@ interface IdentityPanelProps {
  */
 const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange, is_cn, configData }) => {
 	const [errors, setErrors] = useState<Record<string, string>>({})
-	const [generatingPrompt, setGeneratingPrompt] = useState(false)
 	const global = useGlobal()
-	const locale = getLocale()
-	const generatedPromptRef = useRef('')
 
 	// Get options from configData
 	const agentOptions = useMemo(() => 
@@ -108,119 +105,77 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 		}
 	}
 
-	// Handle AI generate prompt - streaming call to robot_prompt agent
-	const handleGeneratePrompt = async () => {
-		if (generatingPrompt) return
-
-		// Check if we have the necessary dependencies
-		if (!window.$app?.openapi) {
-			console.warn('OpenAPI not initialized')
-			message.error(is_cn ? 'API 未初始化' : 'API not initialized')
-			return
-		}
-
-		const robotPromptAgentId = global?.agent_uses?.robot_prompt
-		if (!robotPromptAgentId) {
-			console.warn('Robot prompt agent not configured in global.agent_uses.robot_prompt')
-			message.error(is_cn ? '未配置职责生成助手' : 'Robot prompt agent not configured')
-			return
-		}
-
-		setGeneratingPrompt(true)
-		generatedPromptRef.current = ''
-
-		try {
-			const { Chat, IsEventMessage, IsStreamEndEvent } = await import('@/openapi')
-			const chatClient = new Chat(window.$app.openapi)
-
-			// Build context from form data
-			const name = formData.display_name || (is_cn ? '智能体' : 'Agent')
-			const currentPrompt = formData.system_prompt || ''
-			
-			// Language hint
-			const languageHint = is_cn ? '请用中文生成。' : 'Please generate in English.'
-
-			// Build user message - if there's existing content, optimize it; otherwise generate new
-			const userMessage = currentPrompt.trim()
-				? `${languageHint}\n\n请优化以下 Robot 的职责说明，使其更加专业、清晰、全面：\n\n名称：${name}\n\n当前职责说明：\n${currentPrompt}`
-				: `${languageHint}\n\n请为名为"${name}"的 Robot 生成一份专业的职责说明（System Prompt）。`
-
-			// Stream generation
-			chatClient.StreamCompletion(
-				{
-					assistant_id: robotPromptAgentId,
-					messages: [
-						{
-							role: 'user',
-							content: userMessage
-						}
-					],
-					locale,
-					skip: {
-						history: true,
-						trace: true
-					}
-				},
-				(chunk) => {
-					// Check for stream end event
-					if (IsEventMessage(chunk) && IsStreamEndEvent(chunk)) {
-						setGeneratingPrompt(false)
-						return
-					}
-
-					// Accumulate and update in real-time
-					if (chunk.type === 'text' && chunk.props?.content) {
-						if (chunk.delta) {
-							generatedPromptRef.current += chunk.props.content
-						} else {
-							generatedPromptRef.current = chunk.props.content
-						}
-
-						// Real-time update the form field
-						if (generatedPromptRef.current.trim()) {
-							handleFieldChange('system_prompt', generatedPromptRef.current.trim())
-						}
-					}
-				},
-				(error) => {
-					console.error('Failed to generate prompt:', error)
-					message.error(is_cn ? '生成职责说明失败' : 'Failed to generate prompt')
-					setGeneratingPrompt(false)
-				}
-			)
-		} catch (error) {
-			console.error('Error generating prompt:', error)
-			message.error(is_cn ? '生成职责说明失败' : 'Failed to generate prompt')
-			setGeneratingPrompt(false)
-		}
-	}
-
 	return (
 		<div className={styles.panelInner}>
 			<div className={styles.panelTitle}>
-				{is_cn ? '身份设定' : 'Identity & Resources'}
+				<span>{is_cn ? '身份设定' : 'Identity & Resources'}</span>
+				{global?.agent_uses?.robot_prompt && (
+					<AIGenerator
+						assistantId={global.agent_uses.robot_prompt}
+						context={() => {
+							const agentNames = selectedAgentItems.map(a => a.label).join(', ')
+							const mcpNames = selectedMcpItems.map(s => s.label).join(', ')
+							const llmLabel = llmOptions.find(o => o.value === formData.language_model)?.label || ''
+							const snapshot = {
+								display_name: formData.display_name || robot?.name || '',
+								description: robot?.description || '',
+								email: formData.robot_email || '',
+								bio: formData.bio || '',
+								autonomous_mode: formData.autonomous_mode ?? false,
+								system_prompt: formData.system_prompt || '',
+								language_model: formData.language_model ? `${llmLabel} (${formData.language_model})` : '',
+								agents: agentNames || '',
+								mcp_servers: mcpNames || '',
+								available_agents: agentOptions.map(a => `${a.label} (${a.value})`).join(', '),
+								available_mcp_servers: mcpOptions.map(s => `${s.label} (${s.value})`).join(', '),
+								available_language_models: llmOptions.map(o => `${o.label} (${o.value})`).join(', ')
+							}
+							return [{
+								role: 'system',
+								content: `Current robot configuration:\n${JSON.stringify(snapshot, null, 2)}`
+							}]
+						}}
+						outputFormat="json"
+						onStart={() => {}}
+						onStream={(text, parsed) => {
+							if (parsed?.system_prompt) handleFieldChange('system_prompt', parsed.system_prompt)
+							if (parsed?.language_model) handleFieldChange('language_model', parsed.language_model)
+							if (parsed?.agents) handleFieldChange('agents', parsed.agents)
+							if (parsed?.mcp_servers) handleFieldChange('mcp_servers', parsed.mcp_servers)
+						}}
+						onComplete={(text, parsed) => {
+							if (parsed) {
+								if (parsed.system_prompt) handleFieldChange('system_prompt', parsed.system_prompt)
+								if (parsed.language_model) handleFieldChange('language_model', parsed.language_model)
+								if (parsed.agents) handleFieldChange('agents', parsed.agents)
+								if (parsed.mcp_servers) handleFieldChange('mcp_servers', parsed.mcp_servers)
+							} else {
+								handleFieldChange('system_prompt', text)
+								message.warning(is_cn ? 'AI 返回格式异常，仅回填了职责说明' : 'AI output format error, only prompt was filled')
+							}
+						}}
+						onCancel={(text, parsed) => {
+							if (parsed?.system_prompt) handleFieldChange('system_prompt', parsed.system_prompt)
+						}}
+						onError={(err) => {
+							console.error('AI generate failed:', err)
+							message.error(is_cn ? '生成失败' : 'Generation failed')
+						}}
+						placeholder={is_cn
+							? '描述你需要什么样的智能体...\n\nCtrl+Enter 发送'
+							: 'Describe what kind of agent you need...\n\nCtrl+Enter to send'
+						}
+						size="small"
+					/>
+				)}
 			</div>
 
 			{/* Role & Responsibilities */}
 			<div className={styles.formItem}>
-				<div className={styles.labelWithAction}>
-					<label className={styles.formLabel}>
-						<span className={styles.required}>*</span>
-						{is_cn ? '职责说明' : 'Role & Responsibilities'}
-					</label>
-					<Tooltip title={is_cn ? '使用 AI 生成职责说明' : 'Generate with AI'}>
-						<div
-							className={`${styles.generateButton} ${generatingPrompt ? styles.generating : ''}`}
-							onClick={generatingPrompt ? undefined : handleGeneratePrompt}
-						>
-							<Icon name='material-auto_awesome' size={14} />
-							<span>{generatingPrompt 
-								? (is_cn ? '生成中...' : 'Generating...') 
-								: (is_cn ? '生成' : 'Generate')
-							}</span>
-						</div>
-					</Tooltip>
-				</div>
+				<label className={styles.formLabel}>
+					<span className={styles.required}>*</span>
+					{is_cn ? '职责说明' : 'Role & Responsibilities'}
+				</label>
 			<MarkdownEditor
 				value={formData.system_prompt}
 				onChange={(value) => handleFieldChange('system_prompt', value)}
