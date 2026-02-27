@@ -147,6 +147,7 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 					'triggers.event.enabled': triggers.event?.enabled || false,
 					
 					// Resources/Phases configuration (Advanced panel - Developer options)
+					'resources.phases.host': resources.phases?.host || '__yao.host',
 					'resources.phases.inspiration': resources.phases?.inspiration || '__yao.inspiration',
 					'resources.phases.goals': resources.phases?.goals || '__yao.goals',
 					'resources.phases.tasks': resources.phases?.tasks || '__yao.tasks',
@@ -391,6 +392,7 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 				// Resources/Phases settings (Developer options)
 				resources: {
 					phases: {
+						host: formData['resources.phases.host'] || '__yao.host',
 						inspiration: formData['resources.phases.inspiration'] || '__yao.inspiration',
 						goals: formData['resources.phases.goals'] || '__yao.goals',
 						tasks: formData['resources.phases.tasks'] || '__yao.tasks',

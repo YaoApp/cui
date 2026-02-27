@@ -874,29 +874,16 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 
 				{/* Footer Actions */}
 				<div className={styles.drawerFooter}>
-					{isActive && (
-						<>
-							<button className={styles.actionBtnPrimary} onClick={onGuide}>
-								<Icon name='material-quickreply' size={16} />
-								<span>{is_cn ? '指导执行' : 'Guide'}</span>
-							</button>
-							{isPaused ? (
-								<button className={styles.actionBtnSecondary} onClick={handleResume}>
-									<Icon name='material-play_arrow' size={16} />
-									<span>{is_cn ? '继续' : 'Resume'}</span>
-								</button>
-							) : (
-								<button className={styles.actionBtnSecondary} onClick={handlePause}>
-									<Icon name='material-pause' size={16} />
-									<span>{is_cn ? '暂停' : 'Pause'}</span>
-								</button>
-							)}
-							<button className={styles.actionBtnDanger} onClick={handleStop}>
-								<Icon name='material-stop' size={16} />
-								<span>{is_cn ? '停止' : 'Stop'}</span>
-							</button>
-						</>
-					)}
+				{isActive && (
+					<>
+						{/* TODO: v2 — Guide Execution */}
+						{/* TODO: v2 — Pause/Resume */}
+						<button className={styles.actionBtnDanger} onClick={handleStop}>
+							<Icon name='material-stop' size={16} />
+							<span>{is_cn ? '停止' : 'Stop'}</span>
+						</button>
+					</>
+				)}
 
 					{isCompleted && (
 						<>
