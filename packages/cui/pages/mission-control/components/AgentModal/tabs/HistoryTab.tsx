@@ -5,6 +5,7 @@ import Icon from '@/widgets/Icon'
 import { useRobots } from '@/hooks/useRobots'
 import type { RobotState, Execution } from '../../../types'
 import type { ExecutionResponse, ExecStatus } from '@/openapi/agent/robot'
+import { triggerFileDownload } from '@/utils/fileWrapper'
 import CreatureLoading from '../../CreatureLoading'
 import styles from '../index.less'
 
@@ -249,14 +250,9 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 		e.stopPropagation()
 		const attachments = exec.delivery?.content?.attachments
 		if (attachments && attachments.length > 0) {
-			console.log('Download attachments:', attachments)
-			// TODO: Trigger download
-			// For now, just show what would be downloaded
-			alert(
-				is_cn
-					? `下载: ${attachments.map((a) => a.title).join(', ')}`
-					: `Download: ${attachments.map((a) => a.title).join(', ')}`
-			)
+			attachments.forEach((att, i) => {
+				triggerFileDownload(att.file, att.title, i)
+			})
 		}
 	}
 

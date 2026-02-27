@@ -3,6 +3,7 @@ import { Modal, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import type { ResultDetail } from '@/openapi/agent/robot'
+import { triggerFileDownload, WrapperToContentURL } from '@/utils/fileWrapper'
 import styles from './index.less'
 
 interface ResultDetailModalProps {
@@ -178,24 +179,25 @@ const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose,
 	// Handle download
 	const handleDownload = (e: React.MouseEvent, attachment: { title: string; file: string }) => {
 		e.stopPropagation()
-		console.log('Download:', attachment)
-		alert(is_cn ? `下载: ${attachment.title}` : `Download: ${attachment.title}`)
+		triggerFileDownload(attachment.file, attachment.title)
 	}
 
-	// Handle preview
+	// Handle preview — open in new tab
 	const handlePreview = (e: React.MouseEvent, attachment: { title: string; file: string }) => {
 		e.stopPropagation()
-		console.log('Preview:', attachment)
-		alert(is_cn ? `预览: ${attachment.title}` : `Preview: ${attachment.title}`)
+		const url = WrapperToContentURL(attachment.file)
+		if (url) {
+			window.open(url, '_blank', 'noopener,noreferrer')
+		}
 	}
 
 	// Handle download all
 	const handleDownloadAll = () => {
 		const attachments = result?.delivery?.content?.attachments
 		if (attachments && attachments.length > 0) {
-			const names = attachments.map((a) => a.title).join(', ')
-			console.log('Download all:', attachments)
-			alert(is_cn ? `下载全部: ${names}` : `Download all: ${names}`)
+			attachments.forEach((att, i) => {
+				triggerFileDownload(att.file, att.title, i)
+			})
 		}
 	}
 
