@@ -1,6 +1,7 @@
 import { OpenAPI } from '../../openapi'
 import { ApiResponse } from '../../types'
 import { BuildURL } from '../../lib/utils'
+import type { Message, StreamCallback } from '../../chat/types'
 import type {
 	RobotFilter,
 	RobotListResponse,
@@ -17,7 +18,11 @@ import type {
 	ResultListResponse,
 	ResultDetail,
 	ActivityListResponse,
-	ActivityType
+	ActivityType,
+	InteractRequest,
+	InteractResponse,
+	InteractStreamEvent,
+	InteractStreamCallback
 } from './types'
 
 /**
@@ -106,6 +111,7 @@ export class AgentRobots {
 
 		if (filter) {
 			if (filter.status) params.append('status', filter.status)
+			if (filter.exclude_status) params.append('exclude_status', filter.exclude_status)
 			if (filter.trigger_type) params.append('trigger_type', filter.trigger_type)
 			if (filter.keyword) params.append('keyword', filter.keyword)
 			if (filter.page) params.append('page', filter.page.toString())
@@ -203,5 +209,191 @@ export class AgentRobots {
 		}
 
 		return this.api.Get<ActivityListResponse>(BuildURL('/agent/robots/activities', urlParams))
+	}
+
+	// ==================== V2 Interact APIs ====================
+
+	/**
+	 * Interact with a robot (synchronous mode)
+	 * POST /v1/agent/robots/:id/interact
+	 */
+	async Interact(robotId: string, req: InteractRequest): Promise<ApiResponse<InteractResponse>> {
+		return this.api.Post<InteractResponse>(
+			`/agent/robots/${encodeURIComponent(robotId)}/interact`,
+			{ ...req, stream: false }
+		)
+	}
+
+	/**
+	 * @deprecated Use InteractStreamCUI instead which uses standard CUI Message protocol.
+	 * Interact with a robot (SSE streaming mode - legacy format)
+	 */
+	InteractStream(
+		robotId: string,
+		req: InteractRequest,
+		onEvent: InteractStreamCallback,
+		onError?: (error: Error) => void
+	): () => void {
+		return this.InteractStreamCUI(
+			robotId,
+			req,
+			(msg) => {
+				const legacy: InteractStreamEvent = { type: msg.type }
+				if (msg.type === 'text' && msg.delta && msg.props) {
+					legacy.type = 'delta'
+					legacy.content = msg.props.content as string
+					legacy.delta = true
+				} else if (msg.type === 'event' && msg.props?.event === 'interact_done') {
+					legacy.type = 'done'
+					const data = msg.props.data as Record<string, any> | undefined
+					if (data) {
+						legacy.execution_id = data.execution_id
+						legacy.status = data.status
+						legacy.message = data.message
+						legacy.chat_id = data.chat_id
+						legacy.reply = data.reply
+						legacy.wait_for_more = data.wait_for_more
+					}
+				} else if (msg.type === 'error') {
+					legacy.type = 'error'
+					legacy.error = msg.props?.message as string
+				}
+				onEvent(legacy)
+			},
+			onError
+		)
+	}
+
+	/**
+	 * Interact with a robot (SSE streaming mode - CUI standard Message protocol)
+	 * POST /v1/agent/robots/:id/interact (stream=true)
+	 *
+	 * Streams standard CUI Message objects (text, thinking, tool_call, event, etc.)
+	 * in real-time via SSE, then emits a final "interact_done" event message.
+	 *
+	 * @returns Abort function to cancel the stream
+	 */
+	InteractStreamCUI(
+		robotId: string,
+		req: InteractRequest,
+		onChunk: StreamCallback,
+		onError?: (error: Error) => void
+	): () => void {
+		// @ts-ignore - access private config for baseURL
+		const baseURL = this.api.config.baseURL
+		const url = `${baseURL}/agent/robots/${encodeURIComponent(robotId)}/interact`
+
+		const abortController = new AbortController()
+
+		const body = { ...req, stream: true }
+
+		this.startCUIStream(url, body, onChunk, onError, abortController).catch((error) => {
+			onError?.(error)
+		})
+
+		return () => {
+			abortController.abort()
+		}
+	}
+
+	/**
+	 * Reply to a specific waiting task
+	 * POST /v1/agent/robots/:id/executions/:exec_id/tasks/:task_id/reply
+	 */
+	async ReplyToTask(
+		robotId: string,
+		execId: string,
+		taskId: string,
+		message: string
+	): Promise<ApiResponse<InteractResponse>> {
+		return this.api.Post<InteractResponse>(
+			`/agent/robots/${encodeURIComponent(robotId)}/executions/${encodeURIComponent(execId)}/tasks/${encodeURIComponent(taskId)}/reply`,
+			{ message }
+		)
+	}
+
+	/**
+	 * Confirm a pending execution
+	 * POST /v1/agent/robots/:id/executions/:exec_id/confirm
+	 */
+	async ConfirmExecution(
+		robotId: string,
+		execId: string,
+		message?: string
+	): Promise<ApiResponse<InteractResponse>> {
+		return this.api.Post<InteractResponse>(
+			`/agent/robots/${encodeURIComponent(robotId)}/executions/${encodeURIComponent(execId)}/confirm`,
+			{ message: message || '' }
+		)
+	}
+
+	/**
+	 * Internal: Start CUI-protocol SSE stream for robot interaction.
+	 * Parses `data: {json}` lines as standard CUI Message objects.
+	 */
+	private async startCUIStream(
+		url: string,
+		body: any,
+		onChunk: StreamCallback,
+		onError: ((error: Error) => void) | undefined,
+		abortController: AbortController
+	): Promise<void> {
+		try {
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'text/event-stream'
+				},
+				body: JSON.stringify(body),
+				credentials: 'include',
+				signal: abortController.signal
+			})
+
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+			}
+
+			if (!response.body) {
+				throw new Error('Response body is null')
+			}
+
+			const reader = response.body.getReader()
+			const decoder = new TextDecoder()
+			let buffer = ''
+
+			while (true) {
+				const { done, value } = await reader.read()
+				if (done) break
+
+				buffer += decoder.decode(value, { stream: true })
+
+				const lines = buffer.split('\n')
+				buffer = lines.pop() || ''
+
+				for (const line of lines) {
+					if (line.trim() === '') continue
+
+					let data: string
+					if (line.startsWith('data: ')) {
+						data = line.substring(6)
+					} else {
+						data = line
+					}
+
+					if (data.trim() === '[DONE]') return
+
+					try {
+						const chunk = JSON.parse(data) as Message
+						onChunk(chunk)
+					} catch {
+						console.warn('[Robot API] Failed to parse SSE data:', data.substring(0, 100))
+					}
+				}
+			}
+		} catch (error) {
+			if (error instanceof Error && error.name === 'AbortError') return
+			throw error
+		}
 	}
 }

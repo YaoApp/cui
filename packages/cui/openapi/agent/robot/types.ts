@@ -242,7 +242,7 @@ export interface RobotDeleteResponse {
 /**
  * Execution status values
  */
-export type ExecStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
+export type ExecStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled' | 'confirming' | 'waiting'
 
 /**
  * Trigger type values
@@ -260,6 +260,8 @@ export type Phase = 'inspiration' | 'goals' | 'tasks' | 'run' | 'delivery' | 'le
 export interface ExecutionFilter {
 	/** Filter by execution status */
 	status?: ExecStatus
+	/** Comma-separated statuses to exclude, e.g. "confirming,waiting" */
+	exclude_status?: string
 	/** Filter by trigger type */
 	trigger_type?: TriggerType
 	/** Search keyword in execution details */
@@ -464,3 +466,90 @@ export interface ActivityListResponse {
 	/** List of activities */
 	data: Activity[]
 }
+
+// ==================== Interact Types (V2) ====================
+
+/**
+ * Source of an interact request
+ */
+export type InteractSource = 'ui' | 'email' | 'webhook' | 'a2a' | 'cron'
+
+/**
+ * Interact request for unified robot interaction
+ */
+export interface InteractRequest {
+	/** Execution ID (omit for new assignment) */
+	execution_id?: string
+	/** Task ID (for replying to specific task) */
+	task_id?: string
+	/** Source of the interaction */
+	source?: InteractSource
+	/** User message (required) */
+	message: string
+	/** Action hint (e.g. "confirm") */
+	action?: string
+	/** Whether to use SSE streaming */
+	stream?: boolean
+}
+
+/**
+ * Interact response from the backend
+ */
+export interface InteractResponse {
+	/** Execution ID */
+	execution_id?: string
+	/** Result status */
+	status: string
+	/** Human-readable message */
+	message?: string
+	/** Chat session ID */
+	chat_id?: string
+	/** Host Agent reply text */
+	reply?: string
+	/** Whether more input is needed */
+	wait_for_more?: boolean
+}
+
+/**
+ * Data payload for the "interact_done" event sent at the end of an InteractStream.
+ * Extracted from: event.props.data where event.type === 'event' && event.props.event === 'interact_done'
+ */
+export interface InteractDoneData {
+	/** Execution ID */
+	execution_id?: string
+	/** Result status */
+	status?: string
+	/** Human-readable message */
+	message?: string
+	/** Chat session ID */
+	chat_id?: string
+	/** Host Agent reply text */
+	reply?: string
+	/** Whether more input is needed */
+	wait_for_more?: boolean
+	/** Error message (if status is "error") */
+	error?: string
+}
+
+/**
+ * @deprecated Use Message from 'openapi/chat/types' with InteractDoneData instead.
+ * SSE stream event from InteractStream (legacy format)
+ */
+export interface InteractStreamEvent {
+	type: string
+	content?: string
+	delta?: boolean
+	execution_id?: string
+	status?: string
+	message?: string
+	chat_id?: string
+	reply?: string
+	wait_for_more?: boolean
+	error?: string
+}
+
+/**
+ * @deprecated Use StreamCallback from 'openapi/chat/types' instead.
+ * Callback for InteractStream events (legacy)
+ */
+export type InteractStreamCallback = (event: InteractStreamEvent) => void

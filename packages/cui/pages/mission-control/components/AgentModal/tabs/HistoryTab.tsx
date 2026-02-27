@@ -58,7 +58,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const initialFillCheckedRef = useRef(false)
 	const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
-	const pageSize = 10
+	const pageSize = 20
 
 	// Show API error
 	useEffect(() => {
@@ -67,7 +67,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 		}
 	}, [apiError])
 
-	// Load data from API
+	// Load data from API (same pattern as ResultsTab)
 	const loadData = useCallback(
 		async (reset: boolean = false) => {
 			const currentPage = reset ? 1 : page
@@ -79,13 +79,14 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 				setLoadingMore(true)
 			}
 
-			// Build API filter
 			const filter: any = {
 				page: currentPage,
 				pagesize: pageSize
 			}
 			if (statusFilter !== 'all') {
 				filter.status = statusFilter as ExecStatus
+			} else {
+				filter.exclude_status = 'confirming,waiting'
 			}
 			if (searchKeywords) {
 				filter.keyword = searchKeywords
@@ -98,7 +99,6 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 				if (reset) {
 					setExecutions(converted)
 				} else {
-					// Merge with deduplication by id
 					setExecutions((prev) => {
 						const existingIds = new Set(prev.map((e) => e.id))
 						const newItems = converted.filter((e) => !existingIds.has(e.id))
@@ -106,7 +106,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 					})
 				}
 				setTotal(result.total)
-				setHasMore(currentPage * pageSize < result.total)
+				setHasMore(currentPage * pageSize < (result.total || 0))
 			}
 
 			setLoading(false)
@@ -119,7 +119,6 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 	useEffect(() => {
 		loadData(true)
 
-		// Set up 60-second polling for list refresh
 		pollingRef.current = setInterval(() => {
 			loadData(true)
 		}, 60000)
@@ -129,6 +128,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 				clearInterval(pollingRef.current)
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [robot.member_id, statusFilter, searchKeywords])
 
 	// Load more
@@ -143,6 +143,7 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 		if (page > 1) {
 			loadData(false)
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [page])
 
 	// Scroll handler
@@ -166,11 +167,8 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 		initialFillCheckedRef.current = false
 	}, [robot.member_id, statusFilter, searchKeywords])
 
-	// Check if we need to load more after initial load (for large screens)
-	// Auto-load next page if content doesn't fill the container (no scrollbar)
-	// Only runs once per filter change
+	// Auto-load for large screens
 	useEffect(() => {
-		// Skip if already checked or conditions not met
 		if (
 			initialFillCheckedRef.current ||
 			executions.length === 0 ||
@@ -185,14 +183,11 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 		const container = containerRef.current
 		if (!container) return
 
-		// Use requestAnimationFrame to ensure DOM has updated
 		requestAnimationFrame(() => {
 			const { scrollHeight, clientHeight } = container
-			// Only load more if content doesn't fill the container
 			if (scrollHeight <= clientHeight) {
 				loadMore()
 			} else {
-				// Content fills container, mark as checked
 				initialFillCheckedRef.current = true
 			}
 		})
@@ -490,74 +485,11 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 											)}
 										</div>
 										<div className={styles.colActions}>
-											{/* Active (Running or Paused): Guide + Pause/Resume + Stop */}
+											{/* Active (Running or Paused): Stop only (Guide & Pause: TODO v2) */}
 											{isActive && (
 												<>
-													<Tooltip
-														title={is_cn ? '指导执行' : 'Guide'}
-													>
-														<button
-															className={styles.actionBtn}
-															onClick={(e) => {
-																e.stopPropagation()
-																onOpenDetail?.(exec)
-															}}
-														>
-															<Icon
-																name='material-quickreply'
-																size={14}
-															/>
-														</button>
-													</Tooltip>
-													{isPaused ? (
-														<Tooltip
-															title={
-																is_cn
-																	? '继续'
-																	: 'Resume'
-															}
-														>
-															<button
-																className={
-																	styles.actionBtn
-																}
-																onClick={(e) =>
-																	handleResume(
-																		e,
-																		exec
-																	)
-																}
-															>
-																<Icon
-																	name='material-play_circle'
-																	size={14}
-																/>
-															</button>
-														</Tooltip>
-													) : (
-														<Tooltip
-															title={
-																is_cn ? '暂停' : 'Pause'
-															}
-														>
-															<button
-																className={
-																	styles.actionBtn
-																}
-																onClick={(e) =>
-																	handlePause(
-																		e,
-																		exec
-																	)
-																}
-															>
-																<Icon
-																	name='material-pause_circle'
-																	size={14}
-																/>
-															</button>
-														</Tooltip>
-													)}
+													{/* TODO: v2 — Guide Execution */}
+													{/* TODO: v2 — Pause/Resume */}
 													<Tooltip title={is_cn ? '停止' : 'Stop'}>
 														<button
 															className={`${styles.actionBtn} ${styles.actionBtnDanger}`}

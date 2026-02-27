@@ -222,20 +222,8 @@ const ExecutionCard: React.FC<ExecutionCardProps> = ({
 
 				{showControls && !isFailed && (
 					<>
-						<button
-							className={styles.actionBtn}
-							onClick={(e) => handleActionClick(e, () => onGuide?.(execution.id))}
-							title={is_cn ? '指导执行' : 'Guide Execution'}
-						>
-							<Icon name='material-quickreply' size={14} />
-						</button>
-						<button
-							className={styles.actionBtn}
-							onClick={(e) => handleActionClick(e, () => onPause?.(execution.id))}
-							title={is_cn ? (isPaused ? '继续' : '暂停') : (isPaused ? 'Resume' : 'Pause')}
-						>
-							<Icon name={isPaused ? 'material-play_circle' : 'material-pause_circle'} size={14} />
-						</button>
+						{/* TODO: v2 — Guide Execution */}
+						{/* TODO: v2 — Pause/Resume */}
 						<button
 							className={styles.actionBtn}
 							onClick={(e) => handleActionClick(e, () => onStop?.(execution.id))}
