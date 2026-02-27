@@ -85,6 +85,29 @@ export function ContentURLToWrapper(url: string): string | null {
 }
 
 /**
+ * 触发浏览器下载文件
+ * 支持 wrapper 格式（__yao.attachment://fileID）和普通 URL。
+ * 多附件批量下载时可传 index，每隔 300ms 触发一次以避免浏览器拦截。
+ *
+ * @param file - wrapper 字符串或完整 URL
+ * @param filename - 下载时使用的文件名
+ * @param index - 批量下载时的序号（用于错开触发时机）
+ */
+export function triggerFileDownload(file: string, filename: string, index = 0): void {
+	const url = WrapperToContentURL(file)
+	if (!url) return
+	setTimeout(() => {
+		const a = document.createElement('a')
+		a.href = url
+		a.download = filename || 'attachment'
+		a.style.display = 'none'
+		document.body.appendChild(a)
+		a.click()
+		document.body.removeChild(a)
+	}, index * 300)
+}
+
+/**
  * 解析文件地址并返回可直接使用的 URL
  * 支持多种格式：
  * - Wrapper 格式: {uploaderID}://{fileID} -> 转换为 Content API URL

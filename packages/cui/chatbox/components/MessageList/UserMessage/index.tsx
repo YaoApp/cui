@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import clsx from 'clsx'
+import { message } from 'antd'
 import { FileText, Image as ImageIcon, DownloadSimple } from 'phosphor-react'
 import type { Message } from '../../../../openapi'
 import { FileAPI } from '../../../../openapi'
@@ -166,10 +167,10 @@ const FileAttachment: React.FC<{ url: string; filename?: string }> = ({ url, fil
 			setTimeout(() => {
 				URL.revokeObjectURL(blobUrl)
 			}, 100)
-		} catch (err) {
-			console.error('Failed to download file:', err)
-			alert('Failed to download file')
-		} finally {
+	} catch (err) {
+		console.error('Failed to download file:', err)
+		message.error('Failed to download file')
+	} finally {
 			setDownloading(false)
 		}
 	}

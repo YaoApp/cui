@@ -5,6 +5,7 @@ import Icon from '@/widgets/Icon'
 import { useRobots } from '@/hooks/useRobots'
 import type { Execution, Task } from '../../types'
 import type { ExecutionResponse } from '@/openapi/agent/robot'
+import { triggerFileDownload } from '@/utils/fileWrapper'
 import CreatureLoading from '../CreatureLoading'
 import styles from './index.less'
 
@@ -291,9 +292,15 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 	}
 
 	const handleDownload = (attachment: { title: string; file: string }) => {
-		console.log('Download:', attachment)
-		// TODO: Trigger download
-		alert(is_cn ? `下载: ${attachment.title}` : `Download: ${attachment.title}`)
+		triggerFileDownload(attachment.file, attachment.title)
+	}
+
+	const handleDownloadAll = () => {
+		const attachments = execution?.delivery?.content?.attachments
+		if (!attachments || attachments.length === 0) return
+		attachments.forEach((att, i) => {
+			triggerFileDownload(att.file, att.title, i)
+		})
 	}
 
 	const handleClose = () => {
@@ -885,42 +892,36 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 					</>
 				)}
 
-					{isCompleted && (
+				{isCompleted && (
+					<>
+						{/* TODO: v2 — Re-run */}
+						{execution.delivery?.content?.attachments &&
+							execution.delivery.content.attachments.length > 0 && (
+								<button
+									className={styles.actionBtnPrimary}
+									onClick={handleDownloadAll}
+								>
+									<Icon name='material-download' size={16} />
+									<span>
+										{is_cn
+											? `下载结果 (${execution.delivery.content.attachments.length})`
+											: `Download (${execution.delivery.content.attachments.length})`}
+									</span>
+								</button>
+							)}
+					</>
+				)}
+
+					{isFailed && (
 						<>
-							<button className={styles.actionBtnSecondary} onClick={handleRerun}>
-								<Icon name='material-refresh' size={16} />
-								<span>{is_cn ? '重新执行' : 'Re-run'}</span>
-							</button>
-							{execution.delivery?.content?.attachments &&
-								execution.delivery.content.attachments.length > 0 && (
-									<button
-										className={styles.actionBtnPrimary}
-										onClick={() =>
-											execution.delivery?.content?.attachments?.[0] &&
-											handleDownload(
-												execution.delivery.content.attachments[0]
-											)
-										}
-									>
-										<Icon name='material-download' size={16} />
-										<span>{is_cn ? '下载结果' : 'Download'}</span>
-									</button>
-								)}
+							{/* TODO: v2 — Retry */}
 						</>
 					)}
 
-					{isFailed && (
-						<button className={styles.actionBtnPrimary} onClick={handleRetry}>
-							<Icon name='material-refresh' size={16} />
-							<span>{is_cn ? '重试' : 'Retry'}</span>
-						</button>
-					)}
-
 					{isCancelled && (
-						<button className={styles.actionBtnSecondary} onClick={handleRerun}>
-							<Icon name='material-refresh' size={16} />
-							<span>{is_cn ? '重新执行' : 'Re-run'}</span>
-						</button>
+						<>
+							{/* TODO: v2 — Re-run */}
+						</>
 					)}
 				</div>
 			</div>

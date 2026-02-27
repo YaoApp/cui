@@ -5,6 +5,7 @@ import Icon from '@/widgets/Icon'
 import useRobots from '@/hooks/useRobots'
 import type { RobotState } from '../../../types'
 import type { Result, ResultDetail, TriggerType } from '@/openapi/agent/robot'
+import { triggerFileDownload } from '@/utils/fileWrapper'
 import CreatureLoading from '../../CreatureLoading'
 import styles from '../index.less'
 
@@ -192,13 +193,16 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 		}
 	}
 
-	// Handle download
-	const handleDownload = (e: React.MouseEvent, result: Result) => {
+	// Handle download — fetch full detail first to get attachment file wrappers
+	const handleDownload = async (e: React.MouseEvent, result: Result) => {
 		e.stopPropagation()
-		if (result.has_attachments) {
-			console.log('Download attachments for result:', result.id)
-			// TODO: Implement actual download - need to fetch detail first to get attachment URLs
-			alert(is_cn ? '下载功能开发中...' : 'Download feature coming soon...')
+		if (!result.has_attachments) return
+		const detail = await getResult(robot.member_id, result.id)
+		const attachments = detail?.delivery?.content?.attachments
+		if (attachments && attachments.length > 0) {
+			attachments.forEach((att, i) => {
+				triggerFileDownload(att.file, att.title, i)
+			})
 		}
 	}
 

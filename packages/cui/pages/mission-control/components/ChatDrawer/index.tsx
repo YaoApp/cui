@@ -473,14 +473,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 								)}
 
 								<div className={styles.inputRow}>
-								<button
-									className={styles.actionBtn}
-									onClick={handleFileAdd}
-									disabled={sending || isFinalized}
-									title={is_cn ? '添加附件' : 'Add attachment'}
-								>
-										<Icon name='material-attach_file' size={18} />
-									</button>
+								{/* TODO: v2 — Attachment upload */}
 								<textarea
 									ref={textareaRef}
 									className={styles.taskInput}
