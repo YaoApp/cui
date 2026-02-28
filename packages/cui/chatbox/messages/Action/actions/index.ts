@@ -8,8 +8,9 @@ import navigateReplace, { NavigateReplacePayload } from './navigate.replace'
 import appMenuReload from './app.menu.reload'
 import { notifySuccess, notifyError, notifyWarning, notifyInfo, NotifyPayload } from './notify'
 import chatNewWithAssistant, { ChatNewWithAssistantPayload } from './chat.newWithAssistant'
+import robotExecute, { RobotExecutePayload } from './robot.execute'
 
-export type ActionPayload = NavigatePayload | NavigateBackPayload | NavigateReplacePayload | NotifyPayload | ChatNewWithAssistantPayload | undefined
+export type ActionPayload = NavigatePayload | NavigateBackPayload | NavigateReplacePayload | NotifyPayload | ChatNewWithAssistantPayload | RobotExecutePayload | undefined
 
 export interface ActionHandler {
 	(payload?: any): void
@@ -34,7 +35,10 @@ export const actionHandlers: Record<string, ActionHandler> = {
 	'notify.info': notifyInfo,
 
 	// Chat
-	'chat.newWithAssistant': chatNewWithAssistant
+	'chat.newWithAssistant': chatNewWithAssistant,
+
+	// Robot
+	'robot.execute': robotExecute
 }
 
 /**

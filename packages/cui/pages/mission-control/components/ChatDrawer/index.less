@@ -778,7 +778,184 @@
 	}
 }
 
+// ==================== History Dropdown ====================
+.metaRight {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.historyBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: none;
+	background: transparent;
+	border-radius: 6px;
+	cursor: pointer;
+	color: var(--color_mission_text_muted);
+	transition: all 0.15s;
+
+	&:hover {
+		background: var(--color_mission_glass_hover);
+		color: var(--color_mission_text_secondary);
+	}
+
+	&.historyBtnActive {
+		background: var(--color_mission_glass_hover);
+		color: var(--color_mission_accent_cyan);
+	}
+}
+
+// Floating dropdown — does not affect layout flow
+.historyDropdown {
+	position: absolute;
+	top: calc(100% + 6px);
+	right: 0;
+	z-index: 100;
+	width: 280px;
+	max-height: 280px;
+	display: flex;
+	flex-direction: column;
+	background: var(--color_mission_modal_header_bg);
+	border: 1px solid var(--color_mission_modal_border);
+	border-radius: 8px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+	animation: slideDown 0.15s ease-out;
+	overflow: hidden;
+}
+
+.historyHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--color_mission_text_muted);
+	border-bottom: 1px solid var(--color_mission_glass_border);
+	flex-shrink: 0;
+}
+
+.historyNewBtn {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	border: none;
+	background: transparent;
+	font-size: 11px;
+	font-weight: 500;
+	text-transform: none;
+	letter-spacing: 0;
+	color: var(--color_mission_accent_cyan);
+	cursor: pointer;
+	padding: 2px 6px;
+	border-radius: 4px;
+	transition: background 0.15s;
+
+	&:hover {
+		background: var(--color_mission_glass_hover);
+	}
+}
+
+.historyList {
+	overflow-y: auto;
+	flex: 1;
+	padding: 4px;
+
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_mission_glass_border);
+		border-radius: 2px;
+	}
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+.historyEmpty {
+	padding: 20px;
+	text-align: center;
+	font-size: 12px;
+	color: var(--color_mission_text_muted);
+}
+
+.historyItem {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 7px 10px;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background 0.12s;
+	gap: 8px;
+
+	&:hover {
+		background: var(--color_mission_glass_hover);
+	}
+
+	&.historyItemActive {
+		background: var(--color_mission_glass_hover);
+
+		.historyItemTitle {
+			color: var(--color_mission_accent_cyan);
+		}
+	}
+}
+
+.historyItemTitle {
+	font-size: 13px;
+	color: var(--color_mission_text);
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.historyItemDelete {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+	border: none;
+	background: transparent;
+	border-radius: 4px;
+	cursor: pointer;
+	color: var(--color_mission_text_muted);
+	transition: all 0.12s;
+	padding: 0;
+
+	&:hover {
+		background: rgba(255, 80, 80, 0.15);
+		color: #ff6b6b;
+	}
+}
+
+.historyItem:hover .historyItemDelete {
+	display: flex;
+}
+
 // ==================== Animations ====================
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
 @keyframes fadeIn {
 	from {
 		opacity: 0;

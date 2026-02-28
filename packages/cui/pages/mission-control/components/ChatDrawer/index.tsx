@@ -1,15 +1,23 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Creature from '@/widgets/Creature'
 import DrawerMessageList from './DrawerMessageList'
-import { newStreamSession, processChunk } from '@/chatbox/utils/chunkProcessor'
+import { newStreamSession } from '@/chatbox/utils/chunkProcessor'
 import type { StreamSession } from '@/chatbox/utils/chunkProcessor'
-import { clearMessageCache } from '@/chatbox/hooks/delta'
-import type { Message as CUIMessage, StreamCallback } from '@/openapi/chat/types'
+import { applyDelta, clearMessageCache } from '@/chatbox/hooks/delta'
+import { nanoid } from 'nanoid'
+import { Chat } from '@/openapi'
+import type { Message as CUIMessage } from '@/openapi/chat/types'
 import type { InteractDoneData } from '@/openapi/agent/robot/types'
 import type { RobotState } from '../../types'
 import styles from './index.less'
+
+interface ChatHistoryItem {
+	chat_id: string
+	title: string
+	updated_at: string
+}
 
 // ==================== Types ====================
 export interface ExecutionContextInfo {
@@ -47,10 +55,13 @@ export interface ChatDrawerProps {
 		title: string
 		hint: string
 	}
-	onSend?: (content: string, onChunk: StreamCallback) => Promise<InteractDoneData | null>
+	// Stream configuration — ChatDrawer manages StreamCompletion internally (fire-and-forget, like chatbox)
+	assistantId?: string
+	chatId?: string
+	metadata?: Record<string, any>
 	onComplete?: () => void
 	showExecutionContext?: boolean
-	chatId?: string
+	robotId?: string
 	initialMessages?: CUIMessage[]
 }
 
@@ -62,10 +73,12 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 	emptyState,
 	placeholder,
 	successState,
-	onSend,
+	assistantId,
+	chatId: propChatId,
+	metadata,
 	onComplete,
 	showExecutionContext = false,
-	chatId: propChatId,
+	robotId,
 	initialMessages
 }) => {
 	const locale = getLocale()
@@ -73,6 +86,13 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const chatIdRef = useRef(propChatId || `chat-drawer-${Date.now()}`)
 	const sessionRef = useRef<StreamSession>(newStreamSession())
+	const abortRef = useRef<(() => void) | null>(null)
+
+	const chatClient = useMemo(() => {
+		const openapi = window.$app?.openapi
+		if (!openapi) return null
+		return new Chat(openapi)
+	}, [])
 
 	const [messages, setMessages] = useState<CUIMessage[]>(initialMessages || [])
 	const [inputContent, setInputContent] = useState('')
@@ -82,6 +102,11 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 	const [completed, setCompleted] = useState(false)
 	const [contextExpanded, setContextExpanded] = useState(false)
 	const [interactResult, setInteractResult] = useState<InteractDoneData | null>(null)
+	const [historyOpen, setHistoryOpen] = useState(false)
+	const [historyItems, setHistoryItems] = useState<ChatHistoryItem[]>([])
+	const [historyLoading, setHistoryLoading] = useState(false)
+	const historyDropdownRef = useRef<HTMLDivElement>(null)
+	const historyBtnRef = useRef<HTMLButtonElement>(null)
 
 	// Task is finalized when we have an interact result that is not "wait_for_more"
 	const isFinalized = !!(interactResult && !interactResult.wait_for_more && interactResult.status !== 'error')
@@ -120,7 +145,12 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 			if (context.type === 'assign') {
 				setMessages([])
 				clearMessageCache(chatIdRef.current)
-				chatIdRef.current = `chat-drawer-${Date.now()}`
+				// Preserve robot_ prefix format so history lookup works correctly
+				if (robotId) {
+					chatIdRef.current = `robot_${robotId}_${Date.now()}`
+				} else {
+					chatIdRef.current = propChatId || `chat-drawer-${Date.now()}`
+				}
 				sessionRef.current = newStreamSession()
 			}
 			setInputContent('')
@@ -135,6 +165,126 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 			setMessages(initialMessages)
 		}
 	}, [initialMessages])
+
+	// Close history dropdown on outside click or ESC
+	useEffect(() => {
+		if (!historyOpen) return
+		const handleClick = (e: MouseEvent) => {
+			if (
+				historyDropdownRef.current &&
+				!historyDropdownRef.current.contains(e.target as Node) &&
+				historyBtnRef.current &&
+				!historyBtnRef.current.contains(e.target as Node)
+			) {
+				setHistoryOpen(false)
+			}
+		}
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') setHistoryOpen(false)
+		}
+		document.addEventListener('mousedown', handleClick)
+		document.addEventListener('keydown', handleKeyDown)
+		return () => {
+			document.removeEventListener('mousedown', handleClick)
+			document.removeEventListener('keydown', handleKeyDown)
+		}
+	}, [historyOpen])
+
+	// Fetch chat history for this robot
+	const fetchHistory = useCallback(async () => {
+		if (!robotId) return
+		const openapi = window.$app?.openapi
+		if (!openapi) return
+
+		setHistoryLoading(true)
+		try {
+			const chatApi = new Chat(openapi)
+			const res = await chatApi.ListSessions({
+				chat_id_prefix: `robot_${robotId}_`,
+				pagesize: 20,
+				order_by: 'updated_at',
+				order: 'desc'
+			})
+				const items: any[] = res?.data ?? []
+			setHistoryItems(
+				items.map((s: any) => ({
+					chat_id: s.chat_id,
+					// title is written by Next Hook on confirm_task; fallback to time if not yet set
+					title: s.title || new Date(s.last_message_at || s.updated_at || s.created_at).toLocaleString(),
+					updated_at: s.updated_at
+				}))
+			)
+		} catch (err) {
+			console.error('[ChatDrawer] Failed to fetch history:', err)
+		} finally {
+			setHistoryLoading(false)
+		}
+	}, [robotId])
+
+	const handleHistoryToggle = useCallback(() => {
+		if (!historyOpen) {
+			fetchHistory()
+		}
+		setHistoryOpen((prev) => !prev)
+	}, [historyOpen, fetchHistory])
+
+	const handleHistorySelect = useCallback(
+		(item: ChatHistoryItem) => {
+			chatIdRef.current = item.chat_id
+			setMessages([])
+			clearMessageCache(item.chat_id)
+			sessionRef.current = newStreamSession()
+			setHistoryOpen(false)
+			setInteractResult(null)
+			setCompleted(false)
+
+			// Load messages for the selected chat
+			if (chatClient) {
+				chatClient.GetMessages(item.chat_id).then((res) => {
+					const msgs = (res?.messages ?? []).filter(
+						(m: any) => m.type !== 'action' && m.type !== 'loading'
+					)
+					setMessages(msgs)
+				}).catch((err) => {
+					console.error('[ChatDrawer] Failed to load messages:', err)
+				})
+			}
+		},
+		[chatClient]
+	)
+
+	const handleHistoryDelete = useCallback(
+		async (e: React.MouseEvent, item: ChatHistoryItem) => {
+			e.stopPropagation()
+			if (!chatClient) return
+			try {
+				await chatClient.DeleteSession(item.chat_id)
+				setHistoryItems((prev) => prev.filter((h) => h.chat_id !== item.chat_id))
+				// If the deleted chat is the current one, start a new conversation
+				if (chatIdRef.current === item.chat_id) {
+					chatIdRef.current = `robot_${robotId}_${Date.now()}`
+					setMessages([])
+					clearMessageCache(chatIdRef.current)
+					sessionRef.current = newStreamSession()
+					setInteractResult(null)
+					setCompleted(false)
+				}
+			} catch (err) {
+				console.error('[ChatDrawer] Failed to delete session:', err)
+			}
+		},
+		[chatClient, robotId]
+	)
+
+	const handleNewConversation = useCallback(() => {
+		chatIdRef.current = `robot_${robotId}_${Date.now()}`
+		setMessages([])
+		clearMessageCache(chatIdRef.current)
+		sessionRef.current = newStreamSession()
+		setHistoryOpen(false)
+		setInteractResult(null)
+		setCompleted(false)
+	}, [robotId])
 
 	// Auto-close drawer after task is finalized (confirmed/adjusted)
 	useEffect(() => {
@@ -154,17 +304,20 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 		textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px'
 	}
 
-	const handleSend = useCallback(async () => {
+	const handleSend = useCallback(() => {
 		if (!inputContent.trim() || sending || isFinalized) return
+		if (!chatClient || !assistantId) return
 
 		const userContent = inputContent.trim()
+		const currentChatId = chatIdRef.current
+
+		// Add user message immediately
 		const userMsg: CUIMessage = {
 			type: 'user_input',
 			props: { content: userContent, role: 'user' },
 			ui_id: `user-${Date.now()}`,
 			message_id: `user-${Date.now()}`
 		}
-
 		setMessages((prev) => [...prev, userMsg])
 		setInputContent('')
 		setSending(true)
@@ -175,24 +328,28 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 			textareaRef.current.style.height = 'auto'
 		}
 
-		// New stream session per send to isolate message_ids across rounds
+		// New stream session per send (isolates message_ids across rounds, same as chatbox)
 		sessionRef.current = newStreamSession()
-		const currentChatId = chatIdRef.current
 		const currentSession = sessionRef.current
 
-		try {
-			const onChunk: StreamCallback = (chunk) => {
+		// Fire-and-forget: identical pattern to chatbox createChunkHandler
+		const abortFn = chatClient.StreamCompletion(
+			{
+				assistant_id: assistantId,
+				chat_id: currentChatId,
+				messages: [{ role: 'user', content: userContent }],
+				metadata
+			},
+			(chunk: CUIMessage) => {
 				if (!chunk) return
 
-				// Events: handle interact_done and message lifecycle, skip others
 				if (chunk.type === 'event') {
 					const eventName = chunk.props?.event as string
 
-					if (eventName === 'interact_done') {
-						const doneData = (chunk.props?.data || chunk.props) as InteractDoneData
-						if (doneData) {
-							setInteractResult(doneData)
-						}
+					if (eventName === 'stream_start') {
+						const streamId = nanoid()
+						currentSession.streamId = streamId
+						currentSession.completedMessages = {}
 						return
 					}
 
@@ -215,38 +372,90 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 						return
 					}
 
-					// stream_start, stream_end, etc. — no message updates needed
+					if (eventName === 'stream_end') {
+						// stream_end turns off streaming — same as chatbox createChunkHandler
+						setStreaming(false)
+						setSending(false)
+						setTimeout(() => textareaRef.current?.focus(), 50)
+						delete abortRef.current
+						return
+					}
+
+					if (eventName === 'interact_done') {
+						const doneData = (chunk.props?.data || chunk.props) as InteractDoneData
+						if (doneData) {
+							setInteractResult(doneData)
+						}
+						return
+					}
+
 					return
 				}
 
-				// Data chunks: apply processChunk to update messages
-				setMessages((prev) => {
-					const processed = processChunk(currentSession, currentChatId, chunk, prev)
-					return processed.messages
-				})
-			}
+				// Non-event chunks: apply delta merge (same logic as chatbox stream.ts)
+				const streamId = currentSession.streamId || 'default'
+				const rawMsgId = chunk.message_id || chunk.chunk_id || 'ai-response-unknown'
+				const messageId = `${streamId}:${rawMsgId}`
 
-			const doneData = await onSend?.(userContent, onChunk)
-			if (doneData) {
-				setInteractResult((prev) => prev || doneData)
+				if (chunk.type_change) {
+					clearMessageCache(currentChatId, messageId)
+					setMessages((prev) => {
+						const idx = prev.findIndex((m) => m.message_id === messageId)
+						const replaced: CUIMessage = { ...chunk, message_id: messageId, delta: false, ui_id: nanoid() }
+						if (idx !== -1) {
+							const next = [...prev]
+							next[idx] = replaced
+							return next
+						}
+						return [...prev, replaced]
+					})
+					return
+				}
+
+				const mergedState = applyDelta(currentChatId, messageId, chunk)
+				const isCompleted = currentSession.completedMessages[messageId]
+				const snapshotProps = { ...mergedState.props }
+
+				setMessages((prev) => {
+					const idx = prev.findIndex((m) => m.message_id === messageId)
+					if (idx !== -1) {
+						const next = [...prev]
+						next[idx] = {
+							...next[idx],
+							chunk_id: chunk.chunk_id,
+							message_id: messageId,
+							type: mergedState.type,
+							props: snapshotProps,
+							delta: isCompleted ? false : chunk.delta
+						}
+						return next
+					}
+					return [...prev, {
+						ui_id: nanoid(),
+						chunk_id: chunk.chunk_id,
+						message_id: messageId,
+						type: mergedState.type,
+						props: snapshotProps,
+						delta: isCompleted ? false : chunk.delta
+					}]
+				})
+			},
+			(error: any) => {
+				console.error('[ChatDrawer] Stream error:', error)
+				setMessages((prev) => [...prev, {
+					type: 'error',
+					props: { message: error?.message || (is_cn ? '发送失败，请重试' : 'Failed to send, please retry') },
+					ui_id: `error-${Date.now()}`,
+					message_id: `error-${Date.now()}`
+				}])
+				setStreaming(false)
+				setSending(false)
+				delete abortRef.current
 			}
-		} catch {
-			const errMsg: CUIMessage = {
-				type: 'error',
-				props: { message: is_cn ? '发送失败，请重试' : 'Failed to send, please retry' },
-				ui_id: `error-${Date.now()}`,
-				message_id: `error-${Date.now()}`
-			}
-			setMessages((prev) => [...prev, errMsg])
-		} finally {
-			setSending(false)
-			setStreaming(false)
-			setAttachments([])
-			if (!interactResult || interactResult.wait_for_more) {
-				setTimeout(() => textareaRef.current?.focus(), 50)
-			}
-		}
-	}, [inputContent, sending, isFinalized, onSend, is_cn])
+		)
+
+		abortRef.current = abortFn
+	}, [inputContent, sending, isFinalized, chatClient, assistantId, metadata, is_cn])
 
 	const handleComplete = useCallback(async () => {
 		if (messages.length === 0) return
@@ -260,7 +469,13 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 	}, [messages.length, onComplete, onClose])
 
 	const handleClose = () => {
-		if (!sending && !completed) {
+		if (sending) {
+			abortRef.current?.()
+			abortRef.current = null
+			setStreaming(false)
+			setSending(false)
+		}
+		if (!completed) {
 			onClose()
 		}
 	}
@@ -330,6 +545,55 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 							</div>
 						)}
 					</div>
+					{robotId && (
+						<div className={styles.metaRight}>
+							<button
+								ref={historyBtnRef}
+								className={`${styles.historyBtn} ${historyOpen ? styles.historyBtnActive : ''}`}
+								onClick={handleHistoryToggle}
+								title={is_cn ? '对话历史' : 'Chat History'}
+							>
+								<Icon name='material-history' size={16} />
+							</button>
+
+							{/* Floating dropdown — anchored to button via position:absolute on metaRight */}
+							{historyOpen && (
+								<div ref={historyDropdownRef} className={styles.historyDropdown}>
+									<div className={styles.historyHeader}>
+										<span>{is_cn ? '历史对话' : 'History'}</span>
+										<button className={styles.historyNewBtn} onClick={handleNewConversation}>
+											<Icon name='material-add' size={12} />
+											<span>{is_cn ? '新对话' : 'New'}</span>
+										</button>
+									</div>
+									<div className={styles.historyList}>
+										{historyLoading ? (
+											<div className={styles.historyEmpty}>{is_cn ? '加载中...' : 'Loading...'}</div>
+										) : historyItems.length === 0 ? (
+											<div className={styles.historyEmpty}>{is_cn ? '暂无历史对话' : 'No history'}</div>
+										) : (
+											historyItems.map((item) => (
+												<div
+													key={item.chat_id}
+													className={`${styles.historyItem} ${item.chat_id === chatIdRef.current ? styles.historyItemActive : ''}`}
+													onClick={() => handleHistorySelect(item)}
+												>
+													<span className={styles.historyItemTitle}>{item.title}</span>
+													<button
+														className={styles.historyItemDelete}
+														onClick={(e) => handleHistoryDelete(e, item)}
+														title={is_cn ? '删除' : 'Delete'}
+													>
+														<Icon name='material-close' size={12} />
+													</button>
+												</div>
+											))
+										)}
+									</div>
+								</div>
+							)}
+						</div>
+					)}
 				</div>
 
 				{/* Content */}
