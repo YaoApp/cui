@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import type { Message as CUIMessage } from '@/openapi/chat/types'
 import type { InteractDoneData } from '@/openapi/agent/robot/types'
-import { Loading, Thinking, Text, ToolCall, Error as ErrorMsg, Custom } from '@/chatbox/messages'
+import { Loading, Thinking, Text, ToolCall, Error as ErrorMsg, Action, Custom } from '@/chatbox/messages'
 import InteractResultCard from './InteractResultCard'
 import styles from './index.less'
 
@@ -64,6 +64,8 @@ const DrawerMessageList: React.FC<DrawerMessageListProps> = ({ messages, streami
 				return <ToolCall message={msg as any} loading={isGenerating} />
 			case 'error':
 				return <ErrorMsg message={msg as any} />
+			case 'action':
+				return <Action message={msg as any} />
 			default:
 				return <Custom message={msg as any} />
 		}

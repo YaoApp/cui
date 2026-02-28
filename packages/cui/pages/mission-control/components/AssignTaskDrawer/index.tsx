@@ -1,9 +1,7 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useRef, useMemo, useState, useEffect } from 'react'
 import { getLocale } from '@umijs/max'
 import ChatDrawer from '../ChatDrawer'
 import { AgentRobots } from '@/openapi/agent/robot/robots'
-import type { StreamCallback } from '@/openapi/chat/types'
-import type { InteractDoneData } from '@/openapi/agent/robot/types'
 import type { RobotState } from '../../types'
 import { robotNames } from '../../mock/data'
 
@@ -22,7 +20,8 @@ const AssignTaskDrawer: React.FC<AssignTaskDrawerProps> = ({
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const abortRef = useRef<(() => void) | null>(null)
+	const chatIdRef = useRef(`robot_${robot.member_id}_${Date.now()}`)
+	const [hostAssistantId, setHostAssistantId] = useState<string | null>(null)
 
 	const displayName = robotNames[robot.member_id]
 		? is_cn
@@ -30,50 +29,44 @@ const AssignTaskDrawer: React.FC<AssignTaskDrawerProps> = ({
 			: robotNames[robot.member_id].en
 		: robot.display_name
 
-	const handleSend = useCallback(
-		async (content: string, onChunk: StreamCallback): Promise<InteractDoneData | null> => {
-			const openapi = window.$app?.openapi
-			if (!openapi) return null
+	// Resolve host assistant ID once when drawer first opens
+	useEffect(() => {
+		if (!visible || hostAssistantId) return
+		const openapi = window.$app?.openapi
+		if (!openapi) return
 
-			const robotsApi = new AgentRobots(openapi)
+		const robotsApi = new AgentRobots(openapi)
+		robotsApi.GetHostID(robot.member_id).then((res) => {
+			if (res?.data?.assistant_id) {
+				setHostAssistantId(res.data.assistant_id)
+			}
+		}).catch((err) => {
+			console.error('[AssignTask] Failed to resolve host ID:', err)
+		})
+	}, [visible, robot.member_id, hostAssistantId])
 
-			return new Promise<InteractDoneData | null>((resolve) => {
-				const abort = robotsApi.InteractStreamCUI(
-					robot.member_id,
-					{ message: content, source: 'ui' },
-					(chunk) => {
-						if (chunk.type === 'event' && chunk.props?.event === 'interact_done') {
-							resolve((chunk.props?.data as InteractDoneData) || null)
-							return
-						}
-						onChunk(chunk)
-					},
-					(error: Error) => {
-						console.error('[AssignTask] Stream error:', error)
-						resolve(null)
-					}
-				)
+	// Listen for robot/executionStarted event emitted by robot.execute action handler
+	useEffect(() => {
+		if (!visible) return
 
-				abortRef.current = abort
-			})
-		},
-		[robot.member_id]
-	)
+		const handleExecutionStarted = (data: { robot_id: string; execution_id: string }) => {
+			if (data?.robot_id === robot.member_id) {
+				onTaskAssigned?.()
+			}
+		}
 
-	const handleComplete = useCallback(async () => {
-		onTaskAssigned?.()
-	}, [onTaskAssigned])
+		window.$app?.Event?.on('robot/executionStarted', handleExecutionStarted)
+		return () => {
+			window.$app?.Event?.off('robot/executionStarted', handleExecutionStarted)
+		}
+	}, [visible, robot.member_id, onTaskAssigned])
 
-	const handleClose = useCallback(() => {
-		abortRef.current?.()
-		abortRef.current = null
-		onClose()
-	}, [onClose])
+	const metadata = useMemo(() => ({ robot_id: robot.member_id }), [robot.member_id])
 
 	return (
 		<ChatDrawer
 			visible={visible}
-			onClose={handleClose}
+			onClose={onClose}
 			context={{
 				type: 'assign',
 				robotName: displayName,
@@ -92,8 +85,11 @@ const AssignTaskDrawer: React.FC<AssignTaskDrawerProps> = ({
 				title: is_cn ? '任务已启动' : 'Task Started',
 				hint: is_cn ? '正在跳转到执行详情...' : 'Redirecting to execution details...'
 			}}
-			onSend={handleSend}
-			onComplete={handleComplete}
+			assistantId={hostAssistantId || undefined}
+			chatId={chatIdRef.current}
+			metadata={metadata}
+			onComplete={onTaskAssigned}
+			robotId={robot.member_id}
 		/>
 	)
 }

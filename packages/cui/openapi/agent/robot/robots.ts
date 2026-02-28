@@ -211,6 +211,37 @@ export class AgentRobots {
 		return this.api.Get<ActivityListResponse>(BuildURL('/agent/robots/activities', urlParams))
 	}
 
+	// ==================== Execute API ====================
+
+	/**
+	 * Execute robot with confirmed goals (called after Host Agent confirms task)
+	 * POST /v1/agent/robots/:id/execute
+	 * @param robotId - Robot member_id
+	 * @param req - Execute request with goals, optional context and chat_id
+	 * @returns Execution result with execution_id and status
+	 */
+	async Execute(
+		robotId: string,
+		req: { goals: string; context?: Record<string, any>; chat_id?: string }
+	): Promise<ApiResponse<{ execution_id: string; status: string; message: string }>> {
+		return this.api.Post<{ execution_id: string; status: string; message: string }>(
+			`/agent/robots/${encodeURIComponent(robotId)}/execute`,
+			req
+		)
+	}
+
+	/**
+	 * Get host assistant ID for a robot
+	 * GET /v1/agent/robots/:id/host
+	 * @param robotId - Robot member_id
+	 * @returns Host assistant ID
+	 */
+	async GetHostID(robotId: string): Promise<ApiResponse<{ assistant_id: string; robot_id: string }>> {
+		return this.api.Get<{ assistant_id: string; robot_id: string }>(
+			`/agent/robots/${encodeURIComponent(robotId)}/host`
+		)
+	}
+
 	// ==================== V2 Interact APIs ====================
 
 	/**

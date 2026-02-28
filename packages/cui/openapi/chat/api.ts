@@ -376,6 +376,7 @@ export class Chat {
 			if (filter.assistant_id) params.append('assistant_id', filter.assistant_id)
 			if (filter.status) params.append('status', filter.status)
 			if (filter.keywords) params.append('keywords', filter.keywords)
+			if (filter.chat_id_prefix) params.append('chat_id_prefix', filter.chat_id_prefix)
 			if (filter.start_time) params.append('start_time', filter.start_time)
 			if (filter.end_time) params.append('end_time', filter.end_time)
 			if (filter.time_field) params.append('time_field', filter.time_field)
@@ -400,8 +401,7 @@ export class Chat {
 		}
 
 		const result = await response.json()
-		// Handle both { data: {...} } and direct response formats
-		return (result.data || result) as ChatSessionList
+		return result as ChatSessionList
 	}
 
 	/**

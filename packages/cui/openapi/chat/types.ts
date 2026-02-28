@@ -794,6 +794,7 @@ export interface ChatSessionFilter {
 	assistant_id?: string
 	status?: ChatStatus
 	keywords?: string
+	chat_id_prefix?: string
 	// Time range filter
 	start_time?: string // ISO 8601 datetime
 	end_time?: string // ISO 8601 datetime
