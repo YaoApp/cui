@@ -10,6 +10,7 @@ import Tag from '../../../components/Tag'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
 import { useLLMProviders } from '@/hooks/useLLMProviders'
+import ApiAccess from '../ApiAccess'
 
 interface ViewProps {
 	data: App.Assistant
@@ -195,6 +196,11 @@ const View = ({ data, connectors }: ViewProps) => {
 			key: 'capabilities',
 			label: is_cn ? '能力' : 'Capabilities',
 			children: renderCapabilities()
+		},
+		{
+			key: 'api',
+			label: is_cn ? '集成' : 'Integrations',
+			children: <ApiAccess data={data} is_cn={is_cn} />
 		}
 	]
 
