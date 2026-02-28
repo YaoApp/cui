@@ -22,6 +22,8 @@ interface AdvancedPanelProps {
 // Phase agents - for customizing which AI handles each execution phase
 // inspiration phase is only available in autonomous mode
 // run phase is not configurable (it's a built-in scheduler, not an agent)
+// validation phase is removed (not part of pipeline in current version)
+// learning phase is hidden (placeholder implementation, not yet functional)
 // Each phase has a corresponding agent type for filtering (e.g., robot-goals, robot-tasks)
 const PHASES = [
 	{ key: 'host', label_en: 'Host Agent', label_cn: '交互代理', desc_en: 'Human interaction', desc_cn: '人机交互中介', default: '__yao.host', type: 'robot-host' },
@@ -29,9 +31,10 @@ const PHASES = [
 	{ key: 'goals', label_en: 'Goals', label_cn: '目标规划', desc_en: 'Generate goals', desc_cn: '生成目标', default: '__yao.goals', type: 'robot-goals' },
 	{ key: 'tasks', label_en: 'Tasks', label_cn: '任务拆解', desc_en: 'Split into tasks', desc_cn: '拆分任务', default: '__yao.tasks', type: 'robot-tasks' },
 	// run phase is omitted - it's a built-in scheduler, not a replaceable agent
-	{ key: 'validation', label_en: 'Validation', label_cn: '校验', desc_en: 'Validate results', desc_cn: '校验结果', default: '__yao.validation', type: 'robot-validation' },
+	// validation is omitted - not a pipeline stage in current version (used internally by runner)
 	{ key: 'delivery', label_en: 'Delivery', label_cn: '交付', desc_en: 'Format & deliver', desc_cn: '格式化并交付', default: '__yao.delivery', type: 'robot-delivery' },
-	{ key: 'learning', label_en: 'Learning', label_cn: '学习', desc_en: 'Extract insights', desc_cn: '提取经验', default: '__yao.learning', type: 'robot-learning' }
+	// learning is hidden - placeholder implementation, not yet functional
+	// { key: 'learning', label_en: 'Learning', label_cn: '学习', desc_en: 'Extract insights', desc_cn: '提取经验', default: '__yao.learning', type: 'robot-learning' }
 ]
 
 // Learn types
@@ -364,96 +367,7 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 				</div>
 			</div>
 
-			{/* Webhook */}
-			<div className={styles.formItem}>
-				<label className={styles.formLabel}>Webhook</label>
-				{webhookTargets.length > 0 && (
-					<div className={styles.webhookList}>
-						{webhookTargets.map((target, index) => (
-							<div key={index} className={styles.webhookItem}>
-								<div className={styles.webhookUrl}>
-									<span>{target.url}</span>
-									{target.secret && (
-										<span className={styles.webhookSecretBadge}>
-											<Icon name='material-lock' size={12} />
-											Secret
-										</span>
-									)}
-								</div>
-								<div
-									className={styles.tagRemove}
-									onClick={() => handleRemoveWebhook(index)}
-								>
-									<Icon name='material-close' size={12} />
-								</div>
-							</div>
-						))}
-					</div>
-				)}
-				<div className={styles.webhookInputRow}>
-					<div className={styles.webhookInputs}>
-						<Input
-							value={newWebhook}
-							onChange={(value) => {
-								setNewWebhook(String(value))
-								if (webhookError) setWebhookError('')
-							}}
-							schema={{
-								type: 'string',
-								placeholder: 'https://example.com/webhook'
-							}}
-							error={webhookError}
-							hasError={!!webhookError}
-						/>
-						<InputPassword
-							value={newWebhookSecret}
-							onChange={(value) => setNewWebhookSecret(String(value))}
-							schema={{
-								type: 'string',
-								placeholder: is_cn ? 'Secret（可选）' : 'Secret (optional)'
-							}}
-						/>
-					</div>
-					<div className={styles.addItemButton} onClick={handleAddWebhook}>
-						<Icon name='material-add' size={16} />
-					</div>
-				</div>
-			</div>
-
-			{/* Yao Process */}
-			<div className={styles.formItem}>
-				<label className={styles.formLabel}>Yao Process</label>
-				{processes.length > 0 && (
-					<div className={styles.tagList}>
-						{processes.map((process, index) => (
-							<div key={index} className={styles.tag}>
-								<span className={styles.tagCode}>{process}</span>
-								<div
-									className={styles.tagRemove}
-									onClick={() => handleRemoveProcess(index)}
-								>
-									<Icon name='material-close' size={12} />
-								</div>
-							</div>
-						))}
-					</div>
-				)}
-				<div className={styles.addItemRow}>
-					<Input
-						value={newProcess}
-						onChange={(value) => setNewProcess(String(value))}
-						schema={{
-							type: 'string',
-							placeholder: is_cn ? '如 scripts.notify.Send' : 'e.g. scripts.notify.Send'
-						}}
-					/>
-					<div className={styles.addItemButton} onClick={handleAddProcess}>
-						<Icon name='material-add' size={16} />
-					</div>
-				</div>
-			</div>
-
-			{/* ==================== Concurrency Section ==================== */}
+		{/* ==================== Concurrency Section ==================== */}
 			<div className={styles.sectionTitle}>
 				{is_cn ? '并发控制' : 'Concurrency'}
 			</div>
@@ -510,155 +424,264 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 				<span className={styles.concurrencyUnit}>{is_cn ? '分钟' : 'minutes'}</span>
 			</div>
 
-			{/* ==================== Testing Section ==================== */}
-			<div className={styles.sectionTitle}>
-				{is_cn ? '测试' : 'Testing'}
+		{/* ==================== Testing Section (hidden, reserved for future use) ==================== */}
+		{/* TODO: unhide when dryrun mode is fully supported
+		<div className={styles.sectionTitle}>
+			{is_cn ? '测试' : 'Testing'}
+		</div>
+		<div className={styles.formItem}>
+			<div className={styles.switchRow}>
+				<Switch
+					value={formData['executor.mode'] === 'dryrun'}
+					onChange={(value) => handleFieldChange('executor.mode', value ? 'dryrun' : 'standard')}
+					schema={{ type: 'boolean' }}
+				/>
+				<span className={styles.switchLabel}>
+					{is_cn ? '试运行模式' : 'Dry run mode'}
+				</span>
+				<span className={styles.switchHint}>
+					{is_cn ? '（模拟执行，不实际操作）' : '(simulate without executing)'}
+				</span>
 			</div>
+		</div>
+		*/}
 
-			<div className={styles.formItem}>
-				<div className={styles.switchRow}>
-					<Switch
-						value={formData['executor.mode'] === 'dryrun'}
-						onChange={(value) => handleFieldChange('executor.mode', value ? 'dryrun' : 'standard')}
-						schema={{ type: 'boolean' }}
-					/>
-					<span className={styles.switchLabel}>
-						{is_cn ? '试运行模式' : 'Dry run mode'}
-					</span>
-					<span className={styles.switchHint}>
-						{is_cn ? '（模拟执行，不实际操作）' : '(simulate without executing)'}
-					</span>
+		{/* ==================== Learning Section (hidden, placeholder impl) ==================== */}
+		{/* TODO: unhide when RunLearning has real knowledge-base integration
+		<div className={styles.sectionTitle}>
+			{is_cn ? '学习' : 'Learning'}
+		</div>
+		<div className={styles.formItem}>
+			<div className={styles.switchRow}>
+				<Switch
+					value={formData['learn.on'] || false}
+					onChange={(value) => handleFieldChange('learn.on', value)}
+					schema={{ type: 'boolean' }}
+				/>
+				<span className={styles.switchLabel}>
+					{is_cn ? '从经验中学习' : 'Learn from experience'}
+				</span>
+			</div>
+			{formData['learn.on'] && (
+				<div className={styles.switchContent}>
+					<div className={styles.learnOptions}>
+						<label className={styles.formLabel}>
+							{is_cn ? '学习内容' : 'Learn from'}
+						</label>
+						<CheckboxGroup
+							value={formData['learn.types'] || ['execution', 'feedback', 'insight']}
+							onChange={(value) => handleFieldChange('learn.types', value)}
+							schema={{
+								type: 'array',
+								enum: LEARN_TYPES.map(t => ({
+									label: is_cn ? t.label_cn : t.label,
+									value: t.value
+								}))
+							}}
+						/>
+					</div>
+					<div className={styles.learnKeep}>
+						<label className={styles.formLabel}>
+							{is_cn ? '保留时间' : 'Keep for'}
+						</label>
+						<div className={styles.keepRow}>
+							<InputNumber
+								value={formData['learn.keep'] ?? 90}
+								onChange={(value) => handleFieldChange('learn.keep', value)}
+								schema={{ type: 'integer', minimum: 0 }}
+							/>
+							<span className={styles.keepUnit}>
+								{is_cn ? '天（0 = 永久保留）' : 'days (0 = forever)'}
+							</span>
+						</div>
+					</div>
 				</div>
+			)}
+		</div>
+		*/}
+
+		{/* ==================== Triggers Section (hidden, reserved for future use) ==================== */}
+		{/* TODO: unhide when webhook/event triggers are fully supported
+		<div className={styles.sectionTitle}>
+			{is_cn ? '触发器' : 'Triggers'}
+		</div>
+		<div className={styles.formItem}>
+			<div className={styles.switchRow}>
+				<Switch
+					value={formData['triggers.intervene.enabled'] ?? true}
+					onChange={(value) => handleFieldChange('triggers.intervene.enabled', value)}
+					schema={{ type: 'boolean' }}
+				/>
+				<span className={styles.switchLabel}>
+					{is_cn ? '接受临时任务' : 'Accept ad-hoc tasks'}
+				</span>
 			</div>
-
-			{/* ==================== Learning Section ==================== */}
-			<div className={styles.sectionTitle}>
-				{is_cn ? '学习' : 'Learning'}
+		</div>
+		<div className={styles.formItem}>
+			<div className={styles.switchRow}>
+				<Switch
+					value={formData['triggers.event.enabled'] || false}
+					onChange={(value) => handleFieldChange('triggers.event.enabled', value)}
+					schema={{ type: 'boolean' }}
+				/>
+				<span className={styles.switchLabel}>
+					{is_cn ? '事件触发' : 'Trigger on events'}
+				</span>
+				<span className={styles.switchHint}>
+					{is_cn ? '（webhook / 数据库）' : '(webhook / database)'}
+				</span>
 			</div>
+		</div>
+		*/}
 
-			<div className={styles.formItem}>
-				<div className={styles.switchRow}>
-					<Switch
-						value={formData['learn.on'] || false}
-						onChange={(value) => handleFieldChange('learn.on', value)}
-						schema={{ type: 'boolean' }}
-					/>
-					<span className={styles.switchLabel}>
-						{is_cn ? '从经验中学习' : 'Learn from experience'}
-					</span>
-				</div>
+		{/* ==================== Execution Pipeline Section ==================== */}
+		<div className={styles.sectionTitle}>
+			{is_cn ? '执行流水线' : 'Execution Pipeline'}
+		</div>
+		<div className={styles.sectionHint}>
+			{is_cn 
+				? '自定义各阶段的执行智能体，通常无需修改' 
+				: 'Customize the agent for each execution phase, usually no need to change'}
+		</div>
 
-				{formData['learn.on'] && (
-					<div className={styles.switchContent}>
-						<div className={styles.learnOptions}>
-							<label className={styles.formLabel}>
-								{is_cn ? '学习内容' : 'Learn from'}
-							</label>
-							<CheckboxGroup
-								value={formData['learn.types'] || ['execution', 'feedback', 'insight']}
-								onChange={(value) => handleFieldChange('learn.types', value)}
+		<div className={styles.phaseList}>
+			{PHASES
+				.filter(phase => !phase.autonomousOnly || autonomousMode)
+				.map(phase => (
+					<div key={phase.key} className={styles.phaseItem}>
+						<div className={styles.phaseLabel}>
+							{is_cn ? phase.label_cn : phase.label_en}
+						</div>
+						<div className={styles.phaseSelect}>
+							<Select
+								value={formData[`resources.phases.${phase.key}`] || phase.default}
+								onChange={(value) => handleFieldChange(`resources.phases.${phase.key}`, value)}
 								schema={{
-									type: 'array',
-									enum: LEARN_TYPES.map(t => ({
-										label: is_cn ? t.label_cn : t.label,
-										value: t.value
-									}))
+									type: 'string',
+									enum: getPhaseAgentOptions(
+										phase.key, 
+										phase.type, 
+										phase.default, 
+										formData[`resources.phases.${phase.key}`]
+									)
 								}}
 							/>
 						</div>
-
-						<div className={styles.learnKeep}>
-							<label className={styles.formLabel}>
-								{is_cn ? '保留时间' : 'Keep for'}
-							</label>
-							<div className={styles.keepRow}>
-								<InputNumber
-									value={formData['learn.keep'] ?? 90}
-									onChange={(value) => handleFieldChange('learn.keep', value)}
-									schema={{ type: 'integer', minimum: 0 }}
-								/>
-								<span className={styles.keepUnit}>
-									{is_cn ? '天（0 = 永久保留）' : 'days (0 = forever)'}
-								</span>
-							</div>
+						<div className={styles.phaseDesc}>
+							{is_cn ? phase.desc_cn : phase.desc_en}
 						</div>
 					</div>
-				)}
-			</div>
+				))}
+		</div>
 
-			{/* ==================== Triggers Section ==================== */}
-			<div className={styles.sectionTitle}>
-				{is_cn ? '触发器' : 'Triggers'}
-			</div>
+		{/* ==================== Developer Options Section ==================== */}
+		<div className={styles.sectionTitle}>
+			{is_cn ? '开发者选项' : 'Developer Options'}
+		</div>
+		<div className={styles.sectionHint}>
+			{is_cn 
+				? '任务交付完成后，除邮件通知外，还可以通过以下方式触发外部系统' 
+				: 'After task delivery, notify or trigger external systems in addition to email'}
+		</div>
 
-			<div className={styles.formItem}>
-				<div className={styles.switchRow}>
-					<Switch
-						value={formData['triggers.intervene.enabled'] ?? true}
-						onChange={(value) => handleFieldChange('triggers.intervene.enabled', value)}
-						schema={{ type: 'boolean' }}
-					/>
-					<span className={styles.switchLabel}>
-						{is_cn ? '接受临时任务' : 'Accept ad-hoc tasks'}
-					</span>
-				</div>
-			</div>
-
-			<div className={styles.formItem}>
-				<div className={styles.switchRow}>
-					<Switch
-						value={formData['triggers.event.enabled'] || false}
-						onChange={(value) => handleFieldChange('triggers.event.enabled', value)}
-						schema={{ type: 'boolean' }}
-					/>
-					<span className={styles.switchLabel}>
-						{is_cn ? '事件触发' : 'Trigger on events'}
-					</span>
-					<span className={styles.switchHint}>
-						{is_cn ? '（webhook / 数据库）' : '(webhook / database)'}
-					</span>
-				</div>
-			</div>
-
-			{/* ==================== Developer Options Section ==================== */}
-			<div className={styles.sectionTitle}>
-				{is_cn ? '开发者选项' : 'Developer Options'}
-			</div>
-			<div className={styles.sectionHint}>
-				{is_cn 
-					? '自定义各阶段的执行智能体，仅限开发者使用，通常无需修改' 
-					: 'Customize execution agents, for developers only, usually no need to change'}
-			</div>
-
-			<div className={styles.phaseList}>
-				{PHASES
-					.filter(phase => !phase.autonomousOnly || autonomousMode)
-					.map(phase => (
-						<div key={phase.key} className={styles.phaseItem}>
-							<div className={styles.phaseLabel}>
-								{is_cn ? phase.label_cn : phase.label_en}
+		{/* Webhook (moved from Delivery) */}
+		<div className={styles.formItem}>
+			<label className={styles.formLabel}>
+				Webhook
+				<span className={styles.fieldHint}>
+					{is_cn ? '— 交付完成时推送结果到指定 URL' : '— push results to URL on delivery'}
+				</span>
+			</label>
+			{webhookTargets.length > 0 && (
+				<div className={styles.webhookList}>
+					{webhookTargets.map((target, index) => (
+						<div key={index} className={styles.webhookItem}>
+							<div className={styles.webhookUrl}>
+								<span>{target.url}</span>
+								{target.secret && (
+									<span className={styles.webhookSecretBadge}>
+										<Icon name='material-lock' size={12} />
+										Secret
+									</span>
+								)}
 							</div>
-							<div className={styles.phaseSelect}>
-								<Select
-									value={formData[`resources.phases.${phase.key}`] || phase.default}
-									onChange={(value) => handleFieldChange(`resources.phases.${phase.key}`, value)}
-									schema={{
-										type: 'string',
-										enum: getPhaseAgentOptions(
-											phase.key, 
-											phase.type, 
-											phase.default, 
-											formData[`resources.phases.${phase.key}`]
-										)
-									}}
-								/>
-							</div>
-							<div className={styles.phaseDesc}>
-								{is_cn ? phase.desc_cn : phase.desc_en}
+							<div
+								className={styles.tagRemove}
+								onClick={() => handleRemoveWebhook(index)}
+							>
+								<Icon name='material-close' size={12} />
 							</div>
 						</div>
 					))}
+				</div>
+			)}
+			<div className={styles.webhookInputRow}>
+				<div className={styles.webhookInputs}>
+					<Input
+						value={newWebhook}
+						onChange={(value) => {
+							setNewWebhook(String(value))
+							if (webhookError) setWebhookError('')
+						}}
+						schema={{
+							type: 'string',
+							placeholder: 'https://example.com/webhook'
+						}}
+						error={webhookError}
+						hasError={!!webhookError}
+					/>
+					<InputPassword
+						value={newWebhookSecret}
+						onChange={(value) => setNewWebhookSecret(String(value))}
+						schema={{
+							type: 'string',
+							placeholder: is_cn ? 'Secret（可选）' : 'Secret (optional)'
+						}}
+					/>
+				</div>
+				<div className={styles.addItemButton} onClick={handleAddWebhook}>
+					<Icon name='material-add' size={16} />
+				</div>
 			</div>
+		</div>
+
+		{/* Yao Process (moved from Delivery) */}
+		<div className={styles.formItem}>
+			<label className={styles.formLabel}>
+				Yao Process
+				<span className={styles.fieldHint}>
+					{is_cn ? '— 交付完成时调用指定处理器' : '— call a process handler on delivery'}
+				</span>
+			</label>
+			{processes.length > 0 && (
+				<div className={styles.tagList}>
+					{processes.map((process, index) => (
+						<div key={index} className={styles.tag}>
+							<span className={styles.tagCode}>{process}</span>
+							<div
+								className={styles.tagRemove}
+								onClick={() => handleRemoveProcess(index)}
+							>
+								<Icon name='material-close' size={12} />
+							</div>
+						</div>
+					))}
+				</div>
+			)}
+			<div className={styles.addItemRow}>
+				<Input
+					value={newProcess}
+					onChange={(value) => setNewProcess(String(value))}
+					schema={{
+						type: 'string',
+						placeholder: is_cn ? '如 scripts.notify.Send' : 'e.g. scripts.notify.Send'
+					}}
+				/>
+				<div className={styles.addItemButton} onClick={handleAddProcess}>
+					<Icon name='material-add' size={16} />
+				</div>
+			</div>
+		</div>
 
 			{/* ==================== Danger Zone ==================== */}
 			<div className={styles.dangerZone}>
