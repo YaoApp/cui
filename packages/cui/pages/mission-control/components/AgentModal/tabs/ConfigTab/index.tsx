@@ -17,6 +17,7 @@ import CreatureLoading from '../../../CreatureLoading'
 import BasicPanel from './panels/BasicPanel'
 import IdentityPanel from './panels/IdentityPanel'
 import SchedulePanel from './panels/SchedulePanel'
+import IntegrationPanel from './panels/IntegrationPanel'
 import AdvancedPanel from './panels/AdvancedPanel'
 import styles from './index.less'
 
@@ -26,7 +27,7 @@ interface ConfigTabProps {
 	onUpdated?: () => void
 }
 
-type MenuKey = 'basic' | 'identity' | 'schedule' | 'advanced'
+type MenuKey = 'basic' | 'identity' | 'schedule' | 'integration' | 'advanced'
 
 interface MenuItem {
 	key: MenuKey
@@ -99,6 +100,15 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 				const learn = robotConfig.learn || {}
 				const triggers = robotConfig.triggers || {}
 				const resources = robotConfig.resources || {}
+				const integrations = robotConfig.integrations || {}
+
+				// Helper: flatten integrations.<platform>.<field> into dot-notation form keys
+				const flatIntegrations: Record<string, any> = {}
+				for (const [platform, fields] of Object.entries(integrations)) {
+					for (const [field, value] of Object.entries(fields as Record<string, any>)) {
+						flatIntegrations[`integrations.${platform}.${field}`] = value
+					}
+				}
 				
 				const data: Record<string, any> = {
 					// Basic fields
@@ -153,7 +163,10 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 					'resources.phases.tasks': resources.phases?.tasks || '__yao.tasks',
 					'resources.phases.validation': resources.phases?.validation || '__yao.validation',
 					'resources.phases.delivery': resources.phases?.delivery || '__yao.delivery',
-					'resources.phases.learning': resources.phases?.learning || '__yao.learning'
+					'resources.phases.learning': resources.phases?.learning || '__yao.learning',
+
+					// Integration credentials (Integration panel)
+					...flatIntegrations
 				}
 				setFormData(data)
 			}
@@ -320,6 +333,11 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 			visible: autonomousMode
 		},
 		{
+			key: 'integration',
+			label: is_cn ? '平台集成' : 'Integrations',
+			icon: 'material-hub'
+		},
+		{
 			key: 'advanced',
 			label: is_cn ? '高级配置' : 'Advanced',
 			icon: 'material-tune'
@@ -400,7 +418,22 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 						delivery: formData['resources.phases.delivery'] || '__yao.delivery',
 						learning: formData['resources.phases.learning'] || '__yao.learning'
 					}
-				}
+				},
+				// Integration settings — rebuild nested object from dot-notation keys
+				integrations: (() => {
+					const result: Record<string, Record<string, any>> = {}
+					for (const [dotKey, value] of Object.entries(formData)) {
+						if (!dotKey.startsWith('integrations.')) continue
+						const parts = dotKey.split('.')
+						// parts: ['integrations', platform, field]
+						if (parts.length < 3) continue
+						const platform = parts[1]
+						const field = parts.slice(2).join('.')
+						if (!result[platform]) result[platform] = {}
+						result[platform][field] = value
+					}
+					return result
+				})()
 			}
 
 			// Build update request
@@ -451,6 +484,8 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 				return <IdentityPanel {...panelProps} />
 			case 'schedule':
 				return <SchedulePanel {...panelProps} />
+			case 'integration':
+				return <IntegrationPanel {...panelProps} />
 			case 'advanced':
 				return <AdvancedPanel {...panelProps} autonomousMode={autonomousMode} onDelete={onDelete} />
 			default:

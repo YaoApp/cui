@@ -1302,3 +1302,374 @@
 		background: var(--color_bg_hover);
 	}
 }
+
+// ── Integration Panel ─────────────────────────────────────────────────────────
+
+.integrationList {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 16px;
+}
+
+.integrationCard {
+	border: 1px solid var(--color_mission_border);
+	border-radius: 8px;
+	background: var(--color_mission_bg_card);
+	overflow: hidden;
+	transition: border-color 0.15s ease;
+
+	&:hover {
+		border-color: var(--color_mission_border_hover, var(--color_mission_text_muted));
+	}
+}
+
+.integrationCardActive {
+	border-color: var(--color_main);
+	background: color-mix(in srgb, var(--color_main) 5%, var(--color_mission_bg_card));
+}
+
+.integrationHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 14px;
+	cursor: pointer;
+	user-select: none;
+	gap: 12px;
+}
+
+.integrationMeta {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex: 1;
+	min-width: 0;
+}
+
+.integrationIconWrap {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.integrationIconImg {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	display: block;
+	filter: brightness(0) invert(1);
+}
+
+.integrationInfo {
+	min-width: 0;
+}
+
+.integrationName {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+	line-height: 1.3;
+}
+
+.integrationDesc {
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+	margin-top: 2px;
+	line-height: 1.4;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.integrationHeaderRight {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+// Toggle switch
+.integrationToggle {
+	width: 36px;
+	height: 20px;
+	border-radius: 10px;
+	border: none;
+	background: var(--color_mission_bg_hover);
+	cursor: pointer;
+	position: relative;
+	transition: background 0.2s ease;
+	padding: 0;
+
+	&:focus {
+		outline: none;
+	}
+}
+
+.integrationToggleOn {
+	background: var(--color_main);
+}
+
+.integrationToggleThumb {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #fff;
+	transition: left 0.2s ease;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+	.integrationToggleOn & {
+		left: calc(100% - 18px);
+	}
+}
+
+.integrationChevron {
+	color: var(--color_mission_text_muted);
+	display: flex;
+	align-items: center;
+	transition: transform 0.2s ease;
+}
+
+.integrationChevronOpen {
+	transform: rotate(180deg);
+}
+
+// Card body
+.integrationBody {
+	padding: 0 14px 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	border-top: 1px solid var(--color_mission_border);
+}
+
+// Group label (Messaging / API Access)
+.integrationGroupLabel {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--color_mission_text_muted);
+	margin-bottom: 10px;
+}
+
+// ── API Access block ──────────────────────────────────────────────────────────
+
+.apiAccessGroup {
+	border: 1px solid var(--color_mission_border);
+	border-radius: 8px;
+	background: var(--color_mission_bg_card);
+	overflow: hidden;
+}
+
+.apiAccessHeader {
+	padding: 12px 14px 10px;
+	border-bottom: 1px solid var(--color_mission_border);
+}
+
+.apiAccessTitle {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color_mission_text);
+	margin-bottom: 4px;
+}
+
+.apiAccessHint {
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+	line-height: 1.5;
+}
+
+.apiCodeBody {
+	background: var(--color_chatbox_bg_card, #1e1e2e);
+	margin: 0 12px;
+	border-radius: 6px;
+}
+
+.apiCodeToolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px 8px 12px;
+	background: var(--color_mission_bg_card);
+}
+
+.apiCodeLangs {
+	display: flex;
+	gap: 2px;
+}
+
+.apiCodeLangBtn {
+	padding: 3px 10px;
+	border-radius: 4px;
+	border: none;
+	background: transparent;
+	color: var(--color_mission_text_muted);
+	font-size: 11px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover {
+		color: var(--color_mission_text);
+		background: var(--color_mission_bg_hover);
+	}
+}
+
+.apiCodeLangBtnActive {
+	color: var(--color_mission_text);
+	background: var(--color_mission_bg_hover);
+}
+
+.apiCodeCopyBtn {
+	display: flex;
+	align-items: center;
+	padding: 4px 6px;
+	border-radius: 4px;
+	border: none;
+	background: transparent;
+	color: var(--color_mission_text_muted);
+	cursor: pointer;
+
+	&:hover {
+		color: var(--color_mission_text);
+		background: var(--color_mission_bg_hover);
+	}
+}
+
+.apiCodePre {
+	margin: 0;
+	padding: 14px 16px;
+	font-size: 12px;
+	line-height: 1.6;
+	font-family: 'JetBrains Mono', 'Fira Code', monospace;
+	white-space: pre;
+	overflow-x: auto;
+	color: var(--color_text);
+
+	code {
+		font-family: inherit;
+		background: transparent;
+	}
+}
+
+// hljs token colours — top-level :global with stable class .api-code-pre (non-CSS-Modules)
+:global {
+	.api-code-pre { color: var(--color_text); }
+	.api-code-pre .hljs { color: var(--color_text); background: transparent; }
+	.api-code-pre .hljs-comment,
+	.api-code-pre .hljs-punctuation { color: var(--color_text_grey); }
+	.api-code-pre .hljs-string,
+	.api-code-pre .hljs-addition,
+	.api-code-pre .hljs-code { color: var(--color_success); }
+	.api-code-pre .hljs-keyword,
+	.api-code-pre .hljs-type,
+	.api-code-pre .hljs-template-tag,
+	.api-code-pre .hljs-variable,
+	.api-code-pre .hljs-selector-tag { color: var(--color_danger); }
+	.api-code-pre .hljs-built_in,
+	.api-code-pre .hljs-quote,
+	.api-code-pre .hljs-regexp { color: var(--color_info); }
+	.api-code-pre .hljs-attr,
+	.api-code-pre .hljs-number,
+	.api-code-pre .hljs-literal,
+	.api-code-pre .hljs-symbol,
+	.api-code-pre .hljs-bullet { color: var(--color_warning); }
+	.api-code-pre .hljs-title,
+	.api-code-pre .hljs-title\.function_,
+	.api-code-pre .hljs-section,
+	.api-code-pre .hljs-function .hljs-title,
+	.api-code-pre .hljs-attribute { color: var(--color_primary); }
+	.api-code-pre .hljs-meta,
+	.api-code-pre .hljs-meta .hljs-keyword { color: var(--color_warning); font-weight: 700; }
+	.api-code-pre .hljs-params { color: var(--color_text); }
+}
+
+.apiBaseURL {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 14px;
+	background: var(--color_mission_bg_card);
+}
+
+.apiBaseURLLabel {
+	font-size: 10px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--color_mission_text_muted);
+	flex-shrink: 0;
+}
+
+.apiBaseURLValue {
+	font-size: 11px;
+	font-family: monospace;
+	color: var(--color_mission_text_secondary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+// Docs link row
+.integrationDocs {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+	margin-top: 12px;
+
+	> :first-child {
+		flex-shrink: 0;
+	}
+
+	a {
+		color: var(--color_main);
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}
+
+// Footer row: verify button aligned right
+.integrationFooter {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 4px;
+}
+
+.integrationVerifyBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 5px 12px;
+	border-radius: 6px;
+	border: 1px solid var(--color_mission_border);
+	background: transparent;
+	color: var(--color_mission_text_secondary);
+	font-size: 12px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover:not(:disabled) {
+		border-color: var(--color_main);
+		color: var(--color_main);
+	}
+}
+
+.integrationVerifyBtnDisabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}

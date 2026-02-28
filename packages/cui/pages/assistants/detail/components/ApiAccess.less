@@ -1,0 +1,175 @@
+.container {
+	height: 100%;
+	max-width: 720px;
+	margin: 0 auto;
+	padding: 0 24px 24px;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_border);
+		border-radius: 3px;
+
+		&:hover { background: var(--color_text_grey); }
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--color_border_soft);
+		border-radius: 3px;
+	}
+}
+
+// ── Header row: title + lang tabs + copy ─────────────────────────────────────
+.header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+
+.title {
+	font-size: 15px;
+	font-weight: 500;
+	color: var(--color_text);
+}
+
+.hint {
+	font-size: 13px;
+	color: var(--color_text_grey);
+	line-height: 1.6;
+	margin-bottom: 20px;
+}
+
+// ── Toolbar: lang tabs + copy (right-aligned) ─────────────────────────────────
+.toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+
+.langs {
+	display: flex;
+	gap: 2px;
+}
+
+.langBtn {
+	padding: 3px 10px;
+	border-radius: 4px;
+	border: none;
+	background: transparent;
+	color: var(--color_text_grey);
+	font-size: 12px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover {
+		color: var(--color_text);
+		background: var(--color_bg_hover);
+	}
+}
+
+.langBtnActive {
+	color: var(--color_text);
+	background: var(--color_bg_hover);
+}
+
+.copyBtn {
+	display: flex;
+	align-items: center;
+	padding: 4px 6px;
+	border-radius: 4px;
+	border: none;
+	background: transparent;
+	color: var(--color_text_grey);
+	cursor: pointer;
+
+	&:hover {
+		color: var(--color_text);
+		background: var(--color_bg_hover);
+	}
+}
+
+// ── Code block ───────────────────────────────────────────────────────────────
+.codeBlock {
+	background: var(--color_bg_nav);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.codePre {
+	margin: 0;
+	padding: 18px 20px;
+	font-size: 12px;
+	line-height: 1.6;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	white-space: pre;
+	overflow-x: auto;
+	color: var(--color_text);
+
+	code {
+		font-family: inherit;
+		background: transparent;
+	}
+}
+
+// ── Endpoint row ─────────────────────────────────────────────────────────────
+.endpoint {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 16px;
+}
+
+.endpointLabel {
+	font-size: 10px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--color_text_grey);
+	flex-shrink: 0;
+}
+
+.endpointValue {
+	font-size: 12px;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	color: var(--color_text_grey);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+// ── hljs token colours ───────────────────────────────────────────────────────
+:global {
+	.assistant-api-code-pre .hljs { color: var(--color_text); background: transparent; }
+	.assistant-api-code-pre .hljs-comment,
+	.assistant-api-code-pre .hljs-punctuation { color: var(--color_text_grey); }
+	.assistant-api-code-pre .hljs-string,
+	.assistant-api-code-pre .hljs-addition,
+	.assistant-api-code-pre .hljs-code { color: var(--color_success); }
+	.assistant-api-code-pre .hljs-keyword,
+	.assistant-api-code-pre .hljs-type,
+	.assistant-api-code-pre .hljs-template-tag,
+	.assistant-api-code-pre .hljs-variable,
+	.assistant-api-code-pre .hljs-selector-tag { color: var(--color_danger); }
+	.assistant-api-code-pre .hljs-built_in,
+	.assistant-api-code-pre .hljs-quote,
+	.assistant-api-code-pre .hljs-regexp { color: var(--color_info); }
+	.assistant-api-code-pre .hljs-attr,
+	.assistant-api-code-pre .hljs-number,
+	.assistant-api-code-pre .hljs-literal,
+	.assistant-api-code-pre .hljs-symbol,
+	.assistant-api-code-pre .hljs-bullet { color: var(--color_warning); }
+	.assistant-api-code-pre .hljs-title,
+	.assistant-api-code-pre .hljs-title\.function_,
+	.assistant-api-code-pre .hljs-section,
+	.assistant-api-code-pre .hljs-function .hljs-title,
+	.assistant-api-code-pre .hljs-attribute { color: var(--color_main); }
+	.assistant-api-code-pre .hljs-meta,
+	.assistant-api-code-pre .hljs-meta .hljs-keyword { color: var(--color_warning); font-weight: 700; }
+	.assistant-api-code-pre .hljs-params { color: var(--color_text); }
+}
