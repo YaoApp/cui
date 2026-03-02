@@ -242,6 +242,22 @@ export class AgentRobots {
 		)
 	}
 
+	// ==================== Integration Verify API ====================
+
+	/**
+	 * Verify integration credentials for a platform
+	 * POST /v1/agent/robots/integrations/verify
+	 */
+	async VerifyIntegration(
+		provider: string,
+		config: Record<string, any>
+	): Promise<ApiResponse<{ valid: boolean; info?: Record<string, any>; error?: string }>> {
+		return this.api.Post<{ valid: boolean; info?: Record<string, any>; error?: string }>(
+			'/agent/robots/integrations/verify',
+			{ provider, config }
+		)
+	}
+
 	// ==================== V2 Interact APIs ====================
 
 	/**

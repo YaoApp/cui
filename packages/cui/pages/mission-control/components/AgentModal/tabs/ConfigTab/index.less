@@ -1643,11 +1643,14 @@
 	}
 }
 
-// Footer row: verify button aligned right
+// Footer row: verify button + result text
 .integrationFooter {
 	display: flex;
+	align-items: center;
+	gap: 8px;
 	justify-content: flex-end;
 	margin-top: 4px;
+	flex-wrap: wrap;
 }
 
 .integrationVerifyBtn {
@@ -1672,4 +1675,32 @@
 .integrationVerifyBtnDisabled {
 	opacity: 0.4;
 	cursor: not-allowed;
+}
+
+.integrationVerifyBtnSuccess {
+	border-color: #52c41a;
+	color: #52c41a;
+}
+
+.integrationVerifyBtnError {
+	border-color: #ff4d4f;
+	color: #ff4d4f;
+}
+
+.integrationVerifyInfo {
+	font-size: 11px;
+	color: #52c41a;
+	max-width: 240px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.integrationVerifyError {
+	font-size: 11px;
+	color: #ff4d4f;
+	max-width: 240px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }

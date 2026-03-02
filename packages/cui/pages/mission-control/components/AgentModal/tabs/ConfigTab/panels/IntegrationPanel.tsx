@@ -353,6 +353,14 @@ const PLATFORMS: PlatformConfig[] = [
 				placeholder_en: 'Token from @BotFather',
 				secret: true,
 				required: true
+			},
+			{
+				key: 'host',
+				label: 'API Host',
+				placeholder_cn: '自建 Bot API 地址（可选，默认官方）',
+				placeholder_en: 'Custom Bot API server (optional)',
+				secret: false,
+				required: false
 			}
 		]
 	},
@@ -373,12 +381,26 @@ const PLATFORMS: PlatformConfig[] = [
 				placeholder_en: 'From Discord Developer Portal',
 				secret: true,
 				required: true
+			},
+			{
+				key: 'app_id',
+				label: 'Application ID',
+				placeholder_cn: '应用 ID（可选）',
+				placeholder_en: 'Application ID (optional)',
+				secret: false,
+				required: false
 			}
 		]
 	}
 ]
 
-type VerifyState = 'idle' | 'loading'
+type VerifyState = 'idle' | 'loading' | 'success' | 'error'
+
+interface VerifyResult {
+	valid: boolean
+	info?: Record<string, any>
+	error?: string
+}
 
 /**
  * IntegrationPanel — Connect the Agent to external messaging platforms.
@@ -389,6 +411,7 @@ type VerifyState = 'idle' | 'loading'
 const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, onChange, is_cn }) => {
 	const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 	const [verifying, setVerifying] = useState<Record<string, VerifyState>>({})
+	const [verifyResults, setVerifyResults] = useState<Record<string, VerifyResult>>({})
 
 	const toggleExpand = (key: string) => {
 		setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -403,21 +426,47 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 		if (value) setExpanded((prev) => ({ ...prev, [platform]: true }))
 	}
 
-	// Credentials filled check
 	const credsFilled = (platform: PlatformConfig) =>
-		platform.fields.every((f) => !!formData[fieldKey(platform.key, f.key)])
+		platform.fields.filter((f) => f.required).every((f) => !!formData[fieldKey(platform.key, f.key)])
 
-	// Verify handler — response intentionally left empty for now
 	const handleVerify = useCallback(
-		(platform: PlatformConfig) => {
+		async (platform: PlatformConfig) => {
 			if (verifying[platform.key] === 'loading') return
 			setVerifying((prev) => ({ ...prev, [platform.key]: 'loading' }))
-			// TODO: call verify API
-			setTimeout(() => {
-				setVerifying((prev) => ({ ...prev, [platform.key]: 'idle' }))
-			}, 1500)
+			setVerifyResults((prev) => ({ ...prev, [platform.key]: undefined as any }))
+
+			try {
+				const { Agent } = await import('@/openapi/agent')
+				if (!window.$app?.openapi) throw new Error('OpenAPI not available')
+				const agent = new Agent(window.$app.openapi)
+
+				const config: Record<string, any> = {}
+				for (const f of platform.fields) {
+					const val = formData[fieldKey(platform.key, f.key)]
+					if (val) config[f.key] = val
+				}
+
+				const resp = await agent.robots.VerifyIntegration(platform.key, config)
+				const result: VerifyResult = resp.data ?? { valid: false, error: 'No response' }
+				setVerifyResults((prev) => ({ ...prev, [platform.key]: result }))
+				setVerifying((prev) => ({
+					...prev,
+					[platform.key]: result.valid ? 'success' : 'error'
+				}))
+
+				setTimeout(() => {
+					setVerifying((prev) => ({ ...prev, [platform.key]: 'idle' }))
+				}, 5000)
+			} catch (err: any) {
+				const result: VerifyResult = { valid: false, error: err?.message || 'Request failed' }
+				setVerifyResults((prev) => ({ ...prev, [platform.key]: result }))
+				setVerifying((prev) => ({ ...prev, [platform.key]: 'error' }))
+				setTimeout(() => {
+					setVerifying((prev) => ({ ...prev, [platform.key]: 'idle' }))
+				}, 5000)
+			}
 		},
-		[verifying]
+		[verifying, formData]
 	)
 
 	// CN: 飞书、钉钉在前；EN: Telegram、Discord 在前
@@ -441,8 +490,10 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 				{visiblePlatforms.map((platform) => {
 					const enabled = isEnabled(platform.key)
 					const open = expanded[platform.key] ?? enabled
-					const isVerifying = verifying[platform.key] === 'loading'
+					const verifyState = verifying[platform.key] || 'idle'
+					const isVerifying = verifyState === 'loading'
 					const canVerify = credsFilled(platform)
+					const verifyResult = verifyResults[platform.key]
 					const docsUrl = `${DOCS_BASE}/${platform.docsPath}`
 
 					return (
@@ -559,12 +610,16 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 										</div>
 									))}
 
-									{/* Footer: verify button */}
+									{/* Footer: verify button + result */}
 									<div className={styles.integrationFooter}>
 										<button
 											className={`${styles.integrationVerifyBtn} ${
 												!canVerify || isVerifying
 													? styles.integrationVerifyBtnDisabled
+													: verifyState === 'success'
+													? styles.integrationVerifyBtnSuccess
+													: verifyState === 'error'
+													? styles.integrationVerifyBtnError
 													: ''
 											}`}
 											disabled={!canVerify || isVerifying}
@@ -582,6 +637,26 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 															: 'Verifying...'}
 													</span>
 												</>
+											) : verifyState === 'success' ? (
+												<>
+													<Icon
+														name='material-check_circle'
+														size={13}
+													/>
+													<span>
+														{is_cn ? '验证通过' : 'Connected'}
+													</span>
+												</>
+											) : verifyState === 'error' ? (
+												<>
+													<Icon
+														name='material-error_outline'
+														size={13}
+													/>
+													<span>
+														{is_cn ? '验证失败' : 'Failed'}
+													</span>
+												</>
 											) : (
 												<>
 													<Icon
@@ -594,6 +669,21 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 												</>
 											)}
 										</button>
+										{verifyResult && verifyResult.valid && verifyResult.info && (
+											<span className={styles.integrationVerifyInfo}>
+												{verifyResult.info.name || verifyResult.info.username || verifyResult.info.app_id || verifyResult.info.client_id || ''}
+												{verifyResult.info.username && verifyResult.info.name
+													? ` (@${verifyResult.info.username})`
+													: ''}
+											</span>
+										)}
+										{verifyResult && !verifyResult.valid && verifyResult.error && (
+											<span className={styles.integrationVerifyError}>
+												{verifyResult.error.length > 80
+													? verifyResult.error.slice(0, 80) + '...'
+													: verifyResult.error}
+											</span>
+										)}
 									</div>
 								</div>
 							)}
