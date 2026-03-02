@@ -85,7 +85,7 @@ export function ContentURLToWrapper(url: string): string | null {
 }
 
 /**
- * 触发浏览器下载文件
+ * 通过 fetch + blob 方式下载文件，自动携带认证信息。
  * 支持 wrapper 格式（__yao.attachment://fileID）和普通 URL。
  * 多附件批量下载时可传 index，每隔 300ms 触发一次以避免浏览器拦截。
  *
@@ -96,14 +96,30 @@ export function ContentURLToWrapper(url: string): string | null {
 export function triggerFileDownload(file: string, filename: string, index = 0): void {
 	const url = WrapperToContentURL(file)
 	if (!url) return
-	setTimeout(() => {
-		const a = document.createElement('a')
-		a.href = url
-		a.download = filename || 'attachment'
-		a.style.display = 'none'
-		document.body.appendChild(a)
-		a.click()
-		document.body.removeChild(a)
+
+	setTimeout(async () => {
+		try {
+			const response = await fetch(url, {
+				method: 'GET',
+				credentials: 'include'
+			})
+			if (!response.ok) {
+				console.error(`Download failed: ${response.status} ${response.statusText}`)
+				return
+			}
+			const blob = await response.blob()
+			const blobUrl = URL.createObjectURL(blob)
+			const a = document.createElement('a')
+			a.href = blobUrl
+			a.download = filename || 'attachment'
+			a.style.display = 'none'
+			document.body.appendChild(a)
+			a.click()
+			document.body.removeChild(a)
+			setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
+		} catch (err) {
+			console.error('Download failed:', err)
+		}
 	}, index * 300)
 }
 
