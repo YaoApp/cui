@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
-import { Input } from '@/components/ui/inputs'
+import { Input, InputPassword } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import { brandIcons } from '@/assets/icons/brands'
 import hljsCore from 'highlight.js/lib/core'
@@ -574,7 +574,9 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 										</a>
 									</div>
 
-									{platform.fields.map((field) => (
+								{platform.fields.map((field) => {
+									const InputComp = field.secret ? InputPassword : Input
+									return (
 										<div key={field.key} className={styles.formItem}>
 											<label className={styles.formLabel}>
 												{field.label}
@@ -585,13 +587,13 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 													</span>
 												)}
 											</label>
-											<Input
+											<InputComp
 												value={
 													formData[
 														fieldKey(platform.key, field.key)
 													] || ''
 												}
-												onChange={(value) =>
+												onChange={(value: any) =>
 													onChange(
 														fieldKey(platform.key, field.key),
 														value
@@ -599,16 +601,14 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 												}
 												schema={{
 													type: 'string',
-													component: field.secret
-														? 'InputPassword'
-														: 'Input',
 													placeholder: is_cn
 														? field.placeholder_cn
 														: field.placeholder_en
 												}}
 											/>
 										</div>
-									))}
+									)
+								})}
 
 									{/* Footer: verify button + result */}
 									<div className={styles.integrationFooter}>
