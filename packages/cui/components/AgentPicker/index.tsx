@@ -112,7 +112,7 @@ const AgentPicker = (props: AgentPickerProps) => {
 			value: s.value || s.name,
 			label: s.label || s.name,
 			description: s.description,
-			tags: s.builtin ? ['Built-in'] : ['Custom']
+			tags: s.tags
 		}))
 	}, [type, assistants, mcpServers])
 
@@ -139,7 +139,8 @@ const AgentPicker = (props: AgentPickerProps) => {
 				(item) =>
 					item.label.toLowerCase().includes(kw) ||
 					item.description?.toLowerCase().includes(kw) ||
-					item.value.toLowerCase().includes(kw)
+					item.value.toLowerCase().includes(kw) ||
+					item.tags?.some((t) => t.toLowerCase().includes(kw))
 			)
 		}
 		return result
@@ -208,7 +209,7 @@ const AgentPicker = (props: AgentPickerProps) => {
 		}
 	})
 
-	const hasSidebar = type === 'assistant'
+	const hasSidebar = true
 
 	const renderSidebar = () => {
 		if (!hasSidebar || sidebarCollapsed) return null
