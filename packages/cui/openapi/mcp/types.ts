@@ -15,6 +15,8 @@ export interface MCPServer {
 	name: string
 	/** Server description */
 	description?: string
+	/** Tags for categorization */
+	tags?: string[]
 	/** Transport type (e.g., "stdio", "sse", "http") */
 	transport?: string
 	/** Whether the server is built-in */
