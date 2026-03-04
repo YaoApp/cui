@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { message } from 'antd'
-import { getLocale } from '@umijs/max'
+import { getLocale, history } from '@umijs/max'
 import { observer } from 'mobx-react-lite'
 import { useGlobal } from '@/context/app'
 import { AuthInput, AuthButton } from '../components'
 import AuthLayout from '../components/AuthLayout'
+import { IsLoggedIn } from '../auth'
 import { Icon } from '@/widgets'
 import { User } from '@/openapi'
 import { getDefaultLogoUrl } from '@/services/wellknown'
@@ -36,6 +37,12 @@ const DeviceAuthorize = () => {
 	const inputRef = useRef<HTMLInputElement>(null)
 
 	useEffect(() => {
+		if (!IsLoggedIn()) {
+			const currentPath = window.location.pathname + window.location.search
+			history.push(`/auth/entry?redirect=${encodeURIComponent(currentPath)}`)
+			return
+		}
+
 		const params = new URLSearchParams(window.location.search)
 		const code = params.get('user_code') || ''
 		if (code) setUserCode(code.toUpperCase())
