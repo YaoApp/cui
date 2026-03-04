@@ -400,6 +400,14 @@ export class UserAuth {
 	}
 
 	/**
+	 * Authorize a pending device code (RFC 8628).
+	 * Called by the authenticated user from the /auth/device page.
+	 */
+	async AuthorizeDevice(userCode: string): Promise<ApiResponse<{ status: string }>> {
+		return this.api.Post<{ status: string }>('/oauth/device/authorize', { user_code: userCode })
+	}
+
+	/**
 	 * Get captcha image for entry (login/register)
 	 */
 	async GetCaptcha(): Promise<ApiResponse<CaptchaResponse>> {
