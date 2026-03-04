@@ -25,6 +25,7 @@ const STANDALONE_PAGES = new Map([
 	['auth_entry', '/auth/entry'], // Unified login/register entry point
 	['auth_entry_mfa', '/auth/entry/mfa'], // MFA verification
 	['auth_entry_invite', '/auth/entry/invite'], // Invitation code verification
+	['auth_device', '/auth/device'], // Device authorization (RFC 8628)
 	['auth_logout', '/auth/logout'],
 	['auth_back', '/auth/back/'],
 	['auth_consent', '/auth/consent'],
