@@ -3,7 +3,7 @@ import { getLocale, useParams, useNavigate } from '@umijs/max'
 import { message } from 'antd'
 import WorkspaceList from './components/WorkspaceList'
 import WorkspaceDetail from './components/WorkspaceDetail'
-import CreateWorkspace from './components/CreateWorkspace'
+import CreateModal from './components/CreateModal'
 import { mockApi } from './mockData'
 import type { Workspace } from './types'
 import styles from './index.less'
@@ -74,14 +74,6 @@ const WorkspacePage = () => {
 		navigate('/workspace/list')
 	}
 
-	if (showCreate) {
-		return (
-			<div className={styles.container}>
-				<CreateWorkspace onSubmit={handleCreate} onCancel={() => setShowCreate(false)} />
-			</div>
-		)
-	}
-
 	if (isDetail && selectedWorkspace) {
 		return (
 			<div className={styles.container}>
@@ -103,6 +95,11 @@ const WorkspacePage = () => {
 				onSelect={handleWorkspaceClick}
 				onDelete={handleDelete}
 				onCreate={() => setShowCreate(true)}
+			/>
+			<CreateModal
+				open={showCreate}
+				onSubmit={handleCreate}
+				onCancel={() => setShowCreate(false)}
 			/>
 		</div>
 	)

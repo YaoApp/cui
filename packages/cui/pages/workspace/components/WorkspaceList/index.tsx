@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react'
 import { Input, Spin, Tooltip, Popconfirm } from 'antd'
-import { SearchOutlined, DeleteOutlined } from '@ant-design/icons'
+import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import Button from '@/components/ui/Button'
 import type { Workspace } from '../../types'
 import styles from './index.less'
 
@@ -61,10 +62,14 @@ const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: Wo
 						<Icon name='material-workspaces' size={24} style={{ color: 'var(--color_page_title)' }} />
 						<h1 className={styles.title}>{is_cn ? '工作空间' : 'Workspaces'}</h1>
 					</div>
-					<div className={styles.createIcon} onClick={onCreate}>
-						<Icon name='material-add' size={24} />
-						<span className={styles.createText}>{is_cn ? '创建' : 'Create'}</span>
-					</div>
+					<Button
+						type='primary'
+						size='small'
+						icon={<Icon name='material-add' size={12} />}
+						onClick={onCreate}
+					>
+						{is_cn ? '创建' : 'Create'}
+					</Button>
 				</div>
 				<div className={styles.searchWrapper}>
 					<Input
@@ -170,11 +175,8 @@ const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: Wo
 													okText={is_cn ? '确认' : 'Confirm'}
 													cancelText={is_cn ? '取消' : 'Cancel'}
 												>
-													<div
-														className={styles.deleteBtn}
-														onClick={(e) => e.stopPropagation()}
-													>
-														<DeleteOutlined />
+													<div className={styles.deleteAction} onClick={(e) => e.stopPropagation()}>
+														<Icon name='material-delete' size={14} />
 													</div>
 												</Popconfirm>
 											</div>
