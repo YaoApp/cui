@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Input, Spin, Tooltip, Popconfirm } from 'antd'
+import { Input, Spin } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
@@ -15,6 +15,13 @@ interface WorkspaceListProps {
 	onCreate: () => void
 }
 
+const envLabel: Record<string, { cn: string; en: string }> = {
+	production: { cn: '生产', en: 'Production' },
+	staging: { cn: '预发布', en: 'Staging' },
+	development: { cn: '开发', en: 'Development' },
+	testing: { cn: '测试', en: 'Testing' }
+}
+
 const envColors: Record<string, string> = {
 	production: 'var(--color_success)',
 	staging: 'var(--color_warning)',
@@ -26,6 +33,9 @@ const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: Wo
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [search, setSearch] = useState('')
+
+	// suppress unused lint — onDelete will be used in detail page
+	void onDelete
 
 	const filtered = useMemo(() => {
 		if (!search.trim()) return workspaces
@@ -46,31 +56,26 @@ const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: Wo
 		const diffMin = Math.floor(diffMs / 60000)
 		const diffHour = Math.floor(diffMin / 60)
 		const diffDay = Math.floor(diffHour / 24)
-
 		if (diffMin < 1) return is_cn ? '刚刚' : 'Just now'
-		if (diffMin < 60) return is_cn ? `${diffMin} 分钟前` : `${diffMin}m ago`
-		if (diffHour < 24) return is_cn ? `${diffHour} 小时前` : `${diffHour}h ago`
-		if (diffDay < 7) return is_cn ? `${diffDay} 天前` : `${diffDay}d ago`
+		if (diffMin < 60) return is_cn ? `${diffMin}分钟前` : `${diffMin}m ago`
+		if (diffHour < 24) return is_cn ? `${diffHour}小时前` : `${diffHour}h ago`
+		if (diffDay < 7) return is_cn ? `${diffDay}天前` : `${diffDay}d ago`
 		return d.toLocaleDateString()
 	}
 
 	return (
-		<div className={styles.wrapper}>
+		<div className={styles.container}>
 			<div className={styles.header}>
 				<div className={styles.titleContainer}>
-					<div className={styles.titleWithIcon}>
-						<Icon name='material-workspaces' size={24} style={{ color: 'var(--color_page_title)' }} />
+					<div className={styles.titleGroup}>
+						<Icon name='material-workspaces' size={24} />
 						<h1 className={styles.title}>{is_cn ? '工作空间' : 'Workspaces'}</h1>
 					</div>
-					<Button
-						type='primary'
-						size='small'
-						icon={<Icon name='material-add' size={12} />}
-						onClick={onCreate}
-					>
+					<Button type='primary' size='small' icon={<Icon name='material-add' size={12} />} onClick={onCreate}>
 						{is_cn ? '创建' : 'Create'}
 					</Button>
 				</div>
+
 				<div className={styles.searchWrapper}>
 					<Input
 						size='large'
@@ -78,7 +83,7 @@ const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: Wo
 						placeholder={is_cn ? '搜索工作空间...' : 'Search workspaces...'}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
-						className={styles.search}
+						className={styles.searchInput}
 						allowClear
 					/>
 				</div>
@@ -86,99 +91,56 @@ const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: Wo
 
 			<div className={styles.content}>
 				{loading && workspaces.length === 0 ? (
-					<div className={styles.loading}>
+					<div className={styles.empty}>
 						<Spin />
 						<span>{is_cn ? '加载中...' : 'Loading...'}</span>
 					</div>
 				) : filtered.length === 0 ? (
 					<div className={styles.empty}>
-						<Icon name='material-folder_off' size={64} />
+						<Icon name='material-folder_off' size={48} />
 						<div className={styles.emptyTitle}>
 							{search
-								? is_cn ? '未找到匹配的工作空间' : 'No matching workspaces found'
+								? is_cn ? '未找到匹配的工作空间' : 'No matching workspaces'
 								: is_cn ? '暂无工作空间' : 'No workspaces'}
-						</div>
-						<div className={styles.emptyDesc}>
-							{search
-								? is_cn ? '尝试调整搜索关键词' : 'Try adjusting your search keywords'
-								: is_cn ? '创建您的第一个工作空间开始吧' : 'Create your first workspace to get started'}
 						</div>
 					</div>
 				) : (
 					<div className={styles.grid}>
 						{filtered.map((ws) => {
 							const env = ws.labels.env || null
-							const labelEntries = Object.entries(ws.labels).filter(([k]) => k !== 'env')
+							const envInfo = env ? envLabel[env] : null
 
 							return (
 								<div key={ws.id} className={styles.gridItem}>
 									<div className={styles.card} onClick={() => onSelect(ws)}>
-										<div className={styles.cardTop}>
-											<div className={styles.cardIcon}>
-												<Icon name='material-deployed_code' size={28} />
+										<div className={styles.cardInner}>
+											{/* ── HEADER: icon + name + env ── */}
+											<div className={styles.cardHeader}>
+												<div className={styles.cardIcon}>
+													<Icon name='material-folder' size={22} />
+												</div>
+												<div className={styles.headerRight}>
+													<div className={styles.nameRow}>
+														<span className={styles.cardName}>{ws.name}</span>
+														{envInfo && (
+															<span className={styles.envPill} style={{ color: envColors[env!] }}>
+																{is_cn ? envInfo.cn : envInfo.en}
+															</span>
+														)}
+													</div>
+													<span className={styles.subLine}>{ws.id}</span>
+												</div>
 											</div>
-											<div className={styles.cardMeta}>
-												{env && (
-													<span
-														className={styles.envTag}
-														style={{ color: envColors[env] || 'var(--color_text_grey)' }}
-													>
-														{env}
-													</span>
-												)}
-											</div>
-										</div>
 
-										<div className={styles.cardBody}>
-											<h3 className={styles.cardTitle}>{ws.name}</h3>
-											<div className={styles.cardId}>
-												<Icon name='material-tag' size={12} />
-												<span>{ws.id}</span>
-											</div>
-										</div>
-
-										<div className={styles.cardLabels}>
-											{labelEntries.slice(0, 3).map(([k, v]) => (
-												<Tooltip key={k} title={`${k}: ${v}`}>
-													<span className={styles.label}>{v}</span>
-												</Tooltip>
-											))}
-											{labelEntries.length > 3 && (
-												<span className={styles.labelMore}>+{labelEntries.length - 3}</span>
-											)}
-										</div>
-
-										<div className={styles.cardFooter}>
-											<div className={styles.footerLeft}>
-												<Tooltip title={ws.node}>
-													<span className={styles.nodeChip}>
-														<Icon name='material-dns' size={12} />
+											{/* ── FOOTER: meta + time ── */}
+											<div className={styles.cardFooter}>
+												<div className={styles.footLeft}>
+													<span className={styles.chip}>
+														<Icon name='material-dns' size={11} />
 														{ws.node}
 													</span>
-												</Tooltip>
-											</div>
-											<div className={styles.footerRight}>
-												<span className={styles.updateTime}>
-													{formatDate(ws.updated_at)}
-												</span>
-												<Popconfirm
-													title={
-														is_cn
-															? '确定要删除这个工作空间吗？此操作不可恢复！'
-															: 'Delete this workspace? This action cannot be undone!'
-													}
-													onConfirm={(e) => {
-														e?.stopPropagation()
-														onDelete(ws)
-													}}
-													onCancel={(e) => e?.stopPropagation()}
-													okText={is_cn ? '确认' : 'Confirm'}
-													cancelText={is_cn ? '取消' : 'Cancel'}
-												>
-													<div className={styles.deleteAction} onClick={(e) => e.stopPropagation()}>
-														<Icon name='material-delete' size={14} />
-													</div>
-												</Popconfirm>
+												</div>
+												<span className={styles.footTime}>{formatDate(ws.updated_at)}</span>
 											</div>
 										</div>
 									</div>

@@ -291,6 +291,21 @@ const Header: FC<HeaderProps> = ({
 					</div>
 				</Tooltip>
 
+				<Tooltip title={is_cn ? '电脑' : 'Computers'}>
+					<div
+						className='sidebar_header_btn'
+						onClick={() => {
+							window.$app?.Event?.emit('app/openSidebar', {
+								path: '/computers/list',
+								title: is_cn ? '电脑' : 'Computers',
+								icon: 'material-computer'
+							})
+						}}
+					>
+						<Icon name='material-computer' size={14} />
+					</div>
+				</Tooltip>
+
 					<div
 						className='sidebar_header_btn'
 						onClick={closeSidebar}
