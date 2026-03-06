@@ -1,0 +1,182 @@
+.modal {
+	:global(.xgen-modal-content) {
+		border-radius: 16px;
+		overflow: hidden;
+		background: var(--color_bg_menu);
+	}
+
+	:global(.xgen-modal-body) {
+		padding: 0;
+	}
+
+	:global(.xgen-modal-close) {
+		top: 20px;
+		right: 20px;
+		color: var(--color_text_grey);
+	}
+}
+
+.wrapper {
+	padding: 28px;
+}
+
+.formHeader {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin-bottom: 28px;
+
+	.formIcon {
+		width: 44px;
+		height: 44px;
+		border-radius: 12px;
+		background: linear-gradient(135deg, rgba(51, 113, 252, 0.1), rgba(139, 92, 246, 0.1));
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+
+		:global(.Icon),
+		:global(.xgen-icon) {
+			color: var(--color_main);
+		}
+	}
+
+	.formTitle {
+		margin: 0 0 2px 0;
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--color_text);
+	}
+
+	.formDesc {
+		margin: 0;
+		font-size: 13px;
+		color: var(--color_text_grey);
+		line-height: 1.4;
+	}
+}
+
+.formBody {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+
+	.fieldLabel {
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--color_neo_text_secondary);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+
+		span {
+			color: var(--color_danger);
+		}
+	}
+}
+
+.nodeOption {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 2px 0;
+
+	.nodeStatus {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		flex-shrink: 0;
+
+		&.online {
+			background: var(--color_success);
+			box-shadow: 0 0 6px rgba(0, 200, 83, 0.4);
+		}
+
+		&.offline {
+			background: var(--color_text_grey);
+			opacity: 0.5;
+		}
+	}
+
+	.nodeAddr {
+		margin-left: auto;
+		font-size: 11px;
+		color: var(--color_text_grey);
+		font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+	}
+}
+
+.labelInput {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+
+}
+
+.labelTags {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-top: 4px;
+
+	.labelTag {
+		display: inline-flex;
+		align-items: center;
+		border-radius: 6px;
+		overflow: hidden;
+		border: 1px solid var(--color_neo_border_card);
+		font-size: 12px;
+
+		.labelTagKey {
+			padding: 3px 8px;
+			background: var(--color_neo_bg_header);
+			color: var(--color_neo_text_secondary);
+			font-weight: 500;
+		}
+
+		.labelTagVal {
+			padding: 3px 10px;
+			background: var(--color_neo_bg_card);
+			color: var(--color_neo_text_primary);
+		}
+
+		.labelTagRemove {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 22px;
+			background: var(--color_neo_bg_card);
+			cursor: pointer;
+			color: var(--color_text_grey);
+			transition: all 0.2s;
+			border-left: 1px solid var(--color_neo_border_card);
+
+			&:hover {
+				color: var(--color_danger);
+				background: var(--color_danger_bg);
+			}
+
+			:global(.Icon),
+			:global(.xgen-icon) {
+				color: inherit;
+			}
+		}
+	}
+}
+
+.formFooter {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 12px;
+	margin-top: 28px;
+	padding-top: 20px;
+	border-top: 1px solid var(--color_neo_border_field);
+
+}

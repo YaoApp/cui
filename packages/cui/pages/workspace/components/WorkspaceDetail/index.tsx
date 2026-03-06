@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Popconfirm, message, Upload, Input } from 'antd'
-import { UploadOutlined, DeleteOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import Button from '@/components/ui/Button'
 import { mockApi } from '../../mockData'
 import type { Workspace, DirEntry } from '../../types'
 import styles from './index.less'
@@ -133,7 +133,7 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 			<div className={styles.detailHeader}>
 				<div className={styles.headerLeft}>
 					<div className={styles.backBtn} onClick={onBack}>
-						<ArrowLeftOutlined />
+						<Icon name='material-arrow_back' size={16} />
 					</div>
 					<div className={styles.wsIcon}>
 						<Icon name='material-deployed_code' size={24} />
@@ -168,10 +168,13 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 						okText={is_cn ? '确认' : 'Confirm'}
 						cancelText={is_cn ? '取消' : 'Cancel'}
 					>
-						<div className={styles.dangerBtn}>
-							<DeleteOutlined />
-							<span>{is_cn ? '删除' : 'Delete'}</span>
-						</div>
+						<Button
+							type='danger'
+							size='small'
+							icon={<Icon name='material-delete' size={12} />}
+						>
+							{is_cn ? '删除' : 'Delete'}
+						</Button>
 					</Popconfirm>
 				</div>
 			</div>
@@ -227,10 +230,12 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 						showUploadList={false}
 						multiple
 					>
-						<div className={styles.uploadBtn}>
-							<UploadOutlined />
-							<span>{is_cn ? '上传文件' : 'Upload'}</span>
-						</div>
+						<Button
+							size='small'
+							icon={<Icon name='material-upload' size={12} />}
+						>
+							{is_cn ? '上传文件' : 'Upload'}
+						</Button>
 					</Upload>
 				</div>
 
@@ -304,7 +309,7 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 										className={styles.fileDelete}
 										onClick={(e) => e.stopPropagation()}
 									>
-										<DeleteOutlined />
+										<Icon name='material-delete' size={14} />
 									</div>
 								</Popconfirm>
 							</div>
