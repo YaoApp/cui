@@ -84,13 +84,13 @@ const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) 
 									</span>
 								</Tooltip>
 							)}
-							{data.sandbox == true && (
-								<Tooltip title={is_cn ? '沙箱' : 'Sandbox'}>
-									<span className={styles.statusIcon}>
-										<Icon name='icon-codesandbox' size={16} color='#13c2c2' />
-									</span>
-								</Tooltip>
-							)}
+						{data.sandbox == true && (
+							<Tooltip title={is_cn ? '在电脑上运行' : 'Runs on Computer'}>
+								<span className={styles.statusIcon}>
+									<Icon name='material-computer' size={16} color='#13c2c2' />
+								</span>
+							</Tooltip>
+						)}
 						</div>
 					</div>
 					<div className={styles.tags}>
@@ -110,7 +110,7 @@ const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) 
 			<div className={styles.footer}>
 				<div className={styles.actions}>
 					<Tooltip
-						title={chatDisabled ? (is_cn ? '需要启用 Docker 服务' : 'Docker service required') : undefined}
+						title={chatDisabled ? (is_cn ? '需要配置计算节点' : 'Compute node required') : undefined}
 					>
 						<Button
 							type='primary'

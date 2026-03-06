@@ -362,22 +362,22 @@ const AssistantDetail = () => {
 									</span>
 								</Tooltip>
 							)}
-							{sandbox === true && (
-								<Tooltip title={is_cn ? '沙箱' : 'Sandbox'}>
-									<span className={styles.statusIcon}>
-										<Icon name='icon-codesandbox' size={16} color='#13c2c2' />
-									</span>
-								</Tooltip>
-							)}
+						{sandbox === true && (
+							<Tooltip title={is_cn ? '在电脑上运行' : 'Runs on Computer'}>
+								<span className={styles.statusIcon}>
+									<Icon name='material-computer' size={16} color='#13c2c2' />
+								</span>
+							</Tooltip>
+						)}
 							</div>
 						</div>
 					</div>
 				</div>
 				<div className={styles.headerActions}>
 					<div className={styles.leftButton}>
-						<Tooltip
-							title={chatDisabled ? (is_cn ? '需要启用 Docker 服务' : 'Docker service required') : undefined}
-						>
+					<Tooltip
+						title={chatDisabled ? (is_cn ? '需要配置计算节点' : 'Compute node required') : undefined}
+					>
 							<Button
 								type='primary'
 								size='small'
