@@ -147,7 +147,7 @@
 // ─────────────────────────────────────────────
 .cardHeader {
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	gap: @icon_gap;
 	padding: @card_px;
 }
@@ -170,6 +170,20 @@
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
+}
+
+.hostLabel {
+	margin-left: auto;
+	flex-shrink: 1;
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+	background: var(--color_neo_bg_field);
+	padding: 2px 8px;
+	border-radius: 4px;
+	line-height: 1.4;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .nameRow {
