@@ -291,16 +291,25 @@ export class OpenAPI {
 		// Add CSRF token for security
 		this.addCSRFToken(headerBuilder)
 
-		// Set content type for JSON payload
-		if (payload && typeof payload === 'object' && !headerBuilder.has('Content-Type')) {
-			headerBuilder.set('Content-Type', 'application/json')
+		const isBinary =
+			payload instanceof ArrayBuffer ||
+			payload instanceof Blob ||
+			ArrayBuffer.isView(payload)
+
+		let body: BodyInit | undefined
+		if (isBinary) {
+			headerBuilder.set('Content-Type', 'application/octet-stream')
+			body = payload
+		} else if (payload && typeof payload === 'object') {
+			body = JSON.stringify(payload)
+		} else {
+			body = payload
 		}
 
 		const response = await fetch(`${this.config.baseURL}${path}`, {
 			method: 'PUT',
-			body: typeof payload === 'object' ? JSON.stringify(payload) : payload,
+			body,
 			headers: headerBuilder.toHeaders(),
-			// Include HttpOnly cookies automatically for authentication
 			credentials: 'include'
 		})
 
