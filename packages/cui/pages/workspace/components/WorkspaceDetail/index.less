@@ -300,6 +300,7 @@
 		padding: 10px 16px;
 		border-bottom: 1px solid var(--color_border_soft);
 		transition: background 0.15s ease;
+		cursor: pointer;
 
 		&:last-child {
 			border-bottom: none;
@@ -308,14 +309,16 @@
 		&:hover {
 			background: var(--color_neo_bg_field);
 
+			.fileName {
+				color: var(--color_main);
+			}
+
 			.fileDelete {
 				opacity: 1;
 			}
 		}
 
 		&.fileRowDir {
-			cursor: pointer;
-
 			.fileName {
 				font-weight: 500;
 			}

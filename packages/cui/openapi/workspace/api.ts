@@ -38,6 +38,12 @@ export class WorkspaceAPI {
 		return this.api.Get<any>(`/workspace/${wsId}/files/${path}`, params)
 	}
 
+	ContentURL(wsId: string, path: string): string {
+		const base = (this.api as any).config?.baseURL ?? ''
+		const normalized = path.startsWith('/') ? path.slice(1) : path
+		return `${base}/workspace/${wsId}/files/${normalized}`
+	}
+
 	async WriteFile(wsId: string, path: string, data: string | ArrayBuffer): Promise<ApiResponse<void>> {
 		return this.api.Put<void>(`/workspace/${wsId}/files/${path}`, data)
 	}

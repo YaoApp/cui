@@ -4,7 +4,7 @@ import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
-import { resolveNodeAddr, type Workspace, type NodeInfo } from '../../types'
+import { resolveNodeAddr, nodeName, type Workspace, type NodeInfo } from '../../types'
 import styles from './index.less'
 
 interface WorkspaceListProps {
@@ -135,7 +135,7 @@ const WorkspaceList = ({ workspaces, nodeMap, loading, onSelect, onDelete, onCre
 														)}
 													</div>
 													<span className={styles.subLine}>
-														{nodeMap?.[ws.node]?.system?.hostname || ws.id}
+														{nodeMap?.[ws.node] ? nodeName(nodeMap[ws.node]) : ws.id}
 													</span>
 												</div>
 											</div>
