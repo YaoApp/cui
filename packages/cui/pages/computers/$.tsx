@@ -3,8 +3,7 @@ import { getLocale, useParams, useNavigate } from '@umijs/max'
 import { message } from 'antd'
 import ComputerList from './components/ComputerList'
 import ComputerDetail from './components/ComputerDetail'
-import NodeConfigModal from './components/CreateModal'
-import { mockApi } from './mockData'
+import { Sandbox } from '@/openapi/sandbox'
 import type { BoxInfo } from './types'
 import styles from './index.less'
 
@@ -16,7 +15,6 @@ const ComputersPage = () => {
 
 	const [boxes, setBoxes] = useState<BoxInfo[]>([])
 	const [loading, setLoading] = useState(true)
-	const [showNodeConfig, setShowNodeConfig] = useState(false)
 
 	const currentPath = params['*'] || 'list'
 	const isDetail = currentPath.startsWith('detail/')
@@ -24,18 +22,28 @@ const ComputersPage = () => {
 
 	const selectedBox = boxes.find((b) => b.id === detailId) || null
 
+	const getApi = useCallback((): Sandbox | null => {
+		if (!window.$app?.openapi) return null
+		return new Sandbox(window.$app.openapi)
+	}, [])
+
 	const loadBoxes = useCallback(async () => {
 		try {
 			setLoading(true)
-			const data = await mockApi.listBoxes()
-			setBoxes(data)
-		} catch (error) {
+			const api = getApi()
+			if (!api) return
+			const resp = await api.ListBoxes()
+			if (window.$app.openapi.IsError(resp)) {
+				throw new Error(resp.error?.error_description || 'Unknown error')
+			}
+			setBoxes(window.$app.openapi.GetData(resp) || [])
+		} catch (error: any) {
 			console.error('Failed to load computers:', error)
 			message.error(is_cn ? '加载电脑列表失败' : 'Failed to load computers')
 		} finally {
 			setLoading(false)
 		}
-	}, [is_cn])
+	}, [is_cn, getApi])
 
 	useEffect(() => {
 		loadBoxes()
@@ -45,29 +53,14 @@ const ComputersPage = () => {
 		navigate(`/computers/detail/${box.id}`)
 	}
 
-	const handleStart = async (box: BoxInfo) => {
-		try {
-			await mockApi.startBox(box.id)
-			message.success(is_cn ? '启动成功' : 'Started successfully')
-			setBoxes((prev) => prev.map((b) => (b.id === box.id ? { ...b, status: 'running' as const } : b)))
-		} catch {
-			message.error(is_cn ? '启动失败' : 'Start failed')
-		}
-	}
-
-	const handleStop = async (box: BoxInfo) => {
-		try {
-			await mockApi.stopBox(box.id)
-			message.success(is_cn ? '停止成功' : 'Stopped successfully')
-			setBoxes((prev) => prev.map((b) => (b.id === box.id ? { ...b, status: 'stopped' as const, process_count: 0 } : b)))
-		} catch {
-			message.error(is_cn ? '停止失败' : 'Stop failed')
-		}
-	}
-
 	const handleRemove = async (box: BoxInfo) => {
 		try {
-			await mockApi.removeBox(box.id)
+			const api = getApi()
+			if (!api) return
+			const resp = await api.RemoveBox(box.id)
+			if (window.$app.openapi.IsError(resp)) {
+				throw new Error(resp.error?.error_description)
+			}
 			message.success(is_cn ? '删除成功' : 'Deleted successfully')
 			setBoxes((prev) => prev.filter((b) => b.id !== box.id))
 			if (detailId === box.id) {
@@ -79,12 +72,10 @@ const ComputersPage = () => {
 	}
 
 	const handleVNC = async (box: BoxInfo) => {
-		try {
-			const url = await mockApi.getVNCUrl(box.id)
-			window.open(url, '_blank')
-		} catch {
-			message.error(is_cn ? '获取 VNC 链接失败' : 'Failed to get VNC URL')
-		}
+		const api = getApi()
+		if (!api) return
+		const url = api.GetViewerURL(box.id)
+		navigate(url)
 	}
 
 	const handleBack = () => {
@@ -110,15 +101,8 @@ const ComputersPage = () => {
 				boxes={boxes}
 				loading={loading}
 				onSelect={handleSelect}
-				onStart={handleStart}
-				onStop={handleStop}
 				onRemove={handleRemove}
-				onNodeConfig={() => setShowNodeConfig(true)}
 				onVNC={handleVNC}
-			/>
-			<NodeConfigModal
-				open={showNodeConfig}
-				onCancel={() => setShowNodeConfig(false)}
 			/>
 		</div>
 	)

@@ -3,7 +3,7 @@ import { Popconfirm, message } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
-import { mockApi } from '../../mockData'
+import { Sandbox } from '@/openapi/sandbox'
 import type { BoxInfo } from '../../types'
 import styles from './index.less'
 
@@ -27,52 +27,31 @@ const statusLabels: Record<string, { cn: string; en: string }> = {
 	creating: { cn: '创建中', en: 'Creating' }
 }
 
+const formatMemory = (bytes?: number): string => {
+	if (!bytes) return '—'
+	const gb = bytes / (1024 * 1024 * 1024)
+	if (gb >= 1) return `${gb.toFixed(1)} GB`
+	const mb = bytes / (1024 * 1024)
+	return `${mb.toFixed(0)} MB`
+}
+
 const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const [starting, setStarting] = useState(false)
-	const [stopping, setStopping] = useState(false)
 	const [vncUrl, setVncUrl] = useState<string | null>(null)
 
 	const isOneShot = box.policy === 'oneshot'
 	const policy = policyLabels[box.policy] || policyLabels.session
 	const status = statusLabels[box.status] || statusLabels.stopped
-	const labelEntries = Object.entries(box.labels)
-
-	const handleStart = async () => {
-		setStarting(true)
-		try {
-			await mockApi.startBox(box.id)
-			message.success(is_cn ? '启动成功' : 'Started successfully')
-			onRefresh()
-		} catch {
-			message.error(is_cn ? '启动失败' : 'Start failed')
-		} finally {
-			setStarting(false)
-		}
-	}
-
-	const handleStop = async () => {
-		setStopping(true)
-		try {
-			await mockApi.stopBox(box.id)
-			message.success(is_cn ? '停止成功' : 'Stopped successfully')
-			onRefresh()
-		} catch {
-			message.error(is_cn ? '停止失败' : 'Stop failed')
-		} finally {
-			setStopping(false)
-		}
-	}
+	const labelEntries = Object.entries(box.labels || {})
+	const sys = box.system
 
 	const handleVNC = async () => {
-		try {
-			const url = await mockApi.getVNCUrl(box.id)
-			setVncUrl(url)
-			window.open(url, '_blank')
-		} catch {
-			message.error(is_cn ? '获取 VNC 链接失败' : 'Failed to get VNC URL')
-		}
+		if (!window.$app?.openapi) return
+		const api = new Sandbox(window.$app.openapi)
+		const url = api.GetViewerURL(box.id)
+		setVncUrl(url)
+		window.open(url, '_blank')
 	}
 
 	return (
@@ -95,26 +74,6 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 				<div className={styles.headerRight}>
 					{!isOneShot && (
 						<>
-							{box.status === 'stopped' ? (
-								<Button
-									type='primary'
-									size='small'
-									icon={<Icon name='material-play_arrow' size={12} />}
-									onClick={handleStart}
-									loading={starting}
-								>
-									{is_cn ? '启动' : 'Start'}
-								</Button>
-							) : box.status === 'running' ? (
-								<Button
-									size='small'
-									icon={<Icon name='material-stop' size={12} />}
-									onClick={handleStop}
-									loading={stopping}
-								>
-									{is_cn ? '停止' : 'Stop'}
-								</Button>
-							) : null}
 							{box.vnc && box.status === 'running' && (
 								<Button
 									type='primary'
@@ -178,22 +137,22 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 					</div>
 				</div>
 				<div className={styles.infoCard}>
-					<div className={styles.infoLabel}>{is_cn ? '资源池' : 'Pool'}</div>
+					<div className={styles.infoLabel}>{is_cn ? '节点' : 'Node'}</div>
 					<div className={styles.infoValue}>
 						<Icon name='material-dns' size={14} />
-						<span>{box.pool}</span>
+						<span>{box.node_id}</span>
 					</div>
 				</div>
 				<div className={styles.infoCard}>
 					<div className={styles.infoLabel}>{is_cn ? '创建时间' : 'Created'}</div>
 					<div className={styles.infoValue}>
-						<span>{new Date(box.created_at).toLocaleString()}</span>
+						<span>{box.created_at ? new Date(box.created_at).toLocaleString() : '—'}</span>
 					</div>
 				</div>
 				<div className={styles.infoCard}>
 					<div className={styles.infoLabel}>{is_cn ? '最后活跃' : 'Last Active'}</div>
 					<div className={styles.infoValue}>
-						<span>{new Date(box.last_active).toLocaleString()}</span>
+						<span>{box.last_active ? new Date(box.last_active).toLocaleString() : '—'}</span>
 					</div>
 				</div>
 				{box.workspace_id && (
@@ -212,6 +171,59 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 					</div>
 				</div>
 			</div>
+
+			{sys && (sys.os || sys.hostname) && (
+				<div className={styles.labelsSection}>
+					<div className={styles.sectionTitle}>{is_cn ? '系统信息' : 'System Info'}</div>
+					<div className={styles.infoCards}>
+						{sys.os && (
+							<div className={styles.infoCard}>
+								<div className={styles.infoLabel}>OS</div>
+								<div className={styles.infoValue}>
+									<Icon name='material-computer' size={14} />
+									<span>{sys.os} / {sys.arch}</span>
+								</div>
+							</div>
+						)}
+						{sys.hostname && (
+							<div className={styles.infoCard}>
+								<div className={styles.infoLabel}>Hostname</div>
+								<div className={styles.infoValue}>
+									<Icon name='material-dns' size={14} />
+									<span>{sys.hostname}</span>
+								</div>
+							</div>
+						)}
+						{sys.num_cpu > 0 && (
+							<div className={styles.infoCard}>
+								<div className={styles.infoLabel}>CPU</div>
+								<div className={styles.infoValue}>
+									<Icon name='material-memory' size={14} />
+									<span>{sys.num_cpu} {is_cn ? '核' : 'cores'}</span>
+								</div>
+							</div>
+						)}
+						{sys.total_mem && sys.total_mem > 0 && (
+							<div className={styles.infoCard}>
+								<div className={styles.infoLabel}>{is_cn ? '内存' : 'Memory'}</div>
+								<div className={styles.infoValue}>
+									<Icon name='material-sd_card' size={14} />
+									<span>{formatMemory(sys.total_mem)}</span>
+								</div>
+							</div>
+						)}
+						{sys.shell && (
+							<div className={styles.infoCard}>
+								<div className={styles.infoLabel}>Shell</div>
+								<div className={styles.infoValue}>
+									<Icon name='material-terminal' size={14} />
+									<span className={styles.monoText}>{sys.shell}</span>
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+			)}
 
 			{labelEntries.length > 0 && (
 				<div className={styles.labelsSection}>

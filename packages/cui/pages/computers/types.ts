@@ -2,10 +2,20 @@ export type LifecyclePolicy = 'oneshot' | 'session' | 'longrunning' | 'persisten
 
 export type BoxStatus = 'running' | 'stopped' | 'creating'
 
+export interface SystemInfo {
+	os: string
+	arch: string
+	hostname: string
+	num_cpu: number
+	total_mem?: number
+	shell?: string
+	temp_dir?: string
+}
+
 export interface BoxInfo {
 	id: string
 	container_id: string
-	pool: string
+	node_id: string
 	owner: string
 	status: BoxStatus
 	policy: LifecyclePolicy
@@ -16,18 +26,7 @@ export interface BoxInfo {
 	process_count: number
 	vnc: boolean
 	workspace_id?: string
-	workspace_name?: string
-}
-
-export interface PoolInfo {
-	name: string
-	addr: string
-	connected: boolean
-	boxes: number
-	max_per_user: number
-	max_total: number
-	idle_timeout: number
-	max_lifetime: number
+	system: SystemInfo
 }
 
 export interface PortMapping {
@@ -39,10 +38,9 @@ export interface PortMapping {
 
 export interface CreateBoxOptions {
 	id?: string
-	owner: string
-	pool?: string
+	node_id?: string
 	image: string
-	workdir?: string
+	work_dir?: string
 	user?: string
 	env?: Record<string, string>
 	memory?: number
@@ -50,16 +48,28 @@ export interface CreateBoxOptions {
 	vnc?: boolean
 	ports?: PortMapping[]
 	policy: LifecyclePolicy
-	idle_timeout?: number
-	stop_timeout?: number
+	labels?: Record<string, string>
 	workspace_id?: string
 	mount_mode?: 'rw' | 'ro'
 	mount_path?: string
-	labels?: Record<string, string>
 }
 
 export interface ListBoxOptions {
-	owner?: string
-	pool?: string
-	labels?: Record<string, string>
+	node_id?: string
+}
+
+export interface ExecRequest {
+	cmd: string[]
+	work_dir?: string
+	env?: Record<string, string>
+	timeout?: number
+}
+
+export interface ExecResult {
+	exit_code: number
+	stdout: string
+	stderr: string
+	duration_ms?: number
+	error?: string
+	truncated?: boolean
 }

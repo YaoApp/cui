@@ -3,7 +3,6 @@ import { Input, Spin } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import Button from '@/components/ui/Button'
 import type { BoxInfo, LifecyclePolicy } from '../../types'
 import styles from './index.less'
 
@@ -11,10 +10,7 @@ interface ComputerListProps {
 	boxes: BoxInfo[]
 	loading: boolean
 	onSelect: (box: BoxInfo) => void
-	onStart: (box: BoxInfo) => void
-	onStop: (box: BoxInfo) => void
 	onRemove: (box: BoxInfo) => void
-	onNodeConfig: () => void
 	onVNC: (box: BoxInfo) => void
 }
 
@@ -27,11 +23,13 @@ const policyLabel: Record<LifecyclePolicy, { cn: string; en: string; icon: strin
 
 type FilterTab = 'running' | 'stopped' | 'all'
 
-const ComputerList = ({ boxes, loading, onSelect, onStart, onStop, onRemove, onNodeConfig, onVNC }: ComputerListProps) => {
+const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC }: ComputerListProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [search, setSearch] = useState('')
 	const [activeTab, setActiveTab] = useState<FilterTab>('running')
+
+	void onRemove
 
 	const counts = useMemo(
 		() => ({
@@ -58,15 +56,16 @@ const ComputerList = ({ boxes, loading, onSelect, onStart, onStop, onRemove, onN
 				(b) =>
 					b.id.toLowerCase().includes(q) ||
 					b.image.toLowerCase().includes(q) ||
-					b.pool.toLowerCase().includes(q) ||
+					b.node_id.toLowerCase().includes(q) ||
 					(b.workspace_id && b.workspace_id.toLowerCase().includes(q)) ||
-					Object.values(b.labels).some((v) => v.toLowerCase().includes(q))
+					Object.values(b.labels || {}).some((v) => v.toLowerCase().includes(q))
 			)
 		}
 		return result
 	}, [boxes, activeTab, search])
 
 	const formatDate = (dateStr: string) => {
+		if (!dateStr) return '—'
 		const d = new Date(dateStr)
 		const now = new Date()
 		const diffMs = now.getTime() - d.getTime()
@@ -90,9 +89,6 @@ const ComputerList = ({ boxes, loading, onSelect, onStart, onStop, onRemove, onN
 						<Icon name='material-computer' size={24} />
 						<h1 className={styles.title}>{is_cn ? '电脑' : 'Computers'}</h1>
 					</div>
-					<Button size='small' icon={<Icon name='material-dns' size={12} />} onClick={onNodeConfig}>
-						{is_cn ? '节点管理' : 'Nodes'}
-					</Button>
 				</div>
 
 				<div className={styles.tabs}>
@@ -140,13 +136,12 @@ const ComputerList = ({ boxes, loading, onSelect, onStart, onStop, onRemove, onN
 				) : (
 					<div className={styles.grid}>
 						{filtered.map((box) => {
-							const pol = policyLabel[box.policy]
+							const pol = policyLabel[box.policy] || policyLabel.session
 							const canVNC = box.vnc && box.status === 'running' && !isOneShot(box)
 
 							return (
 								<div key={box.id} className={styles.gridItem}>
 									<div className={`${styles.card} ${box.status === 'stopped' ? styles.cardDim : ''}`}>
-										{/* Hover overlay */}
 										<div className={styles.overlay}>
 											{canVNC && (
 												<div className={styles.overlayBtn} onClick={(e) => { e.stopPropagation(); onVNC(box) }}>
@@ -161,7 +156,6 @@ const ComputerList = ({ boxes, loading, onSelect, onStart, onStop, onRemove, onN
 										</div>
 
 										<div className={styles.cardInner} onClick={() => onSelect(box)}>
-											{/* ── HEADER: icon + name + status ── */}
 											<div className={styles.cardHeader}>
 												<div className={styles.cardIcon}>
 													<Icon name='material-computer' size={22} />
@@ -180,21 +174,20 @@ const ComputerList = ({ boxes, loading, onSelect, onStart, onStop, onRemove, onN
 												</div>
 											</div>
 
-											{/* ── FOOTER: workspace + meta + time ── */}
 											<div className={styles.cardFooter}>
 												<div className={styles.footLeft}>
 													<span className={styles.chip}>
 														<Icon name='material-dns' size={11} />
-														{box.pool}
+														{box.node_id}
 													</span>
 													<span className={styles.chip}>
 													<Icon name={pol.icon} size={11} />
 													{is_cn ? pol.cn : pol.en}
 												</span>
-													{box.workspace_name && (
+													{box.system?.os && (
 														<span className={styles.chip}>
-															<Icon name='material-workspaces' size={11} />
-															{box.workspace_name}
+															<Icon name='material-memory' size={11} />
+															{box.system.os}/{box.system.arch}
 														</span>
 													)}
 												</div>

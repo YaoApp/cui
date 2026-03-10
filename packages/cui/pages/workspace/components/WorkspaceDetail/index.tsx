@@ -1,14 +1,15 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Popconfirm, message, Upload, Input } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
-import { mockApi } from '../../mockData'
-import type { Workspace, DirEntry } from '../../types'
+import { WorkspaceAPI } from '@/openapi/workspace'
+import { resolveNodeAddr, nodeName, nodeAddr, type Workspace, type DirEntry, type NodeInfo } from '../../types'
 import styles from './index.less'
 
 interface WorkspaceDetailProps {
 	workspace: Workspace
+	nodeMap?: Record<string, NodeInfo>
 	onBack: () => void
 	onDelete: () => void
 	onRefresh: () => void
@@ -41,7 +42,7 @@ const getFileIcon = (entry: DirEntry): string => {
 	return iconMap[ext] || 'material-insert_drive_file'
 }
 
-const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDetailProps) => {
+const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: WorkspaceDetailProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -50,11 +51,25 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 	const [loading, setLoading] = useState(false)
 	const [editingName, setEditingName] = useState(false)
 	const [newName, setNewName] = useState(workspace.name)
+	const [showHidden, setShowHidden] = useState(false)
+	const [creatingDir, setCreatingDir] = useState(false)
+	const [newDirName, setNewDirName] = useState('')
+
+	const getApi = useCallback((): WorkspaceAPI | null => {
+		if (!window.$app?.openapi) return null
+		return new WorkspaceAPI(window.$app.openapi)
+	}, [])
 
 	const loadDir = useCallback(async (path: string) => {
 		try {
 			setLoading(true)
-			const data = await mockApi.listDir(workspace.id, path)
+			const api = getApi()
+			if (!api) return
+			const resp = await api.ListDir(workspace.id, path)
+			if (window.$app.openapi.IsError(resp)) {
+				throw new Error(resp.error?.error_description)
+			}
+			const data = window.$app.openapi.GetData(resp) || []
 			const sorted = [...data].sort((a, b) => {
 				if (a.is_dir !== b.is_dir) return a.is_dir ? -1 : 1
 				return a.name.localeCompare(b.name)
@@ -65,7 +80,7 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 		} finally {
 			setLoading(false)
 		}
-	}, [workspace.id, is_cn])
+	}, [workspace.id, is_cn, getApi])
 
 	useEffect(() => {
 		loadDir(currentPath)
@@ -86,15 +101,32 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 
 	const breadcrumbs = currentPath.split('/').filter(Boolean)
 
+	const visibleEntries = useMemo(
+		() => (showHidden ? entries : entries.filter((e) => !e.name.startsWith('.'))),
+		[entries, showHidden]
+	)
+
 	const handleUpload = async (file: File) => {
 		const hide = message.loading(is_cn ? '上传中...' : 'Uploading...', 0)
 		try {
-			await mockApi.uploadFile(workspace.id, `${currentPath}/${file.name}`, file)
-			message.success(is_cn ? '上传成功' : 'Upload successful')
-			loadDir(currentPath)
+			const api = getApi()
+			if (!api) return false
+
+			const reader = new FileReader()
+			reader.onload = async () => {
+				const filePath = currentPath === '/' ? file.name : `${currentPath.slice(1)}/${file.name}`
+				const resp = await api.WriteFile(workspace.id, filePath, reader.result as string)
+				if (window.$app.openapi.IsError(resp)) {
+					message.error(is_cn ? '上传失败' : 'Upload failed')
+				} else {
+					message.success(is_cn ? '上传成功' : 'Upload successful')
+					loadDir(currentPath)
+				}
+				hide()
+			}
+			reader.readAsText(file)
 		} catch {
 			message.error(is_cn ? '上传失败' : 'Upload failed')
-		} finally {
 			hide()
 		}
 		return false
@@ -102,8 +134,13 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 
 	const handleDeleteFile = async (entry: DirEntry) => {
 		try {
-			const fullPath = currentPath === '/' ? `/${entry.name}` : `${currentPath}/${entry.name}`
-			await mockApi.deleteFile(workspace.id, fullPath)
+			const api = getApi()
+			if (!api) return
+			const fullPath = currentPath === '/' ? entry.name : `${currentPath.slice(1)}/${entry.name}`
+			const resp = await api.DeleteFile(workspace.id, fullPath)
+			if (window.$app.openapi.IsError(resp)) {
+				throw new Error(resp.error?.error_description)
+			}
 			message.success(is_cn ? '删除成功' : 'Deleted successfully')
 			loadDir(currentPath)
 		} catch {
@@ -117,7 +154,12 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 			return
 		}
 		try {
-			await mockApi.updateWorkspace(workspace.id, { name: newName.trim() })
+			const api = getApi()
+			if (!api) return
+			const resp = await api.Update(workspace.id, { name: newName.trim() })
+			if (window.$app.openapi.IsError(resp)) {
+				throw new Error(resp.error?.error_description)
+			}
 			message.success(is_cn ? '已更新' : 'Updated')
 			setEditingName(false)
 			onRefresh()
@@ -126,7 +168,31 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 		}
 	}
 
-	const labelEntries = Object.entries(workspace.labels)
+	const handleCreateDir = async () => {
+		const name = newDirName.trim()
+		if (!name) {
+			setCreatingDir(false)
+			return
+		}
+		try {
+			const api = getApi()
+			if (!api) return
+			const dirPath = currentPath === '/' ? name : `${currentPath.slice(1)}/${name}`
+			const resp = await api.Mkdir(workspace.id, dirPath)
+			if (window.$app.openapi.IsError(resp)) {
+				throw new Error(resp.error?.error_description)
+			}
+			message.success(is_cn ? '文件夹已创建' : 'Folder created')
+			setCreatingDir(false)
+			setNewDirName('')
+			loadDir(currentPath)
+		} catch {
+			message.error(is_cn ? '创建失败' : 'Failed to create folder')
+		}
+	}
+
+	const node = nodeMap?.[workspace.node]
+	const labelEntries = Object.entries(workspace.labels || {})
 
 	return (
 		<div className={styles.wrapper}>
@@ -184,26 +250,44 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 					<div className={styles.infoLabel}>{is_cn ? '节点' : 'Node'}</div>
 					<div className={styles.infoValue}>
 						<Icon name='material-dns' size={14} />
-						<span>{workspace.node}</span>
+						<span>{node ? nodeName(node) : workspace.node}</span>
 					</div>
+					{node && (
+						<div className={styles.infoSub}>{nodeAddr(node)}</div>
+					)}
 				</div>
-				<div className={styles.infoCard}>
-					<div className={styles.infoLabel}>{is_cn ? '所有者' : 'Owner'}</div>
-					<div className={styles.infoValue}>
-						<Icon name='material-person' size={14} />
-						<span>{workspace.owner}</span>
+				{node?.system && (
+					<div className={styles.infoCard}>
+						<div className={styles.infoLabel}>{is_cn ? '系统' : 'System'}</div>
+						<div className={styles.infoValue}>
+							<Icon name='material-computer' size={14} />
+							<span>{node.system.os}/{node.system.arch}</span>
+						</div>
+						<div className={styles.infoSub}>
+							{[
+								node.system.hostname,
+								node.system.num_cpu ? `${node.system.num_cpu} CPU` : '',
+								node.system.total_mem ? `${Math.round(node.system.total_mem / 1024 / 1024 / 1024)} GB` : ''
+							].filter(Boolean).join(' · ')}
+						</div>
 					</div>
-				</div>
+				)}
 				<div className={styles.infoCard}>
 					<div className={styles.infoLabel}>{is_cn ? '创建时间' : 'Created'}</div>
 					<div className={styles.infoValue}>
 						<span>{new Date(workspace.created_at).toLocaleDateString()}</span>
+					</div>
+					<div className={styles.infoSub}>
+						{new Date(workspace.created_at).toLocaleTimeString()}
 					</div>
 				</div>
 				<div className={styles.infoCard}>
 					<div className={styles.infoLabel}>{is_cn ? '更新时间' : 'Updated'}</div>
 					<div className={styles.infoValue}>
 						<span>{new Date(workspace.updated_at).toLocaleDateString()}</span>
+					</div>
+					<div className={styles.infoSub}>
+						{new Date(workspace.updated_at).toLocaleTimeString()}
 					</div>
 				</div>
 			</div>
@@ -225,18 +309,35 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 			<div className={styles.fileSection}>
 				<div className={styles.fileSectionHeader}>
 					<div className={styles.sectionTitle}>{is_cn ? '文件管理' : 'File Manager'}</div>
-					<Upload
-						beforeUpload={handleUpload}
-						showUploadList={false}
-						multiple
-					>
+					<div className={styles.fileActions}>
 						<Button
 							size='small'
-							icon={<Icon name='material-upload' size={12} />}
+							type={showHidden ? 'primary' : 'default'}
+							icon={<Icon name={showHidden ? 'material-visibility' : 'material-visibility_off'} size={12} />}
+							onClick={() => setShowHidden((v) => !v)}
 						>
-							{is_cn ? '上传文件' : 'Upload'}
+							{is_cn ? '隐藏文件' : 'Hidden'}
 						</Button>
-					</Upload>
+						<Button
+							size='small'
+							icon={<Icon name='material-create_new_folder' size={12} />}
+							onClick={() => { setCreatingDir(true); setNewDirName('') }}
+						>
+							{is_cn ? '新建文件夹' : 'New Folder'}
+						</Button>
+						<Upload
+							beforeUpload={handleUpload}
+							showUploadList={false}
+							multiple
+						>
+							<Button
+								size='small'
+								icon={<Icon name='material-upload' size={12} />}
+							>
+								{is_cn ? '上传文件' : 'Upload'}
+							</Button>
+						</Upload>
+					</div>
 				</div>
 
 				<div className={styles.breadcrumb}>
@@ -268,17 +369,37 @@ const WorkspaceDetail = ({ workspace, onBack, onDelete, onRefresh }: WorkspaceDe
 				</div>
 
 				<div className={styles.fileList}>
+					{creatingDir && (
+						<div className={`${styles.fileRow} ${styles.fileRowDir}`}>
+							<div className={styles.fileIcon}>
+								<Icon name='material-create_new_folder' size={18} />
+							</div>
+							<div className={styles.fileName}>
+								<Input
+									size='small'
+									value={newDirName}
+									placeholder={is_cn ? '文件夹名称' : 'Folder name'}
+									onChange={(e) => setNewDirName(e.target.value)}
+									onPressEnter={handleCreateDir}
+									onBlur={handleCreateDir}
+									onKeyDown={(e) => { if (e.key === 'Escape') { setCreatingDir(false); setNewDirName('') } }}
+									autoFocus
+									style={{ height: 26 }}
+								/>
+							</div>
+						</div>
+					)}
 					{loading ? (
 						<div className={styles.fileLoading}>
 							<span>{is_cn ? '加载中...' : 'Loading...'}</span>
 						</div>
-					) : entries.length === 0 ? (
+					) : visibleEntries.length === 0 && !creatingDir ? (
 						<div className={styles.fileEmpty}>
 							<Icon name='material-folder_off' size={40} />
 							<span>{is_cn ? '空目录' : 'Empty directory'}</span>
 						</div>
 					) : (
-						entries.map((entry) => (
+						visibleEntries.map((entry) => (
 							<div
 								key={entry.name}
 								className={`${styles.fileRow} ${entry.is_dir ? styles.fileRowDir : ''}`}

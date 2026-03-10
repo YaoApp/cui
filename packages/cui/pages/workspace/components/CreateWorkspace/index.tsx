@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Input, Select } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import { mockApi } from '../../mockData'
-import type { NodeInfo } from '../../types'
+import { NodesAPI } from '@/openapi/nodes'
+import { nodeName, nodeDetail, type NodeInfo } from '../../types'
 import styles from './index.less'
 
 interface CreateWorkspaceProps {
@@ -24,10 +24,15 @@ const CreateWorkspace = ({ onSubmit, onCancel }: CreateWorkspaceProps) => {
 	const [submitting, setSubmitting] = useState(false)
 
 	useEffect(() => {
-		mockApi.getNodes().then((data) => {
-			setNodes(data)
-			const onlineNode = data.find((n) => n.online)
-			if (onlineNode) setNode(onlineNode.name)
+		const api = window.$app?.openapi ? new NodesAPI(window.$app.openapi) : null
+		if (!api) return
+		api.List().then((resp) => {
+			if (!window.$app.openapi.IsError(resp)) {
+				const data = window.$app.openapi.GetData(resp) || []
+				setNodes(data)
+				const onlineNode = data.find((n) => n.status === 'online')
+				if (onlineNode) setNode(onlineNode.tai_id)
+			}
 		})
 	}, [])
 
@@ -102,15 +107,15 @@ const CreateWorkspace = ({ onSubmit, onCancel }: CreateWorkspaceProps) => {
 						placeholder={is_cn ? '选择节点...' : 'Select a node...'}
 						className={styles.select}
 						options={nodes.map((n) => ({
-							value: n.name,
+							value: n.tai_id,
 							label: (
 								<div className={styles.nodeOption}>
-									<span className={`${styles.nodeStatus} ${n.online ? styles.online : styles.offline}`} />
-									<span>{n.name}</span>
-									<span className={styles.nodeAddr}>{n.addr}</span>
+									<span className={`${styles.nodeStatus} ${n.status === 'online' ? styles.online : styles.offline}`} />
+									<span>{nodeName(n)}</span>
+									<span className={styles.nodeAddr}>{nodeDetail(n)}</span>
 								</div>
 							),
-							disabled: !n.online
+							disabled: n.status !== 'online'
 						}))}
 					/>
 				</div>

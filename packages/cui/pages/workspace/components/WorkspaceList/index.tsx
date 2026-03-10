@@ -4,11 +4,12 @@ import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
-import type { Workspace } from '../../types'
+import { resolveNodeAddr, type Workspace, type NodeInfo } from '../../types'
 import styles from './index.less'
 
 interface WorkspaceListProps {
 	workspaces: Workspace[]
+	nodeMap?: Record<string, NodeInfo>
 	loading: boolean
 	onSelect: (ws: Workspace) => void
 	onDelete: (ws: Workspace) => void
@@ -29,7 +30,7 @@ const envColors: Record<string, string> = {
 	testing: 'var(--color_mission_accent_purple)'
 }
 
-const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: WorkspaceListProps) => {
+const WorkspaceList = ({ workspaces, nodeMap, loading, onSelect, onDelete, onCreate }: WorkspaceListProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [search, setSearch] = useState('')
@@ -45,7 +46,7 @@ const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: Wo
 				ws.name.toLowerCase().includes(q) ||
 				ws.id.toLowerCase().includes(q) ||
 				ws.node.toLowerCase().includes(q) ||
-				Object.values(ws.labels).some((v) => v.toLowerCase().includes(q))
+				Object.values(ws.labels || {}).some((v) => v.toLowerCase().includes(q))
 		)
 	}, [workspaces, search])
 
@@ -107,14 +108,14 @@ const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: Wo
 				) : (
 					<div className={styles.grid}>
 						{filtered.map((ws) => {
-							const env = ws.labels.env || null
+							const env = ws.labels?.env || null
 							const envInfo = env ? envLabel[env] : null
 
 							return (
 								<div key={ws.id} className={styles.gridItem}>
 									<div className={styles.card} onClick={() => onSelect(ws)}>
 										<div className={styles.cardInner}>
-											{/* ── HEADER: icon + name + env ── */}
+											{/* ── HEADER: icon + two rows ── */}
 											<div className={styles.cardHeader}>
 												<div className={styles.cardIcon}>
 													<Icon name='material-folder' size={22} />
@@ -127,17 +128,24 @@ const WorkspaceList = ({ workspaces, loading, onSelect, onDelete, onCreate }: Wo
 																{is_cn ? envInfo.cn : envInfo.en}
 															</span>
 														)}
+														{nodeMap?.[ws.node]?.system && (
+															<span className={styles.hostLabel}>
+																{nodeMap[ws.node].system.os}/{nodeMap[ws.node].system.arch}
+															</span>
+														)}
 													</div>
-													<span className={styles.subLine}>{ws.id}</span>
+													<span className={styles.subLine}>
+														{nodeMap?.[ws.node]?.system?.hostname || ws.id}
+													</span>
 												</div>
 											</div>
 
-											{/* ── FOOTER: meta + time ── */}
+											{/* ── FOOTER: addr + id + time ── */}
 											<div className={styles.cardFooter}>
 												<div className={styles.footLeft}>
 													<span className={styles.chip}>
 														<Icon name='material-dns' size={11} />
-														{ws.node}
+														{resolveNodeAddr(ws.node, nodeMap)}
 													</span>
 												</div>
 												<span className={styles.footTime}>{formatDate(ws.updated_at)}</span>

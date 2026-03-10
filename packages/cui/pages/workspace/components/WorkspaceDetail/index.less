@@ -139,6 +139,13 @@
 				color: var(--color_neo_icon_muted);
 			}
 		}
+
+		.infoSub {
+			margin-top: 4px;
+			font-size: 12px;
+			color: var(--color_neo_text_secondary);
+			line-height: 1.4;
+		}
 	}
 }
 
@@ -198,6 +205,12 @@
 		flex-shrink: 0;
 	}
 
+	.fileActions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
 }
 
 .breadcrumb {
@@ -210,6 +223,7 @@
 	margin-bottom: 12px;
 	flex-shrink: 0;
 	flex-wrap: wrap;
+	min-height: 40px;
 
 	.crumb {
 		display: inline-flex;
