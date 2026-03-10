@@ -3,6 +3,7 @@ import { Input, Spin } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import { brandIcons } from '@/assets/icons/brands'
 import Button from '@/components/ui/Button'
 import { resolveNodeAddr, nodeName, type Workspace, type NodeInfo } from '../../types'
 import styles from './index.less'
@@ -110,6 +111,8 @@ const WorkspaceList = ({ workspaces, nodeMap, loading, onSelect, onDelete, onCre
 						{filtered.map((ws) => {
 							const env = ws.labels?.env || null
 							const envInfo = env ? envLabel[env] : null
+							const nodeOs = (nodeMap?.[ws.node]?.system?.os || '').toLowerCase()
+							const osSvg = brandIcons[nodeOs] || null
 
 							return (
 								<div key={ws.id} className={styles.gridItem}>
@@ -128,11 +131,12 @@ const WorkspaceList = ({ workspaces, nodeMap, loading, onSelect, onDelete, onCre
 																{is_cn ? envInfo.cn : envInfo.en}
 															</span>
 														)}
-														{nodeMap?.[ws.node]?.system && (
-															<span className={styles.hostLabel}>
-																{nodeMap[ws.node].system.os}/{nodeMap[ws.node].system.arch}
-															</span>
-														)}
+													{nodeMap?.[ws.node]?.system && (
+														<span className={styles.hostLabel}>
+															{osSvg && <img className={styles.osIcon} src={osSvg} />}
+															{nodeMap[ws.node].system.os}/{nodeMap[ws.node].system.arch}
+														</span>
+													)}
 													</div>
 													<span className={styles.subLine}>
 														{nodeMap?.[ws.node] ? nodeName(nodeMap[ws.node]) : ws.id}
@@ -144,7 +148,7 @@ const WorkspaceList = ({ workspaces, nodeMap, loading, onSelect, onDelete, onCre
 											<div className={styles.cardFooter}>
 												<div className={styles.footLeft}>
 													<span className={styles.chip}>
-														<Icon name='material-dns' size={11} />
+														<Icon name='material-bolt' size={11} />
 														{resolveNodeAddr(ws.node, nodeMap)}
 													</span>
 												</div>

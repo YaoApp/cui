@@ -2,6 +2,8 @@ export type LifecyclePolicy = 'oneshot' | 'session' | 'longrunning' | 'persisten
 
 export type BoxStatus = 'running' | 'stopped' | 'creating'
 
+export type ComputerKind = 'box' | 'host'
+
 export interface SystemInfo {
 	os: string
 	arch: string
@@ -13,14 +15,18 @@ export interface SystemInfo {
 }
 
 export interface BoxInfo {
+	kind: ComputerKind
 	id: string
-	container_id: string
+	display_name: string
+	container_id?: string
 	node_id: string
 	owner: string
 	status: BoxStatus
-	policy: LifecyclePolicy
+	policy?: LifecyclePolicy
 	labels: Record<string, string>
-	image: string
+	image?: string
+	mode?: string
+	addr?: string
 	created_at: string
 	last_active: string
 	process_count: number

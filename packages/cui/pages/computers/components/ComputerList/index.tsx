@@ -3,6 +3,7 @@ import { Input, Spin } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
+import { brandIcons } from '@/assets/icons/brands'
 import type { BoxInfo, LifecyclePolicy } from '../../types'
 import styles from './index.less'
 
@@ -18,10 +19,18 @@ const policyLabel: Record<LifecyclePolicy, { cn: string; en: string; icon: strin
 	persistent: { cn: '持久', en: 'Persistent', icon: 'material-all_inclusive' },
 	longrunning: { cn: '长程', en: 'Long-running', icon: 'material-schedule' },
 	session: { cn: '会话', en: 'Session', icon: 'material-timer' },
-	oneshot: { cn: '一次性', en: 'One-shot', icon: 'material-bolt' }
+	oneshot: { cn: '一次性', en: 'One-shot', icon: 'material-rocket_launch' }
 }
 
 type FilterTab = 'running' | 'stopped' | 'all'
+
+const formatMemory = (bytes?: number): string => {
+	if (!bytes) return ''
+	const gb = bytes / (1024 * 1024 * 1024)
+	if (gb >= 1) return `${gb.toFixed(1)} GB`
+	const mb = bytes / (1024 * 1024)
+	return `${mb.toFixed(0)} MB`
+}
 
 const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC }: ComputerListProps) => {
 	const locale = getLocale()
@@ -54,8 +63,9 @@ const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC }: ComputerLis
 			const q = search.toLowerCase()
 			result = result.filter(
 				(b) =>
+					b.display_name.toLowerCase().includes(q) ||
 					b.id.toLowerCase().includes(q) ||
-					b.image.toLowerCase().includes(q) ||
+					(b.image && b.image.toLowerCase().includes(q)) ||
 					b.node_id.toLowerCase().includes(q) ||
 					(b.workspace_id && b.workspace_id.toLowerCase().includes(q)) ||
 					Object.values(b.labels || {}).some((v) => v.toLowerCase().includes(q))
@@ -77,6 +87,16 @@ const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC }: ComputerLis
 		if (diffHour < 24) return is_cn ? `${diffHour}小时前` : `${diffHour}h ago`
 		if (diffDay < 7) return is_cn ? `${diffDay}天前` : `${diffDay}d ago`
 		return d.toLocaleDateString()
+	}
+
+	const systemSummary = (box: BoxInfo): string => {
+		const sys = box.system
+		if (!sys?.os) return ''
+		const parts = [`${sys.os}/${sys.arch}`]
+		if (sys.num_cpu > 0) parts.push(`${sys.num_cpu}C`)
+		const mem = formatMemory(sys.total_mem)
+		if (mem) parts.push(mem)
+		return parts.join(' · ')
 	}
 
 	const isOneShot = (box: BoxInfo) => box.policy === 'oneshot'
@@ -136,8 +156,11 @@ const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC }: ComputerLis
 				) : (
 					<div className={styles.grid}>
 						{filtered.map((box) => {
-							const pol = policyLabel[box.policy] || policyLabel.session
+							const pol = box.policy ? policyLabel[box.policy] : null
 							const canVNC = box.vnc && box.status === 'running' && !isOneShot(box)
+							const sysLine = box.kind === 'host' ? systemSummary(box) : (box.image || systemSummary(box))
+							const os = (box.system?.os || '').toLowerCase()
+							const osSvg = box.kind === 'box' ? brandIcons['linux'] : (brandIcons[os] || null)
 
 							return (
 								<div key={box.id} className={styles.gridItem}>
@@ -158,11 +181,14 @@ const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC }: ComputerLis
 										<div className={styles.cardInner} onClick={() => onSelect(box)}>
 											<div className={styles.cardHeader}>
 												<div className={styles.cardIcon}>
-													<Icon name='material-computer' size={22} />
+													{osSvg
+														? <img className={styles.brandIcon} src={osSvg} />
+														: <Icon name={box.kind === 'host' ? 'material-computer' : 'material-memory'} size={22} />
+													}
 												</div>
 												<div className={styles.headerRight}>
 													<div className={styles.nameRow}>
-														<span className={styles.cardName}>{box.id}</span>
+														<span className={styles.cardName}>{box.display_name}</span>
 														<div className={`${styles.statusPill} ${styles[`st_${box.status}`]}`}>
 															<span className={styles.statusDot} />
 															{is_cn
@@ -170,24 +196,24 @@ const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC }: ComputerLis
 																: box.status === 'running' ? 'Running' : box.status === 'stopped' ? 'Stopped' : 'Creating'}
 														</div>
 													</div>
-													<span className={styles.imageLine}>{box.image}</span>
+													{sysLine && (
+														<span className={styles.imageLine}>{sysLine}</span>
+													)}
 												</div>
 											</div>
 
 											<div className={styles.cardFooter}>
 												<div className={styles.footLeft}>
-													<span className={styles.chip}>
-														<Icon name='material-dns' size={11} />
-														{box.node_id}
-													</span>
-													<span className={styles.chip}>
-													<Icon name={pol.icon} size={11} />
-													{is_cn ? pol.cn : pol.en}
-												</span>
-													{box.system?.os && (
+													{box.addr && (
 														<span className={styles.chip}>
-															<Icon name='material-memory' size={11} />
-															{box.system.os}/{box.system.arch}
+															<Icon name='material-bolt' size={11} />
+															{box.addr}
+														</span>
+													)}
+													{pol && (
+														<span className={styles.chip}>
+															<Icon name={pol.icon} size={11} />
+															{is_cn ? pol.cn : pol.en}
 														</span>
 													)}
 												</div>

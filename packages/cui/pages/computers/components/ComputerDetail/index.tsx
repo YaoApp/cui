@@ -4,6 +4,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { Sandbox } from '@/openapi/sandbox'
+import { brandIcons } from '@/assets/icons/brands'
 import type { BoxInfo } from '../../types'
 import styles from './index.less'
 
@@ -41,10 +42,14 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 	const [vncUrl, setVncUrl] = useState<string | null>(null)
 
 	const isOneShot = box.policy === 'oneshot'
-	const policy = policyLabels[box.policy] || policyLabels.session
+	const isHost = box.kind === 'host'
+	const policy = box.policy ? (policyLabels[box.policy] || policyLabels.session) : null
 	const status = statusLabels[box.status] || statusLabels.stopped
 	const labelEntries = Object.entries(box.labels || {})
 	const sys = box.system
+	const os = (sys?.os || '').toLowerCase()
+	const osSvg = box.kind === 'box' ? brandIcons['linux'] : (brandIcons[os] || null)
+	const kindIcon = isHost ? 'material-computer' : 'material-memory'
 
 	const handleVNC = async () => {
 		if (!window.$app?.openapi) return
@@ -62,17 +67,18 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 						<Icon name='material-arrow_back' size={16} />
 					</div>
 					<div className={styles.boxIcon}>
-						<Icon name='material-computer' size={24} />
+						{osSvg
+							? <img className={styles.brandIcon} src={osSvg} />
+							: <Icon name={kindIcon} size={24} />
+						}
 					</div>
 					<div className={styles.boxInfo}>
-						<h2 className={styles.boxId}>{box.id}</h2>
-						<span className={styles.containerId}>
-							{is_cn ? '容器' : 'Container'}: {box.container_id}
-						</span>
+						<h2 className={styles.boxId}>{box.display_name}</h2>
+						<span className={styles.containerId}>ID: {box.id}</span>
 					</div>
 				</div>
 				<div className={styles.headerRight}>
-					{!isOneShot && (
+					{!isOneShot && !isHost && (
 						<>
 							{box.vnc && box.status === 'running' && (
 								<Button
@@ -117,9 +123,11 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 					<span className={styles.statusDot} />
 					<span>{is_cn ? status.cn : status.en}</span>
 				</div>
-				<span className={styles.statusPolicy}>
-					{is_cn ? policy.cn : policy.en}
-				</span>
+				{policy && (
+					<span className={styles.statusPolicy}>
+						{is_cn ? policy.cn : policy.en}
+					</span>
+				)}
 				{box.process_count > 0 && (
 					<span className={styles.statusProcess}>
 						<Icon name='material-terminal' size={12} />
@@ -129,20 +137,31 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 			</div>
 
 			<div className={styles.infoCards}>
-				<div className={styles.infoCard}>
-					<div className={styles.infoLabel}>{is_cn ? '镜像' : 'Image'}</div>
-					<div className={styles.infoValue}>
-						<Icon name='material-layers' size={14} />
-						<span className={styles.monoText}>{box.image}</span>
+				{box.image && (
+					<div className={styles.infoCard}>
+						<div className={styles.infoLabel}>{is_cn ? '镜像' : 'Image'}</div>
+						<div className={styles.infoValue}>
+							<Icon name='material-layers' size={14} />
+							<span className={styles.monoText}>{box.image}</span>
+						</div>
 					</div>
-				</div>
+				)}
 				<div className={styles.infoCard}>
 					<div className={styles.infoLabel}>{is_cn ? '节点' : 'Node'}</div>
 					<div className={styles.infoValue}>
-						<Icon name='material-dns' size={14} />
-						<span>{box.node_id}</span>
+						<Icon name='material-bolt' size={14} />
+						<span className={styles.monoText}>{box.addr || box.node_id}</span>
 					</div>
 				</div>
+				{box.container_id && (
+					<div className={styles.infoCard}>
+						<div className={styles.infoLabel}>{is_cn ? '容器' : 'Container'}</div>
+						<div className={styles.infoValue}>
+							<Icon name='material-widgets' size={14} />
+							<span className={styles.monoText}>{box.container_id}</span>
+						</div>
+					</div>
+				)}
 				<div className={styles.infoCard}>
 					<div className={styles.infoLabel}>{is_cn ? '创建时间' : 'Created'}</div>
 					<div className={styles.infoValue}>
@@ -180,7 +199,10 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 							<div className={styles.infoCard}>
 								<div className={styles.infoLabel}>OS</div>
 								<div className={styles.infoValue}>
-									<Icon name='material-computer' size={14} />
+									{osSvg
+										? <img className={styles.osIcon} src={osSvg} />
+										: <Icon name='material-computer' size={14} />
+									}
 									<span>{sys.os} / {sys.arch}</span>
 								</div>
 							</div>
