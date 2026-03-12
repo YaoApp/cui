@@ -148,6 +148,7 @@ export default class GlobalModel {
 			window.$app.openapi = new OpenAPI({ baseURL: '/v1', onUnauthorized })
 		}
 
+		window.$app.mode = res.mode || 'production'
 		window.$app.kb = res.kb || {}
 
 		// Storage

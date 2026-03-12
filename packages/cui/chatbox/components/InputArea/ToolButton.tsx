@@ -8,8 +8,9 @@ interface IToolButtonProps {
 	onClick?: () => void
 	disabled?: boolean
 	active?: boolean
+	activeVariant?: 'pulse' | 'highlight'
 	className?: string
-	children: React.ReactNode // 支持传入任何图标组件
+	children: React.ReactNode
 }
 
 const ToolButton: React.FC<IToolButtonProps> = ({
@@ -17,6 +18,7 @@ const ToolButton: React.FC<IToolButtonProps> = ({
 	onClick,
 	disabled = false,
 	active = false,
+	activeVariant = 'pulse',
 	className,
 	children
 }) => {
@@ -24,7 +26,8 @@ const ToolButton: React.FC<IToolButtonProps> = ({
 		<button
 			className={clsx(styles.toolButton, className, {
 				[styles.disabled]: disabled,
-				[styles.active]: active
+				[styles.active]: active && activeVariant === 'pulse',
+				[styles.highlight]: active && activeVariant === 'highlight'
 			})}
 			onClick={onClick}
 			disabled={disabled}

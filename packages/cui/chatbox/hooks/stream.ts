@@ -56,10 +56,11 @@ function createChunkHandler(
 				refs.streamIds.current[targetTabId] = streamId
 				refs.completedMessages.current = {}
 
-				// Open sidebar trace view for task mode
+				// Open sidebar trace view when trace is enabled (development mode only)
 				const metadata = chunk.props?.data?.metadata
 				const traceId = chunk.props?.data?.trace_id
-				if (metadata?.mode === 'task' && traceId) {
+				const isDev = window.$app?.mode === 'development'
+				if (isDev && metadata?.trace === true && traceId) {
 					if (window.$app?.Event) {
 						const locale = getLocale()
 						const is_cn = locale === 'zh-CN'
