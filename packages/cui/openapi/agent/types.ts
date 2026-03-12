@@ -276,6 +276,21 @@ export interface AgentDetailResponse {
 }
 
 /**
+ * ComputerFilter defines query parameters for GET /computer/options.
+ * Declared in DSL sandbox.filter; frontend passes it through to the API.
+ */
+export interface ComputerFilter {
+	kind?: string
+	image?: string
+	vnc?: boolean
+	os?: string
+	arch?: string
+	min_cpus?: number
+	min_mem?: string
+	labels?: Record<string, string>
+}
+
+/**
  * Agent info response (essential fields for InputArea)
  * Returns minimal information needed for UI display
  */
@@ -296,6 +311,10 @@ export interface AgentInfoResponse {
 	modes?: string[]
 	/** Default mode (optional) */
 	default_mode?: string
+	/** Whether this is a Sandbox assistant */
+	sandbox?: boolean
+	/** Computer filter for selector (non-null = show Computer selector) */
+	computer_filter?: ComputerFilter
 }
 
 /**

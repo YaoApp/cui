@@ -8,6 +8,7 @@ import { FileAPI } from '../../../openapi'
 import type { IInputAreaProps } from '../../types'
 import type { UserMessage } from '../../../openapi'
 import { useAssistantProviders } from '@/hooks/useAssistantProviders'
+import { useComputerWorkspace } from '@/hooks/useComputerWorkspace'
 import { useGlobal } from '@/context/app'
 import styles from './index.less'
 import AgentTag from './AgentTag'
@@ -52,6 +53,7 @@ const InputArea = (props: IInputAreaProps) => {
 		onCancelQueuedMessage,
 		initialModel,
 		initialChatMode,
+		initialTrace,
 		onSwitchAssistant
 	} = props
 	const [isAnimating, setIsAnimating] = useState(false)
@@ -60,7 +62,10 @@ const InputArea = (props: IInputAreaProps) => {
 	const [isEmpty, setIsEmpty] = useState(true)
 	const [currentModel, setCurrentModel] = useState<string>('')
 	const [chatMode, setChatMode] = useState<'chat' | 'task'>('task')
-	const [isOptimizing, setIsOptimizing] = useState(false) // 优化提示词状态
+	const [showTrace, setShowTrace] = useState(false)
+	const [selectedComputer, setSelectedComputer] = useState<string>('auto')
+	const [selectedWorkspace, setSelectedWorkspace] = useState<string>('')
+	const [isOptimizing, setIsOptimizing] = useState(false)
 
 	// Get global config
 	const global = useGlobal()
@@ -80,6 +85,17 @@ const InputArea = (props: IInputAreaProps) => {
 			: undefined
 	})
 
+	// Load Computer and Workspace options based on assistant configuration
+	const { computers, workspaces, loadingComputers, loadingWorkspaces, nodesAvailable, showComputerSelector } =
+		useComputerWorkspace({
+			sandbox: propAssistant?.sandbox,
+			computerFilter: propAssistant?.computer_filter,
+			selectedComputer
+		})
+
+	// Block sending when computer selector is shown but no computers available
+	const sendBlocked = showComputerSelector && !nodesAvailable && !loadingComputers
+
 	// Localization & Routing
 	const locale = getLocale()
 	const { search, pathname } = useLocation()
@@ -96,7 +112,6 @@ const InputArea = (props: IInputAreaProps) => {
 	const [agent, setAgent] = useState(propAssistant)
 	const [resourcePickerVisible, setResourcePickerVisible] = useState(false)
 	const contextRowRef = useRef<HTMLDivElement>(null)
-	const [showPageText, setShowPageText] = useState(true)
 	const toolbarRef = useRef<HTMLDivElement>(null)
 	const [showModeText, setShowModeText] = useState(true)
 	const [showModelSelectorResponsive, setShowModelSelectorResponsive] = useState(true) // Responsive layout control
@@ -118,8 +133,15 @@ const InputArea = (props: IInputAreaProps) => {
 			} else if (propAssistant.default_mode) {
 				setChatMode(propAssistant.default_mode as 'chat' | 'task')
 			}
+
+			// Trace: initialTrace (from session) > derive from default_mode
+			if (initialTrace !== undefined) {
+				setShowTrace(initialTrace)
+			} else {
+				setShowTrace(propAssistant.default_mode === 'task')
+			}
 		}
-	}, [propAssistant, defaultProvider, initialModel, initialChatMode])
+	}, [propAssistant, defaultProvider, initialModel, initialChatMode, initialTrace])
 
 	// Reset animating state after transition
 	useEffect(() => {
@@ -386,6 +408,8 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	const handleSend = () => {
+		if (sendBlocked) return
+
 		const message = constructMessage()
 		if (!message) return
 
@@ -396,11 +420,14 @@ const InputArea = (props: IInputAreaProps) => {
 		// Construct ChatCompletionRequest
 		onSend({
 			messages: [message],
-			model: currentModel, // User selected model
-			locale, // Pass user locale for i18n
+			model: currentModel,
+			locale,
 			metadata: {
 				mode: chatMode,
-				page: currentPage || undefined
+				trace: (global?.app_info?.mode === 'development' && showTrace) || undefined,
+				page: currentPage || undefined,
+				computer_id: selectedComputer !== 'auto' ? selectedComputer : undefined,
+				workspace_id: selectedWorkspace || undefined
 			}
 		}).then(() => {
 			clearInput()
@@ -629,36 +656,10 @@ const InputArea = (props: IInputAreaProps) => {
 
 	const handlePageClick = () => {
 		if (!currentPage) return
-		// Just open the sidebar, don't navigate
 		if (window.$app?.Event) {
 			window.$app.Event.emit('app/openSidebar', {})
 		}
 	}
-
-	// Monitor container width to toggle page text visibility
-	useEffect(() => {
-		const checkWidth = () => {
-			if (contextRowRef.current) {
-				const width = contextRowRef.current.offsetWidth
-				// Hide page text when container is less than 400px wide
-				setShowPageText(width >= 400)
-			}
-		}
-
-		checkWidth()
-		window.addEventListener('resize', checkWidth)
-
-		// Use ResizeObserver for more accurate detection
-		const resizeObserver = new ResizeObserver(checkWidth)
-		if (contextRowRef.current) {
-			resizeObserver.observe(contextRowRef.current)
-		}
-
-		return () => {
-			window.removeEventListener('resize', checkWidth)
-			resizeObserver.disconnect()
-		}
-	}, [agent, currentPage])
 
 	// Monitor toolbar width to toggle mode text and model selector visibility
 	useEffect(() => {
@@ -686,21 +687,53 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 	}, [])
 
-	const renderContextRow = () => (
-		<div ref={contextRowRef} className={styles.contextRow}>
-			<div className={styles.leftTags}>{agent && <AgentTag agent={agent} onSwitchAssistant={onSwitchAssistant} />}</div>
-			<div className={styles.rightTags}>
-				{currentPage && (
-					<Tooltip content={currentPage}>
-						<div className={clsx(styles.tag, styles.pageTag)} onClick={handlePageClick}>
-							<Icon name='material-my_location' size={12} />
-							{showPageText && <span className={styles.pageTagText}>{currentPage}</span>}
-						</div>
-					</Tooltip>
-				)}
+	const renderContextRow = () => {
+		const computerOptions = [
+			{ label: is_cn ? '自动' : 'Auto', value: 'auto', icon: 'material-computer' },
+			...computers.map((c) => ({
+				label: c.display_name,
+				value: c.id,
+				icon:
+					c.kind === 'box'
+						? 'material-inventory_2'
+						: c.kind === 'host'
+						? 'material-computer'
+						: 'material-cloud'
+			}))
+		]
+
+		return (
+			<div ref={contextRowRef} className={styles.contextRow}>
+				<div className={styles.leftTags}>
+					{agent && <AgentTag agent={agent} onSwitchAssistant={onSwitchAssistant} />}
+				</div>
+				<div className={styles.rightTags}>
+					{showComputerSelector && (
+						<Selector
+							value={selectedComputer}
+							options={computerOptions}
+							onChange={(val) => setSelectedComputer(val as string)}
+							variant='normal'
+							tooltip={is_cn ? '选择运行环境' : 'Select Computer'}
+							disabled={loading || isOptimizing || loadingComputers}
+							searchable={false}
+							dropdownWidth='auto'
+							dropdownMinWidth={160}
+							dropdownMaxWidth={280}
+							dropdownAlign='right'
+						/>
+					)}
+					{currentPage && (
+						<Tooltip content={currentPage}>
+							<div className={clsx(styles.tag, styles.pageTag)} onClick={handlePageClick}>
+								<Icon name='material-my_location' size={12} />
+							</div>
+						</Tooltip>
+					)}
+				</div>
 			</div>
-		</div>
-	)
+		)
+	}
 
 	const renderAttachments = () => {
 		if (attachments.length === 0) return null
@@ -754,21 +787,26 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	const renderSendButton = () => {
-		// Hide send button when optimizing
 		if (isOptimizing) {
 			return null
 		}
 
 		const showStop = loading
-		// Enable send if not empty, or has attachments that are ready
 		const hasReadyAttachments = attachments.some((att) => !att.uploading && !att.error)
-		const canSend = !isEmpty || hasReadyAttachments
+		const canSend = (!isEmpty || hasReadyAttachments) && !sendBlocked
 
 		return (
 			<button
 				className={clsx(styles.sendBtn, showStop && styles.stopping)}
 				onClick={showStop ? props.onAbort : handleSend}
 				disabled={!showStop && (!canSend || disabled)}
+				title={
+					sendBlocked
+						? is_cn
+							? '请先接入计算节点'
+							: 'Please connect a compute node first'
+						: undefined
+				}
 			>
 				{showStop ? <Stop size={16} weight='regular' /> : <PaperPlaneTilt size={16} />}
 			</button>
@@ -785,48 +823,45 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	const renderToolbar = () => {
-		// Build mode options from assistant configuration
-		const allModeOptions = [
-			{ label: is_cn ? '聊天' : 'Chat', value: 'chat', icon: 'material-chat_bubble_outline' },
-			{ label: is_cn ? '任务' : 'Task', value: 'task', icon: 'material-rocket_launch' }
+		// Workspace options
+		const workspaceOptions = [
+			{
+				label: is_cn ? '选择工作区' : 'Select Workspace',
+				value: '',
+				icon: 'material-folder_open'
+			},
+			...workspaces.map((w) => ({
+				label: w.name || w.id,
+				value: w.id,
+				icon: 'material-folder'
+			}))
 		]
-
-		// Filter mode options based on assistant's modes configuration
-		const modeOptions =
-			propAssistant?.modes && propAssistant.modes.length > 0
-				? allModeOptions.filter((opt) => propAssistant.modes?.includes(opt.value))
-				: allModeOptions
-
-		// Show mode selector only if there are multiple modes to choose from
-		const showModeSelector = modeOptions.length > 1
 
 		// Build model options from API data
 		const modelOptions = llmProviders.map((provider) => ({
 			label: provider.label,
-			value: provider.value
+			value: provider.value,
+			icon: 'material-psychology'
 		}))
 
-		// Only show search if there are 5 or more options
 		const showModelSearch = modelOptions.length >= 5
 
 		return (
 			<div ref={toolbarRef} className={styles.toolbar}>
 				<div className={styles.leftTools}>
-					{showModeSelector && (
-						<Selector
-							value={chatMode}
-							options={modeOptions}
-							onChange={(value) => setChatMode(value as 'chat' | 'task')}
-							variant='tag'
-							tooltip={is_cn ? '切换智能体模式' : 'Switch Agent Mode'}
-							disabled={loading || isOptimizing}
-							searchable={false}
-							dropdownWidth='auto'
-							dropdownMinWidth={120}
-							dropdownMaxWidth={200}
-							hideLabel={!showModeText}
-						/>
-					)}
+					<Selector
+						value={selectedWorkspace}
+						options={workspaceOptions}
+						onChange={(val) => setSelectedWorkspace(val as string)}
+						variant='tag'
+						tooltip={is_cn ? '选择工作区' : 'Select Workspace'}
+						disabled={loading || isOptimizing || loadingWorkspaces}
+						searchable={false}
+						dropdownWidth='auto'
+						dropdownMinWidth={160}
+						dropdownMaxWidth={280}
+						hideLabel={!showModeText}
+					/>
 					{showSelector && showModelSelectorResponsive && (
 						<Selector
 							value={currentModel}
@@ -858,16 +893,6 @@ const InputArea = (props: IInputAreaProps) => {
 						multiple
 					/>
 
-					{/* 
-					 Use drag & drop to add data source to the chat box. disabled for now.
-					  <ToolButton
-						tooltip={is_cn ? '添加数据' : 'Add Data'}
-						onClick={handleOpenResourcePicker}
-						disabled={loading || isOptimizing}
-					>
-						<Database size={14} />
-					</ToolButton> */}
-
 					<ToolButton
 						tooltip={
 							isOptimizing
@@ -888,6 +913,25 @@ const InputArea = (props: IInputAreaProps) => {
 					>
 						<Sparkle size={14} />
 					</ToolButton>
+
+					{global?.app_info?.mode === 'development' && (
+						<ToolButton
+							tooltip={
+								showTrace
+									? is_cn
+										? '隐藏追踪'
+										: 'Hide Trace'
+									: is_cn
+									? '显示追踪'
+									: 'Show Trace'
+							}
+							onClick={() => setShowTrace(!showTrace)}
+							active={showTrace}
+							activeVariant='highlight'
+						>
+							<Icon name='material-footprint' size={14} />
+						</ToolButton>
+					)}
 				</div>
 			</div>
 		)
@@ -980,7 +1024,11 @@ const InputArea = (props: IInputAreaProps) => {
 								onKeyDown={handleKeyDown}
 								onPaste={handlePaste}
 								data-placeholder={
-									mode === 'placeholder'
+									sendBlocked
+										? is_cn
+											? '请先接入计算节点后才可使用'
+											: 'Please connect a compute node first'
+										: mode === 'placeholder'
 										? is_cn
 											? '输入消息... (Shift + Enter 换行)'
 											: 'Type a message... (Shift + Enter for new line)'
@@ -988,7 +1036,7 @@ const InputArea = (props: IInputAreaProps) => {
 										? is_cn
 											? '正在响应中，请等待完成后再发送...'
 											: 'Waiting for response to complete...'
-										// TODO: Queue/pre-send feature temporarily disabled
+										: // TODO: Queue/pre-send feature temporarily disabled
 										// ? is_cn
 										// 	? messageQueue && messageQueue.length > 0
 										// 		? '继续输入（回车键排队）或空回车立即发送队列 (Shift + Enter 换行)'
@@ -996,14 +1044,14 @@ const InputArea = (props: IInputAreaProps) => {
 										// 	: messageQueue && messageQueue.length > 0
 										// 	? 'Continue typing (Enter to queue, empty Enter to send now, Shift + Enter for new line)'
 										// 	: 'Continue typing (Enter to queue, empty Enter to send, Shift + Enter for new line)'
-										: is_cn
+										is_cn
 										? '输入消息 (Shift + Enter 换行)'
 										: 'Type a message (Shift + Enter for new line)'
 								}
 							/>
-						{renderSendButton()}
-						{/* TODO: Mention feature temporarily disabled */}
-						{/* {renderMentions()} */}
+							{renderSendButton()}
+							{/* TODO: Mention feature temporarily disabled */}
+							{/* {renderMentions()} */}
 						</div>
 
 						{renderToolbar()}

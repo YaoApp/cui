@@ -2,7 +2,10 @@
 .selectorContainer {
 	position: relative;
 	display: inline-block;
-	z-index: 1; // 确保容器有正确的层级
+
+	&.selectorOpen {
+		z-index: 9999;
+	}
 }
 
 // Tooltip 已移至独立的 Tooltip 组件
@@ -131,7 +134,6 @@
 // Dropdown menu - 参考图2的样式
 .dropdown {
 	position: absolute;
-	left: 0;
 	// width 通过内联样式设置，支持 auto 或固定值
 	max-height: 320px !important; // 增加高度容纳搜索框
 	padding: 4px;
@@ -160,6 +162,16 @@
 .dropdownTop {
 	bottom: calc(100% + 6px);
 	animation: slideUp 0.2s ease;
+}
+
+// 左对齐（默认）
+.dropdownLeft {
+	left: 0;
+}
+
+// 右对齐（右侧空间不足时）
+.dropdownRight {
+	right: 0;
 }
 
 @keyframes slideDown {

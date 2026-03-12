@@ -11,6 +11,12 @@ export class WorkspaceAPI {
 		return this.api.Get<Workspace[]>('/workspace', params)
 	}
 
+	async Options(node?: string): Promise<ApiResponse<Workspace[]>> {
+		const params: Record<string, string> = {}
+		if (node) params.node = node
+		return this.api.Get<Workspace[]>('/workspace/options', params)
+	}
+
 	async Get(id: string): Promise<ApiResponse<Workspace>> {
 		return this.api.Get<Workspace>(`/workspace/${id}`)
 	}

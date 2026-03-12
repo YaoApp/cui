@@ -85,6 +85,8 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 						connector_options: data.connector_options,
 						modes: data.modes,
 						default_mode: data.default_mode,
+						sandbox: data.sandbox,
+						computer_filter: data.computer_filter,
 						allowModelSelection: data.connector_options?.optional || false,
 						defaultModel: data.connector
 					})

@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Message, UserMessage, ChatCompletionRequest, ConnectorOptions } from '../openapi'
+import type { Message, UserMessage, ChatCompletionRequest, ConnectorOptions, ComputerFilter } from '../openapi'
 import type { QueuedMessage } from './hooks/useChat'
 
 /**
@@ -32,7 +32,10 @@ export interface ChatTab {
 	assistantId?: string // Added assistantId
 	streaming?: boolean // Is this tab currently streaming
 	lastConnector?: string // Last used connector/model for this chat
-	mode?: 'chat' | 'task' // Chat mode (chat or task)
+	mode?: 'chat' | 'task' // Chat mode (deprecated, kept for backward compat)
+	trace?: boolean // Trace toggle state (replaces mode)
+	lastComputer?: string // Last selected computer ID
+	lastWorkspace?: string // Last selected workspace ID
 	isNew?: boolean // True if this is a newly created chat, not loaded from history
 	historyLoaded?: boolean // True if history has been loaded from API (prevents duplicate requests)
 }
@@ -82,14 +85,18 @@ export interface IInputAreaProps {
 		connector_options?: ConnectorOptions
 		modes?: string[]
 		default_mode?: string
+		sandbox?: boolean
+		computer_filter?: ComputerFilter
 		// Deprecated fields (for backward compatibility)
 		allowModelSelection?: boolean
 		defaultModel?: string
 	}
 	/** Initial model/connector from session history */
 	initialModel?: string
-	/** Initial chat mode from session history */
+	/** Initial chat mode from session history (deprecated, kept for compat) */
 	initialChatMode?: 'chat' | 'task'
+	/** Initial trace toggle state from session history */
+	initialTrace?: boolean
 	/** Message Queue */
 	messageQueue?: QueuedMessage[]
 	/** Queue message callback */

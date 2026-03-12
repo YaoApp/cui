@@ -22,6 +22,7 @@ interface ISelectorProps {
 	dropdownWidth?: number | 'auto' // 下拉菜单宽度：数字(px)或'auto'自适应
 	dropdownMaxWidth?: number // 下拉菜单最大宽度(px)
 	dropdownMinWidth?: number // 下拉菜单最小宽度(px)
+	dropdownAlign?: 'left' | 'right' // 下拉菜单水平对齐方向
 	hideLabel?: boolean // 是否隐藏标签文字，只显示图标
 }
 
@@ -37,6 +38,7 @@ const Selector: React.FC<ISelectorProps> = ({
 	dropdownWidth = 'auto',
 	dropdownMaxWidth = 320,
 	dropdownMinWidth = 180,
+	dropdownAlign: propAlign,
 	hideLabel = false
 }) => {
 	const locale = getLocale()
@@ -45,6 +47,7 @@ const Selector: React.FC<ISelectorProps> = ({
 	const [isOpen, setIsOpen] = useState(false)
 	const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom')
 	const [searchQuery, setSearchQuery] = useState('')
+	const dropdownAlign = propAlign || 'left'
 	const containerRef = useRef<HTMLDivElement>(null)
 	const dropdownRef = useRef<HTMLDivElement>(null)
 	const searchInputRef = useRef<HTMLInputElement>(null)
@@ -108,15 +111,14 @@ const Selector: React.FC<ISelectorProps> = ({
 			if (willOpen) {
 				setSearchQuery('')
 				
-				// Calculate position when opening
+				// Calculate vertical position when opening
 				if (containerRef.current) {
 					const rect = containerRef.current.getBoundingClientRect()
 					const viewportHeight = window.innerHeight
 					const spaceBelow = viewportHeight - rect.bottom
 					const spaceAbove = rect.top
-					const dropdownHeight = 280 // max-height of dropdown
+					const dropdownHeight = 280
 					
-					// If not enough space below but more space above, show on top
 					if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
 						setDropdownPosition('top')
 					} else {
@@ -156,7 +158,7 @@ const Selector: React.FC<ISelectorProps> = ({
 	)
 
 	return (
-		<div className={styles.selectorContainer} ref={containerRef}>
+		<div className={`${styles.selectorContainer} ${isOpen ? styles.selectorOpen : ''}`} ref={containerRef}>
 			{/* Selector Button with Tooltip */}
 			{tooltip && !isOpen ? (
 				<Tooltip content={tooltip} disabled={disabled}>{selectorButton}</Tooltip>
@@ -169,7 +171,7 @@ const Selector: React.FC<ISelectorProps> = ({
 				<div 
 					className={`${styles.dropdown} ${
 						dropdownPosition === 'top' ? styles.dropdownTop : styles.dropdownBottom
-					}`} 
+					} ${dropdownAlign === 'right' ? styles.dropdownRight : styles.dropdownLeft}`} 
 					ref={dropdownRef}
 					style={dropdownStyle}
 				>
