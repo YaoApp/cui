@@ -4,6 +4,7 @@ import { message } from 'antd'
 import ComputerList from './components/ComputerList'
 import ComputerDetail from './components/ComputerDetail'
 import { Sandbox } from '@/openapi/sandbox'
+import { ComputerAPI } from '@/openapi/computer'
 import type { BoxInfo } from './types'
 import styles from './index.less'
 
@@ -72,9 +73,16 @@ const ComputersPage = () => {
 	}
 
 	const handleVNC = async (box: BoxInfo) => {
-		const api = getApi()
-		if (!api) return
-		const url = api.GetViewerURL(box.id)
+		if (!window.$app?.openapi) return
+		let url: string
+		if (box.kind === 'host') {
+			const api = new ComputerAPI(window.$app.openapi)
+			url = api.GetViewerURL(box.id)
+		} else {
+			const api = getApi()
+			if (!api) return
+			url = api.GetViewerURL(box.id)
+		}
 		navigate(url)
 	}
 
