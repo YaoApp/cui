@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Popconfirm, message } from 'antd'
-import { getLocale } from '@umijs/max'
+import { getLocale, useNavigate } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { Sandbox } from '@/openapi/sandbox'
+import { ComputerAPI } from '@/openapi/computer'
 import { brandIcons } from '@/assets/icons/brands'
 import type { BoxInfo } from '../../types'
 import styles from './index.less'
@@ -51,12 +52,20 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 	const osSvg = box.kind === 'box' ? brandIcons['linux'] : (brandIcons[os] || null)
 	const kindIcon = isHost ? 'material-computer' : 'material-memory'
 
+	const navigate = useNavigate()
+
 	const handleVNC = async () => {
 		if (!window.$app?.openapi) return
-		const api = new Sandbox(window.$app.openapi)
-		const url = api.GetViewerURL(box.id)
+		let url: string
+		if (isHost) {
+			const api = new ComputerAPI(window.$app.openapi)
+			url = api.GetViewerURL(box.id)
+		} else {
+			const api = new Sandbox(window.$app.openapi)
+			url = api.GetViewerURL(box.id)
+		}
 		setVncUrl(url)
-		window.open(url, '_blank')
+		navigate(url)
 	}
 
 	return (
@@ -78,7 +87,7 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 					</div>
 				</div>
 				<div className={styles.headerRight}>
-					{!isOneShot && !isHost && (
+					{!isOneShot && (
 						<>
 							{box.vnc && box.status === 'running' && (
 								<Button
@@ -90,24 +99,26 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 									{is_cn ? '打开桌面' : 'Open Desktop'}
 								</Button>
 							)}
-							<Popconfirm
-								title={
-									is_cn
-										? '确定要删除这台电脑吗？此操作不可恢复！'
-										: 'Delete this computer? This action cannot be undone!'
-								}
-								onConfirm={onRemove}
-								okText={is_cn ? '确认' : 'Confirm'}
-								cancelText={is_cn ? '取消' : 'Cancel'}
-							>
-								<Button
-									type='danger'
-									size='small'
-									icon={<Icon name='material-delete' size={12} />}
+							{!isHost && (
+								<Popconfirm
+									title={
+										is_cn
+											? '确定要删除这台电脑吗？此操作不可恢复！'
+											: 'Delete this computer? This action cannot be undone!'
+									}
+									onConfirm={onRemove}
+									okText={is_cn ? '确认' : 'Confirm'}
+									cancelText={is_cn ? '取消' : 'Cancel'}
 								>
-									{is_cn ? '删除' : 'Delete'}
-								</Button>
-							</Popconfirm>
+									<Button
+										type='danger'
+										size='small'
+										icon={<Icon name='material-delete' size={12} />}
+									>
+										{is_cn ? '删除' : 'Delete'}
+									</Button>
+								</Popconfirm>
+							)}
 						</>
 					)}
 					{isOneShot && (
