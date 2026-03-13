@@ -18,12 +18,14 @@ interface ISelectorProps {
 	tooltip?: string
 	disabled?: boolean
 	placeholder?: string
-	searchable?: boolean // 是否显示搜索框
-	dropdownWidth?: number | 'auto' // 下拉菜单宽度：数字(px)或'auto'自适应
-	dropdownMaxWidth?: number // 下拉菜单最大宽度(px)
-	dropdownMinWidth?: number // 下拉菜单最小宽度(px)
-	dropdownAlign?: 'left' | 'right' // 下拉菜单水平对齐方向
-	hideLabel?: boolean // 是否隐藏标签文字，只显示图标
+	placeholderIcon?: string
+	clearable?: boolean
+	searchable?: boolean
+	dropdownWidth?: number | 'auto'
+	dropdownMaxWidth?: number
+	dropdownMinWidth?: number
+	dropdownAlign?: 'left' | 'right'
+	hideLabel?: boolean
 }
 
 const Selector: React.FC<ISelectorProps> = ({
@@ -34,6 +36,8 @@ const Selector: React.FC<ISelectorProps> = ({
 	tooltip,
 	disabled,
 	placeholder,
+	placeholderIcon,
+	clearable = false,
 	searchable = false,
 	dropdownWidth = 'auto',
 	dropdownMaxWidth = 320,
@@ -53,7 +57,9 @@ const Selector: React.FC<ISelectorProps> = ({
 	const searchInputRef = useRef<HTMLInputElement>(null)
 
 	const currentOption = options.find((opt) => opt.value === value)
+	const isPlaceholder = !currentOption && !!placeholder
 	const displayLabel = currentOption?.label || placeholder || value
+	const displayIcon = currentOption?.icon || (isPlaceholder ? placeholderIcon : undefined)
 
 	// Filter options based on search query
 	const filteredOptions = searchQuery
@@ -136,7 +142,11 @@ const Selector: React.FC<ISelectorProps> = ({
 
 	const handleSelect = (optionValue: string) => {
 		if (!disabled) {
-			onChange(optionValue)
+			if (clearable && optionValue === value) {
+				onChange('')
+			} else {
+				onChange(optionValue)
+			}
 			setIsOpen(false)
 		}
 	}
@@ -145,12 +155,12 @@ const Selector: React.FC<ISelectorProps> = ({
 		<button
 			className={`${styles.selectorButton} ${styles[variant]} ${disabled ? styles.disabled : ''} ${
 				isOpen ? styles.open : ''
-			} ${hideLabel ? styles.iconOnly : ''}`}
+			} ${hideLabel ? styles.iconOnly : ''} ${isPlaceholder ? styles.placeholder : ''}`}
 			onClick={handleToggle}
 			disabled={disabled}
 		>
-			{currentOption?.icon && (
-				<Icon name={currentOption.icon} size={13} className={styles.selectorIcon} />
+			{displayIcon && (
+				<Icon name={displayIcon} size={13} className={styles.selectorIcon} />
 			)}
 			{!hideLabel && <span className={styles.selectorLabel}>{displayLabel}</span>}
 			<Icon name='material-expand_more' size={14} className={styles.arrow} />
@@ -224,7 +234,11 @@ const Selector: React.FC<ISelectorProps> = ({
 									)}
 									<span className={styles.menuLabel}>{option.label}</span>
 									{option.value === value && (
-										<Icon name='material-check' size={14} className={styles.checkIcon} />
+										<Icon
+											name={clearable ? 'material-close' : 'material-check'}
+											size={14}
+											className={styles.checkIcon}
+										/>
 									)}
 								</div>
 							))

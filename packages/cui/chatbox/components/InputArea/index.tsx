@@ -164,6 +164,27 @@ const InputArea = (props: IInputAreaProps) => {
 		setAttachments([])
 	}, [chatId])
 
+	// Bidirectional sync: Workspace → Computer
+	// When the user selects a workspace, auto-switch computer to the workspace's bound node.
+	useEffect(() => {
+		if (!selectedWorkspace || !showComputerSelector) return
+		const ws = workspaces.find((w) => w.id === selectedWorkspace)
+		if (!ws?.node) return
+		const nodeMatchesComputer = computers.some((c) => c.id === ws.node)
+		if (nodeMatchesComputer && selectedComputer !== ws.node) {
+			setSelectedComputer(ws.node)
+		}
+	}, [selectedWorkspace])
+
+	// Bidirectional sync: Computer → Workspace validity check
+	// When the workspace list updates (due to computer change), clear workspace if no longer valid.
+	useEffect(() => {
+		if (!selectedWorkspace) return
+		if (workspaces.length > 0 && !workspaces.some((w) => w.id === selectedWorkspace)) {
+			setSelectedWorkspace('')
+		}
+	}, [workspaces])
+
 	// When loading changes from true to false (request completed), ensure UI state is correct
 	useEffect(() => {
 		if (!loading && editorRef.current) {
@@ -823,19 +844,12 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	const renderToolbar = () => {
-		// Workspace options
-		const workspaceOptions = [
-			{
-				label: is_cn ? '选择工作区' : 'Select Workspace',
-				value: '',
-				icon: 'material-folder_open'
-			},
-			...workspaces.map((w) => ({
-				label: w.name || w.id,
-				value: w.id,
-				icon: 'material-folder'
-			}))
-		]
+		// Workspace options (no fake "Select Workspace" entry; use placeholder + clearable instead)
+		const workspaceOptions = workspaces.map((w) => ({
+			label: w.name || w.id,
+			value: w.id,
+			icon: 'material-folder'
+		}))
 
 		// Build model options from API data
 		const modelOptions = llmProviders.map((provider) => ({
@@ -855,6 +869,9 @@ const InputArea = (props: IInputAreaProps) => {
 						onChange={(val) => setSelectedWorkspace(val as string)}
 						variant='tag'
 						tooltip={is_cn ? '选择工作区' : 'Select Workspace'}
+						placeholder={is_cn ? '选择工作区' : 'Select Workspace'}
+						placeholderIcon='material-folder_open'
+						clearable
 						disabled={loading || isOptimizing || loadingWorkspaces}
 						searchable={false}
 						dropdownWidth='auto'
