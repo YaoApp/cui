@@ -164,3 +164,70 @@
 	text-align: center;
 }
 
+.actionBtnActive {
+	background: var(--color_bg_hover);
+	color: var(--color_text);
+}
+
+.visitPopover {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px;
+	min-width: 280px;
+}
+
+.visitInput {
+	flex: 1;
+	box-sizing: border-box;
+	height: var(--base_height, 32px);
+	padding: 0 12px;
+	font-size: var(--fontsize, 13px);
+	color: var(--color_text);
+	background: var(--color_bg_menu);
+	border: 1px solid var(--color_border);
+	border-radius: var(--radius, 6px);
+	outline: none;
+	transition: all 0.2s ease;
+
+	&::placeholder {
+		color: var(--color_placeholder, #727272);
+	}
+
+	&:hover {
+		border-color: var(--color_main_hover, #4580ff);
+		background-color: var(--color_bg_hover, #f5f5f5);
+	}
+
+	&:focus {
+		background-color: var(--color_bg_menu);
+		border-color: var(--color_main, #3371fc);
+		box-shadow: 0 0 0 2px rgba(51, 113, 252, 0.1);
+	}
+}
+
+.visitGoBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	color: var(--color_main);
+	cursor: pointer;
+	flex-shrink: 0;
+	transition: all 0.2s ease;
+
+	&:hover:not(:disabled) {
+		background: var(--color_bg_hover);
+	}
+
+	&:disabled {
+		color: var(--color_text_grey);
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+}
+
