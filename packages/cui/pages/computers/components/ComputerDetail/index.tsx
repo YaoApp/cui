@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { Popconfirm, message } from 'antd'
 import { getLocale, useNavigate } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
-import { Sandbox } from '@/openapi/sandbox'
 import { ComputerAPI } from '@/openapi/computer'
 import { brandIcons } from '@/assets/icons/brands'
 import type { BoxInfo } from '../../types'
@@ -40,8 +38,6 @@ const formatMemory = (bytes?: number): string => {
 const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const [vncUrl, setVncUrl] = useState<string | null>(null)
-
 	const isOneShot = box.policy === 'oneshot'
 	const isHost = box.kind === 'host'
 	const policy = box.policy ? (policyLabels[box.policy] || policyLabels.session) : null
@@ -56,15 +52,10 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 
 	const handleVNC = async () => {
 		if (!window.$app?.openapi) return
-		let url: string
-		if (isHost) {
-			const api = new ComputerAPI(window.$app.openapi)
-			url = api.GetViewerURL(box.id)
-		} else {
-			const api = new Sandbox(window.$app.openapi)
-			url = api.GetViewerURL(box.id)
-		}
-		setVncUrl(url)
+		const api = new ComputerAPI(window.$app.openapi)
+		const url = isHost
+			? api.GetViewerURL(box.node_id)
+			: api.GetViewerURL(box.node_id, box.id)
 		navigate(url)
 	}
 
@@ -279,16 +270,8 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 						<div className={styles.vncPlaceholder}>
 							<Icon name='material-desktop_windows' size={48} />
 							<div className={styles.vncText}>
-								{vncUrl
-									? is_cn ? 'VNC 已连接' : 'VNC Connected'
-									: is_cn ? '点击下方按钮打开远程桌面' : 'Click below to open remote desktop'}
+								{is_cn ? '点击下方按钮打开远程桌面' : 'Click below to open remote desktop'}
 							</div>
-							{vncUrl && (
-								<div className={styles.vncUrl}>
-									<Icon name='material-link' size={12} />
-									<span>{vncUrl}</span>
-								</div>
-							)}
 							<Button
 								type='primary'
 								size='small'

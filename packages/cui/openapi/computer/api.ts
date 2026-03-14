@@ -6,6 +6,7 @@ export interface ComputerOption {
 	kind: 'box' | 'host' | 'node'
 	id: string
 	display_name: string
+	container_id?: string
 	node_id: string
 	status: string
 	mode?: string
@@ -66,7 +67,10 @@ export class ComputerAPI {
 		return `${wsBaseURL}/tai/${taiID}/vnc/${target}/ws`
 	}
 
-	GetViewerURL(taiID: string): string {
+	GetViewerURL(taiID: string, sandboxId?: string): string {
+		if (sandboxId) {
+			return `/computer/${taiID}/desktop/${sandboxId}`
+		}
 		return `/computer/${taiID}/desktop`
 	}
 }
