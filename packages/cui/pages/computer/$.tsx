@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { getLocale, useParams, useNavigate } from '@umijs/max'
-import { Spin } from 'antd'
-import { ReloadOutlined, ExpandOutlined, CompressOutlined, LoadingOutlined } from '@ant-design/icons'
+import { Spin, Tooltip, Popover } from 'antd'
+import {
+	ReloadOutlined, ExpandOutlined, CompressOutlined, LoadingOutlined,
+	GlobalOutlined, ArrowRightOutlined
+} from '@ant-design/icons'
 import { VncScreen, VncScreenHandle } from 'react-vnc'
 import { ComputerAPI, type ComputerOption } from '@/openapi/computer'
 import { brandIcons } from '@/assets/icons/brands'
@@ -34,6 +37,8 @@ const Computer = () => {
 	const [isMaximized, setIsMaximized] = useState(false)
 	const [nodeInfo, setNodeInfo] = useState<ComputerOption | null>(null)
 	const [vncKey, setVncKey] = useState(0)
+	const [visitOpen, setVisitOpen] = useState(false)
+	const [visitAddr, setVisitAddr] = useState('')
 
 	useEffect(() => {
 		if (!computerAPI || !taiID) return
@@ -47,12 +52,16 @@ const Computer = () => {
 		})
 	}, [computerAPI, taiID, sandboxId])
 
+	const nodeID = useMemo(() => nodeInfo?.node_id || taiID, [nodeInfo, taiID])
+	const containerID = useMemo(() => {
+		if (nodeInfo?.kind === 'box') return nodeInfo.container_id || sandboxId
+		return '__host__'
+	}, [nodeInfo, sandboxId])
+
 	const wsUrl = useMemo(() => {
 		if (!taiID || !computerAPI || !nodeInfo) return null
-		const nodeID = nodeInfo.node_id || taiID
-		const containerID = nodeInfo.kind === 'box' ? (nodeInfo.container_id || sandboxId) : undefined
 		return computerAPI.GetVNCWebSocketURL(nodeID, containerID)
-	}, [taiID, sandboxId, computerAPI, nodeInfo])
+	}, [taiID, computerAPI, nodeInfo, nodeID, containerID])
 
 	const handleConnect = useCallback(() => {
 		setDisplayStatus('connected')
@@ -77,6 +86,34 @@ const Computer = () => {
 		setDisplayStatus('connecting')
 		setVncKey((k) => k + 1)
 	}, [])
+
+	const buildProxyURL = useCallback((addr: string): string | null => {
+		if (!computerAPI || !nodeInfo || !containerID) return null
+
+		let url: URL
+		try {
+			const normalized = addr.match(/^https?:\/\//) ? addr : `http://${addr}`
+			url = new URL(normalized)
+		} catch {
+			return null
+		}
+
+		const port = url.port || (url.protocol === 'https:' ? '443' : '80')
+		const path = url.pathname + url.search + url.hash
+
+		// @ts-ignore
+		const baseURL: string = computerAPI['baseURL'] || '/api/v1'
+		return `${baseURL}/tai/${nodeID}/proxy/${containerID}:${port}${path}`
+	}, [computerAPI, nodeInfo, nodeID, containerID])
+
+	const handleVisitOpen = useCallback(() => {
+		const proxyURL = buildProxyURL(visitAddr)
+		if (proxyURL) {
+			window.open(proxyURL, '_blank')
+			setVisitOpen(false)
+			setVisitAddr('')
+		}
+	}, [visitAddr, buildProxyURL])
 
 	useEffect(() => {
 		const el = screenRef.current
@@ -158,34 +195,74 @@ const Computer = () => {
 
 			<div className={styles.toolbar}>
 				<div className={styles.title}>
-					<div className={styles.backBtn} onClick={() => navigate('/computers')}>
-						<Icon name='material-arrow_back' size={16} />
-					</div>
+					<Tooltip title={is_cn ? '返回' : 'Back'}>
+						<div className={styles.backBtn} onClick={() => navigate('/computers')}>
+							<Icon name='material-arrow_back' size={16} />
+						</div>
+					</Tooltip>
 					{osSvg && (
 						<img className={styles.osIcon} src={osSvg} alt={os} />
 					)}
-					<span className={styles.label}>{displayName}</span>
-					{hostname && <span className={styles.hostname}>{hostname}</span>}
+					<Tooltip title={displayName} placement="top">
+						<span className={styles.label}>{displayName}</span>
+					</Tooltip>
+					{hostname && (
+						<Tooltip title={hostname} placement="top">
+							<span className={styles.hostname}>{hostname}</span>
+						</Tooltip>
+					)}
 				</div>
 				<div className={styles.actions}>
-					<button
-						className={styles.actionBtn}
-						onClick={handleReconnect}
-						title={is_cn ? '重新连接' : 'Reconnect'}
-					>
-						<ReloadOutlined />
-					</button>
-					<button
-						className={styles.actionBtn}
-						onClick={toggleMaximize}
-						title={
-							is_cn
-								? isMaximized ? '还原' : '最大化'
-								: isMaximized ? 'Restore' : 'Maximize'
-						}
-					>
-						{isMaximized ? <CompressOutlined /> : <ExpandOutlined />}
-					</button>
+					{nodeInfo && (
+						<Popover
+							open={visitOpen}
+							onOpenChange={(v) => { setVisitOpen(v); if (!v) setVisitAddr('') }}
+							trigger="click"
+							placement="topRight"
+							overlayInnerStyle={{ padding: 0 }}
+							content={
+								<div className={styles.visitPopover}>
+									<input
+										className={styles.visitInput}
+										placeholder={is_cn ? '例如 localhost:8080' : 'e.g. localhost:8080'}
+										value={visitAddr}
+										onChange={(e) => setVisitAddr(e.target.value)}
+										onKeyDown={(e) => { if (e.key === 'Enter' && visitAddr.trim() && buildProxyURL(visitAddr)) handleVisitOpen() }}
+										autoFocus
+									/>
+									<button
+										className={styles.visitGoBtn}
+										disabled={!visitAddr.trim() || !buildProxyURL(visitAddr)}
+										onClick={handleVisitOpen}
+									>
+										<ArrowRightOutlined />
+									</button>
+								</div>
+							}
+						>
+							<Tooltip title={is_cn ? '访问' : 'Visit'} open={visitOpen ? false : undefined}>
+								<button className={`${styles.actionBtn} ${visitOpen ? styles.actionBtnActive : ''}`}>
+									<GlobalOutlined />
+								</button>
+							</Tooltip>
+						</Popover>
+					)}
+					<Tooltip title={is_cn ? '重新连接' : 'Reconnect'}>
+						<button
+							className={styles.actionBtn}
+							onClick={handleReconnect}
+						>
+							<ReloadOutlined />
+						</button>
+					</Tooltip>
+					<Tooltip title={is_cn ? (isMaximized ? '还原' : '最大化') : (isMaximized ? 'Restore' : 'Maximize')}>
+						<button
+							className={styles.actionBtn}
+							onClick={toggleMaximize}
+						>
+							{isMaximized ? <CompressOutlined /> : <ExpandOutlined />}
+						</button>
+					</Tooltip>
 				</div>
 			</div>
 		</div>
