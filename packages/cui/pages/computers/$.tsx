@@ -74,15 +74,10 @@ const ComputersPage = () => {
 
 	const handleVNC = async (box: BoxInfo) => {
 		if (!window.$app?.openapi) return
-		let url: string
-		if (box.kind === 'host') {
-			const api = new ComputerAPI(window.$app.openapi)
-			url = api.GetViewerURL(box.id)
-		} else {
-			const api = getApi()
-			if (!api) return
-			url = api.GetViewerURL(box.id)
-		}
+		const api = new ComputerAPI(window.$app.openapi)
+		const url = box.kind === 'host'
+			? api.GetViewerURL(box.node_id)
+			: api.GetViewerURL(box.node_id, box.id)
 		navigate(url)
 	}
 

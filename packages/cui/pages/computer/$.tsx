@@ -19,7 +19,7 @@ const Computer = () => {
 	const raw = params['*'] || ''
 	const parts = raw.replace(/\/$/, '').split('/')
 	const taiID = parts[0] || ''
-	const containerID = parts.length > 2 ? parts.slice(2).join('/') : undefined
+	const sandboxId = parts.length > 2 ? parts.slice(2).join('/') : undefined
 
 	const vncRef = useRef<VncScreenHandle>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -40,15 +40,19 @@ const Computer = () => {
 		computerAPI.Options().then((res) => {
 			const list = res?.data || res || []
 			if (!Array.isArray(list)) return
-			const node = list.find((n: ComputerOption) => n.id === taiID)
+			const node = sandboxId
+				? (list.find((n: ComputerOption) => n.id === sandboxId) || list.find((n: ComputerOption) => n.node_id === taiID))
+				: list.find((n: ComputerOption) => n.id === taiID)
 			if (node) setNodeInfo(node)
 		})
-	}, [computerAPI, taiID])
+	}, [computerAPI, taiID, sandboxId])
 
 	const wsUrl = useMemo(() => {
-		if (!taiID || !computerAPI) return null
-		return computerAPI.GetVNCWebSocketURL(taiID, containerID)
-	}, [taiID, containerID, computerAPI])
+		if (!taiID || !computerAPI || !nodeInfo) return null
+		const nodeID = nodeInfo.node_id || taiID
+		const containerID = nodeInfo.kind === 'box' ? (nodeInfo.container_id || sandboxId) : undefined
+		return computerAPI.GetVNCWebSocketURL(nodeID, containerID)
+	}, [taiID, sandboxId, computerAPI, nodeInfo])
 
 	const handleConnect = useCallback(() => {
 		setDisplayStatus('connected')
