@@ -13,6 +13,7 @@ interface ComputerListProps {
 	onSelect: (box: BoxInfo) => void
 	onRemove: (box: BoxInfo) => void
 	onVNC: (box: BoxInfo) => void
+	onRefresh?: () => void
 }
 
 const policyLabel: Record<LifecyclePolicy, { cn: string; en: string; icon: string }> = {
@@ -32,7 +33,7 @@ const formatMemory = (bytes?: number): string => {
 	return `${mb.toFixed(0)} MB`
 }
 
-const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC }: ComputerListProps) => {
+const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC, onRefresh }: ComputerListProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const [search, setSearch] = useState('')
@@ -109,6 +110,15 @@ const ComputerList = ({ boxes, loading, onSelect, onRemove, onVNC }: ComputerLis
 						<Icon name='material-computer' size={24} />
 						<h1 className={styles.title}>{is_cn ? '电脑' : 'Computers'}</h1>
 					</div>
+					{onRefresh && (
+						<div
+							className={styles.refreshBtn}
+							onClick={onRefresh}
+							title={is_cn ? '刷新' : 'Refresh'}
+						>
+							<Icon name='material-refresh' size={18} />
+						</div>
+					)}
 				</div>
 
 				<div className={styles.tabs}>

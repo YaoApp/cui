@@ -106,6 +106,7 @@ const ComputersPage = () => {
 				onSelect={handleSelect}
 				onRemove={handleRemove}
 				onVNC={handleVNC}
+				onRefresh={loadBoxes}
 			/>
 		</div>
 	)
