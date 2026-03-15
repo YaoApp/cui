@@ -77,41 +77,48 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 						<span className={styles.containerId}>ID: {box.id}</span>
 					</div>
 				</div>
-				<div className={styles.headerRight}>
-					{!isOneShot && (
-						<>
-							{box.vnc && box.status === 'running' && (
+			<div className={styles.headerRight}>
+				<div
+					className={styles.refreshBtn}
+					onClick={onRefresh}
+					title={is_cn ? '刷新' : 'Refresh'}
+				>
+					<Icon name='material-refresh' size={18} />
+				</div>
+				{!isOneShot && (
+					<>
+						{box.vnc && box.status === 'running' && (
+							<Button
+								type='primary'
+								size='small'
+								icon={<Icon name='material-desktop_windows' size={12} />}
+								onClick={handleVNC}
+							>
+								{is_cn ? '打开桌面' : 'Open Desktop'}
+							</Button>
+						)}
+						{!isHost && (
+							<Popconfirm
+								title={
+									is_cn
+										? '确定要删除这台电脑吗？此操作不可恢复！'
+										: 'Delete this computer? This action cannot be undone!'
+								}
+								onConfirm={onRemove}
+								okText={is_cn ? '确认' : 'Confirm'}
+								cancelText={is_cn ? '取消' : 'Cancel'}
+							>
 								<Button
-									type='primary'
+									type='danger'
 									size='small'
-									icon={<Icon name='material-desktop_windows' size={12} />}
-									onClick={handleVNC}
+									icon={<Icon name='material-delete' size={12} />}
 								>
-									{is_cn ? '打开桌面' : 'Open Desktop'}
+									{is_cn ? '删除' : 'Delete'}
 								</Button>
-							)}
-							{!isHost && (
-								<Popconfirm
-									title={
-										is_cn
-											? '确定要删除这台电脑吗？此操作不可恢复！'
-											: 'Delete this computer? This action cannot be undone!'
-									}
-									onConfirm={onRemove}
-									okText={is_cn ? '确认' : 'Confirm'}
-									cancelText={is_cn ? '取消' : 'Cancel'}
-								>
-									<Button
-										type='danger'
-										size='small'
-										icon={<Icon name='material-delete' size={12} />}
-									>
-										{is_cn ? '删除' : 'Delete'}
-									</Button>
-								</Popconfirm>
-							)}
-						</>
-					)}
+							</Popconfirm>
+						)}
+					</>
+				)}
 					{isOneShot && (
 						<span className={styles.oneshotHint}>
 							{is_cn ? '一次性电脑，仅供查看' : 'One-shot computer, view only'}
