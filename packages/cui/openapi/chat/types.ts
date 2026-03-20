@@ -22,6 +22,7 @@ export const MessageType = {
 	THINKING: 'thinking',
 	LOADING: 'loading',
 	TOOL_CALL: 'tool_call',
+	EXECUTE: 'execute', // Agent execution observation (sandbox CLI agent tool actions)
 	ERROR: 'error',
 
 	// Media types
@@ -108,6 +109,25 @@ export interface ToolCallProps {
 	name?: string
 	arguments?: string // JSON string
 	raw?: string // Raw tool call data (streamed incrementally via delta)
+}
+
+/**
+ * Execute message props (agent tool execution observation)
+ * Represents tool invocations made by a CLI agent (e.g., Claude sandbox runner).
+ * Distinct from ToolCall which represents LLM-requested tool calls.
+ */
+export interface ExecuteProps {
+	tool?: string // Tool name (e.g., "Bash", "Read", "Write")
+	tool_id?: string // Unique tool call ID
+	input?: any // Tool input (command, path, etc.)
+	input_delta?: string // Incremental input (streaming)
+	output?: any // Tool output / result
+	summary?: string // Short human-readable summary (e.g., "server.js", "cd /workspace && node...")
+	status?: 'running' | 'completed' | 'error' // Execution status
+	is_error?: boolean
+	exit_code?: number
+	runner?: string // Runner name (e.g., "claude-cli")
+	metadata?: Record<string, any>
 }
 
 /**
@@ -372,6 +392,7 @@ export type UserInputMessage = BaseMessage & { type: typeof MessageType.USER_INP
 export type ThinkingMessage = BaseMessage & { type: typeof MessageType.THINKING; props: ThinkingProps }
 export type LoadingMessage = BaseMessage & { type: typeof MessageType.LOADING; props: LoadingProps }
 export type ToolCallMessage = BaseMessage & { type: typeof MessageType.TOOL_CALL; props: ToolCallProps }
+export type ExecuteMessage = BaseMessage & { type: typeof MessageType.EXECUTE; props: ExecuteProps }
 export type ErrorMessage = BaseMessage & { type: typeof MessageType.ERROR; props: ErrorProps }
 export type ImageMessage = BaseMessage & { type: typeof MessageType.IMAGE; props: ImageProps }
 export type AudioMessage = BaseMessage & { type: typeof MessageType.AUDIO; props: AudioProps }
@@ -388,6 +409,7 @@ export type BuiltinMessage =
 	| ThinkingMessage
 	| LoadingMessage
 	| ToolCallMessage
+	| ExecuteMessage
 	| ErrorMessage
 	| ImageMessage
 	| AudioMessage

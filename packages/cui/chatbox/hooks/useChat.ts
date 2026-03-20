@@ -36,6 +36,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		sessions,
 		loadingStates,
 		streamingStates,
+		tokenUsageStates,
 		messageQueues,
 		assistant,
 		chatClient
@@ -45,6 +46,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const messages = activeTabId ? chatStates[activeTabId] || [] : []
 	const loading = activeTabId ? loadingStates[activeTabId] || false : false
 	const streaming = activeTabId ? streamingStates[activeTabId] || false : false
+	const tokenUsage = activeTabId ? tokenUsageStates[activeTabId] : undefined
 	const messageQueue = activeTabId ? messageQueues[activeTabId] || [] : []
 	const currentChatId = activeTabId || undefined
 
@@ -152,6 +154,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		setChatStates: actions.setChatStates,
 		setActiveTabId: actions.setActiveTabId,
 		setStreamingStates: actions.setStreamingStates,
+		setTokenUsageStates: actions.setTokenUsageStates,
 		setMessageQueues: actions.setMessageQueues,
 		refs,
 		generateChatTitle
@@ -163,6 +166,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		currentChatId,
 		loading,
 		streaming,
+		tokenUsage,
 		assistant,
 		tabs,
 		activeTab,
