@@ -1,5 +1,6 @@
 import type { Message, UserMessage } from '../../openapi'
 import type { IChatSession, ChatTab, SendMessageRequest } from '../types'
+import type { TokenUsage } from './state'
 
 export interface QueuedMessage {
 	id: string
@@ -21,6 +22,7 @@ export interface UseChatReturn {
 	currentChatId?: string
 	loading: boolean
 	streaming: boolean
+	tokenUsage?: TokenUsage
 	assistant?: any
 
 	// Tab State

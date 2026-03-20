@@ -47,6 +47,7 @@ const InputArea = (props: IInputAreaProps) => {
 		chatId,
 		assistant: propAssistant,
 		streaming,
+		tokenUsage,
 		messageQueue,
 		onQueueMessage,
 		onSendQueuedMessage,

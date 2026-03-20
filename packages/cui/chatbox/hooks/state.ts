@@ -75,6 +75,11 @@ const saveActiveTabIdToStorage = (activeTabId: string, userId?: string, teamId?:
 	}
 }
 
+export interface TokenUsage {
+	input_tokens: number
+	output_tokens: number
+}
+
 export interface ChatRefs {
 	abortHandles: React.MutableRefObject<Record<string, () => void>>
 	streamIds: React.MutableRefObject<Record<string, string>>
@@ -84,6 +89,7 @@ export interface ChatRefs {
 	requestIds: React.MutableRefObject<Record<string, string>>
 	titleGenerated: React.MutableRefObject<Record<string, boolean>>
 	completedMessages: React.MutableRefObject<Record<string, boolean>>
+	tokenUsage: React.MutableRefObject<Record<string, TokenUsage>>
 }
 
 export interface ChatState {
@@ -93,6 +99,7 @@ export interface ChatState {
 	sessions: any[]
 	loadingStates: Record<string, boolean>
 	streamingStates: Record<string, boolean>
+	tokenUsageStates: Record<string, TokenUsage>
 	messageQueues: Record<string, QueuedMessage[]>
 	assistant: any
 	chatClient: any
@@ -105,6 +112,7 @@ export interface ChatStateActions {
 	setSessions: React.Dispatch<React.SetStateAction<any[]>>
 	setLoadingStates: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
 	setStreamingStates: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
+	setTokenUsageStates: React.Dispatch<React.SetStateAction<Record<string, TokenUsage>>>
 	setMessageQueues: React.Dispatch<React.SetStateAction<Record<string, QueuedMessage[]>>>
 	setAssistant: React.Dispatch<React.SetStateAction<any>>
 	setChatClient: React.Dispatch<React.SetStateAction<any>>
@@ -178,6 +186,7 @@ export function useChatState(options: UseChatStateOptions = {}): [ChatState, Cha
 	// Loading/Streaming States Map: chatId -> boolean
 	const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({})
 	const [streamingStates, setStreamingStates] = useState<Record<string, boolean>>({})
+	const [tokenUsageStates, setTokenUsageStates] = useState<Record<string, TokenUsage>>({})
 
 	// Message Queue State Map: chatId -> queue
 	const [messageQueues, setMessageQueues] = useState<Record<string, QueuedMessage[]>>({})
@@ -194,6 +203,7 @@ export function useChatState(options: UseChatStateOptions = {}): [ChatState, Cha
 	const requestIdsRef = useRef<Record<string, string>>({})
 	const titleGeneratedRef = useRef<Record<string, boolean>>({})
 	const completedMessagesRef = useRef<Record<string, boolean>>({})
+	const tokenUsageRef = useRef<Record<string, TokenUsage>>({})
 
 	// Helper to update messages for a specific chat ID
 	const updateMessages = useCallback((chatId: string, updater: (prev: Message[]) => Message[]) => {
@@ -210,6 +220,7 @@ export function useChatState(options: UseChatStateOptions = {}): [ChatState, Cha
 		sessions,
 		loadingStates,
 		streamingStates,
+		tokenUsageStates,
 		messageQueues,
 		assistant,
 		chatClient
@@ -224,6 +235,7 @@ export function useChatState(options: UseChatStateOptions = {}): [ChatState, Cha
 			setSessions,
 			setLoadingStates,
 			setStreamingStates,
+			setTokenUsageStates,
 			setMessageQueues,
 			setAssistant,
 			setChatClient,
@@ -242,7 +254,8 @@ export function useChatState(options: UseChatStateOptions = {}): [ChatState, Cha
 			contextIds: contextIdsRef,
 			requestIds: requestIdsRef,
 			titleGenerated: titleGeneratedRef,
-			completedMessages: completedMessagesRef
+			completedMessages: completedMessagesRef,
+			tokenUsage: tokenUsageRef
 		}),
 		[]
 	)

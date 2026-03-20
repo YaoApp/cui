@@ -65,6 +65,8 @@ export interface IInputAreaProps {
 	loading?: boolean
 	/** 是否正在流式输出中 */
 	streaming?: boolean
+	/** Token usage during streaming */
+	tokenUsage?: { input_tokens: number; output_tokens: number }
 	/** 是否禁用 */
 	disabled?: boolean
 	/** 发送回调 - 接受 ChatCompletionRequest 的部分参数 (assistant_id 和 chat_id 由 useChat 控制) */

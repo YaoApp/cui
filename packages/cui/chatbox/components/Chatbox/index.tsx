@@ -37,6 +37,7 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 		messages,
 		loading,
 		streaming,
+		tokenUsage,
 		activeTab,
 		activeTabId,
 		assistant,
@@ -70,6 +71,7 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 				onSend={sendMessage}
 				loading={streaming}
 				streaming={streaming}
+				tokenUsage={tokenUsage}
 				onAbort={abort}
 				chatId={activeTabId || ''}
 				assistant={assistant}

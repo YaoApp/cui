@@ -5,7 +5,7 @@ import type { Message, UserMessage } from '../../openapi'
 import { Chat } from '../../openapi'
 import type { ChatTab, SendMessageRequest } from '../types'
 import type { QueuedMessage } from './types'
-import type { ChatRefs } from './state'
+import type { ChatRefs, TokenUsage } from './state'
 import { applyDelta, clearMessageCache } from './delta'
 
 export interface UseStreamOptions {
@@ -18,6 +18,7 @@ export interface UseStreamOptions {
 	setChatStates: React.Dispatch<React.SetStateAction<Record<string, Message[]>>>
 	setActiveTabId: React.Dispatch<React.SetStateAction<string>>
 	setStreamingStates: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
+	setTokenUsageStates: React.Dispatch<React.SetStateAction<Record<string, TokenUsage>>>
 	setMessageQueues: React.Dispatch<React.SetStateAction<Record<string, QueuedMessage[]>>>
 	refs: ChatRefs
 	generateChatTitle: (targetTabId: string, currentMessages: Message[]) => Promise<void>
@@ -29,6 +30,7 @@ function createChunkHandler(
 	refs: ChatRefs,
 	updateMessages: (chatId: string, updater: (prev: Message[]) => Message[]) => void,
 	setStreamingStates: React.Dispatch<React.SetStateAction<Record<string, boolean>>>,
+	setTokenUsageStates: React.Dispatch<React.SetStateAction<Record<string, TokenUsage>>>,
 	setMessageQueues: React.Dispatch<React.SetStateAction<Record<string, QueuedMessage[]>>>,
 	tabs: ChatTab[],
 	defaultAssistantId: string | undefined,
@@ -55,6 +57,8 @@ function createChunkHandler(
 				const streamId = nanoid()
 				refs.streamIds.current[targetTabId] = streamId
 				refs.completedMessages.current = {}
+				refs.tokenUsage.current[targetTabId] = { input_tokens: 0, output_tokens: 0 }
+				setTokenUsageStates((prev) => ({ ...prev, [targetTabId]: { input_tokens: 0, output_tokens: 0 } }))
 
 				// Open sidebar trace view when trace is enabled (development mode only)
 				const metadata = chunk.props?.data?.metadata
@@ -73,6 +77,21 @@ function createChunkHandler(
 							forceNormal: true
 						})
 					}
+				}
+			}
+
+			if (chunk.props?.event === 'token/usage') {
+				const data = chunk.props?.data
+				if (data) {
+					const inputDelta = Number(data.input_tokens) || 0
+					const outputDelta = Number(data.output_tokens) || 0
+					const prev = refs.tokenUsage.current[targetTabId] || { input_tokens: 0, output_tokens: 0 }
+					const next = {
+						input_tokens: prev.input_tokens + inputDelta,
+						output_tokens: prev.output_tokens + outputDelta
+					}
+					refs.tokenUsage.current[targetTabId] = next
+					setTokenUsageStates((s) => ({ ...s, [targetTabId]: next }))
 				}
 			}
 
@@ -100,6 +119,12 @@ function createChunkHandler(
 			if (chunk.props?.event === 'stream_end') {
 				setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
 				delete refs.abortHandles.current[targetTabId]
+				delete refs.tokenUsage.current[targetTabId]
+				setTokenUsageStates((prev) => {
+					const next = { ...prev }
+					delete next[targetTabId]
+					return next
+				})
 
 				// Display error message if stream ended with error status
 				const streamEndData = chunk.props?.data
@@ -242,6 +267,7 @@ export function useStream({
 	setChatStates,
 	setActiveTabId,
 	setStreamingStates,
+	setTokenUsageStates,
 	setMessageQueues,
 	refs,
 	generateChatTitle
@@ -288,6 +314,7 @@ export function useStream({
 						refs,
 						updateMessages,
 						setStreamingStates,
+						setTokenUsageStates,
 						setMessageQueues,
 						tabs,
 						defaultAssistantId,
@@ -385,6 +412,7 @@ export function useStream({
 						refs,
 						updateMessages,
 						setStreamingStates,
+						setTokenUsageStates,
 						setMessageQueues,
 						tabs,
 						defaultAssistantId,
