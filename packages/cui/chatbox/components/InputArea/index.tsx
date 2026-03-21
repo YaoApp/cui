@@ -8,7 +8,7 @@ import { FileAPI } from '../../../openapi'
 import type { IInputAreaProps } from '../../types'
 import type { UserMessage } from '../../../openapi'
 import { useAssistantProviders } from '@/hooks/useAssistantProviders'
-import { useComputerWorkspace } from '@/hooks/useComputerWorkspace'
+import { useWorkspace } from '@/hooks/useComputerWorkspace'
 import { useGlobal } from '@/context/app'
 import styles from './index.less'
 import AgentTag from './AgentTag'
@@ -64,8 +64,13 @@ const InputArea = (props: IInputAreaProps) => {
 	const [currentModel, setCurrentModel] = useState<string>('')
 	const [chatMode, setChatMode] = useState<'chat' | 'task'>('task')
 	const [showTrace, setShowTrace] = useState(false)
-	const [selectedComputer, setSelectedComputer] = useState<string>('auto')
-	const [selectedWorkspace, setSelectedWorkspace] = useState<string>('')
+	const [selectedWorkspace, setSelectedWorkspace] = useState<string>(() => {
+		try {
+			return localStorage.getItem('yao:selectedWorkspace') || ''
+		} catch {
+			return ''
+		}
+	})
 	const [isOptimizing, setIsOptimizing] = useState(false)
 
 	// Get global config
@@ -86,16 +91,9 @@ const InputArea = (props: IInputAreaProps) => {
 			: undefined
 	})
 
-	// Load Computer and Workspace options based on assistant configuration
-	const { computers, workspaces, loadingComputers, loadingWorkspaces, nodesAvailable, showComputerSelector } =
-		useComputerWorkspace({
-			sandbox: propAssistant?.sandbox,
-			computerFilter: propAssistant?.computer_filter,
-			selectedComputer
-		})
+	// Load Workspace options (real-time fetch on dropdown open)
+	const { workspaces, hasOnlineNodes, loading: loadingWorkspaces, fetchWorkspaces } = useWorkspace()
 
-	// Block sending when computer selector is shown but no computers available
-	const sendBlocked = showComputerSelector && !nodesAvailable && !loadingComputers
 
 	// Localization & Routing
 	const locale = getLocale()
@@ -165,26 +163,47 @@ const InputArea = (props: IInputAreaProps) => {
 		setAttachments([])
 	}, [chatId])
 
-	// Bidirectional sync: Workspace → Computer
-	// When the user selects a workspace, auto-switch computer to the workspace's bound node.
+	// Persist selectedWorkspace to localStorage
 	useEffect(() => {
-		if (!selectedWorkspace || !showComputerSelector) return
-		const ws = workspaces.find((w) => w.id === selectedWorkspace)
-		if (!ws?.node) return
-		const nodeMatchesComputer = computers.some((c) => c.id === ws.node)
-		if (nodeMatchesComputer && selectedComputer !== ws.node) {
-			setSelectedComputer(ws.node)
-		}
+		try {
+			if (selectedWorkspace) {
+				localStorage.setItem('yao:selectedWorkspace', selectedWorkspace)
+			} else {
+				localStorage.removeItem('yao:selectedWorkspace')
+			}
+		} catch {}
 	}, [selectedWorkspace])
 
-	// Bidirectional sync: Computer → Workspace validity check
-	// When the workspace list updates (due to computer change), clear workspace if no longer valid.
+	// Clear stale selectedWorkspace if it no longer exists in the options list
 	useEffect(() => {
-		if (!selectedWorkspace) return
-		if (workspaces.length > 0 && !workspaces.some((w) => w.id === selectedWorkspace)) {
+		if (!selectedWorkspace || workspaces.length === 0) return
+		if (!workspaces.some((w) => w.id === selectedWorkspace)) {
 			setSelectedWorkspace('')
 		}
-	}, [workspaces])
+	}, [workspaces, selectedWorkspace])
+
+	// Workspace follow: when assistant changes, check compatibility
+	useEffect(() => {
+		if (!selectedWorkspace || !propAssistant?.computer_filter) return
+		const ws = workspaces.find((w) => w.id === selectedWorkspace)
+		if (!ws) return
+
+		const filter = propAssistant.computer_filter
+		const caps = ws.node_capabilities || {}
+		const incompatible =
+			(filter.os && ws.node_os && filter.os !== ws.node_os) ||
+			(filter.arch && ws.node_arch && filter.arch !== ws.node_arch) ||
+			(filter.kind &&
+				(() => {
+					const kinds = Array.isArray(filter.kind) ? filter.kind : [filter.kind]
+					return !kinds.some((k) =>
+						k === 'host' ? caps.host_exec : k === 'box' ? caps.docker || caps.k8s : false
+					)
+				})())
+		if (incompatible) {
+			setSelectedWorkspace('')
+		}
+	}, [propAssistant])
 
 	// When loading changes from true to false (request completed), ensure UI state is correct
 	useEffect(() => {
@@ -430,8 +449,6 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	const handleSend = () => {
-		if (sendBlocked) return
-
 		const message = constructMessage()
 		if (!message) return
 
@@ -439,7 +456,6 @@ const InputArea = (props: IInputAreaProps) => {
 			setIsAnimating(true)
 		}
 
-		// Construct ChatCompletionRequest
 		onSend({
 			messages: [message],
 			model: currentModel,
@@ -448,7 +464,6 @@ const InputArea = (props: IInputAreaProps) => {
 				mode: chatMode,
 				trace: (global?.app_info?.mode === 'development' && showTrace) || undefined,
 				page: currentPage || undefined,
-				computer_id: selectedComputer !== 'auto' ? selectedComputer : undefined,
 				workspace_id: selectedWorkspace || undefined
 			}
 		}).then(() => {
@@ -710,41 +725,12 @@ const InputArea = (props: IInputAreaProps) => {
 	}, [])
 
 	const renderContextRow = () => {
-		const computerOptions = [
-			{ label: is_cn ? '自动' : 'Auto', value: 'auto', icon: 'material-computer' },
-			...computers.map((c) => ({
-				label: c.display_name,
-				value: c.id,
-				icon:
-					c.kind === 'box'
-						? 'material-inventory_2'
-						: c.kind === 'host'
-						? 'material-computer'
-						: 'material-cloud'
-			}))
-		]
-
 		return (
 			<div ref={contextRowRef} className={styles.contextRow}>
 				<div className={styles.leftTags}>
 					{agent && <AgentTag agent={agent} onSwitchAssistant={onSwitchAssistant} />}
 				</div>
 				<div className={styles.rightTags}>
-					{showComputerSelector && (
-						<Selector
-							value={selectedComputer}
-							options={computerOptions}
-							onChange={(val) => setSelectedComputer(val as string)}
-							variant='normal'
-							tooltip={is_cn ? '选择运行环境' : 'Select Computer'}
-							disabled={loading || isOptimizing || loadingComputers}
-							searchable={false}
-							dropdownWidth='auto'
-							dropdownMinWidth={160}
-							dropdownMaxWidth={280}
-							dropdownAlign='right'
-						/>
-					)}
 					{currentPage && (
 						<Tooltip content={currentPage}>
 							<div className={clsx(styles.tag, styles.pageTag)} onClick={handlePageClick}>
@@ -815,20 +801,13 @@ const InputArea = (props: IInputAreaProps) => {
 
 		const showStop = loading
 		const hasReadyAttachments = attachments.some((att) => !att.uploading && !att.error)
-		const canSend = (!isEmpty || hasReadyAttachments) && !sendBlocked
+		const canSend = !isEmpty || hasReadyAttachments
 
 		return (
 			<button
 				className={clsx(styles.sendBtn, showStop && styles.stopping)}
 				onClick={showStop ? props.onAbort : handleSend}
 				disabled={!showStop && (!canSend || disabled)}
-				title={
-					sendBlocked
-						? is_cn
-							? '请先接入计算节点'
-							: 'Please connect a compute node first'
-						: undefined
-				}
 			>
 				{showStop ? <Stop size={16} weight='regular' /> : <PaperPlaneTilt size={16} />}
 			</button>
@@ -845,12 +824,37 @@ const InputArea = (props: IInputAreaProps) => {
 	}
 
 	const renderToolbar = () => {
-		// Workspace options (no fake "Select Workspace" entry; use placeholder + clearable instead)
-		const workspaceOptions = workspaces.map((w) => ({
-			label: w.name || w.id,
-			value: w.id,
-			icon: 'material-folder'
-		}))
+		const filter = propAssistant?.computer_filter
+		const compatibleWorkspaces = workspaces.filter((w) => {
+			if (!filter) return true
+			if (filter.os && w.node_os && filter.os !== w.node_os) return false
+			if (filter.arch && w.node_arch && filter.arch !== w.node_arch) return false
+			if (filter.kind) {
+				const kinds = Array.isArray(filter.kind) ? filter.kind : [filter.kind]
+				const caps = w.node_capabilities || {}
+				const hasMatch = kinds.some((k) =>
+					k === 'host' ? caps.host_exec : k === 'box' ? caps.docker || caps.k8s : false
+				)
+				if (!hasMatch) return false
+			}
+			return true
+		})
+
+		const workspaceOptions = compatibleWorkspaces.map((w) => {
+			const nodeName = w.node_name || w.node || (is_cn ? '未知节点' : 'Unknown Node')
+			const groupParts = [nodeName]
+			if (w.node_os) {
+				groupParts.push([w.node_os, w.node_arch].filter(Boolean).join('/'))
+			}
+			if (!w.node_online) groupParts.push(is_cn ? '离线' : 'offline')
+
+			return {
+				label: w.name || w.id,
+				value: w.id,
+				icon: w.node_online === false ? 'material-cloud_off' : 'material-folder',
+				group: groupParts.join(' · ')
+			}
+		})
 
 		// Build model options from API data
 		const modelOptions = llmProviders.map((provider) => ({
@@ -874,11 +878,13 @@ const InputArea = (props: IInputAreaProps) => {
 						placeholderIcon='material-folder_open'
 						clearable
 						disabled={loading || isOptimizing || loadingWorkspaces}
-						searchable={false}
+						searchable={workspaceOptions.length >= 3}
+						searchPlaceholder={is_cn ? '搜索工作区...' : 'Search workspaces...'}
 						dropdownWidth='auto'
-						dropdownMinWidth={160}
-						dropdownMaxWidth={280}
+						dropdownMinWidth={200}
+						dropdownMaxWidth={320}
 						hideLabel={!showModeText}
+						onOpen={fetchWorkspaces}
 					/>
 					{showSelector && showModelSelectorResponsive && (
 						<Selector
@@ -1041,12 +1047,8 @@ const InputArea = (props: IInputAreaProps) => {
 								onInput={handleInput}
 								onKeyDown={handleKeyDown}
 								onPaste={handlePaste}
-								data-placeholder={
-									sendBlocked
-										? is_cn
-											? '请先接入计算节点后才可使用'
-											: 'Please connect a compute node first'
-										: mode === 'placeholder'
+							data-placeholder={
+								mode === 'placeholder'
 										? is_cn
 											? '输入消息... (Shift + Enter 换行)'
 											: 'Type a message... (Shift + Enter for new line)'

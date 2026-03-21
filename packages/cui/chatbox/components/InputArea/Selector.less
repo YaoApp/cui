@@ -290,7 +290,26 @@
 	background: var(--color_text_light);
 }
 
-// Menu item - 参考图2的菜单项样式
+// Group header
+.groupHeader {
+	padding: 6px 12px 2px;
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--color_chatbox_text_secondary);
+	line-height: 16px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	user-select: none;
+
+	&:not(:first-child) {
+		margin-top: 4px;
+		border-top: 1px solid var(--color_chatbox_border_field);
+		padding-top: 8px;
+	}
+}
+
+// Menu item
 .menuItem {
 	display: flex;
 	align-items: center;
@@ -318,14 +337,29 @@
 		flex-shrink: 0;
 	}
 
-	.menuLabel {
+	.menuLabelGroup {
 		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.menuLabel {
 		font-size: 13px;
 		color: var(--color_chatbox_text_primary);
 		line-height: 20px;
 		white-space: nowrap;
 		overflow: hidden;
-		text-overflow: ellipsis; // 文本过长时显示省略号
+		text-overflow: ellipsis;
+	}
+
+	.menuSubtitle {
+		font-size: 11px;
+		color: var(--color_chatbox_text_secondary);
+		line-height: 16px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.checkIcon {

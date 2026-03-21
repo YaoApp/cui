@@ -1,6 +1,12 @@
 import { OpenAPI } from '../openapi'
 import type { ApiResponse } from '../types'
-import type { Workspace, DirEntry, CreateWorkspaceOptions, UpdateWorkspaceOptions } from '../../pages/workspace/types'
+import type {
+	Workspace,
+	WorkspaceOptionsResponse,
+	DirEntry,
+	CreateWorkspaceOptions,
+	UpdateWorkspaceOptions
+} from '../../pages/workspace/types'
 
 export class WorkspaceAPI {
 	constructor(private api: OpenAPI) {}
@@ -11,10 +17,8 @@ export class WorkspaceAPI {
 		return this.api.Get<Workspace[]>('/workspace', params)
 	}
 
-	async Options(node?: string): Promise<ApiResponse<Workspace[]>> {
-		const params: Record<string, string> = {}
-		if (node) params.node = node
-		return this.api.Get<Workspace[]>('/workspace/options', params)
+	async Options(): Promise<ApiResponse<WorkspaceOptionsResponse>> {
+		return this.api.Get<WorkspaceOptionsResponse>('/workspace/options')
 	}
 
 	async Get(id: string): Promise<ApiResponse<Workspace>> {
