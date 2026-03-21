@@ -3,9 +3,20 @@ export interface Workspace {
 	name: string
 	owner: string
 	node: string
+	node_name?: string
+	node_os?: string
+	node_arch?: string
+	node_kind?: string
+	node_online?: boolean
+	node_capabilities?: Record<string, boolean>
 	labels: Record<string, string>
 	created_at: string
 	updated_at: string
+}
+
+export interface WorkspaceOptionsResponse {
+	data: Workspace[]
+	has_online_nodes: boolean
 }
 
 export interface DirEntry {

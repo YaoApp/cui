@@ -8,6 +8,8 @@ interface ISelectorOption {
 	label: string
 	value: string
 	icon?: string
+	subtitle?: string
+	group?: string
 }
 
 interface ISelectorProps {
@@ -21,11 +23,13 @@ interface ISelectorProps {
 	placeholderIcon?: string
 	clearable?: boolean
 	searchable?: boolean
+	searchPlaceholder?: string
 	dropdownWidth?: number | 'auto'
 	dropdownMaxWidth?: number
 	dropdownMinWidth?: number
 	dropdownAlign?: 'left' | 'right'
 	hideLabel?: boolean
+	onOpen?: () => void
 }
 
 const Selector: React.FC<ISelectorProps> = ({
@@ -39,11 +43,13 @@ const Selector: React.FC<ISelectorProps> = ({
 	placeholderIcon,
 	clearable = false,
 	searchable = false,
+	searchPlaceholder,
 	dropdownWidth = 'auto',
 	dropdownMaxWidth = 320,
 	dropdownMinWidth = 180,
 	dropdownAlign: propAlign,
-	hideLabel = false
+	hideLabel = false,
+	onOpen
 }) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -61,11 +67,15 @@ const Selector: React.FC<ISelectorProps> = ({
 	const displayLabel = currentOption?.label || placeholder || value
 	const displayIcon = currentOption?.icon || (isPlaceholder ? placeholderIcon : undefined)
 
-	// Filter options based on search query
 	const filteredOptions = searchQuery
-		? options.filter((option) =>
-				option.label.toLowerCase().includes(searchQuery.toLowerCase())
-		  )
+		? options.filter((option) => {
+				const q = searchQuery.toLowerCase()
+				return (
+					option.label.toLowerCase().includes(q) ||
+					(option.subtitle && option.subtitle.toLowerCase().includes(q)) ||
+					(option.group && option.group.toLowerCase().includes(q))
+				)
+		  })
 		: options
 
 	// Calculate dropdown style
@@ -113,11 +123,10 @@ const Selector: React.FC<ISelectorProps> = ({
 			const willOpen = !isOpen
 			setIsOpen(willOpen)
 			
-			// Reset search when opening
 			if (willOpen) {
 				setSearchQuery('')
+				onOpen?.()
 				
-				// Calculate vertical position when opening
 				if (containerRef.current) {
 					const rect = containerRef.current.getBoundingClientRect()
 					const viewportHeight = window.innerHeight
@@ -132,7 +141,6 @@ const Selector: React.FC<ISelectorProps> = ({
 					}
 				}
 				
-				// Auto-focus search input if searchable
 				if (searchable) {
 					setTimeout(() => searchInputRef.current?.focus(), 100)
 				}
@@ -167,6 +175,27 @@ const Selector: React.FC<ISelectorProps> = ({
 		</button>
 	)
 
+	const renderOption = (option: ISelectorOption) => (
+		<div
+			key={option.value}
+			className={`${styles.menuItem} ${option.value === value ? styles.selected : ''}`}
+			onClick={() => handleSelect(option.value)}
+		>
+			{option.icon && <Icon name={option.icon} size={14} className={styles.menuIcon} />}
+			<div className={styles.menuLabelGroup}>
+				<span className={styles.menuLabel}>{option.label}</span>
+				{option.subtitle && <span className={styles.menuSubtitle}>{option.subtitle}</span>}
+			</div>
+			{option.value === value && (
+				<Icon
+					name={clearable ? 'material-close' : 'material-check'}
+					size={14}
+					className={styles.checkIcon}
+				/>
+			)}
+		</div>
+	)
+
 	return (
 		<div className={`${styles.selectorContainer} ${isOpen ? styles.selectorOpen : ''}`} ref={containerRef}>
 			{/* Selector Button with Tooltip */}
@@ -193,7 +222,7 @@ const Selector: React.FC<ISelectorProps> = ({
 								ref={searchInputRef}
 								type='text'
 								className={styles.searchInput}
-								placeholder={is_cn ? '搜索模型...' : 'Search models...'}
+								placeholder={searchPlaceholder || (is_cn ? '搜索...' : 'Search...')}
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								onClick={(e) => e.stopPropagation()}
@@ -221,27 +250,30 @@ const Selector: React.FC<ISelectorProps> = ({
 					{/* Options List */}
 					<div className={styles.optionsList}>
 						{filteredOptions.length > 0 ? (
-							filteredOptions.map((option) => (
-								<div
-									key={option.value}
-									className={`${styles.menuItem} ${
-										option.value === value ? styles.selected : ''
-									}`}
-									onClick={() => handleSelect(option.value)}
-								>
-									{option.icon && (
-										<Icon name={option.icon} size={14} className={styles.menuIcon} />
-									)}
-									<span className={styles.menuLabel}>{option.label}</span>
-									{option.value === value && (
-										<Icon
-											name={clearable ? 'material-close' : 'material-check'}
-											size={14}
-											className={styles.checkIcon}
-										/>
-									)}
-								</div>
-							))
+							(() => {
+								const hasGroups = filteredOptions.some((o) => o.group)
+								if (!hasGroups) {
+									return filteredOptions.map((option) => renderOption(option))
+								}
+								const groups: { key: string; items: ISelectorOption[] }[] = []
+								const seen = new Set<string>()
+								for (const opt of filteredOptions) {
+									const g = opt.group || ''
+									if (!seen.has(g)) {
+										seen.add(g)
+										groups.push({ key: g, items: [] })
+									}
+									groups.find((x) => x.key === g)!.items.push(opt)
+								}
+								return groups.map((g, gi) => (
+									<div key={g.key || `_ungrouped_${gi}`}>
+										{g.key && (
+											<div className={styles.groupHeader}>{g.key}</div>
+										)}
+										{g.items.map((option) => renderOption(option))}
+									</div>
+								))
+							})()
 						) : (
 							<div className={styles.emptyState}>
 								{is_cn ? '未找到匹配项' : 'No matches found'}

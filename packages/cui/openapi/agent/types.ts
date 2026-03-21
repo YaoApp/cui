@@ -280,7 +280,7 @@ export interface AgentDetailResponse {
  * Declared in DSL sandbox.filter; frontend passes it through to the API.
  */
 export interface ComputerFilter {
-	kind?: string
+	kind?: string | string[]
 	image?: string
 	vnc?: boolean
 	os?: string
