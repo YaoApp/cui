@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { Input, InputPassword } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import { brandIcons } from '@/assets/icons/brands'
+import WeixinQRModal from './WeixinQRModal'
 import hljsCore from 'highlight.js/lib/core'
 import hljsBash from 'highlight.js/lib/languages/bash'
 import hljsTs from 'highlight.js/lib/languages/typescript'
@@ -266,6 +267,8 @@ interface PlatformConfig {
 	/** Icon padding inside the circle, e.g. '6px' — adjust per-logo optical size */
 	iconPadding?: string
 	fields: FieldDef[]
+	/** If true, uses QR code scan login instead of credential fields */
+	scanLogin?: boolean
 }
 
 interface FieldDef {
@@ -280,6 +283,19 @@ interface FieldDef {
 const DOCS_BASE = 'https://yaoagents.com/docs'
 
 const PLATFORMS: PlatformConfig[] = [
+	// ── WeChat (always first) ─────────────────────────────────────────────
+	{
+		key: 'weixin',
+		name_cn: '微信',
+		name_en: 'WeChat',
+		iconBg: '#07C160',
+		iconPadding: '5px',
+		desc_cn: '通过扫码连接微信，直接在微信中与 Agent 对话',
+		desc_en: 'Scan QR code to connect WeChat and chat with the Agent directly',
+		docsPath: 'integrations/weixin',
+		scanLogin: true,
+		fields: []
+	},
 	// ── Chinese locale platforms ───────────────────────────────────────────
 	{
 		key: 'dingtalk',
@@ -412,6 +428,7 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 	const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 	const [verifying, setVerifying] = useState<Record<string, VerifyState>>({})
 	const [verifyResults, setVerifyResults] = useState<Record<string, VerifyResult>>({})
+	const [qrModalOpen, setQrModalOpen] = useState(false)
 
 	const toggleExpand = (key: string) => {
 		setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -469,11 +486,11 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 		[verifying, formData]
 	)
 
-	// CN: 飞书、钉钉在前；EN: Telegram、Discord 在前
+	// weixin always first; CN: 钉钉、飞书 next; EN: Telegram、Discord next
 	const visiblePlatforms = is_cn
 		? PLATFORMS
 		: [...PLATFORMS].sort((a, b) => {
-				const order = ['telegram', 'discord', 'dingtalk', 'feishu']
+				const order = ['weixin', 'telegram', 'discord', 'dingtalk', 'feishu']
 				return order.indexOf(a.key) - order.indexOf(b.key)
 		  })
 
@@ -563,130 +580,171 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 								</div>
 							</div>
 
-							{/* Card Body */}
-							{open && (
-								<div className={styles.integrationBody}>
-									{/* Docs link */}
-									<div className={styles.integrationDocs}>
-										<Icon name='material-menu_book' size={13} />
-										<a href={docsUrl} target='_blank' rel='noopener noreferrer'>
-											{is_cn ? '查看接入文档' : 'Setup guide'}
-										</a>
-									</div>
+						{/* Card Body */}
+						{open && (
+							<div className={styles.integrationBody}>
+								{/* Docs link */}
+								<div className={styles.integrationDocs}>
+									<Icon name='material-menu_book' size={13} />
+									<a href={docsUrl} target='_blank' rel='noopener noreferrer'>
+										{is_cn ? '查看接入文档' : 'Setup guide'}
+									</a>
+								</div>
 
-								{platform.fields.map((field) => {
-									const InputComp = field.secret ? InputPassword : Input
-									return (
-										<div key={field.key} className={styles.formItem}>
-											<label className={styles.formLabel}>
-												{field.label}
-												{field.required && (
-													<span className={styles.required}>
-														{' '}
-														*
-													</span>
-												)}
-											</label>
-											<InputComp
-												value={
-													formData[
-														fieldKey(platform.key, field.key)
-													] || ''
-												}
-												onChange={(value: any) =>
-													onChange(
-														fieldKey(platform.key, field.key),
-														value
-													)
-												}
-												schema={{
-													type: 'string',
-													placeholder: is_cn
-														? field.placeholder_cn
-														: field.placeholder_en
-												}}
-											/>
-										</div>
-									)
-								})}
-
-									{/* Footer: verify button + result */}
-									<div className={styles.integrationFooter}>
-										<button
-											className={`${styles.integrationVerifyBtn} ${
-												!canVerify || isVerifying
-													? styles.integrationVerifyBtnDisabled
-													: verifyState === 'success'
-													? styles.integrationVerifyBtnSuccess
-													: verifyState === 'error'
-													? styles.integrationVerifyBtnError
-													: ''
-											}`}
-											disabled={!canVerify || isVerifying}
-											onClick={() => handleVerify(platform)}
-										>
-											{isVerifying ? (
-												<>
-													<Icon
-														name='material-hourglass_empty'
-														size={13}
-													/>
-													<span>
-														{is_cn
-															? '验证中...'
-															: 'Verifying...'}
-													</span>
-												</>
-											) : verifyState === 'success' ? (
-												<>
-													<Icon
-														name='material-check_circle'
-														size={13}
-													/>
-													<span>
-														{is_cn ? '验证通过' : 'Connected'}
-													</span>
-												</>
-											) : verifyState === 'error' ? (
-												<>
-													<Icon
-														name='material-error_outline'
-														size={13}
-													/>
-													<span>
-														{is_cn ? '验证失败' : 'Failed'}
-													</span>
-												</>
-											) : (
-												<>
-													<Icon
-														name='material-wifi_tethering'
-														size={13}
-													/>
-													<span>
-														{is_cn ? '验证连接' : 'Verify'}
-													</span>
-												</>
-											)}
-										</button>
-										{verifyResult && verifyResult.valid && verifyResult.info && (
-											<span className={styles.integrationVerifyInfo}>
-												{verifyResult.info.name || verifyResult.info.username || verifyResult.info.app_id || verifyResult.info.client_id || ''}
-												{verifyResult.info.username && verifyResult.info.name
-													? ` (@${verifyResult.info.username})`
+							{platform.scanLogin ? (
+								<>
+									{/* Scan-login branch (WeChat) */}
+									{formData[fieldKey(platform.key, 'bot_token')] ? (
+										<div className={styles.integrationConnected}>
+											<Icon name='material-check_circle' size={16} />
+											<span>
+												{is_cn ? '已连接' : 'Connected'}
+												{formData[fieldKey(platform.key, 'account_id')]
+													? ` (${formData[fieldKey(platform.key, 'account_id')]})`
 													: ''}
 											</span>
-										)}
-										{verifyResult && !verifyResult.valid && verifyResult.error && (
-											<span className={styles.integrationVerifyError}>
-												{verifyResult.error.length > 80
-													? verifyResult.error.slice(0, 80) + '...'
-													: verifyResult.error}
-											</span>
-										)}
+											<button
+												className={styles.integrationScanBtn}
+												onClick={() => setQrModalOpen(true)}
+											>
+												<Icon name='material-refresh' size={13} />
+												<span>{is_cn ? '重新连接' : 'Reconnect'}</span>
+											</button>
+										</div>
+									) : (
+										<div className={styles.integrationScanArea}>
+											<button
+												className={styles.integrationScanBtn}
+												onClick={() => setQrModalOpen(true)}
+											>
+												<Icon name='material-qr_code_2' size={16} />
+												<span>{is_cn ? '扫码连接' : 'Scan to Connect'}</span>
+											</button>
+											<div className={styles.integrationScanHint}>
+												{is_cn
+													? '点击后将弹出二维码，使用微信扫描即可完成连接'
+													: 'Click to show QR code, then scan with WeChat to connect'}
+											</div>
+										</div>
+									)}
+								</>
+							) : (
+								<>
+							{platform.fields.map((field) => {
+								const InputComp = field.secret ? InputPassword : Input
+								return (
+									<div key={field.key} className={styles.formItem}>
+										<label className={styles.formLabel}>
+											{field.label}
+											{field.required && (
+												<span className={styles.required}>
+													{' '}
+													*
+												</span>
+											)}
+										</label>
+										<InputComp
+											value={
+												formData[
+													fieldKey(platform.key, field.key)
+												] || ''
+											}
+											onChange={(value: any) =>
+												onChange(
+													fieldKey(platform.key, field.key),
+													value
+												)
+											}
+											schema={{
+												type: 'string',
+												placeholder: is_cn
+													? field.placeholder_cn
+													: field.placeholder_en
+											}}
+										/>
 									</div>
+								)
+							})}
+
+								{/* Footer: verify button + result */}
+								<div className={styles.integrationFooter}>
+									<button
+										className={`${styles.integrationVerifyBtn} ${
+											!canVerify || isVerifying
+												? styles.integrationVerifyBtnDisabled
+												: verifyState === 'success'
+												? styles.integrationVerifyBtnSuccess
+												: verifyState === 'error'
+												? styles.integrationVerifyBtnError
+												: ''
+										}`}
+										disabled={!canVerify || isVerifying}
+										onClick={() => handleVerify(platform)}
+									>
+										{isVerifying ? (
+											<>
+												<Icon
+													name='material-hourglass_empty'
+													size={13}
+												/>
+												<span>
+													{is_cn
+														? '验证中...'
+														: 'Verifying...'}
+												</span>
+											</>
+										) : verifyState === 'success' ? (
+											<>
+												<Icon
+													name='material-check_circle'
+													size={13}
+												/>
+												<span>
+													{is_cn ? '验证通过' : 'Connected'}
+												</span>
+											</>
+										) : verifyState === 'error' ? (
+											<>
+												<Icon
+													name='material-error_outline'
+													size={13}
+												/>
+												<span>
+													{is_cn ? '验证失败' : 'Failed'}
+												</span>
+											</>
+										) : (
+											<>
+												<Icon
+													name='material-wifi_tethering'
+													size={13}
+												/>
+												<span>
+													{is_cn ? '验证连接' : 'Verify'}
+												</span>
+											</>
+										)}
+									</button>
+									{verifyResult && verifyResult.valid && verifyResult.info && (
+										<span className={styles.integrationVerifyInfo}>
+											{verifyResult.info.name || verifyResult.info.username || verifyResult.info.app_id || verifyResult.info.client_id || ''}
+											{verifyResult.info.username && verifyResult.info.name
+												? ` (@${verifyResult.info.username})`
+												: ''}
+										</span>
+									)}
+									{verifyResult && !verifyResult.valid && verifyResult.error && (
+										<span className={styles.integrationVerifyError}>
+											{verifyResult.error.length > 80
+												? verifyResult.error.slice(0, 80) + '...'
+												: verifyResult.error}
+										</span>
+									)}
 								</div>
+								</>
 							)}
+							</div>
+						)}
 						</div>
 					)
 				})}
@@ -702,6 +760,22 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 					: 'OpenAI-compatible — works with any OpenAI-compatible SDK or tool'}
 			</div>
 			<ApiAccessGroup robot={robot} is_cn={is_cn} />
+
+			{/* WeChat QR Code Modal */}
+			<WeixinQRModal
+				open={qrModalOpen}
+				is_cn={is_cn}
+				onClose={() => setQrModalOpen(false)}
+				onSuccess={(data) => {
+					onChange(fieldKey('weixin', 'bot_token'), data.bot_token)
+					onChange(fieldKey('weixin', 'account_id'), data.account_id)
+					if (data.base_url) {
+						onChange(fieldKey('weixin', 'api_host'), data.base_url)
+					}
+					onChange(fieldKey('weixin', 'enabled'), true)
+					setQrModalOpen(false)
+				}}
+			/>
 		</div>
 	)
 }
