@@ -258,6 +258,38 @@ export class AgentRobots {
 		)
 	}
 
+	// ==================== WeChat QR Code APIs ====================
+
+	/**
+	 * Create a WeChat QR code session for scan-to-login
+	 * POST /v1/agent/robots/integrations/weixin/qrcode
+	 */
+	async WeixinQRCodeCreate(apiHost?: string): Promise<ApiResponse<{
+		session_key: string
+		qrcode_url: string
+		qrcode_img: string
+	}>> {
+		return this.api.Post<{ session_key: string; qrcode_url: string; qrcode_img: string }>(
+			'/agent/robots/integrations/weixin/qrcode',
+			apiHost ? { api_host: apiHost } : {}
+		)
+	}
+
+	/**
+	 * Poll WeChat QR code scan status
+	 * GET /v1/agent/robots/integrations/weixin/qrcode/:session_key
+	 */
+	async WeixinQRCodePoll(sessionKey: string): Promise<ApiResponse<{
+		status: string
+		bot_token?: string
+		account_id?: string
+		base_url?: string
+	}>> {
+		return this.api.Get<{ status: string; bot_token?: string; account_id?: string; base_url?: string }>(
+			`/agent/robots/integrations/weixin/qrcode/${encodeURIComponent(sessionKey)}`
+		)
+	}
+
 	// ==================== V2 Interact APIs ====================
 
 	/**

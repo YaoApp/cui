@@ -1704,3 +1704,169 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
+// ── WeChat scan-login styles ──────────────────────────────────────
+.integrationConnected {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 0;
+	font-size: 13px;
+	color: #52c41a;
+
+	> button {
+		margin-left: auto;
+	}
+}
+
+.integrationScanArea {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 16px 0 8px;
+}
+
+.integrationScanBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 20px;
+	border-radius: 8px;
+	border: 1px solid var(--color_main);
+	background: transparent;
+	color: var(--color_main);
+	font-size: 13px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover {
+		background: var(--color_main);
+		color: #fff;
+	}
+}
+
+.integrationScanHint {
+	font-size: 11px;
+	color: var(--color_mission_text_muted);
+	text-align: center;
+}
+
+// ── WeChat QR Modal styles ────────────────────────────────────────
+.weixinQrModal {
+	:global(.ant-modal-body) {
+		padding: 24px;
+	}
+}
+
+.weixinQrContent {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+}
+
+.weixinQrImageWrap {
+	position: relative;
+	width: 240px;
+	height: 240px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	background: #fff;
+	border: 1px solid #e8e8e8;
+	overflow: hidden;
+}
+
+.weixinQrImage {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	padding: 12px;
+}
+
+.weixinQrLoading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	color: var(--color_mission_text_muted);
+}
+
+.weixinQrOverlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.85);
+	backdrop-filter: blur(2px);
+}
+
+.weixinQrScannedOverlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.75);
+	color: #52c41a;
+}
+
+.weixinQrRefreshBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 8px 16px;
+	border-radius: 8px;
+	border: 1px solid var(--color_mission_border);
+	background: var(--color_mission_bg);
+	color: var(--color_mission_text_secondary);
+	font-size: 13px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover {
+		border-color: var(--color_main);
+		color: var(--color_main);
+	}
+}
+
+.weixinQrStatus {
+	font-size: 13px;
+	color: var(--color_mission_text_secondary);
+	text-align: center;
+}
+
+.weixinQrStatusSuccess {
+	color: #52c41a;
+}
+
+.weixinQrStatusError {
+	color: #ff4d4f;
+}
+
+.weixinQrStatusScanned {
+	color: var(--color_main);
+}
+
+.weixinQrRetryBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 16px;
+	border-radius: 6px;
+	border: 1px solid var(--color_mission_border);
+	background: transparent;
+	color: var(--color_mission_text_secondary);
+	font-size: 12px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover {
+		border-color: var(--color_main);
+		color: var(--color_main);
+	}
+}
