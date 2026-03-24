@@ -45,6 +45,7 @@ export class AgentTags {
 		if (filter) {
 			if (filter.locale) params.append('locale', filter.locale)
 			if (filter.type) params.append('type', filter.type)
+			if (filter.types && filter.types.length > 0) params.append('types', filter.types.join(','))
 			if (filter.connector) params.append('connector', filter.connector)
 			if (filter.built_in !== undefined) params.append('built_in', String(filter.built_in))
 			if (filter.mentionable !== undefined) params.append('mentionable', String(filter.mentionable))

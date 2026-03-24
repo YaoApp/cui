@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useMemo } from 'react'
 import { Tooltip } from 'antd'
 import { Button } from '@/components/ui'
 import { App } from '@/types'
@@ -21,14 +21,21 @@ interface Props {
 }
 
 const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) => {
-	// Get current locale using the same method as in useAIChat.ts
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
 	const { default_assistant } = global
 
 	const dockerAvailable = (global.app_info as any)?.tools?.docker?.available === true
-	const chatDisabled = data.sandbox === true && !dockerAvailable
+	const chatDisabled = useMemo(() => {
+		if (!data.sandbox) return false
+
+		const filter = data.computer_filter as { kind?: string | string[] } | undefined
+		if (!filter?.kind) return !dockerAvailable
+
+		const kinds = Array.isArray(filter.kind) ? filter.kind : [filter.kind]
+		return !kinds.some((k) => k === 'host' ? true : k === 'box' ? dockerAvailable : false)
+	}, [data.sandbox, data.computer_filter, dockerAvailable])
 
 	// Handle chat button click without triggering the card click
 	const handleChatClick = (e: React.MouseEvent) => {

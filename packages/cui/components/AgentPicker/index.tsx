@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useMemoizedFn } from 'ahooks'
+import { useMemoizedFn, useDebounceFn } from 'ahooks'
 import { Modal, Spin, Button, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
@@ -10,6 +10,8 @@ import type { Agent } from '@/openapi/agent/types'
 import type { MCPServer } from '@/openapi/mcp/types'
 import type { AgentPickerProps, PickerItem } from './types'
 import styles from './index.less'
+
+const PAGE_SIZE = 50
 
 const AgentPicker = (props: AgentPickerProps) => {
 	const { visible, onClose, onConfirm, type, mode, value, expandTools = false, filter } = props
@@ -31,6 +33,7 @@ const AgentPicker = (props: AgentPickerProps) => {
 	}
 
 	const [search, setSearch] = useState('')
+	const [keywords, setKeywords] = useState('')
 	const [searchOpen, setSearchOpen] = useState(false)
 	const [activeTag, setActiveTag] = useState('all')
 	const [selected, setSelected] = useState<PickerItem[]>([])
@@ -41,55 +44,179 @@ const AgentPicker = (props: AgentPickerProps) => {
 	}
 	const searchInputRef = useRef<HTMLInputElement>(null)
 	const bodyRef = useRef<HTMLDivElement>(null)
+	const contentRef = useRef<HTMLDivElement>(null)
 
 	const [assistants, setAssistants] = useState<Agent[]>([])
 	const [mcpServers, setMCPServers] = useState<MCPServer[]>([])
 	const [loading, setLoading] = useState(false)
-	const loadedRef = useRef(false)
+	const [loadingMore, setLoadingMore] = useState(false)
+	const [currentPage, setCurrentPage] = useState(1)
+	const [total, setTotal] = useState(0)
+	const [hasMore, setHasMore] = useState(true)
+
+	const [tags, setTags] = useState<{ name: string; count?: number }[]>([])
+	const [tagsLoading, setTagsLoading] = useState(false)
+
+	const filterKey = useMemo(() => JSON.stringify(filter || {}), [filter])
 
 	useEffect(() => {
 		if (!visible) return
 		setSearch('')
+		setKeywords('')
 		setSearchOpen(false)
 		setActiveTag('all')
 		setSelected(value || [])
 	}, [visible, value])
 
-	useEffect(() => {
-		if (!visible || loadedRef.current || !window.$app?.openapi) return
-		loadedRef.current = true
+	const buildListFilter = useMemoizedFn((page: number, extraKeywords?: string, extraTag?: string) => {
+		const params: Record<string, any> = {
+			select: ['assistant_id', 'name', 'avatar', 'description', 'tags', 'connector', 'sandbox', 'built_in'],
+			locale: is_cn ? 'zh-cn' : 'en-us',
+			pagesize: PAGE_SIZE,
+			page,
+			...filter
+		}
+		if (extraKeywords) params.keywords = extraKeywords
+		if (extraTag && extraTag !== 'all') params.tags = [extraTag]
+		return params
+	})
+
+	const loadAssistants = useMemoizedFn(async (page: number, append: boolean) => {
+		if (!window.$app?.openapi) return
+
+		const isFirstPage = page === 1
+		if (isFirstPage) setLoading(true)
+		else setLoadingMore(true)
+
+		try {
+			const api = new AgentAPI(window.$app.openapi)
+			const res = await api.assistants.List(buildListFilter(page, keywords, activeTag))
+			if (window.$app.openapi.IsError(res)) return
+
+			const data = window.$app.openapi.GetData(res)
+			const newItems: Agent[] = Array.isArray(data?.data) ? data.data : []
+			const serverTotal = typeof data?.total === 'number' ? data.total : 0
+
+			if (append) {
+				setAssistants((prev) => [...prev, ...newItems])
+			} else {
+				setAssistants(newItems)
+			}
+			setTotal(serverTotal)
+			setCurrentPage(page)
+
+			const loadedCount = append ? assistants.length + newItems.length : newItems.length
+			setHasMore(loadedCount < serverTotal)
+		} finally {
+			if (isFirstPage) setLoading(false)
+			else setLoadingMore(false)
+		}
+	})
+
+	const loadTags = useMemoizedFn(async () => {
+		if (!window.$app?.openapi || type !== 'assistant') return
+
+		setTagsLoading(true)
+		try {
+			const api = new AgentAPI(window.$app.openapi)
+			const tagsFilter: Record<string, any> = {
+				locale: is_cn ? 'zh-cn' : 'en-us',
+				...filter
+			}
+			if (keywords) tagsFilter.keywords = keywords
+
+			const res = await api.tags.List(tagsFilter)
+			if (window.$app.openapi.IsError(res)) return
+
+			const tagsData = window.$app.openapi.GetData(res)
+			if (!Array.isArray(tagsData)) return
+
+			const formatted: { name: string }[] = tagsData.map((tag: any) => {
+				if (typeof tag === 'string') return { name: tag }
+				if (tag && typeof tag === 'object' && 'value' in tag) return { name: tag.label || tag.value }
+				return { name: String(tag) }
+			})
+			setTags(formatted)
+		} finally {
+			setTagsLoading(false)
+		}
+	})
+
+	const loadMCPServers = useMemoizedFn(async () => {
+		if (!window.$app?.openapi) return
+
 		setLoading(true)
+		try {
+			const api = new MCP(window.$app.openapi)
+			const servers = await api.ListServers()
+			if (servers) setMCPServers(servers)
+		} finally {
+			setLoading(false)
+		}
+	})
+
+	// Load data when visible or filter conditions change
+	useEffect(() => {
+		if (!visible || !window.$app?.openapi) return
 
 		if (type === 'assistant') {
-			const api = new AgentAPI(window.$app.openapi)
-			api.assistants
-				.List({
-					select: ['assistant_id', 'name', 'avatar', 'description', 'tags', 'connector', 'sandbox', 'built_in'],
-					locale: is_cn ? 'zh-cn' : 'en-us',
-					pagesize: 200,
-					...filter
-				})
-				.then((res) => {
-					if (!window.$app.openapi.IsError(res)) {
-						const data = window.$app.openapi.GetData(res)
-						if (data?.data) setAssistants(data.data)
-					}
-				})
-				.finally(() => setLoading(false))
+			setAssistants([])
+			setCurrentPage(1)
+			setHasMore(true)
+			loadAssistants(1, false)
+			loadTags()
 		} else {
-			const api = new MCP(window.$app.openapi)
-			api.ListServers()
-				.then((servers) => {
-					if (servers) setMCPServers(servers)
-				})
-				.finally(() => setLoading(false))
+			loadMCPServers()
 		}
-	}, [visible, type, is_cn])
+	}, [visible, type, is_cn, filterKey, keywords, activeTag])
 
+	// Scroll to load more
 	useEffect(() => {
-		if (!visible) {
-			loadedRef.current = false
+		const container = contentRef.current
+		if (!container || type !== 'assistant') return
+
+		const handleScroll = () => {
+			const { scrollTop, scrollHeight, clientHeight } = container
+			if (scrollHeight - scrollTop - clientHeight < 50 && !loadingMore && hasMore) {
+				loadAssistants(currentPage + 1, true)
+			}
 		}
+
+		container.addEventListener('scroll', handleScroll)
+		return () => container.removeEventListener('scroll', handleScroll)
+	}, [loadingMore, hasMore, currentPage, type])
+
+	// Large screen: fill viewport if first page doesn't produce a scrollbar
+	useEffect(() => {
+		if (
+			type !== 'assistant' ||
+			assistants.length === 0 ||
+			loading ||
+			loadingMore ||
+			!hasMore ||
+			assistants.length >= total
+		) return
+
+		const container = contentRef.current
+		if (!container) return
+
+		requestAnimationFrame(() => {
+			const { scrollHeight, clientHeight } = container
+			if (scrollHeight <= clientHeight) {
+				loadAssistants(currentPage + 1, true)
+			}
+		})
+	}, [assistants.length, loading, loadingMore, hasMore, total])
+
+	// Reset loaded state when invisible
+	useEffect(() => {
+		if (visible) return
+		setAssistants([])
+		setMCPServers([])
+		setTags([])
+		setTotal(0)
+		setCurrentPage(1)
+		setHasMore(true)
 	}, [visible])
 
 	useEffect(() => {
@@ -97,6 +224,16 @@ const AgentPicker = (props: AgentPickerProps) => {
 			searchInputRef.current.focus()
 		}
 	}, [searchOpen])
+
+	const { run: debouncedSetKeywords } = useDebounceFn(
+		(val: string) => setKeywords(val),
+		{ wait: 300 }
+	)
+
+	const handleSearchChange = useMemoizedFn((val: string) => {
+		setSearch(val)
+		debouncedSetKeywords(val.trim())
+	})
 
 	const items: PickerItem[] = useMemo(() => {
 		if (type === 'assistant') {
@@ -116,23 +253,10 @@ const AgentPicker = (props: AgentPickerProps) => {
 		}))
 	}, [type, assistants, mcpServers])
 
-	const tags = useMemo(() => {
-		const tagMap: Record<string, number> = {}
-		items.forEach((item) => {
-			(item.tags || []).forEach((t) => {
-				tagMap[t] = (tagMap[t] || 0) + 1
-			})
-		})
-		return Object.entries(tagMap)
-			.sort((a, b) => b[1] - a[1])
-			.map(([name, count]) => ({ name, count }))
-	}, [items])
-
+	// MCP servers still use client-side filtering (no server-side support)
 	const filteredItems = useMemo(() => {
+		if (type === 'assistant') return items
 		let result = items
-		if (activeTag !== 'all') {
-			result = result.filter((item) => item.tags?.includes(activeTag))
-		}
 		if (search.trim()) {
 			const kw = search.trim().toLowerCase()
 			result = result.filter(
@@ -144,7 +268,7 @@ const AgentPicker = (props: AgentPickerProps) => {
 			)
 		}
 		return result
-	}, [items, activeTag, search])
+	}, [type, items, search])
 
 	const isSelected = useMemoizedFn((itemValue: string) => {
 		return selected.some((s) => s.value === itemValue)
@@ -198,6 +322,8 @@ const AgentPicker = (props: AgentPickerProps) => {
 
 	const closeSearch = useMemoizedFn(() => {
 		setSearch('')
+		debouncedSetKeywords('')
+		setKeywords('')
 		setSearchOpen(false)
 		requestAnimationFrame(() => bodyRef.current?.focus())
 	})
@@ -209,6 +335,10 @@ const AgentPicker = (props: AgentPickerProps) => {
 		}
 	})
 
+	const handleTagClick = useMemoizedFn((tag: string) => {
+		setActiveTag(tag)
+	})
+
 	const hasSidebar = true
 
 	const renderSidebar = () => {
@@ -218,21 +348,26 @@ const AgentPicker = (props: AgentPickerProps) => {
 				<div className={styles.sidebarList}>
 					<div
 						className={`${styles.sidebarItem} ${activeTag === 'all' ? styles.active : ''}`}
-						onClick={() => setActiveTag('all')}
+						onClick={() => handleTagClick('all')}
 					>
 						<span className={styles.sidebarName}>{is_cn ? '全部' : 'All'}</span>
-						<span className={styles.sidebarCount}>{items.length}</span>
+						<span className={styles.sidebarCount}>{total}</span>
 					</div>
-					{tags.map((tag) => (
-						<div
-							key={tag.name}
-							className={`${styles.sidebarItem} ${activeTag === tag.name ? styles.active : ''}`}
-							onClick={() => setActiveTag(tag.name)}
-						>
-							<span className={styles.sidebarName}>{tag.name}</span>
-							<span className={styles.sidebarCount}>{tag.count}</span>
+					{tagsLoading && tags.length === 0 ? (
+						<div className={styles.sidebarItem}>
+							<Spin size='small' />
 						</div>
-					))}
+					) : (
+						tags.map((tag) => (
+							<div
+								key={tag.name}
+								className={`${styles.sidebarItem} ${activeTag === tag.name ? styles.active : ''}`}
+								onClick={() => handleTagClick(tag.name)}
+							>
+								<span className={styles.sidebarName}>{tag.name}</span>
+							</div>
+						))
+					)}
 				</div>
 			</div>
 		)
@@ -250,7 +385,7 @@ const AgentPicker = (props: AgentPickerProps) => {
 						className={styles.searchInput}
 						placeholder={is_cn ? '搜索...' : 'Search...'}
 						value={search}
-						onChange={(e) => setSearch(e.target.value)}
+						onChange={(e) => handleSearchChange(e.target.value)}
 						onKeyDown={handleSearchKeyDown}
 					/>
 					<div className={styles.searchClose} onClick={handleSearchToggle}>
@@ -262,7 +397,7 @@ const AgentPicker = (props: AgentPickerProps) => {
 	}
 
 	const renderCards = () => {
-		if (loading) {
+		if (loading && assistants.length === 0 && mcpServers.length === 0) {
 			return (
 				<div className={styles.stateContainer}>
 					<Spin />
@@ -271,7 +406,7 @@ const AgentPicker = (props: AgentPickerProps) => {
 			)
 		}
 
-		if (filteredItems.length === 0) {
+		if (filteredItems.length === 0 && !loading) {
 			return (
 				<div className={styles.stateContainer}>
 					<Icon name='icon-inbox' size={40} />
@@ -284,7 +419,12 @@ const AgentPicker = (props: AgentPickerProps) => {
 						<Button
 							type='link'
 							size='small'
-							onClick={() => { setSearch(''); setActiveTag('all') }}
+							onClick={() => {
+								setSearch('')
+								debouncedSetKeywords('')
+								setKeywords('')
+								setActiveTag('all')
+							}}
 						>
 							{is_cn ? '清除筛选' : 'Clear filters'}
 						</Button>
@@ -294,56 +434,63 @@ const AgentPicker = (props: AgentPickerProps) => {
 		}
 
 		return (
-			<div className={styles.cardGrid}>
-				{filteredItems.map((item) => {
-					const checked = isSelected(item.value)
-					return (
-						<div
-							key={item.value}
-							className={`${styles.card} ${checked ? styles.cardSelected : ''}`}
-							onClick={() => handleCardClick(item)}
-						>
-							<div className={styles.cardHeader}>
-								<div className={styles.cardAvatar}>
-									{type === 'assistant' ? (
-										<UserAvatar
-											size='sm'
-											shape='circle'
-											displayType='avatar'
-											data={{
-												id: item.value,
-												name: item.label,
-												avatar: item.avatar
-											}}
-										/>
-									) : (
-										<div className={styles.mcpIcon}>
-											<Icon name='icon-server' size={18} />
-										</div>
-									)}
-								</div>
-								<div className={styles.cardInfo}>
-									<div className={styles.cardName} title={item.label}>
-										{item.label}
+			<>
+				<div className={styles.cardGrid}>
+					{filteredItems.map((item) => {
+						const checked = isSelected(item.value)
+						return (
+							<div
+								key={item.value}
+								className={`${styles.card} ${checked ? styles.cardSelected : ''}`}
+								onClick={() => handleCardClick(item)}
+							>
+								<div className={styles.cardHeader}>
+									<div className={styles.cardAvatar}>
+										{type === 'assistant' ? (
+											<UserAvatar
+												size='sm'
+												shape='circle'
+												displayType='avatar'
+												data={{
+													id: item.value,
+													name: item.label,
+													avatar: item.avatar
+												}}
+											/>
+										) : (
+											<div className={styles.mcpIcon}>
+												<Icon name='icon-server' size={18} />
+											</div>
+										)}
 									</div>
-									{item.description && (
-										<div className={styles.cardDesc} title={item.description}>
-											{item.description}
+									<div className={styles.cardInfo}>
+										<div className={styles.cardName} title={item.label}>
+											{item.label}
 										</div>
-									)}
-								</div>
-								<div className={styles.cardCheck}>
-									{checked ? (
-										<Icon name='icon-check-circle' size={18} />
-									) : (
-										<Icon name='icon-circle' size={18} />
-									)}
+										{item.description && (
+											<div className={styles.cardDesc} title={item.description}>
+												{item.description}
+											</div>
+										)}
+									</div>
+									<div className={styles.cardCheck}>
+										{checked ? (
+											<Icon name='icon-check-circle' size={18} />
+										) : (
+											<Icon name='icon-circle' size={18} />
+										)}
+									</div>
 								</div>
 							</div>
-						</div>
-					)
-				})}
-			</div>
+						)
+					})}
+				</div>
+				{loadingMore && (
+					<div className={styles.stateContainer} style={{ minHeight: 60, height: 'auto' }}>
+						<Spin size='small' />
+					</div>
+				)}
+			</>
 		)
 	}
 
@@ -437,7 +584,7 @@ const AgentPicker = (props: AgentPickerProps) => {
 				{renderSidebar()}
 				<div className={styles.contentPanel}>
 					{renderSearchBar()}
-					<div className={styles.content}>
+					<div className={styles.content} ref={contentRef}>
 						{renderCards()}
 					</div>
 				</div>
