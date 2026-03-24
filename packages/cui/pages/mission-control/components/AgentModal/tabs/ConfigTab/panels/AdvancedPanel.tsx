@@ -26,15 +26,15 @@ interface AdvancedPanelProps {
 // learning phase is hidden (placeholder implementation, not yet functional)
 // Each phase has a corresponding agent type for filtering (e.g., robot-goals, robot-tasks)
 const PHASES = [
-	{ key: 'host', label_en: 'Host Agent', label_cn: '交互代理', desc_en: 'Human interaction', desc_cn: '人机交互中介', default: '__yao.host', type: 'robot-host' },
-	{ key: 'inspiration', label_en: 'Inspiration', label_cn: '洞察发现', desc_en: 'Discover insights', desc_cn: '发现洞察', default: '__yao.inspiration', type: 'robot-inspiration', autonomousOnly: true },
-	{ key: 'goals', label_en: 'Goals', label_cn: '目标规划', desc_en: 'Generate goals', desc_cn: '生成目标', default: '__yao.goals', type: 'robot-goals' },
-	{ key: 'tasks', label_en: 'Tasks', label_cn: '任务拆解', desc_en: 'Split into tasks', desc_cn: '拆分任务', default: '__yao.tasks', type: 'robot-tasks' },
+	{ key: 'host', label_en: 'Host Agent', label_cn: '交互代理', desc_en: 'Human interaction', desc_cn: '人机交互中介', type: 'robot-host' },
+	{ key: 'inspiration', label_en: 'Inspiration', label_cn: '洞察发现', desc_en: 'Discover insights', desc_cn: '发现洞察', type: 'robot-inspiration', autonomousOnly: true },
+	{ key: 'goals', label_en: 'Goals', label_cn: '目标规划', desc_en: 'Generate goals', desc_cn: '生成目标', type: 'robot-goals' },
+	{ key: 'tasks', label_en: 'Tasks', label_cn: '任务拆解', desc_en: 'Split into tasks', desc_cn: '拆分任务', type: 'robot-tasks' },
 	// run phase is omitted - it's a built-in scheduler, not a replaceable agent
 	// validation is omitted - not a pipeline stage in current version (used internally by runner)
-	{ key: 'delivery', label_en: 'Delivery', label_cn: '交付', desc_en: 'Format & deliver', desc_cn: '格式化并交付', default: '__yao.delivery', type: 'robot-delivery' },
+	{ key: 'delivery', label_en: 'Delivery', label_cn: '交付', desc_en: 'Format & deliver', desc_cn: '格式化并交付', type: 'robot-delivery' },
 	// learning is hidden - placeholder implementation, not yet functional
-	// { key: 'learning', label_en: 'Learning', label_cn: '学习', desc_en: 'Extract insights', desc_cn: '提取经验', default: '__yao.learning', type: 'robot-learning' }
+	// { key: 'learning', label_en: 'Learning', label_cn: '学习', desc_en: 'Extract insights', desc_cn: '提取经验', type: 'robot-learning' }
 ]
 
 // Learn types
@@ -110,39 +110,28 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 	}, [])
 
 	// Build agent options for each phase
-	// Default system agent (__yao.*) is always first, then agents matching the phase type
-	// Also includes current value if not in the list (to preserve saved selection)
+	// First option is always the "use global default" placeholder, then agents from API
 	const getPhaseAgentOptions = useMemo(() => {
-		return (phaseKey: string, phaseType: string, defaultAgent: string, currentValue?: string) => {
-			// Start with the default system agent
+		return (phaseKey: string, phaseType: string, currentValue?: string) => {
 			const options: Array<{ label: string; value: string }> = [
-				{ label: `${defaultAgent} (${is_cn ? '默认' : 'default'})`, value: defaultAgent }
+				{ label: is_cn ? '使用全局默认' : 'Use global default', value: '' }
 			]
-			
-			// Add agents that match the phase type from API query
+
 			const agents = phaseAgents[phaseType] || []
 			agents.forEach(agent => {
-				// Skip if it's the default agent (already added)
-				if (agent.assistant_id === defaultAgent) return
-				
 				options.push({
 					label: agent.name || agent.assistant_id,
 					value: agent.assistant_id
 				})
 			})
-			
-			// If current value exists and is not in options, add it
-			// This preserves saved values that might not appear in the agent list
-			if (currentValue && currentValue !== defaultAgent) {
+
+			if (currentValue) {
 				const exists = options.some(opt => opt.value === currentValue)
 				if (!exists) {
-					options.push({
-						label: currentValue,
-						value: currentValue
-					})
+					options.push({ label: currentValue, value: currentValue })
 				}
 			}
-			
+
 			return options
 		}
 	}, [phaseAgents, is_cn])
@@ -554,14 +543,13 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 						</div>
 						<div className={styles.phaseSelect}>
 							<Select
-								value={formData[`resources.phases.${phase.key}`] || phase.default}
+								value={formData[`resources.phases.${phase.key}`] || ''}
 								onChange={(value) => handleFieldChange(`resources.phases.${phase.key}`, value)}
 								schema={{
 									type: 'string',
 									enum: getPhaseAgentOptions(
 										phase.key, 
 										phase.type, 
-										phase.default, 
 										formData[`resources.phases.${phase.key}`]
 									)
 								}}
