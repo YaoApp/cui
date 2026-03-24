@@ -157,13 +157,13 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 					'triggers.event.enabled': triggers.event?.enabled || false,
 					
 					// Resources/Phases configuration (Advanced panel - Developer options)
-					'resources.phases.host': resources.phases?.host || '__yao.host',
-					'resources.phases.inspiration': resources.phases?.inspiration || '__yao.inspiration',
-					'resources.phases.goals': resources.phases?.goals || '__yao.goals',
-					'resources.phases.tasks': resources.phases?.tasks || '__yao.tasks',
-					'resources.phases.validation': resources.phases?.validation || '__yao.validation',
-					'resources.phases.delivery': resources.phases?.delivery || '__yao.delivery',
-					'resources.phases.learning': resources.phases?.learning || '__yao.learning',
+					'resources.phases.host': resources.phases?.host || '',
+					'resources.phases.inspiration': resources.phases?.inspiration || '',
+					'resources.phases.goals': resources.phases?.goals || '',
+					'resources.phases.tasks': resources.phases?.tasks || '',
+					'resources.phases.validation': resources.phases?.validation || '',
+					'resources.phases.delivery': resources.phases?.delivery || '',
+					'resources.phases.learning': resources.phases?.learning || '',
 
 					// Integration credentials (Integration panel)
 					...flatIntegrations
@@ -410,13 +410,13 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 				// Resources/Phases settings (Developer options)
 				resources: {
 					phases: {
-						host: formData['resources.phases.host'] || '__yao.host',
-						inspiration: formData['resources.phases.inspiration'] || '__yao.inspiration',
-						goals: formData['resources.phases.goals'] || '__yao.goals',
-						tasks: formData['resources.phases.tasks'] || '__yao.tasks',
-						validation: formData['resources.phases.validation'] || '__yao.validation',
-						delivery: formData['resources.phases.delivery'] || '__yao.delivery',
-						learning: formData['resources.phases.learning'] || '__yao.learning'
+						host: formData['resources.phases.host'] || '',
+						inspiration: formData['resources.phases.inspiration'] || '',
+						goals: formData['resources.phases.goals'] || '',
+						tasks: formData['resources.phases.tasks'] || '',
+						validation: formData['resources.phases.validation'] || '',
+						delivery: formData['resources.phases.delivery'] || '',
+						learning: formData['resources.phases.learning'] || ''
 					}
 				},
 				// Integration settings — rebuild nested object from dot-notation keys
