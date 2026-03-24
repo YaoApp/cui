@@ -48,73 +48,23 @@ const Index = () => {
 	const [tags, setTags] = useState<{ key: string; label: string }[]>([
 		{ key: 'all', label: is_cn ? '全部' : 'All' }
 	])
-	const [tagsLoading, setTagsLoading] = useState(true)
 	
 	// Load LLM providers once for all cards
 	const { mapping: connectorMapping } = useLLMProviders()
 
-	// Load tags
-	useEffect(() => {
-		const loadTags = async () => {
-			if (!window.$app?.openapi) {
-				console.error('OpenAPI not available')
-				return
-			}
-
-			try {
-				const agent = new Agent(window.$app.openapi)
-				const response = await agent.tags.List({
-					locale: is_cn ? 'zh-cn' : 'en-us',
-					type: 'assistant'
-				})
-
-				if (window.$app.openapi.IsError(response)) {
-					throw new Error(response.error?.error_description || 'Failed to load tags')
+	const extractTags = (assistants: App.Assistant[]): { key: string; label: string }[] => {
+		const tagSet = new Set<string>()
+		for (const a of assistants) {
+			if (Array.isArray(a.tags)) {
+				for (const t of a.tags) {
+					if (t) tagSet.add(t)
 				}
-
-				// Transform the response into the required format
-				let formattedTags: { key: string; value: string; label: string }[] = [
-					{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }
-				]
-
-				const tagsData = window.$app.openapi.GetData(response)
-				if (Array.isArray(tagsData)) {
-					// If response is an array of strings, transform each string into an object
-					if (typeof tagsData[0] === 'string') {
-						const tagObjects = tagsData.map((tag: string) => ({
-							key: tag,
-							value: tag,
-							label: tag
-						}))
-						formattedTags = [
-							{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' },
-							...tagObjects
-						]
-					}
-					// If response is already an array of objects with key and label, use it directly
-					else if (tagsData[0] && typeof tagsData[0] === 'object' && 'value' in tagsData[0]) {
-						formattedTags = [{ key: 'all', value: 'all', label: is_cn ? '全部' : 'All' }]
-						tagsData.forEach((tag: any) => {
-							formattedTags.push({
-								key: tag.value,
-								value: tag.value,
-								label: tag.label
-							})
-						})
-					}
-				}
-
-				setTags(formattedTags)
-			} catch (error) {
-				console.error(is_cn ? '加载助手标签失败:' : 'Failed to load assistant tags:', error)
-				message.error(is_cn ? '加载助手标签失败' : 'Failed to load assistant tags')
-			} finally {
-				setTagsLoading(false)
 			}
 		}
-
-		loadTags()
-	}, [is_cn])
+		return Array.from(tagSet)
+			.sort()
+			.map((t) => ({ key: t, label: t }))
+	}
 
 	// Load data - initial load
 	const loadData = async () => {
@@ -180,13 +130,15 @@ const Index = () => {
 				return assistant
 			})
 
-			// Reset mode: replace data
 			setData(newData)
 			setCurrentPage(1)
 			setTotalAssistants(total)
-
-			// Check if there's more data
 			setHasMore(newData.length < total)
+
+			if (activeType === 'all') {
+				const pageTags = extractTags(newData)
+				setTags([{ key: 'all', label: is_cn ? '全部' : 'All' }, ...pageTags])
+			}
 		} catch (error) {
 			console.error(is_cn ? '加载助手失败:' : 'Failed to load assistants:', error)
 			message.error(is_cn ? '加载助手失败' : 'Failed to load assistants')
@@ -264,12 +216,18 @@ const Index = () => {
 				return assistant
 			})
 
-			// Append data
 			setData((prev) => (Array.isArray(prev) ? [...prev, ...newData] : newData))
 			setTotalAssistants(total)
-
-			// Check if there's more data
 			setHasMore(data.length + newData.length < total)
+
+			if (activeType === 'all') {
+				const pageTags = extractTags(newData)
+				setTags((prev) => {
+					const existing = new Set(prev.map((t) => t.key))
+					const fresh = pageTags.filter((t) => !existing.has(t.key))
+					return fresh.length > 0 ? [...prev, ...fresh] : prev
+				})
+			}
 		} catch (error) {
 			console.error(is_cn ? '加载更多助手失败:' : 'Failed to load more assistants:', error)
 			message.error(is_cn ? '加载更多助手失败' : 'Failed to load more assistants')
@@ -386,15 +344,11 @@ const Index = () => {
 					</Button>
 				</div>
 				<div className={styles.tabsWrapper}>
-					{tagsLoading ? (
-						<Spin size='small' />
-					) : (
-						<Tabs
-							activeKey={activeType}
-							onChange={setActiveType}
-							items={tags.map((type) => ({ key: type.key, label: type.label }))}
-						/>
-					)}
+					<Tabs
+						activeKey={activeType}
+						onChange={setActiveType}
+						items={tags.map((type) => ({ key: type.key, label: type.label }))}
+					/>
 				</div>
 			</div>
 
