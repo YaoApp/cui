@@ -1,18 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { EnumOption, OptionGroup, PropertySchema, PropertyValue, InputComponentProps } from '../types'
+import Icon from '@/widgets/Icon'
 import styles from './index.less'
 
 interface GroupedOption {
 	label: string
 	value: string
 	description?: string
+	icon?: string
 }
 
 interface SelectProps extends InputComponentProps {
 	tabIndex?: number
+	allowClear?: boolean
 }
 
-export default function Select({ value, onChange, schema, size = 'medium', tabIndex = 0 }: SelectProps) {
+export default function Select({ value, onChange, schema, size = 'medium', tabIndex = 0, allowClear }: SelectProps) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [highlightedIndex, setHighlightedIndex] = useState(-1)
 	const [isDropup, setIsDropup] = useState(false)
@@ -129,13 +132,13 @@ export default function Select({ value, onChange, schema, size = 'medium', tabIn
 	}
 
 	// 获取默认选项
+	const isClearable = allowClear || schema.allowClear
 	const getDefaultOption = (): GroupedOption | null => {
-		// 从 schema.default 获取默认值
 		if (schema.default !== undefined) {
 			const defaultOpt = flatOptions.find((opt) => opt.value === schema.default)
 			if (defaultOpt) return defaultOpt
 		}
-		// 如果没有找到，返回第一个选项
+		if (isClearable) return null
 		return flatOptions.length > 0 ? flatOptions[0] : null
 	}
 
@@ -256,6 +259,7 @@ export default function Select({ value, onChange, schema, size = 'medium', tabIn
 				<div className={styles.selectedContent}>
 					{selectedOption ? (
 						<>
+							{selectedOption.icon && <Icon name={selectedOption.icon} size={14} className={styles.optionIcon} />}
 							<span className={styles.selectedLabel}>{selectedOption.label}</span>
 							{selectedOption.description && (
 								<span className={styles.selectedDescription}>
@@ -264,20 +268,35 @@ export default function Select({ value, onChange, schema, size = 'medium', tabIn
 							)}
 						</>
 					) : (
-						<span className={styles.placeholder}>Select an option...</span>
+						<span className={styles.placeholder}>{schema.placeholder || 'Select an option...'}</span>
 					)}
 				</div>
-				<div className={`${styles.arrow} ${isOpen ? styles.arrowUp : ''}`}>
-					<svg width='12' height='8' viewBox='0 0 12 8' fill='none'>
-						<path
-							d='M1 1.5L6 6.5L11 1.5'
-							stroke='currentColor'
-							strokeWidth='1.5'
-							strokeLinecap='round'
-							strokeLinejoin='round'
-						/>
-					</svg>
-				</div>
+				{isClearable && selectedOption ? (
+					<div
+						className={styles.clearBtn}
+						onClick={(e) => {
+							e.stopPropagation()
+							onChange?.(undefined as any)
+							setIsOpen(false)
+						}}
+					>
+						<svg width='12' height='12' viewBox='0 0 12 12' fill='none'>
+							<path d='M3 3L9 9M9 3L3 9' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' />
+						</svg>
+					</div>
+				) : (
+					<div className={`${styles.arrow} ${isOpen ? styles.arrowUp : ''}`}>
+						<svg width='12' height='8' viewBox='0 0 12 8' fill='none'>
+							<path
+								d='M1 1.5L6 6.5L11 1.5'
+								stroke='currentColor'
+								strokeWidth='1.5'
+								strokeLinecap='round'
+								strokeLinejoin='round'
+							/>
+						</svg>
+					</div>
+				)}
 			</div>
 
 			{/* 下拉选项 */}
@@ -344,6 +363,7 @@ export default function Select({ value, onChange, schema, size = 'medium', tabIn
 												}
 											>
 												<div className={styles.optionContent}>
+													{option.icon && <Icon name={option.icon} size={14} className={styles.optionIcon} />}
 													<span className={styles.optionLabel}>
 														{option.label}
 													</span>
@@ -380,6 +400,7 @@ export default function Select({ value, onChange, schema, size = 'medium', tabIn
 									onMouseEnter={() => setHighlightedIndex(flatIndex)}
 								>
 									<div className={styles.optionContent}>
+										{item.icon && <Icon name={item.icon} size={14} className={styles.optionIcon} />}
 										<span className={styles.optionLabel}>{item.label}</span>
 										{item.description && (
 											<span className={styles.optionDescription}>

@@ -7,11 +7,23 @@ import { newStreamSession } from '@/chatbox/utils/chunkProcessor'
 import type { StreamSession } from '@/chatbox/utils/chunkProcessor'
 import { applyDelta, clearMessageCache } from '@/chatbox/hooks/delta'
 import { nanoid } from 'nanoid'
-import { Chat } from '@/openapi'
+import { Chat, FileAPI } from '@/openapi'
 import type { Message as CUIMessage } from '@/openapi/chat/types'
 import type { InteractDoneData } from '@/openapi/agent/robot/types'
 import type { RobotState } from '../../types'
 import styles from './index.less'
+
+interface ChatAttachment {
+	id: string
+	file: File
+	name: string
+	type: 'image' | 'file'
+	previewUrl?: string
+	uploading: boolean
+	error?: string
+	fileId?: string
+	wrapper?: string
+}
 
 interface ChatHistoryItem {
 	chat_id: string
@@ -84,6 +96,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
+	const fileInputRef = useRef<HTMLInputElement>(null)
 	const chatIdRef = useRef(propChatId || `chat-drawer-${Date.now()}`)
 	const sessionRef = useRef<StreamSession>(newStreamSession())
 	const abortRef = useRef<(() => void) | null>(null)
@@ -96,7 +109,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
 	const [messages, setMessages] = useState<CUIMessage[]>(initialMessages || [])
 	const [inputContent, setInputContent] = useState('')
-	const [attachments, setAttachments] = useState<File[]>([])
+	const [attachments, setAttachments] = useState<ChatAttachment[]>([])
 	const [sending, setSending] = useState(false)
 	const [streaming, setStreaming] = useState(false)
 	const [completed, setCompleted] = useState(false)
@@ -297,6 +310,14 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 		}
 	}, [isFinalized, onComplete, onClose])
 
+	useEffect(() => {
+		return () => {
+			attachments.forEach((att) => {
+				if (att.previewUrl) URL.revokeObjectURL(att.previewUrl)
+			})
+		}
+	}, [])
+
 	const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setInputContent(e.target.value)
 		const textarea = e.target
@@ -305,21 +326,45 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 	}
 
 	const handleSend = useCallback(() => {
-		if (!inputContent.trim() || sending || isFinalized) return
+		const readyAttachments = attachments.filter((att) => !att.uploading && !att.error && att.wrapper)
+		const hasUploading = attachments.some((att) => att.uploading)
+
+		if ((!inputContent.trim() && readyAttachments.length === 0) || sending || isFinalized || hasUploading) return
 		if (!chatClient || !assistantId) return
 
 		const userContent = inputContent.trim()
 		const currentChatId = chatIdRef.current
 
+		let messageContent: any
+		if (readyAttachments.length > 0) {
+			const parts: any[] = []
+			if (userContent) parts.push({ type: 'text', text: userContent })
+			readyAttachments.forEach((att) => {
+				if (att.type === 'image') {
+					parts.push({ type: 'image_url', image_url: { url: att.wrapper, detail: 'auto' } })
+				} else {
+					parts.push({ type: 'file', file: { url: att.wrapper, filename: att.name } })
+				}
+			})
+			messageContent = parts
+		} else {
+			messageContent = userContent
+		}
+
+		const displayContent = userContent || (is_cn
+			? `[${readyAttachments.length} 个附件]`
+			: `[${readyAttachments.length} attachment${readyAttachments.length > 1 ? 's' : ''}]`)
+
 		// Add user message immediately
 		const userMsg: CUIMessage = {
 			type: 'user_input',
-			props: { content: userContent, role: 'user' },
+			props: { content: displayContent, role: 'user' },
 			ui_id: `user-${Date.now()}`,
 			message_id: `user-${Date.now()}`
 		}
 		setMessages((prev) => [...prev, userMsg])
 		setInputContent('')
+		setAttachments([])
 		setSending(true)
 		setStreaming(true)
 		setInteractResult(null)
@@ -337,7 +382,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 			{
 				assistant_id: assistantId,
 				chat_id: currentChatId,
-				messages: [{ role: 'user', content: userContent }],
+				messages: [{ role: 'user', content: messageContent }],
 				metadata
 			},
 			(chunk: CUIMessage) => {
@@ -455,7 +500,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 		)
 
 		abortRef.current = abortFn
-	}, [inputContent, sending, isFinalized, chatClient, assistantId, metadata, is_cn])
+	}, [inputContent, sending, isFinalized, chatClient, assistantId, metadata, is_cn, attachments])
 
 	const handleComplete = useCallback(async () => {
 		if (messages.length === 0) return
@@ -481,13 +526,69 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 	}
 
 	const handleFileAdd = () => {
-		console.log('Add file attachment')
+		fileInputRef.current?.click()
+	}
+
+	const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const files = e.target.files
+		if (!files || files.length === 0) return
+
+		if (fileInputRef.current) fileInputRef.current.value = ''
+
+		const openapi = window.$app?.openapi
+		if (!openapi) return
+
+		const uploaderID = '__yao.attachment'
+		const fileApi = new FileAPI(openapi, uploaderID)
+
+		const newAttachments: ChatAttachment[] = Array.from(files).map((file) => ({
+			id: Math.random().toString(36).substring(7),
+			file,
+			name: file.name,
+			type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
+			previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+			uploading: true
+		}))
+
+		setAttachments((prev) => [...prev, ...newAttachments])
+
+		for (const att of newAttachments) {
+			try {
+				const res = await fileApi.Upload(att.file, {
+					uploaderID,
+					originalFilename: att.name,
+					compressImage: att.type === 'image',
+					public: true
+				})
+
+				if (openapi.IsError(res) || !res.data?.file_id) {
+					throw new Error(res.error?.error_description || (is_cn ? '上传失败' : 'Upload failed'))
+				}
+
+				const fileId = res.data.file_id
+				const wrapper = `${uploaderID}://${fileId}`
+
+				setAttachments((prev) =>
+					prev.map((p) => (p.id === att.id ? { ...p, uploading: false, fileId, wrapper } : p))
+				)
+			} catch (err: any) {
+				console.error('[ChatDrawer] Upload error:', err)
+				setAttachments((prev) =>
+					prev.map((p) =>
+						p.id === att.id
+							? { ...p, uploading: false, error: err?.message || (is_cn ? '上传失败' : 'Upload failed') }
+							: p
+					)
+				)
+			}
+		}
 	}
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
 			e.preventDefault()
-			if (inputContent.trim() && !sending) {
+			const hasReadyAttachments = attachments.some((a) => !a.uploading && !a.error && a.wrapper)
+			if ((inputContent.trim() || hasReadyAttachments) && !sending) {
 				handleSend()
 			}
 		}
@@ -717,27 +818,62 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 
 							{/* Input Area */}
 							<div className={styles.inputArea}>
-								{attachments.length > 0 && (
-									<div className={styles.attachmentList}>
-										{attachments.map((file, index) => (
-											<div key={index} className={styles.attachmentItem}>
+							{attachments.length > 0 && (
+								<div className={styles.attachmentList}>
+									{attachments.map((att) => (
+										<div
+											key={att.id}
+											className={`${styles.attachmentItem} ${att.error ? styles.attachmentError : ''}`}
+										>
+											{att.type === 'image' && att.previewUrl ? (
+												<div
+													className={styles.attachmentThumb}
+													style={{ backgroundImage: `url(${att.previewUrl})` }}
+												/>
+											) : (
 												<Icon name='material-attach_file' size={12} />
-												<span className={styles.attachmentName}>{file.name}</span>
-												<button
-													className={styles.attachmentRemove}
-													onClick={() =>
-														setAttachments((prev) => prev.filter((_, i) => i !== index))
-													}
-												>
-													<Icon name='material-close' size={10} />
-												</button>
-											</div>
-										))}
-									</div>
-								)}
+											)}
+											<span className={styles.attachmentName}>{att.name}</span>
+											{att.uploading && (
+												<span className={styles.attachmentUploading}>
+													<Icon name='material-sync' size={10} />
+												</span>
+											)}
+											{att.error && (
+												<span className={styles.attachmentErrorText}>
+													{att.error}
+												</span>
+											)}
+											<button
+												className={styles.attachmentRemove}
+												onClick={() => {
+													if (att.previewUrl) URL.revokeObjectURL(att.previewUrl)
+													setAttachments((prev) => prev.filter((p) => p.id !== att.id))
+												}}
+											>
+												<Icon name='material-close' size={10} />
+											</button>
+										</div>
+									))}
+								</div>
+							)}
 
 								<div className={styles.inputRow}>
-								{/* TODO: v2 — Attachment upload */}
+								<button
+									className={styles.actionBtn}
+									onClick={handleFileAdd}
+									disabled={sending || isFinalized}
+									title={is_cn ? '添加附件' : 'Add attachment'}
+								>
+									<Icon name='material-attach_file' size={16} />
+								</button>
+								<input
+									type='file'
+									ref={fileInputRef}
+									style={{ display: 'none' }}
+									onChange={handleFileSelect}
+									multiple
+								/>
 								<textarea
 									ref={textareaRef}
 									className={styles.taskInput}
@@ -749,10 +885,15 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 								/>
 								<button
 									className={`${styles.sendBtn} ${
-										!inputContent.trim() || sending || isFinalized ? styles.sendBtnDisabled : ''
+										(!inputContent.trim() && !attachments.some((a) => !a.uploading && !a.error && a.wrapper))
+											|| sending || isFinalized || attachments.some((a) => a.uploading)
+											? styles.sendBtnDisabled : ''
 									}`}
 									onClick={handleSend}
-									disabled={!inputContent.trim() || sending || isFinalized}
+									disabled={
+										(!inputContent.trim() && !attachments.some((a) => !a.uploading && !a.error && a.wrapper))
+											|| sending || isFinalized || attachments.some((a) => a.uploading)
+									}
 								>
 										<Icon name='material-rocket_launch' size={16} />
 									</button>

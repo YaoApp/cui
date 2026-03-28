@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Tooltip } from 'antd'
 import { Input, Select, RadioGroup } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
+import { useWorkspace } from '@/hooks/useComputerWorkspace'
 import type { RobotState } from '../../../../../types'
 import type { ConfigContextData } from '../index'
 import styles from '../index.less'
@@ -19,46 +20,24 @@ interface BasicPanelProps {
  * 
  * Fields from `__yao.member`:
  * - display_name: Name
- * - robot_email: Email (full email address string, e.g. "robot@ai.yaoagents.com")
  * - role_id: Role
  * - bio: Description
  * - manager_id: Reports To
  * - autonomous_mode: Work Mode
+ * - workspace: Workspace binding
  */
 const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_cn, configData }) => {
 	const [errors, setErrors] = useState<Record<string, string>>({})
-	
-	// Local state for email prefix and domain (for UI split display)
-	const [emailPrefix, setEmailPrefix] = useState('')
-	const [emailDomain, setEmailDomain] = useState('')
 
-	// Get options from configData
-	const emailDomains = useMemo(() => configData?.emailDomains || [], [configData?.emailDomains])
+	const { fetchWorkspaces, workspaceOptionsGrouped } = useWorkspace()
+
+	useEffect(() => {
+		fetchWorkspaces()
+	}, [fetchWorkspaces])
+
 	const roles = useMemo(() => configData?.roles || [], [configData?.roles])
 	const managers = useMemo(() => configData?.managers || [], [configData?.managers])
 
-	// Parse robot_email into prefix and domain when formData changes
-	useEffect(() => {
-		const email = formData.robot_email || ''
-		const atIndex = email.indexOf('@')
-		if (atIndex > 0) {
-			// Valid email like "robot@ai.yaoagents.com"
-			setEmailPrefix(email.substring(0, atIndex))
-			setEmailDomain(`@${email.substring(atIndex + 1)}`)
-		} else if (atIndex === 0) {
-			// Only domain like "@ai.yaoagents.com" (invalid, clear prefix)
-			setEmailPrefix('')
-			setEmailDomain(email)
-		} else if (email === '') {
-			// Empty email - keep prefix empty, set default domain if available
-			setEmailPrefix('')
-			if (emailDomains.length > 0 && !emailDomain) {
-				setEmailDomain(emailDomains[0].value)
-			}
-		}
-	}, [formData.robot_email, emailDomains])
-
-	// Handle field change with error clearing
 	const handleFieldChange = (field: string, value: any) => {
 		onChange(field, value)
 		if (errors[field]) {
@@ -67,33 +46,6 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 				delete newErrors[field]
 				return newErrors
 			})
-		}
-	}
-
-	// Handle email prefix change - combine with domain and update formData
-	const handleEmailPrefixChange = (value: any) => {
-		const prefix = String(value || '')
-		setEmailPrefix(prefix)
-		// Only update robot_email if we have both prefix and domain
-		if (prefix && emailDomain) {
-			onChange('robot_email', `${prefix}${emailDomain}`)
-		}
-		if (errors.robot_email) {
-			setErrors(prev => {
-				const newErrors = { ...prev }
-				delete newErrors.robot_email
-				return newErrors
-			})
-		}
-	}
-
-	// Handle email domain change - combine with prefix and update formData
-	const handleEmailDomainChange = (value: any) => {
-		const domain = String(value || '')
-		setEmailDomain(domain)
-		// Only update robot_email if we have both prefix and domain
-		if (emailPrefix && domain) {
-			onChange('robot_email', `${emailPrefix}${domain}`)
 		}
 	}
 
@@ -121,15 +73,14 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 				/>
 			</div>
 
-			{/* Email */}
+			{/* Workspace */}
 			<div className={styles.formItem}>
 				<label className={styles.formLabel}>
-					<span className={styles.required}>*</span>
-					{is_cn ? '邮箱地址' : 'Email Address'}
+					{is_cn ? '工作空间' : 'Workspace'}
 					<Tooltip
 						title={is_cn
-							? '智能体可通过此邮箱接收任务和发送工作报告'
-							: 'The agent can receive tasks and send reports through this email'
+							? '将智能体绑定到指定的工作空间环境'
+							: 'Bind the agent to a specific workspace environment'
 						}
 						placement='top'
 					>
@@ -138,32 +89,17 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 						</span>
 					</Tooltip>
 				</label>
-				<div className={styles.emailInput}>
-					<Input
-						value={emailPrefix}
-						onChange={handleEmailPrefixChange}
-						schema={{
-							type: 'string',
-							placeholder: is_cn ? '邮箱前缀' : 'Email prefix'
-						}}
-						error=''
-						hasError={!!errors.robot_email}
-					/>
-					<span className={styles.emailAt}>@</span>
-					<Select
-						value={emailDomain}
-						onChange={handleEmailDomainChange}
-						schema={{
-							type: 'string',
-							enum: emailDomains,
-							placeholder: is_cn ? '选择域名' : 'Select domain'
-						}}
-						tabIndex={-1}
-					/>
-				</div>
-				{errors.robot_email && (
-					<div className={styles.formError}>{errors.robot_email}</div>
-				)}
+				<Select
+					value={formData.workspace || undefined}
+					onChange={(value) => handleFieldChange('workspace', value || null)}
+					schema={{
+						type: 'string',
+						enum: workspaceOptionsGrouped,
+						placeholder: is_cn ? '选择工作空间（可选）' : 'Select workspace (optional)',
+						searchable: true,
+						allowClear: true
+					}}
+				/>
 			</div>
 
 			{/* Role and Manager - Two columns */}

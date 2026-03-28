@@ -701,6 +701,37 @@
 	white-space: nowrap;
 }
 
+.attachmentError {
+	border-color: rgba(239, 68, 68, 0.4);
+	background: rgba(239, 68, 68, 0.06);
+}
+
+.attachmentThumb {
+	width: 18px;
+	height: 18px;
+	border-radius: 3px;
+	background-size: cover;
+	background-position: center;
+	flex-shrink: 0;
+}
+
+.attachmentUploading {
+	display: flex;
+	align-items: center;
+	color: var(--color_mission_accent_cyan);
+	animation: spin 1s linear infinite;
+
+	:global(.xgen-icon) {
+		font-size: 10px;
+	}
+}
+
+.attachmentErrorText {
+	font-size: 10px;
+	color: var(--color_danger);
+	white-space: nowrap;
+}
+
 .attachmentRemove {
 	display: flex;
 	align-items: center;
@@ -982,6 +1013,15 @@
 	to {
 		transform: scale(1);
 		opacity: 1;
+	}
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
 	}
 }
 

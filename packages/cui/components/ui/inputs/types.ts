@@ -16,6 +16,8 @@ export interface EnumOption {
 	description?: string
 	/** Whether this option is the default selection */
 	default?: boolean
+	/** Optional icon name (e.g. 'material-folder') */
+	icon?: string
 }
 
 /**

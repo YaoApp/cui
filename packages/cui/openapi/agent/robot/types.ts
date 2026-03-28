@@ -79,6 +79,8 @@ export interface Robot {
 	mcp_servers?: string[]
 	/** Language model name */
 	language_model?: string
+	/** Workspace ID */
+	workspace?: string
 	/** Monthly cost limit USD */
 	cost_limit?: number
 	/** Who invited this robot */
@@ -182,6 +184,8 @@ export interface RobotCreateRequest {
 	mcp_servers?: string[]
 	/** Language model name */
 	language_model?: string
+	/** Workspace ID */
+	workspace?: string
 	/** Monthly cost limit USD */
 	cost_limit?: number
 }
@@ -223,6 +227,8 @@ export interface RobotUpdateRequest {
 	mcp_servers?: string[]
 	/** Language model name */
 	language_model?: string
+	/** Workspace ID (null to clear) */
+	workspace?: string | null
 	/** Monthly cost limit USD */
 	cost_limit?: number
 }
