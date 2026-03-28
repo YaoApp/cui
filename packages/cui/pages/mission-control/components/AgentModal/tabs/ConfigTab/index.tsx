@@ -114,7 +114,6 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 					// Basic fields
 					display_name: robotDetail.display_name || '',
 					bio: robotDetail.bio || '',
-					robot_email: robotDetail.robot_email || '',
 					role_id: robotDetail.role_id || '',
 					manager_id: robotDetail.manager_id || '',
 					autonomous_mode: robotDetail.autonomous_mode || false,
@@ -122,6 +121,7 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 					agents: robotDetail.agents || [],
 					mcp_servers: robotDetail.mcp_servers || [],
 					language_model: robotDetail.language_model || '',
+					workspace: robotDetail.workspace || '',
 					cost_limit: robotDetail.cost_limit || 100,
 					
 					// Clock configuration (Schedule panel)
@@ -440,7 +440,6 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 			const updateData: RobotUpdateRequest = {
 				display_name: formData.display_name,
 				bio: formData.bio,
-				robot_email: formData.robot_email,
 				role_id: formData.role_id,
 				manager_id: formData.manager_id || undefined,
 				autonomous_mode: formData.autonomous_mode,
@@ -448,6 +447,7 @@ const ConfigTab: React.FC<ConfigTabProps> = ({ robot, onDelete, onUpdated }) => 
 				agents: formData.agents?.length > 0 ? formData.agents : undefined,
 				mcp_servers: formData.mcp_servers?.length > 0 ? formData.mcp_servers : undefined,
 				language_model: formData.language_model || undefined,
+				workspace: formData.workspace || null,
 				cost_limit: formData.cost_limit,
 				robot_config: robotConfig
 			}

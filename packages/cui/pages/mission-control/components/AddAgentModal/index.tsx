@@ -7,6 +7,7 @@ import AgentPicker from '@/components/AgentPicker'
 import AIGenerator from '@/components/AIGenerator'
 import type { PickerItem } from '@/components/AgentPicker/types'
 import { useRobots } from '@/hooks/useRobots'
+import { useWorkspace } from '@/hooks/useComputerWorkspace'
 import { useGlobal } from '@/context/app'
 import { Agent } from '@/openapi/agent/api'
 import { MCP } from '@/openapi/mcp/api'
@@ -32,12 +33,13 @@ type StepType = 1 | 2
  * 
  * Step 1: Basic Info
  * - display_name (Name)
- * - robot_email (Email + domain)
  * - manager_id (Manager)
  * - autonomous_mode (Work Mode)
+ * - workspace (Workspace)
  * 
  * Step 2: Identity
  * - system_prompt (Role & Responsibilities)
+ * - language_model (AI Model)
  * - agents (AI Assistants)
  * - mcp_servers (MCP Tools)
  */
@@ -55,8 +57,6 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 	// Form state
 	const [formData, setFormData] = useState<Record<string, any>>({
 		display_name: '',
-		robot_email_prefix: '',
-		robot_email_domain: '',
 		manager_id: '',
 		autonomous_mode: false,
 		system_prompt: '',
@@ -80,6 +80,9 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 	const [mcpLoading, setMCPLoading] = useState(false)
 	const [llmProviders, setLlmProviders] = useState<LLMProvider[]>([])
 	const [llmLoading, setLlmLoading] = useState(false)
+
+	// Workspace hook
+	const { loading: workspaceLoading, fetchWorkspaces, workspaceOptionsGrouped } = useWorkspace()
 
 	// Picker visibility state
 	const [agentPickerVisible, setAgentPickerVisible] = useState(false)
@@ -115,14 +118,6 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 					}
 					if (response.data) {
 						setTeamConfig(response.data)
-						// Set default email domain
-						if (response.data?.robot?.email_domains?.[0]?.domain) {
-							const domain = response.data.robot.email_domains[0].domain
-							setFormData(prev => ({
-								...prev,
-								robot_email_domain: domain
-							}))
-						}
 					}
 				})
 				.catch((error) => {
@@ -241,6 +236,12 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 		}
 	}, [visible, currentStep])
 
+	useEffect(() => {
+		if (visible) {
+			fetchWorkspaces()
+		}
+	}, [visible])
+
 	// Reset when modal closes
 	useEffect(() => {
 		if (!visible) {
@@ -251,14 +252,6 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			llmLoadedRef.current = false
 		}
 	}, [visible])
-
-	// Email domains from config
-	const emailDomains = useMemo(() => {
-		return teamConfig?.robot?.email_domains?.map((domain) => ({
-			label: `@${domain.domain}`,
-			value: domain.domain || ''
-		})) || []
-	}, [teamConfig])
 
 	// Manager options
 	const managerOptions = useMemo(() => {
@@ -317,12 +310,11 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			setCurrentStep(1)
 			setFormData({
 				display_name: '',
-				robot_email_prefix: '',
-				robot_email_domain: teamConfig?.robot?.email_domains?.[0]?.domain || '',
 				manager_id: '',
 				autonomous_mode: false,
 				system_prompt: '',
 				language_model: '',
+				workspace: '',
 				agents: [],
 				mcp_servers: []
 			})
@@ -335,7 +327,6 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 	const isDirty = useMemo(() => {
 		return !!(
 			formData.display_name ||
-			formData.robot_email_prefix ||
 			formData.system_prompt ||
 			formData.agents?.length > 0
 		)
@@ -362,17 +353,6 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			newErrors.display_name = is_cn ? '请输入名称' : 'Name is required'
 		}
 
-		if (!formData.robot_email_prefix?.trim()) {
-			newErrors.robot_email_prefix = is_cn ? '请输入邮箱' : 'Email is required'
-		} else if (!/^[a-zA-Z0-9._-]+$/.test(formData.robot_email_prefix)) {
-			newErrors.robot_email_prefix = is_cn ? '邮箱格式不正确' : 'Invalid email format'
-		}
-
-		// Keep existing email error if any (from blur check)
-		if (errors.robot_email_prefix && formData.robot_email_prefix?.trim()) {
-			newErrors.robot_email_prefix = errors.robot_email_prefix
-		}
-
 		setErrors(newErrors)
 		return Object.keys(newErrors).length === 0
 	}
@@ -391,42 +371,6 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 
 		setErrors(newErrors)
 		return Object.keys(newErrors).length === 0
-	}
-
-	// Handle email blur - check uniqueness
-	const handleEmailBlur = async () => {
-		if (!formData.robot_email_prefix?.trim() || !teamId || !window.$app?.openapi) {
-			return
-		}
-
-		const fullEmail = `${formData.robot_email_prefix}@${formData.robot_email_domain}`
-
-		try {
-			const openapi = window.$app.openapi
-			const auth = new UserAuth(openapi)
-			const teamsAPI = new UserTeams(openapi, auth)
-			const response = await teamsAPI.CheckRobotEmail(teamId, fullEmail)
-
-			if (openapi.IsError(response)) {
-				console.error('Failed to check robot email:', response)
-				return
-			}
-
-			if (response.data?.exists) {
-				setErrors(prev => ({
-					...prev,
-					robot_email_prefix: is_cn ? '该机器人邮箱已被使用' : 'This robot email is already in use'
-				}))
-			} else {
-				setErrors(prev => {
-					const newErrors = { ...prev }
-					delete newErrors.robot_email_prefix
-					return newErrors
-				})
-			}
-		} catch (error) {
-			console.error('Failed to check robot email:', error)
-		}
 	}
 
 	// Handle next step
@@ -450,13 +394,13 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 		try {
 			// Call API to create robot (member_id auto-generated by backend)
 			const result = await createRobot({
-				// member_id: auto-generated by backend (12-digit numeric ID)
 				team_id: teamId,
 				display_name: formData.display_name,
-				robot_email: `${formData.robot_email_prefix}@${formData.robot_email_domain}`,
 				manager_id: formData.manager_id || undefined,
 				autonomous_mode: formData.autonomous_mode,
 				system_prompt: formData.system_prompt,
+				language_model: formData.language_model || undefined,
+				workspace: formData.workspace || undefined,
 				agents: formData.agents?.length > 0 ? formData.agents : undefined,
 				mcp_servers: formData.mcp_servers?.length > 0 ? formData.mcp_servers : undefined,
 				status: 'active',
@@ -565,11 +509,11 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 							<div className={styles.stepTitle}>
 								{is_cn ? '设置基本信息' : 'Set up basic information'}
 							</div>
-							<div className={styles.stepDescription}>
-								{is_cn 
-									? '为智能体设置名称、邮箱和工作模式' 
-									: 'Configure name, email and work mode for your AI teammate'}
-							</div>
+						<div className={styles.stepDescription}>
+							{is_cn 
+								? '为智能体设置名称和工作模式' 
+								: 'Configure name and work mode for your AI teammate'}
+						</div>
 
 							<div className={styles.formContent}>
 								{/* Name */}
@@ -590,16 +534,14 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 									/>
 								</div>
 
-								{/* Email */}
+								{/* Workspace */}
 								<div className={styles.formItem}>
 									<label className={styles.formLabel}>
-										{is_cn ? '邮箱' : 'Email'}
-										<span className={styles.required}>*</span>
+										{is_cn ? '工作空间' : 'Workspace'}
 										<Tooltip
-											title={
-												is_cn
-													? 'AI 成员可通过此邮箱接收和发送邮件'
-													: 'The AI member can receive and send emails through this address'
+											title={is_cn
+												? '将智能体绑定到指定的工作空间环境'
+												: 'Bind the agent to a specific workspace environment'
 											}
 											placement='top'
 										>
@@ -607,39 +549,26 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 												<Icon name='material-help' size={14} className={styles.helpIcon} />
 											</span>
 										</Tooltip>
+										{workspaceLoading && (
+											<span className={styles.loadingHint}>
+												{is_cn ? ' (加载中...)' : ' (Loading...)'}
+											</span>
+										)}
 									</label>
-									<div className={styles.emailInput}>
-										<Input
-											value={formData.robot_email_prefix}
-											onChange={(value) => handleFieldChange('robot_email_prefix', value)}
-											onBlur={handleEmailBlur}
-											schema={{
-												type: 'string',
-												placeholder: is_cn ? '邮箱前缀' : 'email prefix'
-											}}
-											error={errors.robot_email_prefix}
-											hasError={!!errors.robot_email_prefix}
-										/>
-										<span className={styles.emailAt}>@</span>
-										<Select
-											value={formData.robot_email_domain}
-											onChange={(value) => {
-												handleFieldChange('robot_email_domain', value)
-												// Re-check email when domain changes
-												if (formData.robot_email_prefix?.trim()) {
-													setTimeout(handleEmailBlur, 100)
-												}
-											}}
-											schema={{
-												type: 'string',
-												enum: emailDomains,
-												placeholder: is_cn ? '选择域名' : 'Select domain'
-											}}
-										/>
-									</div>
+									<Select
+										value={formData.workspace || undefined}
+										onChange={(value) => handleFieldChange('workspace', value || '')}
+										schema={{
+											type: 'string',
+											enum: workspaceOptionsGrouped,
+											placeholder: is_cn ? '选择工作空间（可选）' : 'Select workspace (optional)',
+											searchable: true,
+											allowClear: true
+										}}
+									/>
 								</div>
 
-								{/* Manager */}
+							{/* Manager */}
 								<div className={styles.formItem}>
 									<label className={styles.formLabel}>
 										{is_cn ? '直属主管' : 'Manager'}
@@ -724,14 +653,10 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 									context={() => {
 										const agentNames = selectedAgentItems.map(a => a.label).join(', ')
 										const mcpNames = selectedMcpItems.map(s => s.label).join(', ')
-										const llmLabel = llmOptions.find(o => o.value === formData.language_model)?.label || ''
-										const managerLabel = managerOptions.find(o => o.value === formData.manager_id)?.label || ''
-										const email = formData.robot_email_prefix
-											? `${formData.robot_email_prefix}@${formData.robot_email_domain || ''}`
-											: ''
-										const snapshot = {
-											display_name: formData.display_name || '',
-											email: email,
+									const llmLabel = llmOptions.find(o => o.value === formData.language_model)?.label || ''
+									const managerLabel = managerOptions.find(o => o.value === formData.manager_id)?.label || ''
+									const snapshot = {
+										display_name: formData.display_name || '',
 											manager: formData.manager_id ? managerLabel : '',
 											autonomous_mode: formData.autonomous_mode || false,
 											system_prompt: formData.system_prompt || '',
@@ -829,10 +754,10 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 									/>
 								</div>
 
-								{/* Accessible AI Assistants */}
-								<div className={styles.formItem}>
-									<label className={styles.formLabel}>
-										{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
+							{/* Accessible AI Assistants */}
+							<div className={styles.formItem}>
+								<label className={styles.formLabel}>
+									{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
 										{agentsLoading && (
 											<span className={styles.loadingHint}>
 												{is_cn ? ' (加载中...)' : ' (Loading...)'}
@@ -932,11 +857,10 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 							<button className={styles.cancelButton} onClick={handleClose}>
 								{is_cn ? '取消' : 'Cancel'}
 							</button>
-							<button 
-								className={styles.nextButton} 
-								onClick={handleNext}
-								disabled={!!errors.robot_email_prefix}
-							>
+						<button 
+							className={styles.nextButton} 
+							onClick={handleNext}
+						>
 								<span>{is_cn ? '下一步' : 'Next'}</span>
 								<Icon name='material-arrow_forward' size={16} />
 							</button>

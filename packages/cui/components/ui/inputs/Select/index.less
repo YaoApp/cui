@@ -53,8 +53,8 @@
 	.selectedContent {
 		flex: 1;
 		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
+		align-items: center;
+		gap: 8px;
 		min-width: 0;
 	}
 
@@ -91,6 +91,23 @@
 
 		&.arrowUp {
 			transform: rotate(180deg);
+		}
+	}
+
+	.clearBtn {
+		margin-left: 8px;
+		color: var(--color_text_grey, #999);
+		flex-shrink: 0;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		padding: 2px;
+
+		&:hover {
+			color: var(--color_text, #333);
+			background: var(--color_bg_hover, rgba(0, 0, 0, 0.06));
 		}
 	}
 
@@ -207,8 +224,13 @@
 	.optionContent {
 		padding: 10px 12px;
 		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.optionIcon {
+		flex-shrink: 0;
+		color: var(--color_text_grey, #999);
 	}
 
 	.optionLabel {
