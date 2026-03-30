@@ -1,9 +1,10 @@
 import { useMemoizedFn } from 'ahooks'
-import { Popover } from 'antd'
+import { Popover, Tooltip } from 'antd'
 import clsx from 'clsx'
 import NiceAvatar from 'react-nice-avatar'
 
 import { useIntl } from '@/hooks'
+import { Icon } from '@/widgets'
 
 import NavItem from '../NavItem'
 import UserModalContent from '../UserModalContent'
@@ -12,8 +13,14 @@ import styles from './index.less'
 import type { IPropsOptions, IPropsUserModalContent } from '@/layouts/types'
 
 const Index = (props: IPropsOptions) => {
-	const { items, current_nav, show_name, in_setting, avatar, user, setAvatar, setInSetting } = props
+	const { items, current_nav, show_name, in_setting, avatar, yao_metadata, user, setAvatar, setInSetting } = props
 	const messages = useIntl()
+
+	const license = yao_metadata?.license
+	const showWebsiteLink = !license?.valid || license?.edition === 'community'
+	const licenseLabel = license?.edition
+		? license.edition.charAt(0).toUpperCase() + license.edition.slice(1) + ' Edition'
+		: 'Unlicensed'
 
 	const Avatar = (
 		<NiceAvatar
@@ -45,6 +52,23 @@ const Index = (props: IPropsOptions) => {
 					></NavItem>
 				))}
 			</div>
+			{/*
+			 * LICENSE NOTICE: This website link is required by the Yao open source license.
+			 * Removing or hiding this link requires a commercial license.
+			 * See /LICENSE for details.
+			 */}
+			{showWebsiteLink && (
+				<Tooltip title={`Yao Agents · ${licenseLabel}`} placement='right'>
+					<a
+						href='https://yaoagents.com'
+						target='_blank'
+						rel='noopener noreferrer'
+						className='website_link flex justify_center align_center'
+					>
+						<Icon name='material-language' size={20}></Icon>
+					</a>
+				</Tooltip>
+			)}
 			<Popover
 				overlayClassName='popover_user_wrap'
 				trigger='click'

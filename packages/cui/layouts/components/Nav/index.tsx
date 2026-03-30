@@ -8,7 +8,7 @@ import { Tooltip } from 'antd'
 import { Link } from '@umijs/max'
 
 const Index = (props: IPropsNav) => {
-	const { avatar, app_info, user, menus, current_nav, in_setting, setAvatar, setInSetting } = props
+	const { avatar, app_info, user, menus, current_nav, in_setting, yao_metadata, setAvatar, setInSetting } = props
 
 	const props_logo: IPropsLogo = {
 		logo: app_info?.logo
@@ -30,6 +30,7 @@ const Index = (props: IPropsNav) => {
 		avatar,
 		app_info,
 		show_name: show_name,
+		yao_metadata,
 		user,
 		setAvatar,
 		setInSetting

@@ -104,6 +104,36 @@
 			}
 		}
 
+		.menu-website-link {
+			width: 100%;
+			justify-content: flex-start;
+			padding: 0 12px;
+			gap: 10px;
+			margin: 0;
+			height: 40px;
+
+			&:hover {
+				background: var(--color_bg_hover);
+
+				.menu-icon i {
+					color: var(--color_main);
+				}
+
+				.menu-website-text {
+					color: var(--color_main);
+				}
+			}
+
+			.menu-icon {
+				width: 24px;
+				justify-content: center;
+			}
+
+			.menu-website-text {
+				display: block;
+			}
+		}
+
 		.menu-avatar {
 			width: 100%;
 			justify-content: flex-start;
@@ -355,6 +385,51 @@
 			&.expanded {
 				transform: rotate(180deg);
 			}
+		}
+	}
+
+	.menu-website-link {
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		border-radius: var(--radius);
+		text-decoration: none;
+		margin: 0 auto;
+		transition: all 0.2s ease;
+
+		&:hover {
+			.menu-icon {
+				transform: scale(1.15);
+
+				i {
+					color: var(--color_main);
+				}
+			}
+		}
+
+		.menu-icon {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: transform 0.2s ease;
+
+			i {
+				color: var(--color_text_grey);
+				transition: color 0.2s ease;
+			}
+		}
+
+		.menu-website-text {
+			display: none;
+			font-size: 14px;
+			color: var(--color_text);
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			transition: color 0.2s ease;
 		}
 	}
 

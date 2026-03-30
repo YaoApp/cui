@@ -34,6 +34,7 @@ const AdminWrapper: FC<PropsWithChildren> = ({ children }) => {
 		menus: global.menus,
 		current_nav: global.current_nav,
 		in_setting: global.in_setting,
+		yao_metadata: global.yao_metadata,
 		setAvatar: global.setAvatar,
 		setInSetting: (v) => (global.in_setting = v)
 	}

@@ -9,6 +9,7 @@ import './menu.less'
 import { Icon, UserAvatar } from '@/widgets'
 import { App } from '@/types'
 import { GetCurrentUser } from '@/pages/auth/auth'
+import type { YaoMetadata } from '@/services/wellknown'
 
 /**
  * Check if menu item is sidebar-only mode (no Chatbox)
@@ -201,6 +202,13 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 	// Use full menu data: items + setting
 	const menuItems = global.menus?.items || []
 	const settingItems = global.menus?.setting || []
+
+	// Check license for website link
+	const license = (global.yao_metadata as YaoMetadata | null)?.license
+	const showWebsiteLink = !license?.valid || license?.edition === 'community'
+	const licenseLabel = license?.edition
+		? license.edition.charAt(0).toUpperCase() + license.edition.slice(1) + ' Edition'
+		: 'Unlicensed'
 
 	// Menu expanded state: false = collapsed (icon only), true = expanded (icon + text)
 	const [expanded, setExpanded] = useState(false)
@@ -501,7 +509,7 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 					{menuItems.map((menu, index) => renderMenuItem(menu, index))}
 				</div>
 
-				{/* Bottom section: Settings + Avatar */}
+				{/* Bottom section: Settings + Website Link + Avatar */}
 				<div className='menu-bottom'>
 					{/* Setting items */}
 					{settingItems.length > 0 && (
@@ -510,6 +518,27 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 								renderMenuItem(menu, index + menuItems.length)
 							)}
 						</div>
+					)}
+
+					{/*
+					 * LICENSE NOTICE: This website link is required by the Yao open source license.
+					 * Removing or hiding this link requires a commercial license.
+					 * See /LICENSE for details.
+					 */}
+					{showWebsiteLink && (
+						<Tooltip title={`Yao Agents · ${licenseLabel}`} placement='right'>
+							<a
+								href='https://yaoagents.com'
+								target='_blank'
+								rel='noopener noreferrer'
+								className='menu-website-link'
+							>
+								<span className='menu-icon'>
+									<Icon name='material-language' size={20} />
+								</span>
+								{expanded && <span className='menu-website-text'>{licenseLabel}</span>}
+							</a>
+						</Tooltip>
 					)}
 
 					<div

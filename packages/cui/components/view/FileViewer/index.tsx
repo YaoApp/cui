@@ -381,18 +381,44 @@ const Index = (props: IProps) => {
 							: getFileExtension(fileName) || fileType}
 					</span>
 					{/* 统一的下载按钮 - 所有文件类型都支持 */}
-					{fileSource && fileName && (
+					{(fileSource || content) && fileName && (
 						<Button
 							type='text'
 							size='small'
 							icon={<DownloadOutlined />}
-							onClick={() => {
-								const link = document.createElement('a')
-								link.href = fileSource
-								link.download = fileName
-								document.body.appendChild(link)
-								link.click()
-								document.body.removeChild(link)
+							onClick={async () => {
+								if (content) {
+									const blob = new Blob([content], { type: contentType || 'text/plain' })
+									const blobUrl = URL.createObjectURL(blob)
+									const a = document.createElement('a')
+									a.href = blobUrl
+									a.download = fileName
+									a.style.display = 'none'
+									document.body.appendChild(a)
+									a.click()
+									document.body.removeChild(a)
+									URL.revokeObjectURL(blobUrl)
+								} else if (fileSource) {
+									try {
+										const resp = await fetch(fileSource, { credentials: 'include' })
+										if (!resp.ok) {
+											console.error(`Download failed: ${resp.status} ${resp.statusText}`)
+											return
+										}
+										const blob = await resp.blob()
+										const blobUrl = URL.createObjectURL(blob)
+										const a = document.createElement('a')
+										a.href = blobUrl
+										a.download = fileName
+										a.style.display = 'none'
+										document.body.appendChild(a)
+										a.click()
+										document.body.removeChild(a)
+										URL.revokeObjectURL(blobUrl)
+									} catch (err) {
+										console.error('Download failed:', err)
+									}
+								}
 							}}
 							title={is_cn ? '下载文件' : 'Download File'}
 						/>
