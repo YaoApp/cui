@@ -9,6 +9,11 @@ export interface YaoMetadata {
 	issuer_url?: string
 	dashboard?: string // Admin dashboard root path (e.g., "/admin")
 	optional?: Record<string, any>
+	license?: {
+		valid?: boolean
+		edition?: string
+		product?: string[]
+	}
 	developer?: {
 		id?: string
 		name?: string

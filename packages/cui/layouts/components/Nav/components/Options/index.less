@@ -16,6 +16,23 @@
 
 ._local {
 	:global {
+		.website_link {
+			width: 100%;
+			height: 40px;
+			text-decoration: none;
+			cursor: pointer;
+			transition: opacity ease 0.3s;
+
+			i {
+				color: var(--color_title_grey);
+				transition: color ease 0.3s;
+			}
+
+			&:hover i {
+				color: var(--color_main);
+			}
+		}
+
 		.user_item {
 			margin-top: 12px;
 			margin-bottom: 18px;

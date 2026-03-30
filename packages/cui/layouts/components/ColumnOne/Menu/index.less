@@ -101,6 +101,33 @@
 				border-radius: 8px;
 				font-size: 12px;
 			}
+
+			.website_link {
+				padding: 8px 24px;
+				text-decoration: none;
+				cursor: pointer;
+				font-size: 14px;
+				font-weight: 500;
+				color: var(--color_title_grey);
+				transition: color ease 0.3s;
+
+				&:hover {
+					color: var(--color_main);
+
+					i {
+						color: var(--color_main);
+					}
+				}
+
+				i {
+					color: var(--color_title_grey);
+					transition: color ease 0.3s;
+				}
+
+				.website_link_text {
+					margin-left: 10px;
+				}
+			}
 		}
 
 		.menu_wrap {

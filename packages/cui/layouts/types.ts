@@ -1,5 +1,6 @@
 import type { Locale, App } from '@/types'
 import type { GlobalModel } from '@/context/app'
+import type { YaoMetadata } from '@/services/wellknown'
 
 export interface IPropsHelmet {
 	theme: GlobalModel['theme']
@@ -31,6 +32,7 @@ export interface IPropsNav {
 	menus: GlobalModel['menus']
 	current_nav: GlobalModel['current_nav']
 	in_setting: GlobalModel['in_setting']
+	yao_metadata?: YaoMetadata | null
 	setAvatar: GlobalModel['setAvatar']
 	setInSetting: (v: boolean) => void
 }
@@ -55,6 +57,7 @@ export interface IPropsOptions {
 	app_info: GlobalModel['app_info']
 	user: GlobalModel['user']
 	show_name?: boolean
+	yao_metadata?: YaoMetadata | null
 	setAvatar: GlobalModel['setAvatar']
 	setInSetting: IPropsNav['setInSetting']
 }

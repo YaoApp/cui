@@ -1,5 +1,5 @@
 import { useDeepCompareEffect } from 'ahooks'
-import { Input, Menu } from 'antd'
+import { Input, Menu, Tooltip } from 'antd'
 import clsx from 'clsx'
 import { useState } from 'react'
 
@@ -19,6 +19,12 @@ const Index = (props: IPropsMenu) => {
 	const { visible_input, current_items, toggle, setInput } = useSearch(items)
 	// const { menu_items } = useMenuItems(current_items)
 	const [openKeys, setOpenKeys] = useState<Array<string>>([])
+
+	const license = nav_props?.yao_metadata?.license
+	const showWebsiteLink = !license?.valid || license?.edition === 'community'
+	const licenseLabel = license?.edition
+		? license.edition.charAt(0).toUpperCase() + license.edition.slice(1) + ' Edition'
+		: 'Unlicensed'
 
 	useDeepCompareEffect(() => {
 		setOpenKeys(menu_selected_keys)
@@ -83,6 +89,23 @@ const Index = (props: IPropsMenu) => {
 
 			<div className='setting_wrap w_100'>
 				<Menu {...props_setting}></Menu>
+				{/*
+				 * LICENSE NOTICE: This website link is required by the Yao open source license.
+				 * Removing or hiding this link requires a commercial license.
+				 * See /LICENSE for details.
+				 */}
+				{showWebsiteLink && (
+					<a
+						href='https://yaoagents.com'
+						target='_blank'
+						rel='noopener noreferrer'
+						className='website_link flex align_center'
+						title={`Yao Agents · ${licenseLabel}`}
+					>
+						<Icon name='material-language' size={14}></Icon>
+						<span className='website_link_text'>{licenseLabel}</span>
+					</a>
+				)}
 			</div>
 		</div>
 	)

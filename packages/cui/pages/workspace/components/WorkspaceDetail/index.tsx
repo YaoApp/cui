@@ -174,7 +174,7 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 				const resp = await api.ReadFile(workspace.id, filePath)
 				if (window.$app.openapi.IsError(resp)) throw new Error(resp.error?.error_description)
 				const text = typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data, null, 2)
-				setPreviewFile({ name: entry.name, content: text, contentType: 'text/plain' })
+				setPreviewFile({ name: entry.name, content: text, contentType: 'text/plain', src: api.ContentURL(workspace.id, filePath) })
 			} catch {
 				message.error(is_cn ? '加载文件失败' : 'Failed to load file')
 				setPreviewFile(null)
