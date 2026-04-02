@@ -5,17 +5,19 @@ import styles from './index.less'
 
 interface AuthHeaderProps {
 	logo?: string
+	logoLink?: string
 	theme?: 'light' | 'dark'
 	onThemeChange?: (theme: 'light' | 'dark') => void
 }
 
-const AuthHeader: React.FC<AuthHeaderProps> = ({ logo = getDefaultLogoUrl(), theme, onThemeChange }) => {
+const AuthHeader: React.FC<AuthHeaderProps> = ({ logo = getDefaultLogoUrl(), logoLink, theme, onThemeChange }) => {
+	const logoImg = <img src={logo} alt='Logo' />
 	return (
 		<>
 			{/* App Logo */}
 			<div className={styles.logoWrap}>
 				<div className={styles.appLogo}>
-					<img src={logo} alt='Logo' />
+					{logoLink ? <a href={logoLink}>{logoImg}</a> : logoImg}
 				</div>
 			</div>
 
