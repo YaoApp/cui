@@ -22,6 +22,10 @@ const setCookie = (name: string, value: string) => {
 	document.cookie = `${name}=${value};path=/;max-age=315360000`
 }
 
+const deleteCookie = (name: string) => {
+	document.cookie = `${name}=;path=/;max-age=0`
+}
+
 const getUrlParam = (name: string): string | null => {
 	const urlParams = new URLSearchParams(window.location.search)
 	return urlParams.get(name)
@@ -429,6 +433,10 @@ const AuthEntry = () => {
 
 					message.success(currentLocale === 'zh-CN' ? '登录成功！' : 'Login successful!')
 
+					// Clean up redirect cookies before navigating
+					deleteCookie('login_redirect')
+					deleteCookie('logout_redirect')
+
 					// Redirect to entry page
 					setTimeout(() => {
 						window.location.href = loginRedirect
@@ -520,6 +528,10 @@ const AuthEntry = () => {
 							: 'Registration and login successful!'
 					)
 
+					// Clean up redirect cookies before navigating
+					deleteCookie('login_redirect')
+					deleteCookie('logout_redirect')
+
 					// Redirect to entry page
 					setTimeout(() => {
 						window.location.href = loginRedirect
@@ -565,6 +577,7 @@ const AuthEntry = () => {
 	return (
 		<AuthLayout
 			logo={global.app_info?.logo || getDefaultLogoUrl()}
+			logoLink='/'
 			theme={global.theme}
 			onThemeChange={(theme: 'light' | 'dark') => global.setTheme(theme)}
 		>
