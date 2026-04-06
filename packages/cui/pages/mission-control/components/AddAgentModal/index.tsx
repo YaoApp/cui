@@ -57,6 +57,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 	// Form state
 	const [formData, setFormData] = useState<Record<string, any>>({
 		display_name: '',
+		role_id: '',
 		manager_id: '',
 		autonomous_mode: false,
 		system_prompt: '',
@@ -253,6 +254,21 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 		}
 	}, [visible])
 
+	// Role options from team config
+	const roleOptions = useMemo(() => {
+		return teamConfig?.roles
+			?.filter((role: any) => !role.hidden)
+			.map((role: any) => ({
+				label: role.label,
+				value: role.role_id
+			})) || []
+	}, [teamConfig])
+
+	// Default role from config
+	const defaultRoleId = useMemo(() => {
+		return teamConfig?.roles?.find((role: any) => role.default)?.role_id || ''
+	}, [teamConfig])
+
 	// Manager options
 	const managerOptions = useMemo(() => {
 		return userMembers
@@ -310,6 +326,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			setCurrentStep(1)
 			setFormData({
 				display_name: '',
+				role_id: defaultRoleId,
 				manager_id: '',
 				autonomous_mode: false,
 				system_prompt: '',
@@ -351,6 +368,10 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 
 		if (!formData.display_name?.trim()) {
 			newErrors.display_name = is_cn ? '请输入名称' : 'Name is required'
+		}
+
+		if (!formData.role_id) {
+			newErrors.role_id = is_cn ? '请选择身份' : 'Role is required'
 		}
 
 		setErrors(newErrors)
@@ -396,6 +417,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 			const result = await createRobot({
 				team_id: teamId,
 				display_name: formData.display_name,
+				role_id: formData.role_id || undefined,
 				manager_id: formData.manager_id || undefined,
 				autonomous_mode: formData.autonomous_mode,
 				system_prompt: formData.system_prompt,
@@ -568,41 +590,61 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 									/>
 								</div>
 
-							{/* Manager */}
-								<div className={styles.formItem}>
-									<label className={styles.formLabel}>
-										{is_cn ? '直属主管' : 'Manager'}
-										<Tooltip
-											title={
-												is_cn
-													? 'AI 成员会定期向直接主管发送工作总结和进度报告'
-													: 'AI member will regularly send work summaries and progress reports to the direct manager'
-											}
-											placement='top'
-										>
-											<span className={styles.helpIconWrapper}>
-												<Icon name='material-help' size={14} className={styles.helpIcon} />
-											</span>
-										</Tooltip>
-										{userMembersLoading && (
-											<span className={styles.loadingHint}>
-												{is_cn ? ' (加载中...)' : ' (Loading...)'}
-											</span>
-										)}
-									</label>
-									<Select
-										value={formData.manager_id}
-										onChange={(value) => handleFieldChange('manager_id', value)}
-										schema={{
-											type: 'string',
-											enum: managerOptions,
-											placeholder: is_cn ? '选择主管（可选）' : 'Select manager (optional)'
-										}}
-										error={errors.manager_id}
-										hasError={!!errors.manager_id}
-									/>
-									<div className={styles.fieldHint}>
-										{is_cn ? '执行结果将发送给直属主管' : 'Results will be sent to the manager'}
+							{/* Role and Manager - Two columns */}
+								<div className={styles.formRow}>
+									<div className={styles.formItemHalf}>
+										<label className={styles.formLabel}>
+											{is_cn ? '身份' : 'Role'}
+											<span className={styles.required}>*</span>
+										</label>
+										<Select
+											value={formData.role_id}
+											onChange={(value) => handleFieldChange('role_id', value)}
+											schema={{
+												type: 'string',
+												enum: roleOptions,
+												placeholder: is_cn ? '选择身份' : 'Select role'
+											}}
+											error={errors.role_id}
+											hasError={!!errors.role_id}
+										/>
+									</div>
+
+									<div className={styles.formItemHalf}>
+										<label className={styles.formLabel}>
+											{is_cn ? '直属主管' : 'Manager'}
+											<Tooltip
+												title={
+													is_cn
+														? 'AI 成员会定期向直接主管发送工作总结和进度报告'
+														: 'AI member will regularly send work summaries and progress reports to the direct manager'
+												}
+												placement='top'
+											>
+												<span className={styles.helpIconWrapper}>
+													<Icon name='material-help' size={14} className={styles.helpIcon} />
+												</span>
+											</Tooltip>
+											{userMembersLoading && (
+												<span className={styles.loadingHint}>
+													{is_cn ? ' (加载中...)' : ' (Loading...)'}
+												</span>
+											)}
+										</label>
+										<Select
+											value={formData.manager_id}
+											onChange={(value) => handleFieldChange('manager_id', value)}
+											schema={{
+												type: 'string',
+												enum: managerOptions,
+												placeholder: is_cn ? '选择主管（可选）' : 'Select manager (optional)'
+											}}
+											error={errors.manager_id}
+											hasError={!!errors.manager_id}
+										/>
+										<div className={styles.fieldHint}>
+											{is_cn ? '执行结果将发送给直属主管' : 'Results will be sent to the manager'}
+										</div>
 									</div>
 								</div>
 
