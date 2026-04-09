@@ -355,10 +355,17 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 			? `[${readyAttachments.length} 个附件]`
 			: `[${readyAttachments.length} attachment${readyAttachments.length > 1 ? 's' : ''}]`)
 
+		// Build attachment previews for the user bubble
+		const attachmentPreviews = readyAttachments.map((att) => ({
+			type: att.type,
+			name: att.name,
+			previewUrl: att.previewUrl
+		}))
+
 		// Add user message immediately
 		const userMsg: CUIMessage = {
 			type: 'user_input',
-			props: { content: displayContent, role: 'user' },
+			props: { content: displayContent, role: 'user', attachments: attachmentPreviews },
 			ui_id: `user-${Date.now()}`,
 			message_id: `user-${Date.now()}`
 		}
@@ -533,6 +540,8 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 		const files = e.target.files
 		if (!files || files.length === 0) return
 
+		// Snapshot files before clearing input — FileList is live and becomes empty after reset
+		const fileArray = Array.from(files)
 		if (fileInputRef.current) fileInputRef.current.value = ''
 
 		const openapi = window.$app?.openapi
@@ -541,7 +550,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({
 		const uploaderID = '__yao.attachment'
 		const fileApi = new FileAPI(openapi, uploaderID)
 
-		const newAttachments: ChatAttachment[] = Array.from(files).map((file) => ({
+		const newAttachments: ChatAttachment[] = fileArray.map((file) => ({
 			id: Math.random().toString(36).substring(7),
 			file,
 			name: file.name,
