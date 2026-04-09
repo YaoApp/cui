@@ -83,13 +83,35 @@ const DrawerMessageList: React.FC<DrawerMessageListProps> = ({ messages, streami
 					const text = typeof content === 'string' ? content : Array.isArray(content)
 						? content.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')
 						: ''
+					const attachments: Array<{ type: string; name: string; previewUrl?: string }> =
+						msg.props?.attachments || []
 
 					return (
 						<div
 							key={msg.ui_id || msg.message_id || index}
 							className={`${styles.drawerMsg} ${styles.drawerMsgUser}`}
 						>
-							<div className={styles.drawerBubbleUser}>{text}</div>
+							<div className={styles.drawerBubbleUser}>
+								{attachments.length > 0 && (
+									<div className={styles.userAttachments}>
+										{attachments.map((att, i) =>
+											att.type === 'image' && att.previewUrl ? (
+												<img
+													key={i}
+													src={att.previewUrl}
+													alt={att.name}
+													className={styles.userAttachmentImg}
+												/>
+											) : (
+												<div key={i} className={styles.userAttachmentFile}>
+													{att.name}
+												</div>
+											)
+										)}
+									</div>
+								)}
+								{text && <span>{text}</span>}
+							</div>
 						</div>
 					)
 				}
