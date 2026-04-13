@@ -10,10 +10,13 @@ import { visit } from 'unist-util-visit'
 import { VFile } from 'vfile'
 import { compile, run } from '@mdx-js/mdx'
 import { useMDXComponents } from '@mdx-js/react'
+import { Modal } from 'antd'
 import styles from './index.less'
 import Code from './components/Code'
 import Mermaid from './components/Mermaid'
 import ReferencePopover from './components/ReferencePopover'
+import FileViewer from '@/components/view/FileViewer'
+import { WorkspaceAPI } from '@/openapi/workspace'
 import Thinking from '../Thinking'
 import ToolCall from '../ToolCall'
 import type { TextMessage, ThinkingMessage, ToolCallMessage } from '../../../openapi'
@@ -257,6 +260,83 @@ const handleUnclosedHtmlTags = (text: string): string => {
 	return text
 }
 
+/**
+ * Build an HTML <a> tag for a workspace:// URL.
+ * Displays the full path after the workspace ID with a file icon.
+ */
+const buildWorkspaceTag = (url: string): string => {
+	const rest = url.slice('workspace://'.length)
+	const slashIdx = rest.indexOf('/')
+	const displayPath = slashIdx !== -1 ? rest.slice(slashIdx + 1) : rest
+	return `<a class="workspace-link" href="${url}"><i class="Icon material">insert_drive_file</i>${displayPath || url}</a>`
+}
+
+/**
+ * Convert workspace:// URLs in text to clickable HTML <a> tags.
+ * Handles: backtick-wrapped URLs, markdown links, and bare URLs.
+ * Skips URLs inside fenced code blocks (``` ... ```).
+ */
+const wrapWorkspaceLinks = (text: string): string => {
+	const codeBlockPositions: Array<[number, number]> = []
+	const codeBlockRegex = /```/g
+	let cbMatch
+	let inCodeBlock = false
+	while ((cbMatch = codeBlockRegex.exec(text)) !== null) {
+		if (!inCodeBlock) {
+			inCodeBlock = true
+			codeBlockPositions.push([cbMatch.index, -1])
+		} else {
+			inCodeBlock = false
+			const last = codeBlockPositions[codeBlockPositions.length - 1]
+			if (last) last[1] = cbMatch.index + 3
+		}
+	}
+	if (inCodeBlock) {
+		const last = codeBlockPositions[codeBlockPositions.length - 1]
+		if (last) last[1] = text.length
+	}
+	const isInCodeBlock = (pos: number) =>
+		codeBlockPositions.some(([start, end]) => pos >= start && pos < end)
+
+	// Pass 1: unwrap backtick-wrapped workspace URLs:  `workspace://...`  →  <a>
+	// Also handle markdown links: [text](workspace://...) → <a>
+	let result = text.replace(
+		/`(workspace:\/\/[^`]+)`/g,
+		(match, url, offset) => {
+			if (isInCodeBlock(offset)) return match
+			return buildWorkspaceTag(url)
+		}
+	)
+	result = result.replace(
+		/\[([^\]]*)\]\((workspace:\/\/[^)]+)\)/g,
+		(match, label, url, offset) => {
+			if (isInCodeBlock(offset)) return match
+			const displayName = label || url.split('/').pop() || url
+			return `<a class="workspace-link" href="${url}">${displayName}</a>`
+		}
+	)
+
+	// Pass 2: convert remaining bare workspace:// URLs
+	const parts: string[] = []
+	let lastIndex = 0
+	const wsRegex = /workspace:\/\/[^\s)>\]`"']+/g
+	let wsMatch
+	while ((wsMatch = wsRegex.exec(result)) !== null) {
+		if (isInCodeBlock(wsMatch.index)) continue
+		const before = result.slice(Math.max(0, wsMatch.index - 6), wsMatch.index)
+		if (before.endsWith('href="') || before.endsWith("href='")) continue
+
+		const url = wsMatch[0]
+		parts.push(result.slice(lastIndex, wsMatch.index))
+		parts.push(buildWorkspaceTag(url))
+		lastIndex = wsMatch.index + url.length
+	}
+
+	if (parts.length === 0) return result
+	parts.push(result.slice(lastIndex))
+	return parts.join('')
+}
+
 const escape = (text?: string) => {
 	if (!text) return ''
 
@@ -269,6 +349,9 @@ const escape = (text?: string) => {
 		.replace(/\r/g, '')
 		.replace(/\$\$[\n\r]+/g, '$$\n')
 		.replace(/[\n\r]+\$\$/g, '\n$$')
+
+	// Convert bare workspace:// URLs to markdown links before further processing
+	result = wrapWorkspaceLinks(result)
 
 	// Escape < that are not part of valid HTML tags (handles <3, <--, etc.)
 	result = escapeInvalidHtmlTags(result)
@@ -338,7 +421,82 @@ const Text = ({ message }: ITextProps) => {
 		return url.startsWith('http://') || url.startsWith('https://')
 	}, [])
 
-	// Handle link clicks (reference links and external links)
+	/**
+	 * Check if URL is a workspace file link (workspace://{workspaceId}/{path})
+	 */
+	const isWorkspaceLink = useCallback((url: string): boolean => {
+		return url.startsWith('workspace://')
+	}, [])
+
+	/**
+	 * Parse workspace:// URL into workspaceId and filePath
+	 * Format: workspace://{workspaceId}/{filePath}
+	 */
+	const parseWorkspaceLink = useCallback((url: string): { workspaceId: string; filePath: string } | null => {
+		if (!url.startsWith('workspace://')) return null
+		const rest = url.slice('workspace://'.length)
+		const slashIdx = rest.indexOf('/')
+		if (slashIdx === -1) return { workspaceId: rest, filePath: '' }
+		return {
+			workspaceId: rest.slice(0, slashIdx),
+			filePath: rest.slice(slashIdx + 1)
+		}
+	}, [])
+
+	// Workspace file preview state
+	const [wsPreviewFile, setWsPreviewFile] = useState<{
+		name: string
+		src?: string
+		content?: string
+		contentType?: string
+	} | null>(null)
+	const [wsPreviewLoading, setWsPreviewLoading] = useState(false)
+
+	const textExts = useRef(
+		new Set([
+			'txt', 'md', 'log', 'ini', 'cfg', 'csv', 'json', 'jsonc',
+			'yaml', 'yml', 'xml', 'py', 'js', 'ts', 'jsx', 'tsx',
+			'java', 'cpp', 'go', 'sh', 'html', 'css', 'sql', 'php',
+			'rb', 'rs', 'c', 'h', 'yao', 'less', 'scss', 'toml', 'env'
+		])
+	)
+
+	const handleWorkspaceLinkOpen = useCallback(
+		async (workspaceId: string, filePath: string) => {
+			if (!filePath || !window.$app?.openapi) return
+			const api = new WorkspaceAPI(window.$app.openapi)
+			const fileName = filePath.split('/').pop() || filePath
+			const ext = fileName.split('.').pop()?.toLowerCase() || ''
+
+			if (textExts.current.has(ext)) {
+				setWsPreviewFile({ name: fileName })
+				setWsPreviewLoading(true)
+				try {
+					const resp = await api.ReadFile(workspaceId, filePath)
+					if (window.$app.openapi.IsError(resp)) throw new Error(resp.error?.error_description)
+					const text = typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data, null, 2)
+					setWsPreviewFile({
+						name: fileName,
+						content: text,
+						contentType: 'text/plain',
+						src: api.ContentURL(workspaceId, filePath)
+					})
+				} catch {
+					setWsPreviewFile(null)
+				} finally {
+					setWsPreviewLoading(false)
+				}
+			} else {
+				setWsPreviewFile({
+					name: fileName,
+					src: api.ContentURL(workspaceId, filePath)
+				})
+			}
+		},
+		[]
+	)
+
+	// Handle link clicks (reference links, workspace links, and external links)
 	const handleLinkClick = useCallback(
 		(e: MouseEvent) => {
 			const target = e.target as HTMLElement
@@ -368,11 +526,25 @@ const Text = ({ message }: ITextProps) => {
 				return
 			}
 
-			// Check for regular external links (http/https)
+			// Check for all links (workspace:// and external)
 			const link = target.closest('a') as HTMLAnchorElement
 			if (link) {
 				const href = link.getAttribute('href')
-				if (href && isExternalLink(href)) {
+				if (!href) return
+
+				// Handle workspace:// links
+				if (isWorkspaceLink(href)) {
+					e.preventDefault()
+					e.stopPropagation()
+					const parsed = parseWorkspaceLink(href)
+					if (parsed) {
+						handleWorkspaceLinkOpen(parsed.workspaceId, parsed.filePath)
+					}
+					return
+				}
+
+				// Handle external http/https links
+				if (isExternalLink(href)) {
 					e.preventDefault()
 					e.stopPropagation()
 
@@ -383,7 +555,7 @@ const Text = ({ message }: ITextProps) => {
 				}
 			}
 		},
-		[requestId, isExternalLink, addTrackingParam]
+		[requestId, isExternalLink, isWorkspaceLink, parseWorkspaceLink, addTrackingParam, handleWorkspaceLinkOpen]
 	)
 
 	// Close reference popover
@@ -496,31 +668,47 @@ const Text = ({ message }: ITextProps) => {
 							}
 						})
 					},
-					// Handle newlines - convert standalone newlines to paragraph breaks
-					() => (tree) => {
-						visit(tree, (node: any, index: any, parent: any) => {
-							if (node?.type === 'text' && node?.value === '\n') {
-								const skipInTags = [
-									'table',
-									'thead',
-									'tbody',
-									'tfoot',
-									'tr',
-									'th',
-									'td',
-									'pre',
-									'code'
-								]
-								if (parent?.type === 'element' && skipInTags.includes(parent.tagName)) {
-									return
+				// Ensure workspace:// links have the workspace-link class
+				() => (tree) => {
+					visit(tree, (node: any) => {
+						if (node?.type === 'element' && node?.tagName === 'a') {
+							const href = node.properties?.href
+							if (typeof href === 'string' && href.startsWith('workspace://')) {
+								const cls = Array.isArray(node.properties.className)
+									? node.properties.className.join(' ')
+									: (node.properties.className || '')
+								if (!cls.includes('workspace-link')) {
+									node.properties.className = (cls + ' workspace-link').trim()
 								}
-								node.type = 'element'
-								node.tagName = 'p'
-								node.properties = { className: styles.newline }
-								node.children = []
 							}
-						})
-					}
+						}
+					})
+				},
+				// Handle newlines - convert standalone newlines to paragraph breaks
+				() => (tree) => {
+					visit(tree, (node: any, index: any, parent: any) => {
+						if (node?.type === 'text' && node?.value === '\n') {
+							const skipInTags = [
+								'table',
+								'thead',
+								'tbody',
+								'tfoot',
+								'tr',
+								'th',
+								'td',
+								'pre',
+								'code'
+							]
+							if (parent?.type === 'element' && skipInTags.includes(parent.tagName)) {
+								return
+							}
+							node.type = 'element'
+							node.tagName = 'p'
+							node.properties = { className: styles.newline }
+							node.children = []
+						}
+					})
+				}
 				]
 			})
 		)
@@ -591,6 +779,43 @@ const Text = ({ message }: ITextProps) => {
 					onClose={handleCloseReference}
 				/>
 			)}
+
+			{/* Workspace File Preview Modal */}
+			<Modal
+				open={!!wsPreviewFile}
+				title={wsPreviewFile?.name}
+				footer={null}
+				width='80vw'
+				bodyStyle={{ height: '70vh', padding: 0, overflow: 'hidden' }}
+				onCancel={() => setWsPreviewFile(null)}
+				destroyOnClose
+			>
+				{wsPreviewLoading ? (
+					<div
+						style={{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							height: '100%'
+						}}
+					>
+						Loading...
+					</div>
+				) : (
+					wsPreviewFile && (
+						<FileViewer
+							src={wsPreviewFile.src}
+							content={wsPreviewFile.content}
+							contentType={wsPreviewFile.contentType}
+							__name={wsPreviewFile.name}
+							__bind=''
+							__value={wsPreviewFile.name}
+							style={{ height: '70vh' }}
+							showMaximize
+						/>
+					)
+				)}
+			</Modal>
 		</div>
 	)
 }
