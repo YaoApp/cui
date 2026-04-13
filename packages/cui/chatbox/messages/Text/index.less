@@ -83,6 +83,28 @@
 		}
 	}
 
+	// Workspace file links (workspace://{workspaceId}/{path})
+	a:global(.workspace-link) {
+		color: var(--color_primary);
+		text-decoration: none;
+		border: none;
+		cursor: pointer;
+		border-radius: 3px;
+		transition: background 0.15s ease;
+
+		> :global(.Icon.material) {
+			font-size: inherit !important;
+			line-height: inherit !important;
+			vertical-align: bottom !important;
+			margin-right: 2px;
+		}
+
+		&:hover {
+			background: rgba(var(--r), var(--g), var(--b), 0.08);
+			border: none;
+		}
+	}
+
 	// Reference citation links
 	// Backend format: <a class="ref" data-ref-id="{id}" data-ref-type="{type}" href="#ref:{id}">[{id}]</a>
 	a.ref {
