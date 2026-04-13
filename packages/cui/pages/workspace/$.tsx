@@ -116,13 +116,13 @@ const WorkspacePage = () => {
 	if (isDetail && selectedWorkspace) {
 		return (
 			<div className={styles.container}>
-			<WorkspaceDetail
-				workspace={selectedWorkspace}
-				nodeMap={nodeMap}
-				onBack={handleBack}
-				onDelete={() => handleDelete(selectedWorkspace)}
-				onRefresh={loadWorkspaces}
-			/>
+		<WorkspaceDetail
+			workspace={selectedWorkspace}
+			nodeMap={nodeMap}
+			onBack={handleBack}
+			onDelete={() => handleDelete(selectedWorkspace)}
+			onRefresh={loadWorkspaces}
+		/>
 			</div>
 		)
 	}

@@ -158,7 +158,9 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 		'flac',
 		'ogg',
 		'm4a',
-		'pdf'
+		'pdf',
+		'docx',
+		'pptx'
 	])
 	const handlePreview = async (entry: DirEntry) => {
 		if (entry.is_dir) return
@@ -186,8 +188,7 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 		} else {
 			setPreviewFile({
 				name: entry.name,
-				content: is_cn ? '不支持预览此文件类型' : 'Preview not supported for this file type',
-				contentType: 'text/plain'
+				src: api.ContentURL(workspace.id, filePath)
 			})
 		}
 	}
@@ -245,6 +246,29 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 			loadDir(currentPath)
 		} catch {
 			message.error(is_cn ? '删除失败' : 'Delete failed')
+		}
+	}
+
+	const handleDownloadFile = async (entry: DirEntry) => {
+		const api = getApi()
+		if (!api) return
+		const filePath = currentPath === '/' ? entry.name : `${currentPath.slice(1)}/${entry.name}`
+		const url = api.ContentURL(workspace.id, filePath)
+		try {
+			const resp = await fetch(url, { credentials: 'include' })
+			if (!resp.ok) throw new Error(`${resp.status}`)
+			const blob = await resp.blob()
+			const blobUrl = URL.createObjectURL(blob)
+			const a = document.createElement('a')
+			a.href = blobUrl
+			a.download = entry.name
+			a.style.display = 'none'
+			document.body.appendChild(a)
+			a.click()
+			document.body.removeChild(a)
+			URL.revokeObjectURL(blobUrl)
+		} catch {
+			message.error(is_cn ? '下载失败' : 'Download failed')
 		}
 	}
 
@@ -315,29 +339,38 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 								className={styles.nameInput}
 							/>
 						) : (
-							<h2 className={styles.wsName} onClick={() => setEditingName(true)}>
-								{workspace.name}
-								<Icon name='material-edit' size={14} className={styles.editIcon} />
+							<h2 className={styles.wsName}>
+								<span onClick={() => setEditingName(true)}>
+									{workspace.name}
+									<Icon name='material-edit' size={14} className={styles.editIcon} />
+								</span>
+								<Popconfirm
+									title={
+										is_cn
+											? '确定要删除这个工作空间吗？此操作不可恢复！'
+											: 'Delete this workspace? This action cannot be undone!'
+									}
+									onConfirm={onDelete}
+									okText={is_cn ? '确认' : 'Confirm'}
+									cancelText={is_cn ? '取消' : 'Cancel'}
+								>
+									<span className={styles.deleteIcon}>
+										<Icon name='material-delete' size={14} />
+									</span>
+								</Popconfirm>
 							</h2>
 						)}
 						<span className={styles.wsId}>{workspace.id}</span>
 					</div>
 				</div>
 				<div className={styles.headerRight}>
-					<Popconfirm
-						title={
-							is_cn
-								? '确定要删除这个工作空间吗？此操作不可恢复！'
-								: 'Delete this workspace? This action cannot be undone!'
-						}
-						onConfirm={onDelete}
-						okText={is_cn ? '确认' : 'Confirm'}
-						cancelText={is_cn ? '取消' : 'Cancel'}
+					<div
+						className={styles.refreshBtn}
+						onClick={() => loadDir(currentPath)}
+						title={is_cn ? '刷新' : 'Refresh'}
 					>
-						<Button type='danger' size='small' icon={<Icon name='material-delete' size={12} />}>
-							{is_cn ? '删除' : 'Delete'}
-						</Button>
-					</Popconfirm>
+						<Icon name='material-refresh' size={18} />
+					</div>
 				</div>
 			</div>
 
@@ -523,10 +556,30 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 									<Icon name={getFileIcon(entry)} size={18} />
 								</div>
 								<div className={styles.fileName}>{entry.name}</div>
+								<div className={styles.fileTime}>
+									{entry.mod_time
+										? new Date(entry.mod_time).toLocaleString(
+												is_cn ? 'zh-CN' : 'en-US',
+												{ month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+										  )
+										: '—'}
+								</div>
 								<div className={styles.fileSize}>
 									{entry.is_dir ? '—' : formatSize(entry.size)}
 								</div>
-								{!entry.name.startsWith('.') && (
+								<div className={styles.fileActions}>
+									{!entry.is_dir && (
+										<div
+											className={styles.fileActionBtn}
+											onClick={(e) => {
+												e.stopPropagation()
+												handleDownloadFile(entry)
+											}}
+											title={is_cn ? '下载' : 'Download'}
+										>
+											<Icon name='material-download' size={14} />
+										</div>
+									)}
 									<Popconfirm
 										title={
 											is_cn
@@ -542,13 +595,14 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 										cancelText={is_cn ? '取消' : 'Cancel'}
 									>
 										<div
-											className={styles.fileDelete}
+											className={`${styles.fileActionBtn} ${styles.deleteBtn}`}
 											onClick={(e) => e.stopPropagation()}
+											title={is_cn ? '删除' : 'Delete'}
 										>
 											<Icon name='material-delete' size={14} />
 										</div>
 									</Popconfirm>
-								)}
+								</div>
 							</div>
 						))
 					)}
