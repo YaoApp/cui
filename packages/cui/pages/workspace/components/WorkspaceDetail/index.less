@@ -64,8 +64,14 @@
 			line-height: 1.4;
 			display: flex;
 			align-items: center;
-			gap: 8px;
-			cursor: pointer;
+			gap: 4px;
+
+			> span:first-child {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				cursor: pointer;
+			}
 
 			.editIcon {
 				opacity: 0;
@@ -73,8 +79,32 @@
 				color: var(--color_text_grey);
 			}
 
-			&:hover .editIcon {
-				opacity: 1;
+			.deleteIcon {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 26px;
+				height: 26px;
+				border-radius: 6px;
+				cursor: pointer;
+				opacity: 0;
+				color: var(--color_text_grey);
+				transition: all 0.2s ease;
+
+				&:hover {
+					color: var(--color_danger);
+					background: var(--color_danger_bg);
+				}
+			}
+
+			&:hover {
+				.editIcon {
+					opacity: 1;
+				}
+
+				.deleteIcon {
+					opacity: 1;
+				}
 			}
 		}
 
@@ -102,6 +132,36 @@
 		flex-shrink: 0;
 	}
 
+	.refreshBtn {
+		width: 36px;
+		height: 36px;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		color: var(--color_neo_text_secondary);
+		transition: background 0.2s ease, color 0.2s ease;
+		flex-shrink: 0;
+
+		&:hover {
+			background: var(--color_neo_bg_field);
+			color: var(--color_neo_text_primary);
+		}
+
+		:global(.Icon),
+		:global(.xgen-icon) {
+			color: inherit;
+			transition: transform 0.3s ease;
+		}
+
+		&:active {
+			:global(.Icon),
+			:global(.xgen-icon) {
+				transform: rotate(180deg);
+			}
+		}
+	}
 }
 
 .infoCards {
@@ -313,7 +373,7 @@
 				color: var(--color_main);
 			}
 
-			.fileDelete {
+			.fileActions {
 				opacity: 1;
 			}
 		}
@@ -359,30 +419,54 @@
 		white-space: nowrap;
 	}
 
+	.fileTime {
+		font-size: 12px;
+		color: var(--color_neo_text_secondary);
+		width: 140px;
+		text-align: right;
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+
 	.fileSize {
 		font-size: 12px;
 		color: var(--color_neo_text_secondary);
-		min-width: 60px;
+		width: 80px;
 		text-align: right;
+		flex-shrink: 0;
 		font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
 	}
 
-	.fileDelete {
-		width: 28px;
-		height: 28px;
-		border-radius: 6px;
+	.fileActions {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		color: var(--color_text_grey);
-		cursor: pointer;
+		justify-content: flex-end;
+		gap: 2px;
+		width: 58px;
 		opacity: 0;
-		transition: all 0.2s ease;
+		transition: opacity 0.15s ease;
 		flex-shrink: 0;
 
-		&:hover {
-			color: var(--color_danger);
-			background: var(--color_danger_bg);
+		.fileActionBtn {
+			width: 28px;
+			height: 28px;
+			border-radius: 6px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--color_text_grey);
+			cursor: pointer;
+			transition: all 0.2s ease;
+
+			&:hover {
+				color: var(--color_main);
+				background: var(--color_neo_bg_header);
+			}
+
+			&.deleteBtn:hover {
+				color: var(--color_danger);
+				background: var(--color_danger_bg);
+			}
 		}
 	}
 }

@@ -94,6 +94,13 @@ const InputArea = (props: IInputAreaProps) => {
 	// Load Workspace options (real-time fetch on dropdown open)
 	const { workspaces, hasOnlineNodes, loading: loadingWorkspaces, fetchWorkspaces } = useWorkspace()
 
+	// Pre-fetch workspaces when a workspace was previously selected (from localStorage)
+	// so the Selector can display the saved workspace name instead of the placeholder
+	useEffect(() => {
+		if (selectedWorkspace) {
+			fetchWorkspaces()
+		}
+	}, [])
 
 	// Localization & Routing
 	const locale = getLocale()

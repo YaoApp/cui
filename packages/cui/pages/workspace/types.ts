@@ -23,6 +23,7 @@ export interface DirEntry {
 	name: string
 	is_dir: boolean
 	size: number
+	mod_time?: string
 }
 
 export interface NodeInfo {
