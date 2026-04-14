@@ -123,35 +123,83 @@ export function triggerFileDownload(file: string, filename: string, index = 0): 
 	}, index * 300)
 }
 
+// ========== Unified File Reference Protocol ==========
+
+export type FileRefType = 'wrapper' | 'workspace' | 'url' | 'unknown'
+
+export interface FileRef {
+	type: FileRefType
+	raw: string
+	uploaderID?: string
+	fileID?: string
+	workspaceId?: string
+	filePath?: string
+}
+
 /**
- * 解析文件地址并返回可直接使用的 URL
- * 支持多种格式：
- * - Wrapper 格式: {uploaderID}://{fileID} -> 转换为 Content API URL
- * - HTTP/HTTPS URL: 直接返回
- * - 空字符串或其他格式: 直接返回
+ * 统一解析文件引用字符串，识别三种格式：
+ * - workspace://{wsId}/{filePath}   → Workspace 文件
+ * - http(s)://...                   → 外部 URL
+ * - {uploaderID}://{fileID}         → File Wrapper
  *
- * @param str - 文件地址字符串（可以是 wrapper、URL 或其他格式）
- * @returns 可直接使用的 URL 地址
+ * 顺序很重要：workspace:// 和 http(s):// 必须先匹配，
+ * 因为 IsFileWrapper 的正则也能匹配这两种格式。
+ */
+export function ParseFileRef(str: string): FileRef {
+	if (!str || typeof str !== 'string') return { type: 'unknown', raw: str || '' }
+
+	if (str.startsWith('workspace://')) {
+		const rest = str.slice('workspace://'.length)
+		const slashIdx = rest.indexOf('/')
+		if (slashIdx === -1) {
+			return { type: 'workspace', raw: str, workspaceId: rest, filePath: '' }
+		}
+		return {
+			type: 'workspace',
+			raw: str,
+			workspaceId: rest.slice(0, slashIdx),
+			filePath: rest.slice(slashIdx + 1)
+		}
+	}
+
+	if (str.startsWith('http://') || str.startsWith('https://')) {
+		return { type: 'url', raw: str }
+	}
+
+	if (IsFileWrapper(str)) {
+		const parsed = ParseFileWrapper(str)
+		if (parsed) {
+			return { type: 'wrapper', raw: str, ...parsed }
+		}
+	}
+
+	return { type: 'unknown', raw: str }
+}
+
+/**
+ * 解析文件地址并返回可直接使用的 URL。
+ * 支持三种格式：
+ * - workspace://{wsId}/{filePath}   → {apiBase}/workspace/{wsId}/files/{filePath}
+ * - {uploaderID}://{fileID}         → {apiBase}/file/{uploaderID}/{fileID}/content
+ * - http(s)://...                   → 原样返回
  *
  * @example
- * ResolveFileURL('__yao.attachment://file123') // => '{baseURL}/file/__yao.attachment/file123/content'
- * ResolveFileURL('https://example.com/avatar.png') // => 'https://example.com/avatar.png'
- * ResolveFileURL('http://example.com/image.jpg') // => 'http://example.com/image.jpg'
- * ResolveFileURL('/static/default.png') // => '/static/default.png'
+ * ResolveFileURL('__yao.attachment://file123')        // => '{baseURL}/file/__yao.attachment/file123/content'
+ * ResolveFileURL('workspace://ws01/reports/Q3.pdf')   // => '{baseURL}/workspace/ws01/files/reports/Q3.pdf'
+ * ResolveFileURL('https://example.com/avatar.png')    // => 'https://example.com/avatar.png'
  */
 export function ResolveFileURL(str: string): string {
 	if (!str) return str
 
-	// 如果是 HTTP/HTTPS URL，直接返回
-	if (str.startsWith('http://') || str.startsWith('https://')) {
-		return str
+	const ref = ParseFileRef(str)
+	switch (ref.type) {
+		case 'workspace':
+			return `${getBaseURL()}/workspace/${ref.workspaceId}/files/${ref.filePath}`
+		case 'wrapper':
+			return WrapperToContentURL(str)
+		case 'url':
+			return str
+		default:
+			return str
 	}
-
-	// 如果是 wrapper 格式，转换为 Content API URL
-	if (IsFileWrapper(str)) {
-		return WrapperToContentURL(str)
-	}
-
-	// 其他格式直接返回（如相对路径、data URL 等）
-	return str
 }

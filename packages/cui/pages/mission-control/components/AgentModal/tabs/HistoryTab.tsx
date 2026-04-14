@@ -5,7 +5,7 @@ import Icon from '@/widgets/Icon'
 import { useRobots } from '@/hooks/useRobots'
 import type { RobotState, Execution } from '../../../types'
 import type { ExecutionResponse, ExecStatus } from '@/openapi/agent/robot'
-import { triggerFileDownload } from '@/utils/fileWrapper'
+import { useFileDownload } from '@/hooks/useFileDownload'
 import CreatureLoading from '../../CreatureLoading'
 import styles from '../index.less'
 
@@ -246,14 +246,16 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 		}
 	}
 
-	const handleDownload = (e: React.MouseEvent, exec: Execution) => {
+	const { downloading, downloadAll } = useFileDownload()
+	const [downloadingId, setDownloadingId] = useState<string | null>(null)
+
+	const handleDownload = async (e: React.MouseEvent, exec: Execution) => {
 		e.stopPropagation()
 		const attachments = exec.delivery?.content?.attachments
-		if (attachments && attachments.length > 0) {
-			attachments.forEach((att, i) => {
-				triggerFileDownload(att.file, att.title, i)
-			})
-		}
+		if (!attachments || attachments.length === 0 || downloading) return
+		setDownloadingId(exec.id)
+		await downloadAll(attachments.map((att) => ({ file: att.file, filename: att.title })))
+		setDownloadingId(null)
 	}
 
 	const handleRetry = (e: React.MouseEvent, exec: Execution) => {
@@ -512,11 +514,16 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ robot, onOpenDetail }) => {
 														onClick={(e) =>
 															handleDownload(e, exec)
 														}
+														disabled={downloadingId === exec.id}
 													>
-														<Icon
-															name='material-download'
-															size={14}
-														/>
+														{downloadingId === exec.id ? (
+															<Spin size='small' />
+														) : (
+															<Icon
+																name='material-download'
+																size={14}
+															/>
+														)}
 													</button>
 												</Tooltip>
 											)}

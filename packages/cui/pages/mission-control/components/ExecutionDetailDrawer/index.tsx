@@ -5,7 +5,7 @@ import Icon from '@/widgets/Icon'
 import { useRobots } from '@/hooks/useRobots'
 import type { Execution, Task } from '../../types'
 import type { ExecutionResponse } from '@/openapi/agent/robot'
-import { triggerFileDownload } from '@/utils/fileWrapper'
+import AttachmentList from '@/components/common/AttachmentList'
 import CreatureLoading from '../CreatureLoading'
 import styles from './index.less'
 
@@ -291,18 +291,6 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 		message.info(is_cn ? '重新执行功能开发中' : 'Re-run coming soon')
 	}
 
-	const handleDownload = (attachment: { title: string; file: string }) => {
-		triggerFileDownload(attachment.file, attachment.title)
-	}
-
-	const handleDownloadAll = () => {
-		const attachments = execution?.delivery?.content?.attachments
-		if (!attachments || attachments.length === 0) return
-		attachments.forEach((att, i) => {
-			triggerFileDownload(att.file, att.title, i)
-		})
-	}
-
 	const handleClose = () => {
 		onClose()
 	}
@@ -564,56 +552,10 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 									{execution.delivery.content.attachments &&
 										execution.delivery.content.attachments.length > 0 && (
 											<div className={styles.attachments}>
-												<div className={styles.attachmentsHeader}>
-													<Icon
-														name='material-attach_file'
-														size={14}
-													/>
-													<span>
-														{is_cn ? '附件' : 'Attachments'} (
-														{
-															execution.delivery.content
-																.attachments.length
-														}
-														)
-													</span>
-												</div>
-												<div className={styles.attachmentList}>
-													{execution.delivery.content.attachments.map(
-														(attachment, index) => (
-															<div
-																key={index}
-																className={
-																	styles.attachmentItem
-																}
-																onClick={() =>
-																	handleDownload(
-																		attachment
-																	)
-																}
-															>
-																<Icon
-																	name='material-description'
-																	size={16}
-																/>
-																<span
-																	className={
-																		styles.attachmentTitle
-																	}
-																>
-																	{attachment.title}
-																</span>
-																<Icon
-																	name='material-download'
-																	size={14}
-																	className={
-																		styles.attachmentDownload
-																	}
-																/>
-															</div>
-														)
-													)}
-												</div>
+												<AttachmentList
+													attachments={execution.delivery.content.attachments}
+													layout='compact'
+												/>
 											</div>
 										)}
 								</section>
@@ -895,20 +837,6 @@ const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
 				{isCompleted && (
 					<>
 						{/* TODO: v2 — Re-run */}
-						{execution.delivery?.content?.attachments &&
-							execution.delivery.content.attachments.length > 0 && (
-								<button
-									className={styles.actionBtnPrimary}
-									onClick={handleDownloadAll}
-								>
-									<Icon name='material-download' size={16} />
-									<span>
-										{is_cn
-											? `下载结果 (${execution.delivery.content.attachments.length})`
-											: `Download (${execution.delivery.content.attachments.length})`}
-									</span>
-								</button>
-							)}
 					</>
 				)}
 

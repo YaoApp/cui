@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { Modal, Tooltip } from 'antd'
+import { Modal } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import type { ResultDetail } from '@/openapi/agent/robot'
-import { triggerFileDownload, WrapperToContentURL } from '@/utils/fileWrapper'
+import AttachmentList from '@/components/common/AttachmentList'
 import styles from './index.less'
 
 interface ResultDetailModalProps {
@@ -131,12 +131,6 @@ const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose,
 		return `${year}-${month}-${day} ${hours}:${minutes}`
 	}
 
-	const formatFileSize = (bytes: number) => {
-		if (bytes < 1024) return `${bytes} B`
-		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-	}
-
 	const getTriggerInfo = (type: string) => {
 		switch (type) {
 			case 'clock':
@@ -150,64 +144,12 @@ const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose,
 		}
 	}
 
-	const getFileIcon = (filename: string) => {
-		const ext = filename.split('.').pop()?.toLowerCase()
-		switch (ext) {
-			case 'pdf':
-				return 'material-picture_as_pdf'
-			case 'xlsx':
-			case 'xls':
-			case 'csv':
-				return 'material-table_chart'
-			case 'md':
-			case 'txt':
-				return 'material-article'
-			case 'png':
-			case 'jpg':
-			case 'jpeg':
-			case 'svg':
-				return 'material-image'
-			case 'json':
-				return 'material-code'
-			case 'zip':
-				return 'material-folder_zip'
-			default:
-				return 'material-description'
-		}
-	}
-
-	// Handle download
-	const handleDownload = (e: React.MouseEvent, attachment: { title: string; file: string }) => {
-		e.stopPropagation()
-		triggerFileDownload(attachment.file, attachment.title)
-	}
-
-	// Handle preview — open in new tab
-	const handlePreview = (e: React.MouseEvent, attachment: { title: string; file: string }) => {
-		e.stopPropagation()
-		const url = WrapperToContentURL(attachment.file)
-		if (url) {
-			window.open(url, '_blank', 'noopener,noreferrer')
-		}
-	}
-
-	// Handle download all
-	const handleDownloadAll = () => {
-		const attachments = result?.delivery?.content?.attachments
-		if (attachments && attachments.length > 0) {
-			attachments.forEach((att, i) => {
-				triggerFileDownload(att.file, att.title, i)
-			})
-		}
-	}
-
 	if (!result) return null
 
 	const delivery = result.delivery
 	const title = result.name || '-'
 	const triggerInfo = getTriggerInfo(result.trigger_type)
 	const attachments = delivery?.content?.attachments || []
-	const hasAttachments = attachments.length > 0
 	const attachmentCount = attachments.length
 
 	// Tab definitions
@@ -316,57 +258,7 @@ const ResultDetailModal: React.FC<ResultDetailModalProps> = ({ visible, onClose,
 
 				{activeTab === 'attachments' && (
 					<div className={styles.attachmentsTab}>
-						{hasAttachments ? (
-							<>
-								<div className={styles.attachmentsHeader}>
-									<span className={styles.attachmentsCount}>
-										{is_cn ? `共 ${attachmentCount} 个附件` : `${attachmentCount} attachments`}
-									</span>
-									<button className={styles.downloadAllBtn} onClick={handleDownloadAll}>
-										<Icon name='material-download' size={14} />
-										<span>{is_cn ? '全部下载' : 'Download All'}</span>
-									</button>
-								</div>
-								<div className={styles.attachmentList}>
-									{attachments.map((att, idx) => (
-										<div key={idx} className={styles.attachmentCard}>
-											<div className={styles.attachmentIcon}>
-												<Icon name={getFileIcon(att.title)} size={28} />
-											</div>
-											<div className={styles.attachmentInfo}>
-												<span className={styles.attachmentName}>{att.title}</span>
-												{att.description && (
-													<span className={styles.attachmentDesc}>{att.description}</span>
-												)}
-											</div>
-											<div className={styles.attachmentActions}>
-												<Tooltip title={is_cn ? '预览' : 'Preview'}>
-													<button
-														className={styles.attachmentBtn}
-														onClick={(e) => handlePreview(e, att)}
-													>
-														<Icon name='material-visibility' size={16} />
-													</button>
-												</Tooltip>
-												<Tooltip title={is_cn ? '下载' : 'Download'}>
-													<button
-														className={`${styles.attachmentBtn} ${styles.attachmentBtnPrimary}`}
-														onClick={(e) => handleDownload(e, att)}
-													>
-														<Icon name='material-download' size={16} />
-													</button>
-												</Tooltip>
-											</div>
-										</div>
-									))}
-								</div>
-							</>
-						) : (
-							<div className={styles.emptyAttachments}>
-								<Icon name='material-folder_off' size={48} />
-								<span>{is_cn ? '无附件' : 'No attachments'}</span>
-							</div>
-						)}
+						<AttachmentList attachments={attachments} />
 					</div>
 				)}
 			</div>
