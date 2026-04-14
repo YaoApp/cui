@@ -16,7 +16,9 @@ import {
 	OAuthAuthResult,
 	UserInfo,
 	CaptchaResponse,
-	LoginStatus
+	LoginStatus,
+	DeviceAuthResponse,
+	DeviceTokenResponse
 } from './types'
 
 /**
@@ -405,6 +407,29 @@ export class UserAuth {
 	 */
 	async AuthorizeDevice(userCode: string): Promise<ApiResponse<{ status: string }>> {
 		return this.api.Post<{ status: string }>('/oauth/device/authorize', { user_code: userCode })
+	}
+
+	/**
+	 * Device Flow (RFC 8628): Initiate device authorization with a third-party IdP.
+	 * Used by desktop clients where redirect_uri is not available.
+	 */
+	async DeviceFlowAuthorize(providerId: string): Promise<ApiResponse<DeviceAuthResponse>> {
+		return this.api.Post<DeviceAuthResponse>(`/user/oauth/${providerId}/device/authorize`, {})
+	}
+
+	/**
+	 * Device Flow (RFC 8628): Poll IdP token endpoint.
+	 * Returns status: "pending" while waiting, "success" when authorized.
+	 */
+	async DeviceFlowToken(
+		providerId: string,
+		deviceCode: string,
+		locale?: string
+	): Promise<ApiResponse<DeviceTokenResponse>> {
+		return this.api.Post<DeviceTokenResponse>(`/user/oauth/${providerId}/device/token`, {
+			device_code: deviceCode,
+			locale: locale || ''
+		})
 	}
 
 	/**
