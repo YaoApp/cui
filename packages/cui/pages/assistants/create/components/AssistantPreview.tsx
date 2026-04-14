@@ -30,7 +30,7 @@ const AssistantPreview = ({ data, is_cn, onChat, onViewDetail, loading = false }
 				<div className={styles.cardHeader}>
 					<Icon name='material-check_circle' size={20} className={styles.successIcon} />
 					<span className={styles.successTitle}>
-						{is_cn ? '助手创建成功' : 'Assistant Created Successfully'}
+						{is_cn ? '专家创建成功' : 'Expert Created Successfully'}
 					</span>
 				</div>
 
@@ -54,7 +54,7 @@ const AssistantPreview = ({ data, is_cn, onChat, onViewDetail, loading = false }
 						<div className={styles.capabilitySection}>
 							<div className={styles.capabilityLabel}>
 								<Icon name='material-psychology' size={16} />
-								<span>{is_cn ? '可访问的助手' : 'Accessible Agents'}</span>
+								<span>{is_cn ? '可访问的专家' : 'Accessible Experts'}</span>
 							</div>
 							{data.agents && data.agents.length > 0 ? (
 								<div className={styles.capabilityList}>
@@ -67,7 +67,7 @@ const AssistantPreview = ({ data, is_cn, onChat, onViewDetail, loading = false }
 								</div>
 							) : (
 								<div className={styles.emptyHint}>
-									{is_cn ? '暂无可访问的助手' : 'No accessible agents'}
+									{is_cn ? '暂无可访问的专家' : 'No accessible experts'}
 								</div>
 							)}
 						</div>

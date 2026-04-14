@@ -162,7 +162,7 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 							message.error(is_cn ? '生成失败' : 'Generation failed')
 						}}
 						placeholder={is_cn
-							? '描述你需要什么样的智能体...\n\nCtrl+Enter 发送'
+							? '描述你需要什么样的任务智能体...\n\nCtrl+Enter 发送'
 							: 'Describe what kind of agent you need...\n\nCtrl+Enter to send'
 						}
 						size="small"
@@ -182,7 +182,7 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 				schema={{
 					type: 'string',
 					placeholder: is_cn
-						? '描述这个智能体的身份、职责和工作方式...'
+						? '描述这个任务智能体的身份、职责和工作方式...'
 						: 'Describe this agent\'s role, responsibilities, and how it should work...',
 					rows: 10
 				}}
@@ -229,11 +229,11 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 			{/* Accessible AI Assistants */}
 			<div className={styles.formItem}>
 				<label className={styles.formLabel}>
-					{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
+					{is_cn ? '可协作的专家' : 'Accessible AI Experts'}
 					<Tooltip
 						title={is_cn
-							? '选择该智能体可以调用协作的其他智能体'
-							: 'Select other agents this agent can work with'
+							? '选择该任务智能体可以协作的 AI 专家'
+							: 'Select AI experts this task agent can work with'
 						}
 					>
 						<span className={styles.helpIconWrapper}>
@@ -283,7 +283,7 @@ const IdentityPanel: React.FC<IdentityPanelProps> = ({ robot, formData, onChange
 					{is_cn ? '可使用的工具' : 'Accessible Tools'}
 					<Tooltip
 						title={is_cn
-							? '选择该智能体可以使用的 MCP 工具'
+							? '选择该任务智能体可以使用的 MCP 工具'
 							: 'Select MCP tools this agent can use'
 						}
 					>

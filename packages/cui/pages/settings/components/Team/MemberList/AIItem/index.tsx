@@ -15,7 +15,7 @@ interface AIItemProps {
 }
 
 const AIItem = ({ member, is_cn, getRoleDisplayName, onRemove, onEdit, onAvatarUpdate }: AIItemProps) => {
-	const displayName = member.display_name || (is_cn ? 'AI 助手' : 'AI Assistant')
+	const displayName = member.display_name || (is_cn ? 'AI 专家' : 'AI Expert')
 
 	const handleRemoveClick = () => {
 		if (!onRemove) return

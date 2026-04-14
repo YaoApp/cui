@@ -697,7 +697,7 @@ const EditAIMember = ({
 				{agentOptions.length > 0 && (
 					<div className={styles.formItem}>
 						<label className={styles.formLabel}>
-							{is_cn ? '可访问的智能体' : 'Accessible Agents'}
+							{is_cn ? '可访问的任务智能体' : 'Accessible Task Agents'}
 							{agentsLoading && (
 								<span className={styles.loadingHint}>
 									{is_cn ? ' (加载中...)' : ' (Loading...)'}

@@ -150,8 +150,8 @@ const ActiveTab: React.FC<ActiveTabProps> = ({ robot, onAssignTask, onOpenDetail
 				</span>
 				<span className={styles.emptyHint}>
 					{is_cn
-						? '智能体空闲中，等待下次触发或手动指派任务'
-						: 'Agent is idle. Waiting for next trigger or task.'}
+						? '任务智能体空闲中，等待下次触发或手动指派任务'
+						: 'Task Agent is idle. Waiting for next trigger or task.'}
 				</span>
 				{onAssignTask && (
 					<button className={styles.emptyAction} onClick={onAssignTask}>

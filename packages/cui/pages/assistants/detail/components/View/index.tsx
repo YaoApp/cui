@@ -26,7 +26,7 @@ const View = ({ data, connectors }: ViewProps) => {
 		<div className={styles.viewSection}>
 			<div className={styles.fieldGroup}>
 				<div className={styles.fieldItem}>
-					<div className={styles.fieldLabel}>{is_cn ? '助手名称' : 'Assistant Name'}</div>
+					<div className={styles.fieldLabel}>{is_cn ? '专家名称' : 'Expert Name'}</div>
 					<div className={styles.fieldValue}>{data.name || '-'}</div>
 				</div>
 

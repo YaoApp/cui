@@ -325,7 +325,7 @@ const MissionControl = () => {
 	const handleAgentCreated = () => {
 		// Refresh robot list from API
 		loadRobots()
-		message.success(is_cn ? '智能体创建成功' : 'Agent created successfully')
+		message.success(is_cn ? '任务智能体创建成功' : 'Task Agent created successfully')
 	}
 
 	// Get status text
@@ -670,7 +670,7 @@ const MissionControl = () => {
 												<Icon name='material-add' size={32} className={styles.addIcon} />
 											</div>
 											<span className={styles.addText}>
-												{is_cn ? '添加智能体' : 'Add Agent'}
+												{is_cn ? '添加任务智能体' : 'Add Task Agent'}
 											</span>
 										</div>
 									)}
@@ -679,7 +679,7 @@ const MissionControl = () => {
 								<div className={styles.emptyState}>
 									<Icon name='material-search_off' size={80} className={styles.emptyIcon} />
 									<div className={styles.emptyTitle}>
-										{is_cn ? '没有匹配的智能体' : 'No Matching Agents'}
+										{is_cn ? '没有匹配的任务智能体' : 'No Matching Task Agents'}
 									</div>
 									<div className={styles.emptyDescription}>
 										{is_cn
@@ -694,12 +694,12 @@ const MissionControl = () => {
 								<div className={styles.emptyState}>
 									<Icon name='material-auto_awesome' size={80} className={styles.emptyIcon} />
 									<div className={styles.emptyTitle}>
-										{is_cn ? '暂无智能体' : 'No Agents Yet'}
+										{is_cn ? '暂无任务智能体' : 'No Task Agents Yet'}
 									</div>
 									<div className={styles.emptyDescription}>
 										{is_cn
-											? '添加您的第一个自主智能体，开始自动化工作流程'
-											: 'Add your first autonomous agent to start automating workflows'}
+											? '添加您的第一个任务智能体，开始自动化工作流程'
+											: 'Add your first task agent to start automating workflows'}
 									</div>
 									<button
 										className={styles.emptyCreateButton}
@@ -707,7 +707,7 @@ const MissionControl = () => {
 									>
 										<span className={styles.bubbles} />
 										<Icon name='material-add' size={18} />
-										<span>{is_cn ? '创建智能体' : 'Create Agent'}</span>
+										<span>{is_cn ? '创建任务智能体' : 'Create Task Agent'}</span>
 									</button>
 								</div>
 							)}

@@ -77,8 +77,8 @@ const AssignTaskDrawer: React.FC<AssignTaskDrawerProps> = ({
 				icon: 'material-chat',
 				title: is_cn ? `向 ${displayName} 描述任务` : `Describe task to ${displayName}`,
 				hint: is_cn
-					? '清晰描述你希望完成的目标，智能体会确认理解后开始执行'
-					: 'Clearly describe your goal. The agent will confirm understanding before starting.'
+					? '清晰描述你希望完成的目标，任务智能体会确认理解后开始执行'
+					: 'Clearly describe your goal. The task agent will confirm understanding before starting.'
 			}}
 			placeholder={is_cn ? '描述任务内容... ⌘+Enter 发送' : 'Describe the task... ⌘+Enter to send'}
 			successState={{

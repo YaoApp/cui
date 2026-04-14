@@ -76,12 +76,12 @@ const AssistantDetail = () => {
 				if (window.$app.openapi.IsError(response)) {
 					throw new Error(response.error?.error_description || 'Failed to delete assistant')
 				}
-				message.success(is_cn ? '助手删除成功' : 'Assistant deleted successfully')
+				message.success(is_cn ? '专家删除成功' : 'Expert deleted successfully')
 				fetchedRef.current = false
 				previousIdRef.current = ''
 				history.push('/assistants')
 			} catch (error) {
-				message.error(is_cn ? '删除助手失败' : 'Failed to delete assistant')
+				message.error(is_cn ? '删除专家失败' : 'Failed to delete expert')
 			}
 		}
 
@@ -99,7 +99,7 @@ const AssistantDetail = () => {
 
 			try {
 				if (!id) {
-					message.error(is_cn ? '无效的助手ID' : 'Invalid assistant ID')
+					message.error(is_cn ? '无效的专家ID' : 'Invalid expert ID')
 					history.push('/assistants')
 					return
 				}
@@ -110,7 +110,7 @@ const AssistantDetail = () => {
 				const response = await apiClient.assistants.Get(id, locale_param)
 
 				if (window.$app.openapi.IsError(response)) {
-					message.error(is_cn ? '未找到助手' : 'Assistant not found')
+					message.error(is_cn ? '未找到专家' : 'Expert not found')
 					history.push('/assistants')
 					return
 				}
@@ -118,7 +118,7 @@ const AssistantDetail = () => {
 				const data = window.$app.openapi.GetData(response)
 
 				if (!data) {
-					message.error(is_cn ? '未找到助手' : 'Assistant not found')
+					message.error(is_cn ? '未找到专家' : 'Expert not found')
 					history.push('/assistants')
 					return
 				}
@@ -163,7 +163,7 @@ const AssistantDetail = () => {
 
 				fetchedRef.current = true
 			} catch (error) {
-				message.error(is_cn ? '加载助手数据失败' : 'Failed to load assistant data')
+				message.error(is_cn ? '加载专家数据失败' : 'Failed to load expert data')
 			}
 
 			setLoading(false)
@@ -245,13 +245,13 @@ const AssistantDetail = () => {
 				throw new Error(response.error?.error_description || 'Failed to save assistant')
 			}
 
-			message.success(is_cn ? '助手更新成功' : 'Assistant updated successfully')
+			message.success(is_cn ? '专家更新成功' : 'Expert updated successfully')
 			setEditing(false)
 
 			// Refetch data to get the updated version
 			fetchedRef.current = false
 		} catch (error) {
-			message.error(is_cn ? '更新助手失败' : 'Failed to update assistant')
+			message.error(is_cn ? '更新专家失败' : 'Failed to update expert')
 		} finally {
 			setSaving(false)
 		}
@@ -283,10 +283,10 @@ const AssistantDetail = () => {
 								handleBack()
 							}}
 						>
-							{is_cn ? '助手列表' : 'Assistants'}
+							{is_cn ? '专家列表' : 'Experts'}
 						</a>
 					</Breadcrumb.Item>
-					<Breadcrumb.Item>{name || (is_cn ? '助手详情' : 'Assistant Detail')}</Breadcrumb.Item>
+					<Breadcrumb.Item>{name || (is_cn ? '专家详情' : 'Expert Detail')}</Breadcrumb.Item>
 				</Breadcrumb>
 				<Button
 					className={styles.backButton}
