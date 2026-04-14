@@ -168,23 +168,19 @@ export const ClearAuthInfo = (): void => {
  * Handle post-logout cleanup
  * Clears user info from global state and local storage
  */
-export const AfterLogout = (global: GlobalModel): void => {
+export const AfterLogout = (global: GlobalModel): { login_url: string; logout_redirect: string } => {
+	const login_url = (local.login_url as string) || '/auth/entry'
+	const logout_redirect = (local.logout_redirect as string) || ''
 	try {
-		// Clear user info from global state
 		global.setUserInfo(null)
-
-		// Clear features cache (all domains)
 		global.clearFeatures()
-
-		// Clear user info from local storage
 		ClearAuthInfo()
-
-		// Clear menus
 		global.menus = { items: [], setting: [], quick: [] }
 		global.menu = []
 	} catch (error) {
 		console.error('Failed to handle post-logout cleanup:', error)
 	}
+	return { login_url, logout_redirect }
 }
 
 /**

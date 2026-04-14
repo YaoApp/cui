@@ -56,11 +56,7 @@ const Menu = ({ active, onChange }: MenuProps) => {
 
 		// Clear user info from local storage and global state
 		const { AfterLogout } = await import('@/pages/auth/auth')
-		AfterLogout(global)
-
-		if (!local.logout_redirect) {
-			history.push(local.login_url || '/')
-		}
+		const { login_url, logout_redirect } = AfterLogout(global)
 
 		const excludes = ['paths', 'avatar', 'xgen_theme', 'remote_cache', 'token_storage', 'temp_sid']
 		const all = []
@@ -71,15 +67,18 @@ const Menu = ({ active, onChange }: MenuProps) => {
 		difference(all, excludes).map((item) => local.removeItem(item))
 		sessionStorage.clear()
 
-		// Clear the token and studio token
 		localStorage.removeItem('xgen:token')
 		localStorage.removeItem('xgen:studio')
 
-		// Redirect to the custom logout page
-		if (local.logout_redirect) {
-			window.location = local.logout_redirect
+		if (logout_redirect) {
+			if (logout_redirect.startsWith('$dashboard/')) {
+				history.push(logout_redirect.replace('$dashboard', ''))
+			} else {
+				window.location = logout_redirect as any
+			}
 			return
 		}
+		history.push(login_url)
 	})
 
 	// 切换语言

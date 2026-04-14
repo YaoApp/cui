@@ -40,11 +40,7 @@ const Card: FC<CardProps> = ({ data, isCombined, className }) => {
 
 		// Clear user info from local storage and global state
 		const { AfterLogout } = await import('@/pages/auth/auth')
-		AfterLogout(global)
-
-		if (!local.logout_redirect) {
-			history.push(local.login_url || '/')
-		}
+		const { login_url, logout_redirect } = AfterLogout(global)
 
 		const excludes = ['paths', 'avatar', 'xgen_theme', 'remote_cache', 'token_storage', 'temp_sid']
 		const all = []
@@ -55,15 +51,18 @@ const Card: FC<CardProps> = ({ data, isCombined, className }) => {
 		difference(all, excludes).map((item) => local.removeItem(item))
 		sessionStorage.clear()
 
-		// Clear the token and studio token
 		localStorage.removeItem('xgen:token')
 		localStorage.removeItem('xgen:studio')
 
-		// Redirect to the custom logout page
-		if (local.logout_redirect) {
-			window.location = local.logout_redirect
+		if (logout_redirect) {
+			if (logout_redirect.startsWith('$dashboard/')) {
+				history.push(logout_redirect.replace('$dashboard', ''))
+			} else {
+				window.location = logout_redirect as any
+			}
 			return
 		}
+		history.push(login_url)
 	})
 
 	// 跳转到设置页面（使用全局事件打开侧边栏并导航）
