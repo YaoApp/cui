@@ -90,6 +90,32 @@ export interface OAuthAuthResult {
 }
 
 /**
+ * Device Flow (RFC 8628) authorization response from IdP
+ */
+export interface DeviceAuthResponse {
+	device_code: string
+	user_code: string
+	verification_uri: string
+	verification_uri_complete?: string
+	expires_in: number
+	interval: number
+}
+
+/**
+ * Device Flow (RFC 8628) token polling response
+ */
+export interface DeviceTokenResponse {
+	status: 'pending' | 'success' | 'expired' | 'denied' | 'slow_down'
+	id_token?: string
+	access_token?: string
+	refresh_token?: string
+	expires_in?: number
+	refresh_token_expires_in?: number
+	session_id?: string
+	mfa_enabled?: boolean
+}
+
+/**
  * User information from OpenID Connect ID token
  * Contains standard OIDC claims plus additional custom claims
  */
