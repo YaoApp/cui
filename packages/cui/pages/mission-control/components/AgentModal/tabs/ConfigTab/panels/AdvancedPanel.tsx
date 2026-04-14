@@ -279,8 +279,8 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 				// Check for 409 conflict (robot is running)
 				if (apiError?.includes('running') || apiError?.includes('conflict') || apiError?.includes('409')) {
 					message.error(is_cn 
-						? '该智能体正在执行任务，请等待任务完成后再删除' 
-						: 'This agent is currently running tasks. Please wait for tasks to complete before deleting.'
+						? '该任务智能体正在执行任务，请等待任务完成后再删除' 
+						: 'This task agent is currently running tasks. Please wait for tasks to complete before deleting.'
 					)
 				} else {
 					message.error(apiError || (is_cn ? '删除失败' : 'Failed to delete'))
@@ -291,8 +291,8 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 			// Handle 409 conflict error
 			if (error?.status === 409 || error?.message?.includes('running')) {
 				message.error(is_cn 
-					? '该智能体正在执行任务，请等待任务完成后再删除' 
-					: 'This agent is currently running tasks. Please wait for tasks to complete before deleting.'
+					? '该任务智能体正在执行任务，请等待任务完成后再删除' 
+					: 'This task agent is currently running tasks. Please wait for tasks to complete before deleting.'
 				)
 			} else {
 				message.error(is_cn ? '删除失败' : 'Failed to delete')
@@ -529,8 +529,8 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 		</div>
 		<div className={styles.sectionHint}>
 			{is_cn 
-				? '自定义各阶段的执行智能体，通常无需修改' 
-				: 'Customize the agent for each execution phase, usually no need to change'}
+				? '自定义各阶段的执行任务智能体，通常无需修改' 
+				: 'Customize the task agent for each execution phase, usually no need to change'}
 		</div>
 
 		<div className={styles.phaseList}>
@@ -680,7 +680,7 @@ const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ robot, formData, onChange
 					<div className={styles.dangerZoneItem}>
 						<div className={styles.dangerZoneInfo}>
 							<div className={styles.dangerZoneLabel}>
-								{is_cn ? '删除智能体' : 'Delete Agent'}
+								{is_cn ? '删除任务智能体' : 'Delete Task Agent'}
 							</div>
 							<div className={styles.dangerZoneDesc}>
 								{is_cn 

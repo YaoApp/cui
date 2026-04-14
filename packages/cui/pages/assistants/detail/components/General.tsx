@@ -129,9 +129,9 @@ export default function General({ form }: GeneralProps) {
 		>
 			<Form.Item
 				name='name'
-				label={is_cn ? '助手名称' : 'Assistant Name'}
+				label={is_cn ? '专家名称' : 'Expert Name'}
 				rules={[
-					{ required: true, message: is_cn ? '请输入助手名称' : 'Please input assistant name' }
+					{ required: true, message: is_cn ? '请输入专家名称' : 'Please input expert name' }
 				]}
 			>
 				<Input placeholder={is_cn ? '输入一个描述性名称' : 'Enter a descriptive name'} />
@@ -203,8 +203,8 @@ export default function General({ form }: GeneralProps) {
 					autoSize={{ minRows: 4, maxRows: 6 }}
 					placeholder={
 						is_cn
-							? '描述这个助手能做什么以及如何帮助用户...'
-							: 'Describe what this assistant can do and how it can help users...'
+							? '描述这个专家能做什么以及如何帮助用户...'
+							: 'Describe what this expert can do and how it can help users...'
 					}
 				/>
 			</Form.Item>
@@ -217,8 +217,8 @@ export default function General({ form }: GeneralProps) {
 				<Select
 					placeholder={
 						is_cn
-							? '选择为此助手提供支持的AI连接器'
-							: 'Select the AI connector to power this assistant'
+							? '选择为此专家提供支持的AI连接器'
+							: 'Select the AI connector to power this expert'
 					}
 					showSearch
 				filterOption={(input, option) =>
@@ -270,8 +270,8 @@ export default function General({ form }: GeneralProps) {
 							<>
 								<div>
 									{is_cn
-										? '确定要删除这个助手吗？'
-										: 'Are you sure you want to delete this assistant?'}
+										? '确定要删除这个专家吗？'
+										: 'Are you sure you want to delete this expert?'}
 								</div>
 								<div
 									style={{
@@ -292,7 +292,7 @@ export default function General({ form }: GeneralProps) {
 							type='primary'
 							icon={<DeleteOutlined style={{ fontSize: '14px' }} />}
 						>
-							{is_cn ? '删除助手' : 'Delete Assistant'}
+							{is_cn ? '删除专家' : 'Delete Expert'}
 						</Button>
 					</Popconfirm>
 				</Form.Item>

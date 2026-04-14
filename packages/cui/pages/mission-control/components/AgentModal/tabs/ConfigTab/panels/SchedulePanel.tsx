@@ -269,8 +269,8 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ robot, formData, onChange
 						<div className={styles.scheduleOptionContent}>
 							<div className={styles.daemonHint}>
 								{is_cn 
-									? '智能体将持续运行，直到手动停止' 
-									: 'Agent runs non-stop until manually stopped'
+									? '任务智能体将持续运行，直到手动停止' 
+									: 'Task Agent runs non-stop until manually stopped'
 								}
 							</div>
 						</div>

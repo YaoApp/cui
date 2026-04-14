@@ -244,13 +244,13 @@ const Header: FC<HeaderProps> = ({
 						</div>
 					</Tooltip>
 
-					<Tooltip title={is_cn ? 'AI 助手' : 'AI Assistants'}>
+					<Tooltip title={is_cn ? 'AI 专家' : 'AI Experts'}>
 						<div
 							className='sidebar_header_btn'
 							onClick={() => {
 								window.$app?.Event?.emit('app/openSidebar', {
 									path: '/assistants',
-									title: is_cn ? 'AI 助手' : 'AI Assistants',
+									title: is_cn ? 'AI 专家' : 'AI Experts',
 									icon: 'material-assistant'
 								})
 							}}

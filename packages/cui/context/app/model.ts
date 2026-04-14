@@ -229,7 +229,7 @@ export default class GlobalModel {
 				{
 					id: 1,
 					key: '/assistants',
-					name: 'AI Assistants',
+					name: 'AI Experts',
 					path: '/assistants',
 					icon: 'material-robot_2'
 				},

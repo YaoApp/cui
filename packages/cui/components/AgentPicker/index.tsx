@@ -20,7 +20,7 @@ const AgentPicker = (props: AgentPickerProps) => {
 	const is_cn = locale === 'zh-CN'
 
 	const defaultTitle = type === 'assistant'
-		? (is_cn ? '选择助手' : 'Select Assistant')
+		? (is_cn ? '选择专家' : 'Select Expert')
 		: (is_cn ? '选择工具' : 'Select Tools')
 	const title = props.title || defaultTitle
 

@@ -290,7 +290,7 @@ const PLATFORMS: PlatformConfig[] = [
 		name_en: 'WeChat',
 		iconBg: '#07C160',
 		iconPadding: '5px',
-		desc_cn: '通过扫码连接微信，直接在微信中与 Agent 对话',
+		desc_cn: '通过扫码连接微信，直接在微信中与任务智能体对话',
 		desc_en: 'Scan QR code to connect WeChat and chat with the Agent directly',
 		docsPath: 'integrations/weixin',
 		scanLogin: true,
@@ -330,7 +330,7 @@ const PLATFORMS: PlatformConfig[] = [
 		name_en: 'Lark',
 		iconBg: '#3370FF',
 		iconPadding: '6px',
-		desc_cn: '连接飞书，让团队成员可以直接在通讯录搜索并与 Agent 对话',
+		desc_cn: '连接飞书，让团队成员可以直接在通讯录搜索并与任务智能体对话',
 		desc_en: 'Connect Lark/Feishu so team members can chat with the Agent directly',
 		docsPath: 'integrations/feishu',
 		fields: [
@@ -500,7 +500,7 @@ const IntegrationPanel: React.FC<IntegrationPanelProps> = ({ robot, formData, on
 			<div className={styles.panelTitle}>{is_cn ? '平台集成' : 'Integrations'}</div>
 			<div className={styles.sectionHint}>
 				{is_cn
-					? '将 Agent 接入即时通讯平台，用户无需安装任何插件，粘贴凭证即可使用'
+					? '将任务智能体接入即时通讯平台，用户无需安装任何插件，粘贴凭证即可使用'
 					: 'Connect the Agent to messaging platforms — paste credentials and it just works'}
 			</div>
 			<div className={styles.integrationList}>

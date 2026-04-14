@@ -138,15 +138,15 @@ const GuideExecutionDrawer: React.FC<GuideExecutionDrawerProps> = ({
 			title={is_cn ? '指导执行' : 'Guide Execution'}
 			emptyState={{
 				icon: 'material-support_agent',
-				title: is_cn ? '与智能体沟通' : 'Talk to the agent',
+				title: is_cn ? '与任务智能体沟通' : 'Talk to the task agent',
 				hint: is_cn
-					? '告诉智能体你想要的调整，例如：暂停、修改目标、添加任务等'
-					: 'Tell the agent what you want to adjust, e.g., pause, modify goals, add tasks, etc.'
+					? '告诉任务智能体你想要的调整，例如：暂停、修改目标、添加任务等'
+					: 'Tell the task agent what you want to adjust, e.g., pause, modify goals, add tasks, etc.'
 			}}
 			placeholder={is_cn ? '输入指导指令... ⌘+Enter 发送' : 'Enter guidance... ⌘+Enter to send'}
 			successState={{
 				title: is_cn ? '指令已发送' : 'Guidance Sent',
-				hint: is_cn ? '智能体正在处理你的指令...' : 'Agent is processing your guidance...'
+				hint: is_cn ? '任务智能体正在处理你的指令...' : 'Task Agent is processing your guidance...'
 			}}
 			onSend={handleSend}
 			onComplete={handleComplete}

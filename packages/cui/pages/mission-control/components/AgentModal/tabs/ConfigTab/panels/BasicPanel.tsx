@@ -66,7 +66,7 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 					onChange={(value) => handleFieldChange('display_name', value)}
 					schema={{
 						type: 'string',
-						placeholder: is_cn ? '请输入智能体名称' : 'Enter agent name'
+						placeholder: is_cn ? '请输入任务智能体名称' : 'Enter task agent name'
 					}}
 					error={errors.display_name || ''}
 					hasError={!!errors.display_name}
@@ -79,7 +79,7 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 					{is_cn ? '工作空间' : 'Workspace'}
 					<Tooltip
 						title={is_cn
-							? '将智能体绑定到指定的工作空间环境'
+							? '将任务智能体绑定到指定的工作空间环境'
 							: 'Bind the agent to a specific workspace environment'
 						}
 						placement='top'
@@ -124,8 +124,8 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 						{is_cn ? '直属主管' : 'Reports To'}
 						<Tooltip
 							title={is_cn
-								? '智能体会定期向主管发送工作报告'
-								: 'Agent will send regular reports to the manager'
+								? '任务智能体会定期向主管发送工作报告'
+								: 'Task Agent will send regular reports to the manager'
 							}
 						>
 							<span className={styles.helpIconWrapper}>
@@ -156,7 +156,7 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 					schema={{
 						type: 'string',
 						placeholder: is_cn 
-							? '简要介绍这个智能体的职责和特点' 
+							? '简要介绍这个任务智能体的职责和特点' 
 							: 'Brief description of this agent'
 					}}
 					error=''
@@ -170,8 +170,8 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 					{is_cn ? '工作模式' : 'Work Mode'}
 					<Tooltip
 						title={is_cn
-							? '自主模式：智能体会主动思考、发现任务并自主完成。按需模式：仅在收到任务指派时工作。'
-							: 'Autonomous: Agent proactively thinks, identifies tasks and completes them independently. On Demand: Works only when assigned tasks.'
+							? '自主模式：任务智能体会主动思考、发现任务并自主完成。按需模式：仅在收到任务指派时工作。'
+							: 'Autonomous: Task Agent proactively thinks, identifies tasks and completes them independently. On Demand: Works only when assigned tasks.'
 						}
 					>
 						<span className={styles.helpIconWrapper}>
@@ -198,8 +198,8 @@ const BasicPanel: React.FC<BasicPanelProps> = ({ robot, formData, onChange, is_c
 				/>
 				<div className={styles.formHint}>
 					{formData.autonomous_mode
-						? (is_cn ? '智能体会主动思考、发现任务并按计划自主完成' : 'Agent will proactively identify and complete tasks on schedule')
-						: (is_cn ? '智能体仅在收到任务指派时工作' : 'Agent will only work when assigned tasks')
+						? (is_cn ? '任务智能体会主动思考、发现任务并按计划自主完成' : 'Task Agent will proactively identify and complete tasks on schedule')
+						: (is_cn ? '任务智能体仅在收到任务指派时工作' : 'Task Agent will only work when assigned tasks')
 					}
 				</div>
 			</div>

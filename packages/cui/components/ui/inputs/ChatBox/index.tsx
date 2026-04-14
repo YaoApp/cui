@@ -149,7 +149,7 @@ export default function ChatBox({
 						value={String(value || '')}
 						onChange={handleChange}
 						onKeyDown={handleKeyDown}
-						placeholder={schema.placeholder || '描述你需要创建的智能体...'}
+						placeholder={schema.placeholder || '描述你需要创建的任务智能体...'}
 						disabled={disabled || loading}
 						rows={1}
 					/>

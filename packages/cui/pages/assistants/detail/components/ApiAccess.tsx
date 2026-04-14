@@ -96,8 +96,8 @@ const ApiAccess = ({ data, is_cn }: ApiAccessProps) => {
 			</div>
 			<div className={styles.hint}>
 				{is_cn
-					? '与该助手对话。兼容 OpenAI Chat Completion 协议，支持流式输出'
-					: 'Chat with this assistant. OpenAI-compatible, streaming supported'}
+					? '与该专家对话。兼容 OpenAI Chat Completion 协议，支持流式输出'
+					: 'Chat with this expert. OpenAI-compatible, streaming supported'}
 			</div>
 
 			{/* Lang tabs + copy */}

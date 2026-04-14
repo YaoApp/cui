@@ -140,8 +140,8 @@ const Index = () => {
 				setTags([{ key: 'all', label: is_cn ? '全部' : 'All' }, ...pageTags])
 			}
 		} catch (error) {
-			console.error(is_cn ? '加载助手失败:' : 'Failed to load assistants:', error)
-			message.error(is_cn ? '加载助手失败' : 'Failed to load assistants')
+			console.error(is_cn ? '加载专家失败:' : 'Failed to load experts:', error)
+			message.error(is_cn ? '加载专家失败' : 'Failed to load experts')
 		} finally {
 			setLoading(false)
 		}
@@ -229,8 +229,8 @@ const Index = () => {
 				})
 			}
 		} catch (error) {
-			console.error(is_cn ? '加载更多助手失败:' : 'Failed to load more assistants:', error)
-			message.error(is_cn ? '加载更多助手失败' : 'Failed to load more assistants')
+			console.error(is_cn ? '加载更多专家失败:' : 'Failed to load more experts:', error)
+			message.error(is_cn ? '加载更多专家失败' : 'Failed to load more experts')
 		} finally {
 			setLoadingMore(false)
 		}
@@ -321,7 +321,7 @@ const Index = () => {
 							size={24}
 							style={{ color: 'var(--color_page_title)' }}
 						/>
-						<h1 className={styles.title}>{is_cn ? 'AI 助手' : 'AI Assistants'}</h1>
+						<h1 className={styles.title}>{is_cn ? 'AI 专家' : 'AI Experts'}</h1>
 					</div>
 					{/* Temporarily hidden - assistants should be installed via Yao commands, only for developers */}
 					{/* <div className={styles.createIcon} onClick={handleCreate}>
@@ -333,7 +333,7 @@ const Index = () => {
 					<Input
 						size='large'
 						prefix={<SearchOutlined />}
-						placeholder={is_cn ? '搜索 AI 助手...' : 'Search AI assistants...'}
+						placeholder={is_cn ? '搜索 AI 专家...' : 'Search AI experts...'}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						onKeyPress={handleKeyPress}

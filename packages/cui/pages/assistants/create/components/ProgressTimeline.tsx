@@ -79,8 +79,8 @@ const ProgressTimeline = ({
 								? '创建失败'
 								: 'Creation Failed'
 							: is_cn
-							? 'AI 正在创建助手...'
-							: 'AI is creating assistant...'}
+							? 'AI 正在创建专家...'
+							: 'AI is creating expert...'}
 					</h3>
 				</div>
 				{isGenerating && onStop && (

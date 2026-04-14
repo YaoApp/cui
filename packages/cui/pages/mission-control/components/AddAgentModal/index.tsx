@@ -476,7 +476,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 					<div className={styles.titleSection}>
 						<Icon name='material-person_add' size={20} className={styles.titleIcon} />
 						<span className={styles.modalTitle}>
-							{is_cn ? '创建智能体' : 'Create Agent'}
+							{is_cn ? '创建任务智能体' : 'Create Task Agent'}
 						</span>
 					</div>
 					<div className={styles.steps}>
@@ -533,7 +533,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 							</div>
 						<div className={styles.stepDescription}>
 							{is_cn 
-								? '为智能体设置名称和工作模式' 
+								? '为任务智能体设置名称和工作模式' 
 								: 'Configure name and work mode for your AI teammate'}
 						</div>
 
@@ -562,7 +562,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 										{is_cn ? '工作空间' : 'Workspace'}
 										<Tooltip
 											title={is_cn
-												? '将智能体绑定到指定的工作空间环境'
+												? '将任务智能体绑定到指定的工作空间环境'
 												: 'Bind the agent to a specific workspace environment'
 											}
 											placement='top'
@@ -685,7 +685,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 								</div>
 								<div className={styles.stepDescription}>
 									{is_cn 
-										? '定义智能体的角色职责和可用的助手' 
+										? '定义任务智能体的角色职责和可用的专家' 
 										: 'Define the role, responsibilities and available assistants'}
 								</div>
 							</div>
@@ -741,7 +741,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 										message.error(is_cn ? '生成失败' : 'Generation failed')
 									}}
 									placeholder={is_cn
-										? '描述你需要什么样的智能体...\n\nCtrl+Enter 发送'
+										? '描述你需要什么样的任务智能体...\n\nCtrl+Enter 发送'
 										: 'Describe what kind of agent you need...\n\nCtrl+Enter to send'
 									}
 									size="small"
@@ -762,7 +762,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 									schema={{
 										type: 'string',
 										placeholder: is_cn 
-											? '描述智能体的角色定位和主要职责...' 
+											? '描述任务智能体的角色定位和主要职责...' 
 											: 'Describe the role and responsibilities of this AI teammate...',
 										rows: 6
 									}}
@@ -799,7 +799,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 							{/* Accessible AI Assistants */}
 							<div className={styles.formItem}>
 								<label className={styles.formLabel}>
-									{is_cn ? '可协作的智能体' : 'Accessible AI Assistants'}
+									{is_cn ? '可协作的专家' : 'Accessible AI Experts'}
 										{agentsLoading && (
 											<span className={styles.loadingHint}>
 												{is_cn ? ' (加载中...)' : ' (Loading...)'}
@@ -926,7 +926,7 @@ const AddAgentModal: React.FC<AddAgentModalProps> = ({ visible, onClose, onCreat
 								) : (
 									<>
 										<Icon name='material-check' size={16} />
-										<span>{is_cn ? '创建智能体' : 'Create Agent'}</span>
+										<span>{is_cn ? '创建任务智能体' : 'Create Task Agent'}</span>
 									</>
 								)}
 							</button>
