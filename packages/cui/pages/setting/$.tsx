@@ -20,9 +20,8 @@ const Index = () => {
 	const user = global.user || {}
 
 	const clearStorage = useMemoizedFn(() => {
-		if (!local.logout_redirect) {
-			history.push(local.login_url || '/')
-		}
+		const login_url = (local.login_url as string) || '/auth/entry'
+		const logout_redirect = (local.logout_redirect as string) || ''
 
 		const excludes = ['paths', 'avatar', 'xgen_theme', 'remote_cache', 'token_storage', 'temp_sid']
 		const all = []
@@ -33,15 +32,18 @@ const Index = () => {
 		difference(all, excludes).map((item) => local.removeItem(item))
 		sessionStorage.clear()
 
-		// Clear the token and studio token
 		localStorage.removeItem('xgen:token')
 		localStorage.removeItem('xgen:studio')
 
-		// Redirect to the custom logout page
-		if (local.logout_redirect) {
-			window.location = local.logout_redirect
+		if (logout_redirect) {
+			if (logout_redirect.startsWith('$dashboard/')) {
+				history.push(logout_redirect.replace('$dashboard', ''))
+			} else {
+				window.location = logout_redirect as any
+			}
 			return
 		}
+		history.push(login_url)
 	})
 
 	const Avatar = (

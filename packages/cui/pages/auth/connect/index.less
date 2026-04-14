@@ -31,14 +31,132 @@
 }
 
 @keyframes spin {
-	0% {
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+/* Entry form container (username/password login) */
+.entryContainer {
+	width: 100%;
+	max-width: 420px;
+	padding: 20px;
+
+	.entryCard {
+		background: var(--color_bg_menu);
+		border-radius: calc(var(--radius) * 3);
+		padding: 40px;
+		box-shadow: var(--shadow);
+		border: 1px solid var(--color_border);
+
+		.titleSection {
+			text-align: center;
+			margin-bottom: 28px;
+
+			.appTitle {
+				font-size: 24px;
+				font-weight: 600;
+				color: var(--color_text);
+				margin: 0 0 8px 0;
+				letter-spacing: -0.01em;
+			}
+
+			.appSubtitle {
+				font-size: 15px;
+				color: var(--color_text_light);
+				margin: 0;
+				line-height: 1.5;
+			}
+		}
+
+		.socialSection {
+			margin-top: 24px;
+			margin-bottom: 24px;
+		}
+
+		.termsSection {
+			text-align: center;
+			margin-top: 20px;
+
+			.termsText {
+				font-size: 12px;
+				color: var(--color_text_grey);
+				line-height: 1.4;
+				margin: 0;
+
+				.termsLink {
+					color: var(--color_main);
+					text-decoration: none;
+					transition: all 0.3s ease;
+
+					&:hover {
+						color: var(--color_main_hover);
+						text-decoration: underline;
+					}
+				}
+			}
+		}
+
+		.entryForm {
+			.changeEmailLink {
+				color: var(--color_main);
+				font-size: 13px;
+				cursor: pointer;
+				white-space: nowrap;
+				user-select: none;
+				transition: color 0.2s ease;
+
+				&:hover {
+					color: var(--color_main_hover);
+				}
+			}
+
+			.otpWrapper {
+				position: relative;
+
+				.otpHelper {
+					position: absolute;
+					top: calc(100% - 16px);
+					left: 0;
+					font-size: 11px;
+					color: var(--color_text_grey);
+					line-height: 1.2;
+					animation: fadeIn 0.2s ease-in;
+					z-index: 1000;
+					pointer-events: none;
+					white-space: nowrap;
+					background: var(--color_bg_nav);
+					padding: 2px 0;
+				}
+
+				@keyframes fadeIn {
+					from { opacity: 0; }
+					to { opacity: 1; }
+				}
+			}
+
+			.loginOptions {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin: 16px 0;
+				font-size: 14px;
+
+				.forgotPasswordLink {
+					color: var(--color_main);
+					text-decoration: none;
+					transition: all 0.2s ease;
+
+					&:hover {
+						color: var(--color_main_hover);
+						text-decoration: underline;
+					}
+				}
+			}
+		}
 	}
 }
 
+/* Device Flow polling/status container */
 .connectContainer {
 	width: 100%;
 	max-width: 420px;
@@ -82,10 +200,6 @@
 			}
 		}
 
-		.socialSection {
-			margin-bottom: 20px;
-		}
-
 		.pollingSection {
 			text-align: center;
 
@@ -96,12 +210,13 @@
 			}
 
 			.userCode {
-				font-size: 32px;
+				font-size: 28px;
 				font-weight: 700;
 				font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-				letter-spacing: 4px;
+				letter-spacing: 0.2em;
+				white-space: nowrap;
 				color: var(--color_text);
-				margin: 0 0 20px 0;
+				margin: 0 0 28px 0;
 			}
 
 			.pollingStatus {
@@ -111,6 +226,7 @@
 				gap: 8px;
 				font-size: 14px;
 				color: var(--color_text_light);
+				margin-top: 20px;
 				margin-bottom: 16px;
 
 				.pollingDot {
@@ -129,89 +245,54 @@
 			}
 		}
 
-		.retrySection {
-			margin-top: 20px;
+		.cancelLink {
+			display: inline-block;
+			margin-top: 16px;
+			font-size: 13px;
+			color: var(--color_text_grey);
+			cursor: pointer;
+			transition: color 0.2s ease;
+
+			&:hover {
+				color: var(--color_text);
+			}
 		}
 
-		.helpSection {
-			text-align: center;
+		.retrySection {
 			margin-top: 20px;
-
-			.helpText {
-				font-size: 12px;
-				color: var(--color_text_grey);
-				line-height: 1.4;
-				margin: 0;
-			}
 		}
 	}
 }
 
 @keyframes pulse {
-	0%,
-	100% {
-		opacity: 0.4;
-	}
-	50% {
-		opacity: 1;
-	}
+	0%, 100% { opacity: 0.4; }
+	50% { opacity: 1; }
 }
 
 /* Height responsive system */
 @media (max-height: 499px) {
-	.container {
-		padding-top: 40px;
-		padding-bottom: 10px;
-	}
+	.container { padding-top: 40px; padding-bottom: 10px; }
 }
-
 @media (min-height: 500px) and (max-height: 599px) {
-	.container {
-		padding-top: 50px;
-		padding-bottom: 15px;
-	}
+	.container { padding-top: 50px; padding-bottom: 15px; }
 }
-
 @media (min-height: 600px) and (max-height: 767px) {
-	.container {
-		padding-top: 60px;
-		padding-bottom: 20px;
-	}
+	.container { padding-top: 60px; padding-bottom: 20px; }
 }
-
 @media (min-height: 768px) and (max-height: 899px) {
-	.container {
-		padding-top: 80px;
-		padding-bottom: 30px;
-	}
+	.container { padding-top: 80px; padding-bottom: 30px; }
 }
-
 @media (min-height: 900px) and (max-height: 1079px) {
-	.container {
-		padding-top: 100px;
-		padding-bottom: 40px;
-	}
+	.container { padding-top: 100px; padding-bottom: 40px; }
 }
-
 @media (min-height: 1080px) and (max-height: 1199px) {
-	.container {
-		padding-top: 115px;
-		padding-bottom: 50px;
-	}
+	.container { padding-top: 115px; padding-bottom: 50px; }
 }
-
 @media (min-height: 1200px) and (max-height: 1599px) {
-	.container {
-		padding-top: 130px;
-		padding-bottom: 60px;
-	}
+	.container { padding-top: 130px; padding-bottom: 60px; }
 }
-
 @media (min-height: 1600px) {
-	.container {
-		padding-top: 140px;
-		padding-bottom: 80px;
-	}
+	.container { padding-top: 140px; padding-bottom: 80px; }
 }
 
 /* Mobile responsive */
@@ -219,6 +300,33 @@
 	.container {
 		padding: 20px;
 		padding-top: calc(6vh + 30px);
+	}
+
+	.entryContainer {
+		max-width: 360px;
+		padding: 16px;
+
+		.entryCard {
+			padding: 24px;
+
+			.titleSection {
+				margin-bottom: 24px;
+				.appTitle { font-size: 20px; }
+				.appSubtitle { font-size: 14px; }
+			}
+
+			.entryForm {
+				.loginSection {
+					font-size: 13px;
+					margin: 16px 0;
+				}
+			}
+
+			.termsSection {
+				margin-top: 16px;
+				.termsText { font-size: 11px; }
+			}
+		}
 	}
 
 	.connectContainer {
@@ -230,28 +338,14 @@
 
 			.titleSection {
 				margin-bottom: 24px;
-
-				.appTitle {
-					font-size: 20px;
-				}
-
-				.appSubtitle {
-					font-size: 14px;
-				}
+				.appTitle { font-size: 20px; }
+				.appSubtitle { font-size: 14px; }
 			}
 
 			.pollingSection {
 				.userCode {
-					font-size: 26px;
-					letter-spacing: 3px;
-				}
-			}
-
-			.helpSection {
-				margin-top: 16px;
-
-				.helpText {
-					font-size: 11px;
+					font-size: 22px;
+					letter-spacing: 0.18em;
 				}
 			}
 		}
@@ -259,9 +353,7 @@
 }
 
 @media (max-width: 768px) and (max-height: 700px) {
-	.container {
-		padding-top: calc(4vh + 20px);
-	}
+	.container { padding-top: calc(4vh + 20px); }
 }
 
 /* Dark theme support */
@@ -282,6 +374,50 @@
 		}
 	}
 
+	.entryContainer .entryCard {
+		background: rgba(26, 29, 41, 0.85);
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+		.titleSection {
+			.appTitle { color: rgba(255, 255, 255, 0.95); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+			.appSubtitle { color: rgba(255, 255, 255, 0.65); }
+		}
+
+		.entryForm {
+			.changeEmailLink {
+				color: rgba(69, 128, 255, 0.9);
+				&:hover { color: rgba(90, 143, 255, 1); }
+			}
+
+			.otpWrapper {
+				.otpHelper {
+					color: rgba(255, 255, 255, 0.6);
+					background: rgba(26, 29, 41, 0.95);
+				}
+			}
+
+			.loginOptions {
+				.forgotPasswordLink {
+					color: rgba(69, 128, 255, 0.9);
+					&:hover { color: rgba(90, 143, 255, 1); text-shadow: 0 0 8px rgba(69, 128, 255, 0.3); }
+				}
+			}
+		}
+
+		.termsSection {
+			.termsText {
+				color: rgba(255, 255, 255, 0.5);
+				.termsLink {
+					color: rgba(69, 128, 255, 0.9);
+					&:hover { color: rgba(90, 143, 255, 1); text-shadow: 0 0 8px rgba(69, 128, 255, 0.3); }
+				}
+			}
+		}
+	}
+
 	.connectContainer .connectCard {
 		background: rgba(26, 29, 41, 0.85);
 		backdrop-filter: blur(20px);
@@ -290,46 +426,24 @@
 			inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
 		.titleSection {
-			.appTitle {
-				color: rgba(255, 255, 255, 0.95);
-				text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-			}
-
-			.appSubtitle {
-				color: rgba(255, 255, 255, 0.65);
-			}
-
+			.appTitle { color: rgba(255, 255, 255, 0.95); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+			.appSubtitle { color: rgba(255, 255, 255, 0.65); }
 			.statusIcon {
 				color: rgba(69, 128, 255, 0.9);
-
-				&.statusError {
-					color: #ff4d4f;
-				}
+				&.statusError { color: #ff4d4f; }
 			}
 		}
 
 		.pollingSection {
-			.userCodeLabel {
-				color: rgba(255, 255, 255, 0.5);
-			}
-
-			.userCode {
-				color: rgba(255, 255, 255, 0.95);
-			}
-
-			.pollingStatus {
-				color: rgba(255, 255, 255, 0.65);
-			}
-
-			.countdown {
-				color: rgba(255, 255, 255, 0.4);
-			}
+			.userCodeLabel { color: rgba(255, 255, 255, 0.5); }
+			.userCode { color: rgba(255, 255, 255, 0.95); }
+			.pollingStatus { color: rgba(255, 255, 255, 0.65); }
+			.countdown { color: rgba(255, 255, 255, 0.4); }
 		}
 
-		.helpSection {
-			.helpText {
-				color: rgba(255, 255, 255, 0.5);
-			}
+		.cancelLink {
+			color: rgba(255, 255, 255, 0.4);
+			&:hover { color: rgba(255, 255, 255, 0.7); }
 		}
 	}
 }

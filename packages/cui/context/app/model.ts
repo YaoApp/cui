@@ -127,8 +127,9 @@ export default class GlobalModel {
 			// Skip for OTP verification pages - they handle their own auth flow
 			if (currentPath.startsWith('/v/')) return
 
-			// Use history.push which respects the router base prefix
-			history.push('/auth/entry')
+			// Redirect back to the login page used during sign-in
+			const loginUrl = (local.login_url as string) || '/auth/entry'
+			history.push(loginUrl)
 			return true
 		}
 
