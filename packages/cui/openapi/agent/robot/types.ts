@@ -414,6 +414,8 @@ export interface ResultDetail {
 				title: string
 				file: string
 				description?: string
+				size?: number
+				content_type?: string
 			}>
 		}
 		success?: boolean

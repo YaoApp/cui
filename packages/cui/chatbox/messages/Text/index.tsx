@@ -10,13 +10,12 @@ import { visit } from 'unist-util-visit'
 import { VFile } from 'vfile'
 import { compile, run } from '@mdx-js/mdx'
 import { useMDXComponents } from '@mdx-js/react'
-import { Modal } from 'antd'
 import styles from './index.less'
 import Code from './components/Code'
 import Mermaid from './components/Mermaid'
 import ReferencePopover from './components/ReferencePopover'
-import FileViewer from '@/components/view/FileViewer'
-import { WorkspaceAPI } from '@/openapi/workspace'
+import AttachmentPreviewModal, { type AttachmentPreviewItem } from '@/components/common/AttachmentPreviewModal'
+import { ParseFileRef } from '@/utils/fileWrapper'
 import Thinking from '../Thinking'
 import ToolCall from '../ToolCall'
 import type { TextMessage, ThinkingMessage, ToolCallMessage } from '../../../openapi'
@@ -421,80 +420,18 @@ const Text = ({ message }: ITextProps) => {
 		return url.startsWith('http://') || url.startsWith('https://')
 	}, [])
 
-	/**
-	 * Check if URL is a workspace file link (workspace://{workspaceId}/{path})
-	 */
 	const isWorkspaceLink = useCallback((url: string): boolean => {
 		return url.startsWith('workspace://')
 	}, [])
 
-	/**
-	 * Parse workspace:// URL into workspaceId and filePath
-	 * Format: workspace://{workspaceId}/{filePath}
-	 */
-	const parseWorkspaceLink = useCallback((url: string): { workspaceId: string; filePath: string } | null => {
-		if (!url.startsWith('workspace://')) return null
-		const rest = url.slice('workspace://'.length)
-		const slashIdx = rest.indexOf('/')
-		if (slashIdx === -1) return { workspaceId: rest, filePath: '' }
-		return {
-			workspaceId: rest.slice(0, slashIdx),
-			filePath: rest.slice(slashIdx + 1)
-		}
+	const [wsPreviewItem, setWsPreviewItem] = useState<AttachmentPreviewItem | null>(null)
+
+	const handleWorkspaceLinkOpen = useCallback((href: string) => {
+		const ref = ParseFileRef(href)
+		if (ref.type !== 'workspace' || !ref.filePath) return
+		const fileName = ref.filePath.split('/').pop() || ref.filePath
+		setWsPreviewItem({ title: fileName, file: href })
 	}, [])
-
-	// Workspace file preview state
-	const [wsPreviewFile, setWsPreviewFile] = useState<{
-		name: string
-		src?: string
-		content?: string
-		contentType?: string
-	} | null>(null)
-	const [wsPreviewLoading, setWsPreviewLoading] = useState(false)
-
-	const textExts = useRef(
-		new Set([
-			'txt', 'md', 'log', 'ini', 'cfg', 'csv', 'json', 'jsonc',
-			'yaml', 'yml', 'xml', 'py', 'js', 'ts', 'jsx', 'tsx',
-			'java', 'cpp', 'go', 'sh', 'html', 'css', 'sql', 'php',
-			'rb', 'rs', 'c', 'h', 'yao', 'less', 'scss', 'toml', 'env'
-		])
-	)
-
-	const handleWorkspaceLinkOpen = useCallback(
-		async (workspaceId: string, filePath: string) => {
-			if (!filePath || !window.$app?.openapi) return
-			const api = new WorkspaceAPI(window.$app.openapi)
-			const fileName = filePath.split('/').pop() || filePath
-			const ext = fileName.split('.').pop()?.toLowerCase() || ''
-
-			if (textExts.current.has(ext)) {
-				setWsPreviewFile({ name: fileName })
-				setWsPreviewLoading(true)
-				try {
-					const resp = await api.ReadFile(workspaceId, filePath)
-					if (window.$app.openapi.IsError(resp)) throw new Error(resp.error?.error_description)
-					const text = typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data, null, 2)
-					setWsPreviewFile({
-						name: fileName,
-						content: text,
-						contentType: 'text/plain',
-						src: api.ContentURL(workspaceId, filePath)
-					})
-				} catch {
-					setWsPreviewFile(null)
-				} finally {
-					setWsPreviewLoading(false)
-				}
-			} else {
-				setWsPreviewFile({
-					name: fileName,
-					src: api.ContentURL(workspaceId, filePath)
-				})
-			}
-		},
-		[]
-	)
 
 	// Handle link clicks (reference links, workspace links, and external links)
 	const handleLinkClick = useCallback(
@@ -536,10 +473,7 @@ const Text = ({ message }: ITextProps) => {
 				if (isWorkspaceLink(href)) {
 					e.preventDefault()
 					e.stopPropagation()
-					const parsed = parseWorkspaceLink(href)
-					if (parsed) {
-						handleWorkspaceLinkOpen(parsed.workspaceId, parsed.filePath)
-					}
+					handleWorkspaceLinkOpen(href)
 					return
 				}
 
@@ -555,7 +489,7 @@ const Text = ({ message }: ITextProps) => {
 				}
 			}
 		},
-		[requestId, isExternalLink, isWorkspaceLink, parseWorkspaceLink, addTrackingParam, handleWorkspaceLinkOpen]
+		[requestId, isExternalLink, isWorkspaceLink, addTrackingParam, handleWorkspaceLinkOpen]
 	)
 
 	// Close reference popover
@@ -781,41 +715,11 @@ const Text = ({ message }: ITextProps) => {
 			)}
 
 			{/* Workspace File Preview Modal */}
-			<Modal
-				open={!!wsPreviewFile}
-				title={wsPreviewFile?.name}
-				footer={null}
-				width='80vw'
-				bodyStyle={{ height: '70vh', padding: 0, overflow: 'hidden' }}
-				onCancel={() => setWsPreviewFile(null)}
-				destroyOnClose
-			>
-				{wsPreviewLoading ? (
-					<div
-						style={{
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							height: '100%'
-						}}
-					>
-						Loading...
-					</div>
-				) : (
-					wsPreviewFile && (
-						<FileViewer
-							src={wsPreviewFile.src}
-							content={wsPreviewFile.content}
-							contentType={wsPreviewFile.contentType}
-							__name={wsPreviewFile.name}
-							__bind=''
-							__value={wsPreviewFile.name}
-							style={{ height: '70vh' }}
-							showMaximize
-						/>
-					)
-				)}
-			</Modal>
+			<AttachmentPreviewModal
+				visible={!!wsPreviewItem}
+				onClose={() => setWsPreviewItem(null)}
+				attachment={wsPreviewItem}
+			/>
 		</div>
 	)
 }

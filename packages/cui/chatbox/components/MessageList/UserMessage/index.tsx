@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { message } from 'antd'
 import { FileText, Image as ImageIcon, DownloadSimple } from 'phosphor-react'
 import type { Message } from '../../../../openapi'
-import { FileAPI } from '../../../../openapi'
+import { ParseFileRef, ResolveFileURL } from '@/utils/fileWrapper'
 import styles from './index.less'
 
 interface IUserMessageProps {
@@ -24,17 +24,6 @@ interface ContentPart {
 	}
 }
 
-// Parse attachment URL (e.g., "__yao.attachment://fileID")
-const parseAttachmentURL = (url: string): { uploaderID: string; fileID: string } | null => {
-	const match = url.match(/^([^:]+):\/\/(.+)$/)
-	if (!match) return null
-	return {
-		uploaderID: match[1],
-		fileID: match[2]
-	}
-}
-
-// Component to handle image attachment with URL resolution
 const ImageAttachment: React.FC<{ url: string }> = ({ url }) => {
 	const [blobUrl, setBlobUrl] = useState<string | null>(null)
 	const [loading, setLoading] = useState(true)
@@ -44,43 +33,30 @@ const ImageAttachment: React.FC<{ url: string }> = ({ url }) => {
 		let currentBlobUrl: string | null = null
 
 		const loadImage = async () => {
-			// Check if it's an attachment URL that needs resolution
-			const parsed = parseAttachmentURL(url)
-			if (!parsed) {
-				// Direct URL, use as-is
+			const ref = ParseFileRef(url)
+			if (ref.type === 'url') {
 				setBlobUrl(url)
 				setLoading(false)
 				return
 			}
 
-			// Load via FileAPI
+			const resolvedUrl = ResolveFileURL(url)
 			try {
-				if (!window.$app?.openapi) {
-					throw new Error('OpenAPI not initialized')
-				}
-
-				const fileApi = new FileAPI(window.$app.openapi, parsed.uploaderID)
-				const response = await fileApi.Download(parsed.fileID, parsed.uploaderID)
-
-				if (window.$app.openapi.IsError(response) || !response.data) {
-					throw new Error('Failed to download image')
-				}
-
-				const blob = response.data
+				const resp = await fetch(resolvedUrl, { credentials: 'include' })
+				if (!resp.ok) throw new Error(`${resp.status}`)
+				const blob = await resp.blob()
 				const objectUrl = URL.createObjectURL(blob)
 				currentBlobUrl = objectUrl
 				setBlobUrl(objectUrl)
-				setLoading(false)
-			} catch (err) {
-				console.error('Failed to load image:', err)
+			} catch {
 				setError(true)
+			} finally {
 				setLoading(false)
 			}
 		}
 
 		loadImage()
 
-		// Cleanup blob URL on unmount
 		return () => {
 			if (currentBlobUrl && currentBlobUrl.startsWith('blob:')) {
 				URL.revokeObjectURL(currentBlobUrl)
@@ -123,54 +99,31 @@ const ImageAttachment: React.FC<{ url: string }> = ({ url }) => {
 	)
 }
 
-// Component to handle file attachment
 const FileAttachment: React.FC<{ url: string; filename?: string }> = ({ url, filename }) => {
-	const parsed = parseAttachmentURL(url)
-	const displayName = filename || parsed?.fileID || 'file'
+	const ref = ParseFileRef(url)
+	const displayName = filename || ref.fileID || url.split('/').pop() || 'file'
 	const [downloading, setDownloading] = useState(false)
 
 	const handleDownload = async () => {
 		if (downloading) return
-
 		setDownloading(true)
 		try {
-			// Check if it's an attachment URL that needs resolution
-			if (!parsed) {
-				// Direct URL, try to download directly
-				window.open(url, '_blank')
-				return
-			}
-
-			// Load via FileAPI
-			if (!window.$app?.openapi) {
-				throw new Error('OpenAPI not initialized')
-			}
-
-			const fileApi = new FileAPI(window.$app.openapi, parsed.uploaderID)
-			const response = await fileApi.Download(parsed.fileID, parsed.uploaderID)
-
-			if (window.$app.openapi.IsError(response) || !response.data) {
-				throw new Error('Failed to download file')
-			}
-
-			// Create blob URL and trigger download
-			const blob = response.data
+			const resolvedUrl = ResolveFileURL(url)
+			const resp = await fetch(resolvedUrl, { credentials: 'include' })
+			if (!resp.ok) throw new Error(`${resp.status}`)
+			const blob = await resp.blob()
 			const blobUrl = URL.createObjectURL(blob)
 			const link = document.createElement('a')
 			link.href = blobUrl
 			link.download = displayName
+			link.style.display = 'none'
 			document.body.appendChild(link)
 			link.click()
 			document.body.removeChild(link)
-
-			// Cleanup
-			setTimeout(() => {
-				URL.revokeObjectURL(blobUrl)
-			}, 100)
-	} catch (err) {
-		console.error('Failed to download file:', err)
-		message.error('Failed to download file')
-	} finally {
+			setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
+		} catch {
+			message.error('Failed to download file')
+		} finally {
 			setDownloading(false)
 		}
 	}

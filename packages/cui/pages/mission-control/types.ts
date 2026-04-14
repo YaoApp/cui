@@ -154,7 +154,9 @@ export interface DeliveryAttachment {
 	title: string
 	description?: string
 	task_id?: string
-	file: string // __<uploader>://<fileID>
+	file: string // __<uploader>://<fileID>, workspace://, or URL
+	size?: number
+	content_type?: string
 }
 
 // DeliveryContent (from types/robot.go)

@@ -5,7 +5,7 @@ import Icon from '@/widgets/Icon'
 import useRobots from '@/hooks/useRobots'
 import type { RobotState } from '../../../types'
 import type { Result, ResultDetail, TriggerType } from '@/openapi/agent/robot'
-import { triggerFileDownload } from '@/utils/fileWrapper'
+import { useFileDownload } from '@/hooks/useFileDownload'
 import CreatureLoading from '../../CreatureLoading'
 import styles from '../index.less'
 
@@ -193,17 +193,19 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 		}
 	}
 
-	// Handle download — fetch full detail first to get attachment file wrappers
+	const { downloading, downloadAll } = useFileDownload()
+	const [downloadingId, setDownloadingId] = useState<string | null>(null)
+
 	const handleDownload = async (e: React.MouseEvent, result: Result) => {
 		e.stopPropagation()
-		if (!result.has_attachments) return
+		if (!result.has_attachments || downloading) return
+		setDownloadingId(result.id)
 		const detail = await getResult(robot.member_id, result.id)
 		const attachments = detail?.delivery?.content?.attachments
 		if (attachments && attachments.length > 0) {
-			attachments.forEach((att, i) => {
-				triggerFileDownload(att.file, att.title, i)
-			})
+			await downloadAll(attachments.map((att) => ({ file: att.file, filename: att.title })))
 		}
+		setDownloadingId(null)
 	}
 
 	// Format helpers
@@ -358,8 +360,13 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ robot, onOpenDetail }) => {
 													<button
 														className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
 														onClick={(e) => handleDownload(e, result)}
+														disabled={downloadingId === result.id}
 													>
-														<Icon name='material-download' size={14} />
+														{downloadingId === result.id ? (
+															<Spin size='small' />
+														) : (
+															<Icon name='material-download' size={14} />
+														)}
 													</button>
 												</Tooltip>
 											)}
