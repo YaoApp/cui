@@ -29,6 +29,7 @@ const STANDALONE_PAGES = new Map([
 	['auth_connect', '/auth/connect'], // Desktop client Device Flow login
 	['auth_logout', '/auth/logout'],
 	['auth_back', '/auth/back/'],
+	['auth_token', '/auth/token'],
 	['auth_consent', '/auth/consent'],
 	['auth_helloworld', '/auth/helloworld'],
 	// Team pages
