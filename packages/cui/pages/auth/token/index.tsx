@@ -6,14 +6,23 @@ import { useGlobal } from '@/context/app'
 import AuthLayout from '../components/AuthLayout'
 import styles from '../back/index.less'
 import { User, UserInfo } from '@/openapi'
+import { EntryConfig } from '@/openapi/user/types'
 import { AfterLogin } from '../auth'
 import { getDefaultLogoUrl } from '@/services/wellknown'
+
+const setCookie = (name: string, value: string) => {
+	document.cookie = `${name}=${value};path=/;max-age=315360000`
+}
 
 const getCookie = (name: string): string | null => {
 	const value = `; ${document.cookie}`
 	const parts = value.split(`; ${name}=`)
 	if (parts.length === 2) return parts.pop()?.split(';').shift() || null
 	return null
+}
+
+const deleteCookie = (name: string) => {
+	document.cookie = `${name}=;path=/;max-age=0`
 }
 
 const getBrowserLanguage = (): string => {
@@ -44,8 +53,32 @@ const AuthToken = () => {
 			try {
 				setLoading(true)
 
-				// Read token from URL query: ?token=<base64-encoded access_token>
 				const urlParams = new URLSearchParams(window.location.search)
+
+				// Load entry config from API (same as /auth/entry)
+				let config: EntryConfig | null = null
+				try {
+					const configRes = await user.auth.GetEntryConfig(currentLocale)
+					if (!user.IsError(configRes) && configRes.data) {
+						config = configRes.data
+					}
+				} catch {
+					// Config is optional; proceed without it
+				}
+
+				// Set redirect cookies: URL param > config.success_url (same as /auth/entry)
+				const redirectParam = urlParams.get('redirect')
+				if (redirectParam && redirectParam.trim() !== '') {
+					setCookie('login_redirect', redirectParam)
+				} else if (config?.success_url) {
+					setCookie('login_redirect', config.success_url)
+				}
+
+				if (config?.logout_redirect) {
+					setCookie('logout_redirect', config.logout_redirect)
+				}
+
+				// Read token from URL query: ?token=<base64-encoded access_token>
 				const tokenParam = urlParams.get('token')
 				if (!tokenParam) {
 					setError(isZh ? '缺少 token 参数' : 'Missing token parameter')
@@ -96,8 +129,7 @@ const AuthToken = () => {
 					return
 				}
 
-				// Read redirect targets from cookies (same as /auth/back)
-				const loginRedirect = getCookie('login_redirect') || '/auth/helloworld'
+				const loginRedirect = getCookie('login_redirect') || '/'
 				const logoutRedirect = getCookie('logout_redirect') || '/'
 
 				await AfterLogin(global, {
@@ -107,6 +139,8 @@ const AuthToken = () => {
 				})
 
 				message.success(isZh ? '登录成功！正在跳转...' : 'Login successful! Redirecting...')
+				deleteCookie('login_redirect')
+				deleteCookie('logout_redirect')
 				setTimeout(() => {
 					window.location.href = loginRedirect
 				}, 500)
