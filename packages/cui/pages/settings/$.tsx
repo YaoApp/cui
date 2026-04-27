@@ -18,7 +18,14 @@ import Stripe from './components/Stripe'
 import MCPServers from './components/MCPServers'
 import Security from './components/Security'
 import AuditLogs from './components/AuditLogs'
-import { mockApi, MenuItem, MenuGroup } from './mockData'
+import SystemInfo from './components/SystemInfo'
+import CloudService from './components/CloudService'
+import Models from './components/Models'
+import SearchScrape from './components/SearchScrape'
+import Sandbox from './components/Sandbox'
+import SmtpConfig from './components/SmtpConfig'
+import type { MenuItem, MenuGroup } from './types'
+import { mockApi } from './mockApi'
 import styles from './index.less'
 
 // 临时组件，用于显示其他页面
@@ -60,8 +67,13 @@ const Settings = () => {
 			stripe: Stripe,
 			'mcp-servers': MCPServers,
 			security: Security,
-			'audit-logs': AuditLogs
-			// 其他组件可以在这里注册，未注册的会显示 ComingSoon
+			'audit-logs': AuditLogs,
+			system: SystemInfo,
+			cloud: CloudService,
+			models: Models,
+			search: SearchScrape,
+			sandbox: Sandbox,
+			smtp: SmtpConfig
 		}),
 		[]
 	)
@@ -132,7 +144,6 @@ const Settings = () => {
 					<p>{is_cn ? '管理您的账户设置和偏好' : 'Manage your account settings and preferences'}</p>
 				</div>
 			</div>
-
 			<div className={styles.content}>
 				<Menu active={activeKey} onChange={handleTabChange} />
 				<div className={styles.main}>{pageComponents[activeKey] || <Profile />}</div>

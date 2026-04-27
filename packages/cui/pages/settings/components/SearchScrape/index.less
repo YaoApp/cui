@@ -1,0 +1,243 @@
+.searchScrape {
+	width: 100%;
+	max-width: 760px;
+}
+
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 160px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	span { font-size: 12px; }
+}
+
+// Header — matches Models page
+.header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	margin-bottom: 24px;
+}
+
+.headerContent {
+	h2 { margin: 0 0 6px 0; font-size: 24px; font-weight: 600; color: var(--color_neo_text_primary); }
+	p { margin: 0; font-size: 14px; color: var(--color_neo_text_secondary); line-height: 1.5; }
+}
+
+// Sections
+.section { margin-top: 28px; }
+.sectionHeader { display: flex; align-items: center; margin-bottom: 12px; }
+.sectionTitle { font-size: 14px; font-weight: 600; color: var(--color_neo_text_secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+// Card — matches Models page
+.card {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	padding: 24px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+// Role/Tool Assignment — matches Models page
+.roleRow {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 10px 0;
+	&:first-child { padding-top: 0; }
+}
+
+.roleLabel {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 140px;
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.roleName { font-size: 14px; font-weight: 500; color: var(--color_neo_text_primary); }
+.roleOptional { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--color_neo_bg_field); color: var(--color_neo_text_secondary); flex-shrink: 0; }
+.roleSelect { flex: 1; min-width: 0; }
+
+.roleFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-top: 12px;
+}
+
+.roleHint {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	opacity: 0.7;
+}
+
+// Provider List
+.providerList {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+// Search Provider Card
+.searchCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	overflow: hidden;
+	transition: border-color 0.2s ease;
+}
+
+.searchCardEnabled {
+	border-color: rgba(59, 130, 246, 0.3);
+}
+
+.searchCardHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 20px;
+}
+
+.searchCardTitle {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.searchCardName {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.searchCardStatus {
+	font-size: 11px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-weight: 500;
+}
+
+.statusConnected { background: rgba(34, 197, 94, 0.1); color: rgb(34, 197, 94); }
+.statusDisconnected { background: rgba(239, 68, 68, 0.1); color: rgb(239, 68, 68); }
+
+.toolTag {
+	font-size: 10px;
+	padding: 2px 8px;
+	border-radius: 4px;
+	background: rgba(59, 130, 246, 0.08);
+	color: rgb(59, 130, 246);
+	white-space: nowrap;
+}
+
+.searchCardDesc {
+	padding: 0 20px 12px;
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	line-height: 1.5;
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.websiteLink {
+	font-size: 12px;
+	color: var(--color_main);
+	text-decoration: none;
+	white-space: nowrap;
+	flex-shrink: 0;
+	&:hover { text-decoration: underline; }
+}
+
+.searchCardBody {
+	padding: 0 20px 16px;
+}
+
+// Cloud service status blocks — matches Models modal cloudStatus
+.cloudConnected {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	background: rgba(82, 196, 26, 0.08);
+	border: 1px solid rgba(82, 196, 26, 0.25);
+	font-size: 13px;
+	color: #52c41a;
+
+	a {
+		margin-left: auto;
+		color: var(--color_neo_primary, var(--color_main));
+		cursor: pointer;
+		white-space: nowrap;
+		&:hover { text-decoration: underline; }
+	}
+}
+
+.cloudDisconnected {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	background: rgba(250, 173, 20, 0.08);
+	border: 1px solid rgba(250, 173, 20, 0.25);
+	font-size: 13px;
+	color: #faad14;
+
+	a {
+		margin-left: auto;
+		color: var(--color_neo_primary, var(--color_main));
+		cursor: pointer;
+		white-space: nowrap;
+		&:hover { text-decoration: underline; }
+	}
+}
+
+// Form fields in provider cards
+.searchField {
+	margin-bottom: 12px;
+	&:last-of-type { margin-bottom: 16px; }
+}
+
+.searchFieldLabel {
+	display: block;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_neo_text_primary);
+	margin-bottom: 6px;
+}
+
+.searchFieldHint {
+	font-weight: 400;
+	font-size: 12px;
+	color: var(--color_neo_text_tertiary);
+	margin-left: 8px;
+}
+
+// Actions row in provider card
+.searchCardActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	padding-top: 4px;
+}
+
+// Responsive
+@media (max-width: 768px) {
+	.roleRow { flex-direction: column; align-items: flex-start; gap: 8px; }
+	.roleLabel { width: auto; }
+	.roleSelect { width: 100%; }
+	.searchCardHeader { padding: 12px 16px; }
+	.searchCardDesc { padding: 0 16px 10px; }
+	.searchCardBody { padding: 0 16px 14px; }
+	.card { padding: 20px; }
+}

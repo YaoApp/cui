@@ -4,7 +4,8 @@ import { message } from 'antd'
 import { Button, PaginatedTable, Select } from '@/components/ui'
 import { TableColumn, TableAction } from '@/components/ui/PaginatedTable/types'
 import Icon from '@/widgets/Icon'
-import { mockApi, BillingData, Invoice } from '../../mockData'
+import type { BillingData, Invoice } from '../../types'
+import { mockApi } from '../../mockApi'
 import styles from './index.less'
 
 const Billing = () => {

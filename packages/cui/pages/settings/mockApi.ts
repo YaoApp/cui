@@ -1,311 +1,48 @@
 // Mock data for settings page - remove when API is ready
-import { ProviderSchema, PropertyValue } from '@/components/ui/Provider/types'
-
-export interface User {
-	id: string
-	name: string
-	email: string
-	avatar?: string
-	picture?: string
-	gender?: string
-	zoneinfo?: string
-	website?: string
-	role: string
-	plan: string
-	created_at: string
-	updated_at: string
-}
-
-// 安全相关数据类型
-export interface ContactInfo {
-	email?: string
-	phone?: string
-	email_verified: boolean
-	phone_verified: boolean
-}
-
-export interface OAuthProvider {
-	provider: string
-	provider_id: string
-	email?: string
-	name?: string
-	avatar?: string
-	connected_at: string
-}
-
-export interface TwoFactorMethod {
-	type: 'sms' | 'totp'
-	enabled: boolean
-	phone?: string // for SMS
-	secret?: string // for TOTP (base32 encoded)
-	backup_codes?: string[] // backup codes for TOTP
-	enabled_at?: string
-}
-
-export interface SecurityData {
-	contact: ContactInfo
-	oauthProviders: OAuthProvider[]
-	twoFactor: {
-		enabled: boolean
-		primary_method?: 'sms' | 'totp'
-		methods: TwoFactorMethod[]
-	}
-}
-
-export interface MenuItem {
-	id: string
-	key: string
-	name: {
-		'zh-CN': string
-		'en-US': string
-	}
-	icon: string
-	path: string
-}
-
-export interface MenuGroup {
-	key: string
-	name: {
-		'zh-CN': string
-		'en-US': string
-	}
-	order: number
-	items: MenuItem[]
-}
-
-export interface ApiKey {
-	id: string
-	name: string
-	key: string
-	created_at: string
-	last_used_at?: string
-	status: 'active' | 'disabled'
-}
-
-export interface Subscription {
-	id: string
-	plan: string
-	status: 'active' | 'expired' | 'cancelled'
-	start_date: string
-	end_date: string
-	requests_included: number
-	requests_used: number
-	monthly_cost: number
-}
-
-export type PlanType = 'free' | 'pro' | 'enterprise' | 'selfhosting'
-
-// 点数包类型
-export type CreditPackageType = 'purchased' | 'reward' | 'referral' | 'promotion' | 'gift'
-
-// 充值记录相关类型
-export type TopUpMethod = 'stripe' | 'card_code' | 'bank_transfer' | 'alipay' | 'wechat'
-export type TopUpStatus = 'completed' | 'pending' | 'failed' | 'cancelled'
-
-export interface TopUpRecord {
-	id: string
-	amount: number // 充值金额（美元）
-	credits: number // 获得点数
-	method: TopUpMethod
-	status: TopUpStatus
-	expiry_date: string // 点数有效期
-	created_at: string
-	completed_at?: string
-	transaction_id?: string
-	card_code?: string // 如果是点卡充值，记录卡号（脱敏）
-	notes?: string
-}
-
-export interface BalanceInfo {
-	total_credits: number // 总点数余额
-	monthly_credits: {
-		used: number
-		limit: number
-		reset_date: string
-	}
-	extra_credits: CreditPackage[] // 额外点数包
-	pending_credits: number // 待到账点数
-}
-
-// 单个点数包
-export interface CreditPackage {
-	id: string
-	type: CreditPackageType
-	name: {
-		'zh-CN': string
-		'en-US': string
-	}
-	original_amount: number // 原始数量
-	used: number // 已使用
-	balance: number // 剩余
-	expiry_date: string // 有效期
-	created_at: string // 获得时间
-	description?: {
-		'zh-CN': string
-		'en-US': string
-	}
-}
-
-export interface CreditsInfo {
-	monthly: {
-		used: number
-		limit: number
-		reset_date: string // Next reset date
-	}
-	packages: CreditPackage[] // 额外点数包列表
-	total_used: number
-	total_available: number
-}
-
-export interface PlanData {
-	type: PlanType
-	name: {
-		'zh-CN': string
-		'en-US': string
-	}
-	status: 'active' | 'cancelled' | 'expired'
-	billing_cycle?: 'monthly' | 'yearly'
-	current_period_start?: string
-	current_period_end?: string
-	next_billing_date?: string // Next billing/reset date
-	credits: CreditsInfo
-}
-
-export interface UsageStats {
-	current_month: {
-		requests: number
-		requests_limit: number
-		cost: number
-		monthly_quota_used: number
-		monthly_quota_limit: number
-		extra_credits_used: number
-		tokens_used: number
-	}
-	last_30_days: Array<{
-		date: string
-		requests: number
-		cost: number
-	}>
-}
-
-export interface UsageRecord {
-	id: string
-	date: string
-	requests: number
-	cost: number
-	tokens: number
-}
-
-// Billing 相关类型定义
-export interface PaymentMethod {
-	id: string
-	type: 'card' | 'bank_account'
-	brand?: string // visa, mastercard, amex, etc.
-	last4?: string
-	exp_month?: number
-	exp_year?: number
-}
-
-export interface BillingAddress {
-	line1: string
-	line2?: string
-	city: string
-	state: string
-	postal_code: string
-	country: string
-}
-
-export interface CurrentPlan {
-	id: string
-	name: string
-	amount: number // 金额（分为单位）
-	currency: string
-	interval: 'month' | 'year'
-}
-
-export interface BillingData {
-	customer_id: string
-	current_plan: CurrentPlan
-	next_billing_date?: string
-	payment_method?: PaymentMethod
-	billing_address?: BillingAddress
-}
-
-export type InvoiceStatus = 'paid' | 'pending' | 'failed' | 'refunded'
-
-export interface Invoice {
-	id: string
-	invoice_number: string
-	date: string
-	description: string
-	amount: number // 金额（分为单位）
-	currency: string
-	status: InvoiceStatus
-	pdf_url?: string | null
-}
-
-export interface TeamMember {
-	id: string
-	name: string
-	email: string
-	avatar?: string
-	role: 'owner' | 'admin' | 'member'
-	status: 'active' | 'pending' | 'suspended'
-	joined_at: string
-	last_active?: string
-}
-
-export interface Team {
-	id: string
-	name: string
-	description?: string
-	avatar?: string
-	created_at: string
-	updated_at: string
-	member_count: number
-	invite_link: string
-	invite_link_enabled: boolean
-}
-
-export interface TeamInvitation {
-	id: string
-	email: string
-	role: 'admin' | 'member'
-	invited_by: string
-	invited_at: string
-	expires_at: string
-	status: 'pending' | 'expired' | 'cancelled'
-}
-
-export type PreferencesData = Record<string, PropertyValue>
-export type PrivacyData = Record<string, PropertyValue>
-
-// Audit log types based on audit.mod.yao
-export interface AuditLog {
-	id: string
-	event_id?: string
-	operation: string
-	category?: 'authentication' | 'authorization' | 'data' | 'system'
-	severity: 'low' | 'medium' | 'high' | 'critical'
-	user_id: string
-	user_name?: string
-	session_id?: string
-	client_ip?: string
-	user_agent?: string
-	target_resource?: string
-	resource_type?: string
-	source?: string
-	application?: string
-	success: boolean
-	error_message?: string
-	created_at: string
-	updated_at: string
-}
-
-export interface AuditLogResponse {
-	records: AuditLog[]
-	total: number
-}
+import { ProviderSchema } from '@/components/ui/Provider/types'
+import type {
+	User,
+	ApiKey,
+	Subscription,
+	UsageStats,
+	UsageRecord,
+	TeamMember,
+	Team,
+	TeamInvitation,
+	PreferencesData,
+	PrivacyData,
+	AuditLog,
+	AuditLogResponse,
+	PlanData,
+	CreditPackage,
+	BalanceInfo,
+	TopUpRecord,
+	BillingData,
+	Invoice,
+	SecurityData,
+	MenuGroup,
+	SystemInfoData,
+	CheckUpdateResult,
+	CloudServiceData,
+	CloudServiceTestResult,
+	ModelInfo,
+	ProviderConfig,
+	ModelsPageData,
+	RoleAssignment,
+	ProviderTestResult,
+	SearchProviderPreset,
+	SearchProviderConfig,
+	SearchToolAssignment,
+	SearchPageData,
+	ComputerNode,
+	RegistryConfig,
+	SandboxImage,
+	SandboxPageData,
+	SmtpPreset,
+	SmtpConfig,
+	SmtpPageData
+} from './types'
+import { settingMenuGroups } from './menu'
 
 // Generate internationalized preferences schema
 const generatePreferencesSchema = (locale: string = 'en-US'): ProviderSchema => {
@@ -434,185 +171,6 @@ const generatePrivacySchema = (locale: string = 'en-US'): ProviderSchema => {
 		required: []
 	}
 }
-
-// Mock menu groups with items
-export const mockMenuGroups: MenuGroup[] = [
-	{
-		key: 'profile',
-		name: { 'zh-CN': '账户设置', 'en-US': 'Account' },
-		order: 1,
-		items: [
-			{
-				id: '1',
-				key: 'profile',
-				name: { 'zh-CN': '个人资料', 'en-US': 'Profile' },
-				icon: 'material-person',
-				path: '/settings/profile'
-			},
-			// {
-			// 	id: '1a',
-			// 	key: 'balance',
-			// 	name: { 'zh-CN': '账户余额', 'en-US': 'Balance' },
-			// 	icon: 'material-account_balance_wallet',
-			// 	path: '/settings/balance'
-			// },
-		{
-			id: '2a',
-			key: 'team',
-			name: { 'zh-CN': '团队管理', 'en-US': 'Team' },
-			icon: 'material-group',
-			path: '/settings/team'
-		}
-			// {
-			// 	id: '2b',
-			// 	key: 'preferences',
-			// 	name: { 'zh-CN': '偏好设置', 'en-US': 'Preferences' },
-			// 	icon: 'material-settings',
-			// 	path: '/settings/preferences'
-			// }
-		]
-	},
-	// {
-	// 	key: 'plan',
-	// 	name: { 'zh-CN': '套餐计划', 'en-US': 'Plan' },
-	// 	order: 2,
-	// 	items: [
-	// 		{
-	// 			id: '3',
-	// 			key: 'plans',
-	// 			name: { 'zh-CN': '套餐与价格', 'en-US': 'Plans & Pricing' },
-	// 			icon: 'material-workspace_premium',
-	// 			path: '/settings/plans'
-	// 		},
-	// 		{
-	// 			id: '4',
-	// 			key: 'subscription',
-	// 			name: { 'zh-CN': '订阅管理', 'en-US': 'Subscription' },
-	// 			icon: 'material-card_membership',
-	// 			path: '/settings/subscription'
-	// 		},
-	// 		{
-	// 			id: '5',
-	// 			key: 'usage',
-	// 			name: { 'zh-CN': '使用统计', 'en-US': 'Usage' },
-	// 			icon: 'material-analytics',
-	// 			path: '/settings/usage'
-	// 		},
-	// 		{
-	// 			id: '6',
-	// 			key: 'billing',
-	// 			name: { 'zh-CN': '账单发票', 'en-US': 'Billing & Invoices' },
-	// 			icon: 'material-receipt',
-	// 			path: '/settings/billing'
-	// 		}
-	// 	]
-	// },
-	// {
-	// 	key: 'marketing',
-	// 	name: { 'zh-CN': '邀请奖励', 'en-US': 'Referrals' },
-	// 	order: 3,
-	// 	items: [
-	// 		{
-	// 			id: '7',
-	// 			key: 'invite',
-	// 			name: { 'zh-CN': '邀请码', 'en-US': 'Invite Code' },
-	// 			icon: 'material-qr_code',
-	// 			path: '/settings/invite'
-	// 		},
-	// 		{
-	// 			id: '8',
-	// 			key: 'commissions',
-	// 			name: { 'zh-CN': '邀请记录', 'en-US': 'Commissions' },
-	// 			icon: 'material-people_outline',
-	// 			path: '/settings/commissions'
-	// 		}
-	// 	]
-	// },
-	// {
-	// 	key: 'integrations',
-	// 	name: { 'zh-CN': '第三方服务', 'en-US': 'Integrations' },
-	// 	order: 4,
-	// 	items: [
-	// 		{
-	// 			id: '9',
-	// 			key: 'llm-providers',
-	// 			name: { 'zh-CN': 'LLM 提供商', 'en-US': 'LLM Providers' },
-	// 			icon: 'material-psychology',
-	// 			path: '/settings/llm-providers'
-	// 		},
-	// 		{
-	// 			id: '10',
-	// 			key: 'mcp-servers',
-	// 			name: { 'zh-CN': 'MCP 服务器', 'en-US': 'MCP Servers' },
-	// 			icon: 'material-dns',
-	// 			path: '/settings/mcp-servers'
-	// 		},
-	// 		{
-	// 			id: '11',
-	// 			key: 'stripe',
-	// 			name: { 'zh-CN': 'Stripe', 'en-US': 'Stripe' },
-	// 			icon: 'material-payment',
-	// 			path: '/settings/stripe'
-	// 		}
-	// 	]
-	// },
-	// {
-	// 	key: 'security',
-	// 	name: { 'zh-CN': '安全设置', 'en-US': 'Security' },
-	// 	order: 5,
-	// 	items: [
-	// 		{
-	// 			id: '12',
-	// 			key: 'security',
-	// 			name: { 'zh-CN': '账号安全', 'en-US': 'Account Security' },
-	// 			icon: 'material-security',
-	// 			path: '/settings/security'
-	// 		},
-	// 		{
-	// 			id: '13',
-	// 			key: 'privacy',
-	// 			name: { 'zh-CN': '隐私设置', 'en-US': 'Privacy' },
-	// 			icon: 'material-privacy_tip',
-	// 			path: '/settings/privacy'
-	// 		},
-	// 		{
-	// 			id: '14',
-	// 			key: 'audit-logs',
-	// 			name: { 'zh-CN': '审计日志', 'en-US': 'Audit Logs' },
-	// 			icon: 'material-history',
-	// 			path: '/settings/audit-logs'
-	// 		}
-	// 	]
-	// },
-	{
-		key: 'support',
-		name: { 'zh-CN': '帮助支持', 'en-US': 'Support' },
-		order: 6,
-		items: [
-			{
-				id: '15',
-				key: 'docs',
-				name: { 'zh-CN': '文档', 'en-US': 'Documentation' },
-				icon: 'material-description',
-				path: 'https://yaoapps.com/docs'
-			},
-			{
-				id: '16',
-				key: 'discord',
-				name: { 'zh-CN': '加入 Discord', 'en-US': 'Join Discord' },
-				icon: 'material-forum',
-				path: 'https://discord.gg/BkMR2NUsjU'
-			},
-			{
-				id: '17',
-				key: 'twitter',
-				name: { 'zh-CN': '关注 X', 'en-US': 'Follow on X' },
-				icon: 'material-tag',
-				path: 'https://x.com/YaoApp'
-			}
-		]
-	}
-]
 
 // Mock user data
 export const mockUser: User = {
@@ -902,18 +460,18 @@ export const mockTeamInvitations: TeamInvitation[] = [
 	}
 ]
 
-// Mock preferences data - with default "auto" language preference
+// Mock preferences data
 const generateMockPreferencesData = (): PreferencesData => ({
-	language: 'auto', // Default to "Follow Browser" option
+	language: 'auto',
 	theme: 'auto',
 	emailSubscription: true
 })
 
-// Mock privacy data - with default privacy settings (all enabled by default)
+// Mock privacy data
 const generateMockPrivacyData = (): PrivacyData => ({
-	policyNotifications: true, // Default to allow policy notifications
-	dataCollection: true, // Default to allow data collection
-	thirdPartySharing: true // Default to allow third-party sharing
+	policyNotifications: true,
+	dataCollection: true,
+	thirdPartySharing: true
 })
 
 // Generate mock audit logs data
@@ -939,7 +497,7 @@ const generateMockAuditLogs = (page: number = 1, size: number = 20): AuditLogRes
 		{ id: '4', name: 'System' }
 	]
 
-	const total = 1247 // Mock total count
+	const total = 1247
 	const records: AuditLog[] = []
 
 	for (let i = 0; i < size; i++) {
@@ -950,12 +508,11 @@ const generateMockAuditLogs = (page: number = 1, size: number = 20): AuditLogRes
 		const operation = operations[Math.floor(Math.random() * operations.length)]
 		const category = categories[Math.floor(Math.random() * categories.length)]
 		const severity = severities[Math.floor(Math.random() * severities.length)]
-		const success = Math.random() > 0.1 // 90% success rate
+		const success = Math.random() > 0.1
 		const source = sources[Math.floor(Math.random() * sources.length)]
 		const application = applications[Math.floor(Math.random() * applications.length)]
 		const resourceType = resourceTypes[Math.floor(Math.random() * resourceTypes.length)]
 
-		// Generate timestamp (recent logs)
 		const daysAgo = Math.floor(Math.random() * 30)
 		const hoursAgo = Math.floor(Math.random() * 24)
 		const minutesAgo = Math.floor(Math.random() * 60)
@@ -990,7 +547,7 @@ const generateMockAuditLogs = (page: number = 1, size: number = 20): AuditLogRes
 	return { records, total }
 }
 
-// Static reference for updates (will be initialized dynamically)
+// Static reference for updates
 let mockPreferencesDataCache: PreferencesData | null = null
 let mockPrivacyDataCache: PrivacyData | null = null
 
@@ -1003,9 +560,7 @@ export const mockApi = {
 	},
 
 	getMenuGroups: (): Promise<MenuGroup[]> => {
-		return new Promise((resolve) => {
-			resolve(mockMenuGroups)
-		})
+		return Promise.resolve(settingMenuGroups)
 	},
 
 	getApiKeys: (): Promise<ApiKey[]> => {
@@ -1040,10 +595,8 @@ export const mockApi = {
 
 	getTeam: (): Promise<Team> => {
 		return new Promise((resolve, reject) => {
-			// 模拟没有团队的情况，返回 reject 来触发创建团队界面
 			setTimeout(() => {
-				// 可以通过这个变量控制是否有团队
-				const hasTeam = false // 设置为 true 来显示正常团队界面，false 来测试创建团队界面
+				const hasTeam = false
 				if (hasTeam) {
 					resolve(mockTeam)
 				} else {
@@ -1062,7 +615,6 @@ export const mockApi = {
 	getPreferencesData: (): Promise<PreferencesData> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
-				// Initialize cache if not exists
 				if (!mockPreferencesDataCache) {
 					mockPreferencesDataCache = generateMockPreferencesData()
 				}
@@ -1074,11 +626,9 @@ export const mockApi = {
 	updatePreferencesData: (data: PreferencesData): Promise<PreferencesData> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
-				// Initialize cache if not exists
 				if (!mockPreferencesDataCache) {
 					mockPreferencesDataCache = generateMockPreferencesData()
 				}
-				// Update cached data
 				Object.assign(mockPreferencesDataCache, data)
 				resolve(mockPreferencesDataCache)
 			}, 500)
@@ -1094,7 +644,6 @@ export const mockApi = {
 	getPrivacyData: (): Promise<PrivacyData> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
-				// Initialize cache if not exists
 				if (!mockPrivacyDataCache) {
 					mockPrivacyDataCache = generateMockPrivacyData()
 				}
@@ -1106,11 +655,9 @@ export const mockApi = {
 	updatePrivacyData: (data: PrivacyData): Promise<PrivacyData> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
-				// Initialize cache if not exists
 				if (!mockPrivacyDataCache) {
 					mockPrivacyDataCache = generateMockPrivacyData()
 				}
-				// Update cached data
 				Object.assign(mockPrivacyDataCache, data)
 				resolve(mockPrivacyDataCache)
 			}, 500)
@@ -1133,85 +680,6 @@ export const mockApi = {
 				nextMonth.setMonth(nextMonth.getMonth() + 1)
 				nextMonth.setDate(1)
 
-				// 创建不同类型的点数包
-				const now = new Date()
-				const packages: CreditPackage[] = [
-					{
-						id: 'pkg-001',
-						type: 'purchased',
-						name: { 'zh-CN': '充值点数', 'en-US': 'Purchased Credits' },
-						original_amount: 5000,
-						used: 1000,
-						balance: 4000,
-						expiry_date: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1年后
-						created_at: '2024-01-15T10:30:00Z',
-						description: { 'zh-CN': '通过在线支付获得', 'en-US': 'Obtained via online payment' }
-					},
-					{
-						id: 'pkg-002',
-						type: 'referral',
-						name: { 'zh-CN': '邀请奖励', 'en-US': 'Referral Reward' },
-						original_amount: 2000,
-						used: 500,
-						balance: 1500,
-						expiry_date: new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString(), // 6个月后
-						created_at: '2024-02-01T14:20:00Z',
-						description: {
-							'zh-CN': '成功邀请好友获得',
-							'en-US': 'Earned by successful referrals'
-						}
-					},
-					{
-						id: 'pkg-003',
-						type: 'promotion',
-						name: { 'zh-CN': '新年活动赠送', 'en-US': 'New Year Promotion' },
-						original_amount: 1000,
-						used: 0,
-						balance: 1000,
-						expiry_date: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 3个月后
-						created_at: '2024-01-01T00:00:00Z',
-						description: { 'zh-CN': '新年活动限时赠送', 'en-US': 'Limited-time New Year gift' }
-					}
-				]
-
-				const totalPackageBalance = packages.reduce((sum, pkg) => sum + pkg.balance, 0)
-				const totalPackageUsed = packages.reduce((sum, pkg) => sum + pkg.used, 0)
-
-				const mockPlan: PlanData = {
-					type: 'pro',
-					name: {
-						'zh-CN': 'Pro 版',
-						'en-US': 'Pro Plan'
-					},
-					status: 'active',
-					billing_cycle: 'monthly',
-					current_period_start: '2024-01-01T00:00:00Z',
-					current_period_end: '2024-02-01T00:00:00Z',
-					next_billing_date: nextMonth.toISOString(),
-					credits: {
-						monthly: {
-							used: 7500,
-							limit: 10000,
-							reset_date: nextMonth.toISOString()
-						},
-						packages: packages,
-						total_used: 7500 + totalPackageUsed, // 月度使用 + 额外包使用
-						total_available: 10000 + totalPackageBalance // 月度额度 + 额外包余额
-					}
-				}
-				resolve(mockPlan)
-			}, 300)
-		})
-	},
-
-	getBalanceInfo: (): Promise<BalanceInfo> => {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				const nextMonth = new Date()
-				nextMonth.setMonth(nextMonth.getMonth() + 1)
-				nextMonth.setDate(1)
-
-				// 创建不同类型的点数包
 				const now = new Date()
 				const packages: CreditPackage[] = [
 					{
@@ -1253,16 +721,91 @@ export const mockApi = {
 				]
 
 				const totalPackageBalance = packages.reduce((sum, pkg) => sum + pkg.balance, 0)
+				const totalPackageUsed = packages.reduce((sum, pkg) => sum + pkg.used, 0)
+
+				const mockPlan: PlanData = {
+					type: 'pro',
+					name: {
+						'zh-CN': 'Pro 版',
+						'en-US': 'Pro Plan'
+					},
+					status: 'active',
+					billing_cycle: 'monthly',
+					current_period_start: '2024-01-01T00:00:00Z',
+					current_period_end: '2024-02-01T00:00:00Z',
+					next_billing_date: nextMonth.toISOString(),
+					credits: {
+						monthly: {
+							used: 7500,
+							limit: 10000,
+							reset_date: nextMonth.toISOString()
+						},
+						packages: packages,
+						total_used: 7500 + totalPackageUsed,
+						total_available: 10000 + totalPackageBalance
+					}
+				}
+				resolve(mockPlan)
+			}, 300)
+		})
+	},
+
+	getBalanceInfo: (): Promise<BalanceInfo> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const nextMonth = new Date()
+				nextMonth.setMonth(nextMonth.getMonth() + 1)
+				nextMonth.setDate(1)
+
+				const now = new Date()
+				const packages: CreditPackage[] = [
+					{
+						id: 'pkg-001',
+						type: 'purchased',
+						name: { 'zh-CN': '充值点数', 'en-US': 'Purchased Credits' },
+						original_amount: 5000,
+						used: 1000,
+						balance: 4000,
+						expiry_date: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-15T10:30:00Z',
+						description: { 'zh-CN': '通过在线支付获得', 'en-US': 'Obtained via online payment' }
+					},
+					{
+						id: 'pkg-002',
+						type: 'referral',
+						name: { 'zh-CN': '邀请奖励', 'en-US': 'Referral Reward' },
+						original_amount: 2000,
+						used: 500,
+						balance: 1500,
+						expiry_date: new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-02-01T14:20:00Z',
+						description: {
+							'zh-CN': '成功邀请好友获得',
+							'en-US': 'Earned by successful referrals'
+						}
+					},
+					{
+						id: 'pkg-003',
+						type: 'promotion',
+						name: { 'zh-CN': '新年活动赠送', 'en-US': 'New Year Promotion' },
+						original_amount: 1000,
+						used: 0,
+						balance: 1000,
+						expiry_date: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+						created_at: '2024-01-01T00:00:00Z',
+						description: { 'zh-CN': '新年活动限时赠送', 'en-US': 'Limited-time New Year gift' }
+					}
+				]
 
 				const balanceInfo: BalanceInfo = {
-					total_credits: 12500, // 10000 (monthly) + 6500 (extra packages)
+					total_credits: 12500,
 					monthly_credits: {
 						used: 2500,
 						limit: 10000,
 						reset_date: nextMonth.toISOString()
 					},
 					extra_credits: packages,
-					pending_credits: 500 // 待到账点数
+					pending_credits: 500
 				}
 
 				resolve(balanceInfo)
@@ -1276,14 +819,12 @@ export const mockApi = {
 	): Promise<{ records: TopUpRecord[]; total: number; hasMore: boolean }> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
-				// 模拟充值记录数据 - 包含更多类型
 				const allRecords: TopUpRecord[] = [
-					// 邀请奖励
 					{
 						id: 'reward-001',
 						amount: 0,
 						credits: 1000,
-						method: 'stripe', // 系统奖励也用stripe表示
+						method: 'stripe',
 						status: 'completed',
 						expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
 						created_at: '2024-01-25T09:15:00Z',
@@ -1301,7 +842,6 @@ export const mockApi = {
 						completed_at: '2024-01-22T16:20:00Z',
 						notes: '新用户注册奖励 - Welcome Bonus'
 					},
-					// 活动奖励
 					{
 						id: 'reward-003',
 						amount: 0,
@@ -1313,7 +853,6 @@ export const mockApi = {
 						completed_at: '2024-01-20T12:00:00Z',
 						notes: '春节活动奖励 - New Year Event Bonus'
 					},
-					// 推广奖励
 					{
 						id: 'reward-004',
 						amount: 0,
@@ -1325,7 +864,6 @@ export const mockApi = {
 						completed_at: '2024-01-18T10:30:00Z',
 						notes: '社交媒体分享奖励 - Social Media Bonus'
 					},
-					// 任务完成奖励
 					{
 						id: 'reward-005',
 						amount: 0,
@@ -1433,7 +971,6 @@ export const mockApi = {
 					}
 				]
 
-				// 分页逻辑
 				const startIndex = (page - 1) * limit
 				const endIndex = startIndex + limit
 				const records = allRecords.slice(startIndex, endIndex)
@@ -1448,11 +985,9 @@ export const mockApi = {
 		})
 	},
 
-	// 获取使用记录（分页）
 	getUsageRecords: (page: number = 1, limit: number = 20): Promise<{ records: UsageRecord[]; total: number }> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
-				// 生成 30 天的使用记录
 				const records: UsageRecord[] = []
 				const now = new Date()
 
@@ -1473,7 +1008,6 @@ export const mockApi = {
 					})
 				}
 
-				// 分页逻辑
 				const startIndex = (page - 1) * limit
 				const endIndex = startIndex + limit
 				const paginatedRecords = records.slice(startIndex, endIndex)
@@ -1486,7 +1020,6 @@ export const mockApi = {
 		})
 	},
 
-	// 获取账单数据
 	getBillingData: (): Promise<BillingData> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
@@ -1495,7 +1028,7 @@ export const mockApi = {
 					current_plan: {
 						id: 'price_pro_monthly',
 						name: 'Pro Plan',
-						amount: 2000, // $20.00 in cents
+						amount: 2000,
 						currency: 'USD',
 						interval: 'month'
 					},
@@ -1522,7 +1055,6 @@ export const mockApi = {
 		})
 	},
 
-	// 获取发票列表
 	getInvoices: (): Promise<Invoice[]> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
@@ -1603,7 +1135,6 @@ export const mockApi = {
 		})
 	},
 
-	// 获取安全信息
 	getSecurityData: (): Promise<SecurityData> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
@@ -1653,5 +1184,644 @@ export const mockApi = {
 				resolve(securityData)
 			}, 300)
 		})
+	},
+
+	getSystemInfo: (): Promise<SystemInfoData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve({
+					app: {
+						name: 'YaoAgents',
+						short: 'YaoAgents',
+						description: 'Your AI Team. On Your Device. Under Your Control.',
+						logo: '/api/__yao/app/icons/app.png',
+						version: '1.0.0'
+					},
+					deployment: 'community',
+					server: {
+						version: '0.10.5',
+						build_date: '2026-04-20',
+						commit: '4996b86'
+					},
+					client: {
+						version: '1.0.0',
+						build_date: '2026-04-25',
+						commit: 'bb6fee8'
+					},
+					environment: 'development',
+					technical: {
+						listen: '0.0.0.0:5099',
+						db_driver: 'sqlite3',
+						session_store: 'file'
+					}
+				})
+			}, 300)
+		})
+	},
+
+	checkUpdate: (): Promise<CheckUpdateResult> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve({
+					has_update: false,
+					latest_version: '0.10.5'
+				})
+			}, 1000)
+		})
+	},
+
+	getCloudService: (): Promise<CloudServiceData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve({
+					regions: [
+						{ key: 'us', label: { 'zh-CN': '美国', 'en-US': 'United States' }, api_url: 'https://api-us.yao.run', default: true },
+						{ key: 'cn', label: { 'zh-CN': '中国', 'en-US': 'China' }, api_url: 'https://api-cn.yao.run' },
+						{ key: 'ap', label: { 'zh-CN': '亚太', 'en-US': 'Asia Pacific' }, api_url: 'https://api-ap.yao.run' },
+						{ key: 'eu', label: { 'zh-CN': '欧洲', 'en-US': 'Europe' }, api_url: 'https://api-eu.yao.run' }
+					],
+					region: 'us',
+					api_url: 'https://api-us.yao.run',
+					api_key: '',
+					status: 'unconfigured'
+				})
+			}, 300)
+		})
+	},
+
+	saveCloudService: (data: Partial<CloudServiceData>): Promise<CloudServiceData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve({
+					regions: [
+						{ key: 'us', label: { 'zh-CN': '美国', 'en-US': 'United States' }, api_url: 'https://api-us.yao.run', default: true },
+						{ key: 'cn', label: { 'zh-CN': '中国', 'en-US': 'China' }, api_url: 'https://api-cn.yao.run' },
+						{ key: 'ap', label: { 'zh-CN': '亚太', 'en-US': 'Asia Pacific' }, api_url: 'https://api-ap.yao.run' },
+						{ key: 'eu', label: { 'zh-CN': '欧洲', 'en-US': 'Europe' }, api_url: 'https://api-eu.yao.run' }
+					],
+					region: data.region || 'us',
+					api_url: data.api_url || 'https://api-us.yao.run',
+					api_key: data.api_key || '',
+					status: data.api_key ? 'connected' : 'unconfigured'
+				})
+			}, 500)
+		})
+	},
+
+	testCloudService: (): Promise<CloudServiceTestResult> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve({
+					success: true,
+					message: 'Connection successful',
+					latency_ms: 128
+				})
+			}, 1000)
+		})
+	},
+
+	// ─── Models ──────────────────────────────────────────────
+
+	getModelsConfig: (): Promise<ModelsPageData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => resolve(JSON.parse(JSON.stringify(modelsCache))), 400)
+		})
+	},
+
+	saveRoleAssignment: (roles: RoleAssignment): Promise<RoleAssignment> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				modelsCache.roles = { ...roles }
+				resolve({ ...roles })
+			}, 300)
+		})
+	},
+
+	addProvider: (presetKey: string, overrides: { api_key?: string; api_url?: string; name?: string; type?: ProviderConfig['type']; models?: ModelInfo[] }): Promise<ProviderConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const isCustom = presetKey === 'custom'
+				const preset = isCustom ? null : modelsCache.preset_providers.find((p) => p.key === presetKey)
+				const key = isCustom ? `custom_${Date.now()}` : presetKey
+				const newP: ProviderConfig = {
+					key,
+					name: overrides.name || preset?.name || 'Custom',
+					type: overrides.type || preset?.type || 'openai',
+					api_url: overrides.api_url ?? preset?.api_url ?? '',
+					api_key: overrides.api_key || '',
+					models: overrides.models || preset?.default_models?.map((m) => ({ ...m })) || [],
+					enabled: true,
+					status: 'unconfigured',
+					is_custom: isCustom,
+					preset_key: isCustom ? undefined : presetKey,
+					require_key: isCustom ? true : (preset?.require_key ?? true)
+				}
+				modelsCache.providers.push(newP)
+				resolve(JSON.parse(JSON.stringify(newP)))
+			}, 300)
+		})
+	},
+
+	updateProvider: (key: string, config: { api_url?: string; api_key?: string; models?: ModelInfo[] }): Promise<ProviderConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const p = modelsCache.providers.find((x) => x.key === key)
+				if (p) {
+					if (config.api_url !== undefined) p.api_url = config.api_url
+					if (config.api_key !== undefined) p.api_key = config.api_key
+					if (config.models) p.models = config.models.map((m) => ({ ...m }))
+				}
+				resolve(JSON.parse(JSON.stringify(p)))
+			}, 300)
+		})
+	},
+
+	testProvider: (key: string): Promise<ProviderTestResult> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const p = modelsCache.providers.find((x) => x.key === key)
+				if (p) p.status = 'connected'
+				resolve({ success: true, message: 'Connection successful', latency_ms: 95 })
+			}, 1000)
+		})
+	},
+
+	removeProvider: (key: string): Promise<boolean> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				modelsCache.providers = modelsCache.providers.filter((x) => x.key !== key)
+				resolve(true)
+			}, 200)
+		})
+	},
+
+	// ─── Search & Scrape ──────────────────────────────────
+
+	getSearchPageData: (): Promise<SearchPageData> => {
+		return new Promise((resolve) => {
+			setTimeout(async () => {
+				const cloud = await mockApi.getCloudService()
+				const cloudProvider = searchCache.providers.find((p) => p.preset_key === 'cloud')
+				if (cloudProvider) {
+					if (cloud.status === 'connected') {
+						cloudProvider.enabled = true
+						cloudProvider.status = 'connected'
+					} else {
+						cloudProvider.enabled = false
+						cloudProvider.status = 'unconfigured'
+					}
+				}
+				resolve(JSON.parse(JSON.stringify(searchCache)))
+			}, 400)
+		})
+	},
+
+	saveSearchProvider: (presetKey: string, fieldValues: Record<string, string>): Promise<SearchProviderConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const p = searchCache.providers.find((x) => x.preset_key === presetKey)
+				if (p) {
+					p.field_values = { ...p.field_values, ...fieldValues }
+				}
+				resolve(JSON.parse(JSON.stringify(p)))
+			}, 300)
+		})
+	},
+
+	toggleSearchProvider: (presetKey: string, enabled: boolean): Promise<SearchProviderConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const p = searchCache.providers.find((x) => x.preset_key === presetKey)
+				if (p) {
+					p.enabled = enabled
+				}
+				resolve(JSON.parse(JSON.stringify(p)))
+			}, 200)
+		})
+	},
+
+	testSearchProvider: (presetKey: string): Promise<ProviderTestResult> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const p = searchCache.providers.find((x) => x.preset_key === presetKey)
+				if (p) p.status = 'connected'
+				resolve({ success: true, message: 'Connection successful', latency_ms: 120 })
+			}, 1000)
+		})
+	},
+
+	saveSearchToolAssignment: (assignment: SearchToolAssignment): Promise<SearchToolAssignment> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				searchCache.tool_assignment = { ...assignment }
+				resolve({ ...assignment })
+			}, 300)
+		})
+	},
+
+	// ─── Sandbox ───────────────────────────────────────────
+
+	getSandboxPageData: (): Promise<SandboxPageData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => resolve(JSON.parse(JSON.stringify(sandboxCache))), 400)
+		})
+	},
+
+	saveRegistryConfig: (config: Partial<RegistryConfig>): Promise<RegistryConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				Object.assign(sandboxCache.registry, config)
+				resolve({ ...sandboxCache.registry })
+			}, 300)
+		})
+	},
+
+	pullImage: (nodeId: string, imageId: string): Promise<SandboxImage> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const images = sandboxCache.images[nodeId]
+				const img = images?.find((i) => i.id === imageId)
+				if (img) {
+					img.status = 'downloading'
+					img.progress = 0
+				}
+				resolve(JSON.parse(JSON.stringify(img)))
+			}, 300)
+		})
+	},
+
+	pullAllImages: (nodeId: string): Promise<SandboxImage[]> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const images = sandboxCache.images[nodeId]
+				if (images) {
+					images.forEach((img) => {
+						if (img.status === 'not_downloaded') {
+							img.status = 'downloading'
+							img.progress = 0
+						}
+					})
+				}
+				resolve(JSON.parse(JSON.stringify(images || [])))
+			}, 300)
+		})
+	},
+
+	removeImage: (nodeId: string, imageId: string): Promise<boolean> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const images = sandboxCache.images[nodeId]
+				const img = images?.find((i) => i.id === imageId)
+				if (img) {
+					img.status = 'not_downloaded'
+					img.progress = undefined
+				}
+				resolve(true)
+			}, 300)
+		})
+	},
+
+	checkDocker: (_nodeId: string): Promise<{ docker_version?: string }> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve({ docker_version: '24.0.7' })
+			}, 1000)
+		})
+	},
+
+	// ─── SMTP ──────────────────────────────────────────────
+
+	getSmtpConfig: (): Promise<SmtpPageData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => resolve(JSON.parse(JSON.stringify({ presets: smtpPresets, config: smtpCache }))), 400)
+		})
+	},
+
+	saveSmtpConfig: (config: Partial<SmtpConfig>): Promise<SmtpConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				Object.assign(smtpCache, config)
+				resolve(JSON.parse(JSON.stringify(smtpCache)))
+			}, 300)
+		})
+	},
+
+	toggleSmtp: (enabled: boolean): Promise<SmtpConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				smtpCache.enabled = enabled
+				if (!enabled) smtpCache.status = 'unconfigured'
+				resolve(JSON.parse(JSON.stringify(smtpCache)))
+			}, 200)
+		})
+	},
+
+	testSmtp: (_toEmail: string): Promise<{ success: boolean; message: string }> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				smtpCache.status = 'connected'
+				smtpCache.last_sent_at = new Date().toISOString()
+				resolve({ success: true, message: 'Test email sent successfully' })
+			}, 1500)
+		})
 	}
+}
+
+// ─── Models mock data ────────────────────────────────────
+
+const mkModel = (id: string, name: string, caps: ModelInfo['capabilities'], enabled = true): ModelInfo => ({
+	id,
+	name,
+	capabilities: caps,
+	enabled
+})
+
+const modelsCache: ModelsPageData = {
+	roles: {},
+	providers: [],
+	preset_providers: [
+		{ key: 'yaoagents', name: 'Yao Agents', type: 'openai', api_url: 'https://api-us.yao.run/v1', require_key: false, is_cloud: true, default_models: [
+			mkModel('kimi-k2.5', 'Kimi K2.5', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('gpt-4o', 'GPT-4o', ['vision', 'audio', 'tool_calls', 'streaming', 'json']),
+			mkModel('claude-sonnet-4.5', 'Claude Sonnet 4.5', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('deepseek-reasoner', 'DeepSeek Reasoner', ['reasoning', 'streaming'], false),
+			mkModel('whisper-1', 'Whisper-1', ['audio'], false),
+			mkModel('text-embedding-3-large', 'Text Embedding 3 Large', ['embedding'], false),
+			mkModel('gemini-2.5-pro', 'Gemini 2.5 Pro', ['vision', 'tool_calls', 'streaming', 'json'], false)
+		]},
+		{ key: 'openai', name: 'OpenAI', type: 'openai', api_url: 'https://api.openai.com/v1', require_key: true, default_models: [
+			mkModel('gpt-4o', 'GPT-4o', ['vision', 'audio', 'tool_calls', 'streaming', 'json']),
+			mkModel('gpt-4o-mini', 'GPT-4o Mini', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('gpt-5.2', 'GPT-5.2', ['vision', 'audio', 'reasoning', 'tool_calls', 'streaming', 'json'], false),
+			mkModel('o3', 'o3', ['reasoning', 'vision', 'tool_calls', 'streaming'], false),
+			mkModel('whisper-1', 'Whisper-1', ['audio'], false),
+			mkModel('text-embedding-3-large', 'Text Embedding 3 Large', ['embedding'], false)
+		]},
+		{ key: 'anthropic', name: 'Anthropic', type: 'anthropic', api_url: 'https://api.anthropic.com', require_key: true, default_models: [
+			mkModel('claude-opus-4.5', 'Claude Opus 4.5', ['vision', 'reasoning', 'tool_calls', 'streaming', 'json']),
+			mkModel('claude-sonnet-4.5', 'Claude Sonnet 4.5', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('claude-haiku', 'Claude Haiku', ['vision', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'ollama', name: 'Ollama', type: 'ollama', api_url: 'http://127.0.0.1:11434/v1', require_key: false, url_editable: true, default_models: [
+			mkModel('llama3.3', 'Llama 3.3', ['tool_calls', 'streaming', 'json']),
+			mkModel('deepseek-r1', 'DeepSeek R1', ['reasoning', 'streaming']),
+			mkModel('qwen3', 'Qwen 3', ['tool_calls', 'streaming', 'json']),
+			mkModel('nomic-embed-text', 'Nomic Embed Text', ['embedding'])
+		]},
+		{ key: 'google', name: 'Google (Gemini)', type: 'google', api_url: 'https://generativelanguage.googleapis.com/v1beta', require_key: true, default_models: [
+			mkModel('gemini-2.5-pro', 'Gemini 2.5 Pro', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('gemini-3-flash', 'Gemini 3 Flash', ['vision', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'moonshot', name: 'Moonshot / Kimi', type: 'openai', api_url: 'https://api.moonshot.cn/v1', require_key: true, default_models: [
+			mkModel('kimi-k2', 'Kimi K2', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('kimi-k2.5', 'Kimi K2.5', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('kimi-k2.5-thinking', 'Kimi K2.5 Thinking', ['vision', 'reasoning', 'tool_calls', 'streaming'])
+		]},
+		{ key: 'xai', name: 'xAI', type: 'openai', api_url: 'https://api.x.ai/v1', require_key: true, default_models: [
+			mkModel('grok-4', 'Grok-4', ['vision', 'reasoning', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'deepseek', name: 'DeepSeek', type: 'openai', api_url: 'https://api.deepseek.com/v1', require_key: true, default_models: [
+			mkModel('deepseek-chat', 'DeepSeek Chat', ['tool_calls', 'streaming', 'json']),
+			mkModel('deepseek-reasoner', 'DeepSeek Reasoner', ['reasoning', 'streaming'])
+		]},
+		{ key: 'meta', name: 'Meta Llama', type: 'openai', api_url: 'https://api.llama.com/v1', require_key: true, default_models: [
+			mkModel('llama-4-maverick', 'Llama 4 Maverick', ['vision', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'mistral', name: 'Mistral', type: 'openai', api_url: 'https://api.mistral.ai/v1', require_key: true, default_models: [
+			mkModel('mistral-large-3', 'Mistral Large 3', ['vision', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'azure', name: 'Azure OpenAI', type: 'openai', api_url: '', require_key: true, url_editable: true, default_models: [
+			mkModel('gpt-5.2', 'GPT-5.2', ['vision', 'audio', 'reasoning', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'groq', name: 'Groq', type: 'openai', api_url: 'https://api.groq.com/openai/v1', require_key: true, default_models: [
+			mkModel('llama-4-maverick', 'Llama 4 Maverick', ['vision', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'together', name: 'Together', type: 'openai', api_url: 'https://api.together.xyz/v1', require_key: true, default_models: [
+			mkModel('llama-4-maverick', 'Llama 4 Maverick', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('deepseek-r1', 'DeepSeek R1', ['reasoning', 'streaming'])
+		]},
+		{ key: 'fireworks', name: 'Fireworks', type: 'openai', api_url: 'https://api.fireworks.ai/inference/v1', require_key: true, default_models: [
+			mkModel('llama-4-maverick', 'Llama 4 Maverick', ['vision', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'openrouter', name: 'OpenRouter', type: 'openai', api_url: 'https://openrouter.ai/api/v1', require_key: true, default_models: [
+			mkModel('auto', 'Auto', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('claude-opus-4.5', 'Claude Opus 4.5', ['vision', 'reasoning', 'tool_calls', 'streaming', 'json']),
+			mkModel('nova-premier', 'Nova Premier', ['vision', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'siliconflow', name: 'SiliconFlow', type: 'openai', api_url: 'https://api.siliconflow.cn/v1', require_key: true, default_models: [
+			mkModel('deepseek-v3', 'DeepSeek V3', ['tool_calls', 'streaming', 'json']),
+			mkModel('qwen-2.5-72b', 'Qwen 2.5 72B', ['tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'volcengine', name: '\u706B\u5C71\u65B9\u821F (Volcengine)', type: 'openai', api_url: '', require_key: true, url_editable: true, default_models: [
+			mkModel('doubao', 'Doubao', ['vision', 'tool_calls', 'streaming', 'json']),
+			mkModel('deepseek-r1', 'DeepSeek R1', ['reasoning', 'streaming']),
+			mkModel('glm-4-plus', 'GLM-4 Plus', ['vision', 'tool_calls', 'streaming', 'json'])
+		]}
+	]
+}
+
+// ─── Search & Scrape mock data ───────────────────────────
+
+const searchPresets: SearchProviderPreset[] = [
+	{
+		key: 'cloud',
+		name: 'Yao Agents',
+		description: {
+			'zh-CN': '云服务提供的搜索与抓取能力，凭证来自云服务配置页',
+			'en-US': 'Search & scrape capabilities from cloud service, credentials from cloud config'
+		},
+		website: 'https://yaoagents.com',
+		tools: ['web_search', 'web_scrape'],
+		tool_labels: [
+			{ 'zh-CN': '网页搜索', 'en-US': 'Web Search' },
+			{ 'zh-CN': '网页抓取', 'en-US': 'Web Scrape' }
+		],
+		fields: [],
+		is_cloud: true
+	},
+	{
+		key: 'tavily',
+		name: 'Tavily',
+		description: {
+			'zh-CN': 'AI 优化的搜索 API，返回结构化结果，适合 Agent 使用',
+			'en-US': 'AI-optimized search API with structured results, ideal for agents'
+		},
+		website: 'https://tavily.com',
+		tools: ['web_search'],
+		tool_labels: [{ 'zh-CN': '网页搜索', 'en-US': 'Web Search' }],
+		fields: [{
+			key: 'api_key',
+			label: { 'zh-CN': 'API Key', 'en-US': 'API Key' },
+			type: 'password',
+			placeholder: 'tvly-...'
+		}]
+	},
+	{
+		key: 'serper',
+		name: 'Serper (Google)',
+		description: {
+			'zh-CN': '基于 Google 搜索的 API，价格实惠，结果质量高',
+			'en-US': 'Google Search API with affordable pricing and high-quality results'
+		},
+		website: 'https://serper.dev',
+		tools: ['web_search'],
+		tool_labels: [{ 'zh-CN': '网页搜索', 'en-US': 'Web Search' }],
+		fields: [{
+			key: 'api_key',
+			label: { 'zh-CN': 'API Key', 'en-US': 'API Key' },
+			type: 'password',
+			placeholder: ''
+		}]
+	},
+	{
+		key: 'brightdata',
+		name: 'Brightdata',
+		description: {
+			'zh-CN': '部分网站有访问限制，开启代理可提升网页抓取成功率。不开启也能正常使用，如遇抓取失败可回来开启。',
+			'en-US': 'Some websites have access restrictions. Enabling proxy improves scraping success rate. Not required for normal use.'
+		},
+		website: 'https://brightdata.com',
+		tools: ['web_scrape'],
+		tool_labels: [{ 'zh-CN': '网页抓取', 'en-US': 'Web Scrape' }],
+		fields: [
+			{
+				key: 'api_key',
+				label: { 'zh-CN': 'API Key', 'en-US': 'API Key' },
+				type: 'password',
+				placeholder: ''
+			},
+			{
+				key: 'zone',
+				label: { 'zh-CN': 'Zone', 'en-US': 'Zone' },
+				type: 'text',
+				default: 'web_unlocker1',
+				hint: { 'zh-CN': '一般无需修改', 'en-US': 'Usually no need to change' }
+			}
+		]
+	}
+]
+
+const searchCache: SearchPageData = {
+	presets: searchPresets,
+	providers: [
+		{ preset_key: 'cloud', enabled: false, field_values: {}, status: 'unconfigured' },
+		{ preset_key: 'tavily', enabled: false, field_values: {}, status: 'unconfigured' },
+		{ preset_key: 'serper', enabled: false, field_values: {}, status: 'unconfigured' },
+		{ preset_key: 'brightdata', enabled: false, field_values: { zone: 'web_unlocker1' }, status: 'unconfigured' }
+	],
+	tool_assignment: {}
+}
+
+// ─── Sandbox mock data ───────────────────────────────────
+
+const sandboxNodes: ComputerNode[] = [
+	{
+		node_id: 'local',
+		display_name: '\u672C\u673A',
+		kind: 'host',
+		os: 'macOS',
+		arch: 'arm64',
+		cpu: 10,
+		memory_gb: 32,
+		docker_version: '24.0.7',
+		running_sandboxes: 2,
+		online: true
+	},
+	{
+		node_id: 'gpu-server-01',
+		display_name: 'GPU Server',
+		kind: 'node',
+		os: 'Linux',
+		arch: 'amd64',
+		cpu: 64,
+		memory_gb: 256,
+		docker_version: '26.1.0',
+		running_sandboxes: 5,
+		online: true
+	},
+	{
+		node_id: 'dev-pc-02',
+		display_name: '\u5F00\u53D1\u673A',
+		kind: 'node',
+		os: 'Windows',
+		arch: 'amd64',
+		cpu: 16,
+		memory_gb: 64,
+		running_sandboxes: 0,
+		online: true
+	}
+]
+
+const sandboxImages: Record<string, SandboxImage[]> = {
+	local: [
+		{ id: 'img-1', assistant_names: ['\u901A\u7528\u52A9\u624B (OpenCode)', '\u516C\u53F8\u7814\u7A76\u5458', '\u6570\u636E\u7BA1\u5BB6', 'Claude Code'], image_name: 'yaoapps/sandbox', tag: 'latest', size_mb: 1228, status: 'downloaded' },
+		{ id: 'img-2', assistant_names: ['\u6D4F\u89C8\u5668\u52A9\u624B'], image_name: 'yaoapps/browser', tag: 'latest', size_mb: 2150, status: 'not_downloaded' },
+		{ id: 'img-3', assistant_names: ['\u6570\u636E\u5206\u6790\u52A9\u624B', 'ML \u52A9\u624B'], image_name: 'yaoapps/python', tag: '3.12', size_mb: 870, status: 'downloading', progress: 67 },
+		{ id: 'img-4', assistant_names: ['ML \u52A9\u624B'], image_name: 'custom-registry/ml', tag: 'v2', size_mb: 3584, status: 'downloaded' }
+	],
+	'gpu-server-01': [
+		{ id: 'img-1', assistant_names: ['\u901A\u7528\u52A9\u624B (OpenCode)', '\u516C\u53F8\u7814\u7A76\u5458', '\u6570\u636E\u7BA1\u5BB6', 'Claude Code'], image_name: 'yaoapps/sandbox', tag: 'latest', size_mb: 1228, status: 'downloaded' },
+		{ id: 'img-2', assistant_names: ['\u6D4F\u89C8\u5668\u52A9\u624B'], image_name: 'yaoapps/browser', tag: 'latest', size_mb: 2150, status: 'downloaded' },
+		{ id: 'img-3', assistant_names: ['\u6570\u636E\u5206\u6790\u52A9\u624B', 'ML \u52A9\u624B'], image_name: 'yaoapps/python', tag: '3.12', size_mb: 870, status: 'downloaded' },
+		{ id: 'img-4', assistant_names: ['ML \u52A9\u624B'], image_name: 'custom-registry/ml', tag: 'v2', size_mb: 3584, status: 'not_downloaded' }
+	],
+	'dev-pc-02': []
+}
+
+const sandboxCache: SandboxPageData = {
+	nodes: sandboxNodes,
+	registry: { registry_url: 'docker.io', username: '', password: '' },
+	images: sandboxImages
+}
+
+// ─── SMTP mock data ─────────────────────────────────────
+
+const smtpPresets: SmtpPreset[] = [
+	{
+		key: 'gmail', name: 'Gmail', host: 'smtp.gmail.com', port: 465, encryption: 'ssl',
+		url: 'https://myaccount.google.com/apppasswords',
+		hint: { 'zh-CN': 'Gmail 需要专用密码（App Password），非登录密码', 'en-US': 'Gmail requires an App Password, not your login password' }
+	},
+	{
+		key: 'outlook', name: 'Outlook / Office 365', host: 'smtp.office365.com', port: 587, encryption: 'tls',
+		url: 'https://admin.microsoft.com/',
+		hint: { 'zh-CN': '需在 Microsoft 365 管理后台启用 SMTP AUTH', 'en-US': 'SMTP AUTH must be enabled in Microsoft 365 admin center' }
+	},
+	{
+		key: 'aliyun', name: '阿里云邮箱', host: 'smtp.aliyun.com', port: 465, encryption: 'ssl',
+		url: 'https://mail.aliyun.com/',
+		hint: { 'zh-CN': '需在阿里云邮箱设置中开启 SMTP 服务', 'en-US': 'Enable SMTP in Aliyun Mail settings' }
+	},
+	{
+		key: 'qq', name: '腾讯企业邮', host: 'smtp.exmail.qq.com', port: 465, encryption: 'ssl',
+		url: 'https://exmail.qq.com/',
+		hint: { 'zh-CN': '密码需使用客户端专用密码，在企业邮设置中生成', 'en-US': 'Use a client-specific password generated in Tencent Exmail settings' }
+	},
+	{
+		key: 'sendgrid', name: 'SendGrid', host: 'smtp.sendgrid.net', port: 587, encryption: 'tls',
+		url: 'https://app.sendgrid.com/',
+		hint: { 'zh-CN': '用户名固定为 apikey，密码填 API Key', 'en-US': 'Username is always "apikey", password is your API Key' }
+	},
+	{
+		key: 'ses', name: 'Amazon SES', host: 'email-smtp.us-east-1.amazonaws.com', port: 587, encryption: 'tls',
+		url: 'https://console.aws.amazon.com/ses/',
+		hint: { 'zh-CN': '需在 AWS SES 控制台创建 SMTP 凭证，非 IAM 密钥', 'en-US': 'Create SMTP credentials in AWS SES console, not IAM keys' }
+	},
+	{
+		key: 'custom', name: '自定义', host: '', port: 465, encryption: 'ssl',
+		hint: { 'zh-CN': '手动填写 SMTP 服务器信息', 'en-US': 'Manually enter SMTP server details' }
+	}
+]
+
+const smtpCache: SmtpConfig = {
+	enabled: false,
+	preset_key: 'custom',
+	host: '',
+	port: 465,
+	encryption: 'ssl',
+	username: '',
+	password: '',
+	from_name: '',
+	from_email: '',
+	status: 'unconfigured'
 }

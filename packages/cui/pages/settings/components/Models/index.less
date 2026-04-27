@@ -1,0 +1,656 @@
+.models {
+	width: 100%;
+	max-width: 760px;
+}
+
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 160px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+	span { font-size: 12px; }
+}
+
+// Header
+.header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	margin-bottom: 24px;
+}
+
+.headerContent {
+	h2 { margin: 0 0 6px 0; font-size: 24px; font-weight: 600; color: var(--color_neo_text_primary); }
+	p { margin: 0; font-size: 14px; color: var(--color_neo_text_secondary); line-height: 1.5; }
+}
+
+// Sections
+.section { margin-top: 28px; }
+.sectionHeader { display: flex; align-items: center; margin-bottom: 12px; }
+.sectionTitle { font-size: 14px; font-weight: 600; color: var(--color_neo_text_secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+// Card
+.card {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	padding: 24px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+// Role Assignment
+.roleRow {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 10px 0;
+	&:first-child { padding-top: 0; }
+}
+
+.roleLabel {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 140px;
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.roleName { font-size: 14px; font-weight: 500; color: var(--color_neo_text_primary); }
+.roleRequired { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.1); color: rgb(59, 130, 246); font-weight: 500; flex-shrink: 0; }
+.roleOptional { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--color_neo_bg_field); color: var(--color_neo_text_secondary); flex-shrink: 0; }
+.roleSelect { flex: 1; min-width: 0; }
+
+.roleFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-top: 12px;
+}
+
+.roleHint {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	opacity: 0.7;
+}
+
+// Provider List
+.providerList {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+// Provider Card
+.providerCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.providerHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 20px;
+	cursor: pointer;
+	transition: background 0.15s ease;
+	&:hover { background: var(--color_neo_bg_field); }
+}
+
+.providerName {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.providerTitle { font-size: 15px; font-weight: 600; color: var(--color_neo_text_primary); }
+
+.providerStatus {
+	font-size: 11px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-weight: 500;
+}
+
+.status_connected { background: rgba(34, 197, 94, 0.1); color: rgb(34, 197, 94); }
+.status_disconnected { background: rgba(239, 68, 68, 0.1); color: rgb(239, 68, 68); }
+.status_unconfigured { background: var(--color_neo_bg_field); color: var(--color_neo_text_secondary); }
+
+.modelCount {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+}
+
+.providerActions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.editBtn, .deleteBtn {
+	background: none;
+	border: none;
+	padding: 6px;
+	cursor: pointer;
+	color: var(--color_neo_text_secondary);
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	transition: all 0.15s ease;
+	&:hover { background: var(--color_neo_bg_field); }
+}
+
+.deleteBtn:hover { color: rgb(239, 68, 68); }
+.editBtn:hover { color: var(--color_main); }
+
+.expandIcon {
+	display: flex;
+	align-items: center;
+	color: var(--color_neo_text_secondary);
+	opacity: 0.4;
+	transition: transform 0.2s ease;
+	margin-left: 4px;
+}
+
+.expandIconOpen { transform: rotate(180deg); }
+
+// Capability overview
+.capOverview {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	padding: 0 20px 14px;
+}
+
+.capTag {
+	font-size: 11px;
+	padding: 2px 8px;
+	border-radius: 4px;
+	white-space: nowrap;
+}
+
+.capPrimary {
+	background: rgba(59, 130, 246, 0.08);
+	color: rgb(59, 130, 246);
+}
+
+.capSecondary {
+	background: var(--color_neo_bg_field);
+	color: var(--color_neo_text_secondary);
+	font-size: 10px;
+}
+
+.capTagSmall {
+	font-size: 10px;
+	padding: 1px 5px;
+	border-radius: 3px;
+	white-space: nowrap;
+}
+
+// Expanded model list
+.modelListExpanded {
+	border-top: 1px solid var(--color_neo_border_field);
+	padding: 12px 20px 16px;
+}
+
+.modelRow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 6px 0;
+}
+
+.modelName {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_neo_text_primary);
+}
+
+.modelCaps {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+// Add Provider Button
+.addProviderBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 14px;
+	margin-top: 12px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_main);
+	border: 1px dashed var(--color_main);
+	border-radius: 10px;
+	transition: all 0.2s ease;
+	opacity: 0.7;
+	&:hover { opacity: 1; background: rgba(59, 130, 246, 0.04); }
+}
+
+// Preset tag on provider card
+.presetTag {
+	font-size: 10px;
+	padding: 1px 6px;
+	border-radius: 4px;
+	background: rgba(139, 92, 246, 0.1);
+	color: rgb(139, 92, 246);
+	font-weight: 500;
+	white-space: nowrap;
+}
+
+// Modal — mirrors AddAgentModal pattern exactly
+.providerModal {
+	:global(.ant-modal-content) {
+		display: flex;
+		flex-direction: column;
+		border-radius: 12px;
+		overflow: hidden;
+		max-height: 80vh;
+	}
+
+	:global(.ant-modal-header) {
+		padding: 0 !important;
+		border-bottom: none !important;
+		margin: 0 !important;
+	}
+
+	:global(.ant-modal-body) {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0 !important;
+		overflow: hidden;
+	}
+
+	// CUI uses prefixCls='xgen', so DOM classes are xgen-modal-*
+	:global(.xgen-modal-content) {
+		display: flex;
+		flex-direction: column;
+		border-radius: 12px;
+		overflow: hidden;
+		max-height: 80vh;
+	}
+
+	:global(.xgen-modal-header) {
+		padding: 0 !important;
+		border-bottom: none !important;
+		margin: 0 !important;
+	}
+
+	:global(.xgen-modal-body) {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0 !important;
+		overflow: hidden;
+	}
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 24px;
+	border-bottom: 1px solid var(--color_neo_border);
+	height: 52px;
+	flex-shrink: 0;
+}
+
+.modalTitle {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.modalClose {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--color_neo_text_secondary);
+	padding: 4px;
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	&:hover { background: var(--color_neo_bg_field); color: var(--color_neo_text_primary); }
+}
+
+.modalBody {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	max-height: calc(80vh - 52px);
+}
+
+.modalContent {
+	flex: 1;
+	overflow-y: auto;
+	padding: 16px 24px 20px;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: var(--color_neo_text_quaternary, rgba(0, 0, 0, 0.15));
+		border-radius: 3px;
+		&:hover { background: var(--color_neo_text_tertiary, rgba(0, 0, 0, 0.25)); }
+	}
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+.formField {
+	margin-bottom: 16px;
+}
+
+.fieldLabel {
+	display: block;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_neo_text_primary);
+	margin-bottom: 6px;
+}
+
+.readonlyField {
+	font-size: 13px;
+	color: var(--color_neo_text_secondary);
+	padding: 8px 12px;
+	background: var(--color_neo_bg_secondary);
+	border: 1px solid var(--color_neo_border);
+	border-radius: 8px;
+	user-select: text;
+}
+
+.optionalHint {
+	font-weight: 400;
+	font-size: 12px;
+	color: var(--color_neo_text_tertiary);
+}
+
+.cloudStatusBlock {
+	margin-bottom: 16px;
+}
+
+.cloudStatusConnected {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	background: rgba(82, 196, 26, 0.08);
+	border: 1px solid rgba(82, 196, 26, 0.25);
+	font-size: 13px;
+	color: #52c41a;
+
+	a {
+		margin-left: auto;
+		color: var(--color_neo_primary);
+		cursor: pointer;
+		white-space: nowrap;
+		&:hover { text-decoration: underline; }
+	}
+}
+
+.cloudStatusDisconnected {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	background: rgba(250, 173, 20, 0.08);
+	border: 1px solid rgba(250, 173, 20, 0.25);
+	font-size: 13px;
+	color: #faad14;
+
+	a {
+		margin-left: auto;
+		color: var(--color_neo_primary);
+		cursor: pointer;
+		white-space: nowrap;
+		&:hover { text-decoration: underline; }
+	}
+}
+
+.cloudKeyHint {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	padding: 8px 12px;
+	margin-bottom: 16px;
+	background: rgba(59, 130, 246, 0.04);
+	border: 1px solid rgba(59, 130, 246, 0.12);
+	border-radius: 8px;
+	a {
+		color: var(--color_main);
+		cursor: pointer;
+		text-decoration: none;
+		font-weight: 500;
+		&:hover { text-decoration: underline; }
+	}
+}
+
+// Preset model list (select from preset, not editable)
+.presetModelList {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.presetModelRow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	background: var(--color_neo_bg_secondary);
+	border: 1px solid var(--color_neo_border);
+	border-radius: 6px;
+}
+
+.presetModelInfo {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.presetModelName {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_neo_text_primary);
+}
+
+.presetModelCaps {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+}
+
+.presetModelRemove {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--color_neo_text_secondary);
+	padding: 4px;
+	border-radius: 4px;
+	flex-shrink: 0;
+	&:hover { color: var(--color_neo_text_danger, #ff4d4f); background: var(--color_neo_bg_hover); }
+}
+
+.presetPickerWrap {
+	position: relative;
+}
+
+.presetPickerDropdown {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: calc(100% + 4px);
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border);
+	border-radius: 8px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+	max-height: 200px;
+	overflow-y: auto;
+	z-index: 10;
+}
+
+.presetPickerItem {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 8px 12px;
+	cursor: pointer;
+	transition: background 0.1s ease;
+	&:hover { background: var(--color_neo_bg_field); }
+	&:first-child { border-radius: 8px 8px 0 0; }
+	&:last-child { border-radius: 0 0 8px 8px; }
+}
+
+.presetPickerName {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_neo_text_primary);
+}
+
+.presetPickerCaps {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+}
+
+.allModelsHint {
+	display: block;
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	opacity: 0.7;
+	padding: 6px 0;
+}
+
+// Custom model list (fully user-defined)
+.customModelList {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.customModelItem {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	background: var(--color_neo_bg_secondary);
+	border-radius: 6px;
+	border: 1px solid var(--color_neo_border);
+}
+
+.customModelInfo {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.customModelName {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_neo_text_primary);
+}
+
+.customModelCaps {
+	font-size: 11px;
+	color: var(--color_neo_text_secondary);
+}
+
+.customModelRemove {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--color_neo_text_secondary);
+	padding: 4px;
+	border-radius: 4px;
+	flex-shrink: 0;
+	&:hover { color: var(--color_neo_text_danger, #ff4d4f); background: var(--color_neo_bg_hover); }
+}
+
+.addModelForm {
+	padding: 10px 12px;
+	background: var(--color_neo_bg_secondary);
+	border-radius: 6px;
+	border: 1px dashed var(--color_neo_border);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.addModelRow {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.capsLabel {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+}
+
+.addModelBtns {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+}
+
+.addModelTrigger {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	padding: 8px;
+	background: none;
+	border: 1px dashed var(--color_neo_border);
+	border-radius: 6px;
+	color: var(--color_neo_text_secondary);
+	font-size: 12px;
+	cursor: pointer;
+	&:hover {
+		border-color: var(--color_neo_text_primary);
+		color: var(--color_neo_text_primary);
+	}
+}
+
+.noModelsHint {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+}
+
+.modalActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	padding: 12px 24px;
+	border-top: 1px solid var(--color_neo_border);
+	flex-shrink: 0;
+}
+
+// Responsive
+@media (max-width: 768px) {
+	.roleRow { flex-direction: column; align-items: flex-start; gap: 8px; }
+	.roleLabel { width: auto; }
+	.roleSelect { width: 100%; }
+	.providerHeader { padding: 12px 16px; }
+	.capOverview { padding: 0 16px 12px; }
+	.modelListExpanded { padding: 10px 16px 14px; }
+	.card { padding: 20px; }
+}

@@ -1,7 +1,9 @@
 .menu {
 	width: 280px;
 	flex-shrink: 0;
-	height: 100%;
+	position: sticky;
+	top: 80px;
+	max-height: calc(100vh - 80px);
 	display: flex;
 	flex-direction: column;
 	padding: 0;
@@ -260,6 +262,8 @@
 @media (max-width: 1200px) {
 	.menu {
 		width: 100%;
+		position: static;
+		max-height: none;
 		height: auto;
 	}
 
@@ -303,6 +307,8 @@
 @media (max-width: 768px) {
 	.menu {
 		width: 100%;
+		position: static;
+		max-height: none;
 		height: auto;
 	}
 

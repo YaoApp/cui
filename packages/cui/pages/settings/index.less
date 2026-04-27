@@ -1,55 +1,53 @@
+@header-height: 80px;
+
 .container {
-	padding: 24px;
-	height: calc(100vh - 100px); // 减去顶部导航栏高度（调整为100px）
-	max-height: calc(100vh - 100px);
-	display: flex;
-	flex-direction: column;
 	max-width: var(--max_width);
 	margin: 0 auto;
 	width: 100%;
 	box-sizing: border-box;
-	overflow: hidden; // 防止页面级别滚动
 }
 
 .header {
-	margin-bottom: 32px;
-	flex-shrink: 0; // 防止header被压缩
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: var(--color_bg);
+	height: @header-height;
+	display: flex;
+	align-items: center;
+	padding: 0 24px;
 
 	.title {
 		h1 {
-			margin: 0 0 8px 0;
-			font-size: 28px;
+			margin: 0 0 4px 0;
+			font-size: 24px;
 			font-weight: 600;
 			color: var(--color_page_title);
 		}
 
 		p {
 			margin: 0;
-			font-size: 16px;
+			font-size: 13px;
 			color: var(--color_text_grey);
-			line-height: 1.5;
+			line-height: 1.4;
 		}
 	}
 }
 
 .content {
-	flex: 1;
 	display: flex;
 	gap: 32px;
-	min-height: 0;
-	overflow: hidden;
+	align-items: flex-start;
+	padding: 0 24px;
 }
 
 .main {
 	flex: 1;
 	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	// overflow: hidden; // 注释掉，让子组件控制滚动
+	padding-bottom: 48px;
 }
 
 .comingSoon {
-	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -85,42 +83,36 @@
 @media (max-width: 1200px) {
 	.container {
 		max-width: 100%;
-		padding: 20px;
+	}
+
+	.header {
+		padding: 0 20px;
 	}
 
 	.content {
 		flex-direction: column;
 		gap: 24px;
+		padding: 0 20px;
 	}
 
 	.main {
-		padding: 0;
+		padding-bottom: 24px;
 	}
 }
 
 @media (max-width: 768px) {
-	.container {
-		padding: 16px;
-		height: 100vh;
-		overflow: hidden;
-	}
-
 	.header {
-		margin-bottom: 24px;
+		height: 64px;
+		padding: 0 16px;
 
-		.title {
-			h1 {
-				font-size: 24px;
-			}
-
-			p {
-				font-size: 14px;
-			}
+		.title h1 {
+			font-size: 20px;
 		}
 	}
 
 	.content {
 		gap: 20px;
+		padding: 0 16px;
 	}
 
 	.comingSoon {
@@ -137,22 +129,3 @@
 		}
 	}
 }
-
-// 滚动条样式 - 已移至子组件内部处理
-// .main::-webkit-scrollbar {
-// 	width: 6px;
-// }
-
-// .main::-webkit-scrollbar-track {
-// 	background: var(--color_neo_bg_field);
-// 	border-radius: 3px;
-// }
-
-// .main::-webkit-scrollbar-thumb {
-// 	background: var(--color_neo_border_field);
-// 	border-radius: 3px;
-
-// 	&:hover {
-// 		background: var(--color_neo_border_hover);
-// 	}
-// }
