@@ -4,7 +4,7 @@ import { message, Modal, Switch } from 'antd'
 import { Button } from '@/components/ui'
 import { Input } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
-import { ContactInfo as ContactInfoType, SecurityData } from '../../../mockData'
+import type { ContactInfo as ContactInfoType, SecurityData } from '../../../types'
 import styles from './ContactInfo.less'
 
 interface ContactInfoProps {

@@ -4,7 +4,8 @@ import { Button, PaginatedTable } from '@/components/ui'
 import { DateRange, DateRangeValue } from '@/components/ui/inputs'
 import { TableColumn, TableAction } from '@/components/ui/PaginatedTable/types'
 import Icon from '@/widgets/Icon'
-import { mockApi, AuditLog, AuditLogResponse } from '../../mockData'
+import type { AuditLog, AuditLogResponse } from '../../types'
+import { mockApi } from '../../mockApi'
 import styles from './index.less'
 
 const AuditLogs = () => {

@@ -8,7 +8,8 @@ import { difference } from 'lodash-es'
 import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
 import { GetCurrentUser } from '@/pages/auth/auth'
-import { mockApi, MenuItem, MenuGroup, User } from '../../mockData'
+import type { MenuItem, MenuGroup, User } from '../../types'
+import { mockApi } from '../../mockApi'
 import { useGlobal } from '@/context/app'
 import { useIntl } from '@/hooks'
 import styles from './index.less'
@@ -184,26 +185,30 @@ const Menu = ({ active, onChange }: MenuProps) => {
 								<div className={styles.title}>
 									{group.name[is_cn ? 'zh-CN' : 'en-US']}
 								</div>
-								<div className={styles.items}>
-									{group.items.map((item) => {
-										const isExternal = isExternalUrl(item.path)
-										return (
-											<div
-												key={item.key}
-												className={`${styles.item} ${
-													active === item.key ? styles.active : ''
-												}`}
-												onClick={() => {
-													if (isExternal) {
-														window.open(
-															item.path,
-															'_blank',
-															'noopener,noreferrer'
-														)
-													} else {
-														onChange(item.key)
-													}
-												}}
+							<div className={styles.items}>
+								{group.items.map((item) => {
+									const resolvedPath =
+										typeof item.path === 'string'
+											? item.path
+											: item.path[is_cn ? 'zh-CN' : 'en-US']
+									const isExternal = isExternalUrl(resolvedPath)
+									return (
+										<div
+											key={item.key}
+											className={`${styles.item} ${
+												active === item.key ? styles.active : ''
+											}`}
+											onClick={() => {
+												if (isExternal) {
+													window.open(
+														resolvedPath,
+														'_blank',
+														'noopener,noreferrer'
+													)
+												} else {
+													onChange(item.key)
+												}
+											}}
 											>
 												<Icon
 													name={item.icon}

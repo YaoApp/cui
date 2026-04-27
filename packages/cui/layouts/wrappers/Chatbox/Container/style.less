@@ -22,7 +22,28 @@
 	min-width: 0;
 	position: relative;
 	background-color: var(--color_bg);
-	// No border-radius, no margin - full space for content
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		background: transparent;
+		transition: background 0.2s ease;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&:hover::-webkit-scrollbar-thumb {
+		background: var(--color_scrollbar_thumb);
+
+		&:hover {
+			background: var(--color_dot);
+		}
+	}
 }
 
 .sidebar_content_wrapper {

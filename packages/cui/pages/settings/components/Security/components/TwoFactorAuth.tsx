@@ -5,7 +5,7 @@ import { Button } from '@/components/ui'
 import { RadioGroup } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import TOTPSetup from '@/components/TOTP'
-import { TwoFactorMethod, SecurityData } from '../../../mockData'
+import type { TwoFactorMethod, SecurityData } from '../../../types'
 import styles from './TwoFactorAuth.less'
 
 interface TwoFactorAuthProps {

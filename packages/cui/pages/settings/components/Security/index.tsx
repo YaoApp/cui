@@ -4,7 +4,8 @@ import { message } from 'antd'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
 import { ContactInfo, OAuthProviders, TwoFactorAuth } from './components'
-import { mockApi, SecurityData } from '../../mockData'
+import type { SecurityData } from '../../types'
+import { mockApi } from '../../mockApi'
 import styles from './index.less'
 
 const Security = () => {

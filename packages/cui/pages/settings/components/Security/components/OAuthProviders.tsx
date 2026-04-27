@@ -3,7 +3,7 @@ import { getLocale } from '@umijs/max'
 import { message, Modal } from 'antd'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
-import { OAuthProvider, SecurityData } from '../../../mockData'
+import type { OAuthProvider, SecurityData } from '../../../types'
 import { User, SigninProvider } from '@/openapi'
 import styles from './OAuthProviders.less'
 

@@ -4,8 +4,8 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { Button, PaginatedTable } from '@/components/ui'
 import type { PaginatedTableProps, TableColumn, TableAction } from '@/components/ui'
-import { mockApi } from '../../mockData'
-import type { BalanceInfo, TopUpRecord, TopUpMethod, TopUpStatus } from '../../mockData'
+import type { BalanceInfo, TopUpRecord, TopUpMethod, TopUpStatus } from '../../types'
+import { mockApi } from '../../mockApi'
 import styles from './index.less'
 
 const Balance: React.FC = () => {
