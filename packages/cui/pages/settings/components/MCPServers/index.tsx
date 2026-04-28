@@ -1,417 +1,339 @@
-import React, { useState, useEffect } from 'react'
-import { Modal, Form, Input, Select, message } from 'antd'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { getLocale } from '@umijs/max'
-import { Button, Dropdown } from '@/components/ui'
-import type { DropdownMenuItem } from '@/components/ui'
+import { message, Modal, Spin } from 'antd'
 import Icon from '@/widgets/Icon'
-import CardList from '../CardList'
+import Button from '@/components/ui/Button'
+import { Input, InputPassword, RadioGroup } from '@/components/ui/inputs'
+import type { PropertySchema } from '@/components/ui/inputs/types'
+import type { McpServerConfig, McpPageData } from '../../types'
+import { mockApi } from '../../mockApi'
 import styles from './index.less'
 
-export interface MCPServer {
-	id: string
-	label: string
-	description: string
-	command: string
-	args?: string
-	transport: 'stdio' | 'sse'
-	created_at?: string
-	updated_at?: string
-}
-
-interface MCPServerFormData {
-	label: string
-	description: string
-	command: string
-	args?: string
-	transport: 'stdio' | 'sse'
-}
+const slugify = (text: string) =>
+	text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 const MCPServers = () => {
-	const locale = getLocale()
-	const is_cn = locale === 'zh-CN'
-	const [form] = Form.useForm<MCPServerFormData>()
+	const is_cn = getLocale() === 'zh-CN'
 
-	// 状态管理
-	const [data, setData] = useState<MCPServer[]>([])
 	const [loading, setLoading] = useState(true)
-	const [loadingMore, setLoadingMore] = useState(false)
-	const [hasMore, setHasMore] = useState(true)
-	const [currentPage, setCurrentPage] = useState(1)
-	const [modalVisible, setModalVisible] = useState(false)
-	const [editingServer, setEditingServer] = useState<MCPServer | null>(null)
-	const [formLoading, setFormLoading] = useState(false)
+	const [data, setData] = useState<McpPageData | null>(null)
 
-	const pageSize = 20
+	const [modalOpen, setModalOpen] = useState(false)
+	const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+	const [editServer, setEditServer] = useState<McpServerConfig | null>(null)
+	const [saving, setSaving] = useState(false)
 
-	// 模拟 API 数据
-	const generateMockServers = (page: number, size: number): MCPServer[] => {
-		const servers: MCPServer[] = []
-		const serverTypes = [
-			{
-				label: 'File System Server',
-				label_cn: '文件系统服务器',
-				desc: 'Local file system access server',
-				desc_cn: '本地文件系统访问服务器',
-				command: 'node',
-				args: '/path/to/filesystem-server.js',
-				transport: 'stdio' as const
-			},
-			{
-				label: 'Database Connector',
-				label_cn: '数据库连接器',
-				desc: 'PostgreSQL database connection server',
-				desc_cn: 'PostgreSQL 数据库连接服务器',
-				command: 'python',
-				args: '-m mcp_database --db postgresql://localhost:5432/mydb',
-				transport: 'stdio' as const
-			},
-			{
-				label: 'Git Repository Server',
-				label_cn: 'Git 仓库服务器',
-				desc: 'Git repository management server',
-				desc_cn: 'Git 仓库管理服务器',
-				command: 'mcp-git-server',
-				args: '--repo /path/to/repo',
-				transport: 'sse' as const
-			},
-			{
-				label: 'Web Search Server',
-				label_cn: '网页搜索服务器',
-				desc: 'Web search and scraping server',
-				desc_cn: '网页搜索和抓取服务器',
-				command: 'node',
-				args: '/opt/mcp-servers/web-search/index.js',
-				transport: 'stdio' as const
-			}
-		]
+	const [formLabel, setFormLabel] = useState('')
+	const [formName, setFormName] = useState('')
+	const [formNameManual, setFormNameManual] = useState(false)
+	const [formDesc, setFormDesc] = useState('')
+	const [formTransport, setFormTransport] = useState<'http' | 'sse'>('http')
+	const [formUrl, setFormUrl] = useState('')
+	const [formToken, setFormToken] = useState('')
+	const [formTimeout, setFormTimeout] = useState('30s')
 
-		const start = (page - 1) * size
-		const end = Math.min(start + size, 100) // 总共100条数据，确保有足够内容触发滚动
-
-		for (let i = start; i < end; i++) {
-			const serverType = serverTypes[i % serverTypes.length]
-			servers.push({
-				id: `mcp-${i + 1}`,
-				label: is_cn ? serverType.label_cn : serverType.label,
-				description: is_cn ? serverType.desc_cn : serverType.desc,
-				command: serverType.command,
-				args: serverType.args,
-				transport: serverType.transport,
-				created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-				updated_at: new Date().toISOString()
-			})
-		}
-
-		return servers
-	}
-
-	// 加载数据
-	const loadData = async (page: number = 1, append: boolean = false) => {
-		try {
-			if (!append) {
-				setLoading(true)
-			} else {
-				setLoadingMore(true)
-			}
-
-			// 模拟网络延迟
-			await new Promise((resolve) => setTimeout(resolve, 800))
-
-			const newServers = generateMockServers(page, pageSize)
-
-			if (append) {
-				setData((prev) => [...prev, ...newServers])
-			} else {
-				setData(newServers)
-			}
-
-			setCurrentPage(page)
-			setHasMore(newServers.length === pageSize && page * pageSize < 100)
-		} catch (error) {
-			console.error('Failed to load MCP servers:', error)
-			message.error(is_cn ? '加载失败' : 'Failed to load')
-		} finally {
-			setLoading(false)
-			setLoadingMore(false)
-		}
-	}
-
-	// 加载更多
-	const handleLoadMore = () => {
-		if (!loadingMore && hasMore) {
-			loadData(currentPage + 1, true)
-		}
-	}
-
-	// 初始加载
 	useEffect(() => {
-		loadData()
+		mockApi.getMcpServers().then((res) => {
+			setData(res)
+			setLoading(false)
+		})
 	}, [])
 
-	// 处理添加
-	const handleAdd = () => {
-		setEditingServer(null)
-		form.resetFields()
-		setModalVisible(true)
+	const reload = useCallback(async () => {
+		const res = await mockApi.getMcpServers()
+		setData(res)
+	}, [])
+
+	const resetForm = () => {
+		setFormLabel('')
+		setFormName('')
+		setFormNameManual(false)
+		setFormDesc('')
+		setFormTransport('http')
+		setFormUrl('')
+		setFormToken('')
+		setFormTimeout('30s')
 	}
 
-	// 处理编辑
-	const handleEdit = (server: MCPServer) => {
-		setEditingServer(server)
-		form.setFieldsValue({
-			label: server.label,
-			description: server.description,
-			command: server.command,
-			args: server.args,
-			transport: server.transport
+	const handleOpenAdd = () => {
+		setModalMode('add')
+		setEditServer(null)
+		resetForm()
+		setModalOpen(true)
+	}
+
+	const handleOpenEdit = (server: McpServerConfig) => {
+		setModalMode('edit')
+		setEditServer(server)
+		setFormLabel(server.label)
+		setFormName(server.name)
+		setFormNameManual(true)
+		setFormDesc(server.description || '')
+		setFormTransport(server.transport)
+		setFormUrl(server.url)
+		setFormToken(server.authorization_token || '')
+		setFormTimeout(server.timeout || '30s')
+		setModalOpen(true)
+	}
+
+	const handleDelete = (server: McpServerConfig) => {
+		Modal.confirm({
+			title: is_cn ? '确认删除' : 'Confirm Delete',
+			content: is_cn
+				? `确定要删除「${server.label}」吗？此操作不可撤销。`
+				: `Are you sure you want to delete "${server.label}"? This cannot be undone.`,
+			okText: is_cn ? '删除' : 'Delete',
+			cancelText: is_cn ? '取消' : 'Cancel',
+			okType: 'danger',
+			onOk: async () => {
+				await mockApi.deleteMcpServer(server.id)
+				await reload()
+				message.success(is_cn ? '已删除' : 'Deleted')
+			}
 		})
-		setModalVisible(true)
 	}
 
-	// 处理删除
-	const handleDelete = async (server: MCPServer) => {
-		try {
-			// 模拟删除 API 调用
-			await new Promise((resolve) => setTimeout(resolve, 500))
+	const handleLabelChange = (val: unknown) => {
+		const v = String(val || '')
+		setFormLabel(v)
+		if (!formNameManual) setFormName(slugify(v))
+	}
 
-			setData((prev) => prev.filter((item) => item.id !== server.id))
-			message.success(is_cn ? '删除成功' : 'Deleted successfully')
-		} catch (error) {
-			message.error(is_cn ? '删除失败' : 'Failed to delete')
+	const handleNameChange = (val: unknown) => {
+		setFormName(String(val || ''))
+		setFormNameManual(true)
+	}
+
+	const handleSave = async () => {
+		if (!formLabel.trim()) {
+			message.warning(is_cn ? '请填写名称' : 'Please enter a name')
+			return
 		}
-	}
+		if (!formName.trim()) {
+			message.warning(is_cn ? '请填写标识' : 'Please enter an identifier')
+			return
+		}
+		if (!formUrl.trim()) {
+			message.warning(is_cn ? '请填写 URL' : 'Please enter URL')
+			return
+		}
 
-	// 处理表单提交
-	const handleSubmit = async () => {
+		setSaving(true)
 		try {
-			setFormLoading(true)
-			const values = await form.validateFields()
-
-			// 模拟 API 调用
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-
-			if (editingServer) {
-				// 编辑模式
-				const updatedServer: MCPServer = {
-					...editingServer,
-					...values,
-					updated_at: new Date().toISOString()
-				}
-				setData((prev) => prev.map((item) => (item.id === editingServer.id ? updatedServer : item)))
-				message.success(is_cn ? '更新成功' : 'Updated successfully')
-			} else {
-				// 添加模式
-				const newServer: MCPServer = {
-					id: `mcp-${Date.now()}`,
-					...values,
-					created_at: new Date().toISOString(),
-					updated_at: new Date().toISOString()
-				}
-				setData((prev) => [newServer, ...prev])
-				message.success(is_cn ? '添加成功' : 'Added successfully')
+			if (modalMode === 'add') {
+				await mockApi.addMcpServer({
+					name: formName.trim(),
+					label: formLabel.trim(),
+					description: formDesc.trim() || undefined,
+					transport: formTransport,
+					url: formUrl.trim(),
+					authorization_token: formToken.trim() || undefined,
+					timeout: formTimeout.trim() || '30s',
+				})
+				message.success(is_cn ? '添加成功' : 'Added')
+			} else if (editServer) {
+				await mockApi.updateMcpServer(editServer.id, {
+					name: formName.trim(),
+					label: formLabel.trim(),
+					description: formDesc.trim() || undefined,
+					transport: formTransport,
+					url: formUrl.trim(),
+					authorization_token: formToken.trim() || undefined,
+					timeout: formTimeout.trim() || '30s',
+				})
+				message.success(is_cn ? '已更新' : 'Updated')
 			}
-
-			handleCancel()
-		} catch (error) {
-			console.error('Form validation failed:', error)
+			setModalOpen(false)
+			await reload()
 		} finally {
-			setFormLoading(false)
+			setSaving(false)
 		}
 	}
 
-	// 处理取消
-	const handleCancel = () => {
-		setModalVisible(false)
-		form.resetFields()
-		setEditingServer(null)
+	const textSchema = useMemo((): PropertySchema => ({ type: 'string' }), [])
+	const pwdSchema = useMemo((): PropertySchema => ({ type: 'string' }), [])
+	const transportSchema = useMemo((): PropertySchema => ({
+		type: 'string',
+		enum: [
+			{ label: 'Streamable HTTP', value: 'http' },
+			{ label: 'SSE', value: 'sse' }
+		]
+	}), [])
+
+	const urlPlaceholder = formTransport === 'sse'
+		? 'https://mcp.example.com/sse'
+		: 'https://mcp.example.com/mcp'
+
+	const statusLabel = (status: string) => {
+		const map: Record<string, { text: string; cls: string }> = {
+			connected: { text: is_cn ? '已连接' : 'Connected', cls: styles.status_connected },
+			disconnected: { text: is_cn ? '连接失败' : 'Disconnected', cls: styles.status_disconnected },
+			unconfigured: { text: is_cn ? '未配置' : 'Not configured', cls: styles.status_unconfigured }
+		}
+		return map[status] || map.unconfigured
 	}
 
-	// 渲染卡片
-	const renderServerCard = (server: MCPServer) => {
-		const menuItems: DropdownMenuItem[] = [
-			{
-				key: 'edit',
-				label: is_cn ? '编辑' : 'Edit',
-				icon: <Icon name='material-edit' size={14} />,
-				onClick: () => handleEdit(server)
-			},
-			{
-				key: 'delete',
-				label: is_cn ? '删除' : 'Delete',
-				icon: <Icon name='material-delete' size={14} />,
-				onClick: () => handleDelete(server)
-			}
-		]
-
+	if (loading || !data) {
 		return (
-			<div className={styles.serverCard}>
-				<div className={styles.cardHeader}>
-					<div className={styles.cardTitle}>
-						<Icon name='material-dns' size={16} className={styles.cardIcon} />
-						<h3 className={styles.serverLabel}>{server.label}</h3>
+			<div className={styles.mcpServices}>
+				<div className={styles.header}>
+					<div className={styles.headerContent}>
+						<h2>{is_cn ? 'MCP 服务' : 'MCP Services'}</h2>
+						<p>{is_cn ? '管理外部 MCP 服务器连接，为 AI 助手扩展工具能力' : 'Manage external MCP server connections to extend AI assistant capabilities'}</p>
 					</div>
-					<Dropdown items={menuItems} placement='bottomRight'>
-						<button className={styles.moreButton} title={is_cn ? '更多操作' : 'More actions'}>
-							<Icon name='material-more_horiz' size={16} />
-						</button>
-					</Dropdown>
 				</div>
-
-				<div className={styles.cardContent}>
-					<p className={styles.serverDescription}>{server.description}</p>
-					<div className={styles.transportTag}>{server.transport.toUpperCase()}</div>
+				<div className={styles.loadingState}>
+					<Spin size='small' />
+					<span>{is_cn ? '加载中...' : 'Loading...'}</span>
 				</div>
 			</div>
 		)
 	}
 
 	return (
-		<div className={styles.mcpServers}>
+		<div className={styles.mcpServices}>
 			<div className={styles.header}>
 				<div className={styles.headerContent}>
-					<h1 className={styles.title}>{is_cn ? 'MCP 服务器' : 'MCP Servers'}</h1>
-					<p className={styles.subtitle}>
-						{is_cn
-							? '管理您的模型上下文协议服务器配置'
-							: 'Manage your Model Context Protocol server configurations'}
-					</p>
+					<h2>{is_cn ? 'MCP 服务' : 'MCP Services'}</h2>
+					<p>{is_cn ? '管理外部 MCP 服务器连接，为 AI 助手扩展工具能力' : 'Manage external MCP server connections to extend AI assistant capabilities'}</p>
 				</div>
-				<Button type='primary' icon={<Icon name='material-add' size={14} />} onClick={handleAdd}>
-					{is_cn ? '添加服务器' : 'Add Server'}
-				</Button>
 			</div>
 
-			<div className={styles.contentStack}>
-				<CardList
-					data={data}
-					loading={loading}
-					loadingMore={loadingMore}
-					hasMore={hasMore}
-					onLoadMore={handleLoadMore}
-					renderCard={renderServerCard}
-					emptyIcon='material-dns'
-					emptyTitle={is_cn ? '暂无 MCP 服务器' : 'No MCP servers'}
-					emptyDescription={
-						is_cn
-							? '点击上方按钮添加您的第一个服务器'
-							: 'Click the button above to add your first server'
-					}
-					className={styles.serverList}
-				/>
+			<div className={styles.section}>
+				<div className={styles.sectionHeader}>
+					<div className={styles.sectionTitle}>{is_cn ? '服务列表' : 'Services'}</div>
+				</div>
+
+				{data.servers.length > 0 ? (
+					<div className={styles.serverList}>
+						{data.servers.map((server) => {
+							const st = statusLabel(server.status)
+							return (
+								<div key={server.id} className={styles.serverCard}>
+									<div className={styles.serverHeader}>
+										<div className={styles.serverInfo}>
+											<div className={styles.serverTitle}>{server.label}</div>
+											<span className={`${styles.serverStatus} ${st.cls}`}>{st.text}</span>
+											<span className={styles.transportTag}>{server.transport === 'http' ? 'HTTP' : 'SSE'}</span>
+										</div>
+										<div className={styles.serverActions}>
+											<button className={styles.editBtn} onClick={() => handleOpenEdit(server)} title={is_cn ? '编辑' : 'Edit'}>
+												<Icon name='material-edit' size={16} />
+											</button>
+											<button className={styles.deleteBtn} onClick={() => handleDelete(server)} title={is_cn ? '删除' : 'Delete'}>
+												<Icon name='material-delete' size={16} />
+											</button>
+										</div>
+									</div>
+									{server.description && (
+										<div className={styles.serverDesc}>{server.description}</div>
+									)}
+									<div className={styles.serverUrl}>{server.url}</div>
+									{server.tags && server.tags.length > 0 && (
+										<div className={styles.serverTags}>
+											{server.tags.map((tag) => (
+												<span key={tag} className={styles.tag}>{tag}</span>
+											))}
+										</div>
+									)}
+								</div>
+							)
+						})}
+					</div>
+				) : (
+					<div className={styles.emptyState}>
+						<Icon name='material-hub' size={40} />
+						<h3>{is_cn ? '暂无 MCP 服务' : 'No MCP services'}</h3>
+						<p>{is_cn ? '添加外部 MCP 服务器，为 AI 助手扩展工具能力' : 'Add external MCP servers to extend AI assistant capabilities'}</p>
+					</div>
+				)}
+
+				<div className={styles.addBtn} onClick={handleOpenAdd}>
+					<Icon name='material-add' size={18} />
+					<span>{is_cn ? '添加 MCP 服务' : 'Add MCP Service'}</span>
+				</div>
 			</div>
 
+			{/* Modal */}
 			<Modal
-				title={
-					editingServer
-						? is_cn
-							? '编辑服务器'
-							: 'Edit Server'
-						: is_cn
-						? '添加服务器'
-						: 'Add Server'
-				}
-				open={modalVisible}
-				onOk={handleSubmit}
-				onCancel={handleCancel}
-				okText={is_cn ? '保存' : 'Save'}
-				cancelText={is_cn ? '取消' : 'Cancel'}
-				confirmLoading={formLoading}
-				width={600}
+				open={modalOpen}
+				onCancel={() => setModalOpen(false)}
+				footer={null}
+				closable={false}
+				width={560}
 				destroyOnClose
+				className={styles.serverModal}
 			>
-				<Form form={form} layout='vertical' style={{ marginTop: 16 }} autoComplete='off'>
-					{/* 隐藏字段防止浏览器自动填写 */}
-					<input type='text' style={{ display: 'none' }} />
-					<input type='password' style={{ display: 'none' }} />
+				<div className={styles.modalHeader}>
+					<span className={styles.modalTitle}>
+						{modalMode === 'add'
+							? (is_cn ? '添加 MCP 服务' : 'Add MCP Service')
+							: (is_cn ? `编辑 ${editServer?.label || ''}` : `Edit ${editServer?.label || ''}`)}
+					</span>
+					<button className={styles.modalClose} onClick={() => setModalOpen(false)}>
+						<Icon name='material-close' size={18} />
+					</button>
+				</div>
 
-					<Form.Item
-						name='label'
-						label={is_cn ? '服务器名称' : 'Server Name'}
-						rules={[
-							{
-								required: true,
-								message: is_cn ? '请输入服务器名称' : 'Please enter server name'
-							}
-						]}
-					>
-						<Input
-							placeholder={is_cn ? '例如：文件系统服务器' : 'e.g., File System Server'}
-							autoComplete='off'
-						/>
-					</Form.Item>
+				<div className={styles.modalBody}>
+					<div className={styles.modalContent}>
+						<div className={styles.formField}>
+							<label className={styles.fieldLabel}>{is_cn ? '名称' : 'Name'}</label>
+							<Input schema={textSchema} value={formLabel} onChange={handleLabelChange} />
+						</div>
 
-					<Form.Item
-						name='description'
-						label={is_cn ? '描述' : 'Description'}
-						rules={[
-							{ required: true, message: is_cn ? '请输入描述' : 'Please enter description' }
-						]}
-					>
-						<Input.TextArea
-							rows={3}
-							placeholder={
-								is_cn
-									? '简要描述这个服务器的功能和用途'
-									: 'Briefly describe the functionality and purpose of this server'
-							}
-							autoComplete='off'
-						/>
-					</Form.Item>
+						<div className={styles.formField}>
+							<label className={styles.fieldLabel}>
+								{is_cn ? '标识' : 'Identifier'}
+								<span className={styles.optionalHint}> ({is_cn ? '英文，用于系统引用' : 'used for system reference'})</span>
+							</label>
+							<Input schema={textSchema} value={formName} onChange={handleNameChange} />
+						</div>
 
-					<Form.Item
-						name='command'
-						label={is_cn ? '启动命令' : 'Command'}
-						rules={[
-							{
-								required: true,
-								message: is_cn ? '请输入启动命令' : 'Please enter command'
-							}
-						]}
-					>
-						<Input
-							placeholder={
-								is_cn
-									? '例如：node, python, mcp-server'
-									: 'e.g., node, python, mcp-server'
-							}
-							autoComplete='off'
-							data-lpignore='true'
-							data-form-type='other'
-						/>
-					</Form.Item>
+						<div className={styles.formField}>
+							<label className={styles.fieldLabel}>
+								{is_cn ? '描述' : 'Description'}
+								<span className={styles.optionalHint}> ({is_cn ? '可选' : 'optional'})</span>
+							</label>
+							<Input schema={textSchema} value={formDesc} onChange={(v) => setFormDesc(String(v || ''))} />
+						</div>
 
-					<Form.Item name='args' label={is_cn ? '参数 (可选)' : 'Arguments (Optional)'}>
-						<Input
-							placeholder={
-								is_cn
-									? '例如：/path/to/script.js --port 3000'
-									: 'e.g., /path/to/script.js --port 3000'
-							}
-							autoComplete='off'
-							data-lpignore='true'
-							data-form-type='other'
-						/>
-					</Form.Item>
+						<div className={styles.formField}>
+							<label className={styles.fieldLabel}>{is_cn ? '传输方式' : 'Transport'}</label>
+							<RadioGroup schema={transportSchema} value={formTransport} onChange={(v) => setFormTransport(String(v) as any)} />
+						</div>
 
-					<Form.Item
-						name='transport'
-						label={is_cn ? '传输方式' : 'Transport'}
-						rules={[
-							{
-								required: true,
-								message: is_cn ? '请选择传输方式' : 'Please select transport'
-							}
-						]}
-					>
-						<Select
-							placeholder={is_cn ? '选择传输方式' : 'Select transport'}
-							options={[
-								{ value: 'stdio', label: 'STDIO' },
-								{ value: 'sse', label: 'SSE (Server-Sent Events)' }
-							]}
-						/>
-					</Form.Item>
-				</Form>
+						<div className={styles.formField}>
+							<label className={styles.fieldLabel}>URL</label>
+							<Input schema={textSchema} value={formUrl} onChange={(v) => setFormUrl(String(v || ''))} placeholder={urlPlaceholder} />
+						</div>
+
+						<div className={styles.formField}>
+							<label className={styles.fieldLabel}>
+								{is_cn ? '认证 Token' : 'Authorization Token'}
+								<span className={styles.optionalHint}> ({is_cn ? '可选，支持 Bearer Token / API Key / PAT' : 'optional, Bearer Token / API Key / PAT'})</span>
+							</label>
+							<InputPassword schema={pwdSchema} value={formToken} onChange={(v) => setFormToken(String(v || ''))} />
+						</div>
+
+						<div className={styles.formField}>
+							<label className={styles.fieldLabel}>
+								{is_cn ? '超时' : 'Timeout'}
+								<span className={styles.optionalHint}> ({is_cn ? '默认 30s' : 'default 30s'})</span>
+							</label>
+							<Input schema={textSchema} value={formTimeout} onChange={(v) => setFormTimeout(String(v || ''))} />
+						</div>
+					</div>
+
+					<div className={styles.modalActions}>
+						<Button type='default' onClick={() => setModalOpen(false)}>
+							{is_cn ? '取消' : 'Cancel'}
+						</Button>
+						<Button type='primary' loading={saving} onClick={handleSave}>
+							{modalMode === 'add' ? (is_cn ? '添加' : 'Add') : (is_cn ? '保存' : 'Save')}
+						</Button>
+					</div>
+				</div>
 			</Modal>
 		</div>
 	)

@@ -68,6 +68,13 @@ export const settingMenuGroups: MenuGroup[] = [
 				name: { 'zh-CN': '邮箱配置', 'en-US': 'Email' },
 				icon: 'material-mail',
 				path: '/settings/smtp'
+			},
+			{
+				id: 'sys-7',
+				key: 'mcp',
+				name: { 'zh-CN': 'MCP 服务', 'en-US': 'MCP Services' },
+				icon: 'material-hub',
+				path: '/settings/mcp'
 			}
 		]
 	},

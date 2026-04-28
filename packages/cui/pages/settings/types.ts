@@ -525,3 +525,27 @@ export interface SmtpPageData {
 	presets: SmtpPreset[]
 	config: SmtpConfig
 }
+
+// ─── MCP Services Page ──────────────────────────────────
+
+export type McpTransport = 'http' | 'sse'
+export type McpStatus = 'connected' | 'disconnected' | 'unconfigured'
+
+export interface McpServerConfig {
+	id: string
+	name: string
+	label: string
+	description?: string
+	transport: McpTransport
+	url: string
+	authorization_token?: string
+	timeout?: string
+	tags?: string[]
+	status: McpStatus
+	created_at?: string
+	updated_at?: string
+}
+
+export interface McpPageData {
+	servers: McpServerConfig[]
+}
