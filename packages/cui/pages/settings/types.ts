@@ -300,40 +300,7 @@ export interface AuditLogResponse {
 	total: number
 }
 
-export interface SystemInfoData {
-	app: {
-		name: string
-		short: string
-		description: string
-		logo: string
-		version: string
-	}
-	deployment: 'community' | 'enterprise' | 'cloud'
-	license_key?: string
-	server: {
-		version: string
-		build_date: string
-		commit: string
-	}
-	client: {
-		version: string
-		build_date: string
-		commit: string
-	}
-	environment: 'development' | 'production'
-	technical: {
-		listen: string
-		db_driver: string
-		session_store: string
-	}
-}
-
-export interface CheckUpdateResult {
-	has_update: boolean
-	latest_version?: string
-	download_url?: string
-	release_notes?: string
-}
+export type { SystemInfoData, CheckUpdateResult } from '@/openapi/setting/types'
 
 export interface CloudRegion {
 	key: string

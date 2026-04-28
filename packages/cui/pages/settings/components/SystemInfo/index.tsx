@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getLocale } from '@umijs/max'
 import { message, Spin } from 'antd'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { useGlobal } from '@/context/app'
 import { getDefaultLogoUrl } from '@/services/wellknown'
+import { Setting } from '@/openapi/setting'
 import type { SystemInfoData } from '../../types'
-import { mockApi } from '../../mockApi'
 import styles from './index.less'
+
+function getSettingAPI(): Setting | null {
+	if (!window.$app?.openapi) return null
+	return new Setting(window.$app.openapi)
+}
 
 const SystemInfo = () => {
 	const locale = getLocale()
@@ -17,48 +22,81 @@ const SystemInfo = () => {
 	const [checking, setChecking] = useState(false)
 	const [data, setData] = useState<SystemInfoData | null>(null)
 	const [techExpanded, setTechExpanded] = useState(false)
+	const [error, setError] = useState<string | null>(null)
+	const retryRef = useRef(0)
 
 	useEffect(() => {
-		mockApi.getSystemInfo().then((res) => {
-			setData(res)
-			setLoading(false)
-		})
+		let cancelled = false
+
+		const load = () => {
+			const api = getSettingAPI()
+			if (!api) {
+				if (retryRef.current < 10) {
+					retryRef.current++
+					setTimeout(load, 300)
+				} else {
+					if (!cancelled) {
+						setError(is_cn ? 'OpenAPI 未就绪' : 'OpenAPI not ready')
+						setLoading(false)
+					}
+				}
+				return
+			}
+
+			const apiLocale = locale === 'zh-CN' ? 'zh-cn' : 'en-us'
+			api.GetSystemInfo(apiLocale)
+				.then((res) => {
+					if (cancelled) return
+					if (res.data) {
+						setData(res.data)
+					} else {
+						setError(res.error?.error_description || 'Failed to load system info')
+					}
+					setLoading(false)
+				})
+				.catch((err) => {
+					if (cancelled) return
+					setError(err?.message || 'Network error')
+					setLoading(false)
+				})
+		}
+
+		load()
+		return () => { cancelled = true }
 	}, [])
 
 	const handleCheckUpdate = async () => {
+		const api = getSettingAPI()
+		if (!api) return
 		setChecking(true)
 		try {
-			const result = await mockApi.checkUpdate()
-			if (result.has_update) {
+			const res = await api.CheckUpdate()
+			const result = res.data
+			if (result?.has_update) {
+				const url = 'https://yaoagents.com/?source=yao-upgrade'
 				message.info(
-					is_cn
-						? `发现新版本 ${result.latest_version}，请前往官网下载`
-						: `New version ${result.latest_version} available, please download from website`
+					<span>
+						{is_cn
+							? `发现新版本 ${result.latest_version}，`
+							: `New version ${result.latest_version} available, `}
+						<a href={url} target='_blank' rel='noopener noreferrer'>
+							{is_cn ? '前往下载' : 'Download'}
+						</a>
+					</span>
 				)
 			} else {
 				message.success(is_cn ? '已是最新版本' : 'Already up to date')
 			}
+		} catch {
+			message.error(is_cn ? '检查更新失败' : 'Failed to check for updates')
 		} finally {
 			setChecking(false)
 		}
 	}
 
-	const deploymentLabel = (type: SystemInfoData['deployment']) => {
-		const map = {
-			community: is_cn ? '社区版' : 'Community',
-			enterprise: is_cn ? '企业版' : 'Enterprise',
-			cloud: 'Cloud'
-		}
-		return map[type]
-	}
+	
 
-	const envLabel = (env: SystemInfoData['environment']) => {
-		return env === 'production'
-			? is_cn ? '正式环境' : 'Production'
-			: is_cn ? '测试环境' : 'Development'
-	}
-
-	if (loading || !data) {
+	if (loading) {
 		return (
 			<div className={styles.systemInfo}>
 				<div className={styles.header}>
@@ -70,6 +108,22 @@ const SystemInfo = () => {
 				<div className={styles.loadingState}>
 					<Spin size='small' />
 					<span>{is_cn ? '加载中...' : 'Loading...'}</span>
+				</div>
+			</div>
+		)
+	}
+
+	if (error || !data) {
+		return (
+			<div className={styles.systemInfo}>
+				<div className={styles.header}>
+					<div className={styles.headerContent}>
+						<h2>{is_cn ? '系统信息' : 'System Info'}</h2>
+						<p>{is_cn ? '查看应用版本、运行环境和系统状态' : 'View app version, runtime environment and system status'}</p>
+					</div>
+				</div>
+				<div className={styles.loadingState}>
+					<span>{error || (is_cn ? '加载失败' : 'Failed to load')}</span>
 				</div>
 			</div>
 		)
@@ -100,35 +154,29 @@ const SystemInfo = () => {
 							<h3>{data.app.name}</h3>
 							<span className={styles.appVersion}>v{data.app.version}</span>
 							<span className={`${styles.badge} ${styles[`badge_${data.deployment}`]}`}>
-								{deploymentLabel(data.deployment)}
+								{data.deployment_label || data.deployment}
 							</span>
 						</div>
 						<div className={styles.appDesc}>{data.app.description}</div>
 					</div>
 				</div>
 
-				{data.deployment === 'community' && (
-					<div className={styles.ctaBanner}>
+				{data.promotions?.map((promo) => (
+					<div key={promo.id} className={styles.ctaBanner}>
 						<div className={styles.ctaContent}>
-							<div className={styles.ctaTitle}>
-								{is_cn ? '升级到企业版' : 'Upgrade to Enterprise'}
-							</div>
-							<div className={styles.ctaDesc}>
-								{is_cn
-									? '解锁多租户、SSO、审计、SLA 支持等高级功能'
-									: 'Unlock multi-tenancy, SSO, audit, SLA support and more'}
-							</div>
+							<div className={styles.ctaTitle}>{promo.title}</div>
+							<div className={styles.ctaDesc}>{promo.desc}</div>
 						</div>
 						<a
-							href='https://yaoagents.com/enterprise'
+							href={promo.link}
 							target='_blank'
 							rel='noopener noreferrer'
 							className={styles.ctaLink}
 						>
-							{is_cn ? '了解更多 →' : 'Learn more →'}
+							{promo.label}
 						</a>
 					</div>
-				)}
+				))}
 			</div>
 
 			{/* Version Section */}
@@ -190,7 +238,7 @@ const SystemInfo = () => {
 							<div className={styles.fieldLabel}>{is_cn ? '环境' : 'Environment'}</div>
 							<div className={styles.fieldValue}>
 								<span className={`${styles.badge} ${styles[`badge_${data.environment}`]}`}>
-									{envLabel(data.environment)}
+									{data.environment_label || data.environment}
 								</span>
 							</div>
 						</div>
