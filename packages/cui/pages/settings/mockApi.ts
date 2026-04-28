@@ -40,7 +40,9 @@ import type {
 	SandboxPageData,
 	SmtpPreset,
 	SmtpConfig,
-	SmtpPageData
+	SmtpPageData,
+	McpServerConfig,
+	McpPageData
 } from './types'
 import { settingMenuGroups } from './menu'
 
@@ -1524,6 +1526,52 @@ export const mockApi = {
 				resolve({ success: true, message: 'Test email sent successfully' })
 			}, 1500)
 		})
+	},
+
+	// ─── MCP Services ─────────────────────────────────────
+
+	getMcpServers: (): Promise<McpPageData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => resolve(JSON.parse(JSON.stringify({ servers: mcpServersCache }))), 400)
+		})
+	},
+
+	addMcpServer: (server: Omit<McpServerConfig, 'id' | 'status' | 'created_at' | 'updated_at'>): Promise<McpServerConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const now = new Date().toISOString()
+				const newServer: McpServerConfig = {
+					...server,
+					id: `mcp-${Date.now()}`,
+					status: server.authorization_token || !server.authorization_token ? 'connected' : 'unconfigured',
+					created_at: now,
+					updated_at: now
+				}
+				mcpServersCache.unshift(newServer)
+				resolve(JSON.parse(JSON.stringify(newServer)))
+			}, 500)
+		})
+	},
+
+	updateMcpServer: (id: string, updates: Partial<McpServerConfig>): Promise<McpServerConfig> => {
+		return new Promise((resolve, reject) => {
+			setTimeout(() => {
+				const idx = mcpServersCache.findIndex((s) => s.id === id)
+				if (idx === -1) { reject(new Error('Server not found')); return }
+				Object.assign(mcpServersCache[idx], updates, { updated_at: new Date().toISOString() })
+				resolve(JSON.parse(JSON.stringify(mcpServersCache[idx])))
+			}, 400)
+		})
+	},
+
+	deleteMcpServer: (id: string): Promise<void> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const idx = mcpServersCache.findIndex((s) => s.id === id)
+				if (idx !== -1) mcpServersCache.splice(idx, 1)
+				resolve()
+			}, 300)
+		})
 	}
 }
 
@@ -1825,3 +1873,76 @@ const smtpCache: SmtpConfig = {
 	from_email: '',
 	status: 'unconfigured'
 }
+
+// ─── MCP Services mock data ─────────────────────────────
+
+const mcpServersCache: McpServerConfig[] = [
+	{
+		id: 'mcp-1',
+		name: 'stripe',
+		label: 'Stripe',
+		description: 'Payments, subscriptions, invoices',
+		transport: 'http',
+		url: 'https://mcp.stripe.com',
+		authorization_token: 'Bearer rk_test_51abc...xyz',
+		timeout: '30s',
+		tags: ['payments', 'finance'],
+		status: 'connected',
+		created_at: '2026-03-15T08:00:00Z',
+		updated_at: '2026-04-20T10:30:00Z'
+	},
+	{
+		id: 'mcp-2',
+		name: 'github',
+		label: 'GitHub',
+		description: 'Repos, issues, PRs, workflows',
+		transport: 'http',
+		url: 'https://api.githubcopilot.com/mcp/',
+		authorization_token: 'Bearer ghp_xxxxxxxxxxxx',
+		timeout: '30s',
+		tags: ['development', 'git'],
+		status: 'connected',
+		created_at: '2026-03-10T12:00:00Z',
+		updated_at: '2026-04-18T09:00:00Z'
+	},
+	{
+		id: 'mcp-3',
+		name: 'cloudflare',
+		label: 'Cloudflare',
+		description: 'DNS, Workers, R2, Zero Trust',
+		transport: 'http',
+		url: 'https://mcp.cloudflare.com/mcp',
+		timeout: '30s',
+		tags: ['cloud', 'infrastructure'],
+		status: 'unconfigured',
+		created_at: '2026-04-01T06:00:00Z',
+		updated_at: '2026-04-01T06:00:00Z'
+	},
+	{
+		id: 'mcp-4',
+		name: 'notion',
+		label: 'Notion',
+		description: 'Pages, databases, comments',
+		transport: 'http',
+		url: 'https://mcp.notion.com/mcp',
+		authorization_token: 'Bearer ntn_xxx_xxxxxxxx',
+		timeout: '30s',
+		tags: ['productivity'],
+		status: 'connected',
+		created_at: '2026-03-20T14:00:00Z',
+		updated_at: '2026-04-22T11:00:00Z'
+	},
+	{
+		id: 'mcp-5',
+		name: 'supabase',
+		label: 'Supabase',
+		description: 'Database, auth, storage, realtime',
+		transport: 'http',
+		url: 'https://mcp.supabase.com/mcp',
+		timeout: '30s',
+		tags: ['database', 'backend'],
+		status: 'connected',
+		created_at: '2026-04-05T16:00:00Z',
+		updated_at: '2026-04-25T08:00:00Z'
+	}
+]

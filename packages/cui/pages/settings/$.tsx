@@ -65,7 +65,7 @@ const Settings = () => {
 			commissions: Commissions,
 			'llm-providers': LLMProviders,
 			stripe: Stripe,
-			'mcp-servers': MCPServers,
+			mcp: MCPServers,
 			security: Security,
 			'audit-logs': AuditLogs,
 			system: SystemInfo,

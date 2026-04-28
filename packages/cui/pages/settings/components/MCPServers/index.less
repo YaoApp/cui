@@ -1,244 +1,390 @@
-// MCP Servers 页面样式 - 基于 LLMProviders 样式
-
-.mcpServers {
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-	min-height: 0;
+.mcpServices {
+	width: 100%;
+	max-width: 760px;
 }
 
-// 页面头部
+.loadingState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 160px;
+	gap: 12px;
+	color: var(--color_neo_text_secondary);
+
+	span {
+		font-size: 12px;
+	}
+}
+
+// Header — matches CloudService/Models
 .header {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: space-between;
 	margin-bottom: 24px;
-	margin-right: 12px; // 为按钮 hover 效果留出空间
-	flex-shrink: 0;
 }
 
 .headerContent {
-	flex: 1;
+	h2 {
+		margin: 0 0 6px 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+		color: var(--color_neo_text_secondary);
+		line-height: 1.5;
+	}
 }
 
-.title {
-	font-size: 24px;
-	font-weight: 600;
-	color: var(--color_neo_text_primary);
-	margin: 0 0 8px 0;
-	line-height: 1.3;
+// Sections
+.section {
+	margin-top: 28px;
 }
 
-.subtitle {
+.sectionHeader {
+	display: flex;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.sectionTitle {
 	font-size: 14px;
+	font-weight: 600;
 	color: var(--color_neo_text_secondary);
-	margin: 0;
-	line-height: 1.4;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
 }
 
-// 内容垂直堆叠布局 - 与 LLMProviders 保持一致
-.contentStack {
-	flex: 1;
+// Server List
+.serverList {
 	display: flex;
 	flex-direction: column;
-	gap: 24px;
-	padding: 0;
-	overflow: auto; // 支持滚动
-	min-height: 0; // 允许收缩
+	gap: 12px;
+}
 
-	// 滚动条基础样式
+// Server Card
+.serverCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	padding: 16px 20px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.serverHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.serverInfo {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1;
+	min-width: 0;
+}
+
+.serverTitle {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.serverStatus {
+	font-size: 11px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-weight: 500;
+}
+
+.status_connected {
+	background: rgba(34, 197, 94, 0.1);
+	color: rgb(34, 197, 94);
+}
+
+.status_disconnected {
+	background: rgba(239, 68, 68, 0.1);
+	color: rgb(239, 68, 68);
+}
+
+.status_unconfigured {
+	background: var(--color_neo_bg_field);
+	color: var(--color_neo_text_secondary);
+}
+
+.transportTag {
+	font-size: 10px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	background: rgba(59, 130, 246, 0.08);
+	color: rgb(59, 130, 246);
+	font-weight: 500;
+}
+
+.serverActions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.editBtn,
+.deleteBtn {
+	background: none;
+	border: none;
+	padding: 6px;
+	cursor: pointer;
+	color: var(--color_neo_text_secondary);
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	transition: all 0.15s ease;
+
+	&:hover {
+		background: var(--color_neo_bg_field);
+	}
+}
+
+.editBtn:hover {
+	color: var(--color_main);
+}
+
+.deleteBtn:hover {
+	color: rgb(239, 68, 68);
+}
+
+.serverDesc {
+	font-size: 13px;
+	color: var(--color_neo_text_secondary);
+	margin-top: 8px;
+	line-height: 1.5;
+}
+
+.serverUrl {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	opacity: 0.7;
+	margin-top: 6px;
+	font-family: monospace;
+	word-break: break-all;
+}
+
+.serverTags {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+	margin-top: 10px;
+}
+
+.tag {
+	font-size: 10px;
+	padding: 2px 8px;
+	border-radius: 4px;
+	background: var(--color_neo_bg_field);
+	color: var(--color_neo_text_secondary);
+}
+
+// Empty state
+.emptyState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 48px 24px;
+	color: var(--color_neo_text_secondary);
+	opacity: 0.6;
+
+	h3 {
+		margin: 16px 0 4px;
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--color_neo_text_primary);
+		opacity: 0.7;
+	}
+
+	p {
+		margin: 0;
+		font-size: 13px;
+	}
+}
+
+// Add button
+.addBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 14px;
+	margin-top: 12px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_main);
+	border: 1px dashed var(--color_main);
+	border-radius: 10px;
+	transition: all 0.2s ease;
+	opacity: 0.7;
+
+	&:hover {
+		opacity: 1;
+		background: rgba(59, 130, 246, 0.04);
+	}
+}
+
+// Modal
+.serverModal {
+	:global(.ant-modal-content) {
+		display: flex;
+		flex-direction: column;
+		border-radius: 12px;
+		overflow: hidden;
+		max-height: 80vh;
+	}
+
+	:global(.ant-modal-header) {
+		padding: 0 !important;
+		border-bottom: none !important;
+		margin: 0 !important;
+	}
+
+	:global(.ant-modal-body) {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0 !important;
+		overflow: hidden;
+	}
+
+	:global(.xgen-modal-content) {
+		display: flex;
+		flex-direction: column;
+		border-radius: 12px;
+		overflow: hidden;
+		max-height: 80vh;
+	}
+
+	:global(.xgen-modal-header) {
+		padding: 0 !important;
+		border-bottom: none !important;
+		margin: 0 !important;
+	}
+
+	:global(.xgen-modal-body) {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0 !important;
+		overflow: hidden;
+	}
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 24px;
+	border-bottom: 1px solid var(--color_neo_border);
+	height: 52px;
+	flex-shrink: 0;
+}
+
+.modalTitle {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary);
+}
+
+.modalClose {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--color_neo_text_secondary);
+	padding: 4px;
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+
+	&:hover {
+		background: var(--color_neo_bg_field);
+		color: var(--color_neo_text_primary);
+	}
+}
+
+.modalBody {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	max-height: calc(80vh - 52px);
+}
+
+.modalContent {
+	flex: 1;
+	overflow-y: auto;
+	padding: 16px 24px 20px;
+
 	&::-webkit-scrollbar {
 		width: 6px;
-		height: 6px;
 	}
 
 	&::-webkit-scrollbar-thumb {
+		background: var(--color_neo_text_quaternary, rgba(0, 0, 0, 0.15));
 		border-radius: 3px;
-		transition: background 0.2s ease;
-		background: transparent; // 默认透明
+
+		&:hover {
+			background: var(--color_neo_text_tertiary, rgba(0, 0, 0, 0.25));
+		}
 	}
 
 	&::-webkit-scrollbar-track {
 		background: transparent;
 	}
-
-	// 鼠标悬停时显示滚动条 - 与 LLMProviders 完全一致
-	.mcpServers:hover &::-webkit-scrollbar-thumb {
-		background: var(--color_border_light);
-
-		&:hover {
-			background: var(--color_dot);
-		}
-	}
 }
 
-// 服务器卡片样式 - 与 LLMProviders 完全一致
-.serverCardWrapper {
-	// 卡片包装器样式由 CardList 控制
+.formField {
+	margin-bottom: 16px;
 }
 
-.serverCard {
-	background: var(--color_neo_bg_card);
-	border: 1px solid var(--color_neo_border_card);
-	border-radius: 12px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-	overflow: hidden;
-	display: flex;
-	flex-direction: column;
-	flex-shrink: 0;
-	// 固定高度确保一致性
-	height: 160px;
-	min-height: 160px;
-	max-height: 160px;
-	// 间距由网格布局控制
-	transition: all 0.2s ease;
-
-	&:hover {
-		border-color: var(--color_neo_border_hover);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-	}
-}
-
-// 卡片头部
-.cardHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 12px 16px;
-	border-bottom: 1px solid var(--color_neo_border_field);
-	background: var(--color_neo_bg_header);
-	flex-shrink: 0;
-
-	h3 {
-		margin: 0;
-		font-size: 14px;
-		font-weight: 600;
-		color: var(--color_neo_text_primary);
-	}
-}
-
-.cardTitle {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-size: 14px;
-	font-weight: 600;
-	color: var(--color_neo_text_primary);
-}
-
-.cardIcon {
-	color: var(--color_neo_icon_muted);
-}
-
-.serverLabel {
-	margin: 0;
-	font-size: 14px;
-	font-weight: 600;
-	color: var(--color_neo_text_primary);
-	line-height: 1.3;
-	word-break: break-word;
-	flex: 1;
-}
-
-.moreButton {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 28px;
-	border: none;
-	background: none;
-	border-radius: 6px;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	color: var(--color_neo_text_secondary);
-	flex-shrink: 0;
-
-	&:hover {
-		background: var(--color_bg_hover);
-		color: var(--color_neo_text_primary);
-	}
-
-	&:active {
-		background: var(--color_bg_active);
-	}
-}
-
-// 卡片内容
-.cardContent {
-	padding: 16px;
-	flex: 1;
-	min-height: 0;
-	display: flex;
-	flex-direction: column;
-	position: relative;
-}
-
-.serverDescription {
-	margin: 0;
-	font-size: 14px;
-	color: var(--color_neo_text_secondary);
-	line-height: 1.5;
-	word-break: break-word;
-	flex: 1;
-	padding-bottom: 32px; // 为底部标签留出空间
-	// 限制显示两行，超出部分显示省略号
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	// 确保两行的固定高度
-	height: 63px; // 14px * 1.5 * 3 = 63px (给足空间显示两行)
-	max-height: 63px;
-}
-
-.transportTag {
-	position: absolute;
-	bottom: 16px;
-	right: 16px;
-	padding: 3px 6px;
-	background: var(--color_neo_bg_field);
-	color: var(--color_neo_text_secondary);
-	font-size: 9px;
+.fieldLabel {
+	display: block;
+	font-size: 13px;
 	font-weight: 500;
-	border-radius: 3px;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	border: 1px solid var(--color_neo_border_field);
+	color: var(--color_neo_text_primary);
+	margin-bottom: 6px;
 }
 
-// 响应式设计
+.optionalHint {
+	font-weight: 400;
+	font-size: 12px;
+	color: var(--color_neo_text_tertiary);
+}
+
+.modalActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	padding: 12px 24px;
+	border-top: 1px solid var(--color_neo_border);
+	flex-shrink: 0;
+}
+
+// Responsive
 @media (max-width: 768px) {
-	.header {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 12px;
+	.serverCard {
+		padding: 14px 16px;
 	}
 
-	.title {
-		font-size: 20px;
+	.serverHeader {
+		flex-wrap: wrap;
+		gap: 8px;
 	}
 
-	.contentStack {
-		gap: 16px;
-	}
-}
-
-@media (max-width: 480px) {
-	.header {
-		margin-bottom: 16px;
-	}
-
-	.title {
-		font-size: 18px;
-	}
-
-	.subtitle {
-		font-size: 13px;
-	}
-
-	.contentStack {
-		gap: 12px;
+	.serverInfo {
+		flex-wrap: wrap;
 	}
 }
