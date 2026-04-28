@@ -1,15 +1,20 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { getLocale, useNavigate } from '@umijs/max'
 import { message, Spin } from 'antd'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { RadioGroup, Input, InputPassword } from '@/components/ui/inputs'
+import { Setting } from '@/openapi/setting'
 import type { CloudServiceData, CloudRegion } from '../../types'
 import type { PropertySchema } from '@/components/ui/inputs/types'
-import { mockApi } from '../../mockApi'
 import styles from './index.less'
 
 const REGISTER_URL = 'https://yaoagents.com?source=client-settings-cloud'
+
+function getSettingAPI(): Setting | null {
+	if (!window.$app?.openapi) return null
+	return new Setting(window.$app.openapi)
+}
 
 const CloudService = () => {
 	const locale = getLocale()
@@ -20,19 +25,61 @@ const CloudService = () => {
 	const [saving, setSaving] = useState(false)
 	const [testing, setTesting] = useState(false)
 	const [data, setData] = useState<CloudServiceData | null>(null)
+	const [error, setError] = useState<string | null>(null)
 
 	const [region, setRegion] = useState('')
 	const [apiUrl, setApiUrl] = useState('')
 	const [apiKey, setApiKey] = useState('')
+	const [editingKey, setEditingKey] = useState(false)
+	const retryRef = useRef(0)
+
+	const hasKey = Boolean(data?.api_key)
+	const regionChanged = Boolean(data && region !== data.region)
+	const isEditing = editingKey || !hasKey || regionChanged
 
 	useEffect(() => {
-		mockApi.getCloudService().then((res) => {
-			setData(res)
-			setRegion(res.region)
-			setApiUrl(res.api_url)
-			setApiKey(res.api_key)
-			setLoading(false)
-		})
+		let cancelled = false
+
+		const load = () => {
+			const api = getSettingAPI()
+			if (!api) {
+				if (retryRef.current < 10) {
+					retryRef.current++
+					setTimeout(load, 300)
+				} else {
+					if (!cancelled) {
+						setError(is_cn ? 'API 客户端初始化失败' : 'API client initialization failed')
+						setLoading(false)
+					}
+				}
+				return
+			}
+
+			api.GetCloudService()
+				.then((resp) => {
+					if (cancelled) return
+					if (resp.error || !resp.data) {
+						setError(resp.error?.error_description || 'Failed to load cloud service config')
+						setLoading(false)
+						return
+					}
+					const res = resp.data
+					setData(res)
+					setRegion(res.region)
+					setApiUrl(res.api_url)
+					setApiKey('')
+					setLoading(false)
+				})
+				.catch((err) => {
+					if (!cancelled) {
+						setError(err?.message || 'Failed to load cloud service config')
+						setLoading(false)
+					}
+				})
+		}
+
+		load()
+		return () => { cancelled = true }
 	}, [])
 
 	const handleRegionChange = (val: any) => {
@@ -45,15 +92,29 @@ const CloudService = () => {
 	}
 
 	const handleSave = async () => {
-		if (!apiKey.trim()) {
+		if (isEditing && !apiKey.trim()) {
 			message.warning(is_cn ? '请输入 API Key' : 'Please enter API Key')
 			return
 		}
+		const api = getSettingAPI()
+		if (!api) return
+
 		setSaving(true)
 		try {
-			const result = await mockApi.saveCloudService({ region, api_url: apiUrl, api_key: apiKey })
-			setData(result)
+			const payload: Record<string, string> = { region, api_url: apiUrl }
+			if (isEditing) payload.api_key = apiKey
+
+			const resp = await api.SaveCloudService(payload)
+			if (resp.error || !resp.data) {
+				message.error(resp.error?.error_description || (is_cn ? '保存失败' : 'Save failed'))
+				return
+			}
+			setData(resp.data)
+			setApiKey('')
+			setEditingKey(false)
 			message.success(is_cn ? '保存成功' : 'Saved successfully')
+		} catch (err: any) {
+			message.error(err?.message || (is_cn ? '保存失败' : 'Save failed'))
 		} finally {
 			setSaving(false)
 		}
@@ -61,34 +122,55 @@ const CloudService = () => {
 
 	const handleTest = async () => {
 		if (!apiKey.trim()) {
-			message.warning(is_cn ? '请先输入 API Key' : 'Please enter API Key first')
+			message.warning(is_cn ? '请输入 API Key' : 'Please enter API Key')
 			return
 		}
+		const api = getSettingAPI()
+		if (!api) return
+
 		setTesting(true)
 		try {
-			const result = await mockApi.testCloudService()
+			const resp = await api.TestCloudService({ api_url: apiUrl, api_key: apiKey.trim() })
+			if (resp.error || !resp.data) {
+				message.error(resp.error?.error_description || (is_cn ? '连接测试失败' : 'Connection test failed'))
+				return
+			}
+
+			const result = resp.data
 			if (result.success) {
 				message.success(
 					is_cn
 						? `连接成功（延迟 ${result.latency_ms}ms）`
 						: `Connected successfully (${result.latency_ms}ms latency)`
 				)
-				const saved = await mockApi.saveCloudService({ region, api_url: apiUrl, api_key: apiKey })
-				setData(saved)
 			} else {
 				message.error(result.message)
 			}
+			const refreshed = await api.GetCloudService()
+			if (refreshed.data) setData(refreshed.data)
+		} catch (err: any) {
+			message.error(err?.message || (is_cn ? '连接测试失败' : 'Connection test failed'))
 		} finally {
 			setTesting(false)
 		}
 	}
 
+	const handleEditKey = () => {
+		setApiKey('')
+		setEditingKey(true)
+	}
+
+	const handleCancelEdit = () => {
+		setApiKey('')
+		setEditingKey(false)
+	}
+
 	const regionSchema = useMemo((): PropertySchema => {
-		if (!data) return { type: 'string', enum: [] }
+		if (!data?.regions) return { type: 'string', enum: [] }
 		return {
 			type: 'string',
 			enum: data.regions.map((r: CloudRegion) => ({
-				label: r.label[is_cn ? 'zh-CN' : 'en-US'],
+				label: r.label?.[is_cn ? 'zh-CN' : 'en-US'] || r.key,
 				value: r.key
 			}))
 		}
@@ -112,6 +194,19 @@ const CloudService = () => {
 			unconfigured: { text: is_cn ? '未配置' : 'Not configured', cls: styles.status_unconfigured }
 		}
 		return map[status]
+	}
+
+	if (error) {
+		return (
+			<div className={styles.cloudService}>
+				<div className={styles.header}>
+					<div className={styles.headerContent}>
+						<h2>{is_cn ? '云服务' : 'Cloud Service'}</h2>
+						<p>{error}</p>
+					</div>
+				</div>
+			</div>
+		)
 	}
 
 	if (loading || !data) {
@@ -183,23 +278,53 @@ const CloudService = () => {
 						<Input schema={urlSchema} value={apiUrl} onChange={() => {}} />
 					</div>
 
-					<div className={styles.formField}>
-						<label className={styles.fieldLabel}>API Key</label>
-						<InputPassword
-							schema={keySchema}
-							value={apiKey}
-							onChange={(val) => setApiKey(String(val))}
-						/>
-					</div>
+				<div className={styles.formField}>
+					<label className={styles.fieldLabel}>API Key</label>
+					{!isEditing ? (
+						<div className={styles.keyDisplay}>
+							<span className={styles.keyText}>
+								{data.api_key}
+							</span>
+							<button
+								type='button'
+								className={styles.keyEditBtn}
+								onClick={handleEditKey}
+							>
+								{is_cn ? '修改' : 'Change'}
+							</button>
+						</div>
+					) : (
+						<>
+							<InputPassword
+								schema={keySchema}
+								value={apiKey}
+								onChange={(val) => setApiKey(String(val))}
+							/>
+							{hasKey && editingKey && (
+								<button
+									type='button'
+									className={styles.keyCancelBtn}
+									onClick={handleCancelEdit}
+								>
+									{is_cn ? '取消修改' : 'Cancel'}
+								</button>
+							)}
+						</>
+					)}
+				</div>
 
-					<div className={styles.actions}>
+				{isEditing && (
+				<div className={styles.actions}>
+					{hasKey && (
 						<Button type='default' loading={testing} onClick={handleTest}>
 							{is_cn ? '测试连接' : 'Test Connection'}
 						</Button>
-						<Button type='primary' loading={saving} onClick={handleSave}>
-							{is_cn ? '保存' : 'Save'}
-						</Button>
-					</div>
+					)}
+					<Button type='primary' loading={saving} onClick={handleSave}>
+						{is_cn ? '保存' : 'Save'}
+					</Button>
+				</div>
+			)}
 				</div>
 			</div>
 
