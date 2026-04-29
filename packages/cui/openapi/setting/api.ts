@@ -15,7 +15,9 @@ import type {
 	SearchTestResult,
 	SmtpPageData,
 	SmtpConfig,
-	SmtpTestResult
+	SmtpTestResult,
+	McpPageData,
+	McpServerConfig
 } from './types'
 
 export class Setting {
@@ -111,5 +113,27 @@ export class Setting {
 
 	async TestSmtp(data: { to_email: string }): Promise<ApiResponse<SmtpTestResult>> {
 		return this.api.Post<SmtpTestResult>('/setting/smtp/test', data)
+	}
+
+	// ─── MCP Servers ──────────────────────────────────────────
+
+	async GetMcpServers(): Promise<ApiResponse<McpPageData>> {
+		return this.api.Get<McpPageData>('/setting/mcp/servers')
+	}
+
+	async CreateMcpServer(data: Omit<McpServerConfig, 'id' | 'status' | 'enabled'>): Promise<ApiResponse<McpServerConfig>> {
+		return this.api.Post<McpServerConfig>('/setting/mcp/servers', data)
+	}
+
+	async UpdateMcpServer(id: string, data: Partial<McpServerConfig>): Promise<ApiResponse<McpServerConfig>> {
+		return this.api.Put<McpServerConfig>(`/setting/mcp/servers/${encodeURIComponent(id)}`, data)
+	}
+
+	async DeleteMcpServer(id: string): Promise<ApiResponse<void>> {
+		return this.api.Delete<void>(`/setting/mcp/servers/${encodeURIComponent(id)}`)
+	}
+
+	async TestMcpServer(data: { transport: string; url: string; authorization_token?: string; timeout?: string }): Promise<ApiResponse<{ success: boolean; message: string; latency_ms?: number }>> {
+		return this.api.Post<{ success: boolean; message: string; latency_ms?: number }>('/setting/mcp/test', data)
 	}
 }
