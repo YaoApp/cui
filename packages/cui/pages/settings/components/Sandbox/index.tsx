@@ -1,29 +1,45 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { getLocale } from '@umijs/max'
 import { Spin } from 'antd'
 import Icon from '@/widgets/Icon'
-import type { SandboxPageData } from '../../types'
-import { mockApi } from '../../mockApi'
+import { Setting } from '@/openapi/setting/api'
+import type { SandboxPageData } from '@/openapi/setting/types'
 import ComputerCard from './ComputerCard'
-import RegistryPanel from './RegistryPanel'
 import ImageList from './ImageList'
 import DockerMissing from './DockerMissing'
 import styles from './index.less'
 
+function getSettingAPI(): Setting | null {
+	if (!window.$app?.openapi) return null
+	return new Setting(window.$app.openapi)
+}
+
+function toBackendLocale(locale: string): string {
+	return locale.toLowerCase()
+}
+
 const Sandbox = () => {
 	const is_cn = getLocale() === 'zh-CN'
+	const backendLocale = toBackendLocale(getLocale())
 	const [data, setData] = useState<SandboxPageData | null>(null)
 	const [loading, setLoading] = useState(true)
 	const [selectedNodeId, setSelectedNodeId] = useState<string>('')
 
 	const loadData = async (silent = false) => {
+		const api = getSettingAPI()
+		if (!api) return
 		if (!silent) setLoading(true)
 		try {
-			const result = await mockApi.getSandboxPageData()
-			setData(result)
-			if (!selectedNodeId && result.nodes.length > 0) {
-				setSelectedNodeId(result.nodes[0].node_id)
+			const resp = await api.GetSandboxConfig(backendLocale)
+			if (resp.data) {
+				setData(resp.data)
+				if (!selectedNodeId && resp.data.nodes.length > 0) {
+					const local = resp.data.nodes.find((n) => n.kind === 'local')
+					setSelectedNodeId(local ? local.node_id : resp.data.nodes[0].node_id)
+				}
 			}
+		} catch {
+			// Silently ignore fetch errors during polling
 		} finally {
 			if (!silent) setLoading(false)
 		}
@@ -31,19 +47,43 @@ const Sandbox = () => {
 
 	useEffect(() => { loadData() }, [])
 
-	const selectedNode = useMemo(
-		() => data?.nodes.find((n) => n.node_id === selectedNodeId),
-		[data, selectedNodeId]
+	const sortedNodes = useMemo(
+		() =>
+			data?.nodes
+				? [...data.nodes].sort((a, b) => {
+						if (a.kind === 'local' && b.kind !== 'local') return -1
+						if (a.kind !== 'local' && b.kind === 'local') return 1
+						return (a.display_name || '').localeCompare(b.display_name || '')
+				  })
+				: [],
+		[data]
 	)
 
-	const isMultiNode = (data?.nodes.length ?? 0) > 1
-	const isSingleNode = (data?.nodes.length ?? 0) === 1
+	const selectedNode = useMemo(
+		() => sortedNodes.find((n) => n.node_id === selectedNodeId),
+		[sortedNodes, selectedNodeId]
+	)
+
+	const isMultiNode = sortedNodes.length > 1
+	const isSingleNode = sortedNodes.length === 1
 	const dockerInstalled = selectedNode?.docker_version != null
 
 	const currentImages = useMemo(
 		() => (selectedNodeId && data?.images[selectedNodeId]) || [],
 		[data, selectedNodeId]
 	)
+
+	const updateImageStatus = useCallback((imageId: string, status: string) => {
+		setData((prev) => {
+			if (!prev || !selectedNodeId) return prev
+			const imgs = prev.images[selectedNodeId]
+			if (!imgs) return prev
+			const updated = imgs.map((img) =>
+				img.id === imageId ? { ...img, status, progress: status === 'downloading' ? 0 : img.progress } : img
+			)
+			return { ...prev, images: { ...prev.images, [selectedNodeId]: updated } }
+		})
+	}, [selectedNodeId])
 
 	if (loading || !data) {
 		return (
@@ -69,13 +109,26 @@ const Sandbox = () => {
 		<div className={styles.container}>
 			{/* Header */}
 			<div className={styles.header}>
-				<div className={styles.icon}>
-					<Icon name='material-desktop_mac' size={20} />
+				<div className={styles.headerLeft}>
+					<div className={styles.icon}>
+						<Icon name='material-desktop_mac' size={20} />
+					</div>
+					<div>
+						<h2>{is_cn ? '沙箱配置' : 'Sandbox'}</h2>
+						<p>{is_cn ? '管理计算节点、Docker 环境和沙箱镜像' : 'Manage compute nodes, Docker environment and sandbox images'}</p>
+					</div>
 				</div>
-				<div>
-					<h2>{is_cn ? '沙箱配置' : 'Sandbox'}</h2>
-					<p>{is_cn ? '管理计算节点、Docker 环境和沙箱镜像' : 'Manage compute nodes, Docker environment and sandbox images'}</p>
-				</div>
+				<a
+					className={styles.helpLink}
+					href={is_cn
+						? 'https://yaoagents.com/docs/zh-cn/settings/docker-setting?source=yao-setting'
+						: 'https://yaoagents.com/docs/en-us/settings/docker-setting?source=yao-setting'}
+					target='_blank'
+					rel='noopener noreferrer'
+				>
+					<Icon name='material-help_outline' size={14} />
+					{is_cn ? '帮助文档' : 'Docs'}
+				</a>
 			</div>
 
 			{/* Section 1: Computer list or single-node info */}
@@ -87,7 +140,7 @@ const Sandbox = () => {
 						</span>
 					</div>
 					<div className={styles.computerGrid}>
-						{data.nodes.map((node) => (
+						{sortedNodes.map((node) => (
 							<ComputerCard
 								key={node.node_id}
 								node={node}
@@ -124,17 +177,7 @@ const Sandbox = () => {
 				/>
 			)}
 
-			{/* Section 2: Registry (always show if docker installed) */}
-			{dockerInstalled && (
-				<div className={styles.section}>
-					<RegistryPanel
-						registry={data.registry}
-						onSaved={(reg) => setData((prev) => prev ? { ...prev, registry: reg } : prev)}
-					/>
-				</div>
-			)}
-
-			{/* Section 3: Images */}
+			{/* Section 2: Images */}
 			{dockerInstalled && (
 				<div className={styles.section}>
 					<ImageList
@@ -142,6 +185,7 @@ const Sandbox = () => {
 						nodeName={isMultiNode ? selectedNode?.display_name : undefined}
 						images={currentImages}
 						onReload={() => loadData(true)}
+						onOptimisticUpdate={updateImageStatus}
 					/>
 				</div>
 			)}

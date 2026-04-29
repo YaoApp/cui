@@ -2,12 +2,17 @@ import { useState } from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
-import { mockApi } from '../../mockApi'
+import { Setting } from '@/openapi/setting/api'
 import styles from './index.less'
 
 interface DockerMissingProps {
 	nodeId: string
 	onDockerDetected: (version: string) => void
+}
+
+function getSettingAPI(): Setting | null {
+	if (!window.$app?.openapi) return null
+	return new Setting(window.$app.openapi)
 }
 
 const DOWNLOAD_LINKS = {
@@ -21,11 +26,13 @@ export default function DockerMissing({ nodeId, onDockerDetected }: DockerMissin
 	const [checking, setChecking] = useState(false)
 
 	const handleRecheck = async () => {
+		const api = getSettingAPI()
+		if (!api) return
 		setChecking(true)
 		try {
-			const result = await mockApi.checkDocker(nodeId)
-			if (result.docker_version) {
-				onDockerDetected(result.docker_version)
+			const resp = await api.CheckSandboxDocker(nodeId)
+			if (resp.data?.docker_version) {
+				onDockerDetected(resp.data.docker_version)
 			}
 		} finally {
 			setChecking(false)

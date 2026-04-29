@@ -17,7 +17,10 @@ import type {
 	SmtpConfig,
 	SmtpTestResult,
 	McpPageData,
-	McpServerConfig
+	McpServerConfig,
+	SandboxPageData,
+	SandboxRegistryConfig,
+	SandboxImage
 } from './types'
 
 export class Setting {
@@ -135,5 +138,33 @@ export class Setting {
 
 	async TestMcpServer(data: { transport: string; url: string; authorization_token?: string; timeout?: string }): Promise<ApiResponse<{ success: boolean; message: string; latency_ms?: number }>> {
 		return this.api.Post<{ success: boolean; message: string; latency_ms?: number }>('/setting/mcp/test', data)
+	}
+
+	// ─── Sandbox ──────────────────────────────────────────────
+
+	async GetSandboxConfig(locale?: string): Promise<ApiResponse<SandboxPageData>> {
+		const params = locale ? `?locale=${encodeURIComponent(locale)}` : ''
+		return this.api.Get<SandboxPageData>(`/setting/sandbox${params}`)
+	}
+
+	async SaveSandboxRegistry(data: Partial<SandboxRegistryConfig>): Promise<ApiResponse<SandboxRegistryConfig>> {
+		return this.api.Put<SandboxRegistryConfig>('/setting/sandbox/registry', data)
+	}
+
+	async PullSandboxImage(nodeId: string, imageId: string): Promise<ApiResponse<SandboxImage>> {
+		return this.api.Post<SandboxImage>(`/setting/sandbox/nodes/${encodeURIComponent(nodeId)}/images/${encodeURIComponent(imageId)}/pull`, {})
+	}
+
+	async PullAllSandboxImages(nodeId: string, locale?: string): Promise<ApiResponse<SandboxImage[]>> {
+		const params = locale ? `?locale=${encodeURIComponent(locale)}` : ''
+		return this.api.Post<SandboxImage[]>(`/setting/sandbox/nodes/${encodeURIComponent(nodeId)}/images/pull-all${params}`, {})
+	}
+
+	async RemoveSandboxImage(nodeId: string, imageId: string): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Delete<{ success: boolean }>(`/setting/sandbox/nodes/${encodeURIComponent(nodeId)}/images/${encodeURIComponent(imageId)}`)
+	}
+
+	async CheckSandboxDocker(nodeId: string): Promise<ApiResponse<{ docker_version?: string; message?: string }>> {
+		return this.api.Post<{ docker_version?: string; message?: string }>(`/setting/sandbox/nodes/${encodeURIComponent(nodeId)}/check-docker`, {})
 	}
 }
