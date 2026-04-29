@@ -1,6 +1,6 @@
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import type { ComputerNode } from '../../types'
+import type { ComputerNode } from '@/openapi/setting/types'
 import styles from './index.less'
 
 interface ComputerCardProps {
@@ -12,7 +12,8 @@ interface ComputerCardProps {
 export default function ComputerCard({ node, selected, onClick }: ComputerCardProps) {
 	const is_cn = getLocale() === 'zh-CN'
 
-	const kindLabel = node.kind === 'host' ? (is_cn ? '本机' : 'Local') : (is_cn ? '远程' : 'Remote')
+	const isLocal = node.kind === 'local'
+	const kindLabel = isLocal ? (is_cn ? '本机' : 'Local') : 'Tai Link'
 	const sysInfo = `${node.os} ${node.arch} · ${node.cpu} CPU · ${node.memory_gb} GB`
 
 	return (
@@ -22,10 +23,10 @@ export default function ComputerCard({ node, selected, onClick }: ComputerCardPr
 		>
 			<div className={styles.computerCardHeader}>
 				<div className={styles.computerCardName}>
-					<Icon name={node.kind === 'host' ? 'material-computer' : 'material-dns'} size={16} />
+					<Icon name={isLocal ? 'material-computer' : 'material-dns'} size={16} />
 					<span>{node.display_name}</span>
 				</div>
-				<span className={`${styles.kindTag} ${node.kind === 'host' ? styles.kindHost : styles.kindNode}`}>
+				<span className={`${styles.kindTag} ${isLocal ? styles.kindHost : styles.kindNode}`}>
 					{kindLabel}
 				</span>
 			</div>

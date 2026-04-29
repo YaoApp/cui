@@ -421,44 +421,15 @@ export interface SearchPageData {
 	tool_assignment: SearchToolAssignment
 }
 
-// ─── Sandbox Page ────────────────────────────────────────
+// ─── Sandbox Page (re-exported from canonical types) ─────
 
-export interface ComputerNode {
-	node_id: string
-	display_name: string
-	kind: 'host' | 'node'
-	os: string
-	arch: string
-	cpu: number
-	memory_gb: number
-	docker_version?: string
-	running_sandboxes: number
-	online: boolean
-}
-
-export interface RegistryConfig {
-	registry_url: string
-	username: string
-	password: string
-}
-
-export type ImageStatus = 'downloaded' | 'not_downloaded' | 'downloading'
-
-export interface SandboxImage {
-	id: string
-	assistant_names: string[]
-	image_name: string
-	tag: string
-	size_mb: number
-	status: ImageStatus
-	progress?: number
-}
-
-export interface SandboxPageData {
-	nodes: ComputerNode[]
-	registry: RegistryConfig
-	images: Record<string, SandboxImage[]>
-}
+export type {
+	ComputerNode,
+	SandboxRegistryConfig as RegistryConfig,
+	SandboxImage,
+	SandboxImageStatus as ImageStatus,
+	SandboxPageData
+} from '@/openapi/setting/types'
 
 // ─── SMTP Page ───────────────────────────────────────────
 

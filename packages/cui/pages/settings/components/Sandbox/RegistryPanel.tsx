@@ -5,13 +5,18 @@ import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { Input, InputPassword } from '@/components/ui/inputs'
 import type { PropertySchema } from '@/components/ui/inputs/types'
-import type { RegistryConfig } from '../../types'
-import { mockApi } from '../../mockApi'
+import { Setting } from '@/openapi/setting/api'
+import type { SandboxRegistryConfig } from '@/openapi/setting/types'
 import styles from './index.less'
 
 interface RegistryPanelProps {
-	registry: RegistryConfig
-	onSaved: (reg: RegistryConfig) => void
+	registry: SandboxRegistryConfig
+	onSaved: (reg: SandboxRegistryConfig) => void
+}
+
+function getSettingAPI(): Setting | null {
+	if (!window.$app?.openapi) return null
+	return new Setting(window.$app.openapi)
 }
 
 const textSchema: PropertySchema = { type: 'string' }
@@ -20,15 +25,21 @@ const pwdSchema: PropertySchema = { type: 'string' }
 export default function RegistryPanel({ registry, onSaved }: RegistryPanelProps) {
 	const is_cn = getLocale() === 'zh-CN'
 	const [collapsed, setCollapsed] = useState(true)
-	const [form, setForm] = useState<RegistryConfig>({ ...registry })
+	const [form, setForm] = useState<SandboxRegistryConfig>({ ...registry })
 	const [saving, setSaving] = useState(false)
 
 	const handleSave = async () => {
+		const api = getSettingAPI()
+		if (!api) return
 		setSaving(true)
 		try {
-			const result = await mockApi.saveRegistryConfig(form)
-			onSaved(result)
-			message.success(is_cn ? '已保存' : 'Saved')
+			const resp = await api.SaveSandboxRegistry(form)
+			if (resp.data) {
+				onSaved(resp.data)
+				message.success(is_cn ? '已保存' : 'Saved')
+			} else if (resp.error) {
+				message.error(resp.error)
+			}
 		} finally {
 			setSaving(false)
 		}

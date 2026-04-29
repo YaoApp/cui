@@ -222,3 +222,43 @@ export interface McpServerConfig {
 export interface McpPageData {
 	servers: McpServerConfig[]
 }
+
+// ─── Sandbox ────────────────────────────────────────────
+
+export interface ComputerNode {
+	node_id: string
+	display_name: string
+	kind: 'host' | 'node'
+	os: string
+	arch: string
+	cpu: number
+	memory_gb: number
+	docker_version?: string
+	running_sandboxes: number
+	online: boolean
+}
+
+export interface SandboxRegistryConfig {
+	registry_url: string
+	username: string
+	password: string
+}
+
+export type SandboxImageStatus = 'downloaded' | 'not_downloaded' | 'downloading' | 'error'
+
+export interface SandboxImage {
+	id: string
+	assistant_names: string[]
+	image_name: string
+	tag: string
+	size_mb: number
+	status: SandboxImageStatus
+	progress?: number
+	error_message?: string
+}
+
+export interface SandboxPageData {
+	nodes: ComputerNode[]
+	registry: SandboxRegistryConfig
+	images: Record<string, SandboxImage[]>
+}
