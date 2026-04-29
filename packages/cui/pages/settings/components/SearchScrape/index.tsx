@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getLocale } from '@umijs/max'
 import { message, Spin } from 'antd'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { Select } from '@/components/ui/inputs'
-import type { PropertySchema, OptionGroup, EnumOption } from '@/components/ui/inputs/types'
+import { Setting } from '@/openapi/setting'
+import type { PropertySchema, EnumOption } from '@/components/ui/inputs/types'
 import type { SearchPageData, SearchToolAssignment, SearchToolType } from '../../types'
-import { mockApi } from '../../mockApi'
 import SearchProviderCard from './SearchProviderCard'
 import styles from './index.less'
 
@@ -38,6 +38,11 @@ const TOOL_ROLES: {
 	}
 ]
 
+function getSettingAPI(): Setting | null {
+	if (!window.$app?.openapi) return null
+	return new Setting(window.$app.openapi)
+}
+
 const SearchScrape = () => {
 	const is_cn = getLocale() === 'zh-CN'
 
@@ -47,10 +52,17 @@ const SearchScrape = () => {
 	const [savingAssignment, setSavingAssignment] = useState(false)
 
 	const loadData = useCallback(async () => {
-		const res = await mockApi.getSearchPageData()
-		setData(res)
-		setAssignment(res.tool_assignment)
-		setLoading(false)
+		const api = getSettingAPI()
+		if (!api) return
+		try {
+			const resp = await api.GetSearchConfig()
+			if (resp.data) {
+				setData(resp.data)
+				setAssignment(resp.data.tool_assignment)
+			}
+		} finally {
+			setLoading(false)
+		}
 	}, [])
 
 	useEffect(() => {
@@ -58,16 +70,24 @@ const SearchScrape = () => {
 	}, [loadData])
 
 	const handleSaveAssignment = async () => {
+		const api = getSettingAPI()
+		if (!api) return
 		setSavingAssignment(true)
 		try {
-			await mockApi.saveSearchToolAssignment(assignment)
-			message.success(is_cn ? '默认工具已保存' : 'Default tools saved')
+			const resp = await api.SaveSearchToolAssignment(assignment)
+			if (resp.error) {
+				message.error(resp.error?.error_description || (is_cn ? '保存失败' : 'Save failed'))
+			} else {
+				message.success(is_cn ? '默认工具已保存' : 'Default tools saved')
+			}
 		} finally {
 			setSavingAssignment(false)
 		}
 	}
 
 	const handleToggle = async (presetKey: string, enabled: boolean) => {
+		const api = getSettingAPI()
+		if (!api) return
 		setData((prev) => {
 			if (!prev) return prev
 			return {
@@ -77,11 +97,23 @@ const SearchScrape = () => {
 				)
 			}
 		})
-		await mockApi.toggleSearchProvider(presetKey, enabled)
+		const resp = await api.ToggleSearchProvider(presetKey, { enabled })
+		if (resp.error) {
+			message.error(resp.error?.error_description || (is_cn ? '操作失败' : 'Operation failed'))
+			await loadData()
+		} else if (!enabled) {
+			await loadData()
+		}
 	}
 
 	const handleSaveProvider = async (presetKey: string, fieldValues: Record<string, string>) => {
-		await mockApi.saveSearchProvider(presetKey, fieldValues)
+		const api = getSettingAPI()
+		if (!api) return
+		const resp = await api.UpdateSearchProvider(presetKey, { field_values: fieldValues })
+		if (resp.error) {
+			message.error(resp.error?.error_description || (is_cn ? '保存失败' : 'Save failed'))
+			throw resp.error
+		}
 		await loadData()
 	}
 

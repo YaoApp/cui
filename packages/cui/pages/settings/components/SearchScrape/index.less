@@ -223,12 +223,73 @@
 	margin-left: 8px;
 }
 
+// Key view / edit — mirrors Models page
+.keyDisplay {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 0 14px;
+	height: 40px;
+	background: var(--color_neo_bg_field);
+	border: 1px solid var(--color_neo_border_field);
+	border-radius: 8px;
+}
+
+.keyText {
+	flex: 1;
+	font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+	font-size: 13px;
+	color: var(--color_neo_text_secondary);
+	letter-spacing: 0.3px;
+	user-select: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.keyEditBtn {
+	flex-shrink: 0;
+	background: none;
+	border: none;
+	padding: 4px 10px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_main);
+	cursor: pointer;
+	border-radius: 6px;
+	transition: background 0.15s ease;
+	&:hover { background: rgba(var(--color_main_rgb, 59, 130, 246), 0.08); }
+}
+
+.keyCancelBtn {
+	background: none;
+	border: none;
+	padding: 4px 0;
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	cursor: pointer;
+	&:hover { color: var(--color_neo_text_primary); }
+}
+
 // Actions row in provider card
 .searchCardActions {
 	display: flex;
-	justify-content: flex-end;
+	justify-content: space-between;
+	align-items: center;
 	gap: 8px;
 	padding-top: 4px;
+}
+
+.searchCardActionsLeft {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.searchCardActionsRight {
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 
 // Responsive

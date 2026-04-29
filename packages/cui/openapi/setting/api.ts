@@ -8,7 +8,11 @@ import type {
 	LLMPageData,
 	LLMProviderConfig,
 	LLMRoleAssignment,
-	LLMProviderTestResult
+	LLMProviderTestResult,
+	SearchPageData,
+	SearchProviderConfig,
+	SearchToolAssignment,
+	SearchTestResult
 } from './types'
 
 export class Setting {
@@ -63,5 +67,27 @@ export class Setting {
 
 	async TestProvider(key: string): Promise<ApiResponse<LLMProviderTestResult>> {
 		return this.api.Post<LLMProviderTestResult>(`/setting/llm/providers/${encodeURIComponent(key)}/test`, {})
+	}
+
+	// ─── Search & Scrape ──────────────────────────────────
+
+	async GetSearchConfig(): Promise<ApiResponse<SearchPageData>> {
+		return this.api.Get<SearchPageData>('/setting/search')
+	}
+
+	async UpdateSearchProvider(key: string, data: { field_values: Record<string, string> }): Promise<ApiResponse<SearchProviderConfig>> {
+		return this.api.Put<SearchProviderConfig>(`/setting/search/providers/${encodeURIComponent(key)}`, data)
+	}
+
+	async ToggleSearchProvider(key: string, data: { enabled: boolean }): Promise<ApiResponse<SearchProviderConfig>> {
+		return this.api.Put<SearchProviderConfig>(`/setting/search/providers/${encodeURIComponent(key)}/toggle`, data)
+	}
+
+	async TestSearchProvider(key: string, data?: { field_values?: Record<string, string> }): Promise<ApiResponse<SearchTestResult>> {
+		return this.api.Post<SearchTestResult>(`/setting/search/providers/${encodeURIComponent(key)}/test`, data || {})
+	}
+
+	async SaveSearchToolAssignment(data: SearchToolAssignment): Promise<ApiResponse<SearchToolAssignment>> {
+		return this.api.Put<SearchToolAssignment>('/setting/search/tool-assignment', data)
 	}
 }
