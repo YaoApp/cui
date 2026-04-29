@@ -165,3 +165,40 @@ export interface SearchTestResult {
 	message: string
 	latency_ms?: number
 }
+
+// ─── SMTP ───────────────────────────────────────────────
+
+export interface SmtpPreset {
+	key: string
+	name: string
+	host: string
+	port: number
+	encryption: string
+	hint?: Record<string, string>
+	url?: string
+	default?: boolean
+}
+
+export interface SmtpConfig {
+	enabled: boolean
+	preset_key: string
+	host: string
+	port: number
+	encryption: string
+	username: string
+	password: string
+	from_name: string
+	from_email: string
+	status: 'connected' | 'disconnected' | 'unconfigured'
+	last_sent_at?: string
+}
+
+export interface SmtpPageData {
+	presets: SmtpPreset[]
+	config: SmtpConfig
+}
+
+export interface SmtpTestResult {
+	success: boolean
+	message: string
+}
