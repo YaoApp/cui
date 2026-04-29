@@ -202,3 +202,23 @@ export interface SmtpTestResult {
 	success: boolean
 	message: string
 }
+
+// ─── MCP Servers ────────────────────────────────────────
+
+export interface McpServerConfig {
+	id: string
+	name: string
+	label: string
+	description?: string
+	transport: 'http' | 'sse'
+	url: string
+	authorization_token?: string
+	timeout?: string
+	tags?: string[]
+	enabled: boolean
+	status: 'connected' | 'disconnected' | 'unconfigured'
+}
+
+export interface McpPageData {
+	servers: McpServerConfig[]
+}
