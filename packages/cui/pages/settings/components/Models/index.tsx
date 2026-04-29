@@ -3,12 +3,17 @@ import { getLocale } from '@umijs/max'
 import { message, Modal, Spin } from 'antd'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
+import { Setting } from '@/openapi/setting'
 import type { ModelsPageData, RoleAssignment, ModelRole, ProviderConfig } from '../../types'
-import { mockApi } from '../../mockApi'
 import RoleSelect from './RoleSelect'
 import ProviderCard from './ProviderCard'
 import ProviderModal from './ProviderModal'
 import styles from './index.less'
+
+function getSettingAPI(): Setting | null {
+	if (!window.$app?.openapi) return null
+	return new Setting(window.$app.openapi)
+}
 
 const ROLE_META: {
 	key: ModelRole
@@ -48,16 +53,22 @@ const Models = () => {
 	const [editProvider, setEditProvider] = useState<ProviderConfig | null>(null)
 
 	useEffect(() => {
-		mockApi.getModelsConfig().then((res) => {
-			setData(res)
-			setRoles(res.roles)
+		const api = getSettingAPI()
+		if (!api) return
+		api.GetLLMConfig().then((resp) => {
+			if (resp.error || !resp.data) return
+			setData(resp.data as unknown as ModelsPageData)
+			setRoles((resp.data as any).roles || {})
 			setLoading(false)
 		})
 	}, [])
 
 	const reload = useCallback(async () => {
-		const res = await mockApi.getModelsConfig()
-		setData(res)
+		const api = getSettingAPI()
+		if (!api) return
+		const resp = await api.GetLLMConfig()
+		if (resp.error || !resp.data) return
+		setData(resp.data as unknown as ModelsPageData)
 	}, [])
 
 	const handleSaveRoles = async () => {
@@ -65,9 +76,15 @@ const Models = () => {
 			message.warning(is_cn ? '请选择默认对话模型' : 'Please select a default chat model')
 			return
 		}
+		const api = getSettingAPI()
+		if (!api) return
 		setSavingRoles(true)
 		try {
-			await mockApi.saveRoleAssignment(roles)
+			const resp = await api.SaveRoles(roles as any)
+			if (resp.error) {
+				message.error(resp.error?.error_description || (is_cn ? '保存失败' : 'Save failed'))
+				return
+			}
 			message.success(is_cn ? '默认模型已保存' : 'Default models saved')
 		} finally {
 			setSavingRoles(false)
@@ -110,7 +127,13 @@ const Models = () => {
 			cancelText: is_cn ? '取消' : 'Cancel',
 			okType: 'danger',
 			onOk: async () => {
-				await mockApi.removeProvider(key)
+				const api = getSettingAPI()
+				if (!api) return
+				const resp = await api.DeleteProvider(key)
+				if (resp.error) {
+					message.error(resp.error?.error_description || (is_cn ? '删除失败' : 'Delete failed'))
+					return
+				}
 				await reload()
 				message.success(is_cn ? '已删除' : 'Deleted')
 			}

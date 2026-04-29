@@ -380,6 +380,70 @@
 	color: var(--color_neo_text_tertiary);
 }
 
+.keyDisplay {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 0 14px;
+	height: 40px;
+	background: var(--color_neo_bg_field);
+	border: 1px solid var(--color_neo_border_field);
+	border-radius: 8px;
+}
+
+.keyText {
+	flex: 1;
+	font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+	font-size: 13px;
+	color: var(--color_neo_text_secondary);
+	letter-spacing: 0.3px;
+	user-select: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.keyEditBtn {
+	flex-shrink: 0;
+	background: none;
+	border: none;
+	padding: 4px 10px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_main);
+	cursor: pointer;
+	border-radius: 6px;
+	transition: background 0.15s ease;
+	&:hover { background: rgba(var(--color_main_rgb, 59, 130, 246), 0.08); }
+}
+
+.keyCancelBtn {
+	background: none;
+	border: none;
+	padding: 4px 0;
+	margin-top: 6px;
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	cursor: pointer;
+	&:hover { color: var(--color_neo_text_primary); }
+}
+
+.fieldHint {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary);
+	margin-top: 4px;
+	line-height: 1.5;
+	opacity: 0.75;
+
+	code {
+		font-size: 11px;
+		padding: 1px 4px;
+		border-radius: 3px;
+		background: var(--color_neo_bg_secondary);
+		font-family: 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
+	}
+}
+
 .cloudStatusBlock {
 	margin-bottom: 16px;
 }
@@ -567,6 +631,17 @@
 	font-size: 13px;
 	font-weight: 500;
 	color: var(--color_neo_text_primary);
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.customModelId {
+	font-size: 11px;
+	font-weight: 400;
+	color: var(--color_neo_text_secondary);
+	font-family: 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
+	opacity: 0.7;
 }
 
 .customModelCaps {
