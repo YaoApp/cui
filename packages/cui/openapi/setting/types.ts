@@ -119,3 +119,49 @@ export interface LLMProviderTestResult {
 	message: string
 	latency_ms?: number
 }
+
+// ─── Search & Scrape ────────────────────────────────────
+
+export interface SearchProviderField {
+	key: string
+	label: Record<string, string>
+	type: 'text' | 'password'
+	default?: string
+	placeholder?: string
+	hint?: Record<string, string>
+}
+
+export interface SearchProviderPreset {
+	key: string
+	name: string
+	description?: Record<string, string>
+	website?: string
+	tools: string[]
+	tool_labels: Record<string, string>[]
+	fields: SearchProviderField[]
+	is_cloud?: boolean
+}
+
+export interface SearchProviderConfig {
+	preset_key: string
+	enabled: boolean
+	field_values: Record<string, string>
+	status: 'connected' | 'disconnected' | 'unconfigured'
+}
+
+export interface SearchToolAssignment {
+	web_search?: string | null
+	web_scrape?: string | null
+}
+
+export interface SearchPageData {
+	presets: SearchProviderPreset[]
+	providers: SearchProviderConfig[]
+	tool_assignment: SearchToolAssignment
+}
+
+export interface SearchTestResult {
+	success: boolean
+	message: string
+	latency_ms?: number
+}
