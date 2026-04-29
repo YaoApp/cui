@@ -12,7 +12,10 @@ import type {
 	SearchPageData,
 	SearchProviderConfig,
 	SearchToolAssignment,
-	SearchTestResult
+	SearchTestResult,
+	SmtpPageData,
+	SmtpConfig,
+	SmtpTestResult
 } from './types'
 
 export class Setting {
@@ -89,5 +92,24 @@ export class Setting {
 
 	async SaveSearchToolAssignment(data: SearchToolAssignment): Promise<ApiResponse<SearchToolAssignment>> {
 		return this.api.Put<SearchToolAssignment>('/setting/search/tool-assignment', data)
+	}
+
+	// ─── SMTP ──────────────────────────────────────────────
+
+	async GetSmtpConfig(locale?: string): Promise<ApiResponse<SmtpPageData>> {
+		const params = locale ? `?locale=${encodeURIComponent(locale)}` : ''
+		return this.api.Get<SmtpPageData>(`/setting/smtp${params}`)
+	}
+
+	async SaveSmtpConfig(data: Partial<SmtpConfig>): Promise<ApiResponse<SmtpConfig>> {
+		return this.api.Put<SmtpConfig>('/setting/smtp', data)
+	}
+
+	async ToggleSmtp(data: { enabled: boolean }): Promise<ApiResponse<SmtpConfig>> {
+		return this.api.Put<SmtpConfig>('/setting/smtp/toggle', data)
+	}
+
+	async TestSmtp(data: { to_email: string }): Promise<ApiResponse<SmtpTestResult>> {
+		return this.api.Post<SmtpTestResult>('/setting/smtp/test', data)
 	}
 }

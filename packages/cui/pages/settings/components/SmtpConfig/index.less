@@ -210,12 +210,96 @@
 	}
 }
 
-// Actions — matches CloudService
+// View mode fields
+.viewField {
+	margin-bottom: 16px;
+
+	&:last-of-type {
+		margin-bottom: 20px;
+	}
+}
+
+.viewLabel {
+	display: block;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_neo_text_secondary);
+	margin-bottom: 4px;
+}
+
+.viewValue {
+	display: block;
+	font-size: 13px;
+	color: var(--color_neo_text_primary);
+	line-height: 1.5;
+	word-break: break-all;
+}
+
+.viewRow {
+	display: flex;
+	gap: 24px;
+	margin-bottom: 16px;
+
+	.viewField {
+		margin-bottom: 0;
+	}
+}
+
+// View/Edit mode buttons
+.keyEditBtn {
+	background: none;
+	border: none;
+	color: var(--color_main);
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	padding: 4px 12px;
+	border-radius: 4px;
+	transition: background 0.2s ease;
+
+	&:hover {
+		background: rgba(59, 130, 246, 0.08);
+	}
+}
+
+.keyCancelBtn {
+	background: none;
+	border: none;
+	color: var(--color_neo_text_secondary);
+	font-size: 13px;
+	cursor: pointer;
+	padding: 4px 0;
+
+	&:hover {
+		color: var(--color_neo_text_primary);
+	}
+}
+
+// Actions — view mode
 .actions {
 	display: flex;
-	justify-content: flex-end;
+	justify-content: flex-start;
 	gap: 10px;
 	padding-top: 4px;
+}
+
+// Actions — edit mode
+.editActions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-top: 4px;
+}
+
+.editActionsLeft {
+	display: flex;
+	align-items: center;
+}
+
+.editActionsRight {
+	display: flex;
+	align-items: center;
+	gap: 10px;
 }
 
 // Test section
