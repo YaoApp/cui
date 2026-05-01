@@ -15,23 +15,33 @@ function getSettingAPI(): Setting | null {
 }
 
 const ALL_CAPS: { key: ModelCapability; cn: string; en: string }[] = [
-	{ key: 'vision', cn: '看图', en: 'Vision' },
-	{ key: 'audio', cn: '语音', en: 'Audio' },
-	{ key: 'reasoning', cn: '思考', en: 'Reasoning' },
+	{ key: 'vision', cn: '视觉', en: 'Vision' },
 	{ key: 'tool_calls', cn: '工具调用', en: 'Tools' },
-	{ key: 'streaming', cn: '逐字输出', en: 'Streaming' },
+	{ key: 'reasoning', cn: '深度思考', en: 'Reasoning' },
+	{ key: 'streaming', cn: '流式输出', en: 'Streaming' },
 	{ key: 'json', cn: '结构化输出', en: 'JSON' },
-	{ key: 'embedding', cn: '嵌入', en: 'Embedding' }
+	{ key: 'embedding', cn: '嵌入', en: 'Embedding' },
+	{ key: 'audio', cn: '语音', en: 'Audio' }
 ]
 
 function capDesc(caps: ModelCapability[], is_cn: boolean): string {
-	return caps
-		.map((c) => {
-			const item = ALL_CAPS.find((a) => a.key === c)
-			return item ? (is_cn ? item.cn : item.en) : ''
-		})
-		.filter(Boolean)
+	const capSet = new Set(caps)
+	return ALL_CAPS
+		.filter((a) => capSet.has(a.key))
+		.map((a) => (is_cn ? a.cn : a.en))
 		.join(' · ')
+}
+
+function formatTokens(n: number): string {
+	if (n >= 1000000) return `${(n / 1000000).toFixed(n % 1000000 === 0 ? 0 : 1)}M`
+	return `${Math.round(n / 1000)}K`
+}
+
+function tokenDesc(m: ModelInfo): string {
+	const parts: string[] = []
+	if (m.max_input_tokens) parts.push(formatTokens(m.max_input_tokens))
+	if (m.max_output_tokens) parts.push(formatTokens(m.max_output_tokens))
+	return parts.length === 2 ? `${parts[0]} / ${parts[1]}` : parts.join('')
 }
 
 interface ProviderModalProps {
@@ -62,6 +72,8 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 	const [newModelName, setNewModelName] = useState('')
 	const [newModelLabel, setNewModelLabel] = useState('')
 	const [newModelCaps, setNewModelCaps] = useState<string[]>([])
+	const [newModelMaxInput, setNewModelMaxInput] = useState('')
+	const [newModelMaxOutput, setNewModelMaxOutput] = useState('')
 	const [showAddModel, setShowAddModel] = useState(false)
 	const [showPresetPicker, setShowPresetPicker] = useState(false)
 	const [cloudConnected, setCloudConnected] = useState(false)
@@ -93,11 +105,17 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 
 	const modelsChanged = useMemo(() => {
 		if (mode !== 'edit') return false
+		if (isCustomMode) {
+			const currentIds = [...models.map((m) => m.id)].sort()
+			const origSorted = [...origModelIds].sort()
+			if (currentIds.length !== origSorted.length) return true
+			return currentIds.some((id, i) => id !== origSorted[i])
+		}
 		const sorted = [...selectedModelIds].sort()
 		const origSorted = [...origModelIds].sort()
 		if (sorted.length !== origSorted.length) return true
 		return sorted.some((id, i) => id !== origSorted[i])
-	}, [mode, selectedModelIds, origModelIds])
+	}, [mode, isCustomMode, models, selectedModelIds, origModelIds])
 
 	const canSaveEdit = isKeyEditing ? Boolean(newApiKey.trim()) : modelsChanged
 	const canTestEdit = isKeyEditing && Boolean(newApiKey.trim())
@@ -181,10 +199,19 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 			return
 		}
 		const label = newModelLabel.trim() || trimmedId
-		const newModel: ModelInfo = { id: trimmedId, name: label, capabilities: newModelCaps as ModelCapability[], enabled: true }
+		const newModel: ModelInfo = {
+			id: trimmedId,
+			name: label,
+			capabilities: newModelCaps as ModelCapability[],
+			enabled: true,
+			...(newModelMaxInput ? { max_input_tokens: Number(newModelMaxInput) } : {}),
+			...(newModelMaxOutput ? { max_output_tokens: Number(newModelMaxOutput) } : {}),
+		}
 		setModels((prev) => [...prev, newModel])
 		setNewModelName('')
 		setNewModelLabel('')
+		setNewModelMaxInput('')
+		setNewModelMaxOutput('')
 		setNewModelCaps([])
 		setShowAddModel(false)
 	}
@@ -349,6 +376,14 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 		type: 'string', placeholder: is_cn ? '展示名称（如 GPT-4o）' : 'Display name (e.g. GPT-4o)'
 	}), [is_cn])
 
+	const newModelMaxInputSchema = useMemo((): PropertySchema => ({
+		type: 'string', placeholder: is_cn ? '最大输入 Tokens（如 128000）' : 'Max Input Tokens (e.g. 128000)'
+	}), [is_cn])
+
+	const newModelMaxOutputSchema = useMemo((): PropertySchema => ({
+		type: 'string', placeholder: is_cn ? '最大输出 Tokens（如 16384）' : 'Max Output Tokens (e.g. 16384)'
+	}), [is_cn])
+
 	// ─── Render: Preset Model List (shared by all preset modes) ───
 
 	const renderPresetModelList = () => (
@@ -361,7 +396,10 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 					return (
 						<div key={m.id} className={styles.presetModelRow}>
 							<div className={styles.presetModelInfo}>
-								<span className={styles.presetModelName}>{m.name}</span>
+								<span className={styles.presetModelName}>
+									{m.name}
+									{tokenDesc(m) && <span className={styles.tokenSpec}>{tokenDesc(m)}</span>}
+								</span>
 								<span className={styles.presetModelCaps}>{capDesc(m.capabilities, is_cn)}</span>
 							</div>
 							<button className={styles.presetModelRemove} onClick={() => setSelectedModelIds((prev) => prev.filter((x) => x !== id))}>
@@ -392,7 +430,10 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 												setShowPresetPicker(false)
 											}}
 										>
-											<span className={styles.presetPickerName}>{m.name}</span>
+											<span className={styles.presetPickerName}>
+												{m.name}
+												{tokenDesc(m) && <span className={styles.tokenSpec}>{tokenDesc(m)}</span>}
+											</span>
 											<span className={styles.presetPickerCaps}>{capDesc(m.capabilities, is_cn)}</span>
 										</div>
 									))}
@@ -482,7 +523,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 			open={open}
 			onCancel={onClose}
 			footer={null}
-			width={560}
+			width={680}
 			destroyOnClose
 			closable={false}
 			className={styles.providerModal}
@@ -539,10 +580,28 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 											: <>No trailing <code>/</code>: appends <code>/v1/</code>; with trailing <code>/</code>: used as-is</>}
 									</div>
 								</div>
-									<div className={styles.formField}>
-										<label className={styles.fieldLabel}>API Key</label>
+								<div className={styles.formField}>
+									<label className={styles.fieldLabel}>API Key</label>
+									{mode === 'edit' && hasSavedKey && !isKeyEditing ? (
+										<div className={styles.keyDisplay}>
+											<span className={styles.keyText}>{apiKey}</span>
+											<button type='button' className={styles.keyEditBtn} onClick={handleEditKey}>
+												{is_cn ? '修改' : 'Change'}
+											</button>
+										</div>
+									) : mode === 'edit' ? (
+										<>
+											<InputPassword schema={keySchema} value={newApiKey} onChange={(v) => setNewApiKey(String(v))} />
+											{hasSavedKey && editingKey && (
+												<button type='button' className={styles.keyCancelBtn} onClick={handleCancelEditKey}>
+													{is_cn ? '取消修改' : 'Cancel'}
+												</button>
+											)}
+										</>
+									) : (
 										<InputPassword schema={keySchema} value={apiKey} onChange={(v) => setApiKey(String(v))} />
-									</div>
+									)}
+								</div>
 									<div className={styles.formField}>
 										<label className={styles.fieldLabel}>{is_cn ? '模型' : 'Models'}</label>
 										<div className={styles.customModelList}>
@@ -551,6 +610,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 												<div className={styles.customModelInfo}>
 													<span className={styles.customModelName}>
 														{m.name}{m.name !== m.id && <span className={styles.customModelId}>{m.id}</span>}
+														{tokenDesc(m) && <span className={styles.tokenSpec}>{tokenDesc(m)}</span>}
 													</span>
 													<span className={styles.customModelCaps}>
 														{capDesc(m.capabilities, is_cn) || (is_cn ? '无特殊能力' : 'No special capabilities')}
@@ -569,13 +629,19 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 												<div className={styles.addModelRow}>
 													<Input schema={newModelLabelSchema} value={newModelLabel} onChange={(v) => setNewModelLabel(String(v))} />
 												</div>
-												<div className={styles.addModelRow}>
-													<label className={styles.capsLabel}>{is_cn ? '能力' : 'Capabilities'}</label>
+											<div className={styles.addModelRow}>
+												<label className={styles.capsLabel}>{is_cn ? '能力' : 'Capabilities'}</label>
+												<div className={styles.capsGrid}>
 													<CheckboxGroup schema={capsSchema} value={newModelCaps} onChange={(v) => setNewModelCaps(Array.isArray(v) ? v.map(String) : [])} />
+												</div>
+											</div>
+												<div className={styles.addModelTokenRow}>
+													<Input schema={newModelMaxInputSchema} value={newModelMaxInput} onChange={(v) => setNewModelMaxInput(String(v))} />
+													<Input schema={newModelMaxOutputSchema} value={newModelMaxOutput} onChange={(v) => setNewModelMaxOutput(String(v))} />
 												</div>
 												<div className={styles.addModelBtns}>
 													<Button size='small' type='primary' onClick={handleAddCustomModel}>{is_cn ? '确认' : 'Confirm'}</Button>
-													<Button size='small' type='default' onClick={() => { setShowAddModel(false); setNewModelName(''); setNewModelLabel(''); setNewModelCaps([]) }}>{is_cn ? '取消' : 'Cancel'}</Button>
+													<Button size='small' type='default' onClick={() => { setShowAddModel(false); setNewModelName(''); setNewModelLabel(''); setNewModelCaps([]); setNewModelMaxInput(''); setNewModelMaxOutput('') }}>{is_cn ? '取消' : 'Cancel'}</Button>
 												</div>
 											</div>
 											) : (

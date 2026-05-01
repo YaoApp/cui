@@ -6,6 +6,7 @@ import type { ProviderConfig, ModelRole, ModelCapability } from '../../types'
 
 const ROLE_FILTER: Record<ModelRole, ModelCapability | null> = {
 	default: null,
+	light: null,
 	vision: 'vision',
 	audio: 'audio',
 	embedding: 'embedding'

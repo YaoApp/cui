@@ -1,18 +1,30 @@
 import { useState } from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
-import type { ProviderConfig, ModelCapability } from '../../types'
+import type { ProviderConfig, ModelCapability, ModelInfo } from '../../types'
 import styles from './index.less'
 
-const PRIMARY_CAPS: ModelCapability[] = ['vision', 'audio', 'reasoning', 'tool_calls']
+const PRIMARY_CAPS: ModelCapability[] = ['vision', 'tool_calls', 'reasoning', 'audio']
 const CAP_LABELS: Record<string, { cn: string; en: string }> = {
-	vision: { cn: '看图', en: 'Vision' },
-	audio: { cn: '语音', en: 'Audio' },
-	reasoning: { cn: '思考', en: 'Reasoning' },
+	vision: { cn: '视觉', en: 'Vision' },
 	tool_calls: { cn: '工具调用', en: 'Tools' },
-	streaming: { cn: '逐字输出', en: 'Streaming' },
+	reasoning: { cn: '深度思考', en: 'Reasoning' },
+	streaming: { cn: '流式输出', en: 'Streaming' },
+	audio: { cn: '语音', en: 'Audio' },
 	json: { cn: '结构化输出', en: 'JSON' },
 	embedding: { cn: '嵌入', en: 'Embedding' }
+}
+
+function formatTokens(n: number): string {
+	if (n >= 1000000) return `${(n / 1000000).toFixed(n % 1000000 === 0 ? 0 : 1)}M`
+	return `${Math.round(n / 1000)}K`
+}
+
+function tokenDesc(m: ModelInfo): string {
+	const parts: string[] = []
+	if (m.max_input_tokens) parts.push(formatTokens(m.max_input_tokens))
+	if (m.max_output_tokens) parts.push(formatTokens(m.max_output_tokens))
+	return parts.length === 2 ? `${parts[0]} / ${parts[1]}` : parts.join('')
 }
 
 interface ProviderCardProps {
@@ -83,18 +95,24 @@ export default function ProviderCard({ provider, onEdit, onDelete }: ProviderCar
 			{/* Expanded: model list */}
 			{expanded && (
 				<div className={styles.modelListExpanded}>
-					{enabledModels.map((m) => (
-						<div key={m.id} className={styles.modelRow}>
-							<span className={styles.modelName}>{m.name}</span>
-							<span className={styles.modelCaps}>
-								{m.capabilities.filter((c) => PRIMARY_CAPS.includes(c)).map((c) => (
+					{enabledModels.map((m) => {
+						const tokens = tokenDesc(m)
+						return (
+							<div key={m.id} className={styles.modelRow}>
+								<span className={styles.modelName}>
+									{m.name}
+									{tokens && <span className={styles.tokenSpec}>{tokens}</span>}
+								</span>
+								<span className={styles.modelCaps}>
+								{PRIMARY_CAPS.filter((c) => m.capabilities.includes(c)).map((c) => (
 									<span key={c} className={`${styles.capTagSmall} ${styles.capPrimary}`}>
 										{is_cn ? CAP_LABELS[c]?.cn : CAP_LABELS[c]?.en}
 									</span>
 								))}
 							</span>
-						</div>
-					))}
+							</div>
+						)
+					})}
 				</div>
 			)}
 		</div>

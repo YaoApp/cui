@@ -23,10 +23,46 @@ const ROLE_META: {
 	tooltip_en: string
 	required: boolean
 }[] = [
-	{ key: 'default', cn: '默认对话', en: 'Default Chat', tooltip_cn: '日常聊天使用的模型', tooltip_en: 'Model for daily conversations', required: true },
-	{ key: 'vision', cn: '视觉模型', en: 'Vision', tooltip_cn: '能看懂图片和截图的模型', tooltip_en: 'Model that understands images', required: false },
-	{ key: 'audio', cn: '语音模型', en: 'Audio', tooltip_cn: '语音转文字使用的模型', tooltip_en: 'Model for speech-to-text', required: false },
-	{ key: 'embedding', cn: '嵌入模型', en: 'Embedding', tooltip_cn: '文档搜索内部使用，一般不用选', tooltip_en: 'Used internally for document search, usually not needed', required: false }
+	{
+		key: 'default',
+		cn: '默认模型',
+		en: 'Default',
+		tooltip_cn: '主力模型，用于日常对话、代码生成和复杂推理。建议选择能力最强的模型',
+		tooltip_en: 'Primary model for conversations, code generation and complex reasoning. Choose the most capable model available',
+		required: true
+	},
+	{
+		key: 'light',
+		cn: '轻量模型',
+		en: 'Light',
+		tooltip_cn: '用于标题生成、关键词提取、摘要等简单任务。建议选择快速便宜的模型。不选则使用默认模型',
+		tooltip_en: 'For titles, keywords, summaries and simple tasks. Choose a fast, affordable model. Uses Default if not set',
+		required: false
+	},
+	{
+		key: 'vision',
+		cn: '视觉模型',
+		en: 'Vision',
+		tooltip_cn: '图片理解与分析。不选则使用默认模型，若默认模型不支持视觉则相关功能将不可用',
+		tooltip_en: 'Image understanding and analysis. Uses Default if not set; vision features will fail if Default model lacks vision support',
+		required: false
+	},
+	{
+		key: 'audio',
+		cn: '语音模型',
+		en: 'Audio',
+		tooltip_cn: '语音转文字（STT）。不选则关闭语音功能',
+		tooltip_en: 'Speech-to-text (STT). Disabled if not set',
+		required: false
+	},
+	{
+		key: 'embedding',
+		cn: '嵌入模型',
+		en: 'Embedding',
+		tooltip_cn: '文档搜索使用的向量化模型。不选则关闭知识库搜索功能',
+		tooltip_en: 'Vectorization model for document search. Disabled if not set',
+		required: false
+	}
 ]
 
 function roleValueToStr(assignment?: { provider: string; model: string }): string | undefined {
@@ -151,10 +187,10 @@ const Models = () => {
 				<div className={styles.header}>
 					<div className={styles.headerContent}>
 						<h2>{is_cn ? '模型配置' : 'Model Configuration'}</h2>
-						<p>{is_cn ? '分配默认/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/vision/audio/embedding models, manage model providers'}</p>
-					</div>
+					<p>{is_cn ? '分配默认/轻量/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/light/vision/audio/embedding models, manage model providers'}</p>
 				</div>
-				<div className={styles.loadingState}>
+			</div>
+			<div className={styles.loadingState}>
 					<Spin size='small' />
 					<span>{is_cn ? '加载中...' : 'Loading...'}</span>
 				</div>
@@ -168,11 +204,11 @@ const Models = () => {
 			<div className={styles.header}>
 				<div className={styles.headerContent}>
 					<h2>{is_cn ? '模型配置' : 'Model Configuration'}</h2>
-					<p>{is_cn ? '分配默认/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/vision/audio/embedding models, manage model providers'}</p>
-				</div>
+				<p>{is_cn ? '分配默认/轻量/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/light/vision/audio/embedding models, manage model providers'}</p>
 			</div>
+		</div>
 
-			{/* Role Assignment */}
+		{/* Role Assignment */}
 			<div className={styles.section}>
 				<div className={styles.sectionHeader}>
 					<div className={styles.sectionTitle}>{is_cn ? '默认模型' : 'Default Models'}</div>
@@ -187,13 +223,16 @@ const Models = () => {
 									{r.required ? (is_cn ? '必填' : 'Required') : (is_cn ? '可选' : 'Optional')}
 								</span>
 							</div>
-							<div className={styles.roleSelect}>
-								<RoleSelect
-									role={r.key}
-									value={roleValueToStr(roles[r.key])}
-									onChange={(v) => handleRoleChange(r.key, v)}
-									providers={data.providers}
-								/>
+							<div className={styles.roleRight}>
+								<div className={styles.roleSelect}>
+									<RoleSelect
+										role={r.key}
+										value={roleValueToStr(roles[r.key])}
+										onChange={(v) => handleRoleChange(r.key, v)}
+										providers={data.providers}
+									/>
+								</div>
+								<div className={styles.roleDesc}>{is_cn ? r.tooltip_cn : r.tooltip_en}</div>
 							</div>
 						</div>
 					))}

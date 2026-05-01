@@ -72,6 +72,8 @@ export interface LLMModelInfo {
 	name: string
 	capabilities: string[]
 	enabled: boolean
+	max_input_tokens?: number
+	max_output_tokens?: number
 }
 
 export interface LLMProviderConfig {

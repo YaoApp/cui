@@ -332,6 +332,8 @@ export interface ModelInfo {
 	name: string
 	capabilities: ModelCapability[]
 	enabled: boolean
+	max_input_tokens?: number
+	max_output_tokens?: number
 }
 
 export type ProviderType = 'openai' | 'anthropic' | 'google' | 'ollama' | 'custom'
@@ -350,7 +352,7 @@ export interface ProviderConfig {
 	require_key: boolean
 }
 
-export type ModelRole = 'default' | 'vision' | 'audio' | 'embedding'
+export type ModelRole = 'default' | 'light' | 'vision' | 'audio' | 'embedding'
 
 export type RoleAssignment = {
 	[role in ModelRole]?: { provider: string; model: string }
