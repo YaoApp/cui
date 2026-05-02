@@ -12,7 +12,8 @@ const CAP_LABELS: Record<string, { cn: string; en: string }> = {
 	streaming: { cn: '流式输出', en: 'Streaming' },
 	audio: { cn: '语音', en: 'Audio' },
 	json: { cn: '结构化输出', en: 'JSON' },
-	embedding: { cn: '嵌入', en: 'Embedding' }
+	embedding: { cn: '嵌入', en: 'Embedding' },
+	image_generation: { cn: '绘图', en: 'Image' }
 }
 
 function formatTokens(n: number): string {
@@ -39,7 +40,7 @@ export default function ProviderCard({ provider, onEdit, onDelete }: ProviderCar
 
 	const enabledModels = provider.models.filter((m) => m.enabled)
 	const allCaps = new Set<ModelCapability>()
-	enabledModels.forEach((m) => m.capabilities.forEach((c) => allCaps.add(c)))
+	enabledModels.forEach((m) => (m.capabilities || []).forEach((c) => allCaps.add(c)))
 
 	const statusMap: Record<string, { text: string; cls: string } | null> = {
 		connected: { text: is_cn ? '已连接' : 'Connected', cls: styles.status_connected },
@@ -85,7 +86,7 @@ export default function ProviderCard({ provider, onEdit, onDelete }: ProviderCar
 						{is_cn ? CAP_LABELS[cap]?.cn : CAP_LABELS[cap]?.en}
 					</span>
 				))}
-				{['streaming', 'json', 'embedding'].filter((c) => allCaps.has(c as ModelCapability)).map((cap) => (
+				{['streaming', 'json', 'embedding', 'image_generation'].filter((c) => allCaps.has(c as ModelCapability)).map((cap) => (
 					<span key={cap} className={`${styles.capTag} ${styles.capSecondary}`}>
 						{is_cn ? CAP_LABELS[cap]?.cn : CAP_LABELS[cap]?.en}
 					</span>
@@ -104,7 +105,7 @@ export default function ProviderCard({ provider, onEdit, onDelete }: ProviderCar
 									{tokens && <span className={styles.tokenSpec}>{tokens}</span>}
 								</span>
 								<span className={styles.modelCaps}>
-								{PRIMARY_CAPS.filter((c) => m.capabilities.includes(c)).map((c) => (
+								{PRIMARY_CAPS.filter((c) => (m.capabilities || []).includes(c)).map((c) => (
 									<span key={c} className={`${styles.capTagSmall} ${styles.capPrimary}`}>
 										{is_cn ? CAP_LABELS[c]?.cn : CAP_LABELS[c]?.en}
 									</span>

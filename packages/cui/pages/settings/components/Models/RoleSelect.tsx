@@ -19,7 +19,7 @@ const CAP_SHORT: Record<string, { cn: string; en: string }> = {
 }
 
 function capDesc(caps: ModelCapability[], is_cn: boolean): string {
-	return caps
+	return (caps || [])
 		.filter((c) => CAP_SHORT[c])
 		.map((c) => (is_cn ? CAP_SHORT[c].cn : CAP_SHORT[c].en))
 		.join(' · ')
@@ -43,8 +43,13 @@ export default function RoleSelect({ role, value, onChange, providers }: RoleSel
 			if (!p.enabled) continue
 			const enabledModels = p.models.filter((m) => m.enabled)
 			const filtered = requiredCap
-				? enabledModels.filter((m) => m.capabilities.includes(requiredCap))
-				: enabledModels.filter((m) => !m.capabilities.includes('embedding'))
+				? enabledModels.filter((m) => m.capabilities?.includes(requiredCap))
+				: enabledModels.filter(
+					(m) =>
+						!m.capabilities?.includes('embedding') &&
+						!m.capabilities?.includes('audio') &&
+						!m.capabilities?.includes('image_generation')
+				)
 
 			if (filtered.length === 0) continue
 

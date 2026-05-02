@@ -21,11 +21,12 @@ const ALL_CAPS: { key: ModelCapability; cn: string; en: string }[] = [
 	{ key: 'streaming', cn: '流式输出', en: 'Streaming' },
 	{ key: 'json', cn: '结构化输出', en: 'JSON' },
 	{ key: 'embedding', cn: '嵌入', en: 'Embedding' },
-	{ key: 'audio', cn: '语音', en: 'Audio' }
+	{ key: 'audio', cn: '语音', en: 'Audio' },
+	{ key: 'image_generation', cn: '绘图', en: 'Image' }
 ]
 
 function capDesc(caps: ModelCapability[], is_cn: boolean): string {
-	const capSet = new Set(caps)
+	const capSet = new Set(caps || [])
 	return ALL_CAPS
 		.filter((a) => capSet.has(a.key))
 		.map((a) => (is_cn ? a.cn : a.en))
@@ -76,6 +77,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 	const [newModelMaxOutput, setNewModelMaxOutput] = useState('')
 	const [showAddModel, setShowAddModel] = useState(false)
 	const [showPresetPicker, setShowPresetPicker] = useState(false)
+	const [modelSearch, setModelSearch] = useState('')
 	const [cloudConnected, setCloudConnected] = useState(false)
 	const [editingKey, setEditingKey] = useState(false)
 	const [origModelIds, setOrigModelIds] = useState<string[]>([])
@@ -139,7 +141,20 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 			setType(editProvider.type)
 			setApiUrl(editProvider.api_url)
 			setApiKey(editProvider.api_key)
-			setModels(editProvider.models.map((m) => ({ ...m })))
+			const savedModels = editProvider.models.map((m) => ({ ...m }))
+			const pkey = editProvider.preset_key || ''
+			if (pkey) {
+				const preset = presets.find((p) => p.key === pkey)
+				if (preset?.default_models?.length) {
+					const savedIds = new Set(savedModels.map((m) => m.id))
+					for (const dm of preset.default_models) {
+						if (!savedIds.has(dm.id)) {
+							savedModels.push({ ...dm, enabled: false })
+						}
+					}
+				}
+			}
+			setModels(savedModels)
 			const enabledIds = editProvider.models.filter((m) => m.enabled).map((m) => m.id)
 			setSelectedModelIds(enabledIds)
 			setOrigModelIds(enabledIds)
@@ -232,9 +247,10 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 		const keyToTest = mode === 'edit' ? newApiKey : apiKey
 		setTesting(true)
 		try {
-			const testData: { api_url: string; api_key?: string; type?: string } = { api_url: apiUrl }
+			const testData: { api_url: string; api_key?: string; type?: string; require_key?: boolean } = { api_url: apiUrl }
 			if (keyToTest) testData.api_key = keyToTest
 			if (type) testData.type = type
+			testData.require_key = isKeyRequired
 			const resp = await api.TestLLMConnection(testData)
 			if (resp.data?.success) {
 				message.success(is_cn ? `连接成功（${resp.data.latency_ms}ms）` : `Connected (${resp.data.latency_ms}ms)`)
@@ -408,40 +424,66 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 						</div>
 					)
 				})}
-				{(() => {
-					const remaining = models.filter((m) => !selectedModelIds.includes(m.id))
-					if (remaining.length === 0) {
-						return <span className={styles.allModelsHint}>{is_cn ? '已添加全部可用模型' : 'All available models added'}</span>
-					}
-					return (
-						<div className={styles.presetPickerWrap}>
-							<button className={styles.addModelTrigger} onClick={() => setShowPresetPicker(!showPresetPicker)}>
-								<Icon name='material-add' size={14} />
-								{is_cn ? '添加模型' : 'Add Model'}
-							</button>
-							{showPresetPicker && (
-								<div className={styles.presetPickerDropdown}>
-									{remaining.map((m) => (
-										<div
-											key={m.id}
-											className={styles.presetPickerItem}
-											onClick={() => {
-												setSelectedModelIds((prev) => [...prev, m.id])
-												setShowPresetPicker(false)
-											}}
-										>
-											<span className={styles.presetPickerName}>
-												{m.name}
-												{tokenDesc(m) && <span className={styles.tokenSpec}>{tokenDesc(m)}</span>}
-											</span>
-											<span className={styles.presetPickerCaps}>{capDesc(m.capabilities, is_cn)}</span>
-										</div>
-									))}
+			{(() => {
+				const remaining = models.filter((m) => !selectedModelIds.includes(m.id))
+				if (remaining.length === 0 && !showPresetPicker) {
+					return <span className={styles.allModelsHint}>{is_cn ? '已添加全部可用模型' : 'All available models added'}</span>
+				}
+				const searchLower = modelSearch.toLowerCase()
+				const filtered = remaining.filter(
+					(m) => !modelSearch || m.name.toLowerCase().includes(searchLower) || m.id.toLowerCase().includes(searchLower)
+				)
+				return (
+					<div className={styles.presetPickerWrap}>
+						<button
+							className={styles.addModelTrigger}
+							onClick={() => {
+								setShowPresetPicker(!showPresetPicker)
+								if (showPresetPicker) setModelSearch('')
+							}}
+						>
+							<Icon name={showPresetPicker ? 'material-expand_less' : 'material-add'} size={14} />
+							{showPresetPicker ? (is_cn ? '收起' : 'Collapse') : (is_cn ? '添加模型' : 'Add Model')}
+						</button>
+						{showPresetPicker && (
+							<div className={styles.presetPickerPanel}>
+								<div className={styles.presetPickerSearch}>
+									<input
+										type='text'
+										placeholder={is_cn ? '搜索模型...' : 'Search models...'}
+										value={modelSearch}
+										onChange={(e) => setModelSearch(e.target.value)}
+										autoFocus
+									/>
 								</div>
-							)}
-						</div>
-					)
-				})()}
+								<div className={styles.presetPickerList}>
+									{filtered.length === 0 ? (
+										<div className={styles.presetPickerEmpty}>
+											{remaining.length === 0
+												? (is_cn ? '已添加全部可用模型' : 'All available models added')
+												: (is_cn ? '无匹配模型' : 'No matching models')}
+										</div>
+									) : (
+										filtered.map((m) => (
+											<div
+												key={m.id}
+												className={styles.presetPickerItem}
+												onClick={() => setSelectedModelIds((prev) => [...prev, m.id])}
+											>
+												<span className={styles.presetPickerName}>
+													{m.name}
+													{tokenDesc(m) && <span className={styles.tokenSpec}>{tokenDesc(m)}</span>}
+												</span>
+												<span className={styles.presetPickerCaps}>{capDesc(m.capabilities, is_cn)}</span>
+											</div>
+										))
+									)}
+								</div>
+							</div>
+						)}
+					</div>
+				)
+			})()}
 			</div>
 		</div>
 	)
