@@ -1,3 +1,4 @@
+import { getLocale } from '@umijs/max'
 import { OpenAPI } from '../openapi'
 import type { ApiResponse } from '../types'
 import type {
@@ -50,7 +51,8 @@ export class Setting {
 	// ─── LLM Providers ──────────────────────────────────
 
 	async GetLLMConfig(): Promise<ApiResponse<LLMPageData>> {
-		return this.api.Get<LLMPageData>('/setting/llm')
+		const locale = getLocale()
+		return this.api.Get<LLMPageData>(`/setting/llm?locale=${locale}`)
 	}
 
 	async TestLLMConnection(data: { api_url: string; api_key?: string; type?: string }): Promise<ApiResponse<LLMProviderTestResult>> {

@@ -69,11 +69,13 @@ export interface CloudServiceTestResult {
 
 export interface LLMModelInfo {
 	id: string
+	model?: string
 	name: string
 	capabilities: string[]
 	enabled: boolean
 	max_input_tokens?: number
 	max_output_tokens?: number
+	options?: Record<string, any>
 }
 
 export interface LLMProviderConfig {
@@ -95,6 +97,7 @@ export interface LLMProviderConfig {
 export interface LLMProviderPreset {
 	key: string
 	name: string
+	locale?: string
 	type: string
 	api_url: string
 	require_key: boolean

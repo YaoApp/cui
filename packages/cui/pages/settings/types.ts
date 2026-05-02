@@ -325,15 +325,17 @@ export interface CloudServiceTestResult {
 
 // ─── Models Page ─────────────────────────────────────────
 
-export type ModelCapability = 'vision' | 'audio' | 'reasoning' | 'tool_calls' | 'streaming' | 'json' | 'embedding'
+export type ModelCapability = 'vision' | 'audio' | 'reasoning' | 'tool_calls' | 'streaming' | 'json' | 'embedding' | 'image_generation'
 
 export interface ModelInfo {
 	id: string
+	model?: string
 	name: string
 	capabilities: ModelCapability[]
 	enabled: boolean
 	max_input_tokens?: number
 	max_output_tokens?: number
+	options?: Record<string, any>
 }
 
 export type ProviderType = 'openai' | 'anthropic' | 'google' | 'ollama' | 'custom'
@@ -361,6 +363,7 @@ export type RoleAssignment = {
 export interface ProviderPreset {
 	key: string
 	name: string
+	locale?: string
 	type: ProviderType
 	api_url: string
 	require_key: boolean
