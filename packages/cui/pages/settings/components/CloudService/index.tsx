@@ -24,6 +24,7 @@ const CloudService = () => {
 	const [loading, setLoading] = useState(true)
 	const [saving, setSaving] = useState(false)
 	const [testing, setTesting] = useState(false)
+	const [refreshing, setRefreshing] = useState(false)
 	const [data, setData] = useState<CloudServiceData | null>(null)
 	const [error, setError] = useState<string | null>(null)
 
@@ -165,6 +166,29 @@ const CloudService = () => {
 		setEditingKey(false)
 	}
 
+	const handleRefresh = async () => {
+		const api = getSettingAPI()
+		if (!api) return
+
+		setRefreshing(true)
+		try {
+			const resp = await api.RefreshCloudModels()
+			if (resp.error || !resp.data) {
+				message.error(resp.error?.error_description || (is_cn ? '刷新失败' : 'Refresh failed'))
+				return
+			}
+			message.success(
+				is_cn
+					? `已更新，共 ${resp.data.count} 个可用模型`
+					: `Updated, ${resp.data.count} models available`
+			)
+		} catch (err: any) {
+			message.error(err?.message || (is_cn ? '刷新失败' : 'Refresh failed'))
+		} finally {
+			setRefreshing(false)
+		}
+	}
+
 	const regionSchema = useMemo((): PropertySchema => {
 		if (!data?.regions) return { type: 'string', enum: [] }
 		return {
@@ -260,6 +284,18 @@ const CloudService = () => {
 			<div className={styles.section}>
 				<div className={styles.sectionHeader}>
 					<div className={styles.sectionTitle}>{is_cn ? '凭证配置' : 'Credentials'}</div>
+					{data.status === 'connected' && !isEditing && (
+						<button
+							type='button'
+							className={styles.refreshBtn}
+							onClick={handleRefresh}
+							disabled={refreshing}
+						>
+							{refreshing
+								? (is_cn ? '刷新中...' : 'Refreshing...')
+								: (is_cn ? '更新可用模型' : 'Refresh Models')}
+						</button>
+					)}
 				</div>
 
 				<div className={styles.card}>
