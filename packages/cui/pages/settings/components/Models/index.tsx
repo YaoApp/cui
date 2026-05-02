@@ -132,6 +132,7 @@ const Models = () => {
 				return
 			}
 			message.success(is_cn ? '默认模型已保存' : 'Default models saved')
+			window.$app?.Event?.emit('models/changed')
 		} finally {
 			setSavingRoles(false)
 		}
@@ -182,6 +183,7 @@ const Models = () => {
 				}
 				await reload()
 				message.success(is_cn ? '已删除' : 'Deleted')
+				window.$app?.Event?.emit('models/changed')
 			}
 		})
 	}
@@ -189,6 +191,7 @@ const Models = () => {
 	const handleModalDone = async () => {
 		setModalOpen(false)
 		await reload()
+		window.$app?.Event?.emit('models/changed')
 	}
 
 	if (loading || !data) {

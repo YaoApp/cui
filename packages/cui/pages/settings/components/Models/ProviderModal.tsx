@@ -197,7 +197,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 			setName(preset.name)
 			setType(preset.type)
 			setApiUrl(preset.api_url)
-			const presetModels = preset.default_models.map((m) => ({ ...m }))
+			const presetModels = (preset.default_models || []).map((m) => ({ ...m }))
 			setModels(presetModels)
 			setSelectedModelIds(presetModels.filter((m) => m.enabled).map((m) => m.id))
 		}
@@ -594,13 +594,13 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 
 					{hasContent && (
 						<>
-							{/* ─── Preset Mode ─── */}
-							{!isCustomMode && (
-								<>
-									{renderPresetFields()}
-									{renderPresetModelList()}
-								</>
-							)}
+						{/* ─── Preset Mode ─── */}
+						{!isCustomMode && (
+							<>
+								{renderPresetFields()}
+								{!(isCloud && !cloudConnected) && renderPresetModelList()}
+							</>
+						)}
 
 							{/* ─── Custom Mode ─── */}
 							{isCustomMode && (
@@ -701,7 +701,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 				</div>
 
 				{/* Actions — pinned to bottom, outside scrollable area */}
-			{hasContent && (
+			{hasContent && !(isCloud && !cloudConnected) && (
 				<div className={styles.modalActions}>
 					{!isCloud && (
 						<Button

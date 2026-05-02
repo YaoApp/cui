@@ -182,6 +182,7 @@ const CloudService = () => {
 					? `已更新，共 ${resp.data.count} 个可用模型`
 					: `Updated, ${resp.data.count} models available`
 			)
+			window.$app?.Event?.emit('models/changed')
 		} catch (err: any) {
 			message.error(err?.message || (is_cn ? '刷新失败' : 'Refresh failed'))
 		} finally {
