@@ -48,6 +48,10 @@ export class Setting {
 		return this.api.Post<CloudServiceTestResult>('/setting/cloud/test', data || {})
 	}
 
+	async RefreshCloudModels(): Promise<ApiResponse<{ success: boolean; count: number }>> {
+		return this.api.Post<{ success: boolean; count: number }>('/setting/cloud/refresh', {})
+	}
+
 	// ─── LLM Providers ──────────────────────────────────
 
 	async GetLLMConfig(): Promise<ApiResponse<LLMPageData>> {

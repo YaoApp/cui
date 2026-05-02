@@ -110,6 +110,11 @@ export default function ProviderCard({ provider, onEdit, onDelete }: ProviderCar
 										{is_cn ? CAP_LABELS[c]?.cn : CAP_LABELS[c]?.en}
 									</span>
 								))}
+								{['embedding', 'image_generation'].filter((c) => (m.capabilities || []).includes(c)).map((c) => (
+									<span key={c} className={`${styles.capTagSmall} ${styles.capSecondary}`}>
+										{is_cn ? CAP_LABELS[c]?.cn : CAP_LABELS[c]?.en}
+									</span>
+								))}
 							</span>
 							</div>
 						)
