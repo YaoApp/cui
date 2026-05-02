@@ -27,9 +27,19 @@ const ROLE_META: {
 		key: 'default',
 		cn: '默认模型',
 		en: 'Default',
-		tooltip_cn: '主力模型，用于日常对话、代码生成和复杂推理。建议选择能力最强的模型',
-		tooltip_en: 'Primary model for conversations, code generation and complex reasoning. Choose the most capable model available',
+		tooltip_cn: '日常对话、简单编码和常规任务的主力模型。建议选择性价比高、响应快的模型',
+		tooltip_en: 'Primary model for everyday conversations, simple coding and routine tasks. Choose a balanced, fast-responding model',
 		required: true
+	},
+	{
+		key: 'heavy',
+		cn: '复杂任务',
+		en: 'Heavy',
+		tooltip_cn:
+			'用于复杂任务（代码生成、架构规划、深度审查、多步推理）。Claude 沙箱中替代 Opus 层级用于深度推理，OpenCode 沙箱中作为默认主力模型。不选则使用默认模型',
+		tooltip_en:
+			'For complex tasks (code generation, architecture planning, deep review, multi-step reasoning). Replaces the Opus tier in Claude sandbox; used as the default primary model in OpenCode sandbox. Falls back to default if not set',
+		required: false
 	},
 	{
 		key: 'light',
@@ -187,10 +197,10 @@ const Models = () => {
 				<div className={styles.header}>
 					<div className={styles.headerContent}>
 						<h2>{is_cn ? '模型配置' : 'Model Configuration'}</h2>
-					<p>{is_cn ? '分配默认/轻量/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/light/vision/audio/embedding models, manage model providers'}</p>
-				</div>
+				<p>{is_cn ? '分配默认/推理/轻量/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/reasoning/light/vision/audio/embedding models, manage model providers'}</p>
 			</div>
-			<div className={styles.loadingState}>
+		</div>
+		<div className={styles.loadingState}>
 					<Spin size='small' />
 					<span>{is_cn ? '加载中...' : 'Loading...'}</span>
 				</div>
@@ -204,11 +214,11 @@ const Models = () => {
 			<div className={styles.header}>
 				<div className={styles.headerContent}>
 					<h2>{is_cn ? '模型配置' : 'Model Configuration'}</h2>
-				<p>{is_cn ? '分配默认/轻量/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/light/vision/audio/embedding models, manage model providers'}</p>
-			</div>
+			<p>{is_cn ? '分配默认/推理/轻量/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/reasoning/light/vision/audio/embedding models, manage model providers'}</p>
 		</div>
+	</div>
 
-		{/* Role Assignment */}
+	{/* Role Assignment */}
 			<div className={styles.section}>
 				<div className={styles.sectionHeader}>
 					<div className={styles.sectionTitle}>{is_cn ? '默认模型' : 'Default Models'}</div>
