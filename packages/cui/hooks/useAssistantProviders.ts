@@ -30,6 +30,15 @@ export function useAssistantProviders(options: UseAssistantProvidersOptions): Us
 	const { assistant } = options
 	const [providers, setProviders] = useState<LLMProvider[]>([])
 	const [loading, setLoading] = useState(false)
+	const [refreshKey, setRefreshKey] = useState(0)
+
+	useEffect(() => {
+		const handler = () => setRefreshKey((k) => k + 1)
+		window.$app?.Event?.on('models/changed', handler)
+		return () => {
+			window.$app?.Event?.off('models/changed', handler)
+		}
+	}, [])
 
 	useEffect(() => {
 		// Check if openapi is ready
@@ -111,7 +120,7 @@ export function useAssistantProviders(options: UseAssistantProvidersOptions): Us
 		return () => {
 			ignore = true
 		}
-	}, [assistant?.connector, assistant?.connector_options])
+	}, [assistant?.connector, assistant?.connector_options, refreshKey])
 
 	// Determine if selector should be shown
 	// Conditions: 1. optional !== false, 2. has providers to select from
