@@ -307,8 +307,28 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 				// Fetch session details and messages in parallel
 				const [sessionRes, messagesRes] = await Promise.all([
 					state.chatClient.GetSession(chatId).catch(() => null),
-					state.chatClient.GetMessages(chatId)
+					state.chatClient.GetMessages(chatId).catch((err: any) => {
+						const msg = err?.message || ''
+						if (msg.includes('404') || msg.includes('Not Found')) {
+							return { messages: [], assistants: {} }
+						}
+						throw err
+					})
 				])
+
+				// Session not found on server — treat as new chat
+				if (!sessionRes && messagesRes.messages.length === 0) {
+					setChatStates((prev) => ({ ...prev, [chatId]: [] }))
+					setTabs((prev) =>
+						prev.map((t) =>
+							t.chatId === chatId
+								? { ...t, title: is_cn ? '新对话' : 'New Chat', isNew: true, historyLoaded: true }
+								: t
+						)
+					)
+					setLoadingStates((prev) => ({ ...prev, [chatId]: false }))
+					return
+				}
 
 				// Get main assistant ID from session
 				const mainAssistantId = sessionRes?.assistant_id || session?.assistant_id

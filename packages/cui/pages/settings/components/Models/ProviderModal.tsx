@@ -253,8 +253,9 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 			testData.require_key = isKeyRequired
 			const resp = await api.TestLLMConnection(testData)
 			if (resp.data?.success) {
-				message.success(is_cn ? `连接成功（${resp.data.latency_ms}ms）` : `Connected (${resp.data.latency_ms}ms)`)
-			} else {
+			message.success(is_cn ? `连接成功（${resp.data.latency_ms}ms）` : `Connected (${resp.data.latency_ms}ms)`)
+			window.$app?.Event?.emit('setup/recheck')
+		} else {
 				message.error(resp.data?.message || (is_cn ? '连接失败' : 'Connection failed'))
 			}
 		} finally {
@@ -348,8 +349,9 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 					return
 				}
 			}
-			message.success(is_cn ? (mode === 'edit' ? '已保存' : '已添加') : (mode === 'edit' ? 'Saved' : 'Added'))
-			onDone()
+		message.success(is_cn ? (mode === 'edit' ? '已保存' : '已添加') : (mode === 'edit' ? 'Saved' : 'Added'))
+		window.$app?.Event?.emit('setup/recheck')
+		onDone()
 		} finally {
 			setSaving(false)
 		}

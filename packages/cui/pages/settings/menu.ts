@@ -13,13 +13,20 @@ export const settingMenuGroups: MenuGroup[] = [
 				icon: 'material-person',
 				path: '/settings/profile'
 			},
-			{
-				id: '2a',
-				key: 'team',
-				name: { 'zh-CN': '团队管理', 'en-US': 'Team' },
-				icon: 'material-group',
-				path: '/settings/team'
-			}
+		{
+			id: '2a',
+			key: 'team',
+			name: { 'zh-CN': '团队管理', 'en-US': 'Team' },
+			icon: 'material-group',
+			path: '/settings/team'
+		},
+		{
+			id: 'pref-1',
+			key: 'preferences',
+			name: { 'zh-CN': '偏好设置', 'en-US': 'Preferences' },
+			icon: 'material-tune',
+			path: '/settings/preferences'
+		}
 		]
 	},
 	{

@@ -57,11 +57,12 @@ export default function ImageList({ nodeId, nodeName, images, onReload, onOptimi
 	useEffect(() => {
 		if (hasDownloading && !pollRef.current) {
 			pollRef.current = setInterval(() => onReloadRef.current(), 3000)
-		} else if (!hasDownloading && pollRef.current) {
-			clearInterval(pollRef.current)
-			pollRef.current = null
-			onReloadRef.current()
-		}
+	} else if (!hasDownloading && pollRef.current) {
+		clearInterval(pollRef.current)
+		pollRef.current = null
+		onReloadRef.current()
+		window.$app?.Event?.emit('setup/recheck')
+	}
 		return () => {
 			if (pollRef.current) {
 				clearInterval(pollRef.current)
@@ -105,11 +106,12 @@ export default function ImageList({ nodeId, nodeName, images, onReload, onOptimi
 				try {
 					const resp = await api.RemoveSandboxImage(nodeId, imageId)
 					if (resp.error) {
-						message.error(resp.error.error_description || (is_cn ? '删除失败' : 'Failed to delete'))
-					} else {
-						message.success(is_cn ? '已删除' : 'Deleted')
-					}
-					await onReload()
+				message.error(resp.error.error_description || (is_cn ? '删除失败' : 'Failed to delete'))
+				} else {
+					message.success(is_cn ? '已删除' : 'Deleted')
+					window.$app?.Event?.emit('setup/recheck')
+				}
+				await onReload()
 				} finally {
 					setRemoving((prev) => ({ ...prev, [imageId]: false }))
 				}

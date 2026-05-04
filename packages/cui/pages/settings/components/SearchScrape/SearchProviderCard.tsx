@@ -131,8 +131,9 @@ export default function SearchProviderCard({ preset, config, onToggle, onSave, o
 			}
 			const resp = await api.TestSearchProvider(preset.key, { field_values: testValues })
 			if (resp.data?.success) {
-				message.success(is_cn ? `连接成功 (${resp.data.latency_ms}ms)` : `Connected (${resp.data.latency_ms}ms)`)
-				onReload()
+			message.success(is_cn ? `连接成功 (${resp.data.latency_ms}ms)` : `Connected (${resp.data.latency_ms}ms)`)
+			window.$app?.Event?.emit('setup/recheck')
+			onReload()
 			} else {
 				message.error(resp.data?.message || resp.error?.error_description || (is_cn ? '连接失败' : 'Connection failed'))
 			}

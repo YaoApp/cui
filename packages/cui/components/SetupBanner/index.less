@@ -1,0 +1,119 @@
+.setup_banner {
+	position: sticky;
+	top: 0;
+	width: 100%;
+	z-index: 100;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 24px;
+	background: var(--color_neo_bg_field);
+	border-bottom: 1px solid var(--color_neo_border_field);
+	transform: translateY(0);
+	opacity: 1;
+	transition: transform 0.3s ease, opacity 0.3s ease;
+	gap: 16px;
+
+	&.hidden {
+		transform: translateY(-100%);
+		opacity: 0;
+		pointer-events: none;
+	}
+}
+
+.banner_left {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+
+	&.has_overflow {
+		-webkit-mask-image: linear-gradient(to right, black calc(100% - 80px), transparent);
+		mask-image: linear-gradient(to right, black calc(100% - 80px), transparent);
+	}
+}
+
+.banner_title {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--color_neo_text_primary);
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.checkpoint_list {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.checkpoint_item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 12px;
+	white-space: nowrap;
+	cursor: pointer;
+	border-radius: var(--radius);
+	padding: 2px 8px;
+	transition: background 0.2s;
+
+	&:hover {
+		background: var(--color_neo_bg_hover);
+	}
+
+	&.pass {
+		color: var(--color_success);
+	}
+
+	&.fail_required {
+		color: var(--color_warning);
+	}
+
+	&.fail_optional {
+		color: var(--color_neo_text_tertiary);
+	}
+}
+
+.banner_actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.action_button {
+	font-size: 12px;
+	color: var(--color_main);
+	cursor: pointer;
+	white-space: nowrap;
+	padding: 4px 12px;
+	border-radius: var(--radius);
+	border: none;
+	background: none;
+	transition: background 0.2s;
+
+	&:hover {
+		background: var(--color_neo_bg_hover);
+		color: var(--color_main_hover);
+	}
+}
+
+.dismiss_button {
+	font-size: 12px;
+	color: var(--color_neo_text_tertiary);
+	cursor: pointer;
+	white-space: nowrap;
+	padding: 4px 8px;
+	border-radius: var(--radius);
+	border: none;
+	background: none;
+	transition: background 0.2s;
+
+	&:hover {
+		background: var(--color_neo_bg_hover);
+	}
+}
