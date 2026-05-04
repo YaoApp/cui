@@ -528,7 +528,7 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 					{showWebsiteLink && (
 						<Tooltip title={`Yao Agents · ${licenseLabel}`} placement='right'>
 							<a
-								href='https://yaoagents.com'
+								href='https://yaoagents.com?from=yaoagents-client'
 								target='_blank'
 								rel='noopener noreferrer'
 								className='menu-website-link'

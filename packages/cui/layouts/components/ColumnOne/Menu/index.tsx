@@ -96,7 +96,7 @@ const Index = (props: IPropsMenu) => {
 				 */}
 				{showWebsiteLink && (
 					<a
-						href='https://yaoagents.com'
+						href='https://yaoagents.com?from=yaoagents-client'
 						target='_blank'
 						rel='noopener noreferrer'
 						className='website_link flex align_center'
