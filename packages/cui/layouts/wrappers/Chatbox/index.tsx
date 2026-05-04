@@ -9,7 +9,8 @@ import { nanoid } from 'nanoid'
 import { IPropsNeo } from '@/layouts/types'
 import Menu from './Menu'
 import Container from './Container/index'
-import { Page } from '@/chatbox' // Import new Page component
+import { Page } from '@/chatbox'
+import SetupBanner from '@/components/SetupBanner'
 import { ChatProvider } from '@/chatbox/context'
 import './style.less'
 import { useNavigate, useLocation } from '@umijs/max'
@@ -960,6 +961,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 							height: '100%'
 						}}
 					>
+						<SetupBanner />
 						<Container
 							isMaximized={false}
 							openSidebar={openSidebar}

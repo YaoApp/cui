@@ -131,9 +131,10 @@ const SmtpConfig = () => {
 				setPassword('')
 				setEditing(false)
 			}
-			message.success(is_cn ? '保存成功' : 'Saved')
-		} finally {
-			setSaving(false)
+		message.success(is_cn ? '保存成功' : 'Saved')
+		window.$app?.Event?.emit('setup/recheck')
+	} finally {
+		setSaving(false)
 		}
 	}
 
@@ -149,8 +150,9 @@ const SmtpConfig = () => {
 		try {
 			const resp = await api.TestSmtp({ to_email: testEmail })
 			if (resp.data?.success) {
-				message.success(is_cn ? '测试邮件发送成功' : 'Test email sent successfully')
-				setLastTestResult({ success: true, time: new Date().toISOString() })
+			message.success(is_cn ? '测试邮件发送成功' : 'Test email sent successfully')
+			window.$app?.Event?.emit('setup/recheck')
+			setLastTestResult({ success: true, time: new Date().toISOString() })
 				await loadData()
 			} else {
 				const errMsg = resp.data?.message || resp.error?.error_description || (is_cn ? '发送失败' : 'Send failed')

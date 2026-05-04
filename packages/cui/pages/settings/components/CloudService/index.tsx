@@ -113,8 +113,9 @@ const CloudService = () => {
 			setData(resp.data)
 			setApiKey('')
 			setEditingKey(false)
-			message.success(is_cn ? '保存成功' : 'Saved successfully')
-		} catch (err: any) {
+		message.success(is_cn ? '保存成功' : 'Saved successfully')
+			window.$app?.Event?.emit('setup/recheck')
+	} catch (err: any) {
 			message.error(err?.message || (is_cn ? '保存失败' : 'Save failed'))
 		} finally {
 			setSaving(false)
@@ -139,12 +140,13 @@ const CloudService = () => {
 
 			const result = resp.data
 			if (result.success) {
-				message.success(
-					is_cn
-						? `连接成功（延迟 ${result.latency_ms}ms）`
-						: `Connected successfully (${result.latency_ms}ms latency)`
-				)
-			} else {
+			message.success(
+				is_cn
+					? `连接成功（延迟 ${result.latency_ms}ms）`
+					: `Connected successfully (${result.latency_ms}ms latency)`
+			)
+			window.$app?.Event?.emit('setup/recheck')
+		} else {
 				message.error(result.message)
 			}
 			const refreshed = await api.GetCloudService()
@@ -177,12 +179,13 @@ const CloudService = () => {
 				message.error(resp.error?.error_description || (is_cn ? '刷新失败' : 'Refresh failed'))
 				return
 			}
-			message.success(
-				is_cn
-					? `已更新，共 ${resp.data.count} 个可用模型`
-					: `Updated, ${resp.data.count} models available`
-			)
-			window.$app?.Event?.emit('models/changed')
+		message.success(
+			is_cn
+				? `已更新，共 ${resp.data.count} 个可用模型`
+				: `Updated, ${resp.data.count} models available`
+		)
+		window.$app?.Event?.emit('setup/recheck')
+		window.$app?.Event?.emit('models/changed')
 		} catch (err: any) {
 			message.error(err?.message || (is_cn ? '刷新失败' : 'Refresh failed'))
 		} finally {

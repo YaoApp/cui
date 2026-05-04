@@ -267,3 +267,35 @@ export interface SandboxPageData {
 	registry: SandboxRegistryConfig
 	images: Record<string, SandboxImage[]>
 }
+
+// ─── Setup Status ───────────────────────────────────
+
+export interface Checkpoint {
+	status: 'pass' | 'fail'
+	required: boolean
+	label: string
+	path: string
+	detail?: string
+}
+
+export interface SetupStatus {
+	completed: boolean
+	checkpoints: Record<string, Checkpoint>
+	onboarding_completed: boolean
+	banner_dismissed: boolean
+}
+
+export interface AssistantSetupStatus {
+	assistant_id: string
+	assistant_name: string
+	ready: boolean
+	checkpoints: Record<string, Checkpoint>
+}
+
+// ─── User Preference ────────────────────────────────
+
+export interface PreferenceData {
+	email_notification?: boolean
+	banner_dismissed?: boolean
+	onboarding_completed?: boolean
+}

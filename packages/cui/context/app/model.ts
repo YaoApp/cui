@@ -11,6 +11,8 @@ import { local } from '@yaoapp/storex'
 
 import type { AvatarFullConfig } from 'react-nice-avatar'
 import type { App, LocaleMessages } from '@/types'
+import type { SetupStatus } from '@/openapi/setting/types'
+import { Setting as SettingAPI } from '@/openapi/setting/api'
 import { OpenAPI, OpenAPIConfig, UserInfo, JobAPI, AppAPI } from '@/openapi'
 import { getLocale, history } from '@umijs/max'
 import { getPath } from '@/utils'
@@ -52,6 +54,11 @@ export default class GlobalModel {
 	sidebar_width: number = (local.sidebar_width || 400) as number
 
 	developer = {} as App.Developer
+
+	// Setup status (configuration completeness)
+	setup_status = (local.setup_status || null) as SetupStatus | null
+	setup_status_ts: number = (local.setup_status_ts || 0) as number
+	setup_status_locale: string = (local.setup_status_locale || '') as string
 
 	// Global Neo Context
 	neo: App.Neo = { assistant_id: undefined, chat_id: undefined, placeholder: undefined }
@@ -173,6 +180,11 @@ export default class GlobalModel {
 
 		// Developer
 		this.setDeveloper(res.developer || {})
+
+		// Fetch setup status asynchronously (non-blocking)
+		if (this.shouldRefreshSetupStatus()) {
+			this.fetchSetupStatus()
+		}
 
 		return Promise.resolve()
 	}
@@ -455,6 +467,33 @@ export default class GlobalModel {
 		}
 	}
 
+	async fetchSetupStatus() {
+		try {
+			if (!this.isLoggedIn()) return
+			if (!window.$app?.openapi) return
+
+			const api = new SettingAPI(window.$app.openapi)
+			const lang = getLocale()?.toLowerCase() || 'en-us'
+			const res = await api.GetSetupStatus(lang)
+			if (res?.data && !window.$app.openapi.IsError(res)) {
+				this.setup_status = res.data
+				this.setup_status_ts = Date.now()
+				this.setup_status_locale = lang
+				local.setup_status = res.data
+				local.setup_status_ts = this.setup_status_ts
+				local.setup_status_locale = lang
+			}
+		} catch {}
+	}
+
+	private shouldRefreshSetupStatus(): boolean {
+		if (this.setup_status === null) return true
+		if (Date.now() - this.setup_status_ts > 5 * 60 * 1000) return true
+		const currentLocale = getLocale()?.toLowerCase() || 'en-us'
+		if (this.setup_status_locale !== currentLocale) return true
+		return false
+	}
+
 	updateMenuStatus(itemkey_or_pathname: string) {
 		const { hit, current_nav, paths, keys } = getCurrentMenuIndexs(
 			itemkey_or_pathname,
@@ -511,6 +550,7 @@ export default class GlobalModel {
 		window.$app.Event.on('app/getUserMenu', this.getUserMenu)
 		window.$app.Event.on('app/updateMenuStatus', this.updateMenuStatus)
 		window.$app.Event.on('app/refreshJobsCount', this.refreshJobsCount)
+		window.$app.Event.on('setup/recheck', this.fetchSetupStatus)
 
 		// 启动Jobs数量定时刷新
 		this.startJobsCountTimer()
@@ -521,6 +561,7 @@ export default class GlobalModel {
 		window.$app.Event.off('app/getUserMenu', this.getUserMenu)
 		window.$app.Event.off('app/updateMenuStatus', this.updateMenuStatus)
 		window.$app.Event.off('app/refreshJobsCount', this.refreshJobsCount)
+		window.$app.Event.off('setup/recheck', this.fetchSetupStatus)
 
 		// 停止Jobs数量定时刷新
 		this.stopJobsCountTimer()

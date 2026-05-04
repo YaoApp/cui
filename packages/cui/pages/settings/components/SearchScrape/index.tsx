@@ -78,10 +78,11 @@ const SearchScrape = () => {
 			if (resp.error) {
 				message.error(resp.error?.error_description || (is_cn ? '保存失败' : 'Save failed'))
 			} else {
-				message.success(is_cn ? '默认工具已保存' : 'Default tools saved')
-			}
-		} finally {
-			setSavingAssignment(false)
+			message.success(is_cn ? '默认工具已保存' : 'Default tools saved')
+			window.$app?.Event?.emit('setup/recheck')
+		}
+	} finally {
+		setSavingAssignment(false)
 		}
 	}
 

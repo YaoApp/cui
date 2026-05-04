@@ -21,7 +21,10 @@ import type {
 	McpServerConfig,
 	SandboxPageData,
 	SandboxRegistryConfig,
-	SandboxImage
+	SandboxImage,
+	SetupStatus,
+	AssistantSetupStatus,
+	PreferenceData
 } from './types'
 
 export class Setting {
@@ -172,5 +175,26 @@ export class Setting {
 
 	async CheckSandboxDocker(nodeId: string): Promise<ApiResponse<{ docker_version?: string; message?: string }>> {
 		return this.api.Post<{ docker_version?: string; message?: string }>(`/setting/sandbox/nodes/${encodeURIComponent(nodeId)}/check-docker`, {})
+	}
+
+	// ─── Setup Status ──────────────────────────────────
+
+	async GetSetupStatus(locale?: string): Promise<ApiResponse<SetupStatus>> {
+		const params = locale ? `?locale=${encodeURIComponent(locale)}` : ''
+		return this.api.Get<SetupStatus>(`/setting/setup-status${params}`)
+	}
+
+	async GetAssistantSetupStatus(id: string): Promise<ApiResponse<AssistantSetupStatus>> {
+		return this.api.Get<AssistantSetupStatus>(`/setting/setup-status/assistant/${encodeURIComponent(id)}`)
+	}
+
+	// ─── User Preference ───────────────────────────────
+
+	async GetPreference(): Promise<ApiResponse<PreferenceData>> {
+		return this.api.Get<PreferenceData>('/setting/preference')
+	}
+
+	async UpdatePreference(data: Partial<PreferenceData>): Promise<ApiResponse<PreferenceData>> {
+		return this.api.Put<PreferenceData>('/setting/preference', data)
 	}
 }

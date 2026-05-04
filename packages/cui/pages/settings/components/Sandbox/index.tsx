@@ -89,9 +89,6 @@ const Sandbox = () => {
 		return (
 			<div className={styles.container}>
 				<div className={styles.header}>
-					<div className={styles.icon}>
-					<Icon name='material-desktop_mac' size={20} />
-				</div>
 				<div>
 					<h2>{is_cn ? '沙箱配置' : 'Sandbox'}</h2>
 					<p>{is_cn ? '管理计算节点、Docker 环境和沙箱镜像' : 'Manage compute nodes, Docker environment and sandbox images'}</p>
@@ -110,9 +107,6 @@ const Sandbox = () => {
 			{/* Header */}
 			<div className={styles.header}>
 				<div className={styles.headerLeft}>
-					<div className={styles.icon}>
-						<Icon name='material-desktop_mac' size={20} />
-					</div>
 					<div>
 						<h2>{is_cn ? '沙箱配置' : 'Sandbox'}</h2>
 						<p>{is_cn ? '管理计算节点、Docker 环境和沙箱镜像' : 'Manage compute nodes, Docker environment and sandbox images'}</p>

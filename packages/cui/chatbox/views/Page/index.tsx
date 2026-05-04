@@ -5,6 +5,8 @@ import { useChatContext } from '../../context'
 import Chatbox from '../../components/Chatbox'
 import Header from '../../components/Header'
 import History from '../../components/History'
+import SetupBanner from '@/components/SetupBanner'
+import AssistantSetupBanner from '../../components/AssistantSetupBanner'
 import { exportChatAsMarkdown } from '../../utils/exportMarkdown'
 import { useGlobal } from '@/context/app'
 import type { App } from '@/types'
@@ -32,6 +34,7 @@ const Page = (props: IPageProps) => {
 	// History sidebar state
 	const [historyOpen, setHistoryOpen] = useState(false)
 	const [overlayMode, setOverlayMode] = useState(false)
+	const [assistantReady, setAssistantReady] = useState(true)
 
 	// Minimum width for push-pull mode (History width 280 + min chat width 400)
 	const MIN_CONTAINER_WIDTH = 680
@@ -189,8 +192,15 @@ const Page = (props: IPageProps) => {
 					/>
 				)}
 
+				{/* Setup Banner - 配置完整性提示，位于 tabs 下方 */}
+				<SetupBanner />
+				<AssistantSetupBanner
+					assistantId={activeTab?.assistantId}
+					onReadyChange={setAssistantReady}
+				/>
+
 				{/* Chatbox - 独立的聊天实例，始终显示 */}
-				{showChatbox && <Chatbox />}
+				{showChatbox && <Chatbox disabled={!assistantReady} />}
 			</div>
 		</div>
 	)

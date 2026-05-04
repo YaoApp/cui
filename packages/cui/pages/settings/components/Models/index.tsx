@@ -131,8 +131,9 @@ const Models = () => {
 				message.error(resp.error?.error_description || (is_cn ? '保存失败' : 'Save failed'))
 				return
 			}
-			message.success(is_cn ? '默认模型已保存' : 'Default models saved')
-			window.$app?.Event?.emit('models/changed')
+		message.success(is_cn ? '默认模型已保存' : 'Default models saved')
+		window.$app?.Event?.emit('setup/recheck')
+		window.$app?.Event?.emit('models/changed')
 		} finally {
 			setSavingRoles(false)
 		}
@@ -181,9 +182,10 @@ const Models = () => {
 					message.error(resp.error?.error_description || (is_cn ? '删除失败' : 'Delete failed'))
 					return
 				}
-				await reload()
-				message.success(is_cn ? '已删除' : 'Deleted')
-				window.$app?.Event?.emit('models/changed')
+			await reload()
+			message.success(is_cn ? '已删除' : 'Deleted')
+			window.$app?.Event?.emit('setup/recheck')
+			window.$app?.Event?.emit('models/changed')
 			}
 		})
 	}

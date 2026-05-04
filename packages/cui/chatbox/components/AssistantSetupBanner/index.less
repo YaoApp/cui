@@ -1,0 +1,77 @@
+.assistant_banner {
+	width: 100%;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 24px;
+	background: var(--color_neo_bg_field);
+	border-bottom: 1px solid var(--color_neo_border_field);
+	gap: 12px;
+}
+
+.banner_left {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+
+	&.has_overflow {
+		-webkit-mask-image: linear-gradient(to right, black calc(100% - 60px), transparent);
+		mask-image: linear-gradient(to right, black calc(100% - 60px), transparent);
+	}
+}
+
+.banner_name {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_warning);
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.checkpoint_list {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.checkpoint_item {
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	font-size: 12px;
+	white-space: nowrap;
+	cursor: pointer;
+	border-radius: var(--radius);
+	padding: 2px 6px;
+	color: var(--color_warning);
+	transition: background 0.2s;
+
+	&:hover {
+		background: var(--color_neo_bg_hover);
+	}
+}
+
+.action_button {
+	font-size: 12px;
+	color: var(--color_main);
+	cursor: pointer;
+	white-space: nowrap;
+	padding: 4px 10px;
+	border-radius: var(--radius);
+	border: none;
+	background: none;
+	flex-shrink: 0;
+	transition: background 0.2s;
+
+	&:hover {
+		background: var(--color_neo_bg_hover);
+		color: var(--color_main_hover);
+	}
+}

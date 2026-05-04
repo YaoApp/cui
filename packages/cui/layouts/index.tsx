@@ -16,6 +16,7 @@ import AuthWrapper from './wrappers/Auth'
 import AdminWrapper from './wrappers/Admin'
 import ChatWrapper from './wrappers/Chat'
 import ChatboxWrapper from './wrappers/Chatbox'
+import SetupBanner from '@/components/SetupBanner'
 
 import type { IPropsHelmet, IPropsLoginWrapper } from './types'
 
@@ -167,9 +168,12 @@ const Index = () => {
 		}
 
 		return (
-			<AdminWrapper>
-				<Outlet />
-			</AdminWrapper>
+			<>
+				<SetupBanner />
+				<AdminWrapper>
+					<Outlet />
+				</AdminWrapper>
+			</>
 		)
 	}
 

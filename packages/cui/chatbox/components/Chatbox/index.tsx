@@ -9,6 +9,8 @@ export interface IChatboxProps {
 	className?: string
 	/** 内联样式 */
 	style?: React.CSSProperties
+	/** 禁止发送（助手配置不就绪时） */
+	disabled?: boolean
 }
 
 /**
@@ -23,7 +25,7 @@ export interface IChatboxProps {
  * 当 chatId 变化时，InputArea 会自动重置（清空输入）
  */
 const Chatbox: React.FC<IChatboxProps> = (props) => {
-	const { className, style } = props
+	const { className, style, disabled } = props
 
 	// 直接从 Context 获取所需的状态和方法
 	const chatContext = useChatContext()
@@ -71,6 +73,7 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 				onSend={sendMessage}
 				loading={streaming}
 				streaming={streaming}
+				disabled={disabled}
 				tokenUsage={tokenUsage}
 				onAbort={abort}
 				chatId={activeTabId || ''}

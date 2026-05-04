@@ -35,9 +35,10 @@ export default function RegistryPanel({ registry, onSaved }: RegistryPanelProps)
 		try {
 			const resp = await api.SaveSandboxRegistry(form)
 			if (resp.data) {
-				onSaved(resp.data)
-				message.success(is_cn ? '已保存' : 'Saved')
-			} else if (resp.error) {
+			onSaved(resp.data)
+			message.success(is_cn ? '已保存' : 'Saved')
+			window.$app?.Event?.emit('setup/recheck')
+		} else if (resp.error) {
 				message.error(resp.error)
 			}
 		} finally {
