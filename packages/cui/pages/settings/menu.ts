@@ -68,13 +68,6 @@ export const settingMenuGroups: MenuGroup[] = [
 				name: { 'zh-CN': '邮箱配置', 'en-US': 'Email' },
 				icon: 'material-mail',
 				path: '/settings/smtp'
-			},
-			{
-				id: 'sys-7',
-				key: 'mcp',
-				name: { 'zh-CN': 'MCP 服务', 'en-US': 'MCP Services' },
-				icon: 'material-hub',
-				path: '/settings/mcp'
 			}
 		]
 	},
@@ -89,8 +82,8 @@ export const settingMenuGroups: MenuGroup[] = [
 				name: { 'zh-CN': '文档', 'en-US': 'Documentation' },
 				icon: 'material-description',
 				path: {
-					'zh-CN': 'https://yaoagents.com/docs/zh-cn/getting-started/what-is-yao-agents',
-					'en-US': 'https://yaoagents.com/docs/en-us/getting-started/what-is-yao-agents'
+					'zh-CN': 'https://yaoagents.com/docs/zh-cn/getting-started/what-is-yao-agents?from=yao-setting',
+					'en-US': 'https://yaoagents.com/docs/en-us/getting-started/what-is-yao-agents?from=yao-setting'
 				}
 			},
 			{
@@ -112,7 +105,7 @@ export const settingMenuGroups: MenuGroup[] = [
 				key: 'feedback',
 				name: { 'zh-CN': '意见反馈', 'en-US': 'Feedback' },
 				icon: 'material-feedback',
-				path: '/settings/feedback'
+				path: 'https://yaoagents.com/feedback?from=yao-setting'
 			}
 		]
 	}
