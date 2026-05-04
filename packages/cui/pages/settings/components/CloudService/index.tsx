@@ -255,6 +255,11 @@ const CloudService = () => {
 
 	return (
 		<div className={styles.cloudService}>
+			{/*
+			 * LICENSE NOTICE: This cloud service header and branding is required by the Yao open source license.
+			 * Removing or hiding this section requires a commercial license.
+			 * See /LICENSE for details.
+			 */}
 			{/* Header */}
 			<div className={styles.header}>
 				<div className={styles.headerContent}>
@@ -264,6 +269,11 @@ const CloudService = () => {
 				<span className={`${styles.statusBadge} ${status.cls}`}>{status.text}</span>
 			</div>
 
+			{/*
+			 * LICENSE NOTICE: This intro card and registration link is required by the Yao open source license.
+			 * Removing or hiding this section requires a commercial license.
+			 * See /LICENSE for details.
+			 */}
 			{/* Intro Card */}
 			<div className={styles.introCard}>
 				<div className={styles.introIcon}>

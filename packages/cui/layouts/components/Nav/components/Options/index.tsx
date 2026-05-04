@@ -60,7 +60,7 @@ const Index = (props: IPropsOptions) => {
 			{showWebsiteLink && (
 				<Tooltip title={`Yao Agents · ${licenseLabel}`} placement='right'>
 					<a
-						href='https://yaoagents.com'
+						href='https://yaoagents.com?from=yaoagents-client'
 						target='_blank'
 						rel='noopener noreferrer'
 						className='website_link flex justify_center align_center'

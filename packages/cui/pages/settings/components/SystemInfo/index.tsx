@@ -161,7 +161,12 @@ const SystemInfo = () => {
 					</div>
 				</div>
 
-				{data.promotions?.map((promo) => (
+				{/*
+				 * LICENSE NOTICE: This promotion/upgrade section is required by the Yao open source license.
+				 * Removing or hiding this section requires a commercial license.
+				 * See /LICENSE for details.
+				 */}
+			{data.promotions?.map((promo) => (
 					<div key={promo.id} className={styles.ctaBanner}>
 						<div className={styles.ctaContent}>
 							<div className={styles.ctaTitle}>{promo.title}</div>

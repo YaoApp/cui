@@ -1,23 +1,23 @@
 # Open Source License
 
-CUI is licensed under a modified version of the Apache License 2.0, with the following additional conditions:
+Yao App Engine is licensed under a modified version of the Apache License 2.0, with the following additional conditions:
 
 1. Commercial Usage Terms:
-   CUI may be utilized commercially, A commercial license from the producer is required if:
+   Yao App Engine may be utilized commercially, A commercial license from the producer is required if:
 
-      a. Trademark and Branding Requirements
+   a. Trademark and Branding Requirements
 
-      - The CUI console/application logo and copyright information must not be removed or modified
-      - Logo and copyright information can only be changed with an authorization certificate issued through Yao Developer Certificate
+   - The Yao App Engine console/application logo and copyright information must not be removed or modified
+   - Logo and copyright information can only be changed with an authorization certificate issued through Yao Developer Certificate
 
-      b. Authorization Verification Requirements
+   b. Authorization Verification Requirements
 
-      - The Yao certificate verification logic, processes, and related pages (marked in code comments) must be preserved
-      - The complete Yao certificate verification system must be maintained regardless of usage purpose
+   - The Yao certificate verification logic, processes, and related pages (marked in code comments) must be preserved
+   - The complete Yao certificate verification system must be maintained regardless of usage purpose
 
 2. Contributor Agreement:
-      - The producer reserves the right to modify the open-source agreement terms
-      - Contributed code may be used for commercial purposes, including cloud business operations
+   - The producer reserves the right to modify the open-source agreement terms
+   - Contributed code may be used for commercial purposes, including cloud business operations
 
 All other rights and restrictions follow the Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
 
