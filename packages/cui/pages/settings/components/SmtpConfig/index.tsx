@@ -58,7 +58,7 @@ const SmtpConfig = () => {
 				setPassword('')
 				setFromName(c.from_name)
 				setFromEmail(c.from_email)
-				setEditing(!c.username && !c.host)
+				setEditing(c.status === 'unconfigured' || (!c.username && !c.host))
 				if (c.last_sent_at) {
 					setLastTestResult({ success: true, time: c.last_sent_at })
 				}
