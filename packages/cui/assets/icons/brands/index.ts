@@ -6,6 +6,7 @@ import discord from './discord.svg'
 import windows from './windows.svg'
 import darwin from './darwin.svg'
 import linux from './linux.svg'
+import yaoagents from './yaoagents.svg'
 
 export const brandIcons: Record<string, string> = {
 	weixin,
@@ -15,8 +16,9 @@ export const brandIcons: Record<string, string> = {
 	discord,
 	windows,
 	darwin,
-	linux
+	linux,
+	yaoagents
 }
 
-export { weixin, feishu, dingtalk, telegram, discord, windows, darwin, linux }
+export { weixin, feishu, dingtalk, telegram, discord, windows, darwin, linux, yaoagents }
 export default brandIcons
