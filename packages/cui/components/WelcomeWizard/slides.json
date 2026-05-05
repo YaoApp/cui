@@ -2,35 +2,39 @@
   {
     "title": { "zh-CN": "欢迎使用 Yao Agents", "en-US": "Welcome to Yao Agents" },
     "description": {
-      "zh-CN": "AI Agent 创建和管理平台，通过自然语言对话构建智能助手。\n选择您偏好的语言和主题，开始探索。",
-      "en-US": "A platform for creating and managing AI Agents through natural language.\nSelect your preferred language and theme to get started."
+      "zh-CN": "你的 AI 团队，在你的设备上，由你掌控。\n选择你偏好的语言和主题，开始探索。",
+      "en-US": "Your AI team. On your devices. Under your control.\nSelect your preferred language and theme to get started."
     },
     "image": "welcome",
+    "remoteImage": null,
     "hasPreferences": true
   },
   {
-    "title": { "zh-CN": "对话即创造", "en-US": "Chat to Create" },
+    "title": { "zh-CN": "30+ AI 专家，各司其职", "en-US": "30+ AI Experts, Each a Specialist" },
     "description": {
-      "zh-CN": "通过自然语言对话，构建和管理 AI 助手。每个助手拥有独立的知识、工具和沙箱环境，帮助您完成各种任务。",
-      "en-US": "Build and manage AI assistants through natural language. Each assistant has its own knowledge, tools, and sandbox environment to help you accomplish various tasks."
+      "zh-CN": "编程、写作、数据分析、项目管理……选对专家，事半功倍。\n不确定找谁？问 Yao Agents，它帮你调度。",
+      "en-US": "Coding, writing, data analysis, project management — pick the right expert, get better results.\nNot sure who to ask? Yao Agents routes you to the right one."
     },
-    "image": "chat"
+    "image": "experts",
+    "remoteImage": "experts/01-experts-grid-en-$__THEME.png"
   },
   {
-    "title": { "zh-CN": "AI 专家市场", "en-US": "AI Expert Marketplace" },
+    "title": { "zh-CN": "设定目标，自动执行", "en-US": "Set the Goal, Let It Run" },
     "description": {
-      "zh-CN": "浏览丰富的预构建 AI 专家，涵盖编程、设计、写作、数据分析等领域。一键添加到您的工作区，立即开始对话。",
-      "en-US": "Browse a rich collection of pre-built AI experts across coding, design, writing, data analysis, and more. Add them to your workspace with one click."
+      "zh-CN": "创建 Robot，设置触发条件。晨间简报、邮件处理、数据报告——你睡觉，它干活。",
+      "en-US": "Create a Robot, set the trigger. Morning briefings, inbox processing, data reports — done while you sleep."
     },
-    "image": "experts"
+    "image": "chat",
+    "remoteImage": "mission/01-mission-list-en-$__THEME.png"
   },
   {
-    "title": { "zh-CN": "开始吧", "en-US": "Let's Get Started" },
+    "title": { "zh-CN": "一切就绪，开始吧", "en-US": "Ready When You Are" },
     "description": {
-      "zh-CN": "完成几项基础配置，即可充分发挥 Yao Agents 的能力。您也可以跳过配置，直接开始体验。",
-      "en-US": "Complete a few basic configurations to unlock the full power of Yao Agents. You can also skip setup and start exploring right away."
+      "zh-CN": "完成几项基础配置，释放全部能力。\n也可以直接开聊，边用边配。",
+      "en-US": "Complete a few quick settings to unlock full power.\nOr just start chatting — set up as you go."
     },
     "image": "start",
+    "remoteImage": "chat/01-chat-empty-en-$__THEME.png",
     "isLast": true
   }
 ]

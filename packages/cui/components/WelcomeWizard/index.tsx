@@ -5,15 +5,16 @@ import { local } from '@yaoapp/storex'
 import { Setting as SettingAPI } from '@/openapi/setting/api'
 import RadioGroupInput from '@/components/ui/inputs/RadioGroup'
 import type { PropertySchema } from '@/components/ui/inputs/types'
+import { yaoagents as yaoagentsLogo } from '@/assets/icons/brands'
 
-import welcomeSvg from './assets/welcome.svg'
 import chatSvg from './assets/chat.svg'
 import expertsSvg from './assets/experts.svg'
 import startSvg from './assets/start.svg'
 import slidesData from './slides.json'
 import styles from './index.less'
 
-const images: Record<string, string> = { welcome: welcomeSvg, chat: chatSvg, experts: expertsSvg, start: startSvg }
+const CDN_BASE = 'https://assets.yaoagents.com/en/'
+const fallbackImages: Record<string, string> = { welcome: yaoagentsLogo, chat: chatSvg, experts: expertsSvg, start: startSvg }
 
 interface WelcomeWizardProps {
 	visible: boolean
@@ -26,13 +27,16 @@ const WelcomeWizard = ({ visible, onClose, isReopen }: WelcomeWizardProps) => {
 	const [currentStep, setCurrentStep] = useState(0)
 	const [selectedLocale, setSelectedLocale] = useState(() => getLocale() || 'en-US')
 	const [mounted, setMounted] = useState(false)
+	const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({})
 
 	const is_cn = selectedLocale === 'zh-CN'
+	const theme = global.theme || 'light'
 
 	useEffect(() => {
 		if (visible) {
 			setCurrentStep(0)
 			setSelectedLocale(getLocale() || 'en-US')
+			setImgErrors({})
 			requestAnimationFrame(() => setMounted(true))
 		} else {
 			setMounted(false)
@@ -126,6 +130,20 @@ const WelcomeWizard = ({ visible, onClose, isReopen }: WelcomeWizardProps) => {
 		]
 	}
 
+	const getIllustrationSrc = useCallback(
+		(slide: any, idx: number) => {
+			if (slide.remoteImage && !imgErrors[idx]) {
+				return CDN_BASE + slide.remoteImage.replace('$__THEME', theme)
+			}
+			return fallbackImages[slide.image] || ''
+		},
+		[theme, imgErrors]
+	)
+
+	const handleImgError = useCallback((idx: number) => {
+		setImgErrors((prev) => ({ ...prev, [idx]: true }))
+	}, [])
+
 	if (!visible) return null
 
 	const slide = slidesData[currentStep] as any
@@ -134,14 +152,22 @@ const WelcomeWizard = ({ visible, onClose, isReopen }: WelcomeWizardProps) => {
 	return (
 		<div className={`${styles.overlay} ${mounted ? styles.visible : ''}`}>
 			<div className={styles.modal}>
-				{/* Illustration */}
-				<div className={`${styles.illustration} ${styles[`gradient_${currentStep}`]}`}>
-					<img
-						className={styles.illustration_img}
-						src={images[slide.image]}
-						alt=""
-						draggable={false}
-					/>
+				{/* Illustration — all slides rendered, crossfade via opacity */}
+				<div className={styles.illustration}>
+					{slidesData.map((s: any, idx: number) => (
+						<div
+							key={idx}
+							className={`${styles.illustration_layer} ${styles[`gradient_${idx}`]} ${idx === currentStep ? styles.illustration_active : ''}`}
+						>
+							<img
+								className={`${styles.illustration_img} ${idx === 0 ? styles.illustration_logo : styles.illustration_screenshot}`}
+								src={getIllustrationSrc(s, idx)}
+								alt=""
+								draggable={false}
+								onError={() => handleImgError(idx)}
+							/>
+						</div>
+					))}
 				</div>
 
 				{/* Slide content with horizontal slide animation */}
