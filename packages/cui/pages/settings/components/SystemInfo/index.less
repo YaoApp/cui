@@ -184,6 +184,7 @@
 	align-items: center;
 	padding: 16px 0;
 	border-bottom: 1px solid var(--color_neo_border_field);
+	transition: opacity 0.15s ease;
 
 	&:last-child,
 	&.fieldRowLast {
@@ -193,6 +194,10 @@
 
 	&:first-child {
 		padding-top: 0;
+	}
+
+	&[style*='cursor: pointer']:hover {
+		opacity: 0.75;
 	}
 }
 

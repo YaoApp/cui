@@ -219,6 +219,14 @@ const Preferences = () => {
 						onChange={handleSettingChange}
 						className={styles.setting}
 					/>
+					<div className={styles.wizardLink}>
+						<span
+							className={styles.wizardLinkText}
+							onClick={() => window.$app?.Event?.emit('wizard/show')}
+						>
+							{is_cn ? '重新查看使用向导' : 'Re-view Welcome Guide'}
+						</span>
+					</div>
 				</div>
 			</div>
 		</div>

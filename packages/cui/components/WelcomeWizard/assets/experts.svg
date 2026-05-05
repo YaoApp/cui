@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- Expert avatars in a scattered layout -->
+  <!-- Avatar 1 (center-left) -->
+  <circle cx="160" cy="120" r="28" fill="currentColor" fill-opacity="0.08"/>
+  <circle cx="160" cy="114" r="10" fill="currentColor" fill-opacity="0.15"/>
+  <path d="M144 138 C144 128, 176 128, 176 138" fill="currentColor" fill-opacity="0.1"/>
+  <!-- Avatar 2 (center) -->
+  <circle cx="240" cy="100" r="32" fill="currentColor" fill-opacity="0.1"/>
+  <circle cx="240" cy="93" r="11" fill="currentColor" fill-opacity="0.18"/>
+  <path d="M222 115 C222 104, 258 104, 258 115" fill="currentColor" fill-opacity="0.12"/>
+  <!-- Avatar 3 (center-right) -->
+  <circle cx="320" cy="120" r="28" fill="currentColor" fill-opacity="0.08"/>
+  <circle cx="320" cy="114" r="10" fill="currentColor" fill-opacity="0.15"/>
+  <path d="M304 138 C304 128, 336 128, 336 138" fill="currentColor" fill-opacity="0.1"/>
+  <!-- Tag cards row 1 -->
+  <rect x="100" y="170" width="72" height="28" rx="14" fill="currentColor" fill-opacity="0.08"/>
+  <rect x="112" y="180" width="48" height="8" rx="4" fill="currentColor" fill-opacity="0.12"/>
+  <rect x="184" y="170" width="56" height="28" rx="14" fill="currentColor" fill-opacity="0.06"/>
+  <rect x="196" y="180" width="32" height="8" rx="4" fill="currentColor" fill-opacity="0.1"/>
+  <rect x="252" y="170" width="80" height="28" rx="14" fill="currentColor" fill-opacity="0.08"/>
+  <rect x="264" y="180" width="56" height="8" rx="4" fill="currentColor" fill-opacity="0.12"/>
+  <rect x="344" y="170" width="60" height="28" rx="14" fill="currentColor" fill-opacity="0.06"/>
+  <rect x="356" y="180" width="36" height="8" rx="4" fill="currentColor" fill-opacity="0.1"/>
+  <!-- Tag cards row 2 -->
+  <rect x="130" y="210" width="64" height="28" rx="14" fill="currentColor" fill-opacity="0.06"/>
+  <rect x="142" y="220" width="40" height="8" rx="4" fill="currentColor" fill-opacity="0.1"/>
+  <rect x="206" y="210" width="88" height="28" rx="14" fill="currentColor" fill-opacity="0.08"/>
+  <rect x="218" y="220" width="64" height="8" rx="4" fill="currentColor" fill-opacity="0.12"/>
+  <rect x="306" y="210" width="68" height="28" rx="14" fill="currentColor" fill-opacity="0.06"/>
+  <rect x="318" y="220" width="44" height="8" rx="4" fill="currentColor" fill-opacity="0.1"/>
+  <!-- Small decorative avatar (top-left) -->
+  <circle cx="100" cy="90" r="16" fill="currentColor" fill-opacity="0.05"/>
+  <circle cx="100" cy="86" r="5.5" fill="currentColor" fill-opacity="0.1"/>
+  <!-- Small decorative avatar (top-right) -->
+  <circle cx="380" cy="90" r="16" fill="currentColor" fill-opacity="0.05"/>
+  <circle cx="380" cy="86" r="5.5" fill="currentColor" fill-opacity="0.1"/>
+  <!-- Grid dots background -->
+  <circle cx="80" cy="160" r="1.5" fill="currentColor" fill-opacity="0.06"/>
+  <circle cx="400" cy="160" r="1.5" fill="currentColor" fill-opacity="0.06"/>
+  <circle cx="80" cy="250" r="1.5" fill="currentColor" fill-opacity="0.04"/>
+  <circle cx="400" cy="250" r="1.5" fill="currentColor" fill-opacity="0.04"/>
+</svg>

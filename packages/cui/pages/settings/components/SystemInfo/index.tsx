@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { getLocale } from '@umijs/max'
 import { message, Spin } from 'antd'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { useGlobal } from '@/context/app'
+import { local } from '@yaoapp/storex'
 import { getDefaultLogoUrl } from '@/services/wellknown'
 import { Setting } from '@/openapi/setting'
+import { GetCurrentUser } from '@/pages/auth/auth'
 import type { SystemInfoData } from '../../types'
 import styles from './index.less'
 
@@ -64,6 +66,29 @@ const SystemInfo = () => {
 		load()
 		return () => { cancelled = true }
 	}, [])
+
+	const user = GetCurrentUser()
+	const isOwner = user?.is_owner ?? !user?.team_id
+
+	const handleShowWizard = useCallback(() => {
+		window.$app?.Event?.emit('wizard/show')
+	}, [])
+
+	const handleReshowBanner = useCallback(async () => {
+		try {
+			const api = getSettingAPI()
+			if (!api) return
+			await api.UpdatePreference({ banner_dismissed: false })
+			if (global.setup_status) {
+				global.setup_status = { ...global.setup_status, banner_dismissed: false }
+				local.setup_status = global.setup_status
+			}
+			window.$app?.Event?.emit('setup/recheck')
+			message.success(is_cn ? '配置提醒已重新开启' : 'Setup banner re-enabled')
+		} catch {
+			message.error(is_cn ? '操作失败' : 'Operation failed')
+		}
+	}, [global, is_cn])
 
 	const handleCheckUpdate = async () => {
 		const api = getSettingAPI()
@@ -248,6 +273,39 @@ const SystemInfo = () => {
 							</div>
 						</div>
 					</div>
+				</div>
+			</div>
+
+			{/* Quick Actions Section */}
+			<div className={styles.section}>
+				<div className={styles.sectionHeader}>
+					<div className={styles.sectionTitle}>{is_cn ? '快捷操作' : 'Quick Actions'}</div>
+				</div>
+				<div className={styles.card}>
+					<div className={styles.fieldRow} style={{ cursor: 'pointer' }} onClick={handleShowWizard}>
+						<div className={styles.fieldIcon}>
+							<Icon name='material-auto_awesome' size={16} />
+						</div>
+						<div className={styles.fieldContent}>
+							<div className={styles.fieldLabel}>{is_cn ? '新手引导' : 'Welcome Guide'}</div>
+							<div className={styles.fieldValue}>
+								{is_cn ? '重新查看产品介绍和新手引导' : 'Re-view the product introduction and welcome guide'}
+							</div>
+						</div>
+					</div>
+					{isOwner && (
+						<div className={styles.fieldRow} style={{ cursor: 'pointer' }} onClick={handleReshowBanner}>
+							<div className={styles.fieldIcon}>
+								<Icon name='material-notifications_active' size={16} />
+							</div>
+							<div className={styles.fieldContent}>
+								<div className={styles.fieldLabel}>{is_cn ? '配置提醒' : 'Setup Reminder'}</div>
+								<div className={styles.fieldValue}>
+									{is_cn ? '重新显示配置完整性检查横幅' : 'Re-show the configuration check banner'}
+								</div>
+							</div>
+						</div>
+					)}
 				</div>
 			</div>
 

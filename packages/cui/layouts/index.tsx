@@ -2,7 +2,7 @@ import '@/styles/index.less'
 
 import { ConfigProvider } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { container } from 'tsyringe'
 
@@ -17,6 +17,7 @@ import AdminWrapper from './wrappers/Admin'
 import ChatWrapper from './wrappers/Chat'
 import ChatboxWrapper from './wrappers/Chatbox'
 import SetupBanner from '@/components/SetupBanner'
+import WelcomeWizard from '@/components/WelcomeWizard'
 
 import type { IPropsHelmet, IPropsLoginWrapper } from './types'
 
@@ -65,6 +66,11 @@ const Index = () => {
 	const is_login = pathname.indexOf('/login/') !== -1 || pathname === '/'
 	const is_auth = pathname === '/auth'
 	const is_standalone = isStandalonePage(pathname)
+
+	// Welcome Wizard state
+	const [wizardVisible, setWizardVisible] = useState(false)
+	const [wizardReopen, setWizardReopen] = useState(false)
+	const hasAutoShown = useRef(false)
 
 	useLayoutEffect(() => {
 		window.$global = global
@@ -125,6 +131,34 @@ const Index = () => {
 		}
 	}, [is_login, global.isOpenAPIEnabled])
 
+	// Auto-show Welcome Wizard on first visit (once per session)
+	useEffect(() => {
+		if (
+			global.setup_status &&
+			!global.setup_status.onboarding_completed &&
+			!hasAutoShown.current &&
+			!is_login &&
+			!is_auth &&
+			!is_standalone
+		) {
+			hasAutoShown.current = true
+			setWizardReopen(false)
+			setWizardVisible(true)
+		}
+	}, [global.setup_status?.onboarding_completed, is_login, is_auth, is_standalone])
+
+	// Listen for manual "wizard/show" event (from SystemInfo)
+	useEffect(() => {
+		const handleShowWizard = () => {
+			setWizardReopen(true)
+			setWizardVisible(true)
+		}
+		window.$app?.Event?.on('wizard/show', handleShowWizard)
+		return () => {
+			window.$app?.Event?.off('wizard/show', handleShowWizard)
+		}
+	}, [])
+
 	const renderMainContent = () => {
 		// Standalone pages (OAuth, invitations, etc.) - render without wrappers
 		if (is_standalone) {
@@ -181,7 +215,14 @@ const Index = () => {
 		<HelmetProvider>
 			<Helmet {...props_helmet}></Helmet>
 			<ConfigProvider prefixCls='xgen'>
-				<GlobalContext.Provider value={global}>{renderMainContent()}</GlobalContext.Provider>
+				<GlobalContext.Provider value={global}>
+					{renderMainContent()}
+					<WelcomeWizard
+						visible={wizardVisible}
+						isReopen={wizardReopen}
+						onClose={() => setWizardVisible(false)}
+					/>
+				</GlobalContext.Provider>
 			</ConfigProvider>
 		</HelmetProvider>
 	)

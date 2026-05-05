@@ -102,6 +102,24 @@
 	padding-top: 20px; // 添加顶部间距，与其他组件保持一致
 }
 
+// Wizard link
+.wizardLink {
+	padding: 16px 0 8px;
+	border-top: 1px solid var(--color_border_light);
+	margin-top: 8px;
+}
+
+.wizardLinkText {
+	font-size: 12px;
+	color: var(--color_main);
+	cursor: pointer;
+	transition: opacity 200ms ease;
+
+	&:hover {
+		opacity: 0.75;
+	}
+}
+
 // 加载状态
 .loadingState {
 	display: flex;

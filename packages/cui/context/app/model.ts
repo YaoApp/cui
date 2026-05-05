@@ -59,6 +59,7 @@ export default class GlobalModel {
 	setup_status = (local.setup_status || null) as SetupStatus | null
 	setup_status_ts: number = (local.setup_status_ts || 0) as number
 	setup_status_locale: string = (local.setup_status_locale || '') as string
+	setup_status_uid: string = (local.setup_status_uid || '') as string
 
 	// Global Neo Context
 	neo: App.Neo = { assistant_id: undefined, chat_id: undefined, placeholder: undefined }
@@ -181,10 +182,8 @@ export default class GlobalModel {
 		// Developer
 		this.setDeveloper(res.developer || {})
 
-		// Fetch setup status asynchronously (non-blocking)
-		if (this.shouldRefreshSetupStatus()) {
-			this.fetchSetupStatus()
-		}
+		// Fetch setup status asynchronously (non-blocking, always refresh on init)
+		this.fetchSetupStatus()
 
 		return Promise.resolve()
 	}
@@ -467,21 +466,35 @@ export default class GlobalModel {
 		}
 	}
 
+	private getCurrentUserId(): string {
+		return this.userInfo?.user_id || (local.user as any)?.id || ''
+	}
+
 	async fetchSetupStatus() {
 		try {
 			if (!this.isLoggedIn()) return
 			if (!window.$app?.openapi) return
 
+			// Clear stale cache when user has switched
+			const uid = this.getCurrentUserId()
+			if (uid && this.setup_status_uid !== uid) {
+				this.setup_status = null
+				this.setup_status_ts = 0
+			}
+
 			const api = new SettingAPI(window.$app.openapi)
 			const lang = getLocale()?.toLowerCase() || 'en-us'
 			const res = await api.GetSetupStatus(lang)
 			if (res?.data && !window.$app.openapi.IsError(res)) {
+				const currentUid = this.getCurrentUserId()
 				this.setup_status = res.data
 				this.setup_status_ts = Date.now()
 				this.setup_status_locale = lang
+				this.setup_status_uid = currentUid
 				local.setup_status = res.data
 				local.setup_status_ts = this.setup_status_ts
 				local.setup_status_locale = lang
+				local.setup_status_uid = currentUid
 			}
 		} catch {}
 	}
