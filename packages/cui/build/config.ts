@@ -27,19 +27,20 @@ const createSSEProxy = (target: string) => ({
 	}
 })
 
+const yaoServerHost = 'http://127.0.0.1:5099'
 export const proxy = {
-	'/v1': createSSEProxy('http://127.0.0.1:5099'),
-	'/api': createSSEProxy('http://127.0.0.1:5099'),
-	'/components': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/assets': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/iframe': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/.well-known': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/ai': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/agents': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/docs': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/tools': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/brands': { target: 'http://127.0.0.1:5099', changeOrigin: true },
-	'/admin': { target: 'http://127.0.0.1:5099', changeOrigin: true }
+	'/v1': createSSEProxy(yaoServerHost),
+	'/api': createSSEProxy(yaoServerHost),
+	'/components': { target: yaoServerHost, changeOrigin: true },
+	'/assets': { target: yaoServerHost, changeOrigin: true },
+	'/iframe': { target: yaoServerHost, changeOrigin: true },
+	'/.well-known': { target: yaoServerHost, changeOrigin: true },
+	'/ai': { target: yaoServerHost, changeOrigin: true },
+	'/agents': { target: yaoServerHost, changeOrigin: true },
+	'/docs': { target: yaoServerHost, changeOrigin: true },
+	'/tools': { target: yaoServerHost, changeOrigin: true },
+	'/brands': { target: yaoServerHost, changeOrigin: true },
+	'/admin': { target: yaoServerHost, changeOrigin: true }
 }
 
 export const conventionRoutes = {
