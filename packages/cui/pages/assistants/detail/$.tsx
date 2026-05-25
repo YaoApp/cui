@@ -38,8 +38,7 @@ const AssistantDetail = () => {
 	const readonly = assistantData?.readonly === true
 	const sandbox = !!assistantData?.sandbox
 
-	const dockerAvailable = (global.app_info as any)?.tools?.docker?.available === true
-	const chatDisabled = sandbox && !dockerAvailable
+	const chatDisabled = sandbox && (assistantData as any)?.runnable === false
 
 	useEffect(() => {
 		if (window.$app?.openapi) {
