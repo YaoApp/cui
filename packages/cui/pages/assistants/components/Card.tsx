@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react'
+import { FC } from 'react'
 import { Tooltip } from 'antd'
 import { Button } from '@/components/ui'
 import { App } from '@/types'
@@ -26,16 +26,7 @@ const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) 
 	const global = useGlobal()
 	const { default_assistant } = global
 
-	const dockerAvailable = (global.app_info as any)?.tools?.docker?.available === true
-	const chatDisabled = useMemo(() => {
-		if (!data.sandbox) return false
-
-		const filter = data.computer_filter as { kind?: string | string[] } | undefined
-		if (!filter?.kind) return !dockerAvailable
-
-		const kinds = Array.isArray(filter.kind) ? filter.kind : [filter.kind]
-		return !kinds.some((k) => k === 'host' ? true : k === 'box' ? dockerAvailable : false)
-	}, [data.sandbox, data.computer_filter, dockerAvailable])
+	const chatDisabled = data.sandbox === true && (data as any).runnable === false
 
 	// Handle chat button click without triggering the card click
 	const handleChatClick = (e: React.MouseEvent) => {
