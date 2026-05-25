@@ -24,7 +24,11 @@ import type {
 	SandboxImage,
 	SetupStatus,
 	AssistantSetupStatus,
-	PreferenceData
+	PreferenceData,
+	AgentSettingPageData,
+	UserAgentSetting,
+	SecretEntry,
+	AgentSkill
 } from './types'
 
 export class Setting {
@@ -196,5 +200,35 @@ export class Setting {
 
 	async UpdatePreference(data: Partial<PreferenceData>): Promise<ApiResponse<PreferenceData>> {
 		return this.api.Put<PreferenceData>('/setting/preference', data)
+	}
+
+	// ─── Agent Setting ────────────────────────────────
+
+	async GetAgentSetting(id: string): Promise<ApiResponse<AgentSettingPageData>> {
+		return this.api.Get<AgentSettingPageData>(`/setting/agent/${encodeURIComponent(id)}`)
+	}
+
+	async UpdateAgentSetting(id: string, data: Partial<UserAgentSetting>): Promise<ApiResponse<{ runners?: string[]; image?: string }>> {
+		return this.api.Put<{ runners?: string[]; image?: string }>(`/setting/agent/${encodeURIComponent(id)}`, data)
+	}
+
+	async GetAgentSecrets(id: string): Promise<ApiResponse<Record<string, SecretEntry>>> {
+		return this.api.Get<Record<string, SecretEntry>>(`/setting/agent/${encodeURIComponent(id)}/secrets`)
+	}
+
+	async UpdateAgentSecrets(id: string, secrets: Record<string, { value: string; label?: string; description?: string; required?: boolean; multiline?: boolean }>): Promise<ApiResponse<{ updated: string[] }>> {
+		return this.api.Put<{ updated: string[] }>(`/setting/agent/${encodeURIComponent(id)}/secrets`, secrets)
+	}
+
+	async DeleteAgentSecret(id: string, key: string): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Delete<{ success: boolean }>(`/setting/agent/${encodeURIComponent(id)}/secrets/${encodeURIComponent(key)}`)
+	}
+
+	async GetAgentSkills(id: string): Promise<ApiResponse<AgentSkill[]>> {
+		return this.api.Get<AgentSkill[]>(`/setting/agent/${encodeURIComponent(id)}/skills`)
+	}
+
+	async GetAgentSkillDetail(id: string, name: string): Promise<ApiResponse<{ name: string; description?: string; content: string }>> {
+		return this.api.Get<{ name: string; description?: string; content: string }>(`/setting/agent/${encodeURIComponent(id)}/skills/${encodeURIComponent(name)}`)
 	}
 }

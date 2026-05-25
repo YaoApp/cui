@@ -1,5 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef, Fragment } from 'react'
 import { getLocale } from '@umijs/max'
+import { useAsyncEffect } from 'ahooks'
+import * as JsxRuntime from 'react/jsx-runtime'
+import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
+import { evaluate } from '@mdx-js/mdx'
 import clsx from 'clsx'
 import styles from '../index.less'
 import Editor from 'react-monaco-editor'
@@ -79,13 +84,132 @@ const getSyntaxHighlighting = (text: string, language: string): string => {
 interface TextProps {
 	src?: string
 	file?: File
-	content?: string // 新增：直接传递文本内容
+	content?: string
 	contentType?: string
 	fileName?: string
 	language?: string
+	markdownPreview?: boolean
 }
 
-const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, fileName, language }) => {
+function parseFrontmatter(raw: string): { meta: Record<string, string> | null; body: string } {
+	if (!raw.startsWith('---')) return { meta: null, body: raw }
+	const end = raw.indexOf('---', 3)
+	if (end < 0) return { meta: null, body: raw }
+
+	const yamlBlock = raw.substring(3, end).trim()
+	const body = raw.substring(end + 3).trimStart()
+	const meta: Record<string, string> = {}
+
+	for (const line of yamlBlock.split('\n')) {
+		const idx = line.indexOf(':')
+		if (idx <= 0) continue
+		const key = line.substring(0, idx).trim()
+		let val = line.substring(idx + 1).trim()
+		val = val.replace(/^['"]|['"]$/g, '')
+		if (key && val) meta[key] = val
+	}
+
+	return { meta: Object.keys(meta).length > 0 ? meta : null, body }
+}
+
+const HLJS_STYLE = `
+.fv-hljs pre code.hljs{display:block;overflow-x:auto;padding:0}
+.fv-hljs .hljs{background:transparent}
+.fv-hljs .hljs-comment{color:#6a737d;font-style:italic}
+.fv-hljs .hljs-keyword,.fv-hljs .hljs-selector-tag,.fv-hljs .hljs-title{color:#d73a49;font-weight:600}
+.fv-hljs .hljs-string,.fv-hljs .hljs-attr{color:#032f62}
+.fv-hljs .hljs-number,.fv-hljs .hljs-literal{color:#005cc5}
+.fv-hljs .hljs-built_in,.fv-hljs .hljs-type{color:#6f42c1}
+.fv-hljs .hljs-name,.fv-hljs .hljs-variable{color:#e36209}
+.fv-hljs .hljs-function .hljs-title{color:#6f42c1}
+.fv-hljs .hljs-params{color:#24292e}
+.fv-hljs .hljs-meta{color:#005cc5}
+.fv-hljs .hljs-operator{color:#d73a49}
+.fv-hljs .hljs-punctuation{color:#24292e}
+.fv-hljs .hljs-property{color:#005cc5}
+.fv-hljs .hljs-regexp{color:#032f62}
+.fv-hljs .hljs-addition{color:#22863a;background:rgba(34,134,58,0.08)}
+.fv-hljs .hljs-deletion{color:#b31d28;background:rgba(179,29,40,0.08)}
+.fv-hljs .hljs-section{color:#005cc5;font-weight:700}
+.fv-hljs .hljs-bullet{color:#735c0f}
+.fv-hljs .hljs-emphasis{font-style:italic}
+.fv-hljs .hljs-strong{font-weight:700}
+[data-theme='dark'] .fv-hljs .hljs-comment{color:#8b949e}
+[data-theme='dark'] .fv-hljs .hljs-keyword,[data-theme='dark'] .fv-hljs .hljs-selector-tag,[data-theme='dark'] .fv-hljs .hljs-title{color:#ff7b72}
+[data-theme='dark'] .fv-hljs .hljs-string,[data-theme='dark'] .fv-hljs .hljs-attr{color:#a5d6ff}
+[data-theme='dark'] .fv-hljs .hljs-number,[data-theme='dark'] .fv-hljs .hljs-literal{color:#79c0ff}
+[data-theme='dark'] .fv-hljs .hljs-built_in,[data-theme='dark'] .fv-hljs .hljs-type{color:#d2a8ff}
+[data-theme='dark'] .fv-hljs .hljs-name,[data-theme='dark'] .fv-hljs .hljs-variable{color:#ffa657}
+[data-theme='dark'] .fv-hljs .hljs-function .hljs-title{color:#d2a8ff}
+[data-theme='dark'] .fv-hljs .hljs-params{color:#c9d1d9}
+[data-theme='dark'] .fv-hljs .hljs-meta{color:#79c0ff}
+[data-theme='dark'] .fv-hljs .hljs-operator{color:#ff7b72}
+[data-theme='dark'] .fv-hljs .hljs-punctuation{color:#c9d1d9}
+[data-theme='dark'] .fv-hljs .hljs-property{color:#79c0ff}
+[data-theme='dark'] .fv-hljs .hljs-regexp{color:#a5d6ff}
+[data-theme='dark'] .fv-hljs .hljs-section{color:#79c0ff;font-weight:700}
+[data-theme='dark'] .fv-hljs .hljs-bullet{color:#f2cc60}
+`
+
+const MarkdownPreviewRenderer = ({ content }: { content: string }) => {
+	const [rendered, setRendered] = useState<React.ReactNode>(null)
+	const [showMeta, setShowMeta] = useState(false)
+	const locale = getLocale()
+	const is_cn = locale === 'zh-CN'
+
+	const { meta, body } = useMemo(() => parseFrontmatter(content), [content])
+
+	useAsyncEffect(async () => {
+		if (!body) return
+		try {
+			const { default: Content } = await evaluate(body, {
+				...JsxRuntime,
+				Fragment,
+				format: 'md',
+				remarkPlugins: [remarkGfm],
+				rehypePlugins: [[rehypeHighlight, { ignoreMissing: true }]],
+				baseUrl: import.meta.url
+			})
+			setRendered(<Content />)
+		} catch {
+			setRendered(<div style={{ whiteSpace: 'pre-wrap' }}>{body}</div>)
+		}
+	}, [body])
+
+	if (!rendered) return <div className={styles.loading}>{is_cn ? '渲染中...' : 'Rendering...'}</div>
+	return (
+		<>
+			<style>{HLJS_STYLE}</style>
+			<div className={`${styles.markdownPreview} fv-hljs`}>
+				{meta && (
+					<>
+						<button
+							className={styles.metaToggle}
+							onClick={() => setShowMeta(!showMeta)}
+							title={is_cn ? '文件元信息' : 'File metadata'}
+						>
+							<span className={styles.metaToggleIcon}>i</span>
+							<span>{is_cn ? '元信息' : 'Metadata'}</span>
+						</button>
+						{showMeta && (
+							<div className={styles.metaPanel}>
+								{Object.entries(meta).map(([key, val]) => (
+									<div key={key} className={styles.metaRow}>
+										<span className={styles.metaKey}>{key}</span>
+										<span className={styles.metaVal}>{val}</span>
+									</div>
+								))}
+							</div>
+						)}
+					</>
+				)}
+				{rendered}
+			</div>
+		</>
+	)
+}
+
+const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, fileName, language, markdownPreview }) => {
 	// 统一处理文件源
 	const fileSource = useMemo(() => {
 		if (src) return src
@@ -291,7 +415,10 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 		return <div className={styles.loading}>{is_cn ? '加载中...' : 'Loading...'}</div>
 	}
 
-	// Use Monaco for non-plain text languages
+	if (markdownPreview && language === 'markdown' && textContent) {
+		return <MarkdownPreviewRenderer content={textContent} />
+	}
+
 	if (language && language !== 'text') {
 		const effectiveLanguage = language === 'jsonc' || language === 'yao' ? 'json' : language
 		return (
