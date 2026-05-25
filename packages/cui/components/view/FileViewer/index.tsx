@@ -27,12 +27,12 @@ interface IProps extends Component.PropsViewComponent {
 	showMaximize?: boolean
 	src?: string
 	file?: File
-	content?: string // 新增：直接传递文本内容
+	content?: string
 	contentType?: string
 	style?: React.CSSProperties
-	// 新增支持通过 file ID 和 uploader 加载文件
 	fileID?: string
 	uploader?: string
+	defaultPreview?: boolean
 }
 
 const Index = (props: IProps) => {
@@ -50,6 +50,7 @@ const Index = (props: IProps) => {
 		contentType,
 		fileID,
 		uploader,
+		defaultPreview,
 		...rest_props
 	} = props
 
@@ -57,6 +58,7 @@ const Index = (props: IProps) => {
 	const [maximized, setMaximized] = useState(false)
 	const [fileMetadata, setFileMetadata] = useState<any>()
 	const [loading, setLoading] = useState(false)
+	const [markdownPreview, setMarkdownPreview] = useState(defaultPreview ?? false)
 
 	const token = getToken()
 
@@ -354,7 +356,7 @@ const Index = (props: IProps) => {
 			case 'audio':
 				return <Audio {...viewerProps} />
 			case 'text':
-				return <Text {...viewerProps} language={getLanguage(fileName)} />
+				return <Text {...viewerProps} language={getLanguage(fileName)} markdownPreview={markdownPreview} />
 			case 'pdf':
 				return <Pdf {...viewerProps} />
 			case 'docx':
@@ -369,8 +371,27 @@ const Index = (props: IProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
+	const isMarkdown = fileType === 'text' && getLanguage(fileName) === 'markdown'
+
 	return (
 		<div className={clsx([styles._local, 'xgen-file-viewer', { [styles.maximized]: maximized }])} style={style}>
+			{/* Markdown Preview / Markdown 右上角切换 */}
+			{isMarkdown && (
+				<div className={styles.mdTabs}>
+					<span
+						className={clsx(styles.mdTab, !markdownPreview && styles.mdTabActive)}
+						onClick={() => setMarkdownPreview(false)}
+					>
+						Markdown
+					</span>
+					<span
+						className={clsx(styles.mdTab, markdownPreview && styles.mdTabActive)}
+						onClick={() => setMarkdownPreview(true)}
+					>
+						Preview
+					</span>
+				</div>
+			)}
 			{/* 统一的工具栏 - 根据条件显示 */}
 			{showMaximize && fileType !== 'unsupported' && (
 				<div className={styles.toolbar}>
@@ -380,7 +401,7 @@ const Index = (props: IProps) => {
 							? getLanguage(fileName)
 							: getFileExtension(fileName) || fileType}
 					</span>
-					{/* 统一的下载按钮 - 所有文件类型都支持 */}
+						{/* 统一的下载按钮 - 所有文件类型都支持 */}
 					{(fileSource || content) && fileName && (
 						<Button
 							type='text'

@@ -6,6 +6,7 @@ import hljsPython from 'highlight.js/lib/languages/python'
 import Icon from '@/widgets/Icon'
 import { App } from '@/types'
 import styles from './ApiAccess.less'
+import viewStyles from './View/index.less'
 
 hljsCore.registerLanguage('bash', hljsBash)
 hljsCore.registerLanguage('typescript', hljsTs)
@@ -90,47 +91,48 @@ const ApiAccess = ({ data, is_cn }: ApiAccessProps) => {
 
 	return (
 		<div className={styles.container}>
-			{/* Title */}
-			<div className={styles.title}>
-				{is_cn ? 'Chat 对话' : 'Chat Completions'}
-			</div>
-			<div className={styles.hint}>
-				{is_cn
-					? '与该专家对话。兼容 OpenAI Chat Completion 协议，支持流式输出'
-					: 'Chat with this expert. OpenAI-compatible, streaming supported'}
-			</div>
-
-			{/* Lang tabs + copy */}
-			<div className={styles.toolbar}>
-				<div className={styles.langs}>
-					{(Object.keys(LANG_LABELS) as CodeLang[]).map((l) => (
-						<button
-							key={l}
-							className={`${styles.langBtn} ${lang === l ? styles.langBtnActive : ''}`}
-							onClick={() => setLang(l)}
-						>
-							{LANG_LABELS[l]}
-						</button>
-					))}
+			<div className={viewStyles.card}>
+				<div style={{ marginBottom: 16 }}>
+					<div className={viewStyles.cardTitle}>{is_cn ? 'API 集成' : 'API Integration'}</div>
+					<div className={viewStyles.cardDesc}>
+						{is_cn
+							? '通过 OpenAI 兼容的 REST API 调用此助手。'
+							: 'Call this assistant via OpenAI-compatible REST API.'}
+					</div>
 				</div>
-				<button className={styles.copyBtn} onClick={handleCopy}>
-					<Icon name={copied ? 'material-check' : 'material-content_copy'} size={13} />
-				</button>
-			</div>
 
-			{/* Code block */}
-			<div className={styles.codeBlock}>
-				<pre className={`${styles.codePre} assistant-api-code-pre`}>
-					<code dangerouslySetInnerHTML={{ __html: highlighted }} />
-				</pre>
-			</div>
+				{/* Lang tabs + copy */}
+				<div className={styles.toolbar}>
+					<div className={styles.langs}>
+						{(Object.keys(LANG_LABELS) as CodeLang[]).map((l) => (
+							<button
+								key={l}
+								className={`${styles.langBtn} ${lang === l ? styles.langBtnActive : ''}`}
+								onClick={() => setLang(l)}
+							>
+								{LANG_LABELS[l]}
+							</button>
+						))}
+					</div>
+					<button className={styles.copyBtn} onClick={handleCopy}>
+						<Icon name={copied ? 'material-check' : 'material-content_copy'} size={13} />
+					</button>
+				</div>
 
-			{/* Endpoint */}
-			<div className={styles.endpoint}>
-				<span className={styles.endpointLabel}>Endpoint</span>
-				<code className={styles.endpointValue}>
-					POST {serverURL}/v1/chat/{assistantId}/completions
-				</code>
+				{/* Code block */}
+				<div className={styles.codeBlock}>
+					<pre className={`${styles.codePre} assistant-api-code-pre`}>
+						<code dangerouslySetInnerHTML={{ __html: highlighted }} />
+					</pre>
+				</div>
+
+				{/* Endpoint */}
+				<div className={styles.endpoint}>
+					<span className={styles.endpointLabel}>Endpoint</span>
+					<code className={styles.endpointValue}>
+						POST {serverURL}/v1/chat/{assistantId}/completions
+					</code>
+				</div>
 			</div>
 		</div>
 	)

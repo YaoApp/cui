@@ -299,3 +299,38 @@ export interface PreferenceData {
 	banner_dismissed?: boolean
 	onboarding_completed?: boolean
 }
+
+// ─── Agent Setting ──────────────────────────────────
+
+export interface SecretEntry {
+	value?: string
+	label?: string
+	description?: string
+	required?: boolean
+	multiline?: boolean
+	has_value?: boolean
+	predefined?: boolean
+}
+
+export interface UserAgentSetting {
+	runners?: string[]
+	image?: string
+	secrets?: Record<string, SecretEntry>
+	options?: Record<string, any>
+}
+
+export interface AgentSkill {
+	name: string
+	description?: string
+}
+
+export interface AgentSettingPageData {
+	setting: UserAgentSetting
+	sandbox_config?: {
+		runner?: {
+			supports?: string[]
+			name?: string
+		}
+	}
+	supported_runners?: string[]
+}
