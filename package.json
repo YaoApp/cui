@@ -27,6 +27,11 @@
             "turbo": "^1.7.2",
             "yorkie": "^2.0.0"
       },
+      "pnpm": {
+            "overrides": {
+                  "@vidstack/react": "1.12.12"
+            }
+      },
       "dependencies": {
             "@types/react-beautiful-dnd": "^13.1.8",
             "mermaid": "^11.4.1",
