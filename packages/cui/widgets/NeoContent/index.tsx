@@ -14,6 +14,8 @@ import { useMDXComponents } from '@mdx-js/react'
 import components from './components'
 import styles from './index.less'
 import { App } from '@/types'
+import MdxErrorBoundary from '@/widgets/MdxErrorBoundary'
+import { escapeCurlyBraces, unescapeCurlyBraces } from '@/utils/mdx-helpers'
 
 interface IProps {
 	chat_info: App.ChatAI
@@ -33,7 +35,8 @@ const Index = (props: IProps) => {
 			return
 		}
 
-		const vfile = new VFile(chat_info.text)
+		const escaped = escapeCurlyBraces(chat_info.text)
+		const vfile = new VFile(escaped)
 		const [err, compiled_source] = await to(
 			compile(vfile, {
 				format: 'md',
@@ -51,10 +54,18 @@ const Index = (props: IProps) => {
 
 							if (node?.type === 'element' && node?.tagName === 'pre') {
 								const [codeEl] = node.children
-
 								if (codeEl.tagName !== 'code') return
-
-								node.raw = codeEl.children?.[0].value
+								node.raw = unescapeCurlyBraces(codeEl.children?.[0].value)
+							}
+						})
+					},
+					() => (tree) => {
+						visit(tree, (node: any, _index: any, parent: any) => {
+							if (node?.type === 'text') {
+								if (parent?.type === 'element' && ['code', 'pre'].includes(parent.tagName)) {
+									return
+								}
+								node.value = unescapeCurlyBraces(node.value)
 							}
 						})
 					},
@@ -80,19 +91,25 @@ const Index = (props: IProps) => {
 		}
 
 		if (!compiled_source) return
-		compiled_source.value = (compiled_source.value as string).replaceAll('%7B', '{')
 
-		const { default: Content } = await run(compiled_source, {
-			...JsxRuntime,
-			Fragment,
-			useMDXComponents: () => mdx_components
-		})
-
-		setTarget(Content)
+		try {
+			const { default: Content } = await run(compiled_source, {
+				...JsxRuntime,
+				Fragment,
+				useMDXComponents: () => mdx_components
+			})
+			setTarget(<Content />)
+		} catch (runErr) {
+			setTarget(<div style={{ whiteSpace: 'pre-wrap' }}>{chat_info.text}</div>)
+		}
 		callback?.()
 	}, [chat_info])
 
-	return <div className={clsx(styles._local)}>{target}</div>
+	return (
+		<MdxErrorBoundary fallbackContent={chat_info.text} resetKeys={[chat_info.text]}>
+			<div className={clsx(styles._local)}>{target}</div>
+		</MdxErrorBoundary>
+	)
 }
 
 export default window.$app.memo(Index)

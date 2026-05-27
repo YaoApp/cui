@@ -19,6 +19,8 @@ import { ParseFileRef } from '@/utils/fileWrapper'
 import Thinking from '../Thinking'
 import ToolCall from '../ToolCall'
 import type { TextMessage, ThinkingMessage, ToolCallMessage } from '../../../openapi'
+import MdxErrorBoundary from '@/widgets/MdxErrorBoundary'
+import { escapeCurlyBraces as sharedEscapeCurlyBraces, unescapeCurlyBraces } from '@/utils/mdx-helpers'
 
 interface ITextProps {
 	message: TextMessage
@@ -336,79 +338,7 @@ const wrapWorkspaceLinks = (text: string): string => {
 	return parts.join('')
 }
 
-/**
- * Escape curly braces in text segments (outside fenced code blocks and inline code).
- * MDX treats { } as JSX expressions; unescaped braces around arbitrary words
- * (e.g. {timestamp}) cause ReferenceError at runtime.
- */
-const escapeCurlyBraces = (text: string): string => {
-	const segments: string[] = []
-	let i = 0
-	const len = text.length
-
-	while (i < len) {
-		// Fenced code block ``` ... ```
-		if (text[i] === '`' && text[i + 1] === '`' && text[i + 2] === '`') {
-			const end = text.indexOf('```', i + 3)
-			if (end !== -1) {
-				segments.push(text.slice(i, end + 3))
-				i = end + 3
-			} else {
-				segments.push(text.slice(i))
-				i = len
-			}
-			continue
-		}
-
-		// Inline code ` ... `
-		if (text[i] === '`') {
-			const end = text.indexOf('`', i + 1)
-			if (end !== -1) {
-				segments.push(text.slice(i, end + 1))
-				i = end + 1
-			} else {
-				segments.push(text.slice(i))
-				i = len
-			}
-			continue
-		}
-
-		// Block math $$ ... $$
-		if (text[i] === '$' && text[i + 1] === '$') {
-			const end = text.indexOf('$$', i + 2)
-			if (end !== -1) {
-				segments.push(text.slice(i, end + 2))
-				i = end + 2
-			} else {
-				segments.push(text.slice(i))
-				i = len
-			}
-			continue
-		}
-
-		// Inline math $ ... $ (single $, not preceded by \)
-		if (text[i] === '$' && (i === 0 || text[i - 1] !== '\\')) {
-			const end = text.indexOf('$', i + 1)
-			if (end !== -1 && end > i + 1) {
-				segments.push(text.slice(i, end + 1))
-				i = end + 1
-				continue
-			}
-		}
-
-		// Regular character – escape { and }
-		if (text[i] === '{') {
-			segments.push('\\{')
-		} else if (text[i] === '}') {
-			segments.push('\\}')
-		} else {
-			segments.push(text[i])
-		}
-		i++
-	}
-
-	return segments.join('')
-}
+const escapeCurlyBraces = sharedEscapeCurlyBraces
 
 const escape = (text?: string) => {
 	if (!text) return ''
@@ -447,9 +377,7 @@ const escape = (text?: string) => {
 	return result
 }
 
-const unescape = (text?: string) => {
-	return text?.replace(/\\{/g, '{').replace(/\\}/g, '}')
-}
+const unescape = unescapeCurlyBraces
 
 const Text = ({ message }: ITextProps) => {
 	const contentText = message.props?.content || ''
@@ -777,27 +705,29 @@ const Text = ({ message }: ITextProps) => {
 	}, [contentText, message.delta])
 
 	return (
-		<div ref={containerRef} className={styles._local}>
-			{content}
+		<MdxErrorBoundary fallbackContent={contentText} resetKeys={[contentText]}>
+			<div ref={containerRef} className={styles._local}>
+				{content}
 
-			{/* Reference Popover */}
-			{referenceState && (
-				<ReferencePopover
-					requestId={referenceState.requestId}
-					refIndex={referenceState.refIndex}
-					refType={referenceState.refType}
-					anchorEl={referenceState.anchorEl}
-					onClose={handleCloseReference}
+				{/* Reference Popover */}
+				{referenceState && (
+					<ReferencePopover
+						requestId={referenceState.requestId}
+						refIndex={referenceState.refIndex}
+						refType={referenceState.refType}
+						anchorEl={referenceState.anchorEl}
+						onClose={handleCloseReference}
+					/>
+				)}
+
+				{/* Workspace File Preview Modal */}
+				<AttachmentPreviewModal
+					visible={!!wsPreviewItem}
+					onClose={() => setWsPreviewItem(null)}
+					attachment={wsPreviewItem}
 				/>
-			)}
-
-			{/* Workspace File Preview Modal */}
-			<AttachmentPreviewModal
-				visible={!!wsPreviewItem}
-				onClose={() => setWsPreviewItem(null)}
-				attachment={wsPreviewItem}
-			/>
-		</div>
+			</div>
+		</MdxErrorBoundary>
 	)
 }
 

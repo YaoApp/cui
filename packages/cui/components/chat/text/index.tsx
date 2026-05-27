@@ -16,6 +16,8 @@ import Tool from '../tool'
 import type { Component } from '@/types'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import MdxErrorBoundary from '@/widgets/MdxErrorBoundary'
+import { escapeCurlyBraces, unescapeCurlyBraces } from '@/utils/mdx-helpers'
 
 interface IProps extends Component.PropsChatComponent {
 	chat_id: string
@@ -80,20 +82,17 @@ const components = (chat_id: string, done?: boolean) => {
 }
 
 const escape = (text?: string) => {
-	return text
-		?.replace(
+	if (!text) return ''
+	let result = text
+		.replace(
 			/\|([^|\n]*[<>][^|\n]*)\|/g,
 			(_, content) => `|${content.replace(/[<>]/g, (match: string) => (match === '<' ? '&lt;' : '&gt;'))}|`
 		)
-		.replace(/\r/g, '') // remove \r
-		.replace(/\{/g, '\\{')
-		.replace(/\}/g, '\\}')
+		.replace(/\r/g, '')
 		.replace(/\$\$[\n\r]+/g, '$$\n')
 		.replace(/[\n\r]+\$\$/g, '\n$$')
-}
-
-const unescape = (text?: string) => {
-	return text?.replace(/\\{/g, '{').replace(/\\}/g, '}')
+	result = escapeCurlyBraces(result)
+	return result
 }
 
 const Index = (props: IProps) => {
@@ -121,7 +120,7 @@ const Index = (props: IProps) => {
 							if (node?.type === 'element' && node?.tagName === 'pre') {
 								const [codeEl] = node.children
 								if (codeEl.tagName !== 'code') return
-								node.raw = unescape(codeEl.children?.[0].value)
+								node.raw = unescapeCurlyBraces(codeEl.children?.[0].value)
 							}
 
 							// if (node?.type === 'element' && ['Think', 'Tool'].includes(node?.tagName)) {
@@ -138,14 +137,17 @@ const Index = (props: IProps) => {
 							// }
 						})
 					},
-					// Replace \{ => { and \} => }
-					() => (tree) => {
-						visit(tree, (node) => {
-							if (node?.type === 'text') {
-								node.value = unescape(node.value)
+				// Replace \{ => { and \} => } in text nodes (skip code/pre)
+				() => (tree) => {
+					visit(tree, (node: any, _index: any, parent: any) => {
+						if (node?.type === 'text') {
+							if (parent?.type === 'element' && ['code', 'pre'].includes(parent.tagName)) {
+								return
 							}
-						})
-					},
+							node.value = unescapeCurlyBraces(node.value)
+						}
+					})
+				},
 					() => (tree) => {
 						visit(tree, (node) => {
 							if (node?.type === 'element' && node?.tagName === 'pre') {
@@ -168,7 +170,7 @@ const Index = (props: IProps) => {
 								node?.tagName === 'code' &&
 								node?.properties?.className?.includes('language-mermaid')
 							) {
-								node.properties.raw = unescape(node.children?.[0]?.value)
+								node.properties.raw = unescapeCurlyBraces(node.children?.[0]?.value)
 							}
 						})
 					}
@@ -191,14 +193,18 @@ const Index = (props: IProps) => {
 				useMDXComponents: () => mdxComponents,
 				chat_id
 			})
-			setContent(Content)
+			setContent(<Content />)
 		} catch (err) {
 			console.error(`run mdx error: ${err}`)
-			console.log(`original text:\n`, text)
+			setContent(<div style={{ whiteSpace: 'pre-wrap' }}>{text}</div>)
 		}
 	}, [text, chat_id, done])
 
-	return <div className={styles._local}>{content}</div>
+	return (
+		<MdxErrorBoundary fallbackContent={text} resetKeys={[text]}>
+			<div className={styles._local}>{content}</div>
+		</MdxErrorBoundary>
+	)
 }
 
 export default window.$app.memo(Index)
