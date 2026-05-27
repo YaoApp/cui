@@ -9,6 +9,8 @@ import { evaluate } from '@mdx-js/mdx'
 import { App } from '@/types'
 import Tag from '../../components/Tag'
 import Icon from '@/widgets/Icon'
+import MdxErrorBoundary from '@/widgets/MdxErrorBoundary'
+import { escapeCurlyBraces, rehypeUnescapeBraces, rehypeUnescapeCodeBlocks } from '@/utils/mdx-helpers'
 import { useLLMProviders } from '@/hooks/useLLMProviders'
 import styles from './View/index.less'
 
@@ -52,12 +54,17 @@ const MarkdownContent = ({ content, is_cn }: { content: string; is_cn: boolean }
 	useAsyncEffect(async () => {
 		if (!content) return
 		try {
-			const { default: Content } = await evaluate(content, {
+			const escaped = escapeCurlyBraces(content)
+			const { default: Content } = await evaluate(escaped, {
 				...JsxRuntime,
 				Fragment,
 				format: 'md',
 				remarkPlugins: [remarkGfm],
-				rehypePlugins: [[rehypeHighlight, { ignoreMissing: true }]],
+				rehypePlugins: [
+					rehypeUnescapeCodeBlocks,
+					rehypeUnescapeBraces,
+					[rehypeHighlight, { ignoreMissing: true }]
+				],
 				baseUrl: import.meta.url
 			})
 			setRendered(<Content />)
@@ -68,10 +75,10 @@ const MarkdownContent = ({ content, is_cn }: { content: string; is_cn: boolean }
 
 	if (!rendered) return <span className={styles.emptyValue}>{is_cn ? '暂无内容' : 'No content'}</span>
 	return (
-		<>
+		<MdxErrorBoundary fallbackContent={content} resetKeys={[content]}>
 			<style>{OVERVIEW_HLJS_STYLE}</style>
 			<div className={`${styles.markdownContent} ov-hljs`}>{rendered}</div>
-		</>
+		</MdxErrorBoundary>
 	)
 }
 

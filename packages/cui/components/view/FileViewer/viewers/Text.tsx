@@ -11,6 +11,8 @@ import Editor from 'react-monaco-editor'
 import type { EditorDidMount, monaco } from 'react-monaco-editor'
 import { useGlobal } from '@/context/app'
 import vars from '@/styles/preset/vars'
+import MdxErrorBoundary from '@/widgets/MdxErrorBoundary'
+import { escapeCurlyBraces, rehypeUnescapeBraces, rehypeUnescapeCodeBlocks } from '@/utils/mdx-helpers'
 
 // 简单的语法高亮规则
 const getSyntaxHighlighting = (text: string, language: string): string => {
@@ -162,12 +164,17 @@ const MarkdownPreviewRenderer = ({ content }: { content: string }) => {
 	useAsyncEffect(async () => {
 		if (!body) return
 		try {
-			const { default: Content } = await evaluate(body, {
+			const escaped = escapeCurlyBraces(body)
+			const { default: Content } = await evaluate(escaped, {
 				...JsxRuntime,
 				Fragment,
 				format: 'md',
 				remarkPlugins: [remarkGfm],
-				rehypePlugins: [[rehypeHighlight, { ignoreMissing: true }]],
+				rehypePlugins: [
+					rehypeUnescapeCodeBlocks,
+					rehypeUnescapeBraces,
+					[rehypeHighlight, { ignoreMissing: true }]
+				],
 				baseUrl: import.meta.url
 			})
 			setRendered(<Content />)
@@ -178,7 +185,7 @@ const MarkdownPreviewRenderer = ({ content }: { content: string }) => {
 
 	if (!rendered) return <div className={styles.loading}>{is_cn ? '渲染中...' : 'Rendering...'}</div>
 	return (
-		<>
+		<MdxErrorBoundary fallbackContent={body} resetKeys={[body]}>
 			<style>{HLJS_STYLE}</style>
 			<div className={`${styles.markdownPreview} fv-hljs`}>
 				{meta && (
@@ -205,7 +212,7 @@ const MarkdownPreviewRenderer = ({ content }: { content: string }) => {
 				)}
 				{rendered}
 			</div>
-		</>
+		</MdxErrorBoundary>
 	)
 }
 
