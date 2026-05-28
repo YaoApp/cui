@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, history, getLocale } from '@umijs/max'
-import { Spin, Breadcrumb, Tooltip, message } from 'antd'
+import { Spin, Breadcrumb, Tooltip, Popconfirm, message } from 'antd'
 import { App } from '@/types'
 import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
@@ -139,6 +139,8 @@ const AssistantDetail = () => {
 		window.$app.Event.emit('chat/newWithAssistant', id)
 	}
 
+	const canDelete = !readonly && !assistantData?.built_in
+
 	if (loading || !assistantData) {
 		return (
 			<div className={styles.scrollWrap}>
@@ -216,23 +218,41 @@ const AssistantDetail = () => {
 						</div>
 						<div className={viewStyles.profileActions}>
 							{activeSection === 'overview' ? (
-								<Tooltip
-									title={
-										chatDisabled
-											? is_cn ? '需要配置计算节点' : 'Compute node required'
-											: undefined
-									}
-								>
-									<Button
-										type='primary'
-										size='small'
-										icon={<Icon name='icon-message-circle' size={14} />}
-										onClick={handleChatClick}
-										disabled={chatDisabled}
+								<>
+									{canDelete && (
+										<Popconfirm
+											title={is_cn ? '确认删除此专家？删除后不可恢复' : 'Delete this expert? This cannot be undone'}
+											onConfirm={() => window.$app.Event.emit('assistant/delete')}
+											okText={is_cn ? '确认' : 'Confirm'}
+											cancelText={is_cn ? '取消' : 'Cancel'}
+										>
+											<Button
+												type='danger'
+												size='small'
+												icon={<Icon name='material-delete' size={12} />}
+											>
+												{is_cn ? '删除' : 'Delete'}
+											</Button>
+										</Popconfirm>
+									)}
+									<Tooltip
+										title={
+											chatDisabled
+												? is_cn ? '需要配置计算节点' : 'Compute node required'
+												: undefined
+										}
 									>
-										{is_cn ? '聊天' : 'Chat'}
-									</Button>
-								</Tooltip>
+										<Button
+											type='primary'
+											size='small'
+											icon={<Icon name='icon-message-circle' size={14} />}
+											onClick={handleChatClick}
+											disabled={chatDisabled}
+										>
+											{is_cn ? '聊天' : 'Chat'}
+										</Button>
+									</Tooltip>
+								</>
 							) : (
 								<span className={viewStyles.sectionLabel}>
 									<Icon name={
