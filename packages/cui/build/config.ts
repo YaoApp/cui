@@ -27,7 +27,7 @@ const createSSEProxy = (target: string) => ({
 	}
 })
 
-const yaoServerHost = 'http://127.0.0.1:5099'
+const yaoServerHost = 'http://yao-dev-server:5099'
 export const proxy = {
 	'/v1': createSSEProxy(yaoServerHost),
 	'/api': createSSEProxy(yaoServerHost),

@@ -1,9 +1,11 @@
 import { visit } from 'unist-util-visit'
 
 /**
- * Escape curly braces in text segments (outside fenced code blocks, inline code, and math).
- * MDX treats { } as JSX expressions; unescaped braces around arbitrary words
- * (e.g. {timestamp}) cause ReferenceError at runtime.
+ * Single-pass escape for MDX safety. Handles two problems simultaneously:
+ * 1. Currency $5/$25 being misinterpreted as inline math by remark-math
+ * 2. Bare {YYYY} being treated as JSX expressions causing ReferenceError
+ *
+ * Protected regions (math, code blocks, inline code) are left unchanged.
  */
 export const escapeCurlyBraces = (text: string): string => {
 	const segments: string[] = []
@@ -11,63 +13,102 @@ export const escapeCurlyBraces = (text: string): string => {
 	const len = text.length
 
 	while (i < len) {
-		// Fenced code block ``` ... ```
+		// --- Protected regions: pass through unchanged ---
+
+		// Fenced code block ```...```
 		if (text[i] === '`' && text[i + 1] === '`' && text[i + 2] === '`') {
 			const end = text.indexOf('```', i + 3)
 			if (end !== -1) {
 				segments.push(text.slice(i, end + 3))
 				i = end + 3
 			} else {
-				segments.push(text.slice(i))
-				i = len
+				// Unclosed during streaming: just emit ``` and keep escaping the rest
+				segments.push('```')
+				i += 3
 			}
 			continue
 		}
 
-		// Inline code ` ... `
+		// Inline code `...`
 		if (text[i] === '`') {
 			const end = text.indexOf('`', i + 1)
 			if (end !== -1) {
 				segments.push(text.slice(i, end + 1))
 				i = end + 1
 			} else {
-				segments.push(text.slice(i))
-				i = len
+				// Unclosed during streaming: just emit ` and keep escaping the rest
+				segments.push('`')
+				i++
 			}
 			continue
 		}
 
-		// Block math $$ ... $$
+		// Block math $$...$$
 		if (text[i] === '$' && text[i + 1] === '$') {
 			const end = text.indexOf('$$', i + 2)
 			if (end !== -1) {
 				segments.push(text.slice(i, end + 2))
 				i = end + 2
 			} else {
-				segments.push(text.slice(i))
-				i = len
+				// Unclosed during streaming: just emit $$ and keep escaping the rest
+				segments.push('$$')
+				i += 2
 			}
 			continue
 		}
 
-		// Inline math $ ... $ (single $, not preceded by \)
+		// Dollar sign handling (not preceded by \)
 		if (text[i] === '$' && (i === 0 || text[i - 1] !== '\\')) {
-			const end = text.indexOf('$', i + 1)
-			if (end !== -1 && end > i + 1) {
-				segments.push(text.slice(i, end + 1))
-				i = end + 1
+			// $ followed by digit → currency, escape to prevent remark-math match
+			if (i + 1 < len && text[i + 1] >= '0' && text[i + 1] <= '9') {
+				segments.push('\\$')
+				i++
 				continue
 			}
+			// Try to find matching closing $ for inline math
+			let j = i + 1
+			let found = -1
+			while (j < len) {
+				if (text[j] === '$' && text[j - 1] !== '\\' && (j + 1 >= len || text[j + 1] !== '$')) {
+					found = j
+					break
+				}
+				if (text[j] === '\n' && j + 1 < len && text[j + 1] === '\n') break
+				j++
+			}
+			if (found > i + 1) {
+				segments.push(text.slice(i, found + 1))
+				i = found + 1
+				continue
+			}
+			// Lone $ with no match — pass through as-is
+			segments.push(text[i])
+			i++
+			continue
 		}
 
-		// Regular character – escape { and }
+		// --- Normal text region ---
+
+		// Already-escaped sequences \{ \} → pass through (don't double-escape)
+		if (text[i] === '\\' && i + 1 < len && (text[i + 1] === '{' || text[i + 1] === '}')) {
+			segments.push(text[i], text[i + 1])
+			i += 2
+			continue
+		}
+
+		// Escape unescaped { and }
 		if (text[i] === '{') {
 			segments.push('\\{')
-		} else if (text[i] === '}') {
-			segments.push('\\}')
-		} else {
-			segments.push(text[i])
+			i++
+			continue
 		}
+		if (text[i] === '}') {
+			segments.push('\\}')
+			i++
+			continue
+		}
+
+		segments.push(text[i])
 		i++
 	}
 
@@ -75,10 +116,10 @@ export const escapeCurlyBraces = (text: string): string => {
 }
 
 /**
- * Reverse the escaping done by escapeCurlyBraces: \{ → { and \} → }
+ * Reverse escaping: \{ → {, \} → }, \$ → $
  */
 export const unescapeCurlyBraces = (text?: string): string | undefined => {
-	return text?.replace(/\\{/g, '{').replace(/\\}/g, '}')
+	return text?.replace(/\\{/g, '{').replace(/\\}/g, '}').replace(/\\\$/g, '$')
 }
 
 /**
