@@ -28,7 +28,9 @@ import type {
 	AgentSettingPageData,
 	UserAgentSetting,
 	SecretEntry,
-	AgentSkill
+	AgentSkill,
+	APIKeyResponse,
+	APIKeyCreateResponse
 } from './types'
 
 export class Setting {
@@ -230,5 +232,23 @@ export class Setting {
 
 	async GetAgentSkillDetail(id: string, name: string): Promise<ApiResponse<{ name: string; description?: string; content: string }>> {
 		return this.api.Get<{ name: string; description?: string; content: string }>(`/setting/agent/${encodeURIComponent(id)}/skills/${encodeURIComponent(name)}`)
+	}
+
+	// ─── API Keys ──────────────────────────────────────────
+
+	async GetApiKeys(): Promise<ApiResponse<APIKeyResponse[]>> {
+		return this.api.Get<APIKeyResponse[]>('/setting/api-keys')
+	}
+
+	async CreateApiKey(data: { name: string; expires_at?: string }): Promise<ApiResponse<APIKeyCreateResponse>> {
+		return this.api.Post<APIKeyCreateResponse>('/setting/api-keys', data)
+	}
+
+	async DeleteApiKey(keyId: string): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Delete<{ success: boolean }>(`/setting/api-keys/${encodeURIComponent(keyId)}`)
+	}
+
+	async RegenerateApiKey(keyId: string): Promise<ApiResponse<APIKeyCreateResponse>> {
+		return this.api.Post<APIKeyCreateResponse>(`/setting/api-keys/${encodeURIComponent(keyId)}/regenerate`, {})
 	}
 }
