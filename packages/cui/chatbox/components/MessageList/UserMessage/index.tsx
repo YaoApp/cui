@@ -146,21 +146,55 @@ const FileAttachment: React.FC<{ url: string; filename?: string }> = ({ url, fil
 	)
 }
 
+const MENTION_REGEX = /<Mention\s+type="([^"]+)"\s+value="([^"]+)">([^<]*)<\/Mention>/g
+
+const renderTextWithMentions = (text: string): React.ReactNode => {
+	const parts: React.ReactNode[] = []
+	let lastIndex = 0
+	let match: RegExpExecArray | null
+
+	const re = new RegExp(MENTION_REGEX.source, 'g')
+	while ((match = re.exec(text)) !== null) {
+		if (match.index > lastIndex) {
+			parts.push(text.slice(lastIndex, match.index))
+		}
+
+		const [, type, , label] = match
+		const pillClass =
+			type === 'expert'
+				? styles.mentionExpert
+				: type === 'workspace'
+				? styles.mentionWorkspace
+				: styles.mentionFile
+
+		parts.push(
+			<span key={match.index} className={`${styles.mentionPill} ${pillClass}`}>
+				{label}
+			</span>
+		)
+		lastIndex = re.lastIndex
+	}
+
+	if (parts.length === 0) return text
+	if (lastIndex < text.length) {
+		parts.push(text.slice(lastIndex))
+	}
+	return <>{parts}</>
+}
+
 const UserMessage = ({ message, isLast }: IUserMessageProps) => {
 	const content = message.props?.content
 
-	// Handle string content (plain text)
 	if (typeof content === 'string') {
 		return (
 			<div className={clsx(styles.userRow)} style={{ marginBottom: '16px' }}>
 				<div className={styles.messageBubble}>
-					<div className={styles.messageContent}>{content}</div>
+					<div className={styles.messageContent}>{renderTextWithMentions(content)}</div>
 				</div>
 			</div>
 		)
 	}
 
-	// Handle array content (multimodal: text + attachments)
 	if (Array.isArray(content)) {
 		return (
 			<div className={clsx(styles.userRow)} style={{ marginBottom: '16px' }}>
@@ -169,7 +203,7 @@ const UserMessage = ({ message, isLast }: IUserMessageProps) => {
 						if (part.type === 'text' && part.text) {
 							return (
 								<div key={index} className={styles.messageContent}>
-									{part.text}
+									{renderTextWithMentions(part.text)}
 								</div>
 							)
 						}
@@ -200,7 +234,6 @@ const UserMessage = ({ message, isLast }: IUserMessageProps) => {
 		)
 	}
 
-	// Fallback for other content types
 	return (
 		<div className={clsx(styles.userRow)} style={{ marginBottom: '16px' }}>
 			<div className={styles.messageBubble}>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { message, Tooltip as AntTooltip } from 'antd'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { message, Tooltip as AntTooltip, Spin } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
 import { Database, Sparkle, UploadSimple, PaperPlaneTilt, Stop } from 'phosphor-react'
@@ -10,6 +10,15 @@ import type { UserMessage } from '../../../openapi'
 import { useAssistantProviders } from '@/hooks/useAssistantProviders'
 import { useWorkspace } from '@/hooks/useComputerWorkspace'
 import { useGlobal } from '@/context/app'
+import { Agent } from '@/openapi/agent'
+import { WorkspaceAPI } from '@/openapi/workspace'
+import {
+	type MentionType,
+	type MentionData,
+	MENTION_DRAG_TYPE,
+	serializeEditorContent,
+	parseMentionDragData
+} from '../../utils/mention'
 import styles from './index.less'
 import AgentTag from './AgentTag'
 import ResourcePicker from '../ResourcePicker'
@@ -17,12 +26,6 @@ import MessageQueue from '../MessageQueue'
 import Selector from './Selector'
 import ToolButton from './ToolButton'
 import Tooltip from './Tooltip'
-
-const MOCK_MENTIONS = [
-	{ id: 'neo', name: 'Neo', avatar: 'N' },
-	{ id: 'translate', name: 'Translator', avatar: 'T' },
-	{ id: 'code', name: 'Code Assistant', avatar: 'C' }
-]
 
 interface Attachment {
 	id: string
@@ -60,6 +63,13 @@ const InputArea = (props: IInputAreaProps) => {
 	const [isAnimating, setIsAnimating] = useState(false)
 	const [isDragOver, setIsDragOver] = useState(false)
 	const [showMentions, setShowMentions] = useState(false)
+	const [mentionKeyword, setMentionKeyword] = useState('')
+	const [mentionSelectedIdx, setMentionSelectedIdx] = useState(0)
+	const [mentionExperts, setMentionExperts] = useState<MentionData[]>([])
+	const [mentionWorkspaces, setMentionWorkspaces] = useState<MentionData[]>([])
+	const [mentionFiles, setMentionFiles] = useState<MentionData[]>([])
+	const [mentionLoading, setMentionLoading] = useState(false)
+	const mentionDebounceRef = useRef<ReturnType<typeof setTimeout>>()
 	const [isEmpty, setIsEmpty] = useState(true)
 	const [currentModel, setCurrentModel] = useState<string>('')
 	const [chatMode, setChatMode] = useState<'chat' | 'task'>('task')
@@ -238,7 +248,73 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 	}
 
-	const insertTag = (text: string, id: string, type: 'mention' | 'agent' = 'mention') => {
+	const loadMentionData = useCallback(
+		async (keyword?: string) => {
+			if (!window.$app?.openapi) return
+			setMentionLoading(true)
+			try {
+				const agentClient = new Agent(window.$app.openapi)
+				const res = await agentClient.assistants.List({
+					mentionable: true,
+					keywords: keyword || undefined,
+					select: ['assistant_id', 'name', 'avatar'],
+					pagesize: 10,
+					locale: is_cn ? 'zh-cn' : 'en-us'
+				})
+				if (res.data?.data) {
+					setMentionExperts(
+						res.data.data.map((a: any) => ({
+							type: 'expert' as MentionType,
+							id: a.assistant_id,
+							label: a.name || a.assistant_id
+						}))
+					)
+				}
+
+				const wsApi = new WorkspaceAPI(window.$app.openapi)
+				const wsRes = await wsApi.List()
+				if (wsRes.data) {
+					const kw = (keyword || '').toLowerCase()
+					setMentionWorkspaces(
+						(wsRes.data as any[])
+							.filter((w: any) => !kw || w.name.toLowerCase().includes(kw))
+							.slice(0, 10)
+							.map((w: any) => ({
+								type: 'workspace' as MentionType,
+								id: w.id,
+								label: w.name
+							}))
+					)
+				}
+
+				if (selectedWorkspace) {
+					const dirRes = await wsApi.ListDir(selectedWorkspace, '/')
+					if (dirRes.data) {
+						const kw = (keyword || '').toLowerCase()
+						setMentionFiles(
+							(dirRes.data as any[])
+								.filter((e: any) => !e.is_dir && (!kw || e.name.toLowerCase().includes(kw)))
+								.slice(0, 10)
+								.map((e: any) => ({
+									type: 'file' as MentionType,
+									id: `workspace://${selectedWorkspace}/${e.name}`,
+									label: e.name
+								}))
+						)
+					}
+				} else {
+					setMentionFiles([])
+				}
+			} catch (err) {
+				console.error('Failed to load mention data:', err)
+			} finally {
+				setMentionLoading(false)
+			}
+		},
+		[selectedWorkspace, is_cn]
+	)
+
+	const insertTag = (label: string, id: string, type: MentionType) => {
 		const editor = editorRef.current
 		if (!editor) return
 
@@ -248,11 +324,9 @@ const InputArea = (props: IInputAreaProps) => {
 		if (!selection) return
 
 		let range: Range
-		// Use saved range if available and valid
 		if (lastRangeRef.current && editor.contains(lastRangeRef.current.commonAncestorContainer)) {
 			range = lastRangeRef.current
 		} else {
-			// Fallback to current selection or end of editor
 			if (selection.rangeCount > 0 && editor.contains(selection.getRangeAt(0).commonAncestorContainer)) {
 				range = selection.getRangeAt(0)
 			} else {
@@ -262,39 +336,51 @@ const InputArea = (props: IInputAreaProps) => {
 			}
 		}
 
-		// If triggered by '@', we need to replace the keyword.
-		if (range.startOffset > 0 && range.startContainer.nodeType === Node.TEXT_NODE) {
-			const textBefore = range.startContainer.textContent || ''
-			// Simple check: if char before cursor is '@', delete it.
+		// Delete @ and any keyword typed after it
+		if (range.startContainer.nodeType === Node.TEXT_NODE) {
+			const textContent = range.startContainer.textContent || ''
+			const cursorOffset = range.startOffset
+			const textBefore = textContent.slice(0, cursorOffset)
+			const atIndex = textBefore.lastIndexOf('@')
+			if (atIndex !== -1) {
+				range.setStart(range.startContainer, atIndex)
+				range.deleteContents()
+			}
 		}
 
-		// Create Tag Element
+		const typeClassMap: Record<MentionType, string> = {
+			expert: styles.mentionExpert,
+			workspace: styles.mentionWorkspace,
+			file: styles.mentionFile
+		}
 		const tag = document.createElement('span')
-		tag.className = styles.mentionTag
+		tag.className = `${styles.mentionTag} ${typeClassMap[type] || ''}`
 		tag.contentEditable = 'false'
-		tag.dataset.id = id
-		tag.dataset.type = type
-		tag.innerText = `@${text}`
+		tag.dataset.mentionType = type
+		tag.dataset.mentionId = id
+		tag.dataset.mentionLabel = label
+
+		if (type === 'expert') {
+			tag.innerText = `@${label}`
+		} else {
+			tag.innerText = label
+		}
 
 		range.deleteContents()
 		range.insertNode(tag)
 
-		// Insert a zero-width space or normal space after tag to allow typing
 		const space = document.createTextNode('\u00A0')
 		range.setStartAfter(tag)
 		range.insertNode(space)
 
-		// Move cursor after space
 		range.setStartAfter(space)
 		range.collapse(true)
 
 		selection.removeAllRanges()
 		selection.addRange(range)
 
-		// Clear saved range
 		lastRangeRef.current = null
-
-		handleInput() // Update empty state
+		handleInput()
 	}
 
 	const handleUpload = async (files: File[]) => {
@@ -357,43 +443,50 @@ const InputArea = (props: IInputAreaProps) => {
 	const handleInput = () => {
 		if (!editorRef.current) return
 
-		// Check emptiness: text is empty AND no tags
 		const hasTags = editorRef.current.querySelectorAll(`.${styles.mentionTag}`).length > 0
-
-		// Robust check:
 		const content = editorRef.current.textContent || ''
 		setIsEmpty(!content.trim() && !hasTags)
 
-		// TODO: Mention feature temporarily disabled, will be enabled in a future version
-		// const selection = window.getSelection()
-		// if (selection?.focusNode?.nodeType === Node.TEXT_NODE) {
-		// 	const textNode = selection.focusNode
-		// 	const offset = selection.focusOffset
-		// 	const charBefore = textNode.textContent?.slice(offset - 1, offset)
-		// 	if (charBefore === '@') {
-		// 		saveSelection()
-		// 		setShowMentions(true)
-		// 	}
-		// } else {
-		// 	setShowMentions(false)
-		// }
+		const selection = window.getSelection()
+		if (selection?.focusNode?.nodeType === Node.TEXT_NODE) {
+			const offset = selection.focusOffset
+			const textBefore = selection.focusNode.textContent?.slice(0, offset) || ''
+			const atIndex = textBefore.lastIndexOf('@')
+
+			if (atIndex !== -1) {
+				const charBeforeAt = atIndex === 0 ? '' : textBefore[atIndex - 1]
+				const isValidTrigger =
+					charBeforeAt === '' || charBeforeAt === ' ' || charBeforeAt === '\u00A0' || charBeforeAt === '\n'
+				if (isValidTrigger) {
+					const keyword = textBefore.slice(atIndex + 1)
+					saveSelection()
+					setShowMentions(true)
+					setMentionKeyword(keyword)
+					setMentionSelectedIdx(0)
+					clearTimeout(mentionDebounceRef.current)
+					mentionDebounceRef.current = setTimeout(() => loadMentionData(keyword), 300)
+				} else {
+					setShowMentions(false)
+				}
+			} else {
+				setShowMentions(false)
+			}
+		} else {
+			setShowMentions(false)
+		}
 	}
 
 	const constructMessage = (): UserMessage | null => {
 		if (!editorRef.current) return null
-		const rawText = editorRef.current.innerText
-		const text = rawText.trim()
+		const text = serializeEditorContent(editorRef.current, styles.mentionTag).trim()
 		const hasTags = editorRef.current.querySelectorAll(`.${styles.mentionTag}`).length > 0
 
-		// Filter out attachments that are still uploading or failed
 		const validAttachments = attachments.filter((att) => !att.uploading && !att.error && att.wrapper)
 
 		if (!text && !hasTags && validAttachments.length === 0) return null
 
-		// Construct Content
 		let content: UserMessage['content']
 		if (validAttachments.length > 0) {
-			// Multimodal content
 			const parts: any[] = []
 			if (text) {
 				parts.push({ type: 'text', text })
@@ -419,7 +512,7 @@ const InputArea = (props: IInputAreaProps) => {
 			})
 			content = parts
 		} else {
-			content = text // Plain text (already trimmed)
+			content = text
 		}
 
 		return {
@@ -601,33 +694,46 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 	}
 
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' && !e.shiftKey) {
-			// TODO: Mention feature temporarily disabled
-			// if (showMentions) {
-			// 	e.preventDefault()
-			// 	setShowMentions(false)
-			// 	return
-			// }
-			e.preventDefault()
+	const getMentionFlatList = useCallback((): MentionData[] => {
+		return [...mentionExperts, ...mentionWorkspaces, ...mentionFiles]
+	}, [mentionExperts, mentionWorkspaces, mentionFiles])
 
-			// TODO: Queue/pre-send feature temporarily disabled, will be enabled in a future version
-			// When streaming, block sending entirely - user must wait for current response to finish
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (showMentions) {
+			const flatList = getMentionFlatList()
+			if (e.key === 'ArrowDown') {
+				e.preventDefault()
+				setMentionSelectedIdx((prev) => (prev + 1) % Math.max(flatList.length, 1))
+				return
+			}
+			if (e.key === 'ArrowUp') {
+				e.preventDefault()
+				setMentionSelectedIdx((prev) => (prev - 1 + Math.max(flatList.length, 1)) % Math.max(flatList.length, 1))
+				return
+			}
+			if (e.key === 'Enter' || e.key === 'Tab') {
+				e.preventDefault()
+				if (flatList[mentionSelectedIdx]) {
+					const item = flatList[mentionSelectedIdx]
+					insertTag(item.label, item.id, item.type)
+				}
+				setShowMentions(false)
+				return
+			}
+			if (e.key === 'Escape') {
+				e.preventDefault()
+				setShowMentions(false)
+				return
+			}
+		}
+
+		if (e.key === 'Enter' && !e.shiftKey) {
+			e.preventDefault()
 			if (streaming) {
 				return
 			}
-			// if (streaming) {
-			// 	handleQueueSend()
-			// } else {
-			// 	handleSend()
-			// }
 			handleSend()
 		}
-
-		// TODO: Mention feature temporarily disabled
-		// if (e.key === 'Escape') {
-		// 	setShowMentions(false)
-		// }
 	}
 
 	const handlePaste = (e: React.ClipboardEvent) => {
@@ -668,15 +774,17 @@ const InputArea = (props: IInputAreaProps) => {
 		e.preventDefault()
 		setIsDragOver(false)
 
-		// Check for files
-		if (e.dataTransfer.files.length > 0) {
-			handleUpload(Array.from(e.dataTransfer.files))
+		const mentionJson = e.dataTransfer.getData(MENTION_DRAG_TYPE)
+		if (mentionJson) {
+			const data = parseMentionDragData(mentionJson)
+			if (data) {
+				insertTag(data.label, data.id, data.type)
+				return
+			}
 		}
 
-		// Check for custom protocol (Mock)
-		const customData = e.dataTransfer.getData('application/x-yao-item')
-		if (customData) {
-			insertTag('Dropped Item', 'item-id', 'mention')
+		if (e.dataTransfer.files.length > 0) {
+			handleUpload(Array.from(e.dataTransfer.files))
 		}
 	}
 
@@ -970,34 +1078,72 @@ const InputArea = (props: IInputAreaProps) => {
 
 	const renderMentions = () => {
 		if (!showMentions) return null
+
+		const flatList = getMentionFlatList()
+		let globalIdx = 0
+
+		const renderGroup = (title: string, items: MentionData[], icon: string) => {
+			if (items.length === 0) return null
+			const startIdx = globalIdx
+			const group = (
+				<React.Fragment key={title}>
+					{startIdx > 0 && <div className={styles.mentionDivider} />}
+					<div className={styles.mentionGroupTitle}>{title}</div>
+					{items.map((item, i) => {
+						const idx = startIdx + i
+						return (
+							<div
+								key={`${item.type}-${item.id}`}
+								className={clsx(
+									styles.mentionItem,
+									mentionSelectedIdx === idx && styles.mentionItemActive
+								)}
+								onMouseEnter={() => setMentionSelectedIdx(idx)}
+								onClick={() => {
+									insertTag(item.label, item.id, item.type)
+									setShowMentions(false)
+								}}
+							>
+								<Icon name={icon} size={16} className={styles.mentionIcon} />
+								<span className={styles.mentionName}>{item.label}</span>
+							</div>
+						)
+					})}
+				</React.Fragment>
+			)
+			globalIdx += items.length
+			return group
+		}
+
 		return (
 			<div className={styles.mentionList}>
-				{MOCK_MENTIONS.map((m) => (
-					<div
-						key={m.id}
-						className={styles.mentionItem}
-						onClick={() => {
-							// Try to remove the '@' that triggered this
-							if (lastRangeRef.current) {
-								const range = lastRangeRef.current
-								if (range.startOffset > 0 && range.startContainer.textContent) {
-									const char =
-										range.startContainer.textContent[range.startOffset - 1]
-									if (char === '@') {
-										range.setStart(range.startContainer, range.startOffset - 1)
-										range.deleteContents()
-									}
-								}
-							}
-
-							insertTag(m.name, m.id, 'mention')
-							setShowMentions(false)
-						}}
-					>
-						<div className={styles.mentionAvatar}>{m.avatar}</div>
-						<div className={styles.mentionName}>{m.name}</div>
+				{mentionLoading && flatList.length === 0 ? (
+					<div className={styles.mentionEmpty}>
+						<Spin size='small' />
 					</div>
-				))}
+				) : flatList.length === 0 ? (
+					<div className={styles.mentionEmpty}>
+						{is_cn ? '无匹配项' : 'No matches'}
+					</div>
+				) : (
+					<>
+						{renderGroup(
+							is_cn ? 'AI 专家' : 'AI Experts',
+							mentionExperts,
+							'material-smart_toy'
+						)}
+						{renderGroup(
+							is_cn ? '工作区' : 'Workspaces',
+							mentionWorkspaces,
+							'material-folder'
+						)}
+						{renderGroup(
+							is_cn ? '工作区文件' : 'Workspace Files',
+							mentionFiles,
+							'material-description'
+						)}
+					</>
+				)}
 			</div>
 		)
 	}
@@ -1076,9 +1222,8 @@ const InputArea = (props: IInputAreaProps) => {
 										: 'Type a message (Shift + Enter for new line)'
 								}
 							/>
-							{renderSendButton()}
-							{/* TODO: Mention feature temporarily disabled */}
-							{/* {renderMentions()} */}
+						{renderSendButton()}
+						{renderMentions()}
 						</div>
 
 						{renderToolbar()}

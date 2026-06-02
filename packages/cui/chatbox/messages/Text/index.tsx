@@ -340,11 +340,28 @@ const wrapWorkspaceLinks = (text: string): string => {
 
 const escapeCurlyBraces = sharedEscapeCurlyBraces
 
+/**
+ * Convert <Mention type="..." value="...">Label</Mention> tags into rendered HTML
+ * before escapeInvalidHtmlTags runs (which would escape them as invalid).
+ * expert/workspace → <span>, file → <a>
+ */
+const wrapMentionTags = (text: string): string => {
+	return text.replace(
+		/<Mention\s+type="([^"]+)"\s+value="([^"]+)">([^<]*)<\/Mention>/g,
+		(_match, type: string, value: string, label: string) => {
+			if (type === 'file') {
+				return `<a class="mention-pill mention-file" href="${value}"><i class="Icon material">insert_drive_file</i>${label}</a>`
+			}
+			const cls = type === 'expert' ? 'mention-expert' : 'mention-workspace'
+			return `<span class="mention-pill ${cls}">${label}</span>`
+		}
+	)
+}
+
 const escape = (text?: string) => {
 	if (!text) return ''
 
 	let result = text
-		// First, escape invalid HTML-like patterns (e.g., <3, <--, etc.)
 		.replace(
 			/\|([^|\n]*[<>][^|\n]*)\|/g,
 			(_, content) => `|${content.replace(/[<>]/g, (match: string) => (match === '<' ? '&lt;' : '&gt;'))}|`
@@ -353,19 +370,17 @@ const escape = (text?: string) => {
 		.replace(/\$\$[\n\r]+/g, '$$\n')
 		.replace(/[\n\r]+\$\$/g, '\n$$')
 
-	// Escape { } outside code/math blocks to prevent MDX treating them as JSX expressions
 	result = escapeCurlyBraces(result)
 
-	// Convert bare workspace:// URLs to markdown links before further processing
 	result = wrapWorkspaceLinks(result)
 
-	// Escape < that are not part of valid HTML tags (handles <3, <--, etc.)
+	// Convert <Mention> tags to safe HTML BEFORE escapeInvalidHtmlTags
+	result = wrapMentionTags(result)
+
 	result = escapeInvalidHtmlTags(result)
 
-	// Handle unclosed HTML tags during streaming
 	result = handleUnclosedHtmlTags(result)
 
-	// Auto-close unclosed code blocks to prevent MDX parse errors during streaming
 	const codeBlocks = result.match(/```/g) || []
 	const codeBlockCount = codeBlocks.length
 	const hasUnclosedCodeBlock = codeBlockCount % 2 !== 0

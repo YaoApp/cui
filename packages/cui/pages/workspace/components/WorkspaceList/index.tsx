@@ -5,6 +5,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { brandIcons } from '@/assets/icons/brands'
 import Button from '@/components/ui/Button'
+import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 import { resolveNodeAddr, nodeName, type Workspace, type NodeInfo } from '../../types'
 import styles from './index.less'
 
@@ -116,7 +117,21 @@ const WorkspaceList = ({ workspaces, nodeMap, loading, onSelect, onDelete, onCre
 
 							return (
 								<div key={ws.id} className={styles.gridItem}>
-									<div className={styles.card} onClick={() => onSelect(ws)}>
+									<div
+										className={styles.card}
+										onClick={() => onSelect(ws)}
+										draggable
+										onDragStart={(e) => {
+											const mentionData: MentionData = {
+												type: 'workspace',
+												id: ws.id,
+												label: ws.name
+											}
+											e.dataTransfer.setData(MENTION_DRAG_TYPE, JSON.stringify(mentionData))
+											e.dataTransfer.effectAllowed = 'copy'
+											setMentionDragImage(e, mentionData)
+										}}
+									>
 										<div className={styles.cardInner}>
 											{/* ── HEADER: icon + two rows ── */}
 											<div className={styles.cardHeader}>
