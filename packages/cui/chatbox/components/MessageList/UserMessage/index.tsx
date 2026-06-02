@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import clsx from 'clsx'
 import { message } from 'antd'
 import { FileText, Image as ImageIcon, DownloadSimple } from 'phosphor-react'
+import Icon from '../../../../widgets/Icon'
 import type { Message } from '../../../../openapi'
 import { ParseFileRef, ResolveFileURL } from '@/utils/fileWrapper'
 import styles from './index.less'
@@ -148,6 +149,20 @@ const FileAttachment: React.FC<{ url: string; filename?: string }> = ({ url, fil
 
 const MENTION_REGEX = /<Mention\s+type="([^"]+)"\s+value="([^"]+)">([^<]*)<\/Mention>/g
 
+const mentionPillClassMap: Record<string, string> = {
+	expert: styles.mentionExpert,
+	workspace: styles.mentionWorkspace,
+	file: styles.mentionFile,
+	directory: styles.mentionDirectory
+}
+
+const mentionPillIconMap: Record<string, string> = {
+	expert: 'material-assistant',
+	workspace: 'material-folder',
+	file: 'material-insert_drive_file',
+	directory: 'material-folder_open'
+}
+
 const renderTextWithMentions = (text: string): React.ReactNode => {
 	const parts: React.ReactNode[] = []
 	let lastIndex = 0
@@ -160,15 +175,11 @@ const renderTextWithMentions = (text: string): React.ReactNode => {
 		}
 
 		const [, type, , label] = match
-		const pillClass =
-			type === 'expert'
-				? styles.mentionExpert
-				: type === 'workspace'
-				? styles.mentionWorkspace
-				: styles.mentionFile
+		const pillClass = mentionPillClassMap[type] || styles.mentionFile
 
 		parts.push(
 			<span key={match.index} className={`${styles.mentionPill} ${pillClass}`}>
+				<Icon name={mentionPillIconMap[type] || 'material-insert_drive_file'} size={13} />
 				{label}
 			</span>
 		)
