@@ -118,12 +118,16 @@
 	background: var(--color_bg_menu);
 	border-radius: 12px;
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-	cursor: pointer;
+	cursor: grab;
 	transition: transform 0.2s, box-shadow 0.2s;
 	overflow: hidden;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
+
+	&:active {
+		cursor: grabbing;
+	}
 
 	&:hover {
 		transform: translateY(-2px);

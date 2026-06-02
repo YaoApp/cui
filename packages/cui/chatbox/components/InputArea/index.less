@@ -361,7 +361,7 @@
 	.mentionTag {
 		display: inline-flex;
 		align-items: center;
-		background: var(--color_info_bg); // Light primary bg
+		background: var(--color_info_bg);
 		border-radius: 4px;
 		padding: 0 4px;
 		color: var(--color_primary);
@@ -371,6 +371,21 @@
 		user-select: none;
 		font-size: 13px;
 		vertical-align: middle;
+	}
+
+	.mentionExpert {
+		background: var(--color_info_bg);
+		color: var(--color_primary);
+	}
+
+	.mentionWorkspace {
+		background: var(--color_success_bg, rgba(82, 196, 26, 0.1));
+		color: var(--color_success, #52c41a);
+	}
+
+	.mentionFile {
+		background: var(--color_warning_bg, rgba(250, 173, 20, 0.1));
+		color: var(--color_warning, #faad14);
 	}
 
 	.toolbar {
@@ -446,41 +461,59 @@
 		box-shadow: var(--shadow);
 		border-radius: 8px;
 		padding: 4px;
-		min-width: 200px;
+		min-width: 240px;
 		z-index: 100;
-		max-height: 240px;
+		max-height: 300px;
 		overflow-y: auto;
+
+		.mentionGroupTitle {
+			padding: 6px 12px 4px;
+			font-size: 11px;
+			font-weight: 600;
+			color: var(--color_text_grey);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.mentionDivider {
+			height: 1px;
+			background: var(--color_border_light);
+			margin: 4px 8px;
+		}
 
 		.mentionItem {
 			display: flex;
 			align-items: center;
 			gap: 8px;
-			padding: 8px 12px;
+			padding: 6px 12px;
 			border-radius: 4px;
 			cursor: pointer;
-			transition: background 0.2s;
+			transition: background 0.15s;
 
 			&:hover,
-			&.selected {
+			&.mentionItemActive {
 				background: var(--color_chatbox_bg_selected);
 			}
 
-			.mentionAvatar {
-				width: 20px;
-				height: 20px;
-				border-radius: 50%;
-				background: var(--color_primary);
-				color: #fff;
-				font-size: 10px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
+			.mentionIcon {
+				flex-shrink: 0;
+				color: var(--color_text_grey);
 			}
 
 			.mentionName {
 				font-size: 13px;
 				color: var(--color_text);
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
 			}
+		}
+
+		.mentionEmpty {
+			padding: 16px;
+			text-align: center;
+			font-size: 13px;
+			color: var(--color_text_grey);
 		}
 	}
 

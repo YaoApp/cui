@@ -5,6 +5,7 @@ import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import FileViewer from '@/components/view/FileViewer'
 import { WorkspaceAPI } from '@/openapi/workspace'
+import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 import { resolveNodeAddr, nodeName, nodeAddr, type Workspace, type DirEntry, type NodeInfo } from '../../types'
 import styles from './index.less'
 
@@ -551,6 +552,24 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 								onClick={() =>
 									entry.is_dir ? navigateTo(entry) : handlePreview(entry)
 								}
+								draggable
+								onDragStart={(e) => {
+									const filePath =
+										currentPath === '/'
+											? entry.name
+											: `${currentPath.slice(1)}/${entry.name}`
+									const mentionData: MentionData = {
+										type: 'file',
+										id: `workspace://${workspace.id}/${filePath}`,
+										label: entry.name
+									}
+									e.dataTransfer.setData(
+										MENTION_DRAG_TYPE,
+										JSON.stringify(mentionData)
+									)
+									e.dataTransfer.effectAllowed = 'copy'
+									setMentionDragImage(e, mentionData)
+								}}
 							>
 								<div className={styles.fileIcon}>
 									<Icon name={getFileIcon(entry)} size={18} />

@@ -362,6 +362,12 @@
 		transition: background 0.15s ease;
 		cursor: pointer;
 
+		cursor: grab;
+
+		&:active {
+			cursor: grabbing;
+		}
+
 		&:last-child {
 			border-bottom: none;
 		}

@@ -8,6 +8,7 @@ import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import UserAvatar from '@/widgets/UserAvatar'
 import { useGlobal } from '@/context/app'
+import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 
 interface Props {
 	/** Assistant data */
@@ -37,8 +38,28 @@ const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) 
 		window.$app.Event.emit('chat/newWithAssistant', data.assistant_id)
 	}
 
+	const isDraggable = data.mentionable === true
+
 	return (
-		<div className={styles.card} onClick={() => onClick?.(data)}>
+		<div
+			className={`${styles.card} ${isDraggable ? styles.draggable : ''}`}
+			onClick={() => onClick?.(data)}
+			draggable={isDraggable}
+			onDragStart={
+				isDraggable
+					? (e) => {
+							const mentionData: MentionData = {
+								type: 'expert',
+								id: data.assistant_id,
+								label: data.name
+							}
+							e.dataTransfer.setData(MENTION_DRAG_TYPE, JSON.stringify(mentionData))
+							e.dataTransfer.effectAllowed = 'copy'
+							setMentionDragImage(e, mentionData)
+					  }
+					: undefined
+			}
+		>
 			<div className={styles.header}>
 				<UserAvatar
 					size={48}
