@@ -334,3 +334,27 @@ export interface AgentSettingPageData {
 	}
 	supported_runners?: string[]
 }
+
+// ---------------------------------------------------------------------------
+// API Keys
+// ---------------------------------------------------------------------------
+
+export interface APIKeyResponse {
+	id: string
+	name: string
+	key_prefix: string
+	status: string
+	expires_at?: string
+	created_at: string
+	last_used?: string
+}
+
+export interface APIKeyCreateResponse {
+	id: string
+	name: string
+	key: string
+	key_prefix: string
+	status: string
+	expires_at?: string
+	created_at: string
+}

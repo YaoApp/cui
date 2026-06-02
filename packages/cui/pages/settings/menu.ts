@@ -26,6 +26,13 @@ export const settingMenuGroups: MenuGroup[] = [
 			name: { 'zh-CN': '偏好设置', 'en-US': 'Preferences' },
 			icon: 'material-tune',
 			path: '/settings/preferences'
+		},
+		{
+			id: 'apikeys-1',
+			key: 'api-keys',
+			name: { 'zh-CN': 'API 密钥', 'en-US': 'API Keys' },
+			icon: 'material-key',
+			path: '/settings/api-keys'
 		}
 		]
 	},

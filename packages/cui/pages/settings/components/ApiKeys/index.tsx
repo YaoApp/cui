@@ -1,113 +1,172 @@
-import { useState, useEffect } from 'react'
-import { Form, message, Modal } from 'antd'
-import { getLocale, useNavigate } from '@umijs/max'
-import type { ApiKey } from '../../types'
-import { mockApi } from '../../mockApi'
-import { DataTable, Button } from '@/components/ui'
-import { Input } from '@/components/ui/inputs'
-import { TableColumn, TableAction } from '@/components/ui/DataTable/types'
+import { useState, useEffect, useRef } from 'react'
+import { message, Modal } from 'antd'
+import { getLocale } from '@umijs/max'
+import { Setting } from '@/openapi/setting'
+import type { APIKeyResponse, APIKeyCreateResponse } from '@/openapi/setting/types'
+import { Button } from '@/components/ui'
+import { Input, Select } from '@/components/ui/inputs'
 import Icon from '@/widgets/Icon'
 import styles from './index.less'
+
+function getSettingAPI(): Setting | null {
+	if (!window.$app?.openapi) return null
+	return new Setting(window.$app.openapi)
+}
 
 const ApiKeys = () => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const navigate = useNavigate()
-	const [form] = Form.useForm()
-
-	// 2FA 相关状态
-	const [has2FA, setHas2FA] = useState(false)
-	const [checking2FA, setChecking2FA] = useState(true)
 
 	const [loading, setLoading] = useState(true)
-	const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
-	const [modalVisible, setModalVisible] = useState(false)
+	const [apiKeys, setApiKeys] = useState<APIKeyResponse[]>([])
 	const [creating, setCreating] = useState(false)
-	const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
-	const [newKeyName, setNewKeyName] = useState('')
+	const [visibleKeys, setVisibleKeys] = useState<Map<string, string>>(new Map())
 
-	// 检查 2FA 状态
+	const [createOpen, setCreateOpen] = useState(false)
+	const [newKeyName, setNewKeyName] = useState('')
+	const [newKeyExpiry, setNewKeyExpiry] = useState('never')
+	const retryRef = useRef(0)
+
 	useEffect(() => {
-		const check2FAStatus = async () => {
-			try {
-				setChecking2FA(true)
-				// Mock 2FA 检查 - 后续对接真实 API
-				await new Promise((resolve) => setTimeout(resolve, 500))
-				setHas2FA(false) // 默认为 false，用于演示
-			} catch (error) {
-				console.error('Failed to check 2FA status:', error)
-			} finally {
-				setChecking2FA(false)
+		let cancelled = false
+
+		const load = () => {
+			const api = getSettingAPI()
+			if (!api) {
+				if (retryRef.current < 10) {
+					retryRef.current++
+					setTimeout(load, 300)
+				} else {
+					setLoading(false)
+				}
+				return
 			}
+
+			api.GetApiKeys().then((res) => {
+				if (cancelled) return
+				if (res.error) {
+					message.error(res.error.error_description || (is_cn ? '加载 API 密钥失败' : 'Failed to load API keys'))
+					return
+				}
+				if (res.data) {
+					setApiKeys(res.data)
+				}
+			}).catch((err) => {
+				if (cancelled) return
+				console.error('Failed to load API keys:', err)
+				message.error(is_cn ? '加载 API 密钥失败' : 'Failed to load API keys')
+			}).finally(() => {
+				if (!cancelled) setLoading(false)
+			})
 		}
 
-		check2FAStatus()
+		load()
+		return () => { cancelled = true }
 	}, [])
 
-	// 加载 API Keys（仅在有 2FA 时）
-	useEffect(() => {
-		if (!has2FA) return
+	const handleCreate = async () => {
+		const api = getSettingAPI()
+		if (!api) return
 
-		const loadApiKeys = async () => {
-			try {
-				setLoading(true)
-				const data = await mockApi.getApiKeys()
-				setApiKeys(data)
-			} catch (error) {
-				console.error('Failed to load API keys:', error)
-				message.error(is_cn ? '加载API密钥失败' : 'Failed to load API keys')
-			} finally {
-				setLoading(false)
-			}
-		}
-
-		loadApiKeys()
-	}, [has2FA, is_cn])
-
-	const handleCreate = async (values: { name: string }) => {
 		try {
 			setCreating(true)
-			// Mock create
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-			const newKey: ApiKey = {
-				id: Date.now().toString(),
-				name: values.name,
-				key: 'sk-' + Math.random().toString(36).substring(2, 34),
-				created_at: new Date().toISOString(),
-				status: 'active'
+			const payload: { name: string; expires_at?: string } = {
+				name: newKeyName || (is_cn ? '未命名密钥' : 'Unnamed Key')
 			}
-			setApiKeys((prev) => [...prev, newKey])
-			setModalVisible(false)
-			form.resetFields()
-			message.success(is_cn ? '创建成功' : 'Created successfully')
-		} catch (error) {
-			message.error(is_cn ? '创建失败' : 'Create failed')
+			if (newKeyExpiry !== 'never') {
+				const now = new Date()
+				const days = parseInt(newKeyExpiry, 10)
+				const exp = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+				payload.expires_at = exp.toISOString()
+			}
+			const res = await api.CreateApiKey(payload)
+			if (res.error) {
+				message.error(res.error.error_description || (is_cn ? '创建失败' : 'Create failed'))
+				return
+			}
+			if (res.data) {
+				const created = res.data as APIKeyCreateResponse
+				setApiKeys((prev) => [
+					...prev,
+					{
+						id: created.id,
+						name: created.name,
+						key_prefix: created.key_prefix,
+						status: created.status,
+						expires_at: created.expires_at,
+						created_at: created.created_at
+					}
+				])
+				setVisibleKeys((prev) => new Map(prev).set(created.id, created.key))
+				setNewKeyName('')
+				setNewKeyExpiry('never')
+				setCreateOpen(false)
+				message.success(is_cn ? '创建成功，请立即复制密钥' : 'Created successfully, please copy the key now')
+			}
+		} catch (error: any) {
+			const msg = error?.message || error?.error_description || (is_cn ? '创建失败' : 'Create failed')
+			message.error(msg)
 		} finally {
 			setCreating(false)
 		}
 	}
 
 	const handleDelete = async (id: string) => {
+		const api = getSettingAPI()
+		if (!api) return
+
 		try {
-			// Mock delete
-			await new Promise((resolve) => setTimeout(resolve, 500))
+			const res = await api.DeleteApiKey(id)
+			if (res.error) {
+				message.error(res.error.error_description || (is_cn ? '删除失败' : 'Delete failed'))
+				return
+			}
 			setApiKeys((prev) => prev.filter((key) => key.id !== id))
+			setVisibleKeys((prev) => {
+				const next = new Map(prev)
+				next.delete(id)
+				return next
+			})
 			message.success(is_cn ? '删除成功' : 'Deleted successfully')
-		} catch (error) {
-			message.error(is_cn ? '删除失败' : 'Delete failed')
+		} catch (error: any) {
+			const msg = error?.message || error?.error_description || (is_cn ? '删除失败' : 'Delete failed')
+			message.error(msg)
 		}
 	}
 
-	const toggleKeyVisibility = (id: string) => {
-		setVisibleKeys((prev) => {
-			const newSet = new Set(prev)
-			if (newSet.has(id)) {
-				newSet.delete(id)
-			} else {
-				newSet.add(id)
+	const handleRegenerate = async (id: string) => {
+		const api = getSettingAPI()
+		if (!api) return
+
+		try {
+			const res = await api.RegenerateApiKey(id)
+			if (res.error) {
+				message.error(res.error.error_description || (is_cn ? '重新生成失败' : 'Regenerate failed'))
+				return
 			}
-			return newSet
-		})
+			if (res.data) {
+				const regenerated = res.data as APIKeyCreateResponse
+				setApiKeys((prev) =>
+					prev.map((k) =>
+						k.id === id
+							? {
+									id: regenerated.id,
+									name: regenerated.name,
+									key_prefix: regenerated.key_prefix,
+									status: regenerated.status,
+									expires_at: regenerated.expires_at,
+									created_at: regenerated.created_at
+							  }
+							: k
+					)
+				)
+				setVisibleKeys((prev) => new Map(prev).set(id, regenerated.key))
+				message.success(is_cn ? '重新生成成功，请立即复制新密钥' : 'Regenerated successfully, please copy the new key now')
+			}
+		} catch (error: any) {
+			const msg = error?.message || error?.error_description || (is_cn ? '重新生成失败' : 'Regenerate failed')
+			message.error(msg)
+		}
 	}
 
 	const copyToClipboard = (text: string) => {
@@ -116,354 +175,21 @@ const ApiKeys = () => {
 		})
 	}
 
-	const maskKey = (key: string) => {
-		return key.substring(0, 7) + '...' + key.substring(key.length - 4)
+	const formatDate = (dateStr?: string) => {
+		if (!dateStr) return is_cn ? '从未' : 'Never'
+		return new Date(dateStr).toLocaleDateString(is_cn ? 'zh-CN' : 'en-US', {
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit'
+		})
 	}
 
-	// 临时的 2FA 切换功能（开发用）
-	const toggle2FA = () => {
-		setHas2FA(!has2FA)
-	}
-
-	// 跳转到安全设置页面
-	const goToSecurity = () => {
-		navigate('/settings/security')
-	}
-
-	// 快速创建 API Key
-	const handleQuickCreate = async () => {
-		try {
-			setCreating(true)
-			// Mock create
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-			const newKey: ApiKey = {
-				id: Date.now().toString(),
-				name: newKeyName || (is_cn ? '未命名密钥' : 'Unnamed Key'),
-				key: 'sk-' + Math.random().toString(36).substring(2, 34),
-				created_at: new Date().toISOString(),
-				status: 'active'
-			}
-			setApiKeys((prev) => [...prev, newKey])
-			setNewKeyName('')
-			message.success(is_cn ? '创建成功' : 'Created successfully')
-		} catch (error) {
-			message.error(is_cn ? '创建失败' : 'Create failed')
-		} finally {
-			setCreating(false)
-		}
-	}
-
-	// 渲染 API Key 卡片
-	const renderApiKeyCard = (apiKey: ApiKey) => (
-		<div key={apiKey.id} className={styles.keyCard}>
-			<div className={styles.keyHeader}>
-				<div className={styles.keyName}>{apiKey.name}</div>
-				<div className={styles.keyActions}>
-					<Button
-						type='default'
-						size='small'
-						icon={<Icon name='material-delete' size={14} />}
-						onClick={() => {
-							Modal.confirm({
-								title: is_cn ? '确认删除' : 'Confirm Delete',
-								content: is_cn
-									? '确定要删除这个API密钥吗？此操作不可撤销。'
-									: 'Are you sure to delete this API key? This action cannot be undone.',
-								okText: is_cn ? '删除' : 'Delete',
-								cancelText: is_cn ? '取消' : 'Cancel',
-								okType: 'danger',
-								onOk: () => handleDelete(apiKey.id)
-							})
-						}}
-					/>
-				</div>
-			</div>
-			<div className={styles.keyBody}>
-				<div className={styles.keyValue}>
-					<code className={styles.keyText}>
-						{visibleKeys.has(apiKey.id) ? apiKey.key : maskKey(apiKey.key)}
-					</code>
-					<div className={styles.keyButtonGroup}>
-						<Button
-							type='default'
-							size='small'
-							icon={
-								<Icon
-									name={
-										visibleKeys.has(apiKey.id)
-											? 'material-visibility_off'
-											: 'material-visibility'
-									}
-									size={14}
-								/>
-							}
-							onClick={() => toggleKeyVisibility(apiKey.id)}
-						/>
-						<Button
-							type='default'
-							size='small'
-							icon={<Icon name='material-content_copy' size={14} />}
-							onClick={() => copyToClipboard(apiKey.key)}
-						/>
-					</div>
-				</div>
-				<div className={styles.keyMeta}>
-					<span className={styles.keyLastUsed}>
-						{is_cn ? '最后使用：' : 'Last used: '}
-						{apiKey.last_used_at
-							? new Date(apiKey.last_used_at).toLocaleDateString()
-							: is_cn
-							? '从未'
-							: 'Never'}
-					</span>
-				</div>
-			</div>
-		</div>
-	)
-
-	// 定义表格列
-	const columns: TableColumn<ApiKey>[] = [
-		{
-			key: 'name',
-			title: is_cn ? '名称' : 'Name',
-			dataIndex: 'name',
-			width: 150,
-			ellipsis: true
-		},
-		{
-			key: 'key',
-			title: is_cn ? 'API密钥' : 'API Key',
-			dataIndex: 'key',
-			flex: 2,
-			minWidth: 300,
-			render: (key: string, record: ApiKey) => (
-				<div className={styles.keyCell}>
-					<code className={styles.keyText}>{visibleKeys.has(record.id) ? key : maskKey(key)}</code>
-					<div className={styles.keyActions}>
-						<Button
-							type='default'
-							size='small'
-							icon={
-								<Icon
-									name={
-										visibleKeys.has(record.id)
-											? 'material-visibility_off'
-											: 'material-visibility'
-									}
-									size={14}
-								/>
-							}
-							onClick={() => toggleKeyVisibility(record.id)}
-						/>
-						<Button
-							type='default'
-							size='small'
-							icon={<Icon name='material-content_copy' size={14} />}
-							onClick={() => copyToClipboard(key)}
-						/>
-					</div>
-				</div>
-			)
-		},
-		{
-			key: 'status',
-			title: is_cn ? '状态' : 'Status',
-			dataIndex: 'status',
-			width: 80,
-			render: (status: string) => (
-				<div className={styles.statusTag} data-status={status}>
-					<Icon
-						name={status === 'active' ? 'material-check_circle' : 'material-cancel'}
-						size={12}
-						className={styles.statusIcon}
-					/>
-					<span className={styles.statusText}>
-						{status === 'active' ? (is_cn ? '活跃' : 'Active') : is_cn ? '禁用' : 'Disabled'}
-					</span>
-				</div>
-			)
-		},
-		{
-			key: 'created_at',
-			title: is_cn ? '创建时间' : 'Created',
-			dataIndex: 'created_at',
-			width: 120,
-			render: (date: string) => (
-				<span className={styles.dateText}>
-					{new Date(date).toLocaleDateString(is_cn ? 'zh-CN' : 'en-US')}
-				</span>
-			)
-		},
-		{
-			key: 'last_used_at',
-			title: is_cn ? '最后使用' : 'Last Used',
-			dataIndex: 'last_used_at',
-			width: 120,
-			render: (date?: string) => (
-				<span className={styles.dateText}>
-					{date ? new Date(date).toLocaleDateString(is_cn ? 'zh-CN' : 'en-US') : '-'}
-				</span>
-			)
-		}
-	]
-
-	// 定义表格操作
-	const actions: TableAction<ApiKey>[] = [
-		{
-			key: 'delete',
-			label: is_cn ? '删除' : 'Delete',
-			icon: <Icon name='material-delete' size={14} />,
-			type: 'default',
-			onClick: (record) => {
-				Modal.confirm({
-					title: is_cn ? '确认删除' : 'Confirm Delete',
-					content: is_cn
-						? '确定要删除这个API密钥吗？此操作不可撤销。'
-						: 'Are you sure to delete this API key? This action cannot be undone.',
-					okText: is_cn ? '删除' : 'Delete',
-					cancelText: is_cn ? '取消' : 'Cancel',
-					okType: 'danger',
-					onOk: () => handleDelete(record.id)
-				})
-			}
-		}
-	]
-
-	// 渲染 2FA 未启用的提示页面（完全模仿 Profile 的结构）
-	const render2FAPrompt = () => (
-		<div className={styles.promptPanel}>
-			<div className={styles.promptContainer}>
-				<div className={styles.promptContent}>
-					<div className={styles.promptIcon}>
-						<Icon name='material-security' size={48} />
-					</div>
-					<h3 className={styles.promptTitle}>
-						{is_cn ? '需要启用两步验证' : 'Two-Factor Authentication Required'}
-					</h3>
-					<p className={styles.promptDescription}>
-						{is_cn
-							? '为了保护您的账户安全，您需要先启用两步验证才能管理API密钥。'
-							: 'To protect your account security, you need to enable two-factor authentication before managing API keys.'}
-					</p>
-					<div className={styles.promptActions}>
-						<Button
-							type='primary'
-							icon={<Icon name='material-shield' size={14} />}
-							onClick={goToSecurity}
-						>
-							{is_cn ? '前往安全设置' : 'Go to Security Settings'}
-						</Button>
-						{/* 临时开发按钮 */}
-						<Button
-							type='default'
-							onClick={toggle2FA}
-							style={{ marginTop: '8px', opacity: 0.6 }}
-						>
-							{is_cn ? '[临时] 切换2FA状态' : '[Temp] Toggle 2FA Status'}
-						</Button>
-					</div>
-				</div>
-			</div>
-		</div>
-	)
-
-	// 渲染 API Keys 列表页面
-	const renderApiKeysList = () => (
-		<>
-			{/* API Management Section */}
-			<div className={styles.managementSection}>
-				<div className={styles.sectionHeader}>
-					<div className={styles.sectionInfo}>
-						<h2>{is_cn ? 'API 管理' : 'API Management'}</h2>
-						<p>
-							{is_cn
-								? '创建和管理 API 密钥以集成我们的服务'
-								: 'Create and manage API keys to integrate with our services'}
-						</p>
-					</div>
-					<div className={styles.sectionActions}>
-						<a href='#' className={styles.docLink}>
-							<Icon name='material-open_in_new' size={14} />
-							{is_cn ? '查看 API 文档' : 'View API Documentation'}
-						</a>
-						{/* 临时开发按钮 */}
-						<Button
-							type='default'
-							onClick={toggle2FA}
-							style={{ opacity: 0.6, fontSize: '11px' }}
-						>
-							{is_cn ? '[临时] 切换2FA' : '[Temp] Toggle 2FA'}
-						</Button>
-					</div>
-				</div>
-			</div>
-
-			{/* API Keys Management Panel */}
-			<div className={styles.keysPanel}>
-				{/* Create New Key Section */}
-				<div className={styles.createSection}>
-					<div className={styles.createInputGroup}>
-						<Input
-							schema={{
-								type: 'string',
-								placeholder: is_cn
-									? '输入密钥名称（可选）'
-									: 'Enter key name (optional)'
-							}}
-							value={newKeyName}
-							onChange={(value) => setNewKeyName(String(value || ''))}
-							error=''
-							hasError={false}
-						/>
-						<Button
-							type='primary'
-							icon={<Icon name='material-add' size={14} />}
-							onClick={handleQuickCreate}
-							loading={creating}
-						>
-							{is_cn ? '创建新密钥' : 'Create New Key'}
-						</Button>
-					</div>
-				</div>
-
-				{/* API Keys List */}
-				<div className={styles.keysSection}>
-					{loading ? (
-						<div className={styles.loadingState}>
-							<Icon
-								name='material-hourglass_empty'
-								size={32}
-								className={styles.loadingIcon}
-							/>
-							<span>{is_cn ? '加载中...' : 'Loading...'}</span>
-						</div>
-					) : apiKeys.length === 0 ? (
-						<div className={styles.emptyState}>
-							<Icon name='material-key' size={48} className={styles.emptyIcon} />
-							<div className={styles.emptyTitle}>
-								{is_cn ? '暂无API密钥' : 'No API Keys'}
-							</div>
-							<div className={styles.emptyDescription}>
-								{is_cn
-									? '创建您的第一个API密钥来开始使用我们的服务'
-									: 'Create your first API key to start using our services'}
-							</div>
-						</div>
-					) : (
-						apiKeys.map((apiKey) => renderApiKeyCard(apiKey))
-					)}
-				</div>
-			</div>
-		</>
-	)
-
-	// 主渲染逻辑
-	if (checking2FA) {
+	if (loading) {
 		return (
 			<div className={styles.apiKeys}>
-				<div className={styles.loadingState}>
-					<Icon name='material-hourglass_empty' size={32} className={styles.loadingIcon} />
-					<span>{is_cn ? '检查安全设置...' : 'Checking security settings...'}</span>
+				<div className={styles.emptyState}>
+					<Icon name='material-hourglass_empty' size={32} />
+					<span>{is_cn ? '加载中...' : 'Loading...'}</span>
 				</div>
 			</div>
 		)
@@ -471,84 +197,184 @@ const ApiKeys = () => {
 
 	return (
 		<div className={styles.apiKeys}>
-			{has2FA ? renderApiKeysList() : render2FAPrompt()}
+			{/* Header */}
+			<div className={styles.header}>
+				<div className={styles.headerContent}>
+					<h2>{is_cn ? 'API 密钥' : 'API Keys'}</h2>
+					<p>{is_cn ? '创建和管理 API 密钥以集成我们的服务' : 'Create and manage API keys to integrate with our services'}</p>
+				</div>
+			</div>
 
-			{/* 创建 API Key 弹窗 */}
-			<Modal
-				title={
-					<div className={styles.modalHeader}>
-						<div className={styles.titleSection}>
-							<Icon name='material-key' size={16} className={styles.titleIcon} />
-							<span className={styles.modalTitle}>
-								{is_cn ? '创建API密钥' : 'Create API Key'}
-							</span>
-						</div>
-						<div
-							className={styles.closeButton}
-							onClick={() => {
-								setModalVisible(false)
-								form.resetFields()
-							}}
-						>
-							<Icon name='material-close' size={16} className={styles.closeIcon} />
+			{/* Card */}
+			<div className={styles.card}>
+				<div className={styles.cardHeader}>
+					<div>
+						<div className={styles.cardTitle}>{is_cn ? '密钥管理' : 'Key Management'}</div>
+						<div className={styles.cardDesc}>
+							{is_cn
+								? '使用 API 密钥通过 HTTP 请求访问服务接口'
+								: 'Use API keys to access services via HTTP requests'}
 						</div>
 					</div>
-				}
-				open={modalVisible}
-				onCancel={() => {
-					setModalVisible(false)
-					form.resetFields()
-				}}
-				footer={null}
-				width={480}
-				className={styles.createModal}
-				destroyOnClose
-				closable={false}
-			>
-				<div className={styles.modalContent}>
-					<Form form={form} layout='vertical' onFinish={handleCreate}>
-						<Form.Item
-							name='name'
-							label={is_cn ? '密钥名称' : 'Key Name'}
-							rules={[
-								{
-									required: true,
-									message: is_cn ? '请输入密钥名称' : 'Please enter key name'
-								}
-							]}
-						>
-							<Input
-								schema={{
-									type: 'string',
-									placeholder: is_cn ? '请输入密钥名称' : 'Enter key name'
-								}}
-								error=''
-								hasError={false}
-							/>
-						</Form.Item>
+					<Button size='small' type='primary' onClick={() => setCreateOpen(true)}>
+						{is_cn ? '+ 创建' : '+ Create'}
+					</Button>
+				</div>
 
-						<div className={styles.modalActions}>
-							<Button
-								onClick={() => {
-									setModalVisible(false)
-									form.resetFields()
-								}}
-								disabled={creating}
-							>
-								{is_cn ? '取消' : 'Cancel'}
-							</Button>
-							<button type='submit' className={styles.submitButton} disabled={creating}>
-								{creating && (
-									<Icon
-										name='material-refresh'
-										size={12}
-										className={styles.buttonLoadingIcon}
-									/>
-								)}
-								{is_cn ? '创建' : 'Create'}
-							</button>
-						</div>
-					</Form>
+				{apiKeys.length === 0 ? (
+					<div className={styles.emptyState}>
+						<Icon name='material-key' size={32} />
+						<span>{is_cn ? '暂无 API 密钥' : 'No API Keys'}</span>
+					</div>
+				) : (
+					<table className={styles.keysTable}>
+						<colgroup>
+							<col style={{ width: '18%' }} />
+							<col style={{ width: '42%' }} />
+							<col style={{ width: '18%' }} />
+							<col style={{ width: '22%' }} />
+						</colgroup>
+						<thead>
+							<tr>
+								<th>{is_cn ? '名称' : 'Name'}</th>
+								<th>{is_cn ? '密钥' : 'Key'}</th>
+								<th>{is_cn ? '最后使用' : 'Last Used'}</th>
+								<th style={{ textAlign: 'right' }}>{is_cn ? '操作' : 'Actions'}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{apiKeys.map((apiKey) => {
+								const fullKey = visibleKeys.get(apiKey.id)
+								return (
+									<tr key={apiKey.id}>
+										<td className={styles.nameCell}>{apiKey.name}</td>
+										<td>
+											<div className={styles.keyCell}>
+												<span className={styles.keyValue}>
+													{fullKey || `${apiKey.key_prefix}...`}
+												</span>
+												{fullKey && (
+													<Button
+														size='small'
+														type='default'
+														onClick={() => copyToClipboard(fullKey)}
+													>
+														<Icon name='material-content_copy' size={13} />
+													</Button>
+												)}
+											</div>
+										</td>
+										<td className={styles.dateCell}>{formatDate(apiKey.last_used)}</td>
+										<td>
+											<div className={styles.actionsCell}>
+												<Button
+													size='small'
+													type='default'
+													onClick={() => {
+														Modal.confirm({
+															title: is_cn ? '确认重新生成' : 'Confirm Regenerate',
+															content: is_cn
+																? '重新生成后旧密钥将立即失效，此操作不可撤销。'
+																: 'The old key will be immediately invalidated.',
+															okText: is_cn ? '重新生成' : 'Regenerate',
+															cancelText: is_cn ? '取消' : 'Cancel',
+															onOk: () => handleRegenerate(apiKey.id)
+														})
+													}}
+												>
+													<Icon name='material-refresh' size={14} />
+												</Button>
+												<Button
+													size='small'
+													type='default'
+													onClick={() => {
+														Modal.confirm({
+															title: is_cn ? '确认删除' : 'Confirm Delete',
+															content: is_cn
+																? '确定要删除这个 API 密钥吗？此操作不可撤销。'
+																: 'Are you sure? This cannot be undone.',
+															okText: is_cn ? '删除' : 'Delete',
+															cancelText: is_cn ? '取消' : 'Cancel',
+															okType: 'danger',
+															onOk: () => handleDelete(apiKey.id)
+														})
+													}}
+												>
+													<Icon name='material-delete' size={14} />
+												</Button>
+											</div>
+										</td>
+									</tr>
+								)
+							})}
+						</tbody>
+					</table>
+				)}
+
+				<div className={styles.footer}>
+					<div className={styles.footerNote}>
+						<Icon name='material-lock' size={13} />
+						<span>{is_cn ? '密钥仅在创建时展示一次，请及时复制保存' : 'Keys are only shown once at creation, please copy immediately'}</span>
+					</div>
+					<a href='https://yaoagents.com/docs' target='_blank' rel='noreferrer' className={styles.docLink}>
+						<Icon name='material-open_in_new' size={13} />
+						{is_cn ? 'API 文档' : 'API Docs'}
+					</a>
+				</div>
+			</div>
+
+			{/* Create Modal */}
+			<Modal
+				title={is_cn ? '创建 API 密钥' : 'Create API Key'}
+				open={createOpen}
+				onCancel={() => { setCreateOpen(false); setNewKeyName(''); setNewKeyExpiry('never') }}
+				footer={null}
+				destroyOnClose
+			>
+				<div className={styles.modalBody}>
+					<div className={styles.formField}>
+						<label className={styles.formLabel}>
+							{is_cn ? '密钥名称' : 'Key Name'}
+							<span className={styles.formHint}>{is_cn ? '用于标识该密钥的用途' : 'To identify this key'}</span>
+						</label>
+						<Input
+							schema={{
+								type: 'string',
+								placeholder: is_cn ? '如：生产环境、测试环境' : 'e.g. Production, Testing'
+							}}
+							value={newKeyName}
+							onChange={(v) => setNewKeyName(v as string)}
+						/>
+					</div>
+					<div className={styles.formField}>
+						<label className={styles.formLabel}>
+							{is_cn ? '有效期' : 'Expiration'}
+						</label>
+						<Select
+							schema={{
+								type: 'string',
+								enum: [
+									{ label: is_cn ? '永不过期' : 'Never expires', value: 'never' },
+									{ label: is_cn ? '7 天' : '7 days', value: '7' },
+									{ label: is_cn ? '30 天' : '30 days', value: '30' },
+									{ label: is_cn ? '60 天' : '60 days', value: '60' },
+									{ label: is_cn ? '90 天' : '90 days', value: '90' },
+									{ label: is_cn ? '180 天' : '180 days', value: '180' },
+									{ label: is_cn ? '1 年' : '1 year', value: '365' }
+								]
+							}}
+							value={newKeyExpiry}
+							onChange={(v) => setNewKeyExpiry(v as string)}
+						/>
+					</div>
+					<div className={styles.modalActions}>
+						<Button onClick={() => { setCreateOpen(false); setNewKeyName(''); setNewKeyExpiry('never') }}>
+							{is_cn ? '取消' : 'Cancel'}
+						</Button>
+						<Button type='primary' loading={creating} onClick={handleCreate}>
+							{is_cn ? '创建' : 'Create'}
+						</Button>
+					</div>
 				</div>
 			</Modal>
 		</div>

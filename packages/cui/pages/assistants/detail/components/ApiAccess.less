@@ -117,6 +117,58 @@
 	text-overflow: ellipsis;
 }
 
+.metadataSection {
+	margin-top: 16px;
+	padding: 14px 16px;
+	background: var(--color_neo_bg_field, var(--color_bg_nav));
+	border-radius: 8px;
+	border: 1px solid var(--color_neo_border_field, var(--color_border));
+}
+
+.metadataTitle {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--color_neo_text_secondary, var(--color_text_grey));
+	margin-bottom: 10px;
+}
+
+.metadataTable {
+	width: 100%;
+	border-collapse: collapse;
+
+	tr + tr td {
+		padding-top: 6px;
+	}
+}
+
+.metaKey {
+	font-size: 12px;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	color: var(--color_neo_text_primary, var(--color_text));
+	white-space: nowrap;
+	padding-right: 16px;
+	vertical-align: top;
+	width: 1%;
+}
+
+.metaDesc {
+	font-size: 12px;
+	color: var(--color_neo_text_secondary, var(--color_text_grey));
+	line-height: 1.5;
+}
+
+.metaCode {
+	display: block;
+	margin-top: 4px;
+	font-size: 11px;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	color: var(--color_neo_text_secondary, var(--color_text_grey));
+	opacity: 0.8;
+	word-break: break-all;
+}
+
 :global {
 	.assistant-api-code-pre .hljs { color: var(--color_text); background: transparent; }
 	.assistant-api-code-pre .hljs-comment,
