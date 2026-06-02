@@ -340,20 +340,36 @@ const wrapWorkspaceLinks = (text: string): string => {
 
 const escapeCurlyBraces = sharedEscapeCurlyBraces
 
+const mentionIconNames: Record<string, string> = {
+	expert: 'assistant',
+	workspace: 'folder',
+	file: 'insert_drive_file',
+	directory: 'folder_open'
+}
+
+const mentionCssClasses: Record<string, string> = {
+	expert: 'mention-expert',
+	workspace: 'mention-workspace',
+	file: 'mention-file',
+	directory: 'mention-directory'
+}
+
 /**
  * Convert <Mention type="..." value="...">Label</Mention> tags into rendered HTML
  * before escapeInvalidHtmlTags runs (which would escape them as invalid).
- * expert/workspace → <span>, file → <a>
+ * file → <a>, everything else → <span>
  */
 const wrapMentionTags = (text: string): string => {
 	return text.replace(
 		/<Mention\s+type="([^"]+)"\s+value="([^"]+)">([^<]*)<\/Mention>/g,
 		(_match, type: string, value: string, label: string) => {
+			const iconName = mentionIconNames[type] || 'insert_drive_file'
+			const cls = mentionCssClasses[type] || 'mention-file'
+			const iconHtml = `<i class="Icon material">${iconName}</i>`
 			if (type === 'file') {
-				return `<a class="mention-pill mention-file" href="${value}"><i class="Icon material">insert_drive_file</i>${label}</a>`
+				return `<a class="mention-pill ${cls}" href="${value}">${iconHtml}${label}</a>`
 			}
-			const cls = type === 'expert' ? 'mention-expert' : 'mention-workspace'
-			return `<span class="mention-pill ${cls}">${label}</span>`
+			return `<span class="mention-pill ${cls}">${iconHtml}${label}</span>`
 		}
 	)
 }

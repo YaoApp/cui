@@ -558,11 +558,11 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 										currentPath === '/'
 											? entry.name
 											: `${currentPath.slice(1)}/${entry.name}`
-									const mentionData: MentionData = {
-										type: 'file',
-										id: `workspace://${workspace.id}/${filePath}`,
-										label: entry.name
-									}
+								const mentionData: MentionData = {
+									type: entry.is_dir ? 'directory' : 'file',
+									id: `workspace://${workspace.id}/${filePath}`,
+									label: entry.name
+								}
 									e.dataTransfer.setData(
 										MENTION_DRAG_TYPE,
 										JSON.stringify(mentionData)

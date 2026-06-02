@@ -1,4 +1,4 @@
-export type MentionType = 'expert' | 'workspace' | 'file'
+export type MentionType = 'expert' | 'workspace' | 'file' | 'directory'
 
 export interface MentionData {
 	type: MentionType
@@ -66,15 +66,17 @@ function serializeNode(
 }
 
 const DRAG_GHOST_ICONS: Record<MentionType, string> = {
-	expert: 'smart_toy',
+	expert: 'assistant',
 	workspace: 'folder',
-	file: 'insert_drive_file'
+	file: 'insert_drive_file',
+	directory: 'folder_open'
 }
 
 const DRAG_GHOST_COLORS: Record<MentionType, string> = {
 	expert: '#1677ff',
 	workspace: '#52c41a',
-	file: '#faad14'
+	file: '#faad14',
+	directory: '#722ed1'
 }
 
 /**
@@ -148,7 +150,7 @@ export function parseMentionDragData(jsonStr: string): MentionData | null {
 			typeof data.type === 'string' &&
 			typeof data.id === 'string' &&
 			typeof data.label === 'string' &&
-			['expert', 'workspace', 'file'].includes(data.type)
+			['expert', 'workspace', 'file', 'directory'].includes(data.type)
 		) {
 			return data as MentionData
 		}

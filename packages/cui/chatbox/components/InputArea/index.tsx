@@ -293,10 +293,10 @@ const InputArea = (props: IInputAreaProps) => {
 						const kw = (keyword || '').toLowerCase()
 						setMentionFiles(
 							(dirRes.data as any[])
-								.filter((e: any) => !e.is_dir && (!kw || e.name.toLowerCase().includes(kw)))
+								.filter((e: any) => !e.name.startsWith('.') && (!kw || e.name.toLowerCase().includes(kw)))
 								.slice(0, 10)
 								.map((e: any) => ({
-									type: 'file' as MentionType,
+									type: (e.is_dir ? 'directory' : 'file') as MentionType,
 									id: `workspace://${selectedWorkspace}/${e.name}`,
 									label: e.name
 								}))
@@ -351,7 +351,8 @@ const InputArea = (props: IInputAreaProps) => {
 		const typeClassMap: Record<MentionType, string> = {
 			expert: styles.mentionExpert,
 			workspace: styles.mentionWorkspace,
-			file: styles.mentionFile
+			file: styles.mentionFile,
+			directory: styles.mentionDirectory
 		}
 		const tag = document.createElement('span')
 		tag.className = `${styles.mentionTag} ${typeClassMap[type] || ''}`
@@ -360,11 +361,18 @@ const InputArea = (props: IInputAreaProps) => {
 		tag.dataset.mentionId = id
 		tag.dataset.mentionLabel = label
 
-		if (type === 'expert') {
-			tag.innerText = `@${label}`
-		} else {
-			tag.innerText = label
+		const mentionIconMap: Record<MentionType, string> = {
+			expert: 'assistant',
+			workspace: 'folder',
+			file: 'insert_drive_file',
+			directory: 'folder_open'
 		}
+		const iconEl = document.createElement('span')
+		iconEl.className = 'Icon material'
+		iconEl.textContent = mentionIconMap[type]
+		iconEl.style.cssText = 'font-size:14px;line-height:1;margin-right:2px;vertical-align:middle;'
+		tag.appendChild(iconEl)
+		tag.appendChild(document.createTextNode(label))
 
 		range.deleteContents()
 		range.insertNode(tag)
@@ -1076,13 +1084,24 @@ const InputArea = (props: IInputAreaProps) => {
 		)
 	}
 
+	const mentionTypeIconMap: Record<MentionType, string> = {
+		expert: 'material-assistant',
+		workspace: 'material-folder',
+		file: 'material-insert_drive_file',
+		directory: 'material-folder_open'
+	}
+
 	const renderMentions = () => {
 		if (!showMentions) return null
 
 		const flatList = getMentionFlatList()
 		let globalIdx = 0
 
-		const renderGroup = (title: string, items: MentionData[], icon: string) => {
+		const renderGroup = (
+			title: string,
+			items: MentionData[],
+			icon?: string
+		) => {
 			if (items.length === 0) return null
 			const startIdx = globalIdx
 			const group = (
@@ -1091,6 +1110,7 @@ const InputArea = (props: IInputAreaProps) => {
 					<div className={styles.mentionGroupTitle}>{title}</div>
 					{items.map((item, i) => {
 						const idx = startIdx + i
+						const itemIcon = icon || mentionTypeIconMap[item.type]
 						return (
 							<div
 								key={`${item.type}-${item.id}`}
@@ -1104,7 +1124,7 @@ const InputArea = (props: IInputAreaProps) => {
 									setShowMentions(false)
 								}}
 							>
-								<Icon name={icon} size={16} className={styles.mentionIcon} />
+								<Icon name={itemIcon} size={16} className={styles.mentionIcon} />
 								<span className={styles.mentionName}>{item.label}</span>
 							</div>
 						)
@@ -1130,7 +1150,7 @@ const InputArea = (props: IInputAreaProps) => {
 						{renderGroup(
 							is_cn ? 'AI 专家' : 'AI Experts',
 							mentionExperts,
-							'material-smart_toy'
+							'material-assistant'
 						)}
 						{renderGroup(
 							is_cn ? '工作区' : 'Workspaces',
@@ -1139,8 +1159,7 @@ const InputArea = (props: IInputAreaProps) => {
 						)}
 						{renderGroup(
 							is_cn ? '工作区文件' : 'Workspace Files',
-							mentionFiles,
-							'material-description'
+							mentionFiles
 						)}
 					</>
 				)}
