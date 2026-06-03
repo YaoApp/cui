@@ -69,6 +69,40 @@ export function messagesToMarkdown(messages: Message[], options: ExportOptions =
 				break
 			}
 
+			case 'execute':
+			case 'agent':
+			case 'todo':
+			case 'plan':
+			case 'job': {
+				const tool = props.tool || type
+				const status = props.status || ''
+				const summary = props.summary || ''
+				const heading = summary ? `${tool} ${summary}` : tool
+				const statusLabel = status ? ` (${status})` : ''
+
+				const detailParts: string[] = []
+				if (props.input) {
+					const v =
+						typeof props.input === 'string'
+							? props.input
+							: JSON.stringify(props.input, null, 2)
+					if (v) detailParts.push(v)
+				}
+				if (props.output) {
+					const v =
+						typeof props.output === 'string'
+							? props.output
+							: JSON.stringify(props.output, null, 2)
+					if (v) detailParts.push(v)
+				}
+
+				const detail = detailParts.length
+					? `\n\n\`\`\`\n${detailParts.join('\n')}\n\`\`\``
+					: ''
+				parts.push(`**${heading}**${statusLabel}${detail}\n`)
+				break
+			}
+
 			case 'error': {
 				if (props.message) {
 					parts.push(`> **Error**: ${props.message}\n`)

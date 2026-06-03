@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import type { Message } from '../../../../openapi'
 import UserAvatar from '../../../../widgets/UserAvatar'
-import { Loading, Thinking, Text, ToolCall, Execute, Action, Image, Audio, Video, Custom, Error } from '../../../messages'
+import { Loading, Thinking, Text, ToolCall, Execute, AgentView, TodoView, PlanView, JobView, Action, Image, Audio, Video, Custom, Error } from '../../../messages'
 import styles from './index.less'
 
 interface IAIMessageProps {
@@ -37,6 +37,14 @@ const AIMessage = ({ message, loading }: IAIMessageProps) => {
 				return <ToolCall message={message as any} loading={loading} />
 			case 'execute':
 				return <Execute message={message as any} loading={loading} />
+			case 'agent':
+				return <AgentView message={message as any} loading={loading} />
+			case 'todo':
+				return <TodoView message={message as any} loading={loading} />
+			case 'plan':
+				return <PlanView message={message as any} loading={loading} />
+			case 'job':
+				return <JobView message={message as any} loading={loading} />
 			case 'error':
 				return <Error message={message as any} />
 			case 'action':

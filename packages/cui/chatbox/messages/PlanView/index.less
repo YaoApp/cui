@@ -1,0 +1,50 @@
+@import '../vars.less';
+
+.container {
+	font-size: 12px;
+	padding: 10px 0;
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	line-height: 1;
+	color: var(--color_text_grey);
+	user-select: none;
+}
+
+.icon {
+	display: flex;
+	align-items: center;
+}
+
+.iconActive { color: var(--color_msg_plan); }
+.iconMuted { color: var(--color_msg_plan_muted); }
+
+.shimmerText {
+	line-height: 1;
+	background: linear-gradient(
+		90deg,
+		var(--color_text_grey) 0%,
+		var(--color_text_grey) 35%,
+		var(--color_border_light) 50%,
+		var(--color_text_grey) 65%,
+		var(--color_text_grey) 100%
+	);
+	background-size: 300% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	animation: textShimmer 2s ease-in-out infinite;
+}
+
+.staticText {
+	line-height: 1;
+	color: var(--color_text_grey);
+}
+
+@keyframes textShimmer {
+	0% { background-position: 100% 50%; }
+	100% { background-position: 0% 50%; }
+}
