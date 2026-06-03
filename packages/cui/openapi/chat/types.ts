@@ -23,6 +23,13 @@ export const MessageType = {
 	LOADING: 'loading',
 	TOOL_CALL: 'tool_call',
 	EXECUTE: 'execute', // Agent execution observation (sandbox CLI agent tool actions)
+
+	// Semantic execute sub-types (runner-annotated, rendered by dedicated components)
+	AGENT: 'agent', // Sub-agent dispatch (Claude Agent tool, A2A calls)
+	TODO: 'todo', // Structured task checklist (Claude TodoWrite)
+	PLAN: 'plan', // Plan mode transitions (Claude EnterPlanMode/ExitPlanMode)
+	JOB: 'job', // Async background jobs (Claude TaskCreate/... — Unix job semantics)
+
 	ERROR: 'error',
 
 	// Media types
@@ -128,6 +135,40 @@ export interface ExecuteProps {
 	exit_code?: number
 	runner?: string // Runner name (e.g., "claude-cli")
 	metadata?: Record<string, any>
+}
+
+/**
+ * Agent message props (sub-agent dispatch)
+ * Extends ExecuteProps with semantic_type and agent-specific fields.
+ */
+export interface AgentProps extends ExecuteProps {
+	semantic_type: 'agent'
+	subagent_type?: string // "a2a" | "general-purpose" | "Explore" | "Plan" | etc.
+	description?: string // Agent task description
+}
+
+/**
+ * Todo message props (structured task checklist)
+ */
+export interface TodoProps extends ExecuteProps {
+	semantic_type: 'todo'
+	action: 'write'
+}
+
+/**
+ * Plan message props (plan mode transitions)
+ */
+export interface PlanProps extends ExecuteProps {
+	semantic_type: 'plan'
+	action: 'enter' | 'exit'
+}
+
+/**
+ * Job message props (async background jobs — Unix job semantics)
+ */
+export interface JobProps extends ExecuteProps {
+	semantic_type: 'job'
+	action: 'create' | 'get' | 'list' | 'output' | 'stop' | 'update'
 }
 
 /**
@@ -393,6 +434,10 @@ export type ThinkingMessage = BaseMessage & { type: typeof MessageType.THINKING;
 export type LoadingMessage = BaseMessage & { type: typeof MessageType.LOADING; props: LoadingProps }
 export type ToolCallMessage = BaseMessage & { type: typeof MessageType.TOOL_CALL; props: ToolCallProps }
 export type ExecuteMessage = BaseMessage & { type: typeof MessageType.EXECUTE; props: ExecuteProps }
+export type AgentMessage = BaseMessage & { type: typeof MessageType.AGENT; props: AgentProps }
+export type TodoMessage = BaseMessage & { type: typeof MessageType.TODO; props: TodoProps }
+export type PlanMessage = BaseMessage & { type: typeof MessageType.PLAN; props: PlanProps }
+export type JobMessage = BaseMessage & { type: typeof MessageType.JOB; props: JobProps }
 export type ErrorMessage = BaseMessage & { type: typeof MessageType.ERROR; props: ErrorProps }
 export type ImageMessage = BaseMessage & { type: typeof MessageType.IMAGE; props: ImageProps }
 export type AudioMessage = BaseMessage & { type: typeof MessageType.AUDIO; props: AudioProps }
@@ -410,6 +455,10 @@ export type BuiltinMessage =
 	| LoadingMessage
 	| ToolCallMessage
 	| ExecuteMessage
+	| AgentMessage
+	| TodoMessage
+	| PlanMessage
+	| JobMessage
 	| ErrorMessage
 	| ImageMessage
 	| AudioMessage
