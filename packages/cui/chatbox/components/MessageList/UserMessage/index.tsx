@@ -148,6 +148,7 @@ const FileAttachment: React.FC<{ url: string; filename?: string }> = ({ url, fil
 }
 
 const MENTION_REGEX = /<Mention\s+type="([^"]+)"\s+value="([^"]+)">([^<]*)<\/Mention>/g
+const ANSWER_REGEX = /<Answer\s+question="([^"]+)"\s+value="([^"]+)">([^<]*)<\/Answer>/g
 
 const mentionPillClassMap: Record<string, string> = {
 	expert: styles.mentionExpert,
@@ -163,7 +164,12 @@ const mentionPillIconMap: Record<string, string> = {
 	directory: 'material-folder_open'
 }
 
-const renderTextWithMentions = (text: string): React.ReactNode => {
+const renderTextWithTags = (text: string): React.ReactNode => {
+	const answerTest = new RegExp(ANSWER_REGEX.source)
+	if (answerTest.test(text)) {
+		return renderAnswerSubmission(text)
+	}
+
 	const parts: React.ReactNode[] = []
 	let lastIndex = 0
 	let match: RegExpExecArray | null
@@ -173,10 +179,8 @@ const renderTextWithMentions = (text: string): React.ReactNode => {
 		if (match.index > lastIndex) {
 			parts.push(text.slice(lastIndex, match.index))
 		}
-
 		const [, type, , label] = match
 		const pillClass = mentionPillClassMap[type] || styles.mentionFile
-
 		parts.push(
 			<span key={match.index} className={`${styles.mentionPill} ${pillClass}`}>
 				<Icon name={mentionPillIconMap[type] || 'material-insert_drive_file'} size={13} />
@@ -193,6 +197,34 @@ const renderTextWithMentions = (text: string): React.ReactNode => {
 	return <>{parts}</>
 }
 
+const renderAnswerSubmission = (text: string): React.ReactNode => {
+	const pairs: { question: string; answer: string }[] = []
+	const re = new RegExp(ANSWER_REGEX.source, 'g')
+	let match: RegExpExecArray | null
+	while ((match = re.exec(text)) !== null) {
+		pairs.push({ question: match[1], answer: match[3] })
+	}
+	if (pairs.length === 0) return text
+
+	return (
+		<div className={styles.answerCard}>
+			<div className={styles.answerCardHeader}>
+				<Icon name='material-check_circle' size={14} />
+				<span>已回答</span>
+			</div>
+			{pairs.map((pair, i) => (
+				<div key={i} className={styles.answerPair}>
+					<span className={styles.answerQuestion}>{pair.question}</span>
+					<span className={styles.answerValue}>
+						<Icon name='material-arrow_forward' size={12} />
+						{pair.answer}
+					</span>
+				</div>
+			))}
+		</div>
+	)
+}
+
 const UserMessage = ({ message, isLast }: IUserMessageProps) => {
 	const content = message.props?.content
 
@@ -200,7 +232,7 @@ const UserMessage = ({ message, isLast }: IUserMessageProps) => {
 		return (
 			<div className={clsx(styles.userRow)} style={{ marginBottom: '16px' }}>
 				<div className={styles.messageBubble}>
-					<div className={styles.messageContent}>{renderTextWithMentions(content)}</div>
+					<div className={styles.messageContent}>{renderTextWithTags(content)}</div>
 				</div>
 			</div>
 		)
@@ -214,7 +246,7 @@ const UserMessage = ({ message, isLast }: IUserMessageProps) => {
 						if (part.type === 'text' && part.text) {
 							return (
 								<div key={index} className={styles.messageContent}>
-									{renderTextWithMentions(part.text)}
+									{renderTextWithTags(part.text)}
 								</div>
 							)
 						}
