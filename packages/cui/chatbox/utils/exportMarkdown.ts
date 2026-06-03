@@ -73,7 +73,8 @@ export function messagesToMarkdown(messages: Message[], options: ExportOptions =
 			case 'agent':
 			case 'todo':
 			case 'plan':
-			case 'job': {
+			case 'job':
+			case 'question': {
 				const tool = props.tool || type
 				const status = props.status || ''
 				const summary = props.summary || ''

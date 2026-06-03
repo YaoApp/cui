@@ -29,6 +29,7 @@ export const MessageType = {
 	TODO: 'todo', // Structured task checklist (Claude TodoWrite)
 	PLAN: 'plan', // Plan mode transitions (Claude EnterPlanMode/ExitPlanMode)
 	JOB: 'job', // Async background jobs (Claude TaskCreate/... — Unix job semantics)
+	QUESTION: 'question', // Interactive user questions (Claude AskUserQuestion)
 
 	ERROR: 'error',
 
@@ -169,6 +170,32 @@ export interface PlanProps extends ExecuteProps {
 export interface JobProps extends ExecuteProps {
 	semantic_type: 'job'
 	action: 'create' | 'get' | 'list' | 'output' | 'stop' | 'update'
+}
+
+/**
+ * Question option for AskUserQuestion
+ */
+export interface QuestionOption {
+	label: string
+	description: string
+	preview?: string
+}
+
+/**
+ * Single question item within an AskUserQuestion tool call
+ */
+export interface QuestionItem {
+	question: string // Full question text (also used as answers key)
+	header: string // Short label (max 12 chars)
+	options: QuestionOption[]
+	multiSelect?: boolean
+}
+
+/**
+ * Question message props (interactive user questions — Claude AskUserQuestion)
+ */
+export interface QuestionProps extends ExecuteProps {
+	semantic_type: 'question'
 }
 
 /**
@@ -438,6 +465,7 @@ export type AgentMessage = BaseMessage & { type: typeof MessageType.AGENT; props
 export type TodoMessage = BaseMessage & { type: typeof MessageType.TODO; props: TodoProps }
 export type PlanMessage = BaseMessage & { type: typeof MessageType.PLAN; props: PlanProps }
 export type JobMessage = BaseMessage & { type: typeof MessageType.JOB; props: JobProps }
+export type QuestionMessage = BaseMessage & { type: typeof MessageType.QUESTION; props: QuestionProps }
 export type ErrorMessage = BaseMessage & { type: typeof MessageType.ERROR; props: ErrorProps }
 export type ImageMessage = BaseMessage & { type: typeof MessageType.IMAGE; props: ImageProps }
 export type AudioMessage = BaseMessage & { type: typeof MessageType.AUDIO; props: AudioProps }
@@ -459,6 +487,7 @@ export type BuiltinMessage =
 	| TodoMessage
 	| PlanMessage
 	| JobMessage
+	| QuestionMessage
 	| ErrorMessage
 	| ImageMessage
 	| AudioMessage

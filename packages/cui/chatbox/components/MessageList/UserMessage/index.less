@@ -68,6 +68,46 @@
 	color: #722ed1;
 }
 
+.answerCard {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.answerCardHeader {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color_msg_question, #00acc1);
+}
+
+.answerPair {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.answerQuestion {
+	color: var(--color_text_grey);
+	flex-shrink: 0;
+	max-width: 60%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.answerValue {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	color: var(--color_msg_question, #00acc1);
+	font-weight: 500;
+}
+
 .attachmentItem {
 	margin-top: 4px;
 	width: 100%;
