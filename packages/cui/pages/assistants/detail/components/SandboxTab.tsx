@@ -5,7 +5,7 @@ import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
 import { CheckboxGroup, Select, Input } from '@/components/ui/inputs'
 import { Setting } from '@/openapi/setting'
-import type { AgentSettingPageData, SandboxPageData } from '@/openapi/setting/types'
+import type { AgentSettingPageData, SandboxPageData, WebService } from '@/openapi/setting/types'
 import styles from './View/index.less'
 
 interface SandboxTabProps {
@@ -30,6 +30,7 @@ const SandboxTab = ({ assistantId }: SandboxTabProps) => {
 	const [selectedRunners, setSelectedRunners] = useState<string[]>([])
 	const [selectedImage, setSelectedImage] = useState<string>('')
 	const [customImage, setCustomImage] = useState('')
+	const [services, setServices] = useState<WebService[]>([])
 
 	useEffect(() => {
 		const load = async () => {
@@ -53,6 +54,12 @@ const SandboxTab = ({ assistantId }: SandboxTabProps) => {
 						setSelectedRunners([AUTO_VALUE])
 					}
 					setSelectedImage(data?.setting?.image || '')
+					const allServices: WebService[] = data?.setting?.services || []
+					const defaultPorts: WebService[] = data?.sandbox_config?.ports || []
+					const userOnly = allServices.filter(
+						(s) => !defaultPorts.some((d) => d.port === s.port && d.label === s.label)
+					)
+					setServices(userOnly)
 				} else {
 					setLoadError(true)
 					setSelectedRunners([AUTO_VALUE])
@@ -79,7 +86,9 @@ const SandboxTab = ({ assistantId }: SandboxTabProps) => {
 		try {
 			const runners = selectedRunners.includes(AUTO_VALUE) ? [] : selectedRunners
 			const image = selectedImage === '__custom__' ? customImage : selectedImage
-			const res = await api.UpdateAgentSetting(assistantId, { runners, image })
+			const userServices = services.filter((s) => s.label && s.port > 0)
+			const validServices = userServices.length > 0 ? userServices : []
+			const res = await api.UpdateAgentSetting(assistantId, { runners, image, services: validServices })
 			if (!window.$app?.openapi?.IsError(res)) {
 				message.success(is_cn ? '保存成功' : 'Saved successfully')
 				const agentRes = await api.GetAgentSetting(assistantId)
@@ -105,6 +114,7 @@ const SandboxTab = ({ assistantId }: SandboxTabProps) => {
 	const supportedRunners = agentData?.supported_runners || []
 	const sandboxSupports = agentData?.sandbox_config?.runner?.supports || []
 	const defaultRunner = agentData?.sandbox_config?.runner?.name || ''
+	const sandboxPorts: WebService[] = agentData?.sandbox_config?.ports || []
 
 	const activeRunners = selectedRunners.includes(AUTO_VALUE)
 		? supportedRunners
@@ -160,14 +170,12 @@ const SandboxTab = ({ assistantId }: SandboxTabProps) => {
 
 	const runnerEnumOptions = [
 		{ label: is_cn ? '自动 (推荐)' : 'Auto (Recommended)', value: AUTO_VALUE },
-		...sortedRunners.map((r) => {
-			const isDisabled = sandboxSupports.length > 0 && !sandboxSupports.includes(r)
-			const label = runnerLabels[r] || r.charAt(0).toUpperCase() + r.slice(1)
-			return {
-				label: isDisabled ? `${label} (${is_cn ? '不支持' : 'unsupported'})` : label,
+		...sortedRunners
+			.filter((r) => sandboxSupports.length === 0 || sandboxSupports.includes(r))
+			.map((r) => ({
+				label: runnerLabels[r] || r.charAt(0).toUpperCase() + r.slice(1),
 				value: r
-			}
-		})
+			}))
 	]
 
 	const imageEnumOptions = [
@@ -237,6 +245,16 @@ const SandboxTab = ({ assistantId }: SandboxTabProps) => {
 							value={selectedRunners}
 							onChange={handleRunnerChange}
 						/>
+						{sandboxSupports.length > 0 && (
+							<div className={styles.runnerHint}>
+								<span className={styles.runnerHintLabel}>
+									{is_cn ? 'sandbox.yao 支持:' : 'Supported:'}
+								</span>
+								{sandboxSupports.map((r) => (
+									<span key={r} className={styles.runnerHintTag}>{r}</span>
+								))}
+							</div>
+						)}
 					</div>
 				</div>
 
@@ -281,25 +299,81 @@ const SandboxTab = ({ assistantId }: SandboxTabProps) => {
 						)}
 					</div>
 				</div>
-			</div>
 
-			{sandboxSupports.length > 0 && (
-				<div className={styles.noticeCard}>
-					<Icon name='material-info' size={16} className={styles.noticeIcon} />
-					<div>
-						<div style={{ fontWeight: 500, marginBottom: 4 }}>
-							{is_cn ? 'sandbox.yao 支持的 Runner:' : 'Supported runners (sandbox.yao):'}
+				<div className={styles.settingRow}>
+					<div className={styles.settingHeader}>
+						<div className={styles.settingName}>
+							{is_cn ? 'Web 服务' : 'Web Services'}
 						</div>
-						<div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-							{sandboxSupports.map((r) => (
-								<span key={r} className={styles.tag}>
-									{r}
+						<div className={styles.settingDesc}>
+							{is_cn
+								? '声明容器内运行的 Web 服务。配置后可在运行时一键预览。'
+								: 'Declare web services running inside the container for quick preview access.'}
+						</div>
+					</div>
+					<div className={styles.settingControl}>
+						{sandboxPorts.map((svc, idx) => (
+							<div key={`default-${idx}`} className={`${styles.serviceRow} ${styles.serviceRowReadonly}`}>
+								<input
+									className={styles.serviceInput}
+									style={{ flex: 2 }}
+									value={svc.label}
+									disabled
+								/>
+								<input
+									className={styles.serviceInput}
+									style={{ flex: 1 }}
+									value={String(svc.port)}
+									disabled
+								/>
+								<span className={styles.serviceLockedIcon}>
+									<Icon name='material-lock' size={12} />
 								</span>
-							))}
+							</div>
+						))}
+						{services.map((svc, idx) => (
+							<div key={`user-${idx}`} className={styles.serviceRow}>
+								<input
+									className={styles.serviceInput}
+									style={{ flex: 2 }}
+									placeholder={is_cn ? '服务名称' : 'Service name'}
+									value={svc.label}
+									onChange={(e) => {
+										const next = [...services]
+										next[idx] = { ...next[idx], label: e.target.value }
+										setServices(next)
+									}}
+								/>
+								<input
+									className={styles.serviceInput}
+									style={{ flex: 1 }}
+									placeholder={is_cn ? '端口' : 'Port'}
+									value={svc.port ? String(svc.port) : ''}
+									onChange={(e) => {
+										const next = [...services]
+										next[idx] = { ...next[idx], port: parseInt(e.target.value) || 0 }
+										setServices(next)
+									}}
+								/>
+								<span
+									className={styles.serviceRemoveBtn}
+									onClick={() => setServices(services.filter((_, i) => i !== idx))}
+								>
+									<Icon name='material-close' size={14} />
+								</span>
+							</div>
+						))}
+						<div
+							className={styles.serviceAddBtn}
+							onClick={() => setServices([...services, { label: '', port: 0 }])}
+						>
+							<Icon name='material-add' size={14} />
+							<span>{is_cn ? '添加服务' : 'Add Service'}</span>
 						</div>
 					</div>
 				</div>
-			)}
+			</div>
+
 
 		</div>
 	)

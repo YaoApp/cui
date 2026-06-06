@@ -70,7 +70,7 @@
 	align-items: center;
 	gap: 14px;
 	margin-bottom: 24px;
-	height: 56px;
+	min-height: 56px;
 }
 
 .avatarWrap {
@@ -295,6 +295,111 @@
 
 .settingControl {
 	width: 100%;
+}
+
+.runnerHint {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	margin-top: 10px;
+	font-size: 11px;
+	color: var(--color_neo_text_secondary, var(--color_text_grey));
+}
+
+.runnerHintLabel {
+	opacity: 0.8;
+}
+
+.runnerHintTag {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 6px;
+	font-size: 11px;
+	font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+	border-radius: 3px;
+	background: var(--color_neo_bg_field, var(--color_bg_nav));
+	color: var(--color_neo_text_secondary, var(--color_text_grey));
+}
+
+.serviceRow {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.serviceInput {
+	box-sizing: border-box;
+	height: 34px;
+	padding: 0 10px;
+	font-size: 13px;
+	color: var(--color_neo_text_primary, var(--color_text));
+	background: var(--color_neo_bg_field, var(--color_bg_2));
+	border: 1px solid var(--color_neo_border_field, var(--color_border_light));
+	border-radius: 6px;
+	outline: none;
+	transition: border-color 0.2s;
+
+	&::placeholder {
+		color: var(--color_neo_text_secondary, var(--color_text_grey));
+		opacity: 0.6;
+	}
+
+	&:focus {
+		border-color: var(--color_main);
+	}
+}
+
+.serviceRowReadonly {
+	.serviceInput {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+}
+
+.serviceLockedIcon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	color: var(--color_neo_text_secondary, var(--color_text_grey));
+	opacity: 0.4;
+}
+
+.serviceRemoveBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	cursor: pointer;
+	color: var(--color_neo_text_secondary, var(--color_text_grey));
+	border-radius: 4px;
+	transition: color 0.15s, background 0.15s;
+
+	&:hover {
+		color: var(--color_danger, #e53e3e);
+		background: var(--color_neo_bg_hover, rgba(0, 0, 0, 0.04));
+	}
+}
+
+.serviceAddBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 0;
+	font-size: 12px;
+	color: var(--color_neo_text_secondary, var(--color_text_grey));
+	cursor: pointer;
+	transition: color 0.15s;
+
+	&:hover {
+		color: var(--color_main);
+	}
 }
 
 .emptyState {

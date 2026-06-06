@@ -442,6 +442,7 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 						minimap: { enabled: false },
 						lineNumbers: 'on',
 						renderLineHighlight: 'none',
+						padding: { top: 12 },
 						scrollbar: { verticalScrollbarSize: 8, horizontalSliderSize: 8, useShadows: false }
 					}}
 					editorDidMount={editorDidMount}

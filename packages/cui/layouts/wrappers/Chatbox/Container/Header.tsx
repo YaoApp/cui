@@ -8,6 +8,7 @@ import clsx from 'clsx'
 import './header.less'
 import { getLocale, useNavigate } from '@umijs/max'
 import type { SidebarTab } from './types'
+import { toNavPath } from '../index'
 
 interface HeaderProps {
 	openSidebar: (temporaryLink?: string, title?: string) => void
@@ -103,10 +104,9 @@ const Header: FC<HeaderProps> = ({
 			onHistoryClose?.()
 		}
 		onTabChange?.(tabId)
-		// Also navigate to the tab's URL for URL sync
 		const tab = tabs.find((t) => t.id === tabId)
 		if (tab) {
-			navigate(tab.url, { replace: true })
+			navigate(toNavPath(tab.url), { replace: true })
 		}
 	}
 
@@ -162,12 +162,10 @@ const Header: FC<HeaderProps> = ({
 		if (contextMenu.tabId) {
 			const tab = tabs.find((t) => t.id === contextMenu.tabId)
 			if (tab) {
-				// Activate the tab first if not already active
 				if (tab.id !== activeTabId) {
 					onTabChange?.(tab.id)
-					navigate(tab.url, { replace: true })
+					navigate(toNavPath(tab.url), { replace: true })
 				}
-				// Emit refresh event — $.tsx listens and reloads the iframe
 				window.$app?.Event?.emit('app/refreshTab')
 			}
 		}
