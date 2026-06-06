@@ -2,6 +2,7 @@ import { Popconfirm, message } from 'antd'
 import { getLocale, useNavigate } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
+import ServiceList from '@/components/ServiceList'
 import { ComputerAPI } from '@/openapi/computer'
 import { brandIcons } from '@/assets/icons/brands'
 import type { BoxInfo } from '../../types'
@@ -267,6 +268,20 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 							</span>
 						))}
 					</div>
+				</div>
+			)}
+
+			{box.status === 'running' && (
+				<div className={styles.labelsSection}>
+					<div className={styles.sectionTitle}>{is_cn ? '服务' : 'Services'}</div>
+					<ServiceList
+						taiId={box.node_id}
+						targetId={isHost ? '__host__' : box.id}
+						variant="inline"
+						onOpenTab={(url, title) => {
+							window.$app?.Event?.emit('app/openSidebar', { url, title, icon: 'material-web' })
+						}}
+					/>
 				</div>
 			)}
 

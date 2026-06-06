@@ -17,6 +17,7 @@ import Text from './viewers/Text'
 import Pdf from './viewers/Pdf'
 import Docx from './viewers/Docx'
 import Pptx from './viewers/Pptx'
+import HtmlPreview from './viewers/HtmlPreview'
 
 import Unsupported from './viewers/Unsupported'
 
@@ -33,6 +34,8 @@ interface IProps extends Component.PropsViewComponent {
 	fileID?: string
 	uploader?: string
 	defaultPreview?: boolean
+	workspaceId?: string
+	filePath?: string
 }
 
 const Index = (props: IProps) => {
@@ -51,6 +54,8 @@ const Index = (props: IProps) => {
 		fileID,
 		uploader,
 		defaultPreview,
+		workspaceId,
+		filePath,
 		...rest_props
 	} = props
 
@@ -346,6 +351,14 @@ const Index = (props: IProps) => {
 			content,
 			contentType: contentType || fileMetadata?.content_type,
 			fileName
+		}
+
+		// HTML files with workspace context get rendered preview
+		if (workspaceId && filePath) {
+			const ext = getFileExtension(filePath)
+			if (ext === 'html' || ext === 'htm') {
+				return <HtmlPreview workspaceId={workspaceId} filePath={filePath} />
+			}
 		}
 
 		switch (fileType) {

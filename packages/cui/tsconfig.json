@@ -7,7 +7,8 @@
 			"@@/*": [".umi/*"],
 			"@umijs/max": ["../node_modules/.pnpm/umi@*/node_modules/umi"],
 			"@umijs/max/typings": [".umi/typings"],
-			"@yaoapp/*": ["../*/src"]
+			"@yaoapp/*": ["../*/src"],
+			"react-vnc": ["node_modules/react-vnc/dist/index.d.ts"]
 		}
 	}
 }

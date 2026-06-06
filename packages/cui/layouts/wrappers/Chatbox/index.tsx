@@ -110,6 +110,18 @@ const isChatboxOnlyPath = (path: string): boolean => {
 }
 
 /**
+ * Convert external URL to internal route for React Router navigation.
+ * External URLs (http/https) are routed through /browse page.
+ * Internal URLs are returned as-is.
+ */
+export const toNavPath = (url: string): string => {
+	if (url.startsWith('http://') || url.startsWith('https://')) {
+		return `/browse?src=${encodeURIComponent(url)}`
+	}
+	return url
+}
+
+/**
  * Determine display mode for current path and menu
  * Returns: 'chatbox-only' | 'sidebar-only' | 'both'
  *
@@ -217,14 +229,15 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		setSidebarHistory(newHistory)
 	}, [userId, teamId])
 
-	// Get base URL without query string
+	// Get base URL for tab dedup. External URLs use origin+path as key.
 	const getBaseUrl = (url: string): string => {
 		try {
 			const urlObj = new URL(url, window.location.origin)
-			// Strip /web prefix so that /web/agents/... and /agents/... match
+			if (urlObj.origin !== window.location.origin) {
+				return urlObj.origin + urlObj.pathname
+			}
 			return urlObj.pathname.replace(/^\/web/, '')
 		} catch {
-			// If URL parsing fails, try simple split
 			return url.split('?')[0].replace(/^\/web/, '')
 		}
 	}
@@ -351,27 +364,26 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	)
 
 	// Remove a tab
-	const removeSidebarTab = useCallback((tabId: string) => {
-		setSidebarTabs((prev) => {
-			const index = prev.findIndex((t) => t.id === tabId)
-			const newTabs = prev.filter((t) => t.id !== tabId)
+	const removeSidebarTab = useCallback(
+		(tabId: string) => {
+			const index = sidebarTabs.findIndex((t) => t.id === tabId)
+			const newTabs = sidebarTabs.filter((t) => t.id !== tabId)
 
-			// If removing active tab, activate another one
-			setActiveSidebarTabId((currentActive) => {
-				if (currentActive === tabId && newTabs.length > 0) {
-					// Activate the tab at the same index, or the last one
-					const newIndex = Math.min(index, newTabs.length - 1)
-					return newTabs[newIndex].id
-				}
-				if (newTabs.length === 0) {
-					return null
-				}
-				return currentActive
-			})
+			setSidebarTabs(newTabs)
 
-			return newTabs
-		})
-	}, [])
+			if (activeSidebarTabId === tabId) {
+				if (newTabs.length > 0) {
+					const newIndex = index > 0 ? index - 1 : 0
+					const newTab = newTabs[newIndex]
+					setActiveSidebarTabId(newTab.id)
+					navigate(toNavPath(newTab.url), { replace: true })
+				} else {
+					setActiveSidebarTabId(null)
+				}
+			}
+		},
+		[sidebarTabs, activeSidebarTabId, navigate]
+	)
 
 	// Activate a tab
 	const activateSidebarTab = useCallback((tabId: string) => {
@@ -397,8 +409,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		(item: SidebarHistoryItem) => {
 			addSidebarTab(item.url, item.title, item.icon)
 			setSidebarHistoryOpen(false)
-			// Navigate to the URL to update page content
-			navigate(item.url, { replace: true })
+			navigate(toNavPath(item.url), { replace: true })
 		},
 		[addSidebarTab, navigate]
 	)
@@ -440,6 +451,22 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		const fullUrl = location.pathname + location.search
 		const basePath = location.pathname
 
+		// Restore external URL tab from /browse route on page refresh
+		if (basePath === '/browse') {
+			const params = new URLSearchParams(location.search)
+			const originalUrl = params.get('src')
+			if (originalUrl) {
+				const historyItem = sidebarHistory.find((h) => h.url === originalUrl)
+				const title = historyItem?.title || (() => { try { return new URL(originalUrl).host } catch { return originalUrl } })()
+				const newTab: SidebarTab = { id: nanoid(), url: originalUrl, title, timestamp: Date.now() }
+				setSidebarTabs([newTab])
+				setActiveSidebarTabId(newTab.id)
+				global.setSidebarVisible(true)
+				initializedRef.current = true
+				return
+			}
+		}
+
 		// Skip chatbox-only paths (they don't need tabs)
 		if (isChatboxOnlyPath(basePath)) {
 			initializedRef.current = true
@@ -477,7 +504,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 
 		// Make sure sidebar is visible
 		global.setSidebarVisible(true)
-	}, [location.pathname, location.search, global, allMenuItems])
+	}, [location.pathname, location.search, global, allMenuItems, sidebarHistory])
 
 	// Determine display mode based on menu configuration
 	const displayMode = useMemo(() => {
@@ -609,13 +636,13 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 				// Create a new Tab (Sidebar Tabs mode)
 				addSidebarTab(url, title, detail.icon)
 
-				// Also navigate for URL sync (replace to avoid history stack)
-				navigate(url, { replace: true })
+				// Navigate using internal route path
+				const navUrl = toNavPath(url)
+				navigate(navUrl, { replace: true })
 
 				// If already on the same URL, force-refresh the iframe
-				// (navigate won't change pathname/search, so $.tsx won't reload)
 				const currentFullPath = currentPath + (location.search || '')
-				if (currentFullPath === url) {
+				if (currentFullPath === navUrl) {
 					window.$app?.Event?.emit('app/refreshTab')
 				}
 				}
@@ -683,6 +710,24 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			window.$app.Event.off('app/replaceRoute', handleReplaceRoute)
 		}
 	}, [sidebarVisible, handleSetSidebarVisible, navigate, addSidebarTab, updateSidebarTabTitle, updateActiveTab])
+
+	// Sync active tab URL when location changes (for in-page navigation like list → detail)
+	useEffect(() => {
+		if (!activeSidebarTabId) return
+		if (isChatboxOnlyPath(location.pathname)) return
+		if (isSidebarOnlyPath(location.pathname)) return
+
+		const currentUrl = location.pathname + location.search
+		setSidebarTabs((prev) => {
+			const activeTab = prev.find((t) => t.id === activeSidebarTabId)
+			if (!activeTab) return prev
+			if (activeTab.url.startsWith('http://') || activeTab.url.startsWith('https://')) return prev
+			if (activeTab.url === currentUrl) return prev
+			return prev.map((tab) =>
+				tab.id === activeSidebarTabId ? { ...tab, url: currentUrl } : tab
+			)
+		})
+	}, [location.pathname, location.search, activeSidebarTabId])
 
 	// Listen for window resize events
 	useEffect(() => {

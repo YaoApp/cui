@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Popconfirm, message, Upload, Input, Modal } from 'antd'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { Popconfirm, message, Upload, Input } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
-import FileViewer from '@/components/view/FileViewer'
 import { WorkspaceAPI } from '@/openapi/workspace'
 import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 import { resolveNodeAddr, nodeName, nodeAddr, type Workspace, type DirEntry, type NodeInfo } from '../../types'
@@ -12,6 +11,8 @@ import styles from './index.less'
 interface WorkspaceDetailProps {
 	workspace: Workspace
 	nodeMap?: Record<string, NodeInfo>
+	initialDir?: string
+	onDirChange?: (dir: string) => void
 	onBack: () => void
 	onDelete: () => void
 	onRefresh: () => void
@@ -44,11 +45,19 @@ const getFileIcon = (entry: DirEntry): string => {
 	return iconMap[ext] || 'material-insert_drive_file'
 }
 
-const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: WorkspaceDetailProps) => {
+const WorkspaceDetail = ({
+	workspace,
+	nodeMap,
+	initialDir,
+	onDirChange,
+	onBack,
+	onDelete,
+	onRefresh
+}: WorkspaceDetailProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
-	const [currentPath, setCurrentPath] = useState('/')
+	const [currentPath, setCurrentPath] = useState(initialDir || '/')
 	const [entries, setEntries] = useState<DirEntry[]>([])
 	const [loading, setLoading] = useState(false)
 	const [editingName, setEditingName] = useState(false)
@@ -56,13 +65,8 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 	const [showHidden, setShowHidden] = useState(false)
 	const [creatingDir, setCreatingDir] = useState(false)
 	const [newDirName, setNewDirName] = useState('')
-	const [previewFile, setPreviewFile] = useState<{
-		name: string
-		src?: string
-		content?: string
-		contentType?: string
-	} | null>(null)
-	const [previewLoading, setPreviewLoading] = useState(false)
+	const [dragOver, setDragOver] = useState(false)
+	const dragCounter = useRef(0)
 
 	const getApi = useCallback((): WorkspaceAPI | null => {
 		if (!window.$app?.openapi) return null
@@ -98,107 +102,32 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 		loadDir(currentPath)
 	}, [currentPath, loadDir])
 
+	const updatePath = (path: string) => {
+		setCurrentPath(path)
+		onDirChange?.(path)
+	}
+
 	const navigateTo = (entry: DirEntry) => {
 		if (!entry.is_dir) return
 		const next = currentPath === '/' ? `/${entry.name}` : `${currentPath}/${entry.name}`
-		setCurrentPath(next)
+		updatePath(next)
 	}
 
-	const textExts = new Set([
-		'txt',
-		'md',
-		'log',
-		'ini',
-		'cfg',
-		'csv',
-		'json',
-		'jsonc',
-		'yaml',
-		'yml',
-		'xml',
-		'py',
-		'js',
-		'ts',
-		'jsx',
-		'tsx',
-		'java',
-		'cpp',
-		'go',
-		'sh',
-		'html',
-		'css',
-		'sql',
-		'php',
-		'rb',
-		'rs',
-		'c',
-		'h',
-		'yao',
-		'less',
-		'scss',
-		'toml',
-		'env'
-	])
-	const binaryPreviewExts = new Set([
-		'jpg',
-		'jpeg',
-		'png',
-		'gif',
-		'bmp',
-		'svg',
-		'webp',
-		'ico',
-		'mp4',
-		'avi',
-		'mov',
-		'mkv',
-		'webm',
-		'mp3',
-		'wav',
-		'aac',
-		'flac',
-		'ogg',
-		'm4a',
-		'pdf',
-		'docx',
-		'pptx'
-	])
-	const handlePreview = async (entry: DirEntry) => {
+	const handlePreview = (entry: DirEntry) => {
 		if (entry.is_dir) return
-		const ext = entry.name.split('.').pop()?.toLowerCase() || ''
 		const filePath = currentPath === '/' ? entry.name : `${currentPath.slice(1)}/${entry.name}`
-		const api = getApi()
-		if (!api) return
-
-		if (textExts.has(ext)) {
-			setPreviewFile({ name: entry.name })
-			setPreviewLoading(true)
-			try {
-				const resp = await api.ReadFile(workspace.id, filePath)
-				if (window.$app.openapi.IsError(resp)) throw new Error(resp.error?.error_description)
-				const text = typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data, null, 2)
-				setPreviewFile({ name: entry.name, content: text, contentType: 'text/plain', src: api.ContentURL(workspace.id, filePath) })
-			} catch {
-				message.error(is_cn ? '加载文件失败' : 'Failed to load file')
-				setPreviewFile(null)
-			} finally {
-				setPreviewLoading(false)
-			}
-		} else if (binaryPreviewExts.has(ext)) {
-			setPreviewFile({ name: entry.name, src: api.ContentURL(workspace.id, filePath) })
-		} else {
-			setPreviewFile({
-				name: entry.name,
-				src: api.ContentURL(workspace.id, filePath)
-			})
-		}
+		window.$app?.Event?.emit('app/openSidebar', {
+			url: `/preview?ws=${workspace.id}&path=${encodeURIComponent(filePath)}`,
+			title: entry.name,
+			icon: getFileIcon(entry)
+		})
 	}
 
 	const navigateUp = () => {
 		if (currentPath === '/') return
 		const parts = currentPath.split('/').filter(Boolean)
 		parts.pop()
-		setCurrentPath(parts.length === 0 ? '/' : '/' + parts.join('/'))
+		updatePath(parts.length === 0 ? '/' : '/' + parts.join('/'))
 	}
 
 	const breadcrumbs = currentPath.split('/').filter(Boolean)
@@ -208,30 +137,95 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 		[entries, showHidden]
 	)
 
-	const handleUpload = async (file: File) => {
-		const hide = message.loading(is_cn ? '上传中...' : 'Uploading...', 0)
-		try {
+	const doUploadFile = (file: File): Promise<boolean> => {
+		return new Promise((resolve) => {
 			const api = getApi()
-			if (!api) return false
-
+			if (!api) {
+				resolve(false)
+				return
+			}
 			const reader = new FileReader()
 			reader.onload = async () => {
-				const filePath = currentPath === '/' ? file.name : `${currentPath.slice(1)}/${file.name}`
-				const resp = await api.WriteFile(workspace.id, filePath, reader.result as ArrayBuffer)
-				if (window.$app.openapi.IsError(resp)) {
-					message.error(is_cn ? '上传失败' : 'Upload failed')
-				} else {
-					message.success(is_cn ? '上传成功' : 'Upload successful')
-					loadDir(currentPath)
+				try {
+					const filePath = currentPath === '/' ? file.name : `${currentPath.slice(1)}/${file.name}`
+					const resp = await api.WriteFile(workspace.id, filePath, reader.result as ArrayBuffer)
+					resolve(!window.$app.openapi.IsError(resp))
+				} catch {
+					resolve(false)
 				}
-				hide()
 			}
+			reader.onerror = () => resolve(false)
 			reader.readAsArrayBuffer(file)
-		} catch {
+		})
+	}
+
+	const handleUpload = async (file: File) => {
+		const hide = message.loading(is_cn ? '上传中...' : 'Uploading...', 0)
+		const ok = await doUploadFile(file)
+		hide()
+		if (ok) {
+			message.success(is_cn ? '上传成功' : 'Upload successful')
+			loadDir(currentPath)
+		} else {
 			message.error(is_cn ? '上传失败' : 'Upload failed')
-			hide()
 		}
 		return false
+	}
+
+	const handleDragEnter = (e: React.DragEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
+		dragCounter.current++
+		if (e.dataTransfer.types.includes('Files')) {
+			setDragOver(true)
+		}
+	}
+
+	const handleDragLeave = (e: React.DragEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
+		dragCounter.current--
+		if (dragCounter.current === 0) {
+			setDragOver(false)
+		}
+	}
+
+	const handleDragOver = (e: React.DragEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
+	}
+
+	const handleDrop = async (e: React.DragEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
+		setDragOver(false)
+		dragCounter.current = 0
+
+		const files = Array.from(e.dataTransfer.files).filter((f) => f.size > 0 || f.type !== '')
+		if (files.length === 0) return
+
+		const hide = message.loading(
+			is_cn ? `正在上传 ${files.length} 个文件...` : `Uploading ${files.length} file(s)...`,
+			0
+		)
+
+		let success = 0
+		let failed = 0
+		for (const file of files) {
+			const ok = await doUploadFile(file)
+			if (ok) success++
+			else failed++
+		}
+
+		hide()
+		if (failed === 0) {
+			message.success(is_cn ? `${success} 个文件上传成功` : `${success} file(s) uploaded`)
+		} else {
+			message.warning(
+				is_cn ? `${success} 个成功，${failed} 个失败` : `${success} succeeded, ${failed} failed`
+			)
+		}
+		loadDir(currentPath)
 	}
 
 	const handleDeleteFile = async (entry: DirEntry) => {
@@ -320,7 +314,19 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 	const labelEntries = Object.entries(workspace.labels || {})
 
 	return (
-		<div className={styles.wrapper}>
+		<div
+			className={styles.wrapper}
+			onDragEnter={handleDragEnter}
+			onDragLeave={handleDragLeave}
+			onDragOver={handleDragOver}
+			onDrop={handleDrop}
+		>
+			{dragOver && (
+				<div className={styles.dropOverlay}>
+					<Icon name='material-upload' size={40} />
+					<span>{is_cn ? '拖放文件到此处上传' : 'Drop files here to upload'}</span>
+				</div>
+			)}
 			<div className={styles.detailHeader}>
 				<div className={styles.headerLeft}>
 					<div className={styles.backBtn} onClick={onBack}>
@@ -343,7 +349,11 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 							<h2 className={styles.wsName}>
 								<span onClick={() => setEditingName(true)}>
 									{workspace.name}
-									<Icon name='material-edit' size={14} className={styles.editIcon} />
+									<Icon
+										name='material-edit'
+										size={14}
+										className={styles.editIcon}
+									/>
 								</span>
 								<Popconfirm
 									title={
@@ -482,7 +492,7 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 				<div className={styles.breadcrumb}>
 					<span
 						className={`${styles.crumb} ${currentPath === '/' ? styles.crumbActive : ''}`}
-						onClick={() => setCurrentPath('/')}
+						onClick={() => updatePath('/')}
 					>
 						<Icon name='material-home' size={14} />
 					</span>
@@ -495,7 +505,7 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 								}`}
 								onClick={() => {
 									const path = '/' + breadcrumbs.slice(0, i + 1).join('/')
-									setCurrentPath(path)
+									updatePath(path)
 								}}
 							>
 								{part}
@@ -558,11 +568,11 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 										currentPath === '/'
 											? entry.name
 											: `${currentPath.slice(1)}/${entry.name}`
-								const mentionData: MentionData = {
-									type: entry.is_dir ? 'directory' : 'file',
-									id: `workspace://${workspace.id}/${filePath}`,
-									label: entry.name
-								}
+									const mentionData: MentionData = {
+										type: entry.is_dir ? 'directory' : 'file',
+										id: `workspace://${workspace.id}/${filePath}`,
+										label: entry.name
+									}
 									e.dataTransfer.setData(
 										MENTION_DRAG_TYPE,
 										JSON.stringify(mentionData)
@@ -579,7 +589,12 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 									{entry.mod_time
 										? new Date(entry.mod_time).toLocaleString(
 												is_cn ? 'zh-CN' : 'en-US',
-												{ month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+												{
+													month: 'short',
+													day: 'numeric',
+													hour: '2-digit',
+													minute: '2-digit'
+												}
 										  )
 										: '—'}
 								</div>
@@ -627,42 +642,6 @@ const WorkspaceDetail = ({ workspace, nodeMap, onBack, onDelete, onRefresh }: Wo
 					)}
 				</div>
 			</div>
-
-			<Modal
-				open={!!previewFile}
-				title={previewFile?.name}
-				footer={null}
-				width='80vw'
-				styles={{ body: { height: '70vh', padding: 0, overflow: 'hidden' } }}
-				onCancel={() => setPreviewFile(null)}
-				destroyOnClose
-			>
-				{previewLoading ? (
-					<div
-						style={{
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							height: '100%'
-						}}
-					>
-						{is_cn ? '加载中...' : 'Loading...'}
-					</div>
-				) : (
-					previewFile && (
-						<FileViewer
-							src={previewFile.src}
-							content={previewFile.content}
-							contentType={previewFile.contentType}
-							__name={previewFile.name}
-							__bind=''
-							__value={previewFile.name}
-							style={{ height: '70vh' }}
-							showMaximize
-						/>
-					)
-				)}
-			</Modal>
 		</div>
 	)
 }

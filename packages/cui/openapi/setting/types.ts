@@ -312,11 +312,17 @@ export interface SecretEntry {
 	predefined?: boolean
 }
 
+export interface WebService {
+	label: string
+	port: number
+}
+
 export interface UserAgentSetting {
 	runners?: string[]
 	image?: string
 	secrets?: Record<string, SecretEntry>
 	options?: Record<string, any>
+	services?: WebService[]
 }
 
 export interface AgentSkill {

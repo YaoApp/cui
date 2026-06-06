@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getLocale, useParams, useNavigate } from '@umijs/max'
+import { getLocale, useParams, useNavigate, useLocation } from '@umijs/max'
 import { message } from 'antd'
 import WorkspaceList from './components/WorkspaceList'
 import WorkspaceDetail from './components/WorkspaceDetail'
@@ -14,6 +14,8 @@ const WorkspacePage = () => {
 	const is_cn = locale === 'zh-CN'
 	const params = useParams()
 	const navigate = useNavigate()
+	const location = useLocation()
+	const dirParam = new URLSearchParams(location.search).get('dir') || '/'
 
 	const [workspaces, setWorkspaces] = useState<Workspace[]>([])
 	const [nodeMap, setNodeMap] = useState<Record<string, NodeInfo>>({})
@@ -59,7 +61,9 @@ const WorkspacePage = () => {
 			const map: Record<string, NodeInfo> = {}
 			for (const n of nodes) map[n.tai_id] = n
 			setNodeMap(map)
-		} catch { /* silent */ }
+		} catch {
+			/* silent */
+		}
 	}, [])
 
 	useEffect(() => {
@@ -67,7 +71,20 @@ const WorkspacePage = () => {
 		loadNodes()
 	}, [loadWorkspaces, loadNodes])
 
+	useEffect(() => {
+		if (isDetail && selectedWorkspace) {
+			window.$app?.Event?.emit('app/updateSidebarTabTitle', {
+				url: `/workspace/detail/${selectedWorkspace.id}`,
+				title: selectedWorkspace.name
+			})
+		}
+	}, [isDetail, selectedWorkspace])
+
 	const handleWorkspaceClick = (ws: Workspace) => {
+		window.$app?.Event?.emit('app/updateSidebarTabTitle', {
+			url: '/workspace/list',
+			title: ws.name
+		})
 		navigate(`/workspace/detail/${ws.id}`)
 	}
 
@@ -110,19 +127,33 @@ const WorkspacePage = () => {
 	}
 
 	const handleBack = () => {
+		window.$app?.Event?.emit('app/updateSidebarTabTitle', {
+			url: `/workspace/detail/${detailId}`,
+			title: is_cn ? '工作空间' : 'Workspace'
+		})
 		navigate('/workspace/list')
 	}
+
+	const handleDirChange = useCallback(
+		(dir: string) => {
+			const search = dir === '/' ? '' : `?dir=${encodeURIComponent(dir)}`
+			navigate(`/workspace/detail/${detailId}${search}`, { replace: true })
+		},
+		[detailId, navigate]
+	)
 
 	if (isDetail && selectedWorkspace) {
 		return (
 			<div className={styles.container}>
-		<WorkspaceDetail
-			workspace={selectedWorkspace}
-			nodeMap={nodeMap}
-			onBack={handleBack}
-			onDelete={() => handleDelete(selectedWorkspace)}
-			onRefresh={loadWorkspaces}
-		/>
+				<WorkspaceDetail
+					workspace={selectedWorkspace}
+					nodeMap={nodeMap}
+					initialDir={dirParam}
+					onDirChange={handleDirChange}
+					onBack={handleBack}
+					onDelete={() => handleDelete(selectedWorkspace)}
+					onRefresh={loadWorkspaces}
+				/>
 			</div>
 		)
 	}
@@ -137,11 +168,7 @@ const WorkspacePage = () => {
 				onDelete={handleDelete}
 				onCreate={() => setShowCreate(true)}
 			/>
-			<CreateModal
-				open={showCreate}
-				onSubmit={handleCreate}
-				onCancel={() => setShowCreate(false)}
-			/>
+			<CreateModal open={showCreate} onSubmit={handleCreate} onCancel={() => setShowCreate(false)} />
 		</div>
 	)
 }
