@@ -14,7 +14,6 @@ import styles from './index.less'
 import Code from './components/Code'
 import Mermaid from './components/Mermaid'
 import ReferencePopover from './components/ReferencePopover'
-import AttachmentPreviewModal, { type AttachmentPreviewItem } from '@/components/common/AttachmentPreviewModal'
 import { ParseFileRef } from '@/utils/fileWrapper'
 import Thinking from '../Thinking'
 import ToolCall from '../ToolCall'
@@ -460,13 +459,14 @@ const Text = ({ message }: ITextProps) => {
 		return url.startsWith('workspace://')
 	}, [])
 
-	const [wsPreviewItem, setWsPreviewItem] = useState<AttachmentPreviewItem | null>(null)
-
 	const handleWorkspaceLinkOpen = useCallback((href: string) => {
 		const ref = ParseFileRef(href)
 		if (ref.type !== 'workspace' || !ref.filePath) return
 		const fileName = ref.filePath.split('/').pop() || ref.filePath
-		setWsPreviewItem({ title: fileName, file: href })
+		window.$app?.Event?.emit('app/openSidebar', {
+			url: `/preview?ws=${ref.workspaceId}&path=${encodeURIComponent(ref.filePath)}`,
+			title: fileName
+		})
 	}, [])
 
 	// Handle link clicks (reference links, workspace links, and external links)
@@ -751,12 +751,6 @@ const Text = ({ message }: ITextProps) => {
 					/>
 				)}
 
-				{/* Workspace File Preview Modal */}
-				<AttachmentPreviewModal
-					visible={!!wsPreviewItem}
-					onClose={() => setWsPreviewItem(null)}
-					attachment={wsPreviewItem}
-				/>
 			</div>
 		</MdxErrorBoundary>
 	)
