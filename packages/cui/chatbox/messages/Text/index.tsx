@@ -1,5 +1,6 @@
 import { useAsyncEffect } from 'ahooks'
 import to from 'await-to-js'
+import { message } from 'antd'
 import React, { Fragment, useState, useCallback, useRef, useEffect } from 'react'
 import * as JsxRuntime from 'react/jsx-runtime'
 import rehypeHighlight from 'rehype-highlight'
@@ -271,12 +272,37 @@ const buildWorkspaceTag = (url: string): string => {
 	return `<a class="workspace-link" href="${url}"><i class="Icon material">insert_drive_file</i>${displayPath || url}</a>`
 }
 
+const escapeHtml = (s: string): string =>
+	s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
 /**
- * Convert workspace:// URLs in text to clickable HTML <a> tags.
+ * Build an HTML <a> tag for a service:// URL.
+ * Supports ?title= query param for display; falls back to :port.
+ */
+const buildServiceTag = (url: string): string => {
+	const withoutProto = url.slice('service://'.length)
+	const qIdx = withoutProto.indexOf('?')
+	const mainPart = qIdx === -1 ? withoutProto : withoutProto.slice(0, qIdx)
+	const queryStr = qIdx === -1 ? '' : withoutProto.slice(qIdx + 1)
+	const parts = mainPart.split('/')
+	const port = parts[2] || ''
+
+	let display = `:${port}`
+	if (queryStr) {
+		const params = new URLSearchParams(queryStr)
+		const title = params.get('title')
+		if (title) display = title
+	}
+
+	return `<a class="service-link" href="${escapeHtml(url)}"><i class="Icon material">language</i>${escapeHtml(display)}</a>`
+}
+
+/**
+ * Convert workspace:// and service:// URLs in text to clickable HTML <a> tags.
  * Handles: backtick-wrapped URLs, markdown links, and bare URLs.
  * Skips URLs inside fenced code blocks (``` ... ```).
  */
-const wrapWorkspaceLinks = (text: string): string => {
+const wrapProtocolLinks = (text: string): string => {
 	const codeBlockPositions: Array<[number, number]> = []
 	const codeBlockRegex = /```/g
 	let cbMatch
@@ -298,13 +324,20 @@ const wrapWorkspaceLinks = (text: string): string => {
 	const isInCodeBlock = (pos: number) =>
 		codeBlockPositions.some(([start, end]) => pos >= start && pos < end)
 
-	// Pass 1: unwrap backtick-wrapped workspace URLs:  `workspace://...`  →  <a>
-	// Also handle markdown links: [text](workspace://...) → <a>
+	// Pass 1: unwrap backtick-wrapped protocol URLs:  `workspace://...` / `service://...`  →  <a>
+	// Also handle markdown links: [text](workspace://...) / [text](service://...) → <a>
 	let result = text.replace(
 		/`(workspace:\/\/[^`]+)`/g,
 		(match, url, offset) => {
 			if (isInCodeBlock(offset)) return match
 			return buildWorkspaceTag(url)
+		}
+	)
+	result = result.replace(
+		/`(service:\/\/[^`]+)`/g,
+		(match, url, offset) => {
+			if (isInCodeBlock(offset)) return match
+			return buildServiceTag(url)
 		}
 	)
 	result = result.replace(
@@ -315,21 +348,33 @@ const wrapWorkspaceLinks = (text: string): string => {
 			return `<a class="workspace-link" href="${url}">${displayName}</a>`
 		}
 	)
+	result = result.replace(
+		/\[([^\]]*)\]\((service:\/\/[^)]+)\)/g,
+		(match, label, url, offset) => {
+			if (isInCodeBlock(offset)) return match
+			const displayName = label || `:${url.split('/')[4] || ''}`
+			return `<a class="service-link" href="${url}">${displayName}</a>`
+		}
+	)
 
-	// Pass 2: convert remaining bare workspace:// URLs
+	// Pass 2: convert remaining bare workspace:// and service:// URLs
 	const parts: string[] = []
 	let lastIndex = 0
-	const wsRegex = /workspace:\/\/[^\s)>\]`"']+/g
-	let wsMatch
-	while ((wsMatch = wsRegex.exec(result)) !== null) {
-		if (isInCodeBlock(wsMatch.index)) continue
-		const before = result.slice(Math.max(0, wsMatch.index - 6), wsMatch.index)
+	const protocolRegex = /(?:workspace|service):\/\/[^\s)>\]`"']+/g
+	let protoMatch
+	while ((protoMatch = protocolRegex.exec(result)) !== null) {
+		if (isInCodeBlock(protoMatch.index)) continue
+		const before = result.slice(Math.max(0, protoMatch.index - 6), protoMatch.index)
 		if (before.endsWith('href="') || before.endsWith("href='")) continue
 
-		const url = wsMatch[0]
-		parts.push(result.slice(lastIndex, wsMatch.index))
-		parts.push(buildWorkspaceTag(url))
-		lastIndex = wsMatch.index + url.length
+		const url = protoMatch[0]
+		parts.push(result.slice(lastIndex, protoMatch.index))
+		if (url.startsWith('service://')) {
+			parts.push(buildServiceTag(url))
+		} else {
+			parts.push(buildWorkspaceTag(url))
+		}
+		lastIndex = protoMatch.index + url.length
 	}
 
 	if (parts.length === 0) return result
@@ -387,7 +432,7 @@ const escape = (text?: string) => {
 
 	result = escapeCurlyBraces(result)
 
-	result = wrapWorkspaceLinks(result)
+	result = wrapProtocolLinks(result)
 
 	// Convert <Mention> tags to safe HTML BEFORE escapeInvalidHtmlTags
 	result = wrapMentionTags(result)
@@ -469,6 +514,101 @@ const Text = ({ message }: ITextProps) => {
 		})
 	}, [])
 
+	const isServiceLink = useCallback((url: string): boolean => {
+		return url.startsWith('service://')
+	}, [])
+
+	const handleServiceLinkOpen = useCallback(async (href: string, linkTitle?: string) => {
+		const ref = ParseFileRef(href)
+		if (ref.type !== 'service' || !ref.nodeId || !ref.targetId || !ref.port) return
+
+		try {
+			const baseURL = window.$app?.openapi?.config?.baseURL ?? '/v1'
+
+			const resp = await fetch(
+				`${baseURL}/tai/${ref.nodeId}/webproxy/bindings?target_id=${encodeURIComponent(ref.targetId)}`,
+				{ credentials: 'include' }
+			)
+			if (!resp.ok) throw new Error(`Failed to fetch bindings: ${resp.status}`)
+			const data = await resp.json()
+
+			let hostPort: number | undefined
+			let domainSource = data
+			for (const target of data.targets || []) {
+				for (const asst of target.assistants || []) {
+					const svc = (asst.services || []).find(
+						(s: any) => s.port === ref.port && s.bound
+					)
+					if (svc?.host_port) {
+						hostPort = svc.host_port
+						break
+					}
+				}
+				if (hostPort) break
+				const tmp = (target.temporary || []).find(
+					(t: any) => t.target_port === ref.port
+				)
+				if (tmp) hostPort = tmp.host_port
+				if (hostPort) break
+			}
+
+			if (!hostPort) {
+				const bindResp = await fetch(`${baseURL}/tai/${ref.nodeId}/webproxy/bindings`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						target_id: ref.targetId,
+						port: ref.port,
+						label: `Port ${ref.port}`
+					})
+				})
+				if (!bindResp.ok) throw new Error(`Failed to bind port: ${bindResp.status}`)
+				const bindData = await bindResp.json()
+				domainSource = bindData.domain ? bindData : data
+				for (const target of bindData.targets || []) {
+					for (const asst of target.assistants || []) {
+						const svc = (asst.services || []).find(
+							(s: any) => s.port === ref.port && s.bound
+						)
+						if (svc?.host_port) {
+							hostPort = svc.host_port
+							break
+						}
+					}
+					if (hostPort) break
+					const tmp = (target.temporary || []).find(
+						(t: any) => t.target_port === ref.port
+					)
+					if (tmp) hostPort = tmp.host_port
+					if (hostPort) break
+				}
+			}
+
+			if (!hostPort) {
+				message.error('Service port not available')
+				return
+			}
+
+			const { domain, prefix } = domainSource
+			let url: string
+			if (domain) {
+				url = `https://${prefix || ''}${hostPort}.${domain}`
+			} else {
+				url = `${location.protocol}//${location.hostname}:${hostPort}`
+			}
+			if (ref.servicePath) url += '/' + ref.servicePath
+
+			window.$app?.Event?.emit('app/openSidebar', {
+				url,
+				title: linkTitle || ref.serviceTitle || `Service :${ref.port}`,
+				icon: 'material-web'
+			})
+		} catch (err: any) {
+			message.error(err?.message || 'Failed to open service')
+		}
+	}, [])
+
 	// Handle link clicks (reference links, workspace links, and external links)
 	const handleLinkClick = useCallback(
 		(e: MouseEvent) => {
@@ -513,6 +653,16 @@ const Text = ({ message }: ITextProps) => {
 					return
 				}
 
+				// Handle service:// links
+				if (isServiceLink(href)) {
+					e.preventDefault()
+					e.stopPropagation()
+					const hasIcon = link.querySelector('i.Icon')
+					const linkTitle = hasIcon ? undefined : link.textContent?.trim()
+					handleServiceLinkOpen(href, linkTitle || undefined)
+					return
+				}
+
 				// Handle external http/https links
 				if (isExternalLink(href)) {
 					e.preventDefault()
@@ -525,7 +675,7 @@ const Text = ({ message }: ITextProps) => {
 				}
 			}
 		},
-		[requestId, isExternalLink, isWorkspaceLink, addTrackingParam, handleWorkspaceLinkOpen]
+		[requestId, isExternalLink, isWorkspaceLink, isServiceLink, addTrackingParam, handleWorkspaceLinkOpen, handleServiceLinkOpen]
 	)
 
 	// Close reference popover
@@ -638,7 +788,7 @@ const Text = ({ message }: ITextProps) => {
 							}
 						})
 					},
-				// Ensure workspace:// links have the workspace-link class
+				// Ensure workspace:// and service:// links have their respective classes
 				() => (tree) => {
 					visit(tree, (node: any) => {
 						if (node?.type === 'element' && node?.tagName === 'a') {
@@ -649,6 +799,14 @@ const Text = ({ message }: ITextProps) => {
 									: (node.properties.className || '')
 								if (!cls.includes('workspace-link')) {
 									node.properties.className = (cls + ' workspace-link').trim()
+								}
+							}
+							if (typeof href === 'string' && href.startsWith('service://')) {
+								const cls = Array.isArray(node.properties.className)
+									? node.properties.className.join(' ')
+									: (node.properties.className || '')
+								if (!cls.includes('service-link')) {
+									node.properties.className = (cls + ' service-link').trim()
 								}
 							}
 						}
