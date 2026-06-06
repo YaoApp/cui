@@ -105,6 +105,28 @@
 		}
 	}
 
+	// Service links (service://{nodeId}/{targetId}/{port})
+	a:global(.service-link) {
+		color: var(--color_primary);
+		text-decoration: none;
+		border: none;
+		cursor: pointer;
+		border-radius: 3px;
+		transition: background 0.15s ease;
+
+		> :global(.Icon.material) {
+			font-size: inherit !important;
+			line-height: inherit !important;
+			vertical-align: bottom !important;
+			margin-right: 2px;
+		}
+
+		&:hover {
+			background: rgba(var(--r), var(--g), var(--b), 0.08);
+			border: none;
+		}
+	}
+
 	// Mention pills (inline mentions of experts, workspaces, files)
 	:global(.mention-pill) {
 		display: inline-flex;

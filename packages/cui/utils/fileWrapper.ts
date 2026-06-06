@@ -125,7 +125,7 @@ export function triggerFileDownload(file: string, filename: string, index = 0): 
 
 // ========== Unified File Reference Protocol ==========
 
-export type FileRefType = 'wrapper' | 'workspace' | 'url' | 'unknown'
+export type FileRefType = 'wrapper' | 'workspace' | 'service' | 'url' | 'unknown'
 
 export interface FileRef {
 	type: FileRefType
@@ -134,16 +134,22 @@ export interface FileRef {
 	fileID?: string
 	workspaceId?: string
 	filePath?: string
+	nodeId?: string
+	targetId?: string
+	port?: number
+	servicePath?: string
+	serviceTitle?: string
 }
 
 /**
- * 统一解析文件引用字符串，识别三种格式：
- * - workspace://{wsId}/{filePath}   → Workspace 文件
- * - http(s)://...                   → 外部 URL
- * - {uploaderID}://{fileID}         → File Wrapper
+ * 统一解析文件引用字符串，识别四种格式：
+ * - workspace://{wsId}/{filePath}          → Workspace 文件
+ * - service://{nodeId}/{targetId}/{port}   → Sandbox Web 服务
+ * - http(s)://...                          → 外部 URL
+ * - {uploaderID}://{fileID}                → File Wrapper
  *
- * 顺序很重要：workspace:// 和 http(s):// 必须先匹配，
- * 因为 IsFileWrapper 的正则也能匹配这两种格式。
+ * 顺序很重要：workspace://、service:// 和 http(s):// 必须先匹配，
+ * 因为 IsFileWrapper 的正则也能匹配这些格式。
  */
 export function ParseFileRef(str: string): FileRef {
 	if (!str || typeof str !== 'string') return { type: 'unknown', raw: str || '' }
@@ -159,6 +165,31 @@ export function ParseFileRef(str: string): FileRef {
 			raw: str,
 			workspaceId: rest.slice(0, slashIdx),
 			filePath: rest.slice(slashIdx + 1)
+		}
+	}
+
+	if (str.startsWith('service://')) {
+		const rest = str.slice('service://'.length)
+		const qIdx = rest.indexOf('?')
+		const mainPart = qIdx === -1 ? rest : rest.slice(0, qIdx)
+		const queryStr = qIdx === -1 ? '' : rest.slice(qIdx + 1)
+		const parts = mainPart.split('/')
+		if (parts.length >= 3) {
+			const port = parseInt(parts[2], 10)
+			let title: string | undefined
+			if (queryStr) {
+				const params = new URLSearchParams(queryStr)
+				title = params.get('title') || undefined
+			}
+			return {
+				type: 'service',
+				raw: str,
+				nodeId: parts[0],
+				targetId: parts[1],
+				port: isNaN(port) ? undefined : port,
+				servicePath: parts.length > 3 ? parts.slice(3).join('/') : undefined,
+				serviceTitle: title
+			}
 		}
 	}
 
