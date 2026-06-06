@@ -3,6 +3,7 @@ import { Tooltip, Spin } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { useFileDownload, type DownloadableFile } from '@/hooks/useFileDownload'
+import { ParseFileRef } from '@/utils/fileWrapper'
 import AttachmentPreviewModal, { type AttachmentPreviewItem } from '../AttachmentPreviewModal'
 import styles from './index.less'
 
@@ -104,7 +105,16 @@ const AttachmentList: React.FC<Props> = ({ attachments, showDownloadAll = true, 
 
 	const handlePreview = (e: React.MouseEvent, att: AttachmentItem) => {
 		e.stopPropagation()
-		setPreviewItem({ title: att.title, file: att.file, content_type: att.content_type })
+		const ref = ParseFileRef(att.file)
+		if (ref.type === 'workspace' && ref.workspaceId && ref.filePath) {
+			const fileName = ref.filePath.split('/').pop() || att.title
+			window.$app?.Event?.emit('app/openSidebar', {
+				url: `/preview?ws=${ref.workspaceId}&path=${encodeURIComponent(ref.filePath)}`,
+				title: fileName
+			})
+		} else {
+			setPreviewItem({ title: att.title, file: att.file, content_type: att.content_type })
+		}
 	}
 
 	const handleDownloadAll = () => {
