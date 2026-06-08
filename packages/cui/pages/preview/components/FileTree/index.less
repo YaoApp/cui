@@ -34,10 +34,24 @@
 	padding-right: 8px;
 	cursor: pointer;
 	border-left: 2px solid transparent;
-	transition: background 0.12s ease;
+	transition: background 0.12s ease, color 0.12s ease;
 
 	&:hover {
 		background: var(--color_bg_hover);
+		cursor: grab;
+
+		.name {
+			color: var(--color_main);
+		}
+
+		.icon {
+			color: var(--color_main);
+			opacity: 0.7;
+		}
+	}
+
+	&:active {
+		cursor: grabbing;
 	}
 }
 

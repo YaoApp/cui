@@ -12,6 +12,7 @@ import Pdf from '@/components/view/FileViewer/viewers/Pdf'
 import Docx from '@/components/view/FileViewer/viewers/Docx'
 import Pptx from '@/components/view/FileViewer/viewers/Pptx'
 import Unsupported from '@/components/view/FileViewer/viewers/Unsupported'
+import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 import FileTree from './components/FileTree'
 import viewerStyles from '@/components/view/FileViewer/index.less'
 import styles from './index.less'
@@ -326,7 +327,22 @@ const Preview = () => {
 				>
 					<Icon name='material-file_copy' size={16} />
 				</span>
-				<span className={styles.fileName}>{fileName}</span>
+				<span
+					className={styles.fileName}
+					draggable
+					onDragStart={(e) => {
+						const mentionData: MentionData = {
+							type: 'file',
+							id: `workspace://${ws}/${filePath}`,
+							label: fileName
+						}
+						e.dataTransfer.setData(MENTION_DRAG_TYPE, JSON.stringify(mentionData))
+						e.dataTransfer.effectAllowed = 'copy'
+						setMentionDragImage(e, mentionData)
+					}}
+				>
+					{fileName}
+				</span>
 				{fileType === 'text' && !isHtml && !isMarkdown && (
 					<span className={styles.langBadge}>{ext}</span>
 				)}

@@ -147,21 +147,23 @@ const FileAttachment: React.FC<{ url: string; filename?: string }> = ({ url, fil
 	)
 }
 
-const MENTION_REGEX = /<Mention\s+type="([^"]+)"\s+value="([^"]+)">([^<]*)<\/Mention>/g
+const MENTION_REGEX = /<Mention\s+type="([^"]+)"\s+value="([^"]+)"[^>]*>([^<]*)<\/Mention>/g
 const ANSWER_REGEX = /<Answer\s+question="([^"]+)"\s+value="([^"]+)">([^<]*)<\/Answer>/g
 
 const mentionPillClassMap: Record<string, string> = {
 	expert: styles.mentionExpert,
 	workspace: styles.mentionWorkspace,
 	file: styles.mentionFile,
-	directory: styles.mentionDirectory
+	directory: styles.mentionDirectory,
+	clip: styles.mentionClip
 }
 
 const mentionPillIconMap: Record<string, string> = {
 	expert: 'material-assistant',
 	workspace: 'material-folder',
 	file: 'material-insert_drive_file',
-	directory: 'material-folder_open'
+	directory: 'material-folder_open',
+	clip: 'material-attachment'
 }
 
 const renderTextWithTags = (text: string): React.ReactNode => {

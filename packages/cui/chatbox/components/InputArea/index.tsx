@@ -314,7 +314,7 @@ const InputArea = (props: IInputAreaProps) => {
 		[selectedWorkspace, is_cn]
 	)
 
-	const insertTag = (label: string, id: string, type: MentionType) => {
+	const insertTag = (label: string, id: string, type: MentionType, description?: string, metadata?: Record<string, string>) => {
 		const editor = editorRef.current
 		if (!editor) return
 
@@ -352,7 +352,8 @@ const InputArea = (props: IInputAreaProps) => {
 			expert: styles.mentionExpert,
 			workspace: styles.mentionWorkspace,
 			file: styles.mentionFile,
-			directory: styles.mentionDirectory
+			directory: styles.mentionDirectory,
+			clip: styles.mentionClip
 		}
 		const tag = document.createElement('span')
 		tag.className = `${styles.mentionTag} ${typeClassMap[type] || ''}`
@@ -360,12 +361,15 @@ const InputArea = (props: IInputAreaProps) => {
 		tag.dataset.mentionType = type
 		tag.dataset.mentionId = id
 		tag.dataset.mentionLabel = label
+		if (description) tag.dataset.mentionDescription = description
+		if (metadata) tag.dataset.mentionMetadata = JSON.stringify(metadata)
 
 		const mentionIconMap: Record<MentionType, string> = {
 			expert: 'assistant',
 			workspace: 'folder',
 			file: 'insert_drive_file',
-			directory: 'folder_open'
+			directory: 'folder_open',
+			clip: 'attachment'
 		}
 		const iconEl = document.createElement('span')
 		iconEl.className = 'Icon material'
@@ -786,7 +790,7 @@ const InputArea = (props: IInputAreaProps) => {
 		if (mentionJson) {
 			const data = parseMentionDragData(mentionJson)
 			if (data) {
-				insertTag(data.label, data.id, data.type)
+				insertTag(data.label, data.id, data.type, data.description, data.metadata)
 				return
 			}
 		}
@@ -1088,7 +1092,8 @@ const InputArea = (props: IInputAreaProps) => {
 		expert: 'material-assistant',
 		workspace: 'material-folder',
 		file: 'material-insert_drive_file',
-		directory: 'material-folder_open'
+		directory: 'material-folder_open',
+		clip: 'material-attachment'
 	}
 
 	const renderMentions = () => {
