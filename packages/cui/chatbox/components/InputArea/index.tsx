@@ -17,7 +17,8 @@ import {
 	type MentionData,
 	MENTION_DRAG_TYPE,
 	serializeEditorContent,
-	parseMentionDragData
+	parseMentionDragData,
+	consumePendingCrossOriginDrag
 } from '../../utils/mention'
 import styles from './index.less'
 import AgentTag from './AgentTag'
@@ -793,6 +794,18 @@ const InputArea = (props: IInputAreaProps) => {
 				insertTag(data.label, data.id, data.type, data.description, data.metadata)
 				return
 			}
+		}
+
+		const crossOriginData = consumePendingCrossOriginDrag()
+		if (crossOriginData) {
+			insertTag(
+				crossOriginData.label,
+				crossOriginData.id,
+				crossOriginData.type,
+				crossOriginData.description,
+				crossOriginData.metadata
+			)
+			return
 		}
 
 		if (e.dataTransfer.files.length > 0) {

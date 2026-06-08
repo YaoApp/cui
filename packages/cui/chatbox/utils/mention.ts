@@ -186,3 +186,29 @@ export function parseMentionDragData(jsonStr: string): MentionData | null {
 		return null
 	}
 }
+
+// --- Cross-origin drag bridge (postMessage) ---
+
+interface PendingCrossOriginDrag {
+	data: MentionData
+	timestamp: number
+}
+
+const CROSS_ORIGIN_DRAG_TTL = 5000
+
+let pendingCrossOriginDrag: PendingCrossOriginDrag | null = null
+
+export function setPendingCrossOriginDrag(data: MentionData | null) {
+	pendingCrossOriginDrag = data ? { data, timestamp: Date.now() } : null
+}
+
+export function consumePendingCrossOriginDrag(): MentionData | null {
+	if (!pendingCrossOriginDrag) return null
+	if (Date.now() - pendingCrossOriginDrag.timestamp > CROSS_ORIGIN_DRAG_TTL) {
+		pendingCrossOriginDrag = null
+		return null
+	}
+	const data = pendingCrossOriginDrag.data
+	pendingCrossOriginDrag = null
+	return data
+}
