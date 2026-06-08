@@ -1,9 +1,11 @@
-export type MentionType = 'expert' | 'workspace' | 'file' | 'directory'
+export type MentionType = 'expert' | 'workspace' | 'file' | 'directory' | 'clip'
 
 export interface MentionData {
 	type: MentionType
 	id: string
 	label: string
+	description?: string
+	metadata?: Record<string, string>
 }
 
 export const MENTION_DRAG_TYPE = 'application/x-yao-mention'
@@ -21,6 +23,10 @@ export function serializeEditorContent(editor: HTMLElement, mentionTagClass: str
 	const parts: string[] = []
 	serializeNode(editor, parts, mentionTagClass, true)
 	return parts.join('')
+}
+
+function escapeXmlAttr(s: string): string {
+	return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 function serializeNode(
@@ -48,7 +54,23 @@ function serializeNode(
 		const mType = el.dataset.mentionType || 'expert'
 		const mId = el.dataset.mentionId || ''
 		const mLabel = el.dataset.mentionLabel || el.textContent || ''
-		parts.push(`<Mention type="${mType}" value="${mId}">${mLabel}</Mention>`)
+		const mDesc = el.dataset.mentionDescription || ''
+		const mMeta = el.dataset.mentionMetadata || ''
+
+		let attrs = `type="${escapeXmlAttr(mType)}" value="${escapeXmlAttr(mId)}"`
+		if (mDesc) attrs += ` description="${escapeXmlAttr(mDesc)}"`
+		if (mMeta) {
+			try {
+				const parsed = JSON.parse(mMeta)
+				for (const [k, v] of Object.entries(parsed)) {
+					if (/^[a-zA-Z_][\w.-]*$/.test(k)) {
+						attrs += ` ${k}="${escapeXmlAttr(v as string)}"`
+					}
+				}
+			} catch {}
+		}
+		const safeLabel = mLabel.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+		parts.push(`<Mention ${attrs}>${safeLabel}</Mention>`)
 		return
 	}
 
@@ -69,14 +91,16 @@ const DRAG_GHOST_ICONS: Record<MentionType, string> = {
 	expert: 'assistant',
 	workspace: 'folder',
 	file: 'insert_drive_file',
-	directory: 'folder_open'
+	directory: 'folder_open',
+	clip: 'attachment'
 }
 
 const DRAG_GHOST_COLORS: Record<MentionType, string> = {
 	expert: '#1677ff',
 	workspace: '#52c41a',
 	file: '#faad14',
-	directory: '#722ed1'
+	directory: '#722ed1',
+	clip: '#eb2f96'
 }
 
 /**
@@ -150,9 +174,12 @@ export function parseMentionDragData(jsonStr: string): MentionData | null {
 			typeof data.type === 'string' &&
 			typeof data.id === 'string' &&
 			typeof data.label === 'string' &&
-			['expert', 'workspace', 'file', 'directory'].includes(data.type)
+			['expert', 'workspace', 'file', 'directory', 'clip'].includes(data.type)
 		) {
-			return data as MentionData
+			const result: MentionData = { type: data.type, id: data.id, label: data.label }
+			if (typeof data.description === 'string') result.description = data.description
+			if (data.metadata && typeof data.metadata === 'object') result.metadata = data.metadata
+			return result
 		}
 		return null
 	} catch {

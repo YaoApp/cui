@@ -388,14 +388,16 @@ const mentionIconNames: Record<string, string> = {
 	expert: 'assistant',
 	workspace: 'folder',
 	file: 'insert_drive_file',
-	directory: 'folder_open'
+	directory: 'folder_open',
+	clip: 'attachment'
 }
 
 const mentionCssClasses: Record<string, string> = {
 	expert: 'mention-expert',
 	workspace: 'mention-workspace',
 	file: 'mention-file',
-	directory: 'mention-directory'
+	directory: 'mention-directory',
+	clip: 'mention-clip'
 }
 
 /**
@@ -405,7 +407,7 @@ const mentionCssClasses: Record<string, string> = {
  */
 const wrapMentionTags = (text: string): string => {
 	return text.replace(
-		/<Mention\s+type="([^"]+)"\s+value="([^"]+)">([^<]*)<\/Mention>/g,
+		/<Mention\s+type="([^"]+)"\s+value="([^"]+)"[^>]*>([^<]*)<\/Mention>/g,
 		(_match, type: string, value: string, label: string) => {
 			const iconName = mentionIconNames[type] || 'insert_drive_file'
 			const cls = mentionCssClasses[type] || 'mention-file'

@@ -29,6 +29,16 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	max-width: 240px;
+	cursor: grab;
+	transition: color 0.12s ease;
+
+	&:hover {
+		color: var(--color_main);
+	}
+
+	&:active {
+		cursor: grabbing;
+	}
 }
 
 .langBadge {

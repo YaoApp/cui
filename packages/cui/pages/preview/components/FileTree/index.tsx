@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { WorkspaceAPI } from '@/openapi/workspace'
+import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 import type { DirEntry } from '@/pages/workspace/types'
 import styles from './index.less'
 
@@ -185,6 +186,18 @@ const FileTree = ({ workspaceId, currentPath, onSelect }: FileTreeProps) => {
 						className={`${styles.item} ${isActive ? styles.itemActive : ''}`}
 						style={{ paddingLeft: depth * 16 + 8 }}
 						onClick={() => handleClick(entry, dirPath)}
+						draggable
+						onDragStart={(e) => {
+							const filePath = filePathForSelect(dirPath, entry.name)
+							const mentionData: MentionData = {
+								type: entry.is_dir ? 'directory' : 'file',
+								id: `workspace://${workspaceId}/${filePath}`,
+								label: entry.name
+							}
+							e.dataTransfer.setData(MENTION_DRAG_TYPE, JSON.stringify(mentionData))
+							e.dataTransfer.effectAllowed = 'copy'
+							setMentionDragImage(e, mentionData)
+						}}
 					>
 						{entry.is_dir ? (
 							<Icon
