@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cross-origin Mention Drag Test</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 24px; }
+h2 { margin-bottom: 16px; color: #fff; }
+p { margin-bottom: 12px; color: #aaa; font-size: 13px; }
+.cards { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.card {
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: #16213e;
+  border: 1.5px solid #0f3460;
+  cursor: grab;
+  user-select: none;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex; align-items: center; gap: 8px;
+  touch-action: none;
+}
+.card:hover { border-color: #e94560; background: #1a1a3e; }
+.card .icon { font-size: 18px; }
+.card .label { font-size: 14px; font-weight: 500; }
+.card .type { font-size: 11px; color: #888; margin-left: auto; }
+.log { margin-top: 24px; padding: 12px; background: #0d1117; border-radius: 6px; font-size: 12px; font-family: monospace; max-height: 160px; overflow-y: auto; }
+.log-entry { padding: 2px 0; color: #7ee787; }
+</style>
+</head>
+<body>
+<h2>Cross-origin Mention Drag Test</h2>
+<p>Press and drag a card to the Chatbox on the left. Release over the input area to insert a mention. Ghost appearance is fully controlled by this page; parent only handles positioning.</p>
+
+<div class="cards" id="cards"></div>
+<div class="log" id="log"></div>
+
+<script>
+const items = [
+  { type: 'clip', id: 'clip://screenshot-001', label: 'Screenshot - Homepage', description: 'Homepage design screenshot' },
+  { type: 'file', id: 'workspace://ws1/src/app.tsx', label: 'app.tsx', description: 'Main application entry' },
+  { type: 'directory', id: 'workspace://ws1/src/components', label: 'components/', description: 'UI components folder' },
+  { type: 'clip', id: 'clip://location-data-002', label: 'Location: Beijing', description: 'GPS location data', metadata: { lat: '39.9042', lng: '116.4074' } },
+  { type: 'workspace', id: 'workspace://my-project', label: 'my-project', description: 'Test workspace' },
+];
+
+const icons = { clip: '📎', file: '📄', directory: '📁', workspace: '💼' };
+const logEl = document.getElementById('log');
+
+function addLog(msg) {
+  const el = document.createElement('div');
+  el.className = 'log-entry';
+  el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  logEl.prepend(el);
+}
+
+let dragging = null;
+
+items.forEach((item) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <span class="icon">${icons[item.type] || '📎'}</span>
+    <span class="label">${item.label}</span>
+    <span class="type">${item.type}</span>
+  `;
+
+  card.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    card.setPointerCapture(e.pointerId);
+    dragging = { item, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, started: false };
+  });
+
+  card.addEventListener('pointermove', (e) => {
+    if (!dragging || dragging.pointerId !== e.pointerId) return;
+
+    if (!dragging.started) {
+      const dx = e.clientX - dragging.startX;
+      const dy = e.clientY - dragging.startY;
+      if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+      dragging.started = true;
+
+      const mentionData = { type: item.type, id: item.id, label: item.label };
+      if (item.description) mentionData.description = item.description;
+      if (item.metadata) mentionData.metadata = item.metadata;
+      dragging.mentionData = mentionData;
+
+      const ghostHTML = `<div style="
+        display:flex; align-items:center; gap:6px;
+        padding:6px 12px; border-radius:6px;
+        background:#16213e; border:1.5px solid #e94560;
+        color:#e0e0e0; font-size:13px; font-weight:500;
+        font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+        white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.3);
+      "><span style="font-size:16px">${icons[item.type] || '📎'}</span><span>${item.label}</span></div>`;
+
+      window.parent.postMessage({
+        type: 'mention:drag-start',
+        data: mentionData,
+        ghost: ghostHTML,
+        x: e.clientX,
+        y: e.clientY
+      }, '*');
+      addLog(`drag-start → "${item.label}"`);
+    } else {
+      window.parent.postMessage({ type: 'mention:pointer-move', x: e.clientX, y: e.clientY }, '*');
+    }
+  });
+
+  card.addEventListener('pointerup', (e) => {
+    if (!dragging || dragging.pointerId !== e.pointerId) return;
+    card.releasePointerCapture(e.pointerId);
+    if (dragging.started) {
+      window.parent.postMessage({ type: 'mention:drag-end', x: e.clientX, y: e.clientY }, '*');
+      addLog(`drag-end → released at (${e.clientX}, ${e.clientY})`);
+    }
+    dragging = null;
+  });
+
+  card.addEventListener('pointercancel', (e) => {
+    if (!dragging || dragging.pointerId !== e.pointerId) return;
+    if (dragging.started) {
+      window.parent.postMessage({ type: 'mention:drag-end', x: e.clientX, y: e.clientY }, '*');
+      addLog(`drag-cancel`);
+    }
+    dragging = null;
+  });
+
+  card.addEventListener('lostpointercapture', (e) => {
+    if (dragging && dragging.started) {
+      addLog(`capture lost → parent tracking takes over`);
+      dragging = null;
+    }
+  });
+
+  document.getElementById('cards').appendChild(card);
+});
+
+addLog('Ready. Drag cards to Chatbox to test cross-origin mention insertion.');
+window.parent.postMessage({ type: 'title', message: { title: 'Drag Test' } }, '*');
+</script>
+</body>
+</html>
