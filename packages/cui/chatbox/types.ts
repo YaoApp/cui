@@ -95,6 +95,12 @@ export interface IInputAreaProps {
 	}
 	/** Initial model/connector from session history */
 	initialModel?: string
+	/** Initial workspace from session history (per-tab) */
+	initialWorkspace?: string
+	/** Workspace change callback (syncs back to tab) */
+	onWorkspaceChange?: (workspaceId: string) => void
+	/** Whether workspace selector is locked (chat already has messages) */
+	workspaceLocked?: boolean
 	/** Initial chat mode from session history (deprecated, kept for compat) */
 	initialChatMode?: 'chat' | 'task'
 	/** Initial trace toggle state from session history */

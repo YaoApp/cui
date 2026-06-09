@@ -37,11 +37,12 @@ const loadTabsFromStorage = (userId?: string, teamId?: string): ChatTab[] => {
 const saveTabsToStorage = (tabs: ChatTab[], userId?: string, teamId?: string): void => {
 	try {
 		const key = getTabsStorageKey(userId, teamId)
-		// Only save essential tab data (chatId, title, assistantId)
+		// Only save essential tab data (chatId, title, assistantId, lastWorkspace)
 		const tabsToSave = tabs.map((tab) => ({
 			chatId: tab.chatId,
 			title: tab.title,
-			assistantId: tab.assistantId
+			assistantId: tab.assistantId,
+			lastWorkspace: tab.lastWorkspace
 		}))
 		local[key] = tabsToSave
 	} catch (e) {

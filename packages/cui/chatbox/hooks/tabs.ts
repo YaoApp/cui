@@ -238,10 +238,10 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 		(arg?: string | any) => {
 			const assistantId = typeof arg === 'string' ? arg : undefined
 			const newId = nanoid()
+			const currentTab = tabs.find((t) => t.chatId === activeTabId)
 
 			let targetAssistantId = assistantId
 			if (!targetAssistantId) {
-				const currentTab = tabs.find((t) => t.chatId === activeTabId)
 				targetAssistantId = currentTab?.assistantId
 			}
 			targetAssistantId = targetAssistantId || defaultAssistantId
@@ -250,6 +250,7 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 				chatId: newId,
 				title: is_cn ? '新对话' : 'New Chat',
 				assistantId: targetAssistantId,
+				lastWorkspace: currentTab?.lastWorkspace,
 				isNew: true // Mark as newly created, not loaded from history
 			}
 			setTabs((prev) => [...prev, newTab])
@@ -342,25 +343,27 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 				const displayMessages = deduplicateAssistantInfo(convertedMessages)
 				setChatStates((prev) => ({ ...prev, [chatId]: displayMessages }))
 
-				// Update tab with session details (title, assistantId, lastConnector, lastMode, historyLoaded)
-				const title = sessionRes?.title || session?.title || (is_cn ? '历史对话' : 'Chat History')
-				const assistantId = sessionRes?.assistant_id || session?.assistant_id
-				const lastConnector = sessionRes?.last_connector
-				const mode = sessionRes?.last_mode as 'chat' | 'task' | undefined
-				setTabs((prev) =>
-					prev.map((t) =>
-						t.chatId === chatId
-							? {
-									...t,
-									title,
-									historyLoaded: true, // Mark as loaded to prevent duplicate requests
-									...(assistantId && { assistantId }), // Update assistant from session
-									...(lastConnector && { lastConnector }),
-									...(mode && { mode })
-							  }
-							: t
-					)
+			// Update tab with session details (title, assistantId, lastConnector, lastMode, historyLoaded)
+			const title = sessionRes?.title || session?.title || (is_cn ? '历史对话' : 'Chat History')
+			const assistantId = sessionRes?.assistant_id || session?.assistant_id
+			const lastConnector = sessionRes?.last_connector
+			const mode = sessionRes?.last_mode as 'chat' | 'task' | undefined
+			const apiWorkspace = (sessionRes?.last_workspace || sessionRes?.metadata?.workspace_id) as string | undefined
+			setTabs((prev) =>
+				prev.map((t) =>
+					t.chatId === chatId
+						? {
+								...t,
+								title,
+								historyLoaded: true, // Mark as loaded to prevent duplicate requests
+								...(assistantId && { assistantId }), // Update assistant from session
+								...(lastConnector && { lastConnector }),
+								...(mode && { mode }),
+								...(apiWorkspace && !t.lastWorkspace && { lastWorkspace: apiWorkspace })
+						  }
+						: t
 				)
+			)
 			} catch (err: any) {
 				console.error('Failed to load history', err)
 				// Parse error for better feedback
@@ -406,11 +409,21 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 		[setTabs]
 	)
 
+	const updateTabWorkspace = useCallback(
+		(chatId: string, workspaceId: string) => {
+			setTabs((prev) =>
+				prev.map((t) => (t.chatId === chatId ? { ...t, lastWorkspace: workspaceId } : t))
+			)
+		},
+		[setTabs]
+	)
+
 	return {
 		activateTab,
 		closeTab,
 		createNewChat,
 		loadHistory,
-		updateTabAssistant
+		updateTabAssistant,
+		updateTabWorkspace
 	}
 }

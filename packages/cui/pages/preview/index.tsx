@@ -13,6 +13,7 @@ import Docx from '@/components/view/FileViewer/viewers/Docx'
 import Pptx from '@/components/view/FileViewer/viewers/Pptx'
 import Unsupported from '@/components/view/FileViewer/viewers/Unsupported'
 import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
+import type { DirEntry } from '@/pages/workspace/types'
 import FileTree from './components/FileTree'
 import viewerStyles from '@/components/view/FileViewer/index.less'
 import styles from './index.less'
@@ -127,6 +128,8 @@ const Preview = () => {
 	const [loading, setLoading] = useState(false)
 	const [showTree, setShowTree] = useState(false)
 	const [treeWidth, setTreeWidth] = useState(220)
+	const [dirEntries, setDirEntries] = useState<DirEntry[] | null>(null)
+	const [dirLoading, setDirLoading] = useState(false)
 	const resizingRef = useRef(false)
 	const startXRef = useRef(0)
 	const startWidthRef = useRef(220)
@@ -175,6 +178,38 @@ const Preview = () => {
 		const normalized = filePath.startsWith('/') ? filePath.slice(1) : filePath
 		return `${base}/workspace/${encodeURIComponent(ws)}/preview/${normalized}`
 	}, [ws, filePath, isHtml])
+
+	const pathHint = filePath.endsWith('/')
+
+	useEffect(() => {
+		if (!ws || !filePath) {
+			setDirEntries(null)
+			return
+		}
+		if (!pathHint && fileType !== 'unsupported') {
+			setDirEntries(null)
+			return
+		}
+		setDirLoading(true)
+		const api = getApi()
+		if (!api) { setDirLoading(false); return }
+		const dirPath = '/' + filePath.replace(/\/$/, '')
+		api.ListDir(ws, dirPath || '/')
+			.then((resp) => {
+				if (window.$app.openapi.IsError(resp)) {
+					setDirEntries(null)
+				} else {
+					const data = resp.data || []
+					const sorted = [...data].sort((a: DirEntry, b: DirEntry) => {
+						if (a.is_dir !== b.is_dir) return a.is_dir ? -1 : 1
+						return a.name.localeCompare(b.name)
+					})
+					setDirEntries(sorted)
+				}
+			})
+			.catch(() => setDirEntries(null))
+			.finally(() => setDirLoading(false))
+	}, [ws, filePath, fileType, pathHint, getApi])
 
 	useEffect(() => {
 		if (!ws || !filePath) return
@@ -271,7 +306,89 @@ const Preview = () => {
 		)
 	}
 
+	const getDirEntryIcon = (entry: DirEntry): string => {
+		if (entry.is_dir) return 'material-folder'
+		const e = entry.name.split('.').pop()?.toLowerCase() || ''
+		const map: Record<string, string> = {
+			ts: 'material-code', tsx: 'material-code', js: 'material-javascript',
+			json: 'material-data_object', md: 'material-description',
+			yaml: 'material-settings', yml: 'material-settings',
+			py: 'material-code', go: 'material-code', sh: 'material-terminal',
+			csv: 'material-table_chart', html: 'material-web', htm: 'material-web'
+		}
+		return map[e] || 'material-insert_drive_file'
+	}
+
+	const formatSize = (bytes: number): string => {
+		if (bytes === 0) return '\u2014'
+		const units = ['B', 'KB', 'MB', 'GB']
+		const i = Math.floor(Math.log(bytes) / Math.log(1024))
+		return `${(bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0)} ${units[i]}`
+	}
+
+	const dirBasePath = filePath.endsWith('/') ? filePath : filePath + '/'
+
 	const renderViewer = () => {
+		if (dirLoading) {
+			return <div className={styles.loading}>{is_cn ? '加载中...' : 'Loading...'}</div>
+		}
+
+		if (dirEntries !== null) {
+			if (dirEntries.length === 0) {
+				return (
+					<div className={styles.dirEmpty}>
+						<Icon name='material-folder_off' size={40} />
+						<span>{is_cn ? '空目录' : 'Empty directory'}</span>
+					</div>
+				)
+			}
+			return (
+				<div className={styles.dirList}>
+					{dirEntries.map((entry) => (
+						<div
+							key={entry.name}
+							className={`${styles.dirRow} ${entry.is_dir ? styles.dirRowDir : ''}`}
+							onClick={() => {
+								if (entry.is_dir) {
+									handleFileSelect(dirBasePath + entry.name + '/')
+								} else {
+									handleFileSelect(dirBasePath + entry.name)
+								}
+							}}
+							draggable
+							onDragStart={(e) => {
+								const entryPath = dirBasePath + entry.name
+								const mentionData: MentionData = {
+									type: entry.is_dir ? 'directory' : 'file',
+									id: `workspace://${ws}/${entryPath}`,
+									label: entry.name
+								}
+								e.dataTransfer.setData(MENTION_DRAG_TYPE, JSON.stringify(mentionData))
+								e.dataTransfer.effectAllowed = 'copy'
+								setMentionDragImage(e, mentionData)
+							}}
+						>
+							<div className={styles.dirIcon}>
+								<Icon name={getDirEntryIcon(entry)} size={18} />
+							</div>
+							<div className={styles.dirName}>{entry.name}</div>
+							<div className={styles.dirTime}>
+								{entry.mod_time
+									? new Date(entry.mod_time).toLocaleString(
+											is_cn ? 'zh-CN' : 'en-US',
+											{ month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+									  )
+									: '\u2014'}
+							</div>
+							<div className={styles.dirSize}>
+								{entry.is_dir ? '\u2014' : formatSize(entry.size)}
+							</div>
+						</div>
+					))}
+				</div>
+			)
+		}
+
 		if (loading) {
 			return <div className={styles.loading}>{is_cn ? '加载中...' : 'Loading...'}</div>
 		}
@@ -332,22 +449,22 @@ const Preview = () => {
 					draggable
 					onDragStart={(e) => {
 						const mentionData: MentionData = {
-							type: 'file',
+							type: dirEntries !== null ? 'directory' : 'file',
 							id: `workspace://${ws}/${filePath}`,
-							label: fileName
+							label: dirEntries !== null ? filePath : fileName
 						}
 						e.dataTransfer.setData(MENTION_DRAG_TYPE, JSON.stringify(mentionData))
 						e.dataTransfer.effectAllowed = 'copy'
 						setMentionDragImage(e, mentionData)
 					}}
 				>
-					{fileName}
+					{dirEntries !== null ? filePath : fileName}
 				</span>
-				{fileType === 'text' && !isHtml && !isMarkdown && (
+				{dirEntries === null && fileType === 'text' && !isHtml && !isMarkdown && (
 					<span className={styles.langBadge}>{ext}</span>
 				)}
 				<span className={styles.spacer} />
-				{(isHtml || isMarkdown) && (
+				{dirEntries === null && (isHtml || isMarkdown) && (
 					<div className={styles.tabSwitch}>
 						<span
 							className={`${styles.tabItem} ${
@@ -367,13 +484,15 @@ const Preview = () => {
 						</span>
 					</div>
 				)}
-				<span
-					className={styles.downloadBtn}
-					onClick={handleDownload}
-					title={is_cn ? '下载' : 'Download'}
-				>
-					<DownloadOutlined />
-				</span>
+				{dirEntries === null && (
+					<span
+						className={styles.downloadBtn}
+						onClick={handleDownload}
+						title={is_cn ? '下载' : 'Download'}
+					>
+						<DownloadOutlined />
+					</span>
+				)}
 			</div>
 			<div className={styles.body}>
 				{showTree && ws && (
