@@ -30,6 +30,7 @@ The iframe communicates with the parent via `window.parent.postMessage(payload, 
 | `mention:drag-start` | Begin cross-origin drag | `{ type: 'mention:drag-start', data: MentionData, ghost: string, x, y }` |
 | `mention:pointer-move` | Update drag position | `{ type: 'mention:pointer-move', x, y }` |
 | `mention:drag-end` | End drag (with hit-test) | `{ type: 'mention:drag-end', x, y }` |
+| `content:insert` | Insert content into chatbox | `{ type: 'content:insert', data: MentionData \| InsertSegment[] }` |
 
 ### MentionData Schema
 
@@ -62,6 +63,39 @@ The drag protocol uses **Pointer Events** (not native HTML5 DnD) to avoid cross-
 5. Safety nets: 3s stale timeout, `window blur`, `pointerleave`, `Escape` key → auto-cancel
 
 **Key insight:** `setPointerCapture` may lose capture when the pointer crosses the iframe boundary. The parent's own event listeners seamlessly take over, providing uninterrupted tracking.
+
+### Content Insert Protocol (`content:insert`)
+
+Allows iframe content to programmatically insert text, mentions, or mixed content directly into the chatbox at the cursor position — no drag interaction needed.
+
+**Payload formats:**
+
+```typescript
+// Single mention
+{ type: 'content:insert', data: { type: 'clip', id: 'clip://...', label: '...' } }
+
+// Mixed content (text + mentions interleaved)
+{ type: 'content:insert', data: [
+  { text: 'Please modify ' },
+  { type: 'clip', id: 'clip://screenshot-001', label: 'Homepage Screenshot' },
+  { text: ' to be responsive' }
+] }
+```
+
+**InsertSegment type:**
+
+```typescript
+type InsertSegment =
+  | { text: string }     // plain text node
+  | MentionData          // mention tag (must have type/id/label)
+```
+
+**Behavior:**
+- Inserts at the current cursor position in the chatbox editor
+- If the editor has no focus, inserts at the end
+- If text is selected, replaces the selection
+- No ghost element, no drop-zone check — direct insertion
+- Validated by `browse/$.tsx` (VALID_MENTION_TYPES whitelist for mention segments)
 
 ## Testing
 

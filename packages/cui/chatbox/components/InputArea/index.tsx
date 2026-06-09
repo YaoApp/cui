@@ -315,6 +315,39 @@ const InputArea = (props: IInputAreaProps) => {
 		[selectedWorkspace, is_cn]
 	)
 
+	const createMentionSpan = (data: { type: MentionType; id: string; label: string; description?: string; metadata?: Record<string, string> }): HTMLSpanElement => {
+		const typeClassMap: Record<MentionType, string> = {
+			expert: styles.mentionExpert,
+			workspace: styles.mentionWorkspace,
+			file: styles.mentionFile,
+			directory: styles.mentionDirectory,
+			clip: styles.mentionClip
+		}
+		const mentionIconMap: Record<MentionType, string> = {
+			expert: 'assistant',
+			workspace: 'folder',
+			file: 'insert_drive_file',
+			directory: 'folder_open',
+			clip: 'attachment'
+		}
+		const tag = document.createElement('span')
+		tag.className = `${styles.mentionTag} ${typeClassMap[data.type] || ''}`
+		tag.contentEditable = 'false'
+		tag.dataset.mentionType = data.type
+		tag.dataset.mentionId = data.id
+		tag.dataset.mentionLabel = data.label
+		if (data.description) tag.dataset.mentionDescription = data.description
+		if (data.metadata) tag.dataset.mentionMetadata = JSON.stringify(data.metadata)
+
+		const iconEl = document.createElement('span')
+		iconEl.className = 'Icon material'
+		iconEl.textContent = mentionIconMap[data.type]
+		iconEl.style.cssText = 'font-size:14px;line-height:1;margin-right:2px;vertical-align:middle;'
+		tag.appendChild(iconEl)
+		tag.appendChild(document.createTextNode(data.label))
+		return tag
+	}
+
 	const insertTag = (label: string, id: string, type: MentionType, description?: string, metadata?: Record<string, string>) => {
 		const editor = editorRef.current
 		if (!editor) return
@@ -349,35 +382,7 @@ const InputArea = (props: IInputAreaProps) => {
 			}
 		}
 
-		const typeClassMap: Record<MentionType, string> = {
-			expert: styles.mentionExpert,
-			workspace: styles.mentionWorkspace,
-			file: styles.mentionFile,
-			directory: styles.mentionDirectory,
-			clip: styles.mentionClip
-		}
-		const tag = document.createElement('span')
-		tag.className = `${styles.mentionTag} ${typeClassMap[type] || ''}`
-		tag.contentEditable = 'false'
-		tag.dataset.mentionType = type
-		tag.dataset.mentionId = id
-		tag.dataset.mentionLabel = label
-		if (description) tag.dataset.mentionDescription = description
-		if (metadata) tag.dataset.mentionMetadata = JSON.stringify(metadata)
-
-		const mentionIconMap: Record<MentionType, string> = {
-			expert: 'assistant',
-			workspace: 'folder',
-			file: 'insert_drive_file',
-			directory: 'folder_open',
-			clip: 'attachment'
-		}
-		const iconEl = document.createElement('span')
-		iconEl.className = 'Icon material'
-		iconEl.textContent = mentionIconMap[type]
-		iconEl.style.cssText = 'font-size:14px;line-height:1;margin-right:2px;vertical-align:middle;'
-		tag.appendChild(iconEl)
-		tag.appendChild(document.createTextNode(label))
+		const tag = createMentionSpan({ type, id, label, description, metadata })
 
 		range.deleteContents()
 		range.insertNode(tag)
@@ -392,6 +397,53 @@ const InputArea = (props: IInputAreaProps) => {
 		selection.removeAllRanges()
 		selection.addRange(range)
 
+		lastRangeRef.current = null
+		handleInput()
+	}
+
+	type InsertSegment = { text: string } | MentionData
+
+	const insertContent = (segments: InsertSegment[]) => {
+		const editor = editorRef.current
+		if (!editor) return
+
+		editor.focus()
+
+		const selection = window.getSelection()
+		if (!selection) return
+
+		let range: Range
+		if (lastRangeRef.current && editor.contains(lastRangeRef.current.commonAncestorContainer)) {
+			range = lastRangeRef.current
+		} else if (selection.rangeCount > 0 && editor.contains(selection.getRangeAt(0).commonAncestorContainer)) {
+			range = selection.getRangeAt(0)
+		} else {
+			range = document.createRange()
+			range.selectNodeContents(editor)
+			range.collapse(false)
+		}
+		range.deleteContents()
+
+		for (const seg of segments) {
+			if ('text' in seg) {
+				const textNode = document.createTextNode(seg.text)
+				range.insertNode(textNode)
+				range.setStartAfter(textNode)
+				range.collapse(true)
+			} else {
+				const tag = createMentionSpan(seg)
+				range.insertNode(tag)
+				range.setStartAfter(tag)
+				range.collapse(true)
+			}
+		}
+
+		const space = document.createTextNode('\u00A0')
+		range.insertNode(space)
+		range.setStartAfter(space)
+		range.collapse(true)
+		selection.removeAllRanges()
+		selection.addRange(range)
 		lastRangeRef.current = null
 		handleInput()
 	}
@@ -779,13 +831,22 @@ const InputArea = (props: IInputAreaProps) => {
 				insertTag(data.label, data.id, data.type, data.description, data.metadata)
 			}
 		}
+		const handleInsertContent = (data: any) => {
+			if (Array.isArray(data)) {
+				insertContent(data)
+			} else if (data?.label && data?.id && data?.type) {
+				insertTag(data.label, data.id, data.type, data.description, data.metadata)
+			}
+		}
 		const handleDragIndicator = (show: boolean) => {
 			setIsDragOver(show)
 		}
 		window.$app?.Event?.on('chatbox/insertMention', handleInsertMention)
+		window.$app?.Event?.on('chatbox/insertContent', handleInsertContent)
 		window.$app?.Event?.on('chatbox/dragIndicator', handleDragIndicator)
 		return () => {
 			window.$app?.Event?.off('chatbox/insertMention', handleInsertMention)
+			window.$app?.Event?.off('chatbox/insertContent', handleInsertContent)
 			window.$app?.Event?.off('chatbox/dragIndicator', handleDragIndicator)
 		}
 	}, [])

@@ -137,8 +137,67 @@ items.forEach((item) => {
   document.getElementById('cards').appendChild(card);
 });
 
-addLog('Ready. Drag cards to Chatbox to test cross-origin mention insertion.');
-window.parent.postMessage({ type: 'title', message: { title: 'Drag Test' } }, '*');
+// --- Auto-Insert Tests (content:insert protocol) ---
+function sendInsert(data) {
+  window.parent.postMessage({ type: 'content:insert', data }, '*');
+  addLog(`content:insert → ${JSON.stringify(data).slice(0, 80)}...`);
+}
+
+const insertSection = document.createElement('div');
+insertSection.style.cssText = 'margin-top:24px; padding-top:16px; border-top:1px solid #333;';
+insertSection.innerHTML = `
+  <h3 style="color:#fff; margin-bottom:12px; font-size:15px;">Auto-Insert Tests (content:insert)</h3>
+  <p style="color:#aaa; font-size:12px; margin-bottom:12px;">Click buttons to insert content directly into Chatbox (no drag needed).</p>
+  <div style="display:flex; flex-wrap:wrap; gap:8px;" id="insert-buttons"></div>
+`;
+document.body.appendChild(insertSection);
+
+const tests = [
+  {
+    label: 'Insert Single Mention',
+    data: { type: 'clip', id: 'clip://screenshot-001', label: 'Screenshot - Homepage', description: 'Homepage design screenshot' }
+  },
+  {
+    label: 'Insert Mixed Prompt',
+    data: [
+      { text: 'Please modify the layout based on ' },
+      { type: 'clip', id: 'clip://screenshot-001', label: 'Screenshot - Homepage', description: 'Homepage design' },
+      { text: ' to make it responsive and mobile-friendly' }
+    ]
+  },
+  {
+    label: 'Insert Multi-mention',
+    data: [
+      { text: 'Compare ' },
+      { type: 'file', id: 'workspace://ws1/src/app.tsx', label: 'app.tsx' },
+      { text: ' with ' },
+      { type: 'file', id: 'workspace://ws1/src/index.tsx', label: 'index.tsx' },
+      { text: ' and refactor the common logic' }
+    ]
+  },
+  {
+    label: 'Insert Plain Text',
+    data: [{ text: 'Hello, this is a plain text insertion test.' }]
+  }
+];
+
+const btnContainer = insertSection.querySelector('#insert-buttons');
+tests.forEach(t => {
+  const btn = document.createElement('button');
+  btn.textContent = t.label;
+  btn.style.cssText = `
+    padding:8px 14px; border-radius:6px; border:1.5px solid #0f3460;
+    background:#16213e; color:#e0e0e0; font-size:13px; cursor:pointer;
+    transition: border-color 0.15s;
+  `;
+  btn.onmouseenter = () => btn.style.borderColor = '#e94560';
+  btn.onmouseleave = () => btn.style.borderColor = '#0f3460';
+  btn.onclick = () => sendInsert(t.data);
+  btnContainer.appendChild(btn);
+});
+
+addLog('Ready. Drag cards or click buttons to test.');
+window.parent.postMessage({ type: 'title', message: { title: 'Drag & Insert Test' } }, '*');
 </script>
 </body>
 </html>
