@@ -57,6 +57,9 @@ const InputArea = (props: IInputAreaProps) => {
 		onSendQueuedMessage,
 		onCancelQueuedMessage,
 		initialModel,
+		initialWorkspace,
+		onWorkspaceChange,
+		workspaceLocked,
 		initialChatMode,
 		initialTrace,
 		onSwitchAssistant
@@ -191,6 +194,13 @@ const InputArea = (props: IInputAreaProps) => {
 			}
 		} catch {}
 	}, [selectedWorkspace])
+
+	// Restore workspace from tab when switching tabs or loading history
+	useEffect(() => {
+		if (initialWorkspace !== undefined) {
+			setSelectedWorkspace(initialWorkspace)
+		}
+	}, [initialWorkspace])
 
 	// Clear stale selectedWorkspace if it no longer exists in the options list
 	useEffect(() => {
@@ -1090,13 +1100,25 @@ const InputArea = (props: IInputAreaProps) => {
 					<Selector
 						value={selectedWorkspace}
 						options={workspaceOptions}
-						onChange={(val) => setSelectedWorkspace(val as string)}
+						onChange={(val) => {
+							const ws = val as string
+							setSelectedWorkspace(ws)
+							onWorkspaceChange?.(ws)
+						}}
 						variant='tag'
-						tooltip={is_cn ? '选择工作区' : 'Select Workspace'}
+						tooltip={
+							workspaceLocked
+								? is_cn
+									? '工作区已锁定，新建对话可切换'
+									: 'Workspace locked, start new chat to switch'
+								: is_cn
+									? '选择工作区'
+									: 'Select Workspace'
+						}
 						placeholder={is_cn ? '选择工作区' : 'Select Workspace'}
 						placeholderIcon='material-folder_open'
-						clearable
-						disabled={loading || isOptimizing || loadingWorkspaces}
+						clearable={!workspaceLocked}
+						disabled={workspaceLocked || loading || isOptimizing || loadingWorkspaces}
 						searchable={workspaceOptions.length >= 3}
 						searchPlaceholder={is_cn ? '搜索工作区...' : 'Search workspaces...'}
 						dropdownWidth='auto'

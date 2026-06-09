@@ -83,10 +83,7 @@ const QuestionView = ({ message }: IQuestionViewProps) => {
 			.join('\n')
 		const text = `User has answered your questions:\n${answerTags}\nYou can now continue with the user's answers in mind.`
 
-		const workspaceId = (() => {
-			try { return localStorage.getItem('yao:selectedWorkspace') || undefined }
-			catch { return undefined }
-		})()
+		const workspaceId = chatContext?.activeTab?.lastWorkspace || undefined
 
 		setSubmitted(true)
 		sendMessage({

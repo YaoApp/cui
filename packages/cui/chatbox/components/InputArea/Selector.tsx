@@ -200,7 +200,7 @@ const Selector: React.FC<ISelectorProps> = ({
 		<div className={`${styles.selectorContainer} ${isOpen ? styles.selectorOpen : ''}`} ref={containerRef}>
 			{/* Selector Button with Tooltip */}
 			{tooltip && !isOpen ? (
-				<Tooltip content={tooltip} disabled={disabled}>{selectorButton}</Tooltip>
+				<Tooltip content={tooltip}>{selectorButton}</Tooltip>
 			) : (
 				selectorButton
 			)}

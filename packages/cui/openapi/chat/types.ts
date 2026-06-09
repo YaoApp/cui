@@ -877,6 +877,7 @@ export interface ChatSession {
 	assistant_id: string
 	last_connector?: string // Last used connector ID (updated on each message)
 	last_mode?: string // Last used chat mode (updated on each message)
+	last_workspace?: string // Last used workspace ID (updated on each message)
 	status: ChatStatus
 	public?: boolean // Whether shared across all teams
 	share?: ChatShare // "private" or "team"
