@@ -772,6 +772,24 @@ const InputArea = (props: IInputAreaProps) => {
 		}
 	}
 
+	// --- Cross-origin mention (raised by browse/$.tsx via global event) ---
+	useEffect(() => {
+		const handleInsertMention = (data: any) => {
+			if (data?.label && data?.id && data?.type) {
+				insertTag(data.label, data.id, data.type, data.description, data.metadata)
+			}
+		}
+		const handleDragIndicator = (show: boolean) => {
+			setIsDragOver(show)
+		}
+		window.$app?.Event?.on('chatbox/insertMention', handleInsertMention)
+		window.$app?.Event?.on('chatbox/dragIndicator', handleDragIndicator)
+		return () => {
+			window.$app?.Event?.off('chatbox/insertMention', handleInsertMention)
+			window.$app?.Event?.off('chatbox/dragIndicator', handleDragIndicator)
+		}
+	}, [])
+
 	// --- Drag & Drop ---
 	const handleDragOver = (e: React.DragEvent) => {
 		e.preventDefault()
@@ -1209,6 +1227,7 @@ const InputArea = (props: IInputAreaProps) => {
 						)} */}
 
 					<div
+						data-mention-drop-zone
 						className={clsx(
 							styles.publishBox
 							// TODO: Queue/pre-send feature temporarily disabled
