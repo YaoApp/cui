@@ -189,16 +189,30 @@ const Browse = () => {
 				}
 				break
 			}
-				case 'mention:drag-end': {
-					if (typeof x === 'number' && typeof y === 'number') {
-						const pos = iframeToPage(x, y)
-						finalizeDrag(pos.pageX, pos.pageY)
-					} else {
-						cancelDrag()
-					}
-					break
+			case 'mention:drag-end': {
+				if (typeof x === 'number' && typeof y === 'number') {
+					const pos = iframeToPage(x, y)
+					finalizeDrag(pos.pageX, pos.pageY)
+				} else {
+					cancelDrag()
 				}
+				break
 			}
+			case 'content:insert': {
+				const VALID_TYPES = ['expert', 'workspace', 'file', 'directory', 'clip']
+				if (Array.isArray(data)) {
+					const valid = data.every((seg: any) =>
+						'text' in seg || (seg.id && seg.label && VALID_TYPES.includes(seg.type))
+					)
+					if (valid && data.length > 0) {
+						window.$app?.Event?.emit('chatbox/insertContent', data)
+					}
+				} else if (data?.id && data?.label && VALID_TYPES.includes(data?.type)) {
+					window.$app?.Event?.emit('chatbox/insertContent', data)
+				}
+				break
+			}
+		}
 		}
 
 		window.addEventListener('message', handleMessage)
@@ -208,6 +222,22 @@ const Browse = () => {
 			removeGhost()
 		}
 	}, [pathname, search])
+
+	// Reload iframe when tab refresh is triggered
+	useEffect(() => {
+		const handleRefreshTab = () => {
+			if (ref.current) {
+				const currentSrc = ref.current.src
+				ref.current.src = ''
+				ref.current.src = currentSrc
+				setLoading(true)
+			}
+		}
+		window.$app?.Event?.on('app/refreshTab', handleRefreshTab)
+		return () => {
+			window.$app?.Event?.off('app/refreshTab', handleRefreshTab)
+		}
+	}, [])
 
 	if (!src) {
 		return null
