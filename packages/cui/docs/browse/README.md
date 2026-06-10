@@ -72,12 +72,12 @@ Allows iframe content to programmatically insert text, mentions, or mixed conten
 
 ```typescript
 // Single mention
-{ type: 'content:insert', data: { type: 'clip', id: 'clip://...', label: '...' } }
+{ type: 'content:insert', data: { type: 'clip', id: '<uuid>', label: '...' } }
 
 // Mixed content (text + mentions interleaved)
 { type: 'content:insert', data: [
   { text: 'Please modify ' },
-  { type: 'clip', id: 'clip://screenshot-001', label: 'Homepage Screenshot' },
+  { type: 'clip', id: 'screenshot-001', label: 'Homepage Screenshot' },
   { text: ' to be responsive' }
 ] }
 ```

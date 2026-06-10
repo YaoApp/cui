@@ -37,10 +37,10 @@ p { margin-bottom: 12px; color: #aaa; font-size: 13px; }
 
 <script>
 const items = [
-  { type: 'clip', id: 'clip://screenshot-001', label: 'Screenshot - Homepage', description: 'Homepage design screenshot' },
+  { type: 'clip', id: 'screenshot-001', label: 'Screenshot - Homepage', description: 'Homepage design screenshot' },
   { type: 'file', id: 'workspace://ws1/src/app.tsx', label: 'app.tsx', description: 'Main application entry' },
   { type: 'directory', id: 'workspace://ws1/src/components', label: 'components/', description: 'UI components folder' },
-  { type: 'clip', id: 'clip://location-data-002', label: 'Location: Beijing', description: 'GPS location data', metadata: { lat: '39.9042', lng: '116.4074' } },
+  { type: 'clip', id: 'location-data-002', label: 'Location: Beijing', description: 'GPS location data', metadata: { lat: '39.9042', lng: '116.4074' } },
   { type: 'workspace', id: 'workspace://my-project', label: 'my-project', description: 'Test workspace' },
 ];
 
@@ -155,13 +155,13 @@ document.body.appendChild(insertSection);
 const tests = [
   {
     label: 'Insert Single Mention',
-    data: { type: 'clip', id: 'clip://screenshot-001', label: 'Screenshot - Homepage', description: 'Homepage design screenshot' }
+    data: { type: 'clip', id: 'screenshot-001', label: 'Screenshot - Homepage', description: 'Homepage design screenshot' }
   },
   {
     label: 'Insert Mixed Prompt',
     data: [
       { text: 'Please modify the layout based on ' },
-      { type: 'clip', id: 'clip://screenshot-001', label: 'Screenshot - Homepage', description: 'Homepage design' },
+      { type: 'clip', id: 'screenshot-001', label: 'Screenshot - Homepage', description: 'Homepage design' },
       { text: ' to make it responsive and mobile-friendly' }
     ]
   },
