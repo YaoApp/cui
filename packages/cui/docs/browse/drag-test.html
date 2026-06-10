@@ -196,8 +196,61 @@ tests.forEach(t => {
   btnContainer.appendChild(btn);
 });
 
-addLog('Ready. Drag cards or click buttons to test.');
-window.parent.postMessage({ type: 'title', message: { title: 'Drag & Insert Test' } }, '*');
+// === File Download Section ===
+const downloadSection = document.createElement('div');
+downloadSection.style.cssText = 'margin-top:24px; padding:16px; border-radius:8px; background:#1a1a2e; border:1px solid #0f3460;';
+downloadSection.innerHTML = `
+  <h3 style="margin:0 0 12px; font-size:14px; color:#e94560;">File Download (file:download)</h3>
+  <p style="margin:0 0 12px; font-size:12px; color:#888;">Test cross-origin file download via postMessage</p>
+  <div id="download-buttons" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+`;
+document.body.appendChild(downloadSection);
+
+function sendDownload(data) {
+  window.parent.postMessage({ type: 'file:download', data }, '*');
+  addLog('download → ' + (data.url || data.filename));
+}
+
+const downloadTests = [
+  {
+    label: 'Data: Text File',
+    data: { content: btoa('Hello from iframe!\nThis is a test file.'), filename: 'test.txt', mimeType: 'text/plain' }
+  },
+  {
+    label: 'Data: JSON File',
+    data: { content: btoa(JSON.stringify({ message: 'Hello', timestamp: Date.now() }, null, 2)), filename: 'data.json', mimeType: 'application/json' }
+  },
+  {
+    label: 'Data: Binary (PNG 1x1)',
+    data: {
+      content: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      filename: 'pixel.png',
+      mimeType: 'image/png'
+    }
+  },
+  {
+    label: 'URL: Fetch & Download',
+    data: { url: '/favicon.ico', filename: 'favicon.ico' }
+  }
+];
+
+const dlBtnContainer = downloadSection.querySelector('#download-buttons');
+downloadTests.forEach(t => {
+  const btn = document.createElement('button');
+  btn.textContent = t.label;
+  btn.style.cssText = `
+    padding:8px 14px; border-radius:6px; border:1.5px solid #0f3460;
+    background:#16213e; color:#e0e0e0; font-size:13px; cursor:pointer;
+    transition: border-color 0.15s;
+  `;
+  btn.onmouseenter = () => btn.style.borderColor = '#e94560';
+  btn.onmouseleave = () => btn.style.borderColor = '#0f3460';
+  btn.onclick = () => sendDownload(t.data);
+  dlBtnContainer.appendChild(btn);
+});
+
+addLog('Ready. Drag cards, click buttons, or test downloads.');
+window.parent.postMessage({ type: 'title', message: { title: 'Drag & Insert & Download Test' } }, '*');
 </script>
 </body>
 </html>

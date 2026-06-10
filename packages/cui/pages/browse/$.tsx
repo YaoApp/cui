@@ -134,6 +134,18 @@ const Browse = () => {
 		}
 	}
 
+	const triggerDownload = (blob: Blob, filename: string) => {
+		const url = URL.createObjectURL(blob)
+		const a = document.createElement('a')
+		a.href = url
+		a.download = filename
+		a.style.display = 'none'
+		document.body.appendChild(a)
+		a.click()
+		document.body.removeChild(a)
+		setTimeout(() => URL.revokeObjectURL(url), 1000)
+	}
+
 	useEffect(() => {
 		const handleMessage = (e: MessageEvent) => {
 			if (!ref.current || e.source !== ref.current.contentWindow) return
@@ -209,6 +221,35 @@ const Browse = () => {
 					}
 				} else if (data?.id && data?.label && VALID_TYPES.includes(data?.type)) {
 					window.$app?.Event?.emit('chatbox/insertContent', data)
+				}
+				break
+			}
+			case 'file:download': {
+				if (!data) break
+				const { url, content, filename, mimeType } = data
+				if (url) {
+					fetch(url, { credentials: 'include' })
+						.then(resp => {
+							if (!resp.ok) throw new Error(`${resp.status}`)
+							return resp.blob()
+						})
+						.then(blob => {
+							const name = filename || url.split('/').pop()?.split('?')[0] || 'download'
+							triggerDownload(blob, name)
+						})
+						.catch((err: any) => {
+							console.warn('[browse] file:download fetch failed:', err)
+						})
+				} else if (content && filename) {
+					try {
+						const binary = atob(content)
+						const bytes = new Uint8Array(binary.length)
+						for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+						const blob = new Blob([bytes], { type: mimeType || 'application/octet-stream' })
+						triggerDownload(blob, filename)
+					} catch (err) {
+						console.warn('[browse] file:download decode failed:', err)
+					}
 				}
 				break
 			}
