@@ -81,7 +81,7 @@ const findMenuByPath = (path: string, menus: App.Menu[]): App.Menu | undefined =
 /**
  * Paths that default to sidebar-only mode (system pages without Chatbox)
  */
-const SIDEBAR_ONLY_PATHS = ['/settings', '/login', '/register', '/mission-control']
+const SIDEBAR_ONLY_PATHS = ['/settings', '/login', '/register', '/mission-control', '/kanban']
 
 /**
  * Paths that default to chatbox-only mode (entry pages, no sidebar)
