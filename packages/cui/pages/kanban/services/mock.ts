@@ -841,8 +841,31 @@ export async function moveTask(taskId: string, columnId: string, position: numbe
 	for (const bd of Object.values(mockBoards)) {
 		const task = bd.tasks.find((t) => t.id === taskId)
 		if (task) {
-			task.column_id = columnId
-			task.position = position
+			const oldColumnId = task.column_id
+			const isSameColumn = oldColumnId === columnId
+
+			if (isSameColumn) {
+				const colTasks = bd.tasks
+					.filter((t) => t.column_id === columnId)
+					.sort((a, b) => a.position - b.position)
+				const without = colTasks.filter((t) => t.id !== taskId)
+				without.splice(position, 0, task)
+				without.forEach((t, i) => { t.position = i })
+			} else {
+				const sourceTasks = bd.tasks
+					.filter((t) => t.column_id === oldColumnId && t.id !== taskId)
+					.sort((a, b) => a.position - b.position)
+				sourceTasks.forEach((t, i) => { t.position = i })
+
+				task.column_id = columnId
+
+				const targetTasks = bd.tasks
+					.filter((t) => t.column_id === columnId && t.id !== taskId)
+					.sort((a, b) => a.position - b.position)
+				targetTasks.splice(position, 0, task)
+				targetTasks.forEach((t, i) => { t.position = i })
+			}
+
 			task.updated_at = Date.now()
 			await delay()
 			return
