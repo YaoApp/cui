@@ -288,28 +288,47 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 
 				const isSameColumn = task.column_id === columnId
 
-				if (isSameColumn) {
-					const colTasks = prev
-						.filter((t) => t.column_id === columnId)
-						.sort((a, b) => a.position - b.position)
-					const without = colTasks.filter((t) => t.id !== taskId)
-					without.splice(position, 0, task)
-					const posMap = new Map<string, number>()
-					without.forEach((t, i) => posMap.set(t.id, i))
-					return prev.map((t) => {
-						if (t.column_id !== columnId) return t
-						const newPos = posMap.get(t.id)
-						return newPos !== undefined ? { ...t, position: newPos } : t
-					})
-				}
-
+			if (isSameColumn) {
+				const colTasks = prev
+					.filter((t) => t.column_id === columnId)
+					.sort((a, b) => a.position - b.position)
+				const without = colTasks.filter((t) => t.id !== taskId)
+				without.splice(position, 0, task)
+				const posMap = new Map<string, number>()
+				without.forEach((t, i) => posMap.set(t.id, i))
 				return prev.map((t) => {
-					if (t.id === taskId) return { ...t, column_id: columnId, position }
-					if (t.column_id === columnId && t.position >= position && t.id !== taskId) {
-						return { ...t, position: t.position + 1 }
-					}
-					return t
+					if (t.column_id !== columnId) return t
+					const newPos = posMap.get(t.id)
+					return newPos !== undefined ? { ...t, position: newPos } : t
 				})
+			}
+
+			const oldColumnId = task.column_id
+			const sourceTasks = prev
+				.filter((t) => t.column_id === oldColumnId && t.id !== taskId)
+				.sort((a, b) => a.position - b.position)
+			const sourceMap = new Map<string, number>()
+			sourceTasks.forEach((t, i) => sourceMap.set(t.id, i))
+
+			const targetTasks = prev
+				.filter((t) => t.column_id === columnId && t.id !== taskId)
+				.sort((a, b) => a.position - b.position)
+			targetTasks.splice(position, 0, task)
+			const targetMap = new Map<string, number>()
+			targetTasks.forEach((t, i) => targetMap.set(t.id, i))
+
+			return prev.map((t) => {
+				if (t.id === taskId) return { ...t, column_id: columnId, position }
+				if (t.column_id === oldColumnId) {
+					const newPos = sourceMap.get(t.id)
+					return newPos !== undefined ? { ...t, position: newPos } : t
+				}
+				if (t.column_id === columnId) {
+					const newPos = targetMap.get(t.id)
+					return newPos !== undefined ? { ...t, position: newPos } : t
+				}
+				return t
+			})
 			})
 			if (!taskId.startsWith('temp_')) {
 				services.moveTask(taskId, columnId, position).catch(console.error)
