@@ -220,6 +220,7 @@ const Column = ({ column, tasks, is_cn, totalColumns, selectedTaskId, isDragActi
 	const sortableTasks = useMemo(() => tasks.filter((t) => !t.pinned), [tasks])
 	const sortableIds = useMemo(() => sortableTasks.map((t) => t.id), [sortableTasks])
 	const sortableId = `column-${column.id}`
+	const droppableId = `cardlist-${column.id}`
 	const [menuOpen, setMenuOpen] = useState(false)
 	const [editOpen, setEditOpen] = useState(false)
 
@@ -233,7 +234,7 @@ const Column = ({ column, tasks, is_cn, totalColumns, selectedTaskId, isDragActi
 	} = useSortable({ id: sortableId })
 
 	const { setNodeRef: setDropRef, isOver } = useDroppable({
-		id: sortableId
+		id: droppableId
 	})
 
 	const colStyle: React.CSSProperties = isDragOverlay

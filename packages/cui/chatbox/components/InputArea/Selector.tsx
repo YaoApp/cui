@@ -196,11 +196,13 @@ const Selector: React.FC<ISelectorProps> = ({
 		</div>
 	)
 
+	const tooltipContent = currentOption ? displayLabel : tooltip
+
 	return (
 		<div className={`${styles.selectorContainer} ${isOpen ? styles.selectorOpen : ''}`} ref={containerRef}>
 			{/* Selector Button with Tooltip */}
-			{tooltip && !isOpen ? (
-				<Tooltip content={tooltip}>{selectorButton}</Tooltip>
+			{tooltipContent && !isOpen ? (
+				<Tooltip content={tooltipContent}>{selectorButton}</Tooltip>
 			) : (
 				selectorButton
 			)}

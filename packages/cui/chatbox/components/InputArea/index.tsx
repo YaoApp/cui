@@ -1141,6 +1141,9 @@ const InputArea = (props: IInputAreaProps) => {
 							dropdownMaxWidth={320}
 						/>
 					)}
+					{!showSelector && llmLoading && agent?.connector_options?.optional !== false && (
+						<div style={{ minWidth: 100, height: 24 }} />
+					)}
 				</div>
 				<div className={styles.rightTools}>
 					<ToolButton
