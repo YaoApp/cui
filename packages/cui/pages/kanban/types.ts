@@ -54,6 +54,7 @@ export interface KanbanTask {
 	status: TaskStatus
 	column_id: string
 	position: number
+	chat_id?: string
 	workspace?: WorkspaceBinding
 	services?: ServiceBinding[]
 	tags?: string[]

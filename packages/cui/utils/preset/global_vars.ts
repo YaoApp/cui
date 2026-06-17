@@ -6,5 +6,29 @@ window.$app = {
 	memo,
 	sleep,
 	Handle,
-	Event: new EventEmitter()
+	Event: new EventEmitter(),
+
+	ResolveUrl(url: string): { resolved: string; type: 'dashboard' | 'sui' | 'external' } {
+		if (url.startsWith('http://') || url.startsWith('https://')) {
+			return { resolved: url, type: 'external' }
+		}
+		if (url.startsWith('$dashboard/')) {
+			return { resolved: url.replace('$dashboard', ''), type: 'dashboard' }
+		}
+		return { resolved: url.startsWith('/web/') ? url : `/web${url}`, type: 'sui' }
+	},
+
+	Navigate(url: string, options?: { title?: string; icon?: string; replace?: boolean }) {
+		const global = window.$global
+		if (global?.detail_panel_active) {
+			window.$app?.Event?.emit('app/openSidebar', {
+				url,
+				title: options?.title || url.split('/').pop() || url,
+				icon: options?.icon
+			})
+			return
+		}
+		const { history } = require('@umijs/max')
+		options?.replace ? history.replace(url) : history.push(url)
+	}
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getLocale, useParams, useNavigate } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import { message } from 'antd'
 import ComputerList from './components/ComputerList'
 import ComputerDetail from './components/ComputerDetail'
@@ -7,12 +7,12 @@ import { Sandbox } from '@/openapi/sandbox'
 import { ComputerAPI } from '@/openapi/computer'
 import type { BoxInfo } from './types'
 import styles from './index.less'
+import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
 
-const ComputersPage = () => {
+const ComputersPage = (props: AppRouteProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const params = useParams()
-	const navigate = useNavigate()
+	const { params } = useAppRoute(props)
 
 	const [boxes, setBoxes] = useState<BoxInfo[]>([])
 	const [loading, setLoading] = useState(true)
@@ -51,7 +51,7 @@ const ComputersPage = () => {
 	}, [loadBoxes])
 
 	const handleSelect = (box: BoxInfo) => {
-		navigate(`/computers/detail/${box.id}`)
+		window.$app.Navigate(`/computers/detail/${box.id}`)
 	}
 
 	const handleRemove = async (box: BoxInfo) => {
@@ -65,7 +65,7 @@ const ComputersPage = () => {
 			message.success(is_cn ? '删除成功' : 'Deleted successfully')
 			setBoxes((prev) => prev.filter((b) => b.id !== box.id))
 			if (detailId === box.id) {
-				navigate('/computers/list')
+				window.$app.Navigate('/computers/list')
 			}
 		} catch {
 			message.error(is_cn ? '删除失败' : 'Delete failed')
@@ -78,11 +78,11 @@ const ComputersPage = () => {
 		const url = box.kind === 'host'
 			? api.GetViewerURL(box.node_id)
 			: api.GetViewerURL(box.node_id, box.id)
-		navigate(url)
+		window.$app.Navigate(url)
 	}
 
 	const handleBack = () => {
-		navigate('/computers/list')
+		window.$app.Navigate('/computers/list')
 	}
 
 	if (isDetail && selectedBox) {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { getLocale, useParams, useNavigate } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import { Spin, Tooltip, Popover } from 'antd'
 import {
 	ReloadOutlined, ExpandOutlined, CompressOutlined, LoadingOutlined,
@@ -11,14 +11,14 @@ import { brandIcons } from '@/assets/icons/brands'
 import Icon from '@/widgets/Icon'
 import ServiceList, { ServiceListHandle } from '@/components/ServiceList'
 import styles from './index.less'
+import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
 
 type DisplayStatus = 'connecting' | 'connected' | 'closed' | 'error'
 
-const Computer = () => {
+const Computer = (props: AppRouteProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const params = useParams()
-	const navigate = useNavigate()
+	const { params } = useAppRoute(props)
 
 	const raw = params['*'] || ''
 	const parts = raw.replace(/\/$/, '').split('/')
@@ -183,7 +183,7 @@ const Computer = () => {
 			<div className={styles.toolbar}>
 				<div className={styles.title}>
 					<Tooltip title={is_cn ? '返回' : 'Back'}>
-						<div className={styles.backBtn} onClick={() => navigate('/computers')}>
+						<div className={styles.backBtn} onClick={() => window.$app.Navigate('/computers')}>
 							<Icon name='material-arrow_back' size={16} />
 						</div>
 					</Tooltip>

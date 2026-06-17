@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation } from '@umijs/max'
 import { getLocale } from '@umijs/max'
 import { DownloadOutlined } from '@ant-design/icons'
 import Icon from '@/widgets/Icon'
@@ -17,6 +16,7 @@ import type { DirEntry } from '@/pages/workspace/types'
 import FileTree from './components/FileTree'
 import viewerStyles from '@/components/view/FileViewer/index.less'
 import styles from './index.less'
+import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
 
 const imageExts = new Set(['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff', 'ico'])
 const videoExts = new Set(['mp4', 'avi', 'mov', 'mkv', 'flv', 'webm', 'wmv'])
@@ -107,8 +107,8 @@ function getFileType(ext: string): FileType {
 	return 'unsupported'
 }
 
-const Preview = () => {
-	const { search } = useLocation()
+const Preview = (props: AppRouteProps) => {
+	const { search } = useAppRoute(props)
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 

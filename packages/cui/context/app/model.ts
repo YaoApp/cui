@@ -61,6 +61,9 @@ export default class GlobalModel {
 	setup_status_locale: string = (local.setup_status_locale || '') as string
 	setup_status_uid: string = (local.setup_status_uid || '') as string
 
+	// Detail panel active flag (for event dispatch coordination)
+	detail_panel_active: boolean = false
+
 	// Global Neo Context
 	neo: App.Neo = { assistant_id: undefined, chat_id: undefined, placeholder: undefined }
 	dataCache: Record<string, any> = {}
@@ -403,6 +406,10 @@ export default class GlobalModel {
 	setSidebarWidth(width: number) {
 		this.sidebar_width = width
 		local.sidebar_width = width
+	}
+
+	setDetailPanelActive(active: boolean) {
+		this.detail_panel_active = active
 	}
 
 	// Combined method for updating sidebar state

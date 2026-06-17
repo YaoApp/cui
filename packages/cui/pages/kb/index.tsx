@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button, Input, Spin, message, Tooltip, Popconfirm } from 'antd'
 import { SearchOutlined, DeleteOutlined } from '@ant-design/icons'
-import { history, getLocale } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { CollectionCover } from './components'
 import styles from './index.less'
@@ -159,7 +159,7 @@ const Collections = () => {
 
 	const handleCardClick = (collection: DatabaseCollection) => {
 		if (collection?.collection_id) {
-			history.push(`/kb/detail/${collection.collection_id}`)
+			window.$app.Navigate(`/kb/detail/${collection.collection_id}`)
 		} else {
 			console.error('Collection ID is missing:', collection)
 			message.error(is_cn ? '集合信息异常' : 'Collection information error')
@@ -167,7 +167,7 @@ const Collections = () => {
 	}
 
 	const handleCreate = () => {
-		history.push('/kb/create')
+		window.$app.Navigate('/kb/create')
 	}
 
 	const handleDelete = async (collection: DatabaseCollection) => {

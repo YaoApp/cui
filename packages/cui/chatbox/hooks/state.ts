@@ -123,25 +123,36 @@ export interface ChatStateActions {
 export interface UseChatStateOptions {
 	userId?: string
 	teamId?: string
+	singleSession?: boolean
+	initialChatId?: string
 }
 
 export function useChatState(options: UseChatStateOptions = {}): [ChatState, ChatStateActions, ChatRefs] {
-	const { userId, teamId } = options
+	const { userId, teamId, singleSession, initialChatId } = options
 
 	// Chat States Map: chatId -> messages
 	const [chatStates, setChatStates] = useState<Record<string, Message[]>>({})
 
-	// Tabs - Start empty, will be loaded from storage in useEffect
-	const [tabs, setTabs] = useState<ChatTab[]>([])
-	const [activeTabId, setActiveTabId] = useState<string>('')
+	// Tabs - singleSession mode initializes directly; normal mode loads from storage
+	const [tabs, setTabs] = useState<ChatTab[]>(() => {
+		if (singleSession && initialChatId) {
+			return [{ chatId: initialChatId, title: 'Chat', isNew: !initialChatId.startsWith('new') }]
+		}
+		return []
+	})
+	const [activeTabId, setActiveTabId] = useState<string>(() => {
+		if (singleSession && initialChatId) return initialChatId
+		return ''
+	})
 
 	// Track user/team changes to re-sync storage
 	const userTeamKeyRef = useRef<string | null>(null)
 	// Track if initial load has been done
-	const initialLoadDoneRef = useRef<boolean>(false)
+	const initialLoadDoneRef = useRef<boolean>(singleSession || false)
 
-	// Load tabs when userId/teamId changes (including initial load)
+	// Load tabs when userId/teamId changes (including initial load) — skip for singleSession
 	useEffect(() => {
+		if (singleSession) return
 		const newKey = `${userId}_${teamId}`
 
 		// Skip if userId is not available yet (waiting for auth)
@@ -162,25 +173,27 @@ export function useChatState(options: UseChatStateOptions = {}): [ChatState, Cha
 			}
 			initialLoadDoneRef.current = true
 		}
-	}, [userId, teamId])
+	}, [userId, teamId, singleSession])
 
-	// Persist tabs to storage when they change
+	// Persist tabs to storage when they change — skip for singleSession
 	useEffect(() => {
+		if (singleSession) return
 		// Only save if we have a valid user context and initial load is done
 		if (!initialLoadDoneRef.current || userTeamKeyRef.current === null) {
 			return
 		}
 		saveTabsToStorage(tabs, userId, teamId)
-	}, [tabs, userId, teamId])
+	}, [tabs, userId, teamId, singleSession])
 
-	// Persist active tab to storage when it changes
+	// Persist active tab to storage when it changes — skip for singleSession
 	useEffect(() => {
+		if (singleSession) return
 		// Only save if we have a valid user context and initial load is done
 		if (!initialLoadDoneRef.current || userTeamKeyRef.current === null) {
 			return
 		}
 		saveActiveTabIdToStorage(activeTabId, userId, teamId)
-	}, [activeTabId, userId, teamId])
+	}, [activeTabId, userId, teamId, singleSession])
 
 	const [sessions, setSessions] = useState<any[]>([])
 

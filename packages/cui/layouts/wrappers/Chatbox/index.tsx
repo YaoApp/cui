@@ -595,6 +595,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		}
 
 		const handleOpenSidebar = (detail: any) => {
+			if (global.detail_panel_active) return
 			if (detail) {
 				const url = detail.url || detail.path
 				const title = detail.title || url

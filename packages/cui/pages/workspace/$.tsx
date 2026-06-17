@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getLocale, useParams, useNavigate, useLocation } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import { message } from 'antd'
 import WorkspaceList from './components/WorkspaceList'
 import WorkspaceDetail from './components/WorkspaceDetail'
@@ -8,14 +8,13 @@ import { WorkspaceAPI } from '@/openapi/workspace'
 import { NodesAPI } from '@/openapi/nodes'
 import type { Workspace, NodeInfo } from './types'
 import styles from './index.less'
+import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
 
-const WorkspacePage = () => {
+const WorkspacePage = (props: AppRouteProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
-	const params = useParams()
-	const navigate = useNavigate()
-	const location = useLocation()
-	const dirParam = new URLSearchParams(location.search).get('dir') || '/'
+	const { params, search: searchStr } = useAppRoute(props)
+	const dirParam = new URLSearchParams(searchStr).get('dir') || '/'
 
 	const [workspaces, setWorkspaces] = useState<Workspace[]>([])
 	const [nodeMap, setNodeMap] = useState<Record<string, NodeInfo>>({})
@@ -85,7 +84,7 @@ const WorkspacePage = () => {
 			url: '/workspace/list',
 			title: ws.name
 		})
-		navigate(`/workspace/detail/${ws.id}`)
+		window.$app.Navigate(`/workspace/detail/${ws.id}`)
 	}
 
 	const handleDelete = async (ws: Workspace) => {
@@ -99,7 +98,7 @@ const WorkspacePage = () => {
 			message.success(is_cn ? '删除成功' : 'Deleted successfully')
 			setWorkspaces((prev) => prev.filter((w) => w.id !== ws.id))
 			if (detailId === ws.id) {
-				navigate('/workspace/list')
+				window.$app.Navigate('/workspace/list')
 			}
 		} catch {
 			message.error(is_cn ? '删除失败' : 'Delete failed')
@@ -119,7 +118,7 @@ const WorkspacePage = () => {
 			if (ws) {
 				setWorkspaces((prev) => [ws, ...prev])
 				setShowCreate(false)
-				navigate(`/workspace/detail/${ws.id}`)
+				window.$app.Navigate(`/workspace/detail/${ws.id}`)
 			}
 		} catch {
 			message.error(is_cn ? '创建失败' : 'Create failed')
@@ -131,15 +130,15 @@ const WorkspacePage = () => {
 			url: `/workspace/detail/${detailId}`,
 			title: is_cn ? '工作空间' : 'Workspace'
 		})
-		navigate('/workspace/list')
+		window.$app.Navigate('/workspace/list')
 	}
 
 	const handleDirChange = useCallback(
 		(dir: string) => {
 			const search = dir === '/' ? '' : `?dir=${encodeURIComponent(dir)}`
-			navigate(`/workspace/detail/${detailId}${search}`, { replace: true })
+			window.$app.Navigate(`/workspace/detail/${detailId}${search}`, { replace: true })
 		},
-		[detailId, navigate]
+		[detailId]
 	)
 
 	if (isDetail && selectedWorkspace) {

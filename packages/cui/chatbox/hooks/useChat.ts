@@ -15,7 +15,7 @@ import { useStream } from './stream'
 export type { QueuedMessage, UseChatOptions, UseChatReturn } from './types'
 
 export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
-	const { assistantId: propAssistantId } = options
+	const { assistantId: propAssistantId, chatId: propChatId, singleSession } = options
 	const global = useGlobal()
 
 	// Determine effective assistant ID for defaults
@@ -28,7 +28,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	const teamId = global.user?.team_id
 
 	// Initialize state with user/team context for storage persistence
-	const [state, actions, refs] = useChatState({ userId, teamId })
+	const [state, actions, refs] = useChatState({ userId, teamId, singleSession, initialChatId: propChatId })
 	const {
 		chatStates,
 		tabs,

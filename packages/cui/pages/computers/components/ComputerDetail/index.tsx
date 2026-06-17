@@ -1,5 +1,5 @@
 import { Popconfirm, message } from 'antd'
-import { getLocale, useNavigate } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import ServiceList from '@/components/ServiceList'
@@ -49,15 +49,13 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 	const osSvg = box.kind === 'box' ? brandIcons['linux'] : (brandIcons[os] || null)
 	const kindIcon = isHost ? 'material-computer' : 'material-memory'
 
-	const navigate = useNavigate()
-
 	const handleVNC = async () => {
 		if (!window.$app?.openapi) return
 		const api = new ComputerAPI(window.$app.openapi)
 		const url = isHost
 			? api.GetViewerURL(box.node_id)
 			: api.GetViewerURL(box.node_id, box.id)
-		navigate(url)
+		window.$app.Navigate(url)
 	}
 
 	return (

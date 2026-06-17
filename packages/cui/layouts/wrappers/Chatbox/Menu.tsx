@@ -287,19 +287,23 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 	const menuWidth = expanded ? 240 : 64
 	document.documentElement.style.setProperty('--menu-width', `${menuWidth}px`)
 
+	// Routes with their own detail panel (kanban, future inbox, etc.)
+	const DETAIL_PANEL_ROUTES = ['/kanban', '/inbox']
+	const isDetailPanelPage = (p: string) => DETAIL_PANEL_ROUTES.some((r) => p.startsWith(r))
+
 	// Navigate to menu path
 	const handleNavigate = useCallback(
 		(path: string, menu: App.Menu) => {
-			// Close popup if open
 			setPopupMenu(null)
 
-			// Sidebar-only mode: just navigate (page is full screen without Chatbox)
-			if (isSidebarOnly(menu)) {
+			const isDetailPanel = isDetailPanelPage(path)
+			window.$global?.setDetailPanelActive(isDetailPanel)
+
+			if (isSidebarOnly(menu) || isDetailPanel) {
 				navigate(path)
 				return
 			}
 
-			// Default: emit openSidebar event to create a Tab
 			window.$app?.Event?.emit('app/openSidebar', {
 				path,
 				title: menu.name || path,
