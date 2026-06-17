@@ -96,8 +96,11 @@ const KanbanContent = () => {
 		<div className={containerClass} style={containerStyle}>
 			{loading ? (
 				<div className={styles.loading}>
-					<Icon name='material-refresh' size={18} className={styles.loadingIcon} />
-					{is_cn ? '加载中...' : 'Loading...'}
+					<div className={styles.skeleton}>
+						<div className={styles.skeletonBar} style={{ width: '40%' }} />
+						<div className={styles.skeletonBar} style={{ width: '65%' }} />
+						<div className={styles.skeletonBar} style={{ width: '50%' }} />
+					</div>
 				</div>
 			) : (
 				<>

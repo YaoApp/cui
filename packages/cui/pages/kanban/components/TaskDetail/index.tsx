@@ -1,24 +1,26 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useContext } from 'react'
 import { getLocale } from '@umijs/max'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
 import { TaskChat } from '@/chatbox'
 import { Chat } from '@/openapi'
 import { useGlobal } from '@/context/app'
-import { useKanbanContext } from '../../context'
+import { KanbanContext } from '../../context'
 import * as services from '../../services'
 import DetailPanel from '../DetailPanel'
 import TaskSidebar from '../TaskSidebar'
 import SidebarContent from '../SidebarContent'
 import { useSidebarTabs } from '../../hooks/useSidebarTabs'
+import type { KanbanTask } from '../../types'
 import styles from './index.less'
 
 interface TaskDetailProps {
 	taskId: string | null
 	open: boolean
 	onClose: () => void
-	onPanelWidthChange: (width: number) => void
+	onPanelWidthChange?: (width: number) => void
 	isAnimating?: boolean
+	inline?: boolean
 }
 
 const DEFAULT_CHAT_WIDTH = 560
@@ -37,21 +39,47 @@ const statusLabels: Record<string, { cn: string; en: string }> = {
 	cancelled: { cn: '已取消', en: 'Cancelled' }
 }
 
-const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: TaskDetailProps) => {
+const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, inline }: TaskDetailProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
-	const { tasks, creatingTaskId, finalizeCreating, board, triggerAnimation } = useKanbanContext()
+	const ctx = useContext(KanbanContext)
 
 	const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH)
 	const [sidebarOpen, setSidebarOpen] = useState(false)
 	const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH)
 	const [refreshKey, setRefreshKey] = useState(0)
+	const [localTask, setLocalTask] = useState<KanbanTask | null>(null)
+	const [inlineAnimating, setInlineAnimating] = useState(false)
 
 	const chatWidthRef = useRef(chatWidth)
 	chatWidthRef.current = chatWidth
+	const taskPageRef = useRef<HTMLDivElement>(null)
+	const inlineAnimTimerRef = useRef<number>()
 
-	const task = tasks.find((t) => t.id === taskId) || null
+	const [loadingTask, setLoadingTask] = useState(false)
+
+	// Prefer task from KanbanContext (Kanban page); fallback to independent loading (Inbox page)
+	const task = ctx?.tasks.find((t) => t.id === taskId) || localTask
+
+	useEffect(() => {
+		if (ctx || !taskId) {
+			setLocalTask(null)
+			setLoadingTask(false)
+			return
+		}
+		setLoadingTask(true)
+		services.getTaskDetail(taskId)
+			.then(setLocalTask)
+			.catch(() => setLocalTask(null))
+			.finally(() => setLoadingTask(false))
+	}, [taskId, ctx])
+
+	const creatingTaskId = ctx?.creatingTaskId || null
+	const finalizeCreating = ctx?.finalizeCreating || (() => {})
+	const board = ctx?.board || null
+	const triggerAnimation = ctx?.triggerAnimation || (() => {})
+
 	const isCreating = task?.status === 'creating'
 
 	const totalWidth = chatWidth + (sidebarOpen ? sidebarWidth : 0)
@@ -59,9 +87,9 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 	// Sidebar tabs management
 	const sidebar = useSidebarTabs()
 
-	// Notify parent of width changes
+	// Notify parent of width changes (only in sliding mode)
 	useEffect(() => {
-		if (open) onPanelWidthChange(totalWidth)
+		if (open && onPanelWidthChange) onPanelWidthChange(totalWidth)
 	}, [totalWidth, open, onPanelWidthChange])
 
 	// Reset sidebar only when detail panel closes entirely
@@ -127,7 +155,7 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 			} else {
 				setChatWidth(Math.max(newTotal, MIN_CHAT_WIDTH))
 			}
-			onPanelWidthChange(newTotal)
+			onPanelWidthChange?.(newTotal)
 		},
 		[sidebarOpen, sidebarWidth, onPanelWidthChange]
 	)
@@ -170,22 +198,38 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 		[sidebarWidth]
 	)
 
+	const triggerInlineAnimation = useCallback(() => {
+		if (!inline) return
+		clearTimeout(inlineAnimTimerRef.current)
+		setInlineAnimating(true)
+		inlineAnimTimerRef.current = window.setTimeout(() => setInlineAnimating(false), 300)
+	}, [inline])
+
 	const closeSidebar = useCallback(() => {
 		setSidebarOpen(false)
 		triggerAnimation()
-		onPanelWidthChange(chatWidthRef.current)
-	}, [triggerAnimation, onPanelWidthChange])
+		triggerInlineAnimation()
+		onPanelWidthChange?.(chatWidthRef.current)
+	}, [triggerAnimation, triggerInlineAnimation, onPanelWidthChange])
 
 	const openSidebarView = useCallback(
 		(viewUrl: string, title: string, icon: string) => {
 			sidebar.addTab(viewUrl, title, icon)
 			if (!sidebarOpen) {
+				if (inline && taskPageRef.current) {
+					const available = taskPageRef.current.clientWidth
+					const sb = Math.max(Math.round(available * 2 / 3), MIN_SIDEBAR_WIDTH)
+					const chat = Math.max(available - sb, MIN_CHAT_WIDTH)
+					setChatWidth(chat)
+					setSidebarWidth(sb)
+				}
 				setSidebarOpen(true)
 				triggerAnimation()
-				onPanelWidthChange(chatWidthRef.current + sidebarWidth)
+				triggerInlineAnimation()
+				onPanelWidthChange?.(chatWidthRef.current + sidebarWidth)
 			}
 		},
-		[sidebarOpen, sidebarWidth, sidebar, triggerAnimation, onPanelWidthChange]
+		[sidebarOpen, sidebarWidth, sidebar, triggerAnimation, triggerInlineAnimation, onPanelWidthChange, inline]
 	)
 
 	const generateTaskTitle = useCallback(
@@ -250,7 +294,7 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 		async (text: string, chatId: string) => {
 			if (!creatingTaskId) return
 
-			const creatingTask = tasks.find((t) => t.id === creatingTaskId)
+			const creatingTask = ctx?.tasks.find((t) => t.id === creatingTaskId)
 			const columnId = creatingTask?.column_id || board?.columns[board.columns.length - 1]?.id || ''
 
 			const title = await generateTaskTitle(text)
@@ -265,69 +309,93 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 
 			finalizeCreating(creatingTaskId, realTask)
 		},
-		[creatingTaskId, tasks, board, finalizeCreating, generateTaskTitle, global.default_assistant?.assistant_id]
+		[creatingTaskId, ctx?.tasks, board, finalizeCreating, generateTaskTitle, global.default_assistant?.assistant_id]
 	)
 
 	const statusLabel = task ? statusLabels[task.status] || statusLabels.pending : null
 	const showContent = !!taskId && !!task
+	const showLoading = !!taskId && !task && loadingTask
 
-	return (
-		<DetailPanel
-			open={open}
-			width={totalWidth}
-			onWidthChange={handlePanelResize}
-			isAnimating={isAnimating}
-			minWidth={MIN_CHAT_WIDTH}
+	const taskSidebarStyle = { width: sidebarOpen ? sidebarWidth : 0 }
+
+	const taskSidebarEl = (
+		<div
+			className={clsx(styles.taskSidebar, sidebarOpen && styles.taskSidebarOpen)}
+			style={taskSidebarStyle}
 		>
-			{showContent && (
-				<div className={styles.taskPage}>
-					<div className={styles.chatArea} style={{ width: sidebarOpen ? chatWidth : '100%' }}>
-						<div className={styles.taskHeader}>
-							<span className={clsx(styles.statusDot, styles[task.status])} title={statusLabel ? (is_cn ? statusLabel.cn : statusLabel.en) : ''} />
-							<span className={styles.headerTitle}>{task.title}</span>
+			<div className={styles.sidebarResize} onMouseDown={handleSidebarResizeStart}>
+				<div className={styles.sidebarResizeBar} />
+			</div>
+			<TaskSidebar
+				tabs={sidebar.tabs}
+				activeTabId={sidebar.activeTabId}
+				activeTabUrl={sidebar.activeTabUrl}
+				onTabChange={sidebar.activateTab}
+				onTabClose={(tabId: string) => {
+					sidebar.removeTab(tabId)
+					if (sidebar.tabs.length <= 1) closeSidebar()
+				}}
+				onCloseOtherTabs={sidebar.closeOtherTabs}
+				onCloseAllTabs={() => { sidebar.closeAllTabs(); closeSidebar() }}
+				onRefresh={() => setRefreshKey((k) => k + 1)}
+				onClose={closeSidebar}
+			>
+				<SidebarContent key={refreshKey} url={sidebar.activeTabUrl} task={task} />
+			</TaskSidebar>
+		</div>
+	)
 
-							<div className={styles.resourceActions}>
+	const chatAreaStyle = { width: sidebarOpen ? chatWidth : '100%' }
+
+	const content = showContent ? (
+		<div ref={taskPageRef} className={styles.taskPage}>
+			<div className={styles.chatArea} style={chatAreaStyle}>
+				<div className={styles.taskHeader}>
+					<span className={clsx(styles.statusDot, styles[task.status])} title={statusLabel ? (is_cn ? statusLabel.cn : statusLabel.en) : ''} />
+					<span className={styles.headerTitle}>{task.title}</span>
+
+					<div className={styles.resourceActions}>
+						<span
+							className={styles.resourceBtn}
+							onClick={() => openSidebarView('$dashboard/assistants', is_cn ? 'AI 专家' : 'AI Experts', 'material-assistant')}
+							title={is_cn ? 'AI 专家' : 'AI Experts'}
+						>
+							<Icon name='material-assistant' size={14} />
+						</span>
+						<span
+							className={styles.resourceBtn}
+							onClick={() => openSidebarView('$dashboard/workspace/list', is_cn ? '工作空间' : 'Workspaces', 'material-workspaces')}
+							title={is_cn ? '工作空间' : 'Workspaces'}
+						>
+							<Icon name='material-workspaces' size={14} />
+						</span>
+						{!isCreating && (
+							<>
 								<span
 									className={styles.resourceBtn}
-									onClick={() => openSidebarView('$dashboard/assistants', is_cn ? 'AI 专家' : 'AI Experts', 'material-assistant')}
-									title={is_cn ? 'AI 专家' : 'AI Experts'}
+									onClick={() => openSidebarView('__task/outputs', is_cn ? '产出' : 'Outputs', 'material-attach_file')}
+									title={is_cn ? '产出' : 'Outputs'}
 								>
-									<Icon name='material-assistant' size={14} />
+									<Icon name='material-attach_file' size={14} />
+									{task.outputs && task.outputs.length > 0 && (
+										<span className={styles.resourceBadge}>{task.outputs.length}</span>
+									)}
 								</span>
 								<span
 									className={styles.resourceBtn}
-									onClick={() => openSidebarView('$dashboard/workspace/list', is_cn ? '工作空间' : 'Workspaces', 'material-workspaces')}
-									title={is_cn ? '工作空间' : 'Workspaces'}
+									onClick={() => openSidebarView('__task/settings', is_cn ? '设置' : 'Settings', 'material-settings')}
+									title={is_cn ? '设置' : 'Settings'}
 								>
-									<Icon name='material-workspaces' size={14} />
+									<Icon name='material-settings' size={14} />
 								</span>
-								{!isCreating && (
-									<>
-										<span
-											className={styles.resourceBtn}
-											onClick={() => openSidebarView('__task/outputs', is_cn ? '产出' : 'Outputs', 'material-attach_file')}
-											title={is_cn ? '产出' : 'Outputs'}
-										>
-											<Icon name='material-attach_file' size={14} />
-											{task.outputs && task.outputs.length > 0 && (
-												<span className={styles.resourceBadge}>{task.outputs.length}</span>
-											)}
-										</span>
-										<span
-											className={styles.resourceBtn}
-											onClick={() => openSidebarView('__task/settings', is_cn ? '设置' : 'Settings', 'material-settings')}
-											title={is_cn ? '设置' : 'Settings'}
-										>
-											<Icon name='material-settings' size={14} />
-										</span>
-									</>
-								)}
-							</div>
+							</>
+						)}
+					</div>
 
-							<span className={styles.controlBtn} onClick={onClose}>
-								<Icon name='material-close' size={16} />
-							</span>
-						</div>
+					<span className={styles.controlBtn} onClick={onClose}>
+						<Icon name='material-close' size={16} />
+					</span>
+				</div>
 
 				<div className={styles.chatContent}>
 					{(() => {
@@ -358,33 +426,35 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 						)
 					})()}
 				</div>
-					</div>
+			</div>
 
-					{sidebarOpen && (
-						<div className={styles.taskSidebar} style={{ width: sidebarWidth }}>
-							<div className={styles.sidebarResize} onMouseDown={handleSidebarResizeStart}>
-								<div className={styles.sidebarResizeBar} />
-							</div>
-							<TaskSidebar
-								tabs={sidebar.tabs}
-								activeTabId={sidebar.activeTabId}
-								activeTabUrl={sidebar.activeTabUrl}
-								onTabChange={sidebar.activateTab}
-								onTabClose={(tabId: string) => {
-									sidebar.removeTab(tabId)
-									if (sidebar.tabs.length <= 1) closeSidebar()
-								}}
-								onCloseOtherTabs={sidebar.closeOtherTabs}
-								onCloseAllTabs={() => { sidebar.closeAllTabs(); closeSidebar() }}
-								onRefresh={() => setRefreshKey((k) => k + 1)}
-								onClose={closeSidebar}
-							>
-								<SidebarContent key={refreshKey} url={sidebar.activeTabUrl} task={task} />
-							</TaskSidebar>
-						</div>
-					)}
-				</div>
-			)}
+			{inline ? taskSidebarEl : (sidebarOpen && taskSidebarEl)}
+		</div>
+	) : null
+
+	const loadingEl = showLoading ? (
+		<div className={styles.taskLoading}>
+			<div className={styles.taskLoadingSkeleton}>
+				<div className={styles.taskLoadingBar} style={{ width: '45%' }} />
+				<div className={styles.taskLoadingBar} style={{ width: '70%' }} />
+				<div className={styles.taskLoadingBar} style={{ width: '55%' }} />
+			</div>
+		</div>
+	) : null
+
+	if (inline) {
+		return <div className={clsx(styles.inlinePanel, inlineAnimating && styles.inlineAnimating)}>{content || loadingEl}</div>
+	}
+
+	return (
+		<DetailPanel
+			open={open}
+			width={totalWidth}
+			onWidthChange={handlePanelResize}
+			isAnimating={isAnimating}
+			minWidth={MIN_CHAT_WIDTH}
+		>
+			{content || loadingEl}
 		</DetailPanel>
 	)
 }

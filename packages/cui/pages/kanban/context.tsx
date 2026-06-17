@@ -47,7 +47,7 @@ interface KanbanContextValue {
 	refreshBoards: () => Promise<void>
 }
 
-const KanbanContext = createContext<KanbanContextValue | null>(null)
+export const KanbanContext = createContext<KanbanContextValue | null>(null)
 
 interface KanbanProviderProps {
 	children: React.ReactNode

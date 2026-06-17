@@ -1,3 +1,23 @@
+.inlinePanel {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	overflow: hidden;
+	background: var(--color_neo_bg_card);
+
+	&.inlineAnimating {
+		.chatArea {
+			transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.taskSidebar {
+			transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+	}
+}
+
 .taskPage {
 	display: flex;
 	height: 100%;
@@ -195,8 +215,12 @@
 	position: relative;
 	flex-shrink: 0;
 	height: 100%;
-	border-left: 1px solid var(--color_border_light);
+	border-left: none;
 	overflow: hidden;
+
+	&.taskSidebarOpen {
+		border-left: 1px solid var(--color_border_light);
+	}
 }
 
 .sidebarResize {
@@ -224,6 +248,34 @@
 	background: var(--color_main);
 	opacity: 0;
 	transition: opacity 0.15s ease;
+}
+
+.taskLoading {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.taskLoadingSkeleton {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	width: 180px;
+}
+
+.taskLoadingBar {
+	height: 8px;
+	border-radius: 4px;
+	background: linear-gradient(90deg, var(--color_border_light) 25%, var(--color_border_soft) 50%, var(--color_border_light) 75%);
+	background-size: 200% 100%;
+	animation: taskShimmer 1.5s ease infinite;
+}
+
+@keyframes taskShimmer {
+	0% { background-position: 200% 0; }
+	100% { background-position: -200% 0; }
 }
 
 @keyframes dotPulse {
