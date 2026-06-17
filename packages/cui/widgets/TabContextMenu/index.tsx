@@ -5,41 +5,37 @@ import './index.less'
 
 /**
  * Check if a URL can be opened in a new window
- * - /web/* paths (iframe pages)
+ * - /web/* paths (SUI iframe pages)
+ * - /browse?src=* paths (external browse pages)
  * - http:// or https:// external links
  */
 export const canOpenInNewWindow = (url: string): boolean => {
 	if (!url) return false
-	// External http/https links
-	if (url.startsWith('http://') || url.startsWith('https://')) {
-		return true
-	}
-	// /web/* iframe paths
-	if (url.startsWith('/web/') || url === '/web') {
-		return true
-	}
+	if (url.startsWith('http://') || url.startsWith('https://')) return true
+	if (url.startsWith('/web/') || url === '/web') return true
+	if (url.startsWith('/browse')) return true
 	return false
 }
 
 /**
  * Get the actual URL for opening in a new window
  * - For /web/* paths, remove the /web prefix (e.g., /web/xxx -> /xxx)
+ * - For /browse?src=*, extract the src parameter
  * - For http/https, return as-is
  */
 export const getNewWindowUrl = (url: string): string => {
 	if (!url) return ''
-	// External http/https links - open directly
-	if (url.startsWith('http://') || url.startsWith('https://')) {
-		return url
+	if (url.startsWith('http://') || url.startsWith('https://')) return url
+	if (url.startsWith('/browse')) {
+		try {
+			const src = new URL(url, window.location.origin).searchParams.get('src')
+			return src || url
+		} catch {
+			return url
+		}
 	}
-	// /web/* iframe paths - remove /web prefix
-	if (url.startsWith('/web/')) {
-		// /web/xxx?query=1 -> /xxx?query=1
-		return url.substring(4) // Remove '/web' (4 characters)
-	}
-	if (url === '/web') {
-		return '/'
-	}
+	if (url.startsWith('/web/')) return url.substring(4)
+	if (url === '/web') return '/'
 	return url
 }
 
@@ -68,8 +64,8 @@ export interface TabContextMenuProps {
 	disableCloseAll?: boolean
 	/** Show open in new window option */
 	showOpenInNewWindow?: boolean
-	/** Disable export option */
-	disableExport?: boolean
+	/** Show export option (only for chat tabs) */
+	showExport?: boolean
 	/** Custom labels */
 	labels?: {
 		closeTab?: string
@@ -94,7 +90,7 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 	disableCloseOthers = false,
 	disableCloseAll = false,
 	showOpenInNewWindow = false,
-	disableExport = false,
+	showExport = false,
 	labels
 }) => {
 	const locale = getLocale()
@@ -180,11 +176,9 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 	}, [onRefresh, onClose])
 
 	const handleExport = useCallback(() => {
-		if (!disableExport) {
-			onExport?.()
-			onClose()
-		}
-	}, [disableExport, onExport, onClose])
+		onExport?.()
+		onClose()
+	}, [onExport, onClose])
 
 	if (!position) return null
 
@@ -232,14 +226,15 @@ const TabContextMenu: FC<TabContextMenuProps> = ({
 				<Icon name='material-clear_all' size={14} />
 				<span>{mergedLabels.closeAll}</span>
 			</div>
-			<div className='tab_context_menu_divider' />
-			<div
-				className={`tab_context_menu_item ${disableExport ? 'disabled' : ''}`}
-				onClick={handleExport}
-			>
-				<Icon name='material-download' size={14} />
-				<span>{mergedLabels.export}</span>
-			</div>
+			{showExport && (
+				<>
+					<div className='tab_context_menu_divider' />
+					<div className='tab_context_menu_item' onClick={handleExport}>
+						<Icon name='material-download' size={14} />
+						<span>{mergedLabels.export}</span>
+					</div>
+				</>
+			)}
 		</div>
 	)
 }

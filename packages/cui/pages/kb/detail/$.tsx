@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { useParams, history, getLocale } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import { Spin, Button, message, Input, Empty, Badge, Select, Tooltip, Popconfirm } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 import {
@@ -18,6 +18,7 @@ import AddDocumentModal, { AddDocumentData } from '../add'
 import { Uploader, DocumentCover, Pagination } from '../components'
 import styles from './index.less'
 import { useGlobal } from '@/context/app'
+import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
 import { toJS } from 'mobx'
 import { KB, FileAPI, Collection, Document, ListDocumentsRequest, CollectionInfo } from '@/openapi'
 
@@ -51,8 +52,8 @@ const extractCollectionInfo = (collection: Collection): CollectionInfo => {
 	}
 }
 
-const CollectionDetail = () => {
-	const params = useParams<{ '*': string }>()
+const CollectionDetail = (props: AppRouteProps) => {
+	const { params } = useAppRoute(props)
 	const id = params['*'] || ''
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -429,7 +430,7 @@ const CollectionDetail = () => {
 
 	// 返回上一页
 	const handleBack = () => {
-		history.push('/kb')
+		window.$app.Navigate('/kb')
 	}
 
 	const handleViewDocuments = () => {

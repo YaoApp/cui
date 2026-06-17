@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { history, getLocale } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import { Breadcrumb, Modal, message } from 'antd'
 import { Button } from '@/components/ui'
 import { ChatBox, ChatBoxFile, Input, Select, TextArea, CheckboxGroup } from '@/components/ui/inputs'
@@ -109,7 +109,7 @@ const AssistantCreate = () => {
 	}, [])
 
 	const handleBack = () => {
-		history.push('/assistants')
+		window.$app.Navigate('/assistants')
 	}
 
 	const steps = [
@@ -394,13 +394,13 @@ const AssistantCreate = () => {
 	const handleChat = () => {
 		if (createdAssistantId) {
 			// TODO: Navigate to chat page with assistant
-			history.push(`/assistants/chat/${createdAssistantId}`)
+			window.$app.Navigate(`/assistants/chat/${createdAssistantId}`)
 		}
 	}
 
 	const handleViewDetail = () => {
 		if (createdAssistantId) {
-			history.push(`/assistants/detail/${createdAssistantId}`)
+			window.$app.Navigate(`/assistants/detail/${createdAssistantId}`)
 		}
 	}
 

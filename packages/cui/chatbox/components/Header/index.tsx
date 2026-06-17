@@ -168,7 +168,7 @@ const Header = (props: IHeaderProps) => {
 				disableCloseTab={(tabs?.length || 0) === 0}
 				disableCloseOthers={(tabs?.length || 0) <= 1}
 				disableCloseAll={(tabs?.length || 0) === 0}
-				disableExport={!activeTabId || (tabs?.length || 0) === 0}
+				showExport={!!activeTabId && (tabs?.length || 0) > 0}
 				labels={{
 					closeTab: is_cn ? '关闭当前会话' : 'Close Chat',
 					closeOthers: is_cn ? '关闭其他会话' : 'Close Other Chats',

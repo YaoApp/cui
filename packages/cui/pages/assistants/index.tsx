@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button, Input, Spin, Tabs, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
-import { history, getLocale } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Card from './components/Card'
 import { Agent } from '@/openapi/agent'
@@ -300,15 +300,14 @@ const Index = () => {
 	}
 
 	const handleCardClick = (assistant: App.Assistant) => {
-		// Ensure assistant has placeholder data before redirecting
 		if (!assistant.placeholder || Object.keys(assistant.placeholder).length === 0) {
 			assistant.placeholder = generateDefaultPlaceholder(assistant, is_cn)
 		}
-		history.push(`/assistants/detail/${assistant.assistant_id}`)
+		window.$app.Navigate(`/assistants/detail/${assistant.assistant_id}`)
 	}
 
 	const handleCreate = () => {
-		history.push('/assistants/create')
+		window.$app.Navigate('/assistants/create')
 	}
 
 	return (

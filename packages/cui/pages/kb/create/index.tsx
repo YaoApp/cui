@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { customAlphabet } from 'nanoid'
 import { Button, Card, message, Breadcrumb, Tooltip } from 'antd'
 import { ArrowLeftOutlined, ArrowRightOutlined, InfoCircleOutlined } from '@ant-design/icons'
-import { history, getLocale } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { KB } from '@/openapi'
 import type { CreateCollectionRequest, CollectionConfig } from '@/openapi/kb/types'
@@ -192,7 +192,7 @@ const CreateCollection = () => {
 			}
 
 			message.success(is_cn ? '集合创建成功' : 'Collection created successfully')
-			history.push('/kb')
+			window.$app.Navigate('/kb')
 		} catch (error) {
 			console.error('Create collection failed:', error)
 			const errorMsg = error instanceof Error ? error.message : is_cn ? '创建失败' : 'Create failed'
@@ -203,7 +203,7 @@ const CreateCollection = () => {
 	}
 
 	const handleBack = () => {
-		history.push('/kb')
+		window.$app.Navigate('/kb')
 	}
 
 	return (

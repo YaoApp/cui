@@ -13,6 +13,7 @@ export interface UseChatOptions {
 	assistantId?: string
 	chatId?: string
 	apiBaseUrl?: string
+	singleSession?: boolean
 }
 
 export interface UseChatReturn {

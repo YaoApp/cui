@@ -11,7 +11,7 @@ import ReactFlow, {
 	useReactFlow,
 	MarkerType
 } from 'reactflow'
-import { getLocale, history } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
 import { message, Empty } from 'antd'
@@ -432,7 +432,7 @@ const FlowContent: React.FC<{
 	const handleSubmitTraceId = () => {
 		const newId = inputTraceId.trim()
 		if (newId && newId !== traceId) {
-			history.push(`/trace/${newId}`)
+			window.$app.Navigate(`/trace/${newId}`)
 		}
 		setShowIdInput(false)
 	}

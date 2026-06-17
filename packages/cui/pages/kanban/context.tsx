@@ -36,6 +36,7 @@ interface KanbanContextValue {
 	finalizeCreating: (tempId: string, realTask: KanbanTask) => void
 	cancelCreating: () => void
 
+	triggerAnimation: () => void
 	switchBoard: (boardId: string) => void
 	createBoard: (data: { title: string; icon?: string; color?: string }) => Promise<void>
 	updateBoard: (boardId: string, data: Partial<Board>) => Promise<void>
@@ -533,6 +534,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			startCreating,
 			finalizeCreating,
 			cancelCreating,
+			triggerAnimation,
 			switchBoard,
 			createBoard: createBoardFn,
 			updateBoard: updateBoardFn,
@@ -570,6 +572,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			startCreating,
 			finalizeCreating,
 			cancelCreating,
+			triggerAnimation,
 			switchBoard,
 			createBoardFn,
 			updateBoardFn,

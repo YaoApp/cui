@@ -1,0 +1,53 @@
+.panel {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border-left: 1px solid var(--color_border_light);
+	background: var(--color_neo_bg_card);
+	transform: translateX(100%);
+	z-index: 100;
+	pointer-events: none;
+
+	&.open {
+		transform: translateX(0);
+		pointer-events: auto;
+	}
+
+	&.animating {
+		transition: transform var(--kanban-panel-transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1)),
+			width var(--kanban-panel-transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
+	}
+}
+
+.resizeHandle {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 6px;
+	height: 100%;
+	cursor: col-resize;
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	&:hover .resizeBar,
+	&:active .resizeBar {
+		opacity: 1;
+		width: 3px;
+	}
+}
+
+.resizeBar {
+	width: 2px;
+	height: 40px;
+	border-radius: 1px;
+	background: var(--color_main);
+	opacity: 0;
+	transition: opacity 0.15s ease, width 0.15s ease;
+}

@@ -67,7 +67,8 @@ const KanbanContent = () => {
 	}, [selectedTaskId, cancelCreating, closeDetail])
 
 	const containerClass = clsx(styles.container, isAnimating && styles.animating)
-	const containerStyle = detailOpen ? { paddingRight: panelWidth } : undefined
+	const maxPanelWidth = typeof window !== 'undefined' ? window.innerWidth - 64 : 1200
+	const containerStyle = detailOpen ? { paddingRight: Math.min(panelWidth, maxPanelWidth) } : undefined
 
 	return (
 		<div className={containerClass} style={containerStyle}>
@@ -88,8 +89,7 @@ const KanbanContent = () => {
 						taskId={selectedTaskId}
 						open={detailOpen}
 						onClose={handleDetailClose}
-						panelWidth={panelWidth}
-						onWidthChange={setPanelWidth}
+						onPanelWidthChange={setPanelWidth}
 						isAnimating={isAnimating}
 					/>
 				</>

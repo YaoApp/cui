@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { useParams, history, getLocale } from '@umijs/max'
+import { getLocale } from '@umijs/max'
 import { Spin, Breadcrumb, Tooltip, Popconfirm, message } from 'antd'
 import { App } from '@/types'
 import Icon from '@/widgets/Icon'
@@ -15,9 +15,10 @@ import styles from './index.less'
 import viewStyles from './components/View/index.less'
 import { useGlobal } from '@/context/app'
 import { Agent } from '@/openapi/agent'
+import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
 
-const AssistantDetail = () => {
-	const params = useParams<{ '*': string }>()
+const AssistantDetail = (props: AppRouteProps) => {
+	const { params } = useAppRoute(props)
 	const id = params['*'] || ''
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
@@ -60,7 +61,7 @@ const AssistantDetail = () => {
 				message.success(is_cn ? '专家删除成功' : 'Expert deleted successfully')
 				fetchedRef.current = false
 				previousIdRef.current = ''
-				history.push('/assistants')
+				window.$app.Navigate('/assistants')
 			} catch (error) {
 				message.error(is_cn ? '删除专家失败' : 'Failed to delete expert')
 			}
@@ -80,7 +81,7 @@ const AssistantDetail = () => {
 			try {
 				if (!id) {
 					message.error(is_cn ? '无效的专家ID' : 'Invalid expert ID')
-					history.push('/assistants')
+					window.$app.Navigate('/assistants')
 					return
 				}
 
@@ -89,14 +90,14 @@ const AssistantDetail = () => {
 
 				if (window.$app.openapi.IsError(response)) {
 					message.error(is_cn ? '未找到专家' : 'Expert not found')
-					history.push('/assistants')
+					window.$app.Navigate('/assistants')
 					return
 				}
 
 				const data = window.$app.openapi.GetData(response)
 				if (!data) {
 					message.error(is_cn ? '未找到专家' : 'Expert not found')
-					history.push('/assistants')
+					window.$app.Navigate('/assistants')
 					return
 				}
 
@@ -130,7 +131,7 @@ const AssistantDetail = () => {
 	const handleBack = () => {
 		fetchedRef.current = false
 		previousIdRef.current = ''
-		history.push('/assistants')
+		window.$app.Navigate('/assistants')
 	}
 
 	const handleChatClick = (e: React.MouseEvent) => {
