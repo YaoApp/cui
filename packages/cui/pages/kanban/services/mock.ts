@@ -814,6 +814,7 @@ export async function createTask(data: CreateTaskData): Promise<KanbanTask> {
 		status: data.execute_immediately ? 'running' : 'pending',
 		column_id: data.column_id,
 		position: bd.tasks.filter((t) => t.column_id === data.column_id).length,
+		chat_id: data.chat_id || genId('chat'),
 		tags: data.tags,
 		recurring: data.recurring,
 		assistant_id: data.assistant_id,

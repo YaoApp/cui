@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { getLocale } from '@umijs/max'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
-import { ChatProvider, Chatbox, InputArea } from '@/chatbox'
-import type { SendMessageRequest } from '@/chatbox/types'
+import { TaskChat } from '@/chatbox'
+import { Chat } from '@/openapi'
 import { useGlobal } from '@/context/app'
 import { useKanbanContext } from '../../context'
 import * as services from '../../services'
@@ -21,8 +21,8 @@ interface TaskDetailProps {
 	isAnimating?: boolean
 }
 
-const DEFAULT_CHAT_WIDTH = 480
-const DEFAULT_SIDEBAR_WIDTH = 400
+const DEFAULT_CHAT_WIDTH = 560
+const DEFAULT_SIDEBAR_WIDTH = 480
 const MIN_CHAT_WIDTH = 280
 const MIN_SIDEBAR_WIDTH = 280
 
@@ -46,7 +46,6 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 	const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH)
 	const [sidebarOpen, setSidebarOpen] = useState(false)
 	const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH)
-	const [creatingSending, setCreatingSending] = useState(false)
 	const [refreshKey, setRefreshKey] = useState(0)
 
 	const chatWidthRef = useRef(chatWidth)
@@ -65,11 +64,13 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 		if (open) onPanelWidthChange(totalWidth)
 	}, [totalWidth, open, onPanelWidthChange])
 
-	// Reset sidebar when task changes
+	// Reset sidebar only when detail panel closes entirely
 	useEffect(() => {
-		setSidebarOpen(false)
-		sidebar.closeAllTabs()
-	}, [taskId])
+		if (!open) {
+			setSidebarOpen(false)
+			sidebar.closeAllTabs()
+		}
+	}, [open])
 
 	// Register/unregister detail_panel_active flag
 	useEffect(() => {
@@ -187,37 +188,84 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 		[sidebarOpen, sidebarWidth, sidebar, triggerAnimation, onPanelWidthChange]
 	)
 
-	// Creating mode: intercept first message to create task
-	const handleCreateSend = useCallback(
-		async (request: SendMessageRequest) => {
-			const message = request.messages[0]
-			if (!message || !creatingTaskId) return
+	const generateTaskTitle = useCallback(
+		async (text: string): Promise<string> => {
+			const titleAgentId = global.agent_uses?.title
+			if (!titleAgentId || !window.$app?.openapi) {
+				return text.split('\n')[0].slice(0, 60) || 'New Task'
+			}
 
-			const text =
-				typeof message.content === 'string'
-					? message.content
-					: message.content.map((c) => (c.type === 'text' ? c.text || '' : '')).join('')
-
-			if (!text.trim()) return
-
-			setCreatingSending(true)
 			try {
-				const title = text.split('\n')[0].slice(0, 60)
-				const creatingTask = tasks.find((t) => t.id === creatingTaskId)
-				const columnId = creatingTask?.column_id || board?.columns[board.columns.length - 1]?.id || ''
+				const chatClient = new Chat(window.$app.openapi)
+				const locale = getLocale() || 'en-us'
+				const languageHint = locale.startsWith('zh')
+					? 'Please generate the title in Chinese.'
+					: 'Please generate the title in English.'
 
-				const realTask = await services.createTask({
-					title,
-					description: text.trim(),
-					column_id: columnId
+				return await new Promise<string>((resolve) => {
+					let title = ''
+					const timeout = setTimeout(() => {
+						resolve(title || text.split('\n')[0].slice(0, 60) || 'New Task')
+					}, 10000)
+
+					chatClient.StreamCompletion(
+						{
+							assistant_id: titleAgentId,
+							messages: [
+								{
+									role: 'user',
+									content: `Generate a short title for this task. ${languageHint}\n\nUser message:\n${text.slice(0, 500)}`
+								}
+							],
+							skip: { history: true, trace: true }
+						},
+						(chunk: any) => {
+							if (chunk.type === 'event' && chunk.props?.event === 'message_end') {
+								clearTimeout(timeout)
+								resolve(title.trim().slice(0, 50) || text.split('\n')[0].slice(0, 60) || 'New Task')
+								return
+							}
+							if (chunk.type === 'text' && chunk.props?.content) {
+								if (chunk.delta) {
+									title += chunk.props.content
+								} else {
+									title = chunk.props.content
+								}
+							}
+						},
+						() => {
+							clearTimeout(timeout)
+							resolve(text.split('\n')[0].slice(0, 60) || 'New Task')
+						}
+					)
 				})
-
-				finalizeCreating(creatingTaskId, realTask)
-			} finally {
-				setCreatingSending(false)
+			} catch {
+				return text.split('\n')[0].slice(0, 60) || 'New Task'
 			}
 		},
-		[creatingTaskId, tasks, board, finalizeCreating]
+		[global.agent_uses?.title]
+	)
+
+	const handleFirstMessage = useCallback(
+		async (text: string, chatId: string) => {
+			if (!creatingTaskId) return
+
+			const creatingTask = tasks.find((t) => t.id === creatingTaskId)
+			const columnId = creatingTask?.column_id || board?.columns[board.columns.length - 1]?.id || ''
+
+			const title = await generateTaskTitle(text)
+
+			const realTask = await services.createTask({
+				title,
+				description: '',
+				column_id: columnId,
+				chat_id: chatId,
+				assistant_id: global.default_assistant?.assistant_id
+			})
+
+			finalizeCreating(creatingTaskId, realTask)
+		},
+		[creatingTaskId, tasks, board, finalizeCreating, generateTaskTitle, global.default_assistant?.assistant_id]
 	)
 
 	const statusLabel = task ? statusLabels[task.status] || statusLabels.pending : null
@@ -281,31 +329,35 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating }: 
 							</span>
 						</div>
 
-						<div className={styles.chatContent}>
-							{isCreating ? (
-								<div className={styles.creatingView}>
-									<div className={styles.creatingHint}>
-										<Icon name='material-chat_bubble_outline' size={32} className={styles.creatingHintIcon} />
-										<p>{is_cn ? '输入任务描述，开始执行' : 'Describe your task to get started'}</p>
+				<div className={styles.chatContent}>
+					{(() => {
+						const effectiveChatId = isCreating
+							? (task.chat_id || `creating-${creatingTaskId}`)
+							: (task.chat_id || taskId!)
+
+						return (
+							<TaskChat
+								key={effectiveChatId}
+								chatId={effectiveChatId}
+								assistantId={isCreating
+									? (global.default_assistant?.assistant_id || '')
+									: (task.assistant_id || global.default_assistant?.assistant_id || '')}
+								fallbackAssistantId={global.default_assistant?.assistant_id}
+								className={styles.chatbox}
+								onFirstUserMessage={isCreating ? handleFirstMessage : undefined}
+								initialWorkspace={!isCreating ? task.workspace?.id : undefined}
+								onWorkspaceChange={!isCreating ? (id) => services.updateTask(taskId!, { workspace_id: id }) : undefined}
+								onAssistantChange={!isCreating ? (id) => services.updateTask(taskId!, { assistant_id: id }) : undefined}
+								placeholder={
+									<div className={styles.taskEmptyState}>
+										<Icon name='material-chat_bubble_outline' size={32} className={styles.emptyIcon} />
+										<p>{is_cn ? '发送消息开始任务' : 'Send a message to start the task'}</p>
 									</div>
-									<InputArea
-										mode='normal'
-										onSend={handleCreateSend}
-										loading={creatingSending}
-										disabled={creatingSending}
-									/>
-								</div>
-							) : (
-								<ChatProvider
-									key={taskId}
-									chatId={task.chat_id || taskId}
-									assistantId={task.assistant_id}
-									singleSession
-								>
-									<Chatbox className={styles.chatbox} />
-								</ChatProvider>
-							)}
-						</div>
+								}
+							/>
+						)
+					})()}
+				</div>
 					</div>
 
 					{sidebarOpen && (

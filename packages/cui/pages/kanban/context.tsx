@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { getLocale, useNavigate } from '@umijs/max'
+import { nanoid } from 'nanoid'
 import type { Board, BoardSummary, BoardTemplate, Column, KanbanTask, StatusFilter, CreateTaskData } from './types'
 import * as services from './services'
 
@@ -70,6 +71,10 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 
 	const is_cn = useMemo(() => getLocale() === 'zh-CN', [])
 	const moveVersionRef = useRef(0)
+	// Tracks local position overrides from drag-and-drop moves.
+	// Key: taskId, Value: { column_id, position } the user dragged to.
+	// Cleared only when refreshTasks confirms server data matches.
+	const localMovesRef = useRef<Map<string, { column_id: string; position: number }>>(new Map())
 	const initializedRef = useRef(false)
 	const closeTimerRef = useRef<number>()
 	const animTimerRef = useRef<number>()
@@ -138,6 +143,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 				setTasks((prev) => prev.filter((t) => t.id !== creatingTaskId))
 				setCreatingTaskId(null)
 			}
+			localMovesRef.current.clear()
 			moveVersionRef.current++
 
 			navigate(`/kanban/${boardId}`)
@@ -227,16 +233,17 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			clearTimeout(closeTimerRef.current)
 			const targetColumnId = columnId || board?.columns[board.columns.length - 1]?.id || ''
 			const tempId = `temp_${Date.now()}`
-			const placeholder: KanbanTask = {
-				id: tempId,
-				title: is_cn ? '新任务' : 'New Task',
-				description: '',
-				status: 'creating',
-				column_id: targetColumnId,
-				position: 9999,
-				created_at: Date.now(),
-				updated_at: Date.now()
-			}
+		const placeholder: KanbanTask = {
+			id: tempId,
+			title: is_cn ? '新任务' : 'New Task',
+			description: '',
+			status: 'creating',
+			column_id: targetColumnId,
+			position: 9999,
+			chat_id: nanoid(),
+			created_at: Date.now(),
+			updated_at: Date.now()
+		}
 			setTasks((prev) => {
 				const filtered = creatingTaskId
 					? prev.filter((t) => t.id !== creatingTaskId)
@@ -283,6 +290,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 	const moveTask = useCallback(
 		async (taskId: string, columnId: string, position: number) => {
 			moveVersionRef.current++
+			localMovesRef.current.set(taskId, { column_id: columnId, position })
 			setTasks((prev) => {
 				const task = prev.find((t) => t.id === taskId)
 				if (!task) return prev
@@ -434,9 +442,14 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		}
 
 		await services.deleteColumn(columnId)
-		setBoard((prev) =>
-			prev ? { ...prev, columns: prev.columns.filter((c) => c.id !== columnId) } : prev
-		)
+		setBoard((prev) => {
+			if (!prev) return prev
+			const remaining = prev.columns
+				.filter((c) => c.id !== columnId)
+				.sort((a, b) => a.position - b.position)
+				.map((c, i) => ({ ...c, position: i }))
+			return { ...prev, columns: remaining }
+		})
 	}, [board, tasks])
 
 	const reorderColumns = useCallback(
@@ -465,7 +478,37 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		if (moveVersionRef.current !== versionBefore) return
 		setTasks((prev) => {
 			const creating = prev.find((t) => t.status === 'creating')
-			return creating ? [...tasksData, creating] : tasksData
+			const moves = localMovesRef.current
+
+			let result = tasksData
+			if (moves.size > 0) {
+				result = tasksData.map((t) => {
+					const override = moves.get(t.id)
+					if (!override) return t
+					if (t.column_id === override.column_id && t.position === override.position) {
+						moves.delete(t.id)
+						return t
+					}
+					return { ...t, column_id: override.column_id, position: override.position }
+				})
+			}
+
+			if (!creating) return result
+
+			// Determine creating task's intended position (from local move or prev state)
+			const creatingMove = moves.get(creating.id)
+			const col = creatingMove?.column_id ?? creating.column_id
+			const pos = creatingMove?.position ?? creating.position
+
+			// Shift other tasks in the same column to make room for the creating task
+			result = result.map((t) => {
+				if (t.column_id === col && t.position >= pos) {
+					return { ...t, position: t.position + 1 }
+				}
+				return t
+			})
+
+			return [...result, { ...creating, column_id: col, position: pos }]
 		})
 	}, [board])
 

@@ -171,6 +171,45 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 
 	const canCreate = newName.trim().length > 0
 
+	const [searchOpen, setSearchOpen] = useState(false)
+	const searchInputRef = useRef<HTMLInputElement>(null)
+	const searchBoxRef = useRef<HTMLDivElement>(null)
+
+	useEffect(() => {
+		if (searchOpen && searchInputRef.current) {
+			searchInputRef.current.focus()
+		}
+	}, [searchOpen])
+
+	useEffect(() => {
+		if (!searchOpen) setSearchKeyword('')
+	}, [searchOpen])
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+				e.preventDefault()
+				setSearchOpen((v) => !v)
+			}
+			if (e.key === 'Escape' && searchOpen) {
+				setSearchOpen(false)
+			}
+		}
+		document.addEventListener('keydown', handleKeyDown)
+		return () => document.removeEventListener('keydown', handleKeyDown)
+	}, [searchOpen])
+
+	useEffect(() => {
+		if (!searchOpen) return
+		const handleClickOutside = (e: MouseEvent) => {
+			if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+				setSearchOpen(false)
+			}
+		}
+		document.addEventListener('mousedown', handleClickOutside)
+		return () => document.removeEventListener('mousedown', handleClickOutside)
+	}, [searchOpen])
+
 	return (
 		<div className={styles.header}>
 			<div className={styles.titleSection} ref={triggerRef} onClick={handleToggleDropdown}>
@@ -414,18 +453,6 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 				</div>
 			)}
 
-			<div className={styles.searchBox}>
-				<span className={styles.searchIcon}>
-					<Icon name='material-search' size={14} />
-				</span>
-				<input
-					type='text'
-					placeholder={is_cn ? '搜索任务...' : 'Search tasks...'}
-					value={searchKeyword}
-					onChange={(e) => setSearchKeyword(e.target.value)}
-				/>
-			</div>
-
 			<div className={styles.filters}>
 				{FILTERS.map((f) => (
 					<span
@@ -440,10 +467,24 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 
 			<span className={styles.spacer} />
 
-			<div className={styles.inboxBtn}>
-				<Icon name='material-inbox' size={18} />
-				<span className={styles.inboxBadge}>3</span>
-			</div>
+			{searchOpen && (
+				<div className={styles.searchOverlay} ref={searchBoxRef}>
+					<div className={styles.searchBox}>
+						<span className={styles.searchIcon}>
+							<Icon name='material-search' size={16} />
+						</span>
+						<input
+							ref={searchInputRef}
+							type='text'
+							placeholder={is_cn ? '搜索任务...' : 'Search tasks...'}
+							value={searchKeyword}
+							onChange={(e) => setSearchKeyword(e.target.value)}
+							onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false) }}
+						/>
+						<span className={styles.searchHint}>ESC</span>
+					</div>
+				</div>
+			)}
 
 			<Button
 				type='primary'

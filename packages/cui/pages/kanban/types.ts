@@ -144,6 +144,7 @@ export interface CreateTaskData {
 	title: string
 	description: string
 	column_id: string
+	chat_id?: string
 	workspace_id?: string
 	assistant_id?: string
 	tags?: string[]

@@ -9,7 +9,7 @@ import Board from './components/Board'
 import TaskDetail from './components/TaskDetail'
 import styles from './index.less'
 
-const DEFAULT_PANEL_WIDTH = 480
+const DEFAULT_PANEL_WIDTH = 560
 
 const KanbanContent = () => {
 	const {
@@ -27,25 +27,47 @@ const KanbanContent = () => {
 
 	const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH)
 	const boardAreaRef = useRef<HTMLDivElement>(null)
+	const scrollRafRef = useRef<number>(0)
 
+	const scrollToActiveCard = useCallback(() => {
+		if (!selectedTaskId || !boardAreaRef.current) return
+		const BREATHING = 40
+		const card = boardAreaRef.current.querySelector(`[data-task-id="${selectedTaskId}"]`)
+		if (!card) return
+		const area = boardAreaRef.current
+		const areaRect = area.getBoundingClientRect()
+		const cardRect = card.getBoundingClientRect()
+		if (cardRect.right > areaRect.right - BREATHING) {
+			area.scrollTo({ left: area.scrollLeft + (cardRect.right - areaRect.right) + BREATHING, behavior: 'smooth' })
+		} else if (cardRect.left < areaRect.left + BREATHING) {
+			area.scrollTo({ left: area.scrollLeft - (areaRect.left - cardRect.left) - BREATHING, behavior: 'smooth' })
+		}
+	}, [selectedTaskId])
+
+	// Scroll to active card when task selection or detail panel open/close changes
 	useEffect(() => {
 		if (!selectedTaskId) return
-		const BREATHING = 40
 		const delay = detailOpen ? 300 : 50
-		const timer = setTimeout(() => {
-			const card = boardAreaRef.current?.querySelector(`[data-task-id="${selectedTaskId}"]`)
-			if (!card || !boardAreaRef.current) return
-			const area = boardAreaRef.current
-			const areaRect = area.getBoundingClientRect()
-			const cardRect = card.getBoundingClientRect()
-			if (cardRect.right > areaRect.right - BREATHING) {
-				area.scrollTo({ left: area.scrollLeft + (cardRect.right - areaRect.right) + BREATHING, behavior: 'smooth' })
-			} else if (cardRect.left < areaRect.left + BREATHING) {
-				area.scrollTo({ left: area.scrollLeft - (areaRect.left - cardRect.left) - BREATHING, behavior: 'smooth' })
-			}
-		}, delay)
+		const timer = setTimeout(scrollToActiveCard, delay)
 		return () => clearTimeout(timer)
-	}, [selectedTaskId, detailOpen])
+	}, [selectedTaskId, detailOpen, scrollToActiveCard])
+
+	// Observe board area size changes to keep active card visible
+	// Handles: sidebar open/close, panel resize, window resize, CSS transitions
+	useEffect(() => {
+		const area = boardAreaRef.current
+		if (!area || !selectedTaskId) return
+
+		const observer = new ResizeObserver(() => {
+			cancelAnimationFrame(scrollRafRef.current)
+			scrollRafRef.current = requestAnimationFrame(scrollToActiveCard)
+		})
+		observer.observe(area)
+		return () => {
+			observer.disconnect()
+			cancelAnimationFrame(scrollRafRef.current)
+		}
+	}, [selectedTaskId, scrollToActiveCard])
 
 	const hasRunningTasks = useMemo(
 		() => tasks.some((t) => t.status === 'running' || t.status === 'waiting_input'),

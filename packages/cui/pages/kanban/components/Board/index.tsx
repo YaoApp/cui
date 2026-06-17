@@ -27,13 +27,28 @@ import type { KanbanTask, Column as ColumnType } from '../../types'
 import styles from './index.less'
 
 const COLUMN_PREFIX = 'column-'
+const CARDLIST_PREFIX = 'cardlist-'
 
 function isColumnId(id: string): boolean {
 	return id.startsWith(COLUMN_PREFIX)
 }
 
+function isCardlistId(id: string): boolean {
+	return id.startsWith(CARDLIST_PREFIX)
+}
+
 function extractColumnId(id: string): string {
 	return id.replace(COLUMN_PREFIX, '')
+}
+
+function extractCardlistColumnId(id: string): string {
+	return id.replace(CARDLIST_PREFIX, '')
+}
+
+function getColumnIdFromDropTarget(id: string): string | null {
+	if (isColumnId(id)) return extractColumnId(id)
+	if (isCardlistId(id)) return extractCardlistColumnId(id)
+	return null
 }
 
 type DragType = 'task' | 'column' | null
@@ -198,7 +213,10 @@ const Board = ({ onCreateTaskInColumn }: { onCreateTaskInColumn?: (columnId: str
 	const collisionDetection: CollisionDetection = useCallback(
 		(args) => {
 			if (dragType === 'column') {
-				return closestCorners(args)
+				const columnContainers = args.droppableContainers.filter(
+					(container) => isColumnId(String(container.id))
+				)
+				return closestCorners({ ...args, droppableContainers: columnContainers })
 			}
 
 			const pointerIntersections = pointerWithin(args)
@@ -210,21 +228,21 @@ const Board = ({ onCreateTaskInColumn }: { onCreateTaskInColumn?: (columnId: str
 			if (overId != null) {
 				const overStr = String(overId)
 
-				if (isColumnId(overStr)) {
-					const colId = extractColumnId(overStr)
-					const columnTasks = getColumnTasks(colId)
-					const taskContainers = args.droppableContainers.filter((c) => {
-						const cid = String(c.id)
-						return cid !== overStr && columnTasks.some((t) => t.id === cid)
-					})
+			const colId = getColumnIdFromDropTarget(overStr)
+			if (colId) {
+				const columnTasks = getColumnTasks(colId)
+				const taskContainers = args.droppableContainers.filter((c) => {
+					const cid = String(c.id)
+					return !isColumnId(cid) && !isCardlistId(cid) && columnTasks.some((t) => t.id === cid)
+				})
 
-					if (taskContainers.length > 0) {
-						overId = closestCenter({
-							...args,
-							droppableContainers: taskContainers
-						})[0]?.id
-					}
+				if (taskContainers.length > 0) {
+					overId = closestCenter({
+						...args,
+						droppableContainers: taskContainers
+					})[0]?.id
 				}
+			}
 
 				lastOverIdRef.current = overId
 				return [{ id: overId }]
@@ -279,10 +297,9 @@ const Board = ({ onCreateTaskInColumn }: { onCreateTaskInColumn?: (columnId: str
 			setLocalTasks((prev) => {
 				if (!prev) return prev
 
-				const activeCol = prev.find((t) => t.id === activeStr)?.column_id
-				const overCol = isColumnId(overStr)
-					? extractColumnId(overStr)
-					: prev.find((t) => t.id === overStr)?.column_id
+			const activeCol = prev.find((t) => t.id === activeStr)?.column_id
+			const overCol = getColumnIdFromDropTarget(overStr)
+				?? prev.find((t) => t.id === overStr)?.column_id
 
 				if (!activeCol || !overCol || activeCol === overCol) return prev
 
@@ -290,10 +307,10 @@ const Board = ({ onCreateTaskInColumn }: { onCreateTaskInColumn?: (columnId: str
 					.filter((t) => t.column_id === overCol && t.id !== activeStr)
 					.sort((a, b) => a.position - b.position)
 
-				let newIndex: number
-				if (isColumnId(overStr)) {
-					newIndex = overItems.length + 1
-				} else {
+			let newIndex: number
+			if (getColumnIdFromDropTarget(overStr)) {
+				newIndex = overItems.length + 1
+			} else {
 					const overIndex = overItems.findIndex((t) => t.id === overStr)
 					const isBelowOver =
 						over &&
@@ -334,23 +351,23 @@ const Board = ({ onCreateTaskInColumn }: { onCreateTaskInColumn?: (columnId: str
 		(event: DragEndEvent) => {
 			const { active, over } = event
 
-			if (dragType === 'column') {
-				setActiveId(null)
-				setDragType(null)
-				if (!over || !board) return
-				const activeStr = String(active.id)
-				const overStr = String(over.id)
-				if (activeStr === overStr) return
+		if (dragType === 'column') {
+			setActiveId(null)
+			setDragType(null)
+			if (!over || !board) return
+			const activeStr = String(active.id)
+			const overStr = String(over.id)
+			if (activeStr === overStr) return
 
-				const oldIdx = board.columns.findIndex((c) => `column-${c.id}` === activeStr)
-				const newIdx = board.columns.findIndex((c) => `column-${c.id}` === overStr)
-				if (oldIdx < 0 || newIdx < 0 || oldIdx === newIdx) return
+			const sorted = [...board.columns].sort((a, b) => a.position - b.position)
+			const oldIdx = sorted.findIndex((c) => `column-${c.id}` === activeStr)
+			const newIdx = sorted.findIndex((c) => `column-${c.id}` === overStr)
+			if (oldIdx < 0 || newIdx < 0 || oldIdx === newIdx) return
 
-				const sorted = [...board.columns].sort((a, b) => a.position - b.position)
-				const reordered = arrayMove(sorted, oldIdx, newIdx)
-				reorderColumns(reordered.map((c) => c.id))
-				return
-			}
+			const reordered = arrayMove(sorted, oldIdx, newIdx)
+			reorderColumns(reordered.map((c) => c.id))
+			return
+		}
 
 			const origin = dragOriginRef.current
 			setActiveId(null)
@@ -372,25 +389,24 @@ const Board = ({ onCreateTaskInColumn }: { onCreateTaskInColumn?: (columnId: str
 				return
 			}
 
-			const activeContainer = activeTask.column_id
-			const overContainer = isColumnId(overId)
-				? extractColumnId(overId)
-				: currentTasks.find((t) => t.id === overId)?.column_id
+		const activeContainer = activeTask.column_id
+		const overContainer = getColumnIdFromDropTarget(overId)
+			?? currentTasks.find((t) => t.id === overId)?.column_id
 
-			if (!overContainer) {
-				setLocalTasks(null)
-				return
-			}
+		if (!overContainer) {
+			setLocalTasks(null)
+			return
+		}
 
-			const colTaskIds = currentTasks
-				.filter((t) => t.column_id === overContainer)
-				.sort((a, b) => a.position - b.position)
-				.map((t) => t.id)
+		const colTaskIds = currentTasks
+			.filter((t) => t.column_id === overContainer)
+			.sort((a, b) => a.position - b.position)
+			.map((t) => t.id)
 
-			const activeIndex = colTaskIds.indexOf(activeStr)
-			const overIndex = isColumnId(overId)
-				? colTaskIds.length - 1
-				: colTaskIds.indexOf(overId)
+		const activeIndex = colTaskIds.indexOf(activeStr)
+		const overIndex = getColumnIdFromDropTarget(overId)
+			? colTaskIds.length - 1
+			: colTaskIds.indexOf(overId)
 
 			let finalPosition: number
 			if (activeIndex >= 0 && overIndex >= 0 && activeIndex !== overIndex) {
