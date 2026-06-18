@@ -20,6 +20,7 @@ interface InboxContextValue {
 	markAsRead: (id: string) => void
 	markAllRead: () => void
 	archiveMessage: (id: string) => void
+	toggleStar: (id: string) => void
 	sidebarCollapsed: boolean
 	setSidebarCollapsed: (v: boolean) => void
 }
@@ -54,6 +55,8 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 
 		if (category === 'archived') {
 			result = result.filter((m) => m.archived)
+		} else if (category === 'starred') {
+			result = result.filter((m) => !m.archived && m.starred)
 		} else {
 			result = result.filter((m) => !m.archived)
 			if (category === 'task_interaction') {
@@ -86,6 +89,7 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		const nonArchived = messages.filter((m) => !m.archived)
 		return {
 			all: nonArchived.length,
+			starred: nonArchived.filter((m) => m.starred).length,
 			task_interaction: nonArchived.filter((m) => m.type === 'task_input').length,
 			task_notification: nonArchived.filter((m) => m.type === 'task_completed').length,
 			task_failed: nonArchived.filter((m) => m.type === 'task_failed').length,
@@ -126,6 +130,17 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, [selectedMessageId, messages])
 
+	const toggleStar = useCallback((id: string) => {
+		const msg = messages.find((m) => m.id === id)
+		if (!msg) return
+		if (msg.starred) {
+			services.unstarMessage(id)
+		} else {
+			services.starMessage(id)
+		}
+		setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, starred: !m.starred } : m)))
+	}, [messages])
+
 	const value: InboxContextValue = {
 		messages,
 		filteredMessages,
@@ -143,6 +158,7 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		markAsRead,
 		markAllRead,
 		archiveMessage,
+		toggleStar,
 		sidebarCollapsed,
 		setSidebarCollapsed
 	}

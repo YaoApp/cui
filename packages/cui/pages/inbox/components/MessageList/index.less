@@ -194,6 +194,34 @@
 	white-space: nowrap;
 }
 
+.starBtn {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	cursor: pointer;
+	color: var(--color_neo_text_tertiary);
+	opacity: 0;
+	transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s ease;
+
+	&:hover {
+		transform: scale(1.2);
+		color: var(--color_warning);
+	}
+
+	&:active {
+		transform: scale(0.9);
+	}
+
+	&.starred {
+		opacity: 1;
+		color: var(--color_warning);
+	}
+}
+
+.messageItem:hover .starBtn {
+	opacity: 1;
+}
+
 .itemTime {
 	flex-shrink: 0;
 	font-size: 11px;

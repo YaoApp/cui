@@ -17,6 +17,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-research',
 		read: false,
 		archived: false,
+		starred: false,
 		created_at: now - minutes(3)
 	},
 	{
@@ -31,6 +32,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-data',
 		read: false,
 		archived: false,
+		starred: true,
 		created_at: now - minutes(10)
 	},
 	{
@@ -45,6 +47,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-content',
 		read: false,
 		archived: false,
+		starred: false,
 		created_at: now - minutes(30)
 	},
 	{
@@ -59,6 +62,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-data',
 		read: true,
 		archived: false,
+		starred: false,
 		created_at: now - hours(1),
 		read_at: now - minutes(50)
 	},
@@ -74,6 +78,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-data',
 		read: false,
 		archived: false,
+		starred: true,
 		created_at: now - hours(2)
 	},
 	{
@@ -88,6 +93,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-research',
 		read: true,
 		archived: false,
+		starred: false,
 		created_at: now - hours(3),
 		read_at: now - hours(2)
 	},
@@ -103,6 +109,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-data',
 		read: true,
 		archived: false,
+		starred: false,
 		created_at: now - hours(4),
 		read_at: now - hours(3)
 	},
@@ -118,6 +125,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-research',
 		read: false,
 		archived: false,
+		starred: true,
 		created_at: now - hours(5)
 	},
 	{
@@ -132,6 +140,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-data',
 		read: true,
 		archived: false,
+		starred: false,
 		created_at: now - hours(6),
 		read_at: now - hours(5)
 	},
@@ -147,6 +156,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-content',
 		read: false,
 		archived: false,
+		starred: false,
 		created_at: now - hours(8)
 	},
 	{
@@ -161,6 +171,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-data',
 		read: true,
 		archived: false,
+		starred: false,
 		created_at: now - hours(12),
 		read_at: now - hours(10)
 	},
@@ -176,6 +187,7 @@ const mockMessages: InboxMessage[] = [
 		assistant_id: 'ast-data',
 		read: false,
 		archived: false,
+		starred: false,
 		created_at: now - hours(16)
 	}
 ]
@@ -206,5 +218,15 @@ export const services: InboxAPI = {
 	async archiveMessage(id: string) {
 		await delay(50)
 		messages = messages.map((m) => (m.id === id ? { ...m, archived: true } : m))
+	},
+
+	async starMessage(id: string) {
+		await delay(50)
+		messages = messages.map((m) => (m.id === id ? { ...m, starred: true } : m))
+	},
+
+	async unstarMessage(id: string) {
+		await delay(50)
+		messages = messages.map((m) => (m.id === id ? { ...m, starred: false } : m))
 	}
 }

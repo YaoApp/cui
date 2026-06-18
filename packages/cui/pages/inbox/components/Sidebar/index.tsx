@@ -13,6 +13,7 @@ interface CategoryItem {
 
 const CATEGORIES: CategoryItem[] = [
 	{ key: 'all', icon: 'material-inbox', cn: '全部', en: 'All' },
+	{ key: 'starred', icon: 'material-star_outline', cn: '收藏', en: 'Starred' },
 	{ key: 'task_interaction', icon: 'material-mark_chat_unread', cn: '任务交互', en: 'Interactions' },
 	{ key: 'task_notification', icon: 'material-assignment_turned_in', cn: '任务通知', en: 'Notifications' },
 	{ key: 'task_failed', icon: 'material-assignment_late', cn: '任务失败', en: 'Failed' },
@@ -33,7 +34,7 @@ const Sidebar = () => {
 				{CATEGORIES.map((item, idx) => {
 					const isActive = category === item.key
 					const count = categoryCountMap[item.key] || 0
-					const showDivider = item.key === 'all' || item.key === 'task_failed'
+					const showDivider = item.key === 'starred' || item.key === 'task_failed'
 
 					return (
 						<div key={item.key}>
