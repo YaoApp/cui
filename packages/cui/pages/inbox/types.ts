@@ -1,6 +1,6 @@
 export type InboxMessageType = 'task_input' | 'task_completed' | 'task_failed'
 
-export type InboxCategory = 'all' | 'task_interaction' | 'task_notification' | 'task_failed' | 'archived'
+export type InboxCategory = 'all' | 'starred' | 'task_interaction' | 'task_notification' | 'task_failed' | 'archived'
 
 export interface InboxMessage {
 	id: string
@@ -14,6 +14,7 @@ export interface InboxMessage {
 	assistant_id?: string
 	read: boolean
 	archived: boolean
+	starred: boolean
 	created_at: number
 	read_at?: number
 }
@@ -31,4 +32,6 @@ export interface InboxAPI {
 	markAsRead: (id: string) => Promise<void>
 	markAllRead: () => Promise<void>
 	archiveMessage: (id: string) => Promise<void>
+	starMessage: (id: string) => Promise<void>
+	unstarMessage: (id: string) => Promise<void>
 }

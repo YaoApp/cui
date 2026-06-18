@@ -8,6 +8,7 @@ interface MessageItemProps {
 	selected: boolean
 	is_cn: boolean
 	onClick: () => void
+	onToggleStar: () => void
 }
 
 function formatTimeAgo(ts: number, is_cn: boolean): string {
@@ -28,8 +29,13 @@ function getTypeConfig(message: InboxMessage): { icon: string; color: string } {
 	return { icon: 'material-mark_chat_unread', color: 'var(--color_neo_text_tertiary)' }
 }
 
-const MessageItem = ({ message, selected, is_cn, onClick }: MessageItemProps) => {
+const MessageItem = ({ message, selected, is_cn, onClick, onToggleStar }: MessageItemProps) => {
 	const config = getTypeConfig(message)
+
+	const handleStarClick = (e: React.MouseEvent) => {
+		e.stopPropagation()
+		onToggleStar()
+	}
 
 	return (
 		<div className={clsx(styles.messageItem, selected && styles.selected, !message.read && styles.unread)} onClick={onClick}>
@@ -38,6 +44,12 @@ const MessageItem = ({ message, selected, is_cn, onClick }: MessageItemProps) =>
 					<Icon name={config.icon} size={16} />
 				</span>
 				<span className={styles.itemTitle}>{message.title}</span>
+				<span
+					className={clsx(styles.starBtn, message.starred && styles.starred)}
+					onClick={handleStarClick}
+				>
+					<Icon name={message.starred ? 'material-star' : 'material-star_outline'} size={15} />
+				</span>
 				<span className={styles.itemTime}>{formatTimeAgo(message.created_at, is_cn)}</span>
 			</div>
 			<div className={styles.itemBody}>{message.body}</div>

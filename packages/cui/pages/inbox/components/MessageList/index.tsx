@@ -6,6 +6,7 @@ import styles from './index.less'
 
 const CATEGORY_LABELS: Record<InboxCategory, { cn: string; en: string }> = {
 	all: { cn: '全部', en: 'All' },
+	starred: { cn: '收藏', en: 'Starred' },
 	task_interaction: { cn: '任务交互', en: 'Interactions' },
 	task_notification: { cn: '任务通知', en: 'Notifications' },
 	task_failed: { cn: '任务失败', en: 'Failed' },
@@ -13,7 +14,7 @@ const CATEGORY_LABELS: Record<InboxCategory, { cn: string; en: string }> = {
 }
 
 const MessageList = () => {
-	const { filteredMessages, selectedMessageId, selectMessage, is_cn, category, unreadCount, searchKeyword, setSearchKeyword, markAllRead } = useInboxContext()
+	const { filteredMessages, selectedMessageId, selectMessage, is_cn, category, unreadCount, searchKeyword, setSearchKeyword, markAllRead, toggleStar } = useInboxContext()
 
 	const categoryLabel = CATEGORY_LABELS[category]
 
@@ -52,6 +53,7 @@ const MessageList = () => {
 							selected={msg.id === selectedMessageId}
 							is_cn={is_cn}
 							onClick={() => selectMessage(msg.id)}
+							onToggleStar={() => toggleStar(msg.id)}
 						/>
 					))
 				)}
