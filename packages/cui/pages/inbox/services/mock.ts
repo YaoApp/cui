@@ -18,6 +18,7 @@ const mockMessages: InboxMessage[] = [
 		read: false,
 		archived: false,
 		starred: false,
+		pinned: true,
 		created_at: now - minutes(3)
 	},
 	{
@@ -33,6 +34,7 @@ const mockMessages: InboxMessage[] = [
 		read: false,
 		archived: false,
 		starred: true,
+		pinned: false,
 		created_at: now - minutes(10)
 	},
 	{
@@ -48,6 +50,7 @@ const mockMessages: InboxMessage[] = [
 		read: false,
 		archived: false,
 		starred: false,
+		pinned: false,
 		created_at: now - minutes(30)
 	},
 	{
@@ -63,6 +66,7 @@ const mockMessages: InboxMessage[] = [
 		read: true,
 		archived: false,
 		starred: false,
+		pinned: false,
 		created_at: now - hours(1),
 		read_at: now - minutes(50)
 	},
@@ -79,6 +83,7 @@ const mockMessages: InboxMessage[] = [
 		read: false,
 		archived: false,
 		starred: true,
+		pinned: true,
 		created_at: now - hours(2)
 	},
 	{
@@ -94,6 +99,7 @@ const mockMessages: InboxMessage[] = [
 		read: true,
 		archived: false,
 		starred: false,
+		pinned: false,
 		created_at: now - hours(3),
 		read_at: now - hours(2)
 	},
@@ -110,6 +116,7 @@ const mockMessages: InboxMessage[] = [
 		read: true,
 		archived: false,
 		starred: false,
+		pinned: false,
 		created_at: now - hours(4),
 		read_at: now - hours(3)
 	},
@@ -126,6 +133,7 @@ const mockMessages: InboxMessage[] = [
 		read: false,
 		archived: false,
 		starred: true,
+		pinned: false,
 		created_at: now - hours(5)
 	},
 	{
@@ -141,6 +149,7 @@ const mockMessages: InboxMessage[] = [
 		read: true,
 		archived: false,
 		starred: false,
+		pinned: false,
 		created_at: now - hours(6),
 		read_at: now - hours(5)
 	},
@@ -157,6 +166,7 @@ const mockMessages: InboxMessage[] = [
 		read: false,
 		archived: false,
 		starred: false,
+		pinned: false,
 		created_at: now - hours(8)
 	},
 	{
@@ -172,6 +182,7 @@ const mockMessages: InboxMessage[] = [
 		read: true,
 		archived: false,
 		starred: false,
+		pinned: false,
 		created_at: now - hours(12),
 		read_at: now - hours(10)
 	},
@@ -188,6 +199,7 @@ const mockMessages: InboxMessage[] = [
 		read: false,
 		archived: false,
 		starred: false,
+		pinned: false,
 		created_at: now - hours(16)
 	}
 ]
@@ -228,5 +240,15 @@ export const services: InboxAPI = {
 	async unstarMessage(id: string) {
 		await delay(50)
 		messages = messages.map((m) => (m.id === id ? { ...m, starred: false } : m))
+	},
+
+	async pinMessage(id: string) {
+		await delay(50)
+		messages = messages.map((m) => (m.id === id ? { ...m, pinned: true } : m))
+	},
+
+	async unpinMessage(id: string) {
+		await delay(50)
+		messages = messages.map((m) => (m.id === id ? { ...m, pinned: false } : m))
 	}
 }

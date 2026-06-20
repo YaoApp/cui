@@ -9,6 +9,7 @@ interface MessageItemProps {
 	is_cn: boolean
 	onClick: () => void
 	onToggleStar: () => void
+	onContextMenu: (e: React.MouseEvent) => void
 }
 
 function formatTimeAgo(ts: number, is_cn: boolean): string {
@@ -29,7 +30,7 @@ function getTypeConfig(message: InboxMessage): { icon: string; color: string } {
 	return { icon: 'material-mark_chat_unread', color: 'var(--color_neo_text_tertiary)' }
 }
 
-const MessageItem = ({ message, selected, is_cn, onClick, onToggleStar }: MessageItemProps) => {
+const MessageItem = ({ message, selected, is_cn, onClick, onToggleStar, onContextMenu }: MessageItemProps) => {
 	const config = getTypeConfig(message)
 
 	const handleStarClick = (e: React.MouseEvent) => {
@@ -38,11 +39,20 @@ const MessageItem = ({ message, selected, is_cn, onClick, onToggleStar }: Messag
 	}
 
 	return (
-		<div className={clsx(styles.messageItem, selected && styles.selected, !message.read && styles.unread)} onClick={onClick}>
+		<div
+			className={clsx(styles.messageItem, selected && styles.selected, !message.read && styles.unread)}
+			onClick={onClick}
+			onContextMenu={onContextMenu}
+		>
 			<div className={styles.itemHeader}>
 				<span className={styles.typeIcon} style={{ color: config.color }}>
 					<Icon name={config.icon} size={16} />
 				</span>
+				{message.pinned && (
+					<span className={styles.pinIndicator}>
+						<Icon name='material-push_pin' size={13} />
+					</span>
+				)}
 				<span className={styles.itemTitle}>{message.title}</span>
 				<span
 					className={clsx(styles.starBtn, message.starred && styles.starred)}

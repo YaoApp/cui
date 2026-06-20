@@ -15,6 +15,7 @@ export interface InboxMessage {
 	read: boolean
 	archived: boolean
 	starred: boolean
+	pinned: boolean
 	created_at: number
 	read_at?: number
 }
@@ -34,4 +35,6 @@ export interface InboxAPI {
 	archiveMessage: (id: string) => Promise<void>
 	starMessage: (id: string) => Promise<void>
 	unstarMessage: (id: string) => Promise<void>
+	pinMessage: (id: string) => Promise<void>
+	unpinMessage: (id: string) => Promise<void>
 }
