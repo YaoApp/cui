@@ -42,7 +42,7 @@ const PdfComponent: React.FC<PdfProps> = ({ src, file, contentType, fileName }) 
 			{/* PDF 预览区域 */}
 			<div className={styles.pdfViewer}>
 				<iframe
-					src={`${fileSource}#toolbar=0&navpanes=0&scrollbar=1`}
+					src={`${fileSource}#toolbar=1&navpanes=0&scrollbar=1`}
 					style={{
 						width: '100%',
 						height: '100%',
