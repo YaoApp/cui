@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import Icon from '@/widgets/Icon'
 import { useInboxContext } from '../../context'
-import type { InboxCategory } from '../../types'
+import type { InboxCategory, InboxMessage } from '../../types'
 import MessageItem from './MessageItem'
+import MessageContextMenu, { type ContextMenuState } from '../MessageContextMenu'
 import styles from './index.less'
 
 const CATEGORY_LABELS: Record<InboxCategory, { cn: string; en: string }> = {
@@ -15,8 +17,14 @@ const CATEGORY_LABELS: Record<InboxCategory, { cn: string; en: string }> = {
 
 const MessageList = () => {
 	const { filteredMessages, selectedMessageId, selectMessage, is_cn, category, unreadCount, searchKeyword, setSearchKeyword, markAllRead, toggleStar } = useInboxContext()
+	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
 
 	const categoryLabel = CATEGORY_LABELS[category]
+
+	const handleContextMenu = (e: React.MouseEvent, message: InboxMessage) => {
+		e.preventDefault()
+		setContextMenu({ message, x: e.clientX, y: e.clientY })
+	}
 
 	return (
 		<div className={styles.container}>
@@ -54,10 +62,15 @@ const MessageList = () => {
 							is_cn={is_cn}
 							onClick={() => selectMessage(msg.id)}
 							onToggleStar={() => toggleStar(msg.id)}
+							onContextMenu={(e) => handleContextMenu(e, msg)}
 						/>
 					))
 				)}
 			</div>
+
+			{contextMenu && (
+				<MessageContextMenu menu={contextMenu} onClose={() => setContextMenu(null)} />
+			)}
 		</div>
 	)
 }

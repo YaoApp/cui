@@ -21,6 +21,7 @@ interface InboxContextValue {
 	markAllRead: () => void
 	archiveMessage: (id: string) => void
 	toggleStar: (id: string) => void
+	togglePin: (id: string) => void
 	sidebarCollapsed: boolean
 	setSidebarCollapsed: (v: boolean) => void
 }
@@ -74,6 +75,12 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 				(m) => m.title.toLowerCase().includes(kw) || m.body.toLowerCase().includes(kw)
 			)
 		}
+
+		result.sort((a, b) => {
+			if (a.pinned && !b.pinned) return -1
+			if (!a.pinned && b.pinned) return 1
+			return 0
+		})
 
 		return result
 	}, [messages, category, searchKeyword])
@@ -141,6 +148,17 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, starred: !m.starred } : m)))
 	}, [messages])
 
+	const togglePin = useCallback((id: string) => {
+		const msg = messages.find((m) => m.id === id)
+		if (!msg) return
+		if (msg.pinned) {
+			services.unpinMessage(id)
+		} else {
+			services.pinMessage(id)
+		}
+		setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, pinned: !m.pinned } : m)))
+	}, [messages])
+
 	const value: InboxContextValue = {
 		messages,
 		filteredMessages,
@@ -159,6 +177,7 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		markAllRead,
 		archiveMessage,
 		toggleStar,
+		togglePin,
 		sidebarCollapsed,
 		setSidebarCollapsed
 	}
