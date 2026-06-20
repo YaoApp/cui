@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getLocale } from '@umijs/max'
-import { DownloadOutlined } from '@ant-design/icons'
+import { DownloadOutlined, ReloadOutlined } from '@ant-design/icons'
 import Icon from '@/widgets/Icon'
 import { WorkspaceAPI } from '@/openapi/workspace'
 import Image from '@/components/view/FileViewer/viewers/Image'
@@ -130,6 +130,9 @@ const Preview = (props: AppRouteProps) => {
 	const [treeWidth, setTreeWidth] = useState(220)
 	const [dirEntries, setDirEntries] = useState<DirEntry[] | null>(null)
 	const [dirLoading, setDirLoading] = useState(false)
+	const [iframeKey, setIframeKey] = useState(0)
+	const [imageVersion, setImageVersion] = useState(0)
+	const iframeRef = useRef<HTMLIFrameElement>(null)
 	const resizingRef = useRef(false)
 	const startXRef = useRef(0)
 	const startWidthRef = useRef(220)
@@ -298,6 +301,43 @@ const Preview = (props: AppRouteProps) => {
 		}
 	}
 
+	const handleRefresh = useCallback(() => {
+		if (isHtml) {
+			setIframeKey((k) => k + 1)
+		} else if (isMarkdown) {
+			const api = getApi()
+			if (!api) return
+			setLoading(true)
+			api.ReadFile(ws, filePath)
+				.then((resp) => {
+					if (!window.$app.openapi.IsError(resp)) {
+						const text =
+							typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data, null, 2)
+						setTextContent(text)
+					}
+				})
+				.finally(() => setLoading(false))
+		} else if (fileType === 'image') {
+			setImageVersion((v) => v + 1)
+		}
+	}, [isHtml, isMarkdown, fileType, ws, filePath, getApi])
+
+	const handleIframeLoad = useCallback(() => {
+		try {
+			const doc = iframeRef.current?.contentDocument
+			if (!doc) return
+			const style = doc.createElement('style')
+			style.textContent = `
+				::-webkit-scrollbar { width: 6px; height: 6px; }
+				::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+				::-webkit-scrollbar-track { background: transparent; }
+			`
+			doc.head?.appendChild(style)
+		} catch {
+			// cross-origin or sandbox restriction
+		}
+	}, [])
+
 	if (!ws || !filePath) {
 		return (
 			<div className={styles.container}>
@@ -397,10 +437,13 @@ const Preview = (props: AppRouteProps) => {
 			if (tab === 'preview') {
 				return (
 					<iframe
+						ref={iframeRef}
+						key={iframeKey}
 						src={previewURL}
 						className={styles.iframe}
 						sandbox='allow-scripts allow-same-origin allow-popups allow-forms'
 						title='HTML Preview'
+						onLoad={handleIframeLoad}
 					/>
 				)
 			}
@@ -408,8 +451,12 @@ const Preview = (props: AppRouteProps) => {
 		}
 
 		switch (fileType) {
-			case 'image':
-				return <Image src={contentURL} fileName={fileName} />
+			case 'image': {
+				const imgSrc = imageVersion > 0
+					? `${contentURL}${contentURL.includes('?') ? '&' : '?'}_v=${imageVersion}`
+					: contentURL
+				return <Image src={imgSrc} fileName={fileName} />
+			}
 			case 'video':
 				return <Video src={contentURL} fileName={fileName} />
 			case 'audio':
@@ -483,6 +530,15 @@ const Preview = (props: AppRouteProps) => {
 							Source
 						</span>
 					</div>
+				)}
+				{dirEntries === null && (isHtml || isMarkdown || fileType === 'image') && tab === 'preview' && (
+					<span
+						className={styles.downloadBtn}
+						onClick={handleRefresh}
+						title={is_cn ? '刷新' : 'Refresh'}
+					>
+						<ReloadOutlined />
+					</span>
 				)}
 				{dirEntries === null && (
 					<span
