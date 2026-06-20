@@ -19,13 +19,6 @@ interface TaskSidebarProps {
 	children: React.ReactNode
 }
 
-const formatDisplayUrl = (url: string | null): string => {
-	if (!url) return ''
-	if (url.startsWith('__task/')) return url.replace('__task/', '')
-	if (url.startsWith('$dashboard/')) return url.replace('$dashboard', '')
-	return url
-}
-
 const canOpenInNewWindow = (url: string): boolean => {
 	if (!url) return false
 	if (url.startsWith('__task/') || url.startsWith('$dashboard/')) return false
@@ -37,16 +30,38 @@ const TaskSidebar = ({
 	onTabChange, onTabClose, onCloseOtherTabs, onCloseAllTabs, onRefresh, onClose,
 	children
 }: TaskSidebarProps) => {
-	const tabBarRef = useRef<HTMLDivElement>(null)
+	const tabListRef = useRef<HTMLDivElement>(null)
+	const [overflowLeft, setOverflowLeft] = useState(false)
+	const [overflowRight, setOverflowRight] = useState(false)
 
 	const [contextMenu, setContextMenu] = useState<{
 		position: { x: number; y: number } | null
 		tabId: string | null
 	}>({ position: null, tabId: null })
 
+	const checkOverflow = useCallback(() => {
+		const el = tabListRef.current
+		if (!el) return
+		setOverflowLeft(el.scrollLeft > 0)
+		setOverflowRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
+	}, [])
+
 	useEffect(() => {
-		if (!activeTabId || !tabBarRef.current) return
-		const el = tabBarRef.current.querySelector(`[data-tab-id="${activeTabId}"]`)
+		checkOverflow()
+		const el = tabListRef.current
+		if (!el) return
+		el.addEventListener('scroll', checkOverflow)
+		const ro = new ResizeObserver(checkOverflow)
+		ro.observe(el)
+		return () => {
+			el.removeEventListener('scroll', checkOverflow)
+			ro.disconnect()
+		}
+	}, [checkOverflow, tabs.length])
+
+	useEffect(() => {
+		if (!activeTabId || !tabListRef.current) return
+		const el = tabListRef.current.querySelector(`[data-tab-id="${activeTabId}"]`)
 		el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
 	}, [activeTabId])
 
@@ -85,8 +100,8 @@ const TaskSidebar = ({
 
 	return (
 		<div className={styles.sidebar}>
-			<div className={styles.tabBar}>
-				<div ref={tabBarRef} className={styles.tabList}>
+			<div className={clsx(styles.tabBar, overflowLeft && styles.overflowLeft, overflowRight && styles.overflowRight)}>
+				<div ref={tabListRef} className={styles.tabList}>
 					{tabs.map((tab) => (
 						<div
 							key={tab.id}
@@ -96,7 +111,7 @@ const TaskSidebar = ({
 							onContextMenu={(e) => handleContextMenu(e, tab.id)}
 							title={tab.title}
 						>
-							{tab.icon && <Icon name={tab.icon} size={14} />}
+							{tab.icon && <Icon name={tab.icon} size={13} />}
 							<span className={styles.tabTitle}>{tab.title}</span>
 							<span
 								className={styles.tabClose}
@@ -105,7 +120,7 @@ const TaskSidebar = ({
 									onTabClose(tab.id)
 								}}
 							>
-								<Icon name='material-close' size={12} />
+								<Icon name='material-close' size={11} />
 							</span>
 						</div>
 					))}
@@ -115,15 +130,6 @@ const TaskSidebar = ({
 						<Icon name='material-close' size={16} />
 					</span>
 				</div>
-			</div>
-			<div className={styles.addressBar}>
-				<Icon name='material-link' size={12} className={styles.addressIcon} />
-				<input
-					className={styles.addressInput}
-					value={formatDisplayUrl(activeTabUrl)}
-					readOnly
-					title={activeTabUrl || ''}
-				/>
 			</div>
 			<div className={styles.content}>{children}</div>
 			{createPortal(

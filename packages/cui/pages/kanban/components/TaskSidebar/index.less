@@ -7,33 +7,54 @@
 
 .tabBar {
 	display: flex;
-	align-items: flex-end;
-	padding: 0 18px;
+	align-items: center;
+	padding: 17px 12px;
 	flex-shrink: 0;
 	box-sizing: border-box;
-	height: 34px;
 	position: relative;
 	background: var(--color_neo_bg_card);
+	border-bottom: 1px solid var(--color_border_light);
 
+	&::before,
 	&::after {
 		content: '';
 		position: absolute;
+		top: 0;
 		bottom: 0;
+		width: 24px;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		z-index: 2;
+	}
+
+	&::before {
 		left: 0;
-		right: 0;
-		height: 1px;
-		background: var(--color_border_light);
-		z-index: 0;
+		background: linear-gradient(to right, var(--color_neo_bg_card), transparent);
+	}
+
+	&::after {
+		right: 40px;
+		background: linear-gradient(to left, var(--color_neo_bg_card), transparent);
+	}
+
+	&.overflowLeft::before {
+		opacity: 1;
+	}
+
+	&.overflowRight::after {
+		opacity: 1;
 	}
 }
 
 .tabList {
 	flex: 1;
 	display: flex;
-	align-items: flex-end;
+	align-items: center;
+	justify-content: flex-start;
 	overflow-x: auto;
 	overflow-y: hidden;
-	gap: 0;
+	gap: 4px;
 	scrollbar-width: none;
 	min-width: 0;
 
@@ -47,68 +68,42 @@
 	align-items: center;
 	gap: 5px;
 	height: 30px;
-	padding: 0 14px 4px;
-	font-size: 11px;
+	padding: 0 14px;
+	font-size: 12px;
 	font-weight: 500;
-	color: var(--color_neo_text_tertiary);
+	color: var(--color_neo_text_secondary);
 	cursor: pointer;
 	white-space: nowrap;
-	border-radius: 8px 8px 0 0;
-	transition: color 0.15s ease, background 0.15s ease;
+	border-radius: 14px;
+	transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 	flex-shrink: 0;
 	max-width: 160px;
 	background: transparent;
 	line-height: 1;
-	position: relative;
-	z-index: 1;
-	margin-bottom: -1px;
-	border: 1px solid transparent;
-	border-bottom: 1px solid transparent;
 
 	&:hover {
-		background: rgba(0, 0, 0, 0.04);
-		color: var(--color_neo_text_secondary);
+		background: var(--color_neo_bg_field);
+		color: var(--color_neo_text_primary);
 	}
 
 	&.active {
-		background: var(--color_neo_bg_card);
+		background: var(--color_neo_bg_field);
 		color: var(--color_neo_text_primary);
-		border: 1px solid var(--color_border_light);
-		border-bottom: 1px solid var(--color_neo_bg_card);
-		margin-bottom: -1px;
-		z-index: 2;
-
-		&::before,
-		&::after {
-			content: '';
-			position: absolute;
-			bottom: -1px;
-			width: 8px;
-			height: 8px;
-		}
-
-		&::before {
-			left: -8px;
-			background: radial-gradient(circle at 0 0, transparent 7px, var(--color_border_light) 7px, var(--color_border_light) 8px, var(--color_neo_bg_card) 8px);
-		}
-
-		&::after {
-			right: -8px;
-			background: radial-gradient(circle at 100% 0, transparent 7px, var(--color_border_light) 7px, var(--color_border_light) 8px, var(--color_neo_bg_card) 8px);
-		}
+		font-weight: 600;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 	}
 }
 
 [data-theme='dark'] {
-	.tab:hover {
-		background: rgba(255, 255, 255, 0.04);
+	.tab.active {
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 	}
 }
 
 .tabTitle {
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 100px;
+	max-width: 90px;
 }
 
 .tabClose {
@@ -117,7 +112,7 @@
 	justify-content: center;
 	width: 14px;
 	height: 14px;
-	border-radius: 3px;
+	border-radius: 7px;
 	opacity: 0;
 	transition: all 0.15s ease;
 	flex-shrink: 0;
@@ -142,8 +137,8 @@
 .closeBtnWrap {
 	display: flex;
 	align-items: center;
-	padding-bottom: 4px;
 	margin-left: 4px;
+	flex-shrink: 0;
 }
 
 .closeBtn {
@@ -165,39 +160,6 @@
 	&:active {
 		transform: scale(0.95);
 	}
-}
-
-.addressBar {
-	display: flex;
-	align-items: center;
-	height: 31px;
-	padding: 0 10px;
-	border-bottom: 1px solid var(--color_border_light);
-	flex-shrink: 0;
-	gap: 6px;
-}
-
-.addressIcon {
-	color: var(--color_neo_text_tertiary);
-	opacity: 0.6;
-	flex-shrink: 0;
-}
-
-.addressInput {
-	flex: 1;
-	min-width: 0;
-	height: 100%;
-	padding: 0;
-	margin: 0;
-	font-size: 11px;
-	color: var(--color_neo_text_tertiary);
-	background: transparent;
-	border: none;
-	outline: none;
-	font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	overflow: hidden;
 }
 
 .content {

@@ -1,5 +1,5 @@
 import type { Message } from '@/openapi'
-import type { Board, BoardSummary, BoardTemplate, Column, KanbanTask, CreateTaskData } from '../types'
+import type { Board, BoardSummary, BoardTemplate, Column, KanbanTask, CreateTaskData, ServiceBinding } from '../types'
 
 function userMsg(id: string, content: string): Message {
 	return { type: 'user_input', props: { content }, ui_id: id }
@@ -33,10 +33,36 @@ const board1Tasks: KanbanTask[] = [
 		progress: 40,
 		current_step: '正在整理印尼 OJK 金融监管要求',
 		last_message: '越南和泰国部分已完成，正在分析印尼 OJK 金融科技监管框架...',
-		workspace: { id: 'ws-market', name: 'sea-market-research', path: '/workspace/sea-market', status: 'online' },
+		workspace: { id: 'ws-market', name: 'sea-market-research', path: '/workspace/sea-market', node_name: 'node-sg-01', status: 'online' },
 		tags: ['东南亚', '合规'],
 		assistant_id: 'ast-research',
 		assistant_name: '市场研究助手',
+		connector_name: 'Claude 4 Opus',
+		sandbox: { type: 'docker', cpu: 2, memory: '4GB' },
+		secrets_count: 3,
+		computer: { id: 'comp-a1b2c3', status: 'running', mode: 'sandbox' },
+		skills: [
+			{ id: 'skill-web-search', name: 'Web Search', description: '搜索互联网获取实时信息' },
+			{ id: 'skill-pdf-reader', name: 'PDF Reader', description: '解析 PDF 文档内容' }
+		],
+		schedule: {
+			enabled: true,
+			cron: '0 9 * * 1-5',
+			next_run: '2026-06-23 09:00 (Mon)',
+			history: [
+				{ time: '2026-06-20 09:00', status: 'success' },
+				{ time: '2026-06-19 09:00', status: 'success' },
+				{ time: '2026-06-18 09:00', status: 'failed' }
+			]
+		},
+		inputs: [
+			{ name: '东南亚市场概览.pdf', path: '/inputs/sea-overview.pdf', size: 2_450_000, type: 'application/pdf', created_at: now - hours(4) },
+			{ name: '合规清单模板.xlsx', path: '/inputs/compliance-template.xlsx', size: 56_000, type: 'application/xlsx', created_at: now - hours(4) }
+		],
+		services: [
+			{ name: 'Dev Server', port: 3000, protocol: 'http', status: 'running', pid: 12345 },
+			{ name: 'WebSocket API', port: 8080, protocol: 'websocket', status: 'running', pid: 12346 }
+		],
 		pinned: true,
 		started_at: now - hours(2),
 		created_at: now - hours(3),
@@ -94,6 +120,25 @@ const board1Tasks: KanbanTask[] = [
 		tags: ['营收', '周报'],
 		assistant_id: 'ast-data',
 		assistant_name: '数据分析助手',
+		connector_name: 'GPT-4o',
+		sandbox: { type: 'vm', cpu: 4, memory: '8GB' },
+		secrets_count: 1,
+		computer: { id: 'comp-d4e5f6', status: 'running', mode: 'host' },
+		skills: [
+			{ id: 'skill-chart-gen', name: 'Chart Generator', description: '生成数据可视化图表' },
+			{ id: 'skill-sql', name: 'SQL Query', description: '执行 SQL 数据查询' },
+			{ id: 'skill-excel', name: 'Excel Processor', description: '处理 Excel 文件' }
+		],
+		inputs: [
+			{ name: '财务原始数据.csv', path: '/inputs/finance-raw.csv', size: 890_000, type: 'text/csv', created_at: now - minutes(30) },
+			{ name: '模板样式.json', path: '/inputs/chart-template.json', size: 4_200, type: 'application/json', created_at: now - minutes(30) },
+			{ name: '去年同期数据.xlsx', path: '/inputs/last-year-data.xlsx', size: 156_000, type: 'application/xlsx', created_at: now - minutes(30) }
+		],
+		services: [
+			{ name: 'Jupyter Notebook', port: 8888, protocol: 'http', status: 'running', pid: 23456 },
+			{ name: 'API Server', port: 5000, protocol: 'http', status: 'running', pid: 23457 },
+			{ name: 'Live Reload', port: 35729, protocol: 'websocket', status: 'running', pid: 23458 }
+		],
 		started_at: now - minutes(20),
 		created_at: now - minutes(25),
 		updated_at: now - minutes(3)
@@ -956,4 +1001,114 @@ export async function reorderColumns(boardId: string, columnIds: string[]): Prom
 	bd.board.columns = [...bd.columns]
 	bd.board.updated_at = Date.now()
 	await delay()
+}
+
+// ==================== Task Files Mock ====================
+
+export interface TaskFileEntry {
+	name: string
+	is_dir: boolean
+	size: number
+	mod_time?: string
+}
+
+const mockFileTree: Record<string, TaskFileEntry[]> = {
+	'/': [
+		{ name: 'reports', is_dir: true, size: 0, mod_time: '2026-06-15T10:30:00Z' },
+		{ name: 'scripts', is_dir: true, size: 0, mod_time: '2026-06-14T08:20:00Z' },
+		{ name: 'data', is_dir: true, size: 0, mod_time: '2026-06-13T16:45:00Z' },
+		{ name: 'README.md', is_dir: false, size: 2048, mod_time: '2026-06-15T11:00:00Z' },
+		{ name: 'config.yaml', is_dir: false, size: 512, mod_time: '2026-06-14T09:15:00Z' },
+		{ name: '.env', is_dir: false, size: 128, mod_time: '2026-06-12T14:00:00Z' }
+	],
+	'/reports': [
+		{ name: '月度投诉分析.pdf', is_dir: false, size: 1048576, mod_time: '2026-06-15T10:30:00Z' },
+		{ name: '趋势报告.docx', is_dir: false, size: 524288, mod_time: '2026-06-14T15:20:00Z' },
+		{ name: '数据摘要.csv', is_dir: false, size: 32768, mod_time: '2026-06-13T09:00:00Z' },
+		{ name: 'charts', is_dir: true, size: 0, mod_time: '2026-06-15T10:00:00Z' }
+	],
+	'/reports/charts': [
+		{ name: 'trend_chart.png', is_dir: false, size: 204800, mod_time: '2026-06-15T10:00:00Z' },
+		{ name: 'category_pie.png', is_dir: false, size: 153600, mod_time: '2026-06-15T09:45:00Z' }
+	],
+	'/scripts': [
+		{ name: 'analyze.py', is_dir: false, size: 4096, mod_time: '2026-06-14T08:20:00Z' },
+		{ name: 'fetch_data.sh', is_dir: false, size: 1024, mod_time: '2026-06-13T17:30:00Z' },
+		{ name: 'transform.ts', is_dir: false, size: 3072, mod_time: '2026-06-14T07:50:00Z' }
+	],
+	'/data': [
+		{ name: 'complaints_raw.json', is_dir: false, size: 2097152, mod_time: '2026-06-13T16:45:00Z' },
+		{ name: 'complaints_cleaned.csv', is_dir: false, size: 819200, mod_time: '2026-06-14T10:00:00Z' },
+		{ name: 'categories.json', is_dir: false, size: 8192, mod_time: '2026-06-13T17:00:00Z' }
+	]
+}
+
+export async function getTaskFiles(taskId: string, path: string): Promise<TaskFileEntry[]> {
+	await delay()
+	const normalized = path === '' ? '/' : path
+	const entries = mockFileTree[normalized] || []
+	return [...entries].sort((a, b) => {
+		if (a.is_dir !== b.is_dir) return a.is_dir ? -1 : 1
+		return a.name.localeCompare(b.name)
+	})
+}
+
+export async function getTaskFileName(taskId: string): Promise<string> {
+	await delay()
+	const allTasks = Object.values(mockBoards).flatMap((bd) =>
+		bd.columns.flatMap((col) => col.tasks || [])
+	)
+	const task = allTasks.find((t) => t?.id === taskId)
+	return task?.title || taskId
+}
+
+// ==================== Task Services Mock ====================
+
+const defaultMockServices: ServiceBinding[] = [
+	{ name: 'Dev Server', port: 3000, protocol: 'http', status: 'running', pid: 12345, alias: '开发服务器' },
+	{ name: 'WebSocket API', port: 8080, protocol: 'websocket', status: 'running', pid: 12346 },
+	{ name: 'Database Proxy', port: 5432, protocol: 'tcp', status: 'running', pid: 12347 },
+	{ name: 'Hot Reload', port: 35729, protocol: 'websocket', status: 'stopped', pid: undefined }
+]
+
+export async function getTaskServices(taskId: string): Promise<ServiceBinding[]> {
+	await delay()
+	const allTasks = Object.values(mockBoards).flatMap((bd) =>
+		bd.columns.flatMap((col) => col.tasks || [])
+	)
+	const task = allTasks.find((t) => t?.id === taskId)
+	return task?.services?.length ? task.services : defaultMockServices
+}
+
+// ==================== Task Activity Monitor Mock ====================
+
+export interface TaskProcess {
+	pid: number
+	name: string
+	cpu: number
+	memory: number
+	status: 'running' | 'sleeping' | 'stopped'
+	port?: number
+	user?: string
+	started?: string
+	command?: string
+}
+
+const mockProcesses: TaskProcess[] = [
+	{ pid: 1, name: 'node', cpu: 12.3, memory: 256, status: 'running', port: 3000, user: 'app', started: '10:30', command: 'node dist/server.js' },
+	{ pid: 24, name: 'python3', cpu: 8.7, memory: 512, status: 'running', user: 'app', started: '10:31', command: 'python3 analyze.py --input data.csv' },
+	{ pid: 56, name: 'postgres', cpu: 3.2, memory: 128, status: 'running', port: 5432, user: 'postgres', started: '10:30', command: 'postgres: writer process' },
+	{ pid: 78, name: 'nginx', cpu: 0.1, memory: 32, status: 'running', port: 80, user: 'root', started: '10:30', command: 'nginx: master process' },
+	{ pid: 79, name: 'nginx', cpu: 0.3, memory: 24, status: 'sleeping', user: 'www', started: '10:30', command: 'nginx: worker process' },
+	{ pid: 102, name: 'redis-server', cpu: 1.5, memory: 64, status: 'running', port: 6379, user: 'redis', started: '10:30', command: 'redis-server *:6379' },
+	{ pid: 145, name: 'chromium', cpu: 22.1, memory: 1024, status: 'running', port: 9222, user: 'app', started: '10:35', command: 'chromium --headless --remote-debugging-port=9222' },
+	{ pid: 201, name: 'ts-node', cpu: 5.4, memory: 180, status: 'running', user: 'app', started: '10:32', command: 'ts-node scripts/transform.ts' },
+	{ pid: 310, name: 'esbuild', cpu: 0.0, memory: 48, status: 'sleeping', user: 'app', started: '10:33', command: 'esbuild --watch src/index.ts' },
+	{ pid: 402, name: 'tail', cpu: 0.0, memory: 4, status: 'sleeping', user: 'app', started: '10:34', command: 'tail -f /var/log/app.log' },
+	{ pid: 500, name: 'cron', cpu: 0.0, memory: 8, status: 'stopped', user: 'root', started: '10:30', command: 'cron -f' }
+]
+
+export async function getTaskProcesses(taskId: string): Promise<TaskProcess[]> {
+	await delay()
+	return mockProcesses
 }
