@@ -319,6 +319,8 @@ const Preview = (props: AppRouteProps) => {
 				.finally(() => setLoading(false))
 		} else if (fileType === 'image') {
 			setImageVersion((v) => v + 1)
+		} else if (fileType === 'pdf') {
+			setIframeKey((k) => k + 1)
 		}
 	}, [isHtml, isMarkdown, fileType, ws, filePath, getApi])
 
@@ -462,7 +464,7 @@ const Preview = (props: AppRouteProps) => {
 			case 'audio':
 				return <Audio src={contentURL} fileName={fileName} />
 			case 'pdf':
-				return <Pdf src={contentURL} fileName={fileName} />
+				return <Pdf key={iframeKey} src={contentURL} fileName={fileName} />
 			case 'docx':
 				return <Docx src={contentURL} fileName={fileName} />
 			case 'pptx':
@@ -531,7 +533,7 @@ const Preview = (props: AppRouteProps) => {
 						</span>
 					</div>
 				)}
-				{dirEntries === null && (isHtml || isMarkdown || fileType === 'image') && tab === 'preview' && (
+				{dirEntries === null && (isHtml || isMarkdown || fileType === 'image' || fileType === 'pdf') && tab === 'preview' && (
 					<span
 						className={styles.downloadBtn}
 						onClick={handleRefresh}
