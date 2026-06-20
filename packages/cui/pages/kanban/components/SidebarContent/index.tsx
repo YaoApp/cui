@@ -68,28 +68,63 @@ const WorkspaceView = ({ task }: { task: KanbanTask }) => {
 
 const ServicesView = ({ task }: { task: KanbanTask }) => {
 	const is_cn = getLocale() === 'zh-CN'
+	const [aliases, setAliases] = useState<Record<number, string>>({})
+	const [editingPort, setEditingPort] = useState<number | null>(null)
+
+	const handleAliasChange = (port: number, value: string) => {
+		setAliases((prev) => ({ ...prev, [port]: value }))
+	}
+
+	const handleAliasConfirm = (port: number) => {
+		setEditingPort(null)
+		window.$app?.Event?.emit('app/toast', { type: 'success', message: `Alias saved for :${port}` })
+	}
+
 	if (!task.services?.length) {
 		return (
 			<div className={styles.emptyState}>
 				<Icon name='material-cloud_off' size={32} />
-				<p>{is_cn ? '暂无关联服务' : 'No services'}</p>
+				<p>{is_cn ? '暂无运行中的服务' : 'No running services'}</p>
+				<p style={{ fontSize: 11, opacity: 0.6 }}>{is_cn ? '端口将在 Computer 启动后自动检测' : 'Ports will be auto-detected when Computer starts'}</p>
 			</div>
 		)
 	}
+
 	return (
 		<div className={styles.infoTab}>
 			<div className={styles.infoCard}>
 				<div className={styles.infoCardHeader}>
-					<Icon name='material-language' size={14} />
-					{is_cn ? '关联服务' : 'Services'}
+					<Icon name='material-dns' size={14} />
+					{is_cn ? '监听端口' : 'Listening Ports'}
+					<span className={styles.headerBadge}>{task.services.length}</span>
 				</div>
 				<div className={styles.infoCardBody}>
 					{task.services.map((s) => (
 						<div key={s.port} className={styles.serviceItem}>
 							<span className={styles.serviceStatus} />
-							<span className={styles.serviceName}>{s.name}</span>
-							<span className={styles.serviceUrl}>:{s.port}</span>
-							<span className={styles.linkBtn}>
+							<span className={styles.servicePort}>:{s.port}</span>
+							<span className={styles.serviceProtocol}>{s.protocol || 'http'}</span>
+							{editingPort === s.port ? (
+								<input
+									className={styles.aliasInput}
+									value={aliases[s.port] ?? s.alias ?? s.name}
+									onChange={(e) => handleAliasChange(s.port, e.target.value)}
+									onBlur={() => handleAliasConfirm(s.port)}
+									onKeyDown={(e) => e.key === 'Enter' && handleAliasConfirm(s.port)}
+									autoFocus
+								/>
+							) : (
+								<span
+									className={styles.serviceName}
+									onClick={() => setEditingPort(s.port)}
+									title={is_cn ? '点击编辑别名' : 'Click to edit alias'}
+								>
+									{aliases[s.port] || s.alias || s.name}
+									<Icon name='material-edit' size={10} className={styles.editHint} />
+								</span>
+							)}
+							{s.pid && <span className={styles.servicePid}>PID {s.pid}</span>}
+							<span className={styles.linkBtn} title={is_cn ? '打开预览' : 'Open Preview'}>
 								<Icon name='material-open_in_new' size={11} />
 							</span>
 						</div>
@@ -102,83 +137,61 @@ const ServicesView = ({ task }: { task: KanbanTask }) => {
 
 const OutputsView = ({ task }: { task: KanbanTask }) => {
 	const is_cn = getLocale() === 'zh-CN'
-	if (!task.outputs?.length) {
-		return (
-			<div className={styles.emptyState}>
-				<Icon name='material-folder_open' size={32} />
-				<p>{is_cn ? '暂无产出文件' : 'No outputs yet'}</p>
-			</div>
-		)
-	}
-	return (
-		<div className={styles.infoTab}>
-			<div className={styles.infoCard}>
-				<div className={styles.infoCardHeader}>
-					<Icon name='material-attach_file' size={14} />
-					{is_cn ? '产出文件' : 'Output Files'}
-				</div>
-				<div className={styles.infoCardBody}>
-					{task.outputs.map((f) => (
-						<div key={f.name} className={styles.outputItem}>
-							<Icon name='material-description' size={14} style={{ color: 'var(--color_neo_icon_muted)' }} />
-							<span className={styles.outputName}>{f.name}</span>
-							<span className={styles.outputSize}>{formatFileSize(f.size)}</span>
-							<span className={styles.linkBtn}>
-								<Icon name='material-download' size={11} />
-							</span>
-						</div>
-					))}
-				</div>
-			</div>
-		</div>
-	)
-}
 
-const SettingsView = ({ task }: { task: KanbanTask }) => {
-	const is_cn = getLocale() === 'zh-CN'
+	const handleUpload = () => {
+		window.$app?.Event?.emit('app/toast', { type: 'info', message: is_cn ? '上传功能即将上线' : 'Upload coming soon' })
+	}
+
 	return (
 		<div className={styles.infoTab}>
 			<div className={styles.infoCard}>
 				<div className={styles.infoCardHeader}>
-					<Icon name='material-settings' size={14} />
-					{is_cn ? '任务设置' : 'Task Settings'}
+					<Icon name='material-input' size={14} />
+					{is_cn ? '输入（附件）' : 'Inputs'}
 				</div>
 				<div className={styles.infoCardBody}>
-					{task.assistant_name && (
-						<div className={styles.infoRow}>
-							<span className={styles.infoLabel}>{is_cn ? 'AI 助手' : 'AI Assistant'}</span>
-							<span className={styles.infoValue}>{task.assistant_name}</span>
-						</div>
-					)}
-					{task.tags && task.tags.length > 0 && (
-						<div className={styles.infoRow}>
-							<span className={styles.infoLabel}>{is_cn ? '标签' : 'Tags'}</span>
-							<span className={styles.infoValue}>{task.tags.join(', ')}</span>
-						</div>
-					)}
-					{task.recurring?.enabled && (
-						<>
-							<div className={styles.infoRow}>
-								<span className={styles.infoLabel}>{is_cn ? '调度模式' : 'Schedule'}</span>
-								<span className={styles.infoValue}>
-									{task.recurring.mode === 'fixed_time'
-										? (is_cn ? '固定时间' : 'Fixed Time')
-										: (is_cn ? '固定间隔' : 'Interval')}
+					{task.inputs && task.inputs.length > 0 ? (
+						task.inputs.map((f) => (
+							<div key={f.name} className={styles.outputItem}>
+								<Icon name='material-description' size={14} style={{ color: 'var(--color_neo_icon_muted)' }} />
+								<span className={styles.outputName}>{f.name}</span>
+								<span className={styles.outputSize}>{formatFileSize(f.size)}</span>
+								<span className={styles.linkBtn}>
+									<Icon name='material-visibility' size={11} />
 								</span>
 							</div>
-							{task.recurring.cron && (
-								<div className={styles.infoRow}>
-									<span className={styles.infoLabel}>Cron</span>
-									<span className={styles.infoValue}>{task.recurring.cron}</span>
-								</div>
-							)}
-							{task.run_count != null && (
-								<div className={styles.infoRow}>
-									<span className={styles.infoLabel}>{is_cn ? '已执行' : 'Run Count'}</span>
-									<span className={styles.infoValue}>{task.run_count}</span>
-								</div>
-							)}
-						</>
+						))
+					) : (
+						<div className={styles.emptyHint}>{is_cn ? '暂无输入文件' : 'No inputs'}</div>
+					)}
+					<div className={styles.uploadRow}>
+						<span className={styles.linkBtn} onClick={handleUpload}>
+							<Icon name='material-upload_file' size={12} />
+							{is_cn ? '上传文件' : 'Upload File'}
+						</span>
+					</div>
+				</div>
+			</div>
+
+			<div className={styles.infoCard}>
+				<div className={styles.infoCardHeader}>
+					<Icon name='material-output' size={14} />
+					{is_cn ? '输出（产出）' : 'Outputs'}
+				</div>
+				<div className={styles.infoCardBody}>
+					{task.outputs && task.outputs.length > 0 ? (
+						task.outputs.map((f) => (
+							<div key={f.name} className={styles.outputItem}>
+								<Icon name='material-description' size={14} style={{ color: 'var(--color_neo_icon_muted)' }} />
+								<span className={styles.outputName}>{f.name}</span>
+								<span className={styles.outputSize}>{formatFileSize(f.size)}</span>
+								<span className={styles.linkBtn}>
+									<Icon name='material-download' size={11} />
+								</span>
+							</div>
+						))
+					) : (
+						<div className={styles.emptyHint}>{is_cn ? '暂无产出文件' : 'No outputs yet'}</div>
 					)}
 				</div>
 			</div>
@@ -189,8 +202,7 @@ const SettingsView = ({ task }: { task: KanbanTask }) => {
 const INTERNAL_VIEWS: Record<string, React.FC<{ task: KanbanTask }>> = {
 	'__task/workspace': WorkspaceView,
 	'__task/services': ServicesView,
-	'__task/outputs': OutputsView,
-	'__task/settings': SettingsView
+	'__task/outputs': OutputsView
 }
 
 async function resolveDashboardPage(segments: string[]): Promise<{

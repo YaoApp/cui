@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useContext } from 'react'
 import { getLocale } from '@umijs/max'
+import { Tooltip } from 'antd'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
 import { TaskChat } from '@/chatbox'
@@ -69,7 +70,8 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 			return
 		}
 		setLoadingTask(true)
-		services.getTaskDetail(taskId)
+		services
+			.getTaskDetail(taskId)
 			.then(setLocalTask)
 			.catch(() => setLocalTask(null))
 			.finally(() => setLoadingTask(false))
@@ -218,7 +220,7 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 			if (!sidebarOpen) {
 				if (inline && taskPageRef.current) {
 					const available = taskPageRef.current.clientWidth
-					const sb = Math.max(Math.round(available * 2 / 3), MIN_SIDEBAR_WIDTH)
+					const sb = Math.max(Math.round((available * 2) / 3), MIN_SIDEBAR_WIDTH)
 					const chat = Math.max(available - sb, MIN_CHAT_WIDTH)
 					setChatWidth(chat)
 					setSidebarWidth(sb)
@@ -258,7 +260,10 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 							messages: [
 								{
 									role: 'user',
-									content: `Generate a short title for this task. ${languageHint}\n\nUser message:\n${text.slice(0, 500)}`
+									content: `Generate a short title for this task. ${languageHint}\n\nUser message:\n${text.slice(
+										0,
+										500
+									)}`
 								}
 							],
 							skip: { history: true, trace: true }
@@ -266,7 +271,11 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 						(chunk: any) => {
 							if (chunk.type === 'event' && chunk.props?.event === 'message_end') {
 								clearTimeout(timeout)
-								resolve(title.trim().slice(0, 50) || text.split('\n')[0].slice(0, 60) || 'New Task')
+								resolve(
+									title.trim().slice(0, 50) ||
+										text.split('\n')[0].slice(0, 60) ||
+										'New Task'
+								)
 								return
 							}
 							if (chunk.type === 'text' && chunk.props?.content) {
@@ -309,7 +318,14 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 
 			finalizeCreating(creatingTaskId, realTask)
 		},
-		[creatingTaskId, ctx?.tasks, board, finalizeCreating, generateTaskTitle, global.default_assistant?.assistant_id]
+		[
+			creatingTaskId,
+			ctx?.tasks,
+			board,
+			finalizeCreating,
+			generateTaskTitle,
+			global.default_assistant?.assistant_id
+		]
 	)
 
 	const statusLabel = task ? statusLabels[task.status] || statusLabels.pending : null
@@ -319,10 +335,7 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 	const taskSidebarStyle = { width: sidebarOpen ? sidebarWidth : 0 }
 
 	const taskSidebarEl = (
-		<div
-			className={clsx(styles.taskSidebar, sidebarOpen && styles.taskSidebarOpen)}
-			style={taskSidebarStyle}
-		>
+		<div className={clsx(styles.taskSidebar, sidebarOpen && styles.taskSidebarOpen)} style={taskSidebarStyle}>
 			<div className={styles.sidebarResize} onMouseDown={handleSidebarResizeStart}>
 				<div className={styles.sidebarResizeBar} />
 			</div>
@@ -336,7 +349,10 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 					if (sidebar.tabs.length <= 1) closeSidebar()
 				}}
 				onCloseOtherTabs={sidebar.closeOtherTabs}
-				onCloseAllTabs={() => { sidebar.closeAllTabs(); closeSidebar() }}
+				onCloseAllTabs={() => {
+					sidebar.closeAllTabs()
+					closeSidebar()
+				}}
 				onRefresh={() => setRefreshKey((k) => k + 1)}
 				onClose={closeSidebar}
 			>
@@ -351,43 +367,93 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 		<div ref={taskPageRef} className={styles.taskPage}>
 			<div className={styles.chatArea} style={chatAreaStyle}>
 				<div className={styles.taskHeader}>
-					<span className={clsx(styles.statusDot, styles[task.status])} title={statusLabel ? (is_cn ? statusLabel.cn : statusLabel.en) : ''} />
+					<span
+						className={clsx(styles.statusDot, styles[task.status])}
+						title={statusLabel ? (is_cn ? statusLabel.cn : statusLabel.en) : ''}
+					/>
 					<span className={styles.headerTitle}>{task.title}</span>
 
 					<div className={styles.resourceActions}>
-						<span
-							className={styles.resourceBtn}
-							onClick={() => openSidebarView('$dashboard/assistants', is_cn ? 'AI 专家' : 'AI Experts', 'material-assistant')}
-							title={is_cn ? 'AI 专家' : 'AI Experts'}
-						>
-							<Icon name='material-assistant' size={14} />
-						</span>
-						<span
-							className={styles.resourceBtn}
-							onClick={() => openSidebarView('$dashboard/workspace/list', is_cn ? '工作空间' : 'Workspaces', 'material-workspaces')}
-							title={is_cn ? '工作空间' : 'Workspaces'}
-						>
-							<Icon name='material-workspaces' size={14} />
-						</span>
+						<Tooltip title={is_cn ? '工作空间' : 'Workspaces'}>
+							<span
+								className={styles.resourceBtn}
+								onClick={() =>
+									openSidebarView(
+										'$dashboard/workspace/list',
+										is_cn ? '工作空间' : 'Workspaces',
+										'material-workspaces'
+									)
+								}
+							>
+								<Icon name='material-workspaces' size={14} />
+							</span>
+						</Tooltip>
 						{!isCreating && (
 							<>
-								<span
-									className={styles.resourceBtn}
-									onClick={() => openSidebarView('__task/outputs', is_cn ? '产出' : 'Outputs', 'material-attach_file')}
-									title={is_cn ? '产出' : 'Outputs'}
-								>
-									<Icon name='material-attach_file' size={14} />
-									{task.outputs && task.outputs.length > 0 && (
-										<span className={styles.resourceBadge}>{task.outputs.length}</span>
-									)}
-								</span>
-								<span
-									className={styles.resourceBtn}
-									onClick={() => openSidebarView('__task/settings', is_cn ? '设置' : 'Settings', 'material-settings')}
-									title={is_cn ? '设置' : 'Settings'}
-								>
-									<Icon name='material-settings' size={14} />
-								</span>
+								<Tooltip title={is_cn ? '文件' : 'Files'}>
+									<span
+										className={styles.resourceBtn}
+										onClick={() =>
+											openSidebarView(
+												`$dashboard/task-files/${taskId}`,
+												is_cn ? '文件' : 'Files',
+												'material-folder_open'
+											)
+										}
+									>
+										<Icon name='material-folder_open' size={14} />
+										{task.outputs && task.outputs.length > 0 && (
+											<span className={styles.resourceBadge}>
+												{task.outputs.length}
+											</span>
+										)}
+									</span>
+								</Tooltip>
+								<Tooltip title={is_cn ? '服务' : 'Services'}>
+									<span
+										className={styles.resourceBtn}
+										onClick={() =>
+											openSidebarView(
+												`$dashboard/task-services/${taskId}`,
+												is_cn ? '服务' : 'Services',
+												'material-dns'
+											)
+										}
+									>
+										<Icon name='material-dns' size={14} />
+										{task.services && task.services.length > 0 && (
+											<span className={styles.resourceDot} />
+										)}
+									</span>
+								</Tooltip>
+								<Tooltip title={is_cn ? '活动监视器' : 'Activity Monitor'}>
+									<span
+										className={styles.resourceBtn}
+										onClick={() =>
+											openSidebarView(
+												`$dashboard/task-activity/${taskId}`,
+												is_cn ? '活动' : 'Activity',
+												'material-monitor_heart'
+											)
+										}
+									>
+										<Icon name='material-monitor_heart' size={14} />
+									</span>
+								</Tooltip>
+								<Tooltip title={is_cn ? '设置' : 'Settings'}>
+									<span
+										className={styles.resourceBtn}
+										onClick={() =>
+											openSidebarView(
+												`$dashboard/task-settings/${taskId}`,
+												is_cn ? '设置' : 'Settings',
+												'material-settings'
+											)
+										}
+									>
+										<Icon name='material-settings' size={14} />
+									</span>
+								</Tooltip>
 							</>
 						)}
 					</div>
@@ -400,26 +466,46 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 				<div className={styles.chatContent}>
 					{(() => {
 						const effectiveChatId = isCreating
-							? (task.chat_id || `creating-${creatingTaskId}`)
-							: (task.chat_id || taskId!)
+							? task.chat_id || `creating-${creatingTaskId}`
+							: task.chat_id || taskId!
 
 						return (
 							<TaskChat
 								key={effectiveChatId}
 								chatId={effectiveChatId}
-								assistantId={isCreating
-									? (global.default_assistant?.assistant_id || '')
-									: (task.assistant_id || global.default_assistant?.assistant_id || '')}
+								assistantId={
+									isCreating
+										? global.default_assistant?.assistant_id || ''
+										: task.assistant_id ||
+										  global.default_assistant?.assistant_id ||
+										  ''
+								}
 								fallbackAssistantId={global.default_assistant?.assistant_id}
 								className={styles.chatbox}
 								onFirstUserMessage={isCreating ? handleFirstMessage : undefined}
 								initialWorkspace={!isCreating ? task.workspace?.id : undefined}
-								onWorkspaceChange={!isCreating ? (id) => services.updateTask(taskId!, { workspace_id: id }) : undefined}
-								onAssistantChange={!isCreating ? (id) => services.updateTask(taskId!, { assistant_id: id }) : undefined}
+								onWorkspaceChange={
+									!isCreating
+										? (id) => services.updateTask(taskId!, { workspace_id: id })
+										: undefined
+								}
+								onAssistantChange={
+									!isCreating
+										? (id) => services.updateTask(taskId!, { assistant_id: id })
+										: undefined
+								}
 								placeholder={
 									<div className={styles.taskEmptyState}>
-										<Icon name='material-chat_bubble_outline' size={32} className={styles.emptyIcon} />
-										<p>{is_cn ? '发送消息开始任务' : 'Send a message to start the task'}</p>
+										<Icon
+											name='material-chat_bubble_outline'
+											size={32}
+											className={styles.emptyIcon}
+										/>
+										<p>
+											{is_cn
+												? '发送消息开始任务'
+												: 'Send a message to start the task'}
+										</p>
 									</div>
 								}
 							/>
@@ -428,7 +514,7 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 				</div>
 			</div>
 
-			{inline ? taskSidebarEl : (sidebarOpen && taskSidebarEl)}
+			{inline ? taskSidebarEl : sidebarOpen && taskSidebarEl}
 		</div>
 	) : null
 
@@ -443,7 +529,11 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 	) : null
 
 	if (inline) {
-		return <div className={clsx(styles.inlinePanel, inlineAnimating && styles.inlineAnimating)}>{content || loadingEl}</div>
+		return (
+			<div className={clsx(styles.inlinePanel, inlineAnimating && styles.inlineAnimating)}>
+				{content || loadingEl}
+			</div>
+		)
 	}
 
 	return (

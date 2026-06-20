@@ -33,10 +33,11 @@ export interface WorkspaceBinding {
 export interface ServiceBinding {
 	name: string
 	port: number
-	protocol?: string
+	protocol?: 'http' | 'websocket' | 'tcp'
 	url?: string
 	status?: 'running' | 'stopped'
 	pid?: number
+	alias?: string
 }
 
 export interface OutputFile {
@@ -45,6 +46,36 @@ export interface OutputFile {
 	size: number
 	type: string
 	created_at: number
+}
+
+export interface SandboxConfig {
+	type: 'docker' | 'vm' | 'none'
+	cpu?: number
+	memory?: string
+}
+
+export interface ComputerBinding {
+	id: string
+	status: 'running' | 'stopped'
+	mode: 'sandbox' | 'host'
+}
+
+export interface TaskSkill {
+	id: string
+	name: string
+	description?: string
+}
+
+export interface TaskScheduleHistory {
+	time: string
+	status: 'success' | 'failed'
+}
+
+export interface TaskSchedule {
+	enabled: boolean
+	cron: string
+	next_run?: string
+	history?: TaskScheduleHistory[]
 }
 
 export interface KanbanTask {
@@ -62,6 +93,7 @@ export interface KanbanTask {
 	current_step?: string
 	last_message?: string
 	error_message?: string
+	inputs?: OutputFile[]
 	outputs?: OutputFile[]
 	created_at: number
 	updated_at: number
@@ -73,6 +105,12 @@ export interface KanbanTask {
 	last_run?: TaskRunSummary
 	assistant_id?: string
 	assistant_name?: string
+	connector_name?: string
+	sandbox?: SandboxConfig
+	secrets_count?: number
+	computer?: ComputerBinding
+	skills?: TaskSkill[]
+	schedule?: TaskSchedule
 	pinned?: boolean
 }
 
