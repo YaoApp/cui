@@ -1,12 +1,13 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams } from '@umijs/max'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
 import { KanbanProvider, useKanbanContext } from './context'
-import { useTaskPolling } from './hooks/useTaskPolling'
+import { getEventStream } from '@/openapi/events'
 import HeaderBar from './components/HeaderBar'
 import Board from './components/Board'
 import TaskDetail from './components/TaskDetail'
+import Welcome from './components/Welcome'
 import styles from './index.less'
 
 const DEFAULT_PANEL_WIDTH = 560
@@ -14,6 +15,7 @@ const DEFAULT_PANEL_WIDTH = 560
 const KanbanContent = () => {
 	const {
 		loading,
+		boards,
 		is_cn,
 		tasks,
 		selectedTaskId,
@@ -69,16 +71,14 @@ const KanbanContent = () => {
 		}
 	}, [selectedTaskId, scrollToActiveCard])
 
-	const hasRunningTasks = useMemo(
-		() => tasks.some((t) => t.status === 'running' || t.status === 'waiting_input'),
-		[tasks]
-	)
-
-	const handlePoll = useCallback(async () => {
-		await refreshTasks()
+	// Subscribe to real-time task events via EventBus (replaces polling)
+	useEffect(() => {
+		const stream = getEventStream()
+		const unsub = stream.subscribe('task.*', () => {
+			refreshTasks()
+		})
+		return unsub
 	}, [refreshTasks])
-
-	useTaskPolling({ hasRunningTasks, onPoll: handlePoll })
 
 	const handleDetailClose = useCallback(() => {
 		if (selectedTaskId?.startsWith('temp_')) {
@@ -92,9 +92,9 @@ const KanbanContent = () => {
 	const maxPanelWidth = typeof window !== 'undefined' ? window.innerWidth - 64 : 1200
 	const containerStyle = detailOpen ? { paddingRight: Math.min(panelWidth, maxPanelWidth) } : undefined
 
-	return (
-		<div className={containerClass} style={containerStyle}>
-			{loading ? (
+	if (loading) {
+		return (
+			<div className={containerClass}>
 				<div className={styles.loading}>
 					<div className={styles.skeleton}>
 						<div className={styles.skeletonBar} style={{ width: '40%' }} />
@@ -102,23 +102,33 @@ const KanbanContent = () => {
 						<div className={styles.skeletonBar} style={{ width: '50%' }} />
 					</div>
 				</div>
-			) : (
-				<>
-					<HeaderBar onCreateTask={() => startCreating()} />
-					<div className={styles.body}>
-						<div ref={boardAreaRef} className={styles.boardArea}>
-							<Board onCreateTaskInColumn={(colId) => startCreating(colId)} />
-						</div>
-					</div>
-					<TaskDetail
-						taskId={selectedTaskId}
-						open={detailOpen}
-						onClose={handleDetailClose}
-						onPanelWidthChange={setPanelWidth}
-						isAnimating={isAnimating}
-					/>
-				</>
-			)}
+			</div>
+		)
+	}
+
+	if (boards.length === 0) {
+		return (
+			<div className={containerClass}>
+				<Welcome />
+			</div>
+		)
+	}
+
+	return (
+		<div className={containerClass} style={containerStyle}>
+			<HeaderBar onCreateTask={() => startCreating()} />
+			<div className={styles.body}>
+				<div ref={boardAreaRef} className={styles.boardArea}>
+					<Board onCreateTaskInColumn={(colId) => startCreating(colId)} />
+				</div>
+			</div>
+			<TaskDetail
+				taskId={selectedTaskId}
+				open={detailOpen}
+				onClose={handleDetailClose}
+				onPanelWidthChange={setPanelWidth}
+				isAnimating={isAnimating}
+			/>
 		</div>
 	)
 }

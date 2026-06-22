@@ -20,6 +20,7 @@ export default defineConfig({
 	locale: { default: 'zh-CN', antd: true, baseNavigator: true },
 	conventionRoutes,
 	define: { $runtime: { BASE: process.env.BASE } },
+	plugins: ['./build/plugin-ws-proxy'],
 	// @ts-ignore
 	chainWebpack
 })

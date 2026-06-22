@@ -7,7 +7,11 @@
     },
     "image": "welcome",
     "remoteImage": null,
-    "hasPreferences": true
+    "hasPreferences": true,
+    "gradient": {
+      "light": "linear-gradient(135deg, #e8eaff 0%, #f0e6ff 50%, #e0ecff 100%)",
+      "dark": "linear-gradient(135deg, #303566 0%, #3d2c5e 50%, #1a2744 100%)"
+    }
   },
   {
     "title": { "zh-CN": "30+ AI 专家，各司其职", "en-US": "30+ AI Experts, Each a Specialist" },
@@ -16,7 +20,37 @@
       "en-US": "Coding, writing, data analysis, project management — pick the right expert, get better results.\nNot sure who to ask? Yao Agents routes you to the right one."
     },
     "image": "experts",
-    "remoteImage": "experts/01-experts-grid-en-$__THEME.png"
+    "remoteImage": "experts/01-experts-grid-en-$__THEME.png",
+    "gradient": {
+      "light": "linear-gradient(135deg, #e3f2fd 0%, #e0f7fa 100%)",
+      "dark": "linear-gradient(135deg, #1a2744 0%, #1a3a3a 100%)"
+    }
+  },
+  {
+    "title": { "zh-CN": "任务看板，一目了然", "en-US": "Task Board, at a Glance" },
+    "description": {
+      "zh-CN": "给 AI 团队派活、追踪执行进度。创建任务即启动后台会话，看板让你掌控全局。",
+      "en-US": "Assign work to your AI team and track execution. Each task is a background session — the board keeps you in control."
+    },
+    "image": "chat",
+    "remoteImage": "kanban/01-kanban-en-$__THEME.png",
+    "gradient": {
+      "light": "linear-gradient(135deg, #e8f0fe 0%, #e3ecfa 100%)",
+      "dark": "linear-gradient(135deg, #1a2744 0%, #1e2a4a 100%)"
+    }
+  },
+  {
+    "title": { "zh-CN": "智能收件箱，不漏一件事", "en-US": "Smart Inbox, Nothing Slips Through" },
+    "description": {
+      "zh-CN": "AI 完成的工作、需要你确认的事项，都会送到这里。逐条处理或一键归档，按你的节奏来。",
+      "en-US": "Completed work, questions, and alerts from your AI team — all delivered here. Handle them at your own pace."
+    },
+    "image": "chat",
+    "remoteImage": "inbox/01-inbox-en-$__THEME.png",
+    "gradient": {
+      "light": "linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%)",
+      "dark": "linear-gradient(135deg, #3d2e1a 0%, #3d1a2a 100%)"
+    }
   },
   {
     "title": { "zh-CN": "设定目标，自动执行", "en-US": "Set the Goal, Let It Run" },
@@ -25,7 +59,11 @@
       "en-US": "Create a Robot, set the trigger. Morning briefings, inbox processing, data reports — done while you sleep."
     },
     "image": "chat",
-    "remoteImage": "mission/01-mission-list-en-$__THEME.png"
+    "remoteImage": "mission/01-mission-list-en-$__THEME.png",
+    "gradient": {
+      "light": "linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%)",
+      "dark": "linear-gradient(135deg, #1a3a3a 0%, #1a3322 100%)"
+    }
   },
   {
     "title": { "zh-CN": "一切就绪，开始吧", "en-US": "Ready When You Are" },
@@ -35,6 +73,10 @@
     },
     "image": "start",
     "remoteImage": "chat/01-chat-empty-en-$__THEME.png",
-    "isLast": true
+    "isLast": true,
+    "gradient": {
+      "light": "linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%)",
+      "dark": "linear-gradient(135deg, #1a3a3a 0%, #1a3322 100%)"
+    }
   }
 ]

@@ -9,6 +9,7 @@ import { container } from 'tsyringe'
 import { GlobalContext, GlobalModel } from '@/context/app'
 import { useIntl } from '@/hooks'
 import { history, Outlet, useLocation } from '@umijs/max'
+import { getEventStream, destroyEventStream } from '@/openapi/events'
 
 import Helmet from './components/Helmet'
 import LoginWrapper from './wrappers/Login'
@@ -79,7 +80,19 @@ const Index = () => {
 		global.on()
 		global.stack.on()
 
+		// Initialize global event WebSocket after app setup
+		const initEventWS = () => {
+			if (window.$app?.openapi) {
+				const stream = getEventStream()
+				stream.connect()
+			}
+		}
+		// Delay to ensure OpenAPI is initialized
+		const eventWSTimer = setTimeout(initEventWS, 1000)
+
 		return () => {
+			clearTimeout(eventWSTimer)
+			destroyEventStream()
 			global.off()
 			global.stack.off()
 		}

@@ -78,6 +78,10 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 	const initializedRef = useRef(false)
 	const closeTimerRef = useRef<number>()
 	const animTimerRef = useRef<number>()
+	const boardsRef = useRef<BoardSummary[]>([])
+	const currentBoardIdRef = useRef<string>(urlBoardId || '')
+	boardsRef.current = boards
+	currentBoardIdRef.current = currentBoardId
 
 	const triggerAnimation = useCallback(() => {
 		clearTimeout(animTimerRef.current)
@@ -86,13 +90,19 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 	}, [])
 
 	const loadBoardData = useCallback(async (boardId: string) => {
-		const [boardData, tasksData] = await Promise.all([
-			services.getBoard(boardId),
-			services.getTasks(boardId)
-		])
-		setBoard(boardData)
-		setTasks(tasksData)
-		setCurrentBoardId(boardId)
+		try {
+			const [boardData, tasksData] = await Promise.all([
+				services.getBoard(boardId),
+				services.getTasks(boardId)
+			])
+			setBoard(boardData)
+			setTasks(tasksData)
+			setCurrentBoardId(boardId)
+		} catch (err) {
+			console.error('[Kanban] Failed to load board data:', err)
+			setBoard(null)
+			setTasks([])
+		}
 	}, [])
 
 	const refreshBoards = useCallback(async () => {
@@ -155,43 +165,61 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 
 	const createBoardFn = useCallback(
 		async (data: { title: string; icon?: string; color?: string }) => {
-			const newBoard = await services.createBoard(data)
-			await refreshBoards()
-			switchBoard(newBoard.id)
+			try {
+				const newBoard = await services.createBoard(data)
+				await refreshBoards()
+				switchBoard(newBoard.id)
+			} catch (err: any) {
+				window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '创建看板失败' : 'Failed to create board') })
+			}
 		},
-		[refreshBoards, switchBoard]
+		[refreshBoards, switchBoard, is_cn]
 	)
 
 	const updateBoardFn = useCallback(
 		async (boardId: string, data: Partial<Board>) => {
-			const updated = await services.updateBoard(boardId, data)
-			setBoards((prev) => prev.map((b) => (b.id === boardId ? { ...b, title: updated.title, icon: updated.icon, color: updated.color } : b)))
-			if (boardId === currentBoardId) {
-				setBoard((prev) => (prev ? { ...prev, ...updated, columns: prev.columns } : prev))
+			try {
+				const updated = await services.updateBoard(boardId, data)
+				setBoards((prev) => prev.map((b) => (b.id === boardId ? { ...b, title: updated.title, icon: updated.icon, color: updated.color } : b)))
+				if (boardId === currentBoardId) {
+					setBoard((prev) => (prev ? { ...prev, ...updated, columns: prev.columns } : prev))
+				}
+			} catch (err: any) {
+				window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '更新看板失败' : 'Failed to update board') })
 			}
 		},
-		[currentBoardId]
+		[currentBoardId, is_cn]
 	)
 
 	const deleteBoardFn = useCallback(
 		async (boardId: string) => {
 			await services.deleteBoard(boardId)
-			const list = await refreshBoards()
 
-			if (boardId === currentBoardId && list.length > 0) {
-				switchBoard(list[0].id)
+			const latestBoards = boardsRef.current
+			const prevIndex = latestBoards.findIndex((b) => b.id === boardId)
+			const remaining = latestBoards.filter((b) => b.id !== boardId)
+
+			setBoards((prev) => prev.filter((b) => b.id !== boardId))
+
+			if (boardId === currentBoardIdRef.current && remaining.length > 0) {
+				const targetIndex = Math.min(Math.max(0, prevIndex - 1), remaining.length - 1)
+				switchBoard(remaining[targetIndex].id)
 			}
 		},
-		[currentBoardId, refreshBoards, switchBoard]
+		[switchBoard]
 	)
 
 	const createBoardFromTemplateFn = useCallback(
 		async (templateId: string, title?: string) => {
-			const newBoard = await services.createBoardFromTemplate(templateId, title)
-			await refreshBoards()
-			switchBoard(newBoard.id)
+			try {
+				const newBoard = await services.createBoardFromTemplate(templateId, title)
+				await refreshBoards()
+				switchBoard(newBoard.id)
+			} catch (err: any) {
+				window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '从模板创建失败' : 'Failed to create from template') })
+			}
 		},
-		[refreshBoards, switchBoard]
+		[refreshBoards, switchBoard, is_cn]
 	)
 
 	const getBoardTemplatesFn = useCallback(async () => {
@@ -272,11 +300,15 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 
 	const addTask = useCallback(
 		async (data: CreateTaskData) => {
-			const task = await services.createTask(data)
-			setTasks((prev) => [...prev, task])
-			setBoards((prev) => prev.map((b) => (b.id === currentBoardId ? { ...b, task_count: b.task_count + 1 } : b)))
+			try {
+				const task = await services.createTask(data)
+				setTasks((prev) => [...prev, task])
+				setBoards((prev) => prev.map((b) => (b.id === currentBoardId ? { ...b, task_count: b.task_count + 1 } : b)))
+			} catch (err: any) {
+				window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '创建任务失败' : 'Failed to create task') })
+			}
 		},
-		[currentBoardId]
+		[currentBoardId, is_cn]
 	)
 
 	const updateTask = useCallback(
@@ -386,37 +418,49 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 				}, 260)
 				return
 			}
-			await services.deleteTask(taskId)
-			setTasks((prev) => prev.filter((t) => t.id !== taskId))
-			setBoards((prev) => prev.map((b) => (b.id === currentBoardId ? { ...b, task_count: Math.max(0, b.task_count - 1) } : b)))
-			if (selectedTaskId === taskId) {
-				triggerAnimation()
-				setDetailOpen(false)
-				closeTimerRef.current = window.setTimeout(() => {
-					setSelectedTaskId(null)
-				}, 260)
+			try {
+				await services.deleteTask(taskId)
+				setTasks((prev) => prev.filter((t) => t.id !== taskId))
+				setBoards((prev) => prev.map((b) => (b.id === currentBoardId ? { ...b, task_count: Math.max(0, b.task_count - 1) } : b)))
+				if (selectedTaskId === taskId) {
+					triggerAnimation()
+					setDetailOpen(false)
+					closeTimerRef.current = window.setTimeout(() => {
+						setSelectedTaskId(null)
+					}, 260)
+				}
+			} catch (err: any) {
+				window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '删除任务失败' : 'Failed to delete task') })
 			}
 		},
-		[selectedTaskId, currentBoardId, creatingTaskId, triggerAnimation]
+		[selectedTaskId, currentBoardId, creatingTaskId, triggerAnimation, is_cn]
 	)
 
 	const addColumn = useCallback(
 		async (data: Partial<Column>) => {
 			if (!board) return
-			const column = await services.createColumn(board.id, data)
-			setBoard((prev) => (prev ? { ...prev, columns: [...prev.columns, column] } : prev))
+			try {
+				const column = await services.createColumn(board.id, data)
+				setBoard((prev) => (prev ? { ...prev, columns: [...prev.columns, column] } : prev))
+			} catch (err: any) {
+				window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '添加分组失败' : 'Failed to add column') })
+			}
 		},
-		[board]
+		[board, is_cn]
 	)
 
 	const updateColumnFn = useCallback(async (columnId: string, data: Partial<Column>) => {
-		const updated = await services.updateColumn(columnId, data)
-		setBoard((prev) =>
-			prev
-				? { ...prev, columns: prev.columns.map((c) => (c.id === columnId ? updated : c)) }
-				: prev
-		)
-	}, [])
+		try {
+			const updated = await services.updateColumn(columnId, data)
+			setBoard((prev) =>
+				prev
+					? { ...prev, columns: prev.columns.map((c) => (c.id === columnId ? updated : c)) }
+					: prev
+			)
+		} catch (err: any) {
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '更新分组失败' : 'Failed to update column') })
+		}
+	}, [is_cn])
 
 	const removeColumn = useCallback(async (columnId: string) => {
 		if (!board || board.columns.length <= 1) return
@@ -441,16 +485,20 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			}
 		}
 
-		await services.deleteColumn(columnId)
-		setBoard((prev) => {
-			if (!prev) return prev
-			const remaining = prev.columns
-				.filter((c) => c.id !== columnId)
-				.sort((a, b) => a.position - b.position)
-				.map((c, i) => ({ ...c, position: i }))
+		try {
+			await services.deleteColumn(columnId)
+			setBoard((prev) => {
+				if (!prev) return prev
+				const remaining = prev.columns
+					.filter((c) => c.id !== columnId)
+					.sort((a, b) => a.position - b.position)
+				.map((c, i) => ({ ...c, position: i + 1 }))
 			return { ...prev, columns: remaining }
-		})
-	}, [board, tasks])
+			})
+		} catch (err: any) {
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '删除分组失败' : 'Failed to delete column') })
+		}
+	}, [board, tasks, is_cn])
 
 	const reorderColumns = useCallback(
 		async (columnIds: string[]) => {
@@ -461,7 +509,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 				const reordered = columnIds
 					.map((id, i) => {
 						const col = columnMap.get(id)
-						return col ? { ...col, position: i } : null
+						return col ? { ...col, position: i + 1 } : null
 					})
 					.filter(Boolean) as Column[]
 				return { ...prev, columns: reordered }
@@ -530,7 +578,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		if (statusFilter !== 'all') {
 			const statusMap: Record<Exclude<StatusFilter, 'all'>, string[]> = {
 				running: ['running'],
-				waiting: ['pending', 'waiting_input', 'paused'],
+				waiting: ['pending', 'queued', 'waiting'],
 				completed: ['completed'],
 				failed: ['failed', 'cancelled']
 			}

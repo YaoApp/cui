@@ -32,11 +32,11 @@ const MIN_SIDEBAR_WIDTH = 280
 const statusLabels: Record<string, { cn: string; en: string }> = {
 	creating: { cn: '创建中', en: 'Creating' },
 	pending: { cn: '待执行', en: 'Pending' },
+	queued: { cn: '排队中', en: 'Queued' },
 	running: { cn: '运行中', en: 'Running' },
-	waiting_input: { cn: '等待输入', en: 'Waiting for Input' },
+	waiting: { cn: '等待输入', en: 'Waiting for Input' },
 	completed: { cn: '已完成', en: 'Completed' },
 	failed: { cn: '失败', en: 'Failed' },
-	paused: { cn: '已暂停', en: 'Paused' },
 	cancelled: { cn: '已取消', en: 'Cancelled' }
 }
 
@@ -303,20 +303,24 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 		async (text: string, chatId: string) => {
 			if (!creatingTaskId) return
 
-			const creatingTask = ctx?.tasks.find((t) => t.id === creatingTaskId)
-			const columnId = creatingTask?.column_id || board?.columns[board.columns.length - 1]?.id || ''
+			try {
+				const creatingTask = ctx?.tasks.find((t) => t.id === creatingTaskId)
+				const columnId = creatingTask?.column_id || board?.columns[board.columns.length - 1]?.id || ''
 
-			const title = await generateTaskTitle(text)
+				const title = await generateTaskTitle(text)
 
-			const realTask = await services.createTask({
-				title,
-				description: '',
-				column_id: columnId,
-				chat_id: chatId,
-				assistant_id: global.default_assistant?.assistant_id
-			})
+				const realTask = await services.createTask({
+					title,
+					description: '',
+					column_id: columnId,
+					chat_id: chatId,
+					assistant_id: global.default_assistant?.assistant_id
+				})
 
-			finalizeCreating(creatingTaskId, realTask)
+				finalizeCreating(creatingTaskId, realTask)
+			} catch (err: any) {
+				window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '创建任务失败' : 'Failed to create task') })
+			}
 		},
 		[
 			creatingTaskId,
@@ -324,7 +328,8 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 			board,
 			finalizeCreating,
 			generateTaskTitle,
-			global.default_assistant?.assistant_id
+			global.default_assistant?.assistant_id,
+			is_cn
 		]
 	)
 

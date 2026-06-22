@@ -1,1 +1,1 @@
-export { services } from './mock'
+export { services } from './api'

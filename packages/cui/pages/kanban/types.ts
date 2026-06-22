@@ -1,4 +1,6 @@
-export type TaskStatus = 'creating' | 'pending' | 'running' | 'waiting_input' | 'completed' | 'failed' | 'paused' | 'cancelled'
+// Backend states: pending | queued | running | waiting | completed | failed | cancelled
+// 'creating' is a client-only state used during the task creation UI flow
+export type TaskStatus = 'creating' | 'pending' | 'queued' | 'running' | 'waiting' | 'completed' | 'failed' | 'cancelled'
 
 export type RecurringMode = 'fixed_time' | 'interval'
 
