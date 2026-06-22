@@ -320,11 +320,18 @@
 
 .editFormConfirm {
 	color: #fff;
-	background: var(--color_chatbox_border_focus);
+	background: var(--color_main);
 	border-radius: 4px;
 
 	&:hover {
 		opacity: 0.9;
+	}
+
+	&.disabled {
+		background: var(--color_border_light);
+		color: var(--color_placeholder);
+		cursor: not-allowed;
+		pointer-events: none;
 	}
 }
 

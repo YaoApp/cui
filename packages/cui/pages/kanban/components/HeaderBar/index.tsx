@@ -292,9 +292,12 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 													<span className={styles.editFormCancel} onClick={handleCancelEdit}>
 														{is_cn ? '取消' : 'Cancel'}
 													</span>
-													<span className={styles.editFormConfirm} onClick={handleSaveEdit}>
-														{is_cn ? '保存' : 'Save'}
-													</span>
+												<span
+													className={`${styles.editFormConfirm}${!editName.trim() ? ` ${styles.disabled}` : ''}`}
+													onClick={handleSaveEdit}
+												>
+													{is_cn ? '保存' : 'Save'}
+												</span>
 												</div>
 											</div>
 										) : confirmDeleteId === b.id ? (
