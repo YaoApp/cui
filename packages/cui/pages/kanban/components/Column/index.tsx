@@ -4,22 +4,13 @@ import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
+import presets from '../../presets.json'
 import type { Column as ColumnType, KanbanTask } from '../../types'
 import TaskCard from '../TaskCard'
 import styles from './index.less'
 
-const PRESET_ICONS = [
-	'material-search', 'material-bar_chart', 'material-edit_note', 'material-group',
-	'material-lightbulb', 'material-rocket_launch', 'material-science', 'material-code',
-	'material-shopping_cart', 'material-support_agent', 'material-campaign', 'material-palette',
-	'material-attach_money', 'material-analytics', 'material-folder_special', 'material-task'
-]
-
-const PRESET_COLORS = [
-	'#6366F1', '#3B82F6', '#22C55E', '#F59E0B',
-	'#EF4444', '#EC4899', '#8B5CF6', '#06B6D4',
-	'#F97316', '#14B8A6', '#64748B', '#A855F7'
-]
+const PRESET_ICONS = presets.column.icons
+const PRESET_COLORS = presets.column.colors
 
 interface ColumnProps {
 	column: ColumnType
@@ -86,13 +77,17 @@ const ColumnMenu = ({ column, is_cn, totalColumns, onAddTask, onEdit, onDelete, 
 }) => {
 	const ref = useRef<HTMLDivElement>(null)
 	const isLast = totalColumns <= 1
+	const [confirming, setConfirming] = useState(false)
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (ref.current && !ref.current.contains(e.target as Node)) onClose()
 		}
 		const handleEsc = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') onClose()
+			if (e.key === 'Escape') {
+				if (confirming) setConfirming(false)
+				else onClose()
+			}
 		}
 		document.addEventListener('mousedown', handleClickOutside)
 		document.addEventListener('keydown', handleEsc)
@@ -100,7 +95,27 @@ const ColumnMenu = ({ column, is_cn, totalColumns, onAddTask, onEdit, onDelete, 
 			document.removeEventListener('mousedown', handleClickOutside)
 			document.removeEventListener('keydown', handleEsc)
 		}
-	}, [onClose])
+	}, [onClose, confirming])
+
+	if (confirming) {
+		return (
+			<div ref={ref} className={styles.colMenu}>
+				<div className={styles.colMenuConfirm}>
+					<div className={styles.colMenuConfirmText}>
+						{is_cn ? `确定删除「${column.title}」？任务将移至相邻分组。` : `Delete "${column.title}"? Tasks will be moved to an adjacent group.`}
+					</div>
+					<div className={styles.colMenuConfirmActions}>
+						<span className={styles.colMenuConfirmCancel} onClick={() => setConfirming(false)}>
+							{is_cn ? '取消' : 'Cancel'}
+						</span>
+						<span className={styles.colMenuConfirmOk} onClick={() => { onDelete(); onClose() }}>
+							{is_cn ? '确定删除' : 'Delete'}
+						</span>
+					</div>
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div ref={ref} className={styles.colMenu}>
@@ -118,8 +133,7 @@ const ColumnMenu = ({ column, is_cn, totalColumns, onAddTask, onEdit, onDelete, 
 				className={clsx(styles.colMenuItem, isLast ? styles.colMenuDisabled : styles.colMenuDanger)}
 				onClick={() => {
 					if (isLast) return
-					onDelete()
-					onClose()
+					setConfirming(true)
 				}}
 				title={isLast ? (is_cn ? '至少保留一个分组' : 'Must keep at least one group') : undefined}
 			>

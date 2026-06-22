@@ -75,39 +75,7 @@
 	pointer-events: auto;
 }
 
-// Light mode gradients
-.gradient_0 {
-	background: linear-gradient(135deg, #e8eaf6 0%, #ede7f6 50%, #e3f2fd 100%);
-	&::after {
-		content: '';
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 200px;
-		height: 200px;
-		transform: translate(-50%, -50%);
-		border-radius: 50%;
-		background: radial-gradient(circle, rgba(51, 113, 252, 0.12) 0%, transparent 70%);
-		animation: glow-breathe 4s ease-in-out infinite;
-		pointer-events: none;
-	}
-}
-.gradient_1 { background: linear-gradient(135deg, #e3f2fd 0%, #e0f7fa 100%); }
-.gradient_2 { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); }
-.gradient_3 { background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%); }
-
-// Dark mode gradients
-[data-theme='dark'] {
-	.gradient_0 {
-		background: linear-gradient(135deg, #303566 0%, #3d2c5e 50%, #1a2744 100%);
-		&::after {
-			background: radial-gradient(circle, rgba(51, 113, 252, 0.2) 0%, transparent 70%);
-		}
-	}
-	.gradient_1 { background: linear-gradient(135deg, #1a2744 0%, #1a3a3a 100%); }
-	.gradient_2 { background: linear-gradient(135deg, #3d2e1a 0%, #3d1a2a 100%); }
-	.gradient_3 { background: linear-gradient(135deg, #1a3a3a 0%, #1a3322 100%); }
-}
+// Gradient backgrounds are now driven by slides.json via inline styles
 
 .illustration_img {
 	max-width: 80%;

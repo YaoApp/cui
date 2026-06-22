@@ -18,11 +18,11 @@ interface TaskCardProps {
 const STATUS_CONFIG: Record<string, { icon: string; color: string; label_cn: string; label_en: string }> = {
 	creating: { icon: 'material-add_circle', color: 'var(--color_info)', label_cn: '创建中', label_en: 'Creating' },
 	pending: { icon: 'material-schedule', color: 'var(--color_info)', label_cn: '待开始', label_en: 'Pending' },
+	queued: { icon: 'material-hourglass_top', color: 'var(--color_info)', label_cn: '排队中', label_en: 'Queued' },
 	running: { icon: 'material-play_circle', color: 'var(--color_success)', label_cn: '进行中', label_en: 'Running' },
-	waiting_input: { icon: 'material-chat_bubble', color: 'var(--color_warning)', label_cn: '等待回复', label_en: 'Awaiting' },
+	waiting: { icon: 'material-chat_bubble', color: 'var(--color_warning)', label_cn: '等待回复', label_en: 'Awaiting' },
 	completed: { icon: 'material-check_circle', color: 'var(--color_success)', label_cn: '已完成', label_en: 'Done' },
 	failed: { icon: 'material-error', color: 'var(--color_danger)', label_cn: '失败', label_en: 'Failed' },
-	paused: { icon: 'material-pause_circle', color: 'var(--color_text_grey)', label_cn: '已暂停', label_en: 'Paused' },
 	cancelled: { icon: 'material-cancel', color: 'var(--color_text_grey)', label_cn: '已取消', label_en: 'Cancelled' }
 }
 
@@ -39,14 +39,14 @@ const TaskCard = ({ task, is_cn, isDragging, isSelected, onClick, onMenuClick, o
 
 	const activity = useMemo(() => {
 		if (task.status === 'running' && task.current_step) return task.current_step
-		if (task.status === 'waiting_input' && task.last_message) return task.last_message
+		if (task.status === 'waiting' && task.last_message) return task.last_message
 		if (task.status === 'failed' && task.error_message) return task.error_message
 		return null
 	}, [task.status, task.current_step, task.last_message, task.error_message])
 
 	const elapsed = useMemo(() => {
 		if (task.duration) return formatDuration(task.duration)
-		if (task.started_at && (task.status === 'running' || task.status === 'waiting_input')) {
+		if (task.started_at && (task.status === 'running' || task.status === 'waiting')) {
 			return formatDuration(Math.floor((Date.now() - task.started_at) / 1000))
 		}
 		return null

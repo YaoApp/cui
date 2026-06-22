@@ -20,6 +20,7 @@ import { SortableContext, arrayMove, horizontalListSortingStrategy } from '@dnd-
 import Icon from '@/widgets/Icon'
 import { getLocale } from '@umijs/max'
 import { useKanbanContext } from '../../context'
+import presets from '../../presets.json'
 import Column from '../Column'
 import TaskCard from '../TaskCard'
 import TaskContextMenu, { type ContextMenuState } from '../TaskContextMenu'
@@ -53,18 +54,8 @@ function getColumnIdFromDropTarget(id: string): string | null {
 
 type DragType = 'task' | 'column' | null
 
-const PRESET_ICONS = [
-	'material-search', 'material-bar_chart', 'material-edit_note', 'material-group',
-	'material-lightbulb', 'material-rocket_launch', 'material-science', 'material-code',
-	'material-shopping_cart', 'material-support_agent', 'material-campaign', 'material-palette',
-	'material-attach_money', 'material-analytics', 'material-folder_special', 'material-task'
-]
-
-const PRESET_COLORS = [
-	'#6366F1', '#3B82F6', '#22C55E', '#F59E0B',
-	'#EF4444', '#EC4899', '#8B5CF6', '#06B6D4',
-	'#F97316', '#14B8A6', '#64748B', '#A855F7'
-]
+const PRESET_ICONS = presets.column.icons
+const PRESET_COLORS = presets.column.colors
 
 interface AddColumnFormProps {
 	is_cn: boolean

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { useKanbanContext } from '../../context'
+import presets from '../../presets.json'
 import type { StatusFilter, BoardSummary, BoardTemplate } from '../../types'
 import styles from './index.less'
 
@@ -17,17 +18,8 @@ const FILTERS: { key: StatusFilter; cn: string; en: string }[] = [
 	{ key: 'failed', cn: '失败', en: 'Failed' }
 ]
 
-const PRESET_ICONS = [
-	'material-work', 'material-rocket_launch', 'material-support_agent', 'material-query_stats',
-	'material-edit_note', 'material-code', 'material-campaign', 'material-science',
-	'material-shopping_cart', 'material-school', 'material-analytics', 'material-palette'
-]
-
-const PRESET_COLORS = [
-	'#6366F1', '#3B82F6', '#22C55E', '#F59E0B',
-	'#EF4444', '#EC4899', '#8B5CF6', '#06B6D4',
-	'#F97316', '#14B8A6', '#64748B', '#A855F7'
-]
+const PRESET_ICONS = presets.board.icons
+const PRESET_COLORS = presets.board.colors
 
 const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 	const {
@@ -49,6 +41,7 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 	const [editColor, setEditColor] = useState('')
 	const editInputRef = useRef<HTMLInputElement>(null)
 	const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+	const [deletingId, setDeletingId] = useState<string | null>(null)
 
 	// Create view state
 	const [newName, setNewName] = useState('')
@@ -125,8 +118,12 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 
 	const handleSaveEdit = async () => {
 		if (!editingId || !editName.trim()) return
-		await updateBoard(editingId, { title: editName.trim(), icon: editIcon, color: editColor } as any)
-		setEditingId(null)
+		try {
+			await updateBoard(editingId, { title: editName.trim(), icon: editIcon, color: editColor } as any)
+			setEditingId(null)
+		} catch (err: any) {
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '保存失败' : 'Failed to save') })
+		}
 	}
 
 	const handleCancelEdit = () => {
@@ -137,21 +134,35 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 		const b = boards.find((bd) => bd.id === boardId)
 		if (!b) return
 
-		if (b.task_count > 0 && confirmDeleteId !== boardId) {
+		if (confirmDeleteId !== boardId) {
 			setConfirmDeleteId(boardId)
 			return
 		}
 
-		await deleteBoard(boardId)
+		setDeletingId(boardId)
 		setConfirmDeleteId(null)
-		if (boards.length <= 1) closeDropdown()
+
+		await new Promise((r) => setTimeout(r, 200))
+
+		try {
+			await deleteBoard(boardId)
+			setDeletingId(null)
+			if (boards.length <= 1) closeDropdown()
+		} catch (err: any) {
+			setDeletingId(null)
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '删除失败' : 'Failed to delete') })
+		}
 	}
 
 	const handleShowCreate = async () => {
 		setView('create')
 		resetCreateForm()
-		const tpls = await getBoardTemplates()
-		setTemplates(tpls)
+		try {
+			const tpls = await getBoardTemplates()
+			setTemplates(tpls)
+		} catch (err: any) {
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '加载模板失败' : 'Failed to load templates') })
+		}
 	}
 
 	const handleCreate = async () => {
@@ -164,6 +175,8 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 				await createBoard({ title: newName.trim(), icon: newIcon, color: newColor })
 			}
 			closeDropdown()
+		} catch (err: any) {
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '创建失败' : 'Failed to create') })
 		} finally {
 			setCreating(false)
 		}
@@ -237,7 +250,7 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 								{boards.map((b) => (
 									<div
 										key={b.id}
-										className={`${styles.boardItem} ${b.id === currentBoardId ? styles.boardItemActive : ''}`}
+										className={`${styles.boardItem} ${b.id === currentBoardId ? styles.boardItemActive : ''} ${deletingId === b.id ? styles.deleting : ''}`}
 									>
 										{editingId === b.id ? (
 											<div className={styles.editForm}>
@@ -288,8 +301,12 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 											<div className={styles.confirmDelete}>
 												<div className={styles.confirmText}>
 													{is_cn
-														? `确定删除「${b.title}」？该看板包含 ${b.task_count} 个任务，删除后不可恢复。`
-														: `Delete "${b.title}"? This board has ${b.task_count} tasks. Deletion is irreversible.`}
+														? b.task_count > 0
+															? `确定删除「${b.title}」？该看板包含 ${b.task_count} 个任务，删除后不可恢复。`
+															: `确定删除「${b.title}」？删除后不可恢复。`
+														: b.task_count > 0
+															? `Delete "${b.title}"? This board has ${b.task_count} tasks. Deletion is irreversible.`
+															: `Delete "${b.title}"? Deletion is irreversible.`}
 												</div>
 												<div className={styles.confirmActions}>
 													<span className={styles.confirmCancel} onClick={() => setConfirmDeleteId(null)}>

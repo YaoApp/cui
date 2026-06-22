@@ -132,6 +132,7 @@
             "tsx": "3.12.1",
             "typescript": "^4.9.4",
             "utility-types": "^3.10.0",
-            "webpack-chain": "^6.5.1"
+            "webpack-chain": "^6.5.1",
+            "ws": "^8.21.0"
       }
 }

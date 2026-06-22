@@ -150,6 +150,11 @@ export class OpenAPI {
 			}
 		}
 
+		// 204 No Content - success with no body to parse
+		if (response.status === 204) {
+			return apiResponse
+		}
+
 		try {
 			// Handle different content types
 			const contentType = response.headers.get('content-type') || ''

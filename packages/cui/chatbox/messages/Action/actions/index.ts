@@ -9,8 +9,17 @@ import appMenuReload from './app.menu.reload'
 import { notifySuccess, notifyError, notifyWarning, notifyInfo, NotifyPayload } from './notify'
 import chatNewWithAssistant, { ChatNewWithAssistantPayload } from './chat.newWithAssistant'
 import robotExecute, { RobotExecutePayload } from './robot.execute'
+import confirm, { ConfirmPayload } from './confirm'
+import eventEmit, { EventEmitPayload } from './event.emit'
+import {
+	taskRefreshServices,
+	taskRefreshFiles,
+	taskRefreshProcesses,
+	taskOpenPreview,
+	taskInputRequired
+} from './task'
 
-export type ActionPayload = NavigatePayload | NavigateBackPayload | NavigateReplacePayload | NotifyPayload | ChatNewWithAssistantPayload | RobotExecutePayload | undefined
+export type ActionPayload = NavigatePayload | NavigateBackPayload | NavigateReplacePayload | NotifyPayload | ChatNewWithAssistantPayload | RobotExecutePayload | ConfirmPayload | EventEmitPayload | undefined
 
 export interface ActionHandler {
 	(payload?: any): void
@@ -38,7 +47,20 @@ export const actionHandlers: Record<string, ActionHandler> = {
 	'chat.newWithAssistant': chatNewWithAssistant,
 
 	// Robot
-	'robot.execute': robotExecute
+	'robot.execute': robotExecute,
+
+	// Confirm (Agent requests user confirmation)
+	confirm,
+
+	// Event (Generic custom event dispatch)
+	'event.emit': eventEmit,
+
+	// Task-specific actions
+	'task.refresh_services': taskRefreshServices,
+	'task.refresh_files': taskRefreshFiles,
+	'task.refresh_processes': taskRefreshProcesses,
+	'task.open_preview': taskOpenPreview,
+	'task.input_required': taskInputRequired
 }
 
 /**

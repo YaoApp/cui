@@ -13,12 +13,11 @@ export const env = process.env.NODE_ENV as 'development' | 'production'
 export const base = `/${process.env.BASE}/`
 
 // SSE代理配置函数，支持流式传输
+// WebSocket upgrade is handled by build/plugin-ws-proxy.ts (umi's createProxy does not wire ws upgrades)
 const createSSEProxy = (target: string) => ({
 	target,
 	changeOrigin: true,
-	ws: true,
 	onProxyRes: (proxyRes: any, req: any, res: any) => {
-		// 禁用代理响应缓冲，实现SSE流式传输
 		if (req.headers.accept?.includes('text/event-stream')) {
 			proxyRes.headers['Cache-Control'] = 'no-cache, no-transform'
 			proxyRes.headers['Connection'] = 'keep-alive'

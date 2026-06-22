@@ -48,6 +48,9 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		services.getMessages().then((msgs) => {
 			setMessages(msgs)
 			setLoading(false)
+		}).catch((err: any) => {
+			setLoading(false)
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '加载消息失败' : 'Failed to load messages') })
 		})
 	}, [])
 
@@ -110,54 +113,69 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 			if (!id) return
 			const msg = messages.find((m) => m.id === id)
 			if (msg && !msg.read) {
-				services.markAsRead(id)
 				setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, read: true, read_at: Date.now() } : m)))
+				services.markAsRead(id).catch((err: any) => {
+					setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, read: false, read_at: undefined } : m)))
+					window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '标记已读失败' : 'Failed to mark as read') })
+				})
 			}
 		},
-		[messages]
+		[messages, is_cn]
 	)
 
 	const markAsRead = useCallback((id: string) => {
-		services.markAsRead(id)
 		setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, read: true, read_at: Date.now() } : m)))
-	}, [])
+		services.markAsRead(id).catch((err: any) => {
+			setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, read: false, read_at: undefined } : m)))
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '标记已读失败' : 'Failed to mark as read') })
+		})
+	}, [is_cn])
 
 	const markAllRead = useCallback(() => {
-		services.markAllRead()
+		const snapshot = messages.filter((m) => !m.read).map((m) => m.id)
 		const now = Date.now()
 		setMessages((prev) => prev.map((m) => (m.read ? m : { ...m, read: true, read_at: now })))
-	}, [])
+		services.markAllRead().catch((err: any) => {
+			setMessages((prev) => prev.map((m) => (snapshot.includes(m.id) ? { ...m, read: false, read_at: undefined } : m)))
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '标记全部已读失败' : 'Failed to mark all as read') })
+		})
+	}, [messages, is_cn])
 
 	const archiveMessage = useCallback((id: string) => {
-		services.archiveMessage(id)
 		setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, archived: true } : m)))
 		if (selectedMessageId === id) {
 			const remaining = messages.filter((m) => m.id !== id && !m.archived)
 			setSelectedMessageId(remaining.length > 0 ? remaining[0].id : null)
 		}
-	}, [selectedMessageId, messages])
+		services.archiveMessage(id).catch((err: any) => {
+			setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, archived: false } : m)))
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '归档失败' : 'Failed to archive') })
+		})
+	}, [selectedMessageId, messages, is_cn])
 
 	const toggleStar = useCallback((id: string) => {
 		const msg = messages.find((m) => m.id === id)
 		if (!msg) return
-		if (msg.starred) {
-			services.unstarMessage(id)
-		} else {
-			services.starMessage(id)
-		}
+		const wasStarred = msg.starred
 		setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, starred: !m.starred } : m)))
-	}, [messages])
+		const req = wasStarred ? services.unstarMessage(id) : services.starMessage(id)
+		req.catch((err: any) => {
+			setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, starred: wasStarred } : m)))
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '操作失败' : 'Operation failed') })
+		})
+	}, [messages, is_cn])
 
 	const togglePin = useCallback((id: string) => {
 		const msg = messages.find((m) => m.id === id)
 		if (!msg) return
-		if (msg.pinned) {
-			services.unpinMessage(id)
-		} else {
-			services.pinMessage(id)
-		}
+		const wasPinned = msg.pinned
 		setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, pinned: !m.pinned } : m)))
-	}, [messages])
+		const req = wasPinned ? services.unpinMessage(id) : services.pinMessage(id)
+		req.catch((err: any) => {
+			setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, pinned: wasPinned } : m)))
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '操作失败' : 'Operation failed') })
+		})
+	}, [messages, is_cn])
 
 	const value: InboxContextValue = {
 		messages,

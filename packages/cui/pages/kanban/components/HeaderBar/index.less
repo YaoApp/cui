@@ -75,12 +75,26 @@
 	max-height: 280px;
 	overflow-y: auto;
 	padding: 6px;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		background: var(--color_scrollbar_thumb, rgba(0, 0, 0, 0.15));
+	}
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	&::-webkit-scrollbar-thumb:hover {
+		background: var(--color_dot, rgba(0, 0, 0, 0.3));
+	}
 }
 
 .boardItem {
 	position: relative;
 	border-radius: 6px;
-	transition: background 0.12s ease;
+	transition: opacity 0.2s ease, transform 0.2s ease, background 0.12s ease;
 
 	&:hover {
 		background: var(--color_bg_hover);
@@ -100,6 +114,12 @@
 				opacity: 1;
 			}
 		}
+	}
+
+	&.deleting {
+		opacity: 0;
+		transform: scale(0.95);
+		pointer-events: none;
 	}
 }
 
@@ -380,6 +400,20 @@
 	max-height: 480px;
 	overflow-y: auto;
 	padding-bottom: 12px;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		background: var(--color_scrollbar_thumb, rgba(0, 0, 0, 0.15));
+	}
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	&::-webkit-scrollbar-thumb:hover {
+		background: var(--color_dot, rgba(0, 0, 0, 0.3));
+	}
 }
 
 .createHeader {
@@ -423,10 +457,10 @@
 	font-weight: 500;
 	border: none;
 	border-radius: 6px;
-	background: var(--color_chatbox_border_focus);
+	background: var(--color_main);
 	color: #fff;
 	cursor: pointer;
-	transition: opacity 0.15s ease;
+	transition: all 0.15s ease;
 	flex-shrink: 0;
 
 	&:hover:not(:disabled) {
@@ -434,7 +468,8 @@
 	}
 
 	&:disabled {
-		opacity: 0.4;
+		background: var(--color_border_light);
+		color: var(--color_placeholder);
 		cursor: not-allowed;
 	}
 }
@@ -552,15 +587,13 @@
 	cursor: pointer;
 	transition: all 0.15s ease;
 
-	&:hover {
-		border-color: var(--color_neo_text_tertiary);
+	&:hover:not(.templateSelected) {
 		background: var(--color_bg_hover);
 	}
 
 	&.templateSelected {
-		border-color: var(--color_chatbox_border_focus);
-		background: var(--color_neo_bg_field);
-		box-shadow: 0 0 0 1px var(--color_chatbox_border_focus);
+		border-color: var(--color_main);
+		background: color-mix(in srgb, var(--color_main) 6%, transparent);
 	}
 }
 
@@ -568,7 +601,7 @@
 	position: absolute;
 	top: 6px;
 	right: 6px;
-	color: var(--color_chatbox_border_focus);
+	color: var(--color_main);
 	display: flex;
 	align-items: center;
 }

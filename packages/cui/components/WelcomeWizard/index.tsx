@@ -157,7 +157,8 @@ const WelcomeWizard = ({ visible, onClose, isReopen }: WelcomeWizardProps) => {
 					{slidesData.map((s: any, idx: number) => (
 						<div
 							key={idx}
-							className={`${styles.illustration_layer} ${styles[`gradient_${idx}`]} ${idx === currentStep ? styles.illustration_active : ''}`}
+							className={`${styles.illustration_layer} ${idx === currentStep ? styles.illustration_active : ''}`}
+							style={{ background: s.gradient?.[theme] || '' }}
 						>
 							<img
 								className={`${styles.illustration_img} ${idx === 0 ? styles.illustration_logo : styles.illustration_screenshot}`}
