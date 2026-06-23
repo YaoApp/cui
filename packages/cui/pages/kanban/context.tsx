@@ -3,6 +3,7 @@ import { getLocale, useNavigate } from '@umijs/max'
 import { nanoid } from 'nanoid'
 import type { Board, BoardSummary, BoardTemplate, Column, KanbanTask, StatusFilter, CreateTaskData } from './types'
 import * as services from './services'
+import { initEventStore, disposeEventStore } from '@/openapi/events'
 
 interface KanbanContextValue {
 	board: Board | null
@@ -137,6 +138,103 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		init()
 	}, [urlBoardId, loadBoardData, navigate])
 
+	// Wire eventStore to bridge server-pushed events to React state
+	useEffect(() => {
+		initEventStore({
+			boardStore: {
+		addTask: (data) => {
+			setTasks((prev) => {
+				const idx = prev.findIndex((t) => t.chat_id === data.chat_id)
+				console.log(`[Kanban] addTask chat_id=${data.chat_id} found_idx=${idx} creating=${idx >= 0 ? prev[idx]?.status === 'creating' : false}`)
+				if (idx >= 0) {
+					if (prev[idx].status === 'creating') {
+						const patched = {
+							...prev[idx],
+							status: data.run_status || 'pending',
+							title: data.title || prev[idx].title,
+							column_id: data.column_id || prev[idx].column_id,
+							position: data.position || prev[idx].position
+						}
+						console.log(`[Kanban] addTask patched id=${patched.id} status=${patched.status}`)
+						return prev.map((t, i) => i === idx ? patched : t)
+					}
+					return prev
+				}
+				const newTask: KanbanTask = {
+					id: data.chat_id,
+					chat_id: data.chat_id,
+					title: data.title || 'New Task',
+					description: '',
+					column_id: data.column_id || '',
+					status: data.run_status || 'pending',
+					position: data.position || 0,
+					tags: data.tags || [],
+					created_at: Date.now(),
+					updated_at: Date.now()
+				}
+				return [...prev, newTask]
+			})
+			if (creatingTaskId) {
+				setCreatingTaskId(null)
+			}
+		},
+				patchTask: (chatId, patch) => {
+					setTasks((prev) =>
+						prev.map((t) => (t.chat_id === chatId ? { ...t, ...patch } : t))
+					)
+				},
+				moveTask: (chatId, columnId, position) => {
+					setTasks((prev) =>
+						prev.map((t) => (t.chat_id === chatId ? { ...t, column_id: columnId, position } : t))
+					)
+				},
+				removeTask: (chatId) => {
+					setTasks((prev) => prev.filter((t) => t.chat_id !== chatId))
+				},
+				addBoard: (data) => {
+					setBoards((prev) => [...prev, { id: data.board_id, name: data.name, icon: data.icon, color: data.color }])
+				},
+				patchBoard: (boardId, patch) => {
+					setBoards((prev) => prev.map((b) => (b.id === boardId ? { ...b, ...patch } : b)))
+					if (boardId === currentBoardId && board) {
+						setBoard((prev) => prev ? { ...prev, ...patch } : prev)
+					}
+				},
+				removeBoard: (boardId) => {
+					setBoards((prev) => prev.filter((b) => b.id !== boardId))
+				},
+				addColumn: (boardId, data) => {
+					if (boardId === currentBoardId) {
+						setBoard((prev) => {
+							if (!prev) return prev
+							return { ...prev, columns: [...prev.columns, data as Column] }
+						})
+					}
+				},
+				patchColumn: (boardId, columnId, patch) => {
+					if (boardId === currentBoardId) {
+						setBoard((prev) => {
+							if (!prev) return prev
+							return {
+								...prev,
+								columns: prev.columns.map((c) => (c.id === columnId ? { ...c, ...patch } : c))
+							}
+						})
+					}
+				},
+				removeColumn: (boardId, columnId) => {
+					if (boardId === currentBoardId) {
+						setBoard((prev) => {
+							if (!prev) return prev
+							return { ...prev, columns: prev.columns.filter((c) => c.id !== columnId) }
+						})
+					}
+				}
+			}
+		})
+		return () => disposeEventStore()
+	}, [currentBoardId, board, creatingTaskId])
+
 	const switchBoard = useCallback(
 		(boardId: string) => {
 			if (boardId === currentBoardId) return
@@ -260,30 +358,30 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		(columnId?: string) => {
 			clearTimeout(closeTimerRef.current)
 			const targetColumnId = columnId || board?.columns[board.columns.length - 1]?.id || ''
-			const tempId = `temp_${Date.now()}`
-		const placeholder: KanbanTask = {
-			id: tempId,
-			title: is_cn ? '新任务' : 'New Task',
-			description: '',
-			status: 'creating',
-			column_id: targetColumnId,
-			position: 9999,
-			chat_id: nanoid(),
-			created_at: Date.now(),
-			updated_at: Date.now()
-		}
+			const chatId = nanoid()
+			const placeholder: KanbanTask = {
+				id: chatId,
+				title: is_cn ? '新任务' : 'New Task',
+				description: '',
+				status: 'creating',
+				column_id: targetColumnId,
+				position: 9999,
+				chat_id: chatId,
+				created_at: Date.now(),
+				updated_at: Date.now()
+			}
 			setTasks((prev) => {
 				const filtered = creatingTaskId
 					? prev.filter((t) => t.id !== creatingTaskId)
 					: prev
 				return [...filtered, placeholder]
 			})
-		setCreatingTaskId(tempId)
-		setSelectedTaskId(tempId)
-		triggerAnimation()
-		setDetailOpen(true)
-	},
-	[board, is_cn, creatingTaskId, triggerAnimation]
+			setCreatingTaskId(chatId)
+			setSelectedTaskId(chatId)
+			triggerAnimation()
+			setDetailOpen(true)
+		},
+		[board, is_cn, creatingTaskId, triggerAnimation]
 	)
 
 	const finalizeCreating = useCallback(
@@ -542,6 +640,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			}
 
 			if (!creating) return result
+			if (result.some((t) => t.chat_id === creating.chat_id)) return result
 
 			// Determine creating task's intended position (from local move or prev state)
 			const creatingMove = moves.get(creating.id)

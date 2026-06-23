@@ -56,15 +56,17 @@ function mapTask(t: any): KanbanTask {
 	return {
 		id: t.chat_id,
 		title: t.title || '',
-		description: '',
+		description: t.summary || '',
 		status: (t.run_status || 'pending') as TaskStatus,
 		column_id: t.column_id || '',
 		position: t.position ?? 0,
 		chat_id: t.chat_id,
+		workspace: t.last_workspace ? { id: t.last_workspace, name: t.workspace_name || '' } : undefined,
 		tags: t.tags,
 		progress: t.progress,
 		current_step: t.current_step,
 		error_message: t.error_message,
+		outputs: t.outputs,
 		created_at: new Date(t.created_at || 0).getTime(),
 		updated_at: new Date(t.updated_at || 0).getTime(),
 		started_at: t.started_at ? new Date(t.started_at).getTime() : undefined,
@@ -158,7 +160,8 @@ export async function createBoardFromTemplate(templateId: string, title?: string
 export async function getTasks(boardId: string): Promise<KanbanTask[]> {
 	const agent = getAgent()
 	const api = getOpenAPI()
-	const res = await agent.boards.BoardTasks(boardId)
+	const locale = getLocale() || 'en-us'
+	const res = await agent.boards.BoardTasks(boardId, locale)
 	if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to get tasks')
 	return (res.data?.tasks || []).map(mapTask)
 }

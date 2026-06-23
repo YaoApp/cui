@@ -23,25 +23,27 @@ interface EventStoreOptions {
 }
 
 const EVENT_HANDLERS: Record<string, (data: Record<string, any>, stores: EventStoreOptions) => void> = {
-	// Task events (9)
+	// Task events — unified via task.updated (enrichTaskResult pushes all fields at once)
 	'task.created': (data, { boardStore }) => boardStore?.addTask(data),
-	'task.status_change': (data, { boardStore }) =>
-		boardStore?.patchTask(data.chat_id, {
-			run_status: data.run_status,
-			progress: data.progress,
-			current_step: data.current_step
-		}),
-	'task.title_updated': (data, { boardStore }) => boardStore?.patchTask(data.chat_id, { title: data.title }),
+	'task.updated': (data, { boardStore }) => {
+		const patch: Record<string, any> = {}
+		if (data.title) patch.title = data.title
+		if (data.run_status) patch.run_status = data.run_status
+		if (data.summary) patch.summary = data.summary
+		if (data.instruction) patch.instruction = data.instruction
+		if (data.outputs) patch.outputs = data.outputs
+		if (data.tags) patch.tags = data.tags
+		if (data.priority) patch.priority = data.priority
+		if (data.progress !== undefined) patch.progress = data.progress
+		if (data.current_step) patch.current_step = data.current_step
+		if (data.error_message) patch.error_message = data.error_message
+		if (data.duration !== undefined) patch.duration = data.duration
+		if (Object.keys(patch).length > 0) {
+			boardStore?.patchTask(data.chat_id, patch)
+		}
+	},
 	'task.moved': (data, { boardStore }) => boardStore?.moveTask(data.chat_id, data.column_id, data.position),
 	'task.deleted': (data, { boardStore }) => boardStore?.removeTask(data.chat_id),
-	'task.completed': (data, { boardStore }) =>
-		boardStore?.patchTask(data.chat_id, { run_status: 'completed', duration: data.duration }),
-	'task.failed': (data, { boardStore }) =>
-		boardStore?.patchTask(data.chat_id, { run_status: 'failed', error_message: data.error_message }),
-	'task.progress': (data, { boardStore }) =>
-		boardStore?.patchTask(data.chat_id, { progress: data.progress, current_step: data.current_step }),
-	'task.queue_position': (data, { boardStore }) =>
-		boardStore?.patchTask(data.chat_id, { queue_position: data.position }),
 
 	// Board events (6)
 	'board.created': (data, { boardStore }) => boardStore?.addBoard(data),

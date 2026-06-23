@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { getLocale } from '@umijs/max'
 import type { Message } from '../../../openapi'
 import type { SendMessageRequest } from '../../types'
 import { Agent } from '../../../openapi/agent'
-import { ChatProvider, useChatContext } from '../../context'
+import { useTaskWS } from '../../../pages/kanban/hooks/useTaskWS'
 import MessageList from '../MessageList'
 import InputArea from '../InputArea'
 import styles from './index.less'
@@ -25,6 +25,7 @@ export interface TaskChatProps {
 	chatId: string
 	assistantId: string
 	fallbackAssistantId?: string
+	columnId?: string
 
 	className?: string
 	style?: React.CSSProperties
@@ -45,7 +46,6 @@ export interface TaskChatProps {
 
 	onAssistantChange?: (assistantId: string) => void
 	onMessagesChange?: (messages: Message[]) => void
-	onFirstUserMessage?: (text: string, chatId: string) => void
 }
 
 const TaskChat: React.FC<TaskChatProps> = (props) => {
@@ -53,6 +53,7 @@ const TaskChat: React.FC<TaskChatProps> = (props) => {
 		chatId,
 		assistantId,
 		fallbackAssistantId,
+		columnId,
 		className,
 		style,
 		placeholder,
@@ -67,8 +68,7 @@ const TaskChat: React.FC<TaskChatProps> = (props) => {
 		loading: externalLoading,
 		streaming: externalStreaming,
 		onAssistantChange,
-		onMessagesChange,
-		onFirstUserMessage
+		onMessagesChange
 	} = props
 
 	const locale = getLocale()
@@ -174,30 +174,32 @@ const TaskChat: React.FC<TaskChatProps> = (props) => {
 	}
 
 	return (
-		<ChatProvider chatId={chatId} assistantId={resolvedAssistantId} singleSession>
-			<TaskChatInner
-				className={containerClass}
-				style={style}
-				assistant={assistant}
-				placeholder={placeholder}
-				disabled={disabled}
-				readOnly={readOnly}
-				initialWorkspace={initialWorkspace}
-				onWorkspaceChange={onWorkspaceChange}
-				allowAssistantSwitch={allowAssistantSwitch}
-				onSwitchAssistant={handleSwitchAssistant}
-				onMessagesChange={onMessagesChange}
-				onFirstUserMessage={onFirstUserMessage}
-				chatId={chatId}
-			/>
-		</ChatProvider>
+		<TaskChatWS
+			className={containerClass}
+			style={style}
+			assistant={assistant}
+			chatId={chatId}
+			assistantId={resolvedAssistantId}
+			columnId={columnId}
+			placeholder={placeholder}
+			disabled={disabled}
+			readOnly={readOnly}
+			initialWorkspace={initialWorkspace}
+			onWorkspaceChange={onWorkspaceChange}
+			allowAssistantSwitch={allowAssistantSwitch}
+			onSwitchAssistant={handleSwitchAssistant}
+			onMessagesChange={onMessagesChange}
+		/>
 	)
 }
 
-interface TaskChatInnerProps {
+interface TaskChatWSProps {
 	className?: string
 	style?: React.CSSProperties
 	assistant: AssistantInfo | null
+	chatId: string
+	assistantId: string
+	columnId?: string
 	placeholder?: React.ReactNode
 	disabled?: boolean
 	readOnly?: boolean
@@ -206,14 +208,15 @@ interface TaskChatInnerProps {
 	allowAssistantSwitch: boolean
 	onSwitchAssistant: (id: string) => void
 	onMessagesChange?: (messages: Message[]) => void
-	onFirstUserMessage?: (text: string, chatId: string) => void
-	chatId?: string
 }
 
-const TaskChatInner: React.FC<TaskChatInnerProps> = ({
+const TaskChatWS: React.FC<TaskChatWSProps> = ({
 	className,
 	style,
 	assistant,
+	chatId,
+	assistantId,
+	columnId,
 	placeholder,
 	disabled,
 	readOnly,
@@ -221,70 +224,48 @@ const TaskChatInner: React.FC<TaskChatInnerProps> = ({
 	onWorkspaceChange,
 	allowAssistantSwitch,
 	onSwitchAssistant,
-	onMessagesChange,
-	onFirstUserMessage,
-	chatId
+	onMessagesChange
 }) => {
-	const ctx = useChatContext()
-	const firstMessageFiredRef = useRef(false)
+	const { messages, streaming, sendMessage, abort } = useTaskWS({
+		chatId,
+		assistantId,
+		columnId,
+		workspaceId: initialWorkspace,
+		enabled: true
+	})
 
-	const handleSwitchAssistant = useCallback(
-		(newId: string) => {
-			if (ctx?.activeTabId) {
-				ctx.updateTabAssistant(ctx.activeTabId, newId)
-			}
-			onSwitchAssistant(newId)
+	useEffect(() => {
+		onMessagesChange?.(messages)
+	}, [messages, onMessagesChange])
+
+	const handleSend = useCallback(
+		async (request: SendMessageRequest) => {
+			const msg = request.messages?.[0]
+			if (!msg) return
+			sendMessage(msg, request.metadata)
 		},
-		[ctx?.activeTabId, ctx?.updateTabAssistant, onSwitchAssistant]
+		[sendMessage]
 	)
 
-	useEffect(() => {
-		if (ctx?.messages) {
-			onMessagesChange?.(ctx.messages)
-		}
-	}, [ctx?.messages, onMessagesChange])
-
-	useEffect(() => {
-		if (!onFirstUserMessage || firstMessageFiredRef.current) return
-		if (!ctx?.messages?.length) return
-
-		const firstUserMsg = ctx.messages.find((m) => m.type === 'user_input')
-		if (!firstUserMsg) return
-
-		firstMessageFiredRef.current = true
-		const text = firstUserMsg.props?.content || ''
-		onFirstUserMessage(text, chatId || ctx.activeTabId || '')
-	}, [ctx?.messages, onFirstUserMessage, chatId, ctx?.activeTabId])
-
-	if (!ctx) return null
-
-	const { messages, loading, streaming, tokenUsage, activeTabId, activeTab, messageQueue, sendMessage, abort, queueMessage, sendQueuedMessage, cancelQueuedMessage } = ctx
-	const isEmpty = messages.length === 0 && !loading
+	const isEmpty = messages.length === 0 && !streaming
 
 	return (
 		<div className={className} style={style}>
-			{isEmpty && placeholder ? placeholder : <MessageList messages={messages} loading={loading} streaming={streaming} />}
+			{isEmpty && placeholder ? placeholder : <MessageList messages={messages} loading={false} streaming={streaming} />}
 			{!readOnly && (
 				<InputArea
-					mode='normal'
+					mode={isEmpty ? 'placeholder' : 'normal'}
 					assistant={assistant || undefined}
-					onSend={sendMessage}
+					onSend={handleSend}
 					onAbort={abort}
-					chatId={activeTabId || ''}
+					chatId={chatId}
 					loading={streaming}
 					streaming={streaming}
 					disabled={disabled}
-					tokenUsage={tokenUsage}
-					initialModel={activeTab?.lastConnector}
 					initialWorkspace={initialWorkspace}
 					onWorkspaceChange={onWorkspaceChange}
 					workspaceLocked={messages.length > 0}
-					initialChatMode={activeTab?.mode}
-					messageQueue={messageQueue}
-					onQueueMessage={queueMessage}
-					onSendQueuedMessage={sendQueuedMessage}
-					onCancelQueuedMessage={cancelQueuedMessage}
-					onSwitchAssistant={allowAssistantSwitch ? handleSwitchAssistant : undefined}
+					onSwitchAssistant={allowAssistantSwitch ? onSwitchAssistant : undefined}
 				/>
 			)}
 		</div>

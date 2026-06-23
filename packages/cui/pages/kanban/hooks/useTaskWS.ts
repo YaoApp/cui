@@ -1,56 +1,59 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { nanoid } from 'nanoid'
-import type { Message } from '@/openapi'
+import type { Message, UserMessage } from '@/openapi'
 import { processChunk, newStreamSession } from '@/chatbox/utils/chunkProcessor'
 import type { StreamSession, ChunkEvent } from '@/chatbox/utils/chunkProcessor'
 
-interface TaskWSCommand {
-	type: 'run' | 'input' | 'append' | 'stop' | 'confirm' | 'pong'
-	messages?: Array<{ role: string; content: string }>
-	assistant_id?: string
-	chat_id?: string
-	locale?: string
-	metadata?: Record<string, any>
-	interrupt?: 'graceful' | 'force'
-	id?: string
-	choice?: string
-}
-
-interface UseTaskWSOptions {
+export interface UseTaskWSOptions {
+	chatId: string
+	assistantId?: string
+	columnId?: string
+	workspaceId?: string
+	enabled?: boolean
 	onEvent?: (event: ChunkEvent) => void
-	onAction?: (name: string, payload: Record<string, any>) => void
-	autoConnect?: boolean
-	sinceSequence?: number
 }
 
-interface UseTaskWSReturn {
-	send: (cmd: TaskWSCommand) => void
+export interface UseTaskWSReturn {
 	messages: Message[]
-	isConnected: boolean
-	isStreaming: boolean
-	connect: () => void
-	disconnect: () => void
-	clearMessages: () => void
+	streaming: boolean
+	connected: boolean
+	hasMore: boolean
+	sendMessage: (msg: UserMessage, metadata?: Record<string, any>) => void
+	retry: (extra?: UserMessage) => void
+	repeat: () => void
+	loadMore: () => void
+	abort: () => void
 }
 
-export function useTaskWS(chatId: string, options: UseTaskWSOptions = {}): UseTaskWSReturn {
-	const { onEvent, onAction, autoConnect = true, sinceSequence } = options
+interface WSCommand {
+	type: 'read' | 'run' | 'retry' | 'repeat' | 'stop' | 'cancel'
+	messages?: Array<{ role: string; content: any }>
+	assistant_id?: string
+	metadata?: Record<string, any>
+	since?: number
+	limit?: number
+}
+
+export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
+	const { chatId, assistantId, columnId, enabled = true, onEvent } = options
+
 	const [messages, setMessages] = useState<Message[]>([])
-	const [isConnected, setIsConnected] = useState(false)
-	const [isStreaming, setIsStreaming] = useState(false)
+	const [streaming, setStreaming] = useState(false)
+	const [connected, setConnected] = useState(false)
+	const [hasMore, setHasMore] = useState(false)
 
 	const wsRef = useRef<WebSocket | null>(null)
 	const sessionRef = useRef<StreamSession>(newStreamSession())
 	const messagesRef = useRef<Message[]>([])
-	const heartbeatRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-	const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-	const lastSequenceRef = useRef<number>(sinceSequence || 0)
+	const lastSeqRef = useRef<number>(0)
+	const isFirstRunRef = useRef(true)
 	const destroyedRef = useRef(false)
-
 	const onEventRef = useRef(onEvent)
-	const onActionRef = useRef(onAction)
+	const pendingCommandRef = useRef<WSCommand | null>(null)
+	const assistantIdRef = useRef(assistantId)
+	const columnIdRef = useRef(columnId)
 	onEventRef.current = onEvent
-	onActionRef.current = onAction
+	assistantIdRef.current = assistantId
+	columnIdRef.current = columnId
 
 	const buildWSUrl = useCallback(() => {
 		const baseURL = (window.$app?.openapi as any)?.config?.baseURL || '/v1'
@@ -66,55 +69,57 @@ export function useTaskWS(chatId: string, options: UseTaskWSOptions = {}): UseTa
 		}
 
 		wsBase = wsBase.replace(/\/$/, '')
-		let wsUrl = `${wsBase}/agent/tasks/${chatId}/ws`
-		if (lastSequenceRef.current > 0) {
-			wsUrl += `?since=${lastSequenceRef.current}`
-		}
-		return wsUrl
+		return `${wsBase}/agent/tasks/${chatId}/ws`
 	}, [chatId])
-
-	const clearHeartbeat = useCallback(() => {
-		if (heartbeatRef.current) {
-			clearTimeout(heartbeatRef.current)
-			heartbeatRef.current = null
-		}
-	}, [])
-
-	const resetHeartbeat = useCallback(() => {
-		clearHeartbeat()
-		heartbeatRef.current = setTimeout(() => {
-			wsRef.current?.close()
-		}, 60000)
-	}, [clearHeartbeat])
 
 	const handleChunk = useCallback(
 		(chunk: Message) => {
-			// Handle action type
-			if (chunk.type === 'action') {
-				const name = chunk.props?.name as string
-				const payload = chunk.props?.payload as Record<string, any>
-				if (name && onActionRef.current) {
-					onActionRef.current(name, payload || {})
+			// Track sequence for reconnection
+			if (chunk.metadata?.sequence) {
+				lastSeqRef.current = chunk.metadata.sequence
+			}
+
+			// Handle protocol events
+			if (chunk.type === 'event') {
+				const eventName = chunk.props?.event as string
+
+				if (eventName === 'read_complete') {
+					setHasMore(!!chunk.props?.has_more)
+					if (chunk.props?.last_seq) {
+						lastSeqRef.current = chunk.props.last_seq as number
+					}
+					onEventRef.current?.({ name: 'read_complete', data: chunk.props })
+					return
 				}
+
+				if (eventName === 'error') {
+					onEventRef.current?.({ name: 'error', data: chunk.props })
+					return
+				}
+
+				if (eventName === 'queued') {
+					onEventRef.current?.({ name: 'queued', data: chunk.props })
+					return
+				}
+			}
+
+			// Handle done message (Message DSL protocol)
+			if (chunk.type === 'done') {
+				setStreaming(false)
+				onEventRef.current?.({ name: 'done' })
 				return
 			}
 
-			// Track sequence for reconnection
-			if (chunk.metadata?.sequence) {
-				lastSequenceRef.current = chunk.metadata.sequence
-			}
-
-			// Process through chunkProcessor
+			// Process through chunkProcessor for message accumulation
 			const result = processChunk(sessionRef.current, chatId, chunk, messagesRef.current)
 			messagesRef.current = result.messages
 			setMessages(result.messages)
 
-			// Handle events
 			if (result.event) {
 				if (result.event.name === 'stream_start') {
-					setIsStreaming(true)
+					setStreaming(true)
 				} else if (result.event.name === 'stream_end') {
-					setIsStreaming(false)
+					setStreaming(false)
 				}
 				onEventRef.current?.(result.event)
 			}
@@ -122,84 +127,178 @@ export function useTaskWS(chatId: string, options: UseTaskWSOptions = {}): UseTa
 		[chatId]
 	)
 
-	const connect = useCallback(() => {
-		if (wsRef.current || destroyedRef.current) return
-		const url = buildWSUrl()
+	const doConnect = useCallback(
+		(afterOpen?: WSCommand) => {
+			if (wsRef.current?.readyState === WebSocket.OPEN || destroyedRef.current) {
+				if (afterOpen && wsRef.current?.readyState === WebSocket.OPEN) {
+					console.log(`[TaskWS] SEND chatId=${chatId} cmd=${afterOpen.type}`)
+					wsRef.current.send(JSON.stringify(afterOpen))
+				}
+				return
+			}
 
-		const ws = new WebSocket(url)
-		wsRef.current = ws
+			if (wsRef.current) {
+				wsRef.current.close()
+				wsRef.current = null
+			}
 
-		ws.onopen = () => {
-			setIsConnected(true)
-			resetHeartbeat()
-		}
+			pendingCommandRef.current = afterOpen || null
+			const url = buildWSUrl()
+			console.log(`[TaskWS] connect chatId=${chatId} url=${url}`)
+			const ws = new WebSocket(url)
+			wsRef.current = ws
 
-		ws.onmessage = (event) => {
-			try {
-				const msg = JSON.parse(event.data) as Message
-				// Handle ping from server
-				if (msg.type === 'event' && msg.props?.event === 'ping') {
-					ws.send(JSON.stringify({ type: 'pong' }))
-					resetHeartbeat()
+			ws.onopen = () => {
+				console.log(`[TaskWS] OPEN chatId=${chatId}`)
+				setConnected(true)
+				if (pendingCommandRef.current) {
+					console.log(`[TaskWS] SEND chatId=${chatId} cmd=${pendingCommandRef.current.type}`)
+					ws.send(JSON.stringify(pendingCommandRef.current))
+					pendingCommandRef.current = null
+				}
+			}
+
+			ws.onmessage = (event) => {
+				try {
+					const msg = JSON.parse(event.data) as Message
+					if (msg.type === 'event') {
+						console.log(`[TaskWS] RECV chatId=${chatId} type=event event=${msg.props?.event}`)
+					}
+					handleChunk(msg)
+				} catch {
+					// ignore malformed
+				}
+			}
+
+			ws.onclose = (event) => {
+				console.log(`[TaskWS] CLOSE chatId=${chatId} code=${event.code} reason=${event.reason}`)
+				setConnected(false)
+				wsRef.current = null
+
+				if (event.code === 1000) {
 					return
 				}
-				handleChunk(msg)
-			} catch {
-				// ignore malformed
+
+				if (!destroyedRef.current) {
+					setTimeout(() => {
+						if (!destroyedRef.current) {
+							doConnect({
+								type: 'read',
+								since: lastSeqRef.current,
+								limit: 0
+							})
+						}
+					}, 1000)
+				}
 			}
-		}
 
-		ws.onclose = () => {
-			setIsConnected(false)
-			wsRef.current = null
-			clearHeartbeat()
-		}
+			ws.onerror = () => {
+				console.log(`[TaskWS] ERROR chatId=${chatId}`)
+				ws.close()
+			}
+		},
+		[buildWSUrl, handleChunk, chatId]
+	)
 
-		ws.onerror = () => {
-			ws.close()
-		}
-	}, [buildWSUrl, handleChunk, resetHeartbeat, clearHeartbeat])
+	const sendCmd = useCallback(
+		(cmd: WSCommand) => {
+			if (wsRef.current?.readyState === WebSocket.OPEN) {
+				console.log(`[TaskWS] SEND chatId=${chatId} cmd=${cmd.type}`)
+				wsRef.current.send(JSON.stringify(cmd))
+			} else {
+				doConnect(cmd)
+			}
+		},
+		[doConnect, chatId]
+	)
 
-	const disconnect = useCallback(() => {
-		destroyedRef.current = true
-		clearHeartbeat()
-		if (reconnectRef.current) {
-			clearTimeout(reconnectRef.current)
-			reconnectRef.current = null
-		}
-		if (wsRef.current) {
-			wsRef.current.close()
-			wsRef.current = null
-		}
-		setIsConnected(false)
-	}, [clearHeartbeat])
+	const sendMessage = useCallback(
+		(msg: UserMessage, metadata?: Record<string, any>) => {
+			const cmd: WSCommand = {
+				type: 'run',
+				messages: [{ role: msg.role, content: msg.content }]
+			}
+			const aid = assistantIdRef.current
+			const cid = columnIdRef.current
 
-	const send = useCallback((cmd: TaskWSCommand) => {
-		if (wsRef.current?.readyState === WebSocket.OPEN) {
-			wsRef.current.send(JSON.stringify(cmd))
-		}
-	}, [])
+			cmd.metadata = { ...metadata }
 
-	const clearMessages = useCallback(() => {
+			if (isFirstRunRef.current && (aid || cid)) {
+				cmd.assistant_id = aid
+				if (cid) cmd.metadata.column_id = cid
+				if (aid) cmd.metadata.assistant_id = aid
+				isFirstRunRef.current = false
+			}
+
+			setStreaming(true)
+			sendCmd(cmd)
+		},
+		[sendCmd]
+	)
+
+	const retry = useCallback(
+		(extra?: UserMessage) => {
+			const cmd: WSCommand = { type: 'retry' }
+			if (extra) {
+				cmd.messages = [{ role: extra.role, content: extra.content }]
+			}
+			setStreaming(true)
+			sendCmd(cmd)
+		},
+		[sendCmd]
+	)
+
+	const repeat = useCallback(() => {
+		setStreaming(true)
+		sendCmd({ type: 'repeat' })
+	}, [sendCmd])
+
+	const loadMore = useCallback(() => {
+		sendCmd({
+			type: 'read',
+			since: lastSeqRef.current,
+			limit: 100
+		})
+	}, [sendCmd])
+
+	const abort = useCallback(() => {
+		sendCmd({ type: 'stop' })
+	}, [sendCmd])
+
+	// Auto-connect and send initial read on mount
+	useEffect(() => {
+		destroyedRef.current = false
 		messagesRef.current = []
 		setMessages([])
 		sessionRef.current = newStreamSession()
-	}, [])
+		lastSeqRef.current = 0
+		isFirstRunRef.current = true
+		setHasMore(false)
+		setStreaming(false)
 
-	useEffect(() => {
-		destroyedRef.current = false
-		if (autoConnect && chatId) {
-			connect()
+		if (enabled && chatId) {
+			doConnect({ type: 'read', since: 0, limit: 0 })
 		}
+
 		return () => {
+			console.log(`[TaskWS] UNMOUNT chatId=${chatId}`)
 			destroyedRef.current = true
-			clearHeartbeat()
 			if (wsRef.current) {
 				wsRef.current.close()
 				wsRef.current = null
 			}
 		}
-	}, [chatId, autoConnect, connect, clearHeartbeat])
+	}, [chatId, enabled, doConnect])
 
-	return { send, messages, isConnected, isStreaming, connect, disconnect, clearMessages }
+	return {
+		messages,
+		streaming,
+		connected,
+		hasMore,
+		sendMessage,
+		retry,
+		repeat,
+		loadMore,
+		abort
+	}
 }

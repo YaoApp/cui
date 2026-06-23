@@ -94,8 +94,9 @@ export class AgentBoards {
 		return this.api.Post('/agent/boards/from-template', req)
 	}
 
-	async BoardTasks(boardId: string): Promise<ApiResponse<{ tasks: any[]; total: number }>> {
-		return this.api.Get(`/agent/boards/${boardId}/tasks`)
+	async BoardTasks(boardId: string, locale?: string): Promise<ApiResponse<{ tasks: any[]; total: number }>> {
+		const params = locale ? `?locale=${locale}` : ''
+		return this.api.Get(`/agent/boards/${boardId}/tasks${params}`)
 	}
 
 	async CreateColumn(boardId: string, req: CreateColumnRequest): Promise<ApiResponse<BoardColumn>> {
