@@ -4,7 +4,6 @@ import { Tooltip } from 'antd'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
 import { TaskChat } from '@/chatbox'
-import { Chat } from '@/openapi'
 import { useGlobal } from '@/context/app'
 import { KanbanContext } from '../../context'
 import * as services from '../../services'
@@ -234,104 +233,8 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 		[sidebarOpen, sidebarWidth, sidebar, triggerAnimation, triggerInlineAnimation, onPanelWidthChange, inline]
 	)
 
-	const generateTaskTitle = useCallback(
-		async (text: string): Promise<string> => {
-			const titleAgentId = global.agent_uses?.title
-			if (!titleAgentId || !window.$app?.openapi) {
-				return text.split('\n')[0].slice(0, 60) || 'New Task'
-			}
-
-			try {
-				const chatClient = new Chat(window.$app.openapi)
-				const locale = getLocale() || 'en-us'
-				const languageHint = locale.startsWith('zh')
-					? 'Please generate the title in Chinese.'
-					: 'Please generate the title in English.'
-
-				return await new Promise<string>((resolve) => {
-					let title = ''
-					const timeout = setTimeout(() => {
-						resolve(title || text.split('\n')[0].slice(0, 60) || 'New Task')
-					}, 10000)
-
-					chatClient.StreamCompletion(
-						{
-							assistant_id: titleAgentId,
-							messages: [
-								{
-									role: 'user',
-									content: `Generate a short title for this task. ${languageHint}\n\nUser message:\n${text.slice(
-										0,
-										500
-									)}`
-								}
-							],
-							skip: { history: true, trace: true }
-						},
-						(chunk: any) => {
-							if (chunk.type === 'event' && chunk.props?.event === 'message_end') {
-								clearTimeout(timeout)
-								resolve(
-									title.trim().slice(0, 50) ||
-										text.split('\n')[0].slice(0, 60) ||
-										'New Task'
-								)
-								return
-							}
-							if (chunk.type === 'text' && chunk.props?.content) {
-								if (chunk.delta) {
-									title += chunk.props.content
-								} else {
-									title = chunk.props.content
-								}
-							}
-						},
-						() => {
-							clearTimeout(timeout)
-							resolve(text.split('\n')[0].slice(0, 60) || 'New Task')
-						}
-					)
-				})
-			} catch {
-				return text.split('\n')[0].slice(0, 60) || 'New Task'
-			}
-		},
-		[global.agent_uses?.title]
-	)
-
-	const handleFirstMessage = useCallback(
-		async (text: string, chatId: string) => {
-			if (!creatingTaskId) return
-
-			try {
-				const creatingTask = ctx?.tasks.find((t) => t.id === creatingTaskId)
-				const columnId = creatingTask?.column_id || board?.columns[board.columns.length - 1]?.id || ''
-
-				const title = await generateTaskTitle(text)
-
-				const realTask = await services.createTask({
-					title,
-					description: '',
-					column_id: columnId,
-					chat_id: chatId,
-					assistant_id: global.default_assistant?.assistant_id
-				})
-
-				finalizeCreating(creatingTaskId, realTask)
-			} catch (err: any) {
-				window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '创建任务失败' : 'Failed to create task') })
-			}
-		},
-		[
-			creatingTaskId,
-			ctx?.tasks,
-			board,
-			finalizeCreating,
-			generateTaskTitle,
-			global.default_assistant?.assistant_id,
-			is_cn
-		]
-	)
+	// Task creation is now handled atomically by WS handler (handleRunCmd → CreateFromWS)
+	// Title generation is handled by backend enrichTaskResult after daemon exits
 
 	const statusLabel = task ? statusLabels[task.status] || statusLabels.pending : null
 	const showContent = !!taskId && !!task
@@ -468,16 +371,17 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 					</span>
 				</div>
 
-				<div className={styles.chatContent}>
-					{(() => {
-						const effectiveChatId = isCreating
-							? task.chat_id || `creating-${creatingTaskId}`
-							: task.chat_id || taskId!
+			<div className={styles.chatContent}>
+				{(() => {
+					const effectiveChatId = isCreating
+						? task.chat_id || `creating-${creatingTaskId}`
+						: task.chat_id || taskId!
+					console.log(`[TaskDetail] taskId=${taskId} found=${!!task} effectiveChatId=${effectiveChatId}`)
 
-						return (
-							<TaskChat
-								key={effectiveChatId}
-								chatId={effectiveChatId}
+					return (
+						<TaskChat
+							key={effectiveChatId}
+							chatId={effectiveChatId}
 								assistantId={
 									isCreating
 										? global.default_assistant?.assistant_id || ''
@@ -486,8 +390,8 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 										  ''
 								}
 								fallbackAssistantId={global.default_assistant?.assistant_id}
+								columnId={isCreating ? (task.column_id || board?.columns[board.columns.length - 1]?.id) : undefined}
 								className={styles.chatbox}
-								onFirstUserMessage={isCreating ? handleFirstMessage : undefined}
 								initialWorkspace={!isCreating ? task.workspace?.id : undefined}
 								onWorkspaceChange={
 									!isCreating
