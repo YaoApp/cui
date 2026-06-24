@@ -90,7 +90,8 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 						sandbox: data.sandbox,
 						computer_filter: data.computer_filter,
 						allowModelSelection: data.connector_options?.optional || false,
-						defaultModel: data.connector
+						defaultModel: data.connector,
+						placeholder: data.placeholder
 					})
 				}
 			} catch (err) {

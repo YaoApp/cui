@@ -79,6 +79,11 @@ const TaskCard = ({ task, is_cn, isDragging, isSelected, onClick, onMenuClick, o
 				</span>
 			</div>
 
+			{/* ── Description/summary ── */}
+			{task.description && (
+				<div className={styles.description}>{task.description}</div>
+			)}
+
 			{/* ── Activity text ── */}
 			{activity && (
 				<div className={clsx(styles.activity, task.status === 'failed' && styles.activityError)}>

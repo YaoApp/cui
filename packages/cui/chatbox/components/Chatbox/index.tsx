@@ -1,36 +1,22 @@
-import React from 'react'
+import React, { useRef, useCallback } from 'react'
 import styles from './index.less'
 import MessageList from '../MessageList'
 import InputArea from '../InputArea'
+import Placeholder from './Placeholder'
 import { useChatContext } from '../../context'
+import type { InputAreaHandle } from '../../types'
 
 export interface IChatboxProps {
-	/** 样式类名 */
 	className?: string
-	/** 内联样式 */
 	style?: React.CSSProperties
-	/** 禁止发送（助手配置不就绪时） */
 	disabled?: boolean
 }
 
-/**
- * Chatbox 组件 - 独立的聊天实例
- * 包含 MessageList 和 InputArea
- * 每个 Tab 对应一个 Chatbox 实例
- *
- * 优化：直接从 Context 获取状态和方法，减少 props drilling
- * Page 组件不再需要关注 Chatbox 内部的业务逻辑
- *
- * 重要：InputArea 的状态完全由其内部管理（通过 editorRef）
- * 当 chatId 变化时，InputArea 会自动重置（清空输入）
- */
 const Chatbox: React.FC<IChatboxProps> = (props) => {
 	const { className, style, disabled } = props
+	const inputAreaRef = useRef<InputAreaHandle>(null)
 
-	// 直接从 Context 获取所需的状态和方法
 	const chatContext = useChatContext()
-
-	// Wait for ChatProvider to be ready
 	if (!chatContext) {
 		return null
 	}
@@ -56,53 +42,50 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 		updateTabWorkspace
 	} = chatContext
 
-	// 判断是否为占位符模式
-	// 当消息列表为空且不在加载历史时，显示占位符模式
 	const isPlaceholderMode = messages.length === 0 && !loading
-	const inputMode = isPlaceholderMode ? 'placeholder' : 'normal'
+
+	const handleQuickPrompt = useCallback((text: string) => {
+		inputAreaRef.current?.insertText(text)
+	}, [])
 
 	return (
 		<div className={`${styles.chatbox} ${className || ''}`} style={style}>
-				{/* Message List - 只在非占位符模式下显示 */}
-				{!isPlaceholderMode && (
-					<MessageList
-						messages={messages}
-						loading={loading}
-						streaming={streaming}
-						hasMore={hasMore}
-						loadingMore={loadingMore}
-						onLoadMore={loadMore}
-					/>
-				)}
-
-				{/* Input Area - 始终显示，状态由其内部管理 */}
-				{/* 
-					注意：这里传入的 chatId 实际上就是 activeTabId
-					每个 Tab 对应一个独立的聊天会话，Tab.chatId 就是聊天会话的唯一标识
-					InputArea 使用 chatId 作为 effect 依赖，切换 Tab 时会自动重置输入状态
-				*/}
-				<InputArea
-					mode={inputMode}
-					onSend={sendMessage}
-					loading={streaming}
+			{isPlaceholderMode ? (
+				<Placeholder assistant={assistant} onQuickPrompt={handleQuickPrompt} />
+			) : (
+				<MessageList
+					messages={messages}
+					loading={loading}
 					streaming={streaming}
-					disabled={disabled}
-					tokenUsage={tokenUsage}
-					onAbort={abort}
-					chatId={activeTabId || ''}
-					assistant={assistant}
-					initialModel={activeTab?.lastConnector}
-					initialWorkspace={activeTab?.lastWorkspace}
-					onWorkspaceChange={activeTabId ? (ws: string) => updateTabWorkspace(activeTabId, ws) : undefined}
-					workspaceLocked={messages.length > 0}
-					initialChatMode={activeTab?.mode}
-					messageQueue={messageQueue}
-					onQueueMessage={queueMessage}
-					onSendQueuedMessage={sendQueuedMessage}
-					onCancelQueuedMessage={cancelQueuedMessage}
-					onSwitchAssistant={activeTabId ? (assistantId: string) => updateTabAssistant(activeTabId, assistantId) : undefined}
+					hasMore={hasMore}
+					loadingMore={loadingMore}
+					onLoadMore={loadMore}
+					chatId={activeTabId}
 				/>
-			</div>
+			)}
+
+			<InputArea
+				ref={inputAreaRef}
+				onSend={sendMessage}
+				loading={streaming}
+				streaming={streaming}
+				disabled={disabled}
+				tokenUsage={tokenUsage}
+				onAbort={abort}
+				chatId={activeTabId || ''}
+				assistant={assistant}
+				initialModel={activeTab?.lastConnector}
+				initialWorkspace={activeTab?.lastWorkspace}
+				onWorkspaceChange={activeTabId ? (ws: string) => updateTabWorkspace(activeTabId, ws) : undefined}
+				workspaceLocked={messages.length > 0}
+				initialChatMode={activeTab?.mode}
+				messageQueue={messageQueue}
+				onQueueMessage={queueMessage}
+				onSendQueuedMessage={sendQueuedMessage}
+				onCancelQueuedMessage={cancelQueuedMessage}
+				onSwitchAssistant={activeTabId ? (assistantId: string) => updateTabAssistant(activeTabId, assistantId) : undefined}
+			/>
+		</div>
 	)
 }
 

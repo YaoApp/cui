@@ -24,7 +24,8 @@ const KanbanContent = () => {
 		closeDetail,
 		refreshTasks,
 		startCreating,
-		cancelCreating
+		cancelCreating,
+		creatingTaskId
 	} = useKanbanContext()
 
 	const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH)
@@ -81,12 +82,12 @@ const KanbanContent = () => {
 	}, [refreshTasks])
 
 	const handleDetailClose = useCallback(() => {
-		if (selectedTaskId?.startsWith('temp_')) {
+		if (creatingTaskId && selectedTaskId === creatingTaskId) {
 			cancelCreating()
 		} else {
 			closeDetail()
 		}
-	}, [selectedTaskId, cancelCreating, closeDetail])
+	}, [selectedTaskId, creatingTaskId, cancelCreating, closeDetail])
 
 	const containerClass = clsx(styles.container, isAnimating && styles.animating)
 	const maxPanelWidth = typeof window !== 'undefined' ? window.innerWidth - 64 : 1200

@@ -44,7 +44,7 @@ function formatTimeSeparator(timestamp: number): string {
 }
 
 const MessageList = (props: IMessageListProps) => {
-	const { messages, loading, className, streaming, hasMore, loadingMore, onLoadMore } = props
+	const { messages, loading, className, streaming, hasMore, loadingMore, onLoadMore, chatId } = props
 	const bottomRef = useRef<HTMLDivElement>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const lastMessageRef = useRef<HTMLDivElement | null>(null)
@@ -53,6 +53,8 @@ const MessageList = (props: IMessageListProps) => {
 	const loadMoreSentinelRef = useRef<HTMLDivElement>(null)
 	const onLoadMoreRef = useRef(onLoadMore)
 	const loadingMoreRef = useRef(loadingMore)
+	const initialScrollDone = useRef(false)
+	const prevChatIdRef = useRef(chatId)
 	onLoadMoreRef.current = onLoadMore
 	loadingMoreRef.current = loadingMore
 
@@ -109,6 +111,30 @@ const MessageList = (props: IMessageListProps) => {
 			wasLoadingMoreRef.current = false
 		}
 	}, [loadingMore, messages.length])
+
+	// Reset scroll state on chatId change (tab switch)
+	useEffect(() => {
+		if (prevChatIdRef.current !== chatId) {
+			initialScrollDone.current = false
+			shouldAutoScroll.current = true
+			prevChatIdRef.current = chatId
+		}
+	}, [chatId])
+
+	// Initial scroll to bottom when first messages arrive
+	useEffect(() => {
+		if (!initialScrollDone.current && messages.length > 0 && containerRef.current && bottomRef.current) {
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					const container = containerRef.current
+					const bottom = bottomRef.current
+					if (!container || !bottom) return
+					container.scrollTop = Math.max(0, bottom.offsetTop - container.clientHeight)
+				})
+			})
+			initialScrollDone.current = true
+		}
+	}, [messages.length])
 
 	// IntersectionObserver for loadMore trigger
 	useEffect(() => {

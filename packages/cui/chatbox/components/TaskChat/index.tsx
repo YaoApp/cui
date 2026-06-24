@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { getLocale } from '@umijs/max'
 import type { Message } from '../../../openapi'
-import type { SendMessageRequest } from '../../types'
+import type { SendMessageRequest, InputAreaHandle } from '../../types'
 import { Agent } from '../../../openapi/agent'
 import { useTaskWS } from '../../../pages/kanban/hooks/useTaskWS'
 import MessageList from '../MessageList'
 import InputArea from '../InputArea'
+import Placeholder from '../Chatbox/Placeholder'
 import styles from './index.less'
 
 interface AssistantInfo {
@@ -19,6 +20,7 @@ interface AssistantInfo {
 	default_mode?: string
 	sandbox?: boolean
 	computer_filter?: any
+	placeholder?: { title?: string; description?: string; prompts?: string[] }
 }
 
 export interface TaskChatProps {
@@ -94,7 +96,8 @@ const TaskChat: React.FC<TaskChatProps> = (props) => {
 			modes: data.modes,
 			default_mode: data.default_mode,
 			sandbox: data.sandbox,
-			computer_filter: data.computer_filter
+			computer_filter: data.computer_filter,
+			placeholder: data.placeholder
 		})
 
 		const fetchAssistant = async (id: string): Promise<boolean> => {
@@ -141,7 +144,8 @@ const TaskChat: React.FC<TaskChatProps> = (props) => {
 							modes: data.modes,
 							default_mode: data.default_mode,
 							sandbox: data.sandbox,
-							computer_filter: data.computer_filter
+							computer_filter: data.computer_filter,
+							placeholder: data.placeholder
 						})
 					}
 					onAssistantChange?.(newAssistantId)
@@ -233,6 +237,7 @@ const TaskChatWS: React.FC<TaskChatWSProps> = ({
 		workspaceId: initialWorkspace,
 		enabled: true
 	})
+	const inputAreaRef = useRef<InputAreaHandle>(null)
 
 	useEffect(() => {
 		onMessagesChange?.(messages)
@@ -247,11 +252,20 @@ const TaskChatWS: React.FC<TaskChatWSProps> = ({
 		[sendMessage]
 	)
 
+	const handleQuickPrompt = useCallback((text: string) => {
+		inputAreaRef.current?.insertText(text)
+	}, [])
+
 	const isEmpty = messages.length === 0 && !streaming
+
+	const renderPlaceholder = () => {
+		if (placeholder) return placeholder
+		return <Placeholder assistant={assistant} onQuickPrompt={handleQuickPrompt} />
+	}
 
 	return (
 		<div className={className} style={style}>
-			{isEmpty && placeholder ? placeholder : (
+			{isEmpty ? renderPlaceholder() : (
 				<MessageList
 					messages={messages}
 					loading={false}
@@ -261,24 +275,24 @@ const TaskChatWS: React.FC<TaskChatWSProps> = ({
 					onLoadMore={loadMore}
 				/>
 			)}
-			{!readOnly && (
-				<InputArea
-					mode={isEmpty ? 'placeholder' : 'normal'}
-					assistant={assistant || undefined}
-					onSend={handleSend}
-					onAbort={abort}
-					chatId={chatId}
-					loading={streaming}
-					streaming={streaming}
-					disabled={disabled}
-					initialWorkspace={initialWorkspace}
-					onWorkspaceChange={onWorkspaceChange}
-					workspaceLocked={messages.length > 0}
-					onSwitchAssistant={allowAssistantSwitch ? onSwitchAssistant : undefined}
-				/>
-			)}
-		</div>
-	)
+		{!readOnly && (
+			<InputArea
+				ref={inputAreaRef}
+				assistant={assistant || undefined}
+				onSend={handleSend}
+				onAbort={abort}
+				chatId={chatId}
+				loading={streaming}
+				streaming={streaming}
+				disabled={disabled}
+				initialWorkspace={initialWorkspace}
+				onWorkspaceChange={onWorkspaceChange}
+				workspaceLocked={messages.length > 0}
+				onSwitchAssistant={allowAssistantSwitch ? onSwitchAssistant : undefined}
+			/>
+		)}
+	</div>
+)
 }
 
 interface TaskChatCustomProps {
@@ -312,22 +326,32 @@ const TaskChatCustom: React.FC<TaskChatCustomProps> = ({
 }) => {
 	const msgs = externalMessages || []
 	const isPlaceholder = msgs.length === 0 && !loading
+	const inputAreaRef = useRef<InputAreaHandle>(null)
+
+	const handleQuickPrompt = useCallback((text: string) => {
+		inputAreaRef.current?.insertText(text)
+	}, [])
+
+	const renderPlaceholder = () => {
+		if (placeholder) return placeholder
+		return <Placeholder assistant={assistant} onQuickPrompt={handleQuickPrompt} />
+	}
 
 	return (
 		<div className={className} style={style}>
-			{isPlaceholder && placeholder}
+			{isPlaceholder && renderPlaceholder()}
 			{!isPlaceholder && <MessageList messages={msgs} loading={loading} streaming={streaming} />}
-			{!readOnly && (
-				<InputArea
-					mode={isPlaceholder ? 'placeholder' : 'normal'}
-					assistant={assistant || undefined}
-					onSend={onSend}
-					loading={loading}
-					streaming={streaming}
-					disabled={disabled || loading}
-					onSwitchAssistant={allowAssistantSwitch ? onSwitchAssistant : undefined}
-				/>
-			)}
+		{!readOnly && (
+			<InputArea
+				ref={inputAreaRef}
+				assistant={assistant || undefined}
+				onSend={onSend}
+				loading={loading}
+				streaming={streaming}
+				disabled={disabled || loading}
+				onSwitchAssistant={allowAssistantSwitch ? onSwitchAssistant : undefined}
+			/>
+		)}
 		</div>
 	)
 }
