@@ -26,7 +26,8 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 		board, boards, currentBoardId, is_cn,
 		searchKeyword, setSearchKeyword, statusFilter, setStatusFilter,
 		switchBoard, createBoard, updateBoard, deleteBoard,
-		createBoardFromTemplate, getBoardTemplates
+		createBoardFromTemplate, getBoardTemplates,
+		quota
 	} = useKanbanContext()
 
 	const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -504,6 +505,18 @@ const HeaderBar = ({ onCreateTask }: HeaderBarProps) => {
 						<span className={styles.searchHint}>ESC</span>
 					</div>
 				</div>
+			)}
+
+			{quota && quota.limit > 0 && (
+				<span className={styles.quotaInfo}>
+					<Icon name='material-memory' size={14} />
+					<span>{quota.running}/{quota.limit}</span>
+					{quota.queued > 0 && (
+						<span className={styles.quotaQueued}>
+							{is_cn ? `排队 ${quota.queued}` : `Queue ${quota.queued}`}
+						</span>
+					)}
+				</span>
 			)}
 
 			<Button

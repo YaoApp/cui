@@ -5,6 +5,12 @@ import type { Board, BoardSummary, BoardTemplate, Column, KanbanTask, StatusFilt
 import * as services from './services'
 import { initEventStore, disposeEventStore } from '@/openapi/events'
 
+export interface QuotaInfo {
+	limit: number
+	running: number
+	queued: number
+}
+
 interface KanbanContextValue {
 	board: Board | null
 	boards: BoardSummary[]
@@ -19,6 +25,7 @@ interface KanbanContextValue {
 	statusFilter: StatusFilter
 	is_cn: boolean
 	creatingTaskId: string | null
+	quota: QuotaInfo | null
 
 	selectTask: (taskId: string) => void
 	closeDetail: () => void
@@ -35,6 +42,7 @@ interface KanbanContextValue {
 	removeColumn: (columnId: string) => Promise<void>
 	reorderColumns: (columnIds: string[]) => Promise<void>
 	refreshTasks: () => Promise<void>
+	refreshQuota: () => Promise<void>
 	startCreating: (columnId?: string) => void
 	finalizeCreating: (tempId: string, realTask: KanbanTask) => void
 	cancelCreating: () => void
@@ -68,6 +76,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 	const [searchKeyword, setSearchKeyword] = useState('')
 	const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
 	const [creatingTaskId, setCreatingTaskId] = useState<string | null>(null)
+	const [quota, setQuota] = useState<QuotaInfo | null>(null)
 
 	const [isAnimating, setIsAnimating] = useState(false)
 
@@ -680,6 +689,15 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		})
 	}, [board])
 
+	const refreshQuota = useCallback(async () => {
+		try {
+			const data = await services.getQuota()
+			setQuota(data)
+		} catch (err) {
+			console.error('[Kanban] Failed to refresh quota:', err)
+		}
+	}, [])
+
 	const filteredTasks = useMemo(() => {
 		const creatingTask = tasks.find((t) => t.status === 'creating')
 		let result = tasks
@@ -728,6 +746,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			statusFilter,
 			is_cn,
 			creatingTaskId,
+			quota,
 			selectTask,
 			closeDetail,
 			setSearchKeyword,
@@ -743,6 +762,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			removeColumn,
 			reorderColumns,
 			refreshTasks,
+			refreshQuota,
 			startCreating,
 			finalizeCreating,
 			cancelCreating,
@@ -769,6 +789,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			statusFilter,
 			is_cn,
 			creatingTaskId,
+			quota,
 			selectTask,
 			closeDetail,
 			addTask,
@@ -782,6 +803,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			removeColumn,
 			reorderColumns,
 			refreshTasks,
+			refreshQuota,
 			startCreating,
 			finalizeCreating,
 			cancelCreating,
