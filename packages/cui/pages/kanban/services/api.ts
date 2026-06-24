@@ -270,3 +270,10 @@ export async function reorderColumns(boardId: string, columnIds: string[]): Prom
 	const res = await agent.boards.ReorderColumns(boardId, columnIds)
 	if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to reorder columns')
 }
+
+export async function getQuota(): Promise<{ limit: number; running: number; queued: number }> {
+	const api = getOpenAPI()
+	const res = await api.Get<{ limit: number; running: number; queued: number }>('/agent/tasks/quota')
+	if (api.IsError(res)) return { limit: 0, running: 0, queued: 0 }
+	return res.data || { limit: 0, running: 0, queued: 0 }
+}

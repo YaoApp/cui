@@ -23,6 +23,7 @@ const KanbanContent = () => {
 		isAnimating,
 		closeDetail,
 		refreshTasks,
+		refreshQuota,
 		startCreating,
 		cancelCreating,
 		creatingTaskId
@@ -77,9 +78,15 @@ const KanbanContent = () => {
 		const stream = getEventStream()
 		const unsub = stream.subscribe('task.*', () => {
 			refreshTasks()
+			refreshQuota()
 		})
 		return unsub
-	}, [refreshTasks])
+	}, [refreshTasks, refreshQuota])
+
+	// Initial quota fetch
+	useEffect(() => {
+		refreshQuota()
+	}, [refreshQuota])
 
 	const handleDetailClose = useCallback(() => {
 		if (creatingTaskId && selectedTaskId === creatingTaskId) {
