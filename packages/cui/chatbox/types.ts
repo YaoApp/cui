@@ -133,6 +133,12 @@ export interface IMessageListProps {
 	className?: string
 	/** 重试回调 */
 	onRetry?: (messageId: string) => void
+	/** 是否还有更早的历史消息 */
+	hasMore?: boolean
+	/** 正在加载更多历史消息 */
+	loadingMore?: boolean
+	/** 加载更多历史消息回调 */
+	onLoadMore?: () => void
 }
 
 /**

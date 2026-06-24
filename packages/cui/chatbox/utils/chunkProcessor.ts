@@ -71,8 +71,9 @@ export function processChunk(
 		return { messages: prevMessages, event: { name: eventName, data: chunk.props?.data || chunk.props } }
 	}
 
-	// Build scoped message_id
-	const rawMessageId = chunk.message_id || chunk.chunk_id || 'ai-response-unknown'
+	// Build scoped message_id (defensive fallback to prevent ID collisions)
+	const rawMessageId = chunk.message_id || chunk.chunk_id
+		|| (chunk.metadata?.sequence ? `seq-${chunk.metadata.sequence}` : `msg-${nanoid()}`)
 	const messageId = `${session.streamId}:${rawMessageId}`
 
 	// Type change handling
@@ -105,6 +106,7 @@ export function processChunk(
 			thread_id: chunk.thread_id,
 			type: mergedState.type,
 			props: snapshotProps,
+			metadata: chunk.metadata || next[idx].metadata,
 			delta: isCompleted ? false : chunk.delta
 		}
 		return { messages: next }
@@ -118,6 +120,7 @@ export function processChunk(
 		thread_id: chunk.thread_id,
 		type: mergedState.type,
 		props: snapshotProps,
+		metadata: { ...(chunk.metadata || {}), timestamp: Date.now() },
 		delta: isCompleted ? false : chunk.delta
 	}
 	return { messages: [...prevMessages, newMessage] }

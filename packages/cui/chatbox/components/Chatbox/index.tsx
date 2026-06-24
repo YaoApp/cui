@@ -44,8 +44,11 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 		activeTabId,
 		assistant,
 		messageQueue,
+		hasMore,
+		loadingMore,
 		sendMessage,
 		abort,
+		loadMore,
 		queueMessage,
 		sendQueuedMessage,
 		cancelQueuedMessage,
@@ -61,7 +64,16 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 	return (
 		<div className={`${styles.chatbox} ${className || ''}`} style={style}>
 				{/* Message List - 只在非占位符模式下显示 */}
-				{!isPlaceholderMode && <MessageList messages={messages} loading={loading} streaming={streaming} />}
+				{!isPlaceholderMode && (
+					<MessageList
+						messages={messages}
+						loading={loading}
+						streaming={streaming}
+						hasMore={hasMore}
+						loadingMore={loadingMore}
+						onLoadMore={loadMore}
+					/>
+				)}
 
 				{/* Input Area - 始终显示，状态由其内部管理 */}
 				{/* 

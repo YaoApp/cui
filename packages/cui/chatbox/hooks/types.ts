@@ -34,11 +34,16 @@ export interface UseChatReturn {
 	// Message Queue State
 	messageQueue: QueuedMessage[]
 
+	// Pagination State
+	hasMore: boolean
+	loadingMore: boolean
+
 	// Actions
 	sendMessage: (request: SendMessageRequest) => Promise<void>
 	abort: () => void
 	reset: () => void
 	loadHistory: (chatId: string) => Promise<void>
+	loadMore: () => void
 	createNewChat: (assistantId?: string) => void
 
 	// Tab Actions

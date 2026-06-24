@@ -226,7 +226,7 @@ const TaskChatWS: React.FC<TaskChatWSProps> = ({
 	onSwitchAssistant,
 	onMessagesChange
 }) => {
-	const { messages, streaming, sendMessage, abort } = useTaskWS({
+	const { messages, streaming, hasMore, loadingMore, sendMessage, loadMore, abort } = useTaskWS({
 		chatId,
 		assistantId,
 		columnId,
@@ -251,7 +251,16 @@ const TaskChatWS: React.FC<TaskChatWSProps> = ({
 
 	return (
 		<div className={className} style={style}>
-			{isEmpty && placeholder ? placeholder : <MessageList messages={messages} loading={false} streaming={streaming} />}
+			{isEmpty && placeholder ? placeholder : (
+				<MessageList
+					messages={messages}
+					loading={false}
+					streaming={streaming}
+					hasMore={hasMore}
+					loadingMore={loadingMore}
+					onLoadMore={loadMore}
+				/>
+			)}
 			{!readOnly && (
 				<InputArea
 					mode={isEmpty ? 'placeholder' : 'normal'}
