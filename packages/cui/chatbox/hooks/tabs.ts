@@ -1,11 +1,12 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { nanoid } from 'nanoid'
 import { getLocale } from '@umijs/max'
 import type { ChatTab } from '../types'
 import type { QueuedMessage } from './types'
 import type { ChatState, ChatStateActions, ChatRefs } from './state'
 import { clearMessageCache } from './delta'
-import type { ChatMessage, Message, AssistantInfo } from '../../openapi'
+import type { Message } from '../../openapi'
+import { processHistoryMessages } from '../utils/messageHistory'
 
 export interface UseTabsOptions {
 	state: ChatState
@@ -14,151 +15,17 @@ export interface UseTabsOptions {
 	defaultAssistantId?: string
 }
 
-/**
- * Parse tool_call content from stored format to ToolCallProps
- * Stored format: "[{...delta1}][{...delta2}]..." concatenated JSON arrays
- * Each delta contains: index, id?, type?, function: { name?, arguments? }
- * @param content - Raw content string from storage
- * @returns Parsed ToolCallProps with id, name, arguments
- */
-const parseToolCallContent = (content: string): { id?: string; name?: string; arguments?: string } => {
-	if (!content) return {}
-
-	try {
-		// Split concatenated JSON arrays: "[...][...]" -> ["[...]", "[...]"]
-		const chunks = content.match(/\[[^\[\]]*\]/g) || []
-
-		let id: string | undefined
-		let name: string | undefined
-		let args = ''
-
-		for (const chunk of chunks) {
-			try {
-				const arr = JSON.parse(chunk)
-				if (Array.isArray(arr) && arr.length > 0) {
-					const item = arr[0]
-					// Extract id from first chunk that has it
-					if (item.id && !id) {
-						id = item.id
-					}
-					// Extract name from function
-					if (item.function?.name && !name) {
-						name = item.function.name
-					}
-					// Accumulate arguments
-					if (item.function?.arguments) {
-						args += item.function.arguments
-					}
-				}
-			} catch {
-				// Skip invalid chunks
-			}
-		}
-
-		return { id, name, arguments: args || undefined }
-	} catch {
-		return {}
-	}
-}
-
-/**
- * Convert stored ChatMessage to display Message format
- * @param stored - ChatMessage from server storage
- * @param assistants - Map of assistant_id to AssistantInfo for avatar/name lookup
- * @param mainAssistantId - Main assistant ID for the chat session (used to replace sub-agent info)
- * @returns Message for UI display
- */
-const convertStoredToDisplay = (
-	stored: ChatMessage,
-	assistants?: Record<string, AssistantInfo>,
-	mainAssistantId?: string
-): Message => {
-	// Get assistant info if available
-	let assistantInfo = stored.assistant_id && assistants?.[stored.assistant_id]
-
-	// If message has thread_id, it's from a sub-agent - use the main assistant info instead
-	if (stored.thread_id && mainAssistantId && assistants?.[mainAssistantId]) {
-		assistantInfo = assistants[mainAssistantId]
-	}
-
-	// Parse tool_call content if needed
-	let props = { ...stored.props, role: stored.role }
-	if (stored.type === 'tool_call' && stored.props?.content) {
-		const toolCallProps = parseToolCallContent(stored.props.content)
-		props = {
-			...props,
-			...toolCallProps
-		}
-	}
-
-	// Determine which assistant_id to use for the message
-	// If using main assistant info (for sub-agent messages), use main assistant's ID
-	const effectiveAssistantId =
-		stored.thread_id && mainAssistantId ? mainAssistantId : stored.assistant_id
-
-	return {
-		ui_id: nanoid(), // Generate unique UI ID for React key
-		message_id: stored.message_id,
-		type: stored.type,
-		props,
-		block_id: stored.block_id,
-		thread_id: stored.thread_id,
-		delta: false, // Historical messages are complete
-		metadata: {
-			timestamp: new Date(stored.created_at).getTime(),
-			sequence: stored.sequence,
-			request_id: stored.request_id // Include request_id for reference support
-		},
-		// Add assistant info at message root level (same as streaming messages)
-		...(assistantInfo && {
-			assistant: {
-				assistant_id: effectiveAssistantId,
-				name: assistantInfo.name,
-				avatar: assistantInfo.avatar
-			}
-		})
-	}
-}
-
-/**
- * Process messages to deduplicate consecutive assistant info
- * Only the first message from an assistant (after user message or different assistant) shows avatar
- * @param messages - Array of display messages
- * @returns Processed messages with deduplicated assistant info
- */
-const deduplicateAssistantInfo = (messages: Message[]): Message[] => {
-	let lastAssistantId: string | undefined = undefined
-
-	return messages.map((msg) => {
-		const msgAssistant = (msg as any).assistant
-
-		// User messages reset the lastAssistantId
-		if (msg.type === 'user_input') {
-			lastAssistantId = undefined
-			return msg
-		}
-
-		// For assistant messages, check if we should show the assistant info
-		if (msgAssistant?.assistant_id) {
-			if (msgAssistant.assistant_id === lastAssistantId) {
-				// Same assistant as previous, remove assistant info
-				const { assistant, ...rest } = msg as any
-				return rest as Message
-			}
-			// Different assistant, keep info and update lastAssistantId
-			lastAssistantId = msgAssistant.assistant_id
-		}
-
-		return msg
-	})
-}
-
 export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOptions) {
 	const { tabs, activeTabId, sessions, streamingStates } = state
 	const { setTabs, setActiveTabId, setChatStates, setLoadingStates, setStreamingStates, setMessageQueues } = actions
 
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
+
+	// Pagination state refs (for loadMore support)
+	const hasMoreStatesRef = useRef<Record<string, boolean>>({})
+	const firstSeqStatesRef = useRef<Record<string, number>>({})
+	const loadingMoreStatesRef = useRef<Record<string, boolean>>({})
 
 	// Sync streaming state to tabs
 	useEffect(() => {
@@ -305,10 +172,9 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 					return
 				}
 
-				// Fetch session details and messages in parallel
 				const [sessionRes, messagesRes] = await Promise.all([
 					state.chatClient.GetSession(chatId).catch(() => null),
-					state.chatClient.GetMessages(chatId).catch((err: any) => {
+					state.chatClient.GetMessages(chatId, { limit: 50, locale: getLocale() }).catch((err: any) => {
 						const msg = err?.message || ''
 						if (msg.includes('404') || msg.includes('Not Found')) {
 							return { messages: [], assistants: {} }
@@ -334,14 +200,13 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 				// Get main assistant ID from session
 				const mainAssistantId = sessionRes?.assistant_id || session?.assistant_id
 
-				// Convert stored messages to display format with assistant info
-				// Filter out 'loading' and 'action' type messages (transient states and UI actions)
-				// Then deduplicate consecutive assistant info
-				const convertedMessages = messagesRes.messages
-					.filter((msg: ChatMessage) => msg.type !== 'loading' && msg.type !== 'action')
-					.map((msg: ChatMessage) => convertStoredToDisplay(msg, messagesRes.assistants, mainAssistantId))
-				const displayMessages = deduplicateAssistantInfo(convertedMessages)
+				const displayMessages = processHistoryMessages(messagesRes.messages, messagesRes.assistants, mainAssistantId)
 				setChatStates((prev) => ({ ...prev, [chatId]: displayMessages }))
+
+				hasMoreStatesRef.current[chatId] = messagesRes.messages.length >= 50
+				if (displayMessages.length > 0) {
+					firstSeqStatesRef.current[chatId] = (displayMessages[0]?.metadata as any)?.id || 0
+				}
 
 			// Update tab with session details (title, assistantId, lastConnector, lastMode, historyLoaded)
 			const title = sessionRes?.title || session?.title || (is_cn ? '历史对话' : 'Chat History')
@@ -400,6 +265,52 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 		]
 	)
 
+	const getHasMore = useCallback((chatId: string) => {
+		return hasMoreStatesRef.current[chatId] || false
+	}, [])
+
+	const getLoadingMore = useCallback((chatId: string) => {
+		return loadingMoreStatesRef.current[chatId] || false
+	}, [])
+
+	const loadMoreHistory = useCallback(
+		async (chatId: string) => {
+			const firstId = firstSeqStatesRef.current[chatId]
+			if (!firstId || loadingMoreStatesRef.current[chatId]) return
+			if (!state.chatClient) return
+
+			loadingMoreStatesRef.current[chatId] = true
+
+			try {
+				const messagesRes = await state.chatClient.GetMessages(chatId, {
+					limit: 50,
+					before_id: firstId,
+					locale: getLocale()
+				})
+
+				const session = sessions.find((s: any) => s.chat_id === chatId)
+				const mainAssistantId = session?.assistant_id || defaultAssistantId
+
+				const olderMessages = processHistoryMessages(messagesRes.messages, messagesRes.assistants, mainAssistantId)
+
+				setChatStates((prev) => ({
+					...prev,
+					[chatId]: [...olderMessages, ...(prev[chatId] || [])]
+				}))
+
+				hasMoreStatesRef.current[chatId] = messagesRes.messages.length >= 50
+				if (olderMessages.length > 0) {
+					firstSeqStatesRef.current[chatId] = (olderMessages[0]?.metadata as any)?.id || 0
+				}
+			} catch (err) {
+				console.error('Failed to load more history', err)
+			} finally {
+				loadingMoreStatesRef.current[chatId] = false
+			}
+		},
+		[state.chatClient, sessions, defaultAssistantId, setChatStates]
+	)
+
 	const updateTabAssistant = useCallback(
 		(chatId: string, assistantId: string) => {
 			setTabs((prev) =>
@@ -423,7 +334,12 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 		closeTab,
 		createNewChat,
 		loadHistory,
+		loadMoreHistory,
+		getHasMore,
+		getLoadingMore,
 		updateTabAssistant,
-		updateTabWorkspace
+		updateTabWorkspace,
+		hasMoreStatesRef,
+		firstSeqStatesRef
 	}
 }

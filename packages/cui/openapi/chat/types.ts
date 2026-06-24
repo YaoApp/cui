@@ -946,6 +946,7 @@ export interface UpdateChatRequest {
  * Represents a message stored in the database
  */
 export interface ChatMessage {
+	id?: number // DB primary key (for cursor pagination)
 	message_id: string
 	chat_id: string
 	request_id?: string
@@ -975,6 +976,8 @@ export interface ChatMessageFilter {
 	limit?: number
 	offset?: number
 	locale?: string // Locale for assistant info (e.g., "zh-cn", "en-us")
+	before_sequence?: number // Cursor pagination: load messages with sequence < this value
+	before_id?: number // Cursor pagination: load messages with id < this value
 }
 
 /**

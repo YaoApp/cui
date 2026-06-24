@@ -245,7 +245,7 @@ function createChunkHandler(
 					type: mergedState.type,
 					props: mergedState.props,
 					delta: isCompleted ? false : chunk.delta,
-					metadata: { request_id: requestId },
+					metadata: { request_id: requestId, timestamp: Date.now() },
 					...(finalShouldAdd && assistantInfo && { assistant: assistantInfo })
 				}
 				if (shouldAdd) {

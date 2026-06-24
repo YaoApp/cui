@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { getLocale } from '@umijs/max'
 import { useGlobal } from '@/context/app'
 import { Chat } from '../../openapi'
@@ -111,7 +111,17 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 	})
 
 	// Tab management
-	const { activateTab, closeTab, createNewChat, loadHistory, updateTabAssistant, updateTabWorkspace } = useTabs({
+	const {
+		activateTab,
+		closeTab,
+		createNewChat,
+		loadHistory,
+		loadMoreHistory,
+		getHasMore,
+		getLoadingMore,
+		updateTabAssistant,
+		updateTabWorkspace
+	} = useTabs({
 		state,
 		actions,
 		refs,
@@ -160,6 +170,15 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		generateChatTitle
 	})
 
+	// Pagination for chatbox loadMore
+	const hasMore = activeTabId ? getHasMore(activeTabId) : false
+	const loadingMore = activeTabId ? getLoadingMore(activeTabId) : false
+	const loadMore = useCallback(() => {
+		if (activeTabId) {
+			loadMoreHistory(activeTabId)
+		}
+	}, [activeTabId, loadMoreHistory])
+
 	return {
 		messages,
 		sessions,
@@ -172,10 +191,13 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		activeTab,
 		activeTabId,
 		messageQueue,
+		hasMore,
+		loadingMore,
 		sendMessage,
 		abort,
 		reset,
 		loadHistory,
+		loadMore,
 		createNewChat,
 		activateTab,
 		closeTab,

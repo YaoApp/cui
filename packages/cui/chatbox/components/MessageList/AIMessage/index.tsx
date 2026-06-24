@@ -7,16 +7,16 @@ import styles from './index.less'
 
 interface IAIMessageProps {
 	message: Message
-	loading?: boolean // Is this message still generating?
+	loading?: boolean
+	showHeader?: boolean
 }
 
-const AIMessage = ({ message, loading }: IAIMessageProps) => {
-	// Get assistant info from message props (for history messages) or message.assistant (for streaming)
+const AIMessage = ({ message, loading, showHeader = true }: IAIMessageProps) => {
 	const props = message.props || {}
 	const assistant = (message as any).assistant
 	const hasAssistantInfo = assistant || props.assistant_name || props.assistant_avatar
 
-	const avatarData = hasAssistantInfo
+	const avatarData = showHeader && hasAssistantInfo
 		? {
 				id: assistant?.assistant_id || '',
 				avatar: assistant?.avatar || props.assistant_avatar,

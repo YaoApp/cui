@@ -531,6 +531,9 @@ export class Chat {
 			if (filter.type) params.append('type', filter.type)
 			if (filter.limit) params.append('limit', String(filter.limit))
 			if (filter.offset) params.append('offset', String(filter.offset))
+			if (filter.before_sequence) params.append('before_sequence', String(filter.before_sequence))
+			if (filter.locale) params.append('locale', filter.locale)
+			if (filter.before_id) params.append('before_id', String(filter.before_id))
 		}
 
 		const queryString = params.toString()
