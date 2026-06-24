@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
 import { message, Tooltip as AntTooltip, Spin } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
@@ -40,9 +40,8 @@ interface Attachment {
 	error?: string
 }
 
-const InputArea = (props: IInputAreaProps) => {
+const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaProps>((props, ref) => {
 	const {
-		mode,
 		onSend,
 		loading,
 		disabled,
@@ -64,7 +63,6 @@ const InputArea = (props: IInputAreaProps) => {
 		initialTrace,
 		onSwitchAssistant
 	} = props
-	const [isAnimating, setIsAnimating] = useState(false)
 	const [isDragOver, setIsDragOver] = useState(false)
 	const [showMentions, setShowMentions] = useState(false)
 	const [mentionKeyword, setMentionKeyword] = useState('')
@@ -127,6 +125,25 @@ const InputArea = (props: IInputAreaProps) => {
 	// Store selection range to restore focus after UI interactions
 	const lastRangeRef = useRef<Range | null>(null)
 
+	useImperativeHandle(ref, () => ({
+		insertText(text: string) {
+			const editor = editorRef.current
+			if (!editor) return
+			editor.focus()
+			const range = document.createRange()
+			range.selectNodeContents(editor)
+			range.collapse(false)
+			const textNode = document.createTextNode(text)
+			range.insertNode(textNode)
+			range.setStartAfter(textNode)
+			range.collapse(true)
+			const sel = window.getSelection()
+			sel?.removeAllRanges()
+			sel?.addRange(range)
+			editor.dispatchEvent(new Event('input', { bubbles: true }))
+		}
+	}))
+
 	// State
 	const [attachments, setAttachments] = useState<Attachment[]>([])
 	const [agent, setAgent] = useState(propAssistant)
@@ -162,14 +179,6 @@ const InputArea = (props: IInputAreaProps) => {
 			}
 		}
 	}, [propAssistant, defaultProvider, initialModel, initialChatMode, initialTrace])
-
-	// Reset animating state after transition
-	useEffect(() => {
-		if (mode === 'normal' && isAnimating) {
-			const timer = setTimeout(() => setIsAnimating(false), 350)
-			return () => clearTimeout(timer)
-		}
-	}, [mode, isAnimating])
 
 	// Reset input when chatId changes (new chat or switch tab)
 	// 每个 tab 的输入框是独立的，切换时清空输入
@@ -627,10 +636,6 @@ const InputArea = (props: IInputAreaProps) => {
 		const message = constructMessage()
 		if (!message) return
 
-		if (mode === 'placeholder') {
-			setIsAnimating(true)
-		}
-
 		onSend({
 			messages: [message],
 			model: currentModel,
@@ -914,12 +919,6 @@ const InputArea = (props: IInputAreaProps) => {
 
 	// --- Components ---
 
-	const renderPlaceholder = () => (
-		<div className={styles.placeholderHint}>
-			<h3>{is_cn ? '今天有什么可以帮您？' : 'How can I help you today?'}</h3>
-		</div>
-	)
-
 	const handlePageClick = () => {
 		if (!currentPage) return
 		if (window.$app?.Event) {
@@ -1182,24 +1181,25 @@ const InputArea = (props: IInputAreaProps) => {
 						<Sparkle size={14} />
 					</ToolButton>
 
-					{global?.app_info?.mode === 'development' && (
-						<ToolButton
-							tooltip={
-								showTrace
-									? is_cn
-										? '隐藏追踪'
-										: 'Hide Trace'
-									: is_cn
-									? '显示追踪'
-									: 'Show Trace'
-							}
-							onClick={() => setShowTrace(!showTrace)}
-							active={showTrace}
-							activeVariant='highlight'
-						>
-							<Icon name='material-footprint' size={14} />
-						</ToolButton>
-					)}
+				{/* Trace button hidden - temporarily disabled, kept for future use */}
+				{false && global?.app_info?.mode === 'development' && (
+					<ToolButton
+						tooltip={
+							showTrace
+								? is_cn
+									? '隐藏追踪'
+									: 'Hide Trace'
+								: is_cn
+								? '显示追踪'
+								: 'Show Trace'
+						}
+						onClick={() => setShowTrace(!showTrace)}
+						active={showTrace}
+						activeVariant='highlight'
+					>
+						<Icon name='material-footprint' size={14} />
+					</ToolButton>
+				)}
 				</div>
 			</div>
 		)
@@ -1292,11 +1292,10 @@ const InputArea = (props: IInputAreaProps) => {
 	return (
 		<>
 			<div
-				className={clsx(styles.container, styles[mode], isAnimating && styles.animating, className)}
+				className={clsx(styles.container, styles.normal, className)}
 				style={style}
 			>
 				<div className={styles.content}>
-					{mode === 'placeholder' && renderPlaceholder()}
 
 					{/* TODO: Queue/pre-send feature temporarily disabled, will be enabled in a future version */}
 					{/* {messageQueue &&
@@ -1343,25 +1342,13 @@ const InputArea = (props: IInputAreaProps) => {
 								onKeyDown={handleKeyDown}
 								onPaste={handlePaste}
 							data-placeholder={
-								mode === 'placeholder'
-										? is_cn
-											? '输入消息... (Shift + Enter 换行)'
-											: 'Type a message... (Shift + Enter for new line)'
-										: streaming
-										? is_cn
-											? '正在响应中，请等待完成后再发送...'
-											: 'Waiting for response to complete...'
-										: // TODO: Queue/pre-send feature temporarily disabled
-										// ? is_cn
-										// 	? messageQueue && messageQueue.length > 0
-										// 		? '继续输入（回车键排队）或空回车立即发送队列 (Shift + Enter 换行)'
-										// 		: '可继续输入（回车键排队，空回车立即发送） (Shift + Enter 换行)'
-										// 	: messageQueue && messageQueue.length > 0
-										// 	? 'Continue typing (Enter to queue, empty Enter to send now, Shift + Enter for new line)'
-										// 	: 'Continue typing (Enter to queue, empty Enter to send, Shift + Enter for new line)'
-										is_cn
-										? '输入消息 (Shift + Enter 换行)'
-										: 'Type a message (Shift + Enter for new line)'
+								streaming
+									? is_cn
+										? '正在响应中，请等待完成后再发送...'
+										: 'Waiting for response to complete...'
+									: is_cn
+										? '输入消息... (Shift + Enter 换行)'
+										: 'Type a message... (Shift + Enter for new line)'
 								}
 							/>
 						{renderSendButton()}
@@ -1377,6 +1364,8 @@ const InputArea = (props: IInputAreaProps) => {
 			<ResourcePicker visible={resourcePickerVisible} onClose={handleCloseResourcePicker} />
 		</>
 	)
-}
+})
+
+InputArea.displayName = 'InputArea'
 
 export default InputArea

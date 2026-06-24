@@ -9,7 +9,7 @@ export { Chatbox, Header, InputArea, MessageList, TaskChat } from './components'
 export { ChatProvider, useChatContext } from './context'
 
 // Types
-export type { IChatProps, ChatTab, IChatSession, IInputAreaProps, IMessageListProps, IHeaderProps } from './types'
+export type { IChatProps, ChatTab, IChatSession, IInputAreaProps, InputAreaHandle, IMessageListProps, IHeaderProps } from './types'
 export type { TaskChatProps } from './components/TaskChat'
 
 export type { QueuedMessage } from './hooks/useChat'

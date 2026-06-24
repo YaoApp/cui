@@ -83,6 +83,33 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 
 	const isCreating = task?.status === 'creating'
 
+	const wasCreatingRef = useRef(false)
+	const tempTitleSetRef = useRef(false)
+
+	useEffect(() => {
+		wasCreatingRef.current = false
+		tempTitleSetRef.current = false
+	}, [taskId])
+
+	useEffect(() => {
+		if (isCreating) wasCreatingRef.current = true
+	}, [isCreating])
+
+	const handleMessagesChange = useCallback((msgs: any[]) => {
+		if (!taskId || tempTitleSetRef.current || !wasCreatingRef.current) return
+		const firstUserMsg = msgs.find((m: any) => m.type === 'user_input')
+		if (!firstUserMsg) return
+		const rawContent = firstUserMsg.props?.content
+		if (!rawContent) return
+		const text = typeof rawContent === 'string'
+			? rawContent
+			: (Array.isArray(rawContent) ? (rawContent.find((p: any) => p.type === 'text')?.text || '') : '')
+		if (!text) return
+		tempTitleSetRef.current = true
+		const title = text.length > 50 ? text.slice(0, 50) + '…' : text
+		ctx?.updateLocalTitle?.(taskId, title)
+	}, [taskId, ctx])
+
 	const totalWidth = chatWidth + (sidebarOpen ? sidebarWidth : 0)
 
 	// Sidebar tabs management
@@ -398,25 +425,12 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 										? (id) => services.updateTask(taskId!, { workspace_id: id })
 										: undefined
 								}
-								onAssistantChange={
-									!isCreating
-										? (id) => services.updateTask(taskId!, { assistant_id: id })
-										: undefined
-								}
-								placeholder={
-									<div className={styles.taskEmptyState}>
-										<Icon
-											name='material-chat_bubble_outline'
-											size={32}
-											className={styles.emptyIcon}
-										/>
-										<p>
-											{is_cn
-												? '发送消息开始任务'
-												: 'Send a message to start the task'}
-										</p>
-									</div>
-								}
+						onAssistantChange={
+							!isCreating
+								? (id) => services.updateTask(taskId!, { assistant_id: id })
+								: undefined
+						}
+							onMessagesChange={handleMessagesChange}
 							/>
 						)
 					})()}

@@ -56,11 +56,16 @@ export interface IChatProps {
 }
 
 /**
+ * InputArea 暴露的命令式接口
+ */
+export interface InputAreaHandle {
+	insertText(text: string): void
+}
+
+/**
  * 输入框组件 Props
  */
 export interface IInputAreaProps {
-	/** 当前模式 */
-	mode: 'placeholder' | 'normal'
 	/** 是否正在加载/发送中 */
 	loading?: boolean
 	/** 是否正在流式输出中 */
@@ -139,6 +144,8 @@ export interface IMessageListProps {
 	loadingMore?: boolean
 	/** 加载更多历史消息回调 */
 	onLoadMore?: () => void
+	/** 当前聊天 ID (用于 tab 切换时重置滚动状态) */
+	chatId?: string
 }
 
 /**

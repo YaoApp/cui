@@ -29,6 +29,7 @@ interface KanbanContextValue {
 	moveTask: (taskId: string, columnId: string, position: number) => Promise<void>
 	togglePin: (taskId: string, pinned: boolean) => void
 	removeTask: (taskId: string) => Promise<void>
+	updateLocalTitle: (id: string, title: string) => void
 	addColumn: (data: Partial<Column>) => Promise<void>
 	updateColumn: (columnId: string, data: Partial<Column>) => Promise<void>
 	removeColumn: (columnId: string) => Promise<void>
@@ -76,6 +77,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 	// Key: taskId, Value: { column_id, position } the user dragged to.
 	// Cleared only when refreshTasks confirms server data matches.
 	const localMovesRef = useRef<Map<string, { column_id: string; position: number }>>(new Map())
+	const tempTitlesRef = useRef<Map<string, string>>(new Map())
 	const initializedRef = useRef(false)
 	const closeTimerRef = useRef<number>()
 	const animTimerRef = useRef<number>()
@@ -534,6 +536,11 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		[selectedTaskId, currentBoardId, creatingTaskId, triggerAnimation, is_cn]
 	)
 
+	const updateLocalTitle = useCallback((id: string, title: string) => {
+		tempTitlesRef.current.set(id, title)
+		setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, title } : t)))
+	}, [])
+
 	const addColumn = useCallback(
 		async (data: Partial<Column>) => {
 			if (!board) return
@@ -625,6 +632,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		setTasks((prev) => {
 			const creating = prev.find((t) => t.status === 'creating')
 			const moves = localMovesRef.current
+			const tempTitles = tempTitlesRef.current
 
 			let result = tasksData
 			if (moves.size > 0) {
@@ -636,6 +644,19 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 						return t
 					}
 					return { ...t, column_id: override.column_id, position: override.position }
+				})
+			}
+
+			if (tempTitles.size > 0) {
+				result = result.map((t) => {
+					const tempTitle = tempTitles.get(t.id) || tempTitles.get(t.chat_id)
+					if (!tempTitle) return t
+					if (t.title && t.title !== '新任务' && t.title !== 'New Task') {
+						tempTitles.delete(t.id)
+						tempTitles.delete(t.chat_id)
+						return t
+					}
+					return { ...t, title: tempTitle }
 				})
 			}
 
@@ -716,6 +737,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			moveTask,
 			togglePin,
 			removeTask,
+			updateLocalTitle,
 			addColumn,
 			updateColumn: updateColumnFn,
 			removeColumn,
@@ -754,6 +776,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			moveTask,
 			togglePin,
 			removeTask,
+			updateLocalTitle,
 			addColumn,
 			updateColumnFn,
 			removeColumn,

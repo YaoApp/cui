@@ -5,10 +5,6 @@
 	padding: 0 20px 20px;
 	border-top: 1px solid transparent; // Consistent border
 
-	&.animating {
-		transition: all 0.3s ease;
-	}
-
 	// Message Queue positioned above InputArea
 	.messageQueue {
 		// MessageQueue is independent, no border connection needed
@@ -17,68 +13,27 @@
 	// Common Publish Box Styles
 	.publishBox {
 		background: var(--color_chatbox_bg_card);
-		// Darker border for better visibility
 		border: 1px solid var(--color_chatbox_border_card);
 		border-radius: 16px;
 		padding: 12px 16px 8px;
 		position: relative;
 		overflow: visible;
 		transition: border-color 0.2s, box-shadow 0.2s;
-
-		// Default Shadow (Normal Mode)
-		// Deep shadow to separate white box from white background
 		box-shadow: var(--shadow_float);
 
 		&:focus-within {
-			// Use dedicated focus border color
 			border-color: var(--color_chatbox_border_focus);
-			// Even deeper shadow on focus
 			box-shadow: var(--shadow_float_hover);
 		}
 
-		// When there's a queue above, keep normal style (no connection)
 		&.hasQueue {
 			// Keep normal border-radius and border
 		}
 	}
 
-	// Placeholder Mode Specifics
-	&.placeholder {
-		flex: 1;
-		align-items: center;
-		padding-bottom: 20vh;
-
-		.publishBox {
-			// Adjust shadow for centered element
-			box-shadow: 0 4px 12px var(--color_border_light);
-
-			&:focus-within {
-				box-shadow: 0 4px 16px var(--color_border_light);
-			}
-
-			// .toolbar {
-			// 	display: none; // Show toolbar in placeholder mode as requested
-			// }
-		}
-
-		.placeholderHint {
-			text-align: center;
-			color: var(--color_chatbox_text_primary);
-			margin-bottom: 24px;
-
-			h3 {
-				font-size: 24px;
-				font-weight: 600;
-				margin-bottom: 8px;
-			}
-		}
-	}
-
-	// Normal Mode Specifics
 	&.normal {
-		flex: 0 0 auto; // Don't shrink, don't grow
+		flex: 0 0 auto;
 		z-index: 50;
-		// Remove absolute positioning
 	}
 
 	.content {
