@@ -20,8 +20,17 @@ const CATEGORIES: CategoryItem[] = [
 	{ key: 'archived', icon: 'material-archive', cn: '已归档', en: 'Archived' }
 ]
 
+const statsKeyMap: Record<InboxCategory, string> = {
+	all: 'all',
+	starred: 'starred',
+	task_interaction: 'input',
+	task_notification: 'completed',
+	task_failed: 'failed',
+	archived: 'archived'
+}
+
 const Sidebar = () => {
-	const { is_cn, category, setCategory, categoryCountMap } = useInboxContext()
+	const { is_cn, category, setCategory, stats } = useInboxContext()
 
 	return (
 		<div className={styles.sidebar}>
@@ -33,7 +42,8 @@ const Sidebar = () => {
 			<div className={styles.categories}>
 				{CATEGORIES.map((item, idx) => {
 					const isActive = category === item.key
-					const count = categoryCountMap[item.key] || 0
+					const statsKey = statsKeyMap[item.key] as keyof typeof stats
+					const count = stats ? (stats[statsKey] as number) || 0 : 0
 					const showDivider = item.key === 'starred' || item.key === 'task_failed'
 
 					return (

@@ -202,6 +202,9 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 				removeTask: (chatId) => {
 					setTasks((prev) => prev.filter((t) => t.chat_id !== chatId))
 				},
+				refreshQuota: () => {
+					services.getQuota().then((data) => setQuota(data)).catch(() => {})
+				},
 				addBoard: (data) => {
 					setBoards((prev) => [...prev, { id: data.board_id, name: data.name, icon: data.icon, color: data.color }])
 				},
@@ -527,20 +530,20 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 				}, 260)
 				return
 			}
-			try {
-				await services.deleteTask(taskId)
-				setTasks((prev) => prev.filter((t) => t.id !== taskId))
-				setBoards((prev) => prev.map((b) => (b.id === currentBoardId ? { ...b, task_count: Math.max(0, b.task_count - 1) } : b)))
-				if (selectedTaskId === taskId) {
-					triggerAnimation()
-					setDetailOpen(false)
-					closeTimerRef.current = window.setTimeout(() => {
-						setSelectedTaskId(null)
-					}, 260)
-				}
-			} catch (err: any) {
-				window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '删除任务失败' : 'Failed to delete task') })
+		try {
+			await services.archiveTask(taskId)
+			setTasks((prev) => prev.filter((t) => t.id !== taskId))
+			setBoards((prev) => prev.map((b) => (b.id === currentBoardId ? { ...b, task_count: Math.max(0, b.task_count - 1) } : b)))
+			if (selectedTaskId === taskId) {
+				triggerAnimation()
+				setDetailOpen(false)
+				closeTimerRef.current = window.setTimeout(() => {
+					setSelectedTaskId(null)
+				}, 260)
 			}
+		} catch (err: any) {
+			window.$app?.Event?.emit('app/toast', { type: 'error', message: err?.message || (is_cn ? '归档任务失败' : 'Failed to archive task') })
+		}
 		},
 		[selectedTaskId, currentBoardId, creatingTaskId, triggerAnimation, is_cn]
 	)

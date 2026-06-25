@@ -24,10 +24,11 @@ function formatTimeAgo(ts: number, is_cn: boolean): string {
 }
 
 function getTypeConfig(message: InboxMessage): { icon: string; color: string } {
-	if (message.type === 'task_completed') return { icon: 'material-assignment_turned_in', color: 'var(--color_success)' }
-	if (message.type === 'task_failed') return { icon: 'material-assignment_late', color: 'var(--color_warning)' }
-	if (message.priority === 'high') return { icon: 'material-mark_chat_unread', color: 'var(--color_main)' }
-	return { icon: 'material-mark_chat_unread', color: 'var(--color_neo_text_tertiary)' }
+	if (message.type === 'completed') return { icon: 'material-assignment_turned_in', color: 'var(--color_success)' }
+	if (message.type === 'failed') return { icon: 'material-assignment_late', color: 'var(--color_warning)' }
+	const readIcon = message.read ? 'material-chat_bubble_outline' : 'material-mark_chat_unread'
+	if (message.priority === 'high') return { icon: readIcon, color: 'var(--color_main)' }
+	return { icon: readIcon, color: 'var(--color_neo_text_tertiary)' }
 }
 
 const MessageItem = ({ message, selected, is_cn, onClick, onToggleStar, onContextMenu }: MessageItemProps) => {

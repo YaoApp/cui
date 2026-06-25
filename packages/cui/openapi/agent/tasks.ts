@@ -121,6 +121,14 @@ export class AgentTasks {
 		return this.api.Delete(`/agent/tasks/${chatId}`)
 	}
 
+	async Archive(chatId: string): Promise<ApiResponse<void>> {
+		return this.api.Put(`/agent/tasks/${chatId}/archive`, {})
+	}
+
+	async Unarchive(chatId: string, columnId: string): Promise<ApiResponse<void>> {
+		return this.api.Put(`/agent/tasks/${chatId}/unarchive`, { column_id: columnId })
+	}
+
 	async Move(chatId: string, req: MoveTaskRequest): Promise<ApiResponse<void>> {
 		return this.api.Put(`/agent/tasks/${chatId}/move`, req)
 	}

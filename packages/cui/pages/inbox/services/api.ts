@@ -16,12 +16,12 @@ function getOpenAPI() {
 function mapInboxMessage(m: any): InboxMessage {
 	return {
 		id: m.mail_id,
-		type: m.type || 'task_input',
+		type: m.type || 'input',
 		source: {
 			type: 'kanban',
 			id: m.board_id || '',
 			name: m.board_name || '',
-			task_title: m.title || ''
+			task_title: m.chat_title || ''
 		},
 		priority: m.priority || 'medium',
 		title: m.title || '',
@@ -30,7 +30,6 @@ function mapInboxMessage(m: any): InboxMessage {
 		chat_id: m.chat_id || '',
 		assistant_id: m.assistant_id,
 		read: !!m.read,
-		archived: !!m.archived,
 		starred: !!m.starred,
 		pinned: !!m.pinned,
 		created_at: m.created_at ? new Date(m.created_at).getTime() : Date.now(),
@@ -39,12 +38,23 @@ function mapInboxMessage(m: any): InboxMessage {
 }
 
 export const services: InboxAPI = {
-	async getMessages() {
+	async getStats() {
 		const agent = getAgent()
 		const api = getOpenAPI()
-		const res = await agent.inbox.List()
+		const res = await agent.inbox.Stats()
+		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to get stats')
+		return res.data!
+	},
+
+	async getMessages(query?: { filter?: string; page?: number; size?: number; chat_id?: string }) {
+		const agent = getAgent()
+		const api = getOpenAPI()
+		const res = await agent.inbox.List({ filter: query?.filter, page: query?.page || 1, size: query?.size || 20, chat_id: query?.chat_id })
 		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to list inbox')
-		return (res.data?.messages || []).map(mapInboxMessage)
+		return {
+			items: (res.data?.mails || []).map(mapInboxMessage),
+			total: res.data?.total || 0
+		}
 	},
 
 	async markAsRead(id: string) {
@@ -59,13 +69,6 @@ export const services: InboxAPI = {
 		const api = getOpenAPI()
 		const res = await agent.inbox.ReadAll()
 		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to mark all read')
-	},
-
-	async archiveMessage(id: string) {
-		const agent = getAgent()
-		const api = getOpenAPI()
-		const res = await agent.inbox.Archive(id)
-		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to archive')
 	},
 
 	async starMessage(id: string) {
@@ -94,5 +97,26 @@ export const services: InboxAPI = {
 		const api = getOpenAPI()
 		const res = await agent.inbox.Unpin(id)
 		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to unpin')
+	},
+
+	async archiveTask(chatId: string) {
+		const agent = getAgent()
+		const api = getOpenAPI()
+		const res = await agent.tasks.Archive(chatId)
+		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to archive task')
+	},
+
+	async unarchiveTask(chatId: string, columnId: string) {
+		const agent = getAgent()
+		const api = getOpenAPI()
+		const res = await agent.tasks.Unarchive(chatId, columnId)
+		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to unarchive task')
+	},
+
+	async deleteGroup(chatId: string) {
+		const agent = getAgent()
+		const api = getOpenAPI()
+		const res = await agent.inbox.DeleteByChat(chatId)
+		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to delete')
 	}
 }

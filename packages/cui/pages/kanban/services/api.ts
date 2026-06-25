@@ -222,6 +222,13 @@ export async function deleteTask(taskId: string): Promise<void> {
 	if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to delete task')
 }
 
+export async function archiveTask(taskId: string): Promise<void> {
+	const agent = getAgent()
+	const api = getOpenAPI()
+	const res = await agent.tasks.Archive(taskId)
+	if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to archive task')
+}
+
 export async function sendMessage(_taskId: string, _content: string): Promise<Message> {
 	// Primary message sending goes through Task WS (useTaskWS hook).
 	// This REST fallback is kept for compatibility but should not be the main path.
