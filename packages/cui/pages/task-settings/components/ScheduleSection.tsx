@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getLocale } from '@umijs/max'
 import { message } from 'antd'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
 import { RadioGroup, Select, CheckboxGroup } from '@/components/ui/inputs'
+import type { TaskConfig, SetConfigRequest } from '@/openapi/agent/tasks'
 import type { KanbanTask } from '../../kanban/types'
 import viewStyles from '@/pages/assistants/detail/components/View/index.less'
 
@@ -66,7 +67,14 @@ const UNIT_OPTIONS_EN = [
 	{ label: 'days', value: 'd' }
 ]
 
-const ScheduleSection = ({ task }: { task: KanbanTask }) => {
+interface Props {
+	task: KanbanTask
+	taskId: string
+	config: TaskConfig | null
+	onConfigSave: (req: SetConfigRequest) => Promise<void>
+}
+
+const ScheduleSection = ({ task, taskId, config, onConfigSave }: Props) => {
 	const is_cn = getLocale() === 'zh-CN'
 
 	const [mode, setMode] = useState<ClockMode>('once')
@@ -76,6 +84,19 @@ const ScheduleSection = ({ task }: { task: KanbanTask }) => {
 	const [intervalUnit, setIntervalUnit] = useState('m')
 	const [timezone, setTimezone] = useState('Asia/Shanghai')
 	const [saving, setSaving] = useState(false)
+
+	const scheduleStatus = config?._schedule_status
+
+	useEffect(() => {
+		const sched = config?.setting?.schedule
+		if (!sched) return
+		if (sched.mode) setMode(sched.mode as ClockMode)
+		if (sched.times?.length) setTimes(sched.times)
+		if (sched.days?.length) setDays(sched.days)
+		if (sched.interval_value) setIntervalValue(sched.interval_value)
+		if (sched.interval_unit) setIntervalUnit(sched.interval_unit)
+		if (sched.timezone) setTimezone(sched.timezone)
+	}, [config])
 
 	const handleAddTime = () => {
 		setTimes([...times, '12:00'])
@@ -94,9 +115,49 @@ const ScheduleSection = ({ task }: { task: KanbanTask }) => {
 
 	const handleSave = async () => {
 		setSaving(true)
-		await new Promise((r) => setTimeout(r, 500))
-		setSaving(false)
-		message.success(is_cn ? '保存成功' : 'Saved successfully')
+		try {
+			await onConfigSave({
+				schedule: {
+					enabled: true,
+					mode,
+					times: mode === 'times' ? times : undefined,
+					days: mode === 'times' ? days : undefined,
+					interval_value: mode === 'interval' ? intervalValue : undefined,
+					interval_unit: mode === 'interval' ? intervalUnit : undefined,
+					timezone: mode === 'times' ? timezone : undefined
+				}
+			})
+			message.success(is_cn ? '保存成功' : 'Saved successfully')
+		} catch {
+			message.error(is_cn ? '保存失败' : 'Save failed')
+		} finally {
+			setSaving(false)
+		}
+	}
+
+	const handleReset = async () => {
+		setSaving(true)
+		try {
+			await onConfigSave({ schedule: { enabled: false, mode: 'once' } })
+			setMode('once')
+			setTimes(['09:00'])
+			setDays(['Mon', 'Tue', 'Wed', 'Thu', 'Fri'])
+			setIntervalValue(30)
+			setIntervalUnit('m')
+			setTimezone('Asia/Shanghai')
+			message.success(is_cn ? '已恢复默认' : 'Reset')
+		} catch {
+			message.error(is_cn ? '重置失败' : 'Reset failed')
+		} finally {
+			setSaving(false)
+		}
+	}
+
+	const formatDateTime = (dt?: string) => {
+		if (!dt) return '-'
+		return new Date(dt).toLocaleString(is_cn ? 'zh-CN' : 'en-US', {
+			month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+		})
 	}
 
 	return (
@@ -112,7 +173,7 @@ const ScheduleSection = ({ task }: { task: KanbanTask }) => {
 						</div>
 					</div>
 					<div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-						<Button size='small' onClick={() => { setMode('once'); setTimes(['09:00']); setDays(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']); setIntervalValue(30); setIntervalUnit('m'); setTimezone('Asia/Shanghai') }}>
+						<Button size='small' onClick={handleReset}>
 							{is_cn ? '恢复默认' : 'Reset'}
 						</Button>
 						<Button size='small' type='primary' loading={saving} onClick={handleSave}>
@@ -121,7 +182,28 @@ const ScheduleSection = ({ task }: { task: KanbanTask }) => {
 					</div>
 				</div>
 
-				{/* 执行模式 */}
+				{/* Schedule status display */}
+				{scheduleStatus && (scheduleStatus.last_run || scheduleStatus.next_run) && (
+					<div style={{ marginBottom: 16, padding: '8px 12px', borderRadius: 6, background: 'var(--color_neo_bg_field, var(--color_bg_2))', fontSize: 13 }}>
+						{scheduleStatus.next_run && (
+							<div style={{ color: 'var(--color_neo_text_secondary)' }}>
+								{is_cn ? '下次执行: ' : 'Next run: '}{formatDateTime(scheduleStatus.next_run)}
+							</div>
+						)}
+						{scheduleStatus.last_run && (
+							<div style={{ color: 'var(--color_neo_text_secondary)', marginTop: 4 }}>
+								{is_cn ? '上次执行: ' : 'Last run: '}{formatDateTime(scheduleStatus.last_run)}
+							</div>
+						)}
+						{scheduleStatus.total_runs !== undefined && (
+							<div style={{ color: 'var(--color_neo_text_secondary)', marginTop: 4 }}>
+								{is_cn ? '累计执行: ' : 'Total runs: '}{scheduleStatus.total_runs}
+							</div>
+						)}
+					</div>
+				)}
+
+				{/* Mode selection */}
 				<>
 				<div className={viewStyles.settingRow}>
 					<div className={viewStyles.settingHeader}>
@@ -141,7 +223,7 @@ const ScheduleSection = ({ task }: { task: KanbanTask }) => {
 					</div>
 				</div>
 
-				{/* 定时执行：时间 + 星期 */}
+				{/* Scheduled: times + days */}
 				{mode === 'times' && (
 					<>
 						<div className={viewStyles.settingRow}>
@@ -219,7 +301,7 @@ const ScheduleSection = ({ task }: { task: KanbanTask }) => {
 					</>
 				)}
 
-				{/* 间隔执行 */}
+				{/* Interval */}
 				{mode === 'interval' && (
 					<div className={viewStyles.settingRow}>
 					<div className={viewStyles.settingHeader}>
@@ -267,9 +349,7 @@ const ScheduleSection = ({ task }: { task: KanbanTask }) => {
 					</div>
 				)}
 
-				{/* 持续运行 */}
-
-				{/* 常驻说明 */}
+				{/* Daemon info */}
 				{mode === 'daemon' && (
 					<div className={viewStyles.settingRow}>
 						<div className={viewStyles.settingControl}>
@@ -283,7 +363,7 @@ const ScheduleSection = ({ task }: { task: KanbanTask }) => {
 					</div>
 				)}
 
-				{/* 时区 - 仅定时执行时显示 */}
+				{/* Timezone */}
 				{mode === 'times' && (
 					<div className={viewStyles.settingRow}>
 					<div className={viewStyles.settingHeader}>

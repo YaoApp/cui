@@ -1,6 +1,7 @@
 import type { Message } from '@/openapi'
 import { Agent } from '@/openapi'
 import { getLocale } from '@umijs/max'
+import type { TaskConfig, SetConfigRequest, RunnerInfo, PresetImage } from '@/openapi/agent/tasks'
 import type { Board, BoardSummary, BoardTemplate, Column, KanbanTask, CreateTaskData, TaskStatus } from '../types'
 
 function getAgent() {
@@ -76,7 +77,13 @@ function mapTask(t: any): KanbanTask {
 		assistant_id: t.assistant_id,
 		assistant_name: t.assistant_name,
 		connector_name: t.last_connector,
-		pinned: t.pinned
+		pinned: t.pinned,
+		computer: t.computer_id
+			? { id: t.computer_id, status: 'running', mode: t.computer_mode || 'sandbox' }
+			: undefined,
+		sandbox: t.sandbox_type
+			? { type: t.sandbox_type as any }
+			: undefined
 	}
 }
 
@@ -283,4 +290,36 @@ export async function getQuota(): Promise<{ limit: number; running: number; queu
 	const res = await api.Get<{ limit: number; running: number; queued: number }>('/agent/tasks/quota')
 	if (api.IsError(res)) return { limit: 0, running: 0, queued: 0 }
 	return res.data || { limit: 0, running: 0, queued: 0 }
+}
+
+export async function getTaskConfig(taskId: string): Promise<TaskConfig> {
+	const agent = getAgent()
+	const api = getOpenAPI()
+	const res = await agent.tasks.GetConfig(taskId)
+	if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to get config')
+	return res.data!
+}
+
+export async function setTaskConfig(taskId: string, req: SetConfigRequest): Promise<TaskConfig> {
+	const agent = getAgent()
+	const api = getOpenAPI()
+	const res = await agent.tasks.SetConfig(taskId, req)
+	if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to set config')
+	return res.data!
+}
+
+export async function getRunners(): Promise<RunnerInfo[]> {
+	const agent = getAgent()
+	const api = getOpenAPI()
+	const res = await agent.tasks.GetRunners()
+	if (api.IsError(res)) return []
+	return res.data?.runners || []
+}
+
+export async function getImages(): Promise<PresetImage[]> {
+	const agent = getAgent()
+	const api = getOpenAPI()
+	const res = await agent.tasks.GetImages()
+	if (api.IsError(res)) return []
+	return res.data?.images || []
 }

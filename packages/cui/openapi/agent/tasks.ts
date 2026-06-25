@@ -35,6 +35,11 @@ export interface TaskItem {
 	workspace_name?: string
 	last_connector?: string
 	has_schedule?: boolean
+	computer_id?: string
+	computer_mode?: string
+	sandbox_type?: string
+	instruction?: string
+	summary?: string
 	created_at?: string
 	updated_at?: string
 }
@@ -60,6 +65,11 @@ export interface UpdateTaskRequest {
 	tags?: string[]
 	title?: string
 	assistant_id?: string
+	computer_id?: string
+	computer_mode?: string
+	sandbox_type?: string
+	instruction?: string
+	summary?: string
 }
 
 export interface MoveTaskRequest {
@@ -87,6 +97,19 @@ export interface SetConfigRequest {
 	skills?: string[]
 	runner?: string
 	image?: string
+}
+
+export interface RunnerInfo {
+	name: string
+	description: string
+	available: boolean
+	nodes: string[]
+}
+
+export interface PresetImage {
+	name: string
+	tag?: string
+	description?: string
 }
 
 export class AgentTasks {
@@ -143,5 +166,13 @@ export class AgentTasks {
 
 	async SetConfig(chatId: string, req: SetConfigRequest): Promise<ApiResponse<TaskConfig>> {
 		return this.api.Put(`/agent/tasks/${chatId}/config`, req)
+	}
+
+	async GetRunners(): Promise<ApiResponse<{ runners: RunnerInfo[] }>> {
+		return this.api.Get('/agent/runners')
+	}
+
+	async GetImages(): Promise<ApiResponse<{ images: PresetImage[] }>> {
+		return this.api.Get('/agent/images')
 	}
 }
