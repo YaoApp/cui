@@ -375,20 +375,34 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 										<Icon name='material-monitor_heart' size={14} />
 									</span>
 								</Tooltip>
-								<Tooltip title={is_cn ? '设置' : 'Settings'}>
-									<span
-										className={styles.resourceBtn}
-										onClick={() =>
-											openSidebarView(
-												`$dashboard/task-settings/${taskId}`,
-												is_cn ? '设置' : 'Settings',
-												'material-settings'
-											)
-										}
-									>
-										<Icon name='material-settings' size={14} />
-									</span>
-								</Tooltip>
+							<Tooltip title={is_cn ? '消息往来' : 'Mail History'}>
+								<span
+									className={styles.resourceBtn}
+									onClick={() =>
+										openSidebarView(
+											`$dashboard/task-mails/${taskId}`,
+											is_cn ? '消息往来' : 'Mail History',
+											'material-mail_outline'
+										)
+									}
+								>
+									<Icon name='material-mail_outline' size={14} />
+								</span>
+							</Tooltip>
+							<Tooltip title={is_cn ? '设置' : 'Settings'}>
+								<span
+									className={styles.resourceBtn}
+									onClick={() =>
+										openSidebarView(
+											`$dashboard/task-settings/${taskId}`,
+											is_cn ? '设置' : 'Settings',
+											'material-settings'
+										)
+									}
+								>
+									<Icon name='material-settings' size={14} />
+								</span>
+							</Tooltip>
 							</>
 						)}
 					</div>

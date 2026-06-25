@@ -1,4 +1,4 @@
-import type { InboxMessage, InboxAPI } from '../types'
+import type { InboxMessage, InboxAPI, InboxStatsData } from '../types'
 
 const now = Date.now()
 const minutes = (n: number) => n * 60_000
@@ -16,7 +16,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-1',
 		assistant_id: 'ast-research',
 		read: false,
-		archived: false,
 		starred: false,
 		pinned: true,
 		created_at: now - minutes(3)
@@ -32,7 +31,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-2',
 		assistant_id: 'ast-data',
 		read: false,
-		archived: false,
 		starred: true,
 		pinned: false,
 		created_at: now - minutes(10)
@@ -48,7 +46,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-3',
 		assistant_id: 'ast-content',
 		read: false,
-		archived: false,
 		starred: false,
 		pinned: false,
 		created_at: now - minutes(30)
@@ -64,7 +61,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-4',
 		assistant_id: 'ast-data',
 		read: true,
-		archived: false,
 		starred: false,
 		pinned: false,
 		created_at: now - hours(1),
@@ -81,7 +77,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-5',
 		assistant_id: 'ast-data',
 		read: false,
-		archived: false,
 		starred: true,
 		pinned: true,
 		created_at: now - hours(2)
@@ -97,7 +92,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-6',
 		assistant_id: 'ast-research',
 		read: true,
-		archived: false,
 		starred: false,
 		pinned: false,
 		created_at: now - hours(3),
@@ -114,7 +108,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-7',
 		assistant_id: 'ast-data',
 		read: true,
-		archived: false,
 		starred: false,
 		pinned: false,
 		created_at: now - hours(4),
@@ -131,7 +124,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-8',
 		assistant_id: 'ast-research',
 		read: false,
-		archived: false,
 		starred: true,
 		pinned: false,
 		created_at: now - hours(5)
@@ -147,7 +139,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-9',
 		assistant_id: 'ast-data',
 		read: true,
-		archived: false,
 		starred: false,
 		pinned: false,
 		created_at: now - hours(6),
@@ -164,7 +155,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-10',
 		assistant_id: 'ast-content',
 		read: false,
-		archived: false,
 		starred: false,
 		pinned: false,
 		created_at: now - hours(8)
@@ -180,7 +170,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-11',
 		assistant_id: 'ast-data',
 		read: true,
-		archived: false,
 		starred: false,
 		pinned: false,
 		created_at: now - hours(12),
@@ -197,7 +186,6 @@ const mockMessages: InboxMessage[] = [
 		chat_id: 'chat-inbox-12',
 		assistant_id: 'ast-data',
 		read: false,
-		archived: false,
 		starred: false,
 		pinned: false,
 		created_at: now - hours(16)
@@ -211,9 +199,21 @@ async function delay(ms = 100) {
 }
 
 export const services: InboxAPI = {
+	async getStats(): Promise<InboxStatsData> {
+		await delay()
+		return {
+			all: messages.length,
+			starred: messages.filter((m) => m.starred).length,
+			input: messages.filter((m) => m.type === 'task_input').length,
+			completed: messages.filter((m) => m.type === 'task_completed').length,
+			failed: messages.filter((m) => m.type === 'task_failed').length,
+			archived: 0
+		}
+	},
+
 	async getMessages() {
 		await delay()
-		return [...messages]
+		return { items: [...messages], total: messages.length }
 	},
 
 	async markAsRead(id: string) {
@@ -225,11 +225,6 @@ export const services: InboxAPI = {
 		await delay(50)
 		const now = Date.now()
 		messages = messages.map((m) => (m.read ? m : { ...m, read: true, read_at: now }))
-	},
-
-	async archiveMessage(id: string) {
-		await delay(50)
-		messages = messages.map((m) => (m.id === id ? { ...m, archived: true } : m))
 	},
 
 	async starMessage(id: string) {
@@ -250,5 +245,17 @@ export const services: InboxAPI = {
 	async unpinMessage(id: string) {
 		await delay(50)
 		messages = messages.map((m) => (m.id === id ? { ...m, pinned: false } : m))
+	},
+
+	async archiveTask(_chatId: string) {
+		await delay(50)
+	},
+
+	async unarchiveTask(_chatId: string, _columnId: string) {
+		await delay(50)
+	},
+
+	async deleteGroup(_chatId: string) {
+		await delay(50)
 	}
 }

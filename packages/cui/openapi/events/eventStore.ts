@@ -9,6 +9,7 @@ interface EventStoreOptions {
 		patchTask: (chatId: string, patch: Record<string, any>) => void
 		moveTask: (chatId: string, columnId: string, position: number) => void
 		removeTask: (chatId: string) => void
+		refreshQuota?: () => void
 		addBoard: StoreAction
 		patchBoard: (boardId: string, patch: Record<string, any>) => void
 		removeBoard: (boardId: string) => void
@@ -44,6 +45,14 @@ const EVENT_HANDLERS: Record<string, (data: Record<string, any>, stores: EventSt
 	},
 	'task.moved': (data, { boardStore }) => boardStore?.moveTask(data.chat_id, data.column_id, data.position),
 	'task.deleted': (data, { boardStore }) => boardStore?.removeTask(data.chat_id),
+	'task.archived': (data, { boardStore }) => {
+		boardStore?.removeTask(data.chat_id)
+		boardStore?.refreshQuota?.()
+	},
+	'task.unarchived': (data, { boardStore }) => {
+		boardStore?.addTask(data)
+		boardStore?.refreshQuota?.()
+	},
 
 	// Board events (6)
 	'board.created': (data, { boardStore }) => boardStore?.addBoard(data),

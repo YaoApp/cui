@@ -1,9 +1,10 @@
 import { useState, useCallback, useRef } from 'react'
 import Icon from '@/widgets/Icon'
-import TaskDetail from '@/pages/kanban/components/TaskDetail'
 import { InboxProvider, useInboxContext } from './context'
 import Sidebar from './components/Sidebar'
 import MessageList from './components/MessageList'
+import UnarchiveModal from './components/UnarchiveModal'
+import TaskDetail from '../kanban/components/TaskDetail'
 import styles from './index.less'
 
 const MIN_LIST_WIDTH = 240
@@ -11,8 +12,9 @@ const MAX_LIST_WIDTH = 500
 const DEFAULT_LIST_WIDTH = 320
 
 const InboxContent = () => {
-	const { loading, is_cn, selectedMessage, selectMessage } = useInboxContext()
+	const { is_cn, selectedChatId, selectChatGroup, unarchiveGroup } = useInboxContext()
 	const [listWidth, setListWidth] = useState(DEFAULT_LIST_WIDTH)
+	const [unarchiveChatId, setUnarchiveChatId] = useState<string | null>(null)
 	const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
 	const handleDragStart = useCallback(
@@ -43,43 +45,51 @@ const InboxContent = () => {
 		[listWidth]
 	)
 
-	if (loading) {
-		return (
-			<div className={styles.container}>
-				<div className={styles.loading}>
-					<div className={styles.skeleton}>
-						<div className={styles.skeletonBar} style={{ width: '40%' }} />
-						<div className={styles.skeletonBar} style={{ width: '65%' }} />
-						<div className={styles.skeletonBar} style={{ width: '50%' }} />
-					</div>
-				</div>
-			</div>
-		)
-	}
+	const handleDetailClose = useCallback(() => {
+		selectChatGroup('')
+	}, [selectChatGroup])
+
+	const handleUnarchive = useCallback((chatId: string) => {
+		setUnarchiveChatId(chatId)
+	}, [])
+
+	const handleUnarchiveConfirm = useCallback((chatId: string, columnId: string) => {
+		unarchiveGroup(chatId, columnId)
+		setUnarchiveChatId(null)
+	}, [unarchiveGroup])
 
 	return (
-		<div className={styles.container}>
-			<Sidebar />
-			<div className={styles.listArea} style={{ width: listWidth }}>
-				<MessageList />
+		<>
+			<div className={styles.container}>
+				<Sidebar />
+				<div className={styles.listArea} style={{ width: listWidth }}>
+					<MessageList onUnarchive={handleUnarchive} />
+				</div>
+				<div className={styles.divider} onMouseDown={handleDragStart} />
+				<div className={styles.detailArea}>
+					{selectedChatId ? (
+						<TaskDetail
+							taskId={selectedChatId}
+							open={true}
+							onClose={handleDetailClose}
+							inline={true}
+						/>
+					) : (
+						<div className={styles.emptyDetail}>
+							<Icon name='material-inbox' size={48} className={styles.emptyIcon} />
+							<span>{is_cn ? '选择一条消息查看详情' : 'Select a message to view details'}</span>
+						</div>
+					)}
+				</div>
 			</div>
-			<div className={styles.divider} onMouseDown={handleDragStart} />
-			<div className={styles.detailArea}>
-				{selectedMessage ? (
-					<TaskDetail
-						taskId={selectedMessage.task_id}
-						open={true}
-						inline={true}
-						onClose={() => selectMessage('')}
-					/>
-				) : (
-					<div className={styles.emptyDetail}>
-						<Icon name='material-inbox' size={48} className={styles.emptyIcon} />
-						<span>{is_cn ? '选择一条消息查看详情' : 'Select a message to view details'}</span>
-					</div>
-				)}
-			</div>
-		</div>
+			<UnarchiveModal
+				open={!!unarchiveChatId}
+				chatId={unarchiveChatId || ''}
+				is_cn={is_cn}
+				onConfirm={handleUnarchiveConfirm}
+				onClose={() => setUnarchiveChatId(null)}
+			/>
+		</>
 	)
 }
 

@@ -101,11 +101,11 @@ const TaskContextMenu = ({ menu, onClose }: TaskContextMenuProps) => {
 			<div className={styles.divider} />
 
 			<div
-				className={`${styles.item} ${styles.danger}`}
+				className={styles.item}
 				onClick={() => handleAction(() => removeTask(task.id))}
 			>
-				<span className={styles.icon}><Icon name='material-delete' size={14} /></span>
-				{is_cn ? '删除任务' : 'Delete Task'}
+				<span className={styles.icon}><Icon name='material-archive' size={14} /></span>
+				{is_cn ? '归档' : 'Archive'}
 			</div>
 		</div>
 	)

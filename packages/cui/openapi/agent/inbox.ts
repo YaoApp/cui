@@ -3,10 +3,11 @@ import { ApiResponse } from '../types'
 import { BuildURL } from '../lib/utils'
 
 export interface InboxListQuery {
-	type?: string
-	read?: boolean
+	filter?: string
+	keyword?: string
+	chat_id?: string
 	page?: number
-	pagesize?: number
+	size?: number
 }
 
 export interface InboxItem {
@@ -16,19 +17,28 @@ export interface InboxItem {
 	title: string
 	body?: string
 	chat_id?: string
+	chat_title?: string
 	read: boolean
-	archived: boolean
 	starred: boolean
 	pinned: boolean
 	created_at?: string
 	read_at?: string | null
 }
 
+export interface InboxStats {
+	all: number
+	starred: number
+	input: number
+	completed: number
+	failed: number
+	archived: number
+}
+
 export interface InboxListResponse {
-	messages: InboxItem[]
+	mails: InboxItem[]
 	total: number
 	page: number
-	pagesize: number
+	size: number
 }
 
 export interface UnreadCountResponse {
@@ -42,13 +52,18 @@ export class AgentInbox {
 	async List(query?: InboxListQuery): Promise<ApiResponse<InboxListResponse>> {
 		const params = new URLSearchParams()
 		if (query) {
-			if (query.type) params.append('type', query.type)
-			if (query.read !== undefined) params.append('read', query.read.toString())
+			if (query.filter) params.append('filter', query.filter)
+			if (query.keyword) params.append('keyword', query.keyword)
+			if (query.chat_id) params.append('chat_id', query.chat_id)
 			if (query.page) params.append('page', query.page.toString())
-			if (query.pagesize) params.append('pagesize', query.pagesize.toString())
+			if (query.size) params.append('size', query.size.toString())
 		}
 		const url = BuildURL('/agent/inbox', params)
 		return this.api.Get(url)
+	}
+
+	async Stats(): Promise<ApiResponse<InboxStats>> {
+		return this.api.Get('/agent/inbox/stats')
 	}
 
 	async UnreadCount(): Promise<ApiResponse<UnreadCountResponse>> {
@@ -61,10 +76,6 @@ export class AgentInbox {
 
 	async ReadAll(): Promise<ApiResponse<void>> {
 		return this.api.Put('/agent/inbox/read-all', {})
-	}
-
-	async Archive(mailId: string): Promise<ApiResponse<void>> {
-		return this.api.Put(`/agent/inbox/${mailId}/archive`, {})
 	}
 
 	async Star(mailId: string): Promise<ApiResponse<void>> {
@@ -81,5 +92,9 @@ export class AgentInbox {
 
 	async Unpin(mailId: string): Promise<ApiResponse<void>> {
 		return this.api.Put(`/agent/inbox/${mailId}/unpin`, {})
+	}
+
+	async DeleteByChat(chatId: string): Promise<ApiResponse<{ deleted: number }>> {
+		return this.api.Delete(`/agent/inbox/chat/${chatId}`)
 	}
 }
