@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { getLocale } from '@umijs/max'
+import { message } from 'antd'
 import Icon from '@/widgets/Icon'
 import Selector from '@/chatbox/components/InputArea/Selector'
 import { useLLMProviders } from '@/hooks/useLLMProviders'
 import { Agent } from '@/openapi/agent'
+import type { TaskConfig, SetConfigRequest } from '@/openapi/agent/tasks'
 import type { KanbanTask } from '../../kanban/types'
 import viewStyles from '@/pages/assistants/detail/components/View/index.less'
 import styles from '../index.less'
@@ -16,10 +18,19 @@ const STATUS_MAP: Record<string, { cn: string; en: string; icon: string }> = {
 	paused: { cn: '已暂停', en: 'Paused', icon: 'material-cancel' },
 	cancelled: { cn: '已取消', en: 'Cancelled', icon: 'material-cancel' },
 	creating: { cn: '创建中', en: 'Creating', icon: 'material-cancel' },
-	waiting_input: { cn: '等待输入', en: 'Waiting Input', icon: 'material-cancel' }
+	waiting: { cn: '等待输入', en: 'Waiting Input', icon: 'material-cancel' }
 }
 
-const OverviewSection = ({ task, onNavigate }: { task: KanbanTask; onNavigate?: (section: string) => void }) => {
+interface Props {
+	task: KanbanTask
+	taskId: string
+	config: TaskConfig | null
+	onConfigSave: (req: SetConfigRequest) => Promise<void>
+	onTaskUpdate: (data: Partial<KanbanTask>) => Promise<void>
+	onNavigate?: (section: string) => void
+}
+
+const OverviewSection = ({ task, taskId, config, onConfigSave, onTaskUpdate, onNavigate }: Props) => {
 	const is_cn = getLocale() === 'zh-CN'
 	const { providers: llmProviders } = useLLMProviders()
 	const [assistants, setAssistants] = useState<Array<{ id: string; name: string }>>([])
@@ -27,7 +38,7 @@ const OverviewSection = ({ task, onNavigate }: { task: KanbanTask; onNavigate?: 
 	const [tagInput, setTagInput] = useState('')
 	const [localTags, setLocalTags] = useState<string[]>(task.tags || [])
 	const [currentAssistant, setCurrentAssistant] = useState(task.assistant_id || '')
-	const [currentModel, setCurrentModel] = useState(task.connector_name || '')
+	const [currentModel, setCurrentModel] = useState(config?.setting?.model || task.connector_name || '')
 	const tagInputRef = useRef<HTMLInputElement>(null)
 
 	useEffect(() => {
@@ -41,6 +52,12 @@ const OverviewSection = ({ task, onNavigate }: { task: KanbanTask; onNavigate?: 
 		}).catch(() => {})
 	}, [])
 
+	useEffect(() => {
+		if (config?.setting?.model) {
+			setCurrentModel(config.setting.model)
+		}
+	}, [config])
+
 	const formatTime = (ts?: number) => {
 		if (!ts) return '-'
 		return new Date(ts).toLocaleString(is_cn ? 'zh-CN' : 'en-US', {
@@ -52,6 +69,10 @@ const OverviewSection = ({ task, onNavigate }: { task: KanbanTask; onNavigate?: 
 	}
 
 	const status = STATUS_MAP[task.status] || STATUS_MAP.pending
+
+	const secretsCount = config?.setting?.secrets
+		? Object.keys(config.setting.secrets).length
+		: 0
 
 	const handleSecretsClick = () => {
 		onNavigate?.('secrets')
@@ -66,6 +87,24 @@ const OverviewSection = ({ task, onNavigate }: { task: KanbanTask; onNavigate?: 
 		value: p.value,
 		label: p.label
 	}))
+
+	const handleAssistantChange = async (val: string) => {
+		setCurrentAssistant(val)
+		try {
+			await onTaskUpdate({ assistant_id: val })
+		} catch {
+			message.error(is_cn ? '切换助手失败' : 'Failed to switch assistant')
+		}
+	}
+
+	const handleModelChange = async (val: string) => {
+		setCurrentModel(val)
+		try {
+			await onConfigSave({ model: val })
+		} catch {
+			message.error(is_cn ? '切换模型失败' : 'Failed to switch model')
+		}
+	}
 
 	const handleTagsEdit = () => {
 		setEditingTags(true)
@@ -85,8 +124,15 @@ const OverviewSection = ({ task, onNavigate }: { task: KanbanTask; onNavigate?: 
 		setLocalTags(localTags.filter((t) => t !== tag))
 	}
 
-	const handleTagsDone = () => {
+	const handleTagsDone = async () => {
 		setEditingTags(false)
+		if (JSON.stringify(localTags) !== JSON.stringify(task.tags || [])) {
+			try {
+				await onTaskUpdate({ tags: localTags })
+			} catch {
+				message.error(is_cn ? '标签更新失败' : 'Failed to update tags')
+			}
+		}
 	}
 
 	return (
@@ -104,7 +150,7 @@ const OverviewSection = ({ task, onNavigate }: { task: KanbanTask; onNavigate?: 
 							<Selector
 								value={currentAssistant}
 								options={assistantOptions}
-								onChange={(val) => setCurrentAssistant(val)}
+								onChange={handleAssistantChange}
 								variant='normal'
 								placeholder={is_cn ? '选择助手' : 'Select assistant'}
 								searchable={assistantOptions.length >= 5}
@@ -124,7 +170,7 @@ const OverviewSection = ({ task, onNavigate }: { task: KanbanTask; onNavigate?: 
 							<Selector
 								value={currentModel}
 								options={modelOptions}
-								onChange={(val) => setCurrentModel(val)}
+								onChange={handleModelChange}
 								variant='normal'
 								placeholder={is_cn ? '选择模型' : 'Select model'}
 								searchable={modelOptions.length >= 5}
@@ -247,8 +293,8 @@ const OverviewSection = ({ task, onNavigate }: { task: KanbanTask; onNavigate?: 
 						</div>
 						<div className={viewStyles.kvValue}>
 							<span className={styles.clickableValue} onClick={handleSecretsClick}>
-								{task.secrets_count
-									? `${task.secrets_count} ${is_cn ? '个已配置' : 'configured'}`
+								{secretsCount > 0
+									? `${secretsCount} ${is_cn ? '个已配置' : 'configured'}`
 									: (is_cn ? '无' : 'None')}
 								<Icon name='material-chevron_right' size={14} />
 							</span>
