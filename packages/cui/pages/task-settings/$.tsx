@@ -135,21 +135,19 @@ const TaskSettings = (props: AppRouteProps) => {
 					<DetailMenu active={activeSection} onChange={handleSectionChange} />
 					<div className={styles.main}>
 						{activeSection === 'overview' && (
-							<OverviewSection
-								task={task}
-								taskId={taskId}
-								config={config}
-								onConfigSave={handleConfigSave}
-								onTaskUpdate={handleTaskUpdate}
-								onNavigate={handleSectionChange}
-							/>
+						<OverviewSection
+							task={task}
+							taskId={taskId}
+							onTaskUpdate={handleTaskUpdate}
+						/>
 						)}
 						{activeSection === 'secrets' && (
-							<SecretsManager
-								assistantId={task.assistant_id}
-								chatId={taskId}
-								showSource
-							/>
+					<SecretsManager
+							assistantId={task.assistant_id}
+							chatId={taskId}
+							showSource
+							assistantName={task.assistant_name}
+						/>
 						)}
 						{activeSection === 'computer' && <ComputerSection task={task} />}
 						{activeSection === 'skills' && (

@@ -12,6 +12,7 @@ export interface SecretsManagerProps {
 	assistantId: string
 	chatId?: string
 	showSource?: boolean
+	assistantName?: string
 }
 
 function getSettingAPI(): Setting | null {
@@ -26,7 +27,7 @@ function getSecretsEndpoint(assistantId: string, chatId?: string): string {
 	return `/setting/agent/${encodeURIComponent(assistantId)}/secrets`
 }
 
-const SecretsManager = ({ assistantId, chatId, showSource }: SecretsManagerProps) => {
+const SecretsManager = ({ assistantId, chatId, showSource, assistantName }: SecretsManagerProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -201,7 +202,7 @@ const SecretsManager = ({ assistantId, chatId, showSource }: SecretsManagerProps
 		const labels: Record<string, string> = {
 			dsl: is_cn ? '预制' : 'Predefined',
 			user: is_cn ? '用户设置' : 'User',
-			task: is_cn ? '任务覆盖' : 'Task Override'
+			task: is_cn ? '任务设置' : 'Task Settings'
 		}
 		const colors: Record<string, string> = {
 			dsl: '#8c8c8c',
@@ -334,7 +335,7 @@ const SecretsManager = ({ assistantId, chatId, showSource }: SecretsManagerProps
 						{predefined.length > 0 && (
 							<div style={{ marginBottom: custom.length > 0 ? 20 : 0 }}>
 								<div className={styles.infoLabel} style={{ marginBottom: 8 }}>
-									{is_cn ? 'Agent 要求的 Secrets' : 'Agent Required Secrets'}
+									{is_cn ? `${assistantName || 'Agent'} 要求的 Secrets` : `${assistantName || 'Agent'} Required Secrets`}
 								</div>
 								{renderTable(predefined, false)}
 							</div>

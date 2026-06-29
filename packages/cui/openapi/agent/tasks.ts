@@ -162,8 +162,9 @@ export class AgentTasks {
 		return this.api.Get(url)
 	}
 
-	async Get(chatId: string): Promise<ApiResponse<TaskItem>> {
-		return this.api.Get(`/agent/tasks/${chatId}`)
+	async Get(chatId: string, locale?: string): Promise<ApiResponse<TaskItem>> {
+		const url = locale ? `/agent/tasks/${chatId}?locale=${locale}` : `/agent/tasks/${chatId}`
+		return this.api.Get(url)
 	}
 
 	async Create(req: CreateTaskRequest): Promise<ApiResponse<TaskItem>> {

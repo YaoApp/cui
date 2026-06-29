@@ -74,6 +74,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	const mentionDebounceRef = useRef<ReturnType<typeof setTimeout>>()
 	const [isEmpty, setIsEmpty] = useState(true)
 	const [currentModel, setCurrentModel] = useState<string>('')
+	const userSelectedModelRef = useRef(false)
 	const [chatMode, setChatMode] = useState<'chat' | 'task'>('task')
 	const [showTrace, setShowTrace] = useState(false)
 	const [selectedWorkspace, setSelectedWorkspace] = useState<string>(() => {
@@ -158,9 +159,10 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			setAgent(propAssistant)
 
 			// Priority: initialModel (from session history) > defaultProvider (from assistant config)
+			// Skip if user has already manually selected a model
 			if (initialModel) {
 				setCurrentModel(initialModel)
-			} else if (defaultProvider) {
+			} else if (defaultProvider && !userSelectedModelRef.current) {
 				setCurrentModel(defaultProvider)
 			}
 
@@ -189,8 +191,9 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			// Auto-focus when entering a tab
 			editorRef.current.focus()
 		}
-		// Reset attachments for new chat/tab
+		// Reset attachments and user model selection for new chat/tab
 		setAttachments([])
+		userSelectedModelRef.current = false
 	}, [chatId])
 
 	// Persist selectedWorkspace to localStorage
@@ -1127,13 +1130,16 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						onOpen={fetchWorkspaces}
 					/>
 					{showSelector && showModelSelectorResponsive && (
-						<Selector
-							value={currentModel}
-							options={modelOptions}
-							onChange={setCurrentModel}
-							variant='normal'
-							tooltip={is_cn ? '切换模型' : 'Switch Model'}
-							disabled={loading || isOptimizing}
+					<Selector
+						value={currentModel}
+						options={modelOptions}
+						onChange={(val) => {
+							userSelectedModelRef.current = true
+							setCurrentModel(val as string)
+						}}
+						variant='normal'
+						tooltip={is_cn ? '切换模型' : 'Switch Model'}
+						disabled={loading || isOptimizing}
 							searchable={showModelSearch}
 							dropdownWidth='auto'
 							dropdownMinWidth={200}

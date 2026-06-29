@@ -22,7 +22,7 @@ export interface UseTaskWSReturn {
 	connected: boolean
 	hasMore: boolean
 	loadingMore: boolean
-	sendMessage: (msg: UserMessage, metadata?: Record<string, any>) => void
+	sendMessage: (msg: UserMessage, metadata?: Record<string, any>, model?: string) => void
 	retry: (extra?: UserMessage) => void
 	repeat: () => void
 	loadMore: () => void
@@ -33,6 +33,7 @@ interface WSCommand {
 	type: 'read' | 'history' | 'run' | 'retry' | 'repeat' | 'stop' | 'cancel'
 	messages?: Array<{ role: string; content: any }>
 	assistant_id?: string
+	model?: string
 	metadata?: Record<string, any>
 	since?: number
 	before?: number
@@ -379,7 +380,7 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 	)
 
 	const sendMessage = useCallback(
-		(msg: UserMessage, metadata?: Record<string, any>) => {
+		(msg: UserMessage, metadata?: Record<string, any>, model?: string) => {
 			// Optimistic insert: show user message immediately
 			const userMsgId = `user-${Date.now()}`
 			const localUserMsg: Message = {
@@ -395,6 +396,7 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 			const cmd: WSCommand = {
 				type: 'run',
 				messages: [{ role: msg.role, content: msg.content }],
+				model,
 				locale: getLocale()
 			}
 			const aid = assistantIdRef.current
@@ -440,8 +442,11 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 	}, [sendCmd])
 
 	const abort = useCallback(() => {
-		sendCmd({ type: 'stop' })
-	}, [sendCmd])
+		setStreaming(false)
+		if (wsRef.current?.readyState === WebSocket.OPEN) {
+			wsRef.current.send(JSON.stringify({ type: 'stop' }))
+		}
+	}, [])
 
 	// Auto-connect and send initial read on mount
 	useEffect(() => {
