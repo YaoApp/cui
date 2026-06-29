@@ -4,7 +4,7 @@ import { Spin, message } from 'antd'
 import Icon from '@/widgets/Icon'
 import DetailMenu from './components/DetailMenu'
 import OverviewSection from './components/OverviewSection'
-import SecretsSection from './components/SecretsSection'
+import SecretsManager from '@/components/SecretsManager'
 import ComputerSection from './components/ComputerSection'
 import SkillsSection from './components/SkillsSection'
 import ScheduleSection from './components/ScheduleSection'
@@ -145,11 +145,10 @@ const TaskSettings = (props: AppRouteProps) => {
 							/>
 						)}
 						{activeSection === 'secrets' && (
-							<SecretsSection
-								task={task}
-								taskId={taskId}
-								config={config}
-								onConfigSave={handleConfigSave}
+							<SecretsManager
+								assistantId={task.assistant_id}
+								chatId={taskId}
+								showSource
 							/>
 						)}
 						{activeSection === 'computer' && <ComputerSection task={task} />}
@@ -157,8 +156,6 @@ const TaskSettings = (props: AppRouteProps) => {
 							<SkillsSection
 								task={task}
 								taskId={taskId}
-								config={config}
-								onConfigSave={handleConfigSave}
 							/>
 						)}
 						{activeSection === 'schedule' && (

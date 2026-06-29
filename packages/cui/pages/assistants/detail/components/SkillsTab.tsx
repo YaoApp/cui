@@ -130,6 +130,7 @@ const SkillsTab = ({ assistantId }: SkillsTabProps) => {
 					key={idx}
 					className={clsx(styles.listRow, styles.listRowClickable)}
 					onClick={() => handleSkillClick(skill)}
+					style={!skill.description ? { alignItems: 'center' } : undefined}
 				>
 					<Icon name='material-auto_fix_high' size={16} className={styles.listRowIcon} />
 					<div className={styles.listRowContent}>
