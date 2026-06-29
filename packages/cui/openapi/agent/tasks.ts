@@ -203,6 +203,14 @@ export class AgentTasks {
 		return this.api.Put(`/agent/tasks/${chatId}/config`, req)
 	}
 
+	async GetSchedule(chatId: string): Promise<ApiResponse<{ schedule: ScheduleConfig | null }>> {
+		return this.api.Get(`/agent/tasks/${chatId}/schedule`)
+	}
+
+	async UpdateSchedule(chatId: string, schedule: ScheduleConfig): Promise<ApiResponse<{ ok: boolean }>> {
+		return this.api.Put(`/agent/tasks/${chatId}/schedule`, schedule)
+	}
+
 	async GetRunners(): Promise<ApiResponse<{ runners: RunnerInfo[] }>> {
 		return this.api.Get('/agent/runners')
 	}

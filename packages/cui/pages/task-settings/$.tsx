@@ -9,8 +9,7 @@ import ComputerSection from './components/ComputerSection'
 import SkillsSection from './components/SkillsSection'
 import ScheduleSection from './components/ScheduleSection'
 import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
-import { getTaskDetail, getTaskConfig, setTaskConfig, updateTask } from '../kanban/services/api'
-import type { TaskConfig, SetConfigRequest } from '@/openapi/agent/tasks'
+import { getTaskDetail, updateTask } from '../kanban/services/api'
 import type { KanbanTask } from '../kanban/types'
 import styles from './index.less'
 import viewStyles from '@/pages/assistants/detail/components/View/index.less'
@@ -34,7 +33,6 @@ const TaskSettings = (props: AppRouteProps) => {
 
 	const [loading, setLoading] = useState(true)
 	const [task, setTask] = useState<KanbanTask | null>(null)
-	const [config, setConfig] = useState<TaskConfig | null>(null)
 	const [activeSection, setActiveSection] = useState('overview')
 	const [editingTitle, setEditingTitle] = useState(false)
 	const [titleValue, setTitleValue] = useState('')
@@ -44,21 +42,12 @@ const TaskSettings = (props: AppRouteProps) => {
 	useEffect(() => {
 		if (!taskId) return
 		setLoading(true)
-		Promise.all([
-			getTaskDetail(taskId),
-			getTaskConfig(taskId).catch(() => null)
-		]).then(([t, c]) => {
+		getTaskDetail(taskId).then((t) => {
 			setTask(t)
-			setConfig(c)
 			setLoading(false)
 		}).catch(() => {
 			setLoading(false)
 		})
-	}, [taskId])
-
-	const handleConfigSave = useCallback(async (req: SetConfigRequest) => {
-		const updated = await setTaskConfig(taskId, req)
-		setConfig(updated)
 	}, [taskId])
 
 	const handleTaskUpdate = useCallback(async (data: Partial<KanbanTask>) => {
@@ -156,14 +145,12 @@ const TaskSettings = (props: AppRouteProps) => {
 								taskId={taskId}
 							/>
 						)}
-						{activeSection === 'schedule' && (
-							<ScheduleSection
-								task={task}
-								taskId={taskId}
-								config={config}
-								onConfigSave={handleConfigSave}
-							/>
-						)}
+					{activeSection === 'schedule' && (
+						<ScheduleSection
+							task={task}
+							taskId={taskId}
+						/>
+					)}
 					</div>
 				</div>
 			</div>
