@@ -1,6 +1,7 @@
 import { OpenAPI } from '../openapi'
 import { ApiResponse } from '../types'
 import { BuildURL } from '../lib/utils'
+import type { SecretEntry } from '../setting/types'
 
 export interface TaskListQuery {
 	run_status?: string
@@ -78,8 +79,40 @@ export interface MoveTaskRequest {
 	position?: number
 }
 
+export interface ServiceDecl {
+	name: string
+	port: number
+	protocol?: string
+	public?: boolean
+}
+
+export interface ScheduleConfig {
+	enabled: boolean
+	mode: string
+	times?: string[]
+	days?: string[]
+	interval_value?: number
+	interval_unit?: string
+	timezone?: string
+	start_date?: string
+	end_date?: string
+}
+
+export interface TaskSetting {
+	runner?: string
+	runners?: string[]
+	model?: string
+	image?: string
+	timeout?: string
+	max_turns?: number
+	secrets?: Record<string, SecretEntry>
+	services?: ServiceDecl[]
+	skills?: string[]
+	schedule?: ScheduleConfig
+}
+
 export interface TaskConfig {
-	setting: Record<string, any>
+	setting: TaskSetting
 	_resolved_from?: Record<string, string>
 	_schedule_status?: {
 		last_run?: string
@@ -89,14 +122,15 @@ export interface TaskConfig {
 }
 
 export interface SetConfigRequest {
-	schedule?: Record<string, any>
+	runner?: string
+	model?: string
+	image?: string
 	timeout?: string
 	max_turns?: number
-	model?: string
 	secrets?: Record<string, string | null>
+	services?: ServiceDecl[]
 	skills?: string[]
-	runner?: string
-	image?: string
+	schedule?: ScheduleConfig
 }
 
 export interface RunnerInfo {

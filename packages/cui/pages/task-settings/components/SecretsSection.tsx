@@ -39,25 +39,29 @@ const SecretsSection = ({ task, taskId, config, onConfigSave }: Props) => {
 			setSecrets([])
 			return
 		}
-		const source = config._resolved_from?.secrets || 'task'
-		const items: SecretItem[] = Object.keys(config.setting.secrets).map((key) => ({
-			key,
-			has_value: true,
-			source
-		}))
+		const items: SecretItem[] = Object.entries(config.setting.secrets).map(
+			([key, info]) => ({
+				key,
+				has_value: !!info.has_value,
+				source: info.source || 'dsl'
+			})
+		)
 		setSecrets(items)
 	}, [config])
 
+	const predefined = secrets.filter((s) => config?.setting?.secrets?.[s.key]?.predefined)
+	const custom = secrets.filter((s) => !config?.setting?.secrets?.[s.key]?.predefined)
+
 	const sourceTag = (source: string) => {
 		const labels: Record<string, string> = {
-			task: is_cn ? '任务' : 'Task',
-			agent: is_cn ? 'AI 专家' : 'AI Expert',
-			'system/team/user': is_cn ? '默认' : 'Default'
+			dsl: is_cn ? '预制' : 'Predefined',
+			user: is_cn ? '用户设置' : 'User',
+			task: is_cn ? '任务覆盖' : 'Task Override'
 		}
 		const colors: Record<string, string> = {
-			task: '#1890ff',
-			agent: '#722ed1',
-			'system/team/user': '#8c8c8c'
+			dsl: '#8c8c8c',
+			user: '#722ed1',
+			task: '#1890ff'
 		}
 		return (
 			<span style={{
@@ -178,7 +182,52 @@ const SecretsSection = ({ task, taskId, config, onConfigSave }: Props) => {
 							</tr>
 						</thead>
 						<tbody>
-							{secrets.map((entry) => (
+							{predefined.length > 0 && (
+								<tr>
+									<td colSpan={5} style={{ padding: '8px 10px 4px', fontSize: 11, color: 'var(--color_text_grey)', fontWeight: 600 }}>
+										{is_cn ? '预制密钥' : 'Predefined'}
+									</td>
+								</tr>
+							)}
+							{predefined.map((entry) => (
+								<tr key={entry.key}>
+									<td style={{ textAlign: 'center', padding: '10px 4px 10px 10px' }}>
+										<Icon
+											name={entry.has_value ? 'material-check_circle' : 'material-radio_button_unchecked'}
+											size={14}
+											style={{ color: entry.has_value ? 'var(--color_success, #52c41a)' : 'var(--color_text_grey)' }}
+										/>
+									</td>
+									<td>
+										<code className={viewStyles.secretKey}>{entry.key}</code>
+									</td>
+									<td style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--color_text_grey)' }}>
+										{entry.has_value ? '***···***' : (
+											<em>{is_cn ? '未设置' : 'not set'}</em>
+										)}
+									</td>
+									<td>{sourceTag(entry.source)}</td>
+									<td>
+										<div className={viewStyles.secretsTableActions}>
+											<Button
+												size='small'
+												type='default'
+												onClick={() => { setEditKey(entry.key); setEditValue('') }}
+											>
+												{entry.has_value ? (is_cn ? '修改' : 'Edit') : (is_cn ? '设置' : 'Set')}
+											</Button>
+										</div>
+									</td>
+								</tr>
+							))}
+							{custom.length > 0 && (
+								<tr>
+									<td colSpan={5} style={{ padding: '8px 10px 4px', fontSize: 11, color: 'var(--color_text_grey)', fontWeight: 600 }}>
+										{is_cn ? '自定义密钥' : 'Custom'}
+									</td>
+								</tr>
+							)}
+							{custom.map((entry) => (
 								<tr key={entry.key}>
 									<td style={{ textAlign: 'center', padding: '10px 4px 10px 10px' }}>
 										<Icon
