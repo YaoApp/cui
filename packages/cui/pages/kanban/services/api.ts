@@ -176,7 +176,8 @@ export async function getTasks(boardId: string): Promise<KanbanTask[]> {
 export async function getTaskDetail(taskId: string): Promise<KanbanTask> {
 	const agent = getAgent()
 	const api = getOpenAPI()
-	const res = await agent.tasks.Get(taskId)
+	const locale = getLocale() || 'en-us'
+	const res = await agent.tasks.Get(taskId, locale)
 	if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to get task')
 	return mapTask(res.data)
 }

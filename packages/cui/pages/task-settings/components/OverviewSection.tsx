@@ -1,11 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { getLocale } from '@umijs/max'
 import { message } from 'antd'
 import Icon from '@/widgets/Icon'
-import Selector from '@/chatbox/components/InputArea/Selector'
-import { useLLMProviders } from '@/hooks/useLLMProviders'
-import { Agent } from '@/openapi/agent'
-import type { TaskConfig, SetConfigRequest } from '@/openapi/agent/tasks'
 import type { KanbanTask } from '../../kanban/types'
 import viewStyles from '@/pages/assistants/detail/components/View/index.less'
 import styles from '../index.less'
@@ -24,39 +20,15 @@ const STATUS_MAP: Record<string, { cn: string; en: string; icon: string }> = {
 interface Props {
 	task: KanbanTask
 	taskId: string
-	config: TaskConfig | null
-	onConfigSave: (req: SetConfigRequest) => Promise<void>
 	onTaskUpdate: (data: Partial<KanbanTask>) => Promise<void>
-	onNavigate?: (section: string) => void
 }
 
-const OverviewSection = ({ task, taskId, config, onConfigSave, onTaskUpdate, onNavigate }: Props) => {
+const OverviewSection = ({ task, taskId, onTaskUpdate }: Props) => {
 	const is_cn = getLocale() === 'zh-CN'
-	const { providers: llmProviders } = useLLMProviders()
-	const [assistants, setAssistants] = useState<Array<{ id: string; name: string }>>([])
 	const [editingTags, setEditingTags] = useState(false)
 	const [tagInput, setTagInput] = useState('')
 	const [localTags, setLocalTags] = useState<string[]>(task.tags || [])
-	const [currentAssistant, setCurrentAssistant] = useState(task.assistant_id || '')
-	const [currentModel, setCurrentModel] = useState(config?.setting?.model || task.connector_name || '')
 	const tagInputRef = useRef<HTMLInputElement>(null)
-
-	useEffect(() => {
-		if (!window.$app?.openapi) return
-		const api = new Agent(window.$app.openapi)
-		api.assistants.List({ pagesize: 50 }).then((res: any) => {
-			const list = res?.data?.data
-			if (Array.isArray(list)) {
-				setAssistants(list.map((a: any) => ({ id: a.assistant_id, name: a.name })))
-			}
-		}).catch(() => {})
-	}, [])
-
-	useEffect(() => {
-		if (config?.setting?.model) {
-			setCurrentModel(config.setting.model)
-		}
-	}, [config])
 
 	const formatTime = (ts?: number) => {
 		if (!ts) return '-'
@@ -69,42 +41,6 @@ const OverviewSection = ({ task, taskId, config, onConfigSave, onTaskUpdate, onN
 	}
 
 	const status = STATUS_MAP[task.status] || STATUS_MAP.pending
-
-	const secretsCount = config?.setting?.secrets
-		? Object.keys(config.setting.secrets).length
-		: 0
-
-	const handleSecretsClick = () => {
-		onNavigate?.('secrets')
-	}
-
-	const assistantOptions = assistants.map((a) => ({
-		value: a.id,
-		label: a.name
-	}))
-
-	const modelOptions = llmProviders.map((p) => ({
-		value: p.value,
-		label: p.label
-	}))
-
-	const handleAssistantChange = async (val: string) => {
-		setCurrentAssistant(val)
-		try {
-			await onTaskUpdate({ assistant_id: val })
-		} catch {
-			message.error(is_cn ? '切换助手失败' : 'Failed to switch assistant')
-		}
-	}
-
-	const handleModelChange = async (val: string) => {
-		setCurrentModel(val)
-		try {
-			await onConfigSave({ model: val })
-		} catch {
-			message.error(is_cn ? '切换模型失败' : 'Failed to switch model')
-		}
-	}
 
 	const handleTagsEdit = () => {
 		setEditingTags(true)
@@ -144,41 +80,19 @@ const OverviewSection = ({ task, taskId, config, onConfigSave, onTaskUpdate, onN
 				<div className={viewStyles.kvTable}>
 					<div className={viewStyles.kvRow}>
 						<div className={viewStyles.kvLabel}>
-							{is_cn ? '助手' : 'Assistant'}
+							{is_cn ? '当前专家' : 'Current Expert'}
 						</div>
 						<div className={viewStyles.kvValue}>
-							<Selector
-								value={currentAssistant}
-								options={assistantOptions}
-								onChange={handleAssistantChange}
-								variant='normal'
-								placeholder={is_cn ? '选择助手' : 'Select assistant'}
-								searchable={assistantOptions.length >= 5}
-								searchPlaceholder={is_cn ? '搜索助手...' : 'Search...'}
-								dropdownWidth='auto'
-								dropdownMinWidth={200}
-								dropdownMaxWidth={320}
-							/>
+							{task.assistant_name || task.assistant_id || '-'}
 						</div>
 					</div>
 
 					<div className={viewStyles.kvRow}>
 						<div className={viewStyles.kvLabel}>
-							{is_cn ? '模型' : 'Model'}
+							{is_cn ? '当前模型' : 'Current Model'}
 						</div>
 						<div className={viewStyles.kvValue}>
-							<Selector
-								value={currentModel}
-								options={modelOptions}
-								onChange={handleModelChange}
-								variant='normal'
-								placeholder={is_cn ? '选择模型' : 'Select model'}
-								searchable={modelOptions.length >= 5}
-								searchPlaceholder={is_cn ? '搜索模型...' : 'Search...'}
-								dropdownWidth='auto'
-								dropdownMinWidth={200}
-								dropdownMaxWidth={320}
-							/>
+							{task.connector_name || '-'}
 						</div>
 					</div>
 
@@ -254,52 +168,6 @@ const OverviewSection = ({ task, taskId, config, onConfigSave, onTaskUpdate, onN
 							</span>
 						</div>
 					</div>
-
-					<div className={viewStyles.kvRow}>
-						<div className={viewStyles.kvLabel}>
-							{is_cn ? '电脑' : 'Computer'}
-						</div>
-						<div className={viewStyles.kvValue}>
-							{task.computer ? (
-								<span className={viewStyles.statusBadge}>
-									<Icon name='material-check_circle' size={14} />
-									{task.computer.mode} ({task.computer.status})
-								</span>
-							) : (
-								is_cn ? '未分配' : 'N/A'
-							)}
-						</div>
-					</div>
-
-					<div className={viewStyles.kvRow}>
-						<div className={viewStyles.kvLabel}>
-							{is_cn ? '沙箱' : 'Sandbox'}
-						</div>
-						<div className={viewStyles.kvValue}>
-							{task.sandbox ? (
-								<span className={viewStyles.statusBadge}>
-									<Icon name='material-check_circle' size={14} />
-									{task.sandbox.type}
-								</span>
-							) : (
-								is_cn ? '未配置' : 'N/A'
-							)}
-						</div>
-					</div>
-
-					<div className={viewStyles.kvRow}>
-						<div className={viewStyles.kvLabel}>
-							{is_cn ? '密钥' : 'Secrets'}
-						</div>
-						<div className={viewStyles.kvValue}>
-							<span className={styles.clickableValue} onClick={handleSecretsClick}>
-								{secretsCount > 0
-									? `${secretsCount} ${is_cn ? '个已配置' : 'configured'}`
-									: (is_cn ? '无' : 'None')}
-								<Icon name='material-chevron_right' size={14} />
-							</span>
-						</div>
-					</div>
 				</div>
 			</div>
 
@@ -333,17 +201,6 @@ const OverviewSection = ({ task, taskId, config, onConfigSave, onTaskUpdate, onN
 							</div>
 							<div className={viewStyles.kvValue}>
 								{formatTime(task.started_at)}
-							</div>
-						</div>
-					)}
-
-					{task.progress !== undefined && (
-						<div className={viewStyles.kvRow}>
-							<div className={viewStyles.kvLabel}>
-								{is_cn ? '进度' : 'Progress'}
-							</div>
-							<div className={viewStyles.kvValue}>
-								{task.progress}%
 							</div>
 						</div>
 					)}

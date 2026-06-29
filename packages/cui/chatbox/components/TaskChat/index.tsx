@@ -247,7 +247,7 @@ const TaskChatWS: React.FC<TaskChatWSProps> = ({
 		async (request: SendMessageRequest) => {
 			const msg = request.messages?.[0]
 			if (!msg) return
-			sendMessage(msg, request.metadata)
+			sendMessage(msg, request.metadata, request.model)
 		},
 		[sendMessage]
 	)

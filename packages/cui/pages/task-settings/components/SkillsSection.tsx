@@ -159,7 +159,7 @@ const SkillsSection = ({ task, taskId }: Props) => {
 						{bundled.length > 0 && (
 							<div style={{ marginBottom: extended.length > 0 ? 20 : 0 }}>
 								<div className={styles.infoLabel} style={{ marginBottom: 8 }}>
-									{is_cn ? 'AI 专家自带技能' : 'Agent Bundled Skills'}
+									{is_cn ? `${task.assistant_name || 'AI 专家'} 自带技能` : `${task.assistant_name || 'Agent'} Bundled Skills`}
 								</div>
 								{bundled.map((skill) => renderSkillRow(skill, 'material-auto_fix_high', 'bundled'))}
 							</div>
