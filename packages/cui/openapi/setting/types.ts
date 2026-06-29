@@ -303,13 +303,13 @@ export interface PreferenceData {
 // ─── Agent Setting ──────────────────────────────────
 
 export interface SecretEntry {
-	value?: string
+	has_value?: boolean
+	predefined?: boolean
 	label?: string
 	description?: string
 	required?: boolean
 	multiline?: boolean
-	has_value?: boolean
-	predefined?: boolean
+	source?: string
 }
 
 export interface WebService {

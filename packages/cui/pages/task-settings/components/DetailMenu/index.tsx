@@ -29,7 +29,6 @@ const MENU_GROUPS: MenuGroup[] = [
 			{ key: 'overview', icon: 'material-info', label: { 'zh-CN': '通用', 'en-US': 'General' } },
 			{ key: 'skills', icon: 'material-auto_fix_high', label: { 'zh-CN': '技能', 'en-US': 'Skills' } },
 			{ key: 'secrets', icon: 'material-key', label: { 'zh-CN': '密钥', 'en-US': 'Secrets' } },
-			{ key: 'sandbox', icon: 'material-computer', label: { 'zh-CN': '沙箱', 'en-US': 'Sandbox' } },
 			{ key: 'computer', icon: 'material-desktop_windows', label: { 'zh-CN': '电脑', 'en-US': 'Computer' } },
 			{ key: 'schedule', icon: 'material-schedule', label: { 'zh-CN': '定时', 'en-US': 'Schedule' } }
 		]

@@ -4,7 +4,6 @@ import { Spin, message } from 'antd'
 import Icon from '@/widgets/Icon'
 import DetailMenu from './components/DetailMenu'
 import OverviewSection from './components/OverviewSection'
-import SandboxSection from './components/SandboxSection'
 import SecretsSection from './components/SecretsSection'
 import ComputerSection from './components/ComputerSection'
 import SkillsSection from './components/SkillsSection'
@@ -143,14 +142,6 @@ const TaskSettings = (props: AppRouteProps) => {
 								onConfigSave={handleConfigSave}
 								onTaskUpdate={handleTaskUpdate}
 								onNavigate={handleSectionChange}
-							/>
-						)}
-						{activeSection === 'sandbox' && (
-							<SandboxSection
-								task={task}
-								taskId={taskId}
-								config={config}
-								onConfigSave={handleConfigSave}
 							/>
 						)}
 						{activeSection === 'secrets' && (
