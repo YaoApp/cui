@@ -76,7 +76,7 @@ function mapTask(t: any): KanbanTask {
 		run_count: t.run_count,
 		assistant_id: t.assistant_id,
 		assistant_name: t.assistant_name,
-		connector_name: t.last_connector,
+		connector_name: t.connector_label || t.last_connector,
 		pinned: t.pinned,
 		computer: t.computer_id
 			? { id: t.computer_id, status: 'running', mode: t.computer_mode || 'sandbox' }

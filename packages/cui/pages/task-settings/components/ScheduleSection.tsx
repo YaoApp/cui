@@ -4,7 +4,7 @@ import { message } from 'antd'
 import { Button } from '@/components/ui'
 import Icon from '@/widgets/Icon'
 import { RadioGroup, Select, CheckboxGroup } from '@/components/ui/inputs'
-import type { TaskConfig, SetConfigRequest } from '@/openapi/agent/tasks'
+import type { ScheduleConfig } from '@/openapi/agent/tasks'
 import type { KanbanTask } from '../../kanban/types'
 import viewStyles from '@/pages/assistants/detail/components/View/index.less'
 
@@ -70,11 +70,9 @@ const UNIT_OPTIONS_EN = [
 interface Props {
 	task: KanbanTask
 	taskId: string
-	config: TaskConfig | null
-	onConfigSave: (req: SetConfigRequest) => Promise<void>
 }
 
-const ScheduleSection = ({ task, taskId, config, onConfigSave }: Props) => {
+const ScheduleSection = ({ task, taskId }: Props) => {
 	const is_cn = getLocale() === 'zh-CN'
 
 	const [mode, setMode] = useState<ClockMode>('once')
@@ -84,19 +82,24 @@ const ScheduleSection = ({ task, taskId, config, onConfigSave }: Props) => {
 	const [intervalUnit, setIntervalUnit] = useState('m')
 	const [timezone, setTimezone] = useState('Asia/Shanghai')
 	const [saving, setSaving] = useState(false)
-
-	const scheduleStatus = config?._schedule_status
+	const [loaded, setLoaded] = useState(false)
 
 	useEffect(() => {
-		const sched = config?.setting?.schedule
-		if (!sched) return
-		if (sched.mode) setMode(sched.mode as ClockMode)
-		if (sched.times?.length) setTimes(sched.times)
-		if (sched.days?.length) setDays(sched.days)
-		if (sched.interval_value) setIntervalValue(sched.interval_value)
-		if (sched.interval_unit) setIntervalUnit(sched.interval_unit)
-		if (sched.timezone) setTimezone(sched.timezone)
-	}, [config])
+		if (!taskId || loaded) return
+		const api = window.$app?.openapi
+		if (!api) return
+		api.Get<{ schedule: ScheduleConfig | null }>(`/agent/tasks/${taskId}/schedule`).then((res: any) => {
+			if (api.IsError(res)) return
+			const sched = res.data?.schedule
+			if (!sched) return
+			if (sched.mode) setMode(sched.mode as ClockMode)
+			if (sched.times?.length) setTimes(sched.times)
+			if (sched.days?.length) setDays(sched.days)
+			if (sched.interval_value) setIntervalValue(sched.interval_value)
+			if (sched.interval_unit) setIntervalUnit(sched.interval_unit)
+			if (sched.timezone) setTimezone(sched.timezone)
+		}).finally(() => setLoaded(true))
+	}, [taskId])
 
 	const handleAddTime = () => {
 		setTimes([...times, '12:00'])
@@ -113,19 +116,24 @@ const ScheduleSection = ({ task, taskId, config, onConfigSave }: Props) => {
 		setTimes(next)
 	}
 
+	const saveSchedule = async (schedule: ScheduleConfig) => {
+		const api = window.$app?.openapi
+		if (!api) throw new Error('OpenAPI not initialized')
+		const res = await api.Put(`/agent/tasks/${taskId}/schedule`, schedule)
+		if (api.IsError(res)) throw new Error('save failed')
+	}
+
 	const handleSave = async () => {
 		setSaving(true)
 		try {
-			await onConfigSave({
-				schedule: {
-					enabled: true,
-					mode,
-					times: mode === 'times' ? times : undefined,
-					days: mode === 'times' ? days : undefined,
-					interval_value: mode === 'interval' ? intervalValue : undefined,
-					interval_unit: mode === 'interval' ? intervalUnit : undefined,
-					timezone: mode === 'times' ? timezone : undefined
-				}
+			await saveSchedule({
+				enabled: true,
+				mode,
+				times: mode === 'times' ? times : undefined,
+				days: mode === 'times' ? days : undefined,
+				interval_value: mode === 'interval' ? intervalValue : undefined,
+				interval_unit: mode === 'interval' ? intervalUnit : undefined,
+				timezone: mode === 'times' ? timezone : undefined
 			})
 			message.success(is_cn ? '保存成功' : 'Saved successfully')
 		} catch {
@@ -138,7 +146,7 @@ const ScheduleSection = ({ task, taskId, config, onConfigSave }: Props) => {
 	const handleReset = async () => {
 		setSaving(true)
 		try {
-			await onConfigSave({ schedule: { enabled: false, mode: 'once' } })
+			await saveSchedule({ enabled: false, mode: 'once' })
 			setMode('once')
 			setTimes(['09:00'])
 			setDays(['Mon', 'Tue', 'Wed', 'Thu', 'Fri'])
@@ -151,13 +159,6 @@ const ScheduleSection = ({ task, taskId, config, onConfigSave }: Props) => {
 		} finally {
 			setSaving(false)
 		}
-	}
-
-	const formatDateTime = (dt?: string) => {
-		if (!dt) return '-'
-		return new Date(dt).toLocaleString(is_cn ? 'zh-CN' : 'en-US', {
-			month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-		})
 	}
 
 	return (
@@ -182,26 +183,7 @@ const ScheduleSection = ({ task, taskId, config, onConfigSave }: Props) => {
 					</div>
 				</div>
 
-				{/* Schedule status display */}
-				{scheduleStatus && (scheduleStatus.last_run || scheduleStatus.next_run) && (
-					<div style={{ marginBottom: 16, padding: '8px 12px', borderRadius: 6, background: 'var(--color_neo_bg_field, var(--color_bg_2))', fontSize: 13 }}>
-						{scheduleStatus.next_run && (
-							<div style={{ color: 'var(--color_neo_text_secondary)' }}>
-								{is_cn ? '下次执行: ' : 'Next run: '}{formatDateTime(scheduleStatus.next_run)}
-							</div>
-						)}
-						{scheduleStatus.last_run && (
-							<div style={{ color: 'var(--color_neo_text_secondary)', marginTop: 4 }}>
-								{is_cn ? '上次执行: ' : 'Last run: '}{formatDateTime(scheduleStatus.last_run)}
-							</div>
-						)}
-						{scheduleStatus.total_runs !== undefined && (
-							<div style={{ color: 'var(--color_neo_text_secondary)', marginTop: 4 }}>
-								{is_cn ? '累计执行: ' : 'Total runs: '}{scheduleStatus.total_runs}
-							</div>
-						)}
-					</div>
-				)}
+				
 
 				{/* Mode selection */}
 				<>
