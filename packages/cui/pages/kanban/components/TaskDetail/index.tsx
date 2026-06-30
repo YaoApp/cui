@@ -58,6 +58,9 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 	const inlineAnimTimerRef = useRef<number>()
 
 	const [loadingTask, setLoadingTask] = useState(false)
+	const [editingTitle, setEditingTitle] = useState(false)
+	const [titleValue, setTitleValue] = useState('')
+	const titleInputRef = useRef<HTMLInputElement>(null)
 
 	// Prefer task from KanbanContext (Kanban page); fallback to independent loading (Inbox page)
 	const task = ctx?.tasks.find((t) => t.id === taskId) || localTask
@@ -94,6 +97,21 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 	useEffect(() => {
 		if (isCreating) wasCreatingRef.current = true
 	}, [isCreating])
+
+	const handleTitleClick = useCallback(() => {
+		if (!task) return
+		setTitleValue(task.title || '')
+		setEditingTitle(true)
+		setTimeout(() => titleInputRef.current?.focus(), 0)
+	}, [task])
+
+	const handleTitleSave = useCallback(() => {
+		setEditingTitle(false)
+		const trimmed = titleValue.trim()
+		if (!trimmed || !taskId || trimmed === task?.title) return
+		ctx?.updateLocalTitle?.(taskId, trimmed)
+		services.updateTask(taskId, { title: trimmed } as any).catch(() => {})
+	}, [titleValue, taskId, task, ctx])
 
 	const handleMessagesChange = useCallback((msgs: any[]) => {
 		if (!taskId || tempTitleSetRef.current || !wasCreatingRef.current) return
@@ -306,7 +324,23 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 						className={clsx(styles.statusDot, styles[task.status])}
 						title={statusLabel ? (is_cn ? statusLabel.cn : statusLabel.en) : ''}
 					/>
-					<span className={styles.headerTitle}>{task.title}</span>
+					{editingTitle ? (
+						<input
+							ref={titleInputRef}
+							className={styles.headerTitleInput}
+							value={titleValue}
+							onChange={(e) => setTitleValue(e.target.value)}
+							onBlur={handleTitleSave}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') handleTitleSave()
+								if (e.key === 'Escape') setEditingTitle(false)
+							}}
+						/>
+					) : (
+						<span className={styles.headerTitle} onClick={handleTitleClick}>
+							{task.title}
+						</span>
+					)}
 
 					<div className={styles.resourceActions}>
 						<Tooltip title={is_cn ? '工作空间' : 'Workspaces'}>

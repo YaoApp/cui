@@ -1,5 +1,6 @@
 .sectionContent {
 	padding-bottom: 48px;
+	container-type: inline-size;
 }
 
 .card {
@@ -597,6 +598,39 @@
 	align-items: center;
 	gap: 4px;
 	justify-content: flex-end;
+}
+
+.colLabel,
+.colValue,
+.colSource {
+	transition: opacity 0.15s;
+}
+
+@container (max-width: 480px) {
+	.colLabel,
+	.colValue,
+	.colSource {
+		display: none;
+	}
+
+	.secretsTable {
+		th, td {
+			padding: 8px 6px;
+		}
+		td:first-child, th:first-child {
+			text-align: center;
+		}
+	}
+
+	.legendRow {
+		flex-wrap: nowrap;
+		gap: 8px;
+		font-size: 11px;
+	}
+
+	.noticeCard {
+		display: none;
+	}
 }
 
 .formField {

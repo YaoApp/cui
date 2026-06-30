@@ -226,27 +226,27 @@ const SecretsManager = ({ assistantId, chatId, showSource, assistantName }: Secr
 	const renderTable = (entries: [string, SecretEntry][], canDelete: boolean) => (
 		<table className={styles.secretsTable}>
 			<colgroup>
-				<col style={{ width: 42 }} />
-				<col style={{ width: showSource ? '22%' : '25%' }} />
-				<col style={{ width: showSource ? '22%' : '25%' }} />
-				<col style={{ width: showSource ? '20%' : '30%' }} />
-				{showSource && <col style={{ width: '14%' }} />}
-				<col style={{ width: '20%' }} />
+				<col style={{ width: 36 }} />
+				<col />
+				<col className={styles.colLabel} />
+				<col className={styles.colValue} />
+				{showSource && <col className={styles.colSource} />}
+				<col style={{ width: 80 }} />
 			</colgroup>
 			<thead>
 				<tr>
-					<th style={{ textAlign: 'center', paddingLeft: 14 }}></th>
+					<th style={{ textAlign: 'center', padding: '10px 4px' }}></th>
 					<th>Key</th>
-					<th>{is_cn ? '名称' : 'Label'}</th>
-					<th>{is_cn ? '值' : 'Value'}</th>
-					{showSource && <th>{is_cn ? '来源' : 'Source'}</th>}
+					<th className={styles.colLabel}>{is_cn ? '名称' : 'Label'}</th>
+					<th className={styles.colValue}>{is_cn ? '值' : 'Value'}</th>
+					{showSource && <th className={styles.colSource}>{is_cn ? '来源' : 'Source'}</th>}
 					<th style={{ textAlign: 'right' }}>{is_cn ? '操作' : 'Actions'}</th>
 				</tr>
 			</thead>
 			<tbody>
 				{entries.map(([key, entry]) => (
 					<tr key={key}>
-						<td style={{ textAlign: 'center', padding: '10px 4px 10px 14px' }}>
+						<td style={{ textAlign: 'center', padding: '10px 4px' }}>
 							<Icon
 								name={entry.has_value ? 'material-check_circle' : 'material-radio_button_unchecked'}
 								size={14}
@@ -257,15 +257,15 @@ const SecretsManager = ({ assistantId, chatId, showSource, assistantName }: Secr
 							<code className={styles.secretKey}>{key}</code>
 							{entry.required && <span className={styles.requiredMark}> *</span>}
 						</td>
-						<td style={{ color: 'var(--color_text_grey)', fontSize: 13 }}>
+						<td className={styles.colLabel} style={{ color: 'var(--color_text_grey)', fontSize: 13 }}>
 							{entry.label || '\u2014'}
 						</td>
-						<td style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--color_text_grey)' }}>
+						<td className={styles.colValue} style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--color_text_grey)' }}>
 							{entry.has_value ? '***\u00B7\u00B7\u00B7***' : (
 								<em>{is_cn ? '未设置' : 'not set'}</em>
 							)}
 						</td>
-						{showSource && <td>{sourceTag(entry.source)}</td>}
+						{showSource && <td className={styles.colSource}>{sourceTag(entry.source)}</td>}
 						<td>
 							<div className={styles.secretsTableActions}>
 								<Button
