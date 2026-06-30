@@ -73,6 +73,8 @@ function mapTask(t: any): KanbanTask {
 		started_at: t.started_at ? new Date(t.started_at).getTime() : undefined,
 		completed_at: t.completed_at ? new Date(t.completed_at).getTime() : undefined,
 		duration: t.duration,
+		schedule: t.schedule && typeof t.schedule === 'object' ? t.schedule : undefined,
+		next_run: t.next_run ? new Date(t.next_run).getTime() : undefined,
 		run_count: t.run_count,
 		assistant_id: t.assistant_id,
 		assistant_name: t.assistant_name,
@@ -83,7 +85,8 @@ function mapTask(t: any): KanbanTask {
 			: undefined,
 		sandbox: t.sandbox_type
 			? { type: t.sandbox_type as any }
-			: undefined
+			: undefined,
+		instruction: t.instruction && typeof t.instruction === 'object' ? t.instruction : undefined
 	}
 }
 
