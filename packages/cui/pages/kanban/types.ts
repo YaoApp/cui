@@ -2,16 +2,18 @@
 // 'creating' is a client-only state used during the task creation UI flow
 export type TaskStatus = 'creating' | 'pending' | 'queued' | 'running' | 'waiting' | 'completed' | 'failed' | 'cancelled'
 
-export type RecurringMode = 'fixed_time' | 'interval'
+export type ScheduleMode = 'times' | 'interval' | 'daemon' | 'once'
 
-export interface RecurringConfig {
+export interface ScheduleConfig {
 	enabled: boolean
-	mode: RecurringMode
-	cron?: string
-	interval_minutes?: number
+	mode: ScheduleMode
+	times?: string[]
+	days?: string[]
+	interval_value?: number
+	interval_unit?: string
 	timezone?: string
-	max_runs?: number
-	end_at?: number
+	start_date?: string
+	end_date?: string
 }
 
 export interface TaskRunSummary {
@@ -68,17 +70,6 @@ export interface TaskSkill {
 	description?: string
 }
 
-export interface TaskScheduleHistory {
-	time: string
-	status: 'success' | 'failed'
-}
-
-export interface TaskSchedule {
-	enabled: boolean
-	cron: string
-	next_run?: string
-	history?: TaskScheduleHistory[]
-}
 
 export interface KanbanTask {
 	id: string
@@ -102,7 +93,8 @@ export interface KanbanTask {
 	started_at?: number
 	completed_at?: number
 	duration?: number
-	recurring?: RecurringConfig
+	schedule?: ScheduleConfig
+	next_run?: number
 	run_count?: number
 	last_run?: TaskRunSummary
 	assistant_id?: string
@@ -112,8 +104,14 @@ export interface KanbanTask {
 	secrets_count?: number
 	computer?: ComputerBinding
 	skills?: TaskSkill[]
-	schedule?: TaskSchedule
 	pinned?: boolean
+	instruction?: {
+		prompt: string
+		locale?: string
+		first_question?: string
+		first_answer?: string
+		updated_at?: string
+	}
 }
 
 export interface Column {
@@ -188,6 +186,6 @@ export interface CreateTaskData {
 	workspace_id?: string
 	assistant_id?: string
 	tags?: string[]
-	recurring?: RecurringConfig
+	schedule?: ScheduleConfig
 	execute_immediately?: boolean
 }

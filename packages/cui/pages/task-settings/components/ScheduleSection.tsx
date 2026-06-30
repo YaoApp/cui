@@ -44,15 +44,13 @@ const DAYS_OPTIONS_EN = [
 const MODE_OPTIONS_CN = [
 	{ label: '一次性', value: 'once' },
 	{ label: '定时', value: 'times' },
-	{ label: '间隔', value: 'interval' },
-	{ label: '常驻', value: 'daemon' }
+	{ label: '间隔', value: 'interval' }
 ]
 
 const MODE_OPTIONS_EN = [
 	{ label: 'Once', value: 'once' },
 	{ label: 'Scheduled', value: 'times' },
-	{ label: 'Interval', value: 'interval' },
-	{ label: 'Daemon', value: 'daemon' }
+	{ label: 'Interval', value: 'interval' }
 ]
 
 const UNIT_OPTIONS_CN = [
@@ -72,6 +70,10 @@ interface Props {
 	taskId: string
 }
 
+interface LogEntry {
+	triggered_at: string
+}
+
 const ScheduleSection = ({ task, taskId }: Props) => {
 	const is_cn = getLocale() === 'zh-CN'
 
@@ -83,6 +85,18 @@ const ScheduleSection = ({ task, taskId }: Props) => {
 	const [timezone, setTimezone] = useState('Asia/Shanghai')
 	const [saving, setSaving] = useState(false)
 	const [loaded, setLoaded] = useState(false)
+
+	const [logs, setLogs] = useState<LogEntry[]>([])
+	const [logsTotal, setLogsTotal] = useState(0)
+	const [logsPage, setLogsPage] = useState(1)
+	const logsPageSize = 10
+
+	const [instrEditing, setInstrEditing] = useState(false)
+	const [instrPrompt, setInstrPrompt] = useState('')
+	const [instrLocale, setInstrLocale] = useState('zh-cn')
+	const [instrSaving, setInstrSaving] = useState(false)
+	const [instrLocal, setInstrLocal] = useState(task.instruction)
+	useEffect(() => { setInstrLocal(task.instruction) }, [task.instruction])
 
 	useEffect(() => {
 		if (!taskId || loaded) return
@@ -99,6 +113,27 @@ const ScheduleSection = ({ task, taskId }: Props) => {
 			if (sched.interval_unit) setIntervalUnit(sched.interval_unit)
 			if (sched.timezone) setTimezone(sched.timezone)
 		}).finally(() => setLoaded(true))
+	}, [taskId])
+
+	const fetchLogs = (page: number) => {
+		const api = window.$app?.openapi
+		if (!api || !taskId) return
+		api.Get<{ logs: LogEntry[]; total: number }>(`/agent/tasks/${taskId}/schedule/logs?page=${page}&page_size=${logsPageSize}`).then((res: any) => {
+			if (api.IsError(res)) {
+				console.warn('[ScheduleSection] fetchLogs error:', res.error)
+				return
+			}
+			setLogs(res.data?.logs || [])
+			setLogsTotal(res.data?.total || 0)
+			setLogsPage(page)
+		}).catch((err: any) => {
+			console.warn('[ScheduleSection] fetchLogs network error:', err)
+		})
+	}
+
+	useEffect(() => {
+		if (!taskId) return
+		fetchLogs(1)
 	}, [taskId])
 
 	const handleAddTime = () => {
@@ -367,6 +402,218 @@ const ScheduleSection = ({ task, taskId }: Props) => {
 				)}
 				</>
 
+			</div>
+
+		{/* Scheduled Instruction */}
+		{instrLocal && (
+			<div className={viewStyles.card} style={{ marginTop: 16 }}>
+				<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+					<div className={viewStyles.cardTitle}>
+						{is_cn ? '定时执行指令' : 'Scheduled Instruction'}
+					</div>
+					{!instrEditing && (
+						<span
+							onClick={() => {
+								setInstrPrompt(instrLocal?.prompt || '')
+								const raw = (instrLocal?.locale || '').toLowerCase()
+								setInstrLocale(raw.startsWith('zh') ? 'zh-cn' : 'en')
+								setInstrEditing(true)
+							}}
+							style={{ fontSize: 12, color: 'var(--color_main)', cursor: 'pointer' }}
+						>
+							{is_cn ? '编辑' : 'Edit'}
+						</span>
+					)}
+				</div>
+
+				{instrEditing ? (
+					<div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+						<div>
+							<div style={{ fontSize: 12, color: 'var(--color_neo_text_secondary)', marginBottom: 4 }}>
+								{is_cn ? '指令内容' : 'Prompt'}
+							</div>
+							<textarea
+								value={instrPrompt}
+								onChange={(e) => setInstrPrompt(e.target.value)}
+								rows={4}
+								style={{
+									width: '100%',
+									padding: '8px 12px',
+									border: '1px solid var(--color_neo_border_field, var(--color_border_light))',
+									borderRadius: 6,
+									background: 'var(--color_neo_bg_field, var(--color_bg_2))',
+									color: 'var(--color_neo_text_primary, var(--color_text))',
+									fontSize: 13,
+									lineHeight: 1.5,
+									resize: 'vertical',
+									outline: 'none',
+									fontFamily: 'inherit'
+								}}
+							/>
+						</div>
+						<div>
+							<div style={{ fontSize: 12, color: 'var(--color_neo_text_secondary)', marginBottom: 4 }}>
+								{is_cn ? '执行语言' : 'Locale'}
+							</div>
+							<RadioGroup
+								schema={{
+									type: 'string',
+									enum: [
+										{ label: '中文', value: 'zh-cn' },
+										{ label: 'English', value: 'en' }
+									]
+								}}
+								value={instrLocale}
+								onChange={(v) => setInstrLocale(v as string)}
+							/>
+						</div>
+						{instrLocal?.first_question && (
+							<div style={{ fontSize: 12, color: 'var(--color_neo_text_secondary)' }}>
+								<span style={{ fontWeight: 500 }}>{is_cn ? '首次提问：' : 'First question: '}</span>
+								<span style={{ opacity: 0.8 }}>
+									{instrLocal.first_question.length > 80
+										? instrLocal.first_question.slice(0, 80) + '...'
+										: instrLocal.first_question}
+								</span>
+							</div>
+						)}
+						<div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+							<Button size='small' onClick={() => setInstrEditing(false)}>
+								{is_cn ? '取消' : 'Cancel'}
+							</Button>
+							<Button
+								size='small'
+								type='primary'
+								loading={instrSaving}
+								onClick={async () => {
+									const api = window.$app?.openapi
+									if (!api) return
+									setInstrSaving(true)
+									try {
+										const updatedAt = new Date().toISOString()
+										const res = await api.Put(`/agent/tasks/${taskId}`, {
+											instruction: {
+												prompt: instrPrompt,
+												locale: instrLocale,
+												updated_at: updatedAt
+											}
+										})
+										if (!api.IsError(res)) {
+											setInstrLocal({
+												...instrLocal,
+												prompt: instrPrompt,
+												locale: instrLocale,
+												updated_at: updatedAt
+											})
+											message.success(is_cn ? '保存成功' : 'Saved')
+											setInstrEditing(false)
+										}
+									} catch { /* ignore */ }
+									setInstrSaving(false)
+								}}
+							>
+								{is_cn ? '保存' : 'Save'}
+							</Button>
+						</div>
+					</div>
+				) : (
+					<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+						<div style={{
+							fontSize: 13,
+							color: 'var(--color_neo_text_secondary, var(--color_text_grey))',
+							padding: '8px 12px',
+							borderRadius: 6,
+							background: 'var(--color_neo_bg_field, var(--color_bg_2))',
+							lineHeight: 1.5,
+							wordBreak: 'break-word'
+						}}>
+							{instrLocal?.prompt || '-'}
+						</div>
+						<div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'var(--color_neo_text_secondary)' }}>
+							<span>
+								{is_cn ? '语言：' : 'Locale: '}
+								{(instrLocal?.locale || '').toLowerCase().startsWith('zh') ? '中文' : 'English'}
+							</span>
+							{instrLocal?.updated_at && (
+								<span>
+									{is_cn ? '更新：' : 'Updated: '}
+									{new Date(instrLocal.updated_at).toLocaleString()}
+								</span>
+							)}
+						</div>
+						{instrLocal?.first_question && (
+							<div style={{ fontSize: 12, color: 'var(--color_neo_text_secondary)', marginTop: 4 }}>
+								<span style={{ fontWeight: 500 }}>{is_cn ? '首次提问：' : 'First Q: '}</span>
+								<span style={{ opacity: 0.8 }}>
+									{instrLocal.first_question.length > 100
+										? instrLocal.first_question.slice(0, 100) + '...'
+										: instrLocal.first_question}
+								</span>
+							</div>
+						)}
+					</div>
+				)}
+			</div>
+		)}
+
+		{/* Execution Logs */}
+		<div className={viewStyles.card} style={{ marginTop: 16 }}>
+			<div className={viewStyles.cardTitle} style={{ marginBottom: 12 }}>
+				{is_cn ? '执行记录' : 'Execution Logs'}
+			</div>
+				{logs.length === 0 ? (
+					<div style={{ fontSize: 13, color: 'var(--color_neo_text_secondary, var(--color_text_grey))' }}>
+						{is_cn ? '暂无执行记录' : 'No execution logs'}
+					</div>
+				) : (
+					<>
+						<div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+							{logs.map((log, i) => (
+								<div
+									key={i}
+									style={{
+										display: 'flex',
+										alignItems: 'center',
+										gap: 8,
+										padding: '6px 10px',
+										borderRadius: 6,
+										background: 'var(--color_neo_bg_field, var(--color_bg_2))',
+										fontSize: 13
+									}}
+								>
+									<span style={{
+										width: 6, height: 6, borderRadius: '50%',
+										background: 'var(--color_success, #52c41a)', flexShrink: 0
+									}} />
+									<span style={{ color: 'var(--color_neo_text_primary, var(--color_text))', fontFamily: 'monospace' }}>
+										{new Date(log.triggered_at).toLocaleString()}
+									</span>
+								</div>
+							))}
+						</div>
+						{logsTotal > logsPageSize && (
+							<div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 12 }}>
+								<Button
+									size='small'
+									disabled={logsPage <= 1}
+									onClick={() => fetchLogs(logsPage - 1)}
+								>
+									{is_cn ? '上一页' : 'Prev'}
+								</Button>
+								<span style={{ fontSize: 12, color: 'var(--color_neo_text_secondary)', lineHeight: '28px' }}>
+									{logsPage} / {Math.ceil(logsTotal / logsPageSize)}
+								</span>
+								<Button
+									size='small'
+									disabled={logsPage >= Math.ceil(logsTotal / logsPageSize)}
+									onClick={() => fetchLogs(logsPage + 1)}
+								>
+									{is_cn ? '下一页' : 'Next'}
+								</Button>
+							</div>
+						)}
+					</>
+				)}
 			</div>
 		</div>
 	)

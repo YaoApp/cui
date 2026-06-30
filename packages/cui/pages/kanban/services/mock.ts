@@ -174,7 +174,7 @@ const board1Tasks: KanbanTask[] = [
 		position: 2,
 		progress: 100,
 		workspace: { id: 'ws-ops', name: 'ops-dashboard', path: '/workspace/ops', status: 'online' },
-		recurring: { enabled: true, mode: 'fixed_time', cron: '0 8 * * *', timezone: 'Asia/Shanghai', max_runs: 365 },
+		schedule: { enabled: true, mode: 'times', times: ['08:00'], timezone: 'Asia/Shanghai' },
 		run_count: 42,
 		last_run: {
 			run_number: 42,
@@ -288,7 +288,7 @@ const board1Tasks: KanbanTask[] = [
 		current_step: '等待下次调度（每日 9:00）',
 		last_message: '今日扫描完成：发现 8 个高风险客户（活跃度下降 >50%），已输出预警名单。',
 		workspace: { id: 'ws-customer', name: 'customer-insights', path: '/workspace/customer', status: 'online' },
-		recurring: { enabled: true, mode: 'fixed_time', cron: '0 9 * * *', timezone: 'Asia/Shanghai', max_runs: 365 },
+		schedule: { enabled: true, mode: 'times', times: ['09:00'], timezone: 'Asia/Shanghai' },
 		run_count: 28,
 		last_run: {
 			run_number: 28,
@@ -489,7 +489,7 @@ const board3Tasks: KanbanTask[] = [
 		current_step: '收集问卷回复（已收到 34/80）',
 		last_message: '问卷已发送至 80 家核心客户，目前收回 34 份。初步 NPS 分数 72，高于上季度。',
 		workspace: { id: 'ws-survey', name: 'customer-survey', path: '/workspace/survey', status: 'online' },
-		recurring: { enabled: true, mode: 'interval', interval_minutes: 43200, timezone: 'Asia/Shanghai' },
+		schedule: { enabled: true, mode: 'interval', interval_value: 720, interval_unit: 'minutes', timezone: 'Asia/Shanghai' },
 		run_count: 3,
 		assistant_id: 'ast-research',
 		assistant_name: '市场研究助手',
@@ -643,13 +643,13 @@ const templateColumnConfigs: Record<string, { title: string; icon: string; color
 	]
 }
 
-const templatePresetTasks: Record<string, { title: string; description: string; colIndex: number; recurring?: KanbanTask['recurring'] }[]> = {
+const templatePresetTasks: Record<string, { title: string; description: string; colIndex: number; schedule?: KanbanTask['schedule'] }[]> = {
 	'tpl-market': [
 		{
 			title: '每周行业动态抓取',
 			description: '每周一自动抓取行业新闻和竞品动态，整理成简报。',
 			colIndex: 2,
-			recurring: { enabled: true, mode: 'fixed_time', cron: '0 9 * * 1', timezone: 'Asia/Shanghai' }
+			schedule: { enabled: true, mode: 'times', times: ['09:00'], days: ['mon'], timezone: 'Asia/Shanghai' }
 		}
 	],
 	'tpl-content': [
@@ -657,7 +657,7 @@ const templatePresetTasks: Record<string, { title: string; description: string; 
 			title: '每日数据看板刷新',
 			description: '每天早上 8:00 自动拉取前一天的内容运营数据。',
 			colIndex: 3,
-			recurring: { enabled: true, mode: 'fixed_time', cron: '0 8 * * *', timezone: 'Asia/Shanghai' }
+			schedule: { enabled: true, mode: 'times', times: ['08:00'], timezone: 'Asia/Shanghai' }
 		}
 	]
 }
@@ -809,10 +809,10 @@ export async function createBoardFromTemplate(templateId: string, title?: string
 			id: genId('task'),
 			title: pt.title,
 			description: pt.description,
-			status: pt.recurring ? 'running' : 'pending',
+			status: pt.schedule ? 'running' : 'pending',
 			column_id: col.id,
 			position: tasks.filter((t) => t.column_id === col.id).length,
-			recurring: pt.recurring,
+			schedule: pt.schedule,
 			workspace: { id: genId('ws'), name: 'auto-workspace', status: 'online' },
 			assistant_id: 'ast-data',
 			assistant_name: '数据分析助手',
@@ -861,7 +861,7 @@ export async function createTask(data: CreateTaskData): Promise<KanbanTask> {
 		position: bd.tasks.filter((t) => t.column_id === data.column_id).length,
 		chat_id: data.chat_id || genId('chat'),
 		tags: data.tags,
-		recurring: data.recurring,
+		schedule: data.schedule,
 		assistant_id: data.assistant_id,
 		created_at: Date.now(),
 		updated_at: Date.now(),

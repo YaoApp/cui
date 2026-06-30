@@ -26,12 +26,15 @@ const STATUS_CONFIG: Record<string, { icon: string; color: string; label_cn: str
 	cancelled: { icon: 'material-cancel', color: 'var(--color_text_grey)', label_cn: '已取消', label_en: 'Cancelled' }
 }
 
-function formatDuration(seconds: number): string {
-	if (seconds < 60) return `${seconds}s`
-	if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
-	const h = Math.floor(seconds / 3600)
-	const m = Math.floor((seconds % 3600) / 60)
-	return m > 0 ? `${h}h ${m}m` : `${h}h`
+function formatRelativeTime(ts: number, is_cn: boolean): string {
+	const diff = ts - Date.now()
+	if (diff <= 0) return is_cn ? '即将触发' : 'Soon'
+	const minutes = Math.floor(diff / 60000)
+	if (minutes < 60) return is_cn ? `${minutes}分钟后` : `${minutes}m`
+	const hours = Math.floor(minutes / 60)
+	if (hours < 24) return is_cn ? `${hours}小时后` : `${hours}h`
+	const days = Math.floor(hours / 24)
+	return is_cn ? `${days}天后` : `${days}d`
 }
 
 const TaskCard = ({ task, is_cn, isDragging, isSelected, onClick, onMenuClick, onTogglePin, onContextMenu }: TaskCardProps) => {
@@ -44,13 +47,10 @@ const TaskCard = ({ task, is_cn, isDragging, isSelected, onClick, onMenuClick, o
 		return null
 	}, [task.status, task.current_step, task.last_message, task.error_message])
 
-	const elapsed = useMemo(() => {
-		if (task.duration) return formatDuration(task.duration)
-		if (task.started_at && (task.status === 'running' || task.status === 'waiting')) {
-			return formatDuration(Math.floor((Date.now() - task.started_at) / 1000))
-		}
-		return null
-	}, [task.duration, task.started_at, task.status])
+	const nextRunLabel = useMemo(() => {
+		if (!task.schedule?.enabled || !task.next_run) return null
+		return formatRelativeTime(task.next_run, is_cn)
+	}, [task.schedule, task.next_run, is_cn])
 
 	const handlePinClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
@@ -105,17 +105,17 @@ const TaskCard = ({ task, is_cn, isDragging, isSelected, onClick, onMenuClick, o
 						<Icon name={status.icon} size={12} />
 						{is_cn ? status.label_cn : status.label_en}
 					</span>
-					{task.recurring?.enabled && (
+					{task.schedule?.enabled && (
 						<span className={styles.badge}>
 							<Icon name='material-event_repeat' size={11} />
 							{is_cn ? '定时' : 'Sched'}
 						</span>
 					)}
 					<span className={styles.footerSpacer} />
-					{elapsed && (
+					{nextRunLabel && (
 						<span className={styles.elapsed}>
 							<Icon name='material-schedule' size={11} />
-							{elapsed}
+							{nextRunLabel}
 						</span>
 					)}
 				</div>
