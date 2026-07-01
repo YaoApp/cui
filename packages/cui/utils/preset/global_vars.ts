@@ -20,6 +20,7 @@ window.$app = {
 
 	Navigate(url: string, options?: { title?: string; icon?: string; replace?: boolean }) {
 		const global = window.$global
+
 		if (global?.detail_panel_active) {
 			window.$app?.Event?.emit('app/openSidebar', {
 				url,
@@ -28,6 +29,28 @@ window.$app = {
 			})
 			return
 		}
+
+		if (global?.sidebar_visible) {
+			if (options?.replace) {
+				window.$app?.Event?.emit('app/replaceRoute', {
+					url,
+					title: options?.title || url.split('/').pop() || url
+				})
+				return
+			}
+
+			const currentBase = window.location.pathname.split('/').filter(Boolean)[0] || ''
+			const targetBase = url.split('/').filter(Boolean)[0] || ''
+			if (targetBase && currentBase !== targetBase) {
+				window.$app?.Event?.emit('app/openSidebar', {
+					url,
+					title: options?.title || url.split('/').pop() || url,
+					icon: options?.icon
+				})
+				return
+			}
+		}
+
 		const { history } = require('@umijs/max')
 		options?.replace ? history.replace(url) : history.push(url)
 	}

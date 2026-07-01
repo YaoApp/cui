@@ -390,9 +390,6 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 										}
 									>
 										<Icon name='material-dns' size={14} />
-										{task.services && task.services.length > 0 && (
-											<span className={styles.resourceDot} />
-										)}
 									</span>
 								</Tooltip>
 								<Tooltip title={is_cn ? '活动监视器' : 'Activity Monitor'}>

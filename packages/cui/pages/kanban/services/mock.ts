@@ -1,5 +1,5 @@
 import type { Message } from '@/openapi'
-import type { Board, BoardSummary, BoardTemplate, Column, KanbanTask, CreateTaskData, ServiceBinding } from '../types'
+import type { Board, BoardSummary, BoardTemplate, Column, KanbanTask, CreateTaskData } from '../types'
 
 function userMsg(id: string, content: string): Message {
 	return { type: 'user_input', props: { content }, ui_id: id }
@@ -1062,53 +1062,3 @@ export async function getTaskFileName(taskId: string): Promise<string> {
 	return task?.title || taskId
 }
 
-// ==================== Task Services Mock ====================
-
-const defaultMockServices: ServiceBinding[] = [
-	{ name: 'Dev Server', port: 3000, protocol: 'http', status: 'running', pid: 12345, alias: '开发服务器' },
-	{ name: 'WebSocket API', port: 8080, protocol: 'websocket', status: 'running', pid: 12346 },
-	{ name: 'Database Proxy', port: 5432, protocol: 'tcp', status: 'running', pid: 12347 },
-	{ name: 'Hot Reload', port: 35729, protocol: 'websocket', status: 'stopped', pid: undefined }
-]
-
-export async function getTaskServices(taskId: string): Promise<ServiceBinding[]> {
-	await delay()
-	const allTasks = Object.values(mockBoards).flatMap((bd) =>
-		bd.columns.flatMap((col) => col.tasks || [])
-	)
-	const task = allTasks.find((t) => t?.id === taskId)
-	return task?.services?.length ? task.services : defaultMockServices
-}
-
-// ==================== Task Activity Monitor Mock ====================
-
-export interface TaskProcess {
-	pid: number
-	name: string
-	cpu: number
-	memory: number
-	status: 'running' | 'sleeping' | 'stopped'
-	port?: number
-	user?: string
-	started?: string
-	command?: string
-}
-
-const mockProcesses: TaskProcess[] = [
-	{ pid: 1, name: 'node', cpu: 12.3, memory: 256, status: 'running', port: 3000, user: 'app', started: '10:30', command: 'node dist/server.js' },
-	{ pid: 24, name: 'python3', cpu: 8.7, memory: 512, status: 'running', user: 'app', started: '10:31', command: 'python3 analyze.py --input data.csv' },
-	{ pid: 56, name: 'postgres', cpu: 3.2, memory: 128, status: 'running', port: 5432, user: 'postgres', started: '10:30', command: 'postgres: writer process' },
-	{ pid: 78, name: 'nginx', cpu: 0.1, memory: 32, status: 'running', port: 80, user: 'root', started: '10:30', command: 'nginx: master process' },
-	{ pid: 79, name: 'nginx', cpu: 0.3, memory: 24, status: 'sleeping', user: 'www', started: '10:30', command: 'nginx: worker process' },
-	{ pid: 102, name: 'redis-server', cpu: 1.5, memory: 64, status: 'running', port: 6379, user: 'redis', started: '10:30', command: 'redis-server *:6379' },
-	{ pid: 145, name: 'chromium', cpu: 22.1, memory: 1024, status: 'running', port: 9222, user: 'app', started: '10:35', command: 'chromium --headless --remote-debugging-port=9222' },
-	{ pid: 201, name: 'ts-node', cpu: 5.4, memory: 180, status: 'running', user: 'app', started: '10:32', command: 'ts-node scripts/transform.ts' },
-	{ pid: 310, name: 'esbuild', cpu: 0.0, memory: 48, status: 'sleeping', user: 'app', started: '10:33', command: 'esbuild --watch src/index.ts' },
-	{ pid: 402, name: 'tail', cpu: 0.0, memory: 4, status: 'sleeping', user: 'app', started: '10:34', command: 'tail -f /var/log/app.log' },
-	{ pid: 500, name: 'cron', cpu: 0.0, memory: 8, status: 'stopped', user: 'root', started: '10:30', command: 'cron -f' }
-]
-
-export async function getTaskProcesses(taskId: string): Promise<TaskProcess[]> {
-	await delay()
-	return mockProcesses
-}

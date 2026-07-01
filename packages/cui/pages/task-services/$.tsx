@@ -1,21 +1,30 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
-import { getTaskDetail, getTaskServices } from '../kanban/services/mock'
-import type { KanbanTask, ServiceBinding } from '../kanban/types'
-import viewStyles from '@/pages/assistants/detail/components/View/index.less'
+import { AgentTasks, type TaskItem, type PortInfo, type PortsResponse } from '@/openapi/agent/tasks'
 import styles from './index.less'
 
-const STATUS_COLORS: Record<string, string> = {
-	running: '#52c41a',
-	completed: '#52c41a',
-	pending: '#faad14',
-	creating: '#faad14',
-	waiting_input: '#1890ff',
-	failed: '#ff4d4f',
-	paused: '#d9d9d9',
-	cancelled: '#d9d9d9'
+function getTasksAPI(): AgentTasks | null {
+	const openapi = window.$app?.openapi
+	if (!openapi) return null
+	return new AgentTasks(openapi)
+}
+
+const HIDDEN_PROCESSES = ['x11vnc', 'websockify', 'tai']
+
+const STATE_COLORS: Record<string, string> = {
+	LISTEN: '#52c41a',
+	ESTABLISHED: '#1890ff',
+	TIME_WAIT: '#faad14',
+	CLOSE_WAIT: '#ff4d4f'
+}
+
+const PROTOCOL_STYLES: Record<string, string> = {
+	tcp: 'tcp',
+	udp: 'udp',
+	tcp6: 'tcp',
+	udp6: 'udp'
 }
 
 const TaskServices = (props: AppRouteProps) => {
@@ -24,42 +33,67 @@ const TaskServices = (props: AppRouteProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
-	const [task, setTask] = useState<KanbanTask | null>(null)
-	const [services, setServices] = useState<ServiceBinding[]>([])
+	const [taskInfo, setTaskInfo] = useState<TaskItem | null>(null)
+	const [ports, setPorts] = useState<PortInfo[]>([])
 	const [loading, setLoading] = useState(false)
-	const [editingIdx, setEditingIdx] = useState<number | null>(null)
-	const [editValue, setEditValue] = useState('')
-	const editInputRef = useRef<HTMLInputElement>(null)
+	const [notRunning, setNotRunning] = useState(false)
+	const [error, setError] = useState(false)
 
 	useEffect(() => {
 		if (!taskId) return
-		getTaskDetail(taskId).then(setTask)
-	}, [taskId])
+		const api = getTasksAPI()
+		if (!api) return
+		api.Get(taskId, locale).then((res) => {
+			if (!window.$app?.openapi?.IsError(res)) {
+				const data = window.$app!.openapi.GetData(res)
+				if (data) setTaskInfo(data)
+			}
+		})
+	}, [taskId, locale])
 
-	useEffect(() => {
+	const loadPorts = useCallback(async () => {
 		if (!taskId) return
+		const api = getTasksAPI()
+		if (!api) return
 		setLoading(true)
-		getTaskServices(taskId)
-			.then(setServices)
-			.finally(() => setLoading(false))
+		setError(false)
+		try {
+			const res = await api.GetPorts(taskId)
+			if (window.$app?.openapi?.IsError(res)) {
+				setError(true)
+				return
+			}
+			const data = window.$app!.openapi.GetData(res) as PortsResponse | null
+			if (!data) {
+				setError(true)
+				return
+			}
+			if ('status' in data && data.status === 'sandbox_not_running') {
+				setNotRunning(true)
+				setPorts([])
+			} else if ('ports' in data) {
+				setNotRunning(false)
+				setPorts(data.ports || [])
+			}
+		} catch {
+			setError(true)
+		} finally {
+			setLoading(false)
+		}
 	}, [taskId])
 
-	const handleEditName = (idx: number) => {
-		setEditingIdx(idx)
-		setEditValue(services[idx].alias || services[idx].name)
-		setTimeout(() => editInputRef.current?.focus(), 0)
-	}
+	useEffect(() => {
+		loadPorts()
+	}, [loadPorts])
 
-	const handleSaveName = () => {
-		if (editingIdx === null) return
-		const val = editValue.trim()
-		if (val) {
-			setServices((prev) =>
-				prev.map((svc, i) => i === editingIdx ? { ...svc, alias: val } : svc)
-			)
-		}
-		setEditingIdx(null)
-	}
+	const filteredPorts = useMemo(() => {
+		return ports.filter((p) => {
+			if (!p.process && !p.command) return false
+			const name = (p.process || '').toLowerCase()
+			if (HIDDEN_PROCESSES.some((h) => name.includes(h))) return false
+			return true
+		})
+	}, [ports])
 
 	if (!taskId) {
 		return (
@@ -77,24 +111,17 @@ const TaskServices = (props: AppRouteProps) => {
 	return (
 		<div className={styles.scrollWrap}>
 			<div className={styles.container}>
-				<div className={viewStyles.profileHeader}>
-					<div className={viewStyles.profileInfo}>
-						<h1 className={viewStyles.profileName}>
-							<span
-								className={styles.statusDot}
-								style={{ background: STATUS_COLORS[task?.status || 'pending'] || '#d9d9d9' }}
-							/>
-							{task?.title || taskId}
-						</h1>
-						{task?.description && (
-							<div className={viewStyles.profileDesc}>{task.description}</div>
-						)}
+				<div className={styles.pageHeader}>
+					<div className={styles.pageTitle}>
+						<Icon name='material-dns' size={16} />
+						<span>{taskInfo?.title ? `${taskInfo.title} ${is_cn ? '服务' : 'Services'}` : (is_cn ? '服务端口' : 'Service Ports')}</span>
 					</div>
-					<div className={viewStyles.profileActions}>
-						<span className={viewStyles.sectionLabel}>
-							<Icon name='material-dns' size={16} />
-							{is_cn ? '服务' : 'Services'}
-						</span>
+					<div
+						className={styles.toolBtn}
+						onClick={loadPorts}
+						title={is_cn ? '刷新' : 'Refresh'}
+					>
+						<Icon name='material-refresh' size={14} />
 					</div>
 				</div>
 
@@ -102,61 +129,55 @@ const TaskServices = (props: AppRouteProps) => {
 					<div className={styles.emptyState}>
 						<span>{is_cn ? '加载中...' : 'Loading...'}</span>
 					</div>
-				) : services.length === 0 ? (
+				) : error ? (
+					<div className={styles.emptyState}>
+						<Icon name='material-error_outline' size={40} />
+						<span>{is_cn ? '加载失败' : 'Failed to load'}</span>
+					</div>
+				) : notRunning ? (
+					<div className={styles.emptyState}>
+						<Icon name='material-power_settings_new' size={40} />
+						<span>{is_cn ? 'Sandbox 未运行' : 'Sandbox not running'}</span>
+						<span style={{ fontSize: 12, opacity: 0.6 }}>
+							{is_cn ? '启动任务后将显示监听端口' : 'Listening ports will appear after the task starts'}
+						</span>
+					</div>
+				) : filteredPorts.length === 0 ? (
 					<div className={styles.emptyState}>
 						<Icon name='material-cloud_off' size={40} />
-						<span>{is_cn ? '暂无运行中的服务' : 'No services running'}</span>
+						<span>{is_cn ? '暂无监听端口' : 'No listening ports'}</span>
 					</div>
 				) : (
-					<div className={styles.serviceList}>
-						{services.map((svc, idx) => (
-							<div key={idx} className={styles.serviceRow}>
-								<div className={`${styles.serviceIcon} ${svc.status === 'running' ? styles.running : ''}`}>
-									<Icon
-										name={svc.protocol === 'websocket' ? 'material-sync_alt' : 'material-language'}
-										size={18}
-									/>
-								</div>
-								<div className={styles.serviceInfo}>
-									<div className={styles.serviceName}>
-										{editingIdx === idx ? (
-											<input
-												ref={editInputRef}
-												className={styles.nameInput}
-												value={editValue}
-												onChange={(e) => setEditValue(e.target.value)}
-												onBlur={handleSaveName}
-												onKeyDown={(e) => {
-													if (e.key === 'Enter') handleSaveName()
-													if (e.key === 'Escape') setEditingIdx(null)
-												}}
-											/>
-										) : (
-											<span className={styles.nameEditable} onClick={() => handleEditName(idx)}>
-												{svc.alias || svc.name}
-												<Icon name='material-edit' size={12} className={styles.nameEditIcon} />
-											</span>
-										)}
-									</div>
-									<div className={styles.serviceMeta}>
-										{svc.alias && <span>{svc.name}</span>}
-										{svc.pid && <span>PID {svc.pid}</span>}
-										{svc.url && <span>{svc.url}</span>}
-									</div>
-								</div>
-								<span className={`${styles.protocolTag} ${styles[svc.protocol || 'http']}`}>
-									{svc.protocol || 'http'}
+					<div className={styles.portTable}>
+						<div className={styles.portHeader}>
+							<span className={styles.colProcess}>{is_cn ? '进程' : 'Process'}</span>
+							<span className={styles.colPort}>{is_cn ? '端口' : 'Port'}</span>
+							<span className={styles.colProtocol}>{is_cn ? '协议' : 'Proto'}</span>
+							<span className={styles.colPid}>PID</span>
+							<span className={styles.colAddress}>{is_cn ? '地址' : 'Address'}</span>
+							<span className={styles.colCommand}>{is_cn ? '命令' : 'Command'}</span>
+							<span className={styles.colState}>{is_cn ? '状态' : 'State'}</span>
+						</div>
+						{filteredPorts.map((port, idx) => (
+							<div key={idx} className={styles.portRow}>
+								<span className={styles.colProcess}>{port.process || '—'}</span>
+								<span className={styles.colPort}>{port.port}</span>
+								<span className={styles.colProtocol}>
+									<span className={`${styles.protocolTag} ${styles[PROTOCOL_STYLES[port.protocol] || 'tcp']}`}>
+										{port.protocol}
+									</span>
 								</span>
-								<span className={styles.portLabel}>:{svc.port}</span>
-								<span className={`${styles.statusTag} ${styles[svc.status || 'stopped']}`}>
-									<span style={{
-										width: 6,
-										height: 6,
-										borderRadius: '50%',
-										background: svc.status === 'running' ? '#52c41a' : '#d9d9d9',
-										display: 'inline-block'
-									}} />
-									{svc.status === 'running' ? (is_cn ? '运行中' : 'Running') : (is_cn ? '已停止' : 'Stopped')}
+								<span className={styles.colPid}>{port.pid || '—'}</span>
+								<span className={styles.colAddress}>{port.address || '0.0.0.0'}</span>
+								<span className={styles.colCommand} title={port.command}>
+									{port.command || '—'}
+								</span>
+								<span className={styles.colState}>
+									<span
+										className={styles.stateIndicator}
+										style={{ background: STATE_COLORS[port.state] || '#52c41a' }}
+									/>
+									{port.state}
 								</span>
 							</div>
 						))}
