@@ -42,6 +42,7 @@ interface InboxContextValue {
 	setSidebarCollapsed: (v: boolean) => void
 	loadMore: () => void
 	hasMore: boolean
+	taskVersion: number
 }
 
 const InboxContext = createContext<InboxContextValue | null>(null)
@@ -76,8 +77,11 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 	const [stats, setStats] = useState<InboxStatsData | null>(null)
 	const [page, setPage] = useState(1)
 	const [total, setTotal] = useState(0)
+	const [taskVersion, setTaskVersion] = useState(0)
 	const refreshTimerRef = useRef<number>()
 	const fetchingRef = useRef(false)
+	const selectedChatIdRef = useRef<string | null>(null)
+	selectedChatIdRef.current = selectedChatId
 
 	const fetchStats = useCallback(() => {
 		services.getStats().then(setStats).catch(() => {})
@@ -121,7 +125,12 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		const stream = getEventStream()
-		const unsub = stream.subscribe('task.*', () => {
+		const unsub = stream.subscribe('task.*', (data: any) => {
+			if (data?.__event_type === 'task.updated'
+				&& data.chat_id === selectedChatIdRef.current
+				&& data.outputs) {
+				setTaskVersion((v) => v + 1)
+			}
 			clearTimeout(refreshTimerRef.current)
 			refreshTimerRef.current = window.setTimeout(() => {
 				fetchStats()
@@ -400,7 +409,8 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		sidebarCollapsed,
 		setSidebarCollapsed,
 		loadMore,
-		hasMore
+		hasMore,
+		taskVersion
 	}
 
 	return <InboxContext.Provider value={value}>{children}</InboxContext.Provider>
