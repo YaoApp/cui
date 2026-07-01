@@ -21,6 +21,7 @@ interface TaskDetailProps {
 	onPanelWidthChange?: (width: number) => void
 	isAnimating?: boolean
 	inline?: boolean
+	refreshVersion?: number
 }
 
 const DEFAULT_CHAT_WIDTH = 560
@@ -39,7 +40,7 @@ const statusLabels: Record<string, { cn: string; en: string }> = {
 	cancelled: { cn: '已取消', en: 'Cancelled' }
 }
 
-const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, inline }: TaskDetailProps) => {
+const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, inline, refreshVersion }: TaskDetailProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
@@ -77,7 +78,7 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 			.then(setLocalTask)
 			.catch(() => setLocalTask(null))
 			.finally(() => setLoadingTask(false))
-	}, [taskId, ctx])
+	}, [taskId, ctx, refreshVersion])
 
 	const creatingTaskId = ctx?.creatingTaskId || null
 	const finalizeCreating = ctx?.finalizeCreating || (() => {})
@@ -172,6 +173,13 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 			}
 
 			sidebar.addTab(url, detail.title || url, detail.icon)
+			if (!sidebarOpen && inline && taskPageRef.current) {
+				const available = taskPageRef.current.clientWidth
+				const sb = Math.max(Math.round((available * 2) / 3), MIN_SIDEBAR_WIDTH)
+				const chat = Math.max(available - sb, MIN_CHAT_WIDTH)
+				setChatWidth(chat)
+				setSidebarWidth(sb)
+			}
 			setSidebarOpen(true)
 			triggerAnimation()
 		}

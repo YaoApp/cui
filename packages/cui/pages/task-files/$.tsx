@@ -1,16 +1,22 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
-import { getTaskFiles, getTaskDetail, type TaskFileEntry } from '../kanban/services/mock'
+import { getTaskDetail } from '../kanban/services/api'
 import type { KanbanTask } from '../kanban/types'
 import wsStyles from '../workspace/components/WorkspaceDetail/index.less'
-import viewStyles from '@/pages/assistants/detail/components/View/index.less'
 import styles from './index.less'
 
-const getFileIcon = (entry: TaskFileEntry): string => {
-	if (entry.is_dir) return 'material-folder'
-	const ext = entry.name.split('.').pop()?.toLowerCase() || ''
+interface TaskOutput {
+	name: string
+	type?: string
+	path?: string
+	size?: number
+	created_at?: string
+}
+
+const getFileIcon = (name: string): string => {
+	const ext = name.split('.').pop()?.toLowerCase() || ''
 	const iconMap: Record<string, string> = {
 		ts: 'material-code',
 		tsx: 'material-code',
@@ -27,27 +33,25 @@ const getFileIcon = (entry: TaskFileEntry): string => {
 		docx: 'material-description',
 		png: 'material-image',
 		jpg: 'material-image',
-		jpeg: 'material-image'
+		jpeg: 'material-image',
+		svg: 'material-image',
+		html: 'material-language',
+		css: 'material-palette',
+		sql: 'material-storage',
+		log: 'material-article',
+		txt: 'material-article',
+		zip: 'material-folder_zip',
+		tar: 'material-folder_zip',
+		gz: 'material-folder_zip'
 	}
 	return iconMap[ext] || 'material-insert_drive_file'
 }
 
-const formatSize = (bytes: number): string => {
-	if (bytes === 0) return '—'
+const formatSize = (bytes?: number): string => {
+	if (!bytes || bytes === 0) return '—'
 	const units = ['B', 'KB', 'MB', 'GB']
 	const i = Math.floor(Math.log(bytes) / Math.log(1024))
 	return `${(bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0)} ${units[i]}`
-}
-
-const STATUS_COLORS: Record<string, string> = {
-	running: '#52c41a',
-	completed: '#52c41a',
-	pending: '#faad14',
-	creating: '#faad14',
-	waiting_input: '#1890ff',
-	failed: '#ff4d4f',
-	paused: '#d9d9d9',
-	cancelled: '#d9d9d9'
 }
 
 const TaskFiles = (props: AppRouteProps) => {
@@ -57,63 +61,52 @@ const TaskFiles = (props: AppRouteProps) => {
 	const is_cn = locale === 'zh-CN'
 
 	const [task, setTask] = useState<KanbanTask | null>(null)
-	const [currentPath, setCurrentPath] = useState('/')
-	const [entries, setEntries] = useState<TaskFileEntry[]>([])
-	const [loading, setLoading] = useState(false)
-	const [showHidden, setShowHidden] = useState(false)
+	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
 		if (!taskId) return
-		getTaskDetail(taskId).then(setTask)
+		setLoading(true)
+		getTaskDetail(taskId)
+			.then(setTask)
+			.catch(() => setTask(null))
+			.finally(() => setLoading(false))
 	}, [taskId])
 
-	const loadDir = useCallback(
-		async (path: string) => {
-			if (!taskId) return
-			setLoading(true)
-			try {
-				const data = await getTaskFiles(taskId, path)
-				setEntries(data)
-			} catch {
-				setEntries([])
-			} finally {
-				setLoading(false)
-			}
-		},
-		[taskId]
-	)
-
-	useEffect(() => {
-		loadDir(currentPath)
-	}, [currentPath, loadDir])
-
-	const navigateTo = (entry: TaskFileEntry) => {
-		if (!entry.is_dir) return
-		const next = currentPath === '/' ? `/${entry.name}` : `${currentPath}/${entry.name}`
-		setCurrentPath(next)
-	}
-
-	const navigateUp = () => {
-		if (currentPath === '/') return
-		const parts = currentPath.split('/').filter(Boolean)
-		parts.pop()
-		setCurrentPath(parts.length === 0 ? '/' : '/' + parts.join('/'))
-	}
-
-	const handlePreview = (entry: TaskFileEntry) => {
-		if (entry.is_dir) return
-		window.$app?.Event?.emit('app/toast', {
-			type: 'info',
-			content: is_cn ? `预览: ${entry.name}` : `Preview: ${entry.name}`
+	const outputs: TaskOutput[] = useMemo(() => {
+		if (!task?.outputs || !Array.isArray(task.outputs)) return []
+		return [...(task.outputs as TaskOutput[])].sort((a, b) => {
+			if (a.created_at && b.created_at) return b.created_at.localeCompare(a.created_at)
+			return 0
 		})
+	}, [task?.outputs])
+
+	const handleFileClick = (output: TaskOutput) => {
+		if (!output.path) return
+		let wsId = task?.workspace?.id || ''
+		let filePath = output.path
+
+		if (filePath.startsWith('workspace://')) {
+			const withoutProtocol = filePath.slice('workspace://'.length)
+			const slashIdx = withoutProtocol.indexOf('/')
+			if (slashIdx > 0) {
+				wsId = withoutProtocol.slice(0, slashIdx)
+				filePath = withoutProtocol.slice(slashIdx + 1)
+			}
+		}
+
+		if (!wsId || !filePath) return
+		const url = `/preview?ws=${encodeURIComponent(wsId)}&path=${encodeURIComponent(filePath)}`
+		window.$app.Navigate(url, { title: output.name, replace: true })
 	}
 
-	const breadcrumbs = currentPath.split('/').filter(Boolean)
-
-	const visibleEntries = useMemo(
-		() => (showHidden ? entries : entries.filter((e) => !e.name.startsWith('.'))),
-		[entries, showHidden]
-	)
+	const handleRefresh = () => {
+		if (!taskId) return
+		setLoading(true)
+		getTaskDetail(taskId)
+			.then(setTask)
+			.catch(() => setTask(null))
+			.finally(() => setLoading(false))
+	}
 
 	if (!taskId) {
 		return (
@@ -131,108 +124,55 @@ const TaskFiles = (props: AppRouteProps) => {
 	return (
 		<div className={styles.scrollWrap}>
 			<div className={styles.container}>
-				<div className={viewStyles.profileHeader}>
-					<div className={viewStyles.profileInfo}>
-						<h1 className={viewStyles.profileName}>
-							<span
-								className={styles.statusDot}
-								style={{ background: STATUS_COLORS[task?.status || 'pending'] || '#d9d9d9' }}
-							/>
-							{task?.title || taskId}
-						</h1>
-						{task?.description && (
-							<div className={viewStyles.profileDesc}>{task.description}</div>
-						)}
+				<div className={styles.sectionHeader}>
+					<div className={styles.sectionTitle}>
+						<Icon name='material-description' size={18} />
+						<span>
+							{is_cn ? '产出文件' : 'Output Files'}
+							{outputs.length > 0 && ` (${outputs.length})`}
+						</span>
 					</div>
 					<div className={styles.headerActions}>
-						<div
-							className={`${styles.toolBtn} ${showHidden ? styles.active : ''}`}
-							onClick={() => setShowHidden((v) => !v)}
-							title={is_cn ? '显示隐藏文件' : 'Show hidden files'}
-						>
-							<Icon name={showHidden ? 'material-visibility' : 'material-visibility_off'} size={16} />
-						</div>
-						<div
-							className={styles.toolBtn}
-							onClick={() => loadDir(currentPath)}
-							title={is_cn ? '刷新' : 'Refresh'}
-						>
+						<div className={styles.toolBtn} onClick={handleRefresh} title={is_cn ? '刷新' : 'Refresh'}>
 							<Icon name='material-refresh' size={16} />
 						</div>
 					</div>
 				</div>
 
-				<div className={wsStyles.breadcrumb}>
-					<span
-						className={`${wsStyles.crumb} ${currentPath === '/' ? wsStyles.crumbActive : ''}`}
-						onClick={() => setCurrentPath('/')}
-					>
-						<Icon name='material-home' size={14} />
-					</span>
-					{breadcrumbs.map((part, i) => (
-						<span key={i} className={wsStyles.crumbGroup}>
-							<span className={wsStyles.crumbSep}>/</span>
-							<span
-								className={`${wsStyles.crumb} ${
-									i === breadcrumbs.length - 1 ? wsStyles.crumbActive : ''
-								}`}
-								onClick={() => {
-									const path = '/' + breadcrumbs.slice(0, i + 1).join('/')
-									setCurrentPath(path)
-								}}
-							>
-								{part}
-							</span>
-						</span>
-					))}
-					{currentPath !== '/' && (
-						<span className={wsStyles.crumbUp} onClick={navigateUp}>
-							<Icon name='material-arrow_upward' size={14} />
-						</span>
-					)}
-				</div>
-
-				<div className={wsStyles.fileList}>
-					{loading ? (
-						<div className={wsStyles.fileLoading}>
-							<span>{is_cn ? '加载中...' : 'Loading...'}</span>
-						</div>
-					) : visibleEntries.length === 0 ? (
-						<div className={wsStyles.fileEmpty}>
-							<Icon name='material-folder_off' size={40} />
-							<span>{is_cn ? '空目录' : 'Empty directory'}</span>
-						</div>
-					) : (
-						visibleEntries.map((entry) => (
+				{loading ? (
+					<div className={styles.emptyState}>
+						<span>{is_cn ? '加载中...' : 'Loading...'}</span>
+					</div>
+				) : outputs.length === 0 ? (
+					<div className={styles.emptyState}>
+						<Icon name='material-note_add' size={40} />
+						<span>{is_cn ? '任务完成后将展示产出文件' : 'Output files will appear after task completion'}</span>
+					</div>
+				) : (
+					<div className={wsStyles.fileList}>
+						{outputs.map((output, idx) => (
 							<div
-								key={entry.name}
-								className={`${wsStyles.fileRow} ${entry.is_dir ? wsStyles.fileRowDir : ''}`}
-								onClick={() => (entry.is_dir ? navigateTo(entry) : handlePreview(entry))}
+								key={`${output.name}-${idx}`}
+								className={wsStyles.fileRow}
+								onClick={() => handleFileClick(output)}
 							>
 								<div className={wsStyles.fileIcon}>
-									<Icon name={getFileIcon(entry)} size={18} />
+									<Icon name={getFileIcon(output.name)} size={18} />
 								</div>
-								<div className={wsStyles.fileName}>{entry.name}</div>
+								<div className={wsStyles.fileName}>{output.name}</div>
 								<div className={wsStyles.fileTime}>
-									{entry.mod_time
-										? new Date(entry.mod_time).toLocaleString(
+									{output.created_at
+										? new Date(output.created_at).toLocaleString(
 												is_cn ? 'zh-CN' : 'en-US',
-												{
-													month: 'short',
-													day: 'numeric',
-													hour: '2-digit',
-													minute: '2-digit'
-												}
+												{ month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
 										  )
 										: '—'}
 								</div>
-								<div className={wsStyles.fileSize}>
-									{entry.is_dir ? '—' : formatSize(entry.size)}
-								</div>
+								<div className={wsStyles.fileSize}>{formatSize(output.size)}</div>
 							</div>
-						))
-					)}
-				</div>
+						))}
+					</div>
+				)}
 			</div>
 		</div>
 	)

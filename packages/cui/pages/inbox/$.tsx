@@ -12,7 +12,7 @@ const MAX_LIST_WIDTH = 500
 const DEFAULT_LIST_WIDTH = 320
 
 const InboxContent = () => {
-	const { is_cn, selectedChatId, selectChatGroup, unarchiveGroup } = useInboxContext()
+	const { is_cn, selectedChatId, selectChatGroup, unarchiveGroup, taskVersion } = useInboxContext()
 	const [listWidth, setListWidth] = useState(DEFAULT_LIST_WIDTH)
 	const [unarchiveChatId, setUnarchiveChatId] = useState<string | null>(null)
 	const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
@@ -73,6 +73,7 @@ const InboxContent = () => {
 							open={true}
 							onClose={handleDetailClose}
 							inline={true}
+							refreshVersion={taskVersion}
 						/>
 					) : (
 						<div className={styles.emptyDetail}>
