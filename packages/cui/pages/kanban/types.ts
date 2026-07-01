@@ -34,6 +34,7 @@ export interface WorkspaceBinding {
 	status?: 'online' | 'offline'
 }
 
+/** @deprecated Static port declarations are deprecated. Use dynamic PortInfo from AgentTasks.GetPorts() instead. */
 export interface ServiceBinding {
 	name: string
 	port: number
@@ -80,6 +81,7 @@ export interface KanbanTask {
 	position: number
 	chat_id?: string
 	workspace?: WorkspaceBinding
+	/** @deprecated Use dynamic PortInfo from AgentTasks.GetPorts() instead. */
 	services?: ServiceBinding[]
 	tags?: string[]
 	progress?: number

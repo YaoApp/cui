@@ -66,74 +66,6 @@ const WorkspaceView = ({ task }: { task: KanbanTask }) => {
 	)
 }
 
-const ServicesView = ({ task }: { task: KanbanTask }) => {
-	const is_cn = getLocale() === 'zh-CN'
-	const [aliases, setAliases] = useState<Record<number, string>>({})
-	const [editingPort, setEditingPort] = useState<number | null>(null)
-
-	const handleAliasChange = (port: number, value: string) => {
-		setAliases((prev) => ({ ...prev, [port]: value }))
-	}
-
-	const handleAliasConfirm = (port: number) => {
-		setEditingPort(null)
-		window.$app?.Event?.emit('app/toast', { type: 'success', message: `Alias saved for :${port}` })
-	}
-
-	if (!task.services?.length) {
-		return (
-			<div className={styles.emptyState}>
-				<Icon name='material-cloud_off' size={32} />
-				<p>{is_cn ? '暂无运行中的服务' : 'No running services'}</p>
-				<p style={{ fontSize: 11, opacity: 0.6 }}>{is_cn ? '端口将在 Computer 启动后自动检测' : 'Ports will be auto-detected when Computer starts'}</p>
-			</div>
-		)
-	}
-
-	return (
-		<div className={styles.infoTab}>
-			<div className={styles.infoCard}>
-				<div className={styles.infoCardHeader}>
-					<Icon name='material-dns' size={14} />
-					{is_cn ? '监听端口' : 'Listening Ports'}
-					<span className={styles.headerBadge}>{task.services.length}</span>
-				</div>
-				<div className={styles.infoCardBody}>
-					{task.services.map((s) => (
-						<div key={s.port} className={styles.serviceItem}>
-							<span className={styles.serviceStatus} />
-							<span className={styles.servicePort}>:{s.port}</span>
-							<span className={styles.serviceProtocol}>{s.protocol || 'http'}</span>
-							{editingPort === s.port ? (
-								<input
-									className={styles.aliasInput}
-									value={aliases[s.port] ?? s.alias ?? s.name}
-									onChange={(e) => handleAliasChange(s.port, e.target.value)}
-									onBlur={() => handleAliasConfirm(s.port)}
-									onKeyDown={(e) => e.key === 'Enter' && handleAliasConfirm(s.port)}
-									autoFocus
-								/>
-							) : (
-								<span
-									className={styles.serviceName}
-									onClick={() => setEditingPort(s.port)}
-									title={is_cn ? '点击编辑别名' : 'Click to edit alias'}
-								>
-									{aliases[s.port] || s.alias || s.name}
-									<Icon name='material-edit' size={10} className={styles.editHint} />
-								</span>
-							)}
-							{s.pid && <span className={styles.servicePid}>PID {s.pid}</span>}
-							<span className={styles.linkBtn} title={is_cn ? '打开预览' : 'Open Preview'}>
-								<Icon name='material-open_in_new' size={11} />
-							</span>
-						</div>
-					))}
-				</div>
-			</div>
-		</div>
-	)
-}
 
 const OutputsView = ({ task }: { task: KanbanTask }) => {
 	const is_cn = getLocale() === 'zh-CN'
@@ -201,7 +133,6 @@ const OutputsView = ({ task }: { task: KanbanTask }) => {
 
 const INTERNAL_VIEWS: Record<string, React.FC<{ task: KanbanTask }>> = {
 	'__task/workspace': WorkspaceView,
-	'__task/services': ServicesView,
 	'__task/outputs': OutputsView
 }
 

@@ -146,6 +146,77 @@ export interface PresetImage {
 	description?: string
 }
 
+// ---------------------------------------------------------------------------
+// System Query types (from yao/sandbox/v2/types.go)
+// ---------------------------------------------------------------------------
+
+export interface PortInfo {
+	port: number
+	protocol: string
+	process: string
+	pid: number
+	state: string
+	address: string
+	command: string
+}
+
+export interface ProcessInfo {
+	pid: number
+	ppid: number
+	user: string
+	command: string
+	state: string
+	cpuPercent: number
+	memPercent: number
+	rssBytes: number
+	vszBytes: number
+	startTime: number
+	cpuTimeMs: number
+	threads: number
+	openFiles: number
+}
+
+export interface SystemLoad {
+	load1: number
+	load5: number
+	load15: number
+	memTotal: number
+	memUsed: number
+	memAvailable: number
+	swapTotal: number
+	swapUsed: number
+	cpuCount: number
+	cpuUsage: number
+	uptimeSec: number
+}
+
+export type PortsResponse = { ports: PortInfo[] } | { status: 'sandbox_not_running'; message: string }
+export type ProcessesResponse = { processes: ProcessInfo[]; load?: SystemLoad } | { status: 'sandbox_not_running'; message: string }
+
+export interface ExecResponse {
+	exit_code: number
+	stdout: string
+	stderr: string
+}
+
+export interface ComputerInfoResponse {
+	kind: 'box' | 'host'
+	node_id: string
+	box_id: string
+	status: string
+	vnc: boolean
+	system: {
+		os: string
+		arch: string
+		hostname: string
+		num_cpu: number
+		total_mem: number
+		shell: string
+	}
+}
+
+export type ComputerInfoResult = ComputerInfoResponse | { status: 'not_running'; message: string }
+
 export class AgentTasks {
 	constructor(private api: OpenAPI) {}
 
@@ -217,5 +288,22 @@ export class AgentTasks {
 
 	async GetImages(): Promise<ApiResponse<{ images: PresetImage[] }>> {
 		return this.api.Get('/agent/images')
+	}
+
+	async GetPorts(chatId: string): Promise<ApiResponse<PortsResponse>> {
+		return this.api.Get(`/agent/tasks/${chatId}/ports`)
+	}
+
+	async GetProcesses(chatId: string, fast?: boolean): Promise<ApiResponse<ProcessesResponse>> {
+		const query = fast ? '?fast=true' : ''
+		return this.api.Get(`/agent/tasks/${chatId}/processes${query}`)
+	}
+
+	async Exec(chatId: string, cmd: string[], root?: boolean): Promise<ApiResponse<ExecResponse>> {
+		return this.api.Post<ExecResponse>(`/agent/tasks/${chatId}/exec`, { cmd, root: root || false })
+	}
+
+	async GetComputerInfo(chatId: string): Promise<ApiResponse<ComputerInfoResult>> {
+		return this.api.Get<ComputerInfoResult>(`/agent/tasks/${chatId}/computers`)
 	}
 }

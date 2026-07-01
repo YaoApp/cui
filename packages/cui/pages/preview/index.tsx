@@ -126,8 +126,12 @@ const Preview = (props: AppRouteProps) => {
 	const [textContent, setTextContent] = useState<string | undefined>(undefined)
 	const [sourceContent, setSourceContent] = useState<string | undefined>(undefined)
 	const [loading, setLoading] = useState(false)
-	const [showTree, setShowTree] = useState(false)
-	const [treeWidth, setTreeWidth] = useState(220)
+	const [showTree, setShowTree] = useState(() => {
+		try { return localStorage.getItem('preview_show_tree') === '1' } catch { return false }
+	})
+	const [treeWidth, setTreeWidth] = useState(() => {
+		try { return parseInt(localStorage.getItem('preview_tree_width') || '220', 10) || 220 } catch { return 220 }
+	})
 	const [dirEntries, setDirEntries] = useState<DirEntry[] | null>(null)
 	const [dirLoading, setDirLoading] = useState(false)
 	const [iframeKey, setIframeKey] = useState(0)
@@ -142,11 +146,13 @@ const Preview = (props: AppRouteProps) => {
 		resizingRef.current = true
 		startXRef.current = e.clientX
 		startWidthRef.current = treeWidth
+		let lastWidth = treeWidth
 
 		const onMove = (ev: MouseEvent) => {
 			if (!resizingRef.current) return
 			const delta = ev.clientX - startXRef.current
 			const newWidth = Math.min(Math.max(startWidthRef.current + delta, 140), 480)
+			lastWidth = newWidth
 			setTreeWidth(newWidth)
 		}
 
@@ -156,6 +162,7 @@ const Preview = (props: AppRouteProps) => {
 			document.removeEventListener('mouseup', onUp)
 			document.body.style.cursor = ''
 			document.body.style.userSelect = ''
+			try { localStorage.setItem('preview_tree_width', String(lastWidth)) } catch {}
 		}
 
 		document.body.style.cursor = 'col-resize'
@@ -276,7 +283,7 @@ const Preview = (props: AppRouteProps) => {
 			if (newPath === filePath) return
 			const newFileName = newPath.split('/').pop() || newPath
 			const url = `/preview?ws=${encodeURIComponent(ws)}&path=${encodeURIComponent(newPath)}`
-			window.$app?.Event?.emit('app/replaceRoute', { url, title: newFileName })
+			window.$app.Navigate(url, { title: newFileName, replace: true })
 		},
 		[ws, filePath]
 	)
@@ -488,10 +495,14 @@ const Preview = (props: AppRouteProps) => {
 			<div className={styles.toolbar}>
 				<span
 					className={`${styles.toggleBtn} ${showTree ? styles.toggleBtnActive : ''}`}
-					onClick={() => setShowTree((v) => !v)}
+					onClick={() => setShowTree((v) => {
+						const next = !v
+						try { localStorage.setItem('preview_show_tree', next ? '1' : '0') } catch {}
+						return next
+					})}
 					title={is_cn ? '文件树' : 'File tree'}
 				>
-					<Icon name='material-file_copy' size={16} />
+					<Icon name={showTree ? 'material-folder_open' : 'material-folder'} size={16} />
 				</span>
 				<span
 					className={styles.fileName}

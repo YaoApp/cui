@@ -1,23 +1,35 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { getLocale } from '@umijs/max'
-import { Tooltip, Popconfirm, message } from 'antd'
 import Icon from '@/widgets/Icon'
 import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
-import { getTaskDetail, getTaskProcesses, type TaskProcess } from '../kanban/services/mock'
-import type { KanbanTask } from '../kanban/types'
-import viewStyles from '@/pages/assistants/detail/components/View/index.less'
+import { AgentTasks, type TaskItem, type ProcessInfo, type SystemLoad, type ProcessesResponse } from '@/openapi/agent/tasks'
 import styles from './index.less'
 
-const STATUS_COLORS: Record<string, string> = {
-	running: '#52c41a',
-	completed: '#52c41a',
-	pending: '#faad14',
-	creating: '#faad14',
-	waiting_input: '#1890ff',
-	failed: '#ff4d4f',
-	paused: '#d9d9d9',
-	cancelled: '#d9d9d9'
+function getTasksAPI(): AgentTasks | null {
+	const openapi = window.$app?.openapi
+	if (!openapi) return null
+	return new AgentTasks(openapi)
 }
+
+const SYSTEM_USERS = ['root']
+
+function formatBytes(bytes: number): string {
+	if (bytes <= 0) return '0 B'
+	if (bytes < 1024) return `${bytes} B`
+	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+	if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+	return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
+}
+
+function formatUptime(sec: number): string {
+	if (sec < 60) return `${sec}s`
+	if (sec < 3600) return `${Math.floor(sec / 60)}m`
+	if (sec < 86400) return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`
+	return `${Math.floor(sec / 86400)}d ${Math.floor((sec % 86400) / 3600)}h`
+}
+
+type SortField = 'mem' | 'cpu'
 
 const TaskActivity = (props: AppRouteProps) => {
 	const { params } = useAppRoute(props)
@@ -25,45 +37,110 @@ const TaskActivity = (props: AppRouteProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
-	const [task, setTask] = useState<KanbanTask | null>(null)
-	const [processes, setProcesses] = useState<TaskProcess[]>([])
+	const [taskInfo, setTaskInfo] = useState<TaskItem | null>(null)
+	const [processes, setProcesses] = useState<ProcessInfo[]>([])
+	const [load, setLoad] = useState<SystemLoad | null>(null)
 	const [loading, setLoading] = useState(false)
+	const [notRunning, setNotRunning] = useState(false)
+	const [error, setError] = useState(false)
+	const [sortBy, setSortBy] = useState<SortField>('mem')
+	const [contextMenu, setContextMenu] = useState<{ x: number; y: number; pid: number } | null>(null)
+	const menuRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
 		if (!taskId) return
-		getTaskDetail(taskId).then(setTask)
-	}, [taskId])
+		const api = getTasksAPI()
+		if (!api) return
+		api.Get(taskId, locale).then((res) => {
+			if (!window.$app?.openapi?.IsError(res)) {
+				const data = window.$app!.openapi.GetData(res)
+				if (data) setTaskInfo(data)
+			}
+		})
+	}, [taskId, locale])
 
-	const loadProcesses = () => {
+	const loadProcesses = useCallback(async (fast = true) => {
 		if (!taskId) return
+		const api = getTasksAPI()
+		if (!api) return
 		setLoading(true)
-		getTaskProcesses(taskId)
-			.then(setProcesses)
-			.finally(() => setLoading(false))
-	}
-
-	useEffect(() => {
-		loadProcesses()
+		setError(false)
+		try {
+			const res = await api.GetProcesses(taskId, fast)
+			if (window.$app?.openapi?.IsError(res)) {
+				setError(true)
+				return
+			}
+			const data = window.$app!.openapi.GetData(res) as ProcessesResponse | null
+			if (!data) {
+				setError(true)
+				return
+			}
+			if ('status' in data && data.status === 'sandbox_not_running') {
+				setNotRunning(true)
+				setProcesses([])
+				setLoad(null)
+			} else if ('processes' in data) {
+				setNotRunning(false)
+				setProcesses(data.processes || [])
+				setLoad(data.load || null)
+			}
+		} catch {
+			setError(true)
+		} finally {
+			setLoading(false)
+		}
 	}, [taskId])
 
-	const killProcess = (proc: TaskProcess) => {
-		setProcesses((prev) => prev.filter((p) => p.pid !== proc.pid))
-		message.success(is_cn ? `已终止进程 ${proc.name} (PID: ${proc.pid})` : `Killed ${proc.name} (PID: ${proc.pid})`)
-	}
+	useEffect(() => {
+		loadProcesses(true)
+	}, [loadProcesses])
 
-	const summary = useMemo(() => {
-		const running = processes.filter((p) => p.status === 'running').length
-		const sleeping = processes.filter((p) => p.status === 'sleeping').length
-		const stopped = processes.filter((p) => p.status === 'stopped').length
-		const totalCpu = processes.reduce((sum, p) => sum + p.cpu, 0)
-		const totalMem = processes.reduce((sum, p) => sum + p.memory, 0)
-		return { running, sleeping, stopped, totalCpu, totalMem }
+	useEffect(() => {
+		if (!contextMenu) return
+		const handleDismiss = (e: MouseEvent) => {
+			if (menuRef.current && menuRef.current.contains(e.target as Node)) return
+			setContextMenu(null)
+		}
+		const handleScroll = () => setContextMenu(null)
+		document.addEventListener('mousedown', handleDismiss)
+		document.addEventListener('scroll', handleScroll, true)
+		return () => {
+			document.removeEventListener('mousedown', handleDismiss)
+			document.removeEventListener('scroll', handleScroll, true)
+		}
+	}, [contextMenu])
+
+	const filteredProcesses = useMemo(() => {
+		return processes.filter((p) => !SYSTEM_USERS.includes(p.user))
 	}, [processes])
 
-	const cpuClass = (cpu: number) => {
-		if (cpu >= 20) return styles.high
-		if (cpu >= 10) return styles.medium
-		return ''
+	const sortedProcesses = useMemo(() => {
+		const sorted = [...filteredProcesses]
+		if (sortBy === 'mem') {
+			sorted.sort((a, b) => b.rssBytes - a.rssBytes)
+		} else {
+			sorted.sort((a, b) => b.cpuPercent - a.cpuPercent)
+		}
+		return sorted
+	}, [filteredProcesses, sortBy])
+
+	const handleContextMenu = (e: React.MouseEvent, pid: number) => {
+		e.preventDefault()
+		setContextMenu({ x: e.clientX, y: e.clientY, pid })
+	}
+
+	const handleKill = async (pid: number) => {
+		setContextMenu(null)
+		if (!taskId) return
+		const api = getTasksAPI()
+		if (!api) return
+		try {
+			await api.Exec(taskId, ['kill', '-9', String(pid)], true)
+			setTimeout(() => loadProcesses(true), 500)
+		} catch {
+			// ignore
+		}
 	}
 
 	if (!taskId) {
@@ -82,127 +159,119 @@ const TaskActivity = (props: AppRouteProps) => {
 	return (
 		<div className={styles.scrollWrap}>
 			<div className={styles.container}>
-				<div className={viewStyles.profileHeader}>
-					<div className={viewStyles.profileInfo}>
-						<h1 className={viewStyles.profileName}>
-							<span
-								className={styles.statusDot}
-								style={{ background: STATUS_COLORS[task?.status || 'pending'] || '#d9d9d9' }}
-							/>
-							{task?.title || taskId}
-						</h1>
-						{task?.description && (
-							<div className={viewStyles.profileDesc}>{task.description}</div>
-						)}
+				<div className={styles.pageHeader}>
+					<div className={styles.pageTitle}>
+						<Icon name='material-monitor_heart' size={16} />
+						<span>{taskInfo?.title ? `${taskInfo.title} ${is_cn ? '进程' : 'Processes'}` : (is_cn ? '系统活动' : 'System Activity')}</span>
 					</div>
-					<div className={styles.headerActions}>
-						<div
-							className={styles.toolBtn}
-							onClick={loadProcesses}
-							title={is_cn ? '刷新' : 'Refresh'}
-						>
-							<Icon name='material-refresh' size={16} />
-						</div>
+					<div
+						className={styles.toolBtn}
+						onClick={() => loadProcesses(false)}
+						title={is_cn ? '刷新 (完整采样)' : 'Refresh (full sampling)'}
+					>
+						<Icon name='material-refresh' size={14} />
 					</div>
 				</div>
+
+				{load && !notRunning && (
+					<div className={styles.loadSummary}>
+						<div className={styles.loadItem}>
+							<span className={styles.loadLabel}>CPU</span>
+							<span className={styles.loadValue}>{load.cpuUsage.toFixed(1)}%</span>
+							<span className={styles.loadMeta}>{load.cpuCount} {is_cn ? '核' : 'cores'}</span>
+						</div>
+						<div className={styles.loadItem}>
+							<span className={styles.loadLabel}>{is_cn ? '内存' : 'MEM'}</span>
+							<span className={styles.loadValue}>{formatBytes(load.memUsed)}</span>
+							<span className={styles.loadMeta}>/ {formatBytes(load.memTotal)}</span>
+						</div>
+						<div className={styles.loadItem}>
+							<span className={styles.loadLabel}>LOAD</span>
+							<span className={styles.loadValue}>{load.load1.toFixed(2)}</span>
+							<span className={styles.loadMeta}>{load.load5.toFixed(2)} / {load.load15.toFixed(2)}</span>
+						</div>
+						<div className={styles.loadItem}>
+							<span className={styles.loadLabel}>{is_cn ? '运行' : 'Up'}</span>
+							<span className={styles.loadValue}>{formatUptime(load.uptimeSec)}</span>
+						</div>
+					</div>
+				)}
 
 				{loading ? (
 					<div className={styles.emptyState}>
 						<span>{is_cn ? '加载中...' : 'Loading...'}</span>
 					</div>
-				) : processes.length === 0 ? (
+				) : error ? (
 					<div className={styles.emptyState}>
-						<Icon name='material-hourglass_empty' size={40} />
-						<span>{is_cn ? '暂无活动进程' : 'No active processes'}</span>
+						<Icon name='material-error_outline' size={40} />
+						<span>{is_cn ? '加载失败' : 'Failed to load'}</span>
+					</div>
+				) : notRunning ? (
+					<div className={styles.emptyState}>
+						<Icon name='material-power_settings_new' size={40} />
+						<span>{is_cn ? 'Sandbox 未运行' : 'Sandbox not running'}</span>
+						<span style={{ fontSize: 12, opacity: 0.6 }}>
+							{is_cn ? '启动任务后将显示进程活动' : 'Process activity will appear after the task starts'}
+						</span>
+					</div>
+				) : sortedProcesses.length === 0 ? (
+					<div className={styles.emptyState}>
+						<Icon name='material-do_not_disturb_on' size={40} />
+						<span>{is_cn ? '暂无运行进程' : 'No running processes'}</span>
 					</div>
 				) : (
-					<>
-						<div className={styles.processTable}>
-							<div className={styles.processHeader}>
-								<span className={styles.colPid}>PID</span>
-								<span className={styles.colName}>{is_cn ? '进程' : 'Process'}</span>
-								<span className={styles.colPort}>{is_cn ? '端口' : 'Port'}</span>
-								<span className={styles.colCpu}>CPU%</span>
-								<span className={styles.colMem}>{is_cn ? '内存' : 'Mem'}</span>
-								<span className={styles.colStatus}>{is_cn ? '状态' : 'Status'}</span>
-								<span className={styles.colActions}></span>
+					<div className={styles.processTable}>
+						<div className={styles.processHeader}>
+							<span className={styles.colPid}>PID</span>
+							<span className={styles.colCommand}>{is_cn ? '命令' : 'Command'}</span>
+							<span
+								className={`${styles.colCpu} ${styles.sortable} ${sortBy === 'cpu' ? styles.sortActive : ''}`}
+								onClick={() => setSortBy('cpu')}
+							>
+								CPU%{sortBy === 'cpu' && ' ↓'}
+							</span>
+							<span
+								className={`${styles.colMem} ${styles.sortable} ${sortBy === 'mem' ? styles.sortActive : ''}`}
+								onClick={() => setSortBy('mem')}
+							>
+								{is_cn ? '内存' : 'MEM'}{sortBy === 'mem' && ' ↓'}
+							</span>
+						</div>
+						{sortedProcesses.map((proc, idx) => (
+							<div
+								key={idx}
+								className={styles.processRow}
+								onContextMenu={(e) => handleContextMenu(e, proc.pid)}
+							>
+								<span className={styles.colPid}>{proc.pid}</span>
+								<span className={styles.colCommand} title={proc.command}>
+									{proc.command}
+								</span>
+								<span className={styles.colCpu}>
+									<span className={proc.cpuPercent > 50 ? styles.cpuHigh : proc.cpuPercent > 20 ? styles.cpuMed : ''}>
+										{proc.cpuPercent.toFixed(1)}
+									</span>
+								</span>
+							<span className={styles.colMem}>{formatBytes(proc.rssBytes)}</span>
 							</div>
-							{processes.map((proc) => (
-								<div key={proc.pid} className={styles.processRow}>
-									<span className={styles.colPid}>{proc.pid}</span>
-									<span className={styles.colName}>
-										{proc.name}
-										{proc.command && (
-											<span className={styles.commandHint} title={proc.command}>
-												{proc.command}
-											</span>
-										)}
-									</span>
-									<span className={styles.colPort}>
-										{proc.port ? <span className={styles.portTag}>{proc.port}</span> : '—'}
-									</span>
-									<span className={`${styles.colCpu} ${cpuClass(proc.cpu)}`}>
-										{proc.cpu.toFixed(1)}
-									</span>
-									<span className={styles.colMem}>
-										{proc.memory >= 1024
-											? `${(proc.memory / 1024).toFixed(1)} G`
-											: `${proc.memory} M`}
-									</span>
-									<span className={styles.colStatus}>
-										<span className={`${styles.statusIndicator} ${styles[proc.status]}`} />
-										{proc.status === 'running'
-											? (is_cn ? '运行' : 'run')
-											: proc.status === 'sleeping'
-												? (is_cn ? '休眠' : 'sleep')
-												: (is_cn ? '停止' : 'stop')}
-									</span>
-									<span className={styles.colActions}>
-										{proc.status !== 'stopped' && (
-											<Popconfirm
-												title={
-													is_cn
-														? `确定终止进程 ${proc.name} (PID: ${proc.pid})？`
-														: `Kill ${proc.name} (PID: ${proc.pid})?`
-												}
-												onConfirm={() => killProcess(proc)}
-												okText={is_cn ? '终止' : 'Kill'}
-												cancelText={is_cn ? '取消' : 'Cancel'}
-											>
-												<span className={styles.killBtn}>
-													<Icon name='material-close' size={12} />
-												</span>
-											</Popconfirm>
-										)}
-									</span>
-								</div>
-							))}
-						</div>
-						<div className={styles.summary}>
-							<span className={styles.summaryItem}>
-								<span className={`${styles.statusIndicator} ${styles.running}`} />
-								{summary.running} {is_cn ? '运行' : 'running'}
-							</span>
-							<span className={styles.summaryItem}>
-								<span className={`${styles.statusIndicator} ${styles.sleeping}`} />
-								{summary.sleeping} {is_cn ? '休眠' : 'sleeping'}
-							</span>
-							<span className={styles.summaryItem}>
-								<span className={`${styles.statusIndicator} ${styles.stopped}`} />
-								{summary.stopped} {is_cn ? '停止' : 'stopped'}
-							</span>
-							<span className={styles.summaryItem}>
-								CPU {summary.totalCpu.toFixed(1)}%
-							</span>
-							<span className={styles.summaryItem}>
-								{is_cn ? '内存' : 'Mem'} {summary.totalMem >= 1024
-									? `${(summary.totalMem / 1024).toFixed(1)} GB`
-									: `${summary.totalMem} MB`}
-							</span>
-						</div>
-					</>
+						))}
+					</div>
 				)}
-			</div>
+
+				</div>
+			{contextMenu && createPortal(
+				<div
+					ref={menuRef}
+					className={styles.contextMenu}
+					style={{ left: contextMenu.x, top: contextMenu.y }}
+				>
+					<div className={styles.contextMenuItem} onClick={() => handleKill(contextMenu.pid)}>
+						<Icon name='material-cancel' size={13} />
+						<span>{is_cn ? '终止进程' : 'Kill Process'} (PID {contextMenu.pid})</span>
+					</div>
+				</div>,
+				document.body
+			)}
 		</div>
 	)
 }

@@ -138,7 +138,7 @@ const TaskSettings = (props: AppRouteProps) => {
 							assistantName={task.assistant_name}
 						/>
 						)}
-						{activeSection === 'computer' && <ComputerSection task={task} />}
+						{activeSection === 'computer' && <ComputerSection taskId={taskId} />}
 						{activeSection === 'skills' && (
 							<SkillsSection
 								task={task}
