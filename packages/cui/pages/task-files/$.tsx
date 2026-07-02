@@ -75,7 +75,11 @@ const TaskFiles = (props: AppRouteProps) => {
 	const outputs: TaskOutput[] = useMemo(() => {
 		if (!task?.outputs || !Array.isArray(task.outputs)) return []
 		return [...(task.outputs as TaskOutput[])].sort((a, b) => {
-			if (a.created_at && b.created_at) return b.created_at.localeCompare(a.created_at)
+			const ta = a.created_at || ''
+			const tb = b.created_at || ''
+			if (ta && tb) return tb.localeCompare(ta)
+			if (ta) return -1
+			if (tb) return 1
 			return 0
 		})
 	}, [task?.outputs])
