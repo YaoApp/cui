@@ -29,7 +29,8 @@ export const getNewWindowUrl = (url: string): string => {
 	if (url.startsWith('/browse')) {
 		try {
 			const src = new URL(url, window.location.origin).searchParams.get('src')
-			return src || url
+			if (src) return src
+			return url
 		} catch {
 			return url
 		}

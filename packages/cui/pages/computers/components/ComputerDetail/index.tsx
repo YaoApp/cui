@@ -276,8 +276,8 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 						taiId={box.node_id}
 						targetId={isHost ? '__host__' : box.id}
 						variant="inline"
-						onOpenTab={(url, title) => {
-							window.$app?.Event?.emit('app/openSidebar', { url, title, icon: 'material-web' })
+						onOpenTab={(url, title, newWindowUrl) => {
+							window.$app?.Event?.emit('app/openSidebar', { url, title, icon: 'material-web', newWindowUrl })
 						}}
 					/>
 				</div>

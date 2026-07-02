@@ -297,72 +297,63 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 
 	const doConnect = useCallback(
 		(afterOpen?: WSCommand) => {
-			if (wsRef.current?.readyState === WebSocket.OPEN || destroyedRef.current) {
-				if (afterOpen && wsRef.current?.readyState === WebSocket.OPEN) {
-					console.log(`[TaskWS] SEND chatId=${chatId} cmd=${afterOpen.type}`)
-					wsRef.current.send(JSON.stringify(afterOpen))
-				}
+		if (wsRef.current?.readyState === WebSocket.OPEN || destroyedRef.current) {
+			if (afterOpen && wsRef.current?.readyState === WebSocket.OPEN) {
+				wsRef.current.send(JSON.stringify(afterOpen))
+			}
+			return
+		}
+
+		if (wsRef.current) {
+			wsRef.current.close()
+			wsRef.current = null
+		}
+
+		pendingCommandRef.current = afterOpen || null
+		const url = buildWSUrl()
+		const ws = new WebSocket(url)
+		wsRef.current = ws
+
+		ws.onopen = () => {
+			setConnected(true)
+			if (pendingCommandRef.current) {
+				ws.send(JSON.stringify(pendingCommandRef.current))
+				pendingCommandRef.current = null
+			}
+		}
+
+		ws.onmessage = (event) => {
+			try {
+				const msg = JSON.parse(event.data) as Message
+				handleChunk(msg)
+			} catch {
+				// ignore malformed
+			}
+		}
+
+		ws.onclose = (event) => {
+			setConnected(false)
+			wsRef.current = null
+
+			if (event.code === 1000) {
 				return
 			}
 
-			if (wsRef.current) {
-				wsRef.current.close()
-				wsRef.current = null
-			}
-
-			pendingCommandRef.current = afterOpen || null
-			const url = buildWSUrl()
-			console.log(`[TaskWS] connect chatId=${chatId} url=${url}`)
-			const ws = new WebSocket(url)
-			wsRef.current = ws
-
-			ws.onopen = () => {
-				console.log(`[TaskWS] OPEN chatId=${chatId}`)
-				setConnected(true)
-				if (pendingCommandRef.current) {
-					console.log(`[TaskWS] SEND chatId=${chatId} cmd=${pendingCommandRef.current.type}`)
-					ws.send(JSON.stringify(pendingCommandRef.current))
-					pendingCommandRef.current = null
-				}
-			}
-
-			ws.onmessage = (event) => {
-				try {
-					const msg = JSON.parse(event.data) as Message
-					if (msg.type === 'event') {
-						console.log(`[TaskWS] RECV chatId=${chatId} type=event event=${msg.props?.event}`)
+			if (!destroyedRef.current) {
+				setTimeout(() => {
+					if (!destroyedRef.current) {
+						messagesRef.current = []
+						setMessages([])
+						sessionRef.current = newStreamSession()
+						doConnect({ type: 'read', locale: getLocale() })
 					}
-					handleChunk(msg)
-				} catch {
-					// ignore malformed
-				}
+				}, 1000)
 			}
+		}
 
-			ws.onclose = (event) => {
-				console.log(`[TaskWS] CLOSE chatId=${chatId} code=${event.code} reason=${event.reason}`)
-				setConnected(false)
-				wsRef.current = null
-
-				if (event.code === 1000) {
-					return
-				}
-
-				if (!destroyedRef.current) {
-					setTimeout(() => {
-						if (!destroyedRef.current) {
-							messagesRef.current = []
-							setMessages([])
-							sessionRef.current = newStreamSession()
-							doConnect({ type: 'read', locale: getLocale() })
-						}
-					}, 1000)
-				}
-			}
-
-			ws.onerror = () => {
-				console.log(`[TaskWS] ERROR chatId=${chatId}`)
-				ws.close()
-			}
+		ws.onerror = () => {
+			ws.close()
+		}
 		},
 		[buildWSUrl, handleChunk, chatId]
 	)
@@ -370,7 +361,6 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 	const sendCmd = useCallback(
 		(cmd: WSCommand) => {
 			if (wsRef.current?.readyState === WebSocket.OPEN) {
-				console.log(`[TaskWS] SEND chatId=${chatId} cmd=${cmd.type}`)
 				wsRef.current.send(JSON.stringify(cmd))
 			} else {
 				doConnect(cmd)
@@ -468,7 +458,6 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 		}
 
 		return () => {
-			console.log(`[TaskWS] UNMOUNT chatId=${chatId}`)
 			destroyedRef.current = true
 			if (wsRef.current) {
 				wsRef.current.close()

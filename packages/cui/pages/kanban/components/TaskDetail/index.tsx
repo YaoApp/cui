@@ -172,7 +172,7 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 				url = `$dashboard${url.startsWith('/') ? url : '/' + url}`
 			}
 
-			sidebar.addTab(url, detail.title || url, detail.icon)
+			sidebar.addTab(url, detail.title || url, detail.icon, detail.newWindowUrl)
 			if (!sidebarOpen && inline && taskPageRef.current) {
 				const available = taskPageRef.current.clientWidth
 				const sb = Math.max(Math.round((available * 2) / 3), MIN_SIDEBAR_WIDTH)
@@ -453,10 +453,9 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 
 			<div className={styles.chatContent}>
 				{(() => {
-					const effectiveChatId = isCreating
-						? task.chat_id || `creating-${creatingTaskId}`
-						: task.chat_id || taskId!
-					console.log(`[TaskDetail] taskId=${taskId} found=${!!task} effectiveChatId=${effectiveChatId}`)
+				const effectiveChatId = isCreating
+					? task.chat_id || `creating-${creatingTaskId}`
+					: task.chat_id || taskId!
 
 					return (
 						<TaskChat

@@ -14,6 +14,8 @@ export interface SidebarTab {
 	icon?: string
 	/** 打开时间 */
 	timestamp: number
+	/** 右键"新窗口打开"时使用的 URL（可选，不设则用 url） */
+	newWindowUrl?: string
 }
 
 /** Sidebar History Item */

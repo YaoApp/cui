@@ -57,12 +57,17 @@ const ImageComponent: React.FC<ImageProps> = ({ src, file, contentType, fileName
 		setLoadError(false)
 	}, [])
 
-	const handleWheel = useCallback(
-		(e: React.WheelEvent) => {
-			e.preventDefault()
-			const container = containerRef.current
-			if (!container) return
+	const scaleRef = useRef(scale)
+	const positionRef = useRef(position)
+	scaleRef.current = scale
+	positionRef.current = position
 
+	useEffect(() => {
+		const container = containerRef.current
+		if (!container) return
+
+		const handleWheel = (e: WheelEvent) => {
+			e.preventDefault()
 			const rect = container.getBoundingClientRect()
 			const mouseX = e.clientX - rect.left
 			const mouseY = e.clientY - rect.top
@@ -72,17 +77,21 @@ const ImageComponent: React.FC<ImageProps> = ({ src, file, contentType, fileName
 
 			const direction = e.deltaY < 0 ? 1 : -1
 			const factor = direction > 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR
-			const newScale = Math.min(Math.max(scale * factor, MIN_SCALE), MAX_SCALE)
+			const curScale = scaleRef.current
+			const curPos = positionRef.current
+			const newScale = Math.min(Math.max(curScale * factor, MIN_SCALE), MAX_SCALE)
 
-			const ratio = newScale / scale
-			const newX = position.x - (mouseX - centerX - position.x) * (ratio - 1)
-			const newY = position.y - (mouseY - centerY - position.y) * (ratio - 1)
+			const ratio = newScale / curScale
+			const newX = curPos.x - (mouseX - centerX - curPos.x) * (ratio - 1)
+			const newY = curPos.y - (mouseY - centerY - curPos.y) * (ratio - 1)
 
 			setScale(newScale)
 			setPosition({ x: newX, y: newY })
-		},
-		[scale, position]
-	)
+		}
+
+		container.addEventListener('wheel', handleWheel, { passive: false })
+		return () => container.removeEventListener('wheel', handleWheel)
+	}, [])
 
 	const handleMouseDown = useCallback(
 		(e: React.MouseEvent) => {
@@ -154,7 +163,6 @@ const ImageComponent: React.FC<ImageProps> = ({ src, file, contentType, fileName
 	return (
 		<div
 			ref={containerRef}
-			onWheel={handleWheel}
 			onMouseDown={handleMouseDown}
 			onMouseMove={handleMouseMove}
 			onMouseUp={handleMouseUp}

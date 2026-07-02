@@ -12,7 +12,7 @@ export interface UseSidebarTabsReturn {
 	tabs: SidebarTab[]
 	activeTabId: string | null
 	activeTabUrl: string | null
-	addTab: (url: string, title: string, icon?: string) => void
+	addTab: (url: string, title: string, icon?: string, newWindowUrl?: string) => void
 	removeTab: (tabId: string) => void
 	activateTab: (tabId: string) => void
 	updateTabTitle: (url: string, title: string) => void
@@ -40,7 +40,7 @@ export const useSidebarTabs = (options?: UseSidebarTabsOptions): UseSidebarTabsR
 	const activeTabUrl = activeTab?.url || null
 
 	const addTab = useCallback(
-		(url: string, title: string, icon?: string) => {
+		(url: string, title: string, icon?: string, newWindowUrl?: string) => {
 			const baseUrl = getBaseUrl(url)
 
 			setTabs((prev) => {
@@ -50,12 +50,12 @@ export const useSidebarTabs = (options?: UseSidebarTabsOptions): UseSidebarTabsR
 					options?.onNavigate?.(url)
 					return prev.map((tab) =>
 						tab.id === existing.id
-							? { ...tab, url, title: title || tab.title, timestamp: Date.now() }
+							? { ...tab, url, title: title || tab.title, timestamp: Date.now(), newWindowUrl }
 							: tab
 					)
 				}
 
-				const newTab: SidebarTab = { id: nanoid(), url, title, icon, timestamp: Date.now() }
+				const newTab: SidebarTab = { id: nanoid(), url, title, icon, timestamp: Date.now(), newWindowUrl }
 				setActiveTabId(newTab.id)
 				options?.onNavigate?.(url)
 				return [...prev, newTab]

@@ -18,14 +18,15 @@ window.$app = {
 		return { resolved: url.startsWith('/web/') ? url : `/web${url}`, type: 'sui' }
 	},
 
-	Navigate(url: string, options?: { title?: string; icon?: string; replace?: boolean }) {
+	Navigate(url: string, options?: { title?: string; icon?: string; replace?: boolean; newWindowUrl?: string }) {
 		const global = window.$global
 
 		if (global?.detail_panel_active) {
 			window.$app?.Event?.emit('app/openSidebar', {
 				url,
 				title: options?.title || url.split('/').pop() || url,
-				icon: options?.icon
+				icon: options?.icon,
+				newWindowUrl: options?.newWindowUrl
 			})
 			return
 		}
@@ -45,7 +46,8 @@ window.$app = {
 				window.$app?.Event?.emit('app/openSidebar', {
 					url,
 					title: options?.title || url.split('/').pop() || url,
-					icon: options?.icon
+					icon: options?.icon,
+					newWindowUrl: options?.newWindowUrl
 				})
 				return
 			}

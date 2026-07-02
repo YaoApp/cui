@@ -151,8 +151,8 @@ const Header: FC<HeaderProps> = ({
 		if (contextMenu.tabId) {
 			const tab = tabs.find((t) => t.id === contextMenu.tabId)
 			if (tab && canOpenInNewWindow(tab.url)) {
-				const newWindowUrl = getNewWindowUrl(tab.url)
-				window.open(newWindowUrl, '_blank')
+				const targetUrl = tab.newWindowUrl || getNewWindowUrl(tab.url)
+				window.open(targetUrl, '_blank')
 			}
 		}
 	}, [contextMenu.tabId, tabs])

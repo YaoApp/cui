@@ -97,8 +97,8 @@ const Computer = (props: AppRouteProps) => {
 	// @ts-ignore
 	const baseURL: string = computerAPI?.['baseURL'] || '/v1'
 
-	const openTab = useCallback((url: string, title: string) => {
-		window.$app?.Event?.emit('app/openSidebar', { url, title, icon: 'material-web' })
+	const openTab = useCallback((url: string, title: string, newWindowUrl?: string) => {
+		window.$app?.Event?.emit('app/openSidebar', { url, title, icon: 'material-web', newWindowUrl })
 		setVisitOpen(false)
 	}, [])
 

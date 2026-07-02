@@ -197,6 +197,40 @@
 	flex-shrink: 0;
 }
 
+.colAction {
+	width: 64px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.openBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 2px 8px;
+	border: 1px solid var(--color_neo_border);
+	border-radius: 4px;
+	background: transparent;
+	color: var(--color_neo_text_secondary);
+	font-size: 11px;
+	cursor: pointer;
+	transition: all 0.15s;
+	white-space: nowrap;
+
+	&:hover:not(:disabled) {
+		background: var(--color_neo_bg_hover);
+		color: var(--color_neo_text_primary);
+		border-color: var(--color_neo_text_secondary);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
 .emptyState {
 	display: flex;
 	flex-direction: column;
