@@ -193,6 +193,14 @@ export interface SystemLoad {
 export type PortsResponse = { ports: PortInfo[] } | { status: 'sandbox_not_running'; message: string }
 export type ProcessesResponse = { processes: ProcessInfo[]; load?: SystemLoad } | { status: 'sandbox_not_running'; message: string }
 
+export interface ProxyBindResult {
+	host_port: number
+	target_port: number
+	label: string
+	status: string
+	url: string
+}
+
 export interface ExecResponse {
 	exit_code: number
 	stdout: string
@@ -305,5 +313,9 @@ export class AgentTasks {
 
 	async GetComputerInfo(chatId: string): Promise<ApiResponse<ComputerInfoResult>> {
 		return this.api.Get<ComputerInfoResult>(`/agent/tasks/${chatId}/computers`)
+	}
+
+	async BindProxy(chatId: string, port: number, label?: string): Promise<ApiResponse<ProxyBindResult>> {
+		return this.api.Post<ProxyBindResult>(`/agent/tasks/${chatId}/proxy`, { port, label })
 	}
 }

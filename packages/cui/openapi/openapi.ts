@@ -417,9 +417,6 @@ export class OpenAPI {
 
 		// Handle localhost/development environments
 		if (isLocalhost) {
-			if (!isHTTPS) {
-				console.info('🔧 Development Mode: Using HTTP on localhost for debugging')
-			}
 			return true
 		}
 

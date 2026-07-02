@@ -90,7 +90,8 @@ const TaskSidebar = ({
 		if (contextMenu.tabId) {
 			const tab = tabs.find((t) => t.id === contextMenu.tabId)
 			if (tab && canOpenInNewWindow(tab.url)) {
-				window.open(baseGetUrl(tab.url), '_blank')
+				const targetUrl = tab.newWindowUrl || baseGetUrl(tab.url)
+				window.open(targetUrl, '_blank')
 			}
 		}
 	}, [contextMenu.tabId, tabs])

@@ -86,6 +86,33 @@ const TaskServices = (props: AppRouteProps) => {
 		loadPorts()
 	}, [loadPorts])
 
+	const [bindingPort, setBindingPort] = useState<number | null>(null)
+
+	const handleOpenPort = useCallback(async (port: number) => {
+		const api = getTasksAPI()
+		if (!api || !taskId) return
+		setBindingPort(port)
+		try {
+			const res = await api.BindProxy(taskId, port)
+			if (window.$app?.openapi?.IsError(res)) return
+		const data = window.$app!.openapi.GetData(res) as any
+		if (data?.host_port) {
+			const baseUrl = `${window.location.protocol}//${window.location.hostname}:${data.host_port}`
+			const authUrl = data.token
+				? `${baseUrl}/.auth?token=${encodeURIComponent(data.token)}`
+				: undefined
+			const title = data.label || `Port ${data.target_port}`
+			window.$app.Navigate(baseUrl, { title, newWindowUrl: authUrl })
+			} else if (data?.error) {
+				console.warn('proxy bind error:', data.error)
+			}
+		} catch (e) {
+			console.error('proxy bind failed:', e)
+		} finally {
+			setBindingPort(null)
+		}
+	}, [taskId])
+
 	const filteredPorts = useMemo(() => {
 		return ports.filter((p) => {
 			if (!p.process && !p.command) return false
@@ -157,6 +184,7 @@ const TaskServices = (props: AppRouteProps) => {
 							<span className={styles.colAddress}>{is_cn ? '地址' : 'Address'}</span>
 							<span className={styles.colCommand}>{is_cn ? '命令' : 'Command'}</span>
 							<span className={styles.colState}>{is_cn ? '状态' : 'State'}</span>
+							<span className={styles.colAction}></span>
 						</div>
 						{filteredPorts.map((port, idx) => (
 							<div key={idx} className={styles.portRow}>
@@ -178,6 +206,23 @@ const TaskServices = (props: AppRouteProps) => {
 										style={{ background: STATE_COLORS[port.state] || '#52c41a' }}
 									/>
 									{port.state}
+								</span>
+								<span className={styles.colAction}>
+									{port.state === 'LISTEN' && (
+										<button
+											className={styles.openBtn}
+											onClick={() => handleOpenPort(port.port)}
+											disabled={bindingPort === port.port}
+											title={is_cn ? '打开' : 'Open'}
+										>
+											{bindingPort === port.port ? (
+												<Icon name='material-sync' size={12} />
+											) : (
+												<Icon name='material-open_in_new' size={12} />
+											)}
+											<span>{is_cn ? '打开' : 'Open'}</span>
+										</button>
+									)}
 								</span>
 							</div>
 						))}

@@ -45,7 +45,7 @@ export interface ServiceListProps {
 	targetId: string
 	baseURL?: string
 	variant?: 'popover' | 'inline'
-	onOpenTab?: (url: string, title: string) => void
+	onOpenTab?: (url: string, title: string, newWindowUrl?: string) => void
 }
 
 export interface ServiceListRef {
@@ -144,10 +144,26 @@ const ServiceList = forwardRef<ServiceListRef, ServiceListProps>(({ taiId, targe
 		return `${protocol}://${hostname}:${hostPort}`
 	}, [domain, prefix])
 
-	const handleOpenTab = useCallback((hostPort: number, title: string) => {
+	const handleOpenTab = useCallback(async (hostPort: number, targetPort: number, title: string) => {
 		if (!onOpenTab) return
-		onOpenTab(buildURL(hostPort), title)
-	}, [onOpenTab, buildURL])
+		const url = buildURL(hostPort)
+		let authUrl: string | undefined
+		try {
+			const resp = await fetch(`${baseURL}/tai/${taiId}/webproxy/bindings`, {
+				method: 'POST',
+				credentials: 'include',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ target_id: targetId, port: targetPort, label: title })
+			})
+			if (resp.ok) {
+				const data = await resp.json()
+				if (data.token) {
+					authUrl = `${url}/.auth?token=${encodeURIComponent(data.token)}`
+				}
+			}
+		} catch {}
+		onOpenTab(url, title, authUrl)
+	}, [onOpenTab, buildURL, baseURL, taiId, targetId])
 
 	const getLabel = (svc: ServiceItem, idx: number) => {
 		if (svc.label) return svc.label
@@ -188,7 +204,7 @@ const ServiceList = forwardRef<ServiceListRef, ServiceListProps>(({ taiId, targe
 			className={`${styles.serviceItem} ${!svc.bound ? styles.serviceItemDisabled : ''}`}
 			onClick={() => {
 				if (svc.bound && svc.host_port && onOpenTab) {
-					handleOpenTab(svc.host_port, getLabel(svc, idx))
+					handleOpenTab(svc.host_port, svc.port, getLabel(svc, idx))
 				}
 			}}
 		>
@@ -227,7 +243,7 @@ const ServiceList = forwardRef<ServiceListRef, ServiceListProps>(({ taiId, targe
 		<div
 			key={t.host_port}
 			className={styles.serviceItem}
-			onClick={() => handleOpenTab(t.host_port, t.label || `:${t.target_port}`)}
+			onClick={() => handleOpenTab(t.host_port, t.target_port, t.label || `:${t.target_port}`)}
 		>
 			<LinkOutlined className={styles.iconBound} />
 			<span className={styles.label}>{t.label || `:${t.target_port}`}</span>

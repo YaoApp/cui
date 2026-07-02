@@ -244,7 +244,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 
 	// Add a new tab (or reuse existing tab with same base URL)
 	const addSidebarTab = useCallback(
-		(url: string, title: string, icon?: string) => {
+		(url: string, title: string, icon?: string, newWindowUrl?: string) => {
 			const baseUrl = getBaseUrl(url)
 
 			// Check if a tab with the same base URL already exists
@@ -256,7 +256,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 				setSidebarTabs((prev) =>
 					prev.map((tab) =>
 						tab.id === existingTab.id
-							? { ...tab, url, title: title || tab.title, timestamp: Date.now() }
+							? { ...tab, url, title: title || tab.title, timestamp: Date.now(), newWindowUrl }
 							: tab
 					)
 				)
@@ -285,7 +285,8 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 				url,
 				title,
 				icon,
-				timestamp: Date.now()
+				timestamp: Date.now(),
+				newWindowUrl
 			}
 			setSidebarTabs((prev) => [...prev, newTab])
 			setActiveSidebarTabId(newTab.id)
@@ -635,7 +636,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 					}
 
 				// Create a new Tab (Sidebar Tabs mode)
-				addSidebarTab(url, title, detail.icon)
+				addSidebarTab(url, title, detail.icon, detail.newWindowUrl)
 
 				// Navigate using internal route path
 				const navUrl = toNavPath(url)

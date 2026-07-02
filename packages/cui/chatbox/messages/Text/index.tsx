@@ -269,7 +269,7 @@ const buildWorkspaceTag = (url: string): string => {
 	const rest = url.slice('workspace://'.length)
 	const slashIdx = rest.indexOf('/')
 	const displayPath = slashIdx !== -1 ? rest.slice(slashIdx + 1) : rest
-	return `<a class="workspace-link" href="${url}"><i class="Icon material">insert_drive_file</i>${displayPath || url}</a>`
+	return `<a className="workspace-link" href="${url}"><i className="Icon material">insert_drive_file</i>${displayPath || url}</a>`
 }
 
 const escapeHtml = (s: string): string =>
@@ -294,7 +294,7 @@ const buildServiceTag = (url: string): string => {
 		if (title) display = title
 	}
 
-	return `<a class="service-link" href="${escapeHtml(url)}"><i class="Icon material">language</i>${escapeHtml(display)}</a>`
+	return `<a className="service-link" href="${escapeHtml(url)}"><i className="Icon material">language</i>${escapeHtml(display)}</a>`
 }
 
 /**
@@ -345,7 +345,7 @@ const wrapProtocolLinks = (text: string): string => {
 		(match, label, url, offset) => {
 			if (isInCodeBlock(offset)) return match
 			const displayName = label || url.split('/').pop() || url
-			return `<a class="workspace-link" href="${url}">${displayName}</a>`
+			return `<a className="workspace-link" href="${url}">${displayName}</a>`
 		}
 	)
 	result = result.replace(
@@ -353,7 +353,7 @@ const wrapProtocolLinks = (text: string): string => {
 		(match, label, url, offset) => {
 			if (isInCodeBlock(offset)) return match
 			const displayName = label || `:${url.split('/')[4] || ''}`
-			return `<a class="service-link" href="${url}">${displayName}</a>`
+			return `<a className="service-link" href="${url}">${displayName}</a>`
 		}
 	)
 
@@ -411,11 +411,11 @@ const wrapMentionTags = (text: string): string => {
 		(_match, type: string, value: string, label: string) => {
 			const iconName = mentionIconNames[type] || 'insert_drive_file'
 			const cls = mentionCssClasses[type] || 'mention-file'
-			const iconHtml = `<i class="Icon material">${iconName}</i>`
+			const iconHtml = `<i className="Icon material">${iconName}</i>`
 			if (type === 'file') {
-				return `<a class="mention-pill ${cls}" href="${value}">${iconHtml}${label}</a>`
+				return `<a className="mention-pill ${cls}" href="${value}">${iconHtml}${label}</a>`
 			}
-			return `<span class="mention-pill ${cls}">${iconHtml}${label}</span>`
+			return `<span className="mention-pill ${cls}">${iconHtml}${label}</span>`
 		}
 	)
 }

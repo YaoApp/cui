@@ -502,7 +502,7 @@ const Preview = (props: AppRouteProps) => {
 					})}
 					title={is_cn ? '文件树' : 'File tree'}
 				>
-					<Icon name={showTree ? 'material-folder_open' : 'material-folder'} size={16} />
+					<Icon name={showTree ? 'material-left_panel_close' : 'material-left_panel_open'} size={16} />
 				</span>
 				<span
 					className={styles.fileName}
