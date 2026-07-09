@@ -121,6 +121,10 @@ function connectBackend(WS: any, url: string, headers: Record<string, string>, c
 	})
 
 	backendWs.on('message', (data: any, isBinary: boolean) => {
+		const size = typeof data === 'string' ? data.length : data.byteLength || 0
+		if (size > 50000) {
+			console.warn(`[WS-DBG-PROXY] backend->client LARGE msg size=${size} bytes`)
+		}
 		if (clientWs.readyState === WS.OPEN) {
 			clientWs.send(data, { binary: isBinary })
 		}
@@ -152,6 +156,7 @@ function connectBackend(WS: any, url: string, headers: Record<string, string>, c
 	})
 
 	backendWs.on('error', (err: Error) => {
+		console.error(`[WS-DBG-PROXY] backendWs error: ${err.message}`)
 		if (!connected && retriesLeft > 0) {
 			backendWs.removeAllListeners()
 			setTimeout(() => {
@@ -167,7 +172,8 @@ function connectBackend(WS: any, url: string, headers: Record<string, string>, c
 		}
 	})
 
-	clientWs.on('error', (_err: Error) => {
+	clientWs.on('error', (err: Error) => {
+		console.error(`[WS-DBG-PROXY] clientWs error: ${err.message}`)
 		cleanup()
 		if (backendWs.readyState === WS.OPEN) {
 			backendWs.close()

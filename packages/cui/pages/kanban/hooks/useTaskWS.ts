@@ -96,10 +96,11 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 			if (chunk.type === 'event') {
 				const eventName = chunk.props?.event as string
 
-				if (eventName === 'read_complete') {
-					const isLive = chunk.props?.live === true
+			if (eventName === 'read_complete') {
+				const isLive = chunk.props?.live === true
 
-					if (!isLive && chunk.props?.messages) {
+
+				if (!isLive && chunk.props?.messages) {
 						const rawMessages = chunk.props.messages as any[]
 						const assistants = chunk.props.assistants as Record<string, any> | undefined
 						const processed = processHistoryMessages(rawMessages, assistants, assistantIdRef.current)
@@ -142,10 +143,10 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 					return
 				}
 
-				if (eventName === 'stream_start') {
-					sessionRef.current.streamId = nanoid()
-					sessionRef.current.completedMessages = {}
-					setStreaming(true)
+			if (eventName === 'stream_start') {
+				sessionRef.current.streamId = nanoid()
+				sessionRef.current.completedMessages = {}
+				setStreaming(true)
 
 					const assistantData = chunk.props?.data?.assistant
 					if (assistantData) {
@@ -173,11 +174,11 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 					return
 				}
 
-				if (eventName === 'stream_end') {
-					setStreaming(false)
-					onEventRef.current?.({ name: 'stream_end', data: chunk.props?.data })
-					return
-				}
+			if (eventName === 'stream_end') {
+				setStreaming(false)
+				onEventRef.current?.({ name: 'stream_end', data: chunk.props?.data })
+				return
+			}
 
 				if (eventName === 'error') {
 					onEventRef.current?.({ name: 'error', data: chunk.props })
@@ -324,10 +325,10 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 
 		ws.onmessage = (event) => {
 			try {
-				const msg = JSON.parse(event.data) as Message
+				const msg = JSON.parse(event.data as string) as Message
 				handleChunk(msg)
-			} catch {
-				// ignore malformed
+			} catch (e) {
+				console.error('[useTaskWS] parse error:', e)
 			}
 		}
 

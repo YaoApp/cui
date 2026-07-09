@@ -67,7 +67,7 @@ interface KanbanProviderProps {
 export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProviderProps) {
 	const navigate = useNavigate()
 	const [boards, setBoards] = useState<BoardSummary[]>([])
-	const [currentBoardId, setCurrentBoardId] = useState<string>(urlBoardId || '')
+	const [currentBoardId, setCurrentBoardId] = useState<string>(urlBoardId || localStorage.getItem('kanban_last_board') || '')
 	const [board, setBoard] = useState<Board | null>(null)
 	const [tasks, setTasks] = useState<KanbanTask[]>([])
 	const [loading, setLoading] = useState(true)
@@ -135,7 +135,12 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 
 				if (list.length === 0) return
 
-				const targetId = urlBoardId && list.some((b) => b.id === urlBoardId) ? urlBoardId : list[0].id
+				const savedId = localStorage.getItem('kanban_last_board')
+				const targetId = urlBoardId && list.some((b) => b.id === urlBoardId)
+					? urlBoardId
+					: savedId && list.some((b) => b.id === savedId)
+						? savedId
+						: list[0].id
 
 				await loadBoardData(targetId)
 
@@ -156,7 +161,6 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		addTask: (data) => {
 			setTasks((prev) => {
 				const idx = prev.findIndex((t) => t.chat_id === data.chat_id)
-				console.log(`[Kanban] addTask chat_id=${data.chat_id} found_idx=${idx} creating=${idx >= 0 ? prev[idx]?.status === 'creating' : false}`)
 				if (idx >= 0) {
 					if (prev[idx].status === 'creating') {
 						const patched = {
@@ -166,7 +170,6 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 							column_id: data.column_id || prev[idx].column_id,
 							position: data.position || prev[idx].position
 						}
-						console.log(`[Kanban] addTask patched id=${patched.id} status=${patched.status}`)
 						return prev.map((t, i) => i === idx ? patched : t)
 					}
 					return prev
@@ -269,6 +272,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 			moveVersionRef.current++
 
 			navigate(`/kanban/${boardId}`)
+			localStorage.setItem('kanban_last_board', boardId)
 
 			loadBoardData(boardId).finally(() => setLoading(false))
 		},
@@ -306,6 +310,10 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 	const deleteBoardFn = useCallback(
 		async (boardId: string) => {
 			await services.deleteBoard(boardId)
+
+			if (localStorage.getItem('kanban_last_board') === boardId) {
+				localStorage.removeItem('kanban_last_board')
+			}
 
 			const latestBoards = boardsRef.current
 			const prevIndex = latestBoards.findIndex((b) => b.id === boardId)
