@@ -64,6 +64,45 @@ interface KanbanProviderProps {
 	boardId?: string
 }
 
+const STORAGE_KEY_TITLES = 'kanban_temp_titles_'
+const STORAGE_KEY_MOVES = 'kanban_local_moves_'
+
+function persistTempTitles(boardId: string, map: Map<string, string>) {
+	const key = STORAGE_KEY_TITLES + boardId
+	if (map.size === 0) {
+		sessionStorage.removeItem(key)
+	} else {
+		sessionStorage.setItem(key, JSON.stringify([...map]))
+	}
+}
+
+function persistLocalMoves(boardId: string, map: Map<string, { column_id: string; position: number }>) {
+	const key = STORAGE_KEY_MOVES + boardId
+	if (map.size === 0) {
+		sessionStorage.removeItem(key)
+	} else {
+		sessionStorage.setItem(key, JSON.stringify([...map]))
+	}
+}
+
+function restoreTempTitles(boardId: string): Map<string, string> {
+	try {
+		const saved = sessionStorage.getItem(STORAGE_KEY_TITLES + boardId)
+		return saved ? new Map(JSON.parse(saved)) : new Map()
+	} catch {
+		return new Map()
+	}
+}
+
+function restoreLocalMoves(boardId: string): Map<string, { column_id: string; position: number }> {
+	try {
+		const saved = sessionStorage.getItem(STORAGE_KEY_MOVES + boardId)
+		return saved ? new Map(JSON.parse(saved)) : new Map()
+	} catch {
+		return new Map()
+	}
+}
+
 export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProviderProps) {
 	const navigate = useNavigate()
 	const [boards, setBoards] = useState<BoardSummary[]>([])
@@ -108,7 +147,42 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 				services.getTasks(boardId)
 			])
 			setBoard(boardData)
-			setTasks(tasksData)
+
+			const moves = restoreLocalMoves(boardId)
+			const tempTitles = restoreTempTitles(boardId)
+			localMovesRef.current = moves
+			tempTitlesRef.current = tempTitles
+
+			let result = tasksData
+			if (moves.size > 0) {
+				const sizeBefore = moves.size
+				result = result.map((t) => {
+					const override = moves.get(t.id)
+					if (!override) return t
+					if (t.column_id === override.column_id && t.position === override.position) {
+						moves.delete(t.id)
+						return t
+					}
+					return { ...t, column_id: override.column_id, position: override.position }
+				})
+				if (moves.size !== sizeBefore) persistLocalMoves(boardId, moves)
+			}
+			if (tempTitles.size > 0) {
+				const sizeBefore = tempTitles.size
+				result = result.map((t) => {
+					const tempTitle = tempTitles.get(t.id) || tempTitles.get(t.chat_id)
+					if (!tempTitle) return t
+					if (t.title && t.title !== '新任务' && t.title !== 'New Task') {
+						tempTitles.delete(t.id)
+						tempTitles.delete(t.chat_id)
+						return t
+					}
+					return { ...t, title: tempTitle }
+				})
+				if (tempTitles.size !== sizeBefore) persistTempTitles(boardId, tempTitles)
+			}
+			setTasks(result)
+
 			setCurrentBoardId(boardId)
 		} catch (err) {
 			console.error('[Kanban] Failed to load board data:', err)
@@ -268,7 +342,8 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 				setTasks((prev) => prev.filter((t) => t.id !== creatingTaskId))
 				setCreatingTaskId(null)
 			}
-			localMovesRef.current.clear()
+			localMovesRef.current = new Map()
+			tempTitlesRef.current = new Map()
 			moveVersionRef.current++
 
 			navigate(`/kanban/${boardId}`)
@@ -367,6 +442,10 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 
 	const cancelCreating = useCallback(() => {
 		const tempId = creatingTaskId
+		if (tempId) {
+			tempTitlesRef.current.delete(tempId)
+			persistTempTitles(currentBoardIdRef.current, tempTitlesRef.current)
+		}
 		setCreatingTaskId(null)
 		triggerAnimation()
 		setDetailOpen(false)
@@ -408,6 +487,8 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 
 	const finalizeCreating = useCallback(
 		(tempId: string, realTask: KanbanTask) => {
+			tempTitlesRef.current.delete(tempId)
+			persistTempTitles(currentBoardIdRef.current, tempTitlesRef.current)
 			setTasks((prev) => prev.map((t) => (t.id === tempId ? realTask : t)))
 			setCreatingTaskId(null)
 			setSelectedTaskId(realTask.id)
@@ -443,6 +524,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		async (taskId: string, columnId: string, position: number) => {
 			moveVersionRef.current++
 			localMovesRef.current.set(taskId, { column_id: columnId, position })
+			persistLocalMoves(currentBoardIdRef.current, localMovesRef.current)
 			setTasks((prev) => {
 				const task = prev.find((t) => t.id === taskId)
 				if (!task) return prev
@@ -558,6 +640,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 
 	const updateLocalTitle = useCallback((id: string, title: string) => {
 		tempTitlesRef.current.set(id, title)
+		persistTempTitles(currentBoardIdRef.current, tempTitlesRef.current)
 		setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, title } : t)))
 	}, [])
 
@@ -656,6 +739,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 
 			let result = tasksData
 			if (moves.size > 0) {
+				const sizeBefore = moves.size
 				result = tasksData.map((t) => {
 					const override = moves.get(t.id)
 					if (!override) return t
@@ -665,9 +749,11 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 					}
 					return { ...t, column_id: override.column_id, position: override.position }
 				})
+				if (moves.size !== sizeBefore) persistLocalMoves(board.id, moves)
 			}
 
 			if (tempTitles.size > 0) {
+				const sizeBefore = tempTitles.size
 				result = result.map((t) => {
 					const tempTitle = tempTitles.get(t.id) || tempTitles.get(t.chat_id)
 					if (!tempTitle) return t
@@ -678,6 +764,7 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 					}
 					return { ...t, title: tempTitle }
 				})
+				if (tempTitles.size !== sizeBefore) persistTempTitles(board.id, tempTitles)
 			}
 
 			if (!creating) return result
