@@ -74,20 +74,46 @@ const MessageList = (props: IMessageListProps) => {
 		lastScrollTop.current = scrollTop
 	}, [])
 
-	// Auto scroll to bottom
+	// Auto scroll on new message arrival
 	useEffect(() => {
 		const lastMsg = messages[messages.length - 1]
-		const isUserInput = lastMsg?.type === 'user_input'
-
-		if (isUserInput) {
+		if (lastMsg?.type === 'user_input') {
 			shouldAutoScroll.current = true
-			if (lastMessageRef.current) {
-				lastMessageRef.current.scrollIntoView({ behavior: 'auto', block: 'start' })
-			}
+			lastMessageRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' })
 		} else if (shouldAutoScroll.current && bottomRef.current) {
-			bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+			bottomRef.current.scrollIntoView({ behavior: 'auto', block: 'nearest' })
 		}
-	}, [messages.length, messages[messages.length - 1]?.props?.content])
+	}, [messages.length])
+
+	// Streaming: continuously track bottom via RAF loop
+	useEffect(() => {
+		if (!streaming) return
+		let rafId: number
+		const tick = () => {
+			if (shouldAutoScroll.current && bottomRef.current) {
+				bottomRef.current.scrollIntoView({ behavior: 'auto', block: 'nearest' })
+			}
+			rafId = requestAnimationFrame(tick)
+		}
+		rafId = requestAnimationFrame(tick)
+		return () => cancelAnimationFrame(rafId)
+	}, [streaming])
+
+	// Re-scroll when container becomes visible (panel re-open)
+	useEffect(() => {
+		const container = containerRef.current
+		if (!container) return
+		let wasVisible = false
+		const observer = new IntersectionObserver(([entry]) => {
+			const isVisible = entry.isIntersecting
+			if (isVisible && !wasVisible && shouldAutoScroll.current && bottomRef.current) {
+				container.scrollTop = Math.max(0, bottomRef.current.offsetTop - container.clientHeight)
+			}
+			wasVisible = isVisible
+		}, { threshold: 0.1 })
+		observer.observe(container)
+		return () => observer.disconnect()
+	}, [])
 
 	// Scroll position retention after loadMore prepend
 	const prevScrollHeightRef = useRef(0)
@@ -123,17 +149,26 @@ const MessageList = (props: IMessageListProps) => {
 
 	// Initial scroll to bottom when first messages arrive
 	useEffect(() => {
-		if (!initialScrollDone.current && messages.length > 0 && containerRef.current && bottomRef.current) {
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => {
-					const container = containerRef.current
-					const bottom = bottomRef.current
-					if (!container || !bottom) return
-					container.scrollTop = Math.max(0, bottom.offsetTop - container.clientHeight)
-				})
-			})
+		if (initialScrollDone.current || messages.length === 0) return
+		const container = containerRef.current
+		const bottom = bottomRef.current
+		if (!container || !bottom) return
+
+		const doScroll = () => {
+			if (container.clientHeight === 0 || !bottomRef.current) return false
+			container.scrollTop = Math.max(0, bottomRef.current.offsetTop - container.clientHeight)
 			initialScrollDone.current = true
+			shouldAutoScroll.current = true
+			return true
 		}
+
+		if (doScroll()) return
+
+		const ro = new ResizeObserver(() => {
+			if (doScroll()) ro.disconnect()
+		})
+		ro.observe(container)
+		return () => ro.disconnect()
 	}, [messages.length])
 
 	// IntersectionObserver for loadMore trigger
