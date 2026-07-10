@@ -162,7 +162,7 @@ const ServiceList = forwardRef<ServiceListRef, ServiceListProps>(({ taiId, targe
 				}
 			}
 		} catch {}
-		onOpenTab(url, title, authUrl)
+		onOpenTab(authUrl || url, title, authUrl)
 	}, [onOpenTab, buildURL, baseURL, taiId, targetId])
 
 	const getLabel = (svc: ServiceItem, idx: number) => {
