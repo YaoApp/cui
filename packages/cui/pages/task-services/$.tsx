@@ -102,7 +102,7 @@ const TaskServices = (props: AppRouteProps) => {
 				? `${baseUrl}/.auth?token=${encodeURIComponent(data.token)}`
 				: undefined
 			const title = data.label || `Port ${data.target_port}`
-			window.$app.Navigate(baseUrl, { title, newWindowUrl: authUrl })
+			window.$app.Navigate(authUrl || baseUrl, { title, newWindowUrl: authUrl })
 			} else if (data?.error) {
 				console.warn('proxy bind error:', data.error)
 			}
