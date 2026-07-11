@@ -198,6 +198,25 @@ const Index = () => {
 
 	return (
 		<div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+			{loading && (
+				<div style={{
+					position: 'absolute', inset: 0,
+					display: 'flex', alignItems: 'center', justifyContent: 'center',
+					flexDirection: 'column', gap: 12,
+					color: 'var(--color_text_grey)',
+					fontSize: 13
+				}}>
+					<div style={{
+						width: 24, height: 24,
+						border: '2px solid var(--color_border)',
+						borderTopColor: 'var(--color_main)',
+						borderRadius: '50%',
+						animation: 'spin 0.8s linear infinite'
+					}} />
+					<span>{getLocale() === 'zh-CN' ? '正在加载服务...' : 'Loading service...'}</span>
+					<style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+				</div>
+			)}
 			<iframe
 				className='w_100 h_100'
 				ref={ref}
