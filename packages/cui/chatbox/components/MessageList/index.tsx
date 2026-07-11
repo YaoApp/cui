@@ -60,6 +60,9 @@ const MessageList = (props: IMessageListProps) => {
 
 	const handleScroll = useCallback(() => {
 		if (!containerRef.current) return
+		const rect = containerRef.current.getBoundingClientRect()
+		if (rect.left >= window.innerWidth) return
+
 		const { scrollTop, scrollHeight, clientHeight } = containerRef.current
 
 		if (scrollTop < lastScrollTop.current) {
@@ -103,16 +106,27 @@ const MessageList = (props: IMessageListProps) => {
 	useEffect(() => {
 		const container = containerRef.current
 		if (!container) return
-		let wasVisible = false
-		const observer = new IntersectionObserver(([entry]) => {
-			const isVisible = entry.isIntersecting
-			if (isVisible && !wasVisible && shouldAutoScroll.current && bottomRef.current) {
-				container.scrollTop = Math.max(0, bottomRef.current.offsetTop - container.clientHeight)
+
+		let wasVisible = container.getBoundingClientRect().left < window.innerWidth
+
+		const check = () => {
+			const rect = container.getBoundingClientRect()
+			const visible = rect.width > 0 && rect.left < window.innerWidth
+			if (visible && !wasVisible && bottomRef.current) {
+				shouldAutoScroll.current = true
+				requestAnimationFrame(() => {
+					if (!bottomRef.current || !containerRef.current) return
+					const c = containerRef.current
+					const bottomRect = bottomRef.current.getBoundingClientRect()
+					const containerRect = c.getBoundingClientRect()
+					c.scrollTop = Math.max(0, bottomRect.top - containerRect.top + c.scrollTop - c.clientHeight)
+				})
 			}
-			wasVisible = isVisible
-		}, { threshold: 0.1 })
-		observer.observe(container)
-		return () => observer.disconnect()
+			wasVisible = visible
+		}
+
+		const interval = setInterval(check, 200)
+		return () => clearInterval(interval)
 	}, [])
 
 	// Scroll position retention after loadMore prepend
@@ -148,27 +162,43 @@ const MessageList = (props: IMessageListProps) => {
 	}, [chatId])
 
 	// Initial scroll to bottom when first messages arrive
+	// Polls scrollHeight to keep scrolling as content renders (images, markdown, etc.)
 	useEffect(() => {
 		if (initialScrollDone.current || messages.length === 0) return
 		const container = containerRef.current
-		const bottom = bottomRef.current
-		if (!container || !bottom) return
+		if (!container || !bottomRef.current) return
 
-		const doScroll = () => {
-			if (container.clientHeight === 0 || !bottomRef.current) return false
-			container.scrollTop = Math.max(0, bottomRef.current.offsetTop - container.clientHeight)
-			initialScrollDone.current = true
-			shouldAutoScroll.current = true
+		const scrollToBottom = () => {
+			if (!bottomRef.current || container.clientHeight === 0) return false
+			const bottomRect = bottomRef.current.getBoundingClientRect()
+			const containerRect = container.getBoundingClientRect()
+			const target = bottomRect.top - containerRect.top + container.scrollTop - container.clientHeight
+			container.scrollTop = Math.max(0, target)
 			return true
 		}
 
-		if (doScroll()) return
+		if (!scrollToBottom()) {
+			const ro = new ResizeObserver(() => {
+				if (scrollToBottom()) ro.disconnect()
+			})
+			ro.observe(container)
+			return () => ro.disconnect()
+		}
 
-		const ro = new ResizeObserver(() => {
-			if (doScroll()) ro.disconnect()
-		})
-		ro.observe(container)
-		return () => ro.disconnect()
+		initialScrollDone.current = true
+		shouldAutoScroll.current = true
+
+		let lastHeight = container.scrollHeight
+		const interval = setInterval(() => {
+			if (!shouldAutoScroll.current) { clearInterval(interval); return }
+			const h = container.scrollHeight
+			if (h !== lastHeight) {
+				lastHeight = h
+				scrollToBottom()
+			}
+		}, 100)
+		const timeout = setTimeout(() => clearInterval(interval), 3000)
+		return () => { clearInterval(interval); clearTimeout(timeout) }
 	}, [messages.length])
 
 	// IntersectionObserver for loadMore trigger
