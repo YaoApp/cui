@@ -19,11 +19,12 @@ const SetupBanner = observer(() => {
 	const isOwner = user?.is_owner ?? !user?.team_id
 	const shouldShow = useMemo(() => {
 		if (!status || status.completed || status.banner_dismissed || dismissed || !isOwner) return false
+		if (!status.checkpoints) return false
 		return Object.values(status.checkpoints).some((cp) => cp.status === 'fail')
 	}, [status, isOwner, dismissed])
 
 	const failedRequired = useMemo(() => {
-		if (!status) return []
+		if (!status?.checkpoints) return []
 		return Object.entries(status.checkpoints)
 			.filter(([, cp]) => cp.required && cp.status === 'fail')
 			.map(([key, cp]) => ({ key, ...cp }))
@@ -45,7 +46,7 @@ const SetupBanner = observer(() => {
 
 	if (!shouldShow) return null
 
-	const checkpoints = Object.entries(status!.checkpoints)
+	const checkpoints = Object.entries(status!.checkpoints ?? {})
 
 	const handleNavigate = (path: string) => {
 		history.push(path)
