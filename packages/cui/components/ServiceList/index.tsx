@@ -37,6 +37,7 @@ export interface TargetGroup {
 export interface BindingsGroupedResponse {
 	domain: string
 	prefix: string
+	protocol?: string
 	targets: TargetGroup[]
 }
 
@@ -64,6 +65,7 @@ const ServiceList = forwardRef<ServiceListRef, ServiceListProps>(({ taiId, targe
 	const [loading, setLoading] = useState(false)
 	const [domain, setDomain] = useState('')
 	const [prefix, setPrefix] = useState('p')
+	const [protocol, setProtocol] = useState('http')
 	const [assistants, setAssistants] = useState<AssistantGroup[]>([])
 	const [temporary, setTemporary] = useState<TemporaryBinding[]>([])
 	const [manualPort, setManualPort] = useState('')
@@ -73,6 +75,7 @@ const ServiceList = forwardRef<ServiceListRef, ServiceListProps>(({ taiId, targe
 	const applyResponse = useCallback((data: BindingsGroupedResponse) => {
 		setDomain(data.domain || '')
 		setPrefix(data.prefix || 'p')
+		setProtocol(data.protocol || 'http')
 		const target = data.targets?.[0]
 		if (target) {
 			setAssistants(target.assistants || [])
@@ -136,13 +139,12 @@ const ServiceList = forwardRef<ServiceListRef, ServiceListProps>(({ taiId, targe
 	}, [taiId, targetId, baseURL, locale, applyResponse])
 
 	const buildURL = useCallback((hostPort: number): string => {
-		const hostname = window.location.hostname
 		if (domain) {
-			return `https://${prefix}${hostPort}.${domain}`
+			return `${protocol}://${prefix}${hostPort}.${domain}`
 		}
-		const protocol = window.location.protocol === 'https:' ? 'https' : 'http'
-		return `${protocol}://${hostname}:${hostPort}`
-	}, [domain, prefix])
+		const scheme = window.location.protocol === 'https:' ? 'https' : 'http'
+		return `${scheme}://${window.location.hostname}:${hostPort}`
+	}, [domain, prefix, protocol])
 
 	const handleOpenTab = useCallback(async (hostPort: number, targetPort: number, title: string) => {
 		if (!onOpenTab) return
