@@ -3,6 +3,7 @@ import { getLocale, setLocale } from '@umijs/max'
 import { useGlobal } from '@/context/app'
 import { local } from '@yaoapp/storex'
 import { Setting as SettingAPI } from '@/openapi/setting/api'
+import { getYaoMetadata } from '@/services/wellknown'
 import RadioGroupInput from '@/components/ui/inputs/RadioGroup'
 import type { PropertySchema } from '@/components/ui/inputs/types'
 import { yaoagents as yaoagentsLogo } from '@/assets/icons/brands'
@@ -74,6 +75,12 @@ const WelcomeWizard = ({ visible, onClose, isReopen }: WelcomeWizardProps) => {
 
 	const handleGoSetup = useCallback(() => {
 		handleComplete().then(() => {
+			const metadata = getYaoMetadata()
+			if (metadata?.disable_system_setting) {
+				window.location.pathname = '/settings/profile'
+				return
+			}
+
 			const status = global.setup_status
 			if (status?.checkpoints) {
 				const firstFail = Object.values(status.checkpoints).find(

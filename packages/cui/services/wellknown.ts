@@ -9,6 +9,7 @@ export interface YaoMetadata {
 	issuer_url?: string
 	dashboard?: string // Admin dashboard root path (e.g., "/admin")
 	optional?: Record<string, any>
+	disable_system_setting?: boolean // System setting UI disabled for managed deployments
 	license?: {
 		valid?: boolean
 		edition?: string

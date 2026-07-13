@@ -45,6 +45,7 @@ import type {
 	McpPageData
 } from './types'
 import { settingMenuGroups } from './menu'
+import { getYaoMetadata } from '@/services/wellknown'
 
 // Generate internationalized preferences schema
 const generatePreferencesSchema = (locale: string = 'en-US'): ProviderSchema => {
@@ -562,6 +563,10 @@ export const mockApi = {
 	},
 
 	getMenuGroups: (): Promise<MenuGroup[]> => {
+		const metadata = getYaoMetadata()
+		if (metadata?.disable_system_setting) {
+			return Promise.resolve(settingMenuGroups.filter((g) => g.key !== 'system'))
+		}
 		return Promise.resolve(settingMenuGroups)
 	},
 
