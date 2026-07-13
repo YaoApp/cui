@@ -97,7 +97,9 @@ const TaskServices = (props: AppRouteProps) => {
 			if (window.$app?.openapi?.IsError(res)) return
 		const data = window.$app!.openapi.GetData(res) as any
 		if (data?.host_port) {
-			const baseUrl = `${window.location.protocol}//${window.location.hostname}:${data.host_port}`
+			const baseUrl = data.domain
+				? data.url
+				: `${window.location.protocol}//${window.location.hostname}:${data.host_port}`
 			const authUrl = data.token
 				? `${baseUrl}/.auth?token=${encodeURIComponent(data.token)}`
 				: undefined
