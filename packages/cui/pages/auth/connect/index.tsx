@@ -184,7 +184,7 @@ const AuthConnect = () => {
 			if (!window.$app?.openapi) return
 			const user = new User(window.$app.openapi)
 			const result = await user.auth.EntryVerify({
-				username: formData.email,
+				username: formData.email.trim(),
 				captcha_id: captchaData?.id || undefined,
 				captcha: formData.captcha || undefined,
 				locale: currentLocale
