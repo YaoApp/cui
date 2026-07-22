@@ -13,7 +13,7 @@ import Pptx from '@/components/view/FileViewer/viewers/Pptx'
 import Unsupported from '@/components/view/FileViewer/viewers/Unsupported'
 import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 import type { DirEntry } from '@/pages/workspace/types'
-import FileTree from './components/FileTree'
+import FileTree, { type FileTreeHandle } from './components/FileTree'
 import viewerStyles from '@/components/view/FileViewer/index.less'
 import styles from './index.less'
 import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
@@ -135,8 +135,9 @@ const Preview = (props: AppRouteProps) => {
 	const [dirEntries, setDirEntries] = useState<DirEntry[] | null>(null)
 	const [dirLoading, setDirLoading] = useState(false)
 	const [iframeKey, setIframeKey] = useState(0)
-	const [imageVersion, setImageVersion] = useState(0)
+	const [contentVersion, setContentVersion] = useState(0)
 	const iframeRef = useRef<HTMLIFrameElement>(null)
+	const fileTreeRef = useRef<FileTreeHandle>(null)
 	const resizingRef = useRef(false)
 	const startXRef = useRef(0)
 	const startWidthRef = useRef(220)
@@ -308,28 +309,62 @@ const Preview = (props: AppRouteProps) => {
 		}
 	}
 
+	const reloadDirEntries = useCallback(() => {
+		if (!ws || !filePath) return
+		const api = getApi()
+		if (!api) return
+		setDirLoading(true)
+		const dirPath = '/' + filePath.replace(/\/$/, '')
+		api.ListDir(ws, dirPath || '/')
+			.then((resp) => {
+				if (window.$app.openapi.IsError(resp)) {
+					setDirEntries(null)
+				} else {
+					const data = resp.data || []
+					const sorted = [...data].sort((a: DirEntry, b: DirEntry) => {
+						if (a.is_dir !== b.is_dir) return a.is_dir ? -1 : 1
+						return a.name.localeCompare(b.name)
+					})
+					setDirEntries(sorted)
+				}
+			})
+			.catch(() => setDirEntries(null))
+			.finally(() => setDirLoading(false))
+	}, [ws, filePath, getApi])
+
+	const reloadTextContent = useCallback(() => {
+		const api = getApi()
+		if (!api) return
+		setLoading(true)
+		api.ReadFile(ws, filePath)
+			.then((resp) => {
+				if (!window.$app.openapi.IsError(resp)) {
+					const text =
+						typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data, null, 2)
+					setTextContent(text)
+				}
+			})
+			.finally(() => setLoading(false))
+	}, [ws, filePath, getApi])
+
 	const handleRefresh = useCallback(() => {
+		fileTreeRef.current?.refresh()
+
+		if (dirEntries !== null) {
+			reloadDirEntries()
+			return
+		}
+
 		if (isHtml) {
 			setIframeKey((k) => k + 1)
-		} else if (isMarkdown) {
-			const api = getApi()
-			if (!api) return
-			setLoading(true)
-			api.ReadFile(ws, filePath)
-				.then((resp) => {
-					if (!window.$app.openapi.IsError(resp)) {
-						const text =
-							typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data, null, 2)
-						setTextContent(text)
-					}
-				})
-				.finally(() => setLoading(false))
-		} else if (fileType === 'image') {
-			setImageVersion((v) => v + 1)
-		} else if (fileType === 'pdf') {
+		} else if (isMarkdown || fileType === 'text') {
+			reloadTextContent()
+		} else if (fileType === 'image' || fileType === 'video' || fileType === 'audio') {
+			setContentVersion((v) => v + 1)
+		} else if (fileType === 'pdf' || fileType === 'docx' || fileType === 'pptx') {
 			setIframeKey((k) => k + 1)
 		}
-	}, [isHtml, isMarkdown, fileType, ws, filePath, getApi])
+	}, [isHtml, isMarkdown, fileType, dirEntries, reloadDirEntries, reloadTextContent])
 
 	const handleIframeLoad = useCallback(() => {
 		try {
@@ -346,6 +381,12 @@ const Preview = (props: AppRouteProps) => {
 			// cross-origin or sandbox restriction
 		}
 	}, [])
+
+	useEffect(() => {
+		const handler = () => handleRefresh()
+		window.$app?.Event?.on('app/refreshTab', handler)
+		return () => { window.$app?.Event?.off('app/refreshTab', handler) }
+	}, [handleRefresh])
 
 	if (!ws || !filePath) {
 		return (
@@ -459,23 +500,23 @@ const Preview = (props: AppRouteProps) => {
 			return <Text content={sourceContent} fileName={fileName} language='html' />
 		}
 
+		const versionedURL = contentVersion > 0
+			? `${contentURL}${contentURL.includes('?') ? '&' : '?'}_v=${contentVersion}`
+			: contentURL
+
 		switch (fileType) {
-			case 'image': {
-				const imgSrc = imageVersion > 0
-					? `${contentURL}${contentURL.includes('?') ? '&' : '?'}_v=${imageVersion}`
-					: contentURL
-				return <Image src={imgSrc} fileName={fileName} />
-			}
+			case 'image':
+				return <Image src={versionedURL} fileName={fileName} />
 			case 'video':
-				return <Video src={contentURL} fileName={fileName} />
+				return <Video src={versionedURL} fileName={fileName} />
 			case 'audio':
-				return <Audio src={contentURL} fileName={fileName} />
+				return <Audio src={versionedURL} fileName={fileName} />
 			case 'pdf':
 				return <Pdf key={iframeKey} src={contentURL} fileName={fileName} />
 			case 'docx':
-				return <Docx src={contentURL} fileName={fileName} />
+				return <Docx key={iframeKey} src={contentURL} fileName={fileName} />
 			case 'pptx':
-				return <Pptx src={contentURL} fileName={fileName} />
+				return <Pptx key={iframeKey} src={contentURL} fileName={fileName} />
 			case 'text':
 				return (
 					<Text
@@ -544,15 +585,15 @@ const Preview = (props: AppRouteProps) => {
 						</span>
 					</div>
 				)}
-				{dirEntries === null && (isHtml || isMarkdown || fileType === 'image' || fileType === 'pdf') && tab === 'preview' && (
-					<span
-						className={styles.downloadBtn}
-						onClick={handleRefresh}
-						title={is_cn ? '刷新' : 'Refresh'}
-					>
-						<ReloadOutlined />
-					</span>
-				)}
+			{tab === 'preview' && (
+				<span
+					className={styles.downloadBtn}
+					onClick={handleRefresh}
+					title={is_cn ? '刷新' : 'Refresh'}
+				>
+					<ReloadOutlined />
+				</span>
+			)}
 				{dirEntries === null && (
 					<span
 						className={styles.downloadBtn}
@@ -567,6 +608,7 @@ const Preview = (props: AppRouteProps) => {
 				{showTree && ws && (
 					<div className={styles.treePanel} style={{ width: treeWidth, minWidth: treeWidth }}>
 						<FileTree
+							ref={fileTreeRef}
 							workspaceId={ws}
 							currentPath={filePath}
 							onSelect={handleFileSelect}
