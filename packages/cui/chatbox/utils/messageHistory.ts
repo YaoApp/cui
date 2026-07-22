@@ -124,6 +124,38 @@ export const deduplicateAssistantInfo = (messages: Message[]): Message[] => {
 }
 
 /**
+ * Re-group child messages (those carrying parent_message_id) under their
+ * parent Agent message's props.children, mirroring what stream.ts does in
+ * real-time. Orphan children (parent not in array) stay top-level.
+ */
+export function groupAgentChildren(messages: Message[]): Message[] {
+	const result = messages.map((m) => ({ ...m, props: { ...m.props } }))
+	const childIndices = new Set<number>()
+
+	result.forEach((msg, i) => {
+		const parentId = msg.props?.parent_message_id as string | undefined
+		if (!parentId) return
+
+		const parentIdx = result.findIndex((m) => m.message_id === parentId)
+		if (parentIdx === -1) return
+
+		childIndices.add(i)
+		const parent = result[parentIdx]
+		const children = Array.isArray(parent.props?.children) ? [...parent.props.children] : []
+		children.push({
+			message_id: msg.message_id,
+			type: msg.type,
+			props: msg.props,
+			status: msg.props?.status,
+			delta: false
+		})
+		parent.props = { ...parent.props, children }
+	})
+
+	return result.filter((_, i) => !childIndices.has(i))
+}
+
+/**
  * Process history messages: filter transient types, convert to display format, deduplicate assistant info
  */
 export function processHistoryMessages(
@@ -131,10 +163,12 @@ export function processHistoryMessages(
 	assistants: Record<string, AssistantInfo> | undefined,
 	mainAssistantId?: string
 ): Message[] {
-	return deduplicateAssistantInfo(
-		messages
-			.filter((msg) => msg.type !== 'loading' && msg.type !== 'action')
-			.map((msg) => convertStoredToDisplay(msg, assistants, mainAssistantId))
+	return groupAgentChildren(
+		deduplicateAssistantInfo(
+			messages
+				.filter((msg) => msg.type !== 'loading' && msg.type !== 'action')
+				.map((msg) => convertStoredToDisplay(msg, assistants, mainAssistantId))
+		)
 	)
 }
 

@@ -6,7 +6,7 @@ import type { QueuedMessage } from './types'
 import type { ChatState, ChatStateActions, ChatRefs } from './state'
 import { clearMessageCache } from './delta'
 import type { Message } from '../../openapi'
-import { processHistoryMessages } from '../utils/messageHistory'
+import { processHistoryMessages, groupAgentChildren } from '../utils/messageHistory'
 
 export interface UseTabsOptions {
 	state: ChatState
@@ -293,10 +293,10 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 
 				const olderMessages = processHistoryMessages(messagesRes.messages, messagesRes.assistants, mainAssistantId)
 
-				setChatStates((prev) => ({
-					...prev,
-					[chatId]: [...olderMessages, ...(prev[chatId] || [])]
-				}))
+			setChatStates((prev) => {
+				const merged = [...olderMessages, ...(prev[chatId] || [])]
+				return { ...prev, [chatId]: groupAgentChildren(merged) }
+			})
 
 				hasMoreStatesRef.current[chatId] = messagesRes.messages.length >= 50
 				if (olderMessages.length > 0) {
