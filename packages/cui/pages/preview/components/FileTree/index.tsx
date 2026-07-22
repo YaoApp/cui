@@ -1,10 +1,14 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import { WorkspaceAPI } from '@/openapi/workspace'
 import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 import type { DirEntry } from '@/pages/workspace/types'
 import styles from './index.less'
+
+export interface FileTreeHandle {
+	refresh: () => void
+}
 
 interface FileTreeProps {
 	workspaceId: string
@@ -38,7 +42,7 @@ function filePathForSelect(dirPath: string, name: string): string {
 	return full.startsWith('/') ? full.slice(1) : full
 }
 
-const FileTree = ({ workspaceId, currentPath, onSelect }: FileTreeProps) => {
+const FileTree = forwardRef<FileTreeHandle, FileTreeProps>(({ workspaceId, currentPath, onSelect }, ref) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
@@ -90,6 +94,16 @@ const FileTree = ({ workspaceId, currentPath, onSelect }: FileTreeProps) => {
 		},
 		[workspaceId, getApi]
 	)
+
+	useImperativeHandle(ref, () => ({
+		refresh: () => {
+			const dirsToReload = new Set(expandedDirs)
+			dirsToReload.add('/')
+			setDirContents({})
+			setErrorDirs(new Set())
+			dirsToReload.forEach((p) => loadDir(p))
+		}
+	}), [expandedDirs, loadDir])
 
 	const expandToPath = useCallback(
 		async (filePath: string) => {
@@ -221,6 +235,8 @@ const FileTree = ({ workspaceId, currentPath, onSelect }: FileTreeProps) => {
 	}
 
 	return <div className={styles.tree}>{renderEntries('/', 0)}</div>
-}
+})
+
+FileTree.displayName = 'FileTree'
 
 export default FileTree
