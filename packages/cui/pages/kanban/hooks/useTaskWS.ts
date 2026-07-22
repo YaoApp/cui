@@ -4,7 +4,7 @@ import { getLocale } from '@umijs/max'
 import type { Message, UserMessage } from '@/openapi'
 import { newStreamSession } from '@/chatbox/utils/chunkProcessor'
 import type { StreamSession, ChunkEvent } from '@/chatbox/utils/chunkProcessor'
-import { processHistoryMessages } from '@/chatbox/utils/messageHistory'
+import { processHistoryMessages, groupAgentChildren } from '@/chatbox/utils/messageHistory'
 import { applyDelta, clearMessageCache } from '@/chatbox/hooks/delta'
 
 export interface UseTaskWSOptions {
@@ -99,14 +99,14 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 			if (eventName === 'read_complete') {
 				const isLive = chunk.props?.live === true
 
-
 				if (!isLive && chunk.props?.messages) {
 						const rawMessages = chunk.props.messages as any[]
 						const assistants = chunk.props.assistants as Record<string, any> | undefined
 						const processed = processHistoryMessages(rawMessages, assistants, assistantIdRef.current)
 
 						if (loadingMoreRef.current) {
-							messagesRef.current = [...processed, ...messagesRef.current]
+							const merged = [...processed, ...messagesRef.current]
+							messagesRef.current = groupAgentChildren(merged)
 							loadingMoreRef.current = false
 							setLoadingMore(false)
 						} else {
@@ -245,18 +245,62 @@ export function useTaskWS(options: UseTaskWSOptions): UseTaskWSReturn {
 
 			const mergedState = applyDelta(chatId, messageId, chunk)
 			const snapshotProps = { ...mergedState.props }
+
+			if (mergedState.type === 'agent') {
+			}
+
+			const rawParentMsgId = mergedState.props?.parent_message_id as string | undefined
+			const parentMessageId = rawParentMsgId ? `${streamId}:${rawParentMsgId}` : undefined
+
+			if (parentMessageId) {
+				const parentIdx = messagesRef.current.findIndex((m) => m.message_id === parentMessageId)
+				if (parentIdx !== -1) {
+					const parent = { ...messagesRef.current[parentIdx] }
+					const parentProps = { ...parent.props } as Record<string, any>
+					const children = Array.isArray(parentProps.children) ? [...parentProps.children] : []
+
+					const childIdx = children.findIndex((c: any) => c.message_id === messageId)
+					const childMsg = {
+						message_id: messageId,
+						type: mergedState.type,
+						props: mergedState.props,
+						status: mergedState.props?.status,
+						delta: isCompleted ? false : chunk.delta
+					}
+
+					if (childIdx !== -1) {
+						children[childIdx] = childMsg
+					} else {
+						children.push(childMsg)
+					}
+
+					parentProps.children = children
+					parent.props = parentProps
+					parent.delta = true
+					messagesRef.current[parentIdx] = parent
+					setMessages([...messagesRef.current])
+					return
+				}
+			}
+
 			const idx = messagesRef.current.findIndex((m) => m.message_id === messageId)
 
 			if (idx !== -1) {
+				const existing = messagesRef.current[idx]
+				const existingChildren = (existing.props as Record<string, any>)?.children
+				const updatedProps = { ...snapshotProps }
+				if (Array.isArray(existingChildren) && existingChildren.length > 0 && !Array.isArray(updatedProps.children)) {
+					updatedProps.children = existingChildren
+				}
 				messagesRef.current[idx] = {
-					...messagesRef.current[idx],
+					...existing,
 					chunk_id: chunk.chunk_id,
 					message_id: messageId,
 					block_id: chunk.block_id,
 					thread_id: chunk.thread_id,
 					type: mergedState.type,
-					props: snapshotProps,
-					metadata: chunk.metadata || messagesRef.current[idx].metadata,
+					props: updatedProps,
+					metadata: chunk.metadata || existing.metadata,
 					delta: isCompleted ? false : chunk.delta
 				}
 			} else {

@@ -199,7 +199,42 @@ function createChunkHandler(
 		const mergedState = applyDelta(targetTabId, messageId, chunk)
 		const isCompleted = refs.completedMessages.current[messageId]
 
+		// Sub-agent tool calls: merge into parent Agent message's children
+		const rawParentMsgId = mergedState.props?.parent_message_id as string | undefined
+		const parentMessageId = rawParentMsgId ? `${streamId}:${rawParentMsgId}` : undefined
+
 		updateMessages(targetTabId, (prev) => {
+			if (parentMessageId) {
+				const parentIdx = prev.findIndex((m) => m.message_id === parentMessageId)
+				if (parentIdx !== -1) {
+					const newArr = [...prev]
+					const parent = { ...newArr[parentIdx] }
+					const parentProps = { ...parent.props } as Record<string, any>
+					const children = Array.isArray(parentProps.children) ? [...parentProps.children] : []
+
+					const childIdx = children.findIndex((c: any) => c.message_id === messageId)
+					const childMsg = {
+						message_id: messageId,
+						type: mergedState.type,
+						props: mergedState.props,
+						status: mergedState.props?.status,
+						delta: isCompleted ? false : chunk.delta
+					}
+
+					if (childIdx !== -1) {
+						children[childIdx] = childMsg
+					} else {
+						children.push(childMsg)
+					}
+
+					parentProps.children = children
+					parent.props = parentProps
+					parent.delta = true
+					newArr[parentIdx] = parent
+					return newArr
+				}
+			}
+
 			const index = prev.findIndex((m) => m.message_id === messageId)
 			const assistantInfo = refs.assistantInfo.current[targetTabId]
 			const shouldAdd = refs.shouldAddAssistant.current[targetTabId]
@@ -209,17 +244,23 @@ function createChunkHandler(
 
 			if (index !== -1) {
 				const newArr = [...prev]
+				const existing = newArr[index]
+				const existingChildren = (existing.props as Record<string, any>)?.children
+				const updatedProps = { ...mergedState.props }
+				if (Array.isArray(existingChildren) && existingChildren.length > 0 && !Array.isArray(updatedProps.children)) {
+					updatedProps.children = existingChildren
+				}
 				newArr[index] = {
-					...newArr[index],
+					...existing,
 					chunk_id: chunk.chunk_id,
 					message_id: messageId,
 					block_id: chunk.block_id,
 					thread_id: chunk.thread_id,
 					type: mergedState.type,
-					props: mergedState.props,
+					props: updatedProps,
 					delta: isCompleted ? false : chunk.delta,
 					metadata: {
-						...newArr[index].metadata,
+						...existing.metadata,
 						request_id: requestId
 					}
 				}
