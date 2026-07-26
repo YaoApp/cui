@@ -1,6 +1,7 @@
 {
 	"extends": "./.umi/tsconfig.json",
 	"compilerOptions": {
+		"ignoreDeprecations": "6.0",
 		"experimentalDecorators": true,
 		"paths": {
 			"@/*": ["*"],

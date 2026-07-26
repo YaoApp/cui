@@ -1,4 +1,5 @@
 import { OpenAPI } from '../../openapi'
+import { redirectToLogin } from '../../../utils/authRedirect'
 import { ApiResponse } from '../../types'
 import { BuildURL } from '../../lib/utils'
 import type { Message, StreamCallback } from '../../chat/types'
@@ -430,6 +431,10 @@ export class AgentRobots {
 			})
 
 			if (!response.ok) {
+				if (response.status === 401) {
+					redirectToLogin()
+					throw new Error('Session expired')
+				}
 				throw new Error(`HTTP ${response.status}: ${response.statusText}`)
 			}
 
