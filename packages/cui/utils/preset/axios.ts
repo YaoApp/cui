@@ -3,8 +3,8 @@ import axios from 'axios'
 
 import { getToken } from '@/knife'
 import { getPath } from '@/utils'
+import { redirectToLogin } from '@/utils/authRedirect'
 import { history } from '@umijs/max'
-import { local } from '@yaoapp/storex'
 
 axios.interceptors.request.use((config) => {
 	return {
@@ -37,7 +37,7 @@ axios.interceptors.response.use(
 				return Promise.reject(error)
 			}
 
-			history.push(local.login_url || '/')
+			redirectToLogin()
 		}
 
 		return Promise.reject(error)

@@ -1,4 +1,5 @@
 import { OpenAPI } from '../openapi'
+import { redirectToLogin } from '../../utils/authRedirect'
 import {
 	ChatCompletionRequest,
 	ChatCompletionResponse,
@@ -195,6 +196,10 @@ export class Chat {
 			})
 
 			if (!response.ok) {
+				if (response.status === 401) {
+					redirectToLogin()
+					throw new Error('Session expired')
+				}
 				throw new Error(`HTTP ${response.status}: ${response.statusText}`)
 			}
 
@@ -329,6 +334,10 @@ export class Chat {
 			})
 
 			if (!response.ok) {
+				if (response.status === 401) {
+					redirectToLogin()
+					throw new Error('Session expired')
+				}
 				const errorText = await response.text()
 				throw new Error(`HTTP ${response.status}: ${errorText}`)
 			}
@@ -396,6 +405,10 @@ export class Chat {
 		})
 
 		if (!response.ok) {
+			if (response.status === 401) {
+				redirectToLogin()
+				throw new Error('Session expired')
+			}
 			const errorText = await response.text()
 			throw new Error(`HTTP ${response.status}: ${errorText}`)
 		}
@@ -422,6 +435,10 @@ export class Chat {
 		})
 
 		if (!response.ok) {
+			if (response.status === 401) {
+				redirectToLogin()
+				throw new Error('Session expired')
+			}
 			const errorText = await response.text()
 			throw new Error(`HTTP ${response.status}: ${errorText}`)
 		}
@@ -463,6 +480,10 @@ export class Chat {
 		})
 
 		if (!response.ok) {
+			if (response.status === 401) {
+				redirectToLogin()
+				throw new Error('Session expired')
+			}
 			const errorText = await response.text()
 			throw new Error(`HTTP ${response.status}: ${errorText}`)
 		}
@@ -489,6 +510,10 @@ export class Chat {
 		})
 
 		if (!response.ok) {
+			if (response.status === 401) {
+				redirectToLogin()
+				throw new Error('Session expired')
+			}
 			const errorText = await response.text()
 			throw new Error(`HTTP ${response.status}: ${errorText}`)
 		}
@@ -545,6 +570,10 @@ export class Chat {
 		})
 
 		if (!response.ok) {
+			if (response.status === 401) {
+				redirectToLogin()
+				throw new Error('Session expired')
+			}
 			const errorText = await response.text()
 			throw new Error(`HTTP ${response.status}: ${errorText}`)
 		}
@@ -586,6 +615,10 @@ export class Chat {
 		})
 
 		if (!response.ok) {
+			if (response.status === 401) {
+				redirectToLogin()
+				throw new Error('Session expired')
+			}
 			const errorText = await response.text()
 			throw new Error(`HTTP ${response.status}: ${errorText}`)
 		}
@@ -624,6 +657,10 @@ export class Chat {
 		})
 
 		if (!response.ok) {
+			if (response.status === 401) {
+				redirectToLogin()
+				throw new Error('Session expired')
+			}
 			const errorText = await response.text()
 			throw new Error(`HTTP ${response.status}: ${errorText}`)
 		}

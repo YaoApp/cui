@@ -7,6 +7,7 @@ import { Stack } from '@/models'
 import Service from '@/services/app'
 import { getYaoMetadata, YaoMetadata } from '@/services/wellknown'
 import { getCurrentMenuIndexs } from '@/utils'
+import { redirectToLogin, isRedirecting } from '@/utils/authRedirect'
 import { local } from '@yaoapp/storex'
 
 import type { AvatarFullConfig } from 'react-nice-avatar'
@@ -132,15 +133,14 @@ export default class GlobalModel {
 			const currentPath = getPath(history.location.pathname)
 
 			// Skip for all auth pages (login, OAuth callback, consent, etc.)
-			// These pages handle their own auth flow and 401 is expected
 			if (currentPath.startsWith('/auth/')) return
 
-			// Skip for OTP verification pages - they handle their own auth flow
+			// Skip for OTP verification pages
 			if (currentPath.startsWith('/v/')) return
 
-			// Redirect back to the login page used during sign-in
-			const loginUrl = (local.login_url as string) || '/auth/entry'
-			history.push(loginUrl)
+			if (isRedirecting()) return true
+
+			redirectToLogin()
 			return true
 		}
 

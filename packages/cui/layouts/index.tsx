@@ -3,11 +3,13 @@ import '@/styles/index.less'
 import { ConfigProvider } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 import { HelmetProvider } from 'react-helmet-async'
 import { container } from 'tsyringe'
 
 import { GlobalContext, GlobalModel } from '@/context/app'
 import { useIntl } from '@/hooks'
+import { redirectToLogin, isRedirecting } from '@/utils/authRedirect'
 import { history, Outlet, useLocation } from '@umijs/max'
 import { getEventStream, destroyEventStream } from '@/openapi/events'
 
@@ -57,6 +59,34 @@ const isStandalonePage = (pathname: string): boolean => {
 		// For exact routes, use strict equality
 		return pathname === route
 	})
+}
+
+const AppErrorFallback = ({ error }: { error: Error }) => {
+	const isAuthError = /401|unauthorized|session expired/i.test(error.message)
+	if (isAuthError && !isRedirecting()) {
+		redirectToLogin()
+		return null
+	}
+
+	return (
+		<div style={{
+			display: 'flex', flexDirection: 'column',
+			alignItems: 'center', justifyContent: 'center',
+			height: '100vh', gap: '16px', fontFamily: 'system-ui'
+		}}>
+			<p style={{ color: '#999', fontSize: '14px' }}>页面加载异常</p>
+			<button
+				onClick={() => window.location.reload()}
+				style={{
+					padding: '8px 24px', cursor: 'pointer',
+					border: '1px solid #ddd', borderRadius: '6px',
+					background: '#fff', fontSize: '14px'
+				}}
+			>
+				重新加载
+			</button>
+		</div>
+	)
 }
 
 const Index = () => {
@@ -225,19 +255,21 @@ const Index = () => {
 	}
 
 	return (
-		<HelmetProvider>
-			<Helmet {...props_helmet}></Helmet>
-			<ConfigProvider prefixCls='xgen'>
-				<GlobalContext.Provider value={global}>
-					{renderMainContent()}
-					<WelcomeWizard
-						visible={wizardVisible}
-						isReopen={wizardReopen}
-						onClose={() => setWizardVisible(false)}
-					/>
-				</GlobalContext.Provider>
-			</ConfigProvider>
-		</HelmetProvider>
+		<ErrorBoundary FallbackComponent={AppErrorFallback}>
+			<HelmetProvider>
+				<Helmet {...props_helmet}></Helmet>
+				<ConfigProvider prefixCls='xgen'>
+					<GlobalContext.Provider value={global}>
+						{renderMainContent()}
+						<WelcomeWizard
+							visible={wizardVisible}
+							isReopen={wizardReopen}
+							onClose={() => setWizardVisible(false)}
+						/>
+					</GlobalContext.Provider>
+				</ConfigProvider>
+			</HelmetProvider>
+		</ErrorBoundary>
 	)
 }
 
