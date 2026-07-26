@@ -3,6 +3,7 @@
 	flex-direction: column;
 	position: relative;
 	flex: 1;
+	min-height: 0;
 }
 
 .detailHeader {
@@ -369,9 +370,19 @@
 
 .fileList {
 	flex: 1;
+	min-height: 0;
 	border: 1px solid var(--color_neo_border_card);
 	border-radius: 10px;
-	overflow: hidden;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: var(--color_scrollbar_thumb);
+		border-radius: 3px;
+	}
 
 	.fileRow {
 		display: flex;

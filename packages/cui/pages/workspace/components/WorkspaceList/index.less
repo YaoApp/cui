@@ -79,6 +79,15 @@
 // ═════════════════════════════════════════════
 .content {
 	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: var(--color_scrollbar_thumb);
+		border-radius: 3px;
+	}
 }
 
 .empty {
