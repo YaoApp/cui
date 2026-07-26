@@ -413,23 +413,13 @@
 		overflow: auto;
 		box-sizing: border-box;
 
-		// 使用与系统一致的滚动条样式
 		&::-webkit-scrollbar {
 			width: 6px;
 			height: 6px;
 		}
 
 		&::-webkit-scrollbar-thumb {
-			background: var(--color_border);
-			border-radius: 3px;
-
-			&:hover {
-				background: var(--color_text_grey);
-			}
-		}
-
-		&::-webkit-scrollbar-track {
-			background: var(--color_border_soft);
+			background-color: var(--color_scrollbar_thumb);
 			border-radius: 3px;
 		}
 	}
@@ -614,10 +604,22 @@
 
 	// 纯文本查看器专用样式
 	.textViewer {
-		background: #f9f7f0 !important; // 精确匹配截图的米白色背景
-		color: #1a1a1a !important; // 更深的文字颜色，增强对比度
-		font-size: 14px !important; // 14px字体大小
-		line-height: 1.7 !important; // 增加行高，提升阅读体验
+		background: #f9f7f0 !important;
+		color: #1a1a1a !important;
+		font-size: 14px !important;
+		line-height: 1.7 !important;
+		height: 100%;
+		min-height: unset;
+		overflow: auto;
+
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background-color: var(--color_scrollbar_thumb);
+			border-radius: 3px;
+		}
 	}
 
 	// 暗色主题下的语法高亮
