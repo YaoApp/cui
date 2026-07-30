@@ -19,8 +19,8 @@ function mapInboxMessage(m: any): InboxMessage {
 		type: m.type || 'input',
 		source: {
 			type: 'kanban',
-			id: m.board_id || '',
-			name: m.board_name || '',
+			id: m.source_id || '',
+			name: m.source_name || '',
 			task_title: m.chat_title || ''
 		},
 		priority: m.priority || 'medium',
@@ -29,11 +29,11 @@ function mapInboxMessage(m: any): InboxMessage {
 		task_id: m.chat_id || '',
 		chat_id: m.chat_id || '',
 		assistant_id: m.assistant_id,
-		read: !!m.read,
-		starred: !!m.starred,
-		pinned: !!m.pinned,
-		created_at: m.created_at ? new Date(m.created_at).getTime() : Date.now(),
-		read_at: m.read_at ? new Date(m.read_at).getTime() : undefined
+		bookmarked: !!m.bookmarked,
+		inbox_pinned: !!m.inbox_pinned,
+		has_unread: !!m.has_unread,
+		inbox_read_at: m.inbox_read_at ? new Date(m.inbox_read_at).getTime() : undefined,
+		created_at: m.created_at ? new Date(m.created_at).getTime() : Date.now()
 	}
 }
 
@@ -57,11 +57,11 @@ export const services: InboxAPI = {
 		}
 	},
 
-	async markAsRead(id: string) {
+	async viewTask(chatId: string) {
 		const agent = getAgent()
 		const api = getOpenAPI()
-		const res = await agent.inbox.Read(id)
-		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to mark read')
+		const res = await agent.inbox.View(chatId)
+		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to view task')
 	},
 
 	async markAllRead() {
@@ -71,31 +71,31 @@ export const services: InboxAPI = {
 		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to mark all read')
 	},
 
-	async starMessage(id: string) {
+	async bookmarkTask(chatId: string) {
 		const agent = getAgent()
 		const api = getOpenAPI()
-		const res = await agent.inbox.Star(id)
-		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to star')
+		const res = await agent.inbox.Bookmark(chatId)
+		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to bookmark')
 	},
 
-	async unstarMessage(id: string) {
+	async unbookmarkTask(chatId: string) {
 		const agent = getAgent()
 		const api = getOpenAPI()
-		const res = await agent.inbox.Unstar(id)
-		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to unstar')
+		const res = await agent.inbox.Unbookmark(chatId)
+		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to unbookmark')
 	},
 
-	async pinMessage(id: string) {
+	async pinTask(chatId: string) {
 		const agent = getAgent()
 		const api = getOpenAPI()
-		const res = await agent.inbox.Pin(id)
+		const res = await agent.inbox.Pin(chatId)
 		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to pin')
 	},
 
-	async unpinMessage(id: string) {
+	async unpinTask(chatId: string) {
 		const agent = getAgent()
 		const api = getOpenAPI()
-		const res = await agent.inbox.Unpin(id)
+		const res = await agent.inbox.Unpin(chatId)
 		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to unpin')
 	},
 
