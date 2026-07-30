@@ -13,7 +13,7 @@ interface CategoryItem {
 
 const CATEGORIES: CategoryItem[] = [
 	{ key: 'all', icon: 'material-inbox', cn: '全部', en: 'All' },
-	{ key: 'starred', icon: 'material-star_outline', cn: '收藏', en: 'Starred' },
+	{ key: 'bookmarked', icon: 'material-star_outline', cn: '收藏', en: 'Bookmarked' },
 	{ key: 'task_interaction', icon: 'material-mark_chat_unread', cn: '任务交互', en: 'Interactions' },
 	{ key: 'task_notification', icon: 'material-assignment_turned_in', cn: '任务通知', en: 'Notifications' },
 	{ key: 'task_failed', icon: 'material-assignment_late', cn: '任务失败', en: 'Failed' },
@@ -22,7 +22,7 @@ const CATEGORIES: CategoryItem[] = [
 
 const statsKeyMap: Record<InboxCategory, string> = {
 	all: 'all',
-	starred: 'starred',
+	bookmarked: 'bookmarked',
 	task_interaction: 'input',
 	task_notification: 'completed',
 	task_failed: 'failed',
@@ -44,7 +44,7 @@ const Sidebar = () => {
 					const isActive = category === item.key
 					const statsKey = statsKeyMap[item.key] as keyof typeof stats
 					const count = stats ? (stats[statsKey] as number) || 0 : 0
-					const showDivider = item.key === 'starred' || item.key === 'task_failed'
+					const showDivider = item.key === 'bookmarked' || item.key === 'task_failed'
 
 					return (
 						<div key={item.key}>

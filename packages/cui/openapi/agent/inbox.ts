@@ -18,16 +18,23 @@ export interface InboxItem {
 	body?: string
 	chat_id?: string
 	chat_title?: string
-	read: boolean
-	starred: boolean
-	pinned: boolean
+	assistant_id?: string
+	source_type?: string
+	source_id?: string
+	source_name?: string
+	metadata?: any
 	created_at?: string
-	read_at?: string | null
+	updated_at?: string
+	// Task-level fields
+	bookmarked: boolean
+	inbox_pinned: boolean
+	has_unread: boolean
+	inbox_read_at?: string | null
 }
 
 export interface InboxStats {
 	all: number
-	starred: number
+	bookmarked: number
 	input: number
 	completed: number
 	failed: number
@@ -43,7 +50,6 @@ export interface InboxListResponse {
 
 export interface UnreadCountResponse {
 	total: number
-	by_type?: Record<string, number>
 }
 
 export class AgentInbox {
@@ -70,28 +76,28 @@ export class AgentInbox {
 		return this.api.Get('/agent/inbox/unread-count')
 	}
 
-	async Read(mailId: string): Promise<ApiResponse<void>> {
-		return this.api.Put(`/agent/inbox/${mailId}/read`, {})
+	async View(chatId: string): Promise<ApiResponse<void>> {
+		return this.api.Put(`/agent/inbox/view/${chatId}`, {})
 	}
 
 	async ReadAll(): Promise<ApiResponse<void>> {
 		return this.api.Put('/agent/inbox/read-all', {})
 	}
 
-	async Star(mailId: string): Promise<ApiResponse<void>> {
-		return this.api.Put(`/agent/inbox/${mailId}/star`, {})
+	async Bookmark(chatId: string): Promise<ApiResponse<void>> {
+		return this.api.Put(`/agent/inbox/bookmark/${chatId}`, {})
 	}
 
-	async Unstar(mailId: string): Promise<ApiResponse<void>> {
-		return this.api.Put(`/agent/inbox/${mailId}/unstar`, {})
+	async Unbookmark(chatId: string): Promise<ApiResponse<void>> {
+		return this.api.Put(`/agent/inbox/unbookmark/${chatId}`, {})
 	}
 
-	async Pin(mailId: string): Promise<ApiResponse<void>> {
-		return this.api.Put(`/agent/inbox/${mailId}/pin`, {})
+	async Pin(chatId: string): Promise<ApiResponse<void>> {
+		return this.api.Put(`/agent/inbox/pin/${chatId}`, {})
 	}
 
-	async Unpin(mailId: string): Promise<ApiResponse<void>> {
-		return this.api.Put(`/agent/inbox/${mailId}/unpin`, {})
+	async Unpin(chatId: string): Promise<ApiResponse<void>> {
+		return this.api.Put(`/agent/inbox/unpin/${chatId}`, {})
 	}
 
 	async DeleteByChat(chatId: string): Promise<ApiResponse<{ deleted: number }>> {

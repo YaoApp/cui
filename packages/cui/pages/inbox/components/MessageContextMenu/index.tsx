@@ -60,10 +60,9 @@ const ConfirmDialog = ({ is_cn, title, onConfirm, onCancel }: ConfirmDialogProps
 }
 
 const MessageContextMenu = ({ menu, category, onClose, onUnarchive }: MessageContextMenuProps) => {
-	const { is_cn, togglePin, toggleStar, markAsRead, archiveGroup, deleteGroup } = useInboxContext()
+	const { is_cn, togglePin, toggleBookmark, selectChatGroup, archiveGroup, deleteGroup } = useInboxContext()
 	const ref = useRef<HTMLDivElement>(null)
 	const { group, x, y } = menu
-	const mail = group.latestMail
 	const [showConfirm, setShowConfirm] = useState(false)
 
 	useEffect(() => {
@@ -112,10 +111,10 @@ const MessageContextMenu = ({ menu, category, onClose, onUnarchive }: MessageCon
 			<div ref={ref} className={styles.menu} style={{ left: x, top: y }}>
 				<div
 					className={styles.item}
-					onClick={() => handleAction(() => togglePin(mail.id))}
+					onClick={() => handleAction(() => togglePin(group.chat_id))}
 				>
 					<span className={styles.icon}><Icon name='material-push_pin' size={14} /></span>
-					{mail.pinned
+					{group.inboxPinned
 						? (is_cn ? '取消置顶' : 'Unpin')
 						: (is_cn ? '置顶' : 'Pin to Top')
 					}
@@ -123,23 +122,23 @@ const MessageContextMenu = ({ menu, category, onClose, onUnarchive }: MessageCon
 
 				<div
 					className={styles.item}
-					onClick={() => handleAction(() => toggleStar(mail.id))}
+					onClick={() => handleAction(() => toggleBookmark(group.chat_id))}
 				>
 					<span className={styles.icon}>
-						<Icon name={mail.starred ? 'material-star' : 'material-star_outline'} size={14} />
+						<Icon name={group.bookmarked ? 'material-star' : 'material-star_outline'} size={14} />
 					</span>
-					{mail.starred
-						? (is_cn ? '取消收藏' : 'Unstar')
-						: (is_cn ? '收藏' : 'Star')
+					{group.bookmarked
+						? (is_cn ? '取消收藏' : 'Remove Bookmark')
+						: (is_cn ? '收藏' : 'Bookmark')
 					}
 				</div>
 
 				<div className={styles.divider} />
 
-				{group.unreadCount > 0 && (
+				{group.hasUnread && (
 					<div
 						className={styles.item}
-						onClick={() => handleAction(() => markAsRead(mail.id))}
+						onClick={() => handleAction(() => selectChatGroup(group.chat_id))}
 					>
 						<span className={styles.icon}><Icon name='material-done' size={14} /></span>
 						{is_cn ? '标为已读' : 'Mark as Read'}

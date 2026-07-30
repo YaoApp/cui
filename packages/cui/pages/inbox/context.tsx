@@ -9,7 +9,9 @@ export interface InboxGroup {
 	title: string
 	taskName: string
 	latestMail: InboxMessage
-	unreadCount: number
+	hasUnread: boolean
+	bookmarked: boolean
+	inboxPinned: boolean
 	totalCount: number
 	latestTime: number
 }
@@ -24,20 +26,16 @@ interface InboxContextValue {
 	setCategory: (c: InboxCategory) => void
 	selectedChatId: string | null
 	selectChatGroup: (chatId: string) => void
-	selectedMessageId: string | null
-	selectedMessage: InboxMessage | null
-	selectMessage: (id: string) => void
 	searchKeyword: string
 	setSearchKeyword: (k: string) => void
 	unreadCount: number
 	stats: InboxStatsData | null
-	markAsRead: (id: string) => void
 	markAllRead: () => void
 	archiveGroup: (chatId: string) => void
 	unarchiveGroup: (chatId: string, columnId: string) => void
 	deleteGroup: (chatId: string) => void
-	toggleStar: (id: string) => void
-	togglePin: (id: string) => void
+	toggleBookmark: (chatId: string) => void
+	togglePin: (chatId: string) => void
 	sidebarCollapsed: boolean
 	setSidebarCollapsed: (v: boolean) => void
 	loadMore: () => void
@@ -57,7 +55,7 @@ const PAGE_SIZE = 20
 
 const categoryToFilter: Record<InboxCategory, string> = {
 	all: 'all',
-	starred: 'starred',
+	bookmarked: 'bookmarked',
 	task_interaction: 'input',
 	task_notification: 'completed',
 	task_failed: 'failed',
@@ -70,27 +68,33 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 	const [loading, setLoading] = useState(false)
 	const [loadingMore, setLoadingMore] = useState(false)
 	const [category, setCategoryState] = useState<InboxCategory>('all')
-	const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null)
 	const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
 	const [searchKeyword, setSearchKeyword] = useState('')
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 	const [stats, setStats] = useState<InboxStatsData | null>(null)
-	const [page, setPage] = useState(1)
 	const [total, setTotal] = useState(0)
 	const [taskVersion, setTaskVersion] = useState(0)
 	const refreshTimerRef = useRef<number>()
 	const fetchingRef = useRef(false)
+	const fetchVersionRef = useRef(0)
+	const pageRef = useRef(1)
 	const selectedChatIdRef = useRef<string | null>(null)
 	selectedChatIdRef.current = selectedChatId
 
 	const fetchStats = useCallback(() => {
-		services.getStats().then(setStats).catch(() => {})
+		services
+			.getStats()
+			.then(setStats)
+			.catch(() => {})
 	}, [])
 
 	const fetchMessages = useCallback(
-		(cat: InboxCategory, p: number, append = false) => {
-			if (fetchingRef.current) return
+		(cat: InboxCategory, p: number, append = false, force = false) => {
+			if (fetchingRef.current && !force) {
+				return
+			}
 			fetchingRef.current = true
+			const version = ++fetchVersionRef.current
 			const filter = categoryToFilter[cat]
 			if (append) {
 				setLoadingMore(true)
@@ -100,17 +104,22 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 			services
 				.getMessages({ filter, page: p, size: PAGE_SIZE })
 				.then(({ items, total: t }) => {
+					if (fetchVersionRef.current !== version) return
 					setMessages((prev) => (append ? [...prev, ...items] : items))
 					setTotal(t)
+					pageRef.current = p
 				})
 				.catch((err: any) => {
+					if (fetchVersionRef.current !== version) return
 					window.$app?.Event?.emit('app/toast', {
 						type: 'error',
 						message: err?.message || (is_cn ? '加载消息失败' : 'Failed to load messages')
 					})
 				})
 				.finally(() => {
-					fetchingRef.current = false
+					if (fetchVersionRef.current === version) {
+						fetchingRef.current = false
+					}
 					setLoading(false)
 					setLoadingMore(false)
 				})
@@ -125,17 +134,15 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		const stream = getEventStream()
-		const unsub = stream.subscribe('task.*', (data: any) => {
-			if (data?.__event_type === 'task.updated'
-				&& data.chat_id === selectedChatIdRef.current
-				&& data.outputs) {
-				setTaskVersion((v) => v + 1)
+		const unsub = stream.subscribe('task.updated', (data: any) => {
+			if (data?.chat_id && data.chat_id === selectedChatIdRef.current) {
+				if (data.outputs) setTaskVersion((v) => v + 1)
 			}
 			clearTimeout(refreshTimerRef.current)
 			refreshTimerRef.current = window.setTimeout(() => {
+				if (fetchingRef.current) return
 				fetchStats()
-				fetchMessages(category, 1)
-				setPage(1)
+				fetchMessages(category, 1, false, true)
 			}, 2000)
 		})
 		return () => {
@@ -147,160 +154,98 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 	const setCategory = useCallback(
 		(c: InboxCategory) => {
 			setCategoryState(c)
-			setPage(1)
 			setSelectedChatId(null)
-			setSelectedMessageId(null)
-			fetchMessages(c, 1)
+			fetchMessages(c, 1, false, true)
 		},
 		[fetchMessages]
 	)
 
 	const loadMore = useCallback(() => {
 		if (fetchingRef.current || messages.length >= total) return
-		const nextPage = page + 1
-		setPage(nextPage)
-		fetchMessages(category, nextPage, true)
-	}, [messages.length, total, page, category, fetchMessages])
+		fetchMessages(category, pageRef.current + 1, true)
+	}, [messages.length, total, category, fetchMessages])
 
 	const hasMore = messages.length < total
 
+	// Each message from the API represents one task group (1:1 mapping)
 	const groupedMessages = useMemo(() => {
 		const filtered = searchKeyword.trim()
 			? messages.filter((m) => {
 					const kw = searchKeyword.toLowerCase()
 					return m.title.toLowerCase().includes(kw) || m.body.toLowerCase().includes(kw)
-				})
+			  })
 			: messages
 
-		const map = new Map<string, InboxGroup>()
-		for (const m of filtered) {
-			const key = m.chat_id || m.id
-			const existing = map.get(key)
-			if (!existing) {
-				map.set(key, {
-					chat_id: key,
-					title: m.title,
-					taskName: m.source?.task_title || '',
-					latestMail: m,
-					unreadCount: m.read ? 0 : 1,
-					totalCount: 1,
-					latestTime: m.created_at
-				})
-			} else {
-				existing.totalCount++
-				if (!m.read) existing.unreadCount++
-				if (!existing.taskName && m.source?.task_title) {
-					existing.taskName = m.source.task_title
-				}
-				if (m.created_at > existing.latestTime) {
-					existing.latestTime = m.created_at
-					existing.latestMail = m
-					existing.title = m.title
-				}
-			}
-		}
-		const groups = Array.from(map.values())
-		groups.sort((a, b) => {
-			if (a.latestMail.pinned && !b.latestMail.pinned) return -1
-			if (!a.latestMail.pinned && b.latestMail.pinned) return 1
-			return b.latestTime - a.latestTime
-		})
-		return groups
+		return filtered.map((m) => ({
+			chat_id: m.chat_id || m.id,
+			title: m.title,
+			taskName: m.source?.task_title || '',
+			latestMail: m,
+			hasUnread: m.has_unread,
+			bookmarked: m.bookmarked,
+			inboxPinned: m.inbox_pinned,
+			totalCount: 1,
+			latestTime: m.created_at
+		}))
 	}, [messages, searchKeyword])
 
-	const selectedMessage = useMemo(
-		() => messages.find((m) => m.id === selectedMessageId) || null,
-		[messages, selectedMessageId]
-	)
-
-	const unreadCount = useMemo(() => messages.filter((m) => !m.read).length, [messages])
+	const unreadCount = useMemo(() => messages.filter((m) => m.has_unread).length, [messages])
 
 	const selectChatGroup = useCallback(
 		(chatId: string) => {
 			setSelectedChatId(chatId || null)
 			if (!chatId) return
 
-			const unreadInGroup = messages.filter((m) => m.chat_id === chatId && !m.read)
-			if (unreadInGroup.length === 0) return
+			const msg = messages.find((m) => m.chat_id === chatId)
+			if (!msg || !msg.has_unread) return
 
-			const now = Date.now()
+			// Optimistically mark as read
 			setMessages((prev) =>
-				prev.map((m) => (m.chat_id === chatId && !m.read ? { ...m, read: true, read_at: now } : m))
+				prev.map((m) => (m.chat_id === chatId ? { ...m, has_unread: false, inbox_read_at: Date.now() } : m))
 			)
 
-			Promise.all(unreadInGroup.map((mail) => services.markAsRead(mail.id)))
+			services
+				.viewTask(chatId)
 				.then(() => fetchStats())
-				.catch(() => {})
+				.catch(() => {
+					setMessages((prev) =>
+						prev.map((m) => (m.chat_id === chatId ? { ...m, has_unread: true, inbox_read_at: undefined } : m))
+					)
+				})
 		},
 		[messages, fetchStats]
 	)
 
-	const selectMessage = useCallback(
-		(id: string) => {
-			setSelectedMessageId(id || null)
-			if (!id) return
-			const msg = messages.find((m) => m.id === id)
-			if (msg && !msg.read) {
-				setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, read: true, read_at: Date.now() } : m)))
-				services.markAsRead(id).then(() => fetchStats()).catch((err: any) => {
-					setMessages((prev) =>
-						prev.map((m) => (m.id === id ? { ...m, read: false, read_at: undefined } : m))
-					)
-					window.$app?.Event?.emit('app/toast', {
-						type: 'error',
-						message: err?.message || (is_cn ? '标记已读失败' : 'Failed to mark as read')
-					})
-				})
-			}
-		},
-		[messages, is_cn, fetchStats]
-	)
+	const markAllRead = useCallback(() => {
+		const unreadChatIds = messages.filter((m) => m.has_unread).map((m) => m.chat_id)
+		if (unreadChatIds.length === 0) return
 
-	const markAsRead = useCallback(
-		(id: string) => {
-			setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, read: true, read_at: Date.now() } : m)))
-			services.markAsRead(id).then(() => fetchStats()).catch((err: any) => {
+		setMessages((prev) => prev.map((m) => (m.has_unread ? { ...m, has_unread: false, inbox_read_at: Date.now() } : m)))
+		services
+			.markAllRead()
+			.then(() => fetchStats())
+			.catch((err: any) => {
 				setMessages((prev) =>
-					prev.map((m) => (m.id === id ? { ...m, read: false, read_at: undefined } : m))
+					prev.map((m) =>
+						unreadChatIds.includes(m.chat_id) ? { ...m, has_unread: true, inbox_read_at: undefined } : m
+					)
 				)
 				window.$app?.Event?.emit('app/toast', {
 					type: 'error',
-					message: err?.message || (is_cn ? '标记已读失败' : 'Failed to mark as read')
+					message: err?.message || (is_cn ? '标记全部已读失败' : 'Failed to mark all as read')
 				})
 			})
-		},
-		[is_cn, fetchStats]
-	)
-
-	const markAllRead = useCallback(() => {
-		const snapshot = messages.filter((m) => !m.read).map((m) => m.id)
-		if (snapshot.length === 0) return
-		const now = Date.now()
-		setMessages((prev) => prev.map((m) => (m.read ? m : { ...m, read: true, read_at: now })))
-		services.markAllRead().then(() => fetchStats()).catch((err: any) => {
-			setMessages((prev) =>
-				prev.map((m) => (snapshot.includes(m.id) ? { ...m, read: false, read_at: undefined } : m))
-			)
-			window.$app?.Event?.emit('app/toast', {
-				type: 'error',
-				message: err?.message || (is_cn ? '标记全部已读失败' : 'Failed to mark all as read')
-			})
-		})
 	}, [messages, is_cn, fetchStats])
 
 	const archiveGroup = useCallback(
 		(chatId: string) => {
-			setMessages((prev) => prev.filter((m) => (m.chat_id || m.id) !== chatId))
-			if (selectedChatId === chatId) {
-				setSelectedChatId(null)
-				setSelectedMessageId(null)
-			}
+			setMessages((prev) => prev.filter((m) => m.chat_id !== chatId))
+			if (selectedChatId === chatId) setSelectedChatId(null)
 			services
 				.archiveTask(chatId)
 				.then(() => fetchStats())
 				.catch((err: any) => {
-					fetchMessages(category, 1)
-					setPage(1)
+					fetchMessages(category, 1, false, true)
 					window.$app?.Event?.emit('app/toast', {
 						type: 'error',
 						message: err?.message || (is_cn ? '归档失败' : 'Failed to archive')
@@ -312,17 +257,13 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 
 	const unarchiveGroup = useCallback(
 		(chatId: string, columnId: string) => {
-			setMessages((prev) => prev.filter((m) => (m.chat_id || m.id) !== chatId))
-			if (selectedChatId === chatId) {
-				setSelectedChatId(null)
-				setSelectedMessageId(null)
-			}
+			setMessages((prev) => prev.filter((m) => m.chat_id !== chatId))
+			if (selectedChatId === chatId) setSelectedChatId(null)
 			services
 				.unarchiveTask(chatId, columnId)
 				.then(() => fetchStats())
 				.catch((err: any) => {
-					fetchMessages(category, 1)
-					setPage(1)
+					fetchMessages(category, 1, false, true)
 					window.$app?.Event?.emit('app/toast', {
 						type: 'error',
 						message: err?.message || (is_cn ? '取消归档失败' : 'Failed to unarchive')
@@ -334,17 +275,13 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 
 	const deleteGroup = useCallback(
 		(chatId: string) => {
-			setMessages((prev) => prev.filter((m) => (m.chat_id || m.id) !== chatId))
-			if (selectedChatId === chatId) {
-				setSelectedChatId(null)
-				setSelectedMessageId(null)
-			}
+			setMessages((prev) => prev.filter((m) => m.chat_id !== chatId))
+			if (selectedChatId === chatId) setSelectedChatId(null)
 			services
 				.deleteGroup(chatId)
 				.then(() => fetchStats())
 				.catch((err: any) => {
-					fetchMessages(category, 1)
-					setPage(1)
+					fetchMessages(category, 1, false, true)
 					window.$app?.Event?.emit('app/toast', {
 						type: 'error',
 						message: err?.message || (is_cn ? '删除失败' : 'Failed to delete')
@@ -354,33 +291,41 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		[selectedChatId, category, fetchMessages, fetchStats, is_cn]
 	)
 
-	const toggleStar = useCallback((id: string) => {
-		setMessages((prev) => {
-			const msg = prev.find((m) => m.id === id)
-			if (!msg) return prev
-			const wasStarred = msg.starred
-			const next = prev.map((m) => (m.id === id ? { ...m, starred: !m.starred } : m))
-			const req = wasStarred ? services.unstarMessage(id) : services.starMessage(id)
-			req.catch(() => {
-				setMessages((p) => p.map((m) => (m.id === id ? { ...m, starred: wasStarred } : m)))
+	const toggleBookmark = useCallback(
+		(chatId: string) => {
+			setMessages((prev) => {
+				const msg = prev.find((m) => m.chat_id === chatId)
+				if (!msg) return prev
+				const wasBookmarked = msg.bookmarked
+				const next = prev.map((m) => (m.chat_id === chatId ? { ...m, bookmarked: !m.bookmarked } : m))
+				const req = wasBookmarked ? services.unbookmarkTask(chatId) : services.bookmarkTask(chatId)
+				req.catch(() => {
+					setMessages((p) => p.map((m) => (m.chat_id === chatId ? { ...m, bookmarked: wasBookmarked } : m)))
+				})
+				return next
 			})
-			return next
-		})
-	}, [])
+		},
+		[]
+	)
 
-	const togglePin = useCallback((id: string) => {
-		setMessages((prev) => {
-			const msg = prev.find((m) => m.id === id)
-			if (!msg) return prev
-			const wasPinned = msg.pinned
-			const next = prev.map((m) => (m.id === id ? { ...m, pinned: !m.pinned } : m))
-			const req = wasPinned ? services.unpinMessage(id) : services.pinMessage(id)
-			req.catch(() => {
-				setMessages((p) => p.map((m) => (m.id === id ? { ...m, pinned: wasPinned } : m)))
+	const togglePin = useCallback(
+		(chatId: string) => {
+			setMessages((prev) => {
+				const msg = prev.find((m) => m.chat_id === chatId)
+				if (!msg) return prev
+				const wasPinned = msg.inbox_pinned
+				const next = prev.map((m) => (m.chat_id === chatId ? { ...m, inbox_pinned: !m.inbox_pinned } : m))
+				const req = wasPinned ? services.unpinTask(chatId) : services.pinTask(chatId)
+				req.then(() => {
+					fetchMessages(category, 1, false, true)
+				}).catch(() => {
+					setMessages((p) => p.map((m) => (m.chat_id === chatId ? { ...m, inbox_pinned: wasPinned } : m)))
+				})
+				return next
 			})
-			return next
-		})
-	}, [])
+		},
+		[category, fetchMessages]
+	)
 
 	const value: InboxContextValue = {
 		messages,
@@ -392,19 +337,15 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		setCategory,
 		selectedChatId,
 		selectChatGroup,
-		selectedMessageId,
-		selectedMessage,
-		selectMessage,
 		searchKeyword,
 		setSearchKeyword,
 		unreadCount,
 		stats,
-		markAsRead,
 		markAllRead,
 		archiveGroup,
 		unarchiveGroup,
 		deleteGroup,
-		toggleStar,
+		toggleBookmark,
 		togglePin,
 		sidebarCollapsed,
 		setSidebarCollapsed,

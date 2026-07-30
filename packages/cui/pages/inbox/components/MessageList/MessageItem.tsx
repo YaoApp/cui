@@ -8,7 +8,7 @@ interface MessageItemProps {
 	selected: boolean
 	is_cn: boolean
 	onClick: () => void
-	onToggleStar: () => void
+	onToggleBookmark: () => void
 	onContextMenu: (e: React.MouseEvent) => void
 }
 
@@ -26,22 +26,22 @@ function formatTimeAgo(ts: number, is_cn: boolean): string {
 function getTypeConfig(message: InboxMessage): { icon: string; color: string } {
 	if (message.type === 'completed') return { icon: 'material-assignment_turned_in', color: 'var(--color_success)' }
 	if (message.type === 'failed') return { icon: 'material-assignment_late', color: 'var(--color_warning)' }
-	const readIcon = message.read ? 'material-chat_bubble_outline' : 'material-mark_chat_unread'
+	const readIcon = message.has_unread ? 'material-mark_chat_unread' : 'material-chat_bubble_outline'
 	if (message.priority === 'high') return { icon: readIcon, color: 'var(--color_main)' }
 	return { icon: readIcon, color: 'var(--color_neo_text_tertiary)' }
 }
 
-const MessageItem = ({ message, selected, is_cn, onClick, onToggleStar, onContextMenu }: MessageItemProps) => {
+const MessageItem = ({ message, selected, is_cn, onClick, onToggleBookmark, onContextMenu }: MessageItemProps) => {
 	const config = getTypeConfig(message)
 
-	const handleStarClick = (e: React.MouseEvent) => {
+	const handleBookmarkClick = (e: React.MouseEvent) => {
 		e.stopPropagation()
-		onToggleStar()
+		onToggleBookmark()
 	}
 
 	return (
 		<div
-			className={clsx(styles.messageItem, selected && styles.selected, !message.read && styles.unread)}
+			className={clsx(styles.messageItem, selected && styles.selected, message.has_unread && styles.unread)}
 			onClick={onClick}
 			onContextMenu={onContextMenu}
 		>
@@ -49,17 +49,17 @@ const MessageItem = ({ message, selected, is_cn, onClick, onToggleStar, onContex
 				<span className={styles.typeIcon} style={{ color: config.color }}>
 					<Icon name={config.icon} size={16} />
 				</span>
-				{message.pinned && (
+				{message.inbox_pinned && (
 					<span className={styles.pinIndicator}>
 						<Icon name='material-push_pin' size={13} />
 					</span>
 				)}
 				<span className={styles.itemTitle}>{message.title}</span>
 				<span
-					className={clsx(styles.starBtn, message.starred && styles.starred)}
-					onClick={handleStarClick}
+					className={clsx(styles.starBtn, message.bookmarked && styles.starred)}
+					onClick={handleBookmarkClick}
 				>
-					<Icon name={message.starred ? 'material-star' : 'material-star_outline'} size={15} />
+					<Icon name={message.bookmarked ? 'material-star' : 'material-star_outline'} size={15} />
 				</span>
 				<span className={styles.itemTime}>{formatTimeAgo(message.created_at, is_cn)}</span>
 			</div>
