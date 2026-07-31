@@ -32,6 +32,13 @@ const MENU_GROUPS: MenuGroup[] = [
 			{ key: 'computer', icon: 'material-desktop_windows', label: { 'zh-CN': '电脑', 'en-US': 'Computer' } },
 			{ key: 'schedule', icon: 'material-schedule', label: { 'zh-CN': '定时', 'en-US': 'Schedule' } }
 		]
+	},
+	{
+		key: 'developer',
+		label: { 'zh-CN': '开发', 'en-US': 'DEVELOPER' },
+		items: [
+			{ key: 'integrations', icon: 'material-code', label: { 'zh-CN': '集成', 'en-US': 'Integrations' } }
+		]
 	}
 ]
 

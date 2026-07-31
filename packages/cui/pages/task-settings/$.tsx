@@ -8,6 +8,7 @@ import SecretsManager from '@/components/SecretsManager'
 import ComputerSection from './components/ComputerSection'
 import SkillsSection from './components/SkillsSection'
 import ScheduleSection from './components/ScheduleSection'
+import TaskApiAccess from './components/TaskApiAccess'
 import { useAppRoute, type AppRouteProps } from '@/hooks/useAppRoute'
 import { getTaskDetail, updateTask } from '../kanban/services/api'
 import type { KanbanTask } from '../kanban/types'
@@ -145,13 +146,16 @@ const TaskSettings = (props: AppRouteProps) => {
 								taskId={taskId}
 							/>
 						)}
-					{activeSection === 'schedule' && (
-						<ScheduleSection
-							task={task}
-							taskId={taskId}
-						/>
-					)}
-					</div>
+				{activeSection === 'schedule' && (
+					<ScheduleSection
+						task={task}
+						taskId={taskId}
+					/>
+				)}
+				{activeSection === 'integrations' && (
+					<TaskApiAccess taskId={taskId} task={task} is_cn={is_cn} />
+				)}
+				</div>
 				</div>
 			</div>
 		</div>
