@@ -142,6 +142,14 @@ const Preview = (props: AppRouteProps) => {
 	const [textContent, setTextContent] = useState<string | undefined>(undefined)
 	const [sourceContent, setSourceContent] = useState<string | undefined>(undefined)
 	const [loading, setLoading] = useState(false)
+
+	// Synchronously clear stale content when filePath changes to prevent
+	// the old (potentially huge) content from being processed with new language/renderer.
+	const prevFilePathRef = useRef(filePath)
+	if (prevFilePathRef.current !== filePath) {
+		prevFilePathRef.current = filePath
+		if (textContent !== undefined) setTextContent(undefined)
+	}
 	const [showTree, setShowTree] = useState(() => {
 		try { return localStorage.getItem('preview_show_tree') === '1' } catch { return false }
 	})
@@ -536,6 +544,7 @@ const Preview = (props: AppRouteProps) => {
 			case 'text':
 				return (
 					<Text
+						key={filePath}
 						content={textContent}
 						fileName={fileName}
 						language={language}
