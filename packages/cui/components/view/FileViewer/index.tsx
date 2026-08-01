@@ -207,35 +207,41 @@ const Index = (props: IProps) => {
 
 		// Text extensions
 		const textExts = [
-			'txt',
-			'md',
-			'log',
-			'ini',
-			'cfg',
-			'csv',
-			'json',
-			'jsonc',
-			'yaml',
-			'yml',
-			'xml',
+			// Text / config
+			'txt', 'md', 'mdx', 'log', 'ini', 'cfg', 'csv', 'toml', 'env', 'properties',
+			// Data / markup
+			'json', 'jsonc', 'json5', 'jsonl', 'yaml', 'yml', 'xml', 'plist',
+			'yao', 'sql', 'graphql', 'gql', 'proto', 'tf',
+			// JavaScript / TypeScript
+			'js', 'mjs', 'cjs', 'jsx', 'ts', 'mts', 'cts', 'tsx',
+			// Python
 			'py',
-			'js',
-			'ts',
-			'jsx',
-			'tsx',
-			'java',
-			'cpp',
-			'go',
-			'sh',
-			'html',
-			'css',
-			'yao',
-			'sql',
-			'php',
-			'rb',
-			'rs',
-			'c',
-			'h'
+			// Java / JVM
+			'java', 'kt', 'kts', 'scala', 'groovy', 'gradle',
+			// C / C++
+			'c', 'h', 'cpp', 'hpp', 'cc',
+			// Apple
+			'swift', 'm', 'mm',
+			// C# / .NET
+			'cs',
+			// Go / Rust / Dart / PHP / Ruby
+			'go', 'rs', 'dart', 'php', 'rb',
+			// R / Lua / Perl
+			'r', 'lua', 'pl',
+			// Shell / Windows
+			'sh', 'bash', 'zsh', 'bat', 'cmd', 'ps1',
+			// Functional
+			'clj', 'ex', 'exs', 'elm', 'hs',
+			// CSS / styles
+			'css', 'scss', 'less', 'sass', 'styl',
+			// HTML / templates
+			'html', 'htm', 'ejs', 'hbs', 'pug', 'njk',
+			// Frontend frameworks
+			'vue', 'svelte', 'nvue',
+			// Mini programs
+			'wxml', 'wxss', 'wxs', 'ttml', 'ttss', 'axml', 'acss', 'sjs',
+			// Diff
+			'diff', 'patch'
 		]
 		if (textExts.includes(extension)) return 'text'
 
@@ -305,35 +311,53 @@ const Index = (props: IProps) => {
 		// Fallback to extension-based detection
 		const extension = getFileExtension(fileName)
 		const extensionMap: Record<string, string> = {
-			js: 'javascript',
-			jsx: 'javascript',
-			ts: 'typescript',
-			tsx: 'typescript',
+			// JavaScript / TypeScript
+			js: 'javascript', mjs: 'javascript', cjs: 'javascript', jsx: 'javascript',
+			ts: 'typescript', mts: 'typescript', cts: 'typescript', tsx: 'typescript',
+			// Python
 			py: 'python',
-			java: 'java',
-			cpp: 'cpp',
-			c: 'c',
-			go: 'go',
-			rs: 'rust',
-			php: 'php',
-			rb: 'ruby',
-			sh: 'bash',
-			sql: 'sql',
-			css: 'css',
-			scss: 'scss',
-			sass: 'sass',
-			less: 'less',
-			html: 'html',
-			xml: 'xml',
-			json: 'json',
-			jsonc: 'jsonc',
-			yao: 'yao',
-			yaml: 'yaml',
-			yml: 'yaml',
-			md: 'markdown',
-			markdown: 'markdown',
-			txt: 'text',
-			log: 'text'
+			// Java / JVM
+			java: 'java', kt: 'kotlin', kts: 'kotlin',
+			scala: 'scala', groovy: 'text', gradle: 'text',
+			// C / C++
+			c: 'c', h: 'c', cpp: 'cpp', hpp: 'cpp', cc: 'cpp',
+			// Apple
+			swift: 'swift', m: 'objective-c', mm: 'objective-c',
+			// C# / .NET
+			cs: 'csharp',
+			// Go / Rust / Dart / PHP / Ruby
+			go: 'go', rs: 'rust', dart: 'dart', php: 'php', rb: 'ruby',
+			// R / Lua / Perl
+			r: 'r', lua: 'lua', pl: 'perl',
+			// Shell / Windows
+			sh: 'shell', bash: 'shell', zsh: 'shell',
+			bat: 'bat', cmd: 'bat', ps1: 'powershell',
+			// Functional
+			clj: 'clojure', ex: 'elixir', exs: 'elixir',
+			elm: 'text', hs: 'text',
+			// CSS / styles
+			css: 'css', scss: 'scss', less: 'less', sass: 'scss', styl: 'text',
+			// HTML / templates
+			html: 'html', htm: 'html',
+			ejs: 'html', hbs: 'handlebars', pug: 'pug', njk: 'html',
+			// Frontend frameworks
+			vue: 'html', svelte: 'html', nvue: 'html',
+			// Mini programs
+			wxml: 'html', wxss: 'css', wxs: 'javascript',
+			ttml: 'html', ttss: 'css',
+			axml: 'html', acss: 'css', sjs: 'javascript',
+			// Data / markup
+			xml: 'xml', plist: 'xml',
+			json: 'json', jsonc: 'json', json5: 'json', jsonl: 'json', yao: 'json',
+			yaml: 'yaml', yml: 'yaml',
+			sql: 'sql', graphql: 'graphql', gql: 'graphql',
+			proto: 'protobuf', tf: 'hcl',
+			// Text / config
+			ini: 'ini', properties: 'ini',
+			md: 'markdown', mdx: 'markdown', markdown: 'markdown',
+			txt: 'text', log: 'text', cfg: 'text', csv: 'text',
+			toml: 'text', env: 'text',
+			diff: 'text', patch: 'text'
 		}
 		return extensionMap[extension] || 'text'
 	}
