@@ -118,9 +118,9 @@ const Index = (props: IProps) => {
 							}
 
 							if (node?.type === 'element' && node?.tagName === 'pre') {
-								const [codeEl] = node.children
-								if (codeEl.tagName !== 'code') return
-								node.raw = unescapeCurlyBraces(codeEl.children?.[0].value)
+								const [codeEl] = node.children || []
+								if (!codeEl || codeEl.tagName !== 'code') return
+								node.raw = unescapeCurlyBraces(codeEl.children?.[0]?.value)
 							}
 
 							// if (node?.type === 'element' && ['Think', 'Tool'].includes(node?.tagName)) {
@@ -179,8 +179,7 @@ const Index = (props: IProps) => {
 		)
 
 		if (err) {
-			console.error(`parse mdx error: ${err.message || err}`)
-			console.log(`original text:\n`, text)
+			setContent(<div style={{ whiteSpace: 'pre-wrap' }}>{text}</div>)
 			return
 		}
 
