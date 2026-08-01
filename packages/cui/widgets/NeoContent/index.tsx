@@ -53,9 +53,9 @@ const Index = (props: IProps) => {
 							}
 
 							if (node?.type === 'element' && node?.tagName === 'pre') {
-								const [codeEl] = node.children
-								if (codeEl.tagName !== 'code') return
-								node.raw = unescapeCurlyBraces(codeEl.children?.[0].value)
+								const [codeEl] = node.children || []
+								if (!codeEl || codeEl.tagName !== 'code') return
+								node.raw = unescapeCurlyBraces(codeEl.children?.[0]?.value)
 							}
 						})
 					},

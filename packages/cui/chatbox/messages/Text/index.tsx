@@ -1,6 +1,6 @@
 import { useAsyncEffect } from 'ahooks'
 import to from 'await-to-js'
-import { message } from 'antd'
+import { message as antdMessage } from 'antd'
 import React, { Fragment, useState, useCallback, useRef, useEffect } from 'react'
 import * as JsxRuntime from 'react/jsx-runtime'
 import rehypeHighlight from 'rehype-highlight'
@@ -269,11 +269,14 @@ const buildWorkspaceTag = (url: string): string => {
 	const rest = url.slice('workspace://'.length)
 	const slashIdx = rest.indexOf('/')
 	const displayPath = slashIdx !== -1 ? rest.slice(slashIdx + 1) : rest
-	return `<a className="workspace-link" href="${url}"><i className="Icon material">insert_drive_file</i>${displayPath || url}</a>`
+	return `<a className="workspace-link" href="${url}"><i className="Icon material">insert_drive_file</i>${escapeBraces(displayPath || url)}</a>`
 }
 
 const escapeHtml = (s: string): string =>
 	s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+const escapeBraces = (s: string): string =>
+	s.replace(/\{/g, '\\{').replace(/\}/g, '\\}')
 
 /**
  * Build an HTML <a> tag for a service:// URL.
@@ -294,7 +297,7 @@ const buildServiceTag = (url: string): string => {
 		if (title) display = title
 	}
 
-	return `<a className="service-link" href="${escapeHtml(url)}"><i className="Icon material">language</i>${escapeHtml(display)}</a>`
+	return `<a className="service-link" href="${escapeHtml(url)}"><i className="Icon material">language</i>${escapeBraces(escapeHtml(display))}</a>`
 }
 
 /**
@@ -324,36 +327,39 @@ const wrapProtocolLinks = (text: string): string => {
 	const isInCodeBlock = (pos: number) =>
 		codeBlockPositions.some(([start, end]) => pos >= start && pos < end)
 
+	const hasTemplateBraces = (s: string) => /\{/.test(s)
+
 	// Pass 1: unwrap backtick-wrapped protocol URLs:  `workspace://...` / `service://...`  →  <a>
 	// Also handle markdown links: [text](workspace://...) / [text](service://...) → <a>
+	// Skip URLs containing { } — those are template placeholders, not real links
 	let result = text.replace(
 		/`(workspace:\/\/[^`]+)`/g,
 		(match, url, offset) => {
-			if (isInCodeBlock(offset)) return match
+			if (isInCodeBlock(offset) || hasTemplateBraces(url)) return match
 			return buildWorkspaceTag(url)
 		}
 	)
 	result = result.replace(
 		/`(service:\/\/[^`]+)`/g,
 		(match, url, offset) => {
-			if (isInCodeBlock(offset)) return match
+			if (isInCodeBlock(offset) || hasTemplateBraces(url)) return match
 			return buildServiceTag(url)
 		}
 	)
 	result = result.replace(
 		/\[([^\]]*)\]\((workspace:\/\/[^)]+)\)/g,
 		(match, label, url, offset) => {
-			if (isInCodeBlock(offset)) return match
+			if (isInCodeBlock(offset) || hasTemplateBraces(url)) return match
 			const displayName = label || url.split('/').pop() || url
-			return `<a className="workspace-link" href="${url}">${displayName}</a>`
+			return `<a className="workspace-link" href="${url}">${escapeBraces(displayName)}</a>`
 		}
 	)
 	result = result.replace(
 		/\[([^\]]*)\]\((service:\/\/[^)]+)\)/g,
 		(match, label, url, offset) => {
-			if (isInCodeBlock(offset)) return match
+			if (isInCodeBlock(offset) || hasTemplateBraces(url)) return match
 			const displayName = label || `:${url.split('/')[4] || ''}`
-			return `<a className="service-link" href="${url}">${displayName}</a>`
+			return `<a className="service-link" href="${url}">${escapeBraces(displayName)}</a>`
 		}
 	)
 
@@ -368,6 +374,7 @@ const wrapProtocolLinks = (text: string): string => {
 		if (before.endsWith('href="') || before.endsWith("href='")) continue
 
 		const url = protoMatch[0]
+		if (hasTemplateBraces(url)) continue
 		parts.push(result.slice(lastIndex, protoMatch.index))
 		if (url.startsWith('service://')) {
 			parts.push(buildServiceTag(url))
@@ -411,11 +418,12 @@ const wrapMentionTags = (text: string): string => {
 		(_match, type: string, value: string, label: string) => {
 			const iconName = mentionIconNames[type] || 'insert_drive_file'
 			const cls = mentionCssClasses[type] || 'mention-file'
+			const safeLabel = escapeBraces(label)
 			const iconHtml = `<i className="Icon material">${iconName}</i>`
 			if (type === 'file') {
-				return `<a className="mention-pill ${cls}" href="${value}">${iconHtml}${label}</a>`
+				return `<a className="mention-pill ${cls}" href="${value}">${iconHtml}${safeLabel}</a>`
 			}
-			return `<span className="mention-pill ${cls}">${iconHtml}${label}</span>`
+			return `<span className="mention-pill ${cls}">${iconHtml}${safeLabel}</span>`
 		}
 	)
 }
@@ -588,7 +596,7 @@ const Text = ({ message }: ITextProps) => {
 			}
 
 			if (!hostPort) {
-				message.error('Service port not available')
+				antdMessage.error('Service port not available')
 				return
 			}
 
@@ -607,7 +615,7 @@ const Text = ({ message }: ITextProps) => {
 				icon: 'material-web'
 			})
 		} catch (err: any) {
-			message.error(err?.message || 'Failed to open service')
+			antdMessage.error(err?.message || 'Failed to open service')
 		}
 	}, [])
 
@@ -742,7 +750,7 @@ const Text = ({ message }: ITextProps) => {
 					() => (tree) => {
 						visit(tree, (node: any) => {
 							if (node?.type === 'element' && node?.tagName === 'pre') {
-								const [codeEl] = node.children
+								const [codeEl] = node.children || []
 								if (
 									codeEl?.tagName === 'code' &&
 									codeEl.children?.[0]?.type === 'text'
@@ -875,8 +883,8 @@ const Text = ({ message }: ITextProps) => {
 				useMDXComponents: () => mdxComponents
 			})
 			// Success! Update content and save as last successful render
-			setContent(Content)
-			lastSuccessRef.current = { content: Content, text: contentText }
+			setContent(<Content />)
+			lastSuccessRef.current = { content: <Content />, text: contentText }
 			errorCountRef.current = 0
 		} catch (err) {
 			errorCountRef.current++

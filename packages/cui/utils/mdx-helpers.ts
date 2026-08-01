@@ -22,9 +22,10 @@ export const escapeCurlyBraces = (text: string): string => {
 				segments.push(text.slice(i, end + 3))
 				i = end + 3
 			} else {
-				// Unclosed during streaming: just emit ``` and keep escaping the rest
-				segments.push('```')
-				i += 3
+				// Unclosed during streaming: remaining text is code block content,
+				// pass through as-is to avoid escaping braces inside code
+				segments.push(text.slice(i))
+				i = len
 			}
 			continue
 		}
@@ -50,9 +51,10 @@ export const escapeCurlyBraces = (text: string): string => {
 				segments.push(text.slice(i, end + 2))
 				i = end + 2
 			} else {
-				// Unclosed during streaming: just emit $$ and keep escaping the rest
-				segments.push('$$')
-				i += 2
+				// Unclosed during streaming: remaining text is math content,
+				// pass through as-is to avoid escaping braces inside math
+				segments.push(text.slice(i))
+				i = len
 			}
 			continue
 		}
@@ -65,6 +67,15 @@ export const escapeCurlyBraces = (text: string): string => {
 				i++
 				continue
 			}
+
+			// $ preceded by a word character is likely a shell variable (e.g. HOME$PATH),
+			// not a math delimiter — remark-math won't match this either
+			if (i > 0 && /[a-zA-Z0-9_]/.test(text[i - 1])) {
+				segments.push(text[i])
+				i++
+				continue
+			}
+
 			// Try to find matching closing $ for inline math
 			let j = i + 1
 			let found = -1
@@ -77,11 +88,19 @@ export const escapeCurlyBraces = (text: string): string => {
 				j++
 			}
 			if (found > i + 1) {
-				segments.push(text.slice(i, found + 1))
-				i = found + 1
-				continue
+				// Validate inline math delimiters (matches remark-math rules):
+				// opening $ must not be followed by whitespace,
+				// closing $ must not be preceded by whitespace
+				const afterOpen = text[i + 1]
+				const beforeClose = text[found - 1]
+				if (afterOpen !== ' ' && afterOpen !== '\t' && afterOpen !== '\n' &&
+					beforeClose !== ' ' && beforeClose !== '\t' && beforeClose !== '\n') {
+					segments.push(text.slice(i, found + 1))
+					i = found + 1
+					continue
+				}
 			}
-			// Lone $ with no match — pass through as-is
+			// Lone $ or non-math $ pair — pass through as-is
 			segments.push(text[i])
 			i++
 			continue
