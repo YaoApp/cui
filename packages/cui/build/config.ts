@@ -73,7 +73,45 @@ export const chainWebpack = (config: Config, _: any) => {
 
 	config.module.rule('asset').exclude.add(reg_shadowcss).end().exclude.add(reg_shadowless).end()
 	config.plugin('monaco-editor-webpack-plugin').use(MonacoWebpackPlugin, [
-		{ languages: ['json', 'javascript', 'typescript', 'yaml', 'html', 'css', 'sql', 'markdown'] }
+		{
+			languages: [
+				'json',
+				'javascript',
+				'typescript',
+				'yaml',
+				'html',
+				'css',
+				'sql',
+				'markdown',
+				'python',
+				'java',
+				'cpp',
+				'go',
+				'rust',
+				'php',
+				'ruby',
+				'shell',
+				'xml',
+				'less',
+				'scss',
+				'ini',
+				'kotlin',
+				'swift',
+				'csharp',
+				'objective-c',
+				'scala',
+				'dart',
+				'r',
+				'lua',
+				'perl',
+				'clojure',
+				'graphql',
+				'powershell',
+				'bat',
+				'handlebars',
+				'pug'
+			]
+		}
 	])
 
 	config.module

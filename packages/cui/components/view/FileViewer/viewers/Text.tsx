@@ -387,6 +387,7 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 
 	const editorDidMount: EditorDidMount = (editor, monaco) => {
 		editorRef.current = editor
+
 		monaco.editor.defineTheme('x-dark', {
 			base: 'vs-dark',
 			inherit: true,
@@ -406,7 +407,7 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 		monaco.editor.setTheme(theme)
 
 		// Enable JSON diagnostics to accept comments for JSONC viewing
-		if (language === 'jsonc' || language === 'yao') {
+		if (language === 'jsonc') {
 			try {
 				// @ts-ignore - Monaco json language defaults
 				monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
@@ -416,6 +417,13 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 				})
 			} catch {}
 		}
+
+		// Clear selection whenever content is replaced via value prop
+		editor.onDidChangeModelContent(() => {
+			requestAnimationFrame(() => {
+				editor.setSelection({ startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 })
+			})
+		})
 	}
 
 	if (loading) {
@@ -427,13 +435,12 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 	}
 
 	if (language && language !== 'text') {
-		const effectiveLanguage = language === 'jsonc' || language === 'yao' ? 'json' : language
 		return (
 			<div style={{ width: '100%', height: '100%' }}>
 				<Editor
 					width='100%'
 					height='100%'
-					language={effectiveLanguage}
+					language={language}
 					theme={theme}
 					value={textContent}
 					options={{
@@ -443,7 +450,8 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 						lineNumbers: 'on',
 						renderLineHighlight: 'none',
 						padding: { top: 12 },
-						scrollbar: { verticalScrollbarSize: 8, horizontalSliderSize: 8, useShadows: false }
+						scrollbar: { verticalScrollbarSize: 8, horizontalSliderSize: 8, useShadows: false },
+						selectOnLineNumbers: false
 					}}
 					editorDidMount={editorDidMount}
 				/>

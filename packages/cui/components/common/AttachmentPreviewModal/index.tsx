@@ -18,9 +18,41 @@ interface Props {
 }
 
 const textExts = new Set([
-	'txt', 'md', 'log', 'ini', 'cfg', 'csv', 'json', 'jsonc', 'yaml', 'yml', 'xml',
-	'py', 'js', 'ts', 'jsx', 'tsx', 'java', 'cpp', 'go', 'sh', 'html', 'css',
-	'yao', 'sql', 'php', 'rb', 'rs', 'c', 'h', 'mjs'
+	// Text / config
+	'txt', 'md', 'mdx', 'log', 'ini', 'cfg', 'csv', 'toml', 'env', 'properties',
+	// Data / markup
+	'json', 'jsonc', 'json5', 'jsonl', 'yaml', 'yml', 'xml', 'plist',
+	'yao', 'sql', 'graphql', 'gql', 'proto', 'tf',
+	// JavaScript / TypeScript
+	'js', 'mjs', 'cjs', 'jsx', 'ts', 'mts', 'cts', 'tsx',
+	// Python
+	'py',
+	// Java / JVM
+	'java', 'kt', 'kts', 'scala', 'groovy', 'gradle',
+	// C / C++
+	'c', 'h', 'cpp', 'hpp', 'cc',
+	// Apple
+	'swift', 'm', 'mm',
+	// C# / .NET
+	'cs',
+	// Go / Rust / Dart / PHP / Ruby
+	'go', 'rs', 'dart', 'php', 'rb',
+	// R / Lua / Perl
+	'r', 'lua', 'pl',
+	// Shell / Windows
+	'sh', 'bash', 'zsh', 'bat', 'cmd', 'ps1',
+	// Functional
+	'clj', 'ex', 'exs', 'elm', 'hs',
+	// CSS / styles
+	'css', 'scss', 'less', 'sass', 'styl',
+	// HTML / templates
+	'html', 'htm', 'ejs', 'hbs', 'pug', 'njk',
+	// Frontend frameworks
+	'vue', 'svelte', 'nvue',
+	// Mini programs
+	'wxml', 'wxss', 'wxs', 'ttml', 'ttss', 'axml', 'acss', 'sjs',
+	// Diff
+	'diff', 'patch'
 ])
 
 const AttachmentPreviewModal = ({ visible, onClose, attachment }: Props) => {
