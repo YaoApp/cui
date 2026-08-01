@@ -347,12 +347,6 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 		return bestEncoding
 	}
 
-	// 计算高亮后的内容
-	const highlightedContent = useMemo(() => {
-		if (!textContent || !language) return textContent
-		return getSyntaxHighlighting(textContent, language)
-	}, [textContent, language])
-
 	useEffect(() => {
 		// 如果直接传递了内容，使用传递的内容
 		if (content !== undefined) {
@@ -418,7 +412,6 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 			} catch {}
 		}
 
-		// Clear selection whenever content is replaced via value prop
 		editor.onDidChangeModelContent(() => {
 			requestAnimationFrame(() => {
 				editor.setSelection({ startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 })
@@ -459,11 +452,12 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 		)
 	}
 
+	const highlighted = getSyntaxHighlighting(textContent, language || 'text')
 	return (
 		<pre className={clsx(styles.codeBlock, `language-${language || 'text'}`, styles.textViewer)}>
 			<code
 				dangerouslySetInnerHTML={{
-					__html: highlightedContent
+					__html: highlighted
 				}}
 			/>
 		</pre>
