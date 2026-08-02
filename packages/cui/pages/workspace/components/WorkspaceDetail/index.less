@@ -1,9 +1,76 @@
+.splitLayout {
+	display: flex;
+	flex-direction: row;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
 .wrapper {
 	display: flex;
 	flex-direction: column;
 	position: relative;
 	flex: 1;
+	min-width: 0;
 	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: var(--color_scrollbar_thumb);
+		border-radius: 3px;
+	}
+}
+
+.gitSide {
+	display: flex;
+	flex-shrink: 0;
+	width: 0;
+	overflow: hidden;
+	transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+	&.gitSideOpen {
+		overflow: visible;
+	}
+}
+
+.gitResizeHandle {
+	position: relative;
+	width: 4px;
+	cursor: col-resize;
+	flex-shrink: 0;
+	z-index: 10;
+	background: transparent;
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 1px;
+		height: 100%;
+		background: var(--color_border_soft, var(--color_border));
+	}
+
+	&:hover,
+	&:active {
+		&::after {
+			width: 4px;
+			background: var(--color_main);
+			opacity: 0.3;
+		}
+	}
+}
+
+.gitPanel {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	background: var(--color_bg);
 }
 
 .detailHeader {
@@ -163,6 +230,11 @@
 			:global(.xgen-icon) {
 				transform: rotate(180deg);
 			}
+		}
+
+		&.refreshBtnActive {
+			background: var(--color_neo_bg_field);
+			color: var(--color_main);
 		}
 	}
 }

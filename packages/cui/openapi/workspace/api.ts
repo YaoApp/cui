@@ -5,7 +5,10 @@ import type {
 	WorkspaceOptionsResponse,
 	DirEntry,
 	CreateWorkspaceOptions,
-	UpdateWorkspaceOptions
+	UpdateWorkspaceOptions,
+	GitRepo,
+	GitStatusResponse,
+	GitFileDiffResponse
 } from '../../pages/workspace/types'
 
 export class WorkspaceAPI {
@@ -68,5 +71,48 @@ export class WorkspaceAPI {
 
 	async Rename(wsId: string, oldPath: string, newPath: string): Promise<ApiResponse<void>> {
 		return this.api.Post<void>(`/workspace/${wsId}/rename`, { old_path: oldPath, new_path: newPath })
+	}
+
+	// --- Git ---
+
+	async GitListRepos(wsId: string): Promise<ApiResponse<GitRepo[]>> {
+		return this.api.Get<GitRepo[]>(`/workspace/${wsId}/git/repos`)
+	}
+
+	async GitStatus(wsId: string, repoPath: string): Promise<ApiResponse<GitStatusResponse>> {
+		return this.api.Get<GitStatusResponse>(`/workspace/${wsId}/git/status`, { repo_path: repoPath })
+	}
+
+	async GitFileDiff(wsId: string, repoPath: string, filePath: string, staged: boolean): Promise<ApiResponse<GitFileDiffResponse>> {
+		return this.api.Get<GitFileDiffResponse>(`/workspace/${wsId}/git/diff`, {
+			repo_path: repoPath,
+			file_path: filePath,
+			staged: staged ? 'true' : 'false'
+		})
+	}
+
+	async GitAdd(wsId: string, repoPath: string, files?: string[]): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/add`, { repo_path: repoPath, files })
+	}
+
+	async GitReset(wsId: string, repoPath: string, files?: string[]): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/reset`, { repo_path: repoPath, files })
+	}
+
+	async GitCommit(
+		wsId: string,
+		repoPath: string,
+		message: string,
+		opts?: { author_name?: string; author_email?: string; allow_empty?: boolean }
+	): Promise<ApiResponse<{ commit_hash: string; message: string }>> {
+		return this.api.Post<{ commit_hash: string; message: string }>(`/workspace/${wsId}/git/commit`, {
+			repo_path: repoPath,
+			message,
+			...opts
+		})
+	}
+
+	async GitDiscardChanges(wsId: string, repoPath: string, files?: string[]): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/discard`, { repo_path: repoPath, files })
 	}
 }
