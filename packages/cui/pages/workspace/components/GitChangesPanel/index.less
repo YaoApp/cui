@@ -135,6 +135,54 @@
 		min-width: 14px;
 		text-align: right;
 	}
+
+	.syncIndicator {
+		display: flex;
+		gap: 4px;
+		font-size: 10px;
+		font-weight: 500;
+		flex-shrink: 0;
+
+		.ahead {
+			color: #73c991;
+		}
+		.behind {
+			color: #e2a035;
+		}
+	}
+}
+
+.syncActions {
+	display: flex;
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+.syncBtn {
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 20px;
+	border-radius: 3px;
+	color: var(--color_neo_text_secondary);
+
+	&:hover {
+		background: var(--color_neo_bg_field);
+		color: var(--color_neo_text_primary);
+	}
+
+	&.syncLoading {
+		opacity: 0.5;
+		pointer-events: none;
+		animation: spin 1s linear infinite;
+	}
+}
+
+@keyframes spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
 }
 
 .section {

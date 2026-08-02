@@ -11,6 +11,7 @@ interface RepoStatus {
 	status: GitStatusResponse | null
 	loading: boolean
 	expanded: boolean
+	syncing?: 'sync' | null
 }
 
 interface GitChangesPanelProps {
@@ -66,15 +67,12 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 			const repos: GitRepo[] = reposRes?.data || reposRes || []
 			const statuses: RepoStatus[] = await Promise.all(
 				repos.map(async (repo) => {
-					if (!repo.has_changes) {
-						return { repo, status: null, loading: false, expanded: false }
-					}
 					try {
 						const statusRes = await api.GitStatus(wsId, repo.path)
 						const status: GitStatusResponse = statusRes?.data || statusRes
-						return { repo, status, loading: false, expanded: true }
+						return { repo, status, loading: false, expanded: repo.has_changes, syncing: null }
 					} catch {
-						return { repo, status: null, loading: false, expanded: true }
+						return { repo, status: null, loading: false, expanded: repo.has_changes, syncing: null }
 					}
 				})
 			)
@@ -98,7 +96,7 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 
 	const stagedFiles = useCallback(
 		(status: GitStatusResponse | null): GitChangedFile[] => {
-			if (!status) return []
+			if (!status?.files) return []
 			return status.files.filter(
 				(f) => f.index_status && f.index_status.trim() !== '' && f.index_status !== '?'
 			)
@@ -108,7 +106,7 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 
 	const unstagedFiles = useCallback(
 		(status: GitStatusResponse | null): GitChangedFile[] => {
-			if (!status) return []
+			if (!status?.files) return []
 			return status.files.filter(
 				(f) => f.worktree_status && f.worktree_status.trim() !== '' && f.worktree_status !== ' '
 			)
@@ -215,6 +213,40 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 		[wsId, getApi, commitMessages, loadData, is_cn]
 	)
 
+	const setSyncing = useCallback((repoPath: string, syncing: 'fetch' | 'pull' | 'push' | null) => {
+		setRepoStatuses((prev) =>
+			prev.map((rs) => (rs.repo.path === repoPath ? { ...rs, syncing } : rs))
+		)
+	}, [])
+
+	const handleSync = useCallback(
+		async (repoPath: string) => {
+			const api = getApi()
+			if (!api) return
+			setSyncing(repoPath, 'sync')
+			try {
+				const res = await api.GitSync(wsId, repoPath)
+				const r = res?.data
+				if (r?.has_conflicts) {
+					message.warning(is_cn ? '同步完成，但存在合并冲突' : 'Synced with merge conflicts')
+				} else {
+					const parts: string[] = []
+					if (r?.pulled) parts.push(is_cn ? '已拉取' : 'pulled')
+					if (r?.pushed) parts.push(is_cn ? '已推送' : 'pushed')
+					message.success(parts.length > 0
+						? (is_cn ? '同步完成：' : 'Synced: ') + parts.join(', ')
+						: (is_cn ? '已是最新' : 'Already up to date'))
+				}
+				loadData()
+			} catch (e: any) {
+				message.error(e?.message || (is_cn ? '同步失败' : 'Sync failed'))
+			} finally {
+				setSyncing(repoPath, null)
+			}
+		},
+		[wsId, getApi, loadData, setSyncing, is_cn]
+	)
+
 	const openDiff = useCallback(
 		(repoPath: string, filePath: string, staged: boolean) => {
 			window.$app?.Event?.emit('app/openSidebar', {
@@ -225,8 +257,6 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 		},
 		[wsId]
 	)
-
-	const changedRepos = repoStatuses.filter((rs) => rs.repo.has_changes)
 
 	return (
 		<div className={styles.container}>
@@ -252,16 +282,19 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 			<div className={styles.content}>
 				{loading ? (
 					<div className={styles.loading}>{is_cn ? '加载中...' : 'Loading...'}</div>
-				) : changedRepos.length === 0 ? (
+				) : repoStatuses.length === 0 ? (
 					<div className={styles.empty}>
 						<Icon name='icon-git-commit' size={28} />
-						<span>{is_cn ? '没有未提交的变更' : 'No uncommitted changes'}</span>
+						<span>{is_cn ? '没有 Git 仓库' : 'No Git repositories'}</span>
 					</div>
 				) : (
-					changedRepos.map((rs) => {
+					repoStatuses.map((rs, realIdx) => {
 						const staged = stagedFiles(rs.status)
 						const unstaged = unstagedFiles(rs.status)
-						const realIdx = repoStatuses.indexOf(rs)
+						const ahead = rs.status?.ahead ?? rs.repo.ahead ?? 0
+						const behind = rs.status?.behind ?? rs.repo.behind ?? 0
+						const hasUpstream = rs.status?.has_upstream ?? rs.repo.has_upstream ?? false
+						const hasRemote = !!(rs.status?.remote_url || rs.repo.remote_url)
 
 						return (
 							<div key={rs.repo.path} className={styles.repoGroup}>
@@ -271,10 +304,30 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 										size={14}
 									/>
 									<span className={styles.repoName}>{rs.repo.path === '.' ? '/' : rs.repo.path}</span>
+									{rs.repo.has_changes && (
+										<span className={styles.changeCount}>
+											{rs.status?.files?.length || 0}
+										</span>
+									)}
 									<span className={styles.branch}>{rs.status?.branch || rs.repo.branch}</span>
-									<span className={styles.changeCount}>
-										{rs.status?.files?.length || 0}
-									</span>
+									{hasUpstream && (ahead > 0 || behind > 0) && (
+										<span className={styles.syncIndicator}>
+											{ahead > 0 && <span className={styles.ahead}>↑{ahead}</span>}
+											{behind > 0 && <span className={styles.behind}>↓{behind}</span>}
+										</span>
+									)}
+								{hasRemote && (
+									<div className={styles.syncActions}>
+										<Tooltip title={is_cn ? '同步' : 'Sync'} overlayInnerStyle={tipStyle}>
+											<div
+												className={`${styles.syncBtn} ${rs.syncing === 'sync' ? styles.syncLoading : ''}`}
+												onClick={(e) => { e.stopPropagation(); handleSync(rs.repo.path) }}
+											>
+												<Icon name='material-sync' size={12} />
+											</div>
+										</Tooltip>
+									</div>
+								)}
 								</div>
 
 								{rs.expanded && rs.status && (

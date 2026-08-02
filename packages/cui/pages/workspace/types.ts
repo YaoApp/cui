@@ -99,6 +99,9 @@ export interface GitRepo {
 	branch: string
 	remote_url: string
 	has_changes: boolean
+	ahead: number
+	behind: number
+	has_upstream: boolean
 }
 
 export interface GitChangedFile {
@@ -117,6 +120,10 @@ export interface GitStatusResponse {
 	total_deletions: number
 	is_detached: boolean
 	is_empty: boolean
+	remote_name: string
+	remote_url: string
+	upstream_branch: string
+	has_upstream: boolean
 }
 
 export interface GitFileDiffResponse {
@@ -127,4 +134,15 @@ export interface GitFileDiffResponse {
 	is_new: boolean
 	is_deleted: boolean
 	is_too_large: boolean
+}
+
+export interface GitCredentialEntry {
+	host: string
+	username: string
+}
+
+export interface GitSSHKeyEntry {
+	name: string
+	public_key: string
+	fingerprint: string
 }

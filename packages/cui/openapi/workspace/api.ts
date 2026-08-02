@@ -8,7 +8,9 @@ import type {
 	UpdateWorkspaceOptions,
 	GitRepo,
 	GitStatusResponse,
-	GitFileDiffResponse
+	GitFileDiffResponse,
+	GitCredentialEntry,
+	GitSSHKeyEntry
 } from '../../pages/workspace/types'
 
 export class WorkspaceAPI {
@@ -114,5 +116,94 @@ export class WorkspaceAPI {
 
 	async GitDiscardChanges(wsId: string, repoPath: string, files?: string[]): Promise<ApiResponse<{ success: boolean }>> {
 		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/discard`, { repo_path: repoPath, files })
+	}
+
+	// --- Git Config & Credentials ---
+
+	async GitConfigGet(wsId: string, key?: string): Promise<ApiResponse<{ values: Record<string, string> }>> {
+		const params: Record<string, string> = {}
+		if (key) params.key = key
+		return this.api.Get<{ values: Record<string, string> }>(`/workspace/${wsId}/git/config`, params)
+	}
+
+	async GitConfigSet(wsId: string, key: string, value: string): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/config`, { key, value })
+	}
+
+	async GitCredentialSet(
+		wsId: string,
+		host: string,
+		token: string,
+		username?: string
+	): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/credential`, { host, token, username })
+	}
+
+	async GitCredentialList(wsId: string): Promise<ApiResponse<GitCredentialEntry[]>> {
+		return this.api.Get<GitCredentialEntry[]>(`/workspace/${wsId}/git/credentials`)
+	}
+
+	async GitCredentialDelete(wsId: string, host: string): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Delete<{ success: boolean }>(`/workspace/${wsId}/git/credential?host=${encodeURIComponent(host)}`)
+	}
+
+	async GitSSHKeyImport(
+		wsId: string,
+		name: string,
+		privateKey: string,
+		opts?: { public_key?: string; host?: string }
+	): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/ssh-key`, {
+			name,
+			private_key: privateKey,
+			...opts
+		})
+	}
+
+	async GitSSHKeyList(wsId: string): Promise<ApiResponse<GitSSHKeyEntry[]>> {
+		return this.api.Get<GitSSHKeyEntry[]>(`/workspace/${wsId}/git/ssh-keys`)
+	}
+
+	async GitSSHKeyDelete(wsId: string, name: string): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Delete<{ success: boolean }>(`/workspace/${wsId}/git/ssh-key?name=${encodeURIComponent(name)}`)
+	}
+
+	// --- Git Remote Sync ---
+
+	async GitFetch(wsId: string, repoPath: string, remote?: string): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/fetch`, { repo_path: repoPath, remote })
+	}
+
+	async GitPull(
+		wsId: string,
+		repoPath: string,
+		opts?: { remote?: string; rebase?: boolean }
+	): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/pull`, {
+			repo_path: repoPath,
+			...opts
+		})
+	}
+
+	async GitPush(
+		wsId: string,
+		repoPath: string,
+		opts?: { remote?: string; force?: boolean; set_upstream?: boolean }
+	): Promise<ApiResponse<{ success: boolean }>> {
+		return this.api.Post<{ success: boolean }>(`/workspace/${wsId}/git/push`, {
+			repo_path: repoPath,
+			...opts
+		})
+	}
+
+	async GitSync(
+		wsId: string,
+		repoPath: string,
+		opts?: { remote?: string; set_upstream?: boolean }
+	): Promise<ApiResponse<{ fetched: boolean; pulled: boolean; pushed: boolean; has_conflicts: boolean }>> {
+		return this.api.Post<{ fetched: boolean; pulled: boolean; pushed: boolean; has_conflicts: boolean }>(
+			`/workspace/${wsId}/git/sync`,
+			{ repo_path: repoPath, ...opts }
+		)
 	}
 }
