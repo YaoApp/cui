@@ -46,3 +46,4 @@ docs/onboarding/*/*.md
 packages/cui/pages/kanban/assets/*.png
 packages/cui/pages/kanban/*.md
 packages/cui/docs/git-changes/DESIGN.md
+packages/cui/docs/git-changes/DESIGN-remote-sync.md

@@ -3,7 +3,6 @@
 	flex-direction: row;
 	flex: 1;
 	min-height: 0;
-	overflow: hidden;
 }
 
 .wrapper {
@@ -15,6 +14,7 @@
 	min-height: 0;
 	overflow-y: auto;
 	overflow-x: hidden;
+	padding-right: 24px;
 
 	&::-webkit-scrollbar {
 		width: 6px;
@@ -32,6 +32,9 @@
 	width: 0;
 	overflow: hidden;
 	transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	margin-top: -24px;
+	margin-bottom: -24px;
+	margin-right: -24px;
 
 	&.gitSideOpen {
 		overflow: visible;

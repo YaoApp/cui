@@ -7,6 +7,7 @@ import { WorkspaceAPI } from '@/openapi/workspace'
 import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 import { resolveNodeAddr, nodeName, nodeAddr, type Workspace, type DirEntry, type NodeInfo } from '../../types'
 import GitChangesPanel from '../GitChangesPanel'
+import WorkspaceConfigPanel from '../WorkspaceConfigPanel'
 import styles from './index.less'
 
 interface WorkspaceDetailProps {
@@ -69,6 +70,7 @@ const WorkspaceDetail = ({
 	const [dragOver, setDragOver] = useState(false)
 	const dragCounter = useRef(0)
 	const [showGitPanel, setShowGitPanel] = useState(false)
+	const [showConfigPanel, setShowConfigPanel] = useState(false)
 	const [gitPanelWidth, setGitPanelWidth] = useState(() => {
 		try { return parseInt(localStorage.getItem('ws_git_panel_width') || '320', 10) || 320 } catch { return 320 }
 	})
@@ -412,10 +414,28 @@ const WorkspaceDetail = ({
 					</div>
 				</div>
 			<div className={styles.headerRight}>
+				<Tooltip title={is_cn ? '凭证管理' : 'Credentials'}>
+					<div
+						className={`${styles.refreshBtn} ${showConfigPanel ? styles.refreshBtnActive : ''}`}
+						onClick={() => {
+							setShowConfigPanel((v) => {
+								if (!v) setShowGitPanel(false)
+								return !v
+							})
+						}}
+					>
+						<Icon name='material-key' size={16} />
+					</div>
+				</Tooltip>
 				<Tooltip title={is_cn ? '文件变更' : 'File Changes'}>
 					<div
 						className={`${styles.refreshBtn} ${showGitPanel ? styles.refreshBtnActive : ''}`}
-						onClick={() => setShowGitPanel((v) => !v)}
+						onClick={() => {
+							setShowGitPanel((v) => {
+								if (!v) setShowConfigPanel(false)
+								return !v
+							})
+						}}
 					>
 						<Icon name='icon-git-commit' size={18} />
 					</div>
@@ -690,12 +710,17 @@ const WorkspaceDetail = ({
 			</div>
 		</div>
 			<div
-				className={`${styles.gitSide} ${showGitPanel ? styles.gitSideOpen : ''}`}
-				style={showGitPanel ? { width: gitPanelWidth + 4 } : undefined}
+				className={`${styles.gitSide} ${showGitPanel || showConfigPanel ? styles.gitSideOpen : ''}`}
+				style={showGitPanel || showConfigPanel ? { width: gitPanelWidth + 4 } : undefined}
 			>
 				<div className={styles.gitResizeHandle} onMouseDown={handleGitResizeStart} />
 				<div className={styles.gitPanel}>
-					<GitChangesPanel wsId={workspace.id} onClose={() => setShowGitPanel(false)} />
+					{showGitPanel && (
+						<GitChangesPanel wsId={workspace.id} onClose={() => setShowGitPanel(false)} />
+					)}
+					{showConfigPanel && (
+						<WorkspaceConfigPanel wsId={workspace.id} onClose={() => setShowConfigPanel(false)} />
+					)}
 				</div>
 			</div>
 		</div>
