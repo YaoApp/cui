@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { Popconfirm, message, Upload, Input } from 'antd'
+import { Popconfirm, message, Upload, Input, Tooltip } from 'antd'
 import { getLocale } from '@umijs/max'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { WorkspaceAPI } from '@/openapi/workspace'
 import { MENTION_DRAG_TYPE, setMentionDragImage, type MentionData } from '@/chatbox/utils/mention'
 import { resolveNodeAddr, nodeName, nodeAddr, type Workspace, type DirEntry, type NodeInfo } from '../../types'
+import GitChangesPanel from '../GitChangesPanel'
 import styles from './index.less'
 
 interface WorkspaceDetailProps {
@@ -67,6 +68,41 @@ const WorkspaceDetail = ({
 	const [newDirName, setNewDirName] = useState('')
 	const [dragOver, setDragOver] = useState(false)
 	const dragCounter = useRef(0)
+	const [showGitPanel, setShowGitPanel] = useState(false)
+	const [gitPanelWidth, setGitPanelWidth] = useState(() => {
+		try { return parseInt(localStorage.getItem('ws_git_panel_width') || '320', 10) || 320 } catch { return 320 }
+	})
+	const gitResizingRef = useRef(false)
+	const gitStartXRef = useRef(0)
+	const gitStartWidthRef = useRef(320)
+
+	const handleGitResizeStart = useCallback((e: React.MouseEvent) => {
+		e.preventDefault()
+		gitResizingRef.current = true
+		gitStartXRef.current = e.clientX
+		gitStartWidthRef.current = gitPanelWidth
+		let lastWidth = gitPanelWidth
+
+		const onMove = (ev: MouseEvent) => {
+			if (!gitResizingRef.current) return
+			const delta = gitStartXRef.current - ev.clientX
+			const newWidth = Math.min(Math.max(gitStartWidthRef.current + delta, 220), 600)
+			if (newWidth !== lastWidth) {
+				lastWidth = newWidth
+				setGitPanelWidth(newWidth)
+			}
+		}
+
+		const onUp = () => {
+			gitResizingRef.current = false
+			document.removeEventListener('mousemove', onMove)
+			document.removeEventListener('mouseup', onUp)
+			try { localStorage.setItem('ws_git_panel_width', String(lastWidth)) } catch {}
+		}
+
+		document.addEventListener('mousemove', onMove)
+		document.addEventListener('mouseup', onUp)
+	}, [gitPanelWidth])
 
 	const getApi = useCallback((): WorkspaceAPI | null => {
 		if (!window.$app?.openapi) return null
@@ -314,13 +350,14 @@ const WorkspaceDetail = ({
 	const labelEntries = Object.entries(workspace.labels || {})
 
 	return (
-		<div
-			className={styles.wrapper}
-			onDragEnter={handleDragEnter}
-			onDragLeave={handleDragLeave}
-			onDragOver={handleDragOver}
-			onDrop={handleDrop}
-		>
+		<div className={styles.splitLayout}>
+			<div
+				className={styles.wrapper}
+				onDragEnter={handleDragEnter}
+				onDragLeave={handleDragLeave}
+				onDragOver={handleDragOver}
+				onDrop={handleDrop}
+			>
 			{dragOver && (
 				<div className={styles.dropOverlay}>
 					<Icon name='material-upload' size={40} />
@@ -374,15 +411,24 @@ const WorkspaceDetail = ({
 						<span className={styles.wsId}>{workspace.id}</span>
 					</div>
 				</div>
-				<div className={styles.headerRight}>
+			<div className={styles.headerRight}>
+				<Tooltip title={is_cn ? '文件变更' : 'File Changes'}>
+					<div
+						className={`${styles.refreshBtn} ${showGitPanel ? styles.refreshBtnActive : ''}`}
+						onClick={() => setShowGitPanel((v) => !v)}
+					>
+						<Icon name='icon-git-commit' size={18} />
+					</div>
+				</Tooltip>
+				<Tooltip title={is_cn ? '刷新' : 'Refresh'}>
 					<div
 						className={styles.refreshBtn}
 						onClick={() => loadDir(currentPath)}
-						title={is_cn ? '刷新' : 'Refresh'}
 					>
 						<Icon name='material-refresh' size={18} />
 					</div>
-				</div>
+				</Tooltip>
+			</div>
 			</div>
 
 			<div className={styles.infoCards}>
@@ -640,6 +686,16 @@ const WorkspaceDetail = ({
 							</div>
 						))
 					)}
+				</div>
+			</div>
+		</div>
+			<div
+				className={`${styles.gitSide} ${showGitPanel ? styles.gitSideOpen : ''}`}
+				style={showGitPanel ? { width: gitPanelWidth + 4 } : undefined}
+			>
+				<div className={styles.gitResizeHandle} onMouseDown={handleGitResizeStart} />
+				<div className={styles.gitPanel}>
+					<GitChangesPanel wsId={workspace.id} onClose={() => setShowGitPanel(false)} />
 				</div>
 			</div>
 		</div>

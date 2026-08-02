@@ -91,3 +91,40 @@ export function resolveNodeAddr(taiID: string, nodeMap?: Record<string, NodeInfo
 	if (!n) return taiID
 	return nodeAddr(n)
 }
+
+// --- Git Types ---
+
+export interface GitRepo {
+	path: string
+	branch: string
+	remote_url: string
+	has_changes: boolean
+}
+
+export interface GitChangedFile {
+	path: string
+	index_status: string
+	worktree_status: string
+	old_path?: string
+}
+
+export interface GitStatusResponse {
+	branch: string
+	files: GitChangedFile[]
+	ahead: number
+	behind: number
+	total_insertions: number
+	total_deletions: number
+	is_detached: boolean
+	is_empty: boolean
+}
+
+export interface GitFileDiffResponse {
+	original: string
+	modified: string
+	language: string
+	is_binary: boolean
+	is_new: boolean
+	is_deleted: boolean
+	is_too_large: boolean
+}
