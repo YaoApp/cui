@@ -57,42 +57,83 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 		return new WorkspaceAPI(window.$app.openapi)
 	}, [])
 
-	const loadData = useCallback(async () => {
-		if (!wsId) return
-		const api = getApi()
-		if (!api) return
-		setLoading(true)
-		try {
-			const reposRes = await api.GitListRepos(wsId)
-			const repos: GitRepo[] = reposRes?.data || reposRes || []
-			const statuses: RepoStatus[] = await Promise.all(
-				repos.map(async (repo) => {
-					try {
-						const statusRes = await api.GitStatus(wsId, repo.path)
-						const status: GitStatusResponse = statusRes?.data || statusRes
-						return { repo, status, loading: false, expanded: repo.has_changes, syncing: null }
-					} catch {
-						return { repo, status: null, loading: false, expanded: repo.has_changes, syncing: null }
-					}
-				})
+	const refreshRepoStatus = useCallback(
+		async (repoPath: string) => {
+			const api = getApi()
+			if (!api) return
+			setRepoStatuses((prev) =>
+				prev.map((rs) => (rs.repo.path === repoPath ? { ...rs, loading: true } : rs))
 			)
-			setRepoStatuses(statuses)
-		} catch (e: any) {
-			message.error(e?.message || 'Failed to load repos')
-		} finally {
-			setLoading(false)
-		}
-	}, [wsId, getApi])
+			try {
+				const statusRes = await api.GitStatus(wsId, repoPath)
+				const status: GitStatusResponse = statusRes?.data || statusRes
+				setRepoStatuses((prev) =>
+					prev.map((rs) => (rs.repo.path === repoPath ? { ...rs, status, loading: false } : rs))
+				)
+			} catch {
+				setRepoStatuses((prev) =>
+					prev.map((rs) => (rs.repo.path === repoPath ? { ...rs, loading: false } : rs))
+				)
+			}
+		},
+		[wsId, getApi]
+	)
+
+	const loadData = useCallback(
+		async (refresh?: boolean) => {
+			if (!wsId) return
+			const api = getApi()
+			if (!api) return
+			setLoading(true)
+			try {
+				const reposRes = await api.GitListRepos(wsId, refresh)
+				const raw = reposRes?.data ?? reposRes
+				const repos: GitRepo[] = Array.isArray(raw) ? raw : []
+				setRepoStatuses(
+					repos.map((repo) => ({
+						repo,
+						status: null,
+						loading: false,
+						expanded: repo.has_changes,
+						syncing: null
+					}))
+				)
+				repos.filter((r) => r.has_changes).forEach((r) => refreshRepoStatus(r.path))
+			} catch {
+			} finally {
+				setLoading(false)
+			}
+		},
+		[wsId, getApi, refreshRepoStatus]
+	)
+
+	const refreshAllStatuses = useCallback(() => {
+		repoStatuses.forEach((rs) => refreshRepoStatus(rs.repo.path))
+	}, [repoStatuses, refreshRepoStatus])
 
 	useEffect(() => {
 		loadData()
 	}, [loadData])
 
-	const toggleExpand = useCallback((idx: number) => {
-		setRepoStatuses((prev) =>
-			prev.map((rs, i) => (i === idx ? { ...rs, expanded: !rs.expanded } : rs))
-		)
-	}, [])
+	const toggleExpand = useCallback(
+		(idx: number) => {
+			let repoPath = ''
+			let needLoad = false
+			setRepoStatuses((prev) => {
+				const rs = prev[idx]
+				const willExpand = !rs.expanded
+				if (willExpand && !rs.status && !rs.loading) {
+					needLoad = true
+					repoPath = rs.repo.path
+				}
+				return prev.map((r, i) => (i === idx ? { ...r, expanded: willExpand } : r))
+			})
+			if (needLoad && repoPath) {
+				refreshRepoStatus(repoPath)
+			}
+		},
+		[refreshRepoStatus]
+	)
 
 	const stagedFiles = useCallback(
 		(status: GitStatusResponse | null): GitChangedFile[] => {
@@ -120,12 +161,12 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 			if (!api) return
 			try {
 				await api.GitAdd(wsId, repoPath, [filePath])
-				loadData()
+				refreshRepoStatus(repoPath)
 			} catch (e: any) {
 				message.error(e?.message || 'Stage failed')
 			}
 		},
-		[wsId, getApi, loadData]
+		[wsId, getApi, refreshRepoStatus]
 	)
 
 	const handleUnstageFile = useCallback(
@@ -134,12 +175,12 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 			if (!api) return
 			try {
 				await api.GitReset(wsId, repoPath, [filePath])
-				loadData()
+				refreshRepoStatus(repoPath)
 			} catch (e: any) {
 				message.error(e?.message || 'Unstage failed')
 			}
 		},
-		[wsId, getApi, loadData]
+		[wsId, getApi, refreshRepoStatus]
 	)
 
 	const handleStageAll = useCallback(
@@ -148,12 +189,12 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 			if (!api) return
 			try {
 				await api.GitAdd(wsId, repoPath)
-				loadData()
+				refreshRepoStatus(repoPath)
 			} catch (e: any) {
 				message.error(e?.message || 'Stage all failed')
 			}
 		},
-		[wsId, getApi, loadData]
+		[wsId, getApi, refreshRepoStatus]
 	)
 
 	const handleUnstageAll = useCallback(
@@ -162,12 +203,12 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 			if (!api) return
 			try {
 				await api.GitReset(wsId, repoPath)
-				loadData()
+				refreshRepoStatus(repoPath)
 			} catch (e: any) {
 				message.error(e?.message || 'Unstage all failed')
 			}
 		},
-		[wsId, getApi, loadData]
+		[wsId, getApi, refreshRepoStatus]
 	)
 
 	const handleDiscardFile = useCallback(
@@ -182,14 +223,14 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 				onOk: async () => {
 					try {
 						await api.GitDiscardChanges(wsId, repoPath, [filePath])
-						loadData()
+						refreshRepoStatus(repoPath)
 					} catch (e: any) {
 						message.error(e?.message || 'Discard failed')
 					}
 				}
 			})
 		},
-		[wsId, getApi, loadData, is_cn]
+		[wsId, getApi, refreshRepoStatus, is_cn]
 	)
 
 	const handleCommit = useCallback(
@@ -205,12 +246,12 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 				await api.GitCommit(wsId, repoPath, msg)
 				setCommitMessages((prev) => ({ ...prev, [repoPath]: '' }))
 				message.success(is_cn ? '提交成功' : 'Committed successfully')
-				loadData()
+				refreshRepoStatus(repoPath)
 			} catch (e: any) {
 				message.error(e?.message || 'Commit failed')
 			}
 		},
-		[wsId, getApi, commitMessages, loadData, is_cn]
+		[wsId, getApi, commitMessages, refreshRepoStatus, is_cn]
 	)
 
 	const setSyncing = useCallback((repoPath: string, syncing: 'fetch' | 'pull' | 'push' | null) => {
@@ -237,14 +278,14 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 						? (is_cn ? '同步完成：' : 'Synced: ') + parts.join(', ')
 						: (is_cn ? '已是最新' : 'Already up to date'))
 				}
-				loadData()
+				refreshRepoStatus(repoPath)
 			} catch (e: any) {
 				message.error(e?.message || (is_cn ? '同步失败' : 'Sync failed'))
 			} finally {
 				setSyncing(repoPath, null)
 			}
 		},
-		[wsId, getApi, loadData, setSyncing, is_cn]
+		[wsId, getApi, refreshRepoStatus, setSyncing, is_cn]
 	)
 
 	const openDiff = useCallback(
@@ -264,9 +305,14 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 				<Icon name='icon-git-commit' size={14} />
 				<span className={styles.title}>{is_cn ? '文件变更' : 'File Changes'}</span>
 				<div className={styles.toolbarActions}>
-					<Tooltip title={is_cn ? '刷新' : 'Refresh'} overlayInnerStyle={tipStyle}>
-						<div className={styles.actionBtn} onClick={loadData}>
+					<Tooltip title={is_cn ? '刷新状态' : 'Refresh'} overlayInnerStyle={tipStyle}>
+						<div className={styles.actionBtn} onClick={refreshAllStatuses}>
 							<Icon name='material-refresh' size={14} />
+						</div>
+					</Tooltip>
+					<Tooltip title={is_cn ? '扫描仓库' : 'Scan Repos'} overlayInnerStyle={tipStyle}>
+						<div className={styles.actionBtn} onClick={() => loadData(true)}>
+							<Icon name='material-manage_search' size={14} />
 						</div>
 					</Tooltip>
 					{onClose && (
@@ -306,7 +352,7 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 									<span className={styles.repoName}>{rs.repo.path === '.' ? '/' : rs.repo.path}</span>
 									{rs.repo.has_changes && (
 										<span className={styles.changeCount}>
-											{rs.status?.files?.length || 0}
+											{rs.status ? (rs.status.files?.length || 0) : '●'}
 										</span>
 									)}
 									<span className={styles.branch}>{rs.status?.branch || rs.repo.branch}</span>
@@ -330,8 +376,12 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 								)}
 								</div>
 
-								{rs.expanded && rs.status && (
+								{rs.expanded && (
 									<div className={styles.section}>
+									{rs.loading ? (
+										<div className={styles.loading}>{is_cn ? '加载中...' : 'Loading...'}</div>
+									) : rs.status ? (
+									<>
 										{staged.length > 0 && (
 											<>
 												<div className={styles.sectionHeader}>
@@ -459,6 +509,8 @@ const GitChangesPanel = ({ wsId, onClose }: GitChangesPanelProps) => {
 												</div>
 											</div>
 										)}
+									</>
+									) : null}
 									</div>
 								)}
 							</div>
