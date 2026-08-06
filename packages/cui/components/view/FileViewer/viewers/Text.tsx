@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, Fragment } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback, Fragment } from 'react'
 import { getLocale } from '@umijs/max'
 import { useAsyncEffect } from 'ahooks'
 import * as JsxRuntime from 'react/jsx-runtime'
@@ -13,6 +13,7 @@ import { useGlobal } from '@/context/app'
 import vars from '@/styles/preset/vars'
 import MdxErrorBoundary from '@/widgets/MdxErrorBoundary'
 import { escapeCurlyBraces, rehypeUnescapeBraces, rehypeUnescapeCodeBlocks } from '@/utils/mdx-helpers'
+import { ParseFileRef } from '@/utils/fileWrapper'
 
 // 简单的语法高亮规则
 const getSyntaxHighlighting = (text: string, language: string): string => {
@@ -91,6 +92,8 @@ interface TextProps {
 	fileName?: string
 	language?: string
 	markdownPreview?: boolean
+	workspaceId?: string
+	filePath?: string
 }
 
 function parseFrontmatter(raw: string): { meta: Record<string, string> | null; body: string } {
@@ -153,13 +156,37 @@ const HLJS_STYLE = `
 [data-theme='dark'] .fv-hljs .hljs-bullet{color:#f2cc60}
 `
 
-const MarkdownPreviewRenderer = ({ content }: { content: string }) => {
+interface MarkdownPreviewProps {
+	content: string
+	workspaceId?: string
+	filePath?: string
+}
+
+const MarkdownPreviewRenderer = ({ content, workspaceId, filePath }: MarkdownPreviewProps) => {
 	const [rendered, setRendered] = useState<React.ReactNode>(null)
 	const [showMeta, setShowMeta] = useState(false)
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 
 	const { meta, body } = useMemo(() => parseFrontmatter(content), [content])
+
+	const resolveRelativeSrc = useCallback(
+		(src: string | undefined): string | undefined => {
+			if (!src || !workspaceId || !filePath) return src
+			if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(src)) return src
+			try {
+				const currentDir = filePath.substring(0, filePath.lastIndexOf('/') + 1)
+				const resolved = decodeURIComponent(
+					new URL(src, 'file:///' + currentDir).pathname
+				).replace(/^\//, '')
+				const base = window.$app?.openapi?.config?.baseURL ?? '/v1'
+				return `${base}/workspace/${encodeURIComponent(workspaceId)}/files/${resolved}`
+			} catch {
+				return src
+			}
+		},
+		[workspaceId, filePath]
+	)
 
 	useAsyncEffect(async () => {
 		if (!body) return
@@ -177,17 +204,80 @@ const MarkdownPreviewRenderer = ({ content }: { content: string }) => {
 				],
 				baseUrl: import.meta.url
 			})
-			setRendered(<Content />)
+			const mdxComponents = workspaceId && filePath
+				? {
+						img: ({ src, ...rest }: React.ImgHTMLAttributes<HTMLImageElement>) => (
+							<img {...rest} src={resolveRelativeSrc(src)} />
+						)
+				  }
+				: undefined
+			setRendered(<Content components={mdxComponents} />)
 		} catch {
 			setRendered(<div style={{ whiteSpace: 'pre-wrap' }}>{body}</div>)
 		}
-	}, [body])
+	}, [body, resolveRelativeSrc])
+
+	const handleLinkClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			const link = (e.target as HTMLElement).closest('a') as HTMLAnchorElement
+			if (!link) return
+			const href = link.getAttribute('href')
+			if (!href) return
+
+			if (href.startsWith('#')) return
+
+			if (
+				/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(href) &&
+				!href.startsWith('workspace://') &&
+				!href.startsWith('service://') &&
+				!href.startsWith('http://') &&
+				!href.startsWith('https://')
+			) {
+				return
+			}
+
+			e.preventDefault()
+			e.stopPropagation()
+
+			if (href.startsWith('workspace://')) {
+				const ref = ParseFileRef(href)
+				if (ref.type === 'workspace' && ref.filePath) {
+					const name = ref.filePath.split('/').pop() || ref.filePath
+					window.$app?.Event?.emit('app/openSidebar', {
+						url: `/preview?ws=${ref.workspaceId}&path=${encodeURIComponent(ref.filePath)}`,
+						title: name
+					})
+				}
+				return
+			}
+
+			if (href.startsWith('service://')) return
+
+			if (href.startsWith('http://') || href.startsWith('https://')) {
+				window.open(href, '_blank', 'noopener,noreferrer')
+				return
+			}
+
+			if (workspaceId && filePath) {
+				const currentDir = filePath.substring(0, filePath.lastIndexOf('/') + 1)
+				const resolved = decodeURIComponent(
+					new URL(href, 'file:///' + currentDir).pathname
+				).replace(/^\//, '')
+				const name = resolved.split('/').pop() || resolved
+				window.$app?.Event?.emit('app/openSidebar', {
+					url: `/preview?ws=${encodeURIComponent(workspaceId)}&path=${encodeURIComponent(resolved)}`,
+					title: name
+				})
+			}
+		},
+		[workspaceId, filePath]
+	)
 
 	if (!rendered) return <div className={styles.loading}>{is_cn ? '渲染中...' : 'Rendering...'}</div>
 	return (
 		<MdxErrorBoundary fallbackContent={body} resetKeys={[body]}>
 			<style>{HLJS_STYLE}</style>
-			<div className={`${styles.markdownPreview} fv-hljs`}>
+			<div className={`${styles.markdownPreview} fv-hljs`} onClick={handleLinkClick}>
 				{meta && (
 					<>
 						<button
@@ -216,7 +306,7 @@ const MarkdownPreviewRenderer = ({ content }: { content: string }) => {
 	)
 }
 
-const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, fileName, language, markdownPreview }) => {
+const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, fileName, language, markdownPreview, workspaceId, filePath }) => {
 	// 统一处理文件源
 	const fileSource = useMemo(() => {
 		if (src) return src
@@ -424,7 +514,7 @@ const TextComponent: React.FC<TextProps> = ({ src, file, content, contentType, f
 	}
 
 	if (markdownPreview && language === 'markdown' && textContent) {
-		return <MarkdownPreviewRenderer content={textContent} />
+		return <MarkdownPreviewRenderer content={textContent} workspaceId={workspaceId} filePath={filePath} />
 	}
 
 	if (language && language !== 'text') {

@@ -549,6 +549,8 @@ const Preview = (props: AppRouteProps) => {
 						fileName={fileName}
 						language={language}
 						markdownPreview={isMarkdown && tab === 'preview'}
+						workspaceId={ws}
+						filePath={filePath}
 					/>
 				)
 			default:
