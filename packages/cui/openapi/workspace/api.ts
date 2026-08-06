@@ -77,8 +77,9 @@ export class WorkspaceAPI {
 
 	// --- Git ---
 
-	async GitListRepos(wsId: string): Promise<ApiResponse<GitRepo[]>> {
-		return this.api.Get<GitRepo[]>(`/workspace/${wsId}/git/repos`)
+	async GitListRepos(wsId: string, refresh?: boolean): Promise<ApiResponse<GitRepo[]>> {
+		const params = refresh ? { refresh: 'true' } : undefined
+		return this.api.Get<GitRepo[]>(`/workspace/${wsId}/git/repos`, params)
 	}
 
 	async GitStatus(wsId: string, repoPath: string): Promise<ApiResponse<GitStatusResponse>> {
