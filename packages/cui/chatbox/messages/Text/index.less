@@ -295,8 +295,81 @@
 		max-width: 100%;
 		height: auto;
 		border-radius: var(--radius);
+		margin: 0;
+		border: 1px solid var(--color_border_soft);
+		cursor: zoom-in;
+		transition: opacity 0.15s;
+		&:hover {
+			opacity: 0.9;
+		}
+	}
+
+	// Workspace media block (image/video/audio with optional link)
+	.mediaBlock {
+		margin: 12px 0;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		align-items: flex-start;
+
+		img,
+		video,
+		audio {
+			margin: 0;
+		}
+	}
+
+	// Fallback for failed media loads
+	.mediaFallback {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 8px 12px;
+		margin: 12px 0;
+		border-radius: var(--radius);
+		background: var(--color_bg_field);
+		border: 1px dashed var(--color_border);
+		color: var(--color_text_grey);
+		font-size: 13px;
+
+		> :global(.Icon.material) {
+			font-size: 18px !important;
+			color: var(--color_text_grey);
+		}
+	}
+
+	// Video embeds (YouTube, Bilibili)
+	.videoEmbed {
+		position: relative;
+		width: 100%;
+		padding-bottom: 56.25%; // 16:9 aspect ratio
+		margin: 12px 0;
+		border-radius: var(--radius);
+		overflow: hidden;
+		background: var(--color_bg_field);
+		iframe {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			border: none;
+		}
+	}
+
+	// Native video player
+	video {
+		max-width: 100%;
+		height: auto;
+		border-radius: var(--radius);
 		margin: 12px 0;
 		border: 1px solid var(--color_border_soft);
+	}
+
+	// Native audio player
+	audio {
+		width: 100%;
+		margin: 12px 0;
 	}
 
 	// Horizontal Rule
@@ -333,4 +406,87 @@
 	.newline {
 		margin-bottom: 12px !important;
 	}
+}
+
+// Image preview overlay — portalled to document.body for true fullscreen
+.imagePreviewOverlay {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	background: var(--color_bg);
+	overflow: hidden;
+}
+
+.imagePreviewToolbar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 0 16px;
+	height: 40px;
+	min-height: 40px;
+	border-bottom: 1px solid var(--color_border_soft, var(--color_border));
+	background: var(--color_bg);
+	flex-shrink: 0;
+}
+
+.previewFileInfo {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--color_neo_text_primary, var(--color_text));
+	overflow: hidden;
+	min-width: 0;
+
+	> :global(.Icon.material) {
+		font-size: 16px !important;
+		flex-shrink: 0;
+		color: var(--color_neo_text_secondary, var(--color_text_grey));
+	}
+
+	> span {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+.previewActions {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	flex-shrink: 0;
+}
+
+.previewBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 5px;
+	cursor: pointer;
+	color: var(--color_neo_text_secondary, var(--color_text_grey));
+	transition: all 0.15s ease;
+	font-size: 14px;
+
+	> :global(.Icon.material) {
+		font-size: 16px !important;
+	}
+
+	&:hover {
+		background: var(--color_bg_hover);
+		color: var(--color_main);
+	}
+}
+
+.imagePreviewBody {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	position: relative;
+	background: var(--color_bg_nav);
 }
