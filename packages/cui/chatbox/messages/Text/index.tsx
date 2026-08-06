@@ -2,6 +2,7 @@ import { useAsyncEffect } from 'ahooks'
 import to from 'await-to-js'
 import { message as antdMessage } from 'antd'
 import React, { Fragment, useState, useCallback, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import * as JsxRuntime from 'react/jsx-runtime'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
@@ -15,7 +16,8 @@ import styles from './index.less'
 import Code from './components/Code'
 import Mermaid from './components/Mermaid'
 import ReferencePopover from './components/ReferencePopover'
-import { ParseFileRef } from '@/utils/fileWrapper'
+import { ParseFileRef, ResolveFileURL } from '@/utils/fileWrapper'
+import ImageViewer from '@/components/view/FileViewer/viewers/Image'
 import Thinking from '../Thinking'
 import ToolCall from '../ToolCall'
 import type { TextMessage, ThinkingMessage, ToolCallMessage } from '../../../openapi'
@@ -31,6 +33,48 @@ interface ReferenceState {
 	refIndex: number
 	refType: string
 	anchorEl: HTMLElement | null
+}
+
+interface PreviewImageState {
+	src: string
+	alt?: string
+	wsSrc?: string
+	type: 'workspace' | 'external'
+}
+
+const WorkspaceMediaLink = ({ url }: { url: string }) => {
+	const ref = ParseFileRef(url)
+	if (ref.type !== 'workspace' || !ref.filePath) return null
+	const fileName = ref.filePath.split('/').pop() || ref.filePath
+	return (
+		<a className='workspace-link' href={url} style={{ fontSize: 12, opacity: 0.7 }}>
+			<i className='Icon material'>insert_drive_file</i>
+			{fileName}
+		</a>
+	)
+}
+
+const WorkspaceImg = ({ src, alt, ...rest }: any) => {
+	const [error, setError] = React.useState(false)
+	const wsSrc = rest['data-ws-src'] || (src?.startsWith('workspace://') ? src : '')
+	const resolvedSrc = src?.startsWith('workspace://') ? ResolveFileURL(src) : src
+
+	if (error) {
+		return (
+			<div className={styles.mediaFallback}>
+				<i className='Icon material'>broken_image</i>
+				<span>{alt || wsSrc || src}</span>
+				{wsSrc && <WorkspaceMediaLink url={wsSrc} />}
+			</div>
+		)
+	}
+
+	return (
+		<div className={wsSrc ? styles.mediaBlock : undefined}>
+			<img {...rest} src={resolvedSrc} alt={alt} onError={() => setError(true)} data-ws-src={wsSrc || undefined} />
+			{wsSrc && <WorkspaceMediaLink url={wsSrc} />}
+		</div>
+	)
 }
 
 const components = (done?: boolean) => {
@@ -101,6 +145,71 @@ const components = (done?: boolean) => {
 			<div className={styles.table_wrapper}>
 				<table {...props} />
 			</div>
+		),
+		img: ({ src, alt, ...rest }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+			return <WorkspaceImg src={src} alt={alt} {...rest} />
+		},
+		video: ({ src, children, ...rest }: any) => {
+			const wsSrc = rest['data-ws-src'] || (src?.startsWith('workspace://') ? src : '')
+			const resolvedSrc = src?.startsWith('workspace://') ? ResolveFileURL(src) : src
+			return (
+				<div className={styles.mediaBlock}>
+					<video {...rest} src={resolvedSrc} controls data-ws-src={undefined}>
+						{React.Children.map(children, (child) => {
+							if (
+								React.isValidElement(child) &&
+								(child as any).type === 'source'
+							) {
+								const sourceSrc = (child.props as any)?.src
+								if (sourceSrc?.startsWith('workspace://')) {
+									return React.cloneElement(
+										child as React.ReactElement<any>,
+										{ src: ResolveFileURL(sourceSrc) }
+									)
+								}
+							}
+							return child
+						})}
+					</video>
+					{wsSrc && <WorkspaceMediaLink url={wsSrc} />}
+				</div>
+			)
+		},
+		audio: ({ src, children, ...rest }: any) => {
+			const wsSrc = rest['data-ws-src'] || (src?.startsWith('workspace://') ? src : '')
+			const resolvedSrc = src?.startsWith('workspace://') ? ResolveFileURL(src) : src
+			return (
+				<div className={styles.mediaBlock}>
+					<audio {...rest} src={resolvedSrc} controls data-ws-src={undefined}>
+						{React.Children.map(children, (child) => {
+							if (
+								React.isValidElement(child) &&
+								(child as any).type === 'source'
+							) {
+								const sourceSrc = (child.props as any)?.src
+								if (sourceSrc?.startsWith('workspace://')) {
+									return React.cloneElement(
+										child as React.ReactElement<any>,
+										{ src: ResolveFileURL(sourceSrc) }
+									)
+								}
+							}
+							return child
+						})}
+					</audio>
+					{wsSrc && <WorkspaceMediaLink url={wsSrc} />}
+				</div>
+			)
+		},
+		VideoEmbed: (props: { src: string; platform: string }) => (
+			<div className={styles.videoEmbed}>
+				<iframe
+					src={props.src}
+					allowFullScreen
+					allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+					sandbox='allow-scripts allow-same-origin allow-popups'
+				/>
+			</div>
 		)
 	}
 }
@@ -150,7 +259,10 @@ const ALLOWED_HTML_TAGS = [
 	'figcaption',
 	'caption',
 	'col',
-	'colgroup'
+	'colgroup',
+	'video',
+	'audio',
+	'source'
 ]
 
 // Create a regex pattern for allowed tags
@@ -206,9 +318,12 @@ const escapeInvalidHtmlTags = (text: string): string => {
 /**
  * Escape < that are not part of valid HTML tags in regular text
  */
+const VOID_HTML_TAGS = ['br', 'hr', 'img', 'source', 'col', 'track', 'wbr']
+const VOID_TAG_PATTERN = new RegExp(`<(${VOID_HTML_TAGS.join('|')})\\b([^>]*?)(?<!\\/)>`, 'gi')
+
 const escapeHtmlInText = (text: string): string => {
 	// Match all < characters and check if they start a valid HTML tag
-	return text.replace(/<([^>]*>?)/g, (match, afterBracket) => {
+	let result = text.replace(/<([^>]*>?)/g, (match, afterBracket) => {
 		const fullMatch = '<' + afterBracket
 		// Check if this looks like a valid HTML tag
 		if (ALLOWED_TAG_PATTERN.test(fullMatch)) {
@@ -217,6 +332,10 @@ const escapeHtmlInText = (text: string): string => {
 		// Escape the < for non-valid tags like <3, <-- etc
 		return '&lt;' + afterBracket
 	})
+	// Ensure void HTML elements are self-closed for JSX/MDX compatibility
+	// e.g. <source src="..." type="video/mp4"> → <source src="..." type="video/mp4" />
+	result = result.replace(VOID_TAG_PATTERN, '<$1$2 />')
+	return result
 }
 
 /**
@@ -243,7 +362,7 @@ const handleUnclosedHtmlTags = (text: string): string => {
 				const textAfterTag = text.slice(lastOpenBracket + closeIndex + 1)
 				if (!textAfterTag.toLowerCase().includes(closingTag)) {
 					// Self-closing tags don't need closing
-					const selfClosingTags = ['br', 'hr', 'img', 'col']
+					const selfClosingTags = ['br', 'hr', 'img', 'col', 'source']
 					if (!selfClosingTags.includes(tagMatch) && !afterOpen.includes('/>')) {
 						// Unclosed tag found, append closing tag
 						return text + closingTag
@@ -269,7 +388,7 @@ const buildWorkspaceTag = (url: string): string => {
 	const rest = url.slice('workspace://'.length)
 	const slashIdx = rest.indexOf('/')
 	const displayPath = slashIdx !== -1 ? rest.slice(slashIdx + 1) : rest
-	return `<a className="workspace-link" href="${url}"><i className="Icon material">insert_drive_file</i>${escapeBraces(displayPath || url)}</a>`
+	return `<a className="workspace-link" href="${url}"><i className="Icon material">insert_drive_file</i>${escapeBraces(displayPath || rest)}</a>`
 }
 
 const escapeHtml = (s: string): string =>
@@ -347,7 +466,7 @@ const wrapProtocolLinks = (text: string): string => {
 		}
 	)
 	result = result.replace(
-		/\[([^\]]*)\]\((workspace:\/\/[^)]+)\)/g,
+		/(?<!!)\[([^\]]*)\]\((workspace:\/\/[^)]+)\)/g,
 		(match, label, url, offset) => {
 			if (isInCodeBlock(offset) || hasTemplateBraces(url)) return match
 			const displayName = label || url.split('/').pop() || url
@@ -355,7 +474,7 @@ const wrapProtocolLinks = (text: string): string => {
 		}
 	)
 	result = result.replace(
-		/\[([^\]]*)\]\((service:\/\/[^)]+)\)/g,
+		/(?<!!)\[([^\]]*)\]\((service:\/\/[^)]+)\)/g,
 		(match, label, url, offset) => {
 			if (isInCodeBlock(offset) || hasTemplateBraces(url)) return match
 			const displayName = label || `:${url.split('/')[4] || ''}`
@@ -366,12 +485,19 @@ const wrapProtocolLinks = (text: string): string => {
 	// Pass 2: convert remaining bare workspace:// and service:// URLs
 	const parts: string[] = []
 	let lastIndex = 0
-	const protocolRegex = /(?:workspace|service):\/\/[^\s)>\]`"']+/g
+	const protocolRegex = /(?:workspace|service):\/\/[^\s)><\]`"']+/g
 	let protoMatch
 	while ((protoMatch = protocolRegex.exec(result)) !== null) {
 		if (isInCodeBlock(protoMatch.index)) continue
 		const before = result.slice(Math.max(0, protoMatch.index - 6), protoMatch.index)
-		if (before.endsWith('href="') || before.endsWith("href='")) continue
+		if (
+			before.endsWith('href="') ||
+			before.endsWith("href='") ||
+			before.endsWith('src="') ||
+			before.endsWith("src='") ||
+			before.endsWith('](')
+		)
+			continue
 
 		const url = protoMatch[0]
 		if (hasTemplateBraces(url)) continue
@@ -428,6 +554,48 @@ const wrapMentionTags = (text: string): string => {
 	)
 }
 
+const wrapVideoEmbeds = (text: string): string => {
+	const codeBlockPositions: Array<[number, number]> = []
+	const codeBlockRegex = /```/g
+	let cbMatch
+	let inCodeBlock = false
+	while ((cbMatch = codeBlockRegex.exec(text)) !== null) {
+		if (!inCodeBlock) {
+			inCodeBlock = true
+			codeBlockPositions.push([cbMatch.index, -1])
+		} else {
+			inCodeBlock = false
+			const last = codeBlockPositions[codeBlockPositions.length - 1]
+			if (last) last[1] = cbMatch.index + 3
+		}
+	}
+	if (inCodeBlock) {
+		const last = codeBlockPositions[codeBlockPositions.length - 1]
+		if (last) last[1] = text.length
+	}
+	const isInCodeBlock = (pos: number) =>
+		codeBlockPositions.some(([start, end]) => pos >= start && pos < end)
+
+	const youtubeRegex =
+		/^\s*(https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})\S*)\s*$/gm
+	const bilibiliRegex =
+		/^\s*(https?:\/\/(?:www\.|m\.)?bilibili\.com\/video\/(BV[a-zA-Z0-9]+)\S*)\s*$/gm
+
+	let result = text
+
+	result = result.replace(youtubeRegex, (match, _fullUrl, videoId, offset) => {
+		if (isInCodeBlock(offset)) return match
+		return `<VideoEmbed src="https://www.youtube.com/embed/${videoId}" platform="youtube" />`
+	})
+
+	result = result.replace(bilibiliRegex, (match, _fullUrl, bvId, offset) => {
+		if (isInCodeBlock(offset)) return match
+		return `<VideoEmbed src="https://player.bilibili.com/player.html?bvid=${bvId}&autoplay=0" platform="bilibili" />`
+	})
+
+	return result
+}
+
 const escape = (text?: string) => {
 	if (!text) return ''
 
@@ -451,6 +619,8 @@ const escape = (text?: string) => {
 
 	result = handleUnclosedHtmlTags(result)
 
+	result = wrapVideoEmbeds(result)
+
 	const codeBlocks = result.match(/```/g) || []
 	const codeBlockCount = codeBlocks.length
 	const hasUnclosedCodeBlock = codeBlockCount % 2 !== 0
@@ -468,6 +638,7 @@ const Text = ({ message }: ITextProps) => {
 	const contentText = message.props?.content || ''
 	const [content, setContent] = useState<any>('')
 	const [referenceState, setReferenceState] = useState<ReferenceState | null>(null)
+	const [previewImage, setPreviewImage] = useState<PreviewImageState | null>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
 
 	// Track last successful render to avoid flashing raw content on parse errors
@@ -624,6 +795,25 @@ const Text = ({ message }: ITextProps) => {
 		(e: MouseEvent) => {
 			const target = e.target as HTMLElement
 
+			// Check for image clicks - open preview overlay
+			const imgEl = target.closest('img') as HTMLImageElement
+			if (imgEl) {
+				if (imgEl.naturalWidth > 0 && imgEl.naturalWidth < 40 && imgEl.naturalHeight < 40) return
+				e.preventDefault()
+				e.stopPropagation()
+				const imgSrc = imgEl.getAttribute('src')
+				if (!imgSrc) return
+				const imgAlt = imgEl.getAttribute('alt') || undefined
+				const imgWsSrc = imgEl.getAttribute('data-ws-src') || undefined
+				setPreviewImage({
+					src: imgSrc,
+					alt: imgAlt,
+					wsSrc: imgWsSrc,
+					type: imgWsSrc ? 'workspace' : 'external'
+				})
+				return
+			}
+
 			// First check for reference links (a.ref)
 			const refLink = target.closest('a.ref') as HTMLAnchorElement
 			if (refLink) {
@@ -692,6 +882,47 @@ const Text = ({ message }: ITextProps) => {
 	const handleCloseReference = useCallback(() => {
 		setReferenceState(null)
 	}, [])
+
+	// ESC key to close image preview
+	useEffect(() => {
+		if (!previewImage) return
+		const onKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') setPreviewImage(null)
+		}
+		window.addEventListener('keydown', onKeyDown)
+		return () => window.removeEventListener('keydown', onKeyDown)
+	}, [previewImage])
+
+	// Download the previewed image (same pattern as Preview page)
+	const handleImageDownload = useCallback(async () => {
+		if (!previewImage) return
+		let filename: string
+		if (previewImage.wsSrc) {
+			filename = ParseFileRef(previewImage.wsSrc).filePath?.split('/').pop() || 'image'
+		} else {
+			try {
+				filename = decodeURIComponent(new URL(previewImage.src).pathname.split('/').pop() || '') || previewImage.alt || 'image'
+			} catch {
+				filename = previewImage.alt || 'image'
+			}
+		}
+		try {
+			const resp = await fetch(previewImage.src, { credentials: 'include' })
+			if (!resp.ok) throw new Error('Download failed')
+			const blob = await resp.blob()
+			const url = URL.createObjectURL(blob)
+			const a = document.createElement('a')
+			a.href = url
+			a.download = filename
+			a.style.display = 'none'
+			document.body.appendChild(a)
+			a.click()
+			document.body.removeChild(a)
+			URL.revokeObjectURL(url)
+		} catch {
+			window.open(previewImage.src, '_blank', 'noopener,noreferrer')
+		}
+	}, [previewImage])
 
 	// Attach click handler to container
 	useEffect(() => {
@@ -798,6 +1029,32 @@ const Text = ({ message }: ITextProps) => {
 							}
 						})
 					},
+				// Resolve workspace:// URLs in src attributes for all elements
+				() => (tree) => {
+					visit(tree, (node: any) => {
+						// Standard HTML elements (from markdown syntax like ![](workspace://...))
+						if (node?.type === 'element') {
+							const src = node.properties?.src
+							if (typeof src === 'string' && src.startsWith('workspace://')) {
+								node.properties['data-ws-src'] = src
+								node.properties.src = ResolveFileURL(src)
+							}
+						}
+						// MDX JSX elements (from HTML written in source like <img src="workspace://...">)
+						if (node?.type === 'mdxJsxFlowElement' || node?.type === 'mdxJsxTextElement') {
+							const attrs = node.attributes
+							if (!Array.isArray(attrs)) return
+							const srcAttr = attrs.find((a: any) => a.type === 'mdxJsxAttribute' && a.name === 'src')
+							if (srcAttr && typeof srcAttr.value === 'string' && srcAttr.value.startsWith('workspace://')) {
+								const original = srcAttr.value
+								srcAttr.value = ResolveFileURL(original)
+								if (!attrs.some((a: any) => a.name === 'data-ws-src')) {
+									attrs.push({ type: 'mdxJsxAttribute', name: 'data-ws-src', value: original })
+								}
+							}
+						}
+					})
+				},
 				// Ensure workspace:// and service:// links have their respective classes
 				() => (tree) => {
 					visit(tree, (node: any) => {
@@ -919,8 +1176,42 @@ const Text = ({ message }: ITextProps) => {
 					/>
 				)}
 
-			</div>
-		</MdxErrorBoundary>
+		</div>
+
+		{previewImage && createPortal(
+			<div className={styles.imagePreviewOverlay} onClick={(e) => { if (e.target === e.currentTarget) setPreviewImage(null) }}>
+				<div className={styles.imagePreviewToolbar}>
+					<div className={styles.previewFileInfo}>
+						<i className='Icon material'>
+							{previewImage.type === 'workspace' ? 'insert_drive_file' : 'image'}
+						</i>
+						<span>
+							{previewImage.wsSrc
+								? ParseFileRef(previewImage.wsSrc).filePath || 'image'
+								: previewImage.alt || (() => {
+									try { return decodeURIComponent(new URL(previewImage.src).pathname.split('/').pop() || '') || 'image' }
+									catch { return 'image' }
+								})()
+							}
+						</span>
+					</div>
+					<span style={{ flex: 1 }} />
+					<div className={styles.previewActions}>
+						<span className={styles.previewBtn} onClick={handleImageDownload} title='Download'>
+							<i className='Icon material'>download</i>
+						</span>
+						<span className={styles.previewBtn} onClick={() => setPreviewImage(null)} title='Close'>
+							<i className='Icon material'>close</i>
+						</span>
+					</div>
+				</div>
+				<div className={styles.imagePreviewBody}>
+					<ImageViewer src={previewImage.src} fileName={previewImage.alt} />
+				</div>
+			</div>,
+			document.body
+		)}
+	</MdxErrorBoundary>
 	)
 }
 
