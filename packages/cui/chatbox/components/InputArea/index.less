@@ -311,6 +311,65 @@
 				}
 			}
 		}
+
+		.micBtn {
+			position: absolute;
+			right: 36px;
+			bottom: 0;
+			width: 30px;
+			height: 30px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			background: transparent;
+			color: var(--color_chatbox_text_secondary);
+			border: 1px solid transparent;
+			cursor: pointer;
+			transition: all 0.2s;
+			z-index: 5;
+			padding: 0;
+
+			&:hover {
+				color: var(--color_primary);
+				background: var(--color_info_bg);
+				border-color: var(--color_info_border, var(--color_border_light));
+				transform: scale(1.1);
+			}
+
+			&:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+				transform: none;
+			}
+		}
+
+		.voiceCancelBtn {
+			position: absolute;
+			right: 40px;
+			bottom: 0;
+			width: 30px;
+			height: 30px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			background: var(--color_bg_hover);
+			backdrop-filter: blur(8px);
+			color: var(--color_chatbox_text_secondary);
+			border: 1px solid var(--color_border_light);
+			cursor: pointer;
+			transition: all 0.2s;
+			z-index: 5;
+			padding: 0;
+
+			&:hover {
+				color: var(--color_danger);
+				border-color: var(--color_danger);
+				background: rgba(255, 77, 79, 0.08);
+				transform: scale(1.1);
+			}
+		}
 	}
 
 	.mentionTag {

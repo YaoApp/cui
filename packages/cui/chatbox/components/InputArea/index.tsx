@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperat
 import { message, Tooltip as AntTooltip, Spin } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
-import { Database, Sparkle, UploadSimple, PaperPlaneTilt, Stop } from 'phosphor-react'
+import { Database, Sparkle, UploadSimple, PaperPlaneTilt, Stop, Microphone, XCircle } from 'phosphor-react'
 import Icon from '../../../widgets/Icon'
 import { FileAPI } from '../../../openapi'
 import type { IInputAreaProps } from '../../types'
@@ -27,6 +27,8 @@ import MessageQueue from '../MessageQueue'
 import Selector from './Selector'
 import ToolButton from './ToolButton'
 import Tooltip from './Tooltip'
+import { useVoiceRecorder } from '../../hooks/useVoiceRecorder'
+import VoiceRecordingPanel from './VoiceRecordingPanel'
 
 interface Attachment {
 	id: string
@@ -153,6 +155,11 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	const toolbarRef = useRef<HTMLDivElement>(null)
 	const [showModeText, setShowModeText] = useState(true)
 	const [showModelSelectorResponsive, setShowModelSelectorResponsive] = useState(true) // Responsive layout control
+
+	// Voice recording
+	const { status: voiceStatus, duration: voiceDuration, waveformRef, start: voiceStart, stop: voiceStop, cancel: voiceCancel, error: voiceError } = useVoiceRecorder()
+	const isRecording = voiceStatus === 'recording'
+	const [voicePendingSend, setVoicePendingSend] = useState(false)
 
 	useEffect(() => {
 		if (propAssistant) {
@@ -655,6 +662,43 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		})
 	}
 
+	const handleVoiceStart = async () => {
+		await voiceStart()
+	}
+
+	const handleVoiceCancel = () => {
+		voiceCancel()
+	}
+
+	const handleVoiceSend = async () => {
+		try {
+			const blob = await voiceStop()
+			const ext = blob.type.includes('mp4') ? 'm4a' : blob.type.includes('webm') ? 'webm' : 'wav'
+			const file = new File([blob], `voice_${Date.now()}.${ext}`, { type: blob.type })
+			await handleUpload([file])
+			setVoicePendingSend(true)
+		} catch {
+			message.error(is_cn ? '录音失败' : 'Recording failed')
+		}
+	}
+
+	useEffect(() => {
+		if (voicePendingSend && attachments.length > 0 && attachments.every((att) => !att.uploading)) {
+			setVoicePendingSend(false)
+			handleSend()
+		}
+	}, [voicePendingSend, attachments])
+
+	useEffect(() => {
+		if (voiceError === 'microphone_denied') {
+			message.error(is_cn ? '需要麦克风权限' : 'Microphone permission required')
+		} else if (voiceError === 'microphone_not_found') {
+			message.error(is_cn ? '未检测到麦克风' : 'No microphone detected')
+		} else if (voiceError && voiceError !== 'microphone_denied' && voiceError !== 'microphone_not_found') {
+			message.error(voiceError)
+		}
+	}, [voiceError, is_cn])
+
 	const handleQueueSend = () => {
 		const message = constructMessage()
 		if (!message) {
@@ -1033,12 +1077,12 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 
 		const showStop = loading
 		const hasReadyAttachments = attachments.some((att) => !att.uploading && !att.error)
-		const canSend = !isEmpty || hasReadyAttachments
+		const canSend = !isEmpty || hasReadyAttachments || isRecording
 
 		return (
 			<button
 				className={clsx(styles.sendBtn, showStop && styles.stopping)}
-				onClick={showStop ? props.onAbort : handleSend}
+				onClick={showStop ? props.onAbort : isRecording ? handleVoiceSend : handleSend}
 				disabled={!showStop && (!canSend || disabled)}
 			>
 				{showStop ? <Stop size={16} weight='regular' /> : <PaperPlaneTilt size={16} />}
@@ -1121,7 +1165,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						placeholder={is_cn ? '选择工作区' : 'Select Workspace'}
 						placeholderIcon='material-folder_open'
 						clearable={!workspaceLocked}
-						disabled={workspaceLocked || loading || isOptimizing || loadingWorkspaces}
+						disabled={workspaceLocked || loading || isOptimizing || loadingWorkspaces || isRecording}
 						searchable={workspaceOptions.length >= 3}
 						searchPlaceholder={is_cn ? '搜索工作区...' : 'Search workspaces...'}
 						dropdownWidth='auto'
@@ -1140,7 +1184,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						}}
 						variant='normal'
 						tooltip={is_cn ? '切换模型' : 'Switch Model'}
-						disabled={loading || isOptimizing}
+						disabled={loading || isOptimizing || isRecording}
 							searchable={showModelSearch}
 							dropdownWidth='auto'
 							dropdownMinWidth={200}
@@ -1155,7 +1199,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 					<ToolButton
 						tooltip={is_cn ? '上传文件' : 'Upload File'}
 						onClick={() => fileInputRef.current?.click()}
-						disabled={isOptimizing}
+						disabled={isOptimizing || isRecording}
 					>
 						<UploadSimple size={14} />
 					</ToolButton>
@@ -1182,7 +1226,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 								: 'Please enter content'
 						}
 						onClick={handleOptimizePrompt}
-						disabled={isEmpty || isOptimizing}
+						disabled={isEmpty || isOptimizing || isRecording}
 						active={isOptimizing}
 					>
 						<Sparkle size={14} />
@@ -1339,8 +1383,11 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 
 						{renderContextRow()}
 
-						<div className={styles.inputWrapper}>
-							{renderAttachments()}
+					<div className={styles.inputWrapper}>
+						{renderAttachments()}
+						{isRecording ? (
+							<VoiceRecordingPanel duration={voiceDuration} waveformRef={waveformRef} />
+						) : (
 							<div
 								className={styles.editor}
 								ref={editorRef}
@@ -1348,19 +1395,41 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 								onInput={handleInput}
 								onKeyDown={handleKeyDown}
 								onPaste={handlePaste}
-							data-placeholder={
-								streaming
-									? is_cn
-										? '正在响应中，请等待完成后再发送...'
-										: 'Waiting for response to complete...'
-									: is_cn
-										? '输入消息... (Shift + Enter 换行)'
-										: 'Type a message... (Shift + Enter for new line)'
+								data-placeholder={
+									streaming
+										? is_cn
+											? '正在响应中，请等待完成后再发送...'
+											: 'Waiting for response to complete...'
+										: is_cn
+											? '输入消息... (Shift + Enter 换行)'
+											: 'Type a message... (Shift + Enter for new line)'
 								}
 							/>
+						)}
+						{!loading && !isRecording && !isOptimizing && (
+							<button
+								className={styles.micBtn}
+								onClick={handleVoiceStart}
+								disabled={disabled || streaming}
+								title={is_cn ? '语音输入' : 'Voice input'}
+								aria-label={is_cn ? '语音输入' : 'Voice input'}
+							>
+								<Microphone size={16} />
+							</button>
+						)}
+						{isRecording && (
+							<button
+								className={styles.voiceCancelBtn}
+								onClick={handleVoiceCancel}
+								title={is_cn ? '取消录音' : 'Cancel recording'}
+								aria-label={is_cn ? '取消录音' : 'Cancel recording'}
+							>
+								<XCircle size={16} />
+							</button>
+						)}
 						{renderSendButton()}
 						{renderMentions()}
-						</div>
+					</div>
 
 						{renderToolbar()}
 					</div>
