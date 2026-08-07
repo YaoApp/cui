@@ -24,6 +24,7 @@ import presets from '../../presets.json'
 import Column from '../Column'
 import TaskCard from '../TaskCard'
 import TaskContextMenu, { type ContextMenuState } from '../TaskContextMenu'
+import UnarchiveModal from '@/pages/inbox/components/UnarchiveModal'
 import type { KanbanTask, Column as ColumnType } from '../../types'
 import styles from './index.less'
 
@@ -154,6 +155,7 @@ const Board = ({ onCreateTaskInColumn }: { onCreateTaskInColumn?: (columnId: str
 	const [dragType, setDragType] = useState<DragType>(null)
 	const [localTasks, setLocalTasks] = useState<KanbanTask[] | null>(null)
 	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
+	const [transferTask, setTransferTask] = useState<KanbanTask | null>(null)
 	const [showAddForm, setShowAddForm] = useState(false)
 	const lastOverIdRef = useRef<UniqueIdentifier | null>(null)
 	const recentlyMovedToNewContainer = useRef(false)
@@ -162,6 +164,17 @@ const Board = ({ onCreateTaskInColumn }: { onCreateTaskInColumn?: (columnId: str
 	const handleTaskContextMenu = useCallback((task: KanbanTask, e: React.MouseEvent) => {
 		setContextMenu({ task, x: e.clientX, y: e.clientY })
 	}, [])
+
+	const handleTransfer = useCallback((task: KanbanTask) => {
+		setTransferTask(task)
+	}, [])
+
+	const handleTransferConfirm = useCallback((_chatId: string, columnId: string) => {
+		if (transferTask) {
+			moveTask(transferTask.id, columnId, 0)
+			setTransferTask(null)
+		}
+	}, [transferTask, moveTask])
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -514,12 +527,25 @@ const Board = ({ onCreateTaskInColumn }: { onCreateTaskInColumn?: (columnId: str
 				)}
 			</DragOverlay>
 
-			{contextMenu && (
-				<TaskContextMenu
-					menu={contextMenu}
-					onClose={() => setContextMenu(null)}
-				/>
-			)}
+		{contextMenu && (
+			<TaskContextMenu
+				menu={contextMenu}
+				onClose={() => setContextMenu(null)}
+				onTransfer={handleTransfer}
+			/>
+		)}
+
+		<UnarchiveModal
+			open={!!transferTask}
+			chatId={transferTask?.id || ''}
+			is_cn={is_cn}
+			title={is_cn ? '转移到其他看板' : 'Transfer to Board'}
+			icon='material-drive_file_move'
+			confirmText={is_cn ? '确认转移' : 'Transfer'}
+			excludeColumnId={transferTask?.column_id}
+			onConfirm={handleTransferConfirm}
+			onClose={() => setTransferTask(null)}
+		/>
 		</DndContext>
 	)
 }

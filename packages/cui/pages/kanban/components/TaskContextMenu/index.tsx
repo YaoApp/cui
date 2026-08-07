@@ -13,10 +13,11 @@ export interface ContextMenuState {
 interface TaskContextMenuProps {
 	menu: ContextMenuState
 	onClose: () => void
+	onTransfer?: (task: KanbanTask) => void
 }
 
-const TaskContextMenu = ({ menu, onClose }: TaskContextMenuProps) => {
-	const { board, is_cn, selectTask, togglePin, moveTask, removeTask } = useKanbanContext()
+const TaskContextMenu = ({ menu, onClose, onTransfer }: TaskContextMenuProps) => {
+	const { board, is_cn, selectTask, togglePin, moveTask, removeTask, boards } = useKanbanContext()
 	const ref = useRef<HTMLDivElement>(null)
 	const { task, x, y } = menu
 
@@ -98,15 +99,28 @@ const TaskContextMenu = ({ menu, onClose }: TaskContextMenuProps) => {
 				</>
 			)}
 
-			<div className={styles.divider} />
+		{boards && boards.length > 1 && onTransfer && (
+			<>
+				<div className={styles.divider} />
+				<div
+					className={styles.item}
+					onClick={() => handleAction(() => onTransfer(task))}
+				>
+					<span className={styles.icon}><Icon name='material-drive_file_move' size={14} /></span>
+					{is_cn ? '转移到其他看板...' : 'Transfer to...'}
+				</div>
+			</>
+		)}
 
-			<div
-				className={styles.item}
-				onClick={() => handleAction(() => removeTask(task.id))}
-			>
-				<span className={styles.icon}><Icon name='material-archive' size={14} /></span>
-				{is_cn ? '归档' : 'Archive'}
-			</div>
+		<div className={styles.divider} />
+
+		<div
+			className={styles.item}
+			onClick={() => handleAction(() => removeTask(task.id))}
+		>
+			<span className={styles.icon}><Icon name='material-archive' size={14} /></span>
+			{is_cn ? '归档' : 'Archive'}
+		</div>
 		</div>
 	)
 }
