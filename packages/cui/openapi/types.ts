@@ -119,6 +119,12 @@ export interface FileInfo {
 	content_type: string
 	/** File status */
 	status: string
+	/** Audio/video duration in seconds */
+	duration?: number
+	/** Image/video width in pixels */
+	width?: number
+	/** Image/video height in pixels */
+	height?: number
 	/** File URL (if available) */
 	url?: string
 	/** Additional metadata */
