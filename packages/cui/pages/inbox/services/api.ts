@@ -33,7 +33,8 @@ function mapInboxMessage(m: any): InboxMessage {
 		inbox_pinned: !!m.inbox_pinned,
 		has_unread: !!m.has_unread,
 		inbox_read_at: m.inbox_read_at ? new Date(m.inbox_read_at).getTime() : undefined,
-		created_at: m.created_at ? new Date(m.created_at).getTime() : Date.now()
+		created_at: m.created_at ? new Date(m.created_at).getTime() : Date.now(),
+		run_status: m.run_status || undefined
 	}
 }
 
