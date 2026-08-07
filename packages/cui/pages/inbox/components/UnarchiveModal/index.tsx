@@ -13,9 +13,13 @@ interface UnarchiveModalProps {
 	is_cn: boolean
 	onConfirm: (chatId: string, columnId: string) => void
 	onClose: () => void
+	title?: string
+	icon?: string
+	confirmText?: string
+	excludeColumnId?: string
 }
 
-const UnarchiveModal = ({ open, chatId, is_cn, onConfirm, onClose }: UnarchiveModalProps) => {
+const UnarchiveModal = ({ open, chatId, is_cn, onConfirm, onClose, title, icon, confirmText, excludeColumnId }: UnarchiveModalProps) => {
 	const [boards, setBoards] = useState<BoardSummary[]>([])
 	const [selectedBoardId, setSelectedBoardId] = useState<string>('')
 	const [boardDetail, setBoardDetail] = useState<Board | null>(null)
@@ -58,14 +62,16 @@ const UnarchiveModal = ({ open, chatId, is_cn, onConfirm, onClose }: UnarchiveMo
 
 	const columnSchema: PropertySchema = useMemo(() => {
 		const cols = boardDetail
-			? [...boardDetail.columns].sort((a, b) => a.position - b.position)
+			? [...boardDetail.columns]
+				.sort((a, b) => a.position - b.position)
+				.filter((c) => !excludeColumnId || c.id !== excludeColumnId)
 			: []
 		return {
 			type: 'string',
 			placeholder: is_cn ? '选择列' : 'Select Column',
 			enum: cols.map((c) => ({ label: c.title, value: c.id }))
 		}
-	}, [boardDetail, is_cn])
+	}, [boardDetail, is_cn, excludeColumnId])
 
 	const handleConfirm = useCallback(() => {
 		if (!selectedColumnId) return
@@ -86,11 +92,11 @@ const UnarchiveModal = ({ open, chatId, is_cn, onConfirm, onClose }: UnarchiveMo
 	const modalContent = (
 		<div className={styles.overlay} onClick={onClose}>
 			<div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-				<div className={styles.header}>
-					<span className={styles.headerTitle}>
-						<Icon name='material-unarchive' size={18} />
-						{is_cn ? '取消归档' : 'Unarchive Task'}
-					</span>
+			<div className={styles.header}>
+				<span className={styles.headerTitle}>
+					<Icon name={icon || 'material-unarchive'} size={18} />
+					{title || (is_cn ? '取消归档' : 'Unarchive Task')}
+				</span>
 					<span className={styles.closeBtn} onClick={onClose}>
 						<Icon name='material-close' size={16} />
 					</span>
@@ -134,13 +140,13 @@ const UnarchiveModal = ({ open, chatId, is_cn, onConfirm, onClose }: UnarchiveMo
 					<button className={styles.cancelBtn} onClick={onClose}>
 						{is_cn ? '取消' : 'Cancel'}
 					</button>
-					<button
-						className={styles.confirmBtn}
-						disabled={!selectedColumnId}
-						onClick={handleConfirm}
-					>
-						{is_cn ? '确认恢复' : 'Confirm'}
-					</button>
+				<button
+					className={styles.confirmBtn}
+					disabled={!selectedColumnId}
+					onClick={handleConfirm}
+				>
+					{confirmText || (is_cn ? '确认恢复' : 'Confirm')}
+				</button>
 				</div>
 			</div>
 		</div>
