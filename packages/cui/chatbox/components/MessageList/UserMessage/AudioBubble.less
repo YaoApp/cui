@@ -1,0 +1,242 @@
+/* ======== AudioPlayer styles (used by AI audio messages) ======== */
+
+.audioBubble {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	box-sizing: border-box;
+	width: 100%;
+
+	&.standalone {
+		max-width: 280px;
+		padding: 12px 14px;
+		background-color: var(--color_chatbox_bg_field);
+		color: var(--color_chatbox_text_primary);
+		border: 1px solid var(--color_border_light);
+		border-radius: 12px;
+		border-bottom-right-radius: 4px;
+	}
+
+	&.inline {
+		padding: 10px 12px;
+		background-color: var(--color_chatbox_bg_content);
+		border: 1px solid var(--color_chatbox_border_card);
+		border-radius: 8px;
+		max-width: 300px;
+	}
+
+	&.loading,
+	&.error {
+		min-height: 52px;
+		font-size: 12px;
+		color: var(--color_chatbox_text_tertiary);
+	}
+
+	&.error {
+		color: var(--color_danger);
+		border-color: var(--color_danger_bg);
+		background-color: var(--color_danger_bg);
+	}
+}
+
+.loadingIcon,
+.errorIcon {
+	flex-shrink: 0;
+	opacity: 0.6;
+}
+
+.errorIcon {
+	color: var(--color_danger);
+	opacity: 0.8;
+}
+
+.playButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 36px;
+	height: 36px;
+	border: none;
+	border-radius: 50%;
+	background-color: var(--color_primary);
+	color: #fff;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+
+	.inline & {
+		width: 32px;
+		height: 32px;
+	}
+
+	&:hover {
+		background-color: var(--color_main_hover);
+	}
+}
+
+.playerBody {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.progressBar {
+	width: 100%;
+	height: 4px;
+	margin: 0;
+	appearance: none;
+	background: transparent;
+	cursor: pointer;
+
+	&::-webkit-slider-runnable-track {
+		height: 4px;
+		border-radius: 2px;
+		background: var(--color_chatbox_border_field);
+	}
+
+	&::-webkit-slider-thumb {
+		appearance: none;
+		width: 12px;
+		height: 12px;
+		margin-top: -4px;
+		border-radius: 50%;
+		background: var(--color_primary);
+		border: none;
+		cursor: pointer;
+	}
+
+	&::-moz-range-track {
+		height: 4px;
+		border-radius: 2px;
+		background: var(--color_chatbox_border_field);
+	}
+
+	&::-moz-range-thumb {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: var(--color_primary);
+		border: none;
+		cursor: pointer;
+	}
+}
+
+.timeRow {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	font-size: 11px;
+	color: var(--color_chatbox_text_secondary);
+	font-variant-numeric: tabular-nums;
+}
+
+.timeDivider {
+	opacity: 0.5;
+}
+
+.transcript {
+	font-size: 12px;
+	color: var(--color_chatbox_text_secondary);
+	line-height: 1.4;
+	margin-top: 2px;
+	word-break: break-word;
+}
+
+.downloadButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--color_chatbox_icon_muted);
+	cursor: pointer;
+	transition: color 0.2s ease;
+
+	&:hover:not(:disabled) {
+		color: var(--color_primary);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+/* ======== WeChat-style voice bubble (user-sent voice messages) ======== */
+
+.voiceBubble {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 3px;
+	box-sizing: border-box;
+	cursor: pointer;
+	user-select: none;
+	background-color: var(--color_primary);
+	color: #fff;
+	border-radius: 12px 12px 4px 12px;
+	transition: opacity 0.15s ease;
+	outline: none;
+
+	&:hover {
+		opacity: 0.92;
+	}
+
+	&:active {
+		opacity: 0.8;
+	}
+
+	audio {
+		display: none;
+	}
+}
+
+.voiceStandalone {
+	padding: 12px 14px;
+}
+
+.voiceInline {
+	padding: 10px 12px;
+}
+
+.voiceError {
+	opacity: 0.5;
+	cursor: default;
+
+	&:hover {
+		opacity: 0.5;
+	}
+}
+
+.voiceDuration {
+	font-size: 14px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+	line-height: 1;
+}
+
+.voiceIcon {
+	flex-shrink: 0;
+	line-height: 0;
+}
+
+.voicePlaying .voiceIcon {
+	animation: voicePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes voicePulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+}

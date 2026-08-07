@@ -5,24 +5,13 @@ import { FileText, Image as ImageIcon, DownloadSimple } from 'phosphor-react'
 import Icon from '../../../../widgets/Icon'
 import type { Message } from '../../../../openapi'
 import { ParseFileRef, ResolveFileURL } from '@/utils/fileWrapper'
+import { isVoiceLike, type ContentPart } from '../../../utils/media'
+import AudioBubble from './AudioBubble'
 import styles from './index.less'
 
 interface IUserMessageProps {
 	message: Message
 	isLast?: boolean
-}
-
-interface ContentPart {
-	type: 'text' | 'image_url' | 'file'
-	text?: string
-	image_url?: {
-		url: string
-		detail?: string
-	}
-	file?: {
-		url: string
-		filename?: string
-	}
 }
 
 const ImageAttachment: React.FC<{ url: string }> = ({ url }) => {
@@ -241,16 +230,35 @@ const UserMessage = ({ message, isLast }: IUserMessageProps) => {
 	}
 
 	if (Array.isArray(content)) {
+		const parts = content as ContentPart[]
+		const voiceParts = parts.filter(isVoiceLike)
+		const otherParts = parts.filter((p) => !isVoiceLike(p))
+		const isPureVoice = voiceParts.length > 0 && otherParts.length === 0
+
+		if (isPureVoice) {
+			return (
+				<div className={clsx(styles.userRow)} style={{ marginBottom: '16px' }}>
+					{voiceParts.map((part, i) => (
+						<AudioBubble key={i} part={part} standalone />
+					))}
+				</div>
+			)
+		}
+
 		return (
 			<div className={clsx(styles.userRow)} style={{ marginBottom: '16px' }}>
 				<div className={styles.messageBubble}>
-					{content.map((part: ContentPart, index: number) => {
+					{parts.map((part, index) => {
 						if (part.type === 'text' && part.text) {
 							return (
 								<div key={index} className={styles.messageContent}>
 									{renderTextWithTags(part.text)}
 								</div>
 							)
+						}
+
+						if (isVoiceLike(part)) {
+							return <AudioBubble key={index} part={part} />
 						}
 
 						if (part.type === 'image_url' && part.image_url?.url) {

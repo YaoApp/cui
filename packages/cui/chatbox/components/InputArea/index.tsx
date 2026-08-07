@@ -592,7 +592,8 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						type: 'file',
 						file: {
 							url: att.wrapper,
-							filename: att.name
+							filename: att.name,
+							mime_type: att.file?.type || undefined
 						}
 					})
 				}
