@@ -17,6 +17,7 @@ export interface InboxMessage {
 	has_unread: boolean
 	inbox_read_at?: number
 	created_at: number
+	run_status?: 'running' | 'queued' | 'completed' | 'failed'
 }
 
 export interface InboxStatsData {

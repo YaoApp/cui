@@ -45,11 +45,15 @@ const MessageItem = ({ message, selected, is_cn, onClick, onToggleBookmark, onCo
 			onClick={onClick}
 			onContextMenu={onContextMenu}
 		>
-			<div className={styles.itemHeader}>
+		<div className={styles.itemHeader}>
+			{message.run_status === 'running' ? (
+				<span className={styles.runningIndicator} />
+			) : (
 				<span className={styles.typeIcon} style={{ color: config.color }}>
 					<Icon name={config.icon} size={16} />
 				</span>
-				{message.inbox_pinned && (
+			)}
+			{message.inbox_pinned && (
 					<span className={styles.pinIndicator}>
 						<Icon name='material-push_pin' size={13} />
 					</span>
@@ -64,6 +68,12 @@ const MessageItem = ({ message, selected, is_cn, onClick, onToggleBookmark, onCo
 				<span className={styles.itemTime}>{formatTimeAgo(message.created_at, is_cn)}</span>
 			</div>
 			<div className={styles.itemBody}>{message.body}</div>
+			{message.source?.name && (
+				<div className={styles.itemFooter}>
+					<Icon name='material-view_kanban' size={13} />
+					<span className={styles.footerText}>{message.source.name}</span>
+				</div>
+			)}
 		</div>
 	)
 }

@@ -158,46 +158,56 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 									onClick={() => selectChatGroup(group.chat_id)}
 									onContextMenu={(e) => handleContextMenu(e, group)}
 								>
-									<div className={styles.itemHeader}>
+								<div className={styles.itemHeader}>
+									{group.latestMail.run_status === 'running' ? (
+										<span className={styles.runningIndicator} />
+									) : (
 										<span
 											className={styles.typeIcon}
 											style={{ color: config.color }}
 										>
 											<Icon name={config.icon} size={16} />
 										</span>
-										{group.inboxPinned && (
-											<span className={styles.pinIndicator}>
-												<Icon name='material-push_pin' size={13} />
-											</span>
+									)}
+									{group.inboxPinned && (
+										<span className={styles.pinIndicator}>
+											<Icon name='material-push_pin' size={13} />
+										</span>
+									)}
+									<span className={styles.itemTitle}>
+										{group.taskName || group.title}
+									</span>
+									{hasUnread && <span className={styles.unreadDot} />}
+									<span
+										className={clsx(
+											styles.starBtn,
+											group.bookmarked && styles.starred
 										)}
-										<span className={styles.itemTitle}>
-											{group.taskName || group.title}
-										</span>
-										{hasUnread && <span className={styles.unreadDot} />}
-										<span
-											className={clsx(
-												styles.starBtn,
-												group.bookmarked && styles.starred
-											)}
-											onClick={(e) => {
-												e.stopPropagation()
-												toggleBookmark(group.chat_id)
-											}}
-										>
-											<Icon
-												name={
-													group.bookmarked
-														? 'material-star'
-														: 'material-star_outline'
-												}
-												size={15}
-											/>
-										</span>
-										<span className={styles.itemTime}>
-											{formatTimeAgo(group.latestTime, is_cn)}
-										</span>
+										onClick={(e) => {
+											e.stopPropagation()
+											toggleBookmark(group.chat_id)
+										}}
+									>
+										<Icon
+											name={
+												group.bookmarked
+													? 'material-star'
+													: 'material-star_outline'
+											}
+											size={15}
+										/>
+									</span>
+									<span className={styles.itemTime}>
+										{formatTimeAgo(group.latestTime, is_cn)}
+									</span>
+								</div>
+								<div className={styles.itemBody}>{group.latestMail.body}</div>
+								{group.latestMail.source?.name && (
+									<div className={styles.itemFooter}>
+										<Icon name='material-view_kanban' size={13} />
+										<span className={styles.footerText}>{group.latestMail.source.name}</span>
 									</div>
-									<div className={styles.itemBody}>{group.latestMail.body}</div>
+								)}
 								</div>
 							)
 						})}
