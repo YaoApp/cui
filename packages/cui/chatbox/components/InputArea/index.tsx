@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
+import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useMemo } from 'react'
 import { message, Tooltip as AntTooltip, Spin } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
@@ -109,13 +109,19 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	// Load Workspace options (real-time fetch on dropdown open)
 	const { workspaces, hasOnlineNodes, loading: loadingWorkspaces, fetchWorkspaces } = useWorkspace()
 
+	const isWorkspaceOffline = useMemo(() => {
+		if (!selectedWorkspace || workspaces.length === 0) return false
+		const ws = workspaces.find((w) => w.id === selectedWorkspace)
+		return ws ? ws.node_online === false : true
+	}, [selectedWorkspace, workspaces])
+
 	// Pre-fetch workspaces when a workspace was previously selected (from localStorage)
 	// so the Selector can display the saved workspace name instead of the placeholder
 	useEffect(() => {
 		if (selectedWorkspace) {
 			fetchWorkspaces()
 		}
-	}, [])
+	}, [selectedWorkspace])
 
 	// Localization & Routing
 	const locale = getLocale()
@@ -222,12 +228,13 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	}, [initialWorkspace])
 
 	// Clear stale selectedWorkspace if it no longer exists in the options list
+	// Skip when workspace is locked (existing conversation) — keep ID for offline detection
 	useEffect(() => {
-		if (!selectedWorkspace || workspaces.length === 0) return
+		if (!selectedWorkspace || workspaces.length === 0 || workspaceLocked) return
 		if (!workspaces.some((w) => w.id === selectedWorkspace)) {
 			setSelectedWorkspace('')
 		}
-	}, [workspaces, selectedWorkspace])
+	}, [workspaces, selectedWorkspace, workspaceLocked])
 
 	// Workspace follow: when assistant changes, check compatibility
 	useEffect(() => {
@@ -1011,13 +1018,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 					{agent && <AgentTag agent={agent} onSwitchAssistant={onSwitchAssistant} />}
 				</div>
 				<div className={styles.rightTags}>
-					{currentPage && (
-						<Tooltip content={currentPage}>
-							<div className={clsx(styles.tag, styles.pageTag)} onClick={handlePageClick}>
-								<Icon name='material-my_location' size={12} />
-							</div>
-						</Tooltip>
-					)}
 				</div>
 			</div>
 		)
@@ -1079,6 +1079,8 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			return null
 		}
 
+		if (isWorkspaceOffline) return null
+
 		const showStop = loading
 		const hasReadyAttachments = attachments.some((att) => !att.uploading && !att.error)
 		const canSend = !isEmpty || hasReadyAttachments || isRecording
@@ -1087,7 +1089,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			<button
 				className={clsx(styles.sendBtn, showStop && styles.stopping)}
 				onClick={showStop ? props.onAbort : isRecording ? handleVoiceSend : handleSend}
-				disabled={!showStop && (!canSend || disabled)}
+				disabled={!showStop && (!canSend || disabled || isWorkspaceOffline)}
 			>
 				{showStop ? <Stop size={16} weight='regular' /> : <PaperPlaneTilt size={16} />}
 			</button>
@@ -1157,15 +1159,19 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 							onWorkspaceChange?.(ws)
 						}}
 						variant='tag'
-						tooltip={
-							workspaceLocked
+					tooltip={
+						isWorkspaceOffline
+							? is_cn
+								? '工作区离线，点击刷新重试'
+								: 'Workspace offline, click to refresh'
+							: workspaceLocked
 								? is_cn
 									? '工作区已锁定，新建对话可切换'
 									: 'Workspace locked, start new chat to switch'
 								: is_cn
 									? '选择工作区'
 									: 'Select Workspace'
-						}
+					}
 						placeholder={is_cn ? '选择工作区' : 'Select Workspace'}
 						placeholderIcon='material-folder_open'
 						clearable={!workspaceLocked}
@@ -1391,6 +1397,19 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						{renderAttachments()}
 						{isRecording ? (
 							<VoiceRecordingPanel duration={voiceDuration} waveformRef={waveformRef} />
+						) : isWorkspaceOffline ? (
+							<div className={clsx(styles.editor, styles.workspaceOffline)}>
+								<span className={styles.offlineHint}>
+									{is_cn ? '工作区离线' : 'Workspace offline'}
+								</span>
+								<button
+									className={styles.refreshWorkspaceBtn}
+									onClick={fetchWorkspaces}
+									title={is_cn ? '刷新工作区状态' : 'Refresh workspace status'}
+								>
+									<Icon name='material-refresh' size={14} />
+								</button>
+							</div>
 						) : (
 							<div
 								className={styles.editor}
@@ -1399,22 +1418,22 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 								onInput={handleInput}
 								onKeyDown={handleKeyDown}
 								onPaste={handlePaste}
-								data-placeholder={
-									streaming
-										? is_cn
-											? '正在响应中，请等待完成后再发送...'
-											: 'Waiting for response to complete...'
-										: is_cn
-											? '输入消息... (Shift + Enter 换行)'
-											: 'Type a message... (Shift + Enter for new line)'
-								}
+							data-placeholder={
+								streaming
+									? is_cn
+										? '正在响应中，请等待完成后再发送...'
+										: 'Waiting for response to complete...'
+									: is_cn
+										? '输入消息... (Shift + Enter 换行)'
+										: 'Type a message... (Shift + Enter for new line)'
+							}
 							/>
 						)}
-						{!loading && !isRecording && !isOptimizing && (
+						{!loading && !isRecording && !isOptimizing && !isWorkspaceOffline && (
 							<button
 								className={styles.micBtn}
 								onClick={handleVoiceStart}
-								disabled={disabled || streaming}
+								disabled={disabled || streaming || isWorkspaceOffline}
 								title={is_cn ? '语音输入' : 'Voice input'}
 								aria-label={is_cn ? '语音输入' : 'Voice input'}
 							>

@@ -123,7 +123,7 @@ const TaskCard = ({ task, is_cn, isDragging, isSelected, onClick, onMenuClick, o
 				<div className={styles.footerLine}>
 					<span className={styles.footerSlot}>
 						<Icon name='material-folder' size={12} />
-						{task.workspace?.name || '—'}
+						{task.workspace?.name || (task.workspace?.id ? (is_cn ? '离线' : 'Offline') : '—')}
 					</span>
 					<span className={styles.footerSpacer} />
 					<span className={styles.footerSlot}>
