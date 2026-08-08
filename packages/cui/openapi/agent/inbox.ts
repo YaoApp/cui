@@ -8,6 +8,7 @@ export interface InboxListQuery {
 	chat_id?: string
 	page?: number
 	size?: number
+	locale?: string
 }
 
 export interface InboxItem {
@@ -63,6 +64,7 @@ export class AgentInbox {
 			if (query.chat_id) params.append('chat_id', query.chat_id)
 			if (query.page) params.append('page', query.page.toString())
 			if (query.size) params.append('size', query.size.toString())
+			if (query.locale) params.append('locale', query.locale)
 		}
 		const url = BuildURL('/agent/inbox', params)
 		return this.api.Get(url)

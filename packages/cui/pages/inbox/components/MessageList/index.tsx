@@ -202,10 +202,28 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 									</span>
 								</div>
 								<div className={styles.itemBody}>{group.latestMail.body}</div>
-								{group.latestMail.source?.name && (
+								{(group.latestMail.workspace_id || group.latestMail.assistant_name || group.latestMail.source?.name) && (
 									<div className={styles.itemFooter}>
-										<Icon name='material-view_kanban' size={13} />
-										<span className={styles.footerText}>{group.latestMail.source.name}</span>
+										<div className={styles.footerLeft}>
+											{group.latestMail.source?.name && (
+												<span className={styles.footerInfo}>
+													<Icon name='material-view_kanban' size={12} />
+													<span>{group.latestMail.source.name}</span>
+												</span>
+											)}
+											{group.latestMail.assistant_name && (
+												<span className={clsx(styles.footerInfo, styles.assistantInfo)}>
+													<Icon name='material-assistant' size={12} />
+													<span>{group.latestMail.assistant_name}</span>
+												</span>
+											)}
+										</div>
+										{group.latestMail.workspace_id && (
+											<span className={clsx(styles.footerInfo, !group.latestMail.workspace_name && styles.offline)}>
+												<Icon name='material-folder' size={12} />
+												<span>{group.latestMail.workspace_name || (is_cn ? '离线' : 'Offline')}</span>
+											</span>
+										)}
 									</div>
 								)}
 								</div>

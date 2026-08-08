@@ -1,5 +1,6 @@
 import type { InboxMessage, InboxAPI } from '../types'
 import { Agent } from '@/openapi'
+import { getLocale } from '@umijs/max'
 
 function getAgent() {
 	const openapi = window.$app?.openapi
@@ -29,6 +30,9 @@ function mapInboxMessage(m: any): InboxMessage {
 		task_id: m.chat_id || '',
 		chat_id: m.chat_id || '',
 		assistant_id: m.assistant_id,
+		assistant_name: m.assistant_name || undefined,
+		workspace_id: m.workspace_id || undefined,
+		workspace_name: m.workspace_name || undefined,
 		bookmarked: !!m.bookmarked,
 		inbox_pinned: !!m.inbox_pinned,
 		has_unread: !!m.has_unread,
@@ -50,7 +54,8 @@ export const services: InboxAPI = {
 	async getMessages(query?: { filter?: string; page?: number; size?: number; chat_id?: string }) {
 		const agent = getAgent()
 		const api = getOpenAPI()
-		const res = await agent.inbox.List({ filter: query?.filter, page: query?.page || 1, size: query?.size || 20, chat_id: query?.chat_id })
+		const locale = getLocale() || 'en-us'
+		const res = await agent.inbox.List({ filter: query?.filter, page: query?.page || 1, size: query?.size || 20, chat_id: query?.chat_id, locale })
 		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to list inbox')
 		return {
 			items: (res.data?.mails || []).map(mapInboxMessage),
