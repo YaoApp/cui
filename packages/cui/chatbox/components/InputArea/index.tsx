@@ -694,7 +694,11 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			message.error(is_cn ? '需要麦克风权限' : 'Microphone permission required')
 		} else if (voiceError === 'microphone_not_found') {
 			message.error(is_cn ? '未检测到麦克风' : 'No microphone detected')
-		} else if (voiceError && voiceError !== 'microphone_denied' && voiceError !== 'microphone_not_found') {
+		} else if (voiceError === 'not_supported') {
+			message.error(is_cn ? '当前环境不支持录音' : 'Audio recording is not supported in this environment')
+		} else if (voiceError === 'recording_failed') {
+			message.error(is_cn ? '录音失败' : 'Recording failed')
+		} else if (voiceError) {
 			message.error(voiceError)
 		}
 	}, [voiceError, is_cn])
