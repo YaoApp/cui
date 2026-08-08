@@ -341,8 +341,7 @@
 				opacity: 0.4;
 				cursor: not-allowed;
 				transform: none;
-			}
-		}
+			}		}
 
 		.voiceCancelBtn {
 			position: absolute;
@@ -588,6 +587,44 @@
 
 .editor::-webkit-scrollbar-thumb:active {
 	background: var(--color_text_light);
+}
+
+.workspaceOffline {
+	opacity: 0.5;
+	background: var(--color_neo_bg_field, rgba(0, 0, 0, 0.02));
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 40px;
+}
+
+.offlineHint {
+	color: var(--color_text_grey);
+	font-size: 13px;
+}
+
+.refreshWorkspaceBtn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--color_chatbox_text_secondary);
+	border: 1px solid transparent;
+	cursor: pointer;
+	transition: all 0.2s;
+	padding: 0;
+
+	&:hover {
+		color: var(--color_primary);
+		background: var(--color_info_bg);
+		border-color: var(--color_info_border, var(--color_border_light));
+		transform: rotate(180deg);
+	}
 }
 
 // Breathing animation for stop button
