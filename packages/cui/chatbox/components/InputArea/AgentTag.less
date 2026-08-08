@@ -22,6 +22,19 @@
 		}
 	}
 
+	&.disabled {
+		cursor: not-allowed;
+		opacity: 0.5;
+
+		&:hover {
+			background: transparent;
+
+			.switchIcon {
+				opacity: 0;
+			}
+		}
+	}
+
 	.avatar {
 		width: 28px;
 		height: 28px;
