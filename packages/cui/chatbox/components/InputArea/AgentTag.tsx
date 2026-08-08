@@ -12,12 +12,14 @@ interface IAgentTagProps {
 		id?: string
 	}
 	onSwitchAssistant?: (assistantId: string) => void
+	disabled?: boolean
 }
 
-const AgentTag = ({ agent, onSwitchAssistant }: IAgentTagProps) => {
+const AgentTag = ({ agent, onSwitchAssistant, disabled }: IAgentTagProps) => {
 	const [pickerVisible, setPickerVisible] = useState(false)
 
 	const handleClick = () => {
+		if (disabled) return
 		if (onSwitchAssistant) {
 			setPickerVisible(true)
 		} else {
@@ -38,7 +40,7 @@ const AgentTag = ({ agent, onSwitchAssistant }: IAgentTagProps) => {
 	return (
 		<>
 			<Tooltip content={agent.name} placement="top">
-				<div className={styles.tag} onClick={handleClick}>
+				<div className={`${styles.tag} ${disabled ? styles.disabled : ''}`} onClick={handleClick}>
 					<div className={styles.avatar}>
 						{agent.avatar && agent.avatar.length > 2 ? (
 							<img src={agent.avatar} alt={agent.name} />

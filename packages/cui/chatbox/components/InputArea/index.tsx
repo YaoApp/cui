@@ -1015,7 +1015,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		return (
 			<div ref={contextRowRef} className={styles.contextRow}>
 				<div className={styles.leftTags}>
-					{agent && <AgentTag agent={agent} onSwitchAssistant={onSwitchAssistant} />}
+					{agent && <AgentTag agent={agent} onSwitchAssistant={onSwitchAssistant} disabled={isWorkspaceOffline} />}
 				</div>
 				<div className={styles.rightTags}>
 				</div>
