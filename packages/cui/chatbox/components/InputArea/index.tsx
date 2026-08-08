@@ -228,13 +228,14 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	}, [initialWorkspace])
 
 	// Clear stale selectedWorkspace if it no longer exists in the options list
-	// Skip when workspace is locked (existing conversation) — keep ID for offline detection
+	// Skip when workspace is locked (existing conversation) or matches task/tab workspace — keep ID for offline detection
 	useEffect(() => {
 		if (!selectedWorkspace || workspaces.length === 0 || workspaceLocked) return
+		if (selectedWorkspace === initialWorkspace) return
 		if (!workspaces.some((w) => w.id === selectedWorkspace)) {
 			setSelectedWorkspace('')
 		}
-	}, [workspaces, selectedWorkspace, workspaceLocked])
+	}, [workspaces, selectedWorkspace, workspaceLocked, initialWorkspace])
 
 	// Workspace follow: when assistant changes, check compatibility
 	useEffect(() => {
