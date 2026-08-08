@@ -12,6 +12,9 @@ export interface InboxMessage {
 	task_id: string
 	chat_id: string
 	assistant_id?: string
+	assistant_name?: string
+	workspace_id?: string
+	workspace_name?: string
 	bookmarked: boolean
 	inbox_pinned: boolean
 	has_unread: boolean
