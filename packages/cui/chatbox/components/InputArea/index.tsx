@@ -1172,8 +1172,8 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 									? '选择工作区'
 									: 'Select Workspace'
 					}
-						placeholder={is_cn ? '选择工作区' : 'Select Workspace'}
-						placeholderIcon='material-folder_open'
+						placeholder={isWorkspaceOffline ? (is_cn ? '离线' : 'Offline') : is_cn ? '选择工作区' : 'Select Workspace'}
+						placeholderIcon={isWorkspaceOffline ? 'material-cloud_off' : 'material-folder_open'}
 						clearable={!workspaceLocked}
 						disabled={workspaceLocked || loading || isOptimizing || loadingWorkspaces || isRecording}
 						searchable={workspaceOptions.length >= 3}
@@ -1194,7 +1194,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						}}
 						variant='normal'
 						tooltip={is_cn ? '切换模型' : 'Switch Model'}
-						disabled={loading || isOptimizing || isRecording}
+						disabled={loading || isOptimizing || isRecording || isWorkspaceOffline}
 							searchable={showModelSearch}
 							dropdownWidth='auto'
 							dropdownMinWidth={200}
@@ -1209,7 +1209,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 					<ToolButton
 						tooltip={is_cn ? '上传文件' : 'Upload File'}
 						onClick={() => fileInputRef.current?.click()}
-						disabled={isOptimizing || isRecording}
+						disabled={isOptimizing || isRecording || isWorkspaceOffline}
 					>
 						<UploadSimple size={14} />
 					</ToolButton>
@@ -1236,7 +1236,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 								: 'Please enter content'
 						}
 						onClick={handleOptimizePrompt}
-						disabled={isEmpty || isOptimizing || isRecording}
+						disabled={isEmpty || isOptimizing || isRecording || isWorkspaceOffline}
 						active={isOptimizing}
 					>
 						<Sparkle size={14} />
