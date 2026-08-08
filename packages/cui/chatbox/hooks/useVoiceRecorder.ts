@@ -170,7 +170,7 @@ export function useVoiceRecorder(): VoiceRecorderState & VoiceRecorderActions {
 
 		if (!navigator.mediaDevices?.getUserMedia) {
 			startingRef.current = false
-			setError('Browser does not support audio recording')
+			setError('not_supported')
 			setStatus('error')
 			return
 		}
@@ -238,7 +238,7 @@ export function useVoiceRecorder(): VoiceRecorderState & VoiceRecorderActions {
 			} else if (err?.name === 'NotFoundError') {
 				setError('microphone_not_found')
 			} else {
-				setError(err?.message || 'Recording failed')
+				setError('recording_failed')
 			}
 			setStatus('error')
 		}
