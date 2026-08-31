@@ -125,6 +125,22 @@ export function triggerFileDownload(file: string, filename: string, index = 0): 
 
 // ========== Unified File Reference Protocol ==========
 
+const _wsVersionCache = new Map<string, { version: number; lastAccess: number }>()
+const _WS_GAP_MS = 5000
+
+function _wsVersion(wsId: string, filePath: string): number {
+	const key = `${wsId}/${filePath}`
+	const now = Date.now()
+	const entry = _wsVersionCache.get(key)
+	if (entry && now - entry.lastAccess < _WS_GAP_MS) {
+		entry.lastAccess = now
+		return entry.version
+	}
+	const v = { version: now, lastAccess: now }
+	_wsVersionCache.set(key, v)
+	return now
+}
+
 export type FileRefType = 'wrapper' | 'workspace' | 'service' | 'url' | 'unknown'
 
 export interface FileRef {
@@ -225,7 +241,7 @@ export function ResolveFileURL(str: string): string {
 	const ref = ParseFileRef(str)
 	switch (ref.type) {
 		case 'workspace':
-			return `${getBaseURL()}/workspace/${ref.workspaceId}/files/${ref.filePath}`
+			return `${getBaseURL()}/workspace/${ref.workspaceId}/files/${ref.filePath}?v=${_wsVersion(ref.workspaceId!, ref.filePath!)}`
 		case 'wrapper':
 			return WrapperToContentURL(str)
 		case 'url':
