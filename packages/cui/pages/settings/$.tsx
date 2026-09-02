@@ -22,6 +22,7 @@ import SystemInfo from './components/SystemInfo'
 import CloudService from './components/CloudService'
 import Models from './components/Models'
 import SearchScrape from './components/SearchScrape'
+import OCR from './components/OCR'
 import Sandbox from './components/Sandbox'
 import SmtpConfig from './components/SmtpConfig'
 import type { MenuItem, MenuGroup } from './types'
@@ -72,6 +73,7 @@ const Settings = () => {
 			cloud: CloudService,
 			models: Models,
 			search: SearchScrape,
+			ocr: OCR,
 			sandbox: Sandbox,
 			smtp: SmtpConfig
 		}),

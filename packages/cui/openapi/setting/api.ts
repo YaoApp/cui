@@ -14,6 +14,10 @@ import type {
 	SearchProviderConfig,
 	SearchToolAssignment,
 	SearchTestResult,
+	OCRPageData,
+	OCRProviderConfig,
+	OCRToolAssignment,
+	OCRTestResult,
 	SmtpPageData,
 	SmtpConfig,
 	SmtpTestResult,
@@ -112,6 +116,28 @@ export class Setting {
 
 	async SaveSearchToolAssignment(data: SearchToolAssignment): Promise<ApiResponse<SearchToolAssignment>> {
 		return this.api.Put<SearchToolAssignment>('/setting/search/tool-assignment', data)
+	}
+
+	// ─── OCR ───────────────────────────────────────────────
+
+	async GetOCRConfig(): Promise<ApiResponse<OCRPageData>> {
+		return this.api.Get<OCRPageData>('/setting/ocr')
+	}
+
+	async UpdateOCRProvider(key: string, data: { field_values: Record<string, string> }): Promise<ApiResponse<OCRProviderConfig>> {
+		return this.api.Put<OCRProviderConfig>(`/setting/ocr/providers/${encodeURIComponent(key)}`, data)
+	}
+
+	async ToggleOCRProvider(key: string, data: { enabled: boolean }): Promise<ApiResponse<OCRProviderConfig>> {
+		return this.api.Put<OCRProviderConfig>(`/setting/ocr/providers/${encodeURIComponent(key)}/toggle`, data)
+	}
+
+	async TestOCRProvider(key: string, data?: { field_values?: Record<string, string> }): Promise<ApiResponse<OCRTestResult>> {
+		return this.api.Post<OCRTestResult>(`/setting/ocr/providers/${encodeURIComponent(key)}/test`, data || {})
+	}
+
+	async SaveOCRToolAssignment(data: OCRToolAssignment): Promise<ApiResponse<OCRToolAssignment>> {
+		return this.api.Put<OCRToolAssignment>('/setting/ocr/tool-assignment', data)
 	}
 
 	// ─── SMTP ──────────────────────────────────────────────

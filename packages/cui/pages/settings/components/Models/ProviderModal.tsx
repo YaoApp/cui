@@ -22,7 +22,8 @@ const ALL_CAPS: { key: ModelCapability; cn: string; en: string }[] = [
 	{ key: 'json', cn: '结构化输出', en: 'JSON' },
 	{ key: 'embedding', cn: '嵌入', en: 'Embedding' },
 	{ key: 'audio', cn: '语音', en: 'Audio' },
-	{ key: 'image_generation', cn: '绘图', en: 'Image' }
+	{ key: 'image_generation', cn: '绘图', en: 'Image' },
+	{ key: 'ocr', cn: '文字识别', en: 'OCR' }
 ]
 
 function capDesc(caps: ModelCapability[], is_cn: boolean): string {
