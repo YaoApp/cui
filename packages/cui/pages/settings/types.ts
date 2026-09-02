@@ -325,7 +325,7 @@ export interface CloudServiceTestResult {
 
 // ─── Models Page ─────────────────────────────────────────
 
-export type ModelCapability = 'vision' | 'audio' | 'reasoning' | 'tool_calls' | 'streaming' | 'json' | 'embedding' | 'image_generation'
+export type ModelCapability = 'vision' | 'audio' | 'reasoning' | 'tool_calls' | 'streaming' | 'json' | 'embedding' | 'image_generation' | 'ocr'
 
 export interface ModelInfo {
 	id: string
@@ -394,6 +394,7 @@ export interface SearchProviderField {
 	type: 'text' | 'password'
 	default?: string
 	placeholder?: string
+	optional?: boolean
 	hint?: { 'zh-CN': string; 'en-US': string }
 }
 
@@ -424,6 +425,38 @@ export interface SearchPageData {
 	presets: SearchProviderPreset[]
 	providers: SearchProviderConfig[]
 	tool_assignment: SearchToolAssignment
+}
+
+// ─── OCR Page ────────────────────────────────────────────
+
+export type OCRToolType = 'ocr_recognize'
+
+export interface OCRProviderPreset {
+	key: string
+	name: string
+	description?: { 'zh-CN': string; 'en-US': string }
+	website?: string
+	tools: string[]
+	tool_labels: { 'zh-CN': string; 'en-US': string }[]
+	fields: SearchProviderField[]
+	is_cloud?: boolean
+}
+
+export interface OCRProviderConfig {
+	preset_key: string
+	enabled: boolean
+	field_values: Record<string, string>
+	status: 'connected' | 'disconnected' | 'unconfigured'
+}
+
+export interface OCRToolAssignment {
+	ocr_recognize?: string
+}
+
+export interface OCRPageData {
+	presets: OCRProviderPreset[]
+	providers: OCRProviderConfig[]
+	tool_assignment: OCRToolAssignment
 }
 
 // ─── Sandbox Page (re-exported from canonical types) ─────

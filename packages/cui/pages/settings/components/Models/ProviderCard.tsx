@@ -13,7 +13,8 @@ const CAP_LABELS: Record<string, { cn: string; en: string }> = {
 	audio: { cn: '语音', en: 'Audio' },
 	json: { cn: '结构化输出', en: 'JSON' },
 	embedding: { cn: '嵌入', en: 'Embedding' },
-	image_generation: { cn: '绘图', en: 'Image' }
+	image_generation: { cn: '绘图', en: 'Image' },
+	ocr: { cn: '文字识别', en: 'OCR' }
 }
 
 function formatTokens(n: number): string {
@@ -86,7 +87,7 @@ export default function ProviderCard({ provider, onEdit, onDelete }: ProviderCar
 						{is_cn ? CAP_LABELS[cap]?.cn : CAP_LABELS[cap]?.en}
 					</span>
 				))}
-				{['streaming', 'json', 'embedding', 'image_generation'].filter((c) => allCaps.has(c as ModelCapability)).map((cap) => (
+				{['streaming', 'json', 'embedding', 'image_generation', 'ocr'].filter((c) => allCaps.has(c as ModelCapability)).map((cap) => (
 					<span key={cap} className={`${styles.capTag} ${styles.capSecondary}`}>
 						{is_cn ? CAP_LABELS[cap]?.cn : CAP_LABELS[cap]?.en}
 					</span>
@@ -110,7 +111,7 @@ export default function ProviderCard({ provider, onEdit, onDelete }: ProviderCar
 										{is_cn ? CAP_LABELS[c]?.cn : CAP_LABELS[c]?.en}
 									</span>
 								))}
-								{['embedding', 'image_generation'].filter((c) => (m.capabilities || []).includes(c)).map((c) => (
+								{['embedding', 'image_generation', 'ocr'].filter((c) => (m.capabilities || []).includes(c)).map((c) => (
 									<span key={c} className={`${styles.capTagSmall} ${styles.capSecondary}`}>
 										{is_cn ? CAP_LABELS[c]?.cn : CAP_LABELS[c]?.en}
 									</span>

@@ -42,7 +42,11 @@ import type {
 	SmtpConfig,
 	SmtpPageData,
 	McpServerConfig,
-	McpPageData
+	McpPageData,
+	OCRProviderPreset,
+	OCRProviderConfig,
+	OCRToolAssignment,
+	OCRPageData
 } from './types'
 import { settingMenuGroups } from './menu'
 import { getYaoMetadata } from '@/services/wellknown'
@@ -1426,6 +1430,53 @@ export const mockApi = {
 		})
 	},
 
+	// ─── OCR ───────────────────────────────────────────────
+
+	getOCRConfig: (): Promise<OCRPageData> => {
+		return new Promise((resolve) => {
+			setTimeout(() => resolve(JSON.parse(JSON.stringify(ocrCache))), 300)
+		})
+	},
+
+	updateOCRProvider: (presetKey: string, fieldValues: Record<string, string>): Promise<OCRProviderConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const p = ocrCache.providers.find((x) => x.preset_key === presetKey)
+				if (p) { Object.assign(p.field_values, fieldValues); p.status = 'connected' }
+				resolve(p || { preset_key: presetKey, enabled: false, field_values: {}, status: 'unconfigured' })
+			}, 400)
+		})
+	},
+
+	toggleOCRProvider: (presetKey: string, enabled: boolean): Promise<OCRProviderConfig> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const p = ocrCache.providers.find((x) => x.preset_key === presetKey)
+				if (p) p.enabled = enabled
+				resolve(p || { preset_key: presetKey, enabled, field_values: {}, status: 'unconfigured' })
+			}, 300)
+		})
+	},
+
+	testOCRProvider: (presetKey: string): Promise<ProviderTestResult> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const p = ocrCache.providers.find((x) => x.preset_key === presetKey)
+				if (p) p.status = 'connected'
+				resolve({ success: true, message: 'OK', latency_ms: 120 })
+			}, 600)
+		})
+	},
+
+	saveOCRToolAssignment: (assignment: OCRToolAssignment): Promise<OCRToolAssignment> => {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				ocrCache.tool_assignment = { ...assignment }
+				resolve({ ...assignment })
+			}, 300)
+		})
+	},
+
 	// ─── Sandbox ───────────────────────────────────────────
 
 	getSandboxPageData: (): Promise<SandboxPageData> => {
@@ -1669,6 +1720,11 @@ const modelsCache: ModelsPageData = {
 			mkModel('doubao', 'Doubao', ['vision', 'tool_calls', 'streaming', 'json']),
 			mkModel('deepseek-r1', 'DeepSeek R1', ['reasoning', 'streaming']),
 			mkModel('glm-4-plus', 'GLM-4 Plus', ['vision', 'tool_calls', 'streaming', 'json'])
+		]},
+		{ key: 'alibaba', name: '阿里云百炼 (Alibaba)', type: 'openai', api_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1', require_key: true, default_models: [
+			mkModel('qwen3.5-ocr', 'Qwen3.5-OCR', ['ocr', 'vision']),
+			mkModel('qwen-vl-ocr-latest', 'Qwen-VL-OCR', ['ocr', 'vision']),
+			mkModel('qwen-max', 'Qwen Max', ['vision', 'tool_calls', 'streaming', 'json'])
 		]}
 	]
 }
@@ -1761,6 +1817,69 @@ const searchCache: SearchPageData = {
 		{ preset_key: 'tavily', enabled: false, field_values: {}, status: 'unconfigured' },
 		{ preset_key: 'serper', enabled: false, field_values: {}, status: 'unconfigured' },
 		{ preset_key: 'brightdata', enabled: false, field_values: { zone: 'web_unlocker1' }, status: 'unconfigured' }
+	],
+	tool_assignment: {}
+}
+
+// ─── OCR mock data ───────────────────────────────────────
+
+const ocrPresets: OCRProviderPreset[] = [
+	{
+		key: 'paddleocr',
+		name: 'PaddleOCR',
+		description: { 'zh-CN': '开源 OCR 引擎，自部署，支持 100+ 语言', 'en-US': 'Open-source OCR engine, self-hosted, 100+ languages' },
+		website: 'https://github.com/PaddlePaddle/PaddleOCR',
+		tools: ['ocr_recognize'],
+		tool_labels: [{ 'zh-CN': '文字识别', 'en-US': 'Text Recognition' }],
+		fields: [
+			{ key: 'base_url', label: { 'zh-CN': '服务地址', 'en-US': 'Service URL' }, type: 'text', hint: { 'zh-CN': 'PaddleOCR Serving 端点', 'en-US': 'PaddleOCR Serving endpoint' } },
+			{ key: 'api_key', label: { 'zh-CN': 'API Key', 'en-US': 'API Key' }, type: 'password', optional: true, hint: { 'zh-CN': '服务端认证密钥（选填）', 'en-US': 'Server authentication key (optional)' } }
+		]
+	},
+	{
+		key: 'baidu',
+		name: 'Baidu OCR',
+		description: { 'zh-CN': '百度智能云文字识别', 'en-US': 'Baidu Cloud OCR' },
+		website: 'https://cloud.baidu.com/product/ocr',
+		tools: ['ocr_recognize'],
+		tool_labels: [{ 'zh-CN': '文字识别', 'en-US': 'Text Recognition' }],
+		fields: [
+			{ key: 'api_key', label: { 'zh-CN': 'API Key', 'en-US': 'API Key' }, type: 'password' },
+			{ key: 'secret_key', label: { 'zh-CN': 'Secret Key', 'en-US': 'Secret Key' }, type: 'password' }
+		]
+	},
+	{
+		key: 'google',
+		name: 'Google Cloud Vision',
+		description: { 'zh-CN': 'Google 云视觉 OCR', 'en-US': 'Google Cloud Vision OCR' },
+		website: 'https://cloud.google.com/vision',
+		tools: ['ocr_recognize'],
+		tool_labels: [{ 'zh-CN': '文字识别', 'en-US': 'Text Recognition' }],
+		fields: [
+			{ key: 'api_key', label: { 'zh-CN': 'API Key', 'en-US': 'API Key' }, type: 'password' }
+		]
+	},
+	{
+		key: 'azure',
+		name: 'Azure Document Intelligence',
+		description: { 'zh-CN': 'Azure 文档智能 OCR', 'en-US': 'Azure Document Intelligence OCR' },
+		website: 'https://azure.microsoft.com/products/ai-services/ai-document-intelligence',
+		tools: ['ocr_recognize'],
+		tool_labels: [{ 'zh-CN': '文字识别', 'en-US': 'Text Recognition' }],
+		fields: [
+			{ key: 'api_key', label: { 'zh-CN': 'API Key', 'en-US': 'API Key' }, type: 'password' },
+			{ key: 'endpoint', label: { 'zh-CN': 'Endpoint', 'en-US': 'Endpoint' }, type: 'text' }
+		]
+	}
+]
+
+const ocrCache: OCRPageData = {
+	presets: ocrPresets,
+	providers: [
+		{ preset_key: 'paddleocr', enabled: false, field_values: {}, status: 'unconfigured' },
+		{ preset_key: 'baidu', enabled: false, field_values: {}, status: 'unconfigured' },
+		{ preset_key: 'google', enabled: false, field_values: {}, status: 'unconfigured' },
+		{ preset_key: 'azure', enabled: false, field_values: {}, status: 'unconfigured' }
 	],
 	tool_assignment: {}
 }

@@ -70,6 +70,13 @@ export const settingMenuGroups: MenuGroup[] = [
 				path: '/settings/search'
 			},
 			{
+				id: 'sys-4b',
+				key: 'ocr',
+				name: { 'zh-CN': '文字识别', 'en-US': 'OCR' },
+				icon: 'material-document_scanner',
+				path: '/settings/ocr'
+			},
+			{
 			id: 'sys-5',
 			key: 'sandbox',
 			name: { 'zh-CN': '沙箱配置', 'en-US': 'Sandbox' },

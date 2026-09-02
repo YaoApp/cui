@@ -133,6 +133,7 @@ export interface SearchProviderField {
 	type: 'text' | 'password'
 	default?: string
 	placeholder?: string
+	optional?: boolean
 	hint?: Record<string, string>
 }
 
@@ -166,6 +167,42 @@ export interface SearchPageData {
 }
 
 export interface SearchTestResult {
+	success: boolean
+	message: string
+	latency_ms?: number
+}
+
+// ─── OCR ─────────────────────────────────────────────────
+
+export interface OCRProviderPreset {
+	key: string
+	name: string
+	description?: { 'zh-CN': string; 'en-US': string }
+	website?: string
+	tools: string[]
+	tool_labels: { 'zh-CN': string; 'en-US': string }[]
+	fields: SearchProviderField[]
+	is_cloud?: boolean
+}
+
+export interface OCRProviderConfig {
+	preset_key: string
+	enabled: boolean
+	field_values: Record<string, string>
+	status: 'connected' | 'disconnected' | 'unconfigured'
+}
+
+export interface OCRToolAssignment {
+	ocr_recognize?: string
+}
+
+export interface OCRPageData {
+	presets: OCRProviderPreset[]
+	providers: OCRProviderConfig[]
+	tool_assignment: OCRToolAssignment
+}
+
+export interface OCRTestResult {
 	success: boolean
 	message: string
 	latency_ms?: number
