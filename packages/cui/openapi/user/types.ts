@@ -331,6 +331,7 @@ export interface EntryConfig {
 		remember_me_expires_in?: string
 	}
 	invite_required?: boolean
+	verification_code_required?: boolean // Whether email/SMS verification code is required for registration (default true)
 	invite?: InvitePageConfig
 	third_party?: {
 		providers: SigninProvider[]

@@ -2,7 +2,7 @@ import '@/styles/index.less'
 
 import { ConfigProvider } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { HelmetProvider } from 'react-helmet-async'
 import { container } from 'tsyringe'
@@ -97,6 +97,14 @@ const Index = () => {
 	const is_login = pathname.indexOf('/login/') !== -1 || pathname === '/'
 	const is_auth = pathname === '/auth'
 	const is_standalone = isStandalonePage(pathname)
+	const is_setup = pathname.startsWith('/setup')
+
+	// Setup wizard redirect: LLM not configured → /setup
+	const needsSetup = useMemo(() => {
+		if (!global.setup_status) return false
+		const llmCheck = global.setup_status.checkpoints?.llm_default
+		return llmCheck?.status === 'fail'
+	}, [global.setup_status])
 
 	// Welcome Wizard state
 	const [wizardVisible, setWizardVisible] = useState(false)
@@ -110,23 +118,30 @@ const Index = () => {
 		global.on()
 		global.stack.on()
 
-		// Initialize global event WebSocket after app setup
+		return () => {
+			destroyEventStream()
+			global.off()
+			global.stack.off()
+		}
+	}, [])
+
+	// Event WebSocket: only connect on authenticated app pages
+	useEffect(() => {
+		if (is_login || is_auth || is_standalone || is_setup) return
+
 		const initEventWS = () => {
 			if (window.$app?.openapi) {
 				const stream = getEventStream()
 				stream.connect()
 			}
 		}
-		// Delay to ensure OpenAPI is initialized
-		const eventWSTimer = setTimeout(initEventWS, 1000)
+		const timer = setTimeout(initEventWS, 1000)
 
 		return () => {
-			clearTimeout(eventWSTimer)
+			clearTimeout(timer)
 			destroyEventStream()
-			global.off()
-			global.stack.off()
 		}
-	}, [])
+	}, [is_login, is_auth, is_standalone, is_setup])
 
 	useLayoutEffect(() => {
 		global.visible_menu = true
@@ -174,10 +189,26 @@ const Index = () => {
 		}
 	}, [is_login, global.isOpenAPIEnabled])
 
+	// Redirect to setup wizard when LLM is not configured
+	useEffect(() => {
+		if (
+			needsSetup &&
+			!is_setup &&
+			!pathname.startsWith('/settings') &&
+			!is_login &&
+			!is_auth &&
+			!is_standalone
+		) {
+			history.push('/setup')
+		}
+	}, [needsSetup, pathname, is_setup, is_login, is_auth, is_standalone])
+
 	// Auto-show Welcome Wizard on first visit (once per session)
+	// Only after setup wizard is completed (all required checkpoints pass)
 	useEffect(() => {
 		if (
 			global.setup_status &&
+			global.setup_status.completed &&
 			!global.setup_status.onboarding_completed &&
 			!hasAutoShown.current &&
 			!is_login &&
@@ -188,7 +219,7 @@ const Index = () => {
 			setWizardReopen(false)
 			setWizardVisible(true)
 		}
-	}, [global.setup_status?.onboarding_completed, is_login, is_auth, is_standalone])
+	}, [global.setup_status?.completed, global.setup_status?.onboarding_completed, is_login, is_auth, is_standalone])
 
 	// Listen for manual "wizard/show" event (from SystemInfo)
 	useEffect(() => {
@@ -225,6 +256,16 @@ const Index = () => {
 					<Outlet />
 				</AuthWrapper>
 			)
+		}
+
+		// Setup wizard pages — independent full-screen layout, no wrappers
+		if (is_setup) {
+			return <Outlet />
+		}
+
+		// Needs setup but not yet navigated — return null to prevent content flash
+		if (needsSetup && !pathname.startsWith('/settings') && !is_login && !is_auth && !is_standalone) {
+			return null
 		}
 
 		// Force ChatboxWrapper for /chatdev route regardless of global.layout
