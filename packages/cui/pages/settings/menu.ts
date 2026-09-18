@@ -51,8 +51,8 @@ export const settingMenuGroups: MenuGroup[] = [
 			{
 				id: 'sys-2',
 				key: 'cloud',
-				name: { 'zh-CN': '云服务', 'en-US': 'Cloud Service' },
-				icon: 'material-cloud',
+				name: { 'zh-CN': 'Tao Service', 'en-US': 'Tao Service' },
+				icon: 'material-grain',
 				path: '/settings/cloud'
 			},
 			{

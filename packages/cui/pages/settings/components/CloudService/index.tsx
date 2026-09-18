@@ -3,17 +3,43 @@ import { getLocale, useNavigate } from '@umijs/max'
 import { message, Spin } from 'antd'
 import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
-import { RadioGroup, Input, InputPassword } from '@/components/ui/inputs'
+import { InputPassword } from '@/components/ui/inputs'
 import { Setting } from '@/openapi/setting'
-import type { CloudServiceData, CloudRegion } from '../../types'
+import { getYaoMetadata } from '@/services/wellknown'
+import type { TaoConfig } from '@/openapi/setting/types'
 import type { PropertySchema } from '@/components/ui/inputs/types'
 import styles from './index.less'
-
-const REGISTER_URL = 'https://yaoagents.com?source=client-settings-cloud'
 
 function getSettingAPI(): Setting | null {
 	if (!window.$app?.openapi) return null
 	return new Setting(window.$app.openapi)
+}
+
+/** Resolve Tao registration URL from well-known metadata. */
+function getTaoRegisterUrl(is_cn: boolean): string {
+	const meta = getYaoMetadata()
+	if (meta?.tao) {
+		return is_cn ? meta.tao.register_cn : meta.tao.register_en
+	}
+	return is_cn ? 'https://yaoagents.cn/tao' : 'https://yaoagents.com/tao'
+}
+
+/** Build billing/usage URLs from the register URL. */
+function taoBillingUrl(registerUrl: string): string {
+	return registerUrl.replace('/tao', '/console/billing')
+}
+function taoUsageUrl(registerUrl: string): string {
+	return registerUrl.replace('/tao', '/console/usage')
+}
+
+const SERVICE_LABELS: Record<string, { zh: string; en: string }> = {
+	llm: { zh: 'AI 模型', en: 'AI Models' },
+	search: { zh: '搜索', en: 'Search' },
+	scrape: { zh: '抓取', en: 'Scrape' },
+	ocr: { zh: '文字识别', en: 'OCR' },
+	image: { zh: '图片生成', en: 'Image Generation' },
+	audio: { zh: '语音', en: 'Audio' },
+	embedding: { zh: '嵌入', en: 'Embedding' }
 }
 
 const CloudService = () => {
@@ -23,20 +49,18 @@ const CloudService = () => {
 
 	const [loading, setLoading] = useState(true)
 	const [saving, setSaving] = useState(false)
-	const [testing, setTesting] = useState(false)
-	const [refreshing, setRefreshing] = useState(false)
-	const [data, setData] = useState<CloudServiceData | null>(null)
+	const [refreshingBalance, setRefreshingBalance] = useState(false)
+	const [data, setData] = useState<TaoConfig | null>(null)
 	const [error, setError] = useState<string | null>(null)
 
-	const [region, setRegion] = useState('')
-	const [apiUrl, setApiUrl] = useState('')
 	const [apiKey, setApiKey] = useState('')
 	const [editingKey, setEditingKey] = useState(false)
 	const retryRef = useRef(0)
 
-	const hasKey = Boolean(data?.api_key)
-	const regionChanged = Boolean(data && region !== data.region)
-	const isEditing = editingKey || !hasKey || regionChanged
+	const hasKey = Boolean(data?.key)
+	const isEditing = editingKey || !hasKey
+
+	const registerUrl = useMemo(() => getTaoRegisterUrl(is_cn), [is_cn])
 
 	useEffect(() => {
 		let cancelled = false
@@ -56,24 +80,21 @@ const CloudService = () => {
 				return
 			}
 
-			api.GetCloudService()
+			api.GetTaoConfig()
 				.then((resp) => {
 					if (cancelled) return
 					if (resp.error || !resp.data) {
-						setError(resp.error?.error_description || 'Failed to load cloud service config')
+						setError(resp.error?.error_description || 'Failed to load Tao Service config')
 						setLoading(false)
 						return
 					}
-					const res = resp.data
-					setData(res)
-					setRegion(res.region)
-					setApiUrl(res.api_url)
+					setData(resp.data)
 					setApiKey('')
 					setLoading(false)
 				})
 				.catch((err) => {
 					if (!cancelled) {
-						setError(err?.message || 'Failed to load cloud service config')
+						setError(err?.message || 'Failed to load Tao Service config')
 						setLoading(false)
 					}
 				})
@@ -82,15 +103,6 @@ const CloudService = () => {
 		load()
 		return () => { cancelled = true }
 	}, [])
-
-	const handleRegionChange = (val: any) => {
-		const key = String(val)
-		setRegion(key)
-		const found = data?.regions.find((r) => r.key === key)
-		if (found) {
-			setApiUrl(found.api_url)
-		}
-	}
 
 	const handleSave = async () => {
 		if (isEditing && !apiKey.trim()) {
@@ -102,10 +114,7 @@ const CloudService = () => {
 
 		setSaving(true)
 		try {
-			const payload: Record<string, string> = { region, api_url: apiUrl }
-			if (isEditing) payload.api_key = apiKey
-
-			const resp = await api.SaveCloudService(payload)
+			const resp = await api.UpdateTaoConfig({ key: apiKey.trim() }, locale)
 			if (resp.error || !resp.data) {
 				message.error(resp.error?.error_description || (is_cn ? '保存失败' : 'Save failed'))
 				return
@@ -113,48 +122,12 @@ const CloudService = () => {
 			setData(resp.data)
 			setApiKey('')
 			setEditingKey(false)
-		message.success(is_cn ? '保存成功' : 'Saved successfully')
+			message.success(is_cn ? '保存成功' : 'Saved successfully')
 			window.$app?.Event?.emit('setup/recheck')
-	} catch (err: any) {
+		} catch (err: any) {
 			message.error(err?.message || (is_cn ? '保存失败' : 'Save failed'))
 		} finally {
 			setSaving(false)
-		}
-	}
-
-	const handleTest = async () => {
-		if (!apiKey.trim()) {
-			message.warning(is_cn ? '请输入 API Key' : 'Please enter API Key')
-			return
-		}
-		const api = getSettingAPI()
-		if (!api) return
-
-		setTesting(true)
-		try {
-			const resp = await api.TestCloudService({ api_url: apiUrl, api_key: apiKey.trim() })
-			if (resp.error || !resp.data) {
-				message.error(resp.error?.error_description || (is_cn ? '连接测试失败' : 'Connection test failed'))
-				return
-			}
-
-			const result = resp.data
-			if (result.success) {
-			message.success(
-				is_cn
-					? `连接成功（延迟 ${result.latency_ms}ms）`
-					: `Connected successfully (${result.latency_ms}ms latency)`
-			)
-			window.$app?.Event?.emit('setup/recheck')
-		} else {
-				message.error(result.message)
-			}
-			const refreshed = await api.GetCloudService()
-			if (refreshed.data) setData(refreshed.data)
-		} catch (err: any) {
-			message.error(err?.message || (is_cn ? '连接测试失败' : 'Connection test failed'))
-		} finally {
-			setTesting(false)
 		}
 	}
 
@@ -168,60 +141,42 @@ const CloudService = () => {
 		setEditingKey(false)
 	}
 
-	const handleRefresh = async () => {
+	const handleRefreshBalance = async () => {
 		const api = getSettingAPI()
 		if (!api) return
 
-		setRefreshing(true)
+		setRefreshingBalance(true)
 		try {
-			const resp = await api.RefreshCloudModels()
+			const resp = await api.RefreshTaoBalance()
 			if (resp.error || !resp.data) {
-				message.error(resp.error?.error_description || (is_cn ? '刷新失败' : 'Refresh failed'))
+				message.error(resp.error?.error_description || (is_cn ? '查询余额失败' : 'Failed to refresh balance'))
 				return
 			}
-		message.success(
-			is_cn
-				? `已更新，共 ${resp.data.count} 个可用模型`
-				: `Updated, ${resp.data.count} models available`
-		)
-		window.$app?.Event?.emit('setup/recheck')
-		window.$app?.Event?.emit('models/changed')
+			if (data) {
+				setData({
+					...data,
+					balance: resp.data.balance,
+					balance_available: resp.data.balance_available
+				})
+			}
 		} catch (err: any) {
-			message.error(err?.message || (is_cn ? '刷新失败' : 'Refresh failed'))
+			message.error(err?.message || (is_cn ? '查询余额失败' : 'Failed to refresh balance'))
 		} finally {
-			setRefreshing(false)
+			setRefreshingBalance(false)
 		}
 	}
 
-	const regionSchema = useMemo((): PropertySchema => {
-		if (!data?.regions) return { type: 'string', enum: [] }
-		return {
-			type: 'string',
-			enum: data.regions.map((r: CloudRegion) => ({
-				label: r.label?.[is_cn ? 'zh-CN' : 'en-US'] || r.key,
-				value: r.key
-			}))
-		}
-	}, [data, is_cn])
-
-	const urlSchema = useMemo((): PropertySchema => ({
-		type: 'string',
-		readOnly: true,
-		placeholder: 'https://api-us.yao.run'
-	}), [])
-
 	const keySchema = useMemo((): PropertySchema => ({
 		type: 'string',
-		placeholder: is_cn ? '输入您的 API Key' : 'Enter your API Key'
+		placeholder: is_cn ? '输入您的 Tao Service API Key' : 'Enter your Tao Service API Key'
 	}), [is_cn])
 
-	const statusLabel = (status: CloudServiceData['status']) => {
+	const statusLabel = (status: TaoConfig['status']) => {
 		const map = {
 			connected: { text: is_cn ? '已连接' : 'Connected', cls: styles.status_connected },
-			disconnected: { text: is_cn ? '连接失败' : 'Disconnected', cls: styles.status_disconnected },
 			unconfigured: { text: is_cn ? '未配置' : 'Not configured', cls: styles.status_unconfigured }
 		}
-		return map[status]
+		return map[status] || map.unconfigured
 	}
 
 	if (error) {
@@ -229,7 +184,7 @@ const CloudService = () => {
 			<div className={styles.cloudService}>
 				<div className={styles.header}>
 					<div className={styles.headerContent}>
-						<h2>{is_cn ? '云服务' : 'Cloud Service'}</h2>
+						<h2>Tao Service</h2>
 						<p>{error}</p>
 					</div>
 				</div>
@@ -242,8 +197,12 @@ const CloudService = () => {
 			<div className={styles.cloudService}>
 				<div className={styles.header}>
 					<div className={styles.headerContent}>
-						<h2>{is_cn ? '云服务' : 'Cloud Service'}</h2>
-						<p>{is_cn ? '配置云端 API 凭证，用于模型和搜索' : 'Configure cloud API credentials for models and search'}</p>
+						<h2>Tao Service</h2>
+						<p>
+							{is_cn
+								? '配置 Tao Service API 凭证，用于模型和搜索'
+								: 'Configure Tao Service API credentials for models and search'}
+						</p>
 					</div>
 				</div>
 				<div className={styles.loadingState}>
@@ -255,19 +214,24 @@ const CloudService = () => {
 	}
 
 	const status = statusLabel(data.status)
+	const services = data.services
 
 	return (
 		<div className={styles.cloudService}>
 			{/*
-			 * LICENSE NOTICE: This cloud service header and branding is required by the Yao open source license.
+			 * LICENSE NOTICE: This service header and branding is required by the Yao open source license.
 			 * Removing or hiding this section requires a commercial license.
 			 * See /LICENSE for details.
 			 */}
 			{/* Header */}
 			<div className={styles.header}>
 				<div className={styles.headerContent}>
-					<h2>{is_cn ? '云服务' : 'Cloud Service'}</h2>
-					<p>{is_cn ? '配置云端 API 凭证，用于模型和搜索' : 'Configure cloud API credentials for models and search'}</p>
+					<h2>Tao Service</h2>
+					<p>
+						{is_cn
+							? '配置 Tao Service API 凭证，用于模型和搜索'
+							: 'Configure Tao Service API credentials for models and search'}
+					</p>
 				</div>
 				<span className={`${styles.statusBadge} ${status.cls}`}>{status.text}</span>
 			</div>
@@ -280,16 +244,16 @@ const CloudService = () => {
 			{/* Intro Card */}
 			<div className={styles.introCard}>
 				<div className={styles.introIcon}>
-					<Icon name='material-cloud' size={20} />
+					<Icon name='material-grain' size={20} />
 				</div>
 				<div className={styles.introContent}>
 					<div className={styles.introText}>
 						{is_cn
-							? '云服务由 YaoAgents 平台提供。一个 Key 即可使用多家 LLM 模型和联网搜索能力。'
-							: 'Cloud service is provided by YaoAgents platform. A single key unlocks multiple LLM models and web search capabilities.'}
+							? 'Tao Service 提供一站式 AI 服务。一个 Key 即可使用多家 LLM 模型和联网搜索能力。'
+							: 'Tao Service provides all-in-one AI capabilities. A single key unlocks multiple LLM models and web search.'}
 					</div>
-					<a href={REGISTER_URL} target='_blank' rel='noopener noreferrer' className={styles.introLink}>
-						{is_cn ? '没有 Key？前往 yaoagents.com 注册 →' : "Don't have a key? Register at yaoagents.com →"}
+					<a href={registerUrl} target='_blank' rel='noopener noreferrer' className={styles.introLink}>
+						{is_cn ? '没有 Key？前往注册 →' : "Don't have a key? Register now →"}
 					</a>
 				</div>
 			</div>
@@ -298,87 +262,146 @@ const CloudService = () => {
 			<div className={styles.section}>
 				<div className={styles.sectionHeader}>
 					<div className={styles.sectionTitle}>{is_cn ? '凭证配置' : 'Credentials'}</div>
-					{data.status === 'connected' && !isEditing && (
-						<button
-							type='button'
-							className={styles.refreshBtn}
-							onClick={handleRefresh}
-							disabled={refreshing}
-						>
-							{refreshing
-								? (is_cn ? '刷新中...' : 'Refreshing...')
-								: (is_cn ? '更新可用模型' : 'Refresh Models')}
-						</button>
-					)}
 				</div>
 
 				<div className={styles.card}>
 					<div className={styles.formField}>
-						<label className={styles.fieldLabel}>
-							{is_cn ? '区域' : 'Region'}
-							<span className={styles.fieldHint}>
-								{is_cn ? '选择离你最近的区域以获得最快速度' : 'Choose the region closest to you for best performance'}
-							</span>
-						</label>
-						<RadioGroup schema={regionSchema} value={region} onChange={handleRegionChange} />
-					</div>
-
-					<div className={styles.formField}>
-						<label className={styles.fieldLabel}>API URL</label>
-						<Input schema={urlSchema} value={apiUrl} onChange={() => {}} />
-					</div>
-
-				<div className={styles.formField}>
-					<label className={styles.fieldLabel}>API Key</label>
-					{!isEditing ? (
-						<div className={styles.keyDisplay}>
-							<span className={styles.keyText}>
-								{data.api_key}
-							</span>
-							<button
-								type='button'
-								className={styles.keyEditBtn}
-								onClick={handleEditKey}
-							>
-								{is_cn ? '修改' : 'Change'}
-							</button>
-						</div>
-					) : (
-						<>
-							<InputPassword
-								schema={keySchema}
-								value={apiKey}
-								onChange={(val) => setApiKey(String(val))}
-							/>
-							{hasKey && editingKey && (
-								<button
-									type='button'
-									className={styles.keyCancelBtn}
-									onClick={handleCancelEdit}
-								>
-									{is_cn ? '取消修改' : 'Cancel'}
+						<label className={styles.fieldLabel}>API Key</label>
+						{!isEditing ? (
+							<div className={styles.keyDisplay}>
+								<span className={styles.keyText}>{data.key}</span>
+								<button type='button' className={styles.keyEditBtn} onClick={handleEditKey}>
+									{is_cn ? '修改' : 'Change'}
 								</button>
-							)}
-						</>
-					)}
-				</div>
+							</div>
+						) : (
+							<>
+								<InputPassword
+									schema={keySchema}
+									value={apiKey}
+									onChange={(val) => setApiKey(String(val))}
+								/>
+								{hasKey && editingKey && (
+									<button type='button' className={styles.keyCancelBtn} onClick={handleCancelEdit}>
+										{is_cn ? '取消修改' : 'Cancel'}
+									</button>
+								)}
+							</>
+						)}
+					</div>
 
-				{isEditing && (
-				<div className={styles.actions}>
-					{hasKey && (
-						<Button type='default' loading={testing} onClick={handleTest}>
-							{is_cn ? '测试连接' : 'Test Connection'}
-						</Button>
+					{isEditing && (
+						<div className={styles.actions}>
+							<Button type='primary' loading={saving} onClick={handleSave}>
+								{is_cn ? '保存' : 'Save'}
+							</Button>
+						</div>
 					)}
-					<Button type='primary' loading={saving} onClick={handleSave}>
-						{is_cn ? '保存' : 'Save'}
-					</Button>
-				</div>
-			)}
 				</div>
 			</div>
 
-			{/* Next Steps */}
+			{/* Balance Section */}
+			{data.status === 'connected' && (
+				<div className={styles.section}>
+					<div className={styles.sectionHeader}>
+						<div className={styles.sectionTitle}>{is_cn ? '余额' : 'Balance'}</div>
+						<button
+							type='button'
+							className={styles.refreshBtn}
+							onClick={handleRefreshBalance}
+							disabled={refreshingBalance}
+						>
+							{refreshingBalance
+								? (is_cn ? '查询中...' : 'Refreshing...')
+								: (is_cn ? '刷新余额' : 'Refresh Balance')}
+						</button>
+					</div>
+
+					<div className={styles.card}>
+						{data.balance_available ? (
+							<>
+								<div className={styles.balanceAmount}>
+									<span className={styles.balanceValue}>
+										{data.balance != null ? data.balance.toLocaleString() : '—'}
+									</span>
+									<span className={styles.balanceUnit}>credits</span>
+								</div>
+								{data.balance != null && data.balance <= 0 && (
+									<div className={styles.balanceWarning}>
+										{is_cn
+											? '余额不足时调用付费服务将返回 402 错误'
+											: 'Paid service calls will return 402 error when balance is insufficient'}
+									</div>
+								)}
+								<div className={styles.balanceActions}>
+									<a
+										href={taoUsageUrl(registerUrl)}
+										target='_blank'
+										rel='noopener noreferrer'
+									>
+										{is_cn ? '查看用量' : 'View Usage'}
+									</a>
+									<a
+										href={taoBillingUrl(registerUrl)}
+										target='_blank'
+										rel='noopener noreferrer'
+									>
+										{is_cn ? '充值' : 'Recharge'}
+									</a>
+								</div>
+								<div className={styles.balanceCreditNote}>
+									ⓘ {is_cn
+										? '1 credit ≈ ¥0.001，实际价格以控制台为准'
+										: '1 credit ≈ ¥0.001, actual pricing subject to console'}
+								</div>
+							</>
+						) : (
+							<div className={styles.balanceUnavailable}>
+								<span>
+									{is_cn ? '余额信息暂不可用' : 'Balance information temporarily unavailable'}
+								</span>
+								<button
+									type='button'
+									className={styles.refreshBtn}
+									onClick={handleRefreshBalance}
+									disabled={refreshingBalance}
+								>
+									{is_cn ? '重新查询' : 'Retry'}
+								</button>
+							</div>
+						)}
+					</div>
+				</div>
+			)}
+
+			{/* Available Services */}
+			{data.status === 'connected' && (
+				<div className={styles.section}>
+					<div className={styles.sectionHeader}>
+						<div className={styles.sectionTitle}>{is_cn ? '可用服务' : 'Available Services'}</div>
+					</div>
+
+					<div className={styles.card}>
+						<div className={styles.serviceList}>
+							{Object.entries(SERVICE_LABELS).map(([key, label]) => {
+								const enabled = services[key as keyof typeof services]
+								return (
+									<div key={key} className={styles.serviceItem}>
+										<Icon
+											name={enabled ? 'material-check_circle' : 'material-radio_button_unchecked'}
+											size={16}
+											className={enabled ? styles.serviceEnabled : styles.serviceDisabled}
+										/>
+										<span>{is_cn ? label.zh : label.en}</span>
+									</div>
+								)
+							})}
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Related Settings */}
 			<div className={styles.section}>
 				<div className={styles.sectionHeader}>
 					<div className={styles.sectionTitle}>{is_cn ? '相关配置' : 'Related Settings'}</div>

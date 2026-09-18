@@ -493,7 +493,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 
 	// ─── Render: Preset Connection Fields ─────────────────────
 	// Decision tree:
-	//   is_cloud     → cloud status block (no URL / Key)
+	//   is_cloud     → Tao Service status block (no URL / Key)
 	//   url_editable → editable URL + Key (optional if !require_key)
 	//   else         → readonly URL + Key (required)
 
@@ -504,7 +504,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 					{cloudConnected ? (
 						<div className={styles.cloudStatusConnected}>
 							<Icon name='material-check_circle' size={16} />
-							<span>{is_cn ? '云服务已连接' : 'Cloud service connected'}</span>
+							<span>{is_cn ? 'Tao Service 已连接' : 'Tao Service connected'}</span>
 							<a onClick={() => { onClose(); navigate('/settings/cloud') }}>
 								{is_cn ? '修改配置' : 'Edit settings'}
 							</a>
@@ -512,7 +512,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 					) : (
 						<div className={styles.cloudStatusDisconnected}>
 							<Icon name='material-warning' size={16} />
-							<span>{is_cn ? '云服务未配置' : 'Cloud service not configured'}</span>
+							<span>{is_cn ? 'Tao Service 未配置' : 'Tao Service not configured'}</span>
 							<a onClick={() => { onClose(); navigate('/settings/cloud') }}>
 								{is_cn ? '前往配置' : 'Configure now'}
 							</a>

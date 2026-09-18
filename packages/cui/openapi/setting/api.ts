@@ -6,6 +6,10 @@ import type {
 	CheckUpdateResult,
 	CloudServiceData,
 	CloudServiceTestResult,
+	TaoConfig,
+	TaoVerifyResult,
+	TaoSetupResult,
+	TaoSignupGift,
 	LLMPageData,
 	LLMProviderConfig,
 	LLMRoleAssignment,
@@ -63,6 +67,36 @@ export class Setting {
 
 	async RefreshCloudModels(): Promise<ApiResponse<{ success: boolean; count: number }>> {
 		return this.api.Post<{ success: boolean; count: number }>('/setting/cloud/refresh', {})
+	}
+
+	// ─── Tao Service ────────────────────────────────────
+
+	async GetTaoConfig(): Promise<ApiResponse<TaoConfig>> {
+		return this.api.Get<TaoConfig>('/setting/tao/config')
+	}
+
+	async VerifyTaoKey(key: string, locale?: string): Promise<ApiResponse<TaoVerifyResult>> {
+		const params = locale ? `?locale=${encodeURIComponent(locale)}` : ''
+		return this.api.Post<TaoVerifyResult>(`/setting/tao/verify${params}`, { key })
+	}
+
+	async SetupTao(key: string, locale?: string): Promise<ApiResponse<TaoSetupResult>> {
+		const params = locale ? `?locale=${encodeURIComponent(locale)}` : ''
+		return this.api.Post<TaoSetupResult>(`/setting/tao/setup${params}`, { key })
+	}
+
+	async UpdateTaoConfig(data: { key?: string }, locale?: string): Promise<ApiResponse<TaoConfig>> {
+		const params = locale ? `?locale=${encodeURIComponent(locale)}` : ''
+		return this.api.Put<TaoConfig>(`/setting/tao/config${params}`, data)
+	}
+
+	async RefreshTaoBalance(): Promise<ApiResponse<{ balance?: number; balance_available: boolean }>> {
+		return this.api.Post<{ balance?: number; balance_available: boolean }>('/setting/tao/balance', {})
+	}
+
+	async GetTaoSignupGift(locale?: string): Promise<ApiResponse<TaoSignupGift>> {
+		const params = locale ? `?locale=${encodeURIComponent(locale)}` : ''
+		return this.api.Get<TaoSignupGift>(`/setting/tao/signup-gift${params}`)
 	}
 
 	// ─── LLM Providers ──────────────────────────────────

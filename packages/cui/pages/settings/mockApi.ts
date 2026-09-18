@@ -1372,14 +1372,14 @@ export const mockApi = {
 		return new Promise((resolve) => {
 			setTimeout(async () => {
 				const cloud = await mockApi.getCloudService()
-				const cloudProvider = searchCache.providers.find((p) => p.preset_key === 'cloud')
-				if (cloudProvider) {
+				const taoProvider = searchCache.providers.find((p) => p.preset_key === 'tao')
+				if (taoProvider) {
 					if (cloud.status === 'connected') {
-						cloudProvider.enabled = true
-						cloudProvider.status = 'connected'
+						taoProvider.enabled = true
+						taoProvider.status = 'connected'
 					} else {
-						cloudProvider.enabled = false
-						cloudProvider.status = 'unconfigured'
+						taoProvider.enabled = false
+						taoProvider.status = 'unconfigured'
 					}
 				}
 				resolve(JSON.parse(JSON.stringify(searchCache)))
@@ -1644,7 +1644,7 @@ const modelsCache: ModelsPageData = {
 	roles: {},
 	providers: [],
 	preset_providers: [
-		{ key: 'yaoagents', name: 'Yao Agents', type: 'openai', api_url: 'https://api-us.yao.run/v1', require_key: false, is_cloud: true, default_models: [
+		{ key: 'taoservice', name: 'Tao Service', type: 'openai', api_url: 'https://us.yao.run/v1', require_key: false, is_cloud: true, default_models: [
 			mkModel('kimi-k2.5', 'Kimi K2.5', ['vision', 'tool_calls', 'streaming', 'json']),
 			mkModel('gpt-4o', 'GPT-4o', ['vision', 'audio', 'tool_calls', 'streaming', 'json']),
 			mkModel('claude-sonnet-4.5', 'Claude Sonnet 4.5', ['vision', 'tool_calls', 'streaming', 'json']),
@@ -1733,13 +1733,13 @@ const modelsCache: ModelsPageData = {
 
 const searchPresets: SearchProviderPreset[] = [
 	{
-		key: 'cloud',
-		name: 'Yao Agents',
+		key: 'tao',
+		name: 'Tao Service',
 		description: {
-			'zh-CN': '云服务提供的搜索与抓取能力，凭证来自云服务配置页',
-			'en-US': 'Search & scrape capabilities from cloud service, credentials from cloud config'
+			'zh-CN': 'Tao Service 提供的搜索与抓取能力，凭证来自 Tao Service 配置页',
+			'en-US': 'Search & scrape powered by Tao Service, credentials from Tao Service config'
 		},
-		website: 'https://yaoagents.com',
+		website: 'https://yaoagents.com/tao',
 		tools: ['web_search', 'web_scrape'],
 		tool_labels: [
 			{ 'zh-CN': '网页搜索', 'en-US': 'Web Search' },
@@ -1813,7 +1813,7 @@ const searchPresets: SearchProviderPreset[] = [
 const searchCache: SearchPageData = {
 	presets: searchPresets,
 	providers: [
-		{ preset_key: 'cloud', enabled: false, field_values: {}, status: 'unconfigured' },
+		{ preset_key: 'tao', enabled: false, field_values: {}, status: 'unconfigured' },
 		{ preset_key: 'tavily', enabled: false, field_values: {}, status: 'unconfigured' },
 		{ preset_key: 'serper', enabled: false, field_values: {}, status: 'unconfigured' },
 		{ preset_key: 'brightdata', enabled: false, field_values: { zone: 'web_unlocker1' }, status: 'unconfigured' }
