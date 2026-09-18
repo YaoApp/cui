@@ -65,6 +65,63 @@ export interface CloudServiceTestResult {
 	latency_ms?: number
 }
 
+// ─── Tao Service ────────────────────────────────────────
+
+export interface TaoServices {
+	llm: boolean
+	search: boolean
+	scrape: boolean
+	ocr: boolean
+	image: boolean
+	audio: boolean
+	embedding: boolean
+}
+
+export interface TaoConfig {
+	base_url: string
+	key: string
+	status: 'connected' | 'unconfigured'
+	balance?: number
+	balance_available: boolean
+	services: TaoServices
+}
+
+export interface TaoVerifyResult {
+	valid: boolean
+	balance?: number
+	balance_available: boolean
+	error_type?: string // "invalid_api_key" | "api_key_expired"
+	message: string
+}
+
+export interface TaoSetupLLM {
+	provider_name: string
+	model_count: number
+	roles: Record<string, string>
+}
+
+export interface TaoSetupSearch {
+	provider_name: string
+	tools: string[]
+}
+
+export interface TaoSetupDetails {
+	llm?: TaoSetupLLM
+	search?: TaoSetupSearch
+}
+
+export interface TaoSetupResult {
+	success: boolean
+	message?: string
+	balance?: number
+	balance_available: boolean
+	configured?: TaoSetupDetails
+}
+
+export interface TaoSignupGift {
+	signup_gift: number
+}
+
 // ─── LLM Providers ──────────────────────────────────────
 
 export interface LLMModelInfo {

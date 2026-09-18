@@ -43,6 +43,7 @@ __Test*
 docs/mission-control-download-preview-investigation.md
 docs/onboarding/*.md
 docs/onboarding/*/*.md
+docs/onboarding-v2/*.md
 packages/cui/pages/kanban/assets/*.png
 packages/cui/pages/kanban/*.md
 packages/cui/docs/git-changes/DESIGN.md

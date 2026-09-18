@@ -22,6 +22,15 @@ export interface YaoMetadata {
 		email?: string
 		homepage?: string
 	}
+	tao?: TaoEndpoints
+}
+
+/** Tao Service API and registration URLs per locale, populated by the backend. */
+export interface TaoEndpoints {
+	cn: string
+	en: string
+	register_cn: string
+	register_en: string
 }
 
 // In-memory cache (global singleton)
