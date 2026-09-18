@@ -83,6 +83,9 @@ const AuthEntry = () => {
 	const [rememberMe, setRememberMe] = useState(false)
 	const [otpInputFocused, setOtpInputFocused] = useState(false)
 
+	// Whether verification code is needed for registration (default true)
+	const needsVerificationCode = config?.verification_code_required !== false
+
 	// 处理 redirect 参数 - 设置登录后的跳转地址
 	useAsyncEffect(async () => {
 		const redirectParam = getUrlParam('redirect')
@@ -358,7 +361,7 @@ const AuthEntry = () => {
 				message.warning(currentLocale === 'zh-CN' ? '两次输入的密码不一致' : 'Passwords do not match')
 				return
 			}
-			if (!formData.verificationCode) {
+			if (needsVerificationCode && !formData.verificationCode) {
 				message.warning('Please enter the verification code')
 				return
 			}
@@ -449,8 +452,9 @@ const AuthEntry = () => {
 					{
 						password: formData.password,
 						confirm_password: formData.confirmPassword,
-						otp_id: otpId,
-						verification_code: formData.verificationCode,
+						...(needsVerificationCode
+							? { otp_id: otpId, verification_code: formData.verificationCode }
+							: {}),
 						locale: currentLocale
 					},
 					accessToken
@@ -673,8 +677,8 @@ const AuthEntry = () => {
 							</>
 						)}
 
-						{/* Verification Code Input - only show for registration */}
-						{isEmailVerified && verificationStatus === EntryVerificationStatus.Register && (
+						{/* Verification Code Input - only show for registration when verification is required */}
+						{isEmailVerified && verificationStatus === EntryVerificationStatus.Register && needsVerificationCode && (
 							<div className={styles.otpWrapper}>
 								<OtpInput
 									value={formData.verificationCode}
