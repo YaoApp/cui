@@ -98,7 +98,7 @@ const SystemInfo = () => {
 			const res = await api.CheckUpdate()
 			const result = res.data
 			if (result?.has_update) {
-				const url = 'https://yaoagents.com/?source=yao-upgrade'
+				const url = is_cn ? 'https://yaoagents.cn/?source=yao-upgrade' : 'https://yaoagents.com/?source=yao-upgrade'
 				message.info(
 					<span>
 						{is_cn

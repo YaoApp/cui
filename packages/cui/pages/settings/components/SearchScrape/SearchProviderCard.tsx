@@ -169,7 +169,7 @@ export default function SearchProviderCard({ preset, config, onToggle, onSave, o
 						<div className={styles.cloudConnected}>
 							<Icon name='material-check_circle' size={16} />
 							<span>{is_cn ? 'Tao Service 已连接，搜索与抓取功能可用' : 'Tao Service connected, search & scrape available'}</span>
-							<a onClick={() => navigate('/settings/cloud')}>
+							<a onClick={() => navigate('/settings/tao')}>
 								{is_cn ? '修改配置' : 'Edit settings'}
 							</a>
 						</div>
@@ -177,7 +177,7 @@ export default function SearchProviderCard({ preset, config, onToggle, onSave, o
 						<div className={styles.cloudDisconnected}>
 							<Icon name='material-info' size={16} />
 							<span>{is_cn ? 'Tao Service 未配置，配置后即可使用搜索与抓取' : 'Tao Service not configured, configure to use search & scrape'}</span>
-							<a onClick={() => navigate('/settings/cloud')}>
+							<a onClick={() => navigate('/settings/tao')}>
 								{is_cn ? '前往配置' : 'Configure now'}
 							</a>
 						</div>

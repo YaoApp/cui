@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { getLocale } from '@umijs/max'
+import { getLocale, useNavigate } from '@umijs/max'
 import { message, Switch } from 'antd'
+import Icon from '@/widgets/Icon'
 import Button from '@/components/ui/Button'
 import { Input, InputPassword } from '@/components/ui/inputs'
 import { Setting } from '@/openapi/setting'
@@ -24,6 +25,49 @@ interface OCRProviderCardProps {
 
 export default function OCRProviderCard({ preset, config, onToggle, onSave, onReload }: OCRProviderCardProps) {
 	const is_cn = getLocale() === 'zh-CN'
+	const navigate = useNavigate()
+
+	if (preset.is_cloud) {
+		const isConnected = config.status === 'connected'
+		const st = isConnected
+			? { text: is_cn ? '已连接' : 'Connected', cls: styles.statusConnected }
+			: null
+
+		return (
+			<div className={styles.searchCard}>
+				<div className={styles.searchCardHeader}>
+					<div className={styles.searchCardTitle}>
+						<span className={styles.searchCardName}>{preset.name}</span>
+						{st && <span className={`${styles.searchCardStatus} ${st.cls}`}>{st.text}</span>}
+						{preset.tool_labels.map((label, idx) => (
+							<span key={idx} className={styles.toolTag}>
+								{is_cn ? label['zh-CN'] : label['en-US']}
+							</span>
+						))}
+					</div>
+				</div>
+				<div className={styles.searchCardBody}>
+					{isConnected ? (
+						<div className={styles.cloudConnected}>
+							<Icon name='material-check_circle' size={16} />
+							<span>{is_cn ? 'Tao Service 已连接，OCR 文字识别功能可用' : 'Tao Service connected, OCR available'}</span>
+							<a onClick={() => navigate('/settings/tao')}>
+								{is_cn ? '修改配置' : 'Edit settings'}
+							</a>
+						</div>
+					) : (
+						<div className={styles.cloudDisconnected}>
+							<Icon name='material-info' size={16} />
+							<span>{is_cn ? 'Tao Service 未配置，配置后即可使用 OCR 文字识别' : 'Tao Service not configured, configure to use OCR'}</span>
+							<a onClick={() => navigate('/settings/tao')}>
+								{is_cn ? '前往配置' : 'Configure now'}
+							</a>
+						</div>
+					)}
+				</div>
+			</div>
+		)
+	}
 
 	const allFieldsSaved = preset.fields.every((f) => f.optional || Boolean(config.field_values[f.key]))
 

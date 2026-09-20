@@ -103,8 +103,8 @@ export const settingMenuGroups: MenuGroup[] = [
 				name: { 'zh-CN': '文档', 'en-US': 'Documentation' },
 				icon: 'material-description',
 				path: {
-					'zh-CN': 'https://yaoagents.com/docs/zh-cn/getting-started/what-is-yao-agents?from=yao-setting',
-					'en-US': 'https://yaoagents.com/docs/en-us/getting-started/what-is-yao-agents?from=yao-setting'
+					'zh-CN': 'https://yaoagents.cn/docs/zh-cn/getting-started/what-is-yao-agents?source=yao-setting',
+					'en-US': 'https://yaoagents.com/docs/en-us/getting-started/what-is-yao-agents?source=yao-setting'
 				}
 			},
 			{
@@ -126,7 +126,10 @@ export const settingMenuGroups: MenuGroup[] = [
 				key: 'feedback',
 				name: { 'zh-CN': '意见反馈', 'en-US': 'Feedback' },
 				icon: 'material-feedback',
-				path: 'https://yaoagents.com/feedback?from=yao-setting'
+				path: {
+					'zh-CN': 'https://yaoagents.cn/feedback?source=yao-setting',
+					'en-US': 'https://yaoagents.com/feedback?source=yao-setting'
+				}
 			}
 		]
 	}

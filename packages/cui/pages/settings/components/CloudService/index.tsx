@@ -15,13 +15,14 @@ function getSettingAPI(): Setting | null {
 	return new Setting(window.$app.openapi)
 }
 
-/** Resolve Tao registration URL from well-known metadata. */
+/** Resolve Tao registration URL from well-known metadata, always appending source tracking. */
 function getTaoRegisterUrl(is_cn: boolean): string {
 	const meta = getYaoMetadata()
-	if (meta?.tao) {
-		return is_cn ? meta.tao.register_cn : meta.tao.register_en
-	}
-	return is_cn ? 'https://yaoagents.cn/tao' : 'https://yaoagents.com/tao'
+	const base = meta?.tao
+		? (is_cn ? meta.tao.register_cn : meta.tao.register_en)
+		: (is_cn ? 'https://yaoagents.cn/tao' : 'https://yaoagents.com/tao')
+	const sep = base.includes('?') ? '&' : '?'
+	return `${base}${sep}source=yao-setting`
 }
 
 /** Build billing/usage URLs from the register URL. */
@@ -30,16 +31,6 @@ function taoBillingUrl(registerUrl: string): string {
 }
 function taoUsageUrl(registerUrl: string): string {
 	return registerUrl.replace('/tao', '/console/usage')
-}
-
-const SERVICE_LABELS: Record<string, { zh: string; en: string }> = {
-	llm: { zh: 'AI 模型', en: 'AI Models' },
-	search: { zh: '搜索', en: 'Search' },
-	scrape: { zh: '抓取', en: 'Scrape' },
-	ocr: { zh: '文字识别', en: 'OCR' },
-	image: { zh: '图片生成', en: 'Image Generation' },
-	audio: { zh: '语音', en: 'Audio' },
-	embedding: { zh: '嵌入', en: 'Embedding' }
 }
 
 const CloudService = () => {
@@ -214,7 +205,6 @@ const CloudService = () => {
 	}
 
 	const status = statusLabel(data.status)
-	const services = data.services
 
 	return (
 		<div className={styles.cloudService}>
@@ -247,10 +237,11 @@ const CloudService = () => {
 					<Icon name='material-grain' size={20} />
 				</div>
 				<div className={styles.introContent}>
-					<div className={styles.introText}>
+					<div className={styles.introTitle}>Tao Service</div>
+					<div className={styles.introDesc}>
 						{is_cn
-							? 'Tao Service 提供一站式 AI 服务。一个 Key 即可使用多家 LLM 模型和联网搜索能力。'
-							: 'Tao Service provides all-in-one AI capabilities. A single key unlocks multiple LLM models and web search.'}
+							? '你的 Agent 运行所需的一切服务，一个网关搞定。AI 模型、搜索、抓取、存储，一个 Key，按积分计量计费。'
+							: 'One gateway for everything your agents need to run. AI models, search, fetch, storage — one key, metered and billed in Credits.'}
 					</div>
 					<a href={registerUrl} target='_blank' rel='noopener noreferrer' className={styles.introLink}>
 						{is_cn ? '没有 Key？前往注册 →' : "Don't have a key? Register now →"}
@@ -349,11 +340,6 @@ const CloudService = () => {
 										{is_cn ? '充值' : 'Recharge'}
 									</a>
 								</div>
-								<div className={styles.balanceCreditNote}>
-									ⓘ {is_cn
-										? '1 credit ≈ ¥0.001，实际价格以控制台为准'
-										: '1 credit ≈ ¥0.001, actual pricing subject to console'}
-								</div>
 							</>
 						) : (
 							<div className={styles.balanceUnavailable}>
@@ -370,33 +356,6 @@ const CloudService = () => {
 								</button>
 							</div>
 						)}
-					</div>
-				</div>
-			)}
-
-			{/* Available Services */}
-			{data.status === 'connected' && (
-				<div className={styles.section}>
-					<div className={styles.sectionHeader}>
-						<div className={styles.sectionTitle}>{is_cn ? '可用服务' : 'Available Services'}</div>
-					</div>
-
-					<div className={styles.card}>
-						<div className={styles.serviceList}>
-							{Object.entries(SERVICE_LABELS).map(([key, label]) => {
-								const enabled = services[key as keyof typeof services]
-								return (
-									<div key={key} className={styles.serviceItem}>
-										<Icon
-											name={enabled ? 'material-check_circle' : 'material-radio_button_unchecked'}
-											size={16}
-											className={enabled ? styles.serviceEnabled : styles.serviceDisabled}
-										/>
-										<span>{is_cn ? label.zh : label.en}</span>
-									</div>
-								)
-							})}
-						</div>
 					</div>
 				</div>
 			)}
