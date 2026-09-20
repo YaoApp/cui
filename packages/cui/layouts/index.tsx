@@ -211,6 +211,7 @@ const Index = () => {
 			global.setup_status.completed &&
 			!global.setup_status.onboarding_completed &&
 			!hasAutoShown.current &&
+			!is_setup &&
 			!is_login &&
 			!is_auth &&
 			!is_standalone
@@ -219,7 +220,7 @@ const Index = () => {
 			setWizardReopen(false)
 			setWizardVisible(true)
 		}
-	}, [global.setup_status?.completed, global.setup_status?.onboarding_completed, is_login, is_auth, is_standalone])
+	}, [global.setup_status?.completed, global.setup_status?.onboarding_completed, is_setup, is_login, is_auth, is_standalone])
 
 	// Listen for manual "wizard/show" event (from SystemInfo)
 	useEffect(() => {

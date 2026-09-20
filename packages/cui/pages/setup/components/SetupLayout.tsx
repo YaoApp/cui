@@ -14,12 +14,13 @@ interface StepItem {
 interface SetupLayoutProps {
 	children: React.ReactNode
 	showBack?: boolean
+	backLabel?: string
 	onBack?: () => void
 	steps?: StepItem[]
 	currentStep?: number
 }
 
-const SetupLayout = observer(({ children, showBack, onBack, steps, currentStep }: SetupLayoutProps) => {
+const SetupLayout = observer(({ children, showBack, backLabel, onBack, steps, currentStep }: SetupLayoutProps) => {
 	const global = useGlobal()
 	const is_cn = getLocale() === 'zh-CN'
 	const logo = global.app_info?.logo || getDefaultLogoUrl()
@@ -46,7 +47,7 @@ const SetupLayout = observer(({ children, showBack, onBack, steps, currentStep }
 					{showBack ? (
 						<button className={styles.backButton} type='button' onClick={onBack}>
 							<Icon name='material-arrow_back' size={16} />
-							<span>{is_cn ? '返回' : 'Back'}</span>
+							<span>{backLabel || (is_cn ? '返回' : 'Back')}</span>
 						</button>
 					) : (
 						<div />

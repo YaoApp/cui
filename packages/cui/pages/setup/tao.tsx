@@ -6,6 +6,7 @@ import { useGlobal } from '@/context/app'
 import { Setting as SettingAPI } from '@/openapi/setting/api'
 import { getYaoMetadata } from '@/services/wellknown'
 import Icon from '@/widgets/Icon'
+import { getSetupRedirectUrl, refreshSetupStatus } from './redirect'
 import SetupLayout from './components/SetupLayout'
 import styles from './index.less'
 
@@ -45,7 +46,11 @@ const TaoSetup = observer(() => {
 	// Auto-navigate after successful setup once global state refreshes
 	useEffect(() => {
 		if (state === 'success' && global.setup_status?.completed) {
-			history.replace(global.dashboardPath || '/chat')
+			refreshSetupStatus().then(() =>
+				getSetupRedirectUrl().then((url) => {
+					window.location.href = url
+				})
+			)
 		}
 	}, [state, global.setup_status?.completed])
 
@@ -109,7 +114,11 @@ const TaoSetup = observer(() => {
 	}
 
 	return (
-		<SetupLayout showBack onBack={() => history.push('/setup')}>
+		<SetupLayout
+			showBack
+			backLabel={is_cn ? '切换自带 Key' : 'Switch to BYOK'}
+			onBack={() => history.push('/setup/byok')}
+		>
 			<div className={styles.taoCard}>
 				<h2 className={styles.taoTitle}>
 					{is_cn ? '配置 Tao Service' : 'Configure Tao Service'}

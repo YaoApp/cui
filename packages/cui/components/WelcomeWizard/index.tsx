@@ -253,18 +253,15 @@ const WelcomeWizard = ({ visible, onClose, isReopen }: WelcomeWizardProps) => {
 
 					{/* Action buttons */}
 					<div className={styles.actions}>
-						<button className={styles.btn_skip} onClick={handleComplete}>
-							{is_cn ? '跳过' : 'Skip'}
-						</button>
+						{!isLast && (
+							<button className={styles.btn_skip} onClick={handleComplete}>
+								{is_cn ? '跳过' : 'Skip'}
+							</button>
+						)}
 						{isLast ? (
-							<>
-								<button className={styles.btn_outline} onClick={handleGoSetup}>
-									{is_cn ? '前往设置' : 'Go to Settings'}
-								</button>
-								<button className={styles.btn_primary} onClick={handleComplete}>
-									{is_cn ? '开始体验' : 'Start Exploring'}
-								</button>
-							</>
+							<button className={styles.btn_primary} onClick={handleComplete}>
+								{is_cn ? '开始体验' : 'Start Exploring'}
+							</button>
 						) : (
 							<button className={styles.btn_primary} onClick={handleNext}>
 								{is_cn ? '下一步' : 'Next'}
