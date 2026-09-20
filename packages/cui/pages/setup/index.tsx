@@ -5,6 +5,7 @@ import { Spin } from 'antd'
 import { useGlobal } from '@/context/app'
 import { Setting as SettingAPI } from '@/openapi/setting/api'
 import { getYaoMetadata } from '@/services/wellknown'
+import { getSetupRedirectUrl, refreshSetupStatus } from './redirect'
 import SetupLayout from './components/SetupLayout'
 import PathCard from './components/PathCard'
 import styles from './index.less'
@@ -23,7 +24,11 @@ const SetupIndex = observer(() => {
 		if (!global.setup_status) return
 		const llmCheck = global.setup_status.checkpoints?.llm_default
 		if (llmCheck?.status !== 'fail') {
-			history.replace(global.dashboardPath || '/chat')
+			refreshSetupStatus().then(() =>
+				getSetupRedirectUrl().then((url) => {
+					window.location.href = url
+				})
+			)
 		}
 	}, [global.setup_status])
 
@@ -131,7 +136,7 @@ const SetupIndex = observer(() => {
 						: 'Use your own OpenAI, Anthropic, local Ollama, etc. Configure each service separately.'
 				}
 				buttonText={is_cn ? '开始配置 →' : 'Start Setup →'}
-				onClick={() => history.push('/settings/models')}
+				onClick={() => history.push('/setup/byok')}
 			/>
 		</SetupLayout>
 	)

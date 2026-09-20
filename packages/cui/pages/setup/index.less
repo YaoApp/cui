@@ -2,10 +2,11 @@
 
 // ─── Setup Layout ──────────────────────────────────────
 .setupLayout {
-	min-height: 100vh;
+	height: 100vh;
 	background: var(--color_bg);
 	display: flex;
 	flex-direction: column;
+	overflow: hidden;
 }
 
 .setupHeader {
@@ -49,6 +50,35 @@
 	justify-content: flex-start;
 	padding: 0 24px 64px;
 	padding-top: max(32px, calc((100vh - 64px) * 0.18));
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		-webkit-appearance: none;
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: rgba(0, 0, 0, 0.12);
+		border-radius: 3px;
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.25);
+		}
+	}
+}
+
+:global([data-theme='dark']) .setupBody {
+	&::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.12);
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.25);
+		}
+	}
 }
 
 .setupContent {
@@ -523,6 +553,196 @@
 .resultNote {
 	font-size: 12px;
 	color: var(--color_text_grey);
+}
+
+// ─── BYOK Wizard ───────────────────────────────────────
+.byokCard {
+	background: var(--color_neo_bg_card);
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: 12px;
+	padding: 32px;
+}
+
+.byokTitle {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--color_text);
+	margin: 0 0 8px;
+}
+
+.byokSubtitle {
+	font-size: 14px;
+	color: var(--color_text_grey);
+	line-height: 1.6;
+	margin: 0 0 24px;
+}
+
+.byokProviderList {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+.byokEmpty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 40px 0;
+	color: var(--color_text_grey);
+	font-size: 14px;
+}
+
+.byokAddBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 12px;
+	border: 1px dashed var(--color_neo_border_card);
+	border-radius: var(--radius);
+	color: var(--color_text_grey);
+	font-size: 14px;
+	cursor: pointer;
+	transition: all 0.2s;
+	margin-bottom: 24px;
+
+	&:hover {
+		border-color: var(--color_main);
+		color: var(--color_main);
+	}
+}
+
+.byokFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-top: 16px;
+	border-top: 1px solid var(--color_neo_border_card);
+}
+
+.byokNextBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 8px 20px;
+	border: none;
+	border-radius: var(--radius);
+	background: var(--color_main);
+	color: #fff;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover:not(:disabled) {
+		background: var(--color_main_hover);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+.byokSkipBtn {
+	display: inline-flex;
+	align-items: center;
+	padding: 8px 16px;
+	border: 1px solid var(--color_neo_border_card);
+	border-radius: var(--radius);
+	background: transparent;
+	color: var(--color_text_grey);
+	font-size: 14px;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover:not(:disabled) {
+		border-color: var(--color_text);
+		color: var(--color_text);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+// ─── BYOK Step 2: Roles ───────────────────────────────
+.byokRoleRow {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.byokRoleLabel {
+	flex-shrink: 0;
+	width: 120px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding-top: 8px;
+}
+
+.byokRoleName {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color_text);
+	white-space: nowrap;
+}
+
+.byokRoleRequired {
+	font-size: 11px;
+	color: var(--color_danger, #ff4d4f);
+	background: rgba(255, 77, 79, 0.08);
+	padding: 1px 6px;
+	border-radius: 8px;
+	white-space: nowrap;
+}
+
+.byokRoleOptional {
+	font-size: 11px;
+	color: var(--color_text_grey);
+	background: var(--color_bg_2);
+	padding: 1px 6px;
+	border-radius: 8px;
+	white-space: nowrap;
+}
+
+.byokRoleRight {
+	flex: 1;
+	min-width: 0;
+}
+
+.byokRoleSelect {
+	// RoleSelect fills width
+}
+
+.byokRoleDesc {
+	font-size: 12px;
+	color: var(--color_text_grey);
+	line-height: 1.4;
+	margin-top: 4px;
+}
+
+// ─── BYOK Step 3: Search ──────────────────────────────
+.byokSearchList {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+.byokSearchHint {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--color_text_grey);
+	margin-bottom: 16px;
 }
 
 // ─── Loading State ─────────────────────────────────────
