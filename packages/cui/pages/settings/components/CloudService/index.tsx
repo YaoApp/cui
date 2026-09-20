@@ -105,16 +105,29 @@ const CloudService = () => {
 
 		setSaving(true)
 		try {
-			const resp = await api.UpdateTaoConfig({ key: apiKey.trim() }, locale)
-			if (resp.error || !resp.data) {
-				message.error(resp.error?.error_description || (is_cn ? '保存失败' : 'Save failed'))
+			const setupResp = await api.SetupTao(apiKey.trim(), locale)
+			if (setupResp.error) {
+				message.error(setupResp.error?.error_description || (is_cn ? '保存失败' : 'Save failed'))
 				return
 			}
-			setData(resp.data)
+			if (!setupResp.data?.success) {
+				message.error(setupResp.data?.message || (is_cn ? '验证失败' : 'Verification failed'))
+				return
+			}
+
+			try {
+				const configResp = await api.GetTaoConfig()
+				if (configResp.data) {
+					setData(configResp.data)
+				}
+			} catch {
+				// Non-critical: SetupTao already succeeded; page refreshes on reload
+			}
 			setApiKey('')
 			setEditingKey(false)
 			message.success(is_cn ? '保存成功' : 'Saved successfully')
 			window.$app?.Event?.emit('setup/recheck')
+			window.$app?.Event?.emit('models/changed')
 		} catch (err: any) {
 			message.error(err?.message || (is_cn ? '保存失败' : 'Save failed'))
 		} finally {
