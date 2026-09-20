@@ -21,7 +21,8 @@ const ALL_CAPS: { key: ModelCapability; cn: string; en: string }[] = [
 	{ key: 'streaming', cn: '流式输出', en: 'Streaming' },
 	{ key: 'json', cn: '结构化输出', en: 'JSON' },
 	{ key: 'embedding', cn: '嵌入', en: 'Embedding' },
-	{ key: 'audio', cn: '语音', en: 'Audio' },
+	{ key: 'audio', cn: '语音识别', en: 'Audio' },
+	{ key: 'audio_speech', cn: '语音合成', en: 'TTS' },
 	{ key: 'image_generation', cn: '绘图', en: 'Image' },
 	{ key: 'ocr', cn: '文字识别', en: 'OCR' }
 ]
@@ -129,7 +130,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 		if (!open) return
 		const api = getSettingAPI()
 		if (!api) return
-		api.GetCloudService().then((resp) => {
+		api.GetTaoConfig().then((resp) => {
 			if (resp.data) setCloudConnected(resp.data.status === 'connected')
 		})
 	}, [open])
@@ -505,7 +506,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 						<div className={styles.cloudStatusConnected}>
 							<Icon name='material-check_circle' size={16} />
 							<span>{is_cn ? 'Tao Service 已连接' : 'Tao Service connected'}</span>
-							<a onClick={() => { onClose(); navigate('/settings/cloud') }}>
+							<a onClick={() => { onClose(); navigate('/settings/models') }}>
 								{is_cn ? '修改配置' : 'Edit settings'}
 							</a>
 						</div>
@@ -513,7 +514,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 						<div className={styles.cloudStatusDisconnected}>
 							<Icon name='material-warning' size={16} />
 							<span>{is_cn ? 'Tao Service 未配置' : 'Tao Service not configured'}</span>
-							<a onClick={() => { onClose(); navigate('/settings/cloud') }}>
+							<a onClick={() => { onClose(); navigate('/settings/models') }}>
 								{is_cn ? '前往配置' : 'Configure now'}
 							</a>
 						</div>

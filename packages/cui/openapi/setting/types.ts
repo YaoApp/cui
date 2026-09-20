@@ -44,27 +44,6 @@ export interface CheckUpdateResult {
 	download_url?: string
 }
 
-export interface CloudRegion {
-	key: string
-	label: Record<string, string>
-	api_url: string
-	default?: boolean
-}
-
-export interface CloudServiceData {
-	regions: CloudRegion[]
-	region: string
-	api_url: string
-	api_key: string
-	status: 'connected' | 'disconnected' | 'unconfigured'
-}
-
-export interface CloudServiceTestResult {
-	success: boolean
-	message: string
-	latency_ms?: number
-}
-
 // ─── Tao Service ────────────────────────────────────────
 
 export interface TaoServices {

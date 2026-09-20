@@ -302,30 +302,9 @@ export interface AuditLogResponse {
 
 export type { SystemInfoData, CheckUpdateResult } from '@/openapi/setting/types'
 
-export interface CloudRegion {
-	key: string
-	label: { 'zh-CN': string; 'en-US': string }
-	api_url: string
-	default?: boolean
-}
-
-export interface CloudServiceData {
-	regions: CloudRegion[]
-	region: string
-	api_url: string
-	api_key: string
-	status: 'connected' | 'disconnected' | 'unconfigured'
-}
-
-export interface CloudServiceTestResult {
-	success: boolean
-	message: string
-	latency_ms?: number
-}
-
 // ─── Models Page ─────────────────────────────────────────
 
-export type ModelCapability = 'vision' | 'audio' | 'reasoning' | 'tool_calls' | 'streaming' | 'json' | 'embedding' | 'image_generation' | 'ocr'
+export type ModelCapability = 'vision' | 'audio' | 'audio_speech' | 'reasoning' | 'tool_calls' | 'streaming' | 'json' | 'embedding' | 'image_generation' | 'ocr'
 
 export interface ModelInfo {
 	id: string

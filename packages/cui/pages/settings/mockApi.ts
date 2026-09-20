@@ -23,8 +23,6 @@ import type {
 	MenuGroup,
 	SystemInfoData,
 	CheckUpdateResult,
-	CloudServiceData,
-	CloudServiceTestResult,
 	ModelInfo,
 	ProviderConfig,
 	ModelsPageData,
@@ -1241,55 +1239,6 @@ export const mockApi = {
 		})
 	},
 
-	getCloudService: (): Promise<CloudServiceData> => {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				resolve({
-					regions: [
-						{ key: 'us', label: { 'zh-CN': '美国', 'en-US': 'United States' }, api_url: 'https://api-us.yao.run', default: true },
-						{ key: 'cn', label: { 'zh-CN': '中国', 'en-US': 'China' }, api_url: 'https://api-cn.yao.run' },
-						{ key: 'ap', label: { 'zh-CN': '亚太', 'en-US': 'Asia Pacific' }, api_url: 'https://api-ap.yao.run' },
-						{ key: 'eu', label: { 'zh-CN': '欧洲', 'en-US': 'Europe' }, api_url: 'https://api-eu.yao.run' }
-					],
-					region: 'us',
-					api_url: 'https://api-us.yao.run',
-					api_key: '',
-					status: 'unconfigured'
-				})
-			}, 300)
-		})
-	},
-
-	saveCloudService: (data: Partial<CloudServiceData>): Promise<CloudServiceData> => {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				resolve({
-					regions: [
-						{ key: 'us', label: { 'zh-CN': '美国', 'en-US': 'United States' }, api_url: 'https://api-us.yao.run', default: true },
-						{ key: 'cn', label: { 'zh-CN': '中国', 'en-US': 'China' }, api_url: 'https://api-cn.yao.run' },
-						{ key: 'ap', label: { 'zh-CN': '亚太', 'en-US': 'Asia Pacific' }, api_url: 'https://api-ap.yao.run' },
-						{ key: 'eu', label: { 'zh-CN': '欧洲', 'en-US': 'Europe' }, api_url: 'https://api-eu.yao.run' }
-					],
-					region: data.region || 'us',
-					api_url: data.api_url || 'https://api-us.yao.run',
-					api_key: data.api_key || '',
-					status: data.api_key ? 'connected' : 'unconfigured'
-				})
-			}, 500)
-		})
-	},
-
-	testCloudService: (): Promise<CloudServiceTestResult> => {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				resolve({
-					success: true,
-					message: 'Connection successful',
-					latency_ms: 128
-				})
-			}, 1000)
-		})
-	},
 
 	// ─── Models ──────────────────────────────────────────────
 
@@ -1370,18 +1319,7 @@ export const mockApi = {
 
 	getSearchPageData: (): Promise<SearchPageData> => {
 		return new Promise((resolve) => {
-			setTimeout(async () => {
-				const cloud = await mockApi.getCloudService()
-				const taoProvider = searchCache.providers.find((p) => p.preset_key === 'tao')
-				if (taoProvider) {
-					if (cloud.status === 'connected') {
-						taoProvider.enabled = true
-						taoProvider.status = 'connected'
-					} else {
-						taoProvider.enabled = false
-						taoProvider.status = 'unconfigured'
-					}
-				}
+			setTimeout(() => {
 				resolve(JSON.parse(JSON.stringify(searchCache)))
 			}, 400)
 		})
