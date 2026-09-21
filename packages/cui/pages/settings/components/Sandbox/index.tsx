@@ -115,7 +115,7 @@ const Sandbox = () => {
 				<a
 					className={styles.helpLink}
 					href={is_cn
-						? 'https://yaoagents.com/docs/zh-cn/settings/docker-setting?source=yao-setting'
+						? 'https://yaoagents.cn/docs/zh-cn/settings/docker-setting?source=yao-setting'
 						: 'https://yaoagents.com/docs/en-us/settings/docker-setting?source=yao-setting'}
 					target='_blank'
 					rel='noopener noreferrer'

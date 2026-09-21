@@ -3,10 +3,12 @@ import { history, getLocale } from '@umijs/max'
 import { message, Spin } from 'antd'
 import Icon from '@/widgets/Icon'
 import { Setting } from '@/openapi/setting'
+import { local } from '@yaoapp/storex'
 import { getSetupRedirectUrl, refreshSetupStatus } from '../redirect'
 import type { SearchPageData } from '@/pages/settings/types'
 import SearchProviderCard from '@/pages/settings/components/SearchScrape/SearchProviderCard'
 import SetupLayout from '../components/SetupLayout'
+import SandboxModal, { hasPendingSandboxWork } from '../components/SandboxModal'
 import styles from '../index.less'
 
 function getSettingAPI(): Setting | null {
@@ -26,6 +28,8 @@ const ByokSearch = () => {
 	const [loading, setLoading] = useState(true)
 	const [data, setData] = useState<SearchPageData | null>(null)
 	const [finishing, setFinishing] = useState(false)
+	const [showSandboxModal, setShowSandboxModal] = useState(false)
+	const [redirectUrl, setRedirectUrl] = useState<string>('')
 
 	const loadData = useCallback(async () => {
 		const api = getSettingAPI()
@@ -103,7 +107,12 @@ const ByokSearch = () => {
 			window.$app?.Event?.emit('models/changed')
 			await refreshSetupStatus()
 			const url = await getSetupRedirectUrl()
-			window.location.href = url
+			if (hasPendingSandboxWork(local.setup_status)) {
+				setRedirectUrl(url)
+				setShowSandboxModal(true)
+			} else {
+				window.location.href = url
+			}
 		} catch {
 			setFinishing(false)
 			message.error(is_cn ? '操作失败，请重试' : 'Operation failed, please retry')
@@ -184,6 +193,19 @@ const ByokSearch = () => {
 					</>
 				)}
 			</div>
+			<SandboxModal
+				open={showSandboxModal}
+				onClose={() => {
+					setShowSandboxModal(false)
+					if (redirectUrl) {
+						window.location.href = redirectUrl
+					}
+				}}
+				onGoSetup={() => {
+					setShowSandboxModal(false)
+					history.push('/settings/sandbox')
+				}}
+			/>
 		</SetupLayout>
 	)
 }

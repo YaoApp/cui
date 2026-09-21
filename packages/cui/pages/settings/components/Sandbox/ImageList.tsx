@@ -40,29 +40,35 @@ export default function ImageList({ nodeId, nodeName, images, onReload, onOptimi
 	const onReloadRef = useRef(onReload)
 	useEffect(() => { onReloadRef.current = onReload })
 
-	const statusOrder: Record<string, number> = { downloaded: 0, downloading: 1, error: 2, not_downloaded: 3 }
 	const sortedImages = useMemo(
 		() =>
 			[...images].sort((a, b) => {
-				const sa = statusOrder[a.status] ?? 4
-				const sb = statusOrder[b.status] ?? 4
-				if (sa !== sb) return sa - sb
-				return `${a.image_name}:${a.tag}`.localeCompare(`${b.image_name}:${b.tag}`)
+				const na = a.assistant_names?.length ?? 0
+				const nb = b.assistant_names?.length ?? 0
+				if (na !== nb) return nb - na
+				return (a.image_name?.length ?? 0) - (b.image_name?.length ?? 0)
 			}),
 		[images]
 	)
 
 	const hasDownloading = sortedImages.some((i) => i.status === 'downloading')
+	const wasPollingRef = useRef(false)
 
 	useEffect(() => {
-		if (hasDownloading && !pollRef.current) {
-			pollRef.current = setInterval(() => onReloadRef.current(), 3000)
-	} else if (!hasDownloading && pollRef.current) {
-		clearInterval(pollRef.current)
-		pollRef.current = null
-		onReloadRef.current()
-		window.$app?.Event?.emit('setup/recheck')
-	}
+		if (hasDownloading) {
+			wasPollingRef.current = true
+			if (!pollRef.current) {
+				pollRef.current = setInterval(() => onReloadRef.current(), 3000)
+			}
+		} else if (wasPollingRef.current) {
+			wasPollingRef.current = false
+			if (pollRef.current) {
+				clearInterval(pollRef.current)
+				pollRef.current = null
+			}
+			onReloadRef.current()
+			window.$app?.Event?.emit('setup/recheck')
+		}
 		return () => {
 			if (pollRef.current) {
 				clearInterval(pollRef.current)
@@ -106,12 +112,13 @@ export default function ImageList({ nodeId, nodeName, images, onReload, onOptimi
 				try {
 					const resp = await api.RemoveSandboxImage(nodeId, imageId)
 					if (resp.error) {
-				message.error(resp.error.error_description || (is_cn ? '删除失败' : 'Failed to delete'))
-				} else {
-					message.success(is_cn ? '已删除' : 'Deleted')
+						message.error(resp.error.error_description || (is_cn ? '删除失败' : 'Failed to delete'))
+					} else {
+						message.success(is_cn ? '已删除' : 'Deleted')
+						onOptimisticUpdate?.(imageId, 'not_downloaded')
+					}
+					await onReload()
 					window.$app?.Event?.emit('setup/recheck')
-				}
-				await onReload()
 				} finally {
 					setRemoving((prev) => ({ ...prev, [imageId]: false }))
 				}

@@ -6,7 +6,29 @@ import { GetCurrentUser } from '@/pages/auth/auth'
 import { Setting } from '@/openapi/setting/api'
 import { local } from '@yaoapp/storex'
 import Icon from '@/widgets/Icon'
+import type { Checkpoint } from '@/openapi/setting/types'
 import styles from './index.less'
+
+/** Whether any error- or warning-level checkpoint has failed. Info-level items are advisory and do not trigger the banner. */
+function hasActionableFailures(checkpoints: Record<string, Checkpoint>): boolean {
+	return Object.values(checkpoints).some((cp) => cp.status === 'fail' && cp.level !== 'info')
+}
+
+const LEVEL_PRIORITY: Record<string, number> = { error: 0, warning: 1, info: 2 }
+
+/** Return failed checkpoints sorted by level priority: error > warning > info. */
+function getFailedByPriority(checkpoints: Record<string, Checkpoint>) {
+	return Object.entries(checkpoints)
+		.filter(([, cp]) => cp.status === 'fail')
+		.map(([key, cp]) => ({ key, ...cp }))
+		.sort((a, b) => (LEVEL_PRIORITY[a.level] ?? 3) - (LEVEL_PRIORITY[b.level] ?? 3))
+}
+
+/** Path of the highest-priority failed checkpoint, for the "Go to Settings" button. */
+function getTopFailedPath(checkpoints: Record<string, Checkpoint>): string | null {
+	const sorted = getFailedByPriority(checkpoints)
+	return sorted.length > 0 ? sorted[0].path : null
+}
 
 const SetupBanner = observer(() => {
 	const global = useGlobal()
@@ -16,18 +38,26 @@ const SetupBanner = observer(() => {
 	const is_cn = locale === 'zh-CN'
 	const [dismissed, setDismissed] = useState(false)
 
+	// Reset local dismissed state when banner_dismissed is cleared
+	// (e.g. user clicks "Re-show banner" on System Info page).
+	useEffect(() => {
+		if (status && !status.banner_dismissed) {
+			setDismissed(false)
+		}
+	}, [status?.banner_dismissed])
+
 	const isOwner = user?.is_owner ?? !user?.team_id
+
+	// Visible whenever there are failed checkpoints — no longer gated on `status.completed`.
 	const shouldShow = useMemo(() => {
-		if (!status || status.completed || status.banner_dismissed || dismissed || !isOwner) return false
+		if (!status || status.banner_dismissed || dismissed || !isOwner) return false
 		if (!status.checkpoints) return false
-		return Object.values(status.checkpoints).some((cp) => cp.status === 'fail')
+		return hasActionableFailures(status.checkpoints)
 	}, [status, isOwner, dismissed])
 
-	const failedRequired = useMemo(() => {
-		if (!status?.checkpoints) return []
-		return Object.entries(status.checkpoints)
-			.filter(([, cp]) => cp.required && cp.status === 'fail')
-			.map(([key, cp]) => ({ key, ...cp }))
+	const topFailedPath = useMemo(() => {
+		if (!status?.checkpoints) return null
+		return getTopFailedPath(status.checkpoints)
 	}, [status])
 
 	const leftRef = useRef<HTMLDivElement>(null)
@@ -53,8 +83,8 @@ const SetupBanner = observer(() => {
 	}
 
 	const handleGoSetup = () => {
-		if (failedRequired.length > 0) {
-			history.push(failedRequired[0].path)
+		if (topFailedPath) {
+			history.push(topFailedPath)
 		}
 	}
 
@@ -69,7 +99,9 @@ const SetupBanner = observer(() => {
 				const api = new Setting(window.$app.openapi)
 				await api.UpdatePreference({ banner_dismissed: true })
 			}
-		} catch {}
+		} catch {
+			/* persist best-effort; UI already dismissed */
+		}
 	}
 
 	return (
@@ -85,9 +117,7 @@ const SetupBanner = observer(() => {
 							className={`${styles.checkpoint_item} ${
 								cp.status === 'pass'
 									? styles.pass
-									: cp.required
-									? styles.fail_required
-									: styles.fail_optional
+									: styles[`fail_${cp.level}`] || styles.fail_info
 							}`}
 							onClick={() => handleNavigate(cp.path)}
 						>
@@ -101,7 +131,7 @@ const SetupBanner = observer(() => {
 				</div>
 			</div>
 			<div className={styles.banner_actions}>
-				{failedRequired.length > 0 && (
+				{topFailedPath && (
 					<button className={styles.action_button} onClick={handleGoSetup}>
 						{is_cn ? '前往设置' : 'Go to Settings'}
 					</button>
