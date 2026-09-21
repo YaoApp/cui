@@ -24,7 +24,8 @@ const ALL_CAPS: { key: ModelCapability; cn: string; en: string }[] = [
 	{ key: 'audio', cn: '语音识别', en: 'Audio' },
 	{ key: 'audio_speech', cn: '语音合成', en: 'TTS' },
 	{ key: 'image_generation', cn: '绘图', en: 'Image' },
-	{ key: 'ocr', cn: '文字识别', en: 'OCR' }
+	{ key: 'ocr', cn: '文字识别', en: 'OCR' },
+	{ key: 'decision', cn: '结构化决策', en: 'Structured Decisions' }
 ]
 
 function capDesc(caps: ModelCapability[], is_cn: boolean): string {
@@ -375,7 +376,8 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 		type: 'string',
 		enum: [
 			{ label: 'OpenAI Compatible', value: 'openai' },
-			{ label: 'Anthropic Compatible', value: 'anthropic' }
+			{ label: 'Anthropic Compatible', value: 'anthropic' },
+			{ label: 'TypeSafe AI (Structured Decisions)', value: 'typesafe' }
 		]
 	}), [])
 

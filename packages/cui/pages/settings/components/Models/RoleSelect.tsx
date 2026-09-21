@@ -10,13 +10,15 @@ const ROLE_FILTER: Record<ModelRole, ModelCapability | null> = {
 	light: null,
 	vision: 'vision',
 	audio: 'audio',
-	embedding: 'embedding'
+	embedding: 'embedding',
+	decision: 'decision'
 }
 
 const CAP_SHORT: Record<string, { cn: string; en: string }> = {
 	vision: { cn: '看图', en: 'Vision' },
 	audio: { cn: '语音', en: 'Audio' },
-	reasoning: { cn: '思考', en: 'Reasoning' }
+	reasoning: { cn: '思考', en: 'Reasoning' },
+	decision: { cn: '决策', en: 'Decision' }
 }
 
 function capDesc(caps: ModelCapability[], is_cn: boolean): string {
@@ -49,7 +51,8 @@ export default function RoleSelect({ role, value, onChange, providers }: RoleSel
 					(m) =>
 						!m.capabilities?.includes('embedding') &&
 						!m.capabilities?.includes('audio') &&
-						!m.capabilities?.includes('image_generation')
+						!m.capabilities?.includes('image_generation') &&
+						!m.capabilities?.includes('decision')
 				)
 
 			if (filtered.length === 0) continue
@@ -64,7 +67,7 @@ export default function RoleSelect({ role, value, onChange, providers }: RoleSel
 		}
 
 		const isOptional = role !== 'default'
-		const disableRoles: ModelRole[] = ['audio', 'embedding']
+		const disableRoles: ModelRole[] = ['audio', 'embedding', 'decision']
 		const isDisableType = disableRoles.includes(role)
 		const placeholder = isOptional
 			? is_cn

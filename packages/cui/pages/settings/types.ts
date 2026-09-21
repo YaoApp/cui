@@ -304,7 +304,7 @@ export type { SystemInfoData, CheckUpdateResult } from '@/openapi/setting/types'
 
 // ─── Models Page ─────────────────────────────────────────
 
-export type ModelCapability = 'vision' | 'audio' | 'audio_speech' | 'reasoning' | 'tool_calls' | 'streaming' | 'json' | 'embedding' | 'image_generation' | 'ocr'
+export type ModelCapability = 'vision' | 'audio' | 'audio_speech' | 'reasoning' | 'tool_calls' | 'streaming' | 'json' | 'embedding' | 'image_generation' | 'ocr' | 'decision'
 
 export interface ModelInfo {
 	id: string
@@ -317,7 +317,7 @@ export interface ModelInfo {
 	options?: Record<string, any>
 }
 
-export type ProviderType = 'openai' | 'anthropic' | 'google' | 'ollama' | 'custom'
+export type ProviderType = 'openai' | 'anthropic' | 'google' | 'ollama' | 'custom' | 'typesafe'
 
 export interface ProviderConfig {
 	key: string
@@ -333,7 +333,7 @@ export interface ProviderConfig {
 	require_key: boolean
 }
 
-export type ModelRole = 'default' | 'heavy' | 'light' | 'vision' | 'audio' | 'embedding'
+export type ModelRole = 'default' | 'heavy' | 'light' | 'vision' | 'audio' | 'embedding' | 'decision'
 
 export type RoleAssignment = {
 	[role in ModelRole]?: { provider: string; model: string }

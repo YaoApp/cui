@@ -50,6 +50,14 @@ const ROLE_META: {
 		required: false
 	},
 	{
+		key: 'decision',
+		cn: '结构化决策',
+		en: 'Structured Decisions',
+		tooltip_cn: '带校准概率的类型安全结构化判定，用于分类/路由/评分/抽取（TypeSafe Jev）。不选则关闭决策功能',
+		tooltip_en: 'Type-safe structured decisions with calibrated probabilities — classification, routing, scoring, extraction (TypeSafe Jev). Disabled if not set',
+		required: false
+	},
+	{
 		key: 'vision',
 		cn: '视觉模型',
 		en: 'Vision',
@@ -202,7 +210,7 @@ const Models = () => {
 				<div className={styles.header}>
 					<div className={styles.headerContent}>
 						<h2>{is_cn ? '模型配置' : 'Model Configuration'}</h2>
-				<p>{is_cn ? '分配默认/推理/轻量/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/reasoning/light/vision/audio/embedding models, manage model providers'}</p>
+				<p>{is_cn ? '分配默认/推理/轻量/视觉/语音/嵌入/结构化决策模型，管理模型服务' : 'Assign default/reasoning/light/vision/audio/embedding/structured-decision models, manage model providers'}</p>
 			</div>
 		</div>
 		<div className={styles.loadingState}>
@@ -219,7 +227,7 @@ const Models = () => {
 			<div className={styles.header}>
 				<div className={styles.headerContent}>
 					<h2>{is_cn ? '模型配置' : 'Model Configuration'}</h2>
-			<p>{is_cn ? '分配默认/推理/轻量/视觉/语音/嵌入模型，管理模型服务' : 'Assign default/reasoning/light/vision/audio/embedding models, manage model providers'}</p>
+			<p>{is_cn ? '分配默认/推理/轻量/视觉/语音/嵌入/结构化决策模型，管理模型服务' : 'Assign default/reasoning/light/vision/audio/embedding/structured-decision models, manage model providers'}</p>
 		</div>
 	</div>
 
