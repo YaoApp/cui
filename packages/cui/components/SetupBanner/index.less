@@ -69,11 +69,16 @@
 		color: var(--color_success);
 	}
 
-	&.fail_required {
-		color: var(--color_warning);
+	&.fail_error {
+		color: var(--color_danger);
 	}
 
-	&.fail_optional {
+	&.fail_warning {
+		color: var(--color_warning);
+		font-weight: 500;
+	}
+
+	&.fail_info {
 		color: var(--color_neo_text_tertiary);
 	}
 }

@@ -8,6 +8,7 @@ import { getYaoMetadata } from '@/services/wellknown'
 import Icon from '@/widgets/Icon'
 import { getSetupRedirectUrl, refreshSetupStatus } from './redirect'
 import SetupLayout from './components/SetupLayout'
+import SandboxModal, { hasPendingSandboxWork } from './components/SandboxModal'
 import styles from './index.less'
 
 type PageState = 'idle' | 'verifying' | 'success' | 'error'
@@ -28,6 +29,17 @@ function getErrorMessage(errorType: string | undefined, is_cn: boolean): string 
 	}
 }
 
+/** Append `source=yao-setup` to a URL, preserving existing query params. */
+function withSource(url: string): string {
+	try {
+		const u = new URL(url)
+		u.searchParams.set('source', 'yao-setup')
+		return u.toString()
+	} catch {
+		return url
+	}
+}
+
 const TaoSetup = observer(() => {
 	const global = useGlobal()
 	const locale = getLocale()
@@ -39,18 +51,25 @@ const TaoSetup = observer(() => {
 	const [showKey, setShowKey] = useState(false)
 	const [errorType, setErrorType] = useState<string | undefined>()
 	const [signupGift, setSignupGift] = useState<number | null>(null)
+	const [showSandboxModal, setShowSandboxModal] = useState(false)
 
 	const metadata = getYaoMetadata()
 	const registerUrl = is_cn ? metadata?.tao?.register_cn : metadata?.tao?.register_en
 
-	// Auto-navigate after successful setup once global state refreshes
+	// Auto-navigate after successful setup once global state refreshes.
+	// If sandbox work is pending (Docker detected but not configured), show
+	// the SandboxModal first instead of redirecting immediately.
 	useEffect(() => {
 		if (state === 'success' && global.setup_status?.completed) {
-			refreshSetupStatus().then(() =>
-				getSetupRedirectUrl().then((url) => {
-					window.location.href = url
-				})
-			)
+			refreshSetupStatus().then(() => {
+				if (hasPendingSandboxWork(global.setup_status)) {
+					setShowSandboxModal(true)
+				} else {
+					getSetupRedirectUrl().then((url) => {
+						window.location.href = url
+					})
+				}
+			})
 		}
 	}, [state, global.setup_status?.completed])
 
@@ -99,6 +118,12 @@ const TaoSetup = observer(() => {
 		}
 	}
 
+	const doRedirect = () => {
+		getSetupRedirectUrl().then((url) => {
+			window.location.href = url
+		})
+	}
+
 	// Success state: show loading while waiting for global state refresh
 	if (state === 'success') {
 		return (
@@ -109,6 +134,17 @@ const TaoSetup = observer(() => {
 						{is_cn ? '配置完成，正在跳转...' : 'Setup complete, redirecting...'}
 					</p>
 				</div>
+				<SandboxModal
+					open={showSandboxModal}
+					onClose={() => {
+						setShowSandboxModal(false)
+						doRedirect()
+					}}
+					onGoSetup={() => {
+						setShowSandboxModal(false)
+						history.push('/settings/sandbox')
+					}}
+				/>
 			</SetupLayout>
 		)
 	}
@@ -132,8 +168,8 @@ const TaoSetup = observer(() => {
 				{registerUrl && (
 					<div className={styles.taoRegister}>
 						{is_cn ? '没有 Key？' : "Don't have a key? "}
-						<a href={registerUrl} target='_blank' rel='noopener noreferrer'>
-							{is_cn ? '前往 Tao 注册 →' : 'Sign up at Tao →'}
+						<a href={withSource(registerUrl)} target='_blank' rel='noopener noreferrer'>
+							{is_cn ? '前往 yaoagents.cn 注册 →' : 'Sign up at yaoagents.com →'}
 						</a>
 					</div>
 				)}
@@ -181,6 +217,25 @@ const TaoSetup = observer(() => {
 							/>
 						</button>
 					</div>
+				</div>
+
+				<div className={styles.taoKeyHelper}>
+					{is_cn ? (
+						<>
+							前往{' '}
+							<a href={withSource(registerUrl)} target='_blank' rel='noopener noreferrer'>
+								yaoagents.cn
+							</a>{' '}
+							获取 Key
+						</>
+					) : (
+						<>
+							Get your key at{' '}
+							<a href={withSource(registerUrl)} target='_blank' rel='noopener noreferrer'>
+								yaoagents.com
+							</a>
+						</>
+					)}
 				</div>
 
 				{/* Error message */}

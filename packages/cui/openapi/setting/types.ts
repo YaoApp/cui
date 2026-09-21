@@ -346,6 +346,7 @@ export interface SandboxPageData {
 export interface Checkpoint {
 	status: 'pass' | 'fail'
 	required: boolean
+	level: 'error' | 'warning' | 'info'
 	label: string
 	path: string
 	detail?: string

@@ -10,6 +10,17 @@ import SetupLayout from './components/SetupLayout'
 import PathCard from './components/PathCard'
 import styles from './index.less'
 
+/** Append `source=yao-setup` to a URL, preserving existing query params. */
+function withSource(url: string): string {
+	try {
+		const u = new URL(url)
+		u.searchParams.set('source', 'yao-setup')
+		return u.toString()
+	} catch {
+		return url
+	}
+}
+
 const SetupIndex = observer(() => {
 	const global = useGlobal()
 	const locale = getLocale()
@@ -71,12 +82,12 @@ const SetupIndex = observer(() => {
 		if (!giftFetched) {
 			return (
 				<a
-					href={registerUrl}
+					href={withSource(registerUrl)}
 					target='_blank'
 					rel='noopener noreferrer'
 					onClick={(e) => e.stopPropagation()}
 				>
-					{is_cn ? '前往注册 →' : 'Sign up →'}
+					{is_cn ? '前往 yaoagents.cn 注册 →' : 'Sign up at yaoagents.com →'}
 				</a>
 			)
 		}
@@ -84,15 +95,15 @@ const SetupIndex = observer(() => {
 		const linkText =
 			signupGift !== null && signupGift > 0
 				? is_cn
-					? `注册即送 ${signupGift} 积分 →`
-					: `Sign up and get ${signupGift} credits free →`
+					? `前往 yaoagents.cn 注册，即送 ${signupGift} 积分 →`
+					: `Sign up at yaoagents.com, get ${signupGift} credits free →`
 				: is_cn
-					? '前往注册 →'
-					: 'Sign up →'
+					? '前往 yaoagents.cn 注册 →'
+					: 'Sign up at yaoagents.com →'
 
 		return (
 			<a
-				href={registerUrl}
+				href={withSource(registerUrl)}
 				target='_blank'
 				rel='noopener noreferrer'
 				onClick={(e) => e.stopPropagation()}

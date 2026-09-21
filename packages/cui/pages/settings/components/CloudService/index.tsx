@@ -257,7 +257,7 @@ const CloudService = () => {
 							: 'One gateway for everything your agents need to run. AI models, search, fetch, storage — one key, metered and billed in Credits.'}
 					</div>
 					<a href={registerUrl} target='_blank' rel='noopener noreferrer' className={styles.introLink}>
-						{is_cn ? '没有 Key？前往注册 →' : "Don't have a key? Register now →"}
+						{is_cn ? '没有 Key？前往 yaoagents.cn 注册 →' : "Don't have a key? Register at yaoagents.com →"}
 					</a>
 				</div>
 			</div>
@@ -292,6 +292,24 @@ const CloudService = () => {
 								)}
 							</>
 						)}
+						<div className={styles.fieldHelper}>
+							{is_cn ? (
+								<>
+									前往{' '}
+									<a href={registerUrl} target='_blank' rel='noopener noreferrer'>
+										yaoagents.cn
+									</a>{' '}
+									获取 Key
+								</>
+							) : (
+								<>
+									Get your key at{' '}
+									<a href={registerUrl} target='_blank' rel='noopener noreferrer'>
+										yaoagents.com
+									</a>
+								</>
+							)}
+						</div>
 					</div>
 
 					{isEditing && (
@@ -328,7 +346,7 @@ const CloudService = () => {
 									<span className={styles.balanceValue}>
 										{data.balance != null ? data.balance.toLocaleString() : '—'}
 									</span>
-									<span className={styles.balanceUnit}>credits</span>
+									<span className={styles.balanceUnit}>{is_cn ? '积分' : 'credits'}</span>
 								</div>
 								{data.balance != null && data.balance <= 0 && (
 									<div className={styles.balanceWarning}>
