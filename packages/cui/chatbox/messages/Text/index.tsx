@@ -202,13 +202,16 @@ const components = (done?: boolean) => {
 			)
 		},
 		VideoLink: (props: { href: string; platform: string; videoId: string }) => {
-			const label =
-				props.platform === 'bilibili'
-					? `📺 Bilibili - ${props.videoId}`
-					: `📺 YouTube - ${props.videoId}`
+			const isBilibili = props.platform === 'bilibili'
+			const label = isBilibili ? `Bilibili - ${props.videoId}` : `YouTube - ${props.videoId}`
+			const base = `/${$runtime.BASE}/`
+			const logoSrc = isBilibili
+				? `${base}assets/brands/bilibili.svg`
+				: `${base}assets/brands/youtube.svg`
 			return (
 				<a className={styles.videoLink} href={props.href} target='_blank' rel='noopener noreferrer'>
-					{label}
+					<img src={logoSrc} alt={props.platform} className={styles.videoLinkLogo} />
+					<span>{label}</span>
 				</a>
 			)
 		}
