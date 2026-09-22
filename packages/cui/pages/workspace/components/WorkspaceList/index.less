@@ -6,6 +6,11 @@
 // Page
 // ═════════════════════════════════════════════
 .container {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
 }
 
 .header {
@@ -78,15 +83,26 @@
 // Content
 // ═════════════════════════════════════════════
 .content {
+	flex: 1;
+	min-height: 0;
 	overflow-y: auto;
 
 	&::-webkit-scrollbar {
+		-webkit-appearance: none;
 		width: 6px;
 	}
 
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
 	&::-webkit-scrollbar-thumb {
-		background-color: var(--color_scrollbar_thumb);
+		background: rgba(0, 0, 0, 0.15);
 		border-radius: 3px;
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.3);
+		}
 	}
 }
 
@@ -314,5 +330,20 @@
 @media (min-width: 1400px) {
 	.grid {
 		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+	}
+}
+
+// ═════════════════════════════════════════════
+// Dark mode scrollbar
+// ═════════════════════════════════════════════
+[data-theme='dark'] {
+	.content {
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.15);
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.3);
+			}
+		}
 	}
 }
