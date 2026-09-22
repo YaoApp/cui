@@ -143,7 +143,9 @@ const Card: FC<Props> = ({ data, connectorMapping = {}, onClick, onChatClick }) 
 						</Button>
 					</Tooltip>
 			{data.connector && connectorMapping[data.connector] && (
-				<div className={styles.connector}>{connectorMapping[data.connector]}</div>
+				<Tooltip title={connectorMapping[data.connector]}>
+					<div className={styles.connector}>{connectorMapping[data.connector]}</div>
+				</Tooltip>
 			)}
 				</div>
 			</div>
