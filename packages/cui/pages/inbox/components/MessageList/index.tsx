@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type UIEvent } from 'react'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
 import { useInboxContext, type InboxGroup } from '../../context'
@@ -73,15 +73,18 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 
 	const categoryLabel = CATEGORY_LABELS[category]
 
+	const loadMoreRef = useRef(loadMore)
+	loadMoreRef.current = loadMore
+
 	const handleScroll = useCallback(
-		(e: React.UIEvent<HTMLDivElement>) => {
+		(e: UIEvent<HTMLDivElement>) => {
 			if (!hasMore || loadingMore) return
 			const el = e.currentTarget
 			if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
-				loadMore()
+				loadMoreRef.current()
 			}
 		},
-		[hasMore, loadingMore, loadMore]
+		[hasMore, loadingMore]
 	)
 
 	useEffect(() => {
@@ -91,11 +94,11 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 		const raf = requestAnimationFrame(() => {
 			const { scrollHeight, clientHeight } = el
 			if (scrollHeight <= clientHeight) {
-				loadMore()
+				loadMoreRef.current()
 			}
 		})
 		return () => cancelAnimationFrame(raf)
-	}, [hasMore, loading, loadingMore, loadMore])
+	}, [hasMore, loading, loadingMore, groupedMessages.length])
 
 	const handleContextMenu = useCallback((e: React.MouseEvent, group: InboxGroup) => {
 		e.preventDefault()

@@ -78,6 +78,7 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 	const fetchingRef = useRef(false)
 	const fetchVersionRef = useRef(0)
 	const pageRef = useRef(1)
+	const exhaustedRef = useRef(false)
 	const selectedChatIdRef = useRef<string | null>(null)
 	selectedChatIdRef.current = selectedChatId
 
@@ -105,6 +106,11 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 				.getMessages({ filter, page: p, size: PAGE_SIZE })
 				.then(({ items, total: t }) => {
 					if (fetchVersionRef.current !== version) return
+					if (!append) {
+						exhaustedRef.current = false
+					} else if (items.length === 0) {
+						exhaustedRef.current = true
+					}
 					setMessages((prev) => (append ? [...prev, ...items] : items))
 					setTotal(t)
 					pageRef.current = p
@@ -155,17 +161,18 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		(c: InboxCategory) => {
 			setCategoryState(c)
 			setSelectedChatId(null)
+			exhaustedRef.current = false
 			fetchMessages(c, 1, false, true)
 		},
 		[fetchMessages]
 	)
 
 	const loadMore = useCallback(() => {
-		if (fetchingRef.current || messages.length >= total) return
+		if (fetchingRef.current || messages.length >= total || exhaustedRef.current) return
 		fetchMessages(category, pageRef.current + 1, true)
 	}, [messages.length, total, category, fetchMessages])
 
-	const hasMore = messages.length < total
+	const hasMore = messages.length < total && !exhaustedRef.current
 
 	// Each message from the API represents one task group (1:1 mapping)
 	const groupedMessages = useMemo(() => {
