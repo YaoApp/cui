@@ -17,12 +17,21 @@
 	padding-right: 24px;
 
 	&::-webkit-scrollbar {
+		-webkit-appearance: none;
 		width: 6px;
 	}
 
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
 	&::-webkit-scrollbar-thumb {
-		background-color: var(--color_scrollbar_thumb);
+		background: rgba(0, 0, 0, 0.15);
 		border-radius: 3px;
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.3);
+		}
 	}
 }
 
@@ -451,12 +460,21 @@
 	overflow-y: auto;
 
 	&::-webkit-scrollbar {
+		-webkit-appearance: none;
 		width: 6px;
 	}
 
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
 	&::-webkit-scrollbar-thumb {
-		background-color: var(--color_scrollbar_thumb);
+		background: rgba(0, 0, 0, 0.15);
 		border-radius: 3px;
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.3);
+		}
 	}
 
 	.fileRow {
@@ -619,5 +637,30 @@
 
 	.fileList .fileRow {
 		padding: 8px 12px;
+	}
+}
+
+// ═════════════════════════════════════════════
+// Dark mode scrollbar
+// ═════════════════════════════════════════════
+[data-theme='dark'] {
+	.wrapper {
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.15);
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.3);
+			}
+		}
+	}
+
+	.fileList {
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.15);
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.3);
+			}
+		}
 	}
 }
