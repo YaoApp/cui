@@ -338,22 +338,25 @@
 		}
 	}
 
-	// Video embeds (YouTube, Bilibili)
-	.videoEmbed {
-		position: relative;
-		width: 100%;
-		padding-bottom: 56.25%; // 16:9 aspect ratio
-		margin: 12px 0;
-		border-radius: var(--radius);
-		overflow: hidden;
+	// Video links (YouTube, Bilibili)
+	.videoLink {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 6px 12px;
+		margin: 8px 0;
+		border-radius: 6px;
 		background: var(--color_bg_field);
-		iframe {
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			border: none;
+		border: 1px solid var(--color_border_soft);
+		color: var(--color_main);
+		font-size: 13px;
+		text-decoration: none;
+		transition: background 0.15s ease, border-color 0.15s ease;
+		cursor: pointer;
+
+		&:hover {
+			background: var(--color_bg_menu);
+			border-color: var(--color_main);
 		}
 	}
 

@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import type { Message } from '../../../../openapi'
 import UserAvatar from '../../../../widgets/UserAvatar'
-import { Loading, Thinking, Text, ToolCall, Execute, AgentView, TodoView, PlanView, JobView, QuestionView, Action, Image, Audio, Video, Custom, Error } from '../../../messages'
+import { Loading, Thinking, Text, ToolCall, Execute, AgentView, TodoView, PlanView, JobView, QuestionView, Action, Image, Audio, Video, Custom, Error, Cancelled } from '../../../messages'
 import styles from './index.less'
 
 interface IAIMessageProps {
@@ -47,8 +47,17 @@ const AIMessage = ({ message, loading, showHeader = true }: IAIMessageProps) => 
 				return <JobView message={message as any} loading={loading} />
 			case 'question':
 				return <QuestionView message={message as any} loading={loading} />
-			case 'error':
+			case 'error': {
+				const errProps = (message as any).props || {}
+				const errMsg = typeof errProps.message === 'string' ? errProps.message : ''
+				const isUserAbort = errMsg.includes('aborted') && errMsg.includes('"kind":"user"')
+				if (isUserAbort) {
+					return <Cancelled message={{ type: 'cancelled', props: {} } as any} />
+				}
 				return <Error message={message as any} />
+			}
+			case 'cancelled':
+				return <Cancelled message={message as any} />
 			case 'action':
 				return <Action message={message as any} />
 			case 'image':
