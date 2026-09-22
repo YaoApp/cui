@@ -126,20 +126,32 @@ function createChunkHandler(
 					return next
 				})
 
-				// Display error message if stream ended with error status
+				// Display error or cancellation message based on stream end status
 				const streamEndData = chunk.props?.data
 				if (streamEndData?.status === 'error' && streamEndData?.error) {
-					updateMessages(targetTabId, (prev) => {
-						const errorMessage = {
-							type: 'error' as const,
-							props: {
-								message: streamEndData.error,
-								code: streamEndData.request_id || undefined,
-								details: undefined
+					const errorMsg = streamEndData.error
+					const isUserAbort =
+						typeof errorMsg === 'string' &&
+						errorMsg.includes('aborted') &&
+						errorMsg.includes('"kind":"user"')
+
+					if (isUserAbort) {
+						updateMessages(targetTabId, (prev) => {
+							return [...prev, { type: 'cancelled' as const, props: {} }]
+						})
+					} else {
+						updateMessages(targetTabId, (prev) => {
+							const errorMessage = {
+								type: 'error' as const,
+								props: {
+									message: streamEndData.error,
+									code: streamEndData.request_id || undefined,
+									details: undefined
+								}
 							}
-						}
-						return [...prev, errorMessage]
-					})
+							return [...prev, errorMessage]
+						})
+					}
 				}
 
 				// Generate title on first round completion
@@ -362,13 +374,16 @@ export function useStream({
 						startNewStreamWithMessages
 					),
 					(error: any) => {
+						const msg = error?.message || ''
+						const isAbort = msg.includes('abort') || msg.includes('cancel') || error?.name === 'AbortError'
+						if (isAbort) return
 						console.error('Stream error:', error)
 						setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
 						updateMessages(targetTabId, (prev) => [
 							...prev,
 							{
 								type: 'error',
-								props: { message: error.message || 'Connection failed' }
+								props: { message: msg || 'Connection failed' }
 							}
 						])
 						delete refs.abortHandles.current[targetTabId]
@@ -461,13 +476,16 @@ export function useStream({
 						generateChatTitle
 					),
 					(error: any) => {
+						const msg = error?.message || ''
+						const isAbort = msg.includes('abort') || msg.includes('cancel') || error?.name === 'AbortError'
+						if (isAbort) return
 						console.error('Stream error:', error)
 						setStreamingStates((prev) => ({ ...prev, [targetTabId]: false }))
 						updateMessages(targetTabId, (prev) => [
 							...prev,
 							{
 								type: 'error',
-								props: { message: error.message || 'Connection failed' }
+								props: { message: msg || 'Connection failed' }
 							}
 						])
 						delete refs.abortHandles.current[targetTabId]
@@ -507,7 +525,11 @@ export function useStream({
 			delete refs.abortHandles.current[activeTabId]
 		}
 		setStreamingStates((prev) => ({ ...prev, [activeTabId]: false }))
-	}, [activeTabId, refs, setStreamingStates])
+		updateMessages(activeTabId, (prev) => [
+			...prev,
+			{ type: 'cancelled' as const, props: {} }
+		])
+	}, [activeTabId, refs, setStreamingStates, updateMessages])
 
 	const reset = useCallback(() => {
 		if (!activeTabId) return

@@ -201,16 +201,17 @@ const components = (done?: boolean) => {
 				</div>
 			)
 		},
-		VideoEmbed: (props: { src: string; platform: string }) => (
-			<div className={styles.videoEmbed}>
-				<iframe
-					src={props.src}
-					allowFullScreen
-					allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-					sandbox='allow-scripts allow-same-origin allow-popups'
-				/>
-			</div>
-		)
+		VideoLink: (props: { href: string; platform: string; videoId: string }) => {
+			const label =
+				props.platform === 'bilibili'
+					? `📺 Bilibili - ${props.videoId}`
+					: `📺 YouTube - ${props.videoId}`
+			return (
+				<a className={styles.videoLink} href={props.href} target='_blank' rel='noopener noreferrer'>
+					{label}
+				</a>
+			)
+		}
 	}
 }
 
@@ -583,14 +584,14 @@ const wrapVideoEmbeds = (text: string): string => {
 
 	let result = text
 
-	result = result.replace(youtubeRegex, (match, _fullUrl, videoId, offset) => {
+	result = result.replace(youtubeRegex, (match, fullUrl, videoId, offset) => {
 		if (isInCodeBlock(offset)) return match
-		return `<VideoEmbed src="https://www.youtube.com/embed/${videoId}" platform="youtube" />`
+		return `<VideoLink href="${fullUrl}" platform="youtube" videoId="${videoId}" />`
 	})
 
-	result = result.replace(bilibiliRegex, (match, _fullUrl, bvId, offset) => {
+	result = result.replace(bilibiliRegex, (match, fullUrl, bvId, offset) => {
 		if (isInCodeBlock(offset)) return match
-		return `<VideoEmbed src="https://player.bilibili.com/player.html?bvid=${bvId}&autoplay=0" platform="bilibili" />`
+		return `<VideoLink href="${fullUrl}" platform="bilibili" videoId="${bvId}" />`
 	})
 
 	return result
