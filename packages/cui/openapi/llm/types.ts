@@ -35,7 +35,7 @@ export interface ModelCapabilities {
 export interface LLMProvider {
 	/** Provider display name */
 	label: string
-	/** Provider ID/value */
+	/** Provider ID/value (full connector ID, e.g. "deepseek:deepseek-v4-flash-thinking-low") */
 	value: string
 	/** Provider type (e.g., "openai") */
 	type: string
@@ -46,12 +46,40 @@ export interface LLMProvider {
 }
 
 /**
- * LLM Provider list response
+ * A group of models aggregated by model_family within a provider/vendor.
+ * Each ModelGroup maps reasoning effort levels to connector IDs.
  */
-export interface LLMProviderListResponse {
-	/** List of LLM providers */
-	data: LLMProvider[]
+export interface ModelGroup {
+	/** Display name (e.g. "DeepSeek V4 Flash") */
+	model_name: string
+	/** Family identifier for grouping (e.g. "deepseek-v4-flash") */
+	model_family: string
+	/** Maps effort level → connector ID (e.g. { "none": "deepseek.v4-flash", "high": "deepseek.v4-flash-thinking" }) */
+	connectors: Record<string, string>
+	/** Available effort levels, sorted by effortOrder (e.g. ["none", "high"]) */
+	levels: string[]
 }
+
+/**
+ * Provider group — groups ModelGroups by vendor/provider name.
+ */
+export interface ProviderGroup {
+	/** Vendor display name (e.g. "DeepSeek", "Claude", "OpenAI") */
+	name: string
+	/** Models within this vendor group */
+	models: ModelGroup[]
+}
+
+/**
+ * Response from GET /llm/model-groups
+ */
+export interface ModelGroupsResponse {
+	/** Grouped models by vendor */
+	groups: ProviderGroup[]
+	/** Default connector ID for the current user */
+	default_connector: string
+}
+
 
 /**
  * LLM Provider filter options

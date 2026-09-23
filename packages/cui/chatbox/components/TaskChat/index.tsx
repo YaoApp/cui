@@ -40,6 +40,7 @@ export interface TaskChatProps {
 
 	initialWorkspace?: string
 	onWorkspaceChange?: (id: string) => void
+	initialConnector?: string
 
 	onSend?: (request: SendMessageRequest) => Promise<void>
 	messages?: Message[]
@@ -65,6 +66,7 @@ const TaskChat: React.FC<TaskChatProps> = (props) => {
 		allowAssistantSwitch = true,
 		initialWorkspace,
 		onWorkspaceChange,
+		initialConnector,
 		onSend,
 		messages: externalMessages,
 		loading: externalLoading,
@@ -164,6 +166,7 @@ const TaskChat: React.FC<TaskChatProps> = (props) => {
 				className={containerClass}
 				style={style}
 				assistant={assistant}
+				initialConnector={initialConnector}
 				messages={externalMessages}
 				loading={externalLoading}
 				streaming={externalStreaming}
@@ -188,6 +191,7 @@ const TaskChat: React.FC<TaskChatProps> = (props) => {
 			placeholder={placeholder}
 			disabled={disabled}
 			readOnly={readOnly}
+			initialConnector={initialConnector}
 			initialWorkspace={initialWorkspace}
 			onWorkspaceChange={onWorkspaceChange}
 			allowAssistantSwitch={allowAssistantSwitch}
@@ -207,6 +211,7 @@ interface TaskChatWSProps {
 	placeholder?: React.ReactNode
 	disabled?: boolean
 	readOnly?: boolean
+	initialConnector?: string
 	initialWorkspace?: string
 	onWorkspaceChange?: (id: string) => void
 	allowAssistantSwitch: boolean
@@ -224,6 +229,7 @@ const TaskChatWS: React.FC<TaskChatWSProps> = ({
 	placeholder,
 	disabled,
 	readOnly,
+	initialConnector,
 	initialWorkspace,
 	onWorkspaceChange,
 	allowAssistantSwitch,
@@ -238,6 +244,9 @@ const TaskChatWS: React.FC<TaskChatWSProps> = ({
 		enabled: true
 	})
 	const inputAreaRef = useRef<InputAreaHandle>(null)
+
+	// Model: initialConnector (server last_connector) if available; otherwise ModelSelector picks default_connector from API
+	const [currentModel, setCurrentModel] = useState(initialConnector || '')
 
 	useEffect(() => {
 		onMessagesChange?.(messages)
@@ -285,6 +294,8 @@ const TaskChatWS: React.FC<TaskChatWSProps> = ({
 				loading={streaming}
 				streaming={streaming}
 				disabled={disabled}
+				currentModel={currentModel}
+				onModelChange={setCurrentModel}
 				initialWorkspace={initialWorkspace}
 				onWorkspaceChange={onWorkspaceChange}
 				workspaceLocked={messages.length > 0}
@@ -299,6 +310,7 @@ interface TaskChatCustomProps {
 	className?: string
 	style?: React.CSSProperties
 	assistant: AssistantInfo | null
+	initialConnector?: string
 	messages?: Message[]
 	loading?: boolean
 	streaming?: boolean
@@ -314,6 +326,7 @@ const TaskChatCustom: React.FC<TaskChatCustomProps> = ({
 	className,
 	style,
 	assistant,
+	initialConnector,
 	messages: externalMessages,
 	loading,
 	streaming,
@@ -327,6 +340,9 @@ const TaskChatCustom: React.FC<TaskChatCustomProps> = ({
 	const msgs = externalMessages || []
 	const isPlaceholder = msgs.length === 0 && !loading
 	const inputAreaRef = useRef<InputAreaHandle>(null)
+
+	// Model: initialConnector (server last_connector) if available; otherwise ModelSelector picks default_connector from API
+	const [currentModel, setCurrentModel] = useState(initialConnector || '')
 
 	const handleQuickPrompt = useCallback((text: string) => {
 		inputAreaRef.current?.insertText(text)
@@ -349,6 +365,8 @@ const TaskChatCustom: React.FC<TaskChatCustomProps> = ({
 				loading={loading}
 				streaming={streaming}
 				disabled={disabled || loading}
+				currentModel={currentModel}
+				onModelChange={setCurrentModel}
 				onSwitchAssistant={allowAssistantSwitch ? onSwitchAssistant : undefined}
 			/>
 		)}

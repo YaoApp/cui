@@ -102,6 +102,7 @@ export interface KanbanTask {
 	assistant_id?: string
 	assistant_name?: string
 	connector_name?: string
+	last_connector?: string
 	sandbox?: SandboxConfig
 	secrets_count?: number
 	computer?: ComputerBinding

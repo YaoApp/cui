@@ -196,7 +196,11 @@ const Selector: React.FC<ISelectorProps> = ({
 		</div>
 	)
 
-	const tooltipContent = currentOption ? displayLabel : tooltip
+	const tooltipContent = currentOption
+		? currentOption.group
+			? `${currentOption.group} / ${displayLabel}`
+			: displayLabel
+		: tooltip
 
 	return (
 		<div className={`${styles.selectorContainer} ${isOpen ? styles.selectorOpen : ''}`} ref={containerRef}>
