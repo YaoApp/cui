@@ -71,6 +71,35 @@
 			flex-shrink: 0; // Don't shrink
 		}
 
+		.micBtn {
+			width: 28px;
+			height: 28px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			background: transparent;
+			color: var(--color_chatbox_text_secondary);
+			border: 1px solid transparent;
+			cursor: pointer;
+			transition: all 0.2s;
+			padding: 0;
+			flex-shrink: 0;
+
+			&:hover {
+				color: var(--color_primary);
+				background: var(--color_info_bg);
+				border-color: var(--color_info_border, var(--color_border_light));
+				transform: scale(1.1);
+			}
+
+			&:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+				transform: none;
+			}
+		}
+
 		.tag {
 			display: flex;
 			align-items: center;
@@ -311,37 +340,6 @@
 				}
 			}
 		}
-
-		.micBtn {
-			position: absolute;
-			right: 36px;
-			bottom: 0;
-			width: 30px;
-			height: 30px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			border-radius: 50%;
-			background: transparent;
-			color: var(--color_chatbox_text_secondary);
-			border: 1px solid transparent;
-			cursor: pointer;
-			transition: all 0.2s;
-			z-index: 5;
-			padding: 0;
-
-			&:hover {
-				color: var(--color_primary);
-				background: var(--color_info_bg);
-				border-color: var(--color_info_border, var(--color_border_light));
-				transform: scale(1.1);
-			}
-
-			&:disabled {
-				opacity: 0.4;
-				cursor: not-allowed;
-				transform: none;
-			}		}
 
 		.voiceCancelBtn {
 			position: absolute;

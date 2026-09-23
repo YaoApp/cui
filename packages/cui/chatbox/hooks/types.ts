@@ -51,6 +51,7 @@ export interface UseChatReturn {
 	closeTab: (chatId: string) => void
 	updateTabAssistant: (chatId: string, assistantId: string) => void
 	updateTabWorkspace: (chatId: string, workspaceId: string) => void
+	updateTabConnector: (chatId: string, connector: string) => void
 
 	// Queue Actions
 	queueMessage: (message: UserMessage, type: 'graceful' | 'force') => void

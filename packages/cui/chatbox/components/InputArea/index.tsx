@@ -2,15 +2,14 @@ import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperat
 import { message, Tooltip as AntTooltip, Spin } from 'antd'
 import clsx from 'clsx'
 import { getLocale, useLocation } from '@umijs/max'
-import { Database, Sparkle, UploadSimple, PaperPlaneTilt, Stop, Microphone, XCircle } from 'phosphor-react'
+import { UploadSimple, PaperPlaneTilt, Stop, Microphone, XCircle } from 'phosphor-react'
 import Icon from '../../../widgets/Icon'
 import { FileAPI } from '../../../openapi'
 import type { IInputAreaProps } from '../../types'
 import type { UserMessage } from '../../../openapi'
-import { useAssistantProviders } from '@/hooks/useAssistantProviders'
 import { useWorkspace } from '@/hooks/useComputerWorkspace'
 import { useGlobal } from '@/context/app'
-import { Agent } from '@/openapi/agent'
+import { useAssistantProviders } from '@/hooks/useAssistantProviders'
 import { WorkspaceAPI } from '@/openapi/workspace'
 import {
 	type MentionType,
@@ -57,7 +56,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		onQueueMessage,
 		onSendQueuedMessage,
 		onCancelQueuedMessage,
-		initialModel,
 		initialWorkspace,
 		onWorkspaceChange,
 		workspaceLocked,
@@ -69,14 +67,11 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	const [showMentions, setShowMentions] = useState(false)
 	const [mentionKeyword, setMentionKeyword] = useState('')
 	const [mentionSelectedIdx, setMentionSelectedIdx] = useState(0)
-	const [mentionExperts, setMentionExperts] = useState<MentionData[]>([])
 	const [mentionWorkspaces, setMentionWorkspaces] = useState<MentionData[]>([])
 	const [mentionFiles, setMentionFiles] = useState<MentionData[]>([])
 	const [mentionLoading, setMentionLoading] = useState(false)
 	const mentionDebounceRef = useRef<ReturnType<typeof setTimeout>>()
 	const [isEmpty, setIsEmpty] = useState(true)
-	const [currentModel, setCurrentModel] = useState<string>('')
-	const userSelectedModelRef = useRef(false)
 	const [chatMode, setChatMode] = useState<'chat' | 'task'>('task')
 	const [showTrace, setShowTrace] = useState(false)
 	const [selectedWorkspace, setSelectedWorkspace] = useState<string>(() => {
@@ -86,25 +81,29 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			return ''
 		}
 	})
-	const [isOptimizing, setIsOptimizing] = useState(false)
-
 	// Get global config
 	const global = useGlobal()
 
-	// Load LLM providers based on assistant configuration
+	// --- Model selector (internal state) ---
+	const [currentModel, setCurrentModel] = useState<string>('')
+	const userSelectedModelRef = useRef(false)
+
 	const {
 		providers: llmProviders,
 		loading: llmLoading,
-		showSelector,
+		showSelector: showModelSelector,
 		defaultProvider
 	} = useAssistantProviders({
 		assistant: propAssistant
-			? {
-					connector: propAssistant.connector,
-					connector_options: propAssistant.connector_options
-			  }
+			? { connector: propAssistant.connector, connector_options: propAssistant.connector_options }
 			: undefined
 	})
+
+	const modelOptions = llmProviders.map((provider) => ({
+		label: provider.label,
+		value: provider.value,
+		icon: 'material-psychology'
+	}))
 
 	// Load Workspace options (real-time fetch on dropdown open)
 	const { workspaces, hasOnlineNodes, loading: loadingWorkspaces, fetchWorkspaces } = useWorkspace()
@@ -160,7 +159,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	const contextRowRef = useRef<HTMLDivElement>(null)
 	const toolbarRef = useRef<HTMLDivElement>(null)
 	const [showModeText, setShowModeText] = useState(true)
-	const [showModelSelectorResponsive, setShowModelSelectorResponsive] = useState(true) // Responsive layout control
+	const [showModelSelectorResponsive, setShowModelSelectorResponsive] = useState(true)
 
 	// Voice recording
 	const { status: voiceStatus, duration: voiceDuration, waveformRef, start: voiceStart, stop: voiceStop, cancel: voiceCancel, error: voiceError } = useVoiceRecorder()
@@ -170,14 +169,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	useEffect(() => {
 		if (propAssistant) {
 			setAgent(propAssistant)
-
-			// Priority: initialModel (from session history) > defaultProvider (from assistant config)
-			// Skip if user has already manually selected a model
-			if (initialModel) {
-				setCurrentModel(initialModel)
-			} else if (defaultProvider && !userSelectedModelRef.current) {
-				setCurrentModel(defaultProvider)
-			}
 
 			// Priority: initialChatMode (from session history) > default_mode (from assistant config)
 			if (initialChatMode) {
@@ -193,7 +184,17 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 				setShowTrace(propAssistant.default_mode === 'task')
 			}
 		}
-	}, [propAssistant, defaultProvider, initialModel, initialChatMode, initialTrace])
+	}, [propAssistant, initialChatMode, initialTrace])
+
+	// Model initialization: initialModel (session) > defaultProvider (assistant config)
+	useEffect(() => {
+		const initialModel = props.initialModel
+		if (initialModel) {
+			setCurrentModel(initialModel)
+		} else if (defaultProvider && !userSelectedModelRef.current) {
+			setCurrentModel(defaultProvider)
+		}
+	}, [propAssistant, defaultProvider, props.initialModel])
 
 	// Reset input when chatId changes (new chat or switch tab)
 	// 每个 tab 的输入框是独立的，切换时清空输入
@@ -204,7 +205,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			// Auto-focus when entering a tab
 			editorRef.current.focus()
 		}
-		// Reset attachments and user model selection for new chat/tab
+		// Reset attachments for new chat/tab
 		setAttachments([])
 		userSelectedModelRef.current = false
 	}, [chatId])
@@ -291,24 +292,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			if (!window.$app?.openapi) return
 			setMentionLoading(true)
 			try {
-				const agentClient = new Agent(window.$app.openapi)
-				const res = await agentClient.assistants.List({
-					mentionable: true,
-					keywords: keyword || undefined,
-					select: ['assistant_id', 'name', 'avatar'],
-					pagesize: 10,
-					locale: is_cn ? 'zh-cn' : 'en-us'
-				})
-				if (res.data?.data) {
-					setMentionExperts(
-						res.data.data.map((a: any) => ({
-							type: 'expert' as MentionType,
-							id: a.assistant_id,
-							label: a.name || a.assistant_id
-						}))
-					)
-				}
-
 				const wsApi = new WorkspaceAPI(window.$app.openapi)
 				const wsRes = await wsApi.List()
 				if (wsRes.data) {
@@ -657,7 +640,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 
 		onSend({
 			messages: [message],
-			model: currentModel,
+			model: currentModel || '',
 			locale,
 			metadata: {
 				mode: chatMode,
@@ -730,113 +713,9 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		}
 	}
 
-	// Handle prompt optimization - 直接在 InputArea 内部调用 Chat API
-	const handleOptimizePrompt = async () => {
-		if (isEmpty || !editorRef.current || isOptimizing) return
-
-		const currentText = editorRef.current.innerText.trim()
-		if (!currentText) return
-
-		// Check if we have the necessary dependencies
-		if (!window.$app?.openapi) {
-			console.warn('OpenAPI not initialized')
-			return
-		}
-
-		const promptAgentId = global?.agent_uses?.prompt
-		if (!promptAgentId) {
-			console.warn('Prompt optimization agent not configured in global.agent_uses.prompt')
-			return
-		}
-
-		// Lock the input
-		setIsOptimizing(true)
-
-		try {
-			const { Chat, IsEventMessage, IsStreamEndEvent } = await import('../../../openapi')
-			const chatClient = new Chat(window.$app.openapi)
-			let optimizedPrompt = ''
-
-			// Language hint
-			const languageHint = is_cn ? '请用中文优化提示词。' : 'Please optimize the prompt in English.'
-
-			// Stream optimization
-			chatClient.StreamCompletion(
-				{
-					assistant_id: promptAgentId,
-					messages: [
-						{
-							role: 'user',
-							content: `Optimize and improve this prompt to be more clear, specific, and effective. ${languageHint}\n\nOriginal prompt:\n${currentText}`
-						}
-					],
-					model: currentModel, // Use current selected model
-					locale, // Pass user locale for i18n
-					skip: {
-						history: true, // Don't save to history
-						trace: true // Don't show trace
-					},
-					metadata: {
-						mode: chatMode,
-						page: currentPage || undefined
-					}
-				},
-				(chunk) => {
-					// Check for stream end event
-					if (IsEventMessage(chunk) && IsStreamEndEvent(chunk)) {
-						setIsOptimizing(false)
-						// Focus on editor after optimization completes
-						setTimeout(() => focusEditor(), 0)
-						return
-					}
-
-					// Accumulate and update in real-time
-					if (chunk.type === 'text' && chunk.props?.content) {
-						if (chunk.delta) {
-							optimizedPrompt += chunk.props.content
-						} else {
-							optimizedPrompt = chunk.props.content
-						}
-
-						// Real-time update the editor content
-						if (editorRef.current && optimizedPrompt.trim()) {
-							editorRef.current.innerText = optimizedPrompt.trim()
-							// Trigger input event to update isEmpty state
-							const event = new Event('input', { bubbles: true })
-							editorRef.current.dispatchEvent(event)
-
-							// Move cursor to end
-							const range = document.createRange()
-							const sel = window.getSelection()
-							if (sel && editorRef.current.childNodes.length > 0) {
-								range.selectNodeContents(editorRef.current)
-								range.collapse(false)
-								sel.removeAllRanges()
-								sel.addRange(range)
-							}
-						}
-					}
-				},
-				(error) => {
-					console.error('Failed to optimize prompt:', error)
-					message.error(is_cn ? '优化提示词失败' : 'Failed to optimize prompt')
-					setIsOptimizing(false)
-					// Focus on editor even on error
-					setTimeout(() => focusEditor(), 0)
-				}
-			)
-		} catch (error) {
-			console.error('Error optimizing prompt:', error)
-			message.error(is_cn ? '优化提示词失败' : 'Failed to optimize prompt')
-			setIsOptimizing(false)
-			// Focus on editor even on exception
-			setTimeout(() => focusEditor(), 0)
-		}
-	}
-
 	const getMentionFlatList = useCallback((): MentionData[] => {
-		return [...mentionExperts, ...mentionWorkspaces, ...mentionFiles]
-	}, [mentionExperts, mentionWorkspaces, mentionFiles])
+		return [...mentionWorkspaces, ...mentionFiles]
+	}, [mentionWorkspaces, mentionFiles])
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (showMentions) {
@@ -986,15 +865,15 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		}
 	}
 
-	// Monitor toolbar width to toggle mode text and model selector visibility
+	// Monitor toolbar width to toggle mode text visibility
 	useEffect(() => {
 		const checkToolbarWidth = () => {
 			if (toolbarRef.current) {
 				const width = toolbarRef.current.offsetWidth
 				// Hide mode text when toolbar is less than 300px
 				setShowModeText(width >= 300)
-				// Hide model selector when toolbar is less than 450px (responsive layout)
-				setShowModelSelectorResponsive(width >= 450)
+				// Hide model selector when toolbar is less than 400px
+				setShowModelSelectorResponsive(width >= 400)
 			}
 		}
 
@@ -1019,6 +898,17 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 					{agent && <AgentTag agent={agent} onSwitchAssistant={onSwitchAssistant} disabled={isWorkspaceOffline} />}
 				</div>
 				<div className={styles.rightTags}>
+					{!loading && !isRecording && !isWorkspaceOffline && (
+						<button
+							className={styles.micBtn}
+							onClick={handleVoiceStart}
+							disabled={disabled || streaming || isWorkspaceOffline}
+							title={is_cn ? '语音输入' : 'Voice input'}
+							aria-label={is_cn ? '语音输入' : 'Voice input'}
+						>
+							<Microphone size={16} />
+						</button>
+					)}
 				</div>
 			</div>
 		)
@@ -1076,10 +966,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	}
 
 	const renderSendButton = () => {
-		if (isOptimizing) {
-			return null
-		}
-
 		if (isWorkspaceOffline) return null
 
 		const showStop = loading
@@ -1139,15 +1025,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			}
 		})
 
-		// Build model options from API data
-		const modelOptions = llmProviders.map((provider) => ({
-			label: provider.label,
-			value: provider.value,
-			icon: 'material-psychology'
-		}))
-
-		const showModelSearch = modelOptions.length >= 5
-
 		return (
 			<div ref={toolbarRef} className={styles.toolbar}>
 				<div className={styles.leftTools}>
@@ -1176,7 +1053,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						placeholder={isWorkspaceOffline ? (is_cn ? '离线' : 'Offline') : is_cn ? '选择工作区' : 'Select Workspace'}
 						placeholderIcon={isWorkspaceOffline ? 'material-cloud_off' : 'material-folder_open'}
 						clearable={!workspaceLocked}
-						disabled={workspaceLocked || loading || isOptimizing || loadingWorkspaces || isRecording}
+						disabled={workspaceLocked || loading || loadingWorkspaces || isRecording}
 						searchable={workspaceOptions.length >= 3}
 						searchPlaceholder={is_cn ? '搜索工作区...' : 'Search workspaces...'}
 						dropdownWidth='auto'
@@ -1185,32 +1062,10 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						hideLabel={!showModeText}
 						onOpen={fetchWorkspaces}
 					/>
-					{showSelector && showModelSelectorResponsive && (
-					<Selector
-						value={currentModel}
-						options={modelOptions}
-						onChange={(val) => {
-							userSelectedModelRef.current = true
-							setCurrentModel(val as string)
-						}}
-						variant='normal'
-						tooltip={is_cn ? '切换模型' : 'Switch Model'}
-						disabled={loading || isOptimizing || isRecording || isWorkspaceOffline}
-							searchable={showModelSearch}
-							dropdownWidth='auto'
-							dropdownMinWidth={200}
-							dropdownMaxWidth={320}
-						/>
-					)}
-					{!showSelector && llmLoading && agent?.connector_options?.optional !== false && (
-						<div style={{ minWidth: 100, height: 24 }} />
-					)}
-				</div>
-				<div className={styles.rightTools}>
 					<ToolButton
 						tooltip={is_cn ? '上传文件' : 'Upload File'}
 						onClick={() => fileInputRef.current?.click()}
-						disabled={isOptimizing || isRecording || isWorkspaceOffline}
+						disabled={isRecording || isWorkspaceOffline}
 					>
 						<UploadSimple size={14} />
 					</ToolButton>
@@ -1221,28 +1076,26 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						onChange={handleFileSelect}
 						multiple
 					/>
-
-					<ToolButton
-						tooltip={
-							isOptimizing
-								? is_cn
-									? '优化中...'
-									: 'Optimizing...'
-								: !isEmpty
-								? is_cn
-									? '优化提示词'
-									: 'Optimize Prompt'
-								: is_cn
-								? '请输入内容'
-								: 'Please enter content'
-						}
-						onClick={handleOptimizePrompt}
-						disabled={isEmpty || isOptimizing || isRecording || isWorkspaceOffline}
-						active={isOptimizing}
-					>
-						<Sparkle size={14} />
-					</ToolButton>
-
+				</div>
+				<div className={styles.rightTools}>
+				{showModelSelector && showModelSelectorResponsive && modelOptions.length > 0 && (
+						<Selector
+							value={currentModel || ''}
+							options={modelOptions}
+							onChange={(val) => {
+								userSelectedModelRef.current = true
+								setCurrentModel(val as string)
+								props.onModelChange?.(val as string)
+							}}
+							variant='normal'
+							tooltip={is_cn ? '切换模型' : 'Switch Model'}
+							searchable={modelOptions.length >= 5}
+							dropdownWidth='auto'
+							dropdownMinWidth={200}
+							dropdownMaxWidth={320}
+							dropdownAlign='right'
+						/>
+					)}
 				{/* Trace button hidden - temporarily disabled, kept for future use */}
 				{false && global?.app_info?.mode === 'development' && (
 					<ToolButton
@@ -1332,11 +1185,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 				) : (
 					<>
 						{renderGroup(
-							is_cn ? 'AI 专家' : 'AI Experts',
-							mentionExperts,
-							'material-assistant'
-						)}
-						{renderGroup(
 							is_cn ? '工作区' : 'Workspaces',
 							mentionWorkspaces,
 							'material-folder'
@@ -1415,7 +1263,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 							<div
 								className={styles.editor}
 								ref={editorRef}
-								contentEditable={!disabled && !isOptimizing && !streaming}
+								contentEditable={!disabled && !streaming}
 								onInput={handleInput}
 								onKeyDown={handleKeyDown}
 								onPaste={handlePaste}
@@ -1429,17 +1277,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 										: 'Type a message... (Shift + Enter for new line)'
 							}
 							/>
-						)}
-						{!loading && !isRecording && !isOptimizing && !isWorkspaceOffline && (
-							<button
-								className={styles.micBtn}
-								onClick={handleVoiceStart}
-								disabled={disabled || streaming || isWorkspaceOffline}
-								title={is_cn ? '语音输入' : 'Voice input'}
-								aria-label={is_cn ? '语音输入' : 'Voice input'}
-							>
-								<Microphone size={16} />
-							</button>
 						)}
 						{isRecording && (
 							<button

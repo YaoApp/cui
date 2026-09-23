@@ -98,8 +98,10 @@ export interface IInputAreaProps {
 		allowModelSelection?: boolean
 		defaultModel?: string
 	}
-	/** Initial model/connector from session history */
+	/** Initial model/connector from session history (per-tab lastConnector) */
 	initialModel?: string
+	/** Model change callback (syncs back to tab, like onWorkspaceChange) */
+	onModelChange?: (model: string) => void
 	/** Initial workspace from session history (per-tab) */
 	initialWorkspace?: string
 	/** Workspace change callback (syncs back to tab) */

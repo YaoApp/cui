@@ -329,6 +329,15 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 		[setTabs]
 	)
 
+	const updateTabConnector = useCallback(
+		(chatId: string, connector: string) => {
+			setTabs((prev) =>
+				prev.map((t) => (t.chatId === chatId ? { ...t, lastConnector: connector } : t))
+			)
+		},
+		[setTabs]
+	)
+
 	return {
 		activateTab,
 		closeTab,
@@ -339,6 +348,7 @@ export function useTabs({ state, actions, refs, defaultAssistantId }: UseTabsOpt
 		getLoadingMore,
 		updateTabAssistant,
 		updateTabWorkspace,
+		updateTabConnector,
 		hasMoreStatesRef,
 		firstSeqStatesRef
 	}

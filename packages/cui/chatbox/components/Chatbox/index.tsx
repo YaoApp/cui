@@ -39,7 +39,8 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 		sendQueuedMessage,
 		cancelQueuedMessage,
 		updateTabAssistant,
-		updateTabWorkspace
+		updateTabWorkspace,
+		updateTabConnector
 	} = chatContext
 
 	const isPlaceholderMode = messages.length === 0 && !loading
@@ -75,6 +76,7 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 				chatId={activeTabId || ''}
 				assistant={assistant}
 				initialModel={activeTab?.lastConnector}
+				onModelChange={activeTabId ? (model: string) => updateTabConnector(activeTabId, model) : undefined}
 				initialWorkspace={activeTab?.lastWorkspace}
 				onWorkspaceChange={activeTabId ? (ws: string) => updateTabWorkspace(activeTabId, ws) : undefined}
 				workspaceLocked={messages.length > 0}
