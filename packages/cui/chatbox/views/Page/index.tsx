@@ -9,7 +9,6 @@ import SetupBanner from '@/components/SetupBanner'
 import AssistantSetupBanner from '../../components/AssistantSetupBanner'
 import { exportChatAsMarkdown } from '../../utils/exportMarkdown'
 import { useGlobal } from '@/context/app'
-import type { App } from '@/types'
 
 // Map local props to type
 interface IPageProps extends IChatProps {
@@ -69,7 +68,7 @@ const Page = (props: IPageProps) => {
 		return null
 	}
 
-	const { createNewChat, tabs, activeTabId, activeTab, activateTab, closeTab, loadHistory, messages, assistant } = chatContext
+	const { assistant, activeTab, activeTabId, createNewChat, tabs, activateTab, closeTab, loadHistory, messages } = chatContext
 
 	// Toggle history sidebar
 	const toggleHistory = useCallback(() => {

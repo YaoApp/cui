@@ -121,7 +121,8 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		getHasMore,
 		getLoadingMore,
 		updateTabAssistant,
-		updateTabWorkspace
+		updateTabWorkspace,
+		updateTabConnector
 	} = useTabs({
 		state,
 		actions,
@@ -204,6 +205,7 @@ export const useChat = (options: UseChatOptions = {}): UseChatReturn => {
 		closeTab,
 		updateTabAssistant,
 		updateTabWorkspace,
+		updateTabConnector,
 		queueMessage,
 		sendQueuedMessage,
 		cancelQueuedMessage
