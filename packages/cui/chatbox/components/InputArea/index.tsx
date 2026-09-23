@@ -1090,6 +1090,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 							variant='normal'
 							tooltip={is_cn ? '切换模型' : 'Switch Model'}
 							searchable={modelOptions.length >= 5}
+							disabled={isWorkspaceOffline || loading || isRecording}
 							dropdownWidth='auto'
 							dropdownMinWidth={200}
 							dropdownMaxWidth={320}
