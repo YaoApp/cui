@@ -351,20 +351,38 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 					)}
 
 					<div className={styles.resourceActions}>
-						<Tooltip title={is_cn ? '工作空间' : 'Workspaces'}>
-							<span
-								className={styles.resourceBtn}
-								onClick={() =>
-									openSidebarView(
-										'$dashboard/workspace/list',
-										is_cn ? '工作空间' : 'Workspaces',
-										'material-workspaces'
-									)
-								}
-							>
-								<Icon name='material-workspaces' size={14} />
-							</span>
-						</Tooltip>
+						{isCreating ? (
+							<Tooltip title={is_cn ? '工作空间' : 'Workspaces'}>
+								<span
+									className={styles.resourceBtn}
+									onClick={() =>
+										openSidebarView(
+											'$dashboard/workspace/list',
+											is_cn ? '工作空间' : 'Workspaces',
+											'material-workspaces'
+										)
+									}
+								>
+									<Icon name='material-workspaces' size={14} />
+								</span>
+							</Tooltip>
+						) : (
+							<Tooltip title={task.workspace?.name || (is_cn ? '工作区' : 'Workspace')}>
+								<span
+									className={clsx(styles.resourceBtn, !task.workspace?.id && styles.resourceBtnDisabled)}
+									onClick={() => {
+										if (!task.workspace?.id) return
+										openSidebarView(
+											`$dashboard/workspace/detail/${task.workspace.id}`,
+											task.workspace.name || (is_cn ? '工作区' : 'Workspace'),
+											'material-folder'
+										)
+									}}
+								>
+									<Icon name='material-folder' size={14} />
+								</span>
+							</Tooltip>
+						)}
 						{!isCreating && (
 							<>
 								<Tooltip title={is_cn ? '文件' : 'Files'}>
@@ -374,11 +392,11 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 											openSidebarView(
 												`$dashboard/task-files/${taskId}`,
 												is_cn ? '文件' : 'Files',
-												'material-folder_open'
+												'material-inventory_2'
 											)
 										}
 									>
-										<Icon name='material-folder_open' size={14} />
+										<Icon name='material-inventory_2' size={14} />
 										{task.outputs && task.outputs.length > 0 && (
 											<span className={styles.resourceBadge}>
 												{task.outputs.length}
