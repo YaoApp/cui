@@ -27,7 +27,9 @@ import ModelSelector from '../ModelSelector'
 import ToolButton from './ToolButton'
 import Tooltip from './Tooltip'
 import { useVoiceRecorder } from '../../hooks/useVoiceRecorder'
+import { debounce } from 'lodash-es'
 import VoiceRecordingPanel from './VoiceRecordingPanel'
+import { getInputCache, setInputCache, removeInputCache, type SerializedAttachment } from '../../utils/inputCache'
 
 interface Attachment {
 	id: string
@@ -39,6 +41,29 @@ interface Attachment {
 	fileId?: string
 	wrapper?: string
 	error?: string
+}
+
+/** 序列化：过滤未完成的，剥离不可持久的 blob URL */
+function serializeAttachments(attachments: Attachment[]): SerializedAttachment[] {
+	return attachments
+		.filter((att) => !att.uploading && !att.error)
+		.map((att) => ({
+			id: att.id,
+			name: att.name,
+			type: att.type,
+			fileId: att.fileId,
+			wrapper: att.wrapper,
+			previewUrl: att.previewUrl?.startsWith('blob:') ? undefined : att.previewUrl
+		}))
+}
+
+/** 反序列化：已上传的附件恢复为可发送状态 */
+function deserializeAttachments(serialized: SerializedAttachment[]): Attachment[] {
+	return serialized.map((att) => ({
+		...att,
+		file: new File([], att.name),
+		uploading: false
+	}))
 }
 
 const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaProps>((props, ref) => {
@@ -136,6 +161,16 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 
 	// State
 	const [attachments, setAttachments] = useState<Attachment[]>([])
+
+	// --- Input cache refs ---
+	const prevChatIdRef = useRef<string>('')
+	const chatIdJustChangedRef = useRef(false)
+	const justSentRef = useRef(false)
+	const lastDraftRef = useRef('')
+	const cacheStateRef = useRef({ chatId: '', isEmpty: true, attachments: [] as Attachment[] })
+	cacheStateRef.current = { chatId: chatId || '', isEmpty, attachments }
+	const saveDraftRef = useRef<ReturnType<typeof debounce> | null>(null)
+
 	const [agent, setAgent] = useState(propAssistant)
 	const [resourcePickerVisible, setResourcePickerVisible] = useState(false)
 	const contextRowRef = useRef<HTMLDivElement>(null)
@@ -168,18 +203,83 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		}
 	}, [propAssistant, initialChatMode, initialTrace])
 
-	// Reset input when chatId changes (new chat or switch tab)
-	// 每个 tab 的输入框是独立的，切换时清空输入
+	// Input cache: save old tab / restore new tab when chatId changes
 	useEffect(() => {
-		if (editorRef.current) {
-			editorRef.current.innerText = ''
-			setIsEmpty(true)
-			// Auto-focus when entering a tab
-			editorRef.current.focus()
+		const prevId = prevChatIdRef.current
+
+		// Save old chatId's editor state (skip on first mount when prevId is empty)
+		if (prevId) {
+			setInputCache(prevId, {
+				draft: editorRef.current?.innerHTML || '',
+				isEmpty,
+				attachments: serializeAttachments(attachments)
+			})
 		}
-		// Reset attachments for new chat/tab
-		setAttachments([])
+
+		// Mark chatId transition — prevents attachments effect from writing stale data
+		chatIdJustChangedRef.current = true
+
+		// Restore new chatId's cached state, or clear
+		const cached = chatId ? getInputCache(chatId) : undefined
+		if (cached) {
+			if (editorRef.current) {
+				editorRef.current.innerHTML = cached.draft
+				setIsEmpty(cached.isEmpty)
+			}
+			lastDraftRef.current = cached.draft
+			setAttachments(deserializeAttachments(cached.attachments))
+		} else {
+			if (editorRef.current) {
+				editorRef.current.innerText = ''
+				setIsEmpty(true)
+			}
+			lastDraftRef.current = ''
+			setAttachments([])
+		}
+
+		editorRef.current?.focus()
+		prevChatIdRef.current = chatId || ''
 	}, [chatId])
+
+	// Input cache: save on unmount (TaskChat scenario)
+	// Uses lastDraftRef instead of editorRef — React detaches DOM refs before
+	// running useEffect cleanup, so editorRef.current is null at this point.
+	useEffect(() => {
+		return () => {
+			const s = cacheStateRef.current
+			if (s.chatId) {
+				setInputCache(s.chatId, {
+					draft: lastDraftRef.current,
+					isEmpty: s.isEmpty,
+					attachments: serializeAttachments(s.attachments)
+				})
+			}
+		}
+	}, [])
+
+	// Input cache: debounce draft writes — cancel on chatId change
+	useEffect(() => {
+		saveDraftRef.current?.cancel()
+		saveDraftRef.current = debounce((html: string, empty: boolean) => {
+			if (chatId) setInputCache(chatId, { draft: html, isEmpty: empty })
+		}, 300)
+		return () => saveDraftRef.current?.cancel()
+	}, [chatId])
+
+	// Input cache: real-time attachment writes with dual guards
+	useEffect(() => {
+		if (chatIdJustChangedRef.current) {
+			chatIdJustChangedRef.current = false
+			return
+		}
+		if (justSentRef.current) {
+			justSentRef.current = false
+			return
+		}
+		if (chatId) {
+			setInputCache(chatId, { attachments: serializeAttachments(attachments) })
+		}
+	}, [attachments, chatId])
 
 	// Persist selectedWorkspace to localStorage
 	useEffect(() => {
@@ -501,7 +601,8 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 
 		const hasTags = editorRef.current.querySelectorAll(`.${styles.mentionTag}`).length > 0
 		const content = editorRef.current.textContent || ''
-		setIsEmpty(!content.trim() && !hasTags)
+		const newIsEmpty = !content.trim() && !hasTags
+		setIsEmpty(newIsEmpty)
 
 		const selection = window.getSelection()
 		if (selection?.focusNode?.nodeType === Node.TEXT_NODE) {
@@ -530,6 +631,9 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		} else {
 			setShowMentions(false)
 		}
+
+		lastDraftRef.current = editorRef.current.innerHTML
+		saveDraftRef.current?.(editorRef.current.innerHTML, newIsEmpty)
 	}
 
 	const constructMessage = (): UserMessage | null => {
@@ -602,12 +706,15 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			setIsEmpty(true)
 			editorRef.current.focus()
 		}
+		lastDraftRef.current = ''
 		setAttachments([])
 	}
 
 	const handleSend = () => {
 		const message = constructMessage()
 		if (!message) return
+
+		saveDraftRef.current?.cancel()
 
 		onSend({
 			messages: [message],
@@ -620,7 +727,9 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 				workspace_id: selectedWorkspace || undefined
 			}
 		}).then(() => {
+			justSentRef.current = true
 			clearInput()
+			if (chatId) removeInputCache(chatId)
 		})
 	}
 
