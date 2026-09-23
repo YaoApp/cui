@@ -78,6 +78,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 	const [newModelCaps, setNewModelCaps] = useState<string[]>([])
 	const [newModelMaxInput, setNewModelMaxInput] = useState('')
 	const [newModelMaxOutput, setNewModelMaxOutput] = useState('')
+	const [newModelFamily, setNewModelFamily] = useState('')
 	const [showAddModel, setShowAddModel] = useState(false)
 	const [showPresetPicker, setShowPresetPicker] = useState(false)
 	const [modelSearch, setModelSearch] = useState('')
@@ -224,6 +225,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 			enabled: true,
 			...(newModelMaxInput ? { max_input_tokens: Number(newModelMaxInput) } : {}),
 			...(newModelMaxOutput ? { max_output_tokens: Number(newModelMaxOutput) } : {}),
+			...(newModelFamily.trim() ? { model: newModelFamily.trim() } : {}),
 		}
 		setModels((prev) => [...prev, newModel])
 		setNewModelName('')
@@ -231,6 +233,7 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 		setNewModelMaxInput('')
 		setNewModelMaxOutput('')
 		setNewModelCaps([])
+		setNewModelFamily('')
 		setShowAddModel(false)
 	}
 
@@ -396,6 +399,10 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 
 	const newModelLabelSchema = useMemo((): PropertySchema => ({
 		type: 'string', placeholder: is_cn ? '展示名称（如 GPT-4o）' : 'Display name (e.g. GPT-4o)'
+	}), [is_cn])
+
+	const newModelFamilySchema = useMemo((): PropertySchema => ({
+		type: 'string', placeholder: is_cn ? '模型系列（如 deepseek-r1）' : 'Model family (e.g. deepseek-r1)'
 	}), [is_cn])
 
 	const newModelMaxInputSchema = useMemo((): PropertySchema => ({
@@ -683,13 +690,24 @@ export default function ProviderModal({ open, mode, presets, editProvider, onClo
 													<CheckboxGroup schema={capsSchema} value={newModelCaps} onChange={(v) => setNewModelCaps(Array.isArray(v) ? v.map(String) : [])} />
 												</div>
 											</div>
+											{newModelCaps.includes('reasoning') && (
+												<div className={styles.addModelRow}>
+													<label className={styles.capsLabel}>{is_cn ? '模型系列' : 'Model Family'}</label>
+													<Input schema={newModelFamilySchema} value={newModelFamily} onChange={(v) => setNewModelFamily(String(v))} />
+													<div className={styles.fieldHint}>
+														{is_cn
+															? '同系列模型填写相同的系列名，系统自动归组'
+															: 'Models with the same family name are grouped together'}
+													</div>
+												</div>
+											)}
 												<div className={styles.addModelTokenRow}>
 													<Input schema={newModelMaxInputSchema} value={newModelMaxInput} onChange={(v) => setNewModelMaxInput(String(v))} />
 													<Input schema={newModelMaxOutputSchema} value={newModelMaxOutput} onChange={(v) => setNewModelMaxOutput(String(v))} />
 												</div>
 												<div className={styles.addModelBtns}>
 													<Button size='small' type='primary' onClick={handleAddCustomModel}>{is_cn ? '确认' : 'Confirm'}</Button>
-													<Button size='small' type='default' onClick={() => { setShowAddModel(false); setNewModelName(''); setNewModelLabel(''); setNewModelCaps([]); setNewModelMaxInput(''); setNewModelMaxOutput('') }}>{is_cn ? '取消' : 'Cancel'}</Button>
+													<Button size='small' type='default' onClick={() => { setShowAddModel(false); setNewModelName(''); setNewModelLabel(''); setNewModelCaps([]); setNewModelMaxInput(''); setNewModelMaxOutput(''); setNewModelFamily('') }}>{is_cn ? '取消' : 'Cancel'}</Button>
 												</div>
 											</div>
 											) : (

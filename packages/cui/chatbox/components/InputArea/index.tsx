@@ -9,7 +9,6 @@ import type { IInputAreaProps } from '../../types'
 import type { UserMessage } from '../../../openapi'
 import { useWorkspace } from '@/hooks/useComputerWorkspace'
 import { useGlobal } from '@/context/app'
-import { useAssistantProviders } from '@/hooks/useAssistantProviders'
 import { WorkspaceAPI } from '@/openapi/workspace'
 import {
 	type MentionType,
@@ -24,6 +23,7 @@ import AgentTag from './AgentTag'
 import ResourcePicker from '../ResourcePicker'
 import MessageQueue from '../MessageQueue'
 import Selector from './Selector'
+import ModelSelector from '../ModelSelector'
 import ToolButton from './ToolButton'
 import Tooltip from './Tooltip'
 import { useVoiceRecorder } from '../../hooks/useVoiceRecorder'
@@ -84,26 +84,8 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	// Get global config
 	const global = useGlobal()
 
-	// --- Model selector (internal state) ---
-	const [currentModel, setCurrentModel] = useState<string>('')
-	const userSelectedModelRef = useRef(false)
-
-	const {
-		providers: llmProviders,
-		loading: llmLoading,
-		showSelector: showModelSelector,
-		defaultProvider
-	} = useAssistantProviders({
-		assistant: propAssistant
-			? { connector: propAssistant.connector, connector_options: propAssistant.connector_options }
-			: undefined
-	})
-
-	const modelOptions = llmProviders.map((provider) => ({
-		label: provider.label,
-		value: provider.value,
-		icon: 'material-psychology'
-	}))
+	// --- Model selector (state managed by Chatbox) ---
+	// props.currentModel and props.onModelChange are passed from Chatbox
 
 	// Load Workspace options (real-time fetch on dropdown open)
 	const { workspaces, hasOnlineNodes, loading: loadingWorkspaces, fetchWorkspaces } = useWorkspace()
@@ -159,7 +141,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 	const contextRowRef = useRef<HTMLDivElement>(null)
 	const toolbarRef = useRef<HTMLDivElement>(null)
 	const [showModeText, setShowModeText] = useState(true)
-	const [showModelSelectorResponsive, setShowModelSelectorResponsive] = useState(true)
+	const [toolbarWidth, setToolbarWidth] = useState(0)
 
 	// Voice recording
 	const { status: voiceStatus, duration: voiceDuration, waveformRef, start: voiceStart, stop: voiceStop, cancel: voiceCancel, error: voiceError } = useVoiceRecorder()
@@ -186,16 +168,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		}
 	}, [propAssistant, initialChatMode, initialTrace])
 
-	// Model initialization: initialModel (session) > defaultProvider (assistant config)
-	useEffect(() => {
-		const initialModel = props.initialModel
-		if (initialModel) {
-			setCurrentModel(initialModel)
-		} else if (defaultProvider && !userSelectedModelRef.current) {
-			setCurrentModel(defaultProvider)
-		}
-	}, [propAssistant, defaultProvider, props.initialModel])
-
 	// Reset input when chatId changes (new chat or switch tab)
 	// 每个 tab 的输入框是独立的，切换时清空输入
 	useEffect(() => {
@@ -207,7 +179,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		}
 		// Reset attachments for new chat/tab
 		setAttachments([])
-		userSelectedModelRef.current = false
 	}, [chatId])
 
 	// Persist selectedWorkspace to localStorage
@@ -640,7 +611,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 
 		onSend({
 			messages: [message],
-			model: currentModel || '',
+			model: props.currentModel || '',
 			locale,
 			metadata: {
 				mode: chatMode,
@@ -872,8 +843,8 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 				const width = toolbarRef.current.offsetWidth
 				// Hide mode text when toolbar is less than 300px
 				setShowModeText(width >= 300)
-				// Hide model selector when toolbar is less than 400px
-				setShowModelSelectorResponsive(width >= 400)
+				// Track toolbar width for ModelSelector responsive behavior
+				setToolbarWidth(width)
 			}
 		}
 
@@ -1062,6 +1033,20 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						hideLabel={!showModeText}
 						onOpen={fetchWorkspaces}
 					/>
+					<ModelSelector
+						value={props.currentModel || ''}
+						onChange={(val) => props.onModelChange?.(val)}
+						assistant={
+							propAssistant
+								? { connector: propAssistant.connector, connector_options: propAssistant.connector_options }
+								: undefined
+						}
+						disabled={isWorkspaceOffline || loading || isRecording}
+						responsive
+						containerWidth={toolbarWidth}
+					/>
+				</div>
+				<div className={styles.rightTools}>
 					<ToolButton
 						tooltip={is_cn ? '上传文件' : 'Upload File'}
 						onClick={() => fileInputRef.current?.click()}
@@ -1076,27 +1061,6 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 						onChange={handleFileSelect}
 						multiple
 					/>
-				</div>
-				<div className={styles.rightTools}>
-				{showModelSelector && showModelSelectorResponsive && modelOptions.length > 0 && (
-						<Selector
-							value={currentModel || ''}
-							options={modelOptions}
-							onChange={(val) => {
-								userSelectedModelRef.current = true
-								setCurrentModel(val as string)
-								props.onModelChange?.(val as string)
-							}}
-							variant='normal'
-							tooltip={is_cn ? '切换模型' : 'Switch Model'}
-							searchable={modelOptions.length >= 5}
-							disabled={isWorkspaceOffline || loading || isRecording}
-							dropdownWidth='auto'
-							dropdownMinWidth={200}
-							dropdownMaxWidth={320}
-							dropdownAlign='right'
-						/>
-					)}
 				{/* Trace button hidden - temporarily disabled, kept for future use */}
 				{false && global?.app_info?.mode === 'development' && (
 					<ToolButton

@@ -489,6 +489,7 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 								fallbackAssistantId={global.default_assistant?.assistant_id}
 								columnId={isCreating ? (task.column_id || board?.columns[board.columns.length - 1]?.id) : undefined}
 								className={styles.chatbox}
+								initialConnector={!isCreating ? task.last_connector : undefined}
 								initialWorkspace={!isCreating ? task.workspace?.id : undefined}
 								onWorkspaceChange={
 									!isCreating

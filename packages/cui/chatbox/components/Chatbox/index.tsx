@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import styles from './index.less'
 import MessageList from '../MessageList'
 import InputArea from '../InputArea'
@@ -43,6 +43,25 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 		updateTabConnector
 	} = chatContext
 
+	// --- Model state (lifted from InputArea for ModelSelector) ---
+	const [currentModel, setCurrentModel] = useState<string>('')
+	const userSelectedModelRef = useRef(false)
+
+	// Model initialization: tab history > assistant connector (defaultProvider)
+	useEffect(() => {
+		if (activeTab?.lastConnector) {
+			setCurrentModel(activeTab.lastConnector)
+		} else if (assistant?.connector && !userSelectedModelRef.current) {
+			setCurrentModel(assistant.connector)
+		}
+		userSelectedModelRef.current = false
+	}, [activeTab?.lastConnector, assistant?.connector])
+
+	// Reset user selection flag on tab switch
+	useEffect(() => {
+		userSelectedModelRef.current = false
+	}, [activeTabId])
+
 	const isPlaceholderMode = messages.length === 0 && !loading
 
 	const handleQuickPrompt = useCallback((text: string) => {
@@ -75,8 +94,12 @@ const Chatbox: React.FC<IChatboxProps> = (props) => {
 				onAbort={abort}
 				chatId={activeTabId || ''}
 				assistant={assistant}
-				initialModel={activeTab?.lastConnector}
-				onModelChange={activeTabId ? (model: string) => updateTabConnector(activeTabId, model) : undefined}
+				currentModel={currentModel}
+				onModelChange={(model: string) => {
+					userSelectedModelRef.current = true
+					setCurrentModel(model)
+					if (activeTabId) updateTabConnector(activeTabId, model)
+				}}
 				initialWorkspace={activeTab?.lastWorkspace}
 				onWorkspaceChange={activeTabId ? (ws: string) => updateTabWorkspace(activeTabId, ws) : undefined}
 				workspaceLocked={messages.length > 0}

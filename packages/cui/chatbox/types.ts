@@ -98,8 +98,8 @@ export interface IInputAreaProps {
 		allowModelSelection?: boolean
 		defaultModel?: string
 	}
-	/** Initial model/connector from session history (per-tab lastConnector) */
-	initialModel?: string
+	/** Current model/connector (managed by Chatbox, used by handleSend and ModelSelector) */
+	currentModel?: string
 	/** Model change callback (syncs back to tab, like onWorkspaceChange) */
 	onModelChange?: (model: string) => void
 	/** Initial workspace from session history (per-tab) */
