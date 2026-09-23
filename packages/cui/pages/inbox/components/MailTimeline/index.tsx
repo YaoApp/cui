@@ -42,7 +42,7 @@ const MailTimeline = ({ chatId }: MailTimelineProps) => {
 	useEffect(() => {
 		setLoading(true)
 		setPage(1)
-		services.getMessages({ chat_id: chatId, size: 50 }).then(({ items, total }) => {
+		services.getTaskMails(chatId, { size: 50 }).then(({ items, total }) => {
 			items.sort((a, b) => a.created_at - b.created_at)
 			setMails(items)
 			setHasMore(items.length < total)
@@ -56,7 +56,7 @@ const MailTimeline = ({ chatId }: MailTimelineProps) => {
 		if (loadingMore || !hasMore) return
 		const nextPage = page + 1
 		setLoadingMore(true)
-		services.getMessages({ chat_id: chatId, page: nextPage, size: 50 }).then(({ items, total }) => {
+		services.getTaskMails(chatId, { page: nextPage, size: 50 }).then(({ items, total }) => {
 			setMails((prev) => {
 				const existingIds = new Set(prev.map((m) => m.id))
 				const newItems = items.filter((m) => !existingIds.has(m.id))
