@@ -63,6 +63,17 @@ export const services: InboxAPI = {
 		}
 	},
 
+	async getTaskMails(chatId: string, query?: { page?: number; size?: number }) {
+		const agent = getAgent()
+		const api = getOpenAPI()
+		const res = await agent.inbox.ListByChatID(chatId, { page: query?.page || 1, size: query?.size || 50 })
+		if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to list task mails')
+		return {
+			items: (res.data?.mails || []).map(mapInboxMessage),
+			total: res.data?.total || 0
+		}
+	},
+
 	async viewTask(chatId: string) {
 		const agent = getAgent()
 		const api = getOpenAPI()

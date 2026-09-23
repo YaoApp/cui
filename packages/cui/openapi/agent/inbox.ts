@@ -70,6 +70,14 @@ export class AgentInbox {
 		return this.api.Get(url)
 	}
 
+	async ListByChatID(chatId: string, query?: { page?: number; size?: number }): Promise<ApiResponse<InboxListResponse>> {
+		const params = new URLSearchParams()
+		if (query?.page) params.append('page', query.page.toString())
+		if (query?.size) params.append('size', query.size.toString())
+		const url = BuildURL(`/agent/inbox/chat/${chatId}/mails`, params)
+		return this.api.Get(url)
+	}
+
 	async Stats(): Promise<ApiResponse<InboxStats>> {
 		return this.api.Get('/agent/inbox/stats')
 	}

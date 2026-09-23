@@ -43,6 +43,7 @@ export interface MessageSource {
 export interface InboxAPI {
 	getStats: () => Promise<InboxStatsData>
 	getMessages: (query?: { filter?: string; page?: number; size?: number; chat_id?: string }) => Promise<{ items: InboxMessage[]; total: number }>
+	getTaskMails: (chatId: string, query?: { page?: number; size?: number }) => Promise<{ items: InboxMessage[]; total: number }>
 	viewTask: (chatId: string) => Promise<void>
 	markAllRead: () => Promise<void>
 	archiveTask: (chatId: string) => Promise<void>
