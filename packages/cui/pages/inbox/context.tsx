@@ -90,7 +90,7 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 	}, [])
 
 	const fetchMessages = useCallback(
-		(cat: InboxCategory, p: number, append = false, force = false) => {
+		(cat: InboxCategory, p: number, append = false, force = false, silent = false) => {
 			if (fetchingRef.current && !force) {
 				return
 			}
@@ -99,7 +99,7 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 			const filter = categoryToFilter[cat]
 			if (append) {
 				setLoadingMore(true)
-			} else {
+			} else if (!silent) {
 				setLoading(true)
 			}
 			services
@@ -125,9 +125,9 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 				.finally(() => {
 					if (fetchVersionRef.current === version) {
 						fetchingRef.current = false
+						setLoading(false)
+						setLoadingMore(false)
 					}
-					setLoading(false)
-					setLoadingMore(false)
 				})
 		},
 		[is_cn]
@@ -148,7 +148,7 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 			refreshTimerRef.current = window.setTimeout(() => {
 				if (fetchingRef.current) return
 				fetchStats()
-				fetchMessages(category, 1, false, true)
+				fetchMessages(category, 1, false, true, true)
 			}, 2000)
 		})
 		return () => {
