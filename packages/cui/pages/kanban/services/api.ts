@@ -119,10 +119,15 @@ export async function getBoard(boardId: string): Promise<Board> {
 	return mapBoard(res.data)
 }
 
-export async function createBoard(data: { title: string; icon?: string; color?: string }): Promise<Board> {
+export async function createBoard(data: { title: string; icon?: string; color?: string; skipDefaultColumn?: boolean }): Promise<Board> {
 	const agent = getAgent()
 	const api = getOpenAPI()
-	const res = await agent.boards.Create({ name: data.title, icon: data.icon, color: data.color })
+	const res = await agent.boards.Create({
+		name: data.title,
+		icon: data.icon,
+		color: data.color,
+		skip_default_column: data.skipDefaultColumn
+	})
 	if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to create board')
 	return mapBoard(res.data)
 }
@@ -199,9 +204,10 @@ export async function createTask(data: CreateTaskData): Promise<KanbanTask> {
 	const res = await agent.tasks.Create({
 		title: data.title,
 		assistant_id: data.assistant_id || '',
-		board_id: activeBoardId || undefined,
+		board_id: data.board_id || activeBoardId || undefined,
 		column_id: data.column_id,
-		chat_id: data.chat_id
+		chat_id: data.chat_id,
+		workspace_id: data.workspace_id
 	})
 	if (api.IsError(res)) throw new Error(res.error?.error_description || 'Failed to create task')
 	return mapTask(res.data)

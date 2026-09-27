@@ -22,6 +22,7 @@ interface TaskDetailProps {
 	isAnimating?: boolean
 	inline?: boolean
 	refreshVersion?: number
+	initialTask?: KanbanTask
 }
 
 const DEFAULT_CHAT_WIDTH = 560
@@ -40,7 +41,7 @@ const statusLabels: Record<string, { cn: string; en: string }> = {
 	cancelled: { cn: '已取消', en: 'Cancelled' }
 }
 
-const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, inline, refreshVersion }: TaskDetailProps) => {
+const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, inline, refreshVersion, initialTask }: TaskDetailProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
@@ -63,8 +64,8 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 	const [titleValue, setTitleValue] = useState('')
 	const titleInputRef = useRef<HTMLInputElement>(null)
 
-	// Prefer task from KanbanContext (Kanban page); fallback to independent loading (Inbox page)
-	const task = ctx?.tasks.find((t) => t.id === taskId) || localTask
+	// Prefer task from KanbanContext (Kanban page); fallback to independent loading (Inbox page); then external initial task
+	const task = ctx?.tasks.find((t) => t.id === taskId) || localTask || initialTask
 
 	useEffect(() => {
 		if (ctx || !taskId) {
@@ -110,7 +111,11 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 		setEditingTitle(false)
 		const trimmed = titleValue.trim()
 		if (!trimmed || !taskId || trimmed === task?.title) return
-		ctx?.updateLocalTitle?.(taskId, trimmed)
+		if (ctx) {
+			ctx.updateLocalTitle(taskId, trimmed)
+		} else {
+			setLocalTask((prev) => (prev ? { ...prev, title: trimmed } : prev))
+		}
 		services.updateTask(taskId, { title: trimmed } as any).catch(() => {})
 	}, [titleValue, taskId, task, ctx])
 

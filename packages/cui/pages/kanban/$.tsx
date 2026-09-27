@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams } from '@umijs/max'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
+import { useGlobal } from '@/context/app'
 import { KanbanProvider, useKanbanContext } from './context'
 import { getEventStream } from '@/openapi/events'
 import HeaderBar from './components/HeaderBar'
@@ -28,6 +29,8 @@ const KanbanContent = () => {
 		cancelCreating,
 		creatingTaskId
 	} = useKanbanContext()
+	const global = useGlobal()
+	const userId = String(global.user?.id || '')
 
 	const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH)
 	const boardAreaRef = useRef<HTMLDivElement>(null)
@@ -87,6 +90,15 @@ const KanbanContent = () => {
 	useEffect(() => {
 		refreshQuota()
 	}, [refreshQuota])
+
+	// Auto-create first task for new users
+	useEffect(() => {
+		if (loading || tasks.length > 0 || boards.length === 0 || !userId) return
+		const key = `kanban_task_onboarding:${userId}`
+		if (localStorage.getItem(key)) return
+		localStorage.setItem(key, '1')
+		startCreating()
+	}, [loading, tasks.length, boards.length, startCreating, userId])
 
 	const handleDetailClose = useCallback(() => {
 		if (creatingTaskId && selectedTaskId === creatingTaskId) {

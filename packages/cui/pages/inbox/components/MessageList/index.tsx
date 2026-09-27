@@ -52,9 +52,10 @@ function formatTimeAgo(ts: number, is_cn: boolean): string {
 
 interface MessageListProps {
 	onUnarchive?: (chatId: string) => void
+	onCreateTask?: () => void
 }
 
-const MessageList = ({ onUnarchive }: MessageListProps) => {
+const MessageList = ({ onUnarchive, onCreateTask }: MessageListProps) => {
 	const {
 		groupedMessages,
 		selectedChatId,
@@ -166,13 +167,18 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 						)}
 					</span>
 				)}
-				<span
-					className={styles.headerAction}
-					onClick={markAllRead}
-					title={is_cn ? '全部已读' : 'Mark all read'}
-				>
-					<Icon name='material-done_all' size={14} />
-				</span>
+				{onCreateTask && (
+					<Tooltip title={is_cn ? '新建任务' : 'New Task'}>
+						<span className={styles.headerAction} onClick={onCreateTask}>
+							<Icon name='material-add' size={16} />
+						</span>
+					</Tooltip>
+				)}
+				<Tooltip title={is_cn ? '全部已读' : 'Mark all read'}>
+					<span className={styles.headerAction} onClick={markAllRead}>
+						<Icon name='material-done_all' size={14} />
+					</span>
+				</Tooltip>
 			</div>
 
 			<div className={styles.searchBox}>
@@ -230,7 +236,7 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 										</span>
 									)}
 									<span className={styles.itemTitle}>
-										{group.taskName || group.title}
+										{group.taskName || group.title || (is_cn ? '新任务' : 'New Task')}
 									</span>
 									{hasUnread && <span className={styles.unreadDot} />}
 									<span
@@ -256,7 +262,9 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 										{formatTimeAgo(group.latestTime, is_cn)}
 									</span>
 								</div>
-								<div className={styles.itemBody}>{group.latestMail.body}</div>
+								<div className={styles.itemBody}>
+									{group.latestMail.body || (is_cn ? '等待首轮会话...' : 'Waiting for first message...')}
+								</div>
 								{(group.latestMail.workspace_id || group.latestMail.assistant_name || group.latestMail.source?.name) && (
 									<div className={styles.itemFooter}>
 										<div className={styles.footerLeft}>

@@ -58,7 +58,7 @@ const MessageItem = ({ message, selected, is_cn, onClick, onToggleBookmark, onCo
 						<Icon name='material-push_pin' size={13} />
 					</span>
 				)}
-				<span className={styles.itemTitle}>{message.title}</span>
+				<span className={styles.itemTitle}>{message.source?.task_title || message.title}</span>
 				<span
 					className={clsx(styles.starBtn, message.bookmarked && styles.starred)}
 					onClick={handleBookmarkClick}
