@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useRef, useContext } from 'react'
+import { useState, useEffect, useCallback, useRef, useContext, useMemo } from 'react'
 import { getLocale } from '@umijs/max'
 import { Tooltip } from 'antd'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
 import { TaskChat } from '@/chatbox'
 import { useGlobal } from '@/context/app'
+import useWorkspace from '@/hooks/useComputerWorkspace'
 import { KanbanContext } from '../../context'
 import * as services from '../../services'
 import DetailPanel from '../DetailPanel'
@@ -64,6 +65,12 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 	const [titleValue, setTitleValue] = useState('')
 	const titleInputRef = useRef<HTMLInputElement>(null)
 
+	// Track workspace selected in chatbox during creating state
+	const { workspaces, fetchWorkspaces } = useWorkspace()
+	const [creatingWorkspaceId, setCreatingWorkspaceId] = useState<string>(() => {
+		try { return localStorage.getItem('yao:selectedWorkspace') || '' } catch { return '' }
+	})
+
 	// Prefer task from KanbanContext (Kanban page); fallback to independent loading (Inbox page); then external initial task
 	const task = ctx?.tasks.find((t) => t.id === taskId) || localTask || initialTask
 
@@ -87,6 +94,16 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 	const triggerAnimation = ctx?.triggerAnimation || (() => {})
 
 	const isCreating = task?.status === 'creating'
+
+	useEffect(() => {
+		if (isCreating) fetchWorkspaces()
+	}, [isCreating])
+
+	const creatingWorkspaceInfo = useMemo(() => {
+		if (!creatingWorkspaceId) return null
+		const ws = workspaces.find((w) => w.id === creatingWorkspaceId)
+		return ws ? { id: ws.id, name: ws.name || ws.id } : { id: creatingWorkspaceId, name: is_cn ? '工作区' : 'Workspace' }
+	}, [creatingWorkspaceId, workspaces, is_cn])
 
 	const wasCreatingRef = useRef(false)
 	const tempTitleSetRef = useRef(false)
@@ -356,38 +373,29 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 					)}
 
 					<div className={styles.resourceActions}>
-						{isCreating ? (
-							<Tooltip title={is_cn ? '工作空间' : 'Workspaces'}>
-								<span
-									className={styles.resourceBtn}
-									onClick={() =>
-										openSidebarView(
-											'$dashboard/workspace/list',
-											is_cn ? '工作空间' : 'Workspaces',
-											'material-workspaces'
-										)
-									}
-								>
-									<Icon name='material-workspaces' size={14} />
-								</span>
-							</Tooltip>
-						) : (
-							<Tooltip title={task.workspace?.name || (is_cn ? '工作区' : 'Workspace')}>
-								<span
-									className={clsx(styles.resourceBtn, !task.workspace?.id && styles.resourceBtnDisabled)}
-									onClick={() => {
-										if (!task.workspace?.id) return
-										openSidebarView(
-											`$dashboard/workspace/detail/${task.workspace.id}`,
-											task.workspace.name || (is_cn ? '工作区' : 'Workspace'),
-											'material-folder'
-										)
-									}}
-								>
-									<Icon name='material-folder' size={14} />
-								</span>
-							</Tooltip>
-						)}
+						{(() => {
+							const wsId = isCreating ? creatingWorkspaceInfo?.id : task.workspace?.id
+							const wsName = isCreating
+								? (creatingWorkspaceInfo?.name || (is_cn ? '工作区' : 'Workspace'))
+								: (task.workspace?.name || (is_cn ? '工作区' : 'Workspace'))
+							return (
+								<Tooltip title={wsName}>
+									<span
+										className={clsx(styles.resourceBtn, !wsId && styles.resourceBtnDisabled)}
+										onClick={() => {
+											if (!wsId) return
+											openSidebarView(
+												`$dashboard/workspace/detail/${wsId}`,
+												wsName,
+												'material-folder'
+											)
+										}}
+									>
+										<Icon name='material-folder' size={14} />
+									</span>
+								</Tooltip>
+							)
+						})()}
 						{!isCreating && (
 							<>
 								<Tooltip title={is_cn ? '文件' : 'Files'}>
@@ -444,11 +452,11 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 										openSidebarView(
 											`$dashboard/task-mails/${taskId}`,
 											is_cn ? '消息往来' : 'Mail History',
-											'material-mail_outline'
+											'material-speaker_notes'
 										)
 									}
 								>
-									<Icon name='material-mail_outline' size={14} />
+									<Icon name='material-speaker_notes' size={14} />
 								</span>
 							</Tooltip>
 							<Tooltip title={is_cn ? '设置' : 'Settings'}>
@@ -496,11 +504,13 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 								className={styles.chatbox}
 								initialConnector={!isCreating ? task.last_connector : undefined}
 								initialWorkspace={!isCreating ? task.workspace?.id : undefined}
-								onWorkspaceChange={
-									!isCreating
-										? (id) => services.updateTask(taskId!, { workspace_id: id })
-										: undefined
-								}
+								onWorkspaceChange={(id) => {
+									if (isCreating) {
+										setCreatingWorkspaceId(id)
+									} else {
+										services.updateTask(taskId!, { workspace_id: id })
+									}
+								}}
 						onAssistantChange={
 							!isCreating
 								? (id) => services.updateTask(taskId!, { assistant_id: id })
