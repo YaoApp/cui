@@ -42,7 +42,16 @@ const statusLabels: Record<string, { cn: string; en: string }> = {
 	cancelled: { cn: '已取消', en: 'Cancelled' }
 }
 
-const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, inline, refreshVersion, initialTask }: TaskDetailProps) => {
+const TaskDetail = ({
+	taskId,
+	open,
+	onClose,
+	onPanelWidthChange,
+	isAnimating,
+	inline,
+	refreshVersion,
+	initialTask
+}: TaskDetailProps) => {
 	const locale = getLocale()
 	const is_cn = locale === 'zh-CN'
 	const global = useGlobal()
@@ -68,7 +77,11 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 	// Track workspace selected in chatbox during creating state
 	const { workspaces, fetchWorkspaces } = useWorkspace()
 	const [creatingWorkspaceId, setCreatingWorkspaceId] = useState<string>(() => {
-		try { return localStorage.getItem('yao:selectedWorkspace') || '' } catch { return '' }
+		try {
+			return localStorage.getItem('yao:selectedWorkspace') || ''
+		} catch {
+			return ''
+		}
 	})
 
 	// Prefer task from KanbanContext (Kanban page); fallback to independent loading (Inbox page); then external initial task
@@ -102,7 +115,9 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 	const creatingWorkspaceInfo = useMemo(() => {
 		if (!creatingWorkspaceId) return null
 		const ws = workspaces.find((w) => w.id === creatingWorkspaceId)
-		return ws ? { id: ws.id, name: ws.name || ws.id } : { id: creatingWorkspaceId, name: is_cn ? '工作区' : 'Workspace' }
+		return ws
+			? { id: ws.id, name: ws.name || ws.id }
+			: { id: creatingWorkspaceId, name: is_cn ? '工作区' : 'Workspace' }
 	}, [creatingWorkspaceId, workspaces, is_cn])
 
 	const wasCreatingRef = useRef(false)
@@ -136,20 +151,26 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 		services.updateTask(taskId, { title: trimmed } as any).catch(() => {})
 	}, [titleValue, taskId, task, ctx])
 
-	const handleMessagesChange = useCallback((msgs: any[]) => {
-		if (!taskId || tempTitleSetRef.current || !wasCreatingRef.current) return
-		const firstUserMsg = msgs.find((m: any) => m.type === 'user_input')
-		if (!firstUserMsg) return
-		const rawContent = firstUserMsg.props?.content
-		if (!rawContent) return
-		const text = typeof rawContent === 'string'
-			? rawContent
-			: (Array.isArray(rawContent) ? (rawContent.find((p: any) => p.type === 'text')?.text || '') : '')
-		if (!text) return
-		tempTitleSetRef.current = true
-		const title = text.length > 50 ? text.slice(0, 50) + '…' : text
-		ctx?.updateLocalTitle?.(taskId, title)
-	}, [taskId, ctx])
+	const handleMessagesChange = useCallback(
+		(msgs: any[]) => {
+			if (!taskId || tempTitleSetRef.current || !wasCreatingRef.current) return
+			const firstUserMsg = msgs.find((m: any) => m.type === 'user_input')
+			if (!firstUserMsg) return
+			const rawContent = firstUserMsg.props?.content
+			if (!rawContent) return
+			const text =
+				typeof rawContent === 'string'
+					? rawContent
+					: Array.isArray(rawContent)
+					? rawContent.find((p: any) => p.type === 'text')?.text || ''
+					: ''
+			if (!text) return
+			tempTitleSetRef.current = true
+			const title = text.length > 50 ? text.slice(0, 50) + '…' : text
+			ctx?.updateLocalTitle?.(taskId, title)
+		},
+		[taskId, ctx]
+	)
 
 	const totalWidth = chatWidth + (sidebarOpen ? sidebarWidth : 0)
 
@@ -376,12 +397,15 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 						{(() => {
 							const wsId = isCreating ? creatingWorkspaceInfo?.id : task.workspace?.id
 							const wsName = isCreating
-								? (creatingWorkspaceInfo?.name || (is_cn ? '工作区' : 'Workspace'))
-								: (task.workspace?.name || (is_cn ? '工作区' : 'Workspace'))
+								? creatingWorkspaceInfo?.name || (is_cn ? '工作区' : 'Workspace')
+								: task.workspace?.name || (is_cn ? '工作区' : 'Workspace')
 							return (
 								<Tooltip title={wsName}>
 									<span
-										className={clsx(styles.resourceBtn, !wsId && styles.resourceBtnDisabled)}
+										className={clsx(
+											styles.resourceBtn,
+											!wsId && styles.resourceBtnDisabled
+										)}
 										onClick={() => {
 											if (!wsId) return
 											openSidebarView(
@@ -445,34 +469,34 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 										<Icon name='material-monitor_heart' size={14} />
 									</span>
 								</Tooltip>
-							<Tooltip title={is_cn ? '消息往来' : 'Mail History'}>
-								<span
-									className={styles.resourceBtn}
-									onClick={() =>
-										openSidebarView(
-											`$dashboard/task-mails/${taskId}`,
-											is_cn ? '消息往来' : 'Mail History',
-											'material-speaker_notes'
-										)
-									}
-								>
-									<Icon name='material-speaker_notes' size={14} />
-								</span>
-							</Tooltip>
-							<Tooltip title={is_cn ? '设置' : 'Settings'}>
-								<span
-									className={styles.resourceBtn}
-									onClick={() =>
-										openSidebarView(
-											`$dashboard/task-settings/${taskId}`,
-											is_cn ? '设置' : 'Settings',
-											'material-settings'
-										)
-									}
-								>
-									<Icon name='material-settings' size={14} />
-								</span>
-							</Tooltip>
+								<Tooltip title={is_cn ? '消息往来' : 'Mail History'}>
+									<span
+										className={styles.resourceBtn}
+										onClick={() =>
+											openSidebarView(
+												`$dashboard/task-mails/${taskId}`,
+												is_cn ? '消息往来' : 'Mail History',
+												'material-speaker_notes'
+											)
+										}
+									>
+										<Icon name='material-speaker_notes' size={14} />
+									</span>
+								</Tooltip>
+								<Tooltip title={is_cn ? '设置' : 'Settings'}>
+									<span
+										className={styles.resourceBtn}
+										onClick={() =>
+											openSidebarView(
+												`$dashboard/task-settings/${taskId}`,
+												is_cn ? '设置' : 'Settings',
+												'material-settings'
+											)
+										}
+									>
+										<Icon name='material-settings' size={14} />
+									</span>
+								</Tooltip>
 							</>
 						)}
 					</div>
@@ -482,16 +506,16 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 					</span>
 				</div>
 
-			<div className={styles.chatContent}>
-				{(() => {
-				const effectiveChatId = isCreating
-					? task.chat_id || `creating-${creatingTaskId}`
-					: task.chat_id || taskId!
+				<div className={styles.chatContent}>
+					{(() => {
+						const effectiveChatId = isCreating
+							? task.chat_id || `creating-${creatingTaskId}`
+							: task.chat_id || taskId!
 
-					return (
-						<TaskChat
-							key={effectiveChatId}
-							chatId={effectiveChatId}
+						return (
+							<TaskChat
+								key={effectiveChatId}
+								chatId={effectiveChatId}
 								assistantId={
 									isCreating
 										? global.default_assistant?.assistant_id || ''
@@ -500,7 +524,12 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 										  ''
 								}
 								fallbackAssistantId={global.default_assistant?.assistant_id}
-								columnId={isCreating ? (task.column_id || board?.columns[board.columns.length - 1]?.id) : undefined}
+								columnId={
+									isCreating
+										? task.column_id ||
+										  board?.columns[board.columns.length - 1]?.id
+										: undefined
+								}
 								className={styles.chatbox}
 								initialConnector={!isCreating ? task.last_connector : undefined}
 								initialWorkspace={!isCreating ? task.workspace?.id : undefined}
@@ -511,12 +540,12 @@ const TaskDetail = ({ taskId, open, onClose, onPanelWidthChange, isAnimating, in
 										services.updateTask(taskId!, { workspace_id: id })
 									}
 								}}
-						onAssistantChange={
-							!isCreating
-								? (id) => services.updateTask(taskId!, { assistant_id: id })
-								: undefined
-						}
-							onMessagesChange={handleMessagesChange}
+								onAssistantChange={
+									!isCreating
+										? (id) => services.updateTask(taskId!, { assistant_id: id })
+										: undefined
+								}
+								onMessagesChange={handleMessagesChange}
 							/>
 						)
 					})()}

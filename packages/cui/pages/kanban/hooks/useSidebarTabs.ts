@@ -50,12 +50,25 @@ export const useSidebarTabs = (options?: UseSidebarTabsOptions): UseSidebarTabsR
 					options?.onNavigate?.(url)
 					return prev.map((tab) =>
 						tab.id === existing.id
-							? { ...tab, url, title: title || tab.title, timestamp: Date.now(), newWindowUrl }
+							? {
+									...tab,
+									url,
+									title: title || tab.title,
+									timestamp: Date.now(),
+									newWindowUrl
+							  }
 							: tab
 					)
 				}
 
-				const newTab: SidebarTab = { id: nanoid(), url, title, icon, timestamp: Date.now(), newWindowUrl }
+				const newTab: SidebarTab = {
+					id: nanoid(),
+					url,
+					title,
+					icon,
+					timestamp: Date.now(),
+					newWindowUrl
+				}
 				setActiveTabId(newTab.id)
 				options?.onNavigate?.(url)
 				return [...prev, newTab]
@@ -99,11 +112,7 @@ export const useSidebarTabs = (options?: UseSidebarTabsOptions): UseSidebarTabsR
 
 	const updateTabTitle = useCallback((url: string, title: string) => {
 		const baseUrl = getBaseUrl(url)
-		setTabs((prev) =>
-			prev.map((tab) =>
-				getBaseUrl(tab.url) === baseUrl ? { ...tab, title } : tab
-			)
-		)
+		setTabs((prev) => prev.map((tab) => (getBaseUrl(tab.url) === baseUrl ? { ...tab, title } : tab)))
 	}, [])
 
 	const closeOtherTabs = useCallback(() => {

@@ -291,10 +291,27 @@ const Menu: FC<Props> = ({ sidebarVisible, setSidebarVisible, openSidebar }) => 
 	const DETAIL_PANEL_ROUTES = ['/kanban', '/inbox']
 	const isDetailPanelPage = (p: string) => DETAIL_PANEL_ROUTES.some((r) => p.startsWith(r))
 
+	// Routes that open in a modal overlay instead of navigating away
+	const MODAL_PATHS = ['/workspace', '/computers']
+	const isModalPath = (p: string) => {
+		const lp = p.toLowerCase()
+		return MODAL_PATHS.some((m) => lp === m || lp.startsWith(m + '/'))
+	}
+
 	// Navigate to menu path
 	const handleNavigate = useCallback(
 		(path: string, menu: App.Menu) => {
 			setPopupMenu(null)
+
+			// Modal opening (matched by MODAL_PATHS)
+			if (isModalPath(path)) {
+				window.$app?.Event?.emit('app/openModal', {
+					path,
+					title: menu.name || path,
+					icon: getIconName(menu.icon)
+				})
+				return
+			}
 
 			const isDetailPanel = isDetailPanelPage(path)
 			window.$global?.setDetailPanelActive(isDetailPanel)

@@ -96,7 +96,6 @@ const ModelSelector: React.FC<ModelSelectorProps> = (props) => {
 		? resolvedModel.levels.map((level) => ({
 				label: effortLabel(level, is_cn),
 				value: level,
-				icon: 'material-tune',
 				group: is_cn ? '思考强度' : 'Thinking Level'
 			}))
 		: []
@@ -140,13 +139,12 @@ const ModelSelector: React.FC<ModelSelectorProps> = (props) => {
 					value={resolvedEffort}
 					options={effortOptions}
 					onChange={handleEffortChange}
-					variant='normal'
+					variant='subtle'
 					tooltip={is_cn ? '思考强度' : 'Thinking Level'}
 					disabled={disabled}
 					dropdownMinWidth={120}
 					dropdownMaxWidth={180}
 					dropdownAlign={dropdownAlign}
-					placeholderIcon='material-tune'
 				/>
 			)}
 		</>
