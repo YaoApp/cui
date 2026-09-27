@@ -15,9 +15,29 @@
 	position: relative;
 	width: 100%;
 	height: 100%;
+	display: flex;
+	flex-direction: column;
 	overflow-y: auto;
 	background: var(--color_bg);
 	scrollbar-gutter: stable;
+
+	&::-webkit-scrollbar {
+		-webkit-appearance: none;
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: rgba(0, 0, 0, 0.15);
+		border-radius: 3px;
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.3);
+		}
+	}
 }
 
 .loading {
@@ -255,4 +275,16 @@
 	text-align: center;
 	color: var(--color_neo_text_tertiary);
 	font-size: 13px;
+}
+
+[data-theme='dark'] {
+	.dashboardContainer {
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.15);
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.3);
+			}
+		}
+	}
 }

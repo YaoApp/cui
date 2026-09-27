@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { getLocale } from '@umijs/max'
 import type { AgentMessage } from '../../../openapi'
 import { Icon } from '@/widgets'
+import { resolveToolLabel } from '../Execute/toolLabels'
 import styles from './index.less'
 
 interface ChildTool {
@@ -92,9 +93,10 @@ const AgentView = ({ message, loading }: IAgentViewProps) => {
 					{children.map((child) => {
 						const cp = child.props || {}
 						const childStatus = cp.status || child.status || 'running'
-						const toolName = cp.tool || '...'
-						const summary = cp.summary || extractChildSummary(cp)
-						const childLabel = summary ? `${toolName} ${truncate(summary, 50)}` : toolName
+						const toolLabel = resolveToolLabel(cp.tool || '', is_cn)
+						const childDesc = cp.input?.description
+						const summary = childDesc || cp.summary || extractChildSummary(cp)
+						const childLabel = summary ? `${toolLabel} ${truncate(summary, 50)}` : toolLabel
 						const iconName = childStatusIcon[childStatus] || childStatusIcon.running
 						const isChildStreaming = !!loading && childStatus === 'running'
 						const childDetail = buildChildDetail(cp)
@@ -154,11 +156,11 @@ function buildDetailText(props: any): string {
 
 function extractChildSummary(props: any): string {
 	if (props.input && typeof props.input === 'object') {
-		return props.input.command || props.input.file_path || props.input.path || ''
+		return props.input.description || props.input.command || props.input.file_path || props.input.path || ''
 	}
 	const raw = props.input_delta
 	if (typeof raw === 'string' && raw.length > 0) {
-		for (const key of ['command', 'file_path', 'path', 'url', 'query']) {
+		for (const key of ['description', 'command', 'file_path', 'path', 'url', 'query']) {
 			const re = new RegExp(`"${key}"\\s*:\\s*"([^"]*)"?`)
 			const m = raw.match(re)
 			if (m && m[1]) return m[1]

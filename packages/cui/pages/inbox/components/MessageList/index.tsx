@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type UIEvent } from 'react'
+import { Dropdown, Tooltip } from 'antd'
+import type { MenuProps } from 'antd'
 import clsx from 'clsx'
 import Icon from '@/widgets/Icon'
 import { useInboxContext, type InboxGroup } from '../../context'
 import type { InboxCategory } from '../../types'
+import { CATEGORIES, statsKeyMap } from '../Sidebar'
 import MessageContextMenu, { type ContextMenuState } from '../MessageContextMenu'
 import styles from './index.less'
 
@@ -58,6 +61,7 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 		selectChatGroup,
 		is_cn,
 		category,
+		setCategory,
 		unreadCount,
 		searchKeyword,
 		setSearchKeyword,
@@ -66,7 +70,10 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 		loadMore,
 		hasMore,
 		loading,
-		loadingMore
+		loadingMore,
+		sidebarCollapsed,
+		setSidebarCollapsed,
+		stats
 	} = useInboxContext()
 	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
 	const listRef = useRef<HTMLDivElement>(null)
@@ -105,15 +112,60 @@ const MessageList = ({ onUnarchive }: MessageListProps) => {
 		setContextMenu({ group, x: e.clientX, y: e.clientY })
 	}, [])
 
+	const categoryDropdownItems: MenuProps['items'] = CATEGORIES.map((item) => {
+		const sKey = statsKeyMap[item.key] as keyof typeof stats
+		const count = stats ? (stats[sKey] as number) || 0 : 0
+		return {
+			key: item.key,
+			label: (
+				<span className={styles.dropdownItem}>
+					<Icon name={item.icon} size={16} />
+					<span>{is_cn ? item.cn : item.en}</span>
+					{count > 0 && <span className={styles.dropdownCount}>{count}</span>}
+				</span>
+			)
+		}
+	})
+
 	return (
 		<div className={styles.container}>
 			<div className={styles.header}>
-				<span className={styles.title}>
-					{is_cn ? categoryLabel.cn : categoryLabel.en}
-					{unreadCount > 0 && category === 'all' && (
-						<span className={styles.badge}>({unreadCount})</span>
-					)}
-				</span>
+				<Tooltip title={sidebarCollapsed
+					? (is_cn ? '展开导航' : 'Expand navigation')
+					: (is_cn ? '收起导航' : 'Collapse navigation')
+				}>
+					<span
+						className={styles.toggleBtn}
+						onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+					>
+						<Icon name={sidebarCollapsed ? 'material-menu' : 'material-menu_open'} size={16} />
+					</span>
+				</Tooltip>
+				{sidebarCollapsed ? (
+					<Dropdown
+						menu={{
+							items: categoryDropdownItems,
+							selectedKeys: [category],
+							onClick: ({ key }) => setCategory(key as InboxCategory)
+						}}
+						trigger={['click']}
+					>
+						<span className={styles.titleDropdown}>
+							{is_cn ? categoryLabel.cn : categoryLabel.en}
+							{unreadCount > 0 && category === 'all' && (
+								<span className={styles.badge}>({unreadCount})</span>
+							)}
+							<Icon name='material-expand_more' size={14} className={styles.titleArrow} />
+						</span>
+					</Dropdown>
+				) : (
+					<span className={styles.title}>
+						{is_cn ? categoryLabel.cn : categoryLabel.en}
+						{unreadCount > 0 && category === 'all' && (
+							<span className={styles.badge}>({unreadCount})</span>
+						)}
+					</span>
+				)}
 				<span
 					className={styles.headerAction}
 					onClick={markAllRead}
