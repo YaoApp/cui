@@ -15,7 +15,7 @@
 }
 
 .modal {
-	width: 380px;
+	width: 420px;
 	max-height: 80vh;
 	display: flex;
 	flex-direction: column;
@@ -51,23 +51,35 @@
 }
 
 .body {
-	padding: 20px;
+	padding: 16px 20px;
 }
 
 .field {
-	margin-bottom: 16px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 12px;
 
 	&:last-child {
 		margin-bottom: 0;
 	}
 
 	label {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: 4px;
 		font-size: 13px;
 		font-weight: 500;
 		color: var(--color_text_light);
-		margin-bottom: 8px;
+		white-space: nowrap;
+		min-width: 72px;
+		flex-shrink: 0;
 	}
+}
+
+.fieldInput {
+	flex: 1;
+	min-width: 0;
 }
 
 .loading,

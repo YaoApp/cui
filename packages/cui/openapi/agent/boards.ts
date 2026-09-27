@@ -35,6 +35,7 @@ export interface CreateBoardRequest {
 	name: string
 	icon?: string
 	color?: string
+	skip_default_column?: boolean
 }
 
 export interface UpdateBoardRequest {

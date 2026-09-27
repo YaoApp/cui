@@ -38,6 +38,9 @@ interface InboxContextValue {
 	togglePin: (chatId: string) => void
 	sidebarCollapsed: boolean
 	setSidebarCollapsed: (v: boolean) => void
+	refreshMessages: () => void
+	insertLocalTask: (chatId: string, title: string) => void
+	removeLocalTask: (chatId: string) => void
 	loadMore: () => void
 	hasMore: boolean
 	taskVersion: number
@@ -71,7 +74,10 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 	const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
 	const [searchKeyword, setSearchKeyword] = useState('')
 	const [sidebarCollapsed, setSidebarCollapsedRaw] = useState(() => {
-		try { return localStorage.getItem('inbox_sidebar_collapsed') === 'true' } catch { return false }
+		try {
+			const saved = localStorage.getItem('inbox_sidebar_collapsed')
+			return saved === null ? true : saved === 'true'
+		} catch { return true }
 	})
 	const setSidebarCollapsed = useCallback((v: boolean) => {
 		setSidebarCollapsedRaw(v)
@@ -117,7 +123,12 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 					} else if (items.length === 0) {
 						exhaustedRef.current = true
 					}
-					setMessages((prev) => (append ? [...prev, ...items] : items))
+					setMessages((prev) => {
+						if (append) return [...prev, ...items]
+						const serverChatIds = new Set(items.map((m) => m.chat_id))
+						const kept = prev.filter((m) => m.id.startsWith('local-') && !serverChatIds.has(m.chat_id))
+						return [...kept, ...items]
+					})
 					setTotal(t)
 					pageRef.current = p
 				})
@@ -139,6 +150,32 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		[is_cn]
 	)
 
+	const refreshMessages = useCallback(() => {
+		fetchMessages(category, 1, false, true, true)
+	}, [category, fetchMessages])
+
+	const removeLocalTask = useCallback((chatId: string) => {
+		setMessages((prev) => prev.filter((m) => m.id !== `local-${chatId}`))
+	}, [])
+
+	const insertLocalTask = useCallback((chatId: string, title: string) => {
+		const placeholder: InboxMessage = {
+			id: `local-${chatId}`,
+			type: 'update',
+			source: { type: 'kanban', id: '', name: '', task_title: title },
+			priority: 'medium',
+			title: title,
+			body: is_cn ? '等待首轮会话...' : 'Waiting for first message...',
+			task_id: chatId,
+			chat_id: chatId,
+			bookmarked: false,
+			inbox_pinned: false,
+			has_unread: false,
+			created_at: Date.now()
+		}
+		setMessages((prev) => [placeholder, ...prev])
+	}, [is_cn])
+
 	useEffect(() => {
 		fetchStats()
 		fetchMessages(category, 1)
@@ -147,8 +184,25 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		const stream = getEventStream()
 		const unsub = stream.subscribe('task.updated', (data: any) => {
-			if (data?.chat_id && data.chat_id === selectedChatIdRef.current) {
-				if (data.outputs) setTaskVersion((v) => v + 1)
+			if (data?.chat_id) {
+				if (data.title || data.run_status) {
+					setMessages((prev) =>
+						prev.map((m) => {
+							if (m.chat_id !== data.chat_id) return m
+							const updated = { ...m }
+							if (data.title) {
+								updated.source = { ...m.source, task_title: data.title }
+							}
+							if (data.run_status) updated.run_status = data.run_status
+							return updated
+						})
+					)
+				}
+				if (data.chat_id === selectedChatIdRef.current) {
+					if (data.outputs || data.title || data.run_status) {
+						setTaskVersion((v) => v + 1)
+					}
+				}
 			}
 			clearTimeout(refreshTimerRef.current)
 			refreshTimerRef.current = window.setTimeout(() => {
@@ -362,6 +416,9 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 		togglePin,
 		sidebarCollapsed,
 		setSidebarCollapsed,
+		refreshMessages,
+		insertLocalTask,
+		removeLocalTask,
 		loadMore,
 		hasMore,
 		taskVersion

@@ -58,6 +58,7 @@ export interface CreateTaskRequest {
 	assistant_id: string
 	board_id?: string
 	column_id?: string
+	workspace_id?: string
 }
 
 export interface UpdateTaskRequest {

@@ -4,6 +4,8 @@ import { nanoid } from 'nanoid'
 import type { Board, BoardSummary, BoardTemplate, Column, KanbanTask, StatusFilter, CreateTaskData } from './types'
 import * as services from './services'
 import { initEventStore, disposeEventStore } from '@/openapi/events'
+import { ensureWorkspace } from '@/utils/ensureWorkspace'
+import { ensureBoard } from '@/utils/ensureBoard'
 
 export interface QuotaInfo {
 	limit: number
@@ -204,10 +206,9 @@ export function KanbanProvider({ children, boardId: urlBoardId }: KanbanProvider
 		const init = async () => {
 			setLoading(true)
 			try {
-				const list = await services.getBoards()
+				const list = await ensureBoard(is_cn)
 				setBoards(list)
-
-				if (list.length === 0) return
+				ensureWorkspace(is_cn).catch(() => {})
 
 				const savedId = localStorage.getItem('kanban_last_board')
 				const targetId = urlBoardId && list.some((b) => b.id === urlBoardId)

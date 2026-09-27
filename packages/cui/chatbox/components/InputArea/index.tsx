@@ -10,6 +10,7 @@ import type { UserMessage } from '../../../openapi'
 import { useWorkspace } from '@/hooks/useComputerWorkspace'
 import { useGlobal } from '@/context/app'
 import { WorkspaceAPI } from '@/openapi/workspace'
+import { ensureWorkspace } from '@/utils/ensureWorkspace'
 import {
 	type MentionType,
 	type MentionData,
@@ -121,13 +122,10 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 		return ws ? ws.node_online === false : true
 	}, [selectedWorkspace, workspaces])
 
-	// Pre-fetch workspaces when a workspace was previously selected (from localStorage)
-	// so the Selector can display the saved workspace name instead of the placeholder
+	// Fetch workspaces on mount so the Selector always has options available
 	useEffect(() => {
-		if (selectedWorkspace) {
-			fetchWorkspaces()
-		}
-	}, [selectedWorkspace])
+		fetchWorkspaces()
+	}, [])
 
 	// Localization & Routing
 	const locale = getLocale()
@@ -308,6 +306,28 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 			setSelectedWorkspace('')
 		}
 	}, [workspaces, selectedWorkspace, workspaceLocked, initialWorkspace])
+
+	// Ensure a default workspace exists when fetch completes with an empty list.
+	// Track loading true->false transition to avoid firing before the initial fetch.
+	const ensuredRef = useRef(false)
+	const wasLoadingRef = useRef(false)
+	useEffect(() => {
+		if (wasLoadingRef.current && !loadingWorkspaces && workspaces.length === 0 && !ensuredRef.current) {
+			ensuredRef.current = true
+			ensureWorkspace(is_cn)
+				.then((ok) => {
+					if (ok) fetchWorkspaces()
+				})
+				.catch(() => {})
+		}
+		wasLoadingRef.current = loadingWorkspaces
+	}, [loadingWorkspaces, workspaces])
+
+	// Auto-select the first workspace when none is selected and workspaces are available
+	useEffect(() => {
+		if (selectedWorkspace || workspaces.length === 0 || workspaceLocked) return
+		setSelectedWorkspace(workspaces[0].id)
+	}, [workspaces, selectedWorkspace, workspaceLocked])
 
 	// Workspace follow: when assistant changes, check compatibility
 	useEffect(() => {
