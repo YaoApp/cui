@@ -186,7 +186,7 @@ const ComputerDetail = ({ box, onBack, onRemove, onRefresh }: ComputerDetailProp
 					<div className={styles.infoCard}>
 						<div className={styles.infoLabel}>{is_cn ? '工作空间' : 'Workspace'}</div>
 						<div className={styles.infoValue}>
-							<Icon name='material-workspaces' size={14} />
+							<Icon name='material-folder' size={14} />
 							<span className={styles.monoText}>{box.workspace_id}</span>
 						</div>
 					</div>

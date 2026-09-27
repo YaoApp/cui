@@ -7,6 +7,7 @@ window.$app = {
 	sleep,
 	Handle,
 	Event: new EventEmitter(),
+	_modalActive: false,
 
 	ResolveUrl(url: string): { resolved: string; type: 'dashboard' | 'sui' | 'external' } {
 		if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -20,6 +21,12 @@ window.$app = {
 
 	Navigate(url: string, options?: { title?: string; icon?: string; replace?: boolean; newWindowUrl?: string }) {
 		const global = window.$global
+
+		// When a PageModal is active, only update the URL; preserve existing title/icon
+		if (window.$app?._modalActive) {
+			window.$app?.Event?.emit('app/updateModalUrl', url)
+			return
+		}
 
 		if (global?.detail_panel_active) {
 			window.$app?.Event?.emit('app/openSidebar', {

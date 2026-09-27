@@ -11,6 +11,7 @@ import Menu from './Menu'
 import Container from './Container/index'
 import { Page } from '@/chatbox'
 import SetupBanner from '@/components/SetupBanner'
+import PageModal from '@/components/PageModal'
 import { ChatProvider } from '@/chatbox/context'
 import './style.less'
 import { useNavigate, useLocation } from '@umijs/max'
@@ -256,7 +257,13 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 				setSidebarTabs((prev) =>
 					prev.map((tab) =>
 						tab.id === existingTab.id
-							? { ...tab, url, title: title || tab.title, timestamp: Date.now(), newWindowUrl }
+							? {
+									...tab,
+									url,
+									title: title || tab.title,
+									timestamp: Date.now(),
+									newWindowUrl
+							  }
 							: tab
 					)
 				)
@@ -344,25 +351,22 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	)
 
 	// Update active tab's URL and title (for in-iframe sub-navigation)
-	const updateActiveTab = useCallback(
-		(url: string, title: string) => {
-			setActiveSidebarTabId((activeId) => {
-				if (!activeId) return activeId
+	const updateActiveTab = useCallback((url: string, title: string) => {
+		setActiveSidebarTabId((activeId) => {
+			if (!activeId) return activeId
 
-				setSidebarTabs((prev) =>
-					prev.map((tab) => {
-						if (tab.id === activeId) {
-							return { ...tab, url, title: title || tab.title, timestamp: Date.now() }
-						}
-						return tab
-					})
-				)
+			setSidebarTabs((prev) =>
+				prev.map((tab) => {
+					if (tab.id === activeId) {
+						return { ...tab, url, title: title || tab.title, timestamp: Date.now() }
+					}
+					return tab
+				})
+			)
 
-				return activeId
-			})
-		},
-		[]
-	)
+			return activeId
+		})
+	}, [])
 
 	// Remove a tab
 	const removeSidebarTab = useCallback(
@@ -458,7 +462,15 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			const originalUrl = params.get('src')
 			if (originalUrl) {
 				const historyItem = sidebarHistory.find((h) => h.url === originalUrl)
-				const title = historyItem?.title || (() => { try { return new URL(originalUrl).host } catch { return originalUrl } })()
+				const title =
+					historyItem?.title ||
+					(() => {
+						try {
+							return new URL(originalUrl).host
+						} catch {
+							return originalUrl
+						}
+					})()
 				const newTab: SidebarTab = { id: nanoid(), url: originalUrl, title, timestamp: Date.now() }
 				setSidebarTabs([newTab])
 				setActiveSidebarTabId(newTab.id)
@@ -532,6 +544,13 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 	const [responsiveWidths, setResponsiveWidths] = useState(getResponsiveWidths())
 	const [previousWidth, setPreviousWidth] = useState(DEFAULT_WIDTH)
 	const [menuExpanding, setMenuExpanding] = useState(false) // Disable sidebar transition during menu expand/collapse
+
+	// PageModal state
+	const [modalState, setModalState] = useState<{ open: boolean; url: string; title: string; icon?: string }>({
+		open: false,
+		url: '',
+		title: ''
+	})
 
 	const props_neo: IPropsNeo = {
 		stack: global.stack.paths.join('/'),
@@ -635,18 +654,18 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 						global.setSidebarWidth(defaultWidth)
 					}
 
-				// Create a new Tab (Sidebar Tabs mode)
-				addSidebarTab(url, title, detail.icon, detail.newWindowUrl)
+					// Create a new Tab (Sidebar Tabs mode)
+					addSidebarTab(url, title, detail.icon, detail.newWindowUrl)
 
-				// Navigate using internal route path
-				const navUrl = toNavPath(url)
-				navigate(navUrl, { replace: true })
+					// Navigate using internal route path
+					const navUrl = toNavPath(url)
+					navigate(navUrl, { replace: true })
 
-				// If already on the same URL, force-refresh the iframe
-				const currentFullPath = currentPath + (location.search || '')
-				if (currentFullPath === navUrl) {
-					window.$app?.Event?.emit('app/refreshTab')
-				}
+					// If already on the same URL, force-refresh the iframe
+					const currentFullPath = currentPath + (location.search || '')
+					if (currentFullPath === navUrl) {
+						window.$app?.Event?.emit('app/refreshTab')
+					}
 				}
 
 				// Support forceNormal parameter to exit maximized mode
@@ -694,6 +713,18 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			navigate(url, { replace: true })
 		}
 
+		const handleOpenModal = (detail: any) => {
+			const url = detail?.path || detail?.url
+			if (!url) return
+			window.$app._modalActive = true
+			setModalState({ open: true, url, title: detail.title || url, icon: detail.icon })
+		}
+
+		const handleUpdateModalUrl = (url: string) => {
+			if (!url) return
+			setModalState((prev) => ({ ...prev, url }))
+		}
+
 		window.$app.Event.on('app/toggleSidebar', handleToggleSidebar)
 		window.$app.Event.on('app/openSidebar', handleOpenSidebar)
 		window.$app.Event.on('app/closeSidebar', handleCloseSidebar)
@@ -701,6 +732,8 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 		window.$app.Event.on('app/updateSidebarTabTitle', handleUpdateSidebarTabTitle)
 		window.$app.Event.on('app/updateActiveTab', handleUpdateActiveTab)
 		window.$app.Event.on('app/replaceRoute', handleReplaceRoute)
+		window.$app.Event.on('app/openModal', handleOpenModal)
+		window.$app.Event.on('app/updateModalUrl', handleUpdateModalUrl)
 
 		return () => {
 			window.$app.Event.off('app/toggleSidebar', handleToggleSidebar)
@@ -710,6 +743,8 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			window.$app.Event.off('app/updateSidebarTabTitle', handleUpdateSidebarTabTitle)
 			window.$app.Event.off('app/updateActiveTab', handleUpdateActiveTab)
 			window.$app.Event.off('app/replaceRoute', handleReplaceRoute)
+			window.$app.Event.off('app/openModal', handleOpenModal)
+			window.$app.Event.off('app/updateModalUrl', handleUpdateModalUrl)
 		}
 	}, [sidebarVisible, handleSetSidebarVisible, navigate, addSidebarTab, updateSidebarTabTitle, updateActiveTab])
 
@@ -725,9 +760,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			if (!activeTab) return prev
 			if (activeTab.url.startsWith('http://') || activeTab.url.startsWith('https://')) return prev
 			if (activeTab.url === currentUrl) return prev
-			return prev.map((tab) =>
-				tab.id === activeSidebarTabId ? { ...tab, url: currentUrl } : tab
-			)
+			return prev.map((tab) => (tab.id === activeSidebarTabId ? { ...tab, url: currentUrl } : tab))
 		})
 	}, [location.pathname, location.search, activeSidebarTabId])
 
@@ -816,11 +849,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 
 			// Check if clicked on the maximize button - don't start resize
 			const target = e.target as HTMLElement
-			if (
-				target.closest('.maximize-btn') ||
-				target.closest('button') ||
-				target.tagName === 'BUTTON'
-			) {
+			if (target.closest('.maximize-btn') || target.closest('button') || target.tagName === 'BUTTON') {
 				return
 			}
 
@@ -835,8 +864,7 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 			// Add a transparent overlay to prevent iframe/other elements from capturing mouse events
 			const overlay = document.createElement('div')
 			overlay.id = 'resize-overlay'
-			overlay.style.cssText =
-				'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;cursor:col-resize;'
+			overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;cursor:col-resize;'
 			document.body.appendChild(overlay)
 
 			const handleMouseMove = (e: MouseEvent) => {
@@ -1089,6 +1117,16 @@ const ChatboxWrapper: FC<PropsWithChildren> = ({ children }) => {
 					</>
 				)}
 			</div>
+			<PageModal
+				open={modalState.open}
+				onClose={() => {
+					window.$app._modalActive = false
+					setModalState((prev) => ({ ...prev, open: false }))
+				}}
+				url={modalState.url}
+				title={modalState.title}
+				icon={modalState.icon}
+			/>
 		</ChatProvider>
 	)
 }

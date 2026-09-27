@@ -49,7 +49,7 @@ const WorkspaceSection = ({ task }: { task: KanbanTask }) => {
 					</div>
 				) : (
 					<div className={viewStyles.emptyState}>
-						<Icon name='material-workspaces' size={32} />
+						<Icon name='material-folder' size={32} />
 						<span style={{ marginTop: 8 }}>{is_cn ? '未绑定工作区' : 'No workspace bound'}</span>
 					</div>
 				)}

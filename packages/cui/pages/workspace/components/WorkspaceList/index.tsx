@@ -71,7 +71,7 @@ const WorkspaceList = ({ workspaces, nodeMap, loading, onSelect, onDelete, onCre
 			<div className={styles.header}>
 				<div className={styles.titleContainer}>
 					<div className={styles.titleGroup}>
-						<Icon name='material-workspaces' size={24} />
+						<Icon name='material-folder' size={24} />
 						<h1 className={styles.title}>{is_cn ? '工作空间' : 'Workspaces'}</h1>
 					</div>
 					<Button type='primary' size='small' icon={<Icon name='material-add' size={12} />} onClick={onCreate}>

@@ -16,7 +16,7 @@ interface ISelectorProps {
 	value: string
 	options: ISelectorOption[]
 	onChange: (value: string) => void
-	variant?: 'tag' | 'normal'
+	variant?: 'tag' | 'normal' | 'subtle'
 	tooltip?: string
 	disabled?: boolean
 	placeholder?: string
@@ -203,7 +203,7 @@ const Selector: React.FC<ISelectorProps> = ({
 		: tooltip
 
 	return (
-		<div className={`${styles.selectorContainer} ${isOpen ? styles.selectorOpen : ''}`} ref={containerRef}>
+		<div className={`${styles.selectorContainer} ${isOpen ? styles.selectorOpen : ''} ${variant === 'subtle' ? styles.subtleContainer : ''}`} ref={containerRef}>
 			{/* Selector Button with Tooltip */}
 			{tooltipContent && !isOpen ? (
 				<Tooltip content={tooltipContent}>{selectorButton}</Tooltip>

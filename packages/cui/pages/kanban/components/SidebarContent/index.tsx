@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { getLocale } from '@umijs/max'
-import { Spin } from 'antd'
 import { local } from '@yaoapp/storex'
 import Icon from '@/widgets/Icon'
+import { DashboardPageRenderer } from '@/components/PageRenderer'
 import { sendMessageToIframe } from '@/pages/web/$'
 import { executeAction } from '@/chatbox/messages/Action/actions'
 import type { App } from '@/types'
@@ -134,53 +134,6 @@ const OutputsView = ({ task }: { task: KanbanTask }) => {
 const INTERNAL_VIEWS: Record<string, React.FC<{ task: KanbanTask }>> = {
 	'__task/workspace': WorkspaceView,
 	'__task/outputs': OutputsView
-}
-
-async function resolveDashboardPage(segments: string[]): Promise<{
-	mod: { default: React.ComponentType<any> }
-	catchAll: string
-}> {
-	for (let len = segments.length; len >= 1; len--) {
-		const dir = segments.slice(0, len).join('/')
-		const catchAll = segments.slice(len).join('/')
-		try {
-			return { mod: await import(/* webpackExclude: /_bak/ */ `@/pages/${dir}/$`), catchAll }
-		} catch { /* next */ }
-		try {
-			return { mod: await import(/* webpackExclude: /_bak/ */ `@/pages/${dir}/index`), catchAll }
-		} catch { /* next */ }
-	}
-	return { mod: { default: () => null }, catchAll: '' }
-}
-
-const DashboardPageRenderer = ({ url }: { url: string }) => {
-	const [resolved, setResolved] = useState<{
-		Component: React.ComponentType<any>
-		catchAll: string
-		search: string
-	} | null>(null)
-
-	useEffect(() => {
-		const path = url.replace('$dashboard', '')
-		const [pathname, searchStr] = path.split('?')
-		const segments = pathname.split('/').filter(Boolean)
-		const search = searchStr ? `?${searchStr}` : ''
-
-		resolveDashboardPage(segments).then(({ mod, catchAll }) => {
-			setResolved({ Component: mod.default, catchAll, search })
-		})
-	}, [url])
-
-	if (!resolved) {
-		return <div className={styles.loading}><Spin size='small' /></div>
-	}
-
-	const { Component, catchAll, search } = resolved
-	return (
-		<div className={styles.dashboardContainer}>
-			<Component __routeParams={{ '*': catchAll }} __routeSearch={search} />
-		</div>
-	)
 }
 
 const IframeRenderer = ({ url, isExternal }: { url: string; isExternal: boolean }) => {

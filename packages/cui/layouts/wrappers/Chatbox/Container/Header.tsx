@@ -281,11 +281,11 @@ const Header: FC<HeaderProps> = ({
 							window.$app?.Event?.emit('app/openSidebar', {
 								path: '/workspace/list',
 								title: is_cn ? '工作空间' : 'Workspaces',
-								icon: 'material-workspaces'
+								icon: 'material-folder'
 							})
 						}}
 					>
-						<Icon name='material-workspaces' size={14} />
+						<Icon name='material-folder' size={14} />
 					</div>
 				</Tooltip>
 

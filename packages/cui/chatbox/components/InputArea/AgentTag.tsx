@@ -39,7 +39,7 @@ const AgentTag = ({ agent, onSwitchAssistant, disabled }: IAgentTagProps) => {
 
 	return (
 		<>
-			<Tooltip content={agent.name} placement="top">
+			<Tooltip content={agent.name} placement='top'>
 				<div className={`${styles.tag} ${disabled ? styles.disabled : ''}`} onClick={handleClick}>
 					<div className={styles.avatar}>
 						{agent.avatar && agent.avatar.length > 2 ? (
@@ -49,7 +49,7 @@ const AgentTag = ({ agent, onSwitchAssistant, disabled }: IAgentTagProps) => {
 						)}
 					</div>
 					<span className={styles.name}>{agent.name}</span>
-					<Icon name="material-swap_horiz" size={14} className={styles.switchIcon} />
+					<Icon name='material-swap_horiz' size={14} className={styles.switchIcon} />
 				</div>
 			</Tooltip>
 
@@ -57,8 +57,8 @@ const AgentTag = ({ agent, onSwitchAssistant, disabled }: IAgentTagProps) => {
 				visible={pickerVisible}
 				onClose={() => setPickerVisible(false)}
 				onConfirm={handleConfirm}
-				type="assistant"
-				mode="single"
+				type='assistant'
+				mode='single'
 				value={agent.id ? [{ value: agent.id, label: agent.name }] : []}
 			/>
 		</>

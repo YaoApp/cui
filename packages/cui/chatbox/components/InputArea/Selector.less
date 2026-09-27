@@ -147,6 +147,53 @@
 	}
 }
 
+// Subtle container - pull closer to preceding selector
+.subtleContainer {
+	margin-left: -6px;
+}
+
+// Subtle variant - lighter text, visually attached to preceding selector
+.subtle {
+	gap: 4px;
+	padding: 4px 8px;
+	border-radius: 6px;
+
+	&:hover:not(.disabled) {
+		background: var(--color_chatbox_bg_field);
+	}
+
+	&.open {
+		background: var(--color_chatbox_bg_field);
+	}
+
+	.selectorIcon {
+		color: var(--color_chatbox_text_secondary);
+		opacity: 0.5;
+	}
+
+	.selectorLabel {
+		color: var(--color_chatbox_text_secondary);
+		opacity: 0.9;
+	}
+
+	.arrow {
+		color: var(--color_chatbox_text_secondary);
+		opacity: 0.9;
+	}
+
+	&:hover:not(.disabled) {
+		.selectorLabel {
+			opacity: 1;
+			color: var(--color_chatbox_text_secondary);
+		}
+		.selectorIcon,
+		.arrow {
+			opacity: 0.8;
+			color: var(--color_chatbox_text_secondary);
+		}
+	}
+}
+
 // Dropdown menu - 参考图2的样式
 .dropdown {
 	position: absolute;

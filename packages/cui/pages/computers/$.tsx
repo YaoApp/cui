@@ -75,9 +75,7 @@ const ComputersPage = (props: AppRouteProps) => {
 	const handleVNC = async (box: BoxInfo) => {
 		if (!window.$app?.openapi) return
 		const api = new ComputerAPI(window.$app.openapi)
-		const url = box.kind === 'host'
-			? api.GetViewerURL(box.node_id)
-			: api.GetViewerURL(box.node_id, box.id)
+		const url = box.kind === 'host' ? api.GetViewerURL(box.node_id) : api.GetViewerURL(box.node_id, box.id)
 		window.$app.Navigate(url)
 	}
 
