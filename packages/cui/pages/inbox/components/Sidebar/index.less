@@ -1,8 +1,19 @@
 .sidebar {
-	width: 180px;
 	flex-shrink: 0;
+	width: 180px;
+	overflow: hidden;
+	transition: width 0.2s ease;
+
+	&.collapsed {
+		width: 0;
+	}
+}
+
+.sidebarInner {
+	width: 180px;
 	display: flex;
 	flex-direction: column;
+	height: 100%;
 	border-right: 1px solid var(--color_border_light);
 	background: var(--color_neo_bg_field);
 	overflow-y: auto;

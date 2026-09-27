@@ -70,7 +70,13 @@ export function InboxProvider({ children }: { children: React.ReactNode }) {
 	const [category, setCategoryState] = useState<InboxCategory>('all')
 	const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
 	const [searchKeyword, setSearchKeyword] = useState('')
-	const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+	const [sidebarCollapsed, setSidebarCollapsedRaw] = useState(() => {
+		try { return localStorage.getItem('inbox_sidebar_collapsed') === 'true' } catch { return false }
+	})
+	const setSidebarCollapsed = useCallback((v: boolean) => {
+		setSidebarCollapsedRaw(v)
+		try { localStorage.setItem('inbox_sidebar_collapsed', String(v)) } catch {}
+	}, [])
 	const [stats, setStats] = useState<InboxStatsData | null>(null)
 	const [total, setTotal] = useState(0)
 	const [taskVersion, setTaskVersion] = useState(0)

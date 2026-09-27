@@ -136,6 +136,7 @@ const CreateModal = ({ open, onSubmit, onCancel }: CreateModalProps) => {
 						/>
 					</div>
 
+					{/* TODO: 标签功能暂时隐藏，后续启用时取消注释
 					<div className={styles.field}>
 						<label className={styles.fieldLabel}>{is_cn ? '标签' : 'Labels'}</label>
 						<div className={styles.labelInput}>
@@ -173,6 +174,7 @@ const CreateModal = ({ open, onSubmit, onCancel }: CreateModalProps) => {
 							</div>
 						)}
 					</div>
+					*/}
 				</div>
 
 				<div className={styles.formFooter}>
