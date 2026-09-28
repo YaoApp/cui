@@ -79,6 +79,18 @@ const AuthConnect = () => {
 	// Whether verification code is needed for registration (default true)
 	const needsVerificationCode = config?.verification_code_required !== false
 
+	// TEMP DEBUG (VCR-DEBUG): 排查"后端关闭邮件验证码仍显示验证码"用，定位完成后请删除。
+	console.warn(
+		'[VCR-DEBUG] connect needsVerificationCode:',
+		needsVerificationCode,
+		'| verification_code_required:',
+		config?.verification_code_required,
+		'| typeof:',
+		typeof config?.verification_code_required,
+		'| config is null:',
+		config === null
+	)
+
 	// --- Device Flow state ---
 	const [deviceStatus, setDeviceStatus] = useState<DeviceFlowStatus>('idle')
 	const [userCode, setUserCode] = useState('')
@@ -635,6 +647,24 @@ const AuthConnect = () => {
 								)}
 							</>
 						)}
+
+						{/* TEMP DEBUG (VCR-DEBUG): 渲染决策快照，定位完成后请删除 */}
+						{(() => {
+							if (isEmailVerified && verificationStatus === ('register' as EntryVerificationStatus)) {
+								console.warn(
+									'[VCR-DEBUG] connect OTP gate:',
+									'| needsVerificationCode:',
+									needsVerificationCode,
+									'| isEmailVerified:',
+									isEmailVerified,
+									'| verificationStatus:',
+									verificationStatus,
+									'| vcr:',
+									config?.verification_code_required
+								)
+							}
+							return null
+						})()}
 
 						{isEmailVerified && verificationStatus === ('register' as EntryVerificationStatus) && needsVerificationCode && (
 							<div className={styles.otpWrapper}>
