@@ -76,6 +76,9 @@ const AuthConnect = () => {
 	const [rememberMe, setRememberMe] = useState(false)
 	const [otpInputFocused, setOtpInputFocused] = useState(false)
 
+	// Whether verification code is needed for registration (default true)
+	const needsVerificationCode = config?.verification_code_required !== false
+
 	// --- Device Flow state ---
 	const [deviceStatus, setDeviceStatus] = useState<DeviceFlowStatus>('idle')
 	const [userCode, setUserCode] = useState('')
@@ -253,7 +256,7 @@ const AuthConnect = () => {
 			if (!formData.password) { message.warning(isZh ? '请输入密码' : 'Please enter your password'); return }
 			if (!formData.confirmPassword) { message.warning(isZh ? '请确认密码' : 'Please confirm your password'); return }
 			if (formData.password !== formData.confirmPassword) { message.warning(isZh ? '两次输入的密码不一致' : 'Passwords do not match'); return }
-			if (!formData.verificationCode) { message.warning(isZh ? '请输入验证码' : 'Please enter the verification code'); return }
+			if (needsVerificationCode && !formData.verificationCode) { message.warning(isZh ? '请输入验证码' : 'Please enter the verification code'); return }
 		}
 
 		setLoading(true)
@@ -286,8 +289,9 @@ const AuthConnect = () => {
 					{
 						password: formData.password,
 						confirm_password: formData.confirmPassword,
-						otp_id: otpId,
-						verification_code: formData.verificationCode,
+						...(needsVerificationCode
+							? { otp_id: otpId, verification_code: formData.verificationCode }
+							: {}),
 						locale: currentLocale
 					},
 					accessToken
@@ -632,7 +636,7 @@ const AuthConnect = () => {
 							</>
 						)}
 
-						{isEmailVerified && verificationStatus === ('register' as EntryVerificationStatus) && (
+						{isEmailVerified && verificationStatus === ('register' as EntryVerificationStatus) && needsVerificationCode && (
 							<div className={styles.otpWrapper}>
 								<OtpInput
 									value={formData.verificationCode}
