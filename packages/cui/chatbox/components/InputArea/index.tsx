@@ -112,6 +112,9 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 
 	// --- Model selector (state managed by Chatbox) ---
 	// props.currentModel and props.onModelChange are passed from Chatbox
+	const handleModelChange = useCallback((val: string) => {
+		props.onModelChange?.(val)
+	}, [props.onModelChange])
 
 	// Load Workspace options (real-time fetch on dropdown open)
 	const { workspaces, hasOnlineNodes, loading: loadingWorkspaces, fetchWorkspaces } = useWorkspace()
@@ -1164,7 +1167,7 @@ const InputArea = forwardRef<{ insertText: (text: string) => void }, IInputAreaP
 					/>
 					<ModelSelector
 						value={props.currentModel || ''}
-						onChange={(val) => props.onModelChange?.(val)}
+						onChange={handleModelChange}
 						assistant={
 							propAssistant
 								? { connector: propAssistant.connector, connector_options: propAssistant.connector_options }

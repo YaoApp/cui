@@ -76,16 +76,14 @@ const TaskDetail = ({
 
 	// Track workspace selected in chatbox during creating state
 	const { workspaces, fetchWorkspaces } = useWorkspace()
-	const [creatingWorkspaceId, setCreatingWorkspaceId] = useState<string>(() => {
-		try {
-			return localStorage.getItem('yao:selectedWorkspace') || ''
-		} catch {
-			return ''
-		}
-	})
+	const [creatingWorkspaceId, setCreatingWorkspaceId] = useState<string>('')
 
 	// Prefer task from KanbanContext (Kanban page); fallback to independent loading (Inbox page); then external initial task
-	const task = ctx?.tasks.find((t) => t.id === taskId) || localTask || initialTask
+	const rawTask = ctx?.tasks.find((t) => t.id === taskId) || localTask || initialTask
+	// Cache last valid task to prevent TaskChat unmount during creating → loaded transition
+	const taskCacheRef = useRef<KanbanTask | null>(null)
+	if (rawTask) taskCacheRef.current = rawTask
+	const task = rawTask || taskCacheRef.current
 
 	useEffect(() => {
 		if (ctx || !taskId) {
@@ -107,6 +105,19 @@ const TaskDetail = ({
 	const triggerAnimation = ctx?.triggerAnimation || (() => {})
 
 	const isCreating = task?.status === 'creating'
+
+	// Clear task cache and workspace when switching tasks
+	useEffect(() => {
+		taskCacheRef.current = null
+		setCreatingWorkspaceId('')
+	}, [taskId])
+
+	// Sync workspace from task object (set by handleCreateTask via initialTask.workspace)
+	useEffect(() => {
+		if (isCreating && task?.workspace?.id) {
+			setCreatingWorkspaceId(task.workspace.id)
+		}
+	}, [isCreating, task?.workspace?.id])
 
 	useEffect(() => {
 		if (isCreating) fetchWorkspaces()
@@ -532,7 +543,7 @@ const TaskDetail = ({
 								}
 								className={styles.chatbox}
 								initialConnector={!isCreating ? task.last_connector : undefined}
-								initialWorkspace={!isCreating ? task.workspace?.id : undefined}
+								initialWorkspace={isCreating ? creatingWorkspaceId || undefined : task.workspace?.id}
 								onWorkspaceChange={(id) => {
 									if (isCreating) {
 										setCreatingWorkspaceId(id)
