@@ -76,6 +76,21 @@ const AuthConnect = () => {
 	const [rememberMe, setRememberMe] = useState(false)
 	const [otpInputFocused, setOtpInputFocused] = useState(false)
 
+	// Whether verification code is needed for registration (default true)
+	const needsVerificationCode = config?.verification_code_required !== false
+
+	// TEMP DEBUG (VCR-DEBUG): 排查"后端关闭邮件验证码仍显示验证码"用，定位完成后请删除。
+	console.warn(
+		'[VCR-DEBUG] connect needsVerificationCode:',
+		needsVerificationCode,
+		'| verification_code_required:',
+		config?.verification_code_required,
+		'| typeof:',
+		typeof config?.verification_code_required,
+		'| config is null:',
+		config === null
+	)
+
 	// --- Device Flow state ---
 	const [deviceStatus, setDeviceStatus] = useState<DeviceFlowStatus>('idle')
 	const [userCode, setUserCode] = useState('')
@@ -253,7 +268,7 @@ const AuthConnect = () => {
 			if (!formData.password) { message.warning(isZh ? '请输入密码' : 'Please enter your password'); return }
 			if (!formData.confirmPassword) { message.warning(isZh ? '请确认密码' : 'Please confirm your password'); return }
 			if (formData.password !== formData.confirmPassword) { message.warning(isZh ? '两次输入的密码不一致' : 'Passwords do not match'); return }
-			if (!formData.verificationCode) { message.warning(isZh ? '请输入验证码' : 'Please enter the verification code'); return }
+			if (needsVerificationCode && !formData.verificationCode) { message.warning(isZh ? '请输入验证码' : 'Please enter the verification code'); return }
 		}
 
 		setLoading(true)
@@ -286,8 +301,9 @@ const AuthConnect = () => {
 					{
 						password: formData.password,
 						confirm_password: formData.confirmPassword,
-						otp_id: otpId,
-						verification_code: formData.verificationCode,
+						...(needsVerificationCode
+							? { otp_id: otpId, verification_code: formData.verificationCode }
+							: {}),
 						locale: currentLocale
 					},
 					accessToken
@@ -632,7 +648,25 @@ const AuthConnect = () => {
 							</>
 						)}
 
-						{isEmailVerified && verificationStatus === ('register' as EntryVerificationStatus) && (
+						{/* TEMP DEBUG (VCR-DEBUG): 渲染决策快照，定位完成后请删除 */}
+						{(() => {
+							if (isEmailVerified && verificationStatus === ('register' as EntryVerificationStatus)) {
+								console.warn(
+									'[VCR-DEBUG] connect OTP gate:',
+									'| needsVerificationCode:',
+									needsVerificationCode,
+									'| isEmailVerified:',
+									isEmailVerified,
+									'| verificationStatus:',
+									verificationStatus,
+									'| vcr:',
+									config?.verification_code_required
+								)
+							}
+							return null
+						})()}
+
+						{isEmailVerified && verificationStatus === ('register' as EntryVerificationStatus) && needsVerificationCode && (
 							<div className={styles.otpWrapper}>
 								<OtpInput
 									value={formData.verificationCode}
