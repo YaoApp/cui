@@ -41,7 +41,9 @@ const STANDALONE_PAGES = new Map([
 	['team_select', '/team/select'],
 	['team_invite', '/team/invite/'],
 	// OTP verification
-	['otp_verify', '/v/']
+	['otp_verify', '/v/'],
+	// CUI V2 prototype (BUILD workbench) — standalone, no wrappers
+	['janus', '/janus']
 ])
 
 // Check if current path matches any standalone page
