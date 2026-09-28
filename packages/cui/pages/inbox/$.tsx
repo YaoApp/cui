@@ -83,7 +83,8 @@ const InboxContent = () => {
 			column_id: columnId,
 			position: 0,
 			created_at: Date.now(),
-			updated_at: Date.now()
+			updated_at: Date.now(),
+			...(workspaceId && { workspace: { id: workspaceId, name: '' } })
 		})
 		creatingAtVersionRef.current = taskVersion
 		insertLocalTask(chatId, title)
