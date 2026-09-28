@@ -1,4 +1,5 @@
 import fs from 'fs'
+import path from 'path'
 import moment from 'moment'
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin'
 
@@ -6,7 +7,26 @@ import type Config from 'webpack-chain'
 import type { JscConfig } from '@swc/core'
 
 const packagejson = JSON.parse(fs.readFileSync(`${process.cwd()}/package.json`).toString())
-const version = packagejson.version
+
+// Single source of truth: `version.json` at the cui repo root.
+// Try candidates in order (turbo runs this package script with cwd = packages/cui),
+// then fall back to package.json's version.
+const versionCandidates = [
+	path.resolve(process.cwd(), '../../version.json'),
+	path.resolve(process.cwd(), 'version.json')
+]
+let version = packagejson.version
+for (const candidate of versionCandidates) {
+	try {
+		const resolved = JSON.parse(fs.readFileSync(candidate).toString()).version
+		if (resolved) {
+			version = resolved
+			break
+		}
+	} catch {
+		// unreadable / invalid JSON: try the next candidate
+	}
+}
 
 export const env = process.env.NODE_ENV as 'development' | 'production'
 
