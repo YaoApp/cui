@@ -14,6 +14,8 @@
             "packages/*"
       ],
       "scripts": {
+            "design:css": "node celadon/design/build-css.mjs",
+            "design:i18n": "node celadon/design/build-i18n.mjs",
             "dev": "max dev",
             "local": "max preview --port 8000",
             "build": "max setup && pnpm run build:theme && pnpm run build:components && max build && pnpm run build:after",
