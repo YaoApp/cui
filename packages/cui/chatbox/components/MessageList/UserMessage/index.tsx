@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { message } from 'antd'
 import { FileText, Image as ImageIcon, DownloadSimple } from 'phosphor-react'
 import Icon from '../../../../widgets/Icon'
+import ImagePreview from '@/components/view/ImagePreview'
 import type { Message } from '../../../../openapi'
 import { ParseFileRef, ResolveFileURL } from '@/utils/fileWrapper'
 import { isVoiceLike, type ContentPart } from '../../../utils/media'
@@ -18,6 +19,7 @@ const ImageAttachment: React.FC<{ url: string }> = ({ url }) => {
 	const [blobUrl, setBlobUrl] = useState<string | null>(null)
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(false)
+	const [preview, setPreview] = useState(false)
 
 	useEffect(() => {
 		let currentBlobUrl: string | null = null
@@ -54,12 +56,6 @@ const ImageAttachment: React.FC<{ url: string }> = ({ url }) => {
 		}
 	}, [url])
 
-	const handleImageClick = () => {
-		if (blobUrl) {
-			window.open(blobUrl, '_blank')
-		}
-	}
-
 	if (loading) {
 		return (
 			<div className={styles.attachmentPlaceholder}>
@@ -79,13 +75,18 @@ const ImageAttachment: React.FC<{ url: string }> = ({ url }) => {
 	}
 
 	return (
-		<img
-			src={blobUrl}
-			alt='Uploaded image'
-			className={styles.attachmentImage}
-			onClick={handleImageClick}
-			style={{ cursor: 'pointer' }}
-		/>
+		<>
+			<img
+				src={blobUrl}
+				alt='Uploaded image'
+				className={styles.attachmentImage}
+				onClick={() => setPreview(true)}
+				style={{ cursor: 'pointer' }}
+			/>
+			{preview && (
+				<ImagePreview src={blobUrl} fileName='Uploaded image' onClose={() => setPreview(false)} />
+			)}
+		</>
 	)
 }
 

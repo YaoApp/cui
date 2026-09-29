@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { ResolveFileURL } from '@/utils/fileWrapper'
+import ImagePreview from '@/components/view/ImagePreview'
 import type { ImageMessage } from '../../../openapi'
 
 interface IImageProps {
@@ -8,6 +9,7 @@ interface IImageProps {
 
 const Image = ({ message }: IImageProps) => {
 	const [errored, setErrored] = useState(false)
+	const [preview, setPreview] = useState(false)
 	const url = message.props?.url || ''
 	const alt = message.props?.alt || 'Image'
 
@@ -15,12 +17,6 @@ const Image = ({ message }: IImageProps) => {
 		if (!url) return ''
 		return url.startsWith('workspace://') ? ResolveFileURL(url) : url
 	}, [url])
-
-	const handleClick = useCallback(() => {
-		if (resolvedUrl) {
-			window.open(resolvedUrl, '_blank', 'noopener,noreferrer')
-		}
-	}, [resolvedUrl])
 
 	if (!resolvedUrl || errored) {
 		return (
@@ -51,9 +47,10 @@ const Image = ({ message }: IImageProps) => {
 					border: '1px solid var(--color_border_soft)',
 					cursor: 'pointer'
 				}}
-				onClick={handleClick}
+				onClick={() => setPreview(true)}
 				onError={() => setErrored(true)}
 			/>
+			{preview && <ImagePreview src={resolvedUrl} fileName={alt} onClose={() => setPreview(false)} />}
 		</div>
 	)
 }
