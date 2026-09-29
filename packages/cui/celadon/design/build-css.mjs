@@ -2,7 +2,7 @@
 /**
  * build-css.mjs — 从 tokens.less 生成 tokens.css
  * 用途：色卡（color-card.html）与后续 AntD 主题都从「同一份 token」派生，避免两份来源。
- * 用法：node packages/cui/janus/design/build-css.mjs   （在仓库根或任意目录均可）
+ * 用法：node packages/cui/celadon/design/build-css.mjs   （在仓库根或任意目录均可）
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
@@ -27,5 +27,5 @@ try {
   css = execFileSync(bin, [lessFile], { encoding: 'utf8' })
 }
 
-writeFileSync(cssFile, `/* 自动生成，勿手改 —— 源：tokens.less（node janus/design/build-css.mjs） */\n${css}`)
+writeFileSync(cssFile, `/* 自动生成，勿手改 —— 源：tokens.less（node celadon/design/build-css.mjs） */\n${css}`)
 console.log('✓ 生成', cssFile.replace(process.cwd() + '/', ''), `(${css.split('\n').length} 行)`)
