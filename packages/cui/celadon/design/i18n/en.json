@@ -1,0 +1,129 @@
+{
+  "ui": {
+    "brand": "Yao Agents",
+    "newTask": "New task",
+    "nav": {
+      "chat": "Chat",
+      "inbox": "Inbox",
+      "board": "Board",
+      "workspace": "Workspace",
+      "computer": "Computer",
+      "knowledge": "Knowledge"
+    },
+    "inbox": {
+      "unreadCount": "{count} unread",
+      "searchPlaceholder": "Search messages…",
+      "filterAll": "All",
+      "filterUnread": "Unread",
+      "filterArchived": "Archived"
+    },
+    "time": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "earlier": "Earlier"
+    },
+    "thread": {
+      "newMessages": "{count} new messages",
+      "dateAt": "Today {time}",
+      "changesChip": "Changes +{added} −{removed}"
+    },
+    "tool": {
+      "readFiles": "Read files"
+    },
+    "status": {
+      "done": "Done"
+    },
+    "agent": "Agent",
+    "ask": {
+      "pending": "Needs your input",
+      "pendingAt": "Needs your input · {time}",
+      "differences": "{count} differences",
+      "question": "Which summary angle should I use? It changes the output structure:",
+      "optionRiskFirst": "Summarize by risk first (recommended)",
+      "optionChronological": "Summarize chronologically",
+      "optionCustom": "I will specify my own"
+    },
+    "composer": {
+      "placeholder": "Continue: add the risks to the acceptance criteria…",
+      "defaultPermission": "Default permission"
+    },
+    "panel": {
+      "inProgress": "In progress",
+      "highPriority": "High priority",
+      "remainingDays": "{days} days left",
+      "actionComplete": "Mark complete",
+      "actionPause": "Pause",
+      "actionOpenFullPage": "Open full page",
+      "subtasks": "Subtasks",
+      "gates": "Gates",
+      "changes": "Changes",
+      "relatedFiles": "Related files",
+      "activity": "Activity"
+    },
+    "activity": {
+      "readDocuments": "Read {count} documents",
+      "extractRisks": "Extracted {count} risks",
+      "waitingConfirmation": "Waiting for confirmation"
+    },
+    "theme": {
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "sample": {
+    "conversation": {
+      "greeting": {
+        "title": "Intro & capabilities",
+        "subtitle": "Covered document handling and available tools"
+      },
+      "weekly": {
+        "title": "Weekly report",
+        "subtitle": "Weekly progress from the template"
+      },
+      "scraping": {
+        "title": "Scraping job",
+        "subtitle": "12 pages completed"
+      },
+      "contract": {
+        "title": "Contract review",
+        "subtitle": "3 risks flagged"
+      },
+      "invoice": {
+        "title": "Invoice check",
+        "subtitle": "2 vouchers generated"
+      },
+      "siteCheck": {
+        "title": "Site check",
+        "subtitle": "3 domains healthy"
+      }
+    },
+    "message": {
+      "user1": "Hi — could you review these two documents? Focus on the risk clauses in the contract.",
+      "agent1Html": "I have read both. I found <b>3 risks</b> in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
+      "agent2": "Summarized by risk first, with the source clause and page numbers."
+    },
+    "tool": {
+      "readLineContract": "contract.pdf · 12 pages · text extracted",
+      "readLineRequirements": "requirements.docx · 4 pages · text extracted"
+    },
+    "panel": {
+      "taskTitle": "Contract review",
+      "subtaskRead": "Read contract.pdf / requirements.docx",
+      "subtaskExtract": "Extract risk clauses with page numbers",
+      "subtaskGenerate": "Generate risk-summary.md",
+      "subtaskAcceptance": "Add to acceptance criteria (waiting on your input)",
+      "gateVisual": "visual {count} differences"
+    },
+    "diff": {
+      "line1": "- Payment period: quarterly settlement",
+      "line2": "+ Payment period: ≤30 days (§4.2)",
+      "line3": "- Liability: borne by each party",
+      "line4": "+ Liability: mutual, 0.05%/day late"
+    },
+    "file": {
+      "contract": "contract.pdf",
+      "requirements": "requirements.docx",
+      "riskSummary": "risk-summary.md"
+    }
+  }
+}

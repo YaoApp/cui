@@ -1,0 +1,129 @@
+{
+  "ui": {
+    "brand": "Yao Agents",
+    "newTask": "新任务",
+    "nav": {
+      "chat": "聊天",
+      "inbox": "收件箱",
+      "board": "看板",
+      "workspace": "工作区",
+      "computer": "电脑",
+      "knowledge": "知识库"
+    },
+    "inbox": {
+      "unreadCount": "{count} 未读",
+      "searchPlaceholder": "搜索消息…",
+      "filterAll": "全部",
+      "filterUnread": "未读",
+      "filterArchived": "已归档"
+    },
+    "time": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "earlier": "更早"
+    },
+    "thread": {
+      "newMessages": "{count} 条新消息",
+      "dateAt": "今天 {time}",
+      "changesChip": "变更 +{added} −{removed}"
+    },
+    "tool": {
+      "readFiles": "读取文件"
+    },
+    "status": {
+      "done": "完成"
+    },
+    "agent": "Agent",
+    "ask": {
+      "pending": "待你确认",
+      "pendingAt": "待你确认 · {time}",
+      "differences": "{count} 处差异",
+      "question": "摘要口径按哪个来？这会影响输出结构：",
+      "optionRiskFirst": "按「风险优先」汇总（推荐）",
+      "optionChronological": "按「时间顺序」汇总",
+      "optionCustom": "我自己补口径"
+    },
+    "composer": {
+      "placeholder": "继续：把风险点补进需求文档的验收条款…",
+      "defaultPermission": "默认权限"
+    },
+    "panel": {
+      "inProgress": "进行中",
+      "highPriority": "高优先级",
+      "remainingDays": "剩余 {days} 天",
+      "actionComplete": "标记完成",
+      "actionPause": "挂起",
+      "actionOpenFullPage": "全页打开",
+      "subtasks": "子任务",
+      "gates": "门禁",
+      "changes": "变更",
+      "relatedFiles": "相关文件",
+      "activity": "活动"
+    },
+    "activity": {
+      "readDocuments": "读取 {count} 份文档",
+      "extractRisks": "提取 {count} 处风险",
+      "waitingConfirmation": "等待口径确认"
+    },
+    "theme": {
+      "light": "浅色",
+      "dark": "暗色"
+    }
+  },
+  "sample": {
+    "conversation": {
+      "greeting": {
+        "title": "打招呼与功能咨询",
+        "subtitle": "已介绍文档处理能力与可用工具"
+      },
+      "weekly": {
+        "title": "周报生成",
+        "subtitle": "按模板汇总本周进展"
+      },
+      "scraping": {
+        "title": "数据抓取任务",
+        "subtitle": "已完成 12 个页面"
+      },
+      "contract": {
+        "title": "合同审阅",
+        "subtitle": "风险点 3 处 · 已标注"
+      },
+      "invoice": {
+        "title": "发票核对",
+        "subtitle": "已生成 2 张凭证"
+      },
+      "siteCheck": {
+        "title": "站点巡检",
+        "subtitle": "3 个域名正常"
+      }
+    },
+    "message": {
+      "user1": "你好，能帮我看看这两份文档吗？重点是合同里的风险条款。",
+      "agent1Html": "两份都读完了。合同里我找到 <b>3 处风险</b>：① 第 4.2 条付款周期无上限；② 第 7 条违约责任不对等；③ 附件二缺失签章页。",
+      "agent2": "已按风险优先输出，并标注了依据条款页码。"
+    },
+    "tool": {
+      "readLineContract": "contract.pdf · 12 页 · 已提取正文",
+      "readLineRequirements": "需求.docx · 4 页 · 已提取正文"
+    },
+    "panel": {
+      "taskTitle": "合同审阅",
+      "subtaskRead": "读取 contract.pdf / 需求.docx",
+      "subtaskExtract": "提取风险条款并标页码",
+      "subtaskGenerate": "生成 风险摘要.md",
+      "subtaskAcceptance": "补进验收条款（待你确认口径）",
+      "gateVisual": "visual {count} 处"
+    },
+    "diff": {
+      "line1": "- 付款周期：按季度结算",
+      "line2": "+ 付款周期：≤30 天（4.2 条）",
+      "line3": "- 违约责任：双方各承担",
+      "line4": "+ 违约责任：对等，逾期按 0.05%/日"
+    },
+    "file": {
+      "contract": "contract.pdf",
+      "requirements": "需求.docx",
+      "riskSummary": "风险摘要.md"
+    }
+  }
+}
