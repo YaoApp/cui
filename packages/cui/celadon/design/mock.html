@@ -10,133 +10,133 @@
 body{margin:0;background:#E9E9EA;font:13px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding:56px 18px 18px;-webkit-font-smoothing:antialiased}
 [data-theme="dark"] body{background:#0B0B0B}
-svg.i{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-svg.i.s{width:14px;height:14px}
+svg.icon{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+svg.icon.is-small{width:14px;height:14px}
 .window{width:1440px;height:888px;border-radius:12px;overflow:hidden;display:flex;
   background:var(--background-app);color:var(--text-primary);box-shadow:0 26px 70px rgba(0,0,0,.28);border:1px solid var(--border-default)}
 /* ============ ① 导航列 ============ */
 .nav{width:240px;flex:none;background:var(--background-navigation);border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;position:relative}
-.tl{position:absolute;left:14px;top:14px;display:flex;gap:8px}
-.tl i{width:12px;height:12px;border-radius:50%;display:block}
-.tl i:nth-child(1){background:#FF5F57}.tl i:nth-child(2){background:#FEBC2E}.tl i:nth-child(3){background:#28C840}
-.nav-hd{height:var(--column-header-height);display:flex;align-items:center;gap:2px;padding-left:76px}
-.iconbtn{width:26px;height:26px;border-radius:var(--radius-small);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
-.iconbtn:hover{background:var(--background-hover);color:var(--text-primary)}
+.traffic-lights{position:absolute;left:14px;top:14px;display:flex;gap:8px}
+.traffic-lights i{width:12px;height:12px;border-radius:50%;display:block}
+.traffic-lights i:nth-child(1){background:#FF5F57}.traffic-lights i:nth-child(2){background:#FEBC2E}.traffic-lights i:nth-child(3){background:#28C840}
+.navigation-header{height:var(--column-header-height);display:flex;align-items:center;gap:2px;padding-left:76px}
+.icon-button{width:26px;height:26px;border-radius:var(--radius-small);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
+.icon-button:hover{background:var(--background-hover);color:var(--text-primary)}
 .brand{padding:6px 14px 8px;display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px}
-.brand .mk{width:16px;height:16px;color:var(--brand)}
-.newtask{margin:2px 12px 8px;height:34px;border-radius:var(--radius-medium);display:flex;align-items:center;justify-content:center;gap:7px;
+.brand .brand-mark{width:16px;height:16px;color:var(--brand)}
+.new-task-button{margin:2px 12px 8px;height:34px;border-radius:var(--radius-medium);display:flex;align-items:center;justify-content:center;gap:7px;
   background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand);font-weight:650;font-size:13px}
-.fixed{padding:0 8px;display:flex;flex-direction:column;gap:1px}
-.ni{height:32px;border-radius:var(--radius-small);display:flex;align-items:center;gap:9px;padding:0 9px;color:var(--text-secondary);font-size:13px}
-.ni:hover{background:var(--background-hover);color:var(--text-primary)}
-.ni.on{background:var(--brand-soft);color:var(--brand);font-weight:650}
-.ni .rt{margin-left:auto;font-size:11px;color:var(--text-tertiary);font-weight:500}
-.ni .bdg{margin-left:auto;min-width:17px;height:17px;border-radius:var(--radius-pill);background:var(--brand-soft);color:var(--brand);
+.fixed-navigation{padding:0 8px;display:flex;flex-direction:column;gap:1px}
+.navigation-item{height:32px;border-radius:var(--radius-small);display:flex;align-items:center;gap:9px;padding:0 9px;color:var(--text-secondary);font-size:13px}
+.navigation-item:hover{background:var(--background-hover);color:var(--text-primary)}
+.navigation-item.on{background:var(--brand-soft);color:var(--brand);font-weight:650}
+.navigation-item .meta{margin-left:auto;font-size:11px;color:var(--text-tertiary);font-weight:500}
+.navigation-item .badge{margin-left:auto;min-width:17px;height:17px;border-radius:var(--radius-pill);background:var(--brand-soft);color:var(--brand);
   border:1px solid var(--brand);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
-.sep{height:1px;background:var(--border-subtle);margin:8px 12px}
-.ctx{flex:1;min-height:0;display:flex;flex-direction:column}
-.ctx-hd{padding:2px 14px 8px;font-size:11.5px;color:var(--text-tertiary);letter-spacing:.4px;display:flex;align-items:center;gap:6px}
-.ctx-hd .bdg{margin-left:auto;font-size:10.5px;color:var(--text-secondary);background:var(--background-field);border:1px solid var(--border-default);border-radius:var(--radius-pill);padding:1px 7px}
-.search{margin:0 12px 8px;height:32px;border-radius:var(--radius-medium);background:var(--background-field);border:1px solid var(--border-default);
+.navigation-separator{height:1px;background:var(--border-subtle);margin:8px 12px}
+.navigation-context{flex:1;min-height:0;display:flex;flex-direction:column}
+.navigation-context-header{padding:2px 14px 8px;font-size:11.5px;color:var(--text-tertiary);letter-spacing:.4px;display:flex;align-items:center;gap:6px}
+.navigation-context-header .badge{margin-left:auto;font-size:10.5px;color:var(--text-secondary);background:var(--background-field);border:1px solid var(--border-default);border-radius:var(--radius-pill);padding:1px 7px}
+.search-field{margin:0 12px 8px;height:32px;border-radius:var(--radius-medium);background:var(--background-field);border:1px solid var(--border-default);
   display:flex;align-items:center;gap:8px;padding:0 9px;color:var(--text-muted);font-size:12.5px}
-.search kbd{margin-left:auto;font:inherit;font-size:11px;color:var(--text-tertiary);background:var(--background-surface);border:1px solid var(--border-default);border-radius:5px;padding:0 5px}
-.chips{display:flex;gap:5px;padding:0 12px 8px}
+.search-field kbd{margin-left:auto;font:inherit;font-size:11px;color:var(--text-tertiary);background:var(--background-surface);border:1px solid var(--border-default);border-radius:5px;padding:0 5px}
+.filter-chips{display:flex;gap:5px;padding:0 12px 8px}
 .chip{font-size:11.5px;padding:2px 9px;border-radius:var(--radius-pill);border:1px solid var(--border-default);color:var(--text-secondary);background:var(--background-surface)}
-.chip.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:650}
-.list{flex:1;min-height:0;overflow:hidden;padding:0 8px 8px}
-.glbl{font-size:10.5px;color:var(--text-muted);letter-spacing:.5px;padding:8px 6px 4px;display:flex;align-items:center;gap:6px}
-.row{display:flex;gap:9px;align-items:flex-start;padding:8px 9px;border-radius:var(--radius-medium);position:relative}
-.row:hover{background:var(--background-hover)}
-.row.on{background:var(--background-selected)}
-.row.on::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;border-radius:2px;background:var(--brand)}
-.nv{width:7px;height:7px;border-radius:50%;background:var(--brand);margin-top:6px;flex:none}
-.nv.g{background:var(--text-muted)}
-.row .b{flex:1;min-width:0}
-.row .t1{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:650;color:var(--text-primary)}
-.row.on .t1{color:var(--brand)}
-.row .t2{font-size:11.5px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-.row .tm{font-size:10.5px;color:var(--text-muted);flex:none;margin-top:1px}
+.chip.is-active{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:650}
+.conversation-list{flex:1;min-height:0;overflow:hidden;padding:0 8px 8px}
+.list-group-label{font-size:10.5px;color:var(--text-muted);letter-spacing:.5px;padding:8px 6px 4px;display:flex;align-items:center;gap:6px}
+.conversation-row{display:flex;gap:9px;align-items:flex-start;padding:8px 9px;border-radius:var(--radius-medium);position:relative}
+.conversation-row:hover{background:var(--background-hover)}
+.conversation-row.is-selected{background:var(--background-selected)}
+.conversation-row.is-selected::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;border-radius:2px;background:var(--brand)}
+.unread-dot{width:8px;height:8px;box-sizing:border-box;border-radius:50%;background:var(--brand);margin-top:6px;flex:none}
+.unread-dot.is-read{background:transparent;border:1.5px solid var(--border-control)}
+.conversation-row .row-body{flex:1;min-width:0}
+.conversation-row .row-title{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:650;color:var(--text-primary)}
+.conversation-row.is-selected .row-title{color:var(--brand)}
+.conversation-row .row-subtitle{font-size:11.5px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.conversation-row .row-time{font-size:10.5px;color:var(--text-muted);flex:none;margin-top:1px}
 .user{margin-top:auto;border-top:1px solid var(--border-subtle);padding:9px 12px;display:flex;align-items:center;gap:9px}
-.av{width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand);
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand);
   display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11.5px}
 /* ============ ② 内容列 ============ */
 .main{flex:1;min-width:0;background:var(--background-content);display:flex;flex-direction:column}
-.main-hd{height:var(--column-header-height);flex:none;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--border-subtle)}
-.main-hd .ttl{font-size:13.5px;font-weight:650}
-.main-hd .mt{font-size:11.5px;color:var(--text-tertiary)}
-.caps{margin-left:auto;display:flex;align-items:center;gap:2px}
-.cap{position:relative;width:28px;height:26px;border-radius:var(--radius-small);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
-.cap:hover{background:var(--background-hover);color:var(--text-primary)}
-.cap .n{position:absolute;top:0;right:0;min-width:14px;height:14px;border-radius:var(--radius-pill);background:var(--warm);color:var(--warm-contrast);
+.content-header{height:var(--column-header-height);flex:none;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--border-subtle)}
+.content-header .content-title{font-size:13.5px;font-weight:650}
+.content-header .content-meta{font-size:11.5px;color:var(--text-tertiary)}
+.capability-list{margin-left:auto;display:flex;align-items:center;gap:2px}
+.capability{position:relative;width:28px;height:26px;border-radius:var(--radius-small);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
+.capability:hover{background:var(--background-hover);color:var(--text-primary)}
+.capability .capability-badge{position:absolute;top:0;right:0;min-width:14px;height:14px;border-radius:var(--radius-pill);background:var(--warm);color:var(--warm-contrast);
   font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1px solid var(--background-content)}
-.thread{flex:1;min-height:0;overflow:hidden;padding:16px 0 0;display:flex;flex-direction:column}
-.tl-wrap{padding:0 30px;display:flex;flex-direction:column;gap:14px}
-.daysep{display:flex;align-items:center;gap:10px;color:var(--text-muted);font-size:11px;padding:2px 30px}
-.daysep::before,.daysep::after{content:"";height:1px;background:var(--border-subtle);flex:1}
-.unread{display:flex;align-items:center;gap:10px;color:var(--brand);font-size:11px;font-weight:650;padding:2px 30px}
-.unread::before,.unread::after{content:"";height:1px;background:var(--brand-soft);flex:1}
-.bub{max-width:640px;padding:9px 12px;border-radius:11px;font-size:13px;line-height:1.6}
-.bub.me{align-self:flex-end;background:var(--brand-soft);color:var(--text-primary);border:1px solid var(--border-default)}
-.bub.ai{align-self:flex-start;background:var(--background-surface);border:1px solid var(--border-subtle)}
-.bub .who{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-tertiary);margin-bottom:3px}
-.bub .who .ag{color:var(--brand);display:flex;align-items:center;gap:4px;font-weight:650}
-.files{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.fchip{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-secondary);background:var(--background-field);
+.message-thread{flex:1;min-height:0;overflow:hidden;padding:16px 0 0;display:flex;flex-direction:column}
+.message-group{padding:0 30px;display:flex;flex-direction:column;gap:14px}
+.date-separator{display:flex;align-items:center;gap:10px;color:var(--text-muted);font-size:11px;padding:2px 30px}
+.date-separator::before,.date-separator::after{content:"";height:1px;background:var(--border-subtle);flex:1}
+.unread-divider{display:flex;align-items:center;gap:10px;color:var(--brand);font-size:11px;font-weight:650;padding:2px 30px}
+.unread-divider::before,.unread-divider::after{content:"";height:1px;background:var(--brand-soft);flex:1}
+.message{max-width:640px;padding:9px 12px;border-radius:11px;font-size:13px;line-height:1.6}
+.message.is-user{align-self:flex-end;background:var(--brand-soft);color:var(--text-primary);border:1px solid var(--border-default)}
+.message.is-agent{align-self:flex-start;background:var(--background-surface);border:1px solid var(--border-subtle)}
+.message .message-header{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-tertiary);margin-bottom:3px}
+.message .message-header .message-author{color:var(--brand);display:flex;align-items:center;gap:4px;font-weight:650}
+.attachment-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.attachment-chip{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-secondary);background:var(--background-field);
   border:1px solid var(--border-default);border-radius:var(--radius-small);padding:3px 8px}
-.tool{align-self:flex-start;width:640px;max-width:100%;border:1px solid var(--border-subtle);border-radius:10px;background:var(--background-surface);overflow:hidden}
-.tool .th{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid var(--border-subtle);font-size:12px;font-weight:650}
-.tool .th .k{color:var(--text-tertiary);font-weight:400;font-family:ui-monospace,Menlo,monospace;font-size:11px}
-.tool .th .st{margin-left:auto;font-size:11px;color:var(--success);background:var(--success-soft);border:1px solid var(--success);border-radius:var(--radius-pill);padding:1px 8px;display:flex;align-items:center;gap:4px}
-.tool .tb{padding:9px 11px;background:var(--background-field);font:11.5px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-secondary)}
-.ask{align-self:flex-start;width:640px;max-width:100%;border:1px solid var(--border-subtle);border-radius:10px;background:var(--background-surface);padding:11px 12px}
-.ask .ah{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-tertiary);margin-bottom:7px}
-.ask .ah .w{margin-left:auto;color:var(--warm-text);background:var(--warm-soft);border:1px solid var(--warm);border-radius:var(--radius-pill);padding:1px 8px;font-weight:650;font-size:11px}
-.opt{margin-top:6px;min-height:32px;border:1px solid var(--border-default);border-radius:var(--radius-medium);display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12.5px}
-.opt.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);font-weight:650}
+.tool-card{align-self:flex-start;width:640px;max-width:100%;border:1px solid var(--border-subtle);border-radius:10px;background:var(--background-surface);overflow:hidden}
+.tool-card .tool-header{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid var(--border-subtle);font-size:12px;font-weight:650}
+.tool-card .tool-header .tool-name{color:var(--text-tertiary);font-weight:400;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.tool-card .tool-header .status-chip{margin-left:auto;font-size:11px;color:var(--success);background:var(--success-soft);border:1px solid var(--success);border-radius:var(--radius-pill);padding:1px 8px;display:flex;align-items:center;gap:4px}
+.tool-card .tool-body{padding:9px 11px;background:var(--background-field);font:11.5px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-secondary)}
+.question-card{align-self:flex-start;width:640px;max-width:100%;border:1px solid var(--border-subtle);border-radius:10px;background:var(--background-surface);padding:11px 12px}
+.question-card .question-header{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-tertiary);margin-bottom:7px}
+.question-card .question-header .warning-badge{margin-left:auto;color:var(--warm-text);background:var(--warm-soft);border:1px solid var(--warm);border-radius:var(--radius-pill);padding:1px 8px;font-weight:650;font-size:11px}
+.question-option{margin-top:6px;min-height:32px;border:1px solid var(--border-default);border-radius:var(--radius-medium);display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12.5px}
+.question-option.is-selected{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);font-weight:650}
 .composer{margin:14px 30px 18px;border:1px solid var(--border-default);background:var(--background-surface);border-radius:11px;padding:10px 12px}
-.composer .ph{color:var(--text-muted);font-size:13px}
+.composer .placeholder{color:var(--text-muted);font-size:13px}
 .composer .foot{display:flex;align-items:center;gap:7px;margin-top:10px}
-.send{margin-left:auto;width:30px;height:28px;border-radius:var(--radius-medium);background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand);
+.send-button{margin-left:auto;width:30px;height:28px;border-radius:var(--radius-medium);background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand);
   display:flex;align-items:center;justify-content:center}
 /* ============ ③ 侧边面板 ============ */
 .panel{width:460px;flex:none;background:var(--background-surface);border-left:1px solid var(--border-subtle);display:flex;flex-direction:column}
-.panel-hd{height:var(--column-header-height);flex:none;display:flex;align-items:center;gap:4px;padding:0 10px;border-bottom:1px solid var(--border-subtle)}
-.ptab{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 8px;border-radius:var(--radius-small);background:var(--background-field);border:1px solid var(--border-default);color:var(--text-secondary)}
-.ptab.on{background:var(--background-surface);border-color:var(--border-control);color:var(--text-primary);font-weight:650}
-.ptab .x{color:var(--text-muted);font-size:11px}
-.pbody{flex:1;min-height:0;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:16px}
-.ptitle{font-size:17px;font-weight:700;letter-spacing:-.2px}
-.pmeta{font-size:12px;color:var(--text-tertiary);margin-top:3px;display:flex;align-items:center;gap:7px}
-.pbtns{display:flex;gap:8px;margin-top:12px}
-.pbtn{height:32px;padding:0 13px;border-radius:var(--radius-medium);font-size:12.5px;font-weight:650;display:flex;align-items:center;gap:6px;border:1px solid var(--border-default);color:var(--text-primary);background:var(--background-surface)}
-.pbtn.p{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
-.pbtn.w{background:var(--warm-soft);color:var(--warm-text);border-color:var(--warm)}
-.sec{font-size:11px;color:var(--text-tertiary);letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:7px}
-.sec .rt{margin-left:auto;color:var(--text-secondary);font-weight:650;letter-spacing:0}
-.bar{height:5px;border-radius:3px;background:var(--background-field);overflow:hidden;margin-bottom:10px}
-.bar i{display:block;height:100%;width:75%;background:var(--brand-display)}
-.tk{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;padding:5px 0}
-.cb{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border-control);flex:none;display:flex;align-items:center;justify-content:center;color:transparent;margin-top:1px}
-.cb.done{background:var(--success-soft);border-color:var(--success);color:var(--success)}
-.tk.done .tx{color:var(--text-tertiary)}
-.gates{display:flex;flex-wrap:wrap;gap:5px}
-.g{font-size:11px;padding:3px 8px;border-radius:var(--radius-pill);border:1px solid var(--border-default);color:var(--text-secondary);background:var(--background-field)}
-.g.ok{background:var(--success-soft);border-color:var(--success);color:var(--success);font-weight:650}
-.g.no{background:var(--warm-soft);border-color:var(--warm);color:var(--warm-text);font-weight:650}
-.g.idle{background:transparent;border-style:dashed}
-.diff{border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden;background:var(--background-content)}
-.diff .dh{display:flex;align-items:center;gap:7px;padding:8px 11px;border-bottom:1px solid var(--border-subtle);font-size:11.5px;color:var(--text-secondary)}
-.diff .dh .ch{margin-left:auto;font-family:ui-monospace,Menlo,monospace}
-.diff pre{margin:0;padding:10px 12px;font:11.5px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-secondary)}
-.add{color:var(--success)}.del{color:var(--danger)}
-.frow{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-secondary);padding:5px 0}
-.frow .sz{margin-left:auto;font-size:11px;color:var(--text-muted)}
-.timeline{display:flex;flex-direction:column;gap:0}
-.tl-i{display:flex;gap:10px;font-size:12px;color:var(--text-secondary);padding:5px 0;position:relative}
-.tl-i .dot{width:7px;height:7px;border-radius:50%;background:var(--border-control);margin-top:5px;flex:none}
-.tl-i.done .dot{background:var(--success)}
-.tl-i.now .dot{background:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
-.tl-i .t{margin-left:auto;font-size:10.5px;color:var(--text-muted)}
+.panel-header{height:var(--column-header-height);flex:none;display:flex;align-items:center;gap:4px;padding:0 10px;border-bottom:1px solid var(--border-subtle)}
+.panel-tab{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 8px;border-radius:var(--radius-small);background:var(--background-field);border:1px solid var(--border-default);color:var(--text-secondary)}
+.panel-tab.is-active{background:var(--background-surface);border-color:var(--border-control);color:var(--text-primary);font-weight:650}
+.panel-tab .tab-close{color:var(--text-muted);font-size:11px}
+.panel-body{flex:1;min-height:0;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:16px}
+.panel-title{font-size:17px;font-weight:700;letter-spacing:-.2px}
+.panel-meta{font-size:12px;color:var(--text-tertiary);margin-top:3px;display:flex;align-items:center;gap:7px}
+.panel-actions{display:flex;gap:8px;margin-top:12px}
+.panel-button{height:32px;padding:0 13px;border-radius:var(--radius-medium);font-size:12.5px;font-weight:650;display:flex;align-items:center;gap:6px;border:1px solid var(--border-default);color:var(--text-primary);background:var(--background-surface)}
+.panel-button.is-primary{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
+.panel-button.warning-badge{background:var(--warm-soft);color:var(--warm-text);border-color:var(--warm)}
+.section-label{font-size:11px;color:var(--text-tertiary);letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.section-label .meta{margin-left:auto;color:var(--text-secondary);font-weight:650;letter-spacing:0}
+.progress-bar{height:5px;border-radius:3px;background:var(--background-field);overflow:hidden;margin-bottom:10px}
+.progress-bar i{display:block;height:100%;width:75%;background:var(--brand-display)}
+.subtask{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;padding:5px 0}
+.subtask-checkbox{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border-control);flex:none;display:flex;align-items:center;justify-content:center;color:transparent;margin-top:1px}
+.subtask-checkbox.done{background:var(--success-soft);border-color:var(--success);color:var(--success)}
+.subtask.done .subtask-text{color:var(--text-tertiary)}
+.gate-list{display:flex;flex-wrap:wrap;gap:5px}
+.gate-chip{font-size:11px;padding:3px 8px;border-radius:var(--radius-pill);border:1px solid var(--border-default);color:var(--text-secondary);background:var(--background-field)}
+.gate-chip.is-passed{background:var(--success-soft);border-color:var(--success);color:var(--success);font-weight:650}
+.gate-chip.is-warning{background:var(--warm-soft);border-color:var(--warm);color:var(--warm-text);font-weight:650}
+.gate-chip.is-idle{background:transparent;border-style:dashed}
+.diff-card{border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden;background:var(--background-content)}
+.diff-card .diff-header{display:flex;align-items:center;gap:7px;padding:8px 11px;border-bottom:1px solid var(--border-subtle);font-size:11.5px;color:var(--text-secondary)}
+.diff-card .diff-header .diff-count{margin-left:auto;font-family:ui-monospace,Menlo,monospace}
+.diff-card pre{margin:0;padding:10px 12px;font:11.5px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-secondary)}
+.diff-added{color:var(--success)}.diff-removed{color:var(--danger)}
+.file-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-secondary);padding:5px 0}
+.file-row .file-size{margin-left:auto;font-size:11px;color:var(--text-muted)}
+.activity-timeline{display:flex;flex-direction:column;gap:0}
+.activity-item{display:flex;gap:10px;font-size:12px;color:var(--text-secondary);padding:5px 0;position:relative}
+.activity-item .activity-dot{width:7px;height:7px;border-radius:50%;background:var(--border-control);margin-top:5px;flex:none}
+.activity-item.done .activity-dot{background:var(--success)}
+.activity-item.is-current .activity-dot{background:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.activity-item .activity-time{margin-left:auto;font-size:10.5px;color:var(--text-muted)}
 /* 页外工具条 */
 .toolbar{position:fixed;left:50%;transform:translateX(-50%);top:12px;display:flex;gap:8px;align-items:center;
   background:var(--background-surface);border:1px solid var(--border-default);border-radius:var(--radius-pill);padding:8px 12px;box-shadow:var(--shadow-floating)}
@@ -176,167 +176,167 @@ svg.i.s{width:14px;height:14px}
 <div class="window celadon">
   <!-- ① 导航列 -->
   <aside class="nav">
-    <div class="tl"><i></i><i></i><i></i></div>
-    <div class="nav-hd">
-      <span class="iconbtn"><svg class="i"><use href="#i-collapse"/></svg></span>
-      <span class="iconbtn"><svg class="i s"><use href="#i-left"/></svg></span>
-      <span class="iconbtn"><svg class="i s"><use href="#i-right"/></svg></span>
+    <div class="traffic-lights"><i></i><i></i><i></i></div>
+    <div class="navigation-header">
+      <span class="icon-button"><svg class="icon"><use href="#i-collapse"/></svg></span>
+      <span class="icon-button"><svg class="icon is-small"><use href="#i-left"/></svg></span>
+      <span class="icon-button"><svg class="icon is-small"><use href="#i-right"/></svg></span>
     </div>
-    <div class="brand"><svg class="i mk"><use href="#i-spark"/></svg><span data-i18n="ui.brand">Yao Agents</span></div>
-    <div class="newtask"><svg class="i s"><use href="#i-plus"/></svg><span data-i18n="ui.newTask">新任务</span></div>
-    <div class="fixed">
-      <div class="ni"><svg class="i s"><use href="#i-chat"/></svg><span data-i18n="ui.nav.chat">聊天</span></div>
-      <div class="ni on"><svg class="i s"><use href="#i-inbox"/></svg><span data-i18n="ui.nav.inbox">收件箱</span><span class="bdg">3</span></div>
-      <div class="ni"><svg class="i s"><use href="#i-board"/></svg><span data-i18n="ui.nav.board">看板</span></div>
-      <div class="ni"><svg class="i s"><use href="#i-ws"/></svg><span data-i18n="ui.nav.workspace">工作区</span></div>
-      <div class="ni"><svg class="i s"><use href="#i-pc"/></svg><span data-i18n="ui.nav.computer">电脑</span></div>
-      <div class="ni"><svg class="i s"><use href="#i-book"/></svg><span data-i18n="ui.nav.knowledge">知识库</span></div>
+    <div class="brand"><svg class="icon brand-mark"><use href="#i-spark"/></svg><span data-i18n="ui.brand">Yao Agents</span></div>
+    <div class="new-task-button"><svg class="icon is-small"><use href="#i-plus"/></svg><span data-i18n="ui.newTask">新任务</span></div>
+    <div class="fixed-navigation">
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-chat"/></svg><span data-i18n="ui.nav.chat">聊天</span></div>
+      <div class="navigation-item is-active"><svg class="icon is-small"><use href="#i-inbox"/></svg><span data-i18n="ui.nav.inbox">收件箱</span><span class="badge">3</span></div>
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-board"/></svg><span data-i18n="ui.nav.board">看板</span></div>
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-ws"/></svg><span data-i18n="ui.nav.workspace">工作区</span></div>
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-pc"/></svg><span data-i18n="ui.nav.computer">电脑</span></div>
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-book"/></svg><span data-i18n="ui.nav.knowledge">知识库</span></div>
     </div>
-    <div class="sep"></div>
-    <div class="ctx">
-      <div class="ctx-hd" data-i18n="ui.nav.inbox">收件箱<span class="bdg" data-i18n="ui.inbox.unreadCount" data-count="3">3 未读</span></div>
-      <div class="search"><svg class="i s"><use href="#i-search"/></svg><span data-i18n="ui.inbox.searchPlaceholder">搜索消息…</span><kbd>⌘K</kbd></div>
-      <div class="chips"><span class="chip on" data-i18n="ui.inbox.filterAll">全部</span><span class="chip" data-i18n="ui.inbox.filterUnread">未读</span><span class="chip" data-i18n="ui.inbox.filterArchived">已归档</span></div>
-      <div class="list">
-        <div class="glbl" data-i18n="ui.time.today">今天</div>
-        <div class="row on"><span class="nv"></span><div class="b"><div class="t1" data-i18n="sample.conversation.greeting.title">打招呼与功能咨询</div><div class="t2" data-i18n="sample.conversation.greeting.subtitle">已介绍文档处理能力与可用工具</div></div><span class="tm">21h</span></div>
-        <div class="row"><span class="nv"></span><div class="b"><div class="t1" data-i18n="sample.conversation.weekly.title">周报生成</div><div class="t2" data-i18n="sample.conversation.weekly.subtitle">按模板汇总本周进展</div></div><span class="tm">1d</span></div>
-        <div class="row"><span class="nv g"></span><div class="b"><div class="t1" data-i18n="sample.conversation.scraping.title">数据抓取任务</div><div class="t2" data-i18n="sample.conversation.scraping.subtitle">已完成 12 个页面</div></div><span class="tm">2d</span></div>
-        <div class="glbl" data-i18n="ui.time.yesterday">昨天</div>
-        <div class="row"><span class="nv g"></span><div class="b"><div class="t1" data-i18n="sample.conversation.contract.title" data-i18n="sample.panel.taskTitle">合同审阅</div><div class="t2" data-i18n="sample.conversation.contract.subtitle">风险点 3 处 · 已标注</div></div><span class="tm">3d</span></div>
-        <div class="row"><span class="nv g"></span><div class="b"><div class="t1" data-i18n="sample.conversation.invoice.title">发票核对</div><div class="t2" data-i18n="sample.conversation.invoice.subtitle">已生成 2 张凭证</div></div><span class="tm">4d</span></div>
-        <div class="glbl" data-i18n="ui.time.earlier">更早</div>
-        <div class="row"><span class="nv g"></span><div class="b"><div class="t1" data-i18n="sample.conversation.siteCheck.title">站点巡检</div><div class="t2" data-i18n="sample.conversation.siteCheck.subtitle">3 个域名正常</div></div><span class="tm">1w</span></div>
+    <div class="navigation-separator"></div>
+    <div class="navigation-context">
+      <div class="navigation-context-header" data-i18n="ui.nav.inbox">收件箱<span class="badge" data-i18n="ui.inbox.unreadCount" data-count="3">3 未读</span></div>
+      <div class="search-field"><svg class="icon is-small"><use href="#i-search"/></svg><span data-i18n="ui.inbox.searchPlaceholder">搜索消息…</span><kbd>⌘K</kbd></div>
+      <div class="filter-chips"><span class="chip is-active" data-i18n="ui.inbox.filterAll">全部</span><span class="chip" data-i18n="ui.inbox.filterUnread">未读</span><span class="chip" data-i18n="ui.inbox.filterArchived">已归档</span></div>
+      <div class="conversation-list">
+        <div class="list-group-label" data-i18n="ui.time.today">今天</div>
+        <div class="conversation-row is-selected"><span class="unread-dot"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.greeting.title">打招呼与功能咨询</div><div class="row-subtitle" data-i18n="sample.conversation.greeting.subtitle">已介绍文档处理能力与可用工具</div></div><span class="row-time">21h</span></div>
+        <div class="conversation-row"><span class="unread-dot"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.weekly.title">周报生成</div><div class="row-subtitle" data-i18n="sample.conversation.weekly.subtitle">按模板汇总本周进展</div></div><span class="row-time">1d</span></div>
+        <div class="conversation-row"><span class="unread-dot is-read"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.scraping.title">数据抓取任务</div><div class="row-subtitle" data-i18n="sample.conversation.scraping.subtitle">已完成 12 个页面</div></div><span class="row-time">2d</span></div>
+        <div class="list-group-label" data-i18n="ui.time.yesterday">昨天</div>
+        <div class="conversation-row"><span class="unread-dot is-read"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.contract.title">合同审阅</div><div class="row-subtitle" data-i18n="sample.conversation.contract.subtitle">风险点 3 处 · 已标注</div></div><span class="row-time">3d</span></div>
+        <div class="conversation-row"><span class="unread-dot is-read"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.invoice.title">发票核对</div><div class="row-subtitle" data-i18n="sample.conversation.invoice.subtitle">已生成 2 张凭证</div></div><span class="row-time">4d</span></div>
+        <div class="list-group-label" data-i18n="ui.time.earlier">更早</div>
+        <div class="conversation-row"><span class="unread-dot is-read"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.siteCheck.title">站点巡检</div><div class="row-subtitle" data-i18n="sample.conversation.siteCheck.subtitle">3 个域名正常</div></div><span class="row-time">1w</span></div>
       </div>
     </div>
     <div class="user">
-      <div class="av">M</div>
+      <div class="avatar">M</div>
       <div style="flex:1;min-width:0"><div style="font-weight:650;font-size:12.5px">Max</div><div style="color:var(--text-tertiary);font-size:11px">max@iqka.com</div></div>
-      <span class="iconbtn"><svg class="i s"><use href="#i-dots"/></svg></span>
+      <span class="icon-button"><svg class="icon is-small"><use href="#i-dots"/></svg></span>
     </div>
   </aside>
 
   <!-- ② 内容列 -->
   <main class="main">
-    <div class="main-hd">
-      <span class="iconbtn"><svg class="i s"><use href="#i-left"/></svg></span>
-      <span class="iconbtn"><svg class="i s"><use href="#i-right"/></svg></span>
-      <span class="ttl" data-i18n="sample.conversation.greeting.title">打招呼与功能咨询</span><span class="mt"><span data-i18n="ui.nav.inbox">收件箱</span> · <span data-i18n="ui.thread.newMessages" data-count="3" data-i18n="ui.thread.newMessages" data-count="3">3 条新消息</span></span>
-      <div class="caps">
-        <span class="cap"><svg class="i s"><use href="#i-file"/></svg><span class="n">2</span></span>
-        <span class="cap"><svg class="i s"><use href="#i-pc"/></svg></span>
-        <span class="cap"><svg class="i s"><use href="#i-tasks"/></svg></span>
-        <span class="cap"><svg class="i s"><use href="#i-split"/></svg></span>
-        <span class="cap"><svg class="i s"><use href="#i-book"/></svg></span>
-        <span class="cap"><svg class="i s"><use href="#i-dots"/></svg></span>
-        <span class="cap" style="color:var(--brand)"><svg class="i s"><use href="#i-split2"/></svg></span>
+    <div class="content-header">
+      <span class="icon-button"><svg class="icon is-small"><use href="#i-left"/></svg></span>
+      <span class="icon-button"><svg class="icon is-small"><use href="#i-right"/></svg></span>
+      <span class="content-title" data-i18n="sample.conversation.greeting.title">打招呼与功能咨询</span><span class="content-meta"><span data-i18n="ui.nav.inbox">收件箱</span> · <span data-i18n="ui.thread.newMessages" data-count="3" data-count="3">3 条新消息</span></span>
+      <div class="capability-list">
+        <span class="capability"><svg class="icon is-small"><use href="#i-file"/></svg><span class="capability-badge">2</span></span>
+        <span class="capability"><svg class="icon is-small"><use href="#i-pc"/></svg></span>
+        <span class="capability"><svg class="icon is-small"><use href="#i-tasks"/></svg></span>
+        <span class="capability"><svg class="icon is-small"><use href="#i-split"/></svg></span>
+        <span class="capability"><svg class="icon is-small"><use href="#i-book"/></svg></span>
+        <span class="capability"><svg class="icon is-small"><use href="#i-dots"/></svg></span>
+        <span class="capability" style="color:var(--brand)"><svg class="icon is-small"><use href="#i-split2"/></svg></span>
       </div>
     </div>
-    <div class="thread">
-      <div class="daysep" data-i18n="ui.thread.dateAt" data-time="14:02">今天 14:02</div>
-      <div class="tl-wrap">
-        <div class="bub me" data-i18n="sample.message.user1">你好，能帮我看看这两份文档吗？重点是合同里的风险条款。</div>
-        <div class="tool">
-          <div class="th"><svg class="i s"><use href="#i-folder"/></svg><span data-i18n="ui.tool.readFiles">读取文件</span><span class="k">read_file</span>
-            <span class="st"><svg class="i s" style="width:12px;height:12px"><use href="#i-check"/></svg><span data-i18n="ui.status.done">完成</span></span></div>
-          <div class="tb"><span data-i18n="sample.tool.readLineContract">contract.pdf · 12 页 · 已提取正文</span><br><span data-i18n="sample.tool.readLineRequirements">需求.docx · 4 页 · 已提取正文</span></div>
+    <div class="message-thread">
+      <div class="date-separator" data-i18n="ui.thread.dateAt" data-time="14:02">今天 14:02</div>
+      <div class="message-group">
+        <div class="message is-user" data-i18n="sample.message.user1">你好，能帮我看看这两份文档吗？重点是合同里的风险条款。</div>
+        <div class="tool-card">
+          <div class="tool-header"><svg class="icon is-small"><use href="#i-folder"/></svg><span data-i18n="ui.tool.readFiles">读取文件</span><span class="tool-name">read_file</span>
+            <span class="status-chip"><svg class="icon is-small" style="width:12px;height:12px"><use href="#i-check"/></svg><span data-i18n="ui.status.done">完成</span></span></div>
+          <div class="tool-body"><span data-i18n="sample.tool.readLineContract">contract.pdf · 12 页 · 已提取正文</span><br><span data-i18n="sample.tool.readLineRequirements">需求.docx · 4 页 · 已提取正文</span></div>
         </div>
-        <div class="bub ai">
-          <div class="who"><span class="ag"><svg class="i s" style="width:12px;height:12px"><use href="#i-spark"/></svg><span data-i18n="ui.agent">Agent</span></span>14:04</div>
+        <div class="message is-agent">
+          <div class="message-header"><span class="message-author"><svg class="icon is-small" style="width:12px;height:12px"><use href="#i-spark"/></svg><span data-i18n="ui.agent">Agent</span></span>14:04</div>
           <span data-i18n-html="sample.message.agent1Html">两份都读完了。合同里我找到 <b>3 处风险</b>：① 第 4.2 条付款周期无上限；② 第 7 条违约责任不对等；③ 附件二缺失签章页。</span>
-          <div class="files">
-            <span class="fchip"><svg class="i s"><use href="#i-file"/></svg><span data-i18n="sample.file.contract">contract.pdf</span></span>
-            <span class="fchip"><svg class="i s"><use href="#i-file"/></svg><span data-i18n="sample.file.requirements">需求.docx</span></span>
+          <div class="attachment-list">
+            <span class="attachment-chip"><svg class="icon is-small"><use href="#i-file"/></svg><span data-i18n="sample.file.contract">contract.pdf</span></span>
+            <span class="attachment-chip"><svg class="icon is-small"><use href="#i-file"/></svg><span data-i18n="sample.file.requirements">需求.docx</span></span>
           </div>
         </div>
       </div>
-      <div class="unread" style="margin:14px 0 0" data-i18n="ui.thread.newMessages" data-count="3">3 条新消息</div>
-      <div class="tl-wrap" style="margin-top:14px">
-        <div class="ask">
-          <div class="ah"><svg class="i s"><use href="#i-clock"/></svg><span data-i18n="ui.ask.pendingAt" data-time="14:06">待你确认 · 14:06</span><span class="w" data-i18n="ui.ask.differences" data-count="2">2 处差异</span></div>
+      <div class="unread-divider" style="margin:14px 0 0" data-i18n="ui.thread.newMessages" data-count="3">3 条新消息</div>
+      <div class="message-group" style="margin-top:14px">
+        <div class="question-card">
+          <div class="question-header"><svg class="icon is-small"><use href="#i-clock"/></svg><span data-i18n="ui.ask.pendingAt" data-time="14:06">待你确认 · 14:06</span><span class="warning-badge" data-i18n="ui.ask.differences" data-count="2">2 处差异</span></div>
           <div style="font-size:13px" data-i18n="ui.ask.question">摘要口径按哪个来？这会影响输出结构：</div>
-          <div class="opt on"><svg class="i s"><use href="#i-check"/></svg><span data-i18n="ui.ask.optionRiskFirst">按「风险优先」汇总（推荐）</span></div>
-          <div class="opt"><svg class="i s" style="opacity:.35"><use href="#i-check"/></svg><span data-i18n="ui.ask.optionChronological">按「时间顺序」汇总</span></div>
-          <div class="opt"><svg class="i s" style="opacity:.35"><use href="#i-check"/></svg><span data-i18n="ui.ask.optionCustom">我自己补口径</span></div>
+          <div class="question-option is-selected"><svg class="icon is-small"><use href="#i-check"/></svg><span data-i18n="ui.ask.optionRiskFirst">按「风险优先」汇总（推荐）</span></div>
+          <div class="question-option"><svg class="icon is-small" style="opacity:.35"><use href="#i-check"/></svg><span data-i18n="ui.ask.optionChronological">按「时间顺序」汇总</span></div>
+          <div class="question-option"><svg class="icon is-small" style="opacity:.35"><use href="#i-check"/></svg><span data-i18n="ui.ask.optionCustom">我自己补口径</span></div>
         </div>
-        <div class="bub ai">
-          <div class="who"><span class="ag"><svg class="i s" style="width:12px;height:12px"><use href="#i-spark"/></svg><span data-i18n="ui.agent">Agent</span></span>14:09</div><span data-i18n="sample.message.agent2">
+        <div class="message is-agent">
+          <div class="message-header"><span class="message-author"><svg class="icon is-small" style="width:12px;height:12px"><use href="#i-spark"/></svg><span data-i18n="ui.agent">Agent</span></span>14:09</div><span data-i18n="sample.message.agent2">
           已按风险优先输出，并标注了依据条款页码。
-          </span><div class="files">
-            <span class="fchip"><svg class="i s"><use href="#i-file"/></svg><span data-i18n="sample.file.riskSummary" data-i18n="sample.file.riskSummary">风险摘要.md</span> · 2.1 KB</span>
-            <span class="fchip"><svg class="i s"><use href="#i-split"/></svg><span data-i18n="ui.thread.changesChip" data-added="12" data-removed="4">变更 +12 −4</span></span>
+          </span><div class="attachment-list">
+            <span class="attachment-chip"><svg class="icon is-small"><use href="#i-file"/></svg><span data-i18n="sample.file.riskSummary">风险摘要.md</span> · 2.1 KB</span>
+            <span class="attachment-chip"><svg class="icon is-small"><use href="#i-split"/></svg><span data-i18n="ui.thread.changesChip" data-added="12" data-removed="4">变更 +12 −4</span></span>
           </div>
         </div>
       </div>
     </div>
     <div class="composer">
-      <div class="ph" data-i18n="ui.composer.placeholder">继续：把风险点补进需求文档的验收条款…</div>
+      <div class="placeholder" data-i18n="ui.composer.placeholder">继续：把风险点补进需求文档的验收条款…</div>
       <div class="foot">
-        <span class="chip"><svg class="i s" style="width:12px;height:12px"><use href="#i-plus"/></svg></span>
+        <span class="chip"><svg class="icon is-small" style="width:12px;height:12px"><use href="#i-plus"/></svg></span>
         <span class="chip" data-i18n="ui.composer.defaultPermission">默认权限</span>
         <span class="chip">DeepSeek V4 Flash</span>
-        <span class="send"><svg class="i s"><use href="#i-send"/></svg></span>
+        <span class="send-button"><svg class="icon is-small"><use href="#i-send"/></svg></span>
       </div>
     </div>
   </main>
 
   <!-- ③ 侧边面板 -->
   <aside class="panel">
-    <div class="panel-hd">
-      <span class="ptab on"><svg class="i s"><use href="#i-tasks"/></svg><span data-i18n="sample.panel.taskTitle">合同审阅</span><span class="x">✕</span></span>
-      <span class="ptab"><svg class="i s"><use href="#i-file"/></svg><span data-i18n="sample.file.riskSummary">风险摘要.md</span><span class="x">✕</span></span>
-      <span class="ptab" style="border-style:dashed"><svg class="i s" style="width:12px;height:12px"><use href="#i-plus"/></svg></span>
-      <span style="margin-left:auto" class="iconbtn"><svg class="i s"><use href="#i-expand"/></svg></span>
-      <span class="iconbtn"><svg class="i s"><use href="#i-split2"/></svg></span>
+    <div class="panel-header">
+      <span class="panel-tab is-active"><svg class="icon is-small"><use href="#i-tasks"/></svg><span data-i18n="sample.panel.taskTitle">合同审阅</span><span class="tab-close">✕</span></span>
+      <span class="panel-tab"><svg class="icon is-small"><use href="#i-file"/></svg><span data-i18n="sample.file.riskSummary">风险摘要.md</span><span class="tab-close">✕</span></span>
+      <span class="panel-tab" style="border-style:dashed"><svg class="icon is-small" style="width:12px;height:12px"><use href="#i-plus"/></svg></span>
+      <span style="margin-left:auto" class="icon-button"><svg class="icon is-small"><use href="#i-expand"/></svg></span>
+      <span class="icon-button"><svg class="icon is-small"><use href="#i-split2"/></svg></span>
     </div>
-    <div class="pbody">
+    <div class="panel-body">
       <div>
-        <div class="ptitle" data-i18n="sample.panel.taskTitle">合同审阅</div>
-        <div class="pmeta"><span data-i18n="ui.panel.inProgress">进行中</span> · <span data-i18n="ui.panel.highPriority">高优先级</span><span style="color:var(--border-control)">|</span>max<span style="color:var(--border-control)">|</span><span data-i18n="ui.panel.remainingDays" data-days="2">剩余 2 天</span></div>
-        <div class="pbtns">
-          <span class="pbtn p"><svg class="i s"><use href="#i-check"/></svg><span data-i18n="ui.panel.actionComplete">标记完成</span></span>
-          <span class="pbtn w"><svg class="i s"><use href="#i-pause"/></svg><span data-i18n="ui.panel.actionPause">挂起</span></span>
-          <span class="pbtn"><svg class="i s"><use href="#i-expand"/></svg><span data-i18n="ui.panel.actionOpenFullPage">全页打开</span></span>
+        <div class="panel-title" data-i18n="sample.panel.taskTitle">合同审阅</div>
+        <div class="panel-meta"><span data-i18n="ui.panel.inProgress">进行中</span> · <span data-i18n="ui.panel.highPriority">高优先级</span><span style="color:var(--border-control)">|</span>max<span style="color:var(--border-control)">|</span><span data-i18n="ui.panel.remainingDays" data-days="2">剩余 2 天</span></div>
+        <div class="panel-actions">
+          <span class="panel-button is-primary"><svg class="icon is-small"><use href="#i-check"/></svg><span data-i18n="ui.panel.actionComplete">标记完成</span></span>
+          <span class="panel-button warning-badge"><svg class="icon is-small"><use href="#i-pause"/></svg><span data-i18n="ui.panel.actionPause">挂起</span></span>
+          <span class="panel-button"><svg class="icon is-small"><use href="#i-expand"/></svg><span data-i18n="ui.panel.actionOpenFullPage">全页打开</span></span>
         </div>
       </div>
       <div>
-        <div class="sec" data-i18n="ui.panel.subtasks">子任务<span class="rt">3 / 4</span></div>
-        <div class="bar"><i></i></div>
-        <div class="tk done"><span class="cb done"><svg class="i s" style="width:12px;height:12px"><use href="#i-check"/></svg></span><span class="tx" data-i18n="sample.panel.subtaskRead">读取 contract.pdf / 需求.docx</span></div>
-        <div class="tk done"><span class="cb done"><svg class="i s" style="width:12px;height:12px"><use href="#i-check"/></svg></span><span class="tx" data-i18n="sample.panel.subtaskExtract">提取风险条款并标页码</span></div>
-        <div class="tk done"><span class="cb done"><svg class="i s" style="width:12px;height:12px"><use href="#i-check"/></svg></span><span class="tx" data-i18n="sample.panel.subtaskGenerate">生成 风险摘要.md</span></div>
-        <div class="tk"><span class="cb"></span><span class="tx" data-i18n="sample.panel.subtaskAcceptance">补进验收条款（待你确认口径）</span></div>
+        <div class="section-label" data-i18n="ui.panel.subtasks">子任务<span class="meta">3 / 4</span></div>
+        <div class="progress-bar"><i></i></div>
+        <div class="subtask done"><span class="subtask-checkbox done"><svg class="icon is-small" style="width:12px;height:12px"><use href="#i-check"/></svg></span><span class="subtask-text" data-i18n="sample.panel.subtaskRead">读取 contract.pdf / 需求.docx</span></div>
+        <div class="subtask done"><span class="subtask-checkbox done"><svg class="icon is-small" style="width:12px;height:12px"><use href="#i-check"/></svg></span><span class="subtask-text" data-i18n="sample.panel.subtaskExtract">提取风险条款并标页码</span></div>
+        <div class="subtask done"><span class="subtask-checkbox done"><svg class="icon is-small" style="width:12px;height:12px"><use href="#i-check"/></svg></span><span class="subtask-text" data-i18n="sample.panel.subtaskGenerate">生成 风险摘要.md</span></div>
+        <div class="subtask"><span class="subtask-checkbox"></span><span class="subtask-text" data-i18n="sample.panel.subtaskAcceptance">补进验收条款（待你确认口径）</span></div>
       </div>
       <div>
-        <div class="sec" data-i18n="ui.panel.gates">门禁<span class="rt">5 / 9</span></div>
-        <div class="gates">
-          <span class="g ok">typecheck</span><span class="g ok">lint</span><span class="g ok">unit</span>
-          <span class="g ok">route</span><span class="g ok">contract</span><span class="g no" data-i18n="sample.panel.gateVisual" data-count="2">visual 2 处</span>
-          <span class="g idle">a11y</span><span class="g idle">e2e</span><span class="g idle">report</span>
+        <div class="section-label" data-i18n="ui.panel.gates">门禁<span class="meta">5 / 9</span></div>
+        <div class="gate-list">
+          <span class="gate-chip is-passed">typecheck</span><span class="gate-chip is-passed">lint</span><span class="gate-chip is-passed">unit</span>
+          <span class="gate-chip is-passed">route</span><span class="gate-chip is-passed">contract</span><span class="gate-chip is-warning" data-i18n="sample.panel.gateVisual" data-count="2">visual 2 处</span>
+          <span class="gate-chip is-idle">a11y</span><span class="gate-chip is-idle">e2e</span><span class="gate-chip is-idle">report</span>
         </div>
       </div>
       <div>
-        <div class="sec" data-i18n="ui.panel.changes">变更</div>
-        <div class="diff">
-          <div class="dh"><svg class="i s"><use href="#i-file"/></svg><span data-i18n="sample.file.riskSummary">风险摘要.md</span><span class="ch"><span class="add">+12</span> <span class="del">−4</span></span></div>
-          <pre><span class="del" data-i18n="sample.diff.line1">- 付款周期：按季度结算</span>
-<span class="add" data-i18n="sample.diff.line2">+ 付款周期：≤30 天（4.2 条）</span>
-<span class="del" data-i18n="sample.diff.line3">- 违约责任：双方各承担</span>
-<span class="add" data-i18n="sample.diff.line4">+ 违约责任：对等，逾期按 0.05%/日</span></pre>
+        <div class="section-label" data-i18n="ui.panel.changes">变更</div>
+        <div class="diff-card">
+          <div class="diff-header"><svg class="icon is-small"><use href="#i-file"/></svg><span data-i18n="sample.file.riskSummary">风险摘要.md</span><span class="diff-count"><span class="diff-added">+12</span> <span class="diff-removed">−4</span></span></div>
+          <pre><span class="diff-removed" data-i18n="sample.diff.line1">- 付款周期：按季度结算</span>
+<span class="diff-added" data-i18n="sample.diff.line2">+ 付款周期：≤30 天（4.2 条）</span>
+<span class="diff-removed" data-i18n="sample.diff.line3">- 违约责任：双方各承担</span>
+<span class="diff-added" data-i18n="sample.diff.line4">+ 违约责任：对等，逾期按 0.05%/日</span></pre>
         </div>
       </div>
       <div>
-        <div class="sec" data-i18n="ui.panel.relatedFiles">相关文件</div>
-        <div class="frow"><svg class="i s"><use href="#i-file"/></svg><span data-i18n="sample.file.contract">contract.pdf</span><span class="sz">1.8 MB</span></div>
-        <div class="frow"><svg class="i s"><use href="#i-file"/></svg><span data-i18n="sample.file.requirements">需求.docx</span><span class="sz">240 KB</span></div>
-        <div class="frow"><svg class="i s"><use href="#i-file"/></svg><span data-i18n="sample.file.riskSummary">风险摘要.md</span><span class="sz">2.1 KB</span></div>
+        <div class="section-label" data-i18n="ui.panel.relatedFiles">相关文件</div>
+        <div class="file-row"><svg class="icon is-small"><use href="#i-file"/></svg><span data-i18n="sample.file.contract">contract.pdf</span><span class="file-size">1.8 MB</span></div>
+        <div class="file-row"><svg class="icon is-small"><use href="#i-file"/></svg><span data-i18n="sample.file.requirements">需求.docx</span><span class="file-size">240 KB</span></div>
+        <div class="file-row"><svg class="icon is-small"><use href="#i-file"/></svg><span data-i18n="sample.file.riskSummary">风险摘要.md</span><span class="file-size">2.1 KB</span></div>
       </div>
       <div>
-        <div class="sec" data-i18n="ui.panel.activity">活动</div>
-        <div class="timeline">
-          <div class="tl-i done"><span class="dot"></span><span data-i18n="ui.activity.readDocuments" data-count="2">读取 2 份文档</span><span class="t">14:03</span></div>
-          <div class="tl-i done"><span class="dot"></span><span data-i18n="ui.activity.extractRisks" data-count="3">提取 3 处风险</span><span class="t">14:04</span></div>
-          <div class="tl-i now"><span class="dot"></span><span data-i18n="ui.activity.waitingConfirmation">等待口径确认</span><span class="t">14:06</span></div>
+        <div class="section-label" data-i18n="ui.panel.activity">活动</div>
+        <div class="activity-timeline">
+          <div class="activity-item done"><span class="activity-dot"></span><span data-i18n="ui.activity.readDocuments" data-count="2">读取 2 份文档</span><span class="activity-time">14:03</span></div>
+          <div class="activity-item done"><span class="activity-dot"></span><span data-i18n="ui.activity.extractRisks" data-count="3">提取 3 处风险</span><span class="activity-time">14:04</span></div>
+          <div class="activity-item is-current"><span class="activity-dot"></span><span data-i18n="ui.activity.waitingConfirmation">等待口径确认</span><span class="activity-time">14:06</span></div>
         </div>
       </div>
     </div>
@@ -345,13 +345,13 @@ svg.i.s{width:14px;height:14px}
 
 <div class="toolbar celadon">
   <span class="language-switch">
-    <button data-lang="zh-CN" class="on">简</button>
+    <button data-lang="zh-CN" class="is-active">简</button>
     <button data-lang="zh-TW">繁</button>
     <button data-lang="en">EN</button>
     <button data-lang="ja">日</button>
   </span>
   <span style="width:1px;height:18px;background:var(--border-default)"></span>
-  <button data-t="light" class="on" data-i18n="ui.theme.light">浅色</button>
+  <button data-t="light" class="is-active" data-i18n="ui.theme.light">浅色</button>
   <button data-t="dark" data-i18n="ui.theme.dark">暗色</button>
 </div>
 <script src="./i18n/bundle.js"></script>
@@ -361,7 +361,7 @@ document.querySelectorAll('.toolbar button[data-t]').forEach(function(b){
   b.addEventListener('click', function(){
     document.documentElement.dataset.theme = b.dataset.t;
     document.querySelectorAll('.toolbar button[data-t]').forEach(function(x){ x.classList.remove('on'); });
-    b.classList.add('on');
+    b.classList.diff-added('on');
   });
 });
 /* ---- 多语言：运行时替换，不刷新；缺 key 回退 zh-CN ---- */
