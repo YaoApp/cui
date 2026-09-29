@@ -1,13 +1,13 @@
-# janus/design — 2.0 设计 token（v1.1）
+# celadon/design — 2.0 设计 token（v1.1）
 
 | 文件 | 内容 |
 | --- | --- |
-| [`tokens.less`](tokens.less) | **2.0 设计 token 唯一来源**（浅 + 暗，作用域 `.jn2`）+ 用法约定 |
+| [`tokens.less`](tokens.less) | **2.0 设计 token 唯一来源**（浅 + 暗，作用域 `.celadon`）+ 用法约定 |
 | [`build-css.mjs`](build-css.mjs) | 由 `tokens.less` 生成 `tokens.css`（色卡与后续 AntD 主题都从这里派生） |
 | [`tokens.css`](tokens.css) | **自动生成，勿手改** |
 | [`color-card.html`](color-card.html) | **色卡**（浏览器直接打开）：所有色值/尺寸**实时读 `tokens.css`**，零硬编码；对比度按各主题真实内容底自动实算；点击 hex 复制 |
 
-> 改色只改 `tokens.less` → 跑 `node janus/design/build-css.mjs` → 色卡自动跟随（**不用改 HTML**）。
+> 改色只改 `tokens.less` → 跑 `node celadon/design/build-css.mjs` → 色卡自动跟随（**不用改 HTML**）。
 
 ## 定稿色
 
@@ -37,8 +37,8 @@
 5. **暗色下"浅底 + 品牌字/描边"一律用 `--brand-lift`**（`#2A7B7B` 在近黑上约 4.1:1）；
 6. **交互四态齐**：default / hover / active / disabled；键盘焦点必须可见（`--focus-ring`）；
 7. **success 只用软底 + 图标**，不做大面积实心；
-8. `--r-pill` 仅用于徽标 / 标签 / 头像；
-9. **中文最小 12px**（`--fs-11` 仅西文/数字角标）。
+8. `--radius-pill` 仅用于徽标 / 标签 / 头像；
+9. **中文最小 12px**（`--font-size-11` 仅西文/数字角标）。
 
 ## 用法
 
@@ -49,7 +49,7 @@
 .scrim { background: var(--scrim); }
 ```
 
-> `data-theme` 可挂 `.jn2` 自身或任意祖先（选择器已双写覆盖）。
+> `data-theme` 可挂 `.celadon` 自身或任意祖先（选择器已双写覆盖）。
 
 ## 详细界面稿
 

@@ -14,7 +14,7 @@
             "packages/*"
       ],
       "scripts": {
-            "design:css": "node janus/design/build-css.mjs",
+            "design:css": "node celadon/design/build-css.mjs",
             "dev": "max dev",
             "local": "max preview --port 8000",
             "build": "max setup && pnpm run build:theme && pnpm run build:components && max build && pnpm run build:after",
