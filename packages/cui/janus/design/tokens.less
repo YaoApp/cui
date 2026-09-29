@@ -1,50 +1,52 @@
 /**
- * janus/design/tokens.less — CUI 2.0（Janus）设计 token · **Option A（Codex 化）**
+ * janus/design/tokens.less — CUI 2.0（Janus）设计 token
  *
- * 依据：OpenAI Codex 官方色（openai/codex · codex-rs/tui/src/style.rs）
- *   CHATGPT_BLUE_200 #63A8F8 = UI_ACCENT（暗底）
- *   CHATGPT_BLUE_100 #A4CDFB（浅底选中填充）
- *   LIGHT_BG_ACCENT  #1C64C8（浅底强调）
- *   警示淡琥珀：#8B6214（浅底）/ #C4A767（暗底）—— "可见但不像错误"
- *   OpenAI 品牌中性：Cod Gray #080808 + White
+ * 品牌色 = #2D8282（青）· 中国传统色「青」系 · 浅/暗同值
+ * 中性 = 近白 / 近黑（内容区非纯白，去刺眼）
+ * 作用域 .jn2 —— 不污染 1.x 老界面；2.0 接管后提升为 :root
  *
- * 规则：作用域 .jn2（不污染 1.x）；暗色只覆盖 semantic；禁硬编码。
+ * 红线：单一来源 · 禁硬编码 · 暗色只覆盖 semantic · 语义优先
  */
 
 .jn2 {
-  /* ===== 中性（近白，不带暖调）===== */
-  --bg-app:        #F7F7F8;
-  --bg-nav:        #FBFBFC;
-  --bg-content:    #FFFFFF;
+  /* ===== 中性（近白）===== */
+  --bg-app:        #F4F4F6;
+  --bg-nav:        #F8F8FA;
+  --bg-content:    #FAFAFB;   /* 非纯白（去刺眼） */
   --bg-surface:    #FFFFFF;
   --bg-field:      #F4F4F5;
   --bg-hover:      #F0F0F2;
-  --bg-selected:   #EAF2FE;
+  --bg-selected:   #ECF3F3;   /* 选中底 = 品牌浅底 */
 
-  --border:        #ECECEE;
-  --border-2:      #DEDEE1;
-  --border-3:      #CACACD;
+  --border:        #ECECEE;   /* 装饰线 */
+  --border-2:      #DEDEE1;   /* 常规边界 */
+  --border-3:      #CACACD;   /* 控件边界 */
 
   --text-1:        #0A0A0A;
   --text-2:        #5C5C63;
   --text-3:        #7A7A82;
   --text-muted:    #A8A8B0;
 
-  /* ===== 品牌（单蓝分档）===== */
-  --brand:         #1C64C8;   /* 浅底强调（白字 5.9:1） */
-  --brand-hover:   #1755AC;
-  --brand-soft:    #EAF2FE;   /* 选中/浅底 */
-  --brand-display: #A4CDFB;   /* 大面积/填充（不压白字） */
+  /* ===== 品牌 · 青 #2D8282 ===== */
+  --brand:         #2D8282;   /* 白字 4.54:1 ✓ */
+  --brand-hover:   #26706F;
+  --brand-soft:    #ECF3F3;
+  --brand-display: #96C5C5;   /* 大面积/图形/进度（不压白字） */
   --brand-text:    #FFFFFF;
+  --brand-lift:    #389F9F;   /* 暗色需要"文字/描边"档时用（6.01:1 ✓） */
 
-  /* ===== 警示（淡琥珀，不像 error）===== */
+  /* ===== 警示 · 淡琥珀（不像 error）===== */
   --warm:          #8B6214;
   --warm-soft:     #F7F0E2;
   --warm-text:     #6E4D0C;
 
   /* ===== 语义 ===== */
-  --ok:            #1E8E5A;  --ok-soft:      #E8F5EE;
-  --danger:        #D93B30;  --danger-soft:  #FBECEA;
+  --ok:            #057748;   /* 松花绿（传统色）· 与品牌青拉开 */
+  --ok-soft:       #E9F6F1;
+  --warning:       #8B6214;
+  --warning-soft:  #F7F0E2;
+  --danger:        #D93B30;   /* 朱红 */
+  --danger-soft:   #FBECEA;
 
   /* ===== 尺寸 / 圆角 / 阴影 / 动效 ===== */
   --fs-11:11px; --fs-12:12px; --fs-13:13px; --fs-14:14px; --fs-15:15px; --fs-17:17px; --fs-20:20px;
@@ -58,7 +60,7 @@
   --row-h:40px;
 }
 
-/* 暗色（Cod Gray 近黑 + ChatGPT Blue 200） */
+/* 暗色（Cod Gray 近黑）· 品牌同值 */
 .jn2[data-theme='dark'] {
   --bg-app:        #080808;
   --bg-nav:        #0D0D0D;
@@ -66,7 +68,7 @@
   --bg-surface:    #161616;
   --bg-field:      #1E1E1E;
   --bg-hover:      #242424;
-  --bg-selected:   #14263D;
+  --bg-selected:   #16292A;
 
   --border:        #262626;
   --border-2:      #333333;
@@ -77,29 +79,35 @@
   --text-3:        #949494;
   --text-muted:    #6E6E6E;
 
-  --brand:         #63A8F8;
-  --brand-hover:   #7FB8F9;
-  --brand-soft:    #14263D;
-  --brand-display: #A4CDFB;
-  --brand-text:    #06203C;   /* 深字压亮蓝 */
+  --brand:         #2D8282;
+  --brand-hover:   #379C9C;
+  --brand-soft:    #16292A;
+  --brand-display: #96C5C5;
+  --brand-text:    #FFFFFF;
+  --brand-lift:    #389F9F;
 
   --warm:          #C4A767;
   --warm-soft:     #2C2718;
   --warm-text:     #E4CE9C;
 
-  --ok:            #4ADE80;  --ok-soft:      #12261A;
-  --danger:        #F87171;  --danger-soft:  #2A1614;
+  --ok:            #4ADE80;   --ok-soft:      #12261A;
+  --warning:       #C4A767;   --warning-soft: #2C2718;
+  --danger:        #F87171;   --danger-soft:  #2A1614;
 
   --shadow-1:0 1px 2px rgba(0,0,0,.5);
   --shadow-2:0 12px 34px rgba(0,0,0,.6);
 }
 
 /**
- * 用法约定（"浅底"是 A 的默认观感；要重时切 .is-solid）
+ * 用法约定
+ *  · 默认「浅底」观感；需要强调时加 .is-solid
+ *  · 品牌色只出现在 3 处：主按钮 / 选中态 / 徽标（其余中性）
+ *  · 暗色下若用「浅底 + 品牌字」，改用 --brand-lift（#2D8282 在近黑上仅 4.19:1）
+ *  · success 只用软底 + 图标，不做大面积实心
  */
 .jn2 {
-  .btn-primary { background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand); }
-  .btn-primary.is-solid { background: var(--brand); color: var(--brand-text); }
+  .btn-primary { background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand);
+    &.is-solid { background: var(--brand); color: var(--brand-text); } }
   .btn-ghost   { background: var(--bg-surface); color: var(--text-1); border: 1px solid var(--border-2); }
   .btn-warn    { background: var(--warm-soft); color: var(--warm-text); border: 1px solid var(--warm); }
   .bubble-me   { background: var(--brand-soft); color: var(--text-1); border: 1px solid var(--border-2); }
@@ -109,4 +117,9 @@
   .badge-warn  { background: var(--warm-soft);  color: var(--warm-text); border: 1px solid var(--warm); }
   .avatar      { background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand); }
   .tab-active  { background: var(--bg-surface); color: var(--text-1); border: 1px solid var(--border-3); }
+}
+.jn2[data-theme='dark'] {
+  .btn-primary { color: var(--brand-lift); border-color: var(--brand-lift); }
+  .nav-item.is-active { color: var(--brand-lift); }
+  .badge-brand { color: var(--brand-lift); border-color: var(--brand-lift); }
 }
