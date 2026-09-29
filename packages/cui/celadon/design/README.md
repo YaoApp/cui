@@ -9,7 +9,14 @@
 | [`i18n/`](i18n/) | **多语言文案**：`zh-CN.json` · `zh-TW.json` · `en.json` · `ja.json`（`ui.*` 界面文案 / `sample.*` 演示数据）+ `bundle.js`（自动生成） |
 | [`build-i18n.mjs`](build-i18n.mjs) | 由 `i18n/*.json` 生成 `i18n/bundle.js`（**不用 fetch**，file:// 直接可用） |
 
-> 改色只改 `tokens.less` → 跑 `node celadon/design/build-css.mjs` → 色卡自动跟随（**不用改 HTML**）。
+> 改色只改 `tokens.less` → 跑 `pnpm design:css` → 色卡自动跟随（**不用改 HTML**）。
+
+## 字体（四语）
+
+- **规范**：见 [`design/v2/typography.md`](../../../../design/v2/typography.md)（含 Codex 开源仓库调研与取舍）
+- **按语言分栈（必须）**：`--font-family-ui-hans` / `-hant` / `-japanese`，由 `.celadon:lang(zh-CN|zh-TW|zh-Hant|ja)` 自动映射 —— 繁中不走 SC 字形、日文不走中文字形；
+- **度量**：`--font-weight-normal: 430`（借 Codex 做法）· `--line-height-normal: 1.5` vs `--line-height-cjk: 1.7` · `--font-size-minimum-cjk: 12px` · 中文 `letter-spacing: 0`；
+- **样本**：`color-card.html` →「字体样本」区，四语并列 + **同一段字的字形对照**（SC/TC/JP 差异一眼可见）。
 
 ## 定稿色
 

@@ -59,6 +59,9 @@
   --brand-display: #96C5C5;
   /* **只做填充/图形，不承载文字与图标** */
   --brand-text: #FFFFFF;
+  /* 压在 --brand 实心底上的文字 */
+  --brand-ink: #287575;
+  /* 品牌色文字/图标：比填充深 0.4%，为在 --brand-soft 上过 AA（4.8:1）；暗色自动切 --brand-lift */
   --brand-lift: #389F9F;
   /* 暗色文字/描边档（6.01:1 ✓） */
   /* ===== 交互态 ===== */
@@ -169,6 +172,8 @@
   --brand-soft: #16292A;
   --brand-display: #96C5C5;
   --brand-text: #FFFFFF;
+  --brand-ink: var(--brand-lift);
+  /* 暗色：品牌色文字/图标一律用提亮档（软底 4.79:1） */
   --brand-lift: #389F9F;
   /* 暗色：焦点环改用提亮档，否则在近黑上看不见 */
   --focus-ring-color: var(--brand-lift);
@@ -199,8 +204,8 @@
 .celadon .btn-primary,
 [data-theme] .celadon .btn-primary {
   background: var(--brand-soft);
-  color: var(--brand);
-  border: 1px solid var(--brand);
+  color: var(--brand-ink);
+  border: 1px solid var(--brand-ink);
 }
 .celadon .btn-primary:hover,
 [data-theme] .celadon .btn-primary:hover {
@@ -264,8 +269,8 @@
 .celadon .badge-brand,
 [data-theme] .celadon .badge-brand {
   background: var(--brand-soft);
-  color: var(--brand);
-  border: 1px solid var(--brand);
+  color: var(--brand-ink);
+  border: 1px solid var(--brand-ink);
 }
 .celadon .badge-warn,
 [data-theme] .celadon .badge-warn {
@@ -276,8 +281,8 @@
 .celadon .avatar,
 [data-theme] .celadon .avatar {
   background: var(--brand-soft);
-  color: var(--brand);
-  border: 1px solid var(--brand);
+  color: var(--brand-ink);
+  border: 1px solid var(--brand-ink);
 }
 .celadon .tab-active,
 [data-theme] .celadon .tab-active {

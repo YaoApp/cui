@@ -22,17 +22,24 @@ svg.icon.is-small{width:14px;height:14px}
 .navigation-header{height:var(--column-header-height);display:flex;align-items:center;gap:2px;padding-left:76px}
 .icon-button{width:26px;height:26px;border-radius:var(--radius-small);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
 .icon-button:hover{background:var(--background-hover);color:var(--text-primary)}
-.brand{padding:6px 14px 8px;display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px}
-.brand .brand-mark{width:16px;height:16px;color:var(--brand)}
+.brand{padding:10px 14px 12px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px}
+/* logo：16px 标记 + 8px 间距（= 标记的 1/2）+ 左右与导航项对齐；预留留白区 4px */
+.brand-mark{width:16px;height:16px;flex:none;display:block}
+.brand-mark .logo-half-light{fill:var(--brand-display)}
+.brand-mark .logo-half-dark{fill:var(--brand)}
+html[data-logo="original"] .brand-mark .logo-half-light{fill:#6694FF}
+html[data-logo="original"] .brand-mark .logo-half-dark{fill:#3370FF}
+.jn2[data-theme="dark"] .brand-mark .logo-half-dark, .celadon[data-theme="dark"] .brand-mark .logo-half-dark{fill:var(--brand-lift)}
+.brand .brand-mark{width:16px;height:16px;color:var(--brand-ink)}
 .new-task-button{margin:2px 12px 8px;height:34px;border-radius:var(--radius-medium);display:flex;align-items:center;justify-content:center;gap:7px;
-  background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand);font-weight:650;font-size:13px}
+  background:var(--brand-soft);color:var(--brand-ink);border:1px solid var(--brand-ink);font-weight:650;font-size:13px}
 .fixed-navigation{padding:0 8px;display:flex;flex-direction:column;gap:1px}
 .navigation-item{height:32px;border-radius:var(--radius-small);display:flex;align-items:center;gap:9px;padding:0 9px;color:var(--text-secondary);font-size:13px}
 .navigation-item:hover{background:var(--background-hover);color:var(--text-primary)}
-.navigation-item.on{background:var(--brand-soft);color:var(--brand);font-weight:650}
+.navigation-item.is-active{background:var(--brand-soft);color:var(--brand-ink);font-weight:650}
 .navigation-item .meta{margin-left:auto;font-size:11px;color:var(--text-tertiary);font-weight:500}
-.navigation-item .badge{margin-left:auto;min-width:17px;height:17px;border-radius:var(--radius-pill);background:var(--brand-soft);color:var(--brand);
-  border:1px solid var(--brand);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.navigation-item .badge{margin-left:auto;min-width:17px;height:17px;border-radius:var(--radius-pill);background:var(--brand-soft);color:var(--brand-ink);
+  border:1px solid var(--brand-ink);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
 .navigation-separator{height:1px;background:var(--border-subtle);margin:8px 12px}
 .navigation-context{flex:1;min-height:0;display:flex;flex-direction:column}
 .navigation-context-header{padding:2px 14px 8px;font-size:11.5px;color:var(--text-tertiary);letter-spacing:.4px;display:flex;align-items:center;gap:6px}
@@ -42,7 +49,7 @@ svg.icon.is-small{width:14px;height:14px}
 .search-field kbd{margin-left:auto;font:inherit;font-size:11px;color:var(--text-tertiary);background:var(--background-surface);border:1px solid var(--border-default);border-radius:5px;padding:0 5px}
 .filter-chips{display:flex;gap:5px;padding:0 12px 8px}
 .chip{font-size:11.5px;padding:2px 9px;border-radius:var(--radius-pill);border:1px solid var(--border-default);color:var(--text-secondary);background:var(--background-surface)}
-.chip.is-active{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:650}
+.chip.is-active{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
 .conversation-list{flex:1;min-height:0;overflow:hidden;padding:0 8px 8px}
 .list-group-label{font-size:10.5px;color:var(--text-muted);letter-spacing:.5px;padding:8px 6px 4px;display:flex;align-items:center;gap:6px}
 .conversation-row{display:flex;gap:9px;align-items:flex-start;padding:8px 9px;border-radius:var(--radius-medium);position:relative}
@@ -53,11 +60,11 @@ svg.icon.is-small{width:14px;height:14px}
 .unread-dot.is-read{background:transparent;border:1.5px solid var(--border-control)}
 .conversation-row .row-body{flex:1;min-width:0}
 .conversation-row .row-title{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:650;color:var(--text-primary)}
-.conversation-row.is-selected .row-title{color:var(--brand)}
+.conversation-row.is-selected .row-title{color:var(--brand-ink)}
 .conversation-row .row-subtitle{font-size:11.5px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .conversation-row .row-time{font-size:10.5px;color:var(--text-muted);flex:none;margin-top:1px}
 .user{margin-top:auto;border-top:1px solid var(--border-subtle);padding:9px 12px;display:flex;align-items:center;gap:9px}
-.avatar{width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand);
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand-ink);border:1px solid var(--brand-ink);
   display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11.5px}
 /* ============ ② 内容列 ============ */
 .main{flex:1;min-width:0;background:var(--background-content);display:flex;flex-direction:column}
@@ -73,13 +80,13 @@ svg.icon.is-small{width:14px;height:14px}
 .message-group{padding:0 30px;display:flex;flex-direction:column;gap:14px}
 .date-separator{display:flex;align-items:center;gap:10px;color:var(--text-muted);font-size:11px;padding:2px 30px}
 .date-separator::before,.date-separator::after{content:"";height:1px;background:var(--border-subtle);flex:1}
-.unread-divider{display:flex;align-items:center;gap:10px;color:var(--brand);font-size:11px;font-weight:650;padding:2px 30px}
+.unread-divider{display:flex;align-items:center;gap:10px;color:var(--brand-ink);font-size:11px;font-weight:650;padding:2px 30px}
 .unread-divider::before,.unread-divider::after{content:"";height:1px;background:var(--brand-soft);flex:1}
 .message{max-width:640px;padding:9px 12px;border-radius:11px;font-size:13px;line-height:1.6}
 .message.is-user{align-self:flex-end;background:var(--brand-soft);color:var(--text-primary);border:1px solid var(--border-default)}
 .message.is-agent{align-self:flex-start;background:var(--background-surface);border:1px solid var(--border-subtle)}
 .message .message-header{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-tertiary);margin-bottom:3px}
-.message .message-header .message-author{color:var(--brand);display:flex;align-items:center;gap:4px;font-weight:650}
+.message .message-header .message-author{color:var(--brand-ink);display:flex;align-items:center;gap:4px;font-weight:650}
 .attachment-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .attachment-chip{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-secondary);background:var(--background-field);
   border:1px solid var(--border-default);border-radius:var(--radius-small);padding:3px 8px}
@@ -92,11 +99,11 @@ svg.icon.is-small{width:14px;height:14px}
 .question-card .question-header{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-tertiary);margin-bottom:7px}
 .question-card .question-header .warning-badge{margin-left:auto;color:var(--warm-text);background:var(--warm-soft);border:1px solid var(--warm);border-radius:var(--radius-pill);padding:1px 8px;font-weight:650;font-size:11px}
 .question-option{margin-top:6px;min-height:32px;border:1px solid var(--border-default);border-radius:var(--radius-medium);display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12.5px}
-.question-option.is-selected{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);font-weight:650}
+.question-option.is-selected{border-color:var(--brand-ink);background:var(--brand-soft);color:var(--brand-ink);font-weight:650}
 .composer{margin:14px 30px 18px;border:1px solid var(--border-default);background:var(--background-surface);border-radius:11px;padding:10px 12px}
 .composer .placeholder{color:var(--text-muted);font-size:13px}
 .composer .foot{display:flex;align-items:center;gap:7px;margin-top:10px}
-.send-button{margin-left:auto;width:30px;height:28px;border-radius:var(--radius-medium);background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand);
+.send-button{margin-left:auto;width:30px;height:28px;border-radius:var(--radius-medium);background:var(--brand-soft);color:var(--brand-ink);border:1px solid var(--brand-ink);
   display:flex;align-items:center;justify-content:center}
 /* ============ ③ 侧边面板 ============ */
 .panel{width:460px;flex:none;background:var(--background-surface);border-left:1px solid var(--border-subtle);display:flex;flex-direction:column}
@@ -109,7 +116,7 @@ svg.icon.is-small{width:14px;height:14px}
 .panel-meta{font-size:12px;color:var(--text-tertiary);margin-top:3px;display:flex;align-items:center;gap:7px}
 .panel-actions{display:flex;gap:8px;margin-top:12px}
 .panel-button{height:32px;padding:0 13px;border-radius:var(--radius-medium);font-size:12.5px;font-weight:650;display:flex;align-items:center;gap:6px;border:1px solid var(--border-default);color:var(--text-primary);background:var(--background-surface)}
-.panel-button.is-primary{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
+.panel-button.is-primary{background:var(--brand-soft);color:var(--brand-ink);border-color:var(--brand-ink)}
 .panel-button.warning-badge{background:var(--warm-soft);color:var(--warm-text);border-color:var(--warm)}
 .section-label{font-size:11px;color:var(--text-tertiary);letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:7px}
 .section-label .meta{margin-left:auto;color:var(--text-secondary);font-weight:650;letter-spacing:0}
@@ -142,7 +149,7 @@ svg.icon.is-small{width:14px;height:14px}
   background:var(--background-surface);border:1px solid var(--border-default);border-radius:var(--radius-pill);padding:8px 12px;box-shadow:var(--shadow-floating)}
 .toolbar button{font:inherit;font-size:12px;padding:5px 12px;border-radius:var(--radius-pill);border:1px solid var(--border-default);
   background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
-.toolbar button.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:650}
+.toolbar button.is-active{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
 </style>
 </head>
 <body>
@@ -182,7 +189,7 @@ svg.icon.is-small{width:14px;height:14px}
       <span class="icon-button"><svg class="icon is-small"><use href="#i-left"/></svg></span>
       <span class="icon-button"><svg class="icon is-small"><use href="#i-right"/></svg></span>
     </div>
-    <div class="brand"><svg class="icon brand-mark"><use href="#i-spark"/></svg><span data-i18n="ui.brand">Yao Agents</span></div>
+    <div class="brand"><svg class="brand-mark" viewBox="11 12 50 50" aria-hidden="true"><path class="logo-half-light" d="M53.4075469,54.6265023 C51.0818629,56.9701458 48.3754867,58.81158 45.3645565,60.0950038 C42.6097285,61.2668256 39.7026235,61.9294629 36.7055368,62.0689655 C36.463278,61.9992142 36.2071759,61.9573634 35.9441521,61.9573634 C29.7630933,61.9085375 24.7794848,56.8027427 24.8275862,50.573952 C24.8487016,47.881552 25.8661883,45.244953 27.6312163,43.2221654 C29.4100877,41.1784524 31.8257535,39.9368794 34.4421479,39.539297 C34.9266654,39.4695457 35.4181046,39.4207198 35.9095437,39.4067695 C37.1346808,39.3718939 38.3667396,39.323068 39.5711117,39.0649882 C41.0661942,38.7441322 42.5197467,38.2140224 43.8763957,37.495584 C45.3437915,36.7143695 46.6935188,35.716926 47.8771258,34.5451042 C51.0887846,31.35747 52.8814993,27.102641 52.9161077,22.5548565 C52.9299511,20.7761984 52.673849,19.0324161 52.1685665,17.3793103 C52.5977105,17.7559673 53.0130112,18.1465746 53.4144686,18.5511321 C55.7401525,20.8947756 57.5674757,23.6220513 58.8410645,26.6562327 C60.1561834,29.795041 60.8275862,33.136128 60.8275862,36.5818421 C60.8275862,40.0275561 60.1561834,43.3686431 58.8410645,46.5074514 C57.5536323,49.5555831 55.7332309,52.2828587 53.4075469,54.6265023 Z"/><path class="logo-half-dark" d="M13.1702074,47.3629488 C11.8476263,44.223677 11.1724138,40.8820966 11.1724138,37.4358738 C11.1724138,33.989651 11.8476263,30.6480706 13.1702074,27.5087988 C14.4510227,24.4741694 16.2887144,21.746491 18.6275946,19.4025014 C20.9664749,17.0585118 23.6882076,15.2168056 26.7162222,13.9331923 C29.8347293,12.607722 33.1551039,11.9380106 36.5798929,11.9310345 C36.7399948,11.9589391 36.9000967,11.9728914 37.0741206,11.9728914 L37.2342225,11.9728914 C40.2413542,11.9938199 43.0675012,13.1937194 45.17667,15.3423765 C47.2858389,17.4910336 48.4343961,20.3373067 48.4137931,23.3510077 C48.3926304,25.9670675 47.4459408,28.5273181 45.7613901,30.5294758 C44.0977223,32.503729 41.765803,33.8780324 39.232016,34.3593874 C37.7354111,34.6384338 36.2179233,34.4431014 34.7282793,34.6523861 C30.7466141,35.2244312 27.0781918,37.2056605 24.4121467,40.2472661 C21.7112969,43.3167763 20.207731,47.2652826 20.1729262,51.3602883 C20.1520434,53.620564 20.5766615,55.8250304 21.3910931,57.862069 C20.4235206,57.1365484 19.4977138,56.33429 18.6345556,55.4622701 C16.2887144,53.1252566 14.4520227,50.3975782 13.1702074,47.3629488 Z"/></svg><span data-i18n="ui.brand">Yao Agents</span></div>
     <div class="new-task-button"><svg class="icon is-small"><use href="#i-plus"/></svg><span data-i18n="ui.newTask">新任务</span></div>
     <div class="fixed-navigation">
       <div class="navigation-item"><svg class="icon is-small"><use href="#i-chat"/></svg><span data-i18n="ui.nav.chat">聊天</span></div>
@@ -229,7 +236,7 @@ svg.icon.is-small{width:14px;height:14px}
         <span class="capability"><svg class="icon is-small"><use href="#i-split"/></svg></span>
         <span class="capability"><svg class="icon is-small"><use href="#i-book"/></svg></span>
         <span class="capability"><svg class="icon is-small"><use href="#i-dots"/></svg></span>
-        <span class="capability" style="color:var(--brand)"><svg class="icon is-small"><use href="#i-split2"/></svg></span>
+        <span class="capability" style="color:var(--brand-ink)"><svg class="icon is-small"><use href="#i-split2"/></svg></span>
       </div>
     </div>
     <div class="message-thread">
@@ -353,6 +360,9 @@ svg.icon.is-small{width:14px;height:14px}
   <span style="width:1px;height:18px;background:var(--border-default)"></span>
   <button data-t="light" class="is-active" data-i18n="ui.theme.light">浅色</button>
   <button data-t="dark" data-i18n="ui.theme.dark">暗色</button>
+  <span style="width:1px;height:18px;background:var(--border-default)"></span>
+  <button data-logo="celadon" class="is-active">Logo 青</button>
+  <button data-logo="original">Logo 原色</button>
 </div>
 <script src="./i18n/bundle.js"></script>
 <script>
@@ -360,8 +370,16 @@ svg.icon.is-small{width:14px;height:14px}
 document.querySelectorAll('.toolbar button[data-t]').forEach(function(b){
   b.addEventListener('click', function(){
     document.documentElement.dataset.theme = b.dataset.t;
-    document.querySelectorAll('.toolbar button[data-t]').forEach(function(x){ x.classList.remove('on'); });
-    b.classList.diff-added('on');
+    document.querySelectorAll('.toolbar button[data-t]').forEach(function(x){ x.classList.remove('is-active'); });
+    b.classList.add('is-active');
+  });
+});
+/* ---- Logo 配色切换 ---- */
+document.querySelectorAll('.toolbar button[data-logo]').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.documentElement.dataset.logo = b.dataset.logo;
+    document.querySelectorAll('.toolbar button[data-logo]').forEach(function(x){ x.classList.remove('is-active'); });
+    b.classList.add('is-active');
   });
 });
 /* ---- 多语言：运行时替换，不刷新；缺 key 回退 zh-CN ---- */
@@ -401,7 +419,7 @@ document.querySelectorAll('.toolbar button[data-t]').forEach(function(b){
     });
     document.documentElement.lang = lang;
     document.querySelectorAll('.language-switch button').forEach(function(b){
-      b.classList.toggle('on', b.dataset.lang === lang);
+      b.classList.toggle('is-active', b.dataset.lang === lang);
     });
   }
   document.querySelectorAll('.language-switch button').forEach(function(b){
