@@ -3,17 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Celadon 色卡 · token 单一来源（自动生成）</title>
-<!-- 唯一来源：tokens.less →（build-css.mjs）→ tokens.css -->
+<title>Celadon 设计基线 · tokens · 配对 · 字体 · 对比度</title>
 <link rel="stylesheet" href="./tokens.css">
 <style>
-:root{--f:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+:root{--card-chrome:12px}
 *{box-sizing:border-box} html,body{margin:0}
-body{font:13px/1.5 var(--f);background:#EDEDEE;color:#111;-webkit-font-smoothing:antialiased;padding:22px 22px 60px}
-h1{font-size:19px;margin:0 0 2px}
-.sub{color:#666;font-size:12.5px;margin:0 0 6px}
-.src{font-size:11.5px;color:#777;background:#fff;border:1px solid #e2e2e4;border-radius:8px;padding:6px 10px;display:inline-block;margin-bottom:16px}
-.src code{background:#f2f2f4;padding:1px 5px;border-radius:4px}
+body{font:13px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans","Microsoft YaHei",sans-serif;
+  background:#EDEDEE;color:#111;-webkit-font-smoothing:antialiased;padding:22px 22px 60px}
+h1{font-size:19px;margin:0 0 4px}
+.sub{color:#666;font-size:12.5px;margin:0 0 10px}
+.src{font-size:11.5px;color:#777;background:#fff;border:1px solid #e2e2e4;border-radius:8px;padding:6px 10px;display:inline-block;margin-bottom:14px}
+.src code,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f2f2f4;padding:1px 5px;border-radius:4px;font-size:11.5px}
+.toolbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;background:rgba(237,237,238,.92);
+  backdrop-filter:blur(6px);padding:8px 0 12px;margin-bottom:8px}
+.language-switch{display:flex;gap:4px}
+.toolbar button{font:inherit;font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid #d6d6da;background:#fff;color:#555;cursor:pointer}
+.toolbar button.on{background:#E4EFEF;border-color:#2A7B7B;color:#2A7B7B;font-weight:650}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 @media (max-width:1100px){.cols{grid-template-columns:1fr}}
 .panel{border-radius:14px;overflow:hidden;border:1px solid var(--border-subtle);background:var(--background-content);color:var(--text-primary)}
@@ -23,10 +28,12 @@ h1{font-size:19px;margin:0 0 2px}
 .grp h2{font-size:11.5px;letter-spacing:.4px;color:var(--text-tertiary);margin:0 0 8px;font-weight:650}
 .sw{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dashed var(--border-subtle)}
 .sw:last-child{border-bottom:0}
-.chip{width:44px;height:30px;border-radius:8px;flex:none;border:1px solid rgba(0,0,0,.10)}
+.chip-color{width:44px;height:30px;border-radius:8px;flex:none;border:1px solid rgba(0,0,0,.10)}
+.chip-none{width:44px;height:30px;border-radius:8px;flex:none;border:1px dashed #ccc}
 .meta{flex:1;min-width:0}
 .meta .n{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;font-weight:600}
 .meta .u{font-size:11px;color:var(--text-tertiary);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta .u.long{white-space:normal;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
 .hex{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--text-secondary);cursor:pointer;background:var(--background-field);border:1px solid var(--border-default);border-radius:6px;padding:2px 7px;flex:none}
 .hex:hover{background:var(--background-hover)}
 .cr{font-size:10.5px;padding:2px 6px;border-radius:99px;flex:none;font-weight:650;min-width:48px;text-align:center;border:1px solid transparent}
@@ -40,177 +47,248 @@ h1{font-size:19px;margin:0 0 2px}
 .panel.dark .cr.warn{color:#f0cb9c;background:#2c2718;border-color:#4a3f24}
 .panel.dark .cr.bad{color:#f7a6a0;background:#2a1614;border-color:#5a2a26}
 .panel.dark .cr.dim{color:#999;background:#1e1e1e;border-color:#333}
-.note{padding:10px 14px 14px;font-size:11.5px;color:var(--text-tertiary);border-top:1px solid var(--border-subtle)}
 .card{background:#fff;border:1px solid #e2e2e4;border-radius:12px;padding:14px 16px;margin-top:18px}
-.card h2{font-size:13.5px;margin:0 0 8px}
+.card h2{font-size:13.5px;margin:0 0 6px}
+.card .hint{font-size:11.5px;color:#666;margin:0 0 10px}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th,td{text-align:left;padding:6px 9px;border-bottom:1px solid #ddd}
 th{color:#666;font-weight:650}
-code{font-family:ui-monospace,Menlo,monospace;background:#f2f2f4;padding:1px 5px;border-radius:4px;font-size:11.5px}
+ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:#333;margin:4px 0}
+/* ===== 字体样本 ===== */
+.specimen-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:1100px){.specimen-grid{grid-template-columns:1fr}}
+.specimen{border:1px solid var(--border-subtle);border-radius:10px;padding:12px 14px;background:var(--background-content);font-family:var(--font-family-ui)}
+.specimen .spec-head{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.specimen .spec-head .name{font-weight:700;font-size:13px}
+.specimen .spec-head .code{font-size:11px;color:var(--text-tertiary);font-family:ui-monospace,Menlo,monospace}
+.specimen .stack{font-size:10.5px;color:var(--text-tertiary);font-family:ui-monospace,Menlo,monospace;word-break:break-all;
+  background:var(--background-field);border-radius:6px;padding:5px 7px;margin-bottom:9px;line-height:1.5}
+.specimen .line{padding:5px 0;border-top:1px dashed var(--border-subtle)}
+.specimen .line:first-of-type{border-top:0}
+.specimen .line .lbl{font-size:10.5px;color:var(--text-tertiary);margin-bottom:2px}
+.specimen .line .txt{font-size:15px;line-height:1.7;color:var(--text-primary)}
+.specimen .line.mono .txt{font-family:var(--font-family-monospace);font-size:13px}
+.specimen .glyphs{font-size:17px;letter-spacing:.06em;line-height:1.6}
+.han-note{font-size:11px;color:#666;margin-top:6px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:#111;color:#fff;font-size:12px;padding:7px 14px;border-radius:99px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
 </style>
 </head>
 <body>
-<h1>Celadon 色卡 <span style="color:#666;font-size:13px;font-weight:400">token 单一来源 · 自动生成</span></h1>
-<p class="sub">页面所有色值与尺寸都**从 <code>tokens.css</code> 实时读取**（无一处硬编码）；对比度按各主题真实内容底自动实算。</p>
-<p class="src">源：<code>celadon/design/tokens.less</code> → <code>node celadon/design/build-css.mjs</code> → <code>tokens.css</code> → 本页。改 token 后重跑生成即可，不用改这份 HTML。</p>
+<h1 id="card-title">Celadon 设计基线</h1>
+<p class="sub" id="card-subtitle"></p>
+<p class="src" id="card-source"></p>
 
-<!-- 探针：用于读取 token 解析值（不参与布局） -->
+<div class="toolbar">
+  <span class="language-switch">
+    <button data-lang="zh-CN">简</button><button data-lang="zh-TW">繁</button>
+    <button data-lang="en">EN</button><button data-lang="ja">日</button>
+  </span>
+  <span id="card-langnote" style="font-size:11.5px;color:#777"></span>
+</div>
+
+<div class="cols" id="cols"></div>
+
+<div class="card"><h2 id="pairs-title"></h2><p class="hint" id="pairs-note"></p><div id="pairs"></div></div>
+
+<div class="card"><h2 id="typo-title"></h2><p class="hint" id="typo-note"></p><div class="specimen-grid" id="specimen"></div></div>
+
+<div class="card"><h2 id="contrast-title"></h2><table id="ctab"></table></div>
+<div class="card"><h2 id="redlines-title"></h2><ol id="redlines"></ol></div>
+<div class="toast" id="toast"></div>
+
 <div id="probe-light" class="celadon" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
 <div id="probe-dark" class="celadon" data-theme="dark" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
 
-<div class="cols" id="cols"></div>
-<div class="card"><h2>关键配对（前景 on 背景 · 自动实算）</h2><div id="pairs"></div>
-  <p style="font-size:11.5px;color:#666;margin:8px 0 0">同一 token 有"实心底"和"浅底"两种用法，配对用错就会像 <code>--warm</code>+<code>--warm-text</code>（1.41:1，几乎不可见）。</p></div>
-<div class="card"><h2>对比度实测（WCAG 2.1 · AA 正文 4.5:1 / AAA 7:1）</h2><table id="ctab"></table></div>
-<div class="card"><h2>用法红线</h2>
-  <ol style="margin:0;padding-left:20px">
-    <li><b>品牌两档</b>：实心档（<code>--brand</code>+白字）只用于主按钮/徽标（≤2 处）；浅底档（<code>--brand-soft</code>+品牌字）用于选中/气泡/头像（可多处、单块面积小）；</li>
-    <li><b>暗色下"浅底 + 品牌字/描边"一律用 <code>--brand-lift</code></b>；</li>
-    <li><b>交互四态齐</b>（default/hover/active/disabled），键盘焦点必须可见（<code>--focus-ring</code>）；</li>
-    <li><code>--brand-display</code> <b>只做填充/图形，不承载文字与图标</b>；</li>
-    <li><b>success 只用软底 + 图标</b>，不做大面积实心；</li>
-    <li>控件边界用 <code>--border-default/3</code>，<code>--border-subtle</code> 只作装饰线；</li>
-    <li><code>--radius-pill</code> 仅用于徽标/标签/头像；中文最小 12px（<code>--font-size-11</code> 仅西文/数字）；</li>
-    <li><b>禁硬编码</b>：less/tsx 不得出现颜色字面量（系统色除外）。</li>
-  </ol>
-</div>
-<div class="toast" id="toast"></div>
+<script src="./i18n/bundle.js"></script>
 <script>
-/* 只列 token 名与用途，值一律从 tokens.css 读 */
+/* token 清单：只写 token 名 + 用法 key（文案在 i18n/card.usage.*），值一律从 tokens.css 读 */
 var GROUPS = [
- ['品牌', [
-   ['--brand','主按钮 / 徽标 / 选中文字（实心档）','on'],
-   ['--brand-hover','悬停'],
-   ['--brand-active','按下'],
-   ['--brand-soft','浅底按钮 · 选中底 · 气泡'],
-   ['--brand-display','大面积填充 / 图形（不承载文字）'],
-   ['--brand-text','品牌底上的文字','onbrand'],
-   ['--brand-lift','仅暗色用（文字/描边档）','nocr'],
- ]],
- ['交互态', [
-   ['--focus-ring-color','键盘焦点环颜色（2px offset + 2px 宽）','on'],
-   ['--focus-ring-width','焦点环宽度'],
-   ['--focus-ring-offset','焦点环与控件间隙'],
-   ['--disabled-background','禁用底'],
-   ['--disabled-text','禁用字（豁免对比度）'],
-   ['--disabled-border','禁用边界'],
-   ['--scrim','弹窗 / 抽屉遮罩','nocr'],
- ]],
- ['中性 · 面', [
-   ['--background-app','窗口底'],['--background-navigation','① 导航列'],['--background-content','② 内容区（非纯白）'],
-   ['--background-surface','③ 面板 / 卡片'],['--background-field','输入框 / 字段'],['--background-hover','悬停'],
-   ['--background-selected','选中底（= 品牌浅底）'],
- ]],
- ['中性 · 界', [['--border-subtle','装饰线'],['--border-default','常规边界'],['--border-control','控件边界']]],
- ['中性 · 字', [
-   ['--text-primary','主文字','on'],['--text-secondary','次要文字','on'],['--text-tertiary','第三级'],['--text-muted','占位 / 弱化'],
- ]],
- ['语义', [
-   ['--success','成功（松花绿 · 传统色）','on'],['--success-soft','成功软底'],
-   ['--warning','警示（= --warm 别名）','on'],['--warning-soft','警示软底'],
-   ['--warm','琥珀实心底（须配 --warm-contrast）','on'],
-   ['--warm-soft','琥珀浅底（须配 --warm-text）'],
-   ['--warm-text','琥珀浅底上的文字'],
-   ['--warm-contrast','压在 --warm 实心底上的文字','nocr'],
-   ['--danger','危险（朱红）','on'],['--danger-soft','危险软底'],
- ]],
- ['尺寸 / 圆角 / 动效', [
-   ['--font-size-11','仅西文/数字角标'],['--font-size-12','中文最小档'],['--font-size-13','正文默认'],['--font-size-16','补档（原 15→17 断档）'],
-   ['--spacing-8','间距 8'],['--spacing-12','间距 12'],['--spacing-16','间距 16'],
-   ['--radius-small','6px'],['--radius-medium','主档 8px'],['--radius-large','12px'],['--radius-pill','仅徽标/标签/头像'],
-   ['--row-height','行高 40'],['--column-header-height','列头 40（三列等高）'],
-   ['--duration-fast','hover 120ms'],['--duration-base','展开 200ms'],['--easing','缓动曲线'],
-   ['--shadow-subtle','hairline'],['--shadow-floating','浮层'],
- ]],
+ ['group.brand', [
+   ['--brand','brand','on'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
+   ['--brand-soft','brandSoft'], ['--brand-display','brandDisplay'], ['--brand-text','brandText','onbrand'],
+   ['--brand-lift','brandLift','nocr']]],
+ ['group.interaction', [
+   ['--focus-ring-color','focusRingColor','on'], ['--focus-ring-width','focusRingWidth'], ['--focus-ring-offset','focusRingOffset'],
+   ['--disabled-background','disabledBackground'], ['--disabled-text','disabledText'], ['--disabled-border','disabledBorder'],
+   ['--scrim','scrim','nocr']]],
+ ['group.background', [
+   ['--background-app','backgroundApp'], ['--background-navigation','backgroundNavigation'], ['--background-content','backgroundContent'],
+   ['--background-surface','backgroundSurface'], ['--background-field','backgroundField'], ['--background-hover','backgroundHover'],
+   ['--background-selected','backgroundSelected']]],
+ ['group.border', [['--border-subtle','borderSubtle'], ['--border-default','borderDefault'], ['--border-control','borderControl']]],
+ ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary'], ['--text-muted','textMuted']]],
+ ['group.semantic', [
+   ['--success','success','on'], ['--success-soft','successSoft'],
+   ['--warning','warning','on'], ['--warning-soft','warningSoft'],
+   ['--warm','warm','on'], ['--warm-soft','warmSoft'], ['--warm-text','warmText'], ['--warm-contrast','warmContrast','nocr'],
+   ['--danger','danger','on'], ['--danger-soft','dangerSoft']]],
+ ['group.metrics', [
+   ['--font-family-ui','fontFamilyUi','nocr'], ['--font-family-monospace','fontFamilyMonospace','nocr'],
+   ['--font-size-11','fontSize11'], ['--font-size-12','fontSize12'], ['--font-size-13','fontSize13'], ['--font-size-16','fontSize16'],
+   ['--spacing-8','spacing8'], ['--spacing-12','spacing12'], ['--spacing-16','spacing16'],
+   ['--radius-small','radiusSmall'], ['--radius-medium','radiusMedium'], ['--radius-large','radiusLarge'], ['--radius-pill','radiusPill'],
+   ['--row-height','rowHeight'], ['--column-header-height','columnHeaderHeight'],
+   ['--duration-fast','durationFast'], ['--duration-base','durationBase'], ['--easing','easing'],
+   ['--shadow-subtle','shadowSubtle'], ['--shadow-floating','shadowFloating']]]
 ];
-function readAll(probeEl){ var cs = getComputedStyle(probeEl); var o = {};
-  GROUPS.forEach(function(g){ g[1].forEach(function(t){ o[t[0]] = cs.getPropertyValue(t[0]).trim(); }); }); return o; }
+var PAIRS = [
+ ['--brand-text','--brand','brand'], ['--warm-contrast','--warm','warm'],
+ ['--warm-text','--warm-soft','warmSoft'], ['--success','--success-soft','success'],
+ ['--danger','--danger-soft','danger'], ['--text-primary','--background-content','textPrimary'],
+ ['--text-secondary','--background-content','textSecondary'], ['--brand','--brand-soft','brandSoft']
+];
+var SPECIMEN_LANGUAGES = [
+ ['zh-CN','简体中文'], ['zh-TW','繁體中文'], ['ja','日本語'], ['en','English']
+];
+var SPECIMEN_LINES = [
+ ['mixedLabel','mixedText','', false],   // 混排：按各语言文案
+ ['hanLabel','hanText','', true],        // 汉字：**四列同一段**，比较 SC/TC/JP 字形
+ ['kanaLabel','kanaText','', true],      // 假名：同上
+ ['latinLabel','latinText','', false],
+ ['punctLabel','punctText','', true],    // 标点：同上
+ ['monoLabel','monoText','mono', false]
+];
+
+var BUNDLE = window.CELADON_I18N || {};
+var CURRENT = 'zh-CN';
+function lookup(lang, key){
+  var dict = BUNDLE[lang]; if (!dict) return null;
+  return key.split('.').reduce(function(o, k){ return (o == null ? null : o[k]); }, dict);
+}
+function tr(key){
+  var v = lookup(CURRENT, key);
+  if (v == null) v = lookup('zh-CN', key);
+  return v == null ? key : v;
+}
 function isColor(v){ return /^(#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i.test(v); }
 function toRGB(v){
   if (v[0] === '#'){ var h = v.slice(1); if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
     return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)]; }
   var m = v.match(/rgba?\(([^)]+)\)/); if (!m) return null;
-  var p = m[1].split(',').map(function(x){ return parseFloat(x); }); return [p[0], p[1], p[2]];
+  return m[1].split(',').map(parseFloat).slice(0,3);
 }
 function lum(v){ var c = toRGB(v); if (!c) return null;
   var a = c.map(function(x){ x = x/255; return x <= 0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4); });
   return 0.2126*a[0] + 0.7152*a[1] + 0.0722*a[2]; }
 function ratio(a,b){ var l1 = lum(a), l2 = lum(b); if (l1 === null || l2 === null) return null;
   var hi = Math.max(l1,l2), lo = Math.min(l1,l2); return (hi+0.05)/(lo+0.05); }
-function grade(r){ return r >= 7 ? ['aaa','AAA'] : r >= 4.5 ? ['aa','AA'] : r >= 3 ? ['warn','低于AA'] : ['bad','FAIL']; }
+function grade(r){ return r >= 7 ? ['aaa','AAA'] : r >= 4.5 ? ['aa','AA'] : r >= 3 ? ['warn','&lt;AA'] : ['bad','FAIL']; }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function readAll(el){ var cs = getComputedStyle(el), o = {};
+  GROUPS.forEach(function(g){ g[1].forEach(function(t){ o[t[0]] = cs.getPropertyValue(t[0]).trim(); }); }); return o; }
 
-var CT = [];
-function build(themeName, probeEl, label){
+var CONTRAST_ROWS = [];
+function buildPanel(themeName, probeEl, label){
   var V = readAll(probeEl), bg = V['--background-content'];
   var body = GROUPS.map(function(g){
     var rows = g[1].map(function(t){
-      var name = t[0], use = t[1] || '', mode = t[2] || '', val = V[name] || '';
-      var badge = '', cls = 'dim';
+      var name = t[0], usageKey = t[1], mode = t[2] || '', val = V[name] || '';
+      var usage = tr('card.usage.' + usageKey), badge = '', cls = 'dim', long = !isColor(val);
       if (isColor(val)){
-        if (mode === 'onbrand'){ var rb = ratio(val, V['--brand']); cls = 'dim'; badge = rb ? rb.toFixed(2)+':1' : '—'; }
-        else if (mode !== 'nocr'){ var r = ratio(val, bg); if (r){ var gd = grade(r); cls = gd[0]; badge = mode === 'on' ? r.toFixed(2)+':1' : gd[1];
-          if (mode === 'on') CT.push([label, name, val, bg, r.toFixed(2), gd[1]]); } }
-      }
-      var chip = isColor(val) ? '<span class="chip" style="background:'+val+'"></span>' : '<span class="chip" style="background:transparent;border:1px dashed #ccc"></span>';
+        if (mode === 'onbrand'){ var rb = ratio(val, V['--brand']); badge = rb ? rb.toFixed(2)+':1' : '—'; }
+        else if (mode !== 'nocr'){ var r = ratio(val, bg); if (r){ var gd = grade(r); cls = gd[0]; badge = mode === 'on' ? r.toFixed(2)+':1' : gd[1].replace('&lt;','<');
+          if (mode === 'on') CONTRAST_ROWS.push([label, name, val, bg, r.toFixed(2), gd[1].replace('&lt;','<')]); } }
+      } else { badge = ''; }
+      var chip = isColor(val) ? '<span class="chip-color" style="background:'+val+'"></span>' : '<span class="chip-none"></span>';
+      var right = isColor(val)
+        ? '<span class="cr '+cls+'">'+esc(badge)+'</span><span class="hex" data-hex="'+val+'">'+val+'</span>'
+        : '<span class="cr dim" style="min-width:auto;max-width:52%">'+esc(val)+'</span>';
+      if (long) right = '<span class="cr dim" style="min-width:auto;max-width:50%;white-space:normal;text-align:right;font-family:ui-monospace,Menlo,monospace">'+esc(val)+'</span>';
       return '<div class="sw">'+chip
-        + '<div class="meta"><div class="n">'+esc(name)+'</div><div class="u">'+esc(use)+'</div></div>'
-        + '<span class="cr '+cls+'">'+esc(badge || val || '')+'</span>'
-        + (isColor(val) ? '<span class="hex" data-hex="'+val+'">'+val+'</span>' : '')
-        + '</div>';
+        + '<div class="meta"><div class="n">'+esc(name)+'</div><div class="u'+(long?' long':'')+'">'+esc(usage)+'</div></div>'
+        + right + '</div>';
     }).join('');
-    return '<div class="grp"><h2>'+esc(g[0])+'</h2>'+rows+'</div>';
+    return '<div class="grp"><h2>'+esc(tr('card.'+g[0]))+'</h2>'+rows+'</div>';
   }).join('');
   return '<section class="panel '+(themeName==='dark'?'dark':'')+'" style="'
     + '--background-app:'+V['--background-app']+';--background-navigation:'+V['--background-navigation']+';--background-content:'+bg+';--background-surface:'+V['--background-surface']
     + ';--background-field:'+V['--background-field']+';--background-hover:'+V['--background-hover']
     + ';--border-subtle:'+V['--border-subtle']+';--border-default:'+V['--border-default']
     + ';--text-primary:'+V['--text-primary']+';--text-secondary:'+V['--text-secondary']+';--text-tertiary:'+V['--text-tertiary']+'">'
-    + '<div class="hd">'+label+'<span class="tag">内容底 '+bg+'</span></div>'+body+'</section>';
+    + '<div class="hd">'+esc(tr(themeName === 'light' ? 'card.themeLight' : 'card.themeDark'))+'<span class="tag">'+esc(tr('card.usage.backgroundContent'))+' '+bg+'</span></div>'+body+'</section>';
 }
-window.addEventListener('load', function(){
-  document.getElementById('cols').innerHTML =
-      build('light', document.getElementById('probe-light'), '浅色')
-    + build('dark',  document.getElementById('probe-dark'),  '暗色');
-  var PAIRS = [
-    ['--brand-text','--brand','实心主按钮'],
-    ['--warm-contrast','--warm','琥珀实心（徽标/按钮）'],
-    ['--warm-text','--warm-soft','琥珀浅底'],
-    ['--success','--success-soft','成功（软底）'],
-    ['--danger','--danger-soft','危险（软底）'],
-    ['--text-primary','--background-content','正文'],
-    ['--text-secondary','--background-content','次要文字'],
-    ['--brand','--brand-soft','品牌字 on 品牌浅底'],
-  ];
-  function renderPairs(){
-    var L = readAll(document.getElementById('probe-light')), D = readAll(document.getElementById('probe-dark'));
-    document.getElementById('pairs').innerHTML = PAIRS.map(function(t){
-      var f = t[0], b = t[1], label = t[2];
-      var cell = function(V, themeLabel){
-        var r = ratio(V[f], V[b]); var gd = r ? grade(r) : ['dim','—'];
-        return '<div style="display:flex;align-items:center;gap:9px;padding:4px 0">'
-          + '<span style="font-size:10.5px;color:#888;width:34px">' + themeLabel + '</span>'
-          + '<span style="padding:4px 11px;border-radius:7px;font-size:12px;font-weight:650;'
-          + 'background:' + V[b] + ';color:' + V[f] + ';border:1px solid rgba(0,0,0,.08)">' + (label||'示例') + '</span>'
-          + '<span class="cr ' + gd[0] + '">' + (r ? r.toFixed(2) + ':1' : '—') + '</span>'
-          + '<span style="font-size:10.5px;color:#999;font-family:ui-monospace,Menlo,monospace">' + f + ' on ' + b + '</span>'
-          + '</div>';
-      };
-      return cell(L,'浅') + cell(D,'暗');
+function renderPanels(){
+  document.getElementById('cols').innerHTML = buildPanel('light', document.getElementById('probe-light'), 'light')
+    + buildPanel('dark', document.getElementById('probe-dark'), 'dark');
+}
+function renderContrastTable(){
+  document.getElementById('contrast-title').textContent = tr('card.sectionContrast');
+  document.getElementById('ctab').innerHTML = '<tr><th>'+esc(tr('card.tableTheme'))+'</th><th>'+esc(tr('card.tableToken'))+'</th><th>'+esc(tr('card.tableValue'))
+    +'</th><th>'+esc(tr('card.tableBackground'))+'</th><th>'+esc(tr('card.tableContrast'))+'</th><th>'+esc(tr('card.tableLevel'))+'</th></tr>'
+    + CONTRAST_ROWS.map(function(r){
+        var theme = tr(r[0] === 'light' ? 'card.themeLight' : 'card.themeDark');
+        return '<tr><td>'+theme+'</td><td><code>'+r[1]+'</code></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td><b>'+r[4]+':1</b></td><td>'+r[5]+'</td></tr>'; }).join('');
+}
+function renderPairs(){
+  document.getElementById('pairs-title').textContent = tr('card.sectionPairs');
+  document.getElementById('pairs-note').textContent = tr('card.pairsNote');
+  var L = readAll(document.getElementById('probe-light')), D = readAll(document.getElementById('probe-dark'));
+  document.getElementById('pairs').innerHTML = PAIRS.map(function(t){
+    var f = t[0], b = t[1], label = tr('card.usage.' + t[2]);
+    return ['light','dark'].map(function(themeName){
+      var V = themeName === 'light' ? L : D;
+      var r = ratio(V[f], V[b]); var gd = r ? grade(r) : ['dim','—'];
+      var theme = tr(themeName === 'light' ? 'card.themeLight' : 'card.themeDark');
+      return '<div style="display:flex;align-items:center;gap:9px;padding:4px 0">'
+        + '<span style="font-size:10.5px;color:#888;width:34px">'+esc(theme)+'</span>'
+        + '<span style="padding:4px 11px;border-radius:7px;font-size:12px;font-weight:650;background:'+V[b]+';color:'+V[f]+';border:1px solid rgba(0,0,0,.08)">'+esc(label)+'</span>'
+        + '<span class="cr '+gd[0]+'">'+(r ? r.toFixed(2)+':1' : '—')+'</span>'
+        + '<span style="font-size:10.5px;color:#999;font-family:ui-monospace,Menlo,monospace">'+f+' on '+b+'</span></div>';
     }).join('');
-  }
-  renderPairs();
-  document.getElementById('ctab').innerHTML = '<tr><th>主题</th><th>token</th><th>色值</th><th>背景</th><th>对比度</th><th>等级</th></tr>'
-    + CT.map(function(r){ return '<tr><td>'+r[0]+'</td><td><code>'+r[1]+'</code></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td><b>'+r[4]+':1</b></td><td>'+r[5]+'</td></tr>'; }).join('');
+  }).join('');
+}
+function renderSpecimen(){
+  document.getElementById('typo-title').textContent = tr('card.sectionTypography');
+  document.getElementById('typo-note').innerHTML = esc(tr('card.typographyNote')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  var compareText = lookup('zh-CN', 'card.glyphCompareText') || '';  // 固定，四列同字
+  document.getElementById('specimen').innerHTML = SPECIMEN_LANGUAGES.map(function(L){
+    var lang = L[0], name = L[1];
+    var stack = lookup(lang, 'card.stackLabel');
+    var lines = SPECIMEN_LINES.map(function(s){
+      var text = lookup(s[3] ? 'zh-CN' : lang, 'card.' + s[1]) || '';
+      var lbl = lookup(CURRENT, 'card.' + s[0]) || lookup('zh-CN','card.' + s[0]);
+      return '<div class="line '+(s[2]||'')+'"><div class="lbl">'+esc(lbl)+'</div><div class="txt">'+esc(text)+'</div></div>';
+    }).join('');
+    return '<section class="specimen celadon" lang="'+lang+'" data-specimen="'+lang+'">'
+      + '<div class="spec-head"><span class="name">'+esc(name)+'</span><span class="code">lang="'+lang+'"</span></div>'
+      + '<div class="stack" data-stack></div>'
+      + lines
+      + '<div class="line"><div class="lbl">'+(lookup(CURRENT,'card.glyphCompare')||lookup('zh-CN','card.glyphCompare'))+'</div>'
+      + '<div class="txt glyphs">'+esc(compareText)+'</div></div>'
+      + '</section>';
+  }).join('');
+  // 读取每列**实际解析**的字体栈（此列自带 lang，:lang() 生效）
+  document.querySelectorAll('[data-specimen]').forEach(function(el){
+    var cs = getComputedStyle(el);
+    el.querySelector('[data-stack]').textContent = cs.getPropertyValue('--font-family-ui').trim() + '   /* 实际生效 */';
+  });
+}
+function renderRedlines(){
+  document.getElementById('redlines-title').textContent = tr('card.sectionRedlines');
+  var list = lookup(CURRENT, 'card.redlines') || lookup('zh-CN', 'card.redlines') || [];
+  document.getElementById('redlines').innerHTML = list.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('');
+}
+function renderAll(){
+  CONTRAST_ROWS = [];
+  document.getElementById('card-title').textContent = tr('card.title');
+  document.getElementById('card-subtitle').textContent = tr('card.subtitle');
+  document.getElementById('card-source').innerHTML = esc(tr('card.source')).replace(/(tokens\.less|build-css\.mjs|tokens\.css|pnpm design:css)/g,'<code>$1</code>');
+  document.getElementById('card-langnote').textContent = tr('card.langNote');
+  renderPanels(); renderPairs(); renderSpecimen(); renderContrastTable(); renderRedlines();
+  document.querySelectorAll('.language-switch button').forEach(function(b){ b.classList.toggle('on', b.dataset.lang === CURRENT); });
+  document.documentElement.lang = CURRENT;
+}
+document.querySelectorAll('.language-switch button').forEach(function(b){
+  b.addEventListener('click', function(){ CURRENT = b.dataset.lang; renderAll(); });
 });
 document.addEventListener('click', function(e){
   var el = e.target.closest('.hex'); if (!el) return;
   var hx = el.dataset.hex; navigator.clipboard && navigator.clipboard.writeText(hx);
-  var t = document.getElementById('toast'); t.textContent = '已复制 ' + hx; t.classList.add('on');
-  setTimeout(function(){ t.classList.remove('on'); }, 1200);
+  var t = document.getElementById('toast'); t.textContent = hx; t.classList.add('on');
+  setTimeout(function(){ t.classList.remove('on'); }, 1100);
 });
+window.addEventListener('load', renderAll);
 </script>
 </body>
 </html>
