@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Janus 色卡 · token 单一来源（自动生成）</title>
+<title>Celadon 色卡 · token 单一来源（自动生成）</title>
 <!-- 唯一来源：tokens.less →（build-css.mjs）→ tokens.css -->
 <link rel="stylesheet" href="./tokens.css">
 <style>
@@ -16,19 +16,19 @@ h1{font-size:19px;margin:0 0 2px}
 .src code{background:#f2f2f4;padding:1px 5px;border-radius:4px}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 @media (max-width:1100px){.cols{grid-template-columns:1fr}}
-.panel{border-radius:14px;overflow:hidden;border:1px solid var(--border);background:var(--bg-content);color:var(--text-1)}
-.panel .hd{padding:9px 14px;font-weight:700;font-size:13px;border-bottom:1px solid var(--border);background:var(--bg-nav);display:flex;align-items:center;gap:8px}
-.panel .hd .tag{margin-left:auto;font-weight:400;font-size:11px;color:var(--text-3)}
+.panel{border-radius:14px;overflow:hidden;border:1px solid var(--border-subtle);background:var(--background-content);color:var(--text-primary)}
+.panel .hd{padding:9px 14px;font-weight:700;font-size:13px;border-bottom:1px solid var(--border-subtle);background:var(--background-navigation);display:flex;align-items:center;gap:8px}
+.panel .hd .tag{margin-left:auto;font-weight:400;font-size:11px;color:var(--text-tertiary)}
 .grp{padding:12px 14px 4px}
-.grp h2{font-size:11.5px;letter-spacing:.4px;color:var(--text-3);margin:0 0 8px;font-weight:650}
-.sw{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dashed var(--border)}
+.grp h2{font-size:11.5px;letter-spacing:.4px;color:var(--text-tertiary);margin:0 0 8px;font-weight:650}
+.sw{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dashed var(--border-subtle)}
 .sw:last-child{border-bottom:0}
 .chip{width:44px;height:30px;border-radius:8px;flex:none;border:1px solid rgba(0,0,0,.10)}
 .meta{flex:1;min-width:0}
 .meta .n{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;font-weight:600}
-.meta .u{font-size:11px;color:var(--text-3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hex{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--text-2);cursor:pointer;background:var(--bg-field);border:1px solid var(--border-2);border-radius:6px;padding:2px 7px;flex:none}
-.hex:hover{background:var(--bg-hover)}
+.meta .u{font-size:11px;color:var(--text-tertiary);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hex{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--text-secondary);cursor:pointer;background:var(--background-field);border:1px solid var(--border-default);border-radius:6px;padding:2px 7px;flex:none}
+.hex:hover{background:var(--background-hover)}
 .cr{font-size:10.5px;padding:2px 6px;border-radius:99px;flex:none;font-weight:650;min-width:48px;text-align:center;border:1px solid transparent}
 .cr.aaa{color:#0a6b3d;background:#e6f6ec;border-color:#bfe6cd}
 .cr.aa{color:#0a6b3d;background:#eef8f1;border-color:#cfe9d8}
@@ -40,7 +40,7 @@ h1{font-size:19px;margin:0 0 2px}
 .panel.dark .cr.warn{color:#f0cb9c;background:#2c2718;border-color:#4a3f24}
 .panel.dark .cr.bad{color:#f7a6a0;background:#2a1614;border-color:#5a2a26}
 .panel.dark .cr.dim{color:#999;background:#1e1e1e;border-color:#333}
-.note{padding:10px 14px 14px;font-size:11.5px;color:var(--text-3);border-top:1px solid var(--border)}
+.note{padding:10px 14px 14px;font-size:11.5px;color:var(--text-tertiary);border-top:1px solid var(--border-subtle)}
 .card{background:#fff;border:1px solid #e2e2e4;border-radius:12px;padding:14px 16px;margin-top:18px}
 .card h2{font-size:13.5px;margin:0 0 8px}
 table{width:100%;border-collapse:collapse;font-size:12px}
@@ -52,13 +52,13 @@ code{font-family:ui-monospace,Menlo,monospace;background:#f2f2f4;padding:1px 5px
 </style>
 </head>
 <body>
-<h1>Janus 色卡 <span style="color:#666;font-size:13px;font-weight:400">token 单一来源 · 自动生成</span></h1>
+<h1>Celadon 色卡 <span style="color:#666;font-size:13px;font-weight:400">token 单一来源 · 自动生成</span></h1>
 <p class="sub">页面所有色值与尺寸都**从 <code>tokens.css</code> 实时读取**（无一处硬编码）；对比度按各主题真实内容底自动实算。</p>
-<p class="src">源：<code>janus/design/tokens.less</code> → <code>node janus/design/build-css.mjs</code> → <code>tokens.css</code> → 本页。改 token 后重跑生成即可，不用改这份 HTML。</p>
+<p class="src">源：<code>celadon/design/tokens.less</code> → <code>node celadon/design/build-css.mjs</code> → <code>tokens.css</code> → 本页。改 token 后重跑生成即可，不用改这份 HTML。</p>
 
 <!-- 探针：用于读取 token 解析值（不参与布局） -->
-<div id="probe-light" class="jn2" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
-<div id="probe-dark" class="jn2" data-theme="dark" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
+<div id="probe-light" class="celadon" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
+<div id="probe-dark" class="celadon" data-theme="dark" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
 
 <div class="cols" id="cols"></div>
 <div class="card"><h2>对比度实测（WCAG 2.1 · AA 正文 4.5:1 / AAA 7:1）</h2><table id="ctab"></table></div>
@@ -69,8 +69,8 @@ code{font-family:ui-monospace,Menlo,monospace;background:#f2f2f4;padding:1px 5px
     <li><b>交互四态齐</b>（default/hover/active/disabled），键盘焦点必须可见（<code>--focus-ring</code>）；</li>
     <li><code>--brand-display</code> <b>只做填充/图形，不承载文字与图标</b>；</li>
     <li><b>success 只用软底 + 图标</b>，不做大面积实心；</li>
-    <li>控件边界用 <code>--border-2/3</code>，<code>--border</code> 只作装饰线；</li>
-    <li><code>--r-pill</code> 仅用于徽标/标签/头像；中文最小 12px（<code>--fs-11</code> 仅西文/数字）；</li>
+    <li>控件边界用 <code>--border-default/3</code>，<code>--border-subtle</code> 只作装饰线；</li>
+    <li><code>--radius-pill</code> 仅用于徽标/标签/头像；中文最小 12px（<code>--font-size-11</code> 仅西文/数字）；</li>
     <li><b>禁硬编码</b>：less/tsx 不得出现颜色字面量（系统色除外）。</li>
   </ol>
 </div>
@@ -91,32 +91,32 @@ var GROUPS = [
    ['--focus-ring-color','键盘焦点环颜色（2px offset + 2px 宽）','on'],
    ['--focus-ring-width','焦点环宽度'],
    ['--focus-ring-offset','焦点环与控件间隙'],
-   ['--disabled-bg','禁用底'],
+   ['--disabled-background','禁用底'],
    ['--disabled-text','禁用字（豁免对比度）'],
    ['--disabled-border','禁用边界'],
    ['--scrim','弹窗 / 抽屉遮罩','nocr'],
  ]],
  ['中性 · 面', [
-   ['--bg-app','窗口底'],['--bg-nav','① 导航列'],['--bg-content','② 内容区（非纯白）'],
-   ['--bg-surface','③ 面板 / 卡片'],['--bg-field','输入框 / 字段'],['--bg-hover','悬停'],
-   ['--bg-selected','选中底（= 品牌浅底）'],
+   ['--background-app','窗口底'],['--background-navigation','① 导航列'],['--background-content','② 内容区（非纯白）'],
+   ['--background-surface','③ 面板 / 卡片'],['--background-field','输入框 / 字段'],['--background-hover','悬停'],
+   ['--background-selected','选中底（= 品牌浅底）'],
  ]],
- ['中性 · 界', [['--border','装饰线'],['--border-2','常规边界'],['--border-3','控件边界']]],
+ ['中性 · 界', [['--border-subtle','装饰线'],['--border-default','常规边界'],['--border-control','控件边界']]],
  ['中性 · 字', [
-   ['--text-1','主文字','on'],['--text-2','次要文字','on'],['--text-3','第三级'],['--text-muted','占位 / 弱化'],
+   ['--text-primary','主文字','on'],['--text-secondary','次要文字','on'],['--text-tertiary','第三级'],['--text-muted','占位 / 弱化'],
  ]],
  ['语义', [
-   ['--ok','成功（松花绿 · 传统色）','on'],['--ok-soft','成功软底'],
+   ['--success','成功（松花绿 · 传统色）','on'],['--success-soft','成功软底'],
    ['--warning','警示（= --warm 别名）','on'],['--warning-soft','警示软底'],
    ['--danger','危险（朱红）','on'],['--danger-soft','危险软底'],
  ]],
  ['尺寸 / 圆角 / 动效', [
-   ['--fs-11','仅西文/数字角标'],['--fs-12','中文最小档'],['--fs-13','正文默认'],['--fs-16','补档（原 15→17 断档）'],
-   ['--sp-4','间距 8'],['--sp-5','间距 12'],['--sp-6','间距 16'],
-   ['--r-sm','6px'],['--r-md','主档 8px'],['--r-lg','12px'],['--r-pill','仅徽标/标签/头像'],
-   ['--row-h','行高 40'],['--col-header-h','列头 40（三列等高）'],
-   ['--dur-fast','hover 120ms'],['--dur-base','展开 200ms'],['--ease','缓动曲线'],
-   ['--shadow-1','hairline'],['--shadow-2','浮层'],
+   ['--font-size-11','仅西文/数字角标'],['--font-size-12','中文最小档'],['--font-size-13','正文默认'],['--font-size-16','补档（原 15→17 断档）'],
+   ['--spacing-8','间距 8'],['--spacing-12','间距 12'],['--spacing-16','间距 16'],
+   ['--radius-small','6px'],['--radius-medium','主档 8px'],['--radius-large','12px'],['--radius-pill','仅徽标/标签/头像'],
+   ['--row-height','行高 40'],['--column-header-height','列头 40（三列等高）'],
+   ['--duration-fast','hover 120ms'],['--duration-base','展开 200ms'],['--easing','缓动曲线'],
+   ['--shadow-subtle','hairline'],['--shadow-floating','浮层'],
  ]],
 ];
 function readAll(probeEl){ var cs = getComputedStyle(probeEl); var o = {};
@@ -138,7 +138,7 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 
 var CT = [];
 function build(themeName, probeEl, label){
-  var V = readAll(probeEl), bg = V['--bg-content'];
+  var V = readAll(probeEl), bg = V['--background-content'];
   var body = GROUPS.map(function(g){
     var rows = g[1].map(function(t){
       var name = t[0], use = t[1] || '', mode = t[2] || '', val = V[name] || '';
@@ -158,10 +158,10 @@ function build(themeName, probeEl, label){
     return '<div class="grp"><h2>'+esc(g[0])+'</h2>'+rows+'</div>';
   }).join('');
   return '<section class="panel '+(themeName==='dark'?'dark':'')+'" style="'
-    + '--bg-app:'+V['--bg-app']+';--bg-nav:'+V['--bg-nav']+';--bg-content:'+bg+';--bg-surface:'+V['--bg-surface']
-    + ';--bg-field:'+V['--bg-field']+';--bg-hover:'+V['--bg-hover']
-    + ';--border:'+V['--border']+';--border-2:'+V['--border-2']
-    + ';--text-1:'+V['--text-1']+';--text-2:'+V['--text-2']+';--text-3:'+V['--text-3']+'">'
+    + '--background-app:'+V['--background-app']+';--background-navigation:'+V['--background-navigation']+';--background-content:'+bg+';--background-surface:'+V['--background-surface']
+    + ';--background-field:'+V['--background-field']+';--background-hover:'+V['--background-hover']
+    + ';--border-subtle:'+V['--border-subtle']+';--border-default:'+V['--border-default']
+    + ';--text-primary:'+V['--text-primary']+';--text-secondary:'+V['--text-secondary']+';--text-tertiary:'+V['--text-tertiary']+'">'
     + '<div class="hd">'+label+'<span class="tag">内容底 '+bg+'</span></div>'+body+'</section>';
 }
 window.addEventListener('load', function(){
