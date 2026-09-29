@@ -1,0 +1,245 @@
+{
+  "ui": {
+    "brand": "Yao Agents",
+    "newTask": "New task",
+    "nav": {
+      "chat": "Chat",
+      "inbox": "Inbox",
+      "board": "Board",
+      "workspace": "Workspace",
+      "computer": "Computer",
+      "knowledge": "Knowledge"
+    },
+    "inbox": {
+      "unreadCount": "{count} unread",
+      "searchPlaceholder": "Search messages…",
+      "filterAll": "All",
+      "filterUnread": "Unread",
+      "filterArchived": "Archived"
+    },
+    "time": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "earlier": "Earlier"
+    },
+    "thread": {
+      "newMessages": "{count} new messages",
+      "dateAt": "Today {time}",
+      "changesChip": "Changes +{added} −{removed}"
+    },
+    "tool": {
+      "readFiles": "Read files"
+    },
+    "status": {
+      "done": "Done"
+    },
+    "agent": "Agent",
+    "ask": {
+      "pending": "Needs your input",
+      "pendingAt": "Needs your input · {time}",
+      "differences": "{count} differences",
+      "question": "Which summary angle should I use? It changes the output structure:",
+      "optionRiskFirst": "Summarize by risk first (recommended)",
+      "optionChronological": "Summarize chronologically",
+      "optionCustom": "I will specify my own"
+    },
+    "composer": {
+      "placeholder": "Continue: add the risks to the acceptance criteria…",
+      "defaultPermission": "Default permission"
+    },
+    "panel": {
+      "inProgress": "In progress",
+      "highPriority": "High priority",
+      "remainingDays": "{days} days left",
+      "actionComplete": "Mark complete",
+      "actionPause": "Pause",
+      "actionOpenFullPage": "Open full page",
+      "subtasks": "Subtasks",
+      "gates": "Gates",
+      "changes": "Changes",
+      "relatedFiles": "Related files",
+      "activity": "Activity"
+    },
+    "activity": {
+      "readDocuments": "Read {count} documents",
+      "extractRisks": "Extracted {count} risks",
+      "waitingConfirmation": "Waiting for confirmation"
+    },
+    "theme": {
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "sample": {
+    "conversation": {
+      "greeting": {
+        "title": "Intro & capabilities",
+        "subtitle": "Covered document handling and available tools"
+      },
+      "weekly": {
+        "title": "Weekly report",
+        "subtitle": "Weekly progress from the template"
+      },
+      "scraping": {
+        "title": "Scraping job",
+        "subtitle": "12 pages completed"
+      },
+      "contract": {
+        "title": "Contract review",
+        "subtitle": "3 risks flagged"
+      },
+      "invoice": {
+        "title": "Invoice check",
+        "subtitle": "2 vouchers generated"
+      },
+      "siteCheck": {
+        "title": "Site check",
+        "subtitle": "3 domains healthy"
+      }
+    },
+    "message": {
+      "user1": "Hi — could you review these two documents? Focus on the risk clauses in the contract.",
+      "agent1Html": "I have read both. I found <b>3 risks</b> in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
+      "agent2": "Summarized by risk first, with the source clause and page numbers."
+    },
+    "tool": {
+      "readLineContract": "contract.pdf · 12 pages · text extracted",
+      "readLineRequirements": "requirements.docx · 4 pages · text extracted"
+    },
+    "panel": {
+      "taskTitle": "Contract review",
+      "subtaskRead": "Read contract.pdf / requirements.docx",
+      "subtaskExtract": "Extract risk clauses with page numbers",
+      "subtaskGenerate": "Generate risk-summary.md",
+      "subtaskAcceptance": "Add to acceptance criteria (waiting on your input)",
+      "gateVisual": "visual {count} differences"
+    },
+    "diff": {
+      "line1": "- Payment period: quarterly settlement",
+      "line2": "+ Payment period: ≤30 days (§4.2)",
+      "line3": "- Liability: borne by each party",
+      "line4": "+ Liability: mutual, 0.05%/day late"
+    },
+    "file": {
+      "contract": "contract.pdf",
+      "requirements": "requirements.docx",
+      "riskSummary": "risk-summary.md"
+    }
+  },
+  "card": {
+    "title": "Celadon design baseline",
+    "subtitle": "tokens · pairings · fonts · contrast — all read live from tokens.css (zero hardcoded values)",
+    "source": "Source: tokens.less → build-css.mjs → tokens.css. Font tokens are in the specimen below. After changing a token run pnpm design:css — this page needs no edits.",
+    "sectionPairs": "Key pairings (foreground on background · computed live)",
+    "pairsNote": "Most tokens come in two tiers (solid and soft fill). Pairing them wrongly looks like --warm + --warm-text: 1.41:1, effectively invisible.",
+    "sectionContrast": "Measured contrast (WCAG 2.1 · AA body 4.5:1 / AAA 7:1)",
+    "sectionTypography": "Typography specimen (4 languages · font stack switched by :lang)",
+    "typographyNote": "Per-language stacks are mandatory: Traditional Chinese must not fall back to Simplified glyphs, and Japanese must not fall back to Chinese glyph forms.",
+    "sectionRedlines": "Usage rules",
+    "tableTheme": "Theme",
+    "tableToken": "token",
+    "tableValue": "Value",
+    "tableBackground": "Background",
+    "tableContrast": "Contrast",
+    "tableLevel": "Level",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "samplePrefix": "Sample",
+    "stackLabel": "Resolved font stack",
+    "mixedLabel": "Mixed (body default 13px)",
+    "hanLabel": "Han glyphs (SC / TC / JP differences)",
+    "kanaLabel": "Kana and voiced marks",
+    "latinLabel": "Latin and digits",
+    "punctLabel": "Full-width punctuation",
+    "monoLabel": "Monospace (code / paths)",
+    "glyphCompare": "Glyph comparison",
+    "glyphCompareText": "直 骨 今 令 収 收 真 具 门 門 温 溫 骨 滑 次",
+    "mixedText": "The agent read contract.pdf (12 pages) → 3 risks found. Please confirm before 14:06.",
+    "hanText": "Celadon glaze is calm and warm; the risk assessment and clauses are annotated with page numbers.",
+    "kanaText": "エージェントが契約書を読み込み、リスクを 3 件抽出しました。",
+    "latinText": "Yao Agents 2.0 — Quick brown fox jumps over 0123456789 (AA 4.77:1).",
+    "punctText": "「」『』《》〈〉【】——……、。：；！？（）",
+    "monoText": "const brand = '#2A7B7B';  risk_count <- 3;  // revenue / contract",
+    "langNote": "The language buttons only switch this page. The specimen keeps all four languages side by side for comparison.",
+    "redlines": [
+      "Brand has two tiers: solid (--brand + white text) only for primary buttons/badges (max 2 per view); soft (--brand-soft + brand text) for selection, bubbles and avatars.",
+      "Never mix the amber tiers: --warm pairs with --warm-contrast; --warm-soft pairs with --warm-text.",
+      "In dark mode, brand text/outlines on soft fills must use --brand-lift.",
+      "All four interaction states (default/hover/active/disabled); keyboard focus must stay visible (--focus-ring).",
+      "--brand-display is fill-only: never put text or icons on it.",
+      "Success is soft fill + icon only; never a large solid fill.",
+      "Use --border-default/--border-control for controls; --border-subtle is decorative only.",
+      "No hardcoded colours in less/tsx (system colours excepted); always spell out token and class names."
+    ],
+    "usage": {
+      "brand": "Primary button / badge / selected text",
+      "brandHover": "悬停",
+      "brandActive": "按下",
+      "brandSoft": "Soft button · selected row · bubble",
+      "brandDisplay": "Large fills/graphics (no text)",
+      "brandText": "品牌底上的文字",
+      "brandLift": "Dark mode only (text/outline)",
+      "focusRingColor": "Keyboard focus ring colour (2px offset + 2px width)",
+      "focusRingWidth": "焦点环宽度",
+      "focusRingOffset": "Gap between ring and control",
+      "disabledBackground": "Disabled background",
+      "disabledText": "Disabled text (contrast exempt)",
+      "disabledBorder": "Disabled border",
+      "scrim": "Modal / drawer scrim",
+      "backgroundApp": "Window background",
+      "backgroundNavigation": "① Navigation column",
+      "backgroundContent": "② Content area (not pure white)",
+      "backgroundSurface": "③ Panel / card",
+      "backgroundField": "Input / field",
+      "backgroundHover": "悬停",
+      "backgroundSelected": "Selected row (= brand soft)",
+      "borderSubtle": "Decorative line",
+      "borderDefault": "Default border",
+      "borderControl": "Control border",
+      "textPrimary": "主文字",
+      "textSecondary": "次要文字",
+      "textTertiary": "Tertiary text",
+      "textMuted": "Placeholder / muted",
+      "success": "Success (traditional green)",
+      "successSoft": "成功软底",
+      "warning": "Warning (alias of --warm)",
+      "warningSoft": "Warning soft fill",
+      "warm": "Amber solid fill (pair with --warm-contrast)",
+      "warmSoft": "Amber soft fill (pair with --warm-text)",
+      "warmText": "琥珀浅底上的文字",
+      "warmContrast": "Text on the amber solid fill",
+      "danger": "Danger (vermilion)",
+      "dangerSoft": "Danger soft fill",
+      "fontSize11": "Latin/digit badges only",
+      "fontSize12": "Minimum for Chinese",
+      "fontSize13": "Body default",
+      "fontSize16": "Fills the old 15→17 gap",
+      "spacing8": "Spacing 8",
+      "spacing12": "Spacing 12",
+      "spacing16": "Spacing 16",
+      "radiusSmall": "6px",
+      "radiusMedium": "主档 8px",
+      "radiusLarge": "12px",
+      "radiusPill": "Badges/tabs/avatars only",
+      "rowHeight": "Row height 40",
+      "columnHeaderHeight": "Column header 40 (all three equal)",
+      "durationFast": "hover 120ms",
+      "durationBase": "expand 200ms",
+      "easing": "Easing curve",
+      "shadowSubtle": "hairline",
+      "shadowFloating": "Floating layer",
+      "fontFamilyUi": "UI font (Latin + fallback)",
+      "fontFamilyMonospace": "等宽字体",
+      "brandInk": "Brand-coloured text/icons (4.8:1 on soft fill; auto-lifts in dark)"
+    },
+    "group": {
+      "brand": "Brand",
+      "interaction": "Interaction",
+      "background": "Neutral · Surfaces",
+      "border": "Neutral · Borders",
+      "text": "Neutral · Text",
+      "semantic": "Semantic",
+      "metrics": "Size · Radius · Motion"
+    }
+  }
+}

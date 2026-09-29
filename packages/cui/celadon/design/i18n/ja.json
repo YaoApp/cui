@@ -1,0 +1,245 @@
+{
+  "ui": {
+    "brand": "Yao Agents",
+    "newTask": "新規タスク",
+    "nav": {
+      "chat": "チャット",
+      "inbox": "受信トレイ",
+      "board": "ボード",
+      "workspace": "ワークスペース",
+      "computer": "コンピュータ",
+      "knowledge": "ナレッジ"
+    },
+    "inbox": {
+      "unreadCount": "未読 {count}",
+      "searchPlaceholder": "メッセージを検索…",
+      "filterAll": "すべて",
+      "filterUnread": "未読",
+      "filterArchived": "アーカイブ済み"
+    },
+    "time": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "earlier": "それ以前"
+    },
+    "thread": {
+      "newMessages": "新着 {count} 件",
+      "dateAt": "今日 {time}",
+      "changesChip": "変更 +{added} −{removed}"
+    },
+    "tool": {
+      "readFiles": "ファイルを読み込む"
+    },
+    "status": {
+      "done": "完了"
+    },
+    "agent": "エージェント",
+    "ask": {
+      "pending": "確認待ち",
+      "pendingAt": "確認待ち · {time}",
+      "differences": "差分 {count} 件",
+      "question": "要約の観点はどれにしますか？出力の構成が変わります：",
+      "optionRiskFirst": "「リスク優先」で要約（推奨）",
+      "optionChronological": "「時系列」で要約",
+      "optionCustom": "自分で指定する"
+    },
+    "composer": {
+      "placeholder": "続けて：リスクを要件定義の受け入れ条件に追記…",
+      "defaultPermission": "既定の権限"
+    },
+    "panel": {
+      "inProgress": "進行中",
+      "highPriority": "優先度：高",
+      "remainingDays": "残り {days} 日",
+      "actionComplete": "完了にする",
+      "actionPause": "保留",
+      "actionOpenFullPage": "全画面で開く",
+      "subtasks": "サブタスク",
+      "gates": "ゲート",
+      "changes": "変更",
+      "relatedFiles": "関連ファイル",
+      "activity": "アクティビティ"
+    },
+    "activity": {
+      "readDocuments": "ドキュメント {count} 件を読み込み",
+      "extractRisks": "リスク {count} 件を抽出",
+      "waitingConfirmation": "観点の確認待ち"
+    },
+    "theme": {
+      "light": "ライト",
+      "dark": "ダーク"
+    }
+  },
+  "sample": {
+    "conversation": {
+      "greeting": {
+        "title": "ご挨拶と機能のご案内",
+        "subtitle": "ドキュメント処理と利用可能なツールをご案内"
+      },
+      "weekly": {
+        "title": "週報の作成",
+        "subtitle": "テンプレートで今週の進捗を集計"
+      },
+      "scraping": {
+        "title": "データ収集タスク",
+        "subtitle": "12 ページ完了"
+      },
+      "contract": {
+        "title": "契約書レビュー",
+        "subtitle": "リスク 3 件を指摘"
+      },
+      "invoice": {
+        "title": "請求書チェック",
+        "subtitle": "証憑を 2 件作成"
+      },
+      "siteCheck": {
+        "title": "サイト監視",
+        "subtitle": "3 ドメイン正常"
+      }
+    },
+    "message": {
+      "user1": "こんにちは。この 2 つのドキュメントを確認してもらえますか？契約書のリスク条項が中心です。",
+      "agent1Html": "両方読みました。契約書に<b>リスクが 3 件</b>あります：① 第 4.2 条 支払期間に上限がない；② 第 7 条 責任が不均衡；③ 別紙 2 に署名欄がない。",
+      "agent2": "リスク優先で要約し、根拠条項とページを付記しました。"
+    },
+    "tool": {
+      "readLineContract": "contract.pdf · 12 ページ · 本文を抽出",
+      "readLineRequirements": "要件定義.docx · 4 ページ · 本文を抽出"
+    },
+    "panel": {
+      "taskTitle": "契約書レビュー",
+      "subtaskRead": "contract.pdf / 要件定義.docx を読み込む",
+      "subtaskExtract": "リスク条項を抽出しページを付記",
+      "subtaskGenerate": "リスク摘要.md を生成",
+      "subtaskAcceptance": "受け入れ条件に追記（観点の確認待ち）",
+      "gateVisual": "visual {count} 件"
+    },
+    "diff": {
+      "line1": "- 支払期間：四半期ごとの精算",
+      "line2": "+ 支払期間：≤30 日（4.2 条）",
+      "line3": "- 責任：双方が各自負担",
+      "line4": "+ 責任：対等、遅延は 0.05%/日"
+    },
+    "file": {
+      "contract": "contract.pdf",
+      "requirements": "要件定義.docx",
+      "riskSummary": "リスク摘要.md"
+    }
+  },
+  "card": {
+    "title": "Celadon デザインベースライン",
+    "subtitle": "トークン · ペアリング · フォント · コントラスト —— すべて tokens.css から取得（ハードコードなし）",
+    "source": "出典：tokens.less → build-css.mjs → tokens.css。フォントのトークンは下の見本を参照。変更後は pnpm design:css を実行（本ページの編集は不要）。",
+    "sectionPairs": "主要なペアリング（前景 on 背景 · 自動計算）",
+    "pairsNote": "多くのトークンは「塗り」と「淡色」の2段構成です。組み合わせを誤ると --warm + --warm-text（1.41:1）のように、ほぼ見えなくなります。",
+    "sectionContrast": "コントラスト実測（WCAG 2.1 · AA 本文 4.5:1 / AAA 7:1）",
+    "sectionTypography": "フォント見本（4 言語 · :lang でスタックを切替）",
+    "typographyNote": "言語ごとにスタックを分けるのは必須です。繁体字が簡体字の字形で、日本語が中国語の字形で表示されると誤字になります。",
+    "sectionRedlines": "使用ルール",
+    "tableTheme": "テーマ",
+    "tableToken": "token",
+    "tableValue": "値",
+    "tableBackground": "背景",
+    "tableContrast": "コントラスト",
+    "tableLevel": "評価",
+    "themeLight": "ライト",
+    "themeDark": "ダーク",
+    "samplePrefix": "例",
+    "stackLabel": "解決されたフォントスタック",
+    "mixedLabel": "混植（本文既定 13px）",
+    "hanLabel": "漢字（SC / TC / JP の字形差）",
+    "kanaLabel": "かなと濁点",
+    "latinLabel": "ラテン文字と数字",
+    "punctLabel": "全角約物",
+    "monoLabel": "等幅（コード / パス）",
+    "glyphCompare": "字形の比較",
+    "glyphCompareText": "直 骨 今 令 収 收 真 具 门 門 温 溫 骨 滑 次",
+    "mixedText": "Agent が contract.pdf（12 ページ）を読み込み、リスクを 3 件検出しました。14:06 までにご確認ください。",
+    "hanText": "青磁の釉色は穏やかで温かみがあります。リスク評価と契約条項にページ番号を付記しました。",
+    "kanaText": "エージェントが契約書を読み込み、リスクを 3 件抽出しました。",
+    "latinText": "Yao Agents 2.0 — Quick brown fox jumps over 0123456789 (AA 4.77:1).",
+    "punctText": "「」『』《》〈〉【】——……、。：；！？（）",
+    "monoText": "const brand = '#2A7B7B';  risk_count <- 3;  // 収入・契約書",
+    "langNote": "言語ボタンは本ページの文言のみ切替えます。フォント見本は 4 言語を常時並べて比較できます。",
+    "redlines": [
+      "ブランドは2段構成：塗り（--brand + 白文字）は主要ボタン/バッジのみ（画面に最大2か所）、淡色（--brand-soft + ブランド文字）は選択行・バブル・アバターに。",
+      "アンバーの2段を混ぜない：--warm は --warm-contrast と、--warm-soft は --warm-text と組み合わせる。",
+      "ダークモードで「淡色地 + ブランド文字/枠線」は必ず --brand-lift を使う。",
+      "インタラクションは4状態（default/hover/active/disabled）を揃え、キーボードフォーカスを常に見えるように（--focus-ring）。",
+      "--brand-display は塗り専用。文字やアイコンを載せない。",
+      "成功は淡色地 + アイコンのみ。大きな塗りは使わない。",
+      "部品の枠線は --border-default / --border-control、--border-subtle は装飾用のみ。",
+      "ハードコード禁止（システム色を除く）。トークン名・クラス名は省略せず正式名で。"
+    ],
+    "usage": {
+      "brand": "主要ボタン / バッジ / 選択文字",
+      "brandHover": "悬停",
+      "brandActive": "按下",
+      "brandSoft": "淡色ボタン · 選択行 · バブル",
+      "brandDisplay": "面塗り/図形（文字を載せない）",
+      "brandText": "品牌底上的文字",
+      "brandLift": "ダーク専用（文字/枠線）",
+      "focusRingColor": "フォーカスリング色（2px offset + 2px 幅）",
+      "focusRingWidth": "焦点环宽度",
+      "focusRingOffset": "リングと部品の隙間",
+      "disabledBackground": "無効時の背景",
+      "disabledText": "無効時の文字（コントラスト免除）",
+      "disabledBorder": "無効時の枠線",
+      "scrim": "モーダル/ドロワーのスクリム",
+      "backgroundApp": "ウィンドウ背景",
+      "backgroundNavigation": "① ナビ列",
+      "backgroundContent": "② コンテンツ領域（純白ではない）",
+      "backgroundSurface": "③ パネル/カード",
+      "backgroundField": "入力欄/フィールド",
+      "backgroundHover": "悬停",
+      "backgroundSelected": "選択行（= ブランド淡色）",
+      "borderSubtle": "装飾ライン",
+      "borderDefault": "標準の枠線",
+      "borderControl": "部品の枠線",
+      "textPrimary": "主文字",
+      "textSecondary": "次要文字",
+      "textTertiary": "第三階層",
+      "textMuted": "プレースホルダー/弱化",
+      "success": "成功（伝統色）",
+      "successSoft": "成功软底",
+      "warning": "警告（--warm の別名）",
+      "warningSoft": "警告の淡色",
+      "warm": "アンバー塗り（--warm-contrast と対）",
+      "warmSoft": "アンバー淡色（--warm-text と対）",
+      "warmText": "琥珀浅底上的文字",
+      "warmContrast": "アンバー塗り地の文字",
+      "danger": "危険（朱色）",
+      "dangerSoft": "危険の淡色",
+      "fontSize11": "欧文/数字の角標のみ",
+      "fontSize12": "中国語の最小",
+      "fontSize13": "本文の既定",
+      "fontSize16": "15→17 の欠番を補完",
+      "spacing8": "余白 8",
+      "spacing12": "余白 12",
+      "spacing16": "余白 16",
+      "radiusSmall": "6px",
+      "radiusMedium": "主档 8px",
+      "radiusLarge": "12px",
+      "radiusPill": "バッジ/タブ/アバターのみ",
+      "rowHeight": "行高 40",
+      "columnHeaderHeight": "列ヘッダ 40（3列で統一）",
+      "durationFast": "hover 120ms",
+      "durationBase": "展開 200ms",
+      "easing": "イージング",
+      "shadowSubtle": "hairline",
+      "shadowFloating": "フローティング",
+      "fontFamilyUi": "UI フォント（欧文 + フォールバック）",
+      "fontFamilyMonospace": "等宽字体",
+      "brandInk": "ブランド色の文字/アイコン（淡色地 4.8:1、ダークでは自動で提亮）"
+    },
+    "group": {
+      "brand": "ブランド",
+      "interaction": "インタラクション",
+      "background": "ニュートラル · 面",
+      "border": "ニュートラル · 境界",
+      "text": "ニュートラル · 文字",
+      "semantic": "セマンティック",
+      "metrics": "サイズ · 角丸 · モーション"
+    }
+  }
+}

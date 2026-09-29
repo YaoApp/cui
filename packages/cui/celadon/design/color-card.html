@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celadon 设计基线 · tokens · 配对 · 字体 · 对比度</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+:root{--card-chrome:12px}
+*{box-sizing:border-box} html,body{margin:0}
+body{font:13px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans","Microsoft YaHei",sans-serif;
+  background:#EDEDEE;color:#111;-webkit-font-smoothing:antialiased;padding:22px 22px 60px}
+h1{font-size:19px;margin:0 0 4px}
+.sub{color:#666;font-size:12.5px;margin:0 0 10px}
+.src{font-size:11.5px;color:#777;background:#fff;border:1px solid #e2e2e4;border-radius:8px;padding:6px 10px;display:inline-block;margin-bottom:14px}
+.src code,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f2f2f4;padding:1px 5px;border-radius:4px;font-size:11.5px}
+.toolbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;background:rgba(237,237,238,.92);
+  backdrop-filter:blur(6px);padding:8px 0 12px;margin-bottom:8px}
+.language-switch{display:flex;gap:4px}
+.toolbar button{font:inherit;font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid #d6d6da;background:#fff;color:#555;cursor:pointer}
+.toolbar button.on{background:#E4EFEF;border-color:#2A7B7B;color:#2A7B7B;font-weight:650}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+@media (max-width:1100px){.cols{grid-template-columns:1fr}}
+.panel{border-radius:14px;overflow:hidden;border:1px solid var(--border-subtle);background:var(--background-content);color:var(--text-primary)}
+.panel .hd{padding:9px 14px;font-weight:700;font-size:13px;border-bottom:1px solid var(--border-subtle);background:var(--background-navigation);display:flex;align-items:center;gap:8px}
+.panel .hd .tag{margin-left:auto;font-weight:400;font-size:11px;color:var(--text-tertiary)}
+.grp{padding:12px 14px 4px}
+.grp h2{font-size:11.5px;letter-spacing:.4px;color:var(--text-tertiary);margin:0 0 8px;font-weight:650}
+.sw{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dashed var(--border-subtle)}
+.sw:last-child{border-bottom:0}
+.chip-color{width:44px;height:30px;border-radius:8px;flex:none;border:1px solid rgba(0,0,0,.10)}
+.chip-none{width:44px;height:30px;border-radius:8px;flex:none;border:1px dashed #ccc}
+.meta{flex:1;min-width:0}
+.meta .n{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;font-weight:600}
+.meta .u{font-size:11px;color:var(--text-tertiary);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta .u.long{white-space:normal;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+.hex{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--text-secondary);cursor:pointer;background:var(--background-field);border:1px solid var(--border-default);border-radius:6px;padding:2px 7px;flex:none}
+.hex:hover{background:var(--background-hover)}
+.cr{font-size:10.5px;padding:2px 6px;border-radius:99px;flex:none;font-weight:650;min-width:48px;text-align:center;border:1px solid transparent}
+.cr.aaa{color:#0a6b3d;background:#e6f6ec;border-color:#bfe6cd}
+.cr.aa{color:#0a6b3d;background:#eef8f1;border-color:#cfe9d8}
+.cr.warn{color:#8a5a12;background:#fdf3e3;border-color:#efd6a8}
+.cr.bad{color:#b3261e;background:#fdecea;border-color:#f3c6c1}
+.cr.dim{color:#666;background:#f2f2f4;border-color:#e2e2e4}
+.panel.dark .cr.aaa{color:#8ef0b6;background:#12271a;border-color:#22503a}
+.panel.dark .cr.aa{color:#7fe0a9;background:#122019;border-color:#1f4630}
+.panel.dark .cr.warn{color:#f0cb9c;background:#2c2718;border-color:#4a3f24}
+.panel.dark .cr.bad{color:#f7a6a0;background:#2a1614;border-color:#5a2a26}
+.panel.dark .cr.dim{color:#999;background:#1e1e1e;border-color:#333}
+.card{background:#fff;border:1px solid #e2e2e4;border-radius:12px;padding:14px 16px;margin-top:18px}
+.card h2{font-size:13.5px;margin:0 0 6px}
+.card .hint{font-size:11.5px;color:#666;margin:0 0 10px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:6px 9px;border-bottom:1px solid #ddd}
+th{color:#666;font-weight:650}
+ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:#333;margin:4px 0}
+/* ===== 字体样本 ===== */
+.specimen-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:1100px){.specimen-grid{grid-template-columns:1fr}}
+.specimen{border:1px solid var(--border-subtle);border-radius:10px;padding:12px 14px;background:var(--background-content);font-family:var(--font-family-ui)}
+.specimen .spec-head{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.specimen .spec-head .name{font-weight:700;font-size:13px}
+.specimen .spec-head .code{font-size:11px;color:var(--text-tertiary);font-family:ui-monospace,Menlo,monospace}
+.specimen .stack{font-size:10.5px;color:var(--text-tertiary);font-family:ui-monospace,Menlo,monospace;word-break:break-all;
+  background:var(--background-field);border-radius:6px;padding:5px 7px;margin-bottom:9px;line-height:1.5}
+.specimen .line{padding:5px 0;border-top:1px dashed var(--border-subtle)}
+.specimen .line:first-of-type{border-top:0}
+.specimen .line .lbl{font-size:10.5px;color:var(--text-tertiary);margin-bottom:2px}
+.specimen .line .txt{font-size:15px;line-height:1.7;color:var(--text-primary)}
+.specimen .line.mono .txt{font-family:var(--font-family-monospace);font-size:13px}
+.specimen .glyphs{font-size:17px;letter-spacing:.06em;line-height:1.6}
+.han-note{font-size:11px;color:#666;margin-top:6px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:#111;color:#fff;font-size:12px;padding:7px 14px;border-radius:99px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<h1 id="card-title">Celadon 设计基线</h1>
+<p class="sub" id="card-subtitle"></p>
+<p class="src" id="card-source"></p>
+
+<div class="toolbar">
+  <span class="language-switch">
+    <button data-lang="zh-CN">简</button><button data-lang="zh-TW">繁</button>
+    <button data-lang="en">EN</button><button data-lang="ja">日</button>
+  </span>
+  <span id="card-langnote" style="font-size:11.5px;color:#777"></span>
+</div>
+
+<div class="cols" id="cols"></div>
+
+<div class="card"><h2 id="pairs-title"></h2><p class="hint" id="pairs-note"></p><div id="pairs"></div></div>
+
+<div class="card"><h2 id="typo-title"></h2><p class="hint" id="typo-note"></p><div class="specimen-grid" id="specimen"></div></div>
+
+<div class="card"><h2 id="contrast-title"></h2><table id="ctab"></table></div>
+<div class="card"><h2 id="redlines-title"></h2><ol id="redlines"></ol></div>
+<div class="toast" id="toast"></div>
+
+<div id="probe-light" class="celadon" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
+<div id="probe-dark" class="celadon" data-theme="dark" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
+
+<script src="./i18n/bundle.js"></script>
+<script>
+/* token 清单：只写 token 名 + 用法 key（文案在 i18n/card.usage.*），值一律从 tokens.css 读 */
+var GROUPS = [
+ ['group.brand', [
+   ['--brand','brand','on'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
+   ['--brand-soft','brandSoft'], ['--brand-display','brandDisplay'], ['--brand-text','brandText','onbrand'],
+   ['--brand-lift','brandLift','nocr']]],
+ ['group.interaction', [
+   ['--focus-ring-color','focusRingColor','on'], ['--focus-ring-width','focusRingWidth'], ['--focus-ring-offset','focusRingOffset'],
+   ['--disabled-background','disabledBackground'], ['--disabled-text','disabledText'], ['--disabled-border','disabledBorder'],
+   ['--scrim','scrim','nocr']]],
+ ['group.background', [
+   ['--background-app','backgroundApp'], ['--background-navigation','backgroundNavigation'], ['--background-content','backgroundContent'],
+   ['--background-surface','backgroundSurface'], ['--background-field','backgroundField'], ['--background-hover','backgroundHover'],
+   ['--background-selected','backgroundSelected']]],
+ ['group.border', [['--border-subtle','borderSubtle'], ['--border-default','borderDefault'], ['--border-control','borderControl']]],
+ ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary'], ['--text-muted','textMuted']]],
+ ['group.semantic', [
+   ['--success','success','on'], ['--success-soft','successSoft'],
+   ['--warning','warning','on'], ['--warning-soft','warningSoft'],
+   ['--warm','warm','on'], ['--warm-soft','warmSoft'], ['--warm-text','warmText'], ['--warm-contrast','warmContrast','nocr'],
+   ['--danger','danger','on'], ['--danger-soft','dangerSoft']]],
+ ['group.metrics', [
+   ['--font-family-ui','fontFamilyUi','nocr'], ['--font-family-monospace','fontFamilyMonospace','nocr'],
+   ['--font-size-11','fontSize11'], ['--font-size-12','fontSize12'], ['--font-size-13','fontSize13'], ['--font-size-16','fontSize16'],
+   ['--spacing-8','spacing8'], ['--spacing-12','spacing12'], ['--spacing-16','spacing16'],
+   ['--radius-small','radiusSmall'], ['--radius-medium','radiusMedium'], ['--radius-large','radiusLarge'], ['--radius-pill','radiusPill'],
+   ['--row-height','rowHeight'], ['--column-header-height','columnHeaderHeight'],
+   ['--duration-fast','durationFast'], ['--duration-base','durationBase'], ['--easing','easing'],
+   ['--shadow-subtle','shadowSubtle'], ['--shadow-floating','shadowFloating']]]
+];
+var PAIRS = [
+ ['--brand-text','--brand','brand'], ['--brand-ink','--brand-soft','brandInk'], ['--warm-contrast','--warm','warm'],
+ ['--warm-text','--warm-soft','warmSoft'], ['--success','--success-soft','success'],
+ ['--danger','--danger-soft','danger'], ['--text-primary','--background-content','textPrimary'],
+ ['--text-secondary','--background-content','textSecondary'], ['--brand','--brand-soft','brandSoft']
+];
+var SPECIMEN_LANGUAGES = [
+ ['zh-CN','简体中文'], ['zh-TW','繁體中文'], ['ja','日本語'], ['en','English']
+];
+var SPECIMEN_LINES = [
+ ['mixedLabel','mixedText','', false],   // 混排：按各语言文案
+ ['hanLabel','hanText','', true],        // 汉字：**四列同一段**，比较 SC/TC/JP 字形
+ ['kanaLabel','kanaText','', true],      // 假名：同上
+ ['latinLabel','latinText','', false],
+ ['punctLabel','punctText','', true],    // 标点：同上
+ ['monoLabel','monoText','mono', false]
+];
+
+var BUNDLE = window.CELADON_I18N || {};
+var CURRENT = 'zh-CN';
+function lookup(lang, key){
+  var dict = BUNDLE[lang]; if (!dict) return null;
+  return key.split('.').reduce(function(o, k){ return (o == null ? null : o[k]); }, dict);
+}
+function tr(key){
+  var v = lookup(CURRENT, key);
+  if (v == null) v = lookup('zh-CN', key);
+  return v == null ? key : v;
+}
+function isColor(v){ return /^(#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i.test(v); }
+function toRGB(v){
+  if (v[0] === '#'){ var h = v.slice(1); if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)]; }
+  var m = v.match(/rgba?\(([^)]+)\)/); if (!m) return null;
+  return m[1].split(',').map(parseFloat).slice(0,3);
+}
+function lum(v){ var c = toRGB(v); if (!c) return null;
+  var a = c.map(function(x){ x = x/255; return x <= 0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4); });
+  return 0.2126*a[0] + 0.7152*a[1] + 0.0722*a[2]; }
+function ratio(a,b){ var l1 = lum(a), l2 = lum(b); if (l1 === null || l2 === null) return null;
+  var hi = Math.max(l1,l2), lo = Math.min(l1,l2); return (hi+0.05)/(lo+0.05); }
+function grade(r){ return r >= 7 ? ['aaa','AAA'] : r >= 4.5 ? ['aa','AA'] : r >= 3 ? ['warn','&lt;AA'] : ['bad','FAIL']; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function readAll(el){ var cs = getComputedStyle(el), o = {};
+  GROUPS.forEach(function(g){ g[1].forEach(function(t){ o[t[0]] = cs.getPropertyValue(t[0]).trim(); }); }); return o; }
+
+var CONTRAST_ROWS = [];
+function buildPanel(themeName, probeEl, label){
+  var V = readAll(probeEl), bg = V['--background-content'];
+  var body = GROUPS.map(function(g){
+    var rows = g[1].map(function(t){
+      var name = t[0], usageKey = t[1], mode = t[2] || '', val = V[name] || '';
+      var usage = tr('card.usage.' + usageKey), badge = '', cls = 'dim', long = !isColor(val);
+      if (isColor(val)){
+        if (mode === 'onbrand'){ var rb = ratio(val, V['--brand']); badge = rb ? rb.toFixed(2)+':1' : '—'; }
+        else if (mode !== 'nocr'){ var r = ratio(val, bg); if (r){ var gd = grade(r); cls = gd[0]; badge = mode === 'on' ? r.toFixed(2)+':1' : gd[1].replace('&lt;','<');
+          if (mode === 'on') CONTRAST_ROWS.push([label, name, val, bg, r.toFixed(2), gd[1].replace('&lt;','<')]); } }
+      } else { badge = ''; }
+      var chip = isColor(val) ? '<span class="chip-color" style="background:'+val+'"></span>' : '<span class="chip-none"></span>';
+      var right = isColor(val)
+        ? '<span class="cr '+cls+'">'+esc(badge)+'</span><span class="hex" data-hex="'+val+'">'+val+'</span>'
+        : '<span class="cr dim" style="min-width:auto;max-width:52%">'+esc(val)+'</span>';
+      if (long) right = '<span class="cr dim" style="min-width:auto;max-width:50%;white-space:normal;text-align:right;font-family:ui-monospace,Menlo,monospace">'+esc(val)+'</span>';
+      return '<div class="sw">'+chip
+        + '<div class="meta"><div class="n">'+esc(name)+'</div><div class="u'+(long?' long':'')+'">'+esc(usage)+'</div></div>'
+        + right + '</div>';
+    }).join('');
+    return '<div class="grp"><h2>'+esc(tr('card.'+g[0]))+'</h2>'+rows+'</div>';
+  }).join('');
+  return '<section class="panel '+(themeName==='dark'?'dark':'')+'" style="'
+    + '--background-app:'+V['--background-app']+';--background-navigation:'+V['--background-navigation']+';--background-content:'+bg+';--background-surface:'+V['--background-surface']
+    + ';--background-field:'+V['--background-field']+';--background-hover:'+V['--background-hover']
+    + ';--border-subtle:'+V['--border-subtle']+';--border-default:'+V['--border-default']
+    + ';--text-primary:'+V['--text-primary']+';--text-secondary:'+V['--text-secondary']+';--text-tertiary:'+V['--text-tertiary']+'">'
+    + '<div class="hd">'+esc(tr(themeName === 'light' ? 'card.themeLight' : 'card.themeDark'))+'<span class="tag">'+esc(tr('card.usage.backgroundContent'))+' '+bg+'</span></div>'+body+'</section>';
+}
+function renderPanels(){
+  document.getElementById('cols').innerHTML = buildPanel('light', document.getElementById('probe-light'), 'light')
+    + buildPanel('dark', document.getElementById('probe-dark'), 'dark');
+}
+function renderContrastTable(){
+  document.getElementById('contrast-title').textContent = tr('card.sectionContrast');
+  document.getElementById('ctab').innerHTML = '<tr><th>'+esc(tr('card.tableTheme'))+'</th><th>'+esc(tr('card.tableToken'))+'</th><th>'+esc(tr('card.tableValue'))
+    +'</th><th>'+esc(tr('card.tableBackground'))+'</th><th>'+esc(tr('card.tableContrast'))+'</th><th>'+esc(tr('card.tableLevel'))+'</th></tr>'
+    + CONTRAST_ROWS.map(function(r){
+        var theme = tr(r[0] === 'light' ? 'card.themeLight' : 'card.themeDark');
+        return '<tr><td>'+theme+'</td><td><code>'+r[1]+'</code></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td><b>'+r[4]+':1</b></td><td>'+r[5]+'</td></tr>'; }).join('');
+}
+function renderPairs(){
+  document.getElementById('pairs-title').textContent = tr('card.sectionPairs');
+  document.getElementById('pairs-note').textContent = tr('card.pairsNote');
+  var L = readAll(document.getElementById('probe-light')), D = readAll(document.getElementById('probe-dark'));
+  document.getElementById('pairs').innerHTML = PAIRS.map(function(t){
+    var f = t[0], b = t[1], label = tr('card.usage.' + t[2]);
+    return ['light','dark'].map(function(themeName){
+      var V = themeName === 'light' ? L : D;
+      var r = ratio(V[f], V[b]); var gd = r ? grade(r) : ['dim','—'];
+      var theme = tr(themeName === 'light' ? 'card.themeLight' : 'card.themeDark');
+      return '<div style="display:flex;align-items:center;gap:9px;padding:4px 0">'
+        + '<span style="font-size:10.5px;color:#888;width:34px">'+esc(theme)+'</span>'
+        + '<span style="padding:4px 11px;border-radius:7px;font-size:12px;font-weight:650;background:'+V[b]+';color:'+V[f]+';border:1px solid rgba(0,0,0,.08)">'+esc(label)+'</span>'
+        + '<span class="cr '+gd[0]+'">'+(r ? r.toFixed(2)+':1' : '—')+'</span>'
+        + '<span style="font-size:10.5px;color:#999;font-family:ui-monospace,Menlo,monospace">'+f+' on '+b+'</span></div>';
+    }).join('');
+  }).join('');
+}
+function renderSpecimen(){
+  document.getElementById('typo-title').textContent = tr('card.sectionTypography');
+  document.getElementById('typo-note').innerHTML = esc(tr('card.typographyNote')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  var compareText = lookup('zh-CN', 'card.glyphCompareText') || '';  // 固定，四列同字
+  document.getElementById('specimen').innerHTML = SPECIMEN_LANGUAGES.map(function(L){
+    var lang = L[0], name = L[1];
+    var stack = lookup(lang, 'card.stackLabel');
+    var lines = SPECIMEN_LINES.map(function(s){
+      var text = lookup(s[3] ? 'zh-CN' : lang, 'card.' + s[1]) || '';
+      var lbl = lookup(CURRENT, 'card.' + s[0]) || lookup('zh-CN','card.' + s[0]);
+      return '<div class="line '+(s[2]||'')+'"><div class="lbl">'+esc(lbl)+'</div><div class="txt">'+esc(text)+'</div></div>';
+    }).join('');
+    return '<section class="specimen celadon" lang="'+lang+'" data-specimen="'+lang+'">'
+      + '<div class="spec-head"><span class="name">'+esc(name)+'</span><span class="code">lang="'+lang+'"</span></div>'
+      + '<div class="stack" data-stack></div>'
+      + lines
+      + '<div class="line"><div class="lbl">'+(lookup(CURRENT,'card.glyphCompare')||lookup('zh-CN','card.glyphCompare'))+'</div>'
+      + '<div class="txt glyphs">'+esc(compareText)+'</div></div>'
+      + '</section>';
+  }).join('');
+  // 读取每列**实际解析**的字体栈（此列自带 lang，:lang() 生效）
+  document.querySelectorAll('[data-specimen]').forEach(function(el){
+    var cs = getComputedStyle(el);
+    el.querySelector('[data-stack]').textContent = cs.getPropertyValue('--font-family-ui').trim() + '   /* 实际生效 */';
+  });
+}
+function renderRedlines(){
+  document.getElementById('redlines-title').textContent = tr('card.sectionRedlines');
+  var list = lookup(CURRENT, 'card.redlines') || lookup('zh-CN', 'card.redlines') || [];
+  document.getElementById('redlines').innerHTML = list.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('');
+}
+function renderAll(){
+  CONTRAST_ROWS = [];
+  document.getElementById('card-title').textContent = tr('card.title');
+  document.getElementById('card-subtitle').textContent = tr('card.subtitle');
+  document.getElementById('card-source').innerHTML = esc(tr('card.source')).replace(/(tokens\.less|build-css\.mjs|tokens\.css|pnpm design:css)/g,'<code>$1</code>');
+  document.getElementById('card-langnote').textContent = tr('card.langNote');
+  renderPanels(); renderPairs(); renderSpecimen(); renderContrastTable(); renderRedlines();
+  document.querySelectorAll('.language-switch button').forEach(function(b){ b.classList.toggle('on', b.dataset.lang === CURRENT); });
+  document.documentElement.lang = CURRENT;
+}
+document.querySelectorAll('.language-switch button').forEach(function(b){
+  b.addEventListener('click', function(){ CURRENT = b.dataset.lang; renderAll(); });
+});
+document.addEventListener('click', function(e){
+  var el = e.target.closest('.hex'); if (!el) return;
+  var hx = el.dataset.hex; navigator.clipboard && navigator.clipboard.writeText(hx);
+  var t = document.getElementById('toast'); t.textContent = hx; t.classList.add('on');
+  setTimeout(function(){ t.classList.remove('on'); }, 1100);
+});
+window.addEventListener('load', renderAll);
+</script>
+</body>
+</html>
