@@ -61,6 +61,8 @@ code{font-family:ui-monospace,Menlo,monospace;background:#f2f2f4;padding:1px 5px
 <div id="probe-dark" class="celadon" data-theme="dark" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
 
 <div class="cols" id="cols"></div>
+<div class="card"><h2>关键配对（前景 on 背景 · 自动实算）</h2><div id="pairs"></div>
+  <p style="font-size:11.5px;color:#666;margin:8px 0 0">同一 token 有"实心底"和"浅底"两种用法，配对用错就会像 <code>--warm</code>+<code>--warm-text</code>（1.41:1，几乎不可见）。</p></div>
 <div class="card"><h2>对比度实测（WCAG 2.1 · AA 正文 4.5:1 / AAA 7:1）</h2><table id="ctab"></table></div>
 <div class="card"><h2>用法红线</h2>
   <ol style="margin:0;padding-left:20px">
@@ -108,6 +110,10 @@ var GROUPS = [
  ['语义', [
    ['--success','成功（松花绿 · 传统色）','on'],['--success-soft','成功软底'],
    ['--warning','警示（= --warm 别名）','on'],['--warning-soft','警示软底'],
+   ['--warm','琥珀实心底（须配 --warm-contrast）','on'],
+   ['--warm-soft','琥珀浅底（须配 --warm-text）'],
+   ['--warm-text','琥珀浅底上的文字'],
+   ['--warm-contrast','压在 --warm 实心底上的文字','nocr'],
    ['--danger','危险（朱红）','on'],['--danger-soft','危险软底'],
  ]],
  ['尺寸 / 圆角 / 动效', [
@@ -168,6 +174,34 @@ window.addEventListener('load', function(){
   document.getElementById('cols').innerHTML =
       build('light', document.getElementById('probe-light'), '浅色')
     + build('dark',  document.getElementById('probe-dark'),  '暗色');
+  var PAIRS = [
+    ['--brand-text','--brand','实心主按钮'],
+    ['--warm-contrast','--warm','琥珀实心（徽标/按钮）'],
+    ['--warm-text','--warm-soft','琥珀浅底'],
+    ['--success','--success-soft','成功（软底）'],
+    ['--danger','--danger-soft','危险（软底）'],
+    ['--text-primary','--background-content','正文'],
+    ['--text-secondary','--background-content','次要文字'],
+    ['--brand','--brand-soft','品牌字 on 品牌浅底'],
+  ];
+  function renderPairs(){
+    var L = readAll(document.getElementById('probe-light')), D = readAll(document.getElementById('probe-dark'));
+    document.getElementById('pairs').innerHTML = PAIRS.map(function(t){
+      var f = t[0], b = t[1], label = t[2];
+      var cell = function(V, themeLabel){
+        var r = ratio(V[f], V[b]); var gd = r ? grade(r) : ['dim','—'];
+        return '<div style="display:flex;align-items:center;gap:9px;padding:4px 0">'
+          + '<span style="font-size:10.5px;color:#888;width:34px">' + themeLabel + '</span>'
+          + '<span style="padding:4px 11px;border-radius:7px;font-size:12px;font-weight:650;'
+          + 'background:' + V[b] + ';color:' + V[f] + ';border:1px solid rgba(0,0,0,.08)">' + (label||'示例') + '</span>'
+          + '<span class="cr ' + gd[0] + '">' + (r ? r.toFixed(2) + ':1' : '—') + '</span>'
+          + '<span style="font-size:10.5px;color:#999;font-family:ui-monospace,Menlo,monospace">' + f + ' on ' + b + '</span>'
+          + '</div>';
+      };
+      return cell(L,'浅') + cell(D,'暗');
+    }).join('');
+  }
+  renderPairs();
   document.getElementById('ctab').innerHTML = '<tr><th>主题</th><th>token</th><th>色值</th><th>背景</th><th>对比度</th><th>等级</th></tr>'
     + CT.map(function(r){ return '<tr><td>'+r[0]+'</td><td><code>'+r[1]+'</code></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td><b>'+r[4]+':1</b></td><td>'+r[5]+'</td></tr>'; }).join('');
 });
