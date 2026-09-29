@@ -8,6 +8,7 @@
 | [`color-card.html`](color-card.html) | **色卡**（浏览器直接打开）：所有色值/尺寸**实时读 `tokens.css`**，零硬编码；对比度按各主题真实内容底自动实算；点击 hex 复制 |
 | [`i18n/`](i18n/) | **多语言文案**：`zh-CN.json` · `zh-TW.json` · `en.json` · `ja.json`（`ui.*` 界面文案 / `sample.*` 演示数据）+ `bundle.js`（自动生成） |
 | [`build-i18n.mjs`](build-i18n.mjs) | 由 `i18n/*.json` 生成 `i18n/bundle.js`（**不用 fetch**，file:// 直接可用） |
+| [`logo-mark-celadon.svg`](logo-mark-celadon.svg) 等 | **Logo 设计交付物（仅设计，尚未应用到生产）**：官方原版 logo 换色版（`-dark`）· App 图标 SVG · [`icons/`](icons/) PNG 七档 · [`reference/`](reference/) 官方正源存档 |
 
 > 改色只改 `tokens.less` → 跑 `pnpm design:css` → 色卡自动跟随（**不用改 HTML**）。
 
