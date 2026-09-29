@@ -2,6 +2,12 @@
 /**
  * celadon/design/tokens.less — CUI 2.0（Celadon）设计 token · v1.1
  *
+ * 配色来源 = 中国传统色：
+ *   品牌「青」   #2A7B7B  —— 青瓷釉色，青而不艳、温润耐看
+ *   成功「松花绿」#057748  —— 松花绿，与品牌青拉开色相
+ *   危险「朱红」 #D93B30  —— 朱红，警示明确
+ *   警示「琥珀」 #8B6214  —— 淡琥珀，可见但不像错误
+ *
  * 品牌 = #2A7B7B（青 · 中国传统色）
  * 中性 = 近白 / 近黑（内容区非纯白）
  * 作用域 = .celadon（数据属性 data-theme 挂 .celadon 或其任意祖先均可）
@@ -102,7 +108,7 @@
   --font-family-ui-japanese: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Source Han Sans JP", sans-serif;
   --font-family-monospace-cjk: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK SC", "Noto Sans Mono CJK JP", monospace;
   --font-weight-normal: 430;
-  /* 非整百字重（可变字体），屏幕更清晰；不支持时回落 400 */
+  /* 界面文字用非整百字重（可变字体下更清晰）；不支持时回落 400 */
   --font-weight-medium: 500;
   --font-weight-strong: 650;
   --line-height-normal: 1.5;
@@ -114,7 +120,7 @@
   --letter-spacing-cjk: 0;
   /* 中文不要负字距 */
   --font-size-minimum-cjk: 12px;
-  /* 中文最小档（比 Codex 的 11px 更严） */
+  /* 中文最小档：11px 以下（非 Retina）汉字笔画会糊 */
   /* ===== 字号（7 档 + 16 补档）· 中文最小 12px ===== */
   --font-size-11: 11px;
   /* 仅西文/数字角标，中文勿用 */

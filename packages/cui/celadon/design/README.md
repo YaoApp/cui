@@ -13,9 +13,9 @@
 
 ## 字体（四语）
 
-- **规范**：见 [`design/v2/typography.md`](../../../../design/v2/typography.md)（含 Codex 开源仓库调研与取舍）
+- **字体规范**：本目录 `tokens.less` 内的 `--font-family-*` 即为规范（下方「字体」一节）
 - **按语言分栈（必须）**：`--font-family-ui-hans` / `-hant` / `-japanese`，由 `.celadon:lang(zh-CN|zh-TW|zh-Hant|ja)` 自动映射 —— 繁中不走 SC 字形、日文不走中文字形；
-- **度量**：`--font-weight-normal: 430`（借 Codex 做法）· `--line-height-normal: 1.5` vs `--line-height-cjk: 1.7` · `--font-size-minimum-cjk: 12px` · 中文 `letter-spacing: 0`；
+- **度量**：`--font-weight-normal: 430`（非整百字重，屏幕更清晰）· `--line-height-normal: 1.5` vs `--line-height-cjk: 1.7`（中日文笔画密，需要更大行距）· `--font-size-minimum-cjk: 12px` · 中文 `letter-spacing: 0`；
 - **样本**：`color-card.html` →「字体样本」区，四语并列 + **同一段字的字形对照**（SC/TC/JP 差异一眼可见）。
 
 ## 定稿色
@@ -32,6 +32,17 @@
 | 焦点环 | `--brand` + 2px offset | `--brand-lift` | 键盘可达性必备 |
 | 遮罩 | `rgba(10,10,10,.32)` | `rgba(0,0,0,.56)` | 弹窗/抽屉统一 |
 | 禁用 | `#F0F0F2` / `#A8A8B0` / `#E4E4E7` | `#1A1A1A` / `#5A5A5A` / `#2A2A2A` | 豁免对比度要求 |
+
+## 配色来源（中国传统色）
+
+| 角色 | 色值 | 传统色 | 说明 |
+| --- | --- | --- | --- |
+| 品牌 | **`#2A7B7B`** | **青** | 青瓷釉色：青而不艳、温润耐看；中文里唯一"既是蓝又是绿"的颜色词 |
+| 成功 | `#057748` | 松花绿 | 与品牌青拉开色相，避免"成功=品牌"混淆 |
+| 危险 | `#D93B30` | 朱红 | 警示明确，不做荧光红 |
+| 警示 | `#8B6214` | 琥珀（淡） | 可见但不像错误 |
+
+> 取「青瓷」作为代号与品牌色，器物隐喻也顺：**同一件器，一面看人，一面看 Agent**（双面 App）。
 
 ## 决策依据
 
@@ -73,7 +84,7 @@
 
 ## 多语言（i18n）
 
-- **设计规范**：见 [`design/v2/i18n.md`](../../../../design/v2/i18n.md)（key 命名 · 不翻译清单 · 插值/复数 · 回退链 · 四语排版差异）
+- **设计规范**：`i18n/*.json` 的 `ui.*` / `sample.*` 命名空间即为规范（界面文案必翻 / 演示数据不翻；缺 key 回退 `zh-CN`）
 - **语言**：简 `zh-CN` · 繁 `zh-TW` · 英 `en` · 日 `ja`（缺 key 回退 `zh-CN`）
 - **用法**：元素上加 `data-i18n="ui.nav.inbox"`（富文本用 `data-i18n-html`）；带计数用 `data-count="3"` 等属性，文案里写 `{count}`
 - **运行时**：只替换元素的**第一个文本节点**（保留计数徽标等子元素）；不刷新页面切换，`<html lang>` 同步
