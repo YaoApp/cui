@@ -6,6 +6,8 @@
 | [`build-css.mjs`](build-css.mjs) | 由 `tokens.less` 生成 `tokens.css`（色卡与后续 AntD 主题都从这里派生） |
 | [`tokens.css`](tokens.css) | **自动生成，勿手改** |
 | [`color-card.html`](color-card.html) | **色卡**（浏览器直接打开）：所有色值/尺寸**实时读 `tokens.css`**，零硬编码；对比度按各主题真实内容底自动实算；点击 hex 复制 |
+| [`i18n/`](i18n/) | **多语言文案**：`zh-CN.json` · `zh-TW.json` · `en.json` · `ja.json`（`ui.*` 界面文案 / `sample.*` 演示数据）+ `bundle.js`（自动生成） |
+| [`build-i18n.mjs`](build-i18n.mjs) | 由 `i18n/*.json` 生成 `i18n/bundle.js`（**不用 fetch**，file:// 直接可用） |
 
 > 改色只改 `tokens.less` → 跑 `node celadon/design/build-css.mjs` → 色卡自动跟随（**不用改 HTML**）。
 
@@ -60,3 +62,16 @@
 - **零硬编码**：所有颜色/圆角/间距都从 `tokens.css` 读（页面里查不到任何色值字面量，已验证）；
 - 图标全部为**线性 SVG**（51 个 `<use>`，无 emoji）；
 - 顶部工具条可切 **浅色 / 暗色**；规范相关细节：列头严格 40px、品牌实心/浅底两档、success 只用软底+图标。
+
+## 多语言（i18n）
+
+- **设计规范**：见 [`design/v2/i18n.md`](../../../../design/v2/i18n.md)（key 命名 · 不翻译清单 · 插值/复数 · 回退链 · 四语排版差异）
+- **语言**：简 `zh-CN` · 繁 `zh-TW` · 英 `en` · 日 `ja`（缺 key 回退 `zh-CN`）
+- **用法**：元素上加 `data-i18n="ui.nav.inbox"`（富文本用 `data-i18n-html`）；带计数用 `data-count="3"` 等属性，文案里写 `{count}`
+- **运行时**：只替换元素的**第一个文本节点**（保留计数徽标等子元素）；不刷新页面切换，`<html lang>` 同步
+- **生成**：`pnpm design:i18n` → `i18n/bundle.js`
+
+```bash
+pnpm design:css     # tokens.less → tokens.css
+pnpm design:i18n    # i18n/*.json → i18n/bundle.js
+```

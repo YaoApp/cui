@@ -1,0 +1,129 @@
+{
+  "ui": {
+    "brand": "Yao Agents",
+    "newTask": "新規タスク",
+    "nav": {
+      "chat": "チャット",
+      "inbox": "受信トレイ",
+      "board": "ボード",
+      "workspace": "ワークスペース",
+      "computer": "コンピュータ",
+      "knowledge": "ナレッジ"
+    },
+    "inbox": {
+      "unreadCount": "未読 {count}",
+      "searchPlaceholder": "メッセージを検索…",
+      "filterAll": "すべて",
+      "filterUnread": "未読",
+      "filterArchived": "アーカイブ済み"
+    },
+    "time": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "earlier": "それ以前"
+    },
+    "thread": {
+      "newMessages": "新着 {count} 件",
+      "dateAt": "今日 {time}",
+      "changesChip": "変更 +{added} −{removed}"
+    },
+    "tool": {
+      "readFiles": "ファイルを読み込む"
+    },
+    "status": {
+      "done": "完了"
+    },
+    "agent": "エージェント",
+    "ask": {
+      "pending": "確認待ち",
+      "pendingAt": "確認待ち · {time}",
+      "differences": "差分 {count} 件",
+      "question": "要約の観点はどれにしますか？出力の構成が変わります：",
+      "optionRiskFirst": "「リスク優先」で要約（推奨）",
+      "optionChronological": "「時系列」で要約",
+      "optionCustom": "自分で指定する"
+    },
+    "composer": {
+      "placeholder": "続けて：リスクを要件定義の受け入れ条件に追記…",
+      "defaultPermission": "既定の権限"
+    },
+    "panel": {
+      "inProgress": "進行中",
+      "highPriority": "優先度：高",
+      "remainingDays": "残り {days} 日",
+      "actionComplete": "完了にする",
+      "actionPause": "保留",
+      "actionOpenFullPage": "全画面で開く",
+      "subtasks": "サブタスク",
+      "gates": "ゲート",
+      "changes": "変更",
+      "relatedFiles": "関連ファイル",
+      "activity": "アクティビティ"
+    },
+    "activity": {
+      "readDocuments": "ドキュメント {count} 件を読み込み",
+      "extractRisks": "リスク {count} 件を抽出",
+      "waitingConfirmation": "観点の確認待ち"
+    },
+    "theme": {
+      "light": "ライト",
+      "dark": "ダーク"
+    }
+  },
+  "sample": {
+    "conversation": {
+      "greeting": {
+        "title": "ご挨拶と機能のご案内",
+        "subtitle": "ドキュメント処理と利用可能なツールをご案内"
+      },
+      "weekly": {
+        "title": "週報の作成",
+        "subtitle": "テンプレートで今週の進捗を集計"
+      },
+      "scraping": {
+        "title": "データ収集タスク",
+        "subtitle": "12 ページ完了"
+      },
+      "contract": {
+        "title": "契約書レビュー",
+        "subtitle": "リスク 3 件を指摘"
+      },
+      "invoice": {
+        "title": "請求書チェック",
+        "subtitle": "証憑を 2 件作成"
+      },
+      "siteCheck": {
+        "title": "サイト監視",
+        "subtitle": "3 ドメイン正常"
+      }
+    },
+    "message": {
+      "user1": "こんにちは。この 2 つのドキュメントを確認してもらえますか？契約書のリスク条項が中心です。",
+      "agent1Html": "両方読みました。契約書に<b>リスクが 3 件</b>あります：① 第 4.2 条 支払期間に上限がない；② 第 7 条 責任が不均衡；③ 別紙 2 に署名欄がない。",
+      "agent2": "リスク優先で要約し、根拠条項とページを付記しました。"
+    },
+    "tool": {
+      "readLineContract": "contract.pdf · 12 ページ · 本文を抽出",
+      "readLineRequirements": "要件定義.docx · 4 ページ · 本文を抽出"
+    },
+    "panel": {
+      "taskTitle": "契約書レビュー",
+      "subtaskRead": "contract.pdf / 要件定義.docx を読み込む",
+      "subtaskExtract": "リスク条項を抽出しページを付記",
+      "subtaskGenerate": "リスク摘要.md を生成",
+      "subtaskAcceptance": "受け入れ条件に追記（観点の確認待ち）",
+      "gateVisual": "visual {count} 件"
+    },
+    "diff": {
+      "line1": "- 支払期間：四半期ごとの精算",
+      "line2": "+ 支払期間：≤30 日（4.2 条）",
+      "line3": "- 責任：双方が各自負担",
+      "line4": "+ 責任：対等、遅延は 0.05%/日"
+    },
+    "file": {
+      "contract": "contract.pdf",
+      "requirements": "要件定義.docx",
+      "riskSummary": "リスク摘要.md"
+    }
+  }
+}

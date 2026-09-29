@@ -1,0 +1,129 @@
+{
+  "ui": {
+    "brand": "Yao Agents",
+    "newTask": "新增任務",
+    "nav": {
+      "chat": "聊天",
+      "inbox": "收件匣",
+      "board": "看板",
+      "workspace": "工作區",
+      "computer": "電腦",
+      "knowledge": "知識庫"
+    },
+    "inbox": {
+      "unreadCount": "{count} 未讀",
+      "searchPlaceholder": "搜尋訊息…",
+      "filterAll": "全部",
+      "filterUnread": "未讀",
+      "filterArchived": "已封存"
+    },
+    "time": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "earlier": "更早"
+    },
+    "thread": {
+      "newMessages": "{count} 則新訊息",
+      "dateAt": "今天 {time}",
+      "changesChip": "變更 +{added} −{removed}"
+    },
+    "tool": {
+      "readFiles": "讀取檔案"
+    },
+    "status": {
+      "done": "完成"
+    },
+    "agent": "Agent",
+    "ask": {
+      "pending": "待你確認",
+      "pendingAt": "待你確認 · {time}",
+      "differences": "{count} 處差異",
+      "question": "摘要口徑依哪個？這會影響輸出結構：",
+      "optionRiskFirst": "依「風險優先」彙總（建議）",
+      "optionChronological": "依「時間順序」彙總",
+      "optionCustom": "我自己補口徑"
+    },
+    "composer": {
+      "placeholder": "繼續：把風險點補進需求文件的驗收條款…",
+      "defaultPermission": "預設權限"
+    },
+    "panel": {
+      "inProgress": "進行中",
+      "highPriority": "高優先",
+      "remainingDays": "剩餘 {days} 天",
+      "actionComplete": "標記完成",
+      "actionPause": "擱置",
+      "actionOpenFullPage": "全頁開啟",
+      "subtasks": "子任務",
+      "gates": "品質關卡",
+      "changes": "變更",
+      "relatedFiles": "相關檔案",
+      "activity": "活動"
+    },
+    "activity": {
+      "readDocuments": "讀取 {count} 份文件",
+      "extractRisks": "提取 {count} 處風險",
+      "waitingConfirmation": "等待口徑確認"
+    },
+    "theme": {
+      "light": "淺色",
+      "dark": "深色"
+    }
+  },
+  "sample": {
+    "conversation": {
+      "greeting": {
+        "title": "打招呼與功能諮詢",
+        "subtitle": "已介紹文件處理能力與可用工具"
+      },
+      "weekly": {
+        "title": "週報產生",
+        "subtitle": "依範本彙總本週進度"
+      },
+      "scraping": {
+        "title": "資料擷取任務",
+        "subtitle": "已完成 12 個頁面"
+      },
+      "contract": {
+        "title": "合約審閱",
+        "subtitle": "風險點 3 處 · 已標註"
+      },
+      "invoice": {
+        "title": "發票核對",
+        "subtitle": "已產生 2 張憑證"
+      },
+      "siteCheck": {
+        "title": "網站巡檢",
+        "subtitle": "3 個網域正常"
+      }
+    },
+    "message": {
+      "user1": "你好，能幫我看看這兩份文件嗎？重點是合約裡的風險條款。",
+      "agent1Html": "兩份都讀完了。合約裡我找到 <b>3 處風險</b>：① 第 4.2 條付款週期無上限；② 第 7 條違約責任不對等；③ 附件二缺少簽章頁。",
+      "agent2": "已依風險優先輸出，並標註了依據條款頁碼。"
+    },
+    "tool": {
+      "readLineContract": "contract.pdf · 12 頁 · 已擷取正文",
+      "readLineRequirements": "需求.docx · 4 頁 · 已擷取正文"
+    },
+    "panel": {
+      "taskTitle": "合約審閱",
+      "subtaskRead": "讀取 contract.pdf / 需求.docx",
+      "subtaskExtract": "提取風險條款並標註頁碼",
+      "subtaskGenerate": "產生 風險摘要.md",
+      "subtaskAcceptance": "補進驗收條款（待你確認口徑）",
+      "gateVisual": "visual {count} 處"
+    },
+    "diff": {
+      "line1": "- 付款週期：按季度結算",
+      "line2": "+ 付款週期：≤30 天（4.2 條）",
+      "line3": "- 違約責任：雙方各自承擔",
+      "line4": "+ 違約責任：對等，逾期按 0.05%/日"
+    },
+    "file": {
+      "contract": "contract.pdf",
+      "requirements": "需求.docx",
+      "riskSummary": "風險摘要.md"
+    }
+  }
+}
