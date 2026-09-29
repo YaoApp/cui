@@ -1,0 +1,287 @@
+/* 自动生成，勿手改 —— 源：tokens.less（node janus/design/build-css.mjs） */
+/**
+ * janus/design/tokens.less — CUI 2.0（Janus）设计 token · v1.1
+ *
+ * 品牌 = #2A7B7B（青 · 中国传统色）
+ * 中性 = 近白 / 近黑（内容区非纯白）
+ * 作用域 = .jn2（数据属性 data-theme 挂 .jn2 或其任意祖先均可）
+ *
+ * 红线：单一来源 · 禁硬编码 · 暗色只覆盖 semantic · 语义优先
+ */
+/* data-theme 挂 .jn2 自身、或挂在祖先（如 <html>）都能生效 */
+.jn2,
+[data-theme] .jn2 {
+  /* ===== 中性（近白）===== */
+  --bg-app: #F4F4F6;
+  --bg-nav: #F8F8FA;
+  --bg-content: #FAFAFB;
+  /* 非纯白（去刺眼） */
+  --bg-surface: #FFFFFF;
+  --bg-field: #F4F4F5;
+  --bg-hover: #F0F0F2;
+  --bg-selected: #ECF3F3;
+  /* 选中底 = 品牌浅底 */
+  --border: #ECECEE;
+  /* 装饰线 */
+  --border-2: #DEDEE1;
+  /* 常规边界 */
+  --border-3: #CACACD;
+  /* 控件边界 */
+  --text-1: #0A0A0A;
+  --text-2: #5C5C63;
+  --text-3: #7A7A82;
+  --text-muted: #A8A8B0;
+  /* ===== 品牌 · 青 #2A7B7B ===== */
+  --brand: #2A7B7B;
+  /* 真实内容底(#FAFAFB) 4.77:1 ✓ AA */
+  --brand-hover: #236B6B;
+  --brand-active: #1D5C5C;
+  /* 按下态 */
+  --brand-soft: #ECF3F3;
+  --brand-display: #96C5C5;
+  /* **只做填充/图形，不承载文字与图标** */
+  --brand-text: #FFFFFF;
+  --brand-lift: #389F9F;
+  /* 暗色文字/描边档（6.01:1 ✓） */
+  /* ===== 交互态 ===== */
+  --focus-ring-color: var(--brand);
+  /* 焦点环：与品牌同源 */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  /* ring 与控件留 2px 间隙 */
+  --focus-ring: 0 0 0 var(--focus-ring-offset) var(--bg-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
+  --disabled-bg: #F0F0F2;
+  --disabled-text: #A8A8B0;
+  /* 禁用态豁免对比度要求 */
+  --disabled-border: #E4E4E7;
+  --scrim: rgba(10, 10, 10, 0.32);
+  /* 弹窗/抽屉遮罩 */
+  /* ===== 警示 · 淡琥珀（不像 error）===== */
+  --warm: #8B6214;
+  --warm-soft: #F7F0E2;
+  --warm-text: #6E4D0C;
+  --warning: var(--warm);
+  /* 同源别名，避免两处维护 */
+  --warning-soft: var(--warm-soft);
+  /* ===== 语义 ===== */
+  --ok: #057748;
+  --ok-soft: #E9F6F1;
+  --danger: #D93B30;
+  --danger-soft: #FBECEA;
+  /* ===== 字号（7 档 + 16 补档）· 中文最小 12px ===== */
+  --fs-11: 11px;
+  /* 仅西文/数字角标，中文勿用 */
+  --fs-12: 12px;
+  /* 中文最小档 */
+  --fs-13: 13px;
+  /* 正文默认 */
+  --fs-14: 14px;
+  --fs-15: 15px;
+  --fs-16: 16px;
+  --fs-17: 17px;
+  --fs-20: 20px;
+  /* ===== 间距 / 圆角 / 阴影 / 动效 ===== */
+  --sp-1: 2px;
+  --sp-2: 4px;
+  --sp-3: 6px;
+  --sp-4: 8px;
+  --sp-5: 12px;
+  --sp-6: 16px;
+  --sp-7: 24px;
+  --sp-8: 32px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-1: 0 1px 2px rgba(10, 10, 10, 0.05);
+  --shadow-2: 0 10px 30px rgba(10, 10, 10, 0.1), 0 2px 6px rgba(10, 10, 10, 0.06);
+  --col-header-h: 40px;
+  --row-h: 40px;
+}
+/* 暗色（近黑）· 品牌同值 */
+.jn2[data-theme='dark'],
+[data-theme='dark'] .jn2 {
+  --bg-app: #080808;
+  --bg-nav: #0D0D0D;
+  --bg-content: #101010;
+  --bg-surface: #161616;
+  --bg-field: #1E1E1E;
+  --bg-hover: #242424;
+  --bg-selected: #16292A;
+  --border: #262626;
+  --border-2: #333333;
+  --border-3: #424242;
+  --text-1: #F5F5F5;
+  --text-2: #B4B4B4;
+  --text-3: #949494;
+  --text-muted: #6E6E6E;
+  --brand: #2A7B7B;
+  --brand-hover: #338F8F;
+  --brand-active: #3FA3A3;
+  --brand-soft: #16292A;
+  --brand-display: #96C5C5;
+  --brand-text: #FFFFFF;
+  --brand-lift: #389F9F;
+  /* 暗色：焦点环改用提亮档，否则在近黑上看不见 */
+  --focus-ring-color: var(--brand-lift);
+  --disabled-bg: #1A1A1A;
+  --disabled-text: #5A5A5A;
+  --disabled-border: #2A2A2A;
+  --scrim: rgba(0, 0, 0, 0.56);
+  --warm: #C4A767;
+  --warm-soft: #2C2718;
+  --warm-text: #E4CE9C;
+  --ok: #4ADE80;
+  --ok-soft: #12261A;
+  --danger: #F87171;
+  --danger-soft: #2A1614;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 12px 34px rgba(0, 0, 0, 0.6);
+}
+/**
+ * 用法约定
+ *  · 品牌色两档：**实心档**（--brand + --brand-text）只用于主按钮/徽标（≤2 处）；
+ *    **浅底档**（--brand-soft + --brand）用于选中行、气泡、头像等（可多处，单块面积要小）。
+ *  · 暗色下凡"浅底 + 品牌字/描边"一律用 --brand-lift。
+ *  · 交互标准四态：default / hover / active / disabled。
+ *  · success 只用软底 + 图标，不做大面积实心。
+ */
+.jn2 .btn-primary,
+[data-theme] .jn2 .btn-primary {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border: 1px solid var(--brand);
+}
+.jn2 .btn-primary:hover,
+[data-theme] .jn2 .btn-primary:hover {
+  background: var(--bg-hover);
+}
+.jn2 .btn-primary:active,
+[data-theme] .jn2 .btn-primary:active {
+  color: var(--brand-active);
+  border-color: var(--brand-active);
+}
+.jn2 .btn-primary.is-solid,
+[data-theme] .jn2 .btn-primary.is-solid {
+  background: var(--brand);
+  color: var(--brand-text);
+}
+.jn2 .btn-primary.is-solid:hover,
+[data-theme] .jn2 .btn-primary.is-solid:hover {
+  background: var(--brand-hover);
+}
+.jn2 .btn-primary.is-solid:active,
+[data-theme] .jn2 .btn-primary.is-solid:active {
+  background: var(--brand-active);
+}
+.jn2 .btn-primary:disabled,
+[data-theme] .jn2 .btn-primary:disabled,
+.jn2 .btn-primary.is-disabled,
+[data-theme] .jn2 .btn-primary.is-disabled {
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
+  border-color: var(--disabled-border);
+}
+.jn2 .btn-ghost,
+[data-theme] .jn2 .btn-ghost {
+  background: var(--bg-surface);
+  color: var(--text-1);
+  border: 1px solid var(--border-2);
+}
+.jn2 .btn-warn,
+[data-theme] .jn2 .btn-warn {
+  background: var(--warm-soft);
+  color: var(--warm-text);
+  border: 1px solid var(--warm);
+}
+.jn2 .bubble-me,
+[data-theme] .jn2 .bubble-me {
+  background: var(--brand-soft);
+  color: var(--text-1);
+  border: 1px solid var(--border-2);
+}
+.jn2 .bubble-ai,
+[data-theme] .jn2 .bubble-ai {
+  background: var(--bg-surface);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+}
+.jn2 .nav-item.is-active,
+[data-theme] .jn2 .nav-item.is-active {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+.jn2 .badge-brand,
+[data-theme] .jn2 .badge-brand {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border: 1px solid var(--brand);
+}
+.jn2 .badge-warn,
+[data-theme] .jn2 .badge-warn {
+  background: var(--warm-soft);
+  color: var(--warm-text);
+  border: 1px solid var(--warm);
+}
+.jn2 .avatar,
+[data-theme] .jn2 .avatar {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border: 1px solid var(--brand);
+}
+.jn2 .tab-active,
+[data-theme] .jn2 .tab-active {
+  background: var(--bg-surface);
+  color: var(--text-1);
+  border: 1px solid var(--border-3);
+}
+.jn2 .input,
+[data-theme] .jn2 .input {
+  background: var(--bg-field);
+  border: 1px solid var(--border-3);
+  color: var(--text-1);
+}
+.jn2 .input:focus,
+[data-theme] .jn2 .input:focus {
+  border-color: var(--brand);
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+.jn2 .input:disabled,
+[data-theme] .jn2 .input:disabled {
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
+  border-color: var(--disabled-border);
+}
+.jn2 .focusable:focus-visible,
+[data-theme] .jn2 .focusable:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+.jn2 .scrim,
+[data-theme] .jn2 .scrim {
+  background: var(--scrim);
+}
+.jn2[data-theme='dark'] .btn-primary,
+[data-theme='dark'] .jn2 .btn-primary {
+  color: var(--brand-lift);
+  border-color: var(--brand-lift);
+}
+.jn2[data-theme='dark'] .nav-item.is-active,
+[data-theme='dark'] .jn2 .nav-item.is-active {
+  color: var(--brand-lift);
+}
+.jn2[data-theme='dark'] .badge-brand,
+[data-theme='dark'] .jn2 .badge-brand {
+  color: var(--brand-lift);
+  border-color: var(--brand-lift);
+}
+.jn2[data-theme='dark'] .avatar,
+[data-theme='dark'] .jn2 .avatar {
+  color: var(--brand-lift);
+  border-color: var(--brand-lift);
+}

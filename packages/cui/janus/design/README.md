@@ -2,7 +2,12 @@
 
 | 文件 | 内容 |
 | --- | --- |
-| [`tokens.less`](tokens.less) | **2.0 设计 token 单一来源**（浅 + 暗，作用域 `.jn2`）+ 用法约定 |
+| [`tokens.less`](tokens.less) | **2.0 设计 token 唯一来源**（浅 + 暗，作用域 `.jn2`）+ 用法约定 |
+| [`build-css.mjs`](build-css.mjs) | 由 `tokens.less` 生成 `tokens.css`（色卡与后续 AntD 主题都从这里派生） |
+| [`tokens.css`](tokens.css) | **自动生成，勿手改** |
+| [`color-card.html`](color-card.html) | **色卡**（浏览器直接打开）：所有色值/尺寸**实时读 `tokens.css`**，零硬编码；对比度按各主题真实内容底自动实算；点击 hex 复制 |
+
+> 改色只改 `tokens.less` → 跑 `node janus/design/build-css.mjs` → 色卡自动跟随（**不用改 HTML**）。
 
 ## 定稿色
 
