@@ -229,7 +229,8 @@
       "shadowSubtle": "hairline",
       "shadowFloating": "Floating layer",
       "fontFamilyUi": "UI font (Latin + fallback)",
-      "fontFamilyMonospace": "等宽字体"
+      "fontFamilyMonospace": "等宽字体",
+      "brandInk": "Brand-coloured text/icons (4.8:1 on soft fill; auto-lifts in dark)"
     },
     "group": {
       "brand": "Brand",

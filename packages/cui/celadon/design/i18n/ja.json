@@ -229,7 +229,8 @@
       "shadowSubtle": "hairline",
       "shadowFloating": "フローティング",
       "fontFamilyUi": "UI フォント（欧文 + フォールバック）",
-      "fontFamilyMonospace": "等宽字体"
+      "fontFamilyMonospace": "等宽字体",
+      "brandInk": "ブランド色の文字/アイコン（淡色地 4.8:1、ダークでは自動で提亮）"
     },
     "group": {
       "brand": "ブランド",
