@@ -51,9 +51,10 @@
   --scrim:           rgba(10,10,10,.32);  /* 弹窗/抽屉遮罩 */
 
   /* ===== 警示 · 淡琥珀（不像 error）===== */
-  --warm:          #8B6214;
+  --warm:          #8B6214;   /* 实心底（白字 5.45:1） */
   --warm-soft:     #F7F0E2;
-  --warm-text:     #6E4D0C;
+  --warm-text:     #6E4D0C;   /* 只配 --warm-soft（6.78:1） */
+  --warm-contrast: #FFFFFF;   /* 压在 --warm 实心底上的文字 */
   --warning:       var(--warm);           /* 同源别名，避免两处维护 */
   --warning-soft:  var(--warm-soft);
 
@@ -118,6 +119,7 @@
   --warm:          #C4A767;
   --warm-soft:     #2C2718;
   --warm-text:     #E4CE9C;
+  --warm-contrast: #2A1B05;   /* 暗色下 --warm 较亮 → 用深字（7.21:1） */
 
   --success:            #4ADE80;   --success-soft:      #12261A;
   --danger:        #F87171;   --danger-soft:  #2A1614;
