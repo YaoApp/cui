@@ -385,6 +385,22 @@ document.querySelectorAll('.toolbar button[data-t]').forEach(function(b){
     b.classList.add('is-active');
   });
 });
+/* ---- 自适应缩放：视口窄/矮时整体等比缩小，避免右侧或底部被裁切 ---- */
+(function(){
+  var DESIGN_WIDTH = 1440, DESIGN_HEIGHT = 888;
+  function fitToViewport(){
+    var win = document.querySelector('.window');
+    var scale = Math.min(1,
+      (window.innerWidth - 36) / DESIGN_WIDTH,
+      (window.innerHeight - 72) / DESIGN_HEIGHT);
+    win.style.transform = scale < 1 ? 'scale(' + scale.toFixed(4) + ')' : 'none';
+    win.style.transformOrigin = 'top center';
+    document.body.style.height = scale < 1 ? (DESIGN_HEIGHT * scale + 70) + 'px' : '';
+  }
+  fitToViewport();
+  window.addEventListener('resize', fitToViewport);
+})();
+
 /* ---- Logo 配色切换 ---- */
 document.querySelectorAll('.toolbar button[data-logo]').forEach(function(b){
   b.addEventListener('click', function(){
