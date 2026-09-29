@@ -9,6 +9,24 @@
  * 红线：单一来源 · 禁硬编码 · 暗色只覆盖 semantic · 语义优先
  */
 /* data-theme 挂 .celadon 自身、或挂在祖先（如 <html>）都能生效 */
+/**
+ * 语言 → 字体栈映射（:lang 匹配继承的语言；zh-TW 需同时列 zh-Hant）
+ * 目的：繁中必须走 TC 字形、日文必须走 JP 字形，否则会出现"简中字形冒充繁中/日文"的错字。
+ * 用法：<html lang="zh-TW"> 即可，无需给每个组件传参。
+ */
+.celadon:lang(zh-CN),
+.celadon:lang(zh-Hans) {
+  --font-family-ui: var(--font-family-ui-hans);
+}
+.celadon:lang(zh-TW),
+.celadon:lang(zh-Hant),
+.celadon:lang(zh-HK) {
+  --font-family-ui: var(--font-family-ui-hant);
+}
+.celadon:lang(ja),
+.celadon:lang(ja-JP) {
+  --font-family-ui: var(--font-family-ui-japanese);
+}
 .celadon,
 [data-theme] .celadon {
   /* ===== 中性（近白）===== */
@@ -72,6 +90,28 @@
   --success-soft: #E9F6F1;
   --danger: #D93B30;
   --danger-soft: #FBECEA;
+  /* ===== 字体（四语：简 / 繁 / 英 / 日）===== */
+  --font-family-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Noto Sans", sans-serif;
+  --font-family-monospace: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Cascadia Mono", "Liberation Mono", monospace;
+  /* 各语言字体栈：**必须分开**，否则繁中会渲染成简体字形、日文会渲染成中文字形 */
+  --font-family-ui-hans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
+  --font-family-ui-hant: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", "Source Han Sans TC", sans-serif;
+  --font-family-ui-japanese: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Source Han Sans JP", sans-serif;
+  --font-family-monospace-cjk: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK SC", "Noto Sans Mono CJK JP", monospace;
+  --font-weight-normal: 430;
+  /* 非整百字重（可变字体），屏幕更清晰；不支持时回落 400 */
+  --font-weight-medium: 500;
+  --font-weight-strong: 650;
+  --line-height-normal: 1.5;
+  /* 拉丁 */
+  --line-height-cjk: 1.7;
+  /* 中日文需要更大行距 */
+  --letter-spacing-latin: -0.01em;
+  /* 仅拉丁可收紧 */
+  --letter-spacing-cjk: 0;
+  /* 中文不要负字距 */
+  --font-size-minimum-cjk: 12px;
+  /* 中文最小档（比 Codex 的 11px 更严） */
   /* ===== 字号（7 档 + 16 补档）· 中文最小 12px ===== */
   --font-size-11: 11px;
   /* 仅西文/数字角标，中文勿用 */
