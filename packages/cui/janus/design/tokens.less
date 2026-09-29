@@ -1,0 +1,112 @@
+/**
+ * janus/design/tokens.less — CUI 2.0（Janus）设计 token · **Option A（Codex 化）**
+ *
+ * 依据：OpenAI Codex 官方色（openai/codex · codex-rs/tui/src/style.rs）
+ *   CHATGPT_BLUE_200 #63A8F8 = UI_ACCENT（暗底）
+ *   CHATGPT_BLUE_100 #A4CDFB（浅底选中填充）
+ *   LIGHT_BG_ACCENT  #1C64C8（浅底强调）
+ *   警示淡琥珀：#8B6214（浅底）/ #C4A767（暗底）—— "可见但不像错误"
+ *   OpenAI 品牌中性：Cod Gray #080808 + White
+ *
+ * 规则：作用域 .jn2（不污染 1.x）；暗色只覆盖 semantic；禁硬编码。
+ */
+
+.jn2 {
+  /* ===== 中性（近白，不带暖调）===== */
+  --bg-app:        #F7F7F8;
+  --bg-nav:        #FBFBFC;
+  --bg-content:    #FFFFFF;
+  --bg-surface:    #FFFFFF;
+  --bg-field:      #F4F4F5;
+  --bg-hover:      #F0F0F2;
+  --bg-selected:   #EAF2FE;
+
+  --border:        #ECECEE;
+  --border-2:      #DEDEE1;
+  --border-3:      #CACACD;
+
+  --text-1:        #0A0A0A;
+  --text-2:        #5C5C63;
+  --text-3:        #7A7A82;
+  --text-muted:    #A8A8B0;
+
+  /* ===== 品牌（单蓝分档）===== */
+  --brand:         #1C64C8;   /* 浅底强调（白字 5.9:1） */
+  --brand-hover:   #1755AC;
+  --brand-soft:    #EAF2FE;   /* 选中/浅底 */
+  --brand-display: #A4CDFB;   /* 大面积/填充（不压白字） */
+  --brand-text:    #FFFFFF;
+
+  /* ===== 警示（淡琥珀，不像 error）===== */
+  --warm:          #8B6214;
+  --warm-soft:     #F7F0E2;
+  --warm-text:     #6E4D0C;
+
+  /* ===== 语义 ===== */
+  --ok:            #1E8E5A;  --ok-soft:      #E8F5EE;
+  --danger:        #D93B30;  --danger-soft:  #FBECEA;
+
+  /* ===== 尺寸 / 圆角 / 阴影 / 动效 ===== */
+  --fs-11:11px; --fs-12:12px; --fs-13:13px; --fs-14:14px; --fs-15:15px; --fs-17:17px; --fs-20:20px;
+  --sp-1:2px; --sp-2:4px; --sp-3:6px; --sp-4:8px; --sp-5:12px; --sp-6:16px; --sp-7:24px; --sp-8:32px;
+  --r-sm:6px; --r-md:8px; --r-lg:12px; --r-pill:999px;
+  --dur-fast:120ms; --dur-base:200ms; --dur-slow:320ms;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --shadow-1:0 1px 2px rgba(10,10,10,.05);
+  --shadow-2:0 10px 30px rgba(10,10,10,.10), 0 2px 6px rgba(10,10,10,.06);
+  --col-header-h:40px;
+  --row-h:40px;
+}
+
+/* 暗色（Cod Gray 近黑 + ChatGPT Blue 200） */
+.jn2[data-theme='dark'] {
+  --bg-app:        #080808;
+  --bg-nav:        #0D0D0D;
+  --bg-content:    #101010;
+  --bg-surface:    #161616;
+  --bg-field:      #1E1E1E;
+  --bg-hover:      #242424;
+  --bg-selected:   #14263D;
+
+  --border:        #262626;
+  --border-2:      #333333;
+  --border-3:      #424242;
+
+  --text-1:        #F5F5F5;
+  --text-2:        #B4B4B4;
+  --text-3:        #949494;
+  --text-muted:    #6E6E6E;
+
+  --brand:         #63A8F8;
+  --brand-hover:   #7FB8F9;
+  --brand-soft:    #14263D;
+  --brand-display: #A4CDFB;
+  --brand-text:    #06203C;   /* 深字压亮蓝 */
+
+  --warm:          #C4A767;
+  --warm-soft:     #2C2718;
+  --warm-text:     #E4CE9C;
+
+  --ok:            #4ADE80;  --ok-soft:      #12261A;
+  --danger:        #F87171;  --danger-soft:  #2A1614;
+
+  --shadow-1:0 1px 2px rgba(0,0,0,.5);
+  --shadow-2:0 12px 34px rgba(0,0,0,.6);
+}
+
+/**
+ * 用法约定（"浅底"是 A 的默认观感；要重时切 .is-solid）
+ */
+.jn2 {
+  .btn-primary { background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand); }
+  .btn-primary.is-solid { background: var(--brand); color: var(--brand-text); }
+  .btn-ghost   { background: var(--bg-surface); color: var(--text-1); border: 1px solid var(--border-2); }
+  .btn-warn    { background: var(--warm-soft); color: var(--warm-text); border: 1px solid var(--warm); }
+  .bubble-me   { background: var(--brand-soft); color: var(--text-1); border: 1px solid var(--border-2); }
+  .bubble-ai   { background: var(--bg-surface); color: var(--text-1); border: 1px solid var(--border); }
+  .nav-item.is-active { background: var(--brand-soft); color: var(--brand); }
+  .badge-brand { background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand); }
+  .badge-warn  { background: var(--warm-soft);  color: var(--warm-text); border: 1px solid var(--warm); }
+  .avatar      { background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand); }
+  .tab-active  { background: var(--bg-surface); color: var(--text-1); border: 1px solid var(--border-3); }
+}
