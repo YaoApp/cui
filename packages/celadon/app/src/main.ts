@@ -6,7 +6,7 @@ const t = (k: string) => `var(${k})`
 
 document.getElementById('app')!.innerHTML = `
   <h1 style="font-size:var(--font-size-title);color:var(--text-primary);margin:0 0 var(--spacing-16)">
-    celadon 1.0 · 工具链自检
+    CUI 2.0 · 工具链自检
   </h1>
   <p style="color:var(--text-secondary);margin:0 0 var(--spacing-24)">
     没有引入任何框架 —— 这一页只证明 <b>pnpm + Vite + 设计 token</b> 这条链是通的。
