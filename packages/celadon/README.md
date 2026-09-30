@@ -1,7 +1,7 @@
 # celadon — CUI 2.0
 
 > **与 `cui` 平级的新应用包**。不继承旧包的历史包袱：**用到啥复制啥，适配啥修改啥**。
-> 当前阶段：**🚧 00 设计规范** ｜ 构建工具：**待定**（不预设框架）
+> 当前阶段：**01 基础设施**（待开始）｜ 已完成：**✅ 00 设计规范**（2026-09-30）｜ 构建工具：**待定**（在 01 里选型）
 
 ## 目录
 
@@ -24,7 +24,7 @@ celadon/
 
 | # | 模块 | 状态 | 计划 |
 | --- | --- | --- | --- |
-| 00 | **设计规范** | **🚧 进行中** | [plan/00-design-system.md](plan/00-design-system.md) |
+| 00 | **设计规范** | **✅ 完成** | [plan/00-design-system.md](plan/00-design-system.md) |
 | 01 | 基础设施 | ⏳ 待开始 | [plan/01-infrastructure.md](plan/01-infrastructure.md) |
 | 02 | 布局 | ⏳ 待开始 | [plan/02-layout.md](plan/02-layout.md) |
 | 03 | 组件 | ⏳ 待开始 | [plan/03-components.md](plan/03-components.md) |
