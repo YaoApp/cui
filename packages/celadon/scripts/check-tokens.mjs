@@ -11,6 +11,10 @@ import { readFileSync } from 'node:fs';
    并且从任何目录调用都不会出错。 */
 const DESIGN = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'design')
 process.chdir(DESIGN)
+/* 可选：第一个参数指定目标目录（测试用），默认 ../design */
+const TARGET = resolve(process.argv[2] || DESIGN)
+process.chdir(TARGET)
+
 
 const PAGES = ['icons.html', 'index.html', 'mock.html', 'css-logical.html', 'data-format.html'];
 /* 明文例外：
