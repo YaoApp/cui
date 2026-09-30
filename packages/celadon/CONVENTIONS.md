@@ -54,7 +54,9 @@
 | **物理方向属性**（§3 这条）| `check-css-conventions.mjs` | 产品代码与展示页（演示稿登记为存量）|
 | README 色值与 tokens 一致 | `check-readme-values.mjs` | `design/README.md` |
 
-跑法：`node packages/celadon/scripts/<脚本>`（脚本自己切到 `design/` 工作，从哪跑都行）；四个都应为 0 退出码。
+跑法：`node packages/celadon/scripts/<脚本>`（脚本自己切到 `design/` 工作，从哪跑都行）
+
+**检查器自己有测试**：`node packages/celadon/scripts/tests/run.mjs` —— 把每个检查器喂给一组样本，核对"该过的过、该挂的挂"（含 10 条逻辑属性规则各一个反例）。加样本见 `scripts/tests/README.md`。；四个都应为 0 退出码。
 
 > **已经有扫描版**（`check-css-conventions.mjs`，不依赖构建工具）—— 新增页面里出现物理方向属性会直接失败。
 > stylelint 版待 `01 基础设施` 选型后接线，届时连产品样式表也一起拦。
