@@ -79,6 +79,15 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .s-press .btn:active{transform:scale(.94)}
 .s-focus .inp{left:12px;top:15px;width:146px;height:34px;border-radius:var(--radius-medium);background:var(--background-surface);border:1px solid var(--border-control);box-shadow:0 0 0 0 transparent;font:inherit;font-size:11.5px;color:var(--text-primary);padding:0 10px}
 .s-focus .inp:focus{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand);outline:none}
+/* 演示内容（让每个场景看得懂，不是空色块） */
+.stage.tall{height:96px}
+.stage .ln{display:block;height:6px;border-radius:3px;background:var(--background-field)}
+.stage .page{left:0;right:0;top:0;bottom:0;padding:13px 12px;display:flex;flex-direction:column;gap:9px}
+.stage .page .ln{background:var(--border-subtle)}
+.s-fade .card,.s-panel .p,.s-collapse .p,.s-drawer .sheet,.s-modal .dlg{display:flex;flex-direction:column;justify-content:center;gap:7px;padding:0 11px}
+.s-list .row{display:flex;align-items:center;gap:7px;padding:0 8px}
+.s-list .row b{width:6px;height:6px;border-radius:50%;background:var(--brand-display);flex:none}
+.s-list .row i{flex:1;height:5px;border-radius:3px;background:var(--background-field)}
 /* 4 淡入 */
 .s-fade .card{left:12px;top:14px;width:156px;height:36px;border-radius:var(--radius-medium);background:var(--background-surface);border:1px solid var(--border-default)}
 .s-fade.reset .card{opacity:0}
@@ -93,20 +102,19 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .s-panel.reset .p{opacity:0;transform:translateY(-8px)}
 /* 7 面板收起（只淡出/位移；高度变化归布局层） */
 .s-collapse .p{left:12px;top:12px;width:176px;height:40px;border-radius:var(--radius-large);background:var(--background-surface);border:1px solid var(--border-default)}
-.s-collapse .p b{display:block;height:8px;margin:16px 12px 0;border-radius:3px;background:var(--background-field)}
-.s-collapse .p b{transition-property:opacity,transform;transition-duration:var(--d);transition-timing-function:var(--e)}
+.s-collapse .p .cb{transition-property:opacity,transform;transition-duration:var(--d);transition-timing-function:var(--e)}
 .s-collapse .p{cursor:pointer}
-.s-collapse.collapsed .p b{opacity:0;transform:translateY(-4px)}
+.s-collapse.collapsed .p .cb{opacity:0;transform:translateY(-4px)}
 .s-collapse.collapsed .p{opacity:.65}
 /* 8 抽屉滑入 */
 .s-drawer .scrim{left:0;right:0;top:0;bottom:0;background:var(--scrim);opacity:1}
-.s-drawer .sheet{right:0;top:0;bottom:0;width:136px;background:var(--background-surface);border-left:1px solid var(--border-default);box-shadow:var(--shadow-overlay)}
+.s-drawer .sheet{right:0;top:0;bottom:0;width:140px;background:var(--background-surface);border-left:1px solid var(--border-default);box-shadow:var(--shadow-overlay)}
 .s-drawer .sheet b{display:block;height:8px;margin:14px 12px 0;border-radius:3px;background:var(--background-field)}
 .s-drawer.reset .sheet{transform:translateX(105%)}
 .s-drawer.reset .scrim{opacity:0}
 /* 9 弹窗出现 */
 .s-modal .scrim{left:0;right:0;top:0;bottom:0;background:var(--scrim);opacity:1}
-.s-modal .dlg{left:50%;top:50%;width:152px;height:54px;margin:-27px 0 0 -76px;border-radius:var(--radius-large);background:var(--background-surface);border:1px solid var(--border-default);box-shadow:var(--shadow-overlay)}
+.s-modal .dlg{left:50%;top:50%;width:158px;height:64px;margin:-32px 0 0 -79px;border-radius:var(--radius-large);background:var(--background-surface);border:1px solid var(--border-default);box-shadow:var(--shadow-overlay)}
 .s-modal .dlg b{display:block;height:8px;margin:14px 12px 0;border-radius:3px;background:var(--background-field)}
 .s-modal.reset .dlg{opacity:0;transform:scale(.96)}
 .s-modal.reset .scrim{opacity:0}
@@ -314,18 +322,21 @@ function stageHtml(theme, id){
     case 'hover':    inner = '<span class="el chip">'+esc(tr('f.motion.demoBtn'))+'</span>'; break;
     case 'press':    inner = '<span class="el btn">'+esc(tr('f.motion.demoBtn'))+'</span>'; break;
     case 'focus':    inner = '<input class="el inp" value="">'; break;
-    case 'fade':     inner = '<span class="el card"></span>'; break;
+    case 'fade':     inner = '<span class="el card"><i class="ln" style="width:58%"></i><i class="ln" style="width:86%"></i></span>'; break;
     case 'dropdown': inner = '<button class="el trg" type="button">'+esc(tr('f.motion.demoMenu'))+'</button><span class="el menu"><i></i><i></i><i></i></span>'; break;
-    case 'panel':    inner = '<span class="el p"></span>'; break;
-    case 'collapse': inner = '<span class="el p"><b></b></span>'; break;
-    case 'drawer':   inner = '<span class="el scrim"></span><span class="el sheet"><b></b><b></b><b></b></span>'; break;
-    case 'modal':    inner = '<span class="el scrim"></span><span class="el dlg"><b></b></span>'; break;
+    case 'panel':    inner = '<span class="el p"><i class="ln" style="width:50%"></i><i class="ln" style="width:78%"></i></span>'; break;
+    case 'collapse': inner = '<span class="el p"><i class="ln cb" style="width:50%"></i><i class="ln cb" style="width:78%"></i></span>'; break;
+    case 'drawer':   inner = '<span class="el page"><i class="ln" style="width:46%"></i><i class="ln" style="width:70%"></i><i class="ln" style="width:58%"></i><i class="ln" style="width:64%"></i></span>'
+        + '<span class="el scrim"></span><span class="el sheet"><i class="ln" style="width:56%"></i><i class="ln" style="width:80%"></i><i class="ln" style="width:66%"></i></span>'; break;
+    case 'modal':    inner = '<span class="el page"><i class="ln" style="width:48%"></i><i class="ln" style="width:72%"></i><i class="ln" style="width:60%"></i></span>'
+        + '<span class="el scrim"></span><span class="el dlg"><i class="ln" style="width:52%"></i><i class="ln" style="width:84%"></i></span>'; break;
     case 'toast':    inner = '<span class="el toast">'+esc(tr('f.motion.demoToast'))+'</span>'; break;
-    case 'list':     inner = '<span class="el row"></span><span class="el row"></span><span class="el row"></span>'; break;
+    case 'list':     inner = '<span class="el row"><b></b><i></i></span><span class="el row"><b></b><i></i></span><span class="el row"><b></b><i></i></span>'; break;
     case 'stream':   inner = '<span class="el txt"></span><span class="el caret"></span>'; break;
   }
   var t = SCENE_TOKENS[id];
-  return '<div class="stage s-'+id+'" id="stage-'+theme+'-'+id+'" style="--d:'+tok(t[0],theme)+';--e:'+tok(t[1],theme)+'">'+inner+'</div>';
+  var tall = (id === 'drawer' || id === 'modal') ? ' tall' : '';
+  return '<div class="stage s-'+id+tall+'" id="stage-'+theme+'-'+id+'" style="--d:'+tok(t[0],theme)+';--e:'+tok(t[1],theme)+'">'+inner+'</div>';
 }
 function streamScene(st){
   var txt = st.querySelector('.txt'), full = tr('f.motion.demoStream');
