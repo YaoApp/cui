@@ -7,13 +7,13 @@
 <!-- 唯一来源：tokens.less → build-css.mjs → tokens.css（本页零硬编码色值） -->
 <link rel="stylesheet" href="./tokens.css">
 <style>
-body{margin:0;background:#E9E9EA;font:13px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+body{margin:0;background: var(--background-active);font:13px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding:56px 18px 18px;-webkit-font-smoothing:antialiased}
 [data-theme="dark"] body{background:#0B0B0B}
 svg.icon{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}  /* 24 网格原生 2；16px 显示时视觉 ≈1.33 */
 svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .window{width:1440px;height:888px;border-radius: var(--radius-large);overflow:hidden;display:flex;
-  background:var(--background-app);color:var(--text-primary);box-shadow:0 26px 70px rgba(0,0,0,.28);border:1px solid var(--border-default)}
+  background:var(--background-app);color:var(--text-primary);box-shadow: var(--shadow-overlay);border:1px solid var(--border-default)}
 /* ============ ① 导航列 ============ */
 .nav{width:240px;flex:none;background:var(--background-navigation);border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;position:relative}
 .traffic-lights{position:absolute;left:14px;top:14px;display:flex;gap:8px}
