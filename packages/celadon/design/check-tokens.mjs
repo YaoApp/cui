@@ -4,7 +4,12 @@
    历史：mock 里曾散着 55 处写死的字号与圆角、index 里 7 处，改了 token 也不会跟着变。 */
 import { readFileSync } from 'node:fs';
 const PAGES = ['icons.html', 'index.html', 'mock.html'];
-const ALLOW = new Set(['transparent', 'none', 'inherit', 'currentColor', '50%', '100%', '0', 'auto']);
+/* 明文例外：
+   · 品牌官方色 —— 不在这三张页面的 <style> 里，而在雪碧图中（check-generated.mjs 管）
+   · macOS 红黄绿灯与窗底 —— 系统再现，不是我们的设计决策，改了反而不像系统
+   · 几何值（50% / 100% / 0）与关键字 */
+const ALLOW = new Set(['transparent', 'none', 'inherit', 'currentColor', '50%', '100%', '0', 'auto',
+  '#FF5F57', '#FEBC2E', '#28C840', '#0B0B0B']);
 let bad = [];
 for (const f of PAGES) {
   const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
