@@ -626,6 +626,6 @@
     "brandSearch": "Search brands, try deepseek or openai",
     "brandColor": "Official colour",
     "brandMono": "Mono",
-    "coverBrandNote": "ours {own} (`i-yaoagents`) plus {third} third party (`brand-*`, kept in a separate sprite and referenced externally)"
+    "coverBrandNote": "{own} drawn by us (`brand-yao-agents` and `brand-yao`) plus {third} third party (`brand-*`, kept in separate sprites and referenced externally)"
   }
 }

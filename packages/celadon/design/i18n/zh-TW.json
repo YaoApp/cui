@@ -626,6 +626,6 @@
     "brandSearch": "搜尋品牌（deepseek / openai / 通義…）",
     "brandColor": "官方色",
     "brandMono": "單色",
-    "coverBrandNote": "自建 {own} 個（`i-yaoagents`）+ 第三方 {third} 個（`brand-*`，另存獨立雪碧圖）"
+    "coverBrandNote": "自建 {own} 個（`brand-yao-agents` / `brand-yao`）+ 第三方 {third} 個（`brand-*`，另存獨立雪碧圖）"
   }
 }
