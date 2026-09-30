@@ -414,6 +414,29 @@
       "cHigh": "High",
       "sysLabel": "System: ",
       "previewLabel": "Preview: "
+    },
+    "grid": {
+      "title": "Grid and responsiveness",
+      "note": "Breakpoints are LESS variables because media queries cannot read var(); that is the single source. Below are the sizes and what gives way at each breakpoint.",
+      "slider": "Simulated window width",
+      "bpTitle": "Breakpoints",
+      "sizes": "Sizes",
+      "demo": "What gives way (drag the slider above)",
+      "rules": "Rules",
+      "colBp": "Breakpoint",
+      "colRange": "Width",
+      "colNav": "Navigation",
+      "colSide": "Side panel",
+      "navFull": "Full 240",
+      "navRail": "Icon rail 64",
+      "sideDocked": "Docked 320",
+      "sideDockedWide": "Docked 360",
+      "sideOverlay": "Overlay (summonable)",
+      "r1": "Navigation: full at 1200 and up; collapses to an icon rail at 1024-1199; below 1024 the shell blocks it (minimum window 1024x640).",
+      "r2": "Side panel: docked at 1200 and up; becomes an overlay at 1024-1199 (covers content, Escape closes); widens to 360 at 1800 and up.",
+      "r3": "Content stays centred with a 880 maximum (1040 at 1800 and up) instead of stretching on ultrawide displays.",
+      "r4": "Grid: 12 columns in the content area, 24 gutter, 24 page margin. In the rail breakpoint gutter and margin share a value so nothing is squeezed twice.",
+      "r5": "Cards and tables go single column at 1024-1199. No type scaling: a desktop app does not rescue layout by shrinking text."
     }
   }
 }
