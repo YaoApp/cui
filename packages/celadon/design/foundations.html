@@ -16,10 +16,24 @@ code{font-family:var(--font-family-monospace);background:var(--background-field)
 .language-switch{display:flex;gap:4px}
 .toolbar button{font:inherit;font-size:12px;padding:5px 12px;border-radius:var(--radius-pill);border:1px solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
 .toolbar button.on{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
-/* 模拟系统偏好（仅本页预览；真实偏好仍由 tokens.less 的媒体查询控制） */
-body.sim-rm, body.sim-rm .celadon, body.sim-rm .celadon[data-theme='dark'], body.sim-rm [data-theme='dark'] .celadon{
+/* 预览控件（放在各自卡片里；真实偏好仍由 tokens.less 的媒体查询控制） */
+.prefbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:2px 0 12px}
+.pf-label{font-size:11.5px;color:var(--text-secondary);font-weight:var(--font-weight-medium)}
+.seg-group{display:inline-flex;border:1px solid var(--border-control);border-radius:var(--radius-pill);overflow:hidden;background:var(--background-surface)}
+.seg{font:inherit;font-size:11.5px;padding:4px 13px;border:0;background:transparent;color:var(--text-secondary);cursor:pointer;border-right:1px solid var(--border-subtle)}
+.seg:last-child{border-right:0}
+.seg:hover{background:var(--background-hover)}
+.seg.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:650}
+.pf-note{font-size:11px;color:var(--text-tertiary)}
+/* 动效强度：减少（时长归零）/ 标准 / 丰富（更长） */
+body.mo-low, body.mo-low .celadon, body.mo-low .celadon[data-theme='dark'], body.mo-low [data-theme='dark'] .celadon{
   --duration-fast:0.01ms;--duration-base:0.01ms;--duration-slow:0.01ms}
-body.sim-hc, body.sim-hc .celadon, body.sim-hc .celadon[data-theme='dark'], body.sim-hc [data-theme='dark'] .celadon{
+body.mo-rich, body.mo-rich .celadon, body.mo-rich .celadon[data-theme='dark'], body.mo-rich [data-theme='dark'] .celadon{
+  --duration-fast:var(--duration-fast-rich);--duration-base:var(--duration-base-rich);--duration-slow:var(--duration-slow-rich)}
+/* 对比度偏好：低 / 标准 / 高 */
+body.ct-low, body.ct-low .celadon, body.ct-low .celadon[data-theme='dark'], body.ct-low [data-theme='dark'] .celadon{
+  --border-control:var(--border-control-low);--border-hover:var(--border-hover-low)}
+body.ct-high, body.ct-high .celadon, body.ct-high .celadon[data-theme='dark'], body.ct-high [data-theme='dark'] .celadon{
   --border-control:var(--border-control-strong);--border-hover:var(--border-hover-strong)}
 .dim-note{font-size:11.5px;color:var(--text-tertiary)}
 .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
@@ -177,11 +191,6 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
     <button data-lang="en">EN</button><button data-lang="ja">日</button>
   </span>
   <span class="dim-note" id="f-langnote"></span>
-  <span class="language-switch" style="margin-left:auto">
-    <button id="pref-rm" data-pref="rm" type="button"></button>
-    <button id="pref-hc" data-pref="hc" type="button"></button>
-  </span>
-  <span class="dim-note" id="f-pref-note"></span>
 </div>
 
 <!-- F1 间距 -->
@@ -219,6 +228,7 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 <!-- F4 动效 -->
 <div class="card">
   <h2 id="mo-title"></h2><p class="hint" id="mo-note"></p>
+  <div class="prefbar"><span class="pf-label" id="mo-pref-label"></span><span class="seg-group" id="mo-pref"></span><span class="pf-note" id="mo-pref-note"></span></div>
   <div class="cols">
     <section class="panel" id="mo-light"></section>
     <section class="panel celadon" data-theme="dark" id="mo-dark"></section>
@@ -228,6 +238,7 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 <!-- F5 边框 -->
 <div class="card">
   <h2 id="bd-title"></h2><p class="hint" id="bd-note"></p>
+  <div class="prefbar"><span class="pf-label" id="bd-pref-label"></span><span class="seg-group" id="bd-pref"></span><span class="pf-note" id="bd-pref-note"></span></div>
   <div class="cols">
     <section class="panel" id="bd-light"></section>
     <section class="panel celadon" data-theme="dark" id="bd-dark"></section>
@@ -249,19 +260,30 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 /* ===== 从 tokens.css 实时读值（浅/暗各一份）===== */
 var PROBE = { light: document.getElementById('probe-light'), dark: document.getElementById('probe-dark') };
 /* 偏好：sys = 系统真实值；sim = 本页预览开关（用于检查不同状态下的样子） */
-var PREF = { rm:false, hc:false };
+var PREF = { motion:'std', contrast:'std' };          /* std 之外都是"预览模拟" */
 function sysRM(){ return window.matchMedia('(prefers-reduced-motion: reduce)').matches }
-function rmOn(){ return PREF.rm || sysRM() }
+function rmOn(){ return PREF.motion === 'low' || sysRM() }
+function segHtml(group, opts, cur){
+  return opts.map(function(o){ return '<button class="seg'+(o[0]===cur?' on':'')+'" type="button" data-pref="'+group+'" data-level="'+o[0]+'">'+esc(tr(o[1]))+'</button>'; }).join('');
+}
 function applyPrefs(){
-  document.body.classList.toggle('sim-rm', PREF.rm);
-  document.body.classList.toggle('sim-hc', PREF.hc);
-  var b1 = document.getElementById('pref-rm'), b2 = document.getElementById('pref-hc'), note = document.getElementById('f-pref-note');
-  if (!b1 || !b2 || !note) return;
-  b1.textContent = tr('f.pref.rm') + ' · ' + tr(PREF.rm ? 'f.pref.reduced' : 'f.pref.normal');
-  b2.textContent = tr('f.pref.hc') + ' · ' + tr(PREF.hc ? 'f.pref.high' : 'f.pref.standard');
-  b1.className = PREF.rm ? 'on' : ''; b2.className = PREF.hc ? 'on' : '';
-  note.textContent = tr('f.pref.sys') + (sysRM() ? tr('f.pref.reduced') : tr('f.pref.normal'))
-    + ((PREF.rm || PREF.hc) ? ' · ' + tr('f.pref.simulating') : '');
+  document.body.classList.toggle('mo-low', PREF.motion === 'low');
+  document.body.classList.toggle('mo-rich', PREF.motion === 'rich');
+  document.body.classList.toggle('ct-low', PREF.contrast === 'low');
+  document.body.classList.toggle('ct-high', PREF.contrast === 'high');
+  var l1 = document.getElementById('mo-pref-label');
+  if (l1){
+    l1.textContent = tr('f.pref.motionLabel');
+    document.getElementById('mo-pref').innerHTML = segHtml('motion', [['low','f.pref.mLow'],['std','f.pref.mStd'],['rich','f.pref.mRich']], PREF.motion);
+    document.getElementById('mo-pref-note').textContent = tr('f.pref.sys') + (sysRM() ? tr('f.pref.mLow') : tr('f.pref.mStd'))
+      + (PREF.motion !== 'std' ? ' · ' + tr('f.pref.simulating') : '');
+  }
+  var l2 = document.getElementById('bd-pref-label');
+  if (l2){
+    l2.textContent = tr('f.pref.contrastLabel');
+    document.getElementById('bd-pref').innerHTML = segHtml('contrast', [['low','f.pref.cLow'],['std','f.pref.cStd'],['high','f.pref.cHigh']], PREF.contrast);
+    document.getElementById('bd-pref-note').textContent = PREF.contrast !== 'std' ? tr('f.pref.simulating') : '';
+  }
 }
 function tok(name, theme){ return getComputedStyle(PROBE[theme]).getPropertyValue(name).trim(); }
 function px(v){ return parseFloat(v) || 0; }
@@ -513,10 +535,10 @@ window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',
 });
 /* 偏好预览开关：切换后重新渲染，让读数/预览都反映新状态 */
 document.addEventListener('click', function(e){
-  var b = e.target.closest('[data-pref]'); if (!b) return;
-  var k = b.getAttribute('data-pref');
-  if (k === 'rm'){ PREF.rm = !PREF.rm; var s1 = document.getElementById('stage-light-stream'); if (s1) s1.classList.remove('typing'); }
-  if (k === 'hc'){ PREF.hc = !PREF.hc; }
+  var b = e.target.closest('[data-pref][data-level]'); if (!b) return;
+  var k = b.getAttribute('data-pref'), lv = b.getAttribute('data-level');
+  if (k === 'motion'){ PREF.motion = lv; var s1 = document.getElementById('stage-light-stream'); if (s1) s1.classList.remove('typing'); }
+  if (k === 'contrast'){ PREF.contrast = lv; }
   renderAll();
 });
 renderAll();

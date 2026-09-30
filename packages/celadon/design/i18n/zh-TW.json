@@ -394,12 +394,14 @@
       "deviation": "這是一處**有意偏離**：預設態不滿足 1.4.11 的字面要求；如需嚴格達標，把 --border-control 直接指向強邊界即可（一行改動）。"
     },
     "pref": {
-      "rm": "動效",
-      "hc": "對比度",
-      "normal": "正常",
-      "reduced": "減少動態",
-      "standard": "標準",
-      "high": "高對比",
+      "motionLabel": "動效強度",
+      "contrastLabel": "對比度偏好",
+      "mLow": "減少動態",
+      "mStd": "標準",
+      "mRich": "豐富",
+      "cLow": "低對比",
+      "cStd": "標準",
+      "cHigh": "高對比",
       "sys": "你的系統：",
       "simulating": "正在預覽模擬狀態"
     }

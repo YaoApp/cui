@@ -394,12 +394,14 @@
       "deviation": "This is a deliberate deviation: the default does not literally meet 1.4.11. If strict conformance is needed, point --border-control at the strong value - a one line change."
     },
     "pref": {
-      "rm": "Motion",
-      "hc": "Contrast",
-      "normal": "Normal",
-      "reduced": "Reduced",
-      "standard": "Standard",
-      "high": "High",
+      "motionLabel": "Motion intensity",
+      "contrastLabel": "Contrast preference",
+      "mLow": "Reduced",
+      "mStd": "Standard",
+      "mRich": "Rich",
+      "cLow": "Low",
+      "cStd": "Standard",
+      "cHigh": "High",
       "sys": "Your system: ",
       "simulating": "previewing a simulated state"
     }

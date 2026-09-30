@@ -394,12 +394,14 @@
       "deviation": "这是一处**有意偏离**：默认态不满足 1.4.11 的字面要求；如需严格达标，把 --border-control 直接指向强边界即可（一行改动）。"
     },
     "pref": {
-      "rm": "动效",
-      "hc": "对比度",
-      "normal": "正常",
-      "reduced": "减少动态",
-      "standard": "标准",
-      "high": "高对比",
+      "motionLabel": "动效强度",
+      "contrastLabel": "对比度偏好",
+      "mLow": "减少动态",
+      "mStd": "标准",
+      "mRich": "丰富",
+      "cLow": "低对比",
+      "cStd": "标准",
+      "cHigh": "高对比",
       "sys": "你的系统：",
       "simulating": "正在预览模拟状态"
     }
