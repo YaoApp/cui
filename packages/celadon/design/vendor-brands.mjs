@@ -44,7 +44,9 @@ const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 console.log('✓');
 
-const brands = readdirSync(join(work, 'es')).filter((b) => existsSync(join(work, 'es', b, 'components')) && b !== 'index.js');
+// 明确排除：与我们直接竞争的产品品牌，不进我们的品牌区
+const EXCLUDE = new Set(['LobeHub']);
+const brands = readdirSync(join(work, 'es')).filter((b) => existsSync(join(work, 'es', b, 'components')) && b !== 'index.js' && !EXCLUDE.has(b));
 console.log(`  品牌目录 ${brands.length} 个`);
 
 const render = async (brand, comp) => {

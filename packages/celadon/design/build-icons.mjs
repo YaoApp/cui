@@ -35,7 +35,7 @@ function patch(file) {
   const cats = [...new Set(manifest.map(m => m.cat))];
   const cover = cats.map(cat => `  ['${cat}', [${manifest.filter(m => m.cat === cat).map(m => `'${m.id}'`).join(',')}]]`).join(',\n');
   out = out.replace(/var COVER = \[[\s\S]*?\n\];/, `var COVER = [\n${cover}\n];`);
-  const lobe = JSON.parse(readFileSync('icons/brand-index.json', 'utf8')).map((e) => ({ ...e, lib: 'lobeicons' }));
+  const lobe = JSON.parse(readFileSync('icons/brand-index.json', 'utf8')).map((e) => ({ ...e, lib: 'ai' }));
   const simple = existsSync('icons/brand-simple-index.json')
     ? JSON.parse(readFileSync('icons/brand-simple-index.json', 'utf8')) : [];
   const brands = JSON.stringify([...lobe, ...simple]).replace(/\s+/g, ' ');
