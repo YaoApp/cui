@@ -42,8 +42,8 @@ celadon/
 ## 设计资产（当前阶段产物）
 
 ```bash
-node packages/celadon/design/build-css.mjs    # tokens.less  → tokens.css
-node packages/celadon/design/build-i18n.mjs   # i18n/*.json  → i18n/bundle.js
+node packages/celadon/scripts/build-css.mjs    # tokens.less  → tokens.css
+node packages/celadon/scripts/build-i18n.mjs   # i18n/*.json  → i18n/bundle.js
 ```
 
 - **配色**：中国传统色 —— 品牌「青」`#2A7B7B`（青瓷釉色）· 成功「松花绿」`#057748` · 危险「朱红」`#D93B30` · 警示「琥珀」`#8B6214`；

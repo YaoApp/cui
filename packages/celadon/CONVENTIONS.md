@@ -8,7 +8,7 @@
 - **禁止**任何颜色字面量（`#fff` · `rgb()` · `hsl()`），一律 `var(--token)`
 - 唯一的例外是**品牌官方色**（logo 自带色，商标规范要求不得改色）与**系统再现**（macOS 红黄绿灯）
 - **装饰色（`--text-muted`）不能承载文字** —— 它只用于分隔符、水印
-- 检查：`design/check-tokens.mjs` · `design/check-generated.mjs`
+- 检查：`scripts/check-tokens.mjs` · `scripts/check-generated.mjs`
 
 ## 2. 尺寸只用 token
 
@@ -22,7 +22,7 @@
 | 阴影 | `--shadow-*` | 手写 `box-shadow` |
 
 - **不要用 `font:` 简写** —— 它会把字号与行高一起写死、绕过 token。拆成 `font-family` / `font-size` / `font-weight` / `line-height`
-- 检查：`design/check-tokens.mjs`（含"漏分号"与"`font:` 简写夹带字号"两条）
+- 检查：`scripts/check-tokens.mjs`（含"漏分号"与"`font:` 简写夹带字号"两条）
 
 ## 3. 布局只用逻辑属性（为 RTL 留门）
 
@@ -54,7 +54,7 @@
 | **物理方向属性**（§3 这条）| `check-css-conventions.mjs` | 产品代码与展示页（演示稿登记为存量）|
 | README 色值与 tokens 一致 | `check-readme-values.mjs` | `design/README.md` |
 
-跑法：在 `design/` 下 `node <脚本>`；四个都应为 0 退出码。
+跑法：`node packages/celadon/scripts/<脚本>`（脚本自己切到 `design/` 工作，从哪跑都行）；四个都应为 0 退出码。
 
 > **已经有扫描版**（`check-css-conventions.mjs`，不依赖构建工具）—— 新增页面里出现物理方向属性会直接失败。
 > stylelint 版待 `01 基础设施` 选型后接线，届时连产品样式表也一起拦。

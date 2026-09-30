@@ -572,7 +572,7 @@
     "a4": "**不要只靠图标传达状态**：状态=图标+文字+颜色（色盲下仍可读）。",
     "newTitle": "新增一个图标",
     "n1": "去 **lucide** 找语义最近的名字（`lucide.dev/icons`）。",
-    "n2": "加进 `icons/manifest.json`（取自 lucide 的写 lucide 名；自建的放进 `icons/own-sprite.svg`），跑 `node build-icons.mjs` 重新内联。",
+    "n2": "加进 `icons/manifest.json`（取自 lucide 的写 lucide 名；自建的放进 `icons/own-sprite.svg`），跑 `build-icons.mjs` 重新内联。",
     "n3": "在 **14px** 下确认可辨；不可辨则按 24 网格自绘简化版。",
     "n4": "跑检查：`check-i18n` / `check-readme-values`；确认页面无硬编码颜色、无 16 网格残留。",
     "copied": "已复制",

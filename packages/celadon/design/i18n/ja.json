@@ -572,7 +572,7 @@
     "a4": "**アイコンだけで状態を伝えない**：状態 = アイコン + 文字 + 色。",
     "newTitle": "アイコンの追加",
     "n1": "**lucide** で意味が最も近い名前を探します（`lucide.dev/icons`）。",
-    "n2": "`icons/manifest.json` に追加し（lucide のものは lucide 名、自前は `icons/own-sprite.svg`）、`node build-icons.mjs` で再インラインします。",
+    "n2": "`icons/manifest.json` に追加し（lucide のものは lucide 名、自前は `icons/own-sprite.svg`）、`build-icons.mjs` で再インラインします。",
     "n3": "**14px** で読めるか確認し、読めなければ 24 グリッドで簡略版を描きます。",
     "n4": "検査を実行します（`check-i18n` / `check-readme-values`）。ハードコード色と 16 グリッドの残りがないことも確認します。",
     "copied": "コピーしました",

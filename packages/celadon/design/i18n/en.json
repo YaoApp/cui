@@ -572,7 +572,7 @@
     "a4": "**Never carry state by icon alone**: state is icon plus text plus colour.",
     "newTitle": "Adding an icon",
     "n1": "Find the closest name in **lucide** (`lucide.dev/icons`).",
-    "n2": "Add it to `icons/manifest.json` (the lucide name for theirs, or `icons/own-sprite.svg` for ours) and run `node build-icons.mjs` to re-inline.",
+    "n2": "Add it to `icons/manifest.json` (the lucide name for theirs, or `icons/own-sprite.svg` for ours) and run `build-icons.mjs` to re-inline.",
     "n3": "Check it reads at **14px**; if not, draw a simplified version on the 24 grid.",
     "n4": "Run the checks, `check-i18n` and `check-readme-values`, and confirm the page has no hard coded colour and no 16 grid leftovers.",
     "copied": "Copied",
