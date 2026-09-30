@@ -402,8 +402,8 @@
       "cLow": "低對比",
       "cStd": "標準",
       "cHigh": "高對比",
-      "sys": "你的系統：",
-      "simulating": "正在預覽模擬狀態"
+      "sysLabel": "系統：",
+      "previewLabel": "預覽："
     }
   }
 }

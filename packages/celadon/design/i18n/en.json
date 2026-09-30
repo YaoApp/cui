@@ -402,8 +402,8 @@
       "cLow": "Low",
       "cStd": "Standard",
       "cHigh": "High",
-      "sys": "Your system: ",
-      "simulating": "previewing a simulated state"
+      "sysLabel": "System: ",
+      "previewLabel": "Preview: "
     }
   }
 }
