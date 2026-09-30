@@ -3,7 +3,7 @@
    （品牌官方色是唯一例外，它们不在这三张页面的 <style> 里，而在雪碧图中。）
    历史：mock 里曾散着 55 处写死的字号与圆角、index 里 7 处，改了 token 也不会跟着变。 */
 import { readFileSync } from 'node:fs';
-const PAGES = ['icons.html', 'index.html', 'mock.html'];
+const PAGES = ['icons.html', 'index.html', 'mock.html', 'css-logical.html'];
 /* 明文例外：
    · 品牌官方色 —— 不在这三张页面的 <style> 里，而在雪碧图中（check-generated.mjs 管）
    · macOS 红黄绿灯与窗底 —— 系统再现，不是我们的设计决策，改了反而不像系统
@@ -69,4 +69,4 @@ if (bad.length) {
   bad.slice(0, 8).forEach((b) => console.log('      ' + b));
   process.exit(1);
 }
-console.log('  ✓ 三张规范页的字号 / 行高 / 圆角 / 颜色 / 间距 / 线宽全部走 token');
+console.log('  ✓ 规范页与展示页的字号 / 行高 / 圆角 / 颜色 / 间距 / 线宽全部走 token');
