@@ -5,7 +5,8 @@
   "title": "AMD Radeon Cloud",
   "primary": "#ED1C24",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-ace",
@@ -13,7 +14,8 @@
   "title": "ace",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-adobe",
@@ -21,7 +23,8 @@
   "title": "Adobe",
   "primary": "#EB1000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-adobe-firefly",
@@ -29,7 +32,8 @@
   "title": "AdobeFirefly",
   "primary": "#EB1000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-agent-voice",
@@ -37,7 +41,8 @@
   "title": "AgentVoice",
   "primary": "#0f6fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-agnes-ai",
@@ -45,7 +50,8 @@
   "title": "Agnes AI",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-agui",
@@ -53,7 +59,8 @@
   "title": "AG-UI",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-ai2",
@@ -61,7 +68,8 @@
   "title": "Ai2",
   "primary": "#f0529c",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-ai21",
@@ -69,7 +77,8 @@
   "title": "AI21",
   "primary": "#E91E63",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-ai302",
@@ -77,7 +86,8 @@
   "title": "302.AI",
   "primary": "#8E47FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-ai360",
@@ -85,7 +95,8 @@
   "title": "AI360",
   "primary": "#006ffb",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-ai-hub-mix",
@@ -93,7 +104,8 @@
   "title": "AiHubMix",
   "primary": "#006FFB",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-ai-mass",
@@ -101,7 +113,8 @@
   "title": "AiMass",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-ai-studio",
@@ -109,7 +122,8 @@
   "title": "Google AI Studio",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 1
  },
  {
   "id": "brand-aion-labs",
@@ -117,7 +131,8 @@
   "title": "AionLabs",
   "primary": "#0f172a",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-air-jelly",
@@ -125,7 +140,8 @@
   "title": "AirJelly",
   "primary": "#00C8FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-akash-chat",
@@ -133,7 +149,8 @@
   "title": "AkashChat",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-aleph-alpha",
@@ -141,7 +158,8 @@
   "title": "AlephAlpha",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-alibaba",
@@ -149,7 +167,8 @@
   "title": "Alibaba",
   "primary": "#FF6003",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-alibaba-cloud",
@@ -157,7 +176,8 @@
   "title": "AlibabaCloud",
   "primary": "#FF6A00",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-amp",
@@ -165,7 +185,8 @@
   "title": "Amp",
   "primary": "#F34E3F",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-anspire",
@@ -173,7 +194,8 @@
   "title": "Anspire",
   "primary": "#514BFD",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-ant-group",
@@ -181,7 +203,8 @@
   "title": "AntGroup",
   "primary": "#1677ff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-anthropic",
@@ -189,7 +212,8 @@
   "title": "Anthropic",
   "primary": "#F1F0E8",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-antigravity",
@@ -197,7 +221,8 @@
   "title": "Antigravity",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-anyscale",
@@ -205,7 +230,8 @@
   "title": "Anyscale",
   "primary": "#0163FB",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-apertis",
@@ -213,7 +239,8 @@
   "title": "Apertis",
   "primary": "#0d9488",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-apple",
@@ -221,7 +248,8 @@
   "title": "Apple",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-arcee",
@@ -229,7 +257,8 @@
   "title": "Arcee",
   "primary": "#008C8C",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-ask-verdict",
@@ -237,7 +266,8 @@
   "title": "AskVerdict",
   "primary": "#E8A317",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-assembly-ai",
@@ -245,7 +275,8 @@
   "title": "AssemblyAI",
   "primary": "#2545D3",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-atlas-cloud",
@@ -253,7 +284,8 @@
   "title": "Atlas Cloud",
   "primary": "#7036F0",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-automatic",
@@ -261,7 +293,8 @@
   "title": "Automatic",
   "primary": "#E00054",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 2
  },
  {
   "id": "brand-aws",
@@ -269,7 +302,8 @@
   "title": "AWS",
   "primary": "#222F3E",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-aya",
@@ -277,7 +311,8 @@
   "title": "Aya",
   "primary": "#416FDC",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-azure",
@@ -285,7 +320,8 @@
   "title": "Azure",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-azure-ai",
@@ -293,7 +329,8 @@
   "title": "AzureAI",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-baai",
@@ -301,7 +338,8 @@
   "title": "BAAI",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-baichuan",
@@ -309,7 +347,8 @@
   "title": "Baichuan",
   "primary": "#FF6933",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-baidu",
@@ -317,7 +356,8 @@
   "title": "Baidu",
   "primary": "#2932E1",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-baidu-cloud",
@@ -325,7 +365,8 @@
   "title": "BaiduCloud",
   "primary": "#2468f2",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-bailian",
@@ -333,7 +374,8 @@
   "title": "BaiLian",
   "primary": "#615ced",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-baseten",
@@ -341,7 +383,8 @@
   "title": "Baseten",
   "primary": "#19E76E",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-bedrock",
@@ -349,7 +392,8 @@
   "title": "Bedrock",
   "primary": "#222F3E",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-bfl",
@@ -357,7 +401,8 @@
   "title": "Black Forest Labs",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-bilibili",
@@ -365,7 +410,8 @@
   "title": "bilibili",
   "primary": "#FB7299",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-bilibili-index",
@@ -373,7 +419,8 @@
   "title": "bilibili index",
   "primary": "#5E19B7",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-bing",
@@ -381,7 +428,8 @@
   "title": "Bing",
   "primary": "#174ae4",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-bocha",
@@ -389,7 +437,8 @@
   "title": "Bocha",
   "primary": "#006EFF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-brave",
@@ -397,7 +446,8 @@
   "title": "Brave",
   "primary": "#FF4000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-bria-ai",
@@ -405,7 +455,8 @@
   "title": "BRIA AI",
   "primary": "#671ECC",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-browserless",
@@ -413,7 +464,8 @@
   "title": "Browserless",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-burn-cloud",
@@ -421,7 +473,8 @@
   "title": "BurnCloud",
   "primary": "#E95513",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-byte-dance",
@@ -429,7 +482,8 @@
   "title": "ByteDance",
   "primary": "#325AB4",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-cap-cut",
@@ -437,7 +491,8 @@
   "title": "CapCut",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-celesto-ai",
@@ -445,7 +500,8 @@
   "title": "CelestoAI",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-cent-ml",
@@ -453,7 +509,8 @@
   "title": "CentML",
   "primary": "#004331",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-cerebras",
@@ -461,7 +518,8 @@
   "title": "Cerebras",
   "primary": "#F15A29",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-chat-glm",
@@ -469,7 +527,8 @@
   "title": "ChatGLM",
   "primary": "#4268FA",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-cherry-studio",
@@ -477,7 +536,8 @@
   "title": "CherryStudio",
   "primary": "#EA5E5D",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-chutes",
@@ -485,7 +545,8 @@
   "title": "Chutes",
   "primary": "#0D0D0D",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-civitai",
@@ -493,7 +554,8 @@
   "title": "Civitai",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-claude",
@@ -501,7 +563,8 @@
   "title": "Claude",
   "primary": "#D97757",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-claude-code",
@@ -509,7 +572,8 @@
   "title": "Claude Code",
   "primary": "#D97757",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-cline",
@@ -517,7 +581,8 @@
   "title": "Cline",
   "primary": "#323B43",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-clipdrop",
@@ -525,7 +590,8 @@
   "title": "Clipdrop",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-cloudflare",
@@ -533,7 +599,8 @@
   "title": "Cloudflare",
   "primary": "#F38020",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-code-buddy",
@@ -541,7 +608,8 @@
   "title": "CodeBuddy",
   "primary": "#6c4dff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-code-flicker",
@@ -549,7 +617,8 @@
   "title": "CodeFlicker",
   "primary": "#32EDDA",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-code-gee-x",
@@ -557,7 +626,8 @@
   "title": "CodeGeeX",
   "primary": "#00e7e7",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-codex",
@@ -565,7 +635,8 @@
   "title": "Codex",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-cog-video",
@@ -573,7 +644,8 @@
   "title": "CogVideo",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 3
  },
  {
   "id": "brand-cog-view",
@@ -581,7 +653,8 @@
   "title": "CogView",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-cohere",
@@ -589,7 +662,8 @@
   "title": "Cohere",
   "primary": "#39594D",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-colab",
@@ -597,7 +671,8 @@
   "title": "Colab",
   "primary": "#F9AB00",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-comet-api",
@@ -605,7 +680,8 @@
   "title": "CometAPI",
   "primary": "#00ACE2",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-comfy-ui",
@@ -613,7 +689,8 @@
   "title": "ComfyUI",
   "primary": "#F0FF41",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-command-a",
@@ -621,7 +698,8 @@
   "title": "CommandA",
   "primary": "#39594D",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-command-code",
@@ -629,7 +707,8 @@
   "title": "Command Code",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-copilot",
@@ -637,7 +716,8 @@
   "title": "Copilot",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-copilot-kit",
@@ -645,7 +725,8 @@
   "title": "CopilotKit",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-coqui",
@@ -653,7 +734,8 @@
   "title": "Coqui",
   "primary": "#03363D",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-coze",
@@ -661,7 +743,8 @@
   "title": "Coze",
   "primary": "#4D53E8",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-crew-ai",
@@ -669,7 +752,8 @@
   "title": "CrewAI",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-crusoe",
@@ -677,7 +761,8 @@
   "title": "Crusoe",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-cursor",
@@ -685,7 +770,8 @@
   "title": "Cursor",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-cyber-cut",
@@ -693,7 +779,8 @@
   "title": "CyberCut",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-dalle",
@@ -701,7 +788,8 @@
   "title": "DALL-E",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-dbrx",
@@ -709,7 +797,8 @@
   "title": "DBRX",
   "primary": "#EE3D2C",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-decart",
@@ -717,7 +806,8 @@
   "title": "Decart",
   "primary": "#2548F6",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-deep-ai",
@@ -725,7 +815,8 @@
   "title": "DeepAI",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-deep-cogito",
@@ -733,7 +824,8 @@
   "title": "Deep Cogito",
   "primary": "#4e81ee",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-deep-infra",
@@ -741,7 +833,8 @@
   "title": "DeepInfra",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-deep-l",
@@ -749,7 +842,8 @@
   "title": "DeepL",
   "primary": "#0F2B46",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-deep-mind",
@@ -757,7 +851,8 @@
   "title": "DeepMind",
   "primary": "#4285F4",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-deepseek",
@@ -765,7 +860,8 @@
   "title": "DeepSeek",
   "primary": "#4D6BFE",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-devin",
@@ -773,7 +869,8 @@
   "title": "Devin",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-dify",
@@ -781,7 +878,8 @@
   "title": "Dify",
   "primary": "#03F",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-digital-ocean",
@@ -789,7 +887,8 @@
   "title": "DigitalOcean",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-doc2-x",
@@ -797,7 +896,8 @@
   "title": "Doc2X",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-doc-search",
@@ -805,7 +905,8 @@
   "title": "DocSearch",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 4
  },
  {
   "id": "brand-dolphin",
@@ -813,7 +914,8 @@
   "title": "Dolphin",
   "primary": "#6186db",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-dots-studio",
@@ -821,7 +923,8 @@
   "title": "Dots Studio",
   "primary": "#a3e6d9",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-doubao",
@@ -829,7 +932,8 @@
   "title": "Doubao",
   "primary": "#FFF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-dream-machine",
@@ -837,7 +941,8 @@
   "title": "DreamMachine",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-eleven-labs",
@@ -845,7 +950,8 @@
   "title": "ElevenLabs",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-eleven-x",
@@ -853,7 +959,8 @@
   "title": "11x",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-essential-ai",
@@ -861,7 +968,8 @@
   "title": "Essential AI",
   "primary": "#111322",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-exa",
@@ -869,7 +977,8 @@
   "title": "Exa",
   "primary": "#1f40ed",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-fal",
@@ -877,7 +986,8 @@
   "title": "Fal",
   "primary": "#EC0648",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-fast-gpt",
@@ -885,7 +995,8 @@
   "title": "FastGPT",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-featherless",
@@ -893,7 +1004,8 @@
   "title": "featherless.ai",
   "primary": "#FFE184",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-figma",
@@ -901,7 +1013,8 @@
   "title": "Figma",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-firecrawl",
@@ -909,7 +1022,8 @@
   "title": "Firecrawl",
   "primary": "#ff4d00",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-fireworks",
@@ -917,7 +1031,8 @@
   "title": "Fireworks",
   "primary": "#5019C5",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-fish-audio",
@@ -925,7 +1040,8 @@
   "title": "FishAudio",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-flora",
@@ -933,7 +1049,8 @@
   "title": "Flora",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 5
  },
  {
   "id": "brand-flowith",
@@ -941,7 +1058,8 @@
   "title": "Flowith",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-flux",
@@ -949,7 +1067,8 @@
   "title": "Flux",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-friendli",
@@ -957,7 +1076,8 @@
   "title": "Friendli",
   "primary": "#101723",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-glmv",
@@ -965,7 +1085,8 @@
   "title": "GLM-V",
   "primary": "#0039C6",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-gemini",
@@ -973,7 +1094,8 @@
   "title": "Gemini",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-gemini-cli",
@@ -981,7 +1103,8 @@
   "title": "Gemini CLI",
   "primary": "#1E1E2E",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-gemma",
@@ -989,7 +1112,8 @@
   "title": "Gemma",
   "primary": "#2E96FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-gitee-ai",
@@ -997,7 +1121,8 @@
   "title": "GiteeAI",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-github",
@@ -1005,7 +1130,8 @@
   "title": "Github",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-github-copilot",
@@ -1013,7 +1139,8 @@
   "title": "GithubCopilot",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-glama",
@@ -1021,7 +1148,8 @@
   "title": "Glama",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-glif",
@@ -1029,7 +1157,8 @@
   "title": "Glif",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-gmi-cloud",
@@ -1037,7 +1166,8 @@
   "title": "GmiCloud",
   "primary": "#0A0A0A",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-google",
@@ -1045,7 +1175,8 @@
   "title": "Google",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-google-cloud",
@@ -1053,7 +1184,8 @@
   "title": "GoogleCloud",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-goose",
@@ -1061,7 +1193,8 @@
   "title": "Goose",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-gradio",
@@ -1069,7 +1202,8 @@
   "title": "Gradio",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-greptile",
@@ -1077,7 +1211,8 @@
   "title": "Greptile",
   "primary": "#44A775",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-grok",
@@ -1085,7 +1220,8 @@
   "title": "Grok",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-groq",
@@ -1093,7 +1229,8 @@
   "title": "Groq",
   "primary": "#F55036",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-hailuo",
@@ -1101,7 +1238,8 @@
   "title": "Hailuo",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-haiper",
@@ -1109,7 +1247,8 @@
   "title": "Haiper",
   "primary": "#9581ff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-happy-horse",
@@ -1117,7 +1256,8 @@
   "title": "Hedra",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-hedra",
@@ -1125,7 +1265,8 @@
   "title": "Hedra",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-hermes-agent",
@@ -1133,7 +1274,8 @@
   "title": "Hermes Agent",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-higress",
@@ -1141,7 +1283,8 @@
   "title": "Higress",
   "primary": "#3E5CF4",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-huawei",
@@ -1149,7 +1292,8 @@
   "title": "Huawei",
   "primary": "#C7000B",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-huawei-cloud",
@@ -1157,7 +1301,8 @@
   "title": "HuaweiCloud",
   "primary": "#C7000B",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-huggingface",
@@ -1165,7 +1310,8 @@
   "title": "HuggingFace",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-hunyuan",
@@ -1173,7 +1319,8 @@
   "title": "Hunyuan",
   "primary": "#0053e0",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-hyperbolic",
@@ -1181,7 +1328,8 @@
   "title": "Hyperbolic",
   "primary": "#594CE9",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-ibm",
@@ -1189,7 +1337,8 @@
   "title": "IBM",
   "primary": "#0F62FE",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-i-fly-tek-cloud",
@@ -1197,7 +1346,8 @@
   "title": "iFlyTekCloud",
   "primary": "#2A80E2",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-ideogram",
@@ -1205,7 +1355,8 @@
   "title": "Ideogram",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-inception",
@@ -1213,7 +1364,8 @@
   "title": "Inception",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-inceptron",
@@ -1221,7 +1373,8 @@
   "title": "Inceptron",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-inference",
@@ -1229,7 +1382,8 @@
   "title": "Inference",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-infermatic",
@@ -1237,7 +1391,8 @@
   "title": "Infermatic",
   "primary": "#4334F5",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-infinigence",
@@ -1245,7 +1400,8 @@
   "title": "Infinigence",
   "primary": "#7952ea",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-inflection",
@@ -1253,7 +1409,8 @@
   "title": "Inflection",
   "primary": "#038247",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-intern-lm",
@@ -1261,7 +1418,8 @@
   "title": "InternLM",
   "primary": "#1B3882",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-io-net",
@@ -1269,7 +1427,8 @@
   "title": "IoNet",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 6
  },
  {
   "id": "brand-jimeng",
@@ -1277,7 +1436,8 @@
   "title": "Jimeng",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-jina",
@@ -1285,7 +1445,8 @@
   "title": "Jina",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-junie",
@@ -1293,7 +1454,8 @@
   "title": "Junie",
   "primary": "#47E054",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-kagi",
@@ -1301,7 +1463,8 @@
   "title": "Kagi",
   "primary": "#FEB219",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-kilo-code",
@@ -1309,7 +1472,8 @@
   "title": "Kilo Code",
   "primary": "#F8F676",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-kimi",
@@ -1317,7 +1481,8 @@
   "title": "Kimi",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-kiro",
@@ -1325,7 +1490,8 @@
   "title": "Kiro",
   "primary": "#9046ff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-kling",
@@ -1333,7 +1499,8 @@
   "title": "Kling",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-kluster",
@@ -1341,7 +1508,8 @@
   "title": "Kluster",
   "primary": "#6525F7",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-kolors",
@@ -1349,7 +1517,8 @@
   "title": "Kolors",
   "primary": "#83FF63",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-krea",
@@ -1357,7 +1526,8 @@
   "title": "Krea",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-kwai-kat",
@@ -1365,7 +1535,8 @@
   "title": "KwaiKAT",
   "primary": "#0A67FF",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-kwaipilot",
@@ -1373,7 +1544,8 @@
   "title": "Kwaipilot",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lg",
@@ -1381,7 +1553,8 @@
   "title": "LG AI",
   "primary": "#C00C3F",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-l-la-va",
@@ -1389,7 +1562,8 @@
   "title": "LLaVA",
   "primary": "#CB2D30",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lambda",
@@ -1397,7 +1571,8 @@
   "title": "Lambda",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lang-chain",
@@ -1405,7 +1580,8 @@
   "title": "LangChain",
   "primary": "#7FC8FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lang-graph",
@@ -1413,7 +1589,8 @@
   "title": "LangGraph",
   "primary": "#1C3C3C",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lang-smith",
@@ -1421,7 +1598,8 @@
   "title": "LangSmith",
   "primary": "#1C3C3C",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-langfuse",
@@ -1429,7 +1607,8 @@
   "title": "Langfuse",
   "primary": "#1B1917",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lepton-ai",
@@ -1437,7 +1616,8 @@
   "title": "LeptonAI",
   "primary": "#2F80ED",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lightricks",
@@ -1445,7 +1625,8 @@
   "title": "Lightricks",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-liquid",
@@ -1453,7 +1634,8 @@
   "title": "Liquid",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-live-kit",
@@ -1461,7 +1643,8 @@
   "title": "LiveKit",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-llama-index",
@@ -1469,7 +1652,8 @@
   "title": "LlamaIndex",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-llm-api",
@@ -1477,7 +1661,8 @@
   "title": "LLM API",
   "primary": "#3F35FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lm-studio",
@@ -1485,7 +1670,8 @@
   "title": "LM Studio",
   "primary": "#4338CA",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lobe-hub",
@@ -1493,7 +1679,8 @@
   "title": "LobeHub",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-long-cat",
@@ -1501,7 +1688,8 @@
   "title": "LongCat",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lovable",
@@ -1509,7 +1697,8 @@
   "title": "Lovable",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-lovart",
@@ -1517,7 +1706,8 @@
   "title": "Lovart",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-luma",
@@ -1525,7 +1715,8 @@
   "title": "Luma",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-mcp",
@@ -1533,7 +1724,8 @@
   "title": "ModelContextProtocol",
   "primary": "#FFF",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-magic",
@@ -1541,7 +1733,8 @@
   "title": "Magic",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-make",
@@ -1549,7 +1742,8 @@
   "title": "Make",
   "primary": "#ff009a",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-manus",
@@ -1557,7 +1751,8 @@
   "title": "Manus",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-mastra",
@@ -1565,7 +1760,8 @@
   "title": "Mastra",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-mcp-so",
@@ -1573,7 +1769,8 @@
   "title": "MCP.so",
   "primary": "#1C3F6B",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-menlo",
@@ -1581,7 +1778,8 @@
   "title": "MENLO",
   "primary": "#FF5C00",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-meshy",
@@ -1589,7 +1787,8 @@
   "title": "Meshy",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 7
  },
  {
   "id": "brand-meta",
@@ -1597,7 +1796,8 @@
   "title": "Meta",
   "primary": "#1d65c1",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-meta-ai",
@@ -1605,7 +1805,8 @@
   "title": "MetaAI",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-meta-gpt",
@@ -1613,7 +1814,8 @@
   "title": "MetaGPT",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-microsoft",
@@ -1621,7 +1823,8 @@
   "title": "Azure",
   "primary": "#00A4EF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-midjourney",
@@ -1629,7 +1832,8 @@
   "title": "Midjourney",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-minimax",
@@ -1637,7 +1841,8 @@
   "title": "Minimax",
   "primary": "#F23F5D",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-mistral",
@@ -1645,7 +1850,8 @@
   "title": "Mistral",
   "primary": "#FA520F",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-model-scope",
@@ -1653,7 +1859,8 @@
   "title": "ModelScope",
   "primary": "#624AFF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-monica",
@@ -1661,7 +1868,8 @@
   "title": "Monica",
   "primary": "#6841ea",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-moonshot",
@@ -1669,7 +1877,8 @@
   "title": "MoonshotAI",
   "primary": "#16191E",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-morph",
@@ -1677,7 +1886,8 @@
   "title": "Morph",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-moxt",
@@ -1685,7 +1895,8 @@
   "title": "Moxt",
   "primary": "#29C16A",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-my-shell",
@@ -1693,7 +1904,8 @@
   "title": "MyShell",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-n8n",
@@ -1701,7 +1913,8 @@
   "title": "n8n",
   "primary": "#EA4B71",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-npl-cloud",
@@ -1709,7 +1922,8 @@
   "title": "NPLCloud",
   "primary": "#00D1B2",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-nano-banana",
@@ -1717,7 +1931,8 @@
   "title": "NanoBanana",
   "primary": "#FCD53F",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-nebius",
@@ -1725,7 +1940,8 @@
   "title": "Nebius",
   "primary": "#DAFF33",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-new-api",
@@ -1733,7 +1949,8 @@
   "title": "New API",
   "primary": "#dd2e57",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-nextbit",
@@ -1741,7 +1958,8 @@
   "title": "Nextbit",
   "primary": "#04D98B",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-notebook-lm",
@@ -1749,7 +1967,8 @@
   "title": "NotebookLM",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-notion",
@@ -1757,7 +1976,8 @@
   "title": "Notion",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-nous-research",
@@ -1765,7 +1985,8 @@
   "title": "NousResearch",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-nova",
@@ -1773,7 +1994,8 @@
   "title": "Nova",
   "primary": "#222F3E",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-novel-ai",
@@ -1781,7 +2003,8 @@
   "title": "NovelAI",
   "primary": "#E1E4FF",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-novita",
@@ -1789,7 +2012,8 @@
   "title": "Novita AI",
   "primary": "#23D57C",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-nvidia",
@@ -1797,7 +2021,8 @@
   "title": "Nvidia",
   "primary": "#74B71B",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-obsidian",
@@ -1805,7 +2030,8 @@
   "title": "Obsidian",
   "primary": "#A88BFA",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-ollama",
@@ -1813,7 +2039,8 @@
   "title": "Ollama",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-openai",
@@ -1821,7 +2048,8 @@
   "title": "OpenAI",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-open-chat",
@@ -1829,7 +2057,8 @@
   "title": "OpenChat",
   "primary": "#4A7FE3",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-open-claw",
@@ -1837,7 +2066,8 @@
   "title": "OpenClaw",
   "primary": "#ff4d4d",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-open-code",
@@ -1845,7 +2075,8 @@
   "title": "opencode",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-open-hands",
@@ -1853,7 +2084,8 @@
   "title": "OpenHands",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-open-human",
@@ -1861,7 +2093,8 @@
   "title": "OpenHuman",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-openrouter",
@@ -1869,7 +2102,8 @@
   "title": "OpenRouter",
   "primary": "#C8FF00",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-open-web-ui",
@@ -1877,7 +2111,8 @@
   "title": "OpenWebUI",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-ppio",
@@ -1885,7 +2120,8 @@
   "title": "PPIO",
   "primary": "#2874ff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-pa-lm",
@@ -1893,7 +2129,8 @@
   "title": "PaLM",
   "primary": "#FFF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-parasail",
@@ -1901,7 +2138,8 @@
   "title": "Parasail",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-perceptron",
@@ -1909,7 +2147,8 @@
   "title": "Perceptron",
   "primary": "#F8F4EB",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-perplexity",
@@ -1917,7 +2156,8 @@
   "title": "Perplexity",
   "primary": "#22B8CD",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-phala",
@@ -1925,7 +2165,8 @@
   "title": "Phala",
   "primary": "#CDFA50",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-phidata",
@@ -1933,7 +2174,8 @@
   "title": "Phidata",
   "primary": "#FF4017",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-phind",
@@ -1941,7 +2183,8 @@
   "title": "phind",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-pi",
@@ -1949,7 +2192,8 @@
   "title": "Pi",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-pika",
@@ -1957,7 +2201,8 @@
   "title": "Pika",
   "primary": "#FDF7EF",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-pix-verse",
@@ -1965,7 +2210,8 @@
   "title": "PixVerse",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-player2",
@@ -1973,7 +2219,8 @@
   "title": "Player2",
   "primary": "#A8A6FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 8
  },
  {
   "id": "brand-poe",
@@ -1981,7 +2228,8 @@
   "title": "Poe",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-pollinations",
@@ -1989,7 +2237,8 @@
   "title": "Pollinations",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-poolside",
@@ -1997,7 +2246,8 @@
   "title": "Poolside",
   "primary": "#4137FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-pruna-ai",
@@ -2005,7 +2255,8 @@
   "title": "PrunaAI",
   "primary": "#AC51FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-pydantic-ai",
@@ -2013,7 +2264,8 @@
   "title": "PydanticAI",
   "primary": "#E92063",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-qingyan",
@@ -2021,7 +2273,8 @@
   "title": "Qingyan",
   "primary": "#1041F3",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-qiniu",
@@ -2029,7 +2282,8 @@
   "title": "Qiniu",
   "primary": "#06AEEF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-qoder",
@@ -2037,7 +2291,8 @@
   "title": "Qoder",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-qwen",
@@ -2045,7 +2300,8 @@
   "title": "Qwen",
   "primary": "#615ced",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-rss-hub",
@@ -2053,7 +2309,8 @@
   "title": "RSSHub",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-railway",
@@ -2061,7 +2318,8 @@
   "title": "Railway",
   "primary": "#853bce",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-recraft",
@@ -2069,7 +2327,8 @@
   "title": "Recraft",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-reka",
@@ -2077,7 +2336,8 @@
   "title": "Reka",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-relace",
@@ -2085,7 +2345,8 @@
   "title": "Relace",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-replicate",
@@ -2093,7 +2354,8 @@
   "title": "Replicate",
   "primary": "#EA2805",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-replit",
@@ -2101,7 +2363,8 @@
   "title": "Replit",
   "primary": "#FD5402",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-reve",
@@ -2109,7 +2372,8 @@
   "title": "Reve",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-roo-code",
@@ -2117,7 +2381,8 @@
   "title": "RooCode",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-runway",
@@ -2125,7 +2390,8 @@
   "title": "Runway",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-rwkv",
@@ -2133,7 +2399,8 @@
   "title": "RWKV",
   "primary": "#3431C3",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-sakana",
@@ -2141,7 +2408,8 @@
   "title": "sakana.ai",
   "primary": "#E10600",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-sambanova",
@@ -2149,7 +2417,8 @@
   "title": "SambaNova",
   "primary": "#EE7624",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-sear-xng",
@@ -2157,7 +2426,8 @@
   "title": "SearXNG",
   "primary": "#3050FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-search1-api",
@@ -2165,7 +2435,8 @@
   "title": "Search1API",
   "primary": "#0066FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-search-api",
@@ -2173,7 +2444,8 @@
   "title": "SearchApi",
   "primary": "#4f46e5",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-sense-nova",
@@ -2181,7 +2453,8 @@
   "title": "SenseNova",
   "primary": "#5B2AD8",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-silicon-cloud",
@@ -2189,7 +2462,8 @@
   "title": "SiliconCloud",
   "primary": "#6E29F6",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-silly-tavern",
@@ -2197,7 +2471,8 @@
   "title": "SillyTavern",
   "primary": "#333",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-skywork",
@@ -2205,7 +2480,8 @@
   "title": "Skywork",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-slock",
@@ -2213,7 +2489,8 @@
   "title": "Slock",
   "primary": "#ffd440",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-smithery",
@@ -2221,7 +2498,8 @@
   "title": "Smithery",
   "primary": "#EA580C",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-snowflake",
@@ -2229,7 +2507,8 @@
   "title": "Snowflake",
   "primary": "#249EDC",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-soph-net",
@@ -2237,7 +2516,8 @@
   "title": "SophNet",
   "primary": "#6200ee",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-sora",
@@ -2245,7 +2525,8 @@
   "title": "Sora",
   "primary": "#0968DA",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-spark",
@@ -2253,7 +2534,8 @@
   "title": "Spark",
   "primary": "#0070f0",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-speed-ai",
@@ -2261,7 +2543,8 @@
   "title": "SpeedAI",
   "primary": "#6366F1",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 9
  },
  {
   "id": "brand-stability",
@@ -2269,7 +2552,8 @@
   "title": "Stability",
   "primary": "#330066",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-state-cloud",
@@ -2277,7 +2561,8 @@
   "title": "StateCloud",
   "primary": "#DF0428",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-stepfun",
@@ -2285,7 +2570,8 @@
   "title": "StepFun",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-straico",
@@ -2293,7 +2579,8 @@
   "title": "Straico",
   "primary": "#464bba",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-stream-lake",
@@ -2301,7 +2588,8 @@
   "title": "StreamLake",
   "primary": "#1D70FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-sub-model",
@@ -2309,7 +2597,8 @@
   "title": "SubModel",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-suno",
@@ -2317,7 +2606,8 @@
   "title": "Suno",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-sync",
@@ -2325,7 +2615,8 @@
   "title": "Sync",
   "primary": "#0000FF",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-tii",
@@ -2333,7 +2624,8 @@
   "title": "Technology Innovation Institute",
   "primary": "#6400FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-targon",
@@ -2341,7 +2633,8 @@
   "title": "Targon",
   "primary": "#68C3FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-tavily",
@@ -2349,7 +2642,8 @@
   "title": "Tavily",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-tencent",
@@ -2357,7 +2651,8 @@
   "title": "Tencent",
   "primary": "#0052D9",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-tencent-cloud",
@@ -2365,7 +2660,8 @@
   "title": "TencentCloud",
   "primary": "#2151d1",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-tiangong",
@@ -2373,7 +2669,8 @@
   "title": "Tiangong",
   "primary": "#0057ff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-together",
@@ -2381,7 +2678,8 @@
   "title": "together.ai",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-topaz-labs",
@@ -2389,7 +2687,8 @@
   "title": "TopazLabs",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-trae",
@@ -2397,7 +2696,8 @@
   "title": "TRAE",
   "primary": "#32F08C",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-tripo",
@@ -2405,7 +2705,8 @@
   "title": "Tripo",
   "primary": "#000",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-turi-x",
@@ -2413,7 +2714,8 @@
   "title": "TuriX",
   "primary": "#F7AD8A",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-udio",
@@ -2421,7 +2723,8 @@
   "title": "Udio",
   "primary": "#e30a5d",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-union-alpha",
@@ -2429,7 +2732,8 @@
   "title": "UnionAlpha",
   "primary": "#1A1A1A",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-unsloth",
@@ -2437,7 +2741,8 @@
   "title": "Unsloth",
   "primary": "#16B88A",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-unstructured",
@@ -2445,7 +2750,8 @@
   "title": "Unstructured",
   "primary": "#0ADDF8",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-upstage",
@@ -2453,7 +2759,8 @@
   "title": "Upsate",
   "primary": "#908AF9",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-v0",
@@ -2461,7 +2768,8 @@
   "title": "V0",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-vectorizer-ai",
@@ -2469,7 +2777,8 @@
   "title": "Vectorizer.AI",
   "primary": "#3659FF",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-venice",
@@ -2477,7 +2786,8 @@
   "title": "Venice",
   "primary": "#E05A2D",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-vercel",
@@ -2485,7 +2795,8 @@
   "title": "Vercel",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-vertex-ai",
@@ -2493,7 +2804,8 @@
   "title": "VertexAI",
   "primary": "#4285F4",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-vidu",
@@ -2501,7 +2813,8 @@
   "title": "Vidu",
   "primary": "#22D5FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-viggle",
@@ -2509,7 +2822,8 @@
   "title": "Viggle",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-vllm",
@@ -2517,7 +2831,8 @@
   "title": "vLLM",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-volcengine",
@@ -2525,7 +2840,8 @@
   "title": "Volcengine",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-voyage",
@@ -2533,7 +2849,8 @@
   "title": "Voyage",
   "primary": "#012E33",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-wafer",
@@ -2541,7 +2858,8 @@
   "title": "Wafer",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-wandb",
@@ -2549,7 +2867,8 @@
   "title": "Weights & Biases",
   "primary": "#FFCC33",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-wave-speed",
@@ -2557,7 +2876,8 @@
   "title": "WaveSpeed",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-wenxin",
@@ -2565,7 +2885,8 @@
   "title": "Wenxin",
   "primary": "#167ADF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-windsurf",
@@ -2573,7 +2894,8 @@
   "title": "Windsurf",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-workers-ai",
@@ -2581,7 +2903,8 @@
   "title": "WorkersAI",
   "primary": "#F38020",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-world-router",
@@ -2589,7 +2912,8 @@
   "title": "WorldRouter",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-xai",
@@ -2597,7 +2921,8 @@
   "title": "Grok",
   "primary": "#fff",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-xiaomi-mi-mo",
@@ -2605,7 +2930,8 @@
   "title": "XiaomiMiMo",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-xinference",
@@ -2613,7 +2939,8 @@
   "title": "Xinference",
   "primary": "#781ff5",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-xpay",
@@ -2621,7 +2948,8 @@
   "title": "xpay",
   "primary": "#0F1C4D",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-xuanyuan",
@@ -2629,7 +2957,8 @@
   "title": "轩辕",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-yandex",
@@ -2637,7 +2966,8 @@
   "title": "Yandex",
   "primary": "#FB3E1C",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-yi",
@@ -2645,7 +2975,8 @@
   "title": "Yi",
   "primary": "#003425",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-you-mind",
@@ -2653,7 +2984,8 @@
   "title": "YouMind",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 10
  },
  {
   "id": "brand-yuanbao",
@@ -2661,7 +2993,8 @@
   "title": "Yuanbao",
   "primary": "#fff",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 11
  },
  {
   "id": "brand-zai",
@@ -2669,7 +3002,8 @@
   "title": "Z.ai",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 11
  },
  {
   "id": "brand-zapier",
@@ -2677,7 +3011,8 @@
   "title": "Zapier",
   "primary": "#FF4F00",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 11
  },
  {
   "id": "brand-zeabur",
@@ -2685,7 +3020,8 @@
   "title": "Zeabur",
   "primary": "#6300FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 11
  },
  {
   "id": "brand-zen-mux",
@@ -2693,7 +3029,8 @@
   "title": "ZenMux",
   "primary": "#000",
   "color": false,
-  "mono": true
+  "mono": true,
+  "shard": 11
  },
  {
   "id": "brand-zencoder",
@@ -2701,7 +3038,8 @@
   "title": "Zencoder",
   "primary": "#E65C2C",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 11
  },
  {
   "id": "brand-zero-one",
@@ -2709,7 +3047,8 @@
   "title": "01.AI",
   "primary": "#003425",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 11
  },
  {
   "id": "brand-zhipu",
@@ -2717,6 +3056,7 @@
   "title": "Zhipu",
   "primary": "#3859FF",
   "color": true,
-  "mono": true
+  "mono": true,
+  "shard": 11
  }
 ]

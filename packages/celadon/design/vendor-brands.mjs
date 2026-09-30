@@ -74,7 +74,7 @@ function toSymbol(html, sid, mono) {
   return { viewBox, inner };
 }
 
-const symbols = [], index = [], failed = [];
+const symbols = [], symbolOwner = [], index = [], failed = [];   /* symbolOwner: symbols[i] 属于 index 的第几条 */
 for (const brand of brands.sort()) {
   const dir = join(work, 'es', brand, 'components');
   const hasColor = existsSync(join(dir, 'Color.js')), hasMono = existsSync(join(dir, 'Mono.js'));
@@ -83,14 +83,19 @@ for (const brand of brands.sort()) {
   const title = (existsSync(styleFile) ? (readFileSync(styleFile, 'utf8').match(/TITLE\s*=\s*'([^']*)'/) || [])[1] : null) || brand;
   const primary = existsSync(styleFile) ? (readFileSync(styleFile, 'utf8').match(/COLOR_PRIMARY\s*=\s*'([^']+)'/) || [])[1] : null;
   const id = slug(brand);
-  const attr = `data-title="${title.replace(/"/g, '&quot;')}"`;
+  // XML 严格：& 与 < 都必须转义，否则整个分片解析失败、坏点之后的符号全部失效
+  const xmlEsc = (v) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const attr = `data-title="${xmlEsc(title)}"`;
   let color = null, mono = null;
+  // 关键：彩色与 mono 两个符号必须用**各自**的命名空间前缀，
+  // 否则组件里 useId 生成的 id（两边相同）会撞车，mask/渐变会解析到错的那个符号
   try { if (hasColor) color = toSymbol(await render(brand, 'Color'), id, false); } catch (e) { failed.push(`${brand}/Color: ${e.message.slice(0, 50)}`); }
-  try { if (hasMono) mono = toSymbol(await render(brand, 'Mono'), id, true); } catch (e) { failed.push(`${brand}/Mono: ${e.message.slice(0, 50)}`); }
-  const canon = color || mono;
-  if (canon) symbols.push(`  <symbol id="${id}" viewBox="${canon.viewBox}" data-src="lobeicons:${brand}/${color ? 'Color' : 'Mono'}" ${attr}>${canon.inner}</symbol>`);
-  if (color && mono) symbols.push(`  <symbol id="${id}-mono" viewBox="${mono.viewBox}" data-src="lobeicons:${brand}/Mono" ${attr}>${mono.inner}</symbol>`);
+  try { if (hasMono) mono = toSymbol(await render(brand, 'Mono'), id + '-mono', true); } catch (e) { failed.push(`${brand}/Mono: ${e.message.slice(0, 50)}`); }
   index.push({ id, brand, title, primary: primary || null, color: !!color, mono: !!mono });
+  const owner = index.length - 1;
+  const canon = color || mono;
+  if (canon) { symbols.push(`  <symbol id="${id}" viewBox="${canon.viewBox}" data-src="lobeicons:${brand}/${color ? 'Color' : 'Mono'}" ${attr}>${canon.inner}</symbol>`); symbolOwner.push(owner); }
+  if (color && mono) { symbols.push(`  <symbol id="${id}-mono" viewBox="${mono.viewBox}" data-src="lobeicons:${brand}/Mono" ${attr}>${mono.inner}</symbol>`); symbolOwner.push(owner); }
 }
 rmSync(work, { recursive: true, force: true });
 
@@ -102,9 +107,45 @@ const sprite = `<!-- Third-party brand logos, rendered from @lobehub/icons ${VER
 ${symbols.join('\n')}
 </defs></svg>
 `;
-writeFileSync('icons/brand-sprite.svg', sprite);
+// 分片：Chrome 对外部 use 引用的雪碧图有体积上限（实测 1.1MB 的文件尾部 5% 整体解析失败），
+// 所以按累计体积切成多片，每片目标 ~120 KB，并记进 index 供引用。
+const SHARD_BYTES = 120 * 1024;
+const shards = [[]];
+let acc = sprite.slice(0, sprite.indexOf('<symbol')).length;
+let lastOwner = -1;
+for (const [i, sym] of symbols.entries()) {
+  // 按**品牌**切断：同一品牌的彩色与 mono 符号必须同片，否则按品牌记的片号会指空
+  const owner = symbolOwner[i];
+  if (owner !== lastOwner && acc + sym.length > SHARD_BYTES && shards[shards.length - 1].length) {
+    shards.push([]); acc = 0;
+  }
+  shards[shards.length - 1].push(i);
+  acc += sym.length + 1;
+  lastOwner = owner;
+}
+const header = sprite.slice(0, sprite.indexOf('<symbol'));
+let shardNo = 0;
+for (const group of shards) {
+  shardNo += 1;
+  const file = `icons/brand-sprite-${shardNo}.svg`;
+  writeFileSync(file, `${header}${group.map((i) => symbols[i]).join('\n')}\n</defs></svg>\n`);
+  for (const i of group) { const o = symbolOwner[i]; if (index[o]) index[o].shard = shardNo; }
+}
+for (const f of readdirSync('icons')) {
+  const m = f.match(/^brand-sprite-(\d+)\.svg$/);
+  if (m && Number(m[1]) > shards.length) rmSync(join('icons', f));
+}
 writeFileSync('icons/brand-index.json', JSON.stringify(index, null, 1) + '\n');
-console.log(`  ✓ icons/brand-sprite.svg：${symbols.length} 个符号（品牌 ${index.length} · 官方色 ${index.filter((b) => b.color).length} · 仅 mono ${index.filter((b) => !b.color).length}）· ${(sprite.length / 1024).toFixed(0)} KB`);
+const shardIds = shards.map((g) => new Set(g.map((i) => symbols[i].match(/id="([^"]+)"/)[1])));
+const broken = index.filter((e) => {
+  const set = shardIds[(e.shard || 1) - 1];
+  return !set || !set.has(e.id) || (e.color && e.mono && !set.has(e.id + '-mono'));
+});
+console.log(broken.length ? `  ⚠ 片号指空的品牌 ${broken.length} 个：${broken.slice(0, 5).map((b) => b.id).join(', ')}` : '  ✓ 每个品牌的两个变体都在同一片内');
+const allIds = [...sprite.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]);
+const dupes = allIds.filter((v, i) => allIds.indexOf(v) !== i);
+console.log(`  ✓ 品牌符号 ${symbols.length} 个 · 品牌 ${index.length}（官方色 ${index.filter((b) => b.color).length} · 仅 mono ${index.filter((b) => !b.color).length}）· 切成 ${shards.length} 片（每片 ≤ ~120 KB，规避外部 use 的体积上限）`);
+console.log(`  ✓ id 重复：${new Set(dupes).size} 个`);
 console.log(`  ✓ icons/brand-index.json：${index.length} 条`);
 if (failed.length) { console.log(`  ⚠ 失败 ${failed.length} 条：`); failed.slice(0, 10).forEach((f) => console.log('    ' + f)); }
 else console.log('  ✓ 全部转换成功，无失败');
