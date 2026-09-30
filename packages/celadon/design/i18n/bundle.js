@@ -584,7 +584,8 @@ window.CELADON_I18N = {
         "state": "States",
         "file": "File types",
         "obj": "Objects",
-        "own": "Ours (brand)"
+        "own": "Ours (brand)",
+        "brand": "Brands"
       },
       "spCorner": "Corners",
       "spCornerV": "**2px** for elements 8px or larger, **1px** below that, about **2.41px** on diagonal right angles",
@@ -626,7 +627,9 @@ window.CELADON_I18N = {
       "brandsetNote": "Model and vendor logos come from **@lobehub/icons** (MIT, 340 brands). **Brand marks keep their official colours** as their trademark rules require, which makes them the **only place on this site allowed to use a colour that is not one of our tokens**; on a dark surface switch to the **mono** variant. The logos are trademarks of their owners and identify the corresponding models or services.",
       "brandSearch": "Search brands, try deepseek or openai",
       "brandColor": "Official colour",
-      "brandMono": "Mono"
+      "brandMono": "Mono",
+      "brandOwn": "Yao Agents (ours)",
+      "coverBrandNote": "ours {own} (`i-yaoagents`) plus {third} third party (`brand-*`, kept in a separate sprite and referenced externally)"
     }
   },
   "ja": {
@@ -1213,7 +1216,8 @@ window.CELADON_I18N = {
         "state": "状態",
         "file": "ファイル種別",
         "obj": "対象",
-        "own": "自前（ブランド）"
+        "own": "自前（ブランド）",
+        "brand": "ブランド"
       },
       "spCorner": "角の丸み",
       "spCornerV": "8px 以上の要素は **2px**、それ未満は **1px**、対角の直角は **約 2.41px**",
@@ -1255,7 +1259,9 @@ window.CELADON_I18N = {
       "brandsetNote": "モデルや提供元のロゴは **@lobehub/icons**（MIT・340 ブランド）から取得しています。**ブランドマークは各社の商標ルールに従い公式色のまま**で、当サイトで**トークン以外の色を使ってよい唯一の場所**です。暗い背景では**モノ変体**に切り替えてください。",
       "brandSearch": "ブランドを検索（deepseek / openai など）",
       "brandColor": "公式色",
-      "brandMono": "モノ"
+      "brandMono": "モノ",
+      "brandOwn": "Yao Agents（自前）",
+      "coverBrandNote": "自前 {own} 個（`i-yaoagents`）+ サードパーティ {third} 個（`brand-*`、別スプライトを外部参照）"
     }
   },
   "zh-CN": {
@@ -1842,7 +1848,8 @@ window.CELADON_I18N = {
         "state": "状态",
         "file": "文件类型",
         "obj": "对象 / 领域",
-        "own": "自建 / 品牌"
+        "own": "自建 / 品牌",
+        "brand": "品牌"
       },
       "spCorner": "圆角",
       "spCornerV": "≥8px 的元素 **2px**；<8px 用 **1px**；对角线 90° 用 **≈2.41px**（lucide 规定）",
@@ -1884,7 +1891,9 @@ window.CELADON_I18N = {
       "brandsetNote": "模型与厂商 logo 取自 **@lobehub/icons**（MIT · 340 个品牌 · [lobehub.com/icons](https://lobehub.com/icons)）。**品牌图标按各品牌商标规范保留官方色** —— 这是全站**唯一允许不使用我们 token 的颜色**；**深色底请切「单色」变体**。logo 的商标权归各品牌方，仅用于标识对应模型或服务。",
       "brandSearch": "搜索品牌（deepseek / openai / 通义…）",
       "brandColor": "官方色",
-      "brandMono": "单色"
+      "brandMono": "单色",
+      "brandOwn": "Yao Agents（我们自己的）",
+      "coverBrandNote": "自建 {own} 个（`i-yaoagents`）+ 第三方 {third} 个（`brand-*`，另存独立雪碧图，外部引用）"
     }
   },
   "zh-TW": {
@@ -2471,7 +2480,8 @@ window.CELADON_I18N = {
         "state": "狀態",
         "file": "檔案類型",
         "obj": "物件 / 領域",
-        "own": "自建 / 品牌"
+        "own": "自建 / 品牌",
+        "brand": "品牌"
       },
       "spCorner": "圓角",
       "spCornerV": "≥8px 的元素 **2px**；<8px 用 **1px**；對角線 90° 用 **≈2.41px**",
@@ -2513,7 +2523,9 @@ window.CELADON_I18N = {
       "brandsetNote": "模型與廠商 logo 取自 **@lobehub/icons**（MIT · 340 個品牌）。**品牌圖示依各品牌商標規範保留官方色** —— 這是全站**唯一允許不使用我們 token 的顏色**；**深色底請切「單色」變體**。",
       "brandSearch": "搜尋品牌（deepseek / openai / 通義…）",
       "brandColor": "官方色",
-      "brandMono": "單色"
+      "brandMono": "單色",
+      "brandOwn": "Yao Agents（我們自己的）",
+      "coverBrandNote": "自建 {own} 個（`i-yaoagents`）+ 第三方 {third} 個（`brand-*`，另存獨立雪碧圖）"
     }
   }
 };

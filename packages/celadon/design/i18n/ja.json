@@ -582,7 +582,8 @@
       "state": "状態",
       "file": "ファイル種別",
       "obj": "対象",
-      "own": "自前（ブランド）"
+      "own": "自前（ブランド）",
+      "brand": "ブランド"
     },
     "spCorner": "角の丸み",
     "spCornerV": "8px 以上の要素は **2px**、それ未満は **1px**、対角の直角は **約 2.41px**",
@@ -624,6 +625,8 @@
     "brandsetNote": "モデルや提供元のロゴは **@lobehub/icons**（MIT・340 ブランド）から取得しています。**ブランドマークは各社の商標ルールに従い公式色のまま**で、当サイトで**トークン以外の色を使ってよい唯一の場所**です。暗い背景では**モノ変体**に切り替えてください。",
     "brandSearch": "ブランドを検索（deepseek / openai など）",
     "brandColor": "公式色",
-    "brandMono": "モノ"
+    "brandMono": "モノ",
+    "brandOwn": "Yao Agents（自前）",
+    "coverBrandNote": "自前 {own} 個（`i-yaoagents`）+ サードパーティ {third} 個（`brand-*`、別スプライトを外部参照）"
   }
 }

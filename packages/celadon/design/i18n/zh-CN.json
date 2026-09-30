@@ -582,7 +582,8 @@
       "state": "状态",
       "file": "文件类型",
       "obj": "对象 / 领域",
-      "own": "自建 / 品牌"
+      "own": "自建 / 品牌",
+      "brand": "品牌"
     },
     "spCorner": "圆角",
     "spCornerV": "≥8px 的元素 **2px**；<8px 用 **1px**；对角线 90° 用 **≈2.41px**（lucide 规定）",
@@ -624,6 +625,8 @@
     "brandsetNote": "模型与厂商 logo 取自 **@lobehub/icons**（MIT · 340 个品牌 · [lobehub.com/icons](https://lobehub.com/icons)）。**品牌图标按各品牌商标规范保留官方色** —— 这是全站**唯一允许不使用我们 token 的颜色**；**深色底请切「单色」变体**。logo 的商标权归各品牌方，仅用于标识对应模型或服务。",
     "brandSearch": "搜索品牌（deepseek / openai / 通义…）",
     "brandColor": "官方色",
-    "brandMono": "单色"
+    "brandMono": "单色",
+    "brandOwn": "Yao Agents（我们自己的）",
+    "coverBrandNote": "自建 {own} 个（`i-yaoagents`）+ 第三方 {third} 个（`brand-*`，另存独立雪碧图，外部引用）"
   }
 }
