@@ -161,7 +161,7 @@
 | i18n | `design/i18n/{zh-CN,zh-TW,en,ja}.json`（**518 key × 4 语**，`ui.*` 必翻 / `sample.*` 演示数据）+ 生成器 + 运行时切换 | `build-i18n.mjs` + `check-i18n.mjs` |
 | 色卡（自检工具） | `design/color-card.html`：零硬编码、实时读 `tokens.css`、对比度实算 + 关键配对 + 控件状态矩阵 | 程序化校验无颜色字面量 |
 | 详细界面稿 | `design/mock.html`：1440×888 三列通高 · 零硬编码 · 四语可切 · 67 个图标 | 程序化校验无颜色字面量 |
-| Logo（设计交付物） | `design/logo-mark-celadon.svg`（**当前正版**；几何取自 上一版原始文件、**仅换颜色**；**浅暗同版，不分主题**）· `logo-app-celadon.svg`（正方形画布，图形内缩 78%）· `design/icons/icon-*.png` 7 档 | 上一版原始文件 vs 当前正版 diff 比对 |
+| Logo（设计交付物） | `design/logo-mark-celadon.svg`（**当前正版**；几何取自上一版原始文件、**仅换颜色**；**浅暗同版，不分主题**）· `logo-app-celadon.svg`（正方形画布，图形内缩 78%）· `design/icons/icon-*.png` 7 档 | 上一版原始文件 vs 当前正版 diff 比对 |
 | 本地浏览 / 防缓存 | `design/serve.mjs`（零依赖 · `no-store` · 目录浏览） | 改完刷新即见 |
 
 > **质量门禁（四检查，本地可当 CI 跑）**：`check-i18n.mjs`（缺 key / 漏翻 / 繁简 / 日文）· `check-readme-values.mjs`（色值零漂移）· `check-tokens.mjs`（三张规范页的字号 / 行高 / 圆角 / 颜色 / 间距 / 线宽 / 漏分号）· `check-generated.mjs`（生成物与源一致 · 品牌标记颜色全走 token）
