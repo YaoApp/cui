@@ -42,7 +42,7 @@
 - ✅ **F3 阴影与层级 Elevation** —— L0 无 / L1 `--shadow-subtle` / L2 `--shadow-floating` / L3 `--shadow-overlay`＋`--z-base/raised/sticky/overlay/modal/toast/tooltip`；**暗色用面阶表达层级**（`--elevation-surface-1/2/3` + 1px 暖白内高光 `--elevation-highlight`，深阴影在暗底不可见）
   产物：`tokens.less` · `foundations.html` 层级叠放 + 对照表（含 sticky 行）
 - ✅ **F4 动效 Motion** —— 时长 120/200/320 ＋ 缓动 standard/decelerate/accelerate（曲线图实时由 token 绘制）＋ 规则（只动 transform/opacity）＋ **`prefers-reduced-motion` 下时长归零**（tokens.less 统一处理，实测 0.01ms）
-  产物：`tokens.less` · `foundations.html` 曲线 + 播放演示 + 减动效状态
+  产物：`tokens.less` · `foundations.html` 曲线 + **12 个常用场景画廊**（悬停/按下/焦点环/淡入/下拉/面板展开/面板收起/抽屉/弹窗/通知/列表依次/流式输出，每个可单独或全部播放，标注所用 时长·缓动）+ 减动效状态
 - ✅ **F5 边框 Border（含 1.4.11 决策）** —— **默认保留弱边界（观感）**；新增达标档 `--border-control-strong`（浅 `#8D8A80` 3.14 · 暗 `#7C776B` 3.47）＋ `--border-hover-strong`；`prefers-contrast: more` 下由 tokens.less 媒体查询**自动切换**（浅/暗均已实测生效）
   产物：`tokens.less` · `foundations.html` 梯度实测 + 两个输入框对照 + 偏离说明（**有意偏离**，严格达标只需 1 行）
 ### 2.2 P1 · 结构与适配
