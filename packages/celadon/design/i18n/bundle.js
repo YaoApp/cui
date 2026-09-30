@@ -105,7 +105,7 @@ window.CELADON_I18N = {
       },
       "message": {
         "user1": "Hi — could you review these two documents? Focus on the risk clauses in the contract.",
-        "agent1Html": "I have read both. I found **3 risks** in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
+        "agent1Html": "I have read both. I found 3 risks in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
         "agent2": "Summarized by risk first, with the source clause and page numbers."
       },
       "tool": {
@@ -624,7 +624,7 @@ window.CELADON_I18N = {
       },
       "message": {
         "user1": "こんにちは。この 2 つのドキュメントを確認してもらえますか？契約書のリスク条項が中心です。",
-        "agent1Html": "両方読みました。契約書に**リスクが 3 件**あります：① 第 4.2 条 支払期間に上限がない；② 第 7 条 責任が不均衡；③ 別紙 2 に署名欄がない。",
+        "agent1Html": "両方読みました。契約書にリスクが 3 件あります：① 第 4.2 条 支払期間に上限がない；② 第 7 条 責任が不均衡；③ 別紙 2 に署名欄がない。",
         "agent2": "リスク優先で要約し、根拠条項とページを付記しました。"
       },
       "tool": {
@@ -1143,7 +1143,7 @@ window.CELADON_I18N = {
       },
       "message": {
         "user1": "你好，能帮我看看这两份文档吗？重点是合同里的风险条款。",
-        "agent1Html": "两份都读完了。合同里我找到 **3 处风险**：① 第 4.2 条付款周期无上限；② 第 7 条违约责任不对等；③ 附件二缺失签章页。",
+        "agent1Html": "两份都读完了。合同里我找到 3 处风险：① 第 4.2 条付款周期无上限；② 第 7 条违约责任不对等；③ 附件二缺失签章页。",
         "agent2": "已按风险优先输出，并标注了依据条款页码。"
       },
       "tool": {
@@ -1662,7 +1662,7 @@ window.CELADON_I18N = {
       },
       "message": {
         "user1": "你好，能幫我看看這兩份文件嗎？重點是合約裡的風險條款。",
-        "agent1Html": "兩份都讀完了。合約裡我找到 **3 處風險**：① 第 4.2 條付款週期無上限；② 第 7 條違約責任不對等；③ 附件二缺少簽章頁。",
+        "agent1Html": "兩份都讀完了。合約裡我找到 3 處風險：① 第 4.2 條付款週期無上限；② 第 7 條違約責任不對等；③ 附件二缺少簽章頁。",
         "agent2": "已依風險優先輸出，並標註了依據條款頁碼。"
       },
       "tool": {
