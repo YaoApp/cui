@@ -559,7 +559,7 @@ window.CELADON_I18N = {
       "count": "",
       "coverTitle": "Coverage by group",
       "coverCat": "Group",
-      "specTitle": "3. Usage and drawing rules",
+      "specTitle": "4. Usage and drawing rules",
       "specNote": "Take from **lucide** by default. Only these five cases are drawn by us, and they still go on the **24 grid with a 2 stroke** so mixed icons stay consistent.",
       "r1": "**Look first**: when you need an icon, find the closest meaning in lucide and use it. Do not draw a new one.",
       "r2": "**Names stay ours**: `i-<domain>-<name>`, mapped one to one with the lucide name in `icons/manifest.json`.",
@@ -621,7 +621,12 @@ window.CELADON_I18N = {
       "rx3": "**Hand drawing** is limited to the five cases above; everything else comes from lucide.",
       "coverCount": "Count",
       "coverNames": "Semantic names (ours)",
-      "srcOwn": "ours"
+      "srcOwn": "ours",
+      "brandsetTitle": "3. Third party brands (340, from @lobehub/icons)",
+      "brandsetNote": "Model and vendor logos come from **@lobehub/icons** (MIT, 340 brands). **Brand marks keep their official colours** as their trademark rules require, which makes them the **only place on this site allowed to use a colour that is not one of our tokens**; on a dark surface switch to the **mono** variant. The logos are trademarks of their owners and identify the corresponding models or services.",
+      "brandSearch": "Search brands, try deepseek or openai",
+      "brandColor": "Official colour",
+      "brandMono": "Mono"
     }
   },
   "ja": {
@@ -1183,7 +1188,7 @@ window.CELADON_I18N = {
       "count": "",
       "coverTitle": "分類ごとの覆盖",
       "coverCat": "分類",
-      "specTitle": "3. 使い方と自前作成の規格",
+      "specTitle": "4. 使い方と自前作成の規格",
       "specNote": "既定は **lucide から取得**。自前で描くのは下の 5 類だけで、それも **24 グリッド / 線幅 2** で描きます。",
       "r1": "**まず探す**：必要なときは lucide で意味が最も近いものを探し、あればそれを使います。",
       "r2": "**名前はそのまま**：`i-<領域>-<名前>` を lucide 名と 1 対 1 で `icons/manifest.json` に記録します。",
@@ -1245,7 +1250,12 @@ window.CELADON_I18N = {
       "rx3": "**自前の範囲**は上の 5 類のみ。ほかは lucide から取得します。",
       "coverCount": "数",
       "coverNames": "セマンティック名（私たち）",
-      "srcOwn": "自前"
+      "srcOwn": "自前",
+      "brandsetTitle": "3. サードパーティブランド（340 個・@lobehub/icons 由来）",
+      "brandsetNote": "モデルや提供元のロゴは **@lobehub/icons**（MIT・340 ブランド）から取得しています。**ブランドマークは各社の商標ルールに従い公式色のまま**で、当サイトで**トークン以外の色を使ってよい唯一の場所**です。暗い背景では**モノ変体**に切り替えてください。",
+      "brandSearch": "ブランドを検索（deepseek / openai など）",
+      "brandColor": "公式色",
+      "brandMono": "モノ"
     }
   },
   "zh-CN": {
@@ -1807,7 +1817,7 @@ window.CELADON_I18N = {
       "count": "",
       "coverTitle": "覆盖度（按分类）",
       "coverCat": "分类",
-      "specTitle": "三 · 用法与自绘规范",
+      "specTitle": "四 · 用法与自绘规范",
       "specNote": "默认**从 lucide 取**；只有下面 5 类才自绘，且自绘也必须画在 **24 网格 / 2px** 上 —— 混排才不会脏。",
       "r1": "**先找后用**：需要图标时先去 lucide 找语义最近的一个，找到就用，不要另画。",
       "r2": "**命名照旧**：我们的语义名 `i-<域>-<名>`，与 lucide 名一一对应，记在 `icons/manifest.json`。",
@@ -1869,7 +1879,12 @@ window.CELADON_I18N = {
       "rx3": "**自绘范围**只限上面的 5 类；其余一律从 lucide 取。",
       "coverCount": "数量",
       "coverNames": "语义名（我们的命名）",
-      "srcOwn": "自建"
+      "srcOwn": "自建",
+      "brandsetTitle": "三 · 第三方品牌（340 个 · 来源 @lobehub/icons）",
+      "brandsetNote": "模型与厂商 logo 取自 **@lobehub/icons**（MIT · 340 个品牌 · [lobehub.com/icons](https://lobehub.com/icons)）。**品牌图标按各品牌商标规范保留官方色** —— 这是全站**唯一允许不使用我们 token 的颜色**；**深色底请切「单色」变体**。logo 的商标权归各品牌方，仅用于标识对应模型或服务。",
+      "brandSearch": "搜索品牌（deepseek / openai / 通义…）",
+      "brandColor": "官方色",
+      "brandMono": "单色"
     }
   },
   "zh-TW": {
@@ -2431,7 +2446,7 @@ window.CELADON_I18N = {
       "count": "",
       "coverTitle": "覆蓋度（依分類）",
       "coverCat": "分類",
-      "specTitle": "三 · 用法與自繪規範",
+      "specTitle": "四 · 用法與自繪規範",
       "specNote": "預設**從 lucide 取**；只有下面 5 類才自繪，且自繪也必須畫在 **24 網格 / 2px** 上。",
       "r1": "**先找後用**：需要圖示時先去 lucide 找語意最近的一個，找到就用。",
       "r2": "**命名照舊**：語意名 `i-<域>-<名>` 與 lucide 名一一對應，記在 `icons/manifest.json`。",
@@ -2493,7 +2508,12 @@ window.CELADON_I18N = {
       "rx3": "**自繪範圍**只限上面 5 類；其餘一律取自 lucide。",
       "coverCount": "數量",
       "coverNames": "語意名（我們的命名）",
-      "srcOwn": "自建"
+      "srcOwn": "自建",
+      "brandsetTitle": "三 · 第三方品牌（340 個 · 來源 @lobehub/icons）",
+      "brandsetNote": "模型與廠商 logo 取自 **@lobehub/icons**（MIT · 340 個品牌）。**品牌圖示依各品牌商標規範保留官方色** —— 這是全站**唯一允許不使用我們 token 的顏色**；**深色底請切「單色」變體**。",
+      "brandSearch": "搜尋品牌（deepseek / openai / 通義…）",
+      "brandColor": "官方色",
+      "brandMono": "單色"
     }
   }
 };

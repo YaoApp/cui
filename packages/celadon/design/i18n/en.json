@@ -557,7 +557,7 @@
     "count": "",
     "coverTitle": "Coverage by group",
     "coverCat": "Group",
-    "specTitle": "3. Usage and drawing rules",
+    "specTitle": "4. Usage and drawing rules",
     "specNote": "Take from **lucide** by default. Only these five cases are drawn by us, and they still go on the **24 grid with a 2 stroke** so mixed icons stay consistent.",
     "r1": "**Look first**: when you need an icon, find the closest meaning in lucide and use it. Do not draw a new one.",
     "r2": "**Names stay ours**: `i-<domain>-<name>`, mapped one to one with the lucide name in `icons/manifest.json`.",
@@ -619,6 +619,11 @@
     "rx3": "**Hand drawing** is limited to the five cases above; everything else comes from lucide.",
     "coverCount": "Count",
     "coverNames": "Semantic names (ours)",
-    "srcOwn": "ours"
+    "srcOwn": "ours",
+    "brandsetTitle": "3. Third party brands (340, from @lobehub/icons)",
+    "brandsetNote": "Model and vendor logos come from **@lobehub/icons** (MIT, 340 brands). **Brand marks keep their official colours** as their trademark rules require, which makes them the **only place on this site allowed to use a colour that is not one of our tokens**; on a dark surface switch to the **mono** variant. The logos are trademarks of their owners and identify the corresponding models or services.",
+    "brandSearch": "Search brands, try deepseek or openai",
+    "brandColor": "Official colour",
+    "brandMono": "Mono"
   }
 }
