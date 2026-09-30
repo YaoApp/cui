@@ -43,18 +43,28 @@
   --background-surface: #FFFFFF;
   --background-field: #F4F4F5;
   --background-hover: #F0F0F2;
+  --background-active: #E8E8EB;
+  /* 按下态底（中性控件） */
   --background-selected: #ECF3F3;
   /* 选中底 = 品牌浅底 */
+  --background-readonly: #EDEDF0;
+  /* 只读字段底（比 --background-field 略深 → 明确「不可编辑」）；文字用 --text-secondary */
   --border-subtle: #ECECEE;
   /* 装饰线 */
   --border-default: #DEDEE1;
   /* 常规边界 */
   --border-control: #CACACD;
   /* 控件边界 */
+  --border-hover: #A0A0A8;
+  /* 控件悬停边界（比 --border-control 深一档） */
   --text-primary: #0A0A0A;
   --text-secondary: #5C5C63;
-  --text-tertiary: #7A7A82;
+  --text-tertiary: #6F6F76;
+  /* 已在 --background-field(#F4F4F5) 上 4.54:1 ✓ AA（原 #7A7A82 仅 3.87:1，不达标） */
+  --text-placeholder: var(--text-tertiary);
+  /* 输入占位文字：与三级文字同色（单一来源）；**不要用 --text-muted**（仅 2.15:1，只能做装饰） */
   --text-muted: #A8A8B0;
+  /* 仅装饰/分隔线，不承载文字信息 */
   /* ===== 品牌 · 青 #2A7B7B ===== */
   --brand: #2A7B7B;
   /* 真实内容底(#FAFAFB) 4.77:1 ✓ AA */
@@ -77,10 +87,11 @@
   --focus-ring-offset: 2px;
   /* ring 与控件留 2px 间隙 */
   --focus-ring: 0 0 0 var(--focus-ring-offset) var(--background-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
-  --disabled-background: #F0F0F2;
-  --disabled-text: #A8A8B0;
+  --background-disabled: #F0F0F2;
+  /* 命名与 background-* 家族一致 */
+  --text-disabled: #A8A8B0;
   /* 禁用态豁免对比度要求 */
-  --disabled-border: #E4E4E7;
+  --border-disabled: #E4E4E7;
   --scrim: rgba(10, 10, 10, 0.32);
   /* 弹窗/抽屉遮罩 */
   /* ===== 警示 · 淡琥珀（不像 error）===== */
@@ -164,10 +175,13 @@
   --background-surface: #161616;
   --background-field: #1E1E1E;
   --background-hover: #242424;
+  --background-active: #2A2A2A;
   --background-selected: #16292A;
+  --background-readonly: #1A1A1A;
   --border-subtle: #262626;
   --border-default: #333333;
   --border-control: #424242;
+  --border-hover: #565656;
   --text-primary: #F5F5F5;
   --text-secondary: #B4B4B4;
   --text-tertiary: #949494;
@@ -183,9 +197,9 @@
   --brand-lift: #389F9F;
   /* 暗色：焦点环改用提亮档，否则在近黑上看不见 */
   --focus-ring-color: var(--brand-lift);
-  --disabled-background: #1A1A1A;
-  --disabled-text: #5A5A5A;
-  --disabled-border: #2A2A2A;
+  --background-disabled: #1A1A1A;
+  --text-disabled: #5A5A5A;
+  --border-disabled: #2A2A2A;
   --scrim: rgba(0, 0, 0, 0.56);
   --warm: #C4A767;
   --warm-soft: #2C2718;
@@ -239,9 +253,9 @@
 [data-theme] .celadon .btn-primary:disabled,
 .celadon .btn-primary.is-disabled,
 [data-theme] .celadon .btn-primary.is-disabled {
-  background: var(--disabled-background);
-  color: var(--disabled-text);
-  border-color: var(--disabled-border);
+  background: var(--background-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-disabled);
 }
 .celadon .btn-ghost,
 [data-theme] .celadon .btn-ghost {
@@ -310,9 +324,9 @@
 }
 .celadon .input:disabled,
 [data-theme] .celadon .input:disabled {
-  background: var(--disabled-background);
-  color: var(--disabled-text);
-  border-color: var(--disabled-border);
+  background: var(--background-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-disabled);
 }
 .celadon .focusable:focus-visible,
 [data-theme] .celadon .focusable:focus-visible {
