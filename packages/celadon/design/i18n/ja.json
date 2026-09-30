@@ -537,7 +537,7 @@
     "d3": "ブランド色以外に変えない",
     "d4": "マークを画面アイコンに使わない",
     "setTitle": "2. アイコン一式（68 個）",
-    "setNote": "画面アイコンは **lucide**（24 グリッド・ISC）から。**ブランドマーク `i-yaoagents` は自前**で、同じ 24 グリッドに描いています。",
+    "setNote": "画面アイコンは **lucide**（24 グリッド・ISC）。**自前のブランドマーク**は `brand-yao-agents` と `brand-yao`（太極）で、サードパーティブランドと同じ族として先頭に並びます。",
     "spWhat": "項目",
     "spValue": "値",
     "spGrid": "グリッド",
@@ -626,7 +626,6 @@
     "brandSearch": "ブランドを検索（deepseek / openai など）",
     "brandColor": "公式色",
     "brandMono": "モノ",
-    "brandOwn": "Yao Agents（自前）",
     "coverBrandNote": "自前 {own} 個（`i-yaoagents`）+ サードパーティ {third} 個（`brand-*`、別スプライトを外部参照）"
   }
 }
