@@ -64,7 +64,7 @@
   --text-placeholder: var(--text-tertiary);
   /* 输入占位文字：与三级文字同色（单一来源）；**不要用 --text-muted**（仅 2.15:1，只能做装饰） */
   --text-muted: #A8A8B0;
-  /* 仅装饰/分隔线，不承载文字信息 */
+  /* **纯装饰**（分隔符/水印）；承载文字请用 --text-tertiary（4.78:1 ✓ AA） */
   /* ===== 品牌 · 青 #2A7B7B ===== */
   --brand: #2A7B7B;
   /* 真实内容底(#FAFAFB) 4.77:1 ✓ AA */
@@ -189,6 +189,7 @@
   --text-secondary: #B4B4B4;
   --text-tertiary: #949494;
   --text-muted: #6E6E6E;
+  /* 纯装饰 */
   --brand: #2A7B7B;
   --brand-hover: #338F8F;
   --brand-active: #3FA3A3;

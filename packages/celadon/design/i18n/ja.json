@@ -207,7 +207,7 @@
       "textSecondary": "副テキスト",
       "textTertiary": "第三階層",
       "textPlaceholder": "入力プレースホルダー（第三階層テキストと同色）",
-      "textMuted": "プレースホルダー/弱化",
+      "textMuted": "装飾専用（区切り・透かし。文字には使わない）",
       "success": "成功（伝統色）",
       "successSoft": "成功の淡色",
       "warning": "警告（--warm の別名）",
@@ -272,7 +272,8 @@
       "line": "境界線",
       "overlay": "オーバーレイ",
       "dark": "暗色のみ",
-      "exempt": "無効（免除）"
+      "exempt": "無効（免除）",
+      "deco": "装飾"
     },
     "gradeAaa": "AAA",
     "gradeAa": "AA",
