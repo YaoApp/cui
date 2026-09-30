@@ -54,7 +54,7 @@
 | 层级 | `--shadow-subtle/floating/overlay` + `--z-base/raised/sticky/overlay/modal/toast/tooltip` | L0 无 · L1 卡片 · L2 浮层 · L3 弹窗（配 `--scrim`）|
 | 动效 | `--duration-fast/base/slow`（三档：quiet 80/140/220 · 默认 120/200/320 · rich 180/300/480）+ `--easing-standard/decelerate/accelerate` | 微反馈 fast · 常规 base · 大位移 slow；进场 decelerate、退场 accelerate |
 | 动效强度（两级） | ① **`prefers-reduced-motion` = 总开关**（时长归零，`*{…!important}`，任何局部覆盖不掉）② 场景级：容器加 `.motion-quiet` / `.motion-rich` / `.motion-still` | 局部指定随继承生效；全局默认标准 |
-| 窗口与栅格（非独占优先） | 默认 **1280×800 两列**（第三列默认关）· 推荐 `1440×900` · 建议区间 `1280–1920` · 绝对最小 `480×600`；**阈值 = 各栏最小宽之和**：`--threshold-side-dock` `1144`(=240+560+320+24) · `--threshold-nav-rail` `648` · `--threshold-min` `464` | 让位顺序：侧板 → 次要信息 → 导航(完整→图标轨→浮层) → 内容列 → 留白；高度方向：副标题 → 工具条 → **底栏最后** |
+| 三栏竖分割（导航区 \| 内容区 \| 侧栏） | 导航 `--nav-min` `264` / `--nav-max` `420` / `--nav-default` `280` / 收起 `--nav-collapsed` `56` · 中栏 `--center-min` `400` · 侧栏 `--side-min` `300` / 上限 `--side-max-ratio` `0.7` / 默认 `--side-default-ratio` `0.45` · 自动收轨 `--nav-auto-collapse` `1024` · 窗口 `1280×820`，最小 `520×600` | **竖分割 grid 三栏**（不是横向条带）；让位顺序：**侧栏先缩 → 侧栏整条消失 → 中栏才低于最小**，**导航不参与宽度让步**（<1024 自动收轨，手动展开=覆盖中栏）；屏幕兼容靠**比例默认 + 视口 CSS px**（4K@200% 与 1080p 同构） |
 
 | 边框 | `--border-control` + `--border-control-strong` | 默认弱边界（观感）；高对比偏好自动切达标档（1.4.11 要 3:1） |
 
