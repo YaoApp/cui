@@ -238,7 +238,7 @@
       "shadowFloating": "浮层",
       "fontFamilyUi": "界面字体（拉丁 + 兜底）",
       "fontFamilyMonospace": "等宽字体",
-      "brandInk": "品牌色文字/图标（软底 4.8:1，暗色自动切提亮档）"
+      "brandInk": "品牌色文字/图标（浅底按钮 · 选中底 · 气泡；软底 4.8:1，暗色自动切提亮档）"
     },
     "group": {
       "brand": "品牌",

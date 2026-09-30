@@ -240,7 +240,7 @@ window.CELADON_I18N = {
         "shadowFloating": "Floating layer",
         "fontFamilyUi": "UI font (Latin + fallback)",
         "fontFamilyMonospace": "Monospace font",
-        "brandInk": "Brand-coloured text/icons (4.8:1 on soft fill; auto-lifts in dark)"
+        "brandInk": "Brand text/icons (soft button, selected row, bubble; 4.8:1 on the soft fill, switches to the lifted tone in dark)"
       },
       "group": {
         "brand": "Brand",
@@ -511,7 +511,7 @@ window.CELADON_I18N = {
         "shadowFloating": "フローティング",
         "fontFamilyUi": "UI フォント（欧文 + フォールバック）",
         "fontFamilyMonospace": "等幅フォント",
-        "brandInk": "ブランド色の文字/アイコン（淡色地 4.8:1、ダークでは自動で提亮）"
+        "brandInk": "ブランド色の文字/アイコン（淡色ボタン・選択行・バブル。淡色地で 4.8:1、暗色では自動で明るい方に切替）"
       },
       "group": {
         "brand": "ブランド",
@@ -782,7 +782,7 @@ window.CELADON_I18N = {
         "shadowFloating": "浮层",
         "fontFamilyUi": "界面字体（拉丁 + 兜底）",
         "fontFamilyMonospace": "等宽字体",
-        "brandInk": "品牌色文字/图标（软底 4.8:1，暗色自动切提亮档）"
+        "brandInk": "品牌色文字/图标（浅底按钮 · 选中底 · 气泡；软底 4.8:1，暗色自动切提亮档）"
       },
       "group": {
         "brand": "品牌",
@@ -1053,7 +1053,7 @@ window.CELADON_I18N = {
         "shadowFloating": "浮層",
         "fontFamilyUi": "介面字體（拉丁 + 後備）",
         "fontFamilyMonospace": "等寬字體",
-        "brandInk": "品牌色文字/圖示（淺底 4.8:1，深色自動切提亮檔）"
+        "brandInk": "品牌色文字/圖示（淺底按鈕 · 選取底 · 氣泡；軟底 4.8:1，暗色自動切提亮檔）"
       },
       "group": {
         "brand": "品牌",

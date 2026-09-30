@@ -309,7 +309,7 @@
 .celadon .nav-item.is-active,
 [data-theme] .celadon .nav-item.is-active {
   background: var(--brand-soft);
-  color: var(--brand);
+  color: var(--brand-ink);
 }
 .celadon .badge-brand,
 [data-theme] .celadon .badge-brand {
@@ -358,7 +358,7 @@
 .celadon .input.is-focus,
 [data-theme] .celadon .input.is-focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 var(--focus-ring-width) var(--brand);
+  box-shadow: 0 0 0 1px var(--brand);
   outline: none;
 }
 .celadon .input:read-only,
@@ -393,7 +393,7 @@
 }
 .celadon .input.is-error.is-focus,
 [data-theme] .celadon .input.is-error.is-focus {
-  box-shadow: 0 0 0 var(--focus-ring-width) var(--danger);
+  box-shadow: 0 0 0 1px var(--danger);
 }
 .celadon .input:disabled,
 [data-theme] .celadon .input:disabled {
@@ -409,23 +409,4 @@
 .celadon .scrim,
 [data-theme] .celadon .scrim {
   background: var(--scrim);
-}
-.celadon[data-theme='dark'] .btn-primary,
-[data-theme='dark'] .celadon .btn-primary {
-  color: var(--brand-lift);
-  border-color: var(--brand-lift);
-}
-.celadon[data-theme='dark'] .nav-item.is-active,
-[data-theme='dark'] .celadon .nav-item.is-active {
-  color: var(--brand-lift);
-}
-.celadon[data-theme='dark'] .badge-brand,
-[data-theme='dark'] .celadon .badge-brand {
-  color: var(--brand-lift);
-  border-color: var(--brand-lift);
-}
-.celadon[data-theme='dark'] .avatar,
-[data-theme='dark'] .celadon .avatar {
-  color: var(--brand-lift);
-  border-color: var(--brand-lift);
 }
