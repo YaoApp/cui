@@ -33,6 +33,15 @@
 .celadon:lang(ja-JP) {
   --font-family-ui: var(--font-family-ui-japanese);
 }
+/* ===== 断点（唯一来源）=====
+ * 媒体查询里**不能**使用 CSS `var()`，所以断点写成 LESS 变量，由构建期展开。
+ * 同时导出为 CSS 变量 `--bp-*`，仅供展示/JS 读取，**不用于媒体查询**。
+ * 桌面应用优先：最小支持宽度 1024px（壳层据此设最小窗口）。
+ */
+/* ≥ 1024 才算可用；更窄应由壳层阻止 */
+/* ≥ 1024：导航收图标轨，侧板变浮层 */
+/* ≥ 1200：三列（导航 + 内容 + 侧板） */
+/* ≥ 1440：侧板加宽；≥ 1800：内容最大宽放开 */
 .celadon,
 [data-theme] .celadon {
   /* ===== 中性（近白）===== */
@@ -155,7 +164,7 @@
   --font-size-16: 16px;
   --font-size-17: 17px;
   --font-size-20: 20px;
-  /* ===== 间距 Spacing（4 的倍数；禁魔法数字）=====
+  /* ===== 间距 Spacing（4 基数列，另设 2/6 两个细档用于发丝缝与紧凑控件内距；禁魔法数字）=====
      用法：组件内距 4/6/8/12 · 元素间 8/12/16 · 区块间 24/32/48 · 栅格槽宽 16/24 */
   --spacing-2: 2px;
   --spacing-4: 4px;
@@ -207,6 +216,26 @@
   --z-modal: 1100;
   --z-toast: 1200;
   --z-tooltip: 1300;
+  /* ===== 栅格与响应式 Grid（断点见文件顶部 LESS 变量；以下是尺寸）===== */
+  --bp-compact: 1024px;
+  --bp-regular: 1200px;
+  --bp-wide: 1440px;
+  --bp-ultra: 1800px;
+  /* 仅展示/JS 读取 */
+  --nav-width: 240px;
+  --nav-rail-width: 64px;
+  /* 导航：完整 / 图标轨 */
+  --side-width: 320px;
+  --side-width-wide: 360px;
+  /* 侧板：常规 / 宽屏 */
+  --content-max: 880px;
+  --content-max-wide: 1040px;
+  /* 内容最大宽（居中） */
+  --grid-columns: 12;
+  --grid-gutter: var(--spacing-24);
+  --grid-margin: var(--spacing-24);
+  --page-min-width: 1024px;
+  --page-min-height: 640px;
   /* ===== 边框 Border：强边界档（WCAG 1.4.11 达标值）=====
      默认态用 --border-control（观感轻）；高对比偏好下由下方 @media 自动切到强边界。
      达标实测：内容底 3.31 / 字段底 3.14 */

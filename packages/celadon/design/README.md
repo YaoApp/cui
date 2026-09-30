@@ -54,6 +54,7 @@
 | 层级 | `--shadow-subtle/floating/overlay` + `--z-base/raised/sticky/overlay/modal/toast/tooltip` | L0 无 · L1 卡片 · L2 浮层 · L3 弹窗（配 `--scrim`）|
 | 动效 | `--duration-fast/base/slow`（三档：quiet 80/140/220 · 默认 120/200/320 · rich 180/300/480）+ `--easing-standard/decelerate/accelerate` | 微反馈 fast · 常规 base · 大位移 slow；进场 decelerate、退场 accelerate |
 | 动效强度（两级） | ① **`prefers-reduced-motion` = 总开关**（时长归零，`*{…!important}`，任何局部覆盖不掉）② 场景级：容器加 `.motion-quiet` / `.motion-rich` / `.motion-still` | 局部指定随继承生效；全局默认标准 |
+| 栅格与响应式 | 断点 LESS 变量 `1024 / 1200 / 1440 / 1800` + 尺寸 `--nav-width` `240` · `--nav-rail-width` `64` · `--side-width` `320/360` · `--content-max` `880/1040` · `--grid-columns` `12` · `--page-min-width` `1024` | 导航 ≥1200 完整 / <1200 图标轨；侧板 ≥1440 常驻 / <1440 浮层；内容始终居中；最小窗口 1024×640 |
 | 边框 | `--border-control` + `--border-control-strong` | 默认弱边界（观感）；高对比偏好自动切达标档（1.4.11 要 3:1） |
 
 ## 组件草图与状态
