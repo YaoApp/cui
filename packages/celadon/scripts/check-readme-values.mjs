@@ -10,7 +10,14 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const here = dirname(fileURLToPath(import.meta.url))
+/* 本脚本住在 scripts/，目标资产在 ../design/ —— 统一切到那里作为工作目录，
+   这样下面所有相对路径（icons/… · *.html · tokens.less · i18n/…）都继续成立，
+   并且从任何目录调用都不会出错。 */
+const DESIGN = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'design')
+process.chdir(DESIGN)
+
+
+const here = DESIGN
 const tokens = readFileSync(resolve(here, 'tokens.css'), 'utf8')
 const readme = readFileSync(resolve(here, 'README.md'), 'utf8')
 

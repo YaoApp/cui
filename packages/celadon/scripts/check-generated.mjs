@@ -3,11 +3,20 @@
    曾经出现"改了 own-sprite.svg 但忘了重跑，页面里还是旧副本"的问题，这里把它变成可检查的：
    跑一遍 build-icons.mjs，如果产物有变化，就说明仓库里的生成物是旧的。 */
 import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
+
+/* 本脚本住在 scripts/，目标资产在 ../design/ —— 统一切到那里作为工作目录，
+   这样下面所有相对路径（icons/… · *.html · tokens.less · i18n/…）都继续成立，
+   并且从任何目录调用都不会出错。 */
+const DESIGN = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'design')
+process.chdir(DESIGN)
+
 const GENERATED = ['icons.html', 'mock.html'];   /* build-icons.mjs 的产物 */
 const files = ['icons.html', 'mock.html', 'index.html'];   /* 颜色类检查覆盖三张规范页 */
 const before = GENERATED.map((f) => readFileSync(f, 'utf8'));
-execFileSync('node', ['build-icons.mjs'], { stdio: 'pipe' });
+execFileSync('node', [resolve(dirname(fileURLToPath(import.meta.url)), 'build-icons.mjs')], { stdio: 'pipe' });
 const stale = GENERATED.filter((f, i) => readFileSync(f, 'utf8') !== before[i]);
 if (stale.length) {
   console.log(`  ✗ 生成物是旧的：${stale.join(', ')} —— 请把 build-icons.mjs 的结果一并提交`);

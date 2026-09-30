@@ -8,8 +8,15 @@
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, writeFileSync, readdirSync, existsSync, cpSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { createRequire } from 'node:module';
+
+/* 本脚本住在 scripts/，目标资产在 ../design/ —— 统一切到那里作为工作目录，
+   这样下面所有相对路径（icons/… · *.html · tokens.less · i18n/…）都继续成立，
+   并且从任何目录调用都不会出错。 */
+const DESIGN = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'design')
+process.chdir(DESIGN)
+
 
 const VERSION = '5.21.0';
 const ALIAS = {
