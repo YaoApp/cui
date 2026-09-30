@@ -105,7 +105,7 @@ window.CELADON_I18N = {
       },
       "message": {
         "user1": "Hi — could you review these two documents? Focus on the risk clauses in the contract.",
-        "agent1Html": "I have read both. I found <b>3 risks</b> in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
+        "agent1Html": "I have read both. I found **3 risks** in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
         "agent2": "Summarized by risk first, with the source clause and page numbers."
       },
       "tool": {
@@ -437,13 +437,13 @@ window.CELADON_I18N = {
         "sideDefaultNote": "first open",
         "screenTitle": "Screen compatibility (4K and 1080p share one set)",
         "s1": "Thresholds are judged in **viewport CSS px**, which already include system scaling: 4K at 200% is about 1920 CSS px, the same as a 1080p display, so one set of rules reads correctly on both.",
-        "s2": "Column widths use **a default per view type** (reading 400, tool 600, task 640, wide 840) and are then held by a **70% of frame cap**, so they grow on large displays and shrink on small ones.",
+        "s2": "Column widths use **a default per view type** (reading 400, tool 600, task 640, wide 840) and are then held by **total width minus navigation, content minimum and handle**, so they grow on large displays and shrink on small ones.",
         "s3": "The window only carries a default and a minimum (and remembers the last size). When height runs short the secondary toolbar goes and the **footer stays**.",
         "winDefault": "Default window",
         "winMin": "Minimum window",
         "demo": "Three column demo (drag the viewport, drag the columns, toggle)",
         "orderTitle": "Give way order (the most expensive goes first)",
-        "o1": "The side column **shrinks first**, clamped between 300 and 70% of the frame.",
+        "o1": "The side column **shrinks first**, clamped between 300 and whatever space is actually left.",
         "o2": "The side column then **loses its track entirely**: below 300 of remaining space it is simply not opened rather than squeezed.",
         "o3": "**Only then may the centre drop below its minimum** of 400, and only once that track is gone.",
         "o4": "The **navigation never concedes width**: below 1024 viewport it auto collapses to a 56px icon rail, and a manual expand **overlays** the centre instead of squeezing it.",
@@ -512,7 +512,7 @@ window.CELADON_I18N = {
         "nr3c": "Web drawer: a **hamburger in the content top row**",
         "nr3d": "Transient (Esc or the scrim closes it)",
         "railNote": "There is **no title bar**: three vertical columns, each with its own top row. Only the traffic lights and the toggle float in the top left corner, and they never move",
-        "sideMaxFormula": "<b>total width - (navigation + centre minimum + handle)</b>: drag freely up to that limit, no hard coded ratio",
+        "sideMaxFormula": "**total width - (navigation + centre minimum + handle)**: drag freely up to that limit, no hard coded ratio",
         "cap": "cap ",
         "px": "px",
         "sideHint": "Drag the right edge of the content to resize the side column"
@@ -624,7 +624,7 @@ window.CELADON_I18N = {
       },
       "message": {
         "user1": "こんにちは。この 2 つのドキュメントを確認してもらえますか？契約書のリスク条項が中心です。",
-        "agent1Html": "両方読みました。契約書に<b>リスクが 3 件</b>あります：① 第 4.2 条 支払期間に上限がない；② 第 7 条 責任が不均衡；③ 別紙 2 に署名欄がない。",
+        "agent1Html": "両方読みました。契約書に**リスクが 3 件**あります：① 第 4.2 条 支払期間に上限がない；② 第 7 条 責任が不均衡；③ 別紙 2 に署名欄がない。",
         "agent2": "リスク優先で要約し、根拠条項とページを付記しました。"
       },
       "tool": {
@@ -956,13 +956,13 @@ window.CELADON_I18N = {
         "sideDefaultNote": "初回表示",
         "screenTitle": "画面互換（4K と 1080p で同一）",
         "s1": "しきい値は**ビューポート CSS px**（システム拡大率込み）で判定します。4K@200% は約 1920 CSS px で 1080p と同じになるため、同じ規則が両方で成立します。",
-        "s2": "カラム幅は**ビュー種別の既定幅**（閲覧 400 / ツール 600 / タスク 640 / ワイド 840）を使い、さらに**画面の 70% 上限**で押さえます。大画面では広く、小画面では狭くなります。",
+        "s2": "カラム幅は**ビュー種別の既定幅**（閲覧 400 / ツール 600 / タスク 640 / ワイド 840）を使い、さらに**全体幅 −（ナビ + 内容の最小 + ハンドル）**で押さえます。大画面では広く、小画面では狭くなります。",
         "s3": "ウィンドウは既定値と最小値のみ（前回サイズを記憶）。高さが足りないときは副次ツールバーを畳み、**フッターは残します**。",
         "winDefault": "既定ウィンドウ",
         "winMin": "最小ウィンドウ",
         "demo": "3 カラム演示（ビューポート / 幅 / 開閉を操作）",
         "orderTitle": "譲る順番（コストが大きい方から）",
-        "o1": "サイドが**先に縮みます**：最小 300 と画面 70% の間でクランプ。",
+        "o1": "サイドが**先に縮みます**：最小 300 と実際に残っている空間の間でクランプします。",
         "o2": "次にサイドは**トラックごと消えます**：残りが 300 未満なら狭めずに開きません。",
         "o3": "**その後にようやく中央が最小 400 を下回り得ます**。",
         "o4": "**ナビは幅を譲りません**：ビューポート 1024 未満で 56px のアイコンレールに自動収納。手動展開は中央を**オーバーレイ**し、押しつぶしません。",
@@ -1031,7 +1031,7 @@ window.CELADON_I18N = {
         "nr3c": "Web のドロワー時：内容の上段に**ハンバーガー**",
         "nr3d": "一時的（Esc かスクリムで閉じる）",
         "railNote": "**タイトルバーはありません**：3 つの縦カラムがそれぞれ上段を持ちます。左上に浮くのは信号機と切替ボタンだけで、位置は決して変わりません",
-        "sideMaxFormula": "<b>全体幅 −（ナビ + 内容の最小 + ハンドル）</b>。この上限まで自由にドラッグでき、比率は固定しません",
+        "sideMaxFormula": "**全体幅 −（ナビ + 内容の最小 + ハンドル）**。この上限まで自由にドラッグでき、比率は固定しません",
         "cap": "上限値 ",
         "px": "px",
         "sideHint": "内容の右端をドラッグしてサイド幅を調整"
@@ -1143,7 +1143,7 @@ window.CELADON_I18N = {
       },
       "message": {
         "user1": "你好，能帮我看看这两份文档吗？重点是合同里的风险条款。",
-        "agent1Html": "两份都读完了。合同里我找到 <b>3 处风险</b>：① 第 4.2 条付款周期无上限；② 第 7 条违约责任不对等；③ 附件二缺失签章页。",
+        "agent1Html": "两份都读完了。合同里我找到 **3 处风险**：① 第 4.2 条付款周期无上限；② 第 7 条违约责任不对等；③ 附件二缺失签章页。",
         "agent2": "已按风险优先输出，并标注了依据条款页码。"
       },
       "tool": {
@@ -1475,13 +1475,13 @@ window.CELADON_I18N = {
         "sideDefaultNote": "首次打开",
         "screenTitle": "屏幕兼容（4K 与 1080p 同一套）",
         "s1": "阈值按**视口 CSS px** 判定（已含系统缩放）：4K@200% ≈ 1920 CSS px，与 1080p 的 1920 同构，因此同一套规则都合理。",
-        "s2": "栏宽用**视图类型的默认宽**（阅读 400 / 工具 600 / 任务 640 / 宽屏 840），再被**画面 70% 上限**兜住 —— 大屏自动更宽，小屏自动更窄。",
+        "s2": "栏宽用**视图类型的默认宽**（阅读 400 / 工具 600 / 任务 640 / 宽屏 840），再被**总宽 −（导航区 + 内容区最小 + 把手）**兜住 —— 大屏自动更宽，小屏自动更窄。",
         "s3": "窗口只给默认/最小值（记住用户上次尺寸）；高度不足时收起次级工具条，**底栏保留**。",
         "winDefault": "默认窗口",
         "winMin": "最小窗口",
         "demo": "三栏竖分割演示（拖视口 / 拖栏宽 / 开关）",
         "orderTitle": "让位顺序（代价最大的先丢）",
-        "o1": "侧栏**先缩**：在最小 300 与画面 70% 之间夹取。",
+        "o1": "侧栏**先缩**：在最小 300 与**可用空间上限**之间夹取。",
         "o2": "侧栏**整条消失**：剩余空间不足 300 时直接不开（不是压窄）。",
         "o3": "**中栏才可能低于最小**（400）：只在侧栏整条已被移除之后。",
         "o4": "**导航栏不参与宽度让步**：视口 < 1024 时自动收成 56px 图标轨；手动展开则**覆盖**中栏（浮层），不挤压它。",
@@ -1550,7 +1550,7 @@ window.CELADON_I18N = {
         "nr3c": "Web 抽屉态：内容顶行的**汉堡按钮**",
         "nr3d": "临时（Esc / 点遮罩关闭）",
         "railNote": "**没有标题栏**：三栏竖切，每栏各自的顶行；窗口左上角只浮着\"红绿灯 + 收起键\"，位置永不移动",
-        "sideMaxFormula": "<b>总宽 −（导航区 + 内容区最小 + 把手）</b> —— 可自由拖拽到此上限，不写死比例",
+        "sideMaxFormula": "**总宽 −（导航区 + 内容区最小 + 把手）** —— 可自由拖拽到此上限，不写死比例",
         "cap": "上限 ",
         "px": "px",
         "sideHint": "拖内容区右边缘调整侧栏宽度"
@@ -1662,7 +1662,7 @@ window.CELADON_I18N = {
       },
       "message": {
         "user1": "你好，能幫我看看這兩份文件嗎？重點是合約裡的風險條款。",
-        "agent1Html": "兩份都讀完了。合約裡我找到 <b>3 處風險</b>：① 第 4.2 條付款週期無上限；② 第 7 條違約責任不對等；③ 附件二缺少簽章頁。",
+        "agent1Html": "兩份都讀完了。合約裡我找到 **3 處風險**：① 第 4.2 條付款週期無上限；② 第 7 條違約責任不對等；③ 附件二缺少簽章頁。",
         "agent2": "已依風險優先輸出，並標註了依據條款頁碼。"
       },
       "tool": {
@@ -1994,13 +1994,13 @@ window.CELADON_I18N = {
         "sideDefaultNote": "首次開啟",
         "screenTitle": "螢幕相容（4K 與 1080p 同一套）",
         "s1": "門檻按**視口 CSS px** 判定（已含系統縮放）：4K@200% ≈ 1920 CSS px，與 1080p 的 1920 同構，因此同一套規則都合理。",
-        "s2": "欄寬用**檢視類型的預設寬**（閱讀 400 / 工具 600 / 任務 640 / 寬螢幕 840），再被**畫面 70% 上限**兜住 —— 大螢幕自動更寬，小螢幕自動更窄。",
+        "s2": "欄寬用**檢視類型的預設寬**（閱讀 400 / 工具 600 / 任務 640 / 寬螢幕 840），再被**總寬 −（導覽區 + 內容區最小 + 把手）**兜住 —— 大螢幕自動更寬，小螢幕自動更窄。",
         "s3": "視窗只給預設/最小值（記住使用者上次尺寸）；高度不足時收起次級工具列，**底欄保留**。",
         "winDefault": "預設視窗",
         "winMin": "最小視窗",
         "demo": "三欄豎分割演示（拖視口 / 拖欄寬 / 開關）",
         "orderTitle": "讓位順序（代價最大的先丟）",
-        "o1": "側欄**先縮**：在最小 300 與畫面 70% 之間夾取。",
+        "o1": "側欄**先縮**：在最小 300 與**可用空間上限**之間夾取。",
         "o2": "側欄**整條消失**：剩餘空間不足 300 時直接不開（不是壓窄）。",
         "o3": "**中欄才可能低於最小**（400）：只在側欄整條已被移除之後。",
         "o4": "**導覽欄不參與寬度讓步**：視口 < 1024 時自動收成 56px 圖示軌；手動展開則**覆蓋**中欄（浮層），不擠壓它。",
@@ -2069,7 +2069,7 @@ window.CELADON_I18N = {
         "nr3c": "Web 抽屜態：內容頂列的**漢堡按鈕**",
         "nr3d": "臨時（Esc / 點遮罩關閉）",
         "railNote": "**沒有標題列**：三欄豎切，各欄有自己的頂列；視窗左上只浮著「紅綠燈 + 收合鍵」，位置永不移動",
-        "sideMaxFormula": "<b>總寬 −（導覽區 + 內容區最小 + 把手）</b> —— 可自由拖曳到此上限，不寫死比例",
+        "sideMaxFormula": "**總寬 −（導覽區 + 內容區最小 + 把手）** —— 可自由拖曳到此上限，不寫死比例",
         "cap": "上限 ",
         "px": "px",
         "sideHint": "拖曳內容區右緣調整側欄寬度"
