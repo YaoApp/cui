@@ -7,8 +7,8 @@
 <!-- 唯一来源：tokens.less → build-css.mjs → tokens.css（本页零硬编码色值） -->
 <link rel="stylesheet" href="./tokens.css">
 <style>
-body{margin: 0;background: var(--background-active);font:13px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;padding: var(--spacing-24) var(--spacing-16) var(--spacing-16);-webkit-font-smoothing:antialiased}
+body{margin: 0;background: var(--background-active);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;padding: var(--spacing-24) var(--spacing-16) var(--spacing-16);-webkit-font-smoothing:antialiased;font-size:var(--font-size-body-lg);line-height:var(--line-height-cjk);}
 [data-theme="dark"] body{background:#0B0B0B}
 svg.icon{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}  /* 24 网格原生 2；16px 显示时视觉 ≈1.33 */
 svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
@@ -28,7 +28,7 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .brand-mark .mark-head{fill:url(#mark-live)}        /* 品牌标记：渐变走 --brand-mark-*，全站一版 */
 .celadon[data-theme="dark"] .brand-mark .mark-head, [data-theme="dark"] .celadon .brand-mark .mark-head{fill:url(#mark-live)}
 .brand-name{white-space:nowrap}
-.version-badge{margin-left: auto;font:500 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-tertiary);
+.version-badge{margin-left: auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--font-size-label);font-weight:var(--font-weight-medium);line-height:var(--line-height-normal);color:var(--text-tertiary);
   background:var(--background-field);border: var(--border-width) solid var(--border-subtle);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8);letter-spacing:.02em}
 .fixed-navigation{padding: 0 var(--spacing-8);display:flex;flex-direction:column;gap: var(--spacing-4)}
 .navigation-item{height:32px;border-radius:var(--radius-small);display:flex;align-items:center;gap: var(--spacing-8);padding: 0 var(--spacing-8);color:var(--text-secondary);font-size: var(--font-size-body-lg)}
@@ -79,7 +79,7 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .date-separator::before,.date-separator::after{content:"";height:1px;background:var(--border-subtle);flex:1}
 .unread-divider{display:flex;align-items:center;gap: var(--spacing-8);color:var(--brand-ink);font-size: var(--font-size-label);font-weight:650;padding: var(--spacing-4) var(--spacing-32)}
 .unread-divider::before,.unread-divider::after{content:"";height:1px;background:var(--brand-soft);flex:1}
-.message{max-width:640px;padding: var(--spacing-8) var(--spacing-12);border-radius: var(--radius-large);font-size: var(--font-size-body-lg);line-height:1.6}
+.message{max-width:640px;padding: var(--spacing-8) var(--spacing-12);border-radius: var(--radius-large);font-size: var(--font-size-body-lg);line-height:var(--line-height-cjk)   /* 消息是中文正文，走 CJK 档 */}
 .message.is-user{align-self:flex-end;background:var(--brand-soft);color:var(--text-primary);border: var(--border-width) solid var(--border-default)}
 .message.is-agent{align-self:flex-start;background:var(--background-surface);border: var(--border-width) solid var(--border-subtle)}
 .message .message-header{display:flex;align-items:center;gap: var(--spacing-4);font-size: var(--font-size-label);color:var(--text-tertiary);margin-bottom: var(--spacing-4)}
@@ -91,7 +91,7 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .tool-card .tool-header{display:flex;align-items:center;gap: var(--spacing-8);padding: var(--spacing-8) var(--spacing-12);border-bottom: var(--border-width) solid var(--border-subtle);font-size: var(--font-size-caption);font-weight:650}
 .tool-card .tool-header .tool-name{color:var(--text-tertiary);font-weight:400;font-family:ui-monospace,Menlo,monospace;font-size: var(--font-size-label)}
 .tool-card .tool-header .status-chip{margin-left: auto;font-size: var(--font-size-label);color:var(--success);background:var(--success-soft);border: var(--border-width) solid var(--success);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8);display:flex;align-items:center;gap: var(--spacing-4)}
-.tool-card .tool-body{padding: var(--spacing-8) var(--spacing-12);background:var(--background-field);font:11.5px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-secondary)}
+.tool-card .tool-body{padding: var(--spacing-8) var(--spacing-12);background:var(--background-field);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--font-size-caption);line-height:var(--line-height-cjk);color:var(--text-secondary)}
 .question-card{align-self:flex-start;width:640px;max-width:100%;border: var(--border-width) solid var(--border-subtle);border-radius: var(--radius-large);background:var(--background-surface);padding: var(--spacing-12) var(--spacing-12)}
 .question-card .question-header{display:flex;align-items:center;gap: var(--spacing-8);font-size: var(--font-size-caption);color:var(--text-tertiary);margin-bottom: var(--spacing-8)}
 .question-card .question-header .warning-badge{margin-left: auto;color:var(--warm-text);background:var(--warm-soft);border: var(--border-width) solid var(--warm);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8);font-weight:650;font-size: var(--font-size-label)}
@@ -138,7 +138,7 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .diff-card{border: var(--border-width) solid var(--border-subtle);border-radius: var(--radius-large);overflow:hidden;background:var(--background-content)}
 .diff-card .diff-header{display:flex;align-items:center;gap: var(--spacing-8);padding: var(--spacing-8) var(--spacing-12);border-bottom: var(--border-width) solid var(--border-subtle);font-size: var(--font-size-caption);color:var(--text-secondary)}
 .diff-card .diff-header .diff-count{margin-left: auto;font-family:ui-monospace,Menlo,monospace}
-.diff-card pre{margin: 0;padding: var(--spacing-8) var(--spacing-12);font:11.5px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-secondary)}
+.diff-card pre{margin: 0;padding: var(--spacing-8) var(--spacing-12);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--font-size-caption);line-height:var(--line-height-cjk);color:var(--text-secondary)}
 .diff-added{color:var(--success)}.diff-removed{color:var(--danger)}
 .file-row{display:flex;align-items:center;gap: var(--spacing-8);font-size: var(--font-size-body);color:var(--text-secondary);padding: var(--spacing-4) 0}
 .file-row .file-size{margin-left: auto;font-size: var(--font-size-label);color:var(--text-tertiary)}
@@ -156,7 +156,7 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .toolbar button.is-active{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
 </style>
 </head>
-<body>
+<body class="celadon">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-chat" viewBox="0 0 24 24" data-src="lucide:message-circle"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" /></symbol>
 <symbol id="i-inbox" viewBox="0 0 24 24" data-src="lucide:inbox"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /> <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></symbol>
