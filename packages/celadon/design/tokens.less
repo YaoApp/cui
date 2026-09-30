@@ -295,6 +295,9 @@
     /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
     &:focus, &.is-focus { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); outline: none; }
     &:read-only, &.is-readonly { background: var(--background-readonly); color: var(--text-secondary); }
+    /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
+    &.is-strong { border-color: var(--border-control-strong);
+      &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover-strong); } }
     &.is-error { border-color: var(--danger); }
     &:disabled, &.is-disabled { background: var(--background-disabled); color: var(--text-disabled);
       border-color: var(--border-disabled); cursor: not-allowed;
