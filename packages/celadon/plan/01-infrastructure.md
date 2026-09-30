@@ -53,15 +53,6 @@
 | `pnpm`（**工具**，非依赖）| `10.34.6` | 包管理器，根 `packageManager` 锁死 |
 
 
-**不用**：`antd`（见 §1.2 的界面底座）
-
-**不需要包**：**数据请求** —— 旧仓库的 `openapi/`（71 文件）本身就建在 `fetch` 上，无 axios；
-其中流式用 `EventSource`（GET + cookie）与 fetch 流（`body.getReader()`），WebSocket 另有实现 —— 这些都不归数据缓存库管。
-
-**不需要包**：**图标** —— `00` 的 F7 已定"采用 lucide（ISC）作为源、产物为雪碧图"，
-应用侧用 `<use>` 引用 `icons/lucide-sprite.svg`（67 个符号，命名 `i-<域>-<名>`），
-**不引任何图标库依赖**
-
 **零依赖**：设计资产与检查器（`design/` · `scripts/`）不引任何运行时依赖
 
 ### 1.2 规则与约束
@@ -94,12 +85,21 @@
 | 无外壳模式 | `/iframe` 路径下**不渲染外壳**，保留 |
 | 代理 | 按上表前缀转发；**WS upgrade 用 `server.proxy` 的 `ws: true`**；SSE 三个头照旧（`Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no`）|
 
-**数据与状态**
+**数据怎么请求**
 
-- 传输用**原生 `fetch`**（不用 axios）；类型化客户端**搬旧仓库 `openapi/`**（本身建在 fetch 上）
-- **不引数据缓存库**；加载 / 错误 / 取消 / 重试由**自建小钩子**统一实现
-- **禁止**在页面里散落 `useEffect` + `fetch`
-- 状态用 **`zustand`**；不用 mobx；自研 `storex` 不复活（存储用 `persist` 中间件）
+- **传输**：原生 `fetch`（无 axios）；类型化客户端用旧仓库 **`openapi/`** 的子集
+- **鉴权**：cookie（`credentials: 'include'`）+ CSRF token → 必须**同源**，这是子路径挂载 + 代理成立的原因
+- **组件取数**：走 `openapi/` 封装，**不直接 `fetch`**；加载 / 错误 / 取消 / 重试由**自建小钩子**统一实现（**不引数据缓存库**）
+- **流式**：SSE 用 `EventSource`（GET + cookie）或 fetch 流；WebSocket 单独实现 —— 都不归缓存库管
+- **状态**用 **`zustand`**；不用 mobx；自研 `storex` 不复活（存储用 `persist` 中间件）
+
+**图标怎么使用**
+
+- **源**：**lucide**（ISC · 24 网格 · 描边 2 · 本包收录 **67 个**）；**不自绘**，仅 5 类例外（品牌标识 · 彩色文件类型徽章 · lucide 没有的语义 · 状态/过程图形 · 14px 简化版）
+- **产物**：`icons/lucide-sprite.svg` · `icons/own-sprite.svg` · `icons/brand-sprite-{1..11}.svg` · `icons/manifest.json`
+- **用法**：应用侧用 `<use>` 引用雪碧图；命名 **`i-<域>-<名>`**，与 lucide 名一一对应
+- **尺寸档**：`14 / 16 / 20 / 24`（产品默认 **16**）；小档按比例变细
+- **不引图标库依赖**；品牌官方色是**全站唯一允许不用 token 的颜色**；规格与署名见 `00` 的 F7 与 `THIRD-PARTY-NOTICES.md`
 
 **日期 · 列表 · 动效**
 
