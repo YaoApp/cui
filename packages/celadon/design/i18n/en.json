@@ -537,7 +537,7 @@
     "d3": "No colours beyond the brand colour",
     "d4": "Never use the mark as an interface icon",
     "setTitle": "2. Icon set (67, sourced from lucide)",
-    "setNote": "The icons are **no longer drawn by us**: every shape comes from **lucide** (24 grid, about 1857 icons, ISC). These 67 are the original 25 re-sourced plus 42 that were missing, each with its lucide name recorded.",
+    "setNote": "The icons are **no longer drawn by us**: every shape comes from **lucide** (24 grid, about 1857 icons, ISC), and each one records the lucide name it came from.",
     "spWhat": "Spec",
     "spValue": "Value",
     "spGrid": "Grid",
@@ -557,8 +557,6 @@
     "count": "",
     "coverTitle": "Coverage (67, all from lucide)",
     "coverCat": "Group",
-    "coverHave": "Exists",
-    "coverMiss": "Added now (42)",
     "specTitle": "3. Usage and drawing rules",
     "specNote": "Take from **lucide** by default. Only these five cases are drawn by us, and they still go on the **24 grid with a 2 stroke** so mixed icons stay consistent.",
     "r1": "**Look first**: when you need an icon, find the closest meaning in lucide and use it. Do not draw a new one.",
@@ -617,6 +615,8 @@
     "rxTitle": "Our exceptions (declared)",
     "rx1": "**Display steps 14 / 16 / 20 / 24**: lucide only designs for 24 and says nothing about small displays, so we declare **2.25 stroke across the 16px step** (about 1.5 visually), and a simplified variant at 14 where needed, still drawn on the **24 grid with a 2 stroke**.",
     "rx2": "**Naming** stays ours, `i-<domain>-<name>`, mapped to lucide names in `icons/manifest.json`.",
-    "rx3": "**Hand drawing** is limited to the five cases above; everything else comes from lucide."
+    "rx3": "**Hand drawing** is limited to the five cases above; everything else comes from lucide.",
+    "coverCount": "Count",
+    "coverNames": "Semantic names (ours)"
   }
 }

@@ -22,10 +22,11 @@ function patch(file) {
     `var SYMBOLS = [${manifest.map(m => `'${m.id}'`).join(',')}];`);
   const cover = ['nav', 'act', 'state', 'file', 'obj'].map(cat => {
     const all = manifest.filter(m => m.cat === cat).map(m => `'${m.id}'`).join(',');
-    const added = manifest.filter(m => m.cat === cat && m.added).map(m => `'${m.id}'`).join(',');
-    return `  ['${cat}', [${all}], [${added}]]`;
+    return `  ['${cat}', [${all}]]`;
   }).join(',\n');
   out = out.replace(/var COVER = \[[\s\S]*?\n\];/, `var COVER = [\n${cover}\n];`);
+  const lucideMap = 'var LUCIDE = {' + manifest.map(m => `'${m.id}':'${m.lucide}'`).join(',') + '};';
+  out = out.replace(/var LUCIDE = \{[^}]*\};/, lucideMap);
   writeFileSync(file, out);
   console.log(`  ✓ ${file}：内联 ${symbols.length} 个符号`);
 }
