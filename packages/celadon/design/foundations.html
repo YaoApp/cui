@@ -714,7 +714,8 @@ function syncGrid(){
     var gnav = document.getElementById('gnav-'+theme);
     var ggridEl = document.getElementById('ggrid-'+theme);
     if (ggridEl) ggridEl.classList.toggle('nav-none', L.navTrack === 0);   /* 轨=0：内容顶行给左上控件让位 */
-    gnav.style.width = L.navTrack === 0 ? '0px' : '';   /* 轨=0：钉成 0 宽（只剩 overflow 裁剪），不留缝隙 */
+    gnav.style.width = L.navTrack === 0 ? '0px' : '';
+    gnav.style.visibility = L.navTrack === 0 ? 'hidden' : '';   /* 轨=0：整列隐藏（列已显式定位，不会导致其他列位移） */
     gnav.classList.toggle('rail', L.navMode === 'rail');
     gnav.classList.toggle('overlay', L.navMode === 'overlay');
     gnav.classList.toggle('drawer', !!L.drawer);
