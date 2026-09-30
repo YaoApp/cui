@@ -260,7 +260,7 @@ packages/celadon/
 | --- | --- |
 | **有行为、有原生对应**（33 种 ✓）| `message`→`toast` · `Tooltip`→`tooltip` · `Modal`→`dialog` · `Button`→`button` · `Input`→`input`/`number-field` · `Form`→`form`+`field`+`fieldset` · `Select`→`select`/`combobox`/`autocomplete` · `Switch`/`Checkbox`/`Radio` · `Tabs` · `Dropdown`→`menu` · `Popconfirm`→`popover`+`alert-dialog` |
 | **纯视觉**（自己写几行 ✓）| `Spin` 49 · `Typography` 13 · `Tag` 6 · `Empty` 5 · `Space` · `Row`/`Col` · `Skeleton` · `Statistic` · `Timeline` |
-| **真要自己写 ✗** | `Table`（2 处）· `Upload`（3 处）· `DatePicker`/`TimePicker`/`RangePicker`（共 4 处，`date-fns` 是 Base UI 的 peer ✓）· `Tree`/`Cascader`/`Mentions`/`Image`/`Breadcrumb`/`Anchor`（各 1–2 处）|
+| **真要自己写 ✗** | `Table`（2 处）· `Upload`（3 处）· `DatePicker`/`TimePicker`/`RangePicker`（共 4 处，`date-fns` 是 Base UI 的**可选** peer ✓）· `Tree`/`Cascader`/`Mentions`/`Image`/`Breadcrumb`/`Anchor`（各 1–2 处）|
 
 **已知代价** ✗：`message`/`Tooltip`/`Modal` 等约有 **2700 处调用点** —— 靠**同名的薄封装**
 （`message` → `toast`，API 形状照旧）**机械替换**扛，不逐个重写逻辑。
