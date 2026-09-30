@@ -283,5 +283,78 @@
     "gradeFail": "不达标",
     "contrastLegend": "等级：AAA ≥7:1 · AA ≥4.5:1（正文标准）· 大字/图形 ≥3:1 · 不达标 <3:1；正文低于 4.5:1 不能用于正文。",
     "reasonNote": "「填充 / 边界 / 遮罩 / 仅暗色」不参与文字对比度判定（用法见「关键配对」）；「禁用豁免」按 WCAG 对禁用控件豁免。"
+  },
+  "f": {
+    "title": "Foundations · 间距 · 圆角 · 层级 · 动效 · 边框",
+    "subtitle": "P0 补齐项：所有页面的前置基线。左列浅色 / 右列暗色，数值实时读 tokens.css。",
+    "source": "单一来源：tokens.less → build-css.mjs → tokens.css。本页所有数值与颜色均实时读取，零硬编码。",
+    "langnote": "文案随语言切换；数值与颜色不随语言变化。",
+    "spacing": {
+      "title": "间距 Spacing",
+      "note": "4 的倍数；禁魔法数字。档位越大用于越外层的间距。",
+      "scale": "刻度",
+      "usage": "用法（允许档位）",
+      "example": "实例：卡片内距 16 · 标题与正文 8 · 按钮间 12",
+      "u1": "组件内距（控件 padding）",
+      "u2": "元素间（同组 gap）",
+      "u3": "区块间（section）",
+      "u4": "栅格槽宽（gutter）"
+    },
+    "radius": {
+      "title": "圆角 Radius",
+      "note": "四档，按\"元素越大圆角越大\"取值。",
+      "usage": "用法",
+      "r1": "按钮 · 输入框 · 小控件",
+      "r2": "卡片 · 面板 · 弹层",
+      "r3": "大容器 · 图片",
+      "r4": "标签 · 胶囊按钮 · 头像角标"
+    },
+    "elevation": {
+      "title": "阴影与层级 Elevation",
+      "note": "层级由阴影 + z-index 共同定义；遮罩只用于 L3。",
+      "levels": "层级示例",
+      "table": "层级对照",
+      "lv0": "L0 base",
+      "lv1": "L1 raised",
+      "lv2": "L2 floating",
+      "lv3": "L3 overlay",
+      "colLevel": "层级",
+      "colShadow": "阴影 token",
+      "colZ": "z-index",
+      "colUse": "用于",
+      "use0": "贴合内容（表格行 / 列表）",
+      "use1": "卡片 / 标签页 / 徽标",
+      "use2": "下拉 / 气泡 / 悬浮面板",
+      "use3": "弹窗 / 抽屉 / 通知（配 --scrim）",
+      "useSticky": "吸顶工具条 / 分节标题"
+    },
+    "motion": {
+      "title": "动效 Motion",
+      "note": "时长按位移与重要性分档；进场 decelerate、退场 accelerate。",
+      "scale": "时长",
+      "curves": "缓动曲线",
+      "play": "播放",
+      "rules": "规则",
+      "r1": "该动：面板展开/收起、下拉出现、按下反馈、加载、流式输出、状态切换。",
+      "r2": "不该动：滚动跟随、文字重排、频繁重复的微交互（会晕）。",
+      "r3": "只动 transform / opacity（不动 width/height/top/left）。",
+      "r4": "减动效：开启系统\"减少动态效果\"后全部时长归零（tokens.less 内统一处理，组件无需各自判断）。",
+      "reducedOn": "当前系统偏好：减少动态效果 —— 已降级（时长归零）",
+      "reducedOff": "当前系统偏好：正常动效"
+    },
+    "border": {
+      "title": "边框 Border（含 WCAG 1.4.11 决策）",
+      "note": "字段底与内容底只差 1.05:1，所以边框是输入框唯一的识别手段 —— 1.4.11 要求 3:1。",
+      "ramp": "边界梯度（实测对比度）",
+      "on": "字段底 / 内容底",
+      "demo": "实例：输入框",
+      "demoDefault": "默认（弱边界，观感轻）",
+      "demoStrong": "高对比偏好（强边界，1.4.11 达标）",
+      "decision": "决策",
+      "d1": "默认态保留弱边界（观感优先）；",
+      "d2": "提供 --border-control-strong / --border-hover-strong 达标档；",
+      "d3": "系统开启\"高对比\"时由 tokens.less 的媒体查询自动切换（浅/暗均已实测生效）。",
+      "deviation": "这是一处**有意偏离**：默认态不满足 1.4.11 的字面要求；如需严格达标，把 --border-control 直接指向强边界即可（一行改动）。"
+    }
   }
 }
