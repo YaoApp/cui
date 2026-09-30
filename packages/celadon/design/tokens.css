@@ -238,6 +238,9 @@
   --nav-rail-icon: 24px;
   --nav-rail-pad: 16px;
   --bp-nav-drawer: 768px;
+  /* 收起形态按端不同：**客户端收到 0**（导航改为顶栏图标，和标题栏按钮同一行）；
+     **Web 保留 56 图标轨**（浏览器没有标题栏可放）；窄屏 Web 转抽屉 */
+  --nav-collapsed-desktop: 0px;
   --nav-auto-collapse: 1024px;
   --center-min: 400px;
   --side-min: 300px;
