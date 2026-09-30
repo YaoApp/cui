@@ -456,9 +456,8 @@ function renderOverrides(theme){
   return '<div class="grp" style="margin-top:16px">'+esc(tr('f.motion.overrides'))+'</div>'
     + '<div class="mo-grid">' + OVERRIDES.map(function(o){
         var cls = o[0] ? ' ' + o[0] : '';
-        var dur = tok('--duration-base', theme);
         return '<div class="mo-scene'+cls+'"><div class="mo-head"><span class="n">'+esc(tr('f.motion.ov.'+o[1]))+'</span>'
-          + '<span class="tk">--duration-base '+dur+'</span></div>'
+          + '<span class="tk" data-ovlabel="'+o[1]+'">--duration-base …</span></div>'
           + '<div class="stage s-fade on" id="stage-'+theme+'-ov-'+o[1]+'">'
           + '<button class="el sw" type="button" aria-label="toggle"><i></i></button>'
           + '<span class="el card"><i class="ln" style="width:58%"></i><i class="ln" style="width:86%"></i></span></div></div>'; }).join('')
@@ -489,6 +488,14 @@ function renderMotion(theme){
     + ['r1','r2','r3','r4'].map(function(k){ return '<li>'+esc(tr('f.motion.'+k))+'</li>'; }).join('') + '</ul>';
   document.getElementById(theme === 'dark' ? 'mo-dark' : 'mo-light').innerHTML =
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">duration · easing</span></div><div class="pbody">'+dur+curves+gallery+ov+rm+rules+'</div>';
+  /* 场景级覆盖的标签：必须按各单元格**自身**读，局部覆盖只在那个元素上生效 */
+  OVERRIDES.forEach(function(o){
+    var cell = document.getElementById('stage-'+theme+'-ov-'+o[1]);
+    if (!cell) return;
+    var scene = cell.closest('.mo-scene');
+    var lb = scene && scene.querySelector('[data-ovlabel]');
+    if (lb) lb.textContent = '--duration-base ' + getComputedStyle(scene).getPropertyValue('--duration-base').trim();
+  });
   var el = document.getElementById('rm-'+theme);
   if (el) el.textContent = rmOn() ? tr('f.motion.reducedOn') : tr('f.motion.reducedOff');
 }
