@@ -392,6 +392,16 @@
       "d2": "提供 --border-control-strong / --border-hover-strong 达标档；",
       "d3": "系统开启\"高对比\"时由 tokens.less 的媒体查询自动切换（浅/暗均已实测生效）。",
       "deviation": "这是一处**有意偏离**：默认态不满足 1.4.11 的字面要求；如需严格达标，把 --border-control 直接指向强边界即可（一行改动）。"
+    },
+    "pref": {
+      "rm": "动效",
+      "hc": "对比度",
+      "normal": "正常",
+      "reduced": "减少动态",
+      "standard": "标准",
+      "high": "高对比",
+      "sys": "你的系统：",
+      "simulating": "正在预览模拟状态"
     }
   }
 }

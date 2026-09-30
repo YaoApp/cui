@@ -394,6 +394,16 @@ window.CELADON_I18N = {
         "d2": "Ship --border-control-strong and --border-hover-strong for the compliant look;",
         "d3": "When the system asks for more contrast, a media query in tokens.less switches automatically (verified in both themes).",
         "deviation": "This is a deliberate deviation: the default does not literally meet 1.4.11. If strict conformance is needed, point --border-control at the strong value - a one line change."
+      },
+      "pref": {
+        "rm": "Motion",
+        "hc": "Contrast",
+        "normal": "Normal",
+        "reduced": "Reduced",
+        "standard": "Standard",
+        "high": "High",
+        "sys": "Your system: ",
+        "simulating": "previewing a simulated state"
       }
     }
   },
@@ -791,6 +801,16 @@ window.CELADON_I18N = {
         "d2": "適合値として --border-control-strong / --border-hover-strong を用意。",
         "d3": "システムが高コントラストを求めた場合、tokens.less のメディアクエリで自動的に切り替わります（ライト・ダーク両方で検証済み）。",
         "deviation": "これは意図的な逸脱です。既定では 1.4.11 の文字どおりの要件を満たしません。厳密に適合させる場合は --border-control を強い値に向けるだけです（1 行の変更）。"
+      },
+      "pref": {
+        "rm": "モーション",
+        "hc": "コントラスト",
+        "normal": "通常",
+        "reduced": "低減",
+        "standard": "標準",
+        "high": "高コントラスト",
+        "sys": "お使いのシステム：",
+        "simulating": "模擬状態をプレビュー中"
       }
     }
   },
@@ -1188,6 +1208,16 @@ window.CELADON_I18N = {
         "d2": "提供 --border-control-strong / --border-hover-strong 达标档；",
         "d3": "系统开启\"高对比\"时由 tokens.less 的媒体查询自动切换（浅/暗均已实测生效）。",
         "deviation": "这是一处**有意偏离**：默认态不满足 1.4.11 的字面要求；如需严格达标，把 --border-control 直接指向强边界即可（一行改动）。"
+      },
+      "pref": {
+        "rm": "动效",
+        "hc": "对比度",
+        "normal": "正常",
+        "reduced": "减少动态",
+        "standard": "标准",
+        "high": "高对比",
+        "sys": "你的系统：",
+        "simulating": "正在预览模拟状态"
       }
     }
   },
@@ -1585,6 +1615,16 @@ window.CELADON_I18N = {
         "d2": "提供 --border-control-strong / --border-hover-strong 達標檔；",
         "d3": "系統開啟「高對比」時由 tokens.less 的媒體查詢自動切換（淺/暗均已實測生效）。",
         "deviation": "這是一處**有意偏離**：預設態不滿足 1.4.11 的字面要求；如需嚴格達標，把 --border-control 直接指向強邊界即可（一行改動）。"
+      },
+      "pref": {
+        "rm": "動效",
+        "hc": "對比度",
+        "normal": "正常",
+        "reduced": "減少動態",
+        "standard": "標準",
+        "high": "高對比",
+        "sys": "你的系統：",
+        "simulating": "正在預覽模擬狀態"
       }
     }
   }
