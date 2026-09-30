@@ -22,8 +22,14 @@
   a.card:focus-visible{outline:none;box-shadow:var(--focus-ring)}
   .t{font-weight:var(--font-weight-medium);margin-bottom: var(--spacing-4)}
   .d{font-size: var(--font-size-body);color:var(--text-secondary)}
-  /* App 图标：按真实档位放出来（16/32/64 原生，其余缩到 48 预览），标注真实像素 */
-  .appicons{display:flex;align-items:flex-end;gap: var(--spacing-8);margin-top: var(--spacing-12);flex-wrap:wrap}
+  /* 资产大卡：跨整行，Logo / App 图标 / 官方正源 并排展示 */
+  a.card.is-wide{grid-column:1 / -1}
+  .assets{display:flex;align-items:flex-end;gap: var(--spacing-32);margin-top: var(--spacing-12);flex-wrap:wrap}
+  .asset{margin:0;display:flex;flex-direction:column;align-items:center;gap: var(--spacing-8)}
+  .asset figcaption{font-size: var(--font-size-11);color:var(--text-tertiary)}
+  .asset img{display:block}
+  /* 缩略图：每个档位都用"≥2 倍显示尺寸"的源（2x 屏幕不糊），大档反过来缩小用 */
+  .appicons{display:flex;align-items:flex-end;gap: var(--spacing-12);flex-wrap:wrap}
   .appicons figure{margin:0;display:flex;flex-direction:column;align-items:center;gap: var(--spacing-4)}
   .appicons img{display:block;border-radius:var(--radius-xs)}
   .appicons figcaption{font-size: var(--font-size-11);color:var(--text-tertiary);font-variant-numeric:tabular-nums}
@@ -56,9 +62,7 @@
     <a class="card" href="data-format.html"><div class="t">数据格式 Data format</div><div class="d">四语对照 · 日期/相对时间/数字/单位/货币/排序 · 实时调 Intl.*</div></a>
     <a class="card" href="icons.html"><div class="t">图标与品牌 Icons</div><div class="d">品牌标识 · 图标系列（24 网格）· 三个来源 · 全量画廊</div></a>
     <a class="card" href="mock.html"><div class="t">界面稿 Mock</div><div class="d">1440×888 三栏 · 四语可切 · 浅/暗</div></a>
-    <a class="card" href="icons.html"><div class="t">App 图标 App icons</div><div class="d">方形画布 · 内缩 78% · 源 logo-app-celadon.svg</div><div class="appicons"><figure><img src="icons/icon-16.png" width="16" height="16" alt="App 图标 16 像素"><figcaption>16</figcaption></figure><figure><img src="icons/icon-32.png" width="24" height="24" alt="App 图标 32 像素"><figcaption>32</figcaption></figure><figure><img src="icons/icon-64.png" width="32" height="32" alt="App 图标 64 像素"><figcaption>64</figcaption></figure><figure><img src="icons/icon-128.png" width="32" height="32" alt="App 图标 128 像素"><figcaption>128</figcaption></figure><figure><img src="icons/icon-256.png" width="32" height="32" alt="App 图标 256 像素"><figcaption>256</figcaption></figure><figure><img src="icons/icon-512.png" width="32" height="32" alt="App 图标 512 像素"><figcaption>512</figcaption></figure><figure><img src="icons/icon-1024.png" width="32" height="32" alt="App 图标 1024 像素"><figcaption>1024</figcaption></figure></div></a>
-    <a class="card" href="logo-mark-celadon.svg"><div class="t">Logo 标记</div><div class="d">浅暗同版（一个标记）· 官方原版 · 仅换颜色</div></a>
-    <a class="card" href="reference/logo-official-yaoagents-com.svg"><div class="t">官方正源存档</div><div class="d">配色/形状的唯一比对基准</div></a>
+<a class="card is-wide" href="icons.html"><div class="t">Logo 与 App 图标 Logo and app icons</div><div class="d">标记浅暗同版（一个 SVG）· App 图标方形画布、图形内缩 78% · 源 logo-app-celadon.svg</div><div class="assets"><figure class="asset"><img src="logo-mark-celadon.svg" width="56" height="47" alt="Logo 标记"><figcaption>Logo 标记 · 浅暗同版</figcaption></figure><figure class="asset"><div class="appicons"><figure><img src="icons/icon-16.png" srcset="icons/icon-32.png 2x" width="16" height="16" alt="App 图标 16 像素"><figcaption>16</figcaption></figure><figure><img src="icons/icon-32.png" srcset="icons/icon-64.png 2x" width="24" height="24" alt="App 图标 32 像素"><figcaption>32</figcaption></figure><figure><img src="icons/icon-64.png" srcset="icons/icon-128.png 2x" width="32" height="32" alt="App 图标 64 像素"><figcaption>64</figcaption></figure><figure><img src="icons/icon-128.png" srcset="icons/icon-256.png 2x" width="40" height="40" alt="App 图标 128 像素"><figcaption>128</figcaption></figure><figure><img src="icons/icon-256.png" srcset="icons/icon-512.png 2x" width="48" height="48" alt="App 图标 256 像素"><figcaption>256</figcaption></figure><figure><img src="icons/icon-512.png" srcset="icons/icon-1024.png 2x" width="56" height="56" alt="App 图标 512 像素"><figcaption>512</figcaption></figure><figure><img src="icons/icon-1024.png" width="64" height="64" alt="App 图标 1024 像素"><figcaption>1024</figcaption></figure></div><figcaption>App 图标 · 16–1024 七档（方形画布）</figcaption></figure><figure class="asset"><img src="reference/logo-official-yaoagents-com.svg" width="56" height="47" alt="官方正源 Logo"><figcaption>官方正源 · 唯一比对基准</figcaption></figure></div></a>
     <a class="card" href="README.md"><div class="t">设计说明 README.md</div><div class="d">token / 字体 / i18n / Logo 规则</div></a>
     <a class="card" href="tokens.less"><div class="t">tokens.less</div><div class="d">唯一来源（改这里，别改产物）</div></a>
   </div>
