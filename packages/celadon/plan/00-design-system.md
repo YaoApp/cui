@@ -39,7 +39,7 @@
   产物：`tokens.less` 刻度 · `foundations.html` 刻度+用法+实例 · README Foundations 表；自检：页面实时读 tokens.css，零硬编码
 - ✅ **F2 圆角 Radius** —— 四档 small 6 / medium 8 / large 12 / pill 999 ＋ 用法（小控件/按钮输入/卡片面板/标签胶囊）
   产物：`tokens.less` · `foundations.html` 四档示例；自检：同上
-- ✅ **F3 阴影与层级 Elevation** —— L0 无 / L1 `--shadow-subtle` / L2 `--shadow-floating` / L3 `--shadow-overlay`＋`--z-base/raised/sticky/overlay/modal/toast/tooltip`
+- ✅ **F3 阴影与层级 Elevation** —— L0 无 / L1 `--shadow-subtle` / L2 `--shadow-floating` / L3 `--shadow-overlay`＋`--z-base/raised/sticky/overlay/modal/toast/tooltip`；**暗色用面阶表达层级**（`--elevation-surface-1/2/3` + 1px 暖白内高光 `--elevation-highlight`，深阴影在暗底不可见）
   产物：`tokens.less` · `foundations.html` 层级叠放 + 对照表（含 sticky 行）
 - ✅ **F4 动效 Motion** —— 时长 120/200/320 ＋ 缓动 standard/decelerate/accelerate（曲线图实时由 token 绘制）＋ 规则（只动 transform/opacity）＋ **`prefers-reduced-motion` 下时长归零**（tokens.less 统一处理，实测 0.01ms）
   产物：`tokens.less` · `foundations.html` 曲线 + 播放演示 + 减动效状态
