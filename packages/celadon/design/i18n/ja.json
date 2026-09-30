@@ -45,7 +45,8 @@
     },
     "composer": {
       "placeholder": "続けて：リスクを要件定義の受け入れ条件に追記…",
-      "defaultPermission": "既定の権限"
+      "defaultPermission": "既定の権限",
+      "awaitConfirm": "上記の選択肢を確認してから続けてください…"
     },
     "panel": {
       "inProgress": "進行中",
@@ -68,6 +69,9 @@
     "theme": {
       "light": "ライト",
       "dark": "ダーク"
+    },
+    "task": {
+      "id": "タスク ID"
     }
   },
   "sample": {
@@ -244,6 +248,24 @@
       "text": "ニュートラル · 文字",
       "semantic": "セマンティック",
       "metrics": "サイズ · 角丸 · モーション"
+    },
+    "state": {
+      "statesTitle": "コントロール状態 · ライブプレビュー",
+      "statesNote": "全状態を同時表示：.is-* クラスは実際の疑似クラス（:hover/:focus/:read-only/:disabled）と一対一、同一トークン",
+      "groupInput": "入力欄",
+      "groupButton": "ボタン",
+      "default": "既定",
+      "hover": "ホバー",
+      "active": "押下",
+      "focus": "フォーカス",
+      "disabled": "無効",
+      "filled": "入力済み",
+      "placeholder": "プレースホルダー",
+      "readonly": "読み取り専用",
+      "error": "エラー",
+      "errorHint": "日付形式が不正です",
+      "solid": "主ボタン",
+      "soft": "淡色"
     }
   }
 }

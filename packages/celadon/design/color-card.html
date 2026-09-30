@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="celadon">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,17 +8,17 @@
 <style>
 :root{--card-chrome:12px}
 *{box-sizing:border-box} html,body{margin:0}
-body{font:13px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans","Microsoft YaHei",sans-serif;
-  background:#EDEDEE;color:#111;-webkit-font-smoothing:antialiased;padding:22px 22px 60px}
+body{font:13px/1.5 var(--font-family-ui);
+  background:var(--background-app);color:var(--text-primary);-webkit-font-smoothing:antialiased;padding:22px 22px 60px}
 h1{font-size:19px;margin:0 0 4px}
-.sub{color:#666;font-size:12.5px;margin:0 0 10px}
-.src{font-size:11.5px;color:#777;background:#fff;border:1px solid #e2e2e4;border-radius:8px;padding:6px 10px;display:inline-block;margin-bottom:14px}
-.src code,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f2f2f4;padding:1px 5px;border-radius:4px;font-size:11.5px}
-.toolbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;background:rgba(237,237,238,.92);
+.sub{color:var(--text-secondary);font-size:12.5px;margin:0 0 10px}
+.src{font-size:11.5px;color:var(--text-tertiary);background:var(--background-surface);border:1px solid var(--border-default);border-radius:8px;padding:6px 10px;display:inline-block;margin-bottom:14px}
+.src code,code{font-family:var(--font-family-monospace);background:var(--background-field);padding:1px 5px;border-radius:4px;font-size:11.5px}
+.toolbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;background:color-mix(in srgb, var(--background-app) 92%, transparent);
   backdrop-filter:blur(6px);padding:8px 0 12px;margin-bottom:8px}
 .language-switch{display:flex;gap:4px}
-.toolbar button{font:inherit;font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid #d6d6da;background:#fff;color:#555;cursor:pointer}
-.toolbar button.on{background:#E4EFEF;border-color:#2A7B7B;color:#2A7B7B;font-weight:650}
+.toolbar button{font:inherit;font-size:12px;padding:5px 12px;border-radius:var(--radius-pill);border:1px solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
+.toolbar button.on{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 @media (max-width:1100px){.cols{grid-template-columns:1fr}}
 .panel{border-radius:14px;overflow:hidden;border:1px solid var(--border-subtle);background:var(--background-content);color:var(--text-primary)}
@@ -28,32 +28,27 @@ h1{font-size:19px;margin:0 0 4px}
 .grp h2{font-size:11.5px;letter-spacing:.4px;color:var(--text-tertiary);margin:0 0 8px;font-weight:650}
 .sw{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dashed var(--border-subtle)}
 .sw:last-child{border-bottom:0}
-.chip-color{width:44px;height:30px;border-radius:8px;flex:none;border:1px solid rgba(0,0,0,.10)}
-.chip-none{width:44px;height:30px;border-radius:8px;flex:none;border:1px dashed #ccc}
+.chip-color{width:44px;height:30px;border-radius:8px;flex:none;border:1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)}
+.chip-none{width:44px;height:30px;border-radius:8px;flex:none;border:1px dashed var(--border-control)}
 .meta{flex:1;min-width:0}
-.meta .n{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;font-weight:600}
+.meta .n{font-family:var(--font-family-monospace);font-size:11.5px;font-weight:600}
 .meta .u{font-size:11px;color:var(--text-tertiary);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.meta .u.long{white-space:normal;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
-.hex{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--text-secondary);cursor:pointer;background:var(--background-field);border:1px solid var(--border-default);border-radius:6px;padding:2px 7px;flex:none}
+.meta .u.long{white-space:normal;font-family:var(--font-family-monospace);word-break:break-all}
+.hex{font-family:var(--font-family-monospace);font-size:11.5px;color:var(--text-secondary);cursor:pointer;background:var(--background-field);border:1px solid var(--border-default);border-radius:6px;padding:2px 7px;flex:none}
 .hex:hover{background:var(--background-hover)}
 .cr{font-size:10.5px;padding:2px 6px;border-radius:99px;flex:none;font-weight:650;min-width:48px;text-align:center;border:1px solid transparent}
-.cr.aaa{color:#0a6b3d;background:#e6f6ec;border-color:#bfe6cd}
-.cr.aa{color:#0a6b3d;background:#eef8f1;border-color:#cfe9d8}
-.cr.warn{color:#8a5a12;background:#fdf3e3;border-color:#efd6a8}
-.cr.bad{color:#b3261e;background:#fdecea;border-color:#f3c6c1}
-.cr.dim{color:#666;background:#f2f2f4;border-color:#e2e2e4}
-.panel.dark .cr.aaa{color:#8ef0b6;background:#12271a;border-color:#22503a}
-.panel.dark .cr.aa{color:#7fe0a9;background:#122019;border-color:#1f4630}
-.panel.dark .cr.warn{color:#f0cb9c;background:#2c2718;border-color:#4a3f24}
-.panel.dark .cr.bad{color:#f7a6a0;background:#2a1614;border-color:#5a2a26}
-.panel.dark .cr.dim{color:#999;background:#1e1e1e;border-color:#333}
-.card{background:#fff;border:1px solid #e2e2e4;border-radius:12px;padding:14px 16px;margin-top:18px}
+.cr.aaa{color:var(--success);background:var(--success-soft);border-color:color-mix(in srgb, var(--success) 30%, var(--success-soft))}
+.cr.aa{color:var(--success);background:var(--success-soft);border-color:color-mix(in srgb, var(--success) 18%, var(--success-soft))}
+.cr.warn{color:var(--warm-text);background:var(--warm-soft);border-color:color-mix(in srgb, var(--warm) 30%, var(--warm-soft))}
+.cr.bad{color:var(--danger-ink);background:var(--danger-soft);border-color:color-mix(in srgb, var(--danger) 30%, var(--danger-soft))}
+.cr.dim{color:var(--text-tertiary);background:var(--background-field);border-color:var(--border-default)}
+.card{background:var(--background-surface);border:1px solid var(--border-default);border-radius:12px;padding:14px 16px;margin-top:18px}
 .card h2{font-size:13.5px;margin:0 0 6px}
-.card .hint{font-size:11.5px;color:#666;margin:0 0 10px}
+.card .hint{font-size:11.5px;color:var(--text-secondary);margin:0 0 10px}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th,td{text-align:left;padding:6px 9px;border-bottom:1px solid #ddd}
-th{color:#666;font-weight:650}
-ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:#333;margin:4px 0}
+th,td{text-align:left;padding:6px 9px;border-bottom:1px solid var(--border-subtle)}
+th{color:var(--text-secondary);font-weight:650}
+ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary);margin:4px 0}
 /* ===== 字体样本 ===== */
 .specimen-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:1100px){.specimen-grid{grid-template-columns:1fr}}
@@ -91,6 +86,13 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:#333;margin:4px 0}
 
 <div class="card"><h2 id="pairs-title"></h2><p class="hint" id="pairs-note"></p><div id="pairs"></div></div>
 
+<div class="card" id="states-panel"><h2 id="states-title"></h2><p class="hint" id="states-note"></p>
+  <div class="stgroup" id="states-g1"></div>
+  <div id="states"></div>
+  <div class="stgroup" id="states-g2"></div>
+  <div id="states-btn"></div>
+</div>
+
 <div class="card"><h2 id="typo-title"></h2><p class="hint" id="typo-note"></p><div class="specimen-grid" id="specimen"></div></div>
 
 <div class="card"><h2 id="contrast-title"></h2><table id="ctab"></table></div>
@@ -106,7 +108,7 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:#333;margin:4px 0}
 var GROUPS = [
  ['group.brand', [
    ['--brand','brand','on'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
-   ['--brand-soft','brandSoft'], ['--brand-display','brandDisplay'], ['--brand-text','brandText','onbrand'], ['--brand-ink','brandInk','onbrand'],
+   ['--brand-soft','brandSoft'], ['--brand-display','brandDisplay'], ['--brand-text','brandText','onbrand'], ['--brand-ink','brandInk'],
    ['--brand-lift','brandLift','nocr']]],
  ['group.interaction', [
    ['--focus-ring-color','focusRingColor','on'], ['--focus-ring-width','focusRingWidth'], ['--focus-ring-offset','focusRingOffset'],
@@ -202,12 +204,42 @@ function buildPanel(themeName, probeEl, label){
     }).join('');
     return '<div class="grp"><h2>'+esc(tr('card.'+g[0]))+'</h2>'+rows+'</div>';
   }).join('');
-  return '<section class="panel '+(themeName==='dark'?'dark':'')+'" style="'
-    + '--background-app:'+V['--background-app']+';--background-navigation:'+V['--background-navigation']+';--background-content:'+bg+';--background-surface:'+V['--background-surface']
-    + ';--background-field:'+V['--background-field']+';--background-hover:'+V['--background-hover']
-    + ';--border-subtle:'+V['--border-subtle']+';--border-default:'+V['--border-default']
-    + ';--text-primary:'+V['--text-primary']+';--text-secondary:'+V['--text-secondary']+';--text-tertiary:'+V['--text-tertiary']+'">'
+  return '<section class="panel'+(themeName==='dark'?' celadon" data-theme="dark':'')+'">'
     + '<div class="hd">'+esc(tr(themeName === 'light' ? 'card.themeLight' : 'card.themeDark'))+'<span class="tag">'+esc(tr('card.usage.backgroundContent'))+' '+bg+'</span></div>'+body+'</section>';
+}
+/* ---- 控件状态预览：静态多态（.is-* 与真实伪类一一对应）---- */
+var STATE_INPUTS = [
+  ['inputDefault',  ''], ['inputHover', 'is-hover'], ['inputFocus', 'is-focus'], ['inputFilled', ''],
+  ['inputPlaceholder',''], ['inputReadonly', 'is-readonly'], ['inputDisabled', 'is-disabled'], ['inputError', 'is-error']
+];
+var STATE_BUTTONS = [ ['btnSolid', ['', 'is-hover', 'is-active', 'is-focus', 'is-disabled']],
+                      ['btnSoft',  ['', 'is-hover', 'is-active', 'is-focus', 'is-disabled']] ];
+var STATE_LABEL = { '':'default', 'is-hover':'hover', 'is-active':'active', 'is-focus':'focus', 'is-disabled':'disabled' };
+function renderStates(){
+  document.getElementById('states-title').textContent = tr('card.state.statesTitle');
+  document.getElementById('states-note').textContent  = tr('card.state.statesNote');
+  document.getElementById('states-g1').textContent    = tr('card.state.groupInput');
+  document.getElementById('states').innerHTML = STATE_INPUTS.map(function(it){
+    var cls = it[1], attrs = '', value = '';
+    if (it[0] === 'inputFilled') value = '合同审阅 v3';
+    if (it[0] === 'inputPlaceholder') attrs = ' placeholder="搜索消息…"';
+    if (it[0] === 'inputReadonly')  { value = 'tsk_8f21c4'; attrs = ' readonly'; }
+    if (it[0] === 'inputDisabled')  { value = 'tsk_8f21c4'; attrs = ' disabled'; }
+    if (it[0] === 'inputError') value = '2026-13-45';
+    var lb = tr('card.state.' + it[0].replace('input','').toLowerCase());
+    return '<div class="st"><span class="lb">'+esc(lb)+'</span>'
+      + '<input class="input ' + cls + '" value="'+esc(value)+'"'+attrs+'>'
+      + (it[0]==='inputError' ? '<span class="hint-error">'+esc(tr('card.state.errorHint'))+'</span>' : '')
+      + '</div>';
+  }).join('');
+  document.getElementById('states-g2').textContent = tr('card.state.groupButton');
+  document.getElementById('states-btn').innerHTML = STATE_BUTTONS.map(function(kind){
+    return kind[1].map(function(cls){
+      var cls2 = (kind[0]==='btnSolid' ? 'btn-primary is-solid ' : 'btn-primary ') + cls;
+      return '<div class="st"><span class="lb">'+esc(tr('card.state.'+STATE_LABEL[cls]))+'</span>'
+        + '<button class="'+cls2+'">'+esc(kind[0]==='btnSolid' ? tr('card.state.solid') : tr('card.state.soft'))+'</button></div>';
+    }).join('');
+  }).join('');
 }
 function renderPanels(){
   document.getElementById('cols').innerHTML = buildPanel('light', document.getElementById('probe-light'), 'light')
@@ -278,7 +310,7 @@ function renderAll(){
   document.getElementById('card-subtitle').textContent = tr('card.subtitle');
   document.getElementById('card-source').innerHTML = esc(tr('card.source')).replace(/(tokens\.less|build-css\.mjs|tokens\.css|pnpm design:css)/g,'<code>$1</code>');
   document.getElementById('card-langnote').textContent = tr('card.langNote');
-  renderPanels(); renderPairs(); renderSpecimen(); renderContrastTable(); renderRedlines();
+  renderPanels(); renderPairs(); renderStates(); renderSpecimen(); renderContrastTable(); renderRedlines();
   document.querySelectorAll('.language-switch button').forEach(function(b){ b.classList.toggle('on', b.dataset.lang === CURRENT); });
   document.documentElement.lang = CURRENT;
 }

@@ -45,7 +45,8 @@
     },
     "composer": {
       "placeholder": "繼續：把風險點補進需求文件的驗收條款…",
-      "defaultPermission": "預設權限"
+      "defaultPermission": "預設權限",
+      "awaitConfirm": "請先確認上方選項後繼續…"
     },
     "panel": {
       "inProgress": "進行中",
@@ -68,6 +69,9 @@
     "theme": {
       "light": "淺色",
       "dark": "深色"
+    },
+    "task": {
+      "id": "任務 ID"
     }
   },
   "sample": {
@@ -244,6 +248,24 @@
       "text": "中性 · 字",
       "semantic": "語意",
       "metrics": "尺寸 · 圓角 · 動效"
+    },
+    "state": {
+      "statesTitle": "控件狀態 · 即時預覽",
+      "statesNote": "靜態展示多態：`.is-*` 類與真實偽類（:hover/:focus/:read-only/:disabled）一一對應，同一份 token",
+      "groupInput": "輸入框",
+      "groupButton": "按鈕",
+      "default": "預設",
+      "hover": "懸停",
+      "active": "按下",
+      "focus": "聚焦",
+      "disabled": "停用",
+      "filled": "已填",
+      "placeholder": "佔位",
+      "readonly": "唯讀",
+      "error": "錯誤",
+      "errorHint": "日期格式不正確",
+      "solid": "主按鈕",
+      "soft": "淺底"
     }
   }
 }

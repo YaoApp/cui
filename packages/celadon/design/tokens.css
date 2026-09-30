@@ -109,7 +109,10 @@
   --success: #057748;
   --success-soft: #E9F6F1;
   --danger: #D93B30;
+  /* **只做填充/图形**（文字用途仅 3.96:1，不达 AA） */
   --danger-soft: #FBECEA;
+  --danger-ink: #B32B22;
+  /* 危险色文字/图标：在 --danger-soft 上 5.57:1 ✓、内容底 6.13:1 ✓ */
   /* ===== 字体（四语：简 / 繁 / 英 / 日）===== */
   --font-family-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Noto Sans", sans-serif;
   --font-family-monospace: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Cascadia Mono", "Liberation Mono", monospace;
@@ -210,6 +213,8 @@
   --success-soft: #12261A;
   --danger: #F87171;
   --danger-soft: #2A1614;
+  --danger-ink: #EC7A6E;
+  /* 暗色文字/图标档（danger-soft 上 5.65:1） */
   --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-floating: 0 12px 34px rgba(0, 0, 0, 0.6);
 }
@@ -221,6 +226,11 @@
  *  · 交互标准四态：default / hover / active / disabled。
  *  · success 只用软底 + 图标，不做大面积实心。
  */
+.celadon,
+[data-theme] .celadon {
+  /* 错误提示文字（危险色的文字档） */
+  /* 输入框：六态（真实伪类与 .is-* 静态类一一对应，后者供设计稿/静态页同时展示多态） */
+}
 .celadon .btn-primary,
 [data-theme] .celadon .btn-primary {
   background: var(--brand-soft);
@@ -242,12 +252,21 @@
   color: var(--brand-text);
 }
 .celadon .btn-primary.is-solid:hover,
-[data-theme] .celadon .btn-primary.is-solid:hover {
+[data-theme] .celadon .btn-primary.is-solid:hover,
+.celadon .btn-primary.is-solid.is-hover,
+[data-theme] .celadon .btn-primary.is-solid.is-hover {
   background: var(--brand-hover);
 }
 .celadon .btn-primary.is-solid:active,
-[data-theme] .celadon .btn-primary.is-solid:active {
+[data-theme] .celadon .btn-primary.is-solid:active,
+.celadon .btn-primary.is-solid.is-active,
+[data-theme] .celadon .btn-primary.is-solid.is-active {
   background: var(--brand-active);
+}
+.celadon .btn-primary.is-focus,
+[data-theme] .celadon .btn-primary.is-focus {
+  box-shadow: var(--focus-ring);
+  outline: none;
 }
 .celadon .btn-primary:disabled,
 [data-theme] .celadon .btn-primary:disabled,
@@ -256,6 +275,12 @@
   background: var(--background-disabled);
   color: var(--text-disabled);
   border-color: var(--border-disabled);
+  cursor: not-allowed;
+}
+.celadon .hint-error,
+[data-theme] .celadon .hint-error {
+  color: var(--danger-ink);
+  font-size: 12.5px;
 }
 .celadon .btn-ghost,
 [data-theme] .celadon .btn-ghost {
@@ -315,12 +340,59 @@
   background: var(--background-field);
   border: 1px solid var(--border-control);
   color: var(--text-primary);
+  /* 占位 */
+}
+.celadon .input::placeholder,
+[data-theme] .celadon .input::placeholder {
+  color: var(--text-placeholder);
+}
+.celadon .input:not(:disabled):hover,
+[data-theme] .celadon .input:not(:disabled):hover,
+.celadon .input.is-hover,
+[data-theme] .celadon .input.is-hover {
+  border-color: var(--border-hover);
 }
 .celadon .input:focus,
-[data-theme] .celadon .input:focus {
+[data-theme] .celadon .input:focus,
+.celadon .input.is-focus,
+[data-theme] .celadon .input.is-focus {
   border-color: var(--brand);
   box-shadow: var(--focus-ring);
   outline: none;
+}
+.celadon .input:read-only,
+[data-theme] .celadon .input:read-only,
+.celadon .input.is-readonly,
+[data-theme] .celadon .input.is-readonly {
+  background: var(--background-readonly);
+  color: var(--text-secondary);
+}
+.celadon .input.is-error,
+[data-theme] .celadon .input.is-error {
+  border-color: var(--danger);
+}
+.celadon .input:disabled,
+[data-theme] .celadon .input:disabled,
+.celadon .input.is-disabled,
+[data-theme] .celadon .input.is-disabled {
+  background: var(--background-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-disabled);
+  cursor: not-allowed;
+}
+.celadon .input:disabled::placeholder,
+[data-theme] .celadon .input:disabled::placeholder,
+.celadon .input.is-disabled::placeholder,
+[data-theme] .celadon .input.is-disabled::placeholder {
+  color: var(--text-disabled);
+}
+.celadon .input.is-error,
+[data-theme] .celadon .input.is-error {
+  border-color: var(--danger);
+}
+.celadon .input.is-error.is-focus,
+[data-theme] .celadon .input.is-error.is-focus {
+  box-shadow: 0 0 0 var(--focus-ring-offset) var(--background-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--danger);
 }
 .celadon .input:disabled,
 [data-theme] .celadon .input:disabled {
