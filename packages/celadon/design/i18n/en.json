@@ -238,7 +238,7 @@
       "shadowFloating": "Floating layer",
       "fontFamilyUi": "UI font (Latin + fallback)",
       "fontFamilyMonospace": "Monospace font",
-      "brandInk": "Brand-coloured text/icons (4.8:1 on soft fill; auto-lifts in dark)"
+      "brandInk": "Brand text/icons (soft button, selected row, bubble; 4.8:1 on the soft fill, switches to the lifted tone in dark)"
     },
     "group": {
       "brand": "Brand",
