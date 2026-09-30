@@ -6,12 +6,12 @@
 <link rel="stylesheet" href="tokens.css">
 <style>
   body{margin:0;padding:40px;background:var(--background-app);color:var(--text-primary);
-       font-family:var(--font-family-ui);font-size:14px;line-height:var(--line-height-cjk)}
+       font-family:var(--font-family-ui);font-size: var(--font-size-14);line-height:var(--line-height-cjk)}
   .wrap{max-width:920px;margin:0 auto}
   header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
   header svg{height:26px;width:auto;display:block}
-  h1{font-size:20px;margin:0;font-weight:var(--font-weight-strong)}
-  .ver{font-size:11.5px;color:var(--text-tertiary);border:1px solid var(--border-default);
+  h1{font-size: var(--font-size-title);margin:0;font-weight:var(--font-weight-strong)}
+  .ver{font-size: var(--font-size-caption);color:var(--text-tertiary);border:1px solid var(--border-default);
        border-radius:var(--radius-pill);padding:2px 9px}
   p.lede{color:var(--text-secondary);margin:10px 0 26px}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
@@ -21,12 +21,12 @@
   a.card:hover{border-color:var(--border-hover);background:var(--background-hover)}
   a.card:focus-visible{outline:none;box-shadow:var(--focus-ring)}
   .t{font-weight:var(--font-weight-medium);margin-bottom:4px}
-  .d{font-size:12.5px;color:var(--text-secondary)}
-  code{font-family:var(--font-family-monospace);font-size:12px;background:var(--background-field);
-       border-radius:6px;padding:1px 5px}
+  .d{font-size: var(--font-size-body);color:var(--text-secondary)}
+  code{font-family:var(--font-family-monospace);font-size: var(--font-size-caption);background:var(--background-field);
+       border-radius: var(--radius-small);padding:1px 5px}
   .mark-head{fill:url(#celadon-mark)}
   html[data-theme="dark"] .mark-head{fill:url(#celadon-mark)}
-  footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--border-subtle);font-size:12.5px;color:var(--text-secondary)}
+  footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--border-subtle);font-size: var(--font-size-body);color:var(--text-secondary)}
 </style>
 <script>if(matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.dataset.theme="dark"</script>
 <body>

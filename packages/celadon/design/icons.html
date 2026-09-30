@@ -285,6 +285,8 @@ function brandTile(b){
     + '<span class="logo'+chip+'"><svg width="'+BSIZE+'" height="'+BSIZE+'" viewBox="0 0 24 24" style="display:block"><use href="'+href+'"/></svg></span>'
     + '<span class="nm">'+b.id+'</span><span class="src">'+b.title+'</span></button>';
 }
+  var LUCIDE_COUNT = Object.keys(LUCIDE).length;   /* 界面图标真实数量 */
+  var I18N_N = { 'ic.setTitle': LUCIDE_COUNT, 'ic.galleryTitle': LUCIDE_COUNT };   /* 标题里的 {n} 由它填 */
 function renderBrands(){
   var host = document.getElementById('ic-brandgallery'); if (!host) return;
   var ours = OWNBRANDS;   /* 自有品牌排第一第二 */
@@ -323,7 +325,9 @@ function rows(id, keys, cols){
 }
 function apply(){
   document.querySelectorAll('[id^=ic-]').forEach(function(el){
-    var k = 'ic.' + el.id.slice(3); var v = tr(k); if (v !== k && el.tagName !== 'INPUT') el.innerHTML = fmt(v);
+    var k = 'ic.' + el.id.slice(3); var v = tr(k);
+    if (I18N_N[k] !== undefined) v = String(v).replace('{n}', I18N_N[k]);   /* 数量类文案由页面自己数，不写死 */
+    if (v !== k && el.tagName !== 'INPUT') el.innerHTML = fmt(v);
   });
   document.getElementById('ic-search').setAttribute('placeholder', tr('ic.search'));
   var bsr = document.getElementById('ic-brandsearch'); if (bsr) bsr.setAttribute('placeholder', tr('ic.brandSearch'));
