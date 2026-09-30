@@ -1,35 +1,53 @@
-# celadon — CUI **2.0**（代号 Celadon · 青瓷）
+# celadon — CUI 2.0
 
-> **Celadon（青瓷）** —— 青瓷釉色正是我们最终定下的品牌色 **`#2A7B7B`**：
-> 青而不艳、温润、耐看。它同时承载「**双面 App**」的器物隐喻：**同一件器，一面看人，一面看 Agent**。
-> **本目录即 CUI 2.0 的新代码落点**。当前**只包含设计资产 `design/`**；应用骨架与构建工具（**尚未定，不预设某框架**）在后续步骤中加入。
-
-- 状态：**建设中**（2026-09-29 起）。
-- 备份：1.x 冻结在 **`git tag v1-final`**（`2622079c`）。
-
-## 设计规范（本仓库内自包含）
-
-| 项 | 规范 |
-| --- | --- |
-| **配色** | **中国传统色**：品牌「青」`#2A7B7B`（青瓷釉色）· 成功「松花绿」`#057748` · 危险「朱红」`#D93B30` · 警示「琥珀」`#8B6214`；单一来源 [`design/tokens.less`](design/tokens.less) |
-| **字体** | 四语分栈 `--font-family-ui-hans` / `-hant` / `-japanese`（`.celadon:lang(...)` 自动映射，繁中不走简中字形、日文不走中文字形）；等宽补 CJK |
-| **命名** | 变量/类名**全称，不用缩写**；状态用 `is-*` |
-| **字号/行高** | 中文最小 12px；行高 1.5（拉丁）/ 1.7（中日文）；中文 `letter-spacing: 0` |
-| **主题** | `data-theme` 挂 `.celadon` 或其祖先；暗色只覆盖语义层 |
-| **设计资产生成** | `node packages/celadon/design/build-css.mjs`（tokens.less → tokens.css）· `node packages/celadon/design/build-i18n.mjs`（i18n/*.json → bundle.js） |
+> **与 `cui` 平级的新应用包**。不继承旧包的历史包袱：**用到啥复制啥，适配啥修改啥**。
+> 当前阶段：**🚧 00 设计规范** ｜ 构建工具：**待定**（不预设框架）
 
 ## 目录
 
 ```
 celadon/
-  README.md   本文件
-  design/     设计资产（token 单一来源 · 色卡 · 界面稿 · i18n · logo）
-              —— 与应用构建方式无关，可直接用浏览器打开
+  README.md       本文件：模块清单与当前阶段
+  plan/           计划（11 个模块，每个一份；总览见 plan/README.md）
+  design/         设计资产（可独立于构建工具使用）
+    tokens.less      设计 token 唯一来源（配色/字体/尺寸/圆角/动效）
+    tokens.css       自动生成（build-css.mjs）
+    color-card.html  色卡：实时读 tokens.css + 对比度/配对自检
+    mock.html        详细界面稿（1440×888，三列通高）
+    i18n/*.json      四语文案（简/繁/英/日；ui.* 与 sample.* 分命名空间）
+    logo-*.svg       官方 logo 换色版（设计交付物，未应用到生产）
+    icons/           App 图标 PNG 七档（16–1024）
+  MIGRATION.md    迁移台账（复制了什么、改了什么、为什么）
 ```
 
-## 约定
+## 模块（11）
 
-- **契约优先**：消息按 `@/openapi` 的 `MessageType`（17 种）渲染；缺字段记入文档，不擅自改后端契约。
-- **复用不复制**：`openapi/` `types/` `utils/` `hooks/` `chatbox` 流解析 → import 复用。
-- **不碰老界面**：新样式作用域化在 `.celadon` 下，迁移完成后再切入口。
-- **命名**：变量/类名**用全称，不用缩写**（`--background-content` 而非 `--bg-content`、`--radius-medium` 而非 `--r-md`）。
+| # | 模块 | 状态 | 计划 |
+| --- | --- | --- | --- |
+| 00 | **设计规范** | **🚧 进行中** | [plan/00-design-system.md](plan/00-design-system.md) |
+| 01 | 布局 | ⏳ 待开始 | [plan/01-layout.md](plan/01-layout.md) |
+| 02 | 组件 | ⏳ 待开始 | [plan/02-components.md](plan/02-components.md) |
+| 03 | 登录注册 | ⏳ 待开始 | [plan/03-auth.md](plan/03-auth.md) |
+| 04 | 收件箱 | ⏳ 待开始 | [plan/04-inbox.md](plan/04-inbox.md) |
+| 05 | 看板 | ⏳ 待开始 | [plan/05-kanban.md](plan/05-kanban.md) |
+| 06 | 聊天 | ⏳ 待开始 | [plan/06-chat.md](plan/06-chat.md) |
+| 07 | 专家 | ⏳ 待开始 | [plan/07-experts.md](plan/07-experts.md) |
+| 08 | 电脑 | ⏳ 待开始 | [plan/08-computer.md](plan/08-computer.md) |
+| 09 | 工作空间 | ⏳ 待开始 | [plan/09-workspace.md](plan/09-workspace.md) |
+| 10 | 配置 | ⏳ 待开始 | [plan/10-settings.md](plan/10-settings.md) |
+
+## 设计资产（当前阶段产物）
+
+```bash
+node packages/celadon/design/build-css.mjs    # tokens.less  → tokens.css
+node packages/celadon/design/build-i18n.mjs   # i18n/*.json  → i18n/bundle.js
+```
+
+- **配色**：中国传统色 —— 品牌「青」`#2A7B7B`（青瓷釉色）· 成功「松花绿」`#057748` · 危险「朱红」`#D93B30` · 警示「琥珀」`#8B6214`；
+- **字体**：四语分栈（`--font-family-ui-hans/-hant/-japanese`，按 `:lang` 自动映射），等宽补 CJK；
+- **i18n**：`ui.*` 必翻 / `sample.*` 演示数据；缺 key 回退 `zh-CN`；
+- **命名**：变量与类名全称，不用缩写；状态用 `is-*`。
+
+## 纪律
+
+见 [plan/README.md](plan/README.md)：**台账制** · **零反向依赖**（本包不得 import 旧包）· **旧包冻结**。
