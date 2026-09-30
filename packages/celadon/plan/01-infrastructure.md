@@ -49,7 +49,7 @@
 | `zustand` | 5.0.15 | 状态 | |
 | `@tanstack/react-virtual` | 3.14.13 | 虚拟列表 | 与 `react-virtuoso` 二选一 |
 | `motion` | 13.4.6 | 动效 | |
-| `date-fns` · `@date-fns/tz` | 4.4.0 · 1.5.0 | 日期 | `@base-ui/react` 的 peer，按需引入 |
+| `date-fns` · `@date-fns/tz` | 4.4.0 · 1.5.0 | **日期运算 / 时区**（**不是格式化** ✗）| `@base-ui/react` 的**可选** peer（`optional: true`，不装也能用）；**只有用它的日期组件才需要** —— 且其日期引擎可替换，仓库内仅 `temporal-adapter-date-fns` 一处用到 |
 | `@playwright/test` | 1.63.0 | 浏览器验收 | 与 `scripts/tests/` 的测试策略一起定 |
 
 **不用**：`antd`（见 4.7）
