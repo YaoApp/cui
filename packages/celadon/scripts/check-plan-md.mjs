@@ -15,6 +15,8 @@ process.chdir(DESIGN)
 const TARGET = resolve(process.argv[2] || resolve(DESIGN, '..', 'plan'))
 process.chdir(TARGET)
 
+const FORBIDDEN_HEADINGS = /^#{1,6}\s*.*(待讨论|未决|TODO|FIXME|TBD)/i;
+
 const files = readdirSync('.').filter((f) => f.endsWith('.md'))
 if (files.length === 0) {
   console.log('✗ 没有找到可检查的 Markdown 文件 —— 目标目录不对？(目标：' + TARGET + ')')
@@ -34,6 +36,12 @@ for (const f of files) {
     else { if (cur.length) blocks.push(cur); cur = [] }
   })
   if (cur.length) blocks.push(cur)
+
+  lines.forEach((l, idx) => {
+    if (FORBIDDEN_HEADINGS.test(l)) {
+      problems.push(`${f}:${idx + 1} 对外文档不得有"待讨论 / 未决"小节标题: ${l.trim().slice(0, 40)}`)
+    }
+  })
 
   for (const b of blocks) {
     const where = `${f}:${b[0][0]}`
