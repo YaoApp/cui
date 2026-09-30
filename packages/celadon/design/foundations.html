@@ -770,7 +770,7 @@ function initGrip(theme){
     var k = Math.min(1, (clip.clientWidth - 2) / vw);            /* 预览被缩放，位移要除以缩放比 */
     var track = document.getElementById('ggrid-'+theme).style.gridTemplateColumns.split(' ');
     var startX = e.clientX, startSide = parseInt(track[2], 10) || SIDE_TYPES[SIDE_TYPE][1];
-    function move(ev){ SIDE_WANTED = true; SIDE_DRAG = Math.round(startSide + (ev.clientX - startX) / k); syncGrid(); }
+    function move(ev){ SIDE_WANTED = true; SIDE_DRAG = Math.round(startSide - (ev.clientX - startX) / k);   /* 把手在右：向左拖 = 侧栏变宽 */ syncGrid(); }
     function up(){ grip.classList.remove('on'); window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); }
     window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
   });
