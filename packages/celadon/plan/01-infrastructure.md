@@ -25,6 +25,7 @@
 | 10 | **路由** | **React Router 库模式**（`react-router@^8`，不装 `@react-router/dev`）；**`basename` 与 Vite `base` 同源**，取自引擎注入的 `BASE` |
 | 11 | **数据请求** | **原生 `fetch`**（不用 axios）；搬旧仓库 `openapi/` 作类型化客户端；**不引数据缓存库**，用自建小钩子管加载 / 错误状态 |
 | 12 | **日期运算与时区** | **`date-fns` + `@date-fns/tz`**（Base UI 的官方适配器 · tree-shakable）；**格式化不归它，仍走 `Intl`** |
+| 13 | **长列表** | **`virtua`**（容器与行渲染归我们，库只算位置；索引 ↔ 偏移双向可查，尺寸缓存可存可恢复）|
 
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
@@ -42,14 +43,15 @@
 | `i18next` · `react-i18next` | `^26` · `^17` | i18n 运行时 |
 | `react-router` | `^8` | 路由（库模式，配 `basename`）|
 | `date-fns` · `@date-fns/tz` | `^4` · `^1` | 日期运算与时区（见 4.12）|
+| `virtua` | `^0.52` | 长列表虚拟滚动（聊天流 · 收件箱 · 看板列；见 4.13）|
 | `pnpm`（**工具**，非依赖）| `10.34.6` | 包管理器，根 `packageManager` 锁死 |
 
 **待定**（推荐列出，未拍）：
 
 | 包 | 当前最新 | 用途 | 备注 |
 | --- | --- | --- | --- |
+| `@tanstack/react-virtual` | 3.14.13 | **数据表格**类虚拟滚动 | 写通用表格时再评估；聊天流不用它（见 4.13）|
 | `zustand` | 5.0.15 | 状态 | |
-| `@tanstack/react-virtual` | 3.14.13 | 虚拟列表 | 与 `react-virtuoso` 二选一 |
 | `motion` | 13.4.6 | 动效 | |
 | `@playwright/test` | 1.63.0 | 浏览器验收 | 与 `scripts/tests/` 的测试策略一起定 |
 
@@ -396,6 +398,38 @@ packages/celadon/
 | 显示日期 / 时间 / 数字 / 货币 / 相对时间 | **`Intl`**（或 i18next 的 formatter），规则见 `19` |
 | 加减 · 区间 · 日历网格 · 时区换算 | **`date-fns`** |
 | 存储与传输 | **UTC**（`19` 的铁律），客户端上送 `clientTimeZone` |
+
+### 4.13 长列表：virtua
+
+**结论**：长列表（聊天流 · 收件箱 · 看板列）用 **`virtua`**；容器 DOM 与行渲染都归我们，库只负责位置计算。
+
+**为什么需要**：旧应用**全量渲染**（0 处虚拟化，聊天/收件箱/看板里 94 处直接 `.map()`），上千条消息即上千个 DOM 节点。
+
+**底层 API（要达到的四个能力）**：
+
+| 场景需要 | `virtua` 给的 |
+| --- | --- |
+| 逐帧滚动状态 | `onScroll` · `onScrollEnd` · `getScrollOffset()` · `getScrollSize()` · `getViewportSize()` |
+| **侧边 → 内容**（按索引定位）| `getItemOffset(index)` · `scrollToIndex(index, opts)` |
+| **内容 → 侧边**（反查第几项）| `findItemIndex(offset)` |
+| 不定高 | 内建测量 · `getItemSize(index)` |
+| **切换会话恢复位置** | `getCache()`（尺寸与偏移快照，可存可恢复）|
+| 附带 | `VList` / `Virtualizer` / `WindowVirtualizer` / **`VGrid`**（看板列可用）|
+
+**真实对照（工作区内一件实现）**：聊天列表用 `virtua` —— `VirtualizedList.tsx` **481 行** + 三个聚焦的 hook
+（**加载更早历史** · **按话题恢复滚动位置** · 是否在底部），**手写浏览器滚动细节 0 行**，全部走上述 API。
+
+**活跃度（实测）**：
+
+| | `virtua` | `@tanstack/react-virtual` |
+| --- | --- | --- |
+| 近 90 天提交 | **100** | 37 |
+| 最近 6 个发布 | **一周内 6 个** | 一个半月 6 个 |
+| 最近推送 | 当日 | 9 天前 |
+| Stars | 3747 | 7126 |
+
+**`@tanstack/react-virtual`**：能力齐（`getOffsetForIndex` · `getVirtualItemForOffset` · `indexFromElement` · `measureElement` · `scrollToEnd`），
+但**只提供 hook**，容器与结构要自己搭 —— **留给将来写通用数据表格时评估**，聊天流不用它。
 
 ---
 
