@@ -6,7 +6,7 @@
 ## 1. 颜色只用 token
 
 - **禁止**任何颜色字面量（`#fff` · `rgb()` · `hsl()`），一律 `var(--token)`
-- 唯一的例外是**品牌官方色**（logo 自带色，商标规范要求不得改色）与**系统再现**（macOS 红黄绿灯）
+- 唯一的例外是**品牌官方色**（logo 自带色，商标规范要求不得改色）与**系统再现**（macOS 红黄绿灯**与窗底**）
 - **装饰色（`--text-muted`）不能承载文字** —— 它只用于分隔符、水印
 - 检查：`scripts/check-tokens.mjs` · `scripts/check-generated.mjs`
 
@@ -18,7 +18,7 @@
 | 圆角 | `--radius-*`（xs/small/medium/large/pill） | `border-radius: 10px` |
 | 字号 | `--font-size-*` | `font-size: 11.5px` |
 | 行高 | `--line-height-normal`（拉丁）/ `--line-height-cjk`（中日文） | `line-height: 1.6` |
-| 线宽 | `--border-width` | `border: 1px solid …` |
+| 线宽 | `--border-width` | `border: 1px solid …`；逻辑边框（`border-inline-start` 等）同样要 `var(--border-width)` |
 | 阴影 | `--shadow-*` | 手写 `box-shadow` |
 
 - **不要用 `font:` 简写** —— 它会把字号与行高一起写死、绕过 token。拆成 `font-family` / `font-size` / `font-weight` / `line-height`

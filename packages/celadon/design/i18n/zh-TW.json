@@ -2,7 +2,7 @@
   "ui": {
     "brand": "Yao Agents",
     "newTask": "新增任務",
-    "nav": {
+    "navigation": {
       "chat": "聊天",
       "inbox": "收件匣",
       "board": "看板",
@@ -373,7 +373,7 @@
         "click": "點一下",
         "toggle": "撥一下"
       },
-      "act": {
+      "action": {
         "menu": "選單",
         "drawer": "詳情",
         "modal": "開啟",
@@ -458,7 +458,7 @@
       "belowMin": "低於最小",
       "autoRail": "自動收軌",
       "zone": {
-        "nav": "導覽",
+        "navigation": "導覽",
         "center": "內容",
         "side": "側欄"
       },
@@ -577,8 +577,8 @@
     "n4": "跑檢查：`check-i18n` / `check-readme-values`；確認頁面無硬編碼顏色、無 16 網格殘留。",
     "copied": "已複製",
     "cat": {
-      "nav": "主導覽",
-      "act": "操作",
+      "navigation": "主導覽",
+      "action": "操作",
       "state": "狀態",
       "file": "檔案類型",
       "obj": "物件 / 領域",

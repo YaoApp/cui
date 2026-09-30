@@ -510,27 +510,27 @@ function stageHtml(theme, id){
     case 'focus':    inner = '<input class="el inp" value="">'; break;
     case 'fade':     inner = '<button class="el sw" type="button" aria-label="toggle"><i></i></button>'
                             + '<span class="el card"><i class="ln" style="width:58%"></i><i class="ln" style="width:86%"></i></span>'; break;
-    case 'dropdown': inner = '<button class="el trg" type="button">'+fmt(tr('f.motion.act.menu'))+'</button>'
+    case 'dropdown': inner = '<button class="el trg" type="button">'+fmt(tr('f.motion.action.menu'))+'</button>'
                             + '<span class="el menu"><i></i><i></i><i></i></span>'; break;
     case 'panel':    inner = '<span class="el hdr">'+fmt(tr('f.motion.demoPanel'))+'</span>'
                             + '<span class="el bd"><i class="ln" style="width:56%"></i><i class="ln" style="width:82%"></i></span>'; break;
     case 'collapse': inner = '<span class="el p"><i class="ln cb" style="width:50%"></i><i class="ln cb" style="width:78%"></i></span>'; break;
     case 'drawer':   inner = '<span class="el page">'+pageSkeleton([46,70,58])
-                            + '<button class="act" type="button" data-act="drawer">'+fmt(tr('f.motion.act.drawer'))+'</button></span>'
+                            + '<button class="act" type="button" data-act="drawer">'+fmt(tr('f.motion.action.drawer'))+'</button></span>'
                             + '<span class="el scrim" data-close="drawer"></span>'
                             + '<span class="el sheet"><i class="ln" style="width:56%"></i><i class="ln" style="width:82%"></i><i class="ln" style="width:66%"></i></span>'; break;
     case 'modal':    inner = '<span class="el page">'+pageSkeleton([48,72,60])
-                            + '<button class="act" type="button" data-act="modal">'+fmt(tr('f.motion.act.modal'))+'</button></span>'
+                            + '<button class="act" type="button" data-act="modal">'+fmt(tr('f.motion.action.modal'))+'</button></span>'
                             + '<span class="el scrim" data-close="modal"></span>'
                             + '<span class="el dlg"><i class="ln" style="width:52%"></i><i class="ln" style="width:84%"></i></span>'; break;
     case 'toast':    inner = '<span class="el page"><i class="ln" style="width:52%"></i><i class="ln" style="width:74%"></i>'
-                            + '<button class="act" type="button" data-act="toast">'+fmt(tr('f.motion.act.toast'))+'</button></span>'
+                            + '<button class="act" type="button" data-act="toast">'+fmt(tr('f.motion.action.toast'))+'</button></span>'
                             + '<span class="el toast" data-close="toast">'+fmt(tr('f.motion.demoToast'))+'</span>'; break;
     case 'list':     tall = ' tall';
-                     inner = '<button class="el act" type="button" data-act="list">'+fmt(tr('f.motion.act.list'))+'</button>'
+                     inner = '<button class="el act" type="button" data-act="list">'+fmt(tr('f.motion.action.list'))+'</button>'
                             + '<span class="el row"><b></b><i></i></span><span class="el row"><b></b><i></i></span><span class="el row"><b></b><i></i></span>'; break;
     case 'stream':   tall = ' tall';
-                     inner = '<button class="el act" type="button" data-act="stream">'+fmt(tr('f.motion.act.stream'))+'</button>'
+                     inner = '<button class="el act" type="button" data-act="stream">'+fmt(tr('f.motion.action.stream'))+'</button>'
                             + '<span class="el line"><span class="txt"></span><span class="caret"></span></span>'; break;
   }
   var t = SCENE_TOKENS[id];
@@ -741,7 +741,7 @@ function syncGrid(){
     var k = Math.min(1, (clip.clientWidth - 2) / viewport);
     vp.style.transform = 'scale(' + k + ')';
     var ro = document.getElementById('gr-readout');
-    if (ro) ro.textContent = viewport + 'px → ' + tr('f.grid.zone.nav') + ' ' + tr('f.grid.navMode.'+L.navMode) + ' ' + L.navTrack
+    if (ro) ro.textContent = viewport + 'px → ' + tr('f.grid.zone.navigation') + ' ' + tr('f.grid.navMode.'+L.navMode) + ' ' + L.navTrack
       + (L.navOverlay ? '(+' + tr('f.grid.overlay') + ')' : '') + ' · ' + tr('f.grid.zone.center') + ' ' + L.center
       + (L.centerBelowMin ? '(' + tr('f.grid.belowMin') + ')' : '') + ' · ' + tr('f.grid.zone.side') + ' ' + L.side + tr('f.grid.px') + '（' + tr('f.grid.cap') + L.sideCap + tr('f.grid.px') + '）'
       + (L.drawer ? '' : (L.autoCollapse ? ' · <' + tok('--nav-auto-collapse',theme) + ' ' + tr('f.grid.autoRail') : ''));
