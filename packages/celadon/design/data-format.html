@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>数据格式 · 四语对照（<code>19</code> 的展示页）</title>
+<!-- 唯一来源：tokens.less → build-css.mjs → tokens.css -->
+<link rel="stylesheet" href="./tokens.css">
+<style>
+html,body{margin:0}
+body{background:var(--background-app);color:var(--text-primary);font-family:var(--font-family-ui);
+  font-size:var(--font-size-body-lg);line-height:var(--line-height-cjk);-webkit-font-smoothing:antialiased;
+  padding:var(--spacing-24)}
+.top{display:flex;align-items:flex-end;gap:var(--spacing-16);flex-wrap:wrap;margin-bottom:var(--spacing-16)}
+h1{font-size:var(--font-size-title);font-weight:var(--font-weight-strong);margin:0}
+p.sub{margin:var(--spacing-8) 0 0;color:var(--text-secondary);max-width:1000px}
+.segs{margin-inline-start:auto;display:flex;gap:var(--spacing-8);flex-wrap:wrap}
+.seg{display:inline-flex;gap:var(--spacing-4);padding:var(--spacing-4);border-radius:var(--radius-pill);
+  border:var(--border-width) solid var(--border-control);background:var(--background-field)}
+.seg button{cursor:pointer;font-family:inherit;font-size:var(--font-size-caption);
+  padding:var(--spacing-4) var(--spacing-12);border:0;border-radius:var(--radius-pill);
+  background:transparent;color:var(--text-secondary)}
+.seg button.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:var(--font-weight-strong)}
+.card{background:var(--background-surface);border:var(--border-width) solid var(--border-default);
+  border-radius:var(--radius-large);padding:var(--spacing-16);margin-bottom:var(--spacing-16)}
+.card h2{font-size:var(--font-size-subtitle);font-weight:var(--font-weight-strong);margin:0 0 var(--spacing-4)}
+.card p.hint{margin:0 0 var(--spacing-12);color:var(--text-secondary);font-size:var(--font-size-caption)}
+.card code{font-family:var(--font-family-monospace);font-size:var(--font-size-caption)}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:start;padding:var(--spacing-8) var(--spacing-12);border-bottom:var(--border-width) solid var(--border-subtle)}
+th{color:var(--text-secondary);font-size:var(--font-size-caption);font-weight:var(--font-weight-medium)}
+td{font-size:var(--font-size-body-lg)}
+td.k{color:var(--text-secondary);width:34%}
+td code{color:var(--text-tertiary)}
+.mono{font-family:var(--font-family-monospace);direction:ltr;unicode-bidi:isolate}
+.raw{margin-top:var(--spacing-8);color:var(--text-muted);font-size:var(--font-size-label);font-family:var(--font-family-monospace)}
+</style>
+</head>
+<body class="celadon">
+<div class="top">
+  <div>
+    <h1>数据格式 · 四语对照</h1>
+    <p class="sub">本页所有值都由浏览器<b>实时调用 <code>Intl.*</code> 计算</b>，不是写死的字符串 ——
+      所以它同时是 <code>plan/19-data-format.md</code> §3.4 那张样例表的<b>校验</b>。切语言看同一份数据的写法变化。</p>
+  </div>
+  <div class="segs">
+    <span class="seg" id="langSwitch">
+      <button data-l="zh-CN" class="on">简</button><button data-l="zh-TW">繁</button>
+      <button data-l="en">EN</button><button data-l="ja">日</button>
+    </span>
+    <span class="seg" id="themeSwitch">
+      <button data-t="light" class="on">浅色</button><button data-t="dark">暗色</button>
+    </span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>日期与时间</h2>
+  <p class="hint">同一时刻用 <code>Intl.DateTimeFormat</code> 按语言渲染；相对时间用固定的样例间隔（<code>Intl.RelativeTimeFormat</code>）。</p>
+  <table id="tblDate"><tbody></tbody></table>
+</div>
+
+<div class="card">
+  <h2>相对时间阶梯</h2>
+  <p class="hint">阈值见 <code>19</code> §3.1：刚刚 → N 分钟 → N 小时 → N 天 → 月日 → 年月日。</p>
+  <table id="tblRel"><tbody></tbody></table>
+</div>
+
+<div class="card">
+  <h2>时区</h2>
+  <p class="hint">同一时间戳在三个时区下的显示；落库格式带偏移与 IANA 括注（<code>19</code> §2）。</p>
+  <table id="tblTz"><tbody></tbody></table>
+  <p class="raw" id="tzRaw"></p>
+</div>
+
+<div class="card">
+  <h2>数字 · 单位 · 货币</h2>
+  <p class="hint">千分位 · 大数缩写 · 文件大小（1024 进制 / 1 位小数）· 金额（保留币种小数位）· 列表与范围。<b>技术标识强制拉丁数字与 LTR</b>。</p>
+  <table id="tblNum"><tbody></tbody></table>
+</div>
+
+<div class="card">
+  <h2>排序（按语言）</h2>
+  <p class="hint">同一组词用 <code>Intl.Collator</code> 排序；标识符与路径不本地化，按码位（<code>19</code> §3.6）。</p>
+  <table id="tblSort"><tbody></tbody></table>
+</div>
+
+<div class="card">
+  <h2>双向文本（RTL）</h2>
+  <p class="hint">方向性图标镜像 · bidi 隔离 · 视觉回归 —— 规则见 <code>19</code> §4，效果演示见 <a href="css-logical.html">css-logical.html</a>。</p>
+  <table id="tblRtl"><tbody></tbody></table>
+</div>
+
+<script>
+var LANG = 'zh-CN', THEME = 'light';
+
+/* 固定样例，保证可复现：同一时刻 / 同一数值 / 同一文件大小 */
+var T = Date.UTC(2026, 8, 30, 8, 12, 34);          /* 2026-09-30T08:12:34Z */
+var D = new Date(T);
+var rows = function (el, pairs) {
+  el.querySelector('tbody').innerHTML = pairs.map(function (p) {
+    return '<tr><td class="k">' + p[0] + (p[2] ? ' <code>' + p[2] + '</code>' : '') + '</td><td>' + p[1] + '</td></tr>';
+  }).join('');
+};
+var esc = function (s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+
+function render() {
+  var L = LANG;
+  var dt = function (opt, date) { return new Intl.DateTimeFormat(L, opt).format(date || D); };
+  var rel = function (v, unit) { return new Intl.RelativeTimeFormat(L, { numeric: 'auto' }).format(v, unit); };
+  var num = function (v, opt) { return new Intl.NumberFormat(L, opt || {}).format(v); };
+
+  /* 日期与时间 */
+  rows(document.getElementById('tblDate'), [
+    ['长日期', esc(dt({ dateStyle: 'long' })), 'dateStyle:long'],
+    ['短日期', esc(dt({ dateStyle: 'short' })), 'dateStyle:short'],
+    ['日期 + 时间', esc(dt({ dateStyle: 'medium', timeStyle: 'short' })), 'dateStyle+timeStyle'],
+    ['仅时间（强制 24h）', esc(dt({ hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })), 'hourCycle:h23 —— 不靠 Intl 默认（zh-TW/en 默认是 12h）'],
+    ['星期', esc(dt({ weekday: 'long' })), 'weekday:long']
+  ]);
+
+  /* 相对时间阶梯 */
+  var now = Date.now();
+  var ago = function (ms) { return new Date(now - ms); };
+  /* 规范 §3.1：< 1 分钟显示「刚刚」而不是「20 秒钟前」；正式实现这四个词来自 i18n */
+  var JUST_NOW = { 'zh-CN': '刚刚', 'zh-TW': '剛剛', en: 'just now', ja: 'たった今' };
+  var fmtAgo = function (ms) {
+    var sec = Math.round(ms / 1000), d = ago(ms);
+    if (sec < 60) return JUST_NOW[LANG] || JUST_NOW['zh-CN'];
+    if (sec < 3600) return rel(-Math.round(sec / 60), 'minute');
+    if (sec < 86400) return rel(-Math.round(sec / 3600), 'hour');
+    if (sec < 86400 * 7) return rel(-Math.round(sec / 86400), 'day');
+    return dt({ month: 'short', day: 'numeric' }, d);
+  };
+  rows(document.getElementById('tblRel'), [
+    ['< 1 分钟', esc(fmtAgo(20 * 1000)), '刚刚'],
+    ['几十分钟', esc(fmtAgo(23 * 60 * 1000)), 'N 分钟前'],
+    ['几小时', esc(fmtAgo(5 * 3600 * 1000)), 'N 小时前'],
+    ['几天', esc(fmtAgo(3 * 86400 * 1000)), 'N 天前'],
+    ['> 7 天', esc(fmtAgo(12 * 86400 * 1000)), '月日'],
+    ['> 1 年', esc(dt({ year: 'numeric', month: 'short', day: 'numeric' }, ago(400 * 86400 * 1000))), '年月日']
+  ]);
+
+  /* 时区 */
+  var tz = function (zone) { return new Intl.DateTimeFormat(L, { dateStyle: 'short', timeStyle: 'medium', timeZone: zone }).format(D); };
+  var off = function (zone) {
+    var p = new Intl.DateTimeFormat('en-US', { timeZone: zone, timeZoneName: 'longOffset' }).formatToParts(D);
+    return p.filter(function (x) { return x.type === 'timeZoneName'; })[0].value;
+  };
+  rows(document.getElementById('tblTz'), [
+    ['UTC', esc(tz('UTC')), off('UTC')],
+    ['Asia/Shanghai', esc(tz('Asia/Shanghai')), off('Asia/Shanghai')],
+    ['America/New_York', esc(tz('America/New_York')), off('America/New_York')],
+    ['Europe/Berlin', esc(tz('Europe/Berlin')), off('Europe/Berlin')]
+  ]);
+  document.getElementById('tzRaw').textContent = '落库格式：' + new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+  }).format(D).replace(/(\d+)\/(\d+)\/(\d+), (\d+):(\d+):(\d+)/, '$3-$1-$2T$4:$5:$6') + off('Asia/Shanghai') + '[Asia/Shanghai]';
+
+  /* 数字 · 单位 · 货币 */
+  var size = function (b) {
+    if (b < 1024) return num(b) + ' B';
+    var u = ['KB', 'MB', 'GB'], i = -1, v = b;
+    do { v /= 1024; i++; } while (v >= 1024 && i < u.length - 1);
+    var r = Math.round(v * 10) / 10;
+    return num(r, { minimumFractionDigits: Number.isInteger(r) ? 0 : 1, maximumFractionDigits: 1 }) + ' ' + u[i];
+  };
+  var money = function (v, cur) { return new Intl.NumberFormat(L, { style: 'currency', currency: cur }).format(v); };
+  rows(document.getElementById('tblNum'), [
+    ['千分位与小数', esc(num(1234.56, { minimumFractionDigits: 2 })), 'NumberFormat'],
+    ['大数缩写（12,345）', esc(num(12345, { notation: 'compact', maximumFractionDigits: 1 })), 'notation:compact'],
+    ['文件大小 &lt; 1 KB', esc(size(900)), 'xx B'],
+    ['文件大小 KB', esc(size(2.1 * 1024)), '1 位小数'],
+    ['文件大小 1.8 MB', esc(size(1.8 * 1024 * 1024)), '1024 进制'],
+    ['文件大小整数', esc(size(2 * 1024 * 1024)), '不补 .0'],
+    ['金额 · CNY（默认，带前缀）', esc(money(1280, 'CNY')), 'currencyDisplay 默认'],
+    ['金额 · CNY（窄符号）', esc(new Intl.NumberFormat(L, { style: 'currency', currency: 'CNY', currencyDisplay: 'narrowSymbol' }).format(1280)), '同币种语境用这个'],
+    ['金额 · JPY', esc(money(1280, 'JPY')), '0 位'],
+    ['金额 · USD', esc(money(1280, 'USD')), '2 位'],
+    ['负数金额', esc(money(-100, 'CNY')), '负号不用括号'],
+    ['列表', esc(new Intl.ListFormat(L, { style: 'long', type: 'conjunction' }).format(['甲', '乙', '丙'])), 'ListFormat'],
+    ['范围', esc('1–3'), 'en dash'],
+    ['时长（进度）', '<span class="mono">1:23</span>', '等宽'],
+    ['时长（陈述）', esc(LANG === 'en' ? '2 h 5 min' : LANG === 'ja' ? '2 時間 5 分' : '2 小时 5 分'), '文字'],
+    ['技术标识', '<span class="mono">1.8 MB · v2.0.0 · :8080</span>', '强制拉丁 + LTR']
+  ]);
+
+  /* 排序 */
+  var words = ['阿', '波', '蔡', '邓', '徐', '张'];
+  var coll = new Intl.Collator(L);
+  rows(document.getElementById('tblSort'), [
+    ['按语言（Collator）', esc(words.slice().sort(coll.compare).join(' < ')), 'Intl.Collator'],
+    ['按码位', '<span class="mono">' + esc(words.slice().sort().join(' < ')) + '</span>', '不本地化']
+  ]);
+
+  /* RTL 规则（静态说明） */
+  rows(document.getElementById('tblRtl'), [
+    ['要镜像', esc('i-left · i-right · i-collapse · i-expand · i-act-undo · i-act-redo'), '水平且有方向意义'],
+    ['不镜像', esc('i-act-sort（上下）· 播放 · 时钟 · 进度'), '与方向无关'],
+    ['bidi', esc('用户输入 / 文件名 → dir="auto"；代码 / 路径 / 标识符 → dir="ltr" + isolate'), '19 §4.2']
+  ]);
+}
+
+document.getElementById('langSwitch').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-l]'); if (!b) return;
+  LANG = b.getAttribute('data-l');
+  document.documentElement.setAttribute('lang', LANG);
+  [].forEach.call(this.querySelectorAll('button'), function (x) { x.classList.toggle('on', x === b); });
+  render();
+});
+document.getElementById('themeSwitch').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-t]'); if (!b) return;
+  document.documentElement.setAttribute('data-theme', b.getAttribute('data-t'));
+  [].forEach.call(this.querySelectorAll('button'), function (x) { x.classList.toggle('on', x === b); });
+});
+render();
+</script>
+</body></html>
