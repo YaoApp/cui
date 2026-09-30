@@ -52,10 +52,6 @@
 | `vitest` · `@testing-library/react` · `@testing-library/user-event` · `jsdom` · `@vitest/coverage-v8` · `@playwright/test` | 最新 | **测试**（devDeps；见 4.16）|
 | `pnpm`（**工具**，非依赖）| `10.34.6` | 包管理器，根 `packageManager` 锁死 |
 
-**待定**（推荐列出，未拍）：
-
-| 包 | 当前最新 | 用途 | 备注 |
-| --- | --- | --- | --- |
 
 **不用**：`antd`（见 4.7）
 
