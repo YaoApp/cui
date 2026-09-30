@@ -344,7 +344,6 @@
       "reducedOn": "システム設定：動きを減らす —— 有効（時間はゼロ）",
       "reducedOff": "システム設定：通常のモーション",
       "scenes": "よくある場面（直接操作するか、再生）",
-      "playOne": "再生",
       "demoBtn": "送信",
       "demoToast": "✓ 保存しました",
       "demoStream": "要約を生成しています。少々お待ちください…",
@@ -367,8 +366,18 @@
         "hover": "ホバーしてみる",
         "press": "押し続ける",
         "focus": "クリックまたは Tab",
-        "click": "クリック"
-      }
+        "click": "クリック",
+        "toggle": "切り替えてみる"
+      },
+      "act": {
+        "menu": "メニュー",
+        "drawer": "詳細",
+        "modal": "開く",
+        "toast": "保存する",
+        "list": "再読み込み",
+        "stream": "再生成"
+      },
+      "demoPanel": "契約の詳細"
     },
     "border": {
       "title": "境界線 Border（WCAG 1.4.11 の判断を含む）",
