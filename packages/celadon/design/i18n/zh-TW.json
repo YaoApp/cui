@@ -344,7 +344,6 @@
       "reducedOn": "目前系統偏好：減少動態效果 —— 已降級（時長歸零）",
       "reducedOff": "目前系統偏好：正常動效",
       "scenes": "常用場景（可直接操作，或按播放）",
-      "playOne": "播放",
       "demoBtn": "傳送",
       "demoToast": "✓ 已儲存",
       "demoStream": "正在產生摘要，請稍候…",
@@ -367,8 +366,18 @@
         "hover": "移入試試",
         "press": "按住試試",
         "focus": "點擊或 Tab",
-        "click": "點一下"
-      }
+        "click": "點一下",
+        "toggle": "撥一下"
+      },
+      "act": {
+        "menu": "選單",
+        "drawer": "詳情",
+        "modal": "開啟",
+        "toast": "儲存",
+        "list": "重新載入",
+        "stream": "重新產生"
+      },
+      "demoPanel": "合約詳情"
     },
     "border": {
       "title": "邊框 Border（含 WCAG 1.4.11 決策）",
