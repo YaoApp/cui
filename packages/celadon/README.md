@@ -4,7 +4,8 @@
 > **Celadon** 是**设计体系**的名字（token 体系 · 组件风格 · 视觉规范）；产品与外发一律用 **CUI 2.0**。
 > 目录名 `packages/celadon/` 沿用设计体系名，不改。
 > 不继承旧包的历史包袱：**用到啥复制啥，适配啥修改啥**。
-> 当前阶段：**01 基础设施**（待开始）｜ 已完成：**✅ 00 设计规范**（2026-09-30）｜ 构建工具：**Vite**（已选定）
+> 当前阶段：**01 基础设施**（**进行中**：选型与包结构已定并跑通 `dev`/`build`/`check`，接线待做）｜ 已完成：**✅ 00 设计规范**（2026-09-30）
+> 构建工具 **Vite** ｜ 包管理器 **pnpm** ｜ 包名 `@yaoapp/cui@2.0.0`
 
 ## 结构决定：v2 只有一个包
 
@@ -41,7 +42,7 @@ celadon/
 | # | 模块 | 状态 | 计划 |
 | --- | --- | --- | --- |
 | 00 | **设计规范** | **✅ 完成** | [plan/00-design-system.md](plan/00-design-system.md) |
-| 01 | 基础设施 | ⏳ 待开始 | [plan/01-infrastructure.md](plan/01-infrastructure.md) |
+| 01 | 基础设施 | 🔄 进行中 | [plan/01-infrastructure.md](plan/01-infrastructure.md) |
 | 02 | 布局 | ⏳ 待开始 | [plan/02-layout.md](plan/02-layout.md) |
 | 03 | 组件 | ⏳ 待开始 | [plan/03-components.md](plan/03-components.md) |
 | 04 | 登录注册 | ⏳ 待开始 | [plan/04-auth.md](plan/04-auth.md) |
