@@ -666,6 +666,8 @@ function syncGrid(){
   var vp0 = document.getElementById('gr-range'), navIn = document.getElementById('gr-nav');
   var sideIn = document.getElementById('gr-side');
   var viewport = parseInt(vp0.value, 10), navPref = parseInt(navIn.value, 10), ratio = parseInt(sideIn.value, 10)/100;
+  /* 回到宽屏即清掉"临时展开"标志（临时标志不写回持久化偏好，两级状态） */
+  if (NAV_MANUAL && viewport >= px(tok('--nav-auto-collapse','light'))) NAV_MANUAL = false;
   ['light','dark'].forEach(function(theme){
     var vp = document.getElementById('gvp-'+theme), clip = document.getElementById('gclip-'+theme);
     if (!vp) return;
@@ -728,9 +730,10 @@ function initGrid(){
       /* 两级状态：宽屏收起 = 写"收起偏好"；窄屏/抽屉态 = 只开"临时浮层"，不动偏好 */
       var v = parseInt(document.getElementById('gr-range').value, 10);
       var auto = v < px(tok('--nav-auto-collapse','light')) || (PLATFORM === 1 && v < px(tok('--bp-nav-drawer','light')));
-      if (NAV_COLLAPSED || NAV_MANUAL) { NAV_COLLAPSED = false; NAV_MANUAL = false; }
-      else if (auto) { NAV_MANUAL = true; }
-      else { NAV_COLLAPSED = true; }
+      if (NAV_MANUAL) { NAV_MANUAL = false; }                       /* 浮层 → 收起 */
+      else if (auto) { NAV_MANUAL = true; NAV_COLLAPSED = false; }  /* 窄屏：直接开浮层（否则点了没变化） */
+      else if (NAV_COLLAPSED) { NAV_COLLAPSED = false; }            /* 宽屏：展开 */
+      else { NAV_COLLAPSED = true; }                                /* 宽屏：收起 */
       syncGrid(); }); el.dataset.done = '1'; }
   });
   var pb = document.getElementById('gr-plats');
