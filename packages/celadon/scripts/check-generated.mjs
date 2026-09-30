@@ -13,6 +13,13 @@ import { readFileSync } from 'node:fs';
 const DESIGN = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'design')
 process.chdir(DESIGN)
 
+/* 本检查不接受"目标目录"参数：它要真的重新生成一遍产物，需要整套雪碧图与清单，
+   指到别的目录没有意义 —— 与其静默检查真目录，不如直接说清楚。 */
+if (process.argv[2]) {
+  console.log('✗ check-generated 不接受目标目录参数（它检查的是仓库里真实的生成物）')
+  process.exit(1)
+}
+
 const GENERATED = ['icons.html', 'mock.html'];   /* build-icons.mjs 的产物 */
 const files = ['icons.html', 'mock.html', 'index.html'];   /* 颜色类检查覆盖三张规范页 */
 const before = GENERATED.map((f) => readFileSync(f, 'utf8'));
