@@ -151,7 +151,7 @@
 
 | 项 | 产物（本包内） | 自检方式 |
 | --- | --- | --- |
-| 配色与语义 token | `design/tokens.less` → `tokens.css`（浅/暗两套；含 focus-ring / scrim / disabled / brand-ink / brand-solid-*） | `node design/build-css.mjs` |
+| 配色与语义 token | `design/tokens.less` → `tokens.css`（浅/暗两套；含 focus-ring / scrim / disabled / brand-ink / brand-solid-*） | `node scripts/build-css.mjs` |
 | 配色出处 | 中国传统色：品牌「青」`#2A7B7B` · 成功「松花绿」`#057748` · 危险「朱红」`#D93B30` · 警示「琥珀」`#8B6214` | README 色表 + `check-readme-values.mjs` |
 | 双主题定稿 | 浅色＝冷白底 + 暖墨文字；暗色＝暖墨底（`#191816` / `#121110`）+ 暖白文字（`#F4F1EA`） | 色卡双列实算 |
 | 状态配色 | `--background-hover/-active/-selected/-readonly/-disabled` · `--border-hover/-disabled` · `--text-placeholder/-disabled`；三级文字 5.00:1 ✅ | 色卡「控件状态」矩阵 |

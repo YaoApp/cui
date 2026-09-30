@@ -3,7 +3,16 @@
    并同步画廊数据（含来源名）、覆盖度数据。
    图标本体在 icons/own-sprite.svg（我们自绘）与 icons/lucide-sprite.svg（lucide，ISC）。
    这里只做装配，不手改图标，也不手改页面里的雪碧图块。 */
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+
+/* 本脚本住在 scripts/，目标资产在 ../design/ —— 统一切到那里作为工作目录，
+   这样下面所有相对路径（icons/… · *.html · tokens.less · i18n/…）都继续成立，
+   并且从任何目录调用都不会出错。 */
+const DESIGN = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'design')
+process.chdir(DESIGN)
+
 
 const manifest = JSON.parse(readFileSync('icons/manifest.json', 'utf8'));
 const readSymbols = (file) => {
