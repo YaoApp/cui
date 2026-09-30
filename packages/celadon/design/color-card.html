@@ -58,6 +58,7 @@ h1{font-size:19px;margin:0 0 4px}
 .pchip{padding:4px 11px;border-radius:7px;font-size:12px;font-weight:650;border:1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .psrc{font-size:10.5px;color:var(--text-tertiary);font-family:var(--font-family-monospace);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ctwrap{overflow-x:auto}
+.legend{margin:9px 0 0;font-size:11.5px;line-height:1.5;color:var(--text-tertiary)}
 .stkind{margin-top:14px}
 .stkind .cap{font-size:11.5px;color:var(--text-tertiary);margin-bottom:9px}
 .card{min-width:0;background:var(--background-surface);border:1px solid var(--border-default);border-radius:12px;padding:14px 16px;margin-top:18px}
@@ -97,9 +98,10 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary
     <button data-lang="zh-CN">简</button><button data-lang="zh-TW">繁</button>
     <button data-lang="en">EN</button><button data-lang="ja">日</button>
   </span>
-  <span id="card-langnote" style="font-size:11.5px;color:#777"></span>
+  <span id="card-langnote" style="font-size:11.5px;color:var(--text-tertiary)"></span>
 </div>
 
+<p class="hint" id="tokens-note"></p>
 <div class="cols" id="cols"></div>
 
 <div class="card"><h2 id="pairs-title"></h2><p class="hint" id="pairs-note"></p>
@@ -138,23 +140,23 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary
 var GROUPS = [
  ['group.brand', [
    ['--brand','brand','on'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
-   ['--brand-soft','brandSoft','nocr'], ['--brand-display','brandDisplay','nocr'], ['--brand-text','brandText','on','--brand'], ['--brand-ink','brandInk','on','--brand-soft'],
-   ['--brand-lift','brandLift','nocr']]],
+   ['--brand-soft','brandSoft','fill'], ['--brand-display','brandDisplay','fill'], ['--brand-text','brandText','on','--brand'], ['--brand-ink','brandInk','on','--brand-soft'],
+   ['--brand-lift','brandLift','dark']]],
  ['group.interaction', [
    ['--focus-ring-color','focusRingColor','on'], ['--focus-ring-width','focusRingWidth'], ['--focus-ring-offset','focusRingOffset'],
-   ['--background-disabled','backgroundDisabled','nocr'], ['--text-disabled','textDisabled','nocr'], ['--border-disabled','borderDisabled','nocr'],
-   ['--scrim','scrim','nocr']]],
+   ['--background-disabled','backgroundDisabled','exempt'], ['--text-disabled','textDisabled','exempt'], ['--border-disabled','borderDisabled','exempt'],
+   ['--scrim','scrim','overlay']]],
  ['group.background', [
-   ['--background-app','backgroundApp','nocr'], ['--background-navigation','backgroundNavigation','nocr'], ['--background-content','backgroundContent','nocr'],
-   ['--background-surface','backgroundSurface','nocr'], ['--background-field','backgroundField','nocr'], ['--background-hover','backgroundHover','nocr'],
-   ['--background-selected','backgroundSelected','nocr']]],
- ['group.border', [['--border-subtle','borderSubtle','nocr'], ['--border-default','borderDefault','nocr'], ['--border-control','borderControl','nocr'], ['--border-hover','borderHover','nocr']]],
+   ['--background-app','backgroundApp','fill'], ['--background-navigation','backgroundNavigation','fill'], ['--background-content','backgroundContent','fill'],
+   ['--background-surface','backgroundSurface','fill'], ['--background-field','backgroundField','fill'], ['--background-hover','backgroundHover','fill'],
+   ['--background-selected','backgroundSelected','fill']]],
+ ['group.border', [['--border-subtle','borderSubtle','line'], ['--border-default','borderDefault','line'], ['--border-control','borderControl','line'], ['--border-hover','borderHover','line']]],
  ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary','on'], ['--text-placeholder','textPlaceholder','on','--background-field'], ['--text-muted','textMuted','on']]],
  ['group.semantic', [
-   ['--success','success','on','--success-soft'], ['--success-soft','successSoft','nocr'],
+   ['--success','success','on','--success-soft'], ['--success-soft','successSoft','fill'],
    ['--warning','warning','on'], ['--warning-soft','warningSoft'],
-   ['--warm','warm','on'], ['--warm-soft','warmSoft','nocr'], ['--warm-text','warmText','on','--warm-soft'], ['--warm-contrast','warmContrast','on','--warm'],
-   ['--danger','danger','nocr'], ['--danger-soft','dangerSoft','nocr'], ['--danger-ink','dangerInk','on','--danger-soft']]],
+   ['--warm','warm','on'], ['--warm-soft','warmSoft','fill'], ['--warm-text','warmText','on','--warm-soft'], ['--warm-contrast','warmContrast','on','--warm'],
+   ['--danger','danger','fill'], ['--danger-soft','dangerSoft','fill'], ['--danger-ink','dangerInk','on','--danger-soft']]],
  ['group.metrics', [
    ['--font-family-ui','fontFamilyUi','nocr'], ['--font-family-monospace','fontFamilyMonospace','nocr'],
    ['--font-size-11','fontSize11'], ['--font-size-12','fontSize12'], ['--font-size-13','fontSize13'], ['--font-size-16','fontSize16'],
@@ -205,7 +207,9 @@ function lum(v){ var c = toRGB(v); if (!c) return null;
   return 0.2126*a[0] + 0.7152*a[1] + 0.0722*a[2]; }
 function ratio(a,b){ var l1 = lum(a), l2 = lum(b); if (l1 === null || l2 === null) return null;
   var hi = Math.max(l1,l2), lo = Math.min(l1,l2); return (hi+0.05)/(lo+0.05); }
-function grade(r){ return r >= 7 ? ['aaa','AAA'] : r >= 4.5 ? ['aa','AA'] : r >= 3 ? ['warn','&lt;AA'] : ['bad','FAIL']; }
+function grade(r){ return r >= 7 ? ['aaa','card.gradeAaa'] : r >= 4.5 ? ['aa','card.gradeAa'] : r >= 3 ? ['warn','card.gradeLarge'] : ['bad','card.gradeFail']; }
+function gradeText(gd){ return tr(gd[1]); }
+var REASON = { fill:1, line:1, overlay:1, dark:1, exempt:1 };
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 function readAll(el){ var cs = getComputedStyle(el), o = {};
   GROUPS.forEach(function(g){ g[1].forEach(function(t){ o[t[0]] = cs.getPropertyValue(t[0]).trim(); }); }); return o; }
@@ -219,9 +223,11 @@ function buildPanel(themeName, probeEl, label){
       var bgUse = (bgToken && V[bgToken]) ? V[bgToken] : bg;
       var usage = tr('card.usage.' + usageKey), badge = '', cls = 'dim', long = !isColor(val);
       if (isColor(val)){
-        if (mode === 'onbrand'){ var rb = ratio(val, V['--brand']); badge = rb ? rb.toFixed(2)+':1' : '—'; }
-        else if (mode !== 'nocr'){ var r = ratio(val, bgUse); if (r){ var gd = grade(r); cls = gd[0]; badge = mode === 'on' ? r.toFixed(2)+':1' : gd[1].replace('&lt;','<');
-          if (mode === 'on') CONTRAST_ROWS.push([label, name, val, bgUse, r.toFixed(2), gd[1].replace('&lt;','<')]); } }
+        if (REASON[mode]) { cls = 'dim'; badge = tr('card.reason.' + mode); }
+        else if (mode === 'onbrand'){ var rb = ratio(val, V['--brand']); badge = rb ? rb.toFixed(2)+':1' : '—'; }
+        else if (mode !== 'nocr'){ var r = ratio(val, bgUse); if (r){ var gd = grade(r); cls = gd[0];
+          badge = mode === 'on' ? r.toFixed(2)+':1' : gradeText(gd);
+          if (mode === 'on') CONTRAST_ROWS.push([label, name, val, bgUse, r.toFixed(2), gradeText(gd)]); } }
       } else { badge = ''; }
       var chip = isColor(val) ? '<span class="chip-color" style="background:'+val+'"></span>' : '<span class="chip-none"></span>';
       var right = isColor(val)
@@ -293,10 +299,11 @@ function renderContrastTable(){
     var head = '<tr><th>'+esc(tr('card.tableToken'))+'</th><th>'+esc(tr('card.tableValue'))+'</th><th>'
       + esc(tr('card.tableBackground'))+'</th><th>'+esc(tr('card.tableContrast'))+'</th><th>'+esc(tr('card.tableLevel'))+'</th></tr>';
     var body = rows.map(function(r){
-      return '<tr><td><code>'+r[1]+'</code></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td><b>'+r[4]+':1</b></td><td>'+r[5]+'</td></tr>';
+      return '<tr><td><code>'+esc(r[1])+'</code></td><td>'+esc(r[2])+'</td><td>'+esc(r[3])+'</td><td><b>'+esc(r[4])+':1</b></td><td>'+esc(r[5])+'</td></tr>';
     }).join('');
     document.getElementById('ctab-'+theme).innerHTML = panelHead(theme === 'light' ? 'card.themeLight' : 'card.themeDark')
-      + '<div class="stbody"><div class="ctwrap"><table>'+head+body+'</table></div></div>';
+      + '<div class="stbody"><div class="ctwrap"><table>'+head+body+'</table></div>'
+      + '<p class="legend">'+esc(tr('card.contrastLegend'))+'</p></div>';
   });
 }
 
@@ -362,6 +369,7 @@ function renderAll(){
   document.getElementById('card-subtitle').textContent = tr('card.subtitle');
   document.getElementById('card-source').innerHTML = esc(tr('card.source')).replace(/(tokens\.less|build-css\.mjs|tokens\.css|pnpm design:css)/g,'<code>$1</code>');
   document.getElementById('card-langnote').textContent = tr('card.langNote');
+  document.getElementById('tokens-note').textContent = tr('card.reasonNote');
   renderPanels(); renderPairs(); renderStates(); renderSpecimen(); renderContrastTable(); renderRedlines();
   document.querySelectorAll('.language-switch button').forEach(function(b){ b.classList.toggle('on', b.dataset.lang === CURRENT); });
   document.documentElement.lang = CURRENT;

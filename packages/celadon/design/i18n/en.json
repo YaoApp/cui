@@ -266,6 +266,19 @@
       "errorHint": "Invalid date",
       "solid": "Primary",
       "soft": "Soft"
-    }
+    },
+    "reason": {
+      "fill": "Fill",
+      "line": "Border",
+      "overlay": "Overlay",
+      "dark": "Dark only",
+      "exempt": "Disabled (exempt)"
+    },
+    "gradeAaa": "AAA",
+    "gradeAa": "AA",
+    "gradeLarge": "Large text / graphics",
+    "gradeFail": "Below AA",
+    "contrastLegend": "Level: AAA >= 7:1 - AA >= 4.5:1 (body text) - large text or graphics >= 3:1 - below AA < 3:1. Anything under 4.5:1 must not carry body text.",
+    "reasonNote": "\"Fill / border / overlay / dark only\" are not judged for text contrast (see key pairs for real usage); \"disabled (exempt)\" follows the WCAG exemption for disabled controls."
   }
 }
