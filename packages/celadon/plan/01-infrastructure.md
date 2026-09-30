@@ -19,6 +19,8 @@
 | 4 | **包管理器** | **pnpm 10.34.6**，根 `package.json` 用 `packageManager` 字段锁死 |
 | 5 | **仓库形态** | v2 在 `packages/celadon/` 内**自成一套**；两道保护：外层排除 + 自带工作区根 |
 | 6 | **旧包处置** | **不升级 · 不复活 · 不删**（四个仍被旧应用依赖；甘特图为候选清理）|
+| 7 | **界面底座** | **不用 antd**；行为用 **`@base-ui/react` 1.8**，视觉用 **Celadon token** |
+| 8 | **旧仓库资产取舍** | **搬**：`components/ui/` 输入层（15 个原子输入 · 零 antd）· `PropertySchema` 契约 · `validation.ts` 校验；**不搬**：`FormBuilder`/`FlowBuilder`（低代码 UI）· `DataTable`/`PaginatedTable`（商业化后台表格）|
 
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
@@ -196,6 +198,60 @@ packages/celadon/
 > 实测数据不支持这个判断 —— 本地两个最新的多包仓库都在 **8**，而 8 已经是 `latest`（beta 另是 8.3.0-beta.1），
 > **6 不是"稳定"而是落后两个大版本**。升到 8 后实测：构建 **42ms**（6 上 76–106ms）、五检查与 35 个样本全过。
 
+### 4.7 界面底座：不用 antd
+
+**结论**：**行为**用 **`@base-ui/react`**（headless ✓ 无外观 ✓）· **视觉**用 **Celadon 的 `tokens.less`** ✓；**不用 antd** ✗。
+
+**为什么**（三条，都有实测）：
+
+1. **我们真要用 antd 的那些，旧仓库已经有、而且是零 antd 的** —— 见 4.8；antd 能占的位置只剩「视觉 + 浮层行为」，
+   而**视觉是我们的设计** ✓、**行为正是 headless 的活** ✓
+2. **同方向已有先例**：工作区内一个同领域的开源 UI 组件库，其新的组件目录已整体建在 `@base-ui/react` 上
+   （**42 个组件**），**21 个旧 antd 组件标了 `@deprecated`**、注释直指"改用新目录里的同名组件"，**325 个文件**已引用新目录；
+   antd 在那边只剩**主题引擎**角色（把 antd 的 `ThemeConfig` 渲染成 CSS 变量）。
+   **我们的 token 是纯 CSS 变量** ✓ —— 连这个引擎位置都不需要 ✗
+3. **采用面已验证**：`@base-ui` 出现在工作区内**两个独立产品**的依赖里（其中一个含桌面应用）；
+   而 **React Aria 在工作区 0 个项目使用** ✗
+
+**`@base-ui/react@1.8.0` 的实况**：40 个组件 · `peer: react ^17 || ^18 || ^19` · MIT · 10 个正式版 · 2026-09 仍在更新。
+其中 **`direction-provider` 内建 RTL** —— `19 数据格式` 的 RTL 成本可据此下调 ✓
+
+**对照我们的用量**（旧应用 59 种 antd 组件 ✗）：
+
+| 类别 | 结论 |
+| --- | --- |
+| **有行为、有原生对应**（33 种 ✓）| `message`→`toast` · `Tooltip`→`tooltip` · `Modal`→`dialog` · `Button`→`button` · `Input`→`input`/`number-field` · `Form`→`form`+`field`+`fieldset` · `Select`→`select`/`combobox`/`autocomplete` · `Switch`/`Checkbox`/`Radio` · `Tabs` · `Dropdown`→`menu` · `Popconfirm`→`popover`+`alert-dialog` |
+| **纯视觉**（自己写几行 ✓）| `Spin` 49 · `Typography` 13 · `Tag` 6 · `Empty` 5 · `Space` · `Row`/`Col` · `Skeleton` · `Statistic` · `Timeline` |
+| **真要自己写 ✗** | `Table`（2 处）· `Upload`（3 处）· `DatePicker`/`TimePicker`/`RangePicker`（共 4 处，`date-fns` 是 Base UI 的 peer ✓）· `Tree`/`Cascader`/`Mentions`/`Image`/`Breadcrumb`/`Anchor`（各 1–2 处）|
+
+**已知代价** ✗：`message`/`Tooltip`/`Modal` 等约有 **2700 处调用点** —— 靠**同名的薄封装**
+（`message` → `toast`，API 形状照旧）**机械替换**扛，不逐个重写逻辑。
+
+### 4.8 旧仓库资产取舍：搬什么、不搬什么
+
+**搬**（这三层本来就零 antd ✓，是「搬逻辑、换样式」的典型 ✗）：
+
+| 资产 | 规模 | 现状 |
+| --- | --- | --- |
+| `components/ui/inputs/`（**15 个原子输入**）| 30–419 行 | **零 antd**、纯 HTML + CSS Modules、**schema 驱动**、受控字段契约（`value`/`onChange`/`onBlur`/`error`/`hasError`）|
+| `components/ui/inputs/validation.ts` | 123 行 | 单字段校验（必填 / 长度 / 正则 / 数值 / `errorMessages` 可覆盖）**零依赖** |
+| `PropertySchema` 类型契约 | 158 行 | **22 个文件在用**，是设置类表单的底座 |
+| `ui/Setting` · `ui/Provider` · `ui/Button` · `ui/Dropdown` | 73–745 行 | `ui/` 下 **26 个 tsx 中 21 个零 antd** ✓ |
+
+**不搬** ✗：
+
+- **`edit/FormBuilder` · `edit/FlowBuilder`** —— 低代码时代的产物，**旧应用里 0 处引用** ✓
+- **`DataTable` · `PaginatedTable`** —— 服务佣金 / 余额 / 用量 / 审计 / 账单那套**商业化后台**，新应用不需要 ✗
+
+**搬迁时要修的** ✗（以 `validation.ts` 为例，这是四道工序落到具体文件的样子）：
+
+| 动作 | 内容 |
+| --- | --- |
+| **换** ✗ | 7 条硬编码英文报错 → `ui.*` 的 i18n key（四语）|
+| **补** ✗ | `new RegExp(schema.pattern)` 无保护 —— schema 来自**服务端**定义，正则非法会抛异常，要 `try/catch` |
+| **删** ✗ | `custom: 'Invalid value'` 有文案无实现 · `getErrorClasses` 0 处调用 |
+| **留** ✓ | 函数形状（单字段 · schema 驱动 · `errorMessages` 可覆盖）|
+
 ---
 
 ## 5. 子项与交付物
@@ -219,6 +275,9 @@ packages/celadon/
 | `openapi/` | 71 文件 / 12 444 行 | 后端 SDK 参考（**按需子集**，不整包搬）|
 | `utils/` | 27 文件 / 1 018 行 | 请求封装 / 格式化 / 存储 |
 | `hooks/` | 16 文件 / 1 352 行 | 通用 hooks |
+| `components/ui/` | 26 个 tsx（**21 个零 antd**）| **搬输入层与 schema 契约**：15 个原子输入 + `validation.ts` + `PropertySchema` + `Setting`/`Provider`/`Button`/`Dropdown`；详见 4.8 |
+| `components/**` 业务件 | `AgentPicker` 597 行 · `SecretsManager` · `TOTP` · `WelcomeWizard` | 带真实业务逻辑 → **搬逻辑、换外观**；`AgentPicker` 是否保留待 08 专家页定 |
+| ~~`edit/FormBuilder` · `edit/FlowBuilder` · `DataTable`/`PaginatedTable`~~ | — | **不搬** ✗：低代码 UI（旧应用 0 引用）与商业化后台表格，见 4.8 |
 | 构建期配置 | 主题链 · 代理 · 图标字体 | 只取能力，**重新实现**（不复制旧配置）|
 
 > 旧构建链里明确**不照搬**的三件事：① 主题变量命令行生成链 ② 自定义"原始文本"loader（shadow DOM 动态注入用）③ 编辑器 worker 的打包方式 —— 见 [../MIGRATION.md](../MIGRATION.md)。
