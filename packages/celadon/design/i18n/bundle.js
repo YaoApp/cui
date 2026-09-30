@@ -293,7 +293,7 @@ window.CELADON_I18N = {
       "langnote": "Copy follows the language switch; values and colours do not.",
       "spacing": {
         "title": "Spacing",
-        "note": "Multiples of 4; no magic numbers. The larger the step, the more outer the spacing.",
+        "note": "Base-4 scale (2/4/6/8/12/16/24/32/48), where 2 and 6 are the fine steps for hairlines and tight controls. No magic numbers; larger steps go further out.",
         "scale": "Scale",
         "usage": "Usage (allowed steps)",
         "example": "Example: card padding 16, title to body 8, gap between buttons 12",
@@ -712,7 +712,7 @@ window.CELADON_I18N = {
       "langnote": "文言は言語切替に追随し、数値と色は変わりません。",
       "spacing": {
         "title": "余白 Spacing",
-        "note": "4 の倍数。魔法の数値は禁止。大きい段階ほど外側の余白に使います。",
+        "note": "4 を基数とする段階（2/4/6/8/12/16/24/32/48）。2 と 6 はヘアラインや詰まった部品向けの細かい段階です。魔法の数値は禁止。大きい段階ほど外側の余白に使います。",
         "scale": "スケール",
         "usage": "用途（使用できる段階）",
         "example": "例：カード内側 16 · 見出しと本文 8 · ボタン間 12",
@@ -1131,7 +1131,7 @@ window.CELADON_I18N = {
       "langnote": "文案随语言切换；数值与颜色不随语言变化。",
       "spacing": {
         "title": "间距 Spacing",
-        "note": "4 的倍数；禁魔法数字。档位越大用于越外层的间距。",
+        "note": "以 4 为基数列（2/4/6/8/12/16/24/32/48），2 与 6 是发丝缝/紧凑控件的细档；禁魔法数字。档位越大用于越外层的间距。",
         "scale": "刻度",
         "usage": "用法（允许档位）",
         "example": "实例：卡片内距 16 · 标题与正文 8 · 按钮间 12",
@@ -1550,7 +1550,7 @@ window.CELADON_I18N = {
       "langnote": "文案隨語言切換；數值與顏色不隨語言變化。",
       "spacing": {
         "title": "間距 Spacing",
-        "note": "4 的倍數；禁魔法數字。檔位越大用於越外層的間距。",
+        "note": "以 4 為基數列（2/4/6/8/12/16/24/32/48），2 與 6 是髮絲縫/緊湊元件的細檔；禁魔法數字。檔位越大用於越外層的間距。",
         "scale": "刻度",
         "usage": "用法（允許檔位）",
         "example": "實例：卡片內距 16 · 標題與正文 8 · 按鈕間 12",
