@@ -4,7 +4,7 @@
    历史：mock 里曾散着 55 处写死的字号与圆角、index 里 7 处，改了 token 也不会跟着变。 */
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
 /* 本脚本住在 scripts/，目标资产在 ../design/ —— 统一切到那里作为工作目录，
    这样下面所有相对路径（icons/… · *.html · tokens.less · i18n/…）都继续成立，
@@ -16,7 +16,10 @@ const TARGET = resolve(process.argv[2] || DESIGN)
 process.chdir(TARGET)
 
 
-const PAGES = ['icons.html', 'index.html', 'mock.html', 'css-logical.html', 'data-format.html'];
+/* 存量：这几张是演示稿，按约定不回改（CONVENTIONS §3）。
+   其余 *.html 一律纳入检查 —— 新页面默认被查，不用手工登记。 */
+const LEGACY = new Set(['color-card.html', 'foundations.html']);
+const PAGES = readdirSync('.').filter((f) => f.endsWith('.html') && !LEGACY.has(f)).sort();
 /* 明文例外：
    · 品牌官方色 —— 不在这三张页面的 <style> 里，而在雪碧图中（check-generated.mjs 管）
    · macOS 红黄绿灯与窗底 —— 系统再现，不是我们的设计决策，改了反而不像系统
@@ -30,10 +33,34 @@ for (const f of PAGES) {
    另外最后一条声明通常没有分号，所以用前瞻 (?=;|}) 而不是要求分号 */
     const prop = m[1], v = m[2].trim();
     if (ALLOW.has(v)) continue;
-    const literal = /#[0-9A-Fa-f]{3,8}\b|rgba?\(|hsla?\(/.test(v) || (/^\d+(\.\d+)?(px|rem|em)$/.test(v) && ['font-size', 'border-radius', 'box-shadow'].includes(prop));
-    if (!literal) continue;
-    if (['font-size', 'border-radius', 'box-shadow', 'background', 'background-color', 'color', 'border', 'border-color'].includes(prop) && !v.includes('var(')) {
-      bad.push(`${f}: ${prop}: ${v}`);
+    if (v.includes('var(')) continue;                       // 走 token 的一律放行
+    const colour = /#[0-9A-Fa-f]{3,8}\b|\brgba?\(|\bhsla?\(/.test(v);
+    const sizeLiteral = /^\d+(\.\d+)?(px|rem|em)$/.test(v) && ['font-size', 'border-radius', 'box-shadow'].includes(prop);
+    if (colour || sizeLiteral) bad.push(`${f}: ${prop}: ${v}`);   // 规范原话：禁止**任何**颜色字面量
+  }
+}
+// §1 装饰色（--text-muted / --text-disabled / --text-placeholder）不能承载文字
+const NON_TEXT = ['--text-muted'];   /* 规范只点名 text-muted；disabled/placeholder 本就是给文字用的 */
+for (const f of PAGES) {
+  const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+)(?=;|\})/g)) {
+    if (!/^color$|text-fill-color$/.test(m[1].trim())) continue;
+    const v = m[2].trim();
+    for (const t of NON_TEXT) if (v.includes(t)) bad.push(`${f}: ${m[1].trim()}: ${v}（${t} 是装饰色，不能承载文字）`);
+  }
+}
+// §3 四值简写的 inline 两侧不对称 —— RTL 下会错位（margin: 0 0 0 auto 就是典型）
+const DIRECTIONAL4 = /^(margin|padding|inset|border-width|border-color|border-style)$/;
+for (const f of PAGES) {
+  const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+)(?=;|\})/g)) {
+    const prop = m[1].trim(), v = m[2].trim();
+    if (!DIRECTIONAL4.test(prop) || v.includes('var(')) continue;
+    const parts = v.split(/\s+/).filter((x) => x && !x.startsWith('calc('));
+    if (parts.length < 3) continue;                        // 1–2 值天然对称
+    const second = parts[1], fourth = parts[parts.length === 3 ? 1 : 3];
+    if (parts.length === 3 ? second !== fourth : second !== fourth) {
+      bad.push(`${f}: ${prop}: ${v}（inline 两侧不对称，RTL 下会错位 —— 改用 *-inline-start/end）`);
     }
   }
 }
@@ -68,7 +95,7 @@ for (const f of PAGES) {
 }
 // 间距与线宽同样必须走 token：--spacing-* / --border-width
 const SPACING = /^(padding|margin|gap)(-top|-right|-bottom|-left)?$|^(row-gap|column-gap)$/;
-const BORDER = /^border(-top|-right|-bottom|-left)?$/;
+const BORDER = /^border(-top|-right|-bottom|-left|-inline-start|-inline-end|-block-start|-block-end)?$/;
 for (const f of PAGES) {
   const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
   for (const m of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+)(?=;|\})/g)) {
