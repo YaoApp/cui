@@ -910,7 +910,7 @@ window.CELADON_I18N = {
       ],
       "usage": {
         "brand": "主按鈕 / 徽標 / 選取文字",
-        "brandHover": "悬停",
+        "brandHover": "懸停",
         "brandActive": "按下",
         "brandSoft": "淺底按鈕 · 選取底 · 氣泡",
         "brandDisplay": "大面積填色/圖形（不承載文字）",
@@ -928,7 +928,7 @@ window.CELADON_I18N = {
         "backgroundContent": "② 內容區（非純白）",
         "backgroundSurface": "③ 面板/卡片",
         "backgroundField": "輸入框/欄位",
-        "backgroundHover": "悬停",
+        "backgroundHover": "懸停",
         "backgroundSelected": "選取底（= 品牌淺底）",
         "borderSubtle": "裝飾線",
         "borderDefault": "一般邊界",
