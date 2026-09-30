@@ -342,7 +342,27 @@
       "r3": "只动 transform / opacity（不动 width/height/top/left）。",
       "r4": "减动效：开启系统\"减少动态效果\"后全部时长归零（tokens.less 内统一处理，组件无需各自判断）。",
       "reducedOn": "当前系统偏好：减少动态效果 —— 已降级（时长归零）",
-      "reducedOff": "当前系统偏好：正常动效"
+      "reducedOff": "当前系统偏好：正常动效",
+      "scenes": "常用场景（可单独播放 / 全部播放）",
+      "playAll": "全部播放",
+      "playOne": "播放",
+      "demoBtn": "发送",
+      "demoToast": "✓ 已保存",
+      "demoStream": "正在生成摘要，请稍候…",
+      "s": {
+        "hover": "悬停过渡",
+        "press": "按下反馈",
+        "focus": "焦点环",
+        "fade": "淡入",
+        "dropdown": "下拉出现",
+        "panel": "面板展开",
+        "collapse": "面板收起",
+        "drawer": "抽屉滑入",
+        "modal": "弹窗出现",
+        "toast": "通知出现",
+        "list": "列表依次进入",
+        "stream": "流式输出"
+      }
     },
     "border": {
       "title": "边框 Border（含 WCAG 1.4.11 决策）",
