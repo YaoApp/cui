@@ -240,7 +240,9 @@ window.CELADON_I18N = {
         "shadowFloating": "Floating layer",
         "fontFamilyUi": "UI font (Latin + fallback)",
         "fontFamilyMonospace": "Monospace font",
-        "brandInk": "Brand text/icons (soft button, selected row, bubble; 4.8:1 on the soft fill, switches to the lifted tone in dark)"
+        "brandInk": "Brand text/icons (soft button, selected row, bubble; 4.8:1 on the soft fill, switches to the lifted tone in dark)",
+        "brandSolidHover": "Solid button hover fill (white text, >=4.5:1)",
+        "brandSolidActive": "Solid button pressed fill (white text, >=4.5:1)"
       },
       "group": {
         "brand": "Brand",
@@ -525,7 +527,9 @@ window.CELADON_I18N = {
         "shadowFloating": "フローティング",
         "fontFamilyUi": "UI フォント（欧文 + フォールバック）",
         "fontFamilyMonospace": "等幅フォント",
-        "brandInk": "ブランド色の文字/アイコン（淡色ボタン・選択行・バブル。淡色地で 4.8:1、暗色では自動で明るい方に切替）"
+        "brandInk": "ブランド色の文字/アイコン（淡色ボタン・選択行・バブル。淡色地で 4.8:1、暗色では自動で明るい方に切替）",
+        "brandSolidHover": "主ボタンのホバー背景（白文字 ≥4.5:1）",
+        "brandSolidActive": "主ボタンの押下背景（白文字 ≥4.5:1）"
       },
       "group": {
         "brand": "ブランド",
@@ -810,7 +814,9 @@ window.CELADON_I18N = {
         "shadowFloating": "浮层",
         "fontFamilyUi": "界面字体（拉丁 + 兜底）",
         "fontFamilyMonospace": "等宽字体",
-        "brandInk": "品牌色文字/图标（浅底按钮 · 选中底 · 气泡；软底 4.8:1，暗色自动切提亮档）"
+        "brandInk": "品牌色文字/图标（浅底按钮 · 选中底 · 气泡；软底 4.8:1，暗色自动切提亮档）",
+        "brandSolidHover": "实心按钮悬停底（白字 ≥4.5:1）",
+        "brandSolidActive": "实心按钮按下底（白字 ≥4.5:1）"
       },
       "group": {
         "brand": "品牌",
@@ -1095,7 +1101,9 @@ window.CELADON_I18N = {
         "shadowFloating": "浮層",
         "fontFamilyUi": "介面字體（拉丁 + 後備）",
         "fontFamilyMonospace": "等寬字體",
-        "brandInk": "品牌色文字/圖示（淺底按鈕 · 選取底 · 氣泡；軟底 4.8:1，暗色自動切提亮檔）"
+        "brandInk": "品牌色文字/圖示（淺底按鈕 · 選取底 · 氣泡；軟底 4.8:1，暗色自動切提亮檔）",
+        "brandSolidHover": "實心按鈕懸停底（白字 ≥4.5:1）",
+        "brandSolidActive": "實心按鈕按下底（白字 ≥4.5:1）"
       },
       "group": {
         "brand": "品牌",
