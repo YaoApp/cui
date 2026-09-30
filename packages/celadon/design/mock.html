@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="./tokens.css">
 <style>
 body{margin: 0;background: var(--background-active);font:13px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding: var(--spacing-48) var(--spacing-16) var(--spacing-16);-webkit-font-smoothing:antialiased}
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;padding: var(--spacing-24) var(--spacing-16) var(--spacing-16);-webkit-font-smoothing:antialiased}
 [data-theme="dark"] body{background:#0B0B0B}
 svg.icon{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}  /* 24 网格原生 2；16px 显示时视觉 ≈1.33 */
 svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
@@ -149,8 +149,8 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .activity-item.is-current .activity-dot{background:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
 .activity-item .activity-time{margin-left: auto;font-size: var(--font-size-label);color:var(--text-tertiary)}
 /* 页外工具条 */
-.toolbar{position:fixed;left:50%;transform:translateX(-50%);top:12px;display:flex;gap: var(--spacing-8);align-items:center;
-  background:var(--background-surface);border: var(--border-width) solid var(--border-default);border-radius:var(--radius-pill);padding: var(--spacing-8) var(--spacing-12);box-shadow:var(--shadow-floating)}
+.toolbar{display:flex;gap: var(--spacing-8);align-items:center;
+  background:var(--background-surface);border: var(--border-width) solid var(--border-default);border-radius:var(--radius-pill);padding: var(--spacing-8) var(--spacing-12);box-shadow:var(--shadow-floating)margin-bottom: var(--spacing-16);order:-1}   /* 排在窗口之前：工具条永远在界面上方，不压界面 */
 .toolbar button{font:inherit;font-size: var(--font-size-caption);padding: var(--spacing-4) var(--spacing-12);border-radius:var(--radius-pill);border: var(--border-width) solid var(--border-default);
   background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
 .toolbar button.is-active{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
@@ -468,9 +468,9 @@ document.querySelectorAll('.toolbar button[data-t]').forEach(function(b){
     var scale = Math.min(1,
       (window.innerWidth - 36) / DESIGN_WIDTH,
       (window.innerHeight - 72) / DESIGN_HEIGHT);
-    win.style.transform = scale < 1 ? 'scale(' + scale.toFixed(4) + ')' : 'none';
-    win.style.transformOrigin = 'top center';
-    document.body.style.height = scale < 1 ? (DESIGN_HEIGHT * scale + 70) + 'px' : '';
+          /* 用 zoom 而不是 transform：zoom 会真正改变布局占位，
+         父容器跟着缩小 → 不溢出、能居中，也不会把右侧裁掉 */
+      win.style.zoom = scale < 1 ? scale.toFixed(4) : '';
   }
   fitToViewport();
   window.addEventListener('resize', fitToViewport);
