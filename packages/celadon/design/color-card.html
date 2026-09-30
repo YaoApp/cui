@@ -110,14 +110,14 @@ var GROUPS = [
    ['--brand-lift','brandLift','nocr']]],
  ['group.interaction', [
    ['--focus-ring-color','focusRingColor','on'], ['--focus-ring-width','focusRingWidth'], ['--focus-ring-offset','focusRingOffset'],
-   ['--disabled-background','disabledBackground'], ['--disabled-text','disabledText'], ['--disabled-border','disabledBorder'],
+   ['--background-disabled','backgroundDisabled','nocr'], ['--text-disabled','textDisabled','nocr'], ['--border-disabled','borderDisabled','nocr'],
    ['--scrim','scrim','nocr']]],
  ['group.background', [
    ['--background-app','backgroundApp'], ['--background-navigation','backgroundNavigation'], ['--background-content','backgroundContent'],
    ['--background-surface','backgroundSurface'], ['--background-field','backgroundField'], ['--background-hover','backgroundHover'],
    ['--background-selected','backgroundSelected']]],
- ['group.border', [['--border-subtle','borderSubtle'], ['--border-default','borderDefault'], ['--border-control','borderControl']]],
- ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary'], ['--text-muted','textMuted']]],
+ ['group.border', [['--border-subtle','borderSubtle'], ['--border-default','borderDefault'], ['--border-control','borderControl'], ['--border-hover','borderHover']]],
+ ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary'], ['--text-placeholder','textPlaceholder'], ['--text-muted','textMuted']]],
  ['group.semantic', [
    ['--success','success','on'], ['--success-soft','successSoft'],
    ['--warning','warning','on'], ['--warning-soft','warningSoft'],
@@ -133,6 +133,7 @@ var GROUPS = [
    ['--shadow-subtle','shadowSubtle'], ['--shadow-floating','shadowFloating']]]
 ];
 var PAIRS = [
+ ['--text-placeholder','--background-field','textPlaceholder'],
  ['--brand-text','--brand','brand'], ['--brand-ink','--brand-soft','brandInk'], ['--warm-contrast','--warm','warm'],
  ['--warm-text','--warm-soft','warmSoft'], ['--success','--success-soft','success'],
  ['--danger','--danger-soft','danger'], ['--text-primary','--background-content','textPrimary'],
