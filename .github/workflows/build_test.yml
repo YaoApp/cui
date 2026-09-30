@@ -1,40 +1,40 @@
 name: Build Test
 
 on:
-      push:
-            branches:
-                  - main
-            paths-ignore:
-                  - README.md
-                  - LICENSE
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - README.md
+      - LICENSE
 
 env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-      Build:
-            runs-on: ubuntu-latest
-            steps:
-                  - name: Checkout Repo
-                    uses: actions/checkout@v4
+  Build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v7
 
-                  - name: Setup Pnpm
-                    uses: pnpm/action-setup@v4
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v4
 
-                  - name: Setup Node.js
-                    uses: actions/setup-node@v4
-                    with:
-                          node-version: 20
-                          cache: pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
 
-                  - name: Install
-                    run: pnpm install --no-frozen-lockfile
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
 
-                  - name: Inspect editorjs_plugins dependencies
-                    run: cd packages/editorjs_plugins && pnpm ls
+      - name: Inspect editorjs_plugins dependencies
+        run: cd packages/editorjs_plugins && pnpm ls
 
-                  - name: Inspect cui dependencies
-                    run: cd packages/cui && pnpm ls
+      - name: Inspect cui dependencies
+        run: cd packages/cui && pnpm ls
 
-                  - name: Test Build
-                    run: pnpm run build
+      - name: Test Build
+        run: pnpm run build
