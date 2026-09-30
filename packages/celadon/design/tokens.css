@@ -468,6 +468,7 @@
   color: var(--text-primary);
   /* 占位 */
   /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
+  /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
 }
 .celadon .input::placeholder,
 [data-theme] .celadon .input::placeholder {
@@ -493,6 +494,16 @@
 [data-theme] .celadon .input.is-readonly {
   background: var(--background-readonly);
   color: var(--text-secondary);
+}
+.celadon .input.is-strong,
+[data-theme] .celadon .input.is-strong {
+  border-color: var(--border-control-strong);
+}
+.celadon .input.is-strong:not(:disabled):hover,
+[data-theme] .celadon .input.is-strong:not(:disabled):hover,
+.celadon .input.is-strong.is-hover,
+[data-theme] .celadon .input.is-strong.is-hover {
+  border-color: var(--border-hover-strong);
 }
 .celadon .input.is-error,
 [data-theme] .celadon .input.is-error {

@@ -24,6 +24,9 @@ code{font-family:var(--font-family-monospace);background:var(--background-field)
 .seg{font:inherit;font-size:11.5px;padding:3px 12px;border:0;border-radius:var(--radius-pill);background:transparent;color:var(--text-secondary);cursor:pointer}
 .seg:hover{background:var(--background-hover)}
 .seg.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:650;box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--brand-ink) 30%, transparent)}
+/* 本页自有控件统一品牌焦点环，避免 Tab 时露出浏览器默认蓝环 */
+.stage .act:focus-visible, .seg:focus-visible, .stage .sw:focus-visible, .stage .trg:focus-visible,
+.stage .hdr:focus-visible, .sd:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .pf-note{font-size:11px;color:var(--text-tertiary)}
 /* 动效强度：减少（时长归零）/ 标准 / 丰富（更长） */
 body.mo-low, body.mo-low .celadon, body.mo-low .celadon[data-theme='dark'], body.mo-low [data-theme='dark'] .celadon{
@@ -528,8 +531,8 @@ function renderBorder(theme){
       + '<span class="bd-cr '+cls+'">'+c1+':1</span><span class="bd-cr dim">'+c2+':1</span>'
       + '<span class="mo-val">'+esc(tr('f.border.on'))+'</span></div>'; }).join('');
   var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.border.demo'))+'</div><div class="bd-demo">'
-    + '<div class="col"><div class="cap">'+esc(tr('f.border.demoDefault'))+'</div><input value="tsk_8f21c4" style="border:1px solid '+tok('--border-control',theme)+'"></div>'
-    + '<div class="col"><div class="cap">'+esc(tr('f.border.demoStrong'))+'</div><input value="tsk_8f21c4" style="border:1px solid '+tok('--border-control-strong',theme)+'"></div>'
+    + '<div class="col"><div class="cap">'+esc(tr('f.border.demoDefault'))+'</div><input class="input" value="tsk_8f21c4"></div>'
+    + '<div class="col"><div class="cap">'+esc(tr('f.border.demoStrong'))+'</div><input class="input is-strong" value="tsk_8f21c4"></div>'
     + '</div>';
   var dec = '<div class="grp" style="margin-top:14px">'+esc(tr('f.border.decision'))+'</div><ul>'
     + ['d1','d2','d3'].map(function(k){ return '<li>'+esc(tr('f.border.'+k))+'</li>'; }).join('') + '</ul>'
