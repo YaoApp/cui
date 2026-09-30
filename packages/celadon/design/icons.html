@@ -266,7 +266,7 @@ var COVER = [
   ['obj', ['i-tasks','i-obj-key','i-obj-schedule','i-obj-integration','i-obj-skill','i-obj-model','i-obj-quota','i-obj-billing','i-obj-sandbox','i-obj-container','i-obj-artifact']],
   ['brand', ['brand-yao-agents','brand-yao-agents-mono','brand-yao','brand-yao-mono']]
 ];
-var SIZE = 16, THEME = 'light', Q = '';
+var SIZE = 24, THEME = 'light', Q = '';   /* 画廊默认 24：产品落地仍按规范用 16，这里放大只为了看清 */
 var TR_THEME = { light: '浅色', dark: '暗色' };
 function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
 function fmt(s){ return esc(s).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'); }
