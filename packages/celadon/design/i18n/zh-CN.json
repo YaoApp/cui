@@ -456,9 +456,6 @@
       },
       "sideOff": "侧栏：关",
       "sideOn": "侧栏：开",
-      "navNormal": "导航：完整",
-      "navOverlayOn": "导航：覆盖中（手动）",
-      "navOverlayOff": "导航：图标轨（点开覆盖）",
       "overlay": "覆盖",
       "belowMin": "低于最小",
       "autoRail": "自动收轨",
@@ -475,7 +472,47 @@
         "tool": "工具型 600",
         "task": "任务型 640",
         "wide": "宽屏型 840"
-      }
+      },
+      "plat": {
+        "client": "客户端",
+        "web": "Web"
+      },
+      "navCollapsedBtn": "收起导航",
+      "navExpanded": "展开导航",
+      "navMode": {
+        "full": "完整",
+        "rail": "图标轨",
+        "overlay": "覆盖展开",
+        "drawer": "抽屉（关）",
+        "drawerOpen": "抽屉（开）"
+      },
+      "item": {
+        "overview": "概览",
+        "inbox": "消息",
+        "tasks": "任务",
+        "files": "文件",
+        "apps": "应用",
+        "settings": "设置",
+        "help": "帮助"
+      },
+      "navTitle": "导航收起的三档行为（客户端 / Web 各自对应）",
+      "navColTarget": "场景",
+      "navColForm": "收起形态",
+      "navColToggle": "收起控件位置",
+      "navColState": "状态",
+      "nr1a": "客户端 / Web 宽屏（≥1024）",
+      "nr1b": "图标轨 56（24 图标 + 16×2 内距）",
+      "nr1c": "macOS 在标题栏；其他平台在导航顶部",
+      "nr1d": "持久化偏好 + 临时标志（两级）",
+      "nr2a": "Web 中档（768–1023）",
+      "nr2b": "自动收成图标轨",
+      "nr2c": "同上",
+      "nr2d": "同；窄屏的临时展开不写回偏好",
+      "nr3a": "Web 窄屏（<768）",
+      "nr3b": "抽屉：浮在内容上 + 遮罩",
+      "nr3c": "顶栏汉堡按钮",
+      "nr3d": "临时（Esc / 点遮罩关闭）",
+      "railNote": "轨上图标：hover 出标签 · 当前项左侧指示条 · 键盘可达（aria-expanded）· 图标与文字不同时存在的取舍（图标优先，标签靠 hover）"
     }
   }
 }

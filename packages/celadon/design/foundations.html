@@ -184,6 +184,20 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .gnav{background:var(--background-navigation);border-right:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 .gnav span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .gnav.overlay{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-overlay);box-shadow:var(--shadow-floating)}
+/* 图标轨：只留图标，hover 出标签（图标无文字时的标准做法） */
+.gnav.rail{padding:var(--nav-rail-pad) 0;align-items:center}
+.gnav.rail .gi{width:var(--nav-rail-icon);height:var(--nav-rail-icon);border-radius:var(--radius-small);position:relative;background:var(--background-field)}
+.gnav.rail .gi::after{content:attr(data-label);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);
+  white-space:nowrap;background:var(--background-surface);color:var(--text-primary);border:1px solid var(--border-default);
+  border-radius:var(--radius-small);padding:4px 8px;font-size:11px;box-shadow:var(--shadow-subtle);opacity:0;pointer-events:none;
+  transition:opacity var(--duration-fast) var(--easing-standard);z-index:var(--z-tooltip)}
+.gnav.rail .gi:hover::after{opacity:1}
+.gnav .gi.on{background:var(--brand-soft);box-shadow:inset 2px 0 0 var(--brand)}
+/* Web 窄屏抽屉：导航浮在内容上 + 遮罩 */
+.gscrim{position:absolute;inset:0;background:var(--scrim);z-index:var(--z-overlay);opacity:0;pointer-events:none;transition:opacity var(--duration-base) var(--easing-standard)}
+.gscrim.on{opacity:1;pointer-events:auto}
+.gnav.drawer{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-modal);box-shadow:var(--shadow-overlay);transform:translateX(-100%);transition:transform var(--duration-base) var(--easing-decelerate)}
+.gnav.drawer.open{transform:none}
 .gcenter{min-width:0;display:flex;justify-content:center;padding:14px 12px;overflow:hidden}
 .gcontent{width:100%;display:flex;flex-direction:column;gap:12px}
 .gcontent b{display:block;height:16px;border-radius:4px;background:var(--background-surface);border:1px solid var(--border-default)}
@@ -283,6 +297,7 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
     <span class="pf-label" id="gr-navlabel"></span>
     <input type="range" id="gr-nav" min="264" max="420" step="4" value="280" aria-label="nav width">
     <button type="button" class="gpreset" id="gr-navbtn"></button>
+    <span id="gr-plats" class="prefbar-segs"></span>
     <span class="pf-label" id="gr-sidelabel"></span>
     <span id="gr-sidetypes" class="prefbar-segs"></span>
     <input type="range" id="gr-side" min="30" max="70" step="1" value="70" aria-label="side cap ratio">
@@ -580,29 +595,38 @@ function renderBorder(theme){
 }
 
 /* ===== F6 三栏竖分割（导航 | 内容 | 侧栏）· 最小宽预算求解器 ===== */
-var NAV_MANUAL = false, SIDE_WANTED = false;
+var NAV_MANUAL = false, SIDE_WANTED = false, NAV_COLLAPSED = false, PLATFORM = 0;  /* 0=客户端 · 1=Web */
+var PLATS = ['client','web'];
 var PRESETS = [['half',720],['default',1280],['large',1600],['uhd',1920]];
 function clampW(px, min, max){ return Math.min(max, Math.max(min, Math.round(px))); }
 /* 让位顺序：侧栏先缩 → 侧栏整条消失 → 中栏才可能低于最小；导航不参与宽度让步 */
 var SIDE_TYPES = [['reading',400],['tool',600],['task',640],['wide',840]];
 var SIDE_TYPE = 0;                       /* 默认：阅读型 */
-function computeColumns(theme, viewport, navPref, sidePref, sideRatio, navManual){
+function computeColumns(theme, viewport, navPref, sidePref, sideRatio, navManual, collapsed){
   var NAV_MIN = px(tok('--nav-min',theme)), NAV_MAX = px(tok('--nav-max',theme)), RAIL = px(tok('--nav-collapsed',theme));
   var CENTER_MIN = px(tok('--center-min',theme)), SIDE_MIN = px(tok('--side-min',theme));
   var MAX_RATIO = parseFloat(tok('--side-max-ratio',theme)) || 0.7;
   var MAX_W = px(tok('--side-width-max',theme));
   var autoCollapse = viewport < px(tok('--nav-auto-collapse',theme));
+  var navFull = clampW(navPref, NAV_MIN, NAV_MAX);
+  /* Web 窄屏：导航转抽屉（浮在内容上 + 遮罩），不占列轨 */
+  if (PLATFORM === 1 && viewport < px(tok('--bp-nav-drawer',theme))) {
+    return { navMode: navManual ? 'drawerOpen' : 'drawer', navTrack: 0, navOverlayW: navFull, scrim: !!navManual,
+      side: 0, center: viewport, centerBelowMin: viewport < CENTER_MIN, autoCollapse: true, drawer: true };
+  }
   var navWanted = navPref > 0;
-  var navTrack = (!navWanted || autoCollapse) ? RAIL : clampW(navPref, NAV_MIN, NAV_MAX);
-  var navOverlay = autoCollapse && navManual && navWanted;   /* 手动展开：覆盖中栏，不占布局宽 */
+  var wantRail = !navWanted || autoCollapse || collapsed;          /* 用户收起 = 图标轨 */
+  var navTrack = wantRail ? RAIL : navFull;
+  var navOverlay = autoCollapse && navManual && navWanted;         /* 窄屏手动展开：覆盖中栏 */
   var available = viewport - navTrack - CENTER_MIN;
   var base = SIDE_TYPES[SIDE_TYPE][1];                      /* 视图类型的默认宽 */
   var cap = Math.min(viewport * Math.min(sideRatio, MAX_RATIO), MAX_W);   /* 上限 = 画面比例，兜以绝对上限 */
   var side = (sidePref === 0 || available < SIDE_MIN) ? 0
     : Math.min(available, clampW(base, SIDE_MIN, cap));
   var center = Math.max(0, viewport - navTrack - side);
-  return { navTrack:navTrack, navOverlay:navOverlay, navOverlayW:navOverlay ? clampW(navPref, NAV_MIN, NAV_MAX) : 0,
-    side:side, center:center, centerBelowMin:center < CENTER_MIN, autoCollapse:autoCollapse };
+  return { navMode: navOverlay ? 'overlay' : (wantRail ? 'rail' : 'full'), navTrack:navTrack, navOverlay:navOverlay,
+    navOverlayW:navOverlay ? navFull : 0, scrim:false, side:side, center:center,
+    centerBelowMin:center < CENTER_MIN, autoCollapse:autoCollapse, drawer:false };
 }
 function renderGrid(theme){
   var c = computeColumns(theme, 1280, 280, 0, 0.45, false);
@@ -617,7 +641,8 @@ function renderGrid(theme){
     + ['s1','s2','s3'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ul>'
     + '<table><tr><td>'+esc(tr('f.grid.winDefault'))+'</td><td><code>'+tok('--window-default',theme)+' × '+tok('--window-default-height',theme)+'</code></td></tr>'
     + '<tr><td>'+esc(tr('f.grid.winMin'))+'</td><td><code>'+tok('--page-min-width',theme)+' × '+tok('--page-min-height',theme)+'</code></td></tr></table>';
-  var navs=''; for (var i=0;i<7;i++) navs += '<span></span>';
+  var NAVITEMS = ['overview','inbox','tasks','files','apps','settings','help'];
+  var navs=''; NAVITEMS.forEach(function(k,i){ navs += '<span class="gi'+(i===0?' on':'')+'" data-label="'+esc(tr('f.grid.item.'+k))+'"></span>'; });
   var lines=''; for (var j=0;j<5;j++) lines += '<b></b>';
   var sides=''; for (var k=0;k<6;k++) sides += '<span></span>';
   var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.demo'))+'</div>'
@@ -627,11 +652,15 @@ function renderGrid(theme){
     + '<div class="gnav" id="gnav-'+theme+'">'+navs+'</div>'
     + '<div class="gcenter"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div>'
     + '<div class="gside" id="gside-'+theme+'">'+sides+'</div>'
-    + '</div></div></div>';
+    + '</div><div class="gscrim" id="gscrim-'+theme+'"></div></div></div>';
+  var navModeTbl = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.navTitle'))+'</div><table>'
+    + '<tr><th>'+esc(tr('f.grid.navColTarget'))+'</th><th>'+esc(tr('f.grid.navColForm'))+'</th><th>'+esc(tr('f.grid.navColToggle'))+'</th><th>'+esc(tr('f.grid.navColState'))+'</th></tr>'
+    + ['nr1','nr2','nr3'].map(function(k){ return '<tr>'+['a','b','c','d'].map(function(c){ return '<td>'+esc(tr('f.grid.'+k+c))+'</td>'; }).join('')+'</tr>'; }).join('')
+    + '</table><p class="hint" style="margin:6px 0 0;font-size:11px;color:var(--text-tertiary)">'+esc(tr('f.grid.railNote'))+'</p>';
   var order = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.orderTitle'))+'</div><ol>'
     + ['o1','o2','o3','o4','o5'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ol>';
   document.getElementById(theme === 'dark' ? 'gr-dark' : 'gr-light').innerHTML =
-    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">3 columns · grid</span></div><div class="pbody">'+contract+screen+demo+order+'</div>';
+    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">3 columns · grid</span></div><div class="pbody">'+contract+navModeTbl+screen+demo+order+'</div>';
 }
 function syncGrid(){
   var vp0 = document.getElementById('gr-range'), navIn = document.getElementById('gr-nav');
@@ -640,30 +669,40 @@ function syncGrid(){
   ['light','dark'].forEach(function(theme){
     var vp = document.getElementById('gvp-'+theme), clip = document.getElementById('gclip-'+theme);
     if (!vp) return;
-    var L = computeColumns(theme, viewport, navPref, SIDE_WANTED ? 1 : 0, ratio, NAV_MANUAL);
+    var L = computeColumns(theme, viewport, navPref, SIDE_WANTED ? 1 : 0, ratio, NAV_MANUAL, NAV_COLLAPSED);
     var grid = L.navTrack + 'px ' + L.center + 'px ' + L.side + 'px';
     var ggrid = document.getElementById('ggrid-'+theme);
     if (ggrid) ggrid.style.gridTemplateColumns = grid;
     vp.style.width = viewport + 'px';
     vp.style.height = '300px';
     var gnav = document.getElementById('gnav-'+theme);
-    gnav.classList.toggle('overlay', !!L.navOverlay);
-    gnav.style.width = L.navOverlay ? L.navOverlayW + 'px' : '';
+    gnav.classList.toggle('rail', L.navMode === 'rail');
+    gnav.classList.toggle('overlay', L.navMode === 'overlay');
+    gnav.classList.toggle('drawer', !!L.drawer);
+    gnav.classList.toggle('open', L.navMode === 'drawerOpen');
+    gnav.style.width = (L.navMode === 'overlay' || L.navMode === 'drawerOpen') ? L.navOverlayW + 'px' : '';
+    var scr = document.getElementById('gscrim-'+theme);
+    if (scr) scr.classList.toggle('on', !!L.scrim);
     document.getElementById('gside-'+theme).style.display = L.side > 0 ? '' : 'none';
     var k = Math.min(1, (clip.clientWidth - 2) / viewport);
     vp.style.transform = 'scale(' + k + ')';
     var ro = document.getElementById('gr-readout');
-    if (ro) ro.textContent = viewport + 'px → ' + tr('f.grid.zone.nav') + ' ' + L.navTrack
+    if (ro) ro.textContent = viewport + 'px → ' + tr('f.grid.zone.nav') + ' ' + tr('f.grid.navMode.'+L.navMode) + ' ' + L.navTrack
       + (L.navOverlay ? '(+' + tr('f.grid.overlay') + ')' : '') + ' · ' + tr('f.grid.zone.center') + ' ' + L.center
       + (L.centerBelowMin ? '(' + tr('f.grid.belowMin') + ')' : '') + ' · ' + tr('f.grid.zone.side') + ' ' + L.side
-      + (L.autoCollapse ? ' · <' + tok('--nav-auto-collapse',theme) + ' ' + tr('f.grid.autoRail') : '');
+      + (L.drawer ? '' : (L.autoCollapse ? ' · <' + tok('--nav-auto-collapse',theme) + ' ' + tr('f.grid.autoRail') : ''));
   });
   document.querySelectorAll('.gpreset[data-w]').forEach(function(b){ b.classList.toggle('on', parseInt(b.getAttribute('data-w'),10) === viewport); });
   document.querySelectorAll('.gpreset[data-type]').forEach(function(b){ b.classList.toggle('on', parseInt(b.getAttribute('data-type'),10) === SIDE_TYPE); });
   var nb = document.getElementById('gr-navbtn');
-  if (nb) { var L2 = computeColumns('light', viewport, navPref, 0, ratio, NAV_MANUAL);
-    nb.textContent = tr(L2.autoCollapse ? (NAV_MANUAL ? 'f.grid.navOverlayOn' : 'f.grid.navOverlayOff') : 'f.grid.navNormal');
-    nb.classList.toggle('on', NAV_MANUAL && L2.autoCollapse); nb.setAttribute('aria-pressed', String(NAV_MANUAL)); }
+  if (nb) {
+    var vNow = parseInt(document.getElementById('gr-range').value, 10);
+    var autoNow = vNow < px(tok('--nav-auto-collapse','light')) || (PLATFORM === 1 && vNow < px(tok('--bp-nav-drawer','light')));
+    var expandedNow = NAV_MANUAL || (!autoNow && !NAV_COLLAPSED);
+    nb.textContent = tr(expandedNow ? 'f.grid.navCollapsedBtn' : 'f.grid.navExpanded');
+    nb.setAttribute('aria-pressed', String(NAV_MANUAL)); nb.classList.toggle('on', NAV_MANUAL);
+  }
+  document.querySelectorAll('.gpreset[data-plat]').forEach(function(b){ b.classList.toggle('on', parseInt(b.getAttribute('data-plat'),10) === PLATFORM); });
   var sb = document.getElementById('gr-sidebtn');
   if (sb) { sb.textContent = tr(SIDE_WANTED ? 'f.grid.sideOn' : 'f.grid.sideOff');
     sb.classList.toggle('on', SIDE_WANTED); sb.setAttribute('aria-pressed', String(SIDE_WANTED)); }
@@ -684,8 +723,29 @@ function initGrid(){
   }
   [['gr-navbtn','nav'],['gr-sidebtn','side']].forEach(function(x){
     var el = document.getElementById(x[0]);
-    if (el && !el.dataset.done){ el.addEventListener('click', function(){ if (x[1]==='nav') NAV_MANUAL = !NAV_MANUAL; else SIDE_WANTED = !SIDE_WANTED; syncGrid(); }); el.dataset.done = '1'; }
+    if (el && !el.dataset.done){ el.addEventListener('click', function(){
+      if (x[1] !== 'nav') { SIDE_WANTED = !SIDE_WANTED; syncGrid(); return; }
+      /* 两级状态：宽屏收起 = 写"收起偏好"；窄屏/抽屉态 = 只开"临时浮层"，不动偏好 */
+      var v = parseInt(document.getElementById('gr-range').value, 10);
+      var auto = v < px(tok('--nav-auto-collapse','light')) || (PLATFORM === 1 && v < px(tok('--bp-nav-drawer','light')));
+      if (NAV_COLLAPSED || NAV_MANUAL) { NAV_COLLAPSED = false; NAV_MANUAL = false; }
+      else if (auto) { NAV_MANUAL = true; }
+      else { NAV_COLLAPSED = true; }
+      syncGrid(); }); el.dataset.done = '1'; }
   });
+  var pb = document.getElementById('gr-plats');
+  if (pb && !pb.dataset.done){
+    pb.innerHTML = PLATS.map(function(k,i){ return '<button type="button" class="gpreset" data-plat="'+i+'" data-l="'+k+'">'+esc(tr('f.grid.plat.'+k))+'</button>'; }).join('');
+    pb.addEventListener('click', function(e){ var b = e.target.closest('.gpreset'); if (!b) return;
+      PLATFORM = parseInt(b.getAttribute('data-plat'),10); NAV_MANUAL = false; syncGrid(); });
+    pb.dataset.done = '1';
+  }
+  ['light','dark'].forEach(function(theme){
+    var scr = document.getElementById('gscrim-'+theme);
+    if (scr && !scr.dataset.done){ scr.addEventListener('click', function(){ NAV_MANUAL = false; syncGrid(); }); scr.dataset.done = '1'; }
+  });
+  if (!window.__grEsc){ window.__grEsc = 1; document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && NAV_MANUAL){ NAV_MANUAL = false; syncGrid(); } }); }
 }
 ['gr-range','gr-nav','gr-side'].forEach(function(id){ document.getElementById(id).addEventListener('input', syncGrid); });
 initGrid();

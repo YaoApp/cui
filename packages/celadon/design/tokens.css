@@ -233,6 +233,11 @@
   --nav-max: 420px;
   --nav-default: 280px;
   --nav-collapsed: 56px;
+  /* 收起为图标轨的构成：24 图标 + 16×2 padding = 56（见下 --nav-collapsed）
+     Web 窄屏（< --bp-nav-drawer）转抽屉：导航浮在内容上 + 遮罩，不占列轨 */
+  --nav-rail-icon: 24px;
+  --nav-rail-pad: 16px;
+  --bp-nav-drawer: 768px;
   --nav-auto-collapse: 1024px;
   --center-min: 400px;
   --side-min: 300px;
