@@ -430,7 +430,7 @@
       "navZone": "導覽區",
       "centerZone": "內容區",
       "sideZone": "側欄",
-      "navCollapsedNote": "收起為圖示軌",
+      "navCollapsedNote": "收合：客戶端 0（導覽留在視窗左上）· Web 56 圖示軌",
       "centerMax": "剩餘空間（內文另有可讀上限）",
       "centerDefault": "剩餘空間",
       "sideDefaultNote": "首次開啟",
@@ -464,7 +464,6 @@
         "center": "內容",
         "side": "側欄"
       },
-      "headerZone": "頂欄",
       "orCap": "或上限",
       "byViewType": "依檢視類型",
       "sideType": {

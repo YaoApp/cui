@@ -430,7 +430,7 @@
       "navZone": "ナビ",
       "centerZone": "内容",
       "sideZone": "サイド",
-      "navCollapsedNote": "アイコンレールに収納",
+      "navCollapsedNote": "収納：クライアント 0（ナビは左上に残る）· Web は 56 のレール",
       "centerMax": "残り（本文には可読上限あり）",
       "centerDefault": "残り",
       "sideDefaultNote": "初回表示",
@@ -464,7 +464,6 @@
         "center": "コンテンツ",
         "side": "サイド"
       },
-      "headerZone": "ヘッダー",
       "orCap": "または上限",
       "byViewType": "ビュー種別ごと",
       "sideType": {
