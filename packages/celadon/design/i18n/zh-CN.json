@@ -588,6 +588,8 @@
     "spCorner": "圆角",
     "spCornerV": "≥8px 的元素 **2px**；<8px 用 **1px**；对角线 90° 用 **≈2.41px**（lucide 规定）",
     "spGap": "元素间距",
-    "spGapV": "不同元素之间 **≥2px**（lucide 规定）"
+    "spGapV": "不同元素之间 **≥2px**（lucide 规定）",
+    "themeLight": "浅色",
+    "themeDark": "暗色"
   }
 }

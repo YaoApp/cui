@@ -590,7 +590,9 @@ window.CELADON_I18N = {
       "spCorner": "Corners",
       "spCornerV": "**2px** for elements 8px or larger, **1px** below that, about **2.41px** on diagonal right angles",
       "spGap": "Element spacing",
-      "spGapV": "At least **2px** between distinct elements (lucide rule)"
+      "spGapV": "At least **2px** between distinct elements (lucide rule)",
+      "themeLight": "Light",
+      "themeDark": "Dark"
     }
   },
   "ja": {
@@ -1183,7 +1185,9 @@ window.CELADON_I18N = {
       "spCorner": "角の丸み",
       "spCornerV": "8px 以上の要素は **2px**、それ未満は **1px**、対角の直角は **約 2.41px**",
       "spGap": "要素の間隔",
-      "spGapV": "別々の要素の間は **2px 以上**（lucide の規定）"
+      "spGapV": "別々の要素の間は **2px 以上**（lucide の規定）",
+      "themeLight": "ライト",
+      "themeDark": "ダーク"
     }
   },
   "zh-CN": {
@@ -1776,7 +1780,9 @@ window.CELADON_I18N = {
       "spCorner": "圆角",
       "spCornerV": "≥8px 的元素 **2px**；<8px 用 **1px**；对角线 90° 用 **≈2.41px**（lucide 规定）",
       "spGap": "元素间距",
-      "spGapV": "不同元素之间 **≥2px**（lucide 规定）"
+      "spGapV": "不同元素之间 **≥2px**（lucide 规定）",
+      "themeLight": "浅色",
+      "themeDark": "暗色"
     }
   },
   "zh-TW": {
@@ -2369,7 +2375,9 @@ window.CELADON_I18N = {
       "spCorner": "圓角",
       "spCornerV": "≥8px 的元素 **2px**；<8px 用 **1px**；對角線 90° 用 **≈2.41px**",
       "spGap": "元素間距",
-      "spGapV": "不同元素之間 **≥2px**（lucide 規定）"
+      "spGapV": "不同元素之間 **≥2px**（lucide 規定）",
+      "themeLight": "淺色",
+      "themeDark": "暗色"
     }
   }
 };
