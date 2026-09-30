@@ -62,7 +62,7 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .sp-demo h4{margin:0 0 var(--spacing-8);font-size:12.5px}
 .sp-demo p{margin:0 0 var(--spacing-8);font-size:11.5px;color:var(--text-secondary)}
 .sp-demo .row{display:flex;gap:var(--spacing-12)}
-.sp-demo .b{padding:var(--spacing-6) var(--spacing-12);border-radius:var(--radius-medium);background:var(--brand-soft);color:var(--brand-ink);font-size:11.5px;font-weight:650}
+.sp-demo .b{padding:var(--spacing-8) var(--spacing-12);border-radius:var(--radius-medium);background:var(--brand-soft);color:var(--brand-ink);font-size:11.5px;font-weight:650}
 /* 圆角 */
 .rad-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .rad-item{text-align:center}
@@ -362,14 +362,14 @@ function cr(a,b){ var l1 = lum(a), l2 = lum(b); if (l1 == null || l2 == null) re
   var hi = Math.max(l1,l2), lo = Math.min(l1,l2); return Math.round(((hi+0.05)/(lo+0.05))*100)/100; }
 
 /* ===== F1 间距 ===== */
-var SPACING = ['--spacing-2','--spacing-4','--spacing-6','--spacing-8','--spacing-12','--spacing-16','--spacing-24','--spacing-32','--spacing-48'];
+var SPACING = ['--spacing-4','--spacing-8','--spacing-12','--spacing-16','--spacing-24','--spacing-32','--spacing-48'];
 function renderSpacing(theme){
   var scale = '<div class="grp">'+esc(tr('f.spacing.scale'))+'</div>' + SPACING.map(function(t){
     var v = px(tok(t, theme));
     return '<div class="sp-row"><span class="sp-name">'+t+'</span><span class="sp-val">'+v+'px</span>'
       + '<span class="sp-bar" style="width:'+Math.min(v*2.6,190)+'px"></span></div>'; }).join('');
   var usage = '<div class="grp" style="margin-top:14px">'+esc(tr('f.spacing.usage'))+'</div>'
-    + '<table><tr><td>'+esc(tr('f.spacing.u1'))+'</td><td><code>4 · 6 · 8 · 12</code></td></tr>'
+    + '<table><tr><td>'+esc(tr('f.spacing.u1'))+'</td><td><code>4 · 8 · 12</code></td></tr>'
     + '<tr><td>'+esc(tr('f.spacing.u2'))+'</td><td><code>8 · 12 · 16</code></td></tr>'
     + '<tr><td>'+esc(tr('f.spacing.u3'))+'</td><td><code>24 · 32 · 48</code></td></tr>'
     + '<tr><td>'+esc(tr('f.spacing.u4'))+'</td><td><code>16 · 24</code></td></tr></table>';
