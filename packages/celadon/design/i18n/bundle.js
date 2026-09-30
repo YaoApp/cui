@@ -309,7 +309,8 @@ window.CELADON_I18N = {
         "r1": "Buttons, inputs, small controls",
         "r2": "Cards, panels, popovers",
         "r3": "Large containers, images",
-        "r4": "Tags, pill buttons, avatar badges"
+        "r4": "Tags, pill buttons, avatar badges",
+        "rx": "Tags / chips"
       },
       "elevation": {
         "title": "Elevation and shadow",
@@ -422,7 +423,7 @@ window.CELADON_I18N = {
         "note": "The main structure is three **vertical** columns on a grid, not horizontal bands. Give way order: the **side column shrinks first, then loses its track, and only then may the centre fall below its minimum**; the **navigation never concedes width**. Screen compatibility comes from **ratio defaults plus viewport driven collapse**, not from giving different screens different window sizes.",
         "slider": "Viewport",
         "sliderNav": "Nav width",
-        "sliderSide": "Side share",
+        "sliderSide": "Side cap",
         "contractTitle": "Column contract (drag the sliders to see clamping)",
         "colZone": "Column",
         "colMin": "Min",
@@ -467,6 +468,15 @@ window.CELADON_I18N = {
           "nav": "nav",
           "center": "center",
           "side": "side"
+        },
+        "headerZone": "Header",
+        "orCap": "or capped at",
+        "byViewType": "by view type",
+        "sideType": {
+          "reading": "Reading 400",
+          "tool": "Tool 600",
+          "task": "Task 640",
+          "wide": "Wide 840"
         }
       }
     }
@@ -780,7 +790,8 @@ window.CELADON_I18N = {
         "r1": "ボタン・入力欄・小さな部品",
         "r2": "カード・パネル・ポップオーバー",
         "r3": "大きな容器・画像",
-        "r4": "タグ・ピルボタン・アバターのバッジ"
+        "r4": "タグ・ピルボタン・アバターのバッジ",
+        "rx": "タグ / チップ"
       },
       "elevation": {
         "title": "影と階層 Elevation",
@@ -893,7 +904,7 @@ window.CELADON_I18N = {
         "note": "主構造はグリッドによる 3 つの**縦カラム**で、横帯ではありません。譲る順番：**サイドが先に縮み、次にトラックごと消え、その後にようやく中央が最小を下回れる**。**ナビは幅を譲りません**。画面互換は**比率の既定値 + ビューポート駆動**で担保し、画面ごとに違うウィンドウ寸法を与えることはしません。",
         "slider": "ビューポート",
         "sliderNav": "ナビ幅",
-        "sliderSide": "サイド比率",
+        "sliderSide": "サイド上限",
         "contractTitle": "カラム契約（スライダーでクランプを確認）",
         "colZone": "カラム",
         "colMin": "最小",
@@ -938,6 +949,15 @@ window.CELADON_I18N = {
           "nav": "ナビ",
           "center": "コンテンツ",
           "side": "サイド"
+        },
+        "headerZone": "ヘッダー",
+        "orCap": "または上限",
+        "byViewType": "ビュー種別ごと",
+        "sideType": {
+          "reading": "閲覧 400",
+          "tool": "ツール 600",
+          "task": "タスク 640",
+          "wide": "ワイド 840"
         }
       }
     }
@@ -1251,7 +1271,8 @@ window.CELADON_I18N = {
         "r1": "按钮 · 输入框 · 小控件",
         "r2": "卡片 · 面板 · 弹层",
         "r3": "大容器 · 图片",
-        "r4": "标签 · 胶囊按钮 · 头像角标"
+        "r4": "标签 · 胶囊按钮 · 头像角标",
+        "rx": "标签 / 芯片"
       },
       "elevation": {
         "title": "阴影与层级 Elevation",
@@ -1364,7 +1385,7 @@ window.CELADON_I18N = {
         "note": "主结构是三栏**竖分割**（grid 列轨），不是横向条带。让位顺序：**侧栏先缩 → 侧栏整条消失 → 中栏才可能低于最小**；**导航栏不参与宽度让步**。屏幕兼容靠**比例默认 + 视口驱动**，不靠\"给不同屏幕不同窗口尺寸\"。",
         "slider": "视口宽",
         "sliderNav": "导航宽",
-        "sliderSide": "侧栏占画面",
+        "sliderSide": "侧栏上限",
         "contractTitle": "三栏契约（拖上面的滑杆看夹取）",
         "colZone": "栏",
         "colMin": "最小",
@@ -1409,6 +1430,15 @@ window.CELADON_I18N = {
           "nav": "导航",
           "center": "内容",
           "side": "侧栏"
+        },
+        "headerZone": "顶栏",
+        "orCap": "或上限",
+        "byViewType": "按视图类型",
+        "sideType": {
+          "reading": "阅读型 400",
+          "tool": "工具型 600",
+          "task": "任务型 640",
+          "wide": "宽屏型 840"
         }
       }
     }
@@ -1722,7 +1752,8 @@ window.CELADON_I18N = {
         "r1": "按鈕 · 輸入框 · 小元件",
         "r2": "卡片 · 面板 · 彈層",
         "r3": "大容器 · 圖片",
-        "r4": "標籤 · 膠囊按鈕 · 頭像角標"
+        "r4": "標籤 · 膠囊按鈕 · 頭像角標",
+        "rx": "標籤 / 晶片"
       },
       "elevation": {
         "title": "陰影與層級 Elevation",
@@ -1835,7 +1866,7 @@ window.CELADON_I18N = {
         "note": "主結構是三欄**豎分割**（grid 欄軌），不是橫向條帶。讓位順序：**側欄先縮 → 側欄整條消失 → 中欄才可能低於最小**；**導覽欄不參與寬度讓步**。螢幕相容靠**比例預設 + 視口驅動**，不靠「給不同螢幕不同視窗尺寸」。",
         "slider": "視口寬",
         "sliderNav": "導覽寬",
-        "sliderSide": "側欄佔畫面",
+        "sliderSide": "側欄上限",
         "contractTitle": "三欄契約（拖上面的滑桿看夾取）",
         "colZone": "欄",
         "colMin": "最小",
@@ -1880,6 +1911,15 @@ window.CELADON_I18N = {
           "nav": "導覽",
           "center": "內容",
           "side": "側欄"
+        },
+        "headerZone": "頂欄",
+        "orCap": "或上限",
+        "byViewType": "依檢視類型",
+        "sideType": {
+          "reading": "閱讀型 400",
+          "tool": "工具型 600",
+          "task": "任務型 640",
+          "wide": "寬螢幕型 840"
         }
       }
     }

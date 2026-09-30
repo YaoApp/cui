@@ -176,8 +176,11 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 @keyframes celadon-caret{0%,49%{opacity:1}50%,100%{opacity:0}}
 /* ===== 三栏竖分割演示（导航区 | 内容区 | 侧栏）===== */
 .gclip{position:relative;height:300px;overflow:hidden;border:1px solid var(--border-default);border-radius:var(--radius-medium);background:var(--background-app)}
-.gvp{display:grid;grid-template-columns:0 0 0;height:300px;transform-origin:top left;background:var(--background-app);position:relative;
-  transition:grid-template-columns var(--duration-slow) var(--easing-standard)}
+.gvp{display:flex;flex-direction:column;height:300px;transform-origin:top left;background:var(--background-app);position:relative}
+.ghead{flex:none;height:var(--header-height);background:var(--background-navigation);border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px;padding:0 12px}
+.ghead i{display:block;height:12px;border-radius:3px;background:var(--background-field)}
+.ghead .l{width:96px} .ghead .r{margin-left:auto;width:64px}
+.ggrid{flex:1;min-height:0;display:grid;grid-template-columns:0 0 0;transition:grid-template-columns var(--duration-slow) var(--easing-standard)}
 .gnav{background:var(--background-navigation);border-right:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 .gnav span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .gnav.overlay{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-overlay);box-shadow:var(--shadow-floating)}
@@ -281,7 +284,8 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
     <input type="range" id="gr-nav" min="264" max="420" step="4" value="280" aria-label="nav width">
     <button type="button" class="gpreset" id="gr-navbtn"></button>
     <span class="pf-label" id="gr-sidelabel"></span>
-    <input type="range" id="gr-side" min="30" max="70" step="1" value="45" aria-label="side ratio">
+    <span id="gr-sidetypes" class="prefbar-segs"></span>
+    <input type="range" id="gr-side" min="30" max="70" step="1" value="70" aria-label="side cap ratio">
     <button type="button" class="gpreset" id="gr-sidebtn"></button>
     <span class="greadout" id="gr-readout"></span></div>
   <div class="cols">
@@ -377,7 +381,7 @@ function renderSpacing(theme){
 }
 
 /* ===== F2 圆角 ===== */
-var RADII = [['--radius-small','r1'],['--radius-medium','r2'],['--radius-large','r3'],['--radius-pill','r4']];
+var RADII = [['--radius-xs','rx'],['--radius-small','r1'],['--radius-medium','r2'],['--radius-large','r3'],['--radius-pill','r4']];
 function renderRadius(theme){
   var grid = '<div class="grp">'+esc(tr('f.radius.usage'))+'</div><div class="rad-grid">' + RADII.map(function(p){
     var v = tok(p[0], theme);
@@ -580,17 +584,22 @@ var NAV_MANUAL = false, SIDE_WANTED = false;
 var PRESETS = [['half',720],['default',1280],['large',1600],['uhd',1920]];
 function clampW(px, min, max){ return Math.min(max, Math.max(min, Math.round(px))); }
 /* 让位顺序：侧栏先缩 → 侧栏整条消失 → 中栏才可能低于最小；导航不参与宽度让步 */
+var SIDE_TYPES = [['reading',400],['tool',600],['task',640],['wide',840]];
+var SIDE_TYPE = 0;                       /* 默认：阅读型 */
 function computeColumns(theme, viewport, navPref, sidePref, sideRatio, navManual){
   var NAV_MIN = px(tok('--nav-min',theme)), NAV_MAX = px(tok('--nav-max',theme)), RAIL = px(tok('--nav-collapsed',theme));
   var CENTER_MIN = px(tok('--center-min',theme)), SIDE_MIN = px(tok('--side-min',theme));
   var MAX_RATIO = parseFloat(tok('--side-max-ratio',theme)) || 0.7;
+  var MAX_W = px(tok('--side-width-max',theme));
   var autoCollapse = viewport < px(tok('--nav-auto-collapse',theme));
   var navWanted = navPref > 0;
   var navTrack = (!navWanted || autoCollapse) ? RAIL : clampW(navPref, NAV_MIN, NAV_MAX);
   var navOverlay = autoCollapse && navManual && navWanted;   /* 手动展开：覆盖中栏，不占布局宽 */
   var available = viewport - navTrack - CENTER_MIN;
+  var base = SIDE_TYPES[SIDE_TYPE][1];                      /* 视图类型的默认宽 */
+  var cap = Math.min(viewport * Math.min(sideRatio, MAX_RATIO), MAX_W);   /* 上限 = 画面比例，兜以绝对上限 */
   var side = (sidePref === 0 || available < SIDE_MIN) ? 0
-    : Math.min(available, clampW(viewport * sideRatio, SIDE_MIN, viewport * MAX_RATIO));
+    : Math.min(available, clampW(base, SIDE_MIN, cap));
   var center = Math.max(0, viewport - navTrack - side);
   return { navTrack:navTrack, navOverlay:navOverlay, navOverlayW:navOverlay ? clampW(navPref, NAV_MIN, NAV_MAX) : 0,
     side:side, center:center, centerBelowMin:center < CENTER_MIN, autoCollapse:autoCollapse };
@@ -599,9 +608,10 @@ function renderGrid(theme){
   var c = computeColumns(theme, 1280, 280, 0, 0.45, false);
   var contract = '<div class="grp">'+esc(tr('f.grid.contractTitle'))+'</div><table>'
     + '<tr><th>'+esc(tr('f.grid.colZone'))+'</th><th>'+esc(tr('f.grid.colMin'))+'</th><th>'+esc(tr('f.grid.colMax'))+'</th><th>'+esc(tr('f.grid.colDefault'))+'</th></tr>'
+    + '<tr><td>'+esc(tr('f.grid.headerZone'))+'</td><td>—</td><td>—</td><td><code>'+tok('--header-height',theme)+'</code></td></tr>'
     + '<tr><td>'+esc(tr('f.grid.navZone'))+'</td><td><code>'+tok('--nav-min',theme)+'</code></td><td><code>'+tok('--nav-max',theme)+'</code></td><td><code>'+tok('--nav-default',theme)+'</code> · '+esc(tr('f.grid.navCollapsedNote'))+' <code>'+tok('--nav-collapsed',theme)+'</code></td></tr>'
     + '<tr><td>'+esc(tr('f.grid.centerZone'))+'</td><td><code>'+tok('--center-min',theme)+'</code></td><td>'+esc(tr('f.grid.centerMax'))+'</td><td>'+esc(tr('f.grid.centerDefault'))+'</td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.sideZone'))+'</td><td><code>'+tok('--side-min',theme)+'</code></td><td><code>'+tok('--side-max-ratio',theme)+'</code> '+esc(tr('f.grid.ofFrame'))+'</td><td><code>'+tok('--side-default-ratio',theme)+'</code> '+esc(tr('f.grid.ofFrame'))+' · '+esc(tr('f.grid.sideDefaultNote'))+'</td></tr>'
+    + '<tr><td>'+esc(tr('f.grid.sideZone'))+'</td><td><code>'+tok('--side-min',theme)+'</code></td><td><code>'+tok('--side-width-max',theme)+'</code> '+esc(tr('f.grid.orCap'))+' <code>'+tok('--side-max-ratio',theme)+'</code> '+esc(tr('f.grid.ofFrame'))+'</td><td><code>'+tok('--side-width-reading',theme)+'</code> / <code>'+tok('--side-width-tool',theme)+'</code> / <code>'+tok('--side-width-task',theme)+'</code> / <code>'+tok('--side-width-wide',theme)+'</code> '+esc(tr('f.grid.byViewType'))+'</td></tr>'
     + '</table>';
   var screen = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.screenTitle'))+'</div><ul>'
     + ['s1','s2','s3'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ul>'
@@ -612,10 +622,12 @@ function renderGrid(theme){
   var sides=''; for (var k=0;k<6;k++) sides += '<span></span>';
   var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.demo'))+'</div>'
     + '<div class="gclip" id="gclip-'+theme+'"><div class="gvp" id="gvp-'+theme+'">'
+    + '<div class="ghead" id="ghead-'+theme+'"><i class="l"></i><i class="r"></i></div>'
+    + '<div class="ggrid" id="ggrid-'+theme+'">'
     + '<div class="gnav" id="gnav-'+theme+'">'+navs+'</div>'
     + '<div class="gcenter"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div>'
     + '<div class="gside" id="gside-'+theme+'">'+sides+'</div>'
-    + '</div></div>';
+    + '</div></div></div>';
   var order = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.orderTitle'))+'</div><ol>'
     + ['o1','o2','o3','o4','o5'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ol>';
   document.getElementById(theme === 'dark' ? 'gr-dark' : 'gr-light').innerHTML =
@@ -630,7 +642,8 @@ function syncGrid(){
     if (!vp) return;
     var L = computeColumns(theme, viewport, navPref, SIDE_WANTED ? 1 : 0, ratio, NAV_MANUAL);
     var grid = L.navTrack + 'px ' + L.center + 'px ' + L.side + 'px';
-    vp.style.gridTemplateColumns = grid;
+    var ggrid = document.getElementById('ggrid-'+theme);
+    if (ggrid) ggrid.style.gridTemplateColumns = grid;
     vp.style.width = viewport + 'px';
     vp.style.height = '300px';
     var gnav = document.getElementById('gnav-'+theme);
@@ -646,6 +659,7 @@ function syncGrid(){
       + (L.autoCollapse ? ' · <' + tok('--nav-auto-collapse',theme) + ' ' + tr('f.grid.autoRail') : '');
   });
   document.querySelectorAll('.gpreset[data-w]').forEach(function(b){ b.classList.toggle('on', parseInt(b.getAttribute('data-w'),10) === viewport); });
+  document.querySelectorAll('.gpreset[data-type]').forEach(function(b){ b.classList.toggle('on', parseInt(b.getAttribute('data-type'),10) === SIDE_TYPE); });
   var nb = document.getElementById('gr-navbtn');
   if (nb) { var L2 = computeColumns('light', viewport, navPref, 0, ratio, NAV_MANUAL);
     nb.textContent = tr(L2.autoCollapse ? (NAV_MANUAL ? 'f.grid.navOverlayOn' : 'f.grid.navOverlayOff') : 'f.grid.navNormal');
@@ -661,6 +675,12 @@ function initGrid(){
     box.addEventListener('click', function(e){ var b = e.target.closest('.gpreset'); if (!b) return;
       document.getElementById('gr-range').value = b.getAttribute('data-w'); syncGrid(); });
     box.dataset.done = '1';
+  }
+  var tb = document.getElementById('gr-sidetypes');
+  if (tb && !tb.dataset.done){
+    tb.innerHTML = SIDE_TYPES.map(function(t,i){ return '<button type="button" class="gpreset" data-type="'+i+'" data-l="'+t[0]+'">'+esc(tr('f.grid.sideType.'+t[0]))+'</button>'; }).join('');
+    tb.addEventListener('click', function(e){ var b = e.target.closest('.gpreset'); if (!b) return; SIDE_TYPE = parseInt(b.getAttribute('data-type'),10); syncGrid(); });
+    tb.dataset.done = '1';
   }
   [['gr-navbtn','nav'],['gr-sidebtn','side']].forEach(function(x){
     var el = document.getElementById(x[0]);
@@ -682,7 +702,10 @@ function applyChrome(){
   document.getElementById('gr-range').setAttribute('aria-label', tr('f.grid.slider'));
   document.getElementById('gr-nav').setAttribute('aria-label', tr('f.grid.sliderNav'));
   document.getElementById('gr-side').setAttribute('aria-label', tr('f.grid.sliderSide'));
-  document.querySelectorAll('.gpreset[data-l]').forEach(function(b){ b.textContent = tr('f.grid.preset.'+b.getAttribute('data-l')); });
+  document.querySelectorAll('.gpreset[data-l]').forEach(function(b){
+    var k = b.hasAttribute('data-type') ? 'f.grid.sideType.' : 'f.grid.preset.';
+    b.textContent = tr(k + b.getAttribute('data-l'));
+  });
   document.getElementById('gr-range').setAttribute('aria-label', tr('f.grid.slider'));
   var map = [['sp','spacing'],['rd','radius'],['el','elevation'],['mo','motion'],['bd','border'],['gr','grid']];
   map.forEach(function(m){
