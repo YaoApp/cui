@@ -83,11 +83,7 @@ for (const lang of LANGS) {
   // 2/3) 漏翻
   for (const [k, v] of Object.entries(pack)) {
     if (typeof v !== 'string' || ALLOW_CJK.has(k) || NEUTRAL.test(v)) continue
-
-    // 4) en 里不该出现汉字（除非在字型样本白名单里）—— 英文包最容易被"忘了翻"
-    if (lang === 'en' && /[\u4e00-\u9fff]/.test(v)) {
-      problems.push(`[en] 夹着中文（未翻译？）: ${k} = ${v.slice(0, 40)}`)
-    }
+    // en 里出现汉字 = 没翻（字型样本走 ALLOW_CJK 白名单）
     if (lang === 'en' && HAN.test(v)) problems.push(`[en] 未翻译（含汉字）: ${k} = ${v}`)
     if (lang === 'ja' && HAN.test(v) && v === base[k] && !JA_KEEP.has(v))
       problems.push(`[ja] 疑似未翻译（同 zh-CN）: ${k} = ${v}`)
