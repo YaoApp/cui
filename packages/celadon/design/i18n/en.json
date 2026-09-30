@@ -588,6 +588,8 @@
     "spCorner": "Corners",
     "spCornerV": "**2px** for elements 8px or larger, **1px** below that, about **2.41px** on diagonal right angles",
     "spGap": "Element spacing",
-    "spGapV": "At least **2px** between distinct elements (lucide rule)"
+    "spGapV": "At least **2px** between distinct elements (lucide rule)",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   }
 }
