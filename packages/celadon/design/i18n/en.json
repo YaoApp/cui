@@ -441,7 +441,7 @@
       "winDefault": "Default window",
       "winMin": "Minimum window",
       "demo": "Three column demo (drag the viewport, drag the columns, toggle)",
-      "orderTitle": "Give way order (same as DSH)",
+      "orderTitle": "Give way order (the most expensive goes first)",
       "o1": "The side column **shrinks first**, clamped between 300 and 70% of the frame.",
       "o2": "The side column then **loses its track entirely**: below 300 of remaining space it is simply not opened rather than squeezed.",
       "o3": "**Only then may the centre drop below its minimum** of 400, and only once that track is gone.",

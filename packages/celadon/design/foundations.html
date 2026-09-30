@@ -575,7 +575,7 @@ function renderBorder(theme){
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">border · contrast</span></div><div class="pbody">'+ramp+demo+dec+'</div>';
 }
 
-/* ===== F6 三栏竖分割（导航 | 内容 | 侧栏）· 求解器与 DSH 同构 ===== */
+/* ===== F6 三栏竖分割（导航 | 内容 | 侧栏）· 最小宽预算求解器 ===== */
 var NAV_MANUAL = false, SIDE_WANTED = false;
 var PRESETS = [['half',720],['default',1280],['large',1600],['uhd',1920]];
 function clampW(px, min, max){ return Math.min(max, Math.max(min, Math.round(px))); }
