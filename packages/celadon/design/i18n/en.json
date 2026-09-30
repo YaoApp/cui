@@ -45,7 +45,8 @@
     },
     "composer": {
       "placeholder": "Continue: add the risks to the acceptance criteria…",
-      "defaultPermission": "Default permission"
+      "defaultPermission": "Default permission",
+      "awaitConfirm": "Please confirm the options above to continue…"
     },
     "panel": {
       "inProgress": "In progress",
@@ -68,6 +69,9 @@
     "theme": {
       "light": "Light",
       "dark": "Dark"
+    },
+    "task": {
+      "id": "Task ID"
     }
   },
   "sample": {
@@ -244,6 +248,24 @@
       "text": "Neutral · Text",
       "semantic": "Semantic",
       "metrics": "Size · Radius · Motion"
+    },
+    "state": {
+      "statesTitle": "Control states · live preview",
+      "statesNote": "All states at once: the .is-* classes mirror the real pseudo-classes (:hover/:focus/:read-only/:disabled) from the same tokens",
+      "groupInput": "Input",
+      "groupButton": "Button",
+      "default": "Default",
+      "hover": "Hover",
+      "active": "Pressed",
+      "focus": "Focus",
+      "disabled": "Disabled",
+      "filled": "Filled",
+      "placeholder": "Placeholder",
+      "readonly": "Read-only",
+      "error": "Error",
+      "errorHint": "Invalid date",
+      "solid": "Primary",
+      "soft": "Soft"
     }
   }
 }
