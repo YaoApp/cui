@@ -312,7 +312,7 @@ packages/celadon/
 **命名空间**：按功能域切（`chat` / `settings` / `inbox` …），与使用它的代码就近放置。
 当前 579 key 先单文件即可，切分随页面模块推进。
 
-**格式化归属**：日期 / 数字 / 货币**不交给 i18next** —— 按 `19 数据格式` 的规则走 `Intl`，且**用回退后实际生效的语言**（`i18n.resolvedLanguage`），不用浏览器语言。
+**格式化**：**规则只有一份 —— `19 数据格式`**。`i18next` **自带 `datetime` / `number` / `currency` / `relativetime`** ✗（底层就是 `Intl`）→ **文案里嵌的日期与数字优先走它** ✓；`19` 要求而它不覆盖的（**周起始日 `Intl.Locale.weekInfo`** ✓ **列表 `Intl.ListFormat`** ✗）**直接调 `Intl`** ✓。两条路的**参数必须一致** ✗（`hourCycle: 'h23'` 等）；**语言取当前生效语言** ✓ —— i18next 自身即如此，直调时用 `i18n.resolvedLanguage` ✗。
 
 **翻译流程**（`01` 内落地）：术语表 · 翻译规则 · 给 AI 的翻译提示词 · 风格样例，与 `check-i18n.mjs` 的自动检查配套。
 
