@@ -115,6 +115,7 @@ IANA Area/Location      ← 如 Asia/Shanghai、America/New_York
   **参数必须与本表一致**（如 `hourCycle: 'h23'`），**语言取当前生效语言**（i18next 自身即如此）
 - **`i18next` 不覆盖的**：周起始日（`Intl.Locale.weekInfo`）· 列表（`Intl.ListFormat`）· 独立时间戳 → **直接调 `Intl`**，语言用 `i18n.resolvedLanguage`（**不用浏览器语言** ✗）
 - **禁止** ✗：不带 locale 参数的 `toLocaleDateString()` / `toLocaleString()` —— 那会跟随浏览器语言，出现"中文界面英文日期"
+- **日期运算与时区换算**（加减 · 区间 · 日历网格 · 时区转换）**不属于格式化** ✗ —— 本表不管；**格式化永远不需要日期库，`Intl` 就是全部**
 
 ## 4. 双向文本（RTL）
 
