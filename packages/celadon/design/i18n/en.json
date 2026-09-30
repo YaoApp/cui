@@ -622,7 +622,7 @@
     "coverNames": "Semantic names (ours)",
     "srcOwn": "ours",
     "brandsetTitle": "3. Third party brands (340, from @lobehub/icons)",
-    "brandsetNote": "Model and vendor logos come from **@lobehub/icons** (MIT, 340 brands). **Brand marks keep their official colours** as their trademark rules require, which makes them the **only place on this site allowed to use a colour that is not one of our tokens**; on a dark surface switch to the **mono** variant. The logos are trademarks of their owners and identify the corresponding models or services. **A brand mark is identity, not an interface icon**, so the size defaults to **24** here (interface icons default to 16) and can be switched to 14, 16, 20 or 24.",
+    "brandsetNote": "Model and vendor logos come from **@lobehub/icons** (MIT, 340 brands). **Brand marks keep their official colours** as their trademark rules require, which makes them the **only place on this site allowed to use a colour that is not one of our tokens**; on a dark surface switch to the **mono** variant. The logos are trademarks of their owners and identify the corresponding models or services. **A brand mark is identity, not an interface icon**, so the size defaults to **24** here (interface icons default to 16) and can be switched to 14, 16, 20 or 24. **General brands come in on demand**: for a non AI brand such as WeChat, Slack or Notion, `vendor-simple.mjs` converts that one brand from **simple-icons** (CC0). The other ~3400 are deliberately not imported.",
     "brandSearch": "Search brands, try deepseek or openai",
     "brandColor": "Official colour",
     "brandMono": "Mono",
