@@ -106,7 +106,7 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:#333;margin:4px 0}
 var GROUPS = [
  ['group.brand', [
    ['--brand','brand','on'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
-   ['--brand-soft','brandSoft'], ['--brand-display','brandDisplay'], ['--brand-text','brandText','onbrand'],
+   ['--brand-soft','brandSoft'], ['--brand-display','brandDisplay'], ['--brand-text','brandText','onbrand'], ['--brand-ink','brandInk','onbrand'],
    ['--brand-lift','brandLift','nocr']]],
  ['group.interaction', [
    ['--focus-ring-color','focusRingColor','on'], ['--focus-ring-width','focusRingWidth'], ['--focus-ring-offset','focusRingOffset'],
@@ -228,7 +228,9 @@ function renderPairs(){
     var f = t[0], b = t[1], label = tr('card.usage.' + t[2]);
     return ['light','dark'].map(function(themeName){
       var V = themeName === 'light' ? L : D;
-      var r = ratio(V[f], V[b]); var gd = r ? grade(r) : ['dim','—'];
+      var missing = !V[f] || !V[b];
+      if (missing) console.warn('[color-card] 配对缺少 token:', !V[f] ? f : '', !V[b] ? b : '');
+      var r = missing ? 0 : ratio(V[f], V[b]); var gd = r ? grade(r) : ['dim','—'];
       var theme = tr(themeName === 'light' ? 'card.themeLight' : 'card.themeDark');
       return '<div style="display:flex;align-items:center;gap:9px;padding:4px 0">'
         + '<span style="font-size:10.5px;color:#888;width:34px">'+esc(theme)+'</span>'
