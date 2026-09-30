@@ -45,7 +45,8 @@
     },
     "composer": {
       "placeholder": "继续：把风险点补进需求文档的验收条款…",
-      "defaultPermission": "默认权限"
+      "defaultPermission": "默认权限",
+      "awaitConfirm": "请先确认上方选项后继续…"
     },
     "panel": {
       "inProgress": "进行中",
@@ -68,6 +69,9 @@
     "theme": {
       "light": "浅色",
       "dark": "暗色"
+    },
+    "task": {
+      "id": "任务 ID"
     }
   },
   "sample": {
@@ -244,6 +248,24 @@
       "text": "中性 · 字",
       "semantic": "语义",
       "metrics": "尺寸 · 圆角 · 动效"
+    },
+    "state": {
+      "statesTitle": "控件状态 · 实时预览",
+      "statesNote": "静态展示多态：`.is-*` 类与真实伪类（:hover/:focus/:read-only/:disabled）一一对应，同一份 token",
+      "groupInput": "输入框",
+      "groupButton": "按钮",
+      "default": "默认",
+      "hover": "悬停",
+      "active": "按下",
+      "focus": "聚焦",
+      "disabled": "禁用",
+      "filled": "已填",
+      "placeholder": "占位",
+      "readonly": "只读",
+      "error": "错误",
+      "errorHint": "日期格式不正确",
+      "solid": "主按钮",
+      "soft": "浅底"
     }
   }
 }

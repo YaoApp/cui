@@ -98,7 +98,14 @@ svg.icon.is-small{width:14px;height:14px}
 .question-option{margin-top:6px;min-height:32px;border:1px solid var(--border-default);border-radius:var(--radius-medium);display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12.5px}
 .question-option.is-selected{border-color:var(--brand-ink);background:var(--brand-soft);color:var(--brand-ink);font-weight:650}
 .composer{margin:14px 30px 18px;border:1px solid var(--border-default);background:var(--background-surface);border-radius:11px;padding:10px 12px}
-.composer .placeholder{color:var(--text-placeholder);font-size:13px}
+/* 提高一级特异性：tokens.css 里 .input:disabled 有 [data-theme] .celadon .input:disabled（0,4,0） */
+.celadon .composer .input{border:0;background:transparent;padding:2px 0;height:auto;font-size:13px;width:100%}
+.celadon .composer .input:disabled{background:transparent;color:var(--text-disabled);cursor:not-allowed}
+.celadon .composer .input:disabled::placeholder{color:var(--text-disabled)}
+.field-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.field-row .label{font-size:11.5px;color:var(--text-tertiary);flex:none}
+.field-row .input{height:28px;font-size:12px;width:132px;padding:0 8px}
+.send-button.is-disabled{background:var(--background-disabled);color:var(--text-disabled);border-color:var(--border-disabled);cursor:not-allowed}
 .composer .foot{display:flex;align-items:center;gap:7px;margin-top:10px}
 .send-button{margin-left:auto;width:30px;height:28px;border-radius:var(--radius-medium);background:var(--brand-soft);color:var(--brand-ink);border:1px solid var(--brand-ink);
   display:flex;align-items:center;justify-content:center}
@@ -274,13 +281,13 @@ svg.icon.is-small{width:14px;height:14px}
         </div>
       </div>
     </div>
-    <div class="composer">
-      <div class="placeholder" data-i18n="ui.composer.placeholder">继续：把风险点补进需求文档的验收条款…</div>
+    <div class="composer is-disabled">
+      <input class="input" disabled data-i18n-placeholder="ui.composer.awaitConfirm" placeholder="请先确认上方选项后继续…">
       <div class="foot">
         <span class="chip"><svg class="icon is-small" style="width:12px;height:12px"><use href="#i-plus"/></svg></span>
         <span class="chip" data-i18n="ui.composer.defaultPermission">默认权限</span>
         <span class="chip">DeepSeek V4 Flash</span>
-        <span class="send-button"><svg class="icon is-small"><use href="#i-send"/></svg></span>
+        <span class="send-button is-disabled"><svg class="icon is-small"><use href="#i-send"/></svg></span>
       </div>
     </div>
   </main>
@@ -298,6 +305,7 @@ svg.icon.is-small{width:14px;height:14px}
       <div>
         <div class="panel-title" data-i18n="sample.panel.taskTitle">合同审阅</div>
         <div class="panel-meta"><span data-i18n="ui.panel.inProgress">进行中</span> · <span data-i18n="ui.panel.highPriority">高优先级</span><span style="color:var(--border-control)">|</span>max<span style="color:var(--border-control)">|</span><span data-i18n="ui.panel.remainingDays" data-days="2">剩余 2 天</span></div>
+        <div class="field-row"><span class="label" data-i18n="ui.task.id">任务 ID</span><input class="input is-readonly" readonly value="tsk_8f21c4"></div>
         <div class="panel-actions">
           <span class="panel-button is-primary"><svg class="icon is-small"><use href="#i-check"/></svg><span data-i18n="ui.panel.actionComplete">标记完成</span></span>
           <span class="panel-button warning-badge"><svg class="icon is-small"><use href="#i-pause"/></svg><span data-i18n="ui.panel.actionPause">挂起</span></span>
@@ -419,6 +427,12 @@ document.querySelectorAll('.toolbar button[data-t]').forEach(function(b){
       if (t == null) t = lookup(fallback, el.dataset.i18nHtml);
       if (t == null) return;
       el.innerHTML = interpolate(t, el);
+    });
+    /* 属性类 i18n：placeholder（input 的文案不在 textContent 里） */
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+      var t = lookup(dict, el.dataset.i18nPlaceholder);
+      if (t == null) t = lookup(fallback, el.dataset.i18nPlaceholder);
+      if (t != null) el.setAttribute('placeholder', t);
     });
     document.documentElement.lang = lang;
     document.querySelectorAll('.language-switch button').forEach(function(b){
