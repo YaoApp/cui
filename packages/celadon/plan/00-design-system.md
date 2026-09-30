@@ -12,6 +12,7 @@
 | 配色与语义 token | `design/tokens.less` → `tokens.css`（浅/暗两套；含 focus-ring / scrim / disabled / brand-ink） | `node design/build-css.mjs` 编译通过 |
 | 配色出处 | 中国传统色：品牌「青」`#2A7B7B` · 成功「松花绿」`#057748` · 危险「朱红」`#D93B30` · 警示「琥珀」`#8B6214` | `design/README.md` 色表 |
 | 四语字体栈 | `--font-family-ui-hans/-hant/-japanese` + `:lang` 自动映射（繁中不走简中字形、日文不走中文字形）；等宽补 CJK | 色卡「字体样本」四列解析栈 |
+| 状态配色（交互/禁用/占位） | `--background-hover/-active/-selected/-readonly/-disabled` · `--border-hover/-disabled` · `--text-placeholder/-disabled`；三级文字修正为 AA（4.54:1） | 色卡「关键配对」与「中性/交互态」组实算 |
 | 排版度量 | 字重 430 · 行高 1.5（拉丁）/ 1.7（中日文）· 中文最小 12px · 中文零字距 | `tokens.less` |
 | i18n | `design/i18n/{zh-CN,zh-TW,en,ja}.json`（`ui.*` 必翻 / `sample.*` 演示数据）+ 生成器 + 运行时切换（缺 key 回退 `zh-CN`） | `node design/build-i18n.mjs`；英文模式残留中文 = 0 |
 | 色卡（自检工具） | `design/color-card.html`：**零硬编码**、实时读 `tokens.css`、对比度实算 + **关键配对**校验 | 16 组配对全部 ≥ AA |
