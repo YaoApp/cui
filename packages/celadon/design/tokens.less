@@ -204,14 +204,15 @@
   .input       { background: var(--background-field); border: 1px solid var(--border-control); color: var(--text-primary);
     &::placeholder { color: var(--text-placeholder); }                       /* 占位 */
     &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover); }
-    &:focus, &.is-focus { border-color: var(--brand); box-shadow: var(--focus-ring); outline: none; }
+    /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
+    &:focus, &.is-focus { border-color: var(--brand); box-shadow: 0 0 0 var(--focus-ring-width) var(--brand); outline: none; }
     &:read-only, &.is-readonly { background: var(--background-readonly); color: var(--text-secondary); }
     &.is-error { border-color: var(--danger); }
     &:disabled, &.is-disabled { background: var(--background-disabled); color: var(--text-disabled);
       border-color: var(--border-disabled); cursor: not-allowed;
       &::placeholder { color: var(--text-disabled); } }
     &.is-error            { border-color: var(--danger); }
-    &.is-error.is-focus   { box-shadow: 0 0 0 var(--focus-ring-offset) var(--background-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--danger); }
+    &.is-error.is-focus   { box-shadow: 0 0 0 var(--focus-ring-width) var(--danger); }
     &:disabled { background: var(--background-disabled); color: var(--text-disabled); border-color: var(--border-disabled); } }
   .focusable:focus-visible { box-shadow: var(--focus-ring); outline: none; }
   .scrim       { background: var(--scrim); }

@@ -19,9 +19,9 @@ h1{font-size:19px;margin:0 0 4px}
 .language-switch{display:flex;gap:4px}
 .toolbar button{font:inherit;font-size:12px;padding:5px 12px;border-radius:var(--radius-pill);border:1px solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
 .toolbar button.on{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:1100px){.cols{grid-template-columns:1fr}}
-.panel{border-radius:14px;overflow:hidden;border:1px solid var(--border-subtle);background:var(--background-content);color:var(--text-primary)}
+.panel{min-width:0;border-radius:14px;overflow:hidden;border:1px solid var(--border-subtle);background:var(--background-content);color:var(--text-primary)}
 .panel .hd{padding:9px 14px;font-weight:700;font-size:13px;border-bottom:1px solid var(--border-subtle);background:var(--background-navigation);display:flex;align-items:center;gap:8px}
 .panel .hd .tag{margin-left:auto;font-weight:400;font-size:11px;color:var(--text-tertiary)}
 .grp{padding:12px 14px 4px}
@@ -46,16 +46,17 @@ h1{font-size:19px;margin:0 0 4px}
 .stgroup{margin:16px 0 0;font-size:11.5px;letter-spacing:.3px;font-weight:var(--font-weight-medium);
   color:var(--text-secondary);padding-bottom:7px;border-bottom:1px solid var(--border-subtle)}
 .stgroup:first-of-type{margin-top:12px}
-#states,.stgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px 16px;margin-top:13px}
+.stgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px 16px;margin-top:13px}
 .st{display:flex;flex-direction:column;gap:7px;align-items:stretch;min-width:0}
 .st .lb{font-size:11.5px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st .input,.st .btn-primary,.st .btn-ghost{width:100%;height:34px;font-size:12.5px;border-radius:var(--radius-medium);
   padding:0 10px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;cursor:default}
 .st .input{cursor:text}
 .st .hint-error{font-size:11.5px;line-height:1.3}
+.stbody{padding:12px 15px 18px}
 .stkind{margin-top:14px}
 .stkind .cap{font-size:11.5px;color:var(--text-tertiary);margin-bottom:9px}
-.card{background:var(--background-surface);border:1px solid var(--border-default);border-radius:12px;padding:14px 16px;margin-top:18px}
+.card{min-width:0;background:var(--background-surface);border:1px solid var(--border-default);border-radius:12px;padding:14px 16px;margin-top:18px}
 .card h2{font-size:13.5px;margin:0 0 6px}
 .card .hint{font-size:11.5px;color:var(--text-secondary);margin:0 0 10px}
 table{width:100%;border-collapse:collapse;font-size:12px}
@@ -100,10 +101,10 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary
 <div class="card"><h2 id="pairs-title"></h2><p class="hint" id="pairs-note"></p><div id="pairs"></div></div>
 
 <div class="card" id="states-panel"><h2 id="states-title"></h2><p class="hint" id="states-note"></p>
-  <div class="stgroup" id="states-g1"></div>
-  <div id="states"></div>
-  <div class="stgroup" id="states-g2"></div>
-  <div id="states-btn"></div>
+  <div class="cols">
+    <div class="panel" id="states-light"></div>
+    <div class="panel celadon" data-theme="dark" id="states-dark"></div>
+  </div>
 </div>
 
 <div class="card"><h2 id="typo-title"></h2><p class="hint" id="typo-note"></p><div class="specimen-grid" id="specimen"></div></div>
@@ -128,10 +129,10 @@ var GROUPS = [
    ['--background-disabled','backgroundDisabled','nocr'], ['--text-disabled','textDisabled','nocr'], ['--border-disabled','borderDisabled','nocr'],
    ['--scrim','scrim','nocr']]],
  ['group.background', [
-   ['--background-app','backgroundApp'], ['--background-navigation','backgroundNavigation'], ['--background-content','backgroundContent'],
-   ['--background-surface','backgroundSurface'], ['--background-field','backgroundField'], ['--background-hover','backgroundHover'],
-   ['--background-selected','backgroundSelected']]],
- ['group.border', [['--border-subtle','borderSubtle'], ['--border-default','borderDefault'], ['--border-control','borderControl'], ['--border-hover','borderHover']]],
+   ['--background-app','backgroundApp','nocr'], ['--background-navigation','backgroundNavigation','nocr'], ['--background-content','backgroundContent','nocr'],
+   ['--background-surface','backgroundSurface','nocr'], ['--background-field','backgroundField','nocr'], ['--background-hover','backgroundHover','nocr'],
+   ['--background-selected','backgroundSelected','nocr']]],
+ ['group.border', [['--border-subtle','borderSubtle','nocr'], ['--border-default','borderDefault','nocr'], ['--border-control','borderControl','nocr'], ['--border-hover','borderHover','nocr']]],
  ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary'], ['--text-placeholder','textPlaceholder'], ['--text-muted','textMuted']]],
  ['group.semantic', [
    ['--success','success','on'], ['--success-soft','successSoft'],
@@ -228,11 +229,8 @@ var STATE_INPUTS = [
 var STATE_BUTTONS = [ ['btnSolid', ['', 'is-hover', 'is-active', 'is-focus', 'is-disabled']],
                       ['btnSoft',  ['', 'is-hover', 'is-active', 'is-focus', 'is-disabled']] ];
 var STATE_LABEL = { '':'default', 'is-hover':'hover', 'is-active':'active', 'is-focus':'focus', 'is-disabled':'disabled' };
-function renderStates(){
-  document.getElementById('states-title').textContent = tr('card.state.statesTitle');
-  document.getElementById('states-note').textContent  = tr('card.state.statesNote');
-  document.getElementById('states-g1').textContent    = tr('card.state.groupInput');
-  document.getElementById('states').innerHTML = STATE_INPUTS.map(function(it){
+function statesMatrixHtml(){
+  var inputs = STATE_INPUTS.map(function(it){
     var cls = it[1], attrs = '', value = '';
     if (it[0] === 'inputFilled') value = '合同审阅 v3';
     if (it[0] === 'inputPlaceholder') attrs = ' placeholder="搜索消息…"';
@@ -245,8 +243,7 @@ function renderStates(){
       + (it[0]==='inputError' ? '<span class="hint-error">'+esc(tr('card.state.errorHint'))+'</span>' : '')
       + '</div>';
   }).join('');
-  document.getElementById('states-g2').textContent = tr('card.state.groupButton');
-  document.getElementById('states-btn').innerHTML = STATE_BUTTONS.map(function(kind){
+  var buttons = STATE_BUTTONS.map(function(kind){
     var cap = tr('card.state.' + (kind[0]==='btnSolid' ? 'solid' : 'soft'));
     return '<div class="stkind"><div class="cap">'+esc(cap)+'</div><div class="stgrid">'
       + kind[1].map(function(cls){
@@ -256,6 +253,17 @@ function renderStates(){
         }).join('')
       + '</div></div>';
   }).join('');
+  return '<div class="stbody">'
+    + '<div class="stgroup">'+esc(tr('card.state.groupInput'))+'</div><div class="stgrid">'+inputs+'</div>'
+    + '<div class="stgroup">'+esc(tr('card.state.groupButton'))+'</div>'+buttons
+    + '</div>';
+}
+function renderStates(){
+  document.getElementById('states-title').textContent = tr('card.state.statesTitle');
+  document.getElementById('states-note').textContent  = tr('card.state.statesNote');
+  var matrix = statesMatrixHtml();
+  document.getElementById('states-light').innerHTML = '<div class="hd">'+esc(tr('card.themeLight'))+'</div>' + matrix;
+  document.getElementById('states-dark').innerHTML  = '<div class="hd">'+esc(tr('card.themeDark'))+'</div>'  + matrix;
 }
 function renderPanels(){
   document.getElementById('cols').innerHTML = buildPanel('light', document.getElementById('probe-light'), 'light')
