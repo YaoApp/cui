@@ -458,9 +458,6 @@ window.CELADON_I18N = {
         },
         "sideOff": "Side: off",
         "sideOn": "Side: on",
-        "navNormal": "Nav: full",
-        "navOverlayOn": "Nav: overlaying (manual)",
-        "navOverlayOff": "Nav: rail (tap to overlay)",
         "overlay": "overlay",
         "belowMin": "below min",
         "autoRail": "auto rail",
@@ -477,7 +474,47 @@ window.CELADON_I18N = {
           "tool": "Tool 600",
           "task": "Task 640",
           "wide": "Wide 840"
-        }
+        },
+        "plat": {
+          "client": "Client",
+          "web": "Web"
+        },
+        "navCollapsedBtn": "Collapse nav",
+        "navExpanded": "Expand nav",
+        "navMode": {
+          "full": "full",
+          "rail": "rail",
+          "overlay": "overlay",
+          "drawer": "drawer (closed)",
+          "drawerOpen": "drawer (open)"
+        },
+        "item": {
+          "overview": "Overview",
+          "inbox": "Inbox",
+          "tasks": "Tasks",
+          "files": "Files",
+          "apps": "Apps",
+          "settings": "Settings",
+          "help": "Help"
+        },
+        "navTitle": "The three ways the navigation collapses (client and web)",
+        "navColTarget": "Case",
+        "navColForm": "Collapsed form",
+        "navColToggle": "Toggle position",
+        "navColState": "State",
+        "nr1a": "Client or wide web (1024 and up)",
+        "nr1b": "56 icon rail (24 icon plus 16 padding each side)",
+        "nr1c": "macOS: in the title bar. Elsewhere: at the top of the nav",
+        "nr1d": "Persisted preference plus a transient flag (two levels)",
+        "nr2a": "Mid web (768 to 1023)",
+        "nr2b": "Collapses to the rail automatically",
+        "nr2c": "Same as above",
+        "nr2d": "Same; a narrow expand never writes back to the preference",
+        "nr3a": "Narrow web (below 768)",
+        "nr3b": "Drawer: floats over content with a scrim",
+        "nr3c": "Hamburger in the header",
+        "nr3d": "Transient (Esc or the scrim closes it)",
+        "railNote": "In the rail: a label appears on hover, the current item keeps a left indicator, and everything stays keyboard reachable (aria-expanded)"
       }
     }
   },
@@ -939,9 +976,6 @@ window.CELADON_I18N = {
         },
         "sideOff": "サイド：閉",
         "sideOn": "サイド：開",
-        "navNormal": "ナビ：通常",
-        "navOverlayOn": "ナビ：オーバーレイ中（手動）",
-        "navOverlayOff": "ナビ：レール（押すとオーバーレイ）",
         "overlay": "オーバーレイ",
         "belowMin": "最小未満",
         "autoRail": "自動レール",
@@ -958,7 +992,47 @@ window.CELADON_I18N = {
           "tool": "ツール 600",
           "task": "タスク 640",
           "wide": "ワイド 840"
-        }
+        },
+        "plat": {
+          "client": "クライアント",
+          "web": "Web"
+        },
+        "navCollapsedBtn": "ナビを収納",
+        "navExpanded": "ナビを展開",
+        "navMode": {
+          "full": "通常",
+          "rail": "アイコンレール",
+          "overlay": "オーバーレイ展開",
+          "drawer": "ドロワー（閉）",
+          "drawerOpen": "ドロワー（開）"
+        },
+        "item": {
+          "overview": "概要",
+          "inbox": "メッセージ",
+          "tasks": "タスク",
+          "files": "ファイル",
+          "apps": "アプリ",
+          "settings": "設定",
+          "help": "ヘルプ"
+        },
+        "navTitle": "ナビの収納は 3 通り（クライアントと Web）",
+        "navColTarget": "場面",
+        "navColForm": "収納の形",
+        "navColToggle": "切替の位置",
+        "navColState": "状態",
+        "nr1a": "クライアント / ワイド Web（1024 以上）",
+        "nr1b": "56 のアイコンレール（24 アイコン + 左右 16 の余白）",
+        "nr1c": "macOS はタイトルバー、その他はナビ上部",
+        "nr1d": "永続化した設定 + 一時フラグ（2 段階）",
+        "nr2a": "中間の Web（768–1023）",
+        "nr2b": "自動でレールに収納",
+        "nr2c": "上と同じ",
+        "nr2d": "同じ。狭いときの展開は設定に書き戻さない",
+        "nr3a": "狭い Web（768 未満）",
+        "nr3b": "ドロワー：内容の上に重なり、スクリム付き",
+        "nr3c": "ヘッダーのハンバーガー",
+        "nr3d": "一時的（Esc かスクリムで閉じる）",
+        "railNote": "レール上：ホバーでラベル、現在項目は左のインジケータ、キーボード到達可（aria-expanded）"
       }
     }
   },
@@ -1420,9 +1494,6 @@ window.CELADON_I18N = {
         },
         "sideOff": "侧栏：关",
         "sideOn": "侧栏：开",
-        "navNormal": "导航：完整",
-        "navOverlayOn": "导航：覆盖中（手动）",
-        "navOverlayOff": "导航：图标轨（点开覆盖）",
         "overlay": "覆盖",
         "belowMin": "低于最小",
         "autoRail": "自动收轨",
@@ -1439,7 +1510,47 @@ window.CELADON_I18N = {
           "tool": "工具型 600",
           "task": "任务型 640",
           "wide": "宽屏型 840"
-        }
+        },
+        "plat": {
+          "client": "客户端",
+          "web": "Web"
+        },
+        "navCollapsedBtn": "收起导航",
+        "navExpanded": "展开导航",
+        "navMode": {
+          "full": "完整",
+          "rail": "图标轨",
+          "overlay": "覆盖展开",
+          "drawer": "抽屉（关）",
+          "drawerOpen": "抽屉（开）"
+        },
+        "item": {
+          "overview": "概览",
+          "inbox": "消息",
+          "tasks": "任务",
+          "files": "文件",
+          "apps": "应用",
+          "settings": "设置",
+          "help": "帮助"
+        },
+        "navTitle": "导航收起的三档行为（客户端 / Web 各自对应）",
+        "navColTarget": "场景",
+        "navColForm": "收起形态",
+        "navColToggle": "收起控件位置",
+        "navColState": "状态",
+        "nr1a": "客户端 / Web 宽屏（≥1024）",
+        "nr1b": "图标轨 56（24 图标 + 16×2 内距）",
+        "nr1c": "macOS 在标题栏；其他平台在导航顶部",
+        "nr1d": "持久化偏好 + 临时标志（两级）",
+        "nr2a": "Web 中档（768–1023）",
+        "nr2b": "自动收成图标轨",
+        "nr2c": "同上",
+        "nr2d": "同；窄屏的临时展开不写回偏好",
+        "nr3a": "Web 窄屏（<768）",
+        "nr3b": "抽屉：浮在内容上 + 遮罩",
+        "nr3c": "顶栏汉堡按钮",
+        "nr3d": "临时（Esc / 点遮罩关闭）",
+        "railNote": "轨上图标：hover 出标签 · 当前项左侧指示条 · 键盘可达（aria-expanded）· 图标与文字不同时存在的取舍（图标优先，标签靠 hover）"
       }
     }
   },
@@ -1901,9 +2012,6 @@ window.CELADON_I18N = {
         },
         "sideOff": "側欄：關",
         "sideOn": "側欄：開",
-        "navNormal": "導覽：完整",
-        "navOverlayOn": "導覽：覆蓋中（手動）",
-        "navOverlayOff": "導覽：圖示軌（點開覆蓋）",
         "overlay": "覆蓋",
         "belowMin": "低於最小",
         "autoRail": "自動收軌",
@@ -1920,7 +2028,47 @@ window.CELADON_I18N = {
           "tool": "工具型 600",
           "task": "任務型 640",
           "wide": "寬螢幕型 840"
-        }
+        },
+        "plat": {
+          "client": "客戶端",
+          "web": "Web"
+        },
+        "navCollapsedBtn": "收合導覽",
+        "navExpanded": "展開導覽",
+        "navMode": {
+          "full": "完整",
+          "rail": "圖示軌",
+          "overlay": "覆蓋展開",
+          "drawer": "抽屜（關）",
+          "drawerOpen": "抽屜（開）"
+        },
+        "item": {
+          "overview": "總覽",
+          "inbox": "訊息",
+          "tasks": "任務",
+          "files": "檔案",
+          "apps": "應用",
+          "settings": "設定",
+          "help": "說明"
+        },
+        "navTitle": "導覽收合的三檔行為（客戶端 / Web 各自對應）",
+        "navColTarget": "場景",
+        "navColForm": "收合形態",
+        "navColToggle": "收合控件位置",
+        "navColState": "狀態",
+        "nr1a": "客戶端 / Web 寬螢幕（≥1024）",
+        "nr1b": "圖示軌 56（24 圖示 + 16×2 內距）",
+        "nr1c": "macOS 在標題列；其他平台在導覽頂部",
+        "nr1d": "持久化偏好 + 臨時旗標（兩級）",
+        "nr2a": "Web 中檔（768–1023）",
+        "nr2b": "自動收成圖示軌",
+        "nr2c": "同上",
+        "nr2d": "同；窄螢幕的臨時展開不寫回偏好",
+        "nr3a": "Web 窄螢幕（<768）",
+        "nr3b": "抽屜：浮在內容上 + 遮罩",
+        "nr3c": "頂欄漢堡按鈕",
+        "nr3d": "臨時（Esc / 點遮罩關閉）",
+        "railNote": "軌上圖示：hover 出標籤 · 當前項左側指示條 · 鍵盤可達（aria-expanded）"
       }
     }
   }
