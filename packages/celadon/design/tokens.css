@@ -155,6 +155,14 @@
   --letter-spacing-cjk: 0;
   /* 中文不要负字距 */
   --font-size-minimum-cjk: 12px;
+  /* 字号阶梯（6 档）：页面文字一律用这几档，不写裸像素。
+     label 只用于纯拉丁/数字小标签；含中日韩文字的最小为 caption（= --font-size-minimum-cjk）。 */
+  --font-size-label: 11px;
+  --font-size-caption: 12px;
+  --font-size-body: 12.5px;
+  --font-size-body-lg: 13px;
+  --font-size-subtitle: 15px;
+  --font-size-title: 20px;
   /* 中文最小档：11px 以下（非 Retina）汉字笔画会糊 */
   /* ===== 字号（7 档 + 16 补档）· 中文最小 12px ===== */
   --font-size-11: 11px;

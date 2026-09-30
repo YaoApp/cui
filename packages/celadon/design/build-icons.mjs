@@ -12,20 +12,12 @@ if (symbols.length !== manifest.length) {
 }
 const block = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n${symbols.join('\n')}\n</defs></svg>`;
 
-function patch(file, keepBrand) {
+function patch(file) {
   const src = readFileSync(file, 'utf8');
   const re = /<svg width="0" height="0"[\s\S]*?<\/svg>/;
   const cur = src.match(re);
   if (!cur) throw new Error(`✗ ${file} 里找不到雪碧图块`);
-  let brand = '';
-  if (keepBrand) {
-    const defs = cur[0].match(/<defs>(?:(?!<\/defs>)[\s\S])*<\/defs>/g) || [];
-    const b = defs.find(d => d.includes('brand-mark-path'));
-    if (!b) throw new Error(`✗ ${file} 里找不到品牌 defs`);
-    brand = '\n' + b;
-  }
-  const next = block.replace('</defs></svg>', `${brand}\n</defs></svg>`);
-  let out = src.replace(re, next);
+  let out = src.replace(re, block);
   out = out.replace(/var SYMBOLS = \[[^\]]*\];/,
     `var SYMBOLS = [${manifest.map(m => `'${m.id}'`).join(',')}];`);
   const cover = ['nav', 'act', 'state', 'file', 'obj'].map(cat => {
@@ -35,8 +27,8 @@ function patch(file, keepBrand) {
   }).join(',\n');
   out = out.replace(/var COVER = \[[\s\S]*?\n\];/, `var COVER = [\n${cover}\n];`);
   writeFileSync(file, out);
-  console.log(`  ✓ ${file}：内联 ${symbols.length} 个符号${keepBrand ? '（保留品牌 defs）' : ''}`);
+  console.log(`  ✓ ${file}：内联 ${symbols.length} 个符号`);
 }
-patch('mock.html', false);
-patch('icons.html', true);
+patch('mock.html');
+patch('icons.html');
 console.log('  ✓ 完成（图标来源 lucide · ISC）');
