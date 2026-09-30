@@ -344,7 +344,27 @@ window.CELADON_I18N = {
         "r3": "Animate transform and opacity only (never width, height, top or left).",
         "r4": "Reduced motion: when the system asks for less motion every duration collapses to zero inside tokens.less, so components need no special case.",
         "reducedOn": "System preference: reduce motion - active (durations are zero)",
-        "reducedOff": "System preference: normal motion"
+        "reducedOff": "System preference: normal motion",
+        "scenes": "Common scenes (play one, or play all)",
+        "playAll": "Play all",
+        "playOne": "Play",
+        "demoBtn": "Send",
+        "demoToast": "✓ Saved",
+        "demoStream": "Generating the summary, one moment...",
+        "s": {
+          "hover": "Hover transition",
+          "press": "Press feedback",
+          "focus": "Focus ring",
+          "fade": "Fade in",
+          "dropdown": "Dropdown appears",
+          "panel": "Panel expands",
+          "collapse": "Panel collapses",
+          "drawer": "Drawer slides in",
+          "modal": "Modal appears",
+          "toast": "Toast appears",
+          "list": "List items enter",
+          "stream": "Streaming output"
+        }
       },
       "border": {
         "title": "Border (with the WCAG 1.4.11 decision)",
@@ -706,7 +726,27 @@ window.CELADON_I18N = {
         "r3": "動かすのは transform と opacity のみ（width・height・top・left は不可）。",
         "r4": "動きを減らす設定では、tokens.less 側で時間を一括してゼロにします（各コンポーネントでの対応は不要）。",
         "reducedOn": "システム設定：動きを減らす —— 有効（時間はゼロ）",
-        "reducedOff": "システム設定：通常のモーション"
+        "reducedOff": "システム設定：通常のモーション",
+        "scenes": "よくある場面（個別再生 / すべて再生）",
+        "playAll": "すべて再生",
+        "playOne": "再生",
+        "demoBtn": "送信",
+        "demoToast": "✓ 保存しました",
+        "demoStream": "要約を生成しています。少々お待ちください…",
+        "s": {
+          "hover": "ホバーの遷移",
+          "press": "押下のフィードバック",
+          "focus": "フォーカスリング",
+          "fade": "フェードイン",
+          "dropdown": "ドロップダウンの出現",
+          "panel": "パネルの展開",
+          "collapse": "パネルの収合",
+          "drawer": "ドロワーのスライド",
+          "modal": "モーダルの出現",
+          "toast": "トーストの出現",
+          "list": "リストの順次出現",
+          "stream": "ストリーミング出力"
+        }
       },
       "border": {
         "title": "境界線 Border（WCAG 1.4.11 の判断を含む）",
@@ -1068,7 +1108,27 @@ window.CELADON_I18N = {
         "r3": "只动 transform / opacity（不动 width/height/top/left）。",
         "r4": "减动效：开启系统\"减少动态效果\"后全部时长归零（tokens.less 内统一处理，组件无需各自判断）。",
         "reducedOn": "当前系统偏好：减少动态效果 —— 已降级（时长归零）",
-        "reducedOff": "当前系统偏好：正常动效"
+        "reducedOff": "当前系统偏好：正常动效",
+        "scenes": "常用场景（可单独播放 / 全部播放）",
+        "playAll": "全部播放",
+        "playOne": "播放",
+        "demoBtn": "发送",
+        "demoToast": "✓ 已保存",
+        "demoStream": "正在生成摘要，请稍候…",
+        "s": {
+          "hover": "悬停过渡",
+          "press": "按下反馈",
+          "focus": "焦点环",
+          "fade": "淡入",
+          "dropdown": "下拉出现",
+          "panel": "面板展开",
+          "collapse": "面板收起",
+          "drawer": "抽屉滑入",
+          "modal": "弹窗出现",
+          "toast": "通知出现",
+          "list": "列表依次进入",
+          "stream": "流式输出"
+        }
       },
       "border": {
         "title": "边框 Border（含 WCAG 1.4.11 决策）",
@@ -1430,7 +1490,27 @@ window.CELADON_I18N = {
         "r3": "只動 transform / opacity（不動 width/height/top/left）。",
         "r4": "減動效：開啟系統「減少動態效果」後全部時長歸零（tokens.less 內統一處理，元件無需各自判斷）。",
         "reducedOn": "目前系統偏好：減少動態效果 —— 已降級（時長歸零）",
-        "reducedOff": "目前系統偏好：正常動效"
+        "reducedOff": "目前系統偏好：正常動效",
+        "scenes": "常用場景（可單獨播放 / 全部播放）",
+        "playAll": "全部播放",
+        "playOne": "播放",
+        "demoBtn": "傳送",
+        "demoToast": "✓ 已儲存",
+        "demoStream": "正在產生摘要，請稍候…",
+        "s": {
+          "hover": "懸停過渡",
+          "press": "按下回饋",
+          "focus": "焦點環",
+          "fade": "淡入",
+          "dropdown": "下拉出現",
+          "panel": "面板展開",
+          "collapse": "面板收合",
+          "drawer": "抽屜滑入",
+          "modal": "彈窗出現",
+          "toast": "通知出現",
+          "list": "清單依序進入",
+          "stream": "串流輸出"
+        }
       },
       "border": {
         "title": "邊框 Border（含 WCAG 1.4.11 決策）",

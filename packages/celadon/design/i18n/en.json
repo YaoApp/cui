@@ -342,7 +342,27 @@
       "r3": "Animate transform and opacity only (never width, height, top or left).",
       "r4": "Reduced motion: when the system asks for less motion every duration collapses to zero inside tokens.less, so components need no special case.",
       "reducedOn": "System preference: reduce motion - active (durations are zero)",
-      "reducedOff": "System preference: normal motion"
+      "reducedOff": "System preference: normal motion",
+      "scenes": "Common scenes (play one, or play all)",
+      "playAll": "Play all",
+      "playOne": "Play",
+      "demoBtn": "Send",
+      "demoToast": "✓ Saved",
+      "demoStream": "Generating the summary, one moment...",
+      "s": {
+        "hover": "Hover transition",
+        "press": "Press feedback",
+        "focus": "Focus ring",
+        "fade": "Fade in",
+        "dropdown": "Dropdown appears",
+        "panel": "Panel expands",
+        "collapse": "Panel collapses",
+        "drawer": "Drawer slides in",
+        "modal": "Modal appears",
+        "toast": "Toast appears",
+        "list": "List items enter",
+        "stream": "Streaming output"
+      }
     },
     "border": {
       "title": "Border (with the WCAG 1.4.11 decision)",

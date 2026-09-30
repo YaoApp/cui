@@ -342,7 +342,27 @@
       "r3": "動かすのは transform と opacity のみ（width・height・top・left は不可）。",
       "r4": "動きを減らす設定では、tokens.less 側で時間を一括してゼロにします（各コンポーネントでの対応は不要）。",
       "reducedOn": "システム設定：動きを減らす —— 有効（時間はゼロ）",
-      "reducedOff": "システム設定：通常のモーション"
+      "reducedOff": "システム設定：通常のモーション",
+      "scenes": "よくある場面（個別再生 / すべて再生）",
+      "playAll": "すべて再生",
+      "playOne": "再生",
+      "demoBtn": "送信",
+      "demoToast": "✓ 保存しました",
+      "demoStream": "要約を生成しています。少々お待ちください…",
+      "s": {
+        "hover": "ホバーの遷移",
+        "press": "押下のフィードバック",
+        "focus": "フォーカスリング",
+        "fade": "フェードイン",
+        "dropdown": "ドロップダウンの出現",
+        "panel": "パネルの展開",
+        "collapse": "パネルの収合",
+        "drawer": "ドロワーのスライド",
+        "modal": "モーダルの出現",
+        "toast": "トーストの出現",
+        "list": "リストの順次出現",
+        "stream": "ストリーミング出力"
+      }
     },
     "border": {
       "title": "境界線 Border（WCAG 1.4.11 の判断を含む）",
