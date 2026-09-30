@@ -103,7 +103,7 @@
     },
     "message": {
       "user1": "Hi — could you review these two documents? Focus on the risk clauses in the contract.",
-      "agent1Html": "I have read both. I found **3 risks** in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
+      "agent1Html": "I have read both. I found 3 risks in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
       "agent2": "Summarized by risk first, with the source clause and page numbers."
     },
     "tool": {
