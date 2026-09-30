@@ -377,7 +377,14 @@
         "list": "再読み込み",
         "stream": "再生成"
       },
-      "demoPanel": "契約の詳細"
+      "demoPanel": "契約の詳細",
+      "overrides": "場面ごとの上書き（局所的に強さを指定）",
+      "ovNote": "同じコンポーネントでも、コンテナに .motion-quiet / .motion-rich を付ければその範囲だけ強さが変わります。システムの「動きを減らす」は全体スイッチで、局所指定では打ち消せません。",
+      "ov": {
+        "inherit": "継承（全体）",
+        "quiet": "控えめ .motion-quiet",
+        "rich": "豊か .motion-rich"
+      }
     },
     "border": {
       "title": "境界線 Border（WCAG 1.4.11 の判断を含む）",

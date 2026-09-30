@@ -450,6 +450,20 @@ function runAction(theme, act){
     clearTimeout(st._t); st._t = setTimeout(function(){ st.classList.remove('reset'); }, 24); return; }
   if (act === 'stream'){ streamScene(st); return; }
 }
+/* 场景级覆盖：同一个组件，容器加不同修饰类 → 时长不同（.motion-quiet / .motion-rich） */
+var OVERRIDES = [['', 'inherit'], ['motion-quiet', 'quiet'], ['motion-rich', 'rich']];
+function renderOverrides(theme){
+  return '<div class="grp" style="margin-top:16px">'+esc(tr('f.motion.overrides'))+'</div>'
+    + '<div class="mo-grid">' + OVERRIDES.map(function(o){
+        var cls = o[0] ? ' ' + o[0] : '';
+        var dur = tok('--duration-base', theme);
+        return '<div class="mo-scene'+cls+'"><div class="mo-head"><span class="n">'+esc(tr('f.motion.ov.'+o[1]))+'</span>'
+          + '<span class="tk">--duration-base '+dur+'</span></div>'
+          + '<div class="stage s-fade on" id="stage-'+theme+'-ov-'+o[1]+'">'
+          + '<button class="el sw" type="button" aria-label="toggle"><i></i></button>'
+          + '<span class="el card"><i class="ln" style="width:58%"></i><i class="ln" style="width:86%"></i></span></div></div>'; }).join('')
+    + '</div><p class="hint" style="margin-top:6px;font-size:11px;color:var(--text-tertiary)">'+esc(tr('f.motion.ovNote'))+'</p>';
+}
 function renderMotion(theme){
   var dur = '<div class="grp">'+esc(tr('f.motion.scale'))+'</div>' + DURATIONS.map(function(t){
     var v = px(tok(t, theme));
@@ -469,11 +483,12 @@ function renderMotion(theme){
           + '<span class="tk" title="'+t[0]+' · '+t[1]+'">'+dv+'ms · '+ev+'</span>'
           + '<span class="mo-hint go">'+esc(tr(SCENE_HINT[id]))+'</span></div>'
           + stageHtml(theme, id) + '</div>'; }).join('') + '</div>';
+  var ov = renderOverrides(theme);
   var rm = '<div class="rm-note" id="rm-'+theme+'"></div>';
   var rules = '<div class="grp" style="margin-top:14px">'+esc(tr('f.motion.rules'))+'</div><ul>'
     + ['r1','r2','r3','r4'].map(function(k){ return '<li>'+esc(tr('f.motion.'+k))+'</li>'; }).join('') + '</ul>';
   document.getElementById(theme === 'dark' ? 'mo-dark' : 'mo-light').innerHTML =
-    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">duration · easing</span></div><div class="pbody">'+dur+curves+gallery+rm+rules+'</div>';
+    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">duration · easing</span></div><div class="pbody">'+dur+curves+gallery+ov+rm+rules+'</div>';
   var el = document.getElementById('rm-'+theme);
   if (el) el.textContent = rmOn() ? tr('f.motion.reducedOn') : tr('f.motion.reducedOff');
 }
