@@ -357,6 +357,8 @@ function lookup(lang, key){ var d = BUNDLE[lang]; if (!d) return null;
   return key.split('.').reduce(function(o,k){ return o == null ? null : o[k]; }, d); }
 function tr(key){ var v = lookup(CURRENT, key); if (v == null) v = lookup('zh-CN', key); return v == null ? key : v; }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* 富文本：先转义再上粗体（**x** → <b>），避免把 markdown 当纯文本显示 */
+function fmt(s){ return esc(String(s)).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'); }
 
 /* ===== 从 tokens.css 实时读值（浅/暗各一份）===== */
 var PROBE = { light: document.getElementById('probe-light'), dark: document.getElementById('probe-dark') };
@@ -373,7 +375,7 @@ function prefNote(sysKey, simKey){
   return out;
 }
 function segHtml(group, opts, cur){
-  return opts.map(function(o){ return '<button class="seg'+(o[0]===cur?' on':'')+'" type="button" data-pref="'+group+'" data-level="'+o[0]+'">'+esc(tr(o[1]))+'</button>'; }).join('');
+  return opts.map(function(o){ return '<button class="seg'+(o[0]===cur?' on':'')+'" type="button" data-pref="'+group+'" data-level="'+o[0]+'">'+fmt(tr(o[1]))+'</button>'; }).join('');
 }
 function applyPrefs(){
   document.body.classList.toggle('mo-low', PREF.motion === 'low');
@@ -416,17 +418,17 @@ function cr(a,b){ var l1 = lum(a), l2 = lum(b); if (l1 == null || l2 == null) re
 /* ===== F1 间距 ===== */
 var SPACING = ['--spacing-4','--spacing-8','--spacing-12','--spacing-16','--spacing-24','--spacing-32','--spacing-48'];
 function renderSpacing(theme){
-  var scale = '<div class="grp">'+esc(tr('f.spacing.scale'))+'</div>' + SPACING.map(function(t){
+  var scale = '<div class="grp">'+fmt(tr('f.spacing.scale'))+'</div>' + SPACING.map(function(t){
     var v = px(tok(t, theme));
     return '<div class="sp-row"><span class="sp-name">'+t+'</span><span class="sp-val">'+v+'px</span>'
       + '<span class="sp-bar" style="width:'+Math.min(v*2.6,190)+'px"></span></div>'; }).join('');
-  var usage = '<div class="grp" style="margin-top:14px">'+esc(tr('f.spacing.usage'))+'</div>'
-    + '<table><tr><td>'+esc(tr('f.spacing.u1'))+'</td><td><code>4 · 8 · 12</code></td></tr>'
-    + '<tr><td>'+esc(tr('f.spacing.u2'))+'</td><td><code>8 · 12 · 16</code></td></tr>'
-    + '<tr><td>'+esc(tr('f.spacing.u3'))+'</td><td><code>24 · 32 · 48</code></td></tr>'
-    + '<tr><td>'+esc(tr('f.spacing.u4'))+'</td><td><code>16 · 24</code></td></tr></table>';
-  var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.spacing.example'))+'</div>'
-    + '<div class="sp-demo"><h4>'+esc(tr('f.spacing.title'))+'</h4><p>'+esc(tr('f.spacing.note'))+'</p>'
+  var usage = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.spacing.usage'))+'</div>'
+    + '<table><tr><td>'+fmt(tr('f.spacing.u1'))+'</td><td><code>4 · 8 · 12</code></td></tr>'
+    + '<tr><td>'+fmt(tr('f.spacing.u2'))+'</td><td><code>8 · 12 · 16</code></td></tr>'
+    + '<tr><td>'+fmt(tr('f.spacing.u3'))+'</td><td><code>24 · 32 · 48</code></td></tr>'
+    + '<tr><td>'+fmt(tr('f.spacing.u4'))+'</td><td><code>16 · 24</code></td></tr></table>';
+  var demo = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.spacing.example'))+'</div>'
+    + '<div class="sp-demo"><h4>'+fmt(tr('f.spacing.title'))+'</h4><p>'+fmt(tr('f.spacing.note'))+'</p>'
     + '<div class="row"><span class="b">primary</span><span class="b">ghost</span></div></div>';
   document.getElementById(theme === 'dark' ? 'sp-dark' : 'sp-light').innerHTML =
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">--spacing-*</span></div><div class="pbody">'+scale+usage+demo+'</div>';
@@ -435,11 +437,11 @@ function renderSpacing(theme){
 /* ===== F2 圆角 ===== */
 var RADII = [['--radius-xs','rx'],['--radius-small','r1'],['--radius-medium','r2'],['--radius-large','r3'],['--radius-pill','r4']];
 function renderRadius(theme){
-  var grid = '<div class="grp">'+esc(tr('f.radius.usage'))+'</div><div class="rad-grid">' + RADII.map(function(p){
+  var grid = '<div class="grp">'+fmt(tr('f.radius.usage'))+'</div><div class="rad-grid">' + RADII.map(function(p){
     var v = tok(p[0], theme);
     return '<div class="rad-item"><div class="rad-box" style="border-radius:'+v+'"></div>'
       + '<div class="n">'+p[0].replace('--radius-','')+' · '+v+'</div>'
-      + '<div class="u">'+esc(tr('f.radius.'+p[1]))+'</div></div>'; }).join('') + '</div>';
+      + '<div class="u">'+fmt(tr('f.radius.'+p[1]))+'</div></div>'; }).join('') + '</div>';
   document.getElementById(theme === 'dark' ? 'rd-dark' : 'rd-light').innerHTML =
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">--radius-*</span></div><div class="pbody">'+grid+'</div>';
 }
@@ -449,27 +451,27 @@ function renderRadius(theme){
 var LEVELS = [['lv0','--z-base','--shadow-none','use0','--background-content'],['lv1','--z-raised','--shadow-subtle','use1','--elevation-surface-1'],
               ['lv2','--z-overlay','--shadow-floating','use2','--elevation-surface-2'],['lv3','--z-modal','--shadow-overlay','use3','--elevation-surface-3']];
 function renderElevation(theme){
-  var stack = '<div class="grp">'+esc(tr('f.elevation.levels'))+'</div><div class="el-stack">' + LEVELS.map(function(l,i){
+  var stack = '<div class="grp">'+fmt(tr('f.elevation.levels'))+'</div><div class="el-stack">' + LEVELS.map(function(l,i){
     var sh = l[2] === '--shadow-none' ? 'none' : tok(l[2], theme);
     var pos = ['left:0;top:0','left:34px;top:50px','left:68px;top:100px','left:102px;top:150px'][i];
     return '<div class="el-card" style="'+pos+';background:var('+l[4]+');box-shadow:'+sh+';z-index:var('+l[1]+')">'
-      + '<div class="t">'+esc(tr('f.elevation.'+l[0]))+'</div><div class="m">'+(l[2] === '--shadow-none' ? 'shadow: none' : l[2])+' · z '+tok(l[1],theme)+'</div>'
+      + '<div class="t">'+fmt(tr('f.elevation.'+l[0]))+'</div><div class="m">'+(l[2] === '--shadow-none' ? 'shadow: none' : l[2])+' · z '+tok(l[1],theme)+'</div>'
       + '<div class="m">'+l[4].replace('--','')+'</div></div>'; }).join('') + '</div>';
   var rows = '';
   for (var r = 1; r <= 8; r++) rows += '<div class="sd-row"><b>'+r+'</b><i></i></div>';
-  var sticky = '<div class="grp" style="margin-top:14px">'+esc(tr('f.elevation.stickyDemo'))+'</div>'
-    + '<div class="sd" id="sd-'+theme+'"><div class="sd-head">'+esc(tr('f.elevation.demoTitle'))
+  var sticky = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.elevation.stickyDemo'))+'</div>'
+    + '<div class="sd" id="sd-'+theme+'"><div class="sd-head">'+fmt(tr('f.elevation.demoTitle'))
     + '<span class="m">z '+tok('--z-sticky', theme)+' · --shadow-subtle</span></div>'+rows+'</div>'
-    + '<p class="hint" style="margin:6px 0 0;font-size:11px;color:var(--text-tertiary)">'+esc(tr('f.elevation.stickyHint'))+'</p>';
+    + '<p class="hint" style="margin:6px 0 0;font-size:11px;color:var(--text-tertiary)">'+fmt(tr('f.elevation.stickyHint'))+'</p>';
   document.getElementById(theme === 'dark' ? 'el-dark' : 'el-light').innerHTML =
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">elevation</span></div><div class="pbody">'+stack+sticky+'</div>';
   var sd = document.getElementById('sd-'+theme);
   if (sd) sd.addEventListener('scroll', function(){ sd.classList.toggle('stuck', sd.scrollTop > 2); });
   document.getElementById(theme === 'dark' ? 'el-table-dark' : 'el-table-light').innerHTML =
-    '<tr><th>'+esc(tr('f.elevation.colLevel'))+'</th><th>'+esc(tr('f.elevation.colShadow'))+'</th><th>'+esc(tr('f.elevation.colSurface'))+'</th><th>'+esc(tr('f.elevation.colZ'))+'</th><th>'+esc(tr('f.elevation.colUse'))+'</th></tr>'
-    + LEVELS.map(function(l){ return '<tr><td>'+esc(tr('f.elevation.'+l[0]))+'</td><td><code>'+(l[2]==='--shadow-none'?'—':l[2])+'</code></td>'
-      + '<td><code>'+l[4]+'</code></td><td><code>'+tok(l[1],theme)+'</code></td><td>'+esc(tr('f.elevation.'+l[3]))+'</td></tr>'; }).join('')
-    + '<tr><td>sticky</td><td><code>--shadow-subtle</code></td><td><code>--background-navigation</code></td><td><code>'+tok('--z-sticky',theme)+'</code></td><td>'+esc(tr('f.elevation.useSticky'))+'</td></tr>';
+    '<tr><th>'+fmt(tr('f.elevation.colLevel'))+'</th><th>'+fmt(tr('f.elevation.colShadow'))+'</th><th>'+fmt(tr('f.elevation.colSurface'))+'</th><th>'+fmt(tr('f.elevation.colZ'))+'</th><th>'+fmt(tr('f.elevation.colUse'))+'</th></tr>'
+    + LEVELS.map(function(l){ return '<tr><td>'+fmt(tr('f.elevation.'+l[0]))+'</td><td><code>'+(l[2]==='--shadow-none'?'—':l[2])+'</code></td>'
+      + '<td><code>'+l[4]+'</code></td><td><code>'+tok(l[1],theme)+'</code></td><td>'+fmt(tr('f.elevation.'+l[3]))+'</td></tr>'; }).join('')
+    + '<tr><td>sticky</td><td><code>--shadow-subtle</code></td><td><code>--background-navigation</code></td><td><code>'+tok('--z-sticky',theme)+'</code></td><td>'+fmt(tr('f.elevation.useSticky'))+'</td></tr>';
 }
 
 /* ===== F4 动效 ===== */
@@ -503,32 +505,32 @@ function pageSkeleton(lines){
 function stageHtml(theme, id){
   var inner = '', tall = '';
   switch (id){
-    case 'hover':    inner = '<span class="el chip">'+esc(tr('f.motion.demoBtn'))+'</span>'; break;
-    case 'press':    inner = '<span class="el btn">'+esc(tr('f.motion.demoBtn'))+'</span>'; break;
+    case 'hover':    inner = '<span class="el chip">'+fmt(tr('f.motion.demoBtn'))+'</span>'; break;
+    case 'press':    inner = '<span class="el btn">'+fmt(tr('f.motion.demoBtn'))+'</span>'; break;
     case 'focus':    inner = '<input class="el inp" value="">'; break;
     case 'fade':     inner = '<button class="el sw" type="button" aria-label="toggle"><i></i></button>'
                             + '<span class="el card"><i class="ln" style="width:58%"></i><i class="ln" style="width:86%"></i></span>'; break;
-    case 'dropdown': inner = '<button class="el trg" type="button">'+esc(tr('f.motion.act.menu'))+'</button>'
+    case 'dropdown': inner = '<button class="el trg" type="button">'+fmt(tr('f.motion.act.menu'))+'</button>'
                             + '<span class="el menu"><i></i><i></i><i></i></span>'; break;
-    case 'panel':    inner = '<span class="el hdr">'+esc(tr('f.motion.demoPanel'))+'</span>'
+    case 'panel':    inner = '<span class="el hdr">'+fmt(tr('f.motion.demoPanel'))+'</span>'
                             + '<span class="el bd"><i class="ln" style="width:56%"></i><i class="ln" style="width:82%"></i></span>'; break;
     case 'collapse': inner = '<span class="el p"><i class="ln cb" style="width:50%"></i><i class="ln cb" style="width:78%"></i></span>'; break;
     case 'drawer':   inner = '<span class="el page">'+pageSkeleton([46,70,58])
-                            + '<button class="act" type="button" data-act="drawer">'+esc(tr('f.motion.act.drawer'))+'</button></span>'
+                            + '<button class="act" type="button" data-act="drawer">'+fmt(tr('f.motion.act.drawer'))+'</button></span>'
                             + '<span class="el scrim" data-close="drawer"></span>'
                             + '<span class="el sheet"><i class="ln" style="width:56%"></i><i class="ln" style="width:82%"></i><i class="ln" style="width:66%"></i></span>'; break;
     case 'modal':    inner = '<span class="el page">'+pageSkeleton([48,72,60])
-                            + '<button class="act" type="button" data-act="modal">'+esc(tr('f.motion.act.modal'))+'</button></span>'
+                            + '<button class="act" type="button" data-act="modal">'+fmt(tr('f.motion.act.modal'))+'</button></span>'
                             + '<span class="el scrim" data-close="modal"></span>'
                             + '<span class="el dlg"><i class="ln" style="width:52%"></i><i class="ln" style="width:84%"></i></span>'; break;
     case 'toast':    inner = '<span class="el page"><i class="ln" style="width:52%"></i><i class="ln" style="width:74%"></i>'
-                            + '<button class="act" type="button" data-act="toast">'+esc(tr('f.motion.act.toast'))+'</button></span>'
-                            + '<span class="el toast" data-close="toast">'+esc(tr('f.motion.demoToast'))+'</span>'; break;
+                            + '<button class="act" type="button" data-act="toast">'+fmt(tr('f.motion.act.toast'))+'</button></span>'
+                            + '<span class="el toast" data-close="toast">'+fmt(tr('f.motion.demoToast'))+'</span>'; break;
     case 'list':     tall = ' tall';
-                     inner = '<button class="el act" type="button" data-act="list">'+esc(tr('f.motion.act.list'))+'</button>'
+                     inner = '<button class="el act" type="button" data-act="list">'+fmt(tr('f.motion.act.list'))+'</button>'
                             + '<span class="el row"><b></b><i></i></span><span class="el row"><b></b><i></i></span><span class="el row"><b></b><i></i></span>'; break;
     case 'stream':   tall = ' tall';
-                     inner = '<button class="el act" type="button" data-act="stream">'+esc(tr('f.motion.act.stream'))+'</button>'
+                     inner = '<button class="el act" type="button" data-act="stream">'+fmt(tr('f.motion.act.stream'))+'</button>'
                             + '<span class="el line"><span class="txt"></span><span class="caret"></span></span>'; break;
   }
   var t = SCENE_TOKENS[id];
@@ -562,39 +564,39 @@ function runAction(theme, act){
 /* 场景级覆盖：同一个组件，容器加不同修饰类 → 时长不同（.motion-quiet / .motion-rich） */
 var OVERRIDES = [['', 'inherit'], ['motion-quiet', 'quiet'], ['motion-rich', 'rich']];
 function renderOverrides(theme){
-  return '<div class="grp" style="margin-top:16px">'+esc(tr('f.motion.overrides'))+'</div>'
+  return '<div class="grp" style="margin-top:16px">'+fmt(tr('f.motion.overrides'))+'</div>'
     + '<div class="mo-grid">' + OVERRIDES.map(function(o){
         var cls = o[0] ? ' ' + o[0] : '';
-        return '<div class="mo-scene'+cls+'"><div class="mo-head"><span class="n">'+esc(tr('f.motion.ov.'+o[1]))+'</span>'
+        return '<div class="mo-scene'+cls+'"><div class="mo-head"><span class="n">'+fmt(tr('f.motion.ov.'+o[1]))+'</span>'
           + '<span class="tk" data-ovlabel="'+o[1]+'">--duration-base …</span></div>'
           + '<div class="stage s-fade on" id="stage-'+theme+'-ov-'+o[1]+'">'
           + '<button class="el sw" type="button" aria-label="toggle"><i></i></button>'
           + '<span class="el card"><i class="ln" style="width:58%"></i><i class="ln" style="width:86%"></i></span></div></div>'; }).join('')
-    + '</div><p class="hint" style="margin-top:6px;font-size:11px;color:var(--text-tertiary)">'+esc(tr('f.motion.ovNote'))+'</p>';
+    + '</div><p class="hint" style="margin-top:6px;font-size:11px;color:var(--text-tertiary)">'+fmt(tr('f.motion.ovNote'))+'</p>';
 }
 function renderMotion(theme){
-  var dur = '<div class="grp">'+esc(tr('f.motion.scale'))+'</div>' + DURATIONS.map(function(t){
+  var dur = '<div class="grp">'+fmt(tr('f.motion.scale'))+'</div>' + DURATIONS.map(function(t){
     var v = px(tok(t, theme));
     return '<div class="mo-row"><span class="mo-name">'+t+'</span><span class="mo-val">'+v+'ms</span>'
       + '<span class="mo-bar" style="width:'+Math.round(v/1.8)+'px"></span></div>'; }).join('');
-  var curves = '<div class="grp" style="margin-top:14px">'+esc(tr('f.motion.curves'))+'</div><div class="curve-grid">' + CURVES.map(function(c){
+  var curves = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.motion.curves'))+'</div><div class="curve-grid">' + CURVES.map(function(c){
     var v = tok(c[0], theme);
     return '<div class="curve"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'
       + '<path d="'+curvePath(v)+'" fill="none" stroke="currentColor" stroke-width="1.6" vector-effect="non-scaling-stroke" style="color:var(--brand)"/>'
       + '<line x1="0" y1="100" x2="100" y2="0" stroke="currentColor" stroke-width="0.7" stroke-dasharray="3 3" style="color:var(--border-default)"/></svg>'
       + '<div class="cn">'+c[0].replace('--easing-','')+'</div></div>'; }).join('') + '</div>';
-  var gallery = '<div class="grp" style="margin-top:16px">'+esc(tr('f.motion.scenes'))+'</div>'
+  var gallery = '<div class="grp" style="margin-top:16px">'+fmt(tr('f.motion.scenes'))+'</div>'
     + '<div class="mo-grid">' + SCENES.map(function(id){
         var t = SCENE_TOKENS[id];
         var dv = px(tok(t[0], theme)), ev = t[1].replace('--easing-','');   /* 标注=**实际值**，切档位即变 */
-        return '<div class="mo-scene"><div class="mo-head"><span class="n">'+esc(tr('f.motion.s.'+id))+'</span>'
+        return '<div class="mo-scene"><div class="mo-head"><span class="n">'+fmt(tr('f.motion.s.'+id))+'</span>'
           + '<span class="tk" title="'+t[0]+' · '+t[1]+'">'+dv+'ms · '+ev+'</span>'
-          + '<span class="mo-hint go">'+esc(tr(SCENE_HINT[id]))+'</span></div>'
+          + '<span class="mo-hint go">'+fmt(tr(SCENE_HINT[id]))+'</span></div>'
           + stageHtml(theme, id) + '</div>'; }).join('') + '</div>';
   var ov = renderOverrides(theme);
   var rm = '<div class="rm-note" id="rm-'+theme+'"></div>';
-  var rules = '<div class="grp" style="margin-top:14px">'+esc(tr('f.motion.rules'))+'</div><ul>'
-    + ['r1','r2','r3','r4'].map(function(k){ return '<li>'+esc(tr('f.motion.'+k))+'</li>'; }).join('') + '</ul>';
+  var rules = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.motion.rules'))+'</div><ul>'
+    + ['r1','r2','r3','r4'].map(function(k){ return '<li>'+fmt(tr('f.motion.'+k))+'</li>'; }).join('') + '</ul>';
   document.getElementById(theme === 'dark' ? 'mo-dark' : 'mo-light').innerHTML =
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">duration · easing</span></div><div class="pbody">'+dur+curves+gallery+ov+rm+rules+'</div>';
   /* 场景级覆盖的标签：必须按各单元格**自身**读，局部覆盖只在那个元素上生效 */
@@ -613,20 +615,20 @@ function renderMotion(theme){
 var BORDERS = [['--border-subtle','line'],['--border-default','line'],['--border-control','control'],['--border-hover','hover'],['--border-control-strong','strong']];
 function renderBorder(theme){
   var field = tok('--background-field', theme), content = tok('--background-content', theme), bgApp = tok('--background-app', theme);
-  var ramp = '<div class="grp">'+esc(tr('f.border.ramp'))+'</div>' + BORDERS.map(function(b){
+  var ramp = '<div class="grp">'+fmt(tr('f.border.ramp'))+'</div>' + BORDERS.map(function(b){
     var v = tok(b[0], theme), c1 = cr(v, field), c2 = cr(v, content);
     var isControl = b[1] === 'control' || b[1] === 'hover' || b[1] === 'strong';
     var cls = c1 >= 3 ? 'ok' : 'dim';
     return '<div class="bd-row"><span class="bd-line" style="border-color:var('+b[0]+')"></span><span class="bd-name">'+b[0]+'</span>'
       + '<span class="bd-cr '+cls+'">'+c1+':1</span><span class="bd-cr dim">'+c2+':1</span>'
-      + '<span class="mo-val">'+esc(tr('f.border.on'))+'</span></div>'; }).join('');
-  var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.border.demo'))+'</div><div class="bd-demo">'
-    + '<div class="col"><div class="cap">'+esc(tr('f.border.demoDefault'))+'</div><input class="input" value="tsk_8f21c4"></div>'
-    + '<div class="col"><div class="cap">'+esc(tr('f.border.demoStrong'))+'</div><input class="input is-strong" value="tsk_8f21c4"></div>'
+      + '<span class="mo-val">'+fmt(tr('f.border.on'))+'</span></div>'; }).join('');
+  var demo = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.border.demo'))+'</div><div class="bd-demo">'
+    + '<div class="col"><div class="cap">'+fmt(tr('f.border.demoDefault'))+'</div><input class="input" value="tsk_8f21c4"></div>'
+    + '<div class="col"><div class="cap">'+fmt(tr('f.border.demoStrong'))+'</div><input class="input is-strong" value="tsk_8f21c4"></div>'
     + '</div>';
-  var dec = '<div class="grp" style="margin-top:14px">'+esc(tr('f.border.decision'))+'</div><ul>'
-    + ['d1','d2','d3'].map(function(k){ return '<li>'+esc(tr('f.border.'+k))+'</li>'; }).join('') + '</ul>'
-    + '<div class="dev">'+esc(tr('f.border.deviation'))+'</div>';
+  var dec = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.border.decision'))+'</div><ul>'
+    + ['d1','d2','d3'].map(function(k){ return '<li>'+fmt(tr('f.border.'+k))+'</li>'; }).join('') + '</ul>'
+    + '<div class="dev">'+fmt(tr('f.border.deviation'))+'</div>';
   document.getElementById(theme === 'dark' ? 'bd-dark' : 'bd-light').innerHTML =
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">border · contrast</span></div><div class="pbody">'+ramp+demo+dec+'</div>';
 }
@@ -671,20 +673,20 @@ function computeColumns(theme, viewport, navPref, sidePref, navManual, collapsed
 }
 function renderGrid(theme){
   var c = computeColumns(theme, 1280, 280, 0, 0.45, false);
-  var contract = '<div class="grp">'+esc(tr('f.grid.contractTitle'))+'</div><table>'
-    + '<tr><th>'+esc(tr('f.grid.colZone'))+'</th><th>'+esc(tr('f.grid.colMin'))+'</th><th>'+esc(tr('f.grid.colMax'))+'</th><th>'+esc(tr('f.grid.colDefault'))+'</th></tr>'
-    + '<tr><td>'+esc(tr('f.grid.navZone'))+'</td><td><code>'+tok('--nav-min',theme)+'</code></td><td><code>'+tok('--nav-max',theme)+'</code></td><td><code>'+tok('--nav-default',theme)+'</code> · '+esc(tr('f.grid.navCollapsedNote'))+' <code>'+tok('--nav-collapsed',theme)+'</code></td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.centerZone'))+'</td><td><code>'+tok('--center-min',theme)+'</code></td><td>'+esc(tr('f.grid.centerMax'))+'</td><td>'+esc(tr('f.grid.centerDefault'))+'</td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.sideZone'))+'</td><td><code>'+tok('--side-min',theme)+'</code></td><td>'+esc(tr('f.grid.sideMaxFormula'))+'</td><td><code>'+tok('--side-width-reading',theme)+'</code> / <code>'+tok('--side-width-tool',theme)+'</code> / <code>'+tok('--side-width-task',theme)+'</code> / <code>'+tok('--side-width-wide',theme)+'</code> '+esc(tr('f.grid.byViewType'))+'</td></tr>'
+  var contract = '<div class="grp">'+fmt(tr('f.grid.contractTitle'))+'</div><table>'
+    + '<tr><th>'+fmt(tr('f.grid.colZone'))+'</th><th>'+fmt(tr('f.grid.colMin'))+'</th><th>'+fmt(tr('f.grid.colMax'))+'</th><th>'+fmt(tr('f.grid.colDefault'))+'</th></tr>'
+    + '<tr><td>'+fmt(tr('f.grid.navZone'))+'</td><td><code>'+tok('--nav-min',theme)+'</code></td><td><code>'+tok('--nav-max',theme)+'</code></td><td><code>'+tok('--nav-default',theme)+'</code> · '+fmt(tr('f.grid.navCollapsedNote'))+' <code>'+tok('--nav-collapsed',theme)+'</code></td></tr>'
+    + '<tr><td>'+fmt(tr('f.grid.centerZone'))+'</td><td><code>'+tok('--center-min',theme)+'</code></td><td>'+fmt(tr('f.grid.centerMax'))+'</td><td>'+fmt(tr('f.grid.centerDefault'))+'</td></tr>'
+    + '<tr><td>'+fmt(tr('f.grid.sideZone'))+'</td><td><code>'+tok('--side-min',theme)+'</code></td><td>'+fmt(tr('f.grid.sideMaxFormula'))+'</td><td><code>'+tok('--side-width-reading',theme)+'</code> / <code>'+tok('--side-width-tool',theme)+'</code> / <code>'+tok('--side-width-task',theme)+'</code> / <code>'+tok('--side-width-wide',theme)+'</code> '+fmt(tr('f.grid.byViewType'))+'</td></tr>'
     + '</table>';
-  var screen = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.screenTitle'))+'</div><ul>'
-    + ['s1','s2','s3'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ul>'
-    + '<table><tr><td>'+esc(tr('f.grid.winDefault'))+'</td><td><code>'+tok('--window-default',theme)+' × '+tok('--window-default-height',theme)+'</code></td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.winMin'))+'</td><td><code>'+tok('--page-min-width',theme)+' × '+tok('--page-min-height',theme)+'</code></td></tr></table>';
-  var navs=''; NAVITEMS.forEach(function(k,i){ navs += '<span class="gi'+(i===0?' on':'')+'" data-label="'+esc(tr('f.grid.item.'+k))+'"></span>'; });
+  var screen = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.grid.screenTitle'))+'</div><ul>'
+    + ['s1','s2','s3'].map(function(k){ return '<li>'+fmt(tr('f.grid.'+k))+'</li>'; }).join('') + '</ul>'
+    + '<table><tr><td>'+fmt(tr('f.grid.winDefault'))+'</td><td><code>'+tok('--window-default',theme)+' × '+tok('--window-default-height',theme)+'</code></td></tr>'
+    + '<tr><td>'+fmt(tr('f.grid.winMin'))+'</td><td><code>'+tok('--page-min-width',theme)+' × '+tok('--page-min-height',theme)+'</code></td></tr></table>';
+  var navs=''; NAVITEMS.forEach(function(k,i){ navs += '<span class="gi'+(i===0?' on':'')+'" data-label="'+fmt(tr('f.grid.item.'+k))+'"></span>'; });
   var lines=''; for (var j=0;j<5;j++) lines += '<b></b>';
   var sides=''; for (var k=0;k<6;k++) sides += '<span></span>';
-  var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.demo'))+'</div>'
+  var demo = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.grid.demo'))+'</div>'
     + '<div class="gclip" id="gclip-'+theme+'"><div class="gvp" id="gvp-'+theme+'">'
     + '<div class="gcaps"><span class="lights"><i></i><i></i><i></i></span>'
     + '<button type="button" class="tgl" id="gtgl-'+theme+'"></button></div>'
@@ -694,12 +696,12 @@ function renderGrid(theme){
     + '<span class="grip" id="ggrip-'+theme+'" role="separator" aria-orientation="vertical"></span></div>'
     + '<div class="gside" id="gside-'+theme+'"><div class="gcolhead gsh"><i class="l"></i></div><div class="gbody">'+sides+'</div></div>'
     + '</div><div class="gscrim" id="gscrim-'+theme+'"></div></div></div>';
-  var navModeTbl = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.navTitle'))+'</div><table>'
-    + '<tr><th>'+esc(tr('f.grid.navColTarget'))+'</th><th>'+esc(tr('f.grid.navColForm'))+'</th><th>'+esc(tr('f.grid.navColToggle'))+'</th><th>'+esc(tr('f.grid.navColState'))+'</th></tr>'
-    + ['nr1','nr2','nr3'].map(function(k){ return '<tr>'+['a','b','c','d'].map(function(c){ return '<td>'+esc(tr('f.grid.'+k+c))+'</td>'; }).join('')+'</tr>'; }).join('')
-    + '</table><p class="hint" style="margin:6px 0 0;font-size:11px;color:var(--text-tertiary)">'+esc(tr('f.grid.railNote'))+'</p>';
-  var order = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.orderTitle'))+'</div><ol>'
-    + ['o1','o2','o3','o4','o5'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ol>';
+  var navModeTbl = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.grid.navTitle'))+'</div><table>'
+    + '<tr><th>'+fmt(tr('f.grid.navColTarget'))+'</th><th>'+fmt(tr('f.grid.navColForm'))+'</th><th>'+fmt(tr('f.grid.navColToggle'))+'</th><th>'+fmt(tr('f.grid.navColState'))+'</th></tr>'
+    + ['nr1','nr2','nr3'].map(function(k){ return '<tr>'+['a','b','c','d'].map(function(c){ return '<td>'+fmt(tr('f.grid.'+k+c))+'</td>'; }).join('')+'</tr>'; }).join('')
+    + '</table><p class="hint" style="margin:6px 0 0;font-size:11px;color:var(--text-tertiary)">'+fmt(tr('f.grid.railNote'))+'</p>';
+  var order = '<div class="grp" style="margin-top:14px">'+fmt(tr('f.grid.orderTitle'))+'</div><ol>'
+    + ['o1','o2','o3','o4','o5'].map(function(k){ return '<li>'+fmt(tr('f.grid.'+k))+'</li>'; }).join('') + '</ol>';
   document.getElementById(theme === 'dark' ? 'gr-dark' : 'gr-light').innerHTML =
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">3 columns · grid</span></div><div class="pbody">'+contract+navModeTbl+screen+demo+order+'</div>';
 }
@@ -778,14 +780,14 @@ function initGrip(theme){
 function initGrid(){
   var box = document.getElementById('gr-presets');
   if (box && !box.dataset.done){
-    box.innerHTML = PRESETS.map(function(p){ return '<button type="button" class="gpreset" data-w="'+p[1]+'" data-l="'+p[0]+'">'+esc(tr('f.grid.preset.'+p[0]))+'</button>'; }).join('');
+    box.innerHTML = PRESETS.map(function(p){ return '<button type="button" class="gpreset" data-w="'+p[1]+'" data-l="'+p[0]+'">'+fmt(tr('f.grid.preset.'+p[0]))+'</button>'; }).join('');
     box.addEventListener('click', function(e){ var b = e.target.closest('.gpreset'); if (!b) return;
       document.getElementById('gr-range').value = b.getAttribute('data-w'); syncGrid(); });
     box.dataset.done = '1';
   }
   var tb = document.getElementById('gr-sidetypes');
   if (tb && !tb.dataset.done){
-    tb.innerHTML = SIDE_TYPES.map(function(t,i){ return '<button type="button" class="gpreset" data-type="'+i+'" data-l="'+t[0]+'">'+esc(tr('f.grid.sideType.'+t[0]))+'</button>'; }).join('');
+    tb.innerHTML = SIDE_TYPES.map(function(t,i){ return '<button type="button" class="gpreset" data-type="'+i+'" data-l="'+t[0]+'">'+fmt(tr('f.grid.sideType.'+t[0]))+'</button>'; }).join('');
     tb.addEventListener('click', function(e){ var b = e.target.closest('.gpreset'); if (!b) return; SIDE_TYPE = parseInt(b.getAttribute('data-type'),10); syncGrid(); });
     tb.dataset.done = '1';
   }
@@ -804,7 +806,7 @@ function initGrid(){
   });
   var pb = document.getElementById('gr-plats');
   if (pb && !pb.dataset.done){
-    pb.innerHTML = PLATS.map(function(k,i){ return '<button type="button" class="gpreset" data-plat="'+i+'" data-l="'+k+'">'+esc(tr('f.grid.plat.'+k))+'</button>'; }).join('');
+    pb.innerHTML = PLATS.map(function(k,i){ return '<button type="button" class="gpreset" data-plat="'+i+'" data-l="'+k+'">'+fmt(tr('f.grid.plat.'+k))+'</button>'; }).join('');
     pb.addEventListener('click', function(e){ var b = e.target.closest('.gpreset'); if (!b) return;
       PLATFORM = parseInt(b.getAttribute('data-plat'),10); NAV_MANUAL = false; syncGrid(); });
     pb.dataset.done = '1';
@@ -827,8 +829,8 @@ initGrid();
 /* ===== 语言 / 渲染 ===== */
 function applyChrome(){
   document.getElementById('f-title').textContent = tr('f.title');
-  document.getElementById('f-sub').textContent = tr('f.subtitle');
-  document.getElementById('f-src').textContent = tr('f.source');
+  document.getElementById('f-sub').innerHTML = fmt(tr('f.subtitle'));
+  document.getElementById('f-src').innerHTML = fmt(tr('f.source'));
   document.getElementById('f-langnote').textContent = tr('f.langnote');
   document.getElementById('gr-sliderlabel').textContent = tr('f.grid.slider');
   document.getElementById('gr-navlabel').textContent = tr('f.grid.sliderNav');
@@ -843,9 +845,9 @@ function applyChrome(){
   var map = [['sp','spacing'],['rd','radius'],['el','elevation'],['mo','motion'],['bd','border'],['gr','grid']];
   map.forEach(function(m){
     document.getElementById(m[0]+'-title').textContent = tr('f.'+m[1]+'.title');
-    document.getElementById(m[0]+'-note').textContent = tr('f.'+m[1]+'.note');
+    document.getElementById(m[0]+'-note').innerHTML = fmt(tr('f.'+m[1]+'.note'));
   });
-  var n2 = document.getElementById('el-note2'); if (n2) n2.textContent = tr('f.elevation.note2');
+  var n2 = document.getElementById('el-note2'); if (n2) n2.innerHTML = fmt(tr('f.elevation.note2'));
 }
 function renderAll(){
   applyChrome(); applyPrefs();

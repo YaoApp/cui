@@ -103,7 +103,7 @@
     },
     "message": {
       "user1": "Hi — could you review these two documents? Focus on the risk clauses in the contract.",
-      "agent1Html": "I have read both. I found <b>3 risks</b> in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
+      "agent1Html": "I have read both. I found **3 risks** in the contract: ① §4.2 has no cap on the payment period; ② §7 liabilities are unbalanced; ③ Annex II is missing the signature page.",
       "agent2": "Summarized by risk first, with the source clause and page numbers."
     },
     "tool": {
@@ -435,13 +435,13 @@
       "sideDefaultNote": "first open",
       "screenTitle": "Screen compatibility (4K and 1080p share one set)",
       "s1": "Thresholds are judged in **viewport CSS px**, which already include system scaling: 4K at 200% is about 1920 CSS px, the same as a 1080p display, so one set of rules reads correctly on both.",
-      "s2": "Column widths use **a default per view type** (reading 400, tool 600, task 640, wide 840) and are then held by a **70% of frame cap**, so they grow on large displays and shrink on small ones.",
+      "s2": "Column widths use **a default per view type** (reading 400, tool 600, task 640, wide 840) and are then held by **total width minus navigation, content minimum and handle**, so they grow on large displays and shrink on small ones.",
       "s3": "The window only carries a default and a minimum (and remembers the last size). When height runs short the secondary toolbar goes and the **footer stays**.",
       "winDefault": "Default window",
       "winMin": "Minimum window",
       "demo": "Three column demo (drag the viewport, drag the columns, toggle)",
       "orderTitle": "Give way order (the most expensive goes first)",
-      "o1": "The side column **shrinks first**, clamped between 300 and 70% of the frame.",
+      "o1": "The side column **shrinks first**, clamped between 300 and whatever space is actually left.",
       "o2": "The side column then **loses its track entirely**: below 300 of remaining space it is simply not opened rather than squeezed.",
       "o3": "**Only then may the centre drop below its minimum** of 400, and only once that track is gone.",
       "o4": "The **navigation never concedes width**: below 1024 viewport it auto collapses to a 56px icon rail, and a manual expand **overlays** the centre instead of squeezing it.",
@@ -510,7 +510,7 @@
       "nr3c": "Web drawer: a **hamburger in the content top row**",
       "nr3d": "Transient (Esc or the scrim closes it)",
       "railNote": "There is **no title bar**: three vertical columns, each with its own top row. Only the traffic lights and the toggle float in the top left corner, and they never move",
-      "sideMaxFormula": "<b>total width - (navigation + centre minimum + handle)</b>: drag freely up to that limit, no hard coded ratio",
+      "sideMaxFormula": "**total width - (navigation + centre minimum + handle)**: drag freely up to that limit, no hard coded ratio",
       "cap": "cap ",
       "px": "px",
       "sideHint": "Drag the right edge of the content to resize the side column"
