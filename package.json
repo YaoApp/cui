@@ -1,42 +1,43 @@
 {
-      "private": true,
-      "homepage": "https://yaoapps.com",
-      "scripts": {
-            "dev": "turbo run dev",
-            "build": "turbo run build",
-            "dev:cui": "turbo run dev --filter=cui",
-            "build:cui": "turbo run build --filter=cui",
-            "prettier": "prettier --parser=typescript --write \"**/*.ts?(x)\"",
-            "submodule:init": "git submodule update --init --recursive",
-            "submodule:update": "git submodule sync && git submodule update --recursive --remote --merge"
-      },
-      "gitHooks": {
-            "pre-commit": "lint-staged --allow-empty"
-      },
-      "lint-staged": {
-            "*.{js,jsx,less,md,json}": [
-                  "prettier --write"
-            ],
-            "*.ts?(x)": [
-                  "prettier --parser=typescript --write"
-            ]
-      },
-      "devDependencies": {
-            "lint-staged": "^13.1.0",
-            "prettier": "^2.8.1",
-            "turbo": "^1.7.2",
-            "ws": "^8.21.0",
-            "yorkie": "^2.0.0"
-      },
-      "pnpm": {
-            "overrides": {
-                  "@vidstack/react": "1.12.12"
-            }
-      },
-      "dependencies": {
-            "@types/react-beautiful-dnd": "^13.1.8",
-            "mermaid": "^11.4.1",
-            "mermaid-react": "^0.1.0",
-            "react-beautiful-dnd": "^13.1.1"
-      }
+  "private": true,
+  "packageManager": "pnpm@10.34.6",
+  "homepage": "https://yaoapps.com",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "dev:cui": "turbo run dev --filter=cui",
+    "build:cui": "turbo run build --filter=cui",
+    "prettier": "prettier --parser=typescript --write \"**/*.ts?(x)\"",
+    "submodule:init": "git submodule update --init --recursive",
+    "submodule:update": "git submodule sync && git submodule update --recursive --remote --merge"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged --allow-empty"
+  },
+  "lint-staged": {
+    "*.{js,jsx,less,md,json}": [
+      "prettier --write"
+    ],
+    "*.ts?(x)": [
+      "prettier --parser=typescript --write"
+    ]
+  },
+  "devDependencies": {
+    "lint-staged": "^13.1.0",
+    "prettier": "^2.8.1",
+    "turbo": "^1.7.2",
+    "ws": "^8.21.0",
+    "yorkie": "^2.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@vidstack/react": "1.12.12"
+    }
+  },
+  "dependencies": {
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "mermaid": "^11.4.1",
+    "mermaid-react": "^0.1.0",
+    "react-beautiful-dnd": "^13.1.1"
+  }
 }
