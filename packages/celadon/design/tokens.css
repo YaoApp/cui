@@ -104,6 +104,14 @@
   /* 品牌图形（LOGO/标记）用色：浅色=品牌青，暗色=提升色 */
   --brand-chip: transparent;
   /* 品牌图标垫底：浅色下不需要 */
+  /* 品牌标记（LOGO）专用：与 UI 用的 --brand 解耦，且刻意不随主题切换 ——
+     实测同一支渐变在浅底与暗底都成立，省掉一套深色分支 */
+  --brand-mark-from: #2FA79C;
+  /* 渐变起点 = 原品牌青提亮一档 */
+  --brand-mark-to: #0CC8B7;
+  /* 渐变终点 = 再 +0.5 档；旧值 #2A7B7B 太暗、#00E8D4 太冲 */
+  --brand-eye: #F4F1EA;
+  /* 眼白：暖白，与暗面正文同源，脸不冷 */
   /* ===== 交互态 ===== */
   --focus-ring-color: var(--brand);
   /* 焦点环：与品牌同源 */
@@ -325,6 +333,7 @@
   --focus-ring-color: var(--brand-lift);
   --brand-graphic: var(--brand-lift);
   /* 暗底上标记必须提亮，否则看不见 */
+  /* --brand-mark-* / --brand-eye 不在此覆盖：品牌标记刻意全站一版 */
   --brand-chip: #FFFFFF;
   /* 暗底上官方色 logo（含黑色部分）需要纸白垫底 */
   --background-disabled: #232119;
