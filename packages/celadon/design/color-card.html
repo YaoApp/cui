@@ -42,6 +42,19 @@ h1{font-size:19px;margin:0 0 4px}
 .cr.warn{color:var(--warm-text);background:var(--warm-soft);border-color:color-mix(in srgb, var(--warm) 30%, var(--warm-soft))}
 .cr.bad{color:var(--danger-ink);background:var(--danger-soft);border-color:color-mix(in srgb, var(--danger) 30%, var(--danger-soft))}
 .cr.dim{color:var(--text-tertiary);background:var(--background-field);border-color:var(--border-default)}
+/* 控件状态预览：规格矩阵（状态名在上、控件铺满格子） */
+.stgroup{margin:16px 0 0;font-size:11.5px;letter-spacing:.3px;font-weight:var(--font-weight-medium);
+  color:var(--text-secondary);padding-bottom:7px;border-bottom:1px solid var(--border-subtle)}
+.stgroup:first-of-type{margin-top:12px}
+#states,.stgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px 16px;margin-top:13px}
+.st{display:flex;flex-direction:column;gap:7px;align-items:stretch;min-width:0}
+.st .lb{font-size:11.5px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st .input,.st .btn-primary,.st .btn-ghost{width:100%;height:34px;font-size:12.5px;border-radius:var(--radius-medium);
+  padding:0 10px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;cursor:default}
+.st .input{cursor:text}
+.st .hint-error{font-size:11.5px;line-height:1.3}
+.stkind{margin-top:14px}
+.stkind .cap{font-size:11.5px;color:var(--text-tertiary);margin-bottom:9px}
 .card{background:var(--background-surface);border:1px solid var(--border-default);border-radius:12px;padding:14px 16px;margin-top:18px}
 .card h2{font-size:13.5px;margin:0 0 6px}
 .card .hint{font-size:11.5px;color:var(--text-secondary);margin:0 0 10px}
@@ -234,11 +247,14 @@ function renderStates(){
   }).join('');
   document.getElementById('states-g2').textContent = tr('card.state.groupButton');
   document.getElementById('states-btn').innerHTML = STATE_BUTTONS.map(function(kind){
-    return kind[1].map(function(cls){
-      var cls2 = (kind[0]==='btnSolid' ? 'btn-primary is-solid ' : 'btn-primary ') + cls;
-      return '<div class="st"><span class="lb">'+esc(tr('card.state.'+STATE_LABEL[cls]))+'</span>'
-        + '<button class="'+cls2+'">'+esc(kind[0]==='btnSolid' ? tr('card.state.solid') : tr('card.state.soft'))+'</button></div>';
-    }).join('');
+    var cap = tr('card.state.' + (kind[0]==='btnSolid' ? 'solid' : 'soft'));
+    return '<div class="stkind"><div class="cap">'+esc(cap)+'</div><div class="stgrid">'
+      + kind[1].map(function(cls){
+          var cls2 = (kind[0]==='btnSolid' ? 'btn-primary is-solid ' : 'btn-primary ') + cls;
+          return '<div class="st"><span class="lb">'+esc(tr('card.state.'+STATE_LABEL[cls]))+'</span>'
+            + '<button class="'+cls2+'">'+esc(cap)+'</button></div>';
+        }).join('')
+      + '</div></div>';
   }).join('');
 }
 function renderPanels(){
