@@ -27,6 +27,7 @@
 | 12 | **日期运算与时区** | **`date-fns` + `@date-fns/tz`**（Base UI 的官方适配器 · tree-shakable）；**格式化不归它，仍走 `Intl`** |
 | 13 | **长列表与表格** | **`virtua`** —— 长列表用 `VList`/`Virtualizer`（容器与行渲染归我们；索引 ↔ 偏移双向可查；尺寸缓存可存可恢复）；**表格类用 `VGrid`**（二维 · 固定表头/列）|
 | 14 | **状态管理** | **`zustand`**（不用 mobx；自研的 `storex` 不复活）|
+| 15 | **动效** | **CSS 与浏览器原生为默认**（时长/缓动走 Celadon token）；**`motion`** 只在它更强处用（手势 · 编排 · 布局动画）|
 
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
@@ -46,13 +47,13 @@
 | `date-fns` · `@date-fns/tz` | `^4` · `^1` | 日期运算与时区（见 4.12）|
 | `virtua` | `^0.52` | 长列表虚拟滚动（聊天流 · 收件箱 · 看板列；见 4.13）|
 | `zustand` | `^5` | 状态管理（见 4.14）|
+| `motion` | `^13` | 动效（仅用于手势 / 编排 / 布局动画；见 4.15）|
 | `pnpm`（**工具**，非依赖）| `10.34.6` | 包管理器，根 `packageManager` 锁死 |
 
 **待定**（推荐列出，未拍）：
 
 | 包 | 当前最新 | 用途 | 备注 |
 | --- | --- | --- | --- |
-| `motion` | 13.4.6 | 动效 | |
 | `@playwright/test` | 1.63.0 | 浏览器验收 | 与 `scripts/tests/` 的测试策略一起定 |
 
 **不用**：`antd`（见 4.7）
@@ -469,6 +470,38 @@ packages/celadon/
 
 **为什么不用 `storex`** ✗：它是旧仓库的自研包（存储封装 + 变更监听 ✓），属 `01` 已定的「旧包不复活」范围；
 同类需求用 `zustand` 的 **`persist`** 中间件覆盖 ✓。
+
+### 4.15 动效：CSS 与原生优先，motion 兜底
+
+**结论**：**默认不用 JS 动效库** —— 时长与缓动走 Celadon token 的 **CSS transition / animation**；
+**浏览器原生**能表达的用原生；只有**手势 · 复杂编排 · 布局动画**才引 **`motion`**。
+
+**旧应用现在是什么**：
+
+| 用的 | 规模 |
+| --- | --- |
+| `framer-motion`（**`motion` 的旧名字**）| 一个包 |
+| CSS 为主 | `transition` **254 个文件** · `animation` **94** · `@keyframes` **84** · `cubic-bezier` **25** |
+| 手写时序 | `requestAnimationFrame` **16 个文件** |
+
+**同类项目的选择**：**`motion`** 在三个 React 客户端里都用（其一另加 `@formkit/auto-animate`）；两个不用 CSS 之外的东西。
+
+**2026 的变化在浏览器侧，不在库侧** ✗：
+
+- **库层面 `motion` 仍是 React UI 的事实标准**（它是原 `framer-motion` 改名而来）
+- **新能力来自原生**：**View Transitions**（视图切换 · 列表增删的位移动画）· **`@starting-style`**（元素从 `display: none` 进入时的过渡，正是入场动画那个经典难题）· **滚动驱动动画**（`animation-timeline`）
+- 官方与社区口径一致：**「按任务选 —— 滚动与时间线用 GSAP，React UI 用 Motion，其余的用 CSS」**
+
+**分工（写进组件规范）**：
+
+| 场景 | 用什么 |
+| --- | --- |
+| 悬停 / 按下 / 展开收起 / 强调（**我们已有的 12 个动效场景大多属此类**）| **CSS + token** |
+| 入场 / 退场（含 `display: none` 进入）| **CSS `@starting-style` + `transition-behavior: allow-discrete`** |
+| 路由与视图切换 · 列表增删位移 | **View Transitions**（按目标运行时核对支持度）|
+| 手势拖拽 · 复杂编排 · 布局动画 | **`motion`** |
+
+**约束**：组件规范（`03`）里每个动效场景**必须标注归属**（CSS / 原生 / motion），不允许"顺手引个库"。
 
 ---
 
