@@ -24,9 +24,20 @@ for (const f of PAGES) {
     }
   }
 }
+// 间距与线宽同样必须走 token：--spacing-* / --border-width
+const SPACING = /^(padding|margin|gap)(-top|-right|-bottom|-left)?$|^(row-gap|column-gap)$/;
+const BORDER = /^border(-top|-right|-bottom|-left)?$/;
+for (const f of PAGES) {
+  const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+)(?=;|\})/g)) {
+    const prop = m[1], v = m[2].trim();
+    if (SPACING.test(prop) && /\b[\d.]+(px|rem|em)\b/.test(v)) bad.push(`${f}: ${prop}: ${v}（间距应走 --spacing-*）`);
+    if (BORDER.test(prop) && /\b[\d.]+(px|rem|em)\b/.test(v) && !v.includes('var(--border-width)')) bad.push(`${f}: ${prop}: ${v}（线宽应走 --border-width）`);
+  }
+}
 if (bad.length) {
   console.log(`  ✗ ${bad.length} 处写死（应改走 token）：`);
   bad.slice(0, 8).forEach((b) => console.log('      ' + b));
   process.exit(1);
 }
-console.log('  ✓ 三张规范页的字号 / 圆角 / 颜色全部走 token');
+console.log('  ✓ 三张规范页的字号 / 圆角 / 颜色 / 间距 / 线宽全部走 token');
