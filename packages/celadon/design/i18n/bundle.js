@@ -539,7 +539,7 @@ window.CELADON_I18N = {
       "d3": "No colours beyond the brand colour",
       "d4": "Never use the mark as an interface icon",
       "setTitle": "2. Icon set (67, sourced from lucide)",
-      "setNote": "The icons are **no longer drawn by us**: every shape comes from **lucide** (24 grid, about 1857 icons, ISC). These 67 are the original 25 re-sourced plus 42 that were missing, each with its lucide name recorded.",
+      "setNote": "The icons are **no longer drawn by us**: every shape comes from **lucide** (24 grid, about 1857 icons, ISC), and each one records the lucide name it came from.",
       "spWhat": "Spec",
       "spValue": "Value",
       "spGrid": "Grid",
@@ -559,8 +559,6 @@ window.CELADON_I18N = {
       "count": "",
       "coverTitle": "Coverage (67, all from lucide)",
       "coverCat": "Group",
-      "coverHave": "Exists",
-      "coverMiss": "Added now (42)",
       "specTitle": "3. Usage and drawing rules",
       "specNote": "Take from **lucide** by default. Only these five cases are drawn by us, and they still go on the **24 grid with a 2 stroke** so mixed icons stay consistent.",
       "r1": "**Look first**: when you need an icon, find the closest meaning in lucide and use it. Do not draw a new one.",
@@ -619,7 +617,9 @@ window.CELADON_I18N = {
       "rxTitle": "Our exceptions (declared)",
       "rx1": "**Display steps 14 / 16 / 20 / 24**: lucide only designs for 24 and says nothing about small displays, so we declare **2.25 stroke across the 16px step** (about 1.5 visually), and a simplified variant at 14 where needed, still drawn on the **24 grid with a 2 stroke**.",
       "rx2": "**Naming** stays ours, `i-<domain>-<name>`, mapped to lucide names in `icons/manifest.json`.",
-      "rx3": "**Hand drawing** is limited to the five cases above; everything else comes from lucide."
+      "rx3": "**Hand drawing** is limited to the five cases above; everything else comes from lucide.",
+      "coverCount": "Count",
+      "coverNames": "Semantic names (ours)"
     }
   },
   "ja": {
@@ -1161,7 +1161,7 @@ window.CELADON_I18N = {
       "d3": "ブランド色以外に変えない",
       "d4": "マークを画面アイコンに使わない",
       "setTitle": "2. アイコン一式（67 個・lucide 由来）",
-      "setNote": "アイコンは**もう自前で描きません**。本体はすべて **lucide**（24 グリッド・約 1857 個・ISC）から取得します。この 67 個は既存 25 個の差し替えと不足 42 個の補充です。",
+      "setNote": "アイコンは**もう自前で描きません**。本体はすべて **lucide**（24 グリッド・約 1857 個・ISC）から取得し、各アイコンには対応する lucide 名を記録しています。",
       "spWhat": "項目",
       "spValue": "値",
       "spGrid": "グリッド",
@@ -1181,8 +1181,6 @@ window.CELADON_I18N = {
       "count": "",
       "coverTitle": "覆盖（67 個・すべて lucide 由来）",
       "coverCat": "分類",
-      "coverHave": "あり",
-      "coverMiss": "今回の補充（42）",
       "specTitle": "3. 使い方と自前作成の規格",
       "specNote": "既定は **lucide から取得**。自前で描くのは下の 5 類だけで、それも **24 グリッド / 線幅 2** で描きます。",
       "r1": "**まず探す**：必要なときは lucide で意味が最も近いものを探し、あればそれを使います。",
@@ -1241,7 +1239,9 @@ window.CELADON_I18N = {
       "rxTitle": "私たちの例外（明示）",
       "rx1": "**表示段 14 / 16 / 20 / 24**：lucide は 24 前提で小表示を定めていないため、**16px 段は線幅 2.25**（視覚 ≈1.5）とし、14px 段は必要なら簡略版を、ただし**24 グリッド / 2px** で描きます。",
       "rx2": "**名前**は `i-<領域>-<名前>` のまま。lucide 名と `icons/manifest.json` で対応させます。",
-      "rx3": "**自前の範囲**は上の 5 類のみ。ほかは lucide から取得します。"
+      "rx3": "**自前の範囲**は上の 5 類のみ。ほかは lucide から取得します。",
+      "coverCount": "数",
+      "coverNames": "セマンティック名（私たち）"
     }
   },
   "zh-CN": {
@@ -1783,7 +1783,7 @@ window.CELADON_I18N = {
       "d3": "不改品牌色以外的颜色",
       "d4": "不把标识当界面图标用",
       "setTitle": "二 · 图标系列（67 个 · 来源 lucide）",
-      "setNote": "图标**不再自绘**：本体一律取自 **lucide**（24 网格 · 约 1857 个 · ISC 许可）。本页 67 个 = 原有 25 个换源 + 按缺口补齐 42 个；每个都记着对应的 lucide 名。",
+      "setNote": "图标**不再自绘**：本体一律取自 **lucide**（24 网格 · 约 1857 个 · ISC 许可），每个图标都记着对应的 lucide 名（悬浮或看名字下方）。",
       "spWhat": "规格项",
       "spValue": "值",
       "spGrid": "网格",
@@ -1803,8 +1803,6 @@ window.CELADON_I18N = {
       "count": "",
       "coverTitle": "覆盖度（67 个 · 全部取自 lucide）",
       "coverCat": "分类",
-      "coverHave": "已有",
-      "coverMiss": "本次补齐（42）",
       "specTitle": "三 · 用法与自绘规范",
       "specNote": "默认**从 lucide 取**；只有下面 5 类才自绘，且自绘也必须画在 **24 网格 / 2px** 上 —— 混排才不会脏。",
       "r1": "**先找后用**：需要图标时先去 lucide 找语义最近的一个，找到就用，不要另画。",
@@ -1863,7 +1861,9 @@ window.CELADON_I18N = {
       "rxTitle": "我们的例外（明文声明）",
       "rx1": "**显示档 14 / 16 / 20 / 24**：lucide 只针对 24 设计、未覆盖小尺寸显示 —— 我们声明 **16px 档整档描边 2.25**（视觉 ≈1.5），14px 档必要时用简化版，但**仍画在 24 网格 / 2px 上**。",
       "rx2": "**命名**用我们的语义名 `i-<域>-<名>`，与 lucide 名在 `icons/manifest.json` 一一对应。",
-      "rx3": "**自绘范围**只限上面的 5 类；其余一律从 lucide 取。"
+      "rx3": "**自绘范围**只限上面的 5 类；其余一律从 lucide 取。",
+      "coverCount": "数量",
+      "coverNames": "语义名（我们的命名）"
     }
   },
   "zh-TW": {
@@ -2405,7 +2405,7 @@ window.CELADON_I18N = {
       "d3": "不改品牌色以外的顏色",
       "d4": "不把標識當介面圖示用",
       "setTitle": "二 · 圖示系列（67 個 · 來源 lucide）",
-      "setNote": "圖示**不再自繪**：本體一律取自 **lucide**（24 網格 · 約 1857 個 · ISC 授權）。本頁 67 個 = 原有 25 個換源 + 依缺口補齊 42 個。",
+      "setNote": "圖示**不再自繪**：本體一律取自 **lucide**（24 網格 · 約 1857 個 · ISC 授權），每個圖示都記著對應的 lucide 名。",
       "spWhat": "規格項",
       "spValue": "值",
       "spGrid": "網格",
@@ -2425,8 +2425,6 @@ window.CELADON_I18N = {
       "count": "",
       "coverTitle": "覆蓋度（67 個 · 全部取自 lucide）",
       "coverCat": "分類",
-      "coverHave": "已有",
-      "coverMiss": "本次補齊（42）",
       "specTitle": "三 · 用法與自繪規範",
       "specNote": "預設**從 lucide 取**；只有下面 5 類才自繪，且自繪也必須畫在 **24 網格 / 2px** 上。",
       "r1": "**先找後用**：需要圖示時先去 lucide 找語意最近的一個，找到就用。",
@@ -2485,7 +2483,9 @@ window.CELADON_I18N = {
       "rxTitle": "我們的例外（明文聲明）",
       "rx1": "**顯示檔 14 / 16 / 20 / 24**：lucide 只針對 24 設計 —— 我們聲明 **16px 檔整檔描邊 2.25**（視覺 ≈1.5），14px 檔必要時用簡化版，但**仍畫在 24 網格 / 2px 上**。",
       "rx2": "**命名**用語意名 `i-<域>-<名>`，與 lucide 名一一對應（`icons/manifest.json`）。",
-      "rx3": "**自繪範圍**只限上面 5 類；其餘一律取自 lucide。"
+      "rx3": "**自繪範圍**只限上面 5 類；其餘一律取自 lucide。",
+      "coverCount": "數量",
+      "coverNames": "語意名（我們的命名）"
     }
   }
 };

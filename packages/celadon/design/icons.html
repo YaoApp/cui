@@ -42,6 +42,7 @@ code{font-family:var(--font-family-monospace);font-size:var(--font-size-caption)
   border-radius:var(--radius-medium);background:var(--background-content);cursor:pointer}
 .cell:hover{border-color:var(--brand);background:var(--brand-soft)}
 .cell .nm{font-family:var(--font-family-monospace);font-size:var(--font-size-label);color:var(--text-tertiary);text-align:center;overflow-wrap:anywhere;hyphens:auto}
+.cell .src{font-family:var(--font-family-monospace);font-size:var(--font-size-label);color:var(--text-muted);text-align:center;overflow-wrap:anywhere}
 .cell .ico{color:var(--text-primary);display:flex}
 .cell.ok{background:var(--success-soft);border-color:var(--success-soft)}
 .brandrow{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
@@ -188,13 +189,14 @@ li{margin:3px 0}
 <div class="copy" id="ic-copy"></div>
 <script src="i18n/bundle.js"></script>
 <script>
+var LUCIDE = {'i-chat':'message-circle','i-inbox':'inbox','i-board':'square-kanban','i-ws':'folder-kanban','i-pc':'monitor','i-book':'book','i-search':'search','i-plus':'plus','i-plus-square':'square-plus','i-left':'chevron-left','i-right':'chevron-right','i-collapse':'panel-left-close','i-dots':'ellipsis','i-file':'file','i-split':'columns-2','i-send':'send','i-check':'check','i-clock':'clock','i-stop':'square','i-expand':'panel-left-open','i-split2':'columns-3','i-spark':'sparkles','i-folder':'folder','i-tasks':'list-checks','i-pause':'pause','i-nav-settings':'settings','i-nav-help':'circle-question-mark','i-nav-user':'user','i-nav-team':'users','i-nav-logout':'log-out','i-act-edit':'pencil','i-act-trash':'trash','i-act-copy':'copy','i-act-download':'download','i-act-upload':'upload','i-act-refresh':'refresh-cw','i-act-external':'external-link','i-act-filter':'funnel','i-act-sort':'arrow-up-down','i-act-close':'x','i-act-undo':'undo-2','i-act-redo':'redo-2','i-act-play':'play','i-act-attach':'paperclip','i-state-warning':'triangle-alert','i-state-error':'circle-alert','i-state-info':'info','i-state-loading':'loader-circle','i-state-queued':'list-ordered','i-file-pdf':'file-text','i-file-image':'file-image','i-file-sheet':'table','i-file-code':'code','i-file-archive':'archive','i-file-media':'music','i-file-text':'file-type','i-file-terminal':'terminal','i-obj-key':'key-round','i-obj-schedule':'calendar-clock','i-obj-integration':'plug','i-obj-skill':'wand-sparkles','i-obj-model':'cpu','i-obj-quota':'gauge','i-obj-billing':'receipt','i-obj-sandbox':'box','i-obj-container':'container','i-obj-artifact':'package'};
 var SYMBOLS = ['i-chat','i-inbox','i-board','i-ws','i-pc','i-book','i-search','i-plus','i-plus-square','i-left','i-right','i-collapse','i-dots','i-file','i-split','i-send','i-check','i-clock','i-stop','i-expand','i-split2','i-spark','i-folder','i-tasks','i-pause','i-nav-settings','i-nav-help','i-nav-user','i-nav-team','i-nav-logout','i-act-edit','i-act-trash','i-act-copy','i-act-download','i-act-upload','i-act-refresh','i-act-external','i-act-filter','i-act-sort','i-act-close','i-act-undo','i-act-redo','i-act-play','i-act-attach','i-state-warning','i-state-error','i-state-info','i-state-loading','i-state-queued','i-file-pdf','i-file-image','i-file-sheet','i-file-code','i-file-archive','i-file-media','i-file-text','i-file-terminal','i-obj-key','i-obj-schedule','i-obj-integration','i-obj-skill','i-obj-model','i-obj-quota','i-obj-billing','i-obj-sandbox','i-obj-container','i-obj-artifact'];
 var COVER = [
-  ['nav', ['i-chat','i-inbox','i-board','i-ws','i-pc','i-book','i-nav-settings','i-nav-help','i-nav-user','i-nav-team','i-nav-logout'], ['i-nav-settings','i-nav-help','i-nav-user','i-nav-team','i-nav-logout']],
-  ['act', ['i-search','i-plus','i-plus-square','i-left','i-right','i-collapse','i-dots','i-split','i-send','i-stop','i-expand','i-split2','i-pause','i-act-edit','i-act-trash','i-act-copy','i-act-download','i-act-upload','i-act-refresh','i-act-external','i-act-filter','i-act-sort','i-act-close','i-act-undo','i-act-redo','i-act-play','i-act-attach'], ['i-act-edit','i-act-trash','i-act-copy','i-act-download','i-act-upload','i-act-refresh','i-act-external','i-act-filter','i-act-sort','i-act-close','i-act-undo','i-act-redo','i-act-play','i-act-attach']],
-  ['state', ['i-check','i-clock','i-spark','i-state-warning','i-state-error','i-state-info','i-state-loading','i-state-queued'], ['i-state-warning','i-state-error','i-state-info','i-state-loading','i-state-queued']],
-  ['file', ['i-file','i-folder','i-file-pdf','i-file-image','i-file-sheet','i-file-code','i-file-archive','i-file-media','i-file-text','i-file-terminal'], ['i-file-pdf','i-file-image','i-file-sheet','i-file-code','i-file-archive','i-file-media','i-file-text','i-file-terminal']],
-  ['obj', ['i-tasks','i-obj-key','i-obj-schedule','i-obj-integration','i-obj-skill','i-obj-model','i-obj-quota','i-obj-billing','i-obj-sandbox','i-obj-container','i-obj-artifact'], ['i-obj-key','i-obj-schedule','i-obj-integration','i-obj-skill','i-obj-model','i-obj-quota','i-obj-billing','i-obj-sandbox','i-obj-container','i-obj-artifact']]
+  ['nav', ['i-chat','i-inbox','i-board','i-ws','i-pc','i-book','i-nav-settings','i-nav-help','i-nav-user','i-nav-team','i-nav-logout']],
+  ['act', ['i-search','i-plus','i-plus-square','i-left','i-right','i-collapse','i-dots','i-split','i-send','i-stop','i-expand','i-split2','i-pause','i-act-edit','i-act-trash','i-act-copy','i-act-download','i-act-upload','i-act-refresh','i-act-external','i-act-filter','i-act-sort','i-act-close','i-act-undo','i-act-redo','i-act-play','i-act-attach']],
+  ['state', ['i-check','i-clock','i-spark','i-state-warning','i-state-error','i-state-info','i-state-loading','i-state-queued']],
+  ['file', ['i-file','i-folder','i-file-pdf','i-file-image','i-file-sheet','i-file-code','i-file-archive','i-file-media','i-file-text','i-file-terminal']],
+  ['obj', ['i-tasks','i-obj-key','i-obj-schedule','i-obj-integration','i-obj-skill','i-obj-model','i-obj-quota','i-obj-billing','i-obj-sandbox','i-obj-container','i-obj-artifact']]
 ];
 var SIZE = 16, THEME = 'light', Q = '';
 var TR_THEME = { light: '浅色', dark: '暗色' };
@@ -206,17 +208,16 @@ function renderGallery(){
   var host = document.getElementById('ic-gallery');
   var list = SYMBOLS.filter(function(id){ return !Q || id.toLowerCase().indexOf(Q) >= 0; });
   host.innerHTML = list.map(function(id){
-    return '<button class="cell" data-id="'+id+'">'+icon(id, SIZE)+'<span class="nm">'+id+'</span></button>'; }).join('');
+    return '<button class="cell" data-id="'+id+'" title="lucide:'+(LUCIDE[id]||'')+'">'+icon(id, SIZE)+'<span class="nm">'+id+'</span><span class="src">'+(LUCIDE[id]||'')+'</span></button>'; }).join('');
   document.getElementById('ic-count').textContent = list.length + ' / ' + SYMBOLS.length;
 }
 function renderCover(){
   document.getElementById('ic-coverTbl').innerHTML =
-    '<tr><th>'+esc(tr('ic.coverCat'))+'</th><th>'+esc(tr('ic.coverHave'))+'</th><th>'+esc(tr('ic.coverMiss'))+'</th></tr>'
+    '<tr><th>'+esc(tr('ic.coverCat'))+'</th><th>'+esc(tr('ic.coverCount'))+'</th><th>'+esc(tr('ic.coverNames'))+'</th></tr>'
     + COVER.map(function(r){
-        var have = r[1].length;
         return '<tr><td>'+esc(tr('ic.cat.'+r[0]))+'</td>'
-          + '<td><code>'+have+'</code> '+esc(r[1].join(' '))+'</td>'
-          + '<td>'+r[2].map(function(m){ return '<code>'+m+'</code>'; }).join(' ')+' <span style="color:var(--text-tertiary)">('+r[2].length+')</span></td></tr>';
+          + '<td><code>'+r[1].length+'</code></td>'
+          + '<td>'+(r[1].map(function(m){ return '<code>'+m+'</code>'; }).join(' '))+'</td></tr>';
       }).join('');
 }
 function rows(id, keys, cols){
