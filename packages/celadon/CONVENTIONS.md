@@ -22,7 +22,7 @@
 | 阴影 | `--shadow-*` | 手写 `box-shadow` |
 
 - **不要用 `font:` 简写** —— 它会把字号与行高一起写死、绕过 token。拆成 `font-family` / `font-size` / `font-weight` / `line-height`
-- 检查：`scripts/check-tokens.mjs` —— 含"漏分号"、"`font:` 简写夹带字号"、"间距/线宽写死"、"颜色字面量"、"装饰色承载文字"、"四值简写不对称"六类
+- 检查：`scripts/check-tokens.mjs` —— 含"**大括号不配对**"、"漏分号"、"`font:` 简写夹带字号"、"间距/线宽写死"、"颜色字面量"、"装饰色承载文字"、"四值简写不对称"**七类**
 - 间距与线宽是**从宽**判定的：只要 `padding` / `margin` / `gap` / `border` 的值里出现 `Npx` 就报，**包括 `calc()` 里的** —— 规范说"只用 `--spacing-*`"，把尺寸拆进 `calc()` 仍然是写死
 
 ## 3. 布局只用逻辑属性（为 RTL 留门）
