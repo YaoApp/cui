@@ -557,7 +557,7 @@
     "count": "",
     "coverTitle": "覆盖度（按分类）",
     "coverCat": "分类",
-    "specTitle": "三 · 用法与自绘规范",
+    "specTitle": "四 · 用法与自绘规范",
     "specNote": "默认**从 lucide 取**；只有下面 5 类才自绘，且自绘也必须画在 **24 网格 / 2px** 上 —— 混排才不会脏。",
     "r1": "**先找后用**：需要图标时先去 lucide 找语义最近的一个，找到就用，不要另画。",
     "r2": "**命名照旧**：我们的语义名 `i-<域>-<名>`，与 lucide 名一一对应，记在 `icons/manifest.json`。",
@@ -619,6 +619,11 @@
     "rx3": "**自绘范围**只限上面的 5 类；其余一律从 lucide 取。",
     "coverCount": "数量",
     "coverNames": "语义名（我们的命名）",
-    "srcOwn": "自建"
+    "srcOwn": "自建",
+    "brandsetTitle": "三 · 第三方品牌（340 个 · 来源 @lobehub/icons）",
+    "brandsetNote": "模型与厂商 logo 取自 **@lobehub/icons**（MIT · 340 个品牌 · [lobehub.com/icons](https://lobehub.com/icons)）。**品牌图标按各品牌商标规范保留官方色** —— 这是全站**唯一允许不使用我们 token 的颜色**；**深色底请切「单色」变体**。logo 的商标权归各品牌方，仅用于标识对应模型或服务。",
+    "brandSearch": "搜索品牌（deepseek / openai / 通义…）",
+    "brandColor": "官方色",
+    "brandMono": "单色"
   }
 }

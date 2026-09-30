@@ -32,6 +32,8 @@ function patch(file) {
   const cats = [...new Set(manifest.map(m => m.cat))];
   const cover = cats.map(cat => `  ['${cat}', [${manifest.filter(m => m.cat === cat).map(m => `'${m.id}'`).join(',')}]]`).join(',\n');
   out = out.replace(/var COVER = \[[\s\S]*?\n\];/, `var COVER = [\n${cover}\n];`);
+  const brands = readFileSync('icons/brand-index.json', 'utf8').replace(/\s+/g, ' ');
+  out = out.replace(/var BRANDS = \[[\s\S]*?\];/, `var BRANDS = ${brands.trim()};`);
   writeFileSync(file, out);
   console.log(`  ✓ ${file}：内联 ${symbols.length} 个符号`);
 }
