@@ -392,6 +392,16 @@
       "d2": "提供 --border-control-strong / --border-hover-strong 達標檔；",
       "d3": "系統開啟「高對比」時由 tokens.less 的媒體查詢自動切換（淺/暗均已實測生效）。",
       "deviation": "這是一處**有意偏離**：預設態不滿足 1.4.11 的字面要求；如需嚴格達標，把 --border-control 直接指向強邊界即可（一行改動）。"
+    },
+    "pref": {
+      "rm": "動效",
+      "hc": "對比度",
+      "normal": "正常",
+      "reduced": "減少動態",
+      "standard": "標準",
+      "high": "高對比",
+      "sys": "你的系統：",
+      "simulating": "正在預覽模擬狀態"
     }
   }
 }
