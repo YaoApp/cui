@@ -35,6 +35,17 @@
 | 遮罩 | `rgba(10,10,10,.32)` | `rgba(0,0,0,.56)` | 弹窗/抽屉统一 |
 | 禁用 | `#F0F0F2` / `#A8A8B0` / `#E4E4E7` | `#1A1A1A` / `#5A5A5A` / `#2A2A2A` | 豁免对比度要求 |
 
+## 本地浏览
+
+设计资产是纯静态的，起一个本地服务器最方便（入口页 [index.html](index.html) 汇总了色卡 / 界面稿 / 图标 / Logo）：
+
+```bash
+python3 -m http.server 8080 --directory packages/celadon/design
+# 然后打开 http://127.0.0.1:8080/
+```
+
+> 也可以直接用浏览器打开 `color-card.html` / `mock.html`（`file://` 亦可，产物已随包）。
+
 ## 配色来源（中国传统色）
 
 | 角色 | 色值 | 传统色 | 说明 |
