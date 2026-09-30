@@ -242,7 +242,8 @@ window.CELADON_I18N = {
         "fontFamilyMonospace": "Monospace font",
         "brandInk": "Brand text/icons (soft button, selected row, bubble; 4.8:1 on the soft fill, switches to the lifted tone in dark)",
         "brandSolidHover": "Solid button hover fill (white text, >=4.5:1)",
-        "brandSolidActive": "Solid button pressed fill (white text, >=4.5:1)"
+        "brandSolidActive": "Solid button pressed fill (white text, >=4.5:1)",
+        "dangerInk": "Text on the danger soft surface"
       },
       "group": {
         "brand": "Brand",
@@ -422,7 +423,7 @@ window.CELADON_I18N = {
         "title": "Three columns (navigation | content | side)",
         "note": "The main structure is three **vertical** columns on a grid, not horizontal bands. Give way order: the **side column shrinks first, then loses its track, and only then may the centre fall below its minimum**; the **navigation never concedes width**. Screen compatibility comes from **a default width per view type plus viewport driven collapse**, not from giving different screens different window sizes.",
         "slider": "Viewport",
-        "sliderNav": "Nav width",
+        "sliderNav": "Navigation width",
         "contractTitle": "Column contract (drag the sliders to see clamping)",
         "colZone": "Column",
         "colMin": "Min",
@@ -515,7 +516,8 @@ window.CELADON_I18N = {
         "sideMaxFormula": "**total width - (navigation + centre minimum + handle)**: drag freely up to that limit, no hard coded ratio",
         "cap": "cap ",
         "px": "px",
-        "sideHint": "Drag the right edge of the content to resize the side column"
+        "sideHint": "Drag the right edge of the content to resize the side column",
+        "sliderSide": "Sidebar width"
       }
     },
     "ic": {
@@ -933,7 +935,8 @@ window.CELADON_I18N = {
         "fontFamilyMonospace": "等幅フォント",
         "brandInk": "ブランド色の文字/アイコン（淡色ボタン・選択行・バブル。淡色地で 4.8:1、暗色では自動で明るい方に切替）",
         "brandSolidHover": "主ボタンのホバー背景（白文字 ≥4.5:1）",
-        "brandSolidActive": "主ボタンの押下背景（白文字 ≥4.5:1）"
+        "brandSolidActive": "主ボタンの押下背景（白文字 ≥4.5:1）",
+        "dangerInk": "危険の淡色面上の文字"
       },
       "group": {
         "brand": "ブランド",
@@ -1206,7 +1209,8 @@ window.CELADON_I18N = {
         "sideMaxFormula": "**全体幅 −（ナビ + 内容の最小 + ハンドル）**。この上限まで自由にドラッグでき、比率は固定しません",
         "cap": "上限値 ",
         "px": "px",
-        "sideHint": "内容の右端をドラッグしてサイド幅を調整"
+        "sideHint": "内容の右端をドラッグしてサイド幅を調整",
+        "sliderSide": "サイドバー幅"
       }
     },
     "ic": {
@@ -1624,7 +1628,8 @@ window.CELADON_I18N = {
         "fontFamilyMonospace": "等宽字体",
         "brandInk": "品牌色文字/图标（浅底按钮 · 选中底 · 气泡；软底 4.8:1，暗色自动切提亮档）",
         "brandSolidHover": "实心按钮悬停底（白字 ≥4.5:1）",
-        "brandSolidActive": "实心按钮按下底（白字 ≥4.5:1）"
+        "brandSolidActive": "实心按钮按下底（白字 ≥4.5:1）",
+        "dangerInk": "危险底上的文字"
       },
       "group": {
         "brand": "品牌",
@@ -1897,7 +1902,8 @@ window.CELADON_I18N = {
         "sideMaxFormula": "**总宽 −（导航区 + 内容区最小 + 把手）** —— 可自由拖拽到此上限，不写死比例",
         "cap": "上限 ",
         "px": "px",
-        "sideHint": "拖内容区右边缘调整侧栏宽度"
+        "sideHint": "拖内容区右边缘调整侧栏宽度",
+        "sliderSide": "侧栏宽"
       }
     },
     "ic": {
@@ -2315,7 +2321,8 @@ window.CELADON_I18N = {
         "fontFamilyMonospace": "等寬字體",
         "brandInk": "品牌色文字/圖示（淺底按鈕 · 選取底 · 氣泡；軟底 4.8:1，暗色自動切提亮檔）",
         "brandSolidHover": "實心按鈕懸停底（白字 ≥4.5:1）",
-        "brandSolidActive": "實心按鈕按下底（白字 ≥4.5:1）"
+        "brandSolidActive": "實心按鈕按下底（白字 ≥4.5:1）",
+        "dangerInk": "危險底上的文字"
       },
       "group": {
         "brand": "品牌",
@@ -2588,7 +2595,8 @@ window.CELADON_I18N = {
         "sideMaxFormula": "**總寬 −（導覽區 + 內容區最小 + 把手）** —— 可自由拖曳到此上限，不寫死比例",
         "cap": "上限 ",
         "px": "px",
-        "sideHint": "拖曳內容區右緣調整側欄寬度"
+        "sideHint": "拖曳內容區右緣調整側欄寬度",
+        "sliderSide": "側欄寬"
       }
     },
     "ic": {
