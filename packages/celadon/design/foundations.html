@@ -19,11 +19,11 @@ code{font-family:var(--font-family-monospace);background:var(--background-field)
 /* 预览控件（放在各自卡片里；真实偏好仍由 tokens.less 的媒体查询控制） */
 .prefbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:2px 0 12px}
 .pf-label{font-size:11.5px;color:var(--text-secondary);font-weight:var(--font-weight-medium)}
-.seg-group{display:inline-flex;border:1px solid var(--border-control);border-radius:var(--radius-pill);overflow:hidden;background:var(--background-surface)}
-.seg{font:inherit;font-size:11.5px;padding:4px 13px;border:0;background:transparent;color:var(--text-secondary);cursor:pointer;border-right:1px solid var(--border-subtle)}
-.seg:last-child{border-right:0}
+/* 分段控件：外壳胶囊 + 3px 内衬，每段自身也是胶囊（否则选中态会被外壳曲线切掉、右端留缝） */
+.seg-group{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--border-control);border-radius:var(--radius-pill);background:var(--background-field)}
+.seg{font:inherit;font-size:11.5px;padding:3px 12px;border:0;border-radius:var(--radius-pill);background:transparent;color:var(--text-secondary);cursor:pointer}
 .seg:hover{background:var(--background-hover)}
-.seg.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:650}
+.seg.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:650;box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--brand-ink) 30%, transparent)}
 .pf-note{font-size:11px;color:var(--text-tertiary)}
 /* 动效强度：减少（时长归零）/ 标准 / 丰富（更长） */
 body.mo-low, body.mo-low .celadon, body.mo-low .celadon[data-theme='dark'], body.mo-low [data-theme='dark'] .celadon{
@@ -454,8 +454,9 @@ function renderMotion(theme){
   var gallery = '<div class="grp" style="margin-top:16px">'+esc(tr('f.motion.scenes'))+'</div>'
     + '<div class="mo-grid">' + SCENES.map(function(id){
         var t = SCENE_TOKENS[id];
+        var dv = px(tok(t[0], theme)), ev = t[1].replace('--easing-','');   /* 标注=**实际值**，切档位即变 */
         return '<div class="mo-scene"><div class="mo-head"><span class="n">'+esc(tr('f.motion.s.'+id))+'</span>'
-          + '<span class="tk">'+t[0].replace('--duration-','')+' · '+t[1].replace('--easing-','')+'</span>'
+          + '<span class="tk" title="'+t[0]+' · '+t[1]+'">'+dv+'ms · '+ev+'</span>'
           + '<span class="mo-hint go">'+esc(tr(SCENE_HINT[id]))+'</span></div>'
           + stageHtml(theme, id) + '</div>'; }).join('') + '</div>';
   var rm = '<div class="rm-note" id="rm-'+theme+'"></div>';
