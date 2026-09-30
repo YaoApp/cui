@@ -37,7 +37,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "node scripts/check-i18n.mjs && node scripts/check-readme-values.mjs && node scripts/check-tokens.mjs && node scripts/check-generated.mjs && node scripts/check-css-conventions.mjs",
+    "check": "node scripts/check-i18n.mjs && node scripts/check-readme-values.mjs && node scripts/check-tokens.mjs && node scripts/check-generated.mjs && node scripts/check-css-conventions.mjs && node scripts/check-plan-md.mjs",
     "test": "node scripts/tests/run.mjs",
     "prepare": "vite build",
     "prepack": "vite build"
