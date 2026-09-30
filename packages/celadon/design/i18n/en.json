@@ -430,7 +430,7 @@
       "navZone": "Navigation",
       "centerZone": "Content",
       "sideZone": "Side",
-      "navCollapsedNote": "collapses to an icon rail",
+      "navCollapsedNote": "collapse: client 0 (nav stays in the top left corner), web 56 rail",
       "centerMax": "the remainder (inner text has its own readable cap)",
       "centerDefault": "the remainder",
       "sideDefaultNote": "first open",
@@ -464,7 +464,6 @@
         "center": "center",
         "side": "side"
       },
-      "headerZone": "Header",
       "orCap": "or capped at",
       "byViewType": "by view type",
       "sideType": {

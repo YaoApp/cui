@@ -669,7 +669,6 @@ function renderGrid(theme){
   var c = computeColumns(theme, 1280, 280, 0, 0.45, false);
   var contract = '<div class="grp">'+esc(tr('f.grid.contractTitle'))+'</div><table>'
     + '<tr><th>'+esc(tr('f.grid.colZone'))+'</th><th>'+esc(tr('f.grid.colMin'))+'</th><th>'+esc(tr('f.grid.colMax'))+'</th><th>'+esc(tr('f.grid.colDefault'))+'</th></tr>'
-    + '<tr><td>'+esc(tr('f.grid.headerZone'))+'</td><td>—</td><td>—</td><td><code>'+tok('--header-height',theme)+'</code></td></tr>'
     + '<tr><td>'+esc(tr('f.grid.navZone'))+'</td><td><code>'+tok('--nav-min',theme)+'</code></td><td><code>'+tok('--nav-max',theme)+'</code></td><td><code>'+tok('--nav-default',theme)+'</code> · '+esc(tr('f.grid.navCollapsedNote'))+' <code>'+tok('--nav-collapsed',theme)+'</code></td></tr>'
     + '<tr><td>'+esc(tr('f.grid.centerZone'))+'</td><td><code>'+tok('--center-min',theme)+'</code></td><td>'+esc(tr('f.grid.centerMax'))+'</td><td>'+esc(tr('f.grid.centerDefault'))+'</td></tr>'
     + '<tr><td>'+esc(tr('f.grid.sideZone'))+'</td><td><code>'+tok('--side-min',theme)+'</code></td><td><code>'+tok('--side-width-max',theme)+'</code> '+esc(tr('f.grid.orCap'))+' <code>'+tok('--side-max-ratio',theme)+'</code> '+esc(tr('f.grid.ofFrame'))+'</td><td><code>'+tok('--side-width-reading',theme)+'</code> / <code>'+tok('--side-width-tool',theme)+'</code> / <code>'+tok('--side-width-task',theme)+'</code> / <code>'+tok('--side-width-wide',theme)+'</code> '+esc(tr('f.grid.byViewType'))+'</td></tr>'

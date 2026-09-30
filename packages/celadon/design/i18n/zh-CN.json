@@ -430,7 +430,7 @@
       "navZone": "导航区",
       "centerZone": "内容区",
       "sideZone": "侧栏",
-      "navCollapsedNote": "收起为图标轨",
+      "navCollapsedNote": "收起：客户端 0（导航留在窗口左上）· Web 56 图标轨",
       "centerMax": "剩余空间（内文另有可读上限）",
       "centerDefault": "剩余空间",
       "sideDefaultNote": "首次打开",
@@ -464,7 +464,6 @@
         "center": "内容",
         "side": "侧栏"
       },
-      "headerZone": "顶栏",
       "orCap": "或上限",
       "byViewType": "按视图类型",
       "sideType": {
