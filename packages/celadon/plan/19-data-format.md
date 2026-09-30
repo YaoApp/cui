@@ -109,6 +109,13 @@ IANA Area/Location      ← 如 Asia/Shanghai、America/New_York
 | 技术标识 / 路径 / 代码 | **按码位**（不本地化，保证可预测）|
 | 排序键与显示值 | **解耦** —— 排序用原值（时间戳 · 数值 · 原文），显示才本地化；搜索与过滤同理 |
 
+## 3.7 实现入口
+
+- **文案里嵌的日期 / 数字 / 货币 / 相对时间**：可用 **`i18next` 自带格式化**（`datetime` / `number` / `currency` / `relativetime`，底层即 `Intl`）；
+  **参数必须与本表一致**（如 `hourCycle: 'h23'`），**语言取当前生效语言**（i18next 自身即如此）
+- **`i18next` 不覆盖的**：周起始日（`Intl.Locale.weekInfo`）· 列表（`Intl.ListFormat`）· 独立时间戳 → **直接调 `Intl`**，语言用 `i18n.resolvedLanguage`（**不用浏览器语言** ✗）
+- **禁止** ✗：不带 locale 参数的 `toLocaleDateString()` / `toLocaleString()` —— 那会跟随浏览器语言，出现"中文界面英文日期"
+
 ## 4. 双向文本（RTL）
 
 **结论：暂不新增 RTL 语言，但从第一行产品代码起布局只用逻辑属性。**（写法见 [`../CONVENTIONS.md`](../CONVENTIONS.md) §3 · 效果演示 `design/css-logical.html`）
