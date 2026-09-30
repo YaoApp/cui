@@ -343,8 +343,7 @@
       "r4": "Reduced motion: when the system asks for less motion every duration collapses to zero inside tokens.less, so components need no special case.",
       "reducedOn": "System preference: reduce motion - active (durations are zero)",
       "reducedOff": "System preference: normal motion",
-      "scenes": "Common scenes (play one, or play all)",
-      "playAll": "Play all",
+      "scenes": "Common scenes (try them directly, or press play)",
       "playOne": "Play",
       "demoBtn": "Send",
       "demoToast": "✓ Saved",
@@ -362,6 +361,13 @@
         "toast": "Toast appears",
         "list": "List items enter",
         "stream": "Streaming output"
+      },
+      "demoMenu": "Menu",
+      "hint": {
+        "hover": "Hover me",
+        "press": "Press and hold",
+        "focus": "Click or Tab",
+        "click": "Click it"
       }
     },
     "border": {
