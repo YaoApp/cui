@@ -1,0 +1,404 @@
+[
+ {
+  "id": "i-chat",
+  "lucide": "message-circle",
+  "cat": "nav",
+  "added": false
+ },
+ {
+  "id": "i-inbox",
+  "lucide": "inbox",
+  "cat": "nav",
+  "added": false
+ },
+ {
+  "id": "i-board",
+  "lucide": "square-kanban",
+  "cat": "nav",
+  "added": false
+ },
+ {
+  "id": "i-ws",
+  "lucide": "folder-kanban",
+  "cat": "nav",
+  "added": false
+ },
+ {
+  "id": "i-pc",
+  "lucide": "monitor",
+  "cat": "nav",
+  "added": false
+ },
+ {
+  "id": "i-book",
+  "lucide": "book",
+  "cat": "nav",
+  "added": false
+ },
+ {
+  "id": "i-search",
+  "lucide": "search",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-plus",
+  "lucide": "plus",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-plus-square",
+  "lucide": "square-plus",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-left",
+  "lucide": "chevron-left",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-right",
+  "lucide": "chevron-right",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-collapse",
+  "lucide": "panel-left-close",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-dots",
+  "lucide": "ellipsis",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-file",
+  "lucide": "file",
+  "cat": "file",
+  "added": false
+ },
+ {
+  "id": "i-split",
+  "lucide": "columns-2",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-send",
+  "lucide": "send",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-check",
+  "lucide": "check",
+  "cat": "state",
+  "added": false
+ },
+ {
+  "id": "i-clock",
+  "lucide": "clock",
+  "cat": "state",
+  "added": false
+ },
+ {
+  "id": "i-stop",
+  "lucide": "square",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-expand",
+  "lucide": "panel-left-open",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-split2",
+  "lucide": "columns-3",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-spark",
+  "lucide": "sparkles",
+  "cat": "state",
+  "added": false
+ },
+ {
+  "id": "i-folder",
+  "lucide": "folder",
+  "cat": "file",
+  "added": false
+ },
+ {
+  "id": "i-tasks",
+  "lucide": "list-checks",
+  "cat": "obj",
+  "added": false
+ },
+ {
+  "id": "i-pause",
+  "lucide": "pause",
+  "cat": "act",
+  "added": false
+ },
+ {
+  "id": "i-nav-settings",
+  "lucide": "settings",
+  "cat": "nav",
+  "added": true
+ },
+ {
+  "id": "i-nav-help",
+  "lucide": "circle-question-mark",
+  "cat": "nav",
+  "added": true
+ },
+ {
+  "id": "i-nav-user",
+  "lucide": "user",
+  "cat": "nav",
+  "added": true
+ },
+ {
+  "id": "i-nav-team",
+  "lucide": "users",
+  "cat": "nav",
+  "added": true
+ },
+ {
+  "id": "i-nav-logout",
+  "lucide": "log-out",
+  "cat": "nav",
+  "added": true
+ },
+ {
+  "id": "i-act-edit",
+  "lucide": "pencil",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-trash",
+  "lucide": "trash",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-copy",
+  "lucide": "copy",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-download",
+  "lucide": "download",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-upload",
+  "lucide": "upload",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-refresh",
+  "lucide": "refresh-cw",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-external",
+  "lucide": "external-link",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-filter",
+  "lucide": "funnel",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-sort",
+  "lucide": "arrow-up-down",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-close",
+  "lucide": "x",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-undo",
+  "lucide": "undo-2",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-redo",
+  "lucide": "redo-2",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-play",
+  "lucide": "play",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-act-attach",
+  "lucide": "paperclip",
+  "cat": "act",
+  "added": true
+ },
+ {
+  "id": "i-state-warning",
+  "lucide": "triangle-alert",
+  "cat": "state",
+  "added": true
+ },
+ {
+  "id": "i-state-error",
+  "lucide": "circle-alert",
+  "cat": "state",
+  "added": true
+ },
+ {
+  "id": "i-state-info",
+  "lucide": "info",
+  "cat": "state",
+  "added": true
+ },
+ {
+  "id": "i-state-loading",
+  "lucide": "loader-circle",
+  "cat": "state",
+  "added": true
+ },
+ {
+  "id": "i-state-queued",
+  "lucide": "list-ordered",
+  "cat": "state",
+  "added": true
+ },
+ {
+  "id": "i-file-pdf",
+  "lucide": "file-text",
+  "cat": "file",
+  "added": true
+ },
+ {
+  "id": "i-file-image",
+  "lucide": "file-image",
+  "cat": "file",
+  "added": true
+ },
+ {
+  "id": "i-file-sheet",
+  "lucide": "table",
+  "cat": "file",
+  "added": true
+ },
+ {
+  "id": "i-file-code",
+  "lucide": "code",
+  "cat": "file",
+  "added": true
+ },
+ {
+  "id": "i-file-archive",
+  "lucide": "archive",
+  "cat": "file",
+  "added": true
+ },
+ {
+  "id": "i-file-media",
+  "lucide": "music",
+  "cat": "file",
+  "added": true
+ },
+ {
+  "id": "i-file-text",
+  "lucide": "file-type",
+  "cat": "file",
+  "added": true
+ },
+ {
+  "id": "i-file-terminal",
+  "lucide": "terminal",
+  "cat": "file",
+  "added": true
+ },
+ {
+  "id": "i-obj-key",
+  "lucide": "key-round",
+  "cat": "obj",
+  "added": true
+ },
+ {
+  "id": "i-obj-schedule",
+  "lucide": "calendar-clock",
+  "cat": "obj",
+  "added": true
+ },
+ {
+  "id": "i-obj-integration",
+  "lucide": "plug",
+  "cat": "obj",
+  "added": true
+ },
+ {
+  "id": "i-obj-skill",
+  "lucide": "wand-sparkles",
+  "cat": "obj",
+  "added": true
+ },
+ {
+  "id": "i-obj-model",
+  "lucide": "cpu",
+  "cat": "obj",
+  "added": true
+ },
+ {
+  "id": "i-obj-quota",
+  "lucide": "gauge",
+  "cat": "obj",
+  "added": true
+ },
+ {
+  "id": "i-obj-billing",
+  "lucide": "receipt",
+  "cat": "obj",
+  "added": true
+ },
+ {
+  "id": "i-obj-sandbox",
+  "lucide": "box",
+  "cat": "obj",
+  "added": true
+ },
+ {
+  "id": "i-obj-container",
+  "lucide": "container",
+  "cat": "obj",
+  "added": true
+ },
+ {
+  "id": "i-obj-artifact",
+  "lucide": "package",
+  "cat": "obj",
+  "added": true
+ }
+]
