@@ -537,7 +537,7 @@
     "d3": "不改品牌色以外的顏色",
     "d4": "不把標識當介面圖示用",
     "setTitle": "二 · 圖示系列（68 個）",
-    "setNote": "介面圖示取自 **lucide**（24 網格 · ISC）；**品牌標識 `i-yaoagents` 是我們自建的**，同樣畫在 24 網格上。",
+    "setNote": "介面圖示取自 **lucide**（24 網格 · ISC）；**我們自己的品牌標記自建**：`brand-yao-agents` 與 `brand-yao`（太極），與第三方品牌同族、排在品牌區最前。",
     "spWhat": "規格項",
     "spValue": "值",
     "spGrid": "網格",
@@ -626,7 +626,6 @@
     "brandSearch": "搜尋品牌（deepseek / openai / 通義…）",
     "brandColor": "官方色",
     "brandMono": "單色",
-    "brandOwn": "Yao Agents（我們自己的）",
     "coverBrandNote": "自建 {own} 個（`i-yaoagents`）+ 第三方 {third} 個（`brand-*`，另存獨立雪碧圖）"
   }
 }

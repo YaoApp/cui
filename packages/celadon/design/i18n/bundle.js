@@ -539,7 +539,7 @@ window.CELADON_I18N = {
       "d3": "No colours beyond the brand colour",
       "d4": "Never use the mark as an interface icon",
       "setTitle": "2. Icon set (68)",
-      "setNote": "Interface icons come from **lucide** (24 grid, ISC); the **brand mark, `i-yaoagents`, is drawn by us** and sits on the same 24 grid. Every icon records where it came from.",
+      "setNote": "Interface icons come from **lucide** (24 grid, ISC). Our own marks are drawn by us and belong to the same family as the third party brands: `brand-yao-agents` and `brand-yao` (the taiji), listed first.",
       "spWhat": "Spec",
       "spValue": "Value",
       "spGrid": "Grid",
@@ -628,7 +628,6 @@ window.CELADON_I18N = {
       "brandSearch": "Search brands, try deepseek or openai",
       "brandColor": "Official colour",
       "brandMono": "Mono",
-      "brandOwn": "Yao Agents (ours)",
       "coverBrandNote": "ours {own} (`i-yaoagents`) plus {third} third party (`brand-*`, kept in a separate sprite and referenced externally)"
     }
   },
@@ -1171,7 +1170,7 @@ window.CELADON_I18N = {
       "d3": "ブランド色以外に変えない",
       "d4": "マークを画面アイコンに使わない",
       "setTitle": "2. アイコン一式（68 個）",
-      "setNote": "画面アイコンは **lucide**（24 グリッド・ISC）から。**ブランドマーク `i-yaoagents` は自前**で、同じ 24 グリッドに描いています。",
+      "setNote": "画面アイコンは **lucide**（24 グリッド・ISC）。**自前のブランドマーク**は `brand-yao-agents` と `brand-yao`（太極）で、サードパーティブランドと同じ族として先頭に並びます。",
       "spWhat": "項目",
       "spValue": "値",
       "spGrid": "グリッド",
@@ -1260,7 +1259,6 @@ window.CELADON_I18N = {
       "brandSearch": "ブランドを検索（deepseek / openai など）",
       "brandColor": "公式色",
       "brandMono": "モノ",
-      "brandOwn": "Yao Agents（自前）",
       "coverBrandNote": "自前 {own} 個（`i-yaoagents`）+ サードパーティ {third} 個（`brand-*`、別スプライトを外部参照）"
     }
   },
@@ -1803,7 +1801,7 @@ window.CELADON_I18N = {
       "d3": "不改品牌色以外的颜色",
       "d4": "不把标识当界面图标用",
       "setTitle": "二 · 图标系列（68 个）",
-      "setNote": "界面图标取自 **lucide**（24 网格 · ISC）；**品牌标识 `i-yaoagents` 是我们自建的**，同样画在 24 网格上。每个图标都标着来源。",
+      "setNote": "界面图标取自 **lucide**（24 网格 · ISC）；**我们自己的品牌标记自建**：`brand-yao-agents`（现任标记）与 `brand-yao`（太极，cui 最早的标记），与第三方品牌同族、排在品牌区最前。",
       "spWhat": "规格项",
       "spValue": "值",
       "spGrid": "网格",
@@ -1892,7 +1890,6 @@ window.CELADON_I18N = {
       "brandSearch": "搜索品牌（deepseek / openai / 通义…）",
       "brandColor": "官方色",
       "brandMono": "单色",
-      "brandOwn": "Yao Agents（我们自己的）",
       "coverBrandNote": "自建 {own} 个（`i-yaoagents`）+ 第三方 {third} 个（`brand-*`，另存独立雪碧图，外部引用）"
     }
   },
@@ -2435,7 +2432,7 @@ window.CELADON_I18N = {
       "d3": "不改品牌色以外的顏色",
       "d4": "不把標識當介面圖示用",
       "setTitle": "二 · 圖示系列（68 個）",
-      "setNote": "介面圖示取自 **lucide**（24 網格 · ISC）；**品牌標識 `i-yaoagents` 是我們自建的**，同樣畫在 24 網格上。",
+      "setNote": "介面圖示取自 **lucide**（24 網格 · ISC）；**我們自己的品牌標記自建**：`brand-yao-agents` 與 `brand-yao`（太極），與第三方品牌同族、排在品牌區最前。",
       "spWhat": "規格項",
       "spValue": "值",
       "spGrid": "網格",
@@ -2524,7 +2521,6 @@ window.CELADON_I18N = {
       "brandSearch": "搜尋品牌（deepseek / openai / 通義…）",
       "brandColor": "官方色",
       "brandMono": "單色",
-      "brandOwn": "Yao Agents（我們自己的）",
       "coverBrandNote": "自建 {own} 個（`i-yaoagents`）+ 第三方 {third} 個（`brand-*`，另存獨立雪碧圖）"
     }
   }
