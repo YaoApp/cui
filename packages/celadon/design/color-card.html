@@ -138,7 +138,7 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary
 var GROUPS = [
  ['group.brand', [
    ['--brand','brand','on'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
-   ['--brand-soft','brandSoft','nocr'], ['--brand-display','brandDisplay','nocr'], ['--brand-text','brandText','onbrand'], ['--brand-ink','brandInk'],
+   ['--brand-soft','brandSoft','nocr'], ['--brand-display','brandDisplay','nocr'], ['--brand-text','brandText','on','--brand'], ['--brand-ink','brandInk','on','--brand-soft'],
    ['--brand-lift','brandLift','nocr']]],
  ['group.interaction', [
    ['--focus-ring-color','focusRingColor','on'], ['--focus-ring-width','focusRingWidth'], ['--focus-ring-offset','focusRingOffset'],
@@ -149,12 +149,12 @@ var GROUPS = [
    ['--background-surface','backgroundSurface','nocr'], ['--background-field','backgroundField','nocr'], ['--background-hover','backgroundHover','nocr'],
    ['--background-selected','backgroundSelected','nocr']]],
  ['group.border', [['--border-subtle','borderSubtle','nocr'], ['--border-default','borderDefault','nocr'], ['--border-control','borderControl','nocr'], ['--border-hover','borderHover','nocr']]],
- ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary'], ['--text-placeholder','textPlaceholder'], ['--text-muted','textMuted']]],
+ ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary','on'], ['--text-placeholder','textPlaceholder','on','--background-field'], ['--text-muted','textMuted','on']]],
  ['group.semantic', [
-   ['--success','success','on'], ['--success-soft','successSoft'],
+   ['--success','success','on','--success-soft'], ['--success-soft','successSoft','nocr'],
    ['--warning','warning','on'], ['--warning-soft','warningSoft'],
-   ['--warm','warm','on'], ['--warm-soft','warmSoft'], ['--warm-text','warmText'], ['--warm-contrast','warmContrast','nocr'],
-   ['--danger','danger','on'], ['--danger-soft','dangerSoft']]],
+   ['--warm','warm','on'], ['--warm-soft','warmSoft','nocr'], ['--warm-text','warmText','on','--warm-soft'], ['--warm-contrast','warmContrast','on','--warm'],
+   ['--danger','danger','nocr'], ['--danger-soft','dangerSoft','nocr'], ['--danger-ink','dangerInk','on','--danger-soft']]],
  ['group.metrics', [
    ['--font-family-ui','fontFamilyUi','nocr'], ['--font-family-monospace','fontFamilyMonospace','nocr'],
    ['--font-size-11','fontSize11'], ['--font-size-12','fontSize12'], ['--font-size-13','fontSize13'], ['--font-size-16','fontSize16'],
@@ -215,12 +215,13 @@ function buildPanel(themeName, probeEl, label){
   var V = readAll(probeEl), bg = V['--background-content'];
   var body = GROUPS.map(function(g){
     var rows = g[1].map(function(t){
-      var name = t[0], usageKey = t[1], mode = t[2] || '', val = V[name] || '';
+      var name = t[0], usageKey = t[1], mode = t[2] || '', bgToken = t[3] || '', val = V[name] || '';
+      var bgUse = (bgToken && V[bgToken]) ? V[bgToken] : bg;
       var usage = tr('card.usage.' + usageKey), badge = '', cls = 'dim', long = !isColor(val);
       if (isColor(val)){
         if (mode === 'onbrand'){ var rb = ratio(val, V['--brand']); badge = rb ? rb.toFixed(2)+':1' : '—'; }
-        else if (mode !== 'nocr'){ var r = ratio(val, bg); if (r){ var gd = grade(r); cls = gd[0]; badge = mode === 'on' ? r.toFixed(2)+':1' : gd[1].replace('&lt;','<');
-          if (mode === 'on') CONTRAST_ROWS.push([label, name, val, bg, r.toFixed(2), gd[1].replace('&lt;','<')]); } }
+        else if (mode !== 'nocr'){ var r = ratio(val, bgUse); if (r){ var gd = grade(r); cls = gd[0]; badge = mode === 'on' ? r.toFixed(2)+':1' : gd[1].replace('&lt;','<');
+          if (mode === 'on') CONTRAST_ROWS.push([label, name, val, bgUse, r.toFixed(2), gd[1].replace('&lt;','<')]); } }
       } else { badge = ''; }
       var chip = isColor(val) ? '<span class="chip-color" style="background:'+val+'"></span>' : '<span class="chip-none"></span>';
       var right = isColor(val)
