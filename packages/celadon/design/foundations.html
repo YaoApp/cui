@@ -195,7 +195,10 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .gnh .t{width:64px}
 .gch .l{width:88px} .gch .r{margin-left:auto;width:56px}
 /* 收起导航（轨=0）时：内容区顶行给左上控件让位 —— 红绿灯位置不变，落在内容区头上 */
-.ggrid.nav-none .gch{padding-left:var(--titlebar-inset)}
+.gvp.plt-client .ggrid.nav-none .gch{padding-left:var(--titlebar-inset)}   /* 仅客户端：给左上角的红绿灯+收起键让位 */
+.gvp.plt-web .gcaps{display:none}                                        /* Web 没有红绿灯：不出现左上浮层 */
+.gch .burger{display:none;width:24px;height:18px;border-radius:var(--radius-xs);background:var(--background-field);border:1px solid var(--border-default);cursor:pointer;position:relative}
+.gvp.plt-web .ggrid.nav-none .gch .burger{display:block}                  /* Web 抽屉态：顶行汉堡作为入口 */
 .ghead{flex:none;height:var(--header-height);background:var(--background-navigation);border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px;padding:0 12px}
 .ghead i{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .ghead .l{width:96px} .ghead .r{margin-left:auto;width:64px}
@@ -684,7 +687,7 @@ function renderGrid(theme){
     + '<button type="button" class="tgl" id="gtgl-'+theme+'"></button></div>'
     + '<div class="ggrid" id="ggrid-'+theme+'">'
     + '<div class="gnav" id="gnav-'+theme+'"><div class="gcolhead gnh"><i class="t"></i></div><div class="gbody">'+navs+'</div></div>'
-    + '<div class="gcenter"><div class="gcolhead gch"><i class="l"></i><i class="r"></i></div><div class="gbody"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div></div>'
+    + '<div class="gcenter"><div class="gcolhead gch"><button type="button" class="burger" id="gburger-'+theme+'"></button><i class="l"></i><i class="r"></i></div><div class="gbody"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div></div>'
     + '<div class="gside" id="gside-'+theme+'"><div class="gcolhead gsh"><i class="l"></i></div><div class="gbody">'+sides+'</div></div>'
     + '</div><div class="gscrim" id="gscrim-'+theme+'"></div></div></div>';
   var navModeTbl = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.navTitle'))+'</div><table>'
@@ -712,6 +715,7 @@ function syncGrid(){
     vp.style.width = viewport + 'px';
     vp.style.height = '300px';
     var gnav = document.getElementById('gnav-'+theme);
+    vp.classList.toggle('plt-client', PLATFORM === 0); vp.classList.toggle('plt-web', PLATFORM === 1);
     var ggridEl = document.getElementById('ggrid-'+theme);
     if (ggridEl) ggridEl.classList.toggle('nav-none', L.navTrack === 0);   /* 轨=0：内容顶行给左上控件让位 */
     gnav.style.width = L.navTrack === 0 ? '0px' : '';
@@ -723,6 +727,8 @@ function syncGrid(){
     gnav.style.width = (L.navMode === 'overlay' || L.navMode === 'drawerOpen') ? L.navOverlayW + 'px' : '';
     var scr = document.getElementById('gscrim-'+theme);
     if (scr) scr.classList.toggle('on', !!L.scrim);
+    var bg = document.getElementById('gburger-'+theme);
+    if (bg) { bg.setAttribute('aria-label', tr('f.grid.navExpanded')); bg.setAttribute('aria-expanded', String(!!L.drawer && NAV_MANUAL)); }
     var tg = document.getElementById('gtgl-'+theme);
     if (tg) tg.setAttribute('data-label', tr(NAV_MANUAL ? 'f.grid.navCollapsedBtn' : 'f.grid.navExpanded'));
     document.getElementById('gside-'+theme).style.display = L.side > 0 ? '' : 'none';
@@ -786,6 +792,8 @@ function initGrid(){
   ['light','dark'].forEach(function(theme){
     var tg = document.getElementById('gtgl-'+theme);
     if (tg && !tg.dataset.done){ tg.addEventListener('click', function(){ var b = document.getElementById('gr-navbtn'); if (b) b.click(); }); tg.dataset.done = '1'; }
+    var bg = document.getElementById('gburger-'+theme);
+    if (bg && !bg.dataset.done){ bg.addEventListener('click', function(){ var b = document.getElementById('gr-navbtn'); if (b) b.click(); }); bg.dataset.done = '1'; }
     var scr = document.getElementById('gscrim-'+theme);
     if (scr && !scr.dataset.done){ scr.addEventListener('click', function(){ NAV_MANUAL = false; syncGrid(); }); scr.dataset.done = '1'; }
   });
