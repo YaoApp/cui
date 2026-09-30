@@ -404,8 +404,8 @@ window.CELADON_I18N = {
         "cLow": "Low",
         "cStd": "Standard",
         "cHigh": "High",
-        "sys": "Your system: ",
-        "simulating": "previewing a simulated state"
+        "sysLabel": "System: ",
+        "previewLabel": "Preview: "
       }
     }
   },
@@ -813,8 +813,8 @@ window.CELADON_I18N = {
         "cLow": "低コントラスト",
         "cStd": "標準",
         "cHigh": "高コントラスト",
-        "sys": "お使いのシステム：",
-        "simulating": "模擬状態をプレビュー中"
+        "sysLabel": "システム：",
+        "previewLabel": "プレビュー："
       }
     }
   },
@@ -1222,8 +1222,8 @@ window.CELADON_I18N = {
         "cLow": "低对比",
         "cStd": "标准",
         "cHigh": "高对比",
-        "sys": "你的系统：",
-        "simulating": "正在预览模拟状态"
+        "sysLabel": "系统：",
+        "previewLabel": "预览："
       }
     }
   },
@@ -1631,8 +1631,8 @@ window.CELADON_I18N = {
         "cLow": "低對比",
         "cStd": "標準",
         "cHigh": "高對比",
-        "sys": "你的系統：",
-        "simulating": "正在預覽模擬狀態"
+        "sysLabel": "系統：",
+        "previewLabel": "預覽："
       }
     }
   }

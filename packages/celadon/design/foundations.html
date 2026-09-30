@@ -263,6 +263,14 @@ var PROBE = { light: document.getElementById('probe-light'), dark: document.getE
 var PREF = { motion:'std', contrast:'std' };          /* std 之外都是"预览模拟" */
 function sysRM(){ return window.matchMedia('(prefers-reduced-motion: reduce)').matches }
 function rmOn(){ return PREF.motion === 'low' || sysRM() }
+/* 系统真实偏好（用于和"预览值"分开显示，避免两句话看着自相矛盾） */
+function sysContrast(){ return window.matchMedia('(prefers-contrast: more)').matches ? 'cHigh'
+  : (window.matchMedia('(prefers-contrast: less)').matches ? 'cLow' : 'cStd'); }
+function prefNote(sysKey, simKey){
+  var out = tr('f.pref.sysLabel') + tr('f.pref.' + sysKey);
+  if (simKey) out += ' · ' + tr('f.pref.previewLabel') + tr('f.pref.' + simKey);
+  return out;
+}
 function segHtml(group, opts, cur){
   return opts.map(function(o){ return '<button class="seg'+(o[0]===cur?' on':'')+'" type="button" data-pref="'+group+'" data-level="'+o[0]+'">'+esc(tr(o[1]))+'</button>'; }).join('');
 }
@@ -275,14 +283,16 @@ function applyPrefs(){
   if (l1){
     l1.textContent = tr('f.pref.motionLabel');
     document.getElementById('mo-pref').innerHTML = segHtml('motion', [['low','f.pref.mLow'],['std','f.pref.mStd'],['rich','f.pref.mRich']], PREF.motion);
-    document.getElementById('mo-pref-note').textContent = tr('f.pref.sys') + (sysRM() ? tr('f.pref.mLow') : tr('f.pref.mStd'))
-      + (PREF.motion !== 'std' ? ' · ' + tr('f.pref.simulating') : '');
+    document.getElementById('mo-pref-note').textContent = prefNote(
+      sysRM() ? 'mLow' : 'mStd',
+      PREF.motion === 'std' ? null : (PREF.motion === 'low' ? 'mLow' : 'mRich'));
   }
   var l2 = document.getElementById('bd-pref-label');
   if (l2){
     l2.textContent = tr('f.pref.contrastLabel');
     document.getElementById('bd-pref').innerHTML = segHtml('contrast', [['low','f.pref.cLow'],['std','f.pref.cStd'],['high','f.pref.cHigh']], PREF.contrast);
-    document.getElementById('bd-pref-note').textContent = PREF.contrast !== 'std' ? tr('f.pref.simulating') : '';
+    document.getElementById('bd-pref-note').textContent = prefNote(
+      sysContrast(), PREF.contrast === 'std' ? null : (PREF.contrast === 'low' ? 'cLow' : 'cHigh'));
   }
 }
 function tok(name, theme){ return getComputedStyle(PROBE[theme]).getPropertyValue(name).trim(); }

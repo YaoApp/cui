@@ -402,8 +402,8 @@
       "cLow": "低对比",
       "cStd": "标准",
       "cHigh": "高对比",
-      "sys": "你的系统：",
-      "simulating": "正在预览模拟状态"
+      "sysLabel": "系统：",
+      "previewLabel": "预览："
     }
   }
 }
