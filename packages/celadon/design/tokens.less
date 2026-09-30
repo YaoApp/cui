@@ -125,6 +125,8 @@
   --duration-fast:120ms; --duration-base:200ms; --duration-slow:320ms;
   --easing:cubic-bezier(.4,0,.2,1);
   --easing-standard:cubic-bezier(.4,0,.2,1);
+  /* 动效强度"丰富"档（产品级偏好，非系统）：位移更大、时长更长 */
+  --duration-fast-rich:180ms; --duration-base-rich:300ms; --duration-slow-rich:480ms;
   --easing-decelerate:cubic-bezier(0,0,.2,1);
   --easing-accelerate:cubic-bezier(.4,0,1,1);
 
@@ -146,6 +148,9 @@
      达标实测：内容底 3.31 / 字段底 3.14 */
   --border-control-strong:#8D8A80;
   --border-hover-strong:#847F73;
+  /* 降低对比偏好档（prefers-contrast: less）：边界更淡 */
+  --border-control-low:#D5D3CC;
+  --border-hover-low:#C2BEB4;
   --column-header-height:40px;
   --row-height:40px;
 }
@@ -213,6 +218,8 @@
   /* 强边界档（暗）：内容底 3.98 / 字段底 3.47 ✓ */
   --border-control-strong:#7C776B;
   --border-hover-strong:#827D70;
+  --border-control-low:#3E3C36;
+  --border-hover-low:#474540;
 }
 
 /* ===== 减动效：系统偏好开启时，全部时长归零（组件无需各自处理）===== */
@@ -220,6 +227,15 @@
   :root, .celadon,
   .celadon[data-theme='dark'], [data-theme='dark'] .celadon {
     --duration-fast:0.01ms; --duration-base:0.01ms; --duration-slow:0.01ms;
+  }
+}
+
+/* ===== 降低对比偏好：控件边界更淡（与"高对比"同一机制）===== */
+@media (prefers-contrast: less) {
+  :root, .celadon,
+  .celadon[data-theme='dark'], [data-theme='dark'] .celadon {
+    --border-control:var(--border-control-low);
+    --border-hover:var(--border-hover-low);
   }
 }
 
