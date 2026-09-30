@@ -145,5 +145,10 @@ node packages/celadon/design/serve.mjs 8080     # 零依赖，推荐
 
 ```bash
 node packages/celadon/scripts/build-css.mjs   # tokens.less → tokens.css
+```
+> **前置**：`build-css` 需要 **less**（优先用本仓库的 `node_modules/less`，否则用全局 `lessc`）。
+> 干净克隆里若两者都没有，它会明确报「既无 less 模块也无 lessc 二进制」并以非 0 退出 —— 产物 `tokens.css` 已提交，**不装 less 也能跑全部检查**。
+```
+
 node packages/celadon/scripts/build-i18n.mjs  # i18n/*.json → bundle.js
 ```

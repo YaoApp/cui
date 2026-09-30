@@ -26,6 +26,10 @@ const PAGES = readdirSync('.').filter((f) => f.endsWith('.html') && !LEGACY.has(
    · 几何值（50% / 100% / 0）与关键字 */
 const ALLOW = new Set(['transparent', 'none', 'inherit', 'currentColor', '50%', '100%', '0', 'auto',
   '#FF5F57', '#FEBC2E', '#28C840', '#0B0B0B']);
+if (PAGES.length === 0) {
+  console.log('✗ 没有找到可检查的页面 —— 目标目录不对？(目标：' + TARGET + ')')
+  process.exit(1)
+}
 let bad = [];
 for (const f of PAGES) {
   const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
