@@ -49,10 +49,11 @@
 设计资产是纯静态的，起一个本地服务器最方便（入口页 [index.html](index.html) 汇总了色卡 / 界面稿 / 图标 / Logo）：
 
 ```bash
-python3 -m http.server 8080 --directory packages/celadon/design
-# 然后打开 http://127.0.0.1:8080/
+node packages/celadon/design/serve.mjs 8080     # 零依赖，推荐
+# 然后打开 http://127.0.0.1:8080/  （局域网用 http://<本机IP>:8080/）
 ```
 
+> **为什么不用 `python3 -m http.server`**：它不发 `Cache-Control`，浏览器会启发式缓存 `tokens.css` / `bundle.js` —— 改完 token 刷新还是旧样式（"我改了但看不出变化"）。本服务器一律 `no-store`，改完刷新即见，并支持目录浏览（如 `/icons/`）。
 > 也可以直接用浏览器打开 `color-card.html` / `mock.html`（`file://` 亦可，产物已随包）。
 
 - **暗色 = 暖墨（松烟墨）**：暗面不再是纯黑（`#080808/#101010` 会在 OLED 上产生光晕），改为暖墨阶梯 `#121110 → #191816 → #1F1E1A`（内容底 `#191816`），文字用暖白 `#F4F1EA`；
