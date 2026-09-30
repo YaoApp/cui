@@ -28,6 +28,12 @@ h3{margin:18px 0 6px;font-size:var(--font-size-body);font-weight:var(--font-weig
 table{width:100%;border-collapse:collapse;font-size:var(--font-size-body)}
 th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border-subtle);vertical-align:top}
 th{font-weight:var(--font-weight-strong);color:var(--text-secondary);font-size:var(--font-size-caption)}
+/* 标签列不换行：「文件类型」「对象 / 领域」「端点 / 拐角」这类短标签不该被挤成两行；
+   宽度让给内容列（语义名 / 规则说明）。品牌表首列是长句，保持可换行。 */
+#ic-coverTbl td:first-child,#ic-coverTbl th:first-child,
+#ic-specTbl td:first-child,#ic-specTbl th:first-child,
+#ic-ruleTbl td:first-child,#ic-ruleTbl th:first-child{white-space:nowrap}
+#ic-coverTbl td:last-child{overflow-wrap:anywhere}
 code{font-family:var(--font-family-monospace);font-size:var(--font-size-caption);background:var(--background-field);padding:1px 5px;border-radius:var(--radius-xs)}
 .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 12px}
 .toolbar input[type=search]{font-family:inherit;font-size:var(--font-size-body);padding:5px 10px;border-radius:var(--radius-small);
