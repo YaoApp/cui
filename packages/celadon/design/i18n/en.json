@@ -537,7 +537,7 @@
     "d3": "No colours beyond the brand colour",
     "d4": "Never use the mark as an interface icon",
     "setTitle": "2. Icon set (68)",
-    "setNote": "Interface icons come from **lucide** (24 grid, ISC); the **brand mark, `i-yaoagents`, is drawn by us** and sits on the same 24 grid. Every icon records where it came from.",
+    "setNote": "Interface icons come from **lucide** (24 grid, ISC). Our own marks are drawn by us and belong to the same family as the third party brands: `brand-yao-agents` and `brand-yao` (the taiji), listed first.",
     "spWhat": "Spec",
     "spValue": "Value",
     "spGrid": "Grid",
@@ -626,7 +626,6 @@
     "brandSearch": "Search brands, try deepseek or openai",
     "brandColor": "Official colour",
     "brandMono": "Mono",
-    "brandOwn": "Yao Agents (ours)",
     "coverBrandNote": "ours {own} (`i-yaoagents`) plus {third} third party (`brand-*`, kept in a separate sprite and referenced externally)"
   }
 }

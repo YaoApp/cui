@@ -402,15 +402,27 @@
   "src": "package"
  },
  {
-  "id": "i-yaoagents",
+  "id": "brand-yao-agents",
   "lib": "own",
   "cat": "brand",
-  "src": "brand-mark"
+  "src": "yao-agents"
  },
  {
-  "id": "i-yaoagents-mono",
+  "id": "brand-yao-agents-mono",
   "lib": "own",
   "cat": "brand",
-  "src": "brand-mark-mono"
+  "src": "yao-agents-mono"
+ },
+ {
+  "id": "brand-yao",
+  "lib": "own",
+  "cat": "brand",
+  "src": "yao-alpha"
+ },
+ {
+  "id": "brand-yao-mono",
+  "lib": "own",
+  "cat": "brand",
+  "src": "yao-alpha-mono"
  }
 ]
