@@ -283,5 +283,78 @@
     "gradeFail": "Below AA",
     "contrastLegend": "Level: AAA >= 7:1 - AA >= 4.5:1 (body text) - large text or graphics >= 3:1 - below AA < 3:1. Anything under 4.5:1 must not carry body text.",
     "reasonNote": "\"Fill / border / overlay / dark only\" are not judged for text contrast (see key pairs for real usage); \"disabled (exempt)\" follows the WCAG exemption for disabled controls."
+  },
+  "f": {
+    "title": "Foundations · Spacing · Radius · Elevation · Motion · Border",
+    "subtitle": "The P0 gaps: the baseline every page shares. Light on the left, dark on the right; values are read from tokens.css live.",
+    "source": "Single source: tokens.less to build-css.mjs to tokens.css. Every value and colour on this page is read live; nothing is hardcoded.",
+    "langnote": "Copy follows the language switch; values and colours do not.",
+    "spacing": {
+      "title": "Spacing",
+      "note": "Multiples of 4; no magic numbers. The larger the step, the more outer the spacing.",
+      "scale": "Scale",
+      "usage": "Usage (allowed steps)",
+      "example": "Example: card padding 16, title to body 8, gap between buttons 12",
+      "u1": "Inside a control (padding)",
+      "u2": "Between sibling elements (gap)",
+      "u3": "Between sections",
+      "u4": "Grid gutter"
+    },
+    "radius": {
+      "title": "Radius",
+      "note": "Four steps: the larger the element, the larger the radius.",
+      "usage": "Usage",
+      "r1": "Buttons, inputs, small controls",
+      "r2": "Cards, panels, popovers",
+      "r3": "Large containers, images",
+      "r4": "Tags, pill buttons, avatar badges"
+    },
+    "elevation": {
+      "title": "Elevation and shadow",
+      "note": "A level is defined by shadow plus z-index; the scrim belongs to L3 only.",
+      "levels": "Level examples",
+      "table": "Level reference",
+      "lv0": "L0 base",
+      "lv1": "L1 raised",
+      "lv2": "L2 floating",
+      "lv3": "L3 overlay",
+      "colLevel": "Level",
+      "colShadow": "Shadow token",
+      "colZ": "z-index",
+      "colUse": "Used for",
+      "use0": "Flush with content (table rows, lists)",
+      "use1": "Cards, tabs, badges",
+      "use2": "Dropdowns, popovers, floating panels",
+      "use3": "Modals, drawers, toasts (with --scrim)",
+      "useSticky": "Sticky toolbars and section headers"
+    },
+    "motion": {
+      "title": "Motion",
+      "note": "Duration by distance and importance; ease in with decelerate, out with accelerate.",
+      "scale": "Duration",
+      "curves": "Easing curves",
+      "play": "Play",
+      "rules": "Rules",
+      "r1": "Animate: panel open/close, dropdowns, press feedback, loading, streaming output, state changes.",
+      "r2": "Do not animate: scroll-follow, text reflow, frequent repeated micro-interactions.",
+      "r3": "Animate transform and opacity only (never width, height, top or left).",
+      "r4": "Reduced motion: when the system asks for less motion every duration collapses to zero inside tokens.less, so components need no special case.",
+      "reducedOn": "System preference: reduce motion - active (durations are zero)",
+      "reducedOff": "System preference: normal motion"
+    },
+    "border": {
+      "title": "Border (with the WCAG 1.4.11 decision)",
+      "note": "The field fill is only 1.05:1 from the content background, so the border is the only thing identifying an input, and 1.4.11 asks for 3:1.",
+      "ramp": "Border ramp (measured contrast)",
+      "on": "on field / on content",
+      "demo": "Example: text input",
+      "demoDefault": "Default (light border, calm look)",
+      "demoStrong": "High contrast preference (strong border, meets 1.4.11)",
+      "decision": "Decision",
+      "d1": "Keep the light border by default, for looks;",
+      "d2": "Ship --border-control-strong and --border-hover-strong for the compliant look;",
+      "d3": "When the system asks for more contrast, a media query in tokens.less switches automatically (verified in both themes).",
+      "deviation": "This is a deliberate deviation: the default does not literally meet 1.4.11. If strict conformance is needed, point --border-control at the strong value - a one line change."
+    }
   }
 }

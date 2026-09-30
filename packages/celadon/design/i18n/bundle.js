@@ -285,6 +285,79 @@ window.CELADON_I18N = {
       "gradeFail": "Below AA",
       "contrastLegend": "Level: AAA >= 7:1 - AA >= 4.5:1 (body text) - large text or graphics >= 3:1 - below AA < 3:1. Anything under 4.5:1 must not carry body text.",
       "reasonNote": "\"Fill / border / overlay / dark only\" are not judged for text contrast (see key pairs for real usage); \"disabled (exempt)\" follows the WCAG exemption for disabled controls."
+    },
+    "f": {
+      "title": "Foundations · Spacing · Radius · Elevation · Motion · Border",
+      "subtitle": "The P0 gaps: the baseline every page shares. Light on the left, dark on the right; values are read from tokens.css live.",
+      "source": "Single source: tokens.less to build-css.mjs to tokens.css. Every value and colour on this page is read live; nothing is hardcoded.",
+      "langnote": "Copy follows the language switch; values and colours do not.",
+      "spacing": {
+        "title": "Spacing",
+        "note": "Multiples of 4; no magic numbers. The larger the step, the more outer the spacing.",
+        "scale": "Scale",
+        "usage": "Usage (allowed steps)",
+        "example": "Example: card padding 16, title to body 8, gap between buttons 12",
+        "u1": "Inside a control (padding)",
+        "u2": "Between sibling elements (gap)",
+        "u3": "Between sections",
+        "u4": "Grid gutter"
+      },
+      "radius": {
+        "title": "Radius",
+        "note": "Four steps: the larger the element, the larger the radius.",
+        "usage": "Usage",
+        "r1": "Buttons, inputs, small controls",
+        "r2": "Cards, panels, popovers",
+        "r3": "Large containers, images",
+        "r4": "Tags, pill buttons, avatar badges"
+      },
+      "elevation": {
+        "title": "Elevation and shadow",
+        "note": "A level is defined by shadow plus z-index; the scrim belongs to L3 only.",
+        "levels": "Level examples",
+        "table": "Level reference",
+        "lv0": "L0 base",
+        "lv1": "L1 raised",
+        "lv2": "L2 floating",
+        "lv3": "L3 overlay",
+        "colLevel": "Level",
+        "colShadow": "Shadow token",
+        "colZ": "z-index",
+        "colUse": "Used for",
+        "use0": "Flush with content (table rows, lists)",
+        "use1": "Cards, tabs, badges",
+        "use2": "Dropdowns, popovers, floating panels",
+        "use3": "Modals, drawers, toasts (with --scrim)",
+        "useSticky": "Sticky toolbars and section headers"
+      },
+      "motion": {
+        "title": "Motion",
+        "note": "Duration by distance and importance; ease in with decelerate, out with accelerate.",
+        "scale": "Duration",
+        "curves": "Easing curves",
+        "play": "Play",
+        "rules": "Rules",
+        "r1": "Animate: panel open/close, dropdowns, press feedback, loading, streaming output, state changes.",
+        "r2": "Do not animate: scroll-follow, text reflow, frequent repeated micro-interactions.",
+        "r3": "Animate transform and opacity only (never width, height, top or left).",
+        "r4": "Reduced motion: when the system asks for less motion every duration collapses to zero inside tokens.less, so components need no special case.",
+        "reducedOn": "System preference: reduce motion - active (durations are zero)",
+        "reducedOff": "System preference: normal motion"
+      },
+      "border": {
+        "title": "Border (with the WCAG 1.4.11 decision)",
+        "note": "The field fill is only 1.05:1 from the content background, so the border is the only thing identifying an input, and 1.4.11 asks for 3:1.",
+        "ramp": "Border ramp (measured contrast)",
+        "on": "on field / on content",
+        "demo": "Example: text input",
+        "demoDefault": "Default (light border, calm look)",
+        "demoStrong": "High contrast preference (strong border, meets 1.4.11)",
+        "decision": "Decision",
+        "d1": "Keep the light border by default, for looks;",
+        "d2": "Ship --border-control-strong and --border-hover-strong for the compliant look;",
+        "d3": "When the system asks for more contrast, a media query in tokens.less switches automatically (verified in both themes).",
+        "deviation": "This is a deliberate deviation: the default does not literally meet 1.4.11. If strict conformance is needed, point --border-control at the strong value - a one line change."
+      }
     }
   },
   "ja": {
@@ -572,6 +645,79 @@ window.CELADON_I18N = {
       "gradeFail": "AA 未満",
       "contrastLegend": "等級：AAA ≥7:1 · AA ≥4.5:1（本文）· 大サイズ文字・図形 ≥3:1 · AA 未満 <3:1。4.5:1 未満は本文に使用しないこと。",
       "reasonNote": "「塗り / 境界線 / オーバーレイ / 暗色のみ」は文字コントラスト判定の対象外（実際の用法は「主要な組み合わせ」参照）。「無効（免除）」は WCAG の無効コントロール免除に準拠。"
+    },
+    "f": {
+      "title": "Foundations · 余白 · 角丸 · 階層 · モーション · 境界線",
+      "subtitle": "P0 の不足分：全ページ共通の基準です。左がライト、右がダーク。数値は tokens.css からリアルタイムに読み込みます。",
+      "source": "単一の source：tokens.less → build-css.mjs → tokens.css。本ページの数値と色はすべてリアルタイムに読み込み、ハードコードはありません。",
+      "langnote": "文言は言語切替に追随し、数値と色は変わりません。",
+      "spacing": {
+        "title": "余白 Spacing",
+        "note": "4 の倍数。魔法の数値は禁止。大きい段階ほど外側の余白に使います。",
+        "scale": "スケール",
+        "usage": "用途（使用できる段階）",
+        "example": "例：カード内側 16 · 見出しと本文 8 · ボタン間 12",
+        "u1": "コントロール内側（padding）",
+        "u2": "要素間（同じ組の gap）",
+        "u3": "セクション間",
+        "u4": "グリッドの溝（gutter）"
+      },
+      "radius": {
+        "title": "角丸 Radius",
+        "note": "4 段階。要素が大きいほど角丸も大きくします。",
+        "usage": "用途",
+        "r1": "ボタン・入力欄・小さな部品",
+        "r2": "カード・パネル・ポップオーバー",
+        "r3": "大きな容器・画像",
+        "r4": "タグ・ピルボタン・アバターのバッジ"
+      },
+      "elevation": {
+        "title": "影と階層 Elevation",
+        "note": "階層は影と z-index の組で決まります。スクリムは L3 のみ。",
+        "levels": "階層の例",
+        "table": "階層の対応",
+        "lv0": "L0 base",
+        "lv1": "L1 raised",
+        "lv2": "L2 floating",
+        "lv3": "L3 overlay",
+        "colLevel": "階層",
+        "colShadow": "影の token",
+        "colZ": "z-index",
+        "colUse": "用途",
+        "use0": "内容と同一面（表の行・リスト）",
+        "use1": "カード・タブ・バッジ",
+        "use2": "ドロップダウン・ポップオーバー・浮遊パネル",
+        "use3": "モーダル・ドロワー・トースト（--scrim と併用）",
+        "useSticky": "追従するツールバー・セクション見出し"
+      },
+      "motion": {
+        "title": "モーション Motion",
+        "note": "時間は移動量と重要度で分けます。進入は decelerate、退出は accelerate。",
+        "scale": "時間",
+        "curves": "イージング曲線",
+        "play": "再生",
+        "rules": "ルール",
+        "r1": "動かす：パネルの開閉、ドロップダウン、押下の反応、読み込み、ストリーミング出力、状態の切替。",
+        "r2": "動かさない：スクロール追随、テキストの再配置、頻繁に繰り返す小さな動き。",
+        "r3": "動かすのは transform と opacity のみ（width・height・top・left は不可）。",
+        "r4": "動きを減らす設定では、tokens.less 側で時間を一括してゼロにします（各コンポーネントでの対応は不要）。",
+        "reducedOn": "システム設定：動きを減らす —— 有効（時間はゼロ）",
+        "reducedOff": "システム設定：通常のモーション"
+      },
+      "border": {
+        "title": "境界線 Border（WCAG 1.4.11 の判断を含む）",
+        "note": "入力欄の背景は内容背景と 1.05:1 しか違わないため、境界線が入力欄を識別する唯一の手がかりです。1.4.11 は 3:1 を求めます。",
+        "ramp": "境界線の段階（実測コントラスト）",
+        "on": "入力欄背景 / 内容背景",
+        "demo": "例：テキスト入力",
+        "demoDefault": "既定（弱い境界線・軽い見た目）",
+        "demoStrong": "高コントラスト設定（強い境界線・1.4.11 適合）",
+        "decision": "判断",
+        "d1": "既定は弱い境界線を維持（見た目を優先）。",
+        "d2": "適合値として --border-control-strong / --border-hover-strong を用意。",
+        "d3": "システムが高コントラストを求めた場合、tokens.less のメディアクエリで自動的に切り替わります（ライト・ダーク両方で検証済み）。",
+        "deviation": "これは意図的な逸脱です。既定では 1.4.11 の文字どおりの要件を満たしません。厳密に適合させる場合は --border-control を強い値に向けるだけです（1 行の変更）。"
+      }
     }
   },
   "zh-CN": {
@@ -859,6 +1005,79 @@ window.CELADON_I18N = {
       "gradeFail": "不达标",
       "contrastLegend": "等级：AAA ≥7:1 · AA ≥4.5:1（正文标准）· 大字/图形 ≥3:1 · 不达标 <3:1；正文低于 4.5:1 不能用于正文。",
       "reasonNote": "「填充 / 边界 / 遮罩 / 仅暗色」不参与文字对比度判定（用法见「关键配对」）；「禁用豁免」按 WCAG 对禁用控件豁免。"
+    },
+    "f": {
+      "title": "Foundations · 间距 · 圆角 · 层级 · 动效 · 边框",
+      "subtitle": "P0 补齐项：所有页面的前置基线。左列浅色 / 右列暗色，数值实时读 tokens.css。",
+      "source": "单一来源：tokens.less → build-css.mjs → tokens.css。本页所有数值与颜色均实时读取，零硬编码。",
+      "langnote": "文案随语言切换；数值与颜色不随语言变化。",
+      "spacing": {
+        "title": "间距 Spacing",
+        "note": "4 的倍数；禁魔法数字。档位越大用于越外层的间距。",
+        "scale": "刻度",
+        "usage": "用法（允许档位）",
+        "example": "实例：卡片内距 16 · 标题与正文 8 · 按钮间 12",
+        "u1": "组件内距（控件 padding）",
+        "u2": "元素间（同组 gap）",
+        "u3": "区块间（section）",
+        "u4": "栅格槽宽（gutter）"
+      },
+      "radius": {
+        "title": "圆角 Radius",
+        "note": "四档，按\"元素越大圆角越大\"取值。",
+        "usage": "用法",
+        "r1": "按钮 · 输入框 · 小控件",
+        "r2": "卡片 · 面板 · 弹层",
+        "r3": "大容器 · 图片",
+        "r4": "标签 · 胶囊按钮 · 头像角标"
+      },
+      "elevation": {
+        "title": "阴影与层级 Elevation",
+        "note": "层级由阴影 + z-index 共同定义；遮罩只用于 L3。",
+        "levels": "层级示例",
+        "table": "层级对照",
+        "lv0": "L0 base",
+        "lv1": "L1 raised",
+        "lv2": "L2 floating",
+        "lv3": "L3 overlay",
+        "colLevel": "层级",
+        "colShadow": "阴影 token",
+        "colZ": "z-index",
+        "colUse": "用于",
+        "use0": "贴合内容（表格行 / 列表）",
+        "use1": "卡片 / 标签页 / 徽标",
+        "use2": "下拉 / 气泡 / 悬浮面板",
+        "use3": "弹窗 / 抽屉 / 通知（配 --scrim）",
+        "useSticky": "吸顶工具条 / 分节标题"
+      },
+      "motion": {
+        "title": "动效 Motion",
+        "note": "时长按位移与重要性分档；进场 decelerate、退场 accelerate。",
+        "scale": "时长",
+        "curves": "缓动曲线",
+        "play": "播放",
+        "rules": "规则",
+        "r1": "该动：面板展开/收起、下拉出现、按下反馈、加载、流式输出、状态切换。",
+        "r2": "不该动：滚动跟随、文字重排、频繁重复的微交互（会晕）。",
+        "r3": "只动 transform / opacity（不动 width/height/top/left）。",
+        "r4": "减动效：开启系统\"减少动态效果\"后全部时长归零（tokens.less 内统一处理，组件无需各自判断）。",
+        "reducedOn": "当前系统偏好：减少动态效果 —— 已降级（时长归零）",
+        "reducedOff": "当前系统偏好：正常动效"
+      },
+      "border": {
+        "title": "边框 Border（含 WCAG 1.4.11 决策）",
+        "note": "字段底与内容底只差 1.05:1，所以边框是输入框唯一的识别手段 —— 1.4.11 要求 3:1。",
+        "ramp": "边界梯度（实测对比度）",
+        "on": "字段底 / 内容底",
+        "demo": "实例：输入框",
+        "demoDefault": "默认（弱边界，观感轻）",
+        "demoStrong": "高对比偏好（强边界，1.4.11 达标）",
+        "decision": "决策",
+        "d1": "默认态保留弱边界（观感优先）；",
+        "d2": "提供 --border-control-strong / --border-hover-strong 达标档；",
+        "d3": "系统开启\"高对比\"时由 tokens.less 的媒体查询自动切换（浅/暗均已实测生效）。",
+        "deviation": "这是一处**有意偏离**：默认态不满足 1.4.11 的字面要求；如需严格达标，把 --border-control 直接指向强边界即可（一行改动）。"
+      }
     }
   },
   "zh-TW": {
@@ -1146,6 +1365,79 @@ window.CELADON_I18N = {
       "gradeFail": "不達標",
       "contrastLegend": "等級：AAA ≥7:1 · AA ≥4.5:1（正文標準）· 大字/圖形 ≥3:1 · 不達標 <3:1；正文低於 4.5:1 不能用於正文。",
       "reasonNote": "「填充 / 邊界 / 遮罩 / 僅暗色」不參與文字對比度判定（用法見「關鍵配對」）；「停用豁免」依 WCAG 對停用控件豁免。"
+    },
+    "f": {
+      "title": "Foundations · 間距 · 圓角 · 層級 · 動效 · 邊框",
+      "subtitle": "P0 補齊項：所有頁面的前置基線。左欄淺色 / 右欄暗色，數值即時讀取 tokens.css。",
+      "source": "單一來源：tokens.less → build-css.mjs → tokens.css。本頁所有數值與顏色均即時讀取，零硬編碼。",
+      "langnote": "文案隨語言切換；數值與顏色不隨語言變化。",
+      "spacing": {
+        "title": "間距 Spacing",
+        "note": "4 的倍數；禁魔法數字。檔位越大用於越外層的間距。",
+        "scale": "刻度",
+        "usage": "用法（允許檔位）",
+        "example": "實例：卡片內距 16 · 標題與正文 8 · 按鈕間 12",
+        "u1": "元件內距（控制項 padding）",
+        "u2": "元素間（同組 gap）",
+        "u3": "區塊間（section）",
+        "u4": "柵格槽寬（gutter）"
+      },
+      "radius": {
+        "title": "圓角 Radius",
+        "note": "四檔，按「元素越大圓角越大」取值。",
+        "usage": "用法",
+        "r1": "按鈕 · 輸入框 · 小元件",
+        "r2": "卡片 · 面板 · 彈層",
+        "r3": "大容器 · 圖片",
+        "r4": "標籤 · 膠囊按鈕 · 頭像角標"
+      },
+      "elevation": {
+        "title": "陰影與層級 Elevation",
+        "note": "層級由陰影 + z-index 共同定義；遮罩只用於 L3。",
+        "levels": "層級示例",
+        "table": "層級對照",
+        "lv0": "L0 base",
+        "lv1": "L1 raised",
+        "lv2": "L2 floating",
+        "lv3": "L3 overlay",
+        "colLevel": "層級",
+        "colShadow": "陰影 token",
+        "colZ": "z-index",
+        "colUse": "用於",
+        "use0": "貼合內容（表格列 / 清單）",
+        "use1": "卡片 / 分頁標籤 / 徽標",
+        "use2": "下拉 / 氣泡 / 懸浮面板",
+        "use3": "彈窗 / 抽屜 / 通知（配 --scrim）",
+        "useSticky": "吸頂工具列 / 分節標題"
+      },
+      "motion": {
+        "title": "動效 Motion",
+        "note": "時長按位移與重要性分檔；進場 decelerate、退場 accelerate。",
+        "scale": "時長",
+        "curves": "緩動曲線",
+        "play": "播放",
+        "rules": "規則",
+        "r1": "該動：面板展開/收合、下拉出現、按下回饋、載入、串流輸出、狀態切換。",
+        "r2": "不該動：捲動跟隨、文字重排、頻繁重複的微互動（會暈）。",
+        "r3": "只動 transform / opacity（不動 width/height/top/left）。",
+        "r4": "減動效：開啟系統「減少動態效果」後全部時長歸零（tokens.less 內統一處理，元件無需各自判斷）。",
+        "reducedOn": "目前系統偏好：減少動態效果 —— 已降級（時長歸零）",
+        "reducedOff": "目前系統偏好：正常動效"
+      },
+      "border": {
+        "title": "邊框 Border（含 WCAG 1.4.11 決策）",
+        "note": "欄位底與內容底只差 1.05:1，所以邊框是輸入框唯一的識別手段 —— 1.4.11 要求 3:1。",
+        "ramp": "邊界梯度（實測對比度）",
+        "on": "欄位底 / 內容底",
+        "demo": "實例：輸入框",
+        "demoDefault": "預設（弱邊界，觀感輕）",
+        "demoStrong": "高對比偏好（強邊界，1.4.11 達標）",
+        "decision": "決策",
+        "d1": "預設態保留弱邊界（觀感優先）；",
+        "d2": "提供 --border-control-strong / --border-hover-strong 達標檔；",
+        "d3": "系統開啟「高對比」時由 tokens.less 的媒體查詢自動切換（淺/暗均已實測生效）。",
+        "deviation": "這是一處**有意偏離**：預設態不滿足 1.4.11 的字面要求；如需嚴格達標，把 --border-control 直接指向強邊界即可（一行改動）。"
+      }
     }
   }
 };
