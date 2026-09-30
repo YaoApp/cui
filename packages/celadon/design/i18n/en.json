@@ -536,7 +536,7 @@
     "d2": "No rotation, mirroring or squashing",
     "d3": "No colours beyond the brand colour",
     "d4": "Never use the mark as an interface icon",
-    "setTitle": "2. Icon set (68)",
+    "setTitle": "2. Icon set ({n})",
     "setNote": "Interface icons come from **lucide** (24 grid, ISC). Our own marks are drawn by us and belong to the same family as the third party brands: `brand-yao-agents` and `brand-yao` (the taiji), listed first.",
     "spWhat": "Spec",
     "spValue": "Value",
