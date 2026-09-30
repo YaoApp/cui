@@ -207,7 +207,7 @@
       "textSecondary": "次要文字",
       "textTertiary": "第三級",
       "textPlaceholder": "輸入佔位文字（與三級文字同色）",
-      "textMuted": "佔位/弱化",
+      "textMuted": "純裝飾（分隔符／浮水印；不承載文字）",
       "success": "成功（松花綠 · 傳統色）",
       "successSoft": "成功軟底",
       "warning": "警示（= --warm 別名）",
@@ -272,7 +272,8 @@
       "line": "邊界",
       "overlay": "遮罩",
       "dark": "僅暗色",
-      "exempt": "停用豁免"
+      "exempt": "停用豁免",
+      "deco": "裝飾"
     },
     "gradeAaa": "AAA",
     "gradeAa": "AA",
