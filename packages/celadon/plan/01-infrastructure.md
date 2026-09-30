@@ -28,7 +28,7 @@
 | 13 | **长列表与表格** | **`virtua`** —— 长列表用 `VList`/`Virtualizer`（容器与行渲染归我们；索引 ↔ 偏移双向可查；尺寸缓存可存可恢复）；**表格类用 `VGrid`**（二维 · 固定表头/列）|
 | 14 | **状态管理** | **`zustand`**（不用 mobx；自研的 `storex` 不复活）|
 | 15 | **动效** | **CSS 与浏览器原生为默认**（时长/缓动走 Celadon token）；**`motion`** 只在它更强处用（手势 · 编排 · 布局动画）|
-| 16 | **测试** | **`vitest` + `@testing-library/react` + `user-event` + `jsdom` + `coverage-v8` + `@playwright/test`**；**`*.test.ts(x)` 就近放** |
+| 16 | **测试** | **`vitest` + `@testing-library/react` + `user-event` + `jsdom` + `coverage-v8` + `@playwright/test`**；**`*.test.ts(x)` 与组件 / 页面同目录**（一个组件一个目录，测试放在该目录内）|
 
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
@@ -504,7 +504,7 @@ packages/celadon/
 ### 4.16 测试
 
 **结论**：**`vitest`**（运行器）· **`@testing-library/react` + `user-event`**（组件行为）· **`jsdom`**（DOM 环境）·
-**`@vitest/coverage-v8`**（覆盖率）· **`@playwright/test`**（浏览器真交互）；测试文件 **`*.test.ts(x)` 与源码就近放**。
+**`@vitest/coverage-v8`**（覆盖率）· **`@playwright/test`**（浏览器真交互）；测试文件 **`*.test.ts(x)`**，**与组件 / 页面同目录**。
 
 **同类项目的做法**（四个项目里三个完全一致）：
 
@@ -518,6 +518,9 @@ packages/celadon/
 命名 **`*.test.ts(x)`** 是多数派（2:1，另一家用 `*.spec.ts(x)`）。
 
 **旧应用现状**：**测试文件 0 个，`package.json` 里连 `test` 脚本都没有** —— 起点是零。
+
+**目录约定**：**一个组件 / 页面一个目录，测试文件放在该目录内**（与源码并列）。
+目录结构本身（目录如何分层、公共组件的归属）**留待架构讨论时定**，本模块只定"测试跟着组件走"这一条。
 
 **四层分工**：
 
