@@ -536,8 +536,8 @@
     "d2": "No rotation, mirroring or squashing",
     "d3": "No colours beyond the brand colour",
     "d4": "Never use the mark as an interface icon",
-    "setTitle": "2. Icon set (67, sourced from lucide)",
-    "setNote": "The icons are **no longer drawn by us**: every shape comes from **lucide** (24 grid, about 1857 icons, ISC), and each one records the lucide name it came from.",
+    "setTitle": "2. Icon set (68)",
+    "setNote": "Interface icons come from **lucide** (24 grid, ISC); the **brand mark, `i-yaoagents`, is drawn by us** and sits on the same 24 grid. Every icon records where it came from.",
     "spWhat": "Spec",
     "spValue": "Value",
     "spGrid": "Grid",
@@ -552,10 +552,10 @@
     "spColorV": "`stroke: currentColor`, one colour source per icon",
     "spSize": "Sizes",
     "spSizeV": "Display sizes **14 / 16 / 20 / 24** (16 by default); the artwork itself is one 24 grid set",
-    "galleryTitle": "The full gallery (67, click one to copy our name for it)",
+    "galleryTitle": "The full gallery (68, click one to copy our name for it)",
     "search": "Search i-xxx, try file or plus",
     "count": "",
-    "coverTitle": "Coverage (67, all from lucide)",
+    "coverTitle": "Coverage by group",
     "coverCat": "Group",
     "specTitle": "3. Usage and drawing rules",
     "specNote": "Take from **lucide** by default. Only these five cases are drawn by us, and they still go on the **24 grid with a 2 stroke** so mixed icons stay consistent.",
@@ -572,7 +572,7 @@
     "a4": "**Never carry state by icon alone**: state is icon plus text plus colour.",
     "newTitle": "Adding an icon",
     "n1": "Find the closest name in **lucide** (`lucide.dev/icons`).",
-    "n2": "Add it to `icons/manifest.json` and run `node build-icons.mjs` to re-inline it.",
+    "n2": "Add it to `icons/manifest.json` (the lucide name for theirs, or `icons/own-sprite.svg` for ours) and run `node build-icons.mjs` to re-inline.",
     "n3": "Check it reads at **14px**; if not, draw a simplified version on the 24 grid.",
     "n4": "Run the checks, `check-i18n` and `check-readme-values`, and confirm the page has no hard coded colour and no 16 grid leftovers.",
     "copied": "Copied",
@@ -581,7 +581,8 @@
       "act": "Actions",
       "state": "States",
       "file": "File types",
-      "obj": "Objects"
+      "obj": "Objects",
+      "own": "Ours (brand)"
     },
     "spCorner": "Corners",
     "spCornerV": "**2px** for elements 8px or larger, **1px** below that, about **2.41px** on diagonal right angles",
@@ -617,6 +618,7 @@
     "rx2": "**Naming** stays ours, `i-<domain>-<name>`, mapped to lucide names in `icons/manifest.json`.",
     "rx3": "**Hand drawing** is limited to the five cases above; everything else comes from lucide.",
     "coverCount": "Count",
-    "coverNames": "Semantic names (ours)"
+    "coverNames": "Semantic names (ours)",
+    "srcOwn": "ours"
   }
 }
