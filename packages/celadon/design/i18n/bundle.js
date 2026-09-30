@@ -379,7 +379,14 @@ window.CELADON_I18N = {
           "list": "Reload",
           "stream": "Regenerate"
         },
-        "demoPanel": "Contract details"
+        "demoPanel": "Contract details",
+        "overrides": "Scene level override (set intensity locally)",
+        "ovNote": "The same component, with .motion-quiet or .motion-rich on a container, changes intensity for that subtree only. The system reduce-motion flag is a master switch no local class can beat.",
+        "ov": {
+          "inherit": "Inherited (global)",
+          "quiet": "Quiet .motion-quiet",
+          "rich": "Rich .motion-rich"
+        }
       },
       "border": {
         "title": "Border (with the WCAG 1.4.11 decision)",
@@ -788,7 +795,14 @@ window.CELADON_I18N = {
           "list": "再読み込み",
           "stream": "再生成"
         },
-        "demoPanel": "契約の詳細"
+        "demoPanel": "契約の詳細",
+        "overrides": "場面ごとの上書き（局所的に強さを指定）",
+        "ovNote": "同じコンポーネントでも、コンテナに .motion-quiet / .motion-rich を付ければその範囲だけ強さが変わります。システムの「動きを減らす」は全体スイッチで、局所指定では打ち消せません。",
+        "ov": {
+          "inherit": "継承（全体）",
+          "quiet": "控えめ .motion-quiet",
+          "rich": "豊か .motion-rich"
+        }
       },
       "border": {
         "title": "境界線 Border（WCAG 1.4.11 の判断を含む）",
@@ -1197,7 +1211,14 @@ window.CELADON_I18N = {
           "list": "重新加载",
           "stream": "重新生成"
         },
-        "demoPanel": "合同详情"
+        "demoPanel": "合同详情",
+        "overrides": "场景级覆盖（局部指定强度）",
+        "ovNote": "同一个组件，容器加 .motion-quiet / .motion-rich 即可局部改强度（随继承生效）；系统\"减少动态\"是总开关，任何局部都覆盖不掉。",
+        "ov": {
+          "inherit": "继承（全局）",
+          "quiet": "低调 .motion-quiet",
+          "rich": "丰富 .motion-rich"
+        }
       },
       "border": {
         "title": "边框 Border（含 WCAG 1.4.11 决策）",
@@ -1606,7 +1627,14 @@ window.CELADON_I18N = {
           "list": "重新載入",
           "stream": "重新產生"
         },
-        "demoPanel": "合約詳情"
+        "demoPanel": "合約詳情",
+        "overrides": "場景級覆蓋（局部指定強度）",
+        "ovNote": "同一個元件，容器加上 .motion-quiet / .motion-rich 即可局部改強度（隨繼承生效）；系統「減少動態」是總開關，任何局部都覆蓋不掉。",
+        "ov": {
+          "inherit": "繼承（全域）",
+          "quiet": "低調 .motion-quiet",
+          "rich": "豐富 .motion-rich"
+        }
       },
       "border": {
         "title": "邊框 Border（含 WCAG 1.4.11 決策）",

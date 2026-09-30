@@ -377,7 +377,14 @@
         "list": "重新加载",
         "stream": "重新生成"
       },
-      "demoPanel": "合同详情"
+      "demoPanel": "合同详情",
+      "overrides": "场景级覆盖（局部指定强度）",
+      "ovNote": "同一个组件，容器加 .motion-quiet / .motion-rich 即可局部改强度（随继承生效）；系统\"减少动态\"是总开关，任何局部都覆盖不掉。",
+      "ov": {
+        "inherit": "继承（全局）",
+        "quiet": "低调 .motion-quiet",
+        "rich": "丰富 .motion-rich"
+      }
     },
     "border": {
       "title": "边框 Border（含 WCAG 1.4.11 决策）",
