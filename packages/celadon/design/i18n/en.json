@@ -326,7 +326,9 @@
       "use1": "Cards, tabs, badges",
       "use2": "Dropdowns, popovers, floating panels",
       "use3": "Modals, drawers, toasts (with --scrim)",
-      "useSticky": "Sticky toolbars and section headers"
+      "useSticky": "Sticky toolbars and section headers",
+      "colSurface": "Surface",
+      "note2": "In dark mode a shadow on a dark background is invisible, so levels are carried by tonal surfaces (--elevation-surface-1/2/3) plus a 1px warm white inner highlight; light mode still uses shadows."
     },
     "motion": {
       "title": "Motion",
