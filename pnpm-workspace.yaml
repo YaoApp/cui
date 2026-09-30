@@ -1,3 +1,13 @@
 packages:
       - 'packages/*'
       - '!packages/celadon'
+allowBuilds:
+  '@parcel/watcher': true
+  '@sveltejs/kit': true
+  '@swc/core': true
+  core-js: true
+  core-js-pure: true
+  es5-ext: true
+  esbuild: true
+  svelte-preprocess: true
+  yorkie: true

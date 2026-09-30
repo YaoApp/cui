@@ -1,6 +1,6 @@
 {
   "private": true,
-  "packageManager": "pnpm@10.34.6",
+  "packageManager": "pnpm@12.8.1",
   "homepage": "https://yaoapps.com",
   "scripts": {
     "dev": "turbo run dev",
@@ -28,11 +28,6 @@
     "turbo": "^1.7.2",
     "ws": "^8.21.0",
     "yorkie": "^2.0.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@vidstack/react": "1.12.12"
-    }
   },
   "dependencies": {
     "@types/react-beautiful-dnd": "^13.1.8",
