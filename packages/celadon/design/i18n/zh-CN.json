@@ -266,6 +266,19 @@
       "errorHint": "日期格式不正确",
       "solid": "主按钮",
       "soft": "浅底"
-    }
+    },
+    "reason": {
+      "fill": "填充",
+      "line": "边界",
+      "overlay": "遮罩",
+      "dark": "仅暗色",
+      "exempt": "禁用豁免"
+    },
+    "gradeAaa": "AAA",
+    "gradeAa": "AA",
+    "gradeLarge": "大字 / 图形",
+    "gradeFail": "不达标",
+    "contrastLegend": "等级：AAA ≥7:1 · AA ≥4.5:1（正文标准）· 大字/图形 ≥3:1 · 不达标 <3:1；正文低于 4.5:1 不能用于正文。",
+    "reasonNote": "「填充 / 边界 / 遮罩 / 仅暗色」不参与文字对比度判定（用法见「关键配对」）；「禁用豁免」按 WCAG 对禁用控件豁免。"
   }
 }
