@@ -69,24 +69,25 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .mo-head .n{font-weight:650;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mo-head .tk{font-family:var(--font-family-monospace);font-size:10px;color:var(--text-tertiary)}
 .mo-head .go{margin-left:auto}
+.mo-hint{font-size:10.5px;color:var(--text-tertiary);white-space:nowrap}
 .stage{position:relative;height:64px;border-radius:var(--radius-medium);background:var(--background-field);border:1px solid var(--border-default);overflow:hidden}
 .stage .el{position:absolute;transition-property:opacity,transform,background-color,border-color,box-shadow;transition-duration:var(--d,200ms);transition-timing-function:var(--e,linear)}
-/* 1 悬停过渡 */
-.s-hover .chip{left:14px;top:18px;padding:5px 15px;border-radius:var(--radius-pill);background:var(--brand-soft);border:1px solid var(--brand-ink);color:var(--brand-ink);font-size:11px;font-weight:650}
-.s-hover.reset .chip{background:var(--background-surface);border-color:var(--border-control);color:var(--text-secondary)}
+.s-hover .chip{left:12px;top:18px;padding:5px 15px;border-radius:var(--radius-pill);background:var(--background-surface);border:1px solid var(--border-control);color:var(--text-secondary);font-size:11px;font-weight:650}
+.s-hover .chip:hover{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink)}
 /* 2 按下反馈 */
 .s-press .btn{left:14px;top:16px;padding:6px 18px;border-radius:var(--radius-medium);background:var(--brand);color:var(--brand-text);font-size:11px;font-weight:650}
-.s-press.reset .btn{transform:scale(.94)}
-/* 3 焦点环 */
-.s-focus .inp{left:14px;top:15px;width:160px;height:34px;border-radius:var(--radius-medium);background:var(--background-surface);border:1px solid var(--brand);box-shadow:0 0 0 1px var(--brand)}
-.s-focus.reset .inp{border-color:var(--border-control);box-shadow:0 0 0 0 transparent}
+.s-press .btn:active{transform:scale(.94)}
+.s-focus .inp{left:12px;top:15px;width:146px;height:34px;border-radius:var(--radius-medium);background:var(--background-surface);border:1px solid var(--border-control);box-shadow:0 0 0 0 transparent;font:inherit;font-size:11.5px;color:var(--text-primary);padding:0 10px}
+.s-focus .inp:focus{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand);outline:none}
 /* 4 淡入 */
 .s-fade .card{left:12px;top:14px;width:156px;height:36px;border-radius:var(--radius-medium);background:var(--background-surface);border:1px solid var(--border-default)}
 .s-fade.reset .card{opacity:0}
 /* 5 下拉出现 */
-.s-dropdown .menu{left:12px;top:9px;width:146px;padding:6px 0;border-radius:var(--radius-medium);background:var(--background-surface);border:1px solid var(--border-default);box-shadow:var(--shadow-floating);transform-origin:top left}
+.s-dropdown .trg{left:12px;top:11px;padding:5px 13px;border-radius:var(--radius-medium);background:var(--background-surface);border:1px solid var(--border-control);color:var(--text-primary);font:inherit;font-size:11.5px;cursor:pointer}
+.s-dropdown .menu{left:12px;top:36px;width:146px;padding:6px 0;border-radius:var(--radius-medium);background:var(--background-surface);border:1px solid var(--border-default);box-shadow:var(--shadow-floating);transform-origin:top left}
 .s-dropdown .menu i{display:block;height:7px;margin:5px 10px;border-radius:3px;background:var(--background-field)}
-.s-dropdown.reset .menu{opacity:0;transform:translateY(-8px) scale(.96)}
+.s-dropdown .menu{opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none}
+.s-dropdown.open .menu{opacity:1;transform:none}
 /* 6 面板展开 */
 .s-panel .p{left:12px;top:12px;width:176px;height:40px;border-radius:var(--radius-large);background:var(--background-surface);border:1px solid var(--border-default);box-shadow:var(--shadow-subtle)}
 .s-panel.reset .p{opacity:0;transform:translateY(-8px)}
@@ -94,8 +95,9 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .s-collapse .p{left:12px;top:12px;width:176px;height:40px;border-radius:var(--radius-large);background:var(--background-surface);border:1px solid var(--border-default)}
 .s-collapse .p b{display:block;height:8px;margin:16px 12px 0;border-radius:3px;background:var(--background-field)}
 .s-collapse .p b{transition-property:opacity,transform;transition-duration:var(--d);transition-timing-function:var(--e)}
-.s-collapse.reset .p b{opacity:0;transform:translateY(-4px)}
-.s-collapse.reset .p{opacity:.65}
+.s-collapse .p{cursor:pointer}
+.s-collapse.collapsed .p b{opacity:0;transform:translateY(-4px)}
+.s-collapse.collapsed .p{opacity:.65}
 /* 8 抽屉滑入 */
 .s-drawer .scrim{left:0;right:0;top:0;bottom:0;background:var(--scrim);opacity:1}
 .s-drawer .sheet{right:0;top:0;bottom:0;width:136px;background:var(--background-surface);border-left:1px solid var(--border-default);box-shadow:var(--shadow-overlay)}
@@ -304,14 +306,16 @@ var SCENE_TOKENS = {
   collapse:['--duration-fast','--easing-accelerate'], drawer:['--duration-slow','--easing-decelerate'], modal:['--duration-base','--easing-decelerate'],
   toast:['--duration-base','--easing-decelerate'], list:['--duration-base','--easing-decelerate'], stream:['--duration-base','--easing-standard']
 };
+var SCENE_MODE = {hover:'hover', press:'press', focus:'focus', dropdown:'click', collapse:'click',
+                  fade:'play', panel:'play', drawer:'play', modal:'play', toast:'play', list:'play', stream:'play'};
 function stageHtml(theme, id){
   var inner = '';
   switch (id){
     case 'hover':    inner = '<span class="el chip">'+esc(tr('f.motion.demoBtn'))+'</span>'; break;
     case 'press':    inner = '<span class="el btn">'+esc(tr('f.motion.demoBtn'))+'</span>'; break;
-    case 'focus':    inner = '<span class="el inp"></span>'; break;
+    case 'focus':    inner = '<input class="el inp" value="">'; break;
     case 'fade':     inner = '<span class="el card"></span>'; break;
-    case 'dropdown': inner = '<span class="el menu"><i></i><i></i><i></i></span>'; break;
+    case 'dropdown': inner = '<button class="el trg" type="button">'+esc(tr('f.motion.demoMenu'))+'</button><span class="el menu"><i></i><i></i><i></i></span>'; break;
     case 'panel':    inner = '<span class="el p"></span>'; break;
     case 'collapse': inner = '<span class="el p"><b></b></span>'; break;
     case 'drawer':   inner = '<span class="el scrim"></span><span class="el sheet"><b></b><b></b><b></b></span>'; break;
@@ -358,13 +362,16 @@ function renderMotion(theme){
       + '<line x1="0" y1="100" x2="100" y2="0" stroke="currentColor" stroke-width="0.7" stroke-dasharray="3 3" style="color:var(--border-default)"/></svg>'
       + '<div class="cn">'+c[0].replace('--easing-','')+'</div></div>'; }).join('') + '</div>';
   var gallery = '<div class="grp" style="margin-top:16px">'+esc(tr('f.motion.scenes'))
-    + ' <button class="mo-play" data-playall="'+theme+'" style="margin-left:6px">'+esc(tr('f.motion.playAll'))+'</button></div>'
+    + '</div>'
     + '<div class="mo-grid">' + SCENES.map(function(id){
         var t = SCENE_TOKENS[id];
+        var mode = SCENE_MODE[id];
+        var act = mode === 'play'
+          ? '<button class="mo-play go" data-scene="'+id+'" data-theme-key="'+theme+'">'+esc(tr('f.motion.playOne'))+'</button>'
+          : '<span class="mo-hint go">'+esc(tr('f.motion.hint.'+mode))+'</span>';
         return '<div class="mo-scene"><div class="mo-head"><span class="n">'+esc(tr('f.motion.s.'+id))+'</span>'
           + '<span class="tk">'+t[0].replace('--duration-','')+' · '+t[1].replace('--easing-','')+'</span>'
-          + '<button class="mo-play go" data-scene="'+id+'" data-theme-key="'+theme+'">'+esc(tr('f.motion.playOne'))+'</button></div>'
-          + stageHtml(theme, id) + '</div>'; }).join('') + '</div>';
+          + act + '</div>'+ stageHtml(theme, id) + '</div>'; }).join('') + '</div>';
   var rm = '<div class="rm-note" id="rm-'+theme+'"></div>';
   var rules = '<div class="grp" style="margin-top:14px">'+esc(tr('f.motion.rules'))+'</div><ul>'
     + ['r1','r2','r3','r4'].map(function(k){ return '<li>'+esc(tr('f.motion.'+k))+'</li>'; }).join('') + '</ul>';
@@ -420,9 +427,14 @@ document.querySelector('.language-switch').addEventListener('click', function(e)
   CURRENT = b.getAttribute('data-lang'); renderAll();
 });
 document.addEventListener('click', function(e){
-  var all = e.target.closest('[data-playall]');
-  if (all){ var th = all.getAttribute('data-playall');
-    SCENES.forEach(function(id, i){ setTimeout(function(){ playScene(th, id); }, i * 240); }); return; }
+  /* 真实交互：下拉用触发按钮切换 */
+  var trg = e.target.closest('.s-dropdown .trg');
+  if (trg){ var st1 = trg.closest('.stage'); st1.classList.toggle('open');
+    if (st1.classList.contains('open')) st1.classList.remove('reset'); return; }
+  /* 真实交互：收起用点击面板切换 */
+  var pan = e.target.closest('.s-collapse .p');
+  if (pan){ pan.closest('.stage').classList.toggle('collapsed'); return; }
+  /* 其余场景：播放按钮 */
   var b = e.target.closest('.mo-play[data-scene]'); if (!b) return;
   playScene(b.getAttribute('data-theme-key'), b.getAttribute('data-scene'));
 });

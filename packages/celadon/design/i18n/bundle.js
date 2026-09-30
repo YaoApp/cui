@@ -345,8 +345,7 @@ window.CELADON_I18N = {
         "r4": "Reduced motion: when the system asks for less motion every duration collapses to zero inside tokens.less, so components need no special case.",
         "reducedOn": "System preference: reduce motion - active (durations are zero)",
         "reducedOff": "System preference: normal motion",
-        "scenes": "Common scenes (play one, or play all)",
-        "playAll": "Play all",
+        "scenes": "Common scenes (try them directly, or press play)",
         "playOne": "Play",
         "demoBtn": "Send",
         "demoToast": "✓ Saved",
@@ -364,6 +363,13 @@ window.CELADON_I18N = {
           "toast": "Toast appears",
           "list": "List items enter",
           "stream": "Streaming output"
+        },
+        "demoMenu": "Menu",
+        "hint": {
+          "hover": "Hover me",
+          "press": "Press and hold",
+          "focus": "Click or Tab",
+          "click": "Click it"
         }
       },
       "border": {
@@ -727,8 +733,7 @@ window.CELADON_I18N = {
         "r4": "動きを減らす設定では、tokens.less 側で時間を一括してゼロにします（各コンポーネントでの対応は不要）。",
         "reducedOn": "システム設定：動きを減らす —— 有効（時間はゼロ）",
         "reducedOff": "システム設定：通常のモーション",
-        "scenes": "よくある場面（個別再生 / すべて再生）",
-        "playAll": "すべて再生",
+        "scenes": "よくある場面（直接操作するか、再生）",
         "playOne": "再生",
         "demoBtn": "送信",
         "demoToast": "✓ 保存しました",
@@ -746,6 +751,13 @@ window.CELADON_I18N = {
           "toast": "トーストの出現",
           "list": "リストの順次出現",
           "stream": "ストリーミング出力"
+        },
+        "demoMenu": "メニュー",
+        "hint": {
+          "hover": "ホバーしてみる",
+          "press": "押し続ける",
+          "focus": "クリックまたは Tab",
+          "click": "クリック"
         }
       },
       "border": {
@@ -1109,8 +1121,7 @@ window.CELADON_I18N = {
         "r4": "减动效：开启系统\"减少动态效果\"后全部时长归零（tokens.less 内统一处理，组件无需各自判断）。",
         "reducedOn": "当前系统偏好：减少动态效果 —— 已降级（时长归零）",
         "reducedOff": "当前系统偏好：正常动效",
-        "scenes": "常用场景（可单独播放 / 全部播放）",
-        "playAll": "全部播放",
+        "scenes": "常用场景（可直接操作，或点播放）",
         "playOne": "播放",
         "demoBtn": "发送",
         "demoToast": "✓ 已保存",
@@ -1128,6 +1139,13 @@ window.CELADON_I18N = {
           "toast": "通知出现",
           "list": "列表依次进入",
           "stream": "流式输出"
+        },
+        "demoMenu": "菜单",
+        "hint": {
+          "hover": "移入试试",
+          "press": "按住试试",
+          "focus": "点击或 Tab",
+          "click": "点一下"
         }
       },
       "border": {
@@ -1491,8 +1509,7 @@ window.CELADON_I18N = {
         "r4": "減動效：開啟系統「減少動態效果」後全部時長歸零（tokens.less 內統一處理，元件無需各自判斷）。",
         "reducedOn": "目前系統偏好：減少動態效果 —— 已降級（時長歸零）",
         "reducedOff": "目前系統偏好：正常動效",
-        "scenes": "常用場景（可單獨播放 / 全部播放）",
-        "playAll": "全部播放",
+        "scenes": "常用場景（可直接操作，或按播放）",
         "playOne": "播放",
         "demoBtn": "傳送",
         "demoToast": "✓ 已儲存",
@@ -1510,6 +1527,13 @@ window.CELADON_I18N = {
           "toast": "通知出現",
           "list": "清單依序進入",
           "stream": "串流輸出"
+        },
+        "demoMenu": "選單",
+        "hint": {
+          "hover": "移入試試",
+          "press": "按住試試",
+          "focus": "點擊或 Tab",
+          "click": "點一下"
         }
       },
       "border": {
