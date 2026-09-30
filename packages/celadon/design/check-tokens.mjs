@@ -24,6 +24,22 @@ for (const f of PAGES) {
     }
   }
 }
+// 行高必须走 token（--line-height-normal 拉丁 / --line-height-cjk 中日文）；
+// font 简写里的 /1.5 会绕过 token，一并拦下
+for (const f of PAGES) {
+  const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+)(?=;|\})/g)) {
+    const prop = m[1], v = m[2].trim();
+    if (prop === 'line-height' && !v.startsWith('var(--line-height-') && !['normal', 'inherit', '0'].includes(v)) {
+      bad.push(`${f}: line-height: ${v}（应走 --line-height-*）`);
+    }
+    if (prop === 'font' && /\d+(\.\d+)?(px|rem|em)/.test(v)) {
+      bad.push(`${f}: font 简写里写死了字号/行高（${v.slice(0, 34)}）—— 拆成 font-family/size/weight/line-height 走 token`);
+    } else if (prop === 'font' && /\//.test(v)) {
+      bad.push(`${f}: font 简写里写死了行高（${v.slice(0, 30)}）—— 拆成 font + line-height: var(--line-height-*)`);
+    }
+  }
+}
 // 间距与线宽同样必须走 token：--spacing-* / --border-width
 const SPACING = /^(padding|margin|gap)(-top|-right|-bottom|-left)?$|^(row-gap|column-gap)$/;
 const BORDER = /^border(-top|-right|-bottom|-left)?$/;
@@ -40,4 +56,4 @@ if (bad.length) {
   bad.slice(0, 8).forEach((b) => console.log('      ' + b));
   process.exit(1);
 }
-console.log('  ✓ 三张规范页的字号 / 圆角 / 颜色 / 间距 / 线宽全部走 token');
+console.log('  ✓ 三张规范页的字号 / 行高 / 圆角 / 颜色 / 间距 / 线宽全部走 token');
