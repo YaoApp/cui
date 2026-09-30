@@ -1,0 +1,17 @@
+{
+  "name": "@yaoapp/celadon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CUI 2.0 —— 设计基线、规范工具与前端应用（自成一套，不进外层工作区）",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node scripts/check-i18n.mjs && node scripts/check-readme-values.mjs && node scripts/check-tokens.mjs && node scripts/check-generated.mjs && node scripts/check-css-conventions.mjs",
+    "test": "node scripts/tests/run.mjs"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
