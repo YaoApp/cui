@@ -96,3 +96,14 @@ SOFTWARE.
 The brand logos converted from this package are trademarks of their respective owners. They are
 used only to identify the corresponding models, vendors or services. The colour variants keep each
 brand's official colours and must not be recoloured; use the `-mono` variant on dark surfaces.
+
+## simple-icons
+
+- **Where**: `design/icons/brand-simple-*.svg` and `design/icons/brand-simple-index.json`, generated
+  on demand by `design/vendor-simple.mjs`, one named brand at a time.
+- **Version**: simple-icons 16.33.0 — <https://simpleicons.org>
+- **Licence**: CC0-1.0 (public domain). Attribution is not required; it is recorded here for clarity.
+
+Only the brands we name are converted. The remaining ~3400 are deliberately not imported. The
+trademark note above applies to these logos as well: they identify their owners, and the colour
+variants must not be recoloured.
