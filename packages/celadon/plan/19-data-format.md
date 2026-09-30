@@ -74,10 +74,10 @@ IANA Area/Location      ← 如 Asia/Shanghai、America/New_York
 | `border-left` / `border-right` | `border-inline-start` / `border-inline-end` |
 | `border-top-left-radius` 等 | `border-start-start-radius` 等 |
 
-**有意保留物理方向的例外**（须逐条注明理由）：
+**具体怎么写、哪些例外可以保留物理方向** → 见 [`../CONVENTIONS.md`](../CONVENTIONS.md) §3（CSS / LESS 编码规范）。
+效果演示（可切 RTL 对照）→ `design/css-logical.html`。
 
-1. **窗口红绿灯** —— macOS 在 RTL 语言下也把红黄绿灯放在**左上**，这是系统行为，不是我们的布局
-2. 明确以"屏幕绝对方位"为语义的元素（如拖拽把手的物理位置）—— 出现时单独注明
+> 本节只保留**决策**：现在不新增 RTL 语言，但从第一行产品代码起只用逻辑属性。
 
 ## 5. 待定
 

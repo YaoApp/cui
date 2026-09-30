@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>逻辑属性 · 物理属性 对照（为 RTL 留门）</title>
+<!-- 唯一来源：tokens.less → build-css.mjs → tokens.css -->
+<link rel="stylesheet" href="./tokens.css">
+<style>
+html,body{margin:0}
+body{background:var(--background-app);color:var(--text-primary);font-family:var(--font-family-ui);
+  font-size:var(--font-size-body-lg);line-height:var(--line-height-cjk);-webkit-font-smoothing:antialiased;
+  padding:var(--spacing-24)}
+.top{display:flex;align-items:flex-end;gap:var(--spacing-16);flex-wrap:wrap;margin-bottom:var(--spacing-16)}
+h1{font-size:var(--font-size-title);font-weight:var(--font-weight-strong);margin:0}
+p.sub{margin:var(--spacing-8) 0 0;color:var(--text-secondary);max-width:1000px}
+.seg{margin-inline-start:auto;display:inline-flex;gap:var(--spacing-4);padding:var(--spacing-4);
+  border-radius:var(--radius-pill);border:var(--border-width) solid var(--border-control);background:var(--background-field)}
+.seg button{cursor:pointer;font-family:inherit;font-size:var(--font-size-caption);
+  padding:var(--spacing-4) var(--spacing-16);border:0;border-radius:var(--radius-pill);
+  background:transparent;color:var(--text-secondary)}
+.seg button.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:var(--font-weight-strong)}
+.cols{display:flex;gap:var(--spacing-16);align-items:flex-start;flex-wrap:wrap}
+.col{flex:1 1 380px;min-width:340px;background:var(--background-surface);border:var(--border-width) solid var(--border-default);
+  border-radius:var(--radius-large);padding:var(--spacing-16)}
+.col h2{font-size:var(--font-size-subtitle);font-weight:var(--font-weight-strong);margin:0 0 var(--spacing-4)}
+.col h2 code{font-family:var(--font-family-monospace);font-size:var(--font-size-caption)}
+.warn{color:var(--danger)}
+.ok{color:var(--success)}
+.col p.hint{margin:0 0 var(--spacing-16);color:var(--text-secondary);font-size:var(--font-size-caption)}
+/* 组件样例：导航项（前图标 + 文字 + 尾计数） */
+.item{display:flex;align-items:center;height:36px;border-radius:var(--radius-small);
+  background:var(--background-navigation);padding-inline:var(--spacing-8);margin-bottom:var(--spacing-8)}
+.item .ico{color:var(--text-secondary);display:flex}
+.item .txt{font-size:var(--font-size-body-lg)}
+.item .badge{min-width:17px;height:17px;border-radius:var(--radius-pill);background:var(--brand-soft);
+  color:var(--brand-ink);font-size:var(--font-size-label);display:inline-flex;align-items:center;
+  justify-content:center;padding:0 var(--spacing-4)}
+/* 样例 A：物理属性 —— 尾计数用 margin-left:auto，强调线用 border-left */
+.phys .badge{margin-left:auto}
+.phys .quote{border-left:var(--border-width) solid var(--brand);padding-left:var(--spacing-12)}
+/* 样例 B：逻辑属性 —— 同样的东西，换成 inline 方向 */
+.logi .badge{margin-inline-start:auto}
+.logi .quote{border-inline-start:var(--border-width) solid var(--brand);padding-inline-start:var(--spacing-12)}
+.quote{margin:var(--spacing-4) 0 0;color:var(--text-secondary);font-size:var(--font-size-caption)}
+.note{margin-top:var(--spacing-16);background:var(--background-surface);border:var(--border-width) solid var(--border-default);
+  border-radius:var(--radius-large);padding:var(--spacing-16)}
+.note h3{margin:0 0 var(--spacing-8);font-size:var(--font-size-subtitle)}
+.note ul{margin:0;padding-inline-start:var(--spacing-24);color:var(--text-secondary)}
+.note li{margin-bottom:var(--spacing-4)}
+</style>
+</head>
+<body class="celadon">
+<div class="top">
+  <div>
+    <h1>布局只用逻辑属性 —— 物理 vs 逻辑 对照</h1>
+    <p class="sub">同样的组件写两遍：左边用 <b>物理方向</b>（<code>margin-left</code> / <code>border-left</code>），右边用 <b>逻辑方向</b>（<code>margin-inline-start</code> / <code>border-inline-start</code>）。
+      <b>点右上角切到 RTL</b>：左边会错位（计数跑到左边、强调线跑到右边），右边会跟着文字方向正确镜像。</p>
+  </div>
+  <div class="seg" id="dirSwitch">
+    <button data-d="ltr" class="on">LTR</button>
+    <button data-d="rtl">RTL</button>
+  </div>
+</div>
+
+<div class="cols">
+  <section class="col phys">
+    <h2 class="warn">✗ 物理属性</h2>
+    <p class="hint"><code>margin-left:auto</code> · <code>border-left</code> · <code>padding-left</code> —— 永远朝屏幕的左右，与文字方向无关</p>
+    <div class="item"><span class="ico">◍</span><span class="txt">收件箱</span><span class="badge">3</span></div>
+    <div class="item"><span class="ico">◍</span><span class="txt">看板</span><span class="badge">12</span></div>
+    <p class="quote">「引用」块的强调线：RTL 下仍贴在屏幕左侧，读起来便成了"结尾"</p>
+  </section>
+
+  <section class="col logi">
+    <h2 class="ok">✓ 逻辑属性</h2>
+    <p class="hint"><code>margin-inline-start:auto</code> · <code>border-inline-start</code> · <code>padding-inline-start</code> —— 跟随文字方向自动镜像</p>
+    <div class="item"><span class="ico">◍</span><span class="txt">收件箱</span><span class="badge">3</span></div>
+    <div class="item"><span class="ico">◍</span><span class="txt">看板</span><span class="badge">12</span></div>
+    <p class="quote">「引用」块的强调线：RTL 下自动翻到右侧，仍是"段落起始"</p>
+  </section>
+</div>
+
+<div class="note">
+  <h3>什么时候可以保留物理方向</h3>
+  <ul>
+    <li><b>窗口红绿灯</b> —— macOS 在 RTL 语言下也把红黄绿灯放在左上，这是系统行为，不是我们的布局</li>
+    <li>明确以"屏幕绝对方位"为语义的元素（如拖拽把手的物理位置）—— 用到时在代码里注明理由</li>
+  </ul>
+</div>
+
+<script>
+document.getElementById('dirSwitch').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-d]'); if (!b) return;
+  document.documentElement.setAttribute('dir', b.getAttribute('data-d'));
+  [].forEach.call(this.querySelectorAll('button'), function (x) { x.classList.toggle('on', x === b); });
+});
+</script>
+</body></html>
