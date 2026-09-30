@@ -69,8 +69,13 @@
   --brand: #2A7B7B;
   /* 真实内容底(#FAFAFB) 4.77:1 ✓ AA */
   --brand-hover: #236B6B;
+  /* 浅底/描边档：悬停 */
   --brand-active: #1D5C5C;
-  /* 按下态 */
+  /* 浅底/描边档：按下（作文字/描边色） */
+  --brand-solid-hover: #236B6B;
+  /* **实心档**悬停底（压 --brand-text 白字，≥4.5:1） */
+  --brand-solid-active: #1D5C5C;
+  /* **实心档**按下底 */
   --brand-soft: #ECF3F3;
   --brand-display: #96C5C5;
   /* **只做填充/图形，不承载文字与图标** */
@@ -107,7 +112,8 @@
   --warning-soft: var(--warm-soft);
   /* ===== 语义 ===== */
   --success: #057748;
-  --success-soft: #E9F6F1;
+  --success-soft: #D9F0E0;
+  /* 与 --brand-soft #ECF3F3 拉开（ΔE 3.4 → 10.4），否则"已完成"与"选中"分不清 */
   --danger: #D93B30;
   /* **只做填充/图形**（文字用途仅 3.96:1，不达 AA） */
   --danger-soft: #FBECEA;
@@ -172,27 +178,36 @@
 /* 暗色（近黑）· 品牌同值 */
 .celadon[data-theme='dark'],
 [data-theme='dark'] .celadon {
-  --background-app: #080808;
-  --background-navigation: #0D0D0D;
-  --background-content: #101010;
-  --background-surface: #161616;
-  --background-field: #1E1E1E;
-  --background-hover: #242424;
-  --background-active: #2A2A2A;
-  --background-selected: #16292A;
-  --background-readonly: #1A1A1A;
-  --border-subtle: #262626;
-  --border-default: #333333;
-  --border-control: #424242;
-  --border-hover: #565656;
-  --text-primary: #F5F5F5;
-  --text-secondary: #B4B4B4;
-  --text-tertiary: #949494;
-  --text-muted: #6E6E6E;
+  --background-app: #121110;
+  /* 暖墨（松烟墨）：不再用纯黑，避免 OLED 光晕 */
+  --background-navigation: #151413;
+  --background-content: #191816;
+  --background-surface: #1F1E1A;
+  --background-field: #262420;
+  --background-hover: #2C2A26;
+  --background-active: #333129;
+  --background-selected: #17292A;
+  /* 品牌浅底（保留青调，略暖） */
+  --background-readonly: #232119;
+  --border-subtle: #2E2C28;
+  --border-default: #3B3933;
+  --border-control: #4A4740;
+  --border-hover: #5E5A52;
+  --text-primary: #F4F1EA;
+  /* 暖白 */
+  --text-secondary: #B8B3A8;
+  --text-tertiary: #9A9489;
+  --text-muted: #736E64;
   /* 纯装饰 */
   --brand: #2A7B7B;
   --brand-hover: #338F8F;
+  /* 浅底/描边档：悬停 */
   --brand-active: #3FA3A3;
+  /* 浅底/描边档：按下（作文字/描边色） */
+  --brand-solid-hover: #2C8080;
+  /* 实心档悬停底：白字 4.66:1 ✓（原 #338F8F 仅 3.84:1 ✗） */
+  --brand-solid-active: #266F6F;
+  /* 实心档按下底：白字 5.86:1 ✓（原 #3FA3A3 仅 3.01:1 ✗） */
   --brand-soft: #16292A;
   --brand-display: #96C5C5;
   --brand-text: #FFFFFF;
@@ -201,10 +216,11 @@
   --brand-lift: #389F9F;
   /* 暗色：焦点环改用提亮档，否则在近黑上看不见 */
   --focus-ring-color: var(--brand-lift);
-  --background-disabled: #1A1A1A;
-  --text-disabled: #5A5A5A;
-  --border-disabled: #2A2A2A;
-  --scrim: rgba(0, 0, 0, 0.56);
+  --background-disabled: #232119;
+  --text-disabled: #5F5A52;
+  --border-disabled: #322F29;
+  --scrim: rgba(18, 17, 16, 0.6);
+  /* 暖墨遮罩 */
   --warm: #C4A767;
   --warm-soft: #2C2718;
   --warm-text: #E4CE9C;
@@ -216,8 +232,8 @@
   --danger-soft: #2A1614;
   --danger-ink: #EC7A6E;
   /* 暗色文字/图标档（danger-soft 上 5.65:1） */
-  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-floating: 0 12px 34px rgba(0, 0, 0, 0.6);
+  --shadow-subtle: 0 1px 2px rgba(18, 17, 16, 0.5);
+  --shadow-floating: 0 12px 34px rgba(18, 17, 16, 0.6);
 }
 /**
  * 用法约定
@@ -256,13 +272,13 @@
 [data-theme] .celadon .btn-primary.is-solid:hover,
 .celadon .btn-primary.is-solid.is-hover,
 [data-theme] .celadon .btn-primary.is-solid.is-hover {
-  background: var(--brand-hover);
+  background: var(--brand-solid-hover);
 }
 .celadon .btn-primary.is-solid:active,
 [data-theme] .celadon .btn-primary.is-solid:active,
 .celadon .btn-primary.is-solid.is-active,
 [data-theme] .celadon .btn-primary.is-solid.is-active {
-  background: var(--brand-active);
+  background: var(--brand-solid-active);
 }
 .celadon .btn-primary.is-focus,
 [data-theme] .celadon .btn-primary.is-focus {
