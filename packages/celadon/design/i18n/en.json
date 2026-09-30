@@ -307,7 +307,8 @@
       "r1": "Buttons, inputs, small controls",
       "r2": "Cards, panels, popovers",
       "r3": "Large containers, images",
-      "r4": "Tags, pill buttons, avatar badges"
+      "r4": "Tags, pill buttons, avatar badges",
+      "rx": "Tags / chips"
     },
     "elevation": {
       "title": "Elevation and shadow",
@@ -420,7 +421,7 @@
       "note": "The main structure is three **vertical** columns on a grid, not horizontal bands. Give way order: the **side column shrinks first, then loses its track, and only then may the centre fall below its minimum**; the **navigation never concedes width**. Screen compatibility comes from **ratio defaults plus viewport driven collapse**, not from giving different screens different window sizes.",
       "slider": "Viewport",
       "sliderNav": "Nav width",
-      "sliderSide": "Side share",
+      "sliderSide": "Side cap",
       "contractTitle": "Column contract (drag the sliders to see clamping)",
       "colZone": "Column",
       "colMin": "Min",
@@ -465,6 +466,15 @@
         "nav": "nav",
         "center": "center",
         "side": "side"
+      },
+      "headerZone": "Header",
+      "orCap": "or capped at",
+      "byViewType": "by view type",
+      "sideType": {
+        "reading": "Reading 400",
+        "tool": "Tool 600",
+        "task": "Task 640",
+        "wide": "Wide 840"
       }
     }
   }

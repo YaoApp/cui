@@ -180,6 +180,7 @@
   --spacing-32: 32px;
   --spacing-48: 48px;
   /* ===== 圆角 Radius（用法：按钮/输入 medium · 卡片/面板 large · 标签/胶囊 pill · 小控件 small）===== */
+  --radius-xs: 4px;
   --radius-small: 6px;
   --radius-medium: 8px;
   --radius-large: 12px;
@@ -225,6 +226,8 @@
   --window-default: 1280px;
   --window-default-height: 820px;
   /* 默认打开：两栏（导航 + 内容） */
+  --header-height: 48px;
+  /* 顶栏高度（按自身密度实测，不用 web 式 64） */
   --page-min-width: 520px;
   --page-min-height: 600px;
   /* 最小窗口（壳层设定） */
@@ -235,8 +238,13 @@
   --nav-auto-collapse: 1024px;
   --center-min: 400px;
   --side-min: 300px;
+  /* 右侧栏默认宽**按视图类型**给（阅读 / 工具 / 任务 / 宽屏），再被上限比例兜住 */
+  --side-width-reading: 400px;
+  --side-width-tool: 600px;
+  --side-width-task: 640px;
+  --side-width-wide: 840px;
+  --side-width-max: 1280px;
   --side-max-ratio: 0.7;
-  --side-default-ratio: 0.45;
   --content-max: 880px;
   --content-max-wide: 1040px;
   /* 中栏内文可读最大宽 */
