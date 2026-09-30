@@ -2,7 +2,7 @@
   "ui": {
     "brand": "Yao Agents",
     "newTask": "新任务",
-    "nav": {
+    "navigation": {
       "chat": "聊天",
       "inbox": "收件箱",
       "board": "看板",
@@ -373,7 +373,7 @@
         "click": "点一下",
         "toggle": "拨一下"
       },
-      "act": {
+      "action": {
         "menu": "菜单",
         "drawer": "详情",
         "modal": "打开",
@@ -458,7 +458,7 @@
       "belowMin": "低于最小",
       "autoRail": "自动收轨",
       "zone": {
-        "nav": "导航",
+        "navigation": "导航",
         "center": "内容",
         "side": "侧栏"
       },
@@ -577,8 +577,8 @@
     "n4": "跑检查：`check-i18n` / `check-readme-values`；确认页面无硬编码颜色、无 16 网格残留。",
     "copied": "已复制",
     "cat": {
-      "nav": "主导航",
-      "act": "操作",
+      "navigation": "主导航",
+      "action": "操作",
       "state": "状态",
       "file": "文件类型",
       "obj": "对象 / 领域",
