@@ -1674,15 +1674,6 @@
   "shard": 7
  },
  {
-  "id": "brand-lobe-hub",
-  "brand": "LobeHub",
-  "title": "LobeHub",
-  "primary": "#fff",
-  "color": true,
-  "mono": true,
-  "shard": 7
- },
- {
   "id": "brand-long-cat",
   "brand": "LongCat",
   "title": "LongCat",
@@ -1797,7 +1788,7 @@
   "primary": "#1d65c1",
   "color": true,
   "mono": true,
-  "shard": 8
+  "shard": 7
  },
  {
   "id": "brand-meta-ai",
@@ -1806,7 +1797,7 @@
   "primary": "#000",
   "color": true,
   "mono": true,
-  "shard": 8
+  "shard": 7
  },
  {
   "id": "brand-meta-gpt",
@@ -2229,7 +2220,7 @@
   "primary": "#000",
   "color": true,
   "mono": true,
-  "shard": 9
+  "shard": 8
  },
  {
   "id": "brand-pollinations",
@@ -2238,7 +2229,7 @@
   "primary": "#000",
   "color": false,
   "mono": true,
-  "shard": 9
+  "shard": 8
  },
  {
   "id": "brand-poolside",
@@ -2247,7 +2238,7 @@
   "primary": "#4137FF",
   "color": true,
   "mono": true,
-  "shard": 9
+  "shard": 8
  },
  {
   "id": "brand-pruna-ai",
@@ -2553,7 +2544,7 @@
   "primary": "#330066",
   "color": true,
   "mono": true,
-  "shard": 10
+  "shard": 9
  },
  {
   "id": "brand-state-cloud",
@@ -2562,7 +2553,7 @@
   "primary": "#DF0428",
   "color": true,
   "mono": true,
-  "shard": 10
+  "shard": 9
  },
  {
   "id": "brand-stepfun",
@@ -2571,7 +2562,7 @@
   "primary": "#000",
   "color": false,
   "mono": true,
-  "shard": 10
+  "shard": 9
  },
  {
   "id": "brand-straico",
@@ -2580,7 +2571,7 @@
   "primary": "#464bba",
   "color": true,
   "mono": true,
-  "shard": 10
+  "shard": 9
  },
  {
   "id": "brand-stream-lake",
@@ -2589,7 +2580,7 @@
   "primary": "#1D70FF",
   "color": true,
   "mono": true,
-  "shard": 10
+  "shard": 9
  },
  {
   "id": "brand-sub-model",
@@ -2598,7 +2589,7 @@
   "primary": "#fff",
   "color": true,
   "mono": true,
-  "shard": 10
+  "shard": 9
  },
  {
   "id": "brand-suno",
@@ -2607,7 +2598,7 @@
   "primary": "#000",
   "color": false,
   "mono": true,
-  "shard": 10
+  "shard": 9
  },
  {
   "id": "brand-sync",
@@ -2616,7 +2607,7 @@
   "primary": "#0000FF",
   "color": false,
   "mono": true,
-  "shard": 10
+  "shard": 9
  },
  {
   "id": "brand-tii",
@@ -2625,7 +2616,7 @@
   "primary": "#6400FF",
   "color": true,
   "mono": true,
-  "shard": 10
+  "shard": 9
  },
  {
   "id": "brand-targon",
@@ -2994,7 +2985,7 @@
   "primary": "#fff",
   "color": true,
   "mono": true,
-  "shard": 11
+  "shard": 10
  },
  {
   "id": "brand-zai",
@@ -3003,7 +2994,7 @@
   "primary": "#000",
   "color": false,
   "mono": true,
-  "shard": 11
+  "shard": 10
  },
  {
   "id": "brand-zapier",
@@ -3012,7 +3003,7 @@
   "primary": "#FF4F00",
   "color": true,
   "mono": true,
-  "shard": 11
+  "shard": 10
  },
  {
   "id": "brand-zeabur",
@@ -3021,7 +3012,7 @@
   "primary": "#6300FF",
   "color": true,
   "mono": true,
-  "shard": 11
+  "shard": 10
  },
  {
   "id": "brand-zen-mux",
@@ -3030,7 +3021,7 @@
   "primary": "#000",
   "color": false,
   "mono": true,
-  "shard": 11
+  "shard": 10
  },
  {
   "id": "brand-zencoder",
@@ -3039,7 +3030,7 @@
   "primary": "#E65C2C",
   "color": true,
   "mono": true,
-  "shard": 11
+  "shard": 10
  },
  {
   "id": "brand-zero-one",
@@ -3048,7 +3039,7 @@
   "primary": "#003425",
   "color": true,
   "mono": true,
-  "shard": 11
+  "shard": 10
  },
  {
   "id": "brand-zhipu",
