@@ -266,6 +266,19 @@
       "errorHint": "日期格式不正確",
       "solid": "主按鈕",
       "soft": "淺底"
-    }
+    },
+    "reason": {
+      "fill": "填充",
+      "line": "邊界",
+      "overlay": "遮罩",
+      "dark": "僅暗色",
+      "exempt": "停用豁免"
+    },
+    "gradeAaa": "AAA",
+    "gradeAa": "AA",
+    "gradeLarge": "大字 / 圖形",
+    "gradeFail": "不達標",
+    "contrastLegend": "等級：AAA ≥7:1 · AA ≥4.5:1（正文標準）· 大字/圖形 ≥3:1 · 不達標 <3:1；正文低於 4.5:1 不能用於正文。",
+    "reasonNote": "「填充 / 邊界 / 遮罩 / 僅暗色」不參與文字對比度判定（用法見「關鍵配對」）；「停用豁免」依 WCAG 對停用控件豁免。"
   }
 }
