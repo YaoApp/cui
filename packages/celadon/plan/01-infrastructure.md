@@ -25,6 +25,37 @@
 | 9 | **i18n 运行时** | **`i18next` + `react-i18next`**；语言包 `locales/<locale>/<namespace>.json`；**新增语言 = 只加一个目录**，不改代码 |
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
+### 1.1 依赖清单
+
+**已定**（本模块内落地）：
+
+| 包 | 版本 | 用途 |
+| --- | --- | --- |
+| `vite` | `^8.3.1` | 构建（已装）|
+| `react` · `react-dom` | `^19.3.0` | UI 运行时 |
+| `@types/react` · `@types/react-dom` | `^19.3.0` | 类型 |
+| `typescript` | `^6.0.3` | 语言 |
+| `@base-ui/react` | `^1.8.0` | 行为与无障碍层 |
+| `i18next` · `react-i18next` | `^26` · `^17` | i18n 运行时 |
+| `pnpm`（**工具**，非依赖）| `10.34.6` | 包管理器，根 `packageManager` 锁死 |
+
+**待定**（推荐列出，未拍）：
+
+| 包 | 当前最新 | 用途 | 备注 |
+| --- | --- | --- | --- |
+| `lucide-react` | 1.49.0 | 图标 | 与 §5 子项 4 的图标体系选型一起定 |
+| `react-router` | 8.4.0 | 路由 | |
+| `@tanstack/react-query` | 5.104.0 | 数据请求 | |
+| `zustand` | 5.0.15 | 状态 | |
+| `@tanstack/react-virtual` | 3.14.13 | 虚拟列表 | 与 `react-virtuoso` 二选一 |
+| `motion` | 13.4.6 | 动效 | |
+| `date-fns` · `@date-fns/tz` | 4.4.0 · 1.5.0 | 日期 | `@base-ui/react` 的 peer，按需引入 |
+| `@playwright/test` | 1.63.0 | 浏览器验收 | 与 `scripts/tests/` 的测试策略一起定 |
+
+**不用**：`antd`（见 4.7）
+
+**零依赖**：设计资产与检查器（`design/` · `scripts/`）不引任何运行时依赖
+
 ## 2. 已跑通（✅ 实测）
 
 | 项 | 结果 |
