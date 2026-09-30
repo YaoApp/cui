@@ -240,7 +240,8 @@
       "fontFamilyMonospace": "等寬字體",
       "brandInk": "品牌色文字/圖示（淺底按鈕 · 選取底 · 氣泡；軟底 4.8:1，暗色自動切提亮檔）",
       "brandSolidHover": "實心按鈕懸停底（白字 ≥4.5:1）",
-      "brandSolidActive": "實心按鈕按下底（白字 ≥4.5:1）"
+      "brandSolidActive": "實心按鈕按下底（白字 ≥4.5:1）",
+      "dangerInk": "危險底上的文字"
     },
     "group": {
       "brand": "品牌",
@@ -513,7 +514,8 @@
       "sideMaxFormula": "**總寬 −（導覽區 + 內容區最小 + 把手）** —— 可自由拖曳到此上限，不寫死比例",
       "cap": "上限 ",
       "px": "px",
-      "sideHint": "拖曳內容區右緣調整側欄寬度"
+      "sideHint": "拖曳內容區右緣調整側欄寬度",
+      "sliderSide": "側欄寬"
     }
   },
   "ic": {
