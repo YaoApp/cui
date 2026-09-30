@@ -54,6 +54,10 @@ h1{font-size:19px;margin:0 0 4px}
 .st .input{cursor:text}
 .st .hint-error{font-size:11.5px;line-height:1.3}
 .stbody{padding:12px 15px 18px}
+.prow{display:flex;align-items:center;gap:9px;padding:4px 0;min-width:0}
+.pchip{padding:4px 11px;border-radius:7px;font-size:12px;font-weight:650;border:1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psrc{font-size:10.5px;color:var(--text-tertiary);font-family:var(--font-family-monospace);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctwrap{overflow-x:auto}
 .stkind{margin-top:14px}
 .stkind .cap{font-size:11.5px;color:var(--text-tertiary);margin-bottom:9px}
 .card{min-width:0;background:var(--background-surface);border:1px solid var(--border-default);border-radius:12px;padding:14px 16px;margin-top:18px}
@@ -98,7 +102,11 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary
 
 <div class="cols" id="cols"></div>
 
-<div class="card"><h2 id="pairs-title"></h2><p class="hint" id="pairs-note"></p><div id="pairs"></div></div>
+<div class="card"><h2 id="pairs-title"></h2><p class="hint" id="pairs-note"></p>
+  <div class="cols">
+    <div class="panel" id="pairs-light"></div>
+    <div class="panel celadon" data-theme="dark" id="pairs-dark"></div>
+  </div></div>
 
 <div class="card" id="states-panel"><h2 id="states-title"></h2><p class="hint" id="states-note"></p>
   <div class="cols">
@@ -107,9 +115,17 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary
   </div>
 </div>
 
-<div class="card"><h2 id="typo-title"></h2><p class="hint" id="typo-note"></p><div class="specimen-grid" id="specimen"></div></div>
+<div class="card"><h2 id="typo-title"></h2><p class="hint" id="typo-note"></p>
+  <div class="cols">
+    <div class="panel" id="specimen-light"></div>
+    <div class="panel celadon" data-theme="dark" id="specimen-dark"></div>
+  </div></div>
 
-<div class="card"><h2 id="contrast-title"></h2><table id="ctab"></table></div>
+<div class="card"><h2 id="contrast-title"></h2>
+  <div class="cols">
+    <div class="panel" id="ctab-light"></div>
+    <div class="panel celadon" data-theme="dark" id="ctab-dark"></div>
+  </div></div>
 <div class="card"><h2 id="redlines-title"></h2><ol id="redlines"></ol></div>
 <div class="toast" id="toast"></div>
 
@@ -122,7 +138,7 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary
 var GROUPS = [
  ['group.brand', [
    ['--brand','brand','on'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
-   ['--brand-soft','brandSoft'], ['--brand-display','brandDisplay'], ['--brand-text','brandText','onbrand'], ['--brand-ink','brandInk'],
+   ['--brand-soft','brandSoft','nocr'], ['--brand-display','brandDisplay','nocr'], ['--brand-text','brandText','onbrand'], ['--brand-ink','brandInk'],
    ['--brand-lift','brandLift','nocr']]],
  ['group.interaction', [
    ['--focus-ring-color','focusRingColor','on'], ['--focus-ring-width','focusRingWidth'], ['--focus-ring-offset','focusRingOffset'],
@@ -152,9 +168,8 @@ var PAIRS = [
  ['--text-placeholder','--background-field','textPlaceholder'],
  ['--brand-text','--brand','brand'], ['--brand-ink','--brand-soft','brandInk'], ['--warm-contrast','--warm','warm'],
  ['--warm-text','--warm-soft','warmSoft'], ['--success','--success-soft','success'],
- ['--danger','--danger-soft','danger'], ['--text-primary','--background-content','textPrimary'],
- ['--text-secondary','--background-content','textSecondary'], ['--brand','--brand-soft','brandSoft']
-];
+ ['--danger-ink','--danger-soft','danger'], ['--text-primary','--background-content','textPrimary'],
+ ['--text-secondary','--background-content','textSecondary'],];
 var SPECIMEN_LANGUAGES = [
  ['zh-CN','简体中文'], ['zh-TW','繁體中文'], ['ja','日本語'], ['en','English']
 ];
@@ -266,44 +281,49 @@ function renderStates(){
   document.getElementById('states-dark').innerHTML  = '<div class="hd">'+esc(tr('card.themeDark'))+'</div>'  + matrix;
 }
 function renderPanels(){
+  CONTRAST_ROWS.length = 0;
   document.getElementById('cols').innerHTML = buildPanel('light', document.getElementById('probe-light'), 'light')
     + buildPanel('dark', document.getElementById('probe-dark'), 'dark');
 }
 function renderContrastTable(){
   document.getElementById('contrast-title').textContent = tr('card.sectionContrast');
-  document.getElementById('ctab').innerHTML = '<tr><th>'+esc(tr('card.tableTheme'))+'</th><th>'+esc(tr('card.tableToken'))+'</th><th>'+esc(tr('card.tableValue'))
-    +'</th><th>'+esc(tr('card.tableBackground'))+'</th><th>'+esc(tr('card.tableContrast'))+'</th><th>'+esc(tr('card.tableLevel'))+'</th></tr>'
-    + CONTRAST_ROWS.map(function(r){
-        var theme = tr(r[0] === 'light' ? 'card.themeLight' : 'card.themeDark');
-        return '<tr><td>'+theme+'</td><td><code>'+r[1]+'</code></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td><b>'+r[4]+':1</b></td><td>'+r[5]+'</td></tr>'; }).join('');
+  ['light','dark'].forEach(function(theme){
+    var rows = CONTRAST_ROWS.filter(function(r){ return r[0] === theme; });
+    var head = '<tr><th>'+esc(tr('card.tableToken'))+'</th><th>'+esc(tr('card.tableValue'))+'</th><th>'
+      + esc(tr('card.tableBackground'))+'</th><th>'+esc(tr('card.tableContrast'))+'</th><th>'+esc(tr('card.tableLevel'))+'</th></tr>';
+    var body = rows.map(function(r){
+      return '<tr><td><code>'+r[1]+'</code></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td><b>'+r[4]+':1</b></td><td>'+r[5]+'</td></tr>';
+    }).join('');
+    document.getElementById('ctab-'+theme).innerHTML = panelHead(theme === 'light' ? 'card.themeLight' : 'card.themeDark')
+      + '<div class="stbody"><div class="ctwrap"><table>'+head+body+'</table></div></div>';
+  });
+}
+
+function panelHead(key){ return '<div class="hd">'+esc(tr(key))+'</div>' }
+function pairRows(V){
+  return PAIRS.map(function(t){
+    var f = t[0], b = t[1], label = tr('card.usage.' + t[2]);
+    var missing = !V[f] || !V[b];
+    if (missing) console.warn('[color-card] 配对缺少 token:', !V[f] ? f : '', !V[b] ? b : '');
+    var r = missing ? 0 : ratio(V[f], V[b]); var gd = r ? grade(r) : ['dim','—'];
+    return '<div class="prow">'
+      + '<span class="pchip" style="background:'+V[b]+';color:'+V[f]+'">'+esc(label)+'</span>'
+      + '<span class="cr '+gd[0]+'">'+(r ? r.toFixed(2)+':1' : '—')+'</span>'
+      + '<span class="psrc">'+f+' on '+b+'</span></div>';
+  }).join('');
 }
 function renderPairs(){
   document.getElementById('pairs-title').textContent = tr('card.sectionPairs');
   document.getElementById('pairs-note').textContent = tr('card.pairsNote');
   var L = readAll(document.getElementById('probe-light')), D = readAll(document.getElementById('probe-dark'));
-  document.getElementById('pairs').innerHTML = PAIRS.map(function(t){
-    var f = t[0], b = t[1], label = tr('card.usage.' + t[2]);
-    return ['light','dark'].map(function(themeName){
-      var V = themeName === 'light' ? L : D;
-      var missing = !V[f] || !V[b];
-      if (missing) console.warn('[color-card] 配对缺少 token:', !V[f] ? f : '', !V[b] ? b : '');
-      var r = missing ? 0 : ratio(V[f], V[b]); var gd = r ? grade(r) : ['dim','—'];
-      var theme = tr(themeName === 'light' ? 'card.themeLight' : 'card.themeDark');
-      return '<div style="display:flex;align-items:center;gap:9px;padding:4px 0">'
-        + '<span style="font-size:10.5px;color:#888;width:34px">'+esc(theme)+'</span>'
-        + '<span style="padding:4px 11px;border-radius:7px;font-size:12px;font-weight:650;background:'+V[b]+';color:'+V[f]+';border:1px solid rgba(0,0,0,.08)">'+esc(label)+'</span>'
-        + '<span class="cr '+gd[0]+'">'+(r ? r.toFixed(2)+':1' : '—')+'</span>'
-        + '<span style="font-size:10.5px;color:#999;font-family:ui-monospace,Menlo,monospace">'+f+' on '+b+'</span></div>';
-    }).join('');
-  }).join('');
+  document.getElementById('pairs-light').innerHTML = panelHead('card.themeLight') + '<div class="stbody">'+pairRows(L)+'</div>';
+  document.getElementById('pairs-dark').innerHTML  = panelHead('card.themeDark')  + '<div class="stbody">'+pairRows(D)+'</div>';
 }
-function renderSpecimen(){
-  document.getElementById('typo-title').textContent = tr('card.sectionTypography');
-  document.getElementById('typo-note').innerHTML = esc(tr('card.typographyNote')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
-  var compareText = lookup('zh-CN', 'card.glyphCompareText') || '';  // 固定，四列同字
-  document.getElementById('specimen').innerHTML = SPECIMEN_LANGUAGES.map(function(L){
+
+function specimenHtml(){
+  var compareText = lookup('zh-CN', 'card.glyphCompareText') || '';
+  return SPECIMEN_LANGUAGES.map(function(L){
     var lang = L[0], name = L[1];
-    var stack = lookup(lang, 'card.stackLabel');
     var lines = SPECIMEN_LINES.map(function(s){
       var text = lookup(s[3] ? 'zh-CN' : lang, 'card.' + s[1]) || '';
       var lbl = lookup(CURRENT, 'card.' + s[0]) || lookup('zh-CN','card.' + s[0]);
@@ -317,12 +337,19 @@ function renderSpecimen(){
       + '<div class="txt glyphs">'+esc(compareText)+'</div></div>'
       + '</section>';
   }).join('');
-  // 读取每列**实际解析**的字体栈（此列自带 lang，:lang() 生效）
+}
+function renderSpecimen(){
+  document.getElementById('typo-title').textContent = tr('card.sectionTypography');
+  document.getElementById('typo-note').innerHTML = esc(tr('card.typographyNote')).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  var grid = '<div class="stbody"><div class="specimen-grid">'+specimenHtml()+'</div></div>';
+  document.getElementById('specimen-light').innerHTML = panelHead('card.themeLight') + grid;
+  document.getElementById('specimen-dark').innerHTML  = panelHead('card.themeDark')  + grid;
   document.querySelectorAll('[data-specimen]').forEach(function(el){
     var cs = getComputedStyle(el);
     el.querySelector('[data-stack]').textContent = cs.getPropertyValue('--font-family-ui').trim() + '   /* 实际生效 */';
   });
 }
+
 function renderRedlines(){
   document.getElementById('redlines-title').textContent = tr('card.sectionRedlines');
   var list = lookup(CURRENT, 'card.redlines') || lookup('zh-CN', 'card.redlines') || [];
