@@ -26,6 +26,7 @@
 | 11 | **数据请求** | **原生 `fetch`**（不用 axios）；搬旧仓库 `openapi/` 作类型化客户端；**不引数据缓存库**，用自建小钩子管加载 / 错误状态 |
 | 12 | **日期运算与时区** | **`date-fns` + `@date-fns/tz`**（Base UI 的官方适配器 · tree-shakable）；**格式化不归它，仍走 `Intl`** |
 | 13 | **长列表与表格** | **`virtua`** —— 长列表用 `VList`/`Virtualizer`（容器与行渲染归我们；索引 ↔ 偏移双向可查；尺寸缓存可存可恢复）；**表格类用 `VGrid`**（二维 · 固定表头/列）|
+| 14 | **状态管理** | **`zustand`**（不用 mobx；自研的 `storex` 不复活）|
 
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
@@ -44,13 +45,13 @@
 | `react-router` | `^8` | 路由（库模式，配 `basename`）|
 | `date-fns` · `@date-fns/tz` | `^4` · `^1` | 日期运算与时区（见 4.12）|
 | `virtua` | `^0.52` | 长列表虚拟滚动（聊天流 · 收件箱 · 看板列；见 4.13）|
+| `zustand` | `^5` | 状态管理（见 4.14）|
 | `pnpm`（**工具**，非依赖）| `10.34.6` | 包管理器，根 `packageManager` 锁死 |
 
 **待定**（推荐列出，未拍）：
 
 | 包 | 当前最新 | 用途 | 备注 |
 | --- | --- | --- | --- |
-| `zustand` | 5.0.15 | 状态 | |
 | `motion` | 13.4.6 | 动效 | |
 | `@playwright/test` | 1.63.0 | 浏览器验收 | 与 `scripts/tests/` 的测试策略一起定 |
 
@@ -442,6 +443,32 @@ packages/celadon/
 表格类需求**不再需要第二个库**；**反向无限滚动**这一条对"向上加载更早历史"是硬需求，而 **`@tanstack/react-virtual` 不支持**。
 
 **结论**：`@tanstack/react-virtual` **不采用** ✗（不留在待定表里）。
+
+### 4.14 状态管理：zustand
+
+**结论**：**`zustand`** ✓；**不用 mobx** ✗；旧仓库自研的 `storex` **不复活** ✗。
+
+**旧应用现在是什么**（迁移时要知道换掉什么）：
+
+| 用的 | 规模 |
+| --- | --- |
+| `mobx@^6.7.0` + `mobx-react-lite@^3.4.0` | **89 个文件** import mobx · 18 处 `observer()` |
+| `@yaoapp/storex`（自研 ✗）| **32 个文件**引用 |
+| umi 的 `models/` | 只有 4 个文件（很轻）|
+| `context/app` | React Context |
+
+**同类项目的选择**：`zustand` 是压倒性的 ✓ ——
+一个多包仓库用它（`store/` 目录 **886 个文件**，按领域分：agent · chat · device · aiInfra …），
+另一个在三个应用里都用它，第三个（同为 Vite 项目）也用。剩下的用框架自带能力（如 Solid 的 store ✓）。
+
+**为什么换掉 mobx** ✗：
+
+- `zustand` 的心智更小（一个 `create` + selector ✓），与函数组件配合自然 ✓
+- 体积小（无装饰器 / 无代理层 ✓）；`mobx` 需要 `observer()` 包裹组件，容易漏
+- 迁移不是"改写"而是"重写"：v2 本来就在重写，复制进来的组件按 zustand 重接即可（计入 `MIGRATION.md`）
+
+**为什么不用 `storex`** ✗：它是旧仓库的自研包（存储封装 + 变更监听 ✓），属 `01` 已定的「旧包不复活」范围；
+同类需求用 `zustand` 的 **`persist`** 中间件覆盖 ✓。
 
 ---
 
