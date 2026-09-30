@@ -22,6 +22,7 @@
 | 7 | **界面底座** | **不用 antd**；行为用 **`@base-ui/react` 1.8**，视觉用 **Celadon token** |
 | 8 | **旧仓库资产取舍** | **搬**：`components/ui/` 输入层（15 个原子输入 · 零 antd）· `PropertySchema` 契约 · `validation.ts` 校验；**不搬**：`FormBuilder`/`FlowBuilder`（低代码 UI）· `DataTable`/`PaginatedTable`（商业化后台表格）|
 | 9 | **i18n 运行时** | **`i18next` + `react-i18next`**；语言包 `locales/<locale>/<namespace>.json`；**新增语言 = 只加一个目录**，不改代码 |
+| 10 | **路由** | **React Router 库模式**（`react-router@^8`，不装 `@react-router/dev`）；**`basename` 与 Vite `base` 同源**，取自引擎注入的 `BASE` |
 
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
@@ -37,13 +38,13 @@
 | `typescript` | `^6.0.3` | 语言 |
 | `@base-ui/react` | `^1.8.0` | 行为与无障碍层 |
 | `i18next` · `react-i18next` | `^26` · `^17` | i18n 运行时 |
+| `react-router` | `^8` | 路由（库模式，配 `basename`）|
 | `pnpm`（**工具**，非依赖）| `10.34.6` | 包管理器，根 `packageManager` 锁死 |
 
 **待定**（推荐列出，未拍）：
 
 | 包 | 当前最新 | 用途 | 备注 |
 | --- | --- | --- | --- |
-| `react-router` | 8.4.0 | 路由 | |
 | `@tanstack/react-query` | 5.104.0 | 数据请求 | |
 | `zustand` | 5.0.15 | 状态 | |
 | `@tanstack/react-virtual` | 3.14.13 | 虚拟列表 | 与 `react-virtuoso` 二选一 |
@@ -77,7 +78,7 @@
 
 | 项 | 内容 |
 | --- | --- |
-| **代理** | `/api` 与 `/v1` 的 **SSE 增量不缓冲** + **WebSocket upgrade** —— `cui-desktop` 现在**没有任何 proxy**，从零加 |
+| **代理** | 按 4.10 的 12 个前缀转发给引擎；**SSE 不缓冲**（三个头照旧）+ **WebSocket upgrade**（`server.proxy` 的 `ws: true`）—— `cui-desktop` 现在**没有任何 proxy** |
 | **产物布局** | 定"源码直连"还是"产物拉取"（现状：`pull-cui` / `build-cui` 拉产物，并 `watch.ignored` 掉整个 `cui/`）|
 | **构建期门禁接线** | §5 的 6b：stylelint · TS 类型约束 · 反向依赖边界 · 接进 CI / pre-commit |
 | **后端 SDK** | §5 子项 2 |
@@ -310,6 +311,36 @@ packages/celadon/
 **格式化归属**：日期 / 数字 / 货币**不交给 i18next** —— 按 `19 数据格式` 的规则走 `Intl`，且**用回退后实际生效的语言**（`i18n.resolvedLanguage`），不用浏览器语言。
 
 **翻译流程**（`01` 内落地）：术语表 · 翻译规则 · 给 AI 的翻译提示词 · 风格样例，与 `check-i18n.mjs` 的自动检查配套。
+
+### 4.10 路由与宿主集成
+
+**结论**：**React Router 库模式** —— 装 `react-router@^8`，**不装** `@react-router/dev`；路由写在代码里。
+
+**依据**：
+
+- Vite + React 的项目里它是事实标准（工作区内两个不同产品分别用它的框架模式与库模式）
+- 不需要 SSR（PWA + Tauri），框架模式的主要收益用不上
+- 框架模式自带 dev server 并接管构建，会与「子路径挂载 + 引擎代理」争控制权；库模式下一套 Vite 配置管到底
+
+**旧应用现在的形态（迁移约束的来源）**：
+
+| 项 | 现状 |
+| --- | --- |
+| 路由 | 引擎框架的**约定式（文件）路由**：`pages/**` 目录即路由 |
+| 挂载 | **子路径**：`base` = `publicPath` = `/${process.env.BASE}/`，构建期注入 |
+| 模式 | **browser history**（非 hash）|
+| 跳转调用 | `history.push` 68 · `useNavigate` 18 · `useLocation` 16 · `useParams` 10 |
+| 引擎集成 | dev 时把 **12 个前缀**转发给引擎：`/api` `/v1` `/assets` `/components` `/tools` `/agents` `/admin` `/brands` `/docs` `/ai` `/.well-known` `/iframe` |
+| WS | **单独插件**处理 upgrade（原框架的 proxy 不管 WS）|
+| SSE | proxy 上显式设 `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · **`X-Accel-Buffering: no`** |
+
+**由此确定的硬约束**：
+
+1. **`basename`**：应用挂在 `/<BASE>/` 下，React Router 必须配 `basename`，且与 Vite 的 `base` **取自同一变量**；PWA 的 `scope` 与 `start_url` 同步
+2. **保留前缀**：上表 12 个前缀归**宿主引擎**，新应用路由**不得占用**
+3. **`/iframe` 是无外壳模式**：旧应用有 `/iframe` 页面，布局在路径含 `/iframe` 时**不渲染外壳** —— 保留
+4. **WS upgrade**：用 Vite `server.proxy` 的 `ws: true`；SSE 三个头照旧
+5. **路由 API 替换**：搬迁页面时 `history.push` / `useNavigate` / `useLocation` / `useParams` 一律换成 React Router 的对应 API（计入 `MIGRATION.md` 第 5 类改动）
 
 ---
 
