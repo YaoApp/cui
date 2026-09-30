@@ -8,8 +8,9 @@ const ALLOW = new Set(['transparent', 'none', 'inherit', 'currentColor', '50%', 
 let bad = [];
 for (const f of PAGES) {
   const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
-  for (const [prop, val] of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+);/g)) {
-    const v = val.trim();
+  for (const m of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+)(?=;|\})/g)) {   /* 注意：matchAll 的第 0 项是整个匹配，不能用 [prop, val] 解构；
+   另外最后一条声明通常没有分号，所以用前瞻 (?=;|}) 而不是要求分号 */
+    const prop = m[1], v = m[2].trim();
     if (ALLOW.has(v)) continue;
     const literal = /#[0-9A-Fa-f]{3,8}\b|rgba?\(|hsla?\(/.test(v) || (/^\d+(\.\d+)?(px|rem|em)$/.test(v) && ['font-size', 'border-radius', 'box-shadow'].includes(prop));
     if (!literal) continue;
