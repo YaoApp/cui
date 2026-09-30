@@ -177,6 +177,10 @@ li{margin:3px 0}
     <div class="sizes" id="ic-sizeDemo"></div>
     <h3 id="ic-a11yTitle"></h3>
     <ul id="ic-a11y"></ul>
+    <h3 id="ic-ruleTitle"></h3><p class="note" id="ic-ruleNote"></p>
+    <table id="ic-ruleTbl"></table>
+    <h3 id="ic-rsTitle"></h3><ul id="ic-rsList"></ul>
+    <h3 id="ic-rxTitle"></h3><ul id="ic-rxList"></ul>
     <h3 id="ic-newTitle"></h3>
     <ol id="ic-new"></ol>
   </section>
@@ -246,6 +250,17 @@ function apply(){
     [['d','ic.spGap'],['d','ic.spGapV']]
   ]);
   document.getElementById('ic-rules').innerHTML = ['r1','r2','r3','r4','r5'].map(function(k){ return '<li>'+fmt(tr('ic.'+k))+'</li>'; }).join('');
+  rows('ic-ruleTbl', [
+    [['h','ic.rWhat'],['h','ic.rMust']],
+    [['d','ic.rt1'],['d','ic.rv1']],
+    [['d','ic.rt2'],['d','ic.rv2']],
+    [['d','ic.rt3'],['d','ic.rv3']],
+    [['d','ic.rt4'],['d','ic.rv4']],
+    [['d','ic.rt5'],['d','ic.rv5']],
+    [['d','ic.rt6'],['d','ic.rv6']]
+  ]);
+  document.getElementById('ic-rsList').innerHTML = ['rs1','rs2','rs3','rs4','rs5','rs6'].map(function(k){ return '<li>'+fmt(tr('ic.'+k))+'</li>'; }).join('');
+  document.getElementById('ic-rxList').innerHTML = ['rx1','rx2','rx3'].map(function(k){ return '<li>'+fmt(tr('ic.'+k))+'</li>'; }).join('');
   document.getElementById('ic-a11y').innerHTML = ['a1','a2','a3','a4'].map(function(k){ return '<li>'+fmt(tr('ic.'+k))+'</li>'; }).join('');
   document.getElementById('ic-new').innerHTML = ['n1','n2','n3','n4'].map(function(k){ return '<li>'+fmt(tr('ic.'+k))+'</li>'; }).join('');
   document.getElementById('ic-sizeDemo').innerHTML = [14,16,20,24].map(function(sz){
