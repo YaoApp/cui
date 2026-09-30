@@ -1,7 +1,7 @@
 <!-- Our own icons (drawn by us). Only the five cases in the spec belong here; everything else
-     comes from lucide. i-yaoagents is the brand mark, normalised onto the 24 grid with a 1px
-     clear zone; the export artboard and title are stripped. Do not hand-edit the demo pages:
-     build-icons.mjs inlines this together with the lucide sprite. -->
+     comes from lucide. brand-yao-agents is the current mark and brand-yao the taiji used in the
+     earliest commits, both normalised onto the 24 grid with a 1px clear zone. Do not hand-edit
+     the demo pages: build-icons.mjs inlines this together with the lucide sprite. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <symbol id="brand-yao-agents" viewBox="0 0 24 24" data-src="own:yao-agents">
     <g transform="translate(1 2.6706) scale(0.0305698)">
