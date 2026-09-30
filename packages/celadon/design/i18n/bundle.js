@@ -576,7 +576,7 @@ window.CELADON_I18N = {
       "n1": "Find the closest name in **lucide** (`lucide.dev/icons`).",
       "n2": "Add it to `icons/manifest.json` and run `node build-icons.mjs` to re-inline it.",
       "n3": "Check it reads at **14px**; if not, draw a simplified version on the 24 grid.",
-      "n4": "Run the checks and update `THIRD-PARTY-NOTICES`.",
+      "n4": "Run the checks, `check-i18n` and `check-readme-values`, and confirm the page has no hard coded colour and no 16 grid leftovers.",
       "copied": "Copied",
       "cat": {
         "nav": "Navigation",
@@ -1198,7 +1198,7 @@ window.CELADON_I18N = {
       "n1": "**lucide** で意味が最も近い名前を探します（`lucide.dev/icons`）。",
       "n2": "`icons/manifest.json` に追加し、`node build-icons.mjs` で再インラインします。",
       "n3": "**14px** で読めるか確認し、読めなければ 24 グリッドで簡略版を描きます。",
-      "n4": "検査を実行し、`THIRD-PARTY-NOTICES` を更新します。",
+      "n4": "検査を実行します（`check-i18n` / `check-readme-values`）。ハードコード色と 16 グリッドの残りがないことも確認します。",
       "copied": "コピーしました",
       "cat": {
         "nav": "ナビ",
@@ -1820,7 +1820,7 @@ window.CELADON_I18N = {
       "n1": "去 **lucide** 找语义最近的名字（`lucide.dev/icons`）。",
       "n2": "加进 `icons/manifest.json`，跑 `node build-icons.mjs` 重新内联。",
       "n3": "在 **14px** 下确认可辨；不可辨则按 24 网格自绘简化版。",
-      "n4": "跑检查：`check-i18n` / `check-readme-values`，并补 `THIRD-PARTY-NOTICES`。",
+      "n4": "跑检查：`check-i18n` / `check-readme-values`；确认页面无硬编码颜色、无 16 网格残留。",
       "copied": "已复制",
       "cat": {
         "nav": "主导航",
@@ -2442,7 +2442,7 @@ window.CELADON_I18N = {
       "n1": "去 **lucide** 找語意最近的名字（`lucide.dev/icons`）。",
       "n2": "加進 `icons/manifest.json`，跑 `node build-icons.mjs` 重新內聯。",
       "n3": "在 **14px** 下確認可辨；不可辨則按 24 網格自繪簡化版。",
-      "n4": "跑檢查並補 `THIRD-PARTY-NOTICES`。",
+      "n4": "跑檢查：`check-i18n` / `check-readme-values`；確認頁面無硬編碼顏色、無 16 網格殘留。",
       "copied": "已複製",
       "cat": {
         "nav": "主導覽",

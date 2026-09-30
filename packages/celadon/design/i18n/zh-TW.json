@@ -574,7 +574,7 @@
     "n1": "去 **lucide** 找語意最近的名字（`lucide.dev/icons`）。",
     "n2": "加進 `icons/manifest.json`，跑 `node build-icons.mjs` 重新內聯。",
     "n3": "在 **14px** 下確認可辨；不可辨則按 24 網格自繪簡化版。",
-    "n4": "跑檢查並補 `THIRD-PARTY-NOTICES`。",
+    "n4": "跑檢查：`check-i18n` / `check-readme-values`；確認頁面無硬編碼顏色、無 16 網格殘留。",
     "copied": "已複製",
     "cat": {
       "nav": "主導覽",
