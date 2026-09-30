@@ -1,8 +1,8 @@
 {
   "name": "@yaoapp/cui",
   "version": "2.0.0",
-  "description": "CUI 2.0 — design baseline and application: design tokens, icon system, i18n, specification pages and the app shell.",
-  "license": "Apache-2.0",
+  "description": "A chat UI framework and design baseline for building AI native applications on Yao App Engine.",
+  "license": "Yao License 1.0",
   "type": "module",
   "repository": {
     "type": "git",
