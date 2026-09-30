@@ -283,5 +283,78 @@
     "gradeFail": "不達標",
     "contrastLegend": "等級：AAA ≥7:1 · AA ≥4.5:1（正文標準）· 大字/圖形 ≥3:1 · 不達標 <3:1；正文低於 4.5:1 不能用於正文。",
     "reasonNote": "「填充 / 邊界 / 遮罩 / 僅暗色」不參與文字對比度判定（用法見「關鍵配對」）；「停用豁免」依 WCAG 對停用控件豁免。"
+  },
+  "f": {
+    "title": "Foundations · 間距 · 圓角 · 層級 · 動效 · 邊框",
+    "subtitle": "P0 補齊項：所有頁面的前置基線。左欄淺色 / 右欄暗色，數值即時讀取 tokens.css。",
+    "source": "單一來源：tokens.less → build-css.mjs → tokens.css。本頁所有數值與顏色均即時讀取，零硬編碼。",
+    "langnote": "文案隨語言切換；數值與顏色不隨語言變化。",
+    "spacing": {
+      "title": "間距 Spacing",
+      "note": "4 的倍數；禁魔法數字。檔位越大用於越外層的間距。",
+      "scale": "刻度",
+      "usage": "用法（允許檔位）",
+      "example": "實例：卡片內距 16 · 標題與正文 8 · 按鈕間 12",
+      "u1": "元件內距（控制項 padding）",
+      "u2": "元素間（同組 gap）",
+      "u3": "區塊間（section）",
+      "u4": "柵格槽寬（gutter）"
+    },
+    "radius": {
+      "title": "圓角 Radius",
+      "note": "四檔，按「元素越大圓角越大」取值。",
+      "usage": "用法",
+      "r1": "按鈕 · 輸入框 · 小元件",
+      "r2": "卡片 · 面板 · 彈層",
+      "r3": "大容器 · 圖片",
+      "r4": "標籤 · 膠囊按鈕 · 頭像角標"
+    },
+    "elevation": {
+      "title": "陰影與層級 Elevation",
+      "note": "層級由陰影 + z-index 共同定義；遮罩只用於 L3。",
+      "levels": "層級示例",
+      "table": "層級對照",
+      "lv0": "L0 base",
+      "lv1": "L1 raised",
+      "lv2": "L2 floating",
+      "lv3": "L3 overlay",
+      "colLevel": "層級",
+      "colShadow": "陰影 token",
+      "colZ": "z-index",
+      "colUse": "用於",
+      "use0": "貼合內容（表格列 / 清單）",
+      "use1": "卡片 / 分頁標籤 / 徽標",
+      "use2": "下拉 / 氣泡 / 懸浮面板",
+      "use3": "彈窗 / 抽屜 / 通知（配 --scrim）",
+      "useSticky": "吸頂工具列 / 分節標題"
+    },
+    "motion": {
+      "title": "動效 Motion",
+      "note": "時長按位移與重要性分檔；進場 decelerate、退場 accelerate。",
+      "scale": "時長",
+      "curves": "緩動曲線",
+      "play": "播放",
+      "rules": "規則",
+      "r1": "該動：面板展開/收合、下拉出現、按下回饋、載入、串流輸出、狀態切換。",
+      "r2": "不該動：捲動跟隨、文字重排、頻繁重複的微互動（會暈）。",
+      "r3": "只動 transform / opacity（不動 width/height/top/left）。",
+      "r4": "減動效：開啟系統「減少動態效果」後全部時長歸零（tokens.less 內統一處理，元件無需各自判斷）。",
+      "reducedOn": "目前系統偏好：減少動態效果 —— 已降級（時長歸零）",
+      "reducedOff": "目前系統偏好：正常動效"
+    },
+    "border": {
+      "title": "邊框 Border（含 WCAG 1.4.11 決策）",
+      "note": "欄位底與內容底只差 1.05:1，所以邊框是輸入框唯一的識別手段 —— 1.4.11 要求 3:1。",
+      "ramp": "邊界梯度（實測對比度）",
+      "on": "欄位底 / 內容底",
+      "demo": "實例：輸入框",
+      "demoDefault": "預設（弱邊界，觀感輕）",
+      "demoStrong": "高對比偏好（強邊界，1.4.11 達標）",
+      "decision": "決策",
+      "d1": "預設態保留弱邊界（觀感優先）；",
+      "d2": "提供 --border-control-strong / --border-hover-strong 達標檔；",
+      "d3": "系統開啟「高對比」時由 tokens.less 的媒體查詢自動切換（淺/暗均已實測生效）。",
+      "deviation": "這是一處**有意偏離**：預設態不滿足 1.4.11 的字面要求；如需嚴格達標，把 --border-control 直接指向強邊界即可（一行改動）。"
+    }
   }
 }

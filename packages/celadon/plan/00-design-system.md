@@ -1,38 +1,98 @@
-# 00 · 设计规范
+# 00 · 设计规范（Foundations）
 
-- **状态**：🚧 进行中（当前阶段）
-- **目标**：定下 2.0 的视觉与交互基线：配色 / token / 字体 / i18n / 图标 / 组件样式规格
+- **状态**：🚧 进行中 —— 已完成"色彩/排版/i18n/品牌"；本轮起**补齐 Foundations 缺口**
+- **目标**：定下 2.0 的视觉与交互基线：配色 / token / 字体 / i18n / 图标 / 组件样式规格 + **间距·圆角·层级·动效·栅格**
 - **依赖**：—（本阶段是所有模块的前置）
-- **不包含**：**工程类基础设施**（构建工具 · 主题映射 · 图标体系 · 质量门禁 · 后端 SDK · i18n 构建）→ 见 [01 基础设施](01-infrastructure.md)
+- **不包含**：**工程类基础设施**（构建工具 · 主题映射 · 图标体系落地 · 质量门禁 · 后端 SDK · i18n 构建）→ 见 [01 基础设施](01-infrastructure.md)
+  以及：可访问性 → `13`（拟）· 内容与文案 → `14`（拟）· 数据可视化 → `15`（拟）· AI 交互 → `16`（拟）· 页面模式 → `17`（拟）· 治理与版本 → `12`（拟）
 
-## 已完成 ✅
+> **本轮依据**：2026-09-30 对照 **Atlassian Foundations**（Tokens/Accessibility/Content/Spacing/Grid/Color/Typography/Iconography/Illustrations/Logos/Elevation/Border/Radius）· **Ant Design 设计**（全局样式/设计模式/原则/模板/动效/图形化）· **IBM Carbon**（Design/Develop/Migrate/Contribute，含 Carbon for AI）。
+> 逐项差距见工作区 `design/v2/gap-vs-bigtech.md`。
+>
+> **家底实况**：114 个 token —— 色彩（品牌 9 · 中性底 10 · 文字 6 · 边界 5 · 语义 6 · 焦点 4）与排版（字体栈 6 · 字号 5 · 字重 3 · 行高 2）**强**；间距 1 · 圆角 1 · 时长 1 · 缓动 1 · 阴影 2 **薄**。
+> **结论：不重做，只补层。**
+
+## 1. 已完成 ✅
 
 | 项 | 产物（本包内） | 自检方式 |
 | --- | --- | --- |
-| 配色与语义 token | `design/tokens.less` → `tokens.css`（浅/暗两套；含 focus-ring / scrim / disabled / brand-ink） | `node design/build-css.mjs` 编译通过 |
-| 配色出处 | 中国传统色：品牌「青」`#2A7B7B` · 成功「松花绿」`#057748` · 危险「朱红」`#D93B30` · 警示「琥珀」`#8B6214` | `design/README.md` 色表 |
+| 配色与语义 token（114 个） | `design/tokens.less` → `tokens.css`（浅/暗两套；含 focus-ring / scrim / disabled / brand-ink / brand-solid-*） | `node design/build-css.mjs` |
+| 配色出处 | 中国传统色：品牌「青」`#2A7B7B` · 成功「松花绿」`#057748` · 危险「朱红」`#D93B30` · 警示「琥珀」`#8B6214` | `design/README.md` 色表 + `check-readme-values.mjs` |
+| 双主题定稿 | 浅色＝冷白底 + **暖墨**文字/线条；暗色＝**暖墨**底（`#191816`/`#121110`）+ 暖白文字（`#F4F1EA`） | 色卡双列实算 |
+| 状态配色（交互/禁用/占位） | `--background-hover/-active/-selected/-readonly/-disabled` · `--border-hover/-disabled` · `--text-placeholder/-disabled`；三级文字 5.00:1 ✓ | 色卡「控件状态」矩阵（浅暗各一列） |
+| 对比度自检 | 色卡实时实算：**11 行 × 2 主题，0 行低于 AA**；关键配对 **11 × 2** | `color-card.html` |
 | 四语字体栈 | `--font-family-ui-hans/-hant/-japanese` + `:lang` 自动映射（繁中不走简中字形、日文不走中文字形）；等宽补 CJK | 色卡「字体样本」四列解析栈 |
-| 状态配色（交互/禁用/占位） | `--background-hover/-active/-selected/-readonly/-disabled` · `--border-hover/-disabled` · `--text-placeholder/-disabled`；三级文字修正为 AA（4.54:1） | 色卡「关键配对」与「中性/交互态」组实算 |
 | 排版度量 | 字重 430 · 行高 1.5（拉丁）/ 1.7（中日文）· 中文最小 12px · 中文零字距 | `tokens.less` |
-| i18n | `design/i18n/{zh-CN,zh-TW,en,ja}.json`（`ui.*` 必翻 / `sample.*` 演示数据）+ 生成器 + 运行时切换（缺 key 回退 `zh-CN`） | `node design/build-i18n.mjs`；英文模式残留中文 = 0 |
-| 色卡（自检工具） | `design/color-card.html`：**零硬编码**、实时读 `tokens.css`、对比度实算 + **关键配对**校验 | 16 组配对全部 ≥ AA |
-| 详细界面稿 | `design/mock.html`：1440×888 三列通高 · 零硬编码 · 四语可切 · 51 个线性 SVG 图标 | 程序化校验无颜色字面量 |
-| Logo（设计交付物） | `design/logo-mark-celadon{,-dark}.svg`（官方原版**仅换颜色码**，diff 仅 1 行）· `logo-app-celadon{,-dark}.svg` · `design/icons/icon-*.png` 七档 | 官方原版 vs 换色版 diff 比对 |
+| i18n | `design/i18n/{zh-CN,zh-TW,en,ja}.json`（**214 key × 4 语**，`ui.*` 必翻 / `sample.*` 演示数据）+ 生成器 + 运行时切换 | `build-i18n.mjs` + `check-i18n.mjs`（缺 key / 漏翻 / 繁简 / 日文） |
+| 色卡（自检工具） | `design/color-card.html`：**零硬编码**、实时读 `tokens.css`、对比度实算 + 关键配对 + 控件状态矩阵 + 理由标签 | 程序化校验无颜色字面量 |
+| 详细界面稿 | `design/mock.html`：1440×888 三列通高 · 零硬编码 · 四语可切 · **52 个内联 SVG 图标** | 程序化校验无颜色字面量 |
+| Logo（设计交付物） | `design/logo-mark-celadon{,-dark}.svg`（官方原版**仅换颜色码**，diff 仅 1 行）· `logo-app-celadon{,-dark}.svg` · `design/icons/icon-*.png` 7 档 | 官方原版 vs 换色版 diff 比对 |
+| 本地浏览/防缓存 | `design/serve.mjs`（零依赖 · `no-store` · 目录浏览） | 改完刷新即见 |
 
-## 待完成 ⏳
+## 2. 待补齐 ⬜ —— Foundations（本模块内）
 
-| 项 | 说明 | 阻塞于 |
+> 勾选规则：完成 = 产物 + 自检双落；每项补完即勾。
+
+### 2.1 P0 · 必须先定（所有页面的前置）
+
+- ✅ **F1 间距系统 Spacing** —— 9 档（2/4/6/8/12/16/24/32/48）＋ 用法表（内距 4/6/8/12 · 元素间 8/12/16 · 区块间 24/32/48 · 槽宽 16/24）
+  产物：`tokens.less` 刻度 · `foundations.html` 刻度+用法+实例 · README Foundations 表；自检：页面实时读 tokens.css，零硬编码
+- ✅ **F2 圆角 Radius** —— 四档 small 6 / medium 8 / large 12 / pill 999 ＋ 用法（小控件/按钮输入/卡片面板/标签胶囊）
+  产物：`tokens.less` · `foundations.html` 四档示例；自检：同上
+- ✅ **F3 阴影与层级 Elevation** —— L0 无 / L1 `--shadow-subtle` / L2 `--shadow-floating` / L3 `--shadow-overlay`＋`--z-base/raised/sticky/overlay/modal/toast/tooltip`
+  产物：`tokens.less` · `foundations.html` 层级叠放 + 对照表（含 sticky 行）
+- ✅ **F4 动效 Motion** —— 时长 120/200/320 ＋ 缓动 standard/decelerate/accelerate（曲线图实时由 token 绘制）＋ 规则（只动 transform/opacity）＋ **`prefers-reduced-motion` 下时长归零**（tokens.less 统一处理，实测 0.01ms）
+  产物：`tokens.less` · `foundations.html` 曲线 + 播放演示 + 减动效状态
+- ✅ **F5 边框 Border（含 1.4.11 决策）** —— **默认保留弱边界（观感）**；新增达标档 `--border-control-strong`（浅 `#8D8A80` 3.14 · 暗 `#7C776B` 3.47）＋ `--border-hover-strong`；`prefers-contrast: more` 下由 tokens.less 媒体查询**自动切换**（浅/暗均已实测生效）
+  产物：`tokens.less` · `foundations.html` 梯度实测 + 两个输入框对照 + 偏离说明（**有意偏离**，严格达标只需 1 行）
+### 2.2 P1 · 结构与适配
+
+- [ ] **F6 栅格与响应式 Grid** —— 现状：**无断点体系**（全库仅色卡内部 2 条 `@media`）
+  补：断点（≥1440 / 1280 / 1024 / 768）· 列数与槽宽 · 容器宽 · **三列面板的折叠规则**（导航 / 内容 / 侧板）· 最小支持宽度
+- [ ] **F7 图标体系 Iconography** —— 现状：有 7 档 PNG，缺规范
+  补：16 / 20 / 24 网格 · 描边粗细 · 线帽/转角 · 命名 · 正负形与对齐（与 01 的图标字体子项协同）
+- [ ] **F8 密度模式 Density** —— 现状：无
+  补：先**决策是否需要**（紧凑 / 舒适）；若要：定义行高、控件高、间距的倍增档（会牵动 F1/F3）
+
+### 2.3 P2 · 内容与表达
+
+- [ ] **F9 插画与空状态 Illustrations** —— 现状：无
+  补：空态插画风格 + **六种空/异常态模板**（无数据 / 无结果 / 无权限 / 出错 / 加载中 / 首次使用），含文案与主行动
+- [ ] **F10 数据格式 Data format** —— 现状：无
+  补：数字与千分位 · 日期与相对时间 · 时长 · 文件大小 · 单位与货币 · 四语差异（→ `14` 协同）
+
+## 3. 归属其他模块（此处只登记，不在本文件做）
+
+- [ ] **X1 可访问性**（目标尺寸 ≥24/44 · 键盘与焦点顺序 · ARIA · 减动效 · 色觉障碍 · 屏幕阅读器 · CI 门禁）→ **拟新增模块 `13`** ★
+- [ ] **X2 内容与文案**（语气 · 术语表 · 按钮/错误/空态文案）→ 拟 `14`
+- [ ] **X3 数据可视化色板**（分类/顺序/发散 + 图表规范）→ 拟 `15`
+- [ ] **X4 AI 交互规范**（流式与中断 · 生成内容标注 · 不确定性 · 引用来源 · 人工确认门 · 失败重试 · 重新生成）→ **拟新增模块 `16`** ★
+- [ ] **X5 页面模式与模板**（表单 / 列表 / 详情 / 结果 / 异常 / 工作台 / 可视化页）→ 拟 `17`
+- [ ] **X6 治理与版本**（alpha/beta/stable/deprecated · 废弃策略 · 贡献与评审 · 变更日志）→ 拟 `12`
+- [ ] **X7 桌面壳规范**（Tauri：窗口 / 菜单 / 快捷键 / 托盘 / 通知）→ 拟 `18`
+
+## 4. 补齐顺序（建议）
+
+| 顺序 | 项 | 理由 |
 | --- | --- | --- |
-| 交互规范落到组件规格 | 面板三态（收起≠关闭）· 键盘可达（focus-ring）· 动效（120/200/320ms）· 反馈与空态 | 03 组件 |
+| 1 | **F1 间距 → F2 圆角 → F3 层级 → F4 动效** | 成本最低、影响面最大；02 布局与 03 组件都吃它，先定后写省返工 |
+| 2 | **X1 可访问性** | 目标尺寸/键盘顺序/ARIA **决定组件怎么实现**；组件写完再补要全量返工 |
+| 3 | **F5 边框决策** + **F6 栅格** + **F7 图标** | 输入框形态与断点体系，直接影响第一屏实现 |
+| 4 | **X4 AI 交互规范** | 产品差异化；流式/生成标注/引用/确认门外部组件库帮不上 |
+| 5 | F9 / F10 / X2 / X3 | 内容与表达层，页面铺开时同步 |
+| 6 | F8 / X6 / X7 | 密度、治理、桌面壳，视需要 |
 
-## 验收（Done）
+> **色彩到此停止投入**：114 token + 色卡自检 + 0 行不达标，已远超"够用"。
+
+## 5. 验收（Done）
 
 1. 色卡：真实内容底上全部 ≥ AA，**关键配对**（实心/浅底两种用法）无错配；
 2. 四语字体栈解析正确（繁中/日文字形无混用）；
 3. 界面稿与色卡**零硬编码**（程序化校验通过）；
-4. 设计资产可被 01 基础设施直接消费（同一份 token 生成主题与色卡）。
+4. 设计资产可被 01 基础设施直接消费（同一份 token 生成主题与色卡）；
+5. **新增**：F1–F10 逐项勾完，且每项都有**产物 + 自检**（可在色卡或检查脚本中复现）。
 
-## 台账
+## 6. 台账
 
 > 规则：每从旧包复制一个文件，登记：**源 → 目标 → 改了什么 → 为什么**（也可记在 `../MIGRATION.md`）。
 > 复制的文件必须过四道：① 删掉没用到的分支 ② 换成语义 token（禁硬编码）③ 文案走 `ui.*` ④ 命名全称化。

@@ -112,13 +112,34 @@
   --font-size-13:13px;   /* 正文默认 */
   --font-size-14:14px; --font-size-15:15px; --font-size-16:16px; --font-size-17:17px; --font-size-20:20px;
 
-  /* ===== 间距 / 圆角 / 阴影 / 动效 ===== */
-  --spacing-2:2px; --spacing-4:4px; --spacing-6:6px; --spacing-8:8px; --spacing-12:12px; --spacing-16:16px; --spacing-24:24px; --spacing-32:32px;
+  /* ===== 间距 Spacing（4 的倍数；禁魔法数字）=====
+     用法：组件内距 4/6/8/12 · 元素间 8/12/16 · 区块间 24/32/48 · 栅格槽宽 16/24 */
+  --spacing-2:2px; --spacing-4:4px; --spacing-6:6px; --spacing-8:8px; --spacing-12:12px; --spacing-16:16px; --spacing-24:24px; --spacing-32:32px; --spacing-48:48px;
+
+  /* ===== 圆角 Radius（用法：按钮/输入 medium · 卡片/面板 large · 标签/胶囊 pill · 小控件 small）===== */
   --radius-small:6px; --radius-medium:8px; --radius-large:12px; --radius-pill:999px;
+
+  /* ===== 动效 Motion =====
+     时长：120 微反馈（按下/悬停）· 200 常规（面板展开/淡入）· 320 大位移（抽屉/页面）
+     缓动：standard 通用 · decelerate 进场（快起慢停）· accelerate 退场（慢起快走） */
   --duration-fast:120ms; --duration-base:200ms; --duration-slow:320ms;
   --easing:cubic-bezier(.4,0,.2,1);
+  --easing-standard:cubic-bezier(.4,0,.2,1);
+  --easing-decelerate:cubic-bezier(0,0,.2,1);
+  --easing-accelerate:cubic-bezier(.4,0,1,1);
+
+  /* ===== 阴影与层级 Elevation =====
+     L0 base 无阴影 · L1 raised 卡片/标签页 · L2 floating 下拉/气泡 · L3 overlay 弹窗/抽屉/提示 */
   --shadow-subtle:0 1px 2px rgba(18,17,16,.05);
   --shadow-floating:0 10px 30px rgba(18,17,16,.10), 0 2px 6px rgba(18,17,16,.06);
+  --shadow-overlay:0 24px 60px rgba(18,17,16,.18), 0 4px 12px rgba(18,17,16,.08);
+  --z-base:0; --z-raised:10; --z-sticky:100; --z-overlay:1000; --z-modal:1100; --z-toast:1200; --z-tooltip:1300;
+
+  /* ===== 边框 Border：强边界档（WCAG 1.4.11 达标值）=====
+     默认态用 --border-control（观感轻）；高对比偏好下由下方 @media 自动切到强边界。
+     达标实测：内容底 3.31 / 字段底 3.14 */
+  --border-control-strong:#8D8A80;
+  --border-hover-strong:#847F73;
   --column-header-height:40px;
   --row-height:40px;
 }
@@ -175,6 +196,29 @@
 
   --shadow-subtle:0 1px 2px rgba(18,17,16,.5);
   --shadow-floating:0 12px 34px rgba(18,17,16,.6);
+  --shadow-overlay:0 26px 64px rgba(18,17,16,.72), 0 4px 14px rgba(18,17,16,.5);
+
+  /* 强边界档（暗）：内容底 3.98 / 字段底 3.47 ✓ */
+  --border-control-strong:#7C776B;
+  --border-hover-strong:#827D70;
+}
+
+/* ===== 减动效：系统偏好开启时，全部时长归零（组件无需各自处理）===== */
+@media (prefers-reduced-motion: reduce) {
+  :root, .celadon,
+  .celadon[data-theme='dark'], [data-theme='dark'] .celadon {
+    --duration-fast:0.01ms; --duration-base:0.01ms; --duration-slow:0.01ms;
+  }
+}
+
+/* ===== 高对比偏好：控件边界自动切到 1.4.11 达标档 =====
+   注意：必须重复暗色作用域选择器，否则 .celadon[data-theme='dark']（0,2,0）会盖掉本段（0,1,0） */
+@media (prefers-contrast: more) {
+  :root, .celadon,
+  .celadon[data-theme='dark'], [data-theme='dark'] .celadon {
+    --border-control:var(--border-control-strong);
+    --border-hover:var(--border-hover-strong);
+  }
 }
 
 /**

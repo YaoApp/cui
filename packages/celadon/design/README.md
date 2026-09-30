@@ -35,6 +35,20 @@
 | 焦点环 | `--brand` + 2px offset | `--brand-lift` | 键盘可达性必备 |
 | 遮罩 | `rgba(18,17,16,.32)` | `rgba(18,17,16,.60)` | 两套主题同源（暖墨） |
 | 禁用（底/字/边） | `#F0F0F2` / `#A8A69E` / `#E3E1DA` | `#232119` / `#5F5A52` / `#322F29` | 豁免对比度要求（底未随暖墨改） |
+| 控件边界（默认档） | `#C9C7C0`（悬停 `#9F9D96`） | `#4A4740`（悬停 `#5E5A52`） | 观感轻；字段底对比浅 1.54 / 暗 1.91 |
+| 控件边界（**达标档**） | `#8D8A80`（悬停 `#847F73`） | `#7C776B`（悬停 `#827D70`） | **WCAG 1.4.11 要 ≥3:1**（字段底实测 3.14 / 3.47）；`prefers-contrast: more` 下自动切换 |
+
+## Foundations（P0 补齐）· `foundations.html`
+
+间距 / 圆角 / 层级 / 动效 / 边框 五项基线，浅/暗分列、数值实时读 `tokens.css`：
+
+| 项 | token | 规则 |
+| --- | --- | --- |
+| 间距 | `--spacing-2 … 48`（9 档） | 组件内距 4/6/8/12 · 元素间 8/12/16 · 区块间 24/32/48 · 槽宽 16/24 |
+| 圆角 | `--radius-small/medium/large/pill` | 小控件 small · 按钮/输入 medium · 卡片/面板 large · 标签/胶囊 pill |
+| 层级 | `--shadow-subtle/floating/overlay` + `--z-base/raised/sticky/overlay/modal/toast/tooltip` | L0 无 · L1 卡片 · L2 浮层 · L3 弹窗（配 `--scrim`）|
+| 动效 | `--duration-fast/base/slow` + `--easing-standard/decelerate/accelerate` | 120 微反馈 · 200 常规 · 320 大位移；进场 decelerate、退场 accelerate；**`prefers-reduced-motion` 下时长归零** |
+| 边框 | `--border-control` + `--border-control-strong` | 默认弱边界（观感）；高对比偏好自动切达标档（1.4.11 要 3:1） |
 
 ## 组件草图与状态
 
