@@ -268,7 +268,20 @@ window.CELADON_I18N = {
         "errorHint": "Invalid date",
         "solid": "Primary",
         "soft": "Soft"
-      }
+      },
+      "reason": {
+        "fill": "Fill",
+        "line": "Border",
+        "overlay": "Overlay",
+        "dark": "Dark only",
+        "exempt": "Disabled (exempt)"
+      },
+      "gradeAaa": "AAA",
+      "gradeAa": "AA",
+      "gradeLarge": "Large text / graphics",
+      "gradeFail": "Below AA",
+      "contrastLegend": "Level: AAA >= 7:1 - AA >= 4.5:1 (body text) - large text or graphics >= 3:1 - below AA < 3:1. Anything under 4.5:1 must not carry body text.",
+      "reasonNote": "\"Fill / border / overlay / dark only\" are not judged for text contrast (see key pairs for real usage); \"disabled (exempt)\" follows the WCAG exemption for disabled controls."
     }
   },
   "ja": {
@@ -539,7 +552,20 @@ window.CELADON_I18N = {
         "errorHint": "日付形式が不正です",
         "solid": "主ボタン",
         "soft": "淡色"
-      }
+      },
+      "reason": {
+        "fill": "塗り",
+        "line": "境界線",
+        "overlay": "オーバーレイ",
+        "dark": "暗色のみ",
+        "exempt": "無効（免除）"
+      },
+      "gradeAaa": "AAA",
+      "gradeAa": "AA",
+      "gradeLarge": "大サイズ文字・図形",
+      "gradeFail": "AA 未満",
+      "contrastLegend": "等級：AAA ≥7:1 · AA ≥4.5:1（本文）· 大サイズ文字・図形 ≥3:1 · AA 未満 <3:1。4.5:1 未満は本文に使用しないこと。",
+      "reasonNote": "「塗り / 境界線 / オーバーレイ / 暗色のみ」は文字コントラスト判定の対象外（実際の用法は「主要な組み合わせ」参照）。「無効（免除）」は WCAG の無効コントロール免除に準拠。"
     }
   },
   "zh-CN": {
@@ -810,7 +836,20 @@ window.CELADON_I18N = {
         "errorHint": "日期格式不正确",
         "solid": "主按钮",
         "soft": "浅底"
-      }
+      },
+      "reason": {
+        "fill": "填充",
+        "line": "边界",
+        "overlay": "遮罩",
+        "dark": "仅暗色",
+        "exempt": "禁用豁免"
+      },
+      "gradeAaa": "AAA",
+      "gradeAa": "AA",
+      "gradeLarge": "大字 / 图形",
+      "gradeFail": "不达标",
+      "contrastLegend": "等级：AAA ≥7:1 · AA ≥4.5:1（正文标准）· 大字/图形 ≥3:1 · 不达标 <3:1；正文低于 4.5:1 不能用于正文。",
+      "reasonNote": "「填充 / 边界 / 遮罩 / 仅暗色」不参与文字对比度判定（用法见「关键配对」）；「禁用豁免」按 WCAG 对禁用控件豁免。"
     }
   },
   "zh-TW": {
@@ -1081,7 +1120,20 @@ window.CELADON_I18N = {
         "errorHint": "日期格式不正確",
         "solid": "主按鈕",
         "soft": "淺底"
-      }
+      },
+      "reason": {
+        "fill": "填充",
+        "line": "邊界",
+        "overlay": "遮罩",
+        "dark": "僅暗色",
+        "exempt": "停用豁免"
+      },
+      "gradeAaa": "AAA",
+      "gradeAa": "AA",
+      "gradeLarge": "大字 / 圖形",
+      "gradeFail": "不達標",
+      "contrastLegend": "等級：AAA ≥7:1 · AA ≥4.5:1（正文標準）· 大字/圖形 ≥3:1 · 不達標 <3:1；正文低於 4.5:1 不能用於正文。",
+      "reasonNote": "「填充 / 邊界 / 遮罩 / 僅暗色」不參與文字對比度判定（用法見「關鍵配對」）；「停用豁免」依 WCAG 對停用控件豁免。"
     }
   }
 };
