@@ -588,6 +588,8 @@
     "spCorner": "角の丸み",
     "spCornerV": "8px 以上の要素は **2px**、それ未満は **1px**、対角の直角は **約 2.41px**",
     "spGap": "要素の間隔",
-    "spGapV": "別々の要素の間は **2px 以上**（lucide の規定）"
+    "spGapV": "別々の要素の間は **2px 以上**（lucide の規定）",
+    "themeLight": "ライト",
+    "themeDark": "ダーク"
   }
 }
