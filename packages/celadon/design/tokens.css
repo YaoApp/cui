@@ -44,7 +44,7 @@
  */
 /* 中栏最小宽（保护） */
 /* 侧栏最小宽 */
-/* 侧栏上限/默认 = 画面比例 */
+/* 侧栏上限 = 总宽 − 导航 − 内容最小（由判定函数算，不写死） */
 /* 视口低于此值 → 导航自动收图标轨 */
 .celadon,
 [data-theme] .celadon {
@@ -253,8 +253,9 @@
   --side-width-tool: 600px;
   --side-width-task: 640px;
   --side-width-wide: 840px;
-  --side-width-max: 1280px;
-  --side-max-ratio: 0.7;
+  /* 侧栏上限**不写死**：= 总宽 − 导航区 − 内容区最小（见 --center-min）。用户可自由拖拽到此上限。 */
+  --side-resize-handle: 6px;
+  /* 拖拽把手宽度（贴在内容区与侧栏之间） */
   --content-max: 880px;
   --content-max-wide: 1040px;
   /* 中栏内文可读最大宽 */
