@@ -49,22 +49,24 @@
   /* 选中底 = 品牌浅底 */
   --background-readonly: #EDEDF0;
   /* 只读字段底（比 --background-field 略深 → 明确「不可编辑」）；文字用 --text-secondary */
-  --border-subtle: #ECECEE;
-  /* 装饰线 */
-  --border-default: #DEDEE1;
-  /* 常规边界 */
-  --border-control: #CACACD;
-  /* 控件边界 */
-  --border-hover: #A0A0A8;
+  --border-subtle: #EBEAE6;
+  /* 装饰线（暖灰） */
+  --border-default: #DEDCD7;
+  /* 常规边界（暖灰） */
+  --border-control: #C9C7C0;
+  /* 控件边界（暖灰） */
+  --border-hover: #9F9D96;
   /* 控件悬停边界（比 --border-control 深一档） */
-  --text-primary: #0A0A0A;
-  --text-secondary: #5C5C63;
-  --text-tertiary: #6F6F76;
-  /* 已在 --background-field(#F4F4F5) 上 4.54:1 ✓ AA（原 #7A7A82 仅 3.87:1，不达标） */
+  --text-primary: #14120E;
+  /* 暖墨（b* +2.35）；18.98 → 17.93:1 ✓ 与暗色暖白同源 */
+  --text-secondary: #5E5A52;
+  /* 暖灰 */
+  --text-tertiary: #6B6962;
+  /* 暖灰；字段底(#F4F4F5) 上 5.00:1 ✓ AA（原 #7A7A82 仅 3.87:1 不达标） */
   --text-placeholder: var(--text-tertiary);
   /* 输入占位文字：与三级文字同色（单一来源）；**不要用 --text-muted**（仅 2.15:1，只能做装饰） */
-  --text-muted: #A8A8B0;
-  /* **纯装饰**（分隔符/水印）；承载文字请用 --text-tertiary（4.78:1 ✓ AA） */
+  --text-muted: #A8A69E;
+  /* **纯装饰**（分隔符/水印）；承载文字请用 --text-tertiary（5.00:1 ✓ AA） */
   /* ===== 品牌 · 青 #2A7B7B ===== */
   --brand: #2A7B7B;
   /* 真实内容底(#FAFAFB) 4.77:1 ✓ AA */
@@ -94,11 +96,11 @@
   --focus-ring: 0 0 0 var(--focus-ring-offset) var(--background-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
   --background-disabled: #F0F0F2;
   /* 命名与 background-* 家族一致 */
-  --text-disabled: #A8A8B0;
+  --text-disabled: #A8A69E;
   /* 禁用态豁免对比度要求 */
-  --border-disabled: #E4E4E7;
-  --scrim: rgba(10, 10, 10, 0.32);
-  /* 弹窗/抽屉遮罩 */
+  --border-disabled: #E3E1DA;
+  --scrim: rgba(18, 17, 16, 0.32);
+  /* 弹窗/抽屉遮罩（暖墨，与暗面同源） */
   /* ===== 警示 · 淡琥珀（不像 error）===== */
   --warm: #8B6214;
   /* 实心底（白字 5.45:1） */
@@ -170,8 +172,8 @@
   --duration-base: 200ms;
   --duration-slow: 320ms;
   --easing: cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-subtle: 0 1px 2px rgba(10, 10, 10, 0.05);
-  --shadow-floating: 0 10px 30px rgba(10, 10, 10, 0.1), 0 2px 6px rgba(10, 10, 10, 0.06);
+  --shadow-subtle: 0 1px 2px rgba(18, 17, 16, 0.05);
+  --shadow-floating: 0 10px 30px rgba(18, 17, 16, 0.1), 0 2px 6px rgba(18, 17, 16, 0.06);
   --column-header-height: 40px;
   --row-height: 40px;
 }
