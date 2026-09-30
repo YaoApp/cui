@@ -176,7 +176,26 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 @keyframes celadon-caret{0%,49%{opacity:1}50%,100%{opacity:0}}
 /* ===== 三栏竖分割演示（导航区 | 内容区 | 侧栏）===== */
 .gclip{position:relative;height:300px;overflow:hidden;border:1px solid var(--border-default);border-radius:var(--radius-medium);background:var(--background-app)}
-.gvp{display:flex;flex-direction:column;height:300px;transform-origin:top left;background:var(--background-app);position:relative}
+.gvp{height:300px;transform-origin:top left;background:var(--background-app);position:relative;overflow:hidden}
+/* 窗口左上角控制区：红绿灯 + 收起按钮。**位置永远不变** —— 收起后它落在内容区上方 */
+.gcaps{position:absolute;left:0;top:0;height:var(--titlebar-height);display:flex;align-items:center;gap:8px;padding-left:14px;z-index:var(--z-sticky)}
+.gcaps .lights{display:flex;gap:6px;width:var(--traffic-lights-width)}
+.gcaps .lights i{width:11px;height:11px;border-radius:50%}
+.gcaps .lights i:nth-child(1){background:var(--danger)} .gcaps .lights i:nth-child(2){background:var(--warm)} .gcaps .lights i:nth-child(3){background:var(--success)}
+.gcaps .tgl,.gicons .gi{cursor:pointer}
+.gcaps .tgl{width:24px;height:24px;border-radius:var(--radius-xs);background:var(--background-field);border:1px solid var(--border-default);position:relative}
+.gcaps .tgl::after{content:attr(data-label);position:absolute;top:calc(100% + 6px);left:0;white-space:nowrap;background:var(--background-surface);
+  color:var(--text-primary);border:1px solid var(--border-default);border-radius:var(--radius-small);padding:4px 8px;font-size:11px;
+  box-shadow:var(--shadow-subtle);opacity:0;pointer-events:none;transition:opacity var(--duration-fast) var(--easing-standard);z-index:var(--z-tooltip)}
+.gcaps .tgl:hover::after{opacity:1}
+/* 每栏各自的顶行（不是横跨全宽的标题栏） */
+.gcolhead{flex:none;height:var(--titlebar-height);display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle)}
+.gcolhead i{display:block;height:12px;border-radius:3px;background:var(--background-field)}
+.gnh{padding-left:calc(14px + var(--traffic-lights-width) + 32px)}
+.gnh .t{width:64px}
+.gch .l{width:88px} .gch .r{margin-left:auto;width:56px}
+/* 收起导航（轨=0）时：内容区顶行给左上控件让位 —— 红绿灯位置不变，落在内容区头上 */
+.ggrid.nav-none .gch{padding-left:var(--titlebar-inset)}
 .ghead{flex:none;height:var(--header-height);background:var(--background-navigation);border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px;padding:0 12px}
 .ghead i{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .ghead .l{width:96px} .ghead .r{margin-left:auto;width:64px}
@@ -191,7 +210,7 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
   transition:opacity var(--duration-fast) var(--easing-standard);z-index:var(--z-tooltip)}
 .gicons .gi:hover::after{opacity:1}
 .ggrid{flex:1;min-height:0;display:grid;grid-template-columns:0 0 0;transition:grid-template-columns var(--duration-slow) var(--easing-standard)}
-.gnav{grid-column:1;background:var(--background-navigation);border-right:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden;min-width:0}
+.gnav{grid-column:1;background:var(--background-navigation);border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .gnav span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .gnav.overlay{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-overlay);box-shadow:var(--shadow-floating)}
 /* 图标轨：只留图标，hover 出标签（图标无文字时的标准做法） */
@@ -208,10 +227,12 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .gscrim.on{opacity:1;pointer-events:auto}
 .gnav.drawer{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-modal);box-shadow:var(--shadow-overlay);transform:translateX(-100%);transition:transform var(--duration-base) var(--easing-decelerate)}
 .gnav.drawer.open{transform:none}
-.gcenter{grid-column:2;min-width:0;display:flex;justify-content:center;padding:14px 12px;overflow:hidden}
+.gcenter{grid-column:2;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.gbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:12px 10px;overflow:hidden}
+.gcenter .gbody{justify-content:center;padding:14px 16px}
 .gcontent{width:100%;display:flex;flex-direction:column;gap:12px}
 .gcontent b{display:block;height:16px;border-radius:4px;background:var(--background-surface);border:1px solid var(--border-default)}
-.gside{grid-column:3;background:var(--background-navigation);border-left:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.gside{grid-column:3;background:var(--background-navigation);border-left:1px solid var(--border-subtle);display:flex;flex-direction:column;overflow:hidden}
 .gside span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .gpreset{cursor:pointer;border:1px solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);border-radius:var(--radius-pill);padding:3px 9px;font-size:11px;font-family:inherit}
 .gpreset.on{background:var(--brand-soft);color:var(--brand-ink);border-color:var(--brand);font-weight:650}
@@ -659,11 +680,12 @@ function renderGrid(theme){
   var sides=''; for (var k=0;k<6;k++) sides += '<span></span>';
   var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.demo'))+'</div>'
     + '<div class="gclip" id="gclip-'+theme+'"><div class="gvp" id="gvp-'+theme+'">'
-    + '<div class="ghead" id="ghead-'+theme+'"><span class="gicons" id="gicons-'+theme+'"></span><i class="l"></i><i class="r"></i></div>'
+    + '<div class="gcaps"><span class="lights"><i></i><i></i><i></i></span>'
+    + '<button type="button" class="tgl" id="gtgl-'+theme+'"></button></div>'
     + '<div class="ggrid" id="ggrid-'+theme+'">'
-    + '<div class="gnav" id="gnav-'+theme+'">'+navs+'</div>'
-    + '<div class="gcenter"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div>'
-    + '<div class="gside" id="gside-'+theme+'">'+sides+'</div>'
+    + '<div class="gnav" id="gnav-'+theme+'"><div class="gcolhead gnh"><i class="t"></i></div><div class="gbody">'+navs+'</div></div>'
+    + '<div class="gcenter"><div class="gcolhead gch"><i class="l"></i><i class="r"></i></div><div class="gbody"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div></div>'
+    + '<div class="gside" id="gside-'+theme+'"><div class="gcolhead gsh"><i class="l"></i></div><div class="gbody">'+sides+'</div></div>'
     + '</div><div class="gscrim" id="gscrim-'+theme+'"></div></div></div>';
   var navModeTbl = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.navTitle'))+'</div><table>'
     + '<tr><th>'+esc(tr('f.grid.navColTarget'))+'</th><th>'+esc(tr('f.grid.navColForm'))+'</th><th>'+esc(tr('f.grid.navColToggle'))+'</th><th>'+esc(tr('f.grid.navColState'))+'</th></tr>'
@@ -690,8 +712,9 @@ function syncGrid(){
     vp.style.width = viewport + 'px';
     vp.style.height = '300px';
     var gnav = document.getElementById('gnav-'+theme);
-    gnav.style.display = L.navTrack === 0 ? 'none' : '';
-    vp.classList.toggle('nav-none', L.navMode === 'none' || L.navMode === 'overlay');   /* 客户端收到 0：导航改顶栏图标（浮层打开时也保留入口） */
+    var ggridEl = document.getElementById('ggrid-'+theme);
+    if (ggridEl) ggridEl.classList.toggle('nav-none', L.navTrack === 0);   /* 轨=0：内容顶行给左上控件让位 */
+    gnav.style.width = L.navTrack === 0 ? '0px' : '';   /* 轨=0：钉成 0 宽（只剩 overflow 裁剪），不留缝隙 */
     gnav.classList.toggle('rail', L.navMode === 'rail');
     gnav.classList.toggle('overlay', L.navMode === 'overlay');
     gnav.classList.toggle('drawer', !!L.drawer);
@@ -699,8 +722,8 @@ function syncGrid(){
     gnav.style.width = (L.navMode === 'overlay' || L.navMode === 'drawerOpen') ? L.navOverlayW + 'px' : '';
     var scr = document.getElementById('gscrim-'+theme);
     if (scr) scr.classList.toggle('on', !!L.scrim);
-    var ic = document.getElementById('gicons-'+theme);
-    if (ic) ic.innerHTML = NAVITEMS.map(function(k,i){ return '<span class="gi'+(i===0?' on':'')+'" data-label="'+esc(tr('f.grid.item.'+k))+'"></span>'; }).join('');
+    var tg = document.getElementById('gtgl-'+theme);
+    if (tg) tg.setAttribute('data-label', tr(NAV_MANUAL ? 'f.grid.navCollapsedBtn' : 'f.grid.navExpanded'));
     document.getElementById('gside-'+theme).style.display = L.side > 0 ? '' : 'none';
     var k = Math.min(1, (clip.clientWidth - 2) / viewport);
     vp.style.transform = 'scale(' + k + ')';
@@ -760,6 +783,8 @@ function initGrid(){
     pb.dataset.done = '1';
   }
   ['light','dark'].forEach(function(theme){
+    var tg = document.getElementById('gtgl-'+theme);
+    if (tg && !tg.dataset.done){ tg.addEventListener('click', function(){ var b = document.getElementById('gr-navbtn'); if (b) b.click(); }); tg.dataset.done = '1'; }
     var scr = document.getElementById('gscrim-'+theme);
     if (scr && !scr.dataset.done){ scr.addEventListener('click', function(){ NAV_MANUAL = false; syncGrid(); }); scr.dataset.done = '1'; }
   });

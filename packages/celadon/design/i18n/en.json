@@ -499,10 +499,10 @@
       "navTitle": "The three ways the navigation collapses (client and web)",
       "navColTarget": "Case",
       "navColForm": "Collapsed form",
-      "navColToggle": "Toggle position",
+      "navColToggle": "Top left controls",
       "navColState": "State",
       "nr1a": "Client or wide web (1024 and up)",
-      "nr1b": "**Collapses to 0**: the sidebar goes away and the navigation becomes **icons in the header**, on the same row as the window controls",
+      "nr1b": "**Collapses to 0**: the navigation area disappears and the content runs from the very left edge; the **traffic lights and the toggle do not move**, landing on top of the content, whose top row makes room with a left inset",
       "nr1c": "macOS: the title bar beside the traffic lights. Elsewhere: the header",
       "nr1d": "Persisted preference plus a transient flag (two levels)",
       "nr2a": "Mid web (768 to 1023)",
@@ -513,7 +513,7 @@
       "nr3b": "Drawer: floats over content with a scrim",
       "nr3c": "Hamburger in the header",
       "nr3d": "Transient (Esc or the scrim closes it)",
-      "railNote": "In the rail: a label appears on hover, the current item keeps a left indicator, and everything stays keyboard reachable (aria-expanded)"
+      "railNote": "There is **no title bar**: three vertical columns, each with its own top row. Only the traffic lights and the toggle float in the top left corner, and they never move"
     }
   }
 }
