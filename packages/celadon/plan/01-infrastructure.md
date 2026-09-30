@@ -52,6 +52,23 @@ packages:
   - '!packages/celadon'
 ```
 
+### ⚠️ 光有排除还不够：celadon 必须自带一个 workspace 根
+
+排除只挡住"**被外层吃进去**"，挡不住"**从里面向外找根**"：在 `celadon/` 里跑 `pnpm install`，
+pnpm 会**向上**找到外层的 `pnpm-workspace.yaml`，于是**装了外层**（还会改写外层的锁文件）——
+第一次实测就是这样，外层锁文件被改动，必须回滚。
+
+**解法**：在 `celadon/` 放一个自己的 `pnpm-workspace.yaml`（`packages: []` 即可）。
+pnpm 找的永远是**最近的**那一个，于是本目录成为**它自己的工作区根**，安装、锁文件、`node_modules`
+全部落在 celadon 内部。
+
+**实测（两条都过才算过）**：
+
+| 检查 | 结果 |
+| --- | --- |
+| 装到本地 | `celadon/node_modules` 19M · `celadon/pnpm-lock.yaml` 665 行 · vite 6.4.3 在本目录 |
+| 外层没被碰 | 外层锁文件无改动 · 外层成员仍 7 个 · 外层 git 状态干净 |
+
 **验证方式（带正向对照）**：往 `packages/celadon/` 放一个探针 `package.json`，然后数工作区成员 ——
 既要"**探针不在里面**"，也要"**其他成员仍在**"。实测：成员 7 个、探针不在 ✓。
 
