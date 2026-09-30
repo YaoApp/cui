@@ -25,12 +25,16 @@ p.sub{margin:var(--spacing-8) 0 0;color:var(--text-secondary);max-width:1000px}
 .card h2{font-size:var(--font-size-subtitle);font-weight:var(--font-weight-strong);margin:0 0 var(--spacing-4)}
 .card p.hint{margin:0 0 var(--spacing-12);color:var(--text-secondary);font-size:var(--font-size-caption)}
 .card code{font-family:var(--font-family-monospace);font-size:var(--font-size-caption)}
-table{width:100%;border-collapse:collapse}
-th,td{text-align:start;padding:var(--spacing-8) var(--spacing-12);border-bottom:var(--border-width) solid var(--border-subtle)}
-th{color:var(--text-secondary);font-size:var(--font-size-caption);font-weight:var(--font-weight-medium)}
-td{font-size:var(--font-size-body-lg)}
-td.k{color:var(--text-secondary);width:34%}
-td code{color:var(--text-tertiary)}
+/* 成对两列：一行两个，长值跨整行（原来表格把标签与值拉太开，浪费横向空间） */
+.pairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--spacing-32)}
+@media (max-width:900px){.pairs{grid-template-columns:1fr}}   /* 窄屏退成一列 */
+.pair{display:flex;gap:var(--spacing-12);align-items:baseline;padding:var(--spacing-8) 0;
+  border-bottom:var(--border-width) solid var(--border-subtle);min-width:0}
+.pair.wide{grid-column:1 / -1}
+.pair .k{flex:0 0 44%;color:var(--text-secondary);font-size:var(--font-size-caption);line-height:var(--line-height-normal)}
+.pair .k code{font-size:var(--font-size-label);color:var(--text-tertiary)}
+.pair .v{flex:1;min-width:0;overflow-wrap:anywhere}
+.pair .v code{color:var(--text-tertiary);font-size:var(--font-size-caption)}
 .mono{font-family:var(--font-family-monospace);direction:ltr;unicode-bidi:isolate}
 .raw{margin-top:var(--spacing-8);color:var(--text-muted);font-size:var(--font-size-label);font-family:var(--font-family-monospace)}
 </style>
@@ -56,38 +60,38 @@ td code{color:var(--text-tertiary)}
 <div class="card">
   <h2>日期与时间</h2>
   <p class="hint">同一时刻用 <code>Intl.DateTimeFormat</code> 按语言渲染；相对时间用固定的样例间隔（<code>Intl.RelativeTimeFormat</code>）。</p>
-  <table id="tblDate"><tbody></tbody></table>
+  <div class="pairs" id="tblDate"></div>
 </div>
 
 <div class="card">
   <h2>相对时间阶梯</h2>
   <p class="hint">阈值见 <code>19</code> §3.1：刚刚 → N 分钟 → N 小时 → N 天 → 月日 → 年月日。</p>
-  <table id="tblRel"><tbody></tbody></table>
+  <div class="pairs" id="tblRel"></div>
 </div>
 
 <div class="card">
   <h2>时区</h2>
   <p class="hint">同一时间戳在三个时区下的显示；落库格式带偏移与 IANA 括注（<code>19</code> §2）。</p>
-  <table id="tblTz"><tbody></tbody></table>
+  <div class="pairs" id="tblTz"></div>
   <p class="raw" id="tzRaw"></p>
 </div>
 
 <div class="card">
   <h2>数字 · 单位 · 货币</h2>
   <p class="hint">千分位 · 大数缩写 · 文件大小（1024 进制 / 1 位小数）· 金额（保留币种小数位）· 列表与范围。<b>技术标识强制拉丁数字与 LTR</b>。</p>
-  <table id="tblNum"><tbody></tbody></table>
+  <div class="pairs" id="tblNum"></div>
 </div>
 
 <div class="card">
   <h2>排序（按语言）</h2>
   <p class="hint">同一组词用 <code>Intl.Collator</code> 排序；标识符与路径不本地化，按码位（<code>19</code> §3.6）。</p>
-  <table id="tblSort"><tbody></tbody></table>
+  <div class="pairs" id="tblSort"></div>
 </div>
 
 <div class="card">
   <h2>双向文本（RTL）</h2>
   <p class="hint">方向性图标镜像 · bidi 隔离 · 视觉回归 —— 规则见 <code>19</code> §4，效果演示见 <a href="css-logical.html">css-logical.html</a>。</p>
-  <table id="tblRtl"><tbody></tbody></table>
+  <div class="pairs" id="tblRtl"></div>
 </div>
 
 <script>
@@ -97,8 +101,9 @@ var LANG = 'zh-CN', THEME = 'light';
 var T = Date.UTC(2026, 8, 30, 8, 12, 34);          /* 2026-09-30T08:12:34Z */
 var D = new Date(T);
 var rows = function (el, pairs) {
-  el.querySelector('tbody').innerHTML = pairs.map(function (p) {
-    return '<tr><td class="k">' + p[0] + (p[2] ? ' <code>' + p[2] + '</code>' : '') + '</td><td>' + p[1] + '</td></tr>';
+  el.innerHTML = pairs.map(function (p) {
+    return '<div class="pair' + (p[3] ? ' wide' : '') + '"><span class="k">' + p[0]
+      + (p[2] ? ' <code>' + p[2] + '</code>' : '') + '</span><span class="v">' + p[1] + '</span></div>';
   }).join('');
 };
 var esc = function (s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
@@ -195,9 +200,9 @@ function render() {
 
   /* RTL 规则（静态说明） */
   rows(document.getElementById('tblRtl'), [
-    ['要镜像', esc('i-left · i-right · i-collapse · i-expand · i-act-undo · i-act-redo'), '水平且有方向意义'],
+    ['要镜像', esc('i-left · i-right · i-collapse · i-expand · i-act-undo · i-act-redo'), '水平且有方向意义', true],
     ['不镜像', esc('i-act-sort（上下）· 播放 · 时钟 · 进度'), '与方向无关'],
-    ['bidi', esc('用户输入 / 文件名 → dir="auto"；代码 / 路径 / 标识符 → dir="ltr" + isolate'), '19 §4.2']
+    ['bidi', esc('用户输入 / 文件名 → dir="auto"；代码 / 路径 / 标识符 → dir="ltr" + isolate'), '19 §4.2', true]
   ]);
 }
 
