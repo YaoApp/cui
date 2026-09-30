@@ -11,3 +11,5 @@ allowBuilds:
   esbuild: true
   svelte-preprocess: true
   yorkie: true
+overrides:
+  '@vidstack/react': 1.12.12
