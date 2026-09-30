@@ -43,7 +43,7 @@
   产物：`tokens.less` · `foundations.html` 层级叠放 + 对照表 + **吸顶演示**（可滚动：滚动时头部固定并"抬起"出现阴影，实测 sticky + z 100 + shadow-subtle）
 - ✅ **F4 动效 Motion** —— 时长 120/200/320 ＋ 缓动 standard/decelerate/accelerate（曲线图实时由 token 绘制）＋ 规则（只动 transform/opacity）＋ **`prefers-reduced-motion` 下时长归零**（tokens.less 统一处理，实测 0.01ms）
   产物：`tokens.less` · `foundations.html` 曲线 + **12 个常用场景画廊**（悬停/按下/焦点环/淡入/下拉/面板展开/面板收起/抽屉/弹窗/通知/列表依次/流式输出），**每个都用它在真实产品里的控件操作**（移入/按住/点击或 Tab/拨开关/点行头/页内按钮），并标注所用 时长·缓动；卡片内可切**动效强度三档**（减少动态 0.01ms / 标准 120·200·320 / 丰富 180·300·480）；**强度是两级模型**：`减少动态` = 无障碍总开关（`@media (prefers-reduced-motion)` 用 `*{…!important}` 强制，局部类压不过），`标准/丰富/低调` = 产品口味，**容器加 `.motion-rich/-quiet/-still` 即可场景级指定**（实测：正常偏好 200→140/300ms，减动效时全部 0.01ms）+ 减动效状态
-- ✅ **F5 边框 Border（含 1.4.11 决策）** —— **默认保留弱边界（观感）**；新增达标档 `--border-control-strong`（浅 `#8D8A80` 3.14 · 暗 `#7C776B` 3.47）＋ `--border-hover-strong`；`prefers-contrast: more` 下自动切达标档、`prefers-contrast: less` 下自动切更淡档（新增 `--border-control-low/-hover-low`；浅/暗均已实测）；卡片内可切**对比度三档**（低 `#D5D3CC`/标准 `#C9C7C0`/高 `#8D8A80`）
+- ✅ **F5 边框 Border（含 1.4.11 决策）** —— **默认保留弱边界（观感）**；新增达标档 `--border-control-strong`（浅 `#8D8A80` 3.14 · 暗 `#7C776B` 3.47）＋ `--border-hover-strong`；`prefers-contrast: more` 下自动切达标档、`prefers-contrast: less` 下自动切更淡档（新增 `--border-control-low/-hover-low`；浅/暗均已实测）；组件侧提供 `.input.is-strong` 修饰类（不再靠内联边框；聚焦环统一品牌环）· 卡片内可切**对比度三档**（低 `#D5D3CC`/标准 `#C9C7C0`/高 `#8D8A80`）
   产物：`tokens.less` · `foundations.html` 梯度实测 + 两个输入框对照 + 偏离说明（**有意偏离**，严格达标只需 1 行）
 ### 2.2 P1 · 结构与适配
 
