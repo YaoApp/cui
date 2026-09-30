@@ -536,8 +536,8 @@
     "d2": "回転・反転・圧縮をしない",
     "d3": "ブランド色以外に変えない",
     "d4": "マークを画面アイコンに使わない",
-    "setTitle": "2. アイコン一式（67 個・lucide 由来）",
-    "setNote": "アイコンは**もう自前で描きません**。本体はすべて **lucide**（24 グリッド・約 1857 個・ISC）から取得し、各アイコンには対応する lucide 名を記録しています。",
+    "setTitle": "2. アイコン一式（68 個）",
+    "setNote": "画面アイコンは **lucide**（24 グリッド・ISC）から。**ブランドマーク `i-yaoagents` は自前**で、同じ 24 グリッドに描いています。",
     "spWhat": "項目",
     "spValue": "値",
     "spGrid": "グリッド",
@@ -552,10 +552,10 @@
     "spColorV": "`stroke: currentColor`。1 アイコン 1 色",
     "spSize": "サイズ",
     "spSizeV": "表示段は **14 / 16 / 20 / 24**（既定 16）。本体は 24 グリッドの 1 セットのみ",
-    "galleryTitle": "全ギャラリー（67 個・クリックで名前をコピー）",
+    "galleryTitle": "全ギャラリー（68 個・クリックで名前をコピー）",
     "search": "i-xxx を検索（file / plus など）",
     "count": "",
-    "coverTitle": "覆盖（67 個・すべて lucide 由来）",
+    "coverTitle": "分類ごとの覆盖",
     "coverCat": "分類",
     "specTitle": "3. 使い方と自前作成の規格",
     "specNote": "既定は **lucide から取得**。自前で描くのは下の 5 類だけで、それも **24 グリッド / 線幅 2** で描きます。",
@@ -572,7 +572,7 @@
     "a4": "**アイコンだけで状態を伝えない**：状態 = アイコン + 文字 + 色。",
     "newTitle": "アイコンの追加",
     "n1": "**lucide** で意味が最も近い名前を探します（`lucide.dev/icons`）。",
-    "n2": "`icons/manifest.json` に追加し、`node build-icons.mjs` で再インラインします。",
+    "n2": "`icons/manifest.json` に追加し（lucide のものは lucide 名、自前は `icons/own-sprite.svg`）、`node build-icons.mjs` で再インラインします。",
     "n3": "**14px** で読めるか確認し、読めなければ 24 グリッドで簡略版を描きます。",
     "n4": "検査を実行します（`check-i18n` / `check-readme-values`）。ハードコード色と 16 グリッドの残りがないことも確認します。",
     "copied": "コピーしました",
@@ -581,7 +581,8 @@
       "act": "操作",
       "state": "状態",
       "file": "ファイル種別",
-      "obj": "対象"
+      "obj": "対象",
+      "own": "自前（ブランド）"
     },
     "spCorner": "角の丸み",
     "spCornerV": "8px 以上の要素は **2px**、それ未満は **1px**、対角の直角は **約 2.41px**",
@@ -617,6 +618,7 @@
     "rx2": "**名前**は `i-<領域>-<名前>` のまま。lucide 名と `icons/manifest.json` で対応させます。",
     "rx3": "**自前の範囲**は上の 5 類のみ。ほかは lucide から取得します。",
     "coverCount": "数",
-    "coverNames": "セマンティック名（私たち）"
+    "coverNames": "セマンティック名（私たち）",
+    "srcOwn": "自前"
   }
 }

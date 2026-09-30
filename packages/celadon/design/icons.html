@@ -49,13 +49,13 @@ code{font-family:var(--font-family-monospace);font-size:var(--font-size-caption)
 .cell:hover{border-color:var(--brand);background:var(--brand-soft)}
 .cell .nm{font-family:var(--font-family-monospace);font-size:var(--font-size-label);color:var(--text-tertiary);text-align:center;overflow-wrap:anywhere;hyphens:auto}
 .cell .src{font-family:var(--font-family-monospace);font-size:var(--font-size-label);color:var(--text-muted);text-align:center;overflow-wrap:anywhere}
+.cell.own{border-color:var(--brand-soft);background:var(--brand-soft)}
+.cell.own .src{color:var(--brand-ink)}   /* 自建：来源标品牌色，一眼可辨 */
 .cell .ico{color:var(--text-primary);display:flex}
 .cell.ok{background:var(--success-soft);border-color:var(--success-soft)}
 .brandrow{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
 .brandrow .bm{width:56px;height:56px}
-.brandrow .bm .mark-head{fill:var(--brand)}                              /* 头部：品牌青 */
-[data-theme="dark"] .brandrow .bm .mark-head{fill:var(--brand-lift)}     /* 暗底换提升色，否则看不见 */
-.brandrow .bm .mark-eye{fill:var(--brand-text)}                          /* 眼睛：品牌底上的前景色（原来硬编码 #FFF） */
+.brandrow .bm svg{display:block}   /* 品牌标记走 i-yaoagents 符号；头部/眼睛的取色在符号内（var(--brand-graphic) / var(--brand-text)），随主题自动切换 */
 .brandrow .ba{width:56px;height:56px;border-radius:var(--radius-large);overflow:hidden;border:1px solid var(--border-default)}
 .brandrow .ba img{width:100%;display:block}
 .sizes{display:flex;align-items:flex-end;gap:18px}
@@ -141,6 +141,22 @@ li{margin:3px 0}
 <symbol id="i-obj-sandbox" viewBox="0 0 24 24" data-src="lucide:box"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /> <path d="m3.3 7 8.7 5 8.7-5" /> <path d="M12 22V12" /></symbol>
 <symbol id="i-obj-container" viewBox="0 0 24 24" data-src="lucide:container"><path d="M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z" /> <path d="M10 21.9V14L2.1 9.1" /> <path d="m10 14 11.9-6.9" /> <path d="M14 19.8v-8.1" /> <path d="M18 17.5V9.4" /></symbol>
 <symbol id="i-obj-artifact" viewBox="0 0 24 24" data-src="lucide:package"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" /> <path d="M12 22V12" /> <polyline points="3.29 7 12 12 20.71 7" /> <path d="m7.5 4.27 9 5.15" /></symbol>
+<symbol id="i-yaoagents" viewBox="0 0 24 24" data-src="own:brand-mark">
+    <g transform="translate(1 2.6706) scale(0.0305698)">
+      
+      <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+      <g id="Yaobots" style="stroke:none" transform="translate(-151.5657, -188.764)" fill-rule="nonzero">
+      <path d="M486.884,189.207 C495.1615,188.4345 505.165,188.919 513.59,188.864 C599.61,188.302 684.55,217.9475 749.645,274.6415 C820.74,337.335 864.11,425.629 870.28,520.215 C874.69,585.13 864.71,657.9 819.94,708.215 C766.135,768.695 672.935,788.13 595.875,795.7 C576.14,797.64 557.055,797.635 537.68,798.92 C436.9495,800.75 298.6425,791.955 218.4915,723.25 C173.8735,685 156.2745,627.825 152.411,570.625 C145.8345,474.4635 177.8325,379.6425 241.3305,307.127 C292.7155,248.288 362.5635,208.649 439.428,194.7065 C455.6785,191.7125 470.5135,190.32 486.884,189.207 Z" id="Path" style="fill:var(--brand-graphic)"></path>
+      <g id="Eye-left" transform="translate(352.7054, 366.1909)" style="fill:var(--brand-text)">
+      <path d="M54.3200771,0.00131773874 C90.5575771,-0.297352792 107.046077,50.2461472 109.269077,79.1841472 C111.987077,114.573147 98.0685771,173.204147 55.0560771,176.574147 C19.8370771,176.004147 3.26007709,132.680147 0.574577092,103.311147 C-2.06042291,74.4961472 4.20857709,41.4316472 22.6780771,18.3306472 C30.9835771,7.94264721 41.0875771,1.40214721 54.3200771,0.00131773874 Z M67.8166257,49.886467 L66.8260771,49.8991472 C34.0975771,56.7616472 37.5585771,132.225647 70.5330771,131.761147 C103.215077,124.145147 100.147077,48.7151472 66.8260771,49.8991472 Z" id="Combined-Shape"></path>
+      </g>
+      <g id="Eye-right" transform="translate(562.8175, 366.1247)" style="fill:var(--brand-text)">
+      <path d="M76.7075112,8.55926237 C96.7425112,24.6522624 104.512511,49.8777624 107.982511,74.3482624 C112.957511,109.387262 99.1125112,171.335262 57.0025112,176.520262 C47.7325112,176.880262 37.7225112,173.635262 30.7025112,167.460262 C-8.8974888,132.641762 -8.5574888,58.3082624 22.3475112,18.0877624 C30.2475112,7.80826237 40.7175112,1.45976237 53.2275112,0.0662623674 C61.0975112,-0.590737633 70.7075112,3.73926237 76.7075112,8.55926237 Z M39.6166685,49.9369618 L38.6575112,49.9567624 C5.9375112,57.6252624 10.0475112,133.248262 43.3725112,131.767262 C76.3675112,122.553262 70.8975112,48.5472624 38.6575112,49.9567624 Z" id="Combined-Shape"></path>
+      </g>
+      </g>
+      </g>
+    </g>
+  </symbol>
 </defs></svg>
 <div class="wrap">
   <header class="top">
@@ -153,7 +169,7 @@ li{margin:3px 0}
     <h2 id="ic-brandTitle"></h2><p class="note" id="ic-brandNote"></p>
     <div class="panel">
       <div class="brandrow">
-        <span class="bm" aria-hidden="true"><svg viewBox="0 0 719.664453 610.367745" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%"><g transform="translate(-151.5657,-188.764)"><path class="mark-head" d="M486.884,189.207 C495.1615,188.4345 505.165,188.919 513.59,188.864 C599.61,188.302 684.55,217.9475 749.645,274.6415 C820.74,337.335 864.11,425.629 870.28,520.215 C874.69,585.13 864.71,657.9 819.94,708.215 C766.135,768.695 672.935,788.13 595.875,795.7 C576.14,797.64 557.055,797.635 537.68,798.92 C436.9495,800.75 298.6425,791.955 218.4915,723.25 C173.8735,685 156.2745,627.825 152.411,570.625 C145.8345,474.4635 177.8325,379.6425 241.3305,307.127 C292.7155,248.288 362.5635,208.649 439.428,194.7065 C455.6785,191.7125 470.5135,190.32 486.884,189.207 Z"/><g transform="translate(352.7054, 366.1909)" class="mark-eye"><path d="M54.3200771,0.00131773874 C90.5575771,-0.297352792 107.046077,50.2461472 109.269077,79.1841472 C111.987077,114.573147 98.0685771,173.204147 55.0560771,176.574147 C19.8370771,176.004147 3.26007709,132.680147 0.574577092,103.311147 C-2.06042291,74.4961472 4.20857709,41.4316472 22.6780771,18.3306472 C30.9835771,7.94264721 41.0875771,1.40214721 54.3200771,0.00131773874 Z M67.8166257,49.886467 L66.8260771,49.8991472 C34.0975771,56.7616472 37.5585771,132.225647 70.5330771,131.761147 C103.215077,124.145147 100.147077,48.7151472 66.8260771,49.8991472 Z"/></g><g transform="translate(562.8175, 366.1247)" class="mark-eye"><path d="M76.7075112,8.55926237 C96.7425112,24.6522624 104.512511,49.8777624 107.982511,74.3482624 C112.957511,109.387262 99.1125112,171.335262 57.0025112,176.520262 C47.7325112,176.880262 37.7225112,173.635262 30.7025112,167.460262 C-8.8974888,132.641762 -8.5574888,58.3082624 22.3475112,18.0877624 C30.2475112,7.80826237 40.7175112,1.45976237 53.2275112,0.0662623674 C61.0975112,-0.590737633 70.7075112,3.73926237 76.7075112,8.55926237 Z M39.6166685,49.9369618 L38.6575112,49.9567624 C5.9375112,57.6252624 10.0475112,133.248262 43.3725112,131.767262 C76.3675112,122.553262 70.8975112,48.5472624 38.6575112,49.9567624 Z"/></g></g></svg></span>
+        <span class="bm" aria-hidden="true"><svg viewBox="0 0 24 24" style="width:56px;height:56px"><use href="#i-yaoagents"/></svg></span>
         <span class="ba"><img src="icons/icon-256.png" alt="app icon"></span>
       </div>
     </div>
@@ -196,13 +212,15 @@ li{margin:3px 0}
 <script src="i18n/bundle.js"></script>
 <script>
 var LUCIDE = {'i-chat':'message-circle','i-inbox':'inbox','i-board':'square-kanban','i-ws':'folder-kanban','i-pc':'monitor','i-book':'book','i-search':'search','i-plus':'plus','i-plus-square':'square-plus','i-left':'chevron-left','i-right':'chevron-right','i-collapse':'panel-left-close','i-dots':'ellipsis','i-file':'file','i-split':'columns-2','i-send':'send','i-check':'check','i-clock':'clock','i-stop':'square','i-expand':'panel-left-open','i-split2':'columns-3','i-spark':'sparkles','i-folder':'folder','i-tasks':'list-checks','i-pause':'pause','i-nav-settings':'settings','i-nav-help':'circle-question-mark','i-nav-user':'user','i-nav-team':'users','i-nav-logout':'log-out','i-act-edit':'pencil','i-act-trash':'trash','i-act-copy':'copy','i-act-download':'download','i-act-upload':'upload','i-act-refresh':'refresh-cw','i-act-external':'external-link','i-act-filter':'funnel','i-act-sort':'arrow-up-down','i-act-close':'x','i-act-undo':'undo-2','i-act-redo':'redo-2','i-act-play':'play','i-act-attach':'paperclip','i-state-warning':'triangle-alert','i-state-error':'circle-alert','i-state-info':'info','i-state-loading':'loader-circle','i-state-queued':'list-ordered','i-file-pdf':'file-text','i-file-image':'file-image','i-file-sheet':'table','i-file-code':'code','i-file-archive':'archive','i-file-media':'music','i-file-text':'file-type','i-file-terminal':'terminal','i-obj-key':'key-round','i-obj-schedule':'calendar-clock','i-obj-integration':'plug','i-obj-skill':'wand-sparkles','i-obj-model':'cpu','i-obj-quota':'gauge','i-obj-billing':'receipt','i-obj-sandbox':'box','i-obj-container':'container','i-obj-artifact':'package'};
-var SYMBOLS = ['i-chat','i-inbox','i-board','i-ws','i-pc','i-book','i-search','i-plus','i-plus-square','i-left','i-right','i-collapse','i-dots','i-file','i-split','i-send','i-check','i-clock','i-stop','i-expand','i-split2','i-spark','i-folder','i-tasks','i-pause','i-nav-settings','i-nav-help','i-nav-user','i-nav-team','i-nav-logout','i-act-edit','i-act-trash','i-act-copy','i-act-download','i-act-upload','i-act-refresh','i-act-external','i-act-filter','i-act-sort','i-act-close','i-act-undo','i-act-redo','i-act-play','i-act-attach','i-state-warning','i-state-error','i-state-info','i-state-loading','i-state-queued','i-file-pdf','i-file-image','i-file-sheet','i-file-code','i-file-archive','i-file-media','i-file-text','i-file-terminal','i-obj-key','i-obj-schedule','i-obj-integration','i-obj-skill','i-obj-model','i-obj-quota','i-obj-billing','i-obj-sandbox','i-obj-container','i-obj-artifact'];
+var OWN = ['i-yaoagents'];
+var SYMBOLS = ['i-chat','i-inbox','i-board','i-ws','i-pc','i-book','i-search','i-plus','i-plus-square','i-left','i-right','i-collapse','i-dots','i-file','i-split','i-send','i-check','i-clock','i-stop','i-expand','i-split2','i-spark','i-folder','i-tasks','i-pause','i-nav-settings','i-nav-help','i-nav-user','i-nav-team','i-nav-logout','i-act-edit','i-act-trash','i-act-copy','i-act-download','i-act-upload','i-act-refresh','i-act-external','i-act-filter','i-act-sort','i-act-close','i-act-undo','i-act-redo','i-act-play','i-act-attach','i-state-warning','i-state-error','i-state-info','i-state-loading','i-state-queued','i-file-pdf','i-file-image','i-file-sheet','i-file-code','i-file-archive','i-file-media','i-file-text','i-file-terminal','i-obj-key','i-obj-schedule','i-obj-integration','i-obj-skill','i-obj-model','i-obj-quota','i-obj-billing','i-obj-sandbox','i-obj-container','i-obj-artifact','i-yaoagents'];
 var COVER = [
   ['nav', ['i-chat','i-inbox','i-board','i-ws','i-pc','i-book','i-nav-settings','i-nav-help','i-nav-user','i-nav-team','i-nav-logout']],
   ['act', ['i-search','i-plus','i-plus-square','i-left','i-right','i-collapse','i-dots','i-split','i-send','i-stop','i-expand','i-split2','i-pause','i-act-edit','i-act-trash','i-act-copy','i-act-download','i-act-upload','i-act-refresh','i-act-external','i-act-filter','i-act-sort','i-act-close','i-act-undo','i-act-redo','i-act-play','i-act-attach']],
-  ['state', ['i-check','i-clock','i-spark','i-state-warning','i-state-error','i-state-info','i-state-loading','i-state-queued']],
   ['file', ['i-file','i-folder','i-file-pdf','i-file-image','i-file-sheet','i-file-code','i-file-archive','i-file-media','i-file-text','i-file-terminal']],
-  ['obj', ['i-tasks','i-obj-key','i-obj-schedule','i-obj-integration','i-obj-skill','i-obj-model','i-obj-quota','i-obj-billing','i-obj-sandbox','i-obj-container','i-obj-artifact']]
+  ['state', ['i-check','i-clock','i-spark','i-state-warning','i-state-error','i-state-info','i-state-loading','i-state-queued']],
+  ['obj', ['i-tasks','i-obj-key','i-obj-schedule','i-obj-integration','i-obj-skill','i-obj-model','i-obj-quota','i-obj-billing','i-obj-sandbox','i-obj-container','i-obj-artifact']],
+  ['own', ['i-yaoagents']]
 ];
 var SIZE = 16, THEME = 'light', Q = '';
 var TR_THEME = { light: '浅色', dark: '暗色' };
@@ -214,7 +232,8 @@ function renderGallery(){
   var host = document.getElementById('ic-gallery');
   var list = SYMBOLS.filter(function(id){ return !Q || id.toLowerCase().indexOf(Q) >= 0; });
   host.innerHTML = list.map(function(id){
-    return '<button class="cell" data-id="'+id+'" title="lucide:'+(LUCIDE[id]||'')+'">'+icon(id, SIZE)+'<span class="nm">'+id+'</span><span class="src">'+(LUCIDE[id]||'')+'</span></button>'; }).join('');
+    var own = OWN.indexOf(id) >= 0;
+    return '<button class="cell'+(own?' own':'')+'" data-id="'+id+'" title="'+(own?'own':('lucide:'+LUCIDE[id]))+'">'+icon(id, SIZE)+'<span class="nm">'+id+'</span><span class="src">'+(own?tr('ic.srcOwn'):LUCIDE[id])+'</span></button>'; }).join('');
   document.getElementById('ic-count').textContent = list.length + ' / ' + SYMBOLS.length;
 }
 function renderCover(){
