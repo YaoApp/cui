@@ -47,7 +47,8 @@ window.CELADON_I18N = {
       },
       "composer": {
         "placeholder": "Continue: add the risks to the acceptance criteria…",
-        "defaultPermission": "Default permission"
+        "defaultPermission": "Default permission",
+        "awaitConfirm": "Please confirm the options above to continue…"
       },
       "panel": {
         "inProgress": "In progress",
@@ -70,6 +71,9 @@ window.CELADON_I18N = {
       "theme": {
         "light": "Light",
         "dark": "Dark"
+      },
+      "task": {
+        "id": "Task ID"
       }
     },
     "sample": {
@@ -246,6 +250,24 @@ window.CELADON_I18N = {
         "text": "Neutral · Text",
         "semantic": "Semantic",
         "metrics": "Size · Radius · Motion"
+      },
+      "state": {
+        "statesTitle": "Control states · live preview",
+        "statesNote": "All states at once: the .is-* classes mirror the real pseudo-classes (:hover/:focus/:read-only/:disabled) from the same tokens",
+        "groupInput": "Input",
+        "groupButton": "Button",
+        "default": "Default",
+        "hover": "Hover",
+        "active": "Pressed",
+        "focus": "Focus",
+        "disabled": "Disabled",
+        "filled": "Filled",
+        "placeholder": "Placeholder",
+        "readonly": "Read-only",
+        "error": "Error",
+        "errorHint": "Invalid date",
+        "solid": "Primary",
+        "soft": "Soft"
       }
     }
   },
@@ -296,7 +318,8 @@ window.CELADON_I18N = {
       },
       "composer": {
         "placeholder": "続けて：リスクを要件定義の受け入れ条件に追記…",
-        "defaultPermission": "既定の権限"
+        "defaultPermission": "既定の権限",
+        "awaitConfirm": "上記の選択肢を確認してから続けてください…"
       },
       "panel": {
         "inProgress": "進行中",
@@ -319,6 +342,9 @@ window.CELADON_I18N = {
       "theme": {
         "light": "ライト",
         "dark": "ダーク"
+      },
+      "task": {
+        "id": "タスク ID"
       }
     },
     "sample": {
@@ -495,6 +521,24 @@ window.CELADON_I18N = {
         "text": "ニュートラル · 文字",
         "semantic": "セマンティック",
         "metrics": "サイズ · 角丸 · モーション"
+      },
+      "state": {
+        "statesTitle": "コントロール状態 · ライブプレビュー",
+        "statesNote": "全状態を同時表示：.is-* クラスは実際の疑似クラス（:hover/:focus/:read-only/:disabled）と一対一、同一トークン",
+        "groupInput": "入力欄",
+        "groupButton": "ボタン",
+        "default": "既定",
+        "hover": "ホバー",
+        "active": "押下",
+        "focus": "フォーカス",
+        "disabled": "無効",
+        "filled": "入力済み",
+        "placeholder": "プレースホルダー",
+        "readonly": "読み取り専用",
+        "error": "エラー",
+        "errorHint": "日付形式が不正です",
+        "solid": "主ボタン",
+        "soft": "淡色"
       }
     }
   },
@@ -545,7 +589,8 @@ window.CELADON_I18N = {
       },
       "composer": {
         "placeholder": "继续：把风险点补进需求文档的验收条款…",
-        "defaultPermission": "默认权限"
+        "defaultPermission": "默认权限",
+        "awaitConfirm": "请先确认上方选项后继续…"
       },
       "panel": {
         "inProgress": "进行中",
@@ -568,6 +613,9 @@ window.CELADON_I18N = {
       "theme": {
         "light": "浅色",
         "dark": "暗色"
+      },
+      "task": {
+        "id": "任务 ID"
       }
     },
     "sample": {
@@ -744,6 +792,24 @@ window.CELADON_I18N = {
         "text": "中性 · 字",
         "semantic": "语义",
         "metrics": "尺寸 · 圆角 · 动效"
+      },
+      "state": {
+        "statesTitle": "控件状态 · 实时预览",
+        "statesNote": "静态展示多态：`.is-*` 类与真实伪类（:hover/:focus/:read-only/:disabled）一一对应，同一份 token",
+        "groupInput": "输入框",
+        "groupButton": "按钮",
+        "default": "默认",
+        "hover": "悬停",
+        "active": "按下",
+        "focus": "聚焦",
+        "disabled": "禁用",
+        "filled": "已填",
+        "placeholder": "占位",
+        "readonly": "只读",
+        "error": "错误",
+        "errorHint": "日期格式不正确",
+        "solid": "主按钮",
+        "soft": "浅底"
       }
     }
   },
@@ -794,7 +860,8 @@ window.CELADON_I18N = {
       },
       "composer": {
         "placeholder": "繼續：把風險點補進需求文件的驗收條款…",
-        "defaultPermission": "預設權限"
+        "defaultPermission": "預設權限",
+        "awaitConfirm": "請先確認上方選項後繼續…"
       },
       "panel": {
         "inProgress": "進行中",
@@ -817,6 +884,9 @@ window.CELADON_I18N = {
       "theme": {
         "light": "淺色",
         "dark": "深色"
+      },
+      "task": {
+        "id": "任務 ID"
       }
     },
     "sample": {
@@ -993,6 +1063,24 @@ window.CELADON_I18N = {
         "text": "中性 · 字",
         "semantic": "語意",
         "metrics": "尺寸 · 圓角 · 動效"
+      },
+      "state": {
+        "statesTitle": "控件狀態 · 即時預覽",
+        "statesNote": "靜態展示多態：`.is-*` 類與真實偽類（:hover/:focus/:read-only/:disabled）一一對應，同一份 token",
+        "groupInput": "輸入框",
+        "groupButton": "按鈕",
+        "default": "預設",
+        "hover": "懸停",
+        "active": "按下",
+        "focus": "聚焦",
+        "disabled": "停用",
+        "filled": "已填",
+        "placeholder": "佔位",
+        "readonly": "唯讀",
+        "error": "錯誤",
+        "errorHint": "日期格式不正確",
+        "solid": "主按鈕",
+        "soft": "淺底"
       }
     }
   }
