@@ -240,7 +240,8 @@
       "fontFamilyMonospace": "Monospace font",
       "brandInk": "Brand text/icons (soft button, selected row, bubble; 4.8:1 on the soft fill, switches to the lifted tone in dark)",
       "brandSolidHover": "Solid button hover fill (white text, >=4.5:1)",
-      "brandSolidActive": "Solid button pressed fill (white text, >=4.5:1)"
+      "brandSolidActive": "Solid button pressed fill (white text, >=4.5:1)",
+      "dangerInk": "Text on the danger soft surface"
     },
     "group": {
       "brand": "Brand",
@@ -420,7 +421,7 @@
       "title": "Three columns (navigation | content | side)",
       "note": "The main structure is three **vertical** columns on a grid, not horizontal bands. Give way order: the **side column shrinks first, then loses its track, and only then may the centre fall below its minimum**; the **navigation never concedes width**. Screen compatibility comes from **a default width per view type plus viewport driven collapse**, not from giving different screens different window sizes.",
       "slider": "Viewport",
-      "sliderNav": "Nav width",
+      "sliderNav": "Navigation width",
       "contractTitle": "Column contract (drag the sliders to see clamping)",
       "colZone": "Column",
       "colMin": "Min",
@@ -513,7 +514,8 @@
       "sideMaxFormula": "**total width - (navigation + centre minimum + handle)**: drag freely up to that limit, no hard coded ratio",
       "cap": "cap ",
       "px": "px",
-      "sideHint": "Drag the right edge of the content to resize the side column"
+      "sideHint": "Drag the right edge of the content to resize the side column",
+      "sliderSide": "Sidebar width"
     }
   },
   "ic": {

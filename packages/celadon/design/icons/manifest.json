@@ -1,428 +1,428 @@
 [
- {
-  "id": "i-chat",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "message-circle"
- },
- {
-  "id": "i-inbox",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "inbox"
- },
- {
-  "id": "i-board",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "square-kanban"
- },
- {
-  "id": "i-ws",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "folder-kanban"
- },
- {
-  "id": "i-pc",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "monitor"
- },
- {
-  "id": "i-book",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "book"
- },
- {
-  "id": "i-search",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "search"
- },
- {
-  "id": "i-plus",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "plus"
- },
- {
-  "id": "i-plus-square",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "square-plus"
- },
- {
-  "id": "i-left",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "chevron-left"
- },
- {
-  "id": "i-right",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "chevron-right"
- },
- {
-  "id": "i-collapse",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "panel-left-close"
- },
- {
-  "id": "i-dots",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "ellipsis"
- },
- {
-  "id": "i-file",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "file"
- },
- {
-  "id": "i-split",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "columns-2"
- },
- {
-  "id": "i-send",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "send"
- },
- {
-  "id": "i-check",
-  "lib": "lucide",
-  "cat": "state",
-  "src": "check"
- },
- {
-  "id": "i-clock",
-  "lib": "lucide",
-  "cat": "state",
-  "src": "clock"
- },
- {
-  "id": "i-stop",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "square"
- },
- {
-  "id": "i-expand",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "panel-left-open"
- },
- {
-  "id": "i-split2",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "columns-3"
- },
- {
-  "id": "i-spark",
-  "lib": "lucide",
-  "cat": "state",
-  "src": "sparkles"
- },
- {
-  "id": "i-folder",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "folder"
- },
- {
-  "id": "i-tasks",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "list-checks"
- },
- {
-  "id": "i-pause",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "pause"
- },
- {
-  "id": "i-nav-settings",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "settings"
- },
- {
-  "id": "i-nav-help",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "circle-question-mark"
- },
- {
-  "id": "i-nav-user",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "user"
- },
- {
-  "id": "i-nav-team",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "users"
- },
- {
-  "id": "i-nav-logout",
-  "lib": "lucide",
-  "cat": "nav",
-  "src": "log-out"
- },
- {
-  "id": "i-act-edit",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "pencil"
- },
- {
-  "id": "i-act-trash",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "trash"
- },
- {
-  "id": "i-act-copy",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "copy"
- },
- {
-  "id": "i-act-download",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "download"
- },
- {
-  "id": "i-act-upload",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "upload"
- },
- {
-  "id": "i-act-refresh",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "refresh-cw"
- },
- {
-  "id": "i-act-external",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "external-link"
- },
- {
-  "id": "i-act-filter",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "funnel"
- },
- {
-  "id": "i-act-sort",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "arrow-up-down"
- },
- {
-  "id": "i-act-close",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "x"
- },
- {
-  "id": "i-act-undo",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "undo-2"
- },
- {
-  "id": "i-act-redo",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "redo-2"
- },
- {
-  "id": "i-act-play",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "play"
- },
- {
-  "id": "i-act-attach",
-  "lib": "lucide",
-  "cat": "act",
-  "src": "paperclip"
- },
- {
-  "id": "i-state-warning",
-  "lib": "lucide",
-  "cat": "state",
-  "src": "triangle-alert"
- },
- {
-  "id": "i-state-error",
-  "lib": "lucide",
-  "cat": "state",
-  "src": "circle-alert"
- },
- {
-  "id": "i-state-info",
-  "lib": "lucide",
-  "cat": "state",
-  "src": "info"
- },
- {
-  "id": "i-state-loading",
-  "lib": "lucide",
-  "cat": "state",
-  "src": "loader-circle"
- },
- {
-  "id": "i-state-queued",
-  "lib": "lucide",
-  "cat": "state",
-  "src": "list-ordered"
- },
- {
-  "id": "i-file-pdf",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "file-text"
- },
- {
-  "id": "i-file-image",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "file-image"
- },
- {
-  "id": "i-file-sheet",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "table"
- },
- {
-  "id": "i-file-code",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "code"
- },
- {
-  "id": "i-file-archive",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "archive"
- },
- {
-  "id": "i-file-media",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "music"
- },
- {
-  "id": "i-file-text",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "file-type"
- },
- {
-  "id": "i-file-terminal",
-  "lib": "lucide",
-  "cat": "file",
-  "src": "terminal"
- },
- {
-  "id": "i-obj-key",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "key-round"
- },
- {
-  "id": "i-obj-schedule",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "calendar-clock"
- },
- {
-  "id": "i-obj-integration",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "plug"
- },
- {
-  "id": "i-obj-skill",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "wand-sparkles"
- },
- {
-  "id": "i-obj-model",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "cpu"
- },
- {
-  "id": "i-obj-quota",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "gauge"
- },
- {
-  "id": "i-obj-billing",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "receipt"
- },
- {
-  "id": "i-obj-sandbox",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "box"
- },
- {
-  "id": "i-obj-container",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "container"
- },
- {
-  "id": "i-obj-artifact",
-  "lib": "lucide",
-  "cat": "obj",
-  "src": "package"
- },
- {
-  "id": "brand-yao-agents",
-  "lib": "own",
-  "cat": "brand",
-  "src": "yao-agents"
- },
- {
-  "id": "brand-yao-agents-mono",
-  "lib": "own",
-  "cat": "brand",
-  "src": "yao-agents-mono"
- },
- {
-  "id": "brand-yao",
-  "lib": "own",
-  "cat": "brand",
-  "src": "yao-alpha"
- },
- {
-  "id": "brand-yao-mono",
-  "lib": "own",
-  "cat": "brand",
-  "src": "yao-alpha-mono"
- }
+  {
+    "id": "i-chat",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "message-circle"
+  },
+  {
+    "id": "i-inbox",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "inbox"
+  },
+  {
+    "id": "i-board",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "square-kanban"
+  },
+  {
+    "id": "i-ws",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "folder-kanban"
+  },
+  {
+    "id": "i-pc",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "monitor"
+  },
+  {
+    "id": "i-book",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "book"
+  },
+  {
+    "id": "i-search",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "search"
+  },
+  {
+    "id": "i-plus",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "plus"
+  },
+  {
+    "id": "i-plus-square",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "square-plus"
+  },
+  {
+    "id": "i-left",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "chevron-left"
+  },
+  {
+    "id": "i-right",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "chevron-right"
+  },
+  {
+    "id": "i-collapse",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "panel-left-close"
+  },
+  {
+    "id": "i-dots",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "ellipsis"
+  },
+  {
+    "id": "i-file",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "file"
+  },
+  {
+    "id": "i-split",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "columns-2"
+  },
+  {
+    "id": "i-send",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "send"
+  },
+  {
+    "id": "i-check",
+    "lib": "lucide",
+    "cat": "state",
+    "src": "check"
+  },
+  {
+    "id": "i-clock",
+    "lib": "lucide",
+    "cat": "state",
+    "src": "clock"
+  },
+  {
+    "id": "i-stop",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "square"
+  },
+  {
+    "id": "i-expand",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "panel-left-open"
+  },
+  {
+    "id": "i-split2",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "columns-3"
+  },
+  {
+    "id": "i-spark",
+    "lib": "lucide",
+    "cat": "state",
+    "src": "sparkles"
+  },
+  {
+    "id": "i-folder",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "folder"
+  },
+  {
+    "id": "i-tasks",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "list-checks"
+  },
+  {
+    "id": "i-pause",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "pause"
+  },
+  {
+    "id": "i-nav-settings",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "settings"
+  },
+  {
+    "id": "i-nav-help",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "circle-question-mark"
+  },
+  {
+    "id": "i-nav-user",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "user"
+  },
+  {
+    "id": "i-nav-team",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "users"
+  },
+  {
+    "id": "i-nav-logout",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "log-out"
+  },
+  {
+    "id": "i-act-edit",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "pencil"
+  },
+  {
+    "id": "i-act-trash",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "trash"
+  },
+  {
+    "id": "i-act-copy",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "copy"
+  },
+  {
+    "id": "i-act-download",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "download"
+  },
+  {
+    "id": "i-act-upload",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "upload"
+  },
+  {
+    "id": "i-act-refresh",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "refresh-cw"
+  },
+  {
+    "id": "i-act-external",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "external-link"
+  },
+  {
+    "id": "i-act-filter",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "funnel"
+  },
+  {
+    "id": "i-act-sort",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "arrow-up-down"
+  },
+  {
+    "id": "i-act-close",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "x"
+  },
+  {
+    "id": "i-act-undo",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "undo-2"
+  },
+  {
+    "id": "i-act-redo",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "redo-2"
+  },
+  {
+    "id": "i-act-play",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "play"
+  },
+  {
+    "id": "i-act-attach",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "paperclip"
+  },
+  {
+    "id": "i-state-warning",
+    "lib": "lucide",
+    "cat": "state",
+    "src": "triangle-alert"
+  },
+  {
+    "id": "i-state-error",
+    "lib": "lucide",
+    "cat": "state",
+    "src": "circle-alert"
+  },
+  {
+    "id": "i-state-info",
+    "lib": "lucide",
+    "cat": "state",
+    "src": "info"
+  },
+  {
+    "id": "i-state-loading",
+    "lib": "lucide",
+    "cat": "state",
+    "src": "loader-circle"
+  },
+  {
+    "id": "i-state-queued",
+    "lib": "lucide",
+    "cat": "state",
+    "src": "list-ordered"
+  },
+  {
+    "id": "i-file-pdf",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "file-text"
+  },
+  {
+    "id": "i-file-image",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "file-image"
+  },
+  {
+    "id": "i-file-sheet",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "table"
+  },
+  {
+    "id": "i-file-code",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "code"
+  },
+  {
+    "id": "i-file-archive",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "archive"
+  },
+  {
+    "id": "i-file-media",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "music"
+  },
+  {
+    "id": "i-file-text",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "file-type"
+  },
+  {
+    "id": "i-file-terminal",
+    "lib": "lucide",
+    "cat": "file",
+    "src": "terminal"
+  },
+  {
+    "id": "i-obj-key",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "key-round"
+  },
+  {
+    "id": "i-obj-schedule",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "calendar-clock"
+  },
+  {
+    "id": "i-obj-integration",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "plug"
+  },
+  {
+    "id": "i-obj-skill",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "wand-sparkles"
+  },
+  {
+    "id": "i-obj-model",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "cpu"
+  },
+  {
+    "id": "i-obj-quota",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "gauge"
+  },
+  {
+    "id": "i-obj-billing",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "receipt"
+  },
+  {
+    "id": "i-obj-sandbox",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "box"
+  },
+  {
+    "id": "i-obj-container",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "container"
+  },
+  {
+    "id": "i-obj-artifact",
+    "lib": "lucide",
+    "cat": "obj",
+    "src": "package"
+  },
+  {
+    "id": "brand-yao-agents",
+    "lib": "own",
+    "cat": "brand",
+    "src": "yao-agents"
+  },
+  {
+    "id": "brand-yao-agents-mono",
+    "lib": "own",
+    "cat": "brand",
+    "src": "yao-agents-mono"
+  },
+  {
+    "id": "brand-yao",
+    "lib": "own",
+    "cat": "brand",
+    "src": "yao-alpha"
+  },
+  {
+    "id": "brand-yao-mono",
+    "lib": "own",
+    "cat": "brand",
+    "src": "yao-alpha-mono"
+  }
 ]
