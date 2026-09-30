@@ -139,7 +139,7 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary
 /* token 清单：只写 token 名 + 用法 key（文案在 i18n/card.usage.*），值一律从 tokens.css 读 */
 var GROUPS = [
  ['group.brand', [
-   ['--brand','brand','on'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
+   ['--brand','brand','fill'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
    ['--brand-soft','brandSoft','fill'], ['--brand-display','brandDisplay','fill'], ['--brand-text','brandText','on','--brand'], ['--brand-ink','brandInk','on','--brand-soft'],
    ['--brand-lift','brandLift','dark']]],
  ['group.interaction', [
@@ -151,11 +151,11 @@ var GROUPS = [
    ['--background-surface','backgroundSurface','fill'], ['--background-field','backgroundField','fill'], ['--background-hover','backgroundHover','fill'],
    ['--background-selected','backgroundSelected','fill']]],
  ['group.border', [['--border-subtle','borderSubtle','line'], ['--border-default','borderDefault','line'], ['--border-control','borderControl','line'], ['--border-hover','borderHover','line']]],
- ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary','on'], ['--text-placeholder','textPlaceholder','on','--background-field'], ['--text-muted','textMuted','on']]],
+ ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary','on'], ['--text-placeholder','textPlaceholder','on','--background-field'], ['--text-muted','textMuted','deco']]],
  ['group.semantic', [
    ['--success','success','on','--success-soft'], ['--success-soft','successSoft','fill'],
-   ['--warning','warning','on'], ['--warning-soft','warningSoft'],
-   ['--warm','warm','on'], ['--warm-soft','warmSoft','fill'], ['--warm-text','warmText','on','--warm-soft'], ['--warm-contrast','warmContrast','on','--warm'],
+   ['--warning','warning','fill'], ['--warning-soft','warningSoft','fill'],
+   ['--warm','warm','fill'], ['--warm-soft','warmSoft','fill'], ['--warm-text','warmText','on','--warm-soft'], ['--warm-contrast','warmContrast','on','--warm'],
    ['--danger','danger','fill'], ['--danger-soft','dangerSoft','fill'], ['--danger-ink','dangerInk','on','--danger-soft']]],
  ['group.metrics', [
    ['--font-family-ui','fontFamilyUi','nocr'], ['--font-family-monospace','fontFamilyMonospace','nocr'],
@@ -209,7 +209,7 @@ function ratio(a,b){ var l1 = lum(a), l2 = lum(b); if (l1 === null || l2 === nul
   var hi = Math.max(l1,l2), lo = Math.min(l1,l2); return (hi+0.05)/(lo+0.05); }
 function grade(r){ return r >= 7 ? ['aaa','card.gradeAaa'] : r >= 4.5 ? ['aa','card.gradeAa'] : r >= 3 ? ['warn','card.gradeLarge'] : ['bad','card.gradeFail']; }
 function gradeText(gd){ return tr(gd[1]); }
-var REASON = { fill:1, line:1, overlay:1, dark:1, exempt:1 };
+var REASON = { fill:1, line:1, overlay:1, dark:1, exempt:1, deco:1 };
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 function readAll(el){ var cs = getComputedStyle(el), o = {};
   GROUPS.forEach(function(g){ g[1].forEach(function(t){ o[t[0]] = cs.getPropertyValue(t[0]).trim(); }); }); return o; }

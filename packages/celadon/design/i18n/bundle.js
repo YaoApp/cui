@@ -209,7 +209,7 @@ window.CELADON_I18N = {
         "textSecondary": "Secondary text",
         "textTertiary": "Tertiary text",
         "textPlaceholder": "Input placeholder (same as tertiary text)",
-        "textMuted": "Placeholder / muted",
+        "textMuted": "Decoration only (dividers, watermarks; never text)",
         "success": "Success (traditional green)",
         "successSoft": "Success soft fill",
         "warning": "Warning (alias of --warm)",
@@ -274,7 +274,8 @@ window.CELADON_I18N = {
         "line": "Border",
         "overlay": "Overlay",
         "dark": "Dark only",
-        "exempt": "Disabled (exempt)"
+        "exempt": "Disabled (exempt)",
+        "deco": "Decoration"
       },
       "gradeAaa": "AAA",
       "gradeAa": "AA",
@@ -493,7 +494,7 @@ window.CELADON_I18N = {
         "textSecondary": "副テキスト",
         "textTertiary": "第三階層",
         "textPlaceholder": "入力プレースホルダー（第三階層テキストと同色）",
-        "textMuted": "プレースホルダー/弱化",
+        "textMuted": "装飾専用（区切り・透かし。文字には使わない）",
         "success": "成功（伝統色）",
         "successSoft": "成功の淡色",
         "warning": "警告（--warm の別名）",
@@ -558,7 +559,8 @@ window.CELADON_I18N = {
         "line": "境界線",
         "overlay": "オーバーレイ",
         "dark": "暗色のみ",
-        "exempt": "無効（免除）"
+        "exempt": "無効（免除）",
+        "deco": "装飾"
       },
       "gradeAaa": "AAA",
       "gradeAa": "AA",
@@ -777,7 +779,7 @@ window.CELADON_I18N = {
         "textSecondary": "次要文字",
         "textTertiary": "第三级",
         "textPlaceholder": "输入占位文字（与三级文字同色）",
-        "textMuted": "占位/弱化",
+        "textMuted": "纯装饰（分隔符/水印；不承载文字）",
         "success": "成功（松花绿 · 传统色）",
         "successSoft": "成功软底",
         "warning": "警示（= --warm 别名）",
@@ -842,7 +844,8 @@ window.CELADON_I18N = {
         "line": "边界",
         "overlay": "遮罩",
         "dark": "仅暗色",
-        "exempt": "禁用豁免"
+        "exempt": "禁用豁免",
+        "deco": "装饰"
       },
       "gradeAaa": "AAA",
       "gradeAa": "AA",
@@ -1061,7 +1064,7 @@ window.CELADON_I18N = {
         "textSecondary": "次要文字",
         "textTertiary": "第三級",
         "textPlaceholder": "輸入佔位文字（與三級文字同色）",
-        "textMuted": "佔位/弱化",
+        "textMuted": "純裝飾（分隔符／浮水印；不承載文字）",
         "success": "成功（松花綠 · 傳統色）",
         "successSoft": "成功軟底",
         "warning": "警示（= --warm 別名）",
@@ -1126,7 +1129,8 @@ window.CELADON_I18N = {
         "line": "邊界",
         "overlay": "遮罩",
         "dark": "僅暗色",
-        "exempt": "停用豁免"
+        "exempt": "停用豁免",
+        "deco": "裝飾"
       },
       "gradeAaa": "AAA",
       "gradeAa": "AA",

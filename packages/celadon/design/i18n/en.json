@@ -207,7 +207,7 @@
       "textSecondary": "Secondary text",
       "textTertiary": "Tertiary text",
       "textPlaceholder": "Input placeholder (same as tertiary text)",
-      "textMuted": "Placeholder / muted",
+      "textMuted": "Decoration only (dividers, watermarks; never text)",
       "success": "Success (traditional green)",
       "successSoft": "Success soft fill",
       "warning": "Warning (alias of --warm)",
@@ -272,7 +272,8 @@
       "line": "Border",
       "overlay": "Overlay",
       "dark": "Dark only",
-      "exempt": "Disabled (exempt)"
+      "exempt": "Disabled (exempt)",
+      "deco": "Decoration"
     },
     "gradeAaa": "AAA",
     "gradeAa": "AA",
