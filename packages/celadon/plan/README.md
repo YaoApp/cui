@@ -52,7 +52,7 @@
 | 10 | 工作空间 | ⏳ 待开始 | [10-workspace.md](10-workspace.md) |
 | 11 | 配置 | ⏳ 待开始 | [11-settings.md](11-settings.md) |
 | **19** | **数据格式** | **✅ 规则已定** | [19-data-format.md](19-data-format.md) |
-| **12** | **测试** | **🔄 框架已定 · 细节待讨论** | [12-testing.md](12-testing.md) |
+| **12** | **测试** | **🔄 框架与 QA 流程已定 · 细节待讨论** | [12-testing.md](12-testing.md) |
 
 ## 分两段看
 
