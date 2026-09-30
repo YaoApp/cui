@@ -133,7 +133,7 @@ window.CELADON_I18N = {
       }
     },
     "card": {
-      "title": "Celadon design baseline",
+      "title": "CUI 2.0 design baseline",
       "subtitle": "tokens · pairings · fonts · contrast — all read live from tokens.css (zero hardcoded values)",
       "source": "Source: tokens.less → build-css.mjs → tokens.css. Font tokens are in the specimen below. After changing a token run pnpm design:css — this page needs no edits.",
       "sectionPairs": "Key pairings (foreground on background · computed live)",
@@ -285,7 +285,8 @@ window.CELADON_I18N = {
       "gradeLarge": "Large text / graphics",
       "gradeFail": "Below AA",
       "contrastLegend": "Level: AAA >= 7:1 - AA >= 4.5:1 (body text) - large text or graphics >= 3:1 - below AA < 3:1. Anything under 4.5:1 must not carry body text.",
-      "reasonNote": "\"Fill / border / overlay / dark only\" are not judged for text contrast (see key pairs for real usage); \"disabled (exempt)\" follows the WCAG exemption for disabled controls."
+      "reasonNote": "\"Fill / border / overlay / dark only\" are not judged for text contrast (see key pairs for real usage); \"disabled (exempt)\" follows the WCAG exemption for disabled controls.",
+      "designSystem": "Celadon"
     },
     "f": {
       "title": "Foundations · Spacing · Radius · Elevation · Motion · Border",
@@ -826,7 +827,7 @@ window.CELADON_I18N = {
       }
     },
     "card": {
-      "title": "Celadon デザインベースライン",
+      "title": "CUI 2.0 デザイン基準",
       "subtitle": "トークン · ペアリング · フォント · コントラスト —— すべて tokens.css から取得（ハードコードなし）",
       "source": "出典：tokens.less → build-css.mjs → tokens.css。フォントのトークンは下の見本を参照。変更後は pnpm design:css を実行（本ページの編集は不要）。",
       "sectionPairs": "主要なペアリング（前景 on 背景 · 自動計算）",
@@ -978,7 +979,8 @@ window.CELADON_I18N = {
       "gradeLarge": "大サイズ文字・図形",
       "gradeFail": "AA 未満",
       "contrastLegend": "等級：AAA ≥7:1 · AA ≥4.5:1（本文）· 大サイズ文字・図形 ≥3:1 · AA 未満 <3:1。4.5:1 未満は本文に使用しないこと。",
-      "reasonNote": "「塗り / 境界線 / オーバーレイ / 暗色のみ」は文字コントラスト判定の対象外（実際の用法は「主要な組み合わせ」参照）。「無効（免除）」は WCAG の無効コントロール免除に準拠。"
+      "reasonNote": "「塗り / 境界線 / オーバーレイ / 暗色のみ」は文字コントラスト判定の対象外（実際の用法は「主要な組み合わせ」参照）。「無効（免除）」は WCAG の無効コントロール免除に準拠。",
+      "designSystem": "Celadon"
     },
     "f": {
       "title": "Foundations · 余白 · 角丸 · 階層 · モーション · 境界線",
@@ -1519,7 +1521,7 @@ window.CELADON_I18N = {
       }
     },
     "card": {
-      "title": "Celadon 设计基线",
+      "title": "CUI 2.0 设计基线",
       "subtitle": "token · 配对 · 字体 · 对比度 —— 全部实时读 tokens.css（零硬编码）",
       "source": "源：tokens.less → build-css.mjs → tokens.css；字体 token 见「字体样本」。改 token 后跑 pnpm design:css 即可，本页无需改动。",
       "sectionPairs": "关键配对（前景 on 背景 · 自动实算）",
@@ -1671,7 +1673,8 @@ window.CELADON_I18N = {
       "gradeLarge": "大字 / 图形",
       "gradeFail": "不达标",
       "contrastLegend": "等级：AAA ≥7:1 · AA ≥4.5:1（正文标准）· 大字/图形 ≥3:1 · 不达标 <3:1；正文低于 4.5:1 不能用于正文。",
-      "reasonNote": "「填充 / 边界 / 遮罩 / 仅暗色」不参与文字对比度判定（用法见「关键配对」）；「禁用豁免」按 WCAG 对禁用控件豁免。"
+      "reasonNote": "「填充 / 边界 / 遮罩 / 仅暗色」不参与文字对比度判定（用法见「关键配对」）；「禁用豁免」按 WCAG 对禁用控件豁免。",
+      "designSystem": "Celadon"
     },
     "f": {
       "title": "Foundations · 间距 · 圆角 · 层级 · 动效 · 边框",
@@ -2212,7 +2215,7 @@ window.CELADON_I18N = {
       }
     },
     "card": {
-      "title": "Celadon 設計基準",
+      "title": "CUI 2.0 設計基線",
       "subtitle": "token · 配對 · 字體 · 對比度 —— 全部即時讀取 tokens.css（零硬編碼）",
       "source": "來源：tokens.less → build-css.mjs → tokens.css；字體 token 見「字體樣本」。改 token 後跑 pnpm design:css，本頁無需修改。",
       "sectionPairs": "關鍵配對（前景 on 背景 · 自動實算）",
@@ -2364,7 +2367,8 @@ window.CELADON_I18N = {
       "gradeLarge": "大字 / 圖形",
       "gradeFail": "不達標",
       "contrastLegend": "等級：AAA ≥7:1 · AA ≥4.5:1（正文標準）· 大字/圖形 ≥3:1 · 不達標 <3:1；正文低於 4.5:1 不能用於正文。",
-      "reasonNote": "「填充 / 邊界 / 遮罩 / 僅暗色」不參與文字對比度判定（用法見「關鍵配對」）；「停用豁免」依 WCAG 對停用控件豁免。"
+      "reasonNote": "「填充 / 邊界 / 遮罩 / 僅暗色」不參與文字對比度判定（用法見「關鍵配對」）；「停用豁免」依 WCAG 對停用控件豁免。",
+      "designSystem": "Celadon"
     },
     "f": {
       "title": "Foundations · 間距 · 圓角 · 層級 · 動效 · 邊框",
