@@ -174,29 +174,18 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .s-stream .caret{width:2px;height:14px;background:var(--brand);flex:none;opacity:0}
 .s-stream.typing .caret{opacity:1;animation:celadon-caret 1s steps(1) infinite}
 @keyframes celadon-caret{0%,49%{opacity:1}50%,100%{opacity:0}}
-/* ===== 栅格与响应式演示（拖动宽度 / 点场景 / 开关侧板）===== */
+/* ===== 三栏竖分割演示（导航区 | 内容区 | 侧栏）===== */
 .gclip{position:relative;height:300px;overflow:hidden;border:1px solid var(--border-default);border-radius:var(--radius-medium);background:var(--background-app)}
-.gvp{display:flex;height:300px;transform-origin:top left;background:var(--background-app);position:relative}
-.gnav{flex:none;background:var(--background-navigation);border-right:1px solid var(--border-subtle);padding:12px 8px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.gvp{display:grid;grid-template-columns:0 0 0;height:300px;transform-origin:top left;background:var(--background-app);position:relative;
+  transition:grid-template-columns var(--duration-slow) var(--easing-standard)}
+.gnav{background:var(--background-navigation);border-right:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 .gnav span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
-.gmain{flex:1;min-width:0;display:flex;flex-direction:column;padding:10px 0;position:relative}
-.grows{flex:1;min-width:0;display:flex;align-items:stretch}
-.gcenter{flex:1;min-width:0;display:flex;justify-content:center;padding:6px 0}
-.gbar{flex:none;height:14px;margin:0 12px;border-radius:4px;background:var(--background-field)}
-.gbar.top{background:var(--background-surface);border:1px solid var(--border-default);height:22px}
-.gbar.foot{margin-top:auto;height:18px;background:var(--background-navigation);border:1px solid var(--border-subtle)}
-.gvp[data-h="noSub"] .gbar.sub,
-.gvp[data-h="noBar"] .gbar.sub, .gvp[data-h="noBar"] .gbar.tool,
-.gvp[data-h="min"] .gbar.sub, .gvp[data-h="min"] .gbar.tool{display:none}
-.gcontent{width:100%;display:flex;flex-direction:column;gap:12px;padding:0 12px}
+.gnav.overlay{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-overlay);box-shadow:var(--shadow-floating)}
+.gcenter{min-width:0;display:flex;justify-content:center;padding:14px 12px;overflow:hidden}
+.gcontent{width:100%;display:flex;flex-direction:column;gap:12px}
 .gcontent b{display:block;height:16px;border-radius:4px;background:var(--background-surface);border:1px solid var(--border-default)}
-.gside{flex:none;background:var(--background-navigation);border-left:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.gside{background:var(--background-navigation);border-left:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 .gside span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
-.gvp[data-side="closed"] .gside{display:none}
-.gvp[data-side="overlay"] .gside{position:absolute;right:0;top:0;bottom:0;z-index:var(--z-overlay);box-shadow:var(--shadow-floating)}
-.gvp[data-nav="rail"] .gnav{padding:12px 0;align-items:center}
-.gvp[data-nav="rail"] .gnav span{width:22px;height:22px;border-radius:6px}
-.gvp[data-nav="overlay"] .gnav{display:none}
 .gpreset{cursor:pointer;border:1px solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);border-radius:var(--radius-pill);padding:3px 9px;font-size:11px;font-family:inherit}
 .gpreset.on{background:var(--brand-soft);color:var(--brand-ink);border-color:var(--brand);font-weight:650}
 .greadout{font-family:var(--font-family-monospace);font-size:10.5px;color:var(--text-tertiary);white-space:nowrap}
@@ -286,9 +275,13 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 <div class="card">
   <h2 id="gr-title"></h2><p class="hint" id="gr-note"></p>
   <div class="prefbar"><span class="pf-label" id="gr-sliderlabel"></span>
-    <input type="range" id="gr-range" min="420" max="2200" step="10" value="1280" aria-label="simulated width">
-    <span class="pf-label" id="gr-hlabel"></span><input type="range" id="gr-range-h" min="480" max="1100" step="10" value="800" aria-label="simulated height">
+    <input type="range" id="gr-range" min="520" max="2200" step="10" value="1280" aria-label="viewport width">
     <span id="gr-presets" class="prefbar-segs"></span>
+    <span class="pf-label" id="gr-navlabel"></span>
+    <input type="range" id="gr-nav" min="264" max="420" step="4" value="280" aria-label="nav width">
+    <button type="button" class="gpreset" id="gr-navbtn"></button>
+    <span class="pf-label" id="gr-sidelabel"></span>
+    <input type="range" id="gr-side" min="30" max="70" step="1" value="45" aria-label="side ratio">
     <button type="button" class="gpreset" id="gr-sidebtn"></button>
     <span class="greadout" id="gr-readout"></span></div>
   <div class="cols">
@@ -582,76 +575,81 @@ function renderBorder(theme){
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">border · contrast</span></div><div class="pbody">'+ramp+demo+dec+'</div>';
 }
 
-/* ===== F6 栅格与响应式（阈值由最小宽推导；让位顺序：代价最大的先丢）===== */
-var SIDE_WANTED = false;                       /* 默认两列：第三列不开 */
-var PRESETS = [['half',720],['default',1280],['rec',1440],['ultra',1920]];
-function layoutFor(theme, w, h){
-  var nav = px(tok('--nav-width',theme)), rail = px(tok('--nav-rail-width',theme));
-  var cMin = px(tok('--content-min',theme)), cNarrow = px(tok('--content-min-narrow',theme));
-  var sideW = px(tok('--side-width',theme)), sideWW = px(tok('--side-width-wide',theme));
-  var gap = 24, dock = px(tok('--threshold-side-dock',theme)), minW = px(tok('--threshold-min',theme));
-  var navMode = (w >= rail + cMin + gap) ? 'full' : (w >= minW ? 'rail' : 'overlay');
-  var sideMode = !SIDE_WANTED ? 'closed' : (w >= dock ? 'docked' : 'overlay');
-  var navPx = navMode === 'full' ? nav : (navMode === 'rail' ? rail : 0);
-  var wide = w >= px(tok('--window-range-max',theme));
-  var sidePx = sideMode === 'closed' ? 0 : (sideMode === 'docked' && wide ? sideWW : sideW); /* 浮层也要有宽度 */
-  var sideCost = sideMode === 'docked' ? sidePx + gap : 0;                                  /* 浮层不占布局宽 */
-  var avail = w - navPx - sideCost;
-  /* 高度降级：副标题 → 工具条 → 底栏最后（对齐：底栏最重要，最后才丢） */
-  var hMode = h >= 720 ? 'full' : (h >= 640 ? 'noSub' : (h >= 560 ? 'noBar' : 'min'));
-  return { h:hMode, nav:navMode, side:sideMode, navPx:navPx, sidePx:sidePx, avail:avail,
-    contentMax: w >= px(tok('--window-range-max',theme)) ? px(tok('--content-max-wide',theme)) : px(tok('--content-max',theme)),
-    meta: avail >= 480, gutter: w >= 720 ? 24 : (w >= 560 ? 16 : 12) };
+/* ===== F6 三栏竖分割（导航 | 内容 | 侧栏）· 求解器与 DSH 同构 ===== */
+var NAV_MANUAL = false, SIDE_WANTED = false;
+var PRESETS = [['half',720],['default',1280],['large',1600],['uhd',1920]];
+function clampW(px, min, max){ return Math.min(max, Math.max(min, Math.round(px))); }
+/* 让位顺序：侧栏先缩 → 侧栏整条消失 → 中栏才可能低于最小；导航不参与宽度让步 */
+function computeColumns(theme, viewport, navPref, sidePref, sideRatio, navManual){
+  var NAV_MIN = px(tok('--nav-min',theme)), NAV_MAX = px(tok('--nav-max',theme)), RAIL = px(tok('--nav-collapsed',theme));
+  var CENTER_MIN = px(tok('--center-min',theme)), SIDE_MIN = px(tok('--side-min',theme));
+  var MAX_RATIO = parseFloat(tok('--side-max-ratio',theme)) || 0.7;
+  var autoCollapse = viewport < px(tok('--nav-auto-collapse',theme));
+  var navWanted = navPref > 0;
+  var navTrack = (!navWanted || autoCollapse) ? RAIL : clampW(navPref, NAV_MIN, NAV_MAX);
+  var navOverlay = autoCollapse && navManual && navWanted;   /* 手动展开：覆盖中栏，不占布局宽 */
+  var available = viewport - navTrack - CENTER_MIN;
+  var side = (sidePref === 0 || available < SIDE_MIN) ? 0
+    : Math.min(available, clampW(viewport * sideRatio, SIDE_MIN, viewport * MAX_RATIO));
+  var center = Math.max(0, viewport - navTrack - side);
+  return { navTrack:navTrack, navOverlay:navOverlay, navOverlayW:navOverlay ? clampW(navPref, NAV_MIN, NAV_MAX) : 0,
+    side:side, center:center, centerBelowMin:center < CENTER_MIN, autoCollapse:autoCollapse };
 }
 function renderGrid(theme){
-  var L = layoutFor(theme, 1280, 800);
-  var winTbl = '<div class="grp">'+esc(tr('f.grid.winTitle'))+'</div><table>'
-    + '<tr><td>'+esc(tr('f.grid.winDefault'))+'</td><td><code>'+tok('--window-default',theme)+' × '+tok('--window-default-height',theme)+'</code></td><td>'+esc(tr('f.grid.twoCols'))+'</td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.winRec'))+'</td><td><code>'+tok('--window-recommended',theme)+' × '+tok('--window-recommended-height',theme)+'</code></td><td>'+esc(tr('f.grid.threeCols'))+'</td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.winRange'))+'</td><td><code>'+tok('--window-range-min',theme)+' – '+tok('--window-range-max',theme)+'</code></td><td>'+esc(tr('f.grid.winRangeNote'))+'</td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.winMin'))+'</td><td><code>'+tok('--page-min-width',theme)+' × '+tok('--page-min-height',theme)+'</code></td><td>'+esc(tr('f.grid.winMinNote'))+'</td></tr></table>';
-  var thTbl = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.thTitle'))+'</div><table>'
-    + '<tr><td>'+esc(tr('f.grid.thSide'))+'</td><td><code>'+tok('--nav-width',theme)+' + '+tok('--content-min',theme)+' + '+tok('--side-width',theme)+' + 24</code></td><td><code>'+tok('--threshold-side-dock',theme)+'</code></td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.thRail'))+'</td><td><code>'+tok('--nav-rail-width',theme)+' + '+tok('--content-min',theme)+' + 24</code></td><td><code>'+tok('--threshold-nav-rail',theme)+'</code></td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.thMin'))+'</td><td><code>'+tok('--nav-rail-width',theme)+' + '+tok('--content-min-narrow',theme)+'</code></td><td><code>'+tok('--threshold-min',theme)+'</code></td></tr></table>';
+  var c = computeColumns(theme, 1280, 280, 0, 0.45, false);
+  var contract = '<div class="grp">'+esc(tr('f.grid.contractTitle'))+'</div><table>'
+    + '<tr><th>'+esc(tr('f.grid.colZone'))+'</th><th>'+esc(tr('f.grid.colMin'))+'</th><th>'+esc(tr('f.grid.colMax'))+'</th><th>'+esc(tr('f.grid.colDefault'))+'</th></tr>'
+    + '<tr><td>'+esc(tr('f.grid.navZone'))+'</td><td><code>'+tok('--nav-min',theme)+'</code></td><td><code>'+tok('--nav-max',theme)+'</code></td><td><code>'+tok('--nav-default',theme)+'</code> · '+esc(tr('f.grid.navCollapsedNote'))+' <code>'+tok('--nav-collapsed',theme)+'</code></td></tr>'
+    + '<tr><td>'+esc(tr('f.grid.centerZone'))+'</td><td><code>'+tok('--center-min',theme)+'</code></td><td>'+esc(tr('f.grid.centerMax'))+'</td><td>'+esc(tr('f.grid.centerDefault'))+'</td></tr>'
+    + '<tr><td>'+esc(tr('f.grid.sideZone'))+'</td><td><code>'+tok('--side-min',theme)+'</code></td><td><code>'+tok('--side-max-ratio',theme)+'</code> '+esc(tr('f.grid.ofFrame'))+'</td><td><code>'+tok('--side-default-ratio',theme)+'</code> '+esc(tr('f.grid.ofFrame'))+' · '+esc(tr('f.grid.sideDefaultNote'))+'</td></tr>'
+    + '</table>';
+  var screen = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.screenTitle'))+'</div><ul>'
+    + ['s1','s2','s3'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ul>'
+    + '<table><tr><td>'+esc(tr('f.grid.winDefault'))+'</td><td><code>'+tok('--window-default',theme)+' × '+tok('--window-default-height',theme)+'</code></td></tr>'
+    + '<tr><td>'+esc(tr('f.grid.winMin'))+'</td><td><code>'+tok('--page-min-width',theme)+' × '+tok('--page-min-height',theme)+'</code></td></tr></table>';
   var navs=''; for (var i=0;i<7;i++) navs += '<span></span>';
   var lines=''; for (var j=0;j<5;j++) lines += '<b></b>';
   var sides=''; for (var k=0;k<6;k++) sides += '<span></span>';
   var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.demo'))+'</div>'
-    + '<div class="gclip" id="gclip-'+theme+'"><div class="gvp" id="gvp-'+theme+'" data-nav="full" data-side="closed">'
-    + '<div class="gnav" id="gnav-'+theme+'">'+navs+'</div><div class="gmain">'
-    + '<div class="gbar top"></div><div class="gbar sub"></div><div class="gbar tool"></div>'
-    + '<div class="grows"><div class="gcenter"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div>'
-    + '<div class="gside" id="gside-'+theme+'">'+sides+'</div></div>'
-    + '<div class="gbar foot"></div>'
-    + '</div></div></div>';
+    + '<div class="gclip" id="gclip-'+theme+'"><div class="gvp" id="gvp-'+theme+'">'
+    + '<div class="gnav" id="gnav-'+theme+'">'+navs+'</div>'
+    + '<div class="gcenter"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div>'
+    + '<div class="gside" id="gside-'+theme+'">'+sides+'</div>'
+    + '</div></div>';
   var order = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.orderTitle'))+'</div><ol>'
     + ['o1','o2','o3','o4','o5'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ol>';
   document.getElementById(theme === 'dark' ? 'gr-dark' : 'gr-light').innerHTML =
-    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">window · budget · give way</span></div><div class="pbody">'+winTbl+thTbl+demo+order+'</div>';
+    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">3 columns · grid</span></div><div class="pbody">'+contract+screen+demo+order+'</div>';
 }
 function syncGrid(){
-  var w = parseInt(document.getElementById('gr-range').value, 10);
-  var h = parseInt(document.getElementById('gr-range-h').value, 10);
+  var vp0 = document.getElementById('gr-range'), navIn = document.getElementById('gr-nav');
+  var sideIn = document.getElementById('gr-side');
+  var viewport = parseInt(vp0.value, 10), navPref = parseInt(navIn.value, 10), ratio = parseInt(sideIn.value, 10)/100;
   ['light','dark'].forEach(function(theme){
     var vp = document.getElementById('gvp-'+theme), clip = document.getElementById('gclip-'+theme);
-    if (!vp || !clip) return;
-    var L = layoutFor(theme, w, h);
-    vp.setAttribute('data-nav', L.nav); vp.setAttribute('data-side', L.side); vp.setAttribute('data-h', L.h);
-    vp.style.width = w + 'px'; vp.style.height = '300px';
-    document.getElementById('gnav-'+theme).style.width = L.navPx + 'px';
-    document.getElementById('gside-'+theme).style.width = L.sidePx + 'px';
-    document.getElementById('gcontent-'+theme).style.maxWidth = L.contentMax + 'px';
-    var k = Math.min(1, (clip.clientWidth - 2) / w);
+    if (!vp) return;
+    var L = computeColumns(theme, viewport, navPref, SIDE_WANTED ? 1 : 0, ratio, NAV_MANUAL);
+    var grid = L.navTrack + 'px ' + L.center + 'px ' + L.side + 'px';
+    vp.style.gridTemplateColumns = grid;
+    vp.style.width = viewport + 'px';
+    vp.style.height = '300px';
+    var gnav = document.getElementById('gnav-'+theme);
+    gnav.classList.toggle('overlay', !!L.navOverlay);
+    gnav.style.width = L.navOverlay ? L.navOverlayW + 'px' : '';
+    document.getElementById('gside-'+theme).style.display = L.side > 0 ? '' : 'none';
+    var k = Math.min(1, (clip.clientWidth - 2) / viewport);
     vp.style.transform = 'scale(' + k + ')';
     var ro = document.getElementById('gr-readout');
-    if (ro) ro.textContent = w + 'px → ' + tr('f.grid.nav.'+L.nav) + ' · ' + tr('f.grid.side.'+L.side)
-      + ' · ' + tr('f.grid.meta') + (L.meta ? '✓' : '✗') + ' · ' + tr('f.grid.gutter') + L.gutter + tr('f.grid.px')
-      + ' · h' + h + ' → ' + tr('f.grid.h.'+L.h);
+    if (ro) ro.textContent = viewport + 'px → ' + tr('f.grid.zone.nav') + ' ' + L.navTrack
+      + (L.navOverlay ? '(+' + tr('f.grid.overlay') + ')' : '') + ' · ' + tr('f.grid.zone.center') + ' ' + L.center
+      + (L.centerBelowMin ? '(' + tr('f.grid.belowMin') + ')' : '') + ' · ' + tr('f.grid.zone.side') + ' ' + L.side
+      + (L.autoCollapse ? ' · <' + tok('--nav-auto-collapse',theme) + ' ' + tr('f.grid.autoRail') : '');
   });
-  document.querySelectorAll('.gpreset[data-w]').forEach(function(b){
-    b.classList.toggle('on', parseInt(b.getAttribute('data-w'),10) === w);
-  });
+  document.querySelectorAll('.gpreset[data-w]').forEach(function(b){ b.classList.toggle('on', parseInt(b.getAttribute('data-w'),10) === viewport); });
+  var nb = document.getElementById('gr-navbtn');
+  if (nb) { var L2 = computeColumns('light', viewport, navPref, 0, ratio, NAV_MANUAL);
+    nb.textContent = tr(L2.autoCollapse ? (NAV_MANUAL ? 'f.grid.navOverlayOn' : 'f.grid.navOverlayOff') : 'f.grid.navNormal');
+    nb.classList.toggle('on', NAV_MANUAL && L2.autoCollapse); nb.setAttribute('aria-pressed', String(NAV_MANUAL)); }
   var sb = document.getElementById('gr-sidebtn');
   if (sb) { sb.textContent = tr(SIDE_WANTED ? 'f.grid.sideOn' : 'f.grid.sideOff');
     sb.classList.toggle('on', SIDE_WANTED); sb.setAttribute('aria-pressed', String(SIDE_WANTED)); }
@@ -664,11 +662,12 @@ function initGrid(){
       document.getElementById('gr-range').value = b.getAttribute('data-w'); syncGrid(); });
     box.dataset.done = '1';
   }
-  var sb = document.getElementById('gr-sidebtn');
-  if (sb && !sb.dataset.done){ sb.addEventListener('click', function(){ SIDE_WANTED = !SIDE_WANTED; syncGrid(); }); sb.dataset.done = '1'; }
+  [['gr-navbtn','nav'],['gr-sidebtn','side']].forEach(function(x){
+    var el = document.getElementById(x[0]);
+    if (el && !el.dataset.done){ el.addEventListener('click', function(){ if (x[1]==='nav') NAV_MANUAL = !NAV_MANUAL; else SIDE_WANTED = !SIDE_WANTED; syncGrid(); }); el.dataset.done = '1'; }
+  });
 }
-document.getElementById('gr-range').addEventListener('input', syncGrid);
-document.getElementById('gr-range-h').addEventListener('input', syncGrid);
+['gr-range','gr-nav','gr-side'].forEach(function(id){ document.getElementById(id).addEventListener('input', syncGrid); });
 initGrid();
 
 /* ===== 语言 / 渲染 ===== */
@@ -678,8 +677,11 @@ function applyChrome(){
   document.getElementById('f-src').textContent = tr('f.source');
   document.getElementById('f-langnote').textContent = tr('f.langnote');
   document.getElementById('gr-sliderlabel').textContent = tr('f.grid.slider');
-  document.getElementById('gr-hlabel').textContent = tr('f.grid.sliderH');
-  document.getElementById('gr-range-h').setAttribute('aria-label', tr('f.grid.sliderH'));
+  document.getElementById('gr-navlabel').textContent = tr('f.grid.sliderNav');
+  document.getElementById('gr-sidelabel').textContent = tr('f.grid.sliderSide');
+  document.getElementById('gr-range').setAttribute('aria-label', tr('f.grid.slider'));
+  document.getElementById('gr-nav').setAttribute('aria-label', tr('f.grid.sliderNav'));
+  document.getElementById('gr-side').setAttribute('aria-label', tr('f.grid.sliderSide'));
   document.querySelectorAll('.gpreset[data-l]').forEach(function(b){ b.textContent = tr('f.grid.preset.'+b.getAttribute('data-l')); });
   document.getElementById('gr-range').setAttribute('aria-label', tr('f.grid.slider'));
   var map = [['sp','spacing'],['rd','radius'],['el','elevation'],['mo','motion'],['bd','border'],['gr','grid']];
