@@ -344,7 +344,6 @@
       "reducedOn": "System preference: reduce motion - active (durations are zero)",
       "reducedOff": "System preference: normal motion",
       "scenes": "Common scenes (try them directly, or press play)",
-      "playOne": "Play",
       "demoBtn": "Send",
       "demoToast": "✓ Saved",
       "demoStream": "Generating the summary, one moment...",
@@ -367,8 +366,18 @@
         "hover": "Hover me",
         "press": "Press and hold",
         "focus": "Click or Tab",
-        "click": "Click it"
-      }
+        "click": "Click it",
+        "toggle": "Flip it"
+      },
+      "act": {
+        "menu": "Menu",
+        "drawer": "Details",
+        "modal": "Open",
+        "toast": "Save",
+        "list": "Reload",
+        "stream": "Regenerate"
+      },
+      "demoPanel": "Contract details"
     },
     "border": {
       "title": "Border (with the WCAG 1.4.11 decision)",

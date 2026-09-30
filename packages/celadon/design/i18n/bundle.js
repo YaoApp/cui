@@ -346,7 +346,6 @@ window.CELADON_I18N = {
         "reducedOn": "System preference: reduce motion - active (durations are zero)",
         "reducedOff": "System preference: normal motion",
         "scenes": "Common scenes (try them directly, or press play)",
-        "playOne": "Play",
         "demoBtn": "Send",
         "demoToast": "✓ Saved",
         "demoStream": "Generating the summary, one moment...",
@@ -369,8 +368,18 @@ window.CELADON_I18N = {
           "hover": "Hover me",
           "press": "Press and hold",
           "focus": "Click or Tab",
-          "click": "Click it"
-        }
+          "click": "Click it",
+          "toggle": "Flip it"
+        },
+        "act": {
+          "menu": "Menu",
+          "drawer": "Details",
+          "modal": "Open",
+          "toast": "Save",
+          "list": "Reload",
+          "stream": "Regenerate"
+        },
+        "demoPanel": "Contract details"
       },
       "border": {
         "title": "Border (with the WCAG 1.4.11 decision)",
@@ -734,7 +743,6 @@ window.CELADON_I18N = {
         "reducedOn": "システム設定：動きを減らす —— 有効（時間はゼロ）",
         "reducedOff": "システム設定：通常のモーション",
         "scenes": "よくある場面（直接操作するか、再生）",
-        "playOne": "再生",
         "demoBtn": "送信",
         "demoToast": "✓ 保存しました",
         "demoStream": "要約を生成しています。少々お待ちください…",
@@ -757,8 +765,18 @@ window.CELADON_I18N = {
           "hover": "ホバーしてみる",
           "press": "押し続ける",
           "focus": "クリックまたは Tab",
-          "click": "クリック"
-        }
+          "click": "クリック",
+          "toggle": "切り替えてみる"
+        },
+        "act": {
+          "menu": "メニュー",
+          "drawer": "詳細",
+          "modal": "開く",
+          "toast": "保存する",
+          "list": "再読み込み",
+          "stream": "再生成"
+        },
+        "demoPanel": "契約の詳細"
       },
       "border": {
         "title": "境界線 Border（WCAG 1.4.11 の判断を含む）",
@@ -1122,7 +1140,6 @@ window.CELADON_I18N = {
         "reducedOn": "当前系统偏好：减少动态效果 —— 已降级（时长归零）",
         "reducedOff": "当前系统偏好：正常动效",
         "scenes": "常用场景（可直接操作，或点播放）",
-        "playOne": "播放",
         "demoBtn": "发送",
         "demoToast": "✓ 已保存",
         "demoStream": "正在生成摘要，请稍候…",
@@ -1145,8 +1162,18 @@ window.CELADON_I18N = {
           "hover": "移入试试",
           "press": "按住试试",
           "focus": "点击或 Tab",
-          "click": "点一下"
-        }
+          "click": "点一下",
+          "toggle": "拨一下"
+        },
+        "act": {
+          "menu": "菜单",
+          "drawer": "详情",
+          "modal": "打开",
+          "toast": "保存",
+          "list": "重新加载",
+          "stream": "重新生成"
+        },
+        "demoPanel": "合同详情"
       },
       "border": {
         "title": "边框 Border（含 WCAG 1.4.11 决策）",
@@ -1510,7 +1537,6 @@ window.CELADON_I18N = {
         "reducedOn": "目前系統偏好：減少動態效果 —— 已降級（時長歸零）",
         "reducedOff": "目前系統偏好：正常動效",
         "scenes": "常用場景（可直接操作，或按播放）",
-        "playOne": "播放",
         "demoBtn": "傳送",
         "demoToast": "✓ 已儲存",
         "demoStream": "正在產生摘要，請稍候…",
@@ -1533,8 +1559,18 @@ window.CELADON_I18N = {
           "hover": "移入試試",
           "press": "按住試試",
           "focus": "點擊或 Tab",
-          "click": "點一下"
-        }
+          "click": "點一下",
+          "toggle": "撥一下"
+        },
+        "act": {
+          "menu": "選單",
+          "drawer": "詳情",
+          "modal": "開啟",
+          "toast": "儲存",
+          "list": "重新載入",
+          "stream": "重新產生"
+        },
+        "demoPanel": "合約詳情"
       },
       "border": {
         "title": "邊框 Border（含 WCAG 1.4.11 決策）",
