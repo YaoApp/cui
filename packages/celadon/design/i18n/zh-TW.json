@@ -377,7 +377,14 @@
         "list": "重新載入",
         "stream": "重新產生"
       },
-      "demoPanel": "合約詳情"
+      "demoPanel": "合約詳情",
+      "overrides": "場景級覆蓋（局部指定強度）",
+      "ovNote": "同一個元件，容器加上 .motion-quiet / .motion-rich 即可局部改強度（隨繼承生效）；系統「減少動態」是總開關，任何局部都覆蓋不掉。",
+      "ov": {
+        "inherit": "繼承（全域）",
+        "quiet": "低調 .motion-quiet",
+        "rich": "豐富 .motion-rich"
+      }
     },
     "border": {
       "title": "邊框 Border（含 WCAG 1.4.11 決策）",

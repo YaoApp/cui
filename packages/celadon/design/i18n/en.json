@@ -377,7 +377,14 @@
         "list": "Reload",
         "stream": "Regenerate"
       },
-      "demoPanel": "Contract details"
+      "demoPanel": "Contract details",
+      "overrides": "Scene level override (set intensity locally)",
+      "ovNote": "The same component, with .motion-quiet or .motion-rich on a container, changes intensity for that subtree only. The system reduce-motion flag is a master switch no local class can beat.",
+      "ov": {
+        "inherit": "Inherited (global)",
+        "quiet": "Quiet .motion-quiet",
+        "rich": "Rich .motion-rich"
+      }
     },
     "border": {
       "title": "Border (with the WCAG 1.4.11 decision)",
