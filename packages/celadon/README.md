@@ -1,0 +1,56 @@
+# celadon — CUI 2.0
+
+> **与 `cui` 平级的新应用包**。不继承旧包的历史包袱：**用到啥复制啥，适配啥修改啥**。
+> 当前阶段：**🚧 00 设计规范** ｜ 构建工具：**待定**（不预设框架）
+
+## 目录
+
+```
+celadon/
+  README.md       本文件：模块清单与当前阶段
+  plan/           计划（11 个模块，每个一份；总览见 plan/README.md）
+  design/         设计资产（可独立于构建工具使用）
+    tokens.less      设计 token 唯一来源（配色/字体/尺寸/圆角/动效）
+    tokens.css       自动生成（build-css.mjs）
+    color-card.html  色卡：实时读 tokens.css + 对比度/配对自检
+    mock.html        详细界面稿（1440×888，三列通高）
+    i18n/*.json      四语文案（简/繁/英/日；ui.* 与 sample.* 分命名空间）
+    logo-*.svg       官方 logo 换色版（设计交付物，未应用到生产）
+    icons/           App 图标 PNG 七档（16–1024）
+  MIGRATION.md    迁移台账（复制了什么、改了什么、为什么）
+```
+
+## 模块（12）
+
+| # | 模块 | 状态 | 计划 |
+| --- | --- | --- | --- |
+| 00 | **设计规范** | **🚧 进行中** | [plan/00-design-system.md](plan/00-design-system.md) |
+| 01 | 基础设施 | ⏳ 待开始 | [plan/01-infrastructure.md](plan/01-infrastructure.md) |
+| 02 | 布局 | ⏳ 待开始 | [plan/02-layout.md](plan/02-layout.md) |
+| 03 | 组件 | ⏳ 待开始 | [plan/03-components.md](plan/03-components.md) |
+| 04 | 登录注册 | ⏳ 待开始 | [plan/04-auth.md](plan/04-auth.md) |
+| 05 | 收件箱 | ⏳ 待开始 | [plan/05-inbox.md](plan/05-inbox.md) |
+| 06 | 看板 | ⏳ 待开始 | [plan/06-kanban.md](plan/06-kanban.md) |
+| 07 | 聊天 | ⏳ 待开始 | [plan/07-chat.md](plan/07-chat.md) |
+| 08 | 专家 | ⏳ 待开始 | [plan/08-experts.md](plan/08-experts.md) |
+| 09 | 电脑 | ⏳ 待开始 | [plan/09-computer.md](plan/09-computer.md) |
+| 10 | 工作空间 | ⏳ 待开始 | [plan/10-workspace.md](plan/10-workspace.md) |
+| 11 | 配置 | ⏳ 待开始 | [plan/11-settings.md](plan/11-settings.md) |
+
+> 00–01 是**地基**（设计基线 + 工程底座，不产出用户可见界面）；02 起按"用户能跑通的一条路"逐个交付页面。
+
+## 设计资产（当前阶段产物）
+
+```bash
+node packages/celadon/design/build-css.mjs    # tokens.less  → tokens.css
+node packages/celadon/design/build-i18n.mjs   # i18n/*.json  → i18n/bundle.js
+```
+
+- **配色**：中国传统色 —— 品牌「青」`#2A7B7B`（青瓷釉色）· 成功「松花绿」`#057748` · 危险「朱红」`#D93B30` · 警示「琥珀」`#8B6214`；
+- **字体**：四语分栈（`--font-family-ui-hans/-hant/-japanese`，按 `:lang` 自动映射），等宽补 CJK；
+- **i18n**：`ui.*` 必翻 / `sample.*` 演示数据；缺 key 回退 `zh-CN`；
+- **命名**：变量与类名全称，不用缩写；状态用 `is-*`。
+
+## 纪律
+
+见 [plan/README.md](plan/README.md)：**台账制** · **零反向依赖**（本包不得 import 旧包）· **旧包冻结**。

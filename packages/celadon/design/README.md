@@ -3,14 +3,15 @@
 | 文件 | 内容 |
 | --- | --- |
 | [`tokens.less`](tokens.less) | **2.0 设计 token 唯一来源**（浅 + 暗，作用域 `.celadon`）+ 用法约定 |
-| [`build-css.mjs`](build-css.mjs) | 由 `tokens.less` 生成 `tokens.css`（色卡与后续 AntD 主题都从这里派生） |
+| [`build-css.mjs`](build-css.mjs) | 由 `tokens.less` 生成 `tokens.css`（色卡与后续主题生成都从这里派生） |
 | [`tokens.css`](tokens.css) | **自动生成，勿手改** |
 | [`color-card.html`](color-card.html) | **色卡**（浏览器直接打开）：所有色值/尺寸**实时读 `tokens.css`**，零硬编码；对比度按各主题真实内容底自动实算；点击 hex 复制 |
 | [`i18n/`](i18n/) | **多语言文案**：`zh-CN.json` · `zh-TW.json` · `en.json` · `ja.json`（`ui.*` 界面文案 / `sample.*` 演示数据）+ `bundle.js`（自动生成） |
 | [`build-i18n.mjs`](build-i18n.mjs) | 由 `i18n/*.json` 生成 `i18n/bundle.js`（**不用 fetch**，file:// 直接可用） |
-| [`logo-mark-celadon.svg`](logo-mark-celadon.svg) 等 | **Logo 设计交付物（仅设计，尚未应用到生产）**：官方原版 logo 换色版（`-dark`）· App 图标 SVG · [`icons/`](icons/) PNG 七档 · [`reference/`](reference/) 官方正源存档 |
+| [`logo-mark-celadon.svg`](logo-mark-celadon.svg) 等 | **Logo 设计交付物（仅设计，尚未应用到生产）**：官方原版换色版（浅/暗）· [`reference/`](reference/) 官方正源存档 |
+| [`icons/`](icons/) | **图标 PNG 七档（16–1024）**：由 `logo-mark-celadon.svg` 导出，**等比居中**（实测中心偏移 0，留白 6%，比例 1.179） |
 
-> 改色只改 `tokens.less` → 跑 `pnpm design:css` → 色卡自动跟随（**不用改 HTML**）。
+> 改色只改 `tokens.less` → 跑 `node packages/celadon/design/build-css.mjs` → 色卡自动跟随（**不用改 HTML**）。
 
 ## 字体（四语）
 
@@ -89,9 +90,9 @@
 - **语言**：简 `zh-CN` · 繁 `zh-TW` · 英 `en` · 日 `ja`（缺 key 回退 `zh-CN`）
 - **用法**：元素上加 `data-i18n="ui.nav.inbox"`（富文本用 `data-i18n-html`）；带计数用 `data-count="3"` 等属性，文案里写 `{count}`
 - **运行时**：只替换元素的**第一个文本节点**（保留计数徽标等子元素）；不刷新页面切换，`<html lang>` 同步
-- **生成**：`pnpm design:i18n` → `i18n/bundle.js`
+- **生成**：`node packages/celadon/design/build-i18n.mjs` → `i18n/bundle.js`
 
 ```bash
-pnpm design:css     # tokens.less → tokens.css
-pnpm design:i18n    # i18n/*.json → i18n/bundle.js
+node packages/celadon/design/build-css.mjs   # tokens.less → tokens.css
+node packages/celadon/design/build-i18n.mjs  # i18n/*.json → bundle.js
 ```
