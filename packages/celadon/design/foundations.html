@@ -183,7 +183,7 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 /* 客户端收到 0 时，导航以图标形式留在顶栏（与标题栏按钮同一行） */
 .gicons{display:none;align-items:center;gap:6px}
 .gvp.nav-none .gicons{display:flex}
-.gicons .gi{width:22px;height:22px;border-radius:var(--radius-xs);background:var(--background-field);position:relative}
+.gicons .gi{width:22px;height:22px;border-radius:var(--radius-xs);background:var(--background-field);border:1px solid var(--border-default);position:relative}
 .gicons .gi.on{background:var(--brand-soft);box-shadow:inset 0 -2px 0 var(--brand)}
 .gicons .gi::after{content:attr(data-label);position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
   white-space:nowrap;background:var(--background-surface);color:var(--text-primary);border:1px solid var(--border-default);
@@ -191,7 +191,7 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
   transition:opacity var(--duration-fast) var(--easing-standard);z-index:var(--z-tooltip)}
 .gicons .gi:hover::after{opacity:1}
 .ggrid{flex:1;min-height:0;display:grid;grid-template-columns:0 0 0;transition:grid-template-columns var(--duration-slow) var(--easing-standard)}
-.gnav{background:var(--background-navigation);border-right:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden;min-width:0}
+.gnav{grid-column:1;background:var(--background-navigation);border-right:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden;min-width:0}
 .gnav span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .gnav.overlay{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-overlay);box-shadow:var(--shadow-floating)}
 /* 图标轨：只留图标，hover 出标签（图标无文字时的标准做法） */
@@ -208,10 +208,10 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .gscrim.on{opacity:1;pointer-events:auto}
 .gnav.drawer{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-modal);box-shadow:var(--shadow-overlay);transform:translateX(-100%);transition:transform var(--duration-base) var(--easing-decelerate)}
 .gnav.drawer.open{transform:none}
-.gcenter{min-width:0;display:flex;justify-content:center;padding:14px 12px;overflow:hidden}
+.gcenter{grid-column:2;min-width:0;display:flex;justify-content:center;padding:14px 12px;overflow:hidden}
 .gcontent{width:100%;display:flex;flex-direction:column;gap:12px}
 .gcontent b{display:block;height:16px;border-radius:4px;background:var(--background-surface);border:1px solid var(--border-default)}
-.gside{background:var(--background-navigation);border-left:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.gside{grid-column:3;background:var(--background-navigation);border-left:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 .gside span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .gpreset{cursor:pointer;border:1px solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);border-radius:var(--radius-pill);padding:3px 9px;font-size:11px;font-family:inherit}
 .gpreset.on{background:var(--brand-soft);color:var(--brand-ink);border-color:var(--brand);font-weight:650}
@@ -782,7 +782,7 @@ function applyChrome(){
   document.getElementById('gr-nav').setAttribute('aria-label', tr('f.grid.sliderNav'));
   document.getElementById('gr-side').setAttribute('aria-label', tr('f.grid.sliderSide'));
   document.querySelectorAll('.gpreset[data-l]').forEach(function(b){
-    var k = b.hasAttribute('data-type') ? 'f.grid.sideType.' : 'f.grid.preset.';
+    var k = b.hasAttribute('data-plat') ? 'f.grid.plat.' : (b.hasAttribute('data-type') ? 'f.grid.sideType.' : 'f.grid.preset.');
     b.textContent = tr(k + b.getAttribute('data-l'));
   });
   document.getElementById('gr-range').setAttribute('aria-label', tr('f.grid.slider'));
