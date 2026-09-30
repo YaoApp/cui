@@ -7,7 +7,7 @@
 
 | 源 | 目标 | 改动 | 原因 |
 | --- | --- | --- | --- |
-| `packages/cui/celadon/design/**`（25 文件） | `packages/celadon/design/**` | 整体移动；生成器用法注释与生成的 `tokens.css` 头改为新路径 | 新包与 `cui` 平级；设计资产不依赖构建工具，先搬过来 |
+| `packages/cui/celadon/design/**`（25 文件） | `packages/celadon/design/**` | 整体移动；生成器用法注释与生成的 `tokens.css` 头改为新路径 | 本包即 `cui` 的 2.0（包名 `@yaoapp/cui`）；设计资产不依赖构建工具，先搬过来 |
 | `packages/cui/celadon/README.md` | `packages/celadon/README.md` | 重写为"模块清单 + 当前阶段" | 描述新包而非旧位置 |
 | `packages/cui/package.json` 的 `design:css` / `design:i18n` | — | 移除（暂不在本包加 `package.json`） | 本阶段不引入任何构建/包管理假设 |
 
