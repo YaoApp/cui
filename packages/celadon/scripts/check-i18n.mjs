@@ -65,6 +65,15 @@ const SAME_FORM_GUARD = [...'放播常直使用空白面板本形按交人大小
 }
 const problems = []
 
+
+// 0) key 命名与深度（i18n 规范 §2）：小驼峰 · 深度 ≤ 3 段（不含命名空间）· 不用缩写
+const ABBREV = new Set(['nav', 'act', 'pnl', 'msg', 'btn', 'cfg', 'usr', 'cnt', 'idx'])
+for (const k of Object.keys(base)) {
+  const segs = k.split('.').slice(1)
+  for (const seg of segs) if (!/^[a-z][A-Za-z0-9]*$/.test(seg)) problems.push(`key 命名不合规（要小驼峰）: ${k}`)
+  if (segs.length > 3) problems.push(`key 层级过深（>3 段）: ${k}`)
+  for (const seg of segs) if (ABBREV.has(seg)) problems.push(`key 用了缩写（规范要求全称）: ${k} —— ${seg}`)
+}
 for (const lang of LANGS) {
   if (lang === BASE) continue
   const pack = packs[lang]

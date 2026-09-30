@@ -2,7 +2,7 @@
   "ui": {
     "brand": "Yao Agents",
     "newTask": "新規タスク",
-    "nav": {
+    "navigation": {
       "chat": "チャット",
       "inbox": "受信トレイ",
       "board": "ボード",
@@ -373,7 +373,7 @@
         "click": "クリック",
         "toggle": "切り替えてみる"
       },
-      "act": {
+      "action": {
         "menu": "メニュー",
         "drawer": "詳細",
         "modal": "開く",
@@ -458,7 +458,7 @@
       "belowMin": "最小未満",
       "autoRail": "自動レール",
       "zone": {
-        "nav": "ナビ",
+        "navigation": "ナビゲーション",
         "center": "コンテンツ",
         "side": "サイド"
       },
@@ -577,8 +577,8 @@
     "n4": "検査を実行します（`check-i18n` / `check-readme-values`）。ハードコード色と 16 グリッドの残りがないことも確認します。",
     "copied": "コピーしました",
     "cat": {
-      "nav": "ナビ",
-      "act": "操作",
+      "navigation": "ナビ",
+      "action": "操作",
       "state": "状態",
       "file": "ファイル種別",
       "obj": "対象",
