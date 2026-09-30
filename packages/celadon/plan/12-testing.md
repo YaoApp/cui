@@ -9,7 +9,7 @@
 | **规范门禁** | `scripts/check-*.mjs`（**零依赖**）+ lints | 确定性代码 | 设计规范（token · i18n · 样式约定 · 文档结构）· 类型 · 样式 · 依赖边界 |
 | **单元 / 组件** | `vitest` · `@testing-library/react` · `user-event` · `jsdom` | 确定性代码 | 纯逻辑 · 状态与数据层 · 组件行为 |
 | **浏览器** | `@playwright/test` + 截图 golden | 确定性代码 | 关键交互主路径 · 中文输入法 · 全键盘 · 视觉回归 |
-| **拟人** | 剧本 + 浏览器执行 + **`image_read`** · **`ocr_recognize`** · **`decision_decide`** | **执行者判定；按需转人** | 真实使用路径 · 极端数据 · 环境差异 · 观感与措辞 |
+| **拟人** | 剧本 + 浏览器执行 + 看图（执行者视觉）· **`ocr_recognize`** · **`decision_decide`** | **执行者判定；按需转人** | 真实使用路径 · 极端数据 · 环境差异 · 观感与措辞 |
 
 规范门禁零依赖、随设计资产走，是 QA 流程的**第 1 阶段**；其余三层用上表的栈。
 
@@ -80,11 +80,28 @@
 
 | 手段 | 强在哪 | 弱在哪 |
 | --- | --- | --- |
-| **看截图**（原生视觉；需要第二个视角时用 **`image_read`**）| 布局 · 状态（空 / 满 / 错）· 是否塌 · 观感是否别扭 | 精确文字与数字不可靠 |
+| **看截图**（执行者原生视觉）| 布局 · 状态（空 / 满 / 错）· 是否塌 · 观感是否别扭 | 精确文字与数字不可靠 |
 | **OCR**（**`ocr_recognize`**）| 文字与数字**逐字精确** · 表格 · 手写 | 看不出"哪里不对劲" |
 | **决策模型**（**`decision_decide`**，分类 / 评分 / 度量）| 给出**分级结论 + 置信度** | 需要先把输入整理干净 |
 
-> 三件都是平台工具；**`decision_decide` 与 `ocr_recognize` 不在默认工具提醒里**，用到时按名调用（可用 `decision_providers` / `ocr_providers` 先列可用 provider）。
+> **`decision_decide` 与 `ocr_recognize` 不在默认工具提醒里** —— 命令写在这里，不必每次查技能文件：
+
+```bash
+# OCR：截图 → 文字（json 带坐标与置信度）
+tai tool ocr_recognize --source <截图路径> --output_format json --language zh
+#   --type table|handwriting|invoice|...   按内容类型提升准确率
+
+# 决策：事实 → 分级结论（choice 分类 / score 评分 / noul 概率）
+tai tool decision_decide \
+  --state '<被判定的事实：截图所见 + 预期 + 差异>' \
+  --questions '{"verdict":{"type":"choice","instructions":"判定该步是否通过","criteria":{"pass":"符合预期","fail":"与预期不符","unclear":"证据不足"}}}'
+
+# 列可用 provider / 模型
+tai tool decision_providers
+tai tool ocr_providers
+```
+
+> 完整参数见平台技能文件 `yao-ocr` / `yao-decision`。
 
 **流程**：**看图发现问题 → OCR 确认文字与数值 → 决策模型分级 → 按需转人**；判定必须能回到同一张截图与同一步操作。
 **置信度是门控，不是保证**：高置信可用 · 低置信不得自行结案。
