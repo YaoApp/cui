@@ -280,7 +280,7 @@ function brandTile(b){
   // 外部来源各自的雪碧图分片：brand-sprite-N（AI 品牌）/ brand-simple-N（通用品牌）；自有品牌用内联符号
   var file = b.lib === 'simpleicons' ? 'brand-simple-' : 'brand-sprite-';
   var href = b.lib === 'own' ? ('#' + b.id + (ownMono ? '-mono' : '')) : ('icons/' + file + (b.shard || 1) + '.svg#' + id);
-  var chip = (!useMono && b.lib !== 'own') ? ' chip-on-dark' : '';
+  var chip = !useMono ? ' chip-on-dark' : '';   /* 暗色下官方色 logo 统一垫纸白（我们自己的一样），单色不垫 */
   return '<button class="cell brand" data-id="'+b.id+'" title="'+b.title+'" data-primary="'+(b.primary||'')+'">'
     + '<span class="logo'+chip+'"><svg width="'+BSIZE+'" height="'+BSIZE+'" viewBox="0 0 24 24" style="display:block"><use href="'+href+'"/></svg></span>'
     + '<span class="nm">'+b.id+'</span><span class="src">'+b.title+'</span></button>';
