@@ -573,7 +573,7 @@
   "title": "CogVideo",
   "primary": "#000",
   "color": true,
-  "mono": false
+  "mono": true
  },
  {
   "id": "brand-cog-view",
@@ -581,7 +581,7 @@
   "title": "CogView",
   "primary": "#000",
   "color": true,
-  "mono": false
+  "mono": true
  },
  {
   "id": "brand-cohere",
