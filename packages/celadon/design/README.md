@@ -49,7 +49,7 @@
 
 | 项 | token | 规则 |
 | --- | --- | --- |
-| 间距 | `--spacing-2 … 48`（9 档） | 组件内距 4/6/8/12 · 元素间 8/12/16 · 区块间 24/32/48 · 槽宽 16/24 |
+| 间距 | `--spacing-2 … 48`（9 档，4 基数列 + 2/6 两个细档） | 组件内距 4/6/8/12 · 元素间 8/12/16 · 区块间 24/32/48 · 槽宽 16/24 |
 | 圆角 | `--radius-small/medium/large/pill` | 小控件 small · 按钮/输入 medium · 卡片/面板 large · 标签/胶囊 pill |
 | 层级 | `--shadow-subtle/floating/overlay` + `--z-base/raised/sticky/overlay/modal/toast/tooltip` | L0 无 · L1 卡片 · L2 浮层 · L3 弹窗（配 `--scrim`）|
 | 动效 | `--duration-fast/base/slow`（三档：quiet 80/140/220 · 默认 120/200/320 · rich 180/300/480）+ `--easing-standard/decelerate/accelerate` | 微反馈 fast · 常规 base · 大位移 slow；进场 decelerate、退场 accelerate |
