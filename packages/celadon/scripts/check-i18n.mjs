@@ -74,6 +74,24 @@ for (const k of Object.keys(base)) {
   if (segs.length > 3) problems.push(`key 层级过深（>3 段）: ${k}`)
   for (const seg of segs) if (ABBREV.has(seg)) problems.push(`key 用了缩写（规范要求全称）: ${k} —— ${seg}`)
 }
+// 5) 页面里字面引用的 key 必须在语言包里存在（data-i18n="…" 与 tr('…')）
+//    历史：color-card 的 card.usage.dangerInk 与 foundations 的 f.grid.sliderSide 从来没加过，
+//    页面上直接把 key 当文字显示了出来，而当时没有任何检查发现。
+{
+  const files = readdirSync('.').filter((f) => f.endsWith('.html'))
+  const seen = new Set()
+  for (const f of files) {
+    const text = readFileSync(f, 'utf8')
+    const keys = []
+    for (const mm of text.matchAll(/data-i18n="([^"]+)"/g)) keys.push(mm[1])
+    for (const mm of text.matchAll(/\btr\('([^']+)'\)/g)) keys.push(mm[1])
+    for (const k of keys) {
+      if (k.includes('{') || k.includes('+')) continue          // 含插值/拼接的跳过
+      if (!(k in base) && !seen.has(k)) { seen.add(k); problems.push(`页面引用了不存在的 key: ${k}（${f}）`) }
+    }
+  }
+}
+
 for (const lang of LANGS) {
   if (lang === BASE) continue
   const pack = packs[lang]

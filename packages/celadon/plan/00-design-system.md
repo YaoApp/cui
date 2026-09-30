@@ -164,7 +164,7 @@
 | Logo（设计交付物） | `design/logo-mark-celadon.svg`（**当前正版**；几何取自上一版原始文件、**仅换颜色**；**浅暗同版，不分主题**）· `logo-app-celadon.svg`（正方形画布，图形内缩 78%）· `design/icons/icon-*.png` 7 档 | 上一版原始文件 vs 当前正版 diff 比对 |
 | 本地浏览 / 防缓存 | `design/serve.mjs`（零依赖 · `no-store` · 目录浏览） | 改完刷新即见 |
 
-> **质量门禁（五个检查，本地可当 CI 跑）**：`check-i18n.mjs`（缺 key / 漏翻 / 繁简 / 日文）· `check-readme-values.mjs`（色值零漂移）· `check-tokens.mjs`（规范页与展示页的字号 / 行高 / 圆角 / 颜色 / 间距 / 线宽 / 漏分号）· `check-generated.mjs`（生成物与源一致 · 品牌标记颜色全走 token）· **`check-css-conventions.mjs`**（布局只用逻辑属性；演示稿登记为存量）
+> **质量门禁（五个检查，本地可当 CI 跑）**：`check-i18n.mjs`（缺 key / 漏翻 / 繁简 / 日文）· `check-readme-values.mjs`（色值零漂移）· `check-tokens.mjs`（七类：颜色与尺寸字面量 / 装饰色承载文字 / 四值简写不对称 / 大括号不配对 / 漏分号 / 行高 / `font:` 简写 / 间距与线宽）· `check-generated.mjs`（生成物与源一致 · 品牌标记颜色全走 token）· **`check-css-conventions.mjs`**（布局只用逻辑属性；演示稿登记为存量）
 
 ## 4. 归属其他模块（此处只登记，不在本文件做）
 
