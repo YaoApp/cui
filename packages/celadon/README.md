@@ -2,7 +2,7 @@
 
 > **Celadon（青瓷）** —— 青瓷釉色正是我们最终定下的品牌色 **`#2A7B7B`**：
 > 青而不艳、温润、耐看。它同时承载「**双面 App**」的器物隐喻：**同一件器，一面看人，一面看 Agent**。
-> **本目录即 CUI 2.0 的新代码落点**（"所有新的都往内里搬"）。
+> **本目录即 CUI 2.0 的新代码落点**。当前**只包含设计资产 `design/`**；应用骨架与构建工具（**尚未定，不预设某框架**）在后续步骤中加入。
 
 - 状态：**建设中**（2026-09-29 起）。
 - 备份：1.x 冻结在 **`git tag v1-final`**（`2622079c`）。
@@ -16,21 +16,15 @@
 | **命名** | 变量/类名**全称，不用缩写**；状态用 `is-*` |
 | **字号/行高** | 中文最小 12px；行高 1.5（拉丁）/ 1.7（中日文）；中文 `letter-spacing: 0` |
 | **主题** | `data-theme` 挂 `.celadon` 或其祖先；暗色只覆盖语义层 |
-| **生成** | `pnpm design:css`（tokens.less → tokens.css）· `pnpm design:i18n`（i18n/*.json → bundle.js） |
+| **设计资产生成** | `node packages/celadon/design/build-css.mjs`（tokens.less → tokens.css）· `node packages/celadon/design/build-i18n.mjs`（i18n/*.json → bundle.js） |
 
 ## 目录
 
 ```
 celadon/
-  design/   设计 token 单一来源 + 色卡 + 详细界面稿
-    ├── tokens.less        唯一来源（变量名全用全称，无缩写）
-    ├── build-css.mjs      tokens.less → tokens.css
-    ├── tokens.css         自动生成，勿手改
-    ├── color-card.html    色卡（实时读 tokens.css，自动算对比度）
-    └── mock.html          详细界面稿（同样零硬编码）
-  shell/    AppShell · NavColumn · ContentHeader · SidePanel      （P0 待建）
-  navigation/  navContexts/*（会话历史 / 收件箱 / 看板 / 工作区 / 电脑） （P1+ 待建）
-  apps/     各应用页面                                            （P1+ 待建）
+  README.md   本文件
+  design/     设计资产（token 单一来源 · 色卡 · 界面稿 · i18n · logo）
+              —— 与应用构建方式无关，可直接用浏览器打开
 ```
 
 ## 约定
