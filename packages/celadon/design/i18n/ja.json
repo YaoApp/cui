@@ -456,9 +456,6 @@
       },
       "sideOff": "サイド：閉",
       "sideOn": "サイド：開",
-      "navNormal": "ナビ：通常",
-      "navOverlayOn": "ナビ：オーバーレイ中（手動）",
-      "navOverlayOff": "ナビ：レール（押すとオーバーレイ）",
       "overlay": "オーバーレイ",
       "belowMin": "最小未満",
       "autoRail": "自動レール",
@@ -475,7 +472,47 @@
         "tool": "ツール 600",
         "task": "タスク 640",
         "wide": "ワイド 840"
-      }
+      },
+      "plat": {
+        "client": "クライアント",
+        "web": "Web"
+      },
+      "navCollapsedBtn": "ナビを収納",
+      "navExpanded": "ナビを展開",
+      "navMode": {
+        "full": "通常",
+        "rail": "アイコンレール",
+        "overlay": "オーバーレイ展開",
+        "drawer": "ドロワー（閉）",
+        "drawerOpen": "ドロワー（開）"
+      },
+      "item": {
+        "overview": "概要",
+        "inbox": "メッセージ",
+        "tasks": "タスク",
+        "files": "ファイル",
+        "apps": "アプリ",
+        "settings": "設定",
+        "help": "ヘルプ"
+      },
+      "navTitle": "ナビの収納は 3 通り（クライアントと Web）",
+      "navColTarget": "場面",
+      "navColForm": "収納の形",
+      "navColToggle": "切替の位置",
+      "navColState": "状態",
+      "nr1a": "クライアント / ワイド Web（1024 以上）",
+      "nr1b": "56 のアイコンレール（24 アイコン + 左右 16 の余白）",
+      "nr1c": "macOS はタイトルバー、その他はナビ上部",
+      "nr1d": "永続化した設定 + 一時フラグ（2 段階）",
+      "nr2a": "中間の Web（768–1023）",
+      "nr2b": "自動でレールに収納",
+      "nr2c": "上と同じ",
+      "nr2d": "同じ。狭いときの展開は設定に書き戻さない",
+      "nr3a": "狭い Web（768 未満）",
+      "nr3b": "ドロワー：内容の上に重なり、スクリム付き",
+      "nr3c": "ヘッダーのハンバーガー",
+      "nr3d": "一時的（Esc かスクリムで閉じる）",
+      "railNote": "レール上：ホバーでラベル、現在項目は左のインジケータ、キーボード到達可（aria-expanded）"
     }
   }
 }
