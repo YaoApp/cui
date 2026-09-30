@@ -501,10 +501,10 @@ window.CELADON_I18N = {
         "navTitle": "The three ways the navigation collapses (client and web)",
         "navColTarget": "Case",
         "navColForm": "Collapsed form",
-        "navColToggle": "Toggle position",
+        "navColToggle": "Top left controls",
         "navColState": "State",
         "nr1a": "Client or wide web (1024 and up)",
-        "nr1b": "**Collapses to 0**: the sidebar goes away and the navigation becomes **icons in the header**, on the same row as the window controls",
+        "nr1b": "**Collapses to 0**: the navigation area disappears and the content runs from the very left edge; the **traffic lights and the toggle do not move**, landing on top of the content, whose top row makes room with a left inset",
         "nr1c": "macOS: the title bar beside the traffic lights. Elsewhere: the header",
         "nr1d": "Persisted preference plus a transient flag (two levels)",
         "nr2a": "Mid web (768 to 1023)",
@@ -515,7 +515,7 @@ window.CELADON_I18N = {
         "nr3b": "Drawer: floats over content with a scrim",
         "nr3c": "Hamburger in the header",
         "nr3d": "Transient (Esc or the scrim closes it)",
-        "railNote": "In the rail: a label appears on hover, the current item keeps a left indicator, and everything stays keyboard reachable (aria-expanded)"
+        "railNote": "There is **no title bar**: three vertical columns, each with its own top row. Only the traffic lights and the toggle float in the top left corner, and they never move"
       }
     }
   },
@@ -1020,10 +1020,10 @@ window.CELADON_I18N = {
         "navTitle": "ナビの収納は 3 通り（クライアントと Web）",
         "navColTarget": "場面",
         "navColForm": "収納の形",
-        "navColToggle": "切替の位置",
+        "navColToggle": "左上の操作部",
         "navColState": "状態",
         "nr1a": "クライアント / ワイド Web（1024 以上）",
-        "nr1b": "**0 まで収納**：サイドバーは消え、ナビは**ヘッダーのアイコン**としてウィンドウ操作と同じ行に残ります",
+        "nr1b": "**0 まで収納**：ナビ領域は消え、内容はウィンドウの左端から広がります。**信号機と切替ボタンは動かず**、内容の上に残り、内容の上段が左余白で場所を空けます",
         "nr1c": "macOS はタイトルバー（信号機の隣）、その他はヘッダー",
         "nr1d": "永続化した設定 + 一時フラグ（2 段階）",
         "nr2a": "中間の Web（768–1023）",
@@ -1034,7 +1034,7 @@ window.CELADON_I18N = {
         "nr3b": "ドロワー：内容の上に重なり、スクリム付き",
         "nr3c": "ヘッダーのハンバーガー",
         "nr3d": "一時的（Esc かスクリムで閉じる）",
-        "railNote": "レール上：ホバーでラベル、現在項目は左のインジケータ、キーボード到達可（aria-expanded）"
+        "railNote": "**タイトルバーはありません**：3 つの縦カラムがそれぞれ上段を持ちます。左上に浮くのは信号機と切替ボタンだけで、位置は決して変わりません"
       }
     }
   },
@@ -1539,10 +1539,10 @@ window.CELADON_I18N = {
         "navTitle": "导航收起的三档行为（客户端 / Web 各自对应）",
         "navColTarget": "场景",
         "navColForm": "收起形态",
-        "navColToggle": "收起控件位置",
+        "navColToggle": "左上控制区",
         "navColState": "状态",
         "nr1a": "客户端 / Web 宽屏（≥1024）",
-        "nr1b": "**收起为 0**：侧栏完全收掉，导航改以**图标**留在顶栏（与标题栏按钮同一行）",
+        "nr1b": "**收起为 0**：导航区完全消失，内容区从窗口最左铺满；**红绿灯与收起键位置不变**（落在内容区顶上，内容顶行让出左内距）",
         "nr1c": "macOS 在标题栏（交通灯旁）；其他平台在顶栏",
         "nr1d": "持久化偏好 + 临时标志（两级）",
         "nr2a": "Web 中档（768–1023）",
@@ -1553,7 +1553,7 @@ window.CELADON_I18N = {
         "nr3b": "抽屉：浮在内容上 + 遮罩",
         "nr3c": "顶栏汉堡按钮",
         "nr3d": "临时（Esc / 点遮罩关闭）",
-        "railNote": "轨上图标：hover 出标签 · 当前项左侧指示条 · 键盘可达（aria-expanded）· 图标与文字不同时存在的取舍（图标优先，标签靠 hover）"
+        "railNote": "**没有标题栏**：三栏竖切，每栏各自的顶行；窗口左上角只浮着\"红绿灯 + 收起键\"，位置永不移动"
       }
     }
   },
@@ -2058,10 +2058,10 @@ window.CELADON_I18N = {
         "navTitle": "導覽收合的三檔行為（客戶端 / Web 各自對應）",
         "navColTarget": "場景",
         "navColForm": "收合形態",
-        "navColToggle": "收合控件位置",
+        "navColToggle": "左上控制區",
         "navColState": "狀態",
         "nr1a": "客戶端 / Web 寬螢幕（≥1024）",
-        "nr1b": "**收合為 0**：側欄完全收掉，導覽改以**圖示**留在頂欄（與標題列按鈕同一行）",
+        "nr1b": "**收合為 0**：導覽區完全消失，內容區從視窗最左鋪滿；**紅綠燈與收合鍵位置不變**（落在內容區頂上，內容頂列讓出左內距）",
         "nr1c": "macOS 在標題列（紅綠燈旁）；其他平台在頂欄",
         "nr1d": "持久化偏好 + 臨時旗標（兩級）",
         "nr2a": "Web 中檔（768–1023）",
@@ -2072,7 +2072,7 @@ window.CELADON_I18N = {
         "nr3b": "抽屜：浮在內容上 + 遮罩",
         "nr3c": "頂欄漢堡按鈕",
         "nr3d": "臨時（Esc / 點遮罩關閉）",
-        "railNote": "軌上圖示：hover 出標籤 · 當前項左側指示條 · 鍵盤可達（aria-expanded）"
+        "railNote": "**沒有標題列**：三欄豎切，各欄有自己的頂列；視窗左上只浮著「紅綠燈 + 收合鍵」，位置永不移動"
       }
     }
   }
