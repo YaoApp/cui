@@ -2,7 +2,7 @@
   "ui": {
     "brand": "Yao Agents",
     "newTask": "New task",
-    "nav": {
+    "navigation": {
       "chat": "Chat",
       "inbox": "Inbox",
       "board": "Board",
@@ -373,7 +373,7 @@
         "click": "Click it",
         "toggle": "Flip it"
       },
-      "act": {
+      "action": {
         "menu": "Menu",
         "drawer": "Details",
         "modal": "Open",
@@ -458,7 +458,7 @@
       "belowMin": "below min",
       "autoRail": "auto rail",
       "zone": {
-        "nav": "nav",
+        "navigation": "Navigation",
         "center": "center",
         "side": "side"
       },
@@ -577,8 +577,8 @@
     "n4": "Run the checks, `check-i18n` and `check-readme-values`, and confirm the page has no hard coded colour and no 16 grid leftovers.",
     "copied": "Copied",
     "cat": {
-      "nav": "Navigation",
-      "act": "Actions",
+      "navigation": "Navigation",
+      "action": "Actions",
       "state": "States",
       "file": "File types",
       "obj": "Objects",

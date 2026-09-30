@@ -4,7 +4,7 @@ window.CELADON_I18N = {
     "ui": {
       "brand": "Yao Agents",
       "newTask": "New task",
-      "nav": {
+      "navigation": {
         "chat": "Chat",
         "inbox": "Inbox",
         "board": "Board",
@@ -375,7 +375,7 @@ window.CELADON_I18N = {
           "click": "Click it",
           "toggle": "Flip it"
         },
-        "act": {
+        "action": {
           "menu": "Menu",
           "drawer": "Details",
           "modal": "Open",
@@ -460,7 +460,7 @@ window.CELADON_I18N = {
         "belowMin": "below min",
         "autoRail": "auto rail",
         "zone": {
-          "nav": "nav",
+          "navigation": "Navigation",
           "center": "center",
           "side": "side"
         },
@@ -574,13 +574,13 @@ window.CELADON_I18N = {
       "a4": "**Never carry state by icon alone**: state is icon plus text plus colour.",
       "newTitle": "Adding an icon",
       "n1": "Find the closest name in **lucide** (`lucide.dev/icons`).",
-      "n2": "Add it to `icons/manifest.json` (the lucide name for theirs, or `icons/own-sprite.svg` for ours) and run `node build-icons.mjs` to re-inline.",
+      "n2": "Add it to `icons/manifest.json` (the lucide name for theirs, or `icons/own-sprite.svg` for ours) and run `build-icons.mjs` to re-inline.",
       "n3": "Check it reads at **14px**; if not, draw a simplified version on the 24 grid.",
       "n4": "Run the checks, `check-i18n` and `check-readme-values`, and confirm the page has no hard coded colour and no 16 grid leftovers.",
       "copied": "Copied",
       "cat": {
-        "nav": "Navigation",
-        "act": "Actions",
+        "navigation": "Navigation",
+        "action": "Actions",
         "state": "States",
         "file": "File types",
         "obj": "Objects",
@@ -695,7 +695,7 @@ window.CELADON_I18N = {
     "ui": {
       "brand": "Yao Agents",
       "newTask": "新規タスク",
-      "nav": {
+      "navigation": {
         "chat": "チャット",
         "inbox": "受信トレイ",
         "board": "ボード",
@@ -1066,7 +1066,7 @@ window.CELADON_I18N = {
           "click": "クリック",
           "toggle": "切り替えてみる"
         },
-        "act": {
+        "action": {
           "menu": "メニュー",
           "drawer": "詳細",
           "modal": "開く",
@@ -1151,7 +1151,7 @@ window.CELADON_I18N = {
         "belowMin": "最小未満",
         "autoRail": "自動レール",
         "zone": {
-          "nav": "ナビ",
+          "navigation": "ナビゲーション",
           "center": "コンテンツ",
           "side": "サイド"
         },
@@ -1265,13 +1265,13 @@ window.CELADON_I18N = {
       "a4": "**アイコンだけで状態を伝えない**：状態 = アイコン + 文字 + 色。",
       "newTitle": "アイコンの追加",
       "n1": "**lucide** で意味が最も近い名前を探します（`lucide.dev/icons`）。",
-      "n2": "`icons/manifest.json` に追加し（lucide のものは lucide 名、自前は `icons/own-sprite.svg`）、`node build-icons.mjs` で再インラインします。",
+      "n2": "`icons/manifest.json` に追加し（lucide のものは lucide 名、自前は `icons/own-sprite.svg`）、`build-icons.mjs` で再インラインします。",
       "n3": "**14px** で読めるか確認し、読めなければ 24 グリッドで簡略版を描きます。",
       "n4": "検査を実行します（`check-i18n` / `check-readme-values`）。ハードコード色と 16 グリッドの残りがないことも確認します。",
       "copied": "コピーしました",
       "cat": {
-        "nav": "ナビ",
-        "act": "操作",
+        "navigation": "ナビ",
+        "action": "操作",
         "state": "状態",
         "file": "ファイル種別",
         "obj": "対象",
@@ -1386,7 +1386,7 @@ window.CELADON_I18N = {
     "ui": {
       "brand": "Yao Agents",
       "newTask": "新任务",
-      "nav": {
+      "navigation": {
         "chat": "聊天",
         "inbox": "收件箱",
         "board": "看板",
@@ -1757,7 +1757,7 @@ window.CELADON_I18N = {
           "click": "点一下",
           "toggle": "拨一下"
         },
-        "act": {
+        "action": {
           "menu": "菜单",
           "drawer": "详情",
           "modal": "打开",
@@ -1842,7 +1842,7 @@ window.CELADON_I18N = {
         "belowMin": "低于最小",
         "autoRail": "自动收轨",
         "zone": {
-          "nav": "导航",
+          "navigation": "导航",
           "center": "内容",
           "side": "侧栏"
         },
@@ -1956,13 +1956,13 @@ window.CELADON_I18N = {
       "a4": "**不要只靠图标传达状态**：状态=图标+文字+颜色（色盲下仍可读）。",
       "newTitle": "新增一个图标",
       "n1": "去 **lucide** 找语义最近的名字（`lucide.dev/icons`）。",
-      "n2": "加进 `icons/manifest.json`（取自 lucide 的写 lucide 名；自建的放进 `icons/own-sprite.svg`），跑 `node build-icons.mjs` 重新内联。",
+      "n2": "加进 `icons/manifest.json`（取自 lucide 的写 lucide 名；自建的放进 `icons/own-sprite.svg`），跑 `build-icons.mjs` 重新内联。",
       "n3": "在 **14px** 下确认可辨；不可辨则按 24 网格自绘简化版。",
       "n4": "跑检查：`check-i18n` / `check-readme-values`；确认页面无硬编码颜色、无 16 网格残留。",
       "copied": "已复制",
       "cat": {
-        "nav": "主导航",
-        "act": "操作",
+        "navigation": "主导航",
+        "action": "操作",
         "state": "状态",
         "file": "文件类型",
         "obj": "对象 / 领域",
@@ -2077,7 +2077,7 @@ window.CELADON_I18N = {
     "ui": {
       "brand": "Yao Agents",
       "newTask": "新增任務",
-      "nav": {
+      "navigation": {
         "chat": "聊天",
         "inbox": "收件匣",
         "board": "看板",
@@ -2448,7 +2448,7 @@ window.CELADON_I18N = {
           "click": "點一下",
           "toggle": "撥一下"
         },
-        "act": {
+        "action": {
           "menu": "選單",
           "drawer": "詳情",
           "modal": "開啟",
@@ -2533,7 +2533,7 @@ window.CELADON_I18N = {
         "belowMin": "低於最小",
         "autoRail": "自動收軌",
         "zone": {
-          "nav": "導覽",
+          "navigation": "導覽",
           "center": "內容",
           "side": "側欄"
         },
@@ -2647,13 +2647,13 @@ window.CELADON_I18N = {
       "a4": "**不要只靠圖示傳達狀態**：狀態 = 圖示 + 文字 + 顏色。",
       "newTitle": "新增一個圖示",
       "n1": "去 **lucide** 找語意最近的名字（`lucide.dev/icons`）。",
-      "n2": "加進 `icons/manifest.json`（取自 lucide 的寫 lucide 名；自建的放進 `icons/own-sprite.svg`），跑 `node build-icons.mjs` 重新內聯。",
+      "n2": "加進 `icons/manifest.json`（取自 lucide 的寫 lucide 名；自建的放進 `icons/own-sprite.svg`），跑 `build-icons.mjs` 重新內聯。",
       "n3": "在 **14px** 下確認可辨；不可辨則按 24 網格自繪簡化版。",
       "n4": "跑檢查：`check-i18n` / `check-readme-values`；確認頁面無硬編碼顏色、無 16 網格殘留。",
       "copied": "已複製",
       "cat": {
-        "nav": "主導覽",
-        "act": "操作",
+        "navigation": "主導覽",
+        "action": "操作",
         "state": "狀態",
         "file": "檔案類型",
         "obj": "物件 / 領域",
