@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="zh-CN" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celadon Foundations · 间距 · 圆角 · 层级 · 动效 · 边框</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+*{box-sizing:border-box} html,body{margin:0}
+body{font:13px/1.5 var(--font-family-ui);background:var(--background-app);color:var(--text-primary);-webkit-font-smoothing:antialiased;padding:22px 22px 60px}
+h1{font-size:19px;margin:0 0 4px}
+.sub{color:var(--text-secondary);font-size:12.5px;margin:0 0 10px}
+.src{font-size:11.5px;color:var(--text-tertiary);background:var(--background-surface);border:1px solid var(--border-default);border-radius:8px;padding:6px 10px;display:inline-block;margin-bottom:14px}
+code{font-family:var(--font-family-monospace);background:var(--background-field);padding:1px 5px;border-radius:4px;font-size:11.5px}
+.toolbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;background:color-mix(in srgb, var(--background-app) 92%, transparent);backdrop-filter:blur(6px);padding:8px 0 12px;margin-bottom:8px}
+.language-switch{display:flex;gap:4px}
+.toolbar button{font:inherit;font-size:12px;padding:5px 12px;border-radius:var(--radius-pill);border:1px solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
+.toolbar button.on{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
+.dim-note{font-size:11.5px;color:var(--text-tertiary)}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1100px){.cols{grid-template-columns:1fr}}
+.panel{min-width:0;border-radius:14px;overflow:hidden;border:1px solid var(--border-subtle);background:var(--background-content);color:var(--text-primary)}
+.panel .hd{padding:9px 14px;font-weight:700;font-size:13px;border-bottom:1px solid var(--border-subtle);background:var(--background-navigation);display:flex;align-items:center;gap:8px}
+.panel .hd .tag{margin-left:auto;font-weight:400;font-size:11px;color:var(--text-tertiary)}
+.pbody{padding:12px 15px 16px}
+.grp{margin:0 0 14px;font-size:11.5px;letter-spacing:.3px;font-weight:var(--font-weight-medium);color:var(--text-secondary);padding-bottom:6px;border-bottom:1px solid var(--border-subtle)}
+.card{min-width:0;background:var(--background-surface);border:1px solid var(--border-default);border-radius:12px;padding:14px 16px;margin-top:18px}
+.card h2{font-size:13.5px;margin:0 0 6px}
+.card .hint{font-size:11.5px;color:var(--text-secondary);margin:0 0 10px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:6px 9px;border-bottom:1px solid var(--border-subtle);vertical-align:middle}
+th{color:var(--text-secondary);font-weight:650;font-size:11.5px}
+ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);margin:3px 0}
+/* 间距刻度 */
+.sp-row{display:flex;align-items:center;gap:10px;padding:4px 0}
+.sp-name{font-family:var(--font-family-monospace);font-size:11.5px;width:104px;flex:none;color:var(--text-primary)}
+.sp-val{font-family:var(--font-family-monospace);font-size:11px;color:var(--text-tertiary);width:40px;flex:none;text-align:right}
+.sp-bar{height:14px;border-radius:3px;background:var(--brand-soft);border:1px solid var(--brand-display);flex:none}
+.sp-demo{margin-top:10px;background:var(--background-surface);border:1px solid var(--border-default);border-radius:var(--radius-large);padding:var(--spacing-16)}
+.sp-demo h4{margin:0 0 var(--spacing-8);font-size:12.5px}
+.sp-demo p{margin:0 0 var(--spacing-8);font-size:11.5px;color:var(--text-secondary)}
+.sp-demo .row{display:flex;gap:var(--spacing-12)}
+.sp-demo .b{padding:var(--spacing-6) var(--spacing-12);border-radius:var(--radius-medium);background:var(--brand-soft);color:var(--brand-ink);font-size:11.5px;font-weight:650}
+/* 圆角 */
+.rad-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.rad-item{text-align:center}
+.rad-box{height:58px;background:var(--background-field);border:1px solid var(--border-default);margin-bottom:6px}
+.rad-item .n{font-family:var(--font-family-monospace);font-size:11px;color:var(--text-primary)}
+.rad-item .u{font-size:10.5px;color:var(--text-tertiary);margin-top:2px}
+/* 层级 */
+.el-stack{position:relative;height:190px}
+.el-card{position:absolute;border-radius:var(--radius-large);background:var(--background-surface);border:1px solid var(--border-default);padding:9px 12px;font-size:11.5px;min-width:150px}
+.el-card .t{font-weight:650;font-size:12px}
+.el-card .m{font-family:var(--font-family-monospace);font-size:10.5px;color:var(--text-tertiary)}
+/* 动效 */
+.mo-row{display:flex;align-items:center;gap:10px;padding:5px 0}
+.mo-name{font-family:var(--font-family-monospace);font-size:11.5px;width:126px;flex:none}
+.mo-bar{height:12px;border-radius:3px;background:var(--brand-soft);border:1px solid var(--brand-display);flex:none}
+.mo-val{font-family:var(--font-family-monospace);font-size:11px;color:var(--text-tertiary)}
+.curve-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px}
+.curve{border:1px solid var(--border-subtle);border-radius:10px;padding:8px 10px}
+.curve svg{display:block;width:100%;height:86px}
+.curve .cn{font-family:var(--font-family-monospace);font-size:11px;margin-top:5px}
+.track{margin-top:10px;height:34px;border-radius:var(--radius-medium);background:var(--background-field);border:1px solid var(--border-default);position:relative;overflow:hidden}
+.dot{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;background:var(--brand)}
+.mo-play{font:inherit;font-size:11.5px;padding:4px 11px;border-radius:var(--radius-pill);border:1px solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
+.mo-play:hover{background:var(--background-hover)}
+.rm-note{margin-top:8px;font-size:11.5px;padding:6px 10px;border-radius:8px;background:var(--background-field);border:1px solid var(--border-default);color:var(--text-secondary)}
+/* 边框 */
+.bd-row{display:flex;align-items:center;gap:10px;padding:5px 0}
+.bd-line{width:120px;height:0;border-top:2px solid;flex:none}
+.bd-name{font-family:var(--font-family-monospace);font-size:11.5px;width:150px;flex:none}
+.bd-cr{font-size:10.5px;padding:2px 7px;border-radius:99px;flex:none;font-weight:650;border:1px solid transparent;min-width:56px;text-align:center}
+.bd-cr.ok{color:var(--success);background:var(--success-soft);border-color:color-mix(in srgb, var(--success) 30%, var(--success-soft))}
+.bd-cr.dim{color:var(--text-tertiary);background:var(--background-field);border-color:var(--border-default)}
+.bd-demo{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.bd-demo .col{flex:1;min-width:180px}
+.bd-demo .cap{font-size:11px;color:var(--text-tertiary);margin-bottom:5px}
+.bd-demo input{width:100%;height:34px;font:inherit;font-size:12.5px;border-radius:var(--radius-medium);padding:0 10px;background:var(--background-field);color:var(--text-primary)}
+.dev{margin-top:10px;font-size:11.5px;line-height:1.55;color:var(--text-secondary);background:var(--warm-soft);border:1px solid color-mix(in srgb, var(--warm) 30%, var(--warm-soft));color:var(--warm-text);border-radius:9px;padding:8px 11px}
+</style>
+</head>
+<body>
+<h1 id="f-title"></h1>
+<p class="sub" id="f-sub"></p>
+<p class="src" id="f-src"></p>
+
+<div class="toolbar">
+  <span class="language-switch">
+    <button data-lang="zh-CN">简</button><button data-lang="zh-TW">繁</button>
+    <button data-lang="en">EN</button><button data-lang="ja">日</button>
+  </span>
+  <span class="dim-note" id="f-langnote"></span>
+</div>
+
+<!-- F1 间距 -->
+<div class="card">
+  <h2 id="sp-title"></h2><p class="hint" id="sp-note"></p>
+  <div class="cols">
+    <section class="panel" id="sp-light"></section>
+    <section class="panel celadon" data-theme="dark" id="sp-dark"></section>
+  </div>
+</div>
+
+<!-- F2 圆角 -->
+<div class="card">
+  <h2 id="rd-title"></h2><p class="hint" id="rd-note"></p>
+  <div class="cols">
+    <section class="panel" id="rd-light"></section>
+    <section class="panel celadon" data-theme="dark" id="rd-dark"></section>
+  </div>
+</div>
+
+<!-- F3 层级 -->
+<div class="card">
+  <h2 id="el-title"></h2><p class="hint" id="el-note"></p>
+  <div class="cols">
+    <section class="panel" id="el-light"></section>
+    <section class="panel celadon" data-theme="dark" id="el-dark"></section>
+  </div>
+  <div class="cols" style="margin-top:14px">
+    <div><table id="el-table-light"></table></div>
+    <div><table id="el-table-dark"></table></div>
+  </div>
+</div>
+
+<!-- F4 动效 -->
+<div class="card">
+  <h2 id="mo-title"></h2><p class="hint" id="mo-note"></p>
+  <div class="cols">
+    <section class="panel" id="mo-light"></section>
+    <section class="panel celadon" data-theme="dark" id="mo-dark"></section>
+  </div>
+</div>
+
+<!-- F5 边框 -->
+<div class="card">
+  <h2 id="bd-title"></h2><p class="hint" id="bd-note"></p>
+  <div class="cols">
+    <section class="panel" id="bd-light"></section>
+    <section class="panel celadon" data-theme="dark" id="bd-dark"></section>
+  </div>
+</div>
+
+<div id="probe-light" class="celadon" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
+<div id="probe-dark" class="celadon" data-theme="dark" aria-hidden="true" style="position:absolute;left:-9999px;top:0"></div>
+
+<script src="./i18n/bundle.js"></script>
+<script>
+var BUNDLE = window.CELADON_I18N || {};
+var CURRENT = 'zh-CN';
+function lookup(lang, key){ var d = BUNDLE[lang]; if (!d) return null;
+  return key.split('.').reduce(function(o,k){ return o == null ? null : o[k]; }, d); }
+function tr(key){ var v = lookup(CURRENT, key); if (v == null) v = lookup('zh-CN', key); return v == null ? key : v; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ===== 从 tokens.css 实时读值（浅/暗各一份）===== */
+var PROBE = { light: document.getElementById('probe-light'), dark: document.getElementById('probe-dark') };
+function tok(name, theme){ return getComputedStyle(PROBE[theme]).getPropertyValue(name).trim(); }
+function px(v){ return parseFloat(v) || 0; }
+
+/* ===== 对比度（与色卡同一算法）===== */
+function toRGB(v){
+  if (!v) return null;
+  if (v[0] === '#'){ var h = v.slice(1); if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)]; }
+  var m = v.match(/rgba?\(([^)]+)\)/); if (!m) return null;
+  return m[1].split(',').map(parseFloat).slice(0,3);
+}
+function lum(v){ var c = toRGB(v); if (!c) return null;
+  var f = function(x){ x = x/255; return x <= 0.04045 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4); };
+  return 0.2126*f(c[0]) + 0.7152*f(c[1]) + 0.0722*f(c[2]); }
+function cr(a,b){ var l1 = lum(a), l2 = lum(b); if (l1 == null || l2 == null) return null;
+  var hi = Math.max(l1,l2), lo = Math.min(l1,l2); return Math.round(((hi+0.05)/(lo+0.05))*100)/100; }
+
+/* ===== F1 间距 ===== */
+var SPACING = ['--spacing-2','--spacing-4','--spacing-6','--spacing-8','--spacing-12','--spacing-16','--spacing-24','--spacing-32','--spacing-48'];
+function renderSpacing(theme){
+  var scale = '<div class="grp">'+esc(tr('f.spacing.scale'))+'</div>' + SPACING.map(function(t){
+    var v = px(tok(t, theme));
+    return '<div class="sp-row"><span class="sp-name">'+t+'</span><span class="sp-val">'+v+'px</span>'
+      + '<span class="sp-bar" style="width:'+Math.min(v*2.6,190)+'px"></span></div>'; }).join('');
+  var usage = '<div class="grp" style="margin-top:14px">'+esc(tr('f.spacing.usage'))+'</div>'
+    + '<table><tr><td>'+esc(tr('f.spacing.u1'))+'</td><td><code>4 · 6 · 8 · 12</code></td></tr>'
+    + '<tr><td>'+esc(tr('f.spacing.u2'))+'</td><td><code>8 · 12 · 16</code></td></tr>'
+    + '<tr><td>'+esc(tr('f.spacing.u3'))+'</td><td><code>24 · 32 · 48</code></td></tr>'
+    + '<tr><td>'+esc(tr('f.spacing.u4'))+'</td><td><code>16 · 24</code></td></tr></table>';
+  var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.spacing.example'))+'</div>'
+    + '<div class="sp-demo"><h4>'+esc(tr('f.spacing.title'))+'</h4><p>'+esc(tr('f.spacing.note'))+'</p>'
+    + '<div class="row"><span class="b">primary</span><span class="b">ghost</span></div></div>';
+  document.getElementById(theme === 'dark' ? 'sp-dark' : 'sp-light').innerHTML =
+    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">--spacing-*</span></div><div class="pbody">'+scale+usage+demo+'</div>';
+}
+
+/* ===== F2 圆角 ===== */
+var RADII = [['--radius-small','r1'],['--radius-medium','r2'],['--radius-large','r3'],['--radius-pill','r4']];
+function renderRadius(theme){
+  var grid = '<div class="grp">'+esc(tr('f.radius.usage'))+'</div><div class="rad-grid">' + RADII.map(function(p){
+    var v = tok(p[0], theme);
+    return '<div class="rad-item"><div class="rad-box" style="border-radius:'+v+'"></div>'
+      + '<div class="n">'+p[0].replace('--radius-','')+' · '+v+'</div>'
+      + '<div class="u">'+esc(tr('f.radius.'+p[1]))+'</div></div>'; }).join('') + '</div>';
+  document.getElementById(theme === 'dark' ? 'rd-dark' : 'rd-light').innerHTML =
+    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">--radius-*</span></div><div class="pbody">'+grid+'</div>';
+}
+
+/* ===== F3 层级 ===== */
+/* 层级映射：L2 浮层必须高于 sticky(100)，L3 弹窗再高一层；sticky 见表格附注 */
+var LEVELS = [['lv0','--z-base','--shadow-none','use0'],['lv1','--z-raised','--shadow-subtle','use1'],
+              ['lv2','--z-overlay','--shadow-floating','use2'],['lv3','--z-modal','--shadow-overlay','use3']];
+function renderElevation(theme){
+  var stack = '<div class="grp">'+esc(tr('f.elevation.levels'))+'</div><div class="el-stack">' + LEVELS.map(function(l,i){
+    var sh = l[2] === '--shadow-none' ? 'none' : tok(l[2], theme);
+    var pos = ['left:0;top:0','left:34px;top:44px','left:68px;top:88px','left:102px;top:132px'][i];
+    return '<div class="el-card" style="'+pos+';box-shadow:'+sh+';z-index:'+tok(l[1],theme)+'">'
+      + '<div class="t">'+esc(tr('f.elevation.'+l[0]))+'</div><div class="m">'+(l[2] === '--shadow-none' ? 'shadow: none' : l[2])+' · z '+tok(l[1],theme)+'</div></div>'; }).join('') + '</div>';
+  document.getElementById(theme === 'dark' ? 'el-dark' : 'el-light').innerHTML =
+    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">elevation</span></div><div class="pbody">'+stack+'</div>';
+  document.getElementById(theme === 'dark' ? 'el-table-dark' : 'el-table-light').innerHTML =
+    '<tr><th>'+esc(tr('f.elevation.colLevel'))+'</th><th>'+esc(tr('f.elevation.colShadow'))+'</th><th>'+esc(tr('f.elevation.colZ'))+'</th><th>'+esc(tr('f.elevation.colUse'))+'</th></tr>'
+    + LEVELS.map(function(l){ return '<tr><td>'+esc(tr('f.elevation.'+l[0]))+'</td><td><code>'+(l[2]==='--shadow-none'?'—':l[2])+'</code></td>'
+      + '<td><code>'+tok(l[1],theme)+'</code></td><td>'+esc(tr('f.elevation.'+l[3]))+'</td></tr>'; }).join('')
+    + '<tr><td>sticky</td><td><code>--shadow-subtle</code></td><td><code>'+tok('--z-sticky',theme)+'</code></td><td>'+esc(tr('f.elevation.useSticky'))+'</td></tr>';
+}
+
+/* ===== F4 动效 ===== */
+var DURATIONS = ['--duration-fast','--duration-base','--duration-slow'];
+var CURVES = [['--easing-standard','square'],['--easing-decelerate','enter'],['--easing-accelerate','exit']];
+function curvePath(v){
+  var m = String(v).match(/cubic-bezier\(([^)]+)\)/); if (!m) return 'M0,100 C0,100 100,0 100,0';
+  var n = m[1].split(',').map(parseFloat);
+  var X = function(x){ return Math.round(x*100); }, Y = function(y){ return Math.round(100 - y*100); };
+  return 'M0,100 C'+X(n[0])+','+Y(n[1])+' '+X(n[2])+','+Y(n[3])+' 100,0';
+}
+function renderMotion(theme){
+  var dur = '<div class="grp">'+esc(tr('f.motion.scale'))+'</div>' + DURATIONS.map(function(t){
+    var v = px(tok(t, theme));
+    return '<div class="mo-row"><span class="mo-name">'+t+'</span><span class="mo-val">'+v+'ms</span>'
+      + '<span class="mo-bar" style="width:'+Math.round(v/1.8)+'px"></span></div>'; }).join('');
+  var curves = '<div class="grp" style="margin-top:14px">'+esc(tr('f.motion.curves'))+'</div><div class="curve-grid">' + CURVES.map(function(c){
+    var v = tok(c[0], theme);
+    return '<div class="curve"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'
+      + '<path d="'+curvePath(v)+'" fill="none" stroke="currentColor" stroke-width="1.6" vector-effect="non-scaling-stroke" style="color:var(--brand)"/>'
+      + '<line x1="0" y1="100" x2="100" y2="0" stroke="currentColor" stroke-width="0.7" stroke-dasharray="3 3" style="color:var(--border-default)"/></svg>'
+      + '<div class="cn">'+c[0].replace('--easing-','')+'</div></div>'; }).join('') + '</div>';
+  var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.motion.play'))+'</div>'
+    + '<div class="track"><span class="dot" id="dot-'+theme+'"></span></div>'
+    + '<div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap">'
+    + DURATIONS.map(function(d,i){ return '<button class="mo-play" data-theme-key="'+theme+'" data-dur="'+d+'" data-ease="'+tok('--easing-standard',theme)+'">fast/base/slow'.split('/')[i]+'</button>'; }).join('')
+    + '</div>';
+  var rm = '<div class="rm-note" id="rm-'+theme+'"></div>';
+  var rules = '<div class="grp" style="margin-top:14px">'+esc(tr('f.motion.rules'))+'</div><ul>'
+    + ['r1','r2','r3','r4'].map(function(k){ return '<li>'+esc(tr('f.motion.'+k))+'</li>'; }).join('') + '</ul>';
+  document.getElementById(theme === 'dark' ? 'mo-dark' : 'mo-light').innerHTML =
+    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">duration · easing</span></div><div class="pbody">'+dur+curves+demo+rm+rules+'</div>';
+  var el = document.getElementById('rm-'+theme);
+  if (el) el.textContent = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? tr('f.motion.reducedOn') : tr('f.motion.reducedOff');
+}
+
+/* ===== F5 边框 ===== */
+var BORDERS = [['--border-subtle','line'],['--border-default','line'],['--border-control','control'],['--border-hover','hover'],['--border-control-strong','strong']];
+function renderBorder(theme){
+  var field = tok('--background-field', theme), content = tok('--background-content', theme), bgApp = tok('--background-app', theme);
+  var ramp = '<div class="grp">'+esc(tr('f.border.ramp'))+'</div>' + BORDERS.map(function(b){
+    var v = tok(b[0], theme), c1 = cr(v, field), c2 = cr(v, content);
+    var isControl = b[1] === 'control' || b[1] === 'hover' || b[1] === 'strong';
+    var cls = c1 >= 3 ? 'ok' : 'dim';
+    return '<div class="bd-row"><span class="bd-line" style="border-color:'+v+'"></span><span class="bd-name">'+b[0]+'</span>'
+      + '<span class="bd-cr '+cls+'">'+c1+':1</span><span class="bd-cr dim">'+c2+':1</span>'
+      + '<span class="mo-val">'+esc(tr('f.border.on'))+'</span></div>'; }).join('');
+  var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.border.demo'))+'</div><div class="bd-demo">'
+    + '<div class="col"><div class="cap">'+esc(tr('f.border.demoDefault'))+'</div><input value="tsk_8f21c4" style="border:1px solid '+tok('--border-control',theme)+'"></div>'
+    + '<div class="col"><div class="cap">'+esc(tr('f.border.demoStrong'))+'</div><input value="tsk_8f21c4" style="border:1px solid '+tok('--border-control-strong',theme)+'"></div>'
+    + '</div>';
+  var dec = '<div class="grp" style="margin-top:14px">'+esc(tr('f.border.decision'))+'</div><ul>'
+    + ['d1','d2','d3'].map(function(k){ return '<li>'+esc(tr('f.border.'+k))+'</li>'; }).join('') + '</ul>'
+    + '<div class="dev">'+esc(tr('f.border.deviation'))+'</div>';
+  document.getElementById(theme === 'dark' ? 'bd-dark' : 'bd-light').innerHTML =
+    '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">border · contrast</span></div><div class="pbody">'+ramp+demo+dec+'</div>';
+}
+
+/* ===== 语言 / 渲染 ===== */
+function applyChrome(){
+  document.getElementById('f-title').textContent = tr('f.title');
+  document.getElementById('f-sub').textContent = tr('f.subtitle');
+  document.getElementById('f-src').textContent = tr('f.source');
+  document.getElementById('f-langnote').textContent = tr('f.langnote');
+  var map = [['sp','spacing'],['rd','radius'],['el','elevation'],['mo','motion'],['bd','border']];
+  map.forEach(function(m){
+    document.getElementById(m[0]+'-title').textContent = tr('f.'+m[1]+'.title');
+    document.getElementById(m[0]+'-note').textContent = tr('f.'+m[1]+'.note');
+  });
+}
+function renderAll(){
+  applyChrome();
+  ['light','dark'].forEach(function(t){ renderSpacing(t); renderRadius(t); renderElevation(t); renderMotion(t); renderBorder(t); });
+  Array.prototype.forEach.call(document.querySelectorAll('.language-switch button'), function(b){
+    b.classList.toggle('on', b.getAttribute('data-lang') === CURRENT); });
+}
+document.querySelector('.language-switch').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if (!b) return;
+  CURRENT = b.getAttribute('data-lang'); renderAll();
+});
+document.addEventListener('click', function(e){
+  var b = e.target.closest('.mo-play'); if (!b) return;
+  var theme = b.getAttribute('data-theme-key'), dot = document.getElementById('dot-'+theme); if (!dot) return;
+  var dur = tok(b.getAttribute('data-dur'), theme), ease = tok('--easing-standard', theme);
+  dot.style.transition = 'none'; dot.style.left = '6px';
+  void dot.offsetWidth;
+  dot.style.transition = 'left ' + dur + ' ' + ease; dot.style.left = 'calc(100% - 26px)';
+});
+window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function(){
+  ['light','dark'].forEach(function(t){ var el = document.getElementById('rm-'+t);
+    if (el) el.textContent = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? tr('f.motion.reducedOn') : tr('f.motion.reducedOff'); });
+});
+renderAll();
+</script>
+</body>
+</html>
