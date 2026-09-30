@@ -207,7 +207,7 @@
       "textSecondary": "次要文字",
       "textTertiary": "第三级",
       "textPlaceholder": "输入占位文字（与三级文字同色）",
-      "textMuted": "占位/弱化",
+      "textMuted": "纯装饰（分隔符/水印；不承载文字）",
       "success": "成功（松花绿 · 传统色）",
       "successSoft": "成功软底",
       "warning": "警示（= --warm 别名）",
@@ -272,7 +272,8 @@
       "line": "边界",
       "overlay": "遮罩",
       "dark": "仅暗色",
-      "exempt": "禁用豁免"
+      "exempt": "禁用豁免",
+      "deco": "装饰"
     },
     "gradeAaa": "AAA",
     "gradeAa": "AA",
