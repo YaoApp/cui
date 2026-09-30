@@ -108,6 +108,15 @@ var rows = function (el, pairs) {
 };
 var esc = function (s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
 
+/* 分区兜底：某个 Intl 能力缺失时，只让那一节显示原因，不把整页留白 */
+var section = function (id, build) {
+  var el = document.getElementById(id);
+  try { build(el); } catch (e) {
+    el.innerHTML = '<div class="pair wide"><span class="k">本浏览器缺这个能力</span><span class="v">'
+      + esc(e && e.message ? e.message : String(e)) + '</span></div>';
+  }
+};
+
 function render() {
   var L = LANG;
   var dt = function (opt, date) { return new Intl.DateTimeFormat(L, opt).format(date || D); };
@@ -115,13 +124,13 @@ function render() {
   var num = function (v, opt) { return new Intl.NumberFormat(L, opt || {}).format(v); };
 
   /* 日期与时间 */
-  rows(document.getElementById('tblDate'), [
+  section('tblDate', function (el) { rows(el, [
     ['长日期', esc(dt({ dateStyle: 'long' })), 'dateStyle:long'],
     ['短日期', esc(dt({ dateStyle: 'short' })), 'dateStyle:short'],
     ['日期 + 时间', esc(dt({ dateStyle: 'medium', timeStyle: 'short' })), 'dateStyle+timeStyle'],
     ['仅时间（强制 24h）', esc(dt({ hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })), 'hourCycle:h23 —— 不靠 Intl 默认（zh-TW/en 默认是 12h）'],
     ['星期', esc(dt({ weekday: 'long' })), 'weekday:long']
-  ]);
+  ]); });
 
   /* 相对时间阶梯 */
   var now = Date.now();
@@ -136,14 +145,14 @@ function render() {
     if (sec < 86400 * 7) return rel(-Math.round(sec / 86400), 'day');
     return dt({ month: 'short', day: 'numeric' }, d);
   };
-  rows(document.getElementById('tblRel'), [
+  section('tblRel', function (el) { rows(el, [
     ['< 1 分钟', esc(fmtAgo(20 * 1000)), '刚刚'],
     ['几十分钟', esc(fmtAgo(23 * 60 * 1000)), 'N 分钟前'],
     ['几小时', esc(fmtAgo(5 * 3600 * 1000)), 'N 小时前'],
     ['几天', esc(fmtAgo(3 * 86400 * 1000)), 'N 天前'],
     ['> 7 天', esc(fmtAgo(12 * 86400 * 1000)), '月日'],
     ['> 1 年', esc(dt({ year: 'numeric', month: 'short', day: 'numeric' }, ago(400 * 86400 * 1000))), '年月日']
-  ]);
+  ]); });
 
   /* 时区 */
   var tz = function (zone) { return new Intl.DateTimeFormat(L, { dateStyle: 'short', timeStyle: 'medium', timeZone: zone }).format(D); };
@@ -151,12 +160,12 @@ function render() {
     var p = new Intl.DateTimeFormat('en-US', { timeZone: zone, timeZoneName: 'longOffset' }).formatToParts(D);
     return p.filter(function (x) { return x.type === 'timeZoneName'; })[0].value;
   };
-  rows(document.getElementById('tblTz'), [
+  section('tblTz', function (el) { rows(el, [
     ['UTC', esc(tz('UTC')), off('UTC')],
     ['Asia/Shanghai', esc(tz('Asia/Shanghai')), off('Asia/Shanghai')],
     ['America/New_York', esc(tz('America/New_York')), off('America/New_York')],
     ['Europe/Berlin', esc(tz('Europe/Berlin')), off('Europe/Berlin')]
-  ]);
+  ]); });
   document.getElementById('tzRaw').textContent = '落库格式：' + new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
@@ -171,7 +180,7 @@ function render() {
     return num(r, { minimumFractionDigits: Number.isInteger(r) ? 0 : 1, maximumFractionDigits: 1 }) + ' ' + u[i];
   };
   var money = function (v, cur) { return new Intl.NumberFormat(L, { style: 'currency', currency: cur }).format(v); };
-  rows(document.getElementById('tblNum'), [
+  section('tblNum', function (el) { rows(el, [
     ['千分位与小数', esc(num(1234.56, { minimumFractionDigits: 2 })), 'NumberFormat'],
     ['大数缩写（12,345）', esc(num(12345, { notation: 'compact', maximumFractionDigits: 1 })), 'notation:compact'],
     ['文件大小 &lt; 1 KB', esc(size(900)), 'xx B'],
@@ -188,22 +197,22 @@ function render() {
     ['时长（进度）', '<span class="mono">1:23</span>', '等宽'],
     ['时长（陈述）', esc(LANG === 'en' ? '2 h 5 min' : LANG === 'ja' ? '2 時間 5 分' : '2 小时 5 分'), '文字'],
     ['技术标识', '<span class="mono">1.8 MB · v2.0.0 · :8080</span>', '强制拉丁 + LTR']
-  ]);
+  ]); });
 
   /* 排序 */
   var words = ['阿', '波', '蔡', '邓', '徐', '张'];
   var coll = new Intl.Collator(L);
-  rows(document.getElementById('tblSort'), [
+  section('tblSort', function (el) { rows(el, [
     ['按语言（Collator）', esc(words.slice().sort(coll.compare).join(' < ')), 'Intl.Collator'],
     ['按码位', '<span class="mono">' + esc(words.slice().sort().join(' < ')) + '</span>', '不本地化']
-  ]);
+  ]); });
 
   /* RTL 规则（静态说明） */
-  rows(document.getElementById('tblRtl'), [
+  section('tblRtl', function (el) { rows(el, [
     ['要镜像', esc('i-left · i-right · i-collapse · i-expand · i-act-undo · i-act-redo'), '水平且有方向意义', true],
     ['不镜像', esc('i-act-sort（上下）· 播放 · 时钟 · 进度'), '与方向无关'],
     ['bidi', esc('用户输入 / 文件名 → dir="auto"；代码 / 路径 / 标识符 → dir="ltr" + isolate'), '19 §4.2', true]
-  ]);
+  ]); });
 }
 
 document.getElementById('langSwitch').addEventListener('click', function (e) {
