@@ -456,9 +456,6 @@
       },
       "sideOff": "Side: off",
       "sideOn": "Side: on",
-      "navNormal": "Nav: full",
-      "navOverlayOn": "Nav: overlaying (manual)",
-      "navOverlayOff": "Nav: rail (tap to overlay)",
       "overlay": "overlay",
       "belowMin": "below min",
       "autoRail": "auto rail",
@@ -475,7 +472,47 @@
         "tool": "Tool 600",
         "task": "Task 640",
         "wide": "Wide 840"
-      }
+      },
+      "plat": {
+        "client": "Client",
+        "web": "Web"
+      },
+      "navCollapsedBtn": "Collapse nav",
+      "navExpanded": "Expand nav",
+      "navMode": {
+        "full": "full",
+        "rail": "rail",
+        "overlay": "overlay",
+        "drawer": "drawer (closed)",
+        "drawerOpen": "drawer (open)"
+      },
+      "item": {
+        "overview": "Overview",
+        "inbox": "Inbox",
+        "tasks": "Tasks",
+        "files": "Files",
+        "apps": "Apps",
+        "settings": "Settings",
+        "help": "Help"
+      },
+      "navTitle": "The three ways the navigation collapses (client and web)",
+      "navColTarget": "Case",
+      "navColForm": "Collapsed form",
+      "navColToggle": "Toggle position",
+      "navColState": "State",
+      "nr1a": "Client or wide web (1024 and up)",
+      "nr1b": "56 icon rail (24 icon plus 16 padding each side)",
+      "nr1c": "macOS: in the title bar. Elsewhere: at the top of the nav",
+      "nr1d": "Persisted preference plus a transient flag (two levels)",
+      "nr2a": "Mid web (768 to 1023)",
+      "nr2b": "Collapses to the rail automatically",
+      "nr2c": "Same as above",
+      "nr2d": "Same; a narrow expand never writes back to the preference",
+      "nr3a": "Narrow web (below 768)",
+      "nr3b": "Drawer: floats over content with a scrim",
+      "nr3c": "Hamburger in the header",
+      "nr3d": "Transient (Esc or the scrim closes it)",
+      "railNote": "In the rail: a label appears on hover, the current item keeps a left indicator, and everything stays keyboard reachable (aria-expanded)"
     }
   }
 }
