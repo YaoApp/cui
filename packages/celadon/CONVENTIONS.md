@@ -64,6 +64,7 @@
 | i18n 缺 key / 漏翻 / 繁简混用 / **en 夹中文** | `check-i18n.mjs` | 四语 JSON |
 | **物理方向属性**（§3 这条）| `check-css-conventions.mjs` | 产品代码与展示页（演示稿登记为存量）|
 | README 色值与 tokens 一致 | `check-readme-values.mjs` | `design/README.md` |
+| **`plan/` 的 Markdown 结构**：表格列数一致 · 表头与分隔行齐全 · 无孤立表行 | `check-plan-md.mjs` | `plan/*.md` |
 
 跑法：`node packages/celadon/scripts/<脚本>`（脚本自己切到 `design/` 工作，从哪跑都行）
 

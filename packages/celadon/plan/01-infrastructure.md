@@ -21,8 +21,8 @@
 | 6 | **旧包处置** | **不升级 · 不复活 · 不删**（四个仍被旧应用依赖；甘特图为候选清理）|
 | 7 | **界面底座** | **不用 antd**；行为用 **`@base-ui/react` 1.8**，视觉用 **Celadon token** |
 | 8 | **旧仓库资产取舍** | **搬**：`components/ui/` 输入层（15 个原子输入 · 零 antd）· `PropertySchema` 契约 · `validation.ts` 校验；**不搬**：`FormBuilder`/`FlowBuilder`（低代码 UI）· `DataTable`/`PaginatedTable`（商业化后台表格）|
-
 | 9 | **i18n 运行时** | **`i18next` + `react-i18next`**；语言包 `locales/<locale>/<namespace>.json`；**新增语言 = 只加一个目录**，不改代码 |
+
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
 ### 1.1 依赖清单
@@ -61,7 +61,7 @@
 | 项 | 结果 |
 | --- | --- |
 | **生产构建** | `pnpm build` ✓ **42–47ms**（Vite 8 上；Vite 6 时为 76–106ms）|
-| **五个检查** | `check-i18n` · `check-readme-values` · `check-tokens` · `check-generated` · `check-css-conventions` **全绿** |
+| **六个检查** | `check-i18n` · `check-readme-values` · `check-tokens` · `check-generated` · `check-css-conventions` **全绿** |
 | **检查器自测** | `scripts/tests/run.mjs` **35 / 35** 用例（每条规则一个样本）|
 | **dev / preview** | dev 端口 5199 ✓ · preview HTTP **200** ✓ |
 | **隔离 · 装到本地** | `node_modules` 19M · 自己的 `pnpm-lock.yaml` · Vite 8.3.1 在本地 |
