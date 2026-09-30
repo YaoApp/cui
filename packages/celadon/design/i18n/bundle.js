@@ -538,8 +538,8 @@ window.CELADON_I18N = {
       "d2": "No rotation, mirroring or squashing",
       "d3": "No colours beyond the brand colour",
       "d4": "Never use the mark as an interface icon",
-      "setTitle": "2. Icon set (67, sourced from lucide)",
-      "setNote": "The icons are **no longer drawn by us**: every shape comes from **lucide** (24 grid, about 1857 icons, ISC), and each one records the lucide name it came from.",
+      "setTitle": "2. Icon set (68)",
+      "setNote": "Interface icons come from **lucide** (24 grid, ISC); the **brand mark, `i-yaoagents`, is drawn by us** and sits on the same 24 grid. Every icon records where it came from.",
       "spWhat": "Spec",
       "spValue": "Value",
       "spGrid": "Grid",
@@ -554,10 +554,10 @@ window.CELADON_I18N = {
       "spColorV": "`stroke: currentColor`, one colour source per icon",
       "spSize": "Sizes",
       "spSizeV": "Display sizes **14 / 16 / 20 / 24** (16 by default); the artwork itself is one 24 grid set",
-      "galleryTitle": "The full gallery (67, click one to copy our name for it)",
+      "galleryTitle": "The full gallery (68, click one to copy our name for it)",
       "search": "Search i-xxx, try file or plus",
       "count": "",
-      "coverTitle": "Coverage (67, all from lucide)",
+      "coverTitle": "Coverage by group",
       "coverCat": "Group",
       "specTitle": "3. Usage and drawing rules",
       "specNote": "Take from **lucide** by default. Only these five cases are drawn by us, and they still go on the **24 grid with a 2 stroke** so mixed icons stay consistent.",
@@ -574,7 +574,7 @@ window.CELADON_I18N = {
       "a4": "**Never carry state by icon alone**: state is icon plus text plus colour.",
       "newTitle": "Adding an icon",
       "n1": "Find the closest name in **lucide** (`lucide.dev/icons`).",
-      "n2": "Add it to `icons/manifest.json` and run `node build-icons.mjs` to re-inline it.",
+      "n2": "Add it to `icons/manifest.json` (the lucide name for theirs, or `icons/own-sprite.svg` for ours) and run `node build-icons.mjs` to re-inline.",
       "n3": "Check it reads at **14px**; if not, draw a simplified version on the 24 grid.",
       "n4": "Run the checks, `check-i18n` and `check-readme-values`, and confirm the page has no hard coded colour and no 16 grid leftovers.",
       "copied": "Copied",
@@ -583,7 +583,8 @@ window.CELADON_I18N = {
         "act": "Actions",
         "state": "States",
         "file": "File types",
-        "obj": "Objects"
+        "obj": "Objects",
+        "own": "Ours (brand)"
       },
       "spCorner": "Corners",
       "spCornerV": "**2px** for elements 8px or larger, **1px** below that, about **2.41px** on diagonal right angles",
@@ -619,7 +620,8 @@ window.CELADON_I18N = {
       "rx2": "**Naming** stays ours, `i-<domain>-<name>`, mapped to lucide names in `icons/manifest.json`.",
       "rx3": "**Hand drawing** is limited to the five cases above; everything else comes from lucide.",
       "coverCount": "Count",
-      "coverNames": "Semantic names (ours)"
+      "coverNames": "Semantic names (ours)",
+      "srcOwn": "ours"
     }
   },
   "ja": {
@@ -1160,8 +1162,8 @@ window.CELADON_I18N = {
       "d2": "回転・反転・圧縮をしない",
       "d3": "ブランド色以外に変えない",
       "d4": "マークを画面アイコンに使わない",
-      "setTitle": "2. アイコン一式（67 個・lucide 由来）",
-      "setNote": "アイコンは**もう自前で描きません**。本体はすべて **lucide**（24 グリッド・約 1857 個・ISC）から取得し、各アイコンには対応する lucide 名を記録しています。",
+      "setTitle": "2. アイコン一式（68 個）",
+      "setNote": "画面アイコンは **lucide**（24 グリッド・ISC）から。**ブランドマーク `i-yaoagents` は自前**で、同じ 24 グリッドに描いています。",
       "spWhat": "項目",
       "spValue": "値",
       "spGrid": "グリッド",
@@ -1176,10 +1178,10 @@ window.CELADON_I18N = {
       "spColorV": "`stroke: currentColor`。1 アイコン 1 色",
       "spSize": "サイズ",
       "spSizeV": "表示段は **14 / 16 / 20 / 24**（既定 16）。本体は 24 グリッドの 1 セットのみ",
-      "galleryTitle": "全ギャラリー（67 個・クリックで名前をコピー）",
+      "galleryTitle": "全ギャラリー（68 個・クリックで名前をコピー）",
       "search": "i-xxx を検索（file / plus など）",
       "count": "",
-      "coverTitle": "覆盖（67 個・すべて lucide 由来）",
+      "coverTitle": "分類ごとの覆盖",
       "coverCat": "分類",
       "specTitle": "3. 使い方と自前作成の規格",
       "specNote": "既定は **lucide から取得**。自前で描くのは下の 5 類だけで、それも **24 グリッド / 線幅 2** で描きます。",
@@ -1196,7 +1198,7 @@ window.CELADON_I18N = {
       "a4": "**アイコンだけで状態を伝えない**：状態 = アイコン + 文字 + 色。",
       "newTitle": "アイコンの追加",
       "n1": "**lucide** で意味が最も近い名前を探します（`lucide.dev/icons`）。",
-      "n2": "`icons/manifest.json` に追加し、`node build-icons.mjs` で再インラインします。",
+      "n2": "`icons/manifest.json` に追加し（lucide のものは lucide 名、自前は `icons/own-sprite.svg`）、`node build-icons.mjs` で再インラインします。",
       "n3": "**14px** で読めるか確認し、読めなければ 24 グリッドで簡略版を描きます。",
       "n4": "検査を実行します（`check-i18n` / `check-readme-values`）。ハードコード色と 16 グリッドの残りがないことも確認します。",
       "copied": "コピーしました",
@@ -1205,7 +1207,8 @@ window.CELADON_I18N = {
         "act": "操作",
         "state": "状態",
         "file": "ファイル種別",
-        "obj": "対象"
+        "obj": "対象",
+        "own": "自前（ブランド）"
       },
       "spCorner": "角の丸み",
       "spCornerV": "8px 以上の要素は **2px**、それ未満は **1px**、対角の直角は **約 2.41px**",
@@ -1241,7 +1244,8 @@ window.CELADON_I18N = {
       "rx2": "**名前**は `i-<領域>-<名前>` のまま。lucide 名と `icons/manifest.json` で対応させます。",
       "rx3": "**自前の範囲**は上の 5 類のみ。ほかは lucide から取得します。",
       "coverCount": "数",
-      "coverNames": "セマンティック名（私たち）"
+      "coverNames": "セマンティック名（私たち）",
+      "srcOwn": "自前"
     }
   },
   "zh-CN": {
@@ -1782,8 +1786,8 @@ window.CELADON_I18N = {
       "d2": "不旋转 / 不镜像 / 不压扁",
       "d3": "不改品牌色以外的颜色",
       "d4": "不把标识当界面图标用",
-      "setTitle": "二 · 图标系列（67 个 · 来源 lucide）",
-      "setNote": "图标**不再自绘**：本体一律取自 **lucide**（24 网格 · 约 1857 个 · ISC 许可），每个图标都记着对应的 lucide 名（悬浮或看名字下方）。",
+      "setTitle": "二 · 图标系列（68 个）",
+      "setNote": "界面图标取自 **lucide**（24 网格 · ISC）；**品牌标识 `i-yaoagents` 是我们自建的**，同样画在 24 网格上。每个图标都标着来源。",
       "spWhat": "规格项",
       "spValue": "值",
       "spGrid": "网格",
@@ -1798,10 +1802,10 @@ window.CELADON_I18N = {
       "spColorV": "`stroke: currentColor` —— 一个图标只有一种颜色来源",
       "spSize": "尺寸",
       "spSizeV": "显示档 **14 / 16 / 20 / 24**（默认 16）；图标本体只有 24 网格一套",
-      "galleryTitle": "全量画廊（67 个 · 点任意图标复制我们的语义名）",
+      "galleryTitle": "全量画廊（68 个 · 点任意图标复制我们的语义名）",
       "search": "搜索 i-xxx（试试 file / plus / i-）",
       "count": "",
-      "coverTitle": "覆盖度（67 个 · 全部取自 lucide）",
+      "coverTitle": "覆盖度（按分类）",
       "coverCat": "分类",
       "specTitle": "三 · 用法与自绘规范",
       "specNote": "默认**从 lucide 取**；只有下面 5 类才自绘，且自绘也必须画在 **24 网格 / 2px** 上 —— 混排才不会脏。",
@@ -1818,7 +1822,7 @@ window.CELADON_I18N = {
       "a4": "**不要只靠图标传达状态**：状态=图标+文字+颜色（色盲下仍可读）。",
       "newTitle": "新增一个图标",
       "n1": "去 **lucide** 找语义最近的名字（`lucide.dev/icons`）。",
-      "n2": "加进 `icons/manifest.json`，跑 `node build-icons.mjs` 重新内联。",
+      "n2": "加进 `icons/manifest.json`（取自 lucide 的写 lucide 名；自建的放进 `icons/own-sprite.svg`），跑 `node build-icons.mjs` 重新内联。",
       "n3": "在 **14px** 下确认可辨；不可辨则按 24 网格自绘简化版。",
       "n4": "跑检查：`check-i18n` / `check-readme-values`；确认页面无硬编码颜色、无 16 网格残留。",
       "copied": "已复制",
@@ -1827,7 +1831,8 @@ window.CELADON_I18N = {
         "act": "操作",
         "state": "状态",
         "file": "文件类型",
-        "obj": "对象 / 领域"
+        "obj": "对象 / 领域",
+        "own": "自建 / 品牌"
       },
       "spCorner": "圆角",
       "spCornerV": "≥8px 的元素 **2px**；<8px 用 **1px**；对角线 90° 用 **≈2.41px**（lucide 规定）",
@@ -1863,7 +1868,8 @@ window.CELADON_I18N = {
       "rx2": "**命名**用我们的语义名 `i-<域>-<名>`，与 lucide 名在 `icons/manifest.json` 一一对应。",
       "rx3": "**自绘范围**只限上面的 5 类；其余一律从 lucide 取。",
       "coverCount": "数量",
-      "coverNames": "语义名（我们的命名）"
+      "coverNames": "语义名（我们的命名）",
+      "srcOwn": "自建"
     }
   },
   "zh-TW": {
@@ -2404,8 +2410,8 @@ window.CELADON_I18N = {
       "d2": "不旋轉 / 不鏡像 / 不壓扁",
       "d3": "不改品牌色以外的顏色",
       "d4": "不把標識當介面圖示用",
-      "setTitle": "二 · 圖示系列（67 個 · 來源 lucide）",
-      "setNote": "圖示**不再自繪**：本體一律取自 **lucide**（24 網格 · 約 1857 個 · ISC 授權），每個圖示都記著對應的 lucide 名。",
+      "setTitle": "二 · 圖示系列（68 個）",
+      "setNote": "介面圖示取自 **lucide**（24 網格 · ISC）；**品牌標識 `i-yaoagents` 是我們自建的**，同樣畫在 24 網格上。",
       "spWhat": "規格項",
       "spValue": "值",
       "spGrid": "網格",
@@ -2420,10 +2426,10 @@ window.CELADON_I18N = {
       "spColorV": "`stroke: currentColor` —— 一個圖示只有一種顏色來源",
       "spSize": "尺寸",
       "spSizeV": "顯示檔 **14 / 16 / 20 / 24**（預設 16）；本體只有 24 網格一套",
-      "galleryTitle": "全量畫廊（67 個 · 點任一圖示複製語意名）",
+      "galleryTitle": "全量畫廊（68 個 · 點任一圖示複製語意名）",
       "search": "搜尋 i-xxx（試試 file / plus / i-）",
       "count": "",
-      "coverTitle": "覆蓋度（67 個 · 全部取自 lucide）",
+      "coverTitle": "覆蓋度（依分類）",
       "coverCat": "分類",
       "specTitle": "三 · 用法與自繪規範",
       "specNote": "預設**從 lucide 取**；只有下面 5 類才自繪，且自繪也必須畫在 **24 網格 / 2px** 上。",
@@ -2440,7 +2446,7 @@ window.CELADON_I18N = {
       "a4": "**不要只靠圖示傳達狀態**：狀態 = 圖示 + 文字 + 顏色。",
       "newTitle": "新增一個圖示",
       "n1": "去 **lucide** 找語意最近的名字（`lucide.dev/icons`）。",
-      "n2": "加進 `icons/manifest.json`，跑 `node build-icons.mjs` 重新內聯。",
+      "n2": "加進 `icons/manifest.json`（取自 lucide 的寫 lucide 名；自建的放進 `icons/own-sprite.svg`），跑 `node build-icons.mjs` 重新內聯。",
       "n3": "在 **14px** 下確認可辨；不可辨則按 24 網格自繪簡化版。",
       "n4": "跑檢查：`check-i18n` / `check-readme-values`；確認頁面無硬編碼顏色、無 16 網格殘留。",
       "copied": "已複製",
@@ -2449,7 +2455,8 @@ window.CELADON_I18N = {
         "act": "操作",
         "state": "狀態",
         "file": "檔案類型",
-        "obj": "物件 / 領域"
+        "obj": "物件 / 領域",
+        "own": "自建 / 品牌"
       },
       "spCorner": "圓角",
       "spCornerV": "≥8px 的元素 **2px**；<8px 用 **1px**；對角線 90° 用 **≈2.41px**",
@@ -2485,7 +2492,8 @@ window.CELADON_I18N = {
       "rx2": "**命名**用語意名 `i-<域>-<名>`，與 lucide 名一一對應（`icons/manifest.json`）。",
       "rx3": "**自繪範圍**只限上面 5 類；其餘一律取自 lucide。",
       "coverCount": "數量",
-      "coverNames": "語意名（我們的命名）"
+      "coverNames": "語意名（我們的命名）",
+      "srcOwn": "自建"
     }
   }
 };

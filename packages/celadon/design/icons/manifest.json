@@ -1,404 +1,410 @@
 [
  {
   "id": "i-chat",
-  "lucide": "message-circle",
+  "lib": "lucide",
   "cat": "nav",
-  "added": false
+  "src": "message-circle"
  },
  {
   "id": "i-inbox",
-  "lucide": "inbox",
+  "lib": "lucide",
   "cat": "nav",
-  "added": false
+  "src": "inbox"
  },
  {
   "id": "i-board",
-  "lucide": "square-kanban",
+  "lib": "lucide",
   "cat": "nav",
-  "added": false
+  "src": "square-kanban"
  },
  {
   "id": "i-ws",
-  "lucide": "folder-kanban",
+  "lib": "lucide",
   "cat": "nav",
-  "added": false
+  "src": "folder-kanban"
  },
  {
   "id": "i-pc",
-  "lucide": "monitor",
+  "lib": "lucide",
   "cat": "nav",
-  "added": false
+  "src": "monitor"
  },
  {
   "id": "i-book",
-  "lucide": "book",
+  "lib": "lucide",
   "cat": "nav",
-  "added": false
+  "src": "book"
  },
  {
   "id": "i-search",
-  "lucide": "search",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "search"
  },
  {
   "id": "i-plus",
-  "lucide": "plus",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "plus"
  },
  {
   "id": "i-plus-square",
-  "lucide": "square-plus",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "square-plus"
  },
  {
   "id": "i-left",
-  "lucide": "chevron-left",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "chevron-left"
  },
  {
   "id": "i-right",
-  "lucide": "chevron-right",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "chevron-right"
  },
  {
   "id": "i-collapse",
-  "lucide": "panel-left-close",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "panel-left-close"
  },
  {
   "id": "i-dots",
-  "lucide": "ellipsis",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "ellipsis"
  },
  {
   "id": "i-file",
-  "lucide": "file",
+  "lib": "lucide",
   "cat": "file",
-  "added": false
+  "src": "file"
  },
  {
   "id": "i-split",
-  "lucide": "columns-2",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "columns-2"
  },
  {
   "id": "i-send",
-  "lucide": "send",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "send"
  },
  {
   "id": "i-check",
-  "lucide": "check",
+  "lib": "lucide",
   "cat": "state",
-  "added": false
+  "src": "check"
  },
  {
   "id": "i-clock",
-  "lucide": "clock",
+  "lib": "lucide",
   "cat": "state",
-  "added": false
+  "src": "clock"
  },
  {
   "id": "i-stop",
-  "lucide": "square",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "square"
  },
  {
   "id": "i-expand",
-  "lucide": "panel-left-open",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "panel-left-open"
  },
  {
   "id": "i-split2",
-  "lucide": "columns-3",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "columns-3"
  },
  {
   "id": "i-spark",
-  "lucide": "sparkles",
+  "lib": "lucide",
   "cat": "state",
-  "added": false
+  "src": "sparkles"
  },
  {
   "id": "i-folder",
-  "lucide": "folder",
+  "lib": "lucide",
   "cat": "file",
-  "added": false
+  "src": "folder"
  },
  {
   "id": "i-tasks",
-  "lucide": "list-checks",
+  "lib": "lucide",
   "cat": "obj",
-  "added": false
+  "src": "list-checks"
  },
  {
   "id": "i-pause",
-  "lucide": "pause",
+  "lib": "lucide",
   "cat": "act",
-  "added": false
+  "src": "pause"
  },
  {
   "id": "i-nav-settings",
-  "lucide": "settings",
+  "lib": "lucide",
   "cat": "nav",
-  "added": true
+  "src": "settings"
  },
  {
   "id": "i-nav-help",
-  "lucide": "circle-question-mark",
+  "lib": "lucide",
   "cat": "nav",
-  "added": true
+  "src": "circle-question-mark"
  },
  {
   "id": "i-nav-user",
-  "lucide": "user",
+  "lib": "lucide",
   "cat": "nav",
-  "added": true
+  "src": "user"
  },
  {
   "id": "i-nav-team",
-  "lucide": "users",
+  "lib": "lucide",
   "cat": "nav",
-  "added": true
+  "src": "users"
  },
  {
   "id": "i-nav-logout",
-  "lucide": "log-out",
+  "lib": "lucide",
   "cat": "nav",
-  "added": true
+  "src": "log-out"
  },
  {
   "id": "i-act-edit",
-  "lucide": "pencil",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "pencil"
  },
  {
   "id": "i-act-trash",
-  "lucide": "trash",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "trash"
  },
  {
   "id": "i-act-copy",
-  "lucide": "copy",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "copy"
  },
  {
   "id": "i-act-download",
-  "lucide": "download",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "download"
  },
  {
   "id": "i-act-upload",
-  "lucide": "upload",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "upload"
  },
  {
   "id": "i-act-refresh",
-  "lucide": "refresh-cw",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "refresh-cw"
  },
  {
   "id": "i-act-external",
-  "lucide": "external-link",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "external-link"
  },
  {
   "id": "i-act-filter",
-  "lucide": "funnel",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "funnel"
  },
  {
   "id": "i-act-sort",
-  "lucide": "arrow-up-down",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "arrow-up-down"
  },
  {
   "id": "i-act-close",
-  "lucide": "x",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "x"
  },
  {
   "id": "i-act-undo",
-  "lucide": "undo-2",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "undo-2"
  },
  {
   "id": "i-act-redo",
-  "lucide": "redo-2",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "redo-2"
  },
  {
   "id": "i-act-play",
-  "lucide": "play",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "play"
  },
  {
   "id": "i-act-attach",
-  "lucide": "paperclip",
+  "lib": "lucide",
   "cat": "act",
-  "added": true
+  "src": "paperclip"
  },
  {
   "id": "i-state-warning",
-  "lucide": "triangle-alert",
+  "lib": "lucide",
   "cat": "state",
-  "added": true
+  "src": "triangle-alert"
  },
  {
   "id": "i-state-error",
-  "lucide": "circle-alert",
+  "lib": "lucide",
   "cat": "state",
-  "added": true
+  "src": "circle-alert"
  },
  {
   "id": "i-state-info",
-  "lucide": "info",
+  "lib": "lucide",
   "cat": "state",
-  "added": true
+  "src": "info"
  },
  {
   "id": "i-state-loading",
-  "lucide": "loader-circle",
+  "lib": "lucide",
   "cat": "state",
-  "added": true
+  "src": "loader-circle"
  },
  {
   "id": "i-state-queued",
-  "lucide": "list-ordered",
+  "lib": "lucide",
   "cat": "state",
-  "added": true
+  "src": "list-ordered"
  },
  {
   "id": "i-file-pdf",
-  "lucide": "file-text",
+  "lib": "lucide",
   "cat": "file",
-  "added": true
+  "src": "file-text"
  },
  {
   "id": "i-file-image",
-  "lucide": "file-image",
+  "lib": "lucide",
   "cat": "file",
-  "added": true
+  "src": "file-image"
  },
  {
   "id": "i-file-sheet",
-  "lucide": "table",
+  "lib": "lucide",
   "cat": "file",
-  "added": true
+  "src": "table"
  },
  {
   "id": "i-file-code",
-  "lucide": "code",
+  "lib": "lucide",
   "cat": "file",
-  "added": true
+  "src": "code"
  },
  {
   "id": "i-file-archive",
-  "lucide": "archive",
+  "lib": "lucide",
   "cat": "file",
-  "added": true
+  "src": "archive"
  },
  {
   "id": "i-file-media",
-  "lucide": "music",
+  "lib": "lucide",
   "cat": "file",
-  "added": true
+  "src": "music"
  },
  {
   "id": "i-file-text",
-  "lucide": "file-type",
+  "lib": "lucide",
   "cat": "file",
-  "added": true
+  "src": "file-type"
  },
  {
   "id": "i-file-terminal",
-  "lucide": "terminal",
+  "lib": "lucide",
   "cat": "file",
-  "added": true
+  "src": "terminal"
  },
  {
   "id": "i-obj-key",
-  "lucide": "key-round",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "key-round"
  },
  {
   "id": "i-obj-schedule",
-  "lucide": "calendar-clock",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "calendar-clock"
  },
  {
   "id": "i-obj-integration",
-  "lucide": "plug",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "plug"
  },
  {
   "id": "i-obj-skill",
-  "lucide": "wand-sparkles",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "wand-sparkles"
  },
  {
   "id": "i-obj-model",
-  "lucide": "cpu",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "cpu"
  },
  {
   "id": "i-obj-quota",
-  "lucide": "gauge",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "gauge"
  },
  {
   "id": "i-obj-billing",
-  "lucide": "receipt",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "receipt"
  },
  {
   "id": "i-obj-sandbox",
-  "lucide": "box",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "box"
  },
  {
   "id": "i-obj-container",
-  "lucide": "container",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "container"
  },
  {
   "id": "i-obj-artifact",
-  "lucide": "package",
+  "lib": "lucide",
   "cat": "obj",
-  "added": true
+  "src": "package"
+ },
+ {
+  "id": "i-yaoagents",
+  "lib": "own",
+  "cat": "own",
+  "src": "brand-mark"
  }
 ]

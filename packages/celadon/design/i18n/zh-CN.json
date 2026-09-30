@@ -536,8 +536,8 @@
     "d2": "不旋转 / 不镜像 / 不压扁",
     "d3": "不改品牌色以外的颜色",
     "d4": "不把标识当界面图标用",
-    "setTitle": "二 · 图标系列（67 个 · 来源 lucide）",
-    "setNote": "图标**不再自绘**：本体一律取自 **lucide**（24 网格 · 约 1857 个 · ISC 许可），每个图标都记着对应的 lucide 名（悬浮或看名字下方）。",
+    "setTitle": "二 · 图标系列（68 个）",
+    "setNote": "界面图标取自 **lucide**（24 网格 · ISC）；**品牌标识 `i-yaoagents` 是我们自建的**，同样画在 24 网格上。每个图标都标着来源。",
     "spWhat": "规格项",
     "spValue": "值",
     "spGrid": "网格",
@@ -552,10 +552,10 @@
     "spColorV": "`stroke: currentColor` —— 一个图标只有一种颜色来源",
     "spSize": "尺寸",
     "spSizeV": "显示档 **14 / 16 / 20 / 24**（默认 16）；图标本体只有 24 网格一套",
-    "galleryTitle": "全量画廊（67 个 · 点任意图标复制我们的语义名）",
+    "galleryTitle": "全量画廊（68 个 · 点任意图标复制我们的语义名）",
     "search": "搜索 i-xxx（试试 file / plus / i-）",
     "count": "",
-    "coverTitle": "覆盖度（67 个 · 全部取自 lucide）",
+    "coverTitle": "覆盖度（按分类）",
     "coverCat": "分类",
     "specTitle": "三 · 用法与自绘规范",
     "specNote": "默认**从 lucide 取**；只有下面 5 类才自绘，且自绘也必须画在 **24 网格 / 2px** 上 —— 混排才不会脏。",
@@ -572,7 +572,7 @@
     "a4": "**不要只靠图标传达状态**：状态=图标+文字+颜色（色盲下仍可读）。",
     "newTitle": "新增一个图标",
     "n1": "去 **lucide** 找语义最近的名字（`lucide.dev/icons`）。",
-    "n2": "加进 `icons/manifest.json`，跑 `node build-icons.mjs` 重新内联。",
+    "n2": "加进 `icons/manifest.json`（取自 lucide 的写 lucide 名；自建的放进 `icons/own-sprite.svg`），跑 `node build-icons.mjs` 重新内联。",
     "n3": "在 **14px** 下确认可辨；不可辨则按 24 网格自绘简化版。",
     "n4": "跑检查：`check-i18n` / `check-readme-values`；确认页面无硬编码颜色、无 16 网格残留。",
     "copied": "已复制",
@@ -581,7 +581,8 @@
       "act": "操作",
       "state": "状态",
       "file": "文件类型",
-      "obj": "对象 / 领域"
+      "obj": "对象 / 领域",
+      "own": "自建 / 品牌"
     },
     "spCorner": "圆角",
     "spCornerV": "≥8px 的元素 **2px**；<8px 用 **1px**；对角线 90° 用 **≈2.41px**（lucide 规定）",
@@ -617,6 +618,7 @@
     "rx2": "**命名**用我们的语义名 `i-<域>-<名>`，与 lucide 名在 `icons/manifest.json` 一一对应。",
     "rx3": "**自绘范围**只限上面的 5 类；其余一律从 lucide 取。",
     "coverCount": "数量",
-    "coverNames": "语义名（我们的命名）"
+    "coverNames": "语义名（我们的命名）",
+    "srcOwn": "自建"
   }
 }
