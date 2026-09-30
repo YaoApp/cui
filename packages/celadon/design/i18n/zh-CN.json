@@ -131,7 +131,7 @@
     }
   },
   "card": {
-    "title": "Celadon 设计基线",
+    "title": "CUI 2.0 设计基线",
     "subtitle": "token · 配对 · 字体 · 对比度 —— 全部实时读 tokens.css（零硬编码）",
     "source": "源：tokens.less → build-css.mjs → tokens.css；字体 token 见「字体样本」。改 token 后跑 pnpm design:css 即可，本页无需改动。",
     "sectionPairs": "关键配对（前景 on 背景 · 自动实算）",
@@ -283,7 +283,8 @@
     "gradeLarge": "大字 / 图形",
     "gradeFail": "不达标",
     "contrastLegend": "等级：AAA ≥7:1 · AA ≥4.5:1（正文标准）· 大字/图形 ≥3:1 · 不达标 <3:1；正文低于 4.5:1 不能用于正文。",
-    "reasonNote": "「填充 / 边界 / 遮罩 / 仅暗色」不参与文字对比度判定（用法见「关键配对」）；「禁用豁免」按 WCAG 对禁用控件豁免。"
+    "reasonNote": "「填充 / 边界 / 遮罩 / 仅暗色」不参与文字对比度判定（用法见「关键配对」）；「禁用豁免」按 WCAG 对禁用控件豁免。",
+    "designSystem": "Celadon"
   },
   "f": {
     "title": "Foundations · 间距 · 圆角 · 层级 · 动效 · 边框",
