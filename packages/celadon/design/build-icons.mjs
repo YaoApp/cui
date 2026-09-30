@@ -29,7 +29,7 @@ function patch(file) {
   out = out.replace(/var LUCIDE = \{[^}]*\};/,
     `var LUCIDE = {${manifest.filter(m => m.lib === 'lucide').map(m => `'${m.id}':'${m.src}'`).join(',')}};`);
   out = out.replace(/var OWN = \[[^\]]*\];/, `var OWN = [${manifest.filter(m => m.lib === 'own').map(m => `'${m.id}'`).join(',')}];`);
-  out = out.replace(/var BRANDOWN = \[[^\]]*\];/, `var BRANDOWN = [${manifest.filter(m => m.lib === 'own').map(m => `'${m.id}'`).join(',')}];`);
+  out = out.replace(/var BRANDOWN = \[[^\]]*\];/, `var BRANDOWN = [${manifest.filter(m => m.lib === 'own' && !m.id.endsWith('-mono')).map(m => `'${m.id}'`).join(',')}];`);
   const cats = [...new Set(manifest.map(m => m.cat))];
   const cover = cats.map(cat => `  ['${cat}', [${manifest.filter(m => m.cat === cat).map(m => `'${m.id}'`).join(',')}]]`).join(',\n');
   out = out.replace(/var COVER = \[[\s\S]*?\n\];/, `var COVER = [\n${cover}\n];`);
