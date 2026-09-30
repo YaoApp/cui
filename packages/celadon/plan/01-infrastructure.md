@@ -45,15 +45,15 @@
 | `@base-ui/react` | `^1.8.0` | 行为与无障碍层 |
 | `i18next` · `react-i18next` | `^26` · `^17` | i18n 运行时 |
 | `react-router` | `^8` | 路由（库模式，配 `basename`）|
-| `date-fns` · `@date-fns/tz` | `^4` · `^1` | 日期运算与时区（见 4.12）|
-| `virtua` | `^0.52` | 长列表虚拟滚动（聊天流 · 收件箱 · 看板列；见 4.13）|
-| `zustand` | `^5` | 状态管理（见 4.14）|
-| `motion` | `^13` | 动效（仅用于手势 / 编排 / 布局动画；见 4.15）|
-| `vitest` · `@testing-library/react` · `@testing-library/user-event` · `jsdom` · `@vitest/coverage-v8` · `@playwright/test` | 最新 | **测试**（devDeps；见 4.16）|
+| `date-fns` · `@date-fns/tz` | `^4` · `^1` | 日期运算与时区（见 §1.2 的日期规则）|
+| `virtua` | `^0.52` | 长列表虚拟滚动（聊天流 · 收件箱 · 看板列；见 §1.2 的列表规则）|
+| `zustand` | `^5` | 状态管理（见 §1.2 的状态规则）|
+| `motion` | `^13` | 动效（仅用于手势 / 编排 / 布局动画；见 §1.2 的动效规则）|
+| `vitest` · `@testing-library/react` · `@testing-library/user-event` · `jsdom` · `@vitest/coverage-v8` · `@playwright/test` | 最新 | **测试**（devDeps；见 §1.2 的测试规则）|
 | `pnpm`（**工具**，非依赖）| `10.34.6` | 包管理器，根 `packageManager` 锁死 |
 
 
-**不用**：`antd`（见 4.7）
+**不用**：`antd`（见 §1.2 的界面底座）
 
 **不需要包**：**数据请求** —— 旧仓库的 `openapi/`（71 文件）本身就建在 `fetch` 上，无 axios；
 其中流式用 `EventSource`（GET + cookie）与 fetch 流（`body.getReader()`），WebSocket 另有实现 —— 这些都不归数据缓存库管。
@@ -88,7 +88,7 @@
 | **后端 SDK** | §5 子项 2 |
 | **取数钩子** | 自建 `useRequest` 级小钩子（加载 / 错误 / 取消 / 重试各一处实现），避免散落的 `useEffect` + `fetch` |
 | **测试落地** | 按 `12 测试` 接入：`vitest` 配置（`jsdom` · 就近放）· 搬入模块补测试 · Playwright 跑主路径 · 首条拟人剧本 |
-| **i18n 构建** | §5 子项 3 —— **运行时已定（i18next，见 4.9）**；剩下：命名空间切分 · 按需加载 · 类型生成 · 翻译流程文档 |
+| **i18n 构建** | §5 子项 3 —— **运行时已定（i18next，见 §1.2 的 i18n 规则）**；剩下：命名空间切分 · 按需加载 · 类型生成 · 翻译流程文档 |
 | **图标落地** | §5 子项 4 —— **选型与规格已定（`00` F7：lucide 为源 · 收录 67 · 命名 `i-<域>-<名>` · 档位 14/16/20/24 · 产物为雪碧图）**；剩下：应用侧图标组件与按需引入 |
 | **主题映射** | §5 子项 5：同一份 `tokens.less` 生成组件库主题 |
 | **运行时壳 · 运行期对比度** | §5 子项 7 · 8 |
@@ -101,418 +101,93 @@
 
 ---
 
-## 4. 决定详情
+## 2. 已跑通（✅ 实测）
 
-### 4.1 包名 `@yaoapp/cui`，版本从 2.0.0 起
-
-**为什么**：迁移完成后，**v2 就是 `cui` 这个包** —— 旧包的其余部分会被它取代，不会再有两个并列的东西。
-所以名字**现在**就定下来，不要等到发布时再改名。
-
-**版本为什么从 2.0.0 起**：旧包在 `0.10.x`，但 v2 不是它的延续 —— 构建栈、组件、命令全换。
-主版本号跨越是**如实**的表达，不是营销。
-
-#### 🔒 发布是单向门，所以加了锁
-
-`npm publish` 到**已存在**的包名上**不可撤回**。因此：
-
-- **`publishConfig.tag: next`** —— 发布默认进 `next` 标签，**不动 `latest`**；
-  旧应用按 `latest` 装的仍然是 `0.10.x`，不会被 v2 顶掉。**迁移完成后再**把 `latest` 指过来。
-- **发布需要显式登录**（本机 `npm whoami` → `ENEEDAUTH`）—— 不会误发。
-- 发布流程（届时执行）：`npm login` → 发布 → 验证 `npm view` → `npm dist-tag add @yaoapp/cui@2.0.0 latest`。
-
-### 4.2 v2 在 celadon 目录内自成一套
-
-**目标**：在 `packages/celadon/` 里 `install` / `dev` / `build` / `check` 全都能跑，
-**不改变外层仓库的行为**（根安装不带它、根构建不带它、旧应用零风险）。
-
-**现在的形态**：
-
-```
-packages/celadon/
-  package.json          @yaoapp/cui@2.0.0 —— 包根就在这里
-  pnpm-workspace.yaml   packages: []  ← 让它成为自己的工作区根
-  pnpm-lock.yaml        自己的锁文件
-  node_modules/         自己的（pnpm store 共享，磁盘影响小）
-  vite.config.ts        Vite 配置，root 指向 app/
-  app/                  应用源码（Vite 的 root）
-  design/ plan/ scripts/  设计资产 · 计划 · 工具（工具零依赖，不需要 manifest）
-```
-
-**挡两个方向，要两条保护**：
-
-| 方向 | 会发生什么 | 保护 |
-| --- | --- | --- |
-| **由外向内** | 根工作区是 `packages/*`，会把 celadon 当成员 —— 根 `pnpm install` 会装它、根 `turbo run build` 会构建它，v2 构建失败会弄挂根构建 | 根 `pnpm-workspace.yaml` 里显式排除 `!packages/celadon` |
-| **由内向外** | 在 celadon 里跑 `pnpm install` 时，pnpm 会**向上**找最近的 workspace 根，找到外层的 —— 于是**装了外层**，并改写外层锁文件| celadon 自带 `pnpm-workspace.yaml`，pnpm 找的永远是**最近**的那个 |
-
-**验证方式（带正向对照）**：往 celadon 放探针 `package.json`，然后数工作区成员 ——
-既要"**探针不在里面**"，也要"**其他成员仍在**"。实测：成员 7 个、探针不在其中 ✓
-
-> **改 `pnpm-workspace.yaml` 后必须数一遍工作区成员数**。
-> 只看"目标是否被排除"不够：条目**缩进不一致**时 pnpm 会**静默**把整个 `packages` 列表解析成空，此时**全部成员**都会消失，看起来却像"排除成功"。
-
-**为什么不开独立分支 / 独立仓库**：
-
-- **分支不隔离路径**：pnpm 看的是检出后的目录，同一路径在任何分支都一样；而且 v2 的工作已经在 `main` 上，设计资产与计划本来就该在 `main`
-- **独立仓库**解决的"外层干扰"问题，靠上面的目录层级已经解决；它的收益（独立发版、权限分开）现在用不上
-- **触发条件**（满足任一再拆，用 `git subtree split` 把历史一起带走）：① v2 要独立发版 / 开源 ② 外部协作者只该看到 v2 ③ 团队分工真的分开
-
-### 4.3 框架 React 19 与配套版本
-
-**本地检出的一手数据**（`package.json` 实测）：
-
-| 项目 | React | TypeScript |
-| --- | --- | --- |
-| 多包仓库 A（103 个子包）| **19.2.7** | 6.0.3 |
-| 多包仓库 B（20 个子包）| **19.2.0** | ~5.9.0 |
-| 命令行工具 A | **^19.2.4** | ^6.0.2 |
-| 多包仓库 C（54 个子包）| ^18.2.0 | ^6.0.3 |
-| 我们旧包 `cui` | ^18.2.0 | **^4.9.4** |
-
-**registry 现状**：`react` / `react-dom` / `@types/react` 最新均为 **19.3.0**，**没有 React 20**；
-官方说明 19 已稳定且 **minor 之间不破坏**。
-
-**定下来的版本**：
-
-| 包 | 版本 | 理由 |
-| --- | --- | --- |
-| `react` · `react-dom` | **`^19.3.0`** | 当前主版本；minor 不破坏，用 `^` 安全 |
-| `@types/react` · `@types/react-dom` | **`^19.3.0`** | 与运行时严格对齐 |
-| `typescript` | **`^6.0.3`** | **同行都还在 6**（含最新的那些）；刚 GA 的 Go 版编译器（7.x）等工具链跟上再说 |
-| `vite` | **`^8.3.1`** | 见 4.6 |
-
-**为什么敢直接从 18 跨到 19**：v2 是**新建**，不继承旧应用，没有迁移成本。
-
-**但从旧包复制代码时要注意**：React 18 → 19 有破坏性变更（`ReactDOM.render` 等旧入口、`propTypes`、`ref` 处理），
-复制进来的组件**一律按 19 改** —— 这本来就在「四道工序」里。
-
-**同步完成**：`cui-desktop` 已升到 **Vite 8.3.1**，两边现在是同一套工具链（验收见 §2）。
-
-### 4.4 包管理器统一用 pnpm
-
-**为什么是 pnpm**：
-
-| # | 理由 |
+| 项 | 结果 |
 | --- | --- |
-| 1 | **旧仓库根已经是 pnpm**（`pnpm-lock.yaml`），并已配 Turborepo —— 选它=**零迁移** |
-| 2 | **monorepo 是它的主场**：非扁平 `node_modules` + 严格依赖隔离（一个包只能 import 自己声明的依赖），这是**正确性与安全**上的实打实好处 |
-| 3 | **磁盘**：多包共享一份存储，比传统方式省一半以上 |
-| 4 | **同行普遍**：多包仓库几乎都用它 —— 踩坑资料最厚 |
+| **生产构建** | `pnpm build` ✓ **42–47ms**（Vite 8 上；Vite 6 时为 76–106ms）|
+| **六个检查** | `check-i18n` · `check-readme-values` · `check-tokens` · `check-generated` · `check-css-conventions` **全绿** |
+| **检查器自测** | `scripts/tests/run.mjs` **35 / 35** 用例（每条规则一个样本）|
+| **dev / preview** | dev 端口 5199 ✓ · preview HTTP **200** ✓ |
+| **隔离 · 装到本地** | `node_modules` 19M · 自己的 `pnpm-lock.yaml` · Vite 8.3.1 在本地 |
+| **隔离 · 外层没被碰** | 外层锁文件无改动 · 外层工作区成员仍 7 个 · 外层 git 状态干净 |
+| **桌面壳** | `cui-desktop` 同步升到 **Vite 8.3.1**：生产构建（含类型检查）通过 · **32 / 32** 测试 · 安装 0 漏洞 |
 
-**为什么不改用"更快的"（如 Bun）**：
+## 3. 待做（⏳ 未定 / 未做）
 
-- Bun 的安装确实快得多，但它是**换运行时**，不只是换包管理器；而**安装速度不是我们的瓶颈**（我们是浏览器应用，装依赖主要发生在 CI）
-- 在**多包仓库的管理成熟度**上，pnpm 仍占优
-- 我们**暂不引入第二个运行时**；若将来想用，那是**运行时的独立决定**，不是包管理器的升级
+**本模块内**（对应 §5 子项）：
 
-**版本**：已升到 **pnpm 10.34.6**，并在根 `package.json` 用 **`packageManager`** 字段锁死 ——
-避免"有人用 8、有人用 12，锁文件互相改写"。本次升级前本机是 8.15.9，而仓库锁文件是 `lockfileVersion 9.0`，版本不匹配。
-
-### 4.5 旧包不升级，也不删
-
-旧仓库里的五个包 —— 状态存储 · 事件总线 · 甘特图 · 动作流 · 编辑器插件 —— **v2 不再使用**：
-前端的业务逻辑本来就要重做，其中两个（动作流 · 编辑器插件）是**上一代低代码产品**的产物。
-
-但**不升级 ≠ 可以删**：
-
-| 事实 | 结论 |
+| 项 | 内容 |
 | --- | --- |
-| 其中四个仍被旧应用 `packages/cui` 依赖（状态存储 · 事件总线 · 动作流 · 编辑器插件）| **保留**，不动它们 —— 旧应用还要能跑 |
-| **甘特图**没有任何包依赖它 | 记为**候选清理**，但要先查旧应用源码里有没有直接 import |
-| 事件总线是**公开包的分叉副本** | 将来若真需要，用**上游 npm 包**，不要再维护分叉 |
-
-**v2 要用到非 UI 能力时的做法**：按 `01` 的一贯原则 —— **按需**从旧包取**能力**，在自己这边**重新实现**，
-不复制旧配置、不复活旧包（见 §6 与四道工序）。
-
-### 4.6 构建工具 Vite
-
-| # | 理由 | 说明 |
-| --- | --- | --- |
-| 1 | **与桌面壳一致** | `cui-desktop` 是 **Vite + Tauri**（照 Tauri 官方配方：端口 1420 / HMR 1421）→ Web 与桌面共用一套工具链，不维护两套 |
-| 2 | **构建器不绑框架** | Vite 不要求用哪个框架：现在定了 **React 19**，将来换框架或升大版本都**不用动构建配置**；而有的构建方案与特定框架绑定，直接排除 |
-| 3 | **没有历史包袱** | 传统打包器的**兼容层**类方案（为迁移而生）对我们没有价值 —— 我们没有要迁移的旧构建 |
-| 4 | **生态与踩坑资料最厚** | 同类产品与开源项目的客户端应用大量使用，遇到问题容易找到答案 |
-
-**版本：Vite 8.3.1**（registry 的 `latest`）。
-
-**为什么是 8 而不是 6**：本地两个最新的多包仓库都已在 8；registry 的 `latest` 就是 8.3.1（beta 另是 8.3.0-beta.1）。
-升到 8 后：构建 **42ms**（6 上 76–106ms），五检查与 35 个样本全过。
-
-### 4.7 界面底座：不用 antd
-
-**结论**：**行为**用 **`@base-ui/react`**（headless ✓ 无外观 ✓）· **视觉**用 **Celadon 的 `tokens.less`** ✓；**不用 antd** ✗。
-
-**依据**：
-
-1. **我们真要用 antd 的那些，旧仓库已经有、而且是零 antd 的** —— 见 4.8；antd 能占的位置只剩「视觉 + 浮层行为」，
-   而**视觉是我们的设计** ✓、**行为正是 headless 的活** ✓
-2. **同方向已有先例**：工作区内一个同领域的开源 UI 组件库，其新的组件目录已整体建在 `@base-ui/react` 上
-   （**42 个组件**），**21 个旧 antd 组件标了 `@deprecated`**、注释直指"改用新目录里的同名组件"，**325 个文件**已引用新目录；
-   antd 在那边只剩**主题引擎**角色（把 antd 的 `ThemeConfig` 渲染成 CSS 变量）。
-   **我们的 token 是纯 CSS 变量** —— 不需要这一层
-3. **采用面已验证**：`@base-ui` 出现在工作区内**两个独立产品**的依赖里（其中一个含桌面应用）；
-   而 **React Aria 在工作区 0 个项目使用** ✗
-
-**`@base-ui/react@1.8.0` 的实况**：40 个组件 · `peer: react ^17 || ^18 || ^19` · MIT · 10 个正式版 · 2026-09 仍在更新。
-其中 **`direction-provider` 内建 RTL** —— `19 数据格式` 的 RTL 成本可据此下调 ✓
-
-**对照我们的用量**（旧应用 59 种 antd 组件 ✗）：
-
-| 类别 | 结论 |
-| --- | --- |
-| **有行为、有原生对应**（33 种 ✓）| `message`→`toast` · `Tooltip`→`tooltip` · `Modal`→`dialog` · `Button`→`button` · `Input`→`input`/`number-field` · `Form`→`form`+`field`+`fieldset` · `Select`→`select`/`combobox`/`autocomplete` · `Switch`/`Checkbox`/`Radio` · `Tabs` · `Dropdown`→`menu` · `Popconfirm`→`popover`+`alert-dialog` |
-| **纯视觉**（自己写几行 ✓）| `Spin` 49 · `Typography` 13 · `Tag` 6 · `Empty` 5 · `Space` · `Row`/`Col` · `Skeleton` · `Statistic` · `Timeline` |
-| **真要自己写 ✗** | `Table`（2 处）· `Upload`（3 处）· `DatePicker`/`TimePicker`/`RangePicker`（共 4 处，`date-fns` 是 Base UI 的**可选** peer ✓）· `Tree`/`Cascader`/`Mentions`/`Image`/`Breadcrumb`/`Anchor`（各 1–2 处）|
-
-**已知代价** ✗：`message`/`Tooltip`/`Modal` 等约有 **2700 处调用点** —— 靠**同名的薄封装**
-（`message` → `toast`，API 形状照旧）**机械替换**扛，不逐个重写逻辑。
-
-### 4.8 旧仓库资产取舍：搬什么、不搬什么
-
-**搬**（这三层本来就零 antd ✓，是「搬逻辑、换样式」的典型 ✗）：
-
-| 资产 | 规模 | 现状 |
-| --- | --- | --- |
-| `components/ui/inputs/`（**15 个原子输入**）| 30–419 行 | **零 antd**、纯 HTML + CSS Modules、**schema 驱动**、受控字段契约（`value`/`onChange`/`onBlur`/`error`/`hasError`）|
-| `components/ui/inputs/validation.ts` | 123 行 | 单字段校验（必填 / 长度 / 正则 / 数值 / `errorMessages` 可覆盖）**零依赖** |
-| `PropertySchema` 类型契约 | 158 行 | **22 个文件在用**，是设置类表单的底座 |
-| `ui/Setting` · `ui/Provider` · `ui/Button` · `ui/Dropdown` | 73–745 行 | `ui/` 下 **26 个 tsx 中 21 个零 antd** ✓ |
-
-**不搬** ✗：
-
-- **`edit/FormBuilder` · `edit/FlowBuilder`** —— 低代码时代的产物，**旧应用里 0 处引用** ✓
-- **`DataTable` · `PaginatedTable`** —— 服务佣金 / 余额 / 用量 / 审计 / 账单那套**商业化后台**，新应用不需要 ✗
-
-**搬迁时要修的** ✗（以 `validation.ts` 为例，这是四道工序落到具体文件的样子）：
-
-| 动作 | 内容 |
-| --- | --- |
-| **换** ✗ | 7 条硬编码英文报错 → `ui.*` 的 i18n key（四语）|
-| **补** ✗ | `new RegExp(schema.pattern)` 无保护 —— schema 来自**服务端**定义，正则非法会抛异常，要 `try/catch` |
-| **删** ✗ | `custom: 'Invalid value'` 有文案无实现 · `getErrorClasses` 0 处调用 |
-| **留** ✓ | 函数形状（单字段 · schema 驱动 · `errorMessages` 可覆盖）|
-
-### 4.9 i18n 运行时：i18next
-
-**结论**：应用侧用 **`i18next` + `react-i18next`**；语言包按 **`locales/<locale>/<namespace>.json`** 组织；
-设计页沿用现有零依赖方案（`design/i18n/*.json` + `tr()` + `check-i18n.mjs`）。
-
-**依据**：
-
-- 工作区内两个已做 i18n 的产品都用它，其中一个做到 **18 种语言 / 56 个命名空间**
-- 自带**命名空间 · 按需加载 · 复数（英文 `_one`/`_other`）· 插值**，成熟度最高
-- **可直接读现有嵌套 JSON**，不必改文件格式
-
-**硬要求：新增语言 = 只加一个目录，不改代码**
-
-| 项 | 做法 |
-| --- | --- |
-| 语言包与命名空间 | 用 **`import.meta.glob('../locales/*/*.json')` 发现**，不在 TS 里逐个 `import` |
-| 类型 | 只从**基准语言**生成 → 加语言不动类型 |
-| 检查器 | 通用规则（key 完整性 / 缺 key / 漏翻）按**目录发现**执行；**语言专属规则**（繁中夹简体 · 日文同中文）仍按语言声明 |
-
-**命名空间**：按功能域切（`chat` / `settings` / `inbox` …），与使用它的代码就近放置。
-当前 579 key 先单文件即可，切分随页面模块推进。
-
-**格式化**：**规则只有一份 —— `19 数据格式`**。`i18next` **自带 `datetime` / `number` / `currency` / `relativetime`** ✗（底层就是 `Intl`）→ **文案里嵌的日期与数字优先走它** ✓；`19` 要求而它不覆盖的（**周起始日 `Intl.Locale.weekInfo`** ✓ **列表 `Intl.ListFormat`** ✗）**直接调 `Intl`** ✓。两条路的**参数必须一致** ✗（`hourCycle: 'h23'` 等）；**语言取当前生效语言** ✓ —— i18next 自身即如此，直调时用 `i18n.resolvedLanguage` ✗。
-
-**翻译流程**（`01` 内落地）：术语表 · 翻译规则 · 给 AI 的翻译提示词 · 风格样例，与 `check-i18n.mjs` 的自动检查配套。
-
-### 4.10 路由与宿主集成
-
-**结论**：**React Router 库模式** —— 装 `react-router@^8`，**不装** `@react-router/dev`；路由写在代码里。
-
-**依据**：
-
-- Vite + React 的项目里它是事实标准（工作区内两个不同产品分别用它的框架模式与库模式）
-- 不需要 SSR（PWA + Tauri），框架模式的主要收益用不上
-- 框架模式自带 dev server 并接管构建，会与「子路径挂载 + 引擎代理」争控制权；库模式下一套 Vite 配置管到底
-
-**旧应用现在的形态（迁移约束的来源）**：
-
-| 项 | 现状 |
-| --- | --- |
-| 路由 | 引擎框架的**约定式（文件）路由**：`pages/**` 目录即路由 |
-| 挂载 | **子路径**：`base` = `publicPath` = `/${process.env.BASE}/`，构建期注入 |
-| 模式 | **browser history**（非 hash）|
-| 跳转调用 | `history.push` 68 · `useNavigate` 18 · `useLocation` 16 · `useParams` 10 |
-| 引擎集成 | dev 时把 **12 个前缀**转发给引擎：`/api` `/v1` `/assets` `/components` `/tools` `/agents` `/admin` `/brands` `/docs` `/ai` `/.well-known` `/iframe` |
-| WS | **单独插件**处理 upgrade（原框架的 proxy 不管 WS）|
-| SSE | proxy 上显式设 `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · **`X-Accel-Buffering: no`** |
-
-**由此确定的硬约束**：
-
-1. **`basename`**：应用挂在 `/<BASE>/` 下，React Router 必须配 `basename`，且与 Vite 的 `base` **取自同一变量**；PWA 的 `scope` 与 `start_url` 同步
-2. **保留前缀**：上表 12 个前缀归**宿主引擎**，新应用路由**不得占用**
-3. **`/iframe` 是无外壳模式**：旧应用有 `/iframe` 页面，布局在路径含 `/iframe` 时**不渲染外壳** —— 保留
-4. **WS upgrade**：用 Vite `server.proxy` 的 `ws: true`；SSE 三个头照旧
-5. **路由 API 替换**：搬迁页面时 `history.push` / `useNavigate` / `useLocation` / `useParams` 一律换成 React Router 的对应 API（计入 `MIGRATION.md` 第 5 类改动）
-
-### 4.11 数据请求：原生 fetch + 搬 openapi
-
-**结论**：传输用**原生 `fetch`**（不用 axios）；类型化客户端**搬旧仓库的 `openapi/`**；
-**不引入数据缓存库**（如 react-query）；组件侧用**自建小钩子**统一加载与错误状态。
-
-**依据**：
-
-- 旧仓库 71 个文件、12 444 行的 `openapi/` **本身就建在 `fetch` 上**（`openapi.ts` · `file.ts`），全仓无 axios
-- 鉴权是 **cookie**：`credentials: 'include'`，SSE 用 `EventSource(url, { withCredentials: true })`，另有 CSRF token ——
-  这也是**子路径挂载 + 同源代理**必须成立的原因
-- 流式有两套（`EventSource` / fetch 流的 `body.getReader()`）+ WebSocket 一套 —— **数据缓存库管不到它们**
-- 工作区内两个 **Vite** 项目（含最接近我们的那个）**都不用请求库**；用 react-query 的两家都是 Next 应用
-
-**边界**：
-
-| 归谁 | 内容 |
-| --- | --- |
-| `fetch` + `openapi/` | 请求、错误形状、超时、鉴权头、CSRF |
-| 自建 `useRequest` 钩子 | 加载 / 错误 / 取消 / 重试 / 依赖变化 |
-| 手写 | SSE（`EventSource` 或 fetch 流）· WebSocket |
-| **先不引** | 缓存 / 失效 / 乐观更新 —— 等"同一份数据被多个页面重复取"成为日常再评估 |
-
-**不要**：在页面里散落 `useEffect` + `fetch`（旧仓库有 15 个文件这样，其余 139 个走 `openapi/` 封装）。
-
-### 4.12 日期运算与时区：date-fns
-
-**结论**：日期**运算**与**时区换算**用 **`date-fns` + `@date-fns/tz`**；**格式化不归它** —— 格式化归 `Intl`（见 `19` 的 §3.7）。
-
-**为什么需要库**（原生不够）：
-
-- **原生 `Temporal` 尚不可用**：本机 Node 22 里 `typeof Temporal === 'undefined'`，浏览器/WebView 同样不能作为基线
-- **加减 / 区间 / 日历网格 / 跨时区换算**都要自己写；`Intl.DateTimeFormat({ timeZone })` 只能**显示**，不能**运算**
-- **唯一不需要库的**是相对时间：`Intl.RelativeTimeFormat` ✓
-
-**为什么是 `date-fns`（而不是 `dayjs` / `luxon`）**：
-
-| 候选 | 判断 |
-| --- | --- |
-| **`date-fns` + `@date-fns/tz`** | **选它** —— Base UI 的**官方适配器**（`temporal-adapter-date-fns`），用它的日期组件无需自己接线；tree-shakable，实际进包的只有用到的函数；`@date-fns/tz` 的 `TZDate` 直接吃 **IANA 时区**，与 `19` 的时区契约同口径 |
-| `luxon` | Base UI 也有适配器，但 **4.5 MB 且不可 tree-shake** |
-| `dayjs` | 本地用得最多（9 个项目）且最小（666 KB），但 **Base UI 无适配器**；时区需额外插件；对象可变 |
-
-**分工（两处不要混）**：
-
-| 场景 | 用什么 |
-| --- | --- |
-| 显示日期 / 时间 / 数字 / 货币 / 相对时间 | **`Intl`**（或 i18next 的 formatter），规则见 `19` |
-| 加减 · 区间 · 日历网格 · 时区换算 | **`date-fns`** |
-| 存储与传输 | **UTC**（`19` 的铁律），客户端上送 `clientTimeZone` |
-
-### 4.13 长列表与表格：virtua
-
-**结论**：长列表（聊天流 · 收件箱 · 看板列）用 **`virtua`**；容器 DOM 与行渲染都归我们，库只负责位置计算。
-
-**为什么需要**：旧应用**全量渲染**（0 处虚拟化，聊天/收件箱/看板里 94 处直接 `.map()`），上千条消息即上千个 DOM 节点。
-
-**底层 API（要达到的四个能力）**：
-
-| 场景需要 | `virtua` 给的 |
-| --- | --- |
-| 逐帧滚动状态 | `onScroll` · `onScrollEnd` · `getScrollOffset()` · `getScrollSize()` · `getViewportSize()` |
-| **侧边 → 内容**（按索引定位）| `getItemOffset(index)` · `scrollToIndex(index, opts)` |
-| **内容 → 侧边**（反查第几项）| `findItemIndex(offset)` |
-| 不定高 | 内建测量 · `getItemSize(index)` |
-| **切换会话恢复位置** | `getCache()`（尺寸与偏移快照，可存可恢复）|
-| 附带 | `VList` / `Virtualizer` / `WindowVirtualizer` / **`VGrid`**（看板列可用）|
-
-**真实对照（工作区内一件实现）**：聊天列表用 `virtua` —— `VirtualizedList.tsx` **481 行** + 三个聚焦的 hook
-（**加载更早历史** · **按话题恢复滚动位置** · 是否在底部），**手写浏览器滚动细节 0 行**，全部走上述 API。
-
-**活跃度（实测）**：
-
-| | `virtua` | `@tanstack/react-virtual` |
-| --- | --- | --- |
-| 近 90 天提交 | **100** | 37 |
-| 最近 6 个发布 | **一周内 6 个** | 一个半月 6 个 |
-| 最近推送 | 当日 | 9 天前 |
-| Stars | 3747 | 7126 |
-
-**表格同样归它** —— `virtua` 的官方对比表（它自己列的 5 个库）：
-
-| 能力 | `virtua` | `@tanstack/react-virtual` |
-| --- | --- | --- |
-| **表格数据（带表头的列）** | **✅ `VGrid`** | 🟠 需自己接 |
-| 二维网格 | **✅ `VGrid`** | 🟠 需自己接 |
-| **反向（双向）无限滚动** | **✅** | **❌** |
-| 动态项高 | ✅（未设 `itemSize` 时按实测自动估算）| ✅ |
-| 横向滚动 RTL | ✅ | 🟠（`isRtl`）|
-| 真 `<table>` 元素 | 🟠 需自己接（`as` / `item` 可传 `table` / `tbody` / `tr`）| 🟠 需自己接 |
-
-`VGrid` 自带 **`headerRows` / `footerRows` / 固定列**（`role="columnheader"` / `rowheader`）——
-表格类需求**不再需要第二个库**；**反向无限滚动**这一条对"向上加载更早历史"是硬需求，而 **`@tanstack/react-virtual` 不支持**。
-
-**结论**：`@tanstack/react-virtual` **不采用** ✗（不留在待定表里）。
-
-### 4.14 状态管理：zustand
-
-**结论**：**`zustand`** ✓；**不用 mobx** ✗；旧仓库自研的 `storex` **不复活** ✗。
-
-**旧应用现在是什么**（迁移时要知道换掉什么）：
-
-| 用的 | 规模 |
-| --- | --- |
-| `mobx@^6.7.0` + `mobx-react-lite@^3.4.0` | **89 个文件** import mobx · 18 处 `observer()` |
-| `@yaoapp/storex`（自研 ✗）| **32 个文件**引用 |
-| umi 的 `models/` | 只有 4 个文件（很轻）|
-| `context/app` | React Context |
-
-**同类项目的选择**：`zustand` 是压倒性的 ✓ ——
-一个多包仓库用它（`store/` 目录 **886 个文件**，按领域分：agent · chat · device · aiInfra …），
-另一个在三个应用里都用它，第三个（同为 Vite 项目）也用。剩下的用框架自带能力（如 Solid 的 store ✓）。
-
-**为什么换掉 mobx** ✗：
-
-- `zustand` 的心智更小（一个 `create` + selector ✓），与函数组件配合自然 ✓
-- 体积小（无装饰器 / 无代理层 ✓）；`mobx` 需要 `observer()` 包裹组件，容易漏
-- 迁移不是"改写"而是"重写"：v2 本来就在重写，复制进来的组件按 zustand 重接即可（计入 `MIGRATION.md`）
-
-**为什么不用 `storex`** ✗：它是旧仓库的自研包（存储封装 + 变更监听 ✓），属 `01` 已定的「旧包不复活」范围；
-同类需求用 `zustand` 的 **`persist`** 中间件覆盖 ✓。
-
-### 4.15 动效：CSS 与原生优先，motion 兜底
-
-**结论**：**默认不用 JS 动效库** —— 时长与缓动走 Celadon token 的 **CSS transition / animation**；
-**浏览器原生**能表达的用原生；只有**手势 · 复杂编排 · 布局动画**才引 **`motion`**。
-
-**旧应用现在是什么**：
-
-| 用的 | 规模 |
-| --- | --- |
-| `framer-motion`（**`motion` 的旧名字**）| 一个包 |
-| CSS 为主 | `transition` **254 个文件** · `animation` **94** · `@keyframes` **84** · `cubic-bezier` **25** |
-| 手写时序 | `requestAnimationFrame` **16 个文件** |
-
-**同类项目的选择**：**`motion`** 在三个 React 客户端里都用（其一另加 `@formkit/auto-animate`）；两个不用 CSS 之外的东西。
-
-**2026 的变化在浏览器侧，不在库侧** ✗：
-
-- **库层面 `motion` 仍是 React UI 的事实标准**（它是原 `framer-motion` 改名而来）
-- **新能力来自原生**：**View Transitions**（视图切换 · 列表增删的位移动画）· **`@starting-style`**（元素从 `display: none` 进入时的过渡，正是入场动画那个经典难题）· **滚动驱动动画**（`animation-timeline`）
-- 官方与社区口径一致：**「按任务选 —— 滚动与时间线用 GSAP，React UI 用 Motion，其余的用 CSS」**
-
-**分工（写进组件规范）**：
-
-| 场景 | 用什么 |
-| --- | --- |
-| 悬停 / 按下 / 展开收起 / 强调（**我们已有的 12 个动效场景大多属此类**）| **CSS + token** |
-| 入场 / 退场（含 `display: none` 进入）| **CSS `@starting-style` + `transition-behavior: allow-discrete`** |
-| 路由与视图切换 · 列表增删位移 | **View Transitions**（按目标运行时核对支持度）|
-| 手势拖拽 · 复杂编排 · 布局动画 | **`motion`** |
-
-**约束**：组件规范（`03`）里每个动效场景**必须标注归属**（CSS / 原生 / motion），不允许"顺手引个库"。
-
-### 4.16 测试
-
-**结论**：**测试单独成册 —— 见 `12 测试`**。本模块只保留三处接口：
-
-- **依赖**：`vitest` · `@testing-library/react` · `@testing-library/user-event` · `jsdom` · `@vitest/coverage-v8` · `@playwright/test`（devDeps）
-- **位置**：`*.test.ts(x)`，**与组件 / 页面同目录**（一个组件一个目录，测试放在该目录内）
-- **门禁**：提交前跑规范门禁与受影响测试；合并前加一条拟人剧本；发布前跑主路径全量（见 `12` 的 §5）
-
+| **代理** | 按 4.10 的 12 个前缀转发给引擎；**SSE 不缓冲**（三个头照旧）+ **WebSocket upgrade**（`server.proxy` 的 `ws: true`）—— `cui-desktop` 现在**没有任何 proxy** |
+| **产物布局** | 定"源码直连"还是"产物拉取"（现状：`pull-cui` / `build-cui` 拉产物，并 `watch.ignored` 掉整个 `cui/`）|
+| **构建期门禁接线** | §5 的 6b：stylelint · TS 类型约束 · 反向依赖边界 · 接进 CI / pre-commit |
+| **后端 SDK** | §5 子项 2 |
+| **取数钩子** | 自建 `useRequest` 级小钩子（加载 / 错误 / 取消 / 重试各一处实现），避免散落的 `useEffect` + `fetch` |
+| **测试落地** | 按 `12 测试` 接入：`vitest` 配置（`jsdom` · 就近放）· 搬入模块补测试 · Playwright 跑主路径 · 首条拟人剧本 |
+| **i18n 构建** | §5 子项 3 —— **运行时已定（i18next，见 §1.2 的 i18n 规则）**；剩下：命名空间切分 · 按需加载 · 类型生成 · 翻译流程文档 |
+| **图标落地** | §5 子项 4 —— **选型与规格已定（`00` F7：lucide 为源 · 收录 67 · 命名 `i-<域>-<名>` · 档位 14/16/20/24 · 产物为雪碧图）**；剩下：应用侧图标组件与按需引入 |
+| **主题映射** | §5 子项 5：同一份 `tokens.less` 生成组件库主题 |
+| **运行时壳 · 运行期对比度** | §5 子项 7 · 8 |
+
+**模块外，另行决定**：
+
+- **`cui-desktop` 的包管理器**：现为 npm；统一到 pnpm 需改 `tauri.conf.json` 的 `beforeDevCommand` / `beforeBuildCommand` 两行，并换成 pnpm 锁文件
+- **`cui-desktop` 的锁文件**：其 `.gitignore` **把两种锁文件都忽略**了 → 安装结果**不可复现**。这属它原有的选择，收口时与上面的 pnpm 迁移一起做
+- **是否需要网站 / 文档侧的构建**（当前不需要）
 
 ---
 
-## 5. 子项与交付物
+### 1.2 规则与约束
+
+**包与仓库**
+
+- `celadon` **自成一套**：自己的 `package.json` · `pnpm-workspace.yaml`（`packages: []`）· `pnpm-lock.yaml` · `node_modules`
+- 根工作区用 `!packages/celadon` **排除**；**缺了它自己的 `pnpm-workspace.yaml`，在 celadon 里 install 会改到根锁文件**
+- 旧包**不升级 · 不复活 · 不删**；新代码不引用它们
+- 版本用 **caret**（`^`），不锁小版本；根 `packageManager` 锁死 pnpm，不引 npm / yarn
+
+**界面底座**
+
+- **行为**用 `@base-ui/react`（headless）· **视觉**用 Celadon `tokens.less`；**不引 antd**
+- 纯视觉组件（Spin · Typography · Tag · Empty · Space · Row/Col · Skeleton）**自己写**；缺的能力先在 `03 组件` 里列，再决定自写或补包
+- 组件**不得**直接写颜色 / 间距字面量，一律走 token
+
+**i18n**
+
+- 运行时不引第三方之外的封装；语言包按 `locales/<locale>/<namespace>.json`（**嵌套 JSON**）
+- **新增语言 = 只加一个目录**，不改代码；用 `import.meta.glob` 发现语言
+- 类型只从**基准语言**生成；格式化的归属见 `19 数据格式`
+
+**宿主集成（硬约束）**
+
+| 约束 | 内容 |
+| --- | --- |
+| `basename` | 应用挂在 `/<BASE>/` 下；React Router 的 `basename` 与 Vite 的 `base` **取同一变量**；PWA 的 `scope` / `start_url` 同步 |
+| 保留前缀 | **12 个前缀归引擎，路由不得占用**：`/api` `/v1` `/assets` `/components` `/tools` `/agents` `/admin` `/brands` `/docs` `/ai` `/.well-known` `/iframe` |
+| 无外壳模式 | `/iframe` 路径下**不渲染外壳**，保留 |
+| 代理 | 按上表前缀转发；**WS upgrade 用 `server.proxy` 的 `ws: true`**；SSE 三个头照旧（`Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no`）|
+
+**数据与状态**
+
+- 传输用**原生 `fetch`**（不用 axios）；类型化客户端**搬旧仓库 `openapi/`**（本身建在 fetch 上）
+- **不引数据缓存库**；加载 / 错误 / 取消 / 重试由**自建小钩子**统一实现
+- **禁止**在页面里散落 `useEffect` + `fetch`
+- 状态用 **`zustand`**；不用 mobx；自研 `storex` 不复活（存储用 `persist` 中间件）
+
+**日期 · 列表 · 动效**
+
+- **显示**日期 / 数字 / 货币 / 相对时间 → `Intl`（或 i18next 的 formatter），规则见 `19`
+- **运算 / 区间 / 日历网格 / 时区换算** → `date-fns` + `@date-fns/tz`；存储与传输一律 **UTC**，客户端上送 `clientTimeZone`
+- 长列表与表格用 **`virtua`**：**容器 DOM 与行渲染归我们**，库只算位置；表格用 `VGrid`；`@tanstack/react-virtual` 不采用
+- 动效**默认 CSS + token**；入场 / 退场用 `@starting-style`；视图切换用 View Transitions；**只有手势 / 编排 / 布局动画用 `motion`**
+- `03 组件` 的每个动效场景**必须标注归属**（CSS / 原生 / motion），不允许"顺手引个库"
+
+**测试**：单独成册 —— 见 `12 测试`。
+
+
+
+## 4. 子项与交付物
 
 | # | 子项 | 交付物 | 验收 |
 | --- | --- | --- | --- |
@@ -526,11 +201,11 @@ packages/celadon/
 | 7 | **运行时壳** | 引擎全局（`window.$app` / `window.$global`）的**类型化封装与初始化**；显式声明，禁止隐式依赖 | 全局对象有类型；未初始化时给出明确报错而不是白屏 |
 | 8 | **运行期对比度校验** | `readableColorOn(fg, bg)`：按**实际绘制的背景**算对比度并给出可读替代色；开发期断言 + 关键组件接入（设计期已有色卡门禁，这里是运行期兜底）| 传入低对比组合时开发期直接报错/降级；主题切换后仍保证可读 |
 
-## 6. 素材来源（旧包，按需复制）
+## 5. 素材来源（旧包，按需复制）
 
 | 素材 | 规模 | 用途 |
 | --- | --- | --- |
-| `openapi/` | 71 文件 / 12 444 行 | **搬**作后端 SDK（本身建在 `fetch` 上，见 4.11）：按需子集，去掉旧框架耦合 |
+| `openapi/` | 71 文件 / 12 444 行 | **搬**作后端 SDK（本身建在 `fetch` 上，见 §1.2 的数据规则）：按需子集，去掉旧框架耦合 |
 | `utils/` | 27 文件 / 1 018 行 | 请求封装 / 格式化 / 存储 |
 | `hooks/` | 16 文件 / 1 352 行 | 通用 hooks |
 | `components/ui/` | 26 个 tsx（**21 个零 antd**）| **搬输入层与 schema 契约**：15 个原子输入 + `validation.ts` + `PropertySchema` + `Setting`/`Provider`/`Button`/`Dropdown`；详见 4.8 |
@@ -540,7 +215,7 @@ packages/celadon/
 
 > 旧构建链里明确**不照搬**的三件事：① 主题变量命令行生成链 ② 自定义"原始文本"loader（shadow DOM 动态注入用）③ 编辑器 worker 的打包方式 —— 见 [../MIGRATION.md](../MIGRATION.md)。
 
-## 7. 验收（Done）
+## 6. 验收（Done）
 
 1. 新包**一条命令**可以起 dev、可以出生产构建；
 2. 后端三条链路（认证 / 会话列表 / 流式对话）跑通，含 WebSocket；
@@ -552,7 +227,7 @@ packages/celadon/
 8. 反向依赖边界（禁 `@yaoapp/cui`）在构建期生效。
 9. 测试按 `12 测试` 落地：搬入模块与状态层有测试；主路径有浏览器用例；拟人剧本执行并留档（预期执行前写死 · 证据为外部产物 · 看不清与失败都要写）。
 
-## 8. 台账
+## 7. 台账
 
 > 规则：每从旧包复制一个文件，登记：**源 → 目标 → 改了什么 → 为什么**（也可记在 `../MIGRATION.md`）。
 > 复制的文件必须过四道：① 删掉没用到的分支 ② 换成语义 token（禁硬编码）③ 文案走 `ui.*` ④ 命名全称化。
