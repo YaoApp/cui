@@ -224,8 +224,12 @@
   --window-default: 1280px;
   --window-default-height: 820px;
   /* 默认打开：两栏（导航 + 内容） */
-  --header-height: 48px;
-  /* 顶栏高度（按自身密度实测，不用 web 式 64） */
+  --titlebar-height: 48px;
+  /* 窗口左上角控制区高度（红绿灯 + 收起按钮），**不是**横跨全宽的标题栏 */
+  --traffic-lights-width: 62px;
+  /* 红绿灯占位（macOS） */
+  --titlebar-inset: 96px;
+  /* 收起导航后，内容区顶行要给左上控件让出的左内距 */
   --page-min-width: 520px;
   --page-min-height: 600px;
   /* 最小窗口（壳层设定） */
