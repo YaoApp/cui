@@ -20,21 +20,24 @@ celadon/
   MIGRATION.md    迁移台账（复制了什么、改了什么、为什么）
 ```
 
-## 模块（11）
+## 模块（12）
 
 | # | 模块 | 状态 | 计划 |
 | --- | --- | --- | --- |
 | 00 | **设计规范** | **🚧 进行中** | [plan/00-design-system.md](plan/00-design-system.md) |
-| 01 | 布局 | ⏳ 待开始 | [plan/01-layout.md](plan/01-layout.md) |
-| 02 | 组件 | ⏳ 待开始 | [plan/02-components.md](plan/02-components.md) |
-| 03 | 登录注册 | ⏳ 待开始 | [plan/03-auth.md](plan/03-auth.md) |
-| 04 | 收件箱 | ⏳ 待开始 | [plan/04-inbox.md](plan/04-inbox.md) |
-| 05 | 看板 | ⏳ 待开始 | [plan/05-kanban.md](plan/05-kanban.md) |
-| 06 | 聊天 | ⏳ 待开始 | [plan/06-chat.md](plan/06-chat.md) |
-| 07 | 专家 | ⏳ 待开始 | [plan/07-experts.md](plan/07-experts.md) |
-| 08 | 电脑 | ⏳ 待开始 | [plan/08-computer.md](plan/08-computer.md) |
-| 09 | 工作空间 | ⏳ 待开始 | [plan/09-workspace.md](plan/09-workspace.md) |
-| 10 | 配置 | ⏳ 待开始 | [plan/10-settings.md](plan/10-settings.md) |
+| 01 | 基础设施 | ⏳ 待开始 | [plan/01-infrastructure.md](plan/01-infrastructure.md) |
+| 02 | 布局 | ⏳ 待开始 | [plan/02-layout.md](plan/02-layout.md) |
+| 03 | 组件 | ⏳ 待开始 | [plan/03-components.md](plan/03-components.md) |
+| 04 | 登录注册 | ⏳ 待开始 | [plan/04-auth.md](plan/04-auth.md) |
+| 05 | 收件箱 | ⏳ 待开始 | [plan/05-inbox.md](plan/05-inbox.md) |
+| 06 | 看板 | ⏳ 待开始 | [plan/06-kanban.md](plan/06-kanban.md) |
+| 07 | 聊天 | ⏳ 待开始 | [plan/07-chat.md](plan/07-chat.md) |
+| 08 | 专家 | ⏳ 待开始 | [plan/08-experts.md](plan/08-experts.md) |
+| 09 | 电脑 | ⏳ 待开始 | [plan/09-computer.md](plan/09-computer.md) |
+| 10 | 工作空间 | ⏳ 待开始 | [plan/10-workspace.md](plan/10-workspace.md) |
+| 11 | 配置 | ⏳ 待开始 | [plan/11-settings.md](plan/11-settings.md) |
+
+> 00–01 是**地基**（设计基线 + 工程底座，不产出用户可见界面）；02 起按"用户能跑通的一条路"逐个交付页面。
 
 ## 设计资产（当前阶段产物）
 
