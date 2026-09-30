@@ -406,5 +406,11 @@
   "lib": "own",
   "cat": "brand",
   "src": "brand-mark"
+ },
+ {
+  "id": "i-yaoagents-mono",
+  "lib": "own",
+  "cat": "brand",
+  "src": "brand-mark-mono"
  }
 ]

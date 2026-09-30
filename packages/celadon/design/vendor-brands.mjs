@@ -62,7 +62,14 @@ function toSymbol(html, sid, mono) {
       .split(`url(#${id})`).join(`url(#${sid}-${id})`)
       .split(`href="#${id}"`).join(`href="#${sid}-${id}"`);
   }
-  if (mono) inner = inner.replace(/fill="(?!none)[^"]*"/g, 'fill="currentColor"').replace(/fill:\s*(?!none)[^;"]+/g, 'fill:currentColor');
+  if (mono) {
+    inner = inner.replace(/fill="(?!none)[^"]*"/g, 'fill="currentColor"').replace(/fill:\s*(?!none)[^;"]+/g, 'fill:currentColor');
+    // 关键：原组件有大量 path 不带 fill（靠继承），SVG 默认是黑 —— 整组兜底成 currentColor，
+    // 子元素自带的 fill 依然优先，所以彩色变体不受影响。
+    inner = `<g fill="currentColor">${inner}</g>`;
+  }
+  // 个别彩色组件整条都不带 fill，同样兜底，避免渲染成默认黑
+  if (!mono && !/\bfill=/.test(inner)) inner = `<g fill="currentColor">${inner}</g>`;
   if (!/<(path|circle|rect|ellipse|polygon|line|polyline)/.test(inner)) return null;
   return { viewBox, inner };
 }
