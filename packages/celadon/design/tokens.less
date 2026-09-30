@@ -125,8 +125,10 @@
   --duration-fast:120ms; --duration-base:200ms; --duration-slow:320ms;
   --easing:cubic-bezier(.4,0,.2,1);
   --easing-standard:cubic-bezier(.4,0,.2,1);
-  /* 动效强度"丰富"档（产品级偏好，非系统）：位移更大、时长更长 */
-  --duration-fast-rich:180ms; --duration-base-rich:300ms; --duration-slow-rich:480ms;
+  /* 动效强度三档（产品级偏好，非系统）：
+     quiet 低调（高频区域）/ 默认=标准 / rich 丰富（一次性、有意义的动效） */
+  --duration-fast-quiet:80ms;  --duration-base-quiet:140ms; --duration-slow-quiet:220ms;
+  --duration-fast-rich:180ms;  --duration-base-rich:300ms;  --duration-slow-rich:480ms;
   --easing-decelerate:cubic-bezier(0,0,.2,1);
   --easing-accelerate:cubic-bezier(.4,0,1,1);
 
@@ -224,9 +226,10 @@
 
 /* ===== 减动效：系统偏好开启时，全部时长归零（组件无需各自处理）===== */
 @media (prefers-reduced-motion: reduce) {
-  :root, .celadon,
-  .celadon[data-theme='dark'], [data-theme='dark'] .celadon {
-    --duration-fast:0.01ms; --duration-base:0.01ms; --duration-slow:0.01ms;
+  /* 无障碍总开关。注意：只在 :root 上写 !important 是**没用的** —— 自定义属性沿继承链传递，
+     更近的祖先（.motion-rich 等）会直接覆盖它。必须落到每个元素上，!important 才能压住局部类。 */
+  *, *::before, *::after {
+    --duration-fast:0.01ms !important; --duration-base:0.01ms !important; --duration-slow:0.01ms !important;
   }
 }
 
@@ -248,6 +251,15 @@
     --border-hover:var(--border-hover-strong);
   }
 }
+
+/**
+ * 动效强度：**两级模型**
+ *  ① 减少动态 = 无障碍，系统级强制（见文件末尾 @media 里的 !important，任何局部都覆盖不掉）
+ *  ② 标准/丰富/低调 = 产品口味，全局默认 + **场景可局部指定**（容器加下面三个类即可，随继承生效）
+ */
+.motion-still { --duration-fast:0.01ms; --duration-base:0.01ms; --duration-slow:0.01ms; }
+.motion-quiet { --duration-fast:var(--duration-fast-quiet); --duration-base:var(--duration-base-quiet); --duration-slow:var(--duration-slow-quiet); }
+.motion-rich  { --duration-fast:var(--duration-fast-rich);  --duration-base:var(--duration-base-rich);  --duration-slow:var(--duration-slow-rich); }
 
 /**
  * 用法约定
