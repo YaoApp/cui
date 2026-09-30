@@ -421,7 +421,6 @@
       "note": "The main structure is three **vertical** columns on a grid, not horizontal bands. Give way order: the **side column shrinks first, then loses its track, and only then may the centre fall below its minimum**; the **navigation never concedes width**. Screen compatibility comes from **a default width per view type plus viewport driven collapse**, not from giving different screens different window sizes.",
       "slider": "Viewport",
       "sliderNav": "Nav width",
-      "sliderSide": "Side cap",
       "contractTitle": "Column contract (drag the sliders to see clamping)",
       "colZone": "Column",
       "colMin": "Min",
@@ -434,7 +433,6 @@
       "centerMax": "the remainder (inner text has its own readable cap)",
       "centerDefault": "the remainder",
       "sideDefaultNote": "first open",
-      "ofFrame": "of the frame",
       "screenTitle": "Screen compatibility (4K and 1080p share one set)",
       "s1": "Thresholds are judged in **viewport CSS px**, which already include system scaling: 4K at 200% is about 1920 CSS px, the same as a 1080p display, so one set of rules reads correctly on both.",
       "s2": "Column widths use **a default per view type** (reading 400, tool 600, task 640, wide 840) and are then held by a **70% of frame cap**, so they grow on large displays and shrink on small ones.",
@@ -464,7 +462,6 @@
         "center": "center",
         "side": "side"
       },
-      "orCap": "or capped at",
       "byViewType": "by view type",
       "sideType": {
         "reading": "Reading 400",
@@ -512,7 +509,11 @@
       "nr3b": "Drawer: floats over content with a scrim",
       "nr3c": "Web drawer: a **hamburger in the content top row**",
       "nr3d": "Transient (Esc or the scrim closes it)",
-      "railNote": "There is **no title bar**: three vertical columns, each with its own top row. Only the traffic lights and the toggle float in the top left corner, and they never move"
+      "railNote": "There is **no title bar**: three vertical columns, each with its own top row. Only the traffic lights and the toggle float in the top left corner, and they never move",
+      "sideMaxFormula": "<b>total width - (navigation + centre minimum + handle)</b>: drag freely up to that limit, no hard coded ratio",
+      "cap": "cap ",
+      "px": "px",
+      "sideHint": "Drag the right edge of the content to resize the side column"
     }
   }
 }

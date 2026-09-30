@@ -423,7 +423,6 @@ window.CELADON_I18N = {
         "note": "The main structure is three **vertical** columns on a grid, not horizontal bands. Give way order: the **side column shrinks first, then loses its track, and only then may the centre fall below its minimum**; the **navigation never concedes width**. Screen compatibility comes from **a default width per view type plus viewport driven collapse**, not from giving different screens different window sizes.",
         "slider": "Viewport",
         "sliderNav": "Nav width",
-        "sliderSide": "Side cap",
         "contractTitle": "Column contract (drag the sliders to see clamping)",
         "colZone": "Column",
         "colMin": "Min",
@@ -436,7 +435,6 @@ window.CELADON_I18N = {
         "centerMax": "the remainder (inner text has its own readable cap)",
         "centerDefault": "the remainder",
         "sideDefaultNote": "first open",
-        "ofFrame": "of the frame",
         "screenTitle": "Screen compatibility (4K and 1080p share one set)",
         "s1": "Thresholds are judged in **viewport CSS px**, which already include system scaling: 4K at 200% is about 1920 CSS px, the same as a 1080p display, so one set of rules reads correctly on both.",
         "s2": "Column widths use **a default per view type** (reading 400, tool 600, task 640, wide 840) and are then held by a **70% of frame cap**, so they grow on large displays and shrink on small ones.",
@@ -466,7 +464,6 @@ window.CELADON_I18N = {
           "center": "center",
           "side": "side"
         },
-        "orCap": "or capped at",
         "byViewType": "by view type",
         "sideType": {
           "reading": "Reading 400",
@@ -514,7 +511,11 @@ window.CELADON_I18N = {
         "nr3b": "Drawer: floats over content with a scrim",
         "nr3c": "Web drawer: a **hamburger in the content top row**",
         "nr3d": "Transient (Esc or the scrim closes it)",
-        "railNote": "There is **no title bar**: three vertical columns, each with its own top row. Only the traffic lights and the toggle float in the top left corner, and they never move"
+        "railNote": "There is **no title bar**: three vertical columns, each with its own top row. Only the traffic lights and the toggle float in the top left corner, and they never move",
+        "sideMaxFormula": "<b>total width - (navigation + centre minimum + handle)</b>: drag freely up to that limit, no hard coded ratio",
+        "cap": "cap ",
+        "px": "px",
+        "sideHint": "Drag the right edge of the content to resize the side column"
       }
     }
   },
@@ -941,7 +942,6 @@ window.CELADON_I18N = {
         "note": "主構造はグリッドによる 3 つの**縦カラム**で、横帯ではありません。譲る順番：**サイドが先に縮み、次にトラックごと消え、その後にようやく中央が最小を下回れる**。**ナビは幅を譲りません**。画面互換は**ビュー種別ごとの既定幅 + ビューポート駆動**で担保します。",
         "slider": "ビューポート",
         "sliderNav": "ナビ幅",
-        "sliderSide": "サイド上限",
         "contractTitle": "カラム契約（スライダーでクランプを確認）",
         "colZone": "カラム",
         "colMin": "最小",
@@ -954,7 +954,6 @@ window.CELADON_I18N = {
         "centerMax": "残り（本文には可読上限あり）",
         "centerDefault": "残り",
         "sideDefaultNote": "初回表示",
-        "ofFrame": "× 画面幅",
         "screenTitle": "画面互換（4K と 1080p で同一）",
         "s1": "しきい値は**ビューポート CSS px**（システム拡大率込み）で判定します。4K@200% は約 1920 CSS px で 1080p と同じになるため、同じ規則が両方で成立します。",
         "s2": "カラム幅は**ビュー種別の既定幅**（閲覧 400 / ツール 600 / タスク 640 / ワイド 840）を使い、さらに**画面の 70% 上限**で押さえます。大画面では広く、小画面では狭くなります。",
@@ -984,7 +983,6 @@ window.CELADON_I18N = {
           "center": "コンテンツ",
           "side": "サイド"
         },
-        "orCap": "または上限",
         "byViewType": "ビュー種別ごと",
         "sideType": {
           "reading": "閲覧 400",
@@ -1032,7 +1030,11 @@ window.CELADON_I18N = {
         "nr3b": "ドロワー：内容の上に重なり、スクリム付き",
         "nr3c": "Web のドロワー時：内容の上段に**ハンバーガー**",
         "nr3d": "一時的（Esc かスクリムで閉じる）",
-        "railNote": "**タイトルバーはありません**：3 つの縦カラムがそれぞれ上段を持ちます。左上に浮くのは信号機と切替ボタンだけで、位置は決して変わりません"
+        "railNote": "**タイトルバーはありません**：3 つの縦カラムがそれぞれ上段を持ちます。左上に浮くのは信号機と切替ボタンだけで、位置は決して変わりません",
+        "sideMaxFormula": "<b>全体幅 −（ナビ + 内容の最小 + ハンドル）</b>。この上限まで自由にドラッグでき、比率は固定しません",
+        "cap": "上限値 ",
+        "px": "px",
+        "sideHint": "内容の右端をドラッグしてサイド幅を調整"
       }
     }
   },
@@ -1459,7 +1461,6 @@ window.CELADON_I18N = {
         "note": "主结构是三栏**竖分割**（grid 列轨），不是横向条带。让位顺序：**侧栏先缩 → 侧栏整条消失 → 中栏才可能低于最小**；**导航栏不参与宽度让步**。屏幕兼容靠**按视图类型给默认宽 + 视口驱动**，不靠\"给不同屏幕不同窗口尺寸\"。",
         "slider": "视口宽",
         "sliderNav": "导航宽",
-        "sliderSide": "侧栏上限",
         "contractTitle": "三栏契约（拖上面的滑杆看夹取）",
         "colZone": "栏",
         "colMin": "最小",
@@ -1472,7 +1473,6 @@ window.CELADON_I18N = {
         "centerMax": "剩余空间（内文另有可读上限）",
         "centerDefault": "剩余空间",
         "sideDefaultNote": "首次打开",
-        "ofFrame": "× 画面",
         "screenTitle": "屏幕兼容（4K 与 1080p 同一套）",
         "s1": "阈值按**视口 CSS px** 判定（已含系统缩放）：4K@200% ≈ 1920 CSS px，与 1080p 的 1920 同构，因此同一套规则都合理。",
         "s2": "栏宽用**视图类型的默认宽**（阅读 400 / 工具 600 / 任务 640 / 宽屏 840），再被**画面 70% 上限**兜住 —— 大屏自动更宽，小屏自动更窄。",
@@ -1502,7 +1502,6 @@ window.CELADON_I18N = {
           "center": "内容",
           "side": "侧栏"
         },
-        "orCap": "或上限",
         "byViewType": "按视图类型",
         "sideType": {
           "reading": "阅读型 400",
@@ -1550,7 +1549,11 @@ window.CELADON_I18N = {
         "nr3b": "抽屉：浮在内容上 + 遮罩",
         "nr3c": "Web 抽屉态：内容顶行的**汉堡按钮**",
         "nr3d": "临时（Esc / 点遮罩关闭）",
-        "railNote": "**没有标题栏**：三栏竖切，每栏各自的顶行；窗口左上角只浮着\"红绿灯 + 收起键\"，位置永不移动"
+        "railNote": "**没有标题栏**：三栏竖切，每栏各自的顶行；窗口左上角只浮着\"红绿灯 + 收起键\"，位置永不移动",
+        "sideMaxFormula": "<b>总宽 −（导航区 + 内容区最小 + 把手）</b> —— 可自由拖拽到此上限，不写死比例",
+        "cap": "上限 ",
+        "px": "px",
+        "sideHint": "拖内容区右边缘调整侧栏宽度"
       }
     }
   },
@@ -1977,7 +1980,6 @@ window.CELADON_I18N = {
         "note": "主結構是三欄**豎分割**（grid 欄軌），不是橫向條帶。讓位順序：**側欄先縮 → 側欄整條消失 → 中欄才可能低於最小**；**導覽欄不參與寬度讓步**。螢幕相容靠**依檢視類型給預設寬 + 視口驅動**，不靠「給不同螢幕不同視窗尺寸」。",
         "slider": "視口寬",
         "sliderNav": "導覽寬",
-        "sliderSide": "側欄上限",
         "contractTitle": "三欄契約（拖上面的滑桿看夾取）",
         "colZone": "欄",
         "colMin": "最小",
@@ -1990,7 +1992,6 @@ window.CELADON_I18N = {
         "centerMax": "剩餘空間（內文另有可讀上限）",
         "centerDefault": "剩餘空間",
         "sideDefaultNote": "首次開啟",
-        "ofFrame": "× 畫面",
         "screenTitle": "螢幕相容（4K 與 1080p 同一套）",
         "s1": "門檻按**視口 CSS px** 判定（已含系統縮放）：4K@200% ≈ 1920 CSS px，與 1080p 的 1920 同構，因此同一套規則都合理。",
         "s2": "欄寬用**檢視類型的預設寬**（閱讀 400 / 工具 600 / 任務 640 / 寬螢幕 840），再被**畫面 70% 上限**兜住 —— 大螢幕自動更寬，小螢幕自動更窄。",
@@ -2020,7 +2021,6 @@ window.CELADON_I18N = {
           "center": "內容",
           "side": "側欄"
         },
-        "orCap": "或上限",
         "byViewType": "依檢視類型",
         "sideType": {
           "reading": "閱讀型 400",
@@ -2068,7 +2068,11 @@ window.CELADON_I18N = {
         "nr3b": "抽屜：浮在內容上 + 遮罩",
         "nr3c": "Web 抽屜態：內容頂列的**漢堡按鈕**",
         "nr3d": "臨時（Esc / 點遮罩關閉）",
-        "railNote": "**沒有標題列**：三欄豎切，各欄有自己的頂列；視窗左上只浮著「紅綠燈 + 收合鍵」，位置永不移動"
+        "railNote": "**沒有標題列**：三欄豎切，各欄有自己的頂列；視窗左上只浮著「紅綠燈 + 收合鍵」，位置永不移動",
+        "sideMaxFormula": "<b>總寬 −（導覽區 + 內容區最小 + 把手）</b> —— 可自由拖曳到此上限，不寫死比例",
+        "cap": "上限 ",
+        "px": "px",
+        "sideHint": "拖曳內容區右緣調整側欄寬度"
       }
     }
   }

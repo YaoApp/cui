@@ -230,7 +230,11 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .gscrim.on{opacity:1;pointer-events:auto}
 .gnav.drawer{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-modal);box-shadow:var(--shadow-overlay);transform:translateX(-100%);transition:transform var(--duration-base) var(--easing-decelerate)}
 .gnav.drawer.open{transform:none}
-.gcenter{grid-column:2;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.gcenter{grid-column:2;min-width:0;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.grip{position:absolute;right:0;top:0;bottom:0;width:var(--side-resize-handle);cursor:col-resize;background:transparent;z-index:var(--z-raised)}
+.grip::after{content:'';position:absolute;left:2px;top:0;bottom:0;width:2px;background:transparent;transition:background var(--duration-fast) var(--easing-standard)}
+.grip:hover::after,.grip.on::after{background:var(--brand)}
+.gvp.side-hidden .grip{display:none}
 .gbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:12px 10px;overflow:hidden}
 .gcenter .gbody{justify-content:center;padding:14px 16px}
 .gcontent{width:100%;display:flex;flex-direction:column;gap:12px}
@@ -334,7 +338,6 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
     <span id="gr-plats" class="prefbar-segs"></span>
     <span class="pf-label" id="gr-sidelabel"></span>
     <span id="gr-sidetypes" class="prefbar-segs"></span>
-    <input type="range" id="gr-side" min="30" max="70" step="1" value="70" aria-label="side cap ratio">
     <button type="button" class="gpreset" id="gr-sidebtn"></button>
     <span class="greadout" id="gr-readout"></span></div>
   <div class="cols">
@@ -637,18 +640,18 @@ function clampW(px, min, max){ return Math.min(max, Math.max(min, Math.round(px)
 var SIDE_TYPES = [['reading',400],['tool',600],['task',640],['wide',840]];
 var NAVITEMS = ['overview','inbox','tasks','files','apps','settings','help'];  /* 导航项：图标轨/顶栏图标共用 */
 var SIDE_TYPE = 0;                       /* 默认：阅读型 */
-function computeColumns(theme, viewport, navPref, sidePref, sideRatio, navManual, collapsed){
+var SIDE_DRAG = 0;                       /* 用户拖拽后的宽度（0 = 用类型默认） */
+function computeColumns(theme, viewport, navPref, sidePref, navManual, collapsed){
   var NAV_MIN = px(tok('--nav-min',theme)), NAV_MAX = px(tok('--nav-max',theme));
   /* 收起形态按端：客户端收到 0（导航改顶栏图标）；Web 保留 56 图标轨 */
   var RAIL = PLATFORM === 1 ? px(tok('--nav-collapsed',theme)) : px(tok('--nav-collapsed-desktop',theme));
   var CENTER_MIN = px(tok('--center-min',theme)), SIDE_MIN = px(tok('--side-min',theme));
-  var MAX_RATIO = parseFloat(tok('--side-max-ratio',theme)) || 0.7;
-  var MAX_W = px(tok('--side-width-max',theme));
+  var HANDLE = px(tok('--side-resize-handle',theme));
   var autoCollapse = viewport < px(tok('--nav-auto-collapse',theme));
   var navFull = clampW(navPref, NAV_MIN, NAV_MAX);
   /* Web 窄屏：导航转抽屉（浮在内容上 + 遮罩），不占列轨 */
   if (PLATFORM === 1 && viewport < px(tok('--bp-nav-drawer',theme))) {
-    return { navMode: navManual ? 'drawerOpen' : 'drawer', navTrack: 0, navOverlayW: navFull, scrim: !!navManual,
+    return { sideCap: 0, navMode: navManual ? 'drawerOpen' : 'drawer', navTrack: 0, navOverlayW: navFull, scrim: !!navManual,
       side: 0, center: viewport, centerBelowMin: viewport < CENTER_MIN, autoCollapse: true, drawer: true };
   }
   var navWanted = navPref > 0;
@@ -656,12 +659,13 @@ function computeColumns(theme, viewport, navPref, sidePref, sideRatio, navManual
   var navTrack = wantRail ? RAIL : navFull;
   var navOverlay = autoCollapse && navManual && navWanted;         /* 窄屏手动展开：覆盖中栏 */
   var available = viewport - navTrack - CENTER_MIN;
-  var base = SIDE_TYPES[SIDE_TYPE][1];                      /* 视图类型的默认宽 */
-  var cap = Math.min(viewport * Math.min(sideRatio, MAX_RATIO), MAX_W);   /* 上限 = 画面比例，兜以绝对上限 */
-  var side = (sidePref === 0 || available < SIDE_MIN) ? 0
-    : Math.min(available, clampW(base, SIDE_MIN, cap));
+  var base = SIDE_DRAG || SIDE_TYPES[SIDE_TYPE][1];         /* 用户拖过的宽度优先，否则用视图类型默认宽 */
+  /* 上限 = 总宽 −（导航区 + 内容区最小）——不做任何写死的比例/绝对值 */
+  var cap = Math.max(0, viewport - navTrack - CENTER_MIN - HANDLE);
+  var side = (sidePref === 0 || cap < SIDE_MIN) ? 0
+    : clampW(base, SIDE_MIN, cap);
   var center = Math.max(0, viewport - navTrack - side);
-  return { navMode: navOverlay ? 'overlay' : (wantRail ? (RAIL === 0 ? 'none' : 'rail') : 'full'), navTrack:navTrack, navOverlay:navOverlay,
+  return { sideCap: cap, navMode: navOverlay ? 'overlay' : (wantRail ? (RAIL === 0 ? 'none' : 'rail') : 'full'), navTrack:navTrack, navOverlay:navOverlay,
     navOverlayW:navOverlay ? navFull : 0, scrim:false, side:side, center:center,
     centerBelowMin:center < CENTER_MIN, autoCollapse:autoCollapse, drawer:false };
 }
@@ -671,7 +675,7 @@ function renderGrid(theme){
     + '<tr><th>'+esc(tr('f.grid.colZone'))+'</th><th>'+esc(tr('f.grid.colMin'))+'</th><th>'+esc(tr('f.grid.colMax'))+'</th><th>'+esc(tr('f.grid.colDefault'))+'</th></tr>'
     + '<tr><td>'+esc(tr('f.grid.navZone'))+'</td><td><code>'+tok('--nav-min',theme)+'</code></td><td><code>'+tok('--nav-max',theme)+'</code></td><td><code>'+tok('--nav-default',theme)+'</code> · '+esc(tr('f.grid.navCollapsedNote'))+' <code>'+tok('--nav-collapsed',theme)+'</code></td></tr>'
     + '<tr><td>'+esc(tr('f.grid.centerZone'))+'</td><td><code>'+tok('--center-min',theme)+'</code></td><td>'+esc(tr('f.grid.centerMax'))+'</td><td>'+esc(tr('f.grid.centerDefault'))+'</td></tr>'
-    + '<tr><td>'+esc(tr('f.grid.sideZone'))+'</td><td><code>'+tok('--side-min',theme)+'</code></td><td><code>'+tok('--side-width-max',theme)+'</code> '+esc(tr('f.grid.orCap'))+' <code>'+tok('--side-max-ratio',theme)+'</code> '+esc(tr('f.grid.ofFrame'))+'</td><td><code>'+tok('--side-width-reading',theme)+'</code> / <code>'+tok('--side-width-tool',theme)+'</code> / <code>'+tok('--side-width-task',theme)+'</code> / <code>'+tok('--side-width-wide',theme)+'</code> '+esc(tr('f.grid.byViewType'))+'</td></tr>'
+    + '<tr><td>'+esc(tr('f.grid.sideZone'))+'</td><td><code>'+tok('--side-min',theme)+'</code></td><td>'+esc(tr('f.grid.sideMaxFormula'))+'</td><td><code>'+tok('--side-width-reading',theme)+'</code> / <code>'+tok('--side-width-tool',theme)+'</code> / <code>'+tok('--side-width-task',theme)+'</code> / <code>'+tok('--side-width-wide',theme)+'</code> '+esc(tr('f.grid.byViewType'))+'</td></tr>'
     + '</table>';
   var screen = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.screenTitle'))+'</div><ul>'
     + ['s1','s2','s3'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ul>'
@@ -686,7 +690,8 @@ function renderGrid(theme){
     + '<button type="button" class="tgl" id="gtgl-'+theme+'"></button></div>'
     + '<div class="ggrid" id="ggrid-'+theme+'">'
     + '<div class="gnav" id="gnav-'+theme+'"><div class="gcolhead gnh"><i class="t"></i></div><div class="gbody">'+navs+'</div></div>'
-    + '<div class="gcenter"><div class="gcolhead gch"><button type="button" class="burger" id="gburger-'+theme+'"></button><i class="l"></i><i class="r"></i></div><div class="gbody"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div></div>'
+    + '<div class="gcenter"><div class="gcolhead gch"><button type="button" class="burger" id="gburger-'+theme+'"></button><i class="l"></i><i class="r"></i></div><div class="gbody"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div>'
+    + '<span class="grip" id="ggrip-'+theme+'" role="separator" aria-orientation="vertical"></span></div>'
     + '<div class="gside" id="gside-'+theme+'"><div class="gcolhead gsh"><i class="l"></i></div><div class="gbody">'+sides+'</div></div>'
     + '</div><div class="gscrim" id="gscrim-'+theme+'"></div></div></div>';
   var navModeTbl = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.navTitle'))+'</div><table>'
@@ -700,14 +705,13 @@ function renderGrid(theme){
 }
 function syncGrid(){
   var vp0 = document.getElementById('gr-range'), navIn = document.getElementById('gr-nav');
-  var sideIn = document.getElementById('gr-side');
-  var viewport = parseInt(vp0.value, 10), navPref = parseInt(navIn.value, 10), ratio = parseInt(sideIn.value, 10)/100;
+  var viewport = parseInt(vp0.value, 10), navPref = parseInt(navIn.value, 10);
   /* 回到宽屏即清掉"临时展开"标志（临时标志不写回持久化偏好，两级状态） */
   if (NAV_MANUAL && viewport >= px(tok('--nav-auto-collapse','light'))) NAV_MANUAL = false;
   ['light','dark'].forEach(function(theme){
     var vp = document.getElementById('gvp-'+theme), clip = document.getElementById('gclip-'+theme);
     if (!vp) return;
-    var L = computeColumns(theme, viewport, navPref, SIDE_WANTED ? 1 : 0, ratio, NAV_MANUAL, NAV_COLLAPSED);
+    var L = computeColumns(theme, viewport, navPref, SIDE_WANTED ? 1 : 0, NAV_MANUAL, NAV_COLLAPSED);
     var grid = L.navTrack + 'px ' + L.center + 'px ' + L.side + 'px';
     var ggrid = document.getElementById('ggrid-'+theme);
     if (ggrid) ggrid.style.gridTemplateColumns = grid;
@@ -726,6 +730,7 @@ function syncGrid(){
     gnav.style.width = (L.navMode === 'overlay' || L.navMode === 'drawerOpen') ? L.navOverlayW + 'px' : '';
     var scr = document.getElementById('gscrim-'+theme);
     if (scr) scr.classList.toggle('on', !!L.scrim);
+    vp.classList.toggle('side-hidden', L.side === 0);   /* 侧栏没开：把手隐藏 */
     var bg = document.getElementById('gburger-'+theme);
     if (bg) { bg.setAttribute('aria-label', tr('f.grid.navExpanded')); bg.setAttribute('aria-expanded', String(!!L.drawer && NAV_MANUAL)); }
     var tg = document.getElementById('gtgl-'+theme);
@@ -736,7 +741,7 @@ function syncGrid(){
     var ro = document.getElementById('gr-readout');
     if (ro) ro.textContent = viewport + 'px → ' + tr('f.grid.zone.nav') + ' ' + tr('f.grid.navMode.'+L.navMode) + ' ' + L.navTrack
       + (L.navOverlay ? '(+' + tr('f.grid.overlay') + ')' : '') + ' · ' + tr('f.grid.zone.center') + ' ' + L.center
-      + (L.centerBelowMin ? '(' + tr('f.grid.belowMin') + ')' : '') + ' · ' + tr('f.grid.zone.side') + ' ' + L.side
+      + (L.centerBelowMin ? '(' + tr('f.grid.belowMin') + ')' : '') + ' · ' + tr('f.grid.zone.side') + ' ' + L.side + tr('f.grid.px') + '（' + tr('f.grid.cap') + L.sideCap + tr('f.grid.px') + '）'
       + (L.drawer ? '' : (L.autoCollapse ? ' · <' + tok('--nav-auto-collapse',theme) + ' ' + tr('f.grid.autoRail') : ''));
   });
   document.querySelectorAll('.gpreset[data-w]').forEach(function(b){ b.classList.toggle('on', parseInt(b.getAttribute('data-w'),10) === viewport); });
@@ -753,6 +758,22 @@ function syncGrid(){
   var sb = document.getElementById('gr-sidebtn');
   if (sb) { sb.textContent = tr(SIDE_WANTED ? 'f.grid.sideOn' : 'f.grid.sideOff');
     sb.classList.toggle('on', SIDE_WANTED); sb.setAttribute('aria-pressed', String(SIDE_WANTED)); }
+}
+function initGrip(theme){
+  var grip = document.getElementById('ggrip-'+theme);
+  if (!grip || grip.dataset.done) return;
+  grip.dataset.done = '1';
+  grip.addEventListener('mousedown', function(e){
+    e.preventDefault(); grip.classList.add('on');
+    var clip = document.getElementById('gclip-'+theme);
+    var vw = parseInt(document.getElementById('gr-range').value, 10);
+    var k = Math.min(1, (clip.clientWidth - 2) / vw);            /* 预览被缩放，位移要除以缩放比 */
+    var track = document.getElementById('ggrid-'+theme).style.gridTemplateColumns.split(' ');
+    var startX = e.clientX, startSide = parseInt(track[2], 10) || SIDE_TYPES[SIDE_TYPE][1];
+    function move(ev){ SIDE_WANTED = true; SIDE_DRAG = Math.round(startSide + (ev.clientX - startX) / k); syncGrid(); }
+    function up(){ grip.classList.remove('on'); window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); }
+    window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+  });
 }
 function initGrid(){
   var box = document.getElementById('gr-presets');
@@ -788,6 +809,7 @@ function initGrid(){
       PLATFORM = parseInt(b.getAttribute('data-plat'),10); NAV_MANUAL = false; syncGrid(); });
     pb.dataset.done = '1';
   }
+  ['light','dark'].forEach(function(theme){ initGrip(theme); });
   ['light','dark'].forEach(function(theme){
     var tg = document.getElementById('gtgl-'+theme);
     if (tg && !tg.dataset.done){ tg.addEventListener('click', function(){ var b = document.getElementById('gr-navbtn'); if (b) b.click(); }); tg.dataset.done = '1'; }
@@ -799,7 +821,7 @@ function initGrid(){
   if (!window.__grEsc){ window.__grEsc = 1; document.addEventListener('keydown', function(e){
     if (e.key === 'Escape' && NAV_MANUAL){ NAV_MANUAL = false; syncGrid(); } }); }
 }
-['gr-range','gr-nav','gr-side'].forEach(function(id){ document.getElementById(id).addEventListener('input', syncGrid); });
+['gr-range','gr-nav'].forEach(function(id){ document.getElementById(id).addEventListener('input', syncGrid); });
 initGrid();
 
 /* ===== 语言 / 渲染 ===== */
@@ -813,7 +835,6 @@ function applyChrome(){
   document.getElementById('gr-sidelabel').textContent = tr('f.grid.sliderSide');
   document.getElementById('gr-range').setAttribute('aria-label', tr('f.grid.slider'));
   document.getElementById('gr-nav').setAttribute('aria-label', tr('f.grid.sliderNav'));
-  document.getElementById('gr-side').setAttribute('aria-label', tr('f.grid.sliderSide'));
   document.querySelectorAll('.gpreset[data-l]').forEach(function(b){
     var k = b.hasAttribute('data-plat') ? 'f.grid.plat.' : (b.hasAttribute('data-type') ? 'f.grid.sideType.' : 'f.grid.preset.');
     b.textContent = tr(k + b.getAttribute('data-l'));
@@ -829,6 +850,7 @@ function applyChrome(){
 function renderAll(){
   applyChrome(); applyPrefs();
   ['light','dark'].forEach(function(t){ renderSpacing(t); renderRadius(t); renderElevation(t); renderMotion(t); renderBorder(t); renderGrid(t); });
+  ['light','dark'].forEach(function(t){ initGrip(t); });   /* DOM 已生成，这里才绑得上把手 */
   syncGrid();
   Array.prototype.forEach.call(document.querySelectorAll('.language-switch button'), function(b){
     b.classList.toggle('on', b.getAttribute('data-lang') === CURRENT); });
