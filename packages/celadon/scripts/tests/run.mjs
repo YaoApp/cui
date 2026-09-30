@@ -23,6 +23,7 @@ const SUITES = [
   ['check-tokens.mjs', 'tokens'],
   ['check-i18n.mjs', 'i18n'],
   ['check-readme-values.mjs', 'readme-values'],
+  ['check-plan-md.mjs', 'check-plan-md'],
 ]
 
 let pass = 0, fail = 0
