@@ -23,6 +23,7 @@
 | 8 | **旧仓库资产取舍** | **搬**：`components/ui/` 输入层（15 个原子输入 · 零 antd）· `PropertySchema` 契约 · `validation.ts` 校验；**不搬**：`FormBuilder`/`FlowBuilder`（低代码 UI）· `DataTable`/`PaginatedTable`（商业化后台表格）|
 | 9 | **i18n 运行时** | **`i18next` + `react-i18next`**；语言包 `locales/<locale>/<namespace>.json`；**新增语言 = 只加一个目录**，不改代码 |
 | 10 | **路由** | **React Router 库模式**（`react-router@^8`，不装 `@react-router/dev`）；**`basename` 与 Vite `base` 同源**，取自引擎注入的 `BASE` |
+| 11 | **数据请求** | **原生 `fetch`**（不用 axios）；搬旧仓库 `openapi/` 作类型化客户端；**不引数据缓存库**，用自建小钩子管加载 / 错误状态 |
 
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
@@ -45,7 +46,6 @@
 
 | 包 | 当前最新 | 用途 | 备注 |
 | --- | --- | --- | --- |
-| `@tanstack/react-query` | 5.104.0 | 数据请求 | |
 | `zustand` | 5.0.15 | 状态 | |
 | `@tanstack/react-virtual` | 3.14.13 | 虚拟列表 | 与 `react-virtuoso` 二选一 |
 | `motion` | 13.4.6 | 动效 | |
@@ -53,6 +53,9 @@
 | `@playwright/test` | 1.63.0 | 浏览器验收 | 与 `scripts/tests/` 的测试策略一起定 |
 
 **不用**：`antd`（见 4.7）
+
+**不需要包**：**数据请求** —— 旧仓库的 `openapi/`（71 文件）本身就建在 `fetch` 上，无 axios；
+其中流式用 `EventSource`（GET + cookie）与 fetch 流（`body.getReader()`），WebSocket 另有实现 —— 这些都不归数据缓存库管。
 
 **不需要包**：**图标** —— `00` 的 F7 已定"采用 lucide（ISC）作为源、产物为雪碧图"，
 应用侧用 `<use>` 引用 `icons/lucide-sprite.svg`（67 个符号，命名 `i-<域>-<名>`），
@@ -82,6 +85,7 @@
 | **产物布局** | 定"源码直连"还是"产物拉取"（现状：`pull-cui` / `build-cui` 拉产物，并 `watch.ignored` 掉整个 `cui/`）|
 | **构建期门禁接线** | §5 的 6b：stylelint · TS 类型约束 · 反向依赖边界 · 接进 CI / pre-commit |
 | **后端 SDK** | §5 子项 2 |
+| **取数钩子** | 自建 `useRequest` 级小钩子（加载 / 错误 / 取消 / 重试各一处实现），避免散落的 `useEffect` + `fetch` |
 | **i18n 构建** | §5 子项 3 —— **运行时已定（i18next，见 4.9）**；剩下：命名空间切分 · 按需加载 · 类型生成 · 翻译流程文档 |
 | **图标落地** | §5 子项 4 —— **选型与规格已定（`00` F7：lucide 为源 · 收录 67 · 命名 `i-<域>-<名>` · 档位 14/16/20/24 · 产物为雪碧图）**；剩下：应用侧图标组件与按需引入 |
 | **主题映射** | §5 子项 5：同一份 `tokens.less` 生成组件库主题 |
@@ -342,6 +346,30 @@ packages/celadon/
 4. **WS upgrade**：用 Vite `server.proxy` 的 `ws: true`；SSE 三个头照旧
 5. **路由 API 替换**：搬迁页面时 `history.push` / `useNavigate` / `useLocation` / `useParams` 一律换成 React Router 的对应 API（计入 `MIGRATION.md` 第 5 类改动）
 
+### 4.11 数据请求：原生 fetch + 搬 openapi
+
+**结论**：传输用**原生 `fetch`**（不用 axios）；类型化客户端**搬旧仓库的 `openapi/`**；
+**不引入数据缓存库**（如 react-query）；组件侧用**自建小钩子**统一加载与错误状态。
+
+**依据**：
+
+- 旧仓库 71 个文件、12 444 行的 `openapi/` **本身就建在 `fetch` 上**（`openapi.ts` · `file.ts`），全仓无 axios
+- 鉴权是 **cookie**：`credentials: 'include'`，SSE 用 `EventSource(url, { withCredentials: true })`，另有 CSRF token ——
+  这也是**子路径挂载 + 同源代理**必须成立的原因
+- 流式有两套（`EventSource` / fetch 流的 `body.getReader()`）+ WebSocket 一套 —— **数据缓存库管不到它们**
+- 工作区内两个 **Vite** 项目（含最接近我们的那个）**都不用请求库**；用 react-query 的两家都是 Next 应用
+
+**边界**：
+
+| 归谁 | 内容 |
+| --- | --- |
+| `fetch` + `openapi/` | 请求、错误形状、超时、鉴权头、CSRF |
+| 自建 `useRequest` 钩子 | 加载 / 错误 / 取消 / 重试 / 依赖变化 |
+| 手写 | SSE（`EventSource` 或 fetch 流）· WebSocket |
+| **先不引** | 缓存 / 失效 / 乐观更新 —— 等"同一份数据被多个页面重复取"成为日常再评估 |
+
+**不要**：在页面里散落 `useEffect` + `fetch`（旧仓库有 15 个文件这样，其余 139 个走 `openapi/` 封装）。
+
 ---
 
 ## 5. 子项与交付物
@@ -362,7 +390,7 @@ packages/celadon/
 
 | 素材 | 规模 | 用途 |
 | --- | --- | --- |
-| `openapi/` | 71 文件 / 12 444 行 | 后端 SDK 参考（**按需子集**，不整包搬）|
+| `openapi/` | 71 文件 / 12 444 行 | **搬**作后端 SDK（本身建在 `fetch` 上，见 4.11）：按需子集，去掉旧框架耦合 |
 | `utils/` | 27 文件 / 1 018 行 | 请求封装 / 格式化 / 存储 |
 | `hooks/` | 16 文件 / 1 352 行 | 通用 hooks |
 | `components/ui/` | 26 个 tsx（**21 个零 antd**）| **搬输入层与 schema 契约**：15 个原子输入 + `validation.ts` + `PropertySchema` + `Setting`/`Provider`/`Button`/`Dropdown`；详见 4.8 |
