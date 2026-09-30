@@ -416,6 +416,29 @@ window.CELADON_I18N = {
         "cHigh": "High",
         "sysLabel": "System: ",
         "previewLabel": "Preview: "
+      },
+      "grid": {
+        "title": "Grid and responsiveness",
+        "note": "Breakpoints are LESS variables because media queries cannot read var(); that is the single source. Below are the sizes and what gives way at each breakpoint.",
+        "slider": "Simulated window width",
+        "bpTitle": "Breakpoints",
+        "sizes": "Sizes",
+        "demo": "What gives way (drag the slider above)",
+        "rules": "Rules",
+        "colBp": "Breakpoint",
+        "colRange": "Width",
+        "colNav": "Navigation",
+        "colSide": "Side panel",
+        "navFull": "Full 240",
+        "navRail": "Icon rail 64",
+        "sideDocked": "Docked 320",
+        "sideDockedWide": "Docked 360",
+        "sideOverlay": "Overlay (summonable)",
+        "r1": "Navigation: full at 1200 and up; collapses to an icon rail at 1024-1199; below 1024 the shell blocks it (minimum window 1024x640).",
+        "r2": "Side panel: docked at 1200 and up; becomes an overlay at 1024-1199 (covers content, Escape closes); widens to 360 at 1800 and up.",
+        "r3": "Content stays centred with a 880 maximum (1040 at 1800 and up) instead of stretching on ultrawide displays.",
+        "r4": "Grid: 12 columns in the content area, 24 gutter, 24 page margin. In the rail breakpoint gutter and margin share a value so nothing is squeezed twice.",
+        "r5": "Cards and tables go single column at 1024-1199. No type scaling: a desktop app does not rescue layout by shrinking text."
       }
     }
   },
@@ -835,6 +858,29 @@ window.CELADON_I18N = {
         "cHigh": "高コントラスト",
         "sysLabel": "システム：",
         "previewLabel": "プレビュー："
+      },
+      "grid": {
+        "title": "グリッドとレスポンシブ",
+        "note": "メディアクエリでは var() を使えないため、断点は LESS 変数で持ちます（単一の source）。以下は寸法と、各断点で何が譲るかです。",
+        "slider": "想定ウィンドウ幅",
+        "bpTitle": "ブレークポイント",
+        "sizes": "寸法",
+        "demo": "レイアウトの譲り方（上のスライダーを動かす）",
+        "rules": "ルール",
+        "colBp": "ブレークポイント",
+        "colRange": "幅",
+        "colNav": "ナビ",
+        "colSide": "サイドパネル",
+        "navFull": "通常 240",
+        "navRail": "アイコンレール 64",
+        "sideDocked": "常設 320",
+        "sideDockedWide": "常設 360",
+        "sideOverlay": "オーバーレイ（呼び出し）",
+        "r1": "ナビ：1200 以上は通常表示、1024–1199 はアイコンレールに収納、1024 未満はシェルが阻止（最小ウィンドウ 1024×640）。",
+        "r2": "サイドパネル：1200 以上は常設、1024–1199 はオーバーレイ（内容に重なり Esc で閉じる）、1800 以上は 360 に拡張。",
+        "r3": "内容は常に中央寄せで最大 880（1800 以上で 1040）。ウルトラワイドでも無限に伸ばしません。",
+        "r4": "グリッド：内容領域は 12 列、溝 24、ページ余白 24。レール幅の断点では溝と余白を同値にし、二重に詰まりません。",
+        "r5": "カードと表は 1024–1199 で 1 列。文字サイズは縮めません（デスクトップアプリは縮小でレイアウトを救いません）。"
       }
     }
   },
@@ -1254,6 +1300,29 @@ window.CELADON_I18N = {
         "cHigh": "高对比",
         "sysLabel": "系统：",
         "previewLabel": "预览："
+      },
+      "grid": {
+        "title": "栅格与响应式 Grid",
+        "note": "断点写成 LESS 变量（媒体查询不能吃 var()），单一来源；下面是尺寸与各断点下的让位行为。",
+        "slider": "模拟窗口宽度",
+        "bpTitle": "断点",
+        "sizes": "尺寸",
+        "demo": "布局让位演示（拖动上面的滑杆）",
+        "rules": "规则",
+        "colBp": "断点",
+        "colRange": "宽度",
+        "colNav": "导航",
+        "colSide": "侧板",
+        "navFull": "完整 240",
+        "navRail": "图标轨 64",
+        "sideDocked": "常驻 320",
+        "sideDockedWide": "常驻 360",
+        "sideOverlay": "浮层（可呼出）",
+        "r1": "导航：≥1200 完整；1024–1199 收成图标轨；<1024 由壳层阻止（最小窗口 1024×640）。",
+        "r2": "侧板：≥1200 常驻；1024–1199 改为浮层（覆盖内容，Esc 关闭）；≥1800 加宽到 360。",
+        "r3": "内容：始终居中，最大宽 880（≥1800 放开到 1040），不为超宽屏无限拉伸。",
+        "r4": "栅格：内容区 12 列 · 槽宽 24 · 页边距 24；窄档（图标轨）槽宽与页边距同值，避免二次压缩。",
+        "r5": "卡片与表格：1024–1199 单列排布；不做字号缩放（桌面应用不靠缩字号救布局）。"
       }
     }
   },
@@ -1673,6 +1742,29 @@ window.CELADON_I18N = {
         "cHigh": "高對比",
         "sysLabel": "系統：",
         "previewLabel": "預覽："
+      },
+      "grid": {
+        "title": "柵格與響應式 Grid",
+        "note": "斷點寫成 LESS 變數（媒體查詢不能吃 var()），單一來源；以下是尺寸與各斷點下的讓位行為。",
+        "slider": "模擬視窗寬度",
+        "bpTitle": "斷點",
+        "sizes": "尺寸",
+        "demo": "佈局讓位演示（拖動上面的滑桿）",
+        "rules": "規則",
+        "colBp": "斷點",
+        "colRange": "寬度",
+        "colNav": "導覽",
+        "colSide": "側板",
+        "navFull": "完整 240",
+        "navRail": "圖示軌 64",
+        "sideDocked": "常駐 320",
+        "sideDockedWide": "常駐 360",
+        "sideOverlay": "浮層（可呼出）",
+        "r1": "導覽：≥1200 完整；1024–1199 收成圖示軌；<1024 由殼層阻止（最小視窗 1024×640）。",
+        "r2": "側板：≥1200 常駐；1024–1199 改為浮層（覆蓋內容，Esc 關閉）；≥1800 加寬到 360。",
+        "r3": "內容：始終居中，最大寬 880（≥1800 放開到 1040），不為超寬螢幕無限拉伸。",
+        "r4": "柵格：內容區 12 欄 · 槽寬 24 · 頁邊距 24；窄檔（圖示軌）槽寬與頁邊距同值，避免二次壓縮。",
+        "r5": "卡片與表格：1024–1199 單欄排布；不做字號縮放（桌面應用不靠縮字號救佈局）。"
       }
     }
   }
