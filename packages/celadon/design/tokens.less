@@ -24,23 +24,20 @@
 .celadon:lang(zh-TW), .celadon:lang(zh-Hant), .celadon:lang(zh-HK) { --font-family-ui: var(--font-family-ui-hant); }
 .celadon:lang(ja), .celadon:lang(ja-JP) { --font-family-ui: var(--font-family-ui-japanese); }
 
-/* ===== 宽度预算（阈值**由最小宽推导**，不写设备档位）=====
- * 规则：阈值 = 各栏最小宽之和。改任一处最小宽，阈值自动跟着走（不会两处各改一遍）。
- * 媒体查询里不能使用 CSS var()，所以这些必须写成 LESS 变量由构建期展开；
- * 同一批值再导出为 CSS 变量，仅供展示与判定函数（JS/TS）读取。
- * 布局默认 = **两列**（导航 + 内容）；第三列（侧板）**默认关闭**，由用户按需打开。
+/* ===== 三栏竖分割（导航区 | 内容区 | 侧栏）=====
+ * 主结构是**竖着分割的三栏**（grid-template-columns），不是横向条带。
+ * 让位顺序：**侧栏先缩 → 侧栏整条消失 → 中栏才可能低于最小**；**导航栏不参与宽度让步**，
+ * 而是在视口低于自动收折线时收成图标轨；用户手动展开时**覆盖**在中栏之上（浮层）。
+ * 屏幕兼容靠两件事，而不是靠"不同屏幕给不同窗口尺寸"：
+ *   ① 比例默认 —— 侧栏默认/上限都取画面百分比，大屏小屏都合理；
+ *   ② 视口驱动 —— 阈值按**视口 CSS px**（已含系统缩放）判定，4K@200% 与 1080p 走同一套。
+ * 媒体查询不能使用 CSS var()，所以这些必须写成 LESS 变量由构建期展开。
  */
-@nav-w: 240px;              /* 导航完整宽 */
-@nav-rail: 64px;            /* 导航图标轨 */
-@content-min: 560px;        /* 内容可用最小宽（可读） */
-@content-min-narrow: 400px; /* 内容绝对最小宽（再窄就不该画两栏） */
-@side-w: 320px;             /* 侧板常规宽 */
-@side-w-wide: 360px;        /* 侧板宽屏宽 */
-@gap: 24px;                 /* 栏间距 */
-/* ↓ 推导出来的阈值（勿手改） */
-@bp-side-dock: (@nav-w + @content-min + @side-w + @gap); /* 1144：侧板可常驻 */
-@bp-nav-rail:  (@nav-rail + @content-min + @gap);        /* 648：导航退图标轨 */
-@bp-min:       (@nav-rail + @content-min-narrow);        /* 464：绝对最小可用宽 */
+@nav-min: 264px; @nav-max: 420px; @nav-default: 280px; @nav-collapsed: 56px;
+@center-min: 400px;                       /* 中栏最小宽（保护） */
+@side-min: 300px;                         /* 侧栏最小宽 */
+@side-max-ratio: 0.7; @side-default-ratio: 0.45;  /* 侧栏上限/默认 = 画面比例 */
+@nav-auto-collapse: 1024px;               /* 视口低于此值 → 导航自动收图标轨 */
 
 .celadon, [data-theme] .celadon {
   /* ===== 中性（近白）===== */
@@ -164,18 +161,15 @@
   --z-base:0; --z-raised:10; --z-sticky:100; --z-overlay:1000; --z-modal:1100; --z-toast:1200; --z-tooltip:1300;
 
   /* ===== 栅格与响应式 Grid（断点见文件顶部 LESS 变量；以下是尺寸）===== */
-  /* ===== 窗口与栏宽（阈值见文件顶部 LESS 变量；这里只放尺寸）===== */
-  --window-default:1280px; --window-default-height:800px;         /* 默认打开：两列（导航 + 内容） */
-  --window-recommended:1440px; --window-recommended-height:900px; /* 推荐：三列舒适 */
-  --window-range-min:1280px; --window-range-max:1920px;           /* 建议区间 */
-  --page-min-width:480px; --page-min-height:600px;                /* 绝对最小（浮动窄窗可用） */
-  --nav-width:240px; --nav-rail-width:64px;
-  --content-min:560px; --content-min-narrow:400px;
-  --side-width:320px; --side-width-wide:360px;
-  --content-max:880px; --content-max-wide:1040px;                 /* 内容最大宽（居中，不无限拉伸） */
-  --grid-columns:12; --grid-gutter:var(--spacing-24); --grid-margin:var(--spacing-24);
-  /* 推导阈值（展示/判定函数读取；真值在 LESS 变量） */
-  --threshold-side-dock:1144px; --threshold-nav-rail:648px; --threshold-min:464px;
+  /* ===== 窗口与三栏（阈值/比例见文件顶部 LESS 变量）===== */
+  --window-default:1280px; --window-default-height:820px;   /* 默认打开：两栏（导航 + 内容） */
+  --page-min-width:520px; --page-min-height:600px;          /* 最小窗口（壳层设定） */
+  --nav-min:264px; --nav-max:420px; --nav-default:280px; --nav-collapsed:56px;
+  --nav-auto-collapse:1024px;
+  --center-min:400px;
+  --side-min:300px;
+  --side-max-ratio:0.7; --side-default-ratio:0.45;
+  --content-max:880px; --content-max-wide:1040px;           /* 中栏内文可读最大宽 */
 
   /* ===== 边框 Border：强边界档（WCAG 1.4.11 达标值）=====
      默认态用 --border-control（观感轻）；高对比偏好下由下方 @media 自动切到强边界。
