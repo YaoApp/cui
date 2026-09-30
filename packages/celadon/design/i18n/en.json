@@ -416,27 +416,57 @@
       "previewLabel": "Preview: "
     },
     "grid": {
-      "title": "Grid and responsiveness",
-      "note": "Breakpoints are LESS variables because media queries cannot read var(); that is the single source. Below are the sizes and what gives way at each breakpoint.",
+      "title": "Window and grid",
+      "note": "Thresholds are not device breakpoints but the **sum of each column minimum**, so changing one minimum moves the threshold with it. The layout opens with **two columns**; the third is opened by the user on demand.",
       "slider": "Simulated window width",
-      "bpTitle": "Breakpoints",
-      "sizes": "Sizes",
-      "demo": "What gives way (drag the slider above)",
-      "rules": "Rules",
-      "colBp": "Breakpoint",
-      "colRange": "Width",
-      "colNav": "Navigation",
-      "colSide": "Side panel",
-      "navFull": "Full 240",
-      "navRail": "Icon rail 64",
-      "sideDocked": "Docked 320",
-      "sideDockedWide": "Docked 360",
-      "sideOverlay": "Overlay (summonable)",
-      "r1": "Navigation: full at 1200 and up; collapses to an icon rail at 1024-1199; below 1024 the shell blocks it (minimum window 1024x640).",
-      "r2": "Side panel: docked at 1200 and up; becomes an overlay at 1024-1199 (covers content, Escape closes); widens to 360 at 1800 and up.",
-      "r3": "Content stays centred with a 880 maximum (1040 at 1800 and up) instead of stretching on ultrawide displays.",
-      "r4": "Grid: 12 columns in the content area, 24 gutter, 24 page margin. In the rail breakpoint gutter and margin share a value so nothing is squeezed twice.",
-      "r5": "Cards and tables go single column at 1024-1199. No type scaling: a desktop app does not rescue layout by shrinking text."
+      "winTitle": "Window sizes",
+      "winDefault": "Default",
+      "winRec": "Recommended",
+      "winRange": "Suggested range",
+      "winMin": "Absolute minimum",
+      "twoCols": "Two columns (navigation + content); the third stays closed",
+      "threeCols": "Three columns comfortable (navigation + content + side)",
+      "winRangeNote": "The design target: any content should look right anywhere in this range",
+      "winMinNote": "Floating narrow window: half screen at 720 must still work",
+      "thTitle": "How thresholds are derived (threshold = sum of column minimums)",
+      "thSide": "Side panel can dock",
+      "thRail": "Navigation drops to rail",
+      "thMin": "Absolute minimum usable",
+      "demo": "Watch things give way (drag, pick a scenario, toggle the side panel)",
+      "orderTitle": "Give way order (the most expensive goes first)",
+      "o1": "Side panel: docked to overlay (320+24 is the largest cost, it goes first)",
+      "o2": "Secondary information: metadata column, helper text, timestamps",
+      "o3": "Navigation: full 240 to rail 64 to overlay",
+      "o4": "Content: multi column cards to single column; tables go vertical or scroll sideways",
+      "o5": "Whitespace: gutter and page margin 24 to 16 to 12. In height: subtitle, then toolbar, and the footer last",
+      "preset": {
+        "half": "Half 720",
+        "default": "Default 1280",
+        "rec": "Recommended 1440",
+        "ultra": "Ultra 1920"
+      },
+      "sideOff": "Side panel: off (default)",
+      "sideOn": "Side panel: on",
+      "nav": {
+        "full": "nav full",
+        "rail": "nav rail",
+        "overlay": "nav overlay"
+      },
+      "side": {
+        "closed": "side closed",
+        "docked": "side docked",
+        "overlay": "side overlay"
+      },
+      "meta": "metadata column",
+      "gutter": "gutter ",
+      "px": "px",
+      "sliderH": "Simulated height",
+      "h": {
+        "full": "Full (top, subtitle, toolbar, footer)",
+        "noSub": "Short: subtitle goes first",
+        "noBar": "Shorter: toolbar goes next",
+        "min": "Shortest: footer only"
+      }
     }
   }
 }
