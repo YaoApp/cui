@@ -22,6 +22,7 @@
 | 7 | **界面底座** | **不用 antd**；行为用 **`@base-ui/react` 1.8**，视觉用 **Celadon token** |
 | 8 | **旧仓库资产取舍** | **搬**：`components/ui/` 输入层（15 个原子输入 · 零 antd）· `PropertySchema` 契约 · `validation.ts` 校验；**不搬**：`FormBuilder`/`FlowBuilder`（低代码 UI）· `DataTable`/`PaginatedTable`（商业化后台表格）|
 
+| 9 | **i18n 运行时** | **`i18next` + `react-i18next`**；语言包 `locales/<locale>/<namespace>.json`；**新增语言 = 只加一个目录**，不改代码 |
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
 ## 2. 已跑通（✅ 实测）
@@ -46,7 +47,7 @@
 | **产物布局** | 定"源码直连"还是"产物拉取"（现状：`pull-cui` / `build-cui` 拉产物，并 `watch.ignored` 掉整个 `cui/`）|
 | **构建期门禁接线** | §5 的 6b：stylelint · TS 类型约束 · 反向依赖边界 · 接进 CI / pre-commit |
 | **后端 SDK** | §5 子项 2 |
-| **i18n 构建** | §5 子项 3（检查脚本已就绪）|
+| **i18n 构建** | §5 子项 3 —— **运行时已定（i18next，见 4.9）**；剩下：命名空间切分 · 按需加载 · 类型生成 · 翻译流程文档 |
 | **图标体系** | §5 子项 4：选型 + 16 / 20 / 24 三档 + 按需引入 |
 | **主题映射** | §5 子项 5：同一份 `tokens.less` 生成组件库主题 |
 | **运行时壳 · 运行期对比度** | §5 子项 7 · 8 |
@@ -249,6 +250,32 @@ packages/celadon/
 | **补** ✗ | `new RegExp(schema.pattern)` 无保护 —— schema 来自**服务端**定义，正则非法会抛异常，要 `try/catch` |
 | **删** ✗ | `custom: 'Invalid value'` 有文案无实现 · `getErrorClasses` 0 处调用 |
 | **留** ✓ | 函数形状（单字段 · schema 驱动 · `errorMessages` 可覆盖）|
+
+### 4.9 i18n 运行时：i18next
+
+**结论**：应用侧用 **`i18next` + `react-i18next`**；语言包按 **`locales/<locale>/<namespace>.json`** 组织；
+设计页沿用现有零依赖方案（`design/i18n/*.json` + `tr()` + `check-i18n.mjs`）。
+
+**依据**：
+
+- 工作区内两个已做 i18n 的产品都用它，其中一个做到 **18 种语言 / 56 个命名空间**
+- 自带**命名空间 · 按需加载 · 复数（英文 `_one`/`_other`）· 插值**，成熟度最高
+- **可直接读现有嵌套 JSON**，不必改文件格式
+
+**硬要求：新增语言 = 只加一个目录，不改代码**
+
+| 项 | 做法 |
+| --- | --- |
+| 语言包与命名空间 | 用 **`import.meta.glob('../locales/*/*.json')` 发现**，不在 TS 里逐个 `import` |
+| 类型 | 只从**基准语言**生成 → 加语言不动类型 |
+| 检查器 | 通用规则（key 完整性 / 缺 key / 漏翻）按**目录发现**执行；**语言专属规则**（繁中夹简体 · 日文同中文）仍按语言声明 |
+
+**命名空间**：按功能域切（`chat` / `settings` / `inbox` …），与使用它的代码就近放置。
+当前 579 key 先单文件即可，切分随页面模块推进。
+
+**格式化归属**：日期 / 数字 / 货币**不交给 i18next** —— 按 `19 数据格式` 的规则走 `Intl`，且**用回退后实际生效的语言**（`i18n.resolvedLanguage`），不用浏览器语言。
+
+**翻译流程**（`01` 内落地）：术语表 · 翻译规则 · 给 AI 的翻译提示词 · 风格样例，与 `check-i18n.mjs` 的自动检查配套。
 
 ---
 
