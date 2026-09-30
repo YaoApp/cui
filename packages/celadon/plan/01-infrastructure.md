@@ -24,6 +24,7 @@
 | 9 | **i18n 运行时** | **`i18next` + `react-i18next`**；语言包 `locales/<locale>/<namespace>.json`；**新增语言 = 只加一个目录**，不改代码 |
 | 10 | **路由** | **React Router 库模式**（`react-router@^8`，不装 `@react-router/dev`）；**`basename` 与 Vite `base` 同源**，取自引擎注入的 `BASE` |
 | 11 | **数据请求** | **原生 `fetch`**（不用 axios）；搬旧仓库 `openapi/` 作类型化客户端；**不引数据缓存库**，用自建小钩子管加载 / 错误状态 |
+| 12 | **日期运算与时区** | **`date-fns` + `@date-fns/tz`**（Base UI 的官方适配器 · tree-shakable）；**格式化不归它，仍走 `Intl`** |
 
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
@@ -40,6 +41,7 @@
 | `@base-ui/react` | `^1.8.0` | 行为与无障碍层 |
 | `i18next` · `react-i18next` | `^26` · `^17` | i18n 运行时 |
 | `react-router` | `^8` | 路由（库模式，配 `basename`）|
+| `date-fns` · `@date-fns/tz` | `^4` · `^1` | 日期运算与时区（见 4.12）|
 | `pnpm`（**工具**，非依赖）| `10.34.6` | 包管理器，根 `packageManager` 锁死 |
 
 **待定**（推荐列出，未拍）：
@@ -49,7 +51,6 @@
 | `zustand` | 5.0.15 | 状态 | |
 | `@tanstack/react-virtual` | 3.14.13 | 虚拟列表 | 与 `react-virtuoso` 二选一 |
 | `motion` | 13.4.6 | 动效 | |
-| `date-fns` · `@date-fns/tz` | 4.4.0 · 1.5.0 | **日期运算 / 时区**（**不是格式化** ✗）| `@base-ui/react` 的**可选** peer（`optional: true`，不装也能用）；**只有用它的日期组件才需要** —— 且其日期引擎可替换，仓库内仅 `temporal-adapter-date-fns` 一处用到 |
 | `@playwright/test` | 1.63.0 | 浏览器验收 | 与 `scripts/tests/` 的测试策略一起定 |
 
 **不用**：`antd`（见 4.7）
@@ -369,6 +370,32 @@ packages/celadon/
 | **先不引** | 缓存 / 失效 / 乐观更新 —— 等"同一份数据被多个页面重复取"成为日常再评估 |
 
 **不要**：在页面里散落 `useEffect` + `fetch`（旧仓库有 15 个文件这样，其余 139 个走 `openapi/` 封装）。
+
+### 4.12 日期运算与时区：date-fns
+
+**结论**：日期**运算**与**时区换算**用 **`date-fns` + `@date-fns/tz`**；**格式化不归它** —— 格式化归 `Intl`（见 `19` 的 §3.7）。
+
+**为什么需要库**（原生不够）：
+
+- **原生 `Temporal` 尚不可用**：本机 Node 22 里 `typeof Temporal === 'undefined'`，浏览器/WebView 同样不能作为基线
+- **加减 / 区间 / 日历网格 / 跨时区换算**都要自己写；`Intl.DateTimeFormat({ timeZone })` 只能**显示**，不能**运算**
+- **唯一不需要库的**是相对时间：`Intl.RelativeTimeFormat` ✓
+
+**为什么是 `date-fns`（而不是 `dayjs` / `luxon`）**：
+
+| 候选 | 判断 |
+| --- | --- |
+| **`date-fns` + `@date-fns/tz`** | **选它** —— Base UI 的**官方适配器**（`temporal-adapter-date-fns`），用它的日期组件无需自己接线；tree-shakable，实际进包的只有用到的函数；`@date-fns/tz` 的 `TZDate` 直接吃 **IANA 时区**，与 `19` 的时区契约同口径 |
+| `luxon` | Base UI 也有适配器，但 **4.5 MB 且不可 tree-shake** |
+| `dayjs` | 本地用得最多（9 个项目）且最小（666 KB），但 **Base UI 无适配器**；时区需额外插件；对象可变 |
+
+**分工（两处不要混）**：
+
+| 场景 | 用什么 |
+| --- | --- |
+| 显示日期 / 时间 / 数字 / 货币 / 相对时间 | **`Intl`**（或 i18next 的 formatter），规则见 `19` |
+| 加减 · 区间 · 日历网格 · 时区换算 | **`date-fns`** |
+| 存储与传输 | **UTC**（`19` 的铁律），客户端上送 `clientTimeZone` |
 
 ---
 
