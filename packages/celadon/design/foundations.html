@@ -16,6 +16,11 @@ code{font-family:var(--font-family-monospace);background:var(--background-field)
 .language-switch{display:flex;gap:4px}
 .toolbar button{font:inherit;font-size:12px;padding:5px 12px;border-radius:var(--radius-pill);border:1px solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
 .toolbar button.on{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
+/* 模拟系统偏好（仅本页预览；真实偏好仍由 tokens.less 的媒体查询控制） */
+body.sim-rm, body.sim-rm .celadon, body.sim-rm .celadon[data-theme='dark'], body.sim-rm [data-theme='dark'] .celadon{
+  --duration-fast:0.01ms;--duration-base:0.01ms;--duration-slow:0.01ms}
+body.sim-hc, body.sim-hc .celadon, body.sim-hc .celadon[data-theme='dark'], body.sim-hc [data-theme='dark'] .celadon{
+  --border-control:var(--border-control-strong);--border-hover:var(--border-hover-strong)}
 .dim-note{font-size:11.5px;color:var(--text-tertiary)}
 .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:1100px){.cols{grid-template-columns:1fr}}
@@ -129,13 +134,13 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 /* 11 列表依次进入（点重新加载） */
 .s-list .act{left:12px;top:12px}
 .s-list .row{left:12px;right:12px;height:18px;border-radius:5px;background:var(--background-surface);border:1px solid var(--border-default);display:flex;align-items:center;gap:7px;padding:0 8px}
-.s-list .row:nth-of-type(2){top:46px}
-.s-list .row:nth-of-type(3){top:70px}
-.s-list .row:nth-of-type(4){top:94px}
+.s-list .row:nth-of-type(1){top:44px}
+.s-list .row:nth-of-type(2){top:68px}
+.s-list .row:nth-of-type(3){top:92px}
 .s-list .row b{width:6px;height:6px;border-radius:50%;background:var(--brand-display);flex:none}
 .s-list .row i{flex:1;height:5px;border-radius:3px;background:var(--background-field)}
-.s-list .row:nth-of-type(3){transition-delay:60ms}
-.s-list .row:nth-of-type(4){transition-delay:120ms}
+.s-list .row:nth-of-type(2){transition-delay:60ms}
+.s-list .row:nth-of-type(3){transition-delay:120ms}
 .s-list.reset .row{opacity:0;transform:translateY(6px)}
 /* 12 流式输出（点重新生成） */
 .s-stream .act{left:12px;top:12px}
@@ -160,6 +165,8 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 </style>
 </head>
 <body>
+<!-- 真实偏好由 tokens.css 的媒体查询处理；下面两个开关只是"预览不同状态" -->
+
 <h1 id="f-title"></h1>
 <p class="sub" id="f-sub"></p>
 <p class="src" id="f-src"></p>
@@ -170,6 +177,11 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
     <button data-lang="en">EN</button><button data-lang="ja">日</button>
   </span>
   <span class="dim-note" id="f-langnote"></span>
+  <span class="language-switch" style="margin-left:auto">
+    <button id="pref-rm" data-pref="rm" type="button"></button>
+    <button id="pref-hc" data-pref="hc" type="button"></button>
+  </span>
+  <span class="dim-note" id="f-pref-note"></span>
 </div>
 
 <!-- F1 间距 -->
@@ -236,6 +248,21 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 
 /* ===== 从 tokens.css 实时读值（浅/暗各一份）===== */
 var PROBE = { light: document.getElementById('probe-light'), dark: document.getElementById('probe-dark') };
+/* 偏好：sys = 系统真实值；sim = 本页预览开关（用于检查不同状态下的样子） */
+var PREF = { rm:false, hc:false };
+function sysRM(){ return window.matchMedia('(prefers-reduced-motion: reduce)').matches }
+function rmOn(){ return PREF.rm || sysRM() }
+function applyPrefs(){
+  document.body.classList.toggle('sim-rm', PREF.rm);
+  document.body.classList.toggle('sim-hc', PREF.hc);
+  var b1 = document.getElementById('pref-rm'), b2 = document.getElementById('pref-hc'), note = document.getElementById('f-pref-note');
+  if (!b1 || !b2 || !note) return;
+  b1.textContent = tr('f.pref.rm') + ' · ' + tr(PREF.rm ? 'f.pref.reduced' : 'f.pref.normal');
+  b2.textContent = tr('f.pref.hc') + ' · ' + tr(PREF.hc ? 'f.pref.high' : 'f.pref.standard');
+  b1.className = PREF.rm ? 'on' : ''; b2.className = PREF.hc ? 'on' : '';
+  note.textContent = tr('f.pref.sys') + (sysRM() ? tr('f.pref.reduced') : tr('f.pref.normal'))
+    + ((PREF.rm || PREF.hc) ? ' · ' + tr('f.pref.simulating') : '');
+}
 function tok(name, theme){ return getComputedStyle(PROBE[theme]).getPropertyValue(name).trim(); }
 function px(v){ return parseFloat(v) || 0; }
 
@@ -369,7 +396,7 @@ function stageHtml(theme, id){
 function streamScene(st){
   var txt = st.querySelector('.txt'), full = tr('f.motion.demoStream');
   clearInterval(st._timer); st.classList.add('typing'); txt.textContent = '';
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){ txt.textContent = full; return; }
+  if (rmOn()){ txt.textContent = full; return; }
   var i = 0;
   st._timer = setInterval(function(){
     i += 2; txt.textContent = full.slice(0, i);
@@ -415,7 +442,7 @@ function renderMotion(theme){
   document.getElementById(theme === 'dark' ? 'mo-dark' : 'mo-light').innerHTML =
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">duration · easing</span></div><div class="pbody">'+dur+curves+gallery+rm+rules+'</div>';
   var el = document.getElementById('rm-'+theme);
-  if (el) el.textContent = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? tr('f.motion.reducedOn') : tr('f.motion.reducedOff');
+  if (el) el.textContent = rmOn() ? tr('f.motion.reducedOn') : tr('f.motion.reducedOff');
 }
 
 /* ===== F5 边框 ===== */
@@ -454,7 +481,7 @@ function applyChrome(){
   var n2 = document.getElementById('el-note2'); if (n2) n2.textContent = tr('f.elevation.note2');
 }
 function renderAll(){
-  applyChrome();
+  applyChrome(); applyPrefs();
   ['light','dark'].forEach(function(t){ renderSpacing(t); renderRadius(t); renderElevation(t); renderMotion(t); renderBorder(t); });
   Array.prototype.forEach.call(document.querySelectorAll('.language-switch button'), function(b){
     b.classList.toggle('on', b.getAttribute('data-lang') === CURRENT); });
@@ -480,9 +507,17 @@ document.addEventListener('click', function(e){
     else st.classList.toggle('collapsed');
     return; }
 });
-window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function(){
+window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function(){ applyPrefs();
   ['light','dark'].forEach(function(t){ var el = document.getElementById('rm-'+t);
-    if (el) el.textContent = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? tr('f.motion.reducedOn') : tr('f.motion.reducedOff'); });
+    if (el) el.textContent = rmOn() ? tr('f.motion.reducedOn') : tr('f.motion.reducedOff'); });
+});
+/* 偏好预览开关：切换后重新渲染，让读数/预览都反映新状态 */
+document.addEventListener('click', function(e){
+  var b = e.target.closest('[data-pref]'); if (!b) return;
+  var k = b.getAttribute('data-pref');
+  if (k === 'rm'){ PREF.rm = !PREF.rm; var s1 = document.getElementById('stage-light-stream'); if (s1) s1.classList.remove('typing'); }
+  if (k === 'hc'){ PREF.hc = !PREF.hc; }
+  renderAll();
 });
 renderAll();
 </script>

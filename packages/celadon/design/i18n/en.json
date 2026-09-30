@@ -392,6 +392,16 @@
       "d2": "Ship --border-control-strong and --border-hover-strong for the compliant look;",
       "d3": "When the system asks for more contrast, a media query in tokens.less switches automatically (verified in both themes).",
       "deviation": "This is a deliberate deviation: the default does not literally meet 1.4.11. If strict conformance is needed, point --border-control at the strong value - a one line change."
+    },
+    "pref": {
+      "rm": "Motion",
+      "hc": "Contrast",
+      "normal": "Normal",
+      "reduced": "Reduced",
+      "standard": "Standard",
+      "high": "High",
+      "sys": "Your system: ",
+      "simulating": "previewing a simulated state"
     }
   }
 }
