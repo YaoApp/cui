@@ -29,6 +29,9 @@
 | Logo（设计交付物） | `design/logo-mark-celadon{,-dark}.svg`（官方原版**仅换颜色码**，diff 仅 1 行）· `logo-app-celadon{,-dark}.svg` · `design/icons/icon-*.png` 7 档 | 官方原版 vs 换色版 diff 比对 |
 | 本地浏览/防缓存 | `design/serve.mjs`（零依赖 · `no-store` · 目录浏览） | 改完刷新即见 |
 
+> **P0 自检记录（2026-09-30）**：`build-css` 通过（549 行）· i18n **316 key × 4 语**无缺漏 · README 色值 **86 个零漂移** · 色卡对比度表浅/暗各 **11 行、0 行低于 AA** · 关键配对 **22 组** · `foundations.html` **30 个场景全部真实可操作**（页内 `transitionstart` 计数验证）· 偏好三档实测（动效 0.01 / 120 / 180ms…；对比度 `#D5D3CC` / `#C9C7C0` / `#8D8A80`）· 渲染后 DOM **颜色字面量 0** · JS 报错 **0**
+> → **F1–F5 判定完成 ✅**
+
 ## 2. 待补齐 ⬜ —— Foundations（本模块内）
 
 > 勾选规则：完成 = 产物 + 自检双落；每项补完即勾。
