@@ -37,15 +37,15 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 | 检查器 | 样本 |
 | --- | --- |
 | `check-css-conventions` | 10 条规则各一个反例 + `clean`（纯逻辑属性）+ `clean-exempt-marker`（有物理属性但带豁免标记）|
-| `check-tokens` | `clean`（全走 token，含逻辑边框线宽）+ `violation`（写死字号/行高/圆角/内距）+ `violation-muted-text`（装饰色承载文字）+ `violation-border-logical`（`border-inline-start: 2px`）+ `violation-colour-in-fill`（`fill:#FF0000`）+ `violation-outline-colour`（`rgba()`）+ `violation-shorthand-asym`（`margin: 0 0 0 auto`）|
-| `check-i18n` | `clean`（三语齐全）+ `violation-missing-key` + `violation-untranslated`（ja 与 zh-CN 同文）+ `violation-simplified-in-tw`（繁中夹简体字）+ `violation-en-in-chinese`（en 里写着中文）|
+| `check-tokens` | `clean`（全走 token，含逻辑边框线宽）+ `violation`（写死字号/行高/圆角/内距）+ `violation-muted-text`（装饰色承载文字）+ `violation-border-logical`（`border-inline-start: 2px`）+ `violation-colour-in-fill`（`fill:#FF0000`）+ `violation-outline-colour`（`rgba()`）+ `violation-shorthand-asym`（`margin: 0 0 0 auto`） + `violation-brace-mismatch`（大括号不配对）+ `violation-missing-semicolon`（漏分号）+ `violation-font-shorthand`（`font:` 简写）|
+| `check-i18n` | `clean`（三语齐全）+ `violation-missing-key` + `violation-untranslated`（ja 与 zh-CN 同文）+ `violation-simplified-in-tw`（繁中夹简体字）+ `violation-en-in-chinese`（en 里写着中文） + `violation-abbrev-key`（key 用缩写）+ `violation-key-naming`（含下划线）+ `violation-key-depth`（4 段）+ `violation-extra-key`（某语多出 key）|
 | `check-readme-values` | `clean` + `violation`（README 色值与 tokens 不一致）|
 
 ## 没被样本覆盖的
 
-- **`check-generated`**：它会**真的重新生成**一遍产物再比对，需要整套图标雪碧图与清单，
-  属于集成级检查 —— 不喂样本，靠**日常运行**（它就是产物一致性的那一道）。
-- **`check-tokens` 的"漏分号 / `font:` 简写"两条**：需要 `tokens.less` 的解析路径，等有需要再加样本。
+- **`check-generated`**：它会**真的重新生成**一遍产物再比对 —— 需要整套图标雪碧图与清单，还要一个**可写的副本目录**（它会把生成结果写进去），属于集成级检查。不喂样本，靠**日常运行**（它就是产物一致性的那一道）。
+
+其余四个检查器的**每条规则都有样本**（共 33 个用例）。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
 
 ## 加一个样本
 
