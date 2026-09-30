@@ -503,15 +503,15 @@
       "navColState": "State",
       "nr1a": "Client or wide web (1024 and up)",
       "nr1b": "**Collapses to 0**: the navigation area disappears and the content runs from the very left edge; the **traffic lights and the toggle do not move**, landing on top of the content, whose top row makes room with a left inset",
-      "nr1c": "macOS: the title bar beside the traffic lights. Elsewhere: the header",
+      "nr1c": "Client: the top left corner beside the traffic lights, and it does not move",
       "nr1d": "Persisted preference plus a transient flag (two levels)",
       "nr2a": "Mid web (768 to 1023)",
       "nr2b": "**Keeps a 56px icon rail**, since a browser has no title bar to host the icons",
-      "nr2c": "Same as above",
+      "nr2c": "Web has no traffic lights, so the entry point sits in the **top of the rail**",
       "nr2d": "Same; a narrow expand never writes back to the preference",
       "nr3a": "Narrow web (below 768)",
       "nr3b": "Drawer: floats over content with a scrim",
-      "nr3c": "Hamburger in the header",
+      "nr3c": "Web drawer: a **hamburger in the content top row**",
       "nr3d": "Transient (Esc or the scrim closes it)",
       "railNote": "There is **no title bar**: three vertical columns, each with its own top row. Only the traffic lights and the toggle float in the top left corner, and they never move"
     }
