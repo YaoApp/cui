@@ -362,7 +362,7 @@ function renderElevation(theme){
   var stack = '<div class="grp">'+esc(tr('f.elevation.levels'))+'</div><div class="el-stack">' + LEVELS.map(function(l,i){
     var sh = l[2] === '--shadow-none' ? 'none' : tok(l[2], theme);
     var pos = ['left:0;top:0','left:34px;top:50px','left:68px;top:100px','left:102px;top:150px'][i];
-    return '<div class="el-card" style="'+pos+';background:'+tok(l[4],theme)+';box-shadow:'+sh+';z-index:'+tok(l[1],theme)+'">'
+    return '<div class="el-card" style="'+pos+';background:var('+l[4]+');box-shadow:'+sh+';z-index:var('+l[1]+')">'
       + '<div class="t">'+esc(tr('f.elevation.'+l[0]))+'</div><div class="m">'+(l[2] === '--shadow-none' ? 'shadow: none' : l[2])+' · z '+tok(l[1],theme)+'</div>'
       + '<div class="m">'+l[4].replace('--','')+'</div></div>'; }).join('') + '</div>';
   var rows = '';
@@ -442,7 +442,7 @@ function stageHtml(theme, id){
                             + '<span class="el line"><span class="txt"></span><span class="caret"></span></span>'; break;
   }
   var t = SCENE_TOKENS[id];
-  return '<div class="stage s-'+id+tall+'" id="stage-'+theme+'-'+id+'" style="--d:'+tok(t[0],theme)+';--e:'+tok(t[1],theme)+'">'+inner+'</div>';
+  return '<div class="stage s-'+id+tall+'" id="stage-'+theme+'-'+id+'" style="--d:var('+t[0]+');--e:var('+t[1]+')">'+inner+'</div>';
 }
 function streamScene(st){
   var txt = st.querySelector('.txt'), full = tr('f.motion.demoStream');
@@ -527,7 +527,7 @@ function renderBorder(theme){
     var v = tok(b[0], theme), c1 = cr(v, field), c2 = cr(v, content);
     var isControl = b[1] === 'control' || b[1] === 'hover' || b[1] === 'strong';
     var cls = c1 >= 3 ? 'ok' : 'dim';
-    return '<div class="bd-row"><span class="bd-line" style="border-color:'+v+'"></span><span class="bd-name">'+b[0]+'</span>'
+    return '<div class="bd-row"><span class="bd-line" style="border-color:var('+b[0]+')"></span><span class="bd-name">'+b[0]+'</span>'
       + '<span class="bd-cr '+cls+'">'+c1+':1</span><span class="bd-cr dim">'+c2+':1</span>'
       + '<span class="mo-val">'+esc(tr('f.border.on'))+'</span></div>'; }).join('');
   var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.border.demo'))+'</div><div class="bd-demo">'
