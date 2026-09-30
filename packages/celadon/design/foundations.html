@@ -180,13 +180,23 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .ghead{flex:none;height:var(--header-height);background:var(--background-navigation);border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px;padding:0 12px}
 .ghead i{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .ghead .l{width:96px} .ghead .r{margin-left:auto;width:64px}
+/* 客户端收到 0 时，导航以图标形式留在顶栏（与标题栏按钮同一行） */
+.gicons{display:none;align-items:center;gap:6px}
+.gvp.nav-none .gicons{display:flex}
+.gicons .gi{width:22px;height:22px;border-radius:var(--radius-xs);background:var(--background-field);position:relative}
+.gicons .gi.on{background:var(--brand-soft);box-shadow:inset 0 -2px 0 var(--brand)}
+.gicons .gi::after{content:attr(data-label);position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  white-space:nowrap;background:var(--background-surface);color:var(--text-primary);border:1px solid var(--border-default);
+  border-radius:var(--radius-small);padding:4px 8px;font-size:11px;box-shadow:var(--shadow-subtle);opacity:0;pointer-events:none;
+  transition:opacity var(--duration-fast) var(--easing-standard);z-index:var(--z-tooltip)}
+.gicons .gi:hover::after{opacity:1}
 .ggrid{flex:1;min-height:0;display:grid;grid-template-columns:0 0 0;transition:grid-template-columns var(--duration-slow) var(--easing-standard)}
-.gnav{background:var(--background-navigation);border-right:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.gnav{background:var(--background-navigation);border-right:1px solid var(--border-subtle);padding:12px 10px;display:flex;flex-direction:column;gap:10px;overflow:hidden;min-width:0}
 .gnav span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .gnav.overlay{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-overlay);box-shadow:var(--shadow-floating)}
 /* 图标轨：只留图标，hover 出标签（图标无文字时的标准做法） */
-.gnav.rail{padding:var(--nav-rail-pad) 0;align-items:center}
-.gnav.rail .gi{width:var(--nav-rail-icon);height:var(--nav-rail-icon);border-radius:var(--radius-small);position:relative;background:var(--background-field)}
+.gnav.rail{padding:var(--nav-rail-pad) 0;align-items:center;width:var(--nav-collapsed);box-sizing:border-box}
+.gnav.rail .gi{flex:none;width:var(--nav-rail-icon);height:var(--nav-rail-icon);border-radius:var(--radius-small);position:relative;background:var(--background-field)}
 .gnav.rail .gi::after{content:attr(data-label);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);
   white-space:nowrap;background:var(--background-surface);color:var(--text-primary);border:1px solid var(--border-default);
   border-radius:var(--radius-small);padding:4px 8px;font-size:11px;box-shadow:var(--shadow-subtle);opacity:0;pointer-events:none;
@@ -601,9 +611,12 @@ var PRESETS = [['half',720],['default',1280],['large',1600],['uhd',1920]];
 function clampW(px, min, max){ return Math.min(max, Math.max(min, Math.round(px))); }
 /* 让位顺序：侧栏先缩 → 侧栏整条消失 → 中栏才可能低于最小；导航不参与宽度让步 */
 var SIDE_TYPES = [['reading',400],['tool',600],['task',640],['wide',840]];
+var NAVITEMS = ['overview','inbox','tasks','files','apps','settings','help'];  /* 导航项：图标轨/顶栏图标共用 */
 var SIDE_TYPE = 0;                       /* 默认：阅读型 */
 function computeColumns(theme, viewport, navPref, sidePref, sideRatio, navManual, collapsed){
-  var NAV_MIN = px(tok('--nav-min',theme)), NAV_MAX = px(tok('--nav-max',theme)), RAIL = px(tok('--nav-collapsed',theme));
+  var NAV_MIN = px(tok('--nav-min',theme)), NAV_MAX = px(tok('--nav-max',theme));
+  /* 收起形态按端：客户端收到 0（导航改顶栏图标）；Web 保留 56 图标轨 */
+  var RAIL = PLATFORM === 1 ? px(tok('--nav-collapsed',theme)) : px(tok('--nav-collapsed-desktop',theme));
   var CENTER_MIN = px(tok('--center-min',theme)), SIDE_MIN = px(tok('--side-min',theme));
   var MAX_RATIO = parseFloat(tok('--side-max-ratio',theme)) || 0.7;
   var MAX_W = px(tok('--side-width-max',theme));
@@ -624,7 +637,7 @@ function computeColumns(theme, viewport, navPref, sidePref, sideRatio, navManual
   var side = (sidePref === 0 || available < SIDE_MIN) ? 0
     : Math.min(available, clampW(base, SIDE_MIN, cap));
   var center = Math.max(0, viewport - navTrack - side);
-  return { navMode: navOverlay ? 'overlay' : (wantRail ? 'rail' : 'full'), navTrack:navTrack, navOverlay:navOverlay,
+  return { navMode: navOverlay ? 'overlay' : (wantRail ? (RAIL === 0 ? 'none' : 'rail') : 'full'), navTrack:navTrack, navOverlay:navOverlay,
     navOverlayW:navOverlay ? navFull : 0, scrim:false, side:side, center:center,
     centerBelowMin:center < CENTER_MIN, autoCollapse:autoCollapse, drawer:false };
 }
@@ -641,13 +654,12 @@ function renderGrid(theme){
     + ['s1','s2','s3'].map(function(k){ return '<li>'+esc(tr('f.grid.'+k))+'</li>'; }).join('') + '</ul>'
     + '<table><tr><td>'+esc(tr('f.grid.winDefault'))+'</td><td><code>'+tok('--window-default',theme)+' × '+tok('--window-default-height',theme)+'</code></td></tr>'
     + '<tr><td>'+esc(tr('f.grid.winMin'))+'</td><td><code>'+tok('--page-min-width',theme)+' × '+tok('--page-min-height',theme)+'</code></td></tr></table>';
-  var NAVITEMS = ['overview','inbox','tasks','files','apps','settings','help'];
   var navs=''; NAVITEMS.forEach(function(k,i){ navs += '<span class="gi'+(i===0?' on':'')+'" data-label="'+esc(tr('f.grid.item.'+k))+'"></span>'; });
   var lines=''; for (var j=0;j<5;j++) lines += '<b></b>';
   var sides=''; for (var k=0;k<6;k++) sides += '<span></span>';
   var demo = '<div class="grp" style="margin-top:14px">'+esc(tr('f.grid.demo'))+'</div>'
     + '<div class="gclip" id="gclip-'+theme+'"><div class="gvp" id="gvp-'+theme+'">'
-    + '<div class="ghead" id="ghead-'+theme+'"><i class="l"></i><i class="r"></i></div>'
+    + '<div class="ghead" id="ghead-'+theme+'"><span class="gicons" id="gicons-'+theme+'"></span><i class="l"></i><i class="r"></i></div>'
     + '<div class="ggrid" id="ggrid-'+theme+'">'
     + '<div class="gnav" id="gnav-'+theme+'">'+navs+'</div>'
     + '<div class="gcenter"><div class="gcontent" id="gcontent-'+theme+'">'+lines+'</div></div>'
@@ -678,6 +690,8 @@ function syncGrid(){
     vp.style.width = viewport + 'px';
     vp.style.height = '300px';
     var gnav = document.getElementById('gnav-'+theme);
+    gnav.style.display = L.navTrack === 0 ? 'none' : '';
+    vp.classList.toggle('nav-none', L.navMode === 'none' || L.navMode === 'overlay');   /* 客户端收到 0：导航改顶栏图标（浮层打开时也保留入口） */
     gnav.classList.toggle('rail', L.navMode === 'rail');
     gnav.classList.toggle('overlay', L.navMode === 'overlay');
     gnav.classList.toggle('drawer', !!L.drawer);
@@ -685,6 +699,8 @@ function syncGrid(){
     gnav.style.width = (L.navMode === 'overlay' || L.navMode === 'drawerOpen') ? L.navOverlayW + 'px' : '';
     var scr = document.getElementById('gscrim-'+theme);
     if (scr) scr.classList.toggle('on', !!L.scrim);
+    var ic = document.getElementById('gicons-'+theme);
+    if (ic) ic.innerHTML = NAVITEMS.map(function(k,i){ return '<span class="gi'+(i===0?' on':'')+'" data-label="'+esc(tr('f.grid.item.'+k))+'"></span>'; }).join('');
     document.getElementById('gside-'+theme).style.display = L.side > 0 ? '' : 'none';
     var k = Math.min(1, (clip.clientWidth - 2) / viewport);
     vp.style.transform = 'scale(' + k + ')';

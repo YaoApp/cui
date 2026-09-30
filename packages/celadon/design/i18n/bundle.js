@@ -486,7 +486,8 @@ window.CELADON_I18N = {
           "rail": "rail",
           "overlay": "overlay",
           "drawer": "drawer (closed)",
-          "drawerOpen": "drawer (open)"
+          "drawerOpen": "drawer (open)",
+          "none": "collapsed (header icons)"
         },
         "item": {
           "overview": "Overview",
@@ -503,11 +504,11 @@ window.CELADON_I18N = {
         "navColToggle": "Toggle position",
         "navColState": "State",
         "nr1a": "Client or wide web (1024 and up)",
-        "nr1b": "56 icon rail (24 icon plus 16 padding each side)",
-        "nr1c": "macOS: in the title bar. Elsewhere: at the top of the nav",
+        "nr1b": "**Collapses to 0**: the sidebar goes away and the navigation becomes **icons in the header**, on the same row as the window controls",
+        "nr1c": "macOS: the title bar beside the traffic lights. Elsewhere: the header",
         "nr1d": "Persisted preference plus a transient flag (two levels)",
         "nr2a": "Mid web (768 to 1023)",
-        "nr2b": "Collapses to the rail automatically",
+        "nr2b": "**Keeps a 56px icon rail**, since a browser has no title bar to host the icons",
         "nr2c": "Same as above",
         "nr2d": "Same; a narrow expand never writes back to the preference",
         "nr3a": "Narrow web (below 768)",
@@ -1004,7 +1005,8 @@ window.CELADON_I18N = {
           "rail": "アイコンレール",
           "overlay": "オーバーレイ展開",
           "drawer": "ドロワー（閉）",
-          "drawerOpen": "ドロワー（開）"
+          "drawerOpen": "ドロワー（開）",
+          "none": "収納（ヘッダーのアイコン）"
         },
         "item": {
           "overview": "概要",
@@ -1021,11 +1023,11 @@ window.CELADON_I18N = {
         "navColToggle": "切替の位置",
         "navColState": "状態",
         "nr1a": "クライアント / ワイド Web（1024 以上）",
-        "nr1b": "56 のアイコンレール（24 アイコン + 左右 16 の余白）",
-        "nr1c": "macOS はタイトルバー、その他はナビ上部",
+        "nr1b": "**0 まで収納**：サイドバーは消え、ナビは**ヘッダーのアイコン**としてウィンドウ操作と同じ行に残ります",
+        "nr1c": "macOS はタイトルバー（信号機の隣）、その他はヘッダー",
         "nr1d": "永続化した設定 + 一時フラグ（2 段階）",
         "nr2a": "中間の Web（768–1023）",
-        "nr2b": "自動でレールに収納",
+        "nr2b": "**56px のアイコンレールを維持**（ブラウザにはアイコンを置くタイトルバーがないため）",
         "nr2c": "上と同じ",
         "nr2d": "同じ。狭いときの展開は設定に書き戻さない",
         "nr3a": "狭い Web（768 未満）",
@@ -1522,7 +1524,8 @@ window.CELADON_I18N = {
           "rail": "图标轨",
           "overlay": "覆盖展开",
           "drawer": "抽屉（关）",
-          "drawerOpen": "抽屉（开）"
+          "drawerOpen": "抽屉（开）",
+          "none": "收起（顶栏图标）"
         },
         "item": {
           "overview": "概览",
@@ -1539,11 +1542,11 @@ window.CELADON_I18N = {
         "navColToggle": "收起控件位置",
         "navColState": "状态",
         "nr1a": "客户端 / Web 宽屏（≥1024）",
-        "nr1b": "图标轨 56（24 图标 + 16×2 内距）",
-        "nr1c": "macOS 在标题栏；其他平台在导航顶部",
+        "nr1b": "**收起为 0**：侧栏完全收掉，导航改以**图标**留在顶栏（与标题栏按钮同一行）",
+        "nr1c": "macOS 在标题栏（交通灯旁）；其他平台在顶栏",
         "nr1d": "持久化偏好 + 临时标志（两级）",
         "nr2a": "Web 中档（768–1023）",
-        "nr2b": "自动收成图标轨",
+        "nr2b": "**保留 56px 图标轨**（浏览器没有标题栏可放图标）",
         "nr2c": "同上",
         "nr2d": "同；窄屏的临时展开不写回偏好",
         "nr3a": "Web 窄屏（<768）",
@@ -2040,7 +2043,8 @@ window.CELADON_I18N = {
           "rail": "圖示軌",
           "overlay": "覆蓋展開",
           "drawer": "抽屜（關）",
-          "drawerOpen": "抽屜（開）"
+          "drawerOpen": "抽屜（開）",
+          "none": "收合（頂欄圖示）"
         },
         "item": {
           "overview": "總覽",
@@ -2057,11 +2061,11 @@ window.CELADON_I18N = {
         "navColToggle": "收合控件位置",
         "navColState": "狀態",
         "nr1a": "客戶端 / Web 寬螢幕（≥1024）",
-        "nr1b": "圖示軌 56（24 圖示 + 16×2 內距）",
-        "nr1c": "macOS 在標題列；其他平台在導覽頂部",
+        "nr1b": "**收合為 0**：側欄完全收掉，導覽改以**圖示**留在頂欄（與標題列按鈕同一行）",
+        "nr1c": "macOS 在標題列（紅綠燈旁）；其他平台在頂欄",
         "nr1d": "持久化偏好 + 臨時旗標（兩級）",
         "nr2a": "Web 中檔（768–1023）",
-        "nr2b": "自動收成圖示軌",
+        "nr2b": "**保留 56px 圖示軌**（瀏覽器沒有標題列可放圖示）",
         "nr2c": "同上",
         "nr2d": "同；窄螢幕的臨時展開不寫回偏好",
         "nr3a": "Web 窄螢幕（<768）",
