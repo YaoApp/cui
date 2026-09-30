@@ -51,8 +51,10 @@
 | 颜色 / 字号 / 行高 / 圆角 / 间距 / 线宽 / 漏分号 | `check-tokens.mjs` | 规范页 + 展示页 |
 | 生成物与源一致 · 品牌标记色 | `check-generated.mjs` | `icons.html` / `mock.html` / `index.html` |
 | i18n 缺 key / 漏翻 | `check-i18n.mjs` | 四语 JSON |
+| **物理方向属性**（§3 这条）| `check-css-conventions.mjs` | 产品代码与展示页（演示稿登记为存量）|
 | README 色值与 tokens 一致 | `check-readme-values.mjs` | `design/README.md` |
 
 跑法：在 `design/` 下 `node <脚本>`；四个都应为 0 退出码。
 
-> 逻辑属性的 **lint 规则**（stylelint）待 `01 基础设施` 选型后接线，届时这条规范从"文档"变成"拦得住人"。
+> **已经有扫描版**（`check-css-conventions.mjs`，不依赖构建工具）—— 新增页面里出现物理方向属性会直接失败。
+> stylelint 版待 `01 基础设施` 选型后接线，届时连产品样式表也一起拦。
