@@ -330,7 +330,10 @@ window.CELADON_I18N = {
         "use3": "Modals, drawers, toasts (with --scrim)",
         "useSticky": "Sticky toolbars and section headers",
         "colSurface": "Surface",
-        "note2": "In dark mode a shadow on a dark background is invisible, so levels are carried by tonal surfaces (--elevation-surface-1/2/3) plus a 1px warm white inner highlight; light mode still uses shadows."
+        "note2": "In dark mode a shadow on a dark background is invisible, so levels are carried by tonal surfaces (--elevation-surface-1/2/3) plus a 1px warm white inner highlight; light mode still uses shadows.",
+        "stickyDemo": "Sticky demo (try scrolling)",
+        "stickyHint": "While scrolling, the header stays at the top (z 100) and gains a shadow, which is the elevation behaviour of sticky. At rest it is just a normal title.",
+        "demoTitle": "Contract review"
       },
       "motion": {
         "title": "Motion",
@@ -746,7 +749,10 @@ window.CELADON_I18N = {
         "use3": "モーダル・ドロワー・トースト（--scrim と併用）",
         "useSticky": "追従するツールバー・セクション見出し",
         "colSurface": "サーフェス",
-        "note2": "ダークでは暗い背景の上の影は見えないため、階層は面の段階（--elevation-surface-1/2/3）と 1px の暖白インナーハイライトで表します。ライトは影のままです。"
+        "note2": "ダークでは暗い背景の上の影は見えないため、階層は面の段階（--elevation-surface-1/2/3）と 1px の暖白インナーハイライトで表します。ライトは影のままです。",
+        "stickyDemo": "追従デモ（スクロールしてみる）",
+        "stickyHint": "スクロールすると見出しが上部に固定され（z 100）、影が付きます。これが sticky の階層の振る舞いです。スクロールしていないときは普通の見出しです。",
+        "demoTitle": "契約レビュー"
       },
       "motion": {
         "title": "モーション Motion",
@@ -1162,7 +1168,10 @@ window.CELADON_I18N = {
         "use3": "弹窗 / 抽屉 / 通知（配 --scrim）",
         "useSticky": "吸顶工具条 / 分节标题",
         "colSurface": "表面",
-        "note2": "暗色下阴影在暗底上不可见 —— 所以层级由面阶（--elevation-surface-1/2/3）+ 1px 暖白内高光表达；浅色仍靠阴影。"
+        "note2": "暗色下阴影在暗底上不可见 —— 所以层级由面阶（--elevation-surface-1/2/3）+ 1px 暖白内高光表达；浅色仍靠阴影。",
+        "stickyDemo": "吸顶演示（滚动试试）",
+        "stickyHint": "滚动时头部固定在顶部（z 100）并出现阴影 —— 这就是 sticky 的层级行为；不滚动时它只是普通标题。",
+        "demoTitle": "合同审阅"
       },
       "motion": {
         "title": "动效 Motion",
@@ -1578,7 +1587,10 @@ window.CELADON_I18N = {
         "use3": "彈窗 / 抽屜 / 通知（配 --scrim）",
         "useSticky": "吸頂工具列 / 分節標題",
         "colSurface": "表面",
-        "note2": "暗色下陰影在暗底上不可見 —— 因此層級由面階（--elevation-surface-1/2/3）+ 1px 暖白內高光表達；淺色仍靠陰影。"
+        "note2": "暗色下陰影在暗底上不可見 —— 因此層級由面階（--elevation-surface-1/2/3）+ 1px 暖白內高光表達；淺色仍靠陰影。",
+        "stickyDemo": "吸頂演示（捲動試試）",
+        "stickyHint": "捲動時標題固定在頂部（z 100）並出現陰影 —— 這就是 sticky 的層級行為；未捲動時它只是普通標題。",
+        "demoTitle": "合約審閱"
       },
       "motion": {
         "title": "動效 Motion",
