@@ -328,7 +328,10 @@
       "use3": "彈窗 / 抽屜 / 通知（配 --scrim）",
       "useSticky": "吸頂工具列 / 分節標題",
       "colSurface": "表面",
-      "note2": "暗色下陰影在暗底上不可見 —— 因此層級由面階（--elevation-surface-1/2/3）+ 1px 暖白內高光表達；淺色仍靠陰影。"
+      "note2": "暗色下陰影在暗底上不可見 —— 因此層級由面階（--elevation-surface-1/2/3）+ 1px 暖白內高光表達；淺色仍靠陰影。",
+      "stickyDemo": "吸頂演示（捲動試試）",
+      "stickyHint": "捲動時標題固定在頂部（z 100）並出現陰影 —— 這就是 sticky 的層級行為；未捲動時它只是普通標題。",
+      "demoTitle": "合約審閱"
     },
     "motion": {
       "title": "動效 Motion",

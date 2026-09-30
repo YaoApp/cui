@@ -328,7 +328,10 @@
       "use3": "弹窗 / 抽屉 / 通知（配 --scrim）",
       "useSticky": "吸顶工具条 / 分节标题",
       "colSurface": "表面",
-      "note2": "暗色下阴影在暗底上不可见 —— 所以层级由面阶（--elevation-surface-1/2/3）+ 1px 暖白内高光表达；浅色仍靠阴影。"
+      "note2": "暗色下阴影在暗底上不可见 —— 所以层级由面阶（--elevation-surface-1/2/3）+ 1px 暖白内高光表达；浅色仍靠阴影。",
+      "stickyDemo": "吸顶演示（滚动试试）",
+      "stickyHint": "滚动时头部固定在顶部（z 100）并出现阴影 —— 这就是 sticky 的层级行为；不滚动时它只是普通标题。",
+      "demoTitle": "合同审阅"
     },
     "motion": {
       "title": "动效 Motion",

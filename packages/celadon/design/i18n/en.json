@@ -328,7 +328,10 @@
       "use3": "Modals, drawers, toasts (with --scrim)",
       "useSticky": "Sticky toolbars and section headers",
       "colSurface": "Surface",
-      "note2": "In dark mode a shadow on a dark background is invisible, so levels are carried by tonal surfaces (--elevation-surface-1/2/3) plus a 1px warm white inner highlight; light mode still uses shadows."
+      "note2": "In dark mode a shadow on a dark background is invisible, so levels are carried by tonal surfaces (--elevation-surface-1/2/3) plus a 1px warm white inner highlight; light mode still uses shadows.",
+      "stickyDemo": "Sticky demo (try scrolling)",
+      "stickyHint": "While scrolling, the header stays at the top (z 100) and gains a shadow, which is the elevation behaviour of sticky. At rest it is just a normal title.",
+      "demoTitle": "Contract review"
     },
     "motion": {
       "title": "Motion",
