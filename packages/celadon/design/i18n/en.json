@@ -574,7 +574,7 @@
     "n1": "Find the closest name in **lucide** (`lucide.dev/icons`).",
     "n2": "Add it to `icons/manifest.json` and run `node build-icons.mjs` to re-inline it.",
     "n3": "Check it reads at **14px**; if not, draw a simplified version on the 24 grid.",
-    "n4": "Run the checks and update `THIRD-PARTY-NOTICES`.",
+    "n4": "Run the checks, `check-i18n` and `check-readme-values`, and confirm the page has no hard coded colour and no 16 grid leftovers.",
     "copied": "Copied",
     "cat": {
       "nav": "Navigation",
