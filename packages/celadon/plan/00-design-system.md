@@ -110,7 +110,7 @@
   | **第三方 AI 品牌** | **339** | MIT | 模型/厂商 logo，`vendor-brands.mjs` 自动转成 `brand-<name>` / `-mono`，存独立雪碧图（外部引用、不内联），**按体积切成 11 个分片** |
   | **通用品牌（按需）** | 1（`brand-wechat`）| CC0 | 非 AI 品牌（微信 / Slack / Notion…）由 `vendor-simple.mjs` 逐个引入；**不批量导入**那 3463 个 |
   | **自建** | 2 个品牌 | 自有 | `brand-yao-agents`（现任标记）· `brand-yao`（太极，cui 最早的标记），与第三方同族、**排在品牌区最前** |
-- **自有标记配色**：头部渐变 `--brand-mark-from #2FA79C` → `--brand-mark-to #0CC8B7`（旧 `#2A7B7B` 发暗、直冲 `#00E8D4` 太冲，取中间档）· 眼睛 `--brand-eye #F4F1EA`（暖白，与暗面正文同源）· **三色刻意不分主题**（同一支渐变浅底暗底都成立）· **原始标记完整保留**在 `design/reference/logo-2022-previous.svg`（未改动）
+- **自有标记配色**：头部渐变 `--brand-mark-from #2FA79C` → `--brand-mark-to #0CC8B7`（旧 `#2A7B7B` 发暗、直冲 `#00E8D4` 太冲，取中间档）· 眼睛 `--brand-eye #F4F1EA`（暖白，与暗面正文同源）· **三色刻意不分主题**（同一支渐变浅底暗底都成立）· **原始标记完整保留**在 `design/reference/logo-previous.svg`（未改动）
 - **品牌官方色**：**全站唯一允许不使用 token 的颜色**（商标规范要求不得改色）；深色底切 mono 变体；**图标集不替品牌方做衬底**（logo 按原样呈现，看不见就切 mono）
 - **产物**：
   - `icons/lucide-sprite.svg`
@@ -161,7 +161,7 @@
 | i18n | `design/i18n/{zh-CN,zh-TW,en,ja}.json`（**518 key × 4 语**，`ui.*` 必翻 / `sample.*` 演示数据）+ 生成器 + 运行时切换 | `build-i18n.mjs` + `check-i18n.mjs` |
 | 色卡（自检工具） | `design/color-card.html`：零硬编码、实时读 `tokens.css`、对比度实算 + 关键配对 + 控件状态矩阵 | 程序化校验无颜色字面量 |
 | 详细界面稿 | `design/mock.html`：1440×888 三列通高 · 零硬编码 · 四语可切 · 67 个图标 | 程序化校验无颜色字面量 |
-| Logo（设计交付物） | `design/logo-mark-celadon.svg`（**当前正版**；几何取自 2022 版原始文件、**仅换颜色**；**浅暗同版，不分主题**）· `logo-app-celadon.svg`（正方形画布，图形内缩 78%）· `design/icons/icon-*.png` 7 档 | 2022 版原始文件 vs 当前正版 diff 比对 |
+| Logo（设计交付物） | `design/logo-mark-celadon.svg`（**当前正版**；几何取自 上一版原始文件、**仅换颜色**；**浅暗同版，不分主题**）· `logo-app-celadon.svg`（正方形画布，图形内缩 78%）· `design/icons/icon-*.png` 7 档 | 上一版原始文件 vs 当前正版 diff 比对 |
 | 本地浏览 / 防缓存 | `design/serve.mjs`（零依赖 · `no-store` · 目录浏览） | 改完刷新即见 |
 
 > **质量门禁（四检查，本地可当 CI 跑）**：`check-i18n.mjs`（缺 key / 漏翻 / 繁简 / 日文）· `check-readme-values.mjs`（色值零漂移）· `check-tokens.mjs`（三张规范页的字号 / 行高 / 圆角 / 颜色 / 间距 / 线宽 / 漏分号）· `check-generated.mjs`（生成物与源一致 · 品牌标记颜色全走 token）
