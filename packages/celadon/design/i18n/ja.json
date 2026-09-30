@@ -626,6 +626,6 @@
     "brandSearch": "ブランドを検索（deepseek / openai など）",
     "brandColor": "公式色",
     "brandMono": "モノ",
-    "coverBrandNote": "自前 {own} 個（`i-yaoagents`）+ サードパーティ {third} 個（`brand-*`、別スプライトを外部参照）"
+    "coverBrandNote": "自前 {own} 個（`brand-yao-agents` / `brand-yao`）+ サードパーティ {third} 個（`brand-*`）"
   }
 }

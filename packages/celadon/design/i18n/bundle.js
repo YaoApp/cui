@@ -628,7 +628,7 @@ window.CELADON_I18N = {
       "brandSearch": "Search brands, try deepseek or openai",
       "brandColor": "Official colour",
       "brandMono": "Mono",
-      "coverBrandNote": "ours {own} (`i-yaoagents`) plus {third} third party (`brand-*`, kept in a separate sprite and referenced externally)"
+      "coverBrandNote": "{own} drawn by us (`brand-yao-agents` and `brand-yao`) plus {third} third party (`brand-*`, kept in separate sprites and referenced externally)"
     }
   },
   "ja": {
@@ -1259,7 +1259,7 @@ window.CELADON_I18N = {
       "brandSearch": "ブランドを検索（deepseek / openai など）",
       "brandColor": "公式色",
       "brandMono": "モノ",
-      "coverBrandNote": "自前 {own} 個（`i-yaoagents`）+ サードパーティ {third} 個（`brand-*`、別スプライトを外部参照）"
+      "coverBrandNote": "自前 {own} 個（`brand-yao-agents` / `brand-yao`）+ サードパーティ {third} 個（`brand-*`）"
     }
   },
   "zh-CN": {
@@ -1890,7 +1890,7 @@ window.CELADON_I18N = {
       "brandSearch": "搜索品牌（deepseek / openai / 通义…）",
       "brandColor": "官方色",
       "brandMono": "单色",
-      "coverBrandNote": "自建 {own} 个（`i-yaoagents`）+ 第三方 {third} 个（`brand-*`，另存独立雪碧图，外部引用）"
+      "coverBrandNote": "自建 {own} 个（`brand-yao-agents` / `brand-yao`）+ 第三方 {third} 个（`brand-*`，另存独立雪碧图，外部引用）"
     }
   },
   "zh-TW": {
@@ -2521,7 +2521,7 @@ window.CELADON_I18N = {
       "brandSearch": "搜尋品牌（deepseek / openai / 通義…）",
       "brandColor": "官方色",
       "brandMono": "單色",
-      "coverBrandNote": "自建 {own} 個（`i-yaoagents`）+ 第三方 {third} 個（`brand-*`，另存獨立雪碧圖）"
+      "coverBrandNote": "自建 {own} 個（`brand-yao-agents` / `brand-yao`）+ 第三方 {third} 個（`brand-*`，另存獨立雪碧圖）"
     }
   }
 };
