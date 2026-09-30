@@ -582,7 +582,8 @@
       "state": "States",
       "file": "File types",
       "obj": "Objects",
-      "own": "Ours (brand)"
+      "own": "Ours (brand)",
+      "brand": "Brands"
     },
     "spCorner": "Corners",
     "spCornerV": "**2px** for elements 8px or larger, **1px** below that, about **2.41px** on diagonal right angles",
@@ -624,6 +625,8 @@
     "brandsetNote": "Model and vendor logos come from **@lobehub/icons** (MIT, 340 brands). **Brand marks keep their official colours** as their trademark rules require, which makes them the **only place on this site allowed to use a colour that is not one of our tokens**; on a dark surface switch to the **mono** variant. The logos are trademarks of their owners and identify the corresponding models or services.",
     "brandSearch": "Search brands, try deepseek or openai",
     "brandColor": "Official colour",
-    "brandMono": "Mono"
+    "brandMono": "Mono",
+    "brandOwn": "Yao Agents (ours)",
+    "coverBrandNote": "ours {own} (`i-yaoagents`) plus {third} third party (`brand-*`, kept in a separate sprite and referenced externally)"
   }
 }
