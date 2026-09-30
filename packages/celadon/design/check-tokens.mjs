@@ -24,6 +24,19 @@ for (const f of PAGES) {
     }
   }
 }
+// 语法完整性：大括号配对 + 规则体内一条声明只能有一个冒号（多出来就是漏了分号，
+// 浏览器会静默丢弃整条声明 —— 曾经把 .toolbar 的 margin-bottom 吃掉，工具条就贴上了界面）
+for (const f of PAGES) {
+  const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+  if ((css.match(/\{/g) || []).length !== (css.match(/\}/g) || []).length) bad.push(`${f}: 大括号不配对`);
+  for (const rule of css.matchAll(/\{([^{}]*)\}/g)) {
+    for (const decl of rule[1].split(';')) {
+      const d = decl.trim();
+      if (!d || /url\(|data:/i.test(d)) continue;
+      if ((d.match(/:/g) || []).length > 1) bad.push(`${f}: 疑似漏分号 —— ${d.slice(0, 46)}`);
+    }
+  }
+}
 // 行高必须走 token（--line-height-normal 拉丁 / --line-height-cjk 中日文）；
 // font 简写里的 /1.5 会绕过 token，一并拦下
 for (const f of PAGES) {
