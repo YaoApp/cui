@@ -131,7 +131,7 @@
     }
   },
   "card": {
-    "title": "Celadon design baseline",
+    "title": "CUI 2.0 design baseline",
     "subtitle": "tokens · pairings · fonts · contrast — all read live from tokens.css (zero hardcoded values)",
     "source": "Source: tokens.less → build-css.mjs → tokens.css. Font tokens are in the specimen below. After changing a token run pnpm design:css — this page needs no edits.",
     "sectionPairs": "Key pairings (foreground on background · computed live)",
@@ -283,7 +283,8 @@
     "gradeLarge": "Large text / graphics",
     "gradeFail": "Below AA",
     "contrastLegend": "Level: AAA >= 7:1 - AA >= 4.5:1 (body text) - large text or graphics >= 3:1 - below AA < 3:1. Anything under 4.5:1 must not carry body text.",
-    "reasonNote": "\"Fill / border / overlay / dark only\" are not judged for text contrast (see key pairs for real usage); \"disabled (exempt)\" follows the WCAG exemption for disabled controls."
+    "reasonNote": "\"Fill / border / overlay / dark only\" are not judged for text contrast (see key pairs for real usage); \"disabled (exempt)\" follows the WCAG exemption for disabled controls.",
+    "designSystem": "Celadon"
   },
   "f": {
     "title": "Foundations · Spacing · Radius · Elevation · Motion · Border",
