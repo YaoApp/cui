@@ -23,9 +23,13 @@ import { fileURLToPath } from 'node:url'
    并且从任何目录调用都不会出错。 */
 const DESIGN = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'design')
 process.chdir(DESIGN)
+/* 可选：第一个参数指定目标目录（测试用），默认 ../design */
+const TARGET = resolve(process.argv[2] || DESIGN)
+process.chdir(TARGET)
 
 
-const dir = dirname(fileURLToPath(import.meta.url))
+
+const dir = TARGET
 
 /**
  * 存量豁免：这几张是**演示稿**，按约定不回改（见 CONVENTIONS.md §3 现状一段）。
@@ -90,6 +94,11 @@ for (const file of files) {
       }
     })
   }
+}
+
+if (files.length === 0) {
+  console.log('✗ 没有找到可检查的文件 —— 目标目录不对？(目标：' + dir + ')')
+  process.exit(1)
 }
 
 if (legacyHits.length) {
