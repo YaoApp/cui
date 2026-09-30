@@ -6,7 +6,7 @@
 - **不包含**：**工程类基础设施**（构建工具 · 主题映射 · 图标体系落地 · 质量门禁 · 后端 SDK · i18n 构建）→ 见 [01 基础设施](01-infrastructure.md)
   以及：可访问性 → `13`（拟）· 内容与文案 → `14`（拟）· 数据可视化 → `15`（拟）· AI 交互 → `16`（拟）· 页面模式 → `17`（拟）· 治理与版本 → `12`（拟）
 
-> **本轮依据**：2026-09-30 对照 **Atlassian Foundations**（Tokens/Accessibility/Content/Spacing/Grid/Color/Typography/Iconography/Illustrations/Logos/Elevation/Border/Radius）· **Ant Design 设计**（全局样式/设计模式/原则/模板/动效/图形化）· **IBM Carbon**（Design/Develop/Migrate/Contribute，含 Carbon for AI）。
+> **本轮依据**：2026-09-30 按 Foundations 的**八个维度**（Tokens · 可访问性 · 内容与语气 · 间距 · 栅格 · 色彩 · 字体 · 图标）逐项自检，找出缺口 → 产出 [../design/v2/gap-vs-bigtech.md]（工作区）与「补齐清单」，再按 P0 → P1 逐项落地。
 > 逐项差距见工作区 `design/v2/gap-vs-bigtech.md`。
 >
 > **家底实况**：114 个 token —— 色彩（品牌 9 · 中性底 10 · 文字 6 · 边界 5 · 语义 6 · 焦点 4）与排版（字体栈 6 · 字号 5 · 字重 3 · 行高 2）**强**；间距 1 · 圆角 1 · 时长 1 · 缓动 1 · 阴影 2 **薄**。
