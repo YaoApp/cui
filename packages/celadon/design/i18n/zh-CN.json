@@ -326,7 +326,9 @@
       "use1": "卡片 / 标签页 / 徽标",
       "use2": "下拉 / 气泡 / 悬浮面板",
       "use3": "弹窗 / 抽屉 / 通知（配 --scrim）",
-      "useSticky": "吸顶工具条 / 分节标题"
+      "useSticky": "吸顶工具条 / 分节标题",
+      "colSurface": "表面",
+      "note2": "暗色下阴影在暗底上不可见 —— 所以层级由面阶（--elevation-surface-1/2/3）+ 1px 暖白内高光表达；浅色仍靠阴影。"
     },
     "motion": {
       "title": "动效 Motion",

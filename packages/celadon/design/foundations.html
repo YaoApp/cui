@@ -48,8 +48,8 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .rad-item .n{font-family:var(--font-family-monospace);font-size:11px;color:var(--text-primary)}
 .rad-item .u{font-size:10.5px;color:var(--text-tertiary);margin-top:2px}
 /* 层级 */
-.el-stack{position:relative;height:190px}
-.el-card{position:absolute;border-radius:var(--radius-large);background:var(--background-surface);border:1px solid var(--border-default);padding:9px 12px;font-size:11.5px;min-width:150px}
+.el-stack{position:relative;height:214px}
+.el-card{position:absolute;border-radius:var(--radius-large);background:var(--background-surface);border:1px solid var(--border-default);padding:9px 12px;font-size:11.5px;width:214px;white-space:nowrap;overflow:hidden}
 .el-card .t{font-weight:650;font-size:12px}
 .el-card .m{font-family:var(--font-family-monospace);font-size:10.5px;color:var(--text-tertiary)}
 /* 动效 */
@@ -114,6 +114,7 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 <!-- F3 层级 -->
 <div class="card">
   <h2 id="el-title"></h2><p class="hint" id="el-note"></p>
+  <p class="hint" id="el-note2" style="color:var(--text-tertiary)"></p>
   <div class="cols">
     <section class="panel" id="el-light"></section>
     <section class="panel celadon" data-theme="dark" id="el-dark"></section>
@@ -206,21 +207,22 @@ function renderRadius(theme){
 
 /* ===== F3 层级 ===== */
 /* 层级映射：L2 浮层必须高于 sticky(100)，L3 弹窗再高一层；sticky 见表格附注 */
-var LEVELS = [['lv0','--z-base','--shadow-none','use0'],['lv1','--z-raised','--shadow-subtle','use1'],
-              ['lv2','--z-overlay','--shadow-floating','use2'],['lv3','--z-modal','--shadow-overlay','use3']];
+var LEVELS = [['lv0','--z-base','--shadow-none','use0','--background-content'],['lv1','--z-raised','--shadow-subtle','use1','--elevation-surface-1'],
+              ['lv2','--z-overlay','--shadow-floating','use2','--elevation-surface-2'],['lv3','--z-modal','--shadow-overlay','use3','--elevation-surface-3']];
 function renderElevation(theme){
   var stack = '<div class="grp">'+esc(tr('f.elevation.levels'))+'</div><div class="el-stack">' + LEVELS.map(function(l,i){
     var sh = l[2] === '--shadow-none' ? 'none' : tok(l[2], theme);
-    var pos = ['left:0;top:0','left:34px;top:44px','left:68px;top:88px','left:102px;top:132px'][i];
-    return '<div class="el-card" style="'+pos+';box-shadow:'+sh+';z-index:'+tok(l[1],theme)+'">'
-      + '<div class="t">'+esc(tr('f.elevation.'+l[0]))+'</div><div class="m">'+(l[2] === '--shadow-none' ? 'shadow: none' : l[2])+' · z '+tok(l[1],theme)+'</div></div>'; }).join('') + '</div>';
+    var pos = ['left:0;top:0','left:34px;top:50px','left:68px;top:100px','left:102px;top:150px'][i];
+    return '<div class="el-card" style="'+pos+';background:'+tok(l[4],theme)+';box-shadow:'+sh+';z-index:'+tok(l[1],theme)+'">'
+      + '<div class="t">'+esc(tr('f.elevation.'+l[0]))+'</div><div class="m">'+(l[2] === '--shadow-none' ? 'shadow: none' : l[2])+' · z '+tok(l[1],theme)+'</div>'
+      + '<div class="m">'+l[4].replace('--','')+'</div></div>'; }).join('') + '</div>';
   document.getElementById(theme === 'dark' ? 'el-dark' : 'el-light').innerHTML =
     '<div class="hd">'+(theme === 'dark' ? 'Dark' : 'Light')+'<span class="tag">elevation</span></div><div class="pbody">'+stack+'</div>';
   document.getElementById(theme === 'dark' ? 'el-table-dark' : 'el-table-light').innerHTML =
-    '<tr><th>'+esc(tr('f.elevation.colLevel'))+'</th><th>'+esc(tr('f.elevation.colShadow'))+'</th><th>'+esc(tr('f.elevation.colZ'))+'</th><th>'+esc(tr('f.elevation.colUse'))+'</th></tr>'
+    '<tr><th>'+esc(tr('f.elevation.colLevel'))+'</th><th>'+esc(tr('f.elevation.colShadow'))+'</th><th>'+esc(tr('f.elevation.colSurface'))+'</th><th>'+esc(tr('f.elevation.colZ'))+'</th><th>'+esc(tr('f.elevation.colUse'))+'</th></tr>'
     + LEVELS.map(function(l){ return '<tr><td>'+esc(tr('f.elevation.'+l[0]))+'</td><td><code>'+(l[2]==='--shadow-none'?'—':l[2])+'</code></td>'
-      + '<td><code>'+tok(l[1],theme)+'</code></td><td>'+esc(tr('f.elevation.'+l[3]))+'</td></tr>'; }).join('')
-    + '<tr><td>sticky</td><td><code>--shadow-subtle</code></td><td><code>'+tok('--z-sticky',theme)+'</code></td><td>'+esc(tr('f.elevation.useSticky'))+'</td></tr>';
+      + '<td><code>'+l[4]+'</code></td><td><code>'+tok(l[1],theme)+'</code></td><td>'+esc(tr('f.elevation.'+l[3]))+'</td></tr>'; }).join('')
+    + '<tr><td>sticky</td><td><code>--shadow-subtle</code></td><td><code>--background-navigation</code></td><td><code>'+tok('--z-sticky',theme)+'</code></td><td>'+esc(tr('f.elevation.useSticky'))+'</td></tr>';
 }
 
 /* ===== F4 动效 ===== */
@@ -290,6 +292,7 @@ function applyChrome(){
     document.getElementById(m[0]+'-title').textContent = tr('f.'+m[1]+'.title');
     document.getElementById(m[0]+'-note').textContent = tr('f.'+m[1]+'.note');
   });
+  var n2 = document.getElementById('el-note2'); if (n2) n2.textContent = tr('f.elevation.note2');
 }
 function renderAll(){
   applyChrome();

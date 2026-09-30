@@ -130,6 +130,12 @@
 
   /* ===== 阴影与层级 Elevation =====
      L0 base 无阴影 · L1 raised 卡片/标签页 · L2 floating 下拉/气泡 · L3 overlay 弹窗/抽屉/提示 */
+  /* 层级表面：浅色下各层同为白面（靠阴影分离）；暗色下**必须**用面阶分离（见暗色块） */
+  --elevation-surface-1:#FFFFFF;
+  --elevation-surface-2:#FFFFFF;
+  --elevation-surface-3:#FFFFFF;
+  --elevation-highlight:transparent;   /* 暗色用 1px 内高光勾边，浅色不需要 */
+
   --shadow-subtle:0 1px 2px rgba(18,17,16,.05);
   --shadow-floating:0 10px 30px rgba(18,17,16,.10), 0 2px 6px rgba(18,17,16,.06);
   --shadow-overlay:0 24px 60px rgba(18,17,16,.18), 0 4px 12px rgba(18,17,16,.08);
@@ -194,9 +200,15 @@
   --danger:        #F87171;   --danger-soft:  #2A1614;
   --danger-ink:    #EC7A6E;   /* 暗色文字/图标档（danger-soft 上 5.65:1） */
 
-  --shadow-subtle:0 1px 2px rgba(18,17,16,.5);
-  --shadow-floating:0 12px 34px rgba(18,17,16,.6);
-  --shadow-overlay:0 26px 64px rgba(18,17,16,.72), 0 4px 14px rgba(18,17,16,.5);
+  /* 暗色层级：**用面阶表达**（深阴影在暗底上看不见）；内高光只勾一道边 */
+  --elevation-surface-1:#232119;   /* ≈ L1 在 content(#191816) 上可辨 */
+  --elevation-surface-2:#2B2923;
+  --elevation-surface-3:#33312A;
+  --elevation-highlight:rgba(244,241,234,.07);   /* 暖白高光，与暖墨同源 */
+
+  --shadow-subtle:inset 0 1px 0 var(--elevation-highlight), 0 1px 3px rgba(18,17,16,.55);
+  --shadow-floating:inset 0 1px 0 var(--elevation-highlight), 0 12px 34px rgba(18,17,16,.7);
+  --shadow-overlay:inset 0 1px 0 var(--elevation-highlight), 0 26px 64px rgba(18,17,16,.8), 0 4px 14px rgba(18,17,16,.55);
 
   /* 强边界档（暗）：内容底 3.98 / 字段底 3.47 ✓ */
   --border-control-strong:#7C776B;

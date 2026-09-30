@@ -328,7 +328,9 @@ window.CELADON_I18N = {
         "use1": "Cards, tabs, badges",
         "use2": "Dropdowns, popovers, floating panels",
         "use3": "Modals, drawers, toasts (with --scrim)",
-        "useSticky": "Sticky toolbars and section headers"
+        "useSticky": "Sticky toolbars and section headers",
+        "colSurface": "Surface",
+        "note2": "In dark mode a shadow on a dark background is invisible, so levels are carried by tonal surfaces (--elevation-surface-1/2/3) plus a 1px warm white inner highlight; light mode still uses shadows."
       },
       "motion": {
         "title": "Motion",
@@ -688,7 +690,9 @@ window.CELADON_I18N = {
         "use1": "カード・タブ・バッジ",
         "use2": "ドロップダウン・ポップオーバー・浮遊パネル",
         "use3": "モーダル・ドロワー・トースト（--scrim と併用）",
-        "useSticky": "追従するツールバー・セクション見出し"
+        "useSticky": "追従するツールバー・セクション見出し",
+        "colSurface": "サーフェス",
+        "note2": "ダークでは暗い背景の上の影は見えないため、階層は面の段階（--elevation-surface-1/2/3）と 1px の暖白インナーハイライトで表します。ライトは影のままです。"
       },
       "motion": {
         "title": "モーション Motion",
@@ -1048,7 +1052,9 @@ window.CELADON_I18N = {
         "use1": "卡片 / 标签页 / 徽标",
         "use2": "下拉 / 气泡 / 悬浮面板",
         "use3": "弹窗 / 抽屉 / 通知（配 --scrim）",
-        "useSticky": "吸顶工具条 / 分节标题"
+        "useSticky": "吸顶工具条 / 分节标题",
+        "colSurface": "表面",
+        "note2": "暗色下阴影在暗底上不可见 —— 所以层级由面阶（--elevation-surface-1/2/3）+ 1px 暖白内高光表达；浅色仍靠阴影。"
       },
       "motion": {
         "title": "动效 Motion",
@@ -1408,7 +1414,9 @@ window.CELADON_I18N = {
         "use1": "卡片 / 分頁標籤 / 徽標",
         "use2": "下拉 / 氣泡 / 懸浮面板",
         "use3": "彈窗 / 抽屜 / 通知（配 --scrim）",
-        "useSticky": "吸頂工具列 / 分節標題"
+        "useSticky": "吸頂工具列 / 分節標題",
+        "colSurface": "表面",
+        "note2": "暗色下陰影在暗底上不可見 —— 因此層級由面階（--elevation-surface-1/2/3）+ 1px 暖白內高光表達；淺色仍靠陰影。"
       },
       "motion": {
         "title": "動效 Motion",
