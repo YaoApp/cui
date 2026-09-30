@@ -25,10 +25,11 @@ function patch(file) {
   const re = /<svg width="0" height="0"[\s\S]*?<\/svg>/;
   if (!re.test(src)) throw new Error(`✗ ${file} 里找不到雪碧图块`);
   let out = src.replace(re, block);
-  out = out.replace(/var SYMBOLS = \[[^\]]*\];/, `var SYMBOLS = [${manifest.map(m => `'${m.id}'`).join(',')}];`);
+  out = out.replace(/var SYMBOLS = \[[^\]]*\];/, `var SYMBOLS = [${manifest.filter(m => m.cat !== 'brand').map(m => `'${m.id}'`).join(',')}];`);
   out = out.replace(/var LUCIDE = \{[^}]*\};/,
     `var LUCIDE = {${manifest.filter(m => m.lib === 'lucide').map(m => `'${m.id}':'${m.src}'`).join(',')}};`);
   out = out.replace(/var OWN = \[[^\]]*\];/, `var OWN = [${manifest.filter(m => m.lib === 'own').map(m => `'${m.id}'`).join(',')}];`);
+  out = out.replace(/var BRANDOWN = \[[^\]]*\];/, `var BRANDOWN = [${manifest.filter(m => m.lib === 'own').map(m => `'${m.id}'`).join(',')}];`);
   const cats = [...new Set(manifest.map(m => m.cat))];
   const cover = cats.map(cat => `  ['${cat}', [${manifest.filter(m => m.cat === cat).map(m => `'${m.id}'`).join(',')}]]`).join(',\n');
   out = out.replace(/var COVER = \[[\s\S]*?\n\];/, `var COVER = [\n${cover}\n];`);
