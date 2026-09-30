@@ -61,6 +61,7 @@
   · **画布 / 描边**：`24 × 24`（描边距边缘 ≥1px）· 描边 `2` · 圆头圆角 · `fill:none` · `currentColor`；显示档 **14 / 16 / 20 / 24**（默认 16），小档按比例变细、某档觉得太细就整档调到 `2.25`
   · **命名**：沿用语义名 `i-<域>-<名>`，与 lucide 名一一对应（`design/icons/manifest.json`）
   · **自绘只限 5 类**：品牌标识 · 彩色文件类型徽章 · lucide 没有的语义 · 状态/过程图形 · 14px 简化版；**自绘也必须画在 24 网格 / 2px 上**
+  · **第二来源（按需）**：非 AI 的通用品牌（微信 / Slack / Notion…）用 `design/vendor-simple.mjs` 从 **simple-icons**（CC0）逐个引入（自动跳过我们已有的 75 个交集，保留 lobehub 版），**不批量导入** 3463 个
   · **第三方品牌**：模型/厂商 logo 用 **@lobehub/icons**（MIT · 340 个），由 `design/vendor-brands.mjs` **自动转换**成 `brand-<name>` / `brand-<name>-mono` 存进独立雪碧图 `icons/brand-sprite.svg`（外部引用、不内联）；**品牌官方色是全站唯一允许不使用 token 的颜色**（商标规范要求不得改色 ✗），深色底切 mono 变体
   · **自绘硬规则**：**整段采用 lucide 规范** —— must 6 条（`24×24` 画布 · 描边 `2` 且**沿路径居中** · 圆头圆角 · 描边距边缘 `≥1px` · 元素间距 `≥2px` · 90° 圆角 `2`/`1`/`2.41`）+ should 6 组（视觉重量对齐 `circle`/`square` · 不对称可略偏 · 密度相当 · 曲线平滑优先圆弧 · 坐标尽量落像素网格但视觉优先 · 变体复用基础几何）；**我们只声明 3 处例外并写在页面上**（显示档与按档调线宽 · 命名 `i-<域>-<名>` · 自绘限 5 类）—— lucide 规定 must 只能被项目**显式声明**的例外打破
   产物：`design/icons/lucide-sprite.svg`（vendored · 67 个符号 · 每个带 `data-src` 出处）· **`design/icons/own-sprite.svg`（自建 · 首个是 `i-yaoagents`：品牌标识由 `logo-mark-celadon.svg` 归一化到 24 网格 / 1px 安全区 / 去掉导出画板与 title，头部 `--brand-graphic`、眼睛 `--brand-text` 随主题切换；品牌区与界面共用这一个符号）**· `design/icons/manifest.json` · `design/build-icons.mjs`（装配进页面，不手改雪碧图）· `design/icons.html`（品牌 / 图标系列 / 用法与自绘规范）· `THIRD-PARTY-NOTICES.md`（ISC + Feather MIT）

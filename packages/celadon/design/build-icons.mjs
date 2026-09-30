@@ -3,7 +3,7 @@
    并同步画廊数据（含来源名）、覆盖度数据。
    图标本体在 icons/own-sprite.svg（我们自绘）与 icons/lucide-sprite.svg（lucide，ISC）。
    这里只做装配，不手改图标，也不手改页面里的雪碧图块。 */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 const manifest = JSON.parse(readFileSync('icons/manifest.json', 'utf8'));
 const readSymbols = (file) => {
@@ -33,7 +33,10 @@ function patch(file) {
   const cats = [...new Set(manifest.map(m => m.cat))];
   const cover = cats.map(cat => `  ['${cat}', [${manifest.filter(m => m.cat === cat).map(m => `'${m.id}'`).join(',')}]]`).join(',\n');
   out = out.replace(/var COVER = \[[\s\S]*?\n\];/, `var COVER = [\n${cover}\n];`);
-  const brands = readFileSync('icons/brand-index.json', 'utf8').replace(/\s+/g, ' ');
+  const lobe = JSON.parse(readFileSync('icons/brand-index.json', 'utf8')).map((e) => ({ ...e, lib: 'lobeicons' }));
+  const simple = existsSync('icons/brand-simple-index.json')
+    ? JSON.parse(readFileSync('icons/brand-simple-index.json', 'utf8')) : [];
+  const brands = JSON.stringify([...lobe, ...simple]).replace(/\s+/g, ' ');
   out = out.replace(/var BRANDS = \[[\s\S]*?\];/, `var BRANDS = ${brands.trim()};`);
   writeFileSync(file, out);
   console.log(`  ✓ ${file}：内联 ${symbols.length} 个符号`);

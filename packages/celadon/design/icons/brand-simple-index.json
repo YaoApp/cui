@@ -1,0 +1,12 @@
+[
+ {
+  "id": "brand-wechat",
+  "brand": "WeChat",
+  "title": "WeChat",
+  "primary": "#07C160",
+  "color": true,
+  "mono": true,
+  "lib": "simpleicons",
+  "shard": 1
+ }
+]
