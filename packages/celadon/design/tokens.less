@@ -195,7 +195,7 @@
   .btn-warn    { background: var(--warm-soft); color: var(--warm-text); border: 1px solid var(--warm); }
   .bubble-me   { background: var(--brand-soft); color: var(--text-primary); border: 1px solid var(--border-default); }
   .bubble-ai   { background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-subtle); }
-  .nav-item.is-active { background: var(--brand-soft); color: var(--brand); }
+  .nav-item.is-active { background: var(--brand-soft); color: var(--brand-ink); }
   .badge-brand { background: var(--brand-soft); color: var(--brand-ink); border: 1px solid var(--brand-ink); }
   .badge-warn  { background: var(--warm-soft);  color: var(--warm-text); border: 1px solid var(--warm); }
   .avatar      { background: var(--brand-soft); color: var(--brand-ink); border: 1px solid var(--brand-ink); }
@@ -205,21 +205,15 @@
     &::placeholder { color: var(--text-placeholder); }                       /* 占位 */
     &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover); }
     /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
-    &:focus, &.is-focus { border-color: var(--brand); box-shadow: 0 0 0 var(--focus-ring-width) var(--brand); outline: none; }
+    &:focus, &.is-focus { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); outline: none; }
     &:read-only, &.is-readonly { background: var(--background-readonly); color: var(--text-secondary); }
     &.is-error { border-color: var(--danger); }
     &:disabled, &.is-disabled { background: var(--background-disabled); color: var(--text-disabled);
       border-color: var(--border-disabled); cursor: not-allowed;
       &::placeholder { color: var(--text-disabled); } }
     &.is-error            { border-color: var(--danger); }
-    &.is-error.is-focus   { box-shadow: 0 0 0 var(--focus-ring-width) var(--danger); }
+    &.is-error.is-focus   { box-shadow: 0 0 0 1px var(--danger); }
     &:disabled { background: var(--background-disabled); color: var(--text-disabled); border-color: var(--border-disabled); } }
   .focusable:focus-visible { box-shadow: var(--focus-ring); outline: none; }
   .scrim       { background: var(--scrim); }
-}
-.celadon[data-theme='dark'], [data-theme='dark'] .celadon {
-  .btn-primary { color: var(--brand-lift); border-color: var(--brand-lift); }
-  .nav-item.is-active { color: var(--brand-lift); }
-  .badge-brand { color: var(--brand-lift); border-color: var(--brand-lift); }
-  .avatar { color: var(--brand-lift); border-color: var(--brand-lift); }
 }
