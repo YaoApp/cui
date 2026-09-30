@@ -432,7 +432,7 @@ window.CELADON_I18N = {
         "navZone": "Navigation",
         "centerZone": "Content",
         "sideZone": "Side",
-        "navCollapsedNote": "collapses to an icon rail",
+        "navCollapsedNote": "collapse: client 0 (nav stays in the top left corner), web 56 rail",
         "centerMax": "the remainder (inner text has its own readable cap)",
         "centerDefault": "the remainder",
         "sideDefaultNote": "first open",
@@ -466,7 +466,6 @@ window.CELADON_I18N = {
           "center": "center",
           "side": "side"
         },
-        "headerZone": "Header",
         "orCap": "or capped at",
         "byViewType": "by view type",
         "sideType": {
@@ -951,7 +950,7 @@ window.CELADON_I18N = {
         "navZone": "ナビ",
         "centerZone": "内容",
         "sideZone": "サイド",
-        "navCollapsedNote": "アイコンレールに収納",
+        "navCollapsedNote": "収納：クライアント 0（ナビは左上に残る）· Web は 56 のレール",
         "centerMax": "残り（本文には可読上限あり）",
         "centerDefault": "残り",
         "sideDefaultNote": "初回表示",
@@ -985,7 +984,6 @@ window.CELADON_I18N = {
           "center": "コンテンツ",
           "side": "サイド"
         },
-        "headerZone": "ヘッダー",
         "orCap": "または上限",
         "byViewType": "ビュー種別ごと",
         "sideType": {
@@ -1470,7 +1468,7 @@ window.CELADON_I18N = {
         "navZone": "导航区",
         "centerZone": "内容区",
         "sideZone": "侧栏",
-        "navCollapsedNote": "收起为图标轨",
+        "navCollapsedNote": "收起：客户端 0（导航留在窗口左上）· Web 56 图标轨",
         "centerMax": "剩余空间（内文另有可读上限）",
         "centerDefault": "剩余空间",
         "sideDefaultNote": "首次打开",
@@ -1504,7 +1502,6 @@ window.CELADON_I18N = {
           "center": "内容",
           "side": "侧栏"
         },
-        "headerZone": "顶栏",
         "orCap": "或上限",
         "byViewType": "按视图类型",
         "sideType": {
@@ -1989,7 +1986,7 @@ window.CELADON_I18N = {
         "navZone": "導覽區",
         "centerZone": "內容區",
         "sideZone": "側欄",
-        "navCollapsedNote": "收起為圖示軌",
+        "navCollapsedNote": "收合：客戶端 0（導覽留在視窗左上）· Web 56 圖示軌",
         "centerMax": "剩餘空間（內文另有可讀上限）",
         "centerDefault": "剩餘空間",
         "sideDefaultNote": "首次開啟",
@@ -2023,7 +2020,6 @@ window.CELADON_I18N = {
           "center": "內容",
           "side": "側欄"
         },
-        "headerZone": "頂欄",
         "orCap": "或上限",
         "byViewType": "依檢視類型",
         "sideType": {
