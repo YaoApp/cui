@@ -1,6 +1,7 @@
 # 01 · 基础设施
 
-- **状态**：⏳ 待开始（**前置 `00` 已完成 ✅，可以开始**；本模块是 02 起所有模块的前置）
+- **状态**：🔄 **进行中** —— 选型与包结构**已定并跑通**（构建工具 **Vite** · 包管理器 **pnpm** · 包名 `@yaoapp/cui@2.0.0` · v2 自成一套，`dev` / `build` / `check` 均可跑）
+  　**待做**：代理（SSE 流式 + WebSocket upgrade）· 产物布局 · 构建期门禁 · 后端 SDK · i18n 构建 · 图标体系 · 主题映射 · 运行时壳
 - **目标**：把"可以开始写页面"的工程地基铺好 —— 构建工具、后端 SDK、i18n 构建、图标体系、主题映射、质量门禁、运行时壳
 - **不包含**：任何业务页面（属 02 起的各模块）
 - **依赖**：00 设计规范
@@ -46,63 +47,46 @@
 - **本机未登录 npm**（`npm whoami` → `ENEEDAUTH`）—— 不会误发；发布需要**显式登录**。
 - 发布流程（届时执行）：`npm login` → 改 `publishConfig.tag` 或发布后 `npm dist-tag add @yaoapp/cui@2.0.0 latest` → 验证 `npm view`。
 
-## 决定：v2 在 celadon 目录内自成一套，零外层改动
+## 决定：v2 在 celadon 目录内自成一套
 
-**决定日期**：2026-09-30
+**决定日期**：2026-09-30 ｜ **状态**：已落地并实测
 
-**目标**：v2 开发期间，在 `packages/celadon/` 里就能 `install` / `dev` / `build` / `check`，
+**目标**：在 `packages/celadon/` 里 `install` / `dev` / `build` / `check` 全都能跑，
 **不改变外层仓库的行为**（根安装不带它、根构建不带它、旧应用零风险）。
 
-### 做法：应用放两层目录
+### 现在的形态
 
 ```
 packages/celadon/
-  app/package.json     ← 两层。根工作区是 `packages/*`，glob 的 * 不跨 / → **匹配不到**，自动隔离
-  design/ plan/ scripts/   ← 不变；工具全部零依赖，不需要 package.json
+  package.json          @yaoapp/cui@2.0.0 —— 包根就在这里
+  pnpm-workspace.yaml   packages: []  ← 让它成为自己的工作区根
+  pnpm-lock.yaml        自己的锁文件
+  node_modules/         自己的（pnpm store 共享，磁盘影响小）
+  vite.config.ts        Vite 配置，root 指向 app/
+  app/                  应用源码（Vite 的 root）
+  design/ plan/ scripts/  设计资产 · 计划 · 工具（工具零依赖，不需要 manifest）
 ```
 
-**实测证据**：在 `packages/celadon/app/` 放一个探针 `package.json`，问 pnpm 的工作区成员，
-**探针没有出现**在成员列表里（`pnpm -r list --depth -1`）。
+### 挡两个方向，要两条保护
 
-### ⚠️ 不要在 `celadon/` 根目录放 `package.json`
+| 方向 | 会发生什么 | 保护 |
+| --- | --- | --- |
+| **由外向内** | 根工作区是 `packages/*`，会把 celadon 当成员 —— 根 `pnpm install` 会装它、根 `turbo run build` 会构建它，v2 构建失败会弄挂根构建 | 根 `pnpm-workspace.yaml` 里显式排除 `!packages/celadon` |
+| **由内向外** | 在 celadon 里跑 `pnpm install` 时，pnpm 会**向上**找最近的 workspace 根，找到外层的 —— 于是**装了外层**，还会改写外层锁文件（第一次实测就是这样，已回滚） | celadon 自带 `pnpm-workspace.yaml`，pnpm 找的永远是**最近**的那个 |
 
-放了就会被根工作区吸进去 —— 根 `pnpm install` 会装它、根 `turbo run build` 会构建它，
-v2 的构建失败会**弄挂根构建**。要放就放 `app/` 里，或先完成下面那件事。
-
-### 显式排除：已加，并且是一次"差点误判"的排查
-
-根 `pnpm-workspace.yaml` 现在是这样：
-
-```yaml
-packages:
-  - 'packages/*'
-  - '!packages/celadon'
-```
-
-### ⚠️ 光有排除还不够：celadon 必须自带一个 workspace 根
-
-排除只挡住"**被外层吃进去**"，挡不住"**从里面向外找根**"：在 `celadon/` 里跑 `pnpm install`，
-pnpm 会**向上**找到外层的 `pnpm-workspace.yaml`，于是**装了外层**（还会改写外层的锁文件）——
-第一次实测就是这样，外层锁文件被改动，必须回滚。
-
-**解法**：在 `celadon/` 放一个自己的 `pnpm-workspace.yaml`（`packages: []` 即可）。
-pnpm 找的永远是**最近的**那一个，于是本目录成为**它自己的工作区根**，安装、锁文件、`node_modules`
-全部落在 celadon 内部。
-
-**实测（两条都过才算过）**：
+**两条都实测过**：
 
 | 检查 | 结果 |
 | --- | --- |
-| 装到本地 | `celadon/node_modules` 19M · `celadon/pnpm-lock.yaml` 665 行 · vite 6.4.3 在本目录 |
+| 装到本地 | `node_modules` 19M · `pnpm-lock.yaml` 665 行 · vite 6.4.3 在本地 |
 | 外层没被碰 | 外层锁文件无改动 · 外层成员仍 7 个 · 外层 git 状态干净 |
+| 由外向内 | 往 celadon 放探针 `package.json`，工作区成员仍是 7 个、探针不在其中 |
 
-**验证方式（带正向对照）**：往 `packages/celadon/` 放一个探针 `package.json`，然后数工作区成员 ——
-既要"**探针不在里面**"，也要"**其他成员仍在**"。实测：成员 7 个、探针不在 ✓。
+**验证方式（带正向对照）**：放探针后数工作区成员 —— 既要"**探针不在里面**"，也要"**其他成员仍在**"。
 
-> **记一个坑**：这个排除第一次加的时候**把整个工作区弄空了**（成员 0）。我先后怀疑是 pnpm 版本不支持，
-> 换到 pnpm 10 仍然一样 —— 真正原因是 **YAML 缩进不一致**：原条目缩进 6 空格，我追加的那行缩进 2 空格，
-> pnpm 于是**静默**把整个 `packages` 列表解析成空。
-> **教训**：改工作区配置后**必须数一遍成员数**，不能只看"目标是不是没了" —— 目标没了也可能是**全都没了**。
+> **记一个坑**：排除第一次加的时候把**整个工作区弄空了**（成员 0）。我先后怀疑 pnpm 版本不支持、换到 pnpm 10 仍然一样；
+> 真正原因是 **YAML 缩进不一致**（原条目 6 空格、我追加的 2 空格），pnpm 于是**静默**把整个 `packages` 解析成空。
+> **教训**：改工作区配置后**必须数一遍成员数** —— 目标没了也可能是**全都没了**。
 
 ### 为什么不开独立分支 / 独立仓库
 
@@ -210,4 +194,4 @@ pnpm 找的永远是**最近的**那一个，于是本目录成为**它自己的
 
 | 源 | 目标 | 改动 | 原因 |
 | --- | --- | --- | --- |
-| —（待开始） | | | |
+| —（本阶段为**新建**：`package.json` / `vite.config.ts` / `app/` / `pnpm-workspace.yaml`，未从旧包复制代码） | | | |
