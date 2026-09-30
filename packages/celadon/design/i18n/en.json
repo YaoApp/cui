@@ -484,7 +484,8 @@
         "rail": "rail",
         "overlay": "overlay",
         "drawer": "drawer (closed)",
-        "drawerOpen": "drawer (open)"
+        "drawerOpen": "drawer (open)",
+        "none": "collapsed (header icons)"
       },
       "item": {
         "overview": "Overview",
@@ -501,11 +502,11 @@
       "navColToggle": "Toggle position",
       "navColState": "State",
       "nr1a": "Client or wide web (1024 and up)",
-      "nr1b": "56 icon rail (24 icon plus 16 padding each side)",
-      "nr1c": "macOS: in the title bar. Elsewhere: at the top of the nav",
+      "nr1b": "**Collapses to 0**: the sidebar goes away and the navigation becomes **icons in the header**, on the same row as the window controls",
+      "nr1c": "macOS: the title bar beside the traffic lights. Elsewhere: the header",
       "nr1d": "Persisted preference plus a transient flag (two levels)",
       "nr2a": "Mid web (768 to 1023)",
-      "nr2b": "Collapses to the rail automatically",
+      "nr2b": "**Keeps a 56px icon rail**, since a browser has no title bar to host the icons",
       "nr2c": "Same as above",
       "nr2d": "Same; a narrow expand never writes back to the preference",
       "nr3a": "Narrow web (below 768)",
