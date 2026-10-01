@@ -1,4 +1,4 @@
-/* 自动生成，勿手改 —— 源：tokens.less（node design/build-css.mjs） */
+/* generated — do not edit by hand; source: tokens.less (node design/build-css.mjs) */
 /**
  * celadon/design/tokens.less — CUI 2.0（Celadon）设计 token · v1.1
  *
@@ -430,6 +430,7 @@
 .celadon,
 [data-theme] .celadon {
   /* 错误提示文字（危险色的文字档） */
+  /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .on */
   /* 输入框：六态（真实伪类与 .is-* 静态类一一对应，后者供设计稿/静态页同时展示多态） */
 }
 .celadon .btn-primary,
@@ -488,6 +489,32 @@
   background: var(--background-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-default);
+}
+.celadon .seg,
+[data-theme] .celadon .seg {
+  display: inline-flex;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-control);
+  background: var(--background-field);
+}
+.celadon .seg button,
+[data-theme] .celadon .seg button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-caption);
+  padding: var(--spacing-4) var(--spacing-12);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+}
+.celadon .seg button.is-on,
+[data-theme] .celadon .seg button.is-on {
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+  font-weight: var(--font-weight-strong);
 }
 .celadon .btn-warn,
 [data-theme] .celadon .btn-warn {

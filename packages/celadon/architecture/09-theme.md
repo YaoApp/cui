@@ -25,6 +25,15 @@
 > 又没有父高度可解，于是深色页面下方留了一大块纯白（决策模型判 `fail`/`blocker`）。回归用例见
 > `features/hello/tests/hello.spec.ts` 的 "the page itself follows the theme"。
 
+## 主题状态与切换
+
+主题归 **`app/src/platform/theme/theme-store.ts`**（zustand + persist）：`theme`（`light` / `dark`）· `setTheme` · `toggle`。
+它只做一件事 —— 把当前主题写到根元素的 `data-theme` 上；`tokens.css` 里 `[data-theme='dark'] .celadon` 会切掉整套值，
+**组件不需要知道当前深浅**。选择存 `localStorage`（键 `cui.theme`），刷新后还在。
+
+切换控件是 **`app/src/components/theme-toggle/`** —— 纯组件，只收 `theme` + `onToggle` 两个 props，
+不碰 store；由 feature 接线。新增平台级 store 时，记得在 `app/src/test-support/setup.ts` 里补一行重置。
+
 ## 待讨论
 
 - 主题是只支持 `light` / `dark`，还是要预留"跟随系统"的第三态。

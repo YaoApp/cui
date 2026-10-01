@@ -9,6 +9,7 @@
    截图一律走固化的截图资产 scripts/shots.mjs，落在 app/logs/<日期>/shots/<场景>/（git 忽略）。
    用法：pnpm test:persona（会跑 tests/ 下所有 *.agent.mjs）*/
 import { chromium } from '@playwright/test'   // 直接依赖；playwright-core 是它的传递依赖，解析不到
+import { readdirSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { capturePage, captureScreen, shotDir } from '../../../../../scripts/shots.mjs'
@@ -23,6 +24,38 @@ const SHOTS = shotDir(SCENARIO)
 
 const problems = []
 const say = (s) => console.log(s)
+
+// 拟人层测的是**构建产物**，不是 dev 源码。产物比源码旧就说明在测过期的东西 —— 明确失败，别假绿。
+function newestMtime(dir) {
+  let newest = 0
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (e.name === 'node_modules' || e.name.startsWith('.')) continue
+    // 只算**影响构建**的文件：测试、剧本、采集脚本、测试支持都不进产物，
+    // 编辑它们不该被判成"产物过期"。
+    if (e.name === 'tests' || e.name === 'test-support') continue
+    if (/\.(test|spec|browser|agent)\.(?:[cm]?[jt]sx?|md)$/.test(e.name)) continue
+    const full = join(dir, e.name)
+    if (e.isDirectory()) newest = Math.max(newest, newestMtime(full))
+    else newest = Math.max(newest, statSync(full).mtimeMs)
+  }
+  return newest
+}
+{
+  const distIndex = join(PACKAGE, 'dist', 'index.html')
+  let built = 0
+  try {
+    built = statSync(distIndex).mtimeMs
+  } catch (e) {
+    // 只把"文件不存在"当缺失；其它错误（比如我把 statSync 忘了 import）必须原样报出来，
+    // 否则会得到一个听起来合理、其实是假的诊断。
+    if (e.code === 'ENOENT') problems.push('dist 不存在 —— 拟人层测构建产物，先 pnpm build')
+    else throw e
+  }
+  if (built) {
+    const newestSource = Math.max(newestMtime(join(PACKAGE, 'app', 'src')), newestMtime(join(PACKAGE, 'design')))
+    if (newestSource > built) problems.push('dist 比源码旧 —— 先 pnpm build 再跑拟人，否则测的是过期产物')
+  }
+}
 const box = async (l) => { const b = await l.boundingBox(); return b ? { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) } : null }
 const shot = (page, name) => capturePage(page, join(SHOTS, name))
 
@@ -42,7 +75,8 @@ p.on('response', (r) => { if (r.status() >= 400) problems.push(`${r.status()} ${
 p.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`))
 
 const counter = p.locator('.foo-bar__count')
-const button = p.locator('button.button')
+// 页面上不止一个按钮，按可访问名取 —— 只用 button.button 会撞进严格模式
+const button = p.getByRole('button', { name: '刷新' })
 const title = p.locator('.header__title')
 
 // S1 第一次打开
@@ -69,7 +103,7 @@ await p.keyboard.press('Tab')
 const focused = await p.evaluate(() => ({ tag: document.activeElement?.tagName, text: document.activeElement?.innerText?.trim(), shadow: getComputedStyle(document.activeElement).boxShadow }))
 await shot(p, 's3-focus.png')
 say(`S3 focus     : ${JSON.stringify(focused)}`)
-if (focused.tag !== 'BUTTON') problems.push('S3: Tab 没有落在按钮上')
+if (focused.tag !== 'BUTTON' || focused.text !== '刷新') problems.push('S3: Tab 没有落在「刷新」按钮上')
 if (!focused.shadow || focused.shadow === 'none') problems.push('S3: 焦点环不可见')
 await p.keyboard.press('Enter'); await p.keyboard.press('Space'); await p.waitForTimeout(150)
 await shot(p, 's3-after-keys.png')
@@ -77,13 +111,28 @@ const two = (await counter.innerText()).includes('2')
 say(`S3 counter   : ${await counter.innerText()}`)
 if (!two) problems.push('S3: 回车+空格后计数不是 2')
 
-// S4 深色
-await p.evaluate(() => { document.documentElement.dataset.theme = 'dark' })
+// S4 切主题 —— 用**页面上的分段控件**（设计里的主题切换件：浅色 / 暗色）
+await p.getByRole('button', { name: '暗色' }).click()
 await p.waitForTimeout(250)
 await shot(p, 's4-dark.png')
-const dark = await p.evaluate(() => ({ body: getComputedStyle(document.body).backgroundColor, title: getComputedStyle(document.querySelector('.header__title')).color, card: getComputedStyle(document.querySelector('.foo-bar')).backgroundColor }))
+const dark = await p.evaluate(() => ({
+  body: getComputedStyle(document.body).backgroundColor,
+  title: getComputedStyle(document.querySelector('.header__title')).color,
+  card: getComputedStyle(document.querySelector('.foo-bar')).backgroundColor,
+  root: document.documentElement.dataset.theme,
+  label: document.querySelector('.theme-toggle button.is-on')?.textContent?.trim(),
+}))
 say(`S4 dark      : ${JSON.stringify(dark)}`)
 if (dark.body === 'rgb(255, 255, 255)' || dark.body === 'rgba(0, 0, 0, 0)') problems.push('S4: 深色下页面底色还是白的/透明的')
+if (dark.root !== 'dark') problems.push('S4: 点了按钮但根元素 data-theme 不是 dark')
+if (dark.label !== '暗色') problems.push('S4: 分段控件没有把「暗色」标为选中')
+// 内容面必须铺满视口，否则页面底部会露出另一层的分界（这是本轮抓到并修掉的缺陷）
+const surface = await p.evaluate(() => ({
+  h: Math.round(document.querySelector('#app > *').getBoundingClientRect().height),
+  vh: window.innerHeight,
+}))
+say(`S4 surface   : ${JSON.stringify(surface)}`)
+if (surface.h < surface.vh) problems.push('S4: 内容面没有铺满视口，底部会露出分界')
 
 // S5 窄窗 375
 await p.setViewportSize({ width: 375, height: 400 })
