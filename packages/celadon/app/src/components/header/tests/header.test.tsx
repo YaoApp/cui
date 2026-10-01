@@ -4,12 +4,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { Header } from '@/components/header'
 
 describe('Header', () => {
-  it('显示标题', () => {
+  it('shows the title', () => {
     render(<Header title="Hello" />)
     expect(screen.getByRole('heading', { name: 'Hello' })).toBeInTheDocument()
   })
 
-  it('点刷新时把事件交给上层', async () => {
+  it('hands the refresh event up to its parent', async () => {
     const onRefresh = vi.fn()
     render(<Header title="Hello" onRefresh={onRefresh} />)
     await userEvent.click(screen.getByRole('button', { name: '刷新' }))

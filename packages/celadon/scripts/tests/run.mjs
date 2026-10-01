@@ -48,16 +48,16 @@ for (const [script, group] of SUITES) {
     const good = ok === expectPass
     if (good) pass++
     else { fail++; failures.push({ script, name, expectPass, ok, output }) }
-    console.log(`  ${good ? '✓' : '✗'} ${script.replace('.mjs', '').padEnd(26)} ${name.padEnd(24)} 期望${expectPass ? '通过' : '失败'} · 实际${ok ? '通过' : '失败'}`)
+    console.log(`  ${good ? '✓' : '✗'} ${script.replace('.mjs', '').padEnd(26)} ${name.padEnd(30)} want ${expectPass ? 'pass' : 'fail'} · got ${ok ? 'pass' : 'fail'}`)
   }
 }
 
-console.log(`\n  ${pass} / ${pass + fail} 用例通过`)
+console.log(`\n  ${pass} / ${pass + fail} cases passed`)
 if (fail) {
-  console.log('\n  失败详情：')
+  console.log('\n  Failure detail:')
   for (const f of failures) {
     console.log(`\n  ── ${f.script} · ${f.name}`)
-    console.log(`     期望${f.expectPass ? '通过' : '失败'}，实际${f.ok ? '通过' : '失败'}`)
+    console.log(`     wanted ${f.expectPass ? 'pass' : 'fail'}, got ${f.ok ? 'pass' : 'fail'}`)
     console.log('     ' + f.output.trim().split('\n').slice(0, 4).join('\n     '))
   }
   process.exit(1)

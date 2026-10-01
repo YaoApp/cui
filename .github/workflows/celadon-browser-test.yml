@@ -1,6 +1,7 @@
-name: celadon · 浏览器测试
+name: celadon · browser tests
 
-# 与"规范门禁 + 单元测试"分开：这一份要起服务、要真浏览器，成本高一档，单独看红绿。
+# Separate from the gates and unit tests: this one starts a server and needs a real
+# browser, so it is a step more expensive and worth its own red or green.
 on:
   push:
     paths:
@@ -13,7 +14,7 @@ on:
 
 jobs:
   browser:
-    name: 浏览器测试（Playwright）
+    name: Browser tests (Playwright)
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
@@ -38,19 +39,38 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # 环境准备：playwright.config.ts 用 channel: 'chrome'，吃 runner 自带的 Google Chrome，
-      # 因此不需要 `playwright install`（省掉几百 MB 下载）。这里只确认它真的在。
-      - name: 环境准备 · 确认 Chrome 可用
+      # playwright.config.ts asks for the chrome channel, and the ubuntu-24.04 image
+      # already ships Google Chrome, so there is nothing to download. This step only
+      # fails early and loudly if that assumption ever stops holding.
+      - name: Prepare · confirm Chrome is available
         run: |
           google-chrome --version
           pnpm exec playwright --version
 
-      # 用例自身通过 webServer 起 dev（reuseExistingServer: true），本地已在跑就直接复用
-      - name: 浏览器测试
+      # The specs start the dev server through webServer, reusing one that already runs
+      - name: Browser tests
         run: pnpm test:browser
 
-      # 失败时把轨迹与截图带出来 —— 否则线上红了只能靠猜
-      - name: 失败时上传轨迹与截图
+      - name: Write logs into the run summary
+        if: always()
+        run: |
+          {
+            echo "## celadon · browser test logs"
+            echo
+            for f in app/logs/*/*.log; do
+              [ -f "$f" ] || continue
+              echo "<details><summary><code>$f</code></summary>"
+              echo
+              echo '```'
+              cat "$f"
+              echo '```'
+              echo "</details>"
+              echo
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Traces and screenshots, for when the summary above is not enough
+      - name: Upload traces and screenshots on failure
         if: failure()
         uses: actions/upload-artifact@v7
         with:

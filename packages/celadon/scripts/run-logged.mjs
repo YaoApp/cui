@@ -38,7 +38,7 @@ function pruneOldDays(now) {
 
 const [name, command, ...args] = process.argv.slice(2)
 if (!name || !command) {
-  console.error('用法：node scripts/run-logged.mjs <日志名> <命令> [参数...]')
+  console.error('usage: node scripts/run-logged.mjs <log name> <command> [args...]')
   process.exit(2)
 }
 
@@ -51,10 +51,10 @@ const relativeLog = `app/logs/${localDate(startedAt)}/${file}`
 const out = createWriteStream(resolve(dayDir, file), { flags: 'w' })
 const write = (chunk) => { process.stdout.write(chunk); out.write(chunk) }
 
-out.write(`# 命令 ${command} ${args.join(' ')}\n# 开始 ${localStamp(startedAt)}\n\n`)
+out.write(`# command ${command} ${args.join(' ')}\n# started ${localStamp(startedAt)}\n\n`)
 
 const pruned = pruneOldDays(startedAt)
-if (pruned) console.log(`  已清理 ${pruned} 个超过 ${KEEP_DAYS} 天的日志目录`)
+if (pruned) console.log(`  pruned ${pruned} log director(y|ies) older than ${KEEP_DAYS} days`)
 
 const child = spawn(command, args, { cwd: PACKAGE, stdio: ['inherit', 'pipe', 'pipe'] })
 child.stdout.on('data', write)
@@ -63,11 +63,11 @@ child.stderr.on('data', write)
 child.on('close', (code) => {
   const endedAt = new Date()
   const seconds = ((endedAt.getTime() - startedAt.getTime()) / 1000).toFixed(1)
-  const footer = `\n# 结束 ${localStamp(endedAt)} · 退出码 ${code} · 用时 ${seconds}s\n`
+  const footer = `\n# finished ${localStamp(endedAt)} · exit ${code} · ${seconds}s\n`
   out.write(footer)
   out.end(() => {
     process.stdout.write(footer)
-    console.log(`  日志：${relativeLog}`)
+    console.log(`  log: ${relativeLog}`)
     process.exit(code ?? 1)
   })
 })

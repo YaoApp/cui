@@ -16,7 +16,7 @@ process.chdir(DESIGN)
 /* 本检查不接受"目标目录"参数：它要真的重新生成一遍产物，需要整套雪碧图与清单，
    指到别的目录没有意义 —— 与其静默检查真目录，不如直接说清楚。 */
 if (process.argv[2]) {
-  console.log('✗ check-generated 不接受目标目录参数（它检查的是仓库里真实的生成物）')
+  console.log('✗ check-generated takes no target directory — it checks the real artefacts in this repository')
   process.exit(1)
 }
 
@@ -26,10 +26,10 @@ const before = GENERATED.map((f) => readFileSync(f, 'utf8'));
 execFileSync('node', [resolve(dirname(fileURLToPath(import.meta.url)), 'build-icons.mjs')], { stdio: 'pipe' });
 const stale = GENERATED.filter((f, i) => readFileSync(f, 'utf8') !== before[i]);
 if (stale.length) {
-  console.log(`  ✗ 生成物是旧的：${stale.join(', ')} —— 请把 build-icons.mjs 的结果一并提交`);
+  console.log(`  ✗ generated files are stale: ${stale.join(', ')} — commit the output of build-icons.mjs`);
   process.exit(1);
 }
-console.log('  ✓ 生成物与源一致（icons.html / mock.html）');
+console.log('  ✓ generated files match their sources (icons.html / mock.html)');
 // 品牌标记的颜色只允许来自 token：写死色值会让页面和 token 悄悄脱钩
 const hard = ['#2A7B7B', '#389F9F', '#2FA79C', '#0CC8B7', '#F4F1EA', '#FFFFFF'];
 let dirty = [];
@@ -38,7 +38,7 @@ for (const f of files) {
   for (const c of hard) if (text.includes('fill="' + c + '"') || text.includes('fill:' + c) || text.includes('stop-color="' + c + '"')) dirty.push(`${f}: ${c}`);
 }
 if (dirty.length) {
-  console.log(`  ✗ 品牌标记颜色写死了：${dirty.slice(0, 4).join(', ')} —— 请改用 --brand-mark-* / --brand-eye`);
+  console.log(`  ✗ brand mark colours are hardcoded: ${dirty.slice(0, 4).join(', ')} — use --brand-mark-* / --brand-eye`);
   process.exit(1);
 }
 // 标记的填充只允许 --brand-eye / --brand-mark-*：用 UI 的 --brand-text / --brand-graphic / --brand-lift
@@ -58,8 +58,8 @@ for (const f of files) {
   }
 }
 if (wrongUse.length) {
-  console.log(`  ✗ 用 UI 的品牌 token 给标记上色：${wrongUse.slice(0, 3).join(' · ')}`);
-  console.log('      请改用 --brand-mark-from/to 与 --brand-eye');
+  console.log(`  ✗ a UI brand token is painting the mark: ${wrongUse.slice(0, 3).join(' · ')}`);
+  console.log('      use --brand-mark-from/to and --brand-eye instead');
   process.exit(1);
 }
-console.log('  ✓ 品牌标记颜色全部来自 token');
+console.log('  ✓ every brand mark colour comes from a token');

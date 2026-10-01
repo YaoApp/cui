@@ -27,7 +27,7 @@ const flag = (f) => args.includes(f);
 const names = args.filter((a) => !a.startsWith('--'));
 
 const work = mkdtempSync(join(tmpdir(), 'simpleicons-'));
-process.stdout.write(`  准备 simple-icons@${VERSION} … `);
+process.stdout.write(`  fetching simple-icons@${VERSION} … `);
 execFileSync('curl', ['-sL', `https://registry.npmjs.org/simple-icons/-/simple-icons-${VERSION}.tgz`, '-o', join(work, 'p.tgz')]);
 execFileSync('tar', ['xzf', join(work, 'p.tgz'), '-C', work]);
 const pkg = join(work, 'package');
@@ -43,45 +43,45 @@ const ours = JSON.parse(readFileSync('icons/brand-index.json', 'utf8'));
 const oursKeys = new Set(ours.flatMap((e) => [e.id, e.brand.toLowerCase(), e.title.toLowerCase()].map((s) => String(s).toLowerCase())));
 const file = 'icons/brand-simple-index.json';
 const have = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : [];
-console.log(`✓（simple-icons ${icons.length} 个品牌 · 我们已有 ${ours.length} 个 lobehub 品牌 · 已按需引入 ${have.length} 个）`);
+console.log(`✓ (simple-icons holds ${icons.length} brand(s) · ${ours.length} already came from lobehub · ${have.length} pulled in on demand)`);
 
 if (flag('--search')) {
   const q = (names[0] || '').toLowerCase();
   const hits = icons.filter((e) => e.title.toLowerCase().includes(q) || (e.slug || '').includes(q)).slice(0, 20);
-  console.log(`  匹配「${q}」${hits.length} 个：`);
-  hits.forEach((e) => console.log(`    ${(e.slug || '').padEnd(24)} ${e.title}  #${e.hex}${oursKeys.has(e.title.toLowerCase()) ? '  ← 我们已有（保留 lobehub 版）' : ''}`));
+  console.log(`  "${q}" matches ${hits.length}:`);
+  hits.forEach((e) => console.log(`    ${(e.slug || '').padEnd(24)} ${e.title}  #${e.hex}${oursKeys.has(e.title.toLowerCase()) ? '  ← already ours (keeping the lobehub copy)' : ''}`));
   process.exit(0);
 }
 if (flag('--list')) {
-  console.log(`  已按需引入 ${have.length} 个：${have.map((e) => e.id).join(', ') || '（无）'}`);
+  console.log(`  already pulled in on demand: ${have.map((e) => e.id).join(', ') || '(none)'}`);
   process.exit(0);
 }
-if (!names.length) { console.log('  没给品牌名。用法：node vendor-simple.mjs wechat notion figma'); process.exit(0); }
+if (!names.length) { console.log('  no brand names given. usage: node vendor-simple.mjs wechat notion figma'); process.exit(0); }
 
 const xmlEsc = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 const picked = [], skipped = [], unknown = [];
 for (const n of names) {
   const e = byKey.get(n.toLowerCase());
   if (!e) { unknown.push(n); continue; }
-  if (oursKeys.has(e.title.toLowerCase()) || oursKeys.has(e.slug)) { skipped.push(`${n}（lobehub 已有，保留那份）`); continue; }
+  if (oursKeys.has(e.title.toLowerCase()) || oursKeys.has(e.slug)) { skipped.push(`${n} (lobehub already has it; keeping that copy)`); continue; }
   const svgFile = join(pkg, 'icons', `${e.slug}.svg`);
-  if (!existsSync(svgFile)) { unknown.push(`${n}（有数据无 svg）`); continue; }
+  if (!existsSync(svgFile)) { unknown.push(`${n} (metadata but no svg)`); continue; }
   const svg = readFileSync(svgFile, 'utf8');
   const d = (svg.match(/\bd="([^"]+)"/g) || []).map((m) => m.slice(3, -1));
-  if (!d.length) { unknown.push(`${n}（svg 无 path）`); continue; }
+  if (!d.length) { unknown.push(`${n} (svg has no path)`); continue; }
   const inner = d.map((x) => `<path d="${x}" fill="#${(e.hex || '000000').toUpperCase()}"/>`).join('');
   const mono = d.map((x) => `<path d="${x}" fill="currentColor"/>`).join('');
   picked.push({ id: 'brand-' + e.slug, brand: e.title, title: e.title, primary: '#' + (e.hex || '').toUpperCase(), color: true, mono: true, lib: 'simpleicons', inner, monoInner: mono });
 }
-console.log(`  解析：命中 ${picked.length} · 跳过 ${skipped.length} · 未找到 ${unknown.length}`);
-skipped.forEach((s) => console.log(`    · 跳过 ${s}`));
-unknown.forEach((s) => console.log(`    · 未找到 ${s}`));
+console.log(`  resolved: ${picked.length} picked · ${skipped.length} skipped · ${unknown.length} not found`);
+skipped.forEach((s) => console.log(`    · skipped ${s}`));
+unknown.forEach((s) => console.log(`    · not found ${s}`));
 if (flag('--dry')) {
-  picked.slice(0, 3).forEach((p) => console.log(`    （dry）${p.id} ← ${p.brand} ${p.primary} · path ${(p.inner.match(/<path/g) || []).length} 条`));
-  console.log('  --dry：未写任何文件');
+  picked.slice(0, 3).forEach((p) => console.log(`    (dry) ${p.id} ← ${p.brand} ${p.primary} · ${(p.inner.match(/<path/g) || []).length} path(s)`));
+  console.log('  --dry: nothing was written');
   process.exit(0);
 }
-if (!picked.length) { console.log('  没有可写入的品牌'); process.exit(0); }
+if (!picked.length) { console.log('  no brand to write'); process.exit(0); }
 
 /* 分片：沿用 lobehub 的做法，按体积切，且同一品牌的两个变体同片 */
 const all = have.concat(picked.map(({ inner, monoInner, ...e }) => ({ ...e, symbols: [
@@ -114,6 +114,6 @@ for (const f of readdirSync('icons')) {
   if (m && Number(m[1]) > shards.length) writeFileSync(join('icons', f), ''), execFileSync('rm', ['-f', join('icons', f)]);
 }
 writeFileSync(file, JSON.stringify(all.map(({ symbols, ...e }) => e), null, 1) + '\n');
-console.log(`  ✓ 已引入 ${picked.length} 个 → 合计 ${all.length} 个 · 分 ${shards.length} 片`);
+console.log(`  ✓ wrote ${picked.length} brand(s) → ${all.length} in total · ${shards.length} shard(s)`);
 picked.forEach((p) => console.log(`    + ${p.id}（${p.brand}）${p.primary}`));
-console.log('  → 跑 node build-icons.mjs 生效');
+console.log('  → run node build-icons.mjs to take effect');
