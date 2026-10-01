@@ -14,3 +14,15 @@ describe('HelloPage', () => {
     expect(screen.getByText('已刷新 1 次')).toBeInTheDocument()
   })
 })
+
+describe('HelloPage · theme', () => {
+  it('switches the page theme through the toggle', async () => {
+    render(<HelloPage />)
+    expect(document.documentElement.dataset.theme).toBe('light')
+
+    await userEvent.click(screen.getByRole('button', { name: '暗色' }))
+
+    expect(document.documentElement.dataset.theme).toBe('dark')
+    expect(screen.getByRole('button', { name: '暗色' })).toHaveClass('is-on')
+  })
+})

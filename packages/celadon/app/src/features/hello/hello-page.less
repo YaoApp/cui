@@ -2,10 +2,15 @@
   display: flex;
   flex-direction: column;
   line-height: var(--line-height-cjk);
-  min-block-size: 100%;
+  /* 页面自己声明铺满：壳是弹性列，这一条才生效（父级高度 auto 时 min-block-size:100% 会被丢掉）*/
+  flex: 1;
   background: var(--background-content);
 
   &__body {
     padding: var(--spacing-24);
+  }
+
+  &__actions {
+    margin-block-start: var(--spacing-16);
   }
 }
