@@ -4,20 +4,26 @@
 
 ## 1. 分工
 
-| 层 | 工具 | 判定者 | 测什么 |
-| --- | --- | --- | --- |
-| **规范门禁** | `scripts/check-*.mjs`（**零依赖**）+ lints | 确定性代码 | 设计规范（token · i18n · 样式约定 · 文档结构）· 类型 · 样式 · 依赖边界 |
-| **单元 / 组件** | `vitest` · `@testing-library/react` · `user-event` · `jsdom` | 确定性代码 | 纯逻辑 · 状态与数据层 · 组件行为 |
-| **浏览器** | `@playwright/test` + 截图 golden | 确定性代码 | 关键交互主路径 · 中文输入法 · 全键盘 · 视觉回归 |
-| **拟人** | 剧本 + 浏览器执行 + 看图（执行者视觉）· **`ocr_recognize`** · **`decision_decide`** | **执行者判定；按需转人** | 真实使用路径 · 极端数据 · 环境差异 · 观感与措辞 |
+| 层 | 工具 | 判定者 | 测什么 | 命令 → 日志 |
+| --- | --- | --- | --- | --- |
+| **规范门禁** | `scripts/check-*.mjs`（**零依赖**）+ lints | 确定性代码 | 设计规范（token · i18n · 样式约定 · 文档结构）· 类型 · 样式 · 依赖边界 | `pnpm check` → `gates-<HHMM>.log` |
+| **检查器自测** | `scripts/tests/run.mjs` | 确定性代码 | 每条检查规则一个正例 + 一个违规例 | `pnpm test:checkers` → `checkers-<HHMM>.log` |
+| **单元 / 组件** | `vitest` · `@testing-library/react` · `user-event` · `jsdom` | 确定性代码 | 纯逻辑 · 状态与数据层 · 组件行为 | `pnpm test` → `unit-<HHMM>.log` |
+| **浏览器** | `@playwright/test` + 截图 golden | 确定性代码 | 关键交互主路径 · 中文输入法 · 全键盘 · 视觉回归 | `pnpm test:browser` → `browser-<HHMM>.log` |
+| **拟人** | 剧本 + 浏览器执行 + 看图（执行者视觉）· **`ocr_recognize`** · **`decision_decide`** | **执行者判定；按需转人** | 真实使用路径 · 极端数据 · 环境差异 · 观感与措辞 | `pnpm test:persona` → `<场景>-<HHMM>.log` |
 
-规范门禁零依赖、随设计资产走，是 QA 流程的**第 1 阶段**；其余三层用上表的栈。
+规范门禁零依赖、随设计资产走，是 QA 流程的**第 1 阶段**；其余各层用上表的栈。
+日志落在 `app/logs/<系统日期>/`（git 忽略），写法见 `architecture/14` 的「日志」一节。
+**`pnpm test:all`** 一把跑：门禁 + 检查器自测 + 单元 + 浏览器 + 拟人。
 
 ## 2. 单元 / 组件测试
 
 - **位置（强约束，两条方向相反）**：
   - **单元用例与源文件同目录** —— `button.tsx` 旁边就是 `button.test.tsx`；**不许进 `tests/`**
   - **浏览器用例与拟人剧本脚本进该 feature 的 `tests/`** —— 它们描述的是整体场景，不属于某一个组件或文件
+- **这条由 `check-app-layout` 强制**（两条方向相反的规则，各带正反样本；见 `architecture/13`）。
+- **新增 store 时，要在 `app/src/test-support/setup.ts` 里补一行重置** —— 用例间串味是最常见的 flaky 来源，
+  目前是显式列出，没有自动化。
 - **后缀即分工（三条）**：单元 / 组件 `*.test.ts(x)` · 浏览器 `*.browser.ts` · 拟人 `*.agent.md` + `*.agent.mjs`
   （**同一 `tests/` 目录内并存**）
 - **按场景命名**：一个场景一个文件，文件名说清是哪个场景（`main-path.browser.ts` · `theme.browser.ts` ·
@@ -64,7 +70,8 @@
 - **剧本住 `app/src/features/<域>/tests/<场景>.agent.md`，进仓库**；**一个场景一份**；剧本 · 判定数据 · 结论同一个文件，
   结论在执行后追加并带时间戳，因此"预期先写定"这件事在文件里看得出来。
 - **采集脚本与剧本同名同场景**：`<场景>.agent.mjs`。后缀即分工：`*.test.ts(x)` 给 vitest ·
-  `*.browser.ts` 给 Playwright · `*.agent.mjs` 给 `pnpm test:persona`（它自动发现所有 `*.agent.mjs`）。
+  `*.browser.ts` 给 Playwright · `*.agent.mjs` 给 `pnpm test:persona`
+  （`scripts/run-persona.mjs` 自动发现 `app/src/features/*/tests/*.agent.mjs` 并逐个跑，一个场景一份日志）。
   脚本只做机器能做的部分（开真浏览器 · 按剧本走 · 截图 · 报客观测量），
   判定仍由执行者给出。
 - **证据不进仓库**：截图落在 `app/logs/<日期>/<场景>-<HHMM>/`（与同一次运行的日志同目录 · 同名 · git 忽略）。
