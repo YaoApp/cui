@@ -1,6 +1,7 @@
 # 拟人测试 · 结构试跑页
 
-> 位置规矩：**只有 feature 需要拟人测试**，剧本住 `features/<域>/tests/persona.md`（进仓库）。
+> 位置规矩：**只有 feature 需要拟人测试**，剧本住 `features/<域>/tests/<场景>.agent.md`（进仓库）；
+> 采集脚本是同名的 `<场景>.agent.mjs`。
 > 截图等二进制证据跟着日志走（`app/logs/<日期>/persona-<HHMM>/`，git 忽略），不进仓库。
 
 ## 剧本（执行前写定，预期已冻结）
@@ -129,7 +130,7 @@ body { margin: 0; background: var(--background-app); color: var(--text-primary);
 
 `main.tsx` 引入它；顺带修掉 `body` 默认 8px 外边距（截图里那条带左右各留了一点）。
 
-**回归用例**：`hello.spec.ts` 新增一条 —— 切深色后 `body` 的计算背景必须与浅色不同、且不是白、不是透明。
+**回归用例**：`theme.browser.ts`（原在 `hello.spec.ts` 里，后按场景拆出）新增一条 —— 切深色后 `body` 的计算背景必须与浅色不同、且不是白、不是透明。
 **先证明它会红**：把 shell 的 import 摘掉 → 该用例失败于 `Expected: not "rgba(0, 0, 0, 0)"`；装回去 → 通过。
 
 ## 第二轮逐条

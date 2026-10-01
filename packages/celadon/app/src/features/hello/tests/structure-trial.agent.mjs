@@ -3,13 +3,14 @@
    判定（看图 · OCR · 决策模型 · 是否转人）不在这里，写在同目录的 persona.md 里。
 
    为什么住这里：拟人测试只属于 feature，剧本与它的采集脚本都放在该 feature 的 tests/ 下。
-   后缀即分工 —— *.test.ts(x) 给 vitest · *.spec.ts 给 Playwright · persona.mjs 给 pnpm test:persona。
+   后缀即分工 —— *.test.ts(x) 给 vitest · *.browser.ts 给 Playwright · *.agent.mjs 给 pnpm test:persona。
+   命名按场景：一个场景一份剧本（*.agent.md）与一份采集脚本（*.agent.mjs）。
 
    证据落在 app/logs/<日期>/persona-<HHMM>/（与同一次运行的日志同目录，git 忽略）。
-   用法：pnpm test:persona */
+   用法：pnpm test:persona（会跑 tests/ 下所有 *.agent.mjs）*/
 import { chromium } from '@playwright/test'   // 直接依赖；playwright-core 是它的传递依赖，解析不到
 import { mkdirSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { basename, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -20,7 +21,9 @@ const pad = (n) => String(n).padStart(2, '0')
 const now = new Date()
 const day = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 const stamp = `${pad(now.getHours())}${pad(now.getMinutes())}`
-const EVIDENCE = resolve(PACKAGE, 'app', 'logs', day, `persona-${stamp}`)
+// 证据目录与剧本同名 —— 一个场景一份，互不覆盖
+const SCENARIO = basename(fileURLToPath(import.meta.url)).replace('.agent.mjs', '')
+const EVIDENCE = resolve(PACKAGE, 'app', 'logs', day, `${SCENARIO}-${stamp}`)
 
 const problems = []
 const say = (s) => console.log(s)
@@ -97,4 +100,4 @@ if (!zero) problems.push('S6: 刷新后计数没有归零')
 await b.close()
 say(`evidence     : ${EVIDENCE.replace(PACKAGE + '/', '')}`)
 if (problems.length) { say(`problems     : ${problems.length}`); problems.forEach((x) => say(`  - ${x}`)); process.exit(1) }
-say('objective    : 全部通过（判定见同目录 persona.md）')
+say('objective    : all measurements pass (the verdict lives in the sibling .agent.md)')

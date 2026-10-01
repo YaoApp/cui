@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* app 源码布局检查 —— 管的是"文件该住在哪"。
-   规则：用例（*.test.* / *.spec.*）必须在名为 tests 的目录内，源码目录里不许有。
+   规则：测试产物（*.test.* / *.browser.* / *.agent.*）必须在名为 tests 的目录内，源码目录里不许有。
    目标目录取 process.argv[2]，默认 app/src。 */
 import { readdirSync, statSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
@@ -14,7 +14,7 @@ try { statSync(TARGET) } catch {
   process.exit(1)
 }
 
-const isCase = (name) => /\.(test|spec)\.[cm]?[jt]sx?$/.test(name)
+const isCase = (name) => /\.(test|spec|browser|agent)\.(?:[cm]?[jt]sx?|md)$/.test(name)
 const cases = []
 const problems = []
 
@@ -28,7 +28,7 @@ function walk(dir) {
     cases.push(relative(TARGET, full))
     if (!parts.slice(0, -1).includes('tests')) {
       problems.push(
-        `${relative(TARGET, full)} is a test file outside a tests/ directory — move it there` +
+        `${relative(TARGET, full)} is a test artefact outside a tests/ directory — move it there` +
         ` (e.g. ${parts.slice(0, -1).join('/')}/tests/${entry.name})`
       )
     }

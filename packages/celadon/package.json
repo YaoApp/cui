@@ -45,7 +45,7 @@
     "test:watch": "vitest",
     "test:checkers": "node scripts/run-logged.mjs checkers node scripts/tests/run.mjs",
     "test:browser": "node scripts/run-logged.mjs browser playwright test",
-    "test:persona": "node scripts/run-logged.mjs persona node app/src/features/hello/tests/persona.mjs",
+    "test:persona": "node scripts/run-persona.mjs",
     "test:all": "pnpm test:checkers && pnpm test && pnpm test:browser && pnpm test:persona",
     "prepack": "vite build"
   },
