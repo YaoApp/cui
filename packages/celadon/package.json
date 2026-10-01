@@ -42,11 +42,12 @@
     "check": "node scripts/run-logged.mjs gates pnpm run check:run",
     "check:run": "node scripts/check-i18n.mjs && node scripts/check-readme-values.mjs && node scripts/check-tokens.mjs && node scripts/check-generated.mjs && node scripts/check-css-conventions.mjs && node scripts/check-plan-md.mjs && node scripts/check-app-layout.mjs",
     "test": "node scripts/run-logged.mjs unit vitest run",
-    "prepack": "vite build",
     "test:watch": "vitest",
     "test:checkers": "node scripts/run-logged.mjs checkers node scripts/tests/run.mjs",
-    "test:all": "pnpm test:checkers && pnpm test && pnpm test:browser",
-    "test:browser": "node scripts/run-logged.mjs browser playwright test"
+    "test:browser": "node scripts/run-logged.mjs browser playwright test",
+    "test:persona": "node scripts/run-persona.mjs",
+    "test:all": "pnpm check && pnpm test:checkers && pnpm test && pnpm test:browser && pnpm test:persona",
+    "prepack": "vite build"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

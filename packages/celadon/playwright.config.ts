@@ -5,8 +5,9 @@ const BASE_URL = process.env.CUI_BASE_URL || `http://localhost:${PORT}`
 
 export default defineConfig({
   testDir: 'app/src',
-  // 只认浏览器用例。*.test.* 是单元用例，交给 vitest（两边默认范围重叠，必须收窄）。
-  testMatch: '**/tests/**/*.spec.ts',
+  // 后缀即分工：只认 *.browser.ts。*.test.* 交给 vitest、*.agent.* 交给 pnpm test:persona
+  //（三个 runner 的默认范围会重叠，必须各自收窄）。
+  testMatch: '**/tests/**/*.browser.ts',
   fullyParallel: true,
   reporter: [['list']],
   use: {

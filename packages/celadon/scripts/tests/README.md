@@ -43,13 +43,13 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 | `check-i18n` | `clean`（三语齐全）+ `violation-missing-key` + `violation-untranslated`（ja 与 zh-CN 同文）+ `violation-simplified-in-tw`（繁中夹简体字）+ `violation-en-in-chinese`（en 里写着中文） + `violation-abbrev-key`（key 用缩写）+ `violation-key-naming`（含下划线）+ `violation-key-depth`（4 段）+ `violation-extra-key`（某语多出 key）|
 | `check-readme-values` | `clean` + `violation`（README 色值与 tokens 不一致）|
 | `check-plan-md` | `clean` + `violation-width`（表格列数不一致）+ `violation-orphan-row`（孤立表格行）|
-| `check-app-layout` | `clean`（用例都在 `tests/` 内；`base/` 与复合件都可以有 `parts/`）+ `violation-test-beside-source`（单测与源码同层）+ `violation-spec-beside-source`（浏览器用例散在 feature 根上）|
+| `check-app-layout` | `clean`（单测挨着源文件 · 浏览器与拟人住 `tests/`）+ `violation-unit-in-tests-dir`（单测住进了 `tests/`）+ `violation-unit-without-sibling`（单测旁边没有源文件）+ `violation-browser-beside-source` · `violation-spec-beside-source` · `violation-agent-script-beside-source`（后三条：该进 `tests/` 的散在源码目录）|
 
 ## 没被样本覆盖的
 
 - **`check-generated`**：它会**真的重新生成**一遍产物再比对 —— 需要整套图标雪碧图与清单，还要一个**可写的副本目录**（它会把生成结果写进去），属于集成级检查。不喂样本，靠**日常运行**（它就是产物一致性的那一道）。
 
-除 `check-generated` 外，**其余六个检查器每条规则都有样本**（共 41 个用例）。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
+除 `check-generated` 外，**其余六个检查器每条规则都有样本**（共 44 个用例）。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
 
 ## 加一个样本
 
