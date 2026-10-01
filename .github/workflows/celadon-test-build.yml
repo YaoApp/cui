@@ -1,0 +1,54 @@
+name: celadon · 规范门禁 + 单元测试 + 构建
+
+# celadon 是独立包（自己的 package.json / 锁文件 / workspace / pnpm 版本），不在根 workspace 里，
+# 所以单独一份 workflow，只在它自己或本文件有改动时跑。
+on:
+  push:
+    paths:
+      - 'packages/celadon/**'
+      - '.github/workflows/celadon-*.yml'
+  pull_request:
+    paths:
+      - 'packages/celadon/**'
+      - '.github/workflows/celadon-*.yml'
+
+jobs:
+  check-test-build:
+    name: 规范门禁 + 单元测试 → 构建
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: packages/celadon
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v7
+
+      # 指向 celadon 自己的 package.json —— 不读仓库根的 packageManager，
+      # 这样 celadon 的 pnpm 版本由它自己钉（隔离：根怎么改都不影响这里）。
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          package_json_file: packages/celadon/package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          # celadon 有自己的锁文件，缓存要指到这里（指根锁文件会缓存错东西）
+          cache-dependency-path: packages/celadon/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # 1. 规范门禁（七个检查器）—— 与单元测试同一 job，最便宜的先跑
+      - name: 规范门禁
+        run: pnpm check
+
+      # 2. 单元 / 组件测试 —— 不过就停在这，不进构建
+      - name: 单元 / 组件测试
+        run: pnpm test
+
+      # 3. 前两步都过了才构建
+      - name: 构建
+        run: pnpm build

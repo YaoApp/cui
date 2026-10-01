@@ -1,0 +1,62 @@
+name: celadon · 浏览器测试
+
+# 与"规范门禁 + 单元测试"分开：这一份要起服务、要真浏览器，成本高一档，单独看红绿。
+on:
+  push:
+    paths:
+      - 'packages/celadon/**'
+      - '.github/workflows/celadon-*.yml'
+  pull_request:
+    paths:
+      - 'packages/celadon/**'
+      - '.github/workflows/celadon-*.yml'
+
+jobs:
+  browser:
+    name: 浏览器测试（Playwright）
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: packages/celadon
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v7
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          package_json_file: packages/celadon/package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: packages/celadon/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # 环境准备：playwright.config.ts 用 channel: 'chrome'，吃 runner 自带的 Google Chrome，
+      # 因此不需要 `playwright install`（省掉几百 MB 下载）。这里只确认它真的在。
+      - name: 环境准备 · 确认 Chrome 可用
+        run: |
+          google-chrome --version
+          pnpm exec playwright --version
+
+      # 用例自身通过 webServer 起 dev（reuseExistingServer: true），本地已在跑就直接复用
+      - name: 浏览器测试
+        run: pnpm test:browser
+
+      # 失败时把轨迹与截图带出来 —— 否则线上红了只能靠猜
+      - name: 失败时上传轨迹与截图
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: celadon-browser-test-results
+          path: |
+            packages/celadon/test-results/
+            packages/celadon/app/logs/
+          retention-days: 7
+          if-no-files-found: ignore
