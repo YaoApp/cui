@@ -9,7 +9,8 @@ export default defineConfig({
     environment: 'jsdom',
     // 只认单元用例。*.spec.ts 是浏览器用例，交给 Playwright ——
     // 两个工具的默认范围都同时含 test 与 spec，不收窄就会互相误抓（见 plan/20）。
-    include: ['app/src/**/tests/**/*.test.{ts,tsx}'],
+    // 单元用例与源文件同目录，所以不限定 tests/；*.browser.ts 与 *.agent.* 另有归属，不会误抓
+    include: ['app/src/**/*.test.{ts,tsx}'],
     setupFiles: ['app/src/test-support/setup.ts'],
     coverage: {
       provider: 'v8',

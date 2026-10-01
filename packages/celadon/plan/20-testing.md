@@ -15,9 +15,9 @@
 
 ## 2. 单元 / 组件测试
 
-- **位置（强约束）**：**用例一律放所在单元的 `tests/` 目录内**，源码目录里不得出现 `*.test.*` / `*.spec.*`：
-  - 组件 → `components/base/button/tests/button.test.tsx` · `components/page-header/tests/page-header.test.tsx`
-  - 页面 / 状态 / 数据 → `features/inbox/tests/inbox-page.test.tsx` · `inbox-store.test.ts`
+- **位置（强约束，两条方向相反）**：
+  - **单元用例与源文件同目录** —— `button.tsx` 旁边就是 `button.test.tsx`；**不许进 `tests/`**
+  - **浏览器用例与拟人剧本脚本进该 feature 的 `tests/`** —— 它们描述的是整体场景，不属于某一个组件或文件
 - **后缀即分工（三条）**：单元 / 组件 `*.test.ts(x)` · 浏览器 `*.browser.ts` · 拟人 `*.agent.md` + `*.agent.mjs`
   （**同一 `tests/` 目录内并存**）
 - **按场景命名**：一个场景一个文件，文件名说清是哪个场景（`main-path.browser.ts` · `theme.browser.ts` ·
@@ -35,7 +35,7 @@
 
 - **来源**：该模块的验收条款
 - **数量**：每个模块**只留少量最关键的主路径**（分层 70/20/10 —— UI / E2E 只占一层，其余压到下层）
-- **写在哪**：该 feature 的 `tests/` 目录内，后缀 `*.browser.ts`、**一个场景一个文件**；**该模块的计划里列出它自己的主路径清单**
+- **写在哪**：该 feature 的 `tests/` 目录内（**与单元用例分开放**），后缀 `*.browser.ts`、**一个场景一个文件**；**该模块的计划里列出它自己的主路径清单**
 - **格式**：路径（用户语言）+ 要点（关键断言）
 
 **UI 底座验收**（一次性，之后并入回归）：**中文输入法**（组合中 · 候选词 · **未上屏时回车 / 点击不误提交**）· **全键盘**（Tab 顺序 · Esc · Enter · **焦点环可见**）· **token 换肤生效**（深浅色跟随 token，非硬编码样式）

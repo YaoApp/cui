@@ -6,8 +6,10 @@
 ## 规则
 
 - 栈：**`vitest`** + `@testing-library/react` + `@testing-library/user-event` + **`jsdom`** + `@vitest/coverage-v8` + **`@playwright/test`**。
-- **位置（强约束）**：用例一律放所在单元的 `tests/` 目录内 —— 组件是 `components/<名>/tests/`，
-  feature 是 `features/<域>/tests/`；**源码目录里不得出现 `*.test.*` / `*.spec.*`**。
+- **位置（强约束，两条方向相反）**：
+  - **单元用例与源文件同目录**（`button.tsx` 旁边就是 `button.test.tsx`），**不许进 `tests/`**；
+  - **浏览器用例与拟人剧本脚本必须进 `features/<域>/tests/`**（整体场景，不属于某单个组件）。
+  两条都由 `check-app-layout` 强制（各带正反样本）。
 - **后缀即分工**：单元 / 组件 `*.test.ts(x)` · 浏览器 `*.browser.ts` · 拟人 `<场景>.agent.md` + `<场景>.agent.mjs`。
 - **按场景命名**：一个场景一个文件；文件名说清场景，不说"某组件"。
 - **拟人测试只属于 feature**：剧本住 `features/<域>/tests/<场景>.agent.md`（**进仓库**，剧本与判定数据在前、
