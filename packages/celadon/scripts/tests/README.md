@@ -24,9 +24,9 @@ tests/
 | 目录名前缀 | 期望 | 用途 |
 | --- | --- | --- |
 | `clean` | 检查器**通过**（退出码 0）| 正常输入；也用来放"应该豁免"的样本 |
-
-> 另有一类**护栏**样本：目录里没有可检查的东西时，检查器必须**失败**——"扫到 0 个文件也算通过"是最危险的假绿。
 | `violation` | 检查器**失败**（退出码非 0）| 反例，每条规则一个 |
+
+> 另有一类**护栏**样本：目录里没有可检查的东西时，检查器必须**失败** —— "扫到 0 个文件也算通过"是最危险的假绿。
 
 检查器用**第一个参数**接收目标目录（默认 `../design`），所以样本不需要长得像真项目：
 
@@ -42,12 +42,14 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 | `check-tokens` | `violation-no-pages`（**没有页面** → 护栏报错，防"扫到 0 页也通过"）+ `clean`（全走 token，含逻辑边框线宽）+ `violation`（写死字号/行高/圆角/内距）+ `violation-muted-text`（装饰色承载文字）+ `violation-border-logical`（`border-inline-start: 2px`）+ `violation-colour-in-fill`（`fill:#FF0000`）+ `violation-outline-colour`（`rgba()`）+ `violation-shorthand-asym`（`margin: 0 0 0 auto`） + `violation-brace-mismatch`（大括号不配对）+ `violation-missing-semicolon`（漏分号）+ `violation-font-shorthand`（`font:` 简写）|
 | `check-i18n` | `clean`（三语齐全）+ `violation-missing-key` + `violation-untranslated`（ja 与 zh-CN 同文）+ `violation-simplified-in-tw`（繁中夹简体字）+ `violation-en-in-chinese`（en 里写着中文） + `violation-abbrev-key`（key 用缩写）+ `violation-key-naming`（含下划线）+ `violation-key-depth`（4 段）+ `violation-extra-key`（某语多出 key）|
 | `check-readme-values` | `clean` + `violation`（README 色值与 tokens 不一致）|
+| `check-plan-md` | `clean` + `violation-width`（表格列数不一致）+ `violation-orphan-row`（孤立表格行）|
+| `check-app-layout` | `clean`（用例都在 `tests/` 内；`base/` 与复合件都可以有 `parts/`）+ `violation-test-beside-source`（单测与源码同层）+ `violation-spec-beside-source`（浏览器用例散在 feature 根上）|
 
 ## 没被样本覆盖的
 
 - **`check-generated`**：它会**真的重新生成**一遍产物再比对 —— 需要整套图标雪碧图与清单，还要一个**可写的副本目录**（它会把生成结果写进去），属于集成级检查。不喂样本，靠**日常运行**（它就是产物一致性的那一道）。
 
-其余四个检查器的**每条规则都有样本**（共 33 个用例）。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
+除 `check-generated` 外，**其余六个检查器每条规则都有样本**（共 41 个用例）。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
 
 ## 加一个样本
 
