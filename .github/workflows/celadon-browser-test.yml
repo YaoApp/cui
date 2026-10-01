@@ -17,8 +17,8 @@ jobs:
     name: Browser tests (Playwright)
     runs-on: ubuntu-24.04
     env:
-      # Keep the logs plain: colour codes end up as visible escape glyphs in the run summary
-      NO_COLOR: '1'
+      # Keep the logs plain: colour codes end up as visible escape glyphs in the run summary.
+      # FORCE_COLOR only — setting NO_COLOR alongside it makes node warn that it ignores NO_COLOR.
       FORCE_COLOR: '0'
     timeout-minutes: 15
     defaults:
