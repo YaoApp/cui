@@ -6,7 +6,6 @@ export type Theme = 'light' | 'dark'
 type ThemeState = {
   theme: Theme
   setTheme: (theme: Theme) => void
-  toggle: () => void
 }
 
 /* 主题是运行时的事，归平台层。它只做一件事：把当前主题写到根元素的 data-theme 上 ——
@@ -18,13 +17,12 @@ function apply(theme: Theme) {
 
 export const useThemeStore = create<ThemeState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       theme: 'light',
       setTheme: (theme) => {
         apply(theme)
         set({ theme })
       },
-      toggle: () => get().setTheme(get().theme === 'dark' ? 'light' : 'dark'),
     }),
     {
       name: 'cui.theme',

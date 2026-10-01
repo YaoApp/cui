@@ -1,17 +1,16 @@
 import { expect, test } from '@playwright/test'
 
-/* 场景：切主题 —— 点按钮，整页跟着换，按钮自己说明下一步。 */
-test('the toggle switches the whole page and says what comes next', async ({ page }) => {
+/* 场景：切换主题 —— 设计里的分段控件（浅色 / 暗色），选中项自己标出来。 */
+test('the segmented switch picks a theme and the whole page follows', async ({ page }) => {
   await page.goto('/')
 
-  const toggle = page.getByRole('button', { name: '切到深色' })
-  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('button', { name: '浅色' })).toHaveAttribute('aria-pressed', 'true')
   const light = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
 
-  await toggle.click()
+  await page.getByRole('button', { name: '暗色' }).click()
 
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
-  await expect(page.getByRole('button', { name: '切到浅色' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: '暗色' })).toHaveAttribute('aria-pressed', 'true')
 
   const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
   expect(dark).not.toBe(light)
@@ -20,9 +19,9 @@ test('the toggle switches the whole page and says what comes next', async ({ pag
 
 test('the choice survives a reload', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('button', { name: '切到深色' }).click()
+  await page.getByRole('button', { name: '暗色' }).click()
   await page.reload()
 
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
-  await expect(page.getByRole('button', { name: '切到浅色' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '暗色' })).toHaveAttribute('aria-pressed', 'true')
 })

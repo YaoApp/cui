@@ -20,9 +20,9 @@ describe('HelloPage · theme', () => {
     render(<HelloPage />)
     expect(document.documentElement.dataset.theme).toBe('light')
 
-    await userEvent.click(screen.getByRole('button', { name: '切到深色' }))
+    await userEvent.click(screen.getByRole('button', { name: '暗色' }))
 
     expect(document.documentElement.dataset.theme).toBe('dark')
-    expect(screen.getByRole('button', { name: '切到浅色' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '暗色' })).toHaveClass('is-on')
   })
 })

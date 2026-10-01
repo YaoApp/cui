@@ -1,18 +1,32 @@
 import type { Theme } from '@/platform/theme/theme-store'
-import { Button } from '@/components/base/button'
 
 export type ThemeToggleProps = {
   theme: Theme
-  onToggle: () => void
+  onChange: (theme: Theme) => void
 }
 
-/* 纯组件：状态从 props 来，不知道主题存在哪儿、也不知道怎么应用 ——
-   这样它能被任何 feature 用，也能在单测里独立验。视觉全走 base/button（不新增 .less）。 */
-export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
-  const next = theme === 'dark' ? '浅色' : '深色'
+const OPTIONS: { value: Theme; label: string }[] = [
+  { value: 'light', label: '浅色' },
+  { value: 'dark', label: '暗色' },
+]
+
+/* 纯组件：状态从 props 来，不知道主题存在哪儿、也不知道怎么应用。
+   视觉用设计系统里的 .seg（分段控件，选中项 .is-on）—— 这是设计页里主题切换件的形态，
+   不是自造的样式，也不是浏览器的原生按钮长相。 */
+export function ThemeToggle({ theme, onChange }: ThemeToggleProps) {
   return (
-    <Button variant="ghost" size="small" aria-pressed={theme === 'dark'} onClick={onToggle}>
-      切到{next}
-    </Button>
+    <span className="seg theme-toggle" role="group" aria-label="主题">
+      {OPTIONS.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          className={theme === option.value ? 'is-on' : undefined}
+          aria-pressed={theme === option.value}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </button>
+      ))}
+    </span>
   )
 }
