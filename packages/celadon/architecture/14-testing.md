@@ -56,6 +56,10 @@ CI 与测试的输出面向**所有贡献者**（含海外），因此脚本的 
 - **CI 里这些日志会自动进运行摘要**：两份 workflow 最后都有一句 `if: always()` 的步骤，
   把 `app/logs/*/*.log` 折进 `$GITHUB_STEP_SUMMARY`（折叠块包住），红绿都能在运行页直接读到，
   不必下载 artifact。artifact 里另带 `test-results/` 的轨迹与截图。
+- **摘要里必须是纯文本**：vitest 在 CI 上会着色，ANSI 转义码在 Markdown 视图里变成可见的乱码字符。
+  两道处理 —— job 级 `NO_COLOR=1` + `FORCE_COLOR=0` 从源头关色；写摘要时再用 `sed` 剥掉转义码
+  并去掉 `\r`（**这一道不依赖任何工具行为，是兜底**）。注意本地复现不出这个问题：stdout 是管道时
+  vitest 自己就关色了，只有 CI 上才着色。
 - 体积：一天约十几份、几十 KB，14 天量级在几 MB 内。
 
 > **dev 下 `app/logs/` 能被 URL 直接读到，这是可以接受的** —— 它绑在 `0.0.0.0`，root 内文件按 URL 可取。

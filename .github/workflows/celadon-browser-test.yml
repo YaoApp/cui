@@ -16,6 +16,10 @@ jobs:
   browser:
     name: Browser tests (Playwright)
     runs-on: ubuntu-24.04
+    env:
+      # Keep the logs plain: colour codes end up as visible escape glyphs in the run summary
+      NO_COLOR: '1'
+      FORCE_COLOR: '0'
     timeout-minutes: 15
     defaults:
       run:
@@ -62,7 +66,8 @@ jobs:
               echo "<details><summary><code>$f</code></summary>"
               echo
               echo '```'
-              cat "$f"
+              # Strip ANSI escapes and carriage returns: the markdown view shows them raw
+              sed $'s/\x1b\\[[0-9;]*[a-zA-Z]//g' "$f" | tr -d '\r'
               echo '```'
               echo "</details>"
               echo
