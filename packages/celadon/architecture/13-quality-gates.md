@@ -12,7 +12,7 @@
 | `check-i18n` | 缺 key · 漏翻 · 繁中夹简体 · 日文汉字误用 |
 | `check-readme-values` | README 引用的色值与 `tokens.css` 不一致 |
 | `check-generated` | 产物与源不一致（`tokens.less` → `tokens.css` 等）|
-| `check-plan-md` | `plan/` 的表格结构与禁用小节（"待讨论"等）|
+| `check-plan-md` | `plan/` 的表格结构与禁用小节（"待讨论"等）。**单元格里别写裸 `|`** —— 它不认 `\|` 转义，会按列数不一致报错 |
 | `check-app-layout` | **用例必须在 `tests/` 目录内**（强约束）—— 源码目录里出现 `*.test.*` / `*.spec.*` 即失败 |
 
 - **运行时输出一律英文**（检查器 · 测试 · 脚本的 console 与报错 · 用例名）；注释与文档仍是中文。

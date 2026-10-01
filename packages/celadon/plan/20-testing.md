@@ -77,16 +77,23 @@
 - **结果明细一律看日志** —— 机器测量与执行者判定都写进 `app/logs/<日期>/<场景>-<HHMM>.log`，
   剧本里**不复制**（避免同一件事两处维护）。
 - **采集脚本与剧本同名同场景**：`<场景>.agent.mjs`。后缀即分工：`*.test.ts(x)` 给 vitest ·
-  `*.browser.ts` 给 Playwright · `*.agent.mjs` 给 `pnpm test:persona`
-  （`scripts/run-persona.mjs` 自动发现 `app/src/features/*/tests/*.agent.mjs` 并逐个跑，一个场景一份日志）。
-  脚本只做机器能做的部分（开真浏览器 · 按剧本走 · 截图 · 报客观测量），
-  判定仍由执行者给出。
-- **证据不进仓库**：截图落在 **`app/logs/<日期>/shots/<场景>/`** —— 按日期分目录、专门一层 `shots`、
-  再按拟人文件分目录（同名场景多次运行会覆盖，历史在日志里）。
-- **截图一律走固化资产 `scripts/shots.mjs`**，采集脚本不自己调 `page.screenshot()`：
-  `capturePage()` 出页面视口（跨平台，判定用它的像素）；`captureScreen()` 出系统级整屏
-  （含浏览器外框与系统缩放，**目前只实现 macOS**，其它平台抛清晰错误而不假装成功）。
-  整屏用 jpg（png 有 10M 量级）；`CUI_HEADED=1` 时开真窗口，那一屏才包含浏览器。
+  `*.browser.ts` 给 Playwright · `*.agent.mjs` 给 `pnpm test:persona`。
+
+**固化脚本（拟人层只用这三个，采集脚本不自己造轮子）**：
+
+| 脚本 | 职责 | 契约 |
+| --- | --- | --- |
+| `scripts/run-persona.mjs` | 发现并逐个跑拟人场景 | 扫 `app/src/features/*/tests/*.agent.mjs`；**一个场景一份日志**；一个场景都没有即失败 |
+| `scripts/run-logged.mjs` | 跑一条命令并把输出双写 | `node scripts/run-logged.mjs <日志名> <命令> [参数…]` → `app/logs/<日期>/<日志名>-<HHMM>.log`，**退出码原样透传** |
+| `scripts/shots.mjs` | 截图（**唯一出口**）| `capturePage(page, path)` 页面视口（跨平台）· `captureScreen(path, { region, format })` 系统级整屏（**只实现 macOS**）· `shotDir(场景)` 算目录。CLI：`shots.mjs dir <场景>` · `shots.mjs screen <out> [--region x,y,w,h] [--format png 或 jpg]` |
+
+- **截图一律走 `shots.mjs`** —— 采集脚本不自己调 `page.screenshot()`；判定用的像素来自 `capturePage()`。
+- **落位**：`app/logs/<日期>/shots/<场景>/` —— 按日期分目录 · 专门一层 `shots` · 再按拟人文件分目录
+  （同名场景当天多次运行会覆盖，历史在日志里）。
+- **平台适配**：系统级截图集中在 `shots.mjs` 的 `PLATFORMS` 表，**没实现的平台抛清晰错误、不假装成功**
+  （页面截图跨平台，不受影响；要用新平台就在表里加一条）。整屏用 jpg（png 有 10M 量级）；
+  `CUI_HEADED=1` 开真窗口，那一屏才包含浏览器，默认 headless 时如实标注。
+- 采集脚本只做机器能做的部分（开真浏览器 · 按剧本走 · 截图 · 报客观测量），**判定仍由执行者给出**。
 
 **动机**：开发与测试是同一个执行者 → 风险是**自我确认**（测试按实现写、断言按现有行为写，于是"全绿"但用户一用就坏）。
 
