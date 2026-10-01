@@ -14,4 +14,10 @@ body {
 
 #app {
   min-block-size: 100%;
+  /* 弹性列。光有 min-block-size:100% 不够：这样的父级高度仍是 auto，
+     子元素的百分比高度（min-block-size:100%）会被当成 auto 丢掉，
+     于是内容面只盖到自己的内容高度，页面底部露出一条分界。
+     做成弹性列之后，子元素用 flex:1 就能真的铺满。 */
+  display: flex;
+  flex-direction: column;
 }
