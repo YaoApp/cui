@@ -338,6 +338,15 @@
     &:disabled, &.is-disabled { background: var(--background-disabled); color: var(--text-disabled); border-color: var(--border-disabled); cursor: not-allowed; } }
   .hint-error  { color: var(--danger-ink); font-size: 12.5px; }   /* 错误提示文字（危险色的文字档） */
   .btn-ghost   { background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-default); }
+
+  /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .on */
+  .seg         { display:inline-flex; gap:var(--spacing-4); padding:var(--spacing-4);
+                 border-radius:var(--radius-pill); border:1px solid var(--border-control);
+                 background:var(--background-field); }
+  .seg button  { cursor:pointer; font-family:inherit; font-size:var(--font-size-caption);
+                 padding:var(--spacing-4) var(--spacing-12); border:0; border-radius:var(--radius-pill);
+                 background:transparent; color:var(--text-secondary); }
+  .seg button.is-on { background:var(--brand-soft); color:var(--brand-ink); font-weight:var(--font-weight-strong); }
   .btn-warn    { background: var(--warm-soft); color: var(--warm-text); border: 1px solid var(--warm); }
   .bubble-me   { background: var(--brand-soft); color: var(--text-primary); border: 1px solid var(--border-default); }
   .bubble-ai   { background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-subtle); }

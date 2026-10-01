@@ -19,7 +19,7 @@ p.sub{margin:var(--spacing-8) 0 0;color:var(--text-secondary);max-width:1000px}
 .seg button{cursor:pointer;font-family:inherit;font-size:var(--font-size-caption);
   padding:var(--spacing-4) var(--spacing-12);border:0;border-radius:var(--radius-pill);
   background:transparent;color:var(--text-secondary)}
-.seg button.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:var(--font-weight-strong)}
+.seg button.is-on{background:var(--brand-soft);color:var(--brand-ink);font-weight:var(--font-weight-strong)}
 .card{background:var(--background-surface);border:var(--border-width) solid var(--border-default);
   border-radius:var(--radius-large);padding:var(--spacing-16);margin-bottom:var(--spacing-16)}
 .card h2{font-size:var(--font-size-subtitle);font-weight:var(--font-weight-strong);margin:0 0 var(--spacing-4)}
@@ -47,11 +47,11 @@ p.sub{margin:var(--spacing-8) 0 0;color:var(--text-secondary);max-width:1000px}
   </div>
   <div class="segs">
     <span class="seg" id="langSwitch">
-      <button data-l="zh-CN" class="on">简</button><button data-l="zh-TW">繁</button>
+      <button data-l="zh-CN" class="is-on">简</button><button data-l="zh-TW">繁</button>
       <button data-l="en">EN</button><button data-l="ja">日</button>
     </span>
     <span class="seg" id="themeSwitch">
-      <button data-t="light" class="on" data-i18n="ui.theme.light"></button>
+      <button data-t="light" class="is-on" data-i18n="ui.theme.light"></button>
       <button data-t="dark" data-i18n="ui.theme.dark"></button>
     </span>
   </div>

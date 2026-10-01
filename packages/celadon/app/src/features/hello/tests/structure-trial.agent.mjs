@@ -111,8 +111,8 @@ const two = (await counter.innerText()).includes('2')
 say(`S3 counter   : ${await counter.innerText()}`)
 if (!two) problems.push('S3: 回车+空格后计数不是 2')
 
-// S4 切主题 —— 用**页面上的按钮**（主题现在归平台层 store 管，直接戳 DOM 已不是真实路径）
-await p.getByRole('button', { name: '切到深色' }).click()
+// S4 切主题 —— 用**页面上的分段控件**（设计里的主题切换件：浅色 / 暗色）
+await p.getByRole('button', { name: '暗色' }).click()
 await p.waitForTimeout(250)
 await shot(p, 's4-dark.png')
 const dark = await p.evaluate(() => ({
@@ -120,12 +120,12 @@ const dark = await p.evaluate(() => ({
   title: getComputedStyle(document.querySelector('.header__title')).color,
   card: getComputedStyle(document.querySelector('.foo-bar')).backgroundColor,
   root: document.documentElement.dataset.theme,
-  label: document.querySelector('.hello__actions button')?.textContent?.trim(),
+  label: document.querySelector('.theme-toggle button.is-on')?.textContent?.trim(),
 }))
 say(`S4 dark      : ${JSON.stringify(dark)}`)
 if (dark.body === 'rgb(255, 255, 255)' || dark.body === 'rgba(0, 0, 0, 0)') problems.push('S4: 深色下页面底色还是白的/透明的')
 if (dark.root !== 'dark') problems.push('S4: 点了按钮但根元素 data-theme 不是 dark')
-if (dark.label !== '切到浅色') problems.push('S4: 按钮没有翻成"切到浅色"')
+if (dark.label !== '暗色') problems.push('S4: 分段控件没有把「暗色」标为选中')
 // 内容面必须铺满视口，否则页面底部会露出另一层的分界（这是本轮抓到并修掉的缺陷）
 const surface = await p.evaluate(() => ({
   h: Math.round(document.querySelector('#app > *').getBoundingClientRect().height),

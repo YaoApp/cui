@@ -7,12 +7,12 @@ describe('theme store', () => {
     expect(useThemeStore.getState().theme).toBe('light')
   })
 
-  it('toggles between the two themes and applies each', () => {
-    useThemeStore.getState().toggle()
+  it('applies each theme to the root element', () => {
+    useThemeStore.getState().setTheme('dark')
     expect(useThemeStore.getState().theme).toBe('dark')
     expect(document.documentElement.dataset.theme).toBe('dark')
 
-    useThemeStore.getState().toggle()
+    useThemeStore.getState().setTheme('light')
     expect(useThemeStore.getState().theme).toBe('light')
     expect(document.documentElement.dataset.theme).toBe('light')
   })
