@@ -1,7 +1,7 @@
-name: celadon · 规范门禁 + 单元测试 + 构建
+name: celadon · gates + unit tests + build
 
-# celadon 是独立包（自己的 package.json / 锁文件 / workspace / pnpm 版本），不在根 workspace 里，
-# 所以单独一份 workflow，只在它自己或本文件有改动时跑。
+# celadon is its own package (own package.json, lockfile, workspace and pnpm version),
+# so it gets its own workflow, and only runs when celadon itself changes.
 on:
   push:
     paths:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   check-test-build:
-    name: 规范门禁 + 单元测试 → 构建
+    name: Gates, unit tests, then build
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -23,8 +23,8 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v7
 
-      # 指向 celadon 自己的 package.json —— 不读仓库根的 packageManager，
-      # 这样 celadon 的 pnpm 版本由它自己钉（隔离：根怎么改都不影响这里）。
+      # Reads celadon's own package.json rather than the repository root, so the pnpm
+      # version is pinned by this package and a root change cannot move it.
       - name: Setup Pnpm
         uses: pnpm/action-setup@v5
         with:
@@ -35,20 +35,40 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          # celadon 有自己的锁文件，缓存要指到这里（指根锁文件会缓存错东西）
+          # celadon has its own lockfile; pointing at the root one would cache the wrong thing
           cache-dependency-path: packages/celadon/pnpm-lock.yaml
 
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # 1. 规范门禁（七个检查器）—— 与单元测试同一 job，最便宜的先跑
-      - name: 规范门禁
+      # 1. The seven checkers. Each run writes its log into app/logs/, which the last
+      #    step folds into the run summary.
+      - name: Gates
         run: pnpm check
 
-      # 2. 单元 / 组件测试 —— 不过就停在这，不进构建
-      - name: 单元 / 组件测试
+      # 2. Unit and component tests. A failure stops the job here, before any build.
+      - name: Unit and component tests
         run: pnpm test
 
-      # 3. 前两步都过了才构建
-      - name: 构建
+      # 3. Only reached when the two steps above pass.
+      - name: Build
         run: pnpm build
+
+      # Always runs, so a red job still shows its logs where the reviewer lands.
+      - name: Write logs into the run summary
+        if: always()
+        run: |
+          {
+            echo "## celadon · logs"
+            echo
+            for f in app/logs/*/*.log; do
+              [ -f "$f" ] || continue
+              echo "<details><summary><code>$f</code></summary>"
+              echo
+              echo '```'
+              cat "$f"
+              echo '```'
+              echo "</details>"
+              echo
+            done
+          } >> "$GITHUB_STEP_SUMMARY"

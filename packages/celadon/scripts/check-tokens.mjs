@@ -27,7 +27,7 @@ const PAGES = readdirSync('.').filter((f) => f.endsWith('.html') && !LEGACY.has(
 const ALLOW = new Set(['transparent', 'none', 'inherit', 'currentColor', '50%', '100%', '0', 'auto',
   '#FF5F57', '#FEBC2E', '#28C840', '#0B0B0B']);
 if (PAGES.length === 0) {
-  console.log('✗ 没有找到可检查的页面 —— 目标目录不对？(目标：' + TARGET + ')')
+  console.log('✗ no pages to check — wrong target directory? (target: ' + TARGET + ')')
   process.exit(1)
 }
 let bad = [];
@@ -50,7 +50,7 @@ for (const f of PAGES) {
   for (const m of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+)(?=;|\})/g)) {
     if (!/^color$|text-fill-color$/.test(m[1].trim())) continue;
     const v = m[2].trim();
-    for (const t of NON_TEXT) if (v.includes(t)) bad.push(`${f}: ${m[1].trim()}: ${v}（${t} 是装饰色，不能承载文字）`);
+    for (const t of NON_TEXT) if (v.includes(t)) bad.push(`${f}: ${m[1].trim()}: ${v}(${t} is a decorative colour and may not carry text)`);
   }
 }
 // §3 四值简写的 inline 两侧不对称 —— RTL 下会错位（margin: 0 0 0 auto 就是典型）
@@ -64,7 +64,7 @@ for (const f of PAGES) {
     if (parts.length < 3) continue;                        // 1–2 值天然对称
     const second = parts[1], fourth = parts[parts.length === 3 ? 1 : 3];
     if (parts.length === 3 ? second !== fourth : second !== fourth) {
-      bad.push(`${f}: ${prop}: ${v}（inline 两侧不对称，RTL 下会错位 —— 改用 *-inline-start/end）`);
+      bad.push(`${f}: ${prop}: ${v}(the inline sides are asymmetric, which breaks in RTL — use *-inline-start/end)`);
     }
   }
 }
@@ -72,12 +72,12 @@ for (const f of PAGES) {
 // 浏览器会静默丢弃整条声明 —— 曾经把 .toolbar 的 margin-bottom 吃掉，工具条就贴上了界面）
 for (const f of PAGES) {
   const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
-  if ((css.match(/\{/g) || []).length !== (css.match(/\}/g) || []).length) bad.push(`${f}: 大括号不配对`);
+  if ((css.match(/\{/g) || []).length !== (css.match(/\}/g) || []).length) bad.push(`${f}: unbalanced braces`);
   for (const rule of css.matchAll(/\{([^{}]*)\}/g)) {
     for (const decl of rule[1].split(';')) {
       const d = decl.trim();
       if (!d || /url\(|data:/i.test(d)) continue;
-      if ((d.match(/:/g) || []).length > 1) bad.push(`${f}: 疑似漏分号 —— ${d.slice(0, 46)}`);
+      if ((d.match(/:/g) || []).length > 1) bad.push(`${f}: probably a missing semicolon — ${d.slice(0, 46)}`);
     }
   }
 }
@@ -88,12 +88,12 @@ for (const f of PAGES) {
   for (const m of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+)(?=;|\})/g)) {
     const prop = m[1], v = m[2].trim();
     if (prop === 'line-height' && !v.startsWith('var(--line-height-') && !['normal', 'inherit', '0'].includes(v)) {
-      bad.push(`${f}: line-height: ${v}（应走 --line-height-*）`);
+      bad.push(`${f}: line-height: ${v} (must come from --line-height-*)`);
     }
     if (prop === 'font' && /\d+(\.\d+)?(px|rem|em)/.test(v)) {
-      bad.push(`${f}: font 简写里写死了字号/行高（${v.slice(0, 34)}）—— 拆成 font-family/size/weight/line-height 走 token`);
+      bad.push(`${f}: the font shorthand hardcodes size or line height (${v.slice(0, 34)}) — split it into font-family/size/weight/line-height and use tokens`);
     } else if (prop === 'font' && /\//.test(v)) {
-      bad.push(`${f}: font 简写里写死了行高（${v.slice(0, 30)}）—— 拆成 font + line-height: var(--line-height-*)`);
+      bad.push(`${f}: the font shorthand hardcodes the line height (${v.slice(0, 30)}) — use font plus line-height: var(--line-height-*)`);
     }
   }
 }
@@ -104,13 +104,13 @@ for (const f of PAGES) {
   const css = [...readFileSync(f, 'utf8').matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
   for (const m of css.matchAll(/([-a-z]+)\s*:\s*([^;{}]+)(?=;|\})/g)) {
     const prop = m[1], v = m[2].trim();
-    if (SPACING.test(prop) && /\b[\d.]+(px|rem|em)\b/.test(v)) bad.push(`${f}: ${prop}: ${v}（间距应走 --spacing-*）`);
-    if (BORDER.test(prop) && /\b[\d.]+(px|rem|em)\b/.test(v) && !v.includes('var(--border-width)')) bad.push(`${f}: ${prop}: ${v}（线宽应走 --border-width）`);
+    if (SPACING.test(prop) && /\b[\d.]+(px|rem|em)\b/.test(v)) bad.push(`${f}: ${prop}: ${v} (spacing must come from --spacing-*)`);
+    if (BORDER.test(prop) && /\b[\d.]+(px|rem|em)\b/.test(v) && !v.includes('var(--border-width)')) bad.push(`${f}: ${prop}: ${v}(border width must come from --border-width)`);
   }
 }
 if (bad.length) {
-  console.log(`  ✗ ${bad.length} 处写死（应改走 token）：`);
+  console.log(`  ✗ ${bad.length} hardcoded value(s) that should come from a token:`);
   bad.slice(0, 8).forEach((b) => console.log('      ' + b));
   process.exit(1);
 }
-console.log('  ✓ 规范页与展示页的字号 / 行高 / 圆角 / 颜色 / 间距 / 线宽全部走 token');
+console.log('  ✓ font size, line height, radius, colour, spacing and border width all come from tokens');

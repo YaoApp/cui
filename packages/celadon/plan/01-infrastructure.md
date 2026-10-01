@@ -121,13 +121,14 @@
 | **dev / preview** | dev 端口 5199 ✓ · preview HTTP **200** ✓ |
 | **CI（隔离）· 一** | `.github/workflows/celadon-test-build.yml` · 只在 `packages/celadon/**` 改动时跑 · 干净环境演练通过：安装（不触发构建）→ 规范门禁全绿 → 单元 9/9 → 构建；三处隔离：自己的工作目录 · 自己的锁文件 · 自己的 `packageManager` |
 | **CI（隔离）· 二** | `.github/workflows/celadon-browser-test.yml` · 浏览器测试单独一份、自带环境准备；用例自己起 dev（本地已跑则复用）· 失败时上传轨迹与截图 |
+| **CI 输出** | 两份 workflow 的名字与步骤全英文；结束时把 `app/logs/*/*.log` 写进运行摘要（`$GITHUB_STEP_SUMMARY`，折叠块），红绿都能直接读到 |
 | **产物可独立运行** | `dist/` 用 Python 静态服务器（`python3 -m http.server`）直接跑通：根路径下 4 个文件全 200 · 页面渲染与交互正常 · 零 4xx 零控制台错误 |
 | **产物前缀可配** | `base` 取 `CUI_BASE`（默认 `/`）：`CUI_BASE=/cui/` 构建后资源变 `/cui/_assets/*`，挂到 `/cui/` 下同样跑通（根路径下则 404，佐证前缀生效）|
 | **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**9 / 9**：`button` 4 · `header` 2 · `hello-store` 2 · `hello-page` 1 · 覆盖率 **100%**（不设阈值）|
 | **浏览器测试** | `pnpm test:browser`（`@playwright/test`，走本机 Chrome）**2 / 2**：主路径 + 全键盘（含焦点环可见）|
 | **测试范围收窄** | `vitest` 只认 `*.test.*` · `playwright` 只认 `*.spec.ts` —— 两者默认范围重叠，不收窄会互相误抓（实测：4 个单测文件给 vitest，1 个 spec 给 playwright）|
 | **测试位置强约束** | `check-app-layout` 用真文件验过：5 个用例全在 `tests/` 内；两个违规样本仍按预期失败 |
-| **测试命令** | `pnpm test` · `pnpm test:browser` · `pnpm test:checkers` · `pnpm test:all`；三层各写一份日志到 **`app/logs/<本地日期>/<名>-<HHMM>.log`**（git 忽略；目录取系统日期、文件名精确到分钟，保留 14 天）|
+| **测试命令** | `pnpm check` · `pnpm test` · `pnpm test:browser` · `pnpm test:checkers` · `pnpm test:all`；四层各写一份日志到 **`app/logs/<本地日期>/<名>-<HHMM>.log`**（git 忽略；目录取系统日期、文件名精确到分钟，保留 14 天）|
 | **隔离 · 装到本地** | `node_modules` 154M（含 React · vitest · Playwright · less）· 自己的 `pnpm-lock.yaml` · Vite 8.3.1 在本地 |
 | **隔离 · 外层没被碰** | 外层锁文件无改动 · 外层工作区成员仍 7 个 · 外层 git 状态干净 |
 | **桌面壳** | `cui-desktop` 同步升到 **Vite 8.3.1**：生产构建（含类型检查）通过 · **32 / 32** 测试 · 安装 0 漏洞 |

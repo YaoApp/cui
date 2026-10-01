@@ -55,10 +55,10 @@ readme.split('\n').forEach((line, i) => {
   }
 })
 
-console.log(`✓ README 引用色值检查 · tokens.css 共 ${tokenValues.size} 个色值`)
+console.log(`✓ README colour references · tokens.css holds ${tokenValues.size} value(s)`)
 if (stale.length) {
-  console.log(`✗ 发现 ${stale.length} 个 README 里出现、tokens 里没有的值（可能是旧值）：`)
+  console.log(`✗ ${stale.length} value(s) appear in the README but not in tokens (likely stale):`)
   stale.forEach(x => console.log('   ' + x))
   process.exit(1)
 }
-console.log('✓ README 引用的色值与 tokens 一致')
+console.log('✓ every colour the README quotes matches tokens')

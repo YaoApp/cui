@@ -5,7 +5,7 @@ import { HelloPage } from '@/features/hello'
 
 /* 这条走的是完整链路：base/button → header → feature store → 私有组件 foo-bar */
 describe('HelloPage', () => {
-  it('点刷新，页面上的次数跟着涨', async () => {
+  it('clicking refresh moves the counter on the page', async () => {
     render(<HelloPage />)
     expect(screen.getByText('已刷新 0 次')).toBeInTheDocument()
 

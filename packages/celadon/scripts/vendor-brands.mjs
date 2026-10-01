@@ -36,7 +36,7 @@ const slug = (b) => 'brand-' + (ALIAS[b] || b
 
 /* ---- 准备：下载 + 补相对导入的 .js 扩展名（编译产物没写扩展名，Node ESM 不接受） ---- */
 const work = mkdtempSync(join(tmpdir(), 'lobeicons-'));
-process.stdout.write(`  准备 @lobehub/icons@${VERSION}（连依赖一起装，组件的 Color 变体会用到 es-toolkit 等）… `);
+process.stdout.write(`  fetching @lobehub/icons@${VERSION} (its dependencies come along; the colour variants need es-toolkit and friends)… `);
 execFileSync('npm', ['i', '--silent', '--no-audit', '--no-fund', `@lobehub/icons@${VERSION}`, 'react', 'react-dom'], { cwd: work });
 const pkg = join(work, 'node_modules', '@lobehub', 'icons');
 cpSync(join(pkg, 'es'), join(work, 'es'), { recursive: true });
@@ -54,7 +54,7 @@ console.log('✓');
 // 明确排除：与我们直接竞争的产品品牌，不进我们的品牌区
 const EXCLUDE = new Set(['LobeHub']);
 const brands = readdirSync(join(work, 'es')).filter((b) => existsSync(join(work, 'es', b, 'components')) && b !== 'index.js' && !EXCLUDE.has(b));
-console.log(`  品牌目录 ${brands.length} 个`);
+console.log(`  ${brands.length} brand(s) in the catalogue`);
 
 const render = async (brand, comp) => {
   const mod = await import(join(work, 'es', brand, 'components', comp + '.js'));
@@ -87,7 +87,7 @@ const symbols = [], symbolOwner = [], index = [], failed = [];   /* symbolOwner:
 for (const brand of brands.sort()) {
   const dir = join(work, 'es', brand, 'components');
   const hasColor = existsSync(join(dir, 'Color.js')), hasMono = existsSync(join(dir, 'Mono.js'));
-  if (!hasColor && !hasMono) { failed.push(`${brand}: 无 Color/Mono`); continue; }
+  if (!hasColor && !hasMono) { failed.push(`${brand}: no colour or mono variant`); continue; }
   const styleFile = join(work, 'es', brand, 'style.js');
   const title = (existsSync(styleFile) ? (readFileSync(styleFile, 'utf8').match(/TITLE\s*=\s*'([^']*)'/) || [])[1] : null) || brand;
   const primary = existsSync(styleFile) ? (readFileSync(styleFile, 'utf8').match(/COLOR_PRIMARY\s*=\s*'([^']+)'/) || [])[1] : null;
@@ -150,11 +150,11 @@ const broken = index.filter((e) => {
   const set = shardIds[(e.shard || 1) - 1];
   return !set || !set.has(e.id) || (e.color && e.mono && !set.has(e.id + '-mono'));
 });
-console.log(broken.length ? `  ⚠ 片号指空的品牌 ${broken.length} 个：${broken.slice(0, 5).map((b) => b.id).join(', ')}` : '  ✓ 每个品牌的两个变体都在同一片内');
+console.log(broken.length ? `  ⚠ ${broken.length} brand(s) point at a missing shard: ${broken.slice(0, 5).map((b) => b.id).join(', ')}` : '  ✓ both variants of every brand sit in the same shard');
 const allIds = [...sprite.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]);
 const dupes = allIds.filter((v, i) => allIds.indexOf(v) !== i);
-console.log(`  ✓ 品牌符号 ${symbols.length} 个 · 品牌 ${index.length}（官方色 ${index.filter((b) => b.color).length} · 仅 mono ${index.filter((b) => !b.color).length}）· 切成 ${shards.length} 片（每片 ≤ ~120 KB，规避外部 use 的体积上限）`);
-console.log(`  ✓ id 重复：${new Set(dupes).size} 个`);
-console.log(`  ✓ icons/brand-index.json：${index.length} 条`);
-if (failed.length) { console.log(`  ⚠ 失败 ${failed.length} 条：`); failed.slice(0, 10).forEach((f) => console.log('    ' + f)); }
-else console.log('  ✓ 全部转换成功，无失败');
+console.log(`  ✓ ${symbols.length} brand symbol(s) · ${index.length} brand(s) (${index.filter((b) => b.color).length} in colour, ${index.filter((b) => !b.color).length} mono only) · split into ${shards.length} shard(s) of about 120 KB, the size an external <use> still resolves`);
+console.log(`  ✓ duplicate ids: ${new Set(dupes).size}`);
+console.log(`  ✓ icons/brand-index.json: ${index.length} entr(y|ies)`);
+if (failed.length) { console.log(`  ⚠ ${failed.length} failure(s):`); failed.slice(0, 10).forEach((f) => console.log('    ' + f)); }
+else console.log('  ✓ every brand converted, no failures');

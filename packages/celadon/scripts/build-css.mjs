@@ -20,7 +20,7 @@ const here = DESIGN
 const lessFile = resolve(here, 'tokens.less')
 const cssFile = resolve(here, 'tokens.css')
 
-if (!existsSync(lessFile)) { console.error('缺少 tokens.less:', lessFile); process.exit(1) }
+if (!existsSync(lessFile)) { console.error('missing tokens.less:', lessFile); process.exit(1) }
 
 let css
 try {
@@ -30,9 +30,9 @@ try {
   // 退回 lessc 二进制
   const roots = [resolve(here, '../../..'), resolve(here, '../../../..')]
   const bin = roots.map(r => resolve(r, 'node_modules/.pnpm/node_modules/.bin/lessc')).find(existsSync)
-  if (!bin) { console.error('既无 less 模块也无 lessc 二进制'); process.exit(1) }
+  if (!bin) { console.error('neither the less module nor a lessc binary is available'); process.exit(1) }
   css = execFileSync(bin, [lessFile], { encoding: 'utf8' })
 }
 
-writeFileSync(cssFile, `/* 自动生成，勿手改 —— 源：tokens.less（node design/build-css.mjs） */\n${css}`)
-console.log('✓ 生成', cssFile.replace(process.cwd() + '/', ''), `(${css.split('\n').length} 行)`)
+writeFileSync(cssFile, `/* generated — do not edit by hand; source: tokens.less (node design/build-css.mjs) */\n${css}`)
+console.log('✓ wrote', cssFile.replace(process.cwd() + '/', ''), `(${css.split('\n').length} lines)`)
