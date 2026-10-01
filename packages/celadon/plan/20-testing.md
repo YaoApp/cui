@@ -14,7 +14,8 @@
 
 规范门禁零依赖、随设计资产走，是 QA 流程的**第 1 阶段**；其余各层用上表的栈。
 日志落在 `app/logs/<系统日期>/`（git 忽略），写法见 `architecture/14` 的「日志」一节。
-**`pnpm test:all`** 一把跑：门禁 + 检查器自测 + 单元 + 浏览器 + 拟人。
+**`pnpm test:all`** 一把跑：门禁 + 检查器自测 + 单元 + 浏览器 + **构建** + 拟人 ——
+构建放在拟人之前，因为**拟人层测的是构建产物**（`dist/`），不是 dev 源码。
 
 ## 2. 单元 / 组件测试
 
@@ -88,6 +89,8 @@
 | `scripts/shots.mjs` | 截图（**唯一出口**）| `capturePage(page, path)` 页面视口（跨平台）· `captureScreen(path, { region, format })` 系统级整屏（**只实现 macOS**）· `shotDir(场景)` 算目录。CLI：`shots.mjs dir <场景>` · `shots.mjs screen <out> [--region x,y,w,h] [--format png 或 jpg]` |
 
 - **截图一律走 `shots.mjs`** —— 采集脚本不自己调 `page.screenshot()`；判定用的像素来自 `capturePage()`。
+- **测的是构建产物**：`pnpm build` 之后的 `dist/`。采集脚本带**产物新鲜度守卫** —— `dist` 比影响构建的源码旧，
+  或 `dist` 不存在，就明确失败（别拿过期产物判"通过"；测试/剧本/采集脚本自己不算影响构建）。
 - **落位**：`app/logs/<日期>/shots/<场景>/` —— 按日期分目录 · 专门一层 `shots` · 再按拟人文件分目录
   （同名场景当天多次运行会覆盖，历史在日志里）。
 - **平台适配**：系统级截图集中在 `shots.mjs` 的 `PLATFORMS` 表，**没实现的平台抛清晰错误、不假装成功**
