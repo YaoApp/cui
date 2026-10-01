@@ -8,7 +8,9 @@
 - 栈：**`vitest`** + `@testing-library/react` + `@testing-library/user-event` + **`jsdom`** + `@vitest/coverage-v8` + **`@playwright/test`**。
 - **位置（强约束）**：用例一律放所在单元的 `tests/` 目录内 —— 组件是 `components/<名>/tests/`，
   feature 是 `features/<域>/tests/`；**源码目录里不得出现 `*.test.*` / `*.spec.*`**。
-- **后缀即分工**：单元 / 组件 `*.test.ts(x)` · 浏览器 `*.spec.ts`。
+- **后缀即分工**：单元 / 组件 `*.test.ts(x)` · 浏览器 `*.spec.ts` · 拟人 `persona.md` + `persona.mjs`。
+- **拟人测试只属于 feature**：剧本住 `features/<域>/tests/persona.md`（**进仓库**，剧本与判定数据在前、
+  结论在后），采集脚本 `persona.mjs` 同目录；**组件与基础件不写这一层**。证据截图不进仓库。
 - **两个工具的默认匹配范围重叠** —— `vitest` 默认 `**/*.{test,spec}.?(c|m)[jt]s?(x)` · `playwright` 默认 `**/*.@(spec|test).?(c|m)[jt]s?(x)`：
   **两边配置都要显式收窄**（`vitest` 的 `include` 只留 `*.test.*` · `playwright` 的 `testMatch` 只留 `*.spec.ts`），否则会互相误抓。
 - **共享测试支持放 `app/src/test-support/`**（setup · 跨组件夹具 · 全局 store 重置），**不放组件目录内** —— 组件目录只放该组件自己的用例。
@@ -42,6 +44,7 @@ CI 与测试的输出面向**所有贡献者**（含海外），因此脚本的 
 | `checkers-1355.log` | `pnpm test:checkers` |
 | `unit-1355.log` | `pnpm test` |
 | `browser-1355.log` | `pnpm test:browser` |
+| `persona-1355.log` | `pnpm test:persona`（拟人层的采集；证据截图落在同目录的 `persona-1355/`）|
 
 > `pnpm check` 是带日志的外壳，真正的检查链在 `pnpm check:run` —— 这样它能和其它三层一样留痕。
 
