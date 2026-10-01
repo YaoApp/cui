@@ -1,0 +1,33 @@
+/* 只管设计类没有的部分：布局与尺寸档。颜色/边框/四态全在 design/tokens.less 的 .btn-* 里。 */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-8);
+  border-radius: var(--radius-medium);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-cjk);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+
+  &--medium {
+    min-block-size: var(--spacing-32);
+    padding-inline: var(--spacing-16);
+    font-size: var(--font-size-body);
+  }
+
+  &--small {
+    min-block-size: var(--spacing-24);
+    padding-inline: var(--spacing-12);
+    /* 12px 档：--font-size-label 是 11px，token 注释写明"仅西文/数字角标，中文勿用" */
+    font-size: var(--font-size-caption);
+  }
+
+  /* 焦点环走 token；真实伪类，不靠 .is-focus 静态类 */
+  &:focus-visible {
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+}

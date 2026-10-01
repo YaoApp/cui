@@ -24,6 +24,7 @@ const SUITES = [
   ['check-i18n.mjs', 'i18n'],
   ['check-readme-values.mjs', 'readme-values'],
   ['check-plan-md.mjs', 'check-plan-md'],
+  ['check-app-layout.mjs', 'app-layout'],
 ]
 
 let pass = 0, fail = 0

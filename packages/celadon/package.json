@@ -1,6 +1,7 @@
 {
   "name": "@yaoapp/cui",
   "version": "2.0.0",
+  "packageManager": "pnpm@12.8.1",
   "description": "A chat UI framework and design baseline for building AI native applications on Yao App Engine.",
   "license": "Yao License 1.0",
   "type": "module",
@@ -31,18 +32,38 @@
     "vite.config.ts",
     "CONVENTIONS.md",
     "THIRD-PARTY-NOTICES.md",
-    "README.md"
+    "README.md",
+    "!app/logs"
   ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "node scripts/check-i18n.mjs && node scripts/check-readme-values.mjs && node scripts/check-tokens.mjs && node scripts/check-generated.mjs && node scripts/check-css-conventions.mjs && node scripts/check-plan-md.mjs",
-    "test": "node scripts/tests/run.mjs",
-    "prepare": "vite build",
-    "prepack": "vite build"
+    "check": "node scripts/check-i18n.mjs && node scripts/check-readme-values.mjs && node scripts/check-tokens.mjs && node scripts/check-generated.mjs && node scripts/check-css-conventions.mjs && node scripts/check-plan-md.mjs && node scripts/check-app-layout.mjs",
+    "test": "node scripts/run-logged.mjs unit vitest run",
+    "prepack": "vite build",
+    "test:watch": "vitest",
+    "test:checkers": "node scripts/run-logged.mjs checkers node scripts/tests/run.mjs",
+    "test:all": "pnpm test:checkers && pnpm test && pnpm test:browser",
+    "test:browser": "node scripts/run-logged.mjs browser playwright test"
   },
   "devDependencies": {
-    "vite": "^8.3.1"
+    "@playwright/test": "^1.63.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/coverage-v8": "^5.0.2",
+    "jsdom": "^30.1.1",
+    "less": "^4.9.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2",
+    "zustand": "^5.0.15"
   }
 }
