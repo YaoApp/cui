@@ -3,3 +3,9 @@ dist/
 .vite/
 *.log
 package-lock.json
+
+# 测试日志与产物（app/logs 在 Vite root 下，dev 下按 URL 可取 —— 可接受；生产只发 dist/，不会出厂）
+app/logs/
+test-results/
+playwright-report/
+coverage/
