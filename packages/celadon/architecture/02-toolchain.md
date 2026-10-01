@@ -8,9 +8,9 @@
 | 项 | 结论 |
 | --- | --- |
 | 构建 | **Vite 8.3.1** |
-| UI | **React 19.3** + **TypeScript 6**（`@types/react*` 19.3）|
-| 包管理器 | **pnpm**，根 `package.json` 的 `packageManager` 锁死版本 |
-| 测试 | `vitest` + Testing Library + `jsdom` + `@playwright/test`（见 `14`）|
+| UI | **React 19.3** + **TypeScript 7**（`@types/react*` 19.3）|
+| 包管理器 | **pnpm**，**本目录自己的 `package.json` 钉版本**（不靠仓库根 —— 隔离见 `01`）|
+| 测试 | `vitest` + `@testing-library/react` · `user-event` · `jest-dom` + `jsdom` + `@playwright/test`（见 `14`）|
 
 - 依赖版本一律 **caret**，不锁小版本。
 - `design/` 与 `scripts/` **零运行时依赖** —— 它们是纯静态资产与纯 Node 脚本。
@@ -27,6 +27,7 @@ packages/celadon/          包根 = 设计体系（不是应用）
 │       ├── platform/                  平台层
 │       ├── lib/                       工具层（纯函数 · 常量 · 类型 · 无依赖）
 │       └── test-support/              测试支持（setup · 共享夹具 · store 重置）
+│   └── logs/                运行日志与截图（<日期>/<层>-<HHMM>.log · <日期>/shots/<场景>/，git 忽略）
 ├── architecture/          本目录（工程规范）
 ├── design/                设计资产（视觉唯一来源 · 零依赖）
 ├── plan/                  计划与状态（过程文档）
@@ -46,6 +47,9 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | `scripts/build-i18n.mjs` | `i18n/*.json` → `bundle.js`（设计页用）|
 | `scripts/check-*.mjs` | 七个检查器（见 `13`）|
 | `scripts/tests/run.mjs` | 检查器自身的样本用例 |
+| `scripts/run-logged.mjs` | 跑一条命令并把输出双写到 `app/logs/<日期>/<名>-<HHMM>.log` |
+| `scripts/run-persona.mjs` | 发现并逐个跑 `features/*/tests/*.agent.mjs`，一个场景一份日志 |
+| `scripts/shots.mjs` | **固化截图资产**：`capturePage()` 页面视口（跨平台）· `captureScreen()` 系统级整屏（**只实现 macOS**，其它平台明确报错）· `shotDir()` 算 `app/logs/<日期>/shots/<场景>/` |
 
 ## 已定
 

@@ -56,11 +56,10 @@
 app/src/components/<名>/
 ├── index.ts               出口（必有）
 ├── <名>.tsx               组件本体（必有）
+├── <名>.test.tsx          单元用例（必有 · **与源文件同目录**）
 ├── <名>.less              样式（可选：能用 token 类就不写）
-├── parts/                 私有子组件（可选）—— 里面每一项也是一个组件，同一套结构
-│   └── <子组件>/          index.ts · <子组件>.tsx · <子组件>.less · parts/ · tests/
-└── tests/
-    └── <名>.test.tsx      用例（必有 · 强约束）
+└── parts/                 私有子组件（可选）—— 里面每一项也是一个组件，同一套结构
+    └── <子组件>/          index.ts · <子组件>.tsx · <子组件>.test.tsx · <子组件>.less · parts/
 ```
 
 **所有组件都用这一套结构，`parts/` 也不例外** —— 谁都可以有私有子组件，没有哪个目录被禁止。两个填充示例：
@@ -69,25 +68,22 @@ app/src/components/<名>/
 base/button/                            基础件
 ├── index.ts       export { Button } from './button'
 ├── button.tsx     variant × size，颜色全走 --brand-* token
-├── button.less
-└── tests/
-    └── button.test.tsx
+├── button.test.tsx
+└── button.less
 
 page-header/                            复合件（内部用 base/button）
 ├── index.ts
 ├── page-header.tsx
+├── page-header.test.tsx
 ├── page-header.less
-├── parts/
-│   ├── title/                        子组件：同样一个目录、一套结构
-│   │   ├── index.ts
-│   │   ├── title.tsx
-│   │   └── tests/
-│   │       └── title.test.tsx
-│   └── actions/
-│       ├── index.ts
-│       └── actions.tsx
-└── tests/
-    └── page-header.test.tsx
+└── parts/
+    ├── title/                        子组件：同样一个目录、一套结构
+    │   ├── index.ts
+    │   ├── title.tsx
+    │   └── title.test.tsx
+    └── actions/
+        ├── index.ts
+        └── actions.tsx
 ```
 
 > `parts/` 是**通用槽位**：组件内部要拆的私有子组件放这里，按需建、不需要就留空。
@@ -97,12 +93,14 @@ page-header/                            复合件（内部用 base/button）
 
 ```
 app/src/features/inbox/          ← 示例：收件箱
-├── components/inbox-list/       私有组件（一个组件一个目录；内部同样有 tests/）
+├── components/inbox-list/       私有组件（一个组件一个目录；单测在它旁边）
 ├── inbox-store.ts               状态：只服务本 feature（zustand + persist）
+├── inbox-store.test.ts          单元用例：与源文件同目录
 ├── inbox-page.tsx               页面：组合状态 + 组件
-├── tests/                       用例一律进 tests/（强约束）
-│   ├── inbox-page.test.tsx
-│   └── inbox.spec.ts            浏览器主路径
+├── inbox-page.test.tsx          单元用例：同上
+├── tests/                       整体场景：浏览器与拟人（强约束）
+│   ├── main-path.browser.ts
+│   └── main-path.agent.md · main-path.agent.mjs
 └── index.ts                     出口：只导出页面与必要类型
 ```
 
