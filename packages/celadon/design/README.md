@@ -69,6 +69,21 @@
 - 真实伪类（`:hover` `:focus` `:read-only` `:disabled`）与 **`.is-*` 静态类一一对应** —— 后者用于设计稿/静态页**同时展示多态**；
 - 「危险」色分两档：`--danger` **只做填充**（文字仅 3.96:1），文字/图标用 `--danger-ink`（软底 5.57:1 ✓）。
 
+## 给 Agent 的配套文档
+
+每个规范页都有一个**同名 Markdown**（`<页>.md`），把该页的 token、规则、清单与阈值写成可检索的文本 —— **内容与页面一一对应，值以 `tokens.css` 为准**：
+
+| 页面 | 配套文档 |
+| --- | --- |
+| `index.html` | [index.md](index.md)（资产索引与改色流程） |
+| `color-card.html` | [color-card.md](color-card.md)（token 全量 · 关键配对 · 红线） |
+| `foundations.html` | [foundations.md](foundations.md)（F1–F6） |
+| `css-logical.html` | [css-logical.md](css-logical.md)（逻辑属性对照与豁免） |
+| `data-format.html` | [data-format.md](data-format.md)（六节格式规则） |
+| `icons.html` | [icons.md](icons.md)（品牌与图标全量清单） |
+
+> `mock.html` **按约定不配文档**（界面稿）。
+
 ## 本地浏览
 
 设计资产是纯静态的，起一个本地服务器最方便（入口页 [index.html](index.html) 汇总了色卡 / 规范 / **图标与品牌页** / 界面稿 / 应用图标）：
