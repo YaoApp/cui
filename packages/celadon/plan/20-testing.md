@@ -18,7 +18,10 @@
 - **位置（强约束）**：**用例一律放所在单元的 `tests/` 目录内**，源码目录里不得出现 `*.test.*` / `*.spec.*`：
   - 组件 → `components/base/button/tests/button.test.tsx` · `components/page-header/tests/page-header.test.tsx`
   - 页面 / 状态 / 数据 → `features/inbox/tests/inbox-page.test.tsx` · `inbox-store.test.ts`
-- **后缀即分工**：单元 / 组件用例用 `*.test.ts(x)` · 浏览器用例用 `*.spec.ts`（**同一 `tests/` 目录内并存**）—— **两个工具的默认匹配范围都同时包含 `test` 与 `spec`**（`vitest` 默认 `**/*.{test,spec}.?(c|m)[jt]s?(x)` · `playwright` 默认 `**/*.@(spec|test).?(c|m)[jt]s?(x)`），因此**两边配置都要显式收窄**，否则互相误抓
+- **后缀即分工（三条）**：单元 / 组件 `*.test.ts(x)` · 浏览器 `*.browser.ts` · 拟人 `*.agent.md` + `*.agent.mjs`
+  （**同一 `tests/` 目录内并存**）
+- **按场景命名**：一个场景一个文件，文件名说清是哪个场景（`main-path.browser.ts` · `theme.browser.ts` ·
+  `main-path.agent.md`）。文件名不该是"某组件"，那是文件内部的事—— **两个工具的默认匹配范围都同时包含 `test` 与 `spec`**（`vitest` 默认 `**/*.{test,spec}.?(c|m)[jt]s?(x)`；`playwright` 默认也吃 `test` 与 `spec`，而我们的后缀已改成 `browser`，仍要显式收窄），因此**两边配置都要显式收窄**，否则互相误抓
 - **共享件**：setup · 跨组件复用的夹具 · 全局 store 重置放 `app/src/test-support/`，**不放进单元目录**
 - **硬要求**：从旧仓库搬入的模块必须有测试；状态与数据层必须有测试
 - **断言用户看到什么**（可见文字 · 角色 · 可访问状态），**不测内部结构**
@@ -32,7 +35,7 @@
 
 - **来源**：该模块的验收条款
 - **数量**：每个模块**只留少量最关键的主路径**（分层 70/20/10 —— UI / E2E 只占一层，其余压到下层）
-- **写在哪**：该单元的 `tests/` 目录内，后缀 `*.spec.ts`（与单元用例 `*.test.ts(x)` 并存）；**该模块的计划里列出它自己的主路径清单**
+- **写在哪**：该 feature 的 `tests/` 目录内，后缀 `*.browser.ts`、**一个场景一个文件**；**该模块的计划里列出它自己的主路径清单**
 - **格式**：路径（用户语言）+ 要点（关键断言）
 
 **UI 底座验收**（一次性，之后并入回归）：**中文输入法**（组合中 · 候选词 · **未上屏时回车 / 点击不误提交**）· **全键盘**（Tab 顺序 · Esc · Enter · **焦点环可见**）· **token 换肤生效**（深浅色跟随 token，非硬编码样式）
@@ -58,12 +61,13 @@
 **位置（规范）**：
 
 - **只有 feature 需要拟人测试** —— 组件与基础件不进这一层（它们由单元与浏览器两层覆盖）。
-- **剧本住 `app/src/features/<域>/tests/persona.md`，进仓库**；剧本 · 判定数据 · 结论同一个文件，
+- **剧本住 `app/src/features/<域>/tests/<场景>.agent.md`，进仓库**；**一个场景一份**；剧本 · 判定数据 · 结论同一个文件，
   结论在执行后追加并带时间戳，因此"预期先写定"这件事在文件里看得出来。
-- **采集脚本住同一目录**：`persona.mjs`（后缀即分工：`*.test.ts(x)` 给 vitest · `*.spec.ts` 给 Playwright ·
-  `persona.mjs` 给 `pnpm test:persona`）。脚本只做机器能做的部分（开真浏览器 · 按剧本走 · 截图 · 报客观测量），
+- **采集脚本与剧本同名同场景**：`<场景>.agent.mjs`。后缀即分工：`*.test.ts(x)` 给 vitest ·
+  `*.browser.ts` 给 Playwright · `*.agent.mjs` 给 `pnpm test:persona`（它自动发现所有 `*.agent.mjs`）。
+  脚本只做机器能做的部分（开真浏览器 · 按剧本走 · 截图 · 报客观测量），
   判定仍由执行者给出。
-- **证据不进仓库**：截图落在 `app/logs/<日期>/persona-<HHMM>/`（与同一次运行的日志同目录，git 忽略）。
+- **证据不进仓库**：截图落在 `app/logs/<日期>/<场景>-<HHMM>/`（与同一次运行的日志同目录 · 同名 · git 忽略）。
 
 **动机**：开发与测试是同一个执行者 → 风险是**自我确认**（测试按实现写、断言按现有行为写，于是"全绿"但用户一用就坏）。
 
@@ -137,9 +141,9 @@ tai tool ocr_providers
 ### 4.4 触发与留档
 
 - **触发**：模块完成 → 该模块剧本；提交前 → 相关剧本；发布前 → 主路径全量
-- **留档**：**剧本与结论进仓库**（`features/<域>/tests/persona.md`）· **证据跟日志走**
+- **留档**：**剧本与结论进仓库**（`features/<域>/tests/<场景>.agent.md`）· **证据跟日志走**
   （`app/logs/<日期>/persona-<HHMM>/`，git 忽略）· flake 根因与新失败回流仍留工作区
-- **结果日志**：`pnpm test:persona` 写 `app/logs/<日期>/persona-<HHMM>.log`（与其它四层同一命名规矩）
+- **结果日志**：`pnpm test:persona` 每个场景写一份 `app/logs/<日期>/<场景>-<HHMM>.log`（与其它四层同一命名规矩）
 - **结论含"看不清"，不许并进"通过"**
 
 ## 5. QA 流程（七阶段）
