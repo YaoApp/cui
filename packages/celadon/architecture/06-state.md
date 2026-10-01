@@ -1,0 +1,32 @@
+# 06 · 状态
+
+- **状态**：✅ 已定（状态跟 feature 走，2026-10-01）
+- **依据**：`plan/01` §1 第 14 条 + `00-principles` §2
+
+## 规则
+
+- **`zustand`** 是唯一状态库；**不用 mobx**；自研的 `storex` **不复活**。持久化用 `persist` 中间件。
+- **没有全站 `state/` 目录** —— **状态跟 feature 走**：一个 feature 的页面 · 组件 · 状态 · 测试都住在
+  `app/src/features/<域>/` 里，人和 Agent 在**同一处**找齐。
+- store 文件与 feature 同名（`features/inbox/inbox-store.ts`），导出 `useXxxStore`。
+- store **不写 DOM、不发请求**；取数走数据层钩子（见 `05`）。
+
+## 跨 feature 的状态（先别预设）
+
+真出现"多个 feature 都要用"的状态时，按它的**性质**落位，而不是新开一层：
+
+| 性质 | 落位 |
+| --- | --- |
+| 壳 / 运行时（主题 · 栏宽 · 侧栏折叠） | `app/src/platform/` |
+| 服务端数据的缓存与流 | `app/src/data/` |
+| 确属**客户端共享领域状态**、且没有单一归属 feature | 该 feature 先导出；**出现第三个使用者**时再议（不预设目录） |
+
+## 什么不进 store
+
+- 只在单个组件内用的 UI 状态（展开 / 输入中）→ 留在组件。
+- 路由状态 → 交给路由（见 `07`）。
+
+## 待讨论
+
+- 是否允许 feature **互相订阅**对方的 store（现在规则是 feature 之间不互相 import）。
+- store 的测试约定（重置 / 隔离；同行做法是全局 `__mocks__` 在每个用例前重置所有 store）。
