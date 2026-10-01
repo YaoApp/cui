@@ -19,7 +19,7 @@ const FORBIDDEN_HEADINGS = /^#{1,6}\s*.*(待讨论|未决|TODO|FIXME|TBD)/i;
 
 const files = readdirSync('.').filter((f) => f.endsWith('.md'))
 if (files.length === 0) {
-  console.log('✗ 没有找到可检查的 Markdown 文件 —— 目标目录不对？(目标：' + TARGET + ')')
+  console.log('✗ no Markdown files to check — wrong target directory? (target: ' + TARGET + ')')
   process.exit(1)
 }
 const isRow = (l) => /^\s*\|/.test(l)
@@ -39,30 +39,30 @@ for (const f of files) {
 
   lines.forEach((l, idx) => {
     if (FORBIDDEN_HEADINGS.test(l)) {
-      problems.push(`${f}:${idx + 1} 对外文档不得有"待讨论 / 未决"小节标题: ${l.trim().slice(0, 40)}`)
+      problems.push(`${f}:${idx + 1} an outward-facing document may not have an open-question heading: ${l.trim().slice(0, 40)}`)
     }
   })
 
   for (const b of blocks) {
     const where = `${f}:${b[0][0]}`
     if (b.length === 1) {
-      problems.push(`${where} 孤立表格行（前后没有表格）: ${b[0][1].trim().slice(0, 50)}`)
+      problems.push(`${where} orphan table row (no table around it): ${b[0][1].trim().slice(0, 50)}`)
       continue
     }
     if (!isSep(b[1][1])) {
-      problems.push(`${where} 表格第二行不是分隔行: ${b[1][1].trim().slice(0, 50)}`)
+      problems.push(`${where} second row of the table is not a separator: ${b[1][1].trim().slice(0, 50)}`)
       continue
     }
     const widths = b.map(([, l]) => cells(l))
     if (new Set(widths).size !== 1) {
-      problems.push(`${where} 表格列数不一致（${[...new Set(widths)].sort().join(' / ')}）`)
+      problems.push(`${where} table rows disagree on column count (${[...new Set(widths)].sort().join(' / ')})`)
     }
   }
 }
 
 if (problems.length) {
-  console.log(`✗ 发现 ${problems.length} 个问题：`)
+  console.log(`✗ ${problems.length} problem(s) found:`)
   problems.forEach((p) => console.log('  ' + p))
   process.exit(1)
 }
-console.log('  ✓ plan/ Markdown 结构正常（' + files.length + ' 个文件 · 表格与分隔行都合规）')
+console.log('  ✓ plan/ Markdown structure ok (' + files.length + ' file(s); tables and separators are well formed)')

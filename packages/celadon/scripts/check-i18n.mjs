@@ -61,7 +61,7 @@ const SAME_FORM_GUARD = [...'放播常直使用空白面板本形按交人大小
 // 注：「后」不算同形字 —— 繁中表「之后」用「後」，「后」仅用于皇后，仍属简体专属
 {
   const wrong = SAME_FORM_GUARD.filter(c => SIMPLIFIED_ONLY.has(c));
-  if (wrong.length) { console.error('✗ check-i18n 自身有问题：同形字被误收进简体表 →', wrong.join('')); process.exit(1); }
+  if (wrong.length) { console.error('✗ check-i18n itself is broken: a same-form character was wrongly listed as simplified →', wrong.join('')); process.exit(1); }
 }
 const problems = []
 
@@ -70,9 +70,9 @@ const problems = []
 const ABBREV = new Set(['nav', 'act', 'pnl', 'msg', 'btn', 'cfg', 'usr', 'cnt', 'idx'])
 for (const k of Object.keys(base)) {
   const segs = k.split('.').slice(1)
-  for (const seg of segs) if (!/^[a-z][A-Za-z0-9]*$/.test(seg)) problems.push(`key 命名不合规（要小驼峰）: ${k}`)
-  if (segs.length > 3) problems.push(`key 层级过深（>3 段）: ${k}`)
-  for (const seg of segs) if (ABBREV.has(seg)) problems.push(`key 用了缩写（规范要求全称）: ${k} —— ${seg}`)
+  for (const seg of segs) if (!/^[a-z][A-Za-z0-9]*$/.test(seg)) problems.push(`key name is not lowerCamelCase: ${k}`)
+  if (segs.length > 3) problems.push(`key is too deep (>3 segments): ${k}`)
+  for (const seg of segs) if (ABBREV.has(seg)) problems.push(`key segment is abbreviated (full words required): ${k} — ${seg}`)
 }
 // 5) 页面里字面引用的 key 必须在语言包里存在（data-i18n="…" 与 tr('…')）
 //    历史：color-card 的 card.usage.dangerInk 与 foundations 的 f.grid.sliderSide 从来没加过，
@@ -87,7 +87,7 @@ for (const k of Object.keys(base)) {
     for (const mm of text.matchAll(/\btr\('([^']+)'\)/g)) keys.push(mm[1])
     for (const k of keys) {
       if (k.includes('{') || k.includes('+')) continue          // 含插值/拼接的跳过
-      if (!(k in base) && !seen.has(k)) { seen.add(k); problems.push(`页面引用了不存在的 key: ${k}（${f}）`) }
+      if (!(k in base) && !seen.has(k)) { seen.add(k); problems.push(`a page references a key that does not exist: ${k} (${f})`) }
     }
   }
 }
@@ -96,27 +96,27 @@ for (const lang of LANGS) {
   if (lang === BASE) continue
   const pack = packs[lang]
   // 1) key 完整性
-  for (const k of Object.keys(base)) if (!(k in pack)) problems.push(`[${lang}] 缺 key: ${k}`)
-  for (const k of Object.keys(pack)) if (!(k in base)) problems.push(`[${lang}] 多余 key: ${k}`)
+  for (const k of Object.keys(base)) if (!(k in pack)) problems.push(`[${lang}] missing key: ${k}`)
+  for (const k of Object.keys(pack)) if (!(k in base)) problems.push(`[${lang}] extra key: ${k}`)
   // 2/3) 漏翻
   for (const [k, v] of Object.entries(pack)) {
     if (typeof v !== 'string' || ALLOW_CJK.has(k) || NEUTRAL.test(v)) continue
     // en 里出现汉字 = 没翻（字型样本走 ALLOW_CJK 白名单）
-    if (lang === 'en' && HAN.test(v)) problems.push(`[en] 未翻译（含汉字）: ${k} = ${v}`)
+    if (lang === 'en' && HAN.test(v)) problems.push(`[en] untranslated (contains Han characters): ${k} = ${v}`)
     if (lang === 'ja' && HAN.test(v) && v === base[k] && !JA_KEEP.has(v))
-      problems.push(`[ja] 疑似未翻译（同 zh-CN）: ${k} = ${v}`)
+      problems.push(`[ja] looks untranslated (identical to zh-CN): ${k} = ${v}`)
     // 繁中：只查"简体专属字"（词形相同的词不算错，避免误报）
     if (lang === 'zh-TW' && !ALLOW_CJK.has(k)) {
       const hit = [...v].filter(c => SIMPLIFIED_ONLY.has(c))
-      if (hit.length) problems.push(`[zh-TW] 含简体字「${hit.join('')}」: ${k} = ${v}`)
+      if (hit.length) problems.push(`[zh-TW] contains simplified character(s) ${hit.join('')}: ${k} = ${v}`)
     }
   }
 }
 
-console.log(`✓ 语言包: ${LANGS.join(' / ')} · 基准 ${BASE} 共 ${Object.keys(base).length} key`)
+console.log(`✓ locale packs: ${LANGS.join(' / ')} · baseline ${BASE} holds ${Object.keys(base).length} key(s)`)
 if (problems.length) {
-  console.log(`✗ 发现 ${problems.length} 个问题：`)
+  console.log(`✗ ${problems.length} problem(s) found:`)
   problems.forEach(p => console.log('   ' + p))
   process.exit(1)
 }
-console.log('✓ 未发现漏 key / 漏翻')
+console.log('✓ no missing keys and no untranslated values')

@@ -15,6 +15,7 @@
 | `check-plan-md` | `plan/` 的表格结构与禁用小节（"待讨论"等）|
 | `check-app-layout` | **用例必须在 `tests/` 目录内**（强约束）—— 源码目录里出现 `*.test.*` / `*.spec.*` 即失败 |
 
+- **运行时输出一律英文**（检查器 · 测试 · 脚本的 console 与报错 · 用例名）；注释与文档仍是中文。
 - **检查器自身必须有样本测试**：`node scripts/tests/run.mjs`（**41 / 41**；每条规则一个正例 + 一个违规例）。
 - **三层命令**：`pnpm check`（规范门禁）· `pnpm test`（单元 / 组件）· `pnpm test:browser`（浏览器）；一把跑 `pnpm test:all`。
 - **加一条规则，必须同时加违规样本** —— 否则"全过"是假象。
@@ -28,7 +29,7 @@
 | **组件边界** | 禁组件外写内联边框（会露浏览器默认焦点环）—— 需"组件目录"概念，静态扫描认不出 |
 | **反向依赖边界** | **禁 `import '@yaoapp/cui'`** |
 | **接线** | 进 CI job / pre-commit —— 让**构建或 CI 失败**，不只是脚本失败 |
-| **celadon 的 CI · 一** | `.github/workflows/celadon-test-build.yml`：**规范门禁 → 单元测试 → 构建**（前一步不过不进下一步）；`dist/` 由 `.gitignore` 挡在提交之外 |
+| **celadon 的 CI · 一** | `.github/workflows/celadon-test-build.yml`：**规范门禁 → 单元测试 → 构建**（前一步不过不进下一步）；`dist/` 由 `.gitignore` 挡在提交之外；结束时把 `app/logs/*/*.log` 写进运行摘要 |
 | **celadon 的 CI · 二** | `.github/workflows/celadon-browser-test.yml`：**浏览器测试**，单独一份、自带环境准备；失败时上传轨迹与截图。分两份是因为它要起服务、要真浏览器，成本高一档 |
 
 ## 待讨论

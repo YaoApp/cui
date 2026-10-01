@@ -27,15 +27,23 @@
   `celadon-browser-test.yml`（自带环境准备 —— 用 runner 自带的 Google Chrome，因此不必 `playwright install`；
   失败时上传轨迹与截图）。
 
+## 运行时输出一律英文
+
+CI 与测试的输出面向**所有贡献者**（含海外），因此脚本的 `console` 输出、报错、用例名一律英文；
+注释与 `plan/` `design/` `architecture/` 文档仍用中文。检查器与用例都按这条写。
+
 ## 日志
 
 三层各写一份，落在 **`app/logs/<本地日期>/<名>-<HHMM>.log`**（git 忽略），屏幕与文件双写，退出码原样透传：
 
 | 日志名 | 命令 |
 | --- | --- |
+| `gates-1355.log` | `pnpm check`（七个检查器）|
 | `checkers-1355.log` | `pnpm test:checkers` |
 | `unit-1355.log` | `pnpm test` |
 | `browser-1355.log` | `pnpm test:browser` |
+
+> `pnpm check` 是带日志的外壳，真正的检查链在 `pnpm check:run` —— 这样它能和其它三层一样留痕。
 
 实现是 `scripts/run-logged.mjs`（写命令 · 起止时间 · 退出码 · 用时）。
 
@@ -45,6 +53,9 @@
 - **保留 14 天**：每次运行顺带清理超期的日期目录（只认 `YYYY-MM-DD` 形状的目录，别的不碰）；
   可用 `CUI_LOG_KEEP_DAYS` 调。
 - 找最新：`ls -1t app/logs/*/*.log | head -1`。
+- **CI 里这些日志会自动进运行摘要**：两份 workflow 最后都有一句 `if: always()` 的步骤，
+  把 `app/logs/*/*.log` 折进 `$GITHUB_STEP_SUMMARY`（折叠块包住），红绿都能在运行页直接读到，
+  不必下载 artifact。artifact 里另带 `test-results/` 的轨迹与截图。
 - 体积：一天约十几份、几十 KB，14 天量级在几 MB 内。
 
 > **dev 下 `app/logs/` 能被 URL 直接读到，这是可以接受的** —— 它绑在 `0.0.0.0`，root 内文件按 URL 可取。

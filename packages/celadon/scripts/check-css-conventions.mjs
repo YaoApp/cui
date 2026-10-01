@@ -54,7 +54,7 @@ const PHYSICAL = [
   [/\btext-align\s*:\s*(left|right)\b/g, 'text-align: start / end'],
   [/\bborder-left\b/g, 'border-inline-start'],
   [/\bborder-right\b/g, 'border-inline-end'],
-  [/\bborder-(top|bottom)-(left|right)-radius\b/g, 'border-start-start-radius 等'],
+  [/\bborder-(top|bottom)-(left|right)-radius\b/g, 'border-start-start-radius and friends'],
 ]
 
 /** 取页面里的 <style> 段落 + 独立样式文件全文；返回 [{ lines, exempt }] */
@@ -97,22 +97,22 @@ for (const file of files) {
 }
 
 if (files.length === 0) {
-  console.log('✗ 没有找到可检查的文件 —— 目标目录不对？(目标：' + dir + ')')
+  console.log('✗ no files to check — wrong target directory? (target: ' + dir + ')')
   process.exit(1)
 }
 
 if (legacyHits.length) {
   const files = [...new Set(legacyHits.map((h) => h.file))].sort().join(' · ')
-  console.log(`  · 已知存量 ${legacyHits.length} 处，集中在演示稿：${files}（按约定不回改）`)
+  console.log(`  · ${legacyHits.length} known legacy hit(s), all in the demo pages: ${files} (left alone by agreement)`)
 }
 
 if (problems.length) {
-  console.log(`✗ CONVENTIONS.md §3「布局只用逻辑属性」有 ${problems.length} 处违反：`)
+  console.log(`✗ CONVENTIONS.md §3 "layout uses logical properties only" has ${problems.length} violation(s):`)
   for (const p of problems) {
     console.log(`   ${p.file}:${p.line}  ${p.text}`)
-    console.log(`       → 改用 ${p.suggest}`)
+    console.log(`       → use ${p.suggest}`)
   }
   process.exit(1)
 }
 
-console.log('  ✓ 除存量演示稿外，没有物理方向属性（布局只用逻辑属性）')
+console.log('  ✓ outside the known demo pages there are no physical direction properties (logical layout only)')

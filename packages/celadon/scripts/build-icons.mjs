@@ -23,8 +23,8 @@ const readSymbols = (file) => {
 const symbolsById = { ...readSymbols('icons/lucide-sprite.svg'), ...readSymbols('icons/own-sprite.svg') };
 
 const missing = manifest.filter(m => !symbolsById[m.id]).map(m => m.id);
-if (missing.length) { console.error(`✗ 雪碧图里缺少：${missing.join(', ')}`); process.exit(1); }
-console.log(`  雪碧图共 ${Object.keys(symbolsById).length} 个符号 · manifest ${manifest.length} 条 · 自建 ${manifest.filter(m => m.lib === 'own').length} 个`);
+if (missing.length) { console.error(`✗ missing from the sprite: ${missing.join(', ')}`); process.exit(1); }
+console.log(`  sprite holds ${Object.keys(symbolsById).length} symbol(s) · manifest ${manifest.length} entr(y|ies) · own ${manifest.filter((m) => m.lib === 'own').length}`);
 
 const symbols = manifest.map(m => symbolsById[m.id]);
 const block = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n${symbols.join('\n')}\n</defs></svg>`;
@@ -32,7 +32,7 @@ const block = `<svg width="0" height="0" style="position:absolute" aria-hidden="
 function patch(file) {
   const src = readFileSync(file, 'utf8');
   const re = /<svg width="0" height="0"[\s\S]*?<\/svg>/;
-  if (!re.test(src)) throw new Error(`✗ ${file} 里找不到雪碧图块`);
+  if (!re.test(src)) throw new Error(`✗ no sprite block found in ${file}`);
   let out = src.replace(re, block);
   out = out.replace(/var SYMBOLS = \[[^\]]*\];/, `var SYMBOLS = [${manifest.filter(m => m.cat !== 'brand').map(m => `'${m.id}'`).join(',')}];`);
   out = out.replace(/var LUCIDE = \{[^}]*\};/,
@@ -50,8 +50,8 @@ function patch(file) {
   const brands = JSON.stringify([...lobe, ...simple]).replace(/\s+/g, ' ');
   out = out.replace(/var BRANDS = \[[\s\S]*?\];/, `var BRANDS = ${brands.trim()};`);
   writeFileSync(file, out);
-  console.log(`  ✓ ${file}：内联 ${symbols.length} 个符号`);
+  console.log(`  ✓ ${file}: inlined ${symbols.length} symbol(s)`);
 }
 patch('mock.html');
 patch('icons.html');
-console.log('  ✓ 完成');
+console.log('  ✓ done');

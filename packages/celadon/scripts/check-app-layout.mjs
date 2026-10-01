@@ -10,7 +10,7 @@ const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const TARGET = resolve(process.argv[2] || join(PACKAGE, 'app', 'src'))
 
 try { statSync(TARGET) } catch {
-  console.log('✗ 目标目录不存在 —— 检查器不会在空目录上假装通过（目标：' + TARGET + '）')
+  console.log('✗ target directory does not exist — the checker refuses to pass on an empty tree (target: ' + TARGET + '）')
   process.exit(1)
 }
 
@@ -28,8 +28,8 @@ function walk(dir) {
     cases.push(relative(TARGET, full))
     if (!parts.slice(0, -1).includes('tests')) {
       problems.push(
-        `${relative(TARGET, full)} 用例不在 tests/ 目录内 —— 移到同级 tests/ 下` +
-        `（例：${parts.slice(0, -1).join('/')}/tests/${entry.name}）`
+        `${relative(TARGET, full)} is a test file outside a tests/ directory — move it there` +
+        ` (e.g. ${parts.slice(0, -1).join('/')}/tests/${entry.name})`
       )
     }
   }
@@ -37,8 +37,8 @@ function walk(dir) {
 walk(TARGET)
 
 if (problems.length) {
-  console.log(`✗ 发现 ${problems.length} 个布局问题（扫描到 ${cases.length} 个用例文件）：`)
+  console.log(`✗ ${problems.length} layout problem(s) found (${cases.length} test file(s) scanned):`)
   problems.forEach((p) => console.log('  ' + p))
   process.exit(1)
 }
-console.log('  ✓ app 布局合规（' + cases.length + ' 个用例文件全在 tests/ 内）')
+console.log('  ✓ app layout ok (' + cases.length + ' test file(s), all inside tests/)')

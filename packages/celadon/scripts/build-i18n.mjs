@@ -25,6 +25,6 @@ for (const f of files) {
   const lang = f.replace(/\.json$/, '')
   bundle[lang] = JSON.parse(readFileSync(resolve(dir, f), 'utf8'))
 }
-writeFileSync(out, '/* 自动生成，勿手改 —— 源：i18n/*.json（node packages/celadon/design/build-i18n.mjs） */\n'
+writeFileSync(out, '/* generated — do not edit by hand; source: i18n/*.json (node packages/celadon/design/build-i18n.mjs) */\n'
   + 'window.CELADON_I18N = ' + JSON.stringify(bundle, null, 2) + ';\n')
-console.log('✓ 生成 i18n/bundle.js （' + files.join(' · ') + '）')
+console.log('✓ wrote i18n/bundle.js (' + files.join(' · ') + ')')
