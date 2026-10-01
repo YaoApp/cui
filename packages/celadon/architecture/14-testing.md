@@ -14,7 +14,8 @@
 - **按场景命名**：一个场景一个文件；文件名说清场景，不说"某组件"。
 - **拟人测试只属于 feature**：剧本住 `features/<域>/tests/<场景>.agent.md`（**进仓库**），文件结构固定三段 ——
   **剧本（恒定）· 修改记录 · 测试记录**。剧本不随每轮结果改动；每轮状态进「测试记录」并**指向日志明细**，
-  结果不复制进剧本。采集脚本 `<场景>.agent.mjs` 同目录；**组件与基础件不写这一层**。证据截图不进仓库。
+  结果不复制进剧本。采集脚本 `<场景>.agent.mjs` 同目录；**组件与基础件不写这一层**。
+证据截图不进仓库，落 `app/logs/<日期>/shots/<场景>/`，**统一走固化资产 `scripts/shots.mjs`**（见 `02` 的脚本表）。
 - **拟人由 `scripts/run-persona.mjs` 发现并逐个跑**（`features/*/tests/*.agent.mjs`），一个场景一份日志。
 - **两个工具的默认匹配范围重叠** —— `vitest` 默认 `**/*.{test,spec}.?(c|m)[jt]s?(x)` · `playwright` 默认 `**/*.@(spec|test).?(c|m)[jt]s?(x)`：
   **两边配置都要显式收窄**（`vitest` 的 `include` 只留 `*.test.*` · `playwright` 的 `testMatch` 只留 `*.browser.ts`），否则会互相误抓。
