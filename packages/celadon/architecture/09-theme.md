@@ -16,6 +16,15 @@
 - **组件库主题映射**（子项 5）：同一份 token 生成组件库主题。
 - **运行期对比度校验**（子项 8）：`readableColorOn(fg, bg)` 按**实际绘制的背景**算对比度并给可读替代色；开发期断言 + 关键组件接入。
 
+## 页面底色归壳
+
+**整页底色与整页高度由 `app/src/platform/shell.less` 负责**（`html`/`body` 铺满 + `--background-app` 底色 +
+`body` 的默认外边距清零），feature 与组件只管自己那块。组件**不需要知道当前深浅** —— 深浅由 token 决定。
+
+> 这条是拟人测试抓出来的：app 自己的横带跟随了深色，而 `body` 没有背景、`.hello` 的 `min-block-size:100%`
+> 又没有父高度可解，于是深色页面下方留了一大块纯白（决策模型判 `fail`/`blocker`）。回归用例见
+> `features/hello/tests/hello.spec.ts` 的 "the page itself follows the theme"。
+
 ## 待讨论
 
 - 主题是只支持 `light` / `dark`，还是要预留"跟随系统"的第三态。
