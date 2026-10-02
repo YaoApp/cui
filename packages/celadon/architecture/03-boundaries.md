@@ -1,7 +1,7 @@
 # 03 · 目录与边界
 
 - **版本**：v1.28
-- **最后修改**：2026-10-02 16:47:49
+- **最后修改**：2026-10-02 18:16:26
 - **说明**：目录结构 · 分层职责 · 同层方向 · 谁能 import 谁 · 边界怎么强制
 
 ## 1. 分层职责
@@ -34,8 +34,10 @@
 
 | 位置 | 放什么 | 例子 |
 | --- | --- | --- |
-| `components/base/` | 基础组件：包装 `@base-ui/react` + token 类，只有视觉与行为 | `base/button/` `base/input/` `base/dialog/` `base/menu/` |
+| `components/base/` | 基础组件：包装 `@base-ui/react` + token 类，只有视觉与行为 | `base/button/` `base/select/` |
 | `components/<名>/` | 其余组件：由基础组件拼成，直接命名 | `page-header/` `empty-state/` `confirm-dialog/` |
+
+`base/` 里的基础件**按需新增**：出现真实复用需求才建目录；**已有的一律包装 `@base-ui/react`**，不直接写原生控件。
 
 组件目录里的文件（**所有组件同一套结构**，可选槽位按需留空）：
 
@@ -77,7 +79,7 @@ feature 私有组件**不许**出 `features/<域>/components/`；feature 之间�
 | 规则 | 手段 | 例子 |
 | --- | --- | --- |
 | **层间方向** | ESLint `no-restricted-imports`（`allowTypeImports: true` 只放行类型）| `components/base/` 不许 import 上层组件；`data/` 不许 import `features/`；`features/a/` 不许 import `features/b/` |
-| **用基础件，不裸写控件** | `check-base-components.mjs`（`features/` 与 `routes/` 里不许裸 `<button>`）| 按钮用 `components/base/button`；链接、输入框用设计类 `.link` / `.input` |
+| **用基础件，不裸写控件** | `check-base-components.mjs`（`features/` · `routes/` · `components/` 里不许裸 `<button>` / `<select>`，`components/base/` 豁免）| 按钮用 `components/base/button`；下拉用 `components/base/select`；链接、输入框用设计类 `.link` / `.input` |
 | **组件不发请求** | 同上 + `no-restricted-syntax` | 禁组件里出现 `fetch(` / `new WebSocket(` |
 | **不在 `useEffect` 取数** | 同上 | 取数走数据层钩子（见 `05-data-and-api.md`）|
 | **禁旧包** | 同上 | 禁 `import '@yaoapp/cui'` |
