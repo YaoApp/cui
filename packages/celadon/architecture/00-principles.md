@@ -37,7 +37,7 @@
 
 - `components/<名>/` **可以**引用 `components/base/`；`base/` 不可以引用上层组件。
 - `features/<域>/` 内部自洽；**feature 之间不许互相 import**。
-- **`app/src/routes/` 在依赖方向的最上层**（目录上与 `features/` 并列，都在 `app/src/` 下）：
+- **`routes/` 在依赖方向的最上层**（目录上与 `features/` 并列，都在 `app/src/` 下）：
   它可以 import 组件层与能力层，**反过来不行** —— `features/` 与 `components/` 都不许 import `routes/`。
   路由只做装配，业务实现不住 `routes/`（地址语法见 `07-routing.md`）。
 

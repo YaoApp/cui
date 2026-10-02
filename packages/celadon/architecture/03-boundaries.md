@@ -74,7 +74,7 @@ feature 私有组件**不许**出 `features/<域>/components/`；feature 之间�
 ## 5. 待讨论
 
 - 层与层之间是否允许**类型**互相引用（`allowTypeImports` 就是为这件事留的口子）。
-- 是否加 `app/src/routes/`（薄路由）与 `features/` 并列。
+- 是否加 `routes/`（薄路由）与 `features/` 并列。
 - `components/<名>/` 多了之后是否按域分目录（现在平铺）。
 - 组件子目录是否收口为"只允许 `parts/` 与 `tests/`"。
 - 组件样式走 `.less`、CSS Modules，还是只用 token 类（现在：能靠 token 类就不加文件）。
