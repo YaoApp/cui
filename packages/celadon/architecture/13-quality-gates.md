@@ -1,7 +1,7 @@
 # 13 · 质量门禁
 
-- **版本**：v1.25
-- **最后修改**：2026-10-02 18:38:23
+- **版本**：v1.26
+- **最后修改**：2026-10-02 19:40:51
 - **说明**：扫描期与构建期门禁 · 检查器清单
 
 ## 扫描期（已跑通 · 纯 Node 脚本）
@@ -13,7 +13,7 @@
 | `check-i18n` | 把三处语言包（`app/src/locales/` · `features/*/locales/` · `components/*/locales/`）按 locale 合并后校验：缺 key · 漏翻 · 繁中夹简体 · 日文汉字误用 · **基准语言 `zh-CN` 缺失**（某处不存在则跳过）· **代码里的硬编码汉字文案**（扫描 `app/src` 的 `.ts` / `.tsx`，先剥注释，排除 `locales/` 与测试 / 生成物；豁免走 `ALLOW_LITERALS` 并写明原因）|
 | `check-i18n-types` | **i18n 类型产物过期**：按基准语言 `zh-CN` 重新生成 `i18n-types.d.ts` 再与仓库里的比对（不同即失败，跑 `pnpm build:i18n`）|
 | `check-readme-values` | README 引用的色值与 `tokens.css` 不一致 |
-| `check-generated` | **产物与源不一致**：重新生成 `icons.html` / `mock.html`，以及 `tokens.less` → 两份 `tokens.css`（`design/` 与 `app/src/platform/theme/`），再与仓库比对（跑 `node scripts/build-css.mjs`）|
+| `check-generated` | **产物与源不一致**：重新生成 `icons.html` / `mock.html` / **应用侧图标产物**，以及 `tokens.less` → 两份 `tokens.css`（`design/` 与 `app/src/platform/theme/`），再与仓库比对（跑 `node scripts/build-css.mjs`）|
 | `check-plan-md` | `plan/` 的表格结构与禁用小节（"待讨论"等）。**单元格里别写竖线** —— 检查器不认反斜杠转义，会按列数不一致报错 |
 | `check-app-layout` | 测试产物位置：**单测挨着源文件**（不许进 `tests/`）· **浏览器与拟人必须在 `tests/` 内** —— 两条方向相反的规则，各有正反样本 |
 | `check-doc-references` | 文档提到的 `app/src/...` 路径 · `scripts/*.mjs` · `pnpm <cmd>` **必须真实存在** —— 文档漂移不靠人 review |
