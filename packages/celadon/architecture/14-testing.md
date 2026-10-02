@@ -8,7 +8,8 @@
 - 栈：**`vitest`** + `@testing-library/react` · `user-event` · `jest-dom` · `jsdom` · `@vitest/coverage-v8` + **`@playwright/test`**。
 - **单元用例与源文件同目录**；**浏览器用例与拟人剧本进 `features/<域>/tests/`**。两条都由 `check-app-layout` 强制（各带正反样本）。
 - 后缀即分工：`*.test.ts(x)` · `*.browser.ts` · `<场景>.agent.md` + `<场景>.agent.mjs`；**一个场景一个文件**。
-- 拟人只属于 feature：剧本三段（**剧本恒定 · 修改记录 · 测试记录**），每轮结果明细看日志、不复制进剧本；
+- 拟人只属于 feature：剧本三段（**剧本恒定 · 修改记录 · 测试记录**）+ 同场景的**采集脚本** `<场景>.agent.mjs`（开浏览器走剧本 · 截图 · 报客观测量）；
+  每轮结果明细看日志、不复制进剧本；
   截图落 `app/logs/<日期>/shots/<场景>/`，统一走 `scripts/shots.mjs`（见 `02` 脚本表）。
 - 共享测试支持放 `app/src/test-support/`，**不放组件目录内** —— 组件目录只放该组件自己的用例。
 - **不设覆盖率阈值**（阈值会诱导写无意义断言）。
