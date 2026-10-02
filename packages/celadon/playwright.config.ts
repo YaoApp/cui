@@ -15,7 +15,7 @@ export default defineConfig({
     channel: 'chrome', // 用本机 Chrome，避免下载 Playwright 自带浏览器
     // 浏览器默认语言固定为基准 zh-CN：语言跟随系统后，首个用例才不会因跑测机器而异；
     // 测"跟随系统"的用例自己用 page.addInitScript 覆盖 navigator.languages。
-    locale: 'zh-CN',
+    locale: 'zh-CN', colorScheme: 'light' as const,
     trace: 'on-first-retry',
   },
   webServer: {

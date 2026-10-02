@@ -61,8 +61,9 @@ try {
 }
 
 const b = await chromium.launch({ channel: 'chrome', headless: !headed })
-// 浏览器语言固定为基准 zh-CN：语言跟随系统后，剧本断言的界面文案才不会因跑测机器而异
-const p = await b.newPage({ viewport: { width: 900, height: 500 }, deviceScaleFactor: 2, locale: 'zh-CN' })
+// 浏览器环境显式钉住：语言固定基准 zh-CN，配色固定浅色 —— 两者都跟随系统，
+// 不钉的话剧本断言的界面文案与观感会因跑测机器而异（见 architecture/14-testing.md §1）
+const p = await b.newPage({ viewport: { width: 900, height: 500 }, deviceScaleFactor: 2, locale: 'zh-CN', colorScheme: 'light' })
 p.on('response', (r) => { if (r.status() >= 400) problems.push(`${r.status()} ${r.url()}`) })
 p.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`))
 
