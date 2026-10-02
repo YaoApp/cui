@@ -34,6 +34,23 @@
 标签页 · 历史 · 书签 · 读屏读的都是它。列表页给固定名字，**详情页用对象名**（用户才知道开的是哪一个）。
 `document.title` 是宿主全局，所以这个 hook 住平台层（铁律 4）。
 
+## 文件结构
+
+```
+app/src/routes/            路由（只装配，不写业务）
+├── routes.tsx             路由表：URL → 元素
+├── surface-layout.tsx     表面布局：main 主区 · side 侧边
+├── surface-layout.less    布局样式
+└── surfaces.ts            useSurface：读当前表面
+
+app/src/platform/router/   机制（三端 basename 从这里注入）
+├── router.tsx             createBrowserRouter + RouterProvider
+├── basename.ts            basename 适配器（取 Vite 的 base）
+└── use-page-title.ts      文档标题跟路由走
+```
+
+导航项与"哪条 URL 是当前"的比较在 `platform/utils/nav.ts` —— `routes/` 与 feature 都要用，故不进 `routes/`。
+
 ## 谁说了算
 
 **store 是真相，URL 是它的书签。** 两条方向各走各的路：
