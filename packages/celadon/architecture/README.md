@@ -54,7 +54,7 @@
 | --- | --- | --- |
 | 00 | [principles](00-principles.md) | **八条铁律 + 结构总纲（分层 · 落位 · 依赖 · 命名 · 测试 · 公共态）+ 一个组件一个目录** |
 | 01 | [package-and-repo](01-package-and-repo.md) | 包 · 仓库形态 · 版本与发布 · 旧包处置 |
-| 02 | [toolchain](02-toolchain.md) | 构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 |
+| 02 | [toolchain](02-toolchain.md) | 构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具 |
 | 03 | [boundaries](03-boundaries.md) | 目录结构 · 分层职责 · **同层方向** · 谁能 import 谁 · 边界怎么强制 |
 | 04 | [host-integration](04-host-integration.md) | 宿主挂载 · 保留前缀 · 代理 · SSE / WebSocket |
 | 05 | [data-and-api](05-data-and-api.md) | 传输 · 鉴权 · 后端 SDK · 取数钩子 · 流式 |
