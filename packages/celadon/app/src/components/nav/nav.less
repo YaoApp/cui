@@ -31,3 +31,11 @@
     }
   }
 }
+
+/* 图标与文字之间留空。设计类给了选中态与配色，没给这一处的布局 ——
+   组件只管设计类没有的（与 button.less 同一分工），间距走 token 不写字面量。 */
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}

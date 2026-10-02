@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { Nav, type NavItem } from '@/components/nav'
 
 const ITEMS: NavItem[] = [
-  { label: 'Hello', href: '/main/hello', active: true },
-  { label: 'World', href: '/main/world' },
+  { label: 'Hello', href: '/main/hello', icon: 'i-spark', active: true },
+  { label: 'World', href: '/main/world', icon: 'i-ws' },
 ]
 
 describe('Nav', () => {
@@ -20,6 +20,16 @@ describe('Nav', () => {
     expect(hello).toHaveAttribute('aria-current', 'page')
     expect(hello).toHaveClass('nav-item', 'is-active')
     expect(screen.getByRole('link', { name: 'World' })).not.toHaveAttribute('aria-current')
+  })
+
+  it('shows each item\'s icon, and nothing when an item has none', () => {
+    const { container } = render(
+      <Nav items={[...ITEMS, { label: 'NoIcon', href: '/main/plain' }]} label="应用导航" />,
+    )
+    const links = [...container.querySelectorAll('a.nav__link')]
+    expect(links[0].querySelector('use')?.getAttribute('href')).toBe('#i-spark')
+    expect(links[1].querySelector('use')?.getAttribute('href')).toBe('#i-ws')
+    expect(links[2].querySelector('svg')).toBeNull()
   })
 
   it('hands the click to the caller instead of reloading the page', async () => {

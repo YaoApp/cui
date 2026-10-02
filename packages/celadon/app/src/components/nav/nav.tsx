@@ -1,4 +1,5 @@
 import { LocaleSwitch } from '@/components/locale-switch'
+import { Icon } from '@/components/base/icon'
 import type { NavItem } from '@/platform/utils/nav'
 import './nav.less'
 
@@ -30,6 +31,7 @@ export function Nav({ items, label, localeSwitch, onSelect }: NavProps) {
                 onSelect(item)
               }}
             >
+              {item.icon ? <Icon name={item.icon} size={16} /> : null}
               {item.label}
             </a>
           </li>
