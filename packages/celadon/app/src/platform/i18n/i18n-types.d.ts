@@ -10,6 +10,7 @@ export type I18nKey =
   | 'entityPanel.kind'
   | 'entityPanel.label'
   | 'header.refresh'
+  | 'hello.brands'
   | 'hello.icons'
   | 'hello.refreshed'
   | 'hello.title'
@@ -63,6 +64,7 @@ declare module 'i18next' {
         'entityPanel.kind': string
         'entityPanel.label': string
         'header.refresh': string
+        'hello.brands': string
         'hello.icons': string
         'hello.refreshed': string
         'hello.title': string

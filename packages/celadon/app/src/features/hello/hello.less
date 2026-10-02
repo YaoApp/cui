@@ -15,18 +15,19 @@
   }
 }
 
-/* 图标一览：只做布局与尺寸，颜色/间距走 token。 */
-.hello__icons {
+/* 演示两行：品牌标识一行、界面图标一行（只做布局，间距与颜色走 token）。 */
+.hello__row {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-16);
   align-items: flex-end;
-  padding: var(--spacing-16) 0;
+  padding: var(--spacing-8) 0;
 }
-.hello__icon {
+.hello__cell {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-4);
+  min-width: 64px;
   color: var(--text-secondary);
 }

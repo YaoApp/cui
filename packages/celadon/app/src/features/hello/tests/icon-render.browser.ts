@@ -63,7 +63,7 @@ test('the sprite is a direct child of the body, like the design page', async ({ 
 test('the demo lists a brand mark beside interface icons, all resolving', async ({ page }) => {
   await page.goto('/main/hello')
   const list = await page.evaluate(() =>
-    [...document.querySelectorAll('.hello__icons .hello__icon')].map((cell) => {
+    [...document.querySelectorAll('.hello__row .hello__cell')].map((cell) => {
       const svg = cell.querySelector('svg')
       const href = svg?.querySelector('use')?.getAttribute('href')
       return {
@@ -74,7 +74,7 @@ test('the demo lists a brand mark beside interface icons, all resolving', async 
       }
     }),
   )
-  expect(list.length).toBe(8)
+  expect(list.length).toBe(30)   /* 品牌 4 + 界面图标 26 */
   expect(list.every((x) => x.symbol)).toBe(true)
   const brand = list.find((x) => x.name?.startsWith('brand-'))
   expect(brand, 'the list shows a brand mark').toBeTruthy()
@@ -104,8 +104,8 @@ test('icons scale through the viewBox with a constant stroke, like the design pa
     return {
       button: read('header.header > button svg.icon'),
       nav: read('nav.nav a.nav__link svg.icon'),
-      gallery: read('.hello__icons svg.icon'),
-      brand: read('.hello__icons svg.brand-mark'),
+      gallery: read('.hello__row svg.icon'),
+      brand: read('.hello__row svg.brand-mark'),
     }
   })
   for (const key of ['button', 'nav', 'gallery', 'brand'] as const) {
