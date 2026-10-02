@@ -21,7 +21,7 @@
 
 | # | 分册 | 一句话 | 状态 |
 | --- | --- | --- | --- |
-| 00 | [principles](00-principles.md) | **八条铁律 + 四层模型 + 同层方向 + 每层示例 + 一个组件一个目录** | ✅ 已定 |
+| 00 | [principles](00-principles.md) | **八条铁律 + 四层模型（外加并列的 `routes/`）+ 同层方向 + 每层示例 + 一个组件一个目录** | ✅ 已定 |
 | 01 | [package-and-repo](01-package-and-repo.md) | 包 · 仓库形态 · 版本与发布 · 旧包处置 | ✅ 已定 |
 | 02 | [toolchain](02-toolchain.md) | 构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 | ✅ 已定 |
 | 03 | [boundaries](03-boundaries.md) | 目录结构 · 分层职责 · **同层方向** · 谁能 import 谁 · 边界怎么强制 | ✅ 已定 |

@@ -122,7 +122,7 @@
 | **CI（隔离）· 一** | `.github/workflows/celadon-test-build.yml` · 只在 `packages/celadon/**` 改动时跑 · 干净环境演练通过：安装（不触发构建）→ 规范门禁全绿 → 单元 9/9 → 构建；三处隔离：自己的工作目录 · 自己的锁文件 · 自己的 `packageManager` |
 | **CI（隔离）· 二** | `.github/workflows/celadon-browser-test.yml` · 浏览器测试单独一份、自带环境准备；用例自己起 dev（本地已跑则复用）· 失败时上传轨迹与截图 |
 | **CI 输出** | 两份 workflow 的名字与步骤全英文；结束时把 `app/logs/*/*.log` 写进运行摘要（`$GITHUB_STEP_SUMMARY`，折叠块），红绿都能直接读到 |
-| **产物可独立运行** | `dist/` 用 Python 静态服务器（`python3 -m http.server`）直接跑通：根路径下 4 个文件全 200 · 页面渲染与交互正常 · 零 4xx 零控制台错误 |
+| **产物可独立运行** | `dist/` 用**带 SPA fallback** 的静态服务器跑通（`scripts/serve-dist.mjs` —— `python3 -m http.server` 没有 fallback，深链会 404）：根路径下 4 个文件全 200 · 页面渲染与交互正常 · 零 4xx 零控制台错误 |
 | **产物前缀可配** | `base` 取 `CUI_BASE`（默认 `/`）：`CUI_BASE=/cui/` 构建后资源变 `/cui/_assets/*`，挂到 `/cui/` 下同样跑通（根路径下则 404，佐证前缀生效）|
 | **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**19 / 19**：`button` 4 · `header` 2 · `hello.store` 2 + 1（复位守卫）· `theme.store` 3 · `theme-toggle` 3 · `hello` 2 · `stores` 2（发现跨层）（不设阈值）|
 | **浏览器测试** | `pnpm test:browser`（`@playwright/test`，走本机 Chrome）**6 / 6**：主路径 · 全键盘（含焦点环可见）· 主题跟随 · 分段控件切主题 + 刷新后记住 · 内容面铺满视口 |

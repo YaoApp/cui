@@ -18,7 +18,8 @@
 
 - **运行时输出一律英文**（检查器 · 测试 · 脚本的 console 与报错 · 用例名）；注释与文档仍是中文。
 - **检查器自身必须有样本测试**：`node scripts/tests/run.mjs`（**46 / 46**；每条规则一个正例 + 一个违规例）。
-- **三层命令**：`pnpm check`（规范门禁）· `pnpm test`（单元 / 组件）· `pnpm test:browser`（浏览器）；一把跑 `pnpm test:all`。
+- **五层命令**：`pnpm check`（规范门禁）· `pnpm test:checkers`（检查器自测）· `pnpm test`（单元 / 组件）·
+  `pnpm test:browser`（浏览器）· `pnpm test:persona`（拟人）；一把跑 `pnpm test:all`。
 - **加一条规则，必须同时加违规样本** —— 否则"全过"是假象。
 
 ## 构建期（⏳ 待接线）
