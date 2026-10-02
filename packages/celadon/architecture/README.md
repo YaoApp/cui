@@ -66,7 +66,7 @@
 | 07 | [routing](07-routing.md) | 地址语法（对象在路径 · 表面在首段 · 面板在具名 query）· 谁说了算 · `routes/` 的结构 · 文档标题 |
 | 08 | [i18n](08-i18n.md) | 语言包跟代码走（feature · 组件 · 共用） · locale 规范形式 · 命名空间由位置决定 · 加载 · 后端边界 · 基准语言与翻译流程 |
 | 09 | [theme](09-theme.md) | 设计→代码的转换 · 偏好与解析（三态）· Base UI 基础件 · 页面底色 · 对比度 |
-| 10 | [icons](10-icons.md) | 图标工程落点（规格见 design） |
+| 10 | [icons](10-icons.md) | 图标与品牌：产物 · 基础件用法 · 第三方品牌（规格见 design）|
 | 11 | [formatting-and-lists](11-formatting-and-lists.md) | 日期/数字/时区 · 长列表与表格 |
 | 12 | [motion](12-motion.md) | 动效归属（规格见 design） |
 | 13 | [quality-gates](13-quality-gates.md) | 扫描期与构建期门禁 · 检查器清单 |

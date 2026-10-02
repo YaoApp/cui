@@ -1,8 +1,8 @@
 # 10 · 图标（工程落点）
 
-- **版本**：v1.22
-- **最后修改**：2026-10-02 20:23:09
-- **说明**：图标工程落点（规格见 design）
+- **版本**：v1.23
+- **最后修改**：2026-10-02 20:26:55
+- **说明**：图标与品牌：产物 · 基础件用法 · 第三方品牌（规格见 design）
 
 ## 规则
 
@@ -10,8 +10,9 @@
 - **源**：`design/icons/lucide-sprite.svg` · `own-sprite.svg` · `manifest.json`（`{id, cat, src}`）· 品牌雪碧图。
 - **应用侧产物**（`scripts/build-icons.mjs` 生成，**不许手改**）：`app/src/platform/icons/sprite.svg`（整块）
   与 `icon-ids.ts`（**id 联合类型** —— 写错图标名由 `tsc` 拦下）。
-- **应用侧经平台层**：入口 `mountIconSprite()` 把整块雪碧图挂在 `body` 上一次（`<IconSprite />`）；
+- **应用侧经平台层**：入口 `mountIconSprite()` 把整块雪碧图**直接插进 `body`** 一次；
   其余地方用**基础件 `Icon`**：`<Icon name="i-<域>-<名>" size={16} />`。
+  品牌标识用**另一个基础件 `BrandMark`**：`<BrandMark name="brand-yao-agents" size={24} />`。
   **不引外部雪碧图**（跨文件 `<use>` 有 Safari 与 CSP 的坑，还多一次请求）。
 - 命名 **`i-<域>-<名>`**，与 manifest 一一对应。
 - **尺寸档 14 / 16 / 20 / 24**（产品默认 **16**）。
@@ -36,6 +37,8 @@
    **就不画**，只剩眼睛（2026-10-02 实测三种写法都掉）。
 2. **要图标就用基础件** —— `<Icon name="i-act-refresh" size={16} />`；`size` 取 **14 / 16 / 20 / 24**（默认 16）。
    有语义时给 `label`（`role="img"` + 可访问名）；纯装饰不传（自动 `aria-hidden`）。
+   **品牌标识用 `BrandMark`**（`name` 是 `brand-` 前缀的 id）—— 它与界面图标是两类东西：
+   界面图标固定描边 2、跟随 `currentColor`；品牌标识**只整体使用**，颜色由符号内部自带。
 3. **图标名从 manifest 来** —— 改 `design/icons/manifest.json` → 跑 `node scripts/build-icons.mjs` →
    `icon-ids.ts` 的联合类型随之更新；**写错名字 `tsc` 直接报**。
 4. **不要**自己画 `<svg>`、不要装 `lucide-react`、不要在组件里写图标路径。
