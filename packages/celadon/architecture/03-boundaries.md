@@ -10,14 +10,14 @@
 | 能力层 | `app/src/features/` | 按业务切分（chat / inbox / kanban …）· **页面 + 组件 + 状态 + 测试都在里面** | 不直接 `fetch` · 不碰宿主全局 · **feature 之间不互相 import** |
 | 数据层 | `app/src/data/` | `openapi/` 客户端 · 取数钩子 · 流式通道 | 不 import 组件 · 不读状态 |
 | 平台层 | `app/src/platform/` | 宿主全局 · 挂载与路由 · 主题注入 · 运行时壳 | 不写业务 |
-| 工具层 | `app/src/lib/` | 格式化 · 日期 · 工具 · 常量 · 类型 | **无依赖** |
+| 工具 | `app/src/platform/utils/` | 格式化 · 日期 · 工具 · 常量 · 类型 | **不 import 任何上层** |
 
 源码根为什么是 `app/src/`、依赖方向怎么画，见 `00-principles.md` §2。**没有全站 `state/` 层**（见 `06-state.md`）。
 
 ## 2. 依赖规则
 
 - **只允许向下**：`components ← features ← data ← platform`（箭头指向"被依赖"）。
-- `lib/` 任何层可用；`lib/` 自己不许 import 其它层。
+- `platform/utils/` 任何层可用；它自己不许 import 其它层。
 - 同层之内：`components/<名>/` **可以**用 `components/base/`，**反向不可以**；`features/<域>/` 内部自洽，**feature 之间不互相 import**。
 - `design/` 与 `scripts/` **不进应用依赖图**。
 - 判据：写 `import` 前问 **"我是不是在往上引？"** 是，就错了。
@@ -65,12 +65,11 @@ feature 私有组件**不许**出 `features/<域>/components/`；feature 之间�
 | **路由薄** | 同上 | `routes/` 不许被 `features/` 反向 import |
 | **平台差异** | 适配器接口 + 禁直读环境判断 | 禁 `isDesktop` / `isIframe` 散落 |
 
-每条规则的报错要写出**为什么**与**那该怎么办**（例："服务端代码不在浏览器里跑 —— 走数据层接口，或把纯函数移到 `lib/`"）。没有出路的报错会被绕过。
+每条规则的报错要写出**为什么**与**那该怎么办**（例："服务端代码不在浏览器里跑 —— 走数据层接口，或把纯函数移到 `platform/utils/`"）。没有出路的报错会被绕过。
 
 ## 5. 待讨论
 
 - 层与层之间是否允许**类型**互相引用（`allowTypeImports` 就是为这件事留的口子）。
-- `app/src/lib/` 只放纯函数，还是也放跨层常量与类型。
 - 是否加 `app/src/routes/`（薄路由）与 `features/` 并列。
 - `components/<名>/` 多了之后是否按域分目录（现在平铺）。
 - 组件子目录是否收口为"只允许 `parts/` 与 `tests/`"。
