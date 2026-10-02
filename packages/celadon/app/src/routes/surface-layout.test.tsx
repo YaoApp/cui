@@ -34,4 +34,9 @@ describe('SurfaceLayout · 公共状态与地址栏', () => {
     useSidePanelStore.getState().open({ kind: 'world-entity', id: 'e3' })
     await waitFor(() => expect(router.state.location.search).toBe('?sideEntity=e3'))
   })
+
+  it('names an unknown surface in the current language', () => {
+    renderAt('/bogus/world')
+    expect(screen.getByText('未知的界面表面：bogus')).toBeInTheDocument()
+  })
 })

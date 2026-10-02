@@ -1,0 +1,12 @@
+{
+  "nav.appLabel": "アプリのナビゲーション",
+  "nav.hello": "こんにちは",
+  "nav.world": "ワールド",
+  "header.refresh": "更新",
+  "themeToggle.label": "テーマ",
+  "themeToggle.toLight": "ライト",
+  "themeToggle.toDark": "ダーク",
+  "surface.main": "メインエリア",
+  "surface.side": "サイド",
+  "surface.unknown": "不明な表示領域：{{surface}}"
+}

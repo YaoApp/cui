@@ -70,7 +70,8 @@ try {
 }
 
 const b = await chromium.launch({ channel: 'chrome', headless: !headed })
-const p = await b.newPage({ viewport: { width: 760, height: 300 }, deviceScaleFactor: 2 })
+// 浏览器语言固定为基准 zh-CN：语言跟随系统后，剧本断言的界面文案才不会因跑测机器而异
+const p = await b.newPage({ viewport: { width: 760, height: 300 }, deviceScaleFactor: 2, locale: 'zh-CN' })
 p.on('response', (r) => { if (r.status() >= 400) problems.push(`${r.status()} ${r.url()}`) })
 p.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`))
 
