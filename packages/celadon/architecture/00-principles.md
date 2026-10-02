@@ -1,14 +1,16 @@
 # 00 · 铁律与结构总纲
 
-- **版本**：v1.45
-- **最后修改**：2026-10-02 17:02:16
+- **版本**：v1.47
+- **最后修改**：2026-10-02 18:39:51
 - **说明**：八条铁律 + 结构总纲（分层 · 落位 · 依赖 · 命名 · 测试 · 公共态）+ 一个组件一个目录
 
 ## 1. 八条铁律
 
-1. **单一来源** —— 颜色/间距只在 `../design/tokens.less` · 接口类型只在 `openapi/` ·
-   **文案只在语言包**（谁的词跟谁走：feature 私域 `features/<域>/locales/` · 组件私域 `components/<名>/locales/` ·
-   共用词 `src/locales/`，见 `08-i18n.md`）。不许第二份。
+1. **单一来源** —— 颜色/间距只在 `app/src/platform/theme/`（**唯一代码入口**；
+   改色先改设计规范 `design/tokens.less`，再跑 `scripts/build-css.mjs`）·
+   接口类型只在 `app/src/data/`（从旧仓库 `openapi/` 搬入按需子集）·
+   **文案只在语言包**（谁的词跟谁走：feature 私域 `app/src/features/<域>/locales/` · 组件私域 `app/src/components/<名>/locales/` ·
+   共用词 `app/src/locales/`，见 `08-i18n.md`）。不许第二份。
 2. **零反向依赖** —— 不 `import '@yaoapp/cui'`（旧包）。旧包不升级 · 不复活 · 不删。
 3. **依赖单向** —— 只能上层依赖下层（§2）；下层不引上层，同层不互相 import 业务件。
 4. **宿主是边界** —— `window.$app` / `window.$global` 只在平台层碰一次，之后以类型化接口向上暴露。

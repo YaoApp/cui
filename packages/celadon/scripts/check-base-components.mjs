@@ -1,12 +1,17 @@
 #!/usr/bin/env node
-/* 组件复用的检查器 —— **`features/` 与 `routes/` 里不许出现裸 `<button>`**。
+/* 组件复用的检查器 —— **`features/` · `routes/` · `components/`（`components/base/` 除外）
+   里不许出现裸控件（`<button>` · `<select>`）**。
 
-   为什么：裸 `<button>` 拿不到设计系统的东西（尺寸档 · token 颜色 · 焦点环），
-   于是每个页面各写一套"看起来差不多"的按钮 —— 设计规范就是这么烂掉的。
-   要用 `<Button>`（`components/base/button`）。
+   为什么：裸控件拿不到基础件的行为与无障碍，也拿不到设计系统的尺寸档 · token 颜色 · 焦点环，
+   于是每个页面各写一套"看起来差不多"的控件 —— 设计规范就是这么烂掉的。
+   要按钮用 `<Button>`（`components/base/button`），要下拉用 `<Select>`（`components/base/select`）。
 
-   为什么只管这两处：`components/` 里有些组件**按设计系统自己的标记**写（分段控件 `.seg` 里就是
-   `<button>`，设计页也是这么写的），那是有意的复刻，不是自造。规则窄一点才守得住。
+   为什么 `components/base/` 除外：那里就是**包装库**的地方，基础件内部必须落到原生控件，
+   库的 headless 组件自身也渲染原生 `<button>` / 弹层结构。
+
+   为什么先不管 `<input>`：`components/base/input` 还没有，而 `features/` 里已有真实的裸 `<input>`
+   （world 的过滤框）。在没有受认可的替身之前就禁掉，只会把门禁逼成"过不去"，不是守规范。
+   等 `base/input` 落地再把它加进 RAW_CONTROLS。
 
    目标目录取 process.argv[2]，默认 app/src。 */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
@@ -22,8 +27,22 @@ try { statSync(TARGET) } catch {
 }
 
 const CODE = /\.tsx$/
-const RAW_BUTTON = /<button[\s>]/
-const GUARDED = ['features', 'routes']
+/** 要守的顶层目录 */
+const GUARDED = ['features', 'routes', 'components']
+/** 基础件自己的地盘：包装库的地方，允许落到原生控件 */
+const BASE_DIR = 'components/base'
+const RAW_CONTROLS = [
+  {
+    pattern: /<button[\s>]/,
+    name: '<button>',
+    hint: "use <Button> from '@/components/base/button' (variant / size 表达外观)",
+  },
+  {
+    pattern: /<select[\s>]/,
+    name: '<select>',
+    hint: "use <Select> from '@/components/base/select'",
+  },
+]
 
 const problems = []
 let scanned = 0
@@ -36,21 +55,30 @@ function walk(dir) {
     if (!CODE.test(entry.name) || entry.name.includes('.test.')) continue
     const rel = relative(TARGET, full)
     if (!GUARDED.includes(rel.split('/')[0])) continue
+    if (rel === BASE_DIR || rel.startsWith(BASE_DIR + '/')) continue
     scanned++
     readFileSync(full, 'utf8').split('\n').forEach((line, index) => {
-      if (RAW_BUTTON.test(line)) {
-        problems.push(`${rel}:${index + 1} uses a raw <button> — use <Button> from components/base/button instead`)
+      for (const control of RAW_CONTROLS) {
+        if (control.pattern.test(line)) {
+          problems.push(`${rel}:${index + 1} uses a raw ${control.name} — ${control.hint} instead`)
+        }
       }
     })
   }
 }
 walk(TARGET)
 
-if (problems.length) {
-  console.log(`✗ ${problems.length} raw <button>(s) outside components/base (${scanned} file(s) scanned):`)
-  problems.forEach((p) => console.log('  ' + p))
-  console.log('  为什么：裸 button 拿不到设计系统的尺寸档 / token 颜色 / 焦点环，每个页面会各写一套。')
-  console.log('  怎么办：import { Button } from \'@/components/base/button\'，用 variant / size 表达外观。')
+/* 0 文件也算通过是最危险的假绿：守卫的目标目录里必须真的有被检查的源码。 */
+if (!scanned) {
+  console.log(`✗ no .tsx under features/ · routes/ · components/ (except components/base) — the checker refuses to pass on an empty scan (target: ${TARGET})`)
   process.exit(1)
 }
-console.log(`  ✓ no raw <button> outside components/base (${scanned} file(s) scanned)`)
+
+if (problems.length) {
+  console.log(`✗ ${problems.length} raw control(s) outside components/base (${scanned} file(s) scanned):`)
+  problems.forEach((p) => console.log('  ' + p))
+  console.log('  Why: raw controls miss the base components\' behaviour/a11y and the design system sizes / token colours / focus ring.')
+  console.log('  Fix: import { Button } from \'@/components/base/button\', or use Select (and base/input once it lands).')
+  process.exit(1)
+}
+console.log(`  ✓ no raw <button> / <select> outside components/base (${scanned} file(s) scanned)`)

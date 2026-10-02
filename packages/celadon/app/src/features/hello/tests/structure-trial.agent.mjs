@@ -70,8 +70,9 @@ try {
 }
 
 const b = await chromium.launch({ channel: 'chrome', headless: !headed })
-// 浏览器语言固定为基准 zh-CN：语言跟随系统后，剧本断言的界面文案才不会因跑测机器而异
-const p = await b.newPage({ viewport: { width: 760, height: 300 }, deviceScaleFactor: 2, locale: 'zh-CN' })
+// 浏览器环境显式钉住：语言固定基准 zh-CN，配色固定浅色 —— 两者都跟随系统，
+// 不钉的话剧本断言的界面文案与观感会因跑测机器而异（见 architecture/14-testing.md §1）
+const p = await b.newPage({ viewport: { width: 760, height: 300 }, deviceScaleFactor: 2, locale: 'zh-CN', colorScheme: 'light' })
 p.on('response', (r) => { if (r.status() >= 400) problems.push(`${r.status()} ${r.url()}`) })
 p.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`))
 
@@ -159,8 +160,36 @@ await shot(p, 's6-after-reload.png')
 const zero = (await counter.innerText()).includes('0')
 say(`S6 counter   : ${await counter.innerText()}`)
 if (!zero) problems.push('S6: 刷新后计数没有归零')
+  // S7 深色的系统上第一次打开 —— 首屏就该是暗的，不先闪一下浅色。
+  // 用**独立上下文**：S4 已经写过显式偏好，同一上下文会把它带过来，就测不出"跟随系统"了。
+  const darkCtx = await b.newContext({ viewport: { width: 760, height: 300 }, deviceScaleFactor: 2, locale: 'zh-CN', colorScheme: 'dark' })
+  const dp = await darkCtx.newPage()
+  dp.on('pageerror', (e) => problems.push(`S7 pageerror: ${e.message}`))
+  // 把主包延迟住：这期间根元素上就该已经是暗的，否则说明主题是等 JS 跑完才写的（会先闪浅色）
+  await dp.route('**/src/main.tsx*', async (route) => { await new Promise((r) => setTimeout(r, 1500)); await route.continue() })
+  await dp.goto(BASE_URL, { waitUntil: 'commit' })
+  let firstPaint = 'unknown'
+  try {
+    await dp.waitForFunction(() => document.documentElement.dataset.theme === 'dark', null, { timeout: 1200 })
+    firstPaint = 'dark'
+  } catch { firstPaint = await dp.evaluate(() => document.documentElement.dataset.theme || '(none)') }
+  say(`S7 firstPaint: ${JSON.stringify(firstPaint)}（主包仍在路上）`)
+  if (firstPaint !== 'dark') problems.push('S7: 深色系统下首屏不是暗色（会先闪浅色）')
+  await dp.unroute('**/src/main.tsx*')
+  await dp.goto(BASE_URL, { waitUntil: 'networkidle' })
+  await dp.waitForTimeout(250)
+  await shot(dp, 's7-system-dark.png')
+  const sysDark = await dp.evaluate(() => ({
+    root: document.documentElement.dataset.theme,
+    body: getComputedStyle(document.body).backgroundColor,
+    on: document.querySelector('.theme-toggle button.is-on')?.textContent?.trim(),
+  }))
+  say(`S7 systemDark: ${JSON.stringify(sysDark)}`)
+  if (sysDark.root !== 'dark') problems.push('S7: 深色系统下页面不是暗的')
+  if (sysDark.body === 'rgb(255, 255, 255)') problems.push('S7: 深色系统下页面底色还是白的')
+  await darkCtx.close()
 
-await b.close()
+  await b.close()
 say(`shots        : ${SHOTS.replace(PACKAGE + '/', '')}`)
 if (problems.length) { say(`problems     : ${problems.length}`); problems.forEach((x) => say(`  - ${x}`)); process.exit(1) }
 say('objective    : all measurements pass (the verdict lives in the sibling .agent.md)')

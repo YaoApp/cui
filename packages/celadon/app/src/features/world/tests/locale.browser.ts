@@ -6,7 +6,8 @@ test('switching to English localizes the world fixture and keeps the id in the U
   await page.goto('/main/world/w1')
   await expect(page.getByRole('heading', { name: 'Alpha 世界' })).toBeVisible()
 
-  await page.getByRole('combobox', { name: '语言' }).selectOption('en-US')
+  await page.getByRole('combobox', { name: '语言' }).click()
+  await page.getByRole('option', { name: 'English' }).click()
 
   await expect(page.getByRole('heading', { name: 'Alpha World' })).toBeVisible()
   await expect(page.getByText('The first world, for checking the list and the detail view.')).toBeVisible()

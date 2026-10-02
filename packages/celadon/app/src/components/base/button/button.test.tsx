@@ -30,4 +30,19 @@ describe('Button', () => {
     await userEvent.click(button)
     expect(onClick).not.toHaveBeenCalled()
   })
+
+  it('fires from the keyboard when focused', async () => {
+    const onClick = vi.fn()
+    render(<Button onClick={onClick}>刷新</Button>)
+
+    await userEvent.tab()
+    const button = screen.getByRole('button', { name: '刷新' })
+    expect(button).toHaveFocus()
+
+    await userEvent.keyboard('{Enter}')
+    expect(onClick).toHaveBeenCalledTimes(1)
+
+    await userEvent.keyboard(' ')
+    expect(onClick).toHaveBeenCalledTimes(2)
+  })
 })

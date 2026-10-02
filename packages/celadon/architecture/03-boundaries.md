@@ -1,7 +1,7 @@
 # 03 · 目录与边界
 
-- **版本**：v1.28
-- **最后修改**：2026-10-02 16:47:49
+- **版本**：v1.30
+- **最后修改**：2026-10-02 18:35:16
 - **说明**：目录结构 · 分层职责 · 同层方向 · 谁能 import 谁 · 边界怎么强制
 
 ## 1. 分层职责
@@ -24,6 +24,7 @@
 - `platform/utils/` 任何层可用；它自己不许 import 其它层。
 - 同层之内：`components/<名>/` **可以**用 `components/base/`，**反向不可以**；`features/<域>/` 内部自洽，**feature 之间不互相 import**。
 - `design/` 与 `scripts/` **不进应用依赖图**。
+- **token 的唯一消费入口是 `app/src/platform/theme/`**：应用在**入口引一次**；**组件与 feature 不引设计文件、不写颜色字面量**，只用 token 派生的 CSS 变量与设计类。
 - `routes/` 可以 import `features/`；**`features/` 不许 import `routes/`**（单向，同 `components/base/` 的道理）。
 - 判据：写 `import` 前问 **"我是不是在往上引？"** 是，就错了。
 - **类型可以跨层引用**（编译期的事）；**运行时的值不行** —— 依赖方向管的是值的流动。
@@ -34,8 +35,10 @@
 
 | 位置 | 放什么 | 例子 |
 | --- | --- | --- |
-| `components/base/` | 基础组件：包装 `@base-ui/react` + token 类，只有视觉与行为 | `base/button/` `base/input/` `base/dialog/` `base/menu/` |
+| `components/base/` | 基础组件：包装 `@base-ui/react` + token 类，只有视觉与行为 | `base/button/` `base/select/` |
 | `components/<名>/` | 其余组件：由基础组件拼成，直接命名 | `page-header/` `empty-state/` `confirm-dialog/` |
+
+`base/` 里的基础件**按需新增**：出现真实复用需求才建目录；**已有的一律包装 `@base-ui/react`**，不直接写原生控件。
 
 组件目录里的文件（**所有组件同一套结构**，可选槽位按需留空）：
 
@@ -72,12 +75,20 @@ feature 私有组件**不许**出 `features/<域>/components/`；feature 之间�
 - 组件目录里**只允许两个子目录**：`parts/`（拆出来的零件）与 `tests/`（浏览器与拟人）。
 - 样式：**能靠 token 类就不加 `.less`**；需要布局时用组件自己的 `.less`；**不引入 CSS Modules**。
 
+**回调命名**：基础件跟随上游库；组件用语义名，不用 `onChange`；原生 `onChange` 仅用于真透传原生事件。
+
+| 场景 | 命名 | 签名 |
+| --- | --- | --- |
+| 基础件传递值 | 跟随上游库（值型 `onValueChange`） | `(value) => void` |
+| 组件表达语义动作 | 语义名（`onSelect` · `onToggle` · `onSubmit`） | 参数由动作语义定义 |
+| 原生事件透传 | 原生名（`onChange`） | `(event) => void` |
+
 ## 4. 边界怎么强制
 
 | 规则 | 手段 | 例子 |
 | --- | --- | --- |
 | **层间方向** | ESLint `no-restricted-imports`（`allowTypeImports: true` 只放行类型）| `components/base/` 不许 import 上层组件；`data/` 不许 import `features/`；`features/a/` 不许 import `features/b/` |
-| **用基础件，不裸写控件** | `check-base-components.mjs`（`features/` 与 `routes/` 里不许裸 `<button>`）| 按钮用 `components/base/button`；链接、输入框用设计类 `.link` / `.input` |
+| **用基础件，不裸写控件** | `check-base-components.mjs`（`features/` · `routes/` · `components/` 里不许裸 `<button>` / `<select>`，`components/base/` 豁免）| 按钮用 `components/base/button`；下拉用 `components/base/select`；链接、输入框用设计类 `.link` / `.input` |
 | **组件不发请求** | 同上 + `no-restricted-syntax` | 禁组件里出现 `fetch(` / `new WebSocket(` |
 | **不在 `useEffect` 取数** | 同上 | 取数走数据层钩子（见 `05-data-and-api.md`）|
 | **禁旧包** | 同上 | 禁 `import '@yaoapp/cui'` |

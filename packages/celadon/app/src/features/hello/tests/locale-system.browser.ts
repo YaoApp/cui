@@ -15,10 +15,11 @@ test('follows the system language on first visit, then keeps an explicit choice'
   await expect(page.getByRole('link', { name: 'ワールド' })).toBeVisible()
   await expect(page.getByRole('button', { name: '更新' })).toBeVisible()
   await expect(page.locator('html')).toHaveAttribute('lang', 'ja')
-  await expect(page.getByRole('combobox', { name: '言語' })).toHaveValue('system')
+  await expect(page.getByRole('combobox', { name: '言語' })).toContainText('システムに従う（日本語）')
 
   // 显式选择英文 → 不再跟随系统，<html lang> 跟着换
-  await page.getByRole('combobox', { name: '言語' }).selectOption('en-US')
+  await page.getByRole('combobox', { name: '言語' }).click()
+  await page.getByRole('option', { name: 'English' }).click()
   await expect(page.getByRole('button', { name: 'Refresh' })).toBeVisible()
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US')
 
@@ -28,5 +29,5 @@ test('follows the system language on first visit, then keeps an explicit choice'
   await expect(page.getByRole('button', { name: 'Refresh' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'ワールド' })).toHaveCount(0)
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US')
-  await expect(page.getByRole('combobox', { name: 'Language' })).toHaveValue('en-US')
+  await expect(page.getByRole('combobox', { name: 'Language' })).toContainText('English')
 })

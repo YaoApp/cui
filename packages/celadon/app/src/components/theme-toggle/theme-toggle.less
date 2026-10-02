@@ -1,0 +1,9 @@
+/* .seg 里的按钮本来是裸 <button>，外观全由设计类 `.seg button` 决定。
+   现在换成基础件 Button —— 它渲染的仍是 <button>（`.seg button` 照样命中），但会多带
+   `.button` 的布局与尺寸档。这里只把 `.seg button` 没定义、`.button` 却会改的三项还原成
+   裸按钮的取值，分段控件的观感与替换前一致；颜色/间距不新增，仍走设计类与 token。 */
+.theme-toggle .button {
+  min-block-size: auto;
+  font-weight: inherit;
+  line-height: inherit;
+}

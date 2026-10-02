@@ -45,12 +45,15 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 | `check-readme-values` | `clean` + `violation`（README 色值与 tokens 不一致）|
 | `check-plan-md` | `clean` + `violation-width`（表格列数不一致）+ `violation-orphan-row`（孤立表格行）|
 | `check-app-layout` | `clean`（单测挨着源文件 · 浏览器与拟人住 `tests/`）+ `violation-unit-in-tests-dir`（单测住进了 `tests/`）+ `violation-unit-without-sibling`（单测旁边没有源文件）+ `violation-browser-beside-source` · `violation-spec-beside-source` · `violation-agent-script-beside-source`（后三条：该进 `tests/` 的散在源码目录）|
+| `check-base-components` | `clean`（`features/` 里用 `<Button>`）+ `clean-components`（`components/` 里用基础件）+ `clean-exempt-base`（`components/base/` 里落原生 `<button>` 被豁免）+ `violation-raw-button` · `violation-raw-button-in-component` · `violation-raw-select-in-component`（`features/` 与 `components/` 里裸写控件）|
+| `check-generated` | `clean`（两份 `tokens.css` 都与 `tokens.less` 一致）+ `violation-design-stale` · `violation-theme-stale`（各让一份产物过期，两份都比）|
 
 ## 没被样本覆盖的
 
-- **`check-generated`**：它会**真的重新生成**一遍产物再比对 —— 需要整套图标雪碧图与清单，还要一个**可写的副本目录**（它会把生成结果写进去），属于集成级检查。不喂样本，靠**日常运行**（它就是产物一致性的那一道）。
+- **`check-generated` 的图标比对**（`icons.html` / `mock.html`）：它要**整套图标雪碧图与清单**，只跑真实仓库（给了目标目录时只比对两份 `tokens.css`）。
+- 它比对 `tokens.css` 时会**原地重写产物**，所以样本先整目录拷进临时目录再跑（见 `run.mjs` 的 `DESTRUCTIVE`）—— 否则反例会被"修好"，下次假绿。
 
-除 `check-generated` 外，**其余检查器每条规则都有样本**（共 56 个用例）。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
+**共 63 个用例**。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
 
 ## 加一个样本
 
