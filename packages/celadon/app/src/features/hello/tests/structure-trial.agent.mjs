@@ -144,7 +144,7 @@ const gallery = await p.evaluate(() =>
   }),
 )
 say(`S1 gallery   : ${JSON.stringify(gallery)}`)
-if (gallery.length < 20) problems.push(`S1: 演示图标太少（实测 ${gallery.length}，应为品牌 4 + 图标 26）`)
+if (gallery.length < 40) problems.push(`S1: 演示项太少（实测 ${gallery.length}，应为自有品牌 4 + 其他品牌 12 + 图标 26）`)
 if (gallery.some((x) => !x.symbol)) problems.push('S1: 一览里有图标指不到符号')
 const brand = gallery.find((x) => x.name?.startsWith('brand-'))
 if (!brand) problems.push('S1: 一览里没有品牌标识')
