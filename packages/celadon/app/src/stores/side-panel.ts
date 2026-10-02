@@ -1,17 +1,10 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-
-/** 侧边面板里开着的**条目**。谁想往侧边放东西都按这个形状传 ——
-    公共态**不认识任何功能的词汇**（不认识"世界实体"，也不认识"会话"）。 */
-export type PanelEntry = {
-  /** 哪一类；字符串由放东西的功能定义（`world-entity` · `thread` …）*/
-  kind: string
-  id: string
-}
+import type { Entry } from '@/stores/entry'
 
 type SidePanelState = {
-  entry?: PanelEntry
-  open: (entry?: PanelEntry) => void
+  entry?: Entry
+  open: (entry?: Entry) => void
 }
 
 /* **公共状态**（见 architecture/06-state.md）：侧边是应用级挂载点，谁都可以往里放东西，
