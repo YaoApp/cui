@@ -27,7 +27,7 @@ jobs:
         working-directory: packages/celadon
     steps:
       - name: Checkout Repo
-        uses: actions/lintout@v7
+        uses: actions/checkout@v7
 
       # Reads celadon's own package.json rather than the repository root, so the pnpm
       # version is pinned by this package and a root change cannot move it.

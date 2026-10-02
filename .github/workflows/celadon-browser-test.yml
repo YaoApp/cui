@@ -52,6 +52,8 @@ jobs:
           pnpm exec playwright --version
 
       # The specs start the dev server through webServer, reusing one that already runs
+      - name: Base syntax (lint before the browser tests)
+        run: pnpm lint
       - name: Browser tests
         run: pnpm test:browser
 
