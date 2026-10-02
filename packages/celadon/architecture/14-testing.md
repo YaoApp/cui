@@ -51,6 +51,22 @@
 - 日志在 dev 下可按 URL 读到，**可接受**；生产只发 `dist/`（已用哨兵实测：`app/` 下的 `.md`/`.log`/`.txt` 一个都不进 `dist/`）。
   `pnpm test:watch` 是交互式的，不进日志。
 
+## 卡住怎么办
+
+**同步死循环会占死事件循环，用例自身的超时拦不住它**（同步代码不让出事件循环）。按这个顺序查：
+
+1. **确认是死循环** —— `CUI_STEP_TIMEOUT`（默认 300s）会把超时的一步 `SIGKILL` 掉、退出码 **124**，
+   日志里出现 `ABORTED after` 就是它；逐步加载包装器之前，它会先替你止损。
+2. **绕过 pnpm 直跑** —— `./node_modules/.bin/vitest run <文件>`。仍卡 → 与 pnpm / 锁无关。
+3. **按用例名二分** —— `vitest run <文件> -t "<用例名>"`，一步一个。**别写新探针去猜**：
+   本次事故里探针"过了"只是因为漏了那条带 query 的路径。
+4. **要看卡在哪一行** —— 用 `fs.appendFileSync('/tmp/x.log', …)` 写标记：vitest 会拦截 `console`，
+   通过用例的输出不显示，同步死循环时更刷不出来。
+5. 拿到具体用例后，先问一句 **"哪两个状态在互相追"** —— 本项目踩过的就是 URL 与 store 的互相追写
+   （见 `07-routing.md` 的「谁说了算」，那条规则的机器强制是 `check-effect-url-write.mjs`）。
+
+`scripts/run-logged.mjs` 就是这层看门狗；`CUI_STEP_TIMEOUT=0` 可关掉。
+
 ## 待做
 
 - 搬入模块补测试 · 拟人剧本覆盖到后续模块（见 [`../plan/01`](../plan/01-infrastructure.md) §3）。

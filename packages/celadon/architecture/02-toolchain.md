@@ -45,10 +45,11 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | dev / build / preview | 应用 |
 | `scripts/build-css.mjs` | `tokens.less` → `tokens.css`（**唯一产物方向**）|
 | `scripts/build-i18n.mjs` | `i18n/*.json` → `bundle.js`（设计页用）|
-| `scripts/check-*.mjs` | 七个检查器（见 `13-quality-gates.md`）|
+| `scripts/check-*.mjs` | 八个检查器（见 `13-quality-gates.md`）|
 | `scripts/tests/run.mjs` | 检查器自身的样本用例 |
 | `scripts/run-logged.mjs` | 跑一条命令并把输出双写到 `app/logs/<日期>/<名>-<HHMM>.log` |
 | `scripts/run-persona.mjs` | 发现并逐个跑 `features/*/tests/*.agent.mjs`，一个场景一份日志 |
+| `scripts/serve-dist.mjs` | 预览 `dist/` 的静态服务器（**带 SPA fallback**，见 `04-host-integration.md`）|
 | `scripts/shots.mjs` | **固化截图资产**：`capturePage()` 页面视口（跨平台）· `captureScreen()` 系统级整屏（**只实现 macOS**，其它平台明确报错）· `shotDir()` 算 `app/logs/<日期>/shots/<场景>/` |
 
 ## 已定
