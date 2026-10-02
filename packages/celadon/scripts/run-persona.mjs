@@ -14,7 +14,7 @@ const found = []
 for (const feature of readdirSync(FEATURES, { withFileTypes: true })) {
   if (!feature.isDirectory()) continue
   const dir = join(FEATURES, feature.name, 'tests')
-  let entries = []
+  let entries
   try { entries = readdirSync(dir) } catch { continue }
   for (const name of entries) {
     if (name.endsWith('.agent.mjs')) found.push({ scenario: name.replace('.agent.mjs', ''), path: join(dir, name) })

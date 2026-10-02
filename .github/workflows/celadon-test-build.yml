@@ -27,7 +27,7 @@ jobs:
         working-directory: packages/celadon
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v7
+        uses: actions/lintout@v7
 
       # Reads celadon's own package.json rather than the repository root, so the pnpm
       # version is pinned by this package and a root change cannot move it.
@@ -49,6 +49,8 @@ jobs:
 
       # 1. The seven checkers. Each run writes its log into app/logs/, which the last
       #    step folds into the run summary.
+      - name: Base syntax (lint before the checkers)
+        run: pnpm lint
       - name: Gates
         run: pnpm check
 

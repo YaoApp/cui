@@ -15,7 +15,7 @@
  * 用法：node check-css-conventions.mjs
  */
 import { readFileSync, readdirSync } from 'node:fs'
-import { dirname, resolve, relative } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 /* 本脚本住在 scripts/，目标资产在 ../design/ —— 统一切到那里作为工作目录，

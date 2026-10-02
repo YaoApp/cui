@@ -16,7 +16,7 @@
      node scripts/shots.mjs screen <out.png|jpg> [--region x,y,w,h] [--format png|jpg] */
 import { execFileSync } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')

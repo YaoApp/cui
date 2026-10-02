@@ -9,6 +9,8 @@
      node vendor-simple.mjs --list                   # 已引入的 simple-icons 品牌
    产出：icons/brand-simple-*.svg（分片）+ icons/brand-simple-index.json
    注意：logo 商标权归各品牌方，仅用于标识对应服务；CC0 不要求署名，仍登记在 THIRD-PARTY-NOTICES。 */
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -113,7 +115,7 @@ for (const f of readdirSync('icons')) {
   const m = f.match(/^brand-simple-(\d+)\.svg$/);
   if (m && Number(m[1]) > shards.length) writeFileSync(join('icons', f), ''), execFileSync('rm', ['-f', join('icons', f)]);
 }
-writeFileSync(file, JSON.stringify(all.map(({ symbols, ...e }) => e), null, 1) + '\n');
+writeFileSync(file, JSON.stringify(all.map(({ symbols: _symbols, ...e }) => e), null, 1) + '\n');
 console.log(`  ✓ wrote ${picked.length} brand(s) → ${all.length} in total · ${shards.length} shard(s)`);
 picked.forEach((p) => console.log(`    + ${p.id}（${p.brand}）${p.primary}`));
 console.log('  → run node build-icons.mjs to take effect');

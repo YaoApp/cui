@@ -1,7 +1,7 @@
 # 14 · 测试（工程落点）
 
-- **版本**：v1.42
-- **最后修改**：2026-10-02 20:26:56
+- **版本**：v1.46
+- **最后修改**：2026-10-02 20:48:33
 - **说明**：测试分层 · 位置与命名 · 断言与 mock 边界 · 浏览器与拟人 · 配置与日志
 
 ## 1. 规则
@@ -15,6 +15,8 @@
 - **选择类基础件按 ARIA 角色断言**（`combobox` / `listbox` / `option`），**不用 `.selectOption()` / `toHaveValue()`**（见 `09-theme.md` §4）。
 - **mock 边界**：网络 · 时间 · 存储可以 mock；**真实渲染引擎不 mock**，交给浏览器层。
 - **覆盖率不设阈值** —— 用来发现盲区，不作验收。
+- **交付前必须跑拟人，并把截图附给交付对象** —— 机器层全绿不等于"能交付"：拟人是唯一看**画面**的一层，
+  而"我跑过了"不算证据；**截图要跟着结论一起给出去**（落 `app/logs/<日期>/shots/<场景>/`）。
 - **共享件**（setup · 夹具 · store 复位）住 `app/src/test-support/`，**不放进单元目录**。
 - **搬入的模块必须有测试**；状态与数据层必须有测试。
 - **拟人脚本自己 `launch` 浏览器**（不走 Playwright 配置）→ **必须显式钉浏览器环境**：`locale`（语言）与
@@ -25,7 +27,8 @@
 
 | 层 | 工具 | 判定者 | 测什么 | 命令 → 日志 |
 | --- | --- | --- | --- | --- |
-| **规范门禁** | `scripts/check-*.mjs`（**零依赖**）+ lints | 确定性代码 | 设计规范（token · i18n · 样式约定 · 文档结构）· 类型 · 依赖边界 | `pnpm check` → `gates-<HHMM>.log` |
+| **基础语法** | `stylelint` · `eslint` · `tsc` | 确定性代码 | LESS / JS 的语法与格式 · **TS 的语法与类型** | `pnpm lint` → `lint-<HHMM>.log` |
+| **规范门禁** | `scripts/check-*.mjs`（**零依赖**）| 确定性代码 | 设计规范（token · i18n · 样式约定 · 文档结构）· 类型 · 依赖边界 | `pnpm check` → `gates-<HHMM>.log` |
 | **检查器自测** | `scripts/tests/run.mjs` | 确定性代码 | 每条检查规则一个正例 + 一个违规例 | `pnpm test:checkers` → `checkers-<HHMM>.log` |
 | **单元 / 组件** | `vitest` · Testing Library · `jsdom` | 确定性代码 | 纯逻辑 · 状态与数据层 · 组件行为 | `pnpm test` → `unit-<HHMM>.log` |
 | **浏览器** | `@playwright/test` | 确定性代码 | 关键交互主路径 · 中文输入法 · 全键盘 · 视觉回归 | `pnpm test:browser` → `browser-<HHMM>.log` |
