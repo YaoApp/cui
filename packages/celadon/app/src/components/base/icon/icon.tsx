@@ -1,3 +1,4 @@
+import './icon.less'
 import type { IconId } from '@/platform/icons'
 
 /** 尺寸档（见 architecture/10-icons.md §1）：产品默认 16，小档按比例变细。 */

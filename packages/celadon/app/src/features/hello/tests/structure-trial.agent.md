@@ -97,5 +97,6 @@
 | 6 | 2026-10-02 18:51 | **通过** —— S1–S7 全过。S7：深色系统首开，**主包仍在路上时 `data-theme` 已是 `dark`**（无浅色闪现）；整页深得一致、文字可读、铺满视口（看图判定）| `structure-trial-1851.log` · 截图 `shots/structure-trial/`（含 `s7-system-dark.png`）|
 | 7 | 2026-10-02 19:39 | **通过** —— S1–S7 全过。S1 新增图标测量：`{"href":"#i-act-refresh","symbol":true,"w":14,"h":14}`；看图：图标与文字同行对齐、随文字取色（`currentColor`）、不抢戏 | `structure-trial-1939.log` · 截图 `shots/structure-trial/`（`s1-open.png`）|
 | 8 | 2026-10-02 19:49 | **通过** —— S1–S7 全过。导航项图标：`[{"text":"你好","href":"#i-spark"},{"text":"世界","href":"#i-ws"}]`，符号都指得到；看图：图标与文字基线对齐、间隙 4px（`--spacing-4`），与刷新按钮一致 | `structure-trial-1949.log` · 截图 `shots/structure-trial/`（`s1-open.png`）|
+| 9 | 2026-10-02 19:51 | **通过** —— S1–S7 全过。修掉真缺陷：`base/icon/icon.less` **没被 import**（样式一条没生效 → 符号回落实心黑块、看起来"不响应深浅"、按钮里图标高 3.2px）。修后 `iconFit`：中心差 **0.008px** · `fill: none` · 描边随主题换色 | `structure-trial-1951.log` · 截图 `shots/structure-trial/` |
 | | | 过程 ③：发现拟人层可能测到**过期 dist**（`test:all` 没在拟人前构建）→ 采集脚本加产物新鲜度守卫，`test:all` 加 build | 同上 |
 | 3 | 2026-10-01 14:59 | **通过** —— 六步全过；截图改由 `scripts/shots.mjs` 产出（7 张页面 + 1 张系统整屏）| `app/logs/2026-10-01/structure-trial-1459.log` · 截图在 `app/logs/2026-10-01/shots/structure-trial/` |

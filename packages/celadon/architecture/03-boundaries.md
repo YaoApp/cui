@@ -1,7 +1,7 @@
 # 03 · 目录与边界
 
-- **版本**：v1.31
-- **最后修改**：2026-10-02 19:40:50
+- **版本**：v1.32
+- **最后修改**：2026-10-02 19:51:21
 - **说明**：目录结构 · 分层职责 · 同层方向 · 谁能 import 谁 · 边界怎么强制
 
 ## 1. 分层职责
@@ -36,7 +36,7 @@
 | 位置 | 放什么 | 例子 |
 | --- | --- | --- |
 | `components/base/` | 基础组件：包装 `@base-ui/react` + token 类，只有视觉与行为（**图标例外**：`base/icon/` 包的是平台层的雪碧图，见 `10-icons.md`）| `base/button/` `base/select/` |
-| `components/<名>/` | 其余组件：由基础组件拼成，直接命名 | `page-header/` `empty-state/` `confirm-dialog/` |
+| `components/<名>/` | 其余组件：由基础组件拼成，直接命名；**目录里的 `.less` 必须被同目录的 `.tsx` import** —— 忘了引等于样式一条不生效 | `page-header/` `empty-state/` `confirm-dialog/` |
 
 `base/` 里的基础件**按需新增**：出现真实复用需求才建目录；**已有的一律包装 `@base-ui/react`**，不直接写原生控件。
 

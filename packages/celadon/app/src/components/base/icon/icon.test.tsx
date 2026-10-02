@@ -3,6 +3,12 @@ import { describe, expect, it } from 'vitest'
 import { Icon } from '@/components/base/icon'
 
 describe('Icon', () => {
+  it('carries the class the stylesheet hooks onto', () => {
+    /* `.less` 靠这个类落到 svg 上；类没了样式就静默失效（2026-10-02 真发生过一次）。 */
+    const { container } = render(<Icon name="i-chat" />)
+    expect(container.querySelector('svg')).toHaveClass('icon')
+  })
+
   it('points at the symbol by name', () => {
     const { container } = render(<Icon name="i-act-refresh" />)
     expect(container.querySelector('use')?.getAttribute('href')).toBe('#i-act-refresh')
