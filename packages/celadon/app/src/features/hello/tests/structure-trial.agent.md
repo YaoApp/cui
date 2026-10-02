@@ -85,6 +85,8 @@
 | 4 | 2026-10-01 15:12–15:15 | **通过**（修完两处后）| 见下面三条 |
 | | | 过程 ①：采集脚本 `button.button` 撞上新增的主题按钮 → 严格模式报错；改为按可访问名取（脚本改动，剧本未动）| `structure-trial-1510.log` |
 | | | 过程 ②：深色下暴露**页面底部横向接缝**（内容面只盖到 195px，视口 300）；决策模型判 `defect`（0.86）→ 壳改弹性列 + 页面 `flex:1`，修复后 300/300；回归用例 `page-surface.browser.ts` 已证明修前会红 | `structure-trial-1514.log` |
+| 复跑 | 2026-10-02 12:14 | **通过** —— 头部加应用导航、World 加自身导航之后 | `structure-trial-1214.log` |
+| 复跑 | 2026-10-02 12:20 | **通过** —— World 页改走设计系统之后（S1 多了导航项，四样东西仍在；S3 改为 Tab 走到刷新） | `structure-trial-1220.log` · 截图 `shots/structure-trial/` |
 | 5 | 2026-10-01 15:23 | **通过** —— S4 的控件改为设计里的分段控件（浅色 / 暗色）后六步全过；选中项与整页主题一致 | 当轮 `structure-trial-*.log` · 截图 `shots/structure-trial/` |
 | | | 过程 ③：发现拟人层可能测到**过期 dist**（`test:all` 没在拟人前构建）→ 采集脚本加产物新鲜度守卫，`test:all` 加 build | 同上 |
 | 3 | 2026-10-01 14:59 | **通过** —— 六步全过；截图改由 `scripts/shots.mjs` 产出（7 张页面 + 1 张系统整屏）| `app/logs/2026-10-01/structure-trial-1459.log` · 截图在 `app/logs/2026-10-01/shots/structure-trial/` |
