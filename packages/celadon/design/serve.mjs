@@ -10,7 +10,7 @@
  */
 import { createServer } from 'node:http'
 import { readdir, readFile, stat } from 'node:fs/promises'
-import { extname, join, normalize, relative } from 'node:path'
+import { extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('.', import.meta.url))

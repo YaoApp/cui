@@ -253,7 +253,7 @@ if (!zero) problems.push('S6: 刷新后计数没有归零')
   // 把主包延迟住：这期间根元素上就该已经是暗的，否则说明主题是等 JS 跑完才写的（会先闪浅色）
   await dp.route('**/src/main.tsx*', async (route) => { await new Promise((r) => setTimeout(r, 1500)); await route.continue() })
   await dp.goto(BASE_URL, { waitUntil: 'commit' })
-  let firstPaint = 'unknown'
+  let firstPaint
   try {
     await dp.waitForFunction(() => document.documentElement.dataset.theme === 'dark', null, { timeout: 1200 })
     firstPaint = 'dark'
