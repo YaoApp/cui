@@ -92,8 +92,10 @@ say(`S1 title     : ${JSON.stringify(tabTitle)}`)
 if (tabTitle !== 'Hello · CUI 2.0') problems.push('S1: 标签页标题没有跟路由走')
 
 // 刷新按钮上的图标要真的渲染出来：`<use>` 指得到符号，尺寸是产品默认档
+// 注意：要**指到具体那个按钮**。写 "header 里第一个 .icon" 会被后加进来的导航图标抢先
+// （2026-10-02 就这样误报过一次）。
 const icon = await p.evaluate(() => {
-  const svg = document.querySelector('header svg.icon')
+  const svg = document.querySelector('header.header > button svg.icon')
   const href = svg?.querySelector('use')?.getAttribute('href')
   const box = svg?.getBoundingClientRect()
   return { href, symbol: href ? !!document.querySelector(href) : false, w: Math.round(box?.width || 0), h: Math.round(box?.height || 0) }
@@ -101,6 +103,17 @@ const icon = await p.evaluate(() => {
 say(`S1 icon      : ${JSON.stringify(icon)}`)
 if (!icon.symbol) problems.push('S1: 刷新按钮的图标没渲染（雪碧图里找不到对应符号）')
 if (icon.w !== 14 || icon.h !== 14) problems.push(`S1: 图标尺寸不是 14（实测 ${icon.w}x${icon.h}）`)
+
+// 导航项也要有图标：每项一个 `<use>`，符号都指得到
+const navIcons = await p.evaluate(() =>
+  [...document.querySelectorAll('nav.nav a.nav__link')].map((a) => {
+    const href = a.querySelector('use')?.getAttribute('href')
+    return { text: a.textContent?.trim(), href, symbol: href ? !!document.querySelector(href) : false }
+  }),
+)
+say(`S1 navIcons  : ${JSON.stringify(navIcons)}`)
+if (navIcons.length < 2) problems.push('S1: 导航项少于两个（取不到导航）')
+if (navIcons.some((x) => !x.symbol)) problems.push('S1: 有导航项没有图标，或符号指不到')
 
 // S2 快速连点 12 下
 const before = await box(button)
