@@ -1,5 +1,8 @@
 {
+  "hello.brands": "Brand marks",
+  "hello.brandsOther": "Other brands",
+  "hello.icons": "Icon set",
+  "hello.refreshed": "Refreshed {{count}} times",
   "hello.title": "Hello",
-  "hello.trial": "Structure trial: ",
-  "hello.refreshed": "Refreshed {{count}} times"
+  "hello.trial": "Structure trial: "
 }

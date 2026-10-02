@@ -3,12 +3,32 @@ import { useLocation, useNavigate } from 'react-router'
 import { Header } from '@/components/header'
 import { Nav } from '@/components/nav'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { Icon } from '@/components/base/icon'
+import { BrandMark, type BrandId } from '@/components/base/brand-mark'
 import { useTranslation } from '@/platform/i18n'
 import { useThemeStore } from '@/platform/theme/theme.store'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
 import { FooBar } from './components/foo-bar'
+import type { IconId } from '@/platform/icons'
 import { useHelloStore } from './hello.store'
+
+/* 演示样例：**品牌标识一行、界面图标一行**（两者永不混用，见 design/icons.md §1）。
+   品牌用 manifest 里的全部自有标识；图标覆盖导航 / 动作 / 状态 / 文件 / 对象五类。 */
+const BRAND_IDS = ['brand-yao-agents', 'brand-yao-agents-mono', 'brand-yao', 'brand-yao-mono'] as const
+const BRAND_SAMPLE: readonly BrandId[] = BRAND_IDS
+/* "别人家的"品牌：设计里分片存放，应用侧由 build-icons.mjs 选一批生成进来（看效果用）。 */
+const OTHER_BRAND_SAMPLE: readonly BrandId[] = [
+  'brand-claude', 'brand-openai', 'brand-gemini', 'brand-grok', 'brand-deepseek', 'brand-qwen',
+  'brand-kimi', 'brand-doubao', 'brand-mistral', 'brand-midjourney', 'brand-perplexity', 'brand-cursor',
+]
+
+const ICON_SAMPLE: readonly IconId[] = [
+  'i-chat', 'i-inbox', 'i-board', 'i-ws', 'i-book', 'i-nav-settings', 'i-nav-user', 'i-nav-help',
+  'i-search', 'i-plus', 'i-act-edit', 'i-act-trash', 'i-act-refresh', 'i-act-download', 'i-act-filter', 'i-act-close',
+  'i-check', 'i-clock', 'i-state-warning', 'i-state-error', 'i-state-info', 'i-state-loading',
+  'i-file-pdf', 'i-folder', 'i-obj-model', 'i-obj-skill',
+]
 
 export function HelloPage() {
   const count = useHelloStore((state) => state.count)
@@ -34,6 +54,30 @@ export function HelloPage() {
         <div className="hello__actions">
           <ThemeToggle theme={theme} onSelect={setTheme} />
         </div>
+        <section className="hello__row" aria-label={t('hello.brands')}>
+          {BRAND_SAMPLE.map((name) => (
+            <span className="hello__cell" key={name}>
+              <BrandMark name={name} size={24} />
+              <code>{name}</code>
+            </span>
+          ))}
+        </section>
+        <section className="hello__row" aria-label={t('hello.brandsOther')}>
+          {OTHER_BRAND_SAMPLE.map((name) => (
+            <span className="hello__cell" key={name}>
+              <BrandMark name={name} size={24} />
+              <code>{name}</code>
+            </span>
+          ))}
+        </section>
+        <section className="hello__row" aria-label={t('hello.icons')}>
+          {ICON_SAMPLE.map((name) => (
+            <span className="hello__cell" key={name}>
+              <Icon name={name} size={20} />
+              <code>{name}</code>
+            </span>
+          ))}
+        </section>
       </main>
     </div>
   )
