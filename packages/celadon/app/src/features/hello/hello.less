@@ -14,3 +14,19 @@
     margin-block-start: var(--spacing-16);
   }
 }
+
+/* 图标一览：只做布局与尺寸，颜色/间距走 token。 */
+.hello__icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-16);
+  align-items: flex-end;
+  padding: var(--spacing-16) 0;
+}
+.hello__icon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+  color: var(--text-secondary);
+}

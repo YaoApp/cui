@@ -134,6 +134,35 @@ if (Math.abs((iconFit.navIcon ?? 0) - (iconFit.navLink ?? 99)) > 0.5) problems.p
 if (iconFit.fill !== 'none') problems.push('S1: 图标是实心填充（深色下会变黑块）')
 if (!iconFit.stroke || iconFit.stroke === 'none') problems.push('S1: 图标没有描边颜色（不随文字/主题）')
 
+// 图标一览：一个品牌标识 + 一批界面图标，符号都指得到；品牌标识不套界面图标的描边
+const gallery = await p.evaluate(() =>
+  [...document.querySelectorAll('.hello__icons .hello__icon')].map((cell) => {
+    const svg = cell.querySelector('svg')
+    const href = svg?.querySelector('use')?.getAttribute('href')
+    return { name: cell.querySelector('code')?.textContent, href, symbol: href ? !!document.querySelector(href) : false,
+             stroke: svg ? getComputedStyle(svg).stroke : null }
+  }),
+)
+say(`S1 gallery   : ${JSON.stringify(gallery)}`)
+if (gallery.length < 6) problems.push('S1: 图标一览少于 6 个')
+if (gallery.some((x) => !x.symbol)) problems.push('S1: 一览里有图标指不到符号')
+const brand = gallery.find((x) => x.name?.startsWith('brand-'))
+if (!brand) problems.push('S1: 一览里没有品牌标识')
+if (brand && brand.stroke !== 'none') problems.push('S1: 品牌标识被套上了界面图标的描边规则')
+
+// 描边要按档位缩放（不设就是 1，比设计页细一圈）
+const strokeWidths = await p.evaluate(() => {
+  const read = (sel) => { const s = document.querySelector(sel); return s ? Number.parseFloat(getComputedStyle(s).strokeWidth) : null }
+  return { fourteen: read('header.header > button svg.icon--14'), sixteen: read('nav.nav a.nav__link svg.icon--16'), twenty: read('.hello__icons svg.icon--20') }
+})
+say(`S1 strokeW   : ${JSON.stringify(strokeWidths)}`)
+const expect = { fourteen: 2 * 14 / 24, sixteen: 2 * 16 / 24, twenty: 2 * 20 / 24 }
+for (const [k, want] of Object.entries(expect)) {
+  if (strokeWidths[k] === null || Math.abs(strokeWidths[k] - want) > 0.02) {
+    problems.push(`S1: ${k} 档描边不是 ${want.toFixed(3)}（实测 ${strokeWidths[k]}）`)
+  }
+}
+
 // S2 快速连点 12 下
 const before = await box(button)
 for (let i = 0; i < 12; i++) await button.click({ delay: 0 })

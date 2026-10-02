@@ -27,7 +27,19 @@ if (missing.length) { console.error(`✗ missing from the sprite: ${missing.join
 console.log(`  sprite holds ${Object.keys(symbolsById).length} symbol(s) · manifest ${manifest.length} entr(y|ies) · own ${manifest.filter((m) => m.lib === 'own').length}`);
 
 const symbols = manifest.map(m => symbolsById[m.id]);
-const block = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n${symbols.join('\n')}\n</defs></svg>`;
+
+/* 渐变 / 遮罩 / 裁切这些**绘制资源**必须活在文档级 `<defs>` 里 —— `<use>` 引用 symbol 时内容进
+   shadow tree，而 `url(#…)` 按**文档**解析，留在 symbol 内部就找不到（品牌标识的身体会整个不渲染）。
+   源里它们写在 symbol 内，所以这里把它们抽出来提升到外面。 */
+const DRAWABLE = /<(linearGradient|radialGradient|mask|clipPath|filter)\b[\s\S]*?<\/\1>/g;
+const hoisted = [];
+const stripped = symbols.map((sym) =>
+  sym.replace(DRAWABLE, (m) => {
+    hoisted.push(m);
+    return '';
+  }),
+);
+const block = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n${hoisted.join('\n')}\n</defs>\n${stripped.join('\n')}\n</svg>`;
 
 /* 应用侧产物（方案 A：整块内联）。设计目录里的雪碧图是**源**，这里是**产物**——
    `check-generated.mjs` 会重新生成并比对，改图不跑脚本就红（与 tokens.css 同一套）。 */

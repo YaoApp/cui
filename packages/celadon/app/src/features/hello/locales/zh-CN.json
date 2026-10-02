@@ -1,5 +1,6 @@
 {
+  "hello.icons": "图标一览",
+  "hello.refreshed": "已刷新 {{count}} 次",
   "hello.title": "Hello",
-  "hello.trial": "结构试跑：",
-  "hello.refreshed": "已刷新 {{count}} 次"
+  "hello.trial": "结构试跑："
 }
