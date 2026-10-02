@@ -1,3 +1,4 @@
+import { Button } from '@/components/base/button'
 import type { WorldEntity } from '../../worlds'
 
 export type EntityPanelProps = {
@@ -11,9 +12,9 @@ export function EntityPanel({ entity, onClose }: EntityPanelProps) {
     <section className="entity-panel" aria-label="条目面板">
       <header className="entity-panel__head">
         <h3 className="entity-panel__title">{entity.name}</h3>
-        <button type="button" className="btn-ghost" onClick={onClose}>
+        <Button variant="ghost" size="small" onClick={onClose}>
           关闭
-        </button>
+        </Button>
       </header>
       <dl className="entity-panel__meta">
         <dt>类型</dt>

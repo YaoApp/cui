@@ -1,4 +1,5 @@
 import { useLocation, useNavigate, useParams } from 'react-router'
+import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
 import { Nav } from '@/components/nav'
 import { buildShareUrl } from '@/platform/utils/share-url'
@@ -55,19 +56,19 @@ export function WorldPage() {
           <ul className="world__entities">
             {world.entities.map((item) => (
               <li key={item.id}>
-                <button
-                  type="button"
-                  className="btn-ghost"
+                <Button
+                  variant="ghost"
+                  size="small"
                   aria-pressed={item.id === selectedEntityId}
                   onClick={() => openEntity(item.id)}
                 >
                   {item.name}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
           <p className="world__share">
-            <a href={buildShareUrl({ feature: 'world', object: world.id }, { sideEntity: selectedEntityId })}>
+            <a className="link" href={buildShareUrl({ feature: 'world', object: world.id }, { sideEntity: selectedEntityId })}>
               分享这个视图
             </a>
           </p>
