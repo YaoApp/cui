@@ -99,5 +99,6 @@
 | 8 | 2026-10-02 19:49 | **通过** —— S1–S7 全过。导航项图标：`[{"text":"你好","href":"#i-spark"},{"text":"世界","href":"#i-ws"}]`，符号都指得到；看图：图标与文字基线对齐、间隙 4px（`--spacing-4`），与刷新按钮一致 | `structure-trial-1949.log` · 截图 `shots/structure-trial/`（`s1-open.png`）|
 | 9 | 2026-10-02 19:51 | **通过** —— S1–S7 全过。修掉真缺陷：`base/icon/icon.less` **没被 import**（样式一条没生效 → 符号回落实心黑块、看起来"不响应深浅"、按钮里图标高 3.2px）。修后 `iconFit`：中心差 **0.008px** · `fill: none` · 描边随主题换色 | `structure-trial-1951.log` · 截图 `shots/structure-trial/` |
 | 10 | 2026-10-02 20:09 | **通过** —— S1–S7 全过。修掉两个真缺陷：① 图标描边没设 → SVG 初始值 1，比设计页细一圈（现按档位 1.167 / 1.333 / 1.667）② **底座包了 `<div>`+`hidden`** → 品牌标识的身体（`url(#渐变)`）不画，只剩眼睛（现直接插 `body`，与设计页同构）。`S1 sprite: {"direct":true,"display":"block"}` | `structure-trial-2009.log` · 截图 `shots/structure-trial/` |
+| 11 | 2026-10-02 20:17 | **通过** —— S1–S7 全过。修掉双重缩放：`Icon`/`BrandMark` 补上 `viewBox="0 0 24 24"`，描边改回**固定 2**（与设计页 `icon()` 逐字一致）。此前漏 viewBox 又手工设 1.333 → 实际 0.889，比设计页细 1/3（用户："粗细不跟字体走"）| `structure-trial-2017.log` · 截图 `shots/structure-trial/` |
 | | | 过程 ③：发现拟人层可能测到**过期 dist**（`test:all` 没在拟人前构建）→ 采集脚本加产物新鲜度守卫，`test:all` 加 build | 同上 |
 | 3 | 2026-10-01 14:59 | **通过** —— 六步全过；截图改由 `scripts/shots.mjs` 产出（7 张页面 + 1 张系统整屏）| `app/logs/2026-10-01/structure-trial-1459.log` · 截图在 `app/logs/2026-10-01/shots/structure-trial/` |

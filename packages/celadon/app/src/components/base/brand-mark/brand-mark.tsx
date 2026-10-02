@@ -20,6 +20,8 @@ export function BrandMark({ name, size = 24, label, className }: BrandMarkProps)
       className={classes}
       width={size}
       height={size}
+      /* 与设计页 brandTile 的 svg 逐字一致 */
+      viewBox="0 0 24 24"
       role={label ? 'img' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
