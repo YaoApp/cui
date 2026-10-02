@@ -8,6 +8,7 @@
 | **`basename`** | 应用挂在 **`/<BASE>/`** 下；React Router 的 `basename` 与 Vite 的 `base` **取同一变量**（引擎注入的 `BASE`）；PWA 的 `scope` / `start_url` 同步 |
 | **保留前缀** | **12 个前缀归引擎，路由不得占用**：`/api` `/v1` `/assets` `/components` `/tools` `/agents` `/admin` `/brands` `/docs` `/ai` `/.well-known` `/iframe` |
 | **无外壳模式** | `/iframe` 路径下**不渲染外壳**（chrome-less）|
+| **表面段** | 路由第一段（`main` / `side`）是**应用自己**的命名空间，在 basename 之下，不占保留前缀 |
 | **代理** | 按上述前缀转发给引擎；**WebSocket upgrade 用 `server.proxy` 的 `ws: true`** |
 | **SSE 三个头** | `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no` |
 

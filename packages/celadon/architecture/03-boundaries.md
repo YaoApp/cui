@@ -6,10 +6,11 @@
 
 | 层 | 目录 | 该做什么 | 不该做什么 |
 | --- | --- | --- | --- |
+| 路由 | `app/src/routes/` | 路由表 · 表面（main / side）装配 · 分享链接生成 | **不写业务** · 不许被 `features/` import |
 | 组件层 | `app/src/components/` | 纯视觉与行为（`@base-ui/react`）· 受控 props | **不认识业务** · 不发请求 · 不读状态 |
 | 能力层 | `app/src/features/` | 按业务切分（chat / inbox / kanban …）· **页面 + 组件 + 状态 + 测试都在里面** | 不直接 `fetch` · 不碰宿主全局 · **feature 之间不互相 import** |
 | 数据层 | `app/src/data/` | `openapi/` 客户端 · 取数钩子 · 流式通道 | 不 import 组件 · 不读状态 |
-| 平台层 | `app/src/platform/` | 宿主全局 · 挂载与路由 · 主题注入 · 运行时壳 | 不写业务 |
+| 平台层 | `app/src/platform/` | 宿主全局 · 挂载与**路由机制** · basename 适配 · 主题注入 · 运行时壳 | 不写业务 |
 | 工具 | `app/src/platform/utils/` | 格式化 · 日期 · 工具 · 常量 · 类型 | **不 import 任何上层** |
 
 源码根为什么是 `app/src/`、依赖方向怎么画，见 `00-principles.md` §2。**没有全站 `state/` 层**（见 `06-state.md`）。
@@ -20,6 +21,7 @@
 - `platform/utils/` 任何层可用；它自己不许 import 其它层。
 - 同层之内：`components/<名>/` **可以**用 `components/base/`，**反向不可以**；`features/<域>/` 内部自洽，**feature 之间不互相 import**。
 - `design/` 与 `scripts/` **不进应用依赖图**。
+- `routes/` 可以 import `features/`；**`features/` 不许 import `routes/`**（单向，同 `components/base/` 的道理）。
 - 判据：写 `import` 前问 **"我是不是在往上引？"** 是，就错了。
 
 ## 3. 组件归属判据
