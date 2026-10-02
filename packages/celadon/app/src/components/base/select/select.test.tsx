@@ -13,28 +13,28 @@ const OPTIONS = [
 
 describe('Select', () => {
   it('exposes an accessible name on the combobox', () => {
-    render(<Select aria-label="Theme" value="light" onChange={() => {}} options={OPTIONS} />)
+    render(<Select aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />)
     expect(screen.getByRole('combobox', { name: 'Theme' })).toBeInTheDocument()
   })
 
   it('shows the selected option label', () => {
-    render(<Select aria-label="Theme" value="dark" onChange={() => {}} options={OPTIONS} />)
+    render(<Select aria-label="Theme" value="dark" onValueChange={() => {}} options={OPTIONS} />)
     expect(screen.getByRole('combobox', { name: 'Theme' })).toHaveTextContent('Dark')
   })
 
-  it('reports the picked value through onChange', async () => {
-    const onChange = vi.fn()
-    render(<Select aria-label="Theme" value="light" onChange={onChange} options={OPTIONS} />)
+  it('reports the picked value through onValueChange', async () => {
+    const onValueChange = vi.fn()
+    render(<Select aria-label="Theme" value="light" onValueChange={onValueChange} options={OPTIONS} />)
 
     await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
     await userEvent.click(await screen.findByRole('option', { name: 'Dark' }))
 
-    expect(onChange).toHaveBeenCalledWith('dark')
+    expect(onValueChange).toHaveBeenCalledWith('dark')
   })
 
   it('opens and selects with the keyboard', async () => {
-    const onChange = vi.fn()
-    render(<Select aria-label="Theme" value="light" onChange={onChange} options={OPTIONS} />)
+    const onValueChange = vi.fn()
+    render(<Select aria-label="Theme" value="light" onValueChange={onValueChange} options={OPTIONS} />)
 
     await userEvent.tab()
     expect(screen.getByRole('combobox', { name: 'Theme' })).toHaveFocus()
@@ -43,16 +43,16 @@ describe('Select', () => {
     await userEvent.keyboard('{ArrowDown}')
     await userEvent.keyboard('{Enter}')
 
-    expect(onChange).toHaveBeenCalledWith('dark')
+    expect(onValueChange).toHaveBeenCalledWith('dark')
   })
 
   it('does not call back while disabled', async () => {
-    const onChange = vi.fn()
-    render(<Select aria-label="Theme" value="light" onChange={onChange} options={OPTIONS} disabled />)
+    const onValueChange = vi.fn()
+    render(<Select aria-label="Theme" value="light" onValueChange={onValueChange} options={OPTIONS} disabled />)
 
     await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
 
-    expect(onChange).not.toHaveBeenCalled()
+    expect(onValueChange).not.toHaveBeenCalled()
     expect(screen.queryByRole('option')).not.toBeInTheDocument()
   })
 })

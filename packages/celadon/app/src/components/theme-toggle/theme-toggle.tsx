@@ -5,7 +5,7 @@ import type { Theme } from '@/platform/theme/theme.store'
 
 export type ThemeToggleProps = {
   theme: Theme
-  onChange: (theme: Theme) => void
+  onSelect: (theme: Theme) => void
 }
 
 const OPTIONS: { value: Theme; labelKey: I18nKey }[] = [
@@ -17,7 +17,7 @@ const OPTIONS: { value: Theme; labelKey: I18nKey }[] = [
    两个选项是基础件 Button（行为与无障碍交给 Base UI），但外观仍由设计系统的 .seg 决定 ——
    分段控件里选中项是 .is-on，所以这里传 `variant="ghost"`（.seg 会盖掉按钮自己的底色）。
    文案走语言包，两个主题名不写死在组件里。 */
-export function ThemeToggle({ theme, onChange }: ThemeToggleProps) {
+export function ThemeToggle({ theme, onSelect }: ThemeToggleProps) {
   const { t } = useTranslation()
 
   return (
@@ -31,7 +31,7 @@ export function ThemeToggle({ theme, onChange }: ThemeToggleProps) {
             size="small"
             className={selected ? 'is-on' : undefined}
             aria-pressed={selected}
-            onClick={() => onChange(option.value)}
+            onClick={() => onSelect(option.value)}
           >
             {t(option.labelKey)}
           </Button>

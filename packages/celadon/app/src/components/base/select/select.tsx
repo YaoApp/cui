@@ -11,7 +11,7 @@ export type SelectOption = {
 export type SelectProps = {
   /** 受控值。`system` 之类的哨兵值由调用方定义，基础件不解释。 */
   value: string
-  onChange: (value: string) => void
+  onValueChange: (value: string) => void
   options: readonly SelectOption[]
   /** 可访问名，落在触发器上（Base UI 的 Trigger 渲染为 role=combobox 的按钮）。 */
   'aria-label': string
@@ -24,13 +24,13 @@ export type SelectProps = {
    视觉照旧：触发器沿用设计类 `.input`（和原来裸 <select className="input"> 同一套字段观感），
    弹层是 portal 出来的自定义结构，设计系统没有对应类，select.less 里只按 token 补它。
    Base UI 不参与配色、没有主题系统 —— 它只用 data-* 暴露状态、用 CSS 变量暴露几何。 */
-export function Select({ value, onChange, options, 'aria-label': ariaLabel, id, disabled, className }: SelectProps) {
+export function Select({ value, onValueChange, options, 'aria-label': ariaLabel, id, disabled, className }: SelectProps) {
   return (
     <BaseSelect.Root
       value={value}
       /* Base UI 在无选中项时会回传 null；这里的每个 option 都有值，null 不表达任何选择，忽略。 */
       onValueChange={(next) => {
-        if (next != null) onChange(next)
+        if (next != null) onValueChange(next)
       }}
       items={options}
       disabled={disabled}

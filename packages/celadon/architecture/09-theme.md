@@ -1,7 +1,7 @@
 # 09 · 主题
 
-- **版本**：v1.19
-- **最后修改**：2026-10-02 18:16:27
+- **版本**：v1.20
+- **最后修改**：2026-10-02 18:21:43
 - **说明**：设计→代码的转换 · 偏好与解析（三态）· Base UI 基础件 · 页面底色 · 对比度
 
 ## 1. 规则
@@ -44,7 +44,7 @@
   **`<input>` 暂不在禁令内** —— `components/base/input` 尚未建立，等它落地再把 `<input>` 加进检查器。
 - **选择类基础件的语义是 ARIA combobox / listbox**：触发器 `role="combobox"` · 弹层 `role="listbox"` ·
   选项 `role="option"`，另有一个视觉隐藏的原生 input 只承载序列化值 —— **它不再是原生 `<select>`**。
-  受控用法走 `value` + `onChange`（对内接 Base UI 的 `onValueChange`）。**不许再当原生下拉用**：
+  受控用法走 `value` + `onValueChange`（对内接 Base UI 的 `onValueChange`）。**不许再当原生下拉用**：
   测试里不用 `.selectOption()` / `toHaveValue()`，按角色与可访问名断言。
 - **基础件 Button 默认不提交表单**：默认 `type="button"`；表单提交由表单自身逻辑或调用方显式声明的 `type` 决定。
 - **弹层等共用视觉**：设计系统补了对应类之后，基础件**改为复用该类**；在此之前允许基础件按 token 自写
