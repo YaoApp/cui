@@ -5,6 +5,8 @@
    产出 icons/brand-sprite.svg（独立雪碧图，外部引用，不内联）+ icons/brand-index.json。
    用法：node vendor-brands.mjs
    注意：logo 商标权归各品牌方，仅用于标识对应模型；版权见 THIRD-PARTY-NOTICES。 */
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, writeFileSync, readdirSync, existsSync, cpSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -64,7 +66,7 @@ const render = async (brand, comp) => {
 function toSymbol(html, sid, mono) {
   const m = html.match(/<svg([^>]*)>([\s\S]*)<\/svg>/);
   if (!m) return null;
-  const viewBox = (m[1].match(/viewBox="([^"]+)"/) || [, '0 0 24 24'])[1];
+  const viewBox = (m[1].match(/viewBox="([^"]+)"/) || ['', '0 0 24 24'])[1];
   let inner = m[2].replace(/<!--[\s\S]*?-->/g, '').replace(/\sclass="[^"]*"/g, '').trim();
   for (const id of [...inner.matchAll(/\bid="([^"]+)"/g)].map((x) => x[1])) {
     inner = inner.split(`id="${id}"`).join(`id="${sid}-${id}"`)

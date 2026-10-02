@@ -1,7 +1,7 @@
 # 02 · 工具链
 
-- **版本**：v1.30
-- **最后修改**：2026-10-02 20:33:29
+- **版本**：v1.31
+- **最后修改**：2026-10-02 20:37:55
 - **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具
 
 ## 规则
@@ -50,6 +50,7 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | 命令 | 作用 |
 | --- | --- |
 | dev / build / preview | 应用 |
+| `pnpm lint` | **基础语法先行**：`stylelint`（LESS）→ `eslint`（js/mjs）→ `tsc --noEmit`（TS 语法与类型）；链的最前面（见 `13-quality-gates.md` §2）|
 | `scripts/build-css.mjs` | `tokens.less` → 两份相同 `tokens.css`：`design/tokens.css` 与 `app/src/platform/theme/tokens.css`（**唯一产物方向**）|
 | `scripts/build-i18n.mjs` | `i18n/*.json` → `bundle.js`（设计页用）|
 | `scripts/build-icons.mjs` | 设计目录的雪碧图 → 演示页内联 + **应用侧** `app/src/platform/icons/{sprite.svg,icon-ids.ts}`；**第三方品牌**从设计分片里按清单挑选一并生成（见 `10-icons.md`）|

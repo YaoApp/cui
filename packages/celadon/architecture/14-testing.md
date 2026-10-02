@@ -1,7 +1,7 @@
 # 14 · 测试（工程落点）
 
-- **版本**：v1.43
-- **最后修改**：2026-10-02 20:33:30
+- **版本**：v1.44
+- **最后修改**：2026-10-02 20:37:56
 - **说明**：测试分层 · 位置与命名 · 断言与 mock 边界 · 浏览器与拟人 · 配置与日志
 
 ## 1. 规则
@@ -25,7 +25,8 @@
 
 | 层 | 工具 | 判定者 | 测什么 | 命令 → 日志 |
 | --- | --- | --- | --- | --- |
-| **规范门禁** | `scripts/check-*.mjs`（**零依赖**）+ lints | 确定性代码 | 设计规范（token · i18n · 样式约定 · 文档结构）· 类型 · 依赖边界 | `pnpm check` → `gates-<HHMM>.log` |
+| **基础语法** | `stylelint` · `eslint` · `tsc` | 确定性代码 | LESS / JS 的语法与格式 · **TS 的语法与类型** | `pnpm lint` → `lint-<HHMM>.log` |
+| **规范门禁** | `scripts/check-*.mjs`（**零依赖**）| 确定性代码 | 设计规范（token · i18n · 样式约定 · 文档结构）· 类型 · 依赖边界 | `pnpm check` → `gates-<HHMM>.log` |
 | **检查器自测** | `scripts/tests/run.mjs` | 确定性代码 | 每条检查规则一个正例 + 一个违规例 | `pnpm test:checkers` → `checkers-<HHMM>.log` |
 | **单元 / 组件** | `vitest` · Testing Library · `jsdom` | 确定性代码 | 纯逻辑 · 状态与数据层 · 组件行为 | `pnpm test` → `unit-<HHMM>.log` |
 | **浏览器** | `@playwright/test` | 确定性代码 | 关键交互主路径 · 中文输入法 · 全键盘 · 视觉回归 | `pnpm test:browser` → `browser-<HHMM>.log` |
