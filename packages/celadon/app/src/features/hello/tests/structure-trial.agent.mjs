@@ -136,7 +136,7 @@ if (!iconFit.stroke || iconFit.stroke === 'none') problems.push('S1: 图标没�
 
 // 图标一览：一个品牌标识 + 一批界面图标，符号都指得到；品牌标识不套界面图标的描边
 const gallery = await p.evaluate(() =>
-  [...document.querySelectorAll('.hello__icons .hello__icon')].map((cell) => {
+  [...document.querySelectorAll('.hello__row .hello__cell')].map((cell) => {
     const svg = cell.querySelector('svg')
     const href = svg?.querySelector('use')?.getAttribute('href')
     return { name: cell.querySelector('code')?.textContent, href, symbol: href ? !!document.querySelector(href) : false,
@@ -144,7 +144,7 @@ const gallery = await p.evaluate(() =>
   }),
 )
 say(`S1 gallery   : ${JSON.stringify(gallery)}`)
-if (gallery.length < 6) problems.push('S1: 图标一览少于 6 个')
+if (gallery.length < 20) problems.push(`S1: 演示图标太少（实测 ${gallery.length}，应为品牌 4 + 图标 26）`)
 if (gallery.some((x) => !x.symbol)) problems.push('S1: 一览里有图标指不到符号')
 const brand = gallery.find((x) => x.name?.startsWith('brand-'))
 if (!brand) problems.push('S1: 一览里没有品牌标识')
@@ -167,7 +167,7 @@ const scale = await p.evaluate(() => {
     const st = getComputedStyle(s)
     return { viewBox: s.getAttribute('viewBox'), strokeWidth: st.strokeWidth, stroke: st.stroke, fill: st.fill }
   }
-  return { button: read('header.header > button svg.icon'), gallery: read('.hello__icons svg.icon'), brand: read('.hello__icons svg.brand-mark') }
+  return { button: read('header.header > button svg.icon'), gallery: read('.hello__row svg.icon'), brand: read('.hello__row svg.brand-mark') }
 })
 say(`S1 scale     : ${JSON.stringify(scale)}`)
 for (const k of ['button', 'gallery']) {

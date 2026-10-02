@@ -4,7 +4,7 @@ import { Header } from '@/components/header'
 import { Nav } from '@/components/nav'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Icon } from '@/components/base/icon'
-import { BrandMark } from '@/components/base/brand-mark'
+import { BrandMark, type BrandId } from '@/components/base/brand-mark'
 import { useTranslation } from '@/platform/i18n'
 import { useThemeStore } from '@/platform/theme/theme.store'
 import { usePageTitle } from '@/platform/router/use-page-title'
@@ -13,8 +13,16 @@ import { FooBar } from './components/foo-bar'
 import type { IconId } from '@/platform/icons'
 import { useHelloStore } from './hello.store'
 
-/* 图标一览用的样例：一个品牌标识 + 七个界面图标（品牌标识与界面图标是两类东西，见 design/icons.md §1）。 */
-const ICON_SAMPLE: readonly IconId[] = ['i-chat', 'i-inbox', 'i-board', 'i-ws', 'i-search', 'i-check', 'i-act-refresh']
+/* 演示样例：**品牌标识一行、界面图标一行**（两者永不混用，见 design/icons.md §1）。
+   品牌用 manifest 里的全部自有标识；图标覆盖导航 / 动作 / 状态 / 文件 / 对象五类。 */
+const BRAND_IDS = ['brand-yao-agents', 'brand-yao-agents-mono', 'brand-yao', 'brand-yao-mono'] as const
+const BRAND_SAMPLE: readonly BrandId[] = BRAND_IDS
+const ICON_SAMPLE: readonly IconId[] = [
+  'i-chat', 'i-inbox', 'i-board', 'i-ws', 'i-book', 'i-nav-settings', 'i-nav-user', 'i-nav-help',
+  'i-search', 'i-plus', 'i-act-edit', 'i-act-trash', 'i-act-refresh', 'i-act-download', 'i-act-filter', 'i-act-close',
+  'i-check', 'i-clock', 'i-state-warning', 'i-state-error', 'i-state-info', 'i-state-loading',
+  'i-file-pdf', 'i-folder', 'i-obj-model', 'i-obj-skill',
+]
 
 export function HelloPage() {
   const count = useHelloStore((state) => state.count)
@@ -40,13 +48,17 @@ export function HelloPage() {
         <div className="hello__actions">
           <ThemeToggle theme={theme} onSelect={setTheme} />
         </div>
-        <section className="hello__icons" aria-label={t('hello.icons')}>
-          <span className="hello__icon">
-            <BrandMark name="brand-yao-agents" size={24} label="Yao Agents" />
-            <code>brand-yao-agents</code>
-          </span>
+        <section className="hello__row" aria-label={t('hello.brands')}>
+          {BRAND_SAMPLE.map((name) => (
+            <span className="hello__cell" key={name}>
+              <BrandMark name={name} size={24} />
+              <code>{name}</code>
+            </span>
+          ))}
+        </section>
+        <section className="hello__row" aria-label={t('hello.icons')}>
           {ICON_SAMPLE.map((name) => (
-            <span className="hello__icon" key={name}>
+            <span className="hello__cell" key={name}>
               <Icon name={name} size={20} />
               <code>{name}</code>
             </span>
