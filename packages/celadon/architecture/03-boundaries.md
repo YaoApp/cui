@@ -12,7 +12,7 @@
 | 平台层 | `app/src/platform/` | 宿主全局 · 挂载与路由 · 主题注入 · 运行时壳 | 不写业务 |
 | 工具层 | `app/src/lib/` | 格式化 · 日期 · 工具 · 常量 · 类型 | **无依赖** |
 
-源码根为什么是 `app/src/`、依赖方向怎么画，见 `00` §2。**没有全站 `state/` 层**（见 `06`）。
+源码根为什么是 `app/src/`、依赖方向怎么画，见 `00-principles.md` §2。**没有全站 `state/` 层**（见 `06-state.md`）。
 
 ## 2. 依赖规则
 
@@ -41,9 +41,9 @@
 | `<名>.test.tsx` | 单元用例（**与源文件同目录**，不进 `tests/`） |
 | `parts/<子组件>/` | 私有子组件（可选）—— 它自己也是一个组件，同一套结构（可递归） |
 | `<名>.store.ts` · `<名>.types.ts` | 可选：私有状态 / 类型多到挤占本体时拆出去 |
-| `tests/` | **只在有浏览器或拟人用例时存在**（见 `14`） |
+| `tests/` | **只在有浏览器或拟人用例时存在**（见 `14-testing.md`） |
 
-文件名规则见 `00` §2「文件名里的角色」。`parts/` 是通用槽位，`base/` 里的组件一样可以有。
+文件名规则见 `00-principles.md` §2「文件名里的角色」。`parts/` 是通用槽位，`base/` 里的组件一样可以有。
 
 归属判据（依次问）：
 
@@ -60,7 +60,7 @@ feature 私有组件**不许**出 `features/<域>/components/`；feature 之间�
 | --- | --- | --- |
 | **层间方向** | ESLint `no-restricted-imports`（`allowTypeImports: true` 只放行类型）| `components/base/` 不许 import 上层组件；`data/` 不许 import `features/`；`features/a/` 不许 import `features/b/` |
 | **组件不发请求** | 同上 + `no-restricted-syntax` | 禁组件里出现 `fetch(` / `new WebSocket(` |
-| **不在 `useEffect` 取数** | 同上 | 取数走数据层钩子（见 `05`）|
+| **不在 `useEffect` 取数** | 同上 | 取数走数据层钩子（见 `05-data-and-api.md`）|
 | **禁旧包** | 同上 | 禁 `import '@yaoapp/cui'` |
 | **路由薄** | 同上 | `routes/` 不许被 `features/` 反向 import |
 | **平台差异** | 适配器接口 + 禁直读环境判断 | 禁 `isDesktop` / `isIframe` 散落 |

@@ -10,7 +10,7 @@
 - 后缀即分工：`*.test.ts(x)` · `*.browser.ts` · `<场景>.agent.md` + `<场景>.agent.mjs`；**一个场景一个文件**。
 - 拟人只属于 feature：剧本三段（**剧本恒定 · 修改记录 · 测试记录**）+ 同场景的**采集脚本** `<场景>.agent.mjs`（开浏览器走剧本 · 截图 · 报客观测量）；
   每轮结果明细看日志、不复制进剧本；
-  截图落 `app/logs/<日期>/shots/<场景>/`，统一走 `scripts/shots.mjs`（见 `02` 脚本表）。
+  截图落 `app/logs/<日期>/shots/<场景>/`，统一走 `scripts/shots.mjs`（见 `02-toolchain.md` 脚本表）。
 - 共享测试支持放 `app/src/test-support/`，**不放组件目录内** —— 组件目录只放该组件自己的用例。
 - **不设覆盖率阈值**（阈值会诱导写无意义断言）。
 
@@ -23,7 +23,7 @@
   **组件 / feature / 平台层都覆盖**，`setup.ts` 不写清单（`stores.test.ts` 断言它跨层）。
 - 命令：`pnpm test` · `pnpm test:browser` · `pnpm test:checkers` · `pnpm test:persona` · `pnpm test:all`。
 - **CI**：门禁 + 单元 + 构建进 `celadon-test-build.yml`；浏览器测试单独 `celadon-browser-test.yml`
-  （用 runner 自带的 Google Chrome，不必 `playwright install`；失败上传轨迹与截图）。runner 与 action 版本见 `13`。
+  （用 runner 自带的 Google Chrome，不必 `playwright install`；失败上传轨迹与截图）。runner 与 action 版本见 `13-quality-gates.md`。
 
 ## 运行时输出一律英文
 
