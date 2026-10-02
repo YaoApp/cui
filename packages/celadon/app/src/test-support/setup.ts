@@ -1,15 +1,14 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
-import { useHelloStore } from '@/features/hello/hello-store'
-import { useThemeStore } from '@/platform/theme/theme-store'
+import { discoveredStores } from './stores'
 
-/* 每个用例后：卸载 DOM + 重置 store。
-   store 跨用例串味是最常见的 flaky 来源 —— 新增 store 时在这里补一行重置。 */
+/* 每个用例后：卸载 DOM + 把所有 store 复位。
+   store 的发现与初始状态登记在 ./stores.ts（自动、跨层，见那里的说明和 stores.test.ts 的断言）。 */
+const initial = new Map(discoveredStores.map((entry) => [entry.store, entry.store.getState()] as const))
+
 afterEach(() => {
   cleanup()
-  useHelloStore.setState({ count: 0 })
-  // setTheme 会一并写回根元素，避免上一个用例把 DOM 留在深色
-  useThemeStore.getState().setTheme('light')
+  for (const [store, state] of initial) store.setState(state, true)
   window.localStorage.clear()
 })

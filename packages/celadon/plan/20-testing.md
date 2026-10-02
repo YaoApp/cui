@@ -12,19 +12,23 @@
 | **浏览器** | `@playwright/test` + 截图 golden | 确定性代码 | 关键交互主路径 · 中文输入法 · 全键盘 · 视觉回归 | `pnpm test:browser` → `browser-<HHMM>.log` |
 | **拟人** | 剧本 + 浏览器执行 + 看图（执行者视觉）· **`ocr_recognize`** · **`decision_decide`** | **执行者判定；按需转人** | 真实使用路径 · 极端数据 · 环境差异 · 观感与措辞 | `pnpm test:persona` → `<场景>-<HHMM>.log` |
 
+`pnpm test:all` **整条链也留一份日志**（`all-<HHMM>.log`）—— 链里每一步都有自己的日志，但断在哪一步只有链的日志说得清。
+
 规范门禁零依赖、随设计资产走，是 QA 流程的**第 1 阶段**；其余各层用上表的栈。
-日志落在 `app/logs/<系统日期>/`（git 忽略），写法见 `architecture/14` 的「日志」一节。
+日志落在 `app/logs/<系统日期>/`（git 忽略），写法见 `architecture/14-testing.md` 的「日志」一节。
 **`pnpm test:all`** 一把跑：门禁 + 检查器自测 + 单元 + 浏览器 + **构建** + 拟人 ——
 构建放在拟人之前，因为**拟人层测的是构建产物**（`dist/`），不是 dev 源码。
 
 ## 2. 单元 / 组件测试
 
 - **位置（强约束，两条方向相反）**：
-  - **单元用例与源文件同目录** —— `button.tsx` 旁边就是 `button.test.tsx`；**不许进 `tests/`**
+  - **单元用例与源文件同目录** —— `button.tsx` 旁边就是 `button.test.tsx`；`hello.tsx` 旁边就是
+    `hello.test.tsx`；`hello.store.ts` 旁边就是 `hello.store.test.ts`；**不许进 `tests/`**
   - **浏览器用例与拟人剧本脚本进该 feature 的 `tests/`** —— 它们描述的是整体场景，不属于某一个组件或文件
-- **这条由 `check-app-layout` 强制**（两条方向相反的规则，各带正反样本；见 `architecture/13`）。
-- **新增 store 时，要在 `app/src/test-support/setup.ts` 里补一行重置** —— 用例间串味是最常见的 flaky 来源，
-  目前是显式列出，没有自动化。
+- **这条由 `check-app-layout` 强制**（两条方向相反的规则，各带正反样本；见 `architecture/13-quality-gates.md`）。
+- **store 的复位是全自动的** —— 测试支持用 `import.meta.glob('../**/*.store.ts')` 自动发现所有 store，
+  跑测试前登记初始状态，每个用例后整体复位（`theme.store.test.ts` 里有一条依赖顺序的守卫证明它还在起作用）。
+  **新增 store 不需要改任何测试配置。**
 - **后缀即分工（三条）**：单元 / 组件 `*.test.ts(x)` · 浏览器 `*.browser.ts` · 拟人 `*.agent.md` + `*.agent.mjs`
   （**同一 `tests/` 目录内并存**）
 - **按场景命名**：一个场景一个文件，文件名说清是哪个场景（`main-path.browser.ts` · `theme.browser.ts` ·
@@ -38,7 +42,7 @@
 
 ## 3. 浏览器测试
 
-**主路径用例在写组件 / 页面时产生** —— **不在本模块预先列举**（各模块的路径由其功能决定，见 `02`–`11`）。规则：
+**主路径用例在写组件 / 页面时产生** —— **不在本模块预先列举**（各模块的路径由其功能决定，见 `architecture/02-toolchain.md`–`architecture/11-formatting-and-lists.md`）。规则：
 
 - **来源**：该模块的验收条款
 - **数量**：每个模块**只留少量最关键的主路径**（分层 70/20/10 —— UI / E2E 只占一层，其余压到下层）
@@ -190,7 +194,7 @@ tai tool ocr_providers
 | 7 | **人终审（按需）** | 明确通过 | 回退到对应阶段 |
 
 **1–6 全过、且第 6 阶段给出结论或转人理由，才算 OK**；任一步不过**回到对应阶段**，不许留到下一阶段补。
-**第 1 阶段内容**：`pnpm check`（规范检查器）+ **类型检查** + **样式 lint** + **反向依赖边界**（lint 清单与 `01` 的构建期门禁一并定）。
+**第 1 阶段内容**：`pnpm check`（规范检查器）+ **类型检查** + **样式 lint** + **反向依赖边界**（lint 清单与 `architecture/01-package-and-repo.md` 的构建期门禁一并定）。
 
 **决策模型（`decision_decide`）在浏览器层的三种用法**（都只分流，不结案）：
 
