@@ -85,6 +85,9 @@ await shot(p, 's1-open.png')
 say(`S1 text      : ${JSON.stringify((await p.locator('body').innerText()).replace(/\n/g, ' | '))}`)
 say(`S1 boxes     : title=${JSON.stringify(await box(title))} button=${JSON.stringify(await box(button))} counter=${JSON.stringify(await box(counter))}`)
 say(`S1 overflow  : scrollWidth=${await p.evaluate(() => document.documentElement.scrollWidth)} clientWidth=${await p.evaluate(() => document.documentElement.clientWidth)}`)
+const tabTitle = await p.title()
+say(`S1 title     : ${JSON.stringify(tabTitle)}`)
+if (tabTitle !== 'Hello · CUI 2.0') problems.push('S1: 标签页标题没有跟路由走')
 
 // S2 快速连点 12 下
 const before = await box(button)

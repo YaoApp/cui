@@ -4,6 +4,8 @@ import { expect, test } from '@playwright/test'
 test('an object in the path opens its detail', async ({ page }) => {
   await page.goto('/main/world/w1')
   await expect(page.getByRole('heading', { name: 'Alpha 世界' })).toBeVisible()
+  // 详情页的标题用对象名 —— 用户才知道自己开的是哪一个世界
+  await expect(page).toHaveTitle('Alpha 世界 · CUI 2.0')
 })
 
 test('a surface in the path mounts the same feature in the side panel', async ({ page }) => {

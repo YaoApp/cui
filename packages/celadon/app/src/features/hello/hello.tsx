@@ -4,6 +4,7 @@ import { Header } from '@/components/header'
 import { Nav } from '@/components/nav'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useThemeStore } from '@/platform/theme/theme.store'
+import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
 import { FooBar } from './components/foo-bar'
 import { useHelloStore } from './hello.store'
@@ -16,6 +17,7 @@ export function HelloPage() {
   const setTheme = useThemeStore((state) => state.setTheme)
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  usePageTitle('Hello')
 
   return (
     <div className="hello">
