@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { WorldPage } from '@/features/world/world'

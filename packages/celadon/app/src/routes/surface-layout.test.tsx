@@ -25,13 +25,13 @@ function renderAt(entry: string) {
 describe('SurfaceLayout · 公共状态与地址栏', () => {
   it('reads a named query parameter into the public store', async () => {
     renderAt('/main/world?sideEntity=e2')
-    await waitFor(() => expect(useSidePanelStore.getState().entityId).toBe('e2'))
+    await waitFor(() => expect(useSidePanelStore.getState().entry).toEqual({ kind: 'world-entity', id: 'e2' }))
   })
 
   it('writes the public store back to the address, so it can be shared', async () => {
     const router = renderAt('/main/world')
     expect(screen.getByText('页面')).toBeInTheDocument()
-    useSidePanelStore.getState().open('e3')
+    useSidePanelStore.getState().open({ kind: 'world-entity', id: 'e3' })
     await waitFor(() => expect(router.state.location.search).toBe('?sideEntity=e3'))
   })
 })

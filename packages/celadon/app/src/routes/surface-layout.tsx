@@ -1,7 +1,10 @@
 import { Outlet, useParams } from 'react-router'
 import { useUrlBinding } from '@/platform/router/use-url-binding'
 import { isSurface } from '@/platform/utils/surfaces'
-import { useSidePanelStore } from '@/stores/side-panel'
+import { type PanelEntry, useSidePanelStore } from '@/stores/side-panel'
+
+/** 条目种类 → 地址栏参数名。一个种类一个具名参数；新增种类在这里加一行。 */
+const SIDE_PANEL_PARAMS: Record<string, string> = { 'world-entity': 'sideEntity' }
 import { useSurface } from './surfaces'
 import './surface-layout.less'
 
@@ -10,17 +13,26 @@ import './surface-layout.less'
 export function SurfaceLayout() {
   const { surface } = useParams()
   const current = useSurface()
-  const entityId = useSidePanelStore((s) => s.entityId)
+  const entry = useSidePanelStore((s) => s.entry)
   const open = useSidePanelStore((s) => s.open)
 
-  /* **路由层替公共 store 绑定地址栏** —— 路由只管怎么绑，机制在
-     platform/router/use-url-binding.ts（读只在 POP、写只在值变化）。
-     侧边开着谁 → `?sideEntity=`，push（后退应当关掉它）。 */
-  useUrlBinding<string | undefined>({
-    value: entityId,
+  /* **路由层替公共 store 绑定地址栏**（机制在 platform/router/use-url-binding.ts：
+     读只在 POP、写只在值变化）。条目是通用的，参数名按**种类**选 —— 一个种类一个具名参数
+     （见 `07-routing.md`：别把种类塞进参数值里）。新增种类时，在这张表加一行。 */
+  useUrlBinding<PanelEntry | undefined>({
+    value: entry,
     mode: 'push',
-    read: (params) => open(params.get('sideEntity') ?? undefined),
-    write: (params, value) => (value ? params.set('sideEntity', value) : params.delete('sideEntity')),
+    read: (params) => {
+      for (const [kind, name] of Object.entries(SIDE_PANEL_PARAMS)) {
+        const id = params.get(name)
+        if (id) return open({ kind, id })
+      }
+      open(undefined)
+    },
+    write: (params, value) => {
+      for (const name of Object.values(SIDE_PANEL_PARAMS)) params.delete(name)
+      if (value) params.set(SIDE_PANEL_PARAMS[value.kind] ?? value.kind, value.id)
+    },
   })
 
   if (!isSurface(surface)) {
