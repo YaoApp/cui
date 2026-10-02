@@ -1,7 +1,7 @@
 # 02 · 工具链
 
-- **版本**：v1.22
-- **最后修改**：2026-10-02 17:00:33
+- **版本**：v1.24
+- **最后修改**：2026-10-02 17:26:10
 - **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具
 
 ## 规则
@@ -50,7 +50,8 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | dev / build / preview | 应用 |
 | `scripts/build-css.mjs` | `tokens.less` → `tokens.css`（**唯一产物方向**）|
 | `scripts/build-i18n.mjs` | `i18n/*.json` → `bundle.js`（设计页用）|
-| `scripts/check-*.mjs` | 十个检查器（见 `13-quality-gates.md`）|
+| `scripts/build-i18n-types.mjs` | 三处语言包（基准 `zh-CN`）→ `app/src/platform/i18n/i18n-types.d.ts`（跑 `pnpm build:i18n`；产物**提交进仓库**，见 `08-i18n.md`）|
+| `scripts/check-*.mjs` | 十一个检查器（见 `13-quality-gates.md`）|
 | `scripts/tests/run.mjs` | 检查器自身的样本用例 |
 | `scripts/run-logged.mjs` | 跑一条命令并把输出双写到 `app/logs/<日期>/<名>-<HHMM>.log` |
 | `scripts/run-persona.mjs` | 发现并逐个跑 `features/*/tests/*.agent.mjs`，一个场景一份日志 |

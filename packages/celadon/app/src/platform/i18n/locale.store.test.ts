@@ -20,6 +20,16 @@ describe('locale store', () => {
     expect(i18n.t('nav.hello')).toBe('你好')
   })
 
+  it('switches to the added languages too', () => {
+    useLocaleStore.getState().setLocale('zh-TW')
+    expect(i18n.language).toBe('zh-TW')
+    expect(i18n.t('header.refresh')).toBe('重新整理')
+
+    useLocaleStore.getState().setLocale('ja')
+    expect(i18n.language).toBe('ja')
+    expect(i18n.t('nav.world')).toBe('ワールド')
+  })
+
   it('remembers the choice', () => {
     useLocaleStore.getState().setLocale('en-US')
     expect(window.localStorage.getItem('cui.locale')).toContain('en-US')

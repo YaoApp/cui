@@ -1,0 +1,12 @@
+{
+  "nav.appLabel": "應用導航",
+  "nav.hello": "你好",
+  "nav.world": "世界",
+  "header.refresh": "重新整理",
+  "themeToggle.label": "主題",
+  "themeToggle.toLight": "淺色",
+  "themeToggle.toDark": "深色",
+  "surface.main": "主區",
+  "surface.side": "側邊",
+  "surface.unknown": "未知的介面表面：{{surface}}"
+}

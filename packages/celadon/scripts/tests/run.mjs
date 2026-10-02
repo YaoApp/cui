@@ -22,6 +22,7 @@ const SUITES = [
   ['check-css-conventions.mjs', 'css-conventions'],
   ['check-tokens.mjs', 'tokens'],
   ['check-i18n.mjs', 'i18n'],
+  ['check-i18n-types.mjs', 'i18n-types'],
   ['check-readme-values.mjs', 'readme-values'],
   ['check-plan-md.mjs', 'check-plan-md'],
   ['check-app-layout.mjs', 'app-layout'],

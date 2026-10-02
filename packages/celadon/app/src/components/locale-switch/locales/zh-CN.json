@@ -1,5 +1,7 @@
 {
   "localeSwitch.label": "语言",
   "localeSwitch.zhCN": "中文",
-  "localeSwitch.enUS": "English"
+  "localeSwitch.zhTW": "繁體中文",
+  "localeSwitch.enUS": "English",
+  "localeSwitch.ja": "日本語"
 }

@@ -1,4 +1,4 @@
-import { useTranslation } from '@/platform/i18n'
+import { useTranslation, type I18nKey } from '@/platform/i18n'
 import type { Theme } from '@/platform/theme/theme.store'
 
 export type ThemeToggleProps = {
@@ -6,7 +6,7 @@ export type ThemeToggleProps = {
   onChange: (theme: Theme) => void
 }
 
-const OPTIONS: { value: Theme; labelKey: string }[] = [
+const OPTIONS: { value: Theme; labelKey: I18nKey }[] = [
   { value: 'light', labelKey: 'themeToggle.toLight' },
   { value: 'dark', labelKey: 'themeToggle.toDark' },
 ]

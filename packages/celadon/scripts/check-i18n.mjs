@@ -70,7 +70,8 @@ const ALLOW_CJK = new Set([
   'card.hanText', 'card.kanaText', 'card.punctText', 'card.glyphCompareText', 'card.monoText',
   'card.mixedText', 'card.latinText', 'sample.message.agent1Html',
   'df.listSample',   /* 排序演示：四语必须是同一份输入，故意不翻 */
-  'localeSwitch.zhCN' /* 语言名用本语言自己的写法（中文 / English），不算漏翻 */
+  /* 语言名用本语言自己的写法（endonym：中文 / 繁體中文 / English / 日本語），在所有语言包里都一样，不算漏翻 */
+  'localeSwitch.zhCN', 'localeSwitch.zhTW', 'localeSwitch.enUS', 'localeSwitch.ja'
 ])
 // 语言中立（各语言相同是正确的）：品牌名、文件名、token 名、纯数值/单位
 const NEUTRAL = /^(Yao Agents|Agent|token|contract\.pdf|需求\.docx|requirements\.docx|risk-summary\.md|リスク摘要\.md|風險摘要\.md|6px|12px|hover 120ms|hairline|[\d.]+(px|ms|KB|MB)?)$/

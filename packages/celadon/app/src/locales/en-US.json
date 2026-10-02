@@ -5,5 +5,8 @@
   "header.refresh": "Refresh",
   "themeToggle.label": "Theme",
   "themeToggle.toLight": "Light",
-  "themeToggle.toDark": "Dark"
+  "themeToggle.toDark": "Dark",
+  "surface.main": "Main",
+  "surface.side": "Side",
+  "surface.unknown": "Unknown surface: {{surface}}"
 }

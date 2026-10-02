@@ -4,26 +4,41 @@ import { describe, expect, it } from 'vitest'
 import { Header } from '@/components/header'
 import { LocaleSwitch } from '@/components/locale-switch'
 
-/* 分段控件：一组互斥语言。断言用户看到什么 —— 点选后页面文案跟着换。 */
+/* 语言切换是一个下拉（四种语言塞不进分段控件）。断言用户看到什么 ——
+   四个语言名都是可见选项，选中后页面文案跟着换。 */
 describe('LocaleSwitch', () => {
-  it('offers every discovered language', () => {
+  it('offers every discovered language as a visible option', () => {
     render(<LocaleSwitch />)
-    expect(screen.getByRole('button', { name: '中文' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'English' })).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: '语言' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: '中文' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: '繁體中文' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'English' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: '日本語' })).toBeInTheDocument()
   })
 
-  it('marks the current language, visually and for assistive tech', async () => {
+  it('marks the current language as the selected option', () => {
     render(<LocaleSwitch />)
-    expect(screen.getByRole('button', { name: '中文' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'false')
-
-    await userEvent.click(screen.getByRole('button', { name: 'English' }))
-
-    expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: '中文' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('combobox', { name: '语言' })).toHaveValue('zh-CN')
   })
 
-  it('switches the visible copy to the chosen language', async () => {
+  it.each([
+    ['zh-TW', '重新整理'],
+    ['en-US', 'Refresh'],
+    ['ja', '更新'],
+  ])('switches the visible copy to %s', async (locale, refresh) => {
+    render(
+      <>
+        <LocaleSwitch />
+        <Header title="Hello" />
+      </>,
+    )
+
+    await userEvent.selectOptions(screen.getByRole('combobox'), locale)
+
+    expect(screen.getByRole('button', { name: refresh })).toBeInTheDocument()
+  })
+
+  it('leaves the previous language behind when switching away', async () => {
     render(
       <>
         <LocaleSwitch />
@@ -32,9 +47,9 @@ describe('LocaleSwitch', () => {
     )
     expect(screen.getByRole('button', { name: '刷新' })).toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole('button', { name: 'English' }))
+    await userEvent.selectOptions(screen.getByRole('combobox'), 'ja')
 
-    expect(screen.getByRole('button', { name: 'Refresh' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '更新' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '刷新' })).not.toBeInTheDocument()
   })
 })
