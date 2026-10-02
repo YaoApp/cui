@@ -1,3 +1,4 @@
+import { assertThemeContrast } from '@/platform/theme/assert-contrast'
 import '@/platform/theme/tokens.css'
 import './platform/shell.less'
 /* 初始化 i18n（eager 载入三处语言包）—— 必须在渲染前完成，首屏才有正确文案。 */
@@ -14,3 +15,6 @@ createRoot(document.getElementById('app')!).render(
     <AppRouter />
   </StrictMode>,
 )
+
+/* 开发期自检：正文色与页面底色的对比度（见 architecture/09-theme.md §6）。生产不跑。 */
+assertThemeContrast()
