@@ -30,6 +30,18 @@ export type I18nKey =
   | 'world.detailLabel'
   | 'world.filter'
   | 'world.filterPlaceholder'
+  | 'world.fixture.e1.name'
+  | 'world.fixture.e2.name'
+  | 'world.fixture.e3.name'
+  | 'world.fixture.e4.name'
+  | 'world.fixture.w1.name'
+  | 'world.fixture.w1.summary'
+  | 'world.fixture.w2.name'
+  | 'world.fixture.w2.summary'
+  | 'world.fixture.w3.name'
+  | 'world.fixture.w3.summary'
+  | 'world.kind.place'
+  | 'world.kind.role'
   | 'world.missing'
   | 'world.navLabel'
   | 'world.share'
@@ -69,6 +81,18 @@ declare module 'i18next' {
         'world.detailLabel': string
         'world.filter': string
         'world.filterPlaceholder': string
+        'world.fixture.e1.name': string
+        'world.fixture.e2.name': string
+        'world.fixture.e3.name': string
+        'world.fixture.e4.name': string
+        'world.fixture.w1.name': string
+        'world.fixture.w1.summary': string
+        'world.fixture.w2.name': string
+        'world.fixture.w2.summary': string
+        'world.fixture.w3.name': string
+        'world.fixture.w3.summary': string
+        'world.kind.place': string
+        'world.kind.role': string
         'world.missing': string
         'world.navLabel': string
         'world.share': string
