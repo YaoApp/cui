@@ -1,7 +1,7 @@
 # 07 · 路由
 
-- **版本**：v1.15
-- **最后修改**：2026-10-02 13:53:24
+- **版本**：v1.17
+- **最后修改**：2026-10-02 13:55:26
 - **说明**：地址语法（对象在路径 · 表面在首段 · 面板在具名 query）· 谁说了算 · `routes/` 的结构 · 文档标题
 
 ## 机制
@@ -66,7 +66,7 @@ app/src/platform/router/   机制（三端 basename 从这里注入）
   **读只在 `navigationType === 'POP'`**（首次进入 + 浏览器前进/后退）· **写只在值真的变了时**（没变不动历史）。
   其他地方**不许**在 effect 里写 URL —— 机器强制 `check-effect-url-write.mjs`，唯一放行的就是那个文件。
 - **谁绑**：**公共**状态由**路由层**绑一次（`routes/surface-layout.tsx`）；**私有**状态由**功能自己**绑
-  （`features/world/use-world-url-sync.ts` 的 `?q=`）。
+  （**私有**状态的绑定写在它所属的 feature 里；**公共**状态由路由层统一绑一次）。
 - **为什么读只在 POP**：两个方向都活着又互相触发就是死循环（实测把 vitest 卡死，用例超时都拦不住）。（机器强制：`check-effect-url-write.mjs` —— effect 里出现
   `setSearchParams` / `navigate` 即失败。） 两个方向不在同一批里落地：挂载时 URL 有 `?sideEntity=e2`
   而写入端手里的 store 值还是 `undefined`，它就把参数删掉；下一批 URL→store 又加回来 —— 你删我加，
