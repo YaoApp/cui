@@ -27,6 +27,7 @@ const SUITES = [
   ['check-app-layout.mjs', 'app-layout'],
   ['check-effect-url-write.mjs', 'effect-url-write'],
   ['check-base-components.mjs', 'base-components'],
+  ['check-doc-references.mjs', 'doc-references'],
 ]
 
 let pass = 0, fail = 0

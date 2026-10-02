@@ -45,7 +45,7 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | dev / build / preview | 应用 |
 | `scripts/build-css.mjs` | `tokens.less` → `tokens.css`（**唯一产物方向**）|
 | `scripts/build-i18n.mjs` | `i18n/*.json` → `bundle.js`（设计页用）|
-| `scripts/check-*.mjs` | 九个检查器（见 `13-quality-gates.md`）|
+| `scripts/check-*.mjs` | 十个检查器（见 `13-quality-gates.md`）|
 | `scripts/tests/run.mjs` | 检查器自身的样本用例 |
 | `scripts/run-logged.mjs` | 跑一条命令并把输出双写到 `app/logs/<日期>/<名>-<HHMM>.log` |
 | `scripts/run-persona.mjs` | 发现并逐个跑 `features/*/tests/*.agent.mjs`，一个场景一份日志 |
