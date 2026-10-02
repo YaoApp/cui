@@ -117,16 +117,16 @@
 | --- | --- |
 | **生产构建** | `pnpm build` ✓ **42–47ms**（Vite 8 上；Vite 6 时为 76–106ms）|
 | **七个检查** | `check-i18n` · `check-readme-values` · `check-tokens` · `check-generated` · `check-css-conventions` · `check-plan-md` · `check-app-layout` **全绿** |
-| **检查器自测** | `scripts/tests/run.mjs` **44 / 44** 用例（每条规则一个样本）|
+| **检查器自测** | `scripts/tests/run.mjs` **50 / 50** 用例（每条规则一个样本）|
 | **dev / preview** | dev 端口 5199 ✓ · preview HTTP **200** ✓ |
 | **CI（隔离）· 一** | `.github/workflows/celadon-test-build.yml` · 只在 `packages/celadon/**` 改动时跑 · 干净环境演练通过：安装（不触发构建）→ 规范门禁全绿 → 单元 9/9 → 构建；三处隔离：自己的工作目录 · 自己的锁文件 · 自己的 `packageManager` |
 | **CI（隔离）· 二** | `.github/workflows/celadon-browser-test.yml` · 浏览器测试单独一份、自带环境准备；用例自己起 dev（本地已跑则复用）· 失败时上传轨迹与截图 |
 | **CI 输出** | 两份 workflow 的名字与步骤全英文；结束时把 `app/logs/*/*.log` 写进运行摘要（`$GITHUB_STEP_SUMMARY`，折叠块），红绿都能直接读到 |
-| **产物可独立运行** | `dist/` 用 Python 静态服务器（`python3 -m http.server`）直接跑通：根路径下 4 个文件全 200 · 页面渲染与交互正常 · 零 4xx 零控制台错误 |
+| **产物可独立运行** | `dist/` 用**带 SPA fallback** 的静态服务器跑通（`scripts/serve-dist.mjs` —— `python3 -m http.server` 没有 fallback，深链会 404）：根路径下 4 个文件全 200 · 页面渲染与交互正常 · 零 4xx 零控制台错误 |
 | **产物前缀可配** | `base` 取 `CUI_BASE`（默认 `/`）：`CUI_BASE=/cui/` 构建后资源变 `/cui/_assets/*`，挂到 `/cui/` 下同样跑通（根路径下则 404，佐证前缀生效）|
-| **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**19 / 19**：`button` 4 · `header` 2 · `hello.store` 2 + 1（复位守卫）· `theme.store` 3 · `theme-toggle` 3 · `hello` 2 · `stores` 2（发现跨层）（不设阈值）|
-| **浏览器测试** | `pnpm test:browser`（`@playwright/test`，走本机 Chrome）**6 / 6**：主路径 · 全键盘（含焦点环可见）· 主题跟随 · 分段控件切主题 + 刷新后记住 · 内容面铺满视口 |
-| **测试范围收窄** | `vitest` 只认 `*.test.*` · `playwright` 只认 `*.browser.ts` —— 三个 runner 的默认范围会重叠，不收窄会互相误抓（实测：6 个单测文件给 vitest，6 条 `*.browser.ts` 给 playwright，1 个 `*.agent.mjs` 给拟人）|
+| **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**42 / 42**（13 文件）：`base/button/button.test.tsx` 4 · `header/header.test.tsx` 2 · `nav/nav.test.tsx` 4 · `theme-toggle/theme-toggle.test.tsx` 3 · `hello/hello.store.test.ts` 2 · `hello/hello.test.tsx` 2 · `world/world.store.test.ts` 3 · `world/world.test.tsx` 5 · `router/use-page-title.test.ts` 3 · `theme/theme.store.test.ts` 4 · `utils/nav.test.ts` 4 · `utils/share-url.test.ts` 4 · `stores.test.ts` 2 |
+| **浏览器测试** | `pnpm test:browser`（`@playwright/test`，走本机 Chrome）**10 / 10**：主路径（含标签页标题）· 全键盘（Tab 走到刷新）· 主题跟随 · 分段控件切主题 + 刷新后记住 · 内容面铺满视口 · 深链四条（详情 · 侧边 · 面板参数+后退 · 过滤 replace 不堆历史）|
+| **测试范围收窄** | `vitest` 只认 `*.test.*` · `playwright` 只认 `*.browser.ts` —— 两个工具的默认范围会重叠（`vitest` 与 `playwright`），不收窄会互相误抓（实测：6 个单测文件给 vitest，6 条 `*.browser.ts` 给 playwright，1 个 `*.agent.mjs` 给拟人）|
 | **测试位置强约束** | `check-app-layout` 两条方向相反的规则：单测挨着源文件、浏览器与拟人住 `tests/`（44 个样本，含两个新后缀的反例）|
 | **测试命令** | `pnpm check` · `pnpm test` · `pnpm test:browser` · `pnpm test:checkers` · `pnpm test:all`；四层各写一份日志到 **`app/logs/<本地日期>/<名>-<HHMM>.log`**（git 忽略；目录取系统日期、文件名精确到分钟，保留 14 天）|
 | **隔离 · 装到本地** | `node_modules` 154M（含 React · vitest · Playwright · less）· 自己的 `pnpm-lock.yaml` · Vite 8.3.1 在本地 |

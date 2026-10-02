@@ -1,7 +1,8 @@
 # 13 · 质量门禁
 
-- **状态**：✅ 扫描期已跑通 · ⏳ 构建期待接线
-- **依据**：[`../plan/01-infrastructure.md`](../plan/01-infrastructure.md) §4 子项 6a / 6b
+- **版本**：v1.10
+- **最后修改**：2026-10-02 12:49:30
+- **说明**：扫描期与构建期门禁 · 检查器清单
 
 ## 扫描期（已跑通 · 纯 Node 脚本）
 
@@ -13,11 +14,15 @@
 | `check-readme-values` | README 引用的色值与 `tokens.css` 不一致 |
 | `check-generated` | 产物与源不一致（`tokens.less` → `tokens.css` 等）|
 | `check-plan-md` | `plan/` 的表格结构与禁用小节（"待讨论"等）。**单元格里别写裸 `|`** —— 它不认 `\|` 转义，会按列数不一致报错 |
-| `check-app-layout` | **用例必须在 `tests/` 目录内**（强约束）—— 源码目录里出现 `*.test.*` / `*.spec.*` 即失败 |
+| `check-app-layout` | 测试产物位置：**单测挨着源文件**（不许进 `tests/`）· **浏览器与拟人必须在 `tests/` 内** —— 两条方向相反的规则，各有正反样本 |
+| `check-doc-references` | 文档提到的 `app/src/...` 路径 · `scripts/*.mjs` · `pnpm <cmd>` **必须真实存在** —— 文档漂移不靠人 review |
+| `check-base-components` | `features/` 与 `routes/` 里**不许裸写 `<button>`** —— 用 `components/base/button`；否则每页各写一套按钮 |
+| `check-effect-url-write` | **不许在 `useEffect` 里写 URL**（`setSearchParams` / `navigate`）—— 会与"读 URL 写 store"互相追成同步死循环，见 `07-routing.md` |
 
 - **运行时输出一律英文**（检查器 · 测试 · 脚本的 console 与报错 · 用例名）；注释与文档仍是中文。
-- **检查器自身必须有样本测试**：`node scripts/tests/run.mjs`（**44 / 44**；每条规则一个正例 + 一个违规例）。
-- **三层命令**：`pnpm check`（规范门禁）· `pnpm test`（单元 / 组件）· `pnpm test:browser`（浏览器）；一把跑 `pnpm test:all`。
+- **检查器自身必须有样本测试**：`node scripts/tests/run.mjs`（**50 / 50**；每条规则一个正例 + 一个违规例）。
+- **五层命令**：`pnpm check`（规范门禁）· `pnpm test:checkers`（检查器自测）· `pnpm test`（单元 / 组件）·
+  `pnpm test:browser`（浏览器）· `pnpm test:persona`（拟人）；一把跑 `pnpm test:all`。
 - **加一条规则，必须同时加违规样本** —— 否则"全过"是假象。
 
 ## 构建期（⏳ 待接线）
