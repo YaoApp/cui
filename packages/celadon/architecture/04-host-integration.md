@@ -9,6 +9,7 @@
 | **保留前缀** | **12 个前缀归引擎，路由不得占用**：`/api` `/v1` `/assets` `/components` `/tools` `/agents` `/admin` `/brands` `/docs` `/ai` `/.well-known` `/iframe` |
 | **无外壳模式** | `/iframe` 路径下**不渲染外壳**（chrome-less）|
 | **表面段** | 路由第一段（`main` / `side`）是**应用自己**的命名空间，在 basename 之下，不占保留前缀 |
+| **SPA fallback** | **托管方必须配**：未知路径回 `index.html`，只给导航请求（`Accept: text/html`）；缺的静态资源仍 404。路径路由的代价，预览用 `scripts/serve-dist.mjs` |
 | **代理** | 按上述前缀转发给引擎；**WebSocket upgrade 用 `server.proxy` 的 `ws: true`** |
 | **SSE 三个头** | `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no` |
 

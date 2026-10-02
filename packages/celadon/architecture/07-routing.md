@@ -37,7 +37,8 @@
 | **URL → store** | 挂载，以及**每一次导航**（后退 / 前进也算） | 读 URL 写 store |
 | **store + URL 一起写** | 在**动作里**（改过滤、打开面板、关闭面板） | 同一个动作里既改 store 也导航 |
 
-- **禁止「监视 store 再回写 URL」的观察者。** 两个方向不在同一批里落地：挂载时 URL 有 `?sideEntity=e2`
+- **禁止「监视 store 再回写 URL」的观察者。**（机器强制：`check-effect-url-write.mjs` —— effect 里出现
+  `setSearchParams` / `navigate` 即失败。） 两个方向不在同一批里落地：挂载时 URL 有 `?sideEntity=e2`
   而写入端手里的 store 值还是 `undefined`，它就把参数删掉；下一批 URL→store 又加回来 —— 你删我加，
   同步刷效果时是**死循环**（实测：vitest 直接卡死，连用例超时都拦不住）。
 - **导航语义分开**：过滤用 `replace`（打字不该塞满后退栈）；打开面板用 `push`（后退应当关掉它）。
