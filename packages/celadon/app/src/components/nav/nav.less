@@ -1,0 +1,27 @@
+/* 导航的布局归组件；选中态用设计类 .nav-item.is-active（设计系统里已有）。 */
+.nav {
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-4);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__link {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-4) var(--spacing-12);
+    border: 1px solid transparent;
+    border-radius: var(--radius-medium);
+    color: var(--text-secondary);
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-cjk);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--text-primary);
+    }
+  }
+}

@@ -2,10 +2,10 @@ import '../../design/tokens.css'
 import './platform/shell.less'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { HelloPage } from '@/features/hello'
+import { AppRouter } from '@/platform/router/router'
 
 createRoot(document.getElementById('app')!).render(
   <StrictMode>
-    <HelloPage />
+    <AppRouter />
   </StrictMode>,
 )

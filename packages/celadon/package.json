@@ -40,7 +40,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "node scripts/run-logged.mjs gates pnpm run check:run",
-    "check:run": "node scripts/check-i18n.mjs && node scripts/check-readme-values.mjs && node scripts/check-tokens.mjs && node scripts/check-generated.mjs && node scripts/check-css-conventions.mjs && node scripts/check-plan-md.mjs && node scripts/check-app-layout.mjs",
+    "check:run": "node scripts/check-i18n.mjs && node scripts/check-readme-values.mjs && node scripts/check-tokens.mjs && node scripts/check-generated.mjs && node scripts/check-css-conventions.mjs && node scripts/check-plan-md.mjs && node scripts/check-app-layout.mjs && node scripts/check-effect-url-write.mjs && node scripts/check-base-components.mjs && node scripts/check-doc-references.mjs",
     "test": "node scripts/run-logged.mjs unit vitest run",
     "test:watch": "vitest",
     "test:checkers": "node scripts/run-logged.mjs checkers node scripts/tests/run.mjs",
@@ -48,7 +48,9 @@
     "test:persona": "node scripts/run-persona.mjs",
     "test:all": "node scripts/run-logged.mjs all pnpm run test:all:run",
     "test:all:run": "pnpm check && pnpm test:checkers && pnpm test && pnpm test:browser && pnpm build && pnpm test:persona",
-    "prepack": "vite build"
+    "prepack": "vite build",
+    "docs:stamp": "node scripts/stamp-docs.mjs",
+    "docs:stamp:check": "node scripts/stamp-docs.mjs --check"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
@@ -68,5 +70,8 @@
     "vite": "^8.3.1",
     "vitest": "^5.0.2",
     "zustand": "^5.0.15"
+  },
+  "dependencies": {
+    "react-router": "^8.4.0"
   }
 }

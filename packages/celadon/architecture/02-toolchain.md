@@ -1,7 +1,8 @@
 # 02 · 工具链
 
-- **状态**：✅ 已定（`plan/01` §1 第 2 · 3 · 4 条 + §1.1）
-- **依据**：[`../plan/01-infrastructure.md`](../plan/01-infrastructure.md) §1 · §1.1 · §2 · 源码根与目录结构（§2 目录）
+- **版本**：v1.10
+- **最后修改**：2026-10-02 12:49:29
+- **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口
 
 ## 规则
 
@@ -23,6 +24,7 @@ packages/celadon/          包根 = 设计体系（不是应用）
 │   └── src/               应用源码 —— 分层见 00 / 03
 │       ├── components/base/         组件层：基础组件（其余组件平铺在 components/ 下）
 │       ├── features/                  能力层（页面 + 组件 + 状态 + 测试，按业务自洽）
+│       ├── routes/                    路由表与表面装配（与 features 并列 · 只装配）
 │       ├── data/                      数据层
 │       ├── platform/                  平台层（含 utils/：纯函数 · 常量 · 类型 · 不依赖上层）
 │       └── test-support/              测试支持（setup · 共享夹具 · store 重置）
@@ -44,10 +46,11 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | dev / build / preview | 应用 |
 | `scripts/build-css.mjs` | `tokens.less` → `tokens.css`（**唯一产物方向**）|
 | `scripts/build-i18n.mjs` | `i18n/*.json` → `bundle.js`（设计页用）|
-| `scripts/check-*.mjs` | 七个检查器（见 `13-quality-gates.md`）|
+| `scripts/check-*.mjs` | 十个检查器（见 `13-quality-gates.md`）|
 | `scripts/tests/run.mjs` | 检查器自身的样本用例 |
 | `scripts/run-logged.mjs` | 跑一条命令并把输出双写到 `app/logs/<日期>/<名>-<HHMM>.log` |
 | `scripts/run-persona.mjs` | 发现并逐个跑 `features/*/tests/*.agent.mjs`，一个场景一份日志 |
+| `scripts/serve-dist.mjs` | 预览 `dist/` 的静态服务器（**带 SPA fallback**，见 `04-host-integration.md`）|
 | `scripts/shots.mjs` | **固化截图资产**：`capturePage()` 页面视口（跨平台）· `captureScreen()` 系统级整屏（**只实现 macOS**，其它平台明确报错）· `shotDir()` 算 `app/logs/<日期>/shots/<场景>/` |
 
 ## 已定
