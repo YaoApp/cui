@@ -5,6 +5,6 @@ import { Select } from '@/components/base/select'
 export const Widget = () => (
   <>
     <Button variant="ghost">刷新</Button>
-    <Select aria-label="语言" value="system" onChange={() => {}} options={[]} />
+    <Select aria-label="语言" value="system" onValueChange={() => {}} options={[]} />
   </>
 )

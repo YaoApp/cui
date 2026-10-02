@@ -36,7 +36,7 @@ export function LocaleSwitch() {
       className="locale-switch"
       aria-label={t('localeSwitch.label')}
       value={locale}
-      onChange={setLocale}
+      onValueChange={setLocale}
       options={options}
     />
   )
