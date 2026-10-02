@@ -1,7 +1,8 @@
 import { Outlet, useParams } from 'react-router'
 import { useUrlBinding } from '@/platform/router/use-url-binding'
 import { isSurface } from '@/platform/utils/surfaces'
-import { type PanelEntry, useSidePanelStore } from '@/stores/side-panel'
+import { type Entry } from '@/stores/entry'
+import { useSidePanelStore } from '@/stores/side-panel'
 
 /** 条目种类 → 地址栏参数名。一个种类一个具名参数；新增种类在这里加一行。 */
 const SIDE_PANEL_PARAMS: Record<string, string> = { 'world-entity': 'sideEntity' }
@@ -19,7 +20,7 @@ export function SurfaceLayout() {
   /* **路由层替公共 store 绑定地址栏**（机制在 platform/router/use-url-binding.ts：
      读只在 POP、写只在值变化）。条目是通用的，参数名按**种类**选 —— 一个种类一个具名参数
      （见 `07-routing.md`：别把种类塞进参数值里）。新增种类时，在这张表加一行。 */
-  useUrlBinding<PanelEntry | undefined>({
+  useUrlBinding<Entry | undefined>({
     value: entry,
     mode: 'push',
     read: (params) => {
