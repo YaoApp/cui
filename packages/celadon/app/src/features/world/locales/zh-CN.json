@@ -1,0 +1,13 @@
+{
+  "world.title": "World",
+  "world.navLabel": "世界导航",
+  "world.filter": "过滤",
+  "world.filterPlaceholder": "世界名",
+  "world.detailLabel": "世界详情",
+  "world.share": "分享这个视图",
+  "world.missing": "没有这个世界：{{id}}",
+  "entityPanel.label": "条目面板",
+  "entityPanel.close": "关闭",
+  "entityPanel.kind": "类型",
+  "entityPanel.id": "编号"
+}

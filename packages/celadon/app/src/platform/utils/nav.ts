@@ -2,14 +2,15 @@
    `routes/` 与各 feature 都能用它；type 也在这里，组件只 import type（方向向下）。 */
 
 export type NavItem = {
+  /** 显示文字；应用级导航这里是**语言包 key**（`nav.hello`），由页面用 `t()` 翻成当前语言 */
   label: string
   href: string
   active?: boolean
 }
 
 export const APP_NAV: NavItem[] = [
-  { label: 'Hello', href: '/main/hello' },
-  { label: 'World', href: '/main/world' },
+  { label: 'nav.hello', href: '/main/hello' },
+  { label: 'nav.world', href: '/main/world' },
 ]
 
 /** 按当前路径标出选中项 —— 比较只写这一处，别让每个页面各写一遍。 */

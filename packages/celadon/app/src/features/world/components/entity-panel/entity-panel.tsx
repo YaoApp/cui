@@ -1,4 +1,5 @@
 import { Button } from '@/components/base/button'
+import { useTranslation } from '@/platform/i18n'
 import type { WorldEntity } from '../../worlds'
 
 export type EntityPanelProps = {
@@ -8,18 +9,20 @@ export type EntityPanelProps = {
 
 /* 侧边面板的内容 —— 它只收 props，不知道"面板为什么开着"（那是地址的事）。 */
 export function EntityPanel({ entity, onClose }: EntityPanelProps) {
+  const { t } = useTranslation()
+
   return (
-    <section className="entity-panel" aria-label="条目面板">
+    <section className="entity-panel" aria-label={t('entityPanel.label')}>
       <header className="entity-panel__head">
         <h3 className="entity-panel__title">{entity.name}</h3>
         <Button variant="ghost" size="small" onClick={onClose}>
-          关闭
+          {t('entityPanel.close')}
         </Button>
       </header>
       <dl className="entity-panel__meta">
-        <dt>类型</dt>
+        <dt>{t('entityPanel.kind')}</dt>
         <dd>{entity.kind}</dd>
-        <dt>编号</dt>
+        <dt>{t('entityPanel.id')}</dt>
         <dd>{entity.id}</dd>
       </dl>
     </section>

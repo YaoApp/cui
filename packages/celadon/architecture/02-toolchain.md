@@ -11,6 +11,7 @@
 | 构建 | **Vite 8.3.1** |
 | UI | **React 19.3** + **TypeScript 7**（`@types/react*` 19.3）|
 | 包管理器 | **pnpm**，**本目录自己的 `package.json` 钉版本**（不靠仓库根 —— 隔离见 `01-package-and-repo.md`）|
+| 国际化 | **i18next 26** + **react-i18next 17**（运行时语言包见 `08-i18n.md`）|
 | 测试 | `vitest` + `@testing-library/react` · `user-event` · `jest-dom` + `jsdom` + `@playwright/test`（见 `14-testing.md`）|
 
 - 依赖版本一律 **caret**，不锁小版本。
