@@ -28,18 +28,20 @@ export function WorldPage() {
   const openEntity = (id?: string) => openPanel(id ? { kind: 'world-entity', id } : undefined)
 
   const world = findWorld(worldId)
-  usePageTitle(world ? world.name : t('world.title'))
+  usePageTitle(world ? t(world.nameKey) : t('world.title'))
   const entity = findEntity(world, selectedEntityId)
   const needle = query.trim().toLowerCase()
-  const visible = WORLDS.filter((w) => w.name.toLowerCase().includes(needle))
-  // 应用级导航项存的是 key；世界名是**数据**（plan/19：数据本身不翻译），直接用
+  /* 夹具的 name / summary 持有语言包 key（见 worlds.ts 与 architecture/08-i18n.md §6），
+     所以过滤也在**当前语言的文字**上做，切语言后结果跟着变。 */
+  const visible = WORLDS.filter((w) => t(w.nameKey).toLowerCase().includes(needle))
+  // 应用级导航项存的是 key；世界名是我们自己的夹具，也走语言包
   const appNav = navWithActive(pathname).map((item) => ({ ...item, label: t(item.label) }))
 
   if (worldId && !world) return <p className="world__missing">{t('world.missing', { id: worldId })}</p>
 
   const worldNav = navWithActive(
     pathname,
-    visible.map((item) => ({ label: item.name, href: `/main/world/${item.id}` })),
+    visible.map((item) => ({ label: t(item.nameKey), href: `/main/world/${item.id}` })),
   )
 
   return (
@@ -64,8 +66,8 @@ export function WorldPage() {
 
       {world ? (
         <section className="world__detail" aria-label={t('world.detailLabel')}>
-          <h2 className="world__title">{world.name}</h2>
-          <p className="world__summary">{world.summary}</p>
+          <h2 className="world__title">{t(world.nameKey)}</h2>
+          <p className="world__summary">{t(world.summaryKey)}</p>
           <ul className="world__entities">
             {world.entities.map((item) => (
               <li key={item.id}>
@@ -75,7 +77,7 @@ export function WorldPage() {
                   aria-pressed={item.id === selectedEntityId}
                   onClick={() => openEntity(item.id)}
                 >
-                  {item.name}
+                  {t(item.nameKey)}
                 </Button>
               </li>
             ))}
