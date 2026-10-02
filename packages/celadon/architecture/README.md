@@ -21,13 +21,13 @@
 
 | # | 分册 | 一句话 |
 | --- | --- | --- |
-| 00 | [principles](00-principles.md) | **八条铁律 + 结构总纲（分层 · 落位 · 依赖 · 命名 · 测试）+ 一个组件一个目录** |
+| 00 | [principles](00-principles.md) | **八条铁律 + 结构总纲（分层 · 落位 · 依赖 · 命名 · 测试 · 公共态）+ 一个组件一个目录** |
 | 01 | [package-and-repo](01-package-and-repo.md) | 包 · 仓库形态 · 版本与发布 · 旧包处置 |
 | 02 | [toolchain](02-toolchain.md) | 构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 |
 | 03 | [boundaries](03-boundaries.md) | 目录结构 · 分层职责 · **同层方向** · 谁能 import 谁 · 边界怎么强制 |
 | 04 | [host-integration](04-host-integration.md) | 宿主挂载 · 保留前缀 · 代理 · SSE / WebSocket |
 | 05 | [data-and-api](05-data-and-api.md) | 传输 · 鉴权 · 后端 SDK · 取数钩子 · 流式 |
-| 06 | [state](06-state.md) | **状态跟 feature 走** · 跨 feature 按性质落位（`platform/` · `store/` · `data/`）· 事实用第二个使用者 · 改 store 留动作名 |
+| 06 | [state](06-state.md) | **私有跟 feature 走 · 公共放 `stores/`**（判据：有没有自然所有者）· 要不要进地址栏是另一个问题 · 改 store 留动作名 |
 | 07 | [routing](07-routing.md) | 地址语法（对象在路径 · 表面在首段 · 面板在具名 query）· 谁说了算 · `routes/` 的结构 · 文档标题 |
 | 08 | [i18n](08-i18n.md) | 语言包结构 · 新增语言 · 类型与格式化归属 |
 | 09 | [theme](09-theme.md) | token 单一来源 · 主题映射 · 运行期对比度 |
