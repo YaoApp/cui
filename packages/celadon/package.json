@@ -48,7 +48,9 @@
     "test:persona": "node scripts/run-persona.mjs",
     "test:all": "node scripts/run-logged.mjs all pnpm run test:all:run",
     "test:all:run": "pnpm check && pnpm test:checkers && pnpm test && pnpm test:browser && pnpm build && pnpm test:persona",
-    "prepack": "vite build"
+    "prepack": "vite build",
+    "docs:stamp": "node scripts/stamp-docs.mjs",
+    "docs:stamp:check": "node scripts/stamp-docs.mjs --check"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
