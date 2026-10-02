@@ -115,6 +115,25 @@ say(`S1 navIcons  : ${JSON.stringify(navIcons)}`)
 if (navIcons.length < 2) problems.push('S1: 导航项少于两个（取不到导航）')
 if (navIcons.some((x) => !x.symbol)) problems.push('S1: 有导航项没有图标，或符号指不到')
 
+// 图标要与文字同一条中线，而且是描边不是实心块（实心块在深色下会是黑的）
+const iconFit = await p.evaluate(() => {
+  const cy = (el) => { const b = el?.getBoundingClientRect(); return b ? (b.top + b.bottom) / 2 : null }
+  const btn = document.querySelector('header.header > button')
+  const svg = btn?.querySelector('svg.icon')
+  const link = document.querySelector('nav.nav a.nav__link')
+  return {
+    btnIcon: cy(svg), btnSpan: cy(btn?.querySelector('span')),
+    navIcon: cy(link?.querySelector('svg.icon')), navLink: cy(link),
+    fill: svg ? getComputedStyle(svg).fill : null,
+    stroke: svg ? getComputedStyle(svg).stroke : null,
+  }
+})
+say(`S1 iconFit   : ${JSON.stringify(iconFit)}`)
+if (Math.abs((iconFit.btnIcon ?? 0) - (iconFit.btnSpan ?? 99)) > 0.5) problems.push('S1: 按钮图标与文字没有居中对齐')
+if (Math.abs((iconFit.navIcon ?? 0) - (iconFit.navLink ?? 99)) > 0.5) problems.push('S1: 导航图标与文字没有居中对齐')
+if (iconFit.fill !== 'none') problems.push('S1: 图标是实心填充（深色下会变黑块）')
+if (!iconFit.stroke || iconFit.stroke === 'none') problems.push('S1: 图标没有描边颜色（不随文字/主题）')
+
 // S2 快速连点 12 下
 const before = await box(button)
 for (let i = 0; i < 12; i++) await button.click({ delay: 0 })

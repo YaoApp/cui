@@ -2,7 +2,8 @@
 .icon {
   display: inline-block;
   flex: none;
-  vertical-align: -0.125em;
+  /* 与文字基线对齐：`middle` 比 `-0.125em` 更贴中（实测差 1.7px → 0）*/
+  vertical-align: middle;
   fill: none;
   stroke: currentColor;
 }
