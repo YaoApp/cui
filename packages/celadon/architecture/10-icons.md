@@ -1,13 +1,13 @@
 # 10 · 图标（工程落点）
 
-- **版本**：v1.14
-- **最后修改**：2026-10-02 18:16:27
+- **版本**：v1.15
+- **最后修改**：2026-10-02 18:38:36
 - **说明**：图标工程落点（规格见 design）
 
 ## 规则
 
-- **源是 lucide**（ISC · 24 网格 · 描边 2 · 本包收录 **67 个**）；不自绘，仅 5 类例外（见 `../design/icons.md`）。
-- **产物**：`../design/icons/lucide-sprite.svg` · `own-sprite.svg` · `brand-sprite-{1..11}.svg` · `manifest.json`。
+- **源是 lucide**（ISC · 24 网格 · 描边 2 · 本包收录 **67 个**）；不自绘，仅 5 类例外（见 `design/icons.md`）。
+- **产物**：`design/icons/lucide-sprite.svg` · `own-sprite.svg` · `brand-sprite-{1..11}.svg` · `manifest.json`。
 - 应用侧用 **`<use>` 引用雪碧图**；命名 **`i-<域>-<名>`**，与 lucide 名一一对应。
 - **尺寸档 14 / 16 / 20 / 24**（产品默认 **16**）；小档按比例变细。
 - **不引图标库依赖**（不装 `lucide-react`）。
