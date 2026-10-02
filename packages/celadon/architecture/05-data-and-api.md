@@ -1,7 +1,7 @@
 # 05 · 数据与接口
 
-- **版本**：v1.13
-- **最后修改**：2026-10-02 14:51:57
+- **版本**：v1.14
+- **最后修改**：2026-10-02 18:40:54
 - **说明**：传输 · 鉴权 · 后端 SDK · 取数钩子 · 流式
 
 ## 规则
@@ -17,8 +17,3 @@
 
 - 不许在组件里写 `fetch` / `EventSource` / `new WebSocket`。
 - 不许引 axios / SWR / TanStack Query 等数据层库。
-
-## 待讨论
-
-- `openapi/` 的目录名与出口形态（`openapi/<domain>.ts`？一个 `api/` 门面？）。
-- 取数钩子的签名（`useRequest(fetcher, deps, options)`），以及它与 `zustand` 的分工。
