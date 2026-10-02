@@ -1,7 +1,7 @@
 # 14 · 测试（工程落点）
 
-- **版本**：v1.27
-- **最后修改**：2026-10-02 14:14:26
+- **版本**：v1.28
+- **最后修改**：2026-10-02 14:42:53
 - **说明**：测试分层（规则见 plan/20）
 
 ## 栈与位置
@@ -20,8 +20,9 @@
 - `vitest.config.ts`：`jsdom` · `include: ['app/src/**/*.test.{ts,tsx}']` · setup 用 `test-support/setup.ts` · 覆盖率排除用例与样式。
 - `playwright.config.ts`：`testMatch: '**/tests/**/*.browser.ts'` · `channel: 'chrome'`（不下载浏览器）· `reuseExistingServer` 复用已在跑的 dev。
 - **`vitest` 与 `playwright` 的默认匹配范围会重叠**，配置必须显式收窄，否则互相误抓（拟人是我们自己的脚本，不在其中）。
-- `test-support/stores.ts`：按 `*.store.ts` 自动发现所有 store、登记初始状态并逐用例复位 ——
-  **组件 / feature / 平台层都覆盖**，`setup.ts` 不写清单（`stores.test.ts` 断言它跨层）。
+- `test-support/stores.ts`：**按文件名自动发现** store、登记初始状态并**逐用例复位** ——
+  两种命名都认：私有的 `*.store.ts`（组件 / feature / 平台层）与公共的 `stores/*.ts`（无后缀）。
+  `setup.ts` 不写清单（`stores.test.ts` 断言它跨层）。**改发现规则只改这里。**
 - 命令：`pnpm test` · `pnpm test:browser` · `pnpm test:checkers` · `pnpm test:persona` · `pnpm test:all`。
 - **CI**：门禁 + 单元 + 构建进 `celadon-test-build.yml`；浏览器测试单独 `celadon-browser-test.yml`
   （用 runner 自带的 Google Chrome，不必 `playwright install`；失败上传轨迹与截图）。runner 与 action 版本见 `13-quality-gates.md`。
