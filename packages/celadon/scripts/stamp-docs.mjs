@@ -3,7 +3,7 @@
 
    · 版本    = v1.<该文档的提交次数>（改了多少次，客观、单调）
    · 最后修改 = 盖戳时刻（精确到秒）—— 不用 git 时间，否则永远慢一个提交
-   · 说明    = 取自 architecture/README.md 的索引行（**不在这里再抄一份**，避免第二处真相）
+   · 说明    = 取自 architecture/README.md 的索引行（**不写状态**：那是内部讨论用的，定稿文档不需要）（**不在这里再抄一份**，避免第二处真相）
 
    改完文档跑 `pnpm docs:stamp`；只想核对就跑 `pnpm docs:stamp --check`。 */
 import { execFileSync } from 'node:child_process'
@@ -34,9 +34,9 @@ for (const name of readdirSync(ARCH).filter((n) => /^\d\d-.*\.md$/.test(n)).sort
   const now = new Date()
   const pad = (n) => String(n).padStart(2, '0')
   const modified = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
-  const meta = `- **状态**：✅ 已定\n- **版本**：v1.${commits}\n- **最后修改**：${modified}\n- **说明**：${description(name)}\n`
+  const meta = `- **版本**：v1.${commits}\n- **最后修改**：${modified}\n- **说明**：${description(name)}\n`
 
-  const start = text.indexOf('- **状态**')
+  const start = text.indexOf('- **版本**')
   if (start < 0) { console.error(`  ✗ ${name}: 没有 meta 块`); process.exitCode = 1; continue }
   const end = text.slice(start).search(/\n(?!- \*\*)/) + start + 1
   const next = text.slice(0, start) + meta + text.slice(end > start ? end : start)
