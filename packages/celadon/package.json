@@ -46,7 +46,8 @@
     "test:checkers": "node scripts/run-logged.mjs checkers node scripts/tests/run.mjs",
     "test:browser": "node scripts/run-logged.mjs browser playwright test",
     "test:persona": "node scripts/run-persona.mjs",
-    "test:all": "pnpm check && pnpm test:checkers && pnpm test && pnpm test:browser && pnpm build && pnpm test:persona",
+    "test:all": "node scripts/run-logged.mjs all pnpm run test:all:run",
+    "test:all:run": "pnpm check && pnpm test:checkers && pnpm test && pnpm test:browser && pnpm build && pnpm test:persona",
     "prepack": "vite build"
   },
   "devDependencies": {

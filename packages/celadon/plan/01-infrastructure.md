@@ -28,7 +28,7 @@
 | 13 | **长列表与表格** | **`virtua`** —— 长列表用 `VList`/`Virtualizer`（容器与行渲染归我们；索引 ↔ 偏移双向可查；尺寸缓存可存可恢复）；**表格类用 `VGrid`**（二维 · 固定表头/列）|
 | 14 | **状态管理** | **`zustand`**（不用 mobx；自研的 `storex` 不复活）|
 | 15 | **动效** | **CSS 与浏览器原生为默认**（时长/缓动走 Celadon token）；**`motion`** 只在它更强处用（手势 · 编排 · 布局动画）|
-| 16 | **测试** | **测试单独成册（`12`）**；本模块定依赖与位置：`vitest` + 测试库 + `jsdom` + `@playwright/test`；**用例一律放所在单元的 `tests/` 目录内**（强约束，由 `check-app-layout` 强制） |
+| 16 | **测试** | **测试单独成册（`architecture/12-motion.md`）**；本模块定依赖与位置：`vitest` + 测试库 + `jsdom` + `@playwright/test`；**用例一律放所在单元的 `tests/` 目录内**（强约束，由 `check-app-layout` 强制） |
 
 **三个名字各司其职，不冲突**：包名 `@yaoapp/cui` ｜ 设计体系 **Celadon** ｜ 目录 `packages/celadon/`
 
@@ -99,7 +99,7 @@
 - **产物**：`icons/lucide-sprite.svg` · `icons/own-sprite.svg` · `icons/brand-sprite-{1..11}.svg` · `icons/manifest.json`
 - **用法**：应用侧用 `<use>` 引用雪碧图；命名 **`i-<域>-<名>`**，与 lucide 名一一对应
 - **尺寸档**：`14 / 16 / 20 / 24`（产品默认 **16**）；小档按比例变细
-- **不引图标库依赖**；品牌官方色是**全站唯一允许不用 token 的颜色**；规格与署名见 `00` 的 F7 与 `THIRD-PARTY-NOTICES.md`
+- **不引图标库依赖**；品牌官方色是**全站唯一允许不用 token 的颜色**；规格与署名见 `architecture/00-principles.md` 的 F7 与 `THIRD-PARTY-NOTICES.md`
 
 **日期 · 列表 · 动效**
 
@@ -124,10 +124,10 @@
 | **CI 输出** | 两份 workflow 的名字与步骤全英文；结束时把 `app/logs/*/*.log` 写进运行摘要（`$GITHUB_STEP_SUMMARY`，折叠块），红绿都能直接读到 |
 | **产物可独立运行** | `dist/` 用 Python 静态服务器（`python3 -m http.server`）直接跑通：根路径下 4 个文件全 200 · 页面渲染与交互正常 · 零 4xx 零控制台错误 |
 | **产物前缀可配** | `base` 取 `CUI_BASE`（默认 `/`）：`CUI_BASE=/cui/` 构建后资源变 `/cui/_assets/*`，挂到 `/cui/` 下同样跑通（根路径下则 404，佐证前缀生效）|
-| **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**9 / 9**：`button` 4 · `header` 2 · `hello-store` 2 · `hello-page` 1 · 覆盖率 **100%**（不设阈值）|
-| **浏览器测试** | `pnpm test:browser`（`@playwright/test`，走本机 Chrome）**2 / 2**：主路径 + 全键盘（含焦点环可见）|
-| **测试范围收窄** | `vitest` 只认 `*.test.*` · `playwright` 只认 `*.spec.ts` —— 两者默认范围重叠，不收窄会互相误抓（实测：4 个单测文件给 vitest，1 个 spec 给 playwright）|
-| **测试位置强约束** | `check-app-layout` 用真文件验过：5 个用例全在 `tests/` 内；两个违规样本仍按预期失败 |
+| **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**19 / 19**：`button` 4 · `header` 2 · `hello.store` 2 + 1（复位守卫）· `theme.store` 3 · `theme-toggle` 3 · `hello` 2 · `stores` 2（发现跨层）（不设阈值）|
+| **浏览器测试** | `pnpm test:browser`（`@playwright/test`，走本机 Chrome）**6 / 6**：主路径 · 全键盘（含焦点环可见）· 主题跟随 · 分段控件切主题 + 刷新后记住 · 内容面铺满视口 |
+| **测试范围收窄** | `vitest` 只认 `*.test.*` · `playwright` 只认 `*.browser.ts` —— 三个 runner 的默认范围会重叠，不收窄会互相误抓（实测：6 个单测文件给 vitest，6 条 `*.browser.ts` 给 playwright，1 个 `*.agent.mjs` 给拟人）|
+| **测试位置强约束** | `check-app-layout` 两条方向相反的规则：单测挨着源文件、浏览器与拟人住 `tests/`（44 个样本，含两个新后缀的反例）|
 | **测试命令** | `pnpm check` · `pnpm test` · `pnpm test:browser` · `pnpm test:checkers` · `pnpm test:all`；四层各写一份日志到 **`app/logs/<本地日期>/<名>-<HHMM>.log`**（git 忽略；目录取系统日期、文件名精确到分钟，保留 14 天）|
 | **隔离 · 装到本地** | `node_modules` 154M（含 React · vitest · Playwright · less）· 自己的 `pnpm-lock.yaml` · Vite 8.3.1 在本地 |
 | **隔离 · 外层没被碰** | 外层锁文件无改动 · 外层工作区成员仍 7 个 · 外层 git 状态干净 |
@@ -146,7 +146,7 @@
 | **取数钩子** | 自建 `useRequest` 级小钩子（加载 / 错误 / 取消 / 重试各一处实现），避免散落的 `useEffect` + `fetch` |
 | **测试落地** | 按 `20 测试` 接入（框架已就绪，见 §2）；剩余：搬入模块补测试 · 拟人剧本与判定数据 |
 | **i18n 构建** | §5 子项 3 —— **运行时已定（i18next，见 §1.2 的 i18n 规则）**；剩下：命名空间切分 · 按需加载 · 类型生成 · 翻译流程文档 |
-| **图标落地** | §5 子项 4 —— **选型与规格已定（`00` F7：lucide 为源 · 收录 67 · 命名 `i-<域>-<名>` · 档位 14/16/20/24 · 产物为雪碧图）**；剩下：应用侧图标组件与按需引入 |
+| **图标落地** | §5 子项 4 —— **选型与规格已定（`architecture/00-principles.md` F7：lucide 为源 · 收录 67 · 命名 `i-<域>-<名>` · 档位 14/16/20/24 · 产物为雪碧图）**；剩下：应用侧图标组件与按需引入 |
 | **主题映射** | §5 子项 5：同一份 `tokens.less` 生成组件库主题 |
 | **运行时壳 · 运行期对比度** | §5 子项 7 · 8 |
 | **架构规范** | 新建 **`../architecture/`**（与 `design/` 平级）：**一份总指引 + 每个部分一个文件**（包与仓库 · 工具链 · 目录与边界 · 宿主集成 · 数据 · 状态 · 路由 · i18n · 主题 · 图标 · 格式化与长列表 · 动效 · 门禁 · 测试）—— 见 §4 子项 9 |
@@ -166,7 +166,7 @@
 | 1 | **构建工具与开发服务器** | **选型已定：Vite 8** · **框架已定：React 19**（见 4.3）· `BASE` / publicPath · **代理（SSE 流式 + WebSocket upgrade）** · 产物布局（供桌面壳与 CDN 消费）| 一条命令起 dev；`/api` 与 `/v1` 的 SSE 增量不缓冲；WS 能连上；生产构建产物可被桌面壳直接消费 |
 | 2 | **后端 SDK** | 引擎接口的**类型化客户端**：认证 / 会话 / 消息流（SSE）/ WebSocket；按页面需要增量补齐 | 认证、拉会话列表、跑一轮流式对话三条链路全通；错误与超时有统一形状 |
 | 3 | **i18n 构建** | 四语 JSON → 构建产物 · 运行时切换与持久化 · 组件库 locale 对接 · **缺 key / 漏翻检查进 CI** | 四语切换即时生效且刷新后保持；缺 key 与漏翻让 CI 失败（检查脚本已就绪）|
-| 4 | **图标落地** | **选型与规格见 `00` 的 F7**（lucide 为源 · 产物为 `icons/*-sprite.svg`）· 应用侧图标组件 · 按需引入 | 应用渲染与 `design/icons.html` 一致；打包只含用到的图标 |
+| 4 | **图标落地** | **选型与规格见 `architecture/00-principles.md` 的 F7**（lucide 为源 · 产物为 `icons/*-sprite.svg`）· 应用侧图标组件 · 按需引入 | 应用渲染与 `design/icons.html` 一致；打包只含用到的图标 |
 | 5 | **主题映射** | **同一份 `tokens.less`** 生成组件库主题（构建期）· 浅/暗两套 | 改一处 token → 组件库主题与色卡**同步**变化；不引入第二份颜色来源 |
 | 6a | **扫描型门禁（不依赖构建工具，现在就能做）** | 纯 Node 脚本：禁硬编码色 · **禁装饰/填充 token 当文字用** · 关键配对对比度（色卡）· i18n 缺 key/漏翻（**已有**）· README 色值（**已有**）· **物理方向属性**（**已有** `check-css-conventions.mjs`）| 故意写入硬编码色 / 错配对 / 缺 key / 装饰色当文字时，脚本退出码非 0；**检查器自身有样本测试**（`scripts/tests/run.mjs`，**44 个用例**，每条规则一个）|
 | 6b | **构建期门禁（选定构建工具后接线）** | **禁组件外写内联边框**（会露浏览器默认焦点环）—— 需要"组件边界"这个概念，静态扫描认不出，留给构建期按组件目录判定；stylelint 自定义规则（只允许 `var(--token)` · 禁物理方向属性 —— 扫描版已在 `../scripts/check-css-conventions.mjs`，此处升级为构建期拦截）· TS 类型约束（如 `type Color = \`var(--${string})\`` 让裸色值无法通过类型）· **反向依赖边界**（禁 `import '@yaoapp/cui'`）· 接进 CI job / pre-commit | 违规**让构建或 CI 失败**（不只是脚本失败）—— 规范要能拦住人，而不是只写在文档里 |

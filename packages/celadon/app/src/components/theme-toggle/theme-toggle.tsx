@@ -1,4 +1,4 @@
-import type { Theme } from '@/platform/theme/theme-store'
+import type { Theme } from '@/platform/theme/theme.store'
 
 export type ThemeToggleProps = {
   theme: Theme
