@@ -1,22 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { useWorldStore } from '@/features/world/world.store'
+import { useWorldStore } from './world.store'
 
-describe('world store', () => {
-  it('starts empty', () => {
+/* world 的**私有** store：只剩过滤。
+   "侧边面板里开的是谁"搬去公共的 stores/side-panel.ts，测试也跟着搬了。 */
+describe('useWorldStore', () => {
+  it('starts with no filter', () => {
     expect(useWorldStore.getState().query).toBe('')
-    expect(useWorldStore.getState().selectedEntityId).toBeUndefined()
   })
 
-  it('keeps the filter and the panel selection', () => {
+  it('sets the filter', () => {
     useWorldStore.getState().setQuery('alpha')
-    useWorldStore.getState().selectEntity('e2')
     expect(useWorldStore.getState().query).toBe('alpha')
-    expect(useWorldStore.getState().selectedEntityId).toBe('e2')
   })
 
-  it('closes the panel when nothing is selected', () => {
-    useWorldStore.getState().selectEntity('e2')
-    useWorldStore.getState().selectEntity(undefined)
-    expect(useWorldStore.getState().selectedEntityId).toBeUndefined()
+  it('is reset between cases without anyone asking (test-support discovers it)', () => {
+    expect(useWorldStore.getState().query).toBe('')
   })
 })

@@ -1,7 +1,7 @@
 # 03 · 目录与边界
 
-- **版本**：v1.16
-- **最后修改**：2026-10-02 12:49:30
+- **版本**：v1.24
+- **最后修改**：2026-10-02 13:59:54
 - **说明**：目录结构 · 分层职责 · 同层方向 · 谁能 import 谁 · 边界怎么强制
 
 ## 1. 分层职责
@@ -11,6 +11,7 @@
 | 路由 | `app/src/routes/` | 路由表 · 表面（main / side）与其布局 | **不写业务** · 不许被 `features/` import |
 | 组件层 | `app/src/components/` | 纯视觉与行为（`@base-ui/react`）· 受控 props | **不认识业务** · 不发请求 · 不读状态 |
 | 能力层 | `app/src/features/` | 按业务切分（chat / inbox / kanban …）· **页面 + 组件 + 状态 + 测试都在里面** | 不直接 `fetch` · 不碰宿主全局 · **feature 之间不互相 import** |
+| 公共态 | `app/src/stores/` | **跨功能的公共状态**（说不清归哪个功能的事实）· 目录即角色，文件**不加后缀** | 不放私有状态（跟 feature 走）· **不许 import 上层**（features / routes / components 都不行）|
 | 数据层 | `app/src/data/` | `openapi/` 客户端 · 取数钩子 · 流式通道 | 不 import 组件 · 不读状态 |
 | 平台层 | `app/src/platform/` | 宿主全局 · 挂载与**路由机制** · basename 适配 · 主题注入 · 运行时壳 | 不写业务 |
 | 工具 | `app/src/platform/utils/` | 格式化 · 日期 · 工具 · 常量 · 类型 | **不 import 任何上层** |
