@@ -22,8 +22,8 @@
 ## 2. 单元 / 组件测试
 
 - **位置（强约束，两条方向相反）**：
-  - **单元用例与源文件同目录** —— `button.tsx` 旁边就是 `button.test.tsx`；`hello.page.tsx` 旁边就是
-    `hello.page.test.tsx`；**不许进 `tests/`**
+  - **单元用例与源文件同目录** —— `button.tsx` 旁边就是 `button.test.tsx`；`hello.tsx` 旁边就是
+    `hello.test.tsx`；`hello.store.ts` 旁边就是 `hello.store.test.ts`；**不许进 `tests/`**
   - **浏览器用例与拟人剧本脚本进该 feature 的 `tests/`** —— 它们描述的是整体场景，不属于某一个组件或文件
 - **这条由 `check-app-layout` 强制**（两条方向相反的规则，各带正反样本；见 `architecture/13`）。
 - **store 的复位是全自动的** —— 测试支持用 `import.meta.glob('../**/*.store.ts')` 自动发现所有 store，
