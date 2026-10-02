@@ -6,6 +6,7 @@ import { buildShareUrl } from '@/platform/utils/share-url'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
 import { EntityPanel } from './components/entity-panel'
+import { useSidePanelStore } from '@/stores/side-panel'
 import { useWorldUrlSync } from './use-world-url-sync'
 import { findEntity, findWorld, WORLDS } from './worlds'
 import './world.less'
@@ -16,7 +17,10 @@ export function WorldPage() {
   const { worldId } = useParams()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { query, selectedEntityId, setFilter, openEntity } = useWorldUrlSync()
+  const { query, setFilter } = useWorldUrlSync()
+  // 侧边开着谁 —— **公共**状态（说不清归哪个功能），住 stores/
+  const selectedEntityId = useSidePanelStore((s) => s.entityId)
+  const openEntity = useSidePanelStore((s) => s.open)
 
   const world = findWorld(worldId)
   usePageTitle(world ? world.name : 'World')
