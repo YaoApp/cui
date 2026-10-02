@@ -1,19 +1,22 @@
 # 14 · 测试（工程落点）
 
-- **版本**：v1.28
-- **最后修改**：2026-10-02 14:42:53
+- **版本**：v1.29
+- **最后修改**：2026-10-02 14:44:55
 - **说明**：测试分层（规则见 plan/20）
 
-## 栈与位置
+## 分层与分工
 
-- 栈：**`vitest`** + `@testing-library/react` · `user-event` · `jest-dom` · `jsdom` · `@vitest/coverage-v8` + **`@playwright/test`**。
-- **单元用例与源文件同目录**；**浏览器用例与拟人剧本进 `features/<域>/tests/`**。两条都由 `check-app-layout` 强制（各带正反样本）。
-- 后缀即分工：`*.test.ts(x)` · `*.browser.ts` · `<场景>.agent.md` + `<场景>.agent.mjs`；**一个场景一个文件**。
-- 拟人只属于 feature：剧本三段（**剧本恒定 · 修改记录 · 测试记录**）+ 同场景的**采集脚本** `<场景>.agent.mjs`（开浏览器走剧本 · 截图 · 报客观测量）；
-  每轮结果明细看日志、不复制进剧本；
-  截图落 `app/logs/<日期>/shots/<场景>/`，统一走 `scripts/shots.mjs`（见 `02-toolchain.md` 脚本表）。
-- 共享测试支持放 `app/src/test-support/`，**不放组件目录内** —— 组件目录只放该组件自己的用例。
-- **不设覆盖率阈值**（阈值会诱导写无意义断言）。
+| 层 | 工具 | 判定者 | 测什么 | 命令 → 日志 |
+| --- | --- | --- | --- | --- |
+| **规范门禁** | `scripts/check-*.mjs`（**零依赖**）+ lints | 确定性代码 | 设计规范（token · i18n · 样式约定 · 文档结构）· 类型 · 依赖边界 | `pnpm check` → `gates-<HHMM>.log` |
+| **检查器自测** | `scripts/tests/run.mjs` | 确定性代码 | 每条检查规则一个正例 + 一个违规例 | `pnpm test:checkers` → `checkers-<HHMM>.log` |
+| **单元 / 组件** | `vitest` · Testing Library · `jsdom` | 确定性代码 | 纯逻辑 · 状态与数据层 · 组件行为 | `pnpm test` → `unit-<HHMM>.log` |
+| **浏览器** | `@playwright/test` | 确定性代码 | 关键交互主路径 · 中文输入法 · 全键盘 · 视觉回归 | `pnpm test:browser` → `browser-<HHMM>.log` |
+| **拟人** | 剧本 + 真浏览器 + 看图 · `ocr_recognize` · `decision_decide` | **执行者判定，按需转人** | 真实使用路径 · 极端数据 · 环境差异 | `pnpm test:persona` → `<场景>-<HHMM>.log` |
+
+**`pnpm test:all`** 一把跑：门禁 + 检查器自测 + 单元 + 浏览器 + **构建** + 拟人 ——
+**构建放在拟人之前**，因为拟人层测的是**构建产物**（`dist/`），不是 dev 源码；
+整条链另留一份 `all-<HHMM>.log`（断在哪一步只有它说得清）。
 
 ## 配置与命令
 
