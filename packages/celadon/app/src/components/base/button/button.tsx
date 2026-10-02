@@ -1,5 +1,6 @@
 import './button.less'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { Button as BaseButton } from '@base-ui/react/button'
 import { Label } from './parts/label'
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -16,11 +17,13 @@ const VARIANT_CLASS = {
   ghost: 'btn-ghost',
 } as const
 
+/* 行为与无障碍（type=button · disabled · 键盘）交给 Base UI 的 Button —— 它渲染的是原生
+   <button>，只把状态以 data-* 暴露给样式，没有自带主题系统。视觉仍是上面的设计类。 */
 export function Button({ variant = 'soft', size = 'medium', className, children, ...rest }: ButtonProps) {
   const classes = ['button', `button--${size}`, VARIANT_CLASS[variant], className].filter(Boolean).join(' ')
   return (
-    <button type="button" className={classes} {...rest}>
+    <BaseButton className={classes} {...rest}>
       <Label>{children}</Label>
-    </button>
+    </BaseButton>
   )
 }

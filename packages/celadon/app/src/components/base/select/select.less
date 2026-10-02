@@ -1,0 +1,58 @@
+/* trigger 的字段观感全部来自设计类 `.input`（组件的 className 里挂着它）——
+   这里只补"它是个按钮而不是输入框"这件事：按钮的默认外观没有靠设计类清掉的部分。 */
+.select__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  text-align: start;
+  cursor: pointer;
+}
+
+/* Base UI Select.Icon 自带的 ▼：只调大小与颜色，不换字符、不自绘。 */
+.select__indicator {
+  color: var(--text-secondary);
+  font-size: var(--font-size-label);
+}
+
+/* 弹层是 Base UI 通过 portal 渲染的自定义结构，设计系统里没有对应类；
+   下面只按 token 写它，不引入颜色/间距字面量。
+   Base UI 在 positioner 上用内联样式定位，并通过 CSS 变量给出锚点几何。 */
+.select__positioner {
+  z-index: var(--z-overlay);
+}
+
+.select__popup {
+  min-inline-size: var(--anchor-width, auto);
+  max-block-size: var(--available-height, var(--spacing-48));
+  overflow: auto;
+  padding: var(--spacing-4);
+  background: var(--background-surface);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-floating);
+  outline: none;
+}
+
+.select__item {
+  padding: var(--spacing-4) var(--spacing-8);
+  border-radius: var(--radius-small);
+  color: var(--text-primary);
+  font-size: var(--font-size-caption);
+  cursor: pointer;
+  user-select: none;
+
+  &[data-highlighted] {
+    background: var(--background-hover);
+  }
+
+  &[data-selected] {
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+  }
+
+  &[data-disabled] {
+    color: var(--text-disabled);
+    cursor: not-allowed;
+  }
+}

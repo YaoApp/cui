@@ -5,28 +5,34 @@ import { Header } from '@/components/header'
 import { LocaleSwitch } from '@/components/locale-switch'
 
 /* 语言切换是一个下拉（四种语言塞不进分段控件）。断言用户看到什么 ——
-   语言名都是可见选项，默认"跟随系统"并显示解析出的语言，选中后页面文案跟着换。 */
+   语言名都是可见选项，默认"跟随系统"并显示解析出的语言，选中后页面文案跟着换。
+   它现在是基础件 Select（Base UI 的 listbox），选项在展开后才渲染，所以先点开再选。 */
 describe('LocaleSwitch', () => {
-  it('offers following the system plus every discovered language', () => {
+  it('offers following the system plus every discovered language', async () => {
+    const user = userEvent.setup()
     render(<LocaleSwitch />)
     expect(screen.getByRole('combobox', { name: '语言' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: '跟随系统（中文）' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('combobox', { name: '语言' }))
+
+    expect(await screen.findByRole('option', { name: '跟随系统（中文）' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: '中文' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: '繁體中文' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'English' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: '日本語' })).toBeInTheDocument()
   })
 
-  it('marks following the system as the selected option by default', () => {
+  it('shows following the system, with the resolved language, as the default choice', () => {
     render(<LocaleSwitch />)
-    expect(screen.getByRole('combobox', { name: '语言' })).toHaveValue('system')
+    expect(screen.getByRole('combobox', { name: '语言' })).toHaveTextContent('跟随系统（中文）')
   })
 
   it.each([
-    ['zh-TW', '重新整理'],
-    ['en-US', 'Refresh'],
-    ['ja', '更新'],
-  ])('switches the visible copy to %s', async (locale, refresh) => {
+    ['Traditional Chinese', '繁體中文', '重新整理'],
+    ['English', 'English', 'Refresh'],
+    ['Japanese', '日本語', '更新'],
+  ])('switches the visible copy to %s', async (_label, option, refresh) => {
+    const user = userEvent.setup()
     render(
       <>
         <LocaleSwitch />
@@ -34,12 +40,14 @@ describe('LocaleSwitch', () => {
       </>,
     )
 
-    await userEvent.selectOptions(screen.getByRole('combobox'), locale)
+    await user.click(screen.getByRole('combobox', { name: '语言' }))
+    await user.click(await screen.findByRole('option', { name: option }))
 
     expect(screen.getByRole('button', { name: refresh })).toBeInTheDocument()
   })
 
   it('leaves the previous language behind when switching away', async () => {
+    const user = userEvent.setup()
     render(
       <>
         <LocaleSwitch />
@@ -48,7 +56,8 @@ describe('LocaleSwitch', () => {
     )
     expect(screen.getByRole('button', { name: '刷新' })).toBeInTheDocument()
 
-    await userEvent.selectOptions(screen.getByRole('combobox'), 'ja')
+    await user.click(screen.getByRole('combobox', { name: '语言' }))
+    await user.click(await screen.findByRole('option', { name: '日本語' }))
 
     expect(screen.getByRole('button', { name: '更新' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '刷新' })).not.toBeInTheDocument()
