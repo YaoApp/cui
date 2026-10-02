@@ -60,7 +60,7 @@
 | 05 | [data-and-api](05-data-and-api.md) | 传输 · 鉴权 · 后端 SDK · 取数钩子 · 流式 |
 | 06 | [state](06-state.md) | **私有跟 feature 走 · 公共放 `stores/`**（判据：有没有自然所有者）· 先问归属再问地址栏 · 什么不进 store · 改 store 留动作名 |
 | 07 | [routing](07-routing.md) | 地址语法（对象在路径 · 表面在首段 · 面板在具名 query）· 谁说了算 · `routes/` 的结构 · 文档标题 |
-| 08 | [i18n](08-i18n.md) | 语言包跟 feature 走 · locale 规范形式 · 命名空间由位置决定 · 加载 · 后端边界 · 基准语言与翻译流程 |
+| 08 | [i18n](08-i18n.md) | 语言包跟代码走（feature · 组件 · 共用） · locale 规范形式 · 命名空间由位置决定 · 加载 · 后端边界 · 基准语言与翻译流程 |
 | 09 | [theme](09-theme.md) | token 单一来源 · 主题映射 · 运行期对比度 |
 | 10 | [icons](10-icons.md) | 图标工程落点（规格见 design） |
 | 11 | [formatting-and-lists](11-formatting-and-lists.md) | 日期/数字/时区 · 长列表与表格 |

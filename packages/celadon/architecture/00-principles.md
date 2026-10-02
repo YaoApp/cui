@@ -1,13 +1,14 @@
 # 00 · 铁律与结构总纲
 
-- **版本**：v1.43
-- **最后修改**：2026-10-02 16:59:05
+- **版本**：v1.44
+- **最后修改**：2026-10-02 17:00:32
 - **说明**：八条铁律 + 结构总纲（分层 · 落位 · 依赖 · 命名 · 测试 · 公共态）+ 一个组件一个目录
 
 ## 1. 八条铁律
 
 1. **单一来源** —— 颜色/间距只在 `../design/tokens.less` · 接口类型只在 `openapi/` ·
-   **文案只在语言包**（feature 私域 `features/<域>/locales/` + 公共 `src/locales/`，见 `08-i18n.md`）。不许第二份。
+   **文案只在语言包**（谁的词跟谁走：feature 私域 `features/<域>/locales/` · 组件私域 `components/<名>/locales/` ·
+   共用词 `src/locales/`，见 `08-i18n.md`）。不许第二份。
 2. **零反向依赖** —— 不 `import '@yaoapp/cui'`（旧包）。旧包不升级 · 不复活 · 不删。
 3. **依赖单向** —— 只能上层依赖下层（§2）；下层不引上层，同层不互相 import 业务件。
 4. **宿主是边界** —— `window.$app` / `window.$global` 只在平台层碰一次，之后以类型化接口向上暴露。
@@ -27,7 +28,7 @@
 ```
   路由    app/src/routes/      路由表 · 表面布局（**只装配，不写业务**）
     ↑
-  组件层  app/src/components/   纯视觉 + 行为 · 不认识业务 · 不发请求
+  组件层  app/src/components/   纯视觉 + 行为 · 不认识业务 · 不发请求 · **独有词随本目录走**
     ↑
   能力层  app/src/features/     按业务切分 · 页面 + 组件 + 状态 + 测试 + 语言包都在里面 · 自洽
     ↑
@@ -166,7 +167,7 @@ app/src/platform/
 | --- | --- |
 | **主文件**（组件 · 能力层） | 不带角色后缀：`<名>.tsx` / `<域>.tsx`；样式 `<名>.less` / `<域>.less`；单测 `<名>.test.tsx` / `<域>.test.tsx` |
 | **辅文件**（任何一层） | 点分角色：`<>.store.ts`（组件也可以有自己的私有 store）· `*.browser.ts` · `*.agent.md` · `*.agent.mjs` |
-| **语言包** | `<locale>.json`（**BCP-47 规范形式**：`zh-CN.json`）；feature 私有在 `features/<域>/locales/`，公共在 `src/locales/` |
+| **语言包** | `<locale>.json`（**BCP-47 规范形式**：`zh-CN.json`）；谁的词跟谁走：`features/<域>/locales/` · `components/<名>/locales/`；共用词在 `src/locales/` |
 
 ## 3. 测试
 
