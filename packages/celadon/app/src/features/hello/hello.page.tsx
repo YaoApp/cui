@@ -1,9 +1,9 @@
-import './hello-page.less'
+import './hello.page.less'
 import { Header } from '@/components/header'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { useThemeStore } from '@/platform/theme/theme-store'
+import { useThemeStore } from '@/platform/theme/theme.store'
 import { FooBar } from './components/foo-bar'
-import { useHelloStore } from './hello-store'
+import { useHelloStore } from './hello.store'
 
 export function HelloPage() {
   const count = useHelloStore((state) => state.count)

@@ -50,6 +50,7 @@ CI 与测试的输出面向**所有贡献者**（含海外），因此脚本的 
 | `checkers-1355.log` | `pnpm test:checkers` |
 | `unit-1355.log` | `pnpm test` |
 | `browser-1355.log` | `pnpm test:browser` |
+| `all-1355.log` | `pnpm test:all`（**整条链** —— 链里每一步都有自己的日志，但"断在哪一步"只有链的日志说得清）|
 | `<场景>-1355.log` | `pnpm test:persona`（**一个场景一份**，如 `structure-trial-1355.log`；证据截图落在同名的 `structure-trial-1355/`）|
 
 > `pnpm check` 是带日志的外壳，真正的检查链在 `pnpm check:run` —— 这样它能和其它三层一样留痕。

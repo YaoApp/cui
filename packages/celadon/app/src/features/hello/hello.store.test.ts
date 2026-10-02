@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { useHelloStore } from '@/features/hello/hello-store'
+import { useHelloStore } from '@/features/hello/hello.store'
 
 describe('hello store', () => {
   it('starts at zero', () => {
