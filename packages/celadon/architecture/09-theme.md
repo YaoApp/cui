@@ -23,7 +23,7 @@
 
 > 这条是拟人测试抓出来的：app 自己的横带跟随了深色，而 `body` 没有背景、`.hello` 的 `min-block-size:100%`
 > 又没有父高度可解，于是深色页面下方留了一大块纯白（决策模型判 `fail`/`blocker`）。回归用例见
-> `features/hello/tests/hello.spec.ts` 的 "the page itself follows the theme"。
+> `features/hello/tests/theme.browser.ts` 的 "the page itself follows the theme"。
 
 ## 主题状态与切换
 
