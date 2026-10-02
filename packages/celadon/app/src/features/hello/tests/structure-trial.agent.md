@@ -70,6 +70,8 @@
 
 | 时间 | 改了什么 | 为什么 |
 | --- | --- | --- |
+| 2026-10-02 19:47 | S1 再补一条测量：**导航项各有图标**（每项一个 `<use>`，符号指得到）| 导航图标是本轮新增的可见行为；用户指出导航上应当有图标且必须被测试覆盖 |
+| 2026-10-02 19:44 | S1 补一条**机器测量**：刷新按钮的图标确实渲染（`<use>` 指得到符号 · 尺寸 14）| 图标改为经平台层产物 + 基础件 `Icon` 提供后，这是新的可见行为 |
 | 2026-10-02 18:52 | 新增 **S7**：深色系统上首次打开，首屏即暗（不等 JS）| 主题改为跟随系统后，"系统是深的"成了新的用户可见行为，此前无人覆盖 |
 | 2026-10-01 14:33 | 初版写定（S1–S6 + 判定数据）| 该页第一轮拟人测试 |
 | 2026-10-01 14:46 | 文件由 `persona.md` 改名 `structure-trial.agent.md`，采集脚本同步改名 | 按场景命名与后缀规范 |
@@ -93,5 +95,13 @@
 | 复跑 | 2026-10-02 12:20 | **通过** —— World 页改走设计系统之后（S1 多了导航项，四样东西仍在；S3 改为 Tab 走到刷新） | `structure-trial-1220.log` · 截图 `shots/structure-trial/` |
 | 5 | 2026-10-01 15:23 | **通过** —— S4 的控件改为设计里的分段控件（浅色 / 暗色）后六步全过；选中项与整页主题一致 | 当轮 `structure-trial-*.log` · 截图 `shots/structure-trial/` |
 | 6 | 2026-10-02 18:51 | **通过** —— S1–S7 全过。S7：深色系统首开，**主包仍在路上时 `data-theme` 已是 `dark`**（无浅色闪现）；整页深得一致、文字可读、铺满视口（看图判定）| `structure-trial-1851.log` · 截图 `shots/structure-trial/`（含 `s7-system-dark.png`）|
+| 7 | 2026-10-02 19:39 | **通过** —— S1–S7 全过。S1 新增图标测量：`{"href":"#i-act-refresh","symbol":true,"w":14,"h":14}`；看图：图标与文字同行对齐、随文字取色（`currentColor`）、不抢戏 | `structure-trial-1939.log` · 截图 `shots/structure-trial/`（`s1-open.png`）|
+| 8 | 2026-10-02 19:49 | **通过** —— S1–S7 全过。导航项图标：`[{"text":"你好","href":"#i-spark"},{"text":"世界","href":"#i-ws"}]`，符号都指得到；看图：图标与文字基线对齐、间隙 4px（`--spacing-4`），与刷新按钮一致 | `structure-trial-1949.log` · 截图 `shots/structure-trial/`（`s1-open.png`）|
+| 9 | 2026-10-02 19:51 | **通过** —— S1–S7 全过。修掉真缺陷：`base/icon/icon.less` **没被 import**（样式一条没生效 → 符号回落实心黑块、看起来"不响应深浅"、按钮里图标高 3.2px）。修后 `iconFit`：中心差 **0.008px** · `fill: none` · 描边随主题换色 | `structure-trial-1951.log` · 截图 `shots/structure-trial/` |
+| 10 | 2026-10-02 20:09 | **通过** —— S1–S7 全过。修掉两个真缺陷：① 图标描边没设 → SVG 初始值 1，比设计页细一圈（现按档位 1.167 / 1.333 / 1.667）② **底座包了 `<div>`+`hidden`** → 品牌标识的身体（`url(#渐变)`）不画，只剩眼睛（现直接插 `body`，与设计页同构）。`S1 sprite: {"direct":true,"display":"block"}` | `structure-trial-2009.log` · 截图 `shots/structure-trial/` |
+| 11 | 2026-10-02 20:17 | **通过** —— S1–S7 全过。修掉双重缩放：`Icon`/`BrandMark` 补上 `viewBox="0 0 24 24"`，描边改回**固定 2**（与设计页 `icon()` 逐字一致）。此前漏 viewBox 又手工设 1.333 → 实际 0.889，比设计页细 1/3（用户："粗细不跟字体走"）| `structure-trial-2017.log` · 截图 `shots/structure-trial/` |
+| 12 | 2026-10-02 20:20 | **通过** —— S1–S7 全过。演示改为**两行**：品牌标识一行（manifest 全部 4 个：`brand-yao-agents` / `-mono` / `brand-yao` / `-mono`）· 界面图标一行（26 个，覆盖导航/动作/状态/文件/对象）。画面判定：品牌 4 个都完整渲染（含太极与 mono 版），图标描边与设计页一致 | `structure-trial-2019.log` · 截图 `shots/structure-trial/` · 演示全景 `shots/demo-light.png` |
+| 13 | 2026-10-02 20:23 | **通过** —— S1–S7 全过。演示加第三行**其他品牌**（12 个第三方标识：Claude / OpenAI / Gemini / Grok / DeepSeek / Qwen / Kimi / Doubao / Mistral / Midjourney / Perplexity / Cursor），由 `build-icons.mjs` 从设计分片选一批生成进应用雪碧图（不引外部文件）。画面判定：官方色全对、符号全部指得到（missing 0）| `structure-trial-2022.log` · 截图 `shots/structure-trial/` · 全景 `shots/demo-light.png` |
+| 14 | 2026-10-02 20:26 | **通过** —— S1–S7 全过。演示改**网格**（等宽 184px 卡片，图标落在规则点阵）：修掉两处观感缺陷——① `word-break: break-all` 把名字按字符切断（`brand-yao-agent` + `s`）→ 改 `nowrap` + 格子加宽 ② 浅色品牌（`brand-kimi`）在裸页面底上看不见 → 照设计页 `.cell` 加面底与描边。单元格样式与设计页逐字一致（圆角 `--radius-small` 6px · padding `12px 4px 8px`）| `structure-trial-2022.log` · 截图 `shots/structure-trial/` · 全景 `shots/demo-light.png` |
 | | | 过程 ③：发现拟人层可能测到**过期 dist**（`test:all` 没在拟人前构建）→ 采集脚本加产物新鲜度守卫，`test:all` 加 build | 同上 |
 | 3 | 2026-10-01 14:59 | **通过** —— 六步全过；截图改由 `scripts/shots.mjs` 产出（7 张页面 + 1 张系统整屏）| `app/logs/2026-10-01/structure-trial-1459.log` · 截图在 `app/logs/2026-10-01/shots/structure-trial/` |

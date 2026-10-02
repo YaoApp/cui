@@ -22,12 +22,57 @@ const readSymbols = (file) => {
 };
 const symbolsById = { ...readSymbols('icons/lucide-sprite.svg'), ...readSymbols('icons/own-sprite.svg') };
 
+/* **第三方品牌**（"别人家的"）——设计里它们分片放在 icons/brand-sprite-N.svg，靠外部 `<use>` 引用。
+   应用不引外部文件（跨文件 `<use>` 有 Safari 与 CSP 的坑），所以这里挑一批直接并进应用雪碧图。
+   只挑一批：全部 339 个约 1.1 MB，装进演示包没有意义。 */
+const THIRD_PARTY = [
+  'brand-claude', 'brand-openai', 'brand-gemini', 'brand-grok', 'brand-deepseek', 'brand-qwen',
+  'brand-kimi', 'brand-doubao', 'brand-mistral', 'brand-midjourney', 'brand-perplexity', 'brand-cursor',
+];
+const brandIndex = JSON.parse(readFileSync('icons/brand-index.json', 'utf8'));
+const shardCache = new Map();
+const thirdParty = THIRD_PARTY.map((id) => {
+  const entry = brandIndex.find((e) => e.id === id);
+  if (!entry) throw new Error(`✗ third-party brand not in the index: ${id}`);
+  const file = `icons/brand-sprite-${entry.shard}.svg`;
+  if (!shardCache.has(file)) shardCache.set(file, readSymbols(file));
+  const sym = shardCache.get(file)[id];
+  if (!sym) throw new Error(`✗ ${id} missing from ${file}`);
+  return sym;
+});
+const thirdPartyIds = [...THIRD_PARTY];
+
 const missing = manifest.filter(m => !symbolsById[m.id]).map(m => m.id);
 if (missing.length) { console.error(`✗ missing from the sprite: ${missing.join(', ')}`); process.exit(1); }
 console.log(`  sprite holds ${Object.keys(symbolsById).length} symbol(s) · manifest ${manifest.length} entr(y|ies) · own ${manifest.filter((m) => m.lib === 'own').length}`);
 
-const symbols = manifest.map(m => symbolsById[m.id]);
-const block = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n${symbols.join('\n')}\n</defs></svg>`;
+const symbols = manifest.map(m => symbolsById[m.id]).concat(thirdParty);
+
+/* 渐变 / 遮罩 / 裁切这些**绘制资源**必须活在文档级 `<defs>` 里 —— `<use>` 引用 symbol 时内容进
+   shadow tree，而 `url(#…)` 按**文档**解析，留在 symbol 内部就找不到（品牌标识的身体会整个不渲染）。
+   源里它们写在 symbol 内，所以这里把它们抽出来提升到外面。 */
+const DRAWABLE = /<(linearGradient|radialGradient|mask|clipPath|filter)\b[\s\S]*?<\/\1>/g;
+const hoisted = [];
+const stripped = symbols.map((sym) =>
+  sym.replace(DRAWABLE, (m) => {
+    hoisted.push(m);
+    return '';
+  }),
+);
+const block = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n${hoisted.join('\n')}\n</defs>\n${stripped.join('\n')}\n</svg>`;
+
+/* 应用侧产物（方案 A：整块内联）。设计目录里的雪碧图是**源**，这里是**产物**——
+   `check-generated.mjs` 会重新生成并比对，改图不跑脚本就红（与 tokens.css 同一套）。 */
+const APP_ICONS = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'app', 'src', 'platform', 'icons')
+const SPRITE_HEADER = `<!-- generated — do not edit by hand; source: design/icons/ (node scripts/build-icons.mjs) -->`
+writeFileSync(resolve(APP_ICONS, 'sprite.svg'), `${SPRITE_HEADER}\n${block}\n`)
+writeFileSync(
+  resolve(APP_ICONS, 'icon-ids.ts'),
+  `/* generated — do not edit by hand; source: design/icons/manifest.json (node scripts/build-icons.mjs) */\n` +
+    `export type IconId =\n` +
+    manifest.map((m) => `  | '${m.id}'`).concat(thirdPartyIds.map((id) => `  | '${id}'`)).join('\n') +
+    '\n',
+)
 
 function patch(file) {
   const src = readFileSync(file, 'utf8');

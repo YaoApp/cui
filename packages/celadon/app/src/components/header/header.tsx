@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import './header.less'
 import { Button } from '@/components/base/button'
+import { Icon } from '@/components/base/icon'
 import { useTranslation } from '@/platform/i18n'
 
 export type HeaderProps = {
@@ -18,7 +19,7 @@ export function Header({ title, onRefresh, children }: HeaderProps) {
       <h1 className="header__title">{title}</h1>
       {children ? <div className="header__slot">{children}</div> : null}
       <Button variant="soft" size="small" onClick={onRefresh}>
-        {t('header.refresh')}
+        <Icon name="i-act-refresh" size={14} />{t('header.refresh')}
       </Button>
     </header>
   )

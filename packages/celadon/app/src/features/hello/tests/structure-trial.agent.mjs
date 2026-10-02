@@ -91,6 +91,91 @@ const tabTitle = await p.title()
 say(`S1 title     : ${JSON.stringify(tabTitle)}`)
 if (tabTitle !== 'Hello · CUI 2.0') problems.push('S1: 标签页标题没有跟路由走')
 
+// 刷新按钮上的图标要真的渲染出来：`<use>` 指得到符号，尺寸是产品默认档
+// 注意：要**指到具体那个按钮**。写 "header 里第一个 .icon" 会被后加进来的导航图标抢先
+// （2026-10-02 就这样误报过一次）。
+const icon = await p.evaluate(() => {
+  const svg = document.querySelector('header.header > button svg.icon')
+  const href = svg?.querySelector('use')?.getAttribute('href')
+  const box = svg?.getBoundingClientRect()
+  return { href, symbol: href ? !!document.querySelector(href) : false, w: Math.round(box?.width || 0), h: Math.round(box?.height || 0) }
+})
+say(`S1 icon      : ${JSON.stringify(icon)}`)
+if (!icon.symbol) problems.push('S1: 刷新按钮的图标没渲染（雪碧图里找不到对应符号）')
+if (icon.w !== 14 || icon.h !== 14) problems.push(`S1: 图标尺寸不是 14（实测 ${icon.w}x${icon.h}）`)
+
+// 导航项也要有图标：每项一个 `<use>`，符号都指得到
+const navIcons = await p.evaluate(() =>
+  [...document.querySelectorAll('nav.nav a.nav__link')].map((a) => {
+    const href = a.querySelector('use')?.getAttribute('href')
+    return { text: a.textContent?.trim(), href, symbol: href ? !!document.querySelector(href) : false }
+  }),
+)
+say(`S1 navIcons  : ${JSON.stringify(navIcons)}`)
+if (navIcons.length < 2) problems.push('S1: 导航项少于两个（取不到导航）')
+if (navIcons.some((x) => !x.symbol)) problems.push('S1: 有导航项没有图标，或符号指不到')
+
+// 图标要与文字同一条中线，而且是描边不是实心块（实心块在深色下会是黑的）
+const iconFit = await p.evaluate(() => {
+  const cy = (el) => { const b = el?.getBoundingClientRect(); return b ? (b.top + b.bottom) / 2 : null }
+  const btn = document.querySelector('header.header > button')
+  const svg = btn?.querySelector('svg.icon')
+  const link = document.querySelector('nav.nav a.nav__link')
+  return {
+    btnIcon: cy(svg), btnSpan: cy(btn?.querySelector('span')),
+    navIcon: cy(link?.querySelector('svg.icon')), navLink: cy(link),
+    fill: svg ? getComputedStyle(svg).fill : null,
+    stroke: svg ? getComputedStyle(svg).stroke : null,
+  }
+})
+say(`S1 iconFit   : ${JSON.stringify(iconFit)}`)
+if (Math.abs((iconFit.btnIcon ?? 0) - (iconFit.btnSpan ?? 99)) > 0.5) problems.push('S1: 按钮图标与文字没有居中对齐')
+if (Math.abs((iconFit.navIcon ?? 0) - (iconFit.navLink ?? 99)) > 0.5) problems.push('S1: 导航图标与文字没有居中对齐')
+if (iconFit.fill !== 'none') problems.push('S1: 图标是实心填充（深色下会变黑块）')
+if (!iconFit.stroke || iconFit.stroke === 'none') problems.push('S1: 图标没有描边颜色（不随文字/主题）')
+
+// 图标一览：一个品牌标识 + 一批界面图标，符号都指得到；品牌标识不套界面图标的描边
+const gallery = await p.evaluate(() =>
+  [...document.querySelectorAll('.hello__row .hello__cell')].map((cell) => {
+    const svg = cell.querySelector('svg')
+    const href = svg?.querySelector('use')?.getAttribute('href')
+    return { name: cell.querySelector('code')?.textContent, href, symbol: href ? !!document.querySelector(href) : false,
+             stroke: svg ? getComputedStyle(svg).stroke : null }
+  }),
+)
+say(`S1 gallery   : ${JSON.stringify(gallery)}`)
+if (gallery.length < 40) problems.push(`S1: 演示项太少（实测 ${gallery.length}，应为自有品牌 4 + 其他品牌 12 + 图标 26）`)
+if (gallery.some((x) => !x.symbol)) problems.push('S1: 一览里有图标指不到符号')
+const brand = gallery.find((x) => x.name?.startsWith('brand-'))
+if (!brand) problems.push('S1: 一览里没有品牌标识')
+if (brand && brand.stroke !== 'none') problems.push('S1: 品牌标识被套上了界面图标的描边规则')
+
+// 底座必须是 body 的直接子 svg（包一层就不画品牌身体）
+const sprite = await p.evaluate(() => {
+  const svg = document.querySelector('body > svg[width="0"]')
+  return svg ? { direct: true, display: getComputedStyle(svg).display } : { direct: false, display: null }
+})
+say(`S1 sprite    : ${JSON.stringify(sprite)}`)
+if (!sprite.direct) problems.push('S1: 图标底座不是 body 的直接子 svg（会掉品牌身体）')
+if (sprite.display === 'none') problems.push('S1: 图标底座被 display:none')
+
+// 描边与缩放必须与设计页 icon() 一致：viewBox 在、界面图标描边固定 2（缩放由 viewBox 做）
+const scale = await p.evaluate(() => {
+  const read = (sel) => {
+    const s = document.querySelector(sel)
+    if (!s) return null
+    const st = getComputedStyle(s)
+    return { viewBox: s.getAttribute('viewBox'), strokeWidth: st.strokeWidth, stroke: st.stroke, fill: st.fill }
+  }
+  return { button: read('header.header > button svg.icon'), gallery: read('.hello__row svg.icon'), brand: read('.hello__row svg.brand-mark') }
+})
+say(`S1 scale     : ${JSON.stringify(scale)}`)
+for (const k of ['button', 'gallery']) {
+  if (scale[k]?.viewBox !== '0 0 24 24') problems.push(`S1: ${k} 图标没有 viewBox（缩放无从发生）`)
+  if (scale[k]?.strokeWidth !== '2px') problems.push(`S1: ${k} 图标描边不是固定的 2（双缩放会让它比设计页细）`)
+}
+if (scale.brand?.viewBox !== '0 0 24 24') problems.push('S1: 品牌标识没有 viewBox')
+if (scale.brand?.strokeWidth === '2px') problems.push('S1: 品牌标识被套上了界面图标的描边')
 // S2 快速连点 12 下
 const before = await box(button)
 for (let i = 0; i < 12; i++) await button.click({ delay: 0 })

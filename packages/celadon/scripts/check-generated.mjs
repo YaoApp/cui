@@ -3,6 +3,7 @@
    · tokens.css —— build-css.mjs 一次生成两份相同内容：design/ 与 app/src/platform/theme/，
      两份都在比对清单里。
    · icons.html / mock.html —— build-icons.mjs 从 icons/*.svg + manifest 装配。
+   · app/src/platform/icons/{sprite.svg,icon-ids.ts} —— 同一脚本产出的**应用侧**图标产物。
    曾经出现"改了源但忘了重跑，页面里还是旧副本"的问题，这里把它变成可检查的。
 
    可选：第一个参数是"包根"（测试用）；省略即检查真实仓库。给了参数时只比对 tokens.css
@@ -45,7 +46,14 @@ console.log(`  ✓ generated tokens.css match their source (${TOKENS.join(' / ')
 
 /* ---- icons.html / mock.html 与品牌标记：只在真实仓库里跑（样本目录没有整套雪碧图与清单）---- */
 if (inRepo) {
-  const GENERATED = ['icons.html', 'mock.html'].map((f) => resolve(DESIGN, f));   /* build-icons.mjs 的产物 */
+  const APP_ICONS = ['app/src/platform/icons/sprite.svg', 'app/src/platform/icons/icon-ids.ts'];
+  const iconsMissing = APP_ICONS.filter((f) => !existsSync(resolve(ROOT, f)));
+  if (iconsMissing.length) {
+    console.log(`  ✗ generated file(s) missing: ${iconsMissing.join(', ')} — run \`node scripts/build-icons.mjs\``);
+    process.exit(1);
+  }
+  const GENERATED = ['icons.html', 'mock.html'].map((f) => resolve(DESIGN, f))
+    .concat(APP_ICONS.map((f) => resolve(ROOT, f)));   /* build-icons.mjs 的产物（含应用侧图标） */
   const files = ['icons.html', 'mock.html', 'index.html'].map((f) => resolve(DESIGN, f));   /* 颜色类检查覆盖三张规范页 */
   const before = GENERATED.map((f) => readFileSync(f, 'utf8'));
   execFileSync('node', [resolve(HERE, 'build-icons.mjs')], { stdio: 'pipe' });
@@ -54,7 +62,7 @@ if (inRepo) {
     console.log(`  ✗ generated files are stale: ${iconsStale.map((f) => f.replace(PACKAGE + '/', '')).join(', ')} — commit the output of build-icons.mjs`);
     process.exit(1);
   }
-  console.log('  ✓ generated files match their sources (icons.html / mock.html)');
+  console.log('  ✓ generated files match their sources (icons.html / mock.html / platform icons)');
 
   // 品牌标记的颜色只允许来自 token：写死色值会让页面和 token 悄悄脱钩
   const hard = ['#2A7B7B', '#389F9F', '#2FA79C', '#0CC8B7', '#F4F1EA', '#FFFFFF'];

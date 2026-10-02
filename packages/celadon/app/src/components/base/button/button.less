@@ -31,3 +31,11 @@
     outline: none;
   }
 }
+
+/* 按钮里的图标与文字：用 flex 居中 + 统一间距（与 nav 同一机制）。
+   设计类给了四态与配色，没给这一处的布局 —— 组件只管设计类没有的。 */
+.button > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}

@@ -1,0 +1,14 @@
+/* 图标的视觉只有两件：尺寸由属性给，颜色跟随文字（currentColor）——不写颜色字面量。 */
+.icon {
+  display: inline-block;
+  flex: none;
+  /* 与文字基线对齐：`middle` 比 `-0.125em` 更贴中（实测差 1.7px → 0）*/
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  /* **固定 2**（24 网格规范值）——"小档按比例变细"由 `viewBox="0 0 24 24"` 缩放自动完成。
+     手工按档位换算会**双重缩放**（16 档 → 1.333×16/24 = 0.889），比设计页细 1/3。 */
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
