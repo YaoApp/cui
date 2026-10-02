@@ -4,20 +4,8 @@
 
 ## 1. 分工
 
-| 层 | 工具 | 判定者 | 测什么 | 命令 → 日志 |
-| --- | --- | --- | --- | --- |
-| **规范门禁** | `scripts/check-*.mjs`（**零依赖**）+ lints | 确定性代码 | 设计规范（token · i18n · 样式约定 · 文档结构）· 类型 · 样式 · 依赖边界 | `pnpm check` → `gates-<HHMM>.log` |
-| **检查器自测** | `scripts/tests/run.mjs` | 确定性代码 | 每条检查规则一个正例 + 一个违规例 | `pnpm test:checkers` → `checkers-<HHMM>.log` |
-| **单元 / 组件** | `vitest` · `@testing-library/react` · `user-event` · `jsdom` | 确定性代码 | 纯逻辑 · 状态与数据层 · 组件行为 | `pnpm test` → `unit-<HHMM>.log` |
-| **浏览器** | `@playwright/test` + 截图 golden | 确定性代码 | 关键交互主路径 · 中文输入法 · 全键盘 · 视觉回归 | `pnpm test:browser` → `browser-<HHMM>.log` |
-| **拟人** | 剧本 + 浏览器执行 + 看图（执行者视觉）· **`ocr_recognize`** · **`decision_decide`** | **执行者判定；按需转人** | 真实使用路径 · 极端数据 · 环境差异 · 观感与措辞 | `pnpm test:persona` → `<场景>-<HHMM>.log` |
-
-`pnpm test:all` **整条链也留一份日志**（`all-<HHMM>.log`）—— 链里每一步都有自己的日志，但断在哪一步只有链的日志说得清。
-
-规范门禁零依赖、随设计资产走，是 QA 流程的**第 1 阶段**；其余各层用上表的栈。
-日志落在 `app/logs/<系统日期>/`（git 忽略），写法见 `architecture/14-testing.md` 的「日志」一节。
-**`pnpm test:all`** 一把跑：门禁 + 检查器自测 + 单元 + 浏览器 + **构建** + 拟人 ——
-构建放在拟人之前，因为**拟人层测的是构建产物**（`dist/`），不是 dev 源码。
+**分层 · 判定者 · 命令 → 日志**：见 `architecture/14-testing.md` 的「分层与分工」。
+本册不重复规则，只记进度与未决事项。
 
 ## 2. 单元 / 组件测试
 
