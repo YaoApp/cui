@@ -83,26 +83,40 @@ test('the demo lists a brand mark beside interface icons, all resolving', async 
   expect(list.filter((x) => x.name?.startsWith('i-')).every((x) => x.stroke !== 'none')).toBe(true)
 })
 
-/* 描边按档位缩放：24 网格规范值 2，小档按比例变细（design/icons.md §2）。
-   不设就是 SVG 初始值 1 —— 会"比设计页细一圈"，用户实测发现过。 */
-test('the stroke scales with the icon size instead of staying at the default', async ({ page }) => {
+/* 描边与缩放：**与设计页 design/icons.html 的 icon() 逐字一致** ——
+   描边固定 2（24 网格规范值），"小档按比例变细"由 `viewBox` 缩放自动完成。
+   手工再按档位换算就是双重缩放（16 档会变成 0.889px，比设计页细 1/3）。 */
+test('icons scale through the viewBox with a constant stroke, like the design page', async ({ page }) => {
   await page.goto('/main/hello')
-  const widths = await page.evaluate(() => {
+  const icons = await page.evaluate(() => {
     const read = (sel: string) => {
       const svg = document.querySelector(sel)
-      return svg ? Number.parseFloat(getComputedStyle(svg).strokeWidth) : null
+      if (!svg) return null
+      const style = getComputedStyle(svg)
+      return {
+        viewBox: svg.getAttribute('viewBox'),
+        strokeWidth: style.strokeWidth,
+        stroke: style.stroke,
+        fill: style.fill,
+        width: svg.getAttribute('width'),
+      }
     }
     return {
-      fourteen: read('header.header > button svg.icon--14'),
-      sixteen: read('nav.nav a.nav__link svg.icon--16'),
-      twenty: read('.hello__icons svg.icon--20'),
+      button: read('header.header > button svg.icon'),
+      nav: read('nav.nav a.nav__link svg.icon'),
+      gallery: read('.hello__icons svg.icon'),
+      brand: read('.hello__icons svg.brand-mark'),
     }
   })
-  expect(widths.fourteen).toBeGreaterThan(1)
-  expect(widths.sixteen).toBeGreaterThan(1)
-  expect(widths.twenty).toBeGreaterThan(1)
-  // 按 2 × size/24 缩放（24 档 = 2）
-  expect(widths.fourteen).toBeCloseTo(2 * (14 / 24), 2)
-  expect(widths.sixteen).toBeCloseTo(2 * (16 / 24), 2)
-  expect(widths.twenty).toBeCloseTo(2 * (20 / 24), 2)
+  for (const key of ['button', 'nav', 'gallery', 'brand'] as const) {
+    expect(icons[key]?.viewBox, `${key} needs a viewBox or nothing scales`).toBe('0 0 24 24')
+  }
+  // 界面图标：固定描边 2（设备像素的细由 viewBox 缩放给）
+  for (const key of ['button', 'nav', 'gallery'] as const) {
+    expect(icons[key]?.strokeWidth, key).toBe('2px')
+    expect(icons[key]?.fill).toBe('none')
+    expect(icons[key]?.stroke).not.toBe('none')
+  }
+  // 品牌标识：只整体使用 —— 不套界面图标的 stroke / fill
+  expect(icons.brand?.strokeWidth).not.toBe('2px')
 })

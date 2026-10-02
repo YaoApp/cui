@@ -159,19 +159,23 @@ say(`S1 sprite    : ${JSON.stringify(sprite)}`)
 if (!sprite.direct) problems.push('S1: 图标底座不是 body 的直接子 svg（会掉品牌身体）')
 if (sprite.display === 'none') problems.push('S1: 图标底座被 display:none')
 
-// 描边要按档位缩放（不设就是 1，比设计页细一圈）
-const strokeWidths = await p.evaluate(() => {
-  const read = (sel) => { const s = document.querySelector(sel); return s ? Number.parseFloat(getComputedStyle(s).strokeWidth) : null }
-  return { fourteen: read('header.header > button svg.icon--14'), sixteen: read('nav.nav a.nav__link svg.icon--16'), twenty: read('.hello__icons svg.icon--20') }
-})
-say(`S1 strokeW   : ${JSON.stringify(strokeWidths)}`)
-const expect = { fourteen: 2 * 14 / 24, sixteen: 2 * 16 / 24, twenty: 2 * 20 / 24 }
-for (const [k, want] of Object.entries(expect)) {
-  if (strokeWidths[k] === null || Math.abs(strokeWidths[k] - want) > 0.02) {
-    problems.push(`S1: ${k} 档描边不是 ${want.toFixed(3)}（实测 ${strokeWidths[k]}）`)
+// 描边与缩放必须与设计页 icon() 一致：viewBox 在、界面图标描边固定 2（缩放由 viewBox 做）
+const scale = await p.evaluate(() => {
+  const read = (sel) => {
+    const s = document.querySelector(sel)
+    if (!s) return null
+    const st = getComputedStyle(s)
+    return { viewBox: s.getAttribute('viewBox'), strokeWidth: st.strokeWidth, stroke: st.stroke, fill: st.fill }
   }
+  return { button: read('header.header > button svg.icon'), gallery: read('.hello__icons svg.icon'), brand: read('.hello__icons svg.brand-mark') }
+})
+say(`S1 scale     : ${JSON.stringify(scale)}`)
+for (const k of ['button', 'gallery']) {
+  if (scale[k]?.viewBox !== '0 0 24 24') problems.push(`S1: ${k} 图标没有 viewBox（缩放无从发生）`)
+  if (scale[k]?.strokeWidth !== '2px') problems.push(`S1: ${k} 图标描边不是固定的 2（双缩放会让它比设计页细）`)
 }
-
+if (scale.brand?.viewBox !== '0 0 24 24') problems.push('S1: 品牌标识没有 viewBox')
+if (scale.brand?.strokeWidth === '2px') problems.push('S1: 品牌标识被套上了界面图标的描边')
 // S2 快速连点 12 下
 const before = await box(button)
 for (let i = 0; i < 12; i++) await button.click({ delay: 0 })

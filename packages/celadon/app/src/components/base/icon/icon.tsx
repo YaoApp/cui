@@ -14,12 +14,14 @@ export type IconProps = {
 }
 
 export function Icon({ name, size = 16, label, className }: IconProps) {
-  const classes = ['icon', `icon--${size}`, className].filter(Boolean).join(' ')
+  const classes = ['icon', className].filter(Boolean).join(' ')
   return (
     <svg
       className={classes}
       width={size}
       height={size}
+      /* **与设计页 design/icons.html 的 icon() 逐字一致**：缩放到目标尺寸、描边固定 2（24 网格）。 */
+      viewBox="0 0 24 24"
       role={label ? 'img' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
