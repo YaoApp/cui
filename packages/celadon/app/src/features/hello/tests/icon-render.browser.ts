@@ -44,6 +44,22 @@ test('the icon sits on the text line and takes its colour from the theme', async
 
 /* 图标一览：品牌标识与界面图标都能渲染出来（符号指得到）。
    品牌标识**不套用界面图标的描边规则** —— 它是"只整体使用"的另一类（design/icons.md §1）。 */
+/* 底座必须是 `body` 的直接子 `<svg>` —— 与设计页同构。包一层 / 设 hidden / display:none，
+   品牌标识的身体（靠 url(#渐变) 填充）就不画：只留眼睛（2026-10-02 实测）。 */
+test('the sprite is a direct child of the body, like the design page', async ({ page }) => {
+  await page.goto('/main/hello')
+  const sprite = await page.evaluate(() => {
+    const svg = document.querySelector('body > svg[width="0"]')
+    return svg
+      ? { direct: true, hidden: svg.hasAttribute('hidden'), display: getComputedStyle(svg).display, symbols: svg.querySelectorAll('symbol').length }
+      : { direct: false }
+  })
+  expect(sprite.direct, 'sprite must be a direct child of body').toBe(true)
+  expect(sprite.hidden).toBe(false)
+  expect(sprite.display).not.toBe('none')
+  expect(sprite.symbols).toBeGreaterThan(60)
+})
+
 test('the demo lists a brand mark beside interface icons, all resolving', async ({ page }) => {
   await page.goto('/main/hello')
   const list = await page.evaluate(() =>
