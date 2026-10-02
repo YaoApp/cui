@@ -48,6 +48,13 @@
 - **路由薄** —— 路由只做装配，业务实现不住路由目录。
 - **组件不发请求** —— 组件里不出现 `fetch` / `EventSource` / `new WebSocket`，取数走数据层钩子（`05-data-and-api.md`）。
 
+### 路由
+
+**`routes/` 在依赖方向最上层**（目录上与 `features/` 并列）：只装配 —— 路由表（URL → 元素）与
+表面布局（`main` 主区 · `side` 侧边）。机制住 `platform/router/`（router 实例 · basename 适配器 ·
+文档标题）；导航项与"哪条 URL 是当前"的比较住 `platform/utils/nav.ts`（`routes/` 与 feature 都要用）。
+地址语法：**对象在路径 · 表面在首段 · 面板与选中项在具名 query**（见 `07-routing.md`）。
+
 ### 组件层
 
 `base/` 放基础组件（原子控件 · 只描述外观）；其余组件直接在 `components/` 下命名。
@@ -130,3 +137,17 @@ app/src/platform/
 ## 3. 待讨论
 
 - `components/base/` 的上提阈值是否定"第三个使用者"。
+
+### 测试
+
+用例按**测什么**分四层，各自有固定的家：
+
+| 层 | 住哪 |
+| --- | --- |
+| 单元 / 组件 | **与源文件同目录**（`<名>.test.tsx`）—— 不许进 `tests/` |
+| 浏览器 | `features/<域>/tests/<场景>.browser.ts` |
+| 拟人 | 同一目录：`<场景>.agent.md`（剧本）+ `<场景>.agent.mjs`（采集脚本）|
+| 检查器自测 | `scripts/tests/`（每条规则一个正例 + 一个违规例）|
+
+共享支持放 `test-support/`（`setup.ts` 每个用例后复位 · `stores.ts` 按 `*.store.ts` 自动发现 store）。
+命令与日志见 `14-testing.md`。
