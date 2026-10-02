@@ -1,8 +1,8 @@
 # 02 · 工具链
 
-- **版本**：v1.19
-- **最后修改**：2026-10-02 14:08:09
-- **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口
+- **版本**：v1.20
+- **最后修改**：2026-10-02 16:43:49
+- **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具
 
 ## 规则
 
@@ -53,6 +53,18 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | `scripts/run-persona.mjs` | 发现并逐个跑 `features/*/tests/*.agent.mjs`，一个场景一份日志 |
 | `scripts/serve-dist.mjs` | 预览 `dist/` 的静态服务器（**带 SPA fallback**，见 `04-host-integration.md`）|
 | `scripts/shots.mjs` | **固化截图资产**：`capturePage()` 页面视口（跨平台）· `captureScreen()` 系统级整屏（**只实现 macOS**，其它平台明确报错）· `shotDir()` 算 `app/logs/<日期>/shots/<场景>/` |
+
+## 判定工具
+
+拟人层的判定用**宿主工具**（不属于仓库脚本，命令在各平台一致）：
+
+| 工具 | 用途 | 命令 |
+| --- | --- | --- |
+| `ocr_recognize` | 截图 → 文字（**逐字精确**，带坐标与置信度）| `tai tool ocr_recognize --source <截图> --output_format json --language zh` |
+| `decision_decide` | 事实 → **分级结论 + 置信度**（分类 / 评分 / 概率）| `tai tool decision_decide --state '<事实>' --questions '{…}'` |
+| `ocr_providers` · `decision_providers` | 列可用 provider 与模型 | `tai tool ocr_providers` · `tai tool decision_providers` |
+
+判定流程（看图 → OCR → 决策 → 按需转人）与「置信度是门控」见 `14-testing.md` §4.3。
 
 ## 已定
 
