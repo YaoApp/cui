@@ -1,26 +1,25 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useSidePanelStore } from '@/stores/side-panel'
 
-/* 公共 store 与功能私有 store 用同一套复位机制（test-support 自动发现 *.store.ts），
-   所以这里不用手动清理 —— 下面第一条就是在验证这件事。 */
+/* 公共 store 与私有 store 共用同一套自动复位（test-support 按文件名发现），第一条就在验证它。 */
 describe('useSidePanelStore', () => {
   beforeEach(() => {
-    expect(useSidePanelStore.getState().entityId).toBeUndefined()
+    expect(useSidePanelStore.getState().entry).toBeUndefined()
   })
 
-  it('starts closed, and the shared reset keeps it that way between cases', () => {
-    useSidePanelStore.getState().open('e1')
-    expect(useSidePanelStore.getState().entityId).toBe('e1')
+  it('starts empty, and the shared reset keeps it that way between cases', () => {
+    useSidePanelStore.getState().open({ kind: 'world-entity', id: 'e1' })
+    expect(useSidePanelStore.getState().entry).toEqual({ kind: 'world-entity', id: 'e1' })
   })
 
-  it('opens an object', () => {
-    useSidePanelStore.getState().open('e2')
-    expect(useSidePanelStore.getState().entityId).toBe('e2')
+  it('takes any kind without knowing what it means', () => {
+    useSidePanelStore.getState().open({ kind: 'thread', id: 't9' })
+    expect(useSidePanelStore.getState().entry).toEqual({ kind: 'thread', id: 't9' })
   })
 
   it('closes when opened with nothing', () => {
-    useSidePanelStore.getState().open('e3')
+    useSidePanelStore.getState().open({ kind: 'world-entity', id: 'e3' })
     useSidePanelStore.getState().open(undefined)
-    expect(useSidePanelStore.getState().entityId).toBeUndefined()
+    expect(useSidePanelStore.getState().entry).toBeUndefined()
   })
 })
