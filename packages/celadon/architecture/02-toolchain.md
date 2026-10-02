@@ -1,7 +1,7 @@
 # 02 · 工具链
 
-- **版本**：v1.24
-- **最后修改**：2026-10-02 17:26:10
+- **版本**：v1.25
+- **最后修改**：2026-10-02 18:01:30
 - **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具
 
 ## 规则
@@ -12,6 +12,7 @@
 | UI | **React 19.3** + **TypeScript 7**（`@types/react*` 19.3）|
 | 包管理器 | **pnpm**，**本目录自己的 `package.json` 钉版本**（不靠仓库根 —— 隔离见 `01-package-and-repo.md`）|
 | 国际化 | **i18next 26** + **react-i18next 17**（运行时语言包见 `08-i18n.md`）|
+| 界面行为 | **`@base-ui/react` 1.8**（headless · 无样式；视觉只用 token，见 `09-theme.md`）|
 | 测试 | `vitest` + `@testing-library/react` · `user-event` · `jest-dom` + `jsdom` + `@playwright/test`（见 `14-testing.md`）|
 
 - 依赖版本一律 **caret**，不锁小版本。
