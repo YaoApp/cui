@@ -5,7 +5,8 @@ test('switching to Traditional Chinese localizes the copy and survives a reload'
   await page.goto('/')
   await expect(page.getByRole('button', { name: '刷新' })).toBeVisible()
 
-  await page.getByRole('combobox', { name: '语言' }).selectOption('zh-TW')
+  await page.getByRole('combobox', { name: '语言' }).click()
+  await page.getByRole('option', { name: '繁體中文' }).click()
 
   await expect(page.getByRole('combobox', { name: '語言' })).toBeVisible()
   await expect(page.getByRole('button', { name: '重新整理' })).toBeVisible()
