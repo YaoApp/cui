@@ -18,7 +18,7 @@
 
 - `vitest.config.ts`：`jsdom` · `include: ['app/src/**/*.test.{ts,tsx}']` · setup 用 `test-support/setup.ts` · 覆盖率排除用例与样式。
 - `playwright.config.ts`：`testMatch: '**/tests/**/*.browser.ts'` · `channel: 'chrome'`（不下载浏览器）· `reuseExistingServer` 复用已在跑的 dev。
-- **三个 runner 的默认匹配范围会重叠，配置必须显式收窄**，否则互相误抓。
+- **`vitest` 与 `playwright` 的默认匹配范围会重叠**，配置必须显式收窄，否则互相误抓（拟人是我们自己的脚本，不在其中）。
 - `test-support/stores.ts`：按 `*.store.ts` 自动发现所有 store、登记初始状态并逐用例复位 ——
   **组件 / feature / 平台层都覆盖**，`setup.ts` 不写清单（`stores.test.ts` 断言它跨层）。
 - 命令：`pnpm test` · `pnpm test:browser` · `pnpm test:checkers` · `pnpm test:persona` · `pnpm test:all`。
