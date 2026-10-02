@@ -1,0 +1,13 @@
+{
+  "world.title": "World",
+  "world.navLabel": "World navigation",
+  "world.filter": "Filter",
+  "world.filterPlaceholder": "World name",
+  "world.detailLabel": "World details",
+  "world.share": "Share this view",
+  "world.missing": "No such world: {{id}}",
+  "entityPanel.label": "Entity panel",
+  "entityPanel.close": "Close",
+  "entityPanel.kind": "Kind",
+  "entityPanel.id": "ID"
+}

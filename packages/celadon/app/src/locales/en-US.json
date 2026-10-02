@@ -1,0 +1,9 @@
+{
+  "nav.appLabel": "App navigation",
+  "nav.hello": "Hello",
+  "nav.world": "World",
+  "header.refresh": "Refresh",
+  "themeToggle.label": "Theme",
+  "themeToggle.toLight": "Light",
+  "themeToggle.toDark": "Dark"
+}

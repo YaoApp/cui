@@ -10,7 +10,7 @@
 | --- | --- |
 | `check-tokens` | 硬编码颜色 / 字号 / 行高 / 圆角 / 间距 / 线宽（系统色与品牌官方色白名单）|
 | `check-css-conventions` | **物理方向属性**（`margin-left` `border-left` `left` `text-align:left` …）|
-| `check-i18n` | 缺 key · 漏翻 · 繁中夹简体 · 日文汉字误用 |
+| `check-i18n` | 把三处语言包（`app/src/locales/` · `features/*/locales/` · `components/*/locales/`）按 locale 合并后校验：缺 key · 漏翻 · 繁中夹简体 · 日文汉字误用 · **基准语言 `zh-CN` 缺失**（某处不存在则跳过）|
 | `check-readme-values` | README 引用的色值与 `tokens.css` 不一致 |
 | `check-generated` | 产物与源不一致（`tokens.less` → `tokens.css` 等）|
 | `check-plan-md` | `plan/` 的表格结构与禁用小节（"待讨论"等）。**单元格里别写裸 `|`** —— 它不认 `\|` 转义，会按列数不一致报错 |
@@ -20,7 +20,7 @@
 | `check-effect-url-write` | **不许在 `useEffect` 里写 URL**（`setSearchParams` / `navigate`）—— 会与"读 URL 写 store"互相追成同步死循环，见 `07-routing.md` |
 
 - **运行时输出一律英文**（检查器 · 测试 · 脚本的 console 与报错 · 用例名）；注释与文档仍是中文。
-- **检查器自身必须有样本测试**：`node scripts/tests/run.mjs`（**50 / 50**；每条规则一个正例 + 一个违规例）。
+- **检查器自身必须有样本测试**：`node scripts/tests/run.mjs`（**52 / 52**；每条规则一个正例 + 一个违规例）。
 - **五层命令**：`pnpm check`（规范门禁）· `pnpm test:checkers`（检查器自测）· `pnpm test`（单元 / 组件）·
   `pnpm test:browser`（浏览器）· `pnpm test:persona`（拟人）；一把跑 `pnpm test:all`。
 - **加一条规则，必须同时加违规样本** —— 否则"全过"是假象。
