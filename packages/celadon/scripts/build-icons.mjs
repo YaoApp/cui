@@ -29,6 +29,19 @@ console.log(`  sprite holds ${Object.keys(symbolsById).length} symbol(s) · mani
 const symbols = manifest.map(m => symbolsById[m.id]);
 const block = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n${symbols.join('\n')}\n</defs></svg>`;
 
+/* 应用侧产物（方案 A：整块内联）。设计目录里的雪碧图是**源**，这里是**产物**——
+   `check-generated.mjs` 会重新生成并比对，改图不跑脚本就红（与 tokens.css 同一套）。 */
+const APP_ICONS = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'app', 'src', 'platform', 'icons')
+const SPRITE_HEADER = `<!-- generated — do not edit by hand; source: design/icons/ (node scripts/build-icons.mjs) -->`
+writeFileSync(resolve(APP_ICONS, 'sprite.svg'), `${SPRITE_HEADER}\n${block}\n`)
+writeFileSync(
+  resolve(APP_ICONS, 'icon-ids.ts'),
+  `/* generated — do not edit by hand; source: design/icons/manifest.json (node scripts/build-icons.mjs) */\n` +
+    `export type IconId =\n` +
+    symbols.map((_, i) => `  | '${manifest[i].id}'`).join('\n') +
+    '\n',
+)
+
 function patch(file) {
   const src = readFileSync(file, 'utf8');
   const re = /<svg width="0" height="0"[\s\S]*?<\/svg>/;

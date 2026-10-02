@@ -9,6 +9,10 @@ import '@/platform/i18n/locale.store'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AppRouter } from '@/platform/router/router'
+import { mountIconSprite } from '@/platform/icons'
+
+/* 图标底座挂一次（挂 body，不占页面结构）：所有 <Icon> 靠 #id 引用它（见 10-icons.md）。 */
+mountIconSprite()
 
 createRoot(document.getElementById('app')!).render(
   <StrictMode>
