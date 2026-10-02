@@ -14,7 +14,7 @@ export type IconProps = {
 }
 
 export function Icon({ name, size = 16, label, className }: IconProps) {
-  const classes = ['icon', className].filter(Boolean).join(' ')
+  const classes = ['icon', `icon--${size}`, className].filter(Boolean).join(' ')
   return (
     <svg
       className={classes}
