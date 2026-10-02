@@ -150,6 +150,15 @@ const brand = gallery.find((x) => x.name?.startsWith('brand-'))
 if (!brand) problems.push('S1: 一览里没有品牌标识')
 if (brand && brand.stroke !== 'none') problems.push('S1: 品牌标识被套上了界面图标的描边规则')
 
+// 底座必须是 body 的直接子 svg（包一层就不画品牌身体）
+const sprite = await p.evaluate(() => {
+  const svg = document.querySelector('body > svg[width="0"]')
+  return svg ? { direct: true, display: getComputedStyle(svg).display } : { direct: false, display: null }
+})
+say(`S1 sprite    : ${JSON.stringify(sprite)}`)
+if (!sprite.direct) problems.push('S1: 图标底座不是 body 的直接子 svg（会掉品牌身体）')
+if (sprite.display === 'none') problems.push('S1: 图标底座被 display:none')
+
 // 描边要按档位缩放（不设就是 1，比设计页细一圈）
 const strokeWidths = await p.evaluate(() => {
   const read = (sel) => { const s = document.querySelector(sel); return s ? Number.parseFloat(getComputedStyle(s).strokeWidth) : null }

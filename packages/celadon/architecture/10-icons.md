@@ -1,7 +1,7 @@
 # 10 · 图标（工程落点）
 
-- **版本**：v1.18
-- **最后修改**：2026-10-02 20:05:14
+- **版本**：v1.19
+- **最后修改**：2026-10-02 20:10:23
 - **说明**：图标工程落点（规格见 design）
 
 ## 规则
@@ -20,7 +20,10 @@
 
 ## 用法
 
-1. **入口挂一次** —— `app/src/main.tsx` 调 `mountIconSprite()`（挂在 `<body>`，**不占页面结构**）。
+1. **入口挂一次** —— `app/src/main.tsx` 调 `mountIconSprite()`：雪碧图作为 `<svg width="0" height="0">`
+   **直接插进 `body`**（与设计页 `design/icons.html` 同构）。
+   **必须直接插** —— 外包 `<div>`、设 `hidden` 或 `display:none`，品牌标识的身体（靠 `url(#渐变)` 填充）
+   **就不画**，只剩眼睛（2026-10-02 实测三种写法都掉）。
 2. **要图标就用基础件** —— `<Icon name="i-act-refresh" size={16} />`；`size` 取 **14 / 16 / 20 / 24**（默认 16）。
    有语义时给 `label`（`role="img"` + 可访问名）；纯装饰不传（自动 `aria-hidden`）。
 3. **图标名从 manifest 来** —— 改 `design/icons/manifest.json` → 跑 `node scripts/build-icons.mjs` →
