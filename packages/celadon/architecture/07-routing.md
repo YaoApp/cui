@@ -54,11 +54,20 @@
 
 `basename` 一律由**平台适配器**注入，路由代码里不出现环境判断（见 `04-host-integration.md`）。
 
-## 位置与方向
+## `routes/` 放什么
 
-- **`app/src/routes/` 与 `features/` 并列**：可以 import `features/`；**`features/` 不许 import `routes/`**。
-- **路由只做装配** —— 业务实现不住 `routes/`（见 `00-principles.md`）。
-- 路由路径**不得**占用 12 个保留前缀（见 `04-host-integration.md`）。
+只有两类，**业务实现不住这里**（见 `00-principles.md`）：
+
+| 放什么 | 文件 |
+| --- | --- |
+| **路由表**：URL → 元素 | `routes.tsx` |
+| **表面与其布局**：`main` 主区 · `side` 侧边 | `surface-layout.tsx` · `surfaces.ts` |
+
+- **方向**：`routes/` 可以 import `features/`；**`features/` 不许 import `routes/`**（单向）。
+- **路由路径不得占用 12 个保留前缀**（见 `04-host-integration.md`）。
+- 为什么不把表塞进入口 `main.tsx`：入口只负责"把应用装起来"；URL 契约与表面布局有独立的家，
+  表会随 feature 变长，而表面布局不属于任何 feature。
+  同构参考：lobehub 的 `src/routes/` 按表面分组（`(main)` / `(popup)` / `(mobile)`），layout 也在里面。
 
 ## 待讨论
 

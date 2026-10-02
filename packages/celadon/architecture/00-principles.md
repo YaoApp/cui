@@ -127,4 +127,3 @@ app/src/platform/
 ## 3. 待讨论
 
 - `components/base/` 的上提阈值是否定"第三个使用者"。
-- 是否加 `app/src/routes/`（薄路由）与 `features/` 并列。
