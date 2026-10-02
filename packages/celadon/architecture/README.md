@@ -19,23 +19,23 @@
 
 **开工前读 `00-principles.md` 一份就够**；碰到具体问题时按下表查对应分册。
 
-| # | 分册 | 一句话 | 状态 |
-| --- | --- | --- | --- |
-| 00 | [principles](00-principles.md) | **八条铁律 + 结构总纲（分层 · 落位 · 依赖 · 命名 · 测试）+ 一个组件一个目录** | ✅ 已定 |
-| 01 | [package-and-repo](01-package-and-repo.md) | 包 · 仓库形态 · 版本与发布 · 旧包处置 | ✅ 已定 |
-| 02 | [toolchain](02-toolchain.md) | 构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 | ✅ 已定 |
-| 03 | [boundaries](03-boundaries.md) | 目录结构 · 分层职责 · **同层方向** · 谁能 import 谁 · 边界怎么强制 | ✅ 已定 |
-| 04 | [host-integration](04-host-integration.md) | 宿主挂载 · 保留前缀 · 代理 · SSE / WebSocket | ✅ 已定 |
-| 05 | [data-and-api](05-data-and-api.md) | 传输 · 鉴权 · 后端 SDK · 取数钩子 · 流式 | ✅ 已定 |
-| 06 | [state](06-state.md) | **状态跟 feature 走** · 跨 feature 的落位判据 | ✅ 已定 |
-| 07 | [routing](07-routing.md) | 地址语法（对象在路径 · 表面在首段 · 面板在具名 query）· 谁说了算 · `routes/` 的结构 · 文档标题 | ✅ 已定 |
-| 08 | [i18n](08-i18n.md) | 语言包结构 · 新增语言 · 类型与格式化归属 | ✅ 已定 |
-| 09 | [theme](09-theme.md) | token 单一来源 · 主题映射 · 运行期对比度 | ✅ 已定 |
-| 10 | [icons](10-icons.md) | 图标工程落点（规格见 design） | ✅ 已定 |
-| 11 | [formatting-and-lists](11-formatting-and-lists.md) | 日期/数字/时区 · 长列表与表格 | ✅ 已定 |
-| 12 | [motion](12-motion.md) | 动效归属（规格见 design） | ✅ 已定 |
-| 13 | [quality-gates](13-quality-gates.md) | 扫描期与构建期门禁 · 检查器清单 | ✅ 已定 |
-| 14 | [testing](14-testing.md) | 测试分层（规则见 plan/20） | ✅ 已定 |
+| # | 分册 | 一句话 |
+| --- | --- | --- |
+| 00 | [principles](00-principles.md) | **八条铁律 + 结构总纲（分层 · 落位 · 依赖 · 命名 · 测试）+ 一个组件一个目录** |
+| 01 | [package-and-repo](01-package-and-repo.md) | 包 · 仓库形态 · 版本与发布 · 旧包处置 |
+| 02 | [toolchain](02-toolchain.md) | 构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 |
+| 03 | [boundaries](03-boundaries.md) | 目录结构 · 分层职责 · **同层方向** · 谁能 import 谁 · 边界怎么强制 |
+| 04 | [host-integration](04-host-integration.md) | 宿主挂载 · 保留前缀 · 代理 · SSE / WebSocket |
+| 05 | [data-and-api](05-data-and-api.md) | 传输 · 鉴权 · 后端 SDK · 取数钩子 · 流式 |
+| 06 | [state](06-state.md) | **状态跟 feature 走** · 跨 feature 的落位判据 |
+| 07 | [routing](07-routing.md) | 地址语法（对象在路径 · 表面在首段 · 面板在具名 query）· 谁说了算 · `routes/` 的结构 · 文档标题 |
+| 08 | [i18n](08-i18n.md) | 语言包结构 · 新增语言 · 类型与格式化归属 |
+| 09 | [theme](09-theme.md) | token 单一来源 · 主题映射 · 运行期对比度 |
+| 10 | [icons](10-icons.md) | 图标工程落点（规格见 design） |
+| 11 | [formatting-and-lists](11-formatting-and-lists.md) | 日期/数字/时区 · 长列表与表格 |
+| 12 | [motion](12-motion.md) | 动效归属（规格见 design） |
+| 13 | [quality-gates](13-quality-gates.md) | 扫描期与构建期门禁 · 检查器清单 |
+| 14 | [testing](14-testing.md) | 测试分层（规则见 plan/20） |
 
 > **状态含义**：✅ 已定 = 来自 `plan/01` 已拍板的结论，改动要先改 `plan/01`；
 > 🔄 待讨论 = 本目录**新提出**的草案，需要讨论定案后回写 `plan/01`。
