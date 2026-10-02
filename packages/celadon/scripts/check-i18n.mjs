@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * check-i18n.mjs — 语言包体检（漏 key + 漏翻 + 基准语言缺失）
+ * check-i18n.mjs — 语言包体检（漏 key + 漏翻 + 基准语言缺失 + 代码里硬编码汉字文案）
  * 用法：node scripts/check-i18n.mjs [目标根目录]   （有问题退出码 1，可进 CI）
  *
  * 语言包**跟代码走**，所以先把三处按 locale 合并，再校验：
@@ -9,14 +9,15 @@
  *   app/src/components/<名>/locales/<locale>.json 组件私有词
  * 多出来的另一份 key 必须与**基准语言 zh-CN**完全一致（缺一个都算漏 key）。
  *
- * 四种检查：
+ * 五种检查：
  *   0) 基准语言 zh-CN 必须存在（它是唯一手写的源，缺了整套校验就失去基准）
  *   1) key 完整性：其他语言必须与合并后的 zh-CN key 集合完全一致
  *   2) 漏翻（en-*）：值里不允许出现汉字（语言中性样本走白名单）
  *   3) 漏翻（ja-* / zh-TW）：与 zh-CN 相同 / 出现简体专属字 → 报警
+ *   4) 代码里不许有硬编码文案：`app/src` 的 .ts / .tsx 里出现汉字字面量 → 报警（先剥注释）
  */
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 /* 本脚本住在 scripts/，包根在上一层：默认校验这个仓库的 app/src 三处语言包。
@@ -134,10 +135,76 @@ for (const lang of LANGS) {
   }
 }
 
+/* 5) 代码里不许有硬编码文案 —— `app/src` 下的 .ts / .tsx 出现汉字字面量即失败。
+   为什么：文案只在语言包（铁律 1 · 5）。中文写进代码，切到 en / ja 时它不会变，界面就会中英混杂
+   （`kind: '地点'` 那次事故就是这么来的 —— 系统枚举被写成了文案，检查器当时查不出来）。
+   先剥注释再找：文件头的中文说明是允许的，只有**代码**里的汉字才算硬编码。
+   豁免：确有必要时在 ALLOW_LITERALS 里按相对路径登记并写明原因 —— 例外要看得见，不能悄悄放过。
+   排除：locales/（语言包本身）· *.test.* / *.browser.* / *.agent.*（要用界面文字做断言）· *.d.ts（生成物）。 */
+const ALLOW_LITERALS = new Map([
+  // ['app/src/features/<域>/<文件>.ts', '原因：这里是后端成品文本夹具，按 architecture/08-i18n.md §6② 原样显示、不翻译'],
+])
+const HAN_LITERAL = /[\u4e00-\u9fff]/
+const isExcludedCode = (name) =>
+  name.includes('.test.') || name.includes('.browser.') || name.includes('.agent.') || /\.d\.[cm]?ts$/.test(name)
+
+/** 剥掉行注释与块注释，保留字符串 / 模板串里的内容；换行保留，行号才对得上。 */
+function stripComments(source) {
+  let out = ''
+  let state = 'code'
+  for (let i = 0; i < source.length; i++) {
+    const char = source[i]
+    const next = source[i + 1]
+    if (state === 'code') {
+      if (char === '/' && next === '/') { state = 'line'; i++; continue }
+      if (char === '/' && next === '*') { state = 'block'; i++; continue }
+      if (char === "'" || char === '"' || char === '`') state = char
+      out += char
+      continue
+    }
+    if (state === 'line') { if (char === '\n') { state = 'code'; out += char } continue }
+    if (state === 'block') {
+      if (char === '*' && next === '/') { state = 'code'; i++; continue }
+      if (char === '\n') out += char
+      continue
+    }
+    // 字符串 / 模板串：转义不结束，引号结束
+    if (char === '\\') { out += char + (next ?? ''); i++; continue }
+    if (char === state) state = 'code'
+    out += char
+  }
+  return out
+}
+
+let codeFiles = 0
+{
+  const root = join(TARGET, 'app', 'src')
+  const walk = (dir) => {
+    if (!existsSync(dir) || !statSync(dir).isDirectory()) return
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue
+      const full = join(dir, entry.name)
+      if (entry.isDirectory()) { walk(full); continue }
+      if (!/\.tsx?$/.test(entry.name) || isExcludedCode(entry.name)) continue
+      const rel = relative(TARGET, full)
+      if (rel.includes('/locales/') || ALLOW_LITERALS.has(rel)) continue
+      codeFiles++
+      stripComments(readFileSync(full, 'utf8')).split('\n').forEach((line, index) => {
+        if (!HAN_LITERAL.test(line)) return
+        problems.push(`${rel}:${index + 1} hardcodes user-visible text (Han literal): ${line.trim()} — move it into a locale pack and read it with t() (see architecture/08-i18n.md §6)`)
+      })
+    }
+  }
+  walk(root)
+}
+
 console.log(`✓ locale packs: ${LANGS.join(' / ')} · baseline ${BASE} holds ${Object.keys(base).length} key(s)`)
 if (problems.length) {
   console.log(`✗ ${problems.length} problem(s) found:`)
   problems.forEach(p => console.log('   ' + p))
+  console.log('   How to fix: move user-visible text into a locale pack (features/<domain> · components/<name> · src/locales) and read it with t();')
+  console.log('               if Han characters really must stay, register the file in ALLOW_LITERALS in check-i18n.mjs with a reason.')
   process.exit(1)
 }
 console.log('✓ no missing keys and no untranslated values')
+console.log(`  ✓ no hardcoded Han copy in app source (${codeFiles} file(s) scanned)`)

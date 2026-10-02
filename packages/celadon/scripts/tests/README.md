@@ -40,7 +40,7 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 | --- | --- |
 | `check-css-conventions` | 10 条规则各一个反例 + `clean`（纯逻辑属性）+ `clean-exempt-marker`（有物理属性但带豁免标记）|
 | `check-tokens` | `violation-no-pages`（**没有页面** → 护栏报错，防"扫到 0 页也通过"）+ `clean`（全走 token，含逻辑边框线宽）+ `violation`（写死字号/行高/圆角/内距）+ `violation-muted-text`（装饰色承载文字）+ `violation-border-logical`（`border-inline-start: 2px`）+ `violation-colour-in-fill`（`fill:#FF0000`）+ `violation-outline-colour`（`rgba()`）+ `violation-shorthand-asym`（`margin: 0 0 0 auto`） + `violation-brace-mismatch`（大括号不配对）+ `violation-missing-semicolon`（漏分号）+ `violation-font-shorthand`（`font:` 简写）|
-| `check-i18n` | `clean`（三语齐全，且 key **拆在共用 / feature / 组件三处**，验证合并）+ `violation-missing-baseline`（没有基准语言 `zh-CN`）+ `violation-missing-key` + `violation-untranslated`（ja 与 zh-CN 同文）+ `violation-simplified-in-tw`（繁中夹简体字）+ `violation-en-in-chinese`（en 里写着中文） + `violation-abbrev-key`（key 用缩写）+ `violation-key-naming`（含下划线）+ `violation-key-depth`（4 段）+ `violation-extra-key`（某语多出 key）|
+| `check-i18n` | `clean`（三语齐全，且 key **拆在共用 / feature / 组件三处**，验证合并）+ `violation-missing-baseline`（没有基准语言 `zh-CN`）+ `violation-missing-key` + `violation-untranslated`（ja 与 zh-CN 同文）+ `violation-simplified-in-tw`（繁中夹简体字）+ `violation-en-in-chinese`（en 里写着中文） + `violation-abbrev-key`（key 用缩写）+ `violation-key-naming`（含下划线）+ `violation-key-depth`（4 段）+ `violation-extra-key`（某语多出 key）+ `clean-no-hardcoded-han`（代码无汉字，注释里的中文被剥掉）+ `violation-hardcoded-han`（代码里写死汉字文案）|
 | `check-i18n-types` | `clean`（产物与三处语言包生成的类型一致）+ `violation-stale`（产物里的 key 与语言包对不上 → 过期）|
 | `check-readme-values` | `clean` + `violation`（README 色值与 tokens 不一致）|
 | `check-plan-md` | `clean` + `violation-width`（表格列数不一致）+ `violation-orphan-row`（孤立表格行）|
@@ -50,7 +50,7 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 
 - **`check-generated`**：它会**真的重新生成**一遍产物再比对 —— 需要整套图标雪碧图与清单，还要一个**可写的副本目录**（它会把生成结果写进去），属于集成级检查。不喂样本，靠**日常运行**（它就是产物一致性的那一道）。
 
-除 `check-generated` 外，**其余检查器每条规则都有样本**（共 54 个用例）。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
+除 `check-generated` 外，**其余检查器每条规则都有样本**（共 56 个用例）。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
 
 ## 加一个样本
 
