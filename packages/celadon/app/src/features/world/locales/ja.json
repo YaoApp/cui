@@ -1,0 +1,13 @@
+{
+  "world.title": "World",
+  "world.navLabel": "ワールドナビゲーション",
+  "world.filter": "フィルター",
+  "world.filterPlaceholder": "ワールド名",
+  "world.detailLabel": "ワールドの詳細",
+  "world.share": "このビューを共有",
+  "world.missing": "そのワールドはありません：{{id}}",
+  "entityPanel.label": "エンティティパネル",
+  "entityPanel.close": "閉じる",
+  "entityPanel.kind": "種別",
+  "entityPanel.id": "ID"
+}

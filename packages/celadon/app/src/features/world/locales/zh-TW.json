@@ -1,0 +1,13 @@
+{
+  "world.title": "World",
+  "world.navLabel": "世界導覽",
+  "world.filter": "篩選",
+  "world.filterPlaceholder": "世界名稱",
+  "world.detailLabel": "世界詳情",
+  "world.share": "分享這個檢視",
+  "world.missing": "沒有這個世界：{{id}}",
+  "entityPanel.label": "項目面板",
+  "entityPanel.close": "關閉",
+  "entityPanel.kind": "類型",
+  "entityPanel.id": "編號"
+}

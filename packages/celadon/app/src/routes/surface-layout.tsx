@@ -1,4 +1,5 @@
 import { Outlet, useParams } from 'react-router'
+import { useTranslation } from '@/platform/i18n'
 import { useUrlBinding } from '@/platform/router/use-url-binding'
 import { isSurface } from '@/platform/utils/surfaces'
 import { type Entry } from '@/stores/entry'
@@ -14,6 +15,7 @@ import './surface-layout.less'
 export function SurfaceLayout() {
   const { surface } = useParams()
   const current = useSurface()
+  const { t } = useTranslation()
   const entry = useSidePanelStore((s) => s.entry)
   const open = useSidePanelStore((s) => s.open)
 
@@ -37,14 +39,14 @@ export function SurfaceLayout() {
   })
 
   if (!isSurface(surface)) {
-    return <main className="surface surface--main">未知的界面表面：{String(surface)}</main>
+    return <main className="surface surface--main">{t('surface.unknown', { surface: String(surface) })}</main>
   }
 
   if (current === 'side') {
     return (
       <div className="surface surface--split">
-        <main className="surface__primary" aria-label="主区" />
-        <aside className="surface__side" aria-label="侧边">
+        <main className="surface__primary" aria-label={t('surface.main')} />
+        <aside className="surface__side" aria-label={t('surface.side')}>
           <Outlet />
         </aside>
       </div>
@@ -52,7 +54,7 @@ export function SurfaceLayout() {
   }
 
   return (
-    <main className="surface surface--main" aria-label="主区">
+    <main className="surface surface--main" aria-label={t('surface.main')}>
       <Outlet />
     </main>
   )
