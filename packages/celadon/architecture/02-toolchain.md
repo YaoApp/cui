@@ -1,7 +1,7 @@
 # 02 · 工具链
 
-- **版本**：v1.21
-- **最后修改**：2026-10-02 16:56:14
+- **版本**：v1.22
+- **最后修改**：2026-10-02 17:00:33
 - **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具
 
 ## 规则
@@ -22,13 +22,14 @@
 packages/celadon/          包根 = 设计体系（不是应用）
 ├── app/                   Vite 的 root（index.html 在这）
 │   └── src/               应用源码 —— 分层见 00 / 03
-│       ├── components/base/         组件层：基础组件（其余组件平铺在 components/ 下）
+│       ├── components/                 组件层：基础件在 base/；组件独有的语言包在本目录内
+│       ├── components/base/         基础组件（其余组件平铺在 components/ 下）
 │       ├── features/                  能力层（页面 + 组件 + 状态 + 测试，按业务自洽）
 │       ├── routes/                    路由表与表面装配（与 features 并列 · 只装配）
 │       ├── stores/                    公共态：跨功能的事实（无主状态 · 文件不加 .store 后缀）
 │       ├── data/                      数据层
 │       ├── platform/                  平台层（含 utils/：纯函数 · 常量 · 类型 · 不依赖上层）
-│       ├── locales/                   跨 feature 的公共词；**feature 私有的词在各 feature 自己目录内**
+│       ├── locales/                   共用词（两处以上用的）；**私有的词跟它自己走**：feature 在 features/<域>/locales/，组件在 components/<名>/locales/
 │       └── test-support/              测试支持（setup · 共享夹具 · store 重置）
 │   └── logs/                运行日志与截图（<日期>/<层>-<HHMM>.log · <日期>/shots/<场景>/，git 忽略）
 ├── architecture/          本目录（工程规范）
