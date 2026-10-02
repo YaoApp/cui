@@ -24,8 +24,7 @@ packages/celadon/          包根 = 设计体系（不是应用）
 │       ├── components/base/         组件层：基础组件（其余组件平铺在 components/ 下）
 │       ├── features/                  能力层（页面 + 组件 + 状态 + 测试，按业务自洽）
 │       ├── data/                      数据层
-│       ├── platform/                  平台层
-│       ├── lib/                       工具层（纯函数 · 常量 · 类型 · 无依赖）
+│       ├── platform/                  平台层（含 utils/：纯函数 · 常量 · 类型 · 不依赖上层）
 │       └── test-support/              测试支持（setup · 共享夹具 · store 重置）
 │   └── logs/                运行日志与截图（<日期>/<层>-<HHMM>.log · <日期>/shots/<场景>/，git 忽略）
 ├── architecture/          本目录（工程规范）

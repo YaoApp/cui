@@ -27,7 +27,8 @@
   平台层  app/src/platform/     宿主全局 · 路由与挂载 · 主题注入 · 运行时壳
 ```
 
-箭头 = 允许的依赖方向（上层可依赖下层）。`app/src/lib/`（纯函数 · 常量 · 类型）无依赖，任何层可用。
+箭头 = 允许的依赖方向（上层可依赖下层）。**`app/src/platform/utils/`**（纯函数 · 常量 · 类型）不依赖任何上层，
+**所有层可用** —— 跨层共享的东西放这里，不另设 `lib/`。
 `design/` 与 `scripts/` 是资产与工具，不进应用依赖图。
 
 同层之内：
@@ -117,11 +118,11 @@ app/src/platform/
 ├── host/globals.ts              window.$app / $global 的类型化封装与初始化
 ├── navigation/adapter.ts        导航适配器（宿主 / 无壳 / 桌面各一实现）
 ├── theme/theme.store.ts         主题状态（写根元素 data-theme）
+├── utils/                       纯函数 · 常量 · 类型（不依赖上层 · 所有层可用）
 └── mount.tsx                    挂载入口
 ```
 
 ## 3. 待讨论
 
 - `components/base/` 的上提阈值是否定"第三个使用者"。
-- `app/src/lib/` 收窄为"纯函数"，还是也放跨层常量与类型。
 - 是否加 `app/src/routes/`（薄路由）与 `features/` 并列。
