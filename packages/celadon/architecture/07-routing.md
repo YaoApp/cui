@@ -70,7 +70,7 @@
 | **表面与其布局**：`main` 主区 · `side` 侧边 | `surface-layout.tsx` · `surfaces.ts` |
 | **导航项** 与"哪条 URL 是当前"的比较 | `platform/utils/nav.ts` —— 跨层共享的常量与纯函数，`routes/` 与 feature 都要用 |
 
-- **方向**：`routes/` 可以 import `features/`；**`features/` 不许 import `routes/`**（单向）。
+- **方向**：`routes/` 在依赖方向最上层 —— 可以 import 组件层与能力层；**反过来不行**（单向）。
 - 跨层共享的词汇与纯函数住 `platform/utils/`（`surfaces.ts` · `nav.ts` · `share-url.ts`）—— 否则 feature 为了拿它们
   只能反向 import `routes/`。
 - **路由路径不得占用 12 个保留前缀**（见 `04-host-integration.md`）。

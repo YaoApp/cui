@@ -18,13 +18,15 @@
 源码根 **`app/src/`**：`app/` 是 Vite root，**目录名即公开 URL**，源码再下一层才避开引擎保留前缀（见 `04-host-integration.md`）。
 
 ```
+  路由    app/src/routes/      路由表 · 表面布局（**只装配，不写业务**）
+    ↑
   组件层  app/src/components/   纯视觉 + 行为 · 不认识业务 · 不发请求
     ↑
   能力层  app/src/features/     按业务切分 · 页面 + 组件 + 状态 + 测试都在里面 · 自洽
     ↑
   数据层  app/src/data/         openapi 客户端 · 取数钩子 · 流式通道
     ↑
-  平台层  app/src/platform/     宿主全局 · 路由与挂载 · 主题注入 · 运行时壳
+  平台层  app/src/platform/     宿主全局 · **路由机制与挂载** · 主题注入 · 运行时壳
 ```
 
 箭头 = 允许的依赖方向（上层可依赖下层）。**`app/src/platform/utils/`**（纯函数 · 常量 · 类型）不依赖任何上层，
@@ -35,7 +37,8 @@
 
 - `components/<名>/` **可以**引用 `components/base/`；`base/` 不可以引用上层组件。
 - `features/<域>/` 内部自洽；**feature 之间不许互相 import**。
-- **`app/src/routes/` 与 `features/` 并列**：可以 import `features/`；**`features/` 不许 import `routes/`**（单向）。
+- **`app/src/routes/` 在依赖方向的最上层**（目录上与 `features/` 并列，都在 `app/src/` 下）：
+  它可以 import 组件层与能力层，**反过来不行** —— `features/` 与 `components/` 都不许 import `routes/`。
   路由只做装配，业务实现不住 `routes/`（地址语法见 `07-routing.md`）。
 
 写 `import` 前问一句：**我是不是在往上引？** 是，就错了。
