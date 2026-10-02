@@ -28,7 +28,7 @@
 | 04 | [host-integration](04-host-integration.md) | 宿主挂载 · 保留前缀 · 代理 · SSE / WebSocket | ✅ 已定 |
 | 05 | [data-and-api](05-data-and-api.md) | 传输 · 鉴权 · 后端 SDK · 取数钩子 · 流式 | ✅ 已定 |
 | 06 | [state](06-state.md) | **状态跟 feature 走** · 跨 feature 的落位判据 | ✅ 已定 |
-| 07 | [routing](07-routing.md) | 库模式 · basename · 保留前缀 | ✅ 已定 |
+| 07 | [routing](07-routing.md) | 地址语法（对象在路径 · 表面在首段 · 面板在具名 query）· 谁说了算 · `routes/` 的结构 · 文档标题 | ✅ 已定 |
 | 08 | [i18n](08-i18n.md) | 语言包结构 · 新增语言 · 类型与格式化归属 | ✅ 已定 |
 | 09 | [theme](09-theme.md) | token 单一来源 · 主题映射 · 运行期对比度 | ✅ 已定 |
 | 10 | [icons](10-icons.md) | 图标工程落点（规格见 design） | ✅ 已定 |
