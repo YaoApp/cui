@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   line-height: var(--line-height-cjk);
-  /* 页面自己声明铺满：壳是弹性列，这一条才生效（父级高度 auto 时 min-block-size:100% 会被丢掉）*/
+  /* 页面自己声明铺满：壳是弹性列，这一条才生效（父级高度 auto 时 min-block-size:100% 会被丢掉） */
   flex: 1;
   background: var(--background-content);
 
@@ -23,6 +23,7 @@
   gap: var(--spacing-8);
   padding: var(--spacing-8) 0;
 }
+
 .hello__cell {
   display: flex;
   flex-direction: column;
@@ -36,6 +37,7 @@
   border-radius: var(--radius-small);
   color: var(--text-secondary);
 }
+
 .hello__cell code {
   font-family: var(--font-family-monospace);
   font-size: var(--font-size-label);

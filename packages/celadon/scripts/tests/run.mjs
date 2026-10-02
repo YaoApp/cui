@@ -50,7 +50,7 @@ for (const [script, group] of SUITES) {
     if (scratch) cpSync(dir, scratch, { recursive: true })
     const target = scratch ?? dir
     const expectPass = name.startsWith('clean')
-    let ok, output = ''
+    let ok, output
     try {
       output = execFileSync('node', [resolve(SCRIPTS, script), target], { encoding: 'utf8', stdio: 'pipe' })
       ok = true

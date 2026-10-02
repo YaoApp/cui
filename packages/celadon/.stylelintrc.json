@@ -1,0 +1,20 @@
+{
+  "extends": [
+    "stylelint-config-standard-less"
+  ],
+  "ignoreFiles": [
+    "app/dist/**",
+    "node_modules/**",
+    "app/src/platform/theme/tokens.css",
+    "design/tokens.css"
+  ],
+  "rules": {
+    "custom-property-pattern": null,
+    "selector-class-pattern": null,
+    "no-descending-specificity": null,
+    "comment-empty-line-before": null,
+    "declaration-empty-line-before": null,
+    "value-keyword-case": null,
+    "number-max-precision": null
+  }
+}
