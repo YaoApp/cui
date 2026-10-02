@@ -1,7 +1,7 @@
 # 09 · 主题
 
-- **版本**：v1.20
-- **最后修改**：2026-10-02 18:21:43
+- **版本**：v1.21
+- **最后修改**：2026-10-02 18:35:17
 - **说明**：设计→代码的转换 · 偏好与解析（三态）· Base UI 基础件 · 页面底色 · 对比度
 
 ## 1. 规则
@@ -20,9 +20,9 @@
 | 项 | 规则 |
 | --- | --- |
 | 源 | `design/tokens.less` —— **唯一**手写处；规范变更先落这里 |
-| 转换 | `node design/build-css.mjs` 生成 CSS 变量（产物带生成头，**不许手改**）|
-| 消费 | 应用**只**经 `app/src/platform/theme/` 拿主题；组件与 feature 不直接引设计文件 |
-| 校验 | `check-generated.mjs` 重新生成并与仓库比对，**不一致即失败** |
+| 转换 | `node scripts/build-css.mjs` 一次生成两份相同产物：`design/tokens.css` 与 `app/src/platform/theme/tokens.css`（带生成头，**不许手改**）|
+| 消费 | 产物落 `app/src/platform/theme/tokens.css`；应用在**入口引一次**，**只经平台层**；**组件与 feature 不引设计文件** |
+| 校验 | `check-generated.mjs` 重新生成并与仓库比对**两份产物**（`design/` 与 `app/src/platform/theme/`），**不一致即失败** |
 
 ## 3. 偏好与解析
 

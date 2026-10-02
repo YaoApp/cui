@@ -1,7 +1,7 @@
 # 02 · 工具链
 
-- **版本**：v1.25
-- **最后修改**：2026-10-02 18:01:30
+- **版本**：v1.26
+- **最后修改**：2026-10-02 18:35:16
 - **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具
 
 ## 规则
@@ -30,7 +30,7 @@ packages/celadon/          包根 = 设计体系（不是应用）
 │       ├── routes/                    路由表与表面装配（与 features 并列 · 只装配）
 │       ├── stores/                    公共态：跨功能的事实（无主状态 · 文件不加 .store 后缀）
 │       ├── data/                      数据层
-│       ├── platform/                  平台层（含 utils/：纯函数 · 常量 · 类型 · 不依赖上层）
+│       ├── platform/                  平台层（含 utils/：纯函数 · 常量 · 类型 · 不依赖上层；theme/tokens.css 为生成物）
 │       ├── locales/                   共用词（两处以上用的）；**私有的词跟它自己走**：feature 在 features/<域>/locales/，组件在 components/<名>/locales/
 │       └── test-support/              测试支持（setup · 共享夹具 · store 重置）
 │   └── logs/                运行日志与截图（<日期>/<层>-<HHMM>.log · <日期>/shots/<场景>/，git 忽略）
@@ -49,7 +49,7 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | 命令 | 作用 |
 | --- | --- |
 | dev / build / preview | 应用 |
-| `scripts/build-css.mjs` | `tokens.less` → `tokens.css`（**唯一产物方向**）|
+| `scripts/build-css.mjs` | `tokens.less` → 两份相同 `tokens.css`：`design/tokens.css` 与 `app/src/platform/theme/tokens.css`（**唯一产物方向**）|
 | `scripts/build-i18n.mjs` | `i18n/*.json` → `bundle.js`（设计页用）|
 | `scripts/build-i18n-types.mjs` | 三处语言包（基准 `zh-CN`）→ `app/src/platform/i18n/i18n-types.d.ts`（跑 `pnpm build:i18n`；产物**提交进仓库**，见 `08-i18n.md`）|
 | `scripts/check-*.mjs` | 十一个检查器（见 `13-quality-gates.md`）|
