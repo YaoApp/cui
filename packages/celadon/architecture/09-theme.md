@@ -27,12 +27,13 @@
 
 ## 主题状态与切换
 
-主题归 **`app/src/platform/theme/theme-store.ts`**（zustand + persist）：`theme`（`light` / `dark`）· `setTheme` · `toggle`。
+主题归 **`app/src/platform/theme/theme.store.ts`**（zustand + persist）：`theme`（`light` / `dark`）· `setTheme`。
 它只做一件事 —— 把当前主题写到根元素的 `data-theme` 上；`tokens.css` 里 `[data-theme='dark'] .celadon` 会切掉整套值，
 **组件不需要知道当前深浅**。选择存 `localStorage`（键 `cui.theme`），刷新后还在。
+副作用放在**初始写一次 + 订阅变化**里，而不是塞进 `setTheme` —— 这样持久化水合、测试复位等任何改到主题的路径都会同步 DOM。
 
-切换控件是 **`app/src/components/theme-toggle/`** —— 纯组件，只收 `theme` + `onToggle` 两个 props，
-不碰 store；由 feature 接线。新增平台级 store 时，记得在 `app/src/test-support/setup.ts` 里补一行重置。
+切换控件是 **`app/src/components/theme-toggle/`** —— 纯组件，只收 `theme` + `onChange` 两个 props，
+不碰 store；由 feature 接线。视觉用设计系统里的 `.seg`（分段控件）。测试里的 store 复位是自动的，不必手补。
 
 ## 待讨论
 
