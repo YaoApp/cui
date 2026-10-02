@@ -3,6 +3,7 @@ import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
 import { Nav } from '@/components/nav'
 import { buildShareUrl } from '@/platform/utils/share-url'
+import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
 import { EntityPanel } from './components/entity-panel'
 import { useWorldUrlSync } from './use-world-url-sync'
@@ -18,6 +19,7 @@ export function WorldPage() {
   const { query, selectedEntityId, setFilter, openEntity } = useWorldUrlSync()
 
   const world = findWorld(worldId)
+  usePageTitle(world ? world.name : 'World')
   const entity = findEntity(world, selectedEntityId)
   const needle = query.trim().toLowerCase()
   const visible = WORLDS.filter((w) => w.name.toLowerCase().includes(needle))

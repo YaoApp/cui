@@ -28,6 +28,12 @@
 - **分享链接只有一处生成**：`platform/utils/share-url.ts` 的 `buildShareUrl(...)`，带单测 ——
   手拼 URL 是这套东西烂掉的开始。放在 utils 而不是 routes，是因为 feature 也要用它（方向见下）。
 
+## 文档标题
+
+**标题跟路由走**：页面声明自己的标题（`platform/router/use-page-title.ts` 的 `usePageTitle()`），
+标签页 · 历史 · 书签 · 读屏读的都是它。列表页给固定名字，**详情页用对象名**（用户才知道开的是哪一个）。
+`document.title` 是宿主全局，所以这个 hook 住平台层（铁律 4）。
+
 ## 谁说了算
 
 **store 是真相，URL 是它的书签。** 两条方向各走各的路：
