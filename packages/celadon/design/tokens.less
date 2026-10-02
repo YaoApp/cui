@@ -356,7 +356,7 @@
   .avatar      { background: var(--brand-soft); color: var(--brand-ink); border: 1px solid var(--brand-ink); }
   .tab-active  { background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-control); }
   /* 输入框：六态（真实伪类与 .is-* 静态类一一对应，后者供设计稿/静态页同时展示多态） */
-  .input       { background: var(--background-field); border: 1px solid var(--border-control); color: var(--text-primary);
+  .input       { background: var(--background-field); border: 1px solid var(--border-control); color: var(--text-primary); padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-medium); font: inherit; font-size: var(--font-size-caption);
     &::placeholder { color: var(--text-placeholder); }                       /* 占位 */
     &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover); }
     /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
@@ -374,4 +374,7 @@
     &:disabled { background: var(--background-disabled); color: var(--text-disabled); border-color: var(--border-disabled); } }
   .focusable:focus-visible { box-shadow: var(--focus-ring); outline: none; }
   .scrim       { background: var(--scrim); }
+    font:inherit; font-size:var(--font-size-caption);
 }
+  .link        { color:var(--brand-ink); text-decoration:underline; }
+

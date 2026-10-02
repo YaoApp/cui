@@ -432,6 +432,8 @@
   /* 错误提示文字（危险色的文字档） */
   /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .on */
   /* 输入框：六态（真实伪类与 .is-* 静态类一一对应，后者供设计稿/静态页同时展示多态） */
+  font: inherit;
+  font-size: var(--font-size-caption);
 }
 .celadon .btn-primary,
 [data-theme] .celadon .btn-primary {
@@ -568,6 +570,10 @@
   background: var(--background-field);
   border: 1px solid var(--border-control);
   color: var(--text-primary);
+  padding: var(--spacing-4) var(--spacing-8);
+  border-radius: var(--radius-medium);
+  font: inherit;
+  font-size: var(--font-size-caption);
   /* 占位 */
   /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
   /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
@@ -648,4 +654,8 @@
 .celadon .scrim,
 [data-theme] .celadon .scrim {
   background: var(--scrim);
+}
+.link {
+  color: var(--brand-ink);
+  text-decoration: underline;
 }
