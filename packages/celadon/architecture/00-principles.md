@@ -53,8 +53,9 @@ app/src/components/<名>/
 ├── <名>.tsx               组件本体
 ├── <名>.test.tsx          单元用例（与源文件同目录）
 ├── <名>.less              样式（可选：能用设计类就不写）
+├── <名>.store.ts          私有状态（可选：只服务这个组件 · 单测是 <名>.store.test.ts）
 └── parts/                 私有子组件（可选）—— 每项也是一个组件，同一套结构
-    └── <子组件>/          index.ts · <子组件>.tsx · <子组件>.test.tsx · <子组件>.less · parts/
+    └── <子组件>/          index.ts · <子组件>.tsx · <子组件>.test.tsx · <子组件>.less · <子组件>.store.ts · parts/
 ```
 
 ```
