@@ -99,7 +99,11 @@ if (!twelve) problems.push('S2: 连点 12 下后计数不是 12')
 
 // S3 只用键盘
 await p.goto(BASE_URL, { waitUntil: 'networkidle' })
-await p.keyboard.press('Tab')
+// 头部有导航链接在前：用 Tab 走到「刷新」（脚本实现细节，剧本里用户的动作没变）
+for (let i = 0; i < 12; i++) {
+  if (await p.evaluate(() => document.activeElement?.innerText?.trim() === '刷新')) break
+  await p.keyboard.press('Tab')
+}
 const focused = await p.evaluate(() => ({ tag: document.activeElement?.tagName, text: document.activeElement?.innerText?.trim(), shadow: getComputedStyle(document.activeElement).boxShadow }))
 await shot(p, 's3-focus.png')
 say(`S3 focus     : ${JSON.stringify(focused)}`)
