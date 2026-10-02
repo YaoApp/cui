@@ -1,7 +1,7 @@
 # architecture/AGENTS · 任务索引
 
-- **版本**：v1.1
-- **最后修改**：2026-10-02 20:50:42
+- **版本**：v1.2
+- **最后修改**：2026-10-02 20:51:42 20:50:42
 - **说明**：任务与分册对应 · 动手前的约束 · 编写测试 · 开发与验证 · 交付要求
 
 > 本文回答一个问题：**拿到一项任务，该读哪一册、有哪些约束、做完如何验证。**
@@ -11,19 +11,22 @@
 
 | 任务 | 分册 | 约束 |
 | --- | --- | --- |
-| 新增页面 / 功能 | [03](03-boundaries.md) → [06](06-state.md) → [07](07-routing.md) → [08](08-i18n.md) | 先定落位（`routes/` → `components/` → `features/` → `stores/` → `data/` → `platform/`）；状态先定归属再定是否入地址栏；文案入语言包 |
-| 修改颜色 / 间距 / 字号 | [09](09-theme.md) | 只改 `design/tokens.less`，再执行 `node scripts/build-css.mjs`；代码内不得出现字面值 |
-| 新增图标 / 品牌 | [10](10-icons.md) | 图标改 `design/icons/manifest.json`，再执行 `node scripts/build-icons.mjs`；界面图标用 `<Icon>`，品牌标识用 `<BrandMark>` |
-| 新增 / 修改组件 | [03](03-boundaries.md) | 控件一律包装 `@base-ui/react`（置于 `components/base/`）；不得裸写 `<button>` / `<select>`；目录内的 `.less` 必须被同目录 `.tsx` 引入 |
-| 接入后端 / 取数 / 流式 | [05](05-data-and-api.md) · [04](04-host-integration.md) | 传输 · 鉴权 · 取数钩子 · 流式的形状见 05；宿主挂载与代理见 04 |
-| 修改地址栏 / 深链 | [07](07-routing.md) · [06](06-state.md) | 对象在路径、表面在首段、面板在具名查询参数；URL 只在动作中写入，不在 `useEffect` 中写入 |
-| 新增语言 / 修改文案 | [08](08-i18n.md) | 语言包随代码落位；四语齐备（基准 `zh-CN` · `en-US` · `zh-TW` · `ja`）；代码内不得出现硬编码中文文案 |
+| 新增页面 / 功能 | [03](03-boundaries.md) → [06](06-state.md) → [07](07-routing.md) → [08](08-i18n.md) → [14](14-testing.md) | 先定落位（`routes/` → `components/` → `features/` → `stores/` → `data/` → `platform/`）；状态先定归属再定是否入地址栏；文案入语言包 |
+| 修改颜色 / 间距 / 字号 | [09](09-theme.md) → [14](14-testing.md) | 只改 `design/tokens.less`，再执行 `node scripts/build-css.mjs`；代码内不得出现字面值 |
+| 新增图标 / 品牌 | [10](10-icons.md) → [14](14-testing.md) | 图标改 `design/icons/manifest.json`，再执行 `node scripts/build-icons.mjs`；界面图标用 `<Icon>`，品牌标识用 `<BrandMark>` |
+| 新增 / 修改组件 | [03](03-boundaries.md) → [14](14-testing.md) | 控件一律包装 `@base-ui/react`（置于 `components/base/`）；不得裸写 `<button>` / `<select>`；目录内的 `.less` 必须被同目录 `.tsx` 引入 |
+| 接入后端 / 取数 / 流式 | [05](05-data-and-api.md) · [04](04-host-integration.md) → [14](14-testing.md) | 传输 · 鉴权 · 取数钩子 · 流式的形状见 05；宿主挂载与代理见 04 |
+| 修改地址栏 / 深链 | [07](07-routing.md) · [06](06-state.md) → [14](14-testing.md) | 对象在路径、表面在首段、面板在具名查询参数；URL 只在动作中写入，不在 `useEffect` 中写入 |
+| 新增语言 / 修改文案 | [08](08-i18n.md) → [14](14-testing.md) | 语言包随代码落位；四语齐备（基准 `zh-CN` · `en-US` · `zh-TW` · `ja`）；代码内不得出现硬编码中文文案 |
 | 编写测试 | [14](14-testing.md) | 单元用例与源文件同目录；浏览器与拟人用例置于 `features/<域>/tests/`；一个场景一个文件 |
 | 新增 / 修改门禁 | [13](13-quality-gates.md) | 每条规则配一个正例与一个违规例；新增规则必须同时补违规样本 |
 | 修改工程配置 / 脚本 | [02](02-toolchain.md) | 构建工具 · 框架 · 脚本入口均在此册 |
-| 日期 / 数字 / 长列表 / 表格 | [11](11-formatting-and-lists.md) | 显示走 `Intl`；运算与时区走 `date-fns`（本章随实践推进更新）|
-| 动效 | [12](12-motion.md) | 默认 CSS 与 token；仅手势 / 编排 / 布局动画引入 `motion`（本章随实践推进更新）|
+| 日期 / 数字 / 长列表 / 表格 | [11](11-formatting-and-lists.md) → [14](14-testing.md) | 显示走 `Intl`；运算与时区走 `date-fns`（本章随实践推进更新）|
+| 动效 | [12](12-motion.md) → [14](14-testing.md) | 默认 CSS 与 token；仅手势 / 编排 / 布局动画引入 `motion`（本章随实践推进更新）|
 | 全局铁律与结构总纲 | [00](00-principles.md) | 八条铁律 + 结构总纲；开工前读此一册即可 |
+
+**每一行改动都带测试** —— 上表凡是**改动行为**的任务，分册列都以 [`14`](14-testing.md) 收尾：先按 §3 选层，
+再补对应用例。**纯配置改动**（`02` 工程配置 · `13` 门禁本身的样本）按其自身规则走。
 
 ## 2. 动手前的约束
 
