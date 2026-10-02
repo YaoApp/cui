@@ -16,6 +16,7 @@ export type I18nKey =
   | 'localeSwitch.enUS'
   | 'localeSwitch.ja'
   | 'localeSwitch.label'
+  | 'localeSwitch.system'
   | 'localeSwitch.zhCN'
   | 'localeSwitch.zhTW'
   | 'nav.appLabel'
@@ -67,6 +68,7 @@ declare module 'i18next' {
         'localeSwitch.enUS': string
         'localeSwitch.ja': string
         'localeSwitch.label': string
+        'localeSwitch.system': string
         'localeSwitch.zhCN': string
         'localeSwitch.zhTW': string
         'nav.appLabel': string

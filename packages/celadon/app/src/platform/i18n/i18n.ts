@@ -1,8 +1,9 @@
 import i18next from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { DEFAULT_LOCALE } from './resolve-locale'
 
 /** 基准语言：唯一手写的源（见 architecture/08-i18n.md §5）。 */
-export const DEFAULT_LOCALE = 'zh-CN'
+export { DEFAULT_LOCALE } from './resolve-locale'
 
 type LocaleModule = { default: Record<string, string> }
 
