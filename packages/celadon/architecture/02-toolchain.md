@@ -1,7 +1,7 @@
 # 02 · 工具链
 
-- **版本**：v1.28
-- **最后修改**：2026-10-02 19:40:50
+- **版本**：v1.29
+- **最后修改**：2026-10-02 20:26:54
 - **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具
 
 ## 规则
@@ -52,7 +52,7 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | dev / build / preview | 应用 |
 | `scripts/build-css.mjs` | `tokens.less` → 两份相同 `tokens.css`：`design/tokens.css` 与 `app/src/platform/theme/tokens.css`（**唯一产物方向**）|
 | `scripts/build-i18n.mjs` | `i18n/*.json` → `bundle.js`（设计页用）|
-| `scripts/build-icons.mjs` | 设计目录的雪碧图 → 演示页内联 + **应用侧** `app/src/platform/icons/{sprite.svg,icon-ids.ts}`（见 `10-icons.md`）|
+| `scripts/build-icons.mjs` | 设计目录的雪碧图 → 演示页内联 + **应用侧** `app/src/platform/icons/{sprite.svg,icon-ids.ts}`；**第三方品牌**从设计分片里按清单挑选一并生成（见 `10-icons.md`）|
 | `scripts/build-i18n-types.mjs` | 三处语言包（基准 `zh-CN`）→ `app/src/platform/i18n/i18n-types.d.ts`（跑 `pnpm build:i18n`；产物**提交进仓库**，见 `08-i18n.md`）|
 | `scripts/check-*.mjs` | 十一个检查器（见 `13-quality-gates.md`）|
 | `scripts/tests/run.mjs` | 检查器自身的样本用例 |
