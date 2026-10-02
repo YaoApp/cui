@@ -115,7 +115,7 @@ IANA Area/Location      ← 如 Asia/Shanghai、America/New_York
   **参数必须与本表一致**（如 `hourCycle: 'h23'`），**语言取当前生效语言**（i18next 自身即如此）
 - **`i18next` 不覆盖的**：周起始日（`Intl.Locale.weekInfo`）· 列表（`Intl.ListFormat`）· 独立时间戳 → **直接调 `Intl`**，语言用 `i18n.resolvedLanguage`（**不用浏览器语言** ✗）
 - **禁止** ✗：不带 locale 参数的 `toLocaleDateString()` / `toLocaleString()` —— 那会跟随浏览器语言，出现"中文界面英文日期"
-- **日期运算与时区换算**（加减 · 区间 · 日历网格 · 时区转换）**不属于格式化** ✗ —— 本表不管；**格式化永远不需要日期库，`Intl` 就是全部** ✓；**运算与时区换算用 `date-fns` + `@date-fns/tz`**（见 `01` 的 4.12）
+- **日期运算与时区换算**（加减 · 区间 · 日历网格 · 时区转换）**不属于格式化** ✗ —— 本表不管；**格式化永远不需要日期库，`Intl` 就是全部** ✓；**运算与时区换算用 `date-fns` + `@date-fns/tz`**（见 `architecture/01-package-and-repo.md` 的 4.12）
 
 ## 4. 双向文本（RTL）
 
@@ -152,7 +152,7 @@ IANA Area/Location      ← 如 Asia/Shanghai、America/New_York
 
 ## 6. 台账
 
-> 规则同 `00`：每从旧包复制一个文件，登记 **源 → 目标 → 改了什么 → 为什么**。
+> 规则同 `architecture/00-principles.md`：每从旧包复制一个文件，登记 **源 → 目标 → 改了什么 → 为什么**。
 
 | 源 | 目标 | 改动 | 原因 |
 | --- | --- | --- | --- |

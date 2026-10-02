@@ -11,7 +11,7 @@
 - store 文件与所属单元同名、加 `.store`（`features/inbox/inbox.store.ts` · `components/data-table/data-table.store.ts`），导出 `useXxxStore`。
 - **组件也可以有自己的私有 store**（只服务它自己的局部状态）；跨组件的状态往上走，见下表。
 - **测试里的 store 复位是自动的**（`test-support` 用 `import.meta.glob` 发现所有 `*.store.ts`），新增 store 不用改配置。
-- store **不写 DOM、不发请求**；取数走数据层钩子（见 `05`）。
+- store **不写 DOM、不发请求**；取数走数据层钩子（见 `05-data-and-api.md`）。
 
 ## 跨 feature 的状态（先别预设）
 
@@ -26,7 +26,7 @@
 ## 什么不进 store
 
 - 只在单个组件内用的 UI 状态（展开 / 输入中）→ 留在组件。
-- 路由状态 → 交给路由（见 `07`）。
+- 路由状态 → 交给路由（见 `07-routing.md`）。
 
 ## 待讨论
 

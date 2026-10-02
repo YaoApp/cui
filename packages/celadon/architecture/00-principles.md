@@ -8,14 +8,14 @@
 2. **零反向依赖** —— 不 `import '@yaoapp/cui'`（旧包）。旧包不升级 · 不复活 · 不删。
 3. **依赖单向** —— 只能上层依赖下层（§2）；下层不引上层，同层不互相 import 业务件。
 4. **宿主是边界** —— `window.$app` / `window.$global` 只在平台层碰一次，之后以类型化接口向上暴露。
-5. **禁硬编码** —— 颜色 / 间距 / 圆角 / 字号不写字面量（系统色与品牌官方色除外，见 `09` / `10`）。
+5. **禁硬编码** —— 颜色 / 间距 / 圆角 / 字号不写字面量（系统色与品牌官方色除外，见 `09-theme.md` / `10-icons.md`）。
 6. **全称命名** —— 不缩写（`btn` → `button`）；文件名 kebab-case。
 7. **平台差异走适配器** —— 宿主 / `/iframe` 无壳 / 桌面三端的差异由适配器接口注入（导航 · 存储 · 主题）；不许散落 `if (isDesktop)`。
-8. **边界由机器强制** —— 层间方向必须有会让 CI 失败的规则（`03` §4 · `13`）。
+8. **边界由机器强制** —— 层间方向必须有会让 CI 失败的规则（`03-boundaries.md` §4 · `13-quality-gates.md`）。
 
 ## 2. 分层与依赖方向
 
-源码根 **`app/src/`**：`app/` 是 Vite root，**目录名即公开 URL**，源码再下一层才避开引擎保留前缀（见 `04`）。
+源码根 **`app/src/`**：`app/` 是 Vite root，**目录名即公开 URL**，源码再下一层才避开引擎保留前缀（见 `04-host-integration.md`）。
 
 ```
   组件层  app/src/components/   纯视觉 + 行为 · 不认识业务 · 不发请求
@@ -40,7 +40,7 @@
 两条落位规则：
 
 - **路由薄** —— 路由只做装配，业务实现不住路由目录。
-- **组件不发请求** —— 组件里不出现 `fetch` / `EventSource` / `new WebSocket`，取数走数据层钩子（`05`）。
+- **组件不发请求** —— 组件里不出现 `fetch` / `EventSource` / `new WebSocket`，取数走数据层钩子（`05-data-and-api.md`）。
 
 ### 组件层
 
@@ -89,9 +89,10 @@ app/src/features/inbox/
 ├── inbox.test.tsx               单元用例
 ├── inbox.store.ts               状态（zustand + persist · 只服务本 feature）
 ├── inbox.store.test.ts          单元用例
-├── tests/                       整体场景：浏览器与拟人（见 `14`）
-│   ├── main-path.browser.ts
-│   └── main-path.agent.md · main-path.agent.mjs
+├── tests/                       整体场景：浏览器与拟人（细分见 `14-testing.md`）
+│   ├── main-path.browser.ts     浏览器用例（一个场景一个文件）
+│   └── main-path.agent.md       拟人剧本（三段：剧本 · 修改记录 · 测试记录）
+│       main-path.agent.mjs      同场景的采集脚本（开浏览器走剧本 · 截图 · 报客观测量）
 └── index.ts                     出口：只导出页面与必要类型
 ```
 

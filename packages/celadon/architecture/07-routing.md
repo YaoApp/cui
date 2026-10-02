@@ -6,9 +6,9 @@
 ## 规则
 
 - **React Router 库模式**：`react-router@^8`，**不装 `@react-router/dev`**（不用框架模式）。
-- **`basename` 与 Vite `base` 同源**，取自引擎注入的 `BASE`（见 `04`）。
-- 路由路径**不得**占用 12 个保留前缀（见 `04`）。
-- `/iframe` 下不渲染外壳（见 `04`）。
+- **`basename` 与 Vite `base` 同源**，取自引擎注入的 `BASE`（见 `04-host-integration.md`）。
+- 路由路径**不得**占用 12 个保留前缀（见 `04-host-integration.md`）。
+- `/iframe` 下不渲染外壳（见 `04-host-integration.md`）。
 
 ## 待讨论
 
