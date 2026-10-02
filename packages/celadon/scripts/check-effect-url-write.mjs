@@ -20,6 +20,9 @@ try { statSync(TARGET) } catch {
 }
 
 const CODE = /\.(?:[cm]?[jt]sx?)$/
+/* 唯一例外：绑定的实现本身。它做的就是"值 ↔ URL"这一件事，机制必须住在这里，
+   而且它守住了不变量（读只在 POP · 写没变就不动）。 */
+const ALLOWED = new Set(['platform/router/use-url-binding.ts'])
 const WRITES = /\b(?:setSearchParams|navigate)\s*\(/
 
 /** 从 `useEffect(` 的 `(` 开始，找到与它配对的 `)`；顺带跳过字符串与模板串，别被里面的括号骗了。 */
@@ -52,6 +55,7 @@ function walk(dir) {
     const full = join(dir, entry.name)
     if (entry.isDirectory()) { walk(full); continue }
     if (!CODE.test(entry.name)) continue
+    if (ALLOWED.has(relative(TARGET, full))) continue
     scanned++
     const source = readFileSync(full, 'utf8')
     let at = source.indexOf('useEffect(')
