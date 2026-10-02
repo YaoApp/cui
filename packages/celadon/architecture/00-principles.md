@@ -50,9 +50,14 @@
 
 ### 路由
 
-**`routes/` 在依赖方向最上层**（目录上与 `features/` 并列）：只装配 —— 路由表（URL → 元素）与
-表面布局（`main` 主区 · `side` 侧边）。机制住 `platform/router/`（router 实例 · basename 适配器 ·
-文档标题）；导航项与"哪条 URL 是当前"的比较住 `platform/utils/nav.ts`（`routes/` 与 feature 都要用）。
+**`routes/` 在依赖方向最上层**（目录上与 `features/` 并列），**只装配**：
+
+| 放什么 | 住哪 |
+| --- | --- |
+| 路由表（URL → 元素）· 表面布局（`main` 主区 · `side` 侧边）| `routes/` |
+| 机制：router 实例 · basename 适配器 · 文档标题 | `platform/router/` |
+| 导航项 · "哪条 URL 是当前"的比较 | `platform/utils/nav.ts`（`routes/` 与 feature 都要用）|
+
 地址语法：**对象在路径 · 表面在首段 · 面板与选中项在具名 query**（见 `07-routing.md`）。
 
 ### 组件层
