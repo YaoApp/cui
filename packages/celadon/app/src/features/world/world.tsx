@@ -1,5 +1,8 @@
-import { Link, useParams } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router'
+import { Header } from '@/components/header'
+import { Nav } from '@/components/nav'
 import { buildShareUrl } from '@/platform/utils/share-url'
+import { navWithActive } from '@/platform/utils/nav'
 import { EntityPanel } from './components/entity-panel'
 import { useWorldUrlSync } from './use-world-url-sync'
 import { findEntity, findWorld, WORLDS } from './worlds'
@@ -9,6 +12,8 @@ import './world.less'
    同一个组件也能被 `/side/world/...` 装进侧边 —— 侧边只是挂载点。 */
 export function WorldPage() {
   const { worldId } = useParams()
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { query, selectedEntityId, setFilter, openEntity } = useWorldUrlSync()
 
   const world = findWorld(worldId)
@@ -18,8 +23,18 @@ export function WorldPage() {
 
   if (worldId && !world) return <p className="world__missing">没有这个世界：{worldId}</p>
 
+  const worldNav = navWithActive(
+    pathname,
+    visible.map((item) => ({ label: item.name, href: `/main/world/${item.id}` })),
+  )
+
   return (
     <div className="world">
+      <Header title="World" onRefresh={() => navigate(0)}>
+        <Nav items={navWithActive(pathname)} label="应用导航" onSelect={(item) => navigate(item.href)} />
+      </Header>
+      {/* 同一组件、另一组 items：世界之间的导航 */}
+      <Nav items={worldNav} label="世界导航" onSelect={(item) => navigate(item.href)} />
       <form className="world__filter" role="search" onSubmit={(event) => event.preventDefault()}>
         <label className="world__label" htmlFor="world-q">
           过滤
@@ -56,22 +71,8 @@ export function WorldPage() {
               分享这个视图
             </a>
           </p>
-          <p className="world__back">
-            <Link to="/main/world">回到列表</Link>
-          </p>
         </section>
-      ) : (
-        <ul className="world__list">
-          {visible.map((item) => (
-            <li key={item.id} className="world__row">
-              <Link className="world__link" to={`/main/world/${item.id}`}>
-                {item.name}
-              </Link>
-              <span className="world__summary">{item.summary}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      ) : null}
 
       {entity ? <EntityPanel entity={entity} onClose={() => openEntity(undefined)} /> : null}
     </div>

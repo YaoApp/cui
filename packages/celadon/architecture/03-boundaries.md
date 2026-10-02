@@ -49,10 +49,11 @@
 
 归属判据（依次问）：
 
-1. 只描述"看起来是什么"、不含业务 → `components/base/`
-2. 由基础组件拼成、**仍不认识业务**、会被别的组件或 feature 用 → `components/<名>/`（可拆 `parts/`）
+1. 只描述"看起来是什么"、不含业务 → `components/base/`（原子控件）
+2. 由基础组件拼成、**仍不认识业务**、会被别的组件或 feature 用 → `components/<名>/`（可拆 `parts/`）——
+   **一出现就走这条，不必等第三个使用者**：`nav` 只被两个 feature 用，但它不认识任何业务，所以直接住 `components/`
 3. 出现业务名词或接口字段 → 留在 `features/<域>/components/`
-4. 跨两个 feature 复用 → 先留在原 feature，**出现第三个使用者**再上提到 `components/`
+4. **业务件**跨两个 feature 复用 → 先留在原 feature，出现第三个使用者再上提
 
 feature 私有组件**不许**出 `features/<域>/components/`；feature 之间也不许互相 import 组件。
 
