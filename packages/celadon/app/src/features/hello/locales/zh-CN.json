@@ -1,5 +1,6 @@
 {
   "hello.brands": "品牌标识",
+  "hello.brandsOther": "其他品牌",
   "hello.icons": "图标一览",
   "hello.refreshed": "已刷新 {{count}} 次",
   "hello.title": "Hello",

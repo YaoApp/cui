@@ -17,6 +17,12 @@ import { useHelloStore } from './hello.store'
    品牌用 manifest 里的全部自有标识；图标覆盖导航 / 动作 / 状态 / 文件 / 对象五类。 */
 const BRAND_IDS = ['brand-yao-agents', 'brand-yao-agents-mono', 'brand-yao', 'brand-yao-mono'] as const
 const BRAND_SAMPLE: readonly BrandId[] = BRAND_IDS
+/* "别人家的"品牌：设计里分片存放，应用侧由 build-icons.mjs 选一批生成进来（看效果用）。 */
+const OTHER_BRAND_SAMPLE: readonly BrandId[] = [
+  'brand-claude', 'brand-openai', 'brand-gemini', 'brand-grok', 'brand-deepseek', 'brand-qwen',
+  'brand-kimi', 'brand-doubao', 'brand-mistral', 'brand-midjourney', 'brand-perplexity', 'brand-cursor',
+]
+
 const ICON_SAMPLE: readonly IconId[] = [
   'i-chat', 'i-inbox', 'i-board', 'i-ws', 'i-book', 'i-nav-settings', 'i-nav-user', 'i-nav-help',
   'i-search', 'i-plus', 'i-act-edit', 'i-act-trash', 'i-act-refresh', 'i-act-download', 'i-act-filter', 'i-act-close',
@@ -50,6 +56,14 @@ export function HelloPage() {
         </div>
         <section className="hello__row" aria-label={t('hello.brands')}>
           {BRAND_SAMPLE.map((name) => (
+            <span className="hello__cell" key={name}>
+              <BrandMark name={name} size={24} />
+              <code>{name}</code>
+            </span>
+          ))}
+        </section>
+        <section className="hello__row" aria-label={t('hello.brandsOther')}>
+          {OTHER_BRAND_SAMPLE.map((name) => (
             <span className="hello__cell" key={name}>
               <BrandMark name={name} size={24} />
               <code>{name}</code>

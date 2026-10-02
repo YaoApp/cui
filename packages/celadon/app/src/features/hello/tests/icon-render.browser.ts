@@ -74,7 +74,7 @@ test('the demo lists a brand mark beside interface icons, all resolving', async 
       }
     }),
   )
-  expect(list.length).toBe(30)   /* 品牌 4 + 界面图标 26 */
+  expect(list.length).toBe(42)   /* 自有品牌 4 + 其他品牌 12 + 界面图标 26 */
   expect(list.every((x) => x.symbol)).toBe(true)
   const brand = list.find((x) => x.name?.startsWith('brand-'))
   expect(brand, 'the list shows a brand mark').toBeTruthy()

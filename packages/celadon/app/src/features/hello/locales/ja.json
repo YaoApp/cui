@@ -1,5 +1,6 @@
 {
   "hello.brands": "ブランドマーク",
+  "hello.brandsOther": "その他のブランド",
   "hello.icons": "アイコン一覧",
   "hello.refreshed": "{{count}} 回更新しました",
   "hello.title": "Hello",

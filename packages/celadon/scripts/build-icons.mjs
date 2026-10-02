@@ -22,11 +22,31 @@ const readSymbols = (file) => {
 };
 const symbolsById = { ...readSymbols('icons/lucide-sprite.svg'), ...readSymbols('icons/own-sprite.svg') };
 
+/* **第三方品牌**（"别人家的"）——设计里它们分片放在 icons/brand-sprite-N.svg，靠外部 `<use>` 引用。
+   应用不引外部文件（跨文件 `<use>` 有 Safari 与 CSP 的坑），所以这里挑一批直接并进应用雪碧图。
+   只挑一批：全部 339 个约 1.1 MB，装进演示包没有意义。 */
+const THIRD_PARTY = [
+  'brand-claude', 'brand-openai', 'brand-gemini', 'brand-grok', 'brand-deepseek', 'brand-qwen',
+  'brand-kimi', 'brand-doubao', 'brand-mistral', 'brand-midjourney', 'brand-perplexity', 'brand-cursor',
+];
+const brandIndex = JSON.parse(readFileSync('icons/brand-index.json', 'utf8'));
+const shardCache = new Map();
+const thirdParty = THIRD_PARTY.map((id) => {
+  const entry = brandIndex.find((e) => e.id === id);
+  if (!entry) throw new Error(`✗ third-party brand not in the index: ${id}`);
+  const file = `icons/brand-sprite-${entry.shard}.svg`;
+  if (!shardCache.has(file)) shardCache.set(file, readSymbols(file));
+  const sym = shardCache.get(file)[id];
+  if (!sym) throw new Error(`✗ ${id} missing from ${file}`);
+  return sym;
+});
+const thirdPartyIds = [...THIRD_PARTY];
+
 const missing = manifest.filter(m => !symbolsById[m.id]).map(m => m.id);
 if (missing.length) { console.error(`✗ missing from the sprite: ${missing.join(', ')}`); process.exit(1); }
 console.log(`  sprite holds ${Object.keys(symbolsById).length} symbol(s) · manifest ${manifest.length} entr(y|ies) · own ${manifest.filter((m) => m.lib === 'own').length}`);
 
-const symbols = manifest.map(m => symbolsById[m.id]);
+const symbols = manifest.map(m => symbolsById[m.id]).concat(thirdParty);
 
 /* 渐变 / 遮罩 / 裁切这些**绘制资源**必须活在文档级 `<defs>` 里 —— `<use>` 引用 symbol 时内容进
    shadow tree，而 `url(#…)` 按**文档**解析，留在 symbol 内部就找不到（品牌标识的身体会整个不渲染）。
@@ -50,7 +70,7 @@ writeFileSync(
   resolve(APP_ICONS, 'icon-ids.ts'),
   `/* generated — do not edit by hand; source: design/icons/manifest.json (node scripts/build-icons.mjs) */\n` +
     `export type IconId =\n` +
-    symbols.map((_, i) => `  | '${manifest[i].id}'`).join('\n') +
+    manifest.map((m) => `  | '${m.id}'`).concat(thirdPartyIds.map((id) => `  | '${id}'`)).join('\n') +
     '\n',
 )
 
