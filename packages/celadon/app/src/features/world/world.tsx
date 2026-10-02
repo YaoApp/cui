@@ -19,8 +19,11 @@ export function WorldPage() {
   const { pathname } = useLocation()
   const { query, setFilter } = useWorldUrlSync()
   // 侧边开着谁 —— **公共**状态（说不清归哪个功能），住 stores/
-  const selectedEntityId = useSidePanelStore((s) => s.entityId)
-  const openEntity = useSidePanelStore((s) => s.open)
+  // 面板里开着的是不是**本功能**的条目 —— 公共 store 只认 kind，不认识 world
+  const entry = useSidePanelStore((s) => s.entry)
+  const selectedEntityId = entry?.kind === 'world-entity' ? entry.id : undefined
+  const openPanel = useSidePanelStore((s) => s.open)
+  const openEntity = (id?: string) => openPanel(id ? { kind: 'world-entity', id } : undefined)
 
   const world = findWorld(worldId)
   usePageTitle(world ? world.name : 'World')
