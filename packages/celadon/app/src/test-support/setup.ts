@@ -34,3 +34,18 @@ afterEach(() => {
   resetStores()
   window.localStorage.clear()
 })
+
+/* jsdom 不实现 matchMedia。钉一份"不偏暗"的桩：测试不该随跑测机器的系统偏好漂。 */
+if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
+  window.matchMedia = (query: string): MediaQueryList =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }) as unknown as MediaQueryList
+}

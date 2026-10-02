@@ -5,7 +5,8 @@ test('switching to Japanese localizes the navigation and survives a reload', asy
   await page.goto('/')
   await expect(page.getByRole('link', { name: '你好' })).toBeVisible()
 
-  await page.getByRole('combobox', { name: '语言' }).selectOption('ja')
+  await page.getByRole('combobox', { name: '语言' }).click()
+  await page.getByRole('option', { name: '日本語' }).click()
 
   await expect(page.getByRole('link', { name: 'ワールド' })).toBeVisible()
   await expect(page.getByRole('button', { name: '更新' })).toBeVisible()

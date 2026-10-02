@@ -9,7 +9,8 @@
  * 跑法：node scripts/tests/run.mjs
  */
 import { execFileSync } from 'node:child_process'
-import { readdirSync, existsSync } from 'node:fs'
+import { readdirSync, existsSync, cpSync, mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -29,7 +30,11 @@ const SUITES = [
   ['check-effect-url-write.mjs', 'effect-url-write'],
   ['check-base-components.mjs', 'base-components'],
   ['check-doc-references.mjs', 'doc-references'],
+  ['check-generated.mjs', 'generated'],
 ]
+
+/** 会**原地重写产物**的检查器：样本先拷到临时目录再跑，免得反例被"修好"、下次假绿。 */
+const DESTRUCTIVE = new Set(['check-generated.mjs'])
 
 let pass = 0, fail = 0
 const failures = []
@@ -40,14 +45,20 @@ for (const [script, group] of SUITES) {
   const cases = readdirSync(groupDir).sort()
   for (const name of cases) {
     const dir = resolve(groupDir, name)
+    /* 破坏性检查器在临时副本上跑，样本目录保持原样 */
+    const scratch = DESTRUCTIVE.has(script) ? mkdtempSync(resolve(tmpdir(), 'cui-check-generated-')) : null
+    if (scratch) cpSync(dir, scratch, { recursive: true })
+    const target = scratch ?? dir
     const expectPass = name.startsWith('clean')
     let ok, output = ''
     try {
-      output = execFileSync('node', [resolve(SCRIPTS, script), dir], { encoding: 'utf8', stdio: 'pipe' })
+      output = execFileSync('node', [resolve(SCRIPTS, script), target], { encoding: 'utf8', stdio: 'pipe' })
       ok = true
     } catch (e) {
       ok = false
       output = String((e.stdout || '') + (e.stderr || ''))
+    } finally {
+      if (scratch) rmSync(scratch, { recursive: true, force: true })
     }
     const good = ok === expectPass
     if (good) pass++

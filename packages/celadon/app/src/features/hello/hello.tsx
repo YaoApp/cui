@@ -32,7 +32,7 @@ export function HelloPage() {
       <main className="hello__body">
         <FooBar name="CUI 2.0" count={count} />
         <div className="hello__actions">
-          <ThemeToggle theme={theme} onChange={setTheme} />
+          <ThemeToggle theme={theme} onSelect={setTheme} />
         </div>
       </main>
     </div>
