@@ -1,5 +1,11 @@
-/* 导航的布局归组件；选中态用设计类 .nav-item.is-active（设计系统里已有）。 */
+/* 导航的布局归组件；选中态用设计类 .nav-item.is-active（设计系统里已有）。
+   链接与语言切换并排一行（导航里的控制件）。 */
 .nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-8);
+
   &__list {
     display: flex;
     flex-wrap: wrap;

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router'
 import { Header } from '@/components/header'
 import { Nav } from '@/components/nav'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { useTranslation } from '@/platform/i18n'
 import { useThemeStore } from '@/platform/theme/theme.store'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
@@ -17,13 +18,16 @@ export function HelloPage() {
   const setTheme = useThemeStore((state) => state.setTheme)
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  usePageTitle('Hello')
+  const { t } = useTranslation()
+  // 应用级导航项在 platform/utils 里存的是 key，显示前在这里翻成当前语言
+  const navItems = navWithActive(pathname).map((item) => ({ ...item, label: t(item.label) }))
+  usePageTitle(t('hello.title'))
 
   return (
     <div className="hello">
-      <Header title="Hello" onRefresh={refresh}>
+      <Header title={t('hello.title')} onRefresh={refresh}>
         {/* 头部导航与 World 用的是同一个组件，只是 items 不同 */}
-        <Nav items={navWithActive(pathname)} label="应用导航" onSelect={(item) => navigate(item.href)} />
+        <Nav items={navItems} label={t('nav.appLabel')} localeSwitch onSelect={(item) => navigate(item.href)} />
       </Header>
       <main className="hello__body">
         <FooBar name="CUI 2.0" count={count} />

@@ -1,0 +1,8 @@
+{
+  "localeSwitch.label": "言語",
+  "localeSwitch.system": "システムに従う（{{locale}}）",
+  "localeSwitch.zhCN": "中文",
+  "localeSwitch.zhTW": "繁體中文",
+  "localeSwitch.enUS": "English",
+  "localeSwitch.ja": "日本語"
+}
