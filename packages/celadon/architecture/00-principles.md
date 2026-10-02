@@ -15,6 +15,10 @@
 
 ## 2. 分层、落位与依赖
 
+本章是**总纲**：结构长什么样 · 东西放哪 · 谁依赖谁。细则在各节里。
+
+**结构图**
+
 源码根 **`app/src/`**：`app/` 是 Vite root，**目录名即公开 URL**，源码再下一层才避开引擎保留前缀（见 `04-host-integration.md`）。
 
 ```
@@ -29,24 +33,24 @@
   平台层  app/src/platform/     宿主全局 · **路由机制与挂载** · 主题注入 · 运行时壳
 ```
 
-箭头 = 允许的依赖方向（上层可依赖下层）。**`app/src/platform/utils/`**（纯函数 · 常量 · 类型）不依赖任何上层，
-**所有层可用** —— 跨层共享的东西放这里，不另设 `lib/`。
-`design/` 与 `scripts/` 是资产与工具，不进应用依赖图。
+箭头 = 允许的依赖方向（上层可依赖下层）。
 
-同层之内：
+**不在依赖图里**
+
+| 什么 | 为什么 |
+| --- | --- |
+| `platform/utils/`（纯函数 · 常量 · 类型） | 不依赖任何上层，**所有层可用** —— 跨层共享放这里，**不另设 `lib/`** |
+| `design/` | 设计资产（token · 页面），不是代码 |
+| `scripts/` | 工具，不进应用依赖图 |
+
+**硬规则**
 
 - `components/<名>/` **可以**引用 `components/base/`；`base/` 不可以引用上层组件。
 - `features/<域>/` 内部自洽；**feature 之间不许互相 import**。
 - **`routes/` 在依赖方向的最上层**（目录上与 `features/` 并列，都在 `app/src/` 下）：
   它可以 import 组件层与能力层，**反过来不行** —— `features/` 与 `components/` 都不许 import `routes/`。
   路由只做装配，业务实现不住 `routes/`（地址语法见 `07-routing.md`）。
-
-写 `import` 前问一句：**我是不是在往上引？** 是，就错了。
-
-两条落位规则：
-
-- **路由薄** —— 路由只做装配，业务实现不住路由目录。
-- **组件不发请求** —— 组件里不出现 `fetch` / `EventSource` / `new WebSocket`，取数走数据层钩子（`05-data-and-api.md`）。
+- 写 `import` 前问一句：**我是不是在往上引？** 是，就错了。
 
 ### 2.1 路由
 
@@ -89,6 +93,8 @@ page-header/                    复合件（内部用 base/button）
     ├── title/                  index.ts · title.tsx · title.test.tsx
     └── actions/                index.ts · actions.tsx
 ```
+
+**组件不发请求** —— 组件里不出现 `fetch` / `EventSource` / `new WebSocket`，取数走数据层钩子（`05-data-and-api.md`）。
 
 ### 2.3 能力层
 
