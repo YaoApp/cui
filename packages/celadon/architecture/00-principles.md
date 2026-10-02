@@ -1,12 +1,13 @@
 # 00 · 铁律与结构总纲
 
-- **版本**：v1.46
-- **最后修改**：2026-10-02 18:38:21
+- **版本**：v1.47
+- **最后修改**：2026-10-02 18:39:51
 - **说明**：八条铁律 + 结构总纲（分层 · 落位 · 依赖 · 命名 · 测试 · 公共态）+ 一个组件一个目录
 
 ## 1. 八条铁律
 
-1. **单一来源** —— 颜色/间距只在 `design/tokens.less`（改它，再跑 `scripts/build-css.mjs`）·
+1. **单一来源** —— 颜色/间距只在 `app/src/platform/theme/`（**唯一代码入口**；
+   改色先改设计规范 `design/tokens.less`，再跑 `scripts/build-css.mjs`）·
    接口类型只在 `app/src/data/`（从旧仓库 `openapi/` 搬入按需子集）·
    **文案只在语言包**（谁的词跟谁走：feature 私域 `app/src/features/<域>/locales/` · 组件私域 `app/src/components/<名>/locales/` ·
    共用词 `app/src/locales/`，见 `08-i18n.md`）。不许第二份。
