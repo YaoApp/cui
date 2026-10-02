@@ -89,9 +89,10 @@ app/src/features/inbox/
 ├── inbox.test.tsx               单元用例
 ├── inbox.store.ts               状态（zustand + persist · 只服务本 feature）
 ├── inbox.store.test.ts          单元用例
-├── tests/                       整体场景：浏览器与拟人（强约束）
-│   ├── main-path.browser.ts
-│   └── main-path.agent.md · main-path.agent.mjs
+├── tests/                       整体场景（**只在有这类用例时存在**；单元用例不在这里）
+│   ├── main-path.browser.ts     浏览器用例（Playwright · 一个场景一个文件）
+│   └── main-path.agent.md       拟人剧本（三段：剧本恒定 · 修改记录 · 测试记录）
+│       main-path.agent.mjs      同一场景的采集脚本（开浏览器走剧本 · 截图 · 报客观测量）
 └── index.ts                     出口：只导出页面与必要类型
 ```
 
