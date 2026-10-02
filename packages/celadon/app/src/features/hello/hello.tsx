@@ -1,4 +1,4 @@
-import './hello.page.less'
+import './hello.less'
 import { Header } from '@/components/header'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useThemeStore } from '@/platform/theme/theme.store'

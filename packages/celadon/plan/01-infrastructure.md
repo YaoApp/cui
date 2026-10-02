@@ -124,7 +124,7 @@
 | **CI 输出** | 两份 workflow 的名字与步骤全英文；结束时把 `app/logs/*/*.log` 写进运行摘要（`$GITHUB_STEP_SUMMARY`，折叠块），红绿都能直接读到 |
 | **产物可独立运行** | `dist/` 用 Python 静态服务器（`python3 -m http.server`）直接跑通：根路径下 4 个文件全 200 · 页面渲染与交互正常 · 零 4xx 零控制台错误 |
 | **产物前缀可配** | `base` 取 `CUI_BASE`（默认 `/`）：`CUI_BASE=/cui/` 构建后资源变 `/cui/_assets/*`，挂到 `/cui/` 下同样跑通（根路径下则 404，佐证前缀生效）|
-| **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**17 / 17**：`button` 4 · `header` 2 · `hello.store` 2 + 1（复位守卫）· `theme.store` 3 · `theme-toggle` 3 · `hello.page` 2（不设阈值）|
+| **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**19 / 19**：`button` 4 · `header` 2 · `hello.store` 2 + 1（复位守卫）· `theme.store` 3 · `theme-toggle` 3 · `hello` 2 · `stores` 2（发现跨层）（不设阈值）|
 | **浏览器测试** | `pnpm test:browser`（`@playwright/test`，走本机 Chrome）**6 / 6**：主路径 · 全键盘（含焦点环可见）· 主题跟随 · 分段控件切主题 + 刷新后记住 · 内容面铺满视口 |
 | **测试范围收窄** | `vitest` 只认 `*.test.*` · `playwright` 只认 `*.browser.ts` —— 三个 runner 的默认范围会重叠，不收窄会互相误抓（实测：6 个单测文件给 vitest，6 条 `*.browser.ts` 给 playwright，1 个 `*.agent.mjs` 给拟人）|
 | **测试位置强约束** | `check-app-layout` 两条方向相反的规则：单测挨着源文件、浏览器与拟人住 `tests/`（44 个样本，含两个新后缀的反例）|

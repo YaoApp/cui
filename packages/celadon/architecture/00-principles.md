@@ -92,20 +92,24 @@ page-header/                            复合件（内部用 base/button）
 > `parts/` 是**通用槽位**：组件内部要拆的私有子组件放这里，按需建、不需要就留空。
 > 区别只在**放什么**（`base/` 放只描述外观的基础件），不在**怎么放**。
 
-**文件名里的角色用点分** —— `<域>.page.tsx` · `<域>.page.less` · `<域>.store.ts` ·
-对应的 `<域>.page.test.tsx`。组件目录里不带点（`<名>.tsx`）：一个组件只有一个角色，点分不添信息。
-测试产物沿用点分角色：`*.browser.ts` · `*.agent.md` · `*.agent.mjs` · `*.test.ts(x)`。
+**文件名里的角色**（点分只在"同一目录里不止一个同名角色"时才需要）：
+
+- **主文件不带角色后缀** —— 组件的 `<名>.tsx` 与能力层的 `<域>.tsx` **形状一致**；样式 `<名>.less` / `<域>.less`；
+  单测 `<名>.test.tsx` / `<域>.test.tsx`。`.page` 之类的后缀是啰嗦，不要。
+- **辅文件用点分角色，任何一层都能用** —— `<>.store.ts`（**组件也可以有自己的私有 store**）·
+  测试产物 `*.browser.ts` · `*.agent.md` · `*.agent.mjs`。
+- store 的测试复位是**按 `*.store.ts` 自动发现**的，所以组件、feature、平台层放哪都覆盖得到。
 
 **能力层** —— 一个业务一个目录，**页面 · 状态 · 测试都在里面**；人和 Agent 都在同一处找齐。
 
 ```
 app/src/features/inbox/          ← 示例：收件箱
 ├── components/inbox-list/       私有组件（一个组件一个目录；单测在它旁边）
+├── inbox.tsx                    页面：组合状态 + 组件（主文件不带角色后缀）
+├── inbox.less                   页面样式（可选）
+├── inbox.test.tsx               单元用例：与源文件同目录
 ├── inbox.store.ts               状态：只服务本 feature（zustand + persist）
-├── inbox.store.test.ts          单元用例：与源文件同目录
-├── inbox.page.tsx               页面：组合状态 + 组件
-├── inbox.page.less              页面样式（可选）
-├── inbox.page.test.tsx          单元用例：同上
+├── inbox.store.test.ts          单元用例：同上
 ├── tests/                       整体场景：浏览器与拟人（强约束）
 │   ├── main-path.browser.ts
 │   └── main-path.agent.md · main-path.agent.mjs
