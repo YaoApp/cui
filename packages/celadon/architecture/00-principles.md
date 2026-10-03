@@ -141,12 +141,13 @@ app/src/features/inbox/
 
 ### 2.5 数据层
 
-**只放接口类型与取数钩子**；**请求一律经 `platform/transport/`**。
+**只放接口类型 · 取数/订阅钩子 · 这一层范围内的转换工具**；**请求一律经 `platform/transport/`**。
 
 ```
 app/src/data/
 ├── <域>.ts                      该域的接口类型（手写强类型）
-└── hooks/use-request.ts         加载 / 错误 / 取消 / 重试的唯一实现
+├── hooks/use-request.ts         加载 / 错误 / 取消 / 重试的唯一实现
+└── utils/                       后端不标准处的转换（解包裹 · 分页归一 · 字段映射 · 错误收口）
 ```
 
 ### 2.6 平台层
