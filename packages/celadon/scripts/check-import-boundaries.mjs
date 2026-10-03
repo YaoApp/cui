@@ -22,9 +22,6 @@
    文件自己的层由它在 `app/src/` 下的第一段目录判定；`main.tsx` · `locales/` · `test-support/`
    不在依赖图里（内容 / 测试支持，不是层）—— 它们不被当作 import 方，也不被当作被引目标。
 
-   唯一的装配例外：`platform/router/router.tsx` → `@/routes/routes`（路由实例必须由路由表建成，
-   见 07-routing.md §6）。逐文件登记，不放宽整个 `platform/router/`。
-
    目标目录取 process.argv[2]，默认 app/src。 */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
@@ -246,7 +243,7 @@ if (!scanned) {
 if (problems.length) {
   console.log(`✗ ${problems.length} import-boundary violation(s) (${scanned} file(s) scanned, ${resolved} import(s) resolved):`)
   problems.forEach((p) => console.log('  ' + p))
-  console.log('  Why: layers may only depend downward — routes -> features -> components -> stores -> data -> platform')
+  console.log('  Why: layers may only depend downward; the pairs this check allows are in architecture/03-boundaries.md §2')
   console.log('       (see architecture/03-boundaries.md §2; types may cross layers, values may not).')
   console.log('  Fix: move shared code to a lower layer, import the lower-layer module,')
   console.log("       or — for '@yaoapp/cui' — write against the current source.")
