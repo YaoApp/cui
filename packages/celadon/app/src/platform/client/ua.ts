@@ -39,6 +39,9 @@ export function parseUserAgent(ua: string): UaInfo {
       if (firefox) return { name: 'firefox', version: firefox[1]?.split('.')[0] ?? '' }
       const safari = ua.match(/Version\/([\d.]+).*Safari/)
       if (safari) return { name: 'safari', version: safari[1]?.split('.')[0] ?? '' }
+      // WebKit 引擎（含 Tauri 的 WKWebView）：UA 里**可能连 `Safari` 都没有**，
+      // 形如 `… AppleWebKit/605.1.15 (KHTML, like Gecko)` —— 只认引擎，别再要求 Safari 段。
+      if (/AppleWebKit/.test(ua)) return { name: 'safari', version: '' }
       return { name: 'unknown', version: '' }
     })()
 

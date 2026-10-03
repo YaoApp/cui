@@ -20,6 +20,13 @@ describe('parseUserAgent', () => {
     })
   }
 
+  it('reads the desktop webview, whose user agent has no Safari token', () => {
+    // 真机实测的形态（Tauri 的 WKWebView）：只有 AppleWebKit，没有 Safari
+    const info = parseUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)')
+    expect(info.browser.name).toBe('safari')
+    expect(info.os).toBe('macos')
+  })
+
   it('says unknown rather than guessing', () => {
     expect(parseUserAgent('')).toEqual({ browser: { name: 'unknown', version: '' }, os: 'unknown' })
   })
