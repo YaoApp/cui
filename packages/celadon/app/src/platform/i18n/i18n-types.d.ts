@@ -22,6 +22,10 @@ export type I18nKey =
   | 'bridge.error.theme.expectedLightOrDark'
   | 'bridge.error.theme.readFailed'
   | 'bridge.error.theme.writeFailed'
+  | 'bridge.error.transport.network'
+  | 'bridge.error.transport.parse'
+  | 'bridge.error.transport.status'
+  | 'bridge.error.transport.timeout'
   | 'entityPanel.close'
   | 'entityPanel.id'
   | 'entityPanel.kind'
@@ -54,6 +58,7 @@ export type I18nKey =
   | 'localeSwitch.zhTW'
   | 'nav.appLabel'
   | 'nav.hello'
+  | 'nav.verify'
   | 'nav.world'
   | 'surface.main'
   | 'surface.side'
@@ -62,6 +67,7 @@ export type I18nKey =
   | 'themeToggle.toLight'
   | 'verify.actions'
   | 'verify.appInfo'
+  | 'verify.back'
   | 'verify.bridge'
   | 'verify.capabilities'
   | 'verify.client'
@@ -89,6 +95,8 @@ export type I18nKey =
   | 'verify.themeLight'
   | 'verify.themeRead'
   | 'verify.title'
+  | 'verify.transport'
+  | 'verify.transportProbe'
   | 'verify.url'
   | 'verify.write'
   | 'world.detailLabel'
@@ -137,6 +145,10 @@ declare module 'i18next' {
         'bridge.error.theme.expectedLightOrDark': string
         'bridge.error.theme.readFailed': string
         'bridge.error.theme.writeFailed': string
+        'bridge.error.transport.network': string
+        'bridge.error.transport.parse': string
+        'bridge.error.transport.status': string
+        'bridge.error.transport.timeout': string
         'entityPanel.close': string
         'entityPanel.id': string
         'entityPanel.kind': string
@@ -169,6 +181,7 @@ declare module 'i18next' {
         'localeSwitch.zhTW': string
         'nav.appLabel': string
         'nav.hello': string
+        'nav.verify': string
         'nav.world': string
         'surface.main': string
         'surface.side': string
@@ -177,6 +190,7 @@ declare module 'i18next' {
         'themeToggle.toLight': string
         'verify.actions': string
         'verify.appInfo': string
+        'verify.back': string
         'verify.bridge': string
         'verify.capabilities': string
         'verify.client': string
@@ -204,6 +218,8 @@ declare module 'i18next' {
         'verify.themeLight': string
         'verify.themeRead': string
         'verify.title': string
+        'verify.transport': string
+        'verify.transportProbe': string
         'verify.url': string
         'verify.write': string
         'world.detailLabel': string
