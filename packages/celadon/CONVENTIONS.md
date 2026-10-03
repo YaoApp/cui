@@ -68,7 +68,7 @@
 
 跑法：`node packages/celadon/scripts/<脚本>`（脚本按包根解析路径，从哪跑都行）
 
-**检查器自己有测试**：`node packages/celadon/scripts/tests/run.mjs` —— 把每个检查器喂给一组样本，核对"该过的过、该挂的挂"（每条规则一个反例，共 66 个用例）。加样本见 `scripts/tests/README.md`。
+**检查器自己有测试**：`node packages/celadon/scripts/tests/run.mjs` —— 把每个检查器喂给一组样本，核对"该过的过、该挂的挂"（每条规则一个反例，共 79 个用例）。加样本见 `scripts/tests/README.md`。
 
 > **已经有扫描版**（`check-css-conventions.mjs`，不依赖构建工具）—— 新增页面里出现物理方向属性会直接失败。
 > stylelint 版待 `01 基础设施` 选型后接线，届时连产品样式表也一起拦。

@@ -46,7 +46,12 @@
 | `check-app-layout` | 测试产物位置：**单测挨着源文件**（不许进 `tests/`）· **浏览器与拟人必须在 `tests/` 内** —— 两条方向相反的规则，各有正反样本 |
 | `check-doc-references` | 文档提到的 `app/src/...` 路径 · `scripts/*.mjs` · `pnpm <cmd>` **必须真实存在** —— 文档漂移不靠人 review |
 | `check-base-components` | `features/` · `routes/` · `components/`（`components/base/` 豁免）里**不许裸写 `<button>` / `<select>`** —— 用 `components/base/button` / `components/base/select`；否则每页各写一套控件 |
+| `check-import-boundaries` | **依赖方向**：只扫 `app/src/**/*.{ts,tsx}` 的 import，拦"往上引"· `features/a` 引 `features/b` · `components/base/` 引上层组件 · `stores/` 引 features/routes/components · `platform/` 引上层 · 旧包 `@yaoapp/cui`（别名 `@/...` 与相对路径都解析；解析不到跳过；**类型可以跨层引用**）|
 | `check-effect-url-write` | **不许在 `useEffect` 里写 URL**（`setSearchParams` / `navigate`）—— 会与"读 URL 写 store"互相追成同步死循环，见 `07-routing.md` |
+
+**为什么层间方向用检查器而不是 ESLint**：项目用 TypeScript 7，`typescript-eslint` 尚不支持（§2），
+`no-restricted-imports` 落不下来 —— 铁律 8 要的是"机器强制"，不挑工具。等价语义收在
+`check-import-boundaries.mjs`：`allowTypeImports` 对应"只带类型的 import 放行"。
 
 ## 4. CI（`../../.github/workflows/`）
 
