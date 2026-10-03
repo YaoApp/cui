@@ -91,7 +91,7 @@ export function WorldPage() {
                   variant="ghost"
                   size="small"
                   aria-pressed={item.id === selectedEntityId}
-                  onClick={() => openEntity(item.id)}
+                  onClick={() => openEntity(item.id === selectedEntityId ? undefined : item.id)}
                 >
                   {t(item.nameKey)}
                 </Button>

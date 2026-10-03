@@ -1,4 +1,5 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { useLocaleStore } from '@/platform/i18n/locale.store'
@@ -104,5 +105,21 @@ describe('WorldPage · 找不到的世界', () => {
     expect(screen.getByText('没有这个世界：nope')).toBeInTheDocument()
     expect(screen.getAllByRole('link').length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: '刷新' })).toBeInTheDocument()
+  })
+})
+
+/* `aria-pressed` 说的就是"这个开着"：再点同一个必须关上，否则语义在说谎。 */
+describe('WorldPage · 条目的按下态', () => {
+  it('closes the panel when the active entity is clicked again', async () => {
+    renderAt('/world/w1')
+    const button = screen.getByRole('button', { name: '守门人' })
+
+    await userEvent.click(button)
+    expect(useSidePanelStore.getState().entry).toEqual({ kind: 'world-entity', id: 'e2' })
+    expect(button).toHaveAttribute('aria-pressed', 'true')
+
+    await userEvent.click(button)
+    expect(useSidePanelStore.getState().entry).toBeUndefined()
+    expect(button).toHaveAttribute('aria-pressed', 'false')
   })
 })

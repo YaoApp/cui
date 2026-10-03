@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Nav, type NavItem } from '@/components/nav'
@@ -39,10 +39,16 @@ describe('Nav', () => {
     expect(onSelect).toHaveBeenCalledWith(ITEMS[1])
   })
 
-  it('leaves a plain click alone when nobody intercepts it', async () => {
+  it('leaves a modified click to the browser instead of taking it over', () => {
     const onSelect = vi.fn()
-    render(<Nav items={ITEMS} label="应用导航" />)
-    await userEvent.click(screen.getByRole('link', { name: 'World' }))
+    render(<Nav items={ITEMS} label="应用导航" onSelect={onSelect} />)
+
+    // 修饰键点击是"新标签 / 新窗口"：调用方不许收到选中事件
+    fireEvent.click(screen.getByRole('link', { name: 'World' }), { metaKey: true })
     expect(onSelect).not.toHaveBeenCalled()
+
+    // 主键点击才归调用方
+    fireEvent.click(screen.getByRole('link', { name: 'World' }))
+    expect(onSelect).toHaveBeenCalledWith(ITEMS[1])
   })
 })
