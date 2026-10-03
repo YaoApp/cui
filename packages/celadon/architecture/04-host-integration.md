@@ -4,7 +4,7 @@
 - **最后修改**：2026-10-03 11:58:52
 - **说明**：制品构成 · 宿主挂载 · 放到哪（引擎 / 独立 / 桌面）· SPA fallback · 由命名空间推导的工程约束
 
-## 制品构成
+## 1. 制品构成
 
 **前端制品是 `dist/`，只有两项**：
 
@@ -19,7 +19,7 @@ dist/
   制品里没有这个文件。
 - **桌面与其它制品形态**按 `artifact` 打包（见 `15-platform.md` §5.3 · §6.2）。
 
-## 宿主挂载
+## 2. 宿主挂载
 
 | 约束 | 内容 |
 | --- | --- |
@@ -28,7 +28,7 @@ dist/
 | **SPA fallback** | **托管方必须配**：未知路径回 `index.html`，只给导航请求（`Accept: text/html`）；缺的静态资源仍 404。路径路由的代价，预览用 `scripts/serve-dist.mjs` |
 | **SSE 三个头**（**托管方 · 开发代理**）| `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no`（见 `16-development.md`）|
 
-## `dist/` 的托管方式
+## 3. `dist/` 的托管方式
 
 **`dist/` 是纯静态产物，但有两项约束必须满足**：其一，**必须挂载在构建时的命名空间之下**——
 产物内的资源路径为 `/<namespace>/_assets/*`，挂载位置不符将整页空白；其二，**接口必须与服务同源**——
@@ -141,11 +141,11 @@ export const onRequest: PagesFunction<{ ENGINE: string }> = ({ request, env }) =
 **长连接**：接口路径**不得进入缓存**（Cache Rules 中排除）；SSE 依赖响应头 `Cache-Control: no-cache, no-transform`
 （见上表），WebSocket 由 Cloudflare 代理转发，同样要求引擎可达、不可缓存。
 
-## 禁止
+## 4. 禁止
 
 - 不许在前端拼绝对域名 —— **同源是这套挂载成立的前提**（见 `15-platform.md` §4 的鉴权）。
 
-## 两条由命名空间推导出来的工程约束
+## 5. 两条由命名空间推导出来的工程约束
 
 | 约束 | 原因 |
 | --- | --- |
