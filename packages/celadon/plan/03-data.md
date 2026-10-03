@@ -1,7 +1,7 @@
 # 03 · 数据层（`data/`）
 
-- **版本**：v0.2（计划）
-- **最后修改**：2026-10-04 07:15:31
+- **版本**：v0.3（计划）
+- **最后修改**：2026-10-04 07:17:25
 - **说明**：分**两部分** —— **0 统一抽象**（先把层做出来）· **1 业务接口清单**（要迁移的，逐域列表 + **WebSocket/流式单列**）
 - **事实基础**：[data-legacy-openapi.md](data-legacy-openapi.md)（旧 `openapi/` 71 文件现状报告 · 临时）
 
@@ -27,6 +27,7 @@
 ## 1. 业务接口清单（第一阶段的另一半）
 
 > **量级**：旧客户端 71 个 `.ts` / **12,444 行** / 约 **363 个 async 方法**；结论是**约等于重写**——能从旧代码带走的只有**类型**与**协议知识**。
+> **已弃用、不迁移**（2026-10-04 定）：**`kb` · `job` · `trace` · `agent/robot`** —— 连同它们的类型（`kb/types.ts` 810 · `job/types.ts` 247 · `trace/types.ts` 98 · `agent/robot/types.ts` 563）与流式通道（机器人 SSE · trace `EventSource`）一并从清单移除。
 
 ### 1.1 普通接口（按域）
 
@@ -34,12 +35,8 @@
 | --- | --- | --- | --- | --- | --- |
 | user | `user/{auth,api,account,credits,mfa,preferences,profile,subscription,teams}.ts` | ~90 | 1,456 | **改写** | `auth.ts` 两步登录/JWT 与 `credential/` 联动 |
 | setting | `setting/api.ts` | ~55 | 296 | **改写** | 唯一依赖 `@umijs/max` 取 locale（`:1/:87`）|
-| agent | `agent/{assistants,boards,call,inbox,tags,tasks}.ts` | ~60 | 762 | **改写** | 子域 `robot/` 另计 |
-| agent/robot | `agent/robot/robots.ts` | ~24 | 483 | **改写** | 内含**第二份 SSE 解析**（`:414–483`）|
-| kb | `kb/api.ts` | ~40 | 628 | **改写** | 最大域；分页用 `pagecnt` |
-| job | `job/api.ts` | 13 | 295 | **改写** | |
+| agent | `agent/{assistants,boards,call,inbox,tags,tasks}.ts` | ~60 | 762 | **改写** | 子域 `robot/` **已弃用，不迁移** |
 | workspace | `workspace/api.ts` | ~30 | 210 | **改写** | `ContentURL` 自拼地址（`:13` 反向 import 页面）|
-| trace | `trace/api.ts` | ~8 | 135 | **改写** | 含 `EventSource`（`:46`）|
 | llm | `llm/api.ts` | ~6 | 59 | **改写** | |
 | mcp | `mcp/api.ts` | ~4 | 28 | **改写** | `data \|\| []` **吞错**（`:19`）|
 | sandbox | `sandbox/api.ts` | ~8 | 82 | **改写**（域去留待定）| 混了盒管理/exec/心跳/VNC |
@@ -49,40 +46,37 @@
 | captcha | `captcha.ts` | ~2 | 80 | **改写** | 几乎可搬 |
 | file | `file.ts` | ~12 | 655 | **改写** | 分片协议留、实现重写（见 §1.2/1.4）|
 | ~~helloworld~~ | `helloworld.ts` | 1 | 32 | **丢弃** | 演示端点 |
-| **小计** | **30 个 api 文件** | **≈363** | **≈4,677** | | |
+| **小计** | **26 个 api 文件** | **≈275** | **≈3,100** | | （已减去 4 个弃用域：kb · job · trace · agent/robot）|
 
 ### 1.2 **WebSocket / 流式接口**（别漏，共 6 条通道）
 
 | # | 通道 | 旧位置 | 协议形态 | 行数 | 判定 |
 | --- | --- | --- | --- | --- | --- |
 | 1 | **chat 对话流** | `chat/api.ts:210–261` | SSE-over-POST（手写逐字节解析 `data:` / `[DONE]`）| ~110 | **改写** → `transport/stream` |
-| 2 | **机器人执行流** | `agent/robot/robots.ts:445–477` | SSE-over-POST（**第二份重复解析**）| ~60 | **改写**（与 1 合并成一份）|
-| 3 | **trace 事件流** | `trace/api.ts:46` | `EventSource`（预列 12 个事件名 `:49–62`）| ~50 | **改写** |
-| 4 | **系统事件 WS** | `events/useEventStream.ts:36` | `WebSocket` 单例 + 心跳（`:129`）+ **指数退避**（`:144`）+ `type`/`*` 分发 | 197 | **改写**（重连归 `transport/`）|
-| 5 | **任务 WS（命令协议）** | `pages/kanban/hooks/useTaskWS.ts:29–87` | `WebSocket` + 命令 `read/history/run/retry/repeat/stop/cancel` + **重复的 `buildWSUrl`** | ~360 | **需清点**（在 `openapi/` **之外**，属旧应用层）|
-| 6 | **VNC / 沙箱 WS** | `computer/api.ts` + `sandbox/api.ts:42–67` | WS 地址拼装（盒/心跳/exec）| ~120 | **改写** |
+| 2 | **系统事件 WS** | `events/useEventStream.ts:36` | `WebSocket` 单例 + 心跳（`:129`）+ **指数退避**（`:144`）+ `type`/`*` 分发 | 197 | **改写**（重连归 `transport/`）|
+| 3 | **任务 WS（命令协议）** | `pages/kanban/hooks/useTaskWS.ts:29–87` | `WebSocket` + 命令 `read/history/run/retry/repeat/stop/cancel` + **重复的 `buildWSUrl`** | ~360 | **需清点**（在 `openapi/` **之外**，属旧应用层）|
+| 4 | **VNC / 沙箱 WS** | `computer/api.ts` + `sandbox/api.ts:42–67` | WS 地址拼装（盒/心跳/exec）| ~120 | **改写** |
 | — | 另有裸 WS | `pages/task-settings/.../TaskApiAccess.tsx:57` | 直接 `new WebSocket` | — | **丢弃/归并** |
-| **小计** | | | | **≈900** | |
+| **小计** | | | | **≈790** | （已减去机器人 SSE 与 trace）|
 
-**这 6 条要一起定的**：统一事件形状与事件名 · 命令型 WS 的请求类型 · 重连/心跳只在一处（`transport/`）· 鉴权怎么带上。
+**这 4 条要一起定的**：统一事件形状与事件名 · 命令型 WS 的请求类型 · 重连/心跳只在一处（`transport/`）· 鉴权怎么带上。
 
-### 1.3 类型清单（**可直接搬**，约 4,900 行）
+### 1.3 类型清单（**可直接搬**，约 3,500 行）
 
 | 类型文件 | 行数 | 判定 |
 | --- | --- | --- |
 | `chat/types.ts` + `chat/guards.ts` | 1,018 + 123 | **直接搬**（消息 DSL + 纯守卫；统一分页、收 `any`）|
-| `agent/types.ts` + `agent/robot/types.ts` | 512 + 563 | **直接搬**（去 10 处 `any`）|
 | `user/types.ts` | 1,009 | **直接搬**（去 3 处 `any`）|
-| `kb/types.ts` | 810 | **直接搬**（去 16 处 `any`；分页名统一）|
+| `agent/types.ts` | 512 | **直接搬**（去 `any`；`agent/robot` 已弃用）|
 | `setting/types.ts` | 440 | **直接搬** |
-| `job/types.ts` · `trace/types.ts` · `llm/types.ts` · `mcp/types.ts` · `sandbox/types.ts` | 247+98+90+33+40 | **直接搬** |
+| `llm/types.ts` · `mcp/types.ts` · `sandbox/types.ts` | 90+33+40 | **直接搬** |
 | 核心 `JWK/JWKs`（`types.ts:201–345`）· `File*`（`:52–181`）| ~275 | **直接搬**（`File*` 归 `data/file`）|
 | `chat/README.md`（协议说明）| 3,555 | **仅参考**，不进代码 |
 
 ### 1.4 明确丢弃（实现不要，只留知识）
 
 `openapi.ts`(632) · `headers.ts`(66) · `lib/utils.ts`(52) · 19 个 barrel/shim(67) · `events/eventStore.ts`(91) · `helloworld.ts`(32)
-另：**同一件事的多份实现**——**4 处下载**（`file.ts:206` · `hooks/useFileDownload.ts` · `utils/fileWrapper.ts`）· **2 处上传**（`file.ts:353,519`）· **3 套流式** · **2 条 `buildWSUrl`**：**实现丢，协议知识留**。
+另：**同一件事的多份实现**——**4 处下载**（`file.ts:206` · `hooks/useFileDownload.ts` · `utils/fileWrapper.ts`）· **2 处上传**（`file.ts:353,519`）· **2 套流式**（机器人/trace 已弃用） · **2 条 `buildWSUrl`**：**实现丢，协议知识留**。
 
 ### 1.5 清单顺带要定掉的（**回写 `05 §7`**）
 
