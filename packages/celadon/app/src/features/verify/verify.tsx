@@ -24,6 +24,7 @@ import { buildManifest, capabilities, clientInfo, hasHost } from '@/platform/cli
 import { routerBasename } from '@/platform/router/basename'
 import { bridge, bridgeErrorText, type BridgeResult } from '@/platform/bridge'
 import { credential } from '@/platform/credential'
+import { REDACTED, shouldRedact } from './redact'
 import { transport } from '@/platform/transport'
 
 type Line = { label: string; text: string }
@@ -54,7 +55,7 @@ export function VerifyPage() {
   const report = (label: string, result: BridgeResult<unknown>, redact = false) => {
     const text = result.ok
       // **秘密不上屏**：`credential.read` 的结果只报"读到了"，不印内容
-      ? `${t('verify.result')}: ${redact ? '•••' : JSON.stringify(result.value)}`
+      ? `${t('verify.result')}: ${redact ? REDACTED : JSON.stringify(result.value)}`
       : bridgeErrorText(translate, result)
     setLines((prev) => [{ label, text }, ...prev].slice(0, 12))
   }
@@ -75,11 +76,11 @@ export function VerifyPage() {
         ['machineId', () => bridge.system.machineId()],
         ['transport', () => transport.probe('https://example.com')],
         ['credential.write', () => credential.write('verify-demo', 'self-check')],
-        ['credential.read', () => credential.read('verify-demo')], // 自检也不上屏（见 report 的 redact）
+        ['credential.read', () => credential.read('verify-demo')],
         ['credential.remove', () => credential.remove('verify-demo')],
       ] as const) {
         const result = await call()
-        report(label, result, label === 'credential.read')
+        report(label, result, shouldRedact(label))
       }
       const pinged = await bridge.ping()
       setPing(pinged)
@@ -87,8 +88,8 @@ export function VerifyPage() {
     })()
   }, [host])
 
-  const run = (label: string, call: () => Promise<BridgeResult<unknown>>, redact = false) => {
-    void call().then((result) => report(label, result, redact))
+  const run = (label: string, call: () => Promise<BridgeResult<unknown>>) => {
+    void call().then((result) => report(label, result, shouldRedact(label)))
   }
 
   return (
@@ -216,7 +217,7 @@ export function VerifyPage() {
       </p>
       <p>
         <Button onClick={() => run('credential.write', () => credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
-        <Button onClick={() => run('credential.read', () => credential.read(service), true)}>{t('verify.read')}</Button>{' '}
+        <Button onClick={() => run('credential.read', () => credential.read(service))}>{t('verify.read')}</Button>{' '}
         <Button onClick={() => run('credential.remove', () => credential.remove(service))}>{t('verify.remove')}</Button>{' '}
         <Button onClick={() => run('credential.list', () => credential.list())}>{t('verify.list')}</Button>
       </p>
