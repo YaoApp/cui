@@ -1,7 +1,7 @@
 # 03 · 数据层（`data/`）
 
-- **版本**：v0.9（计划）
-- **最后修改**：2026-10-04 07:27:22
+- **版本**：v0.10（计划）
+- **最后修改**：2026-10-04 07:28:37
 - **说明**：三节 —— **00 代码结构**（先列长什么样）· **0 统一抽象**（要一起定的 7 项）· **1 业务接口清单**（逐域列表 + **WebSocket/流式单列**）
 - **事实基础**：[data-legacy-openapi.md](data-legacy-openapi.md)（旧 `openapi/` 71 文件现状报告 · 临时）
 
@@ -17,9 +17,10 @@ app/src/
 ├── data/                         # 接口类型 + 取数（**只声明，不发请求**）
 │   ├── index.ts                  # 对外唯一入口（按域再导出）
 │   ├── types.ts                  # 公共类型：错误 · 列表/分页 · 出站上下文（§0 的 0.1–0.4）
-│   ├── hooks/                    # **钩子只此一处**（取数与订阅）
+│   ├── hooks/                    # **钩子只此一处**
 │   │   ├── use-request.ts        # 查询 / 提交：加载 · 错误 · 取消 · 重试（唯一实现，§0.5）
-│   │   └── use-stream.ts         # 订阅：订阅一份流 · 取消 · 断线状态（唯一实现）
+│   │   ├── use-sse.ts            # 订阅（SSE）：事件解析 · 重连 · **可续传**（Last-Event-ID）
+│   │   └── use-socket.ts         # 订阅（WS）：**双向** · 心跳 · 退避重连 · 命令应答关联
 │   ├── helloworld/               # **脚手架**：第一个端到端样板（见 §1.1）
 │   │   ├── types.ts
 │   │   ├── api.ts                # 方法声明：路径 + 输入/输出类型
@@ -46,15 +47,16 @@ app/src/
 | 种类 | 放哪 | 依赖 | 例 |
 | --- | --- | --- | --- |
 | **取数钩子** | `data/hooks/use-request.ts` | `platform/transport` + 该域类型 | 加载 / 错误 / 取消 / 重试（四态**唯一实现**）|
-| **订阅钩子** | `data/hooks/use-stream.ts` | `platform/transport` 的 stream/socket | 订阅一条聊天/事件通道、取消、断线状态 |
+| **订阅钩子（SSE）** | `data/hooks/use-sse.ts` | `transport/stream.ts` | 订阅一条单向事件流 · 重连 · 续传 |
+| **订阅钩子（WS）** | `data/hooks/use-socket.ts` | `transport/socket.ts` | 订阅双向通道 · 心跳 · 退避 · 能发命令 |
 | **交互钩子** | `components/`（**就近**，跟着用它的人）| 只依赖 React | 开合、焦点陷阱、合并 ref |
 | **状态钩子** | `stores/`（store 自己导出选择器/动作）| store 内部 | 主题 · 语言 · 导航 |
 | **宿主 / 环境钩子** | `platform/<域>/` | 宿主能力（bridge · client · service）| 页标题（`07 §2` 已定）· 客户端能力 · 服务信息 |
 
-**在 `data/` 里，动作只有三种**：**查询** · **提交** · **订阅** ——
+**在 `data/` 里，动作只有三种**：**查询** · **提交** · **订阅**（订阅按协议分 **SSE / WS** 两个钩子，见上表）——
 
 - **查询与提交共用 `use-request.ts`**（提交＝手动触发那一次），**不再写第二个实现**
-- **订阅**走 `hooks/use-stream.ts`（**形状**在 `data/stream/*`，连接/心跳/重连在 `transport/`）
+- **订阅**走 `hooks/use-sse.ts` / `hooks/use-socket.ts`（**形状**在 `data/stream/*`，连接/心跳/重连在 `transport/`）
 
 **SSE 与 WS：对外合一，对内分二**（**别合成一个实现**）
 
@@ -68,10 +70,14 @@ app/src/
 | 代理 / 缓冲 | HTTP 语义，**要关缓冲**（dev 代理已 `ws: true`，SSE 另需响应头）| 需要升级放行 |
 | 命令型 | 无 | **有**（任务 WS 要"请求-应答关联"）|
 
-**所以**：
-- **对外一个**：`data/stream/use-stream.ts`（订阅 / 取消 / 断线状态）——上层**不关心底下是哪种**
-- **对内两个**：`transport/stream.ts`（SSE 解析 · 关缓冲 · 续传）· `transport/socket.ts`（升级 · 心跳 · 退避 · 命令应答）——**两套状态机不许搅在一起**
-- **形状要能表达差异**：`data/stream/types.ts` 给"**序号 / 可否续传**"留字段（SSE 能续、WS 不能）
+**所以：对外也分开**（差异太大，**合成一个钩子就是漏抽象**——一个 API 要同时容忍"能发命令"和"能续传"，两边都不好用）：
+
+| | 钩子 | 接线 | 它的独有语义 |
+| --- | --- | --- | --- |
+| **SSE** | `data/hooks/use-sse.ts` | `transport/stream.ts` | 单向 · 原生/手动重连 · **`Last-Event-ID` 可续** |
+| **WS** | `data/hooks/use-socket.ts` | `transport/socket.ts` | **双向（能发命令）** · 心跳 + 退避 · **无内建续传** · 握手期鉴权 |
+
+**共用的只有形状**：`data/stream/{types,chat,events,task,vnc}.ts` —— `types.ts` 留「**序号 / 可否续传**」字段（SSE 有、WS 没有）。
 
 **每个域里就三件事**（与旧 `<域>/types.ts + api.ts + index.ts` 同形，**内容不同**）：
 
@@ -110,7 +116,7 @@ app/src/
 | 0.2 | **列表 / 分页** | 一个包裹形状（旧：**四套命名** `pagecount`/`pagecnt`/`totalPages`/`next+prev`）| `data/` 公共类型 | ⏸ |
 | 0.3 | **成功包裹** | 有没有信封；列表 `data` 与实体 `data` 怎么区分（旧：`result.data \|\| result` 反复兜）| 同上 | ⏸ |
 | 0.4 | **出站上下文** | locale / timezone / theme / client 怎么带（旧：locale 走 query · `X-Yao-Accept` 头 · 三来源凑 CSRF）| 同上 + `platform/` | ⏸ |
-| 0.5 | **取数与订阅钩子** | 加载 / 错误 / 取消 / 重试的**唯一实现**与返回形状；订阅（流式）与它并列（旧：**133 个文件手写四态**）| `data/hooks/use-request.ts`（查询 + 提交 · `SPEC.md:95`）· `data/hooks/use-stream.ts`（订阅）| ⏸ |
+| 0.5 | **取数与订阅钩子** | 加载 / 错误 / 取消 / 重试的**唯一实现**与返回形状；订阅（流式）与它并列（旧：**133 个文件手写四态**）| `data/hooks/use-request.ts`（查询 + 提交 · `SPEC.md:95`）· `use-sse.ts` · `use-socket.ts`（订阅，**按协议分开**）| ⏸ |
 | 0.6 | **出口接线** | 一切经 `platform/transport/`；上传/下载/SSE/WS 各归哪一档（`17 §2.2` 三档：`api`/`download`/`stream`）。**SSE 与 WS 同属 `stream` 档，但接线分两处**（见上表）| `platform/transport/{stream.ts,socket.ts}` | ⏸（卡 `17 §2.2` 两档未做）|
 | 0.7 | **类型的组织** | 一域一处；类型与方法同文件还是分开；子域（如 `agent/robot`）怎么放（旧：`<域>/types.ts` + `<域>/api.ts` + barrel，且**反向 import 页面层 6 处**）| `app/src/data/<域>/` | ⏸ |
 
@@ -152,7 +158,8 @@ app/src/
 | **小计** | | | | **≈790** | （已减去机器人 SSE 与 trace）|
 
 **形状落点**：① → `data/stream/chat.ts` · ② → `events.ts` · ③ → `task.ts` · ④ → `vnc.ts`；
-**接线落点**（连接 · 心跳 · 重连 · 鉴权）：`platform/transport/stream.ts` + `socket.ts`（**待做**，见 §00 树）。
+**接线落点**（连接 · 心跳 · 重连 · 鉴权）：`platform/transport/stream.ts` + `socket.ts`（**待做**，见 §00 树）；
+**钩子落点**：① → `data/hooks/use-sse.ts` · ②③④ → `data/hooks/use-socket.ts`（SSE 是单向流，其余三条是双向通道）。
 
 **这 4 条要一起定的**：统一事件形状与事件名 · 命令型 WS 的请求类型 · 重连/心跳只在一处（`transport/`）· 鉴权怎么带上。
 
