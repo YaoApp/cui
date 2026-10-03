@@ -13,12 +13,17 @@ import { routerBasename } from '@/platform/router/basename'
 import { routes } from '@/routes/routes'
 import { mountIconSprite } from '@/platform/icons'
 import { primeClientId } from '@/platform/client'
+import { loadServiceInfo } from '@/platform/service'
 
 /* 图标底座挂一次（挂 body，不占页面结构）：所有 <Icon> 靠 #id 引用它（见 10-icons.md）。 */
 mountIconSprite()
 
 /* 桌面端把 `client_id` 从随机换成**真机器码**（拿不到就保持随机，不报错）。 */
 void primeClientId()
+
+/* 服务信息**启动时读一次**并缓存（`15-platform.md` §3）；读不到不挡界面，失败是值。
+   超时由这里给（出口不替业务方定数字，见 17 §2.2）。 */
+void loadServiceInfo(10_000)
 
 /* 路由实例建在模块作用域 —— 每次渲染重建会丢掉导航栈。
    **装配点放在入口**：入口不属于任何层，于是 platform/ 不必反过来引 routes/

@@ -12,8 +12,8 @@
 | 项 | 状态 | 证据 / 落在哪 |
 | --- | --- | --- |
 | **2.1 `client/`** | ✅ **完成** | `manifest` · `ua`（含 WebView 兜底）· `client_id`（`desk-<机器码>` / `web-<随机>`）· `capabilities` · `context`/`info` · 归一走 `i18n/resolve-locale`；**框架内部只许出现在 `bridge/`**（有守卫测试）|
-| **2.2 `service/`** | ✅ **完成（平台层）** | `service/base.ts` 是基址**唯一来源**（`serviceBase`/`serviceUrl`，`transport` 只拼不定；**换地址只改这一处**）。**well-known 读取 · Web 同域清单 = 随服务对接** |
-| **2.3 `credential/`** | ✅ **完成（平台层）** | 桌面载体：OS 凭据库（`keyring`，经 `bridge/`）· **写→读→删→列**都在（列表靠宿主记账）· 秘密**不回前端**、无明文回退；Web 载体：**前端不需要存储代码**（HttpOnly 由浏览器与服务端负责）。**刷新定时 · 401 重放 · 登入登出流程 = 随服务接口对接**（见 §2.3 末） |
+| **2.2 `service/`** | ✅ **完成（平台层）** | 基址唯一来源（`base.ts`）· **`info.ts` 读 well-known 并缓存**（启动一次 · 并发去重 · 失败不缓存）；dev 由代理代转（`YAO_SERVER_HOST`）。**Web 同域清单 = 随服务对接** |
+| **2.3 `credential/`** | ✅ **完成（平台层）** | `carrier.ts` + `index.ts`：一套接口，载体按宿主选 —— 桌面走宿主 OS 凭据库（写→读→删→列 · 秘密不回前端 · 无明文回退），Web 回 `credential.no_store_here`。**登录/刷新/身份随服务接口** |
 | **2.4 `transport/`** | ✅ **完成** | 两宿主一种接口 · 失败四类归一 · **重试策略在上层**（`utils/retry.ts`）· 浏览器跨域**明确拒绝**；宿主侧 `tauri-plugin-http` + **URL 范围** |
 | **2.5 `data/`** | ⏸ 未开始 | 接口类型与取数钩子（依赖 §3 的未定项）|
 | **2.6 `bridge/`** | ✅ **完成**（本轮范围）| 16 条命令（宿主 · 凭据 · 系统集成）· **命令清单单一来源** · **跨语言比对测试**（Rust `NAMES` ↔ 应用常量）· 失败带 `{code, params, message}` |
@@ -63,13 +63,13 @@
 平台层原有 5 个：`theme/` · `router/` · `i18n/` · `icons/` · `utils/`
 （另有 `manifest.json` —— 客户端事实的**源**，以及 `shell.less`）。
 
-**产品级地基这六个**，有依赖顺序，不能并行乱做；**现在四个已建**：
+**产品级地基这六个**，有依赖顺序，不能并行乱做；**现在五个已建**（`data/` 与 `webproxy/` 未建）：
 
 | # | 目录 | 职责 | 依赖 | 当前 |
 | --- | --- | --- | --- | --- |
 | 1 | **`client/`** | 客户端类型 · 能力开关 · UA 解析 · `client_id` | 无 | ✅ **已建**（`client_id` **带来源前缀**：`desk-<真机器码>` / `web-<随机>`；归一走 `i18n/resolve-locale`）|
-| 2 | **`service/`** | 服务信息（well-known）· **服务地址一处持有** | `client/` | ✅ **已建**（基址唯一来源 `base.ts`；well-known 与 Web 同域清单**随服务对接**）|
-| 3 | `credential/` | 凭据的存取与消费（按宿主选载体）· 刷新定时器 | `service/` · `bridge/` | 🔶 **载体已完成，独立目录未建**：桌面侧落在 **`bridge/credential`**（写→读→删→列 · 无明文回退）· Web 侧**无存储代码**（HttpOnly 由浏览器/服务端负责）；登录/刷新随服务接口，**那时再建这个目录** |
+| 2 | **`service/`** | 服务信息（well-known）· **服务地址一处持有** | `client/` | ✅ **已建**（基址唯一来源 `base.ts` · **`info.ts` 读 `/.well-known/yao` 并缓存**：启动读一次、并发去重、失败不缓存；开发期由 dev server 代转，地址由 `YAO_SERVER_HOST` 给）|
+| 3 | **`credential/`** | 凭据的存取与消费（按宿主选载体）· 刷新定时器 | `service/` · `bridge/` | ✅ **已建（载体）**：`carrier.ts` 按宿主选（`os-store` / `cookie`）· `index.ts` 一套接口 —— 桌面直达宿主 OS 凭据库，**Web 回可读的 `credential.no_store_here`**（不假装、不抛）；**登录/刷新/身份随服务接口** |
 | 4 | **`transport/`** | **对外通信唯一出口** | `service/` | ✅ **已建**（两宿主一种接口 · 四类失败归一 · **限制与重试都由业务方给**；`ws(s)` 与下载/SSE 两档待做）|
 | 5 | `data/`（在 `app/src/`，**不在** platform）| 接口类型（手写）+ 取数钩子 | `transport/` · **服务接口形状** | ⏸ 未建 |
 | 6 | `bridge/` · `webproxy/` | 桌面宿主能力唯一入口 · agent sandbox 域名构造 | 桌面期 | `bridge/` ✅ **已建**（16 条命令：宿主 · 凭据 · 系统集成；**只有它碰框架内部**）· `webproxy/` ⏸ 未建 |
