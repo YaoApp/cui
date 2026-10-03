@@ -16,6 +16,7 @@ describe('resolveLocale', () => {
     [['zh'], 'zh-CN'],
     [['en-US'], 'en-US'],
     [['en-GB'], 'en-US'],
+    [['en-CN'], 'en-US'], // 真机宿主给的就是这个（语言 English + 区域 China）
     [['en'], 'en-US'],
     [['ja-JP'], 'ja'],
     [['ja'], 'ja'],
