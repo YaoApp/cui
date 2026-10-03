@@ -5,6 +5,7 @@
 
 import { hasHost } from '../bridge/invoke'
 import { networkFailure, statusFailure, withTimeout } from './errors'
+import { fail, type BridgeFailure } from '../bridge/result'
 import { ok, type BridgeResult } from '../bridge/result'
 
 export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
@@ -18,6 +19,24 @@ export async function pickFetch(): Promise<FetchLike> {
 
 export type RequestOptions = RequestInit & { timeoutMs?: number }
 
+/** 这个地址在**当前客户端**发得出去吗？
+ *  浏览器受同源策略约束：跨域要对方允许（CORS）才行，所以**不许**它去够任意地址（`15 §5` 同一条道理：
+ *  Web 只认托管方给的清单）。桌面壳走宿主插件，不受这条限制。
+ *  **返回 null 表示可以发**；否则回一条说得清的失败。 */
+export function crossOriginRefusal(input: RequestInfo | URL, host: boolean): BridgeFailure | null {
+  if (host) return null
+  const raw = typeof input === 'string' ? input : String(input)
+  try {
+    const target = new URL(raw, globalThis.location?.href ?? 'http://localhost/')
+    const here = globalThis.location
+    if (!here || !here.origin || here.origin === 'null') return null // 非浏览器环境（测试/SSR）
+    if (target.origin === here.origin) return null
+    return fail('transport.cross_origin', `the browser cannot call another origin: ${raw}`, { url: raw })
+  } catch {
+    return null // 相对路径之类，交给 fetch 自己判断
+  }
+}
+
 /** 发一次请求。**失败是值**，不是异常：形状见 `errors.ts`。 */
 export async function transportFetch(
   input: RequestInfo | URL,
@@ -25,6 +44,10 @@ export async function transportFetch(
 ): Promise<BridgeResult<Response>> {
   const url = typeof input === 'string' ? input : String(input)
   const { timeoutMs = 15_000, ...rest } = init
+  const host = hasHost()
+  // 浏览器里**先判跨域**：不让它去够够不到的地址，也不给说不清的失败
+  const refusal = crossOriginRefusal(input, host)
+  if (refusal) return refusal
   let call: FetchLike
   try {
     call = await pickFetch()
