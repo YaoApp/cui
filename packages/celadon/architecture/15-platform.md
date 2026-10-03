@@ -1,7 +1,7 @@
 # 15 · 平台层
 
-- **版本**：v1.5
-- **最后修改**：2026-10-03 08:41:08
+- **版本**：v1.6
+- **最后修改**：2026-10-03 08:42:48
 - **说明**：平台层：构成与落位 · 服务信息（well-known）· 会话与鉴权 · 运行环境 · 数据层
 
 ## 1. 规则
@@ -24,7 +24,7 @@
 | **`service/`** | **服务信息**：读 `/.well-known/yao` 并缓存（见 §3）| 公共态 + 取数 |
 | **`session/`** | **会话与用户**：token · 当前用户 · 当前团队（见 §4）| 公共态 |
 | **`env/`** | **运行环境**：web / desktop 判定 · 能力开关（见 §5）| 纯函数 + 常量 |
-| **`webproxy/`** | **开发期**的后端地址与预览代理规则（见 §4.2；生产同域，不需要）| 常量 + 构造规则 |
+| **`webproxy/`** | **agent sandbox 服务访问代理**的域名构造规则（见 §4.3）| 纯函数 |
 | `data/` | **接口类型**与传输原语（见 §6）| 类型 + 传输 |
 
 **落位判据**：平台层内部**向下依赖**（`utils/` 不依赖其它；`service/` `session/` `env/` 可依赖 `data/` 与 `utils/`）。
@@ -38,7 +38,7 @@
 | `name` · `version` · `description` | 关于页 · 上报 |
 | **`openapi`** | **接口根**（如 `/v1`）——所有请求以它为前缀 |
 | `issuer_url` · `server_url` | 鉴权与接口的服务地址 |
-| `webproxy`（`domain` / `prefix` / `protocol`）| **仅开发期**：预览代理域名的构造规则（生产同域，不需要；归 `platform/webproxy/`）|
+| `webproxy`（`domain` / `prefix` / `protocol`）| **agent sandbox 服务访问代理**的域名构造规则（见 §4.3）|
 | `license` | 能力开关（`valid` / `edition`）|
 | `tao` | 注册 / 升级入口 |
 | `developer` | 关于页署名 |
@@ -91,8 +91,15 @@
 - **开发期才需要指向别处**：由 **`.env`** 给后端地址（dev server 的代理目标），应用代码不变。
   - `.env` 里的键名由 dev server 读（当前约定 `YAO_SERVER_HOST`，见 `.agent/ENVIRONMENT.md`）。
   - **不要**把后端地址编进应用代码，也不要用 `import.meta.env` 在业务里拼绝对地址。
-- **`webproxy/` 的存在理由只有开发与预览**：把某个端口/预览按 `webproxy` 的
-  `domain` / `prefix` / `protocol` 规则挂成可访问域名。**生产同域，用不到它。**
+
+### 4.3 agent sandbox 的服务访问代理（`webproxy`）
+
+- `webproxy` 的 `domain` / `prefix` / `protocol` 用来**构造 agent sandbox 内服务的访问地址**：
+  sandbox 里的服务（预览、端口）通过它挂在域名下被访问。
+- **它与"开发期的后端地址代理"是两件事，别混淆**：
+  - **后端地址**是**开发期**的事（`.env` → dev server 代理目标，见 §4.2），**生产同域**、应用不感知；
+  - **`webproxy`** 是**运行时**的事（给 sandbox 服务访问用），生产环境同样存在。
+- 构造规则归 `platform/webproxy/`（纯函数）；**消费方按需取用**，不许各自拼字符串。
 
 ## 5. 运行环境（web / desktop）
 
