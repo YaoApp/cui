@@ -59,16 +59,15 @@
 
 | 检查 | 脚本 | 覆盖 |
 | --- | --- | --- |
-| 颜色 / 字号 / 行高 / 圆角 / 间距 / 线宽 / 漏分号 / 装饰色承载文字 / 四值简写不对称 | `check-tokens.mjs` | **所有 `*.html` − 存量名单**（自动发现）|
+| 颜色 / 字号 / 行高 / 圆角 / 间距 / 线宽 / 漏分号 / 装饰色承载文字 / 四值简写不对称 | `check-tokens.mjs` | **design 的 `*.html` − 存量名单** 与 **app 侧 `app/src/**/*.less`**（均自动发现）|
 | 生成物与源一致 · 品牌标记色 | `check-generated.mjs` | `icons.html` / `mock.html` / `index.html` |
 | i18n 缺 key / 漏翻 / 繁简混用 / **en 夹中文** | `check-i18n.mjs` | 四语 JSON |
 | **物理方向属性**（§3 这条）| `check-css-conventions.mjs` | 产品代码与展示页（演示稿登记为存量）|
 | README 色值与 tokens 一致 | `check-readme-values.mjs` | `design/README.md` |
-| **`plan/` 的 Markdown 结构**：表格列数一致 · 表头与分隔行齐全 · 无孤立表行 | `check-plan-md.mjs` | `plan/*.md` |
 
-跑法：`node packages/celadon/scripts/<脚本>`（脚本自己切到 `design/` 工作，从哪跑都行）
+跑法：`node packages/celadon/scripts/<脚本>`（脚本按包根解析路径，从哪跑都行）
 
-**检查器自己有测试**：`node packages/celadon/scripts/tests/run.mjs` —— 把每个检查器喂给一组样本，核对"该过的过、该挂的挂"（每条规则一个反例，共 33 个用例）。加样本见 `scripts/tests/README.md`。
+**检查器自己有测试**：`node packages/celadon/scripts/tests/run.mjs` —— 把每个检查器喂给一组样本，核对"该过的过、该挂的挂"（每条规则一个反例，共 81 个用例）。加样本见 `scripts/tests/README.md`。
 
 > **已经有扫描版**（`check-css-conventions.mjs`，不依赖构建工具）—— 新增页面里出现物理方向属性会直接失败。
 > stylelint 版待 `01 基础设施` 选型后接线，届时连产品样式表也一起拦。

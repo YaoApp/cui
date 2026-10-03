@@ -18,17 +18,19 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const SCRIPTS = resolve(HERE, '..')
 const CASES = resolve(HERE, 'cases')
 
-/** 检查器 → 它的样本目录（样本按检查器分） */
+/** 检查器 → 它的样本目录（样本按检查器分）。
+ *  第三项可选：检查器目标相对用例根的子路径 —— check-tokens 的目标是 `design/`，
+ *  它的 `app/src/` 与 `design/` 同级（样本与真实包同构：包根/{design,app/src}）。 */
 const SUITES = [
   ['check-css-conventions.mjs', 'css-conventions'],
-  ['check-tokens.mjs', 'tokens'],
+  ['check-tokens.mjs', 'tokens', 'design'],
   ['check-i18n.mjs', 'i18n'],
   ['check-i18n-types.mjs', 'i18n-types'],
   ['check-readme-values.mjs', 'readme-values'],
-  ['check-plan-md.mjs', 'check-plan-md'],
   ['check-app-layout.mjs', 'app-layout'],
   ['check-effect-url-write.mjs', 'effect-url-write'],
   ['check-base-components.mjs', 'base-components'],
+  ['check-import-boundaries.mjs', 'import-boundaries'],
   ['check-doc-references.mjs', 'doc-references'],
   ['check-generated.mjs', 'generated'],
 ]
@@ -39,7 +41,7 @@ const DESTRUCTIVE = new Set(['check-generated.mjs'])
 let pass = 0, fail = 0
 const failures = []
 
-for (const [script, group] of SUITES) {
+for (const [script, group, targetSubdir] of SUITES) {
   const groupDir = resolve(CASES, group)
   if (!existsSync(groupDir)) continue
   const cases = readdirSync(groupDir).sort()
@@ -48,7 +50,8 @@ for (const [script, group] of SUITES) {
     /* 破坏性检查器在临时副本上跑，样本目录保持原样 */
     const scratch = DESTRUCTIVE.has(script) ? mkdtempSync(resolve(tmpdir(), 'cui-check-generated-')) : null
     if (scratch) cpSync(dir, scratch, { recursive: true })
-    const target = scratch ?? dir
+    const base = scratch ?? dir
+    const target = targetSubdir ? resolve(base, targetSubdir) : base
     const expectPass = name.startsWith('clean')
     let ok, output
     try {

@@ -8,15 +8,22 @@ import '@/platform/i18n'
 import '@/platform/i18n/locale.store'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { AppRouter } from '@/platform/router/router'
+import { createBrowserRouter, RouterProvider } from 'react-router'
+import { routerBasename } from '@/platform/router/basename'
+import { routes } from '@/routes/routes'
 import { mountIconSprite } from '@/platform/icons'
 
 /* 图标底座挂一次（挂 body，不占页面结构）：所有 <Icon> 靠 #id 引用它（见 10-icons.md）。 */
 mountIconSprite()
 
+/* 路由实例建在模块作用域 —— 每次渲染重建会丢掉导航栈。
+   **装配点放在入口**：入口不属于任何层，于是 platform/ 不必反过来引 routes/
+   （见 architecture/03-boundaries.md §2）。 */
+const router = createBrowserRouter(routes, { basename: routerBasename() })
+
 createRoot(document.getElementById('app')!).render(
   <StrictMode>
-    <AppRouter />
+    <RouterProvider router={router} />
   </StrictMode>,
 )
 
