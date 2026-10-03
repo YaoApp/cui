@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { loadServiceInfo, parseServiceInfo, resetServiceInfo, serviceInfo } from './info'
-import { serviceUrl } from './base'
 
 const PAYLOAD = { name: 'Yao Agents', version: '1.0.0', openapi: '/v1' }
 
@@ -24,8 +23,8 @@ describe('loadServiceInfo', () => {
     expect(second).toMatchObject({ ok: true, value: PAYLOAD })
     expect(fetchMock).toHaveBeenCalledTimes(1)          // 第二次不许再请求
     expect(serviceInfo()).toMatchObject(PAYLOAD)
-    // **同源路径**（带命名空间）：dev 由 dev server 代转到后端，见 16 §1
-    expect(fetchMock.mock.calls[0][0]).toBe(serviceUrl('/.well-known/yao'))
+    // **根相对**：后端真实路由就是这个（dev 由 dev server 代转，见 16 §1）
+    expect(fetchMock.mock.calls[0][0]).toBe('/.well-known/yao')
   })
 
   it('turns an unreachable service into a readable code, not a throw', async () => {
