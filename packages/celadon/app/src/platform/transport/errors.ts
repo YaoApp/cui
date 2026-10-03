@@ -25,17 +25,21 @@ export function parseFailure(error: unknown, url: string): BridgeFailure {
 export async function withTimeout<T>(
   run: (signal: AbortSignal) => Promise<T>,
   url: string,
-  timeoutMs: number,
+  // **不填就不限时**：出口提供能力，数字由业务方给（17 §2.2）
+  timeoutMs?: number,
 ): Promise<{ ok: true; value: T } | { ok: false; failure: BridgeFailure }> {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  const timer = timeoutMs === undefined ? undefined : setTimeout(() => controller.abort(), timeoutMs)
   try {
     return { ok: true, value: await run(controller.signal) }
   } catch (error) {
-    if (controller.signal.aborted) return { ok: false, failure: timeoutFailure(url, timeoutMs) }
+    // 只有"我们设了超时"才算超时；没设还想 abort，那是别的原因
+    if (controller.signal.aborted && timeoutMs !== undefined) {
+      return { ok: false, failure: timeoutFailure(url, timeoutMs) }
+    }
     return { ok: false, failure: networkFailure(error, url) }
   } finally {
-    clearTimeout(timer)
+    if (timer !== undefined) clearTimeout(timer)
   }
 }
 
