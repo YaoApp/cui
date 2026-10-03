@@ -38,6 +38,7 @@
 | 11 | [formatting-and-lists](11-formatting-and-lists.md) | 日期 / 数字 / 时区 · 长列表与表格（随实践推进更新）|
 | 12 | [motion](12-motion.md) | 动效归属（随实践推进更新）|
 | 13 | [quality-gates](13-quality-gates.md) | 基础语法 · 检查器 · CI · 产物与日志 |
+| 15 | [platform](15-platform.md) | 平台层：构成与落位 · 服务信息（well-known）· 会话与鉴权 · 运行环境 · 数据层 |
 | 14 | [testing](14-testing.md) | 测试分层 · 位置与命名 · 断言与 mock 边界 · 浏览器与拟人 · 配置与日志 |
 
 ## 一条铁律
