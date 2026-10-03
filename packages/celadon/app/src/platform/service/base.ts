@@ -10,5 +10,8 @@ export function serviceBase(): string {
 export function serviceUrl(path: string): string {
   const suffix = path.startsWith('/') ? path : `/${path}`
   const base = serviceBase()
+  /* 有宿主基址（桌面）→ 基址 + 路径；否则**根相对** —— 引擎的根是站点根，
+     与应用的命名空间无关（dev 由 dev server 代转，见 16-development.md §1）。 */
   return base ? `${base}${suffix}` : suffix
 }
+

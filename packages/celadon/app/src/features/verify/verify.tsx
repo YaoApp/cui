@@ -23,7 +23,10 @@ import { navWithActive } from '@/platform/utils/nav'
 import { buildManifest, capabilities, clientInfo, hasHost } from '@/platform/client'
 import { routerBasename } from '@/platform/router/basename'
 import { bridge, bridgeErrorText, type BridgeResult } from '@/platform/bridge'
+import { credential } from '@/platform/credential'
+import { REDACTED, shouldRedact } from './redact'
 import { transport } from '@/platform/transport'
+import { loadServiceInfo } from '@/platform/service'
 
 type Line = { label: string; text: string }
 
@@ -50,9 +53,10 @@ export function VerifyPage() {
   const host = hasHost()
 
   /** 一次调用的结果：成功显示值，失败显示**翻译过的**文案（缺翻译时回退诊断并告警）。 */
-  const report = (label: string, result: BridgeResult<unknown>) => {
+  const report = (label: string, result: BridgeResult<unknown>, redact = false) => {
     const text = result.ok
-      ? `${t('verify.result')}: ${JSON.stringify(result.value)}`
+      // **秘密不上屏**：`credential.read` 的结果只报"读到了"，不印内容
+      ? `${t('verify.result')}: ${redact ? REDACTED : JSON.stringify(result.value)}`
       : bridgeErrorText(translate, result)
     setLines((prev) => [{ label, text }, ...prev].slice(0, 12))
   }
@@ -72,12 +76,12 @@ export function VerifyPage() {
         ['theme', () => bridge.system.theme()],
         ['machineId', () => bridge.system.machineId()],
         ['transport', () => transport.probe('https://example.com')],
-        ['credential.write', () => bridge.credential.write('verify-demo', 'self-check')],
-        ['credential.read', () => bridge.credential.read('verify-demo')],
-        ['credential.remove', () => bridge.credential.remove('verify-demo')],
+        ['credential.write', () => credential.write('verify-demo', 'self-check')],
+        ['credential.read', () => credential.read('verify-demo')],
+        ['credential.remove', () => credential.remove('verify-demo')],
       ] as const) {
         const result = await call()
-        report(label, result)
+        report(label, result, shouldRedact(label))
       }
       const pinged = await bridge.ping()
       setPing(pinged)
@@ -86,7 +90,7 @@ export function VerifyPage() {
   }, [host])
 
   const run = (label: string, call: () => Promise<BridgeResult<unknown>>) => {
-    void call().then((result) => report(label, result))
+    void call().then((result) => report(label, result, shouldRedact(label)))
   }
 
   return (
@@ -186,6 +190,15 @@ export function VerifyPage() {
         <Button onClick={() => run('reveal', () => bridge.system.reveal(path))}>{t('verify.reveal')}</Button>
       </p>
 
+      {/* 服务信息：**第一次需要时读一次**并缓存（15 §3）。**按需**——按钮点了才读，
+          所以纯静态托管（演示/拟人）不会平白多出 404 */}
+      <h2 className="verify__heading">{t('verify.serviceInfo')}</h2>
+      <p className="verify__tools">
+        <Button onClick={() => run('service.info', () => loadServiceInfo(10_000))}>
+          {t('verify.serviceInfoRead')}
+        </Button>
+      </p>
+
       {/* 出海口：**只有 platform/transport 发请求**（见 17-transport.md）。
           Web 用浏览器 fetch，桌面壳用官方插件的 fetch（同一签名） */}
       <h2 className="verify__heading">{t('verify.egress')}</h2>
@@ -213,10 +226,10 @@ export function VerifyPage() {
         </label>
       </p>
       <p>
-        <Button onClick={() => run('credential.write', () => bridge.credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
-        <Button onClick={() => run('credential.read', () => bridge.credential.read(service))}>{t('verify.read')}</Button>{' '}
-        <Button onClick={() => run('credential.remove', () => bridge.credential.remove(service))}>{t('verify.remove')}</Button>{' '}
-        <Button onClick={() => run('credential.list', () => bridge.credential.list())}>{t('verify.list')}</Button>
+        <Button onClick={() => run('credential.write', () => credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
+        <Button onClick={() => run('credential.read', () => credential.read(service))}>{t('verify.read')}</Button>{' '}
+        <Button onClick={() => run('credential.remove', () => credential.remove(service))}>{t('verify.remove')}</Button>{' '}
+        <Button onClick={() => run('credential.list', () => credential.list())}>{t('verify.list')}</Button>
       </p>
 
       <h2 className="verify__heading">{t('verify.results')}</h2>

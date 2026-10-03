@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv, type ProxyOptions } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 
@@ -39,7 +39,31 @@ function assertClientManifest(outDirName: string | undefined) {
 }
 assertClientManifest(process.env.CELADON_OUT_DIR)
 
-export default defineConfig({
+
+
+export default defineConfig(({ mode }) => {
+  /* 开发期把**引擎的接口路径**转发到后端（`16-development.md` §1/§3）。
+     **地址不进代码**：`YAO_SERVER_HOST` 由运行环境给 —— shell 里直接给，或写进 `.env`（**要用 `loadEnv` 读**：
+     Vite 只把 `VITE_` 前缀的注进 `import.meta.env`，**不写 `process.env`**，直接读 `process.env` 会静默拿不到）。 */
+  const env = loadEnv(mode, import.meta.dirname, '')
+  const proxyTarget = process.env.YAO_SERVER_HOST || env.YAO_SERVER_HOST
+  const enginePaths = ['.well-known', 'v1']
+  const devProxy: Record<string, ProxyOptions> = proxyTarget
+    ? Object.fromEntries(
+        enginePaths.map((path) => [
+          `/${path}`,
+          {
+            target: proxyTarget,
+            changeOrigin: true,
+            ws: true, // 长连接（16 §1）；**SSE 的响应头等接 SSE 时按 §1 三头一起加**
+                                  // 长连接（16 §1）
+
+          },
+        ]),
+      )
+    : {}
+
+  return {
   root: resolve(import.meta.dirname, 'app'),
   base,
   plugins: [react(), emitHostLocales],
@@ -54,6 +78,8 @@ export default defineConfig({
     // 引擎把 /assets 列为保留前缀 —— 产物静态目录不能用默认名
     assetsDir: '_assets',
   },
-  server: { port: 5199 },
+  // 开发期代理（`YAO_SERVER_HOST` 没给就是空，等于不代理）
+  server: { port: 5199, proxy: devProxy },
   preview: { port: 5199 },
+}
 })
