@@ -1,7 +1,7 @@
 # 04 · 制品与挂载（硬约束）
 
 - **版本**：v1.31
-- **最后修改**：2026-10-03 12:10:51
+- **最后修改**：2026-10-03 12:11:34
 - **说明**：制品构成 · 宿主挂载 · 放到哪（引擎 / 独立 / 桌面）· SPA fallback · 由命名空间推导的工程约束
 
 ## 1. 制品构成
@@ -158,6 +158,37 @@ export const onRequest: PagesFunction<{ ENGINE: string }> = ({ request, env }) =
   return fetch(new Request(url, request))
 }
 ```
+
+**工程配置**：Pages 项目由 `wrangler.toml` 与两类规则文件构成，目录布局如下。
+
+```
+输出根/                       # wrangler.toml 的 pages_build_output_dir
+├── app/                      # 命名空间目录（CUI_BASE 的值）
+│   ├── index.html
+│   └── _assets/
+├── _redirects                # fallback 与 404
+├── _headers                 # 缓存策略
+├── _routes.json             # 只让接口路径进入 Functions
+└── functions/
+    └── v1/[[path]].ts       # 反向代理至引擎
+```
+
+```toml
+# wrangler.toml
+name = "cui"
+pages_build_output_dir = "dist-cf"      # 输出根
+compatibility_date = "2025-01-01"
+
+[vars]
+ENGINE = "engine.example.com"           # Functions 里以 env.ENGINE 读取
+```
+
+```json
+// _routes.json —— 静态请求不走 Functions，只有接口路径进
+{ "version": 1, "include": ["/v1/*"], "exclude": [] }
+```
+
+部署：`wrangler pages deploy`（首次会要求选择项目）。
 
 **长连接**：接口路径**不得进入缓存**（Cache Rules 中排除）；SSE 依赖响应头 `Cache-Control: no-cache, no-transform`
 （见上表），WebSocket 由 Cloudflare 代理转发，同样要求引擎可达、不可缓存。
