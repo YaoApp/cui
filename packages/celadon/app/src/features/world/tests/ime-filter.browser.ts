@@ -4,6 +4,11 @@ import { expect, test, type Page } from '@playwright/test'
    两件事必须成立：① 组合中按回车**不许误提交**（表单真提交会把查询串清掉，侧边面板随之丢失）
    ② 上屏之后，过滤按**最终文字**生效。
 
+   **说清这里钉的是什么**：本应用**不对组合做任何分支**（`world.tsx` 没有 `onComposition*`），
+   所以派发合成 `CompositionEvent` 是为了贴近真实输入路径，**断言本身钉的是两条共通行为** ——
+   表单不提交、以及受控输入边打边同步地址栏（`:44` 的 `q=gam`）。删掉组合事件用例仍会绿；
+   删掉 `onSubmit` 的阻止提交、或改坏 URL 同步，用例会红。
+
    为什么用原生 setter 再派发事件：React 的受控 input 会记住上一次的值，
    直接改 `el.value` 不会触发 onChange —— 这是模拟输入法的标准做法。 */
 
