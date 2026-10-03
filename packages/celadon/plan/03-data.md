@@ -1,12 +1,65 @@
 # 03 · 数据层（`data/`）
 
-- **版本**：v0.4（计划）
-- **最后修改**：2026-10-04 07:19:10
-- **说明**：分**两部分** —— **0 统一抽象**（先把层做出来）· **1 业务接口清单**（要迁移的，逐域列表 + **WebSocket/流式单列**）
+- **版本**：v0.5（计划）
+- **最后修改**：2026-10-04 07:21:27
+- **说明**：三节 —— **00 代码结构**（先列长什么样）· **0 统一抽象**（要一起定的 7 项）· **1 业务接口清单**（逐域列表 + **WebSocket/流式单列**）
 - **事实基础**：[data-legacy-openapi.md](data-legacy-openapi.md)（旧 `openapi/` 71 文件现状报告 · 临时）
 
 > **规则**在 [`../architecture/05-data-and-api.md`](../architecture/05-data-and-api.md) 与 [`17-transport.md`](../architecture/17-transport.md)；本文只回答"先做什么、做到什么算完成"，**不复制规则**。
 > **"怎么做"放第二阶段**：先把 §0 的抽象与 §1 的清单定下来，再谈逐域落地顺序。
+
+## 00. 代码结构（先把"长什么样"列出来）
+
+**一句话**：`data/` 只描述「**有哪些接口 · 进出是什么 · 怎么取**」；**发请求的能力全在 `platform/`**。
+
+```text
+app/src/
+├── data/                         # 接口类型 + 取数（**只声明，不发请求**）
+│   ├── index.ts                  # 对外唯一入口（按域再导出）
+│   ├── types.ts                  # 公共类型：错误 · 列表/分页 · 出站上下文（§0 的 0.1–0.4）
+│   ├── hooks/
+│   │   └── use-request.ts        # 取数钩子：加载 / 错误 / 取消 / 重试（**唯一实现**，§0.5）
+│   ├── helloworld/               # **脚手架**：第一个端到端样板（见 §1.1）
+│   │   ├── types.ts
+│   │   ├── api.ts                # 方法声明：路径 + 输入/输出类型
+│   │   └── index.ts
+│   ├── user/                     # 真实域样板（与 platform/credential 联动）
+│   ├── setting/ · agent/ · workspace/ · llm/ · mcp/ · sandbox/ · computer/ · nodes/ · app/ · captcha/ · file/
+│   └── stream/                   # 流式 / WS 的**消息形状**（接线在 platform/transport，§0.6）
+│       ├── types.ts              # 统一事件形状与事件名
+│       └── chat.ts               # 对话流消息（从旧 chat/types.ts 的消息 DSL 搬）
+└── platform/
+    ├── service/                  # 服务地址（已在）
+    ├── credential/               # 凭据载体（已在）
+    └── transport/                # **唯一出口**：fetch / 上传 / 下载 / SSE / WS（能力都在这）
+```
+
+**每个域里就三件事**（与旧 `<域>/types.ts + api.ts + index.ts` 同形，**内容不同**）：
+
+| 文件 | 放什么 | **不许出现** |
+| --- | --- | --- |
+| `types.ts` | 手写类型（从旧类型搬，收 `any`）| — |
+| `api.ts` | **方法声明**：路径常量 + 输入/输出类型 | `fetch` · `Authorization` · cookie · 自拼 URL · 旧助手 `GetData`/`IsError` |
+| `index.ts` | 该域的导出 | 跨域 re-export 一大坨 |
+
+**边界（谁 import 谁）**：
+
+| 方向 | 允许 | 依据 |
+| --- | --- | --- |
+| `features/` · `components/` · `routes/` → `data/` | ✅ | 上层通过**域**与**钩子**取数 |
+| `data/` → `platform/` | ✅ | 出口与凭据都在平台层 |
+| `data/` → `features/` · `components/` · `pages` | **❌** | 旧代码反向 import 页面层 **6 处**，是反面教材 |
+| 组件 / feature 里 `fetch` · `EventSource` · `new WebSocket` | **❌** | 门禁（§3）|
+
+**旧 → 新的搬法**：
+
+| 旧 | 新 |
+| --- | --- |
+| `openapi/<域>/types.ts` | `data/<域>/types.ts` —— **直接搬** |
+| `openapi/<域>/api.ts` | `data/<域>/api.ts` —— **只留路径与类型**，实现重写 |
+| `openapi/chat/types.ts` 的消息 DSL | `data/stream/chat.ts` |
+| `openapi/helloworld.ts` | `data/helloworld/` —— **脚手架** |
+| `openapi/openapi.ts` · `headers.ts` · `lib/` | **丢弃** —— 能力归 `platform/transport/` |
 
 ## 0. 统一抽象（第一阶段的一半）
 
