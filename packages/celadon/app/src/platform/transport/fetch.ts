@@ -43,7 +43,8 @@ export async function transportFetch(
   init: RequestOptions = {},
 ): Promise<BridgeResult<Response>> {
   const url = typeof input === 'string' ? input : String(input)
-  const { timeoutMs = 15_000, ...rest } = init
+  // **默认不限定**：超时由业务方给（见 17 §2.2），出口不替它定数字
+  const { timeoutMs, ...rest } = init
   const host = hasHost()
   // 浏览器里**先判跨域**：不让它去够够不到的地址，也不给说不清的失败
   const refusal = crossOriginRefusal(input, host)
@@ -72,7 +73,7 @@ export async function transportFetchOk(
 /** 探一下地址能不能用（验证页用）：只回报状态与类型，不读正文。 */
 export async function probe(
   url: string,
-  timeoutMs = 15_000,
+  timeoutMs?: number,
 ): Promise<BridgeResult<{ status: number; ok: boolean; contentType: string }>> {
   const result = await transportFetch(url, { method: 'GET', timeoutMs })
   if (!result.ok) return result
