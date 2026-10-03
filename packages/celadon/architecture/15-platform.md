@@ -1,7 +1,7 @@
 # 15 · 平台层
 
-- **版本**：v1.21
-- **最后修改**：2026-10-03 09:14:46
+- **版本**：v1.22
+- **最后修改**：2026-10-03 09:15:41
 - **说明**：平台层：构成与落位 · 服务信息（well-known）· 会话与鉴权 · 运行环境 · 数据层
 
 ## 1. 规则
@@ -88,15 +88,16 @@
 | 宿主 | 发出请求的层 | 跨域 |
 | --- | --- | --- |
 | Android | **native HTTP**（OkHttp）| **无跨域** —— 直连服务端即可 |
-| Desktop | **native HTTP**（Tauri `http` 插件 → Rust 侧）| **无跨域** —— 直连服务端即可 |
+| Desktop | **Rust 侧自己封装的 fetch**（经 Tauri command 调用）| **无跨域** —— 直连服务端即可 |
 | Desktop | webview 里的 `fetch()` | **有跨域** —— webview 是浏览器引擎，受**同源策略**约束 |
 | Web | 浏览器 `fetch()` | **有跨域** —— 需同源部署或服务端 CORS |
 
 - 服务端**不发 CORS 头、不处理预检**（实测 `Access-Control-*` 全无、`OPTIONS` 返回 404），
   所以 webview 里发出去的跨域请求**拿不到响应**。
-- **结论**：走客户端方式时,**Desktop 必须用 Tauri 的 `http` 插件发请求**（Rust 侧），
-  **不要用 webview 的 `fetch()`** —— 否则仍需一个加 CORS 的本地代理（`cui-desktop` 现状即是此，其
-  `tower-http` 的 `cors` 就用在那个代理上）。走 native 之后**代理与隧道都可以去掉**。
+- **结论**：Desktop 的请求**在 Rust 里发**——我们自己封装的 fetch（经 Tauri command 从 webview 调），
+  **不用 webview 的 `fetch()`**。请求不出浏览器就不受同源策略约束，因此**不需要本地代理**
+  （`cui-desktop` 现状是代理方案，其 `tower-http` 的 `cors` 就用在那个代理上；改走后**代理与隧道都可以去掉**）。
+- 自己封装也意味着**鉴权、续期、出站上下文都在我们手里**，与 §4.4 的统一出口是同一件事。
 
 ### 4.2 后端地址与代理（**仅开发期**）
 
@@ -129,7 +130,7 @@
     **带不带、怎么带由各 API 的接口封装按该接口要求决定**。
 - **宿主差异只藏在实现里**（见 §4.1）：
   - **Web**：浏览器 `fetch` / `WebSocket`（受跨域约束）；
-  - **Desktop**：Tauri `http` 插件 + native WebSocket（**绕开跨域**，不需要本地代理）；
+  - **Desktop**：Rust 侧封装的 fetch（经 Tauri command）+ native WebSocket（**绕开跨域**，不需要本地代理）；
   - **Android**：native HTTP / WebSocket。
 - **对外形状一致**：同一套方法签名与返回类型，**feature 不感知宿主**。
 - **不许**：业务自己拼 URL、自己读 token、自己建 WebSocket、自己判宿主。
