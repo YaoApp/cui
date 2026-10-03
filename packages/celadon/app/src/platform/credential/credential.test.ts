@@ -34,9 +34,20 @@ describe('credential', () => {
   })
 
   it('on the desktop it is the same interface, backed by the host store', async () => {
-    asHost(async (command) => (command === 'celadon_credential_list' ? [{ service: 'srv-a', account: '' }] : true))
-    // 载体由 clientKind() 决定，读的是构建清单；这一条在 Web 构建里只验证接口形状一致
-    const listed = await credential.list()
-    expect(listed.ok === true || listed.code === 'credential.no_store_here').toBe(true)
+    // **真换宿主**：不 mock 的话 clientKind() 恒为 web，这一段就是空跑（复核者点出来的假绿）
+    vi.resetModules()
+    vi.doMock('../client/manifest', () => ({ clientKind: () => 'desktop' }))
+    const calls: string[] = []
+    asHost(async (command) => {
+      calls.push(command)
+      return command === 'celadon_credential_list' ? [{ service: 'srv-a', account: '' }] : true
+    })
+    const { credential: desktopCredential } = await import('./index')
+    expect(desktopCredential.carrier()).toBe('os-store')
+    const listed = await desktopCredential.list()
+    expect(listed).toMatchObject({ ok: true, value: [{ service: 'srv-a', account: '' }] })
+    expect(calls).toContain('celadon_credential_list')   // 真走到了宿主
+    vi.doUnmock('../client/manifest')
+    vi.resetModules()
   })
 })

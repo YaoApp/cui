@@ -51,9 +51,10 @@ export function VerifyPage() {
   const host = hasHost()
 
   /** 一次调用的结果：成功显示值，失败显示**翻译过的**文案（缺翻译时回退诊断并告警）。 */
-  const report = (label: string, result: BridgeResult<unknown>) => {
+  const report = (label: string, result: BridgeResult<unknown>, redact = false) => {
     const text = result.ok
-      ? `${t('verify.result')}: ${JSON.stringify(result.value)}`
+      // **秘密不上屏**：`credential.read` 的结果只报"读到了"，不印内容
+      ? `${t('verify.result')}: ${redact ? '•••' : JSON.stringify(result.value)}`
       : bridgeErrorText(translate, result)
     setLines((prev) => [{ label, text }, ...prev].slice(0, 12))
   }
@@ -86,8 +87,8 @@ export function VerifyPage() {
     })()
   }, [host])
 
-  const run = (label: string, call: () => Promise<BridgeResult<unknown>>) => {
-    void call().then((result) => report(label, result))
+  const run = (label: string, call: () => Promise<BridgeResult<unknown>>, redact = false) => {
+    void call().then((result) => report(label, result, redact))
   }
 
   return (
@@ -215,7 +216,7 @@ export function VerifyPage() {
       </p>
       <p>
         <Button onClick={() => run('credential.write', () => credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
-        <Button onClick={() => run('credential.read', () => credential.read(service))}>{t('verify.read')}</Button>{' '}
+        <Button onClick={() => run('credential.read', () => credential.read(service), true)}>{t('verify.read')}</Button>{' '}
         <Button onClick={() => run('credential.remove', () => credential.remove(service))}>{t('verify.remove')}</Button>{' '}
         <Button onClick={() => run('credential.list', () => credential.list())}>{t('verify.list')}</Button>
       </p>

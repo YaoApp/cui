@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
-import { defineConfig, type ProxyOptions } from 'vite'
+import { defineConfig, loadEnv, type ProxyOptions } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 
@@ -39,19 +39,31 @@ function assertClientManifest(outDirName: string | undefined) {
 }
 assertClientManifest(process.env.CELADON_OUT_DIR)
 
-/* 开发期把**引擎的接口路径**转发到后端（`16-development.md` §1/§3）：
-   浏览器直连后端拿不到响应（跨域/CORS），所以前端一律用**相对路径**，由 dev server 代转。
-   **地址不进代码**：`YAO_SERVER_HOST` 由运行环境给（`.env` / pm2 / 宿主）；没给就不代理。 */
-const proxyTarget = process.env.YAO_SERVER_HOST
 // **必须在应用的命名空间下**：base 是 `/app/`，根下的请求会被 Vite 的 base 中间件先拦掉（实测 404）
-/* 引擎路径**照后端真实路由原样转发**（根下，不带应用命名空间）：
-   dev server 在 `/app/` 下服务前端，但引擎的根是站点根 —— 两者本来就是两套路由。 */
-const enginePaths = ['.well-known', 'v1']
-const devProxy: Record<string, ProxyOptions> = proxyTarget
-  ? Object.fromEntries(enginePaths.map((path) => [`/${path}`, { target: proxyTarget, changeOrigin: true }]))
-  : {}
 
-export default defineConfig({
+
+export default defineConfig(({ mode }) => {
+  /* 开发期把**引擎的接口路径**转发到后端（`16-development.md` §1/§3）。
+     **地址不进代码**：`YAO_SERVER_HOST` 由运行环境给 —— shell 里直接给，或写进 `.env`（**要用 `loadEnv` 读**：
+     Vite 只把 `VITE_` 前缀的注进 `import.meta.env`，**不写 `process.env`**，直接读 `process.env` 会静默拿不到）。 */
+  const env = loadEnv(mode, import.meta.dirname, '')
+  const proxyTarget = process.env.YAO_SERVER_HOST || env.YAO_SERVER_HOST
+  const enginePaths = ['.well-known', 'v1']
+  const devProxy: Record<string, ProxyOptions> = proxyTarget
+    ? Object.fromEntries(
+        enginePaths.map((path) => [
+          `/${path}`,
+          {
+            target: proxyTarget,
+            changeOrigin: true,
+            ws: true,                                   // 长连接（16 §1）
+            headers: { Accept: 'text/event-stream' },   // SSE
+          },
+        ]),
+      )
+    : {}
+
+  return {
   root: resolve(import.meta.dirname, 'app'),
   base,
   plugins: [react(), emitHostLocales],
@@ -69,4 +81,5 @@ export default defineConfig({
   // 开发期代理（`YAO_SERVER_HOST` 没给就是空，等于不代理）
   server: { port: 5199, proxy: devProxy },
   preview: { port: 5199 },
+}
 })

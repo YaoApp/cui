@@ -24,7 +24,8 @@ export function parseServiceInfo(raw: unknown): BridgeResult<ServiceInfo> {
   }
   const value = raw as Record<string, unknown>
   const openapi = value.openapi
-  if (typeof openapi !== 'string' || !openapi.startsWith('/')) {
+  // **不许是协议相对地址**（`//evil.example/x` 会被当跨域前缀）；必须是本站根下的路径段
+  if (typeof openapi !== 'string' || !/^\/[^/]/.test(openapi)) {
     return fail('service.malformed', 'service info has no openapi root', { openapi: String(openapi) })
   }
   return ok({
@@ -35,11 +36,20 @@ export function parseServiceInfo(raw: unknown): BridgeResult<ServiceInfo> {
 }
 
 let cached: ServiceInfo | undefined
+let inFlight: Promise<BridgeResult<ServiceInfo>> | undefined
 
-/** 读一次并缓存（再有调用直接用缓存，**不重复请求**）。 */
-export async function loadServiceInfo(): Promise<BridgeResult<ServiceInfo>> {
-  if (cached) return ok(cached)
-  const response = await transportFetch(serviceUrl('/.well-known/yao'))
+/** 读一次并缓存（再有调用直接用缓存；**并发也只发一次** —— 否则 StrictMode 会打两次）。 */
+export function loadServiceInfo(timeoutMs?: number): Promise<BridgeResult<ServiceInfo>> {
+  if (cached) return Promise.resolve(ok(cached))
+  inFlight ??= readServiceInfo(timeoutMs).finally(() => {
+    inFlight = undefined
+  })
+  return inFlight
+}
+
+async function readServiceInfo(timeoutMs?: number): Promise<BridgeResult<ServiceInfo>> {
+  // **超时由调用方给**（17 §2.2：出口不替业务方定数字）
+  const response = await transportFetch(serviceUrl('/.well-known/yao'), timeoutMs === undefined ? {} : { timeoutMs })
   if (!response.ok) return response
   if (!response.value.ok) {
     return fail('service.unavailable', `the service answered ${response.value.status}`, {
