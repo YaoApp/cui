@@ -21,7 +21,7 @@
 | # | 计划 | 管什么 | 状态 |
 | --- | --- | --- | --- |
 | 00 | [design-system](00-design-system.md) | 设计体系（token · 图标 · 页面）| 进行中 |
-| 01 | [infrastructure](01-infrastructure.md) | 包与工程底座（构建 · 门禁 · 测试装置）| 已落地（随实现微调）|
+| 01 | [infrastructure](01-infrastructure.md) | 工程地基：**架构文档 + 规范脚本** + 构建/生成脚本 + 测试装置 | ✅ **已完成**（2026-10-03）|
 | **02** | [**platform**](02-platform.md) | **产品级平台地基**：`client/` · `service/` · `credential/` · `transport/` · `data/` · `bridge/` | **待开工** |
 
 **开工顺序**：`02-platform.md` §1 的表就是依赖顺序（`client/` → `service/` → `credential/` → `transport/` → `data/` → 桌面期的 `bridge/`）。
