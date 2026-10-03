@@ -1,7 +1,7 @@
 # 03 · 数据层（`data/`）
 
-- **版本**：v0.6（计划）
-- **最后修改**：2026-10-04 07:22:25
+- **版本**：v0.7（计划）
+- **最后修改**：2026-10-04 07:25:16
 - **说明**：三节 —— **00 代码结构**（先列长什么样）· **0 统一抽象**（要一起定的 7 项）· **1 业务接口清单**（逐域列表 + **WebSocket/流式单列**）
 - **事实基础**：[data-legacy-openapi.md](data-legacy-openapi.md)（旧 `openapi/` 71 文件现状报告 · 临时）
 
@@ -30,7 +30,8 @@ app/src/
 │       ├── chat.ts               # ① 对话流：消息 DSL（从旧 chat/types.ts 搬）
 │       ├── events.ts             # ② 系统事件：{type, data} 与事件名（旧 events/useEventStream）
 │       ├── task.ts               # ③ 任务 WS：命令 read/history/run/retry/repeat/stop/cancel 的请求与应答类型
-│       └── vnc.ts                # ④ VNC / 沙箱：通道地址与握手（旧 computer/sandbox）
+│       ├── vnc.ts                # ④ VNC / 沙箱：通道地址与握手（旧 computer/sandbox）
+│       └── use-stream.ts         # ③ 订阅钩子：订阅一份流、取消、断线状态（**唯一实现**，与 use-request 并列）
 └── platform/
     ├── service/                  # 服务地址（已在）
     ├── credential/               # 凭据载体（已在）
@@ -39,6 +40,21 @@ app/src/
         ├── stream.ts             # 待做：SSE 接线（解析归这，形状归 data/stream）
         └── socket.ts             # 待做：WS 连接 · 心跳 · 重连 · 鉴权（**只有这一处**）
 ```
+
+**钩子（hook）分几种 · 放哪** —— **这是结构问题**：钩子的位置由**它依赖哪一层**决定，**不是所有钩子塞进一个 `hooks/`**。
+
+| 种类 | 放哪 | 依赖 | 例 |
+| --- | --- | --- | --- |
+| **取数钩子** | `data/hooks/use-request.ts` | `platform/transport` + 该域类型 | 加载 / 错误 / 取消 / 重试（四态**唯一实现**）|
+| **订阅钩子** | `data/stream/use-stream.ts` | `platform/transport` 的 stream/socket | 订阅一条聊天/事件通道、取消、断线状态 |
+| **交互钩子** | `components/`（**就近**，跟着用它的人）| 只依赖 React | 开合、焦点陷阱、合并 ref |
+| **状态钩子** | `stores/`（store 自己导出选择器/动作）| store 内部 | 主题 · 语言 · 导航 |
+| **宿主 / 环境钩子** | `platform/<域>/` | 宿主能力（bridge · client · service）| 页标题（`07 §2` 已定）· 客户端能力 · 服务信息 |
+
+**在 `data/` 里，动作只有三种**：**查询** · **提交** · **订阅** ——
+
+- **查询与提交共用 `use-request.ts`**（提交＝手动触发那一次），**不再写第二个实现**
+- **订阅**走 `use-stream.ts`（形状在 `data/stream/*`，连接/心跳/重连在 `transport/`）
 
 **每个域里就三件事**（与旧 `<域>/types.ts + api.ts + index.ts` 同形，**内容不同**）：
 
@@ -77,7 +93,7 @@ app/src/
 | 0.2 | **列表 / 分页** | 一个包裹形状（旧：**四套命名** `pagecount`/`pagecnt`/`totalPages`/`next+prev`）| `data/` 公共类型 | ⏸ |
 | 0.3 | **成功包裹** | 有没有信封；列表 `data` 与实体 `data` 怎么区分（旧：`result.data \|\| result` 反复兜）| 同上 | ⏸ |
 | 0.4 | **出站上下文** | locale / timezone / theme / client 怎么带（旧：locale 走 query · `X-Yao-Accept` 头 · 三来源凑 CSRF）| 同上 + `platform/` | ⏸ |
-| 0.5 | **取数钩子** | 加载 / 错误 / 取消 / 重试的**唯一实现**与返回形状（旧：**133 个文件手写四态**）| `app/src/data/hooks/use-request.ts`（`SPEC.md:95` 已给落点）| ⏸ |
+| 0.5 | **取数与订阅钩子** | 加载 / 错误 / 取消 / 重试的**唯一实现**与返回形状；订阅（流式）与它并列（旧：**133 个文件手写四态**）| `data/hooks/use-request.ts`（查询+提交 · `SPEC.md:95`）· `data/stream/use-stream.ts`（订阅）| ⏸ |
 | 0.6 | **出口接线** | 一切经 `platform/transport/`；**上传/下载/SSE/WS 各归哪一档**（`17 §2.2` 的三档：`api`/`download`/`stream`）| `platform/transport/` | ⏸（卡 `17 §2.2` 两档未做）|
 | 0.7 | **类型的组织** | 一域一处；类型与方法同文件还是分开；子域（如 `agent/robot`）怎么放（旧：`<域>/types.ts` + `<域>/api.ts` + barrel，且**反向 import 页面层 6 处**）| `app/src/data/<域>/` | ⏸ |
 
