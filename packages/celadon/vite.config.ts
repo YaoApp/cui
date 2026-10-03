@@ -44,19 +44,11 @@ assertClientManifest(process.env.CELADON_OUT_DIR)
    **地址不进代码**：`YAO_SERVER_HOST` 由运行环境给（`.env` / pm2 / 宿主）；没给就不代理。 */
 const proxyTarget = process.env.YAO_SERVER_HOST
 // **必须在应用的命名空间下**：base 是 `/app/`，根下的请求会被 Vite 的 base 中间件先拦掉（实测 404）
+/* 引擎路径**照后端真实路由原样转发**（根下，不带应用命名空间）：
+   dev server 在 `/app/` 下服务前端，但引擎的根是站点根 —— 两者本来就是两套路由。 */
 const enginePaths = ['.well-known', 'v1']
 const devProxy: Record<string, ProxyOptions> = proxyTarget
-  ? Object.fromEntries(
-      enginePaths.map((path) => [
-        `${base}${path}`,
-        {
-          target: proxyTarget,
-          changeOrigin: true,
-          // **转发前剥掉应用的命名空间**：后端认的是 `/.well-known/yao`，不是 `/app/.well-known/yao`
-          rewrite: (incoming: string) => incoming.replace(new RegExp(`^${base}`), '/'),
-        },
-      ]),
-    )
+  ? Object.fromEntries(enginePaths.map((path) => [`/${path}`, { target: proxyTarget, changeOrigin: true }]))
   : {}
 
 export default defineConfig({
