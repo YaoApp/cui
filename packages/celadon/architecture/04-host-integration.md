@@ -1,7 +1,7 @@
 # 04 · 制品与挂载（硬约束）
 
 - **版本**：v1.31
-- **最后修改**：2026-10-03 11:58:52
+- **最后修改**：2026-10-03 12:11:34
 - **说明**：制品构成 · 宿主挂载 · 放到哪（引擎 / 独立 / 桌面）· SPA fallback · 由命名空间推导的工程约束
 
 ## 1. 制品构成
@@ -39,6 +39,22 @@ dist/
 | **引擎托管**（生产默认）| 引擎的静态服务 | 引擎配置 | 同源，由引擎转发 |
 | **独立部署** | 静态服务器（NGINX 等）| 部署配置 | 反向代理至引擎，保持同源 |
 | **桌面壳** | 壳内本地服务或自定义协议 | 壳挂载至同一命名空间 | Rust 侧直连服务端（无跨域，见 `15` §4.1）|
+
+### 分离部署
+
+**形态**：静态产物与引擎分处两地，**托管方在同一个域名下把接口路径反向代理到引擎** ——
+浏览器看到的仍是同源，因此 Cookie 可用，**引擎不需要任何改动**。
+
+```
+浏览器 ──► https://cui.example.com/app/…   ──► 静态托管（NGINX / Pages / Worker）
+            └─ https://cui.example.com/v1/…  ──► 反向代理 ──► 引擎
+```
+
+- **同域是硬条件**：接口与静态必须落在**同一个域名**下。
+- **跨域直连不可行**：引擎不返回 CORS 头、不处理预检（见 `15-platform.md` §4.1）；其 CORS 机制只在少数路由
+  显式启用，且 `*` 与"允许凭据"并用，对带 Cookie 的请求按规范无效。
+- **应用侧零改动**：接口一律相对路径、产物内无写死地址 —— **换到哪台引擎都不用重新构建**。
+- **两种配法**：反向代理（NGINX 等）与边缘平台（Cloudflare），下各一例。
 
 ### 独立部署（NGINX）
 
@@ -126,7 +142,12 @@ Cloudflare 上以 **Pages**（静态托管）加 **Functions**（接口回源）
   Cache-Control: no-cache
 ```
 
-**接口回源**：Pages Functions 将接口路径同源转发至引擎（示意，按实际域名改写）：
+**接口回源**：由 Pages Functions（本质是 Worker）**反向代理**至引擎。**这一步是"分离部署"成立的关键**——
+静态与接口落在**同一个域名**下，浏览器视作同源，Cookie 因此可用，**引擎无需改动 CORS**
+（引擎的 CORS 目前只在少数路由显式启用，且写法为 `*` 与允许凭据并用，对带 Cookie 的跨域请求无效）。
+另可整体改用单个 Worker（静态资源 + 路径路由）或经 Cloudflare Tunnel 暴露引擎，效果相同。
+
+示意（按实际域名改写）：
 
 ```ts
 // functions/v1/[[path]].ts
@@ -137,6 +158,37 @@ export const onRequest: PagesFunction<{ ENGINE: string }> = ({ request, env }) =
   return fetch(new Request(url, request))
 }
 ```
+
+**工程配置**：Pages 项目由 `wrangler.toml` 与两类规则文件构成，目录布局如下。
+
+```
+输出根/                       # wrangler.toml 的 pages_build_output_dir
+├── app/                      # 命名空间目录（CUI_BASE 的值）
+│   ├── index.html
+│   └── _assets/
+├── _redirects                # fallback 与 404
+├── _headers                 # 缓存策略
+├── _routes.json             # 只让接口路径进入 Functions
+└── functions/
+    └── v1/[[path]].ts       # 反向代理至引擎
+```
+
+```toml
+# wrangler.toml
+name = "cui"
+pages_build_output_dir = "dist-cf"      # 输出根
+compatibility_date = "2025-01-01"
+
+[vars]
+ENGINE = "engine.example.com"           # Functions 里以 env.ENGINE 读取
+```
+
+```json
+// _routes.json —— 静态请求不走 Functions，只有接口路径进
+{ "version": 1, "include": ["/v1/*"], "exclude": [] }
+```
+
+部署：`wrangler pages deploy`（首次会要求选择项目）。
 
 **长连接**：接口路径**不得进入缓存**（Cache Rules 中排除）；SSE 依赖响应头 `Cache-Control: no-cache, no-transform`
 （见上表），WebSocket 由 Cloudflare 代理转发，同样要求引擎可达、不可缓存。
