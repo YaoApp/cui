@@ -64,6 +64,8 @@
   "verify.reveal": "Reveal",
   "verify.secret": "Secret",
   "verify.service": "Service",
+  "verify.serviceInfo": "Service information (read when first needed)",
+  "verify.serviceInfoRead": "Read once",
   "verify.themeDark": "Dark",
   "verify.themeLight": "Light",
   "verify.themeRead": "Read theme",

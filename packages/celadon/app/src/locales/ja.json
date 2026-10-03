@@ -64,6 +64,8 @@
   "verify.reveal": "表示",
   "verify.secret": "シークレット",
   "verify.service": "サービス",
+  "verify.serviceInfo": "サービス情報（初回必要時に読む）",
+  "verify.serviceInfoRead": "一度読む",
   "verify.themeDark": "ダーク",
   "verify.themeLight": "ライト",
   "verify.themeRead": "テーマを読む",

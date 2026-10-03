@@ -64,6 +64,8 @@
   "verify.reveal": "定位",
   "verify.secret": "秘密",
   "verify.service": "服务名",
+  "verify.serviceInfo": "服务信息（第一次需要时读）",
+  "verify.serviceInfoRead": "读一次",
   "verify.themeDark": "深色",
   "verify.themeLight": "浅色",
   "verify.themeRead": "读主题",

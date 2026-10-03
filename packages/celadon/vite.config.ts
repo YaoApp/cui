@@ -56,7 +56,6 @@ export default defineConfig(({ mode }) => {
             target: proxyTarget,
             changeOrigin: true,
             ws: true, // 长连接（16 §1）；**SSE 的响应头等接 SSE 时按 §1 三头一起加**
-            // （上一版无条件给所有 `/v1` 盖 `text/event-stream`，那会污染普通接口）
                                   // 长连接（16 §1）
 
           },
