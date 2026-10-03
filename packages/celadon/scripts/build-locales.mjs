@@ -15,11 +15,20 @@ import { dirname, resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const pkg = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+
+/** 应用支持的语言 = **语言包目录**（唯一来源，见 08-i18n.md）。给清单与构建脚本共用。 */
+export function scanLocales() {
+  const found = new Set()
+  for (const file of localeFiles()) {
+    const locale = file.replace(/\.json$/, '').split(/[\\/]/).pop()
+    if (locale) found.add(locale)
+  }
+  return [...found].sort()
+}
 const src = resolve(pkg, 'app/src')
-const outDir = resolve(pkg, process.env.CELADON_OUT_DIR ?? 'dist', 'locales')
 
 /** 语言包所在的三处目录（与 `platform/i18n/i18n.ts` 的 glob 一致）。 */
-function localeFiles() {
+export function localeFiles() {
   const found = []
   const push = (dir) => {
     if (!existsSync(dir)) return
@@ -37,20 +46,20 @@ function localeFiles() {
 }
 
 /** 按语言合并：后读到的覆盖先读到的（同名键以更深处的域为准，与前端一致）。 */
-const merged = new Map()
-for (const file of localeFiles()) {
-  const locale = file.replace(/\.json$/, '').split(/[\\/]/).pop()
-  const current = merged.get(locale) ?? {}
-  merged.set(locale, { ...current, ...JSON.parse(readFileSync(file, 'utf8')) })
-}
 
-mkdirSync(outDir, { recursive: true })
-const locales = [...merged.keys()].sort()
-for (const locale of locales) {
-  writeFileSync(resolve(outDir, `${locale}.json`), JSON.stringify(merged.get(locale), null, 2) + '\n')
+// 被 import（给别的脚本用）时不写文件；直接执行才产出
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const outDir = resolve(pkg, process.env.CELADON_OUT_DIR ?? 'dist', 'locales')
+  mkdirSync(outDir, { recursive: true })
+  const locales = scanLocales()
+  for (const locale of locales) {
+    const merged = {}
+    for (const file of localeFiles()) {
+      const name = file.replace(/\.json$/, '').split(/[\\/]/).pop()
+      if (name === locale) Object.assign(merged, JSON.parse(readFileSync(file, 'utf8')))
+    }
+    writeFileSync(resolve(outDir, `${locale}.json`), JSON.stringify(merged, null, 2) + '\n')
+  }
+  writeFileSync(resolve(outDir, 'index.json'), JSON.stringify({ locales, generated_from: 'app/src/**/locales/*.json' }, null, 2) + '\n')
+  console.log(`✓ locales: ${locales.join(' · ')} → ${outDir}`)
 }
-writeFileSync(
-  resolve(outDir, 'index.json'),
-  JSON.stringify({ locales, generated_from: 'app/src/**/locales/*.json' }, null, 2) + '\n',
-)
-console.log(`✓ locales: ${locales.join(' · ')} → ${outDir}`)

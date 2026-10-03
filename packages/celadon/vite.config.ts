@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
@@ -23,6 +24,20 @@ const emitHostLocales = {
     })
   },
 }
+
+/* **不许绕过脚本产出客户端那份**：`dist-client` 里必须是 `client=desktop`。
+   直接 `vite build` 到 dist-client 会跳过清单改写（我就这么错过一次），这条把它拦住。 */
+function assertClientManifest(outDirName: string | undefined) {
+  if (outDirName !== 'dist-client') return
+  const manifest = JSON.parse(readFileSync(resolve(import.meta.dirname, 'app/src/platform/manifest.json'), 'utf8'))
+  if (manifest.client !== 'desktop') {
+    throw new Error(
+      `refusing to build into dist-client: the manifest says client=${manifest.client}. ` +
+        "Use `pnpm build:client` (it rewrites the manifest for the client build), not vite build.",
+    )
+  }
+}
+assertClientManifest(process.env.CELADON_OUT_DIR)
 
 export default defineConfig({
   root: resolve(import.meta.dirname, 'app'),
