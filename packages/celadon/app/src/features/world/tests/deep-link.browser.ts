@@ -33,6 +33,23 @@ test('a named panel parameter opens the panel, and Back closes it', async ({ pag
   await expect(page.getByRole('region', { name: '条目面板' })).toHaveCount(0)
 })
 
+test('typing with the panel open adds no history, so Back closes it in one step', async ({ page }) => {
+  await page.goto('/app/world/w1')
+  await page.getByRole('button', { name: '守门人' }).click()
+  await expect(page).toHaveURL(/sideEntity=e2/)
+  const opened = await page.evaluate(() => history.length)
+
+  // 打字是 replace：历史**不该变长**。参数被重排过就会被误判成"变了"而多 push 一条。
+  await page.getByLabel('过滤').fill('alpha')
+  await expect(page).toHaveURL(/q=alpha/)
+  expect(await page.evaluate(() => history.length)).toBe(opened)
+
+  // 一步退回打开面板之前，面板随之收起
+  await page.goBack()
+  await expect(page).toHaveURL(/\/app\/world\/w1$/)
+  await expect(page.getByRole('region', { name: '条目面板' })).toHaveCount(0)
+})
+
 test('typing in the filter replaces the entry instead of stacking history', async ({ page }) => {
   await page.goto('/app/world')
   const before = await page.evaluate(() => history.length)

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  coerceThemePreference,
   resolveTheme,
   systemPrefersDark,
   useThemeStore,
@@ -75,4 +76,19 @@ it('does not follow once the preference is explicit', () => {
   useThemeStore.getState().setPreference('light')
   expect(useThemeStore.getState().theme).toBe('light')
   expect(document.documentElement.dataset.theme).toBe('light')
+})
+
+/* 同语言：存储里的非法偏好不许写到 data-theme 上。 */
+describe('coerceThemePreference', () => {
+  it('keeps the three legal choices', () => {
+    expect(coerceThemePreference('system')).toBe('system')
+    expect(coerceThemePreference('light')).toBe('light')
+    expect(coerceThemePreference('dark')).toBe('dark')
+  })
+
+  it('falls back for anything else', () => {
+    expect(coerceThemePreference('blue')).toBe('system')
+    expect(coerceThemePreference(undefined)).toBe('system')
+    expect(coerceThemePreference(null)).toBe('system')
+  })
 })

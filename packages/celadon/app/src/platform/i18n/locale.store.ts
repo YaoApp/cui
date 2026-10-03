@@ -23,6 +23,12 @@ const systemLanguages = (): readonly string[] => {
   return navigator.language ? [navigator.language] : []
 }
 
+/** 校验一个持久化值是否是合法偏好；非法一律回落 `'system'`。 */
+export const coerceLocalePreference = (value: unknown): LocalePreference =>
+  value === 'system' || (typeof value === 'string' && SUPPORTED_LOCALES.includes(value))
+    ? (value as LocalePreference)
+    : 'system'
+
 /** 把偏好解析成实际语言：`'system'` 跟随 navigator，显式选择不再跟随。 */
 export const resolvePreference = (preference: LocalePreference): Locale =>
   preference === 'system' ? resolveLocale(systemLanguages(), SUPPORTED_LOCALES) : preference
@@ -37,7 +43,14 @@ export const useLocaleStore = create<LocaleState>()(
         locale: 'system',
         setLocale: (locale) => set({ locale }, false, 'i18n/setLocale'),
       }),
-      { name: 'cui.locale' },
+      {
+        name: 'cui.locale',
+        /* 水合时**校验**：存储可能来自旧版本或被手改，非法值不许进入 UI 与 <html lang>。 */
+        merge: (persisted, current) => ({
+          ...current,
+          locale: coerceLocalePreference((persisted as { locale?: unknown } | undefined)?.locale),
+        }),
+      },
     ),
     { name: 'locale' },
   ),
