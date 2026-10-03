@@ -8,7 +8,7 @@
  * 语言与主题由钩子层从 `platform/i18n` · `platform/theme` 读出来传进来。
  */
 
-import type { OutboundContext } from '@/platform/client/context'
+import type { OutboundContext, OutboundInputs } from '@/platform/client/context'
 import { outboundContext } from '@/platform/client/context'
 import { clientId as currentClientId } from '@/platform/client/client-id'
 import { serviceBase } from '@/platform/service'
@@ -21,7 +21,8 @@ export type Context = OutboundContext & {
   service: string
 }
 
-export function callContext(inputs: { locale: string; theme: OutboundContext['theme'] }): Context {
+/** 要什么由平台那侧定（`OutboundInputs`），这里**不另造一个形状**。 */
+export function callContext(inputs: OutboundInputs): Context {
   const facts = outboundContext(inputs)
   return { ...facts, clientId: currentClientId(), service: serviceBase() }
 }
