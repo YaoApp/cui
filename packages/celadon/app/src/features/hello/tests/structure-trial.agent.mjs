@@ -86,6 +86,7 @@ await p.goto(`${BASE_URL}/app/`, { waitUntil: 'networkidle' })
 await shot(p, 's1-open.png')
 say(`S1 text      : ${JSON.stringify((await p.locator('body').innerText()).replace(/\n/g, ' | '))}`)
 say(`S1 boxes     : title=${JSON.stringify(await box(title))} button=${JSON.stringify(await box(button))} counter=${JSON.stringify(await box(counter))}`)
+const fullWidthButtonHeight = (await box(button))?.h ?? 0
 say(`S1 overflow  : scrollWidth=${await p.evaluate(() => document.documentElement.scrollWidth)} clientWidth=${await p.evaluate(() => document.documentElement.clientWidth)}`)
 const tabTitle = await p.title()
 say(`S1 title     : ${JSON.stringify(tabTitle)}`)
@@ -237,6 +238,13 @@ const overlap = tb && bb ? !(tb.x + tb.w <= bb.x || bb.x + bb.w <= tb.x || tb.y 
 say(`S5 boxes     : title=${JSON.stringify(tb)} button=${JSON.stringify(bb)} overlap=${overlap}`)
 if (overlap) problems.push('S5: 标题与按钮重叠')
 if (await p.evaluate(() => document.documentElement.scrollWidth) > 375) problems.push('S5: 窄窗下横向溢出')
+
+// 按钮文字**不许折行**：剧本判据里"换行错乱"就是不通过，但上一条只测重叠与横向溢出，
+// 判据比剧本窄 —— 2026-10-03 复核者据此抓到「刷新」被折成两行却全链绿。
+// 按钮文字**不许折行**：折了高度近乎翻倍（2026-10-03 复核者抓到「刷新」被折成两行却全链绿）。
+// 用高度对比，不用矩形个数/行顶：按钮里的图标会让那两种数法都失真。
+say(`S5 button h  : full=${fullWidthButtonHeight} narrow=${bb?.h}`)
+if (bb && fullWidthButtonHeight && bb.h > fullWidthButtonHeight + 4) problems.push('S5: 按钮文字折行')
 
 // S6 刷新
 await p.setViewportSize({ width: 760, height: 300 })

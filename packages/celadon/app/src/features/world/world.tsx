@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
@@ -30,6 +31,11 @@ export function WorldPage() {
   const world = findWorld(worldId)
   usePageTitle(world ? t(world.nameKey) : t('world.title'))
   const entity = findEntity(world, selectedEntityId)
+  /* 条目指向的对象不在了（换了对象 · 换了世界）：**主动作废** —— 否则地址栏与分享链接
+     会继续宣称"侧边开着某物"，而画面里什么都没有。 */
+  useEffect(() => {
+    if (selectedEntityId && !entity) openPanel(undefined)
+  }, [selectedEntityId, entity, openPanel])
   const needle = query.trim().toLowerCase()
   /* 夹具的 name / summary 持有语言包 key（见 worlds.ts 与 architecture/08-i18n.md §6），
      所以过滤也在**当前语言的文字**上做，切语言后结果跟着变。 */
@@ -37,7 +43,17 @@ export function WorldPage() {
   // 应用级导航项存的是 key；世界名是我们自己的夹具，也走语言包
   const appNav = navWithActive(pathname).map((item) => ({ ...item, label: t(item.label) }))
 
-  if (worldId && !world) return <p className="world__missing">{t('world.missing', { id: worldId })}</p>
+  if (worldId && !world) {
+    /* 保留头部与导航：只换主体，用户还有站内出路（不然只剩浏览器后退）。 */
+    return (
+      <div className="world">
+        <Header title={t('world.title')} onRefresh={() => navigate(0)}>
+          <Nav items={appNav} label={t('nav.appLabel')} localeSwitch onSelect={(item) => navigate(item.href)} />
+        </Header>
+        <p className="world__missing">{t('world.missing', { id: worldId })}</p>
+      </div>
+    )
+  }
 
   const worldNav = navWithActive(
     pathname,
@@ -75,7 +91,7 @@ export function WorldPage() {
                   variant="ghost"
                   size="small"
                   aria-pressed={item.id === selectedEntityId}
-                  onClick={() => openEntity(item.id)}
+                  onClick={() => openEntity(item.id === selectedEntityId ? undefined : item.id)}
                 >
                   {t(item.nameKey)}
                 </Button>
@@ -83,7 +99,7 @@ export function WorldPage() {
             ))}
           </ul>
           <p className="world__share">
-            <a className="link" href={buildShareUrl({ feature: 'world', object: world.id }, { sideEntity: selectedEntityId })}>
+            <a className="link" href={buildShareUrl({ feature: 'world', object: world.id }, entity ? { sideEntity: selectedEntityId } : {})}>
               {t('world.share')}
             </a>
           </p>

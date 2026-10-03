@@ -1,4 +1,5 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { useLocaleStore } from '@/platform/i18n/locale.store'
@@ -82,5 +83,43 @@ describe('WorldPage', () => {
     expect(screen.getByRole('heading', { name: 'Gatekeeper' })).toBeInTheDocument()
     expect(screen.getByText('Role')).toBeInTheDocument()
     expect(screen.queryByText('role')).not.toBeInTheDocument()
+  })
+})
+
+/* 条目指向的对象不在了：必须作废，且**分享链接不许带上它**。 */
+describe('WorldPage · an entry whose object is gone', () => {
+  it('clears an entry whose object is gone, and keeps it out of the share link', async () => {
+    act(() => useSidePanelStore.getState().open({ kind: 'world-entity', id: 'nope' }))
+    renderAt('/world/w1')
+
+    await waitFor(() => expect(useSidePanelStore.getState().entry).toBeUndefined())
+    const hrefs = screen.getAllByRole('link').map((link) => link.getAttribute('href') ?? '')
+    expect(hrefs.some((href) => href.includes('sideEntity'))).toBe(false)
+  })
+})
+
+/* 找不到世界时**必须留下导航** —— 只剩一行文案的话，用户只能按浏览器后退。 */
+describe('WorldPage · a world that does not exist', () => {
+  it('keeps the header and the navigation so the user can get somewhere', () => {
+    renderAt('/world/nope')
+    expect(screen.getByText('没有这个世界：nope')).toBeInTheDocument()
+    expect(screen.getAllByRole('link').length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: '刷新' })).toBeInTheDocument()
+  })
+})
+
+/* `aria-pressed` 说的就是"这个开着"：再点同一个必须关上，否则语义在说谎。 */
+describe('WorldPage · the pressed state of an entry', () => {
+  it('closes the panel when the active entity is clicked again', async () => {
+    renderAt('/world/w1')
+    const button = screen.getByRole('button', { name: '守门人' })
+
+    await userEvent.click(button)
+    expect(useSidePanelStore.getState().entry).toEqual({ kind: 'world-entity', id: 'e2' })
+    expect(button).toHaveAttribute('aria-pressed', 'true')
+
+    await userEvent.click(button)
+    expect(useSidePanelStore.getState().entry).toBeUndefined()
+    expect(button).toHaveAttribute('aria-pressed', 'false')
   })
 })

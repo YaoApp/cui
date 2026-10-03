@@ -28,6 +28,9 @@ export function Nav({ items, label, localeSwitch, onSelect }: NavProps) {
               aria-current={item.active ? 'page' : undefined}
               onClick={(event) => {
                 if (!onSelect) return
+                /* 带修饰键或非主键的点击**交还浏览器**：那是新标签 / 新窗口 / 下载，
+                   拦掉就等于把"真链接"变成只能用左键的假链接。 */
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
                 event.preventDefault()
                 onSelect(item)
               }}

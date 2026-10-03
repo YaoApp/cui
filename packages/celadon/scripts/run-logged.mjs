@@ -63,10 +63,31 @@ out.write(
 const pruned = pruneOldDays(startedAt)
 if (pruned) console.log(`  pruned ${pruned} log director(y|ies) older than ${KEEP_DAYS} days`)
 
-const child = spawn(command, args, { cwd: PACKAGE, stdio: ['inherit', 'pipe', 'pipe'] })
+/* 独立进程组：超时要杀的是**整棵树**（vitest · chrome 都是孙进程）。
+   只杀直接子进程的话，看门狗报超时了，孙进程还在占 CPU（2026-10-03 复核者指出）。 */
+const detached = process.platform !== 'win32'
+const child = spawn(command, args, { cwd: PACKAGE, stdio: ['inherit', 'pipe', 'pipe'], detached })
+const killTree = (signal) => {
+  try {
+    if (detached && child.pid) process.kill(-child.pid, signal)
+    else child.kill(signal)
+  } catch {
+    /* 已经退出 */
+  }
+}
 let timedOut = false
 const watchdog =
-  STEP_TIMEOUT > 0 ? setTimeout(() => { timedOut = true; child.kill('SIGKILL') }, STEP_TIMEOUT * 1000) : null
+  STEP_TIMEOUT > 0 ? setTimeout(() => { timedOut = true; killTree('SIGKILL') }, STEP_TIMEOUT * 1000) : null
+
+/* 起不来（如可执行文件不存在）时也要收尾：否则日志没有 footer、流也不关。 */
+child.on('error', (error) => {
+  if (watchdog) clearTimeout(watchdog)
+  out.write(`\n# failed to start: ${error.message}\n`)
+  out.end(() => {
+    console.error(`  failed to start: ${error.message}`)
+    process.exit(1)
+  })
+})
 
 child.stdout.on('data', write)
 child.stderr.on('data', write)
