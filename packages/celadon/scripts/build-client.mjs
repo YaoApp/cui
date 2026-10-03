@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url'
 const pkg = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const manifestPath = resolve(pkg, 'app/src/platform/manifest.json')
 const original = readFileSync(manifestPath, 'utf8')
+const { scanLocales } = await import('./build-locales.mjs')
 
 /** 目标系统：`--os macos|windows` 或环境 `CELADON_OS`，缺省按构建机。 */
 function targetOs() {
@@ -34,6 +35,8 @@ const manifest = JSON.parse(original)
 manifest.client = 'desktop'
 manifest.os = os
 manifest.artifact = 'cui'
+// **locales 不是手写的**：按语言包目录扫出来（加语言只加目录，见 08-i18n.md）
+manifest.locales = scanLocales()
 manifest.build = {
   commit: execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim(),
   at: new Date().toISOString(),

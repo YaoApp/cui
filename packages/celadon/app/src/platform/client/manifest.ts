@@ -26,6 +26,8 @@ export type Manifest = {
   artifact: ArtifactKind
   yao_version?: string
   tai_version?: string
+  /** 应用支持的语言（**按语言包目录生成**，见 08-i18n.md；不是手写） */
+  locales: readonly string[]
 }
 
 const manifest = raw as Manifest

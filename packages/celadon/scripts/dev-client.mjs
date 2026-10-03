@@ -12,11 +12,14 @@ import { fileURLToPath } from 'node:url'
 const pkg = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const manifestPath = resolve(pkg, 'app/src/platform/manifest.json')
 const original = readFileSync(manifestPath, 'utf8')
+const { scanLocales } = await import('./build-locales.mjs')
 
 const manifest = JSON.parse(original)
 manifest.client = 'desktop'
 manifest.os = process.platform === 'darwin' ? 'macos' : process.platform === 'win32' ? 'windows' : ''
 manifest.artifact = 'cui'
+// **locales 不是手写的**：按语言包目录扫出来（加语言只加目录，见 08-i18n.md）
+manifest.locales = scanLocales()
 manifest.build = { commit: 'dev', at: new Date().toISOString(), by: 'celadon dev:client' }
 writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n')
 console.log(`dev:client — client=desktop · os=${manifest.os || '(未知)'}（退出时还原清单）`)
