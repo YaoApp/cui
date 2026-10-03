@@ -33,7 +33,10 @@ const ALLOW = new Set(['transparent', 'none', 'inherit', 'currentColor', '50%', 
    四条规则只遍历这里返回的 { file, css }，不再各自重复。 */
 function sources() {
   const out = [];
-  const strip = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
+  /* 剥注释：块注释 + Less 的 `//` 行注释（排除 URL 的 `://` 与字符串里的 `//` 常见形态）。 */
+  const strip = (css) => css
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:\\])\/\/[^\n]*/gm, '$1');
   if (existsSync(TARGET) && statSync(TARGET).isDirectory()) {
     const pages = readdirSync(TARGET).filter((f) => f.endsWith('.html') && !LEGACY.has(f)).sort();
     for (const f of pages) {
