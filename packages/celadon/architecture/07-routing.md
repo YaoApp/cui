@@ -1,7 +1,7 @@
 # 07 · 路由
 
 - **版本**：v1.41
-- **最后修改**：2026-10-03 09:19:47
+- **最后修改**：2026-10-03 11:23:35
 - **说明**：地址语法 · 谁说了算 · `routes/` 的结构 · 文档标题
 
 ## 1. 规则
@@ -15,7 +15,9 @@
   手拼 URL 是这套东西烂掉的开始。
 - **文档标题跟路由走**：`platform/router/use-page-title.ts` 的 `usePageTitle()`。列表页给固定名字，
   **详情页用对象名**（用户才知道开的是哪一个）。`document.title` 是宿主全局，所以这个 hook 住平台层。
-- **路由路径不得占用 12 个保留前缀**（见 `04-host-integration.md`）。
+- **路由路径不得占用引擎的 12 个保留前缀**：`/api` · `/v1` · `/assets` · `/components` · `/tools` · `/agents` ·
+  `/admin` · `/brands` · `/docs` · `/ai` · `/.well-known` · `/iframe` —— 这些**归引擎**，
+  应用自己的命名空间只有 `main` / `side` 两个表面（见 §2）。
 
 ## 2. 地址语法
 
@@ -87,12 +89,11 @@
 - 为什么不把表塞进入口 `main.tsx`：入口只负责"把应用装起来"；URL 契约与表面布局有独立的家，
   表会随 feature 变长，而表面布局不属于任何 feature。
 
-## 5. 三端 basename
+## 5. 两端 basename
 
 | 端 | basename | 来源 |
 | --- | --- | --- |
-| 宿主主应用 | `/<BASE>/` | 引擎注入的 `BASE` |
-| `/iframe` 无壳 | `/<BASE>/` | 同上 |
+| Web（宿主托管）| `/<BASE>/` | 引擎注入的 `BASE` |
 | 桌面（Tauri） | 本地资产或代理 origin 的 `/` | 平台适配器 |
 
 `basename` 一律由**平台适配器**注入，路由代码里不出现环境判断（见 `04-host-integration.md`）。
