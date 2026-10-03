@@ -20,6 +20,7 @@ mountIconSprite()
 /* 桌面端把 `client_id` 从随机换成**真机器码**（拿不到就保持随机，不报错）。 */
 void primeClientId()
 
+
 /* 路由实例建在模块作用域 —— 每次渲染重建会丢掉导航栈。
    **装配点放在入口**：入口不属于任何层，于是 platform/ 不必反过来引 routes/
    （见 architecture/03-boundaries.md §2）。 */

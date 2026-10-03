@@ -8,7 +8,7 @@ afterEach(() => {
 describe('serviceBase', () => {
   it('has no base by default, so paths stay relative', () => {
     expect(serviceBase()).toBe('')
-    expect(serviceUrl('/api/things')).toBe('/api/things')
+    expect(serviceUrl('/api/things')).toBe('/api/things')   // 根相对：引擎的根是站点根
     expect(serviceUrl('api/things')).toBe('/api/things')
   })
 

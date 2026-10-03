@@ -1,7 +1,7 @@
 # 02 · 平台地基（产品级）
 
 - **版本**：v0.2（计划 + 进度）
-- **最后修改**：2026-10-03 21:48:29
+- **最后修改**：2026-10-03 22:16:06
 - **说明**：把平台层从"规范先行"做成产品级地基 · 依赖顺序 · 逐项验收 · 未定项
 
 > **这份是计划，不是规范。** 规则在 [`../architecture/15-platform.md`](../architecture/15-platform.md)；
@@ -12,8 +12,8 @@
 | 项 | 状态 | 证据 / 落在哪 |
 | --- | --- | --- |
 | **2.1 `client/`** | ✅ **完成** | `manifest` · `ua`（含 WebView 兜底）· `client_id`（`desk-<机器码>` / `web-<随机>`）· `capabilities` · `context`/`info` · 归一走 `i18n/resolve-locale`；**框架内部只许出现在 `bridge/`**（有守卫测试）|
-| **2.2 `service/`** | ✅ **完成（平台层）** | `service/base.ts` 是基址**唯一来源**（`serviceBase`/`serviceUrl`，`transport` 只拼不定；**换地址只改这一处**）。**well-known 读取 · Web 同域清单 = 随服务对接** |
-| **2.3 `credential/`** | ✅ **完成（平台层）** | 桌面载体：OS 凭据库（`keyring`，经 `bridge/`）· **写→读→删→列**都在（列表靠宿主记账）· 秘密**不回前端**、无明文回退；Web 载体：**前端不需要存储代码**（HttpOnly 由浏览器与服务端负责）。**刷新定时 · 401 重放 · 登入登出流程 = 随服务接口对接**（见 §2.3 末） |
+| **2.2 `service/`** | ✅ **完成（平台层）** | 基址唯一来源（`base.ts`）· **`info.ts` 读 well-known 并缓存**（第一次需要时读一次 · 并发去重 · 失败不缓存）；dev 由代理代转（`YAO_SERVER_HOST`）。**Web 同域清单 = 随服务对接** |
+| **2.3 `credential/`** | ✅ **完成（平台层）** | `carrier.ts` + `index.ts`：一套接口，载体按宿主选 —— 桌面走宿主 OS 凭据库（写→读→删→列 · 秘密不回前端 · 无明文回退），Web 回 `credential.no_store_here`。**登录/刷新/身份随服务接口** |
 | **2.4 `transport/`** | ✅ **完成** | 两宿主一种接口 · 失败四类归一 · **重试策略在上层**（`utils/retry.ts`）· 浏览器跨域**明确拒绝**；宿主侧 `tauri-plugin-http` + **URL 范围** |
 | **2.5 `data/`** | ⏸ 未开始 | 接口类型与取数钩子（依赖 §3 的未定项）|
 | **2.6 `bridge/`** | ✅ **完成**（本轮范围）| 16 条命令（宿主 · 凭据 · 系统集成）· **命令清单单一来源** · **跨语言比对测试**（Rust `NAMES` ↔ 应用常量）· 失败带 `{code, params, message}` |
@@ -60,17 +60,19 @@
 
 ## 1. 要建的东西（`app/src/platform/` 下六个目录）
 
-平台层现有 5 个：`theme/` · `router/` · `i18n/` · `icons/` · `utils/`。
-**产品级地基还差六个**，它们有依赖顺序，不能并行乱做：
+平台层原有 5 个：`theme/` · `router/` · `i18n/` · `icons/` · `utils/`
+（另有 `manifest.json` —— 客户端事实的**源**，以及 `shell.less`）。
+
+**产品级地基这六个**，有依赖顺序，不能并行乱做；**现在五个已建**（`data/` 与 `webproxy/` 未建）：
 
 | # | 目录 | 职责 | 依赖 | 当前 |
 | --- | --- | --- | --- | --- |
-| 1 | `client/` | 客户端类型 · 能力开关 · UA 解析 · `client_id`（webview storage）| 无 | 未建 |
-| 2 | `service/` | 服务信息（well-known）· **服务地址一处持有** | `client/` | 未建 |
-| 3 | `credential/` | 凭据的存取与消费（按宿主选载体）· 刷新定时器 | `service/` · `bridge/`（桌面侧）| 未建 |
-| 4 | `transport/` | **对外通信唯一出口**（`http(s)` + `ws(s)`）| `service/` · `credential/` | 未建 |
-| 5 | `data/`（在 `app/src/`，不在 platform）| 接口类型（手写）+ 取数钩子 | `transport/` | 未建 |
-| 6 | `bridge/` · `webproxy/` | 桌面宿主能力唯一入口 · agent sandbox 域名构造 | 桌面期 | 未建 |
+| 1 | **`client/`** | 客户端类型 · 能力开关 · UA 解析 · `client_id` | 无 | ✅ **已建**（`client_id` **带来源前缀**：`desk-<真机器码>` / `web-<随机>`；归一走 `i18n/resolve-locale`）|
+| 2 | **`service/`** | 服务信息（well-known）· **服务地址一处持有** | `client/` | ✅ **已建**（基址唯一来源 `base.ts` · **`info.ts` 读 `/.well-known/yao` 并缓存**：第一次需要时读一次（消费方：验证页的服务信息一节）、并发去重、失败不缓存；开发期由 dev server 代转，地址由 `YAO_SERVER_HOST` 给）|
+| 3 | **`credential/`** | 凭据的存取与消费（按宿主选载体）· 刷新定时器 | `service/` · `bridge/` | ✅ **已建（载体）**：`carrier.ts` 按宿主选（`os-store` / `cookie`）· `index.ts` 一套接口 —— 桌面直达宿主 OS 凭据库，**Web 回可读的 `credential.no_store_here`**（不假装、不抛）；**登录/刷新/身份随服务接口** |
+| 4 | **`transport/`** | **对外通信唯一出口** | `service/` | ✅ **已建**（两宿主一种接口 · 四类失败归一 · **限制与重试都由业务方给**；`ws(s)` 与下载/SSE 两档待做）|
+| 5 | `data/`（在 `app/src/`，**不在** platform）| 接口类型（手写）+ 取数钩子 | `transport/` · **服务接口形状** | ⏸ 未建 |
+| 6 | `bridge/` · `webproxy/` | 桌面宿主能力唯一入口 · agent sandbox 域名构造 | 桌面期 | `bridge/` ✅ **已建**（16 条命令：宿主 · 凭据 · 系统集成；**只有它碰框架内部**）· `webproxy/` ⏸ 未建 |
 
 ## 2. 逐项 todo 与验收
 
@@ -81,7 +83,7 @@
 
 ### 2.2 `service/` —— 地址只有一处
 
-- [~] 持有**服务地址**（`service/base.ts` 是唯一来源）· 读 well-known **未做**
+- [x] 持有**服务地址**（`service/base.ts` 唯一来源）· **读 well-known 已做**（`info.ts`：第一次需要时读一次 · 并发去重 · 失败不缓存）
 - [ ] **Web**：只认托管方注入的**同域清单** —— **未做**（浏览器里已做到「跨域明确拒绝」这一层）
 - [~] **Desktop**：`serviceBase` 从构建期 `VITE_SERVICE_BASE` 来 —— **宿主配置与「先验证再写入」未做**
 - [ ] **换服务 = 清凭据 + 重读 well-known**（清单内切换同样是换服务）
@@ -126,6 +128,14 @@
 | 2 | ~~错误形状的具体字段~~ → **已定**：`{ code, params, message }`（码给程序 · 参数给插值 · 英文给日志；文案由应用按码翻译，见 `08-i18n.md`）| — |
 | 3 | Web 侧"清凭据"的落地方式（Cookie 是 HttpOnly，前端清不掉）→ **性质是服务接口**（随登出接口定，不是平台地基）| 无（不卡平台）|
 | 4 | `sandbox` 域是否属于前端要消费的接口面 | `data/` |
+
+## 3.5 本批审核（`04 · REVIEW` 的闭环）
+
+**已验收**（2026-10-03 23:20 · 隔离复核者第六轮）：门禁与用例经 `pnpm lint` · `pnpm check` · `pnpm test` 与
+**变异**（关键字句改错必须让用例变红）双向核对，全链 `checkers 81/81 · 212 用例 · browser 26 · persona 2/2`。
+
+- 报告：`app/logs/2026-10-03/review-2320.md`（前五轮 `review-2232/2237/2248/2255/2304`）
+- 遗留 4 条与"何时处理"逐条写在报告末尾 —— **没有"以后再说"**。
 
 ## 4. 门禁（随实现长，不预先写全）
 

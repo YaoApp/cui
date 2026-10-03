@@ -10,6 +10,7 @@ export type I18nKey =
   | 'bridge.error.bridge.unavailable'
   | 'bridge.error.bridge.unknown'
   | 'bridge.error.credential.noEntry'
+  | 'bridge.error.credential.noStoreHere'
   | 'bridge.error.credential.serviceEmpty'
   | 'bridge.error.credential.storeFailed'
   | 'bridge.error.localIps.unavailable'
@@ -19,6 +20,8 @@ export type I18nKey =
   | 'bridge.error.platform.unsupported'
   | 'bridge.error.reveal.failed'
   | 'bridge.error.reveal.pathNotFound'
+  | 'bridge.error.service.malformed'
+  | 'bridge.error.service.unavailable'
   | 'bridge.error.theme.expectedLightOrDark'
   | 'bridge.error.theme.readFailed'
   | 'bridge.error.theme.writeFailed'
@@ -96,6 +99,8 @@ export type I18nKey =
   | 'verify.reveal'
   | 'verify.secret'
   | 'verify.service'
+  | 'verify.serviceInfo'
+  | 'verify.serviceInfoRead'
   | 'verify.themeDark'
   | 'verify.themeLight'
   | 'verify.themeRead'
@@ -138,6 +143,7 @@ declare module 'i18next' {
         'bridge.error.bridge.unavailable': string
         'bridge.error.bridge.unknown': string
         'bridge.error.credential.noEntry': string
+        'bridge.error.credential.noStoreHere': string
         'bridge.error.credential.serviceEmpty': string
         'bridge.error.credential.storeFailed': string
         'bridge.error.localIps.unavailable': string
@@ -147,6 +153,8 @@ declare module 'i18next' {
         'bridge.error.platform.unsupported': string
         'bridge.error.reveal.failed': string
         'bridge.error.reveal.pathNotFound': string
+        'bridge.error.service.malformed': string
+        'bridge.error.service.unavailable': string
         'bridge.error.theme.expectedLightOrDark': string
         'bridge.error.theme.readFailed': string
         'bridge.error.theme.writeFailed': string
@@ -224,6 +232,8 @@ declare module 'i18next' {
         'verify.reveal': string
         'verify.secret': string
         'verify.service': string
+        'verify.serviceInfo': string
+        'verify.serviceInfoRead': string
         'verify.themeDark': string
         'verify.themeLight': string
         'verify.themeRead': string
