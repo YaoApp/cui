@@ -22,7 +22,7 @@ export function ok<T>(value: T): BridgeResult<T> {
 }
 
 /** 失败。`message` 是英文诊断，不是给用户看的句子。 */
-export function fail(code: string, message: string, params: Record<string, unknown> = {}): BridgeResult<never> {
+export function fail(code: string, message: string, params: Record<string, unknown> = {}): BridgeFailure {
   return { ok: false, code, params, message }
 }
 
