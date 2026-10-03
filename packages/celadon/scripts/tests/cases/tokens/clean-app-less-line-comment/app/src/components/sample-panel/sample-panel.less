@@ -1,0 +1,21 @@
+/* 正例：app 侧样式全部走 token，check-tokens 应当通过。
+   与设计页同一套规则（颜色 / 字号 / 行高 / 圆角 / 间距 / 线宽）。 */
+.sample-panel {
+  padding: var(--spacing-12) var(--spacing-16);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-medium);
+  background: var(--background-surface);
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-cjk);
+
+  &__title {
+    margin-block-end: var(--spacing-8);
+    color: var(--text-secondary);
+  }
+}
+
+// 整行注释里的字面值不该被当成违规：border: 1px solid #123456
+.probe-url {
+  background-image: url(//cdn.example.com/icon.svg);
+}

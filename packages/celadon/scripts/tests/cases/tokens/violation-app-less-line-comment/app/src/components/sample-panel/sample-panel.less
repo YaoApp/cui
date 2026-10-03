@@ -1,0 +1,8 @@
+// 上面是注释；真正的字面值在下面，剥注释不该把后面的内容一起吞掉
+/* 违规例：app 侧写了颜色 / 线宽 / 行高的字面量，check-tokens 应当在 app 侧报错。
+   设计页（design/page.html）本身是干净的 —— 失败必须来自这里。 */
+.sample-panel {
+  border: 1px solid #fff;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
