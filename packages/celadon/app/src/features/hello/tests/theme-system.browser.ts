@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
    一个场景一个文件（见 architecture/14-testing.md §1）。 */
 test('theme follows the system while on system, and stops once chosen', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' })
-  await page.goto('/')
+  await page.goto('/app/')
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
   // 系统切换到浅色 → 没有显式偏好时应当跟着走

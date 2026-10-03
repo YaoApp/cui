@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 /* 图标在**真实渲染**里的两件事，单元测试测不到（jsdom 不跑样式）：与文字垂直居中、颜色随主题。
    一个场景一个文件（见 architecture/14-testing.md §1）。 */
 test('the icon sits on the text line and takes its colour from the theme', async ({ page }) => {
-  await page.goto('/main/hello')
+  await page.goto('/app/hello')
 
   const measure = () =>
     page.evaluate(() => {
@@ -47,7 +47,7 @@ test('the icon sits on the text line and takes its colour from the theme', async
 /* 底座必须是 `body` 的直接子 `<svg>` —— 与设计页同构。包一层 / 设 hidden / display:none，
    品牌标识的身体（靠 url(#渐变) 填充）就不画：只留眼睛（2026-10-02 实测）。 */
 test('the sprite is a direct child of the body, like the design page', async ({ page }) => {
-  await page.goto('/main/hello')
+  await page.goto('/app/hello')
   const sprite = await page.evaluate(() => {
     const svg = document.querySelector('body > svg[width="0"]')
     return svg
@@ -61,7 +61,7 @@ test('the sprite is a direct child of the body, like the design page', async ({ 
 })
 
 test('the demo lists a brand mark beside interface icons, all resolving', async ({ page }) => {
-  await page.goto('/main/hello')
+  await page.goto('/app/hello')
   const list = await page.evaluate(() =>
     [...document.querySelectorAll('.hello__row .hello__cell')].map((cell) => {
       const svg = cell.querySelector('svg')
@@ -87,7 +87,7 @@ test('the demo lists a brand mark beside interface icons, all resolving', async 
    描边固定 2（24 网格规范值），"小档按比例变细"由 `viewBox` 缩放自动完成。
    手工再按档位换算就是双重缩放（16 档会变成 0.889px，比设计页细 1/3）。 */
 test('icons scale through the viewBox with a constant stroke, like the design page', async ({ page }) => {
-  await page.goto('/main/hello')
+  await page.goto('/app/hello')
   const icons = await page.evaluate(() => {
     const read = (sel: string) => {
       const svg = document.querySelector(sel)

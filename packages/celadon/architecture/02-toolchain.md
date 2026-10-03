@@ -1,10 +1,10 @@
 # 02 · 工具链
 
 - **版本**：v1.44
-- **最后修改**：2026-10-03 09:19:46
+- **最后修改**：2026-10-03 12:00:22
 - **说明**：构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具
 
-## 规则
+## 1. 规则
 
 | 项 | 结论 |
 | --- | --- |
@@ -19,7 +19,7 @@
 - 依赖版本一律 **caret**，不锁小版本。
 - `design/` 与 `scripts/` **零运行时依赖** —— 它们是纯静态资产与纯 Node 脚本。
 
-## 目录
+## 2. 目录
 
 ```
 packages/celadon/          包根 = 设计体系（不是应用）
@@ -37,15 +37,14 @@ packages/celadon/          包根 = 设计体系（不是应用）
 │   └── logs/                运行日志与截图（<日期>/<层>-<HHMM>.log · <日期>/shots/<场景>/，git 忽略）
 ├── architecture/          本目录（工程规范）
 ├── design/                设计资产（视觉唯一来源 · 零依赖）
-├── plan/                  计划与状态（过程文档）
 ├── scripts/               检查器与构建脚本（纯 Node）
 └── package.json · vite.config.ts · pnpm-workspace.yaml
 ```
 
 > **源码根是 `app/src/`**：`app/` 是 Vite root，它的目录名就是公开 URL，
-> 直接铺 `components/` 会与引擎保留前缀同名并被代理截走（见 `04-host-integration.md`）。
+> 源码再下一层，公开路径才不带源码结构（见 `04-host-integration.md`）。
 
-## 脚本入口
+## 3. 脚本入口
 
 | 命令 | 作用 |
 | --- | --- |
@@ -62,7 +61,7 @@ packages/celadon/          包根 = 设计体系（不是应用）
 | `scripts/serve-dist.mjs` | 预览 `dist/` 的静态服务器（**带 SPA fallback**，见 `04-host-integration.md`）|
 | `scripts/shots.mjs` | **固化截图资产**：`capturePage()` 页面视口（跨平台）· `captureScreen()` 系统级整屏（**只实现 macOS**，其它平台明确报错）· `shotDir()` 算 `app/logs/<日期>/shots/<场景>/` |
 
-## 判定工具
+## 4. 判定工具
 
 拟人层的判定用**宿主工具**（不属于仓库脚本，命令在各平台一致）：
 
@@ -74,6 +73,6 @@ packages/celadon/          包根 = 设计体系（不是应用）
 
 判定流程（看图 → OCR → 决策 → 按需转人）与「置信度是门控」见 `14-testing.md` §4.3。
 
-## 已定
+## 5. 已定
 
-- **源码根 = `app/src/`**（包根是设计体系；`app/` 是 Vite root，源码再下一层避开保留前缀 —— 见 `04-host-integration.md`）。
+- **源码根 = `app/src/`**（包根是设计体系；`app/` 是 Vite root，源码再下一层 —— 见 `04-host-integration.md`）。

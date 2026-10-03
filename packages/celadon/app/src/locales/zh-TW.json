@@ -7,6 +7,5 @@
   "themeToggle.toLight": "淺色",
   "themeToggle.toDark": "深色",
   "surface.main": "主區",
-  "surface.side": "側邊",
-  "surface.unknown": "未知的介面表面：{{surface}}"
+  "surface.side": "側邊"
 }

@@ -73,7 +73,7 @@ const panelText = async () => ((await panel.count()) ? (await panel.innerText())
 const present = async () => (await panel.count()) > 0
 
 // ── S1 别人发我的地址：带参进来，面板该是开的
-await p.goto(`${BASE_URL}/main/world/w1?sideEntity=e2`, { waitUntil: 'networkidle' })
+await p.goto(`${BASE_URL}/app/world/w1?sideEntity=e2`, { waitUntil: 'networkidle' })
 await p.waitForTimeout(300)
 await shot(p, 's1-deeplink.png')
 const s1 = await search()
@@ -85,7 +85,7 @@ if (!(await panelText()).includes('守门人')) problems.push('S1: 面板里不�
 if (s1 !== '?sideEntity=e2') problems.push('S1: 地址被改了（读进来不该回写）')
 
 // ── S2 从详情点开：地址要能复制给别人
-await p.goto(`${BASE_URL}/main/world/w1`, { waitUntil: 'networkidle' })
+await p.goto(`${BASE_URL}/app/world/w1`, { waitUntil: 'networkidle' })
 await p.getByRole('button', { name: '守门人' }).click()
 await p.waitForTimeout(400)
 await shot(p, 's2-after-click.png')
@@ -106,7 +106,7 @@ if (await present()) problems.push('S3: 后退之后面板还开着')
 if (s3.includes('sideEntity')) problems.push('S3: 后退之后地址里还留着面板参数')
 
 // ── S4 刷新：地址是真相，面板该还在
-await p.goto(`${BASE_URL}/main/world/w1?sideEntity=e2`, { waitUntil: 'networkidle' })
+await p.goto(`${BASE_URL}/app/world/w1?sideEntity=e2`, { waitUntil: 'networkidle' })
 await p.reload({ waitUntil: 'networkidle' })
 await p.waitForTimeout(300)
 await shot(p, 's4-after-reload.png')

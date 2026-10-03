@@ -1,13 +1,13 @@
 # 07 · 路由
 
 - **版本**：v1.41
-- **最后修改**：2026-10-03 11:23:35
+- **最后修改**：2026-10-03 11:54:50
 - **说明**：地址语法 · 谁说了算 · `routes/` 的结构 · 文档标题
 
 ## 1. 规则
 
 - **React Router 库模式**：`react-router@^8`，**不装 `@react-router/dev`**（不用框架模式）。
-- **不用 hash 路由**：三端都提供真实路径空间；hash 会让宿主跳转 · 分享 · 埋点都多带一层。
+- **不用 hash 路由**：两端都提供真实路径空间；hash 会让宿主跳转 · 分享 · 埋点都多带一层。
   代价是**托管方要配 SPA fallback**（未知路径回 `index.html`，见 `04-host-integration.md`）。
 - **一个面板一个具名参数**，别在参数值里再塞分隔符（`?sideThread=456` ✓ · `?side=thread:456` ✗）。
 - **默认值不进 URL**（默认的 `activeTab=list` 之类删掉），链接才短。
@@ -15,25 +15,26 @@
   手拼 URL 是这套东西烂掉的开始。
 - **文档标题跟路由走**：`platform/router/use-page-title.ts` 的 `usePageTitle()`。列表页给固定名字，
   **详情页用对象名**（用户才知道开的是哪一个）。`document.title` 是宿主全局，所以这个 hook 住平台层。
-- **路由路径不得占用引擎的 12 个保留前缀**：`/api` · `/v1` · `/assets` · `/components` · `/tools` · `/agents` ·
-  `/admin` · `/brands` · `/docs` · `/ai` · `/.well-known` · `/iframe` —— 这些**归引擎**，
-  应用自己的命名空间只有 `main` / `side` 两个表面（见 §2）。
+- **应用整个跑在构建决定的命名空间之下**（默认 `app`，见 §2 · `04-host-integration.md`）——
+  与引擎的路径**不同层**，因此**不需要避让清单**。
 
 ## 2. 地址语法
 
 ```
-/<surface>/<feature>/<object>?<面板参数>&<环境态>
-   main|side
+/<namespace>/<feature>/<object>?<面板参数>&<环境态>
+     ↑
+     构建决定的命名空间（默认 app）= base；根 / 不属于应用
 ```
 
 | 是什么 | 放哪 | 例 |
 | --- | --- | --- |
-| **主对象** | path | `/inbox/123` |
-| **界面表面** | **path 第一段** | `/side/inbox/123` —— 同一个对象开在侧边 |
+| **主对象** | 命名空间之下的 path | `/<namespace>/inbox/123` |
+| **侧边** | 命名空间之下的一层前缀 | `/<namespace>/side/inbox/123` —— 同一个对象开在侧边 |
 | **面板里打开的对象** · 选中项 · 环境态 | **query（具名）** | `?sideThread=456` · `?activeTab=files` |
 
-- **表面是路径的一等公民**：`main`（主区）· `side`（侧边）；**侧边只是挂载点**，
-  里面放哪个 feature 由路径的第二段决定。
+- **主区没有前缀**：就在命名空间之下（`/<namespace>/world/w1`）。
+- **侧边是一层前缀**：`/<namespace>/side/<feature>/<object>` —— **侧边只是挂载点**，
+  里面放哪个 feature 由它后面那段决定。
 
 ## 3. store 与 URL
 
@@ -80,7 +81,7 @@
 | 放什么 | 文件 |
 | --- | --- |
 | **路由表**：URL → 元素 | `routes.tsx` |
-| **表面与其布局**：`main` 主区 · `side` 侧边 | `surface-layout.tsx` · `surfaces.ts` |
+| **表面与其布局**：主区（命名空间之下）· 侧边（`side/` 前缀）| `surface-layout.tsx` |
 | **导航项** 与"哪条 URL 是当前"的比较 | `platform/utils/nav.ts` —— 跨层共享的常量与纯函数 |
 
 - **方向**：`routes/` 在依赖方向**最上层** —— 可以 import 组件层与能力层；**反过来不行**（单向）。
@@ -93,8 +94,8 @@
 
 | 端 | basename | 来源 |
 | --- | --- | --- |
-| Web（宿主托管）| `/<BASE>/` | 引擎注入的 `BASE` |
-| 桌面（Tauri） | 本地资产或代理 origin 的 `/` | 平台适配器 |
+| Web（引擎托管）| `/<namespace>/` | 构建决定（`CUI_BASE`，默认 `app`）|
+| 桌面（Tauri） | `/<namespace>/` | 同一个命名空间 —— **两端一致**，根都不属于应用 |
 
 `basename` 一律由**平台适配器**注入，路由代码里不出现环境判断（见 `04-host-integration.md`）。
 
@@ -102,12 +103,11 @@
 
 ```
 app/src/routes/            路由（只装配，不写业务）
-├── routes.tsx             路由表：URL → 元素
-├── surface-layout.tsx     表面布局：main 主区 · side 侧边
-├── surface-layout.less    布局样式
-└── surfaces.ts            useSurface：读当前表面
+├── routes.tsx             路由表：URL → 元素（主区一支 · 侧边一支）
+├── surface-layout.tsx     表面布局：主区（命名空间之下）· 侧边（side 前缀）
+└── surface-layout.less    布局样式
 
-app/src/platform/router/   机制（三端 basename 从这里注入）
+app/src/platform/router/   机制（两端 basename 从这里注入）
 ├── router.tsx             createBrowserRouter + RouterProvider
 ├── basename.ts            basename 适配器（取 Vite 的 base）
 ├── use-page-title.ts      文档标题跟路由走

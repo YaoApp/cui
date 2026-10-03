@@ -13,7 +13,7 @@ test('the theme is on the root element before the app bundle runs', async ({ pag
     await new Promise((r) => setTimeout(r, 1500))
     await route.continue()
   })
-  await page.goto('/', { waitUntil: 'commit' })
+  await page.goto('/app/', { waitUntil: 'commit' })
   // 主包仍在路上，这时读到的必须已经是深色
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark', { timeout: 1000 })
 })
