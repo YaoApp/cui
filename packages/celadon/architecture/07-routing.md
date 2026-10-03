@@ -108,7 +108,6 @@ app/src/routes/            路由（只装配，不写业务）
 └── surface-layout.less    布局样式
 
 app/src/platform/router/   机制（两端 basename 从这里注入）
-├── router.tsx             createBrowserRouter + RouterProvider
 ├── basename.ts            basename 适配器（取 Vite 的 base）
 ├── use-page-title.ts      文档标题跟路由走
 └── use-url-binding.ts     值 ↔ 地址栏的绑定（两条不变量在这里）
