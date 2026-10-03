@@ -27,7 +27,6 @@ export type I18nKey =
   | 'nav.world'
   | 'surface.main'
   | 'surface.side'
-  | 'surface.unknown'
   | 'themeToggle.label'
   | 'themeToggle.toDark'
   | 'themeToggle.toLight'
@@ -82,7 +81,6 @@ declare module 'i18next' {
         'nav.world': string
         'surface.main': string
         'surface.side': string
-        'surface.unknown': string
         'themeToggle.label': string
         'themeToggle.toDark': string
         'themeToggle.toLight': string

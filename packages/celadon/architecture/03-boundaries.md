@@ -1,14 +1,14 @@
 # 03 · 目录与边界
 
 - **版本**：v1.47
-- **最后修改**：2026-10-03 09:19:46
+- **最后修改**：2026-10-03 12:00:22
 - **说明**：目录结构 · 分层职责 · 同层方向 · 谁能 import 谁 · 边界怎么强制
 
 ## 1. 分层职责
 
 | 层 | 目录 | 该做什么 | 不该做什么 |
 | --- | --- | --- | --- |
-| 路由 | `app/src/routes/` | 路由表 · 表面（main / side）与其布局 | **不写业务** · 不许被 `features/` import |
+| 路由 | `app/src/routes/` | 路由表 · 表面（主区 · 侧边）与其布局 | **不写业务** · 不许被 `features/` import |
 | 组件层 | `app/src/components/` | 纯视觉与行为（`@base-ui/react`）· 受控 props | **不认识业务** · 不发请求 · 不读状态 |
 | 能力层 | `app/src/features/` | 按业务切分（chat / inbox / kanban …）· **页面 + 组件 + 状态 + 测试都在里面** | 不直接 `fetch` · 不碰宿主全局 · **feature 之间不互相 import** |
 | 公共态 | `app/src/stores/` | **跨功能的公共状态**（说不清归哪个功能的事实）· 目录即角色，文件**不加后缀** | 不放私有状态（跟 feature 走）· **不许 import 上层**（features / routes / components 都不行）|
@@ -94,7 +94,7 @@ feature 私有组件**不许**出 `features/<域>/components/`；feature 之间�
 | **禁旧包** | 同上 | 禁 `import '@yaoapp/cui'` |
 | **路由薄** | 同上 | `routes/` 不许被 `features/` 反向 import |
 | **平台差异** | 适配器接口 + 禁直读环境判断 | 禁 `isDesktop` / `isIframe` 散落 |
-| **判断类规则**（表里无机器强制的那类）| **评审 + 拟人层判定** | 「不认识业务」· 命名规范 · 不引用 `plan/` 的内容；判定三件：看图 · `ocr_recognize` · `decision_decide`（见 `14-testing.md` §4.3）|
+| **判断类规则**（表里无机器强制的那类）| **评审 + 拟人层判定** | 「不认识业务」· 命名规范 · 只写规则不写过程；判定三件：看图 · `ocr_recognize` · `decision_decide`（见 `14-testing.md` §4.3）|
 
 **判断类规则没有机器强制** —— 靠评审与拟人层判定兜底；**别为它们硬造检查器**（假阳性会让人绕过去）。
 

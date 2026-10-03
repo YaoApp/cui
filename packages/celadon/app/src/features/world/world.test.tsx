@@ -7,7 +7,7 @@ import { WorldPage } from '@/features/world/world'
 
 /* 测试自己定义一条最小路由 —— feature 不许 import routes/（见 architecture/07-routing.md）。 */
 function renderAt(entry: string) {
-  const router = createMemoryRouter([{ path: '/:surface/world/:worldId?', element: <WorldPage /> }], {
+  const router = createMemoryRouter([{ path: '/world/:worldId?', element: <WorldPage /> }], {
     initialEntries: [entry],
   })
   render(<RouterProvider router={router} />)
@@ -23,12 +23,12 @@ function setLocale(locale: string) {
 
 describe('WorldPage', () => {
   it('lists the worlds', () => {
-    renderAt('/main/world')
+    renderAt('/world')
     expect(screen.getByRole('link', { name: 'Alpha 世界' })).toBeInTheDocument()
   })
 
   it('renders the detail straight from the path', () => {
-    renderAt('/main/world/w1')
+    renderAt('/world/w1')
     expect(screen.getByRole('heading', { name: 'Alpha 世界' })).toBeInTheDocument()
   })
 
@@ -36,13 +36,13 @@ describe('WorldPage', () => {
      布局侧的单测在 routes/surface-layout.test.tsx，端到端在浏览器层的深链用例。 */
 
   it('leaves the address alone on mount when there is nothing to say', () => {
-    const router = renderAt('/main/world/w1')
+    const router = renderAt('/world/w1')
     expect(router.state.location.search).toBe('')
   })
 
   /* 夹具（我们自己的示例数据）跟语言走：切到英文后，用户看到的列表与详情都是英文。 */
   it('localizes the fixture after switching language', async () => {
-    renderAt('/main/world/w1')
+    renderAt('/world/w1')
     expect(screen.getByRole('heading', { name: 'Alpha 世界' })).toBeInTheDocument()
 
     await setLocale('en-US')
@@ -54,16 +54,16 @@ describe('WorldPage', () => {
   })
 
   it('keeps the world ids in the links while localizing the labels', async () => {
-    renderAt('/main/world')
+    renderAt('/world')
 
     await setLocale('en-US')
 
-    expect(screen.getByRole('link', { name: 'Alpha World' })).toHaveAttribute('href', '/main/world/w1')
-    expect(screen.getByRole('link', { name: 'Gamma World' })).toHaveAttribute('href', '/main/world/w3')
+    expect(screen.getByRole('link', { name: 'Alpha World' })).toHaveAttribute('href', '/world/w1')
+    expect(screen.getByRole('link', { name: 'Gamma World' })).toHaveAttribute('href', '/world/w3')
   })
 
   it('follows the Japanese pack too', async () => {
-    renderAt('/main/world/w1')
+    renderAt('/world/w1')
 
     await setLocale('ja')
 
@@ -74,7 +74,7 @@ describe('WorldPage', () => {
   /* `kind` 是**系统值**：数据里是 code，用户看到的是译文 —— 切语言后 code 不变、文案跟着换。 */
   it('shows the entity kind through the language pack, never the raw code', async () => {
     useSidePanelStore.getState().open({ kind: 'world-entity', id: 'e2' })
-    renderAt('/main/world/w1')
+    renderAt('/world/w1')
     expect(screen.getByText('角色')).toBeInTheDocument()
 
     await setLocale('en-US')

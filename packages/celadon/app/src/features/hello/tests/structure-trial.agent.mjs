@@ -82,7 +82,7 @@ const button = p.getByRole('button', { name: '刷新' })
 const title = p.locator('.header__title')
 
 // S1 第一次打开
-await p.goto(BASE_URL, { waitUntil: 'networkidle' })
+await p.goto(`${BASE_URL}/app/`, { waitUntil: 'networkidle' })
 await shot(p, 's1-open.png')
 say(`S1 text      : ${JSON.stringify((await p.locator('body').innerText()).replace(/\n/g, ' | '))}`)
 say(`S1 boxes     : title=${JSON.stringify(await box(title))} button=${JSON.stringify(await box(button))} counter=${JSON.stringify(await box(counter))}`)
@@ -188,7 +188,7 @@ say(`S2 button box: before=${JSON.stringify(before)} after=${JSON.stringify(afte
 if (!twelve) problems.push('S2: 连点 12 下后计数不是 12')
 
 // S3 只用键盘
-await p.goto(BASE_URL, { waitUntil: 'networkidle' })
+await p.goto(`${BASE_URL}/app/`, { waitUntil: 'networkidle' })
 // 头部有导航链接在前：用 Tab 走到「刷新」（脚本实现细节，剧本里用户的动作没变）
 for (let i = 0; i < 12; i++) {
   if (await p.evaluate(() => document.activeElement?.innerText?.trim() === '刷新')) break
@@ -252,7 +252,7 @@ if (!zero) problems.push('S6: 刷新后计数没有归零')
   dp.on('pageerror', (e) => problems.push(`S7 pageerror: ${e.message}`))
   // 把主包延迟住：这期间根元素上就该已经是暗的，否则说明主题是等 JS 跑完才写的（会先闪浅色）
   await dp.route('**/src/main.tsx*', async (route) => { await new Promise((r) => setTimeout(r, 1500)); await route.continue() })
-  await dp.goto(BASE_URL, { waitUntil: 'commit' })
+  await dp.goto(`${BASE_URL}/app/`, { waitUntil: 'commit' })
   let firstPaint
   try {
     await dp.waitForFunction(() => document.documentElement.dataset.theme === 'dark', null, { timeout: 1200 })
@@ -261,7 +261,7 @@ if (!zero) problems.push('S6: 刷新后计数没有归零')
   say(`S7 firstPaint: ${JSON.stringify(firstPaint)}（主包仍在路上）`)
   if (firstPaint !== 'dark') problems.push('S7: 深色系统下首屏不是暗色（会先闪浅色）')
   await dp.unroute('**/src/main.tsx*')
-  await dp.goto(BASE_URL, { waitUntil: 'networkidle' })
+  await dp.goto(`${BASE_URL}/app/`, { waitUntil: 'networkidle' })
   await dp.waitForTimeout(250)
   await shot(dp, 's7-system-dark.png')
   const sysDark = await dp.evaluate(() => ({

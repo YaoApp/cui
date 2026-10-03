@@ -7,6 +7,5 @@
   "themeToggle.toLight": "ライト",
   "themeToggle.toDark": "ダーク",
   "surface.main": "メインエリア",
-  "surface.side": "サイド",
-  "surface.unknown": "不明な表示領域：{{surface}}"
+  "surface.side": "サイド"
 }

@@ -1,20 +1,18 @@
-import { Outlet, useParams } from 'react-router'
+import { Outlet } from 'react-router'
 import { useTranslation } from '@/platform/i18n'
 import { useUrlBinding } from '@/platform/router/use-url-binding'
-import { isSurface } from '@/platform/utils/surfaces'
+import { type Surface } from '@/platform/utils/surfaces'
 import { type Entry } from '@/stores/entry'
 import { useSidePanelStore } from '@/stores/side-panel'
 
 /** 条目种类 → 地址栏参数名。一个种类一个具名参数；新增种类在这里加一行。 */
 const SIDE_PANEL_PARAMS: Record<string, string> = { 'world-entity': 'sideEntity' }
-import { useSurface } from './surfaces'
 import './surface-layout.less'
 
 /* 装配：按表面决定页面放在哪里。侧边不是弹窗，是一个**挂载点** ——
-   地址说"开在侧边"，这里就把同一棵树放进侧边容器。 */
-export function SurfaceLayout() {
-  const { surface } = useParams()
-  const current = useSurface()
+   地址说"开在侧边"（`/side/...`），这里就把同一棵树放进侧边容器。
+   表面**由支路传入**，不从地址里取（见 architecture/07-routing.md）。 */
+export function SurfaceLayout({ surface }: { surface: Surface }) {
   const { t } = useTranslation()
   const entry = useSidePanelStore((s) => s.entry)
   const open = useSidePanelStore((s) => s.open)
@@ -38,11 +36,7 @@ export function SurfaceLayout() {
     },
   })
 
-  if (!isSurface(surface)) {
-    return <main className="surface surface--main">{t('surface.unknown', { surface: String(surface) })}</main>
-  }
-
-  if (current === 'side') {
+  if (surface === 'side') {
     return (
       <div className="surface surface--split">
         <main className="surface__primary" aria-label={t('surface.main')} />

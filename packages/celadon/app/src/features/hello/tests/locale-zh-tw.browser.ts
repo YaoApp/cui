@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 /* 场景：切换到繁体中文 —— 界面文案用繁体（台湾用词），刷新后仍是繁体。 */
 test('switching to Traditional Chinese localizes the copy and survives a reload', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/app/')
   await expect(page.getByRole('button', { name: '刷新' })).toBeVisible()
 
   await page.getByRole('combobox', { name: '语言' }).click()
