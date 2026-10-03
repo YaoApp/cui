@@ -1,7 +1,7 @@
 # 03 · 数据层（`data/`）
 
-- **版本**：v0.5（计划）
-- **最后修改**：2026-10-04 07:21:27
+- **版本**：v0.6（计划）
+- **最后修改**：2026-10-04 07:22:25
 - **说明**：三节 —— **00 代码结构**（先列长什么样）· **0 统一抽象**（要一起定的 7 项）· **1 业务接口清单**（逐域列表 + **WebSocket/流式单列**）
 - **事实基础**：[data-legacy-openapi.md](data-legacy-openapi.md)（旧 `openapi/` 71 文件现状报告 · 临时）
 
@@ -25,13 +25,19 @@ app/src/
 │   │   └── index.ts
 │   ├── user/                     # 真实域样板（与 platform/credential 联动）
 │   ├── setting/ · agent/ · workspace/ · llm/ · mcp/ · sandbox/ · computer/ · nodes/ · app/ · captcha/ · file/
-│   └── stream/                   # 流式 / WS 的**消息形状**（接线在 platform/transport，§0.6）
-│       ├── types.ts              # 统一事件形状与事件名
-│       └── chat.ts               # 对话流消息（从旧 chat/types.ts 的消息 DSL 搬）
+│   └── stream/                   # **四条通道的消息形状**（接线在 platform/transport，§0.6）
+│       ├── types.ts              # 统一事件形状与事件名（四条共用）
+│       ├── chat.ts               # ① 对话流：消息 DSL（从旧 chat/types.ts 搬）
+│       ├── events.ts             # ② 系统事件：{type, data} 与事件名（旧 events/useEventStream）
+│       ├── task.ts               # ③ 任务 WS：命令 read/history/run/retry/repeat/stop/cancel 的请求与应答类型
+│       └── vnc.ts                # ④ VNC / 沙箱：通道地址与握手（旧 computer/sandbox）
 └── platform/
     ├── service/                  # 服务地址（已在）
     ├── credential/               # 凭据载体（已在）
     └── transport/                # **唯一出口**：fetch / 上传 / 下载 / SSE / WS（能力都在这）
+        ├── fetch.ts · errors.ts  # 已在
+        ├── stream.ts             # 待做：SSE 接线（解析归这，形状归 data/stream）
+        └── socket.ts             # 待做：WS 连接 · 心跳 · 重连 · 鉴权（**只有这一处**）
 ```
 
 **每个域里就三件事**（与旧 `<域>/types.ts + api.ts + index.ts` 同形，**内容不同**）：
@@ -111,6 +117,9 @@ app/src/
 | 4 | **VNC / 沙箱 WS** | `computer/api.ts` + `sandbox/api.ts:42–67` | WS 地址拼装（盒/心跳/exec）| ~120 | **改写** |
 | — | 另有裸 WS | `pages/task-settings/.../TaskApiAccess.tsx:57` | 直接 `new WebSocket` | — | **丢弃/归并** |
 | **小计** | | | | **≈790** | （已减去机器人 SSE 与 trace）|
+
+**形状落点**：① → `data/stream/chat.ts` · ② → `events.ts` · ③ → `task.ts` · ④ → `vnc.ts`；
+**接线落点**（连接 · 心跳 · 重连 · 鉴权）：`platform/transport/stream.ts` + `socket.ts`（**待做**，见 §00 树）。
 
 **这 4 条要一起定的**：统一事件形状与事件名 · 命令型 WS 的请求类型 · 重连/心跳只在一处（`transport/`）· 鉴权怎么带上。
 
