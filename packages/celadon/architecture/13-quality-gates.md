@@ -1,7 +1,7 @@
 # 13 · 质量门禁
 
 - **版本**：v1.43
-- **最后修改**：2026-10-03 12:00:22
+- **最后修改**：2026-10-03 16:19:49
 - **说明**：基础语法 · 检查器 · CI · 产物与日志
 
 ## 1. 规则
@@ -42,7 +42,6 @@
 | `check-i18n-types` | **i18n 类型产物过期**：按基准语言 `zh-CN` 重新生成 `i18n-types.d.ts` 再与仓库里的比对（不同即失败，跑 `pnpm build:i18n`）|
 | `check-readme-values` | README 引用的色值与 `tokens.css` 不一致 |
 | `check-generated` | **产物与源不一致**：重新生成 `icons.html` / `mock.html` / **应用侧图标产物**，以及 `tokens.less` → 两份 `tokens.css`（`design/` 与 `app/src/platform/theme/`），再与仓库比对（跑 `node scripts/build-css.mjs`）|
-| `check-plan-md` | `plan/` 的表格结构与禁用小节（"待讨论"等）。**单元格里别写竖线** —— 检查器不认反斜杠转义，会按列数不一致报错 |
 | `check-app-layout` | 测试产物位置：**单测挨着源文件**（不许进 `tests/`）· **浏览器与拟人必须在 `tests/` 内** —— 两条方向相反的规则，各有正反样本 |
 | `check-doc-references` | 文档提到的 `app/src/...` 路径 · `scripts/*.mjs` · `pnpm <cmd>` **必须真实存在** —— 文档漂移不靠人 review |
 | `check-base-components` | `features/` · `routes/` · `components/`（`components/base/` 豁免）里**不许裸写 `<button>` / `<select>`** —— 用 `components/base/button` / `components/base/select`；否则每页各写一套控件 |
