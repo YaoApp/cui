@@ -1,7 +1,7 @@
 # architecture/ — CUI 2.0 架构规范
 
 - **版本**：v1.0
-- **最后修改**：2026-10-03 10:43:28
+- **最后修改**：2026-10-03 11:14:15
 - **说明**：架构规范总览：分册索引与目录分工
 
 > 本目录回答：**代码如何组织、依赖朝哪个方向、边界在哪、什么不许写。**
@@ -29,7 +29,7 @@
 | 02 | [toolchain](02-toolchain.md) | 构建工具 · 框架 · 语言 · 包管理器 · 脚本入口 · 判定工具 |
 | 03 | [boundaries](03-boundaries.md) | 目录结构 · 分层职责 · 同层方向 · 谁能 import 谁 · 边界怎么强制 |
 | 04 | [host-integration](04-host-integration.md) | 宿主挂载 · 保留前缀 · 代理 · SSE 头 |
-| 05 | [data-and-api](05-data-and-api.md) | 接口类型（手写强类型）· 取数钩子 · 禁止事项 |
+| 05 | [data-and-api](05-data-and-api.md) | 接口面（仅 openapi）· 类型与落位 · 取数钩子 · 流式 · 禁止 |
 | 06 | [state](06-state.md) | 私有跟 feature 走 · 公共放 `stores/` · 先问归属再问地址栏 · 什么不进 store · 改 store 留动作名 |
 | 07 | [routing](07-routing.md) | 地址语法 · 谁说了算 · `routes/` 的结构 · 文档标题 |
 | 08 | [i18n](08-i18n.md) | 语言包跟代码走 · locale 规范形式 · 命名空间由位置决定 · 加载 · 后端边界 · 翻译流程 |
