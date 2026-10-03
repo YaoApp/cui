@@ -1,6 +1,11 @@
 # 01 · 基础设施
 
-- **状态**：🔄 **进行中** —— §1 的六项**已定**，`dev` / `build` / `check` **已跑通**（§2）；接线与其余子项**待做**（§3）
+- **状态**：✅ **已完成**（2026-10-03）
+- **交付物**
+  - **架构文档**：`../architecture/` —— 00–16 分册 + 两份入口 [`SPEC.md`](../architecture/SPEC.md)（开发规范）与 [`REVIEW.md`](../architecture/REVIEW.md)（代码审核）+ 索引 `README.md` / `AGENTS.md`
+  - **规范脚本**：`scripts/check-*.mjs` —— **11 个检查器**（token · 样式约定 · i18n · i18n 类型 · README 色值 · 生成物 · 应用布局 · 文档引用 · 基础件 · 副作用写 URL · **依赖方向**）+ 自测 **81 个样本用例**
+  - **构建与生成脚本**：`build-css.mjs` · `build-icons.mjs` · `build-i18n-types.mjs` · `serve-dist.mjs`
+  - **测试装置**：`vitest` + Testing Library + `jsdom` · `@playwright/test`（本机 Chrome）· 拟人（剧本 + 采集 + 看图）· 日志 `app/logs/` · 两份隔离 CI
 - **目标**：把"可以开始写页面"的工程地基铺好 —— 构建工具、后端 SDK、i18n 构建、图标体系、主题映射、质量门禁、运行时壳
 - **不包含**：任何业务页面（属 02 起的各模块）
 - **依赖**：00 设计规范
@@ -80,9 +85,9 @@
 
 | 约束 | 内容 |
 | --- | --- |
-| `basename` | 应用挂在 `/<BASE>/` 下；React Router 的 `basename` 与 Vite 的 `base` **取同一变量**；PWA 的 `scope` / `start_url` 同步 |
-| 保留前缀 | **12 个前缀归引擎，路由不得占用**：`/api` `/v1` `/assets` `/components` `/tools` `/agents` `/admin` `/brands` `/docs` `/ai` `/.well-known` `/iframe` |
-| 无外壳模式 | `/iframe` 路径下**不渲染外壳**，保留 |
+| `basename` | 应用挂在**构建决定的命名空间**下（`/<namespace>/`，默认 `app`）；React Router 的 `basename` 与 Vite 的 `base` **取同一个值**；**根 `/` 不属于应用**；PWA 的 `scope` / `start_url` 同步 |
+| ~~保留前缀清单~~ | **已作废**：应用整个跑在命名空间之下，与引擎路径不同层，无需避让清单（见 `../architecture/07-routing.md` §1）|
+| ~~无外壳模式~~ | **已作废**：`/iframe` 不再保留（同上）|
 | 代理 | 按上表前缀转发；**WS upgrade 用 `server.proxy` 的 `ws: true`**；SSE 三个头照旧（`Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no`）|
 
 **数据怎么请求**
@@ -124,8 +129,8 @@
 | **CI 输出** | 两份 workflow 的名字与步骤全英文；结束时把 `app/logs/*/*.log` 写进运行摘要（`$GITHUB_STEP_SUMMARY`，折叠块），红绿都能直接读到 |
 | **产物可独立运行** | `dist/` 用**带 SPA fallback** 的静态服务器跑通（`scripts/serve-dist.mjs` —— `python3 -m http.server` 没有 fallback，深链会 404）：根路径下 4 个文件全 200 · 页面渲染与交互正常 · 零 4xx 零控制台错误 |
 | **产物前缀可配** | `base` 取 `CUI_BASE`（默认 `/`）：`CUI_BASE=/cui/` 构建后资源变 `/cui/_assets/*`，挂到 `/cui/` 下同样跑通（根路径下则 404，佐证前缀生效）|
-| **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**42 / 42**（13 文件）：`base/button/button.test.tsx` 4 · `header/header.test.tsx` 2 · `nav/nav.test.tsx` 4 · `theme-toggle/theme-toggle.test.tsx` 3 · `hello/hello.store.test.ts` 2 · `hello/hello.test.tsx` 2 · `world/world.store.test.ts` 3 · `world/world.test.tsx` 5 · `router/use-page-title.test.ts` 3 · `theme/theme.store.test.ts` 4 · `utils/nav.test.ts` 4 · `utils/share-url.test.ts` 4 · `stores.test.ts` 2 |
-| **浏览器测试** | `pnpm test:browser`（`@playwright/test`，走本机 Chrome）**10 / 10**：主路径（含标签页标题）· 全键盘（Tab 走到刷新）· 主题跟随 · 分段控件切主题 + 刷新后记住 · 内容面铺满视口 · 深链四条（详情 · 侧边 · 面板参数+后退 · 过滤 replace 不堆历史）|
+| **单元 / 组件测试** | `pnpm test`（`vitest` + `jsdom` + Testing Library）**134 / 134**（24 文件）；分布见各单元同目录用例 |
+| **浏览器测试** | `pnpm test:browser`（`@playwright/test`，走本机 Chrome）**26 / 26**：主路径 · 全键盘 · 主题跟随与持久 · 深链与后退 · **命名空间恰一次** · **中文输入法** |
 | **测试范围收窄** | `vitest` 只认 `*.test.*` · `playwright` 只认 `*.browser.ts` —— 两个工具的默认范围会重叠（`vitest` 与 `playwright`），不收窄会互相误抓（实测：6 个单测文件给 vitest，6 条 `*.browser.ts` 给 playwright，1 个 `*.agent.mjs` 给拟人）|
 | **测试位置强约束** | `check-app-layout` 两条方向相反的规则：单测挨着源文件、浏览器与拟人住 `tests/`（44 个样本，含两个新后缀的反例）|
 | **测试命令** | `pnpm check` · `pnpm test` · `pnpm test:browser` · `pnpm test:checkers` · `pnpm test:all`；四层各写一份日志到 **`app/logs/<本地日期>/<名>-<HHMM>.log`**（git 忽略；目录取系统日期、文件名精确到分钟，保留 14 天）|
@@ -133,7 +138,19 @@
 | **隔离 · 外层没被碰** | 外层锁文件无改动 · 外层工作区成员仍 7 个 · 外层 git 状态干净 |
 | **桌面壳** | `cui-desktop` 同步升到 **Vite 8.3.1**：生产构建（含类型检查）通过 · **32 / 32** 测试 · 安装 0 漏洞 |
 
-## 3. 待做（⏳ 未定 / 未做）
+## 3. 已移交（本模块不再负责）
+
+原列的"待做"按 2026-10-03 的分工**移出**，这里只留指针：
+
+| 去哪 | 内容 |
+| --- | --- |
+| [`02-platform.md`](02-platform.md) | 接口类型与取数钩子（原"后端 SDK"）· 运行时壳（服务信息 · 凭据 · 传输）|
+| [`../architecture/16-development.md`](../architecture/16-development.md) | 开发期代理：按引擎保留前缀转发 · **SSE 流式透传** · **WS `ws: true`** |
+| 已完成，见 §2 | 图标落地（`Icon` / `BrandMark`）· 主题映射 · i18n（四语 + 类型 + 门禁）· 测试分层与日志 · 11 个检查器 |
+
+**模块外，另行决定**（原样保留）：`cui-desktop` 的包管理器与锁文件 · 是否需要网站 / 文档侧构建。
+
+### 3.1 原「待做」清单（存档，勿再按它推进）
 
 **本模块内**（对应 §5 子项）：
 
@@ -185,7 +202,7 @@
 | 3 | **i18n 构建** | 四语 JSON → 构建产物 · 运行时切换与持久化 · 组件库 locale 对接 · **缺 key / 漏翻检查进 CI** | 四语切换即时生效且刷新后保持；缺 key 与漏翻让 CI 失败（检查脚本已就绪）|
 | 4 | **图标落地** | **选型与规格见 `architecture/00-principles.md` 的 F7**（lucide 为源 · 产物为 `icons/*-sprite.svg`）· 应用侧图标组件 · 按需引入 | 应用渲染与 `design/icons.html` 一致；打包只含用到的图标 |
 | 5 | **主题映射** | **同一份 `tokens.less`** 生成组件库主题（构建期）· 浅/暗两套 | 改一处 token → 组件库主题与色卡**同步**变化；不引入第二份颜色来源 |
-| 6a | **扫描型门禁（不依赖构建工具，现在就能做）** | 纯 Node 脚本：禁硬编码色 · **禁装饰/填充 token 当文字用** · 关键配对对比度（色卡）· i18n 缺 key/漏翻（**已有**）· README 色值（**已有**）· **物理方向属性**（**已有** `check-css-conventions.mjs`）| 故意写入硬编码色 / 错配对 / 缺 key / 装饰色当文字时，脚本退出码非 0；**检查器自身有样本测试**（`scripts/tests/run.mjs`，**76 个用例**，每条规则一个）|
+| 6a | **扫描型门禁（不依赖构建工具，现在就能做）** | 纯 Node 脚本：禁硬编码色 · **禁装饰/填充 token 当文字用** · 关键配对对比度（色卡）· i18n 缺 key/漏翻（**已有**）· README 色值（**已有**）· **物理方向属性**（**已有** `check-css-conventions.mjs`）| 故意写入硬编码色 / 错配对 / 缺 key / 装饰色当文字时，脚本退出码非 0；**检查器自身有样本测试**（`scripts/tests/run.mjs`，**81 个用例**，每条规则一个）|
 | 6b | **构建期门禁（选定构建工具后接线）** | **禁组件外写内联边框**（会露浏览器默认焦点环）—— 需要"组件边界"这个概念，静态扫描认不出，留给构建期按组件目录判定；stylelint 自定义规则（只允许 `var(--token)` · 禁物理方向属性 —— 扫描版已在 `../scripts/check-css-conventions.mjs`，此处升级为构建期拦截）· TS 类型约束（如 `type Color = \`var(--${string})\`` 让裸色值无法通过类型）· **反向依赖边界**（禁 `import '@yaoapp/cui'`）· 接进 CI job / pre-commit | 违规**让构建或 CI 失败**（不只是脚本失败）—— 规范要能拦住人，而不是只写在文档里 |
 | 7 | **运行时壳** | 引擎全局（`window.$app` / `window.$global`）的**类型化封装与初始化**；显式声明，禁止隐式依赖 | 全局对象有类型；未初始化时给出明确报错而不是白屏 |
 | 9 | **架构规范** | 新建 `architecture/`（与 `design/` 平级）· **总指引 `README.md` + 每个部分一个文件**（Agent 逐份读，不塞一个文件）· 内容取自本模块已定条款 + 新提出的分层与边界草案 | ① 每个分册只讲一件事；② 与 `design/` / `plan/` **不重叠**（不复述视觉规格、不记状态）；③ 文档内引用可落地；④ 草案项标注清楚，定案后回写本文件 |
