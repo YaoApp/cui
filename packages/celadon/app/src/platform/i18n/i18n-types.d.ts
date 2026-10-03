@@ -5,6 +5,23 @@ import 'i18next'
 
 /** 基准语言里存在的全部 key —— `t('…')` 只接受这些。 */
 export type I18nKey =
+  | 'bridge.error.bridge.notRunning'
+  | 'bridge.error.bridge.rejected'
+  | 'bridge.error.bridge.unavailable'
+  | 'bridge.error.bridge.unknown'
+  | 'bridge.error.credential.noEntry'
+  | 'bridge.error.credential.serviceEmpty'
+  | 'bridge.error.credential.storeFailed'
+  | 'bridge.error.localIps.unavailable'
+  | 'bridge.error.openBrowser.failed'
+  | 'bridge.error.openBrowser.schemeNotAllowed'
+  | 'bridge.error.pick.failed'
+  | 'bridge.error.platform.unsupported'
+  | 'bridge.error.reveal.failed'
+  | 'bridge.error.reveal.pathNotFound'
+  | 'bridge.error.theme.expectedLightOrDark'
+  | 'bridge.error.theme.readFailed'
+  | 'bridge.error.theme.writeFailed'
   | 'entityPanel.close'
   | 'entityPanel.id'
   | 'entityPanel.kind'
@@ -43,6 +60,37 @@ export type I18nKey =
   | 'themeToggle.label'
   | 'themeToggle.toDark'
   | 'themeToggle.toLight'
+  | 'verify.actions'
+  | 'verify.appInfo'
+  | 'verify.bridge'
+  | 'verify.capabilities'
+  | 'verify.client'
+  | 'verify.credential'
+  | 'verify.filePick'
+  | 'verify.folderPick'
+  | 'verify.hintClient'
+  | 'verify.language'
+  | 'verify.list'
+  | 'verify.localIps'
+  | 'verify.notPinged'
+  | 'verify.openBrowser'
+  | 'verify.openInClient'
+  | 'verify.path'
+  | 'verify.platform'
+  | 'verify.read'
+  | 'verify.ready'
+  | 'verify.remove'
+  | 'verify.result'
+  | 'verify.results'
+  | 'verify.reveal'
+  | 'verify.secret'
+  | 'verify.service'
+  | 'verify.themeDark'
+  | 'verify.themeLight'
+  | 'verify.themeRead'
+  | 'verify.title'
+  | 'verify.url'
+  | 'verify.write'
   | 'world.detailLabel'
   | 'world.filter'
   | 'world.filterPlaceholder'
@@ -72,6 +120,23 @@ declare module 'i18next' {
     nsSeparator: false
     resources: {
       translation: {
+        'bridge.error.bridge.notRunning': string
+        'bridge.error.bridge.rejected': string
+        'bridge.error.bridge.unavailable': string
+        'bridge.error.bridge.unknown': string
+        'bridge.error.credential.noEntry': string
+        'bridge.error.credential.serviceEmpty': string
+        'bridge.error.credential.storeFailed': string
+        'bridge.error.localIps.unavailable': string
+        'bridge.error.openBrowser.failed': string
+        'bridge.error.openBrowser.schemeNotAllowed': string
+        'bridge.error.pick.failed': string
+        'bridge.error.platform.unsupported': string
+        'bridge.error.reveal.failed': string
+        'bridge.error.reveal.pathNotFound': string
+        'bridge.error.theme.expectedLightOrDark': string
+        'bridge.error.theme.readFailed': string
+        'bridge.error.theme.writeFailed': string
         'entityPanel.close': string
         'entityPanel.id': string
         'entityPanel.kind': string
@@ -110,6 +175,37 @@ declare module 'i18next' {
         'themeToggle.label': string
         'themeToggle.toDark': string
         'themeToggle.toLight': string
+        'verify.actions': string
+        'verify.appInfo': string
+        'verify.bridge': string
+        'verify.capabilities': string
+        'verify.client': string
+        'verify.credential': string
+        'verify.filePick': string
+        'verify.folderPick': string
+        'verify.hintClient': string
+        'verify.language': string
+        'verify.list': string
+        'verify.localIps': string
+        'verify.notPinged': string
+        'verify.openBrowser': string
+        'verify.openInClient': string
+        'verify.path': string
+        'verify.platform': string
+        'verify.read': string
+        'verify.ready': string
+        'verify.remove': string
+        'verify.result': string
+        'verify.results': string
+        'verify.reveal': string
+        'verify.secret': string
+        'verify.service': string
+        'verify.themeDark': string
+        'verify.themeLight': string
+        'verify.themeRead': string
+        'verify.title': string
+        'verify.url': string
+        'verify.write': string
         'world.detailLabel': string
         'world.filter': string
         'world.filterPlaceholder': string

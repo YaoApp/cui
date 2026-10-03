@@ -4,6 +4,6 @@
 export { buildManifest, clientKind, targetOs, type ArtifactKind, type BuildInfo, type ClientKind, type Manifest, type TargetOs } from './manifest'
 export { capabilities, type Capabilities } from './capabilities'
 export { clientInfo, clientSignature, type ClientInfo } from './info'
-export { clientId } from './client-id'
+export { clientId, primeClientId, newClientId, randomId } from './client-id'
 export { parseUserAgent, uaInfo, type BrowserInfo, type UaInfo } from './ua'
 export { outboundContext, type OutboundContext, type OutboundInputs } from './context'

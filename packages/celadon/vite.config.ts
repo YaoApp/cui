@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
@@ -9,17 +10,30 @@ import { resolve } from 'node:path'
    默认 'app'（→ /app/）；换一个构建（如 myself）用 CUI_BASE 覆盖。路由 basename 取同一个值，
    **两端一致**：Web 由引擎托管，桌面壳把产物挂在同一个命名空间下。 */
 const ns = (process.env.CUI_BASE ?? 'app').replace(/^\/+|\/+$/g, '')
-const base = `/${ns}/`
+/* 空命名空间 = 应用就是根（桌面壳把产物挂在根下）：`/` 而不是 `//` */
+const base = ns ? `/${ns}/` : '/'
+
+/* 构建收尾：把语言包**另出一份给宿主读**（`<outDir>/locales/*.json` + `index.json`，见 08-i18n.md）。
+   放在配置里而不是 package.json，是为了**跟 outDir 走**（产物目录改了它自动跟上）。 */
+const emitHostLocales = {
+  name: 'celadon-emit-host-locales',
+  closeBundle() {
+    execFileSync(process.execPath, [resolve(import.meta.dirname, 'scripts/build-locales.mjs')], {
+      stdio: 'inherit',
+    })
+  },
+}
 
 export default defineConfig({
   root: resolve(import.meta.dirname, 'app'),
   base,
-  plugins: [react()],
+  plugins: [react(), emitHostLocales],
   resolve: {
     alias: { '@': resolve(import.meta.dirname, 'app/src') },
   },
   build: {
-    outDir: resolve(import.meta.dirname, 'dist'),
+    /* 产物目录可由环境改（客户端那份走 dist-client，见 scripts/build-client.mjs） */
+    outDir: resolve(import.meta.dirname, process.env.CELADON_OUT_DIR ?? 'dist'),
     emptyOutDir: true,
     sourcemap: true,
     // 引擎把 /assets 列为保留前缀 —— 产物静态目录不能用默认名

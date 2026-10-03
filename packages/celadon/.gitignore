@@ -9,3 +9,4 @@ app/logs/
 test-results/
 playwright-report/
 coverage/
+dist-client/
