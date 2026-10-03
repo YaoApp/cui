@@ -1,0 +1,9 @@
+/* 这一份的**唯一**违规就是下面两个"判别性形状"：`//` 紧跟在引号或 `(` 之后，
+   旧实现会把同一行后面的真字面值一起吞掉（假阴）——所以本样本在旧实现下会 pass、新实现下 fail。 */
+.probe-quoted {
+  content: "//"; color: #ff0000;
+}
+
+.probe-protocol-relative {
+  background-image: url(//cdn.example.com/a.svg); border-color: #00ff00;
+}
