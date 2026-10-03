@@ -69,13 +69,13 @@ export function HelloPage() {
           <ThemeToggle theme={theme} onSelect={setTheme} />
         </div>
         <section className="hello__row" aria-label={t('hello.client')}>
-          <span className="hello__cell">
+          <span className="hello__client">
             {t('hello.clientType')}：{clientType}
           </span>
-          <span className="hello__cell">
+          <span className="hello__client">
             {t('hello.namespace')}：{client?.namespace ?? ''}/
           </span>
-          <span className="hello__cell">
+          <span className="hello__client">
             {t('hello.host')}：{hostText}
           </span>
         </section>
