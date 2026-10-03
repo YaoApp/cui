@@ -10,10 +10,16 @@
  */
 
 export * from './result'
+export { bridgeErrorText } from './translate'
 export { hasHost } from './invoke'
 export { ping, PING_COMMAND, type HostStatus } from './ping'
+export { credential, CREDENTIAL_COMMANDS, type CredentialMeta } from './credential'
+export { system, SYSTEM_COMMANDS, type AppInfo } from './system'
+export { useHostStatus } from './use-host-status'
 
+import { credential } from './credential'
+import { system } from './system'
 import { ping } from './ping'
 
 /** 公共面聚合：其它层写 `bridge.ping()`，不直接 import 命令文件。 */
-export const bridge = { ping }
+export const bridge = { ping, credential, system }

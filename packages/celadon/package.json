@@ -56,7 +56,9 @@
     "lint:run": "stylelint \"app/src/**/*.less\" && eslint . && tsc --noEmit",
     "lint:styles": "stylelint \"app/src/**/*.less\"",
     "lint:js": "eslint .",
-    "lint:types": "tsc --noEmit"
+    "lint:types": "tsc --noEmit",
+    "build:client": "tsc && node scripts/build-client.mjs",
+    "dev:client": "node scripts/dev-client.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

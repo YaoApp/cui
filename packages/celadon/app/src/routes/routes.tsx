@@ -1,5 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router'
 import { HelloPage } from '@/features/hello'
+import { VerifyPage } from '@/features/verify'
 import { WorldPage } from '@/features/world'
 import { SurfaceLayout } from './surface-layout'
 
@@ -11,6 +12,8 @@ const pageRoutes: RouteObject[] = [
   { path: 'hello', element: <HelloPage /> },
   { path: 'world', element: <WorldPage /> },
   { path: 'world/:worldId', element: <WorldPage /> },
+  /* 桥的脚手架页：把这轮做出来的宿主能力摆出来点一遍（见 plan/01-bridge-commands.md） */
+  { path: 'verify', element: <VerifyPage /> },
 ]
 
 export const routes: RouteObject[] = [

@@ -17,7 +17,7 @@ describe('ping', () => {
   it('is unavailable in a browser, and says so without throwing', async () => {
     expect(hasHost()).toBe(false)
     const result = await ping()
-    expect(result).toMatchObject({ ok: false, reason: 'unavailable' })
+    expect(result).toMatchObject({ ok: false, code: 'bridge.unavailable' })
   })
 
   it('asks the host by the exact command name and returns its answer', async () => {
@@ -35,6 +35,6 @@ describe('ping', () => {
     asHost(async () => {
       throw new Error('command celadon_ping not found')
     })
-    expect(await ping()).toMatchObject({ ok: false, reason: 'not-running' })
+    expect(await ping()).toMatchObject({ ok: false, code: 'bridge.not_running' })
   })
 })

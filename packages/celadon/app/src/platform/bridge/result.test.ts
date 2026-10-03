@@ -10,13 +10,13 @@ describe('BridgeResult', () => {
   })
 
   it('carries a readable reason when it fails, and never throws', () => {
-    const result: BridgeResult<{ version: string }> = fail('unavailable', 'no host bridge in this client')
+    const result: BridgeResult<{ version: string }> = fail('bridge.unavailable', 'no host bridge in this client')
     expect(isOk(result)).toBe(false)
-    expect(describeFailure(result)).toBe('unavailable: no host bridge in this client')
+    expect(describeFailure(result)).toBe('bridge.unavailable: no host bridge in this client')
   })
 
   it('falls back when there is no value, so a caller can still draw', () => {
     const fallback = { version: 'unknown' }
-    expect(valueOr(fail('not-running', 'celadon_ping not found'), fallback)).toBe(fallback)
+    expect(valueOr(fail('bridge.not_running', 'celadon_ping not found'), fallback)).toBe(fallback)
   })
 })
