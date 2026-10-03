@@ -4,14 +4,14 @@ import { describe, expect, it, vi } from 'vitest'
 import { Nav, type NavItem } from '@/components/nav'
 
 const ITEMS: NavItem[] = [
-  { label: 'Hello', href: '/app/hello', icon: 'i-spark', active: true },
-  { label: 'World', href: '/app/world', icon: 'i-ws' },
+  { label: 'Hello', href: '/hello', icon: 'i-spark', active: true },
+  { label: 'World', href: '/world', icon: 'i-ws' },
 ]
 
 describe('Nav', () => {
   it('renders real links, so they can be copied and opened in a new tab', () => {
     render(<Nav items={ITEMS} label="应用导航" />)
-    expect(screen.getByRole('link', { name: 'Hello' })).toHaveAttribute('href', '/app/hello')
+    expect(screen.getByRole('link', { name: 'Hello' })).toHaveAttribute('href', '/hello')
   })
 
   it('marks the current one for assistive tech and with the design class', () => {
@@ -24,7 +24,7 @@ describe('Nav', () => {
 
   it('shows each item\'s icon, and nothing when an item has none', () => {
     const { container } = render(
-      <Nav items={[...ITEMS, { label: 'NoIcon', href: '/app/plain' }]} label="应用导航" />,
+      <Nav items={[...ITEMS, { label: 'NoIcon', href: '/plain' }]} label="应用导航" />,
     )
     const links = [...container.querySelectorAll('a.nav__link')]
     expect(links[0].querySelector('use')?.getAttribute('href')).toBe('#i-spark')

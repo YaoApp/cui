@@ -9,7 +9,7 @@ test('an object in the path opens its detail', async ({ page }) => {
 })
 
 test('a surface in the path mounts the same feature in the side panel', async ({ page }) => {
-  await page.goto('/side/world/w1')
+  await page.goto('/app/side/world/w1')
   const side = page.getByRole('complementary', { name: '侧边' })
   await expect(side).toBeVisible()
   await expect(side.getByRole('heading', { name: 'Alpha 世界' })).toBeVisible()

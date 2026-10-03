@@ -7,6 +7,5 @@
   "themeToggle.toLight": "Light",
   "themeToggle.toDark": "Dark",
   "surface.main": "Main",
-  "surface.side": "Side",
-  "surface.unknown": "Unknown surface: {{surface}}"
+  "surface.side": "Side"
 }

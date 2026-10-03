@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 /* 场景：全键盘 —— 不用鼠标走完同一条路径，且焦点环可见。 */
 test('the same path on the keyboard alone, with a visible focus ring', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/app/')
   // 等应用真的渲染出来：/ 会重定向到 /app/hello，抢在重定向之前按 Tab 会丢焦点
   await expect(page.getByRole('button', { name: '刷新' })).toBeVisible()
 

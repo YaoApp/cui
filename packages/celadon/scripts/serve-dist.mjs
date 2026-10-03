@@ -2,8 +2,9 @@
 /* 预览 dist/ 的静态服务器 —— **带 SPA fallback**。
 
    为什么不能用 `python3 -m http.server`：它没有 fallback。我们的路由是**路径**路由
-   （`/main/hello`，见 architecture/07-routing.md），用户刷新深链时服务器必须把 index.html 发回去。
+   （`/app/hello`，见 architecture/07-routing.md），用户刷新深链时服务器必须把 index.html 发回去。
    生产由引擎托管，同样需要这条 fallback —— 这是选路径路由的代价，写在 04 里。
+   应用挂在**构建决定的段**下（见 architecture/04）：段名取 CUI_BASE（默认 app），根 `/` 不属于应用。
 
    用法：node scripts/serve-dist.mjs [port] [dir] */
 import { createReadStream, existsSync, statSync } from 'node:fs'
@@ -14,6 +15,8 @@ import { fileURLToPath } from 'node:url'
 const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const PORT = Number(process.argv[2] ?? 5200)
 const ROOT = resolve(process.argv[3] ?? join(PACKAGE, 'dist'))
+const SEGMENT = (process.env.CUI_BASE ?? 'app').replace(/^\/+|\/+$/g, '')
+const PREFIX = `/${SEGMENT}`
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -29,7 +32,14 @@ const TYPES = {
 
 createServer((req, res) => {
   const path = decodeURIComponent(new URL(req.url ?? '/', 'http://localhost').pathname)
-  let file = join(ROOT, normalize(path).replace(/^(\.\.[/\\])+/, ''))
+  // 根不属于应用：段外一律 404，别让人以为这是根部署（见 architecture/04-host-integration.md）
+  if (path !== PREFIX && !path.startsWith(PREFIX + '/')) {
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' })
+    res.end(`not found — the app lives under ${PREFIX}/`)
+    return
+  }
+  const rest = path.slice(PREFIX.length) || '/'
+  let file = join(ROOT, normalize(rest).replace(/^(\.\.[/\\])+/, ''))
   if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html')
   if (!existsSync(file)) {
     // SPA fallback 只给**导航请求**（浏览器要一个文档）；缺的静态资源老老实实 404 ——
@@ -44,5 +54,5 @@ createServer((req, res) => {
   })
   createReadStream(file).pipe(res)
 }).listen(PORT, '0.0.0.0', () => {
-  console.log(`  dist preview → http://0.0.0.0:${PORT}/  (SPA fallback on, root ${ROOT})`)
+  console.log(`  dist preview → http://0.0.0.0:${PORT}${PREFIX}/  (SPA fallback on, root ${ROOT})`)
 })

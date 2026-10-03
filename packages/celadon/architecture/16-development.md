@@ -27,8 +27,8 @@
 
 | 用途 | 起法 | 端口 |
 | --- | --- | --- |
-| 开发服务（HMR）| `pnpm dev` | `5199` |
-| 产物预览（拟人层打这个）| `node scripts/serve-dist.mjs` | `5200` |
+| 开发服务（HMR）| `pnpm dev` | `5199`（地址带段：`/app/...`）|
+| 产物预览（拟人层打这个）| `node scripts/serve-dist.mjs` | `5200`（同样按段挂载）|
 | 构建 | `pnpm build` → `dist/` | — |
 
 - **拟人层测的是 `dist/`**，所以它打的是预览端口（见 `14-testing.md`）。
@@ -38,7 +38,7 @@
 | 变量 | 谁读 | 默认 | 用途 |
 | --- | --- | --- | --- |
 | `YAO_SERVER_HOST` | 开发代理的目标 | 由运行环境给 | 开发期后端地址 |
-| `CUI_BASE` | `vite.config.ts` | `/` | base 前缀；**路由 basename 取同一个值**（见 `04`）|
+| `CUI_BASE` | `vite.config.ts` · `scripts/serve-dist.mjs` | `app` | **挂载段**：base 与路由 basename 都取它（见 `04`）；根 `/` 不属于应用 |
 | `CUI_BASE_URL` | `playwright.config.ts` · 拟人采集脚本 | 开发服务 `5199` · 拟人 `5200` | 测哪一份 |
 | `CUI_HEADED` | 拟人采集脚本 | 空 | `=1` 开真窗口 —— 截图里才有浏览器 |
 | `CUI_STEP_TIMEOUT` | 每层超时（`scripts/run-logged.mjs`）| `300` 秒 | 卡住时先看它 |
