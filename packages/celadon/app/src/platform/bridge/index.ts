@@ -12,6 +12,7 @@
 export * from './result'
 export { hasHost } from './invoke'
 export { ping, PING_COMMAND, type HostStatus } from './ping'
+export { useHostStatus } from './use-host-status'
 
 import { ping } from './ping'
 
