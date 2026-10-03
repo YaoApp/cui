@@ -1,7 +1,7 @@
 # 04 · 制品与挂载（硬约束）
 
 - **版本**：v1.31
-- **最后修改**：2026-10-03 11:57:13
+- **最后修改**：2026-10-03 11:58:06
 - **说明**：制品构成 · 宿主挂载 · 放到哪（引擎 / 独立 / 桌面）· SPA fallback · 由命名空间推导的工程约束
 
 ## 制品构成
@@ -28,29 +28,71 @@ dist/
 | **SPA fallback** | **托管方必须配**：未知路径回 `index.html`，只给导航请求（`Accept: text/html`）；缺的静态资源仍 404。路径路由的代价，预览用 `scripts/serve-dist.mjs` |
 | **SSE 三个头**（**托管方 · 开发代理**）| `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no`（见 `16-development.md`）|
 
-## 把 `dist/` 放到哪
+## `dist/` 的托管方式
 
-**`dist/` 是纯静态产物，放哪都行 —— 但两条铁要求**：**挂在命名空间下**（产物里的资源路径是
-`/<namespace>/_assets/*`，挂错位置就整页空白），**接口同源可达**（服务端不发 CORS 头，见 `15-platform.md` §4.1）。
+**`dist/` 是纯静态产物，但有两项约束必须满足**：其一，**必须挂载在构建时的命名空间之下**——
+产物内的资源路径为 `/<namespace>/_assets/*`，挂载位置不符将整页空白；其二，**接口必须与服务同源**——
+服务端不返回 CORS 头、不处理预检（见 `15-platform.md` §4.1）。
 
-| 形态 | 谁托管 | 命名空间 | 接口怎么走 |
+| 托管形态 | 由谁提供 | 命名空间来源 | 接口路径 |
 | --- | --- | --- | --- |
-| **引擎托管**（生产默认）| 引擎的静态服务 | 引擎配置 | 同源，前缀转发 |
-| **独立部署** | 任意静态服务器（NGINX 等）| 由挂载配置给 | **反代到引擎，保持同源** |
-| **桌面壳** | 壳内的本地服务或协议 | 壳挂到同一个命名空间 | Rust 侧直连服务端（无跨域，见 `15` §4.1）|
+| **引擎托管**（生产默认）| 引擎的静态服务 | 引擎配置 | 同源，由引擎转发 |
+| **独立部署** | 静态服务器（NGINX 等）| 部署配置 | 反向代理至引擎，保持同源 |
+| **桌面壳** | 壳内本地服务或自定义协议 | 壳挂载至同一命名空间 | Rust 侧直连服务端（无跨域，见 `15` §4.1）|
 
-**独立部署的三条要求**：
+### 独立部署（NGINX）
 
-- `/<namespace>/` 指向 `dist/` 的内容；
-- **SPA fallback 只给导航请求**，缺的静态资源仍 404（理由见上）；
-- 接口路径反代到引擎，**保持同源** —— 跨域不可行（不发 CORS 头、不处理预检）。
+三项要求：① `/<namespace>/` 指向产物内容；② SPA fallback **仅对导航请求**生效，缺失的静态资源仍返回 404；
+③ 接口路径**反向代理至引擎**，保持同源。
 
-示意（命名空间 `app` · 接口前缀 `/v1`，指令按各自服务器改写）：
+下例以命名空间 `app`、接口前缀 `/v1`、引擎监听 `127.0.0.1:5099` 为例。
+产物内容置于 `/srv/cui/app/`（**目录名即命名空间**），故使用 `root` 而非 `alias`——
+`alias` 与 `try_files` 组合存在已知的路径解析差异。
 
-```
-location /app/_assets/ { /* 产物静态目录：缺失即 404，不回退 */ }
-location /app/         { /* 目录内容 + 导航回退到 /app/index.html */ }
-location /v1/          { /* 反向代理到引擎，同源 */ }
+```nginx
+server {
+    listen 80;
+    server_name cui.example.com;
+
+    root /srv/cui;
+
+    # 产物静态目录：存在则返回，缺失直接 404，不回退
+    location /app/_assets/ {
+        try_files $uri =404;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # 应用：导航请求回退到 index.html；index.html 不缓存，发版即生效
+    location = /app/index.html {
+        add_header Cache-Control "no-cache";
+    }
+
+    location /app/ {
+        try_files $uri $uri/ /app/index.html;
+    }
+
+    # 接口：反向代理至引擎，保持同源
+    location /v1/ {
+        proxy_pass http://127.0.0.1:5099;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        # SSE 等长连接：不缓冲，放宽读超时
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+    }
+
+    # WebSocket 升级
+    location /ws/ {
+        proxy_pass http://127.0.0.1:5099;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 3600s;
+    }
+}
 ```
 
 ## 禁止
