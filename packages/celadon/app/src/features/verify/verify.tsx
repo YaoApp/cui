@@ -75,11 +75,11 @@ export function VerifyPage() {
         ['machineId', () => bridge.system.machineId()],
         ['transport', () => transport.probe('https://example.com')],
         ['credential.write', () => credential.write('verify-demo', 'self-check')],
-        ['credential.read', () => credential.read('verify-demo')],
+        ['credential.read', () => credential.read('verify-demo')], // 自检也不上屏（见 report 的 redact）
         ['credential.remove', () => credential.remove('verify-demo')],
       ] as const) {
         const result = await call()
-        report(label, result)
+        report(label, result, label === 'credential.read')
       }
       const pinged = await bridge.ping()
       setPing(pinged)

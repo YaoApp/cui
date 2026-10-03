@@ -39,7 +39,6 @@ function assertClientManifest(outDirName: string | undefined) {
 }
 assertClientManifest(process.env.CELADON_OUT_DIR)
 
-// **必须在应用的命名空间下**：base 是 `/app/`，根下的请求会被 Vite 的 base 中间件先拦掉（实测 404）
 
 
 export default defineConfig(({ mode }) => {
@@ -56,8 +55,16 @@ export default defineConfig(({ mode }) => {
           {
             target: proxyTarget,
             changeOrigin: true,
-            ws: true,                                   // 长连接（16 §1）
-            headers: { Accept: 'text/event-stream' },   // SSE
+            ws: true, // 长连接（16 §1）
+            // SSE：**响应**头（不是请求头）—— 声明事件流并关掉缓冲
+            configure: (proxy) => {
+              proxy.on('proxyRes', (proxyRes) => {
+                proxyRes.headers['cache-control'] = 'no-cache'
+                proxyRes.headers['content-type'] = 'text/event-stream'
+                proxyRes.headers['x-accel-buffering'] = 'no'
+              })
+            },                                   // 长连接（16 §1）
+
           },
         ]),
       )

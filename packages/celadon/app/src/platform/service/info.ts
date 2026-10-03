@@ -25,7 +25,8 @@ export function parseServiceInfo(raw: unknown): BridgeResult<ServiceInfo> {
   const value = raw as Record<string, unknown>
   const openapi = value.openapi
   // **不许是协议相对地址**（`//evil.example/x` 会被当跨域前缀）；必须是本站根下的路径段
-  if (typeof openapi !== 'string' || !/^\/[^/]/.test(openapi)) {
+  // 只认"本站根下的普通路径段"：**拒绝**协议相对（`//evil`）与**反斜杠**（`/\evil` 规范化后会被当主机）
+  if (typeof openapi !== 'string' || !/^\/[A-Za-z0-9._~-]/.test(openapi)) {
     return fail('service.malformed', 'service info has no openapi root', { openapi: String(openapi) })
   }
   return ok({

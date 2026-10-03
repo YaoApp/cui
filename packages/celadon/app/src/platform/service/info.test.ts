@@ -62,6 +62,7 @@ describe('parseServiceInfo', () => {
     expect(parseServiceInfo({ openapi: 'v1' })).toMatchObject({ ok: false, code: 'service.malformed' })
     // 协议相对地址（`//evil.example/v1`）会把请求带出站 —— 必须拒
     expect(parseServiceInfo({ openapi: '//evil.example/v1' })).toMatchObject({ ok: false, code: 'service.malformed' })
+    expect(parseServiceInfo({ openapi: '/\\evil.example/v1' })).toMatchObject({ ok: false, code: 'service.malformed' })
     expect(parseServiceInfo(null)).toMatchObject({ ok: false, code: 'service.malformed' })
   })
 })
