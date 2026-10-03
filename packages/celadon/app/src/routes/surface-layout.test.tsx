@@ -55,6 +55,36 @@ describe('SurfaceLayout · an entry that no longer belongs here', () => {
     expect(router.state.location.search).toBe('')
   })
 
+  it('never takes the entry of a route it cannot render, not even for a moment', async () => {
+    /* 只看"最终清空"是不够的：读时不判断、再靠离开 effect 清掉，结果一样绿。
+       这里盯**过程中的每一次 store 变化** —— 读时若认了它，就会留下痕迹。 */
+    const seen: unknown[] = []
+    const unsubscribe = useSidePanelStore.subscribe((state) => seen.push(state.entry))
+    renderAt('/hello?sideEntity=e2')
+    await waitFor(() => expect(useSidePanelStore.getState().entry).toBeUndefined())
+    unsubscribe()
+
+    expect(seen.some((entry) => (entry as { kind?: string } | undefined)?.kind === 'world-entity')).toBe(false)
+  })
+
+  it('leaves the feature without writing the parameter back on the way out', async () => {
+    /* 修的是"离开时先把参数写回去、再删掉"（多塞两条历史）。只看最终地址看不出来，
+       要盯**路由器落过的每一个地址**：不该出现带参的那一站。 */
+    act(() => useSidePanelStore.getState().open({ kind: 'world-entity', id: 'e2' }))
+    const router = renderAt('/world?sideEntity=e2')
+
+    const landed: string[] = []
+    const unsubscribe = router.subscribe((state) => landed.push(state.location.search))
+    await act(async () => {
+      await router.navigate('/hello')
+    })
+    unsubscribe()
+    await waitFor(() => expect(useSidePanelStore.getState().entry).toBeUndefined())
+
+    expect(landed.filter((search) => search.includes('sideEntity'))).toEqual([])
+    expect(router.state.location.search).toBe('')
+  })
+
   it('does not take the parameter of a route it cannot render', async () => {
     const router = renderAt('/hello?sideEntity=e2')
     await waitFor(() => expect(useSidePanelStore.getState().entry).toBeUndefined())
