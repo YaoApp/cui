@@ -116,7 +116,7 @@
 | 项 | 结果 |
 | --- | --- |
 | **生产构建** | `pnpm build` ✓ **42–47ms**（Vite 8 上；Vite 6 时为 76–106ms）|
-| **六个检查** | `check-i18n` · `check-readme-values` · `check-tokens` · `check-generated` · `check-css-conventions` · `check-app-layout` **全绿** |
+| **检查器全绿（11 个）** | 见 `package.json` 的 `check:run` |
 | **检查器自测** | `scripts/tests/run.mjs` **76 / 76** 用例（每条规则一个样本）|
 | **dev / preview** | dev 端口 5199 ✓ · preview HTTP **200** ✓ |
 | **CI（隔离）· 一** | `.github/workflows/celadon-test-build.yml` · 只在 `packages/celadon/**` 改动时跑 · 干净环境演练通过：安装（不触发构建）→ 规范门禁全绿 → 单元 9/9 → 构建；三处隔离：自己的工作目录 · 自己的锁文件 · 自己的 `packageManager` |

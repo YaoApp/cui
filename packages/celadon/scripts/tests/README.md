@@ -53,7 +53,7 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 - **`check-generated` 的图标比对**（`icons.html` / `mock.html`）：它要**整套图标雪碧图与清单**，只跑真实仓库（给了目标目录时只比对两份 `tokens.css`）。
 - 它比对 `tokens.css` 时会**原地重写产物**，所以样本先整目录拷进临时目录再跑（见 `run.mjs` 的 `DESTRUCTIVE`）—— 否则反例会被"修好"，下次假绿。
 
-**共 79 个用例**。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
+**共 81 个用例**。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
 
 ## 加一个样本
 

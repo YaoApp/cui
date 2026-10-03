@@ -6,7 +6,7 @@ import { expect, test, type Page } from '@playwright/test'
 
    **说清这里钉的是什么**：本应用**不对组合做任何分支**（`world.tsx` 没有 `onComposition*`），
    所以派发合成 `CompositionEvent` 是为了贴近真实输入路径，**断言本身钉的是两条共通行为** ——
-   表单不提交、以及受控输入边打边同步地址栏（`:44` 的 `q=gam`）。删掉组合事件用例仍会绿；
+   表单不提交、以及受控输入边打边同步地址栏（`:49` 的 `q=gam`）。删掉组合事件用例仍会绿；
    删掉 `onSubmit` 的阻止提交、或改坏 URL 同步，用例会红。
 
    为什么用原生 setter 再派发事件：React 的受控 input 会记住上一次的值，
@@ -44,8 +44,6 @@ test('composing in the filter does not submit, and the committed text filters', 
   await dispatchComposition(page, 'compositionupdate', 'gam')
   await expect(filter).toHaveValue('gam')
 
-  // 组合中的文字**已经进地址栏**（受控输入边打边同步）—— 这条让上面那两行组合事件真的载重：
-  // 若把 URL 同步改坏，这里就红，而不再只是「装饰性事件」。
   await expect(page).toHaveURL(/q=gam/)
 
   // 组合中按回车 —— 不许提交。表单一旦真提交，查询串被清掉，面板会跟着丢
