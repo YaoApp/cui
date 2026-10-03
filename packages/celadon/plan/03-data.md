@@ -1,7 +1,7 @@
 # 03 · 数据层（`data/`）
 
-- **版本**：v0.12（计划）
-- **最后修改**：2026-10-04 07:30:54
+- **版本**：v0.13（计划）
+- **最后修改**：2026-10-04 07:33:04
 - **说明**：三节 —— **00 代码结构**（先列长什么样）· **0 统一抽象**（要一起定的 7 项）· **1 业务接口清单**（逐域列表 + **WebSocket/流式单列**）
 - **事实基础**：[data-legacy-openapi.md](data-legacy-openapi.md)（旧 `openapi/` 71 文件现状报告 · 临时）
 
@@ -16,8 +16,19 @@
 app/src/
 ├── data/                         # 接口类型 + 取数（**只声明，不发请求**）
 │   ├── index.ts                  # 对外唯一入口（按域再导出）
-│   ├── types.ts                  # 公共类型：错误 · 列表/分页 · 出站上下文（§0 的 0.1–0.4）
-│   ├── utils/                    # **所有接口共有的不标准**只在这里兜（**跟业务无关的三件**）
+│   ├── types.ts                  # 公共类型：错误 · 列表/分页（§0 的 0.1–0.3）
+│   ├── call/                     # **统一包装**：出站调用只在这里组装（普通请求与订阅同一套 ctx）
+│   │   ├── ctx.ts                # 出站上下文：语言 · 主题 · 客户端 · 服务（§0.4）
+│   │   ├── request.ts            # 普通请求：路径 + 输入/输出 + ctx → 经 platform/transport
+│   │   ├── sse.ts                # 订阅（SSE）包装：解析 · 重连 · 可续传
+│   │   ├── socket.ts             # 订阅（WS）包装：双向 · 心跳 · 退避 · 命令应答
+│   │   └── channels/             # **四条通道的消息形状**（只有形状，没有连接）
+│   │       ├── types.ts          # 统一事件形状与事件名（留「序号 / 可否续传」字段）
+│   │       ├── chat.ts           # ① 对话流：消息 DSL（从旧 chat/types.ts 搬）
+│   │       ├── events.ts         # ② 系统事件：{type, data}（旧 events/useEventStream）
+│   │       ├── task.ts           # ③ 任务 WS：命令 read/history/run/retry/repeat/stop/cancel 的类型
+│   │       └── vnc.ts            # ④ VNC / 沙箱：通道地址与握手（旧 computer/sandbox）
+│   ├── utils/                    # **所有接口共有的不标准**只在这里兜（跟业务无关的三件）
 │   │   ├── unwrap.ts             # 成功包裹：`{data}` / 裸对象 → 一种形状（§0.3）
 │   │   ├── paging.ts             # 分页归一：pagecnt / pagecount / totalPages → 一种（§0.2）
 │   │   └── errors.ts             # 服务端错误体 → 统一错误形状（§0.1）
@@ -31,18 +42,12 @@ app/src/
 │   │   └── index.ts
 │   ├── user/                     # 真实域样板（与 platform/credential 联动；**有转换时加 `map.ts`**）
 │   ├── setting/ · agent/ · workspace/ · llm/ · mcp/ · sandbox/ · computer/ · nodes/ · app/ · captcha/ · file/
-│   └── stream/                   # **只有形状**（四条通道的消息类型；接线在 platform/transport）
-│       ├── types.ts              # 统一事件形状与事件名（四条共用；留「序号 / 可否续传」字段）
-│       ├── chat.ts               # ① 对话流：消息 DSL（从旧 chat/types.ts 搬）
-│       ├── events.ts             # ② 系统事件：{type, data} 与事件名（旧 events/useEventStream）
-│       ├── task.ts               # ③ 任务 WS：命令 read/history/run/retry/repeat/stop/cancel 的类型
-│       └── vnc.ts                # ④ VNC / 沙箱：通道地址与握手（旧 computer/sandbox）
 └── platform/
     ├── service/                  # 服务地址（已在）
     ├── credential/               # 凭据载体（已在）
     └── transport/                # **唯一出口**：fetch / 上传 / 下载 / SSE / WS（能力都在这）
         ├── fetch.ts · errors.ts  # 已在
-        ├── stream.ts             # 待做：SSE 接线（解析归这，形状归 data/stream）
+        ├── stream.ts             # 待做：SSE 接线（解析归这，形状归 data/call/channels）
         └── socket.ts             # 待做：WS 连接 · 心跳 · 重连 · 鉴权（**只有这一处**）
 ```
 
@@ -60,7 +65,7 @@ app/src/
 **在 `data/` 里，动作只有三种**：**查询** · **提交** · **订阅**（订阅按协议分 **SSE / WS** 两个钩子，见上表）——
 
 - **查询与提交共用 `use-request.ts`**（提交＝手动触发那一次），**不再写第二个实现**
-- **订阅**走 `hooks/use-sse.ts` / `hooks/use-socket.ts`（**形状**在 `data/stream/*`，连接/心跳/重连在 `transport/`）
+- **订阅**走 `hooks/use-sse.ts` / `hooks/use-socket.ts`（**形状**在 `data/call/channels/*`，连接/心跳/重连在 `transport/`）
 
 **SSE 与 WS：对外合一，对内分二**（**别合成一个实现**）
 
@@ -78,10 +83,10 @@ app/src/
 
 | | 钩子 | 接线 | 它的独有语义 |
 | --- | --- | --- | --- |
-| **SSE** | `data/hooks/use-sse.ts` | `transport/stream.ts` | 单向 · 原生/手动重连 · **`Last-Event-ID` 可续** |
-| **WS** | `data/hooks/use-socket.ts` | `transport/socket.ts` | **双向（能发命令）** · 心跳 + 退避 · **无内建续传** · 握手期鉴权 |
+| **SSE** | `data/hooks/use-sse.ts`（包装在 `data/call/sse.ts`）| `transport/stream.ts` | 单向 · 原生/手动重连 · **`Last-Event-ID` 可续** |
+| **WS** | `data/hooks/use-socket.ts`（包装在 `data/call/socket.ts`）| `transport/socket.ts` | **双向（能发命令）** · 心跳 + 退避 · **无内建续传** · 握手期鉴权 |
 
-**共用的只有形状**：`data/stream/{types,chat,events,task,vnc}.ts` —— `types.ts` 留「**序号 / 可否续传**」字段（SSE 有、WS 没有）。
+**共用的只有形状**：`data/call/channels/{types,chat,events,task,vnc}.ts` —— `types.ts` 留「**序号 / 可否续传**」字段（SSE 有、WS 没有）。
 
 **后端不标准处的转换**（这一层必须有这个位置）：**公共的进 `utils/`，跟业务的跟域走。**
 
@@ -129,7 +134,7 @@ app/src/
 | 0.1 | **错误形状** | 服务端业务错误体字段 · 与 `transport/` 的 `{code,params,message}` 怎么接 · 字段级校验错误（旧：OAuth `{error,error_description}` + `http_error` 回落）| `data/` 公共类型 + `platform/transport/` | ⏸ |
 | 0.2 | **列表 / 分页** | 一个包裹形状（旧：**四套命名** `pagecount`/`pagecnt`/`totalPages`/`next+prev`）| `data/` 公共类型 | ⏸ |
 | 0.3 | **成功包裹** | 有没有信封；列表 `data` 与实体 `data` 怎么区分（旧：`result.data \|\| result` 反复兜）| 同上 | ⏸ |
-| 0.4 | **出站上下文** | locale / timezone / theme / client 怎么带（旧：locale 走 query · `X-Yao-Accept` 头 · 三来源凑 CSRF）| 同上 + `platform/` | ⏸ |
+| 0.4 | **出站上下文（ctx）** | 语言 / 主题 / 客户端 / 服务怎么带 —— **由统一包装 `call/` 一处注入**（旧：locale 走 query · `X-Yao-Accept` 头 · 三来源凑 CSRF，散在各处）| `data/call/ctx.ts`（+ `platform/`）| ⏸ |
 | 0.5 | **取数与订阅钩子** | 加载 / 错误 / 取消 / 重试的**唯一实现**与返回形状；订阅（流式）与它并列（旧：**133 个文件手写四态**）| `data/hooks/use-request.ts`（查询 + 提交 · `SPEC.md:95`）· `use-sse.ts` · `use-socket.ts`（订阅，**按协议分开**）| ⏸ |
 | 0.6 | **出口接线** | 一切经 `platform/transport/`；上传/下载/SSE/WS 各归哪一档（`17 §2.2` 三档：`api`/`download`/`stream`）。**SSE 与 WS 同属 `stream` 档，但接线分两处**（见上表）| `platform/transport/{stream.ts,socket.ts}` | ⏸（卡 `17 §2.2` 两档未做）|
 | 0.7 | **类型的组织** | 一域一处；类型与方法同文件还是分开；子域（如 `agent/robot`）怎么放（旧：`<域>/types.ts` + `<域>/api.ts` + barrel，且**反向 import 页面层 6 处**）| `app/src/data/<域>/` | ⏸ |
@@ -171,8 +176,9 @@ app/src/
 | — | 另有裸 WS | `pages/task-settings/.../TaskApiAccess.tsx:57` | 直接 `new WebSocket` | — | **丢弃/归并** |
 | **小计** | | | | **≈790** | （已减去机器人 SSE 与 trace）|
 
-**形状落点**：① → `data/stream/chat.ts` · ② → `events.ts` · ③ → `task.ts` · ④ → `vnc.ts`；
+**形状落点**：① → `data/call/channels/chat.ts` · ② → `events.ts` · ③ → `task.ts` · ④ → `vnc.ts`；
 **接线落点**（连接 · 心跳 · 重连 · 鉴权）：`platform/transport/stream.ts` + `socket.ts`（**待做**，见 §00 树）；
+**包装落点**：普通请求 `data/call/request.ts` · SSE `data/call/sse.ts` · WS `data/call/socket.ts`；
 **钩子落点**：① → `data/hooks/use-sse.ts` · ②③④ → `data/hooks/use-socket.ts`（SSE 是单向流，其余三条是双向通道）。
 
 **这 4 条要一起定的**：统一事件形状与事件名 · 命令型 WS 的请求类型 · 重连/心跳只在一处（`transport/`）· 鉴权怎么带上。
