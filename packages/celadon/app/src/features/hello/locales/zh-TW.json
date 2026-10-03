@@ -4,5 +4,14 @@
   "hello.icons": "圖示一覽",
   "hello.refreshed": "已重新整理 {{count}} 次",
   "hello.title": "Hello",
-  "hello.trial": "結構試跑："
+  "hello.trial": "結構試跑：",
+  "hello.client": "客戶端",
+  "hello.clientType": "類型",
+  "hello.clientWeb": "Web",
+  "hello.clientDesktop": "桌面",
+  "hello.namespace": "命名空間",
+  "hello.host": "宿主",
+  "hello.hostNone": "無（瀏覽器裡沒有宿主）",
+  "hello.hostReady": "可用（版本 {{version}}）",
+  "hello.loading": "讀取中"
 }

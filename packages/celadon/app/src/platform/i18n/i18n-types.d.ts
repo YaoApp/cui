@@ -12,7 +12,16 @@ export type I18nKey =
   | 'header.refresh'
   | 'hello.brands'
   | 'hello.brandsOther'
+  | 'hello.client'
+  | 'hello.clientDesktop'
+  | 'hello.clientType'
+  | 'hello.clientWeb'
+  | 'hello.host'
+  | 'hello.hostNone'
+  | 'hello.hostReady'
   | 'hello.icons'
+  | 'hello.loading'
+  | 'hello.namespace'
   | 'hello.refreshed'
   | 'hello.title'
   | 'hello.trial'
@@ -66,7 +75,16 @@ declare module 'i18next' {
         'header.refresh': string
         'hello.brands': string
         'hello.brandsOther': string
+        'hello.client': string
+        'hello.clientDesktop': string
+        'hello.clientType': string
+        'hello.clientWeb': string
+        'hello.host': string
+        'hello.hostNone': string
+        'hello.hostReady': string
         'hello.icons': string
+        'hello.loading': string
+        'hello.namespace': string
         'hello.refreshed': string
         'hello.title': string
         'hello.trial': string
