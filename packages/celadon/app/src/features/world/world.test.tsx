@@ -96,3 +96,13 @@ describe('WorldPage · 作废的条目', () => {
     expect(hrefs.some((href) => href.includes('sideEntity'))).toBe(false)
   })
 })
+
+/* 找不到世界时**必须留下导航** —— 只剩一行文案的话，用户只能按浏览器后退。 */
+describe('WorldPage · 找不到的世界', () => {
+  it('keeps the header and the navigation so the user can get somewhere', () => {
+    renderAt('/world/nope')
+    expect(screen.getByText('没有这个世界：nope')).toBeInTheDocument()
+    expect(screen.getAllByRole('link').length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: '刷新' })).toBeInTheDocument()
+  })
+})
