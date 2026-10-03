@@ -46,6 +46,7 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 | `check-plan-md` | `clean` + `violation-width`（表格列数不一致）+ `violation-orphan-row`（孤立表格行）|
 | `check-app-layout` | `clean`（单测挨着源文件 · 浏览器与拟人住 `tests/`）+ `violation-unit-in-tests-dir`（单测住进了 `tests/`）+ `violation-unit-without-sibling`（单测旁边没有源文件）+ `violation-browser-beside-source` · `violation-spec-beside-source` · `violation-agent-script-beside-source`（后三条：该进 `tests/` 的散在源码目录）|
 | `check-base-components` | `clean`（`features/` 里用 `<Button>`）+ `clean-components`（`components/` 里用基础件）+ `clean-exempt-base`（`components/base/` 里落原生 `<button>` 被豁免）+ `violation-raw-button` · `violation-raw-button-in-component` · `violation-raw-select-in-component`（`features/` 与 `components/` 里裸写控件）|
+| `check-import-boundaries` | `clean`（各层只往下引，含"解析不到跳过"：不存在的别名与第三方包；**注释掉的 import 不算**）+ `clean-type-only`（**类型可以跨层引用**：`import type` 与 `{ type X }` 往上层引也放行）+ `violation-upward-store-to-feature`（往上引）+ `violation-upward-feature-to-routes`（往上引 · 路由是顶层）+ `violation-feature-cross-import`（`features/a` 引 `features/b`）+ `violation-components-import-features`（`components/` 引业务）+ `violation-base-imports-upper-component`（`components/base/` 引上层组件）+ `violation-platform-imports-feature`（`platform/` 引上层）+ `violation-data-imports-features`（`data/` 引上层）+ `violation-relative-upward`（相对路径也解析）+ `violation-multiline-import`（跨行 import 带行内注释也要找得到）+ `violation-old-package`（`@yaoapp/cui`）+ `violation-empty-target`（护栏：层目录里没有 `.ts/.tsx` 必须失败）|
 | `check-generated` | `clean`（两份 `tokens.css` 都与 `tokens.less` 一致）+ `violation-design-stale` · `violation-theme-stale`（各让一份产物过期，两份都比）|
 
 ## 没被样本覆盖的
@@ -53,7 +54,7 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 - **`check-generated` 的图标比对**（`icons.html` / `mock.html`）：它要**整套图标雪碧图与清单**，只跑真实仓库（给了目标目录时只比对两份 `tokens.css`）。
 - 它比对 `tokens.css` 时会**原地重写产物**，所以样本先整目录拷进临时目录再跑（见 `run.mjs` 的 `DESTRUCTIVE`）—— 否则反例会被"修好"，下次假绿。
 
-**共 66 个用例**。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
+**共 79 个用例**。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
 
 ## 加一个样本
 

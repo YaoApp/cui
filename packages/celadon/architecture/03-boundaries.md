@@ -87,7 +87,7 @@ feature 私有组件**不许**出 `features/<域>/components/`；feature 之间�
 
 | 规则 | 手段 | 例子 |
 | --- | --- | --- |
-| **层间方向** | ESLint `no-restricted-imports`（`allowTypeImports: true` 只放行类型）| `components/base/` 不许 import 上层组件；`data/` 不许 import `features/`；`features/a/` 不许 import `features/b/` |
+| **层间方向** | `check-import-boundaries.mjs`（零依赖纯 Node 扫 `app/src/**/*.{ts,tsx}` 的 import；**只放行类型** —— TS 7 下 `typescript-eslint` 还不支持，ESLint 版落不来）| `components/base/` 不许 import 上层组件；`data/` 不许 import `features/`；`features/a/` 不许 import `features/b/` |
 | **用基础件，不裸写控件** | `check-base-components.mjs`（`features/` · `routes/` · `components/` 里不许裸 `<button>` / `<select>`，`components/base/` 豁免）| 按钮用 `components/base/button`；下拉用 `components/base/select`；链接、输入框用设计类 `.link` / `.input` |
 | **组件不发请求** | 同上 + `no-restricted-syntax` | 禁组件里出现 `fetch(` / `new WebSocket(` |
 | **不在 `useEffect` 取数** | 同上 | 取数走数据层钩子（见 `05-data-and-api.md`）|

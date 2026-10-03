@@ -31,6 +31,7 @@ const SUITES = [
   ['check-app-layout.mjs', 'app-layout'],
   ['check-effect-url-write.mjs', 'effect-url-write'],
   ['check-base-components.mjs', 'base-components'],
+  ['check-import-boundaries.mjs', 'import-boundaries'],
   ['check-doc-references.mjs', 'doc-references'],
   ['check-generated.mjs', 'generated'],
 ]
