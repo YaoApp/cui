@@ -4,5 +4,14 @@
   "hello.icons": "Icon set",
   "hello.refreshed": "Refreshed {{count}} times",
   "hello.title": "Hello",
-  "hello.trial": "Structure trial: "
+  "hello.trial": "Structure trial: ",
+  "hello.client": "Client",
+  "hello.clientType": "Type",
+  "hello.clientWeb": "Web",
+  "hello.clientDesktop": "Desktop",
+  "hello.namespace": "Namespace",
+  "hello.host": "Host",
+  "hello.hostNone": "none (a browser has no host)",
+  "hello.hostReady": "available (version {{version}})",
+  "hello.loading": "reading"
 }
