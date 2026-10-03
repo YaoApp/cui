@@ -38,9 +38,11 @@ export function SurfaceLayout({ surface }: { surface: Surface }) {
     },
     write: (params, value) => {
       for (const spec of Object.values(SIDE_PANEL_PARAMS)) params.delete(spec.param)
-      /* 未登记的种类**写不出去**（写了也读不回来，等于制造死参数）。 */
+      /* 未登记的种类**写不出去**（写了也读不回来，等于制造死参数）；
+         不在自己地盘上也不写 —— 否则离开功能时会先把参数写回去、再删掉，
+         多出两条历史（用户按后退回不去，2026-10-03 验收抓到）。 */
       const spec = value ? SIDE_PANEL_PARAMS[value.kind] : undefined
-      if (value && spec) params.set(spec.param, value.id)
+      if (value && spec && pathname.startsWith(spec.owner)) params.set(spec.param, value.id)
     },
   })
 

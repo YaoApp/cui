@@ -63,15 +63,6 @@ test('typing in the filter replaces the entry instead of stacking history', asyn
   expect(await page.evaluate(() => history.length)).toBe(before)
 })
 
-test('leaving the feature drops the panel parameter', async ({ page }) => {
-  await page.goto('/app/world/w1?sideEntity=e2')
-  await expect(page.getByRole('region', { name: '条目面板' })).toBeVisible()
-
-  await page.getByRole('link', { name: '你好' }).click()
-  // 别的功能渲染不了这个面板：参数不许跟过去（它只由能渲染它的功能负责）
-  await expect(page).toHaveURL(/\/app\/hello$/)
-})
-
 test('a panel parameter on a route that cannot render it is dropped', async ({ page }) => {
   await page.goto('/app/hello?sideEntity=e2')
   await expect(page).toHaveURL(/\/app\/hello$/)

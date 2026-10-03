@@ -87,7 +87,7 @@ describe('WorldPage', () => {
 })
 
 /* 条目指向的对象不在了：必须作废，且**分享链接不许带上它**。 */
-describe('WorldPage · 作废的条目', () => {
+describe('WorldPage · an entry whose object is gone', () => {
   it('clears an entry whose object is gone, and keeps it out of the share link', async () => {
     act(() => useSidePanelStore.getState().open({ kind: 'world-entity', id: 'nope' }))
     renderAt('/world/w1')
@@ -99,7 +99,7 @@ describe('WorldPage · 作废的条目', () => {
 })
 
 /* 找不到世界时**必须留下导航** —— 只剩一行文案的话，用户只能按浏览器后退。 */
-describe('WorldPage · 找不到的世界', () => {
+describe('WorldPage · a world that does not exist', () => {
   it('keeps the header and the navigation so the user can get somewhere', () => {
     renderAt('/world/nope')
     expect(screen.getByText('没有这个世界：nope')).toBeInTheDocument()
@@ -109,7 +109,7 @@ describe('WorldPage · 找不到的世界', () => {
 })
 
 /* `aria-pressed` 说的就是"这个开着"：再点同一个必须关上，否则语义在说谎。 */
-describe('WorldPage · 条目的按下态', () => {
+describe('WorldPage · the pressed state of an entry', () => {
   it('closes the panel when the active entity is clicked again', async () => {
     renderAt('/world/w1')
     const button = screen.getByRole('button', { name: '守门人' })
