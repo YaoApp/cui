@@ -13,6 +13,8 @@
   "bridge.error.platform.unsupported": "That platform is not supported yet (macOS and Windows only)",
   "bridge.error.reveal.failed": "Could not reveal the file",
   "bridge.error.reveal.pathNotFound": "No such path: {{path}}",
+  "bridge.error.service.malformed": "The service information is not the shape it promises",
+  "bridge.error.service.unavailable": "The service answered {{status}}",
   "bridge.error.theme.expectedLightOrDark": "Theme must be light or dark, got \"{{value}}\"",
   "bridge.error.theme.readFailed": "Could not read the system theme",
   "bridge.error.theme.writeFailed": "Could not set the window theme",

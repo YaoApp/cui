@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
-import { defineConfig } from 'vite'
+import { defineConfig, type ProxyOptions } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 
@@ -39,6 +39,26 @@ function assertClientManifest(outDirName: string | undefined) {
 }
 assertClientManifest(process.env.CELADON_OUT_DIR)
 
+/* 开发期把**引擎的接口路径**转发到后端（`16-development.md` §1/§3）：
+   浏览器直连后端拿不到响应（跨域/CORS），所以前端一律用**相对路径**，由 dev server 代转。
+   **地址不进代码**：`YAO_SERVER_HOST` 由运行环境给（`.env` / pm2 / 宿主）；没给就不代理。 */
+const proxyTarget = process.env.YAO_SERVER_HOST
+// **必须在应用的命名空间下**：base 是 `/app/`，根下的请求会被 Vite 的 base 中间件先拦掉（实测 404）
+const enginePaths = ['.well-known', 'v1']
+const devProxy: Record<string, ProxyOptions> = proxyTarget
+  ? Object.fromEntries(
+      enginePaths.map((path) => [
+        `${base}${path}`,
+        {
+          target: proxyTarget,
+          changeOrigin: true,
+          // **转发前剥掉应用的命名空间**：后端认的是 `/.well-known/yao`，不是 `/app/.well-known/yao`
+          rewrite: (incoming: string) => incoming.replace(new RegExp(`^${base}`), '/'),
+        },
+      ]),
+    )
+  : {}
+
 export default defineConfig({
   root: resolve(import.meta.dirname, 'app'),
   base,
@@ -54,6 +74,7 @@ export default defineConfig({
     // 引擎把 /assets 列为保留前缀 —— 产物静态目录不能用默认名
     assetsDir: '_assets',
   },
-  server: { port: 5199 },
+  // 开发期代理（`YAO_SERVER_HOST` 没给就是空，等于不代理）
+  server: { port: 5199, proxy: devProxy },
   preview: { port: 5199 },
 })

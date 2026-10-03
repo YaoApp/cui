@@ -19,6 +19,8 @@ export type I18nKey =
   | 'bridge.error.platform.unsupported'
   | 'bridge.error.reveal.failed'
   | 'bridge.error.reveal.pathNotFound'
+  | 'bridge.error.service.malformed'
+  | 'bridge.error.service.unavailable'
   | 'bridge.error.theme.expectedLightOrDark'
   | 'bridge.error.theme.readFailed'
   | 'bridge.error.theme.writeFailed'
@@ -147,6 +149,8 @@ declare module 'i18next' {
         'bridge.error.platform.unsupported': string
         'bridge.error.reveal.failed': string
         'bridge.error.reveal.pathNotFound': string
+        'bridge.error.service.malformed': string
+        'bridge.error.service.unavailable': string
         'bridge.error.theme.expectedLightOrDark': string
         'bridge.error.theme.readFailed': string
         'bridge.error.theme.writeFailed': string

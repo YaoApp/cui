@@ -13,6 +13,8 @@
   "bridge.error.platform.unsupported": "这个平台还不支持（目前只有 macOS 与 Windows）",
   "bridge.error.reveal.failed": "定位文件失败",
   "bridge.error.reveal.pathNotFound": "找不到这个路径：{{path}}",
+  "bridge.error.service.malformed": "服务信息不是约定的形状",
+  "bridge.error.service.unavailable": "连不上服务（回了 {{status}}）",
   "bridge.error.theme.expectedLightOrDark": "主题只支持浅色或深色，收到的是「{{value}}」",
   "bridge.error.theme.readFailed": "读不到系统主题",
   "bridge.error.theme.writeFailed": "设置窗口主题失败",
