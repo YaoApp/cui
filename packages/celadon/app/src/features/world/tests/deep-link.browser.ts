@@ -30,6 +30,9 @@ test('a named panel parameter opens the panel, and Back closes it', async ({ pag
   await expect(page).toHaveURL(/\?sideEntity=e2$/)
 
   await page.goBack()
+  // **先等地址稳定，再断言画面**：面板的收起由"读回 URL → 清 store"驱动，
+  // 直接断言画面会与写回抢跑（2026-10-03 整套跑时红过一次、单跑却绿）。
+  await expect(page).toHaveURL(/\/app\/world\/w1$/)
   await expect(page.getByRole('region', { name: '条目面板' })).toHaveCount(0)
 })
 
