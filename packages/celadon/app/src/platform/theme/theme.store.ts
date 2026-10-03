@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { devtools, persist } from 'zustand/middleware'
 
 export type Theme = 'light' | 'dark'
 /** 用户的**偏好**：可以交给系统，也可以明确指定。 */
@@ -35,12 +35,13 @@ export const coerceThemePreference = (value: unknown): 'system' | 'light' | 'dar
   value === 'system' || value === 'light' || value === 'dark' ? value : 'system'
 
 export const useThemeStore = create<ThemeState>()(
-  persist(
+  devtools(
+    persist(
     (set, get) => ({
       preference: 'system',
       theme: resolveTheme('system', systemPrefersDark()),
       setPreference: (preference) =>
-        set({ preference, theme: resolveTheme(preference, systemPrefersDark()) }),
+        set({ preference, theme: resolveTheme(preference, systemPrefersDark()) }, false, 'theme/setPreference'),
       setTheme: (theme) => get().setPreference(theme),
     }),
     {
@@ -62,6 +63,8 @@ export const useThemeStore = create<ThemeState>()(
         if (state) state.theme = resolveTheme(state.preference, systemPrefersDark())
       },
     },
+    ),
+    { name: 'theme' },
   ),
 )
 
