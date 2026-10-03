@@ -1,5 +1,6 @@
 import { LocaleSwitch } from '@/components/locale-switch'
 import { Icon } from '@/components/base/icon'
+import { appHref } from '@/platform/router/basename'
 import type { NavItem } from '@/platform/utils/nav'
 import './nav.less'
 
@@ -23,7 +24,7 @@ export function Nav({ items, label, localeSwitch, onSelect }: NavProps) {
           <li key={item.href}>
             <a
               className={item.active ? 'nav__link nav-item is-active' : 'nav__link nav-item'}
-              href={item.href}
+              href={appHref(item.href)}
               aria-current={item.active ? 'page' : undefined}
               onClick={(event) => {
                 if (!onSelect) return
