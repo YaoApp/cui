@@ -39,6 +39,10 @@ test('composing in the filter does not submit, and the committed text filters', 
   await dispatchComposition(page, 'compositionupdate', 'gam')
   await expect(filter).toHaveValue('gam')
 
+  // 组合中的文字**已经进地址栏**（受控输入边打边同步）—— 这条让上面那两行组合事件真的载重：
+  // 若把 URL 同步改坏，这里就红，而不再只是「装饰性事件」。
+  await expect(page).toHaveURL(/q=gam/)
+
   // 组合中按回车 —— 不许提交。表单一旦真提交，查询串被清掉，面板会跟着丢
   await filter.press('Enter')
   await expect(page).toHaveURL(/\/app\/world\/w1/)
