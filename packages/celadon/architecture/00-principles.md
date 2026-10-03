@@ -1,7 +1,7 @@
 # 00 · 铁律与结构总纲
 
 - **版本**：v1.63
-- **最后修改**：2026-10-03 09:19:46
+- **最后修改**：2026-10-03 10:38:39
 - **说明**：
 
 ## 1. 八条铁律
@@ -9,15 +9,15 @@
 1. **单一来源** —— 颜色/间距只在 `app/src/platform/theme/`（**唯一代码入口**；**例外：品牌官方色**，
    见 `10-icons.md`）·
    改色先改设计规范 `design/tokens.less`，再跑 `scripts/build-css.mjs`）·
-   接口类型只在 `app/src/data/`（从旧仓库 `openapi/` 搬入按需子集）·
+   接口类型只在 `app/src/data/`（**手写强类型**）·
    **文案只在语言包**（谁的词跟谁走：feature 私域 `app/src/features/<域>/locales/` · 组件私域 `app/src/components/<名>/locales/` ·
    共用词 `app/src/locales/`，见 `08-i18n.md`）。不许第二份。
 2. **零反向依赖** —— 不 `import '@yaoapp/cui'`（旧包）。旧包不升级 · 不复活 · 不删。
 3. **依赖单向** —— 只能上层依赖下层（§2）；下层不引上层，同层不互相 import 业务件。
-4. **宿主是边界** —— `window.$app` / `window.$global` 只在平台层碰一次，之后以类型化接口向上暴露。
+4. **宿主是边界** —— 客户端类型与宿主能力**只在平台层读一次**（`platform/client/`），之后以类型化接口向上暴露。
 5. **禁硬编码** —— 颜色 / 间距 / 圆角 / 字号**与用户可见文字**不写字面量（系统色与品牌官方色除外，见 `09-theme.md` / `10-icons.md`）。
 6. **全称命名** —— 不缩写（`btn` → `button`）；文件名 kebab-case。
-7. **平台差异走适配器** —— 宿主 / `/iframe` 无壳 / 桌面三端的差异由适配器接口注入（导航 · 存储 · 主题）；不许散落 `if (isDesktop)`。
+7. **平台差异走能力开关** —— Web 与 Desktop 的差异经 `platform/client/` 的能力开关暴露；不许散落 `if (isDesktop)`。
 8. **边界由机器强制** —— 层间方向必须有会让 CI 失败的规则（`03-boundaries.md` §4 · `13-quality-gates.md`）。
 
 ## 2. 分层、落位与依赖
@@ -39,7 +39,7 @@
     ↑
   数据层  app/src/data/         openapi 客户端 · 取数钩子 · 流式通道
     ↑
-  平台层  app/src/platform/     宿主全局 · **路由机制与挂载** · 主题注入 · 运行时壳
+  平台层  app/src/platform/     客户端类型与能力 · **路由机制与挂载** · 主题注入 · 运行时壳
 ```
 
 箭头 = 允许的依赖方向（上层可依赖下层）。
@@ -141,27 +141,32 @@ app/src/features/inbox/
 
 ### 2.5 数据层
 
-**全站只有这一层发请求。**
+**只放接口类型与取数钩子**；**请求一律经 `platform/transport/`**。
 
 ```
 app/src/data/
-├── openapi/client.ts            fetch 封装（cookie + CSRF + 错误归一）
-├── openapi/inbox.ts             某域的接口方法
-├── hooks/use-request.ts         加载 / 错误 / 取消 / 重试的唯一实现
-└── stream/session-events.ts     SSE 与 WebSocket 通道
+├── <域>.ts                      该域的接口类型（手写强类型）
+└── hooks/use-request.ts         加载 / 错误 / 取消 / 重试的唯一实现
 ```
 
 ### 2.6 平台层
 
-**只有这一层碰宿主全局**；三端差异做成适配器，上层只拿接口。
+**宿主差异只在这一层消化**；上层只拿接口，不碰宿主。构成见 `15-platform.md` §2。
 
 ```
 app/src/platform/
-├── host/globals.ts              window.$app / $global 的类型化封装与初始化
-├── navigation/adapter.ts        导航适配器（宿主 / 无壳 / 桌面各一实现）
-├── theme/theme.store.ts         主题状态（写根元素 data-theme）
-├── utils/                       纯函数 · 常量 · 类型（不依赖上层 · 所有层可用）
-└── mount.tsx                    挂载入口
+├── manifest.json        构建清单（客户端类型 · 版本 · 构建信息）
+├── theme/               主题状态（写根元素 data-theme）
+├── router/              路由机制与挂载
+├── i18n/                语言包加载与解析
+├── icons/               图标产物与底座挂载
+├── client/              客户端类型 · 能力开关 · UA · 客户端标识
+├── service/             服务信息（well-known）
+├── credential/          凭据的存取与消费
+├── transport/           对外通信的唯一出口
+├── bridge/              桌面端宿主能力的唯一接入入口
+├── webproxy/            agent sandbox 服务访问代理的域名构造规则
+└── utils/               纯函数 · 常量 · 类型（不依赖上层 · 所有层可用）
 ```
 
 ### 2.7 文件名里的角色
