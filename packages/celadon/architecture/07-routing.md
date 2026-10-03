@@ -1,13 +1,13 @@
 # 07 · 路由
 
 - **版本**：v1.41
-- **最后修改**：2026-10-03 11:23:35
+- **最后修改**：2026-10-03 11:52:20
 - **说明**：地址语法 · 谁说了算 · `routes/` 的结构 · 文档标题
 
 ## 1. 规则
 
 - **React Router 库模式**：`react-router@^8`，**不装 `@react-router/dev`**（不用框架模式）。
-- **不用 hash 路由**：三端都提供真实路径空间；hash 会让宿主跳转 · 分享 · 埋点都多带一层。
+- **不用 hash 路由**：两端都提供真实路径空间；hash 会让宿主跳转 · 分享 · 埋点都多带一层。
   代价是**托管方要配 SPA fallback**（未知路径回 `index.html`，见 `04-host-integration.md`）。
 - **一个面板一个具名参数**，别在参数值里再塞分隔符（`?sideThread=456` ✓ · `?side=thread:456` ✗）。
 - **默认值不进 URL**（默认的 `activeTab=list` 之类删掉），链接才短。
@@ -29,8 +29,8 @@
 
 | 是什么 | 放哪 | 例 |
 | --- | --- | --- |
-| **主对象** | path | `/inbox/123` |
-| **界面表面** | **path 第一段** | `/side/inbox/123` —— 同一个对象开在侧边 |
+| **主对象** | 段之下的 path | `/<段>/inbox/123` |
+| **侧边** | 段之下的一层前缀 | `/<段>/side/inbox/123` —— 同一个对象开在侧边 |
 | **面板里打开的对象** · 选中项 · 环境态 | **query（具名）** | `?sideThread=456` · `?activeTab=files` |
 
 - **主区没有前缀**：就在段之下（`/<段>/world/w1`）。
@@ -104,12 +104,11 @@
 
 ```
 app/src/routes/            路由（只装配，不写业务）
-├── routes.tsx             路由表：URL → 元素
+├── routes.tsx             路由表：URL → 元素（主区一支 · 侧边一支）
 ├── surface-layout.tsx     表面布局：主区（段之下）· 侧边（side 前缀）
-├── surface-layout.less    布局样式
-└── surfaces.ts            useSurface：读当前表面
+└── surface-layout.less    布局样式
 
-app/src/platform/router/   机制（三端 basename 从这里注入）
+app/src/platform/router/   机制（两端 basename 从这里注入）
 ├── router.tsx             createBrowserRouter + RouterProvider
 ├── basename.ts            basename 适配器（取 Vite 的 base）
 ├── use-page-title.ts      文档标题跟路由走
