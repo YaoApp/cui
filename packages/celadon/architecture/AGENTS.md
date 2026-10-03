@@ -1,7 +1,7 @@
 # architecture/AGENTS · 任务索引
 
 - **版本**：v1.2
-- **最后修改**：2026-10-03 10:25:59
+- **最后修改**：2026-10-03 10:40:38
 - **说明**：任务与分册对应 · 动手前的约束 · 编写测试 · 开发与验证 · 交付要求
 
 > 本文回答一个问题：**拿到一项任务，该读哪一册、有哪些约束、做完如何验证。**
@@ -15,7 +15,7 @@
 | 修改颜色 / 间距 / 字号 | [09](09-theme.md) → [14](14-testing.md) | 只改 `design/tokens.less`，再执行 `node scripts/build-css.mjs`；代码内不得出现字面值 |
 | 新增图标 / 品牌 | [10](10-icons.md) → [14](14-testing.md) | 图标改 `design/icons/manifest.json`，再执行 `node scripts/build-icons.mjs`；界面图标用 `<Icon>`，品牌标识用 `<BrandMark>` |
 | 新增 / 修改组件 | [03](03-boundaries.md) → [14](14-testing.md) | 控件一律包装 `@base-ui/react`（置于 `components/base/`）；不得裸写 `<button>` / `<select>`；目录内的 `.less` 必须被同目录 `.tsx` 引入 |
-| 接入后端 / 取数 / 流式 | [05](05-data-and-api.md) · [04](04-host-integration.md) → [14](14-testing.md) | 传输 · 鉴权 · 取数钩子 · 流式的形状见 05；宿主挂载与代理见 04 |
+| 接入后端 / 取数 / 流式 | [05](05-data-and-api.md) · [15](15-platform.md) · [04](04-host-integration.md) → [14](14-testing.md) | 接口类型与取数钩子见 05；凭据 · 传输 · 客户端底座见 15；宿主挂载与代理见 04 |
 | 修改地址栏 / 深链 | [07](07-routing.md) · [06](06-state.md) → [14](14-testing.md) | 对象在路径、表面在首段、面板在具名查询参数；URL 只在动作中写入，不在 `useEffect` 中写入 |
 | 新增语言 / 修改文案 | [08](08-i18n.md) → [14](14-testing.md) | 语言包随代码落位；四语齐备（基准 `zh-CN` · `en-US` · `zh-TW` · `ja`）；代码内不得出现硬编码中文文案 |
 | 编写测试 | [14](14-testing.md) | 单元用例与源文件同目录；浏览器与拟人用例置于 `features/<域>/tests/`；一个场景一个文件 |
