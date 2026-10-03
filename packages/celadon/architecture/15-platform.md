@@ -1,7 +1,7 @@
 # 15 · 平台层
 
-- **版本**：v1.30
-- **最后修改**：2026-10-03 09:33:59
+- **版本**：v1.31
+- **最后修改**：2026-10-03 09:35:21
 - **说明**：平台层：构成与落位 · 服务信息（well-known）· 会话与鉴权 · 运行环境 · 数据层
 
 ## 1. 规则
@@ -197,8 +197,3 @@
 
 - 层与落位按 `14-testing.md`：纯函数与公共态用**单元层**；**跨宿主差异用浏览器层**
   （改构建清单的取值，把 web 与 desktop 两种情形各跑一遍）；真实登录与真实数据用**拟人层**。
-- **测试后端**：`http://<dev-backend-host>:5099`（**绝不可指向 `127.0.0.1:5099`** —— 生产，也是本 Agent 自身运行时）。
-  测试接口（`--test-mode` 开启时注册，实现见 `trheyi/yao` 的 `openapi/testmode/testmode.go`）：
-  `POST /v1/test/login/token`（体 `{"user":"<email>"}` → `access_token`）· `POST /v1/test/login/web` ·
-  `POST /v1/test/server-key` · `GET /v1/test/users` · `GET /v1/test/teams` · `GET /v1/test/otp?code=` · `GET /v1/test/captcha?id=`。
-- **测试里只许用 token 方式登录**（与生产同一条路径），不测安全 Cookie。
