@@ -1,7 +1,7 @@
 # 03 · 数据层（`data/`）
 
-- **版本**：v0.3（计划）
-- **最后修改**：2026-10-04 07:17:25
+- **版本**：v0.4（计划）
+- **最后修改**：2026-10-04 07:19:10
 - **说明**：分**两部分** —— **0 统一抽象**（先把层做出来）· **1 业务接口清单**（要迁移的，逐域列表 + **WebSocket/流式单列**）
 - **事实基础**：[data-legacy-openapi.md](data-legacy-openapi.md)（旧 `openapi/` 71 文件现状报告 · 临时）
 
@@ -22,7 +22,7 @@
 | 0.6 | **出口接线** | 一切经 `platform/transport/`；**上传/下载/SSE/WS 各归哪一档**（`17 §2.2` 的三档：`api`/`download`/`stream`）| `platform/transport/` | ⏸（卡 `17 §2.2` 两档未做）|
 | 0.7 | **类型的组织** | 一域一处；类型与方法同文件还是分开；子域（如 `agent/robot`）怎么放（旧：`<域>/types.ts` + `<域>/api.ts` + barrel，且**反向 import 页面层 6 处**）| `app/src/data/<域>/` | ⏸ |
 
-**验收（第一阶段）**：`05 §7` 的未定项逐条**变成已定**（每条有落点）· `data/` 的类型新增**零 `any`** · `features/`/`components/`/`routes/` 里**零** `fetch` / `EventSource` / `new WebSocket` · 四态只有一处实现 · **先拿一个域做端到端样板**（建议 `user`，与 `credential/` 联动最紧）。
+**验收（第一阶段）**：`05 §7` 的未定项逐条**变成已定**（每条有落点）· `data/` 的类型新增**零 `any`** · `features/`/`components/`/`routes/` 里**零** `fetch` / `EventSource` / `new WebSocket` · 四态只有一处实现 · **先拿 `helloworld` 做端到端样板**（它就是对接脚手架，见 §1.1），再拿 `user` 做真实域（与 `credential/` 联动最紧）。
 
 ## 1. 业务接口清单（第一阶段的另一半）
 
@@ -45,8 +45,8 @@
 | app | `app.ts`（GetMenu）| 1 | 31 | **改写** | 反向 import `@/types`（`:3`）|
 | captcha | `captcha.ts` | ~2 | 80 | **改写** | 几乎可搬 |
 | file | `file.ts` | ~12 | 655 | **改写** | 分片协议留、实现重写（见 §1.2/1.4）|
-| ~~helloworld~~ | `helloworld.ts` | 1 | 32 | **丢弃** | 演示端点 |
-| **小计** | **26 个 api 文件** | **≈275** | **≈3,100** | | （已减去 4 个弃用域：kb · job · trace · agent/robot）|
+| **helloworld** | `helloworld.ts` | 2–3 | 32 | **保留（脚手架）** | **对接时的脚手架**：联通/自检冒烟用；新层拿它做**第一个端到端样板**（跑通类型 → 出口 → 钩子 → 页面）|
+| **小计** | **27 个 api 文件** | **≈277** | **≈3,130** | | （已减去 4 个弃用域；helloworld 保留作脚手架）|
 
 ### 1.2 **WebSocket / 流式接口**（别漏，共 6 条通道）
 
@@ -75,7 +75,7 @@
 
 ### 1.4 明确丢弃（实现不要，只留知识）
 
-`openapi.ts`(632) · `headers.ts`(66) · `lib/utils.ts`(52) · 19 个 barrel/shim(67) · `events/eventStore.ts`(91) · `helloworld.ts`(32)
+`openapi.ts`(632) · `headers.ts`(66) · `lib/utils.ts`(52) · 19 个 barrel/shim(67) · `events/eventStore.ts`(91)
 另：**同一件事的多份实现**——**4 处下载**（`file.ts:206` · `hooks/useFileDownload.ts` · `utils/fileWrapper.ts`）· **2 处上传**（`file.ts:353,519`）· **2 套流式**（机器人/trace 已弃用） · **2 条 `buildWSUrl`**：**实现丢，协议知识留**。
 
 ### 1.5 清单顺带要定掉的（**回写 `05 §7`**）
