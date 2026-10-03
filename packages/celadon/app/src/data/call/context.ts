@@ -13,21 +13,21 @@ import { outboundContext } from '@/platform/client/context'
 import { clientId as currentClientId } from '@/platform/client/client-id'
 import { serviceBase } from '@/platform/service'
 
-/** 一次出站调用要带的全部上下文。 */
-export type CallContext = OutboundContext & {
+/** 一次出站调用要带的全部上下文（在 `call/` 里，所以就叫 `Context`）。 */
+export type Context = OutboundContext & {
   /** 客户端标识（`web-…` / `desk-<机器码>`，见 `15 §5`）—— 与 `OutboundContext.client`（web/desktop）不是一回事 */
   clientId: string
   /** 服务基址（同源时为空串，见 `platform/service`） */
   service: string
 }
 
-export function callContext(inputs: { locale: string; theme: OutboundContext['theme'] }): CallContext {
+export function callContext(inputs: { locale: string; theme: OutboundContext['theme'] }): Context {
   const facts = outboundContext(inputs)
   return { ...facts, clientId: currentClientId(), service: serviceBase() }
 }
 
 /** **草稿**：与后端对齐后固化（`X-Yao-*` 沿用旧服务的习惯）。 */
-export function contextHeaders(ctx: CallContext): Record<string, string> {
+export function contextHeaders(ctx: Context): Record<string, string> {
   return {
     'Accept-Language': ctx.locale,
     'X-Yao-Client': ctx.clientId,
@@ -37,6 +37,6 @@ export function contextHeaders(ctx: CallContext): Record<string, string> {
 }
 
 /** 少数接口把语言放 query（旧代码的 chat 就是这样）。 */
-export function contextQuery(ctx: CallContext): Record<string, string> {
+export function contextQuery(ctx: Context): Record<string, string> {
   return { locale: ctx.locale }
 }
