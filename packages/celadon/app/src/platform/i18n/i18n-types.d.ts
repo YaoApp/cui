@@ -22,6 +22,7 @@ export type I18nKey =
   | 'bridge.error.theme.expectedLightOrDark'
   | 'bridge.error.theme.readFailed'
   | 'bridge.error.theme.writeFailed'
+  | 'bridge.error.transport.crossOrigin'
   | 'bridge.error.transport.network'
   | 'bridge.error.transport.parse'
   | 'bridge.error.transport.status'
@@ -72,9 +73,13 @@ export type I18nKey =
   | 'verify.capabilities'
   | 'verify.client'
   | 'verify.credential'
+  | 'verify.egress'
+  | 'verify.egressHint'
   | 'verify.filePick'
   | 'verify.folderPick'
   | 'verify.hintClient'
+  | 'verify.hostAbilities'
+  | 'verify.hostHint'
   | 'verify.language'
   | 'verify.list'
   | 'verify.localIps'
@@ -145,6 +150,7 @@ declare module 'i18next' {
         'bridge.error.theme.expectedLightOrDark': string
         'bridge.error.theme.readFailed': string
         'bridge.error.theme.writeFailed': string
+        'bridge.error.transport.crossOrigin': string
         'bridge.error.transport.network': string
         'bridge.error.transport.parse': string
         'bridge.error.transport.status': string
@@ -195,9 +201,13 @@ declare module 'i18next' {
         'verify.capabilities': string
         'verify.client': string
         'verify.credential': string
+        'verify.egress': string
+        'verify.egressHint': string
         'verify.filePick': string
         'verify.folderPick': string
         'verify.hintClient': string
+        'verify.hostAbilities': string
+        'verify.hostHint': string
         'verify.language': string
         'verify.list': string
         'verify.localIps': string
