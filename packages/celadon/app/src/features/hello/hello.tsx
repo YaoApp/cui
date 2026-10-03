@@ -6,6 +6,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { Icon } from '@/components/base/icon'
 import { BrandMark, type BrandId } from '@/components/base/brand-mark'
 import { useTranslation } from '@/platform/i18n'
+import { useClientInfo } from '@/platform/client'
 import { useThemeStore } from '@/platform/theme/theme.store'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
@@ -42,6 +43,19 @@ export function HelloPage() {
   // 应用级导航项在 platform/utils 里存的是 key，显示前在这里翻成当前语言
   const navItems = navWithActive(pathname).map((item) => ({ ...item, label: t(item.label) }))
   usePageTitle(t('hello.title'))
+  /* 客户端自述：**Web 与桌面共用这一份显示**，差别只在"宿主"那一格（见 platform/client）。
+     在平台层的 hook 里问，组件只负责显示 —— 组件不自己发请求（03-boundaries §4）。 */
+  const client = useClientInfo()
+  const clientType = client
+    ? client.client === 'desktop'
+      ? t('hello.clientDesktop')
+      : t('hello.clientWeb')
+    : t('hello.loading')
+  const hostText = client
+    ? client.host.available
+      ? t('hello.hostReady', { version: client.host.version })
+      : t('hello.hostNone')
+    : t('hello.loading')
 
   return (
     <div className="hello">
@@ -54,6 +68,17 @@ export function HelloPage() {
         <div className="hello__actions">
           <ThemeToggle theme={theme} onSelect={setTheme} />
         </div>
+        <section className="hello__row" aria-label={t('hello.client')}>
+          <span className="hello__client">
+            {t('hello.clientType')}：{clientType}
+          </span>
+          <span className="hello__client">
+            {t('hello.namespace')}：{client?.namespace ?? ''}/
+          </span>
+          <span className="hello__client">
+            {t('hello.host')}：{hostText}
+          </span>
+        </section>
         <section className="hello__row" aria-label={t('hello.brands')}>
           {BRAND_SAMPLE.map((name) => (
             <span className="hello__cell" key={name}>
