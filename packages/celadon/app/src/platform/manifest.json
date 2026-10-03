@@ -1,0 +1,9 @@
+{
+  "version": "2.0.0",
+  "build": { "commit": "dev", "at": "dev", "by": "dev" },
+  "client": "web",
+  "os": "",
+  "artifact": "cui",
+  "yao_version": "",
+  "tai_version": ""
+}

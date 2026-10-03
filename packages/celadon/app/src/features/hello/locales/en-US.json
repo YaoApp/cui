@@ -13,5 +13,9 @@
   "hello.host": "Host",
   "hello.hostNone": "none (a browser has no host)",
   "hello.hostReady": "available (version {{version}})",
-  "hello.loading": "reading"
+  "hello.loading": "reading",
+  "hello.os": "System",
+  "hello.browser": "Browser",
+  "hello.version": "Version",
+  "hello.clientId": "Client id"
 }

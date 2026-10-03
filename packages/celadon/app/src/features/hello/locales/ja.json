@@ -13,5 +13,9 @@
   "hello.host": "ホスト",
   "hello.hostNone": "なし（ブラウザにホストはない）",
   "hello.hostReady": "利用可（バージョン {{version}}）",
-  "hello.loading": "読み込み中"
+  "hello.loading": "読み込み中",
+  "hello.os": "システム",
+  "hello.browser": "ブラウザ",
+  "hello.version": "バージョン",
+  "hello.clientId": "クライアント ID"
 }

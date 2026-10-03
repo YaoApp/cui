@@ -12,8 +12,10 @@ export type I18nKey =
   | 'header.refresh'
   | 'hello.brands'
   | 'hello.brandsOther'
+  | 'hello.browser'
   | 'hello.client'
   | 'hello.clientDesktop'
+  | 'hello.clientId'
   | 'hello.clientType'
   | 'hello.clientWeb'
   | 'hello.host'
@@ -22,9 +24,11 @@ export type I18nKey =
   | 'hello.icons'
   | 'hello.loading'
   | 'hello.namespace'
+  | 'hello.os'
   | 'hello.refreshed'
   | 'hello.title'
   | 'hello.trial'
+  | 'hello.version'
   | 'localeSwitch.enUS'
   | 'localeSwitch.ja'
   | 'localeSwitch.label'
@@ -75,8 +79,10 @@ declare module 'i18next' {
         'header.refresh': string
         'hello.brands': string
         'hello.brandsOther': string
+        'hello.browser': string
         'hello.client': string
         'hello.clientDesktop': string
+        'hello.clientId': string
         'hello.clientType': string
         'hello.clientWeb': string
         'hello.host': string
@@ -85,9 +91,11 @@ declare module 'i18next' {
         'hello.icons': string
         'hello.loading': string
         'hello.namespace': string
+        'hello.os': string
         'hello.refreshed': string
         'hello.title': string
         'hello.trial': string
+        'hello.version': string
         'localeSwitch.enUS': string
         'localeSwitch.ja': string
         'localeSwitch.label': string
