@@ -26,6 +26,7 @@ import { bridge, bridgeErrorText, type BridgeResult } from '@/platform/bridge'
 import { credential } from '@/platform/credential'
 import { REDACTED, shouldRedact } from './redact'
 import { transport } from '@/platform/transport'
+import { loadServiceInfo } from '@/platform/service'
 
 type Line = { label: string; text: string }
 
@@ -187,6 +188,15 @@ export function VerifyPage() {
           <input className="input" value={path} onChange={(event) => setPath(event.target.value)} size={32} />
         </label>{' '}
         <Button onClick={() => run('reveal', () => bridge.system.reveal(path))}>{t('verify.reveal')}</Button>
+      </p>
+
+      {/* 服务信息：**第一次需要时读一次**并缓存（15 §3）。**按需**——按钮点了才读，
+          所以纯静态托管（演示/拟人）不会平白多出 404 */}
+      <h2 className="verify__heading">{t('verify.serviceInfo')}</h2>
+      <p className="verify__tools">
+        <Button onClick={() => run('service.info', () => loadServiceInfo(10_000))}>
+          {t('verify.serviceInfoRead')}
+        </Button>
       </p>
 
       {/* 出海口：**只有 platform/transport 发请求**（见 17-transport.md）。

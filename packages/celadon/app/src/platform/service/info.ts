@@ -1,4 +1,4 @@
-/* **服务信息**（`architecture/15-platform.md` §3）：**启动时读一次** `GET /.well-known/yao`，结果进缓存。
+/* **服务信息**（`architecture/15-platform.md` §3）：**第一次需要时读一次** `GET /.well-known/yao`，结果进缓存。
  *
  * 三条按架构来：
  *   · **相对路径**：开发期由 dev server 代转（`16-development.md` §1/§3），生产同源，桌面由宿主给基址

@@ -99,6 +99,8 @@ export type I18nKey =
   | 'verify.reveal'
   | 'verify.secret'
   | 'verify.service'
+  | 'verify.serviceInfo'
+  | 'verify.serviceInfoRead'
   | 'verify.themeDark'
   | 'verify.themeLight'
   | 'verify.themeRead'
@@ -230,6 +232,8 @@ declare module 'i18next' {
         'verify.reveal': string
         'verify.secret': string
         'verify.service': string
+        'verify.serviceInfo': string
+        'verify.serviceInfoRead': string
         'verify.themeDark': string
         'verify.themeLight': string
         'verify.themeRead': string
