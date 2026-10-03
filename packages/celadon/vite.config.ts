@@ -55,15 +55,9 @@ export default defineConfig(({ mode }) => {
           {
             target: proxyTarget,
             changeOrigin: true,
-            ws: true, // 长连接（16 §1）
-            // SSE：**响应**头（不是请求头）—— 声明事件流并关掉缓冲
-            configure: (proxy) => {
-              proxy.on('proxyRes', (proxyRes) => {
-                proxyRes.headers['cache-control'] = 'no-cache'
-                proxyRes.headers['content-type'] = 'text/event-stream'
-                proxyRes.headers['x-accel-buffering'] = 'no'
-              })
-            },                                   // 长连接（16 §1）
+            ws: true, // 长连接（16 §1）；**SSE 的响应头等接 SSE 时按 §1 三头一起加**
+            // （上一版无条件给所有 `/v1` 盖 `text/event-stream`，那会污染普通接口）
+                                  // 长连接（16 §1）
 
           },
         ]),
