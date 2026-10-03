@@ -1,7 +1,7 @@
 # 15 · 平台层
 
-- **版本**：v1.9
-- **最后修改**：2026-10-03 08:50:27
+- **版本**：v1.10
+- **最后修改**：2026-10-03 08:54:02
 - **说明**：平台层：构成与落位 · 服务信息（well-known）· 会话与鉴权 · 运行环境 · 数据层
 
 ## 1. 规则
@@ -43,7 +43,8 @@
 | `license` | 能力开关（`valid` / `edition`）|
 | `tao` | 注册 / 升级入口 |
 | `developer` | 关于页署名 |
-| `disable_system_setting` | 是否禁掉「系统设置」入口（客户端模型里有此字段）|
+| **`disable_system_setting`** | **V2 消费**：为 `true` 时**禁掉「系统设置」入口** |
+| **`cui_only`**（**预留，待后端实现**）| **纯 CUI 站点模式**：为 `true` 时管理端相关接口全部关闭（见 §3.1）|
 | `dashboard` | 后台入口（外链）|
 
 **不消费的字段**：
@@ -53,6 +54,15 @@
 - **`grpc` / `grpc_tls` / `grpc_tls_ca`** —— **不是给前端用的**：**Desktop 也走 http**，gRPC **不暴露到公网**。
 
 - **读失败必须降级**：拿不到 well-known 时应用仍要能起（用默认 `openapi: '/v1'`），**不许白屏**。
+
+### 3.1 服务端关掉了能力时（`cui_only` / `disable_system_setting`）
+
+- **以响应为准，不靠猜**：能力开关只认 well-known（以及接口返回），**前端不自行假设**。
+- **`cui_only: true`（纯 CUI 站点）**：管理端相关的**接口全部关闭**（后端负责）；前端**不进入那些界面**，
+  访问到相关地址时给**关闭提示页**（说明该站点只提供 CUI），**不是白屏、不是报错弹窗**。
+- **`disable_system_setting: true`**：只关「系统设置」入口，其余功能照常；入口**不渲染**（而不是渲染后报错）。
+- **提示页是界面，不是平台逻辑**：`platform/` 只把开关读进公共态，**提示页由路由/界面层给**。
+- **默认值**：字段缺失按 **能力开启**（`false`）处理，保证老服务端仍可用。
 
 ## 4. 凭据与鉴权（`credential/`）
 
@@ -150,12 +160,3 @@
   `POST /v1/test/login/token`（体 `{"user":"<email>"}` → `access_token`）· `POST /v1/test/login/web` ·
   `POST /v1/test/server-key` · `GET /v1/test/users` · `GET /v1/test/teams` · `GET /v1/test/otp?code=` · `GET /v1/test/captcha?id=`。
 - **测试里只许用 token 方式登录**（与生产同一条路径），不测安全 Cookie。
-
-## 8. 待定项（本稿需你确认的点）
-
-1. **`data/` 的类型来源**：**已定 —— 手写强类型**（**依据**：服务端**没有**机器可读的 openapi 文档 ——
-   well-known 的 `openapi` 字段只是**接口前缀**；实测 `/v1/openapi.json` · `/openapi.json` · `/v1/doc` · `/.well-known/openapi.json`
-   等路径**均 404**。与 `cui-android` 的 `data class` 模型一致；详见 §6。）
-2. **命名**：**已定 —— `session/` 改名 `credential/`**（实质是令牌的存储与消费，各宿主不同）；
-   `service/` 保留（服务信息）。
-3. **`disable_system_setting` 要不要进 V2**：android 的 well-known 模型里有，V2 是否消费？
