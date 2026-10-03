@@ -15,7 +15,7 @@ vi.mock('@/platform/credential', () => ({
   credential: {
     carrier: () => 'os-store',
     managedByApp: () => true,
-    read: (...args: unknown[]) => read(...args),
+    read: (service: string) => read(service),
     write: vi.fn(async () => ({ ok: true, value: true })),
     remove: vi.fn(async () => ({ ok: true, value: true })),
     list: vi.fn(async () => ({ ok: true, value: [] })),
@@ -34,7 +34,7 @@ vi.mock('@/platform/bridge', async (importOriginal) => {
   }
 })
 
-import { VerifyPage } from '../verify'
+import { VerifyPage } from './verify'
 
 describe('the verification page', () => {
   beforeEach(() => read.mockClear())
