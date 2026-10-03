@@ -129,6 +129,14 @@
 | 3 | Web 侧"清凭据"的落地方式（Cookie 是 HttpOnly，前端清不掉）→ **性质是服务接口**（随登出接口定，不是平台地基）| 无（不卡平台）|
 | 4 | `sandbox` 域是否属于前端要消费的接口面 | `data/` |
 
+## 3.5 本批审核（`04 · REVIEW` 的闭环）
+
+**已验收**（2026-10-03 23:20 · 隔离复核者第六轮）：门禁与用例经 `pnpm lint` · `pnpm check` · `pnpm test` 与
+**变异**（关键字句改错必须让用例变红）双向核对，全链 `checkers 81/81 · 212 用例 · browser 26 · persona 2/2`。
+
+- 报告：`app/logs/2026-10-03/review-2320.md`（前五轮 `review-2232/2237/2248/2255/2304`）
+- 遗留 4 条与"何时处理"逐条写在报告末尾 —— **没有"以后再说"**。
+
 ## 4. 门禁（随实现长，不预先写全）
 
 - [ ] **组件 / feature 不发请求**：`features/` · `components/` · `routes/` 里不许出现 `fetch` / `EventSource` / `new WebSocket`（等 `transport/` 落地后加检查器，配正反样本）
