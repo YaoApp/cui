@@ -15,6 +15,7 @@ const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 /** 允许缺失的引用 → 原因。 */
 const ALLOW = new Map([
   ['app/src/data/', '规划中未建：架构文档描述目标结构（见 plan/01 §3）'],
+  ['app/src/platform/env/', '规划中未建：15-platform.md 描述的 platform 子目录，尚未落地'],
 ])
 /** 允许出现在文档里、但不是本包 script 的命令。 */
 const ALLOW_COMMANDS = new Set(['install', 'add', 'dlx', 'exec', 'run'])
