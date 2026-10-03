@@ -1,7 +1,7 @@
 # 04 · 制品与挂载（硬约束）
 
 - **版本**：v1.31
-- **最后修改**：2026-10-03 11:58:06
+- **最后修改**：2026-10-03 11:58:52
 - **说明**：制品构成 · 宿主挂载 · 放到哪（引擎 / 独立 / 桌面）· SPA fallback · 由命名空间推导的工程约束
 
 ## 制品构成
@@ -94,6 +94,52 @@ server {
     }
 }
 ```
+
+### 独立部署（Cloudflare）
+
+Cloudflare 上以 **Pages**（静态托管）加 **Functions**（接口回源）为例；若引擎本身已在同一域名之后，
+则只需按路径分发，不必回源。
+
+**产物布局**：Pages 从输出根提供文件，须在其下放一层**命名空间目录**：
+
+```
+输出根/
+└── app/                 命名空间目录（与构建时的 CUI_BASE 一致）
+    ├── index.html
+    └── _assets/
+```
+
+**SPA fallback 与缓存**：`_redirects` 与 `_headers` 各一份。静态文件先于规则命中，故存在的资源直出，
+缺失的资源由 `_redirects` 显式判为 404。
+
+```
+# _redirects —— 缺失的静态资源仍 404；其余回退到 index.html
+/app/_assets/*  /404.html        404
+/app/*          /app/index.html  200
+```
+
+```
+# _headers —— 产物长缓存，index.html 不缓存
+/app/_assets/*
+  Cache-Control: public, max-age=31536000, immutable
+/app/index.html
+  Cache-Control: no-cache
+```
+
+**接口回源**：Pages Functions 将接口路径同源转发至引擎（示意，按实际域名改写）：
+
+```ts
+// functions/v1/[[path]].ts
+export const onRequest: PagesFunction<{ ENGINE: string }> = ({ request, env }) => {
+  const url = new URL(request.url)
+  url.protocol = 'https:'
+  url.hostname = env.ENGINE        // 例：engine.example.com
+  return fetch(new Request(url, request))
+}
+```
+
+**长连接**：接口路径**不得进入缓存**（Cache Rules 中排除）；SSE 依赖响应头 `Cache-Control: no-cache, no-transform`
+（见上表），WebSocket 由 Cloudflare 代理转发，同样要求引擎可达、不可缓存。
 
 ## 禁止
 
