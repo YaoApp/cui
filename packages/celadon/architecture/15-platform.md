@@ -1,7 +1,7 @@
 # 15 · 平台层
 
-- **版本**：v1.34
-- **最后修改**：2026-10-03 09:58:51
+- **版本**：v1.35
+- **最后修改**：2026-10-03 10:01:49
 - **说明**：平台层：构成与落位 · 服务信息（well-known）· 会话与鉴权 · 运行环境 · 数据层
 
 ## 1. 规则
@@ -142,7 +142,8 @@
 | **Web** | **不落盘** | 凭据在服务端会话（HttpOnly Cookie）|
 | **Desktop** | **系统凭据库** | macOS 登录钥匙串 · Windows 凭据管理器 · Linux libsecret |
 
-- **做法**：Rust 侧依赖 **`keyring` crate**（4.x，按目标平台自动选后端），**自己包一层 Tauri command** 给 webview 调。
+- **做法**：Rust 侧依赖 **`keyring` crate**（4.x · 仓库 `open-source-cooperative/keyring-rs`，按目标平台自动选后端），
+  **自己包一层 Tauri command** 给 webview 调。
   Tauri 官方插件里**没有**凭据库插件；`tauri-plugin-store` 是明文 JSON，凭据不放这里。
 - **要点是"解密密钥不随密文走"**：密文拷到另一台机器、或同一台机器的另一个系统账号，**解不开**。
   这就是"凭据被拷走、在别处用不了"的来源。
