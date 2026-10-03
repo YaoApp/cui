@@ -16,7 +16,15 @@ describe('navWithActive', () => {
     expect(navWithActive('/worldwide').find((i) => i.href === '/world')?.active).toBe(false)
   })
 
-  it('ships two destinations', () => {
-    expect(APP_NAV.map((i) => i.href)).toEqual(['/hello', '/world'])
+  it('ships the destinations the application has', () => {
+    // 加页面就加在这里 —— 这条断言的意义是"导航不是随手长的"
+    expect(APP_NAV.map((i) => i.href)).toEqual(['/hello', '/world', '/verify'])
+  })
+
+  it('gives every destination an icon and a translation key', () => {
+    for (const item of APP_NAV) {
+      expect(item.icon, item.href).toBeTruthy()
+      expect(item.label).toMatch(/^nav\./)
+    }
   })
 })
