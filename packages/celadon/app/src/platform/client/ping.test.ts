@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { routerBasename } from '@/platform/router/basename'
 import { ping } from './ping'
 
 /* 两类宿主都要有用例：Web（没有宿主）与桌面（有宿主，含"命令失败"的路径）。 */
@@ -17,7 +18,8 @@ describe('ping', () => {
     const info = await ping()
     expect(info.client).toBe('web')
     expect(info.host.available).toBe(false)
-    expect(info.namespace).toBe('app')
+    // **同一来源**：命名空间必须与 router 的 basename 一字不差（不许各自读环境）
+    expect(info.namespace).toBe(routerBasename())
   })
 
   it('reports the host version when the desktop answers', async () => {

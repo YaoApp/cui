@@ -73,7 +73,7 @@ export function HelloPage() {
             {t('hello.clientType')}：{clientType}
           </span>
           <span className="hello__cell">
-            {t('hello.namespace')}：/{client?.namespace ?? ''}/
+            {t('hello.namespace')}：{client?.namespace ?? ''}/
           </span>
           <span className="hello__cell">
             {t('hello.host')}：{hostText}

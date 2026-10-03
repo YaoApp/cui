@@ -7,6 +7,8 @@
    · 宿主调用失败 = **值**，不抛：`host.available = false`
    · 只回"版本"这类**非敏感**信息；凭据永不经过这里 */
 
+import { routerBasename } from '@/platform/router/basename'
+
 export type ClientKind = 'web' | 'desktop'
 
 export type HostInfo = {
@@ -18,7 +20,7 @@ export type HostInfo = {
 
 export type ClientInfo = {
   client: ClientKind
-  /** 构建决定的命名空间（不带斜杠） */
+  /** 构建决定的命名空间（**原样取自 `routerBasename()`**，如 `/app`；根构建为空串） */
   namespace: string
   host: HostInfo
 }
@@ -33,17 +35,13 @@ function hasHost(): boolean {
   return '__TAURI_INTERNALS__' in scope || '__TAURI__' in scope
 }
 
-/** 命名空间取自构建，与 Vite 的 `base` 同一个来源（`CUI_BASE`，默认 `app`）。 */
-function namespace(): string {
-  const env = ((import.meta as unknown as { env?: Record<string, string | undefined> }).env) ?? {}
-  return (env.CUI_BASE ?? 'app').replace(/^\/+|\/+$/g, '')
-}
-
 const NO_HOST: HostInfo = { available: false, version: '' }
 
 /** 问一次"我是谁"。**永不抛**：问不到就如实说问不到。 */
 export async function ping(): Promise<ClientInfo> {
-  const ns = namespace()
+  // **命名空间只有一处来源**：`platform/router/basename.ts`（SPEC §4：Vite 的 base 与路由 basename 同值）。
+  // 各层自己读环境就会造出第二个来源，两个值能不一致（见 00-principles 铁律 1）。
+  const ns = routerBasename()
   if (!hasHost()) return { client: 'web', namespace: ns, host: NO_HOST }
 
   const invoke = (globalThis as { __TAURI__?: TauriGlobal }).__TAURI__?.core?.invoke
