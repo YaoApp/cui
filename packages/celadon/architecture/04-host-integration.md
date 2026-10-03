@@ -1,8 +1,25 @@
-# 04 · 宿主集成（硬约束）
+# 04 · 制品与挂载（硬约束）
 
 - **版本**：v1.31
-- **最后修改**：2026-10-03 11:19:05
-- **说明**：宿主挂载 · 表面段 · SPA fallback · 代理 · SSE 头
+- **最后修改**：2026-10-03 11:20:42
+- **说明**：制品构成 · 宿主挂载 · SPA fallback · 由挂载推导的工程约束
+
+## 制品构成
+
+**前端制品是 `dist/`，只有两项**：
+
+```
+dist/
+├── index.html
+└── _assets/                 产物静态目录（Vite 的 `build.assetsDir` 改名而来）
+```
+
+- **只含产物**：源码 · 日志 · 临时文件都不进（约束见下）。
+- **构建清单被构建内联进产物**：`manifest.json` 的源头在 `app/src/platform/`（见 `15-platform.md` §5.3），
+  制品里没有这个文件。
+- **桌面与其它制品形态**按 `artifact` 打包（见 `15-platform.md` §5.3 · §6.2）。
+
+## 宿主挂载
 
 | 约束 | 内容 |
 | --- | --- |
@@ -10,8 +27,8 @@
 | **无外壳模式** | `/iframe` 路径下**不渲染外壳**（chrome-less）|
 | **表面段** | 路由第一段（`main` / `side`）是**应用自己**的命名空间，在 basename 之下，不占保留前缀 |
 | **SPA fallback** | **托管方必须配**：未知路径回 `index.html`，只给导航请求（`Accept: text/html`）；缺的静态资源仍 404。路径路由的代价，预览用 `scripts/serve-dist.mjs` |
-| **代理** | 按引擎保留前缀（见 `07-routing.md` §1）转发给引擎；**WebSocket upgrade 用 `server.proxy` 的 `ws: true`** |
-| **SSE 三个头** | `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no` |
+| **代理**（**开发期**）| 按引擎保留前缀（见 `07-routing.md` §1）转发给引擎；**WebSocket upgrade 用 `server.proxy` 的 `ws: true`** |
+| **SSE 三个头**（**托管方**）| `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no` |
 
 ## 禁止
 
