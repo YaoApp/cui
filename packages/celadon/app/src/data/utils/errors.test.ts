@@ -2,21 +2,20 @@ import { describe, expect, it } from 'vitest'
 import { toFailure } from './errors'
 
 describe('toFailure', () => {
-  it('reads the old oauth shape', () => {
-    expect(toFailure(401, { error: 'invalid_grant', error_description: 'bad code' }, 'fallback')).toMatchObject({
-      code: 'invalid_grant', params: { status: 401 }, message: 'bad code',
+  it('reads the engine\'s oauth shape', () => {
+    expect(toFailure(401, { error: 'invalid_token', error_description: 'token expired' }, 'fallback')).toMatchObject({
+      code: 'invalid_token', params: { status: 401 }, message: 'token expired',
     })
   })
 
-  it('reads a nested error object', () => {
-    expect(toFailure(400, { error: { code: 'user.bad_name', message: 'too long' } }, 'fallback')).toMatchObject({
-      code: 'user.bad_name', message: 'too long',
-    })
+  it('carries the scopes the engine reports', () => {
+    const failure = toFailure(403, { error: 'insufficient_scope', required_scopes: ['kb:read'], missing_scopes: ['kb:read'] }, 'fallback')
+    expect(failure).toMatchObject({ code: 'insufficient_scope', requiredScopes: ['kb:read'], missingScopes: ['kb:read'] })
   })
 
-  it('carries field-level issues, mapped to one shape', () => {
-    const failure = toFailure(422, { code: 'user.invalid', fields: [{ field: 'name', code: 'too_long' }] }, 'fallback')
-    expect(failure.fields).toEqual([{ path: 'name', code: 'too_long' }])
+  it('tolerates the interfaces that answer with a nested or bare error', () => {
+    expect(toFailure(400, { error: { code: 'llm.bad_model', message: 'no such model' } }, 'fallback').code).toBe('llm.bad_model')
+    expect(toFailure(400, { error: 'bad_request' }, 'fallback').code).toBe('bad_request')
   })
 
   it('falls back when the service says nothing useful', () => {

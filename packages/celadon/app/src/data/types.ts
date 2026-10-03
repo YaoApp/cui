@@ -4,25 +4,22 @@
  * 业务错误往里加**字段级问题**，不另造一套。
  */
 
-/** 字段级校验问题（服务端指哪个字段错了）。 */
-export type FieldIssue = {
-  /** 字段路径（如 `name` · `profile.email`） */
-  path: string
-  /** 码，给程序；文案由应用按码翻译 */
-  code: string
-  params?: Record<string, unknown>
-}
-
-/** 一次调用的失败：传输失败 + 服务端业务错误，**同一种形状**（与 `platform/transport` 的字段一致）。 */
+/** 一次调用的失败：传输失败 + 服务端业务错误，**同一种形状**（与 `platform/transport` 的字段一致）。
+ *
+ *  **引擎的错误体是 OAuth 形状**（`yao/openapi/oauth/types/types.go:35-45`）：
+ *  `{ error, error_description, error_uri, state, reason, required_scopes, missing_scopes }` ——
+ *  **没有字段级 `fields`/`errors`**（`yao` 里字段校验信息只拼在 `error_description` 文本里），所以这里也不编。 */
 export type ApiFailure = {
   /** 码：`transport.*`（传输）或服务端/业务码（如 `user.invalid`） */
   code: string
   /** 给插值的参数（如 `{ status }`） */
   params: Record<string, unknown>
-  /** 英文诊断信息：**只给日志**，文案由应用按码翻译 */
+  /** 英文诊断信息（引擎的 `error_description`）：**只给日志**，文案由应用按码翻译 */
   message: string
-  /** 服务端认为哪些字段不对（没有就不带） */
-  fields?: readonly FieldIssue[]
+  /** OAuth 的 `required_scopes`（引擎会给） */
+  requiredScopes?: readonly string[]
+  /** OAuth 的 `missing_scopes` */
+  missingScopes?: readonly string[]
 }
 
 /** 一次调用的结果（成功的值 / 失败的形状）。 */

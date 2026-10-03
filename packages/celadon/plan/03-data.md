@@ -1,7 +1,7 @@
 # 03 · 数据层（`data/`）
 
 - **版本**：v0.13（计划）
-- **最后修改**：2026-10-04 07:43:57
+- **最后修改**：2026-10-04 07:51:28
 - **说明**：三节 —— **00 代码结构**（先列长什么样）· **0 统一抽象**（要一起定的 7 项）· **1 业务接口清单**（逐域列表 + **WebSocket/流式单列**）
 - **事实基础**：[data-legacy-openapi.md](data-legacy-openapi.md)（旧 `openapi/` 71 文件现状报告 · 临时）
 
@@ -131,8 +131,8 @@ app/src/
 
 | # | 要统一的 | 要定什么（**旧代码怎么凑合的**）| 落点 | 状态 |
 | --- | --- | --- | --- | --- |
-| 0.1 | **错误形状** | 服务端业务错误体字段 · 与 `transport/` 的 `{code,params,message}` 怎么接 · 字段级校验错误（旧：OAuth `{error,error_description}` + `http_error` 回落）| `data/` 公共类型 + `platform/transport/` | ⏸ |
-| 0.2 | **列表 / 分页** | 一个包裹形状（旧：**四套命名** `pagecount`/`pagecnt`/`totalPages`/`next+prev`）| `data/` 公共类型 | ⏸ |
+| 0.1 | **错误形状** | **已按引擎对齐**：引擎错误体就是 **OAuth 形状** `{error, error_description, error_uri, state, reason, required_scopes, missing_scopes}`（`yao/openapi/oauth/types/types.go:35-45`）——**引擎没有字段级 `fields`/`errors`**（校验信息只拼在 `error_description` 里）→ 我们**不编**结构化字段错误 | `data/types.ts` + `utils/errors.ts` | ✅ **已实现** |
+| 0.2 | **列表 / 分页** | **已按引擎对齐**：标准键 `data, page, pagesize, pagecount, next, prev, total`（`yao/openapi/agent/assistant.go:184-195`）；**KB 例外用 `pagecnt`**；chat 会话在 `group_by` 时给 `groups` 而非 `data` | `data/types.ts` + `utils/paging.ts` | ✅ **已实现** |
 | 0.3 | **成功包裹** | 有没有信封；列表 `data` 与实体 `data` 怎么区分（旧：`result.data \|\| result` 反复兜）| 同上 | ⏸ |
 | 0.4 | **出站上下文（ctx）** | 语言 / 主题 / 客户端 / 服务怎么带 —— **由统一包装 `call/` 一处注入**（旧：locale 走 query · `X-Yao-Accept` 头 · 三来源凑 CSRF，散在各处）| `data/call/context.ts`（+ `platform/`）|| ⏸ |
 | 0.5 | **取数与订阅钩子** | 加载 / 错误 / 取消 / 重试的**唯一实现**与返回形状；订阅（流式）与它并列（旧：**133 个文件手写四态**）| `data/hooks/use-request.ts`（查询 + 提交 · `SPEC.md:95`）· `use-sse.ts` · `use-socket.ts`（订阅，**按协议分开**）| ⏸ |

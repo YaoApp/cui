@@ -27,20 +27,28 @@ export function callContext(inputs: OutboundInputs): Context {
   return { ...facts, clientId: currentClientId(), service: serviceBase() }
 }
 
-/** **按旧客户端对齐**（`packages/cui/openapi/chat/api.ts:170`）：用它告诉后端"要 CUI 格式"。
- *  `cui-web` 是旧代码的取值；**桌面的取值待与后端确认**（先按 `cui-desk` 走）。
- *  **CSRF 不在这里**：`15 §4` 定了前端不碰令牌；若服务端仍要求，注入点只能在 `platform/transport/`。 */
+/** 按**引擎源码**对齐（`yao/agent/context/types.go:33-52` 的 `ValidAccepts`）：
+ *  `standard` · `cui-web` · `cui-native` · **`cui-desktop`**（不是 `cui-desk`）。
+ *  引擎取这个值的优先序：query `accept` > 头 `X-Yao-Accept` > body `metadata.accept`（`yao/agent/context/openapi.go:284-311`）。
+ *  **CSRF 不在这里**：`15 §4` 定了前端不碰令牌。 */
 export function contextHeaders(ctx: Context): Record<string, string> {
   return {
-    'X-Yao-Accept': ctx.client === 'desktop' ? 'cui-desk' : 'cui-web',
-    // 域专属的头（如聊天的 `X-Yao-Assistant` / `X-Yao-Chat`）由**该域**自己加，不塞进 ctx
+    'X-Yao-Accept': contextAccept(ctx),
+    // 引擎取语言：query `locale` > `Accept-Language`（`yao/agent/context/openapi.go:193-224`）；
+    // **登录相关接口只认 `X-Locale`/`Accept-Language`，不读 query**（`yao/openapi/user/utils.go:118-130`）
+    'Accept-Language': ctx.locale,
+    'X-Locale': ctx.locale,
     'Content-Type': 'application/json',
   }
 }
 
-/** **流式（SSE / WS）把上下文放 query —— 只能这么带**：
- *  `EventSource` 不能设自定义头，浏览器 `WebSocket` 握手也带不了自定义头；
- *  旧代码同样把语言放 query（`chat/api.ts` · `kb/api.ts:607`）。 */
+/** 流式（SSE / WS）**只能**把上下文放 query —— `EventSource` 不能设头，浏览器 WS 握手也不能；
+ *  引擎两侧都认：`accept` 与 `locale`（`yao/agent/context/openapi.go:468-540`）。
+ *  会话/助手/模型等**域专属**参数由该域自己加。 */
 export function contextQuery(ctx: Context): Record<string, string> {
-  return { locale: ctx.locale }
+  return { locale: ctx.locale, accept: contextAccept(ctx) }
+}
+
+function contextAccept(ctx: Context): string {
+  return ctx.client === 'desktop' ? 'cui-desktop' : 'cui-web'
 }

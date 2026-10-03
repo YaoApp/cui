@@ -6,7 +6,7 @@
  *   · 字段级：`{ fields: [{ path|field, code, params }] }` · `{ errors: [...] }`
  */
 
-import type { ApiFailure, FieldIssue } from '../types'
+import type { ApiFailure } from '../types'
 
 type Raw = Record<string, unknown>
 
@@ -14,27 +14,26 @@ function text(value: unknown): string | undefined {
   return typeof value === 'string' && value ? value : undefined
 }
 
-function issues(raw: Raw): readonly FieldIssue[] | undefined {
-  const list = raw.fields ?? raw.errors
-  if (!Array.isArray(list)) return undefined
-  const mapped = list
-    .map((item) => {
-      const one = (item ?? {}) as Raw
-      const path = text(one.path) ?? text(one.field) ?? text(one.name)
-      const code = text(one.code) ?? text(one.error) ?? 'invalid'
-      if (!path) return undefined
-      return { path, code, ...(one.params && typeof one.params === 'object' ? { params: one.params as Record<string, unknown> } : {}) }
-    })
-    .filter((one): one is FieldIssue => one !== undefined)
-  return mapped.length > 0 ? mapped : undefined
+function strings(value: unknown): readonly string[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const list = value.filter((one): one is string => typeof one === 'string')
+  return list.length > 0 ? list : undefined
 }
 
 /** @param fallbackCode 服务端没给码时用的（如 `user.create_failed`） */
 export function toFailure(status: number, body: unknown, fallbackCode: string): ApiFailure {
   const raw = (body && typeof body === 'object' ? body : {}) as Raw
   const nested = (raw.error && typeof raw.error === 'object' ? raw.error : {}) as Raw
-  const code = text(nested.code) ?? text(raw.code) ?? text(raw.error) ?? fallbackCode
-  const message = text(nested.message) ?? text(raw.error_description) ?? text(raw.message) ?? `the service answered ${status}`
-  const fields = issues(raw)
-  return { code, params: { status }, message, ...(fields ? { fields } : {}) }
+  // 引擎：`error` 是码、`error_description` 是诊断；少数接口是 `{error:{code,message}}` 或 `{error:"…"}`
+  const code = text(nested.code) ?? text(raw.error) ?? text(raw.code) ?? fallbackCode
+  const message = text(raw.error_description) ?? text(nested.message) ?? text(raw.message) ?? text(raw.reason) ?? `the service answered ${status}`
+  const requiredScopes = strings(raw.required_scopes)
+  const missingScopes = strings(raw.missing_scopes)
+  return {
+    code,
+    params: { status },
+    message,
+    ...(requiredScopes ? { requiredScopes } : {}),
+    ...(missingScopes ? { missingScopes } : {}),
+  }
 }
