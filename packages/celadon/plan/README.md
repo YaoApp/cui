@@ -1,7 +1,7 @@
 # plan/ — 计划与状态
 
 - **版本**：v2.0
-- **最后修改**：2026-10-03 17:32:57
+- **最后修改**：2026-10-04 07:08:32
 - **说明**：现在有哪些计划 · 与 `architecture/` 的分工 · 历史
 
 > **本文回答**：计划放哪、和规范什么关系、哪些讨论已经作废。
@@ -23,6 +23,7 @@
 | 00 | [design-system](00-design-system.md) | 设计体系（token · 图标 · 页面）| 进行中 |
 | 01 | [infrastructure](01-infrastructure.md) | 工程地基：**架构文档 + 规范脚本** + 构建/生成脚本 + 测试装置 | ✅ **已完成**（2026-10-03）|
 | **02** | [**platform**](02-platform.md) | **产品级平台地基**：`client/` · `service/` · `credential/` · `transport/` · `data/` · `bridge/` | **待开工** |
+| **03** | [**data**](03-data.md) | 数据层：接口类型（手写）+ 取数钩子 | **待开工（先定 §3.0 未定项）** |
 
 **开工顺序**：**先 §0**（桌面壳的分支与桥，见 `02-platform.md` §0；**逐条命令清单在桌面仓的 `plan/01-bridge-commands.md`**，本仓不放 —— 宿主侧没有可自由增删的 rustapi，平台层的桌面侧就无处可验）；然后按 §1 的表做：`client/` → `service/` → `credential/` → `transport/` → `data/` → `bridge/`。
 
