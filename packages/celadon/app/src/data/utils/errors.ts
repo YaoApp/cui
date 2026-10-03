@@ -21,7 +21,7 @@ function strings(value: unknown): readonly string[] | undefined {
 }
 
 /** @param fallbackCode 服务端没给码时用的（如 `user.create_failed`） */
-export function toFailure(status: number, body: unknown, fallbackCode: string): ApiFailure {
+export function failure(status: number, body: unknown, fallbackCode: string): ApiFailure {
   const raw = (body && typeof body === 'object' ? body : {}) as Raw
   const nested = (raw.error && typeof raw.error === 'object' ? raw.error : {}) as Raw
   // 引擎：`error` 是码、`error_description` 是诊断；少数接口是 `{error:{code,message}}` 或 `{error:"…"}`

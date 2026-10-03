@@ -14,7 +14,7 @@ function num(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined
 }
 
-export function toPage<T>(raw: unknown, fallback: { page: number; pageSize: number }): Page<T> {
+export function paginate<T>(raw: unknown, fallback: { page: number; pageSize: number }): Page<T> {
   if (Array.isArray(raw)) {
     return { items: raw as T[], page: fallback.page, pageSize: fallback.pageSize }
   }
