@@ -40,6 +40,7 @@
 | 13 | [quality-gates](13-quality-gates.md) | 基础语法 · 检查器 · CI · 产物与日志 |
 | 14 | [testing](14-testing.md) | 测试分层 · 位置与命名 · 断言与 mock 边界 · 浏览器与拟人 · 配置与日志 |
 | 15 | [platform](15-platform.md) | 平台层：构成与落位 · 服务信息 · 凭据与鉴权 · 客户端 · 客户端底座（Bridge）· 测试 |
+| 16 | [dev-setup](16-dev-setup.md) | 开发准备：开发服务与端口 · 代理 · 环境变量 · 日志 |
 
 ## 一条铁律
 
