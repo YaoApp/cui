@@ -4,6 +4,7 @@
   "bridge.error.bridge.unavailable": "このクライアントにホストはない（ブラウザでは常に）",
   "bridge.error.bridge.unknown": "不明なエラー",
   "bridge.error.credential.noEntry": "「{{service}}」の資格情報がない",
+  "bridge.error.credential.noStoreHere": "ブラウザでは資格情報はブラウザとサービスが保持し、アプリは触らない（HttpOnly の意味）",
   "bridge.error.credential.serviceEmpty": "サービス名は空にできない",
   "bridge.error.credential.storeFailed": "システム資格情報ストアを使えない",
   "bridge.error.localIps.unavailable": "ローカルアドレスを読めない",

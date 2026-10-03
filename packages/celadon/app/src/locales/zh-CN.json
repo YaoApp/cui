@@ -4,6 +4,7 @@
   "bridge.error.bridge.unavailable": "这台客户端没有宿主（浏览器里就是如此）",
   "bridge.error.bridge.unknown": "未知错误",
   "bridge.error.credential.noEntry": "没有「{{service}}」的凭据",
+  "bridge.error.credential.noStoreHere": "浏览器里的凭据由浏览器与服务端保管，应用不碰（这正是 HttpOnly 的意义）",
   "bridge.error.credential.serviceEmpty": "服务名不能为空",
   "bridge.error.credential.storeFailed": "系统凭据库读写失败",
   "bridge.error.localIps.unavailable": "读不到本地地址",

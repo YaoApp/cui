@@ -4,6 +4,7 @@
   "bridge.error.bridge.unavailable": "這台客戶端沒有宿主（瀏覽器裡就是如此）",
   "bridge.error.bridge.unknown": "未知錯誤",
   "bridge.error.credential.noEntry": "沒有「{{service}}」的憑證",
+  "bridge.error.credential.noStoreHere": "瀏覽器裡的憑證由瀏覽器與服務端保管，應用不碰（這正是 HttpOnly 的意義）",
   "bridge.error.credential.serviceEmpty": "服務名不能為空",
   "bridge.error.credential.storeFailed": "系統憑證庫讀寫失敗",
   "bridge.error.localIps.unavailable": "讀不到本地位址",

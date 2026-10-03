@@ -4,6 +4,7 @@
   "bridge.error.bridge.unavailable": "This client has no host (a browser never has one)",
   "bridge.error.bridge.unknown": "Unknown error",
   "bridge.error.credential.noEntry": "There is no credential for \"{{service}}\"",
+  "bridge.error.credential.noStoreHere": "In a browser the credential belongs to the browser and the service; the application does not touch it",
   "bridge.error.credential.serviceEmpty": "The service name must not be empty",
   "bridge.error.credential.storeFailed": "The system credential store could not be used",
   "bridge.error.localIps.unavailable": "Could not read the local addresses",
