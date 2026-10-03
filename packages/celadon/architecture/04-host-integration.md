@@ -24,7 +24,7 @@ dist/
 | 约束 | 内容 |
 | --- | --- |
 | **`basename`** | 应用挂在 **`/<BASE>/`** 下；React Router 的 `basename` 与 Vite 的 `base` **取同一变量**（引擎注入的 `BASE`）；PWA 的 `scope` / `start_url` 同步 |
-| **表面段** | 路由第一段（`main` / `side`）是**应用自己**的命名空间，在 basename 之下，不占保留前缀 |
+| **表面段** | 路由第一段（`app` / `side`）是**应用自己**的命名空间，在 basename 之下，不占保留前缀 |
 | **SPA fallback** | **托管方必须配**：未知路径回 `index.html`，只给导航请求（`Accept: text/html`）；缺的静态资源仍 404。路径路由的代价，预览用 `scripts/serve-dist.mjs` |
 | **SSE 三个头**（**托管方 · 开发代理**）| `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no`（见 `16-development.md`）|
 

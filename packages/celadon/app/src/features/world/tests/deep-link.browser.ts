@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 /* 场景：直达。地址决定"看哪个对象、开在哪一屏、侧边开着什么"。 */
 test('an object in the path opens its detail', async ({ page }) => {
-  await page.goto('/main/world/w1')
+  await page.goto('/app/world/w1')
   await expect(page.getByRole('heading', { name: 'Alpha 世界' })).toBeVisible()
   // 详情页的标题用对象名 —— 用户才知道自己开的是哪一个世界
   await expect(page).toHaveTitle('Alpha 世界 · CUI 2.0')
@@ -16,7 +16,7 @@ test('a surface in the path mounts the same feature in the side panel', async ({
 })
 
 test('a named panel parameter opens the panel, and Back closes it', async ({ page }) => {
-  await page.goto('/main/world/w1')
+  await page.goto('/app/world/w1')
   await expect(page.getByRole('region', { name: '条目面板' })).toHaveCount(0)
 
   await page.getByRole('button', { name: '守门人' }).click()
@@ -28,7 +28,7 @@ test('a named panel parameter opens the panel, and Back closes it', async ({ pag
 })
 
 test('typing in the filter replaces the entry instead of stacking history', async ({ page }) => {
-  await page.goto('/main/world')
+  await page.goto('/app/world')
   const before = await page.evaluate(() => history.length)
 
   await page.getByLabel('过滤').fill('gamma')

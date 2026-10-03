@@ -69,7 +69,7 @@
 
 | 放什么 | 住哪 |
 | --- | --- |
-| 路由表（URL → 元素）· 表面布局（`main` 主区 · `side` 侧边）| `routes/` |
+| 路由表（URL → 元素）· 表面布局（`app` 主区 · `side` 侧边）| `routes/` |
 | 机制：router 实例 · basename 适配器 · 文档标题 | `platform/router/` |
 | 导航项 · "哪条 URL 是当前"的比较 | `platform/utils/nav.ts`（`routes/` 与 feature 都要用）|
 

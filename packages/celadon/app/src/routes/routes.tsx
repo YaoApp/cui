@@ -6,7 +6,7 @@ import { SurfaceLayout } from './surface-layout'
 /* 路由表：**只做装配**，业务实现不住这里。
    地址语法：/<surface>/<feature>/<object>?<面板参数>（见 architecture/07-routing.md）。 */
 export const routes: RouteObject[] = [
-  { path: '/', element: <Navigate to="/main/hello" replace /> },
+  { path: '/', element: <Navigate to="/app/hello" replace /> },
   {
     path: '/:surface',
     element: <SurfaceLayout />,
@@ -17,5 +17,5 @@ export const routes: RouteObject[] = [
       { path: 'world/:worldId', element: <WorldPage /> },
     ],
   },
-  { path: '*', element: <Navigate to="/main/hello" replace /> },
+  { path: '*', element: <Navigate to="/app/hello" replace /> },
 ]
