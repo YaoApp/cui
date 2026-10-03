@@ -1,7 +1,7 @@
 # 07 · 路由
 
 - **版本**：v1.41
-- **最后修改**：2026-10-03 11:52:20
+- **最后修改**：2026-10-03 11:53:04
 - **说明**：地址语法 · 谁说了算 · `routes/` 的结构 · 文档标题
 
 ## 1. 规则
@@ -15,8 +15,8 @@
   手拼 URL 是这套东西烂掉的开始。
 - **文档标题跟路由走**：`platform/router/use-page-title.ts` 的 `usePageTitle()`。列表页给固定名字，
   **详情页用对象名**（用户才知道开的是哪一个）。`document.title` 是宿主全局，所以这个 hook 住平台层。
-- **路由路径不得占用引擎的 12 个保留前缀**：`/api` · `/v1` · `/assets` · `/components` · `/tools` · `/agents` ·
-  `/admin` · `/brands` · `/docs` · `/ai` · `/.well-known` · `/iframe` —— 这些**归引擎**，
+- **路由路径不得占用引擎的 11 个保留前缀**：`/api` · `/v1` · `/assets` · `/components` · `/tools` · `/agents` ·
+  `/admin` · `/brands` · `/docs` · `/ai` · `/.well-known` —— 这些**归引擎**，
   应用自己的命名空间是**构建决定的段**（默认 `app`，见 §2 · `04-host-integration.md`）。
 
 ## 2. 地址语法
