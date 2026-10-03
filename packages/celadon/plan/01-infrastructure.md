@@ -117,7 +117,7 @@
 | --- | --- |
 | **生产构建** | `pnpm build` ✓ **42–47ms**（Vite 8 上；Vite 6 时为 76–106ms）|
 | **检查器全绿（11 个）** | 见 `package.json` 的 `check:run` |
-| **检查器自测** | `scripts/tests/run.mjs` **76 / 76** 用例（每条规则一个样本）|
+| **检查器自测** | `scripts/tests/run.mjs` **81 / 81** 用例（每条规则一个样本）|
 | **dev / preview** | dev 端口 5199 ✓ · preview HTTP **200** ✓ |
 | **CI（隔离）· 一** | `.github/workflows/celadon-test-build.yml` · 只在 `packages/celadon/**` 改动时跑 · 干净环境演练通过：安装（不触发构建）→ 规范门禁全绿 → 单元 9/9 → 构建；三处隔离：自己的工作目录 · 自己的锁文件 · 自己的 `packageManager` |
 | **CI（隔离）· 二** | `.github/workflows/celadon-browser-test.yml` · 浏览器测试单独一份、自带环境准备；用例自己起 dev（本地已跑则复用）· 失败时上传轨迹与截图 |
