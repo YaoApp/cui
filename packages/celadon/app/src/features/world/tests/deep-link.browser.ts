@@ -15,6 +15,12 @@ test('a surface in the path mounts the same feature in the side panel', async ({
   await expect(side.getByRole('heading', { name: 'Alpha 世界' })).toBeVisible()
 })
 
+test('a link carries the namespace exactly once', async ({ page }) => {
+  await page.goto('/app/world')
+  // 真链接带命名空间；路由内的跳转不带（由 react-router 加）。混了就会出现 /app/app/...
+  await expect(page.getByRole('link', { name: 'Alpha 世界' })).toHaveAttribute('href', '/app/world/w1')
+})
+
 test('a named panel parameter opens the panel, and Back closes it', async ({ page }) => {
   await page.goto('/app/world/w1')
   await expect(page.getByRole('region', { name: '条目面板' })).toHaveCount(0)
