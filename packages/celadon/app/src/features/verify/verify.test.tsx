@@ -9,7 +9,7 @@ import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const SECRET = 's3cr3t-value-must-not-be-printed'
-const read = vi.fn(async () => ({ ok: true as const, value: SECRET }))
+const read = vi.fn(async (_service?: string) => ({ ok: true as const, value: SECRET }))
 
 vi.mock('@/platform/credential', () => ({
   credential: {
