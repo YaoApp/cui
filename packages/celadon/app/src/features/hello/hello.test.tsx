@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { HelloPage } from '@/features/hello'
 
 /** 页面现在带头部导航（useNavigate / useLocation），必须有路由上下文才能单独渲染。 */
-function renderPage(entry = '/main/hello') {
+function renderPage(entry = '/app/hello') {
   render(
     <RouterProvider
       router={createMemoryRouter([{ path: '/:surface/hello', element: <HelloPage /> }], { initialEntries: [entry] })}

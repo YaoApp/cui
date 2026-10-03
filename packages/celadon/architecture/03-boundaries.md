@@ -8,7 +8,7 @@
 
 | 层 | 目录 | 该做什么 | 不该做什么 |
 | --- | --- | --- | --- |
-| 路由 | `app/src/routes/` | 路由表 · 表面（main / side）与其布局 | **不写业务** · 不许被 `features/` import |
+| 路由 | `app/src/routes/` | 路由表 · 表面（app / side）与其布局 | **不写业务** · 不许被 `features/` import |
 | 组件层 | `app/src/components/` | 纯视觉与行为（`@base-ui/react`）· 受控 props | **不认识业务** · 不发请求 · 不读状态 |
 | 能力层 | `app/src/features/` | 按业务切分（chat / inbox / kanban …）· **页面 + 组件 + 状态 + 测试都在里面** | 不直接 `fetch` · 不碰宿主全局 · **feature 之间不互相 import** |
 | 公共态 | `app/src/stores/` | **跨功能的公共状态**（说不清归哪个功能的事实）· 目录即角色，文件**不加后缀** | 不放私有状态（跟 feature 走）· **不许 import 上层**（features / routes / components 都不行）|

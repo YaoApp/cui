@@ -15,7 +15,7 @@ export function buildShareUrl(
   params: Record<string, string | undefined> = {},
   origin = '',
 ): string {
-  const segments = [target.surface ?? 'main', target.feature, target.object].filter(Boolean).join('/')
+  const segments = [target.surface ?? 'app', target.feature, target.object].filter(Boolean).join('/')
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '') search.set(key, value)
