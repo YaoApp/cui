@@ -13,7 +13,7 @@ import { outboundContext } from '@/platform/client/context'
 import { clientId as currentClientId } from '@/platform/client/client-id'
 import { serviceBase } from '@/platform/service'
 
-/** 一次出站调用要带的全部上下文（在 `call/` 里，所以就叫 `Context`）。 */
+/** 一次出站调用要带的全部上下文（在 `request/` 里，所以就叫 `Context`）。 */
 export type Context = OutboundContext & {
   /** 客户端标识（`web-…` / `desk-<机器码>`，见 `15 §5`）—— 与 `OutboundContext.client`（web/desktop）不是一回事 */
   clientId: string
@@ -22,7 +22,7 @@ export type Context = OutboundContext & {
 }
 
 /** 要什么由平台那侧定（`OutboundInputs`），这里**不另造一个形状**。 */
-export function callContext(inputs: OutboundInputs): Context {
+export function context(inputs: OutboundInputs): Context {
   const facts = outboundContext(inputs)
   return { ...facts, clientId: currentClientId(), service: serviceBase() }
 }
@@ -31,9 +31,9 @@ export function callContext(inputs: OutboundInputs): Context {
  *  `standard` · `cui-web` · `cui-native` · **`cui-desktop`**（不是 `cui-desk`）。
  *  引擎取这个值的优先序：query `accept` > 头 `X-Yao-Accept` > body `metadata.accept`（`yao/agent/context/openapi.go:284-311`）。
  *  **CSRF 不在这里**：`15 §4` 定了前端不碰令牌。 */
-export function contextHeaders(ctx: Context): Record<string, string> {
+export function headers(ctx: Context): Record<string, string> {
   return {
-    'X-Yao-Accept': contextAccept(ctx),
+    'X-Yao-Accept': accept(ctx),
     // 引擎取语言：query `locale` > `Accept-Language`（`yao/agent/context/openapi.go:193-224`）；
     // **登录相关接口只认 `X-Locale`/`Accept-Language`，不读 query**（`yao/openapi/user/utils.go:118-130`）
     'Accept-Language': ctx.locale,
@@ -45,10 +45,10 @@ export function contextHeaders(ctx: Context): Record<string, string> {
 /** 流式（SSE / WS）**只能**把上下文放 query —— `EventSource` 不能设头，浏览器 WS 握手也不能；
  *  引擎两侧都认：`accept` 与 `locale`（`yao/agent/context/openapi.go:468-540`）。
  *  会话/助手/模型等**域专属**参数由该域自己加。 */
-export function contextQuery(ctx: Context): Record<string, string> {
-  return { locale: ctx.locale, accept: contextAccept(ctx) }
+export function query(ctx: Context): Record<string, string> {
+  return { locale: ctx.locale, accept: accept(ctx) }
 }
 
-function contextAccept(ctx: Context): string {
+function accept(ctx: Context): string {
   return ctx.client === 'desktop' ? 'cui-desktop' : 'cui-web'
 }

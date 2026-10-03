@@ -2,5 +2,6 @@ export type { ApiFailure, ApiResult, Page } from './types'
 export { unwrap } from './utils/unwrap'
 export { toPage } from './utils/paging'
 export { toFailure } from './utils/errors'
-export { callContext, contextHeaders, contextQuery } from './call/context'
-// `type Context` 故意不从 barrel 导出（名字太通用）；需要时从 `@/data/call/context` 直接取
+export { context } from './request/context'
+// 头与 query 是**包装内部**用的（`request/send.ts` · `sse.ts` · `socket.ts`），不进对外面
+// `type Context` 也从 `@/data/request/context` 直接取（名字太通用，不进 barrel）
