@@ -14,9 +14,11 @@ describe('callContext', () => {
     expect(typeof ctx.timezone).toBe('string')
   })
 
-  it('carries the same thing on every kind of call', () => {
+  it('sends the header the old client sent, and the language in the query', () => {
     const ctx = callContext({ locale: 'en-US', theme: 'light' })
-    expect(contextHeaders(ctx)).toMatchObject({ 'Accept-Language': 'en-US', 'X-Yao-Client': 'desk-test-id', 'X-Yao-Theme': 'light' })
+    // 旧客户端用 X-Yao-Accept 告诉后端要 CUI 格式（chat/api.ts:170）
+    expect(contextHeaders(ctx)).toEqual({ 'X-Yao-Accept': 'cui-web', 'Content-Type': 'application/json' })
+    // 流式只能放 query（EventSource / WS 握手都不能设自定义头）
     expect(contextQuery(ctx)).toEqual({ locale: 'en-US' })
   })
 })

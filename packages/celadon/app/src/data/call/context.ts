@@ -27,17 +27,20 @@ export function callContext(inputs: OutboundInputs): Context {
   return { ...facts, clientId: currentClientId(), service: serviceBase() }
 }
 
-/** **草稿**：与后端对齐后固化（`X-Yao-*` 沿用旧服务的习惯）。 */
+/** **按旧客户端对齐**（`packages/cui/openapi/chat/api.ts:170`）：用它告诉后端"要 CUI 格式"。
+ *  `cui-web` 是旧代码的取值；**桌面的取值待与后端确认**（先按 `cui-desk` 走）。
+ *  **CSRF 不在这里**：`15 §4` 定了前端不碰令牌；若服务端仍要求，注入点只能在 `platform/transport/`。 */
 export function contextHeaders(ctx: Context): Record<string, string> {
   return {
-    'Accept-Language': ctx.locale,
-    'X-Yao-Client': ctx.clientId,
-    'X-Yao-Theme': ctx.theme,
-    'X-Yao-Timezone': ctx.timezone,
+    'X-Yao-Accept': ctx.client === 'desktop' ? 'cui-desk' : 'cui-web',
+    // 域专属的头（如聊天的 `X-Yao-Assistant` / `X-Yao-Chat`）由**该域**自己加，不塞进 ctx
+    'Content-Type': 'application/json',
   }
 }
 
-/** 少数接口把语言放 query（旧代码的 chat 就是这样）。 */
+/** **流式（SSE / WS）把上下文放 query —— 只能这么带**：
+ *  `EventSource` 不能设自定义头，浏览器 `WebSocket` 握手也带不了自定义头；
+ *  旧代码同样把语言放 query（`chat/api.ts` · `kb/api.ts:607`）。 */
 export function contextQuery(ctx: Context): Record<string, string> {
   return { locale: ctx.locale }
 }
