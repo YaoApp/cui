@@ -4,7 +4,7 @@
 - **最后修改**：2026-10-03 09:19:47
 - **说明**：图标与品牌：产物 · 基础件用法 · 第三方品牌
 
-## 规则
+## 1. 规则
 
 - **源是 lucide**（ISC · 24 网格 · 描边 2 · 本包收录 **67 个**）；不自绘，仅 5 类例外（见 `design/icons.md`）。
 - **源**：`design/icons/lucide-sprite.svg` · `own-sprite.svg` · `manifest.json`（`{id, cat, src}`）· 品牌雪碧图。
@@ -22,14 +22,14 @@
 - **不引图标库依赖**（不装 `lucide-react`）—— 雪碧图已经装好，`Icon` 只是 `<use>` + 尺寸档 + 可访问性。
 - **校验**：`check-generated.mjs` 重新生成并比对应用侧两份产物，**不一致即失败**。
 
-## 第三方品牌
+## 2. 第三方品牌
 
 "别人家的"品牌（AI 厂商等）在设计里**分片**存放（`design/icons/brand-sprite-{1..11}.svg` + `brand-index.json`，
 共 300+ 个，约 1.1 MB）。应用**不引外部雪碧图**，所以由 `scripts/build-icons.mjs` 里的一份**挑选清单**
 （`THIRD_PARTY`）取出所需的符号，与自有品牌一样生成进应用雪碧图 —— 加品牌就改那份清单再跑脚本。
 挑一批而不全放：全量会把演示包撑成 1 MB 级，没有意义。品牌官方色是全站唯一允许不用 token 的颜色。
 
-## 用法
+## 3. 用法
 
 1. **入口挂一次** —— `app/src/main.tsx` 调 `mountIconSprite()`：雪碧图作为 `<svg width="0" height="0">`
    **直接插进 `body`**（与设计页 `design/icons.html` 同构）。
@@ -45,7 +45,7 @@
 5. **与文字同行时靠容器的 flex 居中**（`inline-flex` + `align-items:center` + `gap`），
    **不要**在 JSX 里塞空格凑间距。
 
-## 测试覆盖
+## 4. 测试覆盖
 
 | 层 | 测什么 |
 | --- | --- |
