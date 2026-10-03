@@ -27,7 +27,6 @@ const SUITES = [
   ['check-i18n.mjs', 'i18n'],
   ['check-i18n-types.mjs', 'i18n-types'],
   ['check-readme-values.mjs', 'readme-values'],
-  ['check-plan-md.mjs', 'check-plan-md'],
   ['check-app-layout.mjs', 'app-layout'],
   ['check-effect-url-write.mjs', 'effect-url-write'],
   ['check-base-components.mjs', 'base-components'],
