@@ -1,7 +1,7 @@
 # 15 · 平台层
 
-- **版本**：v1.0
-- **最后修改**：2026-10-03 08:31:01
+- **版本**：v1.1
+- **最后修改**：2026-10-03 08:34:42
 - **说明**：平台层：构成与落位 · 服务信息（well-known）· 会话与鉴权 · 运行环境 · 数据层
 
 ## 1. 规则
@@ -35,18 +35,20 @@
 | 字段 | 用途 |
 | --- | --- |
 | `name` · `version` · `description` | 关于页 · 上报 |
-| `openapi` | **接口根**（如 `/v1`）——所有请求以它为前缀 |
+| **`openapi`** | **接口根**（如 `/v1`）——所有请求以它为前缀 |
 | `issuer_url` · `server_url` | 鉴权与接口的服务地址 |
-| `grpc` · `grpc_tls` · `grpc_tls_ca` | Desktop 直连（gRPC）用 |
 | `webproxy`（`domain` / `prefix` / `protocol`）| 预览代理域名的构造规则 |
-| `optional.avatar` | 头像上传的 agent 与上传器 |
-| `optional.remoteCache` | 是否走远端缓存 |
 | `license` | 能力开关（`valid` / `edition`）|
-| `tao` | 注册/升级入口 |
+| `tao` | 注册 / 升级入口 |
 | `developer` | 关于页署名 |
+| `dashboard` | 后台入口（外链）|
 
-- **弃用字段**：`optional.layout`（v0 低代码时代的首屏形态）与 `optional.neo`（旧 agent 接口）——
-  **应用不读**，对接一律走 `openapi`。
+**不消费的字段**：
+
+- **整个 `optional.*`** —— 它服务于**旧版（v0）**，对 **V2 没有任何意义**（`layout` 首屏形态 · `neo` 旧 agent 接口 ·
+  `avatar` · `remoteCache` 都在此列）。**应用不读、也不依赖。**
+- **`grpc` / `grpc_tls` / `grpc_tls_ca`** —— **不是给前端用的**：**Desktop 也走 http**，gRPC **不暴露到公网**。
+
 - **读失败必须降级**：拿不到 well-known 时应用仍要能起（用默认 `openapi: '/v1'`），**不许白屏**。
 
 ## 4. 会话与鉴权
