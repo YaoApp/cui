@@ -5,19 +5,26 @@
  *   ② **桌面壳里**：真跑一遍 —— 平台 · 语言 · 本地 IP · 应用信息 · 主题 · 打开浏览器 · 定位 ·
  *      选文件/目录 · **凭据写→读→删**（这条是 `cargo test` 在 CLI 里验不了的）
  *
- * 失败一律显示**按码翻译过的文案**（`bridgeErrorText`），不是壳里的英文句子。 */
+ * 失败一律显示**按码翻译过的文案**（`bridgeErrorText`），不是壳里的英文句子。
+ *
+ * **一处在诊断页里的例外**：本页允许手输地址（探一下 / 打开浏览器）。§5 的"Web 端不许任意输入地址"
+ * 管的是**产品入口**（防钓鱼：别让用户在"我们的应用"里把凭据交给陌生服务端）；这里是**诊断页**，
+ * 用来验证出海口本身，地址不落存储、不进服务清单。 */
 
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { Button } from '@/components/base/button'
 import { useTranslation } from '@/platform/i18n'
-import { buildManifest, capabilities, clientInfo } from '@/platform/client'
+import { buildManifest, capabilities, clientInfo, hasHost } from '@/platform/client'
 import { routerBasename } from '@/platform/router/basename'
 import { bridge, bridgeErrorText, type BridgeResult } from '@/platform/bridge'
+import { transport } from '@/platform/transport'
 
 type Line = { label: string; text: string }
 
 export function VerifyPage() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   /* `bridgeErrorText` 收的是"按任意 key 取文案"的函数；i18n 的 t 是**严格 key 类型**，
      这里做一次适配（码是运行期的，类型系统管不到）。 */
   const translate = (key: string, options?: Record<string, unknown>) =>
@@ -31,7 +38,8 @@ export function VerifyPage() {
   const [url, setUrl] = useState('https://example.com')
   const [path, setPath] = useState('')
   const [ping, setPing] = useState<BridgeResult<unknown>>()
-  const host = (typeof globalThis !== 'undefined' && '__TAURI_INTERNALS__' in globalThis) || '__TAURI__' in globalThis
+  // **问 client/**，不自己看框架内部（§5：宿主差异不许渗到 feature）
+  const host = hasHost()
 
   /** 一次调用的结果：成功显示值，失败显示**翻译过的**文案（缺翻译时回退诊断并告警）。 */
   const report = (label: string, result: BridgeResult<unknown>) => {
@@ -55,6 +63,7 @@ export function VerifyPage() {
         ['appInfo', () => bridge.system.appInfo()],
         ['theme', () => bridge.system.theme()],
         ['machineId', () => bridge.system.machineId()],
+        ['transport', () => transport.probe('https://example.com')],
         ['credential.write', () => bridge.credential.write('verify-demo', 'self-check')],
         ['credential.read', () => bridge.credential.read('verify-demo')],
         ['credential.remove', () => bridge.credential.remove('verify-demo')],
@@ -75,6 +84,14 @@ export function VerifyPage() {
   return (
     <section aria-label={t('verify.title')}>
       <h1>{t('verify.title')}</h1>
+
+      {/* 这一页**不在布局的导航里**（导航由各 feature 自己渲染），所以自己给一个返回：
+          人工测试时不用靠浏览器后退键 */}
+      <p>
+        <Button variant="ghost" onClick={() => navigate(-1)}>
+          {t('verify.back')}
+        </Button>
+      </p>
 
       {!host && (
         <p role="status">
@@ -154,6 +171,19 @@ export function VerifyPage() {
           <input value={path} onChange={(event) => setPath(event.target.value)} size={32} />
         </label>{' '}
         <Button onClick={() => run('reveal', () => bridge.system.reveal(path))}>{t('verify.reveal')}</Button>
+      </p>
+
+      {/* 出海口：**只有 platform/transport 发请求**（见 17-transport.md）。
+          Web 用浏览器 fetch，桌面壳用官方插件的 fetch（同一签名） */}
+      <h2>{t('verify.transport')}</h2>
+      <p>
+        <label>
+          {t('verify.url')}
+          <input value={url} onChange={(event) => setUrl(event.target.value)} size={32} />
+        </label>{' '}
+        <Button onClick={() => run('transport.probe', () => transport.probe(url))}>
+          {t('verify.transportProbe')}
+        </Button>
       </p>
 
       {/* 凭据往返：**这条只能在跑起来的应用里验**（CLI 会话没有凭据库域） */}
