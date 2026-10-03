@@ -1,7 +1,7 @@
 # 15 · 平台层
 
 - **版本**：v1.41
-- **最后修改**：2026-10-03 10:56:28
+- **最后修改**：2026-10-03 10:58:09
 - **说明**：平台层：构成与落位 · 服务信息 · 凭据与鉴权 · 客户端 · 客户端底座（Bridge）· 测试
 
 ## 1. 规则
@@ -186,14 +186,15 @@
 | `built_at` | `string`（ISO 8601 · UTC）| 写入时刻 | 构建时刻 | 对时间 |
 | `client` | `"web"` \| `"desktop"` | `"web"` | 按打包目标 | **客户端类型**（见 §5）|
 | `os` | `"macos"` \| `"windows"` \| `"linux"` | 空 | 桌面按打包目标写入 | 桌面目标系统；web 包不写（运行时解析，见 §5.2）|
-| `artifact` | `"unified"` \| `"cui"` \| `"yao"` \| `"tai"` \| `"server"` | `"cui"` | 按打包目标 | **制品类型**，决定首页与管理入口（见 §6.2）|
+| `artifact` | `"unified"` \| `"cui"` \| `"web"` \| `"yao"` \| `"tai"` \| `"server"` | `"web"` | 按打包目标 | **制品类型**，决定首页与管理入口（见 §6.2）|
 | `build` | `"local"` \| `"ci"` | `"local"` | `"ci"` | 区分本地包与流水线包 |
 
 - **只读**：运行时只读不写，要改就得重新构建。
 - **只有 `client/` 读它**（见 §5）。
 - **不放后端地址、不放密钥**：清单会进包。
-- **`artifact` 五个取值**：`unified`（CUI + yao + tai 统一包）· `cui`（仅客户端 / web）·
-  `yao`（仅 yao 管理）· `tai`（仅 tai 管理）· `server`（yao + tai 服务端共享包）。
+- **`artifact` 六个取值**：`unified`（CUI + yao + tai）· **`cui`（仅桌面客户端，含 Bridge）**·
+  **`web`（仅 Web，不含 Bridge）**· `yao`（仅 yao 管理）· `tai`（仅 tai 管理）· `server`（yao + tai 共享包）。
+- **`artifact` 与 `client` 对齐**：含 Bridge 的制品 `client` 为 `"desktop"`，`web` 制品为 `"web"`。
 
 ## 6. 客户端底座（Desktop Bridge）
 
@@ -222,12 +223,14 @@
 | 制品 | 内容 | 首页 | 管理入口 |
 | --- | --- | --- | --- |
 | `unified` | CUI + yao + tai | CUI | yao · tai |
-| `cui` | 仅 CUI | CUI | **无** |
+| `cui` | 仅桌面客户端（**含 Bridge**）| CUI | **无** |
+| `web` | 仅 Web（**无 Bridge**）| CUI | **无** |
 | `yao` | 仅 yao | yao 管理 | yao |
 | `tai` | 仅 tai | tai 管理 | tai |
 | `server` | yao + tai | 管理面 | yao · tai |
 
-- **入口按制品内容出现**：不含 yao 的包不给 yao 入口，不含 tai 的不给 tai 入口；`cui` 包**不给任何管理入口**。
+- **入口按制品内容出现**：不含 yao 的包不给 yao 入口，不含 tai 的不给 tai 入口；`cui` 与 `web` **不给任何管理入口**。
+- **`web` 与 `cui` 的区别只在 Bridge**：`web` 制品**桌面能力整块不存在**，`cui` 含。
 
 ## 7. 测试
 
