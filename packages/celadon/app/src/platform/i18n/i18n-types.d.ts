@@ -10,6 +10,7 @@ export type I18nKey =
   | 'bridge.error.bridge.unavailable'
   | 'bridge.error.bridge.unknown'
   | 'bridge.error.credential.noEntry'
+  | 'bridge.error.credential.noStoreHere'
   | 'bridge.error.credential.serviceEmpty'
   | 'bridge.error.credential.storeFailed'
   | 'bridge.error.localIps.unavailable'
@@ -140,6 +141,7 @@ declare module 'i18next' {
         'bridge.error.bridge.unavailable': string
         'bridge.error.bridge.unknown': string
         'bridge.error.credential.noEntry': string
+        'bridge.error.credential.noStoreHere': string
         'bridge.error.credential.serviceEmpty': string
         'bridge.error.credential.storeFailed': string
         'bridge.error.localIps.unavailable': string

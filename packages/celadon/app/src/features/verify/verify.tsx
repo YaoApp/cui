@@ -23,6 +23,7 @@ import { navWithActive } from '@/platform/utils/nav'
 import { buildManifest, capabilities, clientInfo, hasHost } from '@/platform/client'
 import { routerBasename } from '@/platform/router/basename'
 import { bridge, bridgeErrorText, type BridgeResult } from '@/platform/bridge'
+import { credential } from '@/platform/credential'
 import { transport } from '@/platform/transport'
 
 type Line = { label: string; text: string }
@@ -72,9 +73,9 @@ export function VerifyPage() {
         ['theme', () => bridge.system.theme()],
         ['machineId', () => bridge.system.machineId()],
         ['transport', () => transport.probe('https://example.com')],
-        ['credential.write', () => bridge.credential.write('verify-demo', 'self-check')],
-        ['credential.read', () => bridge.credential.read('verify-demo')],
-        ['credential.remove', () => bridge.credential.remove('verify-demo')],
+        ['credential.write', () => credential.write('verify-demo', 'self-check')],
+        ['credential.read', () => credential.read('verify-demo')],
+        ['credential.remove', () => credential.remove('verify-demo')],
       ] as const) {
         const result = await call()
         report(label, result)
@@ -213,10 +214,10 @@ export function VerifyPage() {
         </label>
       </p>
       <p>
-        <Button onClick={() => run('credential.write', () => bridge.credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
-        <Button onClick={() => run('credential.read', () => bridge.credential.read(service))}>{t('verify.read')}</Button>{' '}
-        <Button onClick={() => run('credential.remove', () => bridge.credential.remove(service))}>{t('verify.remove')}</Button>{' '}
-        <Button onClick={() => run('credential.list', () => bridge.credential.list())}>{t('verify.list')}</Button>
+        <Button onClick={() => run('credential.write', () => credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
+        <Button onClick={() => run('credential.read', () => credential.read(service))}>{t('verify.read')}</Button>{' '}
+        <Button onClick={() => run('credential.remove', () => credential.remove(service))}>{t('verify.remove')}</Button>{' '}
+        <Button onClick={() => run('credential.list', () => credential.list())}>{t('verify.list')}</Button>
       </p>
 
       <h2 className="verify__heading">{t('verify.results')}</h2>
