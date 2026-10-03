@@ -1,7 +1,7 @@
 # architecture/AGENTS · 任务索引
 
 - **版本**：v1.2
-- **最后修改**：2026-10-03 16:20:13
+- **最后修改**：2026-10-03 17:14:24
 - **说明**：任务与分册对应 · 动手前的约束 · 编写测试 · 开发与验证 · 交付要求
 
 > 本文回答一个问题：**拿到一项任务，该读哪一册、有哪些约束、做完如何验证。**
@@ -68,7 +68,7 @@
 pnpm dev            # 开发服务（vite）
 pnpm build          # 构建产物 dist/（拟人层测的是它）
 pnpm lint           # 基础语法：stylelint · eslint · tsc
-pnpm check          # 规范门禁：11 个检查器
+pnpm check          # 规范门禁：11 个检查器（自测 81 个样本用例，见 scripts/tests/README.md）
 pnpm test           # 单元 / 组件
 pnpm test:browser   # 浏览器（真实渲染）
 pnpm test:persona   # 拟人（剧本 + 采集脚本 + 看图）

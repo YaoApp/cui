@@ -1,7 +1,7 @@
 # 03 · 目录与边界
 
 - **版本**：v1.47
-- **最后修改**：2026-10-03 16:19:00
+- **最后修改**：2026-10-03 17:14:24
 - **说明**：目录结构 · 分层职责 · 同层方向 · 谁能 import 谁 · 边界怎么强制
 
 ## 1. 分层职责
@@ -90,9 +90,9 @@ feature 私有组件**不许**出 `features/<域>/components/`；feature 之间�
 | **层间方向** | `check-import-boundaries.mjs`（零依赖纯 Node 扫 `app/src/**/*.{ts,tsx}` 的 import；**只放行类型** —— TS 7 下 `typescript-eslint` 还不支持，ESLint 版落不来）| `components/base/` 不许 import 上层组件；`data/` 不许 import `features/`；`features/a/` 不许 import `features/b/` |
 | **用基础件，不裸写控件** | `check-base-components.mjs`（`features/` · `routes/` · `components/` 里不许裸 `<button>` / `<select>`，`components/base/` 豁免）| 按钮用 `components/base/button`；下拉用 `components/base/select`；链接、输入框用设计类 `.link` / `.input` |
 | **组件不发请求** | 同上（方向）；请求本身**暂无机器强制** | 禁组件里出现 `fetch(` / `new WebSocket(` —— 由**评审**把关，见 §4 末 |
-| **不在 `useEffect` 取数** | 同上 | 取数走数据层钩子（见 `05-data-and-api.md`）|
-| **禁旧包** | 同上 | 禁 `import '@yaoapp/cui'` |
-| **路由薄** | 同上 | `routes/` 不许被 `features/` 反向 import |
+| **不在 `useEffect` 取数** | `check-effect-url-write`（只管"写 URL"那一半）+ **评审** | 取数走数据层钩子（见 `05-data-and-api.md`）；**取数本身暂无机器强制** |
+| **禁旧包** | `check-import-boundaries`（`old-package`）| 禁 `import '@yaoapp/cui'` |
+| **路由薄** | `check-import-boundaries`（`routes-top`）| `routes/` 不许被 `features/` 反向 import |
 | **平台差异** | 适配器接口 + 禁直读环境判断 | 禁 `isDesktop` / `isIframe` 散落 |
 | **判断类规则**（表里无机器强制的那类）| **评审 + 拟人层判定** | 「不认识业务」· 命名规范 · 只写规则不写过程；判定三件：看图 · `ocr_recognize` · `decision_decide`（见 `14-testing.md` §4.3）|
 
