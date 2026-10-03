@@ -18,8 +18,9 @@ const isStore = (value: unknown): value is Store =>
   typeof (value as unknown as Store).subscribe === 'function'
 
 /* 两种命名：私有带 `.store` 后缀（同目录还有别的角色）；公共的 `stores/` 不带（目录即角色）。
-   stores/ 里的测试文件也一起被 glob 到 —— 但它们不导出 store，下面的 isStore 会滤掉。 */
-const modules = import.meta.glob(['../**/*.store.ts', '../stores/*.ts'], {
+   **测试文件要排除**：glob 到就会被 `eager` 导入，它们自己的用例于是在每个单测环境里又跑一遍
+   （用例数被重复计数，2026-10-03 复核者指出）。isStore 只滤"当不当 store"，滤不掉"已被导入"。 */
+const modules = import.meta.glob(['../**/*.store.ts', '../stores/*.ts', '!../stores/*.test.ts'], {
   eager: true,
 }) as Record<string, Record<string, unknown>>
 
