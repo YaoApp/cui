@@ -1,7 +1,7 @@
 # 15 · 平台层
 
 - **版本**：v1.41
-- **最后修改**：2026-10-03 10:58:09
+- **最后修改**：2026-10-03 10:59:52
 - **说明**：平台层：构成与落位 · 服务信息 · 凭据与鉴权 · 客户端 · 客户端底座（Bridge）· 测试
 
 ## 1. 规则
@@ -167,6 +167,8 @@
 | `ua` | UA 解析结果 | UA 解析结果 | 浏览器 · 系统 · 版本；给结果，不散播原始串 |
 | `client_id` | `crypto.randomUUID()` 生成后存**本地存储** | 同 Web（webview 存储）| **UUID v4**；同一安装内不变 |
 | `client_ip` | well-known 给出 | well-known 给出 | 后端在 well-known 里给出它看到的地址（见 §3）|
+| `yao_version` | 构建清单（**可选**）| 同 Web | 制品内含的 yao 版本；不含则为空（见 §5.3）|
+| `tai_version` | 构建清单（**可选**）| 同 Web | 制品内含的 tai 版本；不含则为空（见 §5.3）|
 
 - **`client_id` 用 `crypto.randomUUID()`（UUID v4）**：**首次需要时生成**后存**本地存储**——
   **两个宿主都是 webview 存储，同一套代码**；**同一安装内不变**，清数据或换安装即更换。
@@ -187,6 +189,8 @@
 | `client` | `"web"` \| `"desktop"` | `"web"` | 按打包目标 | **客户端类型**（见 §5）|
 | `os` | `"macos"` \| `"windows"` \| `"linux"` | 空 | 桌面按打包目标写入 | 桌面目标系统；web 包不写（运行时解析，见 §5.2）|
 | `artifact` | `"unified"` \| `"cui"` \| `"web"` \| `"yao"` \| `"tai"` \| `"server"` | `"web"` | 按打包目标 | **制品类型**，决定首页与管理入口（见 §6.2）|
+| `yao_version`（**可选**）| `string`（semver）| 空 | **含 yao 的制品**写入 | 制品内含的 yao 版本 |
+| `tai_version`（**可选**）| `string`（semver）| 空 | **含 tai 的制品**写入 | 制品内含的 tai 版本 |
 | `build` | `"local"` \| `"ci"` | `"local"` | `"ci"` | 区分本地包与流水线包 |
 
 - **只读**：运行时只读不写，要改就得重新构建。
@@ -195,6 +199,8 @@
 - **`artifact` 六个取值**：`unified`（CUI + yao + tai）· **`cui`（仅桌面客户端，含 Bridge）**·
   **`web`（仅 Web，不含 Bridge）**· `yao`（仅 yao 管理）· `tai`（仅 tai 管理）· `server`（yao + tai 共享包）。
 - **`artifact` 与 `client` 对齐**：含 Bridge 的制品 `client` 为 `"desktop"`，`web` 制品为 `"web"`。
+- **版本字段跟着 `artifact` 走**：`unified` 与 `server` 写两个 · `yao` 只写 `yao_version` ·
+  `tai` 只写 `tai_version` · `cui` 与 `web` **两个都不写**。
 
 ## 6. 客户端底座（Desktop Bridge）
 
