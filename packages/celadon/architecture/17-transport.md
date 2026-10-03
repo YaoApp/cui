@@ -1,0 +1,61 @@
+# 17 · 传输（`transport/`）
+
+- **版本**：v1.0
+- **最后修改**：2026-10-03 19:31:44
+- **说明**：唯一出海口 · 一处承担什么 · 两种宿主一种接口 · 流式 · 门禁与测试
+
+> **这是应用唯一的出海口。** 组件 · feature · `data/` 里都不出现 `fetch` · `EventSource` · `new WebSocket`；
+> HTTP 与 WebSocket 的差异只在这一层消化。落位见 [`15-platform.md`](15-platform.md) §2。
+
+## 1. 一条规则
+
+**所有对外通信都经 `platform/transport/`。**
+
+- **不许**：业务自己拼 URL · 自己读 token · 自己建 WebSocket · 自己判宿主
+- **门禁**：`features/` · `components/` · `routes/` 里出现 `fetch(` · `EventSource` · `new WebSocket` 即失败
+  —— 检查器**随实现落地**（`transport/` 建成之后加，配正反样本，见 [`13-quality-gates.md`](13-quality-gates.md)）
+
+## 2. 一处承担
+
+| 事 | 谁做 |
+| --- | --- |
+| **基址解析** | 地址由 `service/` 持有（唯一来源），`transport/` 拼 |
+| **注入凭据** | 凭据由 `credential/` 给，`transport/` 注入；**显式带的 `Authorization` 不覆盖** |
+| **401 刷新并重放** | `transport/` 负责流程；**刷新的实现**在 `credential/` |
+| **错误归一** | `transport/` 把网络 / 超时 / HTTP 状态 / 解析四类**归一成一种形状**（`{ code, params, message }`：码给程序 · 参数给插值 · 英文给日志，见 `08-i18n.md`）|
+| **重连** | SSE 与 WebSocket 的重连由它一处负责 |
+
+## 3. 两种宿主，一种接口
+
+**对外形状一致**：同一套方法签名与返回类型，feature **不感知宿主**。
+
+| 宿主 | HTTP | 流式 / WebSocket |
+| --- | --- | --- |
+| **Web** | 浏览器 `fetch` —— **同源**（宿主已把接口路径代理到引擎）| 浏览器原生对象 |
+| **Desktop** | **官方 `tauri-plugin-http`** 的 `fetch` —— **与浏览器 `fetch` 同签名**，请求由 Rust 的 reqwest 发出 | 宿主侧 native |
+
+- **不自己写 fetch 命令**：官方插件已经给了同签名的实现，**重复造会把"同签名"这件事做成两套**
+- **桌面为什么用宿主代发**：跨域**不受 CORS 约束**；且**不自动带 Cookie**——桌面凭据是 Bearer（见 [`15-platform.md`](15-platform.md) §4.5），正合规则
+- **插件不管、我们自己管的两件**：
+  - **体积上限**：读流到 N 字节就 abort（默认 **1 MiB**）
+  - **超时**：用 `AbortSignal`（默认 **30 秒**）
+- **允许哪些地址**：在桌面壳的 `capabilities/` 里按插件的 **scope** 配 —— **"只允许 http(s)"的强制落点在那里**，不在前端
+- **凭据**：headers 由调用方显式给（凭据从 `credential/` 取），**插件不会替我们带任何东西**
+
+## 4. 流式
+
+- SSE 与 WebSocket **都经 `transport/`**：接线 · 鉴权 · 重连由它负责，不裸用浏览器原生对象
+- 流式与普通请求**共用同一套基址与鉴权**
+
+## 5. 不规定上下文格式
+
+出站上下文的值由 [`15-platform.md`](15-platform.md) §5.1 给；
+**带不带、怎么带（请求头 / 查询参数 / 请求体）由各 API 的接口封装决定** —— 平台层只保证值随时可取。
+
+## 6. 测试
+
+| 层 | 测什么 |
+| --- | --- |
+| 单元 | 错误归一（网络 · 超时 · 状态码 · 解析）· 基址拼接 · **凭据注入不覆盖显式值** · 上限截断 |
+| 浏览器 | 真实渲染引擎下走一次普通请求与一次流式（**宿主差异不 mock**）|
+| 宿主 | `celadon_transport_fetch` 的约束各一条（scheme 拒绝 · 截断 · 超时）|

@@ -13,5 +13,9 @@
   "hello.host": "宿主",
   "hello.hostNone": "無（瀏覽器裡沒有宿主）",
   "hello.hostReady": "可用（版本 {{version}}）",
-  "hello.loading": "讀取中"
+  "hello.loading": "讀取中",
+  "hello.os": "系統",
+  "hello.browser": "瀏覽器",
+  "hello.version": "版本",
+  "hello.clientId": "客戶端標識"
 }

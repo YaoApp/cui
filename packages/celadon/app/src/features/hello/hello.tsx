@@ -6,10 +6,12 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { Icon } from '@/components/base/icon'
 import { BrandMark, type BrandId } from '@/components/base/brand-mark'
 import { useTranslation } from '@/platform/i18n'
-import { useClientInfo } from '@/platform/client'
+import { buildManifest, clientInfo } from '@/platform/client'
+import { useHostStatus } from '@/platform/bridge'
 import { useThemeStore } from '@/platform/theme/theme.store'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
+import { routerBasename } from '@/platform/router/basename'
 import { FooBar } from './components/foo-bar'
 import type { IconId } from '@/platform/icons'
 import { useHelloStore } from './hello.store'
@@ -43,19 +45,16 @@ export function HelloPage() {
   // 应用级导航项在 platform/utils 里存的是 key，显示前在这里翻成当前语言
   const navItems = navWithActive(pathname).map((item) => ({ ...item, label: t(item.label) }))
   usePageTitle(t('hello.title'))
-  /* 客户端自述：**Web 与桌面共用这一份显示**，差别只在"宿主"那一格（见 platform/client）。
-     在平台层的 hook 里问，组件只负责显示 —— 组件不自己发请求（03-boundaries §4）。 */
-  const client = useClientInfo()
-  const clientType = client
-    ? client.client === 'desktop'
-      ? t('hello.clientDesktop')
-      : t('hello.clientWeb')
-    : t('hello.loading')
-  const hostText = client
-    ? client.host.available
-      ? t('hello.hostReady', { version: client.host.version })
+  /* 客户端信息（15-platform.md §5.2）：**两个宿主导出同一组字段**，上层不判宿主。
+     宿主版本与产品版本同源（壳与应用的版本统一，见 02-platform 的实现约定）。 */
+  const info = clientInfo()
+  const hostVersion = buildManifest().version
+  const host = useHostStatus()
+  const hostText = !host
+    ? t('hello.loading')
+    : host.ok
+      ? t('hello.hostReady', { version: host.value.version })
       : t('hello.hostNone')
-    : t('hello.loading')
 
   return (
     <div className="hello">
@@ -70,15 +69,31 @@ export function HelloPage() {
         </div>
         <section className="hello__row" aria-label={t('hello.client')}>
           <span className="hello__client">
-            {t('hello.clientType')}：{clientType}
+            {t('hello.clientType')}：{info.client === 'desktop' ? t('hello.clientDesktop') : t('hello.clientWeb')}
           </span>
           <span className="hello__client">
-            {t('hello.namespace')}：{client?.namespace ?? ''}/
+            {t('hello.os')}：{info.os}
           </span>
+          <span className="hello__client">
+            {t('hello.browser')}：{info.ua.browser.name}{info.ua.browser.version ? ` ${info.ua.browser.version}` : ''}
+          </span>
+          <span className="hello__client">
+            {t('hello.version')}：{hostVersion}
+          </span>
+          <span className="hello__client">
+            {t('hello.clientId')}：{info.client_id.slice(0, 8)}
+          </span>
+        </section>
+
+        <section className="hello__row" aria-label={t('hello.host')}>
           <span className="hello__client">
             {t('hello.host')}：{hostText}
           </span>
+          <span className="hello__client">
+            {t('hello.namespace')}：{routerBasename() || '/'}
+          </span>
         </section>
+
         <section className="hello__row" aria-label={t('hello.brands')}>
           {BRAND_SAMPLE.map((name) => (
             <span className="hello__cell" key={name}>
