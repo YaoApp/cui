@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 vi.mock('@/platform/client/client-id', () => ({ clientId: () => 'desk-test-id' }))
 vi.mock('@/platform/service', () => ({ serviceBase: () => '' }))
 
-import { callContext, contextHeaders, contextQuery } from './ctx'
+import { callContext, contextHeaders, contextQuery } from './context'
 
 afterEach(() => vi.unstubAllGlobals())
 
