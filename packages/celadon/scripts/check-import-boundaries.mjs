@@ -55,8 +55,8 @@ const ALLOWED = {
 const EXTS = ['.ts', '.tsx', '.js', '.mjs', '.cjs', '.jsx', '.json', '.less', '.css', '.svg']
 /** 旧包：铁律 2 · 零反向依赖。其它检查器都没覆盖这条，所以在这里一并拦下。 */
 const OLD_PACKAGE = '@yaoapp/cui'
-/** 唯一装配例外：路由机制把路由表装成 router 实例（07-routing.md §6）。 */
-const ASSEMBLY_EDGES = [{ from: 'platform/router/router.tsx', to: 'routes/routes' }]
+/* 无装配例外：装配点在入口 `app/src/main.tsx`（不属于任何层），platform/ 不反向引 routes/。 */
+const ASSEMBLY_EDGES = []
 
 /** 取一个绝对路径在源码根下的相对路径（用 `/` 归一，便于比较）。 */
 const toRel = (abs) => relative(TARGET, abs).split(/[\\/]/).join('/')
