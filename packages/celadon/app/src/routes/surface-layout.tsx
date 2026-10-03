@@ -1,12 +1,16 @@
-import { Outlet } from 'react-router'
+import { useEffect } from 'react'
+import { Outlet, useLocation } from 'react-router'
 import { useTranslation } from '@/platform/i18n'
 import { useUrlBinding } from '@/platform/router/use-url-binding'
 import { type Surface } from '@/platform/utils/surfaces'
 import { type Entry } from '@/stores/entry'
 import { useSidePanelStore } from '@/stores/side-panel'
 
-/** 条目种类 → 地址栏参数名。一个种类一个具名参数；新增种类在这里加一行。 */
-const SIDE_PANEL_PARAMS: Record<string, string> = { 'world-entity': 'sideEntity' }
+/** 条目种类 → 参数名与**归属路径**。一个种类一个具名参数；新增种类在这里加一行。
+   归属路径解决一件事：条目只由能渲染它的功能负责，落在别人的地盘上就是死参数。 */
+const SIDE_PANEL_PARAMS: Record<string, { param: string; owner: string }> = {
+  'world-entity': { param: 'sideEntity', owner: '/world' },
+}
 import './surface-layout.less'
 
 /* 装配：按表面决定页面放在哪里。侧边不是弹窗，是一个**挂载点** ——
@@ -14,6 +18,7 @@ import './surface-layout.less'
    表面**由支路传入**，不从地址里取（见 architecture/07-routing.md）。 */
 export function SurfaceLayout({ surface }: { surface: Surface }) {
   const { t } = useTranslation()
+  const { pathname } = useLocation()
   const entry = useSidePanelStore((s) => s.entry)
   const open = useSidePanelStore((s) => s.open)
 
@@ -24,17 +29,27 @@ export function SurfaceLayout({ surface }: { surface: Surface }) {
     value: entry,
     mode: 'push',
     read: (params) => {
-      for (const [kind, name] of Object.entries(SIDE_PANEL_PARAMS)) {
-        const id = params.get(name)
-        if (id) return open({ kind, id })
+      for (const [kind, spec] of Object.entries(SIDE_PANEL_PARAMS)) {
+        const id = params.get(spec.param)
+        /* 深链落在别人的地盘上（如 `/hello?sideEntity=`）——**不认**，写回时参数会被抹掉。 */
+        if (id) return open(pathname.startsWith(spec.owner) ? { kind, id } : undefined)
       }
       open(undefined)
     },
     write: (params, value) => {
-      for (const name of Object.values(SIDE_PANEL_PARAMS)) params.delete(name)
-      if (value) params.set(SIDE_PANEL_PARAMS[value.kind] ?? value.kind, value.id)
+      for (const spec of Object.values(SIDE_PANEL_PARAMS)) params.delete(spec.param)
+      /* 未登记的种类**写不出去**（写了也读不回来，等于制造死参数）。 */
+      const spec = value ? SIDE_PANEL_PARAMS[value.kind] : undefined
+      if (value && spec) params.set(spec.param, value.id)
     },
   })
+
+  /* 路由一离开它的地盘就作废条目 —— 否则切到别的功能后，地址栏还留着打不开的面板参数。
+     放在这里（而不是功能的卸载清理）：布局始终挂着，也不会被 StrictMode 的双次挂载误伤。 */
+  useEffect(() => {
+    const spec = entry ? SIDE_PANEL_PARAMS[entry.kind] : undefined
+    if (entry && spec && !pathname.startsWith(spec.owner)) open(undefined)
+  }, [pathname, entry, open])
 
   if (surface === 'side') {
     return (

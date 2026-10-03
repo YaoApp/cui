@@ -85,3 +85,18 @@ describe('coerceLocalePreference', () => {
     expect(coerceLocalePreference(42)).toBe('system')
   })
 })
+
+/* **水合路径**：只测纯函数的话，把 `merge` 整段删掉也照样绿（上一轮验收指出过）。 */
+describe('locale store · hydration', () => {
+  it('falls back when the stored preference is not a supported language', async () => {
+    window.localStorage.setItem('cui.locale', JSON.stringify({ state: { locale: 'fr-FR' }, version: 0 }))
+    await useLocaleStore.persist.rehydrate()
+    expect(useLocaleStore.getState().locale).toBe('system')
+  })
+
+  it('keeps a stored preference that is supported', async () => {
+    window.localStorage.setItem('cui.locale', JSON.stringify({ state: { locale: 'en-US' }, version: 0 }))
+    await useLocaleStore.persist.rehydrate()
+    expect(useLocaleStore.getState().locale).toBe('en-US')
+  })
+})

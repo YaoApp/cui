@@ -92,3 +92,18 @@ describe('coerceThemePreference', () => {
     expect(coerceThemePreference(null)).toBe('system')
   })
 })
+
+/* **水合路径**：同上，纯函数测不到 `merge`。 */
+describe('theme store · hydration', () => {
+  it('falls back when the stored preference is unknown', async () => {
+    window.localStorage.setItem('cui.theme', JSON.stringify({ state: { preference: 'blue' }, version: 1 }))
+    await useThemeStore.persist.rehydrate()
+    expect(useThemeStore.getState().preference).toBe('system')
+  })
+
+  it('keeps the old shape by migrating it to a preference', async () => {
+    window.localStorage.setItem('cui.theme', JSON.stringify({ state: { theme: 'dark' }, version: 0 }))
+    await useThemeStore.persist.rehydrate()
+    expect(useThemeStore.getState().preference).toBe('dark')
+  })
+})

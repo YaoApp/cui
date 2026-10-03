@@ -1,5 +1,7 @@
 /* 只管设计类没有的部分：布局与尺寸档。颜色/边框/四态全在 design/tokens.less 的 .btn-* 里。 */
 .button {
+  /* 按钮文字**不许折行**：窄窗下「刷新」被折成两行（拟人 S5 的截图抓到过）。 */
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   justify-content: center;
