@@ -41,7 +41,7 @@ export function WorldPage() {
 
   const worldNav = navWithActive(
     pathname,
-    visible.map((item) => ({ label: t(item.nameKey), href: `/app/world/${item.id}` })),
+    visible.map((item) => ({ label: t(item.nameKey), href: buildShareUrl({ feature: 'world', object: item.id }) })),
   )
 
   return (

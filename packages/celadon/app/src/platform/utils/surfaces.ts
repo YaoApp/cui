@@ -1,6 +1,6 @@
-/** 界面表面：主区 · 侧边。跨层共享的词汇，住 platform/utils（见 architecture/00-principles.md）。 */
-export const SURFACES = ['app', 'side'] as const
-export type Surface = (typeof SURFACES)[number]
+/** 界面表面：主区与侧边。**只有侧边出现在地址里**（前缀 `side/`），主区就在 base 之下。
+ *  跨层共享的词汇，住 platform/utils（见 architecture/00-principles.md）。 */
+export const SIDE_PREFIX = 'side'
 
-export const isSurface = (value: unknown): value is Surface =>
-  typeof value === 'string' && (SURFACES as readonly string[]).includes(value)
+export const SURFACES = ['main', 'side'] as const
+export type Surface = (typeof SURFACES)[number]

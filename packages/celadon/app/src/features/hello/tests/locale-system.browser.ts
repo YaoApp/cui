@@ -9,7 +9,7 @@ test('follows the system language on first visit, then keeps an explicit choice'
     Object.defineProperty(navigator, 'languages', { value: ['ja-JP', 'ja'], configurable: true })
   })
 
-  await page.goto('/')
+  await page.goto('/app/')
 
   // 没有持久化选择 → 跟随系统：界面日文，<html lang> 也是解析后的 ja
   await expect(page.getByRole('link', { name: 'ワールド' })).toBeVisible()

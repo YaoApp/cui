@@ -16,8 +16,8 @@ export type NavItem = {
 export type AppNavItem = NavItem & { label: I18nKey }
 
 export const APP_NAV: AppNavItem[] = [
-  { label: 'nav.hello', href: '/app/hello', icon: 'i-spark' },
-  { label: 'nav.world', href: '/app/world', icon: 'i-ws' },
+  { label: 'nav.hello', href: '/hello', icon: 'i-spark' },
+  { label: 'nav.world', href: '/world', icon: 'i-ws' },
 ]
 
 /** 按当前路径标出选中项 —— 比较只写这一处，别让每个页面各写一遍。

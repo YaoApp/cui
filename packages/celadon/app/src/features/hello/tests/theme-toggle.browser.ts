@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 /* 场景：切换主题 —— 设计里的分段控件（浅色 / 暗色），选中项自己标出来。 */
 test('the segmented switch picks a theme and the whole page follows', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/app/')
 
   await expect(page.getByRole('button', { name: '浅色' })).toHaveAttribute('aria-pressed', 'true')
   const light = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
@@ -18,7 +18,7 @@ test('the segmented switch picks a theme and the whole page follows', async ({ p
 })
 
 test('the choice survives a reload', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/app/')
   await page.getByRole('button', { name: '暗色' }).click()
   await page.reload()
 
