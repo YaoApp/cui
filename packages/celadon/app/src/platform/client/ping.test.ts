@@ -24,7 +24,7 @@ describe('ping', () => {
 
   it('reports the host version when the desktop answers', async () => {
     asDesktop(async (command) => {
-      expect(command).toBe('celadon_host_status')
+      expect(command).toBe('celadon_ping')
       return { available: true, version: '0.1.0' }
     })
     const info = await ping()

@@ -3,10 +3,11 @@
    所以同一个界面在两边都能显示，差别只在宿主那一格。
 
    规则：
-   · 宿主**存在性**先判（`__TAURI_INTERNALS__` / `__TAURI__`），不去猜命令是否可用
+   · 宿主调用**不在这里**：一律经 `platform/bridge/`（15 §6：桌面能力只在 bridge 实现）
    · 宿主调用失败 = **值**，不抛：`host.available = false`
    · 只回"版本"这类**非敏感**信息；凭据永不经过这里 */
 
+import { bridge, hasHost } from '@/platform/bridge'
 import { routerBasename } from '@/platform/router/basename'
 
 export type ClientKind = 'web' | 'desktop'
@@ -25,37 +26,18 @@ export type ClientInfo = {
   host: HostInfo
 }
 
-type TauriGlobal = {
-  core?: { invoke?: (command: string, args?: Record<string, unknown>) => Promise<unknown> }
-}
-
-/** 宿主在不在。Tauri 2 把内部接口挂在 `__TAURI_INTERNALS__`；`withGlobalTauri` 时另有 `__TAURI__`。 */
-function hasHost(): boolean {
-  const scope = globalThis as { __TAURI_INTERNALS__?: unknown; __TAURI__?: unknown }
-  return '__TAURI_INTERNALS__' in scope || '__TAURI__' in scope
-}
-
-const NO_HOST: HostInfo = { available: false, version: '' }
 
 /** 问一次"我是谁"。**永不抛**：问不到就如实说问不到。 */
 export async function ping(): Promise<ClientInfo> {
-  // **命名空间只有一处来源**：`platform/router/basename.ts`（SPEC §4：Vite 的 base 与路由 basename 同值）。
-  // 各层自己读环境就会造出第二个来源，两个值能不一致（见 00-principles 铁律 1）。
-  const ns = routerBasename()
-  if (!hasHost()) return { client: 'web', namespace: ns, host: NO_HOST }
-
-  const invoke = (globalThis as { __TAURI__?: TauriGlobal }).__TAURI__?.core?.invoke
-  if (!invoke) return { client: 'desktop', namespace: ns, host: NO_HOST }
-
-  try {
-    const status = (await invoke('celadon_host_status')) as { available?: unknown; version?: unknown } | undefined
-    return {
-      client: 'desktop',
-      namespace: ns,
-      host: { available: status?.available === true, version: typeof status?.version === 'string' ? status.version : '' },
-    }
-  } catch {
-    // 宿主在，但命令没起来 / 被拒 —— 一样如实回"不可用"
-    return { client: 'desktop', namespace: ns, host: NO_HOST }
+  // 三件事各有**唯一来源**：命名空间问 router（铁律 1）、宿主状态问 bridge（15 §6）、客户端类型由桥的在否决定。
+  const namespace = routerBasename()
+  const client: ClientKind = hasHost() ? 'desktop' : 'web'
+  const result = await bridge.ping()
+  return {
+    client,
+    namespace,
+    host: result.ok
+      ? { available: result.value.available === true, version: result.value.version ?? '' }
+      : { available: false, version: '' },
   }
 }

@@ -45,3 +45,9 @@
   line-height: var(--line-height-tight);
   white-space: nowrap;   /* 名字不许按字符切断（此前 break-all 把 brand-yao-agents 切成两行） */
 }
+
+/* 客户端自述的格子：外观**继承**自单元格（不复制声明，见 00-principles 铁律 1）。
+   用单独的类是因为它**不是图标格** —— 图标用例与拟人剧本都在数 `.hello__cell`。 */
+.hello__client {
+  &:extend(.hello__cell);
+}
