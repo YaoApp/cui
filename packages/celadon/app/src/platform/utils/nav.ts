@@ -18,6 +18,8 @@ export type AppNavItem = NavItem & { label: I18nKey }
 export const APP_NAV: AppNavItem[] = [
   { label: 'nav.hello', href: '/hello', icon: 'i-spark' },
   { label: 'nav.world', href: '/world', icon: 'i-ws' },
+  /* 桥的验证页：人工测试时从这里进（页内有「返回」） */
+  { label: 'nav.verify', href: '/verify', icon: 'i-check' },
 ]
 
 /** 按当前路径标出选中项 —— 比较只写这一处，别让每个页面各写一遍。

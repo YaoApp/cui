@@ -7,3 +7,7 @@ export { clientInfo, clientSignature, type ClientInfo } from './info'
 export { clientId, primeClientId, newClientId, randomId } from './client-id'
 export { parseUserAgent, uaInfo, type BrowserInfo, type UaInfo } from './ua'
 export { outboundContext, type OutboundContext, type OutboundInputs } from './context'
+
+/* "这台客户端有没有宿主" 也是一条**客户端事实**（§5 让调用方先问 `client/`）。
+   实现留在 `bridge/`（**只有它能碰宿主**），这里只是把它按客户端的面孔转出去。 */
+export { hasHost } from '../bridge/invoke'
