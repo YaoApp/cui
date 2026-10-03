@@ -1,7 +1,7 @@
 # 15 · 平台层
 
-- **版本**：v1.20
-- **最后修改**：2026-10-03 09:12:42
+- **版本**：v1.21
+- **最后修改**：2026-10-03 09:14:46
 - **说明**：平台层：构成与落位 · 服务信息（well-known）· 会话与鉴权 · 运行环境 · 数据层
 
 ## 1. 规则
@@ -89,10 +89,11 @@
 | --- | --- | --- |
 | Android | **native HTTP**（OkHttp）| **无跨域** —— 直连服务端即可 |
 | Desktop | **native HTTP**（Tauri `http` 插件 → Rust 侧）| **无跨域** —— 直连服务端即可 |
-| Desktop | webview 里的 `fetch()` | **有跨域**（标准浏览器语义）|
+| Desktop | webview 里的 `fetch()` | **有跨域** —— webview 是浏览器引擎，受**同源策略**约束 |
 | Web | 浏览器 `fetch()` | **有跨域** —— 需同源部署或服务端 CORS |
 
-- 服务端**不发 CORS 头、不处理预检**（实测 `Access-Control-*` 全无、`OPTIONS` 返回 404）。
+- 服务端**不发 CORS 头、不处理预检**（实测 `Access-Control-*` 全无、`OPTIONS` 返回 404），
+  所以 webview 里发出去的跨域请求**拿不到响应**。
 - **结论**：走客户端方式时,**Desktop 必须用 Tauri 的 `http` 插件发请求**（Rust 侧），
   **不要用 webview 的 `fetch()`** —— 否则仍需一个加 CORS 的本地代理（`cui-desktop` 现状即是此，其
   `tower-http` 的 `cors` 就用在那个代理上）。走 native 之后**代理与隧道都可以去掉**。
