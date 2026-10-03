@@ -47,6 +47,13 @@ describe('transportFetch', () => {
     expect(strict).toMatchObject({ ok: false, code: 'transport.status', params: { status: 503 } })
   })
 
+  it('sets no limit of its own: without a timeout a slow answer still arrives', async () => {
+    // **默认不限定**（17 §2.2）：出口不替业务方定数字
+    vi.stubGlobal('fetch', vi.fn(() => new Promise((resolve) => setTimeout(() => resolve(new Response('late')), 60))))
+    const result = await transportFetch('/api/slow')
+    expect(result.ok).toBe(true)
+  })
+
   it('reports a timeout rather than hanging', async () => {
     vi.stubGlobal('fetch', vi.fn((_input: unknown, init?: RequestInit) => new Promise((_resolve, reject) => {
       init?.signal?.addEventListener('abort', () => reject(new Error('aborted')))
