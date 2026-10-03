@@ -1,7 +1,7 @@
 # 02 · 平台地基（产品级）
 
 - **版本**：v0.2（计划 + 进度）
-- **最后修改**：2026-10-03 21:48:29
+- **最后修改**：2026-10-03 22:16:06
 - **说明**：把平台层从"规范先行"做成产品级地基 · 依赖顺序 · 逐项验收 · 未定项
 
 > **这份是计划，不是规范。** 规则在 [`../architecture/15-platform.md`](../architecture/15-platform.md)；
@@ -60,17 +60,19 @@
 
 ## 1. 要建的东西（`app/src/platform/` 下六个目录）
 
-平台层现有 5 个：`theme/` · `router/` · `i18n/` · `icons/` · `utils/`。
-**产品级地基还差六个**，它们有依赖顺序，不能并行乱做：
+平台层原有 5 个：`theme/` · `router/` · `i18n/` · `icons/` · `utils/`
+（另有 `manifest.json` —— 客户端事实的**源**，以及 `shell.less`）。
+
+**产品级地基这六个**，有依赖顺序，不能并行乱做；**现在四个已建**：
 
 | # | 目录 | 职责 | 依赖 | 当前 |
 | --- | --- | --- | --- | --- |
-| 1 | `client/` | 客户端类型 · 能力开关 · UA 解析 · `client_id`（webview storage）| 无 | 未建 |
-| 2 | `service/` | 服务信息（well-known）· **服务地址一处持有** | `client/` | 未建 |
-| 3 | `credential/` | 凭据的存取与消费（按宿主选载体）· 刷新定时器 | `service/` · `bridge/`（桌面侧）| 未建 |
-| 4 | `transport/` | **对外通信唯一出口**（`http(s)` + `ws(s)`）| `service/` · `credential/` | 未建 |
-| 5 | `data/`（在 `app/src/`，不在 platform）| 接口类型（手写）+ 取数钩子 | `transport/` | 未建 |
-| 6 | `bridge/` · `webproxy/` | 桌面宿主能力唯一入口 · agent sandbox 域名构造 | 桌面期 | 未建 |
+| 1 | **`client/`** | 客户端类型 · 能力开关 · UA 解析 · `client_id` | 无 | ✅ **已建**（`client_id` **带来源前缀**：`desk-<真机器码>` / `web-<随机>`；归一走 `i18n/resolve-locale`）|
+| 2 | **`service/`** | 服务信息（well-known）· **服务地址一处持有** | `client/` | ✅ **已建**（基址唯一来源 `base.ts`；well-known 与 Web 同域清单**随服务对接**）|
+| 3 | `credential/` | 凭据的存取与消费（按宿主选载体）· 刷新定时器 | `service/` · `bridge/` | 🔶 **载体已完成，独立目录未建**：桌面侧落在 **`bridge/credential`**（写→读→删→列 · 无明文回退）· Web 侧**无存储代码**（HttpOnly 由浏览器/服务端负责）；登录/刷新随服务接口，**那时再建这个目录** |
+| 4 | **`transport/`** | **对外通信唯一出口** | `service/` | ✅ **已建**（两宿主一种接口 · 四类失败归一 · **限制与重试都由业务方给**；`ws(s)` 与下载/SSE 两档待做）|
+| 5 | `data/`（在 `app/src/`，**不在** platform）| 接口类型（手写）+ 取数钩子 | `transport/` · **服务接口形状** | ⏸ 未建 |
+| 6 | `bridge/` · `webproxy/` | 桌面宿主能力唯一入口 · agent sandbox 域名构造 | 桌面期 | `bridge/` ✅ **已建**（16 条命令：宿主 · 凭据 · 系统集成；**只有它碰框架内部**）· `webproxy/` ⏸ 未建 |
 
 ## 2. 逐项 todo 与验收
 
