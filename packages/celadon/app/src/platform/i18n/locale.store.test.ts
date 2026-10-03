@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { i18n } from '@/platform/i18n'
-import { resolvePreference, useLocaleStore } from '@/platform/i18n/locale.store'
+import { coerceLocalePreference, resolvePreference, useLocaleStore } from '@/platform/i18n/locale.store'
 
 /* 语言只做一件事：把**解析后的**语言同步到 i18n 实例与 `<html lang>`。store 是唯一写它的地方。
    单测环境的系统语言被 test-support 固定为基准 zh-CN（见那里的说明）。 */
@@ -68,4 +68,20 @@ it('is reset between tests, so one test cannot leak a locale into the next', () 
   expect(useLocaleStore.getState().locale).toBe('system')
   expect(i18n.language).toBe('zh-CN')
   expect(document.documentElement.lang).toBe('zh-CN')
+})
+
+/* 存储里的值可能来自旧版本或被手改 —— 非法一律回落 `system`，不许进入 UI 与 <html lang>。 */
+describe('coerceLocalePreference', () => {
+  it('keeps the supported languages and the system choice', () => {
+    expect(coerceLocalePreference('system')).toBe('system')
+    expect(coerceLocalePreference('en-US')).toBe('en-US')
+    expect(coerceLocalePreference('ja')).toBe('ja')
+  })
+
+  it('falls back for anything else', () => {
+    expect(coerceLocalePreference('fr-FR')).toBe('system')
+    expect(coerceLocalePreference('')).toBe('system')
+    expect(coerceLocalePreference(undefined)).toBe('system')
+    expect(coerceLocalePreference(42)).toBe('system')
+  })
 })

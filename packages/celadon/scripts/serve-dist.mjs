@@ -31,7 +31,15 @@ const TYPES = {
 }
 
 createServer((req, res) => {
-  const path = decodeURIComponent(new URL(req.url ?? '/', 'http://localhost').pathname)
+  let path
+  try {
+    path = decodeURIComponent(new URL(req.url ?? '/', 'http://localhost').pathname)
+  } catch {
+    // 非法转义（如 /app/%zz）：一条坏请求不该打死服务器
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' })
+    res.end('bad request')
+    return
+  }
   // 根不属于应用：命名空间外一律 404，别让人以为这是根部署（见 architecture/04-host-integration.md）
   if (path !== NS_PREFIX && !path.startsWith(NS_PREFIX + '/')) {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' })

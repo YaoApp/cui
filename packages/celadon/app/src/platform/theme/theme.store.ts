@@ -30,6 +30,10 @@ type ThemeState = {
 /* 主题是运行时的事，归平台层。它只做一件事：把**解析后的**主题写到根元素的 data-theme 上 ——
    tokens.css 里 [data-theme='dark'] .celadon 会切掉整套值，**组件不需要知道当前深浅**。
    偏好存 localStorage（键 `cui.theme`）；首帧由 `index.html` 的 inline 脚本先写一次，避免闪浅色。 */
+/** 校验一个持久化值是否是合法偏好；非法一律回落 `'system'`。 */
+export const coerceThemePreference = (value: unknown): 'system' | 'light' | 'dark' =>
+  value === 'system' || value === 'light' || value === 'dark' ? value : 'system'
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
@@ -48,6 +52,10 @@ export const useThemeStore = create<ThemeState>()(
         return old === 'light' || old === 'dark' ? { preference: old } : (persisted as object)
       },
       partialize: (state) => ({ preference: state.preference }),
+      merge: (persisted, current) => ({
+        ...current,
+        preference: coerceThemePreference((persisted as { preference?: unknown } | undefined)?.preference),
+      }),
       /* 水合只带回来 `preference`；`theme` 是解析结果，必须**重新算一次** ——
          否则刷新后偏好是 dark、DOM 却还是创建时的 light（浏览器用例抓到过）。 */
       onRehydrateStorage: () => (state) => {

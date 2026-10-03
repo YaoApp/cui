@@ -22,6 +22,14 @@ export type UrlBinding<T> = {
   mode?: 'replace' | 'push'
 }
 
+/* **语义比较**：参数顺序不算差异。write 会重排参数（先删后加），
+   若与当前 search 逐字符比较，就会被误判成"变了" → 多出一条历史，用户按后退像没反应。 */
+export function sameParams(params: URLSearchParams, search: string): boolean {
+  const left = [...params.entries()].sort()
+  const right = [...new URLSearchParams(search).entries()].sort()
+  return left.length === right.length && left.every(([key, value], i) => key === right[i][0] && value === right[i][1])
+}
+
 export function useUrlBinding<T>({ value, read, write, mode = 'replace' }: UrlBinding<T>) {
   const navigate = useNavigate()
   const { key, search } = useLocation()
@@ -45,7 +53,7 @@ export function useUrlBinding<T>({ value, read, write, mode = 'replace' }: UrlBi
     const params = new URLSearchParams(search)
     write(params, valueRef.current)
     const wanted = params.toString()
-    if (wanted === search.replace(/^\?/, '')) return
+    if (sameParams(params, search)) return
     navigate(wanted ? `?${wanted}` : '?', { replace: mode === 'replace' })
     // write 故意不进依赖：同上
     // eslint-disable-next-line react-hooks/exhaustive-deps

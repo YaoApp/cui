@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { useLocaleStore } from '@/platform/i18n/locale.store'
@@ -82,5 +82,17 @@ describe('WorldPage', () => {
     expect(screen.getByRole('heading', { name: 'Gatekeeper' })).toBeInTheDocument()
     expect(screen.getByText('Role')).toBeInTheDocument()
     expect(screen.queryByText('role')).not.toBeInTheDocument()
+  })
+})
+
+/* 条目指向的对象不在了：必须作废，且**分享链接不许带上它**。 */
+describe('WorldPage · 作废的条目', () => {
+  it('clears an entry whose object is gone, and keeps it out of the share link', async () => {
+    act(() => useSidePanelStore.getState().open({ kind: 'world-entity', id: 'nope' }))
+    renderAt('/world/w1')
+
+    await waitFor(() => expect(useSidePanelStore.getState().entry).toBeUndefined())
+    const hrefs = screen.getAllByRole('link').map((link) => link.getAttribute('href') ?? '')
+    expect(hrefs.some((href) => href.includes('sideEntity'))).toBe(false)
   })
 })
