@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  coerceThemePreference,
   resolveTheme,
   systemPrefersDark,
   useThemeStore,
@@ -75,4 +76,34 @@ it('does not follow once the preference is explicit', () => {
   useThemeStore.getState().setPreference('light')
   expect(useThemeStore.getState().theme).toBe('light')
   expect(document.documentElement.dataset.theme).toBe('light')
+})
+
+/* 同语言：存储里的非法偏好不许写到 data-theme 上。 */
+describe('coerceThemePreference', () => {
+  it('keeps the three legal choices', () => {
+    expect(coerceThemePreference('system')).toBe('system')
+    expect(coerceThemePreference('light')).toBe('light')
+    expect(coerceThemePreference('dark')).toBe('dark')
+  })
+
+  it('falls back for anything else', () => {
+    expect(coerceThemePreference('blue')).toBe('system')
+    expect(coerceThemePreference(undefined)).toBe('system')
+    expect(coerceThemePreference(null)).toBe('system')
+  })
+})
+
+/* **水合路径**：同上，纯函数测不到 `merge`。 */
+describe('theme store · hydration', () => {
+  it('falls back when the stored preference is unknown', async () => {
+    window.localStorage.setItem('cui.theme', JSON.stringify({ state: { preference: 'blue' }, version: 1 }))
+    await useThemeStore.persist.rehydrate()
+    expect(useThemeStore.getState().preference).toBe('system')
+  })
+
+  it('keeps the old shape by migrating it to a preference', async () => {
+    window.localStorage.setItem('cui.theme', JSON.stringify({ state: { theme: 'dark' }, version: 0 }))
+    await useThemeStore.persist.rehydrate()
+    expect(useThemeStore.getState().preference).toBe('dark')
+  })
 })

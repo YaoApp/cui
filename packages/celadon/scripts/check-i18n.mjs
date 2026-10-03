@@ -39,13 +39,26 @@ const flat = (obj, prefix = '', out = {}) => {
 
 /* 三处路径按 locale 合并；某处不存在就跳过，不是错误。 */
 const packs = {}
+/* 同一个 key 在两处语言包里各写一份：合并时后面的会**静默覆盖**前面的，
+   合并结果还依赖目录遍历顺序 —— 那是第二份真相，必须报错（声明在 problems 之前，避免暂时性死区）。 */
+const duplicates = []
+const reported = new Set()
+
 const addDir = (dir) => {
   if (!existsSync(dir) || !statSync(dir).isDirectory()) return
   for (const file of readdirSync(dir)) {
     if (!file.endsWith('.json')) continue
     const locale = basename(file, '.json')
     const parsed = JSON.parse(readFileSync(join(dir, file), 'utf8'))
-    packs[locale] = { ...packs[locale], ...flat(parsed) }
+    const incoming = flat(parsed)
+    for (const key of Object.keys(incoming)) {
+      const seenKey = `${locale}/${key}`
+      if (packs[locale] && key in packs[locale] && !reported.has(seenKey)) {
+        reported.add(seenKey)
+        duplicates.push(`[${locale}] key is defined more than once: ${key} (${file})`)
+      }
+    }
+    packs[locale] = { ...packs[locale], ...incoming }
   }
 }
 addDir(join(TARGET, 'app', 'src', 'locales'))
@@ -87,7 +100,7 @@ const SAME_FORM_GUARD = [...'放播常直使用空白面板本形按交人大小
   const wrong = SAME_FORM_GUARD.filter(c => SIMPLIFIED_ONLY.has(c))
   if (wrong.length) { console.error('✗ check-i18n itself is broken: a same-form character was wrongly listed as simplified →', wrong.join('')); process.exit(1) }
 }
-const problems = []
+const problems = [...duplicates]
 
 // 0) key 命名与深度（i18n 规范 §2）：小驼峰 · 深度 ≤ 3 段（首段是命名空间/分组）· 不用缩写
 const ABBREV = new Set(['nav', 'act', 'pnl', 'msg', 'btn', 'cfg', 'usr', 'cnt', 'idx'])

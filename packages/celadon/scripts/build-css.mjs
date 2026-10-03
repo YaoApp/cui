@@ -28,6 +28,14 @@ const outputs = [
 ]
 
 if (!existsSync(lessFile)) { console.error('missing tokens.less:', lessFile); process.exit(1) }
+/* **内容不变就不落盘** —— 否则每次生成都刷新 mtime，而拟人层用 mtime 判"产物是否比源码旧"：
+   `pnpm check` 之后紧接着单跑 `pnpm test:persona` 会得到假失败（2026-10-03 复核者复现过）。 */
+function writeIfChanged(file, content) {
+  if (existsSync(file) && readFileSync(file, 'utf8') === content) return false
+  writeFileSync(file, content)
+  return true
+}
+
 
 let css
 try {
@@ -50,6 +58,6 @@ const HEADER = '/* generated — do not edit by hand; source: design/tokens.less
 const body = `${HEADER}\n${css}`
 for (const file of outputs) {
   mkdirSync(dirname(file), { recursive: true })
-  writeFileSync(file, body)
+  writeIfChanged(file, body)
   console.log('✓ wrote', file.replace(PACKAGE + '/', ''), `(${css.split('\n').length} lines)`)
 }

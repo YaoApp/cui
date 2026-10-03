@@ -14,7 +14,9 @@ const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 /** 允许缺失的引用 → 原因。 */
 const ALLOW = new Map([
-  ['app/src/data/', '规划中未建：架构文档描述目标结构（见 plan/01 §3）'],
+  ['app/src/data/', '规划中未建：架构文档描述目标结构（00-principles.md §2.5）'],
+  ['app/src/data/hooks/use-request.ts', '规划中未建：00-principles.md §2.5 的取数钩子，尚未落地'],
+  ['app/src/platform/transport/', '规划中未建：15-platform.md 描述的对外通信唯一出口，尚未落地'],
   ['app/src/platform/client/', '规划中未建：15-platform.md 描述的 platform 子目录，尚未落地'],
   ['app/src/platform/manifest.json', '规划中未建：15-platform.md §5.3 的构建清单，由打包写入'],
 ])

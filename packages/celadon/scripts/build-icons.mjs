@@ -15,6 +15,14 @@ process.chdir(DESIGN)
 
 
 const manifest = JSON.parse(readFileSync('icons/manifest.json', 'utf8'));
+/* **内容不变就不落盘** —— 否则每次生成都刷新 mtime，而拟人层用 mtime 判"产物是否比源码旧"：
+   `pnpm check` 之后紧接着单跑 `pnpm test:persona` 会得到假失败（2026-10-03 复核者复现过）。 */
+function writeIfChanged(file, content) {
+  if (existsSync(file) && readFileSync(file, 'utf8') === content) return false
+  writeFileSync(file, content)
+  return true
+}
+
 const readSymbols = (file) => {
   const src = readFileSync(file, 'utf8');
   return Object.fromEntries((src.match(/<symbol[\s\S]*?<\/symbol>/g) || [])
@@ -65,8 +73,8 @@ const block = `<svg width="0" height="0" style="position:absolute" aria-hidden="
    `check-generated.mjs` 会重新生成并比对，改图不跑脚本就红（与 tokens.css 同一套）。 */
 const APP_ICONS = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'app', 'src', 'platform', 'icons')
 const SPRITE_HEADER = `<!-- generated — do not edit by hand; source: design/icons/ (node scripts/build-icons.mjs) -->`
-writeFileSync(resolve(APP_ICONS, 'sprite.svg'), `${SPRITE_HEADER}\n${block}\n`)
-writeFileSync(
+writeIfChanged(resolve(APP_ICONS, 'sprite.svg'), `${SPRITE_HEADER}\n${block}\n`)
+writeIfChanged(
   resolve(APP_ICONS, 'icon-ids.ts'),
   `/* generated — do not edit by hand; source: design/icons/manifest.json (node scripts/build-icons.mjs) */\n` +
     `export type IconId =\n` +
@@ -94,7 +102,7 @@ function patch(file) {
     ? JSON.parse(readFileSync('icons/brand-simple-index.json', 'utf8')) : [];
   const brands = JSON.stringify([...lobe, ...simple]).replace(/\s+/g, ' ');
   out = out.replace(/var BRANDS = \[[\s\S]*?\];/, `var BRANDS = ${brands.trim()};`);
-  writeFileSync(file, out);
+  writeIfChanged(file, out);
   console.log(`  ✓ ${file}: inlined ${symbols.length} symbol(s)`);
 }
 patch('mock.html');
