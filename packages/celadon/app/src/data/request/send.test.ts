@@ -65,6 +65,11 @@ describe('send', () => {
     expect(fetchMock.mock.calls[1][1]?.credentials).toBeUndefined() // 受保护的：由浏览器/宿主自己带
   })
 
+  it('refuses an explicit-auth request that forgot to carry one', async () => {
+    const result = await send({ ...request, auth: 'explicit' }, { outbound })
+    expect(result).toMatchObject({ ok: false, code: 'request.explicit_auth_missing' })
+  })
+
   it('passes a network failure straight through', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline') }))
     const result = await send(request, { outbound })

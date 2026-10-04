@@ -53,6 +53,10 @@ function withQuery(url: string, params: Record<string, string | number | boolean
 /** 一次普通请求。**失败是值**，不抛异常。 */
 export async function send<T>(request: Request, inputs: SendInputs): Promise<Result<T>> {
   const ctx: Context = context(inputs.outbound)
+  // `'explicit'` 是**声明"调用方自己带"** —— 那就必须真带了，否则这里直接拒（免得裸奔）
+  if (request.auth === 'explicit' && !inputs.headers?.Authorization) {
+    return { ok: false, ...buildFailure(0, undefined, 'request.explicit_auth_missing') }
+  }
   // 地址由**平台层**给（基址 + well-known 的 openapi 前缀）；**读不到服务信息就直接报错**，不兜前缀
   const address = apiUrl(request.path)
   if (!address) {
