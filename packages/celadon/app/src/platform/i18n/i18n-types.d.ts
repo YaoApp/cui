@@ -13,6 +13,9 @@ export type I18nKey =
   | 'bridge.error.credential.noStoreHere'
   | 'bridge.error.credential.serviceEmpty'
   | 'bridge.error.credential.storeFailed'
+  | 'bridge.error.forbidden'
+  | 'bridge.error.insufficientScope'
+  | 'bridge.error.invalidToken'
   | 'bridge.error.localIps.unavailable'
   | 'bridge.error.openBrowser.failed'
   | 'bridge.error.openBrowser.schemeNotAllowed'
@@ -26,14 +29,41 @@ export type I18nKey =
   | 'bridge.error.theme.expectedLightOrDark'
   | 'bridge.error.theme.readFailed'
   | 'bridge.error.theme.writeFailed'
+  | 'bridge.error.tokenMissing'
   | 'bridge.error.transport.crossOrigin'
   | 'bridge.error.transport.network'
   | 'bridge.error.transport.parse'
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
+  | 'bridge.error.unauthorized'
+  | 'dataCheck.authenticatedDenied'
+  | 'dataCheck.authzHint'
   | 'dataCheck.back'
+  | 'dataCheck.colActions'
+  | 'dataCheck.credentials'
+  | 'dataCheck.emailUnverified'
+  | 'dataCheck.emailVerified'
   | 'dataCheck.expectedFailure'
+  | 'dataCheck.fieldEmail'
+  | 'dataCheck.fieldEmailVerified'
+  | 'dataCheck.fieldId'
+  | 'dataCheck.fieldName'
+  | 'dataCheck.fieldPreferredUsername'
+  | 'dataCheck.fieldRoleId'
+  | 'dataCheck.fieldStatus'
+  | 'dataCheck.fieldTypeId'
+  | 'dataCheck.fieldUserId'
+  | 'dataCheck.listUsers'
+  | 'dataCheck.listUsersHint'
   | 'dataCheck.locale'
+  | 'dataCheck.loginHint'
+  | 'dataCheck.loginTest'
+  | 'dataCheck.loginTestHint'
+  | 'dataCheck.loginToken'
+  | 'dataCheck.loginTokenResult'
+  | 'dataCheck.loginWeb'
+  | 'dataCheck.loginWebResult'
+  | 'dataCheck.noEmailForLogin'
   | 'dataCheck.ok'
   | 'dataCheck.protectedGet'
   | 'dataCheck.protectedPost'
@@ -42,12 +72,15 @@ export type I18nKey =
   | 'dataCheck.reload'
   | 'dataCheck.scaffold'
   | 'dataCheck.scaffoldHint'
+  | 'dataCheck.signOut'
+  | 'dataCheck.signOutDone'
   | 'dataCheck.stateError'
   | 'dataCheck.stateIdle'
   | 'dataCheck.stateLoading'
   | 'dataCheck.stateOk'
   | 'dataCheck.states'
   | 'dataCheck.statesHint'
+  | 'dataCheck.statusActive'
   | 'dataCheck.theme'
   | 'dataCheck.title'
   | 'entityPanel.close'
@@ -167,6 +200,9 @@ declare module 'i18next' {
         'bridge.error.credential.noStoreHere': string
         'bridge.error.credential.serviceEmpty': string
         'bridge.error.credential.storeFailed': string
+        'bridge.error.forbidden': string
+        'bridge.error.insufficientScope': string
+        'bridge.error.invalidToken': string
         'bridge.error.localIps.unavailable': string
         'bridge.error.openBrowser.failed': string
         'bridge.error.openBrowser.schemeNotAllowed': string
@@ -180,14 +216,41 @@ declare module 'i18next' {
         'bridge.error.theme.expectedLightOrDark': string
         'bridge.error.theme.readFailed': string
         'bridge.error.theme.writeFailed': string
+        'bridge.error.tokenMissing': string
         'bridge.error.transport.crossOrigin': string
         'bridge.error.transport.network': string
         'bridge.error.transport.parse': string
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
+        'bridge.error.unauthorized': string
+        'dataCheck.authenticatedDenied': string
+        'dataCheck.authzHint': string
         'dataCheck.back': string
+        'dataCheck.colActions': string
+        'dataCheck.credentials': string
+        'dataCheck.emailUnverified': string
+        'dataCheck.emailVerified': string
         'dataCheck.expectedFailure': string
+        'dataCheck.fieldEmail': string
+        'dataCheck.fieldEmailVerified': string
+        'dataCheck.fieldId': string
+        'dataCheck.fieldName': string
+        'dataCheck.fieldPreferredUsername': string
+        'dataCheck.fieldRoleId': string
+        'dataCheck.fieldStatus': string
+        'dataCheck.fieldTypeId': string
+        'dataCheck.fieldUserId': string
+        'dataCheck.listUsers': string
+        'dataCheck.listUsersHint': string
         'dataCheck.locale': string
+        'dataCheck.loginHint': string
+        'dataCheck.loginTest': string
+        'dataCheck.loginTestHint': string
+        'dataCheck.loginToken': string
+        'dataCheck.loginTokenResult': string
+        'dataCheck.loginWeb': string
+        'dataCheck.loginWebResult': string
+        'dataCheck.noEmailForLogin': string
         'dataCheck.ok': string
         'dataCheck.protectedGet': string
         'dataCheck.protectedPost': string
@@ -196,12 +259,15 @@ declare module 'i18next' {
         'dataCheck.reload': string
         'dataCheck.scaffold': string
         'dataCheck.scaffoldHint': string
+        'dataCheck.signOut': string
+        'dataCheck.signOutDone': string
         'dataCheck.stateError': string
         'dataCheck.stateIdle': string
         'dataCheck.stateLoading': string
         'dataCheck.stateOk': string
         'dataCheck.states': string
         'dataCheck.statesHint': string
+        'dataCheck.statusActive': string
         'dataCheck.theme': string
         'dataCheck.title': string
         'entityPanel.close': string

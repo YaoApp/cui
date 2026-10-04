@@ -1,7 +1,7 @@
 /* **这一页的页面级用例**：钉住**调用点**的接线（不只是那些纯函数）。
  *
  * 与 `verify.test.tsx` 同一套写法：mock 平台层、挂真页面、断言关键行为。
- * 这里连 `@/platform/transport/fetch` 一起换掉 —— 于是走的是**真的 `send()`**：
+ * 这里连 `@/platform/transport/fetch` 一起换掉 —— 于是走的是**真的 `send`**：
  * 服务信息（`/.well-known/yao`）→ 地址（service.endpoint）→ 出口（transportFetch）→ 解包裹（unwrap）；
  * 受保护的两条在假出口上回 401，页面照预期把结果标注成"预期失败"。 */
 
@@ -12,6 +12,44 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const MESSAGE = 'hello from the scaffold'
 const SERVICE = { name: 'Yao Agents', version: '1.0.0', openapi: '/v1' }
+
+/* 假出口返回的**假凭据**（不是真值）：只用来断言"值不上屏、只上长度"。 */
+const SESSION = 'fake-session-value'
+const ID_TOKEN = 'fake-id-value'
+const ACCESS = 'fake-access-value'
+const REFRESH = 'fake-refresh-value'
+const LOGIN = {
+  session_id: SESSION,
+  id_token: ID_TOKEN,
+  access_token: ACCESS,
+  refresh_token: REFRESH,
+  expires_in: 3600,
+  refresh_token_expires_in: 86400,
+  status: 'active',
+}
+
+/** `/test/users` 的分页回应：把用户行包成引擎的线上形状（12 个字段里页面要展示的那几个）。 */
+function userPage(emails: readonly string[]) {
+  return {
+    data: emails.map((email, index) => ({
+      id: `id-${index}`,
+      user_id: `user-${index}`,
+      email,
+      name: `Name ${index}`,
+      preferred_username: `username-${index}`,
+      status: 'active',
+      role_id: `role-${index}`,
+      type_id: `type-${index}`,
+      email_verified: index % 2 === 0,
+    })),
+    page: 1,
+    pagesize: 20,
+    pagecnt: 1,
+    total: emails.length,
+    next: null,
+    prev: null,
+  }
+}
 
 vi.mock('@/platform/transport/fetch', () => ({ transportFetch: vi.fn() }))
 
@@ -27,6 +65,11 @@ function json(value: unknown, status = 200) {
 const publicCalls = () =>
   vi.mocked(transportFetch).mock.calls.filter(([url]) => String(url).includes('/helloworld/public'))
 
+/** 结果排里某一格的可见文字（页面用例与拟人脚本同一读法）。 */
+const cellText = (label: string) =>
+  [...document.querySelectorAll('.data-check__cell')]
+    .find((el) => el.querySelector('.data-check__label')?.textContent === label)?.textContent ?? ''
+
 function renderPage() {
   render(
     <MemoryRouter>
@@ -40,11 +83,11 @@ describe('the data check page', () => {
     vi.mocked(transportFetch).mockReset()
     vi.mocked(transportFetch).mockImplementation(async (url) => {
       const target = String(url)
-      // 服务信息：`send()` 第一次需要时读一次，给 openapi 前缀地址才拼得出来
+      // 服务信息：`send` 第一次需要时读一次，给 openapi 前缀地址才拼得出来
       if (target.includes('/.well-known/yao')) return json(SERVICE)
-      // 受保护的两条：登录还没接，假出口回 401（预期失败）
+      // 受保护的两条：未登录 → 假出口回 401（页面按码翻成「需要登录」，并标「未登录（缺凭据）」）
       if (target.includes('/helloworld/protected')) {
-        return json({ error: 'unauthorized', error_description: 'login is not wired' }, 401)
+        return json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
       }
       return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
     })
@@ -107,7 +150,7 @@ describe('the data check page', () => {
         await gate
         return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
       }
-      return json({ error: 'unauthorized', error_description: 'login is not wired' }, 401)
+      return json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
     })
 
     const user = userEvent.setup()
@@ -140,7 +183,7 @@ describe('the data check page', () => {
     await user.click(screen.getByRole('button', { name: /^(受保护 GET|受保護 GET|Protected GET)$/ }))
 
     // 预期失败是**页面说清楚的**，不是沉默的报错
-    expect(await screen.findByText(/预期失败（还没接登录）/)).toBeInTheDocument()
+    expect(await screen.findByText(/未登录（缺凭据）/)).toBeInTheDocument()
     expect(
       vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/helloworld/protected')),
     ).toBe(true)
@@ -182,5 +225,253 @@ describe('the data check page', () => {
     // 请求元数据显示的就是 store 里的解析结果（语言 zh-CN · 主题 dark）
     expect(screen.getByText('zh-CN')).toBeInTheDocument()
     expect(screen.getByText('dark')).toBeInTheDocument()
+  })
+
+  it('lists the first few user emails after the list button is clicked', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com', 'grace@example.com', 'linus@example.com', 'extra@example.com']))
+      return json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+
+    expect(await screen.findByText('ada@example.com')).toBeInTheDocument()
+    expect(screen.getByText('grace@example.com')).toBeInTheDocument()
+    expect(screen.getByText('linus@example.com')).toBeInTheDocument()
+    // 只列前几个：第 4 个不上屏（邮箱是用户可见的事实，不是凭据）
+    expect(screen.queryByText('extra@example.com')).not.toBeInTheDocument()
+    // 用户行把关键字段都列出来：id · user_id · 状态 · 角色 · 类型（值都在）
+    for (const value of ['id-0', 'user-0', 'role-0', 'type-0']) {
+      expect(screen.getByText(value)).toBeInTheDocument()
+    }
+    expect(screen.getAllByText('active').length).toBeGreaterThan(0)
+    // email_verified 用人话上屏，不裸印 true / false
+    expect(screen.getAllByText('已验证').length).toBeGreaterThan(0)
+    expect(screen.getByText('未验证')).toBeInTheDocument()
+    expect(screen.queryByText('true')).not.toBeInTheDocument()
+    // 地址真的走了分页查询（域层 query 工厂把参数并进了路径）
+    expect(
+      vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/v1/test/users?page=1&pagesize=20')),
+    ).toBe(true)
+  })
+
+  it('signs in as a listed account and turns the protected cell into a success', async () => {
+    let signedIn = false
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) {
+        signedIn = true
+        return json(LOGIN)
+      }
+      if (target.includes('/helloworld/protected')) {
+        return signedIn
+          ? json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+          : json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
+      }
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+
+    // 登录前：受保护那一格点了就是失败（假出口回 401）
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('未登录'))
+
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+
+    // 登录结果上屏：状态与分钟数（值不上屏，见下一条用例）
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+    expect(screen.getByText(/有效期 60 分钟/)).toBeInTheDocument()
+    const loginCall = vi.mocked(transportFetch).mock.calls.find(([url]) => String(url).includes('/test/login/web'))!
+    expect(JSON.parse(String(loginCall[1]?.body))).toEqual({ user: 'ada@example.com' })
+
+    // 受保护那一格：假出口在登录前回 401，登录后回 200 —— 状态来自这次登录的结果
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain(MESSAGE))
+    expect(cellText('受保护 GET')).not.toContain('未登录')
+  })
+
+  it('signs out through the engine, since only the server can clear an HttpOnly cookie', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) return json(LOGIN)
+      if (target.includes('/user/logout')) return json({ message: 'Logout successful' })
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+    expect(screen.queryByRole('button', { name: '退出登录' })).toBeNull() // 未登录时不给退出按钮
+
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '退出登录' }))
+    expect(await screen.findByText(/已退出/)).toBeInTheDocument()
+    // 退出后不再算登录态：已登录那行与退出按钮都应当消失
+    expect(screen.queryByText(/已登录/)).toBeNull()
+    expect(screen.queryByRole('button', { name: '退出登录' })).toBeNull()
+    const sent = vi.mocked(transportFetch).mock.calls.find(([url]) => String(url).includes('/user/logout'))
+    expect(sent?.[1]?.method).toBe('POST')
+    expect(document.body.textContent).not.toContain(LOGIN.access_token) // 凭据值永不上屏
+  })
+
+  it('lets a sign-in follow a sign-out, so the page stops claiming the old one', async () => {
+  vi.mocked(transportFetch).mockImplementation(async (url) => {
+    const target = String(url)
+    if (target.includes('/.well-known/yao')) return json(SERVICE)
+    if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+    if (target.includes('/test/login/web')) return json(LOGIN)
+    if (target.includes('/user/logout')) return json({ message: 'Logout successful' })
+    return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+  })
+  const user = userEvent.setup()
+  renderPage()
+  await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+  await user.click(screen.getByRole('button', { name: '列出用户' }))
+  await screen.findByText('ada@example.com')
+
+  await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+  expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+
+  await user.click(screen.getByRole('button', { name: '退出登录' }))
+  expect(await screen.findByText(/已退出/)).toBeInTheDocument()
+
+  // 再登录：上一次"已退出"必须让位，否则页面在说谎
+  await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+  expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+  expect(screen.queryByText(/已退出/)).toBeNull()
+})
+
+  it('does not call a token-only sign-in authenticated, since no cookie was written', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/token')) return json(LOGIN)
+      if (target.includes('/helloworld/protected')) return json({ error: 'unauthorized' }, 401)
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+    await user.click(screen.getByRole('button', { name: '只取登录凭据' }))
+    expect(await screen.findByText(/已取得登录凭据/)).toBeInTheDocument()
+
+    // 没给浏览器写 Cookie → 受保护请求仍是"没带凭据"，不能自称已认证
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('未登录'))
+    expect(cellText('受保护 GET')).not.toContain('已认证但未被授权')
+  })
+
+  it('does not let a revoked web sign-in outlive a token-only sign-in', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) return json(LOGIN)
+      if (target.includes('/test/login/token')) return json(LOGIN)
+      if (target.includes('/user/logout')) return json({ message: 'Logout successful' })
+      if (target.includes('/helloworld/protected')) return json({ error: 'unauthorized' }, 401)
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '退出登录' }))
+    expect(await screen.findByText(/已退出/)).toBeInTheDocument()
+
+    // 退出后再只取 token：旧的那次 web 登录已被吊销，页面不许再当它存在
+    await user.click(screen.getByRole('button', { name: '只取登录凭据' }))
+    expect(await screen.findByText(/已取得登录凭据/)).toBeInTheDocument()
+    expect(screen.queryByText(/已登录 ada@example\.com/)).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('未登录'))
+    expect(cellText('受保护 GET')).not.toContain('已认证但未被授权')
+  })
+
+  it('marks a protected cell as authenticated but not authorized when the engine policy denies it', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) return json(LOGIN)
+      // 已登录也照拒：引擎侧的授权策略，403 forbidden + reason
+      if (target.includes('/helloworld/protected')) {
+        return json({ error: 'forbidden', reason: 'no match, default policy: deny' }, 403)
+      }
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+
+    // 还没登录：这一格仍然是"预期失败"
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('未登录'))
+    expect(cellText('受保护 GET')).not.toContain('已认证但未被授权')
+
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+
+    // 登录成功但带凭据仍被拒：标注换成"已认证但未被授权"，（引擎原文不上屏）
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('已认证但未被授权'))
+    expect(cellText('受保护 GET')).not.toContain('no match, default policy: deny') // 引擎原文不上屏
+    expect(cellText('受保护 GET')).not.toContain('未登录')
+  })
+
+  it('never puts a credential value on screen', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web') || target.includes('/test/login/token')) return json(LOGIN)
+      return json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '只取登录凭据' }))
+    expect(await screen.findByText(/已取得登录凭据/)).toBeInTheDocument()
+
+    // 安全断言：假出口返回的凭据串一个都没上屏，上屏的只有长度
+    const body = document.body.textContent ?? ''
+    for (const secret of [SESSION, ID_TOKEN, ACCESS, REFRESH]) expect(body).not.toContain(secret)
+    expect(body).toContain(`长度 ${ACCESS.length}`)
   })
 })

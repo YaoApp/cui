@@ -12,7 +12,19 @@ const REQUEST = { method: 'GET', path: '/things' } as Request<void, string>
 beforeEach(() => send.mockReset())
 
 describe('useRequest', () => {
-  it('runs the declaration on mount and reports the value', async () => {
+  it('drops the last result when reset, without leaving its waiter hanging', async () => {
+    send.mockResolvedValue({ ok: true, value: 'v' })
+    const { result } = renderHook(() => useRequest(REQUEST, { manual: true }))
+    let settled: Promise<void> = Promise.resolve()
+    act(() => { settled = result.current.run() })
+    await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 'v' }))
+    await settled
+
+    act(() => result.current.reset())
+    expect(result.current.state).toEqual({ status: 'idle' })
+  })
+
+    it('runs the declaration on mount and reports the value', async () => {
     send.mockResolvedValue({ ok: true, value: 'v' })
     const { result } = renderHook(() => useRequest(REQUEST))
     expect(result.current.state.status).toBe('loading')

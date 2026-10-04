@@ -1,17 +1,21 @@
 import './data-check.less'
 /* **数据层验证页**（`/data-check`）：把 `app/src/data/` 那条路在界面上跑通，让人看得见结果。
  *
- * 两节：
- *   ① 脚手架四格 —— `@/data/helloworld` 的 公开/受保护 × GET/POST，点一下跑一次，各格显示自己的 state
- *   ② 请求四态 —— `useRequest` 的 idle / loading / ok / error，拿公开 GET 当**声明**，**挂载即跑**
+ * 三节：
+ *   ① 登录（测试模式）—— `@/data/test` 的用户列表与两种测试登录，之后受保护的两格才有凭据
+ *   ② 脚手架四格 —— `@/data/helloworld` 的 公开/受保护 × GET/POST，点一下跑一次，各格显示自己的 state
+ *   ③ 请求四态 —— `useRequest` 的 idle / loading / ok / error，拿公开 GET 当**声明**，**挂载即跑**
  *
  * **取数只有一条路**（`05-data-and-api.md` §1）：页面里没有裸的 `send` 调用 —— 接口声明交给 `useRequest`，
  * 状态从钩子的 `state` 读，失败上屏用 `state.failure.text`（钩子已按码翻译成一句话）。
  *
- * **现在只有公开接口能通**：登录还没接，受保护的两条**预期失败**，页面上明确标注 —— 那不是 bug。
- * **秘密不上屏**：只印接口返回的值，从不读凭据，也不印请求头（凭据由出口自己带，见 17-transport.md）。 */
+ * **秘密不上屏**：只印接口返回的值，从不读凭据，也不印请求头（凭据由出口自己带，见 17-transport.md）；
+ * 登录那节只显示凭据的**存在性与长度**，不显示值。
+ *
+ * **登录成功 ≠ 被允许**：受保护接口还要过引擎的授权策略 —— 带着凭据仍回 403 时，
+ * 标注换成"已认证但未被授权"，（引擎原文不上屏）。 */
 
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
@@ -28,9 +32,17 @@ import {
   publicGetQuery,
   publicPostQuery,
 } from '@/data/helloworld'
+import { listUsersQuery, loginTokenQuery, loginWebQuery, type TestUser } from '@/data/test'
+import { logoutQuery } from '@/data/user'
 
 /** POST 的请求体（引擎会原样回显在 `POST_PAYLOAD` 里）—— 技术样本，不走语言包。 */
 const POST_BODY = { from: 'data-check' }
+
+/** 用户列表的取数参数：一页 20 个（引擎上限 100），只把前几个上屏。 */
+const USER_PAGE = { page: 1, pagesize: 20 }
+
+/** 用户列表最多上屏几个 —— 只是给人看的样本，不参与取数。 */
+const USER_SAMPLE_SIZE = 3
 
 /** 标签 + 值的一格：语言 · 主题与四格结果共用同一段标记。 */
 function Cell({ label, value, children }: { label: string; value: ReactNode; children?: ReactNode }) {
@@ -50,7 +62,7 @@ export function DataCheckPage() {
   const navItems = navWithActive(pathname).map((item) => ({ ...item, label: t(item.label) }))
   usePageTitle(t('dataCheck.title'))
 
-  /* 请求元数据：页面**不拼、不传** —— `send()` 调用时自己从平台层取当前值
+  /* 请求元数据：页面**不拼、不传** —— `send` 调用时自己从平台层取当前值
      （`platform/client/context.ts` 的 `currentPreferences()`），每次请求自动带上。
      这里只是把平台解析出的当前值显示出来，好让人看见请求带的是什么。 */
   const locale = resolvePreference(useLocaleStore((state) => state.locale))
@@ -64,16 +76,56 @@ export function DataCheckPage() {
     return state.failure.text
   }
 
-  /* ① 脚手架四格：**各写各的声明**，点一下跑一次；key 由域层 `keys.ts` 给 ——
+  /* ① 登录（测试模式）：三份声明各写各的，点一下跑一次；key 由域层 `queries.ts` 收口。
+     发送的输入就是请求体（`{ user }`），地址与 key 都不在这里拼。 */
+  const listUsersCall = useRequest(listUsersQuery(USER_PAGE), { manual: true })
+  const loginWebCall = useRequest(loginWebQuery(), { manual: true })
+  const loginTokenCall = useRequest(loginTokenQuery(), { manual: true })
+  const logoutCall = useRequest(logoutQuery(), { manual: true })
+  /** 最近一次做登录的邮箱 —— 只用来标注结果是哪个账号的，不是凭据。 */
+  const [loginEmail, setLoginEmail] = useState('')
+
+  /* ② 脚手架四格：**各写各的声明**，点一下跑一次；key 由域层 `keys.ts` 给 ——
      与失效侧 `invalidate()` 用同一套算法，前缀对得上。 */
   const publicGetCall = useRequest(publicGetQuery(), { manual: true })
   const publicPostCall = useRequest(publicPostQuery(), { body: POST_BODY, manual: true })
   const protectedGetCall = useRequest(protectedGetQuery(), { manual: true })
   const protectedPostCall = useRequest(protectedPostQuery(), { body: POST_BODY, manual: true })
 
-  /* ② 四态：`useRequest` **挂载即跑**（不传 `manual`）、卸载即取消。公开 GET 当声明 ——
-     `send()` 自动带上当前请求元数据，它不挑凭据，登录还没接也照样通。 */
+  /* ③ 四态：`useRequest` **挂载即跑**（不传 `manual`）、卸载即取消。公开 GET 当声明 ——
+     `send` 自动带上当前请求元数据；公开的那两条不挑凭据。 */
   const scaffold = useRequest(publicGetQuery())
+
+  /* 登录成功后浏览器收下 Cookie（`login/web` 的 `SameSite=Strict`，dev 下应用与引擎同源）；
+     再点下面受保护的两格，出口自己就会带上它 —— 这里不读、不碰凭据。 */
+  const users =
+    listUsersCall.state.status === 'ok' ? listUsersCall.state.value.data.slice(0, USER_SAMPLE_SIZE) : []
+  const webLogin = loginWebCall.state.status === 'ok' ? loginWebCall.state.value : null
+  const tokenLogin = loginTokenCall.state.status === 'ok' ? loginTokenCall.state.value : null
+
+  /** 登录态：取到过凭据 **且没退出成功** —— 退出由服务端吊销并清 Cookie，退完就不再是登录态。 */
+  const signedIn = (webLogin !== null || tokenLogin !== null) && logoutCall.state.status !== 'ok'
+
+  /** 认证类拒绝的码：登录态下被拒 = 已认证但未被授权（引擎侧授权策略，不是客户端问题）。 */
+  const authRefusal = /forbidden|insufficient_scope|unauthorized|token_missing|invalid_token/i
+  /** "已认证但未被授权"只在**浏览器真把凭据带上了**（Cookie 登录）时成立；
+   *  只取 token 的那种登录不给浏览器写 Cookie，受保护请求仍是"没带凭据"。 */
+  const cookieSignedIn = webLogin !== null && logoutCall.state.status !== 'ok'
+  const deniedAfterLogin = (state: RequestState<unknown>) =>
+    cookieSignedIn && state.status === 'error' && authRefusal.test(state.failure.code)
+
+  const signIn = (user: TestUser, kind: 'web' | 'token') => {
+    if (!user.email) return
+    logoutCall.reset() // 上一次"已退出"到此为止
+    if (kind === 'web') {
+      loginTokenCall.reset() // 换一种登录方式：另一边的旧凭据一并作废
+      void loginWebCall.run({ user: user.email })
+    } else {
+      loginWebCall.reset()
+      void loginTokenCall.run({ user: user.email })
+    }
+    setLoginEmail(user.email)
+  }
 
   const cells = [
     { label: t('dataCheck.publicGet'), state: publicGetCall.state, expected: false },
@@ -100,9 +152,115 @@ export function DataCheckPage() {
         <Button variant="ghost" onClick={() => navigate(-1)}>{t('dataCheck.back')}</Button>
       </div>
 
-      {/* ① 脚手架四格：公开的两条真跑；受保护的两条也点得动，但登录还没接 —— **预期失败** */}
+      {/* ① 登录（测试模式）：只在开发实例上注册；页面只用 useRequest + 域层 query —— 不出现裸 send / key */}
+      <h2 className="data-check__heading">{t('dataCheck.loginTest')}</h2>
+      <p>{t('dataCheck.loginTestHint')}</p>
+      <p>{t('dataCheck.listUsersHint')}</p>
+      <p className="data-check__tools">
+        <Button onClick={() => void listUsersCall.run()} disabled={listUsersCall.state.status === 'loading'}>{t('dataCheck.listUsers')}</Button>
+      </p>
+      {listUsersCall.state.status === 'error' ? (
+        <p className="data-check__notice" role="status">{listUsersCall.state.failure.text}</p>
+      ) : null}
+      {users.length > 0 ? (
+        <div className="data-check__tablewrap">
+          <table className="data-check__users">
+            <thead>
+              <tr>
+                <th>{t('dataCheck.fieldId')}</th>
+                <th>{t('dataCheck.fieldUserId')}</th>
+                <th>{t('dataCheck.fieldEmail')}</th>
+                <th>{t('dataCheck.fieldName')}</th>
+                <th>{t('dataCheck.fieldPreferredUsername')}</th>
+                <th>{t('dataCheck.fieldStatus')}</th>
+                <th>{t('dataCheck.fieldRoleId')}</th>
+                <th>{t('dataCheck.fieldTypeId')}</th>
+                <th>{t('dataCheck.fieldEmailVerified')}</th>
+                <th>{t('dataCheck.colActions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td>{user.user_id}</td>
+                  <td>{user.email ?? ''}</td>
+                  <td>{user.name ?? ''}</td>
+                  <td>{user.preferred_username ?? ''}</td>
+                  <td>{user.status ?? ''}</td>
+                  <td>{user.role_id ?? ''}</td>
+                  <td>{user.type_id ?? ''}</td>
+                  <td>{user.email_verified ? t('dataCheck.emailVerified') : t('dataCheck.emailUnverified')}</td>
+                  <td className="data-check__actions">
+                    {user.email ? (
+                      <>
+                        <Button onClick={() => signIn(user, 'web')} disabled={loginWebCall.state.status === 'loading'}>{t('dataCheck.loginWeb')}</Button>{' '}
+                        <Button onClick={() => signIn(user, 'token')} disabled={loginTokenCall.state.status === 'loading'}>{t('dataCheck.loginToken')}</Button>
+                      </>
+                    ) : (
+                      <span className="data-check__label">{t('dataCheck.noEmailForLogin')}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+      <p>{t('dataCheck.loginHint')}</p>
+      {/* 退出：Cookie 是 HttpOnly（JS 碰不到）→ 只能由服务端吊销并清掉（`POST /user/logout`） */}
+      {signedIn ? (
+        <p className="data-check__tools">
+          <Button
+            onClick={() =>
+              void logoutCall.run().then(() => {
+                // 服务端已吊销并清 Cookie：两边的旧登录结果都不能再代表"已登录"
+                loginWebCall.reset()
+                loginTokenCall.reset()
+              })
+            }
+            disabled={logoutCall.state.status === 'loading'}
+          >{t('dataCheck.signOut')}</Button>
+        </p>
+      ) : null}
+      {logoutCall.state.status === 'ok' ? (
+        <p className="data-check__value" role="status">{t('dataCheck.signOutDone')}</p>
+      ) : null}
+      {logoutCall.state.status === 'error' ? (
+        <p className="data-check__notice" role="status">{logoutCall.state.failure.text}</p>
+      ) : null}
+      {/* 凭据**只上长度与存在性**，值永不上屏 */}
+      {signedIn && webLogin ? (
+        <p className="data-check__value" role="status">
+          {t('dataCheck.loginWebResult', {
+            email: loginEmail,
+            status: webLogin.status === 'active' ? t('dataCheck.statusActive') : webLogin.status,
+            minutes: Math.round(webLogin.expires_in / 60),
+          })}
+          {' · '}
+          {t('dataCheck.credentials', {
+            session: webLogin.session_id.length,
+            access: webLogin.access_token.length,
+            refresh: webLogin.refresh_token.length,
+          })}
+        </p>
+      ) : null}
+      {loginWebCall.state.status === 'error' ? (
+        <p className="data-check__notice" role="status">{loginWebCall.state.failure.text}</p>
+      ) : null}
+      {signedIn && tokenLogin ? (
+        <p className="data-check__value" role="status">
+          {t('dataCheck.loginTokenResult', { email: loginEmail, length: tokenLogin.access_token.length })}
+        </p>
+      ) : null}
+      {loginTokenCall.state.status === 'error' ? (
+        <p className="data-check__notice" role="status">{loginTokenCall.state.failure.text}</p>
+      ) : null}
+
+      {/* ② 脚手架四格：公开的两条真跑；受保护的两条也点得动，登录成功后就会通 */}
       <h2 className="data-check__heading">{t('dataCheck.scaffold')}</h2>
       <p>{t('dataCheck.scaffoldHint')}</p>
+      <p>{t('dataCheck.authzHint')}</p>
       <div className="data-check__row">
         <Cell label={t('dataCheck.locale')} value={locale} />
         <Cell label={t('dataCheck.theme')} value={theme} />
@@ -113,18 +271,23 @@ export function DataCheckPage() {
         <Button onClick={() => void protectedGetCall.run()} disabled={protectedGetCall.state.status === 'loading'}>{t('dataCheck.protectedGet')}</Button>{' '}
         <Button onClick={() => void protectedPostCall.run()} disabled={protectedPostCall.state.status === 'loading'}>{t('dataCheck.protectedPost')}</Button>
       </p>
-      {/* 每格直接渲染自己的 state：成功印返回值，失败印译文，受保护的两条标出"预期失败" */}
+      {/* 每格直接渲染自己的 state：成功印返回值，失败印译文；受保护的两条按登录与否标注
+          "未登录（缺凭据）" 或 "已认证但未被授权"（Cookie 登录后仍被引擎策略拒绝时） */}
       <div className="data-check__row">
         {cells.map(({ label, state, expected }) => (
           <Cell key={label} label={label} value={stateText(state)}>
             {expected && state.status === 'error' ? (
-              <em className="data-check__expected">{t('dataCheck.expectedFailure')}</em>
+              deniedAfterLogin(state) ? (
+                <em className="data-check__expected">{t('dataCheck.authenticatedDenied')}</em>
+              ) : !cookieSignedIn ? (
+                <em className="data-check__expected">{t('dataCheck.expectedFailure')}</em>
+              ) : null
             ) : null}
           </Cell>
         ))}
       </div>
 
-      {/* ② 请求四态：当前态高亮；成功印值，失败印按码翻译的文案 */}
+      {/* ③ 请求四态：当前态高亮；成功印值，失败印按码翻译的文案 */}
       <h2 className="data-check__heading">{t('dataCheck.states')}</h2>
       <p>{t('dataCheck.statesHint')}</p>
       <div className="data-check__row">
