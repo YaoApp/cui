@@ -1,76 +1,53 @@
-# 盘点与下一步（2026-10-04）
+# 现状（2026-10-05）
 
-- **版本**：v1.0
-- **规则**：[`15-platform.md`](../architecture/15-platform.md) · **进度**：[`01-infrastructure.md`](01-infrastructure.md) · [`02-platform.md`](02-platform.md) · [`03-data.md`](03-data.md)
-- **一句话**：**基础设施可以转起来了** —— 能开始拿真业务"边迁移边对接"，但"稳"要等第一个真域压过一遍。
+- **规则**：[`15-platform.md`](../architecture/15-platform.md) · **更早的进度**：[`01-infrastructure.md`](01-infrastructure.md) · [`02-platform.md`](02-platform.md) · [`03-data.md`](03-data.md)
+- **一句话**：基础设施可以转起来了；**产品页面还没开始做** —— 现有的四个页面是开发期的脚手架，钉在 `/scaffold/*`。
 
-## 1. 现在有什么（可用）
+## 1. 现在有什么
 
 | 层 | 有什么 | 证明 |
 | --- | --- | --- |
-| `platform/client` | 一个 `client` 对象（清单 · 能力 · 宿主 · id）· `loadClient()` 一处装填 · 失败进错误面不兜底 · React 面就是两个偏好 hook | 用例 + macOS/Windows 截图 |
-| `platform/service` | 基址唯一来源 · `well-known` 惰性读一次（并发去重 · 失败不缓存）· **换地址 = 换服务**（作废旧基址/文档/会话镜像，再读新地址的会话） | 用例 + 页面实点 |
-| `platform/credential` | 载体按宿主选（OS 凭据库 / Cookie）· 会话惰性镜像 · **登录动作收令牌** · **退出清 `session` + `refresh` 两条** | 用例 |
-| `platform/transport` | 两宿主一种接口 · 失败是值（不抛）· 401 只重放一次（**机制在，注入尚未接线**）· 跨域明确拒绝 | 用例 |
-| `platform/bridge` | 18 条命令 · 清单单一来源 · Rust 与应用常量跨语言比对 | 比对测试 |
-| `platform/i18n`·`theme`·`router`·`icons`·`utils` | 语言包按 feature 就近 · 主题写 `data-theme` · 页标题 · **失败码 → 人话**从 i18n 面出 | 门禁 + 用例 |
-| `data/request` + `data/hooks` | 出口 `send`（声明 `{method,path,headers?,session?}`）· 四态的**唯一实现** `useRequest` · 声明源（`{key,request}`）与**动作源**（`{key,operation}`）· 失效按 key 前缀 | 用例 |
-| `data/test`·`data/user` | 两个真域：测试模式接口（登录两条端点由载体决定）· 退出（服务端吊销 + 清本机） | 用例 |
-| `routes` | 外壳（主区）+ 首页与四个脚手架页路由（`/` + `/scaffold/*`）| 用例 |
-| 门禁 | 12 个检查器 · 检查器自测 85/85 · 全量单测 308 条 · `lint` / `check` | 本轮验收回合 |
+| `platform/client` | 一个 `client` 对象（清单 · 能力 · 宿主 · id）· `loadClient()` 一处装填 · 失败进错误面 · React 面是两个偏好 hook（`useLocalePreference` · `useThemePreference`）| 单元用例 + macOS/Windows 截图 |
+| `platform/service` | 基址唯一来源（桌面由宿主持有）· `well-known` 惰性读一次（并发去重 · 失败不缓存）· **换地址 = 换服务**（作废旧基址/文档/会话镜像，再读新地址的会话）| 单元用例 + 页面实点 |
+| `platform/credential` | 载体按宿主选（OS 凭据库 / Cookie）· 会话惰性镜像 · 登录动作收令牌（只在应用托管时采纳）· 退出清 `session` + `refresh` 两条 | 单元用例 |
+| `platform/transport` | 两宿主一种接口 · 失败是值（不抛）· 401 只重放一次（**重放机制在，刷新器没有注入方**）· 跨域明确拒绝 | 单元用例 |
+| `platform/bridge` | **18 条命令**（`ping` 1 · `system` 11 · `service` 2 · `credential` 4）· 名字 `celadon_<域>_<动词>` · Web 下不存在 · 秘密不回前端 | 跨语言比对用例 |
+| `platform/{i18n,theme,router,icons,utils}` | 语言包按域就近（`features/*/locales/*.json` + 全局 `src/locales/*.json`）· 主题写 `data-theme` · 页标题 · 失败码 → 人话 | 门禁 + 单元用例 |
+| `data/request` + `data/hooks` | 出口 `send`（声明是 `{method, path, headers?, input?}`，**没有会话开关**）· 四态的唯一实现 `useRequest`（声明源 `{key,request}` / 动作源 `{key,operation}`）· 失效按 key 前缀 | 单元用例 |
+| `data/helloworld` | 测试模式的四个端点：`/helloworld/public` · `/helloworld/protected`（各 GET/POST）| 单元用例 |
+| `data/test` | 用户与登录：`/test/login/web` · `/test/login/token` · `/test/users` · `/test/teams` · `/test/otp` · `/test/captcha` · `createServerKey` | 单元用例 |
+| `features/scaffold` | 四个开发期页面 `/scaffold` · `/scaffold/routing` · `/scaffold/bridge` · `/scaffold/requests`；导航常量 `nav.ts`、页壳 `ScaffoldPage`（页头 + 导航渲染一次）、页头/导航组件 | 单元 + 浏览器用例 |
+| `features/home` | 应用首页 `/`：版本信息 · 语言与主题 · 通往脚手架的四条链接 | 单元 + 浏览器用例 |
+| `components` | `base`（按钮/图标等）· `locale-switch` · `theme-toggle` · `page`（`Page`/`PageSection`/`PageRow`/`PageCell`）| 单元用例 |
+| `routes` | 外壳 `surface-layout`（只渲染 `<main>` + `<Outlet/>`）· `routes.tsx`（`/` · `/scaffold/*` · 未知路径回 `/`）| 单元 + 浏览器用例 |
+| `stores/` | 空目录（只有 `README.md` 说明何时该有 store）| —— |
+| 门禁 | `lint` · `check`（12 个检查器）· 检查器自测 **85/85** · 单元 **61 文件 / 308 条** · 浏览器 **35 条** · 拟人 **2 个场景** · `build` | 每次交付前全跑 |
 
-## 2. 还不能跑的（缺口，按"挡不挡下一步"排）
+## 2. 现在还不能跑的
 
-| 缺口 | 挡什么 | 归谁 |
-| --- | --- | --- |
-| **没有真登录 / 注册**（引擎 `/user/entry/*` 那套 OTP · 邀请 · 两步） | 真业务第一步 | `data/user` + `stores/` |
-| **401 续期未接线**（刷新端点没声明、刷新器没注入） | 长会话 | `data/user` + `platform/credential` |
-| **没有真 layout**（现在只有脚手架的 surface + 四页） | 真界面 | 下一轮 |
-| `stores/` 是空的（公共状态等第一个真产品页来了再建）| 跨页状态 | 随业务建 |
-| SSE / WS 钩子未做 | 实时域 | 随业务建 |
-| `webproxy/`（agent sandbox 域名规则）未做 | 沙箱域 | 随业务建 |
-| 打包 / 更新 / 1.0 迁移 | 交付 | 迁移时 |
+| 缺口 | 挡什么 |
+| --- | --- |
+| **真登录 / 注册**（引擎 `/user/entry/*` 那条 OTP · 邀请 · 两步）| 真业务第一步 |
+| **401 续期未接线**：刷新端点没声明，`setSessionRefresher` 只有定义与导出、**没有调用方** | 长会话 |
+| **真 layout 与产品导航**：今天只有脚手架的 `surface` 与四个脚手架页 | 真界面 |
+| `stores/` 是空的（公共状态等第一个真产品页）| 跨页状态 |
+| SSE / WS 钩子 | 实时域 |
+| `webproxy/`（agent sandbox 域名规则）| 沙箱域 |
+| 打包 / 更新 / 1.0 迁移 | 交付 |
 
-## 3. 复核：基础设施"能转起来"吗
+## 3. 下一步的顺序
 
-**能。** 端到端这条已经打通并用真引擎的测试模式验过：
+1. **第一个真域：登录 / 注册**（`/user/entry/*`）—— 它一次压到：声明 + 动作 + 会话 + 载体 + 表单原子 + layout 雏形。
+2. **真 layout 与产品导航** —— 脚手架留在 `/scaffold/*`，产品页用新的壳。
+3. 之后每个 1.0 功能迁一个：迁它的域（`types` / `api` / `keys` / `queries` / `map`）→ 对接真端点 → 一页 UI → 一轮隔离 Review。
 
-```
-声明 → send（带 Authorization）→ 失败是值 → 四态上屏 →（登录动作收令牌 / 退出动作清本机）
-```
+## 4. 已定 / 待定
 
-**但它有三处"薄"，不是坏，是没被真业务压过：**
+**已定**：
 
-1. **只有一个真域**（`test`）：`queries.ts` 的编排（声明 + 动作）、`map.ts`（字段/时间/枚举）、分页 utils —— 都还只有一个例子。
-2. **会话只被登录 / 请求 / 退出走过**，"刷新"这条没走通（H4 已知）。
-3. **页面壳是脚手架的**（导航就是那四个测试页），真 layout 会把它们换掉。
+1. 脚手架叫 `scaffold`：物理归拢在 `features/scaffold/`，路由 `/scaffold/*`；应用首页是 `/`。
+2. 导航只渲染一处（`ScaffoldPage`）；页面不自造导航，也没有返回按钮。
+3. 页面公共件与样式在 `components/page/`；页面根只声明铺满，内边距归 `Page`。
+4. 语言包按域就近；脚手架的文案（含导航与页头）在 `features/scaffold/locales/*`。
 
-所以结论是：**能转 ✓，"稳"要等第一个真域压一遍** —— 这正是"边迁移边对接"要压的东西。另外，真客户端上验证过的是客户端事实 · 服务地址 · 偏好切换；**登录按钮在真客户端上的点击还没单独留证**（它由 303 条用例守着）。
-
-## 4. 建议的顺序（边迁移边对接）
-
-0. **先归档脚手架**（本轮，见 §5）—— 让"支架"和"真业务"一眼分得开
-1. **第一个真域：登录 / 注册**（`/user/entry/*` 那条线）—— 它一次压到：声明 + 动作 + 会话 + 载体 + 表单原子 + layout 雏形
-2. **真 layout + 导航**（脚手架页收进 `/scaffold/*`）
-3. 之后每个 1.0 功能迁一个：迁它的域（`types/api/keys/queries/map`）→ 对接真端点 → 一页 UI → 一轮隔离 Review
-
-## 5. 归档脚手架：我建议叫 `scaffold`，不叫 `debug`
-
-**理由**：这些页不是"调试残留"，是**开发期的支架**（联通 · 自检 · 冒烟）；`03-data.md` 里描述 helloworld 用的就是"脚手架"这个词。`debug` 说的是"为什么打开它"，不是"它是什么" —— 同一页既用来 debug 也用来对接冒烟。
-
-**已定**：叫 **`scaffold`**，按**物理归拢 + `/scaffold/*`** 做；导航收一处、页面样式抽一层、删返回按钮、首页留在 `/`。细节全在 [`05-scaffold.md`](05-scaffold.md)。
-
-## 6. TODO
-
-归档脚手架那一轮：**已实施**（2026-10-04），见 [`05-scaffold.md`](05-scaffold.md)。
-
-## 7. 已定 / 待定
-
-**已定**（2026-10-04）：
-
-1. 脚手架叫 `scaffold`，物理归拢到 `features/scaffold/`，路由 `/scaffold/*`；应用首页是 `/`。
-2. 导航只渲染一处（`ScaffoldPage`），页面不再自造导航，返回按钮删除。
-3. 顺序：归档脚手架（**已完成** 2026-10-04）→ 再做**登录 / 注册**（第一个真域）→ 再真 layout。
-
-**待定**：登录 / 注册那轮的域边界（`user/entry` 与 `stores/` 的分工）—— 等开工时在 `03-data.md` 里定。
-
+**待定**：登录 / 注册那轮的域边界（`user/entry` 与 `stores/` 的分工）—— 开工时在 [`03-data.md`](03-data.md) 里定。
