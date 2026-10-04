@@ -2,7 +2,7 @@
   "dataCheck.back": "Back",
   "dataCheck.expectedFailure": "Expected failure (no sign-in yet)",
   "dataCheck.locale": "Locale",
-  "dataCheck.ok": "ok",
+  "dataCheck.ok": "Result",
   "dataCheck.protectedGet": "Protected GET",
   "dataCheck.protectedPost": "Protected POST",
   "dataCheck.publicGet": "Public GET",
