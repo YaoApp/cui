@@ -13,22 +13,23 @@ export type RequestState<T> =
   | { status: 'ok'; value: T }
   | { status: 'error'; failure: Failure }
 
-/** @param call 收到 `AbortSignal`（转交给 `send()` 的 `signal`）· @param deps 依赖变了就重跑 */
+/** @param fetcher 收到 `AbortSignal`（转交给 `send()` 的 `signal`）· @param deps 依赖变了就重跑
+ *  （叫 `fetcher` 是 SWR 的说法；TanStack 叫 `queryFn` —— 这里查询与提交共用，所以取前者那种中性词） */
 export function useRequest<T>(
-  call: (signal: AbortSignal) => Promise<Result<T>>,
+  fetcher: (signal: AbortSignal) => Promise<Result<T>>,
   deps: readonly unknown[],
 ): { state: RequestState<T>; reload: () => void } {
   const [state, setState] = useState<RequestState<T>>({ status: 'idle' })
   const [attempt, setAttempt] = useState(0)
   const latest = useRef(0)
-  const callRef = useRef(call)
-  callRef.current = call
+  const fetcherRef = useRef(fetcher)
+  fetcherRef.current = fetcher
 
   useEffect(() => {
     const controller = new AbortController()
     const id = ++latest.current
     setState({ status: 'loading' })
-    void callRef.current(controller.signal).then((result) => {
+    void fetcherRef.current(controller.signal).then((result) => {
       if (id !== latest.current) return // 晚到的结果丢掉（依赖已变或已卸载）
       setState(result.ok ? { status: 'ok', value: result.value } : { status: 'error', failure: result })
     })
