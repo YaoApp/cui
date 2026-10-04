@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="zh-CN" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CUI 2.0 · 草图 · 登录页（第一版）</title>
+<link rel="stylesheet" href="../tokens.css">
+<!--
+  登录页草图（第一版）· 供 UE / UI 评审，不进产品包。
+
+  规则（见 ../AGENTS.md）：颜色 / 间距 / 字号 / 圆角 / 描边 / 阴影一律取 token；无字面量色值。
+  例外只有两处**布局尺寸**，写成局部变量并注明，进产品时归 token：
+    --proto-card：登录卡片的宽度；--proto-stage：状态排版的列宽。
+  状态：一页排开六态（空闲 · 提交中 · 用户名不存在 · 密码错误 · 需要验证码 · 需要 MFA），
+  不只画成功路径。每张卡片下的「说明」写触发条件与结果，供评审逐条对。
+
+  设计依据（2026 年检索所得，已按本仓情形取舍）：
+    1. 登录与注册**分开**两个页面，动作命名用「登录」「创建账号」，不复用同一套字眼（Authgear, Login & Signup UX）。
+    2. 字段越少越好；每个字段先问"是否真必要、能否合并"（NN/g 经 Alfdesign 汇总）。
+    3. 标签**顶对齐**（比左对齐/右对齐更快、更少错）。
+    4. **行内校验**：离开字段即给反馈，而不是等提交（显著降低重复提交）。
+    5. 可访问性：正确的标签关联、`autocomplete` 属性、键盘可达、焦点环可见、错误用文字说明而不只靠颜色。
+    6. 移动优先：点击目标够大、键盘类型正确、不做记忆测试（不用模糊验证码为难人）。
+    7. 信任信号：把当前服务地址摆在明处，并提供切换入口。
+    8. 密码可显式查看（不阻粘贴），按钮态（空闲/提交中/禁用）分明。
+-->
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-13);
+  line-height: var(--line-height-cjk);
+  background: var(--background-app);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+:root { --proto-card: 380px; --proto-stage: 300px; }
+
+/* ── 草图自身的页面骨架（评审用） ───────────────────────────── */
+.wrap { max-width: var(--content-max-wide, var(--content-max)); margin: 0 auto; padding: var(--spacing-32) var(--spacing-24) var(--spacing-48); }
+h1 { font-size: var(--font-size-title); margin: 0 0 var(--spacing-4); }
+h2 { font-size: var(--font-size-subtitle); margin: var(--spacing-32) 0 var(--spacing-12); }
+.sub { color: var(--text-secondary); margin: 0 0 var(--spacing-16); }
+.src { font-size: var(--font-size-11); color: var(--text-tertiary); background: var(--background-surface);
+       border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-small);
+       padding: var(--spacing-8) var(--spacing-12); margin: 0 0 var(--spacing-16); }
+.toolbar { position: sticky; top: 0; z-index: 5; display: flex; gap: var(--spacing-8); align-items: center; flex-wrap: wrap;
+           background: color-mix(in srgb, var(--background-app) 88%, transparent); padding: var(--spacing-8) 0; backdrop-filter: blur(6px); }
+.toolbar button, .seg { font: inherit; font-size: var(--font-size-12); padding: var(--spacing-4) var(--spacing-12);
+           border-radius: var(--radius-pill); border: var(--border-width) solid var(--border-control);
+           background: var(--background-surface); color: var(--text-secondary); cursor: pointer; }
+.toolbar button.on { background: var(--brand-soft); border-color: var(--brand-ink); color: var(--brand-ink); font-weight: var(--font-weight-strong); }
+.toolbar button:focus-visible, .seg:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.seg-group { display: inline-flex; gap: 2px; padding: 3px; border: var(--border-width) solid var(--border-control); border-radius: var(--radius-pill); }
+.seg { border: 0; background: transparent; }
+.seg.on { background: var(--brand-soft); color: var(--brand-ink); font-weight: var(--font-weight-strong); }
+.stage { display: flex; gap: var(--spacing-24); flex-wrap: wrap; align-items: flex-start; }
+.state { width: var(--proto-card); }
+.state > figcaption { font-size: var(--font-size-12); color: var(--text-secondary); margin: 0 0 var(--spacing-8); }
+.state b { color: var(--text-primary); }
+.why { font-size: var(--font-size-11); color: var(--text-tertiary); margin: var(--spacing-8) 0 0; }
+
+/* ── 登录页草图本体（评审对象） ─────────────────────────────── */
+.auth { background: var(--background-content); border: var(--border-width) solid var(--border-subtle);
+        border-radius: var(--radius-large); padding: var(--spacing-32) var(--spacing-24) var(--spacing-24);
+        box-shadow: var(--shadow-subtle); }
+.auth__brand { display: flex; align-items: center; gap: var(--spacing-8); margin: 0 0 var(--spacing-4); }
+.auth__mark { width: 22px; height: 22px; border-radius: var(--radius-xs); background: linear-gradient(135deg, var(--brand-mark-from), var(--brand-mark-to)); }
+.auth h3 { font-size: var(--font-size-subtitle); margin: 0; }
+.auth__lead { color: var(--text-secondary); margin: 0 0 var(--spacing-24); font-size: var(--font-size-12); }
+.field { margin: 0 0 var(--spacing-16); }
+.field > label { display: block; font-size: var(--font-size-label); font-weight: var(--font-weight-medium); color: var(--text-secondary); margin: 0 0 var(--spacing-4); }
+.control { display: flex; align-items: center; gap: var(--spacing-8); background: var(--background-field);
+           border: var(--border-width) solid var(--border-control); border-radius: var(--radius-medium); padding: 0 var(--spacing-12); min-height: var(--row-height); }
+.control:focus-within { border-color: var(--brand); box-shadow: var(--focus-ring); }
+.control input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text-primary);
+                 font: inherit; padding: var(--spacing-8) 0; }
+.control input::placeholder { color: var(--text-placeholder); }
+.control .reveal { border: 0; white-space: nowrap; background: transparent; color: var(--text-tertiary); cursor: pointer; font: inherit; font-size: var(--font-size-12); padding: var(--spacing-4); border-radius: var(--radius-xs); }
+.control .reveal:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.control.is-error { border-color: var(--danger); }
+.field__error { display: flex; gap: var(--spacing-4); align-items: flex-start; color: var(--danger-ink); font-size: var(--font-size-12); margin: var(--spacing-4) 0 0; }
+.field__hint { color: var(--text-tertiary); font-size: var(--font-size-11); margin: var(--spacing-4) 0 0; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-8); margin: 0 0 var(--spacing-16); }
+.check { display: inline-flex; align-items: center; gap: var(--spacing-8); font-size: var(--font-size-12); color: var(--text-secondary); }
+.check input { width: 16px; height: 16px; accent-color: var(--brand); }
+.link { color: var(--brand-ink); text-decoration: none; border-radius: var(--radius-xs); }
+.link:hover { text-decoration: underline; }
+.link:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.btn { width: 100%; min-height: var(--row-height); border-radius: var(--radius-medium); font: inherit;
+       font-weight: var(--font-weight-medium); cursor: pointer; border: var(--border-width) solid transparent; }
+.btn--primary { background: var(--brand); color: var(--background-surface); }
+.btn--primary:hover { background: var(--brand-solid-hover); }
+.btn--primary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.btn[disabled] { background: var(--background-disabled); color: var(--text-disabled); border-color: var(--border-disabled); cursor: not-allowed; }
+.btn .spin { display: inline-block; width: 14px; height: 14px; margin-inline-end: var(--spacing-8); vertical-align: -2px;
+             border: 2px solid color-mix(in srgb, var(--background-surface) 40%, transparent); border-top-color: var(--background-surface);
+             border-radius: var(--radius-pill); animation: spin var(--duration-fast-rich, 700ms) linear infinite; }
+@keyframes spin { to { transform: rotate(1turn); } }
+.auth__foot { margin: var(--spacing-16) 0 0; text-align: center; font-size: var(--font-size-12); color: var(--text-secondary); }
+.auth__server { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-8);
+                margin: var(--spacing-24) 0 0; padding: var(--spacing-8) var(--spacing-12); border-radius: var(--radius-small);
+                background: var(--background-surface); border: var(--border-width) solid var(--border-subtle);
+                font-size: var(--font-size-11); color: var(--text-tertiary); }
+.captcha { display: flex; gap: var(--spacing-12); align-items: flex-end; }
+.captcha .control { flex: 1; }
+.captcha__img { width: 104px; min-height: var(--row-height); border-radius: var(--radius-medium); border: var(--border-width) solid var(--border-control);
+                background: repeating-linear-gradient(45deg, var(--background-field) 0 6px, var(--background-surface) 6px 12px);
+                display: grid; place-items: center; font-family: var(--font-family-monospace); letter-spacing: var(--letter-spacing-latin); color: var(--text-secondary); }
+.steps { display: flex; gap: var(--spacing-4); align-items: center; margin: 0 0 var(--spacing-16); font-size: var(--font-size-11); color: var(--text-tertiary); }
+.steps .dot { width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--border-control); }
+.steps .dot.on { background: var(--brand); }
+.otp { display: flex; gap: var(--spacing-8); }
+.otp .control { flex: none; inline-size: var(--row-height); justify-content: center; }
+.otp input { text-align: center; font-family: var(--font-family-monospace); font-size: var(--font-size-16); letter-spacing: var(--letter-spacing-latin); }
+.notice { display: flex; gap: var(--spacing-8); align-items: flex-start; border-radius: var(--radius-medium); padding: var(--spacing-8) var(--spacing-12); margin: 0 0 var(--spacing-16); font-size: var(--font-size-12); }
+.notice--info { background: var(--brand-soft); color: var(--brand-ink); }
+.notice--warn { background: var(--warning-soft); color: var(--warning-text, var(--warm-text, var(--warning))); }
+
+.notes { margin: var(--spacing-32) 0 0; padding: var(--spacing-16) var(--spacing-24); border-radius: var(--radius-medium);
+         background: var(--background-surface); border: var(--border-width) solid var(--border-subtle); }
+.notes ol { margin: 0; padding-inline-start: var(--spacing-24); }
+.notes li { margin: 0 0 var(--spacing-8); }
+kbd { font-family: var(--font-family-monospace); font-size: var(--font-size-11); background: var(--background-field);
+      border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-xs); padding: 0 var(--spacing-4); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>登录页草图 · 第一版</h1>
+  <p class="sub">六态排开，供 UE / UI 评审。所有颜色、间距、字号、圆角、描边、阴影取自 <code>design/tokens.css</code>；卡宽与状态列宽是本页局部变量，进产品时归 token。</p>
+  <p class="src"><b>设计依据（2026 年检索，已按本仓取舍）</b>：登录与注册分作两页、动作命名分开（Authgear《Login &amp; Signup UX》）；字段数越少越好（NN/g 经 Alfdesign 汇总《Form UX Best Practices 2026》）；标签顶对齐；离开字段即行内校验；正确的标签关联与 <code>autocomplete</code>、键盘可达、焦点环可见；移动优先、点击目标够大；把当前服务地址摆在明处作为信任信号。</p>
+
+  <div class="toolbar">
+    <span class="seg-group" role="group" aria-label="主题">
+      <button class="seg on" data-theme-set="light" type="button">浅色</button>
+      <button class="seg" data-theme-set="dark" type="button">暗色</button>
+    </span>
+    <span class="seg-group" role="group" aria-label="语言">
+      <button class="seg on" data-lang-set="zh-CN" type="button">中文</button>
+      <button class="seg" data-lang-set="zh-TW" type="button">繁中</button>
+      <button class="seg" data-lang-set="en-US" type="button">EN</button>
+      <button class="seg" data-lang-set="ja" type="button">日本語</button>
+    </span>
+    <span class="why" id="proto-note">草图：交互只标注、不实现；真实行为进产品后由用例钉住。</span>
+  </div>
+
+  <h2>六态</h2>
+  <div class="stage">
+
+    <!-- 1 空闲 -->
+    <figure class="state">
+      <figcaption><b>1 · 空闲</b>：进入登录页。</figcaption>
+      <div class="auth">
+        <div class="auth__brand"><span class="auth__mark" aria-hidden="true"></span><h3 data-i18n="login.title">登录</h3></div>
+        <p class="auth__lead" data-i18n="login.lead">用账号继续。没有账号可以随时创建。</p>
+        <div class="field">
+          <label for="s1-user" data-i18n="field.user">账号</label>
+          <div class="control"><input id="s1-user" type="text" autocomplete="username" placeholder="you@example.com" data-i18n-ph="field.userPh"></div>
+        </div>
+        <div class="field">
+          <label for="s1-pass" data-i18n="field.password">密码</label>
+          <div class="control">
+            <input id="s1-pass" type="password" autocomplete="current-password" placeholder="••••••••" data-i18n-ph="field.passwordPh">
+            <button class="reveal" type="button" aria-pressed="false" data-i18n="field.reveal">显示</button>
+          </div>
+        </div>
+        <div class="row-between">
+          <label class="check"><input type="checkbox" checked><span data-i18n="field.remember">记住我</span></label>
+          <a class="link" href="#" data-i18n="login.switch">创建账号</a>
+        </div>
+        <button class="btn btn--primary" type="button" data-i18n="login.submit">登录</button>
+        <div class="auth__server"><span data-i18n="server.current">服务</span><span><dev-backend-host>:5099</span><a class="link" href="#" data-i18n="server.switch">切换</a></div>
+      </div>
+      <p class="why">焦点顺序：账号 → 密码 → 显示 → 记住我 → 创建账号 → 登录 → 切换服务。回车在任一字段即提交。账号字段用 <code>autocomplete="username"</code>，密码用 <code>current-password</code>，便于密码管理器。</p>
+    </figure>
+
+    <!-- 2 提交中 -->
+    <figure class="state">
+      <figcaption><b>2 · 提交中</b>：已提交，等待引擎。</figcaption>
+      <div class="auth">
+        <div class="auth__brand"><span class="auth__mark" aria-hidden="true"></span><h3 data-i18n="login.title">登录</h3></div>
+        <p class="auth__lead" data-i18n="login.lead">用账号继续。没有账号可以随时创建。</p>
+        <div class="field">
+          <label for="s2-user" data-i18n="field.user">账号</label>
+          <div class="control"><input id="s2-user" type="text" value="max@yaoagents.com" disabled></div>
+        </div>
+        <div class="field">
+          <label for="s2-pass" data-i18n="field.password">密码</label>
+          <div class="control"><input id="s2-pass" type="password" value="correct-horse" disabled></div>
+        </div>
+        <div class="row-between">
+          <label class="check"><input type="checkbox" checked disabled><span data-i18n="field.remember">记住我</span></label>
+          <span class="link" aria-disabled="true" data-i18n="login.switch">创建账号</span>
+        </div>
+        <button class="btn btn--primary" type="button" disabled><span class="spin" aria-hidden="true"></span><span data-i18n="login.submitting">正在登录…</span></button>
+        <div class="auth__server"><span data-i18n="server.current">服务</span><span><dev-backend-host>:5099</span><span class="link" aria-disabled="true" data-i18n="server.switch">切换</span></div>
+      </div>
+      <p class="why">整表单禁用、按钮给进行态文字（不是只转圈）；切换服务在提交中不可点。回车不重复提交。</p>
+    </figure>
+
+    <!-- 3 用户名不存在 -->
+    <figure class="state">
+      <figcaption><b>3 · 账号不存在</b>：引擎回 <code>user_exists=false</code>，引导去注册。</figcaption>
+      <div class="auth">
+        <div class="auth__brand"><span class="auth__mark" aria-hidden="true"></span><h3 data-i18n="login.title">登录</h3></div>
+        <p class="auth__lead" data-i18n="login.lead">用账号继续。没有账号可以随时创建。</p>
+        <div class="field">
+          <label for="s3-user" data-i18n="field.user">账号</label>
+          <div class="control is-error" aria-describedby="s3-err"><input id="s3-user" type="text" value="nobody@example.com" aria-invalid="true"></div>
+          <p class="field__error" id="s3-err"><span aria-hidden="true">!</span><span data-i18n="login.noUser">这个账号还没有注册。</span><a class="link" href="#" data-i18n="login.noUserCta">去创建</a></p>
+        </div>
+        <div class="field">
+          <label for="s3-pass" data-i18n="field.password">密码</label>
+          <div class="control"><input id="s3-pass" type="password"></div>
+        </div>
+        <button class="btn btn--primary" type="button" data-i18n="login.submit">登录</button>
+        <div class="auth__server"><span data-i18n="server.current">服务</span><span><dev-backend-host>:5099</span><a class="link" href="#" data-i18n="server.switch">切换</a></div>
+      </div>
+      <p class="why">错误写在字段下、带下一步动作；不弹窗、不跳页、已填的密码不丢。<code>aria-describedby</code> + <code>aria-invalid</code> 让读屏能读到。</p>
+    </figure>
+
+    <!-- 4 密码错误 -->
+    <figure class="state">
+      <figcaption><b>4 · 密码错误</b>：引擎拒绝，留在本页。</figcaption>
+      <div class="auth">
+        <div class="auth__brand"><span class="auth__mark" aria-hidden="true"></span><h3 data-i18n="login.title">登录</h3></div>
+        <div class="field">
+          <label for="s4-user" data-i18n="field.user">账号</label>
+          <div class="control"><input id="s4-user" type="text" value="max@yaoagents.com"></div>
+        </div>
+        <div class="field">
+          <label for="s4-pass" data-i18n="field.password">密码</label>
+          <div class="control is-error" aria-describedby="s4-err"><input id="s4-pass" type="password" value="wrong" aria-invalid="true"></div>
+          <p class="field__error" id="s4-err"><span aria-hidden="true">!</span><span data-i18n="login.badPass">密码不对。检查大小写，或看下大写锁定。</span></p>
+        </div>
+        <button class="btn btn--primary" type="button" data-i18n="login.submit">登录</button>
+        <p class="auth__foot"><a class="link" href="#" data-i18n="login.switch">创建账号</a></p>
+        <div class="auth__server"><span data-i18n="server.current">服务</span><span><dev-backend-host>:5099</span><a class="link" href="#" data-i18n="server.switch">切换</a></div>
+      </div>
+      <p class="why">文案给可执行的动作（查大小写/大写锁定），不写"凭证无效"这类技术词。引擎的原文不上屏。</p>
+    </figure>
+
+    <!-- 5 需要验证码 -->
+    <figure class="state">
+      <figcaption><b>5 · 需要验证码</b>：入口配置要求人机验证。</figcaption>
+      <div class="auth">
+        <div class="auth__brand"><span class="auth__mark" aria-hidden="true"></span><h3 data-i18n="login.title">登录</h3></div>
+        <div class="notice notice--info"><span aria-hidden="true">i</span><span data-i18n="login.captchaLead">这一步需要确认你不是机器人。</span></div>
+        <div class="field">
+          <label for="s5-user" data-i18n="field.user">账号</label>
+          <div class="control"><input id="s5-user" type="text" value="max@yaoagents.com"></div>
+        </div>
+        <div class="field">
+          <label for="s5-pass" data-i18n="field.password">密码</label>
+          <div class="control"><input id="s5-pass" type="password" value="correct-horse"></div>
+        </div>
+        <div class="field">
+          <label for="s5-cap" data-i18n="field.captcha">验证码</label>
+          <div class="captcha">
+            <div class="control"><input id="s5-cap" type="text" inputmode="text" autocomplete="off" placeholder="ABCD"></div>
+            <span class="captcha__img" aria-hidden="true">A7K2</span>
+            <button class="reveal" type="button" data-i18n="field.captchaRefresh">换一张</button>
+          </div>
+          <p class="field__hint" data-i18n="field.captchaHint">看不清就换一张；不分大小写。</p>
+        </div>
+        <button class="btn btn--primary" type="button" data-i18n="login.submit">登录</button>
+        <div class="auth__server"><span data-i18n="server.current">服务</span><span><dev-backend-host>:5099</span><a class="link" href="#" data-i18n="server.switch">切换</a></div>
+      </div>
+      <p class="why">只在入口配置要求时出现；给出"换一张"，并说明不分大小写（降低不必要的失败）。</p>
+    </figure>
+
+    <!-- 6 需要 MFA -->
+    <figure class="state">
+      <figcaption><b>6 · 需要动态码</b>：引擎要求第二步验证。</figcaption>
+      <div class="auth">
+        <div class="auth__brand"><span class="auth__mark" aria-hidden="true"></span><h3 data-i18n="login.mfaTitle">第二步验证</h3></div>
+        <div class="steps" aria-hidden="true"><span class="dot on"></span><span class="dot on"></span><span class="dot"></span><span data-i18n="login.mfaStep">2 / 3</span></div>
+        <p class="auth__lead" data-i18n="login.mfaLead">输入手机或验证器上的 6 位动态码。</p>
+        <div class="field">
+          <label for="s6-code" data-i18n="field.otp">动态码</label>
+          <div class="otp">
+            <div class="control"><input id="s6-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" value="0" aria-label="1"></div>
+            <div class="control"><input type="text" inputmode="numeric" maxlength="1" value="4" aria-label="2"></div>
+            <div class="control"><input type="text" inputmode="numeric" maxlength="1" value="2" aria-label="3"></div>
+            <div class="control"><input type="text" inputmode="numeric" maxlength="1" value="8" aria-label="4"></div>
+            <div class="control"><input type="text" inputmode="numeric" maxlength="1" aria-label="5"></div>
+            <div class="control"><input type="text" inputmode="numeric" maxlength="1" aria-label="6"></div>
+          </div>
+          <p class="field__hint" data-i18n="field.otpHint">填满即自动提交；<code>autocomplete="one-time-code"</code> 支持系统自动填。</p>
+        </div>
+        <button class="btn btn--primary" type="button" data-i18n="login.verify">验证</button>
+        <p class="auth__foot"><a class="link" href="#" data-i18n="login.mfaBack">返回重新输入账号</a></p>
+        <div class="auth__server"><span data-i18n="server.current">服务</span><span><dev-backend-host>:5099</span><a class="link" href="#" data-i18n="server.switch">切换</a></div>
+      </div>
+      <p class="why">六格一格一字符，支持整串粘贴（不做"只准逐格输入"）；系统短信自动填走 <code>one-time-code</code>；给"返回"退路。</p>
+    </figure>
+
+  </div>
+
+  <div class="notes">
+    <h2 style="margin-top:0">UE 说明（评审后定稿）</h2>
+    <ol>
+      <li><b>两页分开</b>：登录与注册各自独立页面，动作字眼分开（「登录」／「创建账号」）；两者互相链接。</li>
+      <li><b>共用的第一步</b>：两页都先输账号并调用 <code>/user/entry/verify</code>，据其 <code>status</code> 继续本页流程或提示切换（判定发生在这一步，不在页面入口）。</li>
+      <li><b>行内校验</b>：离开字段即校验（格式、必填），错误写在字段下并带下一步动作；提交前的错误不堆在页面顶部。</li>
+      <li><b>键盘</b>：账号 → 密码 → 显示 → 记住我 → 创建账号 → 登录 → 切换服务；<kbd>Enter</kbd> 提交；<kbd>Tab</kbd> 顺序即视觉顺序；焦点环用 <code>--focus-ring</code>。</li>
+      <li><b>密码</b>：可显示/隐藏，允许粘贴，不在客户端做复杂度拦截（由引擎裁决），错误文案不含技术词。</li>
+      <li><b>提交中</b>：整表单禁用并给进行态文字；切换服务不可点；重复提交无效。</li>
+      <li><b>服务地址</b>：始终在页脚可见（信任信号），并给切换入口；切换后本页旧结果作废。</li>
+      <li><b>四语与两主题</b>：文案四语齐；浅色与暗色都要成立（工具栏可切，本页即证据）。</li>
+      <li><b>移动端</b>：单列、点击目标不小于 <code>--row-height</code>；账号字段在手机上用合适键盘类型。</li>
+    </ol>
+  </div>
+
+  <div class="notes">
+    <h2 style="margin-top:0">尚未定（评审时定）</h2>
+    <ol>
+      <li>「忘记密码」不在本轮范围（引擎入口线没有该端点），页面上是否占位。</li>
+      <li>第三方登录（OAuth）本轮不做；位置是否预留。</li>
+      <li>「记住我」对 Web（Cookie 载体）与桌面（凭据库载体）的含义是否区分。</li>
+      <li>注册是否允许"账号 + 验证码"免密码（引擎支持 OTP 登录，是否采用）。</li>
+    </ol>
+  </div>
+
+</div>
+
+<script>
+/* 草图专用：主题、语言与文案。真实实现里这些来自平台层与各域语言包。 */
+const COPY = {
+  'zh-CN': {
+    'login.title':'登录','login.lead':'用账号继续。没有账号可以随时创建。','login.submit':'登录','login.submitting':'正在登录…',
+    'login.switch':'创建账号','login.noUser':'这个账号还没有注册。','login.noUserCta':'去创建','login.badPass':'密码不对。检查大小写，或看下大写锁定。',
+    'login.captchaLead':'这一步需要确认你不是机器人。','login.mfaTitle':'第二步验证','login.mfaStep':'2 / 3','login.mfaLead':'输入手机或验证器上的 6 位动态码。',
+    'login.verify':'验证','login.mfaBack':'返回重新输入账号',
+    'field.user':'账号','field.userPh':'you@example.com','field.password':'密码','field.passwordPh':'••••••••','field.reveal':'显示','field.remember':'记住我',
+    'field.captcha':'验证码','field.captchaRefresh':'换一张','field.captchaHint':'看不清就换一张；不分大小写。','field.otp':'动态码',
+    'field.otpHint':'填满即自动提交；autocomplete="one-time-code" 支持系统自动填。','server.current':'服务','server.switch':'切换'
+  },
+  'zh-TW': {
+    'login.title':'登入','login.lead':'用帳號繼續。沒有帳號可以隨時建立。','login.submit':'登入','login.submitting':'正在登入…',
+    'login.switch':'建立帳號','login.noUser':'這個帳號還沒有註冊。','login.noUserCta':'去建立','login.badPass':'密碼不對。檢查大小寫，或看下大寫鎖定。',
+    'login.captchaLead':'這一步需要確認你不是機器人。','login.mfaTitle':'第二步驗證','login.mfaStep':'2 / 3','login.mfaLead':'輸入手機或驗證器上的 6 位動態碼。',
+    'login.verify':'驗證','login.mfaBack':'返回重新輸入帳號',
+    'field.user':'帳號','field.userPh':'you@example.com','field.password':'密碼','field.passwordPh':'••••••••','field.reveal':'顯示','field.remember':'記住我',
+    'field.captcha':'驗證碼','field.captchaRefresh':'換一張','field.captchaHint':'看不清就換一張；不分大小寫。','field.otp':'動態碼',
+    'field.otpHint':'填滿即自動送出；autocomplete="one-time-code" 支援系統自動填。','server.current':'服務','server.switch':'切換'
+  },
+  'en-US': {
+    'login.title':'Sign in','login.lead':'Continue with your account. You can create one any time.','login.submit':'Sign in','login.submitting':'Signing in…',
+    'login.switch':'Create account','login.noUser':'This account has not been registered yet.','login.noUserCta':'Create it','login.badPass':'That password is not right. Check the case, or your caps lock.',
+    'login.captchaLead':'This step checks that you are not a robot.','login.mfaTitle':'Second step','login.mfaStep':'2 / 3','login.mfaLead':'Enter the six-digit code from your phone or authenticator.',
+    'login.verify':'Verify','login.mfaBack':'Back to the account field',
+    'field.user':'Account','field.userPh':'you@example.com','field.password':'Password','field.passwordPh':'••••••••','field.reveal':'Show','field.remember':'Remember me',
+    'field.captcha':'Code','field.captchaRefresh':'New image','field.captchaHint':'Ask for a new image if it is unreadable; the code is case-insensitive.','field.otp':'Code',
+    'field.otpHint':'It submits once filled; autocomplete="one-time-code" lets the system fill it.','server.current':'Server','server.switch':'Change'
+  },
+  'ja': {
+    'login.title':'ログイン','login.lead':'アカウントで続けます。アカウントはいつでも作成できます。','login.submit':'ログイン','login.submitting':'ログイン中…',
+    'login.switch':'アカウントを作成','login.noUser':'このアカウントはまだ登録されていません。','login.noUserCta':'作成する','login.badPass':'パスワードが違います。大文字小文字や Caps Lock をご確認ください。',
+    'login.captchaLead':'この手順ではロボットでないことの確認が必要です。','login.mfaTitle':'2 段階目','login.mfaStep':'2 / 3','login.mfaLead':'スマートフォンか認証アプリの 6 桁コードを入力してください。',
+    'login.verify':'確認','login.mfaBack':'アカウント入力に戻る',
+    'field.user':'アカウント','field.userPh':'you@example.com','field.password':'パスワード','field.passwordPh':'••••••••','field.reveal':'表示','field.remember':'ログイン状態を保持',
+    'field.captcha':'確認コード','field.captchaRefresh':'別の画像','field.captchaHint':'読みにくいときは画像を替えてください。大文字小文字は区別しません。','field.otp':'コード',
+    'field.otpHint':'入力が終わると送信されます。autocomplete="one-time-code" で自動入力できます。','server.current':'サーバー','server.switch':'切り替え'
+  }
+}
+const html = document.documentElement
+
+function applyTheme(theme) {
+  html.dataset.theme = theme
+  document.querySelectorAll('[data-theme-set]').forEach((b) => b.classList.toggle('on', b.dataset.themeSet === theme))
+}
+function applyLang(lang) {
+  html.lang = lang
+  const dict = COPY[lang] || COPY['zh-CN']
+  document.querySelectorAll('[data-i18n]').forEach((el) => { const v = dict[el.dataset.i18n]; if (v) el.textContent = v })
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => { const v = dict[el.dataset.i18nPh]; if (v) el.placeholder = v })
+  document.querySelectorAll('[data-lang-set]').forEach((b) => b.classList.toggle('on', b.dataset.langSet === lang))
+}
+document.querySelectorAll('[data-theme-set]').forEach((b) => b.addEventListener('click', () => applyTheme(b.dataset.themeSet)))
+document.querySelectorAll('[data-lang-set]').forEach((b) => b.addEventListener('click', () => applyLang(b.dataset.langSet)))
+
+/* 允许用 ?theme=dark&lang=en-US 打开，便于截图与并排比对。 */
+const params = new URLSearchParams(location.search)
+applyTheme(params.get('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+applyLang(params.get('lang') || 'zh-CN')
+</script>
+</body>
+</html>
