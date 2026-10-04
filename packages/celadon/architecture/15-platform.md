@@ -164,7 +164,8 @@
   （`data/request/send.ts` 的 `Request`），出口在**成功解包裹之后**把这一个响应体交给平台 ——
   `adopt` 由平台从响应体里取 `access_token` / `refresh_token` 存进载体，`drop` 丢掉本机凭据；
   载体是 Cookie 时 `adopt` 自然是空操作。**怎么登录由数据层决定**：按 `credentialCarrier()`
-  选端点（本机持凭据走回令牌那条，否则走服务端写 Cookie 的那条），业务层只调一个 `login`。
+  选端点（本机持凭据走回令牌那条，否则走服务端写 Cookie 的那条），业务层只调一个 `login`
+  （例外：`data-check` 那个**测试模式页**仍按按钮分别试两个端点 —— 它是诊断页，不是应用的登录入口）。
 
 ## 5. 客户端（web / desktop）
 

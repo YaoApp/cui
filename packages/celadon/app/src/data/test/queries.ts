@@ -1,4 +1,6 @@
 import { credentialCarrier } from '@/platform/credential'
+import type { Request } from '@/data/request/send'
+import type { LoginAttempt, LoginResult } from './types'
 /* **`test` 的 query 收口**：一行一个接口，把 key 与声明配成一对给调用方。
  *
  * 只在需要策略 / 参数时写，`api.ts` 仍只负责声明（不含 key）。取数时把这一对交给 `useRequest`：
@@ -36,7 +38,7 @@ export const readCaptchaQuery = (query: CaptchaLookup) => ({
 
 /** **统一的登录动作**：怎么登录由数据层决定 —— 凭据由本机持有时走回令牌的那条端点，
  *  否则走服务端写 Cookie 的那条。业务层只认识"登录"，不认识端点与令牌。 */
-export const loginQuery = () =>
+export const loginQuery = (): { key: readonly unknown[]; request: Request<LoginAttempt, LoginResult> } =>
   credentialCarrier() === 'os-store'
     ? { key: testKeys.loginToken(), request: loginToken }
     : { key: testKeys.loginWeb(), request: loginWeb }
