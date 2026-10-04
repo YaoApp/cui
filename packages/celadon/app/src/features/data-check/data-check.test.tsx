@@ -65,11 +65,25 @@ describe('the data check page', () => {
     const user = userEvent.setup()
     renderPage()
 
+    // manual：挂载不读服务信息（`send()` 内部那次是无超时的前缀读取，与这里的 10s 无关）
+    expect(loadServiceInfo).not.toHaveBeenCalledWith(10_000)
+    expect(screen.queryByText('Yao Agents')).not.toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: /^(读一次|讀一次|Read once|一度読む)$/ }))
 
     // 接线的证据：读一次 10s 超时，而且读回来的东西真上了屏
     expect((await screen.findAllByText('Yao Agents')).length).toBeGreaterThan(0)
     expect(loadServiceInfo).toHaveBeenCalledWith(10_000)
+  })
+
+  it('does not run the manual requests until a button is clicked', async () => {
+    renderPage()
+
+    // 四态那节挂载即跑（公开 GET），等它落定后：手动的那几条一条都不该动
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+    expect(vi.mocked(transportFetch).mock.calls.some(([, init]) => init?.body !== undefined)).toBe(false)
+    expect(vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/helloworld/protected'))).toBe(false)
+    expect(loadServiceInfo).not.toHaveBeenCalledWith(10_000)
   })
 
   it('translates a service failure by its code instead of printing the raw sentence', async () => {
@@ -112,7 +126,10 @@ describe('the data check page', () => {
     const user = userEvent.setup()
     const withBody = () => vi.mocked(transportFetch).mock.calls.filter(([, init]) => init?.body !== undefined)
     renderPage()
+    // manual：挂载时只有四态那节的公开 GET，没有带 body 的 POST
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
     const before = withBody().length
+    expect(before).toBe(0)
 
     await user.click(screen.getByRole('button', { name: /^(公开 POST|公開 POST|Public POST)$/ }))
 
@@ -126,6 +143,11 @@ describe('the data check page', () => {
   it('lets the protected calls run and marks the result as an expected failure', async () => {
     const user = userEvent.setup()
     renderPage()
+    // manual：挂载时受保护的那条不跑
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+    expect(
+      vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/helloworld/protected')),
+    ).toBe(false)
 
     await user.click(screen.getByRole('button', { name: /^(受保护 GET|受保護 GET|Protected GET)$/ }))
 

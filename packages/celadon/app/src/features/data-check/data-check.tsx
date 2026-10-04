@@ -2,17 +2,20 @@ import './data-check.less'
 /* **数据层验证页**（`/data-check`）：把 `app/src/data/` 那条路在界面上跑通，让人看得见结果。
  *
  * 四节：
- *   ① 服务信息 —— `loadServiceInfo(10_000)` 读一次 `.well-known/yao`，显示 名称 / 版本 / 接口根
- *   ② 脚手架四格 —— `@/data/helloworld` 的 公开/受保护 × GET/POST，点一下真跑
- *   ③ 请求四态 —— `useRequest` 的 idle / loading / ok / error，拿公开 GET 当 fetcher
- *   ④ 结果区 —— 每次调用的结果按行列出
+ *   ① 服务信息 —— 手动 `useRequest`（fetcher 里 `loadServiceInfo` 读 10s），点按钮才读
+ *   ② 脚手架四格 —— `@/data/helloworld` 的 公开/受保护 × GET/POST，四格各一个手动 `useRequest`，点一下才跑
+ *   ③ 请求四态 —— `useRequest` 的 idle / loading / ok / error，拿公开 GET 当 fetcher，**挂载即跑**
+ *   ④ 结果区 —— 每次落定的调用结果按行列出
+ *
+ * **取数只有一条路**（`05-data-and-api.md` §1）：页面里没有裸的 `send` / `loadServiceInfo` 调用 ——
+ * 它们只在 `useRequest` 的 fetcher 参数里出现；状态从钩子的 `state` 读。
  *
  * **现在只有公开接口能通**：登录还没接，受保护的两条**预期失败**，页面上明确标注 —— 那不是 bug。
  *
  * 失败一律显示**按码翻译过的文案**（`bridgeErrorText`），与 `verify` 页同一套规矩。
  * **秘密不上屏**：结果区只印接口返回的值，从不读凭据，也不印请求头（凭据由出口自己带，见 17-transport.md）。 */
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
@@ -21,9 +24,9 @@ import { useTranslation } from '@/platform/i18n'
 import { useThemeStore } from '@/platform/theme/theme.store'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
-import { bridgeErrorText, type BridgeResult } from '@/platform/bridge'
+import { bridgeErrorText } from '@/platform/bridge'
 import { loadServiceInfo, type ServiceInfo } from '@/platform/service'
-import { send, useRequest, type Result } from '@/data'
+import { send, useRequest, type RequestState, type Result } from '@/data'
 import { protectedGet, protectedPost, publicGet, publicPost } from '@/data/helloworld'
 
 /** 结果区的一行：标签 · 文案 · 是不是"预期失败"（受保护的两条）。 */
@@ -50,12 +53,11 @@ export function DataCheckPage() {
   const locale = i18n.language
   const outbound = { locale, theme }
 
-  const [service, setService] = useState<BridgeResult<ServiceInfo>>()
   const [lines, setLines] = useState<Line[]>([])
   const nextId = useRef(0)
 
   /** 一次调用的结果：成功显示值，失败显示**翻译过的**文案（缺翻译时回退诊断并告警）。 */
-  const report = (label: string, result: BridgeResult<unknown>, expected = false) => {
+  const report = (label: string, result: Result<unknown>, expected = false) => {
     const text = result.ok
       ? `${t('dataCheck.ok')}: ${JSON.stringify(result.value)}`
       : bridgeErrorText(translate, result)
@@ -64,19 +66,39 @@ export function DataCheckPage() {
     setLines((prev) => [line, ...prev].slice(0, 20))
   }
 
-  /** 点一条就真跑一条；`expected` 只影响结果行的标注，不影响调用本身。 */
-  const run = (label: string, call: () => Promise<Result<unknown>>, expected = false) => {
-    void call().then((result) => report(label, result, expected))
+  /** 钩子落定后记一笔（idle / loading 不记）—— 取数在钩子里，这里只负责"上了屏"。 */
+  const reportState = (label: string, state: RequestState<unknown>, expected = false) => {
+    if (state.status === 'ok') report(label, { ok: true, value: state.value }, expected)
+    else if (state.status === 'error') report(label, { ok: false, ...state.failure }, expected)
   }
 
-  const readService = () => {
-    void loadServiceInfo(10_000).then((result) => {
-      setService(result)
-      report('service.info', result)
-    })
-  }
+  /* ① 服务信息：**手动** —— 挂载不跑，按钮点了才 `reload()`（`manual: true`）。 */
+  const service = useRequest<ServiceInfo>(() => loadServiceInfo(10_000), [], { manual: true })
+  useEffect(() => reportState('service.info', service.state), [service.state])
 
-  /* 四态：`useRequest` 挂载即跑、卸载即取消、依赖（语言/主题）变了重跑。
+  /* ② 脚手架四格：**各写各的**（四种调用各一个手动钩子 —— 不在这四个上报 `map`，
+     免得钩子落进循环里）。`send` 只作为 fetcher 出现，取数仍走钩子。 */
+  const publicGetCall = useRequest((signal) => send(publicGet, { outbound, signal }), [], { manual: true })
+  useEffect(() => reportState(t('dataCheck.publicGet'), publicGetCall.state), [publicGetCall.state])
+
+  const publicPostCall = useRequest(
+    (signal) => send(publicPost, { outbound, body: POST_BODY, signal }),
+    [],
+    { manual: true },
+  )
+  useEffect(() => reportState(t('dataCheck.publicPost'), publicPostCall.state), [publicPostCall.state])
+
+  const protectedGetCall = useRequest((signal) => send(protectedGet, { outbound, signal }), [], { manual: true })
+  useEffect(() => reportState(t('dataCheck.protectedGet'), protectedGetCall.state, true), [protectedGetCall.state])
+
+  const protectedPostCall = useRequest(
+    (signal) => send(protectedPost, { outbound, body: POST_BODY, signal }),
+    [],
+    { manual: true },
+  )
+  useEffect(() => reportState(t('dataCheck.protectedPost'), protectedPostCall.state, true), [protectedPostCall.state])
+
+  /* ③ 四态：`useRequest` **挂载即跑**（不传 `manual`）、卸载即取消、依赖（语言/主题）变了重跑。
      公开 GET 当 fetcher —— 它不挑凭据，登录还没接也照样通。 */
   const scaffold = useRequest((signal) => send(publicGet, { outbound, signal }), [locale, theme])
 
@@ -98,18 +120,18 @@ export function DataCheckPage() {
         <Button variant="ghost" onClick={() => navigate(-1)}>{t('dataCheck.back')}</Button>
       </div>
 
-      {/* ① 服务信息：**第一次需要时读一次**并缓存（见 platform/service） */}
+      {/* ① 服务信息：**按钮点了才读**（手动钩子；缓存见 platform/service） */}
       <h2 className="data-check__heading">{t('dataCheck.serviceInfo')}</h2>
       <p>{t('dataCheck.serviceInfoHint')}</p>
       <p className="data-check__tools">
-        <Button onClick={readService}>{t('dataCheck.serviceInfoRead')}</Button>
+        <Button onClick={service.reload}>{t('dataCheck.serviceInfoRead')}</Button>
       </p>
-      {service?.ok ? (
+      {service.state.status === 'ok' ? (
         <div className="data-check__row">
           {[
-            [t('dataCheck.name'), service.value.name],
-            [t('dataCheck.version'), service.value.version],
-            [t('dataCheck.openapi'), service.value.openapi],
+            [t('dataCheck.name'), service.state.value.name],
+            [t('dataCheck.version'), service.state.value.version],
+            [t('dataCheck.openapi'), service.state.value.openapi],
           ].map(([label, value]) => (
             <span className="data-check__cell" key={label}>
               <span className="data-check__label">{label}</span>
@@ -118,8 +140,10 @@ export function DataCheckPage() {
           ))}
         </div>
       ) : null}
-      {service && !service.ok ? (
-        <p className="data-check__notice" role="status">{bridgeErrorText(translate, service)}</p>
+      {service.state.status === 'error' ? (
+        <p className="data-check__notice" role="status">
+          {bridgeErrorText(translate, { ok: false, ...service.state.failure })}
+        </p>
       ) : null}
 
       {/* ② 脚手架四格：公开的两条真跑；受保护的两条也点得动，但登录还没接 —— **预期失败** */}
@@ -136,18 +160,10 @@ export function DataCheckPage() {
         </span>
       </div>
       <p className="data-check__tools">
-        <Button onClick={() => run(t('dataCheck.publicGet'), () => send(publicGet, { outbound }))}>
-          {t('dataCheck.publicGet')}
-        </Button>{' '}
-        <Button onClick={() => run(t('dataCheck.publicPost'), () => send(publicPost, { outbound, body: POST_BODY }))}>
-          {t('dataCheck.publicPost')}
-        </Button>{' '}
-        <Button onClick={() => run(t('dataCheck.protectedGet'), () => send(protectedGet, { outbound }), true)}>
-          {t('dataCheck.protectedGet')}
-        </Button>{' '}
-        <Button onClick={() => run(t('dataCheck.protectedPost'), () => send(protectedPost, { outbound, body: POST_BODY }), true)}>
-          {t('dataCheck.protectedPost')}
-        </Button>
+        <Button onClick={publicGetCall.reload}>{t('dataCheck.publicGet')}</Button>{' '}
+        <Button onClick={publicPostCall.reload}>{t('dataCheck.publicPost')}</Button>{' '}
+        <Button onClick={protectedGetCall.reload}>{t('dataCheck.protectedGet')}</Button>{' '}
+        <Button onClick={protectedPostCall.reload}>{t('dataCheck.protectedPost')}</Button>
       </p>
 
       {/* ③ 请求四态：当前态高亮；成功印值，失败印按码翻译的文案 */}
@@ -173,7 +189,7 @@ export function DataCheckPage() {
         </p>
       ) : null}
 
-      {/* ④ 结果区：每次调用的结果按行列出（只印返回的值 —— 请求头与凭据从不上屏） */}
+      {/* ④ 结果区：每次落定的调用按行列出（只印返回的值 —— 请求头与凭据从不上屏） */}
       <h2 className="data-check__heading">{t('dataCheck.results')}</h2>
       <ul className="data-check__results">
         {lines.length === 0 ? <li>{t('dataCheck.empty')}</li> : null}
