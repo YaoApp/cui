@@ -24,8 +24,14 @@ export type I18nKey =
   | 'bridge.error.reveal.failed'
   | 'bridge.error.reveal.pathNotFound'
   | 'bridge.error.service.malformed'
+  | 'bridge.error.service.notAService'
   | 'bridge.error.service.notReady'
+  | 'bridge.error.service.storeFailed'
+  | 'bridge.error.service.storeUnavailable'
+  | 'bridge.error.service.storeUnreadable'
   | 'bridge.error.service.unavailable'
+  | 'bridge.error.service.unreachable'
+  | 'bridge.error.service.urlEmpty'
   | 'bridge.error.theme.expectedLightOrDark'
   | 'bridge.error.theme.readFailed'
   | 'bridge.error.theme.writeFailed'
@@ -211,8 +217,14 @@ declare module 'i18next' {
         'bridge.error.reveal.failed': string
         'bridge.error.reveal.pathNotFound': string
         'bridge.error.service.malformed': string
+        'bridge.error.service.notAService': string
         'bridge.error.service.notReady': string
+        'bridge.error.service.storeFailed': string
+        'bridge.error.service.storeUnavailable': string
+        'bridge.error.service.storeUnreadable': string
         'bridge.error.service.unavailable': string
+        'bridge.error.service.unreachable': string
+        'bridge.error.service.urlEmpty': string
         'bridge.error.theme.expectedLightOrDark': string
         'bridge.error.theme.readFailed': string
         'bridge.error.theme.writeFailed': string
