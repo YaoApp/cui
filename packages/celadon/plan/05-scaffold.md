@@ -39,7 +39,8 @@
 
 ## 4. 导航收到一处
 
-- **`routes/nav-items.ts`（新）**：唯一一份导航定义 —— `home`（`/`）· `overview`（`/scaffold`）· `routing` · `bridge` · `requests`；每项给 `href` 与 `titleKey`。五项平铺，不做二级导航。
+- **`platform/utils/nav.ts`（拆）**：`NavItem` 类型与 `navWithActive()`（纯函数）**留在平台**（跨层共享的机制）；`AppNavItem` 与 `APP_NAV` **搬走** —— 应用级导航项不是平台机制，是路由的事。今天那份 `APP_NAV` 装的正是四个脚手架页（`/hello`…`/data-check`），所以它必须跟着走。
+- **`routes/nav-items.ts`（新）**：唯一一份导航定义 —— `home`（`/`）· `overview`（`/scaffold`）· `routing` · `bridge` · `requests`；每项给 `href` 与 `titleKey`。五项平铺，不做二级导航。脚手架页自己的二级导航（今天的 `world` 页内那份）**留在脚手架内**，用同一份 `NavItem`/`navWithActive`。
 - **`routes/surface-layout.tsx`（改）**：按当前 route 渲染一次 `<Header title={<当前项标题>} onRefresh={() => navigate(0)}><Nav items={navItems} localeSwitch onSelect={…}/></Header>`；`main` 与 `side` 两个面都走它。
 - **四个页面（改）**：删掉自己的 `Header`/`Nav`/`navItems`/`useNavigate`（返回按钮一起删），只留正文。
 - **标题**：仍走平台层的 `usePageTitle`；`Header` 的标题取当前 `nav-item` 的 `titleKey`（页面不再各传一个标题）。
@@ -48,7 +49,7 @@
 ## 5. 页面样式抽一层
 
 - **`components/page/`（新）**：`page.tsx` 导出 `Page`（正文容器）· `PageSection`（带标题的一段）· `PageRow`（一行卡片）· `PageNotice`（一行提示）；`page.less` 收这四类。
-- **四个页面的 `.less` 只留自己特有的**：品牌/图标网格（home）· 世界列表（routing）· 命令树（bridge）· 四态与表格（requests）。
+- **四个页面的 `.less` 只留自己特有的**：品牌/图标网格（overview）· 版本卡片（home）· 世界列表（routing）· 命令树（bridge）· 四态与表格（requests）。
 - 名字仍用现有的设计类（`celadon` 体系里的 `nav-item` · `input` · `link` · `Button` 等），**不新造 token**；`platform/shell.less` 只留底座，不放页面级样式。
 - 目标：四份 `.less` 从 53/78/87/145 行降到各自 30 行以内，重复的 `__body`/`__heading`/`__cell`/`__notice` 只剩一份。
 
@@ -57,19 +58,28 @@
 | # | 位置 | 改什么 |
 | --- | --- | --- |
 | 1 | `routes/routes.tsx` | 新路径（`/` 首页占位 + `/scaffold` 索引 + `/scaffold/{routing,bridge,requests}`）；入口重定向从 `hello` 改成 `/` |
-| 2 | `routes/nav-items.ts` | 新建，唯一导航定义 |
+| 2 | `routes/nav-items.ts`（新）· `platform/utils/nav.ts`（拆） | 应用级导航项搬进 `routes/`；平台只留 `NavItem` 与 `navWithActive` |
 | 3 | `routes/surface-layout.tsx` | 渲染 Header+Nav；`surface-layout.test.tsx` 跟着改 |
 | 4 | `components/page/*` | 新建页面公共件 + 样式 |
 | 5 | `features/home`（新占位页）· `features/scaffold/{overview,routing,bridge,requests}` | 新首页 · 目录搬迁（`hello` → `overview`）· 去掉 Header/Nav/返回按钮 · 语言包跟着目录走 |
 | 6 | `scripts/check-bridge-imports.mjs` + `scripts/tests/cases/bridge-imports/**` | 白名单从 `features/verify/**` 改成 `features/scaffold/bridge/**`；违规样本路径同步 |
-| 7 | 语言包 | 新增 `nav.routing`/`nav.bridge`/`nav.requests`/`nav.home` · 删 `verify.back`/`dataCheck.back` · 页面标题键改名（四语） |
+| 7 | 语言包 | 新增 `nav.home`/`nav.overview`/`nav.routing`/`nav.bridge`/`nav.requests` · 删 `nav.hello`/`nav.world`/`nav.verify`/`nav.dataCheck` 与 `verify.back`/`dataCheck.back` · 页面标题键改名（四语） |
 | 8 | 用例 | 四个页面的 `*.test.tsx` 跟着改路径与断言（尤其"点导航"的用例） |
 | 9 | 截图脚本 | `celadon-client-verify/scripts/shoot-client-macos.sh` 与 `windows-build-and-run.ps1` 的页面参数与 Tab 数（导航项从 5 个变 4 个） |
 | 10 | 文档 | `07-routing.md`（路径表）· `15-platform.md` §5.4 的白名单路径 · `04-status.md` §5/§6 标完成 |
 
+## 6.1 不动的地方（想过，决定不动）
+
+| 东西 | 为什么不搬进 scaffold |
+| --- | --- |
+| `stores/side-panel.ts` + `side-panel.test.ts` | 它是**应用级的侧边挂载点**（`06-state.md`：谁都可以往里放东西），不是脚手架的私有状态；`surface-layout` 的 `side` 面就是它的正经消费方。`world` 页只是**第一个用它的人**，搬页面时它照样留在 `stores/`。 |
+| `stores/entry.ts` | 同上：`Entry` 是应用级条目的形状，`side-panel` 的类型就来自它。 |
+| `components/{nav,header,locale-switch,theme-toggle,base}` | 它们是**真组件**（导航、页头、语言、主题、基座），产品与脚手架共用；本轮只让 `surface-layout` 统一渲染它们，不搬。 |
+| `platform/utils/nav.ts` 的类型与 `navWithActive` | 跨层共享的**机制**（类型 + 纯函数），不是某一页的东西。 |
+
 ## 7. TODO（一轮做完）
 
-- [ ] 1. 建 `components/page/` 与 `routes/nav-items.ts`，`surface-layout` 接上 Header+Nav
+- [ ] 1. 建 `components/page/` 与 `routes/nav-items.ts`（把 `APP_NAV`/`AppNavItem` 从 `platform/utils/nav.ts` 搬过来），`surface-layout` 接上 Header+Nav
 - [ ] 2. 建 `features/home` 占位页（版本信息）；搬目录：`hello → scaffold/overview`、`world/verify/data-check → scaffold/{routing,bridge,requests}`
 - [ ] 3. 删各页的 Header/Nav/返回按钮；`.less` 收编到 `page.less`
 - [ ] 4. 路由表与语言包（四语）改完
