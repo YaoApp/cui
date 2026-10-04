@@ -6,7 +6,7 @@
 
 /** 一次调用的失败：传输失败 + 服务端业务错误，**同一种形状**（与 `platform/transport` 的字段一致）。
  *
- *  **为什么叫 `Failure` 而不是 `ApiFailure`**：出口是 `@/data`，来源写在 import 路径里就够；
+ *  **为什么叫 `Failure` 而不是 `Failure`**：出口是 `@/data`，来源写在 import 路径里就够；
  *  平台那侧的 `BridgeFailure` 保留前缀，是为了在同一次排查里分辨"这条失败来自**宿主桥**还是**服务接口**"。
  *
  *  **引擎的错误体是 OAuth 形状**（`yao/openapi/oauth/types/types.go:35-45`）：
