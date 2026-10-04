@@ -49,7 +49,7 @@
 | 服务信息 | `{ name: "Yao Agents", version: "1.0.0", openapi: "/v1" }` |
 | `/v1/helloworld/public`（GET）| `{"MESSAGE":"data-check-persona-get","SERVER_TIME":"2020-01-01T00:00:00Z"}` |
 | `/v1/helloworld/public`（POST）| `{"MESSAGE":"data-check-persona-post","SERVER_TIME":"2020-01-01T00:00:00Z"}` |
-| `/v1/helloworld/protected`（GET/POST）| HTTP 401 · `{"error":"unauthorized","error_description":"login is not wired"}` |
+| `/v1/helloworld/protected`（GET/POST）| HTTP 401 · `{"error":"unauthorized","error_description":"no credential was sent"}` |
 
 **界面文字**（语言钉基准 `zh-CN`）：四态图例 成功 / 加载中 / 空闲 / 失败 · 结果格前缀 成功 · 标注 未登录（缺凭据）·
 失败诊断按引擎给的码原样上屏（本桩为 `unauthorized`，引擎原文不上屏；页面按码翻成「需要登录」）。

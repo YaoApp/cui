@@ -13,7 +13,7 @@ import './data-check.less'
  * 登录那节只显示凭据的**存在性与长度**，不显示值。
  *
  * **登录成功 ≠ 被允许**：受保护接口还要过引擎的授权策略 —— 带着凭据仍回 403 时，
- * 标注换成"已认证但未被授权"，并附上引擎给的 `reason`（`state.failure.rawMessage`，不新增传输逻辑）。 */
+ * 标注换成"已认证但未被授权"，（引擎原文不上屏）。 */
 
 import { useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'

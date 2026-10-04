@@ -443,7 +443,7 @@ describe('the data check page', () => {
     await user.click(screen.getByRole('button', { name: '以此账号登录' }))
     expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
 
-    // 登录成功但带凭据仍被拒：标注换成"已认证但未被授权"，并附上引擎给的 reason
+    // 登录成功但带凭据仍被拒：标注换成"已认证但未被授权"，（引擎原文不上屏）
     await user.click(screen.getByRole('button', { name: '受保护 GET' }))
     await waitFor(() => expect(cellText('受保护 GET')).toContain('已认证但未被授权'))
     expect(cellText('受保护 GET')).not.toContain('no match, default policy: deny') // 引擎原文不上屏
