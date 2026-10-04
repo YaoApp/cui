@@ -20,6 +20,11 @@ export type Request = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   /** 引擎的路径（**不含** `openapi` 前缀，如 `/helloworld/public`） */
   path: string
+  /** **这个接口要不要凭据** —— 与引擎侧的 `oauth.Guard` 对齐：
+   *  · `'required'`（默认）：受保护（`/helloworld/protected`）—— 出口带上凭据（Web = 浏览器带 Cookie · 桌面 = 宿主带 Bearer）
+   *  · `'none'`：**公开**（`/helloworld/public` · 登录前）—— **别带**（Web 下显式 `credentials: 'omit'`）
+   *  · `'explicit'`：调用方自己在 `headers` 里给（两步登录第一步的临时 `Authorization`） */
+  auth?: 'required' | 'none' | 'explicit'
 }
 
 export type SendInputs = {
@@ -58,6 +63,8 @@ export async function send<T>(request: Request, inputs: SendInputs): Promise<Res
   const response = await transportFetch(url, {
     method: request.method,
     headers: { ...contextHeaders(ctx), ...(inputs.headers ?? {}) },
+    // 公开接口明确不带凭据（Web 下浏览器本来会带同源 Cookie，这里关掉；桌面由宿主照同一条声明判断）
+    ...(request.auth === 'none' ? { credentials: 'omit' as const } : {}),
     ...(inputs.body === undefined ? {} : { body: JSON.stringify(inputs.body) }),
     ...(inputs.signal ? { signal: inputs.signal } : {}),
     ...(inputs.timeoutMs === undefined ? {} : { timeoutMs: inputs.timeoutMs }),

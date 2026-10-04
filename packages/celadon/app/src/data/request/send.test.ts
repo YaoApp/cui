@@ -56,6 +56,15 @@ describe('send', () => {
     expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({ Authorization: 'Bearer temp-one-shot', 'X-Yao-Accept': 'cui-web' })
   })
 
+  it('does not carry credentials on a public interface', async () => {
+    const fetchMock = answer({ ok: true })
+    await send({ ...request, auth: 'none' }, { outbound })
+    expect(fetchMock.mock.calls[0][1]?.credentials).toBe('omit')
+    const protectedCall = await send({ ...request, auth: 'required' }, { outbound })
+    expect(protectedCall.ok).toBe(true)
+    expect(fetchMock.mock.calls[1][1]?.credentials).toBeUndefined() // 受保护的：由浏览器/宿主自己带
+  })
+
   it('passes a network failure straight through', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline') }))
     const result = await send(request, { outbound })
