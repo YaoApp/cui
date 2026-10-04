@@ -41,6 +41,9 @@ function renderBootError(error: unknown): void {
 async function boot(): Promise<void> {
   try {
     await loadClient()
+  /* 会话凭据读一次（桌面 OS 凭据库、Web 是空操作）：**渲染前**完成，首屏之后的请求才带得上；
+     失败不挡启动（没登录 / 钥匙串被拒都由请求自己的失败呈现）。 */
+  await loadSession()
   } catch (error) {
     renderBootError(error)
     return
@@ -56,8 +59,6 @@ async function boot(): Promise<void> {
   )
   /* 开发期自检：正文色与页面底色的对比度（见 architecture/09-theme.md §6）。生产不跑。 */
   assertThemeContrast()
-  /* 会话凭据读一次（桌面 OS 凭据库、Web 是空操作）：出口之后的请求才带得上。 */
-  void loadSession()
 }
 
 void boot()

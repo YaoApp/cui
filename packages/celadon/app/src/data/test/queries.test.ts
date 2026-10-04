@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 /* 登录动作：怎么登录由数据层按凭据载体决定；成功后把响应交给平台收令牌。 */
 const send = vi.hoisted(() => vi.fn())
-const signIn = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: true })))
+type AdoptResult = { ok: boolean; value?: boolean; code?: string; params?: unknown; message?: string }
+const signIn = vi.hoisted(() => vi.fn<() => Promise<AdoptResult>>(async () => ({ ok: true, value: true })))
 const credentialCarrier = vi.hoisted(() => vi.fn(() => 'cookie'))
 
 vi.mock('@/data/request/send', () => ({ send }))
@@ -41,5 +42,14 @@ describe('the login action', () => {
 
     expect(signIn).not.toHaveBeenCalled()
     expect(result).toMatchObject({ ok: false })
+  })
+})
+
+describe('when the credential cannot be stored', () => {
+  it('reports that failure instead of claiming a sign-in', async () => {
+    send.mockResolvedValue({ ok: true, value: { access_token: 'tok' } })
+    signIn.mockResolvedValueOnce({ ok: false, code: 'credential.write_failed', params: {}, message: 'no' })
+
+    expect(await loginQuery().operation({ user: 'ada@example.com' })).toMatchObject({ ok: false, code: 'credential.write_failed' })
   })
 })

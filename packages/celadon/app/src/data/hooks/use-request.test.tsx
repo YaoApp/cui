@@ -132,3 +132,19 @@ describe('an action as the source', () => {
     expect(send).not.toHaveBeenCalled()
   })
 })
+
+describe('two runs in the same tick', () => {
+  it('settles the first promise too, instead of leaving it pending', async () => {
+    send.mockResolvedValue({ ok: true, value: 'first' })
+    const { result } = renderHook(() => useRequest(REQUEST, { manual: true }))
+
+    let first: Promise<unknown> | undefined
+    act(() => {
+      first = result.current.run()
+      void result.current.run()
+    })
+
+    // 被顶掉的那次按契约给 undefined：调用方不会悬着
+    await expect(first).resolves.toBeUndefined()
+  })
+})

@@ -47,8 +47,10 @@ export const loginQuery = (): { key: readonly unknown[]; operation: (input?: Log
     key: keyOf(request),
     operation: async (input) => {
       const result = await send(request, input === undefined ? {} : { body: input })
-      if (result.ok) await signIn(result.value)
-      return result
+      if (!result.ok) return result
+      // 收令牌失败就别宣称登录成功（桌面写不进凭据库时，出口之后也不会有 Authorization）
+      const adopted = await signIn(result.value)
+      return adopted.ok ? result : adopted
     },
   }
 }

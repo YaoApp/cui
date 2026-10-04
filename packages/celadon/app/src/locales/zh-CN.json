@@ -94,6 +94,6 @@
   "verify.transportProbe": "探一下",
   "verify.url": "网址",
   "verify.write": "写",
-  "client.bootFailed": "客户端初始化失败（{code}）",
+  "client.bootFailed": "客户端初始化失败（{{code}}）",
   "client.bootRetry": "重试"
 }

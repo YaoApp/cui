@@ -26,8 +26,17 @@ const LAYERS = ['features', 'components', 'routes']
 /** 白名单：桥检查页。 */
 const ALLOW = /^features[\\/]verify[\\/]/
 const CODE = /\.(?:ts|tsx)$/
-const FROM = /(?:^|\n)\s*(?:import|export)[^'"\n]*from\s*['"]([^'"]+)['"]/g
-const SIDE = /(?:^|\n)\s*import\s*['"]([^'"]+)['"]/g
+/** 把注释换成等长空白（保留换行），免得注释里的 import 被当成真的；
+    行注释只在 `//` 前面不是引号/冒号/反斜杠时才算注释（保住字符串里的 `https://`）。 */
+const blankComments = (source) =>
+  source
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:"'`\\])\/\/[^\n]*/g, (m, p1) => p1 + ' '.repeat(m.length - p1.length))
+
+/* 三种写法都要认：多行 import（子句里有换行）· 副作用 import · 动态 import。 */
+const FROM = /(?:^|\n)[ \t]*(?:import|export)\b[A-Za-z0-9_$*{},\s]*?\bfrom\b[ \t]*['"]([^'"]+)['"]/g
+const SIDE = /(?:^|\n)[ \t]*import[ \t]*['"]([^'"]+)['"]/g
+const DYNAMIC = /\bimport[ \t]*\([ \t]*['"]([^'"]+)['"]/g
 const BRIDGE_DIR = resolve(TARGET, 'platform', 'bridge')
 
 const files = []
@@ -45,9 +54,9 @@ for (const file of files) {
   const rel = relative(TARGET, file)
   const layer = rel.split(/[\\/]/)[0]
   if (!LAYERS.includes(layer) || ALLOW.test(rel)) continue
-  const text = readFileSync(file, 'utf8')
+  const text = blankComments(readFileSync(file, 'utf8'))
   const specifiers = []
-  for (const re of [FROM, SIDE]) {
+  for (const re of [FROM, SIDE, DYNAMIC]) {
     re.lastIndex = 0
     let hit
     while ((hit = re.exec(text)) !== null) specifiers.push(hit[1])

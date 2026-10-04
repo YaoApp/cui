@@ -26,6 +26,15 @@ function storage(): Storage | undefined {
   }
 }
 
+/** 写本地存储：**失败不算错**（隐私模式 / 配额满），身份退化成"本次会话内有效"。 */
+function remember(key: string, value: string): void {
+  try {
+    storage()?.setItem(key, value)
+  } catch {
+    /* 忽略：id 不是凭据，写不进去不该让应用起不来 */
+  }
+}
+
 /** 随机段：**不依赖 `crypto.randomUUID`**（非安全上下文里没有它）。 */
 export function randomId(size = 16): string {
   const cryptoScope = globalThis.crypto as { getRandomValues?: (array: Uint8Array) => Uint8Array } | undefined
@@ -56,7 +65,7 @@ export function clientId(): string {
   if (existing) return existing
 
   const id = newClientId()
-  store?.setItem(STORAGE_KEY, id)
+  remember(STORAGE_KEY, id)
   return id
 }
 
@@ -65,9 +74,8 @@ export function clientId(): string {
 export function adoptMachineId(machine: string): string {
   const id = `${prefix()}-${machine}`
   primed = id
-  const store = storage()
-  store?.setItem(STORAGE_KEY, id)
-  store?.setItem(`${STORAGE_KEY}.machine`, id)
+  remember(STORAGE_KEY, id)
+  remember(`${STORAGE_KEY}.machine`, id)
   return id
 }
 

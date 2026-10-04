@@ -94,6 +94,6 @@
   "verify.transportProbe": "Probe",
   "verify.url": "URL",
   "verify.write": "Write",
-  "client.bootFailed": "The client could not start ({code})",
+  "client.bootFailed": "The client could not start ({{code}})",
   "client.bootRetry": "Retry"
 }

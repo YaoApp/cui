@@ -79,6 +79,8 @@ export function useRequest<Input = void, Output = void>(
   const run = useCallback(
     (body?: Input) => new Promise<Result<Output> | undefined>((resolve) => {
       if (body !== undefined) bodyRef.current = body
+      // 上一次还没被接走的等待者：先放行，别让它悬着（同一 tick 连调两次 run()）
+      settle.current?.(settled.current)
       settle.current = resolve
       settled.current = undefined
       setAttempt((one) => one + 1)
@@ -105,9 +107,6 @@ export function useRequest<Input = void, Output = void>(
       setState(result.ok
         ? { status: 'ok', value: result.value }
         : { status: 'error', failure: { ...result, text: failureText(result) } })
-    }).finally(() => {
-      settle.current?.(settled.current)
-      settle.current = null
     })
     return () => {
       unsubscribe()

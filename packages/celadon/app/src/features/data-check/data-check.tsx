@@ -112,6 +112,10 @@ export function DataCheckPage() {
     if (result.ok) {
       setServiceUrl(result.value)
       setServiceNotice('')
+      // 换地址 = 换服务：页面上的登录态与退出态一起作废（平台的缓存由 writeServiceAddress 清）
+      loginCall.reset()
+      logoutCall.reset()
+      setLoginEmail('')
     } else setServiceNotice(result.code)
   }, [])
   const saveAddress = useCallback(async () => {
@@ -227,7 +231,12 @@ export function DataCheckPage() {
                   <td className="data-check__actions">
                     {user.email ? (
                       <>
-                        <Button onClick={() => signIn(user)} disabled={loginCall.state.status === 'loading'}>{t('dataCheck.loginAction')}</Button>
+                        <Button
+                            onClick={() => signIn(user)}
+                            disabled={loginCall.state.status === 'loading' || logoutCall.state.status === 'loading'}
+                          >
+                            {t('dataCheck.loginAction')}
+                          </Button>
                       </>
                     ) : (
                       <span className="data-check__label">{t('dataCheck.noEmailForLogin')}</span>
@@ -245,10 +254,11 @@ export function DataCheckPage() {
         <p className="data-check__tools">
           <Button
             onClick={() =>
-              void logoutCall.run().then(() => {
+              void logoutCall.run().then((result) => {
                   // 服务端吊销成功后再清本地那把（顺序不能反）—— 仍在动作里，不写副作用
                 // 服务端已吊销并清 Cookie：两边的旧登录结果都不能再代表"已登录"
-                loginCall.reset()
+                // 服务端吊销成功才算退出：失败时页面仍应算登录态
+                if (result?.ok) loginCall.reset()
               })
             }
             disabled={logoutCall.state.status === 'loading'}

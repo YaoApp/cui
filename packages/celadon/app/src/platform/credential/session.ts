@@ -4,7 +4,7 @@
  * **不判宿主**：载体是 Cookie 时（Web）这里全是空操作（Cookie 由浏览器与服务端管）；
  * 载体是 OS 凭据库时（桌面）才真读真写。键按服务 origin 分账（`scope.ts`）→ `<origin>#session`。 */
 
-import { fail, ok, type BridgeResult } from '../bridge/result'
+import { fail, ok, type BridgeFailure, type BridgeResult } from '../bridge/result'
 import { credential } from './index'
 import { credentialKey } from './scope'
 
@@ -21,12 +21,16 @@ const keyOfSession = (): string | undefined => credentialKey(SESSION_PURPOSE)
 /** 读一次会话凭据（惰性 + 内存镜像）。Web 与"没选服务"都回"没有"，不是错误。 */
 export async function loadSession(): Promise<BridgeResult<string | undefined>> {
   if (loaded) return ok(cached)
-  loaded = true
   const name = keyOfSession()
-  if (!name || !credential.managedByApp()) return ok(undefined)
+  if (!name || !credential.managedByApp()) {
+    loaded = true
+    return ok(undefined)
+  }
   const result = await credential.read(name)
-  if (!result.ok) return /no_entry/i.test(result.code) ? ok(undefined) : result
+  // **读失败不算"已读"**：留着重试的机会（比如钥匙串一时被拒），也别把错误吞成"没登录"
+  if (!result.ok) return /no_entry/i.test(result.code) ? ((loaded = true), ok(undefined)) : result
   cached = result.value
+  loaded = true
   return ok(cached)
 }
 
@@ -52,7 +56,8 @@ export async function signIn(payload: unknown): Promise<BridgeResult<boolean>> {
   const { access, refresh } = tokenIn(payload)
   if (!access) return ok(true) // 没有令牌可收（Cookie 载体 / 别的响应形状）
   const name = keyOfSession()
-  if (!name) return fail('credential.service_empty', 'no service address to key a credential', {})
+  // 没有服务地址可挂靠 = 没地方存（正常路径下请求本身就会先失败）；真正的写失败仍要上报
+  if (!name) return ok(true)
   if (!credential.managedByApp()) return ok(true)
   cached = access
   const written = await credential.write(name, access)
@@ -69,13 +74,13 @@ export async function signOut(): Promise<BridgeResult<boolean>> {
   cached = undefined
   loaded = true
   if (!credential.managedByApp()) return ok(true)
-  let dropped = true
+  let failure: BridgeFailure | undefined
   for (const name of [keyOfSession(), credentialKey(REFRESH_PURPOSE)]) {
     if (!name) continue
     const gone = await credential.remove(name)
-    if (!gone.ok) dropped = false
+    if (!gone.ok) failure ??= gone // 删不掉要报出来：留着旧的会带着已"退出"的假象继续生效
   }
-  return ok(dropped)
+  return failure ?? ok(true)
 }
 
 /** 忘记这台服务：把这个 origin 下的凭据**逐条删掉**（`<origin>#…`）。 */
