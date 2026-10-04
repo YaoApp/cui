@@ -95,5 +95,9 @@
   "verify.url": "URL",
   "verify.write": "書き込み",
   "client.bootFailed": "クライアントの初期化に失敗しました（{code}）",
-  "client.bootRetry": "再試行"
+  "client.bootRetry": "再試行",
+  "dataCheck.loginAction": "サインイン",
+  "dataCheck.loginResult": "サインイン済み",
+  "dataCheck.loginHint": "行の「サインイン」を押す：サインインの方法はデータ層が決めます（本機が憑証を持つ場合はトークン、それ以外はサーバーが Cookie を設定）。",
+  "dataCheck.loginTestHint": "これらのエンドポイントは開発インスタンスにのみ存在し、本番エンジンは登録しません。ユーザー行の「サインイン」を押してください：サインインの方法はデータ層が決めます。"
 }

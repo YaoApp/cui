@@ -64,7 +64,9 @@ export type I18nKey =
   | 'dataCheck.listUsers'
   | 'dataCheck.listUsersHint'
   | 'dataCheck.locale'
+  | 'dataCheck.loginAction'
   | 'dataCheck.loginHint'
+  | 'dataCheck.loginResult'
   | 'dataCheck.loginTest'
   | 'dataCheck.loginTestHint'
   | 'dataCheck.loginToken'
@@ -266,7 +268,9 @@ declare module 'i18next' {
         'dataCheck.listUsers': string
         'dataCheck.listUsersHint': string
         'dataCheck.locale': string
+        'dataCheck.loginAction': string
         'dataCheck.loginHint': string
+        'dataCheck.loginResult': string
         'dataCheck.loginTest': string
         'dataCheck.loginTestHint': string
         'dataCheck.loginToken': string

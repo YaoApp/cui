@@ -95,5 +95,9 @@
   "verify.url": "网址",
   "verify.write": "写",
   "client.bootFailed": "客户端初始化失败（{code}）",
-  "client.bootRetry": "重试"
+  "client.bootRetry": "重试",
+  "dataCheck.loginAction": "登录",
+  "dataCheck.loginResult": "已登录",
+  "dataCheck.loginHint": "点某行的「登录」：怎么登录由数据层决定（本机持凭据的回令牌，否则由服务端写 Cookie）；页面只发一个登录动作。",
+  "dataCheck.loginTestHint": "这些接口只在开发实例上存在；正式引擎不注册它们。点用户行的「登录」：怎么登录由数据层决定，页面只发一个登录动作。"
 }

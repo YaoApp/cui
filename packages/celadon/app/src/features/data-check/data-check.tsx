@@ -30,7 +30,7 @@ import {
   publicGetQuery,
   publicPostQuery,
 } from '@/data/helloworld'
-import { listUsersQuery, loginTokenQuery, loginWebQuery, type TestUser } from '@/data/test'
+import { listUsersQuery, loginQuery, type TestUser } from '@/data/test'
 import { logoutQuery } from '@/data/user'
 import { readServiceAddress, writeServiceAddress } from '@/platform/service'
 import { client, useLocalePreference, useThemePreference } from '@/platform/client'
@@ -79,8 +79,7 @@ export function DataCheckPage() {
   /* ① 登录（测试模式）：三份声明各写各的，点一下跑一次；key 由域层 `queries.ts` 收口。
      发送的输入就是请求体（`{ user }`），地址与 key 都不在这里拼。 */
   const listUsersCall = useRequest(listUsersQuery(USER_PAGE), { manual: true })
-  const loginWebCall = useRequest(loginWebQuery(), { manual: true })
-  const loginTokenCall = useRequest(loginTokenQuery(), { manual: true })
+  const loginCall = useRequest(loginQuery(), { manual: true })
   const logoutCall = useRequest(logoutQuery(), { manual: true })
   /** 最近一次做登录的邮箱 —— 只用来标注结果是哪个账号的，不是凭据。 */
   const [loginEmail, setLoginEmail] = useState('')
@@ -100,8 +99,7 @@ export function DataCheckPage() {
      再点下面受保护的两格，出口自己就会带上它 —— 这里不读、不碰凭据。 */
   const users =
     listUsersCall.state.status === 'ok' ? listUsersCall.state.value.data.slice(0, USER_SAMPLE_SIZE) : []
-  const webLogin = loginWebCall.state.status === 'ok' ? loginWebCall.state.value : null
-  const tokenLogin = loginTokenCall.state.status === 'ok' ? loginTokenCall.state.value : null
+  const login = loginCall.state.status === 'ok' ? loginCall.state.value : null
 
 
   /* **服务地址只有客户端能改**（Web 不能换服务）：这里用与验证页同一套平台调用，
@@ -125,27 +123,21 @@ export function DataCheckPage() {
   }, [serviceUrl])
 
   /** 登录态：取到过凭据 **且没退出成功** —— 退出由服务端吊销并清 Cookie，退完就不再是登录态。 */
-  const signedIn = (webLogin !== null || tokenLogin !== null) && logoutCall.state.status !== 'ok'
+  const signedIn = login !== null && logoutCall.state.status !== 'ok'
 
   /** 认证类拒绝的码：登录态下被拒 = 已认证但未被授权（引擎侧授权策略，不是客户端问题）。 */
   const authRefusal = /forbidden|insufficient_scope|unauthorized|token_missing|invalid_token/i
   /** "已认证但未被授权"只在**浏览器真把凭据带上了**（Cookie 登录）时成立；
    *  只取 token 的那种登录不给浏览器写 Cookie，受保护请求仍是"没带凭据"。 */
-  const cookieSignedIn = webLogin !== null && logoutCall.state.status !== 'ok'
+  /* 登录后仍被拒 = 已认证但未被授权（引擎的授权策略）*/
   const deniedAfterLogin = (state: RequestState<unknown>) =>
-    cookieSignedIn && state.status === 'error' && authRefusal.test(state.failure.code)
+    signedIn && state.status === 'error' && authRefusal.test(state.failure.code)
 
-  const signIn = (user: TestUser, kind: 'web' | 'token') => {
+  /* **业务层只认识"登录"**：选哪条端点、令牌存哪儿，都是数据层那个动作的事 */
+  const signIn = (user: TestUser) => {
     if (!user.email) return
     logoutCall.reset() // 上一次"已退出"到此为止
-    if (kind === 'web') {
-      loginTokenCall.reset() // 换一种登录方式：另一边的旧凭据一并作废
-      void loginWebCall.run({ user: user.email })
-    } else {
-      loginWebCall.reset()
-      // 令牌由**出口**自动收下（声明上标了 `session: 'adopt'`）—— 页面不碰令牌字段
-      void loginTokenCall.run({ user: user.email })
-    }
+    void loginCall.run({ user: user.email })
     setLoginEmail(user.email)
   }
 
@@ -235,8 +227,7 @@ export function DataCheckPage() {
                   <td className="data-check__actions">
                     {user.email ? (
                       <>
-                        <Button onClick={() => signIn(user, 'web')} disabled={loginWebCall.state.status === 'loading'}>{t('dataCheck.loginWeb')}</Button>{' '}
-                        <Button onClick={() => signIn(user, 'token')} disabled={loginTokenCall.state.status === 'loading'}>{t('dataCheck.loginToken')}</Button>
+                        <Button onClick={() => signIn(user)} disabled={loginCall.state.status === 'loading'}>{t('dataCheck.loginAction')}</Button>
                       </>
                     ) : (
                       <span className="data-check__label">{t('dataCheck.noEmailForLogin')}</span>
@@ -257,8 +248,7 @@ export function DataCheckPage() {
               void logoutCall.run().then(() => {
                   // 服务端吊销成功后再清本地那把（顺序不能反）—— 仍在动作里，不写副作用
                 // 服务端已吊销并清 Cookie：两边的旧登录结果都不能再代表"已登录"
-                loginWebCall.reset()
-                loginTokenCall.reset()
+                loginCall.reset()
               })
             }
             disabled={logoutCall.state.status === 'loading'}
@@ -272,31 +262,17 @@ export function DataCheckPage() {
         <p className="data-check__notice" role="status">{logoutCall.state.failure.text}</p>
       ) : null}
       {/* 凭据**只上长度与存在性**，值永不上屏 */}
-      {signedIn && webLogin ? (
+      {signedIn && login ? (
         <p className="data-check__value" role="status">
-          {t('dataCheck.loginWebResult', {
-            email: loginEmail,
-            status: webLogin.status === 'active' ? t('dataCheck.statusActive') : webLogin.status,
-            minutes: Math.round(webLogin.expires_in / 60),
-          })}
+          {t('dataCheck.loginResult')}
+          {' '}
+          {loginEmail}
           {' · '}
-          {t('dataCheck.credentials', {
-            session: webLogin.session_id.length,
-            access: webLogin.access_token.length,
-            refresh: webLogin.refresh_token.length,
-          })}
+          <span className="data-check__label">{`access ${login.access_token?.length ?? 0} · refresh ${login.refresh_token?.length ?? 0} · expires ${login.expires_in ?? '—'}`}</span>
         </p>
       ) : null}
-      {loginWebCall.state.status === 'error' ? (
-        <p className="data-check__notice" role="status">{loginWebCall.state.failure.text}</p>
-      ) : null}
-      {signedIn && tokenLogin ? (
-        <p className="data-check__value" role="status">
-          {t('dataCheck.loginTokenResult', { email: loginEmail, length: tokenLogin.access_token.length })}
-        </p>
-      ) : null}
-      {loginTokenCall.state.status === 'error' ? (
-        <p className="data-check__notice" role="status">{loginTokenCall.state.failure.text}</p>
+      {loginCall.state.status === 'error' ? (
+        <p className="data-check__notice" role="status">{loginCall.state.failure.text}</p>
       ) : null}
 
       {/* ② 脚手架四格：公开的两条真跑；受保护的两条也点得动，登录成功后就会通 */}
@@ -321,7 +297,7 @@ export function DataCheckPage() {
             {expected && state.status === 'error' ? (
               deniedAfterLogin(state) ? (
                 <em className="data-check__expected">{t('dataCheck.authenticatedDenied')}</em>
-              ) : !cookieSignedIn ? (
+              ) : !signedIn ? (
                 <em className="data-check__expected">{t('dataCheck.expectedFailure')}</em>
               ) : null
             ) : null}
