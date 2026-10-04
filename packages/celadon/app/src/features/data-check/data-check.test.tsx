@@ -2,7 +2,7 @@
  *
  * 与 `verify.test.tsx` 同一套写法：mock 平台层、挂真页面、断言关键行为。
  * 这里连 `@/platform/transport/fetch` 一起换掉 —— 于是走的是**真的 `send()`**：
- * 地址（service.endpoint）→ 出口（transportFetch）→ 解包裹（unwrap）；
+ * 服务信息（`/.well-known/yao`）→ 地址（service.endpoint）→ 出口（transportFetch）→ 解包裹（unwrap）；
  * 受保护的两条在假出口上回 401，页面照预期把结果标注成"预期失败"。 */
 
 import { render, screen, waitFor } from '@testing-library/react'
@@ -11,23 +11,12 @@ import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const MESSAGE = 'hello from the scaffold'
-const SERVICE: ServiceInfo = { name: 'Yao Agents', version: '1.0.0', openapi: '/v1' }
-const loadServiceInfo = vi.fn(
-  async (_timeoutMs?: number): Promise<BridgeResult<ServiceInfo>> => ({ ok: true, value: SERVICE }),
-)
-
-vi.mock('@/platform/service', () => ({
-  loadServiceInfo: (timeoutMs?: number) => loadServiceInfo(timeoutMs),
-  endpoint: (path: string) => `/v1${path}`,
-  serviceBase: () => '',
-}))
+const SERVICE = { name: 'Yao Agents', version: '1.0.0', openapi: '/v1' }
 
 vi.mock('@/platform/transport/fetch', () => ({ transportFetch: vi.fn() }))
 
 import { transportFetch } from '@/platform/transport/fetch'
 import { useThemeStore } from '@/platform/theme/theme.store'
-import type { BridgeResult } from '@/platform/bridge'
-import type { ServiceInfo } from '@/platform/service'
 import { DataCheckPage } from './data-check'
 
 function json(value: unknown, status = 200) {
@@ -48,32 +37,17 @@ function renderPage() {
 
 describe('the data check page', () => {
   beforeEach(() => {
-    loadServiceInfo.mockReset()
-    loadServiceInfo.mockImplementation(async (_timeoutMs?: number) => ({ ok: true as const, value: SERVICE }))
     vi.mocked(transportFetch).mockReset()
     vi.mocked(transportFetch).mockImplementation(async (url) => {
       const target = String(url)
+      // 服务信息：`send()` 第一次需要时读一次，给 openapi 前缀地址才拼得出来
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
       // 受保护的两条：登录还没接，假出口回 401（预期失败）
       if (target.includes('/helloworld/protected')) {
         return json({ error: 'unauthorized', error_description: 'login is not wired' }, 401)
       }
       return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
     })
-  })
-
-  it('reads the service information when asked, and shows what it got', async () => {
-    const user = userEvent.setup()
-    renderPage()
-
-    // manual：挂载不读服务信息（`send()` 内部那次是无超时的前缀读取，与这里的 10s 无关）
-    expect(loadServiceInfo).not.toHaveBeenCalledWith(10_000)
-    expect(screen.queryByText('Yao Agents')).not.toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: /^(读取|讀取|Read|読み込む)$/ }))
-
-    // 接线的证据：读一次 10s 超时，而且读回来的东西真上了屏
-    expect((await screen.findAllByText('Yao Agents')).length).toBeGreaterThan(0)
-    expect(loadServiceInfo).toHaveBeenCalledWith(10_000)
   })
 
   it('does not run the manual requests until a button is clicked', async () => {
@@ -83,24 +57,6 @@ describe('the data check page', () => {
     await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
     expect(vi.mocked(transportFetch).mock.calls.some(([, init]) => init?.body !== undefined)).toBe(false)
     expect(vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/helloworld/protected'))).toBe(false)
-    expect(loadServiceInfo).not.toHaveBeenCalledWith(10_000)
-  })
-
-  it('translates a service failure by its code instead of printing the raw sentence', async () => {
-    loadServiceInfo.mockImplementation(async () => ({
-      ok: false as const,
-      code: 'service.unavailable',
-      params: { status: 503 },
-      message: 'the service answered 503',
-    }))
-    const user = userEvent.setup()
-    renderPage()
-
-    await user.click(screen.getByRole('button', { name: /^(读取|讀取|Read|読み込む)$/ }))
-
-    expect((await screen.findAllByText(/连不上服务/)).length).toBeGreaterThan(0)
-    // 按码翻译，不是英文诊断原文
-    expect(document.body.textContent).not.toContain('the service answered 503')
   })
 
   it('really runs the public GET through send, carrying the platform context', async () => {

@@ -32,23 +32,16 @@ export type I18nKey =
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
   | 'dataCheck.back'
-  | 'dataCheck.empty'
   | 'dataCheck.expectedFailure'
   | 'dataCheck.locale'
-  | 'dataCheck.name'
   | 'dataCheck.ok'
-  | 'dataCheck.openapi'
   | 'dataCheck.protectedGet'
   | 'dataCheck.protectedPost'
   | 'dataCheck.publicGet'
   | 'dataCheck.publicPost'
   | 'dataCheck.reload'
-  | 'dataCheck.results'
   | 'dataCheck.scaffold'
   | 'dataCheck.scaffoldHint'
-  | 'dataCheck.serviceInfo'
-  | 'dataCheck.serviceInfoHint'
-  | 'dataCheck.serviceInfoRead'
   | 'dataCheck.stateError'
   | 'dataCheck.stateIdle'
   | 'dataCheck.stateLoading'
@@ -57,7 +50,6 @@ export type I18nKey =
   | 'dataCheck.statesHint'
   | 'dataCheck.theme'
   | 'dataCheck.title'
-  | 'dataCheck.version'
   | 'entityPanel.close'
   | 'entityPanel.id'
   | 'entityPanel.kind'
@@ -194,23 +186,16 @@ declare module 'i18next' {
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
         'dataCheck.back': string
-        'dataCheck.empty': string
         'dataCheck.expectedFailure': string
         'dataCheck.locale': string
-        'dataCheck.name': string
         'dataCheck.ok': string
-        'dataCheck.openapi': string
         'dataCheck.protectedGet': string
         'dataCheck.protectedPost': string
         'dataCheck.publicGet': string
         'dataCheck.publicPost': string
         'dataCheck.reload': string
-        'dataCheck.results': string
         'dataCheck.scaffold': string
         'dataCheck.scaffoldHint': string
-        'dataCheck.serviceInfo': string
-        'dataCheck.serviceInfoHint': string
-        'dataCheck.serviceInfoRead': string
         'dataCheck.stateError': string
         'dataCheck.stateIdle': string
         'dataCheck.stateLoading': string
@@ -219,7 +204,6 @@ declare module 'i18next' {
         'dataCheck.statesHint': string
         'dataCheck.theme': string
         'dataCheck.title': string
-        'dataCheck.version': string
         'entityPanel.close': string
         'entityPanel.id': string
         'entityPanel.kind': string

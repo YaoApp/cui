@@ -1,22 +1,15 @@
 {
   "dataCheck.back": "戻る",
-  "dataCheck.empty": "まだ呼び出していない",
   "dataCheck.expectedFailure": "想定どおりの失敗（サインイン未接続）",
   "dataCheck.locale": "言語",
-  "dataCheck.name": "名前",
   "dataCheck.ok": "OK",
-  "dataCheck.openapi": "API プレフィックス",
   "dataCheck.protectedGet": "保護 GET",
   "dataCheck.protectedPost": "保護 POST",
   "dataCheck.publicGet": "公開 GET",
   "dataCheck.publicPost": "公開 POST",
   "dataCheck.reload": "再実行",
-  "dataCheck.results": "結果",
   "dataCheck.scaffold": "API 呼び出し",
   "dataCheck.scaffoldHint": "公開の 2 つは実際に実行できます。保護された 2 つも押せますが、サインインは未接続のため失敗は想定どおりです。リクエストには現在の言語とテーマが自動で付きます。",
-  "dataCheck.serviceInfo": "サービス情報",
-  "dataCheck.serviceInfoHint": "サービス情報（名称 · バージョン · API プレフィックス）を読みます。失敗時は理由を表示します。",
-  "dataCheck.serviceInfoRead": "読み込む",
   "dataCheck.stateError": "失敗",
   "dataCheck.stateIdle": "待機",
   "dataCheck.stateLoading": "読み込み中",
@@ -24,6 +17,5 @@
   "dataCheck.states": "取得の状態",
   "dataCheck.statesHint": "1 回の取得の 4 段階：待機 · 読み込み中 · 成功 · 失敗。ここでは「公開 GET」で示します。",
   "dataCheck.theme": "テーマ",
-  "dataCheck.title": "API 検証",
-  "dataCheck.version": "バージョン"
+  "dataCheck.title": "API 検証"
 }

@@ -1,10 +1,9 @@
 import './data-check.less'
 /* **数据层验证页**（`/data-check`）：把 `app/src/data/` 那条路在界面上跑通，让人看得见结果。
  *
- * 三节：
- *   ① 服务信息 —— 读的是 `/.well-known/yao`（地址本身），手动读一次，不经引擎接口
- *   ② 脚手架四格 —— `@/data/helloworld` 的 公开/受保护 × GET/POST，点一下跑一次，各格显示自己的 state
- *   ③ 请求四态 —— `useRequest` 的 idle / loading / ok / error，拿公开 GET 当**声明**，**挂载即跑**
+ * 两节：
+ *   ① 脚手架四格 —— `@/data/helloworld` 的 公开/受保护 × GET/POST，点一下跑一次，各格显示自己的 state
+ *   ② 请求四态 —— `useRequest` 的 idle / loading / ok / error，拿公开 GET 当**声明**，**挂载即跑**
  *
  * **取数只有一条路**（`05-data-and-api.md` §1）：页面里没有裸的 `send` 调用 —— 接口声明交给 `useRequest`，
  * 状态从钩子的 `state` 读，失败上屏用 `state.failure.text`（钩子已按码翻译成一句话）。
@@ -12,7 +11,7 @@ import './data-check.less'
  * **现在只有公开接口能通**：登录还没接，受保护的两条**预期失败**，页面上明确标注 —— 那不是 bug。
  * **秘密不上屏**：只印接口返回的值，从不读凭据，也不印请求头（凭据由出口自己带，见 17-transport.md）。 */
 
-import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
@@ -22,8 +21,6 @@ import { resolvePreference, useLocaleStore } from '@/platform/i18n/locale.store'
 import { useThemeStore } from '@/platform/theme/theme.store'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
-import { failureText } from '@/platform/bridge'
-import { loadServiceInfo, type ServiceInfo } from '@/platform/service'
 import { useRequest, type RequestState } from '@/data'
 import {
   protectedGetQuery,
@@ -34,6 +31,17 @@ import {
 
 /** POST 的请求体（引擎会原样回显在 `POST_PAYLOAD` 里）—— 技术样本，不走语言包。 */
 const POST_BODY = { from: 'data-check' }
+
+/** 标签 + 值的一格：语言 · 主题与四格结果共用同一段标记。 */
+function Cell({ label, value, children }: { label: string; value: ReactNode; children?: ReactNode }) {
+  return (
+    <span className="data-check__cell">
+      <span className="data-check__label">{label}</span>
+      <code>{value}</code>
+      {children}
+    </span>
+  )
+}
 
 export function DataCheckPage() {
   const { t } = useTranslation()
@@ -56,27 +64,14 @@ export function DataCheckPage() {
     return state.failure.text
   }
 
-  /* ① 服务信息：**按钮点了才读**（`manual` 那一步在按钮回调里）。单独留这一节是**分诊**：
-     `/.well-known/yao` 不通时接口一定也不通（拿不到 `openapi` 前缀）。应用不依赖这一节 ——
-     `send()` 第一次需要时自己读（`platform/service`，惰性 + 内存缓存）。 */
-  const [service, setService] = useState<RequestState<ServiceInfo>>({ status: 'idle' })
-  const readService = () => {
-    setService({ status: 'loading' })
-    void loadServiceInfo(10_000).then((result) =>
-      setService(result.ok
-        ? { status: 'ok', value: result.value }
-        : { status: 'error', failure: { ...result, text: failureText(result) } }),
-    )
-  }
-
-  /* ② 脚手架四格：**各写各的声明**，点一下跑一次；key 由域层 `keys.ts` 给 ——
+  /* ① 脚手架四格：**各写各的声明**，点一下跑一次；key 由域层 `keys.ts` 给 ——
      与失效侧 `invalidate()` 用同一套算法，前缀对得上。 */
   const publicGetCall = useRequest(publicGetQuery(), { manual: true })
   const publicPostCall = useRequest(publicPostQuery(), { body: POST_BODY, manual: true })
   const protectedGetCall = useRequest(protectedGetQuery(), { manual: true })
   const protectedPostCall = useRequest(protectedPostQuery(), { body: POST_BODY, manual: true })
 
-  /* ③ 四态：`useRequest` **挂载即跑**（不传 `manual`）、卸载即取消。公开 GET 当声明 ——
+  /* ② 四态：`useRequest` **挂载即跑**（不传 `manual`）、卸载即取消。公开 GET 当声明 ——
      `send()` 自动带上当前请求元数据，它不挑凭据，登录还没接也照样通。 */
   const scaffold = useRequest(publicGetQuery())
 
@@ -105,44 +100,12 @@ export function DataCheckPage() {
         <Button variant="ghost" onClick={() => navigate(-1)}>{t('dataCheck.back')}</Button>
       </div>
 
-      {/* ① 服务信息：**按钮点了才读**（缓存见 platform/service） */}
-      <h2 className="data-check__heading">{t('dataCheck.serviceInfo')}</h2>
-      <p>{t('dataCheck.serviceInfoHint')}</p>
-      <p className="data-check__tools">
-        <Button onClick={readService}>{t('dataCheck.serviceInfoRead')}</Button>
-      </p>
-      {service.status === 'ok' ? (
-        <div className="data-check__row">
-          {[
-            [t('dataCheck.name'), service.value.name],
-            [t('dataCheck.version'), service.value.version],
-            [t('dataCheck.openapi'), service.value.openapi],
-          ].map(([label, value]) => (
-            <span className="data-check__cell" key={label}>
-              <span className="data-check__label">{label}</span>
-              <code>{value}</code>
-            </span>
-          ))}
-        </div>
-      ) : null}
-      {service.status === 'error' ? (
-        <p className="data-check__notice" role="status">
-          {service.failure.text}
-        </p>
-      ) : null}
-
-      {/* ② 脚手架四格：公开的两条真跑；受保护的两条也点得动，但登录还没接 —— **预期失败** */}
+      {/* ① 脚手架四格：公开的两条真跑；受保护的两条也点得动，但登录还没接 —— **预期失败** */}
       <h2 className="data-check__heading">{t('dataCheck.scaffold')}</h2>
       <p>{t('dataCheck.scaffoldHint')}</p>
       <div className="data-check__row">
-        <span className="data-check__cell">
-          <span className="data-check__label">{t('dataCheck.locale')}</span>
-          <code>{locale}</code>
-        </span>
-        <span className="data-check__cell">
-          <span className="data-check__label">{t('dataCheck.theme')}</span>
-          <code>{theme}</code>
-        </span>
+        <Cell label={t('dataCheck.locale')} value={locale} />
+        <Cell label={t('dataCheck.theme')} value={theme} />
       </div>
       <p className="data-check__tools">
         <Button onClick={() => void publicGetCall.run()}>{t('dataCheck.publicGet')}</Button>{' '}
@@ -153,17 +116,15 @@ export function DataCheckPage() {
       {/* 每格直接渲染自己的 state：成功印返回值，失败印译文，受保护的两条标出"预期失败" */}
       <div className="data-check__row">
         {cells.map(({ label, state, expected }) => (
-          <span className="data-check__cell" key={label}>
-            <span className="data-check__label">{label}</span>
-            <code>{stateText(state)}</code>
+          <Cell key={label} label={label} value={stateText(state)}>
             {expected && state.status === 'error' ? (
               <em className="data-check__expected">{t('dataCheck.expectedFailure')}</em>
             ) : null}
-          </span>
+          </Cell>
         ))}
       </div>
 
-      {/* ③ 请求四态：当前态高亮；成功印值，失败印按码翻译的文案 */}
+      {/* ② 请求四态：当前态高亮；成功印值，失败印按码翻译的文案 */}
       <h2 className="data-check__heading">{t('dataCheck.states')}</h2>
       <p>{t('dataCheck.statesHint')}</p>
       <div className="data-check__row">

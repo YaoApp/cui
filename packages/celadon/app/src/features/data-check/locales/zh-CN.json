@@ -1,22 +1,15 @@
 {
   "dataCheck.back": "返回",
-  "dataCheck.empty": "还没有调用",
   "dataCheck.expectedFailure": "预期失败（还没接登录）",
   "dataCheck.locale": "语言",
-  "dataCheck.name": "名称",
   "dataCheck.ok": "成功",
-  "dataCheck.openapi": "接口前缀",
   "dataCheck.protectedGet": "受保护 GET",
   "dataCheck.protectedPost": "受保护 POST",
   "dataCheck.publicGet": "公开 GET",
   "dataCheck.publicPost": "公开 POST",
   "dataCheck.reload": "重新执行",
-  "dataCheck.results": "结果",
   "dataCheck.scaffold": "接口调用",
   "dataCheck.scaffoldHint": "公开的两条可以真跑；受保护的两条也能点，但还没接登录，失败是预期的。每次请求都会自动带上当前的语言与主题。",
-  "dataCheck.serviceInfo": "服务信息",
-  "dataCheck.serviceInfoHint": "读取服务信息，拿到名称 · 版本 · 接口前缀；读不到会给出对应的说明。",
-  "dataCheck.serviceInfoRead": "读取",
   "dataCheck.stateError": "失败",
   "dataCheck.stateIdle": "空闲",
   "dataCheck.stateLoading": "加载中",
@@ -24,6 +17,5 @@
   "dataCheck.states": "取数状态",
   "dataCheck.statesHint": "一次取数的四个阶段：空闲 · 加载中 · 成功 · 失败。这里用「公开 GET」演示。",
   "dataCheck.theme": "主题",
-  "dataCheck.title": "接口验证",
-  "dataCheck.version": "版本"
+  "dataCheck.title": "接口验证"
 }
