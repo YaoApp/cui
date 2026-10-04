@@ -43,7 +43,8 @@ export type Request<Input = void, Output = void> = {
   readonly output?: Output
 }
 
-export type SendInputs<Input = void> = {
+/** 一次调用除**声明**之外的东西（业界同类：Node 的 `RequestOptions` · axios 的 `AxiosRequestConfig` · gRPC 的 `CallOptions`）。 */
+export type RequestOptions<Input = void> = {
   /** 出站上下文（语言 · 主题）—— 由钩子层从 `platform/` 读出来传进来（`hub` 不变） */
   outbound: OutboundInputs
   /** 该域自己的查询参数（如 `page` · `pagesize`）—— 与 ctx 的合并，ctx 先 */
@@ -87,7 +88,7 @@ function withQuery(url: string, params: Record<string, string | number | boolean
 /** 一次普通请求。**失败是值**，不抛异常。 */
 export async function send<Input = void, Output = void>(
   request: Request<Input, Output>,
-  inputs: SendInputs<Input>,
+  inputs: RequestOptions<Input>,
 ): Promise<Result<Output>> {
   const ctx: Context = context(inputs.outbound)
   // 地址由**平台层**给（基址 + well-known 的 openapi 前缀）；**读不到服务信息就直接报错**，不兜前缀
