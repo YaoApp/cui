@@ -9,12 +9,14 @@ export type Capabilities = {
   files: boolean
   notifications: boolean
   externalOpen: boolean
+  /** 这台客户端**自己持有**服务地址（用户填、跨重启还在）—— 只有桌面为真。 */
+  serviceAddress: boolean
 }
 
 /** 一次探测，按客户端类型给开关。**唯一的分支点。** */
 export function capabilities(): Capabilities {
   if (clientKind() === 'desktop') {
-    return { clipboard: true, files: true, notifications: true, externalOpen: true }
+    return { clipboard: true, files: true, notifications: true, externalOpen: true, serviceAddress: true }
   }
   const scope = globalThis as { isSecureContext?: boolean; Notification?: unknown; showOpenFilePicker?: unknown }
   const secure = scope.isSecureContext !== false
@@ -23,5 +25,7 @@ export function capabilities(): Capabilities {
     files: typeof scope.showOpenFilePicker === 'function',
     notifications: typeof scope.Notification === 'function',
     externalOpen: typeof globalThis.open === 'function',
+    // 浏览器不能换服务地址：地址由服务端 / 构建期决定，页面没有可写的地方
+    serviceAddress: false,
   }
 }

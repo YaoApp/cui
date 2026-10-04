@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { probe, transportFetch, transportFetchOk } from './fetch'
+import type { BridgeResult } from '../bridge/result'
 import { parseFailure } from './errors'
+
+const sessionAuthorization = vi.hoisted(() => vi.fn<() => string | undefined>(() => undefined))
+const refreshSession = vi.hoisted(() =>
+  vi.fn<() => Promise<BridgeResult<string>>>(async () => ({ ok: true, value: 'new-token' })),
+)
+vi.mock('../credential/session', () => ({ sessionAuthorization, refreshSession }))
 
 const pluginFetch = vi.fn()
 vi.mock('@tauri-apps/plugin-http', () => ({ fetch: (...args: unknown[]) => pluginFetch(...args) }))
@@ -13,6 +20,10 @@ function asHost() {
 afterEach(() => {
   vi.unstubAllGlobals()
   pluginFetch.mockReset()
+  sessionAuthorization.mockReset()
+  sessionAuthorization.mockReturnValue(undefined)
+  refreshSession.mockReset()
+  refreshSession.mockResolvedValue({ ok: true, value: 'new-token' })
 })
 
 describe('transportFetch', () => {
@@ -83,5 +94,60 @@ describe('transportFetch', () => {
   it('names a body it cannot read', () => {
     expect(parseFailure(new Error('bad json'), 'https://x'))
       .toMatchObject({ code: 'transport.parse', params: { url: 'https://x' } })
+  })
+})
+
+describe('the egress carries the session, and survives one expiry', () => {
+  it('adds the bearer when the platform has one, and never overrides an explicit one', async () => {
+    const seen: (string | null)[] = []
+    const browser = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      seen.push(new Headers(init?.headers).get('authorization'))
+      return new Response('hi', { status: 200 })
+    })
+    vi.stubGlobal('fetch', browser)
+    sessionAuthorization.mockReturnValue('Bearer stored')
+    await transportFetch('/api/things')
+    await transportFetch('/api/things', { headers: { Authorization: 'Bearer explicit' } })
+    expect(seen).toEqual(['Bearer stored', 'Bearer explicit'])
+  })
+
+  it('sends no authorization when there is no session (a browser cookie needs none)', async () => {
+    let seen: string | null = 'unset'
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        seen = new Headers(init?.headers).get('authorization')
+        return new Response('hi', { status: 200 })
+      }),
+    )
+    await transportFetch('/api/things')
+    expect(seen).toBeNull()
+  })
+
+  it('replays once after a 401, with the refreshed credential', async () => {
+    const seen: (string | null)[] = []
+    const responses = [new Response('nope', { status: 401 }), new Response('hi', { status: 200 })]
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        seen.push(new Headers(init?.headers).get('authorization'))
+        return responses.shift() as Response
+      }),
+    )
+    sessionAuthorization.mockReturnValueOnce('Bearer old').mockReturnValue('Bearer new')
+    const result = await transportFetch('/api/things')
+    expect(result).toMatchObject({ ok: true })
+    expect(seen).toEqual(['Bearer old', 'Bearer new'])
+    expect(refreshSession).toHaveBeenCalledOnce()
+  })
+
+  it('does not replay when the refresh could not produce a credential', async () => {
+    const call = vi.fn(async () => new Response('nope', { status: 401 }))
+    vi.stubGlobal('fetch', call)
+    sessionAuthorization.mockReturnValue('Bearer old')
+    refreshSession.mockResolvedValue({ ok: false, code: 'credential.service_empty', params: {}, message: 'no' })
+    const result = await transportFetch('/api/things')
+    expect(call).toHaveBeenCalledOnce()
+    expect(result.ok && result.value.status).toBe(401)
   })
 })

@@ -1,6 +1,7 @@
 import { Select } from '@/components/base/select'
 import { SUPPORTED_LOCALES, useTranslation, type I18nKey } from '@/platform/i18n'
-import { resolvePreference, useLocaleStore } from '@/platform/i18n/locale.store'
+import { useLocalePreference } from '@/platform/client'
+import { resolvePreference } from '@/platform/i18n/locale.store'
 
 /* 语言名用**本语言自己的写法**（endonym），所以不参与翻译；
    其余语言包里出现同样的值是正确的（检查器里登记在 ALLOW_CJK）。 */
@@ -20,8 +21,7 @@ const endonymKey = (locale: string): I18nKey => LABEL_KEYS[locale] ?? 'localeSwi
    用户显式选过语言后就不再跟随。 */
 export function LocaleSwitch() {
   const { t } = useTranslation()
-  const locale = useLocaleStore((state) => state.locale)
-  const setLocale = useLocaleStore((state) => state.setLocale)
+  const { preference, setLocale } = useLocalePreference()
 
   const options = [
     {
@@ -35,7 +35,7 @@ export function LocaleSwitch() {
     <Select
       className="locale-switch"
       aria-label={t('localeSwitch.label')}
-      value={locale}
+      value={preference}
       onValueChange={setLocale}
       options={options}
     />

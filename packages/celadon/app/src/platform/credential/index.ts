@@ -15,6 +15,17 @@ import { carrierIsReadableByApp, credentialCarrier } from './carrier'
 
 export { credentialCarrier, carrierIsReadableByApp, type CredentialCarrier } from './carrier'
 export { serviceOrigin, credentialKey } from './scope'
+export {
+  SESSION_PURPOSE,
+  forgetService,
+  loadSession,
+  refreshSession,
+  resetSession,
+  sessionAuthorization,
+  setSessionRefresher,
+  signIn,
+  signOut,
+} from './session'
 
 /** 载体不由应用保管时的统一回答（Web 的 Cookie 走这一支）。 */
 function noStoreHere(action: string): BridgeResult<never> {

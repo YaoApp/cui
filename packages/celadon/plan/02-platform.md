@@ -12,6 +12,7 @@
 | 项 | 状态 | 证据 / 落在哪 |
 | --- | --- | --- |
 | **2.1 `client/`** | ✅ **完成** | `manifest` · `ua`（含 WebView 兜底）· `client_id`（`desk-<机器码>` / `web-<随机>`）· `capabilities` · `context`/`info` · 归一走 `i18n/resolve-locale`；**框架内部只许出现在 `bridge/`**（有守卫测试）|
+| **2.1.1 客户端事实** | ✅ **完成（2026-10-04）** | 一个 `client` 对象 + `loadClient()` 一处装填（清单 · 能力 · 宿主 · id）· 失败 → 入口错误面（不兜底）· 公共面不再有 `hasHost` · 新门禁 `check-bridge-imports`|
 | **2.2 `service/`** | ✅ **完成（平台层）** | 基址唯一来源（`base.ts`）· **`info.ts` 读 well-known 并缓存**（第一次需要时读一次 · 并发去重 · 失败不缓存）；dev 由代理代转（`YAO_SERVER_HOST`）。**Web 同域清单 = 随服务对接** |
 | **2.3 `credential/`** | ✅ **完成（平台层）** | `carrier.ts` + `index.ts`：一套接口，载体按宿主选 —— 桌面走宿主 OS 凭据库（写→读→删→列 · 秘密不回前端 · 无明文回退），Web 回 `credential.no_store_here`。**登录/刷新/身份随服务接口** |
 | **2.4 `transport/`** | ✅ **完成** | 两宿主一种接口 · 失败四类归一 · **重试策略在上层**（`utils/retry.ts`）· 浏览器跨域**明确拒绝**；宿主侧 `tauri-plugin-http` + **URL 范围** |

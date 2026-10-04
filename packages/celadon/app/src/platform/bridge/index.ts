@@ -17,7 +17,6 @@ export { ping, PING_COMMAND, type HostStatus } from './ping'
 export { credential, CREDENTIAL_COMMANDS, type CredentialMeta } from './credential'
 export { system, SYSTEM_COMMANDS, type AppInfo } from './system'
 export { service, SERVICE_COMMANDS, type ServiceState } from './service'
-export { useHostStatus } from './use-host-status'
 
 import { credential } from './credential'
 import { system } from './system'

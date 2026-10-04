@@ -36,7 +36,7 @@ describe('credential', () => {
   it('on the desktop it is the same interface, backed by the host store', async () => {
     // **真换宿主**：不 mock 的话 clientKind() 恒为 web，这一段就是空跑（复核者点出来的假绿）
     vi.resetModules()
-    vi.doMock('../client/manifest', () => ({ clientKind: () => 'desktop' }))
+    vi.doMock('../client', () => ({ client: { kind: 'desktop' } }))
     const calls: string[] = []
     asHost(async (command) => {
       calls.push(command)

@@ -8,15 +8,7 @@ export {
   readOtp,
 } from './api'
 export { testKeys } from './keys'
-export {
-  createServerKeyQuery,
-  listTeamsQuery,
-  listUsersQuery,
-  loginTokenQuery,
-  loginWebQuery,
-  readCaptchaQuery,
-  readOtpQuery,
-} from './queries'
+export { createServerKeyQuery, listTeamsQuery, listUsersQuery, loginQuery, loginTokenQuery, loginWebQuery, readCaptchaQuery, readOtpQuery } from './queries'
 export type {
   CaptchaAnswer,
   CaptchaLookup,

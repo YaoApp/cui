@@ -93,5 +93,8 @@
   "verify.transport": "Egress",
   "verify.transportProbe": "Probe",
   "verify.url": "URL",
-  "verify.write": "Write"
+  "verify.write": "Write",
+  "client.bootFailed": "The client could not start ({{code}})",
+  "client.bootRetry": "Retry",
+  "bridge.error.transport.malformed": "The server returned something that is not JSON"
 }

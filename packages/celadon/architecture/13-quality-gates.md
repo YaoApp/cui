@@ -46,6 +46,7 @@
 | `check-doc-references` | 文档提到的 `app/src/...` 路径 · `scripts/*.mjs` · `pnpm <cmd>` **必须真实存在** —— 文档漂移不靠人 review |
 | `check-base-components` | `features/` · `routes/` · `components/`（`components/base/` 豁免）里**不许裸写 `<button>` / `<select>`** —— 用 `components/base/button` / `components/base/select`；否则每页各写一套控件 |
 | `check-import-boundaries` | **依赖方向**：只扫 `app/src/**/*.{ts,tsx}` 的 import，拦"往上引"· `features/a` 引 `features/b` · `components/base/` 引上层组件 · `stores/` 引 features/routes/components · `platform/` 引上层 · 旧包 `@yaoapp/cui`（别名 `@/...` 与相对路径都解析；解析不到跳过；**类型可以跨层引用**）|
+| `check-bridge-imports` | **上层不许碰宿主机制**：`features/` · `components/` · `routes/` 里 import `platform/bridge` 即失败（白名单 `features/verify/**`）。要问能力走 `client/`、读写地址走 `service/` 的面孔（见 `15 §5.4`）|
 | `check-effect-url-write` | **不许在 `useEffect` 里写 URL**（`setSearchParams` / `navigate`）—— 会与"读 URL 写 store"互相追成同步死循环，见 `07-routing.md` |
 
 **为什么层间方向用检查器而不是 ESLint**：项目用 TypeScript 7，`typescript-eslint` 尚不支持（§2），

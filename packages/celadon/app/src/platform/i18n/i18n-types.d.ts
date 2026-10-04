@@ -37,16 +37,18 @@ export type I18nKey =
   | 'bridge.error.theme.writeFailed'
   | 'bridge.error.tokenMissing'
   | 'bridge.error.transport.crossOrigin'
+  | 'bridge.error.transport.malformed'
   | 'bridge.error.transport.network'
   | 'bridge.error.transport.parse'
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
   | 'bridge.error.unauthorized'
+  | 'client.bootFailed'
+  | 'client.bootRetry'
   | 'dataCheck.authenticatedDenied'
   | 'dataCheck.authzHint'
   | 'dataCheck.back'
   | 'dataCheck.colActions'
-  | 'dataCheck.credentials'
   | 'dataCheck.emailUnverified'
   | 'dataCheck.emailVerified'
   | 'dataCheck.expectedFailure'
@@ -62,13 +64,11 @@ export type I18nKey =
   | 'dataCheck.listUsers'
   | 'dataCheck.listUsersHint'
   | 'dataCheck.locale'
+  | 'dataCheck.loginAction'
   | 'dataCheck.loginHint'
+  | 'dataCheck.loginResult'
   | 'dataCheck.loginTest'
   | 'dataCheck.loginTestHint'
-  | 'dataCheck.loginToken'
-  | 'dataCheck.loginTokenResult'
-  | 'dataCheck.loginWeb'
-  | 'dataCheck.loginWebResult'
   | 'dataCheck.noEmailForLogin'
   | 'dataCheck.ok'
   | 'dataCheck.protectedGet'
@@ -237,16 +237,18 @@ declare module 'i18next' {
         'bridge.error.theme.writeFailed': string
         'bridge.error.tokenMissing': string
         'bridge.error.transport.crossOrigin': string
+        'bridge.error.transport.malformed': string
         'bridge.error.transport.network': string
         'bridge.error.transport.parse': string
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
         'bridge.error.unauthorized': string
+        'client.bootFailed': string
+        'client.bootRetry': string
         'dataCheck.authenticatedDenied': string
         'dataCheck.authzHint': string
         'dataCheck.back': string
         'dataCheck.colActions': string
-        'dataCheck.credentials': string
         'dataCheck.emailUnverified': string
         'dataCheck.emailVerified': string
         'dataCheck.expectedFailure': string
@@ -262,13 +264,11 @@ declare module 'i18next' {
         'dataCheck.listUsers': string
         'dataCheck.listUsersHint': string
         'dataCheck.locale': string
+        'dataCheck.loginAction': string
         'dataCheck.loginHint': string
+        'dataCheck.loginResult': string
         'dataCheck.loginTest': string
         'dataCheck.loginTestHint': string
-        'dataCheck.loginToken': string
-        'dataCheck.loginTokenResult': string
-        'dataCheck.loginWeb': string
-        'dataCheck.loginWebResult': string
         'dataCheck.noEmailForLogin': string
         'dataCheck.ok': string
         'dataCheck.protectedGet': string

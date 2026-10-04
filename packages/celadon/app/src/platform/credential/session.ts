@@ -1,0 +1,123 @@
+/* **会话凭据的持有**（`15 §4.5` · §4.2）：出口每个请求都要**同步**拿到 `Authorization`，
+ * 而 OS 凭据库是异步读 —— 所以这里存一份内存镜像（惰性读一次，写时同步）。
+ *
+ * **不判宿主**：载体是 Cookie 时（Web）这里全是空操作（Cookie 由浏览器与服务端管）；
+ * 载体是 OS 凭据库时（桌面）才真读真写。键按服务 origin 分账（`scope.ts`）→ `<origin>#session`。 */
+
+import { fail, ok, type BridgeFailure, type BridgeResult } from '../bridge/result'
+import { credential } from './index'
+import { credentialKey } from './scope'
+
+/** 用途名：一个服务下"登录态"这条凭据。 */
+export const SESSION_PURPOSE = 'session'
+
+let cached: string | undefined
+let loaded = false
+let refresher: (() => Promise<BridgeResult<string>>) | undefined
+let refreshing: Promise<BridgeResult<string>> | undefined
+
+const keyOfSession = (): string | undefined => credentialKey(SESSION_PURPOSE)
+
+/** 读一次会话凭据（惰性 + 内存镜像）。Web 与"没选服务"都回"没有"，不是错误。 */
+export async function loadSession(): Promise<BridgeResult<string | undefined>> {
+  if (loaded) return ok(cached)
+  if (!credential.managedByApp()) {
+    loaded = true
+    return ok(undefined)
+  }
+  // 没有 key = 基址还没读出来（比如刚换过服务地址）：别记成"读过了"
+  const name = keyOfSession()
+  if (!name) return ok(undefined)
+  const result = await credential.read(name)
+  // **读失败不算"已读"**：留着重试的机会（比如钥匙串一时被拒），也别把错误吞成"没登录"
+  if (!result.ok) return /no_entry/i.test(result.code) ? ((loaded = true), ok(undefined)) : result
+  cached = result.value
+  loaded = true
+  return ok(cached)
+}
+
+/** 出口用：`Authorization` 的值（没登录回 `undefined` —— 就不带这个头）。 */
+export function sessionAuthorization(): string | undefined {
+  return cached ? `Bearer ${cached}` : undefined
+}
+
+const REFRESH_PURPOSE = 'refresh'
+
+/** 从**响应体**里取令牌（登录接口回什么由服务端定，业务层不碰字段）。
+ *  Web（Cookie 载体）下没有可存的令牌：空操作。 */
+function tokenIn(payload: unknown): { access?: string; refresh?: string } {
+  if (typeof payload !== 'object' || payload === null) return {}
+  const bag = payload as Record<string, unknown>
+  const pick = (key: string): string | undefined => (typeof bag[key] === 'string' ? (bag[key] as string) : undefined)
+  return { access: pick('access_token'), refresh: pick('refresh_token') }
+}
+
+/** **登录成功后由出口调用**：把响应体里的令牌收进载体。Web 是空操作（服务端已下发 Cookie）。 */
+export async function signIn(payload: unknown): Promise<BridgeResult<boolean>> {
+  loaded = true
+  const { access, refresh } = tokenIn(payload)
+  if (!access) return ok(true) // 没有令牌可收（Cookie 载体 / 别的响应形状）
+  const name = keyOfSession()
+  // 没有服务地址可挂靠 = 没地方存（正常路径下请求本身就会先失败）；真正的写失败仍要上报
+  if (!name) return ok(true)
+  if (!credential.managedByApp()) return ok(true)
+  cached = access
+  const written = await credential.write(name, access)
+  if (!written.ok) {
+    cached = undefined
+    return written
+  }
+  if (refresh && credentialKey(REFRESH_PURPOSE)) await credential.write(credentialKey(REFRESH_PURPOSE) as string, refresh)
+  return ok(true)
+}
+
+/** 退出：清内存 + 删这条凭据。**服务端的吊销由调用方先做**（`data/user` 的 `logout`）。 */
+export async function signOut(): Promise<BridgeResult<boolean>> {
+  cached = undefined
+  loaded = true
+  if (!credential.managedByApp()) return ok(true)
+  let failure: BridgeFailure | undefined
+  for (const name of [keyOfSession(), credentialKey(REFRESH_PURPOSE)]) {
+    if (!name) continue
+    const gone = await credential.remove(name)
+    if (!gone.ok) failure ??= gone // 删不掉要报出来：留着旧的会带着已"退出"的假象继续生效
+  }
+  return failure ?? ok(true)
+}
+
+/** 忘记这台服务：把这个 origin 下的凭据**逐条删掉**（`<origin>#…`）。 */
+export async function forgetService(): Promise<BridgeResult<number>> {
+  cached = undefined
+  const origin = credentialKey(SESSION_PURPOSE)?.split('#')[0]
+  if (!origin || !credential.managedByApp()) return ok(0)
+  const listed = await credential.list()
+  if (!listed.ok) return listed
+  let removed = 0
+  for (const meta of listed.value) {
+    if (!meta.service.startsWith(`${origin}#`)) continue
+    const gone = await credential.remove(meta.service)
+    if (gone.ok && gone.value) removed += 1
+  }
+  return ok(removed)
+}
+
+/** 出口用它做 401 续期重放：注入"怎么刷新"（刷新请求本身由数据层声明，平台不认 URL）。 */
+export function setSessionRefresher(fn: (() => Promise<BridgeResult<string>>) | undefined): void {
+  refresher = fn
+}
+
+/** 刷新一次（并发只发一次）；没有 refresher、或没登录，就回一条可读失败。 */
+export function refreshSession(): Promise<BridgeResult<string>> {
+  if (!refresher || !cached) return Promise.resolve(fail('credential.service_empty', 'no session to refresh', {}))
+  refreshing ??= refresher().finally(() => {
+    refreshing = undefined
+  })
+  return refreshing
+}
+
+/** 清内存镜像（**保留注入好的 refresher**：它是接线，不是值）。 */
+export function resetSession(): void {
+  cached = undefined
+  loaded = false
+  refreshing = undefined
+}

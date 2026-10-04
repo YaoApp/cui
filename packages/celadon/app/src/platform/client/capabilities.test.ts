@@ -15,13 +15,14 @@ describe('capabilities', () => {
       files: false,
       notifications: false,
       externalOpen: true,
+        serviceAddress: false,
     })
   })
 
   it('trusts the host on the desktop', async () => {
     vi.doMock('./manifest', () => ({ clientKind: () => 'desktop', buildManifest: () => ({}), targetOs: () => 'macos' }))
     const { capabilities: desktopCapabilities } = await import('./capabilities')
-    expect(desktopCapabilities()).toEqual({ clipboard: true, files: true, notifications: true, externalOpen: true })
+    expect(desktopCapabilities()).toEqual({ clipboard: true, files: true, notifications: true, externalOpen: true, serviceAddress: true })
     vi.doUnmock('./manifest')
   })
 })

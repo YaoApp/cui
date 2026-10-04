@@ -81,7 +81,7 @@
 - **Web 一律走 Cookie**：前端不读、不写、不存令牌；是否已登录**向服务端查会话**，不靠本地推断。
 - **Desktop 走 token**：请求在 Rust 侧发出（见 §4.1），`Authorization: Bearer <access_token>`；**调用方已显式带 `Authorization` 时不覆盖**（登录第一步用一次性临时 token）。
 - **两步登录**：① 验证账号存在 → 拿临时 token（可能要先过验证码）② 换取凭据（Web 得 Cookie；Desktop 得 `access_token` + `refresh_token` + `session_id`）。
-- **续期**：Web 由服务端会话决定；Desktop **启动时刷一次 + 之后每 6 小时一次**。
+- **续期**：Web 由服务端会话决定；Desktop **启动时刷一次 + 之后~~每 6 小时~~（设想，代码里没有）一次**。
   失败不拦路由、不拦首屏（与未登录同待遇），**定时器只在 `credential/` 一处**。
 - **接口根**取 well-known 的 `openapi`；取不到按 §3 走统一提示页。
 - **凭据只由 `credential/` 一处存取**：读写 · 续期 · 清除；调用方只说"要一个可用凭据"。**feature 不许自己读、自己写**。
@@ -152,6 +152,22 @@
 - **密钥不随密文走**：密文拷到另一台机器、或同一台机器的另一个系统账号，解不开。
 - **不许静默退回明文**：系统凭据库不可用时，明确失败并提示，或用限权文件并告知。
 - **保护范围是"密文被拷走"**：以该用户身份执行代码、或 dump 进程内存，仍能拿到令牌。
+
+### 4.6 会话凭据的持有（`credential/session.ts`）
+
+- **登录成功后写进载体**：桌面写 OS 凭据库；Web 是空操作（Cookie 由服务端下发，前端不接触凭据）。
+  键按服务 origin 分账，用途 `session`（`<origin>#session`，见 `scope.ts`）。
+- **出口要同步拿**：这里留一份**内存镜像**（启动读一次，写时同步更新），`sessionAuthorization()` 直接给值。
+- **忘记这台服务**：删掉该 origin 下**所有用途**的凭据（不是只删 `session`）；删之前由调用方先吊销服务端会话。
+- **平台不认 URL**：刷新怎么发由数据层声明，刷新能力由应用启动时注入（`setSessionRefresher（**尚未接线**：重放机制在出口里，数据层还没声明刷新端点、也没注入刷新器）`）。
+- **凭据自动装填**：登录成功与退出成功**不需要业务层交令牌**。收与丢各自归**动作**，不挂在声明上：
+  - **登录动作**（数据层，如 `data/test` 的 `loginQuery`）：按 `credentialCarrier()` 选端点（本机持凭据走回令牌那条，
+    否则走服务端写 Cookie 的那条），成功后把响应体交给平台 —— 平台按载体判：本机存凭据就收下令牌，
+    Cookie 载体什么都不做（服务端已下发）。
+  - **退出动作**（`data/user` 的 `logoutQuery`）：先让服务端吊销（Web 的 Cookie 随响应清掉），成功后让平台
+    **清本机凭据**（`session` 与 `refresh` 两条；Cookie 载体什么都不做）。
+  - 其它接口与凭据无关。业务层只认识"登录 / 退出"两个动作。
+    用例：`data/test/queries.test.ts` 与 `platform/credential/session.test.ts`。
 
 ## 5. 客户端（web / desktop）
 
@@ -235,6 +251,23 @@
 - **`artifact` 与 `client` 对齐**：含 Bridge 的制品 `client` 为 `"desktop"`，`web` 制品为 `"web"`。
 - **版本字段跟着 `artifact` 走**：`unified` 与 `server` 写两个 · `yao` 只写 `yao_version` ·
   `tai` 只写 `tai_version` · `cui` 与 `web` **两个都不写**。
+
+### 5.4 客户端事实：一个对象 + 一次装填
+
+- **公共面只有一个 `client` 对象**（类型 `Client`）：`kind` · `os` · `manifest` · `capabilities` · `info` · `signature` ·
+  `id` · `host`，外加两个**动态读数** getter（`preferences` · `metadata`）。**不导出** `hasHost` 之类的功能函数 ——
+  "有没有宿主"是平台内部实现（`bridge/` 自用）。
+- **一处装填**：入口在渲染前 `await loadClient()`（`main.tsx`）：解析清单 · 探测能力（Web 一次）·
+  问一次桥（`ping` 拿宿主就绪与版本）· 取 `client_id`（本地值 → 宿主机器码）。之后各处**同步直接读** `client.x`。
+- **失败即不可继续**：桌面下宿主答不上来（桥不可用 · 命令失败 · 超时）→ 抛 `ClientBootError` → 入口渲染
+  **错误面**（失败码 + 重试）；**不拿随机值兜底**（随机值只在 Web 是正确身份）。
+- **模块顶层不许读 `client`**：import 求值早于入口那句 await。
+- **React 里怎么读**：静态事实（`kind` · `os` · `manifest` · `capabilities` · `host` · `id`）**永不变化**，
+  渲染里直接读 `client` 即可，不需要订阅；会变的两项（语言 · 主题）用 `useLocalePreference()` /
+  `useThemePreference()`（值 + 动作，订阅留在平台层）—— **feature 与 component 不 import 语言 / 主题 store**。
+- **走面孔，不走机制**：问能力用 `client.capabilities`；读写服务地址用 `platform/service` 的
+  `readServiceAddress` / `writeServiceAddress`。`features/` · `components/` · `routes/` 直接 import
+  `platform/bridge` 由 `check-bridge-imports` 拦（白名单 `features/verify/**`，它是桥检查页）。
 
 ## 6. 客户端底座（Desktop Bridge）
 

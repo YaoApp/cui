@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { failureText } from '@/platform/bridge'
-import type { Failure } from '../types'
+import type { Failure, Result } from '../types'
 import type { Request } from '../request/send'
 import { send } from '../request/send'
 import { keyOf, subscribe } from '../request/invalidate'
@@ -34,25 +34,36 @@ export type RequestOptions<Input> = {
  *  @param options 身份 / 包体 / 是否手动；见 `RequestOptions`
  *
  *  **查询与提交共用这一个钩子**：查询不传 `body`、挂载即跑；提交传 `body`、`manual: true` 等 `run()`。
- *  **`run(body?)` 返回的 Promise 在这一次的 state 提交之后 resolve** —— `await run()` 读完即新值。 */
+ *  **`run(body?)` 在这一次的 state 提交之后 resolve，并把这次的结果回传** —— `await run()` 读完即新值。 */
 /** 取数的两种写法：直接给**声明**，或给域层的 **query 对象**（`{ key, request }`，见 `data/<域>/queries.ts`）。
  *  query 对象让 key 由域层收口（族前缀 → `invalidate(keys.all)` 才能命中）。 */
 export type RequestSource<Input, Output> =
   | Request<Input, Output>
   | { key: readonly unknown[]; request: Request<Input, Output> }
+  /** **动作**：自己发请求，可能还要让平台做点事（如登录成功后收下令牌）。key 必给。 */
+  | { key: readonly unknown[]; operation: (input?: Input) => Promise<Result<Output>> }
 
 export function useRequest<Input = void, Output = void>(
   source: RequestSource<Input, Output>,
   options: RequestOptions<Input> = {},
-): { state: RequestState<Output>; run: (body?: Input) => Promise<void>; reset: () => void } {
-  const request = 'request' in source ? source.request : source
-  const declaredKey = 'request' in source ? source.key : undefined
+): { state: RequestState<Output>; run: (body?: Input) => Promise<Result<Output> | undefined>; reset: () => void } {
+  const operation = 'operation' in source ? source.operation : undefined
+  const request: Request<Input, Output> | undefined = operation
+    ? undefined
+    : 'request' in source
+      ? source.request
+      : (source as Request<Input, Output>)
+  const declaredKey = 'request' in source || 'operation' in source ? source.key : undefined
   const [state, setState] = useState<RequestState<Output>>({ status: 'idle' })
   const [attempt, setAttempt] = useState(0)
   const latest = useRef(0)
-  const settle = useRef<(() => void) | null>(null)
+  const settle = useRef<((result: Result<Output> | undefined) => void) | null>(null)
+  /* 本次的结果：就算这次被顶掉，也让等待者拿到真实结果（不是笼统的「被取消」）*/
+  const settled = useRef<Result<Output> | undefined>(undefined)
   const requestRef = useRef(request)
   requestRef.current = request
+  const operationRef = useRef(operation)
+  operationRef.current = operation
   // `options.body` 是默认包体；`run(body)` 为这一次覆盖它。身份没变就不覆盖 `run` 的选择。
   const bodyRef = useRef<Input | undefined>(options.body)
   const defaultBodyRef = useRef(options.body)
@@ -60,15 +71,18 @@ export function useRequest<Input = void, Output = void>(
     defaultBodyRef.current = options.body
     bodyRef.current = options.body
   }
-  const key = options.key ?? declaredKey ?? keyOf(request)
+  const key = options.key ?? declaredKey ?? (request ? keyOf(request) : [])
   const keyRef = useRef(key)
   keyRef.current = key
 
   /* 改 key 或 `run()` 都只做一件事：让下面的 effect 再跑一次（真正的请求在 effect 里发）。 */
   const run = useCallback(
-    (body?: Input) => new Promise<void>((resolve) => {
+    (body?: Input) => new Promise<Result<Output> | undefined>((resolve) => {
       if (body !== undefined) bodyRef.current = body
+      // 上一次还没被接走的等待者：先放行，别让它悬着（同一 tick 连调两次 run()）
+      settle.current?.(settled.current)
       settle.current = resolve
+      settled.current = undefined
       setAttempt((one) => one + 1)
     }),
     [],
@@ -81,23 +95,39 @@ export function useRequest<Input = void, Output = void>(
     // 每次跑之前登记：失效侧按同一套 key 前缀命中就再跑一次（unmount 时注销）
     const unsubscribe = subscribe(keyRef.current, () => { void run() })
     setState({ status: 'loading' })
-    void send(requestRef.current, {
-      ...(bodyRef.current === undefined ? {} : { body: bodyRef.current }),
-      signal: controller.signal,
-    }).then((result) => {
+    const answer = operationRef.current
+      ? operationRef.current(bodyRef.current)
+      : send(requestRef.current as Request<Input, Output>, {
+          ...(bodyRef.current === undefined ? {} : { body: bodyRef.current }),
+          signal: controller.signal,
+        })
+    void answer
+      .then((result) => {
+      settled.current = result
       if (id !== latest.current) return // 晚到的结果丢掉（依赖已变或已卸载）
       setState(result.ok
         ? { status: 'ok', value: result.value }
         : { status: 'error', failure: { ...result, text: failureText(result) } })
-    }).finally(() => {
-      settle.current?.()
-      settle.current = null
     })
+      .catch((error: unknown) => {
+        // 出口自己吞掉失败，只有"响应不是 JSON"这种会抛到这里：也落成失败态，别让等待者悬着
+        if (id !== latest.current) return
+        settled.current = undefined
+        setState({
+          status: 'error',
+          failure: {
+            code: 'transport.malformed',
+            params: {},
+            message: error instanceof Error ? error.message : String(error),
+            text: failureText({ code: 'transport.malformed', params: {}, message: '' }),
+          },
+        })
+      })
     return () => {
       unsubscribe()
       latest.current += 1 // 让在途结果失效
       controller.abort()
-      settle.current?.() // 这次被顶掉了：放行等待者，别悬着
+      settle.current?.(settled.current) // 这次被顶掉了：放行等待者，别悬着
       settle.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,7 +136,7 @@ export function useRequest<Input = void, Output = void>(
   /* 落定 = **state 已提交**（所以放在 effect 里，而不是 fetch 的 finally）：`await run()` 之后读到的就是新 state ✓ */
   useEffect(() => {
     if (state.status === 'loading') return
-    settle.current?.()
+    settle.current?.(settled.current)
     settle.current = null
   }, [state])
 
@@ -114,7 +144,7 @@ export function useRequest<Input = void, Output = void>(
    *  **不中止在飞请求** —— 只是让它的结果作废（要中止就先卸载或在调用方 abort）。 */
   const reset = useCallback(() => {
     latest.current += 1
-    settle.current?.()
+    settle.current?.(settled.current)
     settle.current = null
     setState({ status: 'idle' })
   }, [])

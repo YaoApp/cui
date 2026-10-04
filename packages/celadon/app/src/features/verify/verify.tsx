@@ -20,7 +20,7 @@ import { Nav } from '@/components/nav'
 import { useTranslation } from '@/platform/i18n'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
-import { buildManifest, capabilities, clientInfo, hasHost } from '@/platform/client'
+import { client } from '@/platform/client'
 import { routerBasename } from '@/platform/router/basename'
 import { bridge, fail, failureText, type BridgeResult } from '@/platform/bridge'
 import { credential, credentialKey } from '@/platform/credential'
@@ -36,9 +36,9 @@ export function VerifyPage() {
   const { pathname } = useLocation()
   const navItems = navWithActive(pathname).map((item) => ({ ...item, label: t(item.label) }))
   usePageTitle(t('verify.title'))
-  const info = clientInfo()
-  const caps = capabilities()
-  const manifest = buildManifest()
+  const info = client.info
+  const caps = client.capabilities
+  const manifest = client.manifest
   const [lines, setLines] = useState<Line[]>([])
   // 凭据的键按服务 origin 分账（`scope.ts`）：没地址就没有键 —— 输入框默认为空，写也写不进去
   const [credentialScope, setCredentialScope] = useState<string | undefined>(() => credentialKey('session'))
@@ -49,7 +49,7 @@ export function VerifyPage() {
   const [path, setPath] = useState('')
   const [ping, setPing] = useState<BridgeResult<unknown>>()
   // **问 client/**，不自己看框架内部（§5：宿主差异不许渗到 feature）
-  const host = hasHost()
+  const host = client.host.ready
 
   /** 一次调用的结果：成功显示值，失败显示**翻译过的**文案（缺翻译时回退诊断并告警）。 */
   const report = (label: string, result: BridgeResult<unknown>, redact = false) => {

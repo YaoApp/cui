@@ -6,9 +6,8 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { Icon } from '@/components/base/icon'
 import { BrandMark, type BrandId } from '@/components/base/brand-mark'
 import { useTranslation } from '@/platform/i18n'
-import { buildManifest, clientInfo } from '@/platform/client'
-import { useHostStatus } from '@/platform/bridge'
-import { useThemeStore } from '@/platform/theme/theme.store'
+import { client } from '@/platform/client'
+import { useThemePreference } from '@/platform/client'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
 import { routerBasename } from '@/platform/router/basename'
@@ -37,8 +36,7 @@ export function HelloPage() {
   const count = useHelloStore((state) => state.count)
   const refresh = useHelloStore((state) => state.refresh)
   // 主题住在平台层；feature 把它取出来，交给纯组件去显示与触发
-  const theme = useThemeStore((state) => state.theme)
-  const setTheme = useThemeStore((state) => state.setTheme)
+  const { theme, setTheme } = useThemePreference()
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { t } = useTranslation()
@@ -47,14 +45,10 @@ export function HelloPage() {
   usePageTitle(t('hello.title'))
   /* 客户端信息（15-platform.md §5.2）：**两个宿主导出同一组字段**，上层不判宿主。
      宿主版本与产品版本同源（壳与应用的版本统一，见 02-platform 的实现约定）。 */
-  const info = clientInfo()
-  const hostVersion = buildManifest().version
-  const host = useHostStatus()
-  const hostText = !host
-    ? t('hello.loading')
-    : host.ok
-      ? t('hello.hostReady', { version: host.value.version })
-      : t('hello.hostNone')
+  const info = client.info
+  const hostVersion = client.manifest.version
+  const host = client.host
+  const hostText = host.ready ? t('hello.hostReady', { version: host.version }) : t('hello.hostNone')
 
   return (
     <div className="hello">

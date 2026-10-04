@@ -93,5 +93,8 @@
   "verify.transport": "出口",
   "verify.transportProbe": "疎通確認",
   "verify.url": "URL",
-  "verify.write": "書き込み"
+  "verify.write": "書き込み",
+  "client.bootFailed": "クライアントの初期化に失敗しました（{{code}}）",
+  "client.bootRetry": "再試行",
+  "bridge.error.transport.malformed": "サーバーが解釈できない内容を返しました"
 }

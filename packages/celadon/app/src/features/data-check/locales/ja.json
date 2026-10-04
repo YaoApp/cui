@@ -3,7 +3,6 @@
   "dataCheck.authzHint": "サインイン成功は認証済みを意味するだけです。保護された API を呼べるかはエンジンの認可ポリシー次第です。拒否された場合、そのセルは「認証済み・未認可」と表示します。",
   "dataCheck.back": "戻る",
   "dataCheck.colActions": "操作",
-  "dataCheck.credentials": "セッション · アクセス情報 · 更新情報 をすべて受信（長さ {{session}} / {{access}} / {{refresh}}）",
   "dataCheck.emailUnverified": "未確認",
   "dataCheck.emailVerified": "確認済み",
   "dataCheck.expectedFailure": "未サインイン（資格情報なし）",
@@ -19,13 +18,9 @@
   "dataCheck.listUsers": "ユーザーを一覧",
   "dataCheck.listUsersHint": "ユーザー一覧を取得し、先頭いくつかのメールアドレスを表示します。各メールアドレスで一度サインインできます。",
   "dataCheck.locale": "言語",
-  "dataCheck.loginHint": "「このアカウントでサインイン」はブラウザにサインインを記憶させ、以降の保護された呼び出しに付きます。「サインイン情報だけ取得」は情報を持ち帰るだけで、ブラウザには保存しません。",
+  "dataCheck.loginHint": "行の「サインイン」を押す：サインインの方法はデータ層が決めます（本機が憑証を持つ場合はトークン、それ以外はサーバーが Cookie を設定）。",
   "dataCheck.loginTest": "サインイン（テストモード）",
-  "dataCheck.loginTestHint": "これらの API は開発インスタンスにのみ存在します。本番では登録されません。",
-  "dataCheck.loginToken": "サインイン情報だけ取得",
-  "dataCheck.loginTokenResult": "サインイン情報を取得しました（{{email}} · 長さ {{length}}）",
-  "dataCheck.loginWeb": "このアカウントでサインイン",
-  "dataCheck.loginWebResult": "{{email}} でサインインしました：状態 {{status}} · 有効期間 {{minutes}} 分",
+  "dataCheck.loginTestHint": "これらのエンドポイントは開発インスタンスにのみ存在し、本番エンジンは登録しません。ユーザー行の「サインイン」を押してください：サインインの方法はデータ層が決めます。",
   "dataCheck.noEmailForLogin": "このアカウントにはメールがありません。テストサインインはメールのみです",
   "dataCheck.ok": "OK",
   "dataCheck.protectedGet": "保護 GET",
@@ -45,5 +40,7 @@
   "dataCheck.statesHint": "1 回の取得の 4 段階：待機 · 読み込み中 · 成功 · 失敗。ここでは「公開 GET」で示します。",
   "dataCheck.statusActive": "有効",
   "dataCheck.theme": "テーマ",
-  "dataCheck.title": "API 検証"
+  "dataCheck.title": "API 検証",
+  "dataCheck.loginAction": "サインイン",
+  "dataCheck.loginResult": "{{email}} でサインイン済み"
 }

@@ -32,6 +32,7 @@ const SUITES = [
   ['check-base-components.mjs', 'base-components'],
   ['check-import-boundaries.mjs', 'import-boundaries'],
   ['check-doc-references.mjs', 'doc-references'],
+  ['check-bridge-imports.mjs', 'bridge-imports'],
   ['check-generated.mjs', 'generated'],
 ]
 

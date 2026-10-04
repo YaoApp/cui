@@ -1,3 +1,9 @@
+import { credentialCarrier } from '@/platform/credential'
+import { signIn } from '@/platform/credential'
+import { send } from '@/data/request/send'
+import { keyOf } from '@/data/request/invalidate'
+import type { Result } from '@/data/types'
+import type { LoginAttempt, LoginResult } from './types'
 /* **`test` 的 query 收口**：一行一个接口，把 key 与声明配成一对给调用方。
  *
  * 只在需要策略 / 参数时写，`api.ts` 仍只负责声明（不含 key）。取数时把这一对交给 `useRequest`：
@@ -32,3 +38,19 @@ export const readCaptchaQuery = (query: CaptchaLookup) => ({
   key: testKeys.readCaptcha(query),
   request: readCaptcha(query),
 })
+
+/** **应用的登录**：怎么登录由数据层决定 —— 按凭据载体选端点；成功后把响应体交给平台收令牌
+ *  （平台按载体判：本机存凭据就存，Cookie 载体什么都不做）。业务层只认识"登录"这一个动作。 */
+export const loginQuery = (): { key: readonly unknown[]; operation: (input?: LoginAttempt) => Promise<Result<LoginResult>> } => {
+  const request = credentialCarrier() === 'os-store' ? loginToken : loginWeb
+  return {
+    key: keyOf(request),
+    operation: async (input) => {
+      const result = await send(request, input === undefined ? {} : { body: input })
+      if (!result.ok) return result
+      // 收令牌失败就别宣称登录成功（桌面写不进凭据库时，出口之后也不会有 Authorization）
+      const adopted = await signIn(result.value)
+      return adopted.ok ? result : adopted
+    },
+  }
+}
