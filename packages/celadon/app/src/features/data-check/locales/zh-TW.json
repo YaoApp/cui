@@ -34,7 +34,7 @@
   "dataCheck.publicPost": "公開 POST",
   "dataCheck.reload": "重新執行",
   "dataCheck.scaffold": "介面呼叫",
-  "dataCheck.scaffoldHint": "公開的兩條可以真的跑；受保護的兩條也能點，但還沒接登入，失敗是預期的。每次請求都會自動帶上目前的語言與主題。",
+  "dataCheck.scaffoldHint": "公開的兩條可以真跑；受保護的兩條請先用「登入（測試模式）」登入再點，失敗會按碼說明原因。每次請求都會自動帶上目前的語言與主題。",
   "dataCheck.signOut": "登出",
   "dataCheck.signOutDone": "已登出",
   "dataCheck.stateError": "失敗",

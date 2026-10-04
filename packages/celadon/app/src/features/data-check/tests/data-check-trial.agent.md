@@ -52,7 +52,7 @@
 | `/v1/helloworld/protected`（GET/POST）| HTTP 401 · `{"error":"unauthorized","error_description":"login is not wired"}` |
 
 **界面文字**（语言钉基准 `zh-CN`）：四态图例 成功 / 加载中 / 空闲 / 失败 · 结果格前缀 成功 · 标注 未登录（缺凭据）·
-失败诊断按引擎给的码原样上屏（本桩为 `unauthorized`，语言包里还没有这个码的翻译）。
+失败诊断按引擎给的码原样上屏（本桩为 `unauthorized`，引擎原文不上屏；页面按码翻成「需要登录」）。
 
 **每张截图三件并用**：① 执行者视觉（布局 · 观感 · 是否塌）② OCR（文字与数字**逐字精确**）③ 决策模型（分级 + 置信度）。
 

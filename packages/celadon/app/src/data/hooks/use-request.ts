@@ -110,7 +110,8 @@ export function useRequest<Input = void, Output = void>(
     settle.current = null
   }, [state])
 
-  /** 清回 `idle`（放下上次的结果，例如退出后要重新登录）。 */
+  /** 清回 `idle`（放下上次的结果，例如退出后要重新登录）。
+   *  **不中止在飞请求** —— 只是让它的结果作废（要中止就先卸载或在调用方 abort）。 */
   const reset = useCallback(() => {
     latest.current += 1
     settle.current?.()

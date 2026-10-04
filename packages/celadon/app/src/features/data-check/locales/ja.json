@@ -34,7 +34,7 @@
   "dataCheck.publicPost": "公開 POST",
   "dataCheck.reload": "再実行",
   "dataCheck.scaffold": "API 呼び出し",
-  "dataCheck.scaffoldHint": "公開の 2 つは実際に実行できます。保護された 2 つも押せますが、サインインは未接続のため失敗は想定どおりです。リクエストには現在の言語とテーマが自動で付きます。",
+  "dataCheck.scaffoldHint": "公開の 2 つは実際に実行できます。保護された 2 つは「サインイン（テストモード）」でサインインしてから押してください。失敗はコードに応じて説明されます。リクエストには現在の言語とテーマが自動で付きます。",
   "dataCheck.signOut": "サインアウト",
   "dataCheck.signOutDone": "サインアウトしました",
   "dataCheck.stateError": "失敗",

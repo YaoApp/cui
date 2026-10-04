@@ -34,7 +34,7 @@
   "dataCheck.publicPost": "Public POST",
   "dataCheck.reload": "Run again",
   "dataCheck.scaffold": "API calls",
-  "dataCheck.scaffoldHint": "The two public calls run for real. The protected pair can be pressed too, but sign-in is not wired yet, so failing is expected. Every request carries the current language and theme.",
+  "dataCheck.scaffoldHint": "The two public calls run for real; sign in through “Sign-in (test mode)” before pressing the protected pair, which explain any refusal by its code. Every request carries the current language and theme.",
   "dataCheck.signOut": "Sign out",
   "dataCheck.signOutDone": "Signed out",
   "dataCheck.stateError": "Failed",

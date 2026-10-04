@@ -332,33 +332,33 @@ describe('the data check page', () => {
     expect(document.body.textContent).not.toContain(LOGIN.access_token) // 凭据值永不上屏
   })
 
-    it('lets a sign-in follow a sign-out, so the page stops claiming the old one', async () => {
-    vi.mocked(transportFetch).mockImplementation(async (url) => {
-      const target = String(url)
-      if (target.includes('/.well-known/yao')) return json(SERVICE)
-      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
-      if (target.includes('/test/login/web')) return json(LOGIN)
-      if (target.includes('/user/logout')) return json({ message: 'Logout successful' })
-      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
-    })
-    const user = userEvent.setup()
-    renderPage()
-    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
-
-    await user.click(screen.getByRole('button', { name: '列出用户' }))
-    await screen.findByText('ada@example.com')
-
-    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
-    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: '退出登录' }))
-    expect(await screen.findByText(/已退出/)).toBeInTheDocument()
-
-    // 再登录：上一次"已退出"必须让位，否则页面在说谎
-    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
-    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
-    expect(screen.queryByText(/已退出/)).toBeNull()
+  it('lets a sign-in follow a sign-out, so the page stops claiming the old one', async () => {
+  vi.mocked(transportFetch).mockImplementation(async (url) => {
+    const target = String(url)
+    if (target.includes('/.well-known/yao')) return json(SERVICE)
+    if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+    if (target.includes('/test/login/web')) return json(LOGIN)
+    if (target.includes('/user/logout')) return json({ message: 'Logout successful' })
+    return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
   })
+  const user = userEvent.setup()
+  renderPage()
+  await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+  await user.click(screen.getByRole('button', { name: '列出用户' }))
+  await screen.findByText('ada@example.com')
+
+  await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+  expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+
+  await user.click(screen.getByRole('button', { name: '退出登录' }))
+  expect(await screen.findByText(/已退出/)).toBeInTheDocument()
+
+  // 再登录：上一次"已退出"必须让位，否则页面在说谎
+  await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+  expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+  expect(screen.queryByText(/已退出/)).toBeNull()
+})
 
   it('does not call a token-only sign-in authenticated, since no cookie was written', async () => {
     vi.mocked(transportFetch).mockImplementation(async (url) => {
@@ -379,6 +379,38 @@ describe('the data check page', () => {
     expect(await screen.findByText(/已取得登录凭据/)).toBeInTheDocument()
 
     // 没给浏览器写 Cookie → 受保护请求仍是"没带凭据"，不能自称已认证
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('未登录'))
+    expect(cellText('受保护 GET')).not.toContain('已认证但未被授权')
+  })
+
+  it('does not let a revoked web sign-in outlive a token-only sign-in', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) return json(LOGIN)
+      if (target.includes('/test/login/token')) return json(LOGIN)
+      if (target.includes('/user/logout')) return json({ message: 'Logout successful' })
+      if (target.includes('/helloworld/protected')) return json({ error: 'unauthorized' }, 401)
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '退出登录' }))
+    expect(await screen.findByText(/已退出/)).toBeInTheDocument()
+
+    // 退出后再只取 token：旧的那次 web 登录已被吊销，页面不许再当它存在
+    await user.click(screen.getByRole('button', { name: '只取登录凭据' }))
+    expect(await screen.findByText(/已取得登录凭据/)).toBeInTheDocument()
+    expect(screen.queryByText(/已登录 ada@example\.com/)).toBeNull()
+
     await user.click(screen.getByRole('button', { name: '受保护 GET' }))
     await waitFor(() => expect(cellText('受保护 GET')).toContain('未登录'))
     expect(cellText('受保护 GET')).not.toContain('已认证但未被授权')

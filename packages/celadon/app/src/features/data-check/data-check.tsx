@@ -116,10 +116,15 @@ export function DataCheckPage() {
 
   const signIn = (user: TestUser, kind: 'web' | 'token') => {
     if (!user.email) return
-    logoutCall.reset() // 上一次"已退出"到此为止，重新登录后页面不该还挂着它
+    logoutCall.reset() // 上一次"已退出"到此为止
+    if (kind === 'web') {
+      loginTokenCall.reset() // 换一种登录方式：另一边的旧凭据一并作废
+      void loginWebCall.run({ user: user.email })
+    } else {
+      loginWebCall.reset()
+      void loginTokenCall.run({ user: user.email })
+    }
     setLoginEmail(user.email)
-    if (kind === 'web') void loginWebCall.run({ user: user.email })
-    else void loginTokenCall.run({ user: user.email })
   }
 
   const cells = [
@@ -206,7 +211,16 @@ export function DataCheckPage() {
       {/* 退出：Cookie 是 HttpOnly（JS 碰不到）→ 只能由服务端吊销并清掉（`POST /user/logout`） */}
       {signedIn ? (
         <p className="data-check__tools">
-          <Button onClick={() => void logoutCall.run()} disabled={logoutCall.state.status === 'loading'}>{t('dataCheck.signOut')}</Button>
+          <Button
+            onClick={() =>
+              void logoutCall.run().then(() => {
+                // 服务端已吊销并清 Cookie：两边的旧登录结果都不能再代表"已登录"
+                loginWebCall.reset()
+                loginTokenCall.reset()
+              })
+            }
+            disabled={logoutCall.state.status === 'loading'}
+          >{t('dataCheck.signOut')}</Button>
         </p>
       ) : null}
       {logoutCall.state.status === 'ok' ? (
