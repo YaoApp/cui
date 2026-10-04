@@ -96,7 +96,7 @@
 | 9 | **`sandbox` 域去留**（`05 §7` 未定项 2）| `sandbox/api.ts:42–67` 混了盒管理/exec/心跳/VNC |
 | 10 | **"查会话"端点**（`15 §4` 要求问服务端）| 旧代码没有这个调用，只能读 cookie |
 | 11 | **CSRF 是否仍需要**（若需要，注入点只能在 `transport/`）| 三来源凑 `X-CSRF-Token` |
-| 12 | **出站上下文载体**（locale/timezone/theme/client 怎么带）| 散落：locale 走 query、`X-Yao-Accept` 头、`setting/api.ts:87` 取 `getLocale` |
+| 12 | **请求元数据载体**（locale/timezone/theme/client 怎么带）| 散落：locale 走 query、`X-Yao-Accept` 头、`setting/api.ts:87` 取 `getLocale` |
 
 ## 8. 证据索引（关键行）
 

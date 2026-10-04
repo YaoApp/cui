@@ -48,8 +48,8 @@ export function DataCheckPage() {
   const translate = (key: string, options?: Record<string, unknown>) =>
     i18n.t(key as never, options as never) as unknown as string
 
-  /* 出站上下文：页面**不拼、不传** —— `send()` 调用时自己从平台层取当前值
-     （`platform/client/context.ts` 的 `currentOutbound()`），每次请求自动带上。
+  /* 请求元数据：页面**不拼、不传** —— `send()` 调用时自己从平台层取当前值
+     （`platform/client/context.ts` 的 `currentPreferences()`），每次请求自动带上。
      这里只是把平台解析出的当前值显示出来，好让人看见请求带的是什么。 */
   const locale = resolvePreference(useLocaleStore((state) => state.locale))
   const theme = useThemeStore((state) => state.theme)
@@ -100,7 +100,7 @@ export function DataCheckPage() {
   useEffect(() => reportState(t('dataCheck.protectedPost'), protectedPostCall.state, true), [protectedPostCall.state])
 
   /* ③ 四态：`useRequest` **挂载即跑**（不传 `manual`）、卸载即取消、依赖（语言/主题）变了重跑。
-     公开 GET 当 fetcher —— `send()` 自动带上当前出站上下文，它不挑凭据，登录还没接也照样通。 */
+     公开 GET 当 fetcher —— `send()` 自动带上当前请求元数据，它不挑凭据，登录还没接也照样通。 */
   const scaffold = useRequest((signal) => send(publicGet, { signal }), [locale, theme])
 
   const states = [

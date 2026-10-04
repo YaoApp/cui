@@ -47,7 +47,7 @@ describe('send', () => {
     expect(new Headers(init?.headers).get('x-yao-accept')).toBe('cui-web')   // 大小写不敏感
   })
 
-  it('takes the outbound context from the platform when the caller passes none', async () => {
+  it('takes the request metadata from the platform when the caller passes none', async () => {
     const fetchMock = answer({ ok: true })
     await send(request)
     const [url, init] = fetchMock.mock.calls[0]
@@ -55,9 +55,9 @@ describe('send', () => {
     expect(new Headers(init?.headers).get('Accept-Language')).toBe('en-US')
   })
 
-  it('lets the caller override one part of the outbound context', async () => {
+  it('lets the caller override one part of the preferences', async () => {
     const fetchMock = answer({ ok: true })
-    await send(request, { outbound: { locale: 'ja' } })
+    await send(request, { preferences: { locale: 'ja' } })
     const [url, init] = fetchMock.mock.calls[0]
     expect(String(url)).toContain('locale=ja')
     expect(new Headers(init?.headers).get('Accept-Language')).toBe('ja')

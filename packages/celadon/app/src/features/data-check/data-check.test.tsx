@@ -115,7 +115,7 @@ describe('the data check page', () => {
     const [url, init] = publicCalls().at(-1)!
     expect(String(url)).toContain('/v1/helloworld/public')
     expect(init?.method).toBe('GET')
-    // 出站上下文真的来自 i18n：地址带 locale，头带 Accept-Language
+    // 请求元数据真的来自 i18n：地址带 locale，头带 Accept-Language
     expect(String(url)).toContain('locale=zh-CN')
     expect(new Headers(init?.headers).get('Accept-Language')).toBe('zh-CN')
     // 返回值真上了屏（MESSAGE 是引擎线上形状的大写键）
@@ -191,7 +191,7 @@ describe('the data check page', () => {
     renderPage()
 
     await screen.findByText(new RegExp(MESSAGE))
-    // 出站上下文显示的就是 store 里的解析结果（语言 zh-CN · 主题 dark）
+    // 请求元数据显示的就是 store 里的解析结果（语言 zh-CN · 主题 dark）
     expect(screen.getByText('zh-CN')).toBeInTheDocument()
     expect(screen.getByText('dark')).toBeInTheDocument()
   })

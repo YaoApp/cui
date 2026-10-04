@@ -1,29 +1,29 @@
-/* **0.4 出站上下文（ctx）**：普通请求与订阅**带同一份**。
+/* **0.4 请求元数据（ctx）**：普通请求与订阅**带同一份**。
  *
- * 事实的采集在平台层（`platform/client/context.ts` 的 `outboundContext`），这里只做两件事：
+ * 事实的采集在平台层（`platform/client/context.ts` 的 `metadata`），这里只做两件事：
  *   · 把平台事实 + 客户端标识 + 服务地址**组合**成一份 ctx
  *   · 决定**怎么带**（头还是 query）—— 名字是**草稿**，要与后端对齐（旧代码 locale 走 query、`X-Yao-*` 头）
  *
  * **契约**：这里不读 store、不读 DOM（值由调用方传进来），所以是可测的纯函数；
- * 默认值由 `send()` 从平台层取（`platform/client/context.ts` 的 `currentOutbound()`），覆盖时显式传。
+ * 默认值由 `send()` 从平台层取（`platform/client/context.ts` 的 `currentPreferences()`），覆盖时显式传。
  */
 
-import type { OutboundContext, OutboundInputs } from '@/platform/client/context'
-import { outboundContext } from '@/platform/client/context'
+import type { RequestMetadata, Preferences } from '@/platform/client/context'
+import { metadata } from '@/platform/client/context'
 import { clientId as currentClientId } from '@/platform/client/client-id'
 import { serviceBase } from '@/platform/service'
 
 /** 一次出站调用要带的全部上下文（在 `request/` 里，所以就叫 `Context`）。 */
-export type Context = OutboundContext & {
-  /** 客户端标识（`web-…` / `desk-<机器码>`，见 `15 §5`）—— 与 `OutboundContext.client`（web/desktop）不是一回事 */
+export type Context = RequestMetadata & {
+  /** 客户端标识（`web-…` / `desk-<机器码>`，见 `15 §5`）—— 与 `RequestMetadata.client`（web/desktop）不是一回事 */
   clientId: string
   /** 服务基址（同源时为空串，见 `platform/service`） */
   service: string
 }
 
-/** 要什么由平台那侧定（`OutboundInputs`），这里**不另造一个形状**。 */
-export function context(inputs: OutboundInputs): Context {
-  const facts = outboundContext(inputs)
+/** 要什么由平台那侧定（`Preferences`），这里**不另造一个形状**。 */
+export function context(inputs: Preferences): Context {
+  const facts = metadata(inputs)
   return { ...facts, clientId: currentClientId(), service: serviceBase() }
 }
 

@@ -15,5 +15,5 @@ export const publicPost: Request<Record<string, unknown>, HelloWorld> = { method
 export const protectedGet: Request<void, HelloWorld> = { method: 'GET', path: '/helloworld/protected' }
 export const protectedPost: Request<Record<string, unknown>, HelloWorld> = { method: 'POST', path: '/helloworld/protected' }
 
-/* 用的时候就是一句话：`send(publicGet)` —— 对外上下文（语言 · 主题）由 `send()` 自动带上，
-   要覆盖时才传 `outbound`；**不再包一层函数**（包一层只是多一个名字 ✓）。 */
+/* 用的时候就是一句话：`send(publicGet)` —— 请求元数据（语言 · 主题）由 `send()` 自动带上，
+   要覆盖时才传 `preferences`；**不再包一层函数**（包一层只是多一个名字 ✓）。 */
