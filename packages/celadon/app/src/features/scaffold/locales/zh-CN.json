@@ -138,5 +138,5 @@
   "routing.missing": "没有这个世界：{{id}}",
   "routing.navLabel": "世界导航",
   "routing.share": "分享这个视图",
-  "routing.title": "World"
+  "routing.title": "路由"
 }

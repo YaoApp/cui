@@ -138,5 +138,5 @@
   "routing.missing": "沒有這個世界：{{id}}",
   "routing.navLabel": "世界導覽",
   "routing.share": "分享這個檢視",
-  "routing.title": "World"
+  "routing.title": "路由"
 }

@@ -138,5 +138,5 @@
   "routing.missing": "No such world: {{id}}",
   "routing.navLabel": "World navigation",
   "routing.share": "Share this view",
-  "routing.title": "World"
+  "routing.title": "Routing"
 }

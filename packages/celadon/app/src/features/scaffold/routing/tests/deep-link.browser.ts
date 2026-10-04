@@ -6,6 +6,8 @@ test('an object in the path opens its detail', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Alpha 世界' })).toBeVisible()
   // 详情页的标题用对象名 —— 用户才知道自己开的是哪一个世界
   await expect(page).toHaveTitle('Alpha 世界 · CUI 2.0')
+  /* 页头标题是**页面名**（与导航一致），不是对象名 —— 对象名只进页签 */
+  await expect(page.getByRole('heading', { level: 1, name: '路由' })).toBeVisible()
 })
 
 

@@ -138,5 +138,5 @@
   "routing.missing": "そのワールドはありません：{{id}}",
   "routing.navLabel": "ワールドナビゲーション",
   "routing.share": "このビューを共有",
-  "routing.title": "World"
+  "routing.title": "ルーティング"
 }
