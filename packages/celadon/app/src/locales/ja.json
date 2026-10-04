@@ -54,6 +54,8 @@
   "verify.capabilities": "ケイパビリティ",
   "verify.client": "クライアント",
   "verify.credential": "資格情報の往復",
+  "verify.credentialKey": "現在のサービスの資格情報キー",
+  "verify.credentialKeyNone": "サービスアドレスがまだありません",
   "verify.egress": "出口（Web とクライアント共通）",
   "verify.egressHint": "リクエストの出口は一つ。Web はブラウザの fetch、クライアントはホストが代行。ブラウザは同一オリジン制約があり、クロスオリジンは相手の許可が要る。",
   "verify.filePick": "ファイルを選ぶ",

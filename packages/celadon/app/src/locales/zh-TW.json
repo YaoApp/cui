@@ -54,6 +54,8 @@
   "verify.capabilities": "能力開關",
   "verify.client": "客戶端",
   "verify.credential": "憑證往返",
+  "verify.credentialKey": "目前服務的憑據鍵",
+  "verify.credentialKeyNone": "還沒有服務位址",
   "verify.egress": "出海口（Web 與客戶端都有）",
   "verify.egressHint": "發請求只有這一條路：Web 用瀏覽器自己的 fetch，客戶端用宿主代發。瀏覽器受同源限制，跨域要對方允許。",
   "verify.filePick": "選檔案",

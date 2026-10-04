@@ -23,7 +23,7 @@ import { navWithActive } from '@/platform/utils/nav'
 import { buildManifest, capabilities, clientInfo, hasHost } from '@/platform/client'
 import { routerBasename } from '@/platform/router/basename'
 import { bridge, failureText, type BridgeResult } from '@/platform/bridge'
-import { credential } from '@/platform/credential'
+import { credential, credentialKey } from '@/platform/credential'
 import { REDACTED, shouldRedact } from './redact'
 import { transport } from '@/platform/transport'
 import { loadServiceInfo } from '@/platform/service'
@@ -241,6 +241,10 @@ export function VerifyPage() {
         <Button onClick={() => run('credential.read', () => credential.read(service))}>{t('verify.read')}</Button>{' '}
         <Button onClick={() => run('credential.remove', () => credential.remove(service))}>{t('verify.remove')}</Button>{' '}
         <Button onClick={() => run('credential.list', () => credential.list())}>{t('verify.list')}</Button>
+      </p>
+      {/* 键按服务 origin 分账（`scope.ts`）：这里是"当前服务下这个用途的键长什么样" */}
+      <p>
+        {t('verify.credentialKey')}: <code>{credentialKey('session') ?? t('verify.credentialKeyNone')}</code>
       </p>
 
       <h2 className="verify__heading">{t('verify.results')}</h2>

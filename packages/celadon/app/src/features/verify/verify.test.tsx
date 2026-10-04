@@ -14,6 +14,7 @@ const serviceGet = vi.fn(async () => ({ ok: true as const, value: { url: 'http:/
 const serviceSet = vi.fn(async (_url?: string) => ({ ok: true as const, value: { url: 'http://localhost:5099' } }))
 
 vi.mock('@/platform/credential', () => ({
+  credentialKey: (purpose: string) => `http://localhost:5099#${purpose}`,
   credential: {
     carrier: () => 'os-store',
     managedByApp: () => true,

@@ -3,6 +3,8 @@
  * 现在做得到的：**桌面**直接管 OS 凭据库（经 `bridge/credential`）；**Web** 的载体由浏览器与服务端管，
  * 所以读写一律回**可读的失败**（`credential.no_store_here`），而不是假装成功或抛异常。
  *
+ * **键按服务 origin 分账**（`scope.ts`）：调用点写 `credential.write(credentialKey('session')!, …)`，不手拼。
+ *
  * **还没做的**（等**服务接口**，不是平台层的事）：登入/登出/查会话（`POST …/login/web` 等）· 刷新定时 ·
  * 两步登录 · 由凭据推出的当前身份。接口形状定了再加，别在这儿发明假接口。
  */
@@ -12,6 +14,7 @@ import { bridge, type CredentialMeta } from '../bridge'
 import { carrierIsReadableByApp, credentialCarrier } from './carrier'
 
 export { credentialCarrier, carrierIsReadableByApp, type CredentialCarrier } from './carrier'
+export { serviceOrigin, credentialKey } from './scope'
 
 /** 载体不由应用保管时的统一回答（Web 的 Cookie 走这一支）。 */
 function noStoreHere(action: string): BridgeResult<never> {
