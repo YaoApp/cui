@@ -88,9 +88,9 @@ function withQuery(url: string, params: Record<string, string | number | boolean
 /** 一次普通请求。**失败是值**，不抛异常。 */
 export async function send<Input = void, Output = void>(
   request: Request<Input, Output>,
-  inputs: RequestOptions<Input>,
+  options: RequestOptions<Input>,
 ): Promise<Result<Output>> {
-  const ctx: Context = context(inputs.outbound)
+  const ctx: Context = context(options.outbound)
   // **第一次需要时先读**（惰性 ✓，之后走内存缓存）—— 读失败就把它自己的失败报出去（比"没就绪"更准）
   const service = await loadServiceInfo()
   if (!service.ok) return service
@@ -99,15 +99,15 @@ export async function send<Input = void, Output = void>(
   if (!address) {
     return { ok: false, ...buildFailure(0, undefined, 'service.not_ready') }
   }
-  const url = withQuery(address, { ...contextQuery(ctx), ...(inputs.query ?? {}) })
+  const url = withQuery(address, { ...contextQuery(ctx), ...(options.query ?? {}) })
 
   const response = await transportFetch(url, {
     method: request.method,
     // ctx 先 → 声明里固定要带的 → 这次调用显式的（后者说了算）
-    headers: mergeHeaders(contextHeaders(ctx), request.headers, inputs.headers),
-    ...(inputs.body === undefined ? {} : { body: JSON.stringify(inputs.body) }),
-    ...(inputs.signal ? { signal: inputs.signal } : {}),
-    ...(inputs.timeoutMs === undefined ? {} : { timeoutMs: inputs.timeoutMs }),
+    headers: mergeHeaders(contextHeaders(ctx), request.headers, options.headers),
+    ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
+    ...(options.signal ? { signal: options.signal } : {}),
+    ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
   })
   if (!response.ok) return response
   if (!response.value.ok) {
