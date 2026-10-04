@@ -35,6 +35,6 @@ process.on('SIGTERM', () => process.exit(143))
 const dev = spawn(process.execPath, [resolve(pkg, 'node_modules/vite/bin/vite.js')], {
   cwd: pkg,
   stdio: 'inherit',
-  env: process.env,
+  env: { ...process.env, CUI_BASE: '' }, // 客户端就是根：base '/' —— dev 的请求路径与生产一致（引擎在站点根下）,
 })
 dev.on('exit', (code) => process.exit(code ?? 0))
