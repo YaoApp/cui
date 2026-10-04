@@ -15,7 +15,7 @@ describe('useRequest', () => {
   it('drops the last result when reset, without leaving its waiter hanging', async () => {
     send.mockResolvedValue({ ok: true, value: 'v' })
     const { result } = renderHook(() => useRequest(REQUEST, { manual: true }))
-    let settled: Promise<void> = Promise.resolve()
+    let settled: Promise<unknown> = Promise.resolve()
     act(() => { settled = result.current.run() })
     await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 'v' }))
     await settled
@@ -54,7 +54,7 @@ describe('useRequest', () => {
   it('resolves the run promise once the call settles', async () => {
     send.mockResolvedValue({ ok: true, value: 'v' })
     const { result } = renderHook(() => useRequest(REQUEST, { manual: true }))
-    let settled: Promise<void> = Promise.resolve()
+    let settled: Promise<unknown> = Promise.resolve()
     act(() => { settled = result.current.run() })
     await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 'v' }))
     await settled // 落定后 resolve（不悬）—— 且此时 state 已是新的 ✓
@@ -102,5 +102,18 @@ describe('useRequest', () => {
     unmount()
     act(() => invalidate(['GET']))
     expect(send).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('what run() hands back', () => {
+  it('resolves with the result of this very call (so a caller can act in the action, not in an effect)', async () => {
+    send.mockResolvedValue({ ok: true, value: 'v' })
+    const { result } = renderHook(() => useRequest(REQUEST, { manual: true }))
+    let answered: Promise<unknown> = Promise.resolve()
+    act(() => {
+      answered = result.current.run()
+    })
+    await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 'v' }))
+    await expect(answered).resolves.toMatchObject({ ok: true, value: 'v' })
   })
 })

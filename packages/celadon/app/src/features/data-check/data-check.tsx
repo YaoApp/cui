@@ -15,7 +15,7 @@ import './data-check.less'
  * **登录成功 ≠ 被允许**：受保护接口还要过引擎的授权策略 —— 带着凭据仍回 403 时，
  * 标注换成"已认证但未被授权"，（引擎原文不上屏）。 */
 
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useCallback, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
@@ -35,6 +35,7 @@ import {
 import { listUsersQuery, loginTokenQuery, loginWebQuery, type TestUser } from '@/data/test'
 import { logoutQuery } from '@/data/user'
 import { signIn as sessionSignIn, signOut as sessionSignOut } from '@/platform/credential'
+import { hasHost, service } from '@/platform/bridge'
 
 /** POST 的请求体（引擎会原样回显在 `POST_PAYLOAD` 里）—— 技术样本，不走语言包。 */
 const POST_BODY = { from: 'data-check' }
@@ -104,15 +105,26 @@ export function DataCheckPage() {
   const webLogin = loginWebCall.state.status === 'ok' ? loginWebCall.state.value : null
   const tokenLogin = loginTokenCall.state.status === 'ok' ? loginTokenCall.state.value : null
 
-  /* 令牌交给**平台**：桌面写进 OS 凭据库、出口之后自动带上；Web 是空操作（Cookie 由服务端下发）。
-     业务层只说"登录成功了" —— 不判宿主。 */
-  useEffect(() => {
-    if (tokenLogin?.access_token) void sessionSignIn(tokenLogin.access_token)
-  }, [tokenLogin?.access_token])
-  /* 服务端吊销成功后再清本地那把，顺序不能反 */
-  useEffect(() => {
-    if (logoutCall.state.status === 'ok') void sessionSignOut()
-  }, [logoutCall.state.status])
+
+  /* **服务地址只有客户端能改**（Web 不能换服务）：这里用与验证页同一套平台调用，
+     其余行为两边一模一样 —— 业务不判宿主，只有这一段是宿主能力。 */
+  const desktop = hasHost()
+  const [serviceUrl, setServiceUrl] = useState('')
+  const [serviceNotice, setServiceNotice] = useState('')
+  const readAddress = useCallback(async () => {
+    const result = await service.get()
+    if (result.ok) {
+      setServiceUrl(result.value.url)
+      setServiceNotice('')
+    } else setServiceNotice(result.code)
+  }, [])
+  const saveAddress = useCallback(async () => {
+    const result = await service.set(serviceUrl.trim())
+    if (result.ok) {
+      setServiceUrl(result.value.url)
+      setServiceNotice('')
+    } else setServiceNotice(result.code)
+  }, [serviceUrl])
 
   /** 登录态：取到过凭据 **且没退出成功** —— 退出由服务端吊销并清 Cookie，退完就不再是登录态。 */
   const signedIn = (webLogin !== null || tokenLogin !== null) && logoutCall.state.status !== 'ok'
@@ -133,7 +145,10 @@ export function DataCheckPage() {
       void loginWebCall.run({ user: user.email })
     } else {
       loginWebCall.reset()
-      void loginTokenCall.run({ user: user.email })
+      // 登录成功后把令牌交给**平台**（桌面写进 OS 凭据库、Web 是空操作）—— 在动作里接着做，不写副作用
+      void loginTokenCall.run({ user: user.email }).then((result) => {
+        if (result?.ok) void sessionSignIn(result.value.access_token)
+      })
     }
     setLoginEmail(user.email)
   }
@@ -163,6 +178,25 @@ export function DataCheckPage() {
         <Button variant="ghost" onClick={() => navigate(-1)}>{t('dataCheck.back')}</Button>
       </div>
 
+      {/* 服务地址：**只有客户端打开才有这一段**（Web 不能换服务；宿主不持有时地址也不该由页面填）。
+          其余行为两边一致 —— 页面本身不判"接下来怎么请求"。 */}
+      {desktop ? (
+        <>
+          <h2 className="data-check__heading">{t('verify.serviceAddress')}</h2>
+          <p>{t('verify.serviceAddressHint')}</p>
+          <p className="data-check__tools">
+            <input
+              type="text"
+              aria-label={t('verify.serviceAddress')}
+              value={serviceUrl}
+              onChange={(event) => setServiceUrl(event.target.value)}
+            />
+            <Button onClick={() => void readAddress()}>{t('verify.serviceGet')}</Button>
+            <Button onClick={() => void saveAddress()} disabled={!serviceUrl.trim()}>{t('verify.serviceSet')}</Button>
+          </p>
+          {serviceNotice ? <p className="data-check__notice">{serviceNotice}</p> : null}
+        </>
+      ) : null}
       {/* ① 登录（测试模式）：只在开发实例上注册；页面只用 useRequest + 域层 query —— 不出现裸 send / key */}
       <h2 className="data-check__heading">{t('dataCheck.loginTest')}</h2>
       <p>{t('dataCheck.loginTestHint')}</p>
@@ -224,7 +258,9 @@ export function DataCheckPage() {
         <p className="data-check__tools">
           <Button
             onClick={() =>
-              void logoutCall.run().then(() => {
+              void logoutCall.run().then((result) => {
+                  // 服务端吊销成功后再清本地那把（顺序不能反）—— 仍在动作里，不写副作用
+                  if (result?.ok) void sessionSignOut()
                 // 服务端已吊销并清 Cookie：两边的旧登录结果都不能再代表"已登录"
                 loginWebCall.reset()
                 loginTokenCall.reset()

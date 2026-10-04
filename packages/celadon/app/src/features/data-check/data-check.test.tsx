@@ -5,7 +5,7 @@
  * 服务信息（`/.well-known/yao`）→ 地址（service.endpoint）→ 出口（transportFetch）→ 解包裹（unwrap）；
  * 受保护的两条在假出口上回 401，页面照预期把结果标注成"预期失败"。 */
 
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -50,6 +50,14 @@ function userPage(emails: readonly string[]) {
     prev: null,
   }
 }
+
+const hasHostMock = vi.hoisted(() => vi.fn(() => false))
+const serviceGet = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: { url: '' } })))
+const serviceSet = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: { url: '' } })))
+vi.mock('@/platform/bridge', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/platform/bridge')>()
+  return { ...actual, hasHost: hasHostMock, service: { get: serviceGet, set: serviceSet } }
+})
 
 vi.mock('@/platform/transport/fetch', () => ({ transportFetch: vi.fn() }))
 
@@ -473,5 +481,29 @@ describe('the data check page', () => {
     const body = document.body.textContent ?? ''
     for (const secret of [SESSION, ID_TOKEN, ACCESS, REFRESH]) expect(body).not.toContain(secret)
     expect(body).toContain(`长度 ${ACCESS.length}`)
+  })
+})
+
+describe('the service address, which only a client holds', () => {
+  it('is not rendered in a browser', async () => {
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+    expect(document.querySelector('input[aria-label]')).toBeNull()
+  })
+
+  it('reads the address the host holds, and saves a typed one', async () => {
+    hasHostMock.mockReturnValue(true)
+    serviceGet.mockResolvedValue({ ok: true, value: { url: 'http://host:5099' } })
+    serviceSet.mockResolvedValue({ ok: true, value: { url: 'http://typed:5099' } })
+    renderPage()
+
+    const input = await screen.findByLabelText('服务地址')
+    // 地址**不在进来时偷偷读**（不在 useEffect 取数）：点"读当前地址"这个动作才知道
+    fireEvent.click(screen.getByText('读当前地址'))
+    await waitFor(() => expect((input as HTMLInputElement).value).toBe('http://host:5099'))
+
+    fireEvent.change(input, { target: { value: 'http://typed:5099' } })
+    fireEvent.click(screen.getByText('校验并写入'))
+    await waitFor(() => expect(serviceSet).toHaveBeenCalledWith('http://typed:5099'))
   })
 })
