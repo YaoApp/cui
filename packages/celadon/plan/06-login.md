@@ -44,7 +44,7 @@
 
 ## 1. 第一步：草图（纯 HTML，用设计体系 Token）
 
-**产物**：`design/entries/` 下的独立 HTML 草图（`login.html` · `register.html` · `servers.html`），只引 `design/tokens.css`，不引应用代码、不写产品样式。
+**产物**：`design/prototype/` 下的独立 HTML 草图（`login.html` · `register.html` · `servers.html`），只引 `design/tokens.css`，不引应用代码、不写产品样式；草图与 `design/AGENTS.md` 一并进仓库。
 
 **要求**：
 
