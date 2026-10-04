@@ -31,6 +31,33 @@ export type I18nKey =
   | 'bridge.error.transport.parse'
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
+  | 'dataCheck.back'
+  | 'dataCheck.empty'
+  | 'dataCheck.expectedFailure'
+  | 'dataCheck.locale'
+  | 'dataCheck.name'
+  | 'dataCheck.ok'
+  | 'dataCheck.openapi'
+  | 'dataCheck.protectedGet'
+  | 'dataCheck.protectedPost'
+  | 'dataCheck.publicGet'
+  | 'dataCheck.publicPost'
+  | 'dataCheck.reload'
+  | 'dataCheck.results'
+  | 'dataCheck.scaffold'
+  | 'dataCheck.scaffoldHint'
+  | 'dataCheck.serviceInfo'
+  | 'dataCheck.serviceInfoHint'
+  | 'dataCheck.serviceInfoRead'
+  | 'dataCheck.stateError'
+  | 'dataCheck.stateIdle'
+  | 'dataCheck.stateLoading'
+  | 'dataCheck.stateOk'
+  | 'dataCheck.states'
+  | 'dataCheck.statesHint'
+  | 'dataCheck.theme'
+  | 'dataCheck.title'
+  | 'dataCheck.version'
   | 'entityPanel.close'
   | 'entityPanel.id'
   | 'entityPanel.kind'
@@ -62,6 +89,7 @@ export type I18nKey =
   | 'localeSwitch.zhCN'
   | 'localeSwitch.zhTW'
   | 'nav.appLabel'
+  | 'nav.dataCheck'
   | 'nav.hello'
   | 'nav.verify'
   | 'nav.world'
@@ -165,6 +193,33 @@ declare module 'i18next' {
         'bridge.error.transport.parse': string
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
+        'dataCheck.back': string
+        'dataCheck.empty': string
+        'dataCheck.expectedFailure': string
+        'dataCheck.locale': string
+        'dataCheck.name': string
+        'dataCheck.ok': string
+        'dataCheck.openapi': string
+        'dataCheck.protectedGet': string
+        'dataCheck.protectedPost': string
+        'dataCheck.publicGet': string
+        'dataCheck.publicPost': string
+        'dataCheck.reload': string
+        'dataCheck.results': string
+        'dataCheck.scaffold': string
+        'dataCheck.scaffoldHint': string
+        'dataCheck.serviceInfo': string
+        'dataCheck.serviceInfoHint': string
+        'dataCheck.serviceInfoRead': string
+        'dataCheck.stateError': string
+        'dataCheck.stateIdle': string
+        'dataCheck.stateLoading': string
+        'dataCheck.stateOk': string
+        'dataCheck.states': string
+        'dataCheck.statesHint': string
+        'dataCheck.theme': string
+        'dataCheck.title': string
+        'dataCheck.version': string
         'entityPanel.close': string
         'entityPanel.id': string
         'entityPanel.kind': string
@@ -196,6 +251,7 @@ declare module 'i18next' {
         'localeSwitch.zhCN': string
         'localeSwitch.zhTW': string
         'nav.appLabel': string
+        'nav.dataCheck': string
         'nav.hello': string
         'nav.verify': string
         'nav.world': string
