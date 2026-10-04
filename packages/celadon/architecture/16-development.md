@@ -1,7 +1,7 @@
 # 16 · 开发
 
 - **版本**：v1.5
-- **最后修改**：2026-10-04 09:13:15
+- **最后修改**：2026-10-04 09:15:06
 - **说明**：开发：服务与端口 · 代理 · 环境变量 · 日志
 
 ## 1. 规则
@@ -13,8 +13,7 @@
   **不引第三方代理、不自己挂中间件** ✗ —— 官方机制能兜住的事，加插件只会多一层要维护的东西。
 - **代理键是根路径**：`/.well-known` · `/v1`。**dev 的请求路径必须与生产一致** ——
   生产里应用在 `/app/` 下、**引擎在站点根下** ✓，所以代理挂在根下，不挂 `/app/.well-known`、`/app/v1`。
-- **`base: '/app/'` 不影响根路径代理（实测 2026-10-04）**：带 base 时 `server.proxy` **照常代理根路径** ✓。
-  早期"根路径被 base 中间件拦掉、只有客户端跑法才连得上后端"的结论是**假的** ✗ ——
+- **代理键是根路径，`base` 不影响它**：带 base 时 `server.proxy` **照常代理根路径** ✓ —— dev 的请求路径与生产一致（生产里应用在 `/app/` 下、引擎在站点根下）。
   实际原因是当时 curl 打到了**没带 `YAO_SERVER_HOST` 的旧 dev server**：代理压根没建，不是被 base 拦的。
   **不要**为此加插件、加依赖或改 base ✗。
 - **`YAO_SERVER_HOST` 必须给**：不给就等于**不建代理**，`/.well-known` 与 `/v1` 会落到 Vite 自己身上 → **404**
@@ -51,7 +50,7 @@
 
 ### 2.1 改运行环境（pm2）
 
-- **pm2 管的服务不要裸 `kill`** ✗：pm2 会把**同一个配置再拉起来** —— 实测 `cui-dev` 的重启计数 ↺ 就被这样刷到 **243 次** ✗。
+- **pm2 管的服务不要裸 `kill`** ✗ —— pm2 会把**同一个配置再拉起来**；改行为用 `pm2 restart <name> --update-env`（再 `pm2 save` 存住）。
 - **要改行为，改环境变量再 `pm2 restart`** ✓：`YAO_SERVER_HOST=… pm2 restart cui-dev --update-env`
   （`--update-env` 让新变量进进程）；要跨重启保留，再 `pm2 save` ✓。
 - **测一个 dev server 前先确认端口空** ✓：`lsof -nP -iTCP:<port> -sTCP:LISTEN` ——
@@ -60,7 +59,7 @@
 
 ### 2.2 产物预览的代理（5200 · 待做）
 
-- `cui-dist` 现在就是 **`vite preview`** ✓（旧的 `scripts/serve-dist.mjs` **已弃用** ✗：深链 404 ✗、且没有代理 ✗）—— 预览里 `/v1/…` 与 `/.well-known` 与 dev 一致 ✓。
+- `cui-dist` **就是 `vite preview`** —— 预览里 `/v1/…` 与 `/.well-known` 与 dev 一致（它继承 `server.proxy`）。
 - **正解是用 `vite preview` 的 `preview.proxy`**（官方机制 ✓，配置同样写在 `vite.config.ts` ✓），**不要自己手搓代理** ✗。
 - **待做**：`vite.config.ts` 现在只配了 `server.proxy`，**`preview.proxy` 尚未配**；在补上之前，5200 上的产物连不上后端。
 
