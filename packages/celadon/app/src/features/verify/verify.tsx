@@ -22,11 +22,11 @@ import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
 import { buildManifest, capabilities, clientInfo, hasHost } from '@/platform/client'
 import { routerBasename } from '@/platform/router/basename'
-import { bridge, failureText, type BridgeResult } from '@/platform/bridge'
+import { bridge, fail, failureText, type BridgeResult } from '@/platform/bridge'
 import { credential, credentialKey } from '@/platform/credential'
 import { REDACTED, shouldRedact } from './redact'
 import { transport } from '@/platform/transport'
-import { loadServiceInfo } from '@/platform/service'
+import { loadServiceBase, loadServiceInfo } from '@/platform/service'
 
 type Line = { label: string; text: string }
 
@@ -41,7 +41,7 @@ export function VerifyPage() {
   const manifest = buildManifest()
   const [lines, setLines] = useState<Line[]>([])
   // 凭据的键按服务 origin 分账（`scope.ts`）：没地址就没有键 —— 输入框默认为空，写也写不进去
-  const credentialScope = credentialKey('session')
+  const [credentialScope, setCredentialScope] = useState<string | undefined>(() => credentialKey('session'))
   const [service, setService] = useState(credentialScope ?? '')
   const [address, setAddress] = useState('')
   const [secret, setSecret] = useState('')
@@ -67,6 +67,12 @@ export function VerifyPage() {
     if (!host || selfChecked.current) return
     selfChecked.current = true
     void (async () => {
+      // 凭据的键按服务 origin 分账（`scope.ts`）：没地址就没有键 —— 这时**不拿假名字去写**
+      // 基址在桌面由宿主给：先取回来，再算凭据的键（没地址就没有键 —— 这时不拿假名字去写）
+      await loadServiceBase()
+      const selfCheckKey = credentialKey('self-check')
+      setCredentialScope(credentialKey('session'))
+      setService((current) => (current ? current : (credentialKey('session') ?? '')))
       for (const [label, call] of [
         ['platform', () => bridge.system.platform()],
         ['language', () => bridge.system.language()],
@@ -76,9 +82,13 @@ export function VerifyPage() {
         ['machineId', () => bridge.system.machineId()],
         ['service.get', () => bridge.service.get()],
         ['transport', () => transport.probe('https://example.com')],
-        ['credential.write', () => credential.write('verify-demo', 'self-check')],
-        ['credential.read', () => credential.read('verify-demo')],
-        ['credential.remove', () => credential.remove('verify-demo')],
+        ...(selfCheckKey
+          ? ([
+              ['credential.write', () => credential.write(selfCheckKey, 'self-check')],
+              ['credential.read', () => credential.read(selfCheckKey)],
+              ['credential.remove', () => credential.remove(selfCheckKey)],
+            ] as const)
+          : ([['credential.key', async () => fail('credential.service_empty', 'no service address to key a credential', {})]] as const)),
       ] as const) {
         const result = await call()
         report(label, result, shouldRedact(label))

@@ -13,6 +13,7 @@ const SECRET = 's3cr3t-value-must-not-be-printed'
 const mocks = vi.hoisted(() => ({
   read: vi.fn(async (_service?: string) => ({ ok: true as const, value: 's3cr3t-value-must-not-be-printed' })),
   credentialKey: vi.fn((purpose: string): string | undefined => `http://localhost:5099#${purpose}`),
+  write: vi.fn(async (_service?: string, _secret?: string) => ({ ok: true as const, value: true })),
   serviceGet: vi.fn(async () => ({ ok: true as const, value: { url: 'http://localhost:5099' } })),
   serviceSet: vi.fn(async (_url?: string) => ({ ok: true as const, value: { url: 'http://localhost:5099' } })),
 }))
@@ -23,7 +24,7 @@ vi.mock('@/platform/credential', () => ({
     carrier: () => 'os-store',
     managedByApp: () => true,
     read: (service: string) => mocks.read(service),
-    write: vi.fn(async () => ({ ok: true, value: true })),
+    write: (service: string, secret: string) => mocks.write(service, secret),
     remove: vi.fn(async () => ({ ok: true, value: true })),
     list: vi.fn(async () => ({ ok: true, value: [] })),
   },
@@ -120,5 +121,19 @@ describe('the verification page', () => {
     expect(write).toBeDisabled()
     await user.click(write)
     expect(document.body.textContent).not.toContain('credential.write →')
+  })
+  it('writes a credential under the key the service address gives', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <VerifyPage />
+      </MemoryRouter>,
+    )
+
+    // 键就是 `<origin>#<用途>` —— 不是随手起的名字
+    expect(screen.getByText('http://localhost:5099#session')).toBeInTheDocument()
+    await user.type(screen.getByLabelText(/秘密|Secret|機密|シークレット/), 's3cret')
+    await user.click(screen.getByRole('button', { name: /^(写|寫|Write|書き込み)$/ }))
+    await waitFor(() => expect(mocks.write).toHaveBeenCalledWith('http://localhost:5099#session', 's3cret'))
   })
 })
