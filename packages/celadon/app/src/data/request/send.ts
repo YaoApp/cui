@@ -27,6 +27,10 @@ export type SendInputs = {
   outbound: OutboundInputs
   /** 该域自己的查询参数（如 `page` · `pagesize`）—— 与 ctx 的合并，ctx 先 */
   query?: Record<string, string | number | boolean | undefined>
+  /** **显式头**：合并**在 ctx 之后**（调用方说了算）。
+   *  用途之一：两步登录第一步要显式带临时 `Authorization`（`15 §4`：注入凭据但不覆盖它）。
+   *  **凭据本身不从这里注入** —— Web 由浏览器带 Cookie，桌面由宿主带 Bearer（`17 §2`）。 */
+  headers?: Record<string, string>
   /** 请求体（`GET`/`DELETE` 不带） */
   body?: unknown
   signal?: AbortSignal
@@ -53,7 +57,7 @@ export async function send<T>(request: Request, inputs: SendInputs): Promise<Res
 
   const response = await transportFetch(url, {
     method: request.method,
-    headers: contextHeaders(ctx),
+    headers: { ...contextHeaders(ctx), ...(inputs.headers ?? {}) },
     ...(inputs.body === undefined ? {} : { body: JSON.stringify(inputs.body) }),
     ...(inputs.signal ? { signal: inputs.signal } : {}),
     ...(inputs.timeoutMs === undefined ? {} : { timeoutMs: inputs.timeoutMs }),

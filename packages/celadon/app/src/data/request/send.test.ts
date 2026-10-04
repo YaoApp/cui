@@ -50,6 +50,12 @@ describe('send', () => {
     address = '/v1'
   })
 
+  it('lets the caller override a header, which the sign-in step needs', async () => {
+    const fetchMock = answer({ ok: true })
+    await send(request, { outbound, headers: { Authorization: 'Bearer temp-one-shot' } })
+    expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({ Authorization: 'Bearer temp-one-shot', 'X-Yao-Accept': 'cui-web' })
+  })
+
   it('passes a network failure straight through', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline') }))
     const result = await send(request, { outbound })
