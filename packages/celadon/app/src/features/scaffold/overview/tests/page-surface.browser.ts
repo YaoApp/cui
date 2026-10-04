@@ -35,8 +35,6 @@ test('the refresh button stays inside a narrow window', async ({ page }) => {
     page.locator('.header__actions').boundingBox(),
     page.locator('header.header').boundingBox(),
   ])
-  expect(actionsBox).not.toBeNull()
-  expect(headerBox).not.toBeNull()
   const [ab, hb] = [actionsBox!, headerBox!]
   // 右侧动作块**不缩**，且贴着页头右边缘（去掉这两条，导航会把它挤出去）
   const shrink = await page.locator('.header__actions').evaluate((el) => getComputedStyle(el).flexShrink)
@@ -51,7 +49,6 @@ for (const path of ['/app/scaffold', '/app/scaffold/routing', '/app/scaffold/bri
     await page.goto(path)
 
     const header = await page.locator('header.header').boundingBox()
-    expect(header).not.toBeNull()
     expect(Math.round((header as { x: number }).x)).toBe(0)
     expect(Math.round((header as { width: number }).width)).toBe(1080)
   })
@@ -77,8 +74,8 @@ for (const [path, cls] of [
   })
 }
 
-/* 内边距只准有一层（`Page`）：两层会把正文再缩进 24px。取**正文里所有可见元素的最小左缘**
-   —— 容器自己的 padding 量不出来，`display: contents` 的包裹层也没有盒子（2026-10-04 复核抓到假绿）。 */
+/* 内边距只准有一层（`Page`）：两层会把正文再缩进 24px。量**叶子元素**的最小左缘 ——
+   只量所有后代会被"包裹层自己变成盒子"骗过（2026-10-04 复核用探针证明过两种写法都能绿）。 */
 test('the page body is indented exactly once', async ({ page }) => {
   for (const path of ['/app/scaffold', '/app/scaffold/routing', '/app/scaffold/bridge', '/app/scaffold/requests']) {
     await page.goto(path)
@@ -87,12 +84,12 @@ test('the page body is indented exactly once', async ({ page }) => {
       if (!body) return null
       let min = Number.POSITIVE_INFINITY
       for (const el of body.querySelectorAll('*')) {
+        if (el.children.length > 0) continue // 只要叶子：包裹层的盒子不算内容
         const rect = el.getBoundingClientRect()
         if (rect.width > 0 && rect.height > 0) min = Math.min(min, rect.left)
       }
       return Number.isFinite(min) ? Math.round(min) : null
     })
-    // 24 是 `Page` 的内边距；48 说明页面自己又叠了一层
     expect(minX, `${path} 正文缩进不对`).not.toBeNull()
     expect(minX as number, `${path} 正文缩进不对`).toBeLessThan(40)
   }

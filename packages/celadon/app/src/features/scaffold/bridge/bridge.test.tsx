@@ -38,7 +38,9 @@ vi.mock('@/platform/bridge', async (importOriginal) => {
       ping: vi.fn(async () => ({ ok: false, code: 'bridge.unavailable', params: {}, message: 'no host' })),
       credential: actual.bridge.credential,
       service: { get: mocks.serviceGet, set: mocks.serviceSet },
-      system: { machineId: vi.fn(async () => ({ ok: false, code: 'bridge.unavailable', params: {}, message: 'no host' })) },
+      system: {
+        platform: vi.fn(async () => ({ ok: true as const, value: 'darwin' })),
+        machineId: vi.fn(async () => ({ ok: false, code: 'bridge.unavailable', params: {}, message: 'no host' })) },
     },
   }
 })
@@ -51,6 +53,7 @@ vi.mock('@/platform/service', () => ({
   serviceBase: () => '',
 }))
 
+import { bridge } from '@/platform/bridge'
 import { BridgePage } from './bridge'
 
 describe('the verification page', () => {
@@ -135,5 +138,23 @@ describe('the verification page', () => {
     await user.type(screen.getByLabelText(/秘密|Secret|機密|シークレット/), 's3cret')
     await user.click(screen.getByRole('button', { name: /^(写|寫|Write|書き込み)$/ }))
     await waitFor(() => expect(mocks.write).toHaveBeenCalledWith('http://localhost:5099#session', 's3cret'))
+  })
+})
+
+/* 桥调用**不许抛**（失败是值）；真抛了也要按码翻译上报，不能静默中断自检（2026-10-04 复核要求钉住）。 */
+describe('a bridge call that throws', () => {
+  it('reports it as a failure instead of swallowing it', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <BridgePage />
+      </MemoryRouter>,
+    )
+
+    // 自检要宿主就绪才跑；这里点按钮走同一条 `run`（两条路径都补了 catch）
+    vi.mocked(bridge.system.platform).mockRejectedValueOnce(new Error('boom'))
+    await user.click(screen.getByRole('button', { name: /^(平台|Platform|プラットフォーム)$/ }))
+
+    expect(await screen.findByText(/抛了异常/)).toBeInTheDocument()
   })
 })

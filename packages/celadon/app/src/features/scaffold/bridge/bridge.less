@@ -1,4 +1,4 @@
-/* 度量与 `hello.less` **逐字一致**：同一档边距、同一套网格、同一种格子外观。
+/* 度量与 `overview.less` **逐字一致**：同一档边距、同一套网格、同一种格子外观。
    不一样的地方只有"这一页装什么"，不重新发明布局。 */
 .bridge {
   display: flex;
@@ -12,16 +12,9 @@
     display: contents;
   }
 
-  &__actions {
-    margin-block-start: var(--spacing-16);
-  }
 }
 
-/* 分节之间用 hello 里 `.overview__row` 的同一档（padding 上下各 8） */
-.bridge__section {
-  margin-block-start: var(--spacing-16);
-}
-
+/* 分节之间用概览页 `.overview__row` 的同一档（padding 上下各 8） */
 .bridge__row {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
@@ -73,7 +66,7 @@
   color: var(--text-secondary);
 }
 
-/* 工具行：与 hello 的 actions 同一档间距 */
+/* 工具行：与概览页的 actions 同一档间距 */
 .bridge__tools {
   display: flex;
   flex-wrap: wrap;

@@ -115,7 +115,7 @@ export function BridgePage() {
 
       {/* 客户端自述：Web 与桌面导出的字段一致（见 15 §5.2） */}
       <h2 className="bridge__heading">{t('bridge.client')}</h2>
-      {/* 照 `hello` 页的客户端格子：标签小字在上、值走等宽在下（同一套 .bridge__cell） */}
+      {/* 照概览页的客户端格子：标签小字在上、值走等宽在下（同一套 .bridge__cell） */}
       <div className="bridge__row">
         {[
           [t('overview.clientType'), info.client],

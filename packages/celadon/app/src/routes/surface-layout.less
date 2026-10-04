@@ -1,26 +1,9 @@
 /* 高度链上每一环都要是弹性列，下一环的 flex:1 / min-block-size:100% 才有确定高度可算
-   （否则内容面只盖到自己的内容高度，底部露出分界 —— 见 architecture/09-theme.md）。 */
+   （否则内容面只盖到自己的内容高度，底部露出分界 —— 见 architecture/09-theme.md）。
+   侧边那一套（`--split` / `__primary` / `__side`）随侧边面撤掉了（`plan/05-scaffold.md` §6.1）。 */
 .surface {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-block-size: 0;
-
-  &--split {
-    display: grid;
-    grid-template-columns: 1fr minmax(0, 22rem);
-  }
-
-  &__primary {
-    display: flex;
-    flex-direction: column;
-    min-inline-size: 0;
-  }
-
-  &__side {
-    min-inline-size: 0;
-    border-inline-start: var(--border-width) solid var(--border-default);
-    background: var(--background-surface);
-    overflow: auto;
-  }
 }

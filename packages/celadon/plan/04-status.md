@@ -17,7 +17,7 @@
 | `data/request` + `data/hooks` | 出口 `send`（声明 `{method,path,headers?,session?}`）· 四态的**唯一实现** `useRequest` · 声明源（`{key,request}`）与**动作源**（`{key,operation}`）· 失效按 key 前缀 | 用例 |
 | `data/test`·`data/user` | 两个真域：测试模式接口（登录两条端点由载体决定）· 退出（服务端吊销 + 清本机） | 用例 |
 | `routes` | 外壳（主区）+ 首页与四个脚手架页路由（`/` + `/scaffold/*`）| 用例 |
-| 门禁 | 12 个检查器 · 检查器自测 85/85 · 全量单测 304 条 · `lint` / `check` | 本轮验收回合 |
+| 门禁 | 12 个检查器 · 检查器自测 85/85 · 全量单测 307 条 · `lint` / `check` | 本轮验收回合 |
 
 ## 2. 还不能跑的（缺口，按"挡不挡下一步"排）
 

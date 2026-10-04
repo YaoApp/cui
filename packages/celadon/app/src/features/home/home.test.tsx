@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('@/platform/client', () => ({
   client: {
     info: { client: 'desktop', os: 'macos', ua: { browser: { name: 'safari', version: '18' } }, client_id: 'desk-12345678' },
-    host: { ready: true, version: '2.0.0' },
+    host: { ready: true, version: '3.1.4' },
     manifest: { version: '2.0.0' },
   },
   useLocalePreference: () => ({ locale: 'zh-CN', setLocale: vi.fn() }),
@@ -29,7 +29,9 @@ describe('HomePage', () => {
   it('states the current version facts', () => {
     renderPage()
     expect(screen.getByText(/应用版本/)).toBeInTheDocument()
-    expect(screen.getAllByText(/2\.0\.0/).length).toBeGreaterThan(0)
+    // 产品版本与宿主版本取**不同值**：断言才区分得开两个来源
+    expect(screen.getByText(/2\.0\.0/)).toBeInTheDocument()
+    expect(screen.getByText(/3\.1\.4/)).toBeInTheDocument()
     expect(screen.getByText(/桌面/)).toBeInTheDocument()
     expect(screen.getByText(/macos/)).toBeInTheDocument()
   })
