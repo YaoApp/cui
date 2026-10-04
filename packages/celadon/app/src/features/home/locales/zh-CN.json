@@ -1,0 +1,16 @@
+{
+  "home.client": "客户端",
+  "home.clientDesktop": "桌面",
+  "home.clientWeb": "浏览器",
+  "home.host": "宿主",
+  "home.hostNone": "不可用",
+  "home.hostReady": "可用（版本 {{version}}）",
+  "home.language": "语言",
+  "home.namespace": "命名空间",
+  "home.os": "系统",
+  "home.theme": "主题",
+  "home.themeDark": "深色",
+  "home.themeLight": "浅色",
+  "home.title": "版本信息",
+  "home.version": "应用版本"
+}

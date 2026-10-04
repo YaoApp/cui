@@ -1,1 +1,0 @@
-export { WorldPage } from './world'

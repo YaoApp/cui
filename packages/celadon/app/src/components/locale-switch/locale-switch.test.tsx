@@ -1,12 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { Header } from '@/components/header'
 import { LocaleSwitch } from '@/components/locale-switch'
+import { useTranslation } from '@/platform/i18n'
 
 /* 语言切换是一个下拉（四种语言塞不进分段控件）。断言用户看到什么 ——
    语言名都是可见选项，默认"跟随系统"并显示解析出的语言，选中后页面文案跟着换。
    它现在是基础件 Select（Base UI 的 listbox），选项在展开后才渲染，所以先点开再选。 */
+/** 翻译探针：只借它看"刷新"这个词随语言变 —— 页头现在归脚手架，组件测试不许向上引。 */
+function RefreshProbe() {
+  const { t } = useTranslation()
+  return <button type="button">{t('header.refresh')}</button>
+}
+
 describe('LocaleSwitch', () => {
   it('offers following the system plus every discovered language', async () => {
     const user = userEvent.setup()
@@ -36,7 +42,7 @@ describe('LocaleSwitch', () => {
     render(
       <>
         <LocaleSwitch />
-        <Header title="Hello" />
+        <RefreshProbe />
       </>,
     )
 
@@ -51,7 +57,7 @@ describe('LocaleSwitch', () => {
     render(
       <>
         <LocaleSwitch />
-        <Header title="Hello" />
+        <RefreshProbe />
       </>,
     )
     expect(screen.getByRole('button', { name: '刷新' })).toBeInTheDocument()

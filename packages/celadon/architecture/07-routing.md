@@ -29,14 +29,12 @@
 | 是什么 | 放哪 | 例 |
 | --- | --- | --- |
 | **主对象** | 命名空间之下的 path | `/<namespace>/inbox/123` |
-| **侧边** | 命名空间之下的一层前缀 | `/<namespace>/side/inbox/123` —— 同一个对象开在侧边 |
 | **面板里打开的对象** · 选中项 · 环境态 | **query（具名）** | `?sideThread=456` · `?activeTab=files` |
 
-- **主区没有前缀**：就在命名空间之下（`/<namespace>/world/w1`）。
 - **表面是脚手架，不是产品形态**：主区与侧边只是**跑通地址语法用的两个挂载点**；
   产品设计定了之后按设计改。本节约束的是**地址怎么写**（对象在路径、面板在具名 query），
   不承诺界面上真有"侧边"这么一个东西。
-- **侧边是一层前缀**：`/<namespace>/side/<feature>/<object>` —— **侧边只是挂载点**，
+- **对象在路径里**：`/<namespace>/<域>/<对象>`（如 `/<namespace>/scaffold/routing/w1`）。
   里面放哪个 feature 由它后面那段决定。
 
 ## 3. store 与 URL
@@ -84,11 +82,11 @@
 | 放什么 | 文件 |
 | --- | --- |
 | **路由表**：URL → 元素 | `routes.tsx` |
-| **表面与其布局**：主区（命名空间之下）· 侧边（`side/` 前缀）| `surface-layout.tsx` |
+| **外壳**：所有页面住在主区里（侧边能力 2026-10-04 撤掉，没有产品页面时它没有消费者）| `surface-layout.tsx` |
 | **导航项** 与"哪条 URL 是当前"的比较 | `platform/utils/nav.ts` —— 跨层共享的常量与纯函数 |
 
 - **方向**：`routes/` 在依赖方向**最上层** —— 可以 import 组件层与能力层；**反过来不行**（单向）。
-- 跨层共享的词汇与纯函数住 `platform/utils/`（`surfaces.ts` · `nav.ts` · `share-url.ts`）——
+跨层共享的词汇与纯函数住 `platform/utils/`（`share-url.ts`）；脚手架的导航住 `features/scaffold/nav.ts`
   否则 feature 为了拿它们只能反向 import `routes/`。
 - 为什么不把表塞进入口 `main.tsx`：入口只负责"把应用装起来"；URL 契约与表面布局有独立的家，
   表会随 feature 变长，而表面布局不属于任何 feature。
@@ -107,7 +105,7 @@
 ```
 app/src/routes/            路由（只装配，不写业务）
 ├── routes.tsx             路由表：URL → 元素（主区一支 · 侧边一支）
-├── surface-layout.tsx     表面布局：主区（命名空间之下）· 侧边（side 前缀）
+├── surface-layout.tsx     外壳：所有页面住在主区里
 └── surface-layout.less    布局样式
 
 app/src/platform/router/   机制（两端 basename 从这里注入）

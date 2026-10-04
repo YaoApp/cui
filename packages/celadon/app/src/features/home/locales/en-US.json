@@ -1,0 +1,16 @@
+{
+  "home.client": "Client",
+  "home.clientDesktop": "Desktop",
+  "home.clientWeb": "Browser",
+  "home.host": "Host",
+  "home.hostNone": "not available",
+  "home.hostReady": "available (version {{version}})",
+  "home.language": "Language",
+  "home.namespace": "Namespace",
+  "home.os": "System",
+  "home.theme": "Theme",
+  "home.themeDark": "Dark",
+  "home.themeLight": "Light",
+  "home.title": "Version",
+  "home.version": "App version"
+}

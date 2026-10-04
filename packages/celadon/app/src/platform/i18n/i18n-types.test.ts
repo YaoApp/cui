@@ -41,10 +41,10 @@ describe('i18n type generator · pure functions', () => {
 
   it('merges the three locale-pack locations per locale', () => {
     const root = scratch({
-      'app/src/locales/zh-CN.json': JSON.stringify({ 'nav.hello': '你好' }),
+      'app/src/locales/zh-CN.json': JSON.stringify({ 'nav.overview': '你好' }),
       'app/src/features/inbox/locales/zh-CN.json': JSON.stringify({ 'inbox.title': '收件箱' }),
       'app/src/components/page-header/locales/zh-CN.json': JSON.stringify({ 'pageHeader.title': '标题' }),
-      'app/src/locales/en-US.json': JSON.stringify({ 'nav.hello': 'Hello' }),
+      'app/src/locales/en-US.json': JSON.stringify({ 'nav.overview': 'Hello' }),
       'app/src/components/page-header/notes.txt': 'not a locale pack',
     })
 
@@ -52,7 +52,7 @@ describe('i18n type generator · pure functions', () => {
 
     expect(Object.keys(packs).sort()).toEqual(['en-US', 'zh-CN'])
     expect(packs['zh-CN']).toEqual({
-      'nav.hello': '你好',
+      'nav.overview': '你好',
       'inbox.title': '收件箱',
       'pageHeader.title': '标题',
     })
@@ -60,26 +60,26 @@ describe('i18n type generator · pure functions', () => {
 
   it('returns the baseline keys sorted, so the output is stable', () => {
     const root = scratch({
-      'app/src/locales/zh-CN.json': JSON.stringify({ 'nav.world': '世界', 'nav.hello': '你好' }),
+      'app/src/locales/zh-CN.json': JSON.stringify({ 'nav.routing': '世界', 'nav.overview': '你好' }),
     })
 
-    expect(baseKeys(root)).toEqual(['nav.hello', 'nav.world'])
+    expect(baseKeys(root)).toEqual(['nav.overview', 'nav.routing'])
   })
 
   it('refuses to generate when the baseline locale is missing', () => {
-    const root = scratch({ 'app/src/locales/en-US.json': JSON.stringify({ 'nav.hello': 'Hello' }) })
+    const root = scratch({ 'app/src/locales/en-US.json': JSON.stringify({ 'nav.overview': 'Hello' }) })
 
     expect(() => baseKeys(root)).toThrow(new RegExp(BASE))
   })
 
   it('renders the key union and the flat resources i18next reads', () => {
-    const content = renderTypes(['nav.hello', 'world.title'])
+    const content = renderTypes(['nav.overview', 'routing.title'])
 
     expect(content).toContain("export type I18nKey =")
-    expect(content).toContain("  | 'nav.hello'")
-    expect(content).toContain("  | 'world.title'")
-    expect(content).toContain("'nav.hello': string")
-    expect(content).toContain("'world.title': string")
+    expect(content).toContain("  | 'nav.overview'")
+    expect(content).toContain("  | 'routing.title'")
+    expect(content).toContain("'nav.overview': string")
+    expect(content).toContain("'routing.title': string")
     // 平铺 key 与运行时一致：关掉 i18next 的点号分隔
     expect(content).toContain('keySeparator: false')
     expect(content).toContain('nsSeparator: false')
@@ -88,12 +88,12 @@ describe('i18n type generator · pure functions', () => {
 
   it('keeps buildTypes and renderTypes in agreement, and points at the committed path', () => {
     const root = scratch({
-      'app/src/locales/zh-CN.json': JSON.stringify({ 'nav.hello': '你好' }),
+      'app/src/locales/zh-CN.json': JSON.stringify({ 'nav.overview': '你好' }),
     })
 
     const { keys, content } = buildTypes(root)
 
-    expect(keys).toEqual(['nav.hello'])
+    expect(keys).toEqual(['nav.overview'])
     expect(content).toBe(renderTypes(keys))
     expect(typesPath(root).endsWith(join('app', 'src', 'platform', 'i18n', 'i18n-types.d.ts'))).toBe(true)
   })

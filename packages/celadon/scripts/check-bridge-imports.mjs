@@ -24,7 +24,7 @@ try {
 /** 受约束的上层（平台层以下不许出现宿主机制）。 */
 const LAYERS = ['features', 'components', 'routes']
 /** 白名单：桥检查页。 */
-const ALLOW = /^features[\\/]verify[\\/]/
+const ALLOW = /^features[\\/]scaffold[\\/]bridge[\\/]/
 const CODE = /\.(?:ts|tsx)$/
 /** 把注释换成等长空白（保留换行），免得注释里的 import 被当成真的；
     行注释只在 `//` 前面不是引号/冒号/反斜杠时才算注释（保住字符串里的 `https://`）。 */

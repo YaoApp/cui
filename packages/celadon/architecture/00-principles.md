@@ -69,11 +69,11 @@
 
 | 放什么 | 住哪 |
 | --- | --- |
-| 路由表（URL → 元素）· 表面布局（主区在命名空间之下 · 侧边带 `side/` 前缀）| `routes/` |
+| 路由表（URL → 元素）· 外壳（所有页面住在主区里）| `routes/` |
 | 机制：router 实例 · basename 适配器 · 文档标题 | `platform/router/` |
 | 导航项 · "哪条 URL 是当前"的比较 | `platform/utils/nav.ts`（`routes/` 与 feature 都要用）|
 
-地址语法：**对象在路径 · 侧边是一层前缀（`side/`）· 面板与选中项在具名 query**（见 `07-routing.md`）。
+地址语法：**对象在路径 · 其余状态在具名 query**（见 `07-routing.md`）。
 
 ### 2.2 组件层
 
@@ -114,7 +114,7 @@ page-header/                    复合件（内部用 base/button）
 | 项 | 规则 |
 | --- | --- |
 | 位置 | `app/src/stores/`（与 `features/` 并列）|
-| 命名 | **事实名**（`current-team.ts` · `side-panel.ts`）；目录即角色，**不加 `.store` 后缀** |
+| 命名 | **事实名**（`current-team.ts` · `session.ts`）；目录即角色，**不加 `.store` 后缀** |
 | 方向 | 谁都可以 import；**它不许 import 上层** |
 | 词汇 | **不许出现功能的词汇**；值指向对象时用通用条目（**只此一种情形**，形状见 `06-state.md`）|
 

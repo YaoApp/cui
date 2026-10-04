@@ -160,7 +160,7 @@ app/src/
 | `test` | 7 条声明（`login/web` · `login/token` · `createServerKey` · `listUsers` · `listTeams` · `readOtp` · `readCaptcha`）| 引擎**测试模式**才有；开发实例用 |
 | `user` | 1 条声明（`logout`：服务端吊销令牌并清 Cookie）| 真实域刚起头 |
 
-组件侧：`features/data-check`（登录 + 接口调用 + 取数状态）与 `features/verify`（桥的自检页，含服务地址一节）都在用这套。
+组件侧：`features/scaffold/requests`（登录 + 接口调用 + 取数状态）与 `features/scaffold/bridge`（桥的自检页，含服务地址一节）都在用这套。
 
 **还没做的**（按依赖排）：
 

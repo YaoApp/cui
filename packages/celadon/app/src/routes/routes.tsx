@@ -1,26 +1,24 @@
 import { Navigate, type RouteObject } from 'react-router'
-import { DataCheckPage } from '@/features/data-check'
-import { HelloPage } from '@/features/hello'
-import { VerifyPage } from '@/features/verify'
-import { WorldPage } from '@/features/world'
+import { HomePage } from '@/features/home'
+import { BridgePage } from '@/features/scaffold/bridge'
+import { OverviewPage } from '@/features/scaffold/overview'
+import { RequestsPage } from '@/features/scaffold/requests'
+import { RoutingPage } from '@/features/scaffold/routing'
 import { SurfaceLayout } from './surface-layout'
 
-/* 路由表：**只做装配**，业务实现不住这里。
-   应用挂在构建决定的段下（base，见 architecture/04-host-integration.md）；路由路径**在 base 之下**：
-   主区 `/<feature>/<object>` · 侧边 `/side/<feature>/<object>`（见 architecture/07-routing.md）。 */
+/* 路由表：**只做装配**，业务实现不住这里。应用挂在构建决定的段下（base，见 04-host-integration.md）；
+   路径**在 base 之下**：首页在 `/`，脚手架在 `/scaffold/*`（见 architecture/07-routing.md · plan/05-scaffold.md）。 */
 const pageRoutes: RouteObject[] = [
-  { index: true, element: <Navigate to="hello" replace /> },
-  { path: 'hello', element: <HelloPage /> },
-  { path: 'world', element: <WorldPage /> },
-  { path: 'world/:worldId', element: <WorldPage /> },
-  /* 桥的脚手架页：把这轮做出来的宿主能力摆出来点一遍（见 plan/01-bridge-commands.md） */
-  { path: 'verify', element: <VerifyPage /> },
-  /* 数据层的验证页：公开接口真跑、受保护的两条（登录未接）预期失败（见 plan/03-data.md） */
-  { path: 'data-check', element: <DataCheckPage /> },
+  { index: true, element: <HomePage /> },
+  { path: 'scaffold', element: <OverviewPage /> },
+  /* 路由参数的样例：对象在路径里（`/scaffold/routing/<worldId>`） */
+  { path: 'scaffold/routing', element: <RoutingPage /> },
+  { path: 'scaffold/routing/:worldId', element: <RoutingPage /> },
+  { path: 'scaffold/bridge', element: <BridgePage /> },
+  { path: 'scaffold/requests', element: <RequestsPage /> },
 ]
 
 export const routes: RouteObject[] = [
-  { path: '/', element: <SurfaceLayout surface="main" />, children: pageRoutes },
-  { path: '/side', element: <SurfaceLayout surface="side" />, children: pageRoutes },
-  { path: '*', element: <Navigate to="/hello" replace /> },
+  { path: '/', element: <SurfaceLayout />, children: pageRoutes },
+  { path: '*', element: <Navigate to="/" replace /> },
 ]

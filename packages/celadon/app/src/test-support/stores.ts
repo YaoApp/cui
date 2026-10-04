@@ -3,7 +3,7 @@
    但"新增 store 记得去测试支持里加一行"是靠人记住的约定，迟早会漏。
    这里用 Vite 的 import.meta.glob 按**文件名**发现，与它住在哪一层无关：
    两种命名都要认：**功能/组件里的私有 store** 带 `.store` 后缀（`inbox.store.ts` —— 同目录还有别的角色，
-   所以要区分）；**公共的 `stores/` 目录**里每个文件都是 store，**不加后缀**（`side-panel.ts` —— 目录已经说明了角色）。 */
+   所以要区分）；**公共的 `stores/` 目录**里每个文件都是 store，**不加后缀**（目录已经说明了角色；现在 `stores/` 是空的 —— 公共状态等第一个真产品页来了再建）。 */
 
 export type Store = {
   getState: () => unknown

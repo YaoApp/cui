@@ -27,12 +27,12 @@ describe('locale store', () => {
     useLocaleStore.getState().setLocale('en-US')
     expect(useLocaleStore.getState().locale).toBe('en-US')
     expect(i18n.language).toBe('en-US')
-    expect(i18n.t('nav.hello')).toBe('Hello')
+    expect(i18n.t('nav.overview')).toBe('Overview')
     expect(document.documentElement.lang).toBe('en-US')
 
     useLocaleStore.getState().setLocale('zh-CN')
     expect(i18n.language).toBe('zh-CN')
-    expect(i18n.t('nav.hello')).toBe('你好')
+    expect(i18n.t('nav.overview')).toBe('总览')
   })
 
   it('switches to the added languages too', () => {
@@ -42,7 +42,7 @@ describe('locale store', () => {
 
     useLocaleStore.getState().setLocale('ja')
     expect(i18n.language).toBe('ja')
-    expect(i18n.t('nav.world')).toBe('ワールド')
+    expect(i18n.t('nav.routing')).toBe('ルーティング')
   })
 
   it('stops following the system once the user picks a language', () => {

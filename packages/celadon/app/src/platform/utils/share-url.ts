@@ -1,11 +1,9 @@
 import { routerBasename } from '@/platform/router/basename'
-import { SIDE_PREFIX, type Surface } from './surfaces'
 
 export type ShareTarget = {
-  surface?: Surface
-  /** 路径第二段：哪个 feature。 */
+  /** 路径第一段：哪个 feature。 */
   feature: string
-  /** 路径第三段：哪个对象（可选，列表页没有）。 */
+  /** 路径第二段：哪个对象（可选，列表页没有）。 */
   object?: string
 }
 
@@ -17,8 +15,7 @@ export function buildShareUrl(
   params: Record<string, string | undefined> = {},
   origin = '',
 ): string {
-  const prefix = target.surface === 'side' ? SIDE_PREFIX : ''
-  const segments = [prefix, target.feature, target.object].filter(Boolean).join('/')
+  const segments = [target.feature, target.object].filter(Boolean).join('/')
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '') search.set(key, value)

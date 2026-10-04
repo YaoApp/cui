@@ -5,6 +5,18 @@ import 'i18next'
 
 /** 基准语言里存在的全部 key —— `t('…')` 只接受这些。 */
 export type I18nKey =
+  | 'bridge.actions'
+  | 'bridge.appInfo'
+  | 'bridge.back'
+  | 'bridge.bridge'
+  | 'bridge.capabilities'
+  | 'bridge.client'
+  | 'bridge.credential'
+  | 'bridge.credentialKey'
+  | 'bridge.credentialKeyMissing'
+  | 'bridge.credentialKeyNone'
+  | 'bridge.egress'
+  | 'bridge.egressHint'
   | 'bridge.error.bridge.notRunning'
   | 'bridge.error.bridge.rejected'
   | 'bridge.error.bridge.unavailable'
@@ -43,76 +55,62 @@ export type I18nKey =
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
   | 'bridge.error.unauthorized'
+  | 'bridge.filePick'
+  | 'bridge.folderPick'
+  | 'bridge.hintClient'
+  | 'bridge.hostAbilities'
+  | 'bridge.hostHint'
+  | 'bridge.language'
+  | 'bridge.list'
+  | 'bridge.localIps'
+  | 'bridge.notPinged'
+  | 'bridge.openBrowser'
+  | 'bridge.openInClient'
+  | 'bridge.path'
+  | 'bridge.platform'
+  | 'bridge.read'
+  | 'bridge.ready'
+  | 'bridge.remove'
+  | 'bridge.result'
+  | 'bridge.results'
+  | 'bridge.reveal'
+  | 'bridge.secret'
+  | 'bridge.service'
+  | 'bridge.serviceAddress'
+  | 'bridge.serviceAddressHint'
+  | 'bridge.serviceGet'
+  | 'bridge.serviceInfo'
+  | 'bridge.serviceInfoRead'
+  | 'bridge.serviceSet'
+  | 'bridge.themeDark'
+  | 'bridge.themeLight'
+  | 'bridge.themeRead'
+  | 'bridge.title'
+  | 'bridge.transport'
+  | 'bridge.transportProbe'
+  | 'bridge.url'
+  | 'bridge.write'
   | 'client.bootFailed'
   | 'client.bootRetry'
-  | 'dataCheck.authenticatedDenied'
-  | 'dataCheck.authzHint'
-  | 'dataCheck.back'
-  | 'dataCheck.colActions'
-  | 'dataCheck.emailUnverified'
-  | 'dataCheck.emailVerified'
-  | 'dataCheck.expectedFailure'
-  | 'dataCheck.fieldEmail'
-  | 'dataCheck.fieldEmailVerified'
-  | 'dataCheck.fieldId'
-  | 'dataCheck.fieldName'
-  | 'dataCheck.fieldPreferredUsername'
-  | 'dataCheck.fieldRoleId'
-  | 'dataCheck.fieldStatus'
-  | 'dataCheck.fieldTypeId'
-  | 'dataCheck.fieldUserId'
-  | 'dataCheck.listUsers'
-  | 'dataCheck.listUsersHint'
-  | 'dataCheck.locale'
-  | 'dataCheck.loginAction'
-  | 'dataCheck.loginHint'
-  | 'dataCheck.loginResult'
-  | 'dataCheck.loginTest'
-  | 'dataCheck.loginTestHint'
-  | 'dataCheck.noEmailForLogin'
-  | 'dataCheck.ok'
-  | 'dataCheck.protectedGet'
-  | 'dataCheck.protectedPost'
-  | 'dataCheck.publicGet'
-  | 'dataCheck.publicPost'
-  | 'dataCheck.reload'
-  | 'dataCheck.scaffold'
-  | 'dataCheck.scaffoldHint'
-  | 'dataCheck.signOut'
-  | 'dataCheck.signOutDone'
-  | 'dataCheck.stateError'
-  | 'dataCheck.stateIdle'
-  | 'dataCheck.stateLoading'
-  | 'dataCheck.stateOk'
-  | 'dataCheck.states'
-  | 'dataCheck.statesHint'
-  | 'dataCheck.statusActive'
-  | 'dataCheck.theme'
-  | 'dataCheck.title'
   | 'entityPanel.close'
   | 'entityPanel.id'
   | 'entityPanel.kind'
   | 'entityPanel.label'
   | 'header.refresh'
-  | 'hello.brands'
-  | 'hello.brandsOther'
-  | 'hello.browser'
-  | 'hello.client'
-  | 'hello.clientDesktop'
-  | 'hello.clientId'
-  | 'hello.clientType'
-  | 'hello.clientWeb'
-  | 'hello.host'
-  | 'hello.hostNone'
-  | 'hello.hostReady'
-  | 'hello.icons'
-  | 'hello.loading'
-  | 'hello.namespace'
-  | 'hello.os'
-  | 'hello.refreshed'
-  | 'hello.title'
-  | 'hello.trial'
-  | 'hello.version'
+  | 'home.client'
+  | 'home.clientDesktop'
+  | 'home.clientWeb'
+  | 'home.host'
+  | 'home.hostNone'
+  | 'home.hostReady'
+  | 'home.language'
+  | 'home.namespace'
+  | 'home.os'
+  | 'home.theme'
+  | 'home.themeDark'
+  | 'home.themeLight'
+  | 'home.title'
+  | 'home.version'
   | 'localeSwitch.enUS'
   | 'localeSwitch.ja'
   | 'localeSwitch.label'
@@ -120,81 +118,97 @@ export type I18nKey =
   | 'localeSwitch.zhCN'
   | 'localeSwitch.zhTW'
   | 'nav.appLabel'
-  | 'nav.dataCheck'
-  | 'nav.hello'
-  | 'nav.verify'
-  | 'nav.world'
+  | 'nav.bridge'
+  | 'nav.home'
+  | 'nav.overview'
+  | 'nav.requests'
+  | 'nav.routing'
+  | 'overview.brands'
+  | 'overview.brandsOther'
+  | 'overview.browser'
+  | 'overview.client'
+  | 'overview.clientDesktop'
+  | 'overview.clientId'
+  | 'overview.clientType'
+  | 'overview.clientWeb'
+  | 'overview.host'
+  | 'overview.hostNone'
+  | 'overview.hostReady'
+  | 'overview.icons'
+  | 'overview.loading'
+  | 'overview.namespace'
+  | 'overview.os'
+  | 'overview.refreshed'
+  | 'overview.title'
+  | 'overview.trial'
+  | 'overview.version'
+  | 'requests.authenticatedDenied'
+  | 'requests.authzHint'
+  | 'requests.back'
+  | 'requests.colActions'
+  | 'requests.emailUnverified'
+  | 'requests.emailVerified'
+  | 'requests.expectedFailure'
+  | 'requests.fieldEmail'
+  | 'requests.fieldEmailVerified'
+  | 'requests.fieldId'
+  | 'requests.fieldName'
+  | 'requests.fieldPreferredUsername'
+  | 'requests.fieldRoleId'
+  | 'requests.fieldStatus'
+  | 'requests.fieldTypeId'
+  | 'requests.fieldUserId'
+  | 'requests.listUsers'
+  | 'requests.listUsersHint'
+  | 'requests.locale'
+  | 'requests.loginAction'
+  | 'requests.loginHint'
+  | 'requests.loginResult'
+  | 'requests.loginTest'
+  | 'requests.loginTestHint'
+  | 'requests.noEmailForLogin'
+  | 'requests.ok'
+  | 'requests.protectedGet'
+  | 'requests.protectedPost'
+  | 'requests.publicGet'
+  | 'requests.publicPost'
+  | 'requests.reload'
+  | 'requests.scaffold'
+  | 'requests.scaffoldHint'
+  | 'requests.signOut'
+  | 'requests.signOutDone'
+  | 'requests.stateError'
+  | 'requests.stateIdle'
+  | 'requests.stateLoading'
+  | 'requests.stateOk'
+  | 'requests.states'
+  | 'requests.statesHint'
+  | 'requests.statusActive'
+  | 'requests.theme'
+  | 'requests.title'
+  | 'routing.detailLabel'
+  | 'routing.filter'
+  | 'routing.filterPlaceholder'
+  | 'routing.fixture.e1.name'
+  | 'routing.fixture.e2.name'
+  | 'routing.fixture.e3.name'
+  | 'routing.fixture.e4.name'
+  | 'routing.fixture.w1.name'
+  | 'routing.fixture.w1.summary'
+  | 'routing.fixture.w2.name'
+  | 'routing.fixture.w2.summary'
+  | 'routing.fixture.w3.name'
+  | 'routing.fixture.w3.summary'
+  | 'routing.kind.place'
+  | 'routing.kind.role'
+  | 'routing.missing'
+  | 'routing.navLabel'
+  | 'routing.share'
+  | 'routing.title'
   | 'surface.main'
-  | 'surface.side'
   | 'themeToggle.label'
   | 'themeToggle.toDark'
   | 'themeToggle.toLight'
-  | 'verify.actions'
-  | 'verify.appInfo'
-  | 'verify.back'
-  | 'verify.bridge'
-  | 'verify.capabilities'
-  | 'verify.client'
-  | 'verify.credential'
-  | 'verify.credentialKey'
-  | 'verify.credentialKeyMissing'
-  | 'verify.credentialKeyNone'
-  | 'verify.egress'
-  | 'verify.egressHint'
-  | 'verify.filePick'
-  | 'verify.folderPick'
-  | 'verify.hintClient'
-  | 'verify.hostAbilities'
-  | 'verify.hostHint'
-  | 'verify.language'
-  | 'verify.list'
-  | 'verify.localIps'
-  | 'verify.notPinged'
-  | 'verify.openBrowser'
-  | 'verify.openInClient'
-  | 'verify.path'
-  | 'verify.platform'
-  | 'verify.read'
-  | 'verify.ready'
-  | 'verify.remove'
-  | 'verify.result'
-  | 'verify.results'
-  | 'verify.reveal'
-  | 'verify.secret'
-  | 'verify.service'
-  | 'verify.serviceAddress'
-  | 'verify.serviceAddressHint'
-  | 'verify.serviceGet'
-  | 'verify.serviceInfo'
-  | 'verify.serviceInfoRead'
-  | 'verify.serviceSet'
-  | 'verify.themeDark'
-  | 'verify.themeLight'
-  | 'verify.themeRead'
-  | 'verify.title'
-  | 'verify.transport'
-  | 'verify.transportProbe'
-  | 'verify.url'
-  | 'verify.write'
-  | 'world.detailLabel'
-  | 'world.filter'
-  | 'world.filterPlaceholder'
-  | 'world.fixture.e1.name'
-  | 'world.fixture.e2.name'
-  | 'world.fixture.e3.name'
-  | 'world.fixture.e4.name'
-  | 'world.fixture.w1.name'
-  | 'world.fixture.w1.summary'
-  | 'world.fixture.w2.name'
-  | 'world.fixture.w2.summary'
-  | 'world.fixture.w3.name'
-  | 'world.fixture.w3.summary'
-  | 'world.kind.place'
-  | 'world.kind.role'
-  | 'world.missing'
-  | 'world.navLabel'
-  | 'world.share'
-  | 'world.title'
 
 /* 语言包是**平铺 + 点号分组**（`nav.hello`），运行时 keySeparator:false，类型也必须一致，
    否则 `t('nav.hello')` 会被当成嵌套查找。resources 只列 key 不列值：值随语言变，key 不随。 */
@@ -205,6 +219,18 @@ declare module 'i18next' {
     nsSeparator: false
     resources: {
       translation: {
+        'bridge.actions': string
+        'bridge.appInfo': string
+        'bridge.back': string
+        'bridge.bridge': string
+        'bridge.capabilities': string
+        'bridge.client': string
+        'bridge.credential': string
+        'bridge.credentialKey': string
+        'bridge.credentialKeyMissing': string
+        'bridge.credentialKeyNone': string
+        'bridge.egress': string
+        'bridge.egressHint': string
         'bridge.error.bridge.notRunning': string
         'bridge.error.bridge.rejected': string
         'bridge.error.bridge.unavailable': string
@@ -243,76 +269,62 @@ declare module 'i18next' {
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
         'bridge.error.unauthorized': string
+        'bridge.filePick': string
+        'bridge.folderPick': string
+        'bridge.hintClient': string
+        'bridge.hostAbilities': string
+        'bridge.hostHint': string
+        'bridge.language': string
+        'bridge.list': string
+        'bridge.localIps': string
+        'bridge.notPinged': string
+        'bridge.openBrowser': string
+        'bridge.openInClient': string
+        'bridge.path': string
+        'bridge.platform': string
+        'bridge.read': string
+        'bridge.ready': string
+        'bridge.remove': string
+        'bridge.result': string
+        'bridge.results': string
+        'bridge.reveal': string
+        'bridge.secret': string
+        'bridge.service': string
+        'bridge.serviceAddress': string
+        'bridge.serviceAddressHint': string
+        'bridge.serviceGet': string
+        'bridge.serviceInfo': string
+        'bridge.serviceInfoRead': string
+        'bridge.serviceSet': string
+        'bridge.themeDark': string
+        'bridge.themeLight': string
+        'bridge.themeRead': string
+        'bridge.title': string
+        'bridge.transport': string
+        'bridge.transportProbe': string
+        'bridge.url': string
+        'bridge.write': string
         'client.bootFailed': string
         'client.bootRetry': string
-        'dataCheck.authenticatedDenied': string
-        'dataCheck.authzHint': string
-        'dataCheck.back': string
-        'dataCheck.colActions': string
-        'dataCheck.emailUnverified': string
-        'dataCheck.emailVerified': string
-        'dataCheck.expectedFailure': string
-        'dataCheck.fieldEmail': string
-        'dataCheck.fieldEmailVerified': string
-        'dataCheck.fieldId': string
-        'dataCheck.fieldName': string
-        'dataCheck.fieldPreferredUsername': string
-        'dataCheck.fieldRoleId': string
-        'dataCheck.fieldStatus': string
-        'dataCheck.fieldTypeId': string
-        'dataCheck.fieldUserId': string
-        'dataCheck.listUsers': string
-        'dataCheck.listUsersHint': string
-        'dataCheck.locale': string
-        'dataCheck.loginAction': string
-        'dataCheck.loginHint': string
-        'dataCheck.loginResult': string
-        'dataCheck.loginTest': string
-        'dataCheck.loginTestHint': string
-        'dataCheck.noEmailForLogin': string
-        'dataCheck.ok': string
-        'dataCheck.protectedGet': string
-        'dataCheck.protectedPost': string
-        'dataCheck.publicGet': string
-        'dataCheck.publicPost': string
-        'dataCheck.reload': string
-        'dataCheck.scaffold': string
-        'dataCheck.scaffoldHint': string
-        'dataCheck.signOut': string
-        'dataCheck.signOutDone': string
-        'dataCheck.stateError': string
-        'dataCheck.stateIdle': string
-        'dataCheck.stateLoading': string
-        'dataCheck.stateOk': string
-        'dataCheck.states': string
-        'dataCheck.statesHint': string
-        'dataCheck.statusActive': string
-        'dataCheck.theme': string
-        'dataCheck.title': string
         'entityPanel.close': string
         'entityPanel.id': string
         'entityPanel.kind': string
         'entityPanel.label': string
         'header.refresh': string
-        'hello.brands': string
-        'hello.brandsOther': string
-        'hello.browser': string
-        'hello.client': string
-        'hello.clientDesktop': string
-        'hello.clientId': string
-        'hello.clientType': string
-        'hello.clientWeb': string
-        'hello.host': string
-        'hello.hostNone': string
-        'hello.hostReady': string
-        'hello.icons': string
-        'hello.loading': string
-        'hello.namespace': string
-        'hello.os': string
-        'hello.refreshed': string
-        'hello.title': string
-        'hello.trial': string
-        'hello.version': string
+        'home.client': string
+        'home.clientDesktop': string
+        'home.clientWeb': string
+        'home.host': string
+        'home.hostNone': string
+        'home.hostReady': string
+        'home.language': string
+        'home.namespace': string
+        'home.os': string
+        'home.theme': string
+        'home.themeDark': string
+        'home.themeLight': string
+        'home.title': string
+        'home.version': string
         'localeSwitch.enUS': string
         'localeSwitch.ja': string
         'localeSwitch.label': string
@@ -320,81 +332,97 @@ declare module 'i18next' {
         'localeSwitch.zhCN': string
         'localeSwitch.zhTW': string
         'nav.appLabel': string
-        'nav.dataCheck': string
-        'nav.hello': string
-        'nav.verify': string
-        'nav.world': string
+        'nav.bridge': string
+        'nav.home': string
+        'nav.overview': string
+        'nav.requests': string
+        'nav.routing': string
+        'overview.brands': string
+        'overview.brandsOther': string
+        'overview.browser': string
+        'overview.client': string
+        'overview.clientDesktop': string
+        'overview.clientId': string
+        'overview.clientType': string
+        'overview.clientWeb': string
+        'overview.host': string
+        'overview.hostNone': string
+        'overview.hostReady': string
+        'overview.icons': string
+        'overview.loading': string
+        'overview.namespace': string
+        'overview.os': string
+        'overview.refreshed': string
+        'overview.title': string
+        'overview.trial': string
+        'overview.version': string
+        'requests.authenticatedDenied': string
+        'requests.authzHint': string
+        'requests.back': string
+        'requests.colActions': string
+        'requests.emailUnverified': string
+        'requests.emailVerified': string
+        'requests.expectedFailure': string
+        'requests.fieldEmail': string
+        'requests.fieldEmailVerified': string
+        'requests.fieldId': string
+        'requests.fieldName': string
+        'requests.fieldPreferredUsername': string
+        'requests.fieldRoleId': string
+        'requests.fieldStatus': string
+        'requests.fieldTypeId': string
+        'requests.fieldUserId': string
+        'requests.listUsers': string
+        'requests.listUsersHint': string
+        'requests.locale': string
+        'requests.loginAction': string
+        'requests.loginHint': string
+        'requests.loginResult': string
+        'requests.loginTest': string
+        'requests.loginTestHint': string
+        'requests.noEmailForLogin': string
+        'requests.ok': string
+        'requests.protectedGet': string
+        'requests.protectedPost': string
+        'requests.publicGet': string
+        'requests.publicPost': string
+        'requests.reload': string
+        'requests.scaffold': string
+        'requests.scaffoldHint': string
+        'requests.signOut': string
+        'requests.signOutDone': string
+        'requests.stateError': string
+        'requests.stateIdle': string
+        'requests.stateLoading': string
+        'requests.stateOk': string
+        'requests.states': string
+        'requests.statesHint': string
+        'requests.statusActive': string
+        'requests.theme': string
+        'requests.title': string
+        'routing.detailLabel': string
+        'routing.filter': string
+        'routing.filterPlaceholder': string
+        'routing.fixture.e1.name': string
+        'routing.fixture.e2.name': string
+        'routing.fixture.e3.name': string
+        'routing.fixture.e4.name': string
+        'routing.fixture.w1.name': string
+        'routing.fixture.w1.summary': string
+        'routing.fixture.w2.name': string
+        'routing.fixture.w2.summary': string
+        'routing.fixture.w3.name': string
+        'routing.fixture.w3.summary': string
+        'routing.kind.place': string
+        'routing.kind.role': string
+        'routing.missing': string
+        'routing.navLabel': string
+        'routing.share': string
+        'routing.title': string
         'surface.main': string
-        'surface.side': string
         'themeToggle.label': string
         'themeToggle.toDark': string
         'themeToggle.toLight': string
-        'verify.actions': string
-        'verify.appInfo': string
-        'verify.back': string
-        'verify.bridge': string
-        'verify.capabilities': string
-        'verify.client': string
-        'verify.credential': string
-        'verify.credentialKey': string
-        'verify.credentialKeyMissing': string
-        'verify.credentialKeyNone': string
-        'verify.egress': string
-        'verify.egressHint': string
-        'verify.filePick': string
-        'verify.folderPick': string
-        'verify.hintClient': string
-        'verify.hostAbilities': string
-        'verify.hostHint': string
-        'verify.language': string
-        'verify.list': string
-        'verify.localIps': string
-        'verify.notPinged': string
-        'verify.openBrowser': string
-        'verify.openInClient': string
-        'verify.path': string
-        'verify.platform': string
-        'verify.read': string
-        'verify.ready': string
-        'verify.remove': string
-        'verify.result': string
-        'verify.results': string
-        'verify.reveal': string
-        'verify.secret': string
-        'verify.service': string
-        'verify.serviceAddress': string
-        'verify.serviceAddressHint': string
-        'verify.serviceGet': string
-        'verify.serviceInfo': string
-        'verify.serviceInfoRead': string
-        'verify.serviceSet': string
-        'verify.themeDark': string
-        'verify.themeLight': string
-        'verify.themeRead': string
-        'verify.title': string
-        'verify.transport': string
-        'verify.transportProbe': string
-        'verify.url': string
-        'verify.write': string
-        'world.detailLabel': string
-        'world.filter': string
-        'world.filterPlaceholder': string
-        'world.fixture.e1.name': string
-        'world.fixture.e2.name': string
-        'world.fixture.e3.name': string
-        'world.fixture.e4.name': string
-        'world.fixture.w1.name': string
-        'world.fixture.w1.summary': string
-        'world.fixture.w2.name': string
-        'world.fixture.w2.summary': string
-        'world.fixture.w3.name': string
-        'world.fixture.w3.summary': string
-        'world.kind.place': string
-        'world.kind.role': string
-        'world.missing': string
-        'world.navLabel': string
-        'world.share': string
-        'world.title': string
       }
     }
   }

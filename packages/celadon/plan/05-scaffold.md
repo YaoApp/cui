@@ -1,6 +1,6 @@
 # 归档脚手架 + 统一导航与页面样式（2026-10-04）
 
-- **版本**：v1.0（计划 · 未开工）
+- **版本**：v1.1（**已实施** 2026-10-04）
 - **上级**：[`04-status.md`](04-status.md) §5（归档脚手架）
 - **规则**：[`07-routing.md`](../architecture/07-routing.md) · [`03-boundaries.md`](../architecture/03-boundaries.md) · [`13-quality-gates.md`](../architecture/13-quality-gates.md)
 
@@ -92,15 +92,15 @@
 
 ## 7. TODO（一轮做完）
 
-- [ ] 1. 建 `components/page/`；把导航件与 `nav.ts` 搬进 `features/scaffold/`；`surface-layout` 收导航槽位（不提供内容）
-- [ ] 1b. 删掉 `stores/{side-panel,entry}` 与其用例、`world` 的开侧边那段与三条用例、`world-panel.agent.*`、`share-url` 的 `sideEntity`、`surface-layout` 的 `aside` 分支与 `/side` 路由、`surfaces.ts` 的 `side`；清掉三处把它当"公共 store"的注释
-- [ ] 2. 建 `features/home` 占位页（版本信息）；搬目录：`hello → scaffold/overview`、`world/verify/data-check → scaffold/{routing,bridge,requests}`
-- [ ] 3. 删各页的 Header/Nav/返回按钮；`.less` 收编到 `page.less`
-- [ ] 4. 路由表与语言包（四语）改完
-- [ ] 5. 白名单 · 样本 · 用例 · 截图脚本跟着改
-- [ ] 6. `pnpm lint` / `check` / 单测 / 检查器自测（85/85）全绿
-- [ ] 7. macOS 与 Windows 各跑一遍：四个页面都能到、导航只有一份、没有返回按钮，各附一张截图
-- [ ] 8. 回写 `07-routing.md` · `15-platform.md` · `04-status.md`，然后走隔离 Review → 合并推送
+- [x] 1. 建 `components/page/`；把导航件与 `nav.ts` 搬进 `features/scaffold/`；`surface-layout` 收导航槽位（不提供内容）
+- [x] 1b. 删掉 `stores/{side-panel,entry}` 与其用例、`world` 的开侧边那段与三条用例、`world-panel.agent.*`、`share-url` 的 `sideEntity`、`surface-layout` 的 `aside` 分支与 `/side` 路由、`surfaces.ts` 的 `side`；清掉三处把它当"公共 store"的注释
+- [x] 2. 建 `features/home` 占位页（版本信息）；搬目录：`hello → scaffold/overview`、`world/verify/data-check → scaffold/{routing,bridge,requests}`
+- [x] 3. 删各页的 Header/Nav/返回按钮；`.less` 收编到 `page.less`
+- [x] 4. 路由表与语言包（四语）改完
+- [x] 5. 白名单 · 样本 · 用例 · 截图脚本跟着改
+- [x] 6. `pnpm lint` / `check` / 单测 / 检查器自测（85/85）全绿
+- [x] 7. macOS 与 Windows 各跑一遍：四个页面都能到、导航只有一份、没有返回按钮，各附一张截图
+- [x] 8. 回写 `07-routing.md` · `15-platform.md` · `04-status.md`，然后走隔离 Review → 合并推送
 
 ## 8. 验收（能否证）
 
@@ -109,3 +109,15 @@
 3. 四个页面的 `.less` 合计行数下降 ≥ 40%，且 `__body`/`__heading`/`__cell`/`__notice` 只在 `page.less` 里出现。
 4. 真客户端：首页显示出当前版本信息；从首页点导航能到索引页与三个工具页，从任一页能回首页；Windows 与 macOS 各一张截图。
 5. 路由表里旧的四条路径不再存在（`*` 落回 `/`）。
+
+## 9. 实施记录（与计划的差异）
+
+- **语言包合并成一份**：`features/scaffold/locales/*.json`（140 键）—— 嵌套两层的包不在 i18n 的收集路径里
+  （`features/*/locales/*.json` 只扫一层），而"脚手架是一个域"本来就是更干净的读法。全局包里属于脚手架的
+  键（`nav.*` · `header.*` · `verify.*`）一并搬了过去；留下的全局键是 `bridge.*`（失败文案）· `surface.*` ·
+  `themeToggle.*` · `client.*`。
+- **页壳 `ScaffoldPage`**：页头（页面名）+ 导航（五项）+ 正文，各页只传标题与正文；详情页用 `pageTitle`
+  把**页签**标题换成对象名（页头仍是页面名 —— 旧行为如此）。
+- **`aside` 面一并撤掉**：`surface-layout` 只剩主区，`surfaces.ts` 删除（没有产品页面时，空 `aside` 比没有更糟）。
+- **首页加了脚手架入口**：导航住在脚手架页里，而桌面端没有地址栏 —— 首页必须有路过去（真首页来了挪进开发菜单）。
+- **`stores/` 留了一份 README**：说明什么时候该有 store；目录本身空着（第一个真 store 等第一个真域）。

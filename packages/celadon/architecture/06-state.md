@@ -62,7 +62,7 @@ export type XxxState = {
 | 项 | 规则 |
 | --- | --- |
 | 住哪 | `stores/<事实>.ts`（与 `features/` 并列，见 `00-principles.md` §2.3）|
-| 命名 | **事实名**（`session.ts` · `side-panel.ts`），不是域名字；**不加 `.store` 后缀**（目录即角色）|
+| 命名 | **事实名**（`session.ts` · `current-team.ts`），不是域名字；**不加 `.store` 后缀**（目录即角色）|
 | 谁能 import | 谁都可以；**它不许 import 上层**（features / routes / components 都不行）|
 | 地址栏 | 由**路由层**统一绑一次，功能不必知道参数名 |
 

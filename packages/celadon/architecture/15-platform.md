@@ -267,7 +267,7 @@
   `useThemePreference()`（值 + 动作，订阅留在平台层）—— **feature 与 component 不 import 语言 / 主题 store**。
 - **走面孔，不走机制**：问能力用 `client.capabilities`；读写服务地址用 `platform/service` 的
   `readServiceAddress` / `writeServiceAddress`。`features/` · `components/` · `routes/` 直接 import
-  `platform/bridge` 由 `check-bridge-imports` 拦（白名单 `features/verify/**`，它是桥检查页）。
+  `platform/bridge` 由 `check-bridge-imports` 拦（白名单 `features/scaffold/bridge/**`，它是桥检查页）。
 
 ## 6. 客户端底座（Desktop Bridge）
 

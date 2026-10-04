@@ -16,7 +16,7 @@
 | `platform/i18n`·`theme`·`router`·`icons`·`utils` | 语言包按 feature 就近 · 主题写 `data-theme` · 页标题 · **失败码 → 人话**从 i18n 面出 | 门禁 + 用例 |
 | `data/request` + `data/hooks` | 出口 `send`（声明 `{method,path,headers?,session?}`）· 四态的**唯一实现** `useRequest` · 声明源（`{key,request}`）与**动作源**（`{key,operation}`）· 失效按 key 前缀 | 用例 |
 | `data/test`·`data/user` | 两个真域：测试模式接口（登录两条端点由载体决定）· 退出（服务端吊销 + 清本机） | 用例 |
-| `routes` | `main` / `side` 两个 surface + 四个页面路由 | 用例 |
+| `routes` | 外壳（主区）+ 首页与四个脚手架页路由（`/` + `/scaffold/*`）| 用例 |
 | 门禁 | 12 个检查器 · 检查器自测 85/85 · 全量单测 315 条 · `lint` / `check` | 本轮验收回合 |
 
 ## 2. 还不能跑的（缺口，按"挡不挡下一步"排）
@@ -26,7 +26,7 @@
 | **没有真登录 / 注册**（引擎 `/user/entry/*` 那套 OTP · 邀请 · 两步） | 真业务第一步 | `data/user` + `stores/` |
 | **401 续期未接线**（刷新端点没声明、刷新器没注入） | 长会话 | `data/user` + `platform/credential` |
 | **没有真 layout**（现在只有脚手架的 surface + 四页） | 真界面 | 下一轮 |
-| `stores/` 只有 `side-panel` 与 `entry` 雏形 | 跨页状态 | 随业务建 |
+| `stores/` 是空的（公共状态等第一个真产品页来了再建）| 跨页状态 | 随业务建 |
 | SSE / WS 钩子未做 | 实时域 | 随业务建 |
 | `webproxy/`（agent sandbox 域名规则）未做 | 沙箱域 | 随业务建 |
 | 打包 / 更新 / 1.0 迁移 | 交付 | 迁移时 |
@@ -62,7 +62,7 @@
 
 ## 6. TODO
 
-归档脚手架那一轮：见 [`05-scaffold.md`](05-scaffold.md) §7。
+归档脚手架那一轮：**已实施**（2026-10-04），见 [`05-scaffold.md`](05-scaffold.md)。
 
 ## 7. 已定 / 待定
 
@@ -70,7 +70,7 @@
 
 1. 脚手架叫 `scaffold`，物理归拢到 `features/scaffold/`，路由 `/scaffold/*`；应用首页是 `/`。
 2. 导航只渲染一处（`surface-layout`），页面不再自造导航，返回按钮删除。
-3. 顺序：先归档脚手架（[`05-scaffold.md`](05-scaffold.md)）→ 再做**登录 / 注册**（第一个真域）→ 再真 layout。
+3. 顺序：归档脚手架（**已完成** 2026-10-04）→ 再做**登录 / 注册**（第一个真域）→ 再真 layout。
 
 **待定**：登录 / 注册那轮的域边界（`user/entry` 与 `stores/` 的分工）—— 等开工时在 `03-data.md` 里定。
 
