@@ -73,7 +73,9 @@ export function DataCheckPage() {
     else if (state.status === 'error') report(label, { ok: false, ...state.failure }, expected)
   }
 
-  /* ① 服务信息：**手动** —— 挂载不跑，按钮点了才 `reload()`（`manual: true`）。 */
+  /* ① 服务信息：**手动** —— 挂载不跑，按钮点了才 `reload()`（`manual: true`）。
+     单独留这一节是**分诊**：`/.well-known/yao` 不通时接口一定也不通（拿不到 `openapi` 前缀）。
+     应用不依赖这一节 —— `send()` 第一次需要时自己读（`platform/service`，惰性 + 内存缓存）。 */
   const service = useRequest<ServiceInfo>(() => loadServiceInfo(10_000), [], { manual: true })
   useEffect(() => reportState('service.info', service.state), [service.state])
 
