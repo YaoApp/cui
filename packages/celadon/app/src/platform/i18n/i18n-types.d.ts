@@ -34,6 +34,7 @@ export type I18nKey =
   | 'dataCheck.authenticatedDenied'
   | 'dataCheck.authzHint'
   | 'dataCheck.back'
+  | 'dataCheck.colActions'
   | 'dataCheck.credentials'
   | 'dataCheck.emailUnverified'
   | 'dataCheck.emailVerified'
@@ -57,6 +58,7 @@ export type I18nKey =
   | 'dataCheck.loginTokenResult'
   | 'dataCheck.loginWeb'
   | 'dataCheck.loginWebResult'
+  | 'dataCheck.noEmailForLogin'
   | 'dataCheck.ok'
   | 'dataCheck.protectedGet'
   | 'dataCheck.protectedPost'
@@ -211,6 +213,7 @@ declare module 'i18next' {
         'dataCheck.authenticatedDenied': string
         'dataCheck.authzHint': string
         'dataCheck.back': string
+        'dataCheck.colActions': string
         'dataCheck.credentials': string
         'dataCheck.emailUnverified': string
         'dataCheck.emailVerified': string
@@ -234,6 +237,7 @@ declare module 'i18next' {
         'dataCheck.loginTokenResult': string
         'dataCheck.loginWeb': string
         'dataCheck.loginWebResult': string
+        'dataCheck.noEmailForLogin': string
         'dataCheck.ok': string
         'dataCheck.protectedGet': string
         'dataCheck.protectedPost': string

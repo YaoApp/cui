@@ -156,23 +156,49 @@ export function DataCheckPage() {
         <p className="data-check__notice" role="status">{listUsersCall.state.failure.text}</p>
       ) : null}
       {users.length > 0 ? (
-        <ul className="data-check__users">
-          {users.map((user) => (
-            <li className="data-check__user" key={user.id}>
-              <Cell label={t('dataCheck.fieldId')} value={user.id} />
-              <Cell label={t('dataCheck.fieldUserId')} value={user.user_id} />
-              {user.email ? <Cell label={t('dataCheck.fieldEmail')} value={user.email} /> : null}
-              {user.name ? <Cell label={t('dataCheck.fieldName')} value={user.name} /> : null}
-              {user.preferred_username ? <Cell label={t('dataCheck.fieldPreferredUsername')} value={user.preferred_username} /> : null}
-              {user.status ? <Cell label={t('dataCheck.fieldStatus')} value={user.status} /> : null}
-              {user.role_id ? <Cell label={t('dataCheck.fieldRoleId')} value={user.role_id} /> : null}
-              {user.type_id ? <Cell label={t('dataCheck.fieldTypeId')} value={user.type_id} /> : null}
-              <Cell label={t('dataCheck.fieldEmailVerified')} value={user.email_verified ? t('dataCheck.emailVerified') : t('dataCheck.emailUnverified')} />
-              <Button onClick={() => signIn(user, 'web')} disabled={loginWebCall.state.status === 'loading'}>{t('dataCheck.loginWeb')}</Button>{' '}
-              <Button onClick={() => signIn(user, 'token')} disabled={loginTokenCall.state.status === 'loading'}>{t('dataCheck.loginToken')}</Button>
-            </li>
-          ))}
-        </ul>
+        <div className="data-check__tablewrap">
+          <table className="data-check__users">
+            <thead>
+              <tr>
+                <th>{t('dataCheck.fieldId')}</th>
+                <th>{t('dataCheck.fieldUserId')}</th>
+                <th>{t('dataCheck.fieldEmail')}</th>
+                <th>{t('dataCheck.fieldName')}</th>
+                <th>{t('dataCheck.fieldPreferredUsername')}</th>
+                <th>{t('dataCheck.fieldStatus')}</th>
+                <th>{t('dataCheck.fieldRoleId')}</th>
+                <th>{t('dataCheck.fieldTypeId')}</th>
+                <th>{t('dataCheck.fieldEmailVerified')}</th>
+                <th>{t('dataCheck.colActions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td>{user.user_id}</td>
+                  <td>{user.email ?? ''}</td>
+                  <td>{user.name ?? ''}</td>
+                  <td>{user.preferred_username ?? ''}</td>
+                  <td>{user.status ?? ''}</td>
+                  <td>{user.role_id ?? ''}</td>
+                  <td>{user.type_id ?? ''}</td>
+                  <td>{user.email_verified ? t('dataCheck.emailVerified') : t('dataCheck.emailUnverified')}</td>
+                  <td className="data-check__actions">
+                    {user.email ? (
+                      <>
+                        <Button onClick={() => signIn(user, 'web')} disabled={loginWebCall.state.status === 'loading'}>{t('dataCheck.loginWeb')}</Button>{' '}
+                        <Button onClick={() => signIn(user, 'token')} disabled={loginTokenCall.state.status === 'loading'}>{t('dataCheck.loginToken')}</Button>
+                      </>
+                    ) : (
+                      <span className="data-check__label">{t('dataCheck.noEmailForLogin')}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : null}
       <p>{t('dataCheck.loginHint')}</p>
       {/* 凭据**只上长度与存在性**，值永不上屏 */}

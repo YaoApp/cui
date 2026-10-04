@@ -72,6 +72,11 @@
   color: var(--text-primary);
 }
 
+.data-check__tablewrap {
+  overflow-x: auto;
+}
+
+
 .data-check__label {
   font-size: var(--font-size-label);
   color: var(--text-tertiary);
@@ -122,17 +127,8 @@
   list-style: none;
 }
 
-.data-check__user {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-8);
-}
 
 /* 字段格保持自身宽度、整体换行，不被挤成一条竖排 */
-.data-check__user > .data-check__cell {
-  flex: 0 0 auto;
-}
 
 .data-check__user code {
   font-family: var(--font-family-monospace);
