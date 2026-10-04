@@ -67,6 +67,8 @@ export type I18nKey =
   | 'dataCheck.reload'
   | 'dataCheck.scaffold'
   | 'dataCheck.scaffoldHint'
+  | 'dataCheck.signOut'
+  | 'dataCheck.signOutDone'
   | 'dataCheck.stateError'
   | 'dataCheck.stateIdle'
   | 'dataCheck.stateLoading'
@@ -246,6 +248,8 @@ declare module 'i18next' {
         'dataCheck.reload': string
         'dataCheck.scaffold': string
         'dataCheck.scaffoldHint': string
+        'dataCheck.signOut': string
+        'dataCheck.signOutDone': string
         'dataCheck.stateError': string
         'dataCheck.stateIdle': string
         'dataCheck.stateLoading': string

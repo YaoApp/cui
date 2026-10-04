@@ -33,6 +33,7 @@ import {
   publicPostQuery,
 } from '@/data/helloworld'
 import { listUsersQuery, loginTokenQuery, loginWebQuery, type TestUser } from '@/data/test'
+import { logoutQuery } from '@/data/user'
 
 /** POST 的请求体（引擎会原样回显在 `POST_PAYLOAD` 里）—— 技术样本，不走语言包。 */
 const POST_BODY = { from: 'data-check' }
@@ -80,6 +81,7 @@ export function DataCheckPage() {
   const listUsersCall = useRequest(listUsersQuery(USER_PAGE), { manual: true })
   const loginWebCall = useRequest(loginWebQuery(), { manual: true })
   const loginTokenCall = useRequest(loginTokenQuery(), { manual: true })
+  const logoutCall = useRequest(logoutQuery(), { manual: true })
   /** 最近一次做登录的邮箱 —— 只用来标注结果是哪个账号的，不是凭据。 */
   const [loginEmail, setLoginEmail] = useState('')
 
@@ -201,6 +203,18 @@ export function DataCheckPage() {
         </div>
       ) : null}
       <p>{t('dataCheck.loginHint')}</p>
+      {/* 退出：Cookie 是 HttpOnly（JS 碰不到）→ 只能由服务端吊销并清掉（`POST /user/logout`） */}
+      {webLogin || tokenLogin ? (
+        <p className="data-check__tools">
+          <Button onClick={() => void logoutCall.run()} disabled={logoutCall.state.status === 'loading'}>{t('dataCheck.signOut')}</Button>
+        </p>
+      ) : null}
+      {logoutCall.state.status === 'ok' ? (
+        <p className="data-check__value" role="status">{t('dataCheck.signOutDone', { message: logoutCall.state.value.message })}</p>
+      ) : null}
+      {logoutCall.state.status === 'error' ? (
+        <p className="data-check__notice" role="status">{logoutCall.state.failure.text}</p>
+      ) : null}
       {/* 凭据**只上长度与存在性**，值永不上屏 */}
       {webLogin ? (
         <p className="data-check__value" role="status">

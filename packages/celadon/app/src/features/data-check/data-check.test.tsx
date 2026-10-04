@@ -302,7 +302,34 @@ describe('the data check page', () => {
     expect(cellText('受保护 GET')).not.toContain('预期失败')
   })
 
-  it('marks a protected cell as authenticated but not authorized when the engine policy denies it', async () => {
+  it('signs out through the engine, since only the server can clear an HttpOnly cookie', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) return json(LOGIN)
+      if (target.includes('/user/logout')) return json({ message: 'Logout successful' })
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+    expect(screen.queryByRole('button', { name: '退出登录' })).toBeNull() // 未登录时不给退出按钮
+
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '退出登录' }))
+    expect(await screen.findByText(/已退出/)).toBeInTheDocument()
+    const sent = vi.mocked(transportFetch).mock.calls.find(([url]) => String(url).includes('/user/logout'))
+    expect(sent?.[1]?.method).toBe('POST')
+    expect(document.body.textContent).not.toContain(LOGIN.access_token) // 凭据值永不上屏
+  })
+
+    it('marks a protected cell as authenticated but not authorized when the engine policy denies it', async () => {
     vi.mocked(transportFetch).mockImplementation(async (url) => {
       const target = String(url)
       if (target.includes('/.well-known/yao')) return json(SERVICE)

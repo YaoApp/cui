@@ -35,6 +35,8 @@
   "dataCheck.reload": "Run again",
   "dataCheck.scaffold": "API calls",
   "dataCheck.scaffoldHint": "The two public calls run for real. The protected pair can be pressed too, but sign-in is not wired yet, so failing is expected. Every request carries the current language and theme.",
+  "dataCheck.signOut": "Sign out",
+  "dataCheck.signOutDone": "Signed out ({{message}})",
   "dataCheck.stateError": "Failed",
   "dataCheck.stateIdle": "Not started",
   "dataCheck.stateLoading": "In progress",

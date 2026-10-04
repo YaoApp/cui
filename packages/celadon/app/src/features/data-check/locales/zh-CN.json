@@ -35,6 +35,8 @@
   "dataCheck.reload": "重新执行",
   "dataCheck.scaffold": "接口调用",
   "dataCheck.scaffoldHint": "公开的两条可以真跑；受保护的两条也能点，但还没接登录，失败是预期的。每次请求都会自动带上当前的语言与主题。",
+  "dataCheck.signOut": "退出登录",
+  "dataCheck.signOutDone": "已退出（{{message}}）",
   "dataCheck.stateError": "失败",
   "dataCheck.stateIdle": "空闲",
   "dataCheck.stateLoading": "加载中",
