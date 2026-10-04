@@ -15,6 +15,7 @@
   "bridge.error.reveal.failed": "定位檔案失敗",
   "bridge.error.reveal.pathNotFound": "找不到這個路徑：{{path}}",
   "bridge.error.service.malformed": "服務資訊不是約定的形狀",
+  "bridge.error.service.notReady": "還沒讀到服務資訊（位址還沒確定）",
   "bridge.error.service.unavailable": "連不上服務（回了 {{status}}）",
   "bridge.error.theme.expectedLightOrDark": "主題只支援淺色或深色，收到的是「{{value}}」",
   "bridge.error.theme.readFailed": "讀不到系統主題",

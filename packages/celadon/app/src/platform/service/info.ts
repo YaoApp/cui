@@ -77,3 +77,13 @@ export function serviceInfo(): ServiceInfo | undefined {
 export function resetServiceInfo(): void {
   cached = undefined
 }
+
+/** **接口地址**：基址 + `well-known` 给的 `openapi` 前缀 + 路径。
+ *
+ *  **没有 well-known 就不猜**（返回 `undefined`）：兜一个 `/v1` 只会把"还没读服务信息"这件事藏起来，
+ *  最难查的就是这种。调用方拿到 `undefined` 要**明确报错**，别自己编前缀。 */
+export function apiUrl(path: string): string | undefined {
+  const openapi = serviceInfo()?.openapi
+  if (!openapi) return undefined
+  return serviceUrl(`${openapi}${path.startsWith('/') ? path : `/${path}`}`)
+}

@@ -15,6 +15,7 @@
   "bridge.error.reveal.failed": "ファイルを表示できない",
   "bridge.error.reveal.pathNotFound": "そのパスが見つからない：{{path}}",
   "bridge.error.service.malformed": "サービス情報の形が約束と違う",
+  "bridge.error.service.notReady": "サービス情報をまだ読んでいないため、アドレスが未確定",
   "bridge.error.service.unavailable": "サービスが {{status}} を返した",
   "bridge.error.theme.expectedLightOrDark": "テーマは light か dark のみ（受信値 \"{{value}}\"）",
   "bridge.error.theme.readFailed": "システムテーマを読めない",

@@ -5,7 +5,7 @@
  */
 
 import type { OutboundInputs } from '@/platform/client/context'
-import { serviceInfo, serviceUrl } from '@/platform/service'
+import { apiUrl } from '@/platform/service'
 import { transportFetch } from '@/platform/transport/fetch'
 import type { Result } from '../types'
 import { failure as buildFailure } from '../utils/failure'
@@ -41,9 +41,12 @@ function withQuery(url: string, params: Record<string, string | number | boolean
 /** 一次普通请求。**失败是值**，不抛异常。 */
 export async function send<T>(call: Call, inputs: SendInputs): Promise<Result<T>> {
   const ctx: Context = context(inputs.outbound)
-  // 引擎的接口都在 `well-known` 给的 `openapi` 前缀下（没读到就先按 `/v1` —— 见 `plan/03-data.md` 的 serverUrl 缺口）
-  const openapi = serviceInfo()?.openapi ?? '/v1'
-  const url = withQuery(serviceUrl(`${openapi}${call.path}`), { ...contextQuery(ctx), ...(inputs.query ?? {}) })
+  // 地址由**平台层**给（基址 + well-known 的 openapi 前缀）；**读不到服务信息就直接报错**，不兜前缀
+  const address = apiUrl(call.path)
+  if (!address) {
+    return { ok: false, ...buildFailure(0, undefined, 'service.not_ready') }
+  }
+  const url = withQuery(address, { ...contextQuery(ctx), ...(inputs.query ?? {}) })
 
   const response = await transportFetch(url, {
     method: call.method,

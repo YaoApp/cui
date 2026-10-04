@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+let address: string | undefined = '/v1'
 vi.mock('@/platform/service', () => ({
   serviceBase: () => '',
-  serviceUrl: (path: string) => path,
-  serviceInfo: () => ({ name: 't', version: '1', openapi: '/v1' }),
+  apiUrl: (path: string) => (address === undefined ? undefined : `${address}${path}`),
 }))
 
 import { send } from './send'
@@ -41,6 +41,13 @@ describe('send', () => {
     answer({ error: 'invalid_token', error_description: 'token expired' }, 401)
     const result = await send(call, { outbound })
     expect(result).toMatchObject({ ok: false, code: 'invalid_token', rawMessage: 'token expired' })
+  })
+
+  it('refuses to guess the address when the service information has not been read', async () => {
+    address = undefined                       // 模拟"还没读到 well-known"
+    const result = await send(call, { outbound })
+    expect(result).toMatchObject({ ok: false, code: 'service.not_ready' })
+    address = '/v1'
   })
 
   it('passes a network failure straight through', async () => {
