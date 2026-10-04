@@ -1,1 +1,1 @@
-export { useRequest, type RequestState } from './use-request'
+export { useRequest, type RequestOptions, type RequestState } from './use-request'
