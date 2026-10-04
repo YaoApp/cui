@@ -96,6 +96,38 @@ describe('the data check page', () => {
     expect(JSON.parse(String(init?.body))).toEqual({ from: 'data-check' })
   })
 
+  it('keeps the button disabled while its request is in flight, then re-enables it', async () => {
+    // 可控的**挂起 promise**：请求发出去后停在这里，直到用例放行 —— 不靠真实延迟
+    let release = () => {}
+    const gate = new Promise<void>((resolve) => { release = resolve })
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/helloworld/public')) {
+        await gate
+        return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+      }
+      return json({ error: 'unauthorized', error_description: 'login is not wired' }, 401)
+    })
+
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+    const before = publicCalls().length
+    const button = screen.getByRole('button', { name: /^(公开 GET|公開 GET|Public GET)$/ })
+    await expect(button).toBeEnabled()
+
+    await user.click(button)
+
+    // 请求已在飞（这次调用真的发出去了）：按钮必须先禁用，防止重复提交
+    await waitFor(() => expect(publicCalls().length).toBe(before + 1))
+    expect(button).toBeDisabled()
+
+    // 落定后恢复可点
+    release()
+    await waitFor(() => expect(button).toBeEnabled())
+  })
+
   it('lets the protected calls run and marks the result as an expected failure', async () => {
     const user = userEvent.setup()
     renderPage()
