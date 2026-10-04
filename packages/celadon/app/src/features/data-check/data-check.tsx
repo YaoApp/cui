@@ -15,7 +15,7 @@ import './data-check.less'
  * **登录成功 ≠ 被允许**：受保护接口还要过引擎的授权策略 —— 带着凭据仍回 403 时，
  * 标注换成"已认证但未被授权"，（引擎原文不上屏）。 */
 
-import { useState, type ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
@@ -34,6 +34,7 @@ import {
 } from '@/data/helloworld'
 import { listUsersQuery, loginTokenQuery, loginWebQuery, type TestUser } from '@/data/test'
 import { logoutQuery } from '@/data/user'
+import { signIn as sessionSignIn, signOut as sessionSignOut } from '@/platform/credential'
 
 /** POST 的请求体（引擎会原样回显在 `POST_PAYLOAD` 里）—— 技术样本，不走语言包。 */
 const POST_BODY = { from: 'data-check' }
@@ -102,6 +103,16 @@ export function DataCheckPage() {
     listUsersCall.state.status === 'ok' ? listUsersCall.state.value.data.slice(0, USER_SAMPLE_SIZE) : []
   const webLogin = loginWebCall.state.status === 'ok' ? loginWebCall.state.value : null
   const tokenLogin = loginTokenCall.state.status === 'ok' ? loginTokenCall.state.value : null
+
+  /* 令牌交给**平台**：桌面写进 OS 凭据库、出口之后自动带上；Web 是空操作（Cookie 由服务端下发）。
+     业务层只说"登录成功了" —— 不判宿主。 */
+  useEffect(() => {
+    if (tokenLogin?.access_token) void sessionSignIn(tokenLogin.access_token)
+  }, [tokenLogin?.access_token])
+  /* 服务端吊销成功后再清本地那把，顺序不能反 */
+  useEffect(() => {
+    if (logoutCall.state.status === 'ok') void sessionSignOut()
+  }, [logoutCall.state.status])
 
   /** 登录态：取到过凭据 **且没退出成功** —— 退出由服务端吊销并清 Cookie，退完就不再是登录态。 */
   const signedIn = (webLogin !== null || tokenLogin !== null) && logoutCall.state.status !== 'ok'

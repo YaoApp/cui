@@ -165,7 +165,11 @@ app/src/
 **还没做的**（按依赖排）：
 
 1. **订阅三条线**：`transport/{stream,socket}.ts` → `data/request/{sse,socket}.ts` → `data/hooks/{use-sse,use-socket}.ts`（§0.6；`channels/` 四个形状同样没建）。
-2. **登录 / 会话**：把令牌写进 OS 凭据库、出口按服务 origin 取出来附上（`Authorization`）、401 续期重放、"忘记这台服务"。**键与规矩已就位**（`platform/credential/scope.ts`）——缺的是调用它的登录流程。
+2. **登录 / 会话**（2026-10-04 起）：**已落地** —— 令牌写进载体（桌面 OS 凭据库 / Web 空操作）·
+   出口按 origin 取出来附上 `Authorization`（有就带、不覆盖显式给的）· 401 **续期重放一次**（刷新能力注入）·
+   "忘记这台服务"删该 origin 下所有用途的凭据。数据检查页登录成功后把令牌交给会话，入口启动读一次。
+   **还差**：引擎真登录（`/user/entry/*` 那套 OTP/邀请/两步）与刷新端点的声明 —— 现在用的是引擎**测试模式**的
+   `login/token`；另：会话的**公共 store**（`stores/session.ts`，`06 §2.3`）等真登录进来再加。
 3. **其余 12 个业务域**：setting · agent · workspace · llm · mcp · sandbox · computer · nodes · app · captcha · file（§1.1 的清单照旧；`kb`/`job`/`trace`/`agent/robot` 已弃用不迁）。
 4. **门禁**：`features/`/`components/`/`routes/` 里"零 fetch / EventSource / new WebSocket"这条**还没有检查器**（§3 第一条仍未勾）——`check-import-boundaries.mjs` 只管依赖方向。
 

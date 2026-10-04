@@ -4,6 +4,7 @@
    只有本文件发请求；别处一律不直接调 `fetch`。 */
 
 import { hasHost } from '../bridge/invoke'
+import { refreshSession, sessionAuthorization } from '../credential/session'
 import { networkFailure, statusFailure, withTimeout } from './errors'
 import { fail, type BridgeFailure } from '../bridge/result'
 import { ok, type BridgeResult } from '../bridge/result'
@@ -55,8 +56,21 @@ export async function transportFetch(
   } catch (error) {
     return networkFailure(error, url)
   }
-  const outcome = await withTimeout((signal) => call(input, { ...rest, signal }), url, timeoutMs)
-  return outcome.ok ? ok(outcome.value) : outcome.failure
+  // **凭据"有就带上，不覆盖显式给的"**（`15 §4`）：Web 没有 = 不带；桌面 = 宿主拿到的
+  const withCredential = (init: RequestOptions): RequestOptions => {
+    const authorization = sessionAuthorization()
+    if (!authorization) return init
+    const merged = new Headers(init.headers)
+    if (!merged.has('authorization')) merged.set('Authorization', authorization)
+    return { ...init, headers: merged }
+  }
+  const outcome = await withTimeout((signal) => call(input, { ...withCredential(rest), signal }), url, timeoutMs)
+  if (!outcome.ok || outcome.value.status !== 401) return outcome.ok ? ok(outcome.value) : outcome.failure
+  // 401：**续期一次、重放一次**（刷新本身由数据层声明，出口只认注入的那一支；不循环）
+  const refreshed = await refreshSession()
+  if (!refreshed.ok || !refreshed.value) return ok(outcome.value)
+  const retried = await withTimeout((signal) => call(input, { ...withCredential(rest), signal }), url, timeoutMs)
+  return retried.ok ? ok(retried.value) : retried.failure
 }
 
 /** 同上，但**非 2xx 也算失败**（多数业务调用要这个）。 */

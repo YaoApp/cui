@@ -6,6 +6,8 @@ import '@/platform/i18n'
 /* 语言偏好（默认跟随系统）的副作用：把解析后的语言同步到 i18n 与 `<html lang>`。
    放在入口 import，任何界面表面（不只是渲染了语言切换的那页）都从第一帧起就是对的。 */
 import '@/platform/i18n/locale.store'
+// 启动读一次会话凭据（桌面写进 OS 凭据库、Web 是空操作）：出口之后的请求才带得上
+import { loadSession } from '@/platform/credential'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
@@ -34,3 +36,5 @@ createRoot(document.getElementById('app')!).render(
 
 /* 开发期自检：正文色与页面底色的对比度（见 architecture/09-theme.md §6）。生产不跑。 */
 assertThemeContrast()
+
+void loadSession()

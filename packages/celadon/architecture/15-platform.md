@@ -153,6 +153,14 @@
 - **不许静默退回明文**：系统凭据库不可用时，明确失败并提示，或用限权文件并告知。
 - **保护范围是"密文被拷走"**：以该用户身份执行代码、或 dump 进程内存，仍能拿到令牌。
 
+### 4.6 会话凭据的持有（`credential/session.ts`）
+
+- **登录成功后写进载体**：桌面写 OS 凭据库；Web 是空操作（Cookie 由服务端下发，前端不接触凭据）。
+  键按服务 origin 分账，用途 `session`（`<origin>#session`，见 `scope.ts`）。
+- **出口要同步拿**：这里留一份**内存镜像**（启动读一次，写时同步更新），`sessionAuthorization()` 直接给值。
+- **忘记这台服务**：删掉该 origin 下**所有用途**的凭据（不是只删 `session`）；删之前由调用方先吊销服务端会话。
+- **平台不认 URL**：刷新怎么发由数据层声明，刷新能力由应用启动时注入（`setSessionRefresher`）。
+
 ## 5. 客户端（web / desktop）
 
 **落地**：`app/src/platform/client/`（`manifest.ts` · `ua.ts` · `client-id.ts` · `capabilities.ts` · `info.ts` · `context.ts`）。
