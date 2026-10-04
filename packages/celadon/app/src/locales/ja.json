@@ -12,7 +12,6 @@
   "bridge.error.openBrowser.schemeNotAllowed": "http(s) のみ開ける：{{url}}",
   "bridge.error.pick.failed": "選択ダイアログを開けない",
   "bridge.error.platform.unsupported": "そのプラットフォームは未対応（現状 macOS と Windows のみ）",
-  "bridge.error.request.manualAuthMissing": "このインターフェースは呼び出し側が資格情報を持つ前提だが、今回は無い",
   "bridge.error.reveal.failed": "ファイルを表示できない",
   "bridge.error.reveal.pathNotFound": "そのパスが見つからない：{{path}}",
   "bridge.error.service.malformed": "サービス情報の形が約束と違う",

@@ -18,7 +18,6 @@ export type I18nKey =
   | 'bridge.error.openBrowser.schemeNotAllowed'
   | 'bridge.error.pick.failed'
   | 'bridge.error.platform.unsupported'
-  | 'bridge.error.request.manualAuthMissing'
   | 'bridge.error.reveal.failed'
   | 'bridge.error.reveal.pathNotFound'
   | 'bridge.error.service.malformed'
@@ -153,7 +152,6 @@ declare module 'i18next' {
         'bridge.error.openBrowser.schemeNotAllowed': string
         'bridge.error.pick.failed': string
         'bridge.error.platform.unsupported': string
-        'bridge.error.request.manualAuthMissing': string
         'bridge.error.reveal.failed': string
         'bridge.error.reveal.pathNotFound': string
         'bridge.error.service.malformed': string

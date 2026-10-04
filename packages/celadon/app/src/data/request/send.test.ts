@@ -17,7 +17,10 @@ function answer(body: unknown, status = 200) {
   return fetchMock
 }
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  address = '/v1'
+})
 
 describe('send', () => {
   it('composes the url from the well-known prefix, the context and the domain query', async () => {
@@ -44,34 +47,24 @@ describe('send', () => {
   })
 
   it('refuses to guess the address when the service information has not been read', async () => {
-    address = undefined                       // 模拟"还没读到 well-known"
+    address = undefined
     const result = await send(request, { outbound })
     expect(result).toMatchObject({ ok: false, code: 'service.not_ready' })
-    address = '/v1'
   })
 
-  it('lets the caller override a header, which the sign-in step needs', async () => {
+  it('lets the caller set a header explicitly, which the sign-in step needs', async () => {
     const fetchMock = answer({ ok: true })
     await send(request, { outbound, headers: { Authorization: 'Bearer temp-one-shot' } })
-    expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({ Authorization: 'Bearer temp-one-shot', 'X-Yao-Accept': 'cui-web' })
-  })
-
-  it('does not carry credentials on a public interface', async () => {
-    const fetchMock = answer({ ok: true })
-    await send({ ...request, auth: 'none' }, { outbound })
-    expect(fetchMock.mock.calls[0][1]?.credentials).toBe('omit')
-    const protectedCall = await send({ ...request, auth: 'required' }, { outbound })
-    expect(protectedCall.ok).toBe(true)
-    expect(fetchMock.mock.calls[1][1]?.credentials).toBeUndefined() // 受保护的：由浏览器/宿主自己带
-  })
-
-  it('refuses an manual-auth request that forgot to carry one', async () => {
-    const result = await send({ ...request, auth: 'manual' }, { outbound })
-    expect(result).toMatchObject({ ok: false, code: 'request.manual_auth_missing' })
+    expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({
+      Authorization: 'Bearer temp-one-shot',
+      'X-Yao-Accept': 'cui-web',
+    })
   })
 
   it('passes a network failure straight through', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline') }))
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      throw new Error('offline')
+    }))
     const result = await send(request, { outbound })
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.code).toMatch(/^transport\./)
