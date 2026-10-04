@@ -12,31 +12,46 @@ import { failure as buildFailure } from '../utils/failure'
 import { unwrap } from '../utils/unwrap'
 import { context, headers as contextHeaders, query as contextQuery, type Context } from './context'
 
-/** 一个接口的**声明**：只写方法与路径（进出类型在调用方给的泛型上，见 `data/<域>/api.ts`）。
+/** 一个接口的**声明**：方法 · 路径 · **进出类型** · 该接口固定要带的头。
  *
- *  **凭据不在这里声明**：出口**有就带上**（Web = 浏览器带 Cookie · 桌面 = 宿主带 Bearer）——
+ *  **类型只在编译期存在**（运行时 `Request` 就是 `{ method, path, headers }`），所以写声明时给它标注一下：
+ *
+ *  ```ts
+ *  const hello = {} as Request<void, { MESSAGE: string }>   // 无输入 → 有输出
+ *  const login = {} as Request<{ name: string }, User>      // 有输入 → 有输出
+ *  ```
+ *
+ *  **Payload 格式不声明**：引擎默认 JSON（`Content-Type: application/json`）—— 只有上传那类
+ *  将来要 `multipart` 时才加值，**平时谁都不用想**。
+ *
+ *  **凭据也不在这里声明**：出口**有就带上**（Web = 浏览器带 Cookie · 桌面 = 宿主带 Bearer）——
  *  公开接口的服务端不读它（引擎侧只有 `oauth.Guard` 才读，`yao/openapi/oauth/guard.go:240-262`），
  *  登录第一步还没有凭据，自然就不带。**业务不必每次想"要不要带"**。
  *
  *  **名字与 DOM 的 `Request` 同名**，但两者无关：这里指"我们这个接口怎么调"；
  *  发请求用的是 `RequestInit`（`platform/transport/`），别混。 */
-export type Request = {
+export type Request<Input = void, Output = void> = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   /** 引擎的路径（**不含** `openapi` 前缀，如 `/helloworld/public`） */
   path: string
+  /** **这个接口固定要带的头**（如聊天域的标记头）—— 每次调用都带，不用调用方记 */
+  headers?: Record<string, string>
+  /** 只给类型看（运行时不带值） */
+  readonly input?: Input
+  /** 只给类型看（运行时不带值） */
+  readonly output?: Output
 }
 
-export type SendInputs = {
+export type SendInputs<Input = void> = {
   /** 出站上下文（语言 · 主题）—— 由钩子层从 `platform/` 读出来传进来（`hub` 不变） */
   outbound: OutboundInputs
   /** 该域自己的查询参数（如 `page` · `pagesize`）—— 与 ctx 的合并，ctx 先 */
   query?: Record<string, string | number | boolean | undefined>
-  /** **显式头**：合并**在 ctx 之后**（调用方说了算）。
-   *  用途：两步登录第一步要显式带**临时** `Authorization`（`15 §4`：注入凭据但不覆盖显式给的那个）。
-   *  **常态凭据不从这里来** —— 出口有就带上（Web 浏览器 · 桌面宿主，见 `17 §2`）。 */
+  /** **这次调用的请求体**（`GET`/`DELETE` 不带）—— 类型由声明的 `Request<Input, …>` 给 */
+  body?: Input
+  /** **这次调用**要带的头：合并**在 ctx 之后**（调用方说了算）。
+   *  用途：两步登录第一步的**临时** `Authorization`（`15 §4`：注入凭据但不覆盖显式给的那个）。 */
   headers?: Record<string, string>
-  /** 请求体（`GET`/`DELETE` 不带） */
-  body?: unknown
   signal?: AbortSignal
   /** **超时由调用方给**（`17 §2.2`：出口不替业务方定数字） */
   timeoutMs?: number
@@ -50,7 +65,10 @@ function withQuery(url: string, params: Record<string, string | number | boolean
 }
 
 /** 一次普通请求。**失败是值**，不抛异常。 */
-export async function send<T>(request: Request, inputs: SendInputs): Promise<Result<T>> {
+export async function send<Input = void, Output = void>(
+  request: Request<Input, Output>,
+  inputs: SendInputs<Input>,
+): Promise<Result<Output>> {
   const ctx: Context = context(inputs.outbound)
   // 地址由**平台层**给（基址 + well-known 的 openapi 前缀）；**读不到服务信息就直接报错**，不兜前缀
   const address = apiUrl(request.path)
@@ -61,7 +79,8 @@ export async function send<T>(request: Request, inputs: SendInputs): Promise<Res
 
   const response = await transportFetch(url, {
     method: request.method,
-    headers: { ...contextHeaders(ctx), ...(inputs.headers ?? {}) },
+    // ctx 先 → 声明里固定要带的 → 这次调用显式的（后者说了算）
+    headers: { ...contextHeaders(ctx), ...(request.headers ?? {}), ...(inputs.headers ?? {}) },
     ...(inputs.body === undefined ? {} : { body: JSON.stringify(inputs.body) }),
     ...(inputs.signal ? { signal: inputs.signal } : {}),
     ...(inputs.timeoutMs === undefined ? {} : { timeoutMs: inputs.timeoutMs }),
@@ -76,5 +95,5 @@ export async function send<T>(request: Request, inputs: SendInputs): Promise<Res
     }
     return { ok: false, ...buildFailure(response.value.status, body, `${request.method.toLowerCase()}_failed`) }
   }
-  return { ok: true, value: unwrap<T>(await response.value.json()) }
+  return { ok: true, value: unwrap<Output>(await response.value.json()) }
 }

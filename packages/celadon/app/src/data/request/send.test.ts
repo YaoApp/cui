@@ -6,10 +6,13 @@ vi.mock('@/platform/service', () => ({
   apiUrl: (path: string) => (address === undefined ? undefined : `${address}${path}`),
 }))
 
-import { send } from './send'
+import { send, type Request } from './send'
 
 const outbound = { locale: 'en-US', theme: 'light' as const }
-const request = { method: 'GET' as const, path: '/helloworld/public' }
+const request: Request<void, { MESSAGE?: string; id?: string; data?: string; ok?: boolean }> = {
+  method: 'GET',
+  path: '/helloworld/public',
+}
 
 function answer(body: unknown, status = 200) {
   const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => new Response(JSON.stringify(body), { status }))
@@ -25,7 +28,7 @@ afterEach(() => {
 describe('send', () => {
   it('composes the url from the well-known prefix, the context and the domain query', async () => {
     const fetchMock = answer({ MESSAGE: 'HELLO, WORLD' })
-    const result = await send<{ MESSAGE: string }>(request, { outbound, query: { page: 1 } })
+    const result = await send(request, { outbound, query: { page: 1 } })
     expect(result).toMatchObject({ ok: true, value: { MESSAGE: 'HELLO, WORLD' } })
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe('/v1/helloworld/public?locale=en-US&accept=cui-web&page=1')
@@ -35,9 +38,9 @@ describe('send', () => {
 
   it('unwraps an envelope, and leaves a bare entity alone', async () => {
     answer({ data: { id: 'a' }, status: 200 })
-    expect(await send<{ id: string }>(request, { outbound })).toMatchObject({ ok: true, value: { id: 'a' } })
+    expect(await send(request, { outbound })).toMatchObject({ ok: true, value: { id: 'a' } })
     answer({ id: 'b' })
-    expect(await send<{ id: string }>(request, { outbound })).toMatchObject({ ok: true, value: { id: 'b' } })
+    expect(await send(request, { outbound })).toMatchObject({ ok: true, value: { id: 'b' } })
   })
 
   it('turns the engine body into the failure shape, keeping its words raw', async () => {
@@ -59,6 +62,15 @@ describe('send', () => {
       Authorization: 'Bearer temp-one-shot',
       'X-Yao-Accept': 'cui-web',
     })
+  })
+
+  it('carries a header the interface declares, under the one the caller gives', async () => {
+    const fetchMock = answer({ ok: true })
+    const chatty: Request<{ text: string }> = { method: 'POST', path: '/chat', headers: { 'X-Yao-Accept': 'cui-web' } }
+    await send(chatty, { outbound, body: { text: 'hi' }, headers: { Authorization: 'Bearer one-shot' } })
+    const init = fetchMock.mock.calls[0][1]
+    expect(init?.headers).toMatchObject({ 'X-Yao-Accept': 'cui-web', Authorization: 'Bearer one-shot' })
+    expect(init?.body).toBe(JSON.stringify({ text: 'hi' }))
   })
 
   it('passes a network failure straight through', async () => {
