@@ -51,7 +51,7 @@
 
 0. **先归档脚手架**（本轮，见 §5）—— 让"支架"和"真业务"一眼分得开
 1. **第一个真域：登录 / 注册**（`/user/entry/*` 那条线）—— 它一次压到：声明 + 动作 + 会话 + 载体 + 表单原子 + layout 雏形
-2. **真 layout + 导航**（脚手架页收进 `/dev/*`）
+2. **真 layout + 导航**（脚手架页收进 `/scaffold/*`）
 3. 之后每个 1.0 功能迁一个：迁它的域（`types/api/keys/queries/map`）→ 对接真端点 → 一页 UI → 一轮隔离 Review
 
 ## 5. 归档脚手架：我建议叫 `scaffold`，不叫 `debug`
@@ -68,7 +68,7 @@
 
 **已定**（2026-10-04）：
 
-1. 脚手架叫 `scaffold`，物理归拢到 `features/scaffold/`，路由 `/dev/*`；应用首页是 `/`。
+1. 脚手架叫 `scaffold`，物理归拢到 `features/scaffold/`，路由 `/scaffold/*`；应用首页是 `/`。
 2. 导航只渲染一处（`surface-layout`），页面不再自造导航，返回按钮删除。
 3. 顺序：先归档脚手架（[`05-scaffold.md`](05-scaffold.md)）→ 再做**登录 / 注册**（第一个真域）→ 再真 layout。
 

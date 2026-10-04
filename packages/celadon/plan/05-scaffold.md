@@ -6,7 +6,7 @@
 
 ## 1. 一句话
 
-把四个开发期页面**物理归拢**到 `features/scaffold/`，路由按功能取名（应用首页留在 `/`，脚手架进 `/dev/*`），
+把四个开发期页面**物理归拢**到 `features/scaffold/`，路由按功能取名（应用首页留在 `/`，脚手架进 `/scaffold/*`），
 **导航收到一处**（`surface-layout` 渲染一次，页面不再各造一份），**页面样式抽一层公共的**，并删掉页面里的返回按钮。
 
 ## 2. 现状（为什么要动）
@@ -24,18 +24,20 @@
 | 现在 | 之后 | 路由 | 它到底在演示什么 |
 | --- | --- | --- | --- |
 | `features/hello` | **应用首页**（留在 `features/home`） | `/`（`index: true`） | 客户端事实 + 品牌/图标样本 = 设计体系的活样本 |
-| `features/world` | `features/scaffold/routing` | `/dev/routing` · `/dev/routing/:worldId` | 路由参数 · URL ↔ store 同步 · 列表/详情 |
-| `features/verify` | `features/scaffold/bridge` | `/dev/bridge` | 逐条点名调 **18 条桥命令**（唯一允许引桥的页面） |
-| `features/data-check` | `features/scaffold/requests` | `/dev/requests` | 出口 · 四态 · 失效 · 登录/退出 · 服务地址 |
-| （新） | `features/scaffold/index` | `/dev` | 三张小卡片，链到上面三个（导航有"手"可点） |
+| `features/world` | `features/scaffold/routing` | `/scaffold/routing` · `/scaffold/routing/:worldId` | 路由参数 · URL ↔ store 同步 · 列表/详情 |
+| `features/verify` | `features/scaffold/bridge` | `/scaffold/bridge` | 逐条点名调 **18 条桥命令**（唯一允许引桥的页面） |
+| `features/data-check` | `features/scaffold/requests` | `/scaffold/requests` | 出口 · 四态 · 失效 · 登录/退出 · 服务地址 |
+| （新） | `features/scaffold/index` | `/scaffold` | 三张小卡片，链到上面三个（导航有"手"可点） |
 
 - `/hello` · `/world` · `/verify` · `/data-check` 四条旧路径**全部作废**，`*` 兜底重定向到 `/`。
-- 首页保留在 `features/home`（不是 scaffold）：它是应用的第一页，将来被真首页替换；替换时把品牌/图标样本挪到 `/dev/design`（本轮不做）。
+
+**为什么不用 `/dev`**：`dev` 是个通用词，将来真要用"开发工具"（日志 · 开关 · 诊断）时会撞名；而且路由与目录同一个词（`scaffold`）才能一眼对上。发布与否**不由路径回答** —— 真要"脚手架不进正式包"，那时用构建标记（`import.meta.env.DEV` 或清单里的能力开关），不是靠路径名。
+- 首页保留在 `features/home`（不是 scaffold）：它是应用的第一页，将来被真首页替换；替换时把品牌/图标样本挪到 `/scaffold/design`（本轮不做）。
 - **`hello` 这个字留在两个地方**：`data/helloworld`（引擎的冒烟端点，归数据层）与 `platform/…` 里的 `helloworld` 文案键 —— 与本轮页面改名无关。
 
 ## 4. 导航收到一处
 
-- **`routes/nav-items.ts`（新）**：唯一一份导航定义 —— `home`（`/`）+ `routing` · `bridge` · `requests`（`/dev/*`）；每项给 `href` 与 `titleKey`。
+- **`routes/nav-items.ts`（新）**：唯一一份导航定义 —— `home`（`/`）+ `routing` · `bridge` · `requests`（`/scaffold/*`）；每项给 `href` 与 `titleKey`。
 - **`routes/surface-layout.tsx`（改）**：按当前 route 渲染一次 `<Header title={<当前项标题>} onRefresh={() => navigate(0)}><Nav items={navItems} localeSwitch onSelect={…}/></Header>`；`main` 与 `side` 两个面都走它。
 - **四个页面（改）**：删掉自己的 `Header`/`Nav`/`navItems`/`useNavigate`（返回按钮一起删），只留正文。
 - **标题**：仍走平台层的 `usePageTitle`；`Header` 的标题取当前 `nav-item` 的 `titleKey`（页面不再各传一个标题）。
@@ -52,7 +54,7 @@
 
 | # | 位置 | 改什么 |
 | --- | --- | --- |
-| 1 | `routes/routes.tsx` | 新路径（`/` 首页 + `/dev/*` 三个 + `/dev` 索引）；入口重定向从 `hello` 改成 `/` |
+| 1 | `routes/routes.tsx` | 新路径（`/` 首页 + `/scaffold/*` 三个 + `/scaffold` 索引）；入口重定向从 `hello` 改成 `/` |
 | 2 | `routes/nav-items.ts` | 新建，唯一导航定义 |
 | 3 | `routes/surface-layout.tsx` | 渲染 Header+Nav；`surface-layout.test.tsx` 跟着改 |
 | 4 | `components/page/*` | 新建页面公共件 + 样式 |
