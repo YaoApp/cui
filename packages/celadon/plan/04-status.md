@@ -1,0 +1,83 @@
+# 盘点与下一步（2026-10-04）
+
+- **版本**：v1.0
+- **规则**：[`15-platform.md`](../architecture/15-platform.md) · **进度**：[`01-infrastructure.md`](01-infrastructure.md) · [`02-platform.md`](02-platform.md) · [`03-data.md`](03-data.md)
+- **一句话**：**基础设施可以转起来了** —— 能开始拿真业务"边迁移边对接"，但"稳"要等第一个真域压过一遍。
+
+## 1. 现在有什么（可用）
+
+| 层 | 有什么 | 证明 |
+| --- | --- | --- |
+| `platform/client` | 一个 `client` 对象（清单 · 能力 · 宿主 · id）· `loadClient()` 一处装填 · 失败进错误面不兜底 · React 面就是两个偏好 hook | 用例 + macOS/Windows 截图 |
+| `platform/service` | 基址唯一来源 · `well-known` 惰性读一次（并发去重 · 失败不缓存）· **换地址 = 换服务**（作废旧基址/文档/会话镜像，再读新地址的会话） | 用例 + 页面实点 |
+| `platform/credential` | 载体按宿主选（OS 凭据库 / Cookie）· 会话惰性镜像 · **登录动作收令牌** · **退出清 `session` + `refresh` 两条** | 用例 |
+| `platform/transport` | 两宿主一种接口 · 失败是值（不抛）· 401 只重放一次（**机制在，注入尚未接线**）· 跨域明确拒绝 | 用例 |
+| `platform/bridge` | 18 条命令 · 清单单一来源 · Rust 与应用常量跨语言比对 | 比对测试 |
+| `platform/i18n`·`theme`·`router`·`icons`·`utils` | 语言包按 feature 就近 · 主题写 `data-theme` · 页标题 · **失败码 → 人话**从 i18n 面出 | 门禁 + 用例 |
+| `data/request` + `data/hooks` | 出口 `send`（声明 `{method,path,headers?,session?}`）· 四态的**唯一实现** `useRequest` · 声明源（`{key,request}`）与**动作源**（`{key,operation}`）· 失效按 key 前缀 | 用例 |
+| `data/test`·`data/user` | 两个真域：测试模式接口（登录两条端点由载体决定）· 退出（服务端吊销 + 清本机） | 用例 |
+| `routes` | `main` / `side` 两个 surface + 四个页面路由 | 用例 |
+| 门禁 | 12 个检查器 · 检查器自测 85/85 · 全量单测 315 条 · `lint` / `check` | 本轮验收回合 |
+
+## 2. 还不能跑的（缺口，按"挡不挡下一步"排）
+
+| 缺口 | 挡什么 | 归谁 |
+| --- | --- | --- |
+| **没有真登录 / 注册**（引擎 `/user/entry/*` 那套 OTP · 邀请 · 两步） | 真业务第一步 | `data/user` + `stores/` |
+| **401 续期未接线**（刷新端点没声明、刷新器没注入） | 长会话 | `data/user` + `platform/credential` |
+| **没有真 layout**（现在只有脚手架的 surface + 四页） | 真界面 | 下一轮 |
+| `stores/` 只有 `side-panel` 与 `entry` 雏形 | 跨页状态 | 随业务建 |
+| SSE / WS 钩子未做 | 实时域 | 随业务建 |
+| `webproxy/`（agent sandbox 域名规则）未做 | 沙箱域 | 随业务建 |
+| 打包 / 更新 / 1.0 迁移 | 交付 | 迁移时 |
+
+## 3. 复核：基础设施"能转起来"吗
+
+**能。** 端到端这条已经打通并用真引擎的测试模式验过：
+
+```
+声明 → send（带 Authorization）→ 失败是值 → 四态上屏 →（登录动作收令牌 / 退出动作清本机）
+```
+
+**但它有三处"薄"，不是坏，是没被真业务压过：**
+
+1. **只有一个真域**（`test`）：`queries.ts` 的编排（声明 + 动作）、`map.ts`（字段/时间/枚举）、分页 utils —— 都还只有一个例子。
+2. **会话只被登录 / 请求 / 退出走过**，"刷新"这条没走通（H4 已知）。
+3. **页面壳是脚手架的**（导航就是那四个测试页），真 layout 会把它们换掉。
+
+所以结论是：**能转 ✓，"稳"要等第一个真域压一遍** —— 这正是"边迁移边对接"要压的东西。另外，真客户端上验证过的是客户端事实 · 服务地址 · 偏好切换；**登录按钮在真客户端上的点击还没单独留证**（它由 315 条用例守着）。
+
+## 4. 建议的顺序（边迁移边对接）
+
+0. **先归档脚手架**（本轮，见 §5）—— 让"支架"和"真业务"一眼分得开
+1. **第一个真域：登录 / 注册**（`/user/entry/*` 那条线）—— 它一次压到：声明 + 动作 + 会话 + 载体 + 表单原子 + layout 雏形
+2. **真 layout + 导航**（脚手架页收进 `/dev/*`）
+3. 之后每个 1.0 功能迁一个：迁它的域（`types/api/keys/queries/map`）→ 对接真端点 → 一页 UI → 一轮隔离 Review
+
+## 5. 归档脚手架：我建议叫 `scaffold`，不叫 `debug`
+
+**理由**：这些页不是"调试残留"，是**开发期的支架**（联通 · 自检 · 冒烟）；`03-data.md` 里描述 helloworld 用的就是"脚手架"这个词。`debug` 说的是"为什么打开它"，不是"它是什么" —— 同一页既用来 debug 也用来对接冒烟。
+
+**两种做法**：
+
+| | 做法 | 代价 |
+| --- | --- | --- |
+| **A（推荐）** | `features/{hello,world,verify,data-check}` → `features/scaffold/{...}`，路由 `/hello`… → `/dev/*`；`features/verify` 的桥白名单同步改成 `features/scaffold/verify/**` | 路由表 · 白名单 · 路由用例 · 脚本里的导航 Tab 数 · 截图路径都要跟着改一次 |
+| B | 目录不动，加一份登记（本文档 §5 或 `13-quality-gates.md`），只把路由前缀改成 `/dev/*` | 改动小，"支架"与"真业务"仍混在 `features/` 里 |
+
+推荐 **A**：物理归拢 + `/dev/*` 前缀，"真业务页面"和"支架"从此一眼分得开。
+
+## 6. TODO（归档脚手架那一轮）
+
+- [ ] 1. 按 A 归拢四个页面到 `features/scaffold/`，各自的语言包跟着走
+- [ ] 2. 路由表改成 `/dev/hello` · `/dev/world` · `/dev/verify` · `/dev/data-check`，入口重定向跟着改
+- [ ] 3. 桥白名单与样本改成 `features/scaffold/verify/**`
+- [ ] 4. 用例与脚本跟着改（surface-layout 用例 · 检查器样本 · macOS/Windows 截图脚本的 Tab 数）
+- [ ] 5. `pnpm lint` / `check` / 单测 / 检查器自测全绿 + macOS/Windows 各一张截图
+- [ ] 6. 本文档 §2 · §4 · §5 随进展更新
+
+## 7. 待你定
+
+1. 名字用 **`scaffold`**（我推荐）还是 `debug`？
+2. 做法用 **A**（物理归拢 + `/dev/*`，我推荐）还是 B？
+3. 第一个真域先做**登录 / 注册**（我推荐：它把数据层的第二个例子压出来）还是先做 layout？
