@@ -58,26 +58,19 @@
 
 **理由**：这些页不是"调试残留"，是**开发期的支架**（联通 · 自检 · 冒烟）；`03-data.md` 里描述 helloworld 用的就是"脚手架"这个词。`debug` 说的是"为什么打开它"，不是"它是什么" —— 同一页既用来 debug 也用来对接冒烟。
 
-**两种做法**：
+**已定**：叫 **`scaffold`**，按**物理归拢 + `/dev/*`** 做；导航收一处、页面样式抽一层、删返回按钮、首页留在 `/`。细节全在 [`05-scaffold.md`](05-scaffold.md)。
 
-| | 做法 | 代价 |
-| --- | --- | --- |
-| **A（推荐）** | `features/{hello,world,verify,data-check}` → `features/scaffold/{...}`，路由 `/hello`… → `/dev/*`；`features/verify` 的桥白名单同步改成 `features/scaffold/verify/**` | 路由表 · 白名单 · 路由用例 · 脚本里的导航 Tab 数 · 截图路径都要跟着改一次 |
-| B | 目录不动，加一份登记（本文档 §5 或 `13-quality-gates.md`），只把路由前缀改成 `/dev/*` | 改动小，"支架"与"真业务"仍混在 `features/` 里 |
+## 6. TODO
 
-推荐 **A**：物理归拢 + `/dev/*` 前缀，"真业务页面"和"支架"从此一眼分得开。
+归档脚手架那一轮：见 [`05-scaffold.md`](05-scaffold.md) §7。
 
-## 6. TODO（归档脚手架那一轮）
+## 7. 已定 / 待定
 
-- [ ] 1. 按 A 归拢四个页面到 `features/scaffold/`，各自的语言包跟着走
-- [ ] 2. 路由表改成 `/dev/hello` · `/dev/world` · `/dev/verify` · `/dev/data-check`，入口重定向跟着改
-- [ ] 3. 桥白名单与样本改成 `features/scaffold/verify/**`
-- [ ] 4. 用例与脚本跟着改（surface-layout 用例 · 检查器样本 · macOS/Windows 截图脚本的 Tab 数）
-- [ ] 5. `pnpm lint` / `check` / 单测 / 检查器自测全绿 + macOS/Windows 各一张截图
-- [ ] 6. 本文档 §2 · §4 · §5 随进展更新
+**已定**（2026-10-04）：
 
-## 7. 待你定
+1. 脚手架叫 `scaffold`，物理归拢到 `features/scaffold/`，路由 `/dev/*`；应用首页是 `/`。
+2. 导航只渲染一处（`surface-layout`），页面不再自造导航，返回按钮删除。
+3. 顺序：先归档脚手架（[`05-scaffold.md`](05-scaffold.md)）→ 再做**登录 / 注册**（第一个真域）→ 再真 layout。
 
-1. 名字用 **`scaffold`**（我推荐）还是 `debug`？
-2. 做法用 **A**（物理归拢 + `/dev/*`，我推荐）还是 B？
-3. 第一个真域先做**登录 / 注册**（我推荐：它把数据层的第二个例子压出来）还是先做 layout？
+**待定**：登录 / 注册那轮的域边界（`user/entry` 与 `stores/` 的分工）—— 等开工时在 `03-data.md` 里定。
+
