@@ -10,6 +10,13 @@ import type { Failure } from '../types'
 
 type Raw = Record<string, unknown>
 
+/** 由码算一句可读的英文兜底（`user.invalid_name` → `user: invalid name`）。**不做翻译**（翻译按码走）。 */
+function humanize(code: string): string {
+  const [scope, ...rest] = code.split(/[._]/)
+  const what = rest.join(' ').replace(/_/g, ' ')
+  return what ? `${scope}: ${what}` : code
+}
+
 function text(value: unknown): string | undefined {
   return typeof value === 'string' && value ? value : undefined
 }
@@ -32,7 +39,9 @@ export function failure(status: number, body: unknown, fallbackCode: string): Fa
   return {
     code,
     params: { status },
-    rawMessage: message,
+    // 上层兜底：**由码算出来**（渲染不走它，走按码翻译）
+    message: humanize(code),
+    ...(message ? { rawMessage: message } : {}),
     ...(requiredScopes ? { requiredScopes } : {}),
     ...(missingScopes ? { missingScopes } : {}),
   }

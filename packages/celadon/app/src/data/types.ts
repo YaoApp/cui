@@ -4,24 +4,28 @@
  * 业务错误往里加**字段级问题**，不另造一套。
  */
 
-/** 一次调用的失败。**两类信息在这里分家**：
+/** 一次调用的失败。**消息分两级，别混**：
  *
- *  ① **给用户的消息**：由 `code` + `params` **生成** —— 应用按码翻译（`platform/bridge` 的 `bridgeErrorText`），
- *     `params` 负责插值。**别在这里直接塞成品文案**（那就绕过了翻译，4 语就废了）。
- *  ② **给排查的原文**：`rawMessage` 等 —— 引擎的 `error_description` 原文，**不许上屏**。
+ *  | 级别 | 字段 | 谁看 | 怎么来 |
+ *  | --- | --- | --- | --- |
+ *  | **上层（应用）** | `code` + `params` | **用户** | 应用**按码翻译**（`platform/bridge` 的 `bridgeErrorText`）+ `params` 插值 |
+ *  | **上层（兜底）** | `message` | 日志 · 无翻译时的兜底 | **由 `code` 与业务场景算出来**（见 `failure()`）|
+ *  | **底层（原文）** | `rawMessage` | **只给排查** | 宿主桥 / 引擎的 `error_description` 原文，**不许上屏** |
  *
- *  命名上就挡着这件事：叫 `rawMessage` 而不是 `message`，免得有人顺手 `{failure.message}` 渲出去。
+ *  **渲染一律走"按码翻译"**：`message` 只是兜底，不是用户文案（否则 4 语就废了）。
  *
  *  **引擎的错误体是 OAuth 形状**（`yao/openapi/oauth/types/types.go:35-45`）：
  *  `{ error, error_description, error_uri, state, reason, required_scopes, missing_scopes }` ——
  *  **没有字段级 `fields`/`errors`**（字段校验信息只拼在 `error_description` 文本里），所以这里也不编。 */
 export type Failure = {
-  /** **给用户的消息的码**：`transport.*`（传输）或服务端/业务码（如 `user.invalid`）—— 由应用翻译 */
+  /** **上层**：给用户的消息的码（`transport.*` 或服务端/业务码）—— 由应用翻译 */
   code: string
-  /** 给用户的消息的**插值参数**（如 `{ status }` · `{ name }`） */
+  /** **上层**：给用户的消息的**插值参数**（如 `{ status }` · `{ name }`） */
   params: Record<string, unknown>
-  /** **引擎原文**（引擎的 `error_description`）—— 只给日志与排查，**不许上屏** */
-  rawMessage: string
+  /** **上层兜底**：由 `code` 与业务场景算出来的可读句（**英文**，见 `08-i18n.md`：英文只给诊断）—— 渲染仍按码翻译 */
+  message: string
+  /** **底层原文**：宿主桥 / 引擎的 `error_description` —— 只给日志与排查，**不许上屏** */
+  rawMessage?: string
   /** 引擎给的 `required_scopes`（OAuth） */
   requiredScopes?: readonly string[]
   /** 引擎给的 `missing_scopes` */
