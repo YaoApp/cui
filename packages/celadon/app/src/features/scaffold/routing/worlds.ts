@@ -10,10 +10,6 @@ export type WorldEntity = { id: string; nameKey: I18nKey; kind: WorldEntityKind 
 export type World = { id: string; nameKey: I18nKey; summaryKey: I18nKey; entities: WorldEntity[] }
 
 /** 系统值 code → 语言包 key 的唯一映射（别在组件里拼 key）。 */
-export const WORLD_ENTITY_KIND_KEY: Record<WorldEntityKind, I18nKey> = {
-  place: 'routing.kind.place',
-  role: 'routing.kind.role',
-}
 
 export const WORLDS: World[] = [
   {
@@ -41,5 +37,3 @@ export const WORLDS: World[] = [
 
 export const findWorld = (id: string | undefined): World | undefined => WORLDS.find((w) => w.id === id)
 
-export const findEntity = (world: World | undefined, id: string | undefined): WorldEntity | undefined =>
-  world?.entities.find((e) => e.id === id)

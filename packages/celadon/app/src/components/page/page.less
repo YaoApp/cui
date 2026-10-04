@@ -1,6 +1,6 @@
-/* **页面公共件**：正文容器 · 一段 · 一行 · 一格 · 一行提示。
-   四份页面 `.less` 里重复的 `__body`/`__heading`/`__row`/`__cell`/`__notice` 收到这里
-   （`plan/05-scaffold.md` §5）。只做布局与尺寸，间距/颜色/描边走 token。 */
+/* **页面公共件**：正文容器 · 一段 · 一行 · 一格。四份页面 `.less` 里重复的
+   `__body`/`__heading`/`__row`/`__cell` 收到这里（`plan/05-scaffold.md` §5）。
+   只做布局与尺寸，间距/颜色/描边走 token。 */
 .page__body {
   padding: var(--spacing-24);
   line-height: var(--line-height-cjk);
@@ -33,10 +33,5 @@
   background: var(--background-surface);
   border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius-small);
-  color: var(--text-secondary);
-}
-
-.page__notice {
-  margin: 0;
   color: var(--text-secondary);
 }

@@ -18,6 +18,7 @@ export type I18nKey =
   | 'bridge.egressHint'
   | 'bridge.error.bridge.notRunning'
   | 'bridge.error.bridge.rejected'
+  | 'bridge.error.bridge.threw'
   | 'bridge.error.bridge.unavailable'
   | 'bridge.error.bridge.unknown'
   | 'bridge.error.credential.noEntry'
@@ -101,6 +102,7 @@ export type I18nKey =
   | 'home.language'
   | 'home.namespace'
   | 'home.os'
+  | 'home.scaffold'
   | 'home.theme'
   | 'home.themeDark'
   | 'home.themeLight'
@@ -191,8 +193,6 @@ export type I18nKey =
   | 'routing.fixture.w2.summary'
   | 'routing.fixture.w3.name'
   | 'routing.fixture.w3.summary'
-  | 'routing.kind.place'
-  | 'routing.kind.role'
   | 'routing.missing'
   | 'routing.navLabel'
   | 'routing.share'
@@ -224,6 +224,7 @@ declare module 'i18next' {
         'bridge.egressHint': string
         'bridge.error.bridge.notRunning': string
         'bridge.error.bridge.rejected': string
+        'bridge.error.bridge.threw': string
         'bridge.error.bridge.unavailable': string
         'bridge.error.bridge.unknown': string
         'bridge.error.credential.noEntry': string
@@ -307,6 +308,7 @@ declare module 'i18next' {
         'home.language': string
         'home.namespace': string
         'home.os': string
+        'home.scaffold': string
         'home.theme': string
         'home.themeDark': string
         'home.themeLight': string
@@ -397,8 +399,6 @@ declare module 'i18next' {
         'routing.fixture.w2.summary': string
         'routing.fixture.w3.name': string
         'routing.fixture.w3.summary': string
-        'routing.kind.place': string
-        'routing.kind.role': string
         'routing.missing': string
         'routing.navLabel': string
         'routing.share': string

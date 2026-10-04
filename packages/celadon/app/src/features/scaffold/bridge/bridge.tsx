@@ -262,8 +262,9 @@ export function BridgePage() {
 
       <h2 className="bridge__heading">{t('bridge.results')}</h2>
       <ul>
-        {lines.map((line) => (
-          <li key={`${line.label}-${line.text}`}>{`${line.label} → ${line.text}`}</li>
+        {lines.map((line, index) => (
+          // 同一标签同一文案会重复出现：key 里带上序号，别让 React 报警
+          <li key={`${index}-${line.label}`}>{`${line.label} → ${line.text}`}</li>
         ))}
       </ul>
       </div>

@@ -6,7 +6,7 @@
 
 | | |
 | --- | --- |
-| 归属 | `features/hello` |
+| 归属 | `features/scaffold/overview` |
 | 采集脚本 | `structure-trial.agent.mjs`（同目录，机器只做能做的部分）|
 | 被测 | 构建产物（`pnpm build` 后由静态服务器发 `dist/`），不是源码 dev |
 | 判定工具 | 执行者视觉（看截图）· `ocr_recognize`（逐字精读）· `decision_decide`（分级 + 置信度）|

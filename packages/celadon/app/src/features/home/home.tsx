@@ -58,7 +58,7 @@ export function HomePage() {
         </PageSection>
         {/* 脚手架的入口：导航住在脚手架页里，而桌面端没有地址栏 —— 首页必须留一条路过去。
             真首页来了以后，这一行挪进开发菜单（`plan/05-scaffold.md` §3）。 */}
-        <PageSection heading={t('nav.overview')}>
+        <PageSection heading={t('home.scaffold')}>
           <PageRow>
             {SCAFFOLD_LINKS.map(({ key, href }) => (
               <PageCell key={href}>

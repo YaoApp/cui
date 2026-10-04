@@ -71,7 +71,7 @@
 | --- | --- |
 | 路由表（URL → 元素）· 外壳（所有页面住在主区里）| `routes/` |
 | 机制：router 实例 · basename 适配器 · 文档标题 | `platform/router/` |
-| 导航项 · "哪条 URL 是当前"的比较 | `platform/utils/nav.ts`（`routes/` 与 feature 都要用）|
+| 导航项 · "哪条 URL 是当前"的比较 | `features/scaffold/nav.ts`（脚手架自己的导航；产品导航等真页面来了再设计）|
 
 地址语法：**对象在路径 · 其余状态在具名 query**（见 `07-routing.md`）。
 

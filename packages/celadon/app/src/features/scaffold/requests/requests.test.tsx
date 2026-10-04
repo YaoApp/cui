@@ -467,3 +467,35 @@ describe('the service address, which only a client holds', () => {
     await waitFor(() => expect(writeAddress).toHaveBeenCalledWith('http://typed:5099'))
   })
 })
+
+/* 换地址 = 换服务：新服务还没请求，屏上**不许**留着旧服务的结果（2026-10-04 复核要求钉住）。 */
+describe('saving a new service address', () => {
+  it('drops the results the old service produced', async () => {
+    capsMock.mockReturnValue({
+      clipboard: false,
+      files: false,
+      notifications: false,
+      externalOpen: true,
+      serviceAddress: true,
+    })
+    writeAddress.mockResolvedValue({ ok: true, value: 'http://typed:5099' })
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    renderPage()
+
+    // 先让公开 GET 真跑出结果（假出口回了 MESSAGE）
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+    await waitFor(() => expect(document.body.textContent ?? '').toContain(MESSAGE))
+
+    const input = await screen.findByLabelText('服务地址')
+    fireEvent.change(input, { target: { value: 'http://typed:5099' } })
+    fireEvent.click(screen.getByText('校验并写入'))
+    await waitFor(() => expect(writeAddress).toHaveBeenCalledWith('http://typed:5099'))
+
+    // 旧结果必须从屏上消失（不清就是"换服务后还在宣称旧数据"）
+    await waitFor(() => expect(document.body.textContent ?? '').not.toContain(MESSAGE))
+  })
+})

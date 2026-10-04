@@ -12,10 +12,10 @@ import { chromium } from '@playwright/test'   // 直接依赖；playwright-core 
 import { readdirSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { capturePage, captureScreen, shotDir } from '../../../../../scripts/shots.mjs'
+import { capturePage, captureScreen, shotDir } from '../../../../../../scripts/shots.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
-const PACKAGE = resolve(HERE, '../../../../..')
+const PACKAGE = resolve(HERE, '../../../../../..')
 const BASE_URL = process.env.CUI_BASE_URL ?? 'http://localhost:5200'
 
 // 截图一律走固化的截图资产（scripts/shots.mjs），不在这里自己调 page.screenshot。
@@ -76,27 +76,27 @@ const p = await b.newPage({ viewport: { width: 760, height: 300 }, deviceScaleFa
 p.on('response', (r) => { if (r.status() >= 400) problems.push(`${r.status()} ${r.url()}`) })
 p.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`))
 
-const counter = p.locator('.foo-bar__count')
+const trial = p.locator('.foo-bar')
 // 页面上不止一个按钮，按可访问名取 —— 只用 button.button 会撞进严格模式
 const button = p.getByRole('button', { name: '刷新' })
 const title = p.locator('.header__title')
 
 // S1 第一次打开
-await p.goto(`${BASE_URL}/app/`, { waitUntil: 'networkidle' })
+await p.goto(`${BASE_URL}/app/scaffold`, { waitUntil: 'networkidle' })
 await shot(p, 's1-open.png')
 say(`S1 text      : ${JSON.stringify((await p.locator('body').innerText()).replace(/\n/g, ' | '))}`)
-say(`S1 boxes     : title=${JSON.stringify(await box(title))} button=${JSON.stringify(await box(button))} counter=${JSON.stringify(await box(counter))}`)
+say(`S1 boxes     : title=${JSON.stringify(await box(title))} button=${JSON.stringify(await box(button))} `)
 const fullWidthButtonHeight = (await box(button))?.h ?? 0
 say(`S1 overflow  : scrollWidth=${await p.evaluate(() => document.documentElement.scrollWidth)} clientWidth=${await p.evaluate(() => document.documentElement.clientWidth)}`)
 const tabTitle = await p.title()
 say(`S1 title     : ${JSON.stringify(tabTitle)}`)
-if (tabTitle !== 'Hello · CUI 2.0') problems.push('S1: 标签页标题没有跟路由走')
+if (tabTitle !== '总览 · CUI 2.0') problems.push('S1: 标签页标题没有跟路由走')
 
 // 刷新按钮上的图标要真的渲染出来：`<use>` 指得到符号，尺寸是产品默认档
 // 注意：要**指到具体那个按钮**。写 "header 里第一个 .icon" 会被后加进来的导航图标抢先
 // （2026-10-02 就这样误报过一次）。
 const icon = await p.evaluate(() => {
-  const svg = document.querySelector('header.header > button svg.icon')
+  const svg = document.querySelector('header.header .header__actions button svg.icon')
   const href = svg?.querySelector('use')?.getAttribute('href')
   const box = svg?.getBoundingClientRect()
   return { href, symbol: href ? !!document.querySelector(href) : false, w: Math.round(box?.width || 0), h: Math.round(box?.height || 0) }
@@ -119,7 +119,7 @@ if (navIcons.some((x) => !x.symbol)) problems.push('S1: 有导航项没有图标
 // 图标要与文字同一条中线，而且是描边不是实心块（实心块在深色下会是黑的）
 const iconFit = await p.evaluate(() => {
   const cy = (el) => { const b = el?.getBoundingClientRect(); return b ? (b.top + b.bottom) / 2 : null }
-  const btn = document.querySelector('header.header > button')
+  const btn = document.querySelector('header.header .header__actions button')
   const svg = btn?.querySelector('svg.icon')
   const link = document.querySelector('nav.nav a.nav__link')
   return {
@@ -137,7 +137,7 @@ if (!iconFit.stroke || iconFit.stroke === 'none') problems.push('S1: 图标没�
 
 // 图标一览：一个品牌标识 + 一批界面图标，符号都指得到；品牌标识不套界面图标的描边
 const gallery = await p.evaluate(() =>
-  [...document.querySelectorAll('.hello__row .hello__cell')].map((cell) => {
+  [...document.querySelectorAll('.overview__row .overview__cell')].map((cell) => {
     const svg = cell.querySelector('svg')
     const href = svg?.querySelector('use')?.getAttribute('href')
     return { name: cell.querySelector('code')?.textContent, href, symbol: href ? !!document.querySelector(href) : false,
@@ -168,7 +168,7 @@ const scale = await p.evaluate(() => {
     const st = getComputedStyle(s)
     return { viewBox: s.getAttribute('viewBox'), strokeWidth: st.strokeWidth, stroke: st.stroke, fill: st.fill }
   }
-  return { button: read('header.header > button svg.icon'), gallery: read('.hello__row svg.icon'), brand: read('.hello__row svg.brand-mark') }
+  return { button: read('header.header .header__actions button svg.icon'), gallery: read('.overview__row svg.icon'), brand: read('.overview__row svg.brand-mark') }
 })
 say(`S1 scale     : ${JSON.stringify(scale)}`)
 for (const k of ['button', 'gallery']) {
@@ -179,17 +179,15 @@ if (scale.brand?.viewBox !== '0 0 24 24') problems.push('S1: 品牌标识没有 
 if (scale.brand?.strokeWidth === '2px') problems.push('S1: 品牌标识被套上了界面图标的描边')
 // S2 快速连点 12 下
 const before = await box(button)
-for (let i = 0; i < 12; i++) await button.click({ delay: 0 })
-await p.waitForTimeout(250)
-await shot(p, 's2-after-12-clicks.png')
-const twelve = (await counter.innerText()).includes('12')
-say(`S2 counter   : ${await counter.innerText()}`)
-const after = await box(button)
-say(`S2 button box: before=${JSON.stringify(before)} after=${JSON.stringify(after)} moved=${before.x !== after.x || before.y !== after.y || before.w !== after.w}`)
-if (!twelve) problems.push('S2: 连点 12 下后计数不是 12')
+await button.click({ delay: 0 })
+
+// 刷新是**路由重载**（不再自增计数）：点完之后页面还在、那行「结构试跑」还在
+await p.waitForLoadState('domcontentloaded')
+if (!(await trial.innerText()).includes('结构试跑')) problems.push('S2: 刷新之后页面没有回到原样')
+say(`S2 button box: before=${JSON.stringify(before)}`)
 
 // S3 只用键盘
-await p.goto(`${BASE_URL}/app/`, { waitUntil: 'networkidle' })
+await p.goto(`${BASE_URL}/app/scaffold`, { waitUntil: 'networkidle' })
 // 头部有导航链接在前：用 Tab 走到「刷新」（脚本实现细节，剧本里用户的动作没变）
 for (let i = 0; i < 12; i++) {
   if (await p.evaluate(() => document.activeElement?.innerText?.trim() === '刷新')) break
@@ -202,9 +200,6 @@ if (focused.tag !== 'BUTTON' || focused.text !== '刷新') problems.push('S3: Ta
 if (!focused.shadow || focused.shadow === 'none') problems.push('S3: 焦点环不可见')
 await p.keyboard.press('Enter'); await p.keyboard.press('Space'); await p.waitForTimeout(150)
 await shot(p, 's3-after-keys.png')
-const two = (await counter.innerText()).includes('2')
-say(`S3 counter   : ${await counter.innerText()}`)
-if (!two) problems.push('S3: 回车+空格后计数不是 2')
 
 // S4 切主题 —— 用**页面上的分段控件**（设计里的主题切换件：浅色 / 暗色）
 await p.getByRole('button', { name: '暗色' }).click()
@@ -250,9 +245,7 @@ if (bb && fullWidthButtonHeight && bb.h > fullWidthButtonHeight + 4) problems.pu
 await p.setViewportSize({ width: 760, height: 300 })
 await p.reload({ waitUntil: 'networkidle' })
 await shot(p, 's6-after-reload.png')
-const zero = (await counter.innerText()).includes('0')
-say(`S6 counter   : ${await counter.innerText()}`)
-if (!zero) problems.push('S6: 刷新后计数没有归零')
+if (!(await trial.innerText()).includes('结构试跑')) problems.push('S6: 刷新之后那行「结构试跑」不见了')
   // S7 深色的系统上第一次打开 —— 首屏就该是暗的，不先闪一下浅色。
   // 用**独立上下文**：S4 已经写过显式偏好，同一上下文会把它带过来，就测不出"跟随系统"了。
   const darkCtx = await b.newContext({ viewport: { width: 760, height: 300 }, deviceScaleFactor: 2, locale: 'zh-CN', colorScheme: 'dark' })
@@ -260,7 +253,7 @@ if (!zero) problems.push('S6: 刷新后计数没有归零')
   dp.on('pageerror', (e) => problems.push(`S7 pageerror: ${e.message}`))
   // 把主包延迟住：这期间根元素上就该已经是暗的，否则说明主题是等 JS 跑完才写的（会先闪浅色）
   await dp.route('**/src/main.tsx*', async (route) => { await new Promise((r) => setTimeout(r, 1500)); await route.continue() })
-  await dp.goto(`${BASE_URL}/app/`, { waitUntil: 'commit' })
+  await dp.goto(`${BASE_URL}/app/scaffold`, { waitUntil: 'commit' })
   let firstPaint
   try {
     await dp.waitForFunction(() => document.documentElement.dataset.theme === 'dark', null, { timeout: 1200 })
@@ -269,7 +262,7 @@ if (!zero) problems.push('S6: 刷新后计数没有归零')
   say(`S7 firstPaint: ${JSON.stringify(firstPaint)}（主包仍在路上）`)
   if (firstPaint !== 'dark') problems.push('S7: 深色系统下首屏不是暗色（会先闪浅色）')
   await dp.unroute('**/src/main.tsx*')
-  await dp.goto(`${BASE_URL}/app/`, { waitUntil: 'networkidle' })
+  await dp.goto(`${BASE_URL}/app/scaffold`, { waitUntil: 'networkidle' })
   await dp.waitForTimeout(250)
   await shot(dp, 's7-system-dark.png')
   const sysDark = await dp.evaluate(() => ({

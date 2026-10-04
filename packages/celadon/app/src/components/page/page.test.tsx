@@ -14,7 +14,7 @@ describe('the page building blocks', () => {
         </PageSection>
       </Page>,
     )
-    expect(screen.getByRole('main')).toHaveClass('page__body')
+    expect(screen.getByText('甲').closest('.page__body')).not.toBeNull()
     expect(screen.getByRole('region', { name: '一段' })).toBeInTheDocument()
     expect(screen.getByText('标题')).toBeInTheDocument()
     expect(screen.getAllByText(/甲|乙/)).toHaveLength(2)

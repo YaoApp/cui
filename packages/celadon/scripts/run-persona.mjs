@@ -10,14 +10,27 @@ import { fileURLToPath } from 'node:url'
 const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const FEATURES = join(PACKAGE, 'app', 'src', 'features')
 
+/* 目录可能是**嵌套**的（`features/scaffold/overview/tests/`）：递归找 *.agent.mjs。
+   只扫一层会在归档后收 0 个场景（2026-10-04 复核抓到）。 */
 const found = []
-for (const feature of readdirSync(FEATURES, { withFileTypes: true })) {
-  if (!feature.isDirectory()) continue
-  const dir = join(FEATURES, feature.name, 'tests')
+const stack = [FEATURES]
+while (stack.length) {
+  const dir = stack.pop()
   let entries
-  try { entries = readdirSync(dir) } catch { continue }
-  for (const name of entries) {
-    if (name.endsWith('.agent.mjs')) found.push({ scenario: name.replace('.agent.mjs', ''), path: join(dir, name) })
+  try {
+    entries = readdirSync(dir, { withFileTypes: true })
+  } catch {
+    continue
+  }
+  for (const entry of entries) {
+    const full = join(dir, entry.name)
+    if (entry.isDirectory()) {
+      if (entry.name !== 'node_modules') stack.push(full)
+      continue
+    }
+    if (entry.name.endsWith('.agent.mjs')) {
+      found.push({ scenario: entry.name.replace('.agent.mjs', ''), path: full })
+    }
   }
 }
 

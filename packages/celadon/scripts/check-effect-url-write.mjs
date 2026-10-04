@@ -22,7 +22,7 @@ try { statSync(TARGET) } catch {
 const CODE = /\.(?:[cm]?[jt]sx?)$/
 /* 唯一例外：绑定的实现本身。它做的就是"值 ↔ URL"这一件事，机制必须住在这里，
    而且它守住了不变量（读只在 POP · 写没变就不动）。 */
-const ALLOWED = new Set(['platform/router/use-url-binding.ts'])
+const ALLOWED = new Set([]) // 空着：URL 只由页面自己的同步钩子写（2026-10-04 撤掉公共钩子）
 const WRITES = /\b(?:setSearchParams|navigate)\s*\(/
 
 /** 从 `useEffect(` 的 `(` 开始，找到与它配对的 `)`；顺带跳过字符串与模板串，别被里面的括号骗了。 */

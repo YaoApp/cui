@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /* 拟人测试的采集脚本 —— 只做机器能做的部分：开真浏览器、按剧本走一遍、截图、报客观测量。
-   判定（看图 · OCR · 决策模型 · 是否转人）写在同目录的 data-check-trial.agent.md 里。
+   判定（看图 · OCR · 决策模型 · 是否转人）写在同目录的 requests-trial.agent.md 里。
 
-   验证的是**接口验证页**这条路：`/app/data-check` 上的四格接口（公开/受保护 × GET/POST）
+   验证的是**接口验证页**这条路：`/app/scaffold/requests` 上的四格接口（公开/受保护 × GET/POST）
    与「取数状态」那节。接口用**冻结的桩数据**应答（与剧本「判定数据（冻结）」逐字一致）——
    拟人层判的是画面与文案，不是后端；桩住才可复现、可断言的测量才有意义。
 
@@ -12,10 +12,10 @@ import { chromium } from '@playwright/test'   // 直接依赖；playwright-core 
 import { readdirSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { capturePage, captureScreen, shotDir } from '../../../../../scripts/shots.mjs'
+import { capturePage, captureScreen, shotDir } from '../../../../../../scripts/shots.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
-const PACKAGE = resolve(HERE, '../../../../..')
+const PACKAGE = resolve(HERE, '../../../../../..')
 const BASE_URL = process.env.CUI_BASE_URL ?? 'http://localhost:5200'
 
 const SCENARIO = basename(fileURLToPath(import.meta.url)).replace('.agent.mjs', '')
@@ -63,7 +63,7 @@ try {
   say(`screen       : skipped — ${e.message}`)
 }
 
-/* ── 冻结的桩数据（与 data-check-trial.agent.md 的「判定数据（冻结）」逐字一致）
+/* ── 冻结的桩数据（与 requests-trial.agent.md 的「判定数据（冻结）」逐字一致）
    服务信息给 openapi 前缀；公开 GET/POST 各回各的值；受保护两条回 401（未登录 → 页面按码翻成「需要登录」，并标「未登录（缺凭据）」）。*/
 const SERVICE = { name: 'Yao Agents', version: '1.0.0', openapi: '/v1' }
 const GET_VALUE = { MESSAGE: 'data-check-persona-get', SERVER_TIME: '2020-01-01T00:00:00Z' }
@@ -86,23 +86,23 @@ await p.route('**/v1/**', (route) => {
 /** 结果排（四格接口）里某一格的可见文字。 */
 const cellText = (label) =>
   p.evaluate((name) => {
-    const cell = [...document.querySelectorAll('.data-check__cell')].find(
-      (el) => el.querySelector('.data-check__label')?.textContent?.trim() === name,
+    const cell = [...document.querySelectorAll('.requests__cell')].find(
+      (el) => el.querySelector('.requests__label')?.textContent?.trim() === name,
     )
     return cell ? (cell.textContent ?? '').replace(/\s+/g, ' ').trim() : null
   }, label)
 
 /** 四态那节当前高亮的是哪一态。 */
 const activeState = () =>
-  p.evaluate(() => document.querySelector('.data-check__state[data-active="true"]')?.textContent?.trim() ?? null)
+  p.evaluate(() => document.querySelector('.requests__state[data-active="true"]')?.textContent?.trim() ?? null)
 
 /** 结果排四格的几何：盒子 + 内容（值）的实际范围。 */
 const measureRow = () =>
   p.evaluate(() => {
-    const row = [...document.querySelectorAll('.data-check__row')].find(
-      (el) => el.querySelectorAll('.data-check__cell').length === 4,
+    const row = [...document.querySelectorAll('.requests__row')].find(
+      (el) => el.querySelectorAll('.requests__cell').length === 4,
     )
-    const cells = [...row.querySelectorAll('.data-check__cell')].map((el) => {
+    const cells = [...row.querySelectorAll('.requests__cell')].map((el) => {
       const rect = el.getBoundingClientRect()
       const value = el.querySelector('code').getBoundingClientRect()
       return {
@@ -119,8 +119,8 @@ const measureRow = () =>
   })
 
 // ── S1 打开页面：四态那节用公开 GET（挂载即跑），落定后「成功」该高亮
-await p.goto(`${BASE_URL}/app/data-check`, { waitUntil: 'networkidle' })
-await p.waitForFunction(() => document.querySelector('.data-check__state[data-active="true"]')?.textContent?.trim() === '成功')
+await p.goto(`${BASE_URL}/app/scaffold/requests`, { waitUntil: 'networkidle' })
+await p.waitForFunction(() => document.querySelector('.requests__state[data-active="true"]')?.textContent?.trim() === '成功')
 await shot(p, 's1-open.png')
 const s1 = await activeState()
 const title = await p.title()

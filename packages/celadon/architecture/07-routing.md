@@ -9,7 +9,7 @@
 - **React Router 库模式**：`react-router@^8`，**不装 `@react-router/dev`**（不用框架模式）。
 - **不用 hash 路由**：两端都提供真实路径空间；hash 会让宿主跳转 · 分享 · 埋点都多带一层。
   代价是**托管方要配 SPA fallback**（未知路径回 `index.html`，见 `04-host-integration.md`）。
-- **一个面板一个具名参数**，别在参数值里再塞分隔符（`?sideThread=456` ✓ · `?side=thread:456` ✗）。
+- **一个面板一个具名参数**，别在参数值里再塞分隔符（`?q=alpha` ✓ · `?filter=name:alpha` ✗）。
 - **默认值不进 URL**（默认的 `activeTab=list` 之类删掉），链接才短。
 - **分享链接只有一处生成**：`platform/utils/share-url.ts` 的 `buildShareUrl(...)`，带单测 ——
   手拼 URL 是这套东西烂掉的开始。
@@ -29,7 +29,7 @@
 | 是什么 | 放哪 | 例 |
 | --- | --- | --- |
 | **主对象** | 命名空间之下的 path | `/<namespace>/inbox/123` |
-| **面板里打开的对象** · 选中项 · 环境态 | **query（具名）** | `?sideThread=456` · `?activeTab=files` |
+| **面板里打开的对象** · 选中项 · 环境态 | **query（具名）** | `?q=alpha` · `?activeTab=files` |
 
 - **表面是脚手架，不是产品形态**：主区与侧边只是**跑通地址语法用的两个挂载点**；
   产品设计定了之后按设计改。本节约束的是**地址怎么写**（对象在路径、面板在具名 query），

@@ -32,6 +32,18 @@ test('the refresh button stays inside a narrow window', async ({ page }) => {
   expect(b.x + b.width).toBeLessThanOrEqual(1080)
   // 且与导航**同一行**：旧布局会把刷新换到下一行或推出窗口
   expect(Math.abs(b.y + b.height / 2 - (n.y + n.height / 2))).toBeLessThan(12)
+  // 真正的判据在这里：右侧动作块**不缩**、且自己靠右 —— 去掉这两条，导航就会把它挤出去
+  const [actionsBox, headerBox] = await Promise.all([
+    page.locator('.header__actions').boundingBox(),
+    page.locator('header.header').boundingBox(),
+  ])
+  expect(actionsBox).not.toBeNull()
+  expect(headerBox).not.toBeNull()
+  const [ab, hb] = [actionsBox!, headerBox!]
+  // 右侧动作块**不缩**，且贴着页头右边缘（去掉这两条，导航会把它挤出去）
+  const shrink = await page.locator('.header__actions').evaluate((el) => getComputedStyle(el).flexShrink)
+  expect(shrink).toBe('0')
+  expect(Math.abs(ab.x + ab.width - (hb.x + hb.width))).toBeLessThanOrEqual(24)
 })
 
 /* 页头属于外壳，必须横跨整宽：页面自己的根不许再加内边距（2026-10-04 截图抓到 routing 缩进了一层）。 */
@@ -66,3 +78,14 @@ for (const [path, cls] of [
     expect(background).not.toBe('rgba(0, 0, 0, 0)')
   })
 }
+
+/* 内边距只准有一层（`Page`）：两层会把正文再缩进 24px（2026-10-04 复核抓到 bridge/requests 叠成 48）。 */
+test('the page body is indented exactly once', async ({ page }) => {
+  for (const path of ['/app/scaffold', '/app/scaffold/routing', '/app/scaffold/bridge', '/app/scaffold/requests']) {
+    await page.goto(path)
+    const box = await page.locator('main.surface > * > main, main.surface > * > div.page__body, main.surface .page__body').first().boundingBox()
+    expect(box, `${path} 没有正文容器`).not.toBeNull()
+    // 24 是 `Page` 的内边距；48 说明页面自己又叠了一层
+    expect(Math.round((box as { x: number }).x), `${path} 正文缩进不对`).toBeLessThan(40)
+  }
+})

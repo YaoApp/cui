@@ -4,7 +4,7 @@
  * 依据 `15-platform.md` §5：宿主差异只在平台层消化；要问"这是不是桌面 / 能不能做某事"先问 `client/`
  * （能力开关），要读写服务地址走 `service/` 的面孔；`bridge/` 是平台层的内部机制。
  *
- * 白名单只有 `features/verify/**` —— 它是桥检查页，用途就是逐条点名调命令。
+ * 白名单只有 `features/scaffold/bridge/**` —— 它是桥检查页，用途就是逐条点名调命令。
  * 目标目录取 process.argv[2]，默认 `app/src`。 */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'

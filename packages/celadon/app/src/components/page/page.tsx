@@ -4,7 +4,7 @@ import './page.less'
 /* **页面公共件**：正文容器 · 一段带标题 · 一行卡片 · 一行提示。
    页面自己的 `.less` 只留特有的（`plan/05-scaffold.md` §5）。 */
 export function Page({ children, className }: { children: ReactNode; className?: string }) {
-  return <main className={className ? `page__body ${className}` : 'page__body'}>{children}</main>
+  return <div className={className ? `page__body ${className}` : 'page__body'}>{children}</div>
 }
 
 export function PageSection({
