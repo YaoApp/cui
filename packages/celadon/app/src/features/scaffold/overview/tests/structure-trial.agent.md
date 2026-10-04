@@ -88,7 +88,7 @@
 
 | 轮次 | 时间 | 状态 | 日志明细 |
 | --- | --- | --- | --- |
-| 验收轮 | 2026-10-04 20:40 | **通过**（2/2 场景）| `structure-trial-2027.log`（`pnpm test:persona`，先 `pnpm build`）|
+| 验收轮 | 2026-10-04 20:40 | **通过**（2/2 场景）| `structure-trial-2041.log`（`pnpm test:persona`，先 `pnpm build`）|
 | 10-03 全天 | 多轮：命名空间改造的地址回归 · S5 判据补强（按钮不许折行）| **通过** —— 最新 `structure-trial-1458.log` · 截图 `shots/structure-trial/` |
 | 2026-10-03 15:14 | 复核者独立复核（隔离上下文）| **通过** —— `structure-trial-1459.log` |
 | 1 | 2026-10-01 14:34 | **不通过** —— S1/S2/S3/S5/S6 过；**S4 深色下整页只深了自己那条带，下方仍纯白**（决策模型：`fail`，置信度 1.0；性质 `blocker`，0.99）| `app/logs/2026-10-01/persona-1437.log` —— 该日志已随后来的命名整理删除；当轮截图存档在工作区 `.agent/evidence/2026-10-01-structure-trial/` |

@@ -1,6 +1,6 @@
 /* **这一页的页面级用例**：钉住**调用点**的接线（不只是那些纯函数）。
  *
- * 为什么要有它们：复核者用变异证明过——把 `verify.tsx` 里的接线改回 `false`、或整节删掉，
+ * 为什么要有它们：复核者用变异证明过——把 `bridge.tsx` 里的接线改回 `false`、或整节删掉，
  * 三条命令全绿。判定层有测试不够，**调用点**也得钉住。 */
 
 import { render, screen, waitFor } from '@testing-library/react'

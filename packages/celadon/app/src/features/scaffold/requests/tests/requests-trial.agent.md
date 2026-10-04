@@ -47,9 +47,9 @@
 | 项 | 冻结值 |
 | --- | --- |
 | 服务信息 | `{ name: "Yao Agents", version: "1.0.0", openapi: "/v1" }` |
-| `/v1/helloworld/public`（GET）| `{"MESSAGE":"data-check-persona-get","SERVER_TIME":"2020-01-01T00:00:00Z"}` |
-| `/v1/helloworld/public`（POST）| `{"MESSAGE":"data-check-persona-post","SERVER_TIME":"2020-01-01T00:00:00Z"}` |
-| `/v1/helloworld/protected`（GET/POST）| HTTP 401 · `{"error":"unauthorized","error_description":"no credential was sent"}` |
+| `/v1/overviewworld/public`（GET）| `{"MESSAGE":"data-check-persona-get","SERVER_TIME":"2020-01-01T00:00:00Z"}` |
+| `/v1/overviewworld/public`（POST）| `{"MESSAGE":"data-check-persona-post","SERVER_TIME":"2020-01-01T00:00:00Z"}` |
+| `/v1/overviewworld/protected`（GET/POST）| HTTP 401 · `{"error":"unauthorized","error_description":"no credential was sent"}` |
 
 **界面文字**（语言钉基准 `zh-CN`）：四态图例 成功 / 加载中 / 空闲 / 失败 · 结果格前缀 成功 · 标注 未登录（缺凭据）·
 失败诊断按引擎给的码原样上屏（本桩为 `unauthorized`，引擎原文不上屏；页面按码翻成「需要登录」）。
@@ -71,11 +71,11 @@
 
 | 项 | 为什么不做 |
 | --- | --- |
-| 真后端是不是这么回 | 后端契约由 `data/helloworld` 的单元用例与 `send` 的单测覆盖；拟人判的是画面与文案 |
+| 真后端是不是这么回 | 后端契约由 `data/overviewworld` 的单元用例与 `send` 的单测覆盖；拟人判的是画面与文案 |
 | 受保护接口"登录后能不能通" | 开发实例的授权策略会拒（403 `no match, default policy: deny`）→ 本批只验「未登录」这一态；登录后 200 无实证 ✗ |
 | 四态的"加载中"单独截一帧 | 桩数据落定太快，抓不住；在飞态由 `page-layout.browser.ts` 与页面用例控制挂起覆盖 |
 | 中文输入法 / 全键盘 | 这一页没有输入框；按钮的键盘可达性由基础件单测覆盖 |
-| 主题深浅两套观感 | 本页无主题控件；壳的主题由 `hello` 的剧本覆盖 |
+| 主题深浅两套观感 | 本页无主题控件；壳的主题由 `overview` 的剧本覆盖 |
 
 ## 修改记录
 

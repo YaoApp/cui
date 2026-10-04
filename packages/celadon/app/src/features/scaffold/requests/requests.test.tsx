@@ -1,6 +1,6 @@
 /* **这一页的页面级用例**：钉住**调用点**的接线（不只是那些纯函数）。
  *
- * 与 `verify.test.tsx` 同一套写法：mock 平台层、挂真页面、断言关键行为。
+ * 与 `requests 页` 同一套写法：mock 平台层、挂真页面、断言关键行为。
  * 这里连 `@/platform/transport/fetch` 一起换掉 —— 于是走的是**真的 `send`**：
  * 服务信息（`/.well-known/yao`）→ 地址（service.endpoint）→ 出口（transportFetch）→ 解包裹（unwrap）；
  * 受保护的两条在假出口上回 401，页面照预期把结果标注成"预期失败"。 */
