@@ -7,8 +7,9 @@
   flex: 1;
   background: var(--background-content);
 
+  /* 内边距归 `Page`（`page__body`）；这里只是内容容器，别再叠一层（2026-10-04 复核抓到 48px） */
   &__body {
-    padding: var(--spacing-24);
+    display: contents;
   }
 
   &__actions {

@@ -7,7 +7,6 @@ import 'i18next'
 export type I18nKey =
   | 'bridge.actions'
   | 'bridge.appInfo'
-  | 'bridge.back'
   | 'bridge.bridge'
   | 'bridge.capabilities'
   | 'bridge.client'
@@ -92,10 +91,6 @@ export type I18nKey =
   | 'bridge.write'
   | 'client.bootFailed'
   | 'client.bootRetry'
-  | 'entityPanel.close'
-  | 'entityPanel.id'
-  | 'entityPanel.kind'
-  | 'entityPanel.label'
   | 'header.refresh'
   | 'home.client'
   | 'home.clientDesktop'
@@ -135,16 +130,13 @@ export type I18nKey =
   | 'overview.hostNone'
   | 'overview.hostReady'
   | 'overview.icons'
-  | 'overview.loading'
   | 'overview.namespace'
   | 'overview.os'
-  | 'overview.refreshed'
   | 'overview.title'
   | 'overview.trial'
   | 'overview.version'
   | 'requests.authenticatedDenied'
   | 'requests.authzHint'
-  | 'requests.back'
   | 'requests.colActions'
   | 'requests.emailUnverified'
   | 'requests.emailVerified'
@@ -221,7 +213,6 @@ declare module 'i18next' {
       translation: {
         'bridge.actions': string
         'bridge.appInfo': string
-        'bridge.back': string
         'bridge.bridge': string
         'bridge.capabilities': string
         'bridge.client': string
@@ -306,10 +297,6 @@ declare module 'i18next' {
         'bridge.write': string
         'client.bootFailed': string
         'client.bootRetry': string
-        'entityPanel.close': string
-        'entityPanel.id': string
-        'entityPanel.kind': string
-        'entityPanel.label': string
         'header.refresh': string
         'home.client': string
         'home.clientDesktop': string
@@ -349,16 +336,13 @@ declare module 'i18next' {
         'overview.hostNone': string
         'overview.hostReady': string
         'overview.icons': string
-        'overview.loading': string
         'overview.namespace': string
         'overview.os': string
-        'overview.refreshed': string
         'overview.title': string
         'overview.trial': string
         'overview.version': string
         'requests.authenticatedDenied': string
         'requests.authzHint': string
-        'requests.back': string
         'requests.colActions': string
         'requests.emailUnverified': string
         'requests.emailVerified': string

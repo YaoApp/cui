@@ -106,7 +106,8 @@
 
 1. `grep -rn "components/nav\|components/header" app/src/features` 为空（页面不再自造导航）。
 2. `grep -rn "navigate(-1)" app/src/features` 为空（返回按钮删净）。
-3. 四个页面的 `.less` 合计行数下降 ≥ 40%，且 `__body`/`__heading`/`__cell`/`__notice` 只在 `page.less` 里出现。
+3. **未达成**（2026-10-04 复核实测 363 → 368 行）：公共件抽出来了，但各页仍保留自己的选择器；
+   行数不是目标，重复声明才是 —— 下一步真做设计统一时再收。
 4. 真客户端：首页显示出当前版本信息；从首页点导航能到索引页与三个工具页，从任一页能回首页；Windows 与 macOS 各一张截图。
 5. 路由表里旧的四条路径不再存在（`*` 落回 `/`）。
 

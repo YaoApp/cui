@@ -36,10 +36,3 @@ export function PageCell({ children }: { children: ReactNode }) {
   return <span className="page__cell">{children}</span>
 }
 
-export function PageNotice({ children }: { children: ReactNode }) {
-  return (
-    <p className="page__notice" role="status">
-      {children}
-    </p>
-  )
-}

@@ -23,7 +23,9 @@ test('the two switches sit on the first row, left aligned', async ({ page }) => 
 
   // 同一行（纵向重叠）
   expect(Math.abs(l.y - t.y)).toBeLessThan(24)
-  // 左对齐、只留间距：主题紧跟在语言右边，而不是被推到页面另一头
+  // **靠左**：语言控件贴着页面左边距（`flex-end`/`center` 都过不了这一条）
+  expect(l.x).toBeLessThan(120)
+  // 只留间距：主题紧跟在语言右边，而不是被推到页面另一头
   expect(t.x).toBeGreaterThan(l.x)
   expect(t.x - (l.x + l.width)).toBeLessThan(80)
   // 在版本信息**之上**

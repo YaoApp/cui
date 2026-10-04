@@ -49,7 +49,8 @@ test('composing in the filter does not submit, and the committed text filters', 
 
   // 组合中按回车 —— 不许提交。表单一旦真提交，查询串会被清掉 —— 那才是误提交的证据
   await filter.press('Enter')
-  await expect(page).toHaveURL(/\/app\/scaffold\/routing\/w1/)
+  // 必须是**没提交**的样子：查询串还在（提交会把 q 清掉）
+  await expect(page).toHaveURL(/\/app\/scaffold\/routing\/w1\?q=gam$/)
 
   // 上屏：候选词落地，过滤按最终文字生效
   await dispatchComposition(page, 'compositionend', 'gamma')

@@ -14,6 +14,10 @@ describe('buildShareUrl', () => {
     expect(buildShareUrl({ feature: 'scaffold/routing', object: 'w1' })).toBe('/app/scaffold/routing/w1')
   })
 
+  it('carries real parameters into the query', () => {
+    expect(buildShareUrl({ feature: 'scaffold/routing', object: 'w1' }, { q: 'alpha' })).toBe('/app/scaffold/routing/w1?q=alpha')
+  })
+
   it('drops defaults instead of writing them down', () => {
     expect(buildShareUrl({ feature: 'scaffold/routing', object: 'w1' }, { q: '', empty: undefined })).toBe('/app/scaffold/routing/w1')
   })

@@ -71,7 +71,6 @@ describe('RoutingPage', () => {
     renderAt('/scaffold/routing/w1')
     const share = screen.getByRole('link', { name: '分享这个视图' })
     expect(share.getAttribute('href')).toContain('/scaffold/routing/w1')
-    expect(share.getAttribute('href')).not.toContain('sideEntity')
   })
 })
 

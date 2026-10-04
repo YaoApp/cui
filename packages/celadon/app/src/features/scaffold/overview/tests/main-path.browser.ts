@@ -5,12 +5,12 @@ test('main path: the scaffold index has its header, nav and refresh', async ({ p
   await page.goto('/app/scaffold')
   // 标签页标题跟路由走
   await expect(page).toHaveTitle('总览 · CUI 2.0')
-  await expect(page.getByText('已刷新 0 次')).toBeVisible()
+  await expect(page.getByText(/结构试跑/)).toBeVisible()
 
   await page.getByRole('button', { name: '刷新' }).click()
 
-  // 重载这条路由：页面还在，计数回到 0（页头不再自己改页面状态）
-  await expect(page.getByText('已刷新 0 次')).toBeVisible()
+  // 重载这条路由：页面还在、页头还在
+  await expect(page.getByText(/结构试跑/)).toBeVisible()
   await expect(page.getByRole('button', { name: '刷新' })).toBeVisible()
 })
 

@@ -82,8 +82,12 @@ export function BridgePage() {
             ] as const)
           : ([['credential.key', async () => fail('credential.service_empty', 'no service address to key a credential', {})]] as const)),
       ] as const) {
-        const result = await call()
-        report(label, result, shouldRedact(label))
+        // 桥调用**不许抛**（失败是值）；真抛了也不能静默中断整段自检
+        try {
+          report(label, await call(), shouldRedact(label))
+        } catch (error) {
+          report(label, fail('bridge.threw', String(error), {}), true)
+        }
       }
       const pinged = await bridge.ping()
       setPing(pinged)
@@ -92,11 +96,13 @@ export function BridgePage() {
   }, [host])
 
   const run = (label: string, call: () => Promise<BridgeResult<unknown>>) => {
-    void call().then((result) => report(label, result, shouldRedact(label)))
+    void call()
+      .then((result) => report(label, result, shouldRedact(label)))
+      .catch((error: unknown) => report(label, fail('bridge.threw', String(error), {}), true))
   }
 
   return (
-    <div className="verify">
+    <div className="bridge">
       <ScaffoldPage title={t('bridge.title')}>
         <div className="bridge__body">
 

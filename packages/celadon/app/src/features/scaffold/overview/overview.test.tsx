@@ -17,8 +17,9 @@ function renderPage(entry = '/hello') {
 describe('OverviewPage', () => {
   it('renders the page header with a refresh button', () => {
     renderPage()
-    expect(screen.getByText('已刷新 0 次')).toBeInTheDocument()
-    /* 刷新是**路由重载**（`ScaffoldPage` 里 `navigate(0)`），不再是页面状态自增 */
+    expect(screen.getByText(/结构试跑/)).toBeInTheDocument()
+    /* 刷新是**路由重载**（`ScaffoldPage` 里 `navigate(0)`），不再是页面状态自增；
+       那条动作本身由 `scaffold-page.test.tsx` 钉住 */
     expect(screen.getByRole('button', { name: '刷新' })).toBeInTheDocument()
   })
 })

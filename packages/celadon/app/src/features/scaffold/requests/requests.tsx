@@ -112,9 +112,18 @@ export function RequestsPage() {
     if (result.ok) {
       setServiceUrl(result.value)
       setServiceNotice('')
-      // 换地址 = 换服务：页面上的登录态与退出态一起作废（平台那侧的缓存由 writeServiceAddress 作废）
-      loginCall.reset()
-      logoutCall.reset()
+      /* 换地址 = 换服务：页面上**所有**旧结果作废 —— 登录态、用户列表、四个格子、四态，
+         否则新服务还没请求，屏上还挂着旧服务的数据（2026-10-04 复核抓到）。 */
+      ;[
+        loginCall,
+        logoutCall,
+        listUsersCall,
+        publicGetCall,
+        publicPostCall,
+        protectedGetCall,
+        protectedPostCall,
+        scaffold,
+      ].forEach((call) => call.reset())
       setLoginEmail('')
     } else setServiceNotice(failureText(result))
   }, [serviceUrl])
@@ -151,7 +160,7 @@ export function RequestsPage() {
   ] as const
 
   return (
-    <div className="data-check">
+    <div className="requests">
       <ScaffoldPage title={t('requests.title')}>
         <div className="requests__body">
 

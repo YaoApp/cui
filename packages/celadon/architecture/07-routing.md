@@ -70,7 +70,7 @@
 
 | 条目种类 | 参数名 |
 | --- | --- |
-| `world-entity` | `?sideEntity=` |
+| `world-entity` | `?q=` |
 
 - **一个种类一个具名参数**，别把种类塞进参数值里（见 §1 的规则）。
 - **这张表住路由层**（绑定处）：**新增种类只加一行，公共 store 不动**。
@@ -83,7 +83,7 @@
 | --- | --- |
 | **路由表**：URL → 元素 | `routes.tsx` |
 | **外壳**：所有页面住在主区里（侧边能力 2026-10-04 撤掉，没有产品页面时它没有消费者）| `surface-layout.tsx` |
-| **导航项** 与"哪条 URL 是当前"的比较 | `platform/utils/nav.ts` —— 跨层共享的常量与纯函数 |
+| **导航项** 与"哪条 URL 是当前"的比较 | `features/scaffold/nav.ts` —— 跨层共享的常量与纯函数 |
 
 - **方向**：`routes/` 在依赖方向**最上层** —— 可以 import 组件层与能力层；**反过来不行**（单向）。
 跨层共享的词汇与纯函数住 `platform/utils/`（`share-url.ts`）；脚手架的导航住 `features/scaffold/nav.ts`

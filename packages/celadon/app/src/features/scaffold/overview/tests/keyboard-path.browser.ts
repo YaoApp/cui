@@ -18,5 +18,5 @@ test('the same path on the keyboard alone, with a visible focus ring', async ({ 
 
   await page.keyboard.press('Enter')
   await expect(page.getByRole('button', { name: '刷新' })).toBeVisible()
-  await expect(page.getByText('已刷新 0 次')).toBeVisible()
+  await expect(page.getByText(/结构试跑/)).toBeVisible()
 })

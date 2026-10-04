@@ -8,7 +8,6 @@ import { routerBasename } from '@/platform/router/basename'
 import { ScaffoldPage } from '../components/scaffold-page'
 import { FooBar } from './components/foo-bar'
 import type { IconId } from '@/platform/icons'
-import { useOverviewStore } from './overview.store'
 
 /* 脚手架索引页：**品牌标识一行、界面图标一行**（两者永不混用，见 design/icons.md §1），
    外加客户端自述。品牌用 manifest 里的全部自有标识；图标覆盖导航 / 动作 / 状态 / 文件 / 对象五类。 */
@@ -28,7 +27,6 @@ const ICON_SAMPLE: readonly IconId[] = [
 ]
 
 export function OverviewPage() {
-  const count = useOverviewStore((state) => state.count)
   const { theme, setTheme } = useThemePreference()
   const { t } = useTranslation()
   /* 客户端信息（15-platform.md §5.2）：**两个宿主导出同一组字段**，上层不判宿主。
@@ -41,7 +39,7 @@ export function OverviewPage() {
   return (
     <div className="overview">
       <ScaffoldPage title={t('overview.title')}>
-      <FooBar name="CUI 2.0" count={count} />
+      <FooBar name="CUI 2.0" />
       <div className="overview__actions">
         <ThemeToggle theme={theme} onSelect={setTheme} />
       </div>
