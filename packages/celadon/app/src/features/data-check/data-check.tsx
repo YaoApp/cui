@@ -21,8 +21,6 @@ import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
 import { Nav } from '@/components/nav'
 import { useTranslation } from '@/platform/i18n'
-import { resolvePreference, useLocaleStore } from '@/platform/i18n/locale.store'
-import { useThemeStore } from '@/platform/theme/theme.store'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
 import { useRequest, type RequestState } from '@/data'
@@ -35,7 +33,7 @@ import {
 import { listUsersQuery, loginTokenQuery, loginWebQuery, type TestUser } from '@/data/test'
 import { logoutQuery } from '@/data/user'
 import { readServiceAddress, writeServiceAddress } from '@/platform/service'
-import { client } from '@/platform/client'
+import { client, useLocalePreference, useThemePreference } from '@/platform/client'
 
 /** POST 的请求体（引擎会原样回显在 `POST_PAYLOAD` 里）—— 技术样本，不走语言包。 */
 const POST_BODY = { from: 'data-check' }
@@ -67,8 +65,8 @@ export function DataCheckPage() {
   /* 请求元数据：页面**不拼、不传** —— `send` 调用时自己从平台层取当前值
      （`platform/client/context.ts` 的 `currentPreferences()`），每次请求自动带上。
      这里只是把平台解析出的当前值显示出来，好让人看见请求带的是什么。 */
-  const locale = resolvePreference(useLocaleStore((state) => state.locale))
-  const theme = useThemeStore((state) => state.theme)
+  const { locale } = useLocalePreference()
+  const { theme } = useThemePreference()
 
   /** 一句话说清一个 state：成功印值，失败印钩子已经翻译好的文案。 */
   const stateText = (state: RequestState<unknown>) => {

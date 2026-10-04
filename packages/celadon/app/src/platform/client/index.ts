@@ -4,6 +4,7 @@
  * 「有没有宿主」是内部实现：`bridge/` 自己用，不从这里出去。 */
 
 export { client, loadClient, ClientBootError, type Client } from './facts'
+export { useLocalePreference, useThemePreference } from './use-preferences'
 export type { ArtifactKind, BuildInfo, ClientKind, Manifest, TargetOs } from './manifest'
 export type { Capabilities } from './capabilities'
 export type { ClientInfo } from './info'

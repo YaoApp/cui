@@ -262,6 +262,9 @@
 - **失败即不可继续**：桌面下宿主答不上来（桥不可用 · 命令失败 · 超时）→ 抛 `ClientBootError` → 入口渲染
   **错误面**（失败码 + 重试）；**不拿随机值兜底**（随机值只在 Web 是正确身份）。
 - **模块顶层不许读 `client`**：import 求值早于入口那句 await。
+- **React 里怎么读**：静态事实（`kind` · `os` · `manifest` · `capabilities` · `host` · `id`）**永不变化**，
+  渲染里直接读 `client` 即可，不需要订阅；会变的两项（语言 · 主题）用 `useLocalePreference()` /
+  `useThemePreference()`（值 + 动作，订阅留在平台层）—— **feature 与 component 不 import 语言 / 主题 store**。
 - **走面孔，不走机制**：问能力用 `client.capabilities`；读写服务地址用 `platform/service` 的
   `readServiceAddress` / `writeServiceAddress`。`features/` · `components/` · `routes/` 直接 import
   `platform/bridge` 由 `check-bridge-imports` 拦（白名单 `features/verify/**`，它是桥检查页）。
