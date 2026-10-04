@@ -1,7 +1,7 @@
 # 16 · 开发
 
 - **版本**：v1.5
-- **最后修改**：2026-10-04 09:12:00
+- **最后修改**：2026-10-04 09:13:15
 - **说明**：开发：服务与端口 · 代理 · 环境变量 · 日志
 
 ## 1. 规则
@@ -40,7 +40,7 @@
 | 应用（pm2 名）| 端口 | 干什么 |
 | --- | --- | --- |
 | `cui-dev` | **5199** | Vite dev（HMR），base `/app/`：`pnpm dev`（`--host 0.0.0.0 --port 5199 --strictPort`）|
-| `cui-dist` | **5200** | **静态托管构建产物**（带 SPA fallback）：`scripts/serve-dist.mjs`（`node scripts/serve-dist.mjs 5200`）—— **没有代理** ✗（见 §2.2）|
+| `cui-dist` | **5200** | **产物预览**：`vite preview --port 5200 --strictPort --host 0.0.0.0`（**继承 `server.proxy`** ✓，接口在预览里也通 ✓；`--host 0.0.0.0` **必须有** ✗，默认只绑 `localhost`）|
 | `celadon-design` | **8080** | 设计预览 `design/serve.mjs` |
 
 - **拟人层测的是 `dist/`**，所以它打的是预览端口（见 `14-testing.md`）。
@@ -60,7 +60,7 @@
 
 ### 2.2 产物预览的代理（5200 · 待做）
 
-- `cui-dist`（`scripts/serve-dist.mjs`）是**纯静态文件服务，没有代理** ✗ —— 构建后的应用请求 `/v1/…`、`/.well-known/yao` 会 **404** ✓。
+- `cui-dist` 现在就是 **`vite preview`** ✓（旧的 `scripts/serve-dist.mjs` **已弃用** ✗：深链 404 ✗、且没有代理 ✗）—— 预览里 `/v1/…` 与 `/.well-known` 与 dev 一致 ✓。
 - **正解是用 `vite preview` 的 `preview.proxy`**（官方机制 ✓，配置同样写在 `vite.config.ts` ✓），**不要自己手搓代理** ✗。
 - **待做**：`vite.config.ts` 现在只配了 `server.proxy`，**`preview.proxy` 尚未配**；在补上之前，5200 上的产物连不上后端。
 
@@ -69,7 +69,7 @@
 | 变量 | 谁读 | 默认 | 用途 |
 | --- | --- | --- | --- |
 | `YAO_SERVER_HOST` | 开发代理的目标 | **必须给**（不给 = 不建代理 → 根路径 404）| 开发期后端地址（例 `http://…:5099`）|
-| `CUI_BASE` | `vite.config.ts` · `scripts/serve-dist.mjs` | `app` | **命名空间**：base 与路由 basename 都取它（见 `04`）；根 `/` 不属于应用 |
+| `CUI_BASE` | `vite.config.ts` | `app` | **命名空间**：base 与路由 basename 都取它（见 `04`）；根 `/` 不属于应用 |
 | `CUI_BASE_URL` | `playwright.config.ts` · 拟人采集脚本 | 开发服务 `5199` · 拟人 `5200` | 测哪一份 |
 | `CUI_HEADED` | 拟人采集脚本 | 空 | `=1` 开真窗口 —— 截图里才有浏览器 |
 | `CUI_STEP_TIMEOUT` | 每层超时（`scripts/run-logged.mjs`）| `300` 秒 | 卡住时先看它 |

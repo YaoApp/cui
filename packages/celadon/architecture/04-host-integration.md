@@ -1,7 +1,7 @@
 # 04 · 制品与挂载（硬约束）
 
 - **版本**：v1.31
-- **最后修改**：2026-10-03 18:42:27
+- **最后修改**：2026-10-04 09:13:04
 - **说明**：制品构成 · 宿主挂载 · 放到哪（引擎 / 独立 / 桌面）· SPA fallback · 由命名空间推导的工程约束
 
 ## 1. 制品构成
@@ -25,7 +25,7 @@ dist/
 | --- | --- |
 | **命名空间** | 应用整个跑在**构建决定的命名空间**之下（`/<namespace>/`，默认 `app`，`CUI_BASE` 覆盖）；React Router 的 `basename` 与 Vite 的 `base` **取同一个值**；**根 `/` 不属于应用**，两端一致；PWA 的 `scope` / `start_url` 同步 |
 | **表面** | 命名空间之下：主区无前缀；**侧边**是 `side/` 前缀（见 `07-routing.md` §2）|
-| **SPA fallback** | **托管方必须配**：未知路径回 `index.html`，只给导航请求（`Accept: text/html`）；缺的静态资源仍 404。路径路由的代价，预览用 `scripts/serve-dist.mjs` |
+| **SPA fallback** | **托管方必须配**：未知路径回 `index.html`，只给导航请求（`Accept: text/html`）；缺的静态资源仍 404。路径路由的代价，**预览用 `vite preview`**（它**继承 `server.proxy`** ✓，接口在预览里也通 ✓；见 `16-development.md` §2.2）。旧的 `scripts/serve-dist.mjs` |
 | **SSE 三个头**（**托管方 · 开发代理**）| `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no`（见 `16-development.md`）|
 
 ## 3. `dist/` 的托管方式
