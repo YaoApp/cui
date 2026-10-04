@@ -35,7 +35,13 @@ export type Failure = {
 /** 一次调用的结果（成功的值 / 失败的形状）。 */
 export type Result<T> = { ok: true; value: T } | ({ ok: false } & Failure)
 
-/** **0.2 列表与分页只有一种**（旧代码四套命名一律归到这里）。 */
+/** **0.2 列表与分页只有一种**（旧代码四套命名一律归到这里）。
+ *
+ *  **单条（详情）不走这里**：服务端单条也是 `{ data: T }` 的包裹，`unwrap<T>(raw)` 剥掉就完事 ——
+ *  **不为"单条"造第二种壳**（旧代码给列表和详情各写一套 `GetData/IsError` ✗）。
+ *  **列表行与详情要不要分两个类型，按域决定**：引擎的列表返回的通常就是实体本身
+ *  （`yao/openapi/agent/assistant.go:184-195` 里映射的是同一组对象）；确实少字段的域再加 `XxxSummary`，
+ *  **不预先抽象**。详情页独有的东西（权限 · 关联计数）由该域的 `map.ts` 或页面自己组，**不塞进实体**。 */
 export type Page<T> = {
   items: readonly T[]
   /** 总数（拿不到时为 undefined —— 不编 0，避免"看起来是空"） */
