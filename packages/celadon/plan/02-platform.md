@@ -1,7 +1,7 @@
 # 02 · 平台地基（产品级）
 
 - **版本**：v0.2（计划 + 进度）
-- **最后修改**：2026-10-04 09:00:05
+- **最后修改**：2026-10-04 09:08:10
 - **说明**：把平台层从"规范先行"做成产品级地基 · 依赖顺序 · 逐项验收 · 未定项
 
 > **这份是计划，不是规范。** 规则在 [`../architecture/15-platform.md`](../architecture/15-platform.md)；
@@ -120,25 +120,31 @@
 - [x] 配套宿主：**`YaoApp/celadon-desktop`**（不是 `cui-desktop`）· **两份构建**（Web 挂 `/<namespace>/` · 客户端走根）· 产物挂载已定
 - 验收：Web 下这两处不存在；调用前先问能力开关
 
-### 2.2.2 开发代理：**dev 用 base `/`**（已实测可用 · 2026-10-04）
+### 2.2.2 开发代理：根路径 + `YAO_SERVER_HOST`（**已实测可用 · 2026-10-04**）
 
-**规矩**：**dev 的请求路径必须与生产一致** —— 引擎在**站点根**下（`/.well-known` · `/v1`），应用不给自己加前缀。
+**规矩**：**只用 Vite 官方的 `server.proxy`** ✓（不引第三方、不自己挂中间件 ✗）；代理键是**根路径**
+（`/.well-known` · `/v1`）—— **dev 的请求路径必须与生产一致**（生产里应用在 `/app/` 下、**引擎在站点根**下 ✓）。
 
-**实测（真后端 `<dev-backend-host>:5099`，2026-10-04）**：
+**实测（真后端 `<dev-backend-host>:5099`）**：
 
-| 跑法 | `GET /v1/helloworld/public?locale=zh-CN&accept=cui-web` |
+| 情形 | `GET /v1/helloworld/public` |
 | --- | --- |
-| **`CUI_BASE=''`（base `/`）** | **200** + `{"MESSAGE":"HELLO, WORLD","APP":"Yao Agents",…}` ✓ |
-| 默认（base `/app/`）| **404** ✗ —— Vite 的 base 中间件先答根路径，用户中间件（连 `enforce: 'pre'`）都排在它后面 ✗ |
+| `base: '/app/'` + 根路径代理键 + **`YAO_SERVER_HOST` 已给** | **200** + `{"MESSAGE":"HELLO, WORLD",…}` ✓ |
+| 同上但 **`YAO_SERVER_HOST` 没给** | **404** ✗（落到 Vite 自身：`The server is configured with a public base URL of /app/` ✓）|
 
-**可用的命令**：**`pnpm dev:client`**（`scripts/dev-client.mjs` 已补 `CUI_BASE: ''` ✓）——
-它就是**客户端那种跑法**（桌面 = 应用在根 ✓），**请求路径与生产一致** ✓；顺带 `/.well-known/yao` 200 ✓、`/data-check` 200 ✓。
+**⚠️ 曾经的假结论（已推翻）**：一度写成"base `/app/` 时 base 中间件先拦根路径，必须加插件或换 base" ✗ ——
+**错** ✓。真因是**那个 dev server 没带 `YAO_SERVER_HOST`** ✓，而且我 curl 的是**没杀干净的旧服务** ✗。
+**别再为此加插件 / 加依赖 / 改 base** ✗。
 
-**web 命名空间（base `/app/`）下的 dev 不能代理根路径** ✗ —— 要它也能连真后端，只有给应用请求加 `/app` 前缀 ✗（生产没有这条路径）或换 base ✓；**两者都不做**：**要连真后端就用 `dev:client`** ✓。
+**地址怎么给**（`16 §3`）：写进 `packages/celadon/.env`（**已 gitignore** ✓）：`YAO_SERVER_HOST=http://<dev 后端>:5099` ✓。
+**pm2 管的 `cui-dev` 要生效**：`YAO_SERVER_HOST=… pm2 restart cui-dev --update-env` ✓ 再 `pm2 save` ✓
+（**别裸 `kill`** ✗ —— pm2 会把同一份配置再拉起来，实测重启计数被刷到 **243** 次 ✗）。
 
-**另外两条实测事实**：① 引擎**不放跨域**（无 `Access-Control-Allow-Origin` · `OPTIONS` 预检 404 ✗）→ **代理必需**，浏览器直连不行 ✓。② 受保护接口在未登录时回 **401** ✓（预期 ✓）。
+**测试纪律**（今天的教训）：① 起/测服务前先 `lsof -nP -iTCP:<port> -sTCP:LISTEN` **确认端口空** ✓
+（否则 curl 打到旧服务，**结论全假** ✗）② **只杀自己起的那个 PID**，**别顺父进程往上杀** ✗（会杀掉自己那层 ✓）。
 
-**踩过的坑（记下）**：起测试服务**前必须确认端口空**（`lsof -nP -iTCP:<port> -sTCP:LISTEN` ✓）—— 否则 curl 打到**上次没杀干净的旧服务**上，结论全假 ✗；**只杀自己起的那个 PID**，别顺着父进程往上杀 ✗（会把自己那层的进程杀掉 ✓）。
+**5200（`cui-dist`）待做**：它是**纯静态托管**，没有代理 ✗ → 构建产物请求 `/v1/…` 404 ✓；
+正解是 **`vite preview` 的 `preview.proxy`** ✓（配置同样写在 `vite.config.ts` ✓），**不手搓代理** ✗。
 
 ### 2.2.1 服务信息的读与存（**已定**，2026-10-04）
 
