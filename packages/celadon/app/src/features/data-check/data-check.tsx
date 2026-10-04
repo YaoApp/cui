@@ -15,7 +15,7 @@ import './data-check.less'
  * 失败一律显示**按码翻译过的文案**（`bridgeErrorText`），与 `verify` 页同一套规矩。
  * **秘密不上屏**：结果区只印接口返回的值，从不读凭据，也不印请求头（凭据由出口自己带，见 17-transport.md）。 */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
@@ -29,9 +29,7 @@ import { bridgeErrorText } from '@/platform/bridge'
 import { loadServiceInfo, type ServiceInfo } from '@/platform/service'
 import { send, useRequest, type RequestState, type Result } from '@/data'
 import { protectedGet, protectedPost, publicGet, publicPost } from '@/data/helloworld'
-
-/** 结果区的一行：标签 · 文案 · 是不是"预期失败"（受保护的两条）。 */
-type Line = { id: number; label: string; text: string; expected: boolean }
+import { useDataCheckStore } from './data-check.store'
 
 /** POST 的请求体（引擎会原样回显在 `POST_PAYLOAD` 里）—— 技术样本，不走语言包。 */
 const POST_BODY = { from: 'data-check' }
@@ -51,20 +49,17 @@ export function DataCheckPage() {
   /* 请求元数据：页面**不拼、不传** —— `send()` 调用时自己从平台层取当前值
      （`platform/client/context.ts` 的 `currentPreferences()`），每次请求自动带上。
      这里只是把平台解析出的当前值显示出来，好让人看见请求带的是什么。 */
+  const { lines, report: pushLine } = useDataCheckStore()
   const locale = resolvePreference(useLocaleStore((state) => state.locale))
   const theme = useThemeStore((state) => state.theme)
 
-  const [lines, setLines] = useState<Line[]>([])
-  const nextId = useRef(0)
 
   /** 一次调用的结果：成功显示值，失败显示**翻译过的**文案（缺翻译时回退诊断并告警）。 */
   const report = (label: string, result: Result<unknown>, expected = false) => {
     const text = result.ok
       ? `${t('dataCheck.ok')}: ${JSON.stringify(result.value)}`
       : bridgeErrorText(translate, result)
-    nextId.current += 1
-    const line: Line = { id: nextId.current, label, text, expected }
-    setLines((prev) => [line, ...prev].slice(0, 20))
+    pushLine({ label, text, expected })
   }
 
   /** 钩子落定后记一笔（idle / loading 不记）—— 取数在钩子里，这里只负责"上了屏"。 */
