@@ -48,19 +48,10 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, import.meta.dirname, '')
   const proxyTarget = process.env.YAO_SERVER_HOST || env.YAO_SERVER_HOST
   const enginePaths = ['.well-known', 'v1']
+  /* **代理挂在根路径**：dev 的请求路径必须与生产一致 —— 生产里引擎就在站点根下，
+     带应用命名空间（`/app/v1/…`）的请求在生产并不存在。实测：根路径下代理先于 base 中间件生效。 */
   const devProxy: Record<string, ProxyOptions> = proxyTarget
-    ? Object.fromEntries(
-        enginePaths.map((path) => [
-          `/${path}`,
-          {
-            target: proxyTarget,
-            changeOrigin: true,
-            ws: true, // 长连接（16 §1）；**SSE 的响应头等接 SSE 时按 §1 三头一起加**
-                                  // 长连接（16 §1）
-
-          },
-        ]),
-      )
+    ? Object.fromEntries(enginePaths.map((path) => [`/${path}`, { target: proxyTarget, changeOrigin: true }]))
     : {}
 
   return {
