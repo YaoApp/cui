@@ -48,7 +48,6 @@ export type I18nKey =
   | 'dataCheck.authzHint'
   | 'dataCheck.back'
   | 'dataCheck.colActions'
-  | 'dataCheck.credentials'
   | 'dataCheck.emailUnverified'
   | 'dataCheck.emailVerified'
   | 'dataCheck.expectedFailure'
@@ -69,10 +68,6 @@ export type I18nKey =
   | 'dataCheck.loginResult'
   | 'dataCheck.loginTest'
   | 'dataCheck.loginTestHint'
-  | 'dataCheck.loginToken'
-  | 'dataCheck.loginTokenResult'
-  | 'dataCheck.loginWeb'
-  | 'dataCheck.loginWebResult'
   | 'dataCheck.noEmailForLogin'
   | 'dataCheck.ok'
   | 'dataCheck.protectedGet'
@@ -252,7 +247,6 @@ declare module 'i18next' {
         'dataCheck.authzHint': string
         'dataCheck.back': string
         'dataCheck.colActions': string
-        'dataCheck.credentials': string
         'dataCheck.emailUnverified': string
         'dataCheck.emailVerified': string
         'dataCheck.expectedFailure': string
@@ -273,10 +267,6 @@ declare module 'i18next' {
         'dataCheck.loginResult': string
         'dataCheck.loginTest': string
         'dataCheck.loginTestHint': string
-        'dataCheck.loginToken': string
-        'dataCheck.loginTokenResult': string
-        'dataCheck.loginWeb': string
-        'dataCheck.loginWebResult': string
         'dataCheck.noEmailForLogin': string
         'dataCheck.ok': string
         'dataCheck.protectedGet': string

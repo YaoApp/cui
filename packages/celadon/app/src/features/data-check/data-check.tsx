@@ -264,9 +264,7 @@ export function DataCheckPage() {
       {/* 凭据**只上长度与存在性**，值永不上屏 */}
       {signedIn && login ? (
         <p className="data-check__value" role="status">
-          {t('dataCheck.loginResult')}
-          {' '}
-          {loginEmail}
+          {t('dataCheck.loginResult', { email: loginEmail })}
           {' · '}
           <span className="data-check__label">{`access ${login.access_token?.length ?? 0} · refresh ${login.refresh_token?.length ?? 0} · expires ${login.expires_in ?? '—'}`}</span>
         </p>

@@ -95,9 +95,5 @@
   "verify.url": "URL",
   "verify.write": "Write",
   "client.bootFailed": "The client could not start ({code})",
-  "client.bootRetry": "Retry",
-  "dataCheck.loginAction": "Sign in",
-  "dataCheck.loginResult": "Signed in as",
-  "dataCheck.loginHint": "Press Sign in on a row: how to sign in is the data layer's business (a host-held credential gets a token, otherwise the server sets a cookie).",
-  "dataCheck.loginTestHint": "These endpoints exist only on the development instance; a production engine does not register them. Press Sign in on a user row: how to sign in is the data layer's business."
+  "client.bootRetry": "Retry"
 }
