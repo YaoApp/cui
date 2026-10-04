@@ -6,6 +6,7 @@ vi.mock('@/platform/service', () => ({
   serviceBase: () => '',
   loadServiceInfo: async () => (serviceReadable ? { ok: true, value: { name: 't', version: '1', openapi: '/v1' } } : { ok: false, code: 'service.unavailable', params: {}, rawMessage: 'offline', message: 'service: unavailable' }),
   apiUrl: (path: string) => (address === undefined ? undefined : `${address}${path}`),
+  endpoint: (path: string) => (address === undefined ? undefined : `${address}${path}`),
 }))
 
 import { send, type Request } from './send'

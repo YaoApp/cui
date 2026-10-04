@@ -1,2 +1,2 @@
 export { serviceBase, serviceUrl } from './base'
-export { loadServiceInfo, parseServiceInfo, serviceInfo, resetServiceInfo, apiUrl, type ServiceInfo } from './info'
+export { loadServiceInfo, parseServiceInfo, serviceInfo, resetServiceInfo, baseURL, endpoint, type ServiceInfo } from './info'
