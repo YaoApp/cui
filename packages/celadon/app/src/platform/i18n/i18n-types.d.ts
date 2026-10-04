@@ -24,8 +24,14 @@ export type I18nKey =
   | 'bridge.error.reveal.failed'
   | 'bridge.error.reveal.pathNotFound'
   | 'bridge.error.service.malformed'
+  | 'bridge.error.service.notAService'
   | 'bridge.error.service.notReady'
+  | 'bridge.error.service.storeFailed'
+  | 'bridge.error.service.storeUnavailable'
+  | 'bridge.error.service.storeUnreadable'
   | 'bridge.error.service.unavailable'
+  | 'bridge.error.service.unreachable'
+  | 'bridge.error.service.urlEmpty'
   | 'bridge.error.theme.expectedLightOrDark'
   | 'bridge.error.theme.readFailed'
   | 'bridge.error.theme.writeFailed'
@@ -130,6 +136,9 @@ export type I18nKey =
   | 'verify.capabilities'
   | 'verify.client'
   | 'verify.credential'
+  | 'verify.credentialKey'
+  | 'verify.credentialKeyMissing'
+  | 'verify.credentialKeyNone'
   | 'verify.egress'
   | 'verify.egressHint'
   | 'verify.filePick'
@@ -153,8 +162,12 @@ export type I18nKey =
   | 'verify.reveal'
   | 'verify.secret'
   | 'verify.service'
+  | 'verify.serviceAddress'
+  | 'verify.serviceAddressHint'
+  | 'verify.serviceGet'
   | 'verify.serviceInfo'
   | 'verify.serviceInfoRead'
+  | 'verify.serviceSet'
   | 'verify.themeDark'
   | 'verify.themeLight'
   | 'verify.themeRead'
@@ -211,8 +224,14 @@ declare module 'i18next' {
         'bridge.error.reveal.failed': string
         'bridge.error.reveal.pathNotFound': string
         'bridge.error.service.malformed': string
+        'bridge.error.service.notAService': string
         'bridge.error.service.notReady': string
+        'bridge.error.service.storeFailed': string
+        'bridge.error.service.storeUnavailable': string
+        'bridge.error.service.storeUnreadable': string
         'bridge.error.service.unavailable': string
+        'bridge.error.service.unreachable': string
+        'bridge.error.service.urlEmpty': string
         'bridge.error.theme.expectedLightOrDark': string
         'bridge.error.theme.readFailed': string
         'bridge.error.theme.writeFailed': string
@@ -317,6 +336,9 @@ declare module 'i18next' {
         'verify.capabilities': string
         'verify.client': string
         'verify.credential': string
+        'verify.credentialKey': string
+        'verify.credentialKeyMissing': string
+        'verify.credentialKeyNone': string
         'verify.egress': string
         'verify.egressHint': string
         'verify.filePick': string
@@ -340,8 +362,12 @@ declare module 'i18next' {
         'verify.reveal': string
         'verify.secret': string
         'verify.service': string
+        'verify.serviceAddress': string
+        'verify.serviceAddressHint': string
+        'verify.serviceGet': string
         'verify.serviceInfo': string
         'verify.serviceInfoRead': string
+        'verify.serviceSet': string
         'verify.themeDark': string
         'verify.themeLight': string
         'verify.themeRead': string

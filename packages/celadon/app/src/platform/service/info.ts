@@ -8,7 +8,7 @@
 
 import { fail, ok, type BridgeResult } from '../bridge/result'
 import { transportFetch } from '../transport/fetch'
-import { serviceUrl } from './base'
+import { loadServiceBase, serviceUrl } from './base'
 
 export type ServiceInfo = {
   name: string
@@ -49,6 +49,8 @@ export function loadServiceInfo(timeoutMs?: number): Promise<BridgeResult<Servic
 }
 
 async function readServiceInfo(timeoutMs?: number): Promise<BridgeResult<ServiceInfo>> {
+    // 桌面：基址在宿主手里 —— 先把地址取回来，再拼 well-known 的地址
+    await loadServiceBase()
   // **超时由调用方给**（17 §2.2：出口不替业务方定数字）
   const response = await transportFetch(serviceUrl('/.well-known/yao'), timeoutMs === undefined ? {} : { timeoutMs })
   if (!response.ok) return response

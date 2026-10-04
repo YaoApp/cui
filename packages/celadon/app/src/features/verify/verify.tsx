@@ -22,11 +22,11 @@ import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
 import { buildManifest, capabilities, clientInfo, hasHost } from '@/platform/client'
 import { routerBasename } from '@/platform/router/basename'
-import { bridge, failureText, type BridgeResult } from '@/platform/bridge'
-import { credential } from '@/platform/credential'
+import { bridge, fail, failureText, type BridgeResult } from '@/platform/bridge'
+import { credential, credentialKey } from '@/platform/credential'
 import { REDACTED, shouldRedact } from './redact'
 import { transport } from '@/platform/transport'
-import { loadServiceInfo } from '@/platform/service'
+import { loadServiceBase, loadServiceInfo } from '@/platform/service'
 
 type Line = { label: string; text: string }
 
@@ -40,7 +40,10 @@ export function VerifyPage() {
   const caps = capabilities()
   const manifest = buildManifest()
   const [lines, setLines] = useState<Line[]>([])
-  const [service, setService] = useState('verify-demo')
+  // 凭据的键按服务 origin 分账（`scope.ts`）：没地址就没有键 —— 输入框默认为空，写也写不进去
+  const [credentialScope, setCredentialScope] = useState<string | undefined>(() => credentialKey('session'))
+  const [service, setService] = useState(credentialScope ?? '')
+  const [address, setAddress] = useState('')
   const [secret, setSecret] = useState('')
   const [url, setUrl] = useState('https://example.com')
   const [path, setPath] = useState('')
@@ -64,6 +67,12 @@ export function VerifyPage() {
     if (!host || selfChecked.current) return
     selfChecked.current = true
     void (async () => {
+      // 凭据的键按服务 origin 分账（`scope.ts`）：没地址就没有键 —— 这时**不拿假名字去写**
+      // 基址在桌面由宿主给：先取回来，再算凭据的键（没地址就没有键 —— 这时不拿假名字去写）
+      await loadServiceBase()
+      const selfCheckKey = credentialKey('self-check')
+      setCredentialScope(credentialKey('session'))
+      setService((current) => (current ? current : (credentialKey('session') ?? '')))
       for (const [label, call] of [
         ['platform', () => bridge.system.platform()],
         ['language', () => bridge.system.language()],
@@ -71,10 +80,15 @@ export function VerifyPage() {
         ['appInfo', () => bridge.system.appInfo()],
         ['theme', () => bridge.system.theme()],
         ['machineId', () => bridge.system.machineId()],
+        ['service.get', () => bridge.service.get()],
         ['transport', () => transport.probe('https://example.com')],
-        ['credential.write', () => credential.write('verify-demo', 'self-check')],
-        ['credential.read', () => credential.read('verify-demo')],
-        ['credential.remove', () => credential.remove('verify-demo')],
+        ...(selfCheckKey
+          ? ([
+              ['credential.write', () => credential.write(selfCheckKey, 'self-check')],
+              ['credential.read', () => credential.read(selfCheckKey)],
+              ['credential.remove', () => credential.remove(selfCheckKey)],
+            ] as const)
+          : ([['credential.key', async () => fail('credential.service_empty', 'no service address to key a credential', {})]] as const)),
       ] as const) {
         const result = await call()
         report(label, result, shouldRedact(label))
@@ -195,6 +209,25 @@ export function VerifyPage() {
         </Button>
       </p>
 
+      {/* 服务地址：**由宿主持有**（桌面由用户填或选，地址不进产物）；`set` 由宿主先校验再写入。
+          服务信息仍由应用自己读（上面那一节）—— 两宿主同一条路（plan/01-bridge-commands.md §2） */}
+      <h2 className="verify__heading">{t('verify.serviceAddress')}</h2>
+      <p>{t('verify.serviceAddressHint')}</p>
+      <p className="verify__tools">
+        <Button onClick={() => run('service.get', () => bridge.service.get())}>{t('verify.serviceGet')}</Button>{' '}
+        <label>
+          {t('verify.url')}
+          <input
+            className="input"
+            aria-label={t('verify.serviceAddress')}
+            value={address}
+            onChange={(event) => setAddress(event.target.value)}
+            size={32}
+          />
+        </label>{' '}
+        <Button onClick={() => run('service.set', () => bridge.service.set(address))}>{t('verify.serviceSet')}</Button>
+      </p>
+
       {/* 出海口：**只有 platform/transport 发请求**（见 17-transport.md）。
           Web 用浏览器 fetch，桌面壳用官方插件的 fetch（同一签名） */}
       <h2 className="verify__heading">{t('verify.egress')}</h2>
@@ -222,11 +255,17 @@ export function VerifyPage() {
         </label>
       </p>
       <p>
-        <Button onClick={() => run('credential.write', () => credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
-        <Button onClick={() => run('credential.read', () => credential.read(service))}>{t('verify.read')}</Button>{' '}
-        <Button onClick={() => run('credential.remove', () => credential.remove(service))}>{t('verify.remove')}</Button>{' '}
+        <Button disabled={!service.trim()} onClick={() => run('credential.write', () => credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
+        <Button disabled={!service.trim()} onClick={() => run('credential.read', () => credential.read(service))}>{t('verify.read')}</Button>{' '}
+        <Button disabled={!service.trim()} onClick={() => run('credential.remove', () => credential.remove(service))}>{t('verify.remove')}</Button>{' '}
         <Button onClick={() => run('credential.list', () => credential.list())}>{t('verify.list')}</Button>
       </p>
+      {/* 键按服务 origin 分账（`scope.ts`）：这里是"当前服务下这个用途的键长什么样" */}
+      <p>
+        {t('verify.credentialKey')}: <code>{credentialScope ?? t('verify.credentialKeyNone')}</code>
+      </p>
+      {/* 没键就没得写：把原因说出来，按钮也不让点（宿主对空名也会拒：`credential.service_empty`） */}
+      {service.trim() ? null : <p className="verify__notice">{t('verify.credentialKeyMissing')}</p>}
 
       <h2 className="verify__heading">{t('verify.results')}</h2>
       <ul>
