@@ -136,7 +136,7 @@ app/src/
 | 0.1 | **错误形状** | **已按引擎对齐**：引擎错误体就是 **OAuth 形状** `{error, error_description, error_uri, state, reason, required_scopes, missing_scopes}`（`yao/openapi/oauth/types/types.go:35-45`）——**引擎没有字段级 `fields`/`errors`**（校验信息只拼在 `error_description` 里）→ 我们**不编**结构化字段错误；消息**分两级**：上层 = `code`+`params`（应用按码翻译）+ `message`（由码算的**兜底**）、底层 = `rawMessage`（引擎原文，**不许上屏**） | `data/types.ts` + `utils/failure.ts` | ✅ **已实现** |
 | 0.2 | **列表 / 分页** | **已按引擎对齐**：标准键 `data, page, pagesize, pagecount, next, prev, total`（`yao/openapi/agent/assistant.go:184-195`）；chat 会话在 `group_by` 时给 `groups` 而非 `data` | `data/types.ts` + `utils/paginate.ts` | ✅ **已实现** |
 | 0.3 | **成功包裹** | 有没有信封；列表 `data` 与实体 `data` 怎么区分（旧：`result.data \|\| result` 反复兜）| 同上 | ⏸ |
-| 0.4 | **出站上下文（ctx）** | 语言 / 主题 / 客户端 / 服务怎么带 —— **由统一包装 `request/` 一处注入**（旧：locale 走 query · `X-Yao-Accept` 头 · 三来源凑 CSRF，散在各处）| `data/request/context.ts`（+ `platform/`）|| ⏸ |
+| 0.4 | **出站上下文（ctx）** | 语言 / 主题 / 客户端 / 服务怎么带 —— **由统一包装 `request/` 一处注入**：调用时**自动取平台当前值**（`platform/client/context.ts` 的 `currentOutbound()`，读 store，不依赖 React），**只有要覆盖时才传** `outbound`（旧：locale 走 query · `X-Yao-Accept` 头 · 三来源凑 CSRF，散在各处）| `data/request/context.ts`（+ `platform/`）|| ⏸ |
 | 0.5 | **取数与订阅钩子** | 四态（`idle/loading/ok/error`）· 取消 · 重跑的唯一实现；订阅按协议分两个 | `data/hooks/use-request.ts` | ✅ **已实现**（`use-sse` / `use-socket` **待 transport 两个接线**，见 0.6）|
 | 0.6 | **出口接线** | 一切经 `platform/transport/`；上传/下载/SSE/WS 各归哪一档（`17 §2.2` 三档：`api`/`download`/`stream`）。**SSE 与 WS 同属 `stream` 档，但接线分两处**（见上表）| `platform/transport/{stream.ts,socket.ts}` | ⏸（卡 `17 §2.2` 两档未做）|
 | 0.7 | **类型的组织** | 一域一处；类型与方法同文件还是分开；子域（如 `agent/robot`）怎么放（旧：`<域>/types.ts` + `<域>/api.ts` + barrel，且**反向 import 页面层 6 处**）| `app/src/data/<域>/` | ⏸ |

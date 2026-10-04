@@ -39,7 +39,7 @@
   "dataCheck.reload": "重跑",
   "dataCheck.results": "结果",
   "dataCheck.scaffold": "脚手架四格",
-  "dataCheck.scaffoldHint": "公开的两条真跑；受保护的两条也点得动，但登录还没接，预期失败——这不是 bug。",
+  "dataCheck.scaffoldHint": "公开的两条真跑；受保护的两条也点得动，但登录还没接，预期失败——这不是 bug。每次请求自动带上下面显示的当前语言与主题。",
   "dataCheck.serviceInfo": "服务信息（第一次需要时读）",
   "dataCheck.serviceInfoHint": "读一次 /.well-known/yao，拿到名称 · 版本 · 接口根；读不到就按码翻译成一句话。",
   "dataCheck.serviceInfoRead": "读一次",

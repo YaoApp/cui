@@ -39,7 +39,7 @@
   "dataCheck.reload": "重跑",
   "dataCheck.results": "結果",
   "dataCheck.scaffold": "腳手架四格",
-  "dataCheck.scaffoldHint": "公開的兩條真的會跑；受保護的兩條也點得動，但登入還沒接，預期失敗——這不是 bug。",
+  "dataCheck.scaffoldHint": "公開的兩條真的會跑；受保護的兩條也點得動，但登入還沒接，預期失敗——這不是 bug。每次請求自動帶上下面顯示的當前語言與主題。",
   "dataCheck.serviceInfo": "服務資訊（第一次需要時讀）",
   "dataCheck.serviceInfoHint": "讀一次 /.well-known/yao，取得名稱 · 版本 · 介面根；讀不到就依碼翻譯成一句話。",
   "dataCheck.serviceInfoRead": "讀一次",

@@ -39,7 +39,7 @@
   "dataCheck.reload": "Run again",
   "dataCheck.results": "Results",
   "dataCheck.scaffold": "Scaffold, four cells",
-  "dataCheck.scaffoldHint": "The two public calls really run; the protected two are clickable too, but login is not wired yet, so they are expected to fail — that is not a bug.",
+  "dataCheck.scaffoldHint": "The two public calls really run; the protected two are clickable too, but login is not wired yet, so they are expected to fail — that is not a bug. Every request carries the current locale and theme shown below automatically.",
   "dataCheck.serviceInfo": "Service information (read when first needed)",
   "dataCheck.serviceInfoHint": "Reads /.well-known/yao once for the name, version and API root; a failure is translated by its code.",
   "dataCheck.serviceInfoRead": "Read once",

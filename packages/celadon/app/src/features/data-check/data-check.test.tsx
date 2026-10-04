@@ -103,7 +103,7 @@ describe('the data check page', () => {
     expect(document.body.textContent).not.toContain('the service answered 503')
   })
 
-  it('really runs the public GET through send, with the outbound context', async () => {
+  it('really runs the public GET through send, carrying the platform context', async () => {
     const user = userEvent.setup()
     renderPage()
     await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))

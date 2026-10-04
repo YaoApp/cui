@@ -12,6 +12,7 @@
 - **传输与鉴权不在本层**：一律经 `platform/transport/`（**单独成章**：见 [`17-transport.md`](17-transport.md)）；本层不出现 `fetch` · `Authorization` · cookie 读写。
 - **类型手写**：接口类型写在 `app/src/data/`，**不从 `openapi` 生成**（服务端没有机器可读的文档）。
 - **取数只有一条路**：组件与 feature 经**取数钩子**拿数据，不自己拼 URL、不自己建 WebSocket。
+- **对外上下文自动带上**：调用时从平台层取当前语言 · 主题（`platform/client/context.ts` 的 `currentOutbound()`），调用点不传；要覆盖时传 `outbound`（见 `15-platform.md` §5.1）。
 - **错误只有一个形状**：所有接口错误归一为同一形状，业务只判一种。
 - **流式也经 `transport/`**：SSE 与 WebSocket 都用它的流式能力，不裸用浏览器原生对象。
 

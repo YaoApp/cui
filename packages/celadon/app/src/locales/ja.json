@@ -39,7 +39,7 @@
   "dataCheck.reload": "再実行",
   "dataCheck.results": "結果",
   "dataCheck.scaffold": "スキャフォールド四枠",
-  "dataCheck.scaffoldHint": "公開の二つは実際に動く。保護された二つも押せるが、ログインは未接続のため失敗が想定内 —— バグではない。",
+  "dataCheck.scaffoldHint": "公開の二つは実際に動く。保護された二つも押せるが、ログインは未接続のため失敗が想定内 —— バグではない。各リクエストには下に表示された現在の言語とテーマが自動で付く。",
   "dataCheck.serviceInfo": "サービス情報（初回必要時に読む）",
   "dataCheck.serviceInfoHint": "/.well-known/yao を一度読み、名前・バージョン・API ルートを取得。失敗はコードに応じて翻訳される。",
   "dataCheck.serviceInfoRead": "一度読む",

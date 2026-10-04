@@ -5,7 +5,7 @@
  *   · 决定**怎么带**（头还是 query）—— 名字是**草稿**，要与后端对齐（旧代码 locale 走 query、`X-Yao-*` 头）
  *
  * **契约**：这里不读 store、不读 DOM（值由调用方传进来），所以是可测的纯函数；
- * 语言与主题由钩子层从 `platform/i18n` · `platform/theme` 读出来传进来。
+ * 默认值由 `send()` 从平台层取（`platform/client/context.ts` 的 `currentOutbound()`），覆盖时显式传。
  */
 
 import type { OutboundContext, OutboundInputs } from '@/platform/client/context'

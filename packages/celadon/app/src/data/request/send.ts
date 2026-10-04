@@ -5,6 +5,7 @@
  */
 
 import type { OutboundInputs } from '@/platform/client/context'
+import { currentOutbound } from '@/platform/client/context'
 import { endpoint, loadServiceInfo } from '@/platform/service'
 import { transportFetch } from '@/platform/transport/fetch'
 import type { Result } from '../types'
@@ -45,8 +46,9 @@ export type Request<Input = void, Output = void> = {
 
 /** 一次调用除**声明**之外的东西（业界同类：Node 的 `RequestOptions` · axios 的 `AxiosRequestConfig` · gRPC 的 `CallOptions`）。 */
 export type RequestOptions<Input = void> = {
-  /** 出站上下文（语言 · 主题）—— 由钩子层从 `platform/` 读出来传进来（`hub` 不变） */
-  outbound: OutboundInputs
+  /** **覆盖**出站上下文（语言 · 主题）—— 不传就是平台层的**当前值**（`currentOutbound()`），
+   *  所以调用点只在要改的时候传这一项，平时不出现。 */
+  outbound?: Partial<OutboundInputs>
   /** 该域自己的查询参数（如 `page` · `pagesize`）—— 与 ctx 的合并，ctx 先 */
   query?: Record<string, string | number | boolean | undefined>
   /** **这次调用的请求体**（`GET`/`DELETE` 不带）—— 类型由声明的 `Request<Input, …>` 给 */
@@ -88,9 +90,9 @@ function withQuery(url: string, params: Record<string, string | number | boolean
 /** 一次普通请求。**失败是值**，不抛异常。 */
 export async function send<Input = void, Output = void>(
   request: Request<Input, Output>,
-  options: RequestOptions<Input>,
+  options: RequestOptions<Input> = {},
 ): Promise<Result<Output>> {
-  const ctx: Context = context(options.outbound)
+  const ctx: Context = context({ ...currentOutbound(), ...options.outbound })
   // **第一次需要时先读**（惰性 ✓，之后走内存缓存）—— 读失败就把它自己的失败报出去（比"没就绪"更准）
   const service = await loadServiceInfo()
   if (!service.ok) return service

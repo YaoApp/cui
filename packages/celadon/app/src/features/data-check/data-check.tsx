@@ -21,6 +21,7 @@ import { Button } from '@/components/base/button'
 import { Header } from '@/components/header'
 import { Nav } from '@/components/nav'
 import { useTranslation } from '@/platform/i18n'
+import { resolvePreference, useLocaleStore } from '@/platform/i18n/locale.store'
 import { useThemeStore } from '@/platform/theme/theme.store'
 import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
@@ -47,11 +48,11 @@ export function DataCheckPage() {
   const translate = (key: string, options?: Record<string, unknown>) =>
     i18n.t(key as never, options as never) as unknown as string
 
-  /* 出站上下文：语言取 **i18n 的解析结果**（不是 `'system'`），主题取平台 store 的解析结果
-     （形状见 platform/client/context.ts 的 `OutboundInputs`）。显示出来，好让人看见每次请求带的是什么。 */
+  /* 出站上下文：页面**不拼、不传** —— `send()` 调用时自己从平台层取当前值
+     （`platform/client/context.ts` 的 `currentOutbound()`），每次请求自动带上。
+     这里只是把平台解析出的当前值显示出来，好让人看见请求带的是什么。 */
+  const locale = resolvePreference(useLocaleStore((state) => state.locale))
   const theme = useThemeStore((state) => state.theme)
-  const locale = i18n.language
-  const outbound = { locale, theme }
 
   const [lines, setLines] = useState<Line[]>([])
   const nextId = useRef(0)
@@ -78,29 +79,29 @@ export function DataCheckPage() {
 
   /* ② 脚手架四格：**各写各的**（四种调用各一个手动钩子 —— 不在这四个上报 `map`，
      免得钩子落进循环里）。`send` 只作为 fetcher 出现，取数仍走钩子。 */
-  const publicGetCall = useRequest((signal) => send(publicGet, { outbound, signal }), [], { manual: true })
+  const publicGetCall = useRequest((signal) => send(publicGet, { signal }), [], { manual: true })
   useEffect(() => reportState(t('dataCheck.publicGet'), publicGetCall.state), [publicGetCall.state])
 
   const publicPostCall = useRequest(
-    (signal) => send(publicPost, { outbound, body: POST_BODY, signal }),
+    (signal) => send(publicPost, { body: POST_BODY, signal }),
     [],
     { manual: true },
   )
   useEffect(() => reportState(t('dataCheck.publicPost'), publicPostCall.state), [publicPostCall.state])
 
-  const protectedGetCall = useRequest((signal) => send(protectedGet, { outbound, signal }), [], { manual: true })
+  const protectedGetCall = useRequest((signal) => send(protectedGet, { signal }), [], { manual: true })
   useEffect(() => reportState(t('dataCheck.protectedGet'), protectedGetCall.state, true), [protectedGetCall.state])
 
   const protectedPostCall = useRequest(
-    (signal) => send(protectedPost, { outbound, body: POST_BODY, signal }),
+    (signal) => send(protectedPost, { body: POST_BODY, signal }),
     [],
     { manual: true },
   )
   useEffect(() => reportState(t('dataCheck.protectedPost'), protectedPostCall.state, true), [protectedPostCall.state])
 
   /* ③ 四态：`useRequest` **挂载即跑**（不传 `manual`）、卸载即取消、依赖（语言/主题）变了重跑。
-     公开 GET 当 fetcher —— 它不挑凭据，登录还没接也照样通。 */
-  const scaffold = useRequest((signal) => send(publicGet, { outbound, signal }), [locale, theme])
+     公开 GET 当 fetcher —— `send()` 自动带上当前出站上下文，它不挑凭据，登录还没接也照样通。 */
+  const scaffold = useRequest((signal) => send(publicGet, { signal }), [locale, theme])
 
   const states = [
     ['idle', t('dataCheck.stateIdle')],
