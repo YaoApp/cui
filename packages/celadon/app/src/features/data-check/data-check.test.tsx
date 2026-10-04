@@ -162,12 +162,12 @@ describe('the data check page', () => {
     renderPage()
 
     // 挂载即 loading（useRequest 的 effect 同步落到 loading）
-    expect(screen.getByText('loading').closest('.data-check__state')).toHaveAttribute('data-active', 'true')
+    expect(document.querySelector('.data-check__state[data-active="true"]')?.textContent).toBe('加载中')
 
     await screen.findByText(new RegExp(MESSAGE))
-    expect(screen.getByText('ok').closest('.data-check__state')).toHaveAttribute('data-active', 'true')
-    for (const status of ['idle', 'loading', 'ok', 'error']) {
-      expect(screen.getByText(status)).toBeInTheDocument()
+    expect(document.querySelector('.data-check__state[data-active="true"]')?.textContent).toBe('成功')
+    for (const status of ['空闲', '加载中', '成功', '失败']) {
+      expect(screen.getAllByText(status).length).toBeGreaterThan(0)
     }
   })
 
@@ -181,7 +181,7 @@ describe('the data check page', () => {
     renderPage()
 
     await waitFor(() =>
-      expect(screen.getByText('error').closest('.data-check__state')).toHaveAttribute('data-active', 'true'),
+      expect(document.querySelector('.data-check__state[data-active="true"]')?.textContent).toBe('失败'),
     )
     expect(await screen.findByText(/连不上/)).toBeInTheDocument()
   })

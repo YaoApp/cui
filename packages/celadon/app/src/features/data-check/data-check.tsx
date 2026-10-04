@@ -171,7 +171,6 @@ export function DataCheckPage() {
         {states.map(([status, label]) => (
           <span className="data-check__state" key={status} data-active={scaffold.state.status === status}>
             <span className="data-check__label">{label}</span>
-            <code>{status}</code>
           </span>
         ))}
       </div>
