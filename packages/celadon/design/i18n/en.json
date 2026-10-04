@@ -1,37 +1,9 @@
 {
   "ui": {
-    "brand": "Yao Agents",
-    "newTask": "New task",
-    "navigation": {
-      "chat": "Chat",
-      "inbox": "Inbox",
-      "board": "Board",
-      "workspace": "Workspace",
-      "computer": "Computer",
-      "knowledge": "Knowledge"
-    },
-    "inbox": {
-      "unreadCount": "{count} unread",
-      "searchPlaceholder": "Search messages…",
-      "filterAll": "All",
-      "filterUnread": "Unread",
-      "filterArchived": "Archived"
-    },
-    "time": {
-      "today": "Today",
-      "yesterday": "Yesterday",
-      "earlier": "Earlier"
-    },
-    "thread": {
-      "newMessages": "{count} new messages",
-      "dateAt": "Today {time}",
-      "changesChip": "Changes +{added} −{removed}"
-    },
-    "tool": {
-      "readFiles": "Read files"
-    },
-    "status": {
-      "done": "Done"
+    "activity": {
+      "readDocuments": "Read {count} documents",
+      "extractRisks": "Extracted {count} risks",
+      "waitingConfirmation": "Waiting for confirmation"
     },
     "agent": "Agent",
     "ask": {
@@ -43,11 +15,70 @@
       "optionChronological": "Summarize chronologically",
       "optionCustom": "I will specify my own"
     },
+    "brand": "Yao Agents",
     "composer": {
       "placeholder": "Continue: add the risks to the acceptance criteria…",
       "defaultPermission": "Default permission",
       "awaitConfirm": "Please confirm the options above to continue…"
     },
+    "entry": {
+      "loginTitle": "Sign in",
+      "loginLead": "Continue with your account.",
+      "registerTitle": "Create account",
+      "registerLead": "All you need is an account and a password.",
+      "account": "Account",
+      "accountPh": "Email or mobile number",
+      "password": "Password",
+      "passwordPh": "Enter your password",
+      "reveal": "Show",
+      "hide": "Hide",
+      "confirm": "Confirm password",
+      "name": "Display name",
+      "nameHint": "Optional, changeable later",
+      "termsPre": "I have read and agree to the",
+      "termsService": "Terms of Service",
+      "termsAnd": "and",
+      "termsPrivacy": "Privacy Policy",
+      "captcha": "Code",
+      "captchaPh": "Case-insensitive",
+      "captchaRefresh": "New image",
+      "otp": "Code",
+      "otpHint": "Submits once filled",
+      "continue": "Continue",
+      "login": "Sign in",
+      "register": "Create account",
+      "loginBusy": "Signing in…",
+      "registerBusy": "Creating…",
+      "toRegister": "Create account",
+      "toLogin": "Back to sign in",
+      "mfaTitle": "Second step",
+      "mfaLead": "Enter the six-digit code from your phone or authenticator.",
+      "mfaBack": "Back to the account field",
+      "errAccountUnknown": "This account has not been registered yet.",
+      "errAccountUnknownCta": "Create it",
+      "errPassword": "That password is not right. Check the case, or your caps lock.",
+      "errConfirm": "The two entries do not match.",
+      "errCaptcha": "That code is not right. Ask for a new image.",
+      "errOtp": "That code is wrong or expired. Ask for a new one.",
+      "errTerms": "Please read and agree to the terms first.",
+      "errNetwork": "Cannot reach the service. Check your network or the server address."
+    },
+    "inbox": {
+      "unreadCount": "{count} unread",
+      "searchPlaceholder": "Search messages…",
+      "filterAll": "All",
+      "filterUnread": "Unread",
+      "filterArchived": "Archived"
+    },
+    "navigation": {
+      "chat": "Chat",
+      "inbox": "Inbox",
+      "board": "Board",
+      "workspace": "Workspace",
+      "computer": "Computer",
+      "knowledge": "Knowledge"
+    },
+    "newTask": "New task",
     "panel": {
       "inProgress": "In progress",
       "highPriority": "High priority",
@@ -61,17 +92,28 @@
       "relatedFiles": "Related files",
       "activity": "Activity"
     },
-    "activity": {
-      "readDocuments": "Read {count} documents",
-      "extractRisks": "Extracted {count} risks",
-      "waitingConfirmation": "Waiting for confirmation"
+    "status": {
+      "done": "Done"
+    },
+    "task": {
+      "id": "Task ID"
     },
     "theme": {
       "light": "Light",
       "dark": "Dark"
     },
-    "task": {
-      "id": "Task ID"
+    "thread": {
+      "newMessages": "{count} new messages",
+      "dateAt": "Today {time}",
+      "changesChip": "Changes +{added} −{removed}"
+    },
+    "time": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "earlier": "Earlier"
+    },
+    "tool": {
+      "readFiles": "Read files"
     }
   },
   "sample": {

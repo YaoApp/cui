@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="zh-CN" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celadon · Entry</title>
+<link rel="stylesheet" href="../tokens.css">
+<script src="../i18n/bundle.js"></script>
+<!--
+  入口页（登录 / 注册归一）· 静态设计图 = 产品形态。
+
+  一张页面、一条流程：账号先过 `/user/entry/verify`，据结果**在本页内**继续 ——
+    已注册 → 密码（入口配置要求时再要验证码 / 第二步动态码）
+    未注册 → 创建账号（相对登录只多一项「接受使用协议与隐私政策」）
+  静态图里这一步用本地桩数据代替引擎；交互、校验、聚焦、禁用、错误呈现与文案都照产品来。
+  类名与产品同源：`.input`（六态）· `.btn-primary`（`.is-solid` 实心档）· `.hint-error` · `.link` · `.focusable`。
+
+  看不同形态用查询参数，页面上不放评审控件（放了就不像产品）：
+    ?state=account|password|register|submitting|err-account|err-password|captcha|mfa|done
+    &theme=light|dark   &lang=zh-CN|zh-TW|en-US|ja
+
+  颜色 / 间距 / 字号 / 圆角 / 描边 / 阴影一律取 token（见 ../AGENTS.md）。唯一局部变量是卡片宽度。
+-->
+<style>
+/* 页面骨架（本页独有）：整屏居中，卡片即全部。 */
+* { box-sizing: border-box; }
+html, body { block-size: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-cjk);
+  color: var(--text-primary);
+  background: var(--background-app);
+  -webkit-font-smoothing: antialiased;
+}
+:root { --proto-auth: 352px; }   /* 局部：入口卡片宽度；进产品时归 token */
+
+.screen { min-block-size: 100%; display: grid; place-items: center; padding: var(--spacing-24); }
+.entry-card {
+  inline-size: min(100%, var(--proto-auth));
+  padding: var(--spacing-32) var(--spacing-24) var(--spacing-24);
+  background: var(--background-content);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-subtle);
+}
+
+/* 品牌 */
+.brand { display: flex; align-items: center; gap: var(--spacing-8); margin-block-end: var(--spacing-24); }
+.brand__mark { inline-size: 26px; block-size: 26px; border-radius: var(--radius-small);
+               background: linear-gradient(135deg, var(--brand-mark-from), var(--brand-mark-to)); }
+.brand__name { font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin); }
+
+h1 { font-size: var(--font-size-subtitle); font-weight: var(--font-weight-strong); margin: 0 0 var(--spacing-4); }
+.lead { margin: 0 0 var(--spacing-24); color: var(--text-secondary); font-size: var(--font-size-caption); }
+
+/* 字段：标签顶对齐；输入走设计类 `.input`，这里只补布局与尾部按钮的位置 */
+.field { margin-block-end: var(--spacing-16); }
+.field__label { display: block; margin-block-end: var(--spacing-4); font-size: var(--font-size-label);
+                font-weight: var(--font-weight-medium); color: var(--text-secondary); }
+.field__control { position: relative; display: flex; align-items: center; }
+.field__control .input { inline-size: 100%; min-block-size: var(--row-height); border-radius: var(--radius-medium); }
+.field__control--trail .input { padding-inline-end: var(--spacing-48); }
+.field__trail { position: absolute; inset-inline-end: var(--spacing-4); border: 0; background: transparent; cursor: pointer;
+                color: var(--text-tertiary); font: inherit; font-size: var(--font-size-caption);
+                padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-xs); }
+.field__trail:hover { color: var(--text-secondary); }
+.field__trail:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.field.is-error .field__label { color: var(--danger-ink); }
+.field__hint { margin: var(--spacing-4) 0 0; color: var(--text-tertiary); font-size: var(--font-size-11); }
+
+/* 验证码行 */
+.captcha { display: flex; gap: var(--spacing-8); align-items: center; }
+.captcha .field__control { flex: 1; }
+.captcha__img { inline-size: 92px; block-size: var(--row-height); display: grid; place-items: center; flex: none;
+                border: var(--border-width) solid var(--border-control); border-radius: var(--radius-medium);
+                background: var(--background-surface); color: var(--text-secondary);
+                font-family: var(--font-family-monospace); letter-spacing: var(--letter-spacing-latin); user-select: none; }
+
+/* 协议行（仅注册） */
+.terms { display: flex; gap: var(--spacing-8); align-items: flex-start; margin-block: 0 var(--spacing-16);
+         font-size: var(--font-size-caption); color: var(--text-secondary); }
+.terms input { inline-size: 16px; block-size: 16px; margin-block-start: 3px; flex: none; accent-color: var(--brand); }
+.terms a { color: var(--brand-ink); }
+.terms.is-error { color: var(--danger-ink); }
+
+/* 动作：布局与尺寸档（与产品 `components/base/button` 一致），配色与四态走设计类 `.btn-primary` */
+.button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-8);
+          white-space: nowrap; cursor: pointer; font-family: var(--font-family-ui);
+          font-weight: var(--font-weight-medium); line-height: var(--line-height-cjk);
+          border-radius: var(--radius-medium);
+          transition: background-color var(--duration-fast) var(--easing-standard),
+                      border-color var(--duration-fast) var(--easing-standard); }
+.button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-body); }
+.button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.button[disabled] { cursor: not-allowed; }
+.spinner { inline-size: 14px; block-size: 14px; flex: none; border-radius: var(--radius-pill);
+           border: 2px solid color-mix(in srgb, currentColor 35%, transparent); border-top-color: currentColor;
+           animation: entry-spin var(--duration-fast-rich) linear infinite; }
+@keyframes entry-spin { to { transform: rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
+
+/* 顶部提示（需要验证码 / 第二步） */
+.notice { display: flex; gap: var(--spacing-8); align-items: flex-start; margin: 0 0 var(--spacing-16);
+          padding: var(--spacing-8) var(--spacing-12); border-radius: var(--radius-medium);
+          background: var(--brand-soft); color: var(--brand-ink); font-size: var(--font-size-caption); }
+
+/* 局部：表单容器随步骤切换显示；`.is-off` 只用于静态展示多态（真实交互由脚本切） */
+.step.is-off { display: none; }
+.foot { margin: var(--spacing-16) 0 0; text-align: center; font-size: var(--font-size-caption); color: var(--text-secondary); }
+.steps-dots { display: flex; align-items: center; gap: var(--spacing-4); margin-block-end: var(--spacing-16);
+              color: var(--text-tertiary); font-size: var(--font-size-11); }
+.steps-dots i { inline-size: 6px; block-size: 6px; border-radius: var(--radius-pill); background: var(--border-control); }
+.steps-dots i.is-on { background: var(--brand); }
+.otp { display: flex; gap: var(--spacing-8); }
+.otp .input { flex: none; inline-size: var(--row-height); min-block-size: var(--row-height); text-align: center;
+              font-family: var(--font-family-monospace); font-size: var(--font-size-16); border-radius: var(--radius-medium); }
+.done { text-align: center; color: var(--text-secondary); font-size: var(--font-size-caption); }
+.sr { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); }
+</style>
+</head>
+<body>
+<div class="screen">
+  <main class="entry-card" aria-labelledby="entry-title">
+
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__name">Yao Agents</span>
+    </div>
+
+    <h1 id="entry-title" data-i18n="loginTitle">登录</h1>
+    <p class="lead" data-i18n="loginLead">用账号继续。</p>
+
+    <form id="entry-form" novalidate>
+      <p class="sr" id="form-status" role="alert" aria-live="polite"></p>
+
+      <!-- 第一步：账号（登录与注册共用） -->
+      <section class="step" id="step-account" aria-label="account">
+        <div class="field" id="account-field">
+          <label class="field__label" for="account" data-i18n="account">账号</label>
+          <div class="field__control">
+            <input class="input" id="account" name="account" type="text" autocomplete="username"
+                   inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="accountPh" placeholder="邮箱或手机号">
+          </div>
+          <p class="field__hint" id="account-unknown" hidden>
+            <span data-i18n="errAccountUnknown">这个账号还没有注册。</span>
+            <a class="link" href="#register" id="account-unknown-cta" data-i18n="errAccountUnknownCta">去创建</a>
+          </p>
+        </div>
+        <button class="button button--block btn-primary is-solid" type="submit" id="submit-account" data-i18n="continue">继续</button>
+      </section>
+
+      <!-- 第二步（已注册）：密码，可选验证码 -->
+      <section class="step is-off" id="step-password" aria-label="password">
+        <div class="field" id="password-field">
+          <label class="field__label" for="password" data-i18n="password">密码</label>
+          <div class="field__control field__control--trail">
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" data-i18n-ph="passwordPh" placeholder="请输入密码">
+            <button class="field__trail" type="button" data-reveal="password" data-i18n="reveal" aria-pressed="false">显示</button>
+          </div>
+        </div>
+        <div class="field" id="captcha-field-login" hidden>
+          <label class="field__label" for="captcha-login" data-i18n="captcha">验证码</label>
+          <div class="captcha">
+            <div class="field__control">
+              <input class="input" id="captcha-login" name="captcha" type="text" autocomplete="off" data-i18n-ph="captchaPh" placeholder="不区分大小写">
+            </div>
+            <span class="captcha__img" aria-hidden="true">A7K2</span>
+            <button class="field__trail" type="button" data-i18n="captchaRefresh">换一张</button>
+          </div>
+        </div>
+        <button class="button button--block btn-primary is-solid" type="submit" id="submit-login" data-i18n="login">登录</button>
+        <p class="foot"><a class="link" href="#register" id="to-register" data-i18n="toRegister">创建账号</a></p>
+      </section>
+
+      <!-- 第二步（未注册）：创建账号 —— 相对登录只多「接受使用协议与隐私政策」 -->
+      <section class="step is-off" id="step-register" aria-label="register">
+        <div class="field">
+          <label class="field__label" for="reg-password" data-i18n="password">密码</label>
+          <div class="field__control field__control--trail">
+            <input class="input" id="reg-password" name="new-password" type="password" autocomplete="new-password" data-i18n-ph="passwordPh" placeholder="请输入密码">
+            <button class="field__trail" type="button" data-reveal="reg-password" data-i18n="reveal" aria-pressed="false">显示</button>
+          </div>
+        </div>
+        <div class="field" id="confirm-field">
+          <label class="field__label" for="reg-confirm" data-i18n="confirm">确认密码</label>
+          <div class="field__control field__control--trail">
+            <input class="input" id="reg-confirm" name="confirm-password" type="password" autocomplete="new-password" data-i18n-ph="passwordPh" placeholder="请输入密码">
+            <button class="field__trail" type="button" data-reveal="reg-confirm" data-i18n="reveal" aria-pressed="false">显示</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field__label" for="reg-name" data-i18n="name">显示名称</label>
+          <div class="field__control"><input class="input" id="reg-name" name="name" type="text" autocomplete="name"></div>
+          <p class="field__hint" data-i18n="nameHint">选填，之后可以改</p>
+        </div>
+        <div class="terms" id="terms-row">
+          <input id="terms" name="terms" type="checkbox">
+          <label for="terms">
+            <span data-i18n="termsPre">我已阅读并同意</span>
+            <a class="link" href="#" data-i18n="termsService">使用协议</a>
+            <span data-i18n="termsAnd">与</span>
+            <a class="link" href="#" data-i18n="termsPrivacy">隐私政策</a>
+          </label>
+        </div>
+        <button class="button button--block btn-primary is-solid" type="submit" id="submit-register" data-i18n="register">创建账号</button>
+        <p class="foot"><a class="link" href="#login" id="to-login" data-i18n="toLogin">返回登录</a></p>
+      </section>
+
+      <!-- 第二步：动态码（引擎要求时） -->
+      <section class="step is-off" id="step-mfa" aria-label="mfa">
+        <div class="steps-dots" aria-hidden="true"><i class="is-on"></i><i class="is-on"></i><i></i></div>
+        <h1 data-i18n="mfaTitle">第二步验证</h1>
+        <p class="lead" data-i18n="mfaLead">输入手机或验证器上的 6 位动态码。</p>
+        <div class="field" id="otp-field">
+          <label class="field__label" for="otp-1" data-i18n="otp">动态码</label>
+          <div class="otp">
+            <input class="input" id="otp-1" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="1">
+            <input class="input" type="text" inputmode="numeric" maxlength="1" aria-label="2">
+            <input class="input" type="text" inputmode="numeric" maxlength="1" aria-label="3">
+            <input class="input" type="text" inputmode="numeric" maxlength="1" aria-label="4">
+            <input class="input" type="text" inputmode="numeric" maxlength="1" aria-label="5">
+            <input class="input" type="text" inputmode="numeric" maxlength="1" aria-label="6">
+          </div>
+          <p class="field__hint" data-i18n="otpHint">填满即自动提交</p>
+        </div>
+        <button class="button button--block btn-primary is-solid" type="submit" id="submit-mfa" data-i18n="continue">继续</button>
+        <p class="foot"><a class="link" href="#account" id="mfa-back" data-i18n="mfaBack">返回重新输入账号</a></p>
+      </section>
+
+      <!-- 成功（产品会进入应用；设计图停在这里，便于看最后一眼） -->
+      <section class="step is-off" id="step-done" aria-label="done">
+        <p class="done" data-i18n="loginBusy">正在登录…</p>
+      </section>
+    </form>
+
+  </main>
+</div>
+
+<script>
+/* ── 桩：设计图里代替引擎。真实实现走 `data/user` 域与 `platform/credential`。 ───────── */
+const MOCK = {
+  users: ['max@yaoagents.com'],
+  password: 'correct-horse',
+  otp: '0428',
+  captcha: 'A7K2',
+  latency: 550,
+}
+const params = new URLSearchParams(location.search)
+const LANG = params.get('lang') || 'zh-CN'
+const LANG_KEY = LANG === 'en-US' ? 'en' : LANG
+const STATE = params.get('state') || 'account'
+
+/* ── 文案：设计体系语言包（ui.entry.*），与产品同源 ──────────────────────────────── */
+const dict = ((window.CELADON_I18N || {})[LANG_KEY] || {}).ui?.entry || {}
+const t = (key) => dict[key] || key
+
+document.documentElement.lang = LANG
+document.documentElement.dataset.theme = params.get('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n) })
+document.querySelectorAll('[data-i18n-ph]').forEach((el) => { el.placeholder = t(el.dataset.i18nPh) })
+
+/* ── 步骤与状态 ─────────────────────────────────────────────────────────────── */
+const steps = {
+  account: document.getElementById('step-account'),
+  password: document.getElementById('step-password'),
+  register: document.getElementById('step-register'),
+  mfa: document.getElementById('step-mfa'),
+  done: document.getElementById('step-done'),
+}
+const submitOf = {
+  account: document.getElementById('submit-account'),
+  password: document.getElementById('submit-login'),
+  register: document.getElementById('submit-register'),
+  mfa: document.getElementById('submit-mfa'),
+}
+let current = 'account'
+let busy = false
+let lastUser = ''
+
+function show(step) {
+  current = step
+  Object.entries(steps).forEach(([name, el]) => el.classList.toggle('is-off', name !== step))
+  const focusTarget = step === 'mfa' ? document.getElementById('otp-1') : steps[step].querySelector('input:not([type=checkbox])')
+  if (step !== 'done') focusTarget?.focus()
+  document.getElementById('form-status').textContent = ''
+}
+
+function setError(fieldEl, on) {
+  fieldEl.classList.toggle('is-error', on)
+  const input = fieldEl.querySelector('.input')
+  if (input) input.setAttribute('aria-invalid', on ? 'true' : 'false')
+}
+function fieldOf(input) { return input.closest('.field') || input.closest('.terms') }
+function showError(input, messageKey) {
+  const field = fieldOf(input)
+  setError(field, true)
+  let msg = field.querySelector('.hint-error')
+  if (!msg) { msg = document.createElement('p'); msg.className = 'hint-error'; field.append(msg) }
+  msg.textContent = t(messageKey)
+  document.getElementById('form-status').textContent = t(messageKey)
+  input.setAttribute('aria-describedby', msg.id || (msg.id = 'err-' + (input.id || 'x')))
+  input.focus()
+}
+function clearError(input) {
+  const field = fieldOf(input)
+  setError(field, false)
+  field.querySelector('.hint-error')?.remove()
+}
+document.querySelectorAll('.input').forEach((el) => el.addEventListener('input', () => clearError(el)))
+document.querySelectorAll('.input').forEach((el) => el.addEventListener('blur', () => {
+  if (el.value && el.type !== 'checkbox' && el.id === 'account') validateAccount(el)
+}))
+
+function validateAccount(input) {
+  const value = input.value.trim()
+  if (!value) { showError(input, 'errAccountUnknown'); return false }
+  clearError(input)
+  return true
+}
+
+/* 密码的可见性切换：产品里同一动作，文案随之换 */
+document.querySelectorAll('[data-reveal]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const input = document.getElementById(btn.dataset.reveal)
+    const shown = input.type === 'text'
+    input.type = shown ? 'password' : 'text'
+    btn.setAttribute('aria-pressed', shown ? 'false' : 'true')
+    btn.textContent = shown ? t('reveal') : t('hide')
+    input.focus()
+  })
+})
+
+/* 动态码：粘贴整串可用；填满即提交 */
+const otps = [...document.querySelectorAll('.otp .input')]
+otps.forEach((box, i) => {
+  box.addEventListener('input', () => {
+    box.value = box.value.replace(/\D/g, '').slice(0, 1)
+    if (box.value && otps[i + 1]) otps[i + 1].focus()
+    if (otps.every((b) => b.value)) document.getElementById('entry-form').requestSubmit()
+  })
+  box.addEventListener('paste', (event) => {
+    const text = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6)
+    if (!text) return
+    event.preventDefault()
+    otps.forEach((b, k) => { b.value = text[k] || '' })
+    if (text.length === 6) document.getElementById('entry-form').requestSubmit()
+  })
+  box.addEventListener('keydown', (event) => {
+    if (event.key === 'Backspace' && !box.value && otps[i - 1]) otps[i - 1].focus()
+  })
+})
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+function setBusy(step, on) {
+  busy = on
+  const button = submitOf[step]
+  const label = { account: 'continue', password: 'login', register: 'register', mfa: 'continue' }[step]
+  const busyKey = step === 'register' ? 'registerBusy' : 'loginBusy'
+  button.disabled = on
+  button.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span><span>${t(busyKey)}</span>` : t(label)
+  document.querySelectorAll('.step:not(.is-off) .input').forEach((el) => { el.disabled = on })
+}
+
+/* ── 提交：与引擎的分支一一对应 ─────────────────────────────────────────────── */
+document.getElementById('entry-form').addEventListener('submit', async (event) => {
+  event.preventDefault()
+  if (busy) return
+
+  if (current === 'account') {
+    const input = document.getElementById('account')
+    if (!input.value.trim()) { showError(input, 'errAccountUnknown'); return }
+    setBusy('account', true)
+    await wait(MOCK.latency)
+    setBusy('account', false)
+    lastUser = input.value.trim().toLowerCase()
+    /* verify：账号是否存在决定去密码还是去注册 */
+    if (MOCK.users.includes(lastUser)) { show('password') } else { show('register') }
+    return
+  }
+
+  if (current === 'password') {
+    const input = document.getElementById('password')
+    if (!input.value) { showError(input, 'errPassword'); return }
+    setBusy('password', true)
+    await wait(MOCK.latency)
+    setBusy('password', false)
+    if (input.value !== MOCK.password) { showError(input, 'errPassword'); return }
+    const captcha = document.getElementById('captcha-login')
+    if (!captcha.hidden) {
+      if (captcha.value.trim().toUpperCase() !== MOCK.captcha) { showError(captcha, 'errCaptcha'); return }
+    }
+    if (STATE === 'mfa') { show('mfa'); return }
+    show('done')
+    return
+  }
+
+  if (current === 'register') {
+    const password = document.getElementById('reg-password')
+    const confirm = document.getElementById('reg-confirm')
+    const terms = document.getElementById('terms')
+    if (!password.value) { showError(password, 'errPassword'); return }
+    if (password.value !== confirm.value) { showError(confirm, 'errConfirm'); return }
+    if (!terms.checked) {
+      document.getElementById('terms-row').classList.add('is-error')
+      document.getElementById('form-status').textContent = t('errTerms')
+      terms.focus()
+      return
+    }
+    setBusy('register', true)
+    await wait(MOCK.latency)
+    setBusy('register', false)
+    show('done')
+    return
+  }
+
+  if (current === 'mfa') {
+    const code = otps.map((b) => b.value).join('')
+    if (code.length < 6) return
+    if (code !== MOCK.otp) { showError(otps[0], 'errOtp'); return }
+    show('done')
+  }
+})
+
+/* ── 链接：账号已存在就回登录，不存在就去注册（同一页面内切换） ───────────────── */
+document.getElementById('to-register').addEventListener('click', (e) => { e.preventDefault(); show('register') })
+document.getElementById('to-login').addEventListener('click', (e) => { e.preventDefault(); show('password') })
+document.getElementById('mfa-back').addEventListener('click', (e) => { e.preventDefault(); show('account') })
+document.getElementById('account-unknown-cta').addEventListener('click', (e) => { e.preventDefault(); show('register') })
+
+/* ── 静态多态：`?state=` 预置，供评审与截图逐态看（产品里没有这一段） ───────────── */
+if (STATE !== 'account') {
+  const input = document.getElementById('account')
+  input.value = STATE === 'err-account' || STATE === 'register' ? 'nobody@example.com' : 'max@yaoagents.com'
+  if (STATE === 'account' || STATE === 'submitting') show('account')
+  if (STATE === 'password' || STATE === 'err-password' || STATE === 'captcha' || STATE === 'submitting') show('password')
+  if (STATE === 'register') show('register')
+  if (STATE === 'mfa') show('mfa')
+  if (STATE === 'captcha') document.getElementById('captcha-field-login').hidden = false
+  if (STATE === 'captcha') document.getElementById('captcha-login').value = 'A7K2'
+  if (STATE === 'password' || STATE === 'submitting') document.getElementById('password').value = MOCK.password
+  if (STATE === 'err-password') document.getElementById('password').value = 'wrong'
+  if (STATE === 'submitting') setBusy('password', true)
+  if (STATE === 'err-account') {
+    show('account')
+    input.value = 'nobody@example.com'
+    document.getElementById('account-unknown').hidden = false
+    showError(input, 'errAccountUnknown')
+  }
+  if (STATE === 'err-password') showError(document.getElementById('password'), 'errPassword')
+  if (STATE === 'register') {
+    document.getElementById('reg-password').value = 'correct-horse'
+    document.getElementById('reg-confirm').value = 'correct-horse'
+    document.getElementById('reg-name').value = 'Max'
+  }
+  if (STATE === 'mfa') { ['0','4','2','8'].forEach((v, i) => { otps[i].value = v }) }
+}
+</script>
+</body>
+</html>

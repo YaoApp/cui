@@ -1,37 +1,9 @@
 {
   "ui": {
-    "brand": "Yao Agents",
-    "newTask": "新規タスク",
-    "navigation": {
-      "chat": "チャット",
-      "inbox": "受信トレイ",
-      "board": "ボード",
-      "workspace": "ワークスペース",
-      "computer": "コンピュータ",
-      "knowledge": "ナレッジ"
-    },
-    "inbox": {
-      "unreadCount": "未読 {count}",
-      "searchPlaceholder": "メッセージを検索…",
-      "filterAll": "すべて",
-      "filterUnread": "未読",
-      "filterArchived": "アーカイブ済み"
-    },
-    "time": {
-      "today": "今日",
-      "yesterday": "昨日",
-      "earlier": "それ以前"
-    },
-    "thread": {
-      "newMessages": "新着 {count} 件",
-      "dateAt": "今日 {time}",
-      "changesChip": "変更 +{added} −{removed}"
-    },
-    "tool": {
-      "readFiles": "ファイルを読み込む"
-    },
-    "status": {
-      "done": "完了"
+    "activity": {
+      "readDocuments": "ドキュメント {count} 件を読み込み",
+      "extractRisks": "リスク {count} 件を抽出",
+      "waitingConfirmation": "観点の確認待ち"
     },
     "agent": "エージェント",
     "ask": {
@@ -43,11 +15,70 @@
       "optionChronological": "「時系列」で要約",
       "optionCustom": "自分で指定する"
     },
+    "brand": "Yao Agents",
     "composer": {
       "placeholder": "続けて：リスクを要件定義の受け入れ条件に追記…",
       "defaultPermission": "既定の権限",
       "awaitConfirm": "上記の選択肢を確認してから続けてください…"
     },
+    "entry": {
+      "loginTitle": "ログイン",
+      "loginLead": "アカウントで続けます。",
+      "registerTitle": "アカウントを作成",
+      "registerLead": "必要なのはアカウントとパスワードだけです。",
+      "account": "アカウント",
+      "accountPh": "メールアドレスまたは携帯番号",
+      "password": "パスワード",
+      "passwordPh": "パスワードを入力",
+      "reveal": "表示",
+      "hide": "非表示",
+      "confirm": "パスワードの確認",
+      "name": "表示名",
+      "nameHint": "任意、あとで変更できます",
+      "termsPre": "以下を読み、同意します：",
+      "termsService": "利用規約",
+      "termsAnd": "および",
+      "termsPrivacy": "プライバシーポリシー",
+      "captcha": "確認コード",
+      "captchaPh": "大文字小文字は区別しません",
+      "captchaRefresh": "別の画像",
+      "otp": "コード",
+      "otpHint": "入力が終わると送信されます",
+      "continue": "続ける",
+      "login": "ログイン",
+      "register": "アカウントを作成",
+      "loginBusy": "ログイン中…",
+      "registerBusy": "作成中…",
+      "toRegister": "アカウントを作成",
+      "toLogin": "ログインに戻る",
+      "mfaTitle": "2 段階目",
+      "mfaLead": "スマートフォンか認証アプリの 6 桁コードを入力してください。",
+      "mfaBack": "アカウント入力に戻る",
+      "errAccountUnknown": "このアカウントはまだ登録されていません。",
+      "errAccountUnknownCta": "作成する",
+      "errPassword": "パスワードが違います。大文字小文字や Caps Lock をご確認ください。",
+      "errConfirm": "2 回の入力が一致しません。",
+      "errCaptcha": "確認コードが違います。別の画像でお試しください。",
+      "errOtp": "コードが違うか期限切れです。再取得してください。",
+      "errTerms": "先に規約をお読みいただき同意してください。",
+      "errNetwork": "サービスに接続できません。ネットワークかサーバーアドレスをご確認ください。"
+    },
+    "inbox": {
+      "unreadCount": "未読 {count}",
+      "searchPlaceholder": "メッセージを検索…",
+      "filterAll": "すべて",
+      "filterUnread": "未読",
+      "filterArchived": "アーカイブ済み"
+    },
+    "navigation": {
+      "chat": "チャット",
+      "inbox": "受信トレイ",
+      "board": "ボード",
+      "workspace": "ワークスペース",
+      "computer": "コンピュータ",
+      "knowledge": "ナレッジ"
+    },
+    "newTask": "新規タスク",
     "panel": {
       "inProgress": "進行中",
       "highPriority": "優先度：高",
@@ -61,17 +92,28 @@
       "relatedFiles": "関連ファイル",
       "activity": "アクティビティ"
     },
-    "activity": {
-      "readDocuments": "ドキュメント {count} 件を読み込み",
-      "extractRisks": "リスク {count} 件を抽出",
-      "waitingConfirmation": "観点の確認待ち"
+    "status": {
+      "done": "完了"
+    },
+    "task": {
+      "id": "タスク ID"
     },
     "theme": {
       "light": "ライト",
       "dark": "ダーク"
     },
-    "task": {
-      "id": "タスク ID"
+    "thread": {
+      "newMessages": "新着 {count} 件",
+      "dateAt": "今日 {time}",
+      "changesChip": "変更 +{added} −{removed}"
+    },
+    "time": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "earlier": "それ以前"
+    },
+    "tool": {
+      "readFiles": "ファイルを読み込む"
     }
   },
   "sample": {

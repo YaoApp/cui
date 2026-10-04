@@ -1,39 +1,11 @@
-/* 自动生成，勿手改 —— 源：i18n/*.json（node packages/celadon/design/build-i18n.mjs） */
+/* generated — do not edit by hand; source: i18n/*.json (node packages/celadon/design/build-i18n.mjs) */
 window.CELADON_I18N = {
   "en": {
     "ui": {
-      "brand": "Yao Agents",
-      "newTask": "New task",
-      "navigation": {
-        "chat": "Chat",
-        "inbox": "Inbox",
-        "board": "Board",
-        "workspace": "Workspace",
-        "computer": "Computer",
-        "knowledge": "Knowledge"
-      },
-      "inbox": {
-        "unreadCount": "{count} unread",
-        "searchPlaceholder": "Search messages…",
-        "filterAll": "All",
-        "filterUnread": "Unread",
-        "filterArchived": "Archived"
-      },
-      "time": {
-        "today": "Today",
-        "yesterday": "Yesterday",
-        "earlier": "Earlier"
-      },
-      "thread": {
-        "newMessages": "{count} new messages",
-        "dateAt": "Today {time}",
-        "changesChip": "Changes +{added} −{removed}"
-      },
-      "tool": {
-        "readFiles": "Read files"
-      },
-      "status": {
-        "done": "Done"
+      "activity": {
+        "readDocuments": "Read {count} documents",
+        "extractRisks": "Extracted {count} risks",
+        "waitingConfirmation": "Waiting for confirmation"
       },
       "agent": "Agent",
       "ask": {
@@ -45,11 +17,70 @@ window.CELADON_I18N = {
         "optionChronological": "Summarize chronologically",
         "optionCustom": "I will specify my own"
       },
+      "brand": "Yao Agents",
       "composer": {
         "placeholder": "Continue: add the risks to the acceptance criteria…",
         "defaultPermission": "Default permission",
         "awaitConfirm": "Please confirm the options above to continue…"
       },
+      "entry": {
+        "loginTitle": "Sign in",
+        "loginLead": "Continue with your account.",
+        "registerTitle": "Create account",
+        "registerLead": "All you need is an account and a password.",
+        "account": "Account",
+        "accountPh": "Email or mobile number",
+        "password": "Password",
+        "passwordPh": "Enter your password",
+        "reveal": "Show",
+        "hide": "Hide",
+        "confirm": "Confirm password",
+        "name": "Display name",
+        "nameHint": "Optional, changeable later",
+        "termsPre": "I have read and agree to the",
+        "termsService": "Terms of Service",
+        "termsAnd": "and",
+        "termsPrivacy": "Privacy Policy",
+        "captcha": "Code",
+        "captchaPh": "Case-insensitive",
+        "captchaRefresh": "New image",
+        "otp": "Code",
+        "otpHint": "Submits once filled",
+        "continue": "Continue",
+        "login": "Sign in",
+        "register": "Create account",
+        "loginBusy": "Signing in…",
+        "registerBusy": "Creating…",
+        "toRegister": "Create account",
+        "toLogin": "Back to sign in",
+        "mfaTitle": "Second step",
+        "mfaLead": "Enter the six-digit code from your phone or authenticator.",
+        "mfaBack": "Back to the account field",
+        "errAccountUnknown": "This account has not been registered yet.",
+        "errAccountUnknownCta": "Create it",
+        "errPassword": "That password is not right. Check the case, or your caps lock.",
+        "errConfirm": "The two entries do not match.",
+        "errCaptcha": "That code is not right. Ask for a new image.",
+        "errOtp": "That code is wrong or expired. Ask for a new one.",
+        "errTerms": "Please read and agree to the terms first.",
+        "errNetwork": "Cannot reach the service. Check your network or the server address."
+      },
+      "inbox": {
+        "unreadCount": "{count} unread",
+        "searchPlaceholder": "Search messages…",
+        "filterAll": "All",
+        "filterUnread": "Unread",
+        "filterArchived": "Archived"
+      },
+      "navigation": {
+        "chat": "Chat",
+        "inbox": "Inbox",
+        "board": "Board",
+        "workspace": "Workspace",
+        "computer": "Computer",
+        "knowledge": "Knowledge"
+      },
+      "newTask": "New task",
       "panel": {
         "inProgress": "In progress",
         "highPriority": "High priority",
@@ -63,17 +94,28 @@ window.CELADON_I18N = {
         "relatedFiles": "Related files",
         "activity": "Activity"
       },
-      "activity": {
-        "readDocuments": "Read {count} documents",
-        "extractRisks": "Extracted {count} risks",
-        "waitingConfirmation": "Waiting for confirmation"
+      "status": {
+        "done": "Done"
+      },
+      "task": {
+        "id": "Task ID"
       },
       "theme": {
         "light": "Light",
         "dark": "Dark"
       },
-      "task": {
-        "id": "Task ID"
+      "thread": {
+        "newMessages": "{count} new messages",
+        "dateAt": "Today {time}",
+        "changesChip": "Changes +{added} −{removed}"
+      },
+      "time": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "earlier": "Earlier"
+      },
+      "tool": {
+        "readFiles": "Read files"
       }
     },
     "sample": {
@@ -696,38 +738,10 @@ window.CELADON_I18N = {
   },
   "ja": {
     "ui": {
-      "brand": "Yao Agents",
-      "newTask": "新規タスク",
-      "navigation": {
-        "chat": "チャット",
-        "inbox": "受信トレイ",
-        "board": "ボード",
-        "workspace": "ワークスペース",
-        "computer": "コンピュータ",
-        "knowledge": "ナレッジ"
-      },
-      "inbox": {
-        "unreadCount": "未読 {count}",
-        "searchPlaceholder": "メッセージを検索…",
-        "filterAll": "すべて",
-        "filterUnread": "未読",
-        "filterArchived": "アーカイブ済み"
-      },
-      "time": {
-        "today": "今日",
-        "yesterday": "昨日",
-        "earlier": "それ以前"
-      },
-      "thread": {
-        "newMessages": "新着 {count} 件",
-        "dateAt": "今日 {time}",
-        "changesChip": "変更 +{added} −{removed}"
-      },
-      "tool": {
-        "readFiles": "ファイルを読み込む"
-      },
-      "status": {
-        "done": "完了"
+      "activity": {
+        "readDocuments": "ドキュメント {count} 件を読み込み",
+        "extractRisks": "リスク {count} 件を抽出",
+        "waitingConfirmation": "観点の確認待ち"
       },
       "agent": "エージェント",
       "ask": {
@@ -739,11 +753,70 @@ window.CELADON_I18N = {
         "optionChronological": "「時系列」で要約",
         "optionCustom": "自分で指定する"
       },
+      "brand": "Yao Agents",
       "composer": {
         "placeholder": "続けて：リスクを要件定義の受け入れ条件に追記…",
         "defaultPermission": "既定の権限",
         "awaitConfirm": "上記の選択肢を確認してから続けてください…"
       },
+      "entry": {
+        "loginTitle": "ログイン",
+        "loginLead": "アカウントで続けます。",
+        "registerTitle": "アカウントを作成",
+        "registerLead": "必要なのはアカウントとパスワードだけです。",
+        "account": "アカウント",
+        "accountPh": "メールアドレスまたは携帯番号",
+        "password": "パスワード",
+        "passwordPh": "パスワードを入力",
+        "reveal": "表示",
+        "hide": "非表示",
+        "confirm": "パスワードの確認",
+        "name": "表示名",
+        "nameHint": "任意、あとで変更できます",
+        "termsPre": "以下を読み、同意します：",
+        "termsService": "利用規約",
+        "termsAnd": "および",
+        "termsPrivacy": "プライバシーポリシー",
+        "captcha": "確認コード",
+        "captchaPh": "大文字小文字は区別しません",
+        "captchaRefresh": "別の画像",
+        "otp": "コード",
+        "otpHint": "入力が終わると送信されます",
+        "continue": "続ける",
+        "login": "ログイン",
+        "register": "アカウントを作成",
+        "loginBusy": "ログイン中…",
+        "registerBusy": "作成中…",
+        "toRegister": "アカウントを作成",
+        "toLogin": "ログインに戻る",
+        "mfaTitle": "2 段階目",
+        "mfaLead": "スマートフォンか認証アプリの 6 桁コードを入力してください。",
+        "mfaBack": "アカウント入力に戻る",
+        "errAccountUnknown": "このアカウントはまだ登録されていません。",
+        "errAccountUnknownCta": "作成する",
+        "errPassword": "パスワードが違います。大文字小文字や Caps Lock をご確認ください。",
+        "errConfirm": "2 回の入力が一致しません。",
+        "errCaptcha": "確認コードが違います。別の画像でお試しください。",
+        "errOtp": "コードが違うか期限切れです。再取得してください。",
+        "errTerms": "先に規約をお読みいただき同意してください。",
+        "errNetwork": "サービスに接続できません。ネットワークかサーバーアドレスをご確認ください。"
+      },
+      "inbox": {
+        "unreadCount": "未読 {count}",
+        "searchPlaceholder": "メッセージを検索…",
+        "filterAll": "すべて",
+        "filterUnread": "未読",
+        "filterArchived": "アーカイブ済み"
+      },
+      "navigation": {
+        "chat": "チャット",
+        "inbox": "受信トレイ",
+        "board": "ボード",
+        "workspace": "ワークスペース",
+        "computer": "コンピュータ",
+        "knowledge": "ナレッジ"
+      },
+      "newTask": "新規タスク",
       "panel": {
         "inProgress": "進行中",
         "highPriority": "優先度：高",
@@ -757,17 +830,28 @@ window.CELADON_I18N = {
         "relatedFiles": "関連ファイル",
         "activity": "アクティビティ"
       },
-      "activity": {
-        "readDocuments": "ドキュメント {count} 件を読み込み",
-        "extractRisks": "リスク {count} 件を抽出",
-        "waitingConfirmation": "観点の確認待ち"
+      "status": {
+        "done": "完了"
+      },
+      "task": {
+        "id": "タスク ID"
       },
       "theme": {
         "light": "ライト",
         "dark": "ダーク"
       },
-      "task": {
-        "id": "タスク ID"
+      "thread": {
+        "newMessages": "新着 {count} 件",
+        "dateAt": "今日 {time}",
+        "changesChip": "変更 +{added} −{removed}"
+      },
+      "time": {
+        "today": "今日",
+        "yesterday": "昨日",
+        "earlier": "それ以前"
+      },
+      "tool": {
+        "readFiles": "ファイルを読み込む"
       }
     },
     "sample": {
@@ -1390,38 +1474,10 @@ window.CELADON_I18N = {
   },
   "zh-CN": {
     "ui": {
-      "brand": "Yao Agents",
-      "newTask": "新任务",
-      "navigation": {
-        "chat": "聊天",
-        "inbox": "收件箱",
-        "board": "看板",
-        "workspace": "工作区",
-        "computer": "电脑",
-        "knowledge": "知识库"
-      },
-      "inbox": {
-        "unreadCount": "{count} 未读",
-        "searchPlaceholder": "搜索消息…",
-        "filterAll": "全部",
-        "filterUnread": "未读",
-        "filterArchived": "已归档"
-      },
-      "time": {
-        "today": "今天",
-        "yesterday": "昨天",
-        "earlier": "更早"
-      },
-      "thread": {
-        "newMessages": "{count} 条新消息",
-        "dateAt": "今天 {time}",
-        "changesChip": "变更 +{added} −{removed}"
-      },
-      "tool": {
-        "readFiles": "读取文件"
-      },
-      "status": {
-        "done": "完成"
+      "activity": {
+        "readDocuments": "读取 {count} 份文档",
+        "extractRisks": "提取 {count} 处风险",
+        "waitingConfirmation": "等待口径确认"
       },
       "agent": "Agent",
       "ask": {
@@ -1433,11 +1489,70 @@ window.CELADON_I18N = {
         "optionChronological": "按「时间顺序」汇总",
         "optionCustom": "我自己补口径"
       },
+      "brand": "Yao Agents",
       "composer": {
         "placeholder": "继续：把风险点补进需求文档的验收条款…",
         "defaultPermission": "默认权限",
         "awaitConfirm": "请先确认上方选项后继续…"
       },
+      "entry": {
+        "loginTitle": "登录",
+        "loginLead": "用账号继续。",
+        "registerTitle": "创建账号",
+        "registerLead": "只需一个账号和密码。",
+        "account": "账号",
+        "accountPh": "邮箱或手机号",
+        "password": "密码",
+        "passwordPh": "请输入密码",
+        "reveal": "显示",
+        "hide": "隐藏",
+        "confirm": "确认密码",
+        "name": "显示名称",
+        "nameHint": "选填，之后可以改",
+        "termsPre": "我已阅读并同意",
+        "termsService": "使用协议",
+        "termsAnd": "与",
+        "termsPrivacy": "隐私政策",
+        "captcha": "验证码",
+        "captchaPh": "不区分大小写",
+        "captchaRefresh": "换一张",
+        "otp": "动态码",
+        "otpHint": "填满即自动提交",
+        "continue": "继续",
+        "login": "登录",
+        "register": "创建账号",
+        "loginBusy": "正在登录…",
+        "registerBusy": "正在创建…",
+        "toRegister": "创建账号",
+        "toLogin": "返回登录",
+        "mfaTitle": "第二步验证",
+        "mfaLead": "输入手机或验证器上的 6 位动态码。",
+        "mfaBack": "返回重新输入账号",
+        "errAccountUnknown": "这个账号还没有注册。",
+        "errAccountUnknownCta": "去创建",
+        "errPassword": "密码不对。检查大小写，或看下大写锁定。",
+        "errConfirm": "两次输入不一致。",
+        "errCaptcha": "验证码不对，换一张再试。",
+        "errOtp": "动态码不对或已过期，请重新获取。",
+        "errTerms": "请先阅读并同意协议。",
+        "errNetwork": "连不上服务，检查网络或服务地址。"
+      },
+      "inbox": {
+        "unreadCount": "{count} 未读",
+        "searchPlaceholder": "搜索消息…",
+        "filterAll": "全部",
+        "filterUnread": "未读",
+        "filterArchived": "已归档"
+      },
+      "navigation": {
+        "chat": "聊天",
+        "inbox": "收件箱",
+        "board": "看板",
+        "workspace": "工作区",
+        "computer": "电脑",
+        "knowledge": "知识库"
+      },
+      "newTask": "新任务",
       "panel": {
         "inProgress": "进行中",
         "highPriority": "高优先级",
@@ -1451,17 +1566,28 @@ window.CELADON_I18N = {
         "relatedFiles": "相关文件",
         "activity": "活动"
       },
-      "activity": {
-        "readDocuments": "读取 {count} 份文档",
-        "extractRisks": "提取 {count} 处风险",
-        "waitingConfirmation": "等待口径确认"
+      "status": {
+        "done": "完成"
+      },
+      "task": {
+        "id": "任务 ID"
       },
       "theme": {
         "light": "浅色",
         "dark": "暗色"
       },
-      "task": {
-        "id": "任务 ID"
+      "thread": {
+        "newMessages": "{count} 条新消息",
+        "dateAt": "今天 {time}",
+        "changesChip": "变更 +{added} −{removed}"
+      },
+      "time": {
+        "today": "今天",
+        "yesterday": "昨天",
+        "earlier": "更早"
+      },
+      "tool": {
+        "readFiles": "读取文件"
       }
     },
     "sample": {
@@ -2084,38 +2210,10 @@ window.CELADON_I18N = {
   },
   "zh-TW": {
     "ui": {
-      "brand": "Yao Agents",
-      "newTask": "新增任務",
-      "navigation": {
-        "chat": "聊天",
-        "inbox": "收件匣",
-        "board": "看板",
-        "workspace": "工作區",
-        "computer": "電腦",
-        "knowledge": "知識庫"
-      },
-      "inbox": {
-        "unreadCount": "{count} 未讀",
-        "searchPlaceholder": "搜尋訊息…",
-        "filterAll": "全部",
-        "filterUnread": "未讀",
-        "filterArchived": "已封存"
-      },
-      "time": {
-        "today": "今天",
-        "yesterday": "昨天",
-        "earlier": "更早"
-      },
-      "thread": {
-        "newMessages": "{count} 則新訊息",
-        "dateAt": "今天 {time}",
-        "changesChip": "變更 +{added} −{removed}"
-      },
-      "tool": {
-        "readFiles": "讀取檔案"
-      },
-      "status": {
-        "done": "完成"
+      "activity": {
+        "readDocuments": "讀取 {count} 份文件",
+        "extractRisks": "提取 {count} 處風險",
+        "waitingConfirmation": "等待口徑確認"
       },
       "agent": "Agent",
       "ask": {
@@ -2127,11 +2225,70 @@ window.CELADON_I18N = {
         "optionChronological": "依「時間順序」彙總",
         "optionCustom": "我自己補口徑"
       },
+      "brand": "Yao Agents",
       "composer": {
         "placeholder": "繼續：把風險點補進需求文件的驗收條款…",
         "defaultPermission": "預設權限",
         "awaitConfirm": "請先確認上方選項後繼續…"
       },
+      "entry": {
+        "loginTitle": "登入",
+        "loginLead": "用帳號繼續。",
+        "registerTitle": "建立帳號",
+        "registerLead": "只需要一個帳號和密碼。",
+        "account": "帳號",
+        "accountPh": "電子郵件或手機號",
+        "password": "密碼",
+        "passwordPh": "請輸入密碼",
+        "reveal": "顯示",
+        "hide": "隱藏",
+        "confirm": "確認密碼",
+        "name": "顯示名稱",
+        "nameHint": "選填，之後可以改",
+        "termsPre": "我已閱讀並同意",
+        "termsService": "使用條款",
+        "termsAnd": "與",
+        "termsPrivacy": "隱私政策",
+        "captcha": "驗證碼",
+        "captchaPh": "不分大小寫",
+        "captchaRefresh": "換一張",
+        "otp": "動態碼",
+        "otpHint": "填滿即自動送出",
+        "continue": "繼續",
+        "login": "登入",
+        "register": "建立帳號",
+        "loginBusy": "正在登入…",
+        "registerBusy": "正在建立…",
+        "toRegister": "建立帳號",
+        "toLogin": "返回登入",
+        "mfaTitle": "第二步驗證",
+        "mfaLead": "輸入手機或驗證器上的 6 位動態碼。",
+        "mfaBack": "返回重新輸入帳號",
+        "errAccountUnknown": "這個帳號還沒有註冊。",
+        "errAccountUnknownCta": "去建立",
+        "errPassword": "密碼不對。檢查大小寫，或看下大寫鎖定。",
+        "errConfirm": "兩次輸入不一致。",
+        "errCaptcha": "驗證碼不對，換一張再試。",
+        "errOtp": "動態碼不對或已過期，請重新取得。",
+        "errTerms": "請先閱讀並同意條款。",
+        "errNetwork": "連不上服務，檢查網路或服務位址。"
+      },
+      "inbox": {
+        "unreadCount": "{count} 未讀",
+        "searchPlaceholder": "搜尋訊息…",
+        "filterAll": "全部",
+        "filterUnread": "未讀",
+        "filterArchived": "已封存"
+      },
+      "navigation": {
+        "chat": "聊天",
+        "inbox": "收件匣",
+        "board": "看板",
+        "workspace": "工作區",
+        "computer": "電腦",
+        "knowledge": "知識庫"
+      },
+      "newTask": "新增任務",
       "panel": {
         "inProgress": "進行中",
         "highPriority": "高優先",
@@ -2145,17 +2302,28 @@ window.CELADON_I18N = {
         "relatedFiles": "相關檔案",
         "activity": "活動"
       },
-      "activity": {
-        "readDocuments": "讀取 {count} 份文件",
-        "extractRisks": "提取 {count} 處風險",
-        "waitingConfirmation": "等待口徑確認"
+      "status": {
+        "done": "完成"
+      },
+      "task": {
+        "id": "任務 ID"
       },
       "theme": {
         "light": "淺色",
         "dark": "深色"
       },
-      "task": {
-        "id": "任務 ID"
+      "thread": {
+        "newMessages": "{count} 則新訊息",
+        "dateAt": "今天 {time}",
+        "changesChip": "變更 +{added} −{removed}"
+      },
+      "time": {
+        "today": "今天",
+        "yesterday": "昨天",
+        "earlier": "更早"
+      },
+      "tool": {
+        "readFiles": "讀取檔案"
       }
     },
     "sample": {
