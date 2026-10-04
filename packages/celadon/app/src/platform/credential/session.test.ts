@@ -28,7 +28,7 @@ describe('the session credential', () => {
   })
 
   it('writes under the scoped key on sign in, and removes it on sign out', async () => {
-    expect(await signIn('fresh-token')).toMatchObject({ ok: true, value: true })
+    expect(await signIn({ access_token: 'fresh-token' })).toMatchObject({ ok: true, value: true })
     expect(credential.write).toHaveBeenCalledWith('http://a:5099#session', 'fresh-token')
     expect(sessionAuthorization()).toBe('Bearer fresh-token')
     expect(await signOut()).toMatchObject({ ok: true, value: true })
@@ -53,7 +53,13 @@ describe('the session credential', () => {
     vi.mocked(credential.managedByApp).mockReturnValue(false)
     const first = await loadSession()
     expect(first.ok ? first.value : 'unexpected').toBeUndefined()
-    expect(await signIn('x')).toMatchObject({ ok: true, value: true })
+    expect(await signIn({ access_token: 'x' })).toMatchObject({ ok: true, value: true })
     expect(credential.write).not.toHaveBeenCalled()
   })
 })
+
+  it('is a no-op when the response carries no token (a cookie carrier)', async () => {
+    expect(await signIn({ status: 'ok' })).toMatchObject({ ok: true, value: true })
+    expect(credential.write).not.toHaveBeenCalled()
+    expect(sessionAuthorization()).toBeUndefined()
+  })

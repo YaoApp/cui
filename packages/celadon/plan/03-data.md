@@ -168,6 +168,8 @@ app/src/
 2. **登录 / 会话**（2026-10-04 起）：**已落地** —— 令牌写进载体（桌面 OS 凭据库 / Web 空操作）·
    出口按 origin 取出来附上 `Authorization`（有就带、不覆盖显式给的）· 401 **续期重放一次**（刷新能力注入）·
    "忘记这台服务"删该 origin 下所有用途的凭据。数据检查页登录成功后把令牌交给会话，入口启动读一次。
+   **凭据自动装填（2026-10-04）**：声明上标 `session: 'adopt' | 'drop'`，出口在成功后把响应体交给平台收/丢；
+   登录端点由数据层按 `credentialCarrier()` 选，业务层只调一个 `login`。
    **还差**：引擎真登录（`/user/entry/*` 那套 OTP/邀请/两步）与刷新端点的声明 —— 现在用的是引擎**测试模式**的
    `login/token`；另：会话的**公共 store**（`stores/session.ts`，`06 §2.3`）等真登录进来再加。
 3. **其余 12 个业务域**：setting · agent · workspace · llm · mcp · sandbox · computer · nodes · app · captcha · file（§1.1 的清单照旧；`kb`/`job`/`trace`/`agent/robot` 已弃用不迁）。

@@ -7,4 +7,4 @@
 import type { Request } from '../request'
 import type { LogoutResult } from './types'
 
-export const logout: Request<void, LogoutResult> = { method: 'POST', path: '/user/logout' }
+export const logout: Request<void, LogoutResult> = { method: 'POST', path: '/user/logout', session: 'drop' }

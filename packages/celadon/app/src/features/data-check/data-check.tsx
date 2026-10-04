@@ -34,7 +34,6 @@ import {
 } from '@/data/helloworld'
 import { listUsersQuery, loginTokenQuery, loginWebQuery, type TestUser } from '@/data/test'
 import { logoutQuery } from '@/data/user'
-import { signIn as sessionSignIn, signOut as sessionSignOut } from '@/platform/credential'
 import { readServiceAddress, writeServiceAddress } from '@/platform/service'
 import { client } from '@/platform/client'
 
@@ -146,10 +145,8 @@ export function DataCheckPage() {
       void loginWebCall.run({ user: user.email })
     } else {
       loginWebCall.reset()
-      // 登录成功后把令牌交给**平台**（桌面写进 OS 凭据库、Web 是空操作）—— 在动作里接着做，不写副作用
-      void loginTokenCall.run({ user: user.email }).then((result) => {
-        if (result?.ok) void sessionSignIn(result.value.access_token)
-      })
+      // 令牌由**出口**自动收下（声明上标了 `session: 'adopt'`）—— 页面不碰令牌字段
+      void loginTokenCall.run({ user: user.email })
     }
     setLoginEmail(user.email)
   }
@@ -259,9 +256,8 @@ export function DataCheckPage() {
         <p className="data-check__tools">
           <Button
             onClick={() =>
-              void logoutCall.run().then((result) => {
+              void logoutCall.run().then(() => {
                   // 服务端吊销成功后再清本地那把（顺序不能反）—— 仍在动作里，不写副作用
-                  if (result?.ok) void sessionSignOut()
                 // 服务端已吊销并清 Cookie：两边的旧登录结果都不能再代表"已登录"
                 loginWebCall.reset()
                 loginTokenCall.reset()

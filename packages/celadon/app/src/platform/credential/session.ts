@@ -35,16 +35,33 @@ export function sessionAuthorization(): string | undefined {
   return cached ? `Bearer ${cached}` : undefined
 }
 
-/** 登录成功后记下令牌。Web 是空操作（服务端已下发 Cookie，不归应用存）。 */
-export async function signIn(secret: string): Promise<BridgeResult<boolean>> {
-  cached = secret
+const REFRESH_PURPOSE = 'refresh'
+
+/** 从**响应体**里取令牌（登录接口回什么由服务端定，业务层不碰字段）。
+ *  Web（Cookie 载体）下没有可存的令牌：空操作。 */
+function tokenIn(payload: unknown): { access?: string; refresh?: string } {
+  if (typeof payload !== 'object' || payload === null) return {}
+  const bag = payload as Record<string, unknown>
+  const pick = (key: string): string | undefined => (typeof bag[key] === 'string' ? (bag[key] as string) : undefined)
+  return { access: pick('access_token'), refresh: pick('refresh_token') }
+}
+
+/** **登录成功后由出口调用**：把响应体里的令牌收进载体。Web 是空操作（服务端已下发 Cookie）。 */
+export async function signIn(payload: unknown): Promise<BridgeResult<boolean>> {
   loaded = true
+  const { access, refresh } = tokenIn(payload)
+  if (!access) return ok(true) // 没有令牌可收（Cookie 载体 / 别的响应形状）
   const name = keyOfSession()
   if (!name) return fail('credential.service_empty', 'no service address to key a credential', {})
   if (!credential.managedByApp()) return ok(true)
-  const written = await credential.write(name, secret)
-  if (!written.ok) cached = undefined
-  return written
+  cached = access
+  const written = await credential.write(name, access)
+  if (!written.ok) {
+    cached = undefined
+    return written
+  }
+  if (refresh && credentialKey(REFRESH_PURPOSE)) await credential.write(credentialKey(REFRESH_PURPOSE) as string, refresh)
+  return ok(true)
 }
 
 /** 退出：清内存 + 删这条凭据。**服务端的吊销由调用方先做**（`data/user` 的 `logout`）。 */

@@ -160,6 +160,11 @@
 - **出口要同步拿**：这里留一份**内存镜像**（启动读一次，写时同步更新），`sessionAuthorization()` 直接给值。
 - **忘记这台服务**：删掉该 origin 下**所有用途**的凭据（不是只删 `session`）；删之前由调用方先吊销服务端会话。
 - **平台不认 URL**：刷新怎么发由数据层声明，刷新能力由应用启动时注入（`setSessionRefresher`）。
+- **凭据自动装填**：登录成功与退出成功**不需要业务层交令牌**。声明上标一个 `session: 'adopt' | 'drop'`
+  （`data/request/send.ts` 的 `Request`），出口在**成功解包裹之后**把这一个响应体交给平台 ——
+  `adopt` 由平台从响应体里取 `access_token` / `refresh_token` 存进载体，`drop` 丢掉本机凭据；
+  载体是 Cookie 时 `adopt` 自然是空操作。**怎么登录由数据层决定**：按 `credentialCarrier()`
+  选端点（本机持凭据走回令牌那条，否则走服务端写 Cookie 的那条），业务层只调一个 `login`。
 
 ## 5. 客户端（web / desktop）
 
