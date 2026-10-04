@@ -119,12 +119,25 @@
 
 /* 测试登录那节的用户行：每个字段一格（Cell），两个登录按钮在后；行太长就整体换行 */
 .data-check__users {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-label);
+  color: var(--text-secondary);
+
+  th,
+  td {
+    padding: var(--spacing-8);
+    border-bottom: var(--border-width) solid var(--border-subtle);
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere; /* 长 id / 长邮箱不许把表撑破 */
+  }
+
+  th {
+    color: var(--text-tertiary);
+    font-weight: normal;
+    white-space: nowrap;
+  }
 }
 
 
