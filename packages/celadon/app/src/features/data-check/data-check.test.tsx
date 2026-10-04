@@ -69,7 +69,7 @@ describe('the data check page', () => {
     expect(loadServiceInfo).not.toHaveBeenCalledWith(10_000)
     expect(screen.queryByText('Yao Agents')).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /^(读一次|讀一次|Read once|一度読む)$/ }))
+    await user.click(screen.getByRole('button', { name: /^(读取|讀取|Read|読み込む)$/ }))
 
     // 接线的证据：读一次 10s 超时，而且读回来的东西真上了屏
     expect((await screen.findAllByText('Yao Agents')).length).toBeGreaterThan(0)
@@ -96,7 +96,7 @@ describe('the data check page', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: /^(读一次|讀一次|Read once|一度読む)$/ }))
+    await user.click(screen.getByRole('button', { name: /^(读取|讀取|Read|読み込む)$/ }))
 
     expect((await screen.findAllByText(/连不上服务/)).length).toBeGreaterThan(0)
     // 按码翻译，不是英文诊断原文
@@ -152,7 +152,7 @@ describe('the data check page', () => {
     await user.click(screen.getByRole('button', { name: /^(受保护 GET|受保護 GET|Protected GET)$/ }))
 
     // 预期失败是**页面说清楚的**，不是沉默的报错
-    expect(await screen.findByText(/预期失败：登录还没接/)).toBeInTheDocument()
+    expect(await screen.findByText(/预期失败（还没接登录）/)).toBeInTheDocument()
     expect(
       vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/helloworld/protected')),
     ).toBe(true)
