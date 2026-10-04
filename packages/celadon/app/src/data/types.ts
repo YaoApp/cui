@@ -4,24 +4,27 @@
  * 业务错误往里加**字段级问题**，不另造一套。
  */
 
-/** 一次调用的失败：传输失败 + 服务端业务错误，**同一种形状**（与 `platform/transport` 的字段一致）。
+/** 一次调用的失败。**两类信息在这里分家**：
  *
- *  **为什么不带域前缀**：出口是 `@/data`，来源写在 import 路径里就够；
- *  平台那侧的 `BridgeFailure` 保留前缀，是为了在同一次排查里分辨"这条失败来自**宿主桥**还是**服务接口**"。
+ *  ① **给用户的消息**：由 `code` + `params` **生成** —— 应用按码翻译（`platform/bridge` 的 `bridgeErrorText`），
+ *     `params` 负责插值。**别在这里直接塞成品文案**（那就绕过了翻译，4 语就废了）。
+ *  ② **给排查的原文**：`rawMessage` 等 —— 引擎的 `error_description` 原文，**不许上屏**。
+ *
+ *  命名上就挡着这件事：叫 `rawMessage` 而不是 `message`，免得有人顺手 `{failure.message}` 渲出去。
  *
  *  **引擎的错误体是 OAuth 形状**（`yao/openapi/oauth/types/types.go:35-45`）：
  *  `{ error, error_description, error_uri, state, reason, required_scopes, missing_scopes }` ——
- *  **没有字段级 `fields`/`errors`**（`yao` 里字段校验信息只拼在 `error_description` 文本里），所以这里也不编。 */
+ *  **没有字段级 `fields`/`errors`**（字段校验信息只拼在 `error_description` 文本里），所以这里也不编。 */
 export type Failure = {
-  /** 码：`transport.*`（传输）或服务端/业务码（如 `user.invalid`） */
+  /** **给用户的消息的码**：`transport.*`（传输）或服务端/业务码（如 `user.invalid`）—— 由应用翻译 */
   code: string
-  /** 给插值的参数（如 `{ status }`） */
+  /** 给用户的消息的**插值参数**（如 `{ status }` · `{ name }`） */
   params: Record<string, unknown>
-  /** 英文诊断信息（引擎的 `error_description`）：**只给日志**，文案由应用按码翻译 */
-  message: string
-  /** OAuth 的 `required_scopes`（引擎会给） */
+  /** **引擎原文**（引擎的 `error_description`）—— 只给日志与排查，**不许上屏** */
+  rawMessage: string
+  /** 引擎给的 `required_scopes`（OAuth） */
   requiredScopes?: readonly string[]
-  /** OAuth 的 `missing_scopes` */
+  /** 引擎给的 `missing_scopes` */
   missingScopes?: readonly string[]
 }
 

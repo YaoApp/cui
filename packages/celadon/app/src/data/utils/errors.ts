@@ -32,7 +32,7 @@ export function failure(status: number, body: unknown, fallbackCode: string): Fa
   return {
     code,
     params: { status },
-    message,
+    rawMessage: message,
     ...(requiredScopes ? { requiredScopes } : {}),
     ...(missingScopes ? { missingScopes } : {}),
   }
