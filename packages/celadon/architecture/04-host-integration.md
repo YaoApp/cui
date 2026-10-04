@@ -1,7 +1,7 @@
 # 04 · 制品与挂载（硬约束）
 
 - **版本**：v1.31
-- **最后修改**：2026-10-04 09:19:26
+- **最后修改**：2026-10-04 09:22:09
 - **说明**：制品构成 · 宿主挂载 · 放到哪（引擎 / 独立 / 桌面）· SPA fallback · 由命名空间推导的工程约束
 
 ## 1. 制品构成
@@ -106,22 +106,33 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
 
-        # SSE 等长连接：不缓冲，放宽读超时
-        proxy_buffering off;
-        proxy_read_timeout 3600s;
-    }
-
-    # WebSocket 升级
-    location /ws/ {
-        proxy_pass http://127.0.0.1:5099;
-        proxy_http_version 1.1;
+        # 长连接：WebSocket 升级（`/v1/events` · `/v1/agent/tasks/<chat_id>/ws` 都在 /v1/ 下）
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Connection $connection_upgrade;
+
+        # SSE：不缓冲，放宽读超时
+        proxy_buffering off;
         proxy_read_timeout 3600s;
     }
 }
 ```
+
+#### 上线自检（托管方逐条过）
+
+以命名空间 `app` 为例，全部应满足：
+
+| 检查 | 期望 |
+| --- | --- |
+| `GET /app` | **301 → `/app/`，且 `Location` 是相对地址**（对外端口 ≠ 监听端口时不丢端口）|
+| `GET /app/` | `200`，且页面引用的 `_assets/…js` 与产物 `index.html` **一致** |
+| `GET /app/<任意前端路由>` | `200` 且**内容为 `index.html`**（SPA fallback）|
+| `GET /app/_assets/<存在>` | `200`，`Cache-Control` 长缓存（`public, immutable`）|
+| `GET /app/_assets/<不存在>` | **`404`**（缺的资源不回退）|
+| `GET /app/index.html` | `Cache-Control: no-cache`（发版即生效）|
+| `GET /.well-known/yao` | `200` 且含 `openapi` 前缀（**漏了这条应用读不到前缀**）|
+| `GET /v1/<任一接口>` | 与引擎直连**同结果**（同源反代成立）|
 
 ### 独立部署（Cloudflare）
 
