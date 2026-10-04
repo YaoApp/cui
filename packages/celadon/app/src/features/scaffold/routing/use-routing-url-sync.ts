@@ -11,7 +11,8 @@ import { useRoutingStore } from './routing.store'
    它就把参数删掉、下一批又加回来 —— 你删我加，同步刷效果时是死循环（实测卡死过）。
 
    被绑的值是**私有**的，所以绑定住在这里；**公共**的（侧边开着谁）由路由层绑，
-   机制同为 `platform/router/use-url-binding.ts`。导航语义：过滤用 replace（打字不该塞满后退栈）。 */
+   机制自己写在这一个钩子里（公共的 URL 绑定钩子已随侧边面撤掉）。
+   导航语义：过滤用 replace（打字不该塞满后退栈）。 */
 export function useRoutingUrlSync() {
   const location = useLocation()
   const navigate = useNavigate()

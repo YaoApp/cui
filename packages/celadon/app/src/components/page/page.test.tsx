@@ -15,6 +15,8 @@ describe('the page building blocks', () => {
       </Page>,
     )
     expect(screen.getByText('甲').closest('.page__body')).not.toBeNull()
+    // 外壳已经有一个 `<main>`：正文容器不许再套一个
+    expect(screen.queryByRole('main')).toBeNull()
     expect(screen.getByRole('region', { name: '一段' })).toBeInTheDocument()
     expect(screen.getByText('标题')).toBeInTheDocument()
     expect(screen.getAllByText(/甲|乙/)).toHaveLength(2)

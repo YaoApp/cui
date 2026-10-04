@@ -20,7 +20,7 @@ try { statSync(TARGET) } catch {
 }
 
 const CODE = /\.(?:[cm]?[jt]sx?)$/
-/* 唯一例外：绑定的实现本身。它做的就是"值 ↔ URL"这一件事，机制必须住在这里，
+/* 例外清单已清空（绑定钩子随侧边面撤掉了）
    而且它守住了不变量（读只在 POP · 写没变就不动）。 */
 const ALLOWED = new Set([]) // 空着：URL 只由页面自己的同步钩子写（2026-10-04 撤掉公共钩子）
 const WRITES = /\b(?:setSearchParams|navigate)\s*\(/

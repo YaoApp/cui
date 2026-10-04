@@ -1,5 +1,5 @@
 import './requests.less'
-/* **数据层验证页**（`/data-check`）：把 `app/src/data/` 那条路在界面上跑通，让人看得见结果。
+/* **数据层验证页**（`/scaffold/requests`）：把 `app/src/data/` 那条路在界面上跑通，让人看得见结果。
  *
  * 三节：
  *   ① 登录（测试模式）—— `@/data/test` 的用户列表与两种测试登录，之后受保护的两格才有凭据
