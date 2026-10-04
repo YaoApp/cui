@@ -1,7 +1,7 @@
 # 04 · 制品与挂载（硬约束）
 
 - **版本**：v1.31
-- **最后修改**：2026-10-04 09:15:06
+- **最后修改**：2026-10-04 09:17:37
 - **说明**：制品构成 · 宿主挂载 · 放到哪（引擎 / 独立 / 桌面）· SPA fallback · 由命名空间推导的工程约束
 
 ## 1. 制品构成
@@ -89,6 +89,13 @@ server {
         try_files $uri $uri/ /app/index.html;
     }
 
+    # 服务信息：应用**第一次需要时**读一次（`15-platform.md` §3）——**必须代理**，否则应用读不到 openapi 前缀
+    location /.well-known/ {
+        proxy_pass http://127.0.0.1:5099;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
     # 接口：反向代理至引擎，保持同源
     location /v1/ {
         proxy_pass http://127.0.0.1:5099;
@@ -169,7 +176,7 @@ export const onRequest: PagesFunction<{ ENGINE: string }> = ({ request, env }) =
 │   └── _assets/
 ├── _redirects                # fallback 与 404
 ├── _headers                 # 缓存策略
-├── _routes.json             # 只让接口路径进入 Functions
+├── _routes.json             # 只让接口路径与服务信息进入 Functions
 └── functions/
     └── v1/[[path]].ts       # 反向代理至引擎
 ```
@@ -186,7 +193,7 @@ ENGINE = "engine.example.com"           # Functions 里以 env.ENGINE 读取
 
 ```json
 // _routes.json —— 静态请求不走 Functions，只有接口路径进
-{ "version": 1, "include": ["/v1/*"], "exclude": [] }
+{ "version": 1, "include": ["/v1/*", "/.well-known/*"], "exclude": [] }
 ```
 
 部署：`wrangler pages deploy`（首次会要求选择项目）。
