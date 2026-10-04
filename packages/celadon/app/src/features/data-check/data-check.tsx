@@ -10,7 +10,10 @@ import './data-check.less'
  * 状态从钩子的 `state` 读，失败上屏用 `state.failure.text`（钩子已按码翻译成一句话）。
  *
  * **秘密不上屏**：只印接口返回的值，从不读凭据，也不印请求头（凭据由出口自己带，见 17-transport.md）；
- * 登录那节只显示凭据的**存在性与长度**，不显示值。 */
+ * 登录那节只显示凭据的**存在性与长度**，不显示值。
+ *
+ * **登录成功 ≠ 被允许**：受保护接口还要过引擎的授权策略 —— 带着凭据仍回 403 时，
+ * 标注换成"已认证但未被授权"，并附上引擎给的 `reason`（`state.failure.rawMessage`，不新增传输逻辑）。 */
 
 import { useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'
@@ -98,6 +101,18 @@ export function DataCheckPage() {
   const webLogin = loginWebCall.state.status === 'ok' ? loginWebCall.state.value : null
   const tokenLogin = loginTokenCall.state.status === 'ok' ? loginTokenCall.state.value : null
 
+  /** 已登录、却仍被引擎拒：`login/web` 成功 **且** 这一格失败 **且** 失败码是 forbidden / unauthorized。
+   *  这时"预期失败"就不成立了 —— 是"已认证、未被授权"（引擎侧授权策略，不是客户端问题）。 */
+  const deniedAfterLogin = (state: RequestState<unknown>) =>
+    webLogin !== null && state.status === 'error' && /forbidden|unauthorized/i.test(state.failure.code)
+
+  /** 一格的显示值：成功印值，失败印钩子按码翻译好的文案；被策略拒绝时把引擎给的 reason 补在后面。 */
+  const stateValue = (state: RequestState<unknown>) => {
+    if (state.status !== 'error' || !deniedAfterLogin(state)) return stateText(state)
+    const reason = state.failure.rawMessage
+    return reason && !state.failure.text.includes(reason) ? `${state.failure.text} · ${reason}` : state.failure.text
+  }
+
   const signIn = (user: TestUser, kind: 'web' | 'token') => {
     if (!user.email) return
     setLoginEmail(user.email)
@@ -144,7 +159,15 @@ export function DataCheckPage() {
         <ul className="data-check__users">
           {users.map((user) => (
             <li className="data-check__user" key={user.id}>
-              <code>{user.email}</code>{' '}
+              <Cell label={t('dataCheck.fieldId')} value={user.id} />
+              <Cell label={t('dataCheck.fieldUserId')} value={user.user_id} />
+              {user.email ? <Cell label={t('dataCheck.fieldEmail')} value={user.email} /> : null}
+              {user.name ? <Cell label={t('dataCheck.fieldName')} value={user.name} /> : null}
+              {user.preferred_username ? <Cell label={t('dataCheck.fieldPreferredUsername')} value={user.preferred_username} /> : null}
+              {user.status ? <Cell label={t('dataCheck.fieldStatus')} value={user.status} /> : null}
+              {user.role_id ? <Cell label={t('dataCheck.fieldRoleId')} value={user.role_id} /> : null}
+              {user.type_id ? <Cell label={t('dataCheck.fieldTypeId')} value={user.type_id} /> : null}
+              <Cell label={t('dataCheck.fieldEmailVerified')} value={user.email_verified ? t('dataCheck.emailVerified') : t('dataCheck.emailUnverified')} />
               <Button onClick={() => signIn(user, 'web')} disabled={loginWebCall.state.status === 'loading'}>{t('dataCheck.loginWeb')}</Button>{' '}
               <Button onClick={() => signIn(user, 'token')} disabled={loginTokenCall.state.status === 'loading'}>{t('dataCheck.loginToken')}</Button>
             </li>
@@ -183,6 +206,7 @@ export function DataCheckPage() {
       {/* ② 脚手架四格：公开的两条真跑；受保护的两条也点得动，登录成功后就会通 */}
       <h2 className="data-check__heading">{t('dataCheck.scaffold')}</h2>
       <p>{t('dataCheck.scaffoldHint')}</p>
+      <p>{t('dataCheck.authzHint')}</p>
       <div className="data-check__row">
         <Cell label={t('dataCheck.locale')} value={locale} />
         <Cell label={t('dataCheck.theme')} value={theme} />
@@ -193,12 +217,17 @@ export function DataCheckPage() {
         <Button onClick={() => void protectedGetCall.run()} disabled={protectedGetCall.state.status === 'loading'}>{t('dataCheck.protectedGet')}</Button>{' '}
         <Button onClick={() => void protectedPostCall.run()} disabled={protectedPostCall.state.status === 'loading'}>{t('dataCheck.protectedPost')}</Button>
       </p>
-      {/* 每格直接渲染自己的 state：成功印返回值，失败印译文，受保护的两条标出"预期失败" */}
+      {/* 每格直接渲染自己的 state：成功印返回值，失败印译文；受保护的两条按登录与否标注
+          "预期失败（还没登录）" 或 "已认证但未被授权"（登录成功仍被引擎策略拒绝时） */}
       <div className="data-check__row">
         {cells.map(({ label, state, expected }) => (
-          <Cell key={label} label={label} value={stateText(state)}>
+          <Cell key={label} label={label} value={stateValue(state)}>
             {expected && state.status === 'error' ? (
-              <em className="data-check__expected">{t('dataCheck.expectedFailure')}</em>
+              deniedAfterLogin(state) ? (
+                <em className="data-check__expected">{t('dataCheck.authenticatedDenied')}</em>
+              ) : webLogin === null ? (
+                <em className="data-check__expected">{t('dataCheck.expectedFailure')}</em>
+              ) : null
             ) : null}
           </Cell>
         ))}

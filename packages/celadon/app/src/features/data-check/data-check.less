@@ -104,14 +104,15 @@
   padding: var(--spacing-8) 0;
 }
 
-/* "预期失败：登录还没接"——警告档文字，不抢结果的视线 */
+/* 结果格里的标注：还没登录时的「预期失败（还没接登录）」，或登录后被引擎授权策略拒绝时的
+   「已认证但未被授权」—— 警告档文字，不抢结果的视线 */
 .data-check__expected {
   margin-inline-start: var(--spacing-8);
   color: var(--warm-text);
   font-style: normal;
 }
 
-/* 测试登录那节的用户行：邮箱在前，两个登录按钮在后；行太长就换行 */
+/* 测试登录那节的用户行：每个字段一格（Cell），两个登录按钮在后；行太长就整体换行 */
 .data-check__users {
   display: flex;
   flex-direction: column;
@@ -126,6 +127,11 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-8);
+}
+
+/* 字段格保持自身宽度、整体换行，不被挤成一条竖排 */
+.data-check__user > .data-check__cell {
+  flex: 0 0 auto;
 }
 
 .data-check__user code {

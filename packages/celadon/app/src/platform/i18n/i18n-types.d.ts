@@ -31,9 +31,22 @@ export type I18nKey =
   | 'bridge.error.transport.parse'
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
+  | 'dataCheck.authenticatedDenied'
+  | 'dataCheck.authzHint'
   | 'dataCheck.back'
   | 'dataCheck.credentials'
+  | 'dataCheck.emailUnverified'
+  | 'dataCheck.emailVerified'
   | 'dataCheck.expectedFailure'
+  | 'dataCheck.fieldEmail'
+  | 'dataCheck.fieldEmailVerified'
+  | 'dataCheck.fieldId'
+  | 'dataCheck.fieldName'
+  | 'dataCheck.fieldPreferredUsername'
+  | 'dataCheck.fieldRoleId'
+  | 'dataCheck.fieldStatus'
+  | 'dataCheck.fieldTypeId'
+  | 'dataCheck.fieldUserId'
   | 'dataCheck.listUsers'
   | 'dataCheck.listUsersHint'
   | 'dataCheck.locale'
@@ -195,9 +208,22 @@ declare module 'i18next' {
         'bridge.error.transport.parse': string
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
+        'dataCheck.authenticatedDenied': string
+        'dataCheck.authzHint': string
         'dataCheck.back': string
         'dataCheck.credentials': string
+        'dataCheck.emailUnverified': string
+        'dataCheck.emailVerified': string
         'dataCheck.expectedFailure': string
+        'dataCheck.fieldEmail': string
+        'dataCheck.fieldEmailVerified': string
+        'dataCheck.fieldId': string
+        'dataCheck.fieldName': string
+        'dataCheck.fieldPreferredUsername': string
+        'dataCheck.fieldRoleId': string
+        'dataCheck.fieldStatus': string
+        'dataCheck.fieldTypeId': string
+        'dataCheck.fieldUserId': string
         'dataCheck.listUsers': string
         'dataCheck.listUsersHint': string
         'dataCheck.locale': string

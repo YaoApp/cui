@@ -28,10 +28,20 @@ const LOGIN = {
   status: 'active',
 }
 
-/** `/test/users` 的分页回应：把邮件列表包成引擎的线上形状。 */
+/** `/test/users` 的分页回应：把用户行包成引擎的线上形状（12 个字段里页面要展示的那几个）。 */
 function userPage(emails: readonly string[]) {
   return {
-    data: emails.map((email, index) => ({ id: `u${index}`, user_id: `u${index}`, email })),
+    data: emails.map((email, index) => ({
+      id: `id-${index}`,
+      user_id: `user-${index}`,
+      email,
+      name: `Name ${index}`,
+      preferred_username: `username-${index}`,
+      status: 'active',
+      role_id: `role-${index}`,
+      type_id: `type-${index}`,
+      email_verified: index % 2 === 0,
+    })),
     page: 1,
     pagesize: 20,
     pagecnt: 1,
@@ -235,6 +245,15 @@ describe('the data check page', () => {
     expect(screen.getByText('linus@example.com')).toBeInTheDocument()
     // 只列前几个：第 4 个不上屏（邮箱是用户可见的事实，不是凭据）
     expect(screen.queryByText('extra@example.com')).not.toBeInTheDocument()
+    // 用户行把关键字段都列出来：id · user_id · 状态 · 角色 · 类型（值都在）
+    for (const value of ['id-0', 'user-0', 'role-0', 'type-0']) {
+      expect(screen.getByText(value)).toBeInTheDocument()
+    }
+    expect(screen.getAllByText('active').length).toBeGreaterThan(0)
+    // email_verified 用人话上屏，不裸印 true / false
+    expect(screen.getAllByText('已验证').length).toBeGreaterThan(0)
+    expect(screen.getByText('未验证')).toBeInTheDocument()
+    expect(screen.queryByText('true')).not.toBeInTheDocument()
     // 地址真的走了分页查询（域层 query 工厂把参数并进了路径）
     expect(
       vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/v1/test/users?page=1&pagesize=20')),
@@ -280,6 +299,40 @@ describe('the data check page', () => {
     // 受保护那一格：假出口在登录前回 401，登录后回 200 —— 状态来自这次登录的结果
     await user.click(screen.getByRole('button', { name: '受保护 GET' }))
     await waitFor(() => expect(cellText('受保护 GET')).toContain(MESSAGE))
+    expect(cellText('受保护 GET')).not.toContain('预期失败')
+  })
+
+  it('marks a protected cell as authenticated but not authorized when the engine policy denies it', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) return json(LOGIN)
+      // 已登录也照拒：引擎侧的授权策略，403 forbidden + reason
+      if (target.includes('/helloworld/protected')) {
+        return json({ error: 'forbidden', reason: 'no match, default policy: deny' }, 403)
+      }
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+
+    // 还没登录：这一格仍然是"预期失败"
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('预期失败'))
+    expect(cellText('受保护 GET')).not.toContain('已认证但未被授权')
+
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+
+    // 登录成功但带凭据仍被拒：标注换成"已认证但未被授权"，并附上引擎给的 reason
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('已认证但未被授权'))
+    expect(cellText('受保护 GET')).toContain('no match, default policy: deny')
     expect(cellText('受保护 GET')).not.toContain('预期失败')
   })
 
