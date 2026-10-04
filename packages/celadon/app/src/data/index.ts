@@ -1,7 +1,11 @@
-export type { Failure, Result, Page } from './types'
-export { unwrap } from './utils/unwrap'
-export { paginate } from './utils/paginate'
-export { failure } from './utils/failure'
-export { context } from './request/context'
-// 头与 query 是**包装内部**用的（`request/send.ts` · `sse.ts` · `socket.ts`），不进对外面
-// `type Context` 也从 `@/data/request/context` 直接取（名字太通用，不进 barrel）
+/* **数据层对外面**：上层只从 `@/data` 取东西，**不伸手进它的内部目录**。
+ *
+ * 带什么不带什么是有意的：
+ *   · 不带 `Context` 类型 —— 名字太通用，需要时从 `@/data/request/context` 直接取
+ *   · 不带 `headers` / `query` —— 那是包装内部用的（`request/send.ts` · 将来的 `sse.ts` · `socket.ts`）
+ */
+
+export type { Failure, Page, Result } from './types'
+export { failure, paginate, unwrap } from './utils'
+export { context, send, type Call, type SendInputs } from './request'
+export { useRequest, type RequestState } from './hooks'
