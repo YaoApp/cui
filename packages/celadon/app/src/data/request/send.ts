@@ -34,8 +34,9 @@ export type Request<Input = void, Output = void> = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   /** 引擎的路径（**不含** `openapi` 前缀，如 `/helloworld/public`） */
   path: string
-  /** **这个接口固定要带的头**（如聊天域的标记头）—— 每次调用都带，不用调用方记 */
-  headers?: Record<string, string>
+  /** **这个接口固定要带的头**（如聊天域的标记头）—— 每次调用都带，不用调用方记。
+   *  用标准的 `HeadersInit`：**同名重复可以表达**（元组数组 / `Headers.append`），**名字大小写不敏感**。 */
+  headers?: HeadersInit
   /** 只给类型看（运行时不带值） */
   readonly input?: Input
   /** 只给类型看（运行时不带值） */
@@ -49,12 +50,31 @@ export type SendInputs<Input = void> = {
   query?: Record<string, string | number | boolean | undefined>
   /** **这次调用的请求体**（`GET`/`DELETE` 不带）—— 类型由声明的 `Request<Input, …>` 给 */
   body?: Input
-  /** **这次调用**要带的头：合并**在 ctx 之后**（调用方说了算）。
+  /** **这次调用**要带的头：合并**在 ctx 与声明之后**（调用方说了算）—— `HeadersInit`，同声明那级。
    *  用途：两步登录第一步的**临时** `Authorization`（`15 §4`：注入凭据但不覆盖显式给的那个）。 */
-  headers?: Record<string, string>
+  headers?: HeadersInit
   signal?: AbortSignal
   /** **超时由调用方给**（`17 §2.2`：出口不替业务方定数字） */
   timeoutMs?: number
+}
+
+/** 合并头：**不同来源，后者覆盖前者；同一来源里重名，追加**（`a=foo` + `a=bar` 两个都留）。
+ *  用 `Headers` 是为了**大小写不敏感**（HTTP 头名本来就无关大小写）。 */
+function mergeHeaders(...sources: (HeadersInit | undefined)[]): Headers {
+  const merged = new Headers()
+  for (const source of sources) {
+    if (!source) continue
+    const seen = new Set<string>()
+    for (const [name, value] of new Headers(source)) {
+      const key = name.toLowerCase()
+      if (seen.has(key)) merged.append(name, value)
+      else {
+        merged.set(name, value)
+        seen.add(key)
+      }
+    }
+  }
+  return merged
 }
 
 function withQuery(url: string, params: Record<string, string | number | boolean | undefined>): string {
@@ -80,7 +100,7 @@ export async function send<Input = void, Output = void>(
   const response = await transportFetch(url, {
     method: request.method,
     // ctx 先 → 声明里固定要带的 → 这次调用显式的（后者说了算）
-    headers: { ...contextHeaders(ctx), ...(request.headers ?? {}), ...(inputs.headers ?? {}) },
+    headers: mergeHeaders(contextHeaders(ctx), request.headers, inputs.headers),
     ...(inputs.body === undefined ? {} : { body: JSON.stringify(inputs.body) }),
     ...(inputs.signal ? { signal: inputs.signal } : {}),
     ...(inputs.timeoutMs === undefined ? {} : { timeoutMs: inputs.timeoutMs }),

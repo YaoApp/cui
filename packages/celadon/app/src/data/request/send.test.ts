@@ -33,7 +33,7 @@ describe('send', () => {
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe('/v1/helloworld/public?locale=en-US&accept=cui-web&page=1')
     expect(init?.method).toBe('GET')
-    expect(init?.headers).toMatchObject({ 'X-Yao-Accept': 'cui-web' })
+    expect(new Headers(init?.headers).get('x-yao-accept')).toBe('cui-web')   // 大小写不敏感
   })
 
   it('unwraps an envelope, and leaves a bare entity alone', async () => {
@@ -58,10 +58,9 @@ describe('send', () => {
   it('lets the caller set a header explicitly, which the sign-in step needs', async () => {
     const fetchMock = answer({ ok: true })
     await send(request, { outbound, headers: { Authorization: 'Bearer temp-one-shot' } })
-    expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({
-      Authorization: 'Bearer temp-one-shot',
-      'X-Yao-Accept': 'cui-web',
-    })
+    const headers = new Headers(fetchMock.mock.calls[0][1]?.headers)
+    expect(headers.get('Authorization')).toBe('Bearer temp-one-shot')
+    expect(headers.get('X-Yao-Accept')).toBe('cui-web')
   })
 
   it('carries a header the interface declares, under the one the caller gives', async () => {
@@ -69,8 +68,17 @@ describe('send', () => {
     const chatty: Request<{ text: string }> = { method: 'POST', path: '/chat', headers: { 'X-Yao-Accept': 'cui-web' } }
     await send(chatty, { outbound, body: { text: 'hi' }, headers: { Authorization: 'Bearer one-shot' } })
     const init = fetchMock.mock.calls[0][1]
-    expect(init?.headers).toMatchObject({ 'X-Yao-Accept': 'cui-web', Authorization: 'Bearer one-shot' })
+    const headers = new Headers(init?.headers)
+    expect(headers.get('X-Yao-Accept')).toBe('cui-web')
+    expect(headers.get('authorization')).toBe('Bearer one-shot')   // 本次调用覆盖声明的同名头
     expect(init?.body).toBe(JSON.stringify({ text: 'hi' }))
+  })
+
+  it('keeps two values under one name, which a plain object cannot', async () => {
+    const fetchMock = answer({ ok: true })
+    await send(request, { outbound, headers: [['X-Trace', 'a'], ['X-Trace', 'b']] })
+    const headers = new Headers(fetchMock.mock.calls[0][1]?.headers)
+    expect(headers.get('x-trace')).toBe('a, b')   // 两个值都在
   })
 
   it('passes a network failure straight through', async () => {
