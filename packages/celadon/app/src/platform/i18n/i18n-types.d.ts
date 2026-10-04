@@ -32,8 +32,18 @@ export type I18nKey =
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
   | 'dataCheck.back'
+  | 'dataCheck.credentials'
   | 'dataCheck.expectedFailure'
+  | 'dataCheck.listUsers'
+  | 'dataCheck.listUsersHint'
   | 'dataCheck.locale'
+  | 'dataCheck.loginHint'
+  | 'dataCheck.loginTest'
+  | 'dataCheck.loginTestHint'
+  | 'dataCheck.loginToken'
+  | 'dataCheck.loginTokenResult'
+  | 'dataCheck.loginWeb'
+  | 'dataCheck.loginWebResult'
   | 'dataCheck.ok'
   | 'dataCheck.protectedGet'
   | 'dataCheck.protectedPost'
@@ -186,8 +196,18 @@ declare module 'i18next' {
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
         'dataCheck.back': string
+        'dataCheck.credentials': string
         'dataCheck.expectedFailure': string
+        'dataCheck.listUsers': string
+        'dataCheck.listUsersHint': string
         'dataCheck.locale': string
+        'dataCheck.loginHint': string
+        'dataCheck.loginTest': string
+        'dataCheck.loginTestHint': string
+        'dataCheck.loginToken': string
+        'dataCheck.loginTokenResult': string
+        'dataCheck.loginWeb': string
+        'dataCheck.loginWebResult': string
         'dataCheck.ok': string
         'dataCheck.protectedGet': string
         'dataCheck.protectedPost': string

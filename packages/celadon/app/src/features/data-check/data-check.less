@@ -110,3 +110,26 @@
   color: var(--warm-text);
   font-style: normal;
 }
+
+/* 测试登录那节的用户行：邮箱在前，两个登录按钮在后；行太长就换行 */
+.data-check__users {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.data-check__user {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+.data-check__user code {
+  font-family: var(--font-family-monospace);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
