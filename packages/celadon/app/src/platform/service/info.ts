@@ -43,8 +43,9 @@ let inFlight: Promise<BridgeResult<ServiceInfo>> | undefined
 /** 读一次并缓存（再有调用直接用缓存；**并发也只发一次** —— 否则 StrictMode 会打两次）。 */
 export function loadServiceInfo(timeoutMs?: number): Promise<BridgeResult<ServiceInfo>> {
   if (cached) return Promise.resolve(ok(cached))
+  const startedAt = generation
   inFlight ??= readServiceInfo(timeoutMs).finally(() => {
-    inFlight = undefined
+    if (startedAt === generation) inFlight = undefined
   })
   return inFlight
 }

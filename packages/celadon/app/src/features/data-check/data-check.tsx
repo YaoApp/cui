@@ -31,6 +31,7 @@ import {
   publicPostQuery,
 } from '@/data/helloworld'
 import { listUsersQuery, loginQuery, type TestUser } from '@/data/test'
+import { failureText } from '@/platform/i18n'
 import { logoutQuery } from '@/data/user'
 import { readServiceAddress, writeServiceAddress } from '@/platform/service'
 import { client, useLocalePreference, useThemePreference } from '@/platform/client'
@@ -112,7 +113,7 @@ export function DataCheckPage() {
     if (result.ok) {
       setServiceUrl(result.value)
       setServiceNotice('')
-    } else setServiceNotice(result.code)
+    } else setServiceNotice(failureText(result))
   }, [])
   const saveAddress = useCallback(async () => {
     const result = await writeServiceAddress(serviceUrl.trim())
@@ -123,7 +124,7 @@ export function DataCheckPage() {
       loginCall.reset()
       logoutCall.reset()
       setLoginEmail('')
-    } else setServiceNotice(result.code)
+    } else setServiceNotice(failureText(result))
   }, [serviceUrl])
 
   /** 登录态：取到过凭据 **且没退出成功** —— 退出由服务端吊销并清 Cookie，退完就不再是登录态。 */

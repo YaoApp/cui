@@ -3,7 +3,7 @@ import { service } from '../bridge/service'
 import { readServiceAddress, writeServiceAddress } from './address'
 
 vi.mock('../bridge/service', () => ({ service: { get: vi.fn(), set: vi.fn() } }))
-vi.mock('./base', () => ({ loadServiceBase: vi.fn(async () => ({ ok: true, value: '' })), resetServiceBase: vi.fn() }))
+vi.mock('./base', () => ({ loadServiceBase: vi.fn(async () => 'http://b:5099'), resetServiceBase: vi.fn() }))
 vi.mock('./info', () => ({ resetServiceInfo: vi.fn() }))
 vi.mock('../credential/session', () => ({ resetSession: vi.fn(), loadSession: vi.fn(async () => ({ ok: true, value: undefined })) }))
 import { resetServiceBase } from './base'
@@ -27,7 +27,7 @@ describe('the service address faces', () => {
       expect(resetServiceBase).toHaveBeenCalledTimes(1)
       expect(resetServiceInfo).toHaveBeenCalledTimes(1)
       expect(resetSession).toHaveBeenCalledTimes(1)
-      // 新地址的会话不在这里读：基址要先从宿主取回，出口发请求前再惰性补读
+      // 新地址的会话在这里读 —— 但必须等新基址回来之后再读（否则凭据键算不出来）
       expect(loadSession).toHaveBeenCalledTimes(1)
     })
   it('writes through, and hands a refusal back untouched', async () => {

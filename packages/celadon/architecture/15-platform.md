@@ -81,7 +81,7 @@
 - **Web 一律走 Cookie**：前端不读、不写、不存令牌；是否已登录**向服务端查会话**，不靠本地推断。
 - **Desktop 走 token**：请求在 Rust 侧发出（见 §4.1），`Authorization: Bearer <access_token>`；**调用方已显式带 `Authorization` 时不覆盖**（登录第一步用一次性临时 token）。
 - **两步登录**：① 验证账号存在 → 拿临时 token（可能要先过验证码）② 换取凭据（Web 得 Cookie；Desktop 得 `access_token` + `refresh_token` + `session_id`）。
-- **续期**：Web 由服务端会话决定；Desktop **启动时刷一次 + 之后每 6 小时一次**。
+- **续期**：Web 由服务端会话决定；Desktop **启动时刷一次 + 之后~~每 6 小时~~（设想，代码里没有）一次**。
   失败不拦路由、不拦首屏（与未登录同待遇），**定时器只在 `credential/` 一处**。
 - **接口根**取 well-known 的 `openapi`；取不到按 §3 走统一提示页。
 - **凭据只由 `credential/` 一处存取**：读写 · 续期 · 清除；调用方只说"要一个可用凭据"。**feature 不许自己读、自己写**。

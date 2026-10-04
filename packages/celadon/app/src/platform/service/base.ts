@@ -16,7 +16,12 @@ export async function loadServiceBase(): Promise<string> {
   loaded = true
   if (!hasHost()) return serviceBase()
   const result = await bridge.service.get()
-  if (result.ok) hostedBase = result.value.url.replace(/\/+$/, '')
+  if (result.ok) {
+    hostedBase = result.value.url.replace(/\/+$/, '')
+    return serviceBase()
+  }
+  // 读失败不钉死：下次还能再读（钉死会让基址永远是空）
+  loaded = false
   return serviceBase()
 }
 
