@@ -10,7 +10,7 @@
  * 局域网直连 `http://192.168.x.x` 时它是 undefined（实测炸过整页白屏）。所以随机值走
  * `crypto.getRandomValues`（非安全上下文也有），并做降级。 */
 
-import { bridge } from '../bridge'
+
 import { clientKind } from './manifest'
 
 const STORAGE_KEY = 'celadon.client_id'
@@ -60,21 +60,18 @@ export function clientId(): string {
   return id
 }
 
-/** **桌面端**：拿宿主的真机器码，换掉随机段（同一台机器稳定）。
- *  在启动时调一次即可；拿不到就保持随机值，不报错。 */
-export async function primeClientId(): Promise<string> {
-  const id = clientId()
-  if (clientKind() !== 'desktop') return id
-  // 已经是机器码（重启后读到的）就不必再问
+/** **装填内部用**：把宿主的真机器码换成 `client_id`（同一台机器稳定）。
+ *  宿主答不上来由调用方（`facts.ts` 的装填）负责报错，这里不兜底。 */
+export function adoptMachineId(machine: string): string {
+  const id = `${prefix()}-${machine}`
+  primed = id
   const store = storage()
-  const fromMachine = store?.getItem(`${STORAGE_KEY}.machine`)
-  if (fromMachine && id === fromMachine) return id
+  store?.setItem(STORAGE_KEY, id)
+  store?.setItem(`${STORAGE_KEY}.machine`, id)
+  return id
+}
 
-  const result = await bridge.system.machineId()
-  if (!result.ok || !result.value) return id
-  const machine = `${prefix()}-${result.value}`
-  primed = machine
-  store?.setItem(STORAGE_KEY, machine)
-  store?.setItem(`${STORAGE_KEY}.machine`, machine)
-  return machine
+/** 桌面重启后读到的就是机器码时，省掉一次宿主往返。 */
+export function storedMachineId(): string | undefined {
+  return storage()?.getItem(`${STORAGE_KEY}.machine`) ?? undefined
 }

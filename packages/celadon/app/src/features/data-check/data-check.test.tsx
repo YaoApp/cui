@@ -51,12 +51,28 @@ function userPage(emails: readonly string[]) {
   }
 }
 
-const hasHostMock = vi.hoisted(() => vi.fn(() => false))
-const serviceGet = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: { url: '' } })))
-const serviceSet = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: { url: '' } })))
-vi.mock('@/platform/bridge', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/platform/bridge')>()
-  return { ...actual, hasHost: hasHostMock, service: { get: serviceGet, set: serviceSet } }
+const capsMock = vi.hoisted(() =>
+  vi.fn(() => ({ clipboard: false, files: false, notifications: false, externalOpen: true, serviceAddress: false })),
+)
+const readAddress = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: '' })))
+const writeAddress = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: '' })))
+vi.mock('@/platform/service', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/platform/service')>()
+  return { ...actual, readServiceAddress: readAddress, writeServiceAddress: writeAddress }
+})
+vi.mock('@/platform/client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/platform/client')>()
+  return {
+    ...actual,
+    // 能力**读时再取**（用例里可改），其余事实照真值
+    client: {
+      ...actual.client,
+      // 动态读数照旧走真值（用例会改偏好），能力读时可换
+      get capabilities() { return capsMock() },
+      get preferences() { return actual.client.preferences },
+      get metadata() { return actual.client.metadata },
+    },
+  }
 })
 
 vi.mock('@/platform/transport/fetch', () => ({ transportFetch: vi.fn() }))
@@ -492,9 +508,9 @@ describe('the service address, which only a client holds', () => {
   })
 
   it('reads the address the host holds, and saves a typed one', async () => {
-    hasHostMock.mockReturnValue(true)
-    serviceGet.mockResolvedValue({ ok: true, value: { url: 'http://host:5099' } })
-    serviceSet.mockResolvedValue({ ok: true, value: { url: 'http://typed:5099' } })
+    capsMock.mockReturnValue({ clipboard: false, files: false, notifications: false, externalOpen: true, serviceAddress: true })
+    readAddress.mockResolvedValue({ ok: true, value: 'http://host:5099' })
+    writeAddress.mockResolvedValue({ ok: true, value: 'http://typed:5099' })
     renderPage()
 
     const input = await screen.findByLabelText('服务地址')
@@ -504,6 +520,6 @@ describe('the service address, which only a client holds', () => {
 
     fireEvent.change(input, { target: { value: 'http://typed:5099' } })
     fireEvent.click(screen.getByText('校验并写入'))
-    await waitFor(() => expect(serviceSet).toHaveBeenCalledWith('http://typed:5099'))
+    await waitFor(() => expect(writeAddress).toHaveBeenCalledWith('http://typed:5099'))
   })
 })

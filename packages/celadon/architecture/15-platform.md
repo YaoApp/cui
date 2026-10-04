@@ -244,6 +244,20 @@
 - **版本字段跟着 `artifact` 走**：`unified` 与 `server` 写两个 · `yao` 只写 `yao_version` ·
   `tai` 只写 `tai_version` · `cui` 与 `web` **两个都不写**。
 
+### 5.4 客户端事实：一个对象 + 一次装填
+
+- **公共面只有一个 `client` 对象**（类型 `Client`）：`kind` · `os` · `manifest` · `capabilities` · `info` · `signature` ·
+  `id` · `host`，外加两个**动态读数** getter（`preferences` · `metadata`）。**不导出** `hasHost` 之类的功能函数 ——
+  "有没有宿主"是平台内部实现（`bridge/` 自用）。
+- **一处装填**：入口在渲染前 `await loadClient()`（`main.tsx`）：解析清单 · 探测能力（Web 一次）·
+  问一次桥（`ping` 拿宿主就绪与版本）· 取 `client_id`（本地值 → 宿主机器码）。之后各处**同步直接读** `client.x`。
+- **失败即不可继续**：桌面下宿主答不上来（桥不可用 · 命令失败 · 超时）→ 抛 `ClientBootError` → 入口渲染
+  **错误面**（失败码 + 重试）；**不拿随机值兜底**（随机值只在 Web 是正确身份）。
+- **模块顶层不许读 `client`**：import 求值早于入口那句 await。
+- **走面孔，不走机制**：问能力用 `client.capabilities`；读写服务地址用 `platform/service` 的
+  `readServiceAddress` / `writeServiceAddress`。`features/` · `components/` · `routes/` 直接 import
+  `platform/bridge` 由 `check-bridge-imports` 拦（白名单 `features/verify/**`，它是桥检查页）。
+
 ## 6. 客户端底座（Desktop Bridge）
 
 **桌面端宿主能力都在 `bridge/` 里实现**：凭据读写 · 本地服务 · tai · 更新 · 环境 · 隧道 · 系统集成。

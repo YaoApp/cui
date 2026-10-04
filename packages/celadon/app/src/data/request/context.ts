@@ -8,9 +8,7 @@
  * 默认值由 `send()` 从平台层取（`platform/client/context.ts` 的 `currentPreferences()`），覆盖时显式传。
  */
 
-import type { RequestMetadata, Preferences } from '@/platform/client/context'
-import { metadata } from '@/platform/client/context'
-import { clientId as currentClientId } from '@/platform/client/client-id'
+import { client, type Preferences, type RequestMetadata } from '@/platform/client'
 import { serviceBase } from '@/platform/service'
 
 /** 一次出站调用要带的全部上下文（在 `request/` 里，所以就叫 `Context`）。 */
@@ -23,8 +21,8 @@ export type Context = RequestMetadata & {
 
 /** 要什么由平台那侧定（`Preferences`），这里**不另造一个形状**。 */
 export function context(inputs: Preferences): Context {
-  const facts = metadata(inputs)
-  return { ...facts, clientId: currentClientId(), service: serviceBase() }
+  const facts = { ...client.metadata, ...inputs }
+  return { ...facts, clientId: client.id, service: serviceBase() }
 }
 
 /** 按**引擎源码**对齐（`yao/agent/context/types.go:33-52` 的 `ValidAccepts`）：

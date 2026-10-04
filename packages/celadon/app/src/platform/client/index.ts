@@ -1,13 +1,11 @@
-/* `client/` 的公共面（15-platform.md §5）：**客户端类型 · 能力开关 · 宿主版本 · 客户端信息 · 请求元数据**。
- * 只有它读构建清单与 UA；其它层要判宿主或要用能力，一律问这里。 */
+/* `client/` 的公共面（`15-platform.md` §5）：**一个 `client` 对象 + 一次装填**。
+ *
+ * 其它层只读 `client.x`（同步直接读），不 import 内部模块，也不自己判宿主。
+ * 「有没有宿主」是内部实现：`bridge/` 自己用，不从这里出去。 */
 
-export { buildManifest, clientKind, targetOs, type ArtifactKind, type BuildInfo, type ClientKind, type Manifest, type TargetOs } from './manifest'
-export { capabilities, type Capabilities } from './capabilities'
-export { clientInfo, clientSignature, type ClientInfo } from './info'
-export { clientId, primeClientId, newClientId, randomId } from './client-id'
-export { parseUserAgent, uaInfo, type BrowserInfo, type UaInfo } from './ua'
-export { currentPreferences, metadata, type RequestMetadata, type Preferences } from './context'
-
-/* "这台客户端有没有宿主" 也是一条**客户端事实**（§5 让调用方先问 `client/`）。
-   实现留在 `bridge/`（**只有它能碰宿主**），这里只是把它按客户端的面孔转出去。 */
-export { hasHost } from '../bridge/invoke'
+export { client, loadClient, ClientBootError, type Client } from './facts'
+export type { ArtifactKind, BuildInfo, ClientKind, Manifest, TargetOs } from './manifest'
+export type { Capabilities } from './capabilities'
+export type { ClientInfo } from './info'
+export type { BrowserInfo, UaInfo } from './ua'
+export type { Preferences, RequestMetadata } from './context'

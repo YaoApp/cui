@@ -4,8 +4,7 @@
  * **不拼业务字段、不判状态码语义**（那是各域与引擎的事）。
  */
 
-import type { Preferences } from '@/platform/client/context'
-import { currentPreferences } from '@/platform/client/context'
+import { client, type Preferences } from '@/platform/client'
 import { endpoint, loadServiceInfo } from '@/platform/service'
 import { transportFetch } from '@/platform/transport/fetch'
 import type { Result } from '../types'
@@ -92,7 +91,7 @@ export async function send<Input = void, Output = void>(
   request: Request<Input, Output>,
   options: RequestOptions<Input> = {},
 ): Promise<Result<Output>> {
-  const ctx: Context = context({ ...currentPreferences(), ...options.preferences })
+  const ctx: Context = context({ ...client.preferences, ...options.preferences })
   // **第一次需要时先读**（惰性 ✓，之后走内存缓存）—— 读失败就把它自己的失败报出去（比"没就绪"更准）
   const service = await loadServiceInfo()
   if (!service.ok) return service

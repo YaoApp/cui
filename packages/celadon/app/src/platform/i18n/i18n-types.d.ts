@@ -42,6 +42,8 @@ export type I18nKey =
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
   | 'bridge.error.unauthorized'
+  | 'client.bootFailed'
+  | 'client.bootRetry'
   | 'dataCheck.authenticatedDenied'
   | 'dataCheck.authzHint'
   | 'dataCheck.back'
@@ -242,6 +244,8 @@ declare module 'i18next' {
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
         'bridge.error.unauthorized': string
+        'client.bootFailed': string
+        'client.bootRetry': string
         'dataCheck.authenticatedDenied': string
         'dataCheck.authzHint': string
         'dataCheck.back': string

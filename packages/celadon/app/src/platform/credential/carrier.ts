@@ -3,12 +3,12 @@
  *   · Desktop → **OS 凭据库**里的 token（经 `bridge/`）
  * 上层只调 `credential` 这一套，**不判宿主**。 */
 
-import { clientKind } from '../client/manifest'
+import { client } from '../client'
 
 export type CredentialCarrier = 'cookie' | 'os-store'
 
 export function credentialCarrier(): CredentialCarrier {
-  return clientKind() === 'desktop' ? 'os-store' : 'cookie'
+  return client.kind === 'desktop' ? 'os-store' : 'cookie'
 }
 
 /** 这个载体**能不能由应用直接读写**。

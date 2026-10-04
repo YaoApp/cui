@@ -35,7 +35,8 @@ import {
 import { listUsersQuery, loginTokenQuery, loginWebQuery, type TestUser } from '@/data/test'
 import { logoutQuery } from '@/data/user'
 import { signIn as sessionSignIn, signOut as sessionSignOut } from '@/platform/credential'
-import { hasHost, service } from '@/platform/bridge'
+import { readServiceAddress, writeServiceAddress } from '@/platform/service'
+import { client } from '@/platform/client'
 
 /** POST 的请求体（引擎会原样回显在 `POST_PAYLOAD` 里）—— 技术样本，不走语言包。 */
 const POST_BODY = { from: 'data-check' }
@@ -108,20 +109,20 @@ export function DataCheckPage() {
 
   /* **服务地址只有客户端能改**（Web 不能换服务）：这里用与验证页同一套平台调用，
      其余行为两边一模一样 —— 业务不判宿主，只有这一段是宿主能力。 */
-  const desktop = hasHost()
+  const canSetAddress = client.capabilities.serviceAddress
   const [serviceUrl, setServiceUrl] = useState('')
   const [serviceNotice, setServiceNotice] = useState('')
   const readAddress = useCallback(async () => {
-    const result = await service.get()
+    const result = await readServiceAddress()
     if (result.ok) {
-      setServiceUrl(result.value.url)
+      setServiceUrl(result.value)
       setServiceNotice('')
     } else setServiceNotice(result.code)
   }, [])
   const saveAddress = useCallback(async () => {
-    const result = await service.set(serviceUrl.trim())
+    const result = await writeServiceAddress(serviceUrl.trim())
     if (result.ok) {
-      setServiceUrl(result.value.url)
+      setServiceUrl(result.value)
       setServiceNotice('')
     } else setServiceNotice(result.code)
   }, [serviceUrl])
@@ -180,7 +181,7 @@ export function DataCheckPage() {
 
       {/* 服务地址：**只有客户端打开才有这一段**（Web 不能换服务；宿主不持有时地址也不该由页面填）。
           其余行为两边一致 —— 页面本身不判"接下来怎么请求"。 */}
-      {desktop ? (
+      {canSetAddress ? (
         <>
           <h2 className="data-check__heading">{t('verify.serviceAddress')}</h2>
           <p>{t('verify.serviceAddressHint')}</p>
