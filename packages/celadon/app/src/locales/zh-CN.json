@@ -12,7 +12,7 @@
   "bridge.error.openBrowser.schemeNotAllowed": "只能用 http(s) 打开：{{url}}",
   "bridge.error.pick.failed": "打不开选择对话框",
   "bridge.error.platform.unsupported": "这个平台还不支持（目前只有 macOS 与 Windows）",
-  "bridge.error.request.explicitAuthMissing": "这个接口由调用方自带凭据，但这次没带",
+  "bridge.error.request.manualAuthMissing": "这个接口由调用方自带凭据，但这次没带",
   "bridge.error.reveal.failed": "定位文件失败",
   "bridge.error.reveal.pathNotFound": "找不到这个路径：{{path}}",
   "bridge.error.service.malformed": "服务信息不是约定的形状",

@@ -23,8 +23,9 @@ export type Request = {
   /** **这个接口要不要凭据** —— 与引擎侧的 `oauth.Guard` 对齐：
    *  · `'required'`（默认）：受保护（`/helloworld/protected`）—— 出口带上凭据（Web = 浏览器带 Cookie · 桌面 = 宿主带 Bearer）
    *  · `'none'`：**公开**（`/helloworld/public` · 登录前）—— **别带**（Web 下显式 `credentials: 'omit'`）
-   *  · `'explicit'`：调用方自己在 `headers` 里给（两步登录第一步的临时 `Authorization`） */
-  auth?: 'required' | 'none' | 'explicit'
+   *  · `'manual'`：**调用方自己在 `headers` 里给**（两步登录第一步的临时 `Authorization`）
+   *    （叫 `manual` 是直白说法；网关圈子里同类概念叫 `passthrough`，gRPC 叫 call credentials）*/
+  auth?: 'required' | 'none' | 'manual'
 }
 
 export type SendInputs = {
@@ -53,9 +54,9 @@ function withQuery(url: string, params: Record<string, string | number | boolean
 /** 一次普通请求。**失败是值**，不抛异常。 */
 export async function send<T>(request: Request, inputs: SendInputs): Promise<Result<T>> {
   const ctx: Context = context(inputs.outbound)
-  // `'explicit'` 是**声明"调用方自己带"** —— 那就必须真带了，否则这里直接拒（免得裸奔）
-  if (request.auth === 'explicit' && !inputs.headers?.Authorization) {
-    return { ok: false, ...buildFailure(0, undefined, 'request.explicit_auth_missing') }
+  // `'manual'` 是**声明"调用方自己带"** —— 那就必须真带了，否则这里直接拒（免得裸奔）
+  if (request.auth === 'manual' && !inputs.headers?.Authorization) {
+    return { ok: false, ...buildFailure(0, undefined, 'request.manual_auth_missing') }
   }
   // 地址由**平台层**给（基址 + well-known 的 openapi 前缀）；**读不到服务信息就直接报错**，不兜前缀
   const address = apiUrl(request.path)

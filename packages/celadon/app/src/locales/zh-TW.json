@@ -12,7 +12,7 @@
   "bridge.error.openBrowser.schemeNotAllowed": "只能用 http(s) 開啟：{{url}}",
   "bridge.error.pick.failed": "打不開選擇對話框",
   "bridge.error.platform.unsupported": "這個平台還不支援（目前只有 macOS 與 Windows）",
-  "bridge.error.request.explicitAuthMissing": "這個介面由呼叫方自帶憑證，但這次沒帶",
+  "bridge.error.request.manualAuthMissing": "這個介面由呼叫方自帶憑證，但這次沒帶",
   "bridge.error.reveal.failed": "定位檔案失敗",
   "bridge.error.reveal.pathNotFound": "找不到這個路徑：{{path}}",
   "bridge.error.service.malformed": "服務資訊不是約定的形狀",
