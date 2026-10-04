@@ -1,7 +1,7 @@
 # 03 · 数据层（`data/`）
 
 - **版本**：v0.13（计划）
-- **最后修改**：2026-10-04 08:07:36
+- **最后修改**：2026-10-04 08:09:59
 - **说明**：三节 —— **00 代码结构**（先列长什么样）· **0 统一抽象**（要一起定的 7 项）· **1 业务接口清单**（逐域列表 + **WebSocket/流式单列**）
 - **事实基础**：[data-legacy-openapi.md](data-legacy-openapi.md)（旧 `openapi/` 71 文件现状报告 · 临时）
 
@@ -19,7 +19,7 @@ app/src/
 │   ├── types.ts                  # 公共类型：错误 · 列表/分页（§0 的 0.1–0.3）
 │   ├── request/                  # **统一包装**：出站请求只在这里组装（普通请求与订阅同一套 ctx）
 │   │   ├── context.ts            # 出站上下文：类型 `Context` + `context()` / `headers()` / `query()`（§0.4）
-│   │   ├── send.ts               # 普通请求：路径 + 输入/输出 + ctx → 经 platform/transport
+│   │   ├── send.ts               # ✅ 普通请求：路径 + 输入/输出 + ctx → 经 platform/transport → 解包裹
 │   │   ├── sse.ts                # 订阅（SSE）包装：解析 · 重连 · 可续传
 │   │   ├── socket.ts             # 订阅（WS）包装：双向 · 心跳 · 退避 · 命令应答
 │   │   └── channels/             # **四条通道的消息形状**（只有形状，没有连接）
@@ -33,7 +33,7 @@ app/src/
 │   │   ├── paginate.ts           # 分页归一：引擎的标准键 → `Page`（§0.2）
 │   │   └── failure.ts            # 服务端错误体 → `Failure`（两级消息，§0.1）
 │   ├── hooks/                    # **钩子只此一处**
-│   │   ├── use-request.ts        # 查询 / 提交：加载 · 错误 · 取消 · 重试（唯一实现，§0.5）
+│   │   ├── use-request.ts        # ✅ 查询 / 提交：`idle/loading/ok/error` · 取消 · 重跑（唯一实现）
 │   │   ├── use-sse.ts            # 订阅（SSE）：事件解析 · 重连 · **可续传**（Last-Event-ID）
 │   │   └── use-socket.ts         # 订阅（WS）：**双向** · 心跳 · 退避重连 · 命令应答关联
 │   ├── helloworld/               # **脚手架**：第一个端到端样板（见 §1.1）
@@ -66,6 +66,8 @@ app/src/
 
 - **查询与提交共用 `use-request.ts`**（提交＝手动触发那一次），**不再写第二个实现**
 - **订阅**走 `hooks/use-sse.ts` / `hooks/use-socket.ts`（**形状**在 `data/request/channels/*`，连接/心跳/重连在 `transport/`）
+
+**做事的顺序**：`transport/{stream,socket}.ts`（接线）→ `request/{sse,socket}.ts`（组装）→ `hooks/{use-sse,use-socket}.ts`（React 薄壳）—— **包装没做好，钩子写不出来**。
 
 **SSE 与 WS：对外合一，对内分二**（**别合成一个实现**）
 
@@ -135,7 +137,7 @@ app/src/
 | 0.2 | **列表 / 分页** | **已按引擎对齐**：标准键 `data, page, pagesize, pagecount, next, prev, total`（`yao/openapi/agent/assistant.go:184-195`）；chat 会话在 `group_by` 时给 `groups` 而非 `data` | `data/types.ts` + `utils/paginate.ts` | ✅ **已实现** |
 | 0.3 | **成功包裹** | 有没有信封；列表 `data` 与实体 `data` 怎么区分（旧：`result.data \|\| result` 反复兜）| 同上 | ⏸ |
 | 0.4 | **出站上下文（ctx）** | 语言 / 主题 / 客户端 / 服务怎么带 —— **由统一包装 `request/` 一处注入**（旧：locale 走 query · `X-Yao-Accept` 头 · 三来源凑 CSRF，散在各处）| `data/request/context.ts`（+ `platform/`）|| ⏸ |
-| 0.5 | **取数与订阅钩子** | 加载 / 错误 / 取消 / 重试的**唯一实现**与返回形状；订阅（流式）与它并列（旧：**133 个文件手写四态**）| `data/hooks/use-request.ts`（查询 + 提交 · `SPEC.md:95`）· `use-sse.ts` · `use-socket.ts`（订阅，**按协议分开**）| ⏸ |
+| 0.5 | **取数与订阅钩子** | 四态（`idle/loading/ok/error`）· 取消 · 重跑的唯一实现；订阅按协议分两个 | `data/hooks/use-request.ts` | ✅ **已实现**（`use-sse` / `use-socket` **待 transport 两个接线**，见 0.6）|
 | 0.6 | **出口接线** | 一切经 `platform/transport/`；上传/下载/SSE/WS 各归哪一档（`17 §2.2` 三档：`api`/`download`/`stream`）。**SSE 与 WS 同属 `stream` 档，但接线分两处**（见上表）| `platform/transport/{stream.ts,socket.ts}` | ⏸（卡 `17 §2.2` 两档未做）|
 | 0.7 | **类型的组织** | 一域一处；类型与方法同文件还是分开；子域（如 `agent/robot`）怎么放（旧：`<域>/types.ts` + `<域>/api.ts` + barrel，且**反向 import 页面层 6 处**）| `app/src/data/<域>/` | ⏸ |
 | 0.8 | **单条（详情）与列表的关系** | **单条不造壳**：服务端同样是 `{data:T}`，`unwrap` 就够；**列表行与详情是否分两个类型按域定**（引擎列表通常就是实体本身），**不预先抽象** | `data/types.ts`（注释）· 各域自己 | ✅ **已定** |
