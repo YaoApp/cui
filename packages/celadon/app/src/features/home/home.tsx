@@ -40,6 +40,13 @@ export function HomePage() {
   return (
     <div className="home">
       <Page>
+        {/* 语言与主题是平台机制，任何页面都要能改 —— 首页放在**第一行**，左对齐 */}
+        <PageSection>
+          <div className="home__controls">
+            <LocaleSwitch />
+            <ThemeToggle theme={theme} onSelect={setTheme} />
+          </div>
+        </PageSection>
         <PageSection heading={t('home.title')}>
           <PageRow>
             {rows.map(([label, value]) => (
@@ -51,13 +58,6 @@ export function HomePage() {
         </PageSection>
         {/* 脚手架的入口：导航住在脚手架页里，而桌面端没有地址栏 —— 首页必须留一条路过去。
             真首页来了以后，这一行挪进开发菜单（`plan/05-scaffold.md` §3）。 */}
-        {/* 语言与主题是平台机制，任何页面都要能改 —— 首页也不能例外 */}
-        <PageSection>
-          <div className="home__controls">
-            <LocaleSwitch />
-            <ThemeToggle theme={theme} onSelect={setTheme} />
-          </div>
-        </PageSection>
         <PageSection heading={t('nav.overview')}>
           <PageRow>
             {SCAFFOLD_LINKS.map(({ key, href }) => (
