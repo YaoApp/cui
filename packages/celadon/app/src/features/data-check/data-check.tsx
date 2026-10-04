@@ -108,10 +108,10 @@ export function DataCheckPage() {
         <Cell label={t('dataCheck.theme')} value={theme} />
       </div>
       <p className="data-check__tools">
-        <Button onClick={() => void publicGetCall.run()}>{t('dataCheck.publicGet')}</Button>{' '}
-        <Button onClick={() => void publicPostCall.run()}>{t('dataCheck.publicPost')}</Button>{' '}
-        <Button onClick={() => void protectedGetCall.run()}>{t('dataCheck.protectedGet')}</Button>{' '}
-        <Button onClick={() => void protectedPostCall.run()}>{t('dataCheck.protectedPost')}</Button>
+        <Button onClick={() => void publicGetCall.run()} disabled={publicGetCall.state.status === 'loading'}>{t('dataCheck.publicGet')}</Button>{' '}
+        <Button onClick={() => void publicPostCall.run()} disabled={publicPostCall.state.status === 'loading'}>{t('dataCheck.publicPost')}</Button>{' '}
+        <Button onClick={() => void protectedGetCall.run()} disabled={protectedGetCall.state.status === 'loading'}>{t('dataCheck.protectedGet')}</Button>{' '}
+        <Button onClick={() => void protectedPostCall.run()} disabled={protectedPostCall.state.status === 'loading'}>{t('dataCheck.protectedPost')}</Button>
       </p>
       {/* 每格直接渲染自己的 state：成功印返回值，失败印译文，受保护的两条标出"预期失败" */}
       <div className="data-check__row">
@@ -135,7 +135,7 @@ export function DataCheckPage() {
         ))}
       </div>
       <p className="data-check__tools">
-        <Button onClick={() => void scaffold.run()}>{t('dataCheck.reload')}</Button>
+        <Button onClick={() => void scaffold.run()} disabled={scaffold.state.status === 'loading'}>{t('dataCheck.reload')}</Button>
       </p>
       {scaffold.state.status === 'ok' ? (
         <p className="data-check__value">{JSON.stringify(scaffold.state.value)}</p>

@@ -25,6 +25,7 @@
 
 /* 与设计页 `.cell` / `.verify__cell` 逐字一致（padding / 面底 / 边界 / 圆角） */
 .data-check__cell {
+  min-width: 0; /* 网格子项默认 min-width:auto，不肯收缩就会溢出 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -42,7 +43,7 @@
   font-size: var(--font-size-label);
   text-align: center;
   line-height: var(--line-height-tight);
-  white-space: nowrap;
+  white-space: normal; /* 值可能是长 JSON：要能换行，否则撑破格子压到邻居上 */
   overflow-wrap: anywhere;
 }
 
