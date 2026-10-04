@@ -40,7 +40,9 @@ export function VerifyPage() {
   const caps = capabilities()
   const manifest = buildManifest()
   const [lines, setLines] = useState<Line[]>([])
-  const [service, setService] = useState('verify-demo')
+  // 凭据的键按服务 origin 分账（`scope.ts`）：没地址就没有键 —— 输入框默认为空，写也写不进去
+  const credentialScope = credentialKey('session')
+  const [service, setService] = useState(credentialScope ?? '')
   const [address, setAddress] = useState('')
   const [secret, setSecret] = useState('')
   const [url, setUrl] = useState('https://example.com')
@@ -205,7 +207,13 @@ export function VerifyPage() {
         <Button onClick={() => run('service.get', () => bridge.service.get())}>{t('verify.serviceGet')}</Button>{' '}
         <label>
           {t('verify.url')}
-          <input className="input" value={address} onChange={(event) => setAddress(event.target.value)} size={32} />
+          <input
+            className="input"
+            aria-label={t('verify.serviceAddress')}
+            value={address}
+            onChange={(event) => setAddress(event.target.value)}
+            size={32}
+          />
         </label>{' '}
         <Button onClick={() => run('service.set', () => bridge.service.set(address))}>{t('verify.serviceSet')}</Button>
       </p>
@@ -237,15 +245,17 @@ export function VerifyPage() {
         </label>
       </p>
       <p>
-        <Button onClick={() => run('credential.write', () => credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
-        <Button onClick={() => run('credential.read', () => credential.read(service))}>{t('verify.read')}</Button>{' '}
-        <Button onClick={() => run('credential.remove', () => credential.remove(service))}>{t('verify.remove')}</Button>{' '}
+        <Button disabled={!service.trim()} onClick={() => run('credential.write', () => credential.write(service, secret))}>{t('verify.write')}</Button>{' '}
+        <Button disabled={!service.trim()} onClick={() => run('credential.read', () => credential.read(service))}>{t('verify.read')}</Button>{' '}
+        <Button disabled={!service.trim()} onClick={() => run('credential.remove', () => credential.remove(service))}>{t('verify.remove')}</Button>{' '}
         <Button onClick={() => run('credential.list', () => credential.list())}>{t('verify.list')}</Button>
       </p>
       {/* 键按服务 origin 分账（`scope.ts`）：这里是"当前服务下这个用途的键长什么样" */}
       <p>
-        {t('verify.credentialKey')}: <code>{credentialKey('session') ?? t('verify.credentialKeyNone')}</code>
+        {t('verify.credentialKey')}: <code>{credentialScope ?? t('verify.credentialKeyNone')}</code>
       </p>
+      {/* 没键就没得写：把原因说出来，按钮也不让点（宿主对空名也会拒：`credential.service_empty`） */}
+      {service.trim() ? null : <p className="verify__notice">{t('verify.credentialKeyMissing')}</p>}
 
       <h2 className="verify__heading">{t('verify.results')}</h2>
       <ul>

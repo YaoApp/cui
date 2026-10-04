@@ -55,6 +55,7 @@
   "verify.client": "Client",
   "verify.credential": "Credential round trip",
   "verify.credentialKey": "Credential key for the current service",
+  "verify.credentialKeyMissing": "No service address yet, so there is no key to store under — enter one above first",
   "verify.credentialKeyNone": "no service address yet",
   "verify.egress": "Egress (both web and client)",
   "verify.egressHint": "One way out for requests: the browser’s own fetch on the web, the host on the desktop. A browser is bound by its origin; another origin must allow it.",

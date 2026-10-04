@@ -137,6 +137,7 @@ export type I18nKey =
   | 'verify.client'
   | 'verify.credential'
   | 'verify.credentialKey'
+  | 'verify.credentialKeyMissing'
   | 'verify.credentialKeyNone'
   | 'verify.egress'
   | 'verify.egressHint'
@@ -336,6 +337,7 @@ declare module 'i18next' {
         'verify.client': string
         'verify.credential': string
         'verify.credentialKey': string
+        'verify.credentialKeyMissing': string
         'verify.credentialKeyNone': string
         'verify.egress': string
         'verify.egressHint': string

@@ -9,16 +9,20 @@ import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const SECRET = 's3cr3t-value-must-not-be-printed'
-const read = vi.fn(async (_service?: string) => ({ ok: true as const, value: SECRET }))
-const serviceGet = vi.fn(async () => ({ ok: true as const, value: { url: 'http://localhost:5099' } }))
-const serviceSet = vi.fn(async (_url?: string) => ({ ok: true as const, value: { url: 'http://localhost:5099' } }))
+/* `vi.hoisted`：`vi.mock` 的工厂会被提到最上面，里面不能引用模块级常量（会撞 TDZ）。 */
+const mocks = vi.hoisted(() => ({
+  read: vi.fn(async (_service?: string) => ({ ok: true as const, value: 's3cr3t-value-must-not-be-printed' })),
+  credentialKey: vi.fn((purpose: string): string | undefined => `http://localhost:5099#${purpose}`),
+  serviceGet: vi.fn(async () => ({ ok: true as const, value: { url: 'http://localhost:5099' } })),
+  serviceSet: vi.fn(async (_url?: string) => ({ ok: true as const, value: { url: 'http://localhost:5099' } })),
+}))
 
 vi.mock('@/platform/credential', () => ({
-  credentialKey: (purpose: string) => `http://localhost:5099#${purpose}`,
+  credentialKey: (purpose: string) => mocks.credentialKey(purpose),
   credential: {
     carrier: () => 'os-store',
     managedByApp: () => true,
-    read: (service: string) => read(service),
+    read: (service: string) => mocks.read(service),
     write: vi.fn(async () => ({ ok: true, value: true })),
     remove: vi.fn(async () => ({ ok: true, value: true })),
     list: vi.fn(async () => ({ ok: true, value: [] })),
@@ -32,7 +36,7 @@ vi.mock('@/platform/bridge', async (importOriginal) => {
     bridge: {
       ping: vi.fn(async () => ({ ok: false, code: 'bridge.unavailable', params: {}, message: 'no host' })),
       credential: actual.bridge.credential,
-      service: { get: serviceGet, set: serviceSet },
+      service: { get: mocks.serviceGet, set: mocks.serviceSet },
       system: { machineId: vi.fn(async () => ({ ok: false, code: 'bridge.unavailable', params: {}, message: 'no host' })) },
     },
   }
@@ -49,7 +53,11 @@ vi.mock('@/platform/service', () => ({
 import { VerifyPage } from './verify'
 
 describe('the verification page', () => {
-  beforeEach(() => read.mockClear())
+  beforeEach(() => {
+    mocks.read.mockClear()
+    mocks.credentialKey.mockClear()
+    mocks.credentialKey.mockImplementation((purpose: string) => `http://localhost:5099#${purpose}`)
+  })
 
   it('never prints the secret it just read', async () => {
     const user = userEvent.setup()
@@ -64,7 +72,7 @@ describe('the verification page', () => {
     // 结果里出现"读到了"的占位，**而秘密一个字都不在页面上**
     await screen.findByText(/•••/)
     expect(document.body.textContent).not.toContain(SECRET)
-    expect(read).toHaveBeenCalledOnce()
+    expect(mocks.read).toHaveBeenCalledOnce()
   })
 
   it('reads the service information when asked, and shows what it got', async () => {
@@ -91,10 +99,26 @@ describe('the verification page', () => {
     )
 
     await user.click(screen.getByRole('button', { name: /^(读当前地址|讀目前位址|Read the current address|現在のアドレスを読む)$/ }))
-    await screen.findByText(/localhost:5099/)
+    await screen.findByText(/\{"url":"http:\/\/localhost:5099"\}/) // 读回来的地址（键那一行也含同样的字，所以指 JSON）
 
-    await user.type(screen.getAllByRole('textbox')[0], 'localhost:5099')
+    await user.type(screen.getByRole('textbox', { name: /^(服务地址|服務位址|Service address|サービスアドレス)$/ }), 'localhost:5099')
     await user.click(screen.getByRole('button', { name: /^(校验并写入|驗證並寫入|Check and save|検証して保存)$/ }))
-    await waitFor(() => expect(serviceSet).toHaveBeenCalledWith('localhost:5099'))
+    await waitFor(() => expect(mocks.serviceSet).toHaveBeenCalledWith('localhost:5099'))
+  })
+  it('says why a credential cannot be written when there is no service address', async () => {
+    mocks.credentialKey.mockReturnValue(undefined) // 还没选服务：没有键
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <VerifyPage />
+      </MemoryRouter>,
+    )
+
+    // 反馈：把原因说出来，而且写入按钮按不动 —— 空键不该发出去
+    expect(await screen.findByText(/no key to store under|没有可存的键/)).toBeInTheDocument()
+    const write = screen.getByRole('button', { name: /^(写|寫|Write|書き込み)$/ })
+    expect(write).toBeDisabled()
+    await user.click(write)
+    expect(document.body.textContent).not.toContain('credential.write →')
   })
 })

@@ -55,6 +55,7 @@
   "verify.client": "客户端",
   "verify.credential": "凭据往返",
   "verify.credentialKey": "当前服务的凭据键",
+  "verify.credentialKeyMissing": "还没有服务地址，凭据没有可存的键 —— 先在上面填一个服务地址",
   "verify.credentialKeyNone": "还没有服务地址",
   "verify.egress": "出海口（Web 与客户端都有）",
   "verify.egressHint": "发请求只有这一条路：Web 用浏览器自己的 fetch，客户端用宿主代发。浏览器受同源限制，跨域要对方允许。",
