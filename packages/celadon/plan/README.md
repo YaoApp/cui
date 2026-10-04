@@ -10,7 +10,7 @@
 
 | | 回答什么问题 | 现在有什么 |
 | --- | --- | --- |
-| [`../architecture/`](../architecture/README.md) | **怎么做才对**（规则 · 边界 · 不许写什么）| 00–16 分册 + [`SPEC.md`](../architecture/SPEC.md)（开发）+ [`REVIEW.md`](../architecture/REVIEW.md)（审核）|
+| [`../architecture/`](../architecture/README.md) | **怎么做才对**（规则 · 边界 · 不许写什么）| 00–17 分册 + [`SPEC.md`](../architecture/SPEC.md)（开发）+ [`REVIEW.md`](../architecture/REVIEW.md)（审核）|
 | **`plan/`（本文所在）** | **先做什么、做到什么算完成**（计划 · 清单 · 状态）| 见下 |
 
 - **计划不是规范**：规则只写在 `architecture/`；计划做完一项，把结论**回写**到对应分册。
