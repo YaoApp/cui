@@ -3,13 +3,15 @@
  * 为什么要有它们：复核者用变异证明过——把 `verify.tsx` 里的接线改回 `false`、或整节删掉，
  * 三条命令全绿。判定层有测试不够，**调用点**也得钉住。 */
 
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const SECRET = 's3cr3t-value-must-not-be-printed'
 const read = vi.fn(async (_service?: string) => ({ ok: true as const, value: SECRET }))
+const serviceGet = vi.fn(async () => ({ ok: true as const, value: { url: 'http://localhost:5099' } }))
+const serviceSet = vi.fn(async (_url?: string) => ({ ok: true as const, value: { url: 'http://localhost:5099' } }))
 
 vi.mock('@/platform/credential', () => ({
   credential: {
@@ -29,6 +31,7 @@ vi.mock('@/platform/bridge', async (importOriginal) => {
     bridge: {
       ping: vi.fn(async () => ({ ok: false, code: 'bridge.unavailable', params: {}, message: 'no host' })),
       credential: actual.bridge.credential,
+      service: { get: serviceGet, set: serviceSet },
       system: { machineId: vi.fn(async () => ({ ok: false, code: 'bridge.unavailable', params: {}, message: 'no host' })) },
     },
   }
@@ -77,5 +80,20 @@ describe('the verification page', () => {
     await screen.findByText(/Yao Agents/)
     expect(loadServiceInfo).toHaveBeenCalledOnce()
     expect(loadServiceInfo).toHaveBeenCalledWith(10_000)
+  })
+  it('reads the held address, and hands a new one to the host for checking', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <VerifyPage />
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('button', { name: /^(读当前地址|讀目前位址|Read the current address|現在のアドレスを読む)$/ }))
+    await screen.findByText(/localhost:5099/)
+
+    await user.type(screen.getAllByRole('textbox')[0], 'localhost:5099')
+    await user.click(screen.getByRole('button', { name: /^(校验并写入|驗證並寫入|Check and save|検証して保存)$/ }))
+    await waitFor(() => expect(serviceSet).toHaveBeenCalledWith('localhost:5099'))
   })
 })

@@ -159,8 +159,12 @@ export type I18nKey =
   | 'verify.reveal'
   | 'verify.secret'
   | 'verify.service'
+  | 'verify.serviceAddress'
+  | 'verify.serviceAddressHint'
+  | 'verify.serviceGet'
   | 'verify.serviceInfo'
   | 'verify.serviceInfoRead'
+  | 'verify.serviceSet'
   | 'verify.themeDark'
   | 'verify.themeLight'
   | 'verify.themeRead'
@@ -352,8 +356,12 @@ declare module 'i18next' {
         'verify.reveal': string
         'verify.secret': string
         'verify.service': string
+        'verify.serviceAddress': string
+        'verify.serviceAddressHint': string
+        'verify.serviceGet': string
         'verify.serviceInfo': string
         'verify.serviceInfoRead': string
+        'verify.serviceSet': string
         'verify.themeDark': string
         'verify.themeLight': string
         'verify.themeRead': string

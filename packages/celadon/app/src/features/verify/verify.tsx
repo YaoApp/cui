@@ -41,6 +41,7 @@ export function VerifyPage() {
   const manifest = buildManifest()
   const [lines, setLines] = useState<Line[]>([])
   const [service, setService] = useState('verify-demo')
+  const [address, setAddress] = useState('')
   const [secret, setSecret] = useState('')
   const [url, setUrl] = useState('https://example.com')
   const [path, setPath] = useState('')
@@ -71,6 +72,7 @@ export function VerifyPage() {
         ['appInfo', () => bridge.system.appInfo()],
         ['theme', () => bridge.system.theme()],
         ['machineId', () => bridge.system.machineId()],
+        ['service.get', () => bridge.service.get()],
         ['transport', () => transport.probe('https://example.com')],
         ['credential.write', () => credential.write('verify-demo', 'self-check')],
         ['credential.read', () => credential.read('verify-demo')],
@@ -193,6 +195,19 @@ export function VerifyPage() {
         <Button onClick={() => run('service.info', () => loadServiceInfo(10_000))}>
           {t('verify.serviceInfoRead')}
         </Button>
+      </p>
+
+      {/* 服务地址：**由宿主持有**（桌面由用户填或选，地址不进产物）；`set` 由宿主先校验再写入。
+          服务信息仍由应用自己读（上面那一节）—— 两宿主同一条路（plan/01-bridge-commands.md §2） */}
+      <h2 className="verify__heading">{t('verify.serviceAddress')}</h2>
+      <p>{t('verify.serviceAddressHint')}</p>
+      <p className="verify__tools">
+        <Button onClick={() => run('service.get', () => bridge.service.get())}>{t('verify.serviceGet')}</Button>{' '}
+        <label>
+          {t('verify.url')}
+          <input className="input" value={address} onChange={(event) => setAddress(event.target.value)} size={32} />
+        </label>{' '}
+        <Button onClick={() => run('service.set', () => bridge.service.set(address))}>{t('verify.serviceSet')}</Button>
       </p>
 
       {/* 出海口：**只有 platform/transport 发请求**（见 17-transport.md）。
