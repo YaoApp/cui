@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { failure } from './errors'
+import { failure } from './failure'
 
 describe('failure', () => {
   it('reads the engine\'s oauth shape', () => {

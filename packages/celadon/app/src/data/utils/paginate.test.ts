@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { paginate } from './paging'
+import { paginate } from './paginate'
 
 const fallback = { page: 1, pageSize: 20 }
 
