@@ -13,6 +13,8 @@ export type I18nKey =
   | 'bridge.error.credential.noStoreHere'
   | 'bridge.error.credential.serviceEmpty'
   | 'bridge.error.credential.storeFailed'
+  | 'bridge.error.forbidden'
+  | 'bridge.error.invalidToken'
   | 'bridge.error.localIps.unavailable'
   | 'bridge.error.openBrowser.failed'
   | 'bridge.error.openBrowser.schemeNotAllowed'
@@ -26,11 +28,13 @@ export type I18nKey =
   | 'bridge.error.theme.expectedLightOrDark'
   | 'bridge.error.theme.readFailed'
   | 'bridge.error.theme.writeFailed'
+  | 'bridge.error.tokenMissing'
   | 'bridge.error.transport.crossOrigin'
   | 'bridge.error.transport.network'
   | 'bridge.error.transport.parse'
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
+  | 'bridge.error.unauthorized'
   | 'dataCheck.authenticatedDenied'
   | 'dataCheck.authzHint'
   | 'dataCheck.back'
@@ -75,6 +79,7 @@ export type I18nKey =
   | 'dataCheck.stateOk'
   | 'dataCheck.states'
   | 'dataCheck.statesHint'
+  | 'dataCheck.statusActive'
   | 'dataCheck.theme'
   | 'dataCheck.title'
   | 'entityPanel.close'
@@ -194,6 +199,8 @@ declare module 'i18next' {
         'bridge.error.credential.noStoreHere': string
         'bridge.error.credential.serviceEmpty': string
         'bridge.error.credential.storeFailed': string
+        'bridge.error.forbidden': string
+        'bridge.error.invalidToken': string
         'bridge.error.localIps.unavailable': string
         'bridge.error.openBrowser.failed': string
         'bridge.error.openBrowser.schemeNotAllowed': string
@@ -207,11 +214,13 @@ declare module 'i18next' {
         'bridge.error.theme.expectedLightOrDark': string
         'bridge.error.theme.readFailed': string
         'bridge.error.theme.writeFailed': string
+        'bridge.error.tokenMissing': string
         'bridge.error.transport.crossOrigin': string
         'bridge.error.transport.network': string
         'bridge.error.transport.parse': string
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
+        'bridge.error.unauthorized': string
         'dataCheck.authenticatedDenied': string
         'dataCheck.authzHint': string
         'dataCheck.back': string
@@ -256,6 +265,7 @@ declare module 'i18next' {
         'dataCheck.stateOk': string
         'dataCheck.states': string
         'dataCheck.statesHint': string
+        'dataCheck.statusActive': string
         'dataCheck.theme': string
         'dataCheck.title': string
         'entityPanel.close': string

@@ -183,7 +183,7 @@ describe('the data check page', () => {
     await user.click(screen.getByRole('button', { name: /^(受保护 GET|受保護 GET|Protected GET)$/ }))
 
     // 预期失败是**页面说清楚的**，不是沉默的报错
-    expect(await screen.findByText(/预期失败（还没接登录）/)).toBeInTheDocument()
+    expect(await screen.findByText(/未登录（缺凭据）/)).toBeInTheDocument()
     expect(
       vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/helloworld/protected')),
     ).toBe(true)
@@ -286,7 +286,7 @@ describe('the data check page', () => {
 
     // 登录前：受保护那一格点了就是失败（假出口回 401）
     await user.click(screen.getByRole('button', { name: '受保护 GET' }))
-    await waitFor(() => expect(cellText('受保护 GET')).toContain('预期失败'))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('未登录'))
 
     await user.click(screen.getByRole('button', { name: '以此账号登录' }))
 
@@ -299,7 +299,7 @@ describe('the data check page', () => {
     // 受保护那一格：假出口在登录前回 401，登录后回 200 —— 状态来自这次登录的结果
     await user.click(screen.getByRole('button', { name: '受保护 GET' }))
     await waitFor(() => expect(cellText('受保护 GET')).toContain(MESSAGE))
-    expect(cellText('受保护 GET')).not.toContain('预期失败')
+    expect(cellText('受保护 GET')).not.toContain('未登录')
   })
 
   it('signs out through the engine, since only the server can clear an HttpOnly cookie', async () => {
@@ -324,6 +324,9 @@ describe('the data check page', () => {
 
     await user.click(screen.getByRole('button', { name: '退出登录' }))
     expect(await screen.findByText(/已退出/)).toBeInTheDocument()
+    // 退出后不再算登录态：已登录那行与退出按钮都应当消失
+    expect(screen.queryByText(/已登录/)).toBeNull()
+    expect(screen.queryByRole('button', { name: '退出登录' })).toBeNull()
     const sent = vi.mocked(transportFetch).mock.calls.find(([url]) => String(url).includes('/user/logout'))
     expect(sent?.[1]?.method).toBe('POST')
     expect(document.body.textContent).not.toContain(LOGIN.access_token) // 凭据值永不上屏
@@ -350,7 +353,7 @@ describe('the data check page', () => {
 
     // 还没登录：这一格仍然是"预期失败"
     await user.click(screen.getByRole('button', { name: '受保护 GET' }))
-    await waitFor(() => expect(cellText('受保护 GET')).toContain('预期失败'))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('未登录'))
     expect(cellText('受保护 GET')).not.toContain('已认证但未被授权')
 
     await user.click(screen.getByRole('button', { name: '以此账号登录' }))
@@ -359,8 +362,8 @@ describe('the data check page', () => {
     // 登录成功但带凭据仍被拒：标注换成"已认证但未被授权"，并附上引擎给的 reason
     await user.click(screen.getByRole('button', { name: '受保护 GET' }))
     await waitFor(() => expect(cellText('受保护 GET')).toContain('已认证但未被授权'))
-    expect(cellText('受保护 GET')).toContain('no match, default policy: deny')
-    expect(cellText('受保护 GET')).not.toContain('预期失败')
+    expect(cellText('受保护 GET')).not.toContain('no match, default policy: deny') // 引擎原文不上屏
+    expect(cellText('受保护 GET')).not.toContain('未登录')
   })
 
   it('never puts a credential value on screen', async () => {

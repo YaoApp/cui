@@ -103,17 +103,13 @@ export function DataCheckPage() {
   const webLogin = loginWebCall.state.status === 'ok' ? loginWebCall.state.value : null
   const tokenLogin = loginTokenCall.state.status === 'ok' ? loginTokenCall.state.value : null
 
-  /** 已登录、却仍被引擎拒：`login/web` 成功 **且** 这一格失败 **且** 失败码是 forbidden / unauthorized。
-   *  这时"预期失败"就不成立了 —— 是"已认证、未被授权"（引擎侧授权策略，不是客户端问题）。 */
-  const deniedAfterLogin = (state: RequestState<unknown>) =>
-    webLogin !== null && state.status === 'error' && /forbidden|unauthorized/i.test(state.failure.code)
+  /** 登录态：取到过凭据 **且没退出成功** —— 退出由服务端吊销并清 Cookie，退完就不再是登录态。 */
+  const signedIn = (webLogin !== null || tokenLogin !== null) && logoutCall.state.status !== 'ok'
 
-  /** 一格的显示值：成功印值，失败印钩子按码翻译好的文案；被策略拒绝时把引擎给的 reason 补在后面。 */
-  const stateValue = (state: RequestState<unknown>) => {
-    if (state.status !== 'error' || !deniedAfterLogin(state)) return stateText(state)
-    const reason = state.failure.rawMessage
-    return reason && !state.failure.text.includes(reason) ? `${state.failure.text} · ${reason}` : state.failure.text
-  }
+  /** 认证类拒绝的码：登录态下被拒 = 已认证但未被授权（引擎侧授权策略，不是客户端问题）。 */
+  const authRefusal = /forbidden|insufficient_scope|unauthorized|token_missing|invalid_token/i
+  const deniedAfterLogin = (state: RequestState<unknown>) =>
+    signedIn && state.status === 'error' && authRefusal.test(state.failure.code)
 
   const signIn = (user: TestUser, kind: 'web' | 'token') => {
     if (!user.email) return
@@ -204,23 +200,23 @@ export function DataCheckPage() {
       ) : null}
       <p>{t('dataCheck.loginHint')}</p>
       {/* 退出：Cookie 是 HttpOnly（JS 碰不到）→ 只能由服务端吊销并清掉（`POST /user/logout`） */}
-      {webLogin || tokenLogin ? (
+      {signedIn ? (
         <p className="data-check__tools">
           <Button onClick={() => void logoutCall.run()} disabled={logoutCall.state.status === 'loading'}>{t('dataCheck.signOut')}</Button>
         </p>
       ) : null}
       {logoutCall.state.status === 'ok' ? (
-        <p className="data-check__value" role="status">{t('dataCheck.signOutDone', { message: logoutCall.state.value.message })}</p>
+        <p className="data-check__value" role="status">{t('dataCheck.signOutDone')}</p>
       ) : null}
       {logoutCall.state.status === 'error' ? (
         <p className="data-check__notice" role="status">{logoutCall.state.failure.text}</p>
       ) : null}
       {/* 凭据**只上长度与存在性**，值永不上屏 */}
-      {webLogin ? (
+      {signedIn && webLogin ? (
         <p className="data-check__value" role="status">
           {t('dataCheck.loginWebResult', {
             email: loginEmail,
-            status: webLogin.status,
+            status: webLogin.status === 'active' ? t('dataCheck.statusActive') : webLogin.status,
             minutes: Math.round(webLogin.expires_in / 60),
           })}
           {' · '}
@@ -234,7 +230,7 @@ export function DataCheckPage() {
       {loginWebCall.state.status === 'error' ? (
         <p className="data-check__notice" role="status">{loginWebCall.state.failure.text}</p>
       ) : null}
-      {tokenLogin ? (
+      {signedIn && tokenLogin ? (
         <p className="data-check__value" role="status">
           {t('dataCheck.loginTokenResult', { email: loginEmail, length: tokenLogin.access_token.length })}
         </p>
@@ -261,11 +257,11 @@ export function DataCheckPage() {
           "预期失败（还没登录）" 或 "已认证但未被授权"（登录成功仍被引擎策略拒绝时） */}
       <div className="data-check__row">
         {cells.map(({ label, state, expected }) => (
-          <Cell key={label} label={label} value={stateValue(state)}>
+          <Cell key={label} label={label} value={stateText(state)}>
             {expected && state.status === 'error' ? (
               deniedAfterLogin(state) ? (
                 <em className="data-check__expected">{t('dataCheck.authenticatedDenied')}</em>
-              ) : webLogin === null ? (
+              ) : !signedIn ? (
                 <em className="data-check__expected">{t('dataCheck.expectedFailure')}</em>
               ) : null
             ) : null}
