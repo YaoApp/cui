@@ -8,6 +8,7 @@
   "bridge.error.credential.serviceEmpty": "The service name must not be empty",
   "bridge.error.credential.storeFailed": "The system credential store could not be used",
   "bridge.error.forbidden": "You do not have access",
+  "bridge.error.insufficientScope": "The credential lacks the required scope",
   "bridge.error.invalidToken": "The credential is not valid",
   "bridge.error.localIps.unavailable": "Could not read the local addresses",
   "bridge.error.openBrowser.failed": "Could not open the browser",

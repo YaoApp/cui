@@ -14,6 +14,7 @@ export type I18nKey =
   | 'bridge.error.credential.serviceEmpty'
   | 'bridge.error.credential.storeFailed'
   | 'bridge.error.forbidden'
+  | 'bridge.error.insufficientScope'
   | 'bridge.error.invalidToken'
   | 'bridge.error.localIps.unavailable'
   | 'bridge.error.openBrowser.failed'
@@ -200,6 +201,7 @@ declare module 'i18next' {
         'bridge.error.credential.serviceEmpty': string
         'bridge.error.credential.storeFailed': string
         'bridge.error.forbidden': string
+        'bridge.error.insufficientScope': string
         'bridge.error.invalidToken': string
         'bridge.error.localIps.unavailable': string
         'bridge.error.openBrowser.failed': string

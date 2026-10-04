@@ -8,6 +8,7 @@
   "bridge.error.credential.serviceEmpty": "服務名不能為空",
   "bridge.error.credential.storeFailed": "系統憑證庫讀寫失敗",
   "bridge.error.forbidden": "沒有存取權限",
+  "bridge.error.insufficientScope": "權限不足",
   "bridge.error.invalidToken": "憑據無效",
   "bridge.error.localIps.unavailable": "讀不到本地位址",
   "bridge.error.openBrowser.failed": "打不開瀏覽器",

@@ -17,7 +17,7 @@ async function stubApi(page: Page, { holdMs = 0 } = {}) {
     if (url.includes('/helloworld/protected')) {
       return route.fulfill({
         status: 401,
-        json: { error: 'unauthorized', error_description: 'login is not wired' },
+        json: { error: 'unauthorized', error_description: 'no credential was sent' },
       })
     }
     return route.fulfill({ json: PAYLOAD })

@@ -44,7 +44,7 @@ export type RequestSource<Input, Output> =
 export function useRequest<Input = void, Output = void>(
   source: RequestSource<Input, Output>,
   options: RequestOptions<Input> = {},
-): { state: RequestState<Output>; run: (body?: Input) => Promise<void> } {
+): { state: RequestState<Output>; run: (body?: Input) => Promise<void>; reset: () => void } {
   const request = 'request' in source ? source.request : source
   const declaredKey = 'request' in source ? source.key : undefined
   const [state, setState] = useState<RequestState<Output>>({ status: 'idle' })
@@ -110,5 +110,13 @@ export function useRequest<Input = void, Output = void>(
     settle.current = null
   }, [state])
 
-  return { state, run }
+  /** 清回 `idle`（放下上次的结果，例如退出后要重新登录）。 */
+  const reset = useCallback(() => {
+    latest.current += 1
+    settle.current?.()
+    settle.current = null
+    setState({ status: 'idle' })
+  }, [])
+
+  return { state, run, reset }
 }

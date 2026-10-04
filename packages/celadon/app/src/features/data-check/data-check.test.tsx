@@ -85,9 +85,9 @@ describe('the data check page', () => {
       const target = String(url)
       // 服务信息：`send` 第一次需要时读一次，给 openapi 前缀地址才拼得出来
       if (target.includes('/.well-known/yao')) return json(SERVICE)
-      // 受保护的两条：登录还没接，假出口回 401（预期失败）
+      // 受保护的两条：未登录 → 假出口回 401（页面按码翻成「需要登录」，并标「未登录（缺凭据）」）
       if (target.includes('/helloworld/protected')) {
-        return json({ error: 'unauthorized', error_description: 'login is not wired' }, 401)
+        return json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
       }
       return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
     })
@@ -150,7 +150,7 @@ describe('the data check page', () => {
         await gate
         return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
       }
-      return json({ error: 'unauthorized', error_description: 'login is not wired' }, 401)
+      return json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
     })
 
     const user = userEvent.setup()
@@ -232,7 +232,7 @@ describe('the data check page', () => {
       const target = String(url)
       if (target.includes('/.well-known/yao')) return json(SERVICE)
       if (target.includes('/test/users')) return json(userPage(['ada@example.com', 'grace@example.com', 'linus@example.com', 'extra@example.com']))
-      return json({ error: 'unauthorized', error_description: 'login is not wired' }, 401)
+      return json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
     })
     const user = userEvent.setup()
     renderPage()
@@ -273,7 +273,7 @@ describe('the data check page', () => {
       if (target.includes('/helloworld/protected')) {
         return signedIn
           ? json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
-          : json({ error: 'unauthorized', error_description: 'login is not wired' }, 401)
+          : json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
       }
       return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
     })
@@ -332,7 +332,59 @@ describe('the data check page', () => {
     expect(document.body.textContent).not.toContain(LOGIN.access_token) // 凭据值永不上屏
   })
 
-    it('marks a protected cell as authenticated but not authorized when the engine policy denies it', async () => {
+    it('lets a sign-in follow a sign-out, so the page stops claiming the old one', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) return json(LOGIN)
+      if (target.includes('/user/logout')) return json({ message: 'Logout successful' })
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '退出登录' }))
+    expect(await screen.findByText(/已退出/)).toBeInTheDocument()
+
+    // 再登录：上一次"已退出"必须让位，否则页面在说谎
+    await user.click(screen.getByRole('button', { name: '以此账号登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+    expect(screen.queryByText(/已退出/)).toBeNull()
+  })
+
+  it('does not call a token-only sign-in authenticated, since no cookie was written', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/token')) return json(LOGIN)
+      if (target.includes('/helloworld/protected')) return json({ error: 'unauthorized' }, 401)
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+    await user.click(screen.getByRole('button', { name: '只取登录凭据' }))
+    expect(await screen.findByText(/已取得登录凭据/)).toBeInTheDocument()
+
+    // 没给浏览器写 Cookie → 受保护请求仍是"没带凭据"，不能自称已认证
+    await user.click(screen.getByRole('button', { name: '受保护 GET' }))
+    await waitFor(() => expect(cellText('受保护 GET')).toContain('未登录'))
+    expect(cellText('受保护 GET')).not.toContain('已认证但未被授权')
+  })
+
+  it('marks a protected cell as authenticated but not authorized when the engine policy denies it', async () => {
     vi.mocked(transportFetch).mockImplementation(async (url) => {
       const target = String(url)
       if (target.includes('/.well-known/yao')) return json(SERVICE)
@@ -372,7 +424,7 @@ describe('the data check page', () => {
       if (target.includes('/.well-known/yao')) return json(SERVICE)
       if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
       if (target.includes('/test/login/web') || target.includes('/test/login/token')) return json(LOGIN)
-      return json({ error: 'unauthorized', error_description: 'login is not wired' }, 401)
+      return json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
     })
     const user = userEvent.setup()
     renderPage()

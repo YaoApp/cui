@@ -93,7 +93,7 @@ export function DataCheckPage() {
   const protectedPostCall = useRequest(protectedPostQuery(), { body: POST_BODY, manual: true })
 
   /* ③ 四态：`useRequest` **挂载即跑**（不传 `manual`）、卸载即取消。公开 GET 当声明 ——
-     `send` 自动带上当前请求元数据，它不挑凭据，登录还没接也照样通。 */
+     `send` 自动带上当前请求元数据；公开的那两条不挑凭据。 */
   const scaffold = useRequest(publicGetQuery())
 
   /* 登录成功后浏览器收下 Cookie（`login/web` 的 `SameSite=Strict`，dev 下应用与引擎同源）；
@@ -108,11 +108,15 @@ export function DataCheckPage() {
 
   /** 认证类拒绝的码：登录态下被拒 = 已认证但未被授权（引擎侧授权策略，不是客户端问题）。 */
   const authRefusal = /forbidden|insufficient_scope|unauthorized|token_missing|invalid_token/i
+  /** "已认证但未被授权"只在**浏览器真把凭据带上了**（Cookie 登录）时成立；
+   *  只取 token 的那种登录不给浏览器写 Cookie，受保护请求仍是"没带凭据"。 */
+  const cookieSignedIn = webLogin !== null && logoutCall.state.status !== 'ok'
   const deniedAfterLogin = (state: RequestState<unknown>) =>
-    signedIn && state.status === 'error' && authRefusal.test(state.failure.code)
+    cookieSignedIn && state.status === 'error' && authRefusal.test(state.failure.code)
 
   const signIn = (user: TestUser, kind: 'web' | 'token') => {
     if (!user.email) return
+    logoutCall.reset() // 上一次"已退出"到此为止，重新登录后页面不该还挂着它
     setLoginEmail(user.email)
     if (kind === 'web') void loginWebCall.run({ user: user.email })
     else void loginTokenCall.run({ user: user.email })
@@ -254,14 +258,14 @@ export function DataCheckPage() {
         <Button onClick={() => void protectedPostCall.run()} disabled={protectedPostCall.state.status === 'loading'}>{t('dataCheck.protectedPost')}</Button>
       </p>
       {/* 每格直接渲染自己的 state：成功印返回值，失败印译文；受保护的两条按登录与否标注
-          "预期失败（还没登录）" 或 "已认证但未被授权"（登录成功仍被引擎策略拒绝时） */}
+          "未登录（缺凭据）" 或 "已认证但未被授权"（Cookie 登录后仍被引擎策略拒绝时） */}
       <div className="data-check__row">
         {cells.map(({ label, state, expected }) => (
           <Cell key={label} label={label} value={stateText(state)}>
             {expected && state.status === 'error' ? (
               deniedAfterLogin(state) ? (
                 <em className="data-check__expected">{t('dataCheck.authenticatedDenied')}</em>
-              ) : !signedIn ? (
+              ) : !cookieSignedIn ? (
                 <em className="data-check__expected">{t('dataCheck.expectedFailure')}</em>
               ) : null
             ) : null}

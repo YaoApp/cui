@@ -8,6 +8,7 @@
   "bridge.error.credential.serviceEmpty": "服务名不能为空",
   "bridge.error.credential.storeFailed": "系统凭据库读写失败",
   "bridge.error.forbidden": "没有访问权限",
+  "bridge.error.insufficientScope": "权限不足",
   "bridge.error.invalidToken": "凭据无效",
   "bridge.error.localIps.unavailable": "读不到本地地址",
   "bridge.error.openBrowser.failed": "打不开浏览器",
