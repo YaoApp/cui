@@ -12,8 +12,11 @@ import { failure as buildFailure } from '../utils/failure'
 import { unwrap } from '../utils/unwrap'
 import { context, headers as contextHeaders, query as contextQuery, type Context } from './context'
 
-/** 一个接口的声明：**只写方法与路径**（进出类型在调用方给的泛型上，见 `data/<域>/api.ts`）。 */
-export type Call = {
+/** 一个接口的**声明**：只写方法与路径（进出类型在调用方给的泛型上，见 `data/<域>/api.ts`）。
+ *
+ *  **名字与 DOM 的 `Request` 同名**，但两者无关：这里指"我们这个接口怎么调"；
+ *  发请求用的是 `RequestInit`（`platform/transport/`），别混。 */
+export type Request = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   /** 引擎的路径（**不含** `openapi` 前缀，如 `/helloworld/public`） */
   path: string
@@ -39,17 +42,17 @@ function withQuery(url: string, params: Record<string, string | number | boolean
 }
 
 /** 一次普通请求。**失败是值**，不抛异常。 */
-export async function send<T>(call: Call, inputs: SendInputs): Promise<Result<T>> {
+export async function send<T>(request: Request, inputs: SendInputs): Promise<Result<T>> {
   const ctx: Context = context(inputs.outbound)
   // 地址由**平台层**给（基址 + well-known 的 openapi 前缀）；**读不到服务信息就直接报错**，不兜前缀
-  const address = apiUrl(call.path)
+  const address = apiUrl(request.path)
   if (!address) {
     return { ok: false, ...buildFailure(0, undefined, 'service.not_ready') }
   }
   const url = withQuery(address, { ...contextQuery(ctx), ...(inputs.query ?? {}) })
 
   const response = await transportFetch(url, {
-    method: call.method,
+    method: request.method,
     headers: contextHeaders(ctx),
     ...(inputs.body === undefined ? {} : { body: JSON.stringify(inputs.body) }),
     ...(inputs.signal ? { signal: inputs.signal } : {}),
@@ -63,7 +66,7 @@ export async function send<T>(call: Call, inputs: SendInputs): Promise<Result<T>
     } catch {
       body = undefined
     }
-    return { ok: false, ...buildFailure(response.value.status, body, `${call.method.toLowerCase()}_failed`) }
+    return { ok: false, ...buildFailure(response.value.status, body, `${request.method.toLowerCase()}_failed`) }
   }
   return { ok: true, value: unwrap<T>(await response.value.json()) }
 }

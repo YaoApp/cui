@@ -7,5 +7,5 @@
 
 export type { Failure, Page, Result } from './types'
 export { failure, paginate, unwrap } from './utils'
-export { context, send, type Call, type SendInputs } from './request'
+export { context, send, type Request, type SendInputs } from './request'
 export { useRequest, type RequestState } from './hooks'

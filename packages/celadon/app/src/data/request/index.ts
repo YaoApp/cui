@@ -1,2 +1,2 @@
 export { context, type Context } from './context'
-export { send, type Call, type SendInputs } from './send'
+export { send, type Request, type SendInputs } from './send'
