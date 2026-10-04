@@ -21,11 +21,13 @@ const keyOfSession = (): string | undefined => credentialKey(SESSION_PURPOSE)
 /** 读一次会话凭据（惰性 + 内存镜像）。Web 与"没选服务"都回"没有"，不是错误。 */
 export async function loadSession(): Promise<BridgeResult<string | undefined>> {
   if (loaded) return ok(cached)
-  const name = keyOfSession()
-  if (!name || !credential.managedByApp()) {
+  if (!credential.managedByApp()) {
     loaded = true
     return ok(undefined)
   }
+  // 没有 key = 基址还没读出来（比如刚换过服务地址）：别记成"读过了"
+  const name = keyOfSession()
+  if (!name) return ok(undefined)
   const result = await credential.read(name)
   // **读失败不算"已读"**：留着重试的机会（比如钥匙串一时被拒），也别把错误吞成"没登录"
   if (!result.ok) return /no_entry/i.test(result.code) ? ((loaded = true), ok(undefined)) : result
@@ -113,10 +115,9 @@ export function refreshSession(): Promise<BridgeResult<string>> {
   return refreshing
 }
 
-/** 测试用：清内存镜像与注入的 refresher。 */
+/** 清内存镜像（**保留注入好的 refresher**：它是接线，不是值）。 */
 export function resetSession(): void {
   cached = undefined
   loaded = false
-  refresher = undefined
   refreshing = undefined
 }

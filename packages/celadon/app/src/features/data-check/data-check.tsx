@@ -112,10 +112,6 @@ export function DataCheckPage() {
     if (result.ok) {
       setServiceUrl(result.value)
       setServiceNotice('')
-      // 换地址 = 换服务：页面上的登录态与退出态一起作废（平台的缓存由 writeServiceAddress 清）
-      loginCall.reset()
-      logoutCall.reset()
-      setLoginEmail('')
     } else setServiceNotice(result.code)
   }, [])
   const saveAddress = useCallback(async () => {
@@ -123,6 +119,10 @@ export function DataCheckPage() {
     if (result.ok) {
       setServiceUrl(result.value)
       setServiceNotice('')
+      // 换地址 = 换服务：页面上的登录态与退出态一起作废（平台那侧的缓存由 writeServiceAddress 作废）
+      loginCall.reset()
+      logoutCall.reset()
+      setLoginEmail('')
     } else setServiceNotice(result.code)
   }, [serviceUrl])
 
@@ -131,8 +131,6 @@ export function DataCheckPage() {
 
   /** 认证类拒绝的码：登录态下被拒 = 已认证但未被授权（引擎侧授权策略，不是客户端问题）。 */
   const authRefusal = /forbidden|insufficient_scope|unauthorized|token_missing|invalid_token/i
-  /** "已认证但未被授权"只在**浏览器真把凭据带上了**（Cookie 登录）时成立；
-   *  只取 token 的那种登录不给浏览器写 Cookie，受保护请求仍是"没带凭据"。 */
   /* 登录后仍被拒 = 已认证但未被授权（引擎的授权策略）*/
   const deniedAfterLogin = (state: RequestState<unknown>) =>
     signedIn && state.status === 'error' && authRefusal.test(state.failure.code)

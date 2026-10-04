@@ -36,7 +36,7 @@ const blankComments = (source) =>
 /* 三种写法都要认：多行 import（子句里有换行）· 副作用 import · 动态 import。 */
 const FROM = /(?:^|\n)[ \t]*(?:import|export)\b[A-Za-z0-9_$*{},\s]*?\bfrom\b[ \t]*['"]([^'"]+)['"]/g
 const SIDE = /(?:^|\n)[ \t]*import[ \t]*['"]([^'"]+)['"]/g
-const DYNAMIC = /\bimport[ \t]*\([ \t]*['"]([^'"]+)['"]/g
+const DYNAMIC = /\bimport[ \t\r\n]*\([ \t\r\n]*['"]([^'"]+)['"]/g
 const BRIDGE_DIR = resolve(TARGET, 'platform', 'bridge')
 
 const files = []

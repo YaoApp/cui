@@ -101,13 +101,28 @@ export function useRequest<Input = void, Output = void>(
           ...(bodyRef.current === undefined ? {} : { body: bodyRef.current }),
           signal: controller.signal,
         })
-    void answer.then((result) => {
+    void answer
+      .then((result) => {
       settled.current = result
       if (id !== latest.current) return // 晚到的结果丢掉（依赖已变或已卸载）
       setState(result.ok
         ? { status: 'ok', value: result.value }
         : { status: 'error', failure: { ...result, text: failureText(result) } })
     })
+      .catch((error: unknown) => {
+        // 出口自己吞掉失败，只有"响应不是 JSON"这种会抛到这里：也落成失败态，别让等待者悬着
+        settled.current = undefined
+        if (id !== latest.current) return
+        setState({
+          status: 'error',
+          failure: {
+            code: 'transport.bad_response',
+            params: {},
+            message: error instanceof Error ? error.message : String(error),
+            text: failureText({ code: 'transport.bad_response', params: {}, message: '' }),
+          },
+        })
+      })
     return () => {
       unsubscribe()
       latest.current += 1 // 让在途结果失效

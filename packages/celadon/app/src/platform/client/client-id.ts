@@ -26,6 +26,15 @@ function storage(): Storage | undefined {
   }
 }
 
+/** 读本地存储：取不到就当没有（隐私模式下 getItem 也会被拒）。 */
+function recall(key: string): string | undefined {
+  try {
+    return storage()?.getItem(key) ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
 /** 写本地存储：**失败不算错**（隐私模式 / 配额满），身份退化成"本次会话内有效"。 */
 function remember(key: string, value: string): void {
   try {
@@ -60,9 +69,11 @@ export function newClientId(): string {
 /** 取 `client_id`：内存 → 本地存储 → 新建。 */
 export function clientId(): string {
   if (primed) return primed
-  const store = storage()
-  const existing = store?.getItem(STORAGE_KEY)
-  if (existing) return existing
+  const existing = recall(STORAGE_KEY)
+  if (existing) {
+    primed = existing // 没有存储时也让 id 在本次会话里稳定
+    return existing
+  }
 
   const id = newClientId()
   remember(STORAGE_KEY, id)
