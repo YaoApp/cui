@@ -5,7 +5,7 @@
  */
 
 import type { OutboundInputs } from '@/platform/client/context'
-import { apiUrl } from '@/platform/service'
+import { apiUrl, loadServiceInfo } from '@/platform/service'
 import { transportFetch } from '@/platform/transport/fetch'
 import type { Result } from '../types'
 import { failure as buildFailure } from '../utils/failure'
@@ -91,7 +91,10 @@ export async function send<Input = void, Output = void>(
   inputs: RequestOptions<Input>,
 ): Promise<Result<Output>> {
   const ctx: Context = context(inputs.outbound)
-  // 地址由**平台层**给（基址 + well-known 的 openapi 前缀）；**读不到服务信息就直接报错**，不兜前缀
+  // **第一次需要时先读**（惰性 ✓，之后走内存缓存）—— 读失败就把它自己的失败报出去（比"没就绪"更准）
+  const service = await loadServiceInfo()
+  if (!service.ok) return service
+  // 地址由**平台层**给（基址 + well-known 的 openapi 前缀）；**读不到就直接报错**，不兜前缀
   const address = apiUrl(request.path)
   if (!address) {
     return { ok: false, ...buildFailure(0, undefined, 'service.not_ready') }

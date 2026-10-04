@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 let address: string | undefined = '/v1'
+let serviceReadable = true
 vi.mock('@/platform/service', () => ({
   serviceBase: () => '',
+  loadServiceInfo: async () => (serviceReadable ? { ok: true, value: { name: 't', version: '1', openapi: '/v1' } } : { ok: false, code: 'service.unavailable', params: {}, rawMessage: 'offline', message: 'service: unavailable' }),
   apiUrl: (path: string) => (address === undefined ? undefined : `${address}${path}`),
 }))
 
@@ -23,6 +25,7 @@ function answer(body: unknown, status = 200) {
 afterEach(() => {
   vi.unstubAllGlobals()
   address = '/v1'
+  serviceReadable = true
 })
 
 describe('send', () => {
@@ -79,6 +82,12 @@ describe('send', () => {
     await send(request, { outbound, headers: [['X-Trace', 'a'], ['X-Trace', 'b']] })
     const headers = new Headers(fetchMock.mock.calls[0][1]?.headers)
     expect(headers.get('x-trace')).toBe('a, b')   // 两个值都在
+  })
+
+  it('reports the failure of the service read itself, which is more precise', async () => {
+    serviceReadable = false
+    const result = await send(request, { outbound })
+    expect(result).toMatchObject({ ok: false, code: 'service.unavailable' })
   })
 
   it('passes a network failure straight through', async () => {
