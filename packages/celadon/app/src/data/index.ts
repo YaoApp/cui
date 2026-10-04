@@ -1,4 +1,4 @@
-export type { ApiFailure, ApiResult, Page } from './types'
+export type { Failure, Result, Page } from './types'
 export { unwrap } from './utils/unwrap'
 export { paginate } from './utils/paging'
 export { failure } from './utils/errors'

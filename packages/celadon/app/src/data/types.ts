@@ -6,10 +6,13 @@
 
 /** 一次调用的失败：传输失败 + 服务端业务错误，**同一种形状**（与 `platform/transport` 的字段一致）。
  *
+ *  **为什么叫 `Failure` 而不是 `ApiFailure`**：出口是 `@/data`，来源写在 import 路径里就够；
+ *  平台那侧的 `BridgeFailure` 保留前缀，是为了在同一次排查里分辨"这条失败来自**宿主桥**还是**服务接口**"。
+ *
  *  **引擎的错误体是 OAuth 形状**（`yao/openapi/oauth/types/types.go:35-45`）：
  *  `{ error, error_description, error_uri, state, reason, required_scopes, missing_scopes }` ——
  *  **没有字段级 `fields`/`errors`**（`yao` 里字段校验信息只拼在 `error_description` 文本里），所以这里也不编。 */
-export type ApiFailure = {
+export type Failure = {
   /** 码：`transport.*`（传输）或服务端/业务码（如 `user.invalid`） */
   code: string
   /** 给插值的参数（如 `{ status }`） */
@@ -23,7 +26,7 @@ export type ApiFailure = {
 }
 
 /** 一次调用的结果（成功的值 / 失败的形状）。 */
-export type ApiResult<T> = { ok: true; value: T } | ({ ok: false } & ApiFailure)
+export type Result<T> = { ok: true; value: T } | ({ ok: false } & Failure)
 
 /** **0.2 列表与分页只有一种**（旧代码四套命名一律归到这里）。 */
 export type Page<T> = {
