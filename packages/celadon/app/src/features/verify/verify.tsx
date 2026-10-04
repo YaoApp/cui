@@ -6,7 +6,7 @@ import './verify.less'
  *   ② **桌面壳里**：真跑一遍 —— 平台 · 语言 · 本地 IP · 应用信息 · 主题 · 打开浏览器 · 定位 ·
  *      选文件/目录 · **凭据写→读→删**（这条是 `cargo test` 在 CLI 里验不了的）
  *
- * 失败一律显示**按码翻译过的文案**（`bridgeErrorText`），不是壳里的英文句子。
+ * 失败一律显示**按码翻译过的文案**（`failureText`），不是壳里的英文句子。
  *
  * **一处在诊断页里的例外**：本页允许手输地址（探一下 / 打开浏览器）。§5 的"Web 端不许任意输入地址"
  * 管的是**产品入口**（防钓鱼：别让用户在"我们的应用"里把凭据交给陌生服务端）；这里是**诊断页**，
@@ -22,7 +22,7 @@ import { usePageTitle } from '@/platform/router/use-page-title'
 import { navWithActive } from '@/platform/utils/nav'
 import { buildManifest, capabilities, clientInfo, hasHost } from '@/platform/client'
 import { routerBasename } from '@/platform/router/basename'
-import { bridge, bridgeErrorText, type BridgeResult } from '@/platform/bridge'
+import { bridge, failureText, type BridgeResult } from '@/platform/bridge'
 import { credential } from '@/platform/credential'
 import { REDACTED, shouldRedact } from './redact'
 import { transport } from '@/platform/transport'
@@ -31,15 +31,11 @@ import { loadServiceInfo } from '@/platform/service'
 type Line = { label: string; text: string }
 
 export function VerifyPage() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const navItems = navWithActive(pathname).map((item) => ({ ...item, label: t(item.label) }))
   usePageTitle(t('verify.title'))
-  /* `bridgeErrorText` 收的是"按任意 key 取文案"的函数；i18n 的 t 是**严格 key 类型**，
-     这里做一次适配（码是运行期的，类型系统管不到）。 */
-  const translate = (key: string, options?: Record<string, unknown>) =>
-    i18n.t(key as never, options as never) as unknown as string
   const info = clientInfo()
   const caps = capabilities()
   const manifest = buildManifest()
@@ -57,7 +53,7 @@ export function VerifyPage() {
     const text = result.ok
       // **秘密不上屏**：`credential.read` 的结果只报"读到了"，不印内容
       ? `${t('verify.result')}: ${redact ? REDACTED : JSON.stringify(result.value)}`
-      : bridgeErrorText(translate, result)
+      : failureText(result)
     setLines((prev) => [{ label, text }, ...prev].slice(0, 12))
   }
 
@@ -148,7 +144,7 @@ export function VerifyPage() {
           ? t('verify.notPinged')
           : ping.ok
             ? `${t('verify.ready')} · ${JSON.stringify((ping.value as { commands?: unknown }).commands ?? {})}`
-            : bridgeErrorText(translate, ping)}
+            : failureText(ping)}
       </p>
 
       {/* 能力开关：唯一的分支点（15 §5） */}

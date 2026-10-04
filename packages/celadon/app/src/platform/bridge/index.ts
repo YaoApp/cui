@@ -10,7 +10,7 @@
  */
 
 export * from './result'
-export { bridgeErrorText } from './translate'
+export { bridgeErrorText, failureText } from './translate'
 export { hasHost } from './invoke'
 export { ping, PING_COMMAND, type HostStatus } from './ping'
 export { credential, CREDENTIAL_COMMANDS, type CredentialMeta } from './credential'

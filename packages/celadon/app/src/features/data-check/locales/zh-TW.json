@@ -1,0 +1,21 @@
+{
+  "dataCheck.back": "返回",
+  "dataCheck.expectedFailure": "預期失敗（還沒接登入）",
+  "dataCheck.locale": "語言",
+  "dataCheck.ok": "成功",
+  "dataCheck.protectedGet": "受保護 GET",
+  "dataCheck.protectedPost": "受保護 POST",
+  "dataCheck.publicGet": "公開 GET",
+  "dataCheck.publicPost": "公開 POST",
+  "dataCheck.reload": "重新執行",
+  "dataCheck.scaffold": "介面呼叫",
+  "dataCheck.scaffoldHint": "公開的兩條可以真的跑；受保護的兩條也能點，但還沒接登入，失敗是預期的。每次請求都會自動帶上目前的語言與主題。",
+  "dataCheck.stateError": "失敗",
+  "dataCheck.stateIdle": "閒置",
+  "dataCheck.stateLoading": "載入中",
+  "dataCheck.stateOk": "成功",
+  "dataCheck.states": "取數狀態",
+  "dataCheck.statesHint": "一次取數的四個階段：空閒 · 載入中 · 成功 · 失敗。這裡用「公開 GET」示範。",
+  "dataCheck.theme": "主題",
+  "dataCheck.title": "介面驗證"
+}

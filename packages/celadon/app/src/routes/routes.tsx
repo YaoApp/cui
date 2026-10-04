@@ -1,4 +1,5 @@
 import { Navigate, type RouteObject } from 'react-router'
+import { DataCheckPage } from '@/features/data-check'
 import { HelloPage } from '@/features/hello'
 import { VerifyPage } from '@/features/verify'
 import { WorldPage } from '@/features/world'
@@ -14,6 +15,8 @@ const pageRoutes: RouteObject[] = [
   { path: 'world/:worldId', element: <WorldPage /> },
   /* 桥的脚手架页：把这轮做出来的宿主能力摆出来点一遍（见 plan/01-bridge-commands.md） */
   { path: 'verify', element: <VerifyPage /> },
+  /* 数据层的验证页：公开接口真跑、受保护的两条（登录未接）预期失败（见 plan/03-data.md） */
+  { path: 'data-check', element: <DataCheckPage /> },
 ]
 
 export const routes: RouteObject[] = [

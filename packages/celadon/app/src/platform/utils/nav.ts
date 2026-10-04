@@ -20,6 +20,8 @@ export const APP_NAV: AppNavItem[] = [
   { label: 'nav.world', href: '/world', icon: 'i-ws' },
   /* 桥的验证页：人工测试时从这里进（页内有「返回」） */
   { label: 'nav.verify', href: '/verify', icon: 'i-check' },
+  /* 数据层的验证页：公开接口真跑、受保护的预期失败（登录未接） */
+  { label: 'nav.dataCheck', href: '/data-check', icon: 'i-file-code' },
 ]
 
 /** 按当前路径标出选中项 —— 比较只写这一处，别让每个页面各写一遍。

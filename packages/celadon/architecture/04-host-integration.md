@@ -1,7 +1,7 @@
 # 04 · 制品与挂载（硬约束）
 
 - **版本**：v1.31
-- **最后修改**：2026-10-03 18:42:27
+- **最后修改**：2026-10-04 09:22:09
 - **说明**：制品构成 · 宿主挂载 · 放到哪（引擎 / 独立 / 桌面）· SPA fallback · 由命名空间推导的工程约束
 
 ## 1. 制品构成
@@ -25,7 +25,7 @@ dist/
 | --- | --- |
 | **命名空间** | 应用整个跑在**构建决定的命名空间**之下（`/<namespace>/`，默认 `app`，`CUI_BASE` 覆盖）；React Router 的 `basename` 与 Vite 的 `base` **取同一个值**；**根 `/` 不属于应用**，两端一致；PWA 的 `scope` / `start_url` 同步 |
 | **表面** | 命名空间之下：主区无前缀；**侧边**是 `side/` 前缀（见 `07-routing.md` §2）|
-| **SPA fallback** | **托管方必须配**：未知路径回 `index.html`，只给导航请求（`Accept: text/html`）；缺的静态资源仍 404。路径路由的代价，预览用 `scripts/serve-dist.mjs` |
+| **SPA fallback** | **托管方必须配**：未知路径回 `index.html`，只给导航请求（`Accept: text/html`）；缺的静态资源仍 404。**预览用 `vite preview`** —— 它**继承 `server.proxy`**（接口在预览里也通），并自带这套 fallback（见 `16-development.md` §2.2）。|
 | **SSE 三个头**（**托管方 · 开发代理**）| `Cache-Control: no-cache, no-transform` · `Connection: keep-alive` · `X-Accel-Buffering: no`（见 `16-development.md`）|
 
 ## 3. `dist/` 的托管方式
@@ -73,6 +73,10 @@ server {
 
     root /srv/cui;
 
+    # **目录重定向发相对地址**：容器/反代场景下对外端口与监听端口不同，
+    # 绝对地址会把监听端口写进 Location（`…:80/app/`），浏览器随后连错端口
+    absolute_redirect off;
+
     # 产物静态目录：存在则返回，缺失直接 404，不回退
     location /app/_assets/ {
         try_files $uri =404;
@@ -89,28 +93,46 @@ server {
         try_files $uri $uri/ /app/index.html;
     }
 
+    # 服务信息：应用**第一次需要时**读一次（`15-platform.md` §3）——**必须代理**，否则应用读不到 openapi 前缀
+    location /.well-known/ {
+        proxy_pass http://127.0.0.1:5099;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
     # 接口：反向代理至引擎，保持同源
     location /v1/ {
         proxy_pass http://127.0.0.1:5099;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
 
-        # SSE 等长连接：不缓冲，放宽读超时
-        proxy_buffering off;
-        proxy_read_timeout 3600s;
-    }
-
-    # WebSocket 升级
-    location /ws/ {
-        proxy_pass http://127.0.0.1:5099;
-        proxy_http_version 1.1;
+        # 长连接：WebSocket 升级（`/v1/events` · `/v1/agent/tasks/<chat_id>/ws` 都在 /v1/ 下）
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Connection $connection_upgrade;
+
+        # SSE：不缓冲，放宽读超时
+        proxy_buffering off;
         proxy_read_timeout 3600s;
     }
 }
 ```
+
+#### 上线自检（托管方逐条过）
+
+以命名空间 `app` 为例，全部应满足：
+
+| 检查 | 期望 |
+| --- | --- |
+| `GET /app` | **301 → `/app/`，且 `Location` 是相对地址**（对外端口 ≠ 监听端口时不丢端口）|
+| `GET /app/` | `200`，且页面引用的 `_assets/…js` 与产物 `index.html` **一致** |
+| `GET /app/<任意前端路由>` | `200` 且**内容为 `index.html`**（SPA fallback）|
+| `GET /app/_assets/<存在>` | `200`，`Cache-Control` 长缓存（`public, immutable`）|
+| `GET /app/_assets/<不存在>` | **`404`**（缺的资源不回退）|
+| `GET /app/index.html` | `Cache-Control: no-cache`（发版即生效）|
+| `GET /.well-known/yao` | `200` 且含 `openapi` 前缀（**漏了这条应用读不到前缀**）|
+| `GET /v1/<任一接口>` | 与引擎直连**同结果**（同源反代成立）|
 
 ### 独立部署（Cloudflare）
 
@@ -169,7 +191,7 @@ export const onRequest: PagesFunction<{ ENGINE: string }> = ({ request, env }) =
 │   └── _assets/
 ├── _redirects                # fallback 与 404
 ├── _headers                 # 缓存策略
-├── _routes.json             # 只让接口路径进入 Functions
+├── _routes.json             # 只让接口路径与服务信息进入 Functions
 └── functions/
     └── v1/[[path]].ts       # 反向代理至引擎
 ```
@@ -186,7 +208,7 @@ ENGINE = "engine.example.com"           # Functions 里以 env.ENGINE 读取
 
 ```json
 // _routes.json —— 静态请求不走 Functions，只有接口路径进
-{ "version": 1, "include": ["/v1/*"], "exclude": [] }
+{ "version": 1, "include": ["/v1/*", "/.well-known/*"], "exclude": [] }
 ```
 
 部署：`wrangler pages deploy`（首次会要求选择项目）。

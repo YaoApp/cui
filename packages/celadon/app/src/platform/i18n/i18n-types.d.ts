@@ -21,6 +21,7 @@ export type I18nKey =
   | 'bridge.error.reveal.failed'
   | 'bridge.error.reveal.pathNotFound'
   | 'bridge.error.service.malformed'
+  | 'bridge.error.service.notReady'
   | 'bridge.error.service.unavailable'
   | 'bridge.error.theme.expectedLightOrDark'
   | 'bridge.error.theme.readFailed'
@@ -30,6 +31,25 @@ export type I18nKey =
   | 'bridge.error.transport.parse'
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
+  | 'dataCheck.back'
+  | 'dataCheck.expectedFailure'
+  | 'dataCheck.locale'
+  | 'dataCheck.ok'
+  | 'dataCheck.protectedGet'
+  | 'dataCheck.protectedPost'
+  | 'dataCheck.publicGet'
+  | 'dataCheck.publicPost'
+  | 'dataCheck.reload'
+  | 'dataCheck.scaffold'
+  | 'dataCheck.scaffoldHint'
+  | 'dataCheck.stateError'
+  | 'dataCheck.stateIdle'
+  | 'dataCheck.stateLoading'
+  | 'dataCheck.stateOk'
+  | 'dataCheck.states'
+  | 'dataCheck.statesHint'
+  | 'dataCheck.theme'
+  | 'dataCheck.title'
   | 'entityPanel.close'
   | 'entityPanel.id'
   | 'entityPanel.kind'
@@ -61,6 +81,7 @@ export type I18nKey =
   | 'localeSwitch.zhCN'
   | 'localeSwitch.zhTW'
   | 'nav.appLabel'
+  | 'nav.dataCheck'
   | 'nav.hello'
   | 'nav.verify'
   | 'nav.world'
@@ -154,6 +175,7 @@ declare module 'i18next' {
         'bridge.error.reveal.failed': string
         'bridge.error.reveal.pathNotFound': string
         'bridge.error.service.malformed': string
+        'bridge.error.service.notReady': string
         'bridge.error.service.unavailable': string
         'bridge.error.theme.expectedLightOrDark': string
         'bridge.error.theme.readFailed': string
@@ -163,6 +185,25 @@ declare module 'i18next' {
         'bridge.error.transport.parse': string
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
+        'dataCheck.back': string
+        'dataCheck.expectedFailure': string
+        'dataCheck.locale': string
+        'dataCheck.ok': string
+        'dataCheck.protectedGet': string
+        'dataCheck.protectedPost': string
+        'dataCheck.publicGet': string
+        'dataCheck.publicPost': string
+        'dataCheck.reload': string
+        'dataCheck.scaffold': string
+        'dataCheck.scaffoldHint': string
+        'dataCheck.stateError': string
+        'dataCheck.stateIdle': string
+        'dataCheck.stateLoading': string
+        'dataCheck.stateOk': string
+        'dataCheck.states': string
+        'dataCheck.statesHint': string
+        'dataCheck.theme': string
+        'dataCheck.title': string
         'entityPanel.close': string
         'entityPanel.id': string
         'entityPanel.kind': string
@@ -194,6 +235,7 @@ declare module 'i18next' {
         'localeSwitch.zhCN': string
         'localeSwitch.zhTW': string
         'nav.appLabel': string
+        'nav.dataCheck': string
         'nav.hello': string
         'nav.verify': string
         'nav.world': string

@@ -4,6 +4,7 @@
  * 回退到英文诊断并记一条警告，提醒补翻译（`check-i18n` 的缺 key 门禁也会报）。 */
 
 import type { BridgeFailure } from './result'
+import { i18n } from '../i18n'
 
 type Translate = (key: string, options?: Record<string, unknown>) => string
 
@@ -25,4 +26,14 @@ export function bridgeErrorText(t: Translate, failure: BridgeFailure): string {
     return failure.message || failure.code
   }
   return text
+}
+
+/** 一句可直接上屏的失败文案：用**平台 i18n 实例**调 `bridgeErrorText`，调用方不再各自造取词适配器。
+ *
+ *  收的是 `{ code, params, message }`（桥的失败与数据层的 `Failure` 同形），React 之外也能用；
+ *  缺翻译时仍是 `bridgeErrorText` 的回退（英文诊断 + 警告）。 */
+export function failureText(failure: { code: string; params: Record<string, unknown>; message: string }): string {
+  const translate = (key: string, options?: Record<string, unknown>) =>
+    i18n.t(key as never, options as never) as unknown as string
+  return bridgeErrorText(translate, { ok: false, ...failure })
 }

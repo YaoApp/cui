@@ -1,7 +1,7 @@
 # 02 · 平台地基（产品级）
 
 - **版本**：v0.2（计划 + 进度）
-- **最后修改**：2026-10-03 22:16:06
+- **最后修改**：2026-10-04 09:13:04
 - **说明**：把平台层从"规范先行"做成产品级地基 · 依赖顺序 · 逐项验收 · 未定项
 
 > **这份是计划，不是规范。** 规则在 [`../architecture/15-platform.md`](../architecture/15-platform.md)；
@@ -119,6 +119,45 @@
 - [ ] `webproxy/`：agent sandbox 服务访问的域名构造规则
 - [x] 配套宿主：**`YaoApp/celadon-desktop`**（不是 `cui-desktop`）· **两份构建**（Web 挂 `/<namespace>/` · 客户端走根）· 产物挂载已定
 - 验收：Web 下这两处不存在；调用前先问能力开关
+
+### 2.2.2 开发代理：根路径 + `YAO_SERVER_HOST`（**已实测可用 · 2026-10-04**）
+
+**规矩**：**只用 Vite 官方的 `server.proxy`** ✓（不引第三方、不自己挂中间件 ✗）；代理键是**根路径**
+（`/.well-known` · `/v1`）—— **dev 的请求路径必须与生产一致**（生产里应用在 `/app/` 下、**引擎在站点根**下 ✓）。
+
+**实测（真后端 `<dev-backend-host>:5099`）**：
+
+| 情形 | `GET /v1/helloworld/public` |
+| --- | --- |
+| `base: '/app/'` + 根路径代理键 + **`YAO_SERVER_HOST` 已给** | **200** + `{"MESSAGE":"HELLO, WORLD",…}` ✓ |
+| 同上但 **`YAO_SERVER_HOST` 没给** | **404** ✗（落到 Vite 自身：`The server is configured with a public base URL of /app/` ✓）|
+
+**⚠️ 曾经的假结论（已推翻）**：一度写成"base `/app/` 时 base 中间件先拦根路径，必须加插件或换 base" ✗ ——
+**错** ✓。真因是**那个 dev server 没带 `YAO_SERVER_HOST`** ✓，而且我 curl 的是**没杀干净的旧服务** ✗。
+**别再为此加插件 / 加依赖 / 改 base** ✗。
+
+**地址怎么给**（`16 §3`）：写进 `packages/celadon/.env`（**已 gitignore** ✓）：`YAO_SERVER_HOST=http://<dev 后端>:5099` ✓。
+**pm2 管的 `cui-dev` 要生效**：`YAO_SERVER_HOST=… pm2 restart cui-dev --update-env` ✓ 再 `pm2 save` ✓
+（**别裸 `kill`** ✗ —— pm2 会把同一份配置再拉起来，实测重启计数被刷到 **243** 次 ✗）。
+
+**测试纪律**（今天的教训）：① 起/测服务前先 `lsof -nP -iTCP:<port> -sTCP:LISTEN` **确认端口空** ✓
+（否则 curl 打到旧服务，**结论全假** ✗）② **只杀自己起的那个 PID**，**别顺父进程往上杀** ✗（会杀掉自己那层 ✓）。
+
+**5200（`cui-dist`）已切到 `vite preview`** ✓（2026-10-04 实测）：它**继承 `server.proxy`** ✓（所以接口在预览里也通 ✓）、自带 SPA fallback ✓（**深链 200** ✓）；
+命令 `vite preview --port 5200 --strictPort --host 0.0.0.0` ✓ —— **`--host 0.0.0.0` 必须有** ✗（默认只绑 `localhost`，他机 `ERR_CONNECTION_REFUSED` ✓）。
+旧的 `scripts/serve-dist.mjs` **已弃用** ✗（深链 404 ✗、无代理 ✗）。
+
+### 2.2.1 服务信息的读与存（**已定**，2026-10-04）
+
+| 问题 | 定法 | 现状 |
+| --- | --- | --- |
+| **啥时候读** | **第一次需要时读一次**（`loadServiceInfo()` 惰性 ✓）—— **不在启动时空读**（静态托管没有后端，空读只留一串 404）| ✅ 已实现（消费方：验证页的服务信息一节）|
+| **怎么存** | **内存缓存，不落盘** —— well-known 是"**服务的当前事实**"，落盘必出旧值（旧代码塞 `localStorage`，换服务后读到旧的 `openapi` 前缀 ✗）| ✅ 已实现（`serviceInfo()` · `resetServiceInfo()`）|
+| **地址存哪** | **Web**：同域，不存 ✓ · **桌面**：**宿主配置**（该落盘的是"**用户选的地址**"这个配置，不是缓存）| ⏸ 桌面侧未做 |
+| **切服务怎么办** | ① 清凭据（`credential.remove` ✓）② `resetServiceInfo()` ✓ ③ **作废在途请求**（需要"代际"计数，**✗ 未做**）④ 下次需要时自然重读 ✓ ⑤ 清 `data/` 缓存（暂无缓存 ✓）| ⏸ **③ 是缺口** |
+
+**切服务的动作清单**（`15 §4.2` 的落地）：清凭据 → 重置服务信息 → **作废在途** → 重读（下一次需要时）→ 清缓存（有的话）。
+**特别提醒**：**别把 well-known 落盘**；要落盘的是"服务地址"，且只有桌面有这个概念。
 
 ## 3. 未定项（做之前必须先定）
 
