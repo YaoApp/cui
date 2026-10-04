@@ -66,11 +66,14 @@
 | 4 | `components/page/*` | 新建页面公共件 + 样式 |
 | 5 | `features/home`（新占位页）· `features/scaffold/{overview,routing,bridge,requests}` | 新首页 · 目录搬迁（`hello` → `overview`）· 去掉 Header/Nav/返回按钮 · 语言包跟着目录走 |
 | 6 | `scripts/check-bridge-imports.mjs` + `scripts/tests/cases/bridge-imports/**` | 白名单从 `features/verify/**` 改成 `features/scaffold/bridge/**`；违规样本路径同步 |
-| 7 | 语言包 | 新增 `nav.home`/`nav.overview`/`nav.routing`/`nav.bridge`/`nav.requests` · 删 `nav.hello`/`nav.world`/`nav.verify`/`nav.dataCheck` 与 `verify.back`/`dataCheck.back` · 页面标题键改名（四语） |
+| 7 | 语言包 | `nav.*`（现在在**全局**包里）搬进**脚手架**的包；新增 `nav.home`/`nav.overview`/`nav.routing`/`nav.bridge`/`nav.requests` · 删旧四条与 `verify.back`/`dataCheck.back` · `header.refresh`/`nav.appLabel` 跟着导航件走 · 页面标题键改名（四语）|
 | 8 | 用例 | 四个页面的 `*.test.tsx` 跟着改路径与断言（尤其"点导航"的用例） |
 | 9 | 截图脚本 | `celadon-client-verify/scripts/shoot-client-macos.sh` 与 `windows-build-and-run.ps1` 的页面参数与 Tab 数（导航项从 5 个变 4 个） |
-| 10 | **删除** `stores/side-panel.ts` · `stores/entry.ts` · `stores/side-panel.test.ts` · `/side` 的旧路由 · `world` 里开侧边那段 · `world.store.ts` 里提到"公共 store"的注释 | 没有产品消费者的推测结构，删掉（`stores/` 暂时空着，第一个真 store 来了再建）|
-| 11 | 文档 | `07-routing.md`（路径表）· `15-platform.md` §5.4 的白名单路径 · `04-status.md` §5/§6 标完成 |
+| 10 | **删除** `stores/side-panel.ts` · `stores/entry.ts` · `stores/side-panel.test.ts` · `world` 里开侧边那段与它的三条用例（`world.test.tsx`）· `features/world/tests/world-panel.agent.{md,mjs}`（persona）· `world.store.ts` / `world.store.test.ts` / `test-support/stores.ts` 里把它当"公共 store"的注释 · `share-url` 的 `sideEntity` 参数与其用例 | 没有产品消费者的推测结构，删掉（`stores/` 暂时空着，第一个真 store 来了再建）|
+| 10b | `components/nav/nav.test.tsx` · `components/header/header.test.tsx` · `platform/utils/nav.test.ts` | 跟着各自的件搬进 `features/scaffold/`；用例里的旧路径（`/world` `/hello`）换成新路径 |
+| 10c | `scripts/tests/cases/import-boundaries/**`（样本里 import 了 `@/components/header` 与 `@/platform/utils/nav`）| 换成仍然存在的导入目标（样本是合成的，别指向被搬走的件）|
+| 10d | persona 用例：`features/hello/tests/structure-trial.agent.*` · `features/data-check/tests/data-check-trial.agent.*` | 跟着页面搬；`scripts/run-persona.mjs` 的收集方式确认一遍（glob 还是清单）|
+| 11 | 文档 | `07-routing.md`（路径表 + 两面能力撤掉）· `15-platform.md:270`（白名单路径）· `00-principles.md:117` 与 `06-state.md:65`（命名例子用的是 `side-panel.ts`，换掉）· `plan/03-data.md:163`（引用 `features/data-check`/`features/verify`）· `plan/04-status.md:29`（`stores/` 现状）· 本文档标完成 |
 
 ## 6.1 不动的地方（想过，决定不动）
 
@@ -84,12 +87,13 @@
 | `stores/entry.ts` | **没有**（`side-panel` 是它唯一消费者）| **删掉** |
 | `features/world` 里"选中即开侧边"那段 | 没有（演示）| 删掉；`world` 本身搬成 `scaffold/routing` |
 | `components/{base,locale-switch,theme-toggle}` | **有**：设计体系的原语 · 平台的语言/主题控件（机制，不是页面）| 留 |
-| `routes/surface-layout.tsx`（`main`/`aside` 两个面）· `platform/shell.less` | **有**：壳是所有页面的住处，两面的能力是架构决定（`07-routing.md`）| 留（但**不提供导航内容**，导航由脚手架页自己传）|
+| `routes/surface-layout.tsx` 的 `main` 分支 · `platform/shell.less` | **有**：壳是所有页面的住处 | 留（但**不提供导航内容**，导航由脚手架页自己传）|
+| `surface-layout.tsx` 的 `aside` 分支 · `/side` 路由 · `platform/utils/surfaces.ts` 的 `side` | **没有**：它唯一的消费者是那个被删掉的侧边面板 | 本轮**一并删掉**（`07-routing.md` 记为"两面能力曾演示过，没有产品页面时撤掉，需要侧边时重新设计"）—— 免得留下一个永远空的 `aside` |
 
 ## 7. TODO（一轮做完）
 
 - [ ] 1. 建 `components/page/`；把导航件与 `nav.ts` 搬进 `features/scaffold/`；`surface-layout` 收导航槽位（不提供内容）
-- [ ] 1b. 删掉 `stores/{side-panel,entry}` 与其用例、`world` 的开侧边那段、`world.store.ts` 的过时注释；`/side` 改成 `/scaffold/side`
+- [ ] 1b. 删掉 `stores/{side-panel,entry}` 与其用例、`world` 的开侧边那段与三条用例、`world-panel.agent.*`、`share-url` 的 `sideEntity`、`surface-layout` 的 `aside` 分支与 `/side` 路由、`surfaces.ts` 的 `side`；清掉三处把它当"公共 store"的注释
 - [ ] 2. 建 `features/home` 占位页（版本信息）；搬目录：`hello → scaffold/overview`、`world/verify/data-check → scaffold/{routing,bridge,requests}`
 - [ ] 3. 删各页的 Header/Nav/返回按钮；`.less` 收编到 `page.less`
 - [ ] 4. 路由表与语言包（四语）改完
