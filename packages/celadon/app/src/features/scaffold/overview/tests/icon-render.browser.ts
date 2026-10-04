@@ -11,7 +11,7 @@ test('the icon sits on the text line and takes its colour from the theme', async
         const box = el?.getBoundingClientRect()
         return box ? (box.top + box.bottom) / 2 : null
       }
-      const button = document.querySelector('header.header > button')
+      const button = document.querySelector('header.header .header__actions button')
       const buttonIcon = button?.querySelector('svg.icon')
       const buttonText = button?.querySelector('span')
       const navLink = document.querySelector('nav.nav a.nav__link')
@@ -102,7 +102,7 @@ test('icons scale through the viewBox with a constant stroke, like the design pa
       }
     }
     return {
-      button: read('header.header > button svg.icon'),
+      button: read('header.header .header__actions button svg.icon'),
       nav: read('nav.nav a.nav__link svg.icon'),
       gallery: read('.overview__row svg.icon'),
       brand: read('.overview__row svg.brand-mark'),

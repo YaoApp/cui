@@ -15,3 +15,15 @@ test('the page surface covers the viewport, so no seam shows at the bottom', asy
 
   expect(Math.round(surface)).toBeGreaterThanOrEqual(viewport)
 })
+
+/* 窄窗口的回归：页头不换行时，「刷新」会被导航挤出可视区（2026-10-04 用户截图抓到）。 */
+test('the refresh button stays inside a narrow window', async ({ page }) => {
+  await page.setViewportSize({ width: 1080, height: 700 })
+  await page.goto('/app/scaffold')
+
+  const refresh = page.getByRole('button', { name: '刷新' })
+  await expect(refresh).toBeVisible()
+  const box = await refresh.boundingBox()
+  expect(box).not.toBeNull()
+  expect((box as { x: number; width: number }).x + (box as { x: number; width: number }).width).toBeLessThanOrEqual(1080)
+})

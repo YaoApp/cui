@@ -18,9 +18,11 @@ export function Header({ title, onRefresh, children }: HeaderProps) {
     <header className="header">
       <h1 className="header__title">{title}</h1>
       {children ? <div className="header__slot">{children}</div> : null}
-      <Button variant="soft" size="small" onClick={onRefresh}>
-        <Icon name="i-act-refresh" size={14} />{t('header.refresh')}
-      </Button>
+      <div className="header__actions">
+        <Button variant="soft" size="small" onClick={onRefresh}>
+          <Icon name="i-act-refresh" size={14} />{t('header.refresh')}
+        </Button>
+      </div>
     </header>
   )
 }

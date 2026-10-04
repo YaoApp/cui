@@ -1,24 +1,35 @@
 .header {
-  flex-wrap: wrap;
   display: flex;
+  flex-wrap: wrap;                       /* 窄窗口：允许换行，别把右侧动作挤出去 */
   align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-16);
+  gap: var(--spacing-8) var(--spacing-16);
   padding-block: var(--spacing-12);
   padding-inline: var(--spacing-16);
   background: var(--background-surface);
   border-block-end: var(--border-width) solid var(--border-subtle);
 
-  &__slot {
-    margin-inline-end: auto;
-  }
-
   &__title {
+    flex: none;                          /* 标题不缩 */
     margin: 0;
     line-height: var(--line-height-cjk);
     font-family: var(--font-family-ui);
     font-size: var(--font-size-subtitle);
     font-weight: var(--font-weight-strong);
     color: var(--text-primary);
+  }
+
+  &__slot {
+    flex: 1 1 auto;
+    min-inline-size: 0;                  /* 允许收缩，里面的导航自己换行 */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-8);
+  }
+
+  /* 右侧动作（刷新）钉在右端且不缩：导航再挤也不会把它推出可视区（2026-10-04 截图抓到） */
+  &__actions {
+    flex: none;
+    margin-inline-start: auto;
   }
 }
