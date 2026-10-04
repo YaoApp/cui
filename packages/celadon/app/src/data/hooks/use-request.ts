@@ -1,6 +1,6 @@
 /* **取数钩子**：`send()` 的 React 薄壳 —— 四态 · 取消 · 重跑，**唯一实现**（`05 §4`）。
  *
- * 只做"React 的那部分"：挂载时跑、卸载时取消、依赖变了重跑、晚到的结果丢掉。
+ * 只做"React 的那部分"：挂载时跑、卸载时取消、`key` 变了重跑、晚到的结果丢掉。
  * **取数本身在 `request/send.ts`**；**重试由调用方决定**（`17 §2.1`：策略在出口之上）。
  */
 
@@ -14,10 +14,12 @@ export type RequestState<T> =
   | { status: 'error'; failure: Failure }
 
 /** @param fetcher 收到 `AbortSignal`（转交给 `send()` 的 `signal`）
- *  @param key 这份数据的**身份**：变了就重跑（SWR / TanStack 同叫 `key`，也留作将来缓存的键）
- *  （叫 `fetcher` 是 SWR 的说法；TanStack 叫 `queryFn` —— 这里查询与提交共用，所以取前者那种中性词）
- *  @param options `manual: true` → **挂载不跑**，等调用方 `reload()`（提交/按钮那种用法）；
- *                  不传 → 挂载即跑（查询那种用法）。**两种都走这一个钩子**，别在外面直接 `send()`。 */
+ *  @param key 这份数据的**身份**：变了就重跑，也是将来缓存的键。
+ *  @param options `manual: true` → **挂载不跑**，等调用方 `reload()`；不传 → 挂载即跑。
+ *                  查询与提交都走这一个钩子。
+ *
+ *  **不做**：缓存 · 去重（同一份数据两处用由调用方提升共享）· 焦点/重连再取 · 乐观更新 ·
+ *  重试（重试是出口之上的策略，见 `17 §2.1`）。 */
 export function useRequest<T>(
   fetcher: (signal: AbortSignal) => Promise<Result<T>>,
   key: readonly unknown[],

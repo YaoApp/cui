@@ -44,7 +44,7 @@ export type Request<Input = void, Output = void> = {
   readonly output?: Output
 }
 
-/** 一次调用除**声明**之外的东西（业界同类：Node 的 `RequestOptions` · axios 的 `AxiosRequestConfig` · gRPC 的 `CallOptions`）。 */
+/** 一次调用除**声明**之外的东西）。 */
 export type RequestOptions<Input = void> = {
   /** **覆盖**偏好（语言 · 主题）—— 不传就是平台层的**当前值**（`currentPreferences()`），
    *  所以调用点只在要改的时候传这一项，平时不出现。 */
