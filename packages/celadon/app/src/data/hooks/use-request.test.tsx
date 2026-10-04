@@ -23,9 +23,18 @@ describe('useRequest', () => {
     const { result } = renderHook(() => useRequest(call, [], { manual: true }))
     expect(call).not.toHaveBeenCalled()
     expect(result.current.state.status).toBe('idle')
-    act(() => result.current.reload())
+    act(() => { void result.current.reload() })
     await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 'v' }))
     expect(call).toHaveBeenCalledTimes(1)
+  })
+
+  it('resolves its reload promise once the call settles', async () => {
+    const call = vi.fn(async () => ({ ok: true as const, value: 7 }))
+    const { result } = renderHook(() => useRequest(call, [], { manual: true }))
+    let settled: Promise<void> = Promise.resolve()
+    act(() => { settled = result.current.reload() })
+    await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 7 }))
+    await settled // 落定后 resolve（不悬）—— 且此时 state 已是新的 ✓
   })
 
   it('reports a failure as a value, never as a throw', async () => {

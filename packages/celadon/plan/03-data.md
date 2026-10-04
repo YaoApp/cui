@@ -137,7 +137,7 @@ app/src/
 | 0.2 | **列表 / 分页** | **已按引擎对齐**：标准键 `data, page, pagesize, pagecount, next, prev, total`（`yao/openapi/agent/assistant.go:184-195`）；chat 会话在 `group_by` 时给 `groups` 而非 `data` | `data/types.ts` + `utils/paginate.ts` | ✅ **已实现** |
 | 0.3 | **成功包裹** | 有没有信封；列表 `data` 与实体 `data` 怎么区分（旧：`result.data \|\| result` 反复兜）| 同上 | ⏸ |
 | 0.4 | **请求元数据（ctx）** | 语言 / 主题 / 客户端 / 服务怎么带 —— **由统一包装 `request/` 一处注入**：调用时**自动取平台当前值**（`platform/client/context.ts` 的 `currentPreferences()`，读 store，不依赖 React），**只有要覆盖时才传** `preferences`（旧：locale 走 query · `X-Yao-Accept` 头 · 三来源凑 CSRF，散在各处）| `data/request/context.ts`（+ `platform/`）|| ⏸ |
-| 0.5 | **取数与订阅钩子** | 四态（`idle/loading/ok/error`）· 取消 · 重跑的唯一实现；订阅按协议分两个 | `data/hooks/use-request.ts` | ✅ **已实现**（`use-sse` / `use-socket` **待 transport 两个接线**，见 0.6）|
+| 0.5 | **取数与订阅钩子** | 四态（`idle/loading/ok/error`）· 取消 · 重跑的唯一实现；`key` = 数据身份（SWR/TanStack 同名，将来缓存的键）· `reload(): Promise<void>`（**在 state 提交后** resolve，等待者 await 完即读到新值）；**查询与提交共用**（同一件事：发一次请求看结果；`manual: true` 即产品界的 `enabled: false`）——**有意与业界"分两个钩子"不同**，别拆；**不做**：缓存 · 去重（同一份数据两处用由调用方提升共享）· 焦点/重连再取 · 乐观更新 · 重试（策略在出口之上，`17 §2.1`）。订阅按协议分两个 | `data/hooks/use-request.ts` | ✅ **已实现**（`use-sse` / `use-socket` **待 transport 两个接线**，见 0.6）|
 | 0.6 | **出口接线** | 一切经 `platform/transport/`；上传/下载/SSE/WS 各归哪一档（`17 §2.2` 三档：`api`/`download`/`stream`）。**SSE 与 WS 同属 `stream` 档，但接线分两处**（见上表）| `platform/transport/{stream.ts,socket.ts}` | ⏸（卡 `17 §2.2` 两档未做）|
 | 0.7 | **类型的组织** | 一域一处；类型与方法同文件还是分开；子域（如 `agent/robot`）怎么放（旧：`<域>/types.ts` + `<域>/api.ts` + barrel，且**反向 import 页面层 6 处**）| `app/src/data/<域>/` | ⏸ |
 | 0.8 | **单条（详情）与列表的关系** | **单条不造壳**：服务端同样是 `{data:T}`，`unwrap` 就够；**列表行与详情是否分两个类型按域定**（引擎列表通常就是实体本身），**不预先抽象** | `data/types.ts`（注释）· 各域自己 | ✅ **已定** |
