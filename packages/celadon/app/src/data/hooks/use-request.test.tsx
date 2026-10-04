@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { useRequest } from './use-request'
 
@@ -16,6 +16,16 @@ describe('useRequest', () => {
     const { unmount } = renderHook(() => useRequest(call as never, []))
     unmount()
     expect(call.mock.calls[0][0].aborted).toBe(true)
+  })
+
+  it('waits to be asked when it is manual, and runs when asked', async () => {
+    const call = vi.fn(async () => ({ ok: true as const, value: 'v' }))
+    const { result } = renderHook(() => useRequest(call, [], { manual: true }))
+    expect(call).not.toHaveBeenCalled()
+    expect(result.current.state.status).toBe('idle')
+    act(() => result.current.reload())
+    await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 'v' }))
+    expect(call).toHaveBeenCalledTimes(1)
   })
 
   it('reports a failure as a value, never as a throw', async () => {

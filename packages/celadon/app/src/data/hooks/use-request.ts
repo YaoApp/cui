@@ -14,10 +14,13 @@ export type RequestState<T> =
   | { status: 'error'; failure: Failure }
 
 /** @param fetcher 收到 `AbortSignal`（转交给 `send()` 的 `signal`）· @param deps 依赖变了就重跑
- *  （叫 `fetcher` 是 SWR 的说法；TanStack 叫 `queryFn` —— 这里查询与提交共用，所以取前者那种中性词） */
+ *  （叫 `fetcher` 是 SWR 的说法；TanStack 叫 `queryFn` —— 这里查询与提交共用，所以取前者那种中性词）
+ *  @param options `manual: true` → **挂载不跑**，等调用方 `reload()`（提交/按钮那种用法）；
+ *                  不传 → 挂载即跑（查询那种用法）。**两种都走这一个钩子**，别在外面直接 `send()`。 */
 export function useRequest<T>(
   fetcher: (signal: AbortSignal) => Promise<Result<T>>,
   deps: readonly unknown[],
+  options?: { manual?: boolean },
 ): { state: RequestState<T>; reload: () => void } {
   const [state, setState] = useState<RequestState<T>>({ status: 'idle' })
   const [attempt, setAttempt] = useState(0)
@@ -26,6 +29,7 @@ export function useRequest<T>(
   fetcherRef.current = fetcher
 
   useEffect(() => {
+    if (options?.manual && attempt === 0) return // 手动模式：挂载不跑，等 reload()
     const controller = new AbortController()
     const id = ++latest.current
     setState({ status: 'loading' })
