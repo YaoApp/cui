@@ -15,6 +15,5 @@ export const logoutQuery = (): { key: readonly unknown[]; operation: () => Promi
     // 服务端吊销成功，但本机那把删不掉也要说 —— 否则页面显示"已退出"而凭据还在
     const cleared = await signOut()
     return cleared.ok ? result : cleared
-    return result
   },
 })

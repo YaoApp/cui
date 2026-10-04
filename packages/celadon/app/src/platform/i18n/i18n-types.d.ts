@@ -37,6 +37,7 @@ export type I18nKey =
   | 'bridge.error.theme.writeFailed'
   | 'bridge.error.tokenMissing'
   | 'bridge.error.transport.crossOrigin'
+  | 'bridge.error.transport.malformed'
   | 'bridge.error.transport.network'
   | 'bridge.error.transport.parse'
   | 'bridge.error.transport.status'
@@ -236,6 +237,7 @@ declare module 'i18next' {
         'bridge.error.theme.writeFailed': string
         'bridge.error.tokenMissing': string
         'bridge.error.transport.crossOrigin': string
+        'bridge.error.transport.malformed': string
         'bridge.error.transport.network': string
         'bridge.error.transport.parse': string
         'bridge.error.transport.status': string

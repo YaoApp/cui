@@ -95,5 +95,6 @@
   "verify.url": "URL",
   "verify.write": "書き込み",
   "client.bootFailed": "クライアントの初期化に失敗しました（{{code}}）",
-  "client.bootRetry": "再試行"
+  "client.bootRetry": "再試行",
+  "bridge.error.transport.malformed": "サーバーが解釈できない内容を返しました（{{url}}）"
 }

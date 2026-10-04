@@ -111,15 +111,15 @@ export function useRequest<Input = void, Output = void>(
     })
       .catch((error: unknown) => {
         // 出口自己吞掉失败，只有"响应不是 JSON"这种会抛到这里：也落成失败态，别让等待者悬着
-        settled.current = undefined
         if (id !== latest.current) return
+        settled.current = undefined
         setState({
           status: 'error',
           failure: {
-            code: 'transport.bad_response',
+            code: 'transport.malformed',
             params: {},
             message: error instanceof Error ? error.message : String(error),
-            text: failureText({ code: 'transport.bad_response', params: {}, message: '' }),
+            text: failureText({ code: 'transport.malformed', params: {}, message: '' }),
           },
         })
       })

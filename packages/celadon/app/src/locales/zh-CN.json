@@ -95,5 +95,6 @@
   "verify.url": "网址",
   "verify.write": "写",
   "client.bootFailed": "客户端初始化失败（{{code}}）",
-  "client.bootRetry": "重试"
+  "client.bootRetry": "重试",
+  "bridge.error.transport.malformed": "服务端回了看不懂的内容（{{url}}）"
 }

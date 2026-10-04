@@ -76,6 +76,7 @@ export function clientId(): string {
   }
 
   const id = newClientId()
+  primed = id // 写不进去（隐私模式 / 配额满）也要在本次会话里稳定
   remember(STORAGE_KEY, id)
   return id
 }
@@ -92,5 +93,5 @@ export function adoptMachineId(machine: string): string {
 
 /** 桌面重启后读到的就是机器码时，省掉一次宿主往返。 */
 export function storedMachineId(): string | undefined {
-  return storage()?.getItem(`${STORAGE_KEY}.machine`) ?? undefined
+  return recall(`${STORAGE_KEY}.machine`)
 }

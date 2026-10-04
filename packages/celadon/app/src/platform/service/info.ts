@@ -8,6 +8,7 @@
 
 import { fail, ok, type BridgeResult } from '../bridge/result'
 import { transportFetch } from '../transport/fetch'
+import { loadSession } from '../credential/session'
 import { loadServiceBase, serviceUrl } from './base'
 
 export type ServiceInfo = {
@@ -49,8 +50,12 @@ export function loadServiceInfo(timeoutMs?: number): Promise<BridgeResult<Servic
 }
 
 async function readServiceInfo(timeoutMs?: number): Promise<BridgeResult<ServiceInfo>> {
+const mine = generation
     // 桌面：基址在宿主手里 —— 先把地址取回来，再拼 well-known 的地址
     await loadServiceBase()
+    // 基址刚确定：这时 credentialKey 才算得出这个服务的凭据键，会话这时才读得出来
+    // （冷启动时入口读会话太早 —— 基址还没回来，键算不出来）
+    await loadSession()
   // **超时由调用方给**（17 §2.2：出口不替业务方定数字）
   const response = await transportFetch(serviceUrl('/.well-known/yao'), timeoutMs === undefined ? {} : { timeoutMs })
   if (!response.ok) return response
@@ -66,7 +71,7 @@ async function readServiceInfo(timeoutMs?: number): Promise<BridgeResult<Service
     return fail('service.malformed', `could not read the body: ${String(error)}`, {})
   }
   const parsed = parseServiceInfo(raw)
-  if (parsed.ok) cached = parsed.value
+  if (parsed.ok && mine === generation) cached = parsed.value
   return parsed
 }
 
@@ -76,10 +81,14 @@ export function serviceInfo(): ServiceInfo | undefined {
 }
 
 /** 只给测试用：清掉缓存。 */
+/** 代数：reset 一次加一；在飞的旧读数看到代数变了就不回写缓存。 */
+let generation = 0
+
 export function resetServiceInfo(): void {
   cached = undefined
+  inFlight = undefined
+  generation += 1
 }
-
 /** **根地址**：基址 + `well-known` 给的 `openapi` 前缀 —— **从内存拿**（读过才有）。
  *
  *  **没有 well-known 就不猜**（返回 `undefined`）：兜一个 `/v1` 只会把"还没读服务信息"这件事藏起来。 */
