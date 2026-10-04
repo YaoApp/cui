@@ -27,3 +27,16 @@ test('the refresh button stays inside a narrow window', async ({ page }) => {
   expect(box).not.toBeNull()
   expect((box as { x: number; width: number }).x + (box as { x: number; width: number }).width).toBeLessThanOrEqual(1080)
 })
+
+/* 页头属于外壳，必须横跨整宽：页面自己的根不许再加内边距（2026-10-04 截图抓到 routing 缩进了一层）。 */
+for (const path of ['/app/scaffold', '/app/scaffold/routing', '/app/scaffold/bridge', '/app/scaffold/requests']) {
+  test(`the header spans the full width on ${path}`, async ({ page }) => {
+    await page.setViewportSize({ width: 1080, height: 700 })
+    await page.goto(path)
+
+    const header = await page.locator('header.header').boundingBox()
+    expect(header).not.toBeNull()
+    expect(Math.round((header as { x: number }).x)).toBe(0)
+    expect(Math.round((header as { width: number }).width)).toBe(1080)
+  })
+}
