@@ -6,7 +6,6 @@
 
 import { client, type Preferences } from '@/platform/client'
 import { endpoint, loadServiceInfo } from '@/platform/service'
-import { signIn, signOut } from '@/platform/credential'
 import { transportFetch } from '@/platform/transport/fetch'
 import type { Result } from '../types'
 import { failure as buildFailure } from '../utils/failure'
@@ -38,9 +37,6 @@ export type Request<Input = void, Output = void> = {
   /** **这个接口固定要带的头**（如聊天域的标记头）—— 每次调用都带，不用调用方记。
    *  用标准的 `HeadersInit`：**同名重复可以表达**（元组数组 / `Headers.append`），**名字大小写不敏感**。 */
   headers?: HeadersInit
-  /** **这次成功后凭据怎么办**（`15 §4`）：`adopt` = 平台从响应体里收下令牌；`drop` = 丢掉本机凭据。
-   *  业务层不碰令牌字段 —— 收与丢都在出口一处完成。 */
-  session?: 'adopt' | 'drop'
   /** 只给类型看（运行时不带值） */
   readonly input?: Input
   /** 只给类型看（运行时不带值） */
@@ -124,9 +120,5 @@ export async function send<Input = void, Output = void>(
     }
     return { ok: false, ...buildFailure(response.value.status, body, `${request.method.toLowerCase()}_failed`) }
   }
-  const value = unwrap<Output>(await response.value.json())
-  // 凭据的**自动装填**：登录成功收下令牌，退出成功丢掉本机凭据（都由平台决定怎么存）
-  if (request.session === 'adopt') await signIn(value)
-  else if (request.session === 'drop') await signOut()
-  return { ok: true, value }
+  return { ok: true, value: unwrap<Output>(await response.value.json()) }
 }

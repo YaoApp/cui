@@ -32,9 +32,9 @@ function withQuery(path: string, query: Record<string, string | number | undefin
 }
 
 /** 测试登录（下发 3 个 HttpOnly Cookie）。 */
-export const loginWeb: Request<LoginAttempt, LoginResult> = { method: 'POST', path: '/test/login/web', session: 'adopt' }
+export const loginWeb: Request<LoginAttempt, LoginResult> = { method: 'POST', path: '/test/login/web' }
 /** 测试登录（回同样的形状，但**不下发 Cookie**）。 */
-export const loginToken: Request<LoginAttempt, LoginResult> = { method: 'POST', path: '/test/login/token', session: 'adopt' }
+export const loginToken: Request<LoginAttempt, LoginResult> = { method: 'POST', path: '/test/login/token' }
 /** 建服务端密钥（`key` 只显示一次）。 */
 export const createServerKey: Request<ServerKeyRequest, ServerKey> = { method: 'POST', path: '/test/server-key' }
 

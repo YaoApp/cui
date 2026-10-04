@@ -1,5 +1,8 @@
 import { credentialCarrier } from '@/platform/credential'
-import type { Request } from '@/data/request/send'
+import { signIn } from '@/platform/credential'
+import { send } from '@/data/request/send'
+import { keyOf } from '@/data/request/invalidate'
+import type { Result } from '@/data/types'
 import type { LoginAttempt, LoginResult } from './types'
 /* **`test` 的 query 收口**：一行一个接口，把 key 与声明配成一对给调用方。
  *
@@ -36,9 +39,16 @@ export const readCaptchaQuery = (query: CaptchaLookup) => ({
   request: readCaptcha(query),
 })
 
-/** **统一的登录动作**：怎么登录由数据层决定 —— 凭据由本机持有时走回令牌的那条端点，
- *  否则走服务端写 Cookie 的那条。业务层只认识"登录"，不认识端点与令牌。 */
-export const loginQuery = (): { key: readonly unknown[]; request: Request<LoginAttempt, LoginResult> } =>
-  credentialCarrier() === 'os-store'
-    ? { key: testKeys.loginToken(), request: loginToken }
-    : { key: testKeys.loginWeb(), request: loginWeb }
+/** **应用的登录**：怎么登录由数据层决定 —— 按凭据载体选端点；成功后把响应体交给平台收令牌
+ *  （平台按载体判：本机存凭据就存，Cookie 载体什么都不做）。业务层只认识"登录"这一个动作。 */
+export const loginQuery = (): { key: readonly unknown[]; operation: (input?: LoginAttempt) => Promise<Result<LoginResult>> } => {
+  const request = credentialCarrier() === 'os-store' ? loginToken : loginWeb
+  return {
+    key: keyOf(request),
+    operation: async (input) => {
+      const result = await send(request, input === undefined ? {} : { body: input })
+      if (result.ok) await signIn(result.value)
+      return result
+    },
+  }
+}

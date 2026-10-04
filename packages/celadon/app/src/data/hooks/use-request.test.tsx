@@ -117,3 +117,18 @@ describe('what run() hands back', () => {
     await expect(answered).resolves.toMatchObject({ ok: true, value: 'v' })
   })
 })
+
+describe('an action as the source', () => {
+  it('runs the operation, reports its result, and never goes through send', async () => {
+    const operation = vi.fn(async () => ({ ok: true as const, value: 'from-operation' }))
+    const { result } = renderHook(() => useRequest({ key: ['action', 'sign-in'], operation }, { manual: true }))
+
+    act(() => {
+      void result.current.run()
+    })
+
+    await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 'from-operation' }))
+    expect(operation).toHaveBeenCalledTimes(1)
+    expect(send).not.toHaveBeenCalled()
+  })
+})

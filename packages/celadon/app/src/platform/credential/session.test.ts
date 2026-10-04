@@ -33,6 +33,8 @@ describe('the session credential', () => {
     expect(sessionAuthorization()).toBe('Bearer fresh-token')
     expect(await signOut()).toMatchObject({ ok: true, value: true })
     expect(credential.remove).toHaveBeenCalledWith('http://a:5099#session')
+    // 续期那条也要清：退出后库里不留任何能换新令牌的东西
+    expect(credential.remove).toHaveBeenCalledWith('http://a:5099#refresh')
     expect(sessionAuthorization()).toBeUndefined()
   })
 

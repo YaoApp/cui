@@ -160,12 +160,14 @@
 - **出口要同步拿**：这里留一份**内存镜像**（启动读一次，写时同步更新），`sessionAuthorization()` 直接给值。
 - **忘记这台服务**：删掉该 origin 下**所有用途**的凭据（不是只删 `session`）；删之前由调用方先吊销服务端会话。
 - **平台不认 URL**：刷新怎么发由数据层声明，刷新能力由应用启动时注入（`setSessionRefresher`）。
-- **凭据自动装填**：登录成功与退出成功**不需要业务层交令牌**。声明上标一个 `session: 'adopt' | 'drop'`
-  （`data/request/send.ts` 的 `Request`），出口在**成功解包裹之后**把这一个响应体交给平台 ——
-  `adopt` 由平台从响应体里取 `access_token` / `refresh_token` 存进载体，`drop` 丢掉本机凭据；
-  载体是 Cookie 时 `adopt` 自然是空操作。**怎么登录由数据层决定**：按 `credentialCarrier()`
-  选端点（本机持凭据走回令牌那条，否则走服务端写 Cookie 的那条），业务层只调一个 `login`
-  （例外：`data-check` 那个**测试模式页**仍按按钮分别试两个端点 —— 它是诊断页，不是应用的登录入口）。
+- **凭据自动装填**：登录成功与退出成功**不需要业务层交令牌**。收与丢各自归**动作**，不挂在声明上：
+  - **登录动作**（数据层，如 `data/test` 的 `loginQuery`）：按 `credentialCarrier()` 选端点（本机持凭据走回令牌那条，
+    否则走服务端写 Cookie 的那条），成功后把响应体交给平台 —— 平台按载体判：本机存凭据就收下令牌，
+    Cookie 载体什么都不做（服务端已下发）。
+  - **退出动作**（`data/user` 的 `logoutQuery`）：先让服务端吊销（Web 的 Cookie 随响应清掉），成功后让平台
+    **清本机凭据**（`session` 与 `refresh` 两条；Cookie 载体什么都不做）。
+  - 其它接口与凭据无关。业务层只认识"登录 / 退出"两个动作。
+    用例：`data/test/queries.test.ts` 与 `platform/credential/session.test.ts`。
 
 ## 5. 客户端（web / desktop）
 

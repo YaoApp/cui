@@ -68,9 +68,14 @@ export async function signIn(payload: unknown): Promise<BridgeResult<boolean>> {
 export async function signOut(): Promise<BridgeResult<boolean>> {
   cached = undefined
   loaded = true
-  const name = keyOfSession()
-  if (!name || !credential.managedByApp()) return ok(true)
-  return credential.remove(name)
+  if (!credential.managedByApp()) return ok(true)
+  let dropped = true
+  for (const name of [keyOfSession(), credentialKey(REFRESH_PURPOSE)]) {
+    if (!name) continue
+    const gone = await credential.remove(name)
+    if (!gone.ok) dropped = false
+  }
+  return ok(dropped)
 }
 
 /** 忘记这台服务：把这个 origin 下的凭据**逐条删掉**（`<origin>#…`）。 */

@@ -40,13 +40,20 @@ export type RequestOptions<Input> = {
 export type RequestSource<Input, Output> =
   | Request<Input, Output>
   | { key: readonly unknown[]; request: Request<Input, Output> }
+  /** **动作**：自己发请求，可能还要让平台做点事（如登录成功后收下令牌）。key 必给。 */
+  | { key: readonly unknown[]; operation: (input?: Input) => Promise<Result<Output>> }
 
 export function useRequest<Input = void, Output = void>(
   source: RequestSource<Input, Output>,
   options: RequestOptions<Input> = {},
 ): { state: RequestState<Output>; run: (body?: Input) => Promise<Result<Output> | undefined>; reset: () => void } {
-  const request = 'request' in source ? source.request : source
-  const declaredKey = 'request' in source ? source.key : undefined
+  const operation = 'operation' in source ? source.operation : undefined
+  const request: Request<Input, Output> | undefined = operation
+    ? undefined
+    : 'request' in source
+      ? source.request
+      : (source as Request<Input, Output>)
+  const declaredKey = 'request' in source || 'operation' in source ? source.key : undefined
   const [state, setState] = useState<RequestState<Output>>({ status: 'idle' })
   const [attempt, setAttempt] = useState(0)
   const latest = useRef(0)
@@ -55,6 +62,8 @@ export function useRequest<Input = void, Output = void>(
   const settled = useRef<Result<Output> | undefined>(undefined)
   const requestRef = useRef(request)
   requestRef.current = request
+  const operationRef = useRef(operation)
+  operationRef.current = operation
   // `options.body` 是默认包体；`run(body)` 为这一次覆盖它。身份没变就不覆盖 `run` 的选择。
   const bodyRef = useRef<Input | undefined>(options.body)
   const defaultBodyRef = useRef(options.body)
@@ -62,7 +71,7 @@ export function useRequest<Input = void, Output = void>(
     defaultBodyRef.current = options.body
     bodyRef.current = options.body
   }
-  const key = options.key ?? declaredKey ?? keyOf(request)
+  const key = options.key ?? declaredKey ?? (request ? keyOf(request) : [])
   const keyRef = useRef(key)
   keyRef.current = key
 
@@ -84,10 +93,13 @@ export function useRequest<Input = void, Output = void>(
     // 每次跑之前登记：失效侧按同一套 key 前缀命中就再跑一次（unmount 时注销）
     const unsubscribe = subscribe(keyRef.current, () => { void run() })
     setState({ status: 'loading' })
-    void send(requestRef.current, {
-      ...(bodyRef.current === undefined ? {} : { body: bodyRef.current }),
-      signal: controller.signal,
-    }).then((result) => {
+    const answer = operationRef.current
+      ? operationRef.current(bodyRef.current)
+      : send(requestRef.current as Request<Input, Output>, {
+          ...(bodyRef.current === undefined ? {} : { body: bodyRef.current }),
+          signal: controller.signal,
+        })
+    void answer.then((result) => {
       settled.current = result
       if (id !== latest.current) return // 晚到的结果丢掉（依赖已变或已卸载）
       setState(result.ok
