@@ -9,14 +9,13 @@
 <!--
   登录界面（login 状态）· 静态设计稿，与产品同构：类名、文案来源、尺寸档都照产品来。
 
-  · 本页**不含交互脚本**：只做视觉，页面上没有评审控件。
-    主题由平台层的偏好决定：浅色即本页原样；深色是同一个页面加 `data-theme="dark"`（tokens.less 的暗色作用域），
-    截图时也可在浏览器侧注入该属性。本页只放设计体系那句"跟随系统"的一行（与 design/index.html 同一写法），
-    这不是交互。
-  · 文案取自 design/i18n/*.json 的 ui.entry.*（此处写 zh-CN 的成品字）；
-    产品实现时由语言包与平台层提供，本页只呈现字面。
-  · LOGO 用正版标记文件 ../logo-mark-celadon.svg（结构与颜色是该文件的唯一来源，本页不重绘、不改色）。
-  · 颜色 / 间距 / 字号 / 圆角 / 描边 / 阴影一律取 token（见 ../AGENTS.md）；唯一局部变量是卡片宽度。
+  版式参照 LobeHub 的登录页（2026-10-05 实拍比对）：**不用卡片**，表单直接落在页面底上、留白放大；
+  第三方登录在最上、整宽软底；一条「或」分隔；语言与主题收到**底部左侧**，条款在底部右侧；LOGO 小号在左上。
+
+  · 不含交互脚本（只放设计体系那句"跟随系统"的一行）；主题由平台偏好决定：深色即同一页加 `data-theme="dark"`。
+  · 文案取自 design/i18n/*.json 的 ui.entry.*；LOGO 用正版标记 ../logo-mark-celadon.svg。
+  · 颜色 / 间距 / 字号 / 圆角 / 描边 / 阴影一律取 token（见 ../AGENTS.md）。
+  · 第三方名单由入口配置（`/user/entry`）决定；品牌图标尚未进图标集，先用整宽文字按钮。
 -->
 <style>
 * { box-sizing: border-box; }
@@ -30,39 +29,36 @@ body {
   background: var(--background-app);
   -webkit-font-smoothing: antialiased;
 }
-:root { --auth-card: 384px; }   /* 局部：登录卡片宽度；进产品时归 token */
+:root { --auth-col: 400px; }   /* 局部：表单列宽；进产品时归 token */
 
-/* 版面：整屏居中；背景是极轻的品牌晕染，帮助视觉落点，不抢内容 */
-.screen {
-  min-block-size: 100%;
-  display: grid;
-  place-items: center;
-  padding: var(--spacing-48) var(--spacing-24);
-  background:
-    radial-gradient(120% 90% at 50% -10%, var(--brand-soft) 0%, transparent 62%),
-    var(--background-app);
-}
+/* 版面：三段式 —— 左上 LOGO · 中间表单 · 底部工具行 */
+.page { min-block-size: 100%; display: flex; flex-direction: column; padding: var(--spacing-24) var(--spacing-24) var(--spacing-16); }
+.top { display: flex; align-items: center; gap: var(--spacing-8); }
+.top__mark { inline-size: 28px; block-size: auto; display: block; }
+.top__name { font-size: var(--font-size-caption); font-weight: var(--font-weight-medium); color: var(--text-secondary); letter-spacing: var(--letter-spacing-latin); }
 
-/* 卡片 */
-.auth {
-  inline-size: min(100%, var(--auth-card));
-  padding: var(--spacing-48) var(--spacing-32) var(--spacing-32);
-  background: var(--background-content);
-  border: var(--border-width) solid var(--border-subtle);
-  border-radius: var(--radius-large);
-  box-shadow: var(--shadow-floating);
-}
+.main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-block: var(--spacing-48); }
+.form { inline-size: min(100%, var(--auth-col)); }
 
-/* 品牌区：正版标记 + 产品名 */
-.lockup { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-12); margin-block-end: var(--spacing-32); }
-.lockup__mark { inline-size: 52px; block-size: auto; display: block; }
-.lockup__name { font-size: var(--font-size-body-lg); font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin); color: var(--text-primary); }
-
-/* 标题 */
 .title { margin: 0 0 var(--spacing-4); font-size: var(--font-size-title); font-weight: var(--font-weight-strong); line-height: var(--line-height-tight); text-align: center; }
 .lead { margin: 0 0 var(--spacing-32); color: var(--text-secondary); font-size: var(--font-size-caption); text-align: center; }
 
-/* 字段：标签顶对齐；输入走设计类 `.input`，这里只补布局与尾部按钮位置 */
+/* 第三方：整宽、软底、无描边（参照 LobeHub） */
+.providers { display: grid; gap: var(--spacing-8); margin-block-end: var(--spacing-24); }
+.provider { display: flex; align-items: center; justify-content: center; gap: var(--spacing-8);
+            min-block-size: var(--row-height); padding-inline: var(--spacing-16);
+            background: var(--background-field); color: var(--text-primary);
+            border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-medium);
+            font: inherit; font-size: var(--font-size-body); cursor: pointer; }
+.provider:hover { background: var(--background-hover); }
+.provider:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* 「或」分隔 */
+.or { display: flex; align-items: center; gap: var(--spacing-12); margin: 0 0 var(--spacing-24);
+      color: var(--text-tertiary); font-size: var(--font-size-11); }
+.or::before, .or::after { content: ''; flex: 1; block-size: var(--border-width); background: var(--border-subtle); }
+
+/* 字段：标签顶对齐；输入走设计类 `.input` */
 .field { margin-block-end: var(--spacing-16); }
 .field__label { display: block; margin-block-end: var(--spacing-4); font-size: var(--font-size-label); font-weight: var(--font-weight-medium); color: var(--text-secondary); }
 .field__control { position: relative; display: flex; align-items: center; }
@@ -74,109 +70,95 @@ body {
 .field__trail:hover { color: var(--text-secondary); }
 .field__trail:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
-/* 记住我 + 创建账号 */
 .row { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-8); margin-block: 0 var(--spacing-24); }
 .check { display: inline-flex; align-items: center; gap: var(--spacing-8); font-size: var(--font-size-caption); color: var(--text-secondary); }
 .check input { inline-size: 16px; block-size: 16px; accent-color: var(--brand); }
 
-/* 主按钮：布局与尺寸档照产品 `components/base/button`，配色与四态走设计类 `.btn-primary` */
+/* 主按钮：布局与尺寸档照产品 `components/base/button`，配色走设计类 `.btn-primary is-solid` */
 .button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-8);
           white-space: nowrap; cursor: pointer; font-family: var(--font-family-ui);
           font-weight: var(--font-weight-medium); line-height: var(--line-height-cjk);
-          border-radius: var(--radius-medium);
-          transition: background-color var(--duration-fast) var(--easing-standard),
-                      border-color var(--duration-fast) var(--easing-standard); }
+          border-radius: var(--radius-medium); }
 .button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-body); }
 .button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
-/* 右上角：主题与语言。主题用设计类 `.seg`（与产品组件同一套），语言用基础件下拉的视觉（设计类 `.input`） */
-.corner { position: fixed; inset-block-start: var(--spacing-16); inset-inline-end: var(--spacing-16);
-          display: flex; align-items: center; gap: var(--spacing-8); }
-.corner select.input { inline-size: auto; min-block-size: var(--spacing-32); padding-block: 0; font-size: var(--font-size-caption); }
-
-/* 第三方登录：分隔线 + 等宽按钮 */
-.or { display: flex; align-items: center; gap: var(--spacing-12); margin-block: var(--spacing-24) var(--spacing-16);
-      color: var(--text-tertiary); font-size: var(--font-size-11); }
-.or::before, .or::after { content: ''; flex: 1; block-size: var(--border-width); background: var(--border-subtle); }
-.providers { display: grid; gap: var(--spacing-8); }
-.providers .button { min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-body); }
-.providers .button + .button { margin: 0; }
-
-/* 页脚：分隔 + 版本与版权（视觉收口） */
-.foot { margin-block-start: var(--spacing-32); padding-block-start: var(--spacing-16);
-        border-block-start: var(--border-width) solid var(--border-subtle);
-        display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-8);
-        color: var(--text-tertiary); font-size: var(--font-size-11); }
-.foot__mark { color: var(--text-tertiary); letter-spacing: var(--letter-spacing-latin); }
+/* 底部工具行：左语言 + 主题，右条款 */
+.bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-16); flex-wrap: wrap; }
+.tools { display: flex; align-items: center; gap: var(--spacing-8); }
+.tools select.input { inline-size: auto; min-block-size: var(--spacing-32); padding-block: 0; font-size: var(--font-size-caption); }
+.legal { display: flex; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
+.legal a { color: var(--text-tertiary); }
 </style>
 </head>
 <body>
-<div class="corner">
-  <!-- 主题：产品里是 `components/theme-toggle`（设计类 .seg，选中项 .is-on）。这里按浅色设计，故「浅色」为选中 -->
-  <span class="seg theme-toggle" role="group" aria-label="主题">
-    <button type="button" class="is-on" aria-pressed="true">浅色</button>
-    <button type="button" aria-pressed="false">暗色</button>
-  </span>
-  <!-- 语言：产品里是基础件下拉，视觉走设计类 .input；选项用各语言的母语写法，「跟随系统」为一等选项 -->
-  <select class="input" aria-label="语言">
-    <option selected>跟随系统（中文）</option>
-    <option>简体中文</option>
-    <option>繁體中文</option>
-    <option>English</option>
-    <option>日本語</option>
-  </select>
-</div>
+<div class="page">
 
-<div class="screen">
-  <main class="auth" aria-labelledby="auth-title">
+  <header class="top">
+    <img class="top__mark" src="../logo-mark-celadon.svg" alt="" width="28" height="24">
+    <span class="top__name">Yao Agents</span>
+  </header>
 
-    <div class="lockup">
-      <img class="lockup__mark" src="../logo-mark-celadon.svg" alt="" width="52" height="44">
-      <span class="lockup__name">Yao Agents</span>
-    </div>
+  <main class="main">
+    <div class="form">
+      <h1 class="title">登录</h1>
+      <p class="lead">用账号继续。没有账号会自动创建。</p>
 
-    <h1 class="title" id="auth-title">登录</h1>
-    <p class="lead">用账号继续。</p>
+      <!-- 第三方：名单由入口配置决定；品牌图标尚未进图标集，先用整宽文字按钮 -->
+      <div class="providers">
+        <button class="provider" type="button">使用 GitHub 继续</button>
+        <button class="provider" type="button">使用 Google 继续</button>
+      </div>
 
-    <form>
-      <div class="field">
-        <label class="field__label" for="account">账号</label>
-        <div class="field__control">
-          <input class="input" id="account" name="account" type="text" autocomplete="username"
-                 inputmode="email" autocapitalize="off" spellcheck="false" placeholder="邮箱或手机号">
+      <p class="or">或继续使用</p>
+
+      <form>
+        <div class="field">
+          <label class="field__label" for="account">账号</label>
+          <div class="field__control">
+            <input class="input" id="account" name="account" type="text" autocomplete="username"
+                   inputmode="email" autocapitalize="off" spellcheck="false" placeholder="邮箱或手机号">
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label class="field__label" for="password">密码</label>
-        <div class="field__control field__control--trail">
-          <input class="input" id="password" name="password" type="password" autocomplete="current-password" placeholder="请输入密码">
-          <button class="field__trail" type="button">显示</button>
+        <div class="field">
+          <label class="field__label" for="password">密码</label>
+          <div class="field__control field__control--trail">
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" placeholder="请输入密码">
+            <button class="field__trail" type="button">显示</button>
+          </div>
         </div>
-      </div>
 
-      <div class="row">
-        <label class="check"><input type="checkbox" checked>记住我</label>
-        <a class="link" href="./register.html">创建账号</a>
-      </div>
+        <div class="row">
+          <label class="check"><input type="checkbox" checked>记住我</label>
+          <a class="link" href="./register.html">创建账号</a>
+        </div>
 
-      <button class="button button--block btn-primary is-solid" type="submit">登录</button>
-    </form>
-
-    <!-- 第三方登录：名单由入口配置（`/user/entry` 的 form / oauth 段）决定，这里先两名占位；
-         品牌图标尚未进图标集，先用文字按钮 -->
-    <p class="or">或</p>
-    <div class="providers">
-      <button class="button btn-ghost" type="button">使用 GitHub 继续</button>
-      <button class="button btn-ghost" type="button">使用 Google 继续</button>
+        <button class="button button--block btn-primary is-solid" type="submit">登录</button>
+      </form>
     </div>
-
-    <div class="foot">
-      <span class="foot__mark">Celadon 2.0</span>
-      <span>© 2026 Yao Agents</span>
-    </div>
-
   </main>
+
+  <footer class="bottom">
+    <div class="tools">
+      <select class="input" aria-label="语言">
+        <option selected>跟随系统（中文）</option>
+        <option>简体中文</option>
+        <option>繁體中文</option>
+        <option>English</option>
+        <option>日本語</option>
+      </select>
+      <span class="seg theme-toggle" role="group" aria-label="主题">
+        <button type="button" class="is-on" aria-pressed="true">浅色</button>
+        <button type="button" aria-pressed="false">暗色</button>
+      </span>
+    </div>
+    <div class="legal">
+      <a class="link" href="#">服务条款</a>
+      <span>·</span>
+      <a class="link" href="#">隐私政策</a>
+    </div>
+  </footer>
+
 </div>
 </body>
 </html>
