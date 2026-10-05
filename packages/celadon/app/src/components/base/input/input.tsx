@@ -14,12 +14,15 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   /** 右侧附加内容（例如密码的可见性切换），对应原型里的 `.field__trail`。 */
   trailing?: ReactNode
   className?: string
+  /** 静态态：把设计类的 `is-*` 直接写在控件本体上，供清单页与设计稿并排展示同一个控件的多种状态。
+      真实交互仍由伪类驱动，这里只解决"一张图上要同时看到多态"的问题。 */
+  state?: 'hover' | 'focus' | 'error' | 'loading'
 }
 
 /* 行为与无障碍（受控值 · 键盘 · 禁用 · 表单联动）交给 Base UI 的 Field 与 Input；
    视觉照设计：字段是 `.field` 容器加 `.input` 本体，左右两个槽位，颜色与间距一律取 token。
    用户名、邮箱与密码都用它，靠 `type` 与校验规则区分。 */
-export function Input({ id, label, hint, error, icon, trailing, className, disabled, ...rest }: InputProps) {
+export function Input({ id, label, hint, error, icon, trailing, className, disabled, state, ...rest }: InputProps) {
   const hintId = hint ? `${id}-hint` : undefined
   const errorId = error ? `${id}-error` : undefined
   const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined
@@ -41,7 +44,17 @@ export function Input({ id, label, hint, error, icon, trailing, className, disab
             {icon}
           </span>
         ) : null}
-        <BaseInput id={id} className="input" disabled={disabled} aria-describedby={describedBy} {...rest} />
+        <BaseInput
+          id={id}
+          /* 状态类必须落在控件本体上：设计类的规则都写在 `.input` 上，
+             加在字段框上不会生效（错误态曾经因此没有红边）。 */
+          className={['input', error ? 'is-error' : null, state ? `is-${state}` : null]
+            .filter(Boolean)
+            .join(' ')}
+          disabled={disabled}
+          aria-describedby={describedBy}
+          {...rest}
+        />
         {trailing ? <span className="field__trail">{trailing}</span> : null}
       </div>
       {/* 消息位始终存在并占一行：没有消息时留空。

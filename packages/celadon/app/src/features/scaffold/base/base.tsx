@@ -87,6 +87,61 @@ export function BasePage() {
           />
         </div>
 
+        {/* 状态齐：默认 · 悬停 · 焦点 · 禁用 · 错误 · 加载 · 空，一态一个样例。
+            悬停与焦点用设计类的静态态（真实交互由伪类驱动），错误用字段自身的错误态，
+            禁用用真实属性，空态只留占位符。 */}
+        <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
+        <div className="base-grid">
+          <Input
+            id="demo-state-default"
+            label="default"
+            value={account}
+            onChange={(e) => setAccount(e.target.value)}
+          />
+          <Input
+            id="demo-state-hover"
+            label="is-hover"
+            state="hover"
+            value={account}
+            onChange={(e) => setAccount(e.target.value)}
+          />
+          <Input
+            id="demo-state-focus"
+            label="is-focus"
+            state="focus"
+            value={account}
+            onChange={(e) => setAccount(e.target.value)}
+          />
+          <Input
+            id="demo-state-disabled"
+            label="disabled"
+            value="not editable"
+            onChange={() => {}}
+            disabled
+          />
+          <Input
+            id="demo-state-error"
+            label="is-error"
+            state="error"
+            value={account}
+            onChange={(e) => setAccount(e.target.value)}
+          />
+          <Input
+            id="demo-state-loading"
+            label="is-loading"
+            state="loading"
+            value={account}
+            onChange={(e) => setAccount(e.target.value)}
+          />
+          <Input
+            id="demo-state-empty"
+            label="empty"
+            placeholder="empty"
+            value=""
+            onChange={() => {}}
+          />
+        </div>
+
         {/* 带消息的样例单独一组：同一行里不混有消息与没消息的字段，行高就不会参差 */}
         <h3 className="base-subgroup__title">{t('base.sub.messages')}</h3>
         <div className="base-grid">

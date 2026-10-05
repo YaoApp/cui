@@ -84,6 +84,57 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(await icons.count()).toBeGreaterThanOrEqual(4)
   await expect(page.getByRole('img', { name: 'Yao Agents' })).toBeVisible()
 
+  /* 输入：七个状态逐个有样例，静态态类与错误态都要真的改变被绘制元素的样式，不能只看类名 */
+  const stateIds = [
+    'demo-state-default',
+    'demo-state-hover',
+    'demo-state-focus',
+    'demo-state-disabled',
+    'demo-state-error',
+    'demo-state-loading',
+    'demo-state-empty',
+  ]
+  for (const id of stateIds) {
+    await expect(page.locator(`#${id}`)).toBeVisible()
+  }
+
+  const borderOf = (id: string) =>
+    page.locator(`#${id}`).evaluate((el) => getComputedStyle(el).borderTopColor)
+  const bgOf = (id: string) =>
+    page.locator(`#${id}`).evaluate((el) => getComputedStyle(el).backgroundColor)
+  const colorOf = (id: string) => page.locator(`#${id}`).evaluate((el) => getComputedStyle(el).color)
+
+  const [defaultBorder, hoverBorder, focusBorder, stateErrorBorder] = await Promise.all([
+    borderOf('demo-state-default'),
+    borderOf('demo-state-hover'),
+    borderOf('demo-state-focus'),
+    borderOf('demo-state-error'),
+  ])
+  expect(hoverBorder).not.toBe(defaultBorder)
+  expect(focusBorder).not.toBe(defaultBorder)
+  expect(stateErrorBorder).not.toBe(defaultBorder)
+  expect(stateErrorBorder).not.toBe(hoverBorder)
+
+  const [defaultBg, disabledBg] = await Promise.all([
+    bgOf('demo-state-default'),
+    bgOf('demo-state-disabled'),
+  ])
+  expect(disabledBg).not.toBe(defaultBg)
+  await expect(page.locator('#demo-state-disabled')).toBeDisabled()
+
+  const [defaultText, loadingText] = await Promise.all([
+    colorOf('demo-state-default'),
+    colorOf('demo-state-loading'),
+  ])
+  expect(loadingText).not.toBe(defaultText)
+
+  await expect(page.locator('#demo-state-empty')).toHaveValue('')
+  await expect(page.locator('#demo-state-empty')).toHaveAttribute('placeholder', 'empty')
+
+  /* 错误态的类必须落在控件本体上：曾加在字段框上，设计类的红边因此不生效 */
+  await expect(errorField).toHaveClass(/is-error/)
+  expect(await borderOf('demo-error')).not.toBe(defaultBorder)
+
   /* 浅色与暗色成对，按设计红线各出一张 */
   await shot(page, 'light')
   await page.emulateMedia({ colorScheme: 'dark' })
