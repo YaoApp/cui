@@ -45,6 +45,8 @@ body {
 .picker-wrap { margin-block-end: var(--spacing-16); }
 .spinner { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; border: 2px solid var(--border-default);
            border-block-start-color: transparent; border-radius: 50%; animation: button-spin 0.7s linear infinite; }
+/* 选择器与输入框的边界：沿用原值（--border-subtle），**未有意弱化** —— 档位待
+   tokens.less 定清"软件内页用哪一档"后跟随；记录见 plan/07-design-review-entry.md §4.1。 */
 .picker { inline-size: 100%; min-block-size: 56px; display: flex; align-items: center; gap: var(--spacing-8);
           padding: var(--spacing-8) var(--spacing-12); text-align: start; cursor: pointer;
           border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-medium);
