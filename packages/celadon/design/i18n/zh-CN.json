@@ -99,10 +99,10 @@
       "customHint": "填写完整服务器地址（含协议）",
       "registerHelper": "部分服务器为邀请制，需要邀请码才能注册。可前往站点申请。",
       "registerLink": "前往注册申请邀请码",
-      "customOption": "自定义",
+      "customOption": "自托管",
       "serverApac": "Yao Agents 官方亚太",
       "serverCn": "Yao Agents 官方中国",
-      "customDesc": "自己托管的服务器，填入地址即可连接"
+      "customDesc": "连接你自己部署的 Yao Engine 服务器"
     },
     "inbox": {
       "unreadCount": "{count} 未读",

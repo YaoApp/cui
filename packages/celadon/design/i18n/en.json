@@ -99,10 +99,10 @@
       "customHint": "Enter the full server address, scheme included",
       "registerHelper": "Some servers are invite-only and need a code to sign up. You can request one on the site.",
       "registerLink": "Request an invitation code",
-      "customOption": "Custom",
+      "customOption": "Self-hosted",
       "serverApac": "Yao Agents official · Asia Pacific",
       "serverCn": "Yao Agents official · China",
-      "customDesc": "A server you host yourself — point it at your own address"
+      "customDesc": "Connect to a Yao Engine server you run yourself"
     },
     "inbox": {
       "unreadCount": "{count} unread",

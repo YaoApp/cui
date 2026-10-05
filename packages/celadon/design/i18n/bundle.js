@@ -101,10 +101,10 @@ window.CELADON_I18N = {
         "customHint": "Enter the full server address, scheme included",
         "registerHelper": "Some servers are invite-only and need a code to sign up. You can request one on the site.",
         "registerLink": "Request an invitation code",
-        "customOption": "Custom",
+        "customOption": "Self-hosted",
         "serverApac": "Yao Agents official · Asia Pacific",
         "serverCn": "Yao Agents official · China",
-        "customDesc": "A server you host yourself — point it at your own address"
+        "customDesc": "Connect to a Yao Engine server you run yourself"
       },
       "inbox": {
         "unreadCount": "{count} unread",
@@ -878,10 +878,10 @@ window.CELADON_I18N = {
         "customHint": "完全なサーバーアドレスを入力してください（スキームを含む）",
         "registerHelper": "一部のサーバーは招待制で、登録に招待コードが必要です。サイトで申請できます。",
         "registerLink": "招待コードを申請する",
-        "customOption": "カスタム",
+        "customOption": "セルフホスト",
         "serverApac": "Yao Agents 公式・アジア太平洋",
         "serverCn": "Yao Agents 公式・中国",
-        "customDesc": "自分でホストするサーバー。アドレスを入力して接続します"
+        "customDesc": "自分で運用している Yao Engine サーバーに接続します"
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1655,10 +1655,10 @@ window.CELADON_I18N = {
         "customHint": "填写完整服务器地址（含协议）",
         "registerHelper": "部分服务器为邀请制，需要邀请码才能注册。可前往站点申请。",
         "registerLink": "前往注册申请邀请码",
-        "customOption": "自定义",
+        "customOption": "自托管",
         "serverApac": "Yao Agents 官方亚太",
         "serverCn": "Yao Agents 官方中国",
-        "customDesc": "自己托管的服务器，填入地址即可连接"
+        "customDesc": "连接你自己部署的 Yao Engine 服务器"
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2432,10 +2432,10 @@ window.CELADON_I18N = {
         "customHint": "填寫完整伺服器位址（含協定）",
         "registerHelper": "部分伺服器為邀請制，需要邀請碼才能註冊。可前往站點申請。",
         "registerLink": "前往註冊申請邀請碼",
-        "customOption": "自訂",
+        "customOption": "自託管",
         "serverApac": "Yao Agents 官方亞太",
         "serverCn": "Yao Agents 官方中國",
-        "customDesc": "自行託管的伺服器，填入位址即可連接"
+        "customDesc": "連接你自己部署的 Yao Engine 伺服器"
       },
       "inbox": {
         "unreadCount": "{count} 未讀",
