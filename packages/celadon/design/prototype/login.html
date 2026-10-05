@@ -98,7 +98,7 @@ body {
 .or::before, .or::after { content: ''; flex: 1; block-size: var(--border-width); background: var(--border-subtle); }
 
 /* 单输入框：无 label，说明在 placeholder；前导图标住在框内 */
-.field { position: relative; display: flex; align-items: center; flex-wrap: wrap; margin-block-end: var(--spacing-16); }
+.field { position: relative; display: flex; align-items: center; margin-block-end: var(--spacing-16); }
 .field__icon { position: absolute; inset-inline-start: var(--spacing-12); inline-size: var(--spacing-16); block-size: var(--spacing-16);
                display: block; color: var(--text-placeholder); pointer-events: none; }
 /* 输入框：本页先用**低对比档**边界（--border-control-low，观感轻）；
@@ -133,6 +133,13 @@ body {
 /* 禁用态：一眼看得出不可点（底色/字色/描边都走禁用档，光标 not-allowed） */
 .button--inverse:disabled { background: var(--background-disabled); color: var(--text-disabled);
                             border-color: var(--border-disabled); cursor: not-allowed; }
+/* 主按钮内部：横向居中的 inline-flex，便于放加载环 */
+.button--block { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-8); }
+/* 加载动画：按钮内的旋转环（纯 CSS，不引图片） */
+.button.is-loading::before { content: ''; inline-size: 14px; block-size: 14px; flex: none;
+  border: 2px solid currentColor; border-block-start-color: transparent; border-radius: 50%;
+  animation: button-spin 0.7s linear infinite; }
+@keyframes button-spin { to { transform: rotate(360deg); } }
 
 /* 错误态：出错的控件自己变色（输入框边界→危险色；复选框边界→危险色、标签→危险文字色），
    错误行紧贴控件下方：小图标 + 危险色文字，左对齐。 */
@@ -140,7 +147,7 @@ body {
 .field.is-error .field__label { color: var(--danger-ink); }
 .terms.is-error input[type='checkbox'] { border-color: var(--danger); }
 .terms.is-error label { color: var(--danger-ink); }
-.error-line { flex-basis: 100%; display: flex; align-items: flex-start; gap: var(--spacing-4); margin: var(--spacing-4) 0 0;
+.error-line { display: flex; align-items: flex-start; gap: var(--spacing-4); margin: var(--spacing-4) 0 var(--spacing-12);
               color: var(--danger-ink); font-size: var(--font-size-13); text-align: start; }
 .error-line .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; margin-block-start: 2px; }
 :lang(zh-CN) .error-line, :lang(zh-TW) .error-line, :lang(ja) .error-line { font-size: var(--font-size-minimum-cjk); }
@@ -248,7 +255,7 @@ body {
           <span data-i18n="errTerms">Please read and agree to the terms first.</span>
         </p>
 
-        <button class="button button--block button--inverse" type="submit" id="next" data-i18n="next" disabled>Next</button>
+        <button class="button button--block button--inverse" type="submit" id="next" data-i18n="next">Next</button>
       </form>
 
       <p class="footnote"><span data-i18n="noAccount">Don&apos;t have an account?</span> <a class="link" href="./register.html" data-i18n="signUpNow">Sign up now</a></p>
@@ -319,12 +326,10 @@ const emailError = document.createElement('p')
 emailError.className = 'error-line'
 emailError.hidden = true
 emailError.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-state-error"></use></svg><span></span>'
-accountField.append(emailError)
+accountField.after(emailError)   /* 放在字段之后：字段自身仍是原来的形状，图标不会被挤歪 */
 const errorText = (key) => { emailError.querySelector('span').textContent = dictOf(lang)[key] || key }
 
-const syncNext = () => { nextBtn.disabled = emailInput.value.trim() === '' }
 emailInput.addEventListener('input', () => {
-  syncNext()
   emailInput.classList.remove('is-error')
   accountField.classList.remove('is-error')
   emailError.hidden = true
@@ -350,13 +355,12 @@ document.querySelector('form').addEventListener('submit', async (event) => {
     termsBox.focus()
     return
   }
+  nextBtn.classList.add('is-loading')     /* 只有 checking 期间不可点 */
   nextBtn.disabled = true
   nextBtn.textContent = dictOf(lang).nextBusy || 'Checking…'
   await new Promise((resolve) => setTimeout(resolve, 2400))
   location.href = './register.html'
 })
-syncNext()
-
 applyLang('en')
 /* 首屏：跟随系统（head 里那一行已设好 data-theme），图标与选中态据此初始化 */
 applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')
