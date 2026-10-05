@@ -58,7 +58,7 @@ body {
 
 /* 菜单：浮层（token 的层级/圆角/阴影） */
 .menu { position: absolute; inset-block-start: calc(100% + var(--spacing-4)); inset-inline-end: 0;
-        min-inline-size: 176px; padding: var(--spacing-4); z-index: var(--z-base);
+        min-inline-size: 176px; padding: var(--spacing-4); z-index: var(--z-overlay);
         background: var(--background-surface); border: var(--border-width) solid var(--border-default);
         border-radius: var(--radius-large); box-shadow: var(--shadow-overlay); }
 .menu[hidden] { display: none; }
@@ -72,8 +72,8 @@ body {
 .menu .icon { inline-size: 16px; block-size: 16px; display: block; flex: none; color: var(--text-secondary); }
 
 /* 卡片 */
-.stage { flex: 1; display: grid; place-items: center; padding-block: var(--spacing-32); }
-.card { inline-size: min(100%, var(--auth-card)); padding: var(--spacing-32) var(--spacing-24) var(--spacing-32);
+.stage { flex: 1; display: grid; place-items: center; align-content: center; padding-block: var(--spacing-32); }
+.card { position: relative; inline-size: min(100%, var(--auth-card)); padding: var(--spacing-32) var(--spacing-24) var(--spacing-32);
         background: var(--background-content); border: var(--border-width) solid var(--border-subtle);
         border-radius: var(--radius-large); box-shadow: var(--shadow-subtle); }
 /* 标题两行：每行一个块；字号用新加的 24 档 */
@@ -162,6 +162,36 @@ body {
 /* 底行：条款 */
 .bottom { display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
 .bottom a { color: var(--text-tertiary); }
+/* 客户端内模式（?from=connect）：不展示品牌区与服务协议，控件与服务器选择页同位置（卡片下方居中） */
+body.is-client .brand { display: none; }
+body.is-client .terms { display: none; }
+body.is-client .bottom { display: none; }   /* 页脚条款同样不展示 */
+body.is-client .ctrl-wrap { margin-block-start: var(--spacing-24); }
+body.is-client .ctrl-wrap { position: relative; }
+/* 客户端内菜单向上展开、按内容收窄、水平居中（与服务器选择页一致） */
+body.is-client .menu { inset-block-start: auto; inset-block-end: calc(100% + var(--spacing-4));
+                       inset-inline-start: 50%; inset-inline-end: auto; transform: translateX(-50%);
+                       inline-size: max-content; min-inline-size: 160px; }
+body.is-client .ctrl { justify-content: center; }   /* 与服务器选择页一致：卡片下方居中 */
+body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inline-start: 50%; transform: translateX(-50%); }
+/* 客户端内：卡片顶部的「返回服务器选择」与当前服务器（静态展示） */
+/* 客户端内：横条与卡片同属一个区域，间距由容器的 gap 决定 */
+.client-stack { display: grid; gap: var(--spacing-12); inline-size: min(100%, var(--auth-card)); }
+.client-bar { display: none; align-items: center; justify-content: space-between; gap: var(--spacing-8); }
+body.is-client .client-bar { display: flex; }
+.client-back { display: inline-flex; align-items: center; gap: var(--spacing-4); color: var(--text-primary);
+               font-size: var(--font-size-13); text-decoration: none; }
+.client-back:hover { color: var(--brand-ink); }
+.client-back .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
+/* 当前服务器：角标形态（带底色的胶囊），文字用最深一档，比纯文本醒目 */
+/* 当前服务器：与返回入口同一行，右侧，仅加粗文字 */
+.client-server { display: inline-flex; align-items: center; gap: var(--spacing-4); margin-inline-start: auto;
+                 margin-inline-end: var(--spacing-12);   /* 右端略向内收 */
+                 color: var(--text-primary); font-size: var(--font-size-13); font-weight: var(--font-weight-heavy);
+                 min-inline-size: 0; }
+.client-server__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--font-weight-medium); }
+:lang(zh-CN) .client-back, :lang(zh-TW) .client-back, :lang(ja) .client-back,
+:lang(zh-CN) .client-server, :lang(zh-TW) .client-server, :lang(ja) .client-server { font-size: var(--font-size-minimum-cjk); }
 </style>
 </head>
 <body>
@@ -170,6 +200,7 @@ body {
   <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
   <symbol id="i-state-error" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-pc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" x2="16" y1="21" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" x2="12" y1="17" y2="21" stroke="currentColor" stroke-width="2"/></symbol>
@@ -200,14 +231,18 @@ body {
       <button type="button" role="menuitemradio" data-lang="en">English</button>
       <button type="button" role="menuitemradio" data-lang="ja">日本語</button>
     </div>
-
-    <div class="menu" id="theme-menu" role="menu" hidden style="inset-inline-end:0">
-      <button type="button" role="menuitemradio" data-theme="light"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"></use></svg><span data-i18n="themeLight">Light</span></button>
-      <button type="button" role="menuitemradio" data-theme="dark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"></use></svg><span data-i18n="themeDark">Dark</span></button>
-    </div>
   </header>
 
   <div class="stage">
+    <div class="client-bar" id="client-bar">
+        <a class="client-back" href="./servers.html">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+          <span data-i18n="backToServers">Back to servers</span>
+        </a>
+        <span class="client-server">
+          <span class="client-server__name" id="client-server-name"></span>
+        </span>
+      </div>
     <main class="card" aria-labelledby="auth-title">
       <h1 class="title" id="auth-title">
         <span class="title__line" data-i18n="entryTitle">Sign up or sign in to your</span>
@@ -284,6 +319,7 @@ function applyLang(next) {
   /* 值为空串也要写进去：某些语言的标题不换行，第二行必须被清空 */
   document.querySelectorAll('[data-i18n]').forEach((el) => { const v = dict[el.dataset.i18n]; if (v !== undefined) el.textContent = v })
   document.querySelectorAll('[data-i18n-ph]').forEach((el) => { const v = dict[el.dataset.i18nPh]; if (v) el.placeholder = v })
+  if (typeof renderClientBar === 'function') renderClientBar()   /* 名称跟随语言 */
   document.getElementById('lang-label').textContent = { system: '跟随系统（中文）', 'zh-CN': '简体中文', 'zh-TW': '繁體中文', en: 'English', ja: '日本語' }[lang]
   document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.classList.toggle('is-on', b.dataset.lang === lang))
 }
@@ -292,7 +328,6 @@ function applyTheme(next) {
   theme = next === 'dark' ? 'dark' : 'light'      /* 菜单只有 Light / Dark 两项；首屏默认跟随系统 */
   document.documentElement.dataset.theme = theme
   document.getElementById('theme-icon').setAttribute('href', theme === 'dark' ? '#i-moon' : '#i-sun')
-  document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.classList.toggle('is-on', b.dataset.theme === theme))
 }
 
 function toggleMenu(id, open) {
@@ -305,14 +340,15 @@ function toggleMenu(id, open) {
 }
 
 document.getElementById('lang-btn').addEventListener('click', () => toggleMenu('lang-menu'))
-document.getElementById('theme-btn').addEventListener('click', () => toggleMenu('theme-menu'))
+document.getElementById('theme-btn').addEventListener('click', (e) => {
+  e.stopPropagation(); applyTheme(theme === 'dark' ? 'light' : 'dark')
+})
 document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.addEventListener('click', () => { applyLang(b.dataset.lang); toggleMenu('lang-menu', false) }))
-document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.addEventListener('click', () => { applyTheme(b.dataset.theme); toggleMenu('theme-menu', false) }))
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.ctrl, .menu')) { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
+  if (!event.target.closest('.ctrl, .menu')) { toggleMenu('lang-menu', false) }
 })
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
+  if (event.key === 'Escape') { toggleMenu('lang-menu', false) }
 })
 
 
@@ -349,7 +385,7 @@ document.querySelector('form').addEventListener('submit', async (event) => {
     emailInput.focus()
     return
   }
-  if (!termsBox.checked) {
+  if (!isClient && !termsBox.checked) {
     document.querySelector('.terms').classList.add('is-error')
     termsError.hidden = false
     termsBox.focus()
@@ -359,8 +395,52 @@ document.querySelector('form').addEventListener('submit', async (event) => {
   nextBtn.disabled = true
   nextBtn.textContent = dictOf(lang).nextBusy || 'Checking…'
   await new Promise((resolve) => setTimeout(resolve, 2400))
-  location.href = './register.html'
+  location.href = isClient ? './register.html?from=connect' : './register.html'
 })
+/* 客户端内模式：从 Connect 跳来（?from=connect）——收起品牌区与协议，控件移到卡片下方 */
+/* 客户端内（?from=connect）：角标 + 返回入口 + 控件；独立页一律不生效 */
+const isClient = new URLSearchParams(location.search).has('from')
+
+if (isClient) {
+  document.body.classList.add('is-client')
+  const card = document.querySelector('.card')
+  const bar = document.getElementById('client-bar')
+  const tag = document.querySelector('.client-server')
+
+  if (card && bar && tag) {
+    const stack = document.createElement('div')          /* 横条与卡片同一区域 */
+    stack.className = 'client-stack'
+    card.before(stack)
+    stack.append(bar)
+    stack.append(card)
+  }
+
+  const ctrl = document.querySelector('.ctrl')
+  const langMenu = document.getElementById('lang-menu')
+  const anchor = document.querySelector('.client-stack') || card
+  if (ctrl && anchor) {
+    const wrap = document.createElement('div')           /* 控件独立容器：卡下 24、居中 */
+    wrap.className = 'ctrl-wrap'
+    ctrl.replaceWith(wrap)
+    wrap.append(ctrl)
+    if (langMenu) wrap.append(langMenu)
+    anchor.after(wrap)
+  }
+
+  const signUp = document.querySelector('a[href="./register.html"]')
+  if (signUp) signUp.setAttribute('href', './register.html?from=connect')
+}
+
+/* 角标里的名称：走语言包，跟随语言切换 */
+function renderClientBar() {
+  if (!isClient) return
+  const nameEl = document.getElementById('client-server-name')
+  if (!nameEl) return
+  const key = new URLSearchParams(location.search).get('server') || 'serverApac'
+  const dict = dictOf(lang)
+  nameEl.textContent = key === 'custom' ? dict.customOption : (dict[key] || dict.serverApac)
+}
+
 applyLang('en')
 /* 首屏：跟随系统（head 里那一行已设好 data-theme），图标与选中态据此初始化 */
 applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')
