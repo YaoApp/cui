@@ -392,6 +392,7 @@ body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desk
 .panel-toggle:hover { background: var(--background-hover); color: var(--text-primary); }
 .panel-toggle:focus { outline: none; }
 .panel-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+/* 方向按语义：图标原形是「竖条 + 左箭头」（往左收），做「打开右栏」需镜像成右箭头 */
 .panel-toggle .icon { transform: scaleX(-1); }
 .page { position: relative; }
 </style>
