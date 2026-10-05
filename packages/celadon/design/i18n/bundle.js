@@ -75,7 +75,7 @@ window.CELADON_I18N = {
         "themeAuto": "Auto",
         "themeLight": "Light",
         "themeDark": "Dark",
-        "entryTitleLine2": "YaoAgents account"
+        "entryTitleLine2": "Yao Agents account"
       },
       "inbox": {
         "unreadCount": "{count} unread",

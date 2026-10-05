@@ -8,7 +8,7 @@
 <script src="../i18n/bundle.js"></script>
 <!--
   入口页（login 状态）· 静态设计稿 = 产品形态。默认语言为英文，默认文案：
-    Sign up or sign in to your YaoAgents account
+    Sign up or sign in to your Yao Agents account
 
   版式照参照图：一张卡片居中；卡内依次为标题 · 第三方（Google / GitHub，真品牌图标）· OR 分隔 ·
   **单个输入框**（无 label，说明写在 placeholder 里）· 协议勾选 · 近黑反白主按钮 · 卡下引导；
@@ -70,7 +70,7 @@ body {
         background: var(--background-content); border: var(--border-width) solid var(--border-subtle);
         border-radius: var(--radius-large); box-shadow: var(--shadow-subtle); }
 /* 标题两行：每行一个块；字号用新加的 24 档 */
-.title { margin: 0 0 var(--spacing-32); font-size: var(--font-size-28); font-weight: var(--font-weight-strong); line-height: var(--line-height-title); }
+.title { margin: 0 0 var(--spacing-32); font-size: var(--font-size-28); font-weight: var(--font-weight-strong); line-height: var(--line-height-normal); }
 .title__line { display: block; }
 .title__line:empty { display: none; }   /* 某些语言标题不换行：空行收起 */
 
@@ -175,7 +175,7 @@ body {
     <main class="card" aria-labelledby="auth-title">
       <h1 class="title" id="auth-title">
         <span class="title__line" data-i18n="entryTitle">Sign up or sign in to your</span>
-        <span class="title__line" data-i18n="entryTitleLine2">YaoAgents account</span>
+        <span class="title__line" data-i18n="entryTitleLine2">Yao Agents account</span>
       </h1>
 
       <div class="providers">
