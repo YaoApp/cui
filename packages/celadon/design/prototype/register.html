@@ -89,7 +89,7 @@ body {
 
 /* 卡片 */
 .stage { flex: 1; display: grid; place-items: center; align-content: center; padding-block: var(--spacing-32); }
-.card { inline-size: min(100%, var(--auth-card)); padding: var(--spacing-32) var(--spacing-24) var(--spacing-32);
+.card { position: relative; inline-size: min(100%, var(--auth-card)); padding: var(--spacing-32) var(--spacing-24) var(--spacing-32);
         background: var(--background-content); border: var(--border-width) solid var(--border-subtle);
         border-radius: var(--radius-large); box-shadow: var(--shadow-subtle); }
 /* 标题两行：每行一个块；字号用新加的 24 档 */
@@ -169,15 +169,16 @@ body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inl
 /* 客户端内：卡片顶部的「返回服务器选择」与当前服务器（静态展示） */
 /* 客户端内：横条与卡片同属一个区域，间距由容器的 gap 决定 */
 .client-stack { display: grid; gap: var(--spacing-12); inline-size: min(100%, var(--auth-card)); }
-.client-bar { display: none; align-items: center; justify-content: space-between; gap: var(--spacing-8); }
+.client-bar { display: none; align-items: center; gap: var(--spacing-8); }
 body.is-client .client-bar { display: flex; }
 .client-back { display: inline-flex; align-items: center; gap: var(--spacing-4); color: var(--text-primary);
                font-size: var(--font-size-13); text-decoration: none; }
 .client-back:hover { color: var(--brand-ink); }
 .client-back .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
 /* 当前服务器：角标形态（带底色的胶囊），文字用最深一档，比纯文本醒目 */
-/* 当前服务器：标签（tag）形态 —— 描边 + 浅底 + 小圆角，贴右缘 */
-.client-server { display: inline-flex; align-items: center; gap: var(--spacing-4); padding: var(--spacing-4) var(--spacing-8);
+/* 当前服务器：标签叠在卡片右上（骑住卡顶边） */
+.client-server { position: absolute; inset-block-start: calc(var(--spacing-12) * -1); inset-inline-end: var(--spacing-16);
+                 display: inline-flex; align-items: center; gap: var(--spacing-4); padding: var(--spacing-4) var(--spacing-8);
                  border: var(--border-width) solid var(--border-default); border-radius: var(--radius-small);
                  background: var(--background-surface); color: var(--text-primary);
                  font-size: var(--font-size-13); min-inline-size: 0; }
