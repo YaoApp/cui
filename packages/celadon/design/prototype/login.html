@@ -100,7 +100,16 @@ body {
 /* 协议 */
 .terms { display: flex; gap: var(--spacing-8); align-items: flex-start; margin-block: 0 var(--spacing-16);
          font-size: var(--font-size-13); color: var(--text-secondary); }
-.terms input { inline-size: 16px; block-size: 16px; margin-block-start: 3px; flex: none; accent-color: var(--brand); }
+/* 复选框：原生控件的未选中边框无法改，故用 appearance:none 自己画（边框走 low 档，与输入框同一档）。
+   产品实现时这里应是一个基础件 Checkbox（设计体系暂无该类）。 */
+.terms input[type='checkbox'] { appearance: none; -webkit-appearance: none;
+  inline-size: var(--spacing-16); block-size: var(--spacing-16); margin-block-start: 2px; flex: none;
+  border: var(--border-width) solid var(--border-control-low); border-radius: var(--radius-xs);
+  background: var(--background-surface); cursor: pointer; }
+.terms input[type='checkbox']:checked { background: var(--brand); border-color: var(--brand); }
+.terms input[type='checkbox']:checked::after { content: ''; display: block; inline-size: 4px; block-size: 8px;
+  margin: 1px auto 0; border: solid var(--background-surface); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.terms input[type='checkbox']:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .terms a { color: var(--brand-ink); }
 
 /* 主按钮：近黑反白（照参照图） */
