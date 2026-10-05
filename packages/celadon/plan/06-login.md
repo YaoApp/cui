@@ -48,29 +48,23 @@
 
 ## 2. 第二步：接口准备（用啥写啥）
 
-在 `data/user` 域内按现有域形状（`types` · `api` · `keys` · `queries` · `index`）补齐入口一线上真正会用到的声明，不预置用不到的端点。
+**状态：已完成**（2026-10-05）。产物 `app/src/data/user/`（`types` · `api` · `keys` · `queries` · `index`），
+域内说明见 [`README.md`](../app/src/data/user/README.md)（英文）与 [`README.zh-CN.md`](../app/src/data/user/README.zh-CN.md)（中文）。
 
-| 声明 | 用途 | 说明 |
-| --- | --- | --- |
-| `entryConfig` | `GET /user/entry` | 惰性读取一次；失败不缓存 |
-| `entryVerify` | `POST /user/entry/verify` | 返回临时令牌与 `status` |
-| `entryRegister` | `POST /user/entry/register` | 请求头带临时令牌 |
-| `entryLogin` | `POST /user/entry/login` | 请求头带临时令牌 |
-| `entryOtp` | `POST /user/entry/otp` | 重发验证码 |
-| `entryCaptcha` | `GET /user/entry/captcha` | 仅在配置要求时使用 |
-| `entryInvite` | `POST /user/entry/invite/verify` | 仅在配置要求邀请码时使用 |
-| `logout` | `POST /user/logout` | 已存在 |
-| `oauthAuthorize` · `oauthCallback` | `POST /user/oauth/:id/authorize` · `/callback` | **本轮做**；第三方登录（Google · GitHub · Apple） |
-| `deviceAuthorize` · `deviceToken` | 设备码流（1.0 的 `/device/authorize` · `/device/token`）| **本轮做**；设备授权页与轮询 |
-| `oidcKeys` | OIDC 公钥（JWKS）| **用于 ID Token 验签**；接口现已具备 |
+**真实清单（13 条，路径以 1.0 源码与服务端 handler 为准）**：
 
-**规则**：
+| 组 | 声明 |
+| --- | --- |
+| 入口 | `entryConfig`(GET `/user/entry`) · `entryVerify` · `entryRegister` · `entryLogin` · `entryOtp` · `entryCaptcha` · `entryInvite` · `logout` |
+| 第三方 | `oauthAuthorize`(GET `/user/oauth/:id/authorize`) · `oauthCallback`(POST) |
+| 设备码 | `deviceAuthorize`(POST `/oauth/device/authorize`) · `deviceFlowStart` · `deviceFlowToken`(POST `/user/oauth/:providerId/device/authorize|token`) |
+| 验签 | `oidcKeys`(GET `/oauth/jwks`) |
 
-1. 临时令牌走 `Request.headers` 的 `Authorization`，不进凭据库；成功后的正式令牌交给 `signIn`（它只在应用托管凭据时采纳，Web 由服务端写 Cookie）。
-2. 失败以值返回，`code` 与 `params` 由语言包翻成界面文案；引擎原文不上屏。
-3. 入口配置与验证码响应的字段一律进类型，页面不猜字段名。
-4. 端点的取舍以 §1 草图确定的交互为准；**OAuth 与设备码流本轮要做**，草图随之补相应入口与页面。
-5. **ID Token 在客户端验签**（§5 已定）：用 `oidcKeys` 取公钥验签，失败按 §2 规则 2 以值返回，不上屏引擎原文。
+**规则**：临时令牌经 `RequestOptions.headers`，不进凭据库；失败以值返回、按码翻译；
+语言由 ctx 统一带（域层不传 query `locale`）；端点的取舍以 §1 草图为基准，OAuth 与设备码流本轮做。
+
+**验证**：单元 fixture（真实响应体）+ 浏览器层 15 步活体走查（同域代理 → dev 后端），
+`api`/`keys`/`queries` 覆盖率四项 100%；五条成功分支当前配置不可达，已用带来源标注的 fixture 记录。
 
 ## 3. 第三步：页面实现（登录与注册分开）
 
