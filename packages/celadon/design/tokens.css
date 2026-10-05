@@ -606,6 +606,9 @@
   /* 空态：占位 */
   /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
   /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
+  /* 错误是持续状态：悬停与聚焦都不改变边框色，聚焦时描边取危险色。
+       规则必须带上悬停与聚焦的变体并写在它们之后，否则会被权重更高的悬停规则盖掉，
+       表现为"鼠标一进来红边就没了、聚焦时红边配品牌描边"。 */
   /* 加载态：值仍然可读，右侧指示位由调用方放指示器 */
 }
 .celadon .input::placeholder,
@@ -644,9 +647,19 @@
   border-color: var(--border-hover-strong);
 }
 .celadon .input.is-error,
-[data-theme] .celadon .input.is-error {
+[data-theme] .celadon .input.is-error,
+.celadon .input.is-error:not(:disabled):hover,
+[data-theme] .celadon .input.is-error:not(:disabled):hover,
+.celadon .input.is-error:focus,
+[data-theme] .celadon .input.is-error:focus,
+.celadon .input.is-error.is-hover,
+[data-theme] .celadon .input.is-error.is-hover,
+.celadon .input.is-error.is-focus,
+[data-theme] .celadon .input.is-error.is-focus {
   border-color: var(--danger);
 }
+.celadon .input.is-error:focus,
+[data-theme] .celadon .input.is-error:focus,
 .celadon .input.is-error.is-focus,
 [data-theme] .celadon .input.is-error.is-focus {
   box-shadow: 0 0 0 1px var(--danger);

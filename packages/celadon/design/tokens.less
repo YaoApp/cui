@@ -392,7 +392,15 @@
     /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
     &.is-strong { border-color: var(--border-control-strong);
       &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover-strong); } }
-    &.is-error { border-color: var(--danger); }
+    /* 错误是持续状态：悬停与聚焦都不改变边框色，聚焦时描边取危险色。
+       规则必须带上悬停与聚焦的变体并写在它们之后，否则会被权重更高的悬停规则盖掉，
+       表现为"鼠标一进来红边就没了、聚焦时红边配品牌描边"。 */
+    &.is-error,
+    &.is-error:not(:disabled):hover,
+    &.is-error:focus,
+    &.is-error.is-hover,
+    &.is-error.is-focus { border-color: var(--danger); }
+    &.is-error:focus,
     &.is-error.is-focus { box-shadow: 0 0 0 1px var(--danger); }
     &:disabled, &.is-disabled { background: var(--background-disabled); color: var(--text-disabled);
       border-color: var(--border-disabled); cursor: not-allowed;

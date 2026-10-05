@@ -135,8 +135,37 @@ test('lists the five groups and their states', async ({ page }) => {
   await expect(errorField).toHaveClass(/is-error/)
   expect(await borderOf('demo-error')).not.toBe(defaultBorder)
 
+  /* 错误是持续状态：悬停不改红边，聚焦描边取危险色而不是品牌色。
+     曾出现"鼠标一进来红边消失、聚焦时红边配品牌描边"，根因是悬停规则的权重高于错误规则。 */
+  const errorIdle = await borderOf('demo-state-error')
+  await page.locator('#demo-state-error').hover()
+  expect(await borderOf('demo-state-error')).toBe(errorIdle)
+
+  await page.locator('#demo-error').focus()
+  expect(await borderOf('demo-error')).toBe(errorIdle)
+  const errorShadow = await page
+    .locator('#demo-error')
+    .evaluate((el) => getComputedStyle(el).boxShadow)
+  expect(errorShadow).toContain(stateErrorBorder)
+
+  /* 正常字段的悬停仍按悬停色变化，证明上面的规则只作用于错误态 */
+  await page.mouse.move(4, 4)
+  await page.locator('#demo-state-default').hover()
+  expect(await borderOf('demo-state-default')).toBe(hoverBorder)
+
   /* 浅色与暗色成对，按设计红线各出一张 */
   await shot(page, 'light')
   await page.emulateMedia({ colorScheme: 'dark' })
+
+  /* 暗色下同一条规则同样成立：错误边框不因悬停改变，且与正常字段的边框不同 */
+  await page.mouse.move(4, 4)
+  const [darkDefault, darkError] = await Promise.all([
+    borderOf('demo-state-default'),
+    borderOf('demo-state-error'),
+  ])
+  expect(darkError).not.toBe(darkDefault)
+  await page.locator('#demo-state-error').hover()
+  expect(await borderOf('demo-state-error')).toBe(darkError)
+
   await shot(page, 'dark')
 })
