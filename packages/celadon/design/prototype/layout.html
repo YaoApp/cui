@@ -187,6 +187,13 @@ body.is-client .content-header, body.is-client .panel-header { padding-inline-st
 /* 面板内容超出列轨时应可滚动，而不是被裁掉（mock 里 overflow:hidden 是为固定尺寸演示） */
 .panel-body { overflow: auto; }
 .nav, .panel { overflow: hidden auto; }
+/* 窗口左上控制区：红绿灯在最左（系统约定），收起键在右；与内容顶行（--column-header-height）居中对齐 */
+body.is-client .window-controls { inset-block-start: 0; block-size: var(--column-header-height);
+  align-items: center; gap: var(--spacing-8); }
+body.is-client .window-controls .traffic-lights { position: static; display: flex; gap: var(--spacing-8); }
+/* 收起状态：导航所在列轨 0 → --nav-default（客户端里点击收起键切换） */
+body.is-client.is-nav-open .window { grid-template-columns: var(--nav-default) minmax(var(--center-min), 1fr) var(--side-width-reading); }
+body.is-client.is-nav-open .nav { visibility: visible; }
 </style>
 </head>
 <body class="celadon">
@@ -565,8 +572,14 @@ body.is-client .content-header, body.is-client .panel-header { padding-inline-st
   var host = document.createElement('div')
   host.className = 'window-controls'
   host.innerHTML = '<span class="traffic-lights"><i></i><i></i><i></i></span>' +
-    '<span class="icon-button" title="Collapse"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-collapse"></use></svg></span>'
+    '<button class="icon-button" type="button" id="nav-toggle" title="Collapse" aria-expanded="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-collapse"></use></svg></button>'
   win.prepend(host)
+  var toggle = document.getElementById('nav-toggle')
+  toggle.addEventListener('click', function () {
+    var open = document.body.classList.toggle('is-nav-open')
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false')
+    toggle.setAttribute('title', open ? 'Collapse' : 'Expand')
+  })
 })()
 </script>
 </body>
