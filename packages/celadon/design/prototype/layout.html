@@ -241,6 +241,10 @@ body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform:
 .nav ::-webkit-scrollbar-thumb, .nav::-webkit-scrollbar-thumb { background: var(--border-default);
   border-radius: var(--radius-pill); border: 2px solid transparent; background-clip: padding-box; }
 .nav ::-webkit-scrollbar-thumb:hover, .nav::-webkit-scrollbar-thumb:hover { background: var(--border-control); background-clip: padding-box; }
+/* 导航里的固定行不参与高度压缩：顶行（< > 与收起键所在）、品牌行、分隔线始终等高，
+   高度不够时只让菜单区与内容区各自滚动。 */
+.nav > .navigation-header, .nav > .brand, .nav > .navigation-separator { flex: none; }
+.nav > .navigation-header { block-size: var(--column-header-height); }
 </style>
 </head>
 <body class="celadon">
