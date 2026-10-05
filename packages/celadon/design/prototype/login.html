@@ -38,7 +38,7 @@ body {
 /* 顶行：左 LOGO；右语言与主题（照参照图：文字 + 分隔线 + 图标，点开是菜单） */
 .top { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-16); position: relative; }
 .brand { display: flex; align-items: center; gap: var(--spacing-8); }
-.brand__mark { inline-size: 26px; block-size: auto; display: block; }
+.brand__mark { inline-size: var(--spacing-32); block-size: auto; display: block; }
 /* 产品名：大号 + **例外**的品牌渐变（体系里唯一允许渐变文字的地方，用标记自身的渐变 token；
    浅暗同版，与 logo-mark-celadon.svg 的渐变一致）。 */
 .brand__name { font-size: var(--font-size-18); font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin);
@@ -146,7 +146,7 @@ body {
 
   <header class="top">
     <span class="brand">
-      <img class="brand__mark" src="../logo-mark-celadon.svg" alt="" width="26" height="22">
+      <img class="brand__mark" src="../logo-mark-celadon.svg" alt="" width="32" height="27">
       <span class="brand__name">Yao Agents</span>
     </span>
 
