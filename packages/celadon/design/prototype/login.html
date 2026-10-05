@@ -169,8 +169,9 @@ body.is-client .bottom { display: none; }   /* 页脚条款同样不展示 */
 body.is-client .ctrl-wrap { margin-block-start: var(--spacing-24); }
 body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inline-start: 50%; transform: translateX(-50%); }
 /* 客户端内：卡片顶部的「返回服务器选择」与当前服务器（静态展示） */
-.client-bar { display: none; align-items: center; justify-content: space-between; gap: var(--spacing-8);
-              inline-size: min(100%, var(--auth-card)); margin: 0 auto var(--spacing-12); }
+/* 客户端内：横条与卡片同属一个区域，间距由容器的 gap 决定 */
+.client-stack { display: grid; gap: var(--spacing-12); inline-size: min(100%, var(--auth-card)); }
+.client-bar { display: none; align-items: center; justify-content: space-between; gap: var(--spacing-8); }
 body.is-client .client-bar { display: flex; }
 .client-back { display: inline-flex; align-items: center; gap: var(--spacing-4); color: var(--text-secondary);
                font-size: var(--font-size-13); text-decoration: none; }
@@ -412,6 +413,14 @@ if (isClient) {
   const menu = document.getElementById('lang-menu')
   if (ctrl) { ctrl.replaceWith(wrap); wrap.append(ctrl); if (menu) wrap.append(menu) }
   const card = document.querySelector('.card')
+  const bar = document.getElementById('client-bar')
+  if (card && bar) {                                  /* 横条与卡片同一个区域 */
+    const stack = document.createElement('div')
+    stack.className = 'client-stack'
+    card.before(stack)
+    stack.append(bar)
+    stack.append(card)
+  }
   if (card) card.after(wrap)
   const signUpLink = document.querySelector('a[href="./register.html"]')
   if (signUpLink) signUpLink.setAttribute('href', './register.html?from=connect')
