@@ -170,6 +170,7 @@ body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inl
 /* 客户端内：横条与卡片同属一个区域，间距由容器的 gap 决定 */
 .client-stack { display: grid; gap: var(--spacing-12); inline-size: min(100%, var(--auth-card)); }
 .client-bar { display: none; align-items: center; justify-content: space-between; gap: var(--spacing-8); }
+body.is-client .client-bar { display: flex; }
 .client-back { display: inline-flex; align-items: center; gap: var(--spacing-4); color: var(--text-primary);
                font-size: var(--font-size-13); text-decoration: none; }
 .client-back:hover { color: var(--brand-ink); }
