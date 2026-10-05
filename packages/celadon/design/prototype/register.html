@@ -174,20 +174,17 @@ body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inl
 /* 客户端内：卡片顶部的「返回服务器选择」与当前服务器（静态展示） */
 /* 客户端内：横条与卡片同属一个区域，间距由容器的 gap 决定 */
 .client-stack { display: grid; gap: var(--spacing-12); inline-size: min(100%, var(--auth-card)); }
-.client-bar { display: none; align-items: center; gap: var(--spacing-8); }
+.client-bar { display: none; align-items: center; justify-content: space-between; gap: var(--spacing-8); }
 body.is-client .client-bar { display: flex; }
 .client-back { display: inline-flex; align-items: center; gap: var(--spacing-4); color: var(--text-primary);
                font-size: var(--font-size-13); text-decoration: none; }
 .client-back:hover { color: var(--brand-ink); }
 .client-back .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
 /* 当前服务器：角标形态（带底色的胶囊），文字用最深一档，比纯文本醒目 */
-/* 当前服务器：卡片右上角的角标（齐角、与卡片同圆角），带底色 */
-.client-server { position: absolute; inset-block-start: 0; inset-inline-end: 0;
-                 display: inline-flex; align-items: center; gap: var(--spacing-4);
-                 padding: var(--spacing-8) var(--spacing-12);
-                 border-start-end-radius: var(--radius-large); border-end-start-radius: var(--radius-small);
-                 background: var(--background-selected); color: var(--text-primary);
-                 font-size: var(--font-size-13); min-inline-size: 0; }
+/* 当前服务器：与返回入口同一行，右侧，仅加粗文字 */
+.client-server { display: inline-flex; align-items: center; gap: var(--spacing-4); margin-inline-start: auto;
+                 color: var(--text-primary); font-size: var(--font-size-13); font-weight: var(--font-weight-strong);
+                 min-inline-size: 0; }
 .client-server__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--font-weight-medium); }
 :lang(zh-CN) .client-back, :lang(zh-TW) .client-back, :lang(ja) .client-back,
 :lang(zh-CN) .client-server, :lang(zh-TW) .client-server, :lang(ja) .client-server { font-size: var(--font-size-minimum-cjk); }
@@ -385,7 +382,6 @@ if (isClient) {
     card.before(stack)
     stack.append(bar)
     stack.append(card)
-    card.prepend(tag)                                    /* 角标放进卡片：定位相对卡片 */
   }
 
   const ctrl = document.querySelector('.ctrl')
