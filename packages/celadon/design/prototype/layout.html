@@ -343,6 +343,15 @@ body.celadon, html.celadon { font-family: var(--font-family-ui); }
 .composer { position: relative; z-index: var(--z-overlay); background: var(--elevation-surface-2); box-shadow: var(--shadow-floating); }
 /* 输入区描边：用更轻的一档 --border-subtle（原为 --border-default） */
 .composer { border-color: var(--border-subtle); }
+/* 实验：交换中栏与右栏的底色 —— 中栏用 surface、右栏用 content（原为相反）。
+   若后续保留，应回写到 F6 的分工说明；若不保留，删掉这两行即可。 */
+.window > .main { background: var(--background-surface); }
+.window > .panel { background: var(--background-content); }
+/* 实验：导航选中项与会话选中行改用中性的 hover 档（原为品牌色 soft，--background-selected） */
+.nav .navigation-item.is-active { background: var(--background-hover); color: var(--text-primary); }
+.conversation-row.is-selected { background: var(--background-hover); }
+.conversation-row.is-selected::before { background: var(--brand); }
+.conversation-row.is-selected .row-title { color: var(--text-primary); }
 </style>
 </head>
 <body class="celadon">
