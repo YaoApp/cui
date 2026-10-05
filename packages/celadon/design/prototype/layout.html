@@ -229,6 +229,18 @@ body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform:
 .nav .conversation-list { flex: 1 1 auto; min-block-size: 0; overflow: auto; }
 /* 三栏的高度跟随视口：grid 行锁成 minmax(0,1fr)，否则行被内容撑高、导航超出屏幕 */
 .window { grid-template-rows: minmax(0, 1fr); block-size: 100vh; }
+/* ===== 导航两区（修正）=====
+   ① 菜单区不参与压缩/拉伸：区域按内容高度（flex:none），只有超过上限才滚动；菜单项固定 32 高，不被撑开。
+   ② 滚动条自定义，走配色 token（Firefox 用 scrollbar-color，Chromium/Safari 用 ::-webkit-scrollbar）。 */
+.nav .fixed-navigation { flex: 0 0 auto; max-block-size: 45%; overflow: auto; }
+.nav .fixed-navigation .navigation-item { flex: none; block-size: var(--spacing-32); }
+.nav { scrollbar-color: var(--border-control) transparent; scrollbar-width: thin; }
+.nav * { scrollbar-color: var(--border-control) transparent; scrollbar-width: thin; }
+.nav ::-webkit-scrollbar, .nav::-webkit-scrollbar { inline-size: var(--spacing-8); block-size: var(--spacing-8); }
+.nav ::-webkit-scrollbar-track, .nav::-webkit-scrollbar-track { background: transparent; }
+.nav ::-webkit-scrollbar-thumb, .nav::-webkit-scrollbar-thumb { background: var(--border-default);
+  border-radius: var(--radius-pill); border: 2px solid transparent; background-clip: padding-box; }
+.nav ::-webkit-scrollbar-thumb:hover, .nav::-webkit-scrollbar-thumb:hover { background: var(--border-control); background-clip: padding-box; }
 </style>
 </head>
 <body class="celadon">
