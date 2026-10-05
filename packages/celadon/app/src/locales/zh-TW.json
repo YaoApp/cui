@@ -42,5 +42,20 @@
   "themeToggle.toLight": "淺色",
   "client.bootFailed": "客戶端初始化失敗（{{code}}）",
   "client.bootRetry": "重試",
-  "bridge.error.transport.malformed": "伺服端回了看不懂的內容"
+  "bridge.error.transport.malformed": "伺服端回了看不懂的內容",
+  "data.error.transport.crossOrigin": "瀏覽器不能直接存取另一個來源：{{url}}",
+  "data.error.transport.network": "網路不通，檢查連線後重試",
+  "data.error.transport.parse": "服務端回傳的內容讀不懂",
+  "data.error.transport.status": "服務端回傳了 {{status}}",
+  "data.error.transport.timeout": "請求逾時，稍後再試",
+  "data.error.getFailed": "讀取失敗",
+  "data.error.postFailed": "提交失敗",
+  "data.error.putFailed": "儲存失敗",
+  "data.error.deleteFailed": "刪除失敗",
+  "data.error.service.notReady": "還沒讀到服務位址",
+  "data.error.invalidRequest": "請求不合法",
+  "data.error.tokenMissing": "缺少存取權杖",
+  "data.error.unauthorized": "未登入或登入已過期",
+  "data.error.forbidden": "沒有存取權限",
+  "data.error.insufficientScope": "權限不足"
 }

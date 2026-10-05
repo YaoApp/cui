@@ -238,7 +238,8 @@ describe('the data check page', () => {
     await waitFor(() =>
       expect(document.querySelector('.requests__state[data-active="true"]')?.textContent).toBe('失败'),
     )
-    expect(await screen.findByText(/连不上/)).toBeInTheDocument()
+    // 数据层按码翻译：`data.error.transport.network`（app/src/locales/zh-CN.json）
+        expect(await screen.findByText(/网络不通/)).toBeInTheDocument()
   })
 
   it('reads the current language and theme from the platform stores', async () => {

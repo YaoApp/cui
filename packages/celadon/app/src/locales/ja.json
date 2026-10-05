@@ -42,5 +42,20 @@
   "themeToggle.toLight": "ライト",
   "client.bootFailed": "クライアントの初期化に失敗しました（{{code}}）",
   "client.bootRetry": "再試行",
-  "bridge.error.transport.malformed": "サーバーが解釈できない内容を返しました"
+  "bridge.error.transport.malformed": "サーバーが解釈できない内容を返しました",
+  "data.error.transport.crossOrigin": "ブラウザから別のオリジンは呼べません：{{url}}",
+  "data.error.transport.network": "ネットワークに届きません。接続を確認して再試行してください",
+  "data.error.transport.parse": "サービス応答を解釈できません",
+  "data.error.transport.status": "サービスが {{status}} を返しました",
+  "data.error.transport.timeout": "リクエストがタイムアウトしました。しばらくして再試行してください",
+  "data.error.getFailed": "読み込みに失敗しました",
+  "data.error.postFailed": "送信に失敗しました",
+  "data.error.putFailed": "保存に失敗しました",
+  "data.error.deleteFailed": "削除に失敗しました",
+  "data.error.service.notReady": "サービスのアドレスがまだ分かりません",
+  "data.error.invalidRequest": "リクエストが不正です",
+  "data.error.tokenMissing": "アクセストークンがありません",
+  "data.error.unauthorized": "未ログイン、またはセッションの有効期限が切れています",
+  "data.error.forbidden": "アクセス権がありません",
+  "data.error.insufficientScope": "権限が足りません"
 }
