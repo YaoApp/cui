@@ -214,6 +214,8 @@
   --radius-medium: 8px;
   --radius-large: 12px;
   --radius-pill: 999px;
+  --radius-xl: 16px;
+  /* 大输入区 / 大容器（比 large 再大一档） */
   /* ===== 动效 Motion =====
      时长：120 微反馈（按下/悬停）· 200 常规（面板展开/淡入）· 320 大位移（抽屉/页面）
      缓动：standard 通用 · decelerate 进场（快起慢停）· accelerate 退场（慢起快走） */

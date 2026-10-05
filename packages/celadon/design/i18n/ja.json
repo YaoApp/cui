@@ -165,6 +165,16 @@
       "emptyHint": "左から選ぶか、新しく作成してください。",
       "language": "言語",
       "theme": "テーマ"
+    },
+    "welcome": {
+      "welcomeTitle": "タスクから始める",
+      "welcomeSubtitle": "やってほしいことを書いてください。必要な道具はこちらで揃えます。",
+      "welcomePlaceholder": "タスクを書く…",
+      "welcomeMode": "既定の権限",
+      "welcomeHint": "まず例を見ることもできます",
+      "guideTitle": "はじめての方へ",
+      "guideBody": "タスクを書くと、使う道具と結果が並びます。直すところは結果から選べます。",
+      "guideAction": "ガイドを見る"
     }
   },
   "sample": {
