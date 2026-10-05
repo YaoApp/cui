@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Celadon · 登录</title>
 <link rel="stylesheet" href="../tokens.css">
+<script>if(matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.dataset.theme="dark"</script>
 <!--
   登录界面（login 状态）· 静态设计稿，与产品同构：类名、文案来源、尺寸档都照产品来。
 
   · 本页**不含交互脚本**：只做视觉，页面上没有评审控件。
     主题由平台层的偏好决定：浅色即本页原样；深色是同一个页面加 `data-theme="dark"`（tokens.less 的暗色作用域），
-    截图时在浏览器侧注入该属性，页面本身不多写一份。
+    截图时也可在浏览器侧注入该属性。本页只放设计体系那句"跟随系统"的一行（与 design/index.html 同一写法），
+    这不是交互。
   · 文案取自 design/i18n/*.json 的 ui.entry.*（此处写 zh-CN 的成品字）；
     产品实现时由语言包与平台层提供，本页只呈现字面。
   · LOGO 用正版标记文件 ../logo-mark-celadon.svg（结构与颜色是该文件的唯一来源，本页不重绘、不改色）。
