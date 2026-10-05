@@ -39,11 +39,11 @@ body {
 .top { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-16); position: relative; }
 .brand { display: flex; align-items: center; gap: var(--spacing-8); }
 .brand__mark { inline-size: 26px; block-size: auto; display: block; }
-.brand__name { font-size: var(--font-size-caption); font-weight: var(--font-weight-medium); color: var(--text-secondary); letter-spacing: var(--letter-spacing-latin); }
+.brand__name { font-size: var(--font-size-13); font-weight: var(--font-weight-medium); color: var(--text-secondary); letter-spacing: var(--letter-spacing-latin); }
 .ctrl { display: flex; align-items: center; gap: var(--spacing-8); }
 .ctrl__sep { inline-size: var(--border-width); block-size: var(--spacing-16); background: var(--border-default); }
 .ctrl__btn { display: inline-flex; align-items: center; gap: var(--spacing-4); border: 0; background: transparent;
-             color: var(--text-secondary); font: inherit; font-size: var(--font-size-caption); cursor: pointer;
+             color: var(--text-secondary); font: inherit; font-size: var(--font-size-13); cursor: pointer;
              padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-small); }
 .ctrl__btn:hover { background: var(--background-hover); color: var(--text-primary); }
 .ctrl__btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
@@ -77,7 +77,7 @@ body {
             min-block-size: var(--row-height); padding-inline: var(--spacing-12);
             background: var(--background-field); color: var(--text-primary);
             border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-medium);
-            font: inherit; font-size: var(--font-size-body); font-weight: var(--font-weight-medium); cursor: pointer; }
+            font: inherit; font-size: var(--font-size-15); font-weight: var(--font-weight-medium); cursor: pointer; }
 .provider:hover { background: var(--background-hover); }
 .provider:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .provider__label { text-align: center; }
@@ -91,11 +91,11 @@ body {
 .field { position: relative; display: flex; align-items: center; margin-block-end: var(--spacing-16); }
 .field__icon { position: absolute; inset-inline-start: var(--spacing-12); inline-size: var(--spacing-16); block-size: var(--spacing-16);
                display: block; color: var(--text-placeholder); pointer-events: none; }
-.field .input { inline-size: 100%; min-block-size: var(--row-height); border-radius: var(--radius-medium); padding-inline-start: var(--spacing-32); }
+.field .input { inline-size: 100%; min-block-size: var(--row-height); border-radius: var(--radius-medium); padding-inline-start: var(--spacing-32); font-size: var(--font-size-15); }
 
 /* 协议 */
 .terms { display: flex; gap: var(--spacing-8); align-items: flex-start; margin-block: 0 var(--spacing-16);
-         font-size: var(--font-size-caption); color: var(--text-secondary); }
+         font-size: var(--font-size-13); color: var(--text-secondary); }
 .terms input { inline-size: 16px; block-size: 16px; margin-block-start: 3px; flex: none; accent-color: var(--brand); }
 .terms a { color: var(--brand-ink); }
 
@@ -104,11 +104,11 @@ body {
           white-space: nowrap; cursor: pointer; font-family: var(--font-family-ui);
           font-weight: var(--font-weight-medium); line-height: var(--line-height-cjk); border-radius: var(--radius-medium);
           border: var(--border-width) solid transparent; }
-.button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-body); }
+.button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-15); }
 .button--inverse { background: var(--text-primary); color: var(--background-content); }
 .button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
-.footnote { margin: var(--spacing-16) 0 0; text-align: center; font-size: var(--font-size-caption); color: var(--text-secondary); }
+.footnote { margin: var(--spacing-16) 0 0; text-align: center; font-size: var(--font-size-13); color: var(--text-secondary); }
 
 /* 底行：条款 */
 .bottom { display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
