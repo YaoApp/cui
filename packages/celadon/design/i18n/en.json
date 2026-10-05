@@ -142,7 +142,8 @@
     },
     "theme": {
       "light": "Light",
-      "dark": "Dark"
+      "dark": "Dark",
+      "system": "Follow system"
     },
     "thread": {
       "newMessages": "{count} new messages",
@@ -161,7 +162,9 @@
       "settings": "Settings",
       "searchPh": "Search",
       "emptyTitle": "Nothing here yet",
-      "emptyHint": "Pick something on the left, or create one."
+      "emptyHint": "Pick something on the left, or create one.",
+      "language": "Language",
+      "theme": "Theme"
     }
   },
   "sample": {

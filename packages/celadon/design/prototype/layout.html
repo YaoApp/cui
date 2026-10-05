@@ -320,6 +320,18 @@ body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-16)
 body:not(.is-client) .nav .navigation-header { padding-inline-start: var(--spacing-16); }
 /* LOGO 图形与菜单项图标同一左边界：品牌容器自身不再带左内距（mock 里是 16） */
 .nav .navigation-header .brand { padding-inline: 0; }
+/* 用户行「…」上的菜单：语言与主题（与入口页同一套做法；在页面底部，故向上展开） */
+.user-menu-wrap { position: relative; display: inline-flex; }
+.user-menu { position: absolute; inset-block-end: calc(100% + var(--spacing-4)); inset-inline-end: 0; z-index: var(--z-overlay);
+  min-inline-size: 176px; padding: var(--spacing-4); background: var(--background-surface);
+  border: var(--border-width) solid var(--border-default); border-radius: var(--radius-medium); box-shadow: var(--shadow-floating); }
+.user-menu button { display: flex; align-items: center; gap: var(--spacing-8); inline-size: 100%; text-align: start;
+  padding: var(--spacing-8) var(--spacing-12); border: 0; border-radius: var(--radius-small);
+  background: transparent; color: var(--text-primary); font: inherit; font-size: var(--font-size-13); cursor: pointer; }
+.user-menu button:hover { background: var(--background-hover); }
+.user-menu button.is-on { background: var(--background-selected); font-weight: var(--font-weight-medium); }
+.user-menu .sep { block-size: var(--border-width); background: var(--border-subtle); margin: var(--spacing-4) var(--spacing-8); }
+.user-menu .group { padding: var(--spacing-4) var(--spacing-12) 0; color: var(--text-tertiary); font-size: var(--font-size-12); }
 </style>
 </head>
 <body class="celadon">
@@ -703,6 +715,69 @@ body:not(.is-client) .nav .navigation-header { padding-inline-start: var(--spaci
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false')
     toggle.setAttribute('title', open ? 'Collapse' : 'Expand')
   })
+})()
+</script>
+
+<script>
+/* 用户行「…」菜单：语言（四语）与主题（浅/暗/跟随系统）。语言用页内 data-i18n 键 + CELADON_I18N；
+   页面里的演示数据（会话标题等）不在语言包里，切换语言只影响界面文案。 */
+(function () {
+  var row = document.querySelector('.user')
+  if (!row) return
+  var more = row.querySelector('.icon-button')
+  if (!more) return
+  var wrap = document.createElement('span'); wrap.className = 'user-menu-wrap'
+  more.parentNode.insertBefore(wrap, more); wrap.appendChild(more)
+  var menu = document.createElement('div'); menu.className = 'user-menu'; menu.hidden = true
+  menu.setAttribute('role', 'menu')
+  var langs = [['zh-CN', '简体中文'], ['zh-TW', '繁體中文'], ['en', 'English'], ['ja', '日本語']]
+  menu.innerHTML = '<div class="group" data-t="lang">Language</div>' +
+    langs.map(function (l) { return '<button type="button" role="menuitemradio" data-lang="' + l[0] + '">' + l[1] + '</button>' }).join('') +
+    '<div class="sep"></div><div class="group" data-t="theme">Theme</div>' +
+    ['light', 'dark', 'system'].map(function (t) {
+      return '<button type="button" role="menuitemradio" data-theme-set="' + t + '" data-i18n="ui.theme.' + t + '">' + t + '</button>' }).join('')
+  wrap.appendChild(menu)
+  function dict() { return ((window.CELADON_I18N || {})[document.documentElement.lang] || {}).ui || {} }
+  /* 键写成 ui.xxx，而 dict() 已到 ui 这一层，这里剥掉前缀，避免拼成 ui.ui.xxx */
+  function at(path) {
+    var keys = path.split('.'); if (keys[0] === 'ui') keys.shift()
+    return keys.reduce(function (o, k) { return o ? o[k] : undefined }, dict())
+  }
+  function localise() {
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var v = at(el.getAttribute('data-i18n'))
+      /* 语言包里带 {占位符} 的是模板（{count} / {time} …），页面上已是具体值，不能覆盖 */
+      if (typeof v === 'string' && v.indexOf('{') < 0) el.textContent = v
+    })
+    menu.querySelectorAll('[data-t]').forEach(function (el) {
+      var key = el.getAttribute('data-t') === 'lang' ? 'language' : 'theme'
+      var v = at('ui.layout.' + key); if (typeof v === 'string') el.textContent = v
+    })
+    menu.querySelectorAll('[data-theme-set]').forEach(function (b) {
+      var t = b.getAttribute('data-theme-set'); var v = at('ui.theme.' + t)
+      if (typeof v === 'string') b.textContent = v
+    })
+  }
+  function setTheme(t) {
+    var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+    menu.querySelectorAll('[data-theme-set]').forEach(function (b) { b.classList.toggle('is-on', b.getAttribute('data-theme-set') === t) })
+  }
+  function setLang(code) {
+    document.documentElement.lang = code
+    menu.querySelectorAll('[data-lang]').forEach(function (b) { b.classList.toggle('is-on', b.getAttribute('data-lang') === code) })
+    localise()
+  }
+  more.addEventListener('click', function (e) { e.stopPropagation(); menu.hidden = !menu.hidden })
+  menu.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return
+    if (b.dataset.lang) setLang(b.dataset.lang)
+    if (b.dataset.themeSet) setTheme(b.dataset.themeSet)
+    menu.hidden = true
+  })
+  document.addEventListener('click', function () { menu.hidden = true })
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menu.hidden = true })
+  setLang('zh-CN'); setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'system' : 'system')
 })()
 </script>
 </body>
