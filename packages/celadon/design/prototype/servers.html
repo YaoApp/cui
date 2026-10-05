@@ -43,13 +43,13 @@ body {
 .sub--hint { margin: var(--spacing-8) 0 var(--spacing-16); font-size: var(--font-size-13); color: var(--text-tertiary); }
 :lang(zh-CN) .sub--hint, :lang(zh-TW) .sub--hint, :lang(ja) .sub--hint { font-size: var(--font-size-minimum-cjk); }
 .picker-wrap { margin-block-end: var(--spacing-16); }
-.spinner { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; border: 2px solid var(--border-strong);
+.spinner { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; border: 2px solid var(--border-default);
            border-block-start-color: transparent; border-radius: 50%; animation: button-spin 0.7s linear infinite; }
 .picker { inline-size: 100%; min-block-size: 56px; display: flex; align-items: center; gap: var(--spacing-8);
           padding: var(--spacing-8) var(--spacing-12); text-align: start; cursor: pointer;
           border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-medium);
           background: var(--background-field); color: var(--text-primary); font: inherit; }
-.picker:hover { border-color: var(--border-strong); }
+.picker:hover { border-color: var(--border-default); }
 .picker:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 /* 加载 / 空：与选择器同一只盒子，只是内容换成转圈与文字（不再盒中盒） */
 .picker--state { display: flex; align-items: center; gap: var(--spacing-8); cursor: default;
@@ -229,7 +229,7 @@ svg.opt__logo { color: var(--text-tertiary); }
 /* 自托管的图标：与品牌标记同尺寸的描边图标 */
 svg.opt__logo.is-server { inline-size: calc(var(--spacing-16) + var(--spacing-4)); block-size: calc(var(--spacing-16) + var(--spacing-4)); }
 /* 转圈本体：本页此前只写了尺寸、没写边框，所以是个看不见的盒子在转 */
-.spinner { flex: none; border: 2px solid var(--border-strong); border-block-start-color: transparent;
+.spinner { flex: none; border: 2px solid var(--border-default); border-block-start-color: transparent;
            border-radius: 50%; animation: button-spin 0.7s linear infinite; }
 </style>
 </head>
