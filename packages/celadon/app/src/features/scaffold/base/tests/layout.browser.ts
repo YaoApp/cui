@@ -98,11 +98,12 @@ test('the base page obeys the layout rules', async ({ page }) => {
       const r = button.getBoundingClientRect()
       const box = button.closest('.field__box')!
       const input = box.querySelector('input')!
-      /* clientHeight 含内距、不含边框，正好是槽位可用的最大高度 */
+      /* clientHeight 含内距、不含边框，正好是槽位可用的最大高度。
+         它是整数，而按钮高度是小数，两者按设计相等，直接比会因 31.99… < 32 误判，故留 1px 容差。 */
       const innerHeight = input.clientHeight
-      notes.push(`槽位按钮 ${Math.round(r.width)} × ${Math.round(r.height)}，控件边框内高 ${innerHeight}`)
+      notes.push(`槽位按钮 ${r.width.toFixed(1)} × ${r.height.toFixed(1)}，控件边框内高 ${innerHeight}`)
       if (r.width < 24 || r.height < 24) bad.push(`槽位按钮只有 ${Math.round(r.width)} × ${Math.round(r.height)}`)
-      if (r.height < innerHeight) bad.push(`槽位按钮高度 ${Math.round(r.height)} 小于控件边框内高 ${innerHeight}`)
+      if (r.height < innerHeight - 1) bad.push(`槽位按钮高度 ${r.height.toFixed(1)} 小于控件边框内高 ${innerHeight}`)
     }
 
     /* 排版：字段标签的字重必须大于正文，否则标签读起来与正文一样淡（用户 2026-10-06 指出）。

@@ -380,9 +380,11 @@
   .badge-warn  { background: var(--warm-soft);  color: var(--warm-text); border: 1px solid var(--warm); }
   .avatar      { background: var(--brand-soft); color: var(--brand-ink); border: 1px solid var(--brand-ink); }
   .tab-active  { background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-control); }
-  /* 输入框：六态（真实伪类与 .is-* 静态类一一对应，后者供设计稿/静态页同时展示多态） */
-  .input       { background: var(--background-field); border: 1px solid var(--border-control); color: var(--text-primary); padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-medium); font: inherit; font-size: var(--font-size-caption);
-    &::placeholder { color: var(--text-placeholder); }                       /* 占位 */
+  /* 输入框：七态（真实伪类与 .is-* 静态类一一对应，后者供设计稿与静态页同时展示多态）。
+     字号取正文档：输入值是内容，不是说明文字；正文行高 1.7 加 4 的块向内距与 1 的边框，
+     控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。 */
+  .input       { background: var(--background-field); border: 1px solid var(--border-control); color: var(--text-primary); padding-block: var(--spacing-4); padding-inline: var(--spacing-8); border-radius: var(--radius-medium); font: inherit; font-size: var(--font-size-body);
+    &::placeholder { color: var(--text-placeholder); }                       /* 空态：占位 */
     &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover); }
     /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
     &:focus, &.is-focus { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); outline: none; }
@@ -391,15 +393,14 @@
     &.is-strong { border-color: var(--border-control-strong);
       &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover-strong); } }
     &.is-error { border-color: var(--danger); }
+    &.is-error.is-focus { box-shadow: 0 0 0 1px var(--danger); }
     &:disabled, &.is-disabled { background: var(--background-disabled); color: var(--text-disabled);
       border-color: var(--border-disabled); cursor: not-allowed;
       &::placeholder { color: var(--text-disabled); } }
-    &.is-error            { border-color: var(--danger); }
-    &.is-error.is-focus   { box-shadow: 0 0 0 1px var(--danger); }
-    &:disabled { background: var(--background-disabled); color: var(--text-disabled); border-color: var(--border-disabled); } }
+    /* 加载态：值仍然可读，右侧指示位由调用方放指示器 */
+    &.is-loading { color: var(--text-secondary); } }
   .focusable:focus-visible { box-shadow: var(--focus-ring); outline: none; }
   .scrim       { background: var(--scrim); }
-    font:inherit; font-size:var(--font-size-caption);
 }
   .link        { color:var(--brand-ink); text-decoration:underline; }
 

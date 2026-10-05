@@ -459,9 +459,9 @@
 [data-theme] .celadon {
   /* 错误提示文字（危险色的文字档，取说明档字号） */
   /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .on */
-  /* 输入框：六态（真实伪类与 .is-* 静态类一一对应，后者供设计稿/静态页同时展示多态） */
-  font: inherit;
-  font-size: var(--font-size-caption);
+  /* 输入框：七态（真实伪类与 .is-* 静态类一一对应，后者供设计稿与静态页同时展示多态）。
+     字号取正文档：输入值是内容，不是说明文字；正文行高 1.7 加 4 的块向内距与 1 的边框，
+     控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。 */
 }
 .celadon .btn-primary,
 [data-theme] .celadon .btn-primary {
@@ -598,13 +598,15 @@
   background: var(--background-field);
   border: 1px solid var(--border-control);
   color: var(--text-primary);
-  padding: var(--spacing-4) var(--spacing-8);
+  padding-block: var(--spacing-4);
+  padding-inline: var(--spacing-8);
   border-radius: var(--radius-medium);
   font: inherit;
-  font-size: var(--font-size-caption);
-  /* 占位 */
+  font-size: var(--font-size-body);
+  /* 空态：占位 */
   /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
   /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
+  /* 加载态：值仍然可读，右侧指示位由调用方放指示器 */
 }
 .celadon .input::placeholder,
 [data-theme] .celadon .input::placeholder {
@@ -645,6 +647,10 @@
 [data-theme] .celadon .input.is-error {
   border-color: var(--danger);
 }
+.celadon .input.is-error.is-focus,
+[data-theme] .celadon .input.is-error.is-focus {
+  box-shadow: 0 0 0 1px var(--danger);
+}
 .celadon .input:disabled,
 [data-theme] .celadon .input:disabled,
 .celadon .input.is-disabled,
@@ -660,19 +666,9 @@
 [data-theme] .celadon .input.is-disabled::placeholder {
   color: var(--text-disabled);
 }
-.celadon .input.is-error,
-[data-theme] .celadon .input.is-error {
-  border-color: var(--danger);
-}
-.celadon .input.is-error.is-focus,
-[data-theme] .celadon .input.is-error.is-focus {
-  box-shadow: 0 0 0 1px var(--danger);
-}
-.celadon .input:disabled,
-[data-theme] .celadon .input:disabled {
-  background: var(--background-disabled);
-  color: var(--text-disabled);
-  border-color: var(--border-disabled);
+.celadon .input.is-loading,
+[data-theme] .celadon .input.is-loading {
+  color: var(--text-secondary);
 }
 .celadon .focusable:focus-visible,
 [data-theme] .celadon .focusable:focus-visible {
