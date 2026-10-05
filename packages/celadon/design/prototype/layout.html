@@ -312,6 +312,12 @@ body.is-client .nav .navigation-header .icon-button { block-size: var(--column-h
 /* 客户端：翻页键仍靠右，紧接在收起/展开键之前（顺序 ‹ › |←）；只是与收起键同一条中心线 */
 body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-16); }
 body.is-client .nav .navigation-header .icon-button:first-of-type { margin-inline-start: auto; }
+/* 客户端：LOGO 与菜单项图标同一左边界（顶行/菜单项的内距都是 8） */
+body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-8); }
+/* 客户端：LOGO 与菜单项图标同一左边界。菜单项图标在 16（导航内层 8 + 菜单项自身 8），故顶行内距取 16 */
+body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-16); }
+/* Web 侧同样对齐：顶行内距 16 = 菜单项图标的左边界 */
+body:not(.is-client) .nav .navigation-header { padding-inline-start: var(--spacing-16); }
 </style>
 </head>
 <body class="celadon">
