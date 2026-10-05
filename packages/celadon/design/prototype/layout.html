@@ -307,6 +307,8 @@ body.is-client .nav .navigation-header .icon-button { order: 1; }
 /* 客户端：翻页键不再贴右，紧跟在红绿灯之后，与左上控制区连成一组 */
 body.is-client .nav .navigation-header { padding-inline-start: calc(var(--spacing-16) + 60px); }
 body.is-client .nav .navigation-header .icon-button:first-of-type { margin-inline-start: 0; }
+/* 客户端：翻页键与收起/展开键居中对齐（两者都在 --column-header-height 的行内居中） */
+body.is-client .nav .navigation-header .icon-button { block-size: var(--column-header-height); }
 </style>
 </head>
 <body class="celadon">
