@@ -218,6 +218,8 @@ body.is-client.is-nav-open .window-controls #nav-toggle { inset-inline-start: ca
 body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform: scaleX(-1); }
 /* 顶部行右侧给收起键留位，避免 < > 与它互相插入：顺序为 ‹ › |← */
 .nav .navigation-header { padding-inline-end: calc(var(--spacing-24) + var(--spacing-16)); }
+/* 可点击的图标按钮：鼠标指针为可点击（hand） */
+.icon-button, body.is-client .window-controls .icon-button { cursor: pointer; }
 </style>
 </head>
 <body class="celadon">
@@ -589,13 +591,13 @@ body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform:
 /* 两个视图：默认 Web（导航 280 / 无红绿灯）；?view=client 为客户端内（导航收起为 0，红绿灯 + 收起键在窗口左上）。 */
 (function () {
   if (new URLSearchParams(location.search).get('view') !== 'client') return
-  document.body.classList.add('is-client')
+  document.body.classList.add('is-client', 'is-nav-open')   /* 客户端默认展开导航 */
   var win = document.querySelector('.window')
   if (!win) return
   var host = document.createElement('div')
   host.className = 'window-controls'
   host.innerHTML = '<span class="wc-left"><span class="traffic-lights"><i></i><i></i><i></i></span></span>' +
-    '<button class="icon-button" type="button" id="nav-toggle" title="Collapse" aria-expanded="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-collapse"></use></svg></button>'
+    '<button class="icon-button" type="button" id="nav-toggle" title="Collapse" aria-expanded="true"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-collapse"></use></svg></button>'
   win.prepend(host)
   var toggle = document.getElementById('nav-toggle')
   toggle.addEventListener('click', function () {
