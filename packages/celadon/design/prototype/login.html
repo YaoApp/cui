@@ -179,11 +179,12 @@ body.is-client .client-bar { display: flex; }
 .client-back:hover { color: var(--brand-ink); }
 .client-back .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
 /* 当前服务器：角标形态（带底色的胶囊），文字用最深一档，比纯文本醒目 */
-/* 当前服务器：标签叠在卡片右上（骑住卡顶边） */
-.client-server { position: absolute; inset-block-start: calc(var(--spacing-12) * -1); inset-inline-end: var(--spacing-16);
-                 display: inline-flex; align-items: center; gap: var(--spacing-4); padding: var(--spacing-4) var(--spacing-8);
-                 border: var(--border-width) solid var(--border-default); border-radius: var(--radius-small);
-                 background: var(--background-surface); color: var(--text-primary);
+/* 当前服务器：卡片右上角的角标（齐角、与卡片同圆角），带底色 */
+.client-server { position: absolute; inset-block-start: 0; inset-inline-end: 0;
+                 display: inline-flex; align-items: center; gap: var(--spacing-4);
+                 padding: var(--spacing-8) var(--spacing-12);
+                 border-start-end-radius: var(--radius-large); border-end-start-radius: var(--radius-small);
+                 background: var(--background-selected); color: var(--text-primary);
                  font-size: var(--font-size-13); min-inline-size: 0; }
 .client-server__mark { inline-size: calc(var(--spacing-16) + var(--spacing-4)); block-size: calc(var(--spacing-16) + var(--spacing-4)); flex: none; }
 .client-server__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--font-weight-medium); }
