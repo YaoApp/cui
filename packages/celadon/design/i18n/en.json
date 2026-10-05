@@ -171,7 +171,10 @@
       "welcomeSubtitle": "Say what you want done; I bring the tools it needs.",
       "welcomePlaceholder": "Describe the task…",
       "welcomeMode": "Default access",
-      "welcomeHint": "Or look at an example first"
+      "welcomeHint": "Or look at an example first",
+      "guideTitle": "First time here",
+      "guideBody": "Write a task, watch which tools it calls, then claim what needs changing in the result.",
+      "guideAction": "Show me"
     }
   },
   "sample": {

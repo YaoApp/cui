@@ -171,7 +171,10 @@
       "welcomeSubtitle": "把你想完成的事说清楚，我会带上需要的工具去做。",
       "welcomePlaceholder": "描述你想完成的事…",
       "welcomeMode": "默认权限",
-      "welcomeHint": "也可以先看看示例"
+      "welcomeHint": "也可以先看看示例",
+      "guideTitle": "第一次使用",
+      "guideBody": "写下一个任务，看它调用哪些工具，结果里再认领要改的地方。",
+      "guideAction": "看引导"
     }
   },
   "sample": {
