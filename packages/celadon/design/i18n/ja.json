@@ -142,7 +142,8 @@
     },
     "theme": {
       "light": "ライト",
-      "dark": "ダーク"
+      "dark": "ダーク",
+      "system": "システムに従う"
     },
     "thread": {
       "newMessages": "新着 {count} 件",
@@ -156,6 +157,14 @@
     },
     "tool": {
       "readFiles": "ファイルを読み込む"
+    },
+    "layout": {
+      "settings": "設定",
+      "searchPh": "検索",
+      "emptyTitle": "まだ何もありません",
+      "emptyHint": "左から選ぶか、新しく作成してください。",
+      "language": "言語",
+      "theme": "テーマ"
     }
   },
   "sample": {

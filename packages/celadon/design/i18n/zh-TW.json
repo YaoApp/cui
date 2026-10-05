@@ -120,7 +120,7 @@
       "computer": "電腦",
       "knowledge": "知識庫"
     },
-    "newTask": "新增任務",
+    "newTask": "新任務",
     "panel": {
       "inProgress": "進行中",
       "highPriority": "高優先",
@@ -142,7 +142,8 @@
     },
     "theme": {
       "light": "淺色",
-      "dark": "深色"
+      "dark": "暗色",
+      "system": "跟隨系統"
     },
     "thread": {
       "newMessages": "{count} 則新訊息",
@@ -156,6 +157,14 @@
     },
     "tool": {
       "readFiles": "讀取檔案"
+    },
+    "layout": {
+      "settings": "設定",
+      "searchPh": "搜尋",
+      "emptyTitle": "還沒有內容",
+      "emptyHint": "從左側選一項開始，或新建一個。",
+      "language": "語言",
+      "theme": "主題"
     }
   },
   "sample": {

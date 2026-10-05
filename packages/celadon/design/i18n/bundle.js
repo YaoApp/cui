@@ -144,7 +144,8 @@ window.CELADON_I18N = {
       },
       "theme": {
         "light": "Light",
-        "dark": "Dark"
+        "dark": "Dark",
+        "system": "Follow system"
       },
       "thread": {
         "newMessages": "{count} new messages",
@@ -158,6 +159,14 @@ window.CELADON_I18N = {
       },
       "tool": {
         "readFiles": "Read files"
+      },
+      "layout": {
+        "settings": "Settings",
+        "searchPh": "Search",
+        "emptyTitle": "Nothing here yet",
+        "emptyHint": "Pick something on the left, or create one.",
+        "language": "Language",
+        "theme": "Theme"
       }
     },
     "sample": {
@@ -922,7 +931,8 @@ window.CELADON_I18N = {
       },
       "theme": {
         "light": "ライト",
-        "dark": "ダーク"
+        "dark": "ダーク",
+        "system": "システムに従う"
       },
       "thread": {
         "newMessages": "新着 {count} 件",
@@ -936,6 +946,14 @@ window.CELADON_I18N = {
       },
       "tool": {
         "readFiles": "ファイルを読み込む"
+      },
+      "layout": {
+        "settings": "設定",
+        "searchPh": "検索",
+        "emptyTitle": "まだ何もありません",
+        "emptyHint": "左から選ぶか、新しく作成してください。",
+        "language": "言語",
+        "theme": "テーマ"
       }
     },
     "sample": {
@@ -1700,7 +1718,8 @@ window.CELADON_I18N = {
       },
       "theme": {
         "light": "浅色",
-        "dark": "暗色"
+        "dark": "暗色",
+        "system": "跟随系统"
       },
       "thread": {
         "newMessages": "{count} 条新消息",
@@ -1714,6 +1733,14 @@ window.CELADON_I18N = {
       },
       "tool": {
         "readFiles": "读取文件"
+      },
+      "layout": {
+        "settings": "设置",
+        "searchPh": "搜索",
+        "emptyTitle": "还没有内容",
+        "emptyHint": "从左侧选一项开始，或新建一个。",
+        "language": "语言",
+        "theme": "主题"
       }
     },
     "sample": {
@@ -2456,7 +2483,7 @@ window.CELADON_I18N = {
         "computer": "電腦",
         "knowledge": "知識庫"
       },
-      "newTask": "新增任務",
+      "newTask": "新任務",
       "panel": {
         "inProgress": "進行中",
         "highPriority": "高優先",
@@ -2478,7 +2505,8 @@ window.CELADON_I18N = {
       },
       "theme": {
         "light": "淺色",
-        "dark": "深色"
+        "dark": "暗色",
+        "system": "跟隨系統"
       },
       "thread": {
         "newMessages": "{count} 則新訊息",
@@ -2492,6 +2520,14 @@ window.CELADON_I18N = {
       },
       "tool": {
         "readFiles": "讀取檔案"
+      },
+      "layout": {
+        "settings": "設定",
+        "searchPh": "搜尋",
+        "emptyTitle": "還沒有內容",
+        "emptyHint": "從左側選一項開始，或新建一個。",
+        "language": "語言",
+        "theme": "主題"
       }
     },
     "sample": {
