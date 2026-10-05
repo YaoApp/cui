@@ -296,6 +296,14 @@ body:not(.is-nav-open) .window-controls #nav-toggle { inset-inline-start: var(--
 body.is-client:not(.is-nav-open) .window-controls #nav-toggle { inset-inline-start: calc(var(--spacing-16) + 60px); }
 body:not(.is-nav-open) .main .content-header { padding-inline-start: calc(var(--spacing-16) + 40px); }
 body.is-client:not(.is-nav-open) .main .content-header { padding-inline-start: calc(var(--spacing-16) + 100px); }
+/* 客户端：顶行的 LOGO 让开红绿灯（16 + 60），Web 无红绿灯则保持常规内距 */
+body.is-client .nav .navigation-header { padding-inline-start: calc(var(--spacing-16) + 60px); }
+/* 客户端：LOGO 另起一行，落在图标与红绿灯的下一行（Web 才把 LOGO 提到顶行） */
+body.is-client .nav .navigation-header { flex-wrap: wrap; padding-inline-start: var(--spacing-16); block-size: auto; }
+body.is-client .nav .navigation-header .icon-button:first-of-type { order: 1; margin-inline-start: auto; }
+body.is-client .nav .navigation-header .brand { order: 2; flex-basis: 100%; margin-inline-start: 0; margin-block-start: var(--spacing-4); }
+/* 客户端的两个翻页键都留在第一行（否则第二个会跟着 LOGO 折到下一行） */
+body.is-client .nav .navigation-header .icon-button { order: 1; }
 </style>
 </head>
 <body class="celadon">
