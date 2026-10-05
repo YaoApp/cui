@@ -205,22 +205,22 @@ svg.opt__logo { color: var(--text-tertiary); }
 .bottom { display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
 .bottom a { color: var(--text-tertiary); }
 
-/* 选择器与选项的排布：LOGO 在左，名称与域名在右竖排，文字从上方起排、左对齐。
-   放在样式表末尾是为了压住上面 .picker__item / .picker 里的竖排与居中写法。 */
-.picker, .picker__item { flex-direction: row; align-items: flex-start; justify-content: flex-start;
-                         gap: var(--spacing-8); text-align: start; }
-.picker__meta, .picker__item .picker__meta { align-items: flex-start; text-align: start; }
-.picker .opt__logo, .picker__item .opt__logo { align-self: flex-start; margin-block-start: 2px; }
-/* 列表永远浮在字段之上 */
-.picker-wrap { position: relative; z-index: var(--z-popover); }
-/* 名称与域名两行同一起点，不留额内边距与缩进 */
-.picker__item-name, .picker__item-meta, .picker__name, .picker__url { padding: 0; margin: 0; text-indent: 0;
-                                                                     text-align: start; align-self: stretch; }
-/* 选择器与加载/空态共用同一固定高度：切换阶段时高度不跳 */
-:root { --picker-h: calc(var(--spacing-48) + var(--spacing-16)); }
-.picker, .picker--state { block-size: var(--picker-h); align-items: flex-start; }
-.picker--state { align-items: center; }
-/* 弹出列表压在输入框之上（此前用的 --z-popover 并不存在，所以层级失效） */
+:root { --picker-h: calc(var(--spacing-48) + var(--spacing-8)); }   /* 两行文字的盒子高度：56 */
+/* 选择器（Label）、每个选项、加载/空态：**同一只盒子** —— 同高、同内边距、同行距、同字号，
+   这样 Label 的排布与 Options 完全一致，切换阶段高度也不跳。 */
+.picker, .picker__item, .picker--state {
+  display: flex; flex-direction: row; align-items: center; gap: var(--spacing-12);
+  block-size: var(--picker-h); min-block-size: var(--picker-h);
+  padding-block: 0; padding-inline: var(--spacing-12); text-align: start;
+}
+.picker__meta, .picker__item .picker__meta { display: flex; flex-direction: column; justify-content: center;
+                                            gap: 0; flex: 1; min-inline-size: 0; align-items: flex-start; text-align: start; }
+.picker__name, .picker__item-name { font-size: var(--font-size-14); line-height: var(--line-height-tight);
+                                    font-weight: var(--font-weight-medium); padding: 0; margin: 0; text-indent: 0; }
+.picker__url, .picker__item-meta { font-size: var(--font-size-12); line-height: var(--line-height-tight);
+                                   color: var(--text-tertiary); padding: 0; margin: 0; text-indent: 0; }
+.picker .opt__logo, .picker__item .opt__logo { align-self: center; margin-block-start: 0; }
+/* 列表压在字段之上 */
 .picker-wrap { position: relative; z-index: var(--z-raised); }
 .picker__list { z-index: var(--z-overlay); }
 </style>
@@ -247,10 +247,9 @@ svg.opt__logo { color: var(--text-tertiary); }
 
       <div class="picker-wrap" id="picker-wrap">
         <button class="picker" type="button" id="cloud-picker" aria-haspopup="listbox" aria-expanded="false">
-          <span class="picker__meta">
             <img class="opt__logo" src="../logo-mark-celadon.svg" alt="" width="20" height="17">
+          <span class="picker__meta">
             <span class="picker__name placeholder" id="cloud-name" data-i18n="cloudSelectHint">Select a cloud server</span>
-            <span class="picker__url" id="cloud-url"></span>
             <span class="picker__url" id="cloud-url"></span>
           </span>
           <svg class="picker__arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"></use></svg>
@@ -391,7 +390,9 @@ function renderCloud() {
   nameEl.classList.toggle('placeholder', !isCustom() && !found)
   customField.hidden = !isCustom()
   const urlEl = document.getElementById('cloud-url')
-  if (urlEl) urlEl.textContent = isCustom() ? (customInput.value.trim() || '') : (found ? found.url.replace(/^https?:\/\//, '') : '')
+  if (urlEl) urlEl.textContent = isCustom()
+    ? (customInput.value.trim() || dictOf(lang).customDesc)   /* 与 Options 同形：第二行必须有内容 */
+    : (found ? found.url.replace(/^https?:\/\//, '') : '')
 
   /* 每项两行：LOGO + 名称 / 域名。官方用品牌标记，自建用服务器图标、域名留空。 */
   const logo = (custom) => custom
