@@ -7,7 +7,9 @@
  *   它不进凭据库、不留在任何长期存储里（`15-platform.md` §4）。
  */
 
-import { currentPreferences } from '@/platform/client/context'
+import { client } from '@/platform/client'
+import { context } from '../request/context'
+import type { Context } from '../request/context'
 import { signOut } from '@/platform/credential'
 import { send } from '../request/send'
 import type { Result } from '../types'
@@ -44,16 +46,15 @@ import type {
   OAuthCallbackRequest,
 } from './types'
 
-/** **语言只有一个来源：ctx**（`platform/client/context.ts` 的 `currentPreferences()`）。
- *  **业务方无感**：调用点永远不传 `locale`；各接口的**方言**（query / body / 头）由这一层按接口适配，
- *  服务端以后再对齐（`05 §1`：请求元数据自动带上，要覆盖时才显式给）。 */
-function localeOf(): string {
-  return currentPreferences().locale
-}
-
-/** 同上，给 body 方言的接口用：调用点给的 `locale` 优先（测试或特殊场景），否则取 ctx。 */
-function withLocale<T extends { locale?: string }>(input: T): T {
-  return { ...input, locale: input.locale ?? localeOf() }
+/* **具体接口的对接都在这层**：按业务的**参数组合**（语言只是其中一例，比如"中文 foo=123、日语 foo=678、
+ *  其他 foo=cnm"这种按上下文算值的映射）与**返回值标准化**都在这里做；`send` 只负责把组合好的东西发出去。
+ *
+ *  语言：**只有 ctx 一个来源**（`localeOf()`），调用点无感。四个真读线上字段的接口才带它：
+ *  `entryConfig`/`entryOtp` 的方言是 query（构造器参数），`entryVerify`/`entryRegister` 是 body（写进字段）；
+ *  其余接口不读线上 locale，只认请求头，出口已统一带。罕见场景要指定语言，给 `send`/hook 传 `preferences`。 */
+/** 上层传 ctx 时用它；直接调用（测试/脚本）没传才自建。 */
+function localeOf(ctx?: Context): string {
+  return ctx?.locale ?? context({ ...client.preferences }).locale
 }
 
 /** 临时令牌的请求头（下一步调用的凭据；调用完即弃，**不落任何存储**）。 */
@@ -64,7 +65,11 @@ function temporaryToken(token: string): HeadersInit {
 /* ===== 读 ===== */
 
 /** 入口配置。 */
-export const entryConfigQuery = () => ({ key: userKeys.entryConfig(localeOf()), request: entryConfig({ locale: localeOf() }) })
+export const entryConfigQuery = (ctx?: Context) => {
+  /* 这条接口的方言是 **query**：下面一行就是"ctx → 请求"的转换，调用点看不到也不需要知道。 */
+  const locale = localeOf(ctx)
+  return { key: userKeys.entryConfig(locale), request: entryConfig({ locale }) }
+}
 
 /** 图形/人机验证。 */
 export const entryCaptchaQuery = (captchaId?: string) => ({ key: userKeys.entryCaptcha(captchaId), request: entryCaptcha({ captcha_id: captchaId }) })
@@ -81,39 +86,48 @@ export const oauthAuthorizeQuery = (id: string, redirectUri?: string) => ({
 /* ===== 写 ===== */
 
 /** 判定"登录还是注册"：返回临时令牌与下一步。 */
-export const entryVerifyQuery = (input: EntryVerifyRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryVerifyResponse>> } => ({
-  key: userKeys.entryVerify(),
-  operation: () => send(entryVerify, { body: withLocale(input) }),
-})
+export const entryVerifyQuery = (input: Omit<EntryVerifyRequest, 'locale'>): { key: readonly unknown[]; operation: () => Promise<Result<EntryVerifyResponse>> } => {
+  /* 这条接口的方言是 **body**：ctx 的语言进 body.locale（服务端读它）*/
+  return {
+    key: userKeys.entryVerify(),
+    operation: (_input?: void, passed?: Context) => send(entryVerify, { body: { ...input, locale: localeOf(passed) } }),
+  }
+}
 
 /** 注册（带临时令牌）。 */
-export const entryRegisterQuery = (token: string, input: EntryRegisterRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
+export const entryRegisterQuery = (token: string, input: Omit<EntryRegisterRequest, 'locale'>): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => {
+  /* 这条接口的方言是 **body**：ctx 的语言进 body.locale（服务端读它）*/
+  const locale = localeOf()
+  return {
+  /* 方言是 **body**：ctx 的语言进 body.locale（服务端读它）*/
   key: userKeys.entryRegister(),
-  operation: () => send(entryRegister, { body: withLocale(input), headers: temporaryToken(token) }),
-})
+  operation: () => send(entryRegister, { body: { ...input, locale }, headers: temporaryToken(token) }),   // 服务端读 body.locale   // 方言：body
+  }
+}
 
 /** 登录（带临时令牌）。 */
-export const entryLoginQuery = (token: string, input: EntryLoginRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
+export const entryLoginQuery = (token: string, input: Omit<EntryLoginRequest, 'locale'>): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
   key: userKeys.entryLogin(),
-  operation: () => send(entryLogin, { body: withLocale(input), headers: temporaryToken(token) }),
+  operation: () => send(entryLogin, { body: input, headers: temporaryToken(token) }),   // 方言：body
 })
 
 /** 重发验证码（带临时令牌）。 */
 export const entryOtpQuery = (token: string): { key: readonly unknown[]; operation: () => Promise<Result<EntrySendOTPResponse>> } => ({
-  key: userKeys.entryOtp(),
-  operation: () => send(entryOtp, { headers: temporaryToken(token) }),
+  key: userKeys.entryOtp(localeOf()),
+  /* 方言同样是 query */
+  operation: (_input?: void, passed?: Context) => send(entryOtp({ locale: localeOf(passed) }), { headers: temporaryToken(token) }),
 })
 
 /** 邀请码兑换（带 `invite_verification` 作用域的临时令牌）。 */
-export const entryInviteQuery = (token: string, input: EntryInviteRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
+export const entryInviteQuery = (token: string, input: Omit<EntryInviteRequest, 'locale'>): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
   key: userKeys.entryInvite(),
-  operation: () => send(entryInvite, { body: withLocale(input), headers: temporaryToken(token) }),
+  operation: () => send(entryInvite, { body: input, headers: temporaryToken(token) }),   // 方言：body
 })
 
 /** 第三方登录回调换取令牌族。 */
-export const oauthCallbackQuery = (id: string, input: OAuthCallbackRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
+export const oauthCallbackQuery = (id: string, input: Omit<OAuthCallbackRequest, 'locale'>): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
   key: userKeys.oauthCallback(id),
-  operation: () => send(oauthCallback(id), { body: withLocale(input) }),
+  operation: () => send(oauthCallback(id), { body: input }),   // 方言：body
 })
 
 /** 设备授权页：确认用户码。 */
@@ -129,9 +143,9 @@ export const deviceFlowStartQuery = (providerId: string) => ({
 })
 
 /** 轮询设备码。 */
-export const deviceFlowTokenQuery = (providerId: string, input: DeviceFlowTokenRequest): { key: readonly unknown[]; operation: () => Promise<Result<DeviceFlowTokenResult>> } => ({
+export const deviceFlowTokenQuery = (providerId: string, input: Omit<DeviceFlowTokenRequest, 'locale'>): { key: readonly unknown[]; operation: () => Promise<Result<DeviceFlowTokenResult>> } => ({
   key: userKeys.deviceFlowToken(providerId),
-  operation: () => send(deviceFlowToken(providerId), { body: withLocale(input) }),
+  operation: () => send(deviceFlowToken(providerId), { body: input }),   // 方言：body
 })
 
 /** 退出登录：服务端吊销 + 本机凭据按载体清理（沿用既有实现）。 */

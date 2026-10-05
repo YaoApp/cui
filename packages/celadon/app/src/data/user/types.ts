@@ -102,6 +102,7 @@ export type CaptchaResponse = {
 
 /** `POST /user/entry/verify` 的入参。 */
 export type EntryVerifyRequest = {
+  /* 注：`locale` 由数据层从 ctx 注入，调用点不传（见 README「语言从哪来」）。 */
   /** 邮箱或手机号。 */
   username: string
   captcha_id?: string

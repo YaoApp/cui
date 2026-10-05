@@ -21,6 +21,6 @@ describe('context', () => {
       'X-Locale': 'en-US',
     })
     // 流式只能放 query（EventSource 与 WS 握手都设不了自定义头）
-    expect(query(ctx)).toEqual({ locale: 'en-US', accept: 'cui-web' })
+    expect(query(ctx)).toEqual({})   // ctx 不再往 query 塞东西（2026-10-05）
   })
 })

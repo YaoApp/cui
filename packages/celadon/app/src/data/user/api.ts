@@ -61,8 +61,11 @@ export const entryLogin: Request<EntryLoginRequest, EntryAuthResponse> = {
   path: '/user/entry/login',
 }
 
-/** `POST /user/entry/otp`：重发验证码（需临时令牌）。语言同上，由 ctx 带。 */
-export const entryOtp: Request<void, EntrySendOTPResponse> = { method: 'POST', path: '/user/entry/otp' }
+/** `POST /user/entry/otp`：重发验证码（需临时令牌）。**这个接口的方言是 query**，值由查询层从 ctx 取。 */
+export const entryOtp = (query: { locale?: string } = {}): Request<void, EntrySendOTPResponse> => ({
+  method: 'POST',
+  path: withQuery('/user/entry/otp', { locale: query.locale }),
+})
 
 /** `GET /user/entry/captcha`：图形或人机验证；带 `captcha_id` 时取同一张的下一态。 */
 export const entryCaptcha = (query: { captcha_id?: string } = {}): Request<void, CaptchaResponse> => ({

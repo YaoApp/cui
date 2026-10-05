@@ -48,6 +48,8 @@ export type RequestOptions<Input = void> = {
   /** **覆盖**偏好（语言 · 主题）—— 不传就是平台层的**当前值**（`currentPreferences()`），
    *  所以调用点只在要改的时候传这一项，平时不出现。 */
   preferences?: Partial<Preferences>
+  /** **上层已构建的 ctx**（`useRequest` 传下来）：给了就用它，不再重复读平台配置。 */
+  ctx?: Context
   /** 该域自己的查询参数（如 `page` · `pagesize`）—— 与 ctx 的合并，ctx 先 */
   query?: Record<string, string | number | boolean | undefined>
   /** **这次调用的请求体**（`GET`/`DELETE` 不带）—— 类型由声明的 `Request<Input, …>` 给 */
@@ -91,7 +93,9 @@ export async function send<Input = void, Output = void>(
   request: Request<Input, Output>,
   options: RequestOptions<Input> = {},
 ): Promise<Result<Output>> {
-  const ctx: Context = context({ ...client.preferences, ...options.preferences })
+  /* **ctx 由上层构建一次就够**（`useRequest` 会传下来）；直接调 `send` 时才在这里建，
+     免得同一次调用把平台偏好读两遍。 */
+  const ctx: Context = options.ctx ?? context({ ...client.preferences, ...options.preferences })
   // **第一次需要时先读**（惰性 ✓，之后走内存缓存）—— 读失败就把它自己的失败报出去（比"没就绪"更准）
   const service = await loadServiceInfo()
   if (!service.ok) return service
@@ -100,6 +104,8 @@ export async function send<Input = void, Output = void>(
   if (!address) {
     return { ok: false, ...buildFailure(0, undefined, 'service.not_ready') }
   }
+  /* **按业务的参数组合不在这里**（`send` 只把域层给的东西发出去）：语言、字段名、按语言算的值，
+     都由具体接口的包装层在调用前组合好 —— 见 `data/user/queries.ts`。 */
   const url = withQuery(address, { ...contextQuery(ctx), ...(options.query ?? {}) })
 
   const response = await transportFetch(url, {

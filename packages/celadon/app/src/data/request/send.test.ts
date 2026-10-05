@@ -42,7 +42,7 @@ describe('send', () => {
     const result = await send(request, { query: { page: 1 } })
     expect(result).toMatchObject({ ok: true, value: { MESSAGE: 'HELLO, WORLD' } })
     const [url, init] = fetchMock.mock.calls[0]
-    expect(url).toBe('/v1/helloworld/public?locale=en-US&accept=cui-web&page=1')
+    expect(url).toBe('/v1/helloworld/public?page=1')
     expect(init?.method).toBe('GET')
     expect(new Headers(init?.headers).get('x-yao-accept')).toBe('cui-web')   // 大小写不敏感
   })
@@ -51,7 +51,7 @@ describe('send', () => {
     const fetchMock = answer({ ok: true })
     await send(request)
     const [url, init] = fetchMock.mock.calls[0]
-    expect(String(url)).toContain('locale=en-US')
+    expect(String(url)).not.toContain('locale=')   // query 已关闭
     expect(new Headers(init?.headers).get('Accept-Language')).toBe('en-US')
   })
 
@@ -59,7 +59,8 @@ describe('send', () => {
     const fetchMock = answer({ ok: true })
     await send(request, { preferences: { locale: 'ja' } })
     const [url, init] = fetchMock.mock.calls[0]
-    expect(String(url)).toContain('locale=ja')
+    expect(String(url)).not.toContain('locale=')
+    expect(new Headers(init?.headers).get('Accept-Language')).toBe('ja')
     expect(new Headers(init?.headers).get('Accept-Language')).toBe('ja')
   })
 

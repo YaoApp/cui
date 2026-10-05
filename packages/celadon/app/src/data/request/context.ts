@@ -43,8 +43,11 @@ export function headers(ctx: Context): Record<string, string> {
 /** 流式（SSE / WS）**只能**把上下文放 query —— `EventSource` 不能设头，浏览器 WS 握手也不能；
  *  引擎两侧都认：`accept` 与 `locale`（`yao/agent/context/openapi.go:468-540`）。
  *  会话/助手/模型等**域专属**参数由该域自己加。 */
-export function query(ctx: Context): Record<string, string> {
-  return { locale: ctx.locale, accept: accept(ctx) }
+export function query(_ctx: Context): Record<string, string> {
+  /* **ctx 不再往 query 里塞东西**（2026-10-05）：语言与 accept 只走请求头，各接口若方言是 query，
+     由**域层自己**按接口适配（`user/api.ts` 的 entryConfig / entryOtp 就是这么做的）。
+     这个函数保留是为了让出口的合并顺序（ctx → 域 → 调用方）保持不变。 */
+  return {}
 }
 
 function accept(ctx: Context): string {

@@ -8,6 +8,10 @@
  * 重试（重试是出口之上的策略，见 `17 §2.1`）。 */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { client } from '@/platform/client'
+import { context } from '../request/context'
+import type { Context } from '../request/context'
+import type { Preferences } from '@/platform/client'
 import { i18n } from '@/platform/i18n'
 import { dataErrorText } from '../utils/error-text'
 import type { Failure, Result } from '../types'
@@ -29,6 +33,8 @@ export type RequestOptions<Input> = {
   body?: Input
   /** true → 挂载不跑，等 `run()` */
   manual?: boolean
+  /** **调用点要临时改语言/主题时给这个**（罕见场景）：与平台当前值合并后构建 ctx。 */
+  preferences?: Partial<Preferences>
 }
 
 /** @param request 接口声明（方法 · 路径 · 进出类型）—— 取数只经 `send()`
@@ -42,7 +48,7 @@ export type RequestSource<Input, Output> =
   | Request<Input, Output>
   | { key: readonly unknown[]; request: Request<Input, Output> }
   /** **动作**：自己发请求，可能还要让平台做点事（如登录成功后收下令牌）。key 必给。 */
-  | { key: readonly unknown[]; operation: (input?: Input) => Promise<Result<Output>> }
+  | { key: readonly unknown[]; operation: (input?: Input, ctx?: Context) => Promise<Result<Output>> }
 
 /** 取文案的入口：i18next 取不到 key 会原样返回，`dataErrorText` 据此回退并告警。 */
 const translate = (key: string, options?: Record<string, unknown>) =>
@@ -96,13 +102,16 @@ export function useRequest<Input = void, Output = void>(
   useEffect(() => {
     if (options.manual && attempt === 0) return // 手动模式：挂载不跑，等 run()
     const controller = new AbortController()
+    /* **ctx 只构建一次**：动作与出口共用它；调用点要临时改语言就传 `preferences`。 */
+    const requestCtx = context({ ...client.preferences, ...options.preferences })
     const id = ++latest.current
     // 每次跑之前登记：失效侧按同一套 key 前缀命中就再跑一次（unmount 时注销）
     const unsubscribe = subscribe(keyRef.current, () => { void run() })
     setState({ status: 'loading' })
     const answer = operationRef.current
-      ? operationRef.current(bodyRef.current)
+      ? operationRef.current(bodyRef.current, requestCtx)
       : send(requestRef.current as Request<Input, Output>, {
+          ctx: requestCtx,
           ...(bodyRef.current === undefined ? {} : { body: bodyRef.current }),
           signal: controller.signal,
         })

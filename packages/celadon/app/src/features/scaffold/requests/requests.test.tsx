@@ -138,9 +138,11 @@ describe('the data check page', () => {
     const [url, init] = publicCalls().at(-1)!
     expect(String(url)).toContain('/v1/helloworld/public')
     expect(init?.method).toBe('GET')
-    // 请求元数据真的来自 i18n：地址带 locale，头带 Accept-Language
-    expect(String(url)).toContain('locale=zh-CN')
+    // 请求元数据真的来自 i18n：**query 已关闭**，语言只走头
+    expect(String(url)).not.toContain('locale=')
+    expect(String(url)).not.toContain('accept=')
     expect(new Headers(init?.headers).get('Accept-Language')).toBe('zh-CN')
+    expect(new Headers(init?.headers).get('X-Locale')).toBe('zh-CN')
     // 返回值真上了屏（MESSAGE 是引擎线上形状的大写键）
     expect((await screen.findAllByText(new RegExp(MESSAGE))).length).toBeGreaterThan(0)
   })

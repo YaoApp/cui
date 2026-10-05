@@ -31,7 +31,7 @@ describe('the helloworld scaffold', () => {
     const fetchMock = answer({ MESSAGE: 'HELLO, WORLD', APP: 'yaobots' })
     const result = await send(publicGet)
     expect(result).toMatchObject({ ok: true, value: { MESSAGE: 'HELLO, WORLD' } })
-    expect(fetchMock.mock.calls[0][0]).toBe('/v1/helloworld/public?locale=en-US&accept=cui-web')
+    expect(fetchMock.mock.calls[0][0]).toBe('/v1/helloworld/public')
   })
 
   it('lets the credential be carried on the protected one, and the body go through', async () => {
