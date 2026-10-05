@@ -43,6 +43,16 @@
 
 - **一处实现**：加载 · 错误 · 取消 · 重试只有一个实现，全站复用。
 - **统一返回形状**：组件按同一套字段判断渲染，不各写一套 loading / error 分支。
+- **形状已定**（2026-10-05 回写，唯一实现在 `app/src/data/hooks/use-request.ts`）：
+  ```ts
+  type RequestState<T> =
+    | { status: 'idle' }
+    | { status: 'loading' }
+    | { status: 'ok'; value: T }
+    | { status: 'error'; failure: Failure & { text: string } }   // text = 按码翻译后可直接上屏
+  // 钩子返回 { state, run, reset }：重试 = 再调 run()；取消 = 卸载中止 + reset()
+  ```
+  判别只用 `status` 一个字段；错误文案走 `data.error.<code>`（`utils/error-text.ts`），**不看 `message`**。
 - **不引数据缓存库**：axios · SWR · TanStack Query 都不用。
 
 ## 5. 流式
@@ -61,7 +71,6 @@
 
 | # | 未定 | 卡在哪 |
 | --- | --- | --- |
-| 1 | **取数钩子的返回形状** | 加载 / 错误 / 取消 / 重试四态的字段名与判别方式还没定 |
 | 2 | **`sandbox` 域去留** | 它是否属于前端要消费的接口面，未确认 |
 | 3 | **旧 `openapi/` 的处置** | 旧包 71 个文件是移植还是重写，未定 |
 | 4 | **错误形状的具体字段** | 只定了"只有一种形状"，字段未列 |

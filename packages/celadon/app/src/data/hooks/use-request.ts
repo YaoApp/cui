@@ -8,7 +8,8 @@
  * 重试（重试是出口之上的策略，见 `17 §2.1`）。 */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { failureText } from '@/platform/bridge'
+import { i18n } from '@/platform/i18n'
+import { dataErrorText } from '../utils/error-text'
 import type { Failure, Result } from '../types'
 import type { Request } from '../request/send'
 import { send } from '../request/send'
@@ -42,6 +43,10 @@ export type RequestSource<Input, Output> =
   | { key: readonly unknown[]; request: Request<Input, Output> }
   /** **动作**：自己发请求，可能还要让平台做点事（如登录成功后收下令牌）。key 必给。 */
   | { key: readonly unknown[]; operation: (input?: Input) => Promise<Result<Output>> }
+
+/** 取文案的入口：i18next 取不到 key 会原样返回，`dataErrorText` 据此回退并告警。 */
+const translate = (key: string, options?: Record<string, unknown>) =>
+  i18n.t(key as never, options as never) as unknown as string
 
 export function useRequest<Input = void, Output = void>(
   source: RequestSource<Input, Output>,
@@ -107,7 +112,7 @@ export function useRequest<Input = void, Output = void>(
       if (id !== latest.current) return // 晚到的结果丢掉（依赖已变或已卸载）
       setState(result.ok
         ? { status: 'ok', value: result.value }
-        : { status: 'error', failure: { ...result, text: failureText(result) } })
+        : { status: 'error', failure: { ...result, text: dataErrorText(translate, result) } })
     })
       .catch((error: unknown) => {
         // 出口自己吞掉失败，只有"响应不是 JSON"这种会抛到这里：也落成失败态，别让等待者悬着
@@ -116,10 +121,10 @@ export function useRequest<Input = void, Output = void>(
         setState({
           status: 'error',
           failure: {
-            code: 'transport.malformed',
+            code: 'transport.parse',
             params: {},
             message: error instanceof Error ? error.message : String(error),
-            text: failureText({ code: 'transport.malformed', params: {}, message: '' }),
+            text: dataErrorText(translate, { code: 'transport.parse', params: {}, message: '' }),
           },
         })
       })

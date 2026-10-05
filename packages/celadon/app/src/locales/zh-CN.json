@@ -43,23 +43,19 @@
   "client.bootFailed": "客户端初始化失败（{{code}}）",
   "client.bootRetry": "重试",
   "bridge.error.transport.malformed": "服务端回了看不懂的内容",
-  "data": {
-    "error": {
-      "transport.crossOrigin": "浏览器不能直接访问另一个来源：{{url}}",
-      "transport.network": "网络不通，检查连接后重试",
-      "transport.parse": "服务端返回的内容读不懂",
-      "transport.status": "服务端返回了 {{status}}",
-      "transport.timeout": "请求超时，稍后再试",
-      "getFailed": "读取失败",
-      "postFailed": "提交失败",
-      "putFailed": "保存失败",
-      "deleteFailed": "删除失败",
-      "service.notReady": "还没读到服务地址",
-      "invalidRequest": "请求不合法",
-      "tokenMissing": "缺少访问令牌",
-      "unauthorized": "未登录或登录已过期",
-      "forbidden": "没有访问权限",
-      "insufficientScope": "权限不足"
-    }
-  }
+  "data.error.transport.crossOrigin": "浏览器不能直接访问另一个来源：{{url}}",
+  "data.error.transport.network": "网络不通，检查连接后重试",
+  "data.error.transport.parse": "服务端返回的内容读不懂",
+  "data.error.transport.status": "服务端返回了 {{status}}",
+  "data.error.transport.timeout": "请求超时，稍后再试",
+  "data.error.getFailed": "读取失败",
+  "data.error.postFailed": "提交失败",
+  "data.error.putFailed": "保存失败",
+  "data.error.deleteFailed": "删除失败",
+  "data.error.service.notReady": "还没读到服务地址",
+  "data.error.invalidRequest": "请求不合法",
+  "data.error.tokenMissing": "缺少访问令牌",
+  "data.error.unauthorized": "未登录或登录已过期",
+  "data.error.forbidden": "没有访问权限",
+  "data.error.insufficientScope": "权限不足"
 }

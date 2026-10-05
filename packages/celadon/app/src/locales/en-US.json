@@ -43,23 +43,19 @@
   "client.bootFailed": "The client could not start ({{code}})",
   "client.bootRetry": "Retry",
   "bridge.error.transport.malformed": "The server returned something that is not JSON",
-  "data": {
-    "error": {
-      "transport.crossOrigin": "The browser cannot call another origin: {{url}}",
-      "transport.network": "The network did not answer; check the connection and retry",
-      "transport.parse": "The service answered with something we cannot read",
-      "transport.status": "The service answered {{status}}",
-      "transport.timeout": "The request timed out; try again shortly",
-      "getFailed": "Could not load",
-      "postFailed": "Could not submit",
-      "putFailed": "Could not save",
-      "deleteFailed": "Could not delete",
-      "service.notReady": "The service address is not known yet",
-      "invalidRequest": "The request was not valid",
-      "tokenMissing": "The access token is missing",
-      "unauthorized": "Not signed in, or the session has expired",
-      "forbidden": "No access",
-      "insufficientScope": "Not enough permission"
-    }
-  }
+  "data.error.transport.crossOrigin": "The browser cannot call another origin: {{url}}",
+  "data.error.transport.network": "The network did not answer; check the connection and retry",
+  "data.error.transport.parse": "The service answered with something we cannot read",
+  "data.error.transport.status": "The service answered {{status}}",
+  "data.error.transport.timeout": "The request timed out; try again shortly",
+  "data.error.getFailed": "Could not load",
+  "data.error.postFailed": "Could not submit",
+  "data.error.putFailed": "Could not save",
+  "data.error.deleteFailed": "Could not delete",
+  "data.error.service.notReady": "The service address is not known yet",
+  "data.error.invalidRequest": "The request was not valid",
+  "data.error.tokenMissing": "The access token is missing",
+  "data.error.unauthorized": "Not signed in, or the session has expired",
+  "data.error.forbidden": "No access",
+  "data.error.insufficientScope": "Not enough permission"
 }

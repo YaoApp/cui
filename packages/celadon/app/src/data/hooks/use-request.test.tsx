@@ -79,7 +79,8 @@ describe('useRequest', () => {
     const { result } = renderHook(() => useRequest(REQUEST))
     await waitFor(() => expect(result.current.state.status).toBe('error'))
     if (result.current.state.status !== 'error') throw new Error('expected the error state')
-    expect(result.current.state.failure.text).toContain('连不上')
+    // 数据层按码翻译：`data.error.transport.network` 的文案（见 app/src/locales/zh-CN.json）
+    expect(result.current.state.failure.text).toContain('网络不通')
     expect(result.current.state.failure.text).not.toContain('request failed')
   })
 
