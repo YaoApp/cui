@@ -60,13 +60,17 @@
 | `entryCaptcha` | `GET /user/entry/captcha` | 仅在配置要求时使用 |
 | `entryInvite` | `POST /user/entry/invite/verify` | 仅在配置要求邀请码时使用 |
 | `logout` | `POST /user/logout` | 已存在 |
+| `oauthAuthorize` · `oauthCallback` | `POST /user/oauth/:id/authorize` · `/callback` | **本轮做**；第三方登录（Google · GitHub · Apple） |
+| `deviceAuthorize` · `deviceToken` | 设备码流（1.0 的 `/device/authorize` · `/device/token`）| **本轮做**；设备授权页与轮询 |
+| `oidcKeys` | OIDC 公钥（JWKS）| **用于 ID Token 验签**；接口现已具备 |
 
 **规则**：
 
 1. 临时令牌走 `Request.headers` 的 `Authorization`，不进凭据库；成功后的正式令牌交给 `signIn`（它只在应用托管凭据时采纳，Web 由服务端写 Cookie）。
 2. 失败以值返回，`code` 与 `params` 由语言包翻成界面文案；引擎原文不上屏。
 3. 入口配置与验证码响应的字段一律进类型，页面不猜字段名。
-4. 端点的取舍以 §1 草图确定的交互为准：草图上没有的流程，本轮不声明。
+4. 端点的取舍以 §1 草图确定的交互为准；**OAuth 与设备码流本轮要做**，草图随之补相应入口与页面。
+5. **ID Token 在客户端验签**（§5 已定）：用 `oidcKeys` 取公钥验签，失败按 §2 规则 2 以值返回，不上屏引擎原文。
 
 ## 3. 第三步：页面实现（登录与注册分开）
 
