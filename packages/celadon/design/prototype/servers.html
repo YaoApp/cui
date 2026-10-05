@@ -318,6 +318,7 @@ function applyLang(code) {
   const current = LANGS.find((l) => l.code === code)
   document.getElementById('lang-label').textContent = current ? current.label : code
   document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.classList.toggle('is-on', b.dataset.lang === code))
+  if (typeof renderCloud === 'function') renderCloud()   /* 选择器里的名称等动态文案也要跟着换 */
 }
 function applyTheme(next) {
   theme = next === 'dark' ? 'dark' : 'light'
