@@ -602,8 +602,6 @@ body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform:
     var open = document.body.classList.toggle('is-nav-open')
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false')
     toggle.setAttribute('title', open ? 'Collapse' : 'Expand')
-    var use = toggle.querySelector('use')
-    if (use) use.setAttribute('transform', open ? '' : 'scale(-1,1)')
   })
 })()
 </script>
