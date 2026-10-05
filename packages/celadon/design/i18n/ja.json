@@ -85,7 +85,7 @@
       "or": "または",
       "nextBusy": "確認中…",
       "errEmail": "メールアドレスの形式が正しくありません。",
-      "serversTitle": "サーバーを選択",
+      "serversTitle": "Yao Agents サーバーを選択",
       "serversSubtitle": "Yao Engine サーバーに接続します",
       "cloudSection": "クラウドサーバー",
       "customSection": "カスタムサーバー",
@@ -95,11 +95,13 @@
       "cloudLoadFailed": "クラウドサーバー一覧を読み込めませんでした",
       "cloudRetry": "再試行",
       "cloudEmpty": "利用できるクラウドサーバーがありません",
-      "cloudSelectHint": "クラウドサーバーを選択",
+      "cloudSelectHint": "サーバーを選択",
       "customHint": "完全なサーバーアドレスを入力してください（スキームを含む）",
       "registerHelper": "一部のサーバーは招待制で、登録に招待コードが必要です。サイトで申請できます。",
       "registerLink": "招待コードを申請する",
-      "customOption": "カスタムサーバー"
+      "customOption": "カスタム",
+      "serverApac": "Yao Agents 公式・アジア太平洋",
+      "serverCn": "Yao Agents 公式・中国"
     },
     "inbox": {
       "unreadCount": "未読 {count}",

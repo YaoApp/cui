@@ -85,7 +85,7 @@
       "or": "OR",
       "nextBusy": "Checking…",
       "errEmail": "That does not look like an email address.",
-      "serversTitle": "Choose a server",
+      "serversTitle": "Choose your Yao Agents server",
       "serversSubtitle": "Connect to your Yao Engine server",
       "cloudSection": "Cloud servers",
       "customSection": "Custom server",
@@ -95,11 +95,13 @@
       "cloudLoadFailed": "Could not load the cloud server list",
       "cloudRetry": "Retry",
       "cloudEmpty": "No cloud servers available",
-      "cloudSelectHint": "Select a cloud server",
+      "cloudSelectHint": "Choose a server",
       "customHint": "Enter the full server address, scheme included",
       "registerHelper": "Some servers are invite-only and need a code to sign up. You can request one on the site.",
       "registerLink": "Request an invitation code",
-      "customOption": "Custom server"
+      "customOption": "Custom",
+      "serverApac": "Yao Agents official · Asia Pacific",
+      "serverCn": "Yao Agents official · China"
     },
     "inbox": {
       "unreadCount": "{count} unread",

@@ -360,10 +360,8 @@ const stateBox = document.getElementById('cloud-state')
 const failedBox = document.getElementById('cloud-failed')
 const listBox = document.getElementById('cloud-list')
 const nameEl = document.getElementById('cloud-name')
-const urlEl = document.getElementById('cloud-url')
 const pickerBtn = document.getElementById('cloud-picker')
 const customField = document.getElementById('custom-field')
-const customHint = document.getElementById('custom-hint')
 const customInput = document.getElementById('custom-url')
 const connectBtn = document.getElementById('connect')
 const connectError = document.getElementById('connect-error')
@@ -379,28 +377,20 @@ function renderCloud() {
   } else if (cloudState === 'empty') {
     stateBox.innerHTML = '<span>' + dictOf(lang).cloudEmpty + '</span>'
   }
-  if (cloudState !== 'ready') { customField.hidden = true; customHint.hidden = true; return }
+  if (cloudState !== 'ready') { customField.hidden = true; return }
 
   const found = CLOUD.find((c) => c.url === selected)
-  nameEl.textContent = isCustom() ? dictOf(lang).customOption : (found ? found.name : dictOf(lang).cloudSelectHint)
+  nameEl.textContent = isCustom() ? dictOf(lang).customOption : (found ? dictOf(lang)[found.key] : dictOf(lang).cloudSelectHint)
   nameEl.classList.toggle('placeholder', !isCustom() && !found)
-  urlEl.textContent = isCustom() ? (customInput.value.trim() || '') : (found ? found.url : '')
   customField.hidden = !isCustom()
-  customHint.hidden = !isCustom()
 
-  const items = CLOUD.map((c) => {
-    const on = c.url === selected ? ' is-on' : ''
-    return '<button class="picker__item' + on + '" type="button" role="option" data-url="' + c.url + '">' +
-      '<span class="picker__item-name">' + c.name + '</span>' +
-      '<span class="picker__item-meta">' + [c.region, c.url].filter(Boolean).join(' · ') + '</span></button>'
-  }).join('')
-  const customOn = isCustom() ? ' is-on' : ''
-  listBox.innerHTML = items +
-    '<button class="picker__item' + customOn + '" type="button" role="option" data-url="' + CUSTOM + '">' +
-    '<span class="picker__item-name">' + dictOf(lang).customOption + '</span>' +
-    '<span class="picker__item-meta">' + dictOf(lang).customHint + '</span></button>'
-  listBox.querySelectorAll('[data-url]').forEach((item) => item.addEventListener('click', (e) => {
-    e.stopPropagation(); selected = item.dataset.url; listOpen = false; connectError.hidden = true; renderCloud()
+  const item = (url, label, on) =>
+    '<button class="picker__item' + (on ? ' is-on' : '') + '" type="button" role="option" data-url="' + url + '">' +
+    '<span class="picker__item-name">' + label + '</span></button>'
+  listBox.innerHTML = CLOUD.map((c) => item(c.url, dictOf(lang)[c.key], c.url === selected)).join('') +
+    item(CUSTOM, dictOf(lang).customOption, isCustom())
+  listBox.querySelectorAll('[data-url]').forEach((el) => el.addEventListener('click', (e) => {
+    e.stopPropagation(); selected = el.dataset.url; listOpen = false; connectError.hidden = true; renderCloud()
     if (isCustom()) customInput.focus()
   }))
   listBox.hidden = !listOpen
@@ -413,7 +403,11 @@ function loadCloud() {
 document.getElementById('cloud-retry').addEventListener('click', loadCloud)
 pickerBtn.addEventListener('click', (e) => { e.stopPropagation(); listOpen = !listOpen; renderCloud() })
 document.addEventListener('click', () => { if (listOpen) { listOpen = false; renderCloud() } })
-customInput.addEventListener('input', () => { if (isCustom()) urlEl.textContent = customInput.value.trim() })
+customInput.addEventListener('input', () => {          /* 一改就清掉错误态 */
+  customInput.classList.remove('is-error')
+  customField.classList.remove('is-error')
+  connectError.hidden = true
+})
 customInput.addEventListener('input', () => {           /* 一改就清掉错误态 */
   customInput.classList.remove('is-error')
   customField.classList.remove('is-error')

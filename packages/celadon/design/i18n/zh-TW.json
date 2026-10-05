@@ -85,7 +85,7 @@
       "or": "或",
       "nextBusy": "正在檢查…",
       "errEmail": "電子郵件格式不對，檢查一下再試。",
-      "serversTitle": "選擇伺服器",
+      "serversTitle": "選擇 Yao Agents 伺服器",
       "serversSubtitle": "連接您的 Yao Engine 伺服器",
       "cloudSection": "雲端伺服器",
       "customSection": "自訂伺服器",
@@ -95,11 +95,13 @@
       "cloudLoadFailed": "雲端伺服器清單載入失敗",
       "cloudRetry": "重試",
       "cloudEmpty": "暫無可用的雲端伺服器",
-      "cloudSelectHint": "選擇雲端伺服器",
+      "cloudSelectHint": "選擇伺服器",
       "customHint": "填寫完整伺服器位址（含協定）",
       "registerHelper": "部分伺服器為邀請制，需要邀請碼才能註冊。可前往站點申請。",
       "registerLink": "前往註冊申請邀請碼",
-      "customOption": "自訂伺服器"
+      "customOption": "自訂",
+      "serverApac": "Yao Agents 官方亞太",
+      "serverCn": "Yao Agents 官方中國"
     },
     "inbox": {
       "unreadCount": "{count} 未讀",
