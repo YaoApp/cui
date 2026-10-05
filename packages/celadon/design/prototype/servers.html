@@ -216,6 +216,13 @@ svg.opt__logo { color: var(--text-tertiary); }
 /* 名称与域名两行同一起点，不留额内边距与缩进 */
 .picker__item-name, .picker__item-meta, .picker__name, .picker__url { padding: 0; margin: 0; text-indent: 0;
                                                                      text-align: start; align-self: stretch; }
+/* 选择器与加载/空态共用同一固定高度：切换阶段时高度不跳 */
+:root { --picker-h: calc(var(--spacing-48) + var(--spacing-16)); }
+.picker, .picker--state { block-size: var(--picker-h); align-items: flex-start; }
+.picker--state { align-items: center; }
+/* 弹出列表压在输入框之上（此前用的 --z-popover 并不存在，所以层级失效） */
+.picker-wrap { position: relative; z-index: var(--z-raised); }
+.picker__list { z-index: var(--z-overlay); }
 </style>
 </head>
 <body>
@@ -397,7 +404,7 @@ function renderCloud() {
     '<span class="picker__meta"><span class="picker__item-name">' + label + '</span>' +
     '<span class="picker__item-meta">' + domain + '</span></span></button>'
   listBox.innerHTML = CLOUD.map((c) => item(c.url, dictOf(lang)[c.key], bare(c.url), c.url === selected)).join('') +
-    item(CUSTOM, dictOf(lang).customOption, '', isCustom())
+    item(CUSTOM, dictOf(lang).customOption, dictOf(lang).customDesc, isCustom())
   listBox.querySelectorAll('[data-url]').forEach((el) => el.addEventListener('click', (e) => {
     e.stopPropagation(); selected = el.dataset.url; listOpen = false; connectError.hidden = true; renderCloud()
     if (isCustom()) customInput.focus()

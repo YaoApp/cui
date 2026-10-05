@@ -101,7 +101,8 @@
       "registerLink": "Request an invitation code",
       "customOption": "Custom",
       "serverApac": "Yao Agents official · Asia Pacific",
-      "serverCn": "Yao Agents official · China"
+      "serverCn": "Yao Agents official · China",
+      "customDesc": "A server you host yourself — point it at your own address"
     },
     "inbox": {
       "unreadCount": "{count} unread",

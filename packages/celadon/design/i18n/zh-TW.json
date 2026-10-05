@@ -101,7 +101,8 @@
       "registerLink": "前往註冊申請邀請碼",
       "customOption": "自訂",
       "serverApac": "Yao Agents 官方亞太",
-      "serverCn": "Yao Agents 官方中國"
+      "serverCn": "Yao Agents 官方中國",
+      "customDesc": "自行託管的伺服器，填入位址即可連接"
     },
     "inbox": {
       "unreadCount": "{count} 未讀",

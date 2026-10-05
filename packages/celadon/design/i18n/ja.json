@@ -101,7 +101,8 @@
       "registerLink": "招待コードを申請する",
       "customOption": "カスタム",
       "serverApac": "Yao Agents 公式・アジア太平洋",
-      "serverCn": "Yao Agents 公式・中国"
+      "serverCn": "Yao Agents 公式・中国",
+      "customDesc": "自分でホストするサーバー。アドレスを入力して接続します"
     },
     "inbox": {
       "unreadCount": "未読 {count}",

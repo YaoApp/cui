@@ -103,7 +103,8 @@ window.CELADON_I18N = {
         "registerLink": "Request an invitation code",
         "customOption": "Custom",
         "serverApac": "Yao Agents official · Asia Pacific",
-        "serverCn": "Yao Agents official · China"
+        "serverCn": "Yao Agents official · China",
+        "customDesc": "A server you host yourself — point it at your own address"
       },
       "inbox": {
         "unreadCount": "{count} unread",
@@ -879,7 +880,8 @@ window.CELADON_I18N = {
         "registerLink": "招待コードを申請する",
         "customOption": "カスタム",
         "serverApac": "Yao Agents 公式・アジア太平洋",
-        "serverCn": "Yao Agents 公式・中国"
+        "serverCn": "Yao Agents 公式・中国",
+        "customDesc": "自分でホストするサーバー。アドレスを入力して接続します"
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1655,7 +1657,8 @@ window.CELADON_I18N = {
         "registerLink": "前往注册申请邀请码",
         "customOption": "自定义",
         "serverApac": "Yao Agents 官方亚太",
-        "serverCn": "Yao Agents 官方中国"
+        "serverCn": "Yao Agents 官方中国",
+        "customDesc": "自己托管的服务器，填入地址即可连接"
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2431,7 +2434,8 @@ window.CELADON_I18N = {
         "registerLink": "前往註冊申請邀請碼",
         "customOption": "自訂",
         "serverApac": "Yao Agents 官方亞太",
-        "serverCn": "Yao Agents 官方中國"
+        "serverCn": "Yao Agents 官方中國",
+        "customDesc": "自行託管的伺服器，填入位址即可連接"
       },
       "inbox": {
         "unreadCount": "{count} 未讀",
