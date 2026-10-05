@@ -166,7 +166,8 @@ body {
 body.is-client .brand { display: none; }
 body.is-client .terms { display: none; }
 body.is-client .bottom { display: none; }   /* 页脚条款同样不展示 */
-body.is-client .ctrl-wrap { margin-block-start: var(--spacing-24); }
+body.is-client .ctrl-wrap { margin-block-start: 0; }
+body.is-client .ctrl { justify-content: center; }   /* 与服务器选择页一致：卡片下方居中 */
 body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inline-start: 50%; transform: translateX(-50%); }
 /* 客户端内：卡片顶部的「返回服务器选择」与当前服务器（静态展示） */
 /* 客户端内：横条与卡片同属一个区域，间距由容器的 gap 决定 */
@@ -421,7 +422,9 @@ if (isClient) {
     stack.append(bar)
     stack.append(card)
   }
-  if (card) card.after(wrap)
+  const stackEl = document.querySelector('.client-stack')
+  if (card && stackEl) stackEl.append(wrap)          /* 与卡片同区域，间距由容器给 */
+  else if (card) card.after(wrap)
   const signUpLink = document.querySelector('a[href="./register.html"]')
   if (signUpLink) signUpLink.setAttribute('href', './register.html?from=connect')
 }
