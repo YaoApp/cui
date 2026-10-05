@@ -65,13 +65,12 @@ function temporaryToken(token: string): HeadersInit {
 /* ===== 读 ===== */
 
 /** 入口配置。 */
-export const entryConfigQuery = (ctx?: Context) => {
-  /* 这条接口的方言是 **query**：下面一行就是"ctx → 请求"的转换。
-     **注意**：`{key, request}` 对由页面在构建时绑定，hook 只能在调用时把 ctx 交给 operation，
-     传不进这里 —— 所以不显式传 `ctx` 时，这里会读一次平台当前语言（已知缺口，见 README「已知边界」）。 */
-  const locale = localeOf(ctx)
-  return { key: userKeys.entryConfig(locale), request: entryConfig({ locale }) }
-}
+export const entryConfigQuery = () => ({
+  /* 这条接口的方言是 **query**。请求由 hook 在运行时用**它构建的 ctx** 生成（`build` 形态）：
+     域层不再自己读平台配置，调用点写法也不变。key 仍需一个语言段（不同语言是不同数据）。 */
+  key: userKeys.entryConfig(localeOf()),
+  build: (ctx: Context) => entryConfig({ locale: ctx.locale }),
+})
 
 /** 图形/人机验证。 */
 export const entryCaptchaQuery = (captchaId?: string) => ({ key: userKeys.entryCaptcha(captchaId), request: entryCaptcha({ captcha_id: captchaId }) })

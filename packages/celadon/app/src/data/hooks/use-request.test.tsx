@@ -84,6 +84,23 @@ describe('useRequest', () => {
     expect(result.current.state.failure.text).not.toContain('request failed')
   })
 
+  it('builds the request from the runtime context, so the call site does not change', async () => {
+    send.mockResolvedValue({ ok: true, value: 'v' })
+    const seeded: string[] = []
+    renderHook(() =>
+      useRequest<void, string>({
+        key: ['built'],
+        build: (ctx) => {
+          seeded.push(ctx.locale)
+          return { method: 'GET', path: `/things?locale=${ctx.locale}` } as never
+        },
+      }),
+    )
+    await waitFor(() => expect(send).toHaveBeenCalledTimes(1))
+    expect(seeded.length).toBeGreaterThan(0)
+    expect(send.mock.calls[0][0]).toMatchObject({ path: expect.stringContaining('locale=') })
+  })
+
   it('reruns when the matching prefix is invalidated, and only then', async () => {
     send.mockResolvedValue({ ok: true, value: 'v' })
     renderHook(() => useRequest(REQUEST))

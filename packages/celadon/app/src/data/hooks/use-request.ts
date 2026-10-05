@@ -49,6 +49,9 @@ export type RequestSource<Input, Output> =
   | { key: readonly unknown[]; request: Request<Input, Output> }
   /** **动作**：自己发请求，可能还要让平台做点事（如登录成功后收下令牌）。key 必给。 */
   | { key: readonly unknown[]; operation: (input?: Input, ctx?: Context) => Promise<Result<Output>> }
+  /** **用 ctx 构建的取数**：语言等请求元数据由 hook 在**运行时**喂进来，
+   *  域层不再自己读平台配置。**调用点写法不变**（照旧 `useRequest(entryConfigQuery())`）。 */
+  | { key: readonly unknown[]; build: (ctx: Context) => Request<Input, Output> }
 
 /** 取文案的入口：i18next 取不到 key 会原样返回，`dataErrorText` 据此回退并告警。 */
 const translate = (key: string, options?: Record<string, unknown>) =>
@@ -59,12 +62,13 @@ export function useRequest<Input = void, Output = void>(
   options: RequestOptions<Input> = {},
 ): { state: RequestState<Output>; run: (body?: Input) => Promise<Result<Output> | undefined>; reset: () => void } {
   const operation = 'operation' in source ? source.operation : undefined
-  const request: Request<Input, Output> | undefined = operation
+  const build = 'build' in source ? source.build : undefined
+  const request: Request<Input, Output> | undefined = operation || build
     ? undefined
     : 'request' in source
       ? source.request
       : (source as Request<Input, Output>)
-  const declaredKey = 'request' in source || 'operation' in source ? source.key : undefined
+  const declaredKey = 'request' in source || 'operation' in source || 'build' in source ? source.key : undefined
   const [state, setState] = useState<RequestState<Output>>({ status: 'idle' })
   const [attempt, setAttempt] = useState(0)
   const latest = useRef(0)
@@ -75,6 +79,8 @@ export function useRequest<Input = void, Output = void>(
   requestRef.current = request
   const operationRef = useRef(operation)
   operationRef.current = operation
+  const buildRef = useRef(build)
+  buildRef.current = build
   // `options.body` 是默认包体；`run(body)` 为这一次覆盖它。身份没变就不覆盖 `run` 的选择。
   const bodyRef = useRef<Input | undefined>(options.body)
   const defaultBodyRef = useRef(options.body)
@@ -108,9 +114,11 @@ export function useRequest<Input = void, Output = void>(
     // 每次跑之前登记：失效侧按同一套 key 前缀命中就再跑一次（unmount 时注销）
     const unsubscribe = subscribe(keyRef.current, () => { void run() })
     setState({ status: 'loading' })
+    /* `build` 形态：请求在**这里**用运行时 ctx 构建（域层不再自己读平台配置） */
+    const request = buildRef.current ? buildRef.current(requestCtx) : requestRef.current
     const answer = operationRef.current
       ? operationRef.current(bodyRef.current, requestCtx)
-      : send(requestRef.current as Request<Input, Output>, {
+      : send(request as Request<Input, Output>, {
           ctx: requestCtx,
           ...(bodyRef.current === undefined ? {} : { body: bodyRef.current }),
           signal: controller.signal,

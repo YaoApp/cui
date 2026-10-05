@@ -104,7 +104,10 @@ describe('the user key family', () => {
 
 describe('the user read queries pair a key with a declaration', () => {
   it('pairs the reads as-is', () => {
-    expect(entryConfigQuery()).toEqual({ key: userKeys.entryConfig('zh-CN'), request: api.entryConfig({ locale: 'zh-CN' }) })
+    const configPair = entryConfigQuery()
+    expect(configPair.key).toEqual(userKeys.entryConfig('zh-CN'))
+    // 请求由 hook 在运行时用 ctx 构建：断言"ctx → 请求"这一步
+    expect(configPair.build({ locale: 'ja' } as never)).toEqual(api.entryConfig({ locale: 'ja' }))
     expect(entryCaptchaQuery('c1')).toEqual({ key: userKeys.entryCaptcha('c1'), request: api.entryCaptcha({ captcha_id: 'c1' }) })
     expect(oidcKeysQuery()).toEqual({ key: userKeys.oidcKeys(), request: api.oidcKeys })
     expect(oauthAuthorizeQuery('google', 'https://x/back')).toEqual({
