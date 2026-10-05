@@ -84,7 +84,8 @@ window.CELADON_I18N = {
         "providerGoogle": "Continue with Google",
         "providerGitHub": "Continue with GitHub",
         "providerApple": "Continue with Apple",
-        "or": "OR"
+        "or": "OR",
+        "nextBusy": "Checking…"
       },
       "inbox": {
         "unreadCount": "{count} unread",
@@ -841,7 +842,8 @@ window.CELADON_I18N = {
         "providerGoogle": "Google で続ける",
         "providerGitHub": "GitHub で続ける",
         "providerApple": "Apple で続ける",
-        "or": "または"
+        "or": "または",
+        "nextBusy": "確認中…"
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1598,7 +1600,8 @@ window.CELADON_I18N = {
         "providerGoogle": "使用 Google 继续",
         "providerGitHub": "使用 GitHub 继续",
         "providerApple": "使用 Apple 继续",
-        "or": "或"
+        "or": "或",
+        "nextBusy": "正在检查…"
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2355,7 +2358,8 @@ window.CELADON_I18N = {
         "providerGoogle": "使用 Google 繼續",
         "providerGitHub": "使用 GitHub 繼續",
         "providerApple": "使用 Apple 繼續",
-        "or": "或"
+        "or": "或",
+        "nextBusy": "正在檢查…"
       },
       "inbox": {
         "unreadCount": "{count} 未讀",

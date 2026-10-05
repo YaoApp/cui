@@ -130,6 +130,11 @@ body {
 
 .footnote { margin: var(--spacing-16) 0 0; text-align: center; font-size: var(--font-size-13); color: var(--text-secondary); }
 
+/* 简繁日的最小字号：设计体系规定中文最小 12（--font-size-minimum-cjk），11 档只给拉丁/数字 */
+:lang(zh-CN) .or, :lang(zh-TW) .or, :lang(ja) .or,
+:lang(zh-CN) .footnote, :lang(zh-TW) .footnote, :lang(ja) .footnote,
+:lang(zh-CN) .bottom, :lang(zh-TW) .bottom, :lang(ja) .bottom { font-size: var(--font-size-minimum-cjk); }
+
 /* 底行：条款 */
 .bottom { display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
 .bottom a { color: var(--text-tertiary); }
@@ -207,7 +212,7 @@ body {
       <form>
         <div class="field">
           <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mail"></use></svg>
-          <input class="input" id="account" name="account" type="text" autocomplete="username"
+          <input class="input" id="account" name="account" type="email" autocomplete="email"
                  inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="accountPh" placeholder="Enter your email">
         </div>
 
@@ -220,8 +225,9 @@ body {
             <a class="link" href="#" data-i18n="termsPrivacy">Privacy Policy</a>
           </label>
         </div>
+        <p class="terms__error" id="terms-error" role="alert" hidden data-i18n="errTerms">Please read and agree to the terms first.</p>
 
-        <button class="button button--block button--inverse" type="submit" data-i18n="next">Next</button>
+        <button class="button button--block button--inverse" type="submit" id="next" data-i18n="next" disabled>Next</button>
       </form>
 
       <p class="footnote"><span data-i18n="noAccount">Don&apos;t have an account?</span> <a class="link" href="./register.html" data-i18n="signUpNow">Sign up now</a></p>
@@ -281,6 +287,28 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
 })
 
+
+/* 未填邮箱：Next 禁用；提交：先校验协议（未勾选给左对齐错误），再假加载 2–3 秒后进注册页 */
+const nextBtn = document.getElementById('next')
+const emailInput = document.getElementById('account')
+const termsBox = document.getElementById('terms')
+const termsError = document.getElementById('terms-error')
+const syncNext = () => { nextBtn.disabled = emailInput.value.trim() === '' }
+emailInput.addEventListener('input', syncNext)
+termsBox.addEventListener('change', () => { if (termsBox.checked) termsError.hidden = true })
+document.querySelector('form').addEventListener('submit', async (event) => {
+  event.preventDefault()
+  if (!termsBox.checked) {
+    termsError.hidden = false
+    termsBox.focus()
+    return
+  }
+  nextBtn.disabled = true
+  nextBtn.textContent = dictOf(lang).nextBusy || 'Checking…'
+  await new Promise((resolve) => setTimeout(resolve, 2400))
+  location.href = './register.html'
+})
+syncNext()
 
 applyLang('en')
 /* 首屏：跟随系统（head 里那一行已设好 data-theme），图标与选中态据此初始化 */

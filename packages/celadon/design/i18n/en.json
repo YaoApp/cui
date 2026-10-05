@@ -82,7 +82,8 @@
       "providerGoogle": "Continue with Google",
       "providerGitHub": "Continue with GitHub",
       "providerApple": "Continue with Apple",
-      "or": "OR"
+      "or": "OR",
+      "nextBusy": "Checking…"
     },
     "inbox": {
       "unreadCount": "{count} unread",

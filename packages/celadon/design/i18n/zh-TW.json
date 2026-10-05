@@ -82,7 +82,8 @@
       "providerGoogle": "使用 Google 繼續",
       "providerGitHub": "使用 GitHub 繼續",
       "providerApple": "使用 Apple 繼續",
-      "or": "或"
+      "or": "或",
+      "nextBusy": "正在檢查…"
     },
     "inbox": {
       "unreadCount": "{count} 未讀",

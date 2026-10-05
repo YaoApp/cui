@@ -82,7 +82,8 @@
       "providerGoogle": "Google で続ける",
       "providerGitHub": "GitHub で続ける",
       "providerApple": "Apple で続ける",
-      "or": "または"
+      "or": "または",
+      "nextBusy": "確認中…"
     },
     "inbox": {
       "unreadCount": "未読 {count}",
