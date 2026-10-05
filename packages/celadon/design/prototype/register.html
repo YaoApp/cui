@@ -117,7 +117,7 @@ body {
 .field { position: relative; display: flex; align-items: center; margin-block-end: var(--spacing-16); }
 .field__icon { position: absolute; inset-inline-start: var(--spacing-12); inline-size: var(--spacing-16); block-size: var(--spacing-16);
                display: block; color: var(--text-placeholder); pointer-events: none; }
-/* 输入框：本页先用**低对比档**边界（--border-control-low，观感轻）；
+/* 输入框：**有意弱化**边界（--border-control-low，对外独立页追求轻观感），按规范豁免处理；
    合规档（WCAG 1.4.11 ≥3:1）是 --border-control-strong，默认档是 --border-control。 */
 .field .input { inline-size: 100%; min-block-size: var(--row-height); border-radius: var(--radius-medium);
                 padding-inline-start: var(--spacing-32); font-size: var(--font-size-14);
