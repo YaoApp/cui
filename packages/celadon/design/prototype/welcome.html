@@ -384,9 +384,22 @@ body.is-nav-open .window { grid-template-columns: var(--nav-default) minmax(var(
 body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desktop) minmax(var(--center-min), 1fr); }
 /* 首屏输入区用大圆角档 --radius-xl（F2 新增；元素越大圆角越大） */
 .composer { border-radius: var(--radius-xl); }
+/* 右上角的「打开右栏」键：与客户端左上的窗口控制区对称；镜像使用表示「向右展开」 */
+.panel-toggle { position: absolute; inset-block-start: calc((var(--column-header-height) - var(--spacing-24)) / 2);
+  inset-inline-end: var(--spacing-16); z-index: var(--z-raised); inline-size: var(--spacing-24); block-size: var(--spacing-24);
+  display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: var(--radius-small);
+  background: transparent; color: var(--text-secondary); cursor: pointer; }
+.panel-toggle:hover { background: var(--background-hover); color: var(--text-primary); }
+.panel-toggle:focus { outline: none; }
+.panel-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.panel-toggle .icon { transform: scaleX(-1); }
+.page { position: relative; }
 </style>
 </head>
 <body class="celadon">
+<button class="panel-toggle" type="button" id="panel-toggle" aria-label="Toggle side panel">
+  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-collapse"></use></svg>
+</button>
 <!-- 首次进入的首屏（产品级）：与 layout.html 同壳，但无右栏，中栏是引导语 + 大输入区。骨架仍以 design/mock.html 为准，同一套类名与 token；
      相对 mock 只有两处改动：去掉演示用的窗口红绿灯、窗口铺满视口（真客户端由系统窗口承载）。
      组件边界（接产品代码时按此切分）：
