@@ -179,8 +179,10 @@ body.is-client .client-bar { display: flex; }
 .client-back:hover { color: var(--brand-ink); }
 .client-back .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
 /* 当前服务器：角标形态（带底色的胶囊），文字用最深一档，比纯文本醒目 */
-.client-server { display: inline-flex; align-items: center; gap: var(--spacing-8); padding: var(--spacing-4) var(--spacing-12);
-                 border-radius: var(--radius-pill); background: var(--background-field); color: var(--text-primary);
+/* 当前服务器：标签（tag）形态 —— 描边 + 浅底 + 小圆角，贴右缘 */
+.client-server { display: inline-flex; align-items: center; gap: var(--spacing-4); padding: var(--spacing-4) var(--spacing-8);
+                 border: var(--border-width) solid var(--border-default); border-radius: var(--radius-small);
+                 background: var(--background-surface); color: var(--text-primary);
                  font-size: var(--font-size-13); min-inline-size: 0; }
 .client-server__mark { inline-size: calc(var(--spacing-16) + var(--spacing-4)); block-size: calc(var(--spacing-16) + var(--spacing-4)); flex: none; }
 .client-server__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--font-weight-medium); }
