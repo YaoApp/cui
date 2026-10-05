@@ -395,8 +395,41 @@ document.querySelector('form').addEventListener('submit', async (event) => {
   location.href = isClient ? './register.html?from=connect' : './register.html'
 })
 /* 客户端内模式：从 Connect 跳来（?from=connect）——收起品牌区与协议，控件移到卡片下方 */
+/* 客户端内（?from=connect）：角标 + 返回入口 + 控件；独立页一律不生效 */
 const isClient = new URLSearchParams(location.search).has('from')
-/* 客户端内：卡顶显示返回入口与所选服务器（名称走语言包，跟随语言切换） */
+
+if (isClient) {
+  document.body.classList.add('is-client')
+  const card = document.querySelector('.card')
+  const bar = document.getElementById('client-bar')
+  const tag = document.querySelector('.client-server')
+
+  if (card && bar && tag) {
+    const stack = document.createElement('div')          /* 横条与卡片同一区域 */
+    stack.className = 'client-stack'
+    card.before(stack)
+    stack.append(bar)
+    stack.append(card)
+    card.prepend(tag)                                    /* 角标放进卡片：定位相对卡片 */
+  }
+
+  const ctrl = document.querySelector('.ctrl')
+  const langMenu = document.getElementById('lang-menu')
+  const anchor = document.querySelector('.client-stack') || card
+  if (ctrl && anchor) {
+    const wrap = document.createElement('div')           /* 控件独立容器：卡下 24、居中 */
+    wrap.className = 'ctrl-wrap'
+    ctrl.replaceWith(wrap)
+    wrap.append(ctrl)
+    if (langMenu) wrap.append(langMenu)
+    anchor.after(wrap)
+  }
+
+  const signUp = document.querySelector('a[href="./register.html"]')
+  if (signUp) signUp.setAttribute('href', './register.html?from=connect')
+}
+
+/* 角标里的名称：走语言包，跟随语言切换 */
 function renderClientBar() {
   if (!isClient) return
   const nameEl = document.getElementById('client-server-name')
@@ -404,16 +437,8 @@ function renderClientBar() {
   const key = new URLSearchParams(location.search).get('server') || 'serverApac'
   const dict = dictOf(lang)
   nameEl.textContent = key === 'custom' ? dict.customOption : (dict[key] || dict.serverApac)
-  const stackEl = document.querySelector('.client-stack')
-  const clientTag = document.querySelector('.client-server')
-  if (card && clientTag) card.prepend(clientTag)   /* 放进卡片：定位相对卡片 */
-  if (stackEl) stackEl.after(wrap)                   /* 独立容器：与卡片分开，位置与服务器选择页一致 */
-  else if (card) card.after(wrap)
-  const signUpLink = document.querySelector('a[href="./register.html"]')
-  if (signUpLink) signUpLink.setAttribute('href', './register.html?from=connect')
 }
 
-renderClientBar()
 applyLang('en')
 /* 首屏：跟随系统（head 里那一行已设好 data-theme），图标与选中态据此初始化 */
 applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')
