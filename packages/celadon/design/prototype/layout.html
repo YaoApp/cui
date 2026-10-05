@@ -347,9 +347,9 @@ body.celadon, html.celadon { font-family: var(--font-family-ui); }
    若后续保留，应回写到 F6 的分工说明；若不保留，删掉这两行即可。 */
 .window > .main { background: var(--background-surface); }
 .window > .panel { background: var(--background-content); }
-/* 实验：导航选中项与会话选中行改用中性的 hover 档（原为品牌色 soft，--background-selected） */
-.nav .navigation-item.is-active { background: var(--background-hover); color: var(--text-primary); }
-.conversation-row.is-selected { background: var(--background-hover); }
+/* 实验：导航选中项与会话选中行改用中性的 active 档（比 hover 深一档，便于与悬浮态区分） */
+.nav .navigation-item.is-active { background: var(--background-active); color: var(--text-primary); }
+.conversation-row.is-selected { background: var(--background-active); }
 .conversation-row.is-selected::before { background: var(--brand); }
 .conversation-row.is-selected .row-title { color: var(--text-primary); }
 </style>
