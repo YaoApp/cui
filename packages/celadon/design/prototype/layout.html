@@ -338,6 +338,9 @@ body.celadon, html.celadon { font-family: var(--font-family-ui); }
 /* 系统的 `.celadon, [data-theme] .celadon { font-family: inherit }`（0,2,0）把正文字族设成"继承"，
    于是落到 UA 默认字体。这里用同形选择器再加一层（0,2,1）让 token 真正生效。 */
 [data-theme] body.celadon { font-family: var(--font-family-ui); }
+/* 输入区按 F3 的 L2（floating）：阴影 --shadow-floating · 面阶 --elevation-surface-2 · z --z-overlay。
+   暗色下阴影在暗底不可见，靠面阶分离 —— 故必须同时给面阶，不能只给阴影。 */
+.composer { position: relative; z-index: var(--z-overlay); background: var(--elevation-surface-2); box-shadow: var(--shadow-floating); }
 </style>
 </head>
 <body class="celadon">
