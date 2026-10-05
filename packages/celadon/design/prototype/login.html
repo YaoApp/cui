@@ -167,6 +167,11 @@ body.is-client .brand { display: none; }
 body.is-client .terms { display: none; }
 body.is-client .bottom { display: none; }   /* 页脚条款同样不展示 */
 body.is-client .ctrl-wrap { margin-block-start: var(--spacing-24); }
+body.is-client .ctrl-wrap { position: relative; }
+/* 客户端内菜单向上展开、按内容收窄、水平居中（与服务器选择页一致） */
+body.is-client .menu { inset-block-start: auto; inset-block-end: calc(100% + var(--spacing-4));
+                       inset-inline-start: 50%; inset-inline-end: auto; transform: translateX(-50%);
+                       inline-size: max-content; min-inline-size: 160px; }
 body.is-client .ctrl { justify-content: center; }   /* 与服务器选择页一致：卡片下方居中 */
 body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inline-start: 50%; transform: translateX(-50%); }
 /* 客户端内：卡片顶部的「返回服务器选择」与当前服务器（静态展示） */
