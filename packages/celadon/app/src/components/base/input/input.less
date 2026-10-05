@@ -93,11 +93,11 @@
     line-height: var(--line-height-normal);
   }
 
-  /* 提示与错误的字号取设计自身的 12.5（`--font-size-body`）：设计类 `.hint-error` 带的是这个值，
-     若提示用 12，两条消息的行盒会差 1px，看起来就是"间距不一致"。 */
+  /* 提示与错误共用说明档字号（`--font-size-caption`）：设计类 `.hint-error` 带的就是这个值，
+     两者同号，两条消息的行盒才一样高，否则看起来"间距不一致"。 */
   &__hint {
     color: var(--text-tertiary);
-    font-size: var(--font-size-body);
+    font-size: var(--font-size-caption);
     line-height: var(--line-height-normal);
   }
 

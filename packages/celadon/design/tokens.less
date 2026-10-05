@@ -361,7 +361,7 @@
       &:active, &.is-active { background: var(--brand-solid-active); } }
     &.is-focus { box-shadow: var(--focus-ring); outline: none; }
     &:disabled, &.is-disabled { background: var(--background-disabled); color: var(--text-disabled); border-color: var(--border-disabled); cursor: not-allowed; } }
-  .hint-error  { color: var(--danger-ink); font-size: 12.5px; }   /* 错误提示文字（危险色的文字档） */
+  .hint-error  { color: var(--danger-ink); font-size: var(--font-size-caption); }   /* 错误提示文字（危险色的文字档，取说明档字号） */
   .btn-ghost   { background: var(--background-surface); color: var(--text-primary); border: 1px solid var(--border-default); }
 
   /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .on */

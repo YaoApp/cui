@@ -457,7 +457,7 @@
  */
 .celadon,
 [data-theme] .celadon {
-  /* 错误提示文字（危险色的文字档） */
+  /* 错误提示文字（危险色的文字档，取说明档字号） */
   /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .on */
   /* 输入框：六态（真实伪类与 .is-* 静态类一一对应，后者供设计稿/静态页同时展示多态） */
   font: inherit;
@@ -512,7 +512,7 @@
 .celadon .hint-error,
 [data-theme] .celadon .hint-error {
   color: var(--danger-ink);
-  font-size: 12.5px;
+  font-size: var(--font-size-caption);
 }
 .celadon .btn-ghost,
 [data-theme] .celadon .btn-ghost {

@@ -46,8 +46,9 @@
 
 | # | 事项 | 判据 | 状态 |
 | --- | --- | --- | --- |
-| 12 | `components/base/index.ts` | 只做再导出，不带逻辑；调用方从 `@/components/base` 引入 | 未开始 |
-| 13 | 脚手架清单页 | `features/scaffold/base`，路由 `/scaffold/base`，按分组列出全部基础件与状态 | 未开始 |
+| 12 | `components/base/index.ts` | 只做再导出，不带逻辑；调用方从 `@/components/base` 引入 | **已完成** |
+| 13 | 脚手架清单页 | `features/scaffold/base`，路由 `/scaffold/base`，按分组列出全部基础件与状态 | **已完成** |
+| 18 | 按现行字号与字重档位复量全部基础件 | 档位现为 12 · 14 · 16 · 20 · 24、字重 400 / 500 / 600。逐件量被绘制元素的字号、字重、行盒与溢出，判据用实测值 | 未开始 |
 
 ### 2.5 页面内部件
 
