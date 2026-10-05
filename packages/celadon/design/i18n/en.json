@@ -78,7 +78,11 @@
       "invitePh": "Invitation code (optional)",
       "showPassword": "Show password",
       "hidePassword": "Hide password",
-      "emailPh": "Enter your email address"
+      "emailPh": "Enter your email address",
+      "providerGoogle": "Continue with Google",
+      "providerGitHub": "Continue with GitHub",
+      "providerApple": "Continue with Apple",
+      "or": "OR"
     },
     "inbox": {
       "unreadCount": "{count} unread",

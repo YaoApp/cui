@@ -78,7 +78,11 @@
       "invitePh": "招待コード（任意）",
       "showPassword": "パスワードを表示",
       "hidePassword": "パスワードを隠す",
-      "emailPh": "メールアドレスを入力"
+      "emailPh": "メールアドレスを入力",
+      "providerGoogle": "Google で続ける",
+      "providerGitHub": "GitHub で続ける",
+      "providerApple": "Apple で続ける",
+      "or": "または"
     },
     "inbox": {
       "unreadCount": "未読 {count}",

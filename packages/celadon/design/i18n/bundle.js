@@ -80,7 +80,11 @@ window.CELADON_I18N = {
         "invitePh": "Invitation code (optional)",
         "showPassword": "Show password",
         "hidePassword": "Hide password",
-        "emailPh": "Enter your email address"
+        "emailPh": "Enter your email address",
+        "providerGoogle": "Continue with Google",
+        "providerGitHub": "Continue with GitHub",
+        "providerApple": "Continue with Apple",
+        "or": "OR"
       },
       "inbox": {
         "unreadCount": "{count} unread",
@@ -833,7 +837,11 @@ window.CELADON_I18N = {
         "invitePh": "招待コード（任意）",
         "showPassword": "パスワードを表示",
         "hidePassword": "パスワードを隠す",
-        "emailPh": "メールアドレスを入力"
+        "emailPh": "メールアドレスを入力",
+        "providerGoogle": "Google で続ける",
+        "providerGitHub": "GitHub で続ける",
+        "providerApple": "Apple で続ける",
+        "or": "または"
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1586,7 +1594,11 @@ window.CELADON_I18N = {
         "invitePh": "邀请码（可选）",
         "showPassword": "显示密码",
         "hidePassword": "隐藏密码",
-        "emailPh": "请输入邮箱地址"
+        "emailPh": "请输入邮箱地址",
+        "providerGoogle": "使用 Google 继续",
+        "providerGitHub": "使用 GitHub 继续",
+        "providerApple": "使用 Apple 继续",
+        "or": "或"
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2339,7 +2351,11 @@ window.CELADON_I18N = {
         "invitePh": "邀請碼（選填）",
         "showPassword": "顯示密碼",
         "hidePassword": "隱藏密碼",
-        "emailPh": "請輸入電子郵件地址"
+        "emailPh": "請輸入電子郵件地址",
+        "providerGoogle": "使用 Google 繼續",
+        "providerGitHub": "使用 GitHub 繼續",
+        "providerApple": "使用 Apple 繼續",
+        "or": "或"
       },
       "inbox": {
         "unreadCount": "{count} 未讀",
