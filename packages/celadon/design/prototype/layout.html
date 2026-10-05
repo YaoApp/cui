@@ -318,6 +318,8 @@ body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-8);
 body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-16); }
 /* Web 侧同样对齐：顶行内距 16 = 菜单项图标的左边界 */
 body:not(.is-client) .nav .navigation-header { padding-inline-start: var(--spacing-16); }
+/* LOGO 图形与菜单项图标同一左边界：品牌容器自身不再带左内距（mock 里是 16） */
+.nav .navigation-header .brand { padding-inline: 0; }
 </style>
 </head>
 <body class="celadon">
