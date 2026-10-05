@@ -260,6 +260,16 @@ body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform:
 /* 顶行与菜单项同一左边界：不再为窗口按钮预留 48px（窗口控制区已独立） */
 .nav .navigation-header { padding-inline-start: var(--spacing-8); }
 .nav .navigation-header .brand { margin-inline-start: 0; }
+/* 中栏/右栏头部不再有翻页键；左内距恢复常规，只有客户端才为窗口控制区留位（原来 76px 过大） */
+.main .content-header, .panel .panel-header { padding-inline-start: var(--spacing-16); }
+body.is-client .main .content-header { padding-inline-start: calc(var(--spacing-16) + 100px); }
+body.is-client .panel .panel-header { padding-inline-start: var(--spacing-16); }
+/* 头部左内距：Web 用常规内距；客户端才为窗口控制区留位（红绿灯 + 收起键约占 100px） */
+body .main .content-header, body .panel .panel-header { padding-inline-start: var(--spacing-16); }
+body.is-client .main .content-header { padding-inline-start: calc(var(--spacing-16) + 100px); }
+/* 中栏头：内容左对齐（mock 里是右对齐，标题被推到最右）；右栏头残留的翻页键隐藏 */
+.main .content-header { justify-content: flex-start; }
+.panel .panel-header > .icon-button { display: none; }
 </style>
 </head>
 <body class="celadon">
@@ -444,8 +454,6 @@ body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform:
   <!-- ② 内容列 -->
   <main class="main">
     <div class="content-header">
-      <span class="icon-button"><svg class="icon is-small"><use href="#i-left"/></svg></span>
-      <span class="icon-button"><svg class="icon is-small"><use href="#i-right"/></svg></span>
       <span class="content-title" data-i18n="sample.conversation.greeting.title">打招呼与功能咨询</span><span class="content-meta"><span data-i18n="ui.navigation.inbox">收件箱</span> · <span data-i18n="ui.thread.newMessages" data-count="3" data-count="3">3 条新消息</span></span>
       <div class="capability-list">
         <span class="capability"><svg class="icon is-small"><use href="#i-file"/></svg><span class="capability-badge">2</span></span>
@@ -631,7 +639,7 @@ body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform:
 (function () {
   var isClient = new URLSearchParams(location.search).get('view') === 'client'
   document.body.classList.add('is-nav-open')   /* 两个视图默认展开导航 */
-  document.body.classList.add('is-client', 'is-nav-open')   /* 客户端默认展开导航 */
+  if (isClient) document.body.classList.add('is-client')   /* 红绿灯与「收起为 0」只属于客户端 */
   var win = document.querySelector('.window')
   if (!win) return
   var host = document.createElement('div')
