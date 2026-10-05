@@ -156,6 +156,12 @@
     },
     "tool": {
       "readFiles": "讀取檔案"
+    },
+    "layout": {
+      "settings": "設定",
+      "searchPh": "搜尋",
+      "emptyTitle": "還沒有內容",
+      "emptyHint": "從左側選一項開始，或新建一個。"
     }
   },
   "sample": {

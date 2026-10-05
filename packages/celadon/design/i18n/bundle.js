@@ -158,6 +158,12 @@ window.CELADON_I18N = {
       },
       "tool": {
         "readFiles": "Read files"
+      },
+      "layout": {
+        "settings": "Settings",
+        "searchPh": "Search",
+        "emptyTitle": "Nothing here yet",
+        "emptyHint": "Pick something on the left, or create one."
       }
     },
     "sample": {
@@ -936,6 +942,12 @@ window.CELADON_I18N = {
       },
       "tool": {
         "readFiles": "ファイルを読み込む"
+      },
+      "layout": {
+        "settings": "設定",
+        "searchPh": "検索",
+        "emptyTitle": "まだ何もありません",
+        "emptyHint": "左から選ぶか、新しく作成してください。"
       }
     },
     "sample": {
@@ -1714,6 +1726,12 @@ window.CELADON_I18N = {
       },
       "tool": {
         "readFiles": "读取文件"
+      },
+      "layout": {
+        "settings": "设置",
+        "searchPh": "搜索",
+        "emptyTitle": "还没有内容",
+        "emptyHint": "从左侧选一项开始，或新建一个。"
       }
     },
     "sample": {
@@ -2492,6 +2510,12 @@ window.CELADON_I18N = {
       },
       "tool": {
         "readFiles": "讀取檔案"
+      },
+      "layout": {
+        "settings": "設定",
+        "searchPh": "搜尋",
+        "emptyTitle": "還沒有內容",
+        "emptyHint": "從左側選一項開始，或新建一個。"
       }
     },
     "sample": {

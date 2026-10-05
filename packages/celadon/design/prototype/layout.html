@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yao Agents · Workspace</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+
+/* 登录之后的主界面布局稿（产品级）。纯 HTML + token；只画形态，接真数据在第三步。
+   组件边界：注释里 [base] 进 app/src/components/base，[feature] 进 features/<域>，[shell] 是应用外壳。 */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--background-app); color: var(--text-primary);
+       font-family: var(--font-family-ui); font-size: var(--font-size-14); line-height: var(--line-height-normal); }
+[hidden] { display: none !important; }
+.app { display: grid; grid-template-columns: 240px minmax(0, 1fr) 320px; block-size: 100vh; }
+.nav { display: flex; flex-direction: column; gap: var(--spacing-8); padding: var(--spacing-16) var(--spacing-12);
+       background: var(--background-surface); border-inline-end: var(--border-width) solid var(--border-subtle); }
+.nav__brand { display: flex; align-items: center; gap: var(--spacing-8); padding-inline: var(--spacing-8); margin-block-end: var(--spacing-8); }
+.nav__mark { inline-size: var(--spacing-24); block-size: var(--spacing-24); }
+.nav__name { font-size: var(--font-size-15); font-weight: var(--font-weight-heavy); }
+.nav__group { display: flex; flex-direction: column; gap: var(--spacing-4); }
+.nav__item { display: flex; align-items: center; gap: var(--spacing-8); padding: var(--spacing-8) var(--spacing-12);
+             border-radius: var(--radius-small); color: var(--text-secondary); text-decoration: none; cursor: pointer; }
+.nav__item:hover { background: var(--background-hover); color: var(--text-primary); }
+.nav__item.is-on { background: var(--background-selected); color: var(--text-primary); font-weight: var(--font-weight-medium); }
+.nav__item:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.nav__item .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; }
+.nav__count { margin-inline-start: auto; color: var(--text-tertiary); font-size: var(--font-size-12); }
+.nav__foot { margin-block-start: auto; display: flex; flex-direction: column; gap: var(--spacing-8); }
+.nav__server { display: flex; align-items: center; gap: var(--spacing-8); padding: var(--spacing-8) var(--spacing-12);
+               border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-small);
+               color: var(--text-primary); font-size: var(--font-size-13); font-weight: var(--font-weight-heavy); }
+.nav__server .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; color: var(--text-tertiary); }
+.main { display: flex; flex-direction: column; min-inline-size: 0; }
+.topbar { display: flex; align-items: center; gap: var(--spacing-16); padding: var(--spacing-12) var(--spacing-24);
+          border-block-end: var(--border-width) solid var(--border-subtle); background: var(--background-surface); }
+.topbar__title { font-size: var(--font-size-15); font-weight: var(--font-weight-medium); }
+.topbar__search { margin-inline-start: auto; inline-size: 220px; }
+.ctrl-wrap { position: relative; }
+.ctrl { display: flex; align-items: center; gap: var(--spacing-8); }
+.ctrl__sep { inline-size: var(--border-width); block-size: var(--spacing-16); background: var(--border-default); }
+.ctrl__btn { display: inline-flex; align-items: center; gap: var(--spacing-8); border: 0; background: transparent;
+             color: var(--text-secondary); font: inherit; font-size: var(--font-size-13); cursor: pointer;
+             padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-small); }
+.ctrl__btn:hover { background: var(--background-hover); color: var(--text-primary); }
+.ctrl__btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.ctrl__btn .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); display: block; }
+.menu { position: absolute; inset-block-start: calc(100% + var(--spacing-4)); inset-inline-end: 0; z-index: var(--z-overlay);
+        min-inline-size: 176px; padding: var(--spacing-4); background: var(--background-surface);
+        border: var(--border-width) solid var(--border-default); border-radius: var(--radius-medium); box-shadow: var(--shadow-floating); }
+.menu button { display: flex; align-items: center; gap: var(--spacing-8); inline-size: 100%; text-align: start;
+               padding: var(--spacing-8) var(--spacing-12); border: 0; border-radius: var(--radius-small);
+               background: transparent; color: var(--text-primary); font: inherit; font-size: var(--font-size-13); cursor: pointer; }
+.menu button:hover { background: var(--background-hover); }
+.menu button.is-on { background: var(--background-selected); }
+.list { display: flex; flex-direction: column; overflow: auto; padding: var(--spacing-8) var(--spacing-12); flex: 1; }
+.list__row { display: flex; align-items: center; gap: var(--spacing-12); padding: var(--spacing-12);
+             border-radius: var(--radius-small); cursor: pointer; }
+.list__row:hover { background: var(--background-hover); }
+.list__row.is-on { background: var(--background-selected); }
+.list__row:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.list__text { display: flex; flex-direction: column; gap: 2px; min-inline-size: 0; }
+.list__title { font-size: var(--font-size-14); font-weight: var(--font-weight-medium); }
+.list__meta { color: var(--text-tertiary); font-size: var(--font-size-12); }
+.chip { margin-inline-start: auto; padding: 2px var(--spacing-8); border-radius: var(--radius-small);
+        background: var(--background-field); color: var(--text-secondary); font-size: var(--font-size-12); white-space: nowrap; }
+.chip--you { background: var(--brand-soft); color: var(--brand-ink); font-weight: var(--font-weight-medium); }
+.empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-8); text-align: center; }
+.empty__title { font-size: var(--font-size-15); font-weight: var(--font-weight-medium); }
+.empty__hint { color: var(--text-tertiary); font-size: var(--font-size-13); }
+.detail { display: flex; flex-direction: column; gap: var(--spacing-16); padding: var(--spacing-16);
+          background: var(--background-surface); border-inline-start: var(--border-width) solid var(--border-subtle); overflow: auto; }
+.detail__title { font-size: var(--font-size-15); font-weight: var(--font-weight-medium); }
+.detail__block { display: flex; flex-direction: column; gap: var(--spacing-8); }
+.detail__label { color: var(--text-tertiary); font-size: var(--font-size-12); }
+.step { display: flex; align-items: flex-start; gap: var(--spacing-8); font-size: var(--font-size-13); }
+.step__dot { inline-size: var(--spacing-8); block-size: var(--spacing-8); border-radius: 50%; background: var(--brand); flex: none; margin-block-start: 6px; }
+.step--todo .step__dot { background: var(--border-default); }
+.detail .button--block { margin-block-start: auto; }
+@media (max-width: 1100px) { .app { grid-template-columns: 56px minmax(0, 1fr); } .detail { display: none; }
+  .nav__name, .nav__item span, .nav__count, .nav__server span { display: none; } .nav { align-items: center; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" /></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /> <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></symbol>
+  <symbol id="i-board" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M8 7v7" /> <path d="M12 7v4" /> <path d="M16 7v9" /></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" /></symbol>
+  <symbol id="i-pc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" /> <line x1="8" x2="16" y1="21" y2="21" /> <line x1="12" x2="12" y1="17" y2="21" /></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" /> <circle cx="11" cy="11" r="8" /></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2" /><rect width="20" height="8" x="2" y="14" rx="2" /><path d="M6 6h.01M6 18h.01" /></symbol>
+  <symbol id="i-plus-square" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M8 12h8" /> <path d="M12 8v8" /></symbol>
+</defs></svg>
+
+<div class="app">
+  <!-- [shell] 左导航：品牌 · 主导航 · 底部当前服务器 -->
+  <nav class="nav" aria-label="Main">
+    <div class="nav__brand">
+      <img class="nav__mark" src="logo-mark-celadon.svg" alt="" width="24" height="20">
+      <span class="nav__name">Yao Agents</span>
+    </div>
+    <div class="nav__group">
+      <a class="nav__item" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus-square"></use></svg><span data-i18n-key="ui.layout.newItem">New</span></a>
+      <a class="nav__item is-on" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"></use></svg><span data-i18n-key="ui.navigation.chat">Chat</span></a>
+      <a class="nav__item" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-inbox"></use></svg><span data-i18n-key="ui.navigation.inbox">Inbox</span><span class="nav__count">3</span></a>
+      <a class="nav__item" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-board"></use></svg><span data-i18n-key="ui.navigation.board">Board</span></a>
+      <a class="nav__item" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-book"></use></svg><span data-i18n-key="ui.navigation.knowledge">Knowledge</span></a>
+      <a class="nav__item" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pc"></use></svg><span data-i18n-key="ui.navigation.computer">Computer</span></a>
+    </div>
+    <div class="nav__foot">
+      <a class="nav__item" href="#"><span data-i18n-key="ui.layout.settings">Settings</span></a>
+      <div class="nav__server" title="Yao Agents official · Asia Pacific">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>
+        <span>Yao Agents official · Asia Pacific</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <!-- [shell] 顶栏：上下文标题 · 搜索 · 语言与主题（与入口页同一套控件） -->
+    <header class="topbar">
+      <span class="topbar__title" data-i18n-key="ui.navigation.chat">Chat</span>
+      <input class="input topbar__search" type="search" data-i18n-ph="ui.layout.searchPh" placeholder="Search">
+      <span class="ctrl-wrap">
+        <span class="ctrl">
+          <button class="ctrl__btn" type="button" id="lang-btn" aria-haspopup="menu" aria-expanded="false">
+            <span id="lang-label">English</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-globe"></use></svg>
+          </button>
+          <span class="ctrl__sep" aria-hidden="true"></span>
+          <button class="ctrl__btn" type="button" id="theme-btn" aria-label="Theme">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use id="theme-icon" href="#i-sun"></use></svg>
+          </button>
+        </span>
+        <div class="menu" id="lang-menu" role="menu" hidden>
+          <button type="button" role="menuitemradio" data-lang="zh-CN">简体中文</button>
+          <button type="button" role="menuitemradio" data-lang="zh-TW">繁體中文</button>
+          <button type="button" role="menuitemradio" data-lang="en">English</button>
+          <button type="button" role="menuitemradio" data-lang="ja">日本語</button>
+        </div>
+      </span>
+    </header>
+
+    <!-- [feature] 中栏：线程列表（每行一个状态芯片表达「AI 到哪一步了」） -->
+    <div class="list" role="list">
+      <div class="list__row is-on" role="listitem" tabindex="0">
+        <span class="list__text"><span class="list__title">Q2 预算与投放建议</span><span class="list__meta">Analyzed 12 campaigns · 3m38s</span></span>
+        <span class="chip chip--you">Needs you</span>
+      </div>
+      <div class="list__row" role="listitem" tabindex="0">
+        <span class="list__text"><span class="list__title">竞品定价梳理</span><span class="list__meta">Searched 6 sources</span></span>
+        <span class="chip">AI drafted</span>
+      </div>
+      <div class="list__row" role="listitem" tabindex="0">
+        <span class="list__text"><span class="list__title">发布清单核对</span><span class="list__meta">Edited 3 files +12 −6</span></span>
+        <span class="chip">AI reviewed</span>
+      </div>
+      <div class="list__row" role="listitem" tabindex="0">
+        <span class="list__text"><span class="list__title">周报摘要</span><span class="list__meta">Last run · Mon 09:12</span></span>
+        <span class="chip">Done</span>
+      </div>
+    </div>
+
+    <!-- [feature] 同一区块的空态（切 :hidden 看另一种形态） -->
+    <div class="empty" id="empty" hidden>
+      <span class="empty__title" data-i18n-key="ui.layout.emptyTitle">Nothing here yet</span>
+      <span class="empty__hint" data-i18n-key="ui.layout.emptyHint">Pick something on the left, or create one.</span>
+      <button class="btn-primary is-solid" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus-square"></use></svg><span data-i18n-key="ui.layout.newItem">New</span></button>
+    </div>
+  </div>
+
+  <!-- [feature] 右栏：agent 运行透明度 —— 做了什么 · 将做什么 · 一键应用 -->
+  <aside class="detail" aria-label="Run details">
+    <span class="detail__title">Run details</span>
+    <div class="detail__block">
+      <span class="detail__label">Worked for 3m38s · Searched 5 sources</span>
+      <span class="step"><span class="step__dot"></span><span>Pulled last quarter's spend and ROAS</span></span>
+      <span class="step"><span class="step__dot"></span><span>Compared 12 campaigns against target CPA</span></span>
+      <span class="step step--todo"><span class="step__dot"></span><span>Waiting for you to apply the allocation</span></span>
+    </div>
+    <div class="detail__block">
+      <span class="detail__label">Planned (2 steps)</span>
+      <span class="step step--todo"><span class="step__dot"></span><span>Export as PDF</span></span>
+      <span class="step step--todo"><span class="step__dot"></span><span>Notify the team channel</span></span>
+    </div>
+    <button class="btn-primary is-solid button--block" type="button">Apply this budget</button>
+  </aside>
+</div>
+
+<script>
+/* 本页脚本只有语言与主题，和入口页同一套写法；列表与详情是静态形态。 */
+const LANGS = [{ code: 'zh-CN', label: '简体中文' }, { code: 'zh-TW', label: '繁體中文' }, { code: 'en', label: 'English' }, { code: 'ja', label: '日本語' }]
+let lang = 'en'; let theme = 'light'
+function dictAt(path) {
+  const bag = (window.CELADON_I18N && window.CELADON_I18N[lang]) || {}
+  return path.split('.').reduce((o, k) => (o ? o[k] : undefined), bag) || {}
+}
+function applyLang(code) {
+  lang = code; document.documentElement.lang = code
+  document.querySelectorAll('[data-i18n-key]').forEach((el) => { const v = dictAt(el.dataset.i18nKey); if (typeof v === 'string') el.textContent = v })
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => { const v = dictAt(el.dataset.i18nPh); if (typeof v === 'string') el.placeholder = v })
+  document.getElementById('lang-label').textContent = (LANGS.find((l) => l.code === code) || {}).label || code
+  document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.classList.toggle('is-on', b.dataset.lang === code))
+}
+function applyTheme(next) {
+  theme = next === 'dark' ? 'dark' : 'light'
+  document.documentElement.dataset.theme = theme
+  document.getElementById('theme-icon').setAttribute('href', theme === 'dark' ? '#i-moon' : '#i-sun')
+}
+document.getElementById('lang-btn').addEventListener('click', (e) => { e.stopPropagation(); const m = document.getElementById('lang-menu'); m.hidden = !m.hidden })
+document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.addEventListener('click', () => { applyLang(b.dataset.lang); document.getElementById('lang-menu').hidden = true }))
+document.getElementById('theme-btn').addEventListener('click', (e) => { e.stopPropagation(); applyTheme(theme === 'dark' ? 'light' : 'dark') })
+document.addEventListener('click', () => { document.getElementById('lang-menu').hidden = true })
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.getElementById('lang-menu').hidden = true })
+applyLang('en')
+applyTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+</script>
+</body>
+</html>

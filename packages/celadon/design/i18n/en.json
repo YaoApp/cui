@@ -156,6 +156,12 @@
     },
     "tool": {
       "readFiles": "Read files"
+    },
+    "layout": {
+      "settings": "Settings",
+      "searchPh": "Search",
+      "emptyTitle": "Nothing here yet",
+      "emptyHint": "Pick something on the left, or create one."
     }
   },
   "sample": {
