@@ -156,9 +156,9 @@ test.describe('the entry line against the real service', () => {
     )
     // 令牌族：注册与登录各回一份，按声明的字段核
     for (const key of ['entryRegister', 'entryLogin'] as const) {
-      const body = steps[key].body ?? {}
-      expect(Object.keys(body).length).toBeGreaterThan(0)
-      expect(body).toEqual(expect.objectContaining({ status: expect.anything() }))
+      expect(Object.keys(steps[key].body ?? {})).toEqual(
+        expect.arrayContaining(['access_token', 'session_id', 'id_token', 'refresh_token', 'expires_in', 'status']),
+      )
     }
     expect(Object.keys(steps.oauthAuthorize.body ?? {})).toEqual(expect.arrayContaining(['authorization_url']))
     expect(String(steps.oauthAuthorize.body?.authorization_url ?? '')).toMatch(/^https?:\/\//)

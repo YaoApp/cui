@@ -12,6 +12,7 @@
 import { describe, expect, it } from 'vitest'
 import type {
   CaptchaResponse,
+  EntryAuthResponse,
   DeviceFlowStart,
   EntryConfig,
   EntryVerifyResponse,
@@ -64,6 +65,20 @@ const entryVerify: EntryVerifyResponse = {
 const captcha: CaptchaResponse = {
   captcha_id: 'gUMTNEL3X2RWv6KS8OSC',
   captcha_image: 'data:image/png;base64,iVBORw0KGgo=',
+}
+
+/* 真实响应：`POST /v1/user/entry/register`（2026-10-05 实测，十条字段一个不少） */
+const entryAuth: EntryAuthResponse = {
+  user_id: 'u_1',
+  message: 'ok',
+  id_token: 'fake-id',
+  access_token: 'fake-access',
+  session_id: 'fake-session',
+  refresh_token: 'fake-refresh',
+  expires_in: 7200,
+  mfa_enabled: false,
+  refresh_token_expires_in: 604800,
+  status: 'ok',
 }
 
 /* 真实响应：`GET /v1/oauth/jwks` */
@@ -122,6 +137,17 @@ describe('the entry fields the real service sends', () => {
     expect(oauthAuthorize.authorization_url).toMatch(/^https:\/\//)
     expect(Object.keys(deviceFlowStart)).toEqual(expect.arrayContaining(REQUIRED.deviceFlowStart))
     expect(deviceFlowStart.user_code).toMatch(/^[A-Z0-9-]+$/)
+  })
+
+  it('keeps every field of the register answer, with its type', () => {
+    expect(Object.keys(entryAuth)).toEqual(
+      expect.arrayContaining([
+        'user_id', 'message', 'id_token', 'access_token', 'session_id',
+        'refresh_token', 'expires_in', 'mfa_enabled', 'refresh_token_expires_in', 'status',
+      ]),
+    )
+    expect(typeof entryAuth.expires_in).toBe('number')
+    expect(typeof entryAuth.mfa_enabled).toBe('boolean')
   })
 
   it('describes the failure the engine answers with as a pair, not as a status', () => {
