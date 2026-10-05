@@ -44,7 +44,7 @@
 
 ## 1. 第一步：草图（纯 HTML，用设计体系 Token）
 
-**状态：已完成**（2026-10-05）。产物：`design/prototype/login.html` · `register.html` · `servers.html`，以及 `design/prototype/README.md`；已进 `main`。
+**状态：已完成**（2026-10-05）。产物 `login.html` · `register.html` · `servers.html` —— 占位演示，细节随产品迭代再改。
 
 实际做法与下列原始要求的差异（以实际为准）：
 
@@ -73,11 +73,7 @@
 
 ## 1.1 追加：`layout.html`（登录之后的界面布局稿）
 
-**状态：已完成**（2026-10-05）。产物两个：`design/prototype/layout.html`（登录后的完整界面）与 `design/prototype/welcome.html`（首次进入的首屏，同壳但**无右栏**）；均已进 `main`。
-
-**已完成的范围**：三栏 grid（F6）· 导航两档（Web / 客户端 `?view=client`，含红绿灯与收起键、收起态中栏留位）· 导航下半区区隔与滚动 · 用户行语言/主题菜单 · 字体与层级（F3）全部走 token · 首屏的中栏引导与 composer（`--radius-xl`）· 导航指引卡 · 右上角「打开右栏」键（形态）。
-
-**未完成**（明确留着，不算在这条里）：右上角键的点击行为 · 面板类与发送类图标的体系补档 · Web 768–1023 图标轨与 <768 抽屉两档 · 侧栏拖拽把手与最小宽 · 收起偏好持久化 · 页面内留的 mock 品牌雪碧图 404。
+**状态：已完成**（2026-10-05）。产物 `layout.html` 与 `welcome.html` —— 都是**占位演示**，细节等产品迭代时再改。
 
 做法：整页取自 `design/mock.html`（同一套类名与 token、同一细节密度），只改三处 —— 去掉演示用的窗口红绿灯、窗口铺满视口、插入组件边界注释；另修三处路径（`../tokens.css`、`../i18n/bundle.js`、`../icons/`），因为文件从 `design/` 移到了 `design/prototype/`。
 
