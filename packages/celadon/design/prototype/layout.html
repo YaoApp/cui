@@ -309,6 +309,9 @@ body.is-client .nav .navigation-header { padding-inline-start: calc(var(--spacin
 body.is-client .nav .navigation-header .icon-button:first-of-type { margin-inline-start: 0; }
 /* 客户端：翻页键与收起/展开键居中对齐（两者都在 --column-header-height 的行内居中） */
 body.is-client .nav .navigation-header .icon-button { block-size: var(--column-header-height); }
+/* 客户端：翻页键仍靠右，紧接在收起/展开键之前（顺序 ‹ › |←）；只是与收起键同一条中心线 */
+body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-16); }
+body.is-client .nav .navigation-header .icon-button:first-of-type { margin-inline-start: auto; }
 </style>
 </head>
 <body class="celadon">
