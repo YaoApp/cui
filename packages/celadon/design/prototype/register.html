@@ -162,6 +162,7 @@ body {
 /* 客户端内模式（?from=connect）：不展示品牌区与服务协议，控件与服务器选择页同位置（卡片下方居中） */
 body.is-client .brand { display: none; }
 body.is-client .terms { display: none; }
+body.is-client .bottom { display: none; }   /* 页脚条款同样不展示 */
 body.is-client .ctrl-wrap { margin-block-start: var(--spacing-24); }
 body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inline-start: 50%; transform: translateX(-50%); }
 </style>
