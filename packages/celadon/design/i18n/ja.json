@@ -174,15 +174,7 @@
       "welcomeHint": "まず例を見ることもできます",
       "guideTitle": "はじめての方へ",
       "guideBody": "タスクを書くと、使う道具と結果が並びます。直すところは結果から選べます。",
-      "guideAction": "ガイドを見る",
-      "chats": "チャット",
-      "chat1": "今週の進捗を整理",
-      "chat2": "契約書のリスク条項を探す",
-      "chat3": "要件をチェックリストに",
-      "assistA": "汎用アシスタント",
-      "assistADesc": "何でも担当。既定はこれ",
-      "assistB": "ドキュメント",
-      "assistBDesc": "長文を読み、要約と差分を出す"
+      "guideAction": "ガイドを見る"
     }
   },
   "sample": {

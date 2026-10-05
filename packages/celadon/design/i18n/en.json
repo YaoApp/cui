@@ -174,15 +174,7 @@
       "welcomeHint": "Or look at an example first",
       "guideTitle": "First time here",
       "guideBody": "Write a task, watch which tools it calls, then claim what needs changing in the result.",
-      "guideAction": "Show me",
-      "chats": "Chats",
-      "chat1": "Summarise this week",
-      "chat2": "Find risky clauses",
-      "chat3": "Turn the brief into a list",
-      "assistA": "General",
-      "assistADesc": "Takes anything; the default",
-      "assistB": "Documents",
-      "assistBDesc": "Reads long files, drafts summaries and diffs"
+      "guideAction": "Show me"
     }
   },
   "sample": {
