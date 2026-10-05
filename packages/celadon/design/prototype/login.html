@@ -139,6 +139,9 @@ body {
 <!-- 界面图标：目前只有 icons.html 里的内联雪碧图，没有独立文件；这里内联本次用到的一个符号 -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
   <symbol id="i-pc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" x2="16" y1="21" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" x2="12" y1="17" y2="21" stroke="currentColor" stroke-width="2"/></symbol>
 </defs></svg>
 
@@ -152,11 +155,11 @@ body {
 
     <span class="ctrl">
       <button class="ctrl__btn" type="button" id="lang-btn" aria-haspopup="menu" aria-expanded="false">
-        <span id="lang-label">English</span>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-globe"></use></svg><span id="lang-label">English</span>
       </button>
       <span class="ctrl__sep" aria-hidden="true"></span>
       <button class="ctrl__btn" type="button" id="theme-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Theme">
-        <svg class="icon" aria-hidden="true"><use href="#i-pc"></use></svg>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use id="theme-icon" href="#i-sun"></use></svg>
       </button>
     </span>
 
@@ -169,9 +172,8 @@ body {
     </div>
 
     <div class="menu" id="theme-menu" role="menu" hidden style="inset-inline-end:0">
-      <button type="button" role="menuitemradio" data-theme="auto"><svg class="icon" aria-hidden="true"><use href="#i-pc"></use></svg><span data-i18n="themeAuto">Auto</span></button>
-      <button type="button" role="menuitemradio" data-theme="light"><span data-i18n="themeLight">Light</span></button>
-      <button type="button" role="menuitemradio" data-theme="dark"><span data-i18n="themeDark">Dark</span></button>
+      <button type="button" role="menuitemradio" data-theme="light"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"></use></svg><span data-i18n="themeLight">Light</span></button>
+      <button type="button" role="menuitemradio" data-theme="dark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"></use></svg><span data-i18n="themeDark">Dark</span></button>
     </div>
   </header>
 
@@ -199,7 +201,7 @@ body {
 
       <form>
         <div class="field">
-          <svg class="field__icon" aria-hidden="true"><use href="#i-mail"></use></svg>
+          <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mail"></use></svg>
           <input class="input" id="account" name="account" type="text" autocomplete="username"
                  inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="accountPh" placeholder="Enter your email">
         </div>
@@ -248,10 +250,9 @@ function applyLang(next) {
 }
 
 function applyTheme(next) {
-  theme = next
-  document.documentElement.dataset.theme = next === 'auto'
-    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    : next
+  theme = next === 'dark' ? 'dark' : 'light'      /* 菜单只有 Light / Dark 两项；首屏默认跟随系统 */
+  document.documentElement.dataset.theme = theme
+  document.getElementById('theme-icon').setAttribute('href', theme === 'dark' ? '#i-moon' : '#i-sun')
   document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.classList.toggle('is-on', b.dataset.theme === theme))
 }
 
@@ -274,10 +275,11 @@ document.addEventListener('click', (event) => {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
 })
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (theme === 'auto') applyTheme('auto') })
+
 
 applyLang('en')
-applyTheme('auto')
+/* 首屏：跟随系统（head 里那一行已设好 data-theme），图标与选中态据此初始化 */
+applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')
 </script>
 </body>
 </html>
