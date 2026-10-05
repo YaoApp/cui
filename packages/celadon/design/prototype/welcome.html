@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yao Agents · Welcome</title>
+<!-- 唯一来源：tokens.less → build-css.mjs → tokens.css（本页零硬编码色值） -->
+<link rel="stylesheet" href="../tokens.css">
+<style>
+body{margin: 0;background: var(--background-active);font-family: var(--font-family-ui);
+  display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;min-height:100vh;padding: 0;-webkit-font-smoothing:antialiased;font-size:var(--font-size-body-lg);line-height:var(--line-height-cjk);}
+[data-theme="dark"] body{background:#0B0B0B}
+svg.icon{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}  /* 24 网格原生 2；16px 显示时视觉 ≈1.33 */
+svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
+.window{width:100vw;height:100vh;border-radius: 0;overflow:hidden;display:flex;
+  background:var(--background-app);color:var(--text-primary);border: var(--border-width) solid var(--border-default)}
+/* ============ ① 导航列 ============ */
+.nav{width:240px;flex:none;background:var(--background-navigation);border-right: var(--border-width) solid var(--border-subtle);display:flex;flex-direction:column;position:relative}
+.traffic-lights{position:absolute;left:14px;top:14px;display:flex;gap: var(--spacing-8)}
+.traffic-lights i{width:12px;height:12px;border-radius:50%;display:block}
+.traffic-lights i:nth-child(1){background:#FF5F57}.traffic-lights i:nth-child(2){background:#FEBC2E}.traffic-lights i:nth-child(3){background:#28C840}
+.navigation-header{height:var(--column-header-height);display:flex;align-items:center;gap: var(--spacing-4);padding-left: var(--spacing-48)}
+.icon-button{width:26px;height:26px;border-radius:var(--radius-small);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
+.icon-button:hover{background:var(--background-hover);color:var(--text-primary)}
+.brand{height:44px;padding: 0 var(--spacing-16);display:flex;align-items:center;gap: var(--spacing-8);font-weight:650;font-size: var(--font-size-14);letter-spacing:var(--letter-spacing-latin)}
+/* logo：26px（原 16px 偏小）· 间距 10px · 与导航项同左边界（14px）· 右侧版本徽标 */
+.brand-mark{height:20px;width:24px;flex:none;display:block}   /* 显式盒宽，避免 width:auto 在部分引擎下被切边 */
+.brand-mark .mark-head{fill:url(#mark-live)}        /* 品牌标记：渐变走 --brand-mark-*，全站一版 */
+.celadon[data-theme="dark"] .brand-mark .mark-head, [data-theme="dark"] .celadon .brand-mark .mark-head{fill:url(#mark-live)}
+.brand-name{white-space:nowrap}
+.version-badge{margin-left: auto;font-family: var(--font-family-monospace);font-size:var(--font-size-label);font-weight:var(--font-weight-medium);line-height:var(--line-height-normal);color:var(--text-tertiary);
+  background:var(--background-field);border: var(--border-width) solid var(--border-subtle);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8);letter-spacing:.02em}
+.fixed-navigation{padding: 0 var(--spacing-8);display:flex;flex-direction:column;gap: var(--spacing-4)}
+.navigation-item{height:32px;border-radius:var(--radius-small);display:flex;align-items:center;gap: var(--spacing-8);padding: 0 var(--spacing-8);color:var(--text-secondary);font-size: var(--font-size-body-lg)}
+.navigation-item:hover{background:var(--background-hover);color:var(--text-primary)}
+.navigation-item.is-active{background:var(--brand-soft);color:var(--brand-ink);font-weight:650}
+.navigation-item .meta{margin-left: auto;font-size: var(--font-size-label);color:var(--text-tertiary);font-weight:500}
+.navigation-item .badge{margin-left: auto;min-width:17px;height:17px;border-radius:var(--radius-pill);background:var(--brand-soft);color:var(--brand-ink);
+  border: var(--border-width) solid var(--brand-ink);font-size: var(--font-size-label);font-weight:700;display:flex;align-items:center;justify-content:center;padding: 0 var(--spacing-4)}
+.navigation-separator{height:1px;background:var(--border-subtle);margin: var(--spacing-8) var(--spacing-12)}
+.navigation-context{flex:1;min-height:0;display:flex;flex-direction:column}
+.navigation-context-header{padding: var(--spacing-4) var(--spacing-12) var(--spacing-8);font-size: var(--font-size-caption);color:var(--text-tertiary);letter-spacing:.4px;display:flex;align-items:center;gap: var(--spacing-4)}
+.navigation-context-header .badge{margin-left: auto;font-size: var(--font-size-label);color:var(--text-secondary);background:var(--background-field);border: var(--border-width) solid var(--border-default);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8)}
+.search-field{margin: 0 var(--spacing-12) var(--spacing-8);height:32px;border-radius:var(--radius-medium);background:var(--background-field);border: var(--border-width) solid var(--border-default);
+  display:flex;align-items:center;gap: var(--spacing-8);padding: 0 var(--spacing-8);color:var(--text-placeholder);font-size: var(--font-size-body)}
+.search-field kbd{margin-left: auto;font:inherit;font-size: var(--font-size-label);color:var(--text-tertiary);background:var(--background-surface);border: var(--border-width) solid var(--border-default);border-radius: var(--radius-small);padding: 0 var(--spacing-4)}
+.filter-chips{display:flex;gap: var(--spacing-4);padding: 0 var(--spacing-12) var(--spacing-8)}
+.chip{font-size: var(--font-size-caption);padding: var(--spacing-4) var(--spacing-8);border-radius:var(--radius-pill);border: var(--border-width) solid var(--border-default);color:var(--text-secondary);background:var(--background-surface);display:inline-flex;align-items:center;gap: var(--spacing-4)}
+.chip.is-active{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
+.conversation-list{flex:1;min-height:0;overflow:hidden;padding: 0 var(--spacing-8) var(--spacing-8)}
+.list-group-label{font-size: var(--font-size-label);color:var(--text-tertiary);letter-spacing:.5px;padding: var(--spacing-8) var(--spacing-4) var(--spacing-4);display:flex;align-items:center;gap: var(--spacing-4)}
+.conversation-row{display:flex;gap: var(--spacing-8);align-items:flex-start;padding: var(--spacing-8) var(--spacing-8);border-radius:var(--radius-medium);position:relative}
+.conversation-row:hover{background:var(--background-hover)}
+.conversation-row.is-selected{background:var(--background-selected)}
+.conversation-row.is-selected::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;border-radius: var(--radius-xs);background:var(--brand)}
+.unread-dot{width:8px;height:8px;box-sizing:border-box;border-radius:50%;background:var(--brand);margin-top: var(--spacing-4);flex:none}
+.unread-dot.is-read{background:transparent;border: var(--border-width) solid var(--border-control)}
+.conversation-row .row-body{flex:1;min-width:0}
+.conversation-row .row-title{display:flex;align-items:center;gap: var(--spacing-4);font-size: var(--font-size-body);font-weight:650;color:var(--text-primary)}
+.conversation-row.is-selected .row-title{color:var(--brand-ink)}
+.conversation-row .row-subtitle{font-size: var(--font-size-caption);color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top: var(--spacing-4)}
+.conversation-row .row-time{font-size: var(--font-size-label);color:var(--text-tertiary);flex:none;margin-top: var(--spacing-4)}
+.user{margin-top: auto;border-top: var(--border-width) solid var(--border-subtle);padding: var(--spacing-8) var(--spacing-12);display:flex;align-items:center;gap: var(--spacing-8)}
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand-ink);border: var(--border-width) solid var(--brand-ink);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size: var(--font-size-caption)}
+/* ============ ② 内容列 ============ */
+.main{flex:1;min-width:0;background:var(--background-content);display:flex;flex-direction:column}
+.content-header{height:var(--column-header-height);flex:none;display:flex;align-items:center;gap: var(--spacing-8);padding: 0 var(--spacing-12);border-bottom: var(--border-width) solid var(--border-subtle)}
+.content-header .content-title{font-size: var(--font-size-body-lg);font-weight:650}
+.content-header .content-meta{font-size: var(--font-size-caption);color:var(--text-tertiary)}
+.capability-list{margin-left: auto;display:flex;align-items:center;gap: var(--spacing-4)}
+.capability{position:relative;width:28px;height:26px;border-radius:var(--radius-small);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
+.capability:hover{background:var(--background-hover);color:var(--text-primary)}
+.capability .capability-badge{position:absolute;top:0;right:0;min-width:14px;height:14px;border-radius:var(--radius-pill);background:var(--warm);color:var(--warm-contrast);
+  font-size: var(--font-size-label);font-weight:700;display:flex;align-items:center;justify-content:center;padding: 0 var(--spacing-4);border: var(--border-width) solid var(--background-content)}
+.message-thread{flex:1;min-height:0;overflow:hidden;padding: var(--spacing-16) 0 0;display:flex;flex-direction:column}
+.message-group{padding: 0 var(--spacing-32);display:flex;flex-direction:column;gap: var(--spacing-12)}
+.date-separator{display:flex;align-items:center;gap: var(--spacing-8);color:var(--text-tertiary);font-size: var(--font-size-label);padding: var(--spacing-4) var(--spacing-32)}
+.date-separator::before,.date-separator::after{content:"";height:1px;background:var(--border-subtle);flex:1}
+.unread-divider{display:flex;align-items:center;gap: var(--spacing-8);color:var(--brand-ink);font-size: var(--font-size-label);font-weight:650;padding: var(--spacing-4) var(--spacing-32)}
+.unread-divider::before,.unread-divider::after{content:"";height:1px;background:var(--brand-soft);flex:1}
+.message{max-width:640px;padding: var(--spacing-8) var(--spacing-12);border-radius: var(--radius-large);font-size: var(--font-size-body-lg);line-height:var(--line-height-cjk)   /* 消息是中文正文，走 CJK 档 */}
+.message.is-user{align-self:flex-end;background:var(--brand-soft);color:var(--text-primary);border: var(--border-width) solid var(--border-default)}
+.message.is-agent{align-self:flex-start;background:var(--background-surface);border: var(--border-width) solid var(--border-subtle)}
+.message .message-header{display:flex;align-items:center;gap: var(--spacing-4);font-size: var(--font-size-label);color:var(--text-tertiary);margin-bottom: var(--spacing-4)}
+.message .message-header .message-author{color:var(--brand-ink);display:flex;align-items:center;gap: var(--spacing-4);font-weight:650}
+.attachment-list{display:flex;flex-wrap:wrap;gap: var(--spacing-4);margin-top: var(--spacing-8)}
+.attachment-chip{display:flex;align-items:center;gap: var(--spacing-4);font-size: var(--font-size-caption);color:var(--text-secondary);background:var(--background-field);
+  border: var(--border-width) solid var(--border-default);border-radius:var(--radius-small);padding: var(--spacing-4) var(--spacing-8)}
+.tool-card{align-self:flex-start;width:640px;max-width:100%;border: var(--border-width) solid var(--border-subtle);border-radius: var(--radius-large);background:var(--background-surface);overflow:hidden}
+.tool-card .tool-header{display:flex;align-items:center;gap: var(--spacing-8);padding: var(--spacing-8) var(--spacing-12);border-bottom: var(--border-width) solid var(--border-subtle);font-size: var(--font-size-caption);font-weight:650}
+.tool-card .tool-header .tool-name{color:var(--text-tertiary);font-weight:400;font-family: var(--font-family-monospace);font-size: var(--font-size-label)}
+.tool-card .tool-header .status-chip{margin-left: auto;font-size: var(--font-size-label);color:var(--success);background:var(--success-soft);border: var(--border-width) solid var(--success);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8);display:flex;align-items:center;gap: var(--spacing-4)}
+.tool-card .tool-body{padding: var(--spacing-8) var(--spacing-12);background:var(--background-field);font-family: var(--font-family-monospace);font-size:var(--font-size-caption);line-height:var(--line-height-cjk);color:var(--text-secondary)}
+.question-card{align-self:flex-start;width:640px;max-width:100%;border: var(--border-width) solid var(--border-subtle);border-radius: var(--radius-large);background:var(--background-surface);padding: var(--spacing-12) var(--spacing-12)}
+.question-card .question-header{display:flex;align-items:center;gap: var(--spacing-8);font-size: var(--font-size-caption);color:var(--text-tertiary);margin-bottom: var(--spacing-8)}
+.question-card .question-header .warning-badge{margin-left: auto;color:var(--warm-text);background:var(--warm-soft);border: var(--border-width) solid var(--warm);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8);font-weight:650;font-size: var(--font-size-label)}
+.question-option{margin-top: var(--spacing-4);min-height:32px;border: var(--border-width) solid var(--border-default);border-radius:var(--radius-medium);display:flex;align-items:center;gap: var(--spacing-8);padding: 0 var(--spacing-8);font-size: var(--font-size-body)}
+.question-option.is-selected{border-color:var(--brand-ink);background:var(--brand-soft);color:var(--brand-ink);font-weight:650}
+.composer{margin: var(--spacing-12) var(--spacing-32) var(--spacing-16);border: var(--border-width) solid var(--border-default);background:var(--background-surface);border-radius: var(--radius-large);padding: var(--spacing-8) var(--spacing-12)}
+/* 提高一级特异性：tokens.css 里 .input:disabled 有 [data-theme] .celadon .input:disabled（0,4,0） */
+.celadon .composer .input{border:0;background:transparent;padding: var(--spacing-4) 0;height:auto;font-size: var(--font-size-body-lg);width:100%}
+.celadon .composer .input:disabled{background:transparent;color:var(--text-disabled);cursor:not-allowed}
+.celadon .composer .input:disabled::placeholder{color:var(--text-disabled)}
+.field-row{display:flex;align-items:center;gap: var(--spacing-8);margin-top: var(--spacing-8)}
+.field-row .label{font-size: var(--font-size-caption);color:var(--text-tertiary);flex:none}
+.field-row .input{height:28px;font-size: var(--font-size-caption);width:132px;padding: 0 var(--spacing-8)}
+.send-button.is-disabled{background:var(--background-disabled);color:var(--text-disabled);border-color:var(--border-disabled);cursor:not-allowed}
+.composer .foot{display:flex;align-items:center;gap: var(--spacing-8);margin-top: var(--spacing-8)}
+.send-button{margin-left: auto;width:30px;height:28px;border-radius:var(--radius-medium);background:var(--brand-soft);color:var(--brand-ink);border: var(--border-width) solid var(--brand-ink);
+  display:flex;align-items:center;justify-content:center}
+/* ============ ③ 侧边面板 ============ */
+.panel{width:460px;flex:none;background:var(--background-surface);border-left: var(--border-width) solid var(--border-subtle);display:flex;flex-direction:column}
+.panel-header{height:var(--column-header-height);flex:none;display:flex;align-items:center;gap: var(--spacing-4);padding: 0 var(--spacing-8);border-bottom: var(--border-width) solid var(--border-subtle)}
+.panel-tab{display:flex;align-items:center;gap: var(--spacing-4);font-size: var(--font-size-caption);padding: var(--spacing-4) var(--spacing-8);border-radius:var(--radius-small);background:var(--background-field);border: var(--border-width) solid var(--border-default);color:var(--text-secondary)}
+.panel-tab.is-active{background:var(--background-surface);border-color:var(--border-control);color:var(--text-primary);font-weight:650}
+.panel-tab .tab-close{color:var(--text-tertiary);font-size: var(--font-size-label)}
+.panel-body{flex:1;min-height:0;overflow:hidden;padding: var(--spacing-16);display:flex;flex-direction:column;gap: var(--spacing-16)}
+.panel-title{font-size: var(--font-size-17);font-weight:700;letter-spacing:-.2px}
+.panel-meta{font-size: var(--font-size-caption);color:var(--text-tertiary);margin-top: var(--spacing-4);display:flex;align-items:center;gap: var(--spacing-8)}
+.panel-actions{display:flex;gap: var(--spacing-8);margin-top: var(--spacing-12)}
+.panel-button{height:32px;padding: 0 var(--spacing-12);border-radius:var(--radius-medium);font-size: var(--font-size-body);font-weight:650;display:flex;align-items:center;gap: var(--spacing-4);border: var(--border-width) solid var(--border-default);color:var(--text-primary);background:var(--background-surface)}
+.panel-button.is-primary{background:var(--brand-soft);color:var(--brand-ink);border-color:var(--brand-ink)}
+.panel-button.warning-badge{background:var(--warm-soft);color:var(--warm-text);border-color:var(--warm)}
+.section-label{font-size: var(--font-size-label);color:var(--text-tertiary);letter-spacing:.5px;margin-bottom: var(--spacing-8);display:flex;align-items:center;gap: var(--spacing-8)}
+.section-label .meta{margin-left: auto;color:var(--text-secondary);font-weight:650;letter-spacing:0}
+.progress-bar{height:5px;border-radius: var(--radius-xs);background:var(--background-field);overflow:hidden;margin-bottom: var(--spacing-8)}
+.progress-bar i{display:block;height:100%;width:75%;background:var(--brand-display)}
+.subtask{display:flex;align-items:flex-start;gap: var(--spacing-8);font-size: var(--font-size-body);padding: var(--spacing-4) 0}
+.subtask-checkbox{width:16px;height:16px;border-radius: var(--radius-small);border: var(--border-width) solid var(--border-control);flex:none;display:flex;align-items:center;justify-content:center;color:transparent;margin-top: var(--spacing-4)}
+.subtask-checkbox.done{background:var(--success-soft);border-color:var(--success);color:var(--success)}
+.subtask.done .subtask-text{color:var(--text-tertiary)}
+.gate-list{display:flex;flex-wrap:wrap;gap: var(--spacing-4)}
+.gate-chip{font-size: var(--font-size-label);padding: var(--spacing-4) var(--spacing-8);border-radius:var(--radius-pill);border: var(--border-width) solid var(--border-default);color:var(--text-secondary);background:var(--background-field)}
+.gate-chip.is-passed{background:var(--success-soft);border-color:var(--success);color:var(--success);font-weight:650}
+.gate-chip.is-warning{background:var(--warm-soft);border-color:var(--warm);color:var(--warm-text);font-weight:650}
+.gate-chip.is-idle{background:transparent;border-style:dashed}
+.diff-card{border: var(--border-width) solid var(--border-subtle);border-radius: var(--radius-large);overflow:hidden;background:var(--background-content)}
+.diff-card .diff-header{display:flex;align-items:center;gap: var(--spacing-8);padding: var(--spacing-8) var(--spacing-12);border-bottom: var(--border-width) solid var(--border-subtle);font-size: var(--font-size-caption);color:var(--text-secondary)}
+.diff-card .diff-header .diff-count{margin-left: auto;font-family: var(--font-family-monospace)}
+.diff-card pre{margin: 0;padding: var(--spacing-8) var(--spacing-12);font-family: var(--font-family-monospace);font-size:var(--font-size-caption);line-height:var(--line-height-cjk);color:var(--text-secondary)}
+.diff-added{color:var(--success)}.diff-removed{color:var(--danger)}
+.file-row{display:flex;align-items:center;gap: var(--spacing-8);font-size: var(--font-size-body);color:var(--text-secondary);padding: var(--spacing-4) 0}
+.file-row .file-size{margin-left: auto;font-size: var(--font-size-label);color:var(--text-tertiary)}
+.activity-timeline{display:flex;flex-direction:column;gap: 0}
+.activity-item{display:flex;gap: var(--spacing-8);font-size: var(--font-size-caption);color:var(--text-secondary);padding: var(--spacing-4) 0;position:relative}
+.activity-item .activity-dot{width:7px;height:7px;border-radius:50%;background:var(--border-control);margin-top: var(--spacing-4);flex:none}
+.activity-item.done .activity-dot{background:var(--success)}
+.activity-item.is-current .activity-dot{background:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.activity-item .activity-time{margin-left: auto;font-size: var(--font-size-label);color:var(--text-tertiary)}
+/* 页外工具条 */
+.toolbar{display:flex;gap: var(--spacing-8);align-items:center;
+  background:var(--background-surface);border: var(--border-width) solid var(--border-default);border-radius:var(--radius-pill);padding: var(--spacing-8) var(--spacing-12);box-shadow:var(--shadow-floating);margin-bottom: var(--spacing-24);order:-1}   /* 排在窗口之前：工具条永远在界面上方，不压界面 */
+.toolbar button{font:inherit;font-size: var(--font-size-caption);padding: var(--spacing-4) var(--spacing-12);border-radius:var(--radius-pill);border: var(--border-width) solid var(--border-default);
+  background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
+.toolbar button.is-active{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
+
+/* 产品级「打开即用」：应用直接铺满窗口，没有展板的圆角 · 阴影 · 描边与四周留白 */
+.window { border: 0; border-radius: 0; box-shadow: none; width: 100vw; height: 100vh; }
+body { padding: 0; align-items: stretch; }
+
+/* ===== 按 design/foundations.md F6「三栏竖分割」 =====
+   主结构是 grid 列轨（不是 flex）；导航不参与宽度让步；让位顺序：侧栏先缩 → 侧栏消失 → 中栏才可能低于最小。
+   导航三档：客户端/Web 宽屏 ≥1024 收起为 0（红绿灯与收起键位置不变）· Web 768–1023 保留 56px 图标轨 · <768 抽屉。 */
+.window { display: grid;
+          grid-template-columns: var(--nav-default) minmax(var(--center-min), 1fr) var(--side-width-reading); }
+/* 客户端（?view=client）：导航收起为 0，内容从最左铺满；左上只浮着红绿灯 + 收起键 */
+body.is-client .window { grid-template-columns: var(--nav-collapsed-desktop) minmax(var(--center-min), 1fr) var(--side-width-reading); }
+/* 收起为「0 宽的列」：导航仍占住第一条列轨，只是不可见 —— 若用 display:none 移出 grid，
+   中栏会滑进 0 宽列被压没（踩过）。 */
+body.is-client .nav { visibility: hidden; overflow: hidden; }
+.window-controls { display: flex; }
+.window-controls { display: flex; align-items: center; gap: var(--spacing-8);
+  position: absolute; inset-block-start: var(--spacing-12); inset-inline-start: var(--spacing-16); z-index: var(--z-raised); }
+body.is-client .content-header, body.is-client .panel-header { padding-inline-start: calc(var(--spacing-16) + 76px); }
+/* Web 中档：保留 56px 图标轨（浏览器没有标题栏可放图标） */
+@media (max-width: 1023px) {
+  .window { grid-template-columns: var(--nav-collapsed) minmax(var(--center-min), 1fr) var(--side-width-reading); }
+  .window .nav { inline-size: var(--nav-collapsed); }
+  .window .nav .navigation-item span, .window .nav .brand-name, .window .nav .version-badge,
+  .window .nav .navigation-context { display: none; }
+}
+/* mock 里写死了导航宽度，填满 F6 的列轨（默认 280 / 中档 56） */
+.window .nav { inline-size: 100%; border-inline-end: var(--border-width) solid var(--border-subtle); }
+/* grid 列轨的经典溢出：中栏内容有最小内容宽，会把列轨撑开、挤掉右栏 —— 给三列各自 min-inline-size:0 */
+.window > * { min-inline-size: 0; }
+/* 面板内容超出列轨时应可滚动，而不是被裁掉（mock 里 overflow:hidden 是为固定尺寸演示） */
+.panel-body { overflow: auto; }
+.nav, .panel { overflow: hidden auto; }
+/* 窗口左上控制区：红绿灯在最左（系统约定），收起键在右；与内容顶行（--column-header-height）居中对齐 */
+.window-controls { inset-block-start: 0; block-size: var(--column-header-height);
+  align-items: center; gap: var(--spacing-8); }
+.window-controls .traffic-lights { position: static; display: flex; gap: var(--spacing-8); }
+/* 收起状态：导航所在列轨 0 → --nav-default（客户端里点击收起键切换） */
+body.is-nav-open .window { grid-template-columns: var(--nav-default) minmax(var(--center-min), 1fr) var(--side-width-reading); }
+body.is-nav-open .nav { visibility: visible; }
+/* 窗口左上的收起键：无边框 · 无底色 · 焦点环按规范用 --focus-ring（红线 6） */
+.window-controls .icon-button { border: 0; background: transparent; color: var(--text-secondary);
+  inline-size: var(--spacing-24); block-size: var(--spacing-24); display: inline-flex; align-items: center; justify-content: center; }
+.window-controls .icon-button:hover { background: var(--background-hover); color: var(--text-primary); }
+.window-controls .icon-button:focus { outline: none; }
+.window-controls .icon-button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.window-controls .icon-button .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
+/* 收起键放到顶行右侧（位置固定、不随导航开合移动）；红绿灯仍留最左 */
+.window-controls { inset-inline-start: 0; inset-inline-end: 0; padding-inline: var(--spacing-16);
+  justify-content: space-between; }
+.window-controls .wc-left { display: inline-flex; align-items: center; gap: var(--spacing-8); }
+.window-controls #nav-toggle { margin-inline-start: auto; }
+/* 收起键贴在导航栏的右边界上：展开时在导航栏右端（三栏第一根分界处），
+   收起（导航 0 宽）时边界在窗口最左，按钮即跟到红绿灯之后。 */
+.window-controls #nav-toggle { position: absolute; margin-inline-start: 0;
+  inset-block-start: calc((var(--column-header-height) - var(--spacing-24)) / 2);
+  inset-inline-start: calc(var(--spacing-16) + 60px); }
+body.is-nav-open .window-controls #nav-toggle { inset-inline-start: calc(var(--nav-default) - var(--spacing-16) - var(--spacing-24)); }
+/* 导航栏顶行：图标靠右（< > 与收起键都在右端） */
+.nav .navigation-header { justify-content: flex-end; }
+/* 收起 / 展开 是两个方向相反的图标，不是同一个 */
+body:not(.is-nav-open) .window-controls #nav-toggle .icon { transform: scaleX(-1); }
+/* 顶部行右侧给收起键留位，避免 < > 与它互相插入：顺序为 ‹ › |← */
+.nav .navigation-header { padding-inline-end: calc(var(--spacing-24) + var(--spacing-16)); }
+/* 可点击的图标按钮：鼠标指针为可点击（hand） */
+.icon-button, .window-controls .icon-button { cursor: pointer; }
+/* ===== 导航列：高度跟随屏幕，内部分两区 =====
+   上区（菜单 .fixed-navigation）有最大高度；下区（内容 .navigation-context）占余下高度；
+   高度不够时各自出滚动条，互不影响。 */
+.nav { block-size: 100%; min-block-size: 0; }
+.nav .fixed-navigation { max-block-size: 45%; overflow: auto; min-block-size: 0; }
+.nav .navigation-context { flex: 1 1 auto; min-block-size: 0; overflow: hidden; display: flex; flex-direction: column; }
+.nav .conversation-list { flex: 1 1 auto; min-block-size: 0; overflow: auto; }
+/* 三栏的高度跟随视口：grid 行锁成 minmax(0,1fr)，否则行被内容撑高、导航超出屏幕 */
+.window { grid-template-rows: minmax(0, 1fr); block-size: 100vh; }
+/* ===== 导航两区（修正）=====
+   ① 菜单区不参与压缩/拉伸：区域按内容高度（flex:none），只有超过上限才滚动；菜单项固定 32 高，不被撑开。
+   ② 滚动条自定义，走配色 token（Firefox 用 scrollbar-color，Chromium/Safari 用 ::-webkit-scrollbar）。 */
+.nav .fixed-navigation { flex: 0 0 auto; max-block-size: 45%; overflow: auto; }
+.nav .fixed-navigation .navigation-item { flex: none; block-size: var(--spacing-32); }
+.nav { scrollbar-color: var(--border-control) transparent; scrollbar-width: thin; }
+.nav * { scrollbar-color: var(--border-control) transparent; scrollbar-width: thin; }
+.nav ::-webkit-scrollbar, .nav::-webkit-scrollbar { inline-size: var(--spacing-8); block-size: var(--spacing-8); }
+.nav ::-webkit-scrollbar-track, .nav::-webkit-scrollbar-track { background: transparent; }
+.nav ::-webkit-scrollbar-thumb, .nav::-webkit-scrollbar-thumb { background: var(--border-default);
+  border-radius: var(--radius-pill); border: 2px solid transparent; background-clip: padding-box; }
+.nav ::-webkit-scrollbar-thumb:hover, .nav::-webkit-scrollbar-thumb:hover { background: var(--border-control); background-clip: padding-box; }
+/* 导航里的固定行不参与高度压缩：顶行（< > 与收起键所在）、品牌行、分隔线始终等高，
+   高度不够时只让菜单区与内容区各自滚动。 */
+.nav > .navigation-header, .nav > .brand, .nav > .navigation-separator { flex: none; }
+.nav > .navigation-header { block-size: var(--column-header-height); }
+/* ===== 布局原则（三栏通用）=====
+   列内除「滚动区」外，所有块一律 flex:none —— 高度变化只改变滚动区的可视高度，
+   任何组件的尺寸与位置都不得随之变形。滚动区 = 导航会话列表 · 中栏消息流 · 右栏面板正文。 */
+.nav > *, .main > *, .panel > * { flex: none; }
+.nav .navigation-context > * { flex: none; }
+.nav .navigation-context { display: flex; flex-direction: column; overflow: hidden; }
+.nav .conversation-list, .main .message-thread, .panel .panel-body { flex: 1 1 auto; min-block-size: 0; overflow: auto; }
+.nav .search-field { block-size: var(--spacing-32); }
+.main .content-header, .panel .panel-header { block-size: var(--column-header-height); }
+.main .composer { flex: none; }
+/* 品牌靠在顶行最左（顶行有 48px 左内距给窗口按钮留位，这里抵消，使 LOGO 与菜单项同一左边界） */
+.nav .navigation-header .brand { margin-inline: calc(var(--spacing-8) * -1) auto; align-self: center; }
+/* 顶行与菜单项同一左边界：不再为窗口按钮预留 48px（窗口控制区已独立） */
+.nav .navigation-header { padding-inline-start: var(--spacing-8); }
+.nav .navigation-header .brand { margin-inline-start: 0; }
+/* 中栏/右栏头部不再有翻页键；左内距恢复常规，只有客户端才为窗口控制区留位（原来 76px 过大） */
+.main .content-header, .panel .panel-header { padding-inline-start: var(--spacing-16); }
+body.is-client .main .content-header { padding-inline-start: calc(var(--spacing-16) + 100px); }
+body.is-client .panel .panel-header { padding-inline-start: var(--spacing-16); }
+/* 头部左内距：Web 用常规内距；客户端才为窗口控制区留位（红绿灯 + 收起键约占 100px） */
+body .main .content-header, body .panel .panel-header { padding-inline-start: var(--spacing-16); }
+body.is-client .main .content-header { padding-inline-start: calc(var(--spacing-16) + 100px); }
+/* 中栏头：内容左对齐（mock 里是右对齐，标题被推到最右）；右栏头残留的翻页键隐藏 */
+.main .content-header { justify-content: flex-start; }
+.panel .panel-header > .icon-button { display: none; }
+/* 窗口控制区是浮层，绝不可参与 grid 列轨（否则会抢走第一条列轨、把三栏全挤偏一位） */
+.window-controls { position: absolute; z-index: var(--z-raised); }
+/* 三列宽度由 grid 列轨决定：清掉 mock 写死的列宽，避免溢出列轨 */
+.window > .nav, .window > .main, .window > .panel { inline-size: auto; max-inline-size: 100%; min-inline-size: 0; }
+/* 顶行：LOGO 在左，按钮组贴右（原来挤在 LOGO 旁并压住它） */
+.nav .navigation-header { justify-content: flex-start; gap: var(--spacing-4); }
+.nav .navigation-header .brand { margin-inline-end: auto; }
+.nav .navigation-header .icon-button:first-of-type { margin-inline-start: auto; }
+/* 收起态：两个视图一致 —— 导航列轨 0、内容从最左铺满（F6：客户端/Web 宽屏 ≥1024 收起为 0） */
+body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desktop) minmax(var(--center-min), 1fr) var(--side-width-reading); }
+body:not(.is-nav-open) .nav { visibility: hidden; overflow: hidden; }
+/* 控制区（红绿灯/收起键）在两个视图都必须显示，且不参与 grid */
+.window-controls { display: flex !important; position: absolute !important; z-index: var(--z-raised);
+  align-items: center; gap: var(--spacing-8); padding-inline: var(--spacing-16);
+  inset-inline: 0; inset-block-start: 0; block-size: var(--column-header-height); }
+/* 中栏头左内距按「左上控制区是否压到中栏」决定：
+   展开时 —— Web 无控制区（16），客户端有红绿灯（116）；
+   收起时 —— 两个视图的控制区都落在中栏顶上（116），否则标题被展开键压住。 */
+body .main .content-header { padding-inline-start: var(--spacing-16); }
+body.is-client.is-nav-open .main .content-header,
+body:not(.is-nav-open) .main .content-header { padding-inline-start: calc(var(--spacing-16) + 100px); }
+/* 收起态：Web 没有红绿灯，展开键直接靠左（16），标题紧随其后；客户端把红绿灯的位置让出来（76/116） */
+body:not(.is-nav-open) .window-controls #nav-toggle { inset-inline-start: var(--spacing-16); }
+body.is-client:not(.is-nav-open) .window-controls #nav-toggle { inset-inline-start: calc(var(--spacing-16) + 60px); }
+body:not(.is-nav-open) .main .content-header { padding-inline-start: calc(var(--spacing-16) + 40px); }
+body.is-client:not(.is-nav-open) .main .content-header { padding-inline-start: calc(var(--spacing-16) + 100px); }
+/* 客户端：顶行的 LOGO 让开红绿灯（16 + 60），Web 无红绿灯则保持常规内距 */
+body.is-client .nav .navigation-header { padding-inline-start: calc(var(--spacing-16) + 60px); }
+/* 客户端：LOGO 另起一行，落在图标与红绿灯的下一行（Web 才把 LOGO 提到顶行） */
+body.is-client .nav .navigation-header { flex-wrap: wrap; padding-inline-start: var(--spacing-16); block-size: auto; }
+body.is-client .nav .navigation-header .icon-button:first-of-type { order: 1; margin-inline-start: auto; }
+body.is-client .nav .navigation-header .brand { order: 2; flex-basis: 100%; margin-inline-start: 0; margin-block-start: var(--spacing-4); }
+/* 客户端的两个翻页键都留在第一行（否则第二个会跟着 LOGO 折到下一行） */
+body.is-client .nav .navigation-header .icon-button { order: 1; }
+/* 客户端：翻页键不再贴右，紧跟在红绿灯之后，与左上控制区连成一组 */
+body.is-client .nav .navigation-header { padding-inline-start: calc(var(--spacing-16) + 60px); }
+body.is-client .nav .navigation-header .icon-button:first-of-type { margin-inline-start: 0; }
+/* 客户端：翻页键与收起/展开键居中对齐（两者都在 --column-header-height 的行内居中） */
+body.is-client .nav .navigation-header .icon-button { block-size: var(--column-header-height); }
+/* 客户端：翻页键仍靠右，紧接在收起/展开键之前（顺序 ‹ › |←）；只是与收起键同一条中心线 */
+body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-16); }
+body.is-client .nav .navigation-header .icon-button:first-of-type { margin-inline-start: auto; }
+/* 客户端：LOGO 与菜单项图标同一左边界（顶行/菜单项的内距都是 8） */
+body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-8); }
+/* 客户端：LOGO 与菜单项图标同一左边界。菜单项图标在 16（导航内层 8 + 菜单项自身 8），故顶行内距取 16 */
+body.is-client .nav .navigation-header { padding-inline-start: var(--spacing-16); }
+/* Web 侧同样对齐：顶行内距 16 = 菜单项图标的左边界 */
+body:not(.is-client) .nav .navigation-header { padding-inline-start: var(--spacing-16); }
+/* LOGO 图形与菜单项图标同一左边界：品牌容器自身不再带左内距（mock 里是 16） */
+.nav .navigation-header .brand { padding-inline: 0; }
+/* 用户行「…」上的菜单：语言与主题（与入口页同一套做法；在页面底部，故向上展开） */
+.user-menu-wrap { position: relative; display: inline-flex; }
+.user-menu { position: absolute; inset-block-end: calc(100% + var(--spacing-4)); inset-inline-end: 0; z-index: var(--z-overlay);
+  min-inline-size: 176px; padding: var(--spacing-4); background: var(--background-surface);
+  border: var(--border-width) solid var(--border-default); border-radius: var(--radius-medium); box-shadow: var(--shadow-floating); }
+.user-menu button { display: flex; align-items: center; gap: var(--spacing-8); inline-size: 100%; text-align: start;
+  padding: var(--spacing-8) var(--spacing-12); border: 0; border-radius: var(--radius-small);
+  background: transparent; color: var(--text-primary); font: inherit; font-size: var(--font-size-13); cursor: pointer; }
+.user-menu button:hover { background: var(--background-hover); }
+.user-menu button.is-on { background: var(--background-selected); font-weight: var(--font-weight-medium); }
+.user-menu .sep { block-size: var(--border-width); background: var(--border-subtle); margin: var(--spacing-4) var(--spacing-8); }
+.user-menu .group { padding: var(--spacing-4) var(--spacing-12) 0; color: var(--text-tertiary); font-size: var(--font-size-12); }
+/* 正文字族落一次：样式表里有 `.celadon { font-family: inherit }`（0,1,0），会压过 `body{…}`（0,0,1），
+   于是正文继承到 UA 默认字体。这里用 body.celadon（0,1,1）确保 token 生效；换语言时 --font-family-ui 随 :lang 变。 */
+body.celadon, html.celadon { font-family: var(--font-family-ui); }
+/* 系统的 `.celadon, [data-theme] .celadon { font-family: inherit }`（0,2,0）把正文字族设成"继承"，
+   于是落到 UA 默认字体。这里用同形选择器再加一层（0,2,1）让 token 真正生效。 */
+[data-theme] body.celadon { font-family: var(--font-family-ui); }
+/* 输入区按 F3 的 L2（floating）：阴影 --shadow-floating · 面阶 --elevation-surface-2 · z --z-overlay。
+   暗色下阴影在暗底不可见，靠面阶分离 —— 故必须同时给面阶，不能只给阴影。 */
+.composer { position: relative; z-index: var(--z-overlay); background: var(--elevation-surface-2); box-shadow: var(--shadow-floating); }
+/* 输入区描边：用更轻的一档 --border-subtle（原为 --border-default） */
+.composer { border-color: var(--border-subtle); }
+/* 实验：交换中栏与右栏的底色 —— 中栏用 surface、右栏用 content（原为相反）。
+   若后续保留，应回写到 F6 的分工说明；若不保留，删掉这两行即可。 */
+.window > .main { background: var(--background-surface); }
+.window > .panel { background: var(--background-content); }
+/* 实验：导航选中项与会话选中行改用中性的 hover 档（原为品牌色 soft，--background-selected） */
+.nav .navigation-item.is-active { background: var(--background-hover); color: var(--text-primary); }
+.conversation-row.is-selected { background: var(--background-hover); }
+.conversation-row.is-selected::before { background: var(--brand); }
+.conversation-row.is-selected .row-title { color: var(--text-primary); }
+/* ===== welcome（首次进入的首屏）=====
+   与 layout 同壳，但**没有右栏**，中栏换成「引导语 + 一个大输入区」；列轨相应改成两列。 */
+.window { grid-template-columns: var(--nav-default) minmax(var(--center-min), 1fr); }
+body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desktop) minmax(var(--center-min), 1fr); }
+.window > .panel { display: none; }
+#lang-btn { inline-size: auto; gap: var(--spacing-4); padding-inline: var(--spacing-8); }
+#lang-label { white-space: nowrap; font-size: var(--font-size-13); }
+.hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: var(--spacing-24); padding: var(--spacing-24); }
+.hero__mark { inline-size: var(--spacing-48); block-size: var(--spacing-48); }
+.hero__text { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-8); text-align: center; }
+.hero__title { font-size: var(--font-size-24); font-weight: var(--font-weight-heavy); line-height: var(--line-height-title); }
+.hero__subtitle { color: var(--text-secondary); font-size: var(--font-size-14); }
+.composer { inline-size: min(100%, 720px); margin: 0; border: var(--border-width) solid var(--border-subtle);
+            border-radius: var(--radius-large); background: var(--elevation-surface-2);
+            box-shadow: var(--shadow-floating); position: relative; z-index: var(--z-overlay); }
+.composer__input { inline-size: 100%; min-block-size: 96px; padding: var(--spacing-16); border: 0; background: transparent;
+                   color: var(--text-primary); font: inherit; font-size: var(--font-size-15); resize: none; outline: none; }
+.composer__foot { display: flex; align-items: center; gap: var(--spacing-8); padding: var(--spacing-8) var(--spacing-12) var(--spacing-12); }
+.chip { display: inline-flex; align-items: center; gap: var(--spacing-4); padding: var(--spacing-4) var(--spacing-8);
+        border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-pill);
+        color: var(--text-secondary); font-size: var(--font-size-13); background: transparent; cursor: pointer; }
+.chip:hover { background: var(--background-hover); }
+.send { margin-inline-start: auto; inline-size: var(--spacing-32); block-size: var(--spacing-32);
+        display: inline-flex; align-items: center; justify-content: center; border: 0; cursor: pointer;
+        border-radius: 50%; background: var(--brand); color: var(--background-surface); }
+.hint { color: var(--text-tertiary); font-size: var(--font-size-13); }
+/* 两列（无右栏）：需与 layout 里 `body.is-nav-open .window`（0,2,0）同特异性才压得住 */
+body.is-nav-open .window { grid-template-columns: var(--nav-default) minmax(var(--center-min), 1fr); }
+body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desktop) minmax(var(--center-min), 1fr); }
+</style>
+</head>
+<body class="celadon">
+<!-- 首次进入的首屏（产品级）：与 layout.html 同壳，但无右栏，中栏是引导语 + 大输入区。骨架仍以 design/mock.html 为准，同一套类名与 token；
+     相对 mock 只有两处改动：去掉演示用的窗口红绿灯、窗口铺满视口（真客户端由系统窗口承载）。
+     组件边界（接产品代码时按此切分）：
+       [base]    按钮 · 输入 · 菜单 · 芯片 · 头像 · 进度条 · 复选框  → app/src/components/base
+       [shell]   .window 三列骨架 · .navigation-* 导航列 · .content-header 内容列头 · .panel-header 面板列头
+       [feature] .conversation-list 会话列表 · .message-thread 与 .message/.tool-card/.question-card 对话
+                 · .panel-body 内的 subtask / gate-chip / diff-card / activity-timeline（agent 运行与验收）
+     四语走 design/i18n/*.json（ui.*）；浅暗由 [data-theme] 驱动。 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="brand-yao-agents-grad" x1="0.1" y1="0" x2="0.9" y2="1"><stop offset="0" stop-color="var(--brand-mark-from)"/><stop offset="1" stop-color="var(--brand-mark-to)"/></linearGradient>
+<mask id="brand-yao-agents-mono-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+      <g transform="translate(-0.0133 1.8233) scale(0.0333333)"><g transform="translate(-151.5657, -188.764)">
+        <path d="M486.884,189.207 C495.1615,188.4345 505.165,188.919 513.59,188.864 C599.61,188.302 684.55,217.9475 749.645,274.6415 C820.74,337.335 864.11,425.629 870.28,520.215 C874.69,585.13 864.71,657.9 819.94,708.215 C766.135,768.695 672.935,788.13 595.875,795.7 C576.14,797.64 557.055,797.635 537.68,798.92 C436.9495,800.75 298.6425,791.955 218.4915,723.25 C173.8735,685 156.2745,627.825 152.411,570.625 C145.8345,474.4635 177.8325,379.6425 241.3305,307.127 C292.7155,248.288 362.5635,208.649 439.428,194.7065 C455.6785,191.7125 470.5135,190.32 486.884,189.207 Z" fill="#fff"/>
+        <g transform="translate(352.7054, 366.1909)"><path d="M54.3200771,0.00131773874 C90.5575771,-0.297352792 107.046077,50.2461472 109.269077,79.1841472 C111.987077,114.573147 98.0685771,173.204147 55.0560771,176.574147 C19.8370771,176.004147 3.26007709,132.680147 0.574577092,103.311147 C-2.06042291,74.4961472 4.20857709,41.4316472 22.6780771,18.3306472 C30.9835771,7.94264721 41.0875771,1.40214721 54.3200771,0.00131773874 Z M67.8166257,49.886467 L66.8260771,49.8991472 C34.0975771,56.7616472 37.5585771,132.225647 70.5330771,131.761147 C103.215077,124.145147 100.147077,48.7151472 66.8260771,49.8991472 Z" fill="#000"/></g>
+        <g transform="translate(562.8175, 366.1247)"><path d="M76.7075112,8.55926237 C96.7425112,24.6522624 104.512511,49.8777624 107.982511,74.3482624 C112.957511,109.387262 99.1125112,171.335262 57.0025112,176.520262 C47.7325112,176.880262 37.7225112,173.635262 30.7025112,167.460262 C-8.8974888,132.641762 -8.5574888,58.3082624 22.3475112,18.0877624 C30.2475112,7.80826237 40.7175112,1.45976237 53.2275112,0.0662623674 C61.0975112,-0.590737633 70.7075112,3.73926237 76.7075112,8.55926237 Z M39.6166685,49.9369618 L38.6575112,49.9567624 C5.9375112,57.6252624 10.0475112,133.248262 43.3725112,131.767262 C76.3675112,122.553262 70.8975112,48.5472624 38.6575112,49.9567624 Z" fill="#000"/></g>
+      </g></g>
+    </mask>
+<linearGradient gradientUnits="userSpaceOnUse" id="brand-gemini-lobe-icons-gemini-0-_R_0_" x1="7" x2="11" y1="15.5" y2="12"><stop stop-color="#08B962"></stop><stop offset="1" stop-color="#08B962" stop-opacity="0"></stop></linearGradient>
+<linearGradient gradientUnits="userSpaceOnUse" id="brand-gemini-lobe-icons-gemini-1-_R_0_" x1="8" x2="11.5" y1="5.5" y2="11"><stop stop-color="#F94543"></stop><stop offset="1" stop-color="#F94543" stop-opacity="0"></stop></linearGradient>
+<linearGradient gradientUnits="userSpaceOnUse" id="brand-gemini-lobe-icons-gemini-2-_R_0_" x1="3.5" x2="17.5" y1="13.5" y2="12"><stop stop-color="#FABC12"></stop><stop offset=".46" stop-color="#FABC12" stop-opacity="0"></stop></linearGradient>
+<linearGradient id="brand-qwen-lobe-icons-qwen-_R_0_" x1="0%" x2="100%" y1="0%" y2="0%"><stop offset="0%" stop-color="#6336E7" stop-opacity=".84"></stop><stop offset="100%" stop-color="#6F69F7" stop-opacity=".84"></stop></linearGradient>
+</defs>
+<symbol id="i-chat" viewBox="0 0 24 24" data-src="lucide:message-circle"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" /></symbol>
+<symbol id="i-inbox" viewBox="0 0 24 24" data-src="lucide:inbox"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /> <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></symbol>
+<symbol id="i-board" viewBox="0 0 24 24" data-src="lucide:square-kanban"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M8 7v7" /> <path d="M12 7v4" /> <path d="M16 7v9" /></symbol>
+<symbol id="i-ws" viewBox="0 0 24 24" data-src="lucide:folder-kanban"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" /> <path d="M8 10v4" /> <path d="M12 10v2" /> <path d="M16 10v6" /></symbol>
+<symbol id="i-pc" viewBox="0 0 24 24" data-src="lucide:monitor"><rect width="20" height="14" x="2" y="3" rx="2" /> <line x1="8" x2="16" y1="21" y2="21" /> <line x1="12" x2="12" y1="17" y2="21" /></symbol>
+<symbol id="i-book" viewBox="0 0 24 24" data-src="lucide:book"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" /></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" data-src="lucide:search"><path d="m21 21-4.34-4.34" /> <circle cx="11" cy="11" r="8" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24" data-src="lucide:plus"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol>
+<symbol id="i-plus-square" viewBox="0 0 24 24" data-src="lucide:square-plus"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M8 12h8" /> <path d="M12 8v8" /></symbol>
+<symbol id="i-left" viewBox="0 0 24 24" data-src="lucide:chevron-left"><path d="m15 18-6-6 6-6" /></symbol>
+<symbol id="i-right" viewBox="0 0 24 24" data-src="lucide:chevron-right"><path d="m9 18 6-6-6-6" /></symbol>
+<symbol id="i-collapse" viewBox="0 0 24 24" data-src="lucide:panel-left-close"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M9 3v18" /> <path d="m16 15-3-3 3-3" /></symbol>
+<symbol id="i-dots" viewBox="0 0 24 24" data-src="lucide:ellipsis"><circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" /></symbol>
+<symbol id="i-file" viewBox="0 0 24 24" data-src="lucide:file"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /></symbol>
+<symbol id="i-split" viewBox="0 0 24 24" data-src="lucide:columns-2"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M12 3v18" /></symbol>
+<symbol id="i-send" viewBox="0 0 24 24" data-src="lucide:send"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /> <path d="m21.854 2.147-10.94 10.939" /></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" data-src="lucide:check"><path d="M20 6 9 17l-5-5" /></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24" data-src="lucide:clock"><circle cx="12" cy="12" r="10" /> <path d="M12 6v6l4 2" /></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24" data-src="lucide:square"><rect width="18" height="18" x="3" y="3" rx="2" /></symbol>
+<symbol id="i-expand" viewBox="0 0 24 24" data-src="lucide:panel-left-open"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M9 3v18" /> <path d="m14 9 3 3-3 3" /></symbol>
+<symbol id="i-split2" viewBox="0 0 24 24" data-src="lucide:columns-3"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M9 3v18" /> <path d="M15 3v18" /></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24" data-src="lucide:sparkles"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" /> <path d="M20 2v4" /> <path d="M22 4h-4" /> <circle cx="4" cy="20" r="2" /></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24" data-src="lucide:folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" /></symbol>
+<symbol id="i-tasks" viewBox="0 0 24 24" data-src="lucide:list-checks"><path d="M13 5h8" /> <path d="M13 12h8" /> <path d="M13 19h8" /> <path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24" data-src="lucide:pause"><rect x="14" y="3" width="5" height="18" rx="1" /> <rect x="5" y="3" width="5" height="18" rx="1" /></symbol>
+<symbol id="i-nav-settings" viewBox="0 0 24 24" data-src="lucide:settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" /> <circle cx="12" cy="12" r="3" /></symbol>
+<symbol id="i-nav-help" viewBox="0 0 24 24" data-src="lucide:circle-question-mark"><circle cx="12" cy="12" r="10" /> <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /> <path d="M12 17h.01" /></symbol>
+<symbol id="i-nav-user" viewBox="0 0 24 24" data-src="lucide:user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /></symbol>
+<symbol id="i-nav-team" viewBox="0 0 24 24" data-src="lucide:users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <path d="M16 3.128a4 4 0 0 1 0 7.744" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <circle cx="9" cy="7" r="4" /></symbol>
+<symbol id="i-nav-logout" viewBox="0 0 24 24" data-src="lucide:log-out"><path d="m16 17 5-5-5-5" /> <path d="M21 12H9" /> <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /></symbol>
+<symbol id="i-act-edit" viewBox="0 0 24 24" data-src="lucide:pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
+<symbol id="i-act-trash" viewBox="0 0 24 24" data-src="lucide:trash"><path d="M10 11v6" /> <path d="M14 11v6" /> <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /> <path d="M3 6h18" /> <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></symbol>
+<symbol id="i-act-copy" viewBox="0 0 24 24" data-src="lucide:copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></symbol>
+<symbol id="i-act-download" viewBox="0 0 24 24" data-src="lucide:download"><path d="M12 15V3" /> <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /> <path d="m7 10 5 5 5-5" /></symbol>
+<symbol id="i-act-upload" viewBox="0 0 24 24" data-src="lucide:upload"><path d="M12 3v12" /> <path d="m17 8-5-5-5 5" /> <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></symbol>
+<symbol id="i-act-refresh" viewBox="0 0 24 24" data-src="lucide:refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
+<symbol id="i-act-external" viewBox="0 0 24 24" data-src="lucide:external-link"><path d="M15 3h6v6" /> <path d="M10 14 21 3" /> <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol>
+<symbol id="i-act-filter" viewBox="0 0 24 24" data-src="lucide:funnel"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z" /></symbol>
+<symbol id="i-act-sort" viewBox="0 0 24 24" data-src="lucide:arrow-up-down"><path d="m21 16-4 4-4-4" /> <path d="M17 20V4" /> <path d="m3 8 4-4 4 4" /> <path d="M7 4v16" /></symbol>
+<symbol id="i-act-close" viewBox="0 0 24 24" data-src="lucide:x"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
+<symbol id="i-act-undo" viewBox="0 0 24 24" data-src="lucide:undo-2"><path d="M9 14 4 9l5-5" /> <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" /></symbol>
+<symbol id="i-act-redo" viewBox="0 0 24 24" data-src="lucide:redo-2"><path d="m15 14 5-5-5-5" /> <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13" /></symbol>
+<symbol id="i-act-play" viewBox="0 0 24 24" data-src="lucide:play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" /></symbol>
+<symbol id="i-act-attach" viewBox="0 0 24 24" data-src="lucide:paperclip"><path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" /></symbol>
+<symbol id="i-state-warning" viewBox="0 0 24 24" data-src="lucide:triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /> <path d="M12 9v4" /> <path d="M12 17h.01" /></symbol>
+<symbol id="i-state-error" viewBox="0 0 24 24" data-src="lucide:circle-alert"><circle cx="12" cy="12" r="10" /> <line x1="12" x2="12" y1="8" y2="12" /> <line x1="12" x2="12.01" y1="16" y2="16" /></symbol>
+<symbol id="i-state-info" viewBox="0 0 24 24" data-src="lucide:info"><circle cx="12" cy="12" r="10" /> <path d="M12 16v-4" /> <path d="M12 8h.01" /></symbol>
+<symbol id="i-state-loading" viewBox="0 0 24 24" data-src="lucide:loader-circle"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></symbol>
+<symbol id="i-state-queued" viewBox="0 0 24 24" data-src="lucide:list-ordered"><path d="M11 5h10" /> <path d="M11 12h10" /> <path d="M11 19h10" /> <path d="M4 4h1v5" /> <path d="M4 9h2" /> <path d="M6.5 20H3.4c0-1 2.6-1.925 2.6-3.5a1.5 1.5 0 0 0-2.6-1.02" /></symbol>
+<symbol id="i-file-pdf" viewBox="0 0 24 24" data-src="lucide:file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /></symbol>
+<symbol id="i-file-image" viewBox="0 0 24 24" data-src="lucide:file-image"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <circle cx="10" cy="12" r="2" /> <path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22" /></symbol>
+<symbol id="i-file-sheet" viewBox="0 0 24 24" data-src="lucide:table"><path d="M12 3v18" /> <rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M3 9h18" /> <path d="M3 15h18" /></symbol>
+<symbol id="i-file-code" viewBox="0 0 24 24" data-src="lucide:code"><path d="m16 18 6-6-6-6" /> <path d="m8 6-6 6 6 6" /></symbol>
+<symbol id="i-file-archive" viewBox="0 0 24 24" data-src="lucide:archive"><rect width="20" height="5" x="2" y="3" rx="1" /> <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" /> <path d="M10 12h4" /></symbol>
+<symbol id="i-file-media" viewBox="0 0 24 24" data-src="lucide:music"><path d="M9 18V5l12-2v13" /> <circle cx="6" cy="18" r="3" /> <circle cx="18" cy="16" r="3" /></symbol>
+<symbol id="i-file-text" viewBox="0 0 24 24" data-src="lucide:file-type"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <path d="M11 18h2" /> <path d="M12 12v6" /> <path d="M9 13v-.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v.5" /></symbol>
+<symbol id="i-file-terminal" viewBox="0 0 24 24" data-src="lucide:terminal"><path d="M12 19h8" /> <path d="m4 17 6-6-6-6" /></symbol>
+<symbol id="i-obj-key" viewBox="0 0 24 24" data-src="lucide:key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" /> <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
+<symbol id="i-obj-schedule" viewBox="0 0 24 24" data-src="lucide:calendar-clock"><path d="M16 14v2.2l1.6 1" /> <path d="M16 2v3" /> <path d="M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338" /> <path d="M3 9h5.859" /> <path d="M8 2v3" /> <circle cx="16" cy="16" r="6" /></symbol>
+<symbol id="i-obj-integration" viewBox="0 0 24 24" data-src="lucide:plug"><path d="M12 22v-5" /> <path d="M15 8V2" /> <path d="M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z" /> <path d="M9 8V2" /></symbol>
+<symbol id="i-obj-skill" viewBox="0 0 24 24" data-src="lucide:wand-sparkles"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /> <path d="m14 7 3 3" /> <path d="M5 6v4" /> <path d="M19 14v4" /> <path d="M10 2v2" /> <path d="M7 8H3" /> <path d="M21 16h-4" /> <path d="M11 3H9" /></symbol>
+<symbol id="i-obj-model" viewBox="0 0 24 24" data-src="lucide:cpu"><path d="M12 20v2" /> <path d="M12 2v2" /> <path d="M17 20v2" /> <path d="M17 2v2" /> <path d="M2 12h2" /> <path d="M2 17h2" /> <path d="M2 7h2" /> <path d="M20 12h2" /> <path d="M20 17h2" /> <path d="M20 7h2" /> <path d="M7 20v2" /> <path d="M7 2v2" /> <rect x="4" y="4" width="16" height="16" rx="2" /> <rect x="8" y="8" width="8" height="8" rx="1" /></symbol>
+<symbol id="i-obj-quota" viewBox="0 0 24 24" data-src="lucide:gauge"><path d="m12 14 4-4" /> <path d="M3.34 19a10 10 0 1 1 17.32 0" /></symbol>
+<symbol id="i-obj-billing" viewBox="0 0 24 24" data-src="lucide:receipt"><path d="M12 17V7" /> <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8" /> <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z" /></symbol>
+<symbol id="i-obj-sandbox" viewBox="0 0 24 24" data-src="lucide:box"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /> <path d="m3.3 7 8.7 5 8.7-5" /> <path d="M12 22V12" /></symbol>
+<symbol id="i-obj-container" viewBox="0 0 24 24" data-src="lucide:container"><path d="M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z" /> <path d="M10 21.9V14L2.1 9.1" /> <path d="m10 14 11.9-6.9" /> <path d="M14 19.8v-8.1" /> <path d="M18 17.5V9.4" /></symbol>
+<symbol id="i-obj-artifact" viewBox="0 0 24 24" data-src="lucide:package"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" /> <path d="M12 22V12" /> <polyline points="3.29 7 12 12 20.71 7" /> <path d="m7.5 4.27 9 5.15" /></symbol>
+<symbol id="brand-yao-agents" viewBox="0 0 24 24" data-src="own:yao-agents"><defs></defs>
+    <g transform="translate(-0.0133 1.8233) scale(0.0333333)">
+      
+      <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+      <g id="Yaobots" style="stroke:none" transform="translate(-151.5657, -188.764)" fill-rule="nonzero">
+      <path d="M486.884,189.207 C495.1615,188.4345 505.165,188.919 513.59,188.864 C599.61,188.302 684.55,217.9475 749.645,274.6415 C820.74,337.335 864.11,425.629 870.28,520.215 C874.69,585.13 864.71,657.9 819.94,708.215 C766.135,768.695 672.935,788.13 595.875,795.7 C576.14,797.64 557.055,797.635 537.68,798.92 C436.9495,800.75 298.6425,791.955 218.4915,723.25 C173.8735,685 156.2745,627.825 152.411,570.625 C145.8345,474.4635 177.8325,379.6425 241.3305,307.127 C292.7155,248.288 362.5635,208.649 439.428,194.7065 C455.6785,191.7125 470.5135,190.32 486.884,189.207 Z" id="Path" style="fill:url(#brand-yao-agents-grad)"></path>
+      <g id="Eye-left" transform="translate(352.7054, 366.1909)" style="fill:var(--brand-eye)">
+      <path d="M54.3200771,0.00131773874 C90.5575771,-0.297352792 107.046077,50.2461472 109.269077,79.1841472 C111.987077,114.573147 98.0685771,173.204147 55.0560771,176.574147 C19.8370771,176.004147 3.26007709,132.680147 0.574577092,103.311147 C-2.06042291,74.4961472 4.20857709,41.4316472 22.6780771,18.3306472 C30.9835771,7.94264721 41.0875771,1.40214721 54.3200771,0.00131773874 Z M67.8166257,49.886467 L66.8260771,49.8991472 C34.0975771,56.7616472 37.5585771,132.225647 70.5330771,131.761147 C103.215077,124.145147 100.147077,48.7151472 66.8260771,49.8991472 Z" id="Combined-Shape"></path>
+      </g>
+      <g id="Eye-right" transform="translate(562.8175, 366.1247)" style="fill:var(--brand-eye)">
+      <path d="M76.7075112,8.55926237 C96.7425112,24.6522624 104.512511,49.8777624 107.982511,74.3482624 C112.957511,109.387262 99.1125112,171.335262 57.0025112,176.520262 C47.7325112,176.880262 37.7225112,173.635262 30.7025112,167.460262 C-8.8974888,132.641762 -8.5574888,58.3082624 22.3475112,18.0877624 C30.2475112,7.80826237 40.7175112,1.45976237 53.2275112,0.0662623674 C61.0975112,-0.590737633 70.7075112,3.73926237 76.7075112,8.55926237 Z M39.6166685,49.9369618 L38.6575112,49.9567624 C5.9375112,57.6252624 10.0475112,133.248262 43.3725112,131.767262 C76.3675112,122.553262 70.8975112,48.5472624 38.6575112,49.9567624 Z" id="Combined-Shape"></path>
+      </g>
+      </g>
+      </g>
+    </g>
+  </symbol>
+<symbol id="brand-yao-agents-mono" viewBox="0 0 24 24" data-src="own:yao-agents-mono">
+    <defs></defs>
+    <!-- 单色版：整块用 currentColor 填，眼睛用 mask 挖空 —— 浅底深底都成立，不改品牌色也不靠底色 -->
+    <rect x="0" y="0" width="24" height="24" fill="currentColor" mask="url(#brand-yao-agents-mono-cut)"/>
+  </symbol>
+<symbol id="brand-yao" viewBox="0 0 24 24" data-src="own:yao-alpha" data-title="Yao">
+    <!-- 太极：cui 最早使用的品牌标记（原 72×72，#6694FF + #3370FF），归一化到 24 网格 -->
+    <g transform="translate(-5.2112 -5.6892) scale(0.478088)">
+      <path d="M53.4075469,54.6265023 C51.0818629,56.9701458 48.3754867,58.81158 45.3645565,60.0950038 C42.6097285,61.2668256 39.7026235,61.9294629 36.7055368,62.0689655 C36.463278,61.9992142 36.2071759,61.9573634 35.9441521,61.9573634 C29.7630933,61.9085375 24.7794848,56.8027427 24.8275862,50.573952 C24.8487016,47.881552 25.8661883,45.244953 27.6312163,43.2221654 C29.4100877,41.1784524 31.8257535,39.9368794 34.4421479,39.539297 C34.9266654,39.4695457 35.4181046,39.4207198 35.9095437,39.4067695 C37.1346808,39.3718939 38.3667396,39.323068 39.5711117,39.0649882 C41.0661942,38.7441322 42.5197467,38.2140224 43.8763957,37.495584 C45.3437915,36.7143695 46.6935188,35.716926 47.8771258,34.5451042 C51.0887846,31.35747 52.8814993,27.102641 52.9161077,22.5548565 C52.9299511,20.7761984 52.673849,19.0324161 52.1685665,17.3793103 C52.5977105,17.7559673 53.0130112,18.1465746 53.4144686,18.5511321 C55.7401525,20.8947756 57.5674757,23.6220513 58.8410645,26.6562327 C60.1561834,29.795041 60.8275862,33.136128 60.8275862,36.5818421 C60.8275862,40.0275561 60.1561834,43.3686431 58.8410645,46.5074514 C57.5536323,49.5555831 55.7332309,52.2828587 53.4075469,54.6265023 L53.4075469,54.6265023 Z" fill="#6694FF"/>
+      <path d="M13.1702074,47.3629488 C11.8476263,44.223677 11.1724138,40.8820966 11.1724138,37.4358738 C11.1724138,33.989651 11.8476263,30.6480706 13.1702074,27.5087988 C14.4510227,24.4741694 16.2887144,21.746491 18.6275946,19.4025014 C20.9664749,17.0585118 23.6882076,15.2168056 26.7162222,13.9331923 C29.8347293,12.607722 33.1551039,11.9380106 36.5798929,11.9310345 C36.7399948,11.9589391 36.9000967,11.9728914 37.0741206,11.9728914 L37.2342225,11.9728914 C40.2413542,11.9938199 43.0675012,13.1937194 45.17667,15.3423765 C47.2858389,17.4910336 48.4343961,20.3373067 48.4137931,23.3510077 C48.3926304,25.9670675 47.4459408,28.5273181 45.7613901,30.5294758 C44.0977223,32.503729 41.765803,33.8780324 39.232016,34.3593874 C37.7354111,34.6384338 36.2179233,34.4431014 34.7282793,34.6523861 C30.7466141,35.2244312 27.0781918,37.2056605 24.4121467,40.2472661 C21.7112969,43.3167763 20.207731,47.2652826 20.1729262,51.3602883 C20.1520434,53.620564 20.5766615,55.8250304 21.3910931,57.862069 C20.4235206,57.1365484 19.4977138,56.33429 18.6345556,55.4622701 C16.2887144,53.1252566 14.4510227,50.3975782 13.1702074,47.3629488 Z" fill="#3370FF"/>
+    </g>
+  </symbol>
+<symbol id="brand-yao-mono" viewBox="0 0 24 24" data-src="own:yao-alpha-mono" data-title="Yao">
+    <!-- 单色版：同色两档透明度，保住太极的 S 形，浅底深底都成立 -->
+    <g transform="translate(-5.2112 -5.6892) scale(0.478088)">
+      <path d="M53.4075469,54.6265023 C51.0818629,56.9701458 48.3754867,58.81158 45.3645565,60.0950038 C42.6097285,61.2668256 39.7026235,61.9294629 36.7055368,62.0689655 C36.463278,61.9992142 36.2071759,61.9573634 35.9441521,61.9573634 C29.7630933,61.9085375 24.7794848,56.8027427 24.8275862,50.573952 C24.8487016,47.881552 25.8661883,45.244953 27.6312163,43.2221654 C29.4100877,41.1784524 31.8257535,39.9368794 34.4421479,39.539297 C34.9266654,39.4695457 35.4181046,39.4207198 35.9095437,39.4067695 C37.1346808,39.3718939 38.3667396,39.323068 39.5711117,39.0649882 C41.0661942,38.7441322 42.5197467,38.2140224 43.8763957,37.495584 C45.3437915,36.7143695 46.6935188,35.716926 47.8771258,34.5451042 C51.0887846,31.35747 52.8814993,27.102641 52.9161077,22.5548565 C52.9299511,20.7761984 52.673849,19.0324161 52.1685665,17.3793103 C52.5977105,17.7559673 53.0130112,18.1465746 53.4144686,18.5511321 C55.7401525,20.8947756 57.5674757,23.6220513 58.8410645,26.6562327 C60.1561834,29.795041 60.8275862,33.136128 60.8275862,36.5818421 C60.8275862,40.0275561 60.1561834,43.3686431 58.8410645,46.5074514 C57.5536323,49.5555831 55.7332309,52.2828587 53.4075469,54.6265023 L53.4075469,54.6265023 Z" fill="currentColor"/>
+      <path d="M13.1702074,47.3629488 C11.8476263,44.223677 11.1724138,40.8820966 11.1724138,37.4358738 C11.1724138,33.989651 11.8476263,30.6480706 13.1702074,27.5087988 C14.4510227,24.4741694 16.2887144,21.746491 18.6275946,19.4025014 C20.9664749,17.0585118 23.6882076,15.2168056 26.7162222,13.9331923 C29.8347293,12.607722 33.1551039,11.9380106 36.5798929,11.9310345 C36.7399948,11.9589391 36.9000967,11.9728914 37.0741206,11.9728914 L37.2342225,11.9728914 C40.2413542,11.9938199 43.0675012,13.1937194 45.17667,15.3423765 C47.2858389,17.4910336 48.4343961,20.3373067 48.4137931,23.3510077 C48.3926304,25.9670675 47.4459408,28.5273181 45.7613901,30.5294758 C44.0977223,32.503729 41.765803,33.8780324 39.232016,34.3593874 C37.7354111,34.6384338 36.2179233,34.4431014 34.7282793,34.6523861 C30.7466141,35.2244312 27.0781918,37.2056605 24.4121467,40.2472661 C21.7112969,43.3167763 20.207731,47.2652826 20.1729262,51.3602883 C20.1520434,53.620564 20.5766615,55.8250304 21.3910931,57.862069 C20.4235206,57.1365484 19.4977138,56.33429 18.6345556,55.4622701 C16.2887144,53.1252566 14.4510227,50.3975782 13.1702074,47.3629488 Z" fill="currentColor" fill-opacity="0.45"/>
+    </g>
+  </symbol>
+<symbol id="brand-claude" viewBox="0 0 24 24" data-src="lobeicons:Claude/Color" data-title="Claude"><title>Claude</title><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" fill="#D97757" fill-rule="nonzero"></path></symbol>
+<symbol id="brand-openai" viewBox="0 0 24 24" data-src="lobeicons:OpenAI/Mono" data-title="OpenAI"><g fill="currentColor"><title>OpenAI</title><path d="M9.205 8.658v-2.26c0-.19.072-.333.238-.428l4.543-2.616c.619-.357 1.356-.523 2.117-.523 2.854 0 4.662 2.212 4.662 4.566 0 .167 0 .357-.024.547l-4.71-2.759a.797.797 0 00-.856 0l-5.97 3.473zm10.609 8.8V12.06c0-.333-.143-.57-.429-.737l-5.97-3.473 1.95-1.118a.433.433 0 01.476 0l4.543 2.617c1.309.76 2.189 2.378 2.189 3.948 0 1.808-1.07 3.473-2.76 4.163zM7.802 12.703l-1.95-1.142c-.167-.095-.239-.238-.239-.428V5.899c0-2.545 1.95-4.472 4.591-4.472 1 0 1.927.333 2.712.928L8.23 5.067c-.285.166-.428.404-.428.737v6.898zM12 15.128l-2.795-1.57v-3.33L12 8.658l2.795 1.57v3.33L12 15.128zm1.796 7.23c-1 0-1.927-.332-2.712-.927l4.686-2.712c.285-.166.428-.404.428-.737v-6.898l1.974 1.142c.167.095.238.238.238.428v5.233c0 2.545-1.974 4.472-4.614 4.472zm-5.637-5.303l-4.544-2.617c-1.308-.761-2.188-2.378-2.188-3.948A4.482 4.482 0 014.21 6.327v5.423c0 .333.143.571.428.738l5.947 3.449-1.95 1.118a.432.432 0 01-.476 0zm-.262 3.9c-2.688 0-4.662-2.021-4.662-4.519 0-.19.024-.38.047-.57l4.686 2.71c.286.167.571.167.856 0l5.97-3.448v2.26c0 .19-.07.333-.237.428l-4.543 2.616c-.619.357-1.356.523-2.117.523zm5.899 2.83a5.947 5.947 0 005.827-4.756C22.287 18.339 24 15.84 24 13.296c0-1.665-.713-3.282-1.998-4.448.119-.5.19-.999.19-1.498 0-3.401-2.759-5.947-5.946-5.947-.642 0-1.26.095-1.88.31A5.962 5.962 0 0010.205 0a5.947 5.947 0 00-5.827 4.757C1.713 5.447 0 7.945 0 10.49c0 1.666.713 3.283 1.998 4.448-.119.5-.19 1-.19 1.499 0 3.401 2.759 5.946 5.946 5.946.642 0 1.26-.095 1.88-.309a5.96 5.96 0 004.162 1.713z"></path></g></symbol>
+<symbol id="brand-gemini" viewBox="0 0 24 24" data-src="lobeicons:Gemini/Color" data-title="Gemini"><title>Gemini</title><path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="#3186FF"></path><path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="url(#brand-gemini-lobe-icons-gemini-0-_R_0_)"></path><path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="url(#brand-gemini-lobe-icons-gemini-1-_R_0_)"></path><path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="url(#brand-gemini-lobe-icons-gemini-2-_R_0_)"></path><defs></defs></symbol>
+<symbol id="brand-grok" viewBox="0 0 24 24" data-src="lobeicons:Grok/Mono" data-title="Grok"><g fill="currentColor"><title>Grok</title><path d="M9.27 15.29l7.978-5.897c.391-.29.95-.177 1.137.272.98 2.369.542 5.215-1.41 7.169-1.951 1.954-4.667 2.382-7.149 1.406l-2.711 1.257c3.889 2.661 8.611 2.003 11.562-.953 2.341-2.344 3.066-5.539 2.388-8.42l.006.007c-.983-4.232.242-5.924 2.75-9.383.06-.082.12-.164.179-.248l-3.301 3.305v-.01L9.267 15.292M7.623 16.723c-2.792-2.67-2.31-6.801.071-9.184 1.761-1.763 4.647-2.483 7.166-1.425l2.705-1.25a7.808 7.808 0 00-1.829-1A8.975 8.975 0 005.984 5.83c-2.533 2.536-3.33 6.436-1.962 9.764 1.022 2.487-.653 4.246-2.34 6.022-.599.63-1.199 1.259-1.682 1.925l7.62-6.815"></path></g></symbol>
+<symbol id="brand-deepseek" viewBox="0 0 24 24" data-src="lobeicons:DeepSeek/Color" data-title="DeepSeek"><title>DeepSeek</title><path d="M23.748 4.482c-.254-.124-.364.113-.512.234-.051.039-.094.09-.137.136-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.156-.708-.311-.955-.65-.172-.241-.219-.51-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.093.172.187.129.323-.082.28-.18.552-.266.833-.055.179-.137.217-.329.14a5.526 5.526 0 01-1.736-1.18c-.857-.828-1.631-1.742-2.597-2.458a11.365 11.365 0 00-.689-.471c-.985-.957.13-1.743.388-1.836.27-.098.093-.432-.779-.428-.872.004-1.67.295-2.687.684a3.055 3.055 0 01-.465.137 9.597 9.597 0 00-2.883-.102c-1.885.21-3.39 1.102-4.497 2.623C.082 8.606-.231 10.684.152 12.85c.403 2.284 1.569 4.175 3.36 5.653 1.858 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.133-.284 4.994-1.86.47.234.962.327 1.78.397.63.059 1.236-.03 1.705-.128.735-.156.684-.837.419-.961-2.155-1.004-1.682-.595-2.113-.926 1.096-1.296 2.746-2.642 3.392-7.003.05-.347.007-.565 0-.845-.004-.17.035-.237.23-.256a4.173 4.173 0 001.545-.475c1.396-.763 1.96-2.015 2.093-3.517.02-.23-.004-.467-.247-.588zM11.581 18c-2.089-1.642-3.102-2.183-3.52-2.16-.392.024-.321.471-.235.763.09.288.207.486.371.739.114.167.192.416-.113.603-.673.416-1.842-.14-1.897-.167-1.361-.802-2.5-1.86-3.301-3.307-.774-1.393-1.224-2.887-1.298-4.482-.02-.386.093-.522.477-.592a4.696 4.696 0 011.529-.039c2.132.312 3.946 1.265 5.468 2.774.868.86 1.525 1.887 2.202 2.891.72 1.066 1.494 2.082 2.48 2.914.348.292.625.514.891.677-.802.09-2.14.11-3.054-.614zm1-6.44a.306.306 0 01.415-.287.302.302 0 01.2.288.306.306 0 01-.31.307.303.303 0 01-.304-.308zm3.11 1.596c-.2.081-.399.151-.59.16a1.245 1.245 0 01-.798-.254c-.274-.23-.47-.358-.552-.758a1.73 1.73 0 01.016-.588c.07-.327-.008-.537-.239-.727-.187-.156-.426-.199-.688-.199a.559.559 0 01-.254-.078c-.11-.054-.2-.19-.114-.358.028-.054.16-.186.192-.21.356-.202.767-.136 1.146.016.352.144.618.408 1.001.782.391.451.462.576.685.914.176.265.336.537.445.848.067.195-.019.354-.25.452z" fill="#4D6BFE"></path></symbol>
+<symbol id="brand-qwen" viewBox="0 0 24 24" data-src="lobeicons:Qwen/Color" data-title="Qwen"><title>Qwen</title><path d="M12.604 1.34c.393.69.784 1.382 1.174 2.075a.18.18 0 00.157.091h5.552c.174 0 .322.11.446.327l1.454 2.57c.19.337.24.478.024.837-.26.43-.513.864-.76 1.3l-.367.658c-.106.196-.223.28-.04.512l2.652 4.637c.172.301.111.494-.043.77-.437.785-.882 1.564-1.335 2.34-.159.272-.352.375-.68.37-.777-.016-1.552-.01-2.327.016a.099.099 0 00-.081.05 575.097 575.097 0 01-2.705 4.74c-.169.293-.38.363-.725.364-.997.003-2.002.004-3.017.002a.537.537 0 01-.465-.271l-1.335-2.323a.09.09 0 00-.083-.049H4.982c-.285.03-.553-.001-.805-.092l-1.603-2.77a.543.543 0 01-.002-.54l1.207-2.12a.198.198 0 000-.197 550.951 550.951 0 01-1.875-3.272l-.79-1.395c-.16-.31-.173-.496.095-.965.465-.813.927-1.625 1.387-2.436.132-.234.304-.334.584-.335a338.3 338.3 0 012.589-.001.124.124 0 00.107-.063l2.806-4.895a.488.488 0 01.422-.246c.524-.001 1.053 0 1.583-.006L11.704 1c.341-.003.724.032.9.34zm-3.432.403a.06.06 0 00-.052.03L6.254 6.788a.157.157 0 01-.135.078H3.253c-.056 0-.07.025-.041.074l5.81 10.156c.025.042.013.062-.034.063l-2.795.015a.218.218 0 00-.2.116l-1.32 2.31c-.044.078-.021.118.068.118l5.716.008c.046 0 .08.02.104.061l1.403 2.454c.046.081.092.082.139 0l5.006-8.76.783-1.382a.055.055 0 01.096 0l1.424 2.53a.122.122 0 00.107.062l2.763-.02a.04.04 0 00.035-.02.041.041 0 000-.04l-2.9-5.086a.108.108 0 010-.113l.293-.507 1.12-1.977c.024-.041.012-.062-.035-.062H9.2c-.059 0-.073-.026-.043-.077l1.434-2.505a.107.107 0 000-.114L9.225 1.774a.06.06 0 00-.053-.031zm6.29 8.02c.046 0 .058.02.034.06l-.832 1.465-2.613 4.585a.056.056 0 01-.05.029.058.058 0 01-.05-.029L8.498 9.841c-.02-.034-.01-.052.028-.054l.216-.012 6.722-.012z" fill="url(#brand-qwen-lobe-icons-qwen-_R_0_)" fill-rule="nonzero"></path><defs></defs></symbol>
+<symbol id="brand-kimi" viewBox="0 0 24 24" data-src="lobeicons:Kimi/Color" data-title="Kimi"><title>Kimi</title><path d="M21.846 0a1.923 1.923 0 110 3.846H20.15a.226.226 0 01-.227-.226V1.923C19.923.861 20.784 0 21.846 0z" fill="#1783FF"></path><path d="M11.065 11.199l7.257-7.2c.137-.136.06-.41-.116-.41H14.3a.164.164 0 00-.117.051l-7.82 7.756c-.122.12-.302.013-.302-.179V3.82c0-.127-.083-.23-.185-.23H3.186c-.103 0-.186.103-.186.23V19.77c0 .128.083.23.186.23h2.69c.103 0 .186-.102.186-.23v-3.25c0-.069.025-.135.069-.178l2.424-2.406a.158.158 0 01.205-.023l6.484 4.772a7.677 7.677 0 003.453 1.283c.108.012.2-.095.2-.23v-3.06c0-.117-.07-.212-.164-.227a5.028 5.028 0 01-2.027-.807l-5.613-4.064c-.117-.078-.132-.279-.028-.381z" fill="#fff"></path></symbol>
+<symbol id="brand-doubao" viewBox="0 0 24 24" data-src="lobeicons:Doubao/Color" data-title="Doubao"><title>Doubao</title><path d="M5.31 15.756c.172-3.75 1.883-5.999 2.549-6.739-3.26 2.058-5.425 5.658-6.358 8.308v1.12C1.501 21.513 4.226 24 7.59 24a6.59 6.59 0 002.2-.375c.353-.12.7-.248 1.039-.378.913-.899 1.65-1.91 2.243-2.992-4.877 2.431-7.974.072-7.763-4.5l.002.001z" fill="#1E37FC"></path><path d="M22.57 10.283c-1.212-.901-4.109-2.404-7.397-2.8.295 3.792.093 8.766-2.1 12.773a12.782 12.782 0 01-2.244 2.992c3.764-1.448 6.746-3.457 8.596-5.219 2.82-2.683 3.353-5.178 3.361-6.66a2.737 2.737 0 00-.216-1.084v-.002z" fill="#37E1BE"></path><path d="M14.303 1.867C12.955.7 11.248 0 9.39 0 7.532 0 5.883.677 4.545 1.807 2.791 3.29 1.627 5.557 1.5 8.125v9.201c.932-2.65 3.097-6.25 6.357-8.307.5-.318 1.025-.595 1.569-.829 1.883-.801 3.878-.932 5.746-.706-.222-2.83-.718-5.002-.87-5.617h.001z" fill="#A569FF"></path><path d="M17.305 4.961a199.47 199.47 0 01-1.08-1.094c-.202-.213-.398-.419-.586-.622l-1.333-1.378c.151.615.648 2.786.869 5.617 3.288.395 6.185 1.898 7.396 2.8-1.306-1.275-3.475-3.487-5.266-5.323z" fill="#1E37FC"></path></symbol>
+<symbol id="brand-mistral" viewBox="0 0 24 24" data-src="lobeicons:Mistral/Color" data-title="Mistral"><title>Mistral</title><path d="M3.428 3.4h3.429v3.428H3.428V3.4zm13.714 0h3.43v3.428h-3.43V3.4z" fill="gold"></path><path d="M3.428 6.828h6.857v3.429H3.429V6.828zm10.286 0h6.857v3.429h-6.857V6.828z" fill="#FFAF00"></path><path d="M3.428 10.258h17.144v3.428H3.428v-3.428z" fill="#FF8205"></path><path d="M3.428 13.686h3.429v3.428H3.428v-3.428zm6.858 0h3.429v3.428h-3.429v-3.428zm6.856 0h3.43v3.428h-3.43v-3.428z" fill="#FA500F"></path><path d="M0 17.114h10.286v3.429H0v-3.429zm13.714 0H24v3.429H13.714v-3.429z" fill="#E10500"></path></symbol>
+<symbol id="brand-midjourney" viewBox="0 0 24 24" data-src="lobeicons:Midjourney/Mono" data-title="Midjourney"><g fill="currentColor"><title>Midjourney</title><path d="M22.369 17.676c-1.387 1.259-3.17 2.378-5.332 3.417.044.03.086.057.13.083l.018.01.019.012c.216.123.42.184.641.184.222 0 .426-.061.642-.184l.018-.011.019-.011c.14-.084.266-.178.492-.366l.178-.148c.279-.232.426-.342.625-.456.304-.174.612-.266.949-.266.337 0 .645.092.949.266l.023.014c.188.109.334.219.602.442l.178.148c.221.184.346.278.483.36l.028.017.018.01c.21.12.407.181.62.185h.022a.31.31 0 110 .618c-.337 0-.645-.092-.95-.266a3.137 3.137 0 01-.09-.054l-.022-.014-.022-.013-.02-.014a5.356 5.356 0 01-.49-.377l-.159-.132a3.836 3.836 0 00-.483-.36l-.027-.017-.019-.01a1.256 1.256 0 00-.641-.185c-.222 0-.426.061-.641.184l-.02.011-.018.011c-.14.084-.266.178-.492.366l-.158.132a5.125 5.125 0 01-.51.39l-.022.014-.022.014-.09.054a1.868 1.868 0 01-.95.266c-.337 0-.644-.092-.949-.266a3.137 3.137 0 01-.09-.054l-.022-.014-.022-.013-.026-.017a4.881 4.881 0 01-.425-.325.308.308 0 01-.12-.1l-.098-.081a3.836 3.836 0 00-.483-.36l-.027-.017-.019-.01a1.256 1.256 0 00-.641-.185c-.222 0-.426.061-.642.184l-.018.011-.019.011c-.14.084-.266.178-.492.366l-.158.132a5.125 5.125 0 01-.51.39l-.023.014-.022.014-.09.054A1.868 1.868 0 0112 22c-.337 0-.645-.092-.949-.266a3.137 3.137 0 01-.09-.054l-.022-.014-.022-.013-.021-.014a5.356 5.356 0 01-.49-.377l-.158-.132a3.836 3.836 0 00-.483-.36l-.028-.017-.018-.01a1.256 1.256 0 00-.642-.185c-.221 0-.425.061-.641.184l-.019.011-.018.011c-.141.084-.266.178-.492.366l-.158.132a5.125 5.125 0 01-.511.39l-.022.014-.022.014-.09.054a1.868 1.868 0 01-.986.264c-.746-.09-1.319-.38-1.89-.866l-.035-.03c-.047-.041-.118-.106-.192-.174l-.196-.181-.107-.1-.011-.01a1.531 1.531 0 00-.336-.253.313.313 0 00-.095-.03h-.005c-.119.022-.238.059-.361.11a.308.308 0 01-.077.061l-.008.005a.309.309 0 01-.126.034 5.66 5.66 0 00-.774.518l-.416.324-.055.043a6.542 6.542 0 01-.324.236c-.305.207-.552.315-.8.315a.31.31 0 01-.01-.618h.01c.09 0 .235-.062.438-.198l.04-.027c.077-.054.163-.117.27-.199l.385-.301.06-.047c.268-.206.506-.373.73-.505l-.633-1.21a.309.309 0 01.254-.451l20.287-1.305a.309.309 0 01.228.537zm-1.118.14L2.369 19.03l.423.809c.128-.045.256-.078.388-.1a.31.31 0 01.052-.005c.132 0 .26.032.386.093.153.073.294.179.483.35l.016.015.092.086.144.134.097.089c.065.06.125.114.16.144.485.418.948.658 1.554.736h.011a1.25 1.25 0 00.6-.172l.021-.011.019-.011.018-.011c.141-.084.266-.178.492-.366l.178-.148c.279-.232.426-.342.625-.456.305-.174.612-.266.95-.266.336 0 .644.092.948.266l.023.014c.188.109.335.219.603.442l.177.148c.222.184.346.278.484.36l.027.017.019.01c.215.124.42.185.641.185.222 0 .426-.061.641-.184l.019-.011.018-.011c.141-.084.267-.178.493-.366l.177-.148c.28-.232.427-.342.626-.456.304-.174.612-.266.949-.266.337 0 .644.092.949.266l.025.015c.187.109.334.22.603.443 1.867-.878 3.448-1.811 4.73-2.832l.02-.016zM3.653 2.026C6.073 3.06 8.69 4.941 10.8 7.258c2.46 2.7 4.109 5.828 4.637 9.149a.31.31 0 01-.421.335c-2.348-.945-4.54-1.258-6.59-1.02-1.739.2-3.337.792-4.816 1.703-.294.182-.62-.182-.405-.454 1.856-2.355 2.581-4.99 2.343-7.794-.195-2.292-1.031-4.61-2.284-6.709a.31.31 0 01.388-.442zM10.04 4.45c1.778.543 3.892 2.102 5.782 4.243 1.984 2.248 3.552 4.934 4.347 7.582a.31.31 0 01-.401.38l-.022-.01-.386-.154a10.594 10.594 0 00-.291-.112l-.016-.006c-.68-.247-1.199-.291-1.944-.101a.31.31 0 01-.375-.218C15.378 11.123 13.073 7.276 9.775 5c-.291-.201-.072-.653.266-.55zM4.273 2.996l.008.015c1.028 1.94 1.708 4.031 1.885 6.113.213 2.513-.31 4.906-1.673 7.092l-.02.031.003-.001c1.198-.581 2.47-.969 3.825-1.132l.055-.006c1.981-.23 4.083.029 6.309.837l.066.025-.007-.039c-.593-2.95-2.108-5.737-4.31-8.179l-.07-.078c-1.785-1.96-3.944-3.6-6.014-4.65l-.057-.028zm7.92 3.238l.048.048c2.237 2.295 3.885 5.431 4.974 9.191l.038.132.022-.004c.71-.133 1.284-.063 1.963.18l.027.01.066.024.046.018-.025-.073c-.811-2.307-2.208-4.62-3.936-6.594l-.058-.065c-1.02-1.155-2.103-2.132-3.15-2.856l-.015-.011z"></path></g></symbol>
+<symbol id="brand-perplexity" viewBox="0 0 24 24" data-src="lobeicons:Perplexity/Color" data-title="Perplexity"><title>Perplexity</title><path d="M19.785 0v7.272H22.5V17.62h-2.935V24l-7.037-6.194v6.145h-1.091v-6.152L4.392 24v-6.465H1.5V7.188h2.884V0l7.053 6.494V.19h1.09v6.49L19.786 0zm-7.257 9.044v7.319l5.946 5.234V14.44l-5.946-5.397zm-1.099-.08l-5.946 5.398v7.235l5.946-5.234V8.965zm8.136 7.58h1.844V8.349H13.46l6.105 5.54v2.655zm-8.982-8.28H2.59v8.195h1.8v-2.576l6.192-5.62zM5.475 2.476v4.71h5.115l-5.115-4.71zm13.219 0l-5.115 4.71h5.115v-4.71z" fill="#22B8CD" fill-rule="nonzero"></path></symbol>
+<symbol id="brand-cursor" viewBox="0 0 24 24" data-src="lobeicons:Cursor/Mono" data-title="Cursor"><g fill="currentColor"><title>Cursor</title><path d="M22.106 5.68L12.5.135a.998.998 0 00-.998 0L1.893 5.68a.84.84 0 00-.419.726v11.186c0 .3.16.577.42.727l9.607 5.547a.999.999 0 00.998 0l9.608-5.547a.84.84 0 00.42-.727V6.407a.84.84 0 00-.42-.726zm-.603 1.176L12.228 22.92c-.063.108-.228.064-.228-.061V12.34a.59.59 0 00-.295-.51l-9.11-5.26c-.107-.062-.063-.228.062-.228h18.55c.264 0 .428.286.296.514z"></path></g></symbol>
+</svg>
+
+<div class="window celadon">
+  <!-- ① 导航列 -->
+  <aside class="nav">
+    <div class="navigation-header">
+      <div class="brand"><svg class="brand-mark" viewBox="0 0 719.664453 610.367745" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="mark-live" x1="0.1" y1="0" x2="0.9" y2="1"><stop offset="0" stop-color="var(--brand-mark-from)"/><stop offset="1" stop-color="var(--brand-mark-to)"/></linearGradient></defs><g transform="translate(-151.5657,-188.764)"><path class="mark-head" d="M486.884,189.207 C495.1615,188.4345 505.165,188.919 513.59,188.864 C599.61,188.302 684.55,217.9475 749.645,274.6415 C820.74,337.335 864.11,425.629 870.28,520.215 C874.69,585.13 864.71,657.9 819.94,708.215 C766.135,768.695 672.935,788.13 595.875,795.7 C576.14,797.64 557.055,797.635 537.68,798.92 C436.9495,800.75 298.6425,791.955 218.4915,723.25 C173.8735,685 156.2745,627.825 152.411,570.625 C145.8345,474.4635 177.8325,379.6425 241.3305,307.127 C292.7155,248.288 362.5635,208.649 439.428,194.7065 C455.6785,191.7125 470.5135,190.32 486.884,189.207 Z"/><g transform="translate(352.7054, 366.1909)" style="fill:var(--brand-eye)"><path d="M54.3200771,0.00131773874 C90.5575771,-0.297352792 107.046077,50.2461472 109.269077,79.1841472 C111.987077,114.573147 98.0685771,173.204147 55.0560771,176.574147 C19.8370771,176.004147 3.26007709,132.680147 0.574577092,103.311147 C-2.06042291,74.4961472 4.20857709,41.4316472 22.6780771,18.3306472 C30.9835771,7.94264721 41.0875771,1.40214721 54.3200771,0.00131773874 Z M67.8166257,49.886467 L66.8260771,49.8991472 C34.0975771,56.7616472 37.5585771,132.225647 70.5330771,131.761147 C103.215077,124.145147 100.147077,48.7151472 66.8260771,49.8991472 Z"/></g><g transform="translate(562.8175, 366.1247)" style="fill:var(--brand-eye)"><path d="M76.7075112,8.55926237 C96.7425112,24.6522624 104.512511,49.8777624 107.982511,74.3482624 C112.957511,109.387262 99.1125112,171.335262 57.0025112,176.520262 C47.7325112,176.880262 37.7225112,173.635262 30.7025112,167.460262 C-8.8974888,132.641762 -8.5574888,58.3082624 22.3475112,18.0877624 C30.2475112,7.80826237 40.7175112,1.45976237 53.2275112,0.0662623674 C61.0975112,-0.590737633 70.7075112,3.73926237 76.7075112,8.55926237 Z M39.6166685,49.9369618 L38.6575112,49.9567624 C5.9375112,57.6252624 10.0475112,133.248262 43.3725112,131.767262 C76.3675112,122.553262 70.8975112,48.5472624 38.6575112,49.9567624 Z"/></g></g></svg><span class="brand-name" data-i18n="ui.brand">Yao Agents</span></div>
+      <span class="icon-button"><svg class="icon is-small"><use href="#i-left"/></svg></span>
+      <span class="icon-button"><svg class="icon is-small"><use href="#i-right"/></svg></span>
+    </div>
+    <div class="fixed-navigation">
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-plus-square"/></svg><span data-i18n="ui.newTask">新任务</span></div>
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-chat"/></svg><span data-i18n="ui.navigation.chat">聊天</span></div>
+      <div class="navigation-item is-active"><svg class="icon is-small"><use href="#i-inbox"/></svg><span data-i18n="ui.navigation.inbox">收件箱</span><span class="badge">3</span></div>
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-board"/></svg><span data-i18n="ui.navigation.board">看板</span></div>
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-ws"/></svg><span data-i18n="ui.navigation.workspace">工作区</span></div>
+      <div class="navigation-item"><svg class="icon is-small"><use href="#i-pc"/></svg><span data-i18n="ui.navigation.computer">电脑</span></div>
+    </div>
+    <div class="navigation-separator"></div>
+    <div class="navigation-context">
+      <div class="navigation-context-header" data-i18n="ui.navigation.inbox">收件箱<span class="badge" data-i18n="ui.inbox.unreadCount" data-count="3">3 未读</span></div>
+      <div class="search-field"><svg class="icon is-small"><use href="#i-search"/></svg><span data-i18n="ui.inbox.searchPlaceholder">搜索消息…</span><kbd>⌘K</kbd></div>
+      <div class="filter-chips"><span class="chip is-active" data-i18n="ui.inbox.filterAll">全部</span><span class="chip" data-i18n="ui.inbox.filterUnread">未读</span><span class="chip" data-i18n="ui.inbox.filterArchived">已归档</span></div>
+      <div class="conversation-list">
+        <div class="list-group-label" data-i18n="ui.time.today">今天</div>
+        <div class="conversation-row is-selected"><span class="unread-dot"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.greeting.title">打招呼与功能咨询</div><div class="row-subtitle" data-i18n="sample.conversation.greeting.subtitle">已介绍文档处理能力与可用工具</div></div><span class="row-time">21h</span></div>
+        <div class="conversation-row"><span class="unread-dot"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.weekly.title">周报生成</div><div class="row-subtitle" data-i18n="sample.conversation.weekly.subtitle">按模板汇总本周进展</div></div><span class="row-time">1d</span></div>
+        <div class="conversation-row"><span class="unread-dot is-read"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.scraping.title">数据抓取任务</div><div class="row-subtitle" data-i18n="sample.conversation.scraping.subtitle">已完成 12 个页面</div></div><span class="row-time">2d</span></div>
+        <div class="list-group-label" data-i18n="ui.time.yesterday">昨天</div>
+        <div class="conversation-row"><span class="unread-dot is-read"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.contract.title">合同审阅</div><div class="row-subtitle" data-i18n="sample.conversation.contract.subtitle">风险点 3 处 · 已标注</div></div><span class="row-time">3d</span></div>
+        <div class="conversation-row"><span class="unread-dot is-read"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.invoice.title">发票核对</div><div class="row-subtitle" data-i18n="sample.conversation.invoice.subtitle">已生成 2 张凭证</div></div><span class="row-time">4d</span></div>
+        <div class="list-group-label" data-i18n="ui.time.earlier">更早</div>
+        <div class="conversation-row"><span class="unread-dot is-read"></span><div class="row-body"><div class="row-title" data-i18n="sample.conversation.siteCheck.title">站点巡检</div><div class="row-subtitle" data-i18n="sample.conversation.siteCheck.subtitle">3 个域名正常</div></div><span class="row-time">1w</span></div>
+      </div>
+    </div>
+    <div class="user">
+      <div class="avatar">M</div>
+      <div style="flex:1;min-width:0"><div style="font-weight:650;font-size: var(--font-size-12)">Max</div><div style="color:var(--text-tertiary);font-size: var(--font-size-11)">max@iqka.com</div></div>
+      <span class="icon-button"><svg class="icon is-small"><use href="#i-dots"/></svg></span>
+    </div>
+  </aside>
+
+  <!-- ② 内容列 -->
+  <main class="main">
+    <div class="hero">
+      <img class="hero__mark" src="../logo-mark-celadon.svg" alt="" width="48" height="41">
+      <div class="hero__text">
+        <span class="hero__title" data-i18n="ui.welcome.welcomeTitle">从一个任务开始</span>
+        <span class="hero__subtitle" data-i18n="ui.welcome.welcomeSubtitle">把你想完成的事说清楚，我会带上需要的工具去做。</span>
+      </div>
+      <div class="composer">
+        <textarea class="composer__input" rows="3" data-i18n-ph="ui.welcome.welcomePlaceholder" placeholder="描述你想完成的事…"></textarea>
+        <div class="composer__foot">
+          <button class="chip" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus-square"></use></svg><span data-i18n="ui.welcome.welcomeMode">默认权限</span></button>
+          <span class="chip">DeepSeek V4 Flash</span>
+          <button class="send" type="button" aria-label="Send"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"></use></svg></button>
+        </div>
+      </div>
+      <span class="hint" data-i18n="ui.welcome.welcomeHint">也可以先看看示例</span>
+    </div>
+</main>
+
+  <!-- ③ 侧边面板 -->
+</div>
+
+<script src="../i18n/bundle.js"></script>
+<script>
+/* ---- 主题切换 ---- */
+
+/* ---- 多语言：运行时替换，不刷新；缺 key 回退 zh-CN ---- */
+(function(){
+  var FALLBACK = 'zh-CN';
+  function lookup(dict, key){
+    if (!dict) return null;
+    if (dict[key] != null) return dict[key];
+    return key.split('.').reduce(function(o, k){ return (o == null ? null : o[k]); }, dict);
+  }
+  function interpolate(template, el){
+    return String(template).replace(/\{(\w+)\}/g, function(m, name){
+      var v = el.getAttribute('data-' + name);
+      return v == null ? m : v;
+    });
+  }
+  function applyLanguage(lang){
+    var bundle = window.CELADON_I18N || {};
+    var dict = bundle[lang], fallback = bundle[FALLBACK];
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var t = lookup(dict, el.dataset.i18n);
+      if (t == null) t = lookup(fallback, el.dataset.i18n);
+      if (t == null) return;
+      var text = interpolate(t, el);
+      /* 只替换元素里的第一个文本节点：保留子元素（如计数徽标 "3 未读" 里的 3） */
+      var node = null;
+      for (var i = 0; i < el.childNodes.length; i++) {
+        if (el.childNodes[i].nodeType === 3 && el.childNodes[i].textContent.trim()) { node = el.childNodes[i]; break; }
+      }
+      if (node) node.textContent = text; else el.textContent = text;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el){
+      var t = lookup(dict, el.dataset.i18nHtml);
+      if (t == null) t = lookup(fallback, el.dataset.i18nHtml);
+      if (t == null) return;
+      el.innerHTML = interpolate(t, el);
+    });
+    /* 属性类 i18n：placeholder（input 的文案不在 textContent 里） */
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+      var t = lookup(dict, el.dataset.i18nPlaceholder);
+      if (t == null) t = lookup(fallback, el.dataset.i18nPlaceholder);
+      if (t != null) el.setAttribute('placeholder', t);
+    });
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.language-switch button').forEach(function(b){
+      b.classList.toggle('is-active', b.dataset.lang === lang);
+    });
+  }
+  document.querySelectorAll('.language-switch button').forEach(function(b){
+    b.addEventListener('click', function(){ applyLanguage(b.dataset.lang); });
+  });
+  applyLanguage('zh-CN');
+})();
+</script>
+
+<script>
+/* 两个视图：默认 Web（导航 280 / 无红绿灯）；?view=client 为客户端内（导航收起为 0，红绿灯 + 收起键在窗口左上）。 */
+(function () {
+  var isClient = new URLSearchParams(location.search).get('view') === 'client'
+  document.body.classList.add('is-nav-open')   /* 两个视图默认展开导航 */
+  if (isClient) document.body.classList.add('is-client')   /* 红绿灯与「收起为 0」只属于客户端 */
+  var win = document.querySelector('.window')
+  if (!win) return
+  var host = document.createElement('div')
+  host.className = 'window-controls'
+  host.innerHTML = '<span class="wc-left">' + (isClient ? '<span class="traffic-lights"><i></i><i></i><i></i></span>' : '') + '</span>' +
+    '<button class="icon-button" type="button" id="nav-toggle" title="Collapse" aria-expanded="true"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-collapse"></use></svg></button>'
+  win.prepend(host)
+  var toggle = document.getElementById('nav-toggle')
+  toggle.addEventListener('click', function () {
+    var open = document.body.classList.toggle('is-nav-open')
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false')
+    toggle.setAttribute('title', open ? 'Collapse' : 'Expand')
+  })
+})()
+</script>
+
+<script>
+/* 用户行「…」菜单：语言（四语）与主题（浅/暗/跟随系统）。语言用页内 data-i18n 键 + CELADON_I18N；
+   页面里的演示数据（会话标题等）不在语言包里，切换语言只影响界面文案。 */
+(function () {
+  var row = document.querySelector('.user')
+  if (!row) return
+  var more = row.querySelector('.icon-button')
+  if (!more) return
+  var wrap = document.createElement('span'); wrap.className = 'user-menu-wrap'
+  more.parentNode.insertBefore(wrap, more); wrap.appendChild(more)
+  var menu = document.createElement('div'); menu.className = 'user-menu'; menu.hidden = true
+  menu.setAttribute('role', 'menu')
+  var langs = [['zh-CN', '简体中文'], ['zh-TW', '繁體中文'], ['en', 'English'], ['ja', '日本語']]
+  menu.innerHTML = '<div class="group" data-t="lang">Language</div>' +
+    langs.map(function (l) { return '<button type="button" role="menuitemradio" data-lang="' + l[0] + '">' + l[1] + '</button>' }).join('') +
+    '<div class="sep"></div><div class="group" data-t="theme">Theme</div>' +
+    ['light', 'dark', 'system'].map(function (t) {
+      return '<button type="button" role="menuitemradio" data-theme-set="' + t + '" data-i18n="ui.theme.' + t + '">' + t + '</button>' }).join('')
+  wrap.appendChild(menu)
+  function dict() { return ((window.CELADON_I18N || {})[document.documentElement.lang] || {}).ui || {} }
+  /* 键写成 ui.xxx，而 dict() 已到 ui 这一层，这里剥掉前缀，避免拼成 ui.ui.xxx */
+  function at(path) {
+    var keys = path.split('.'); if (keys[0] === 'ui') keys.shift()
+    return keys.reduce(function (o, k) { return o ? o[k] : undefined }, dict())
+  }
+  function localise() {
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var v = at(el.getAttribute('data-i18n'))
+      /* 语言包里带 {占位符} 的是模板（{count} / {time} …），页面上已是具体值，不能覆盖 */
+      if (typeof v === 'string' && v.indexOf('{') < 0) el.textContent = v
+    })
+    menu.querySelectorAll('[data-t]').forEach(function (el) {
+      var key = el.getAttribute('data-t') === 'lang' ? 'language' : 'theme'
+      var v = at('ui.layout.' + key); if (typeof v === 'string') el.textContent = v
+    })
+    menu.querySelectorAll('[data-theme-set]').forEach(function (b) {
+      var t = b.getAttribute('data-theme-set'); var v = at('ui.theme.' + t)
+      if (typeof v === 'string') b.textContent = v
+    })
+  }
+  function setTheme(t) {
+    var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+    menu.querySelectorAll('[data-theme-set]').forEach(function (b) { b.classList.toggle('is-on', b.getAttribute('data-theme-set') === t) })
+  }
+  function setLang(code) {
+    document.documentElement.lang = code
+    menu.querySelectorAll('[data-lang]').forEach(function (b) { b.classList.toggle('is-on', b.getAttribute('data-lang') === code) })
+    localise()
+  }
+  more.addEventListener('click', function (e) { e.stopPropagation(); menu.hidden = !menu.hidden })
+  menu.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return
+    if (b.dataset.lang) setLang(b.dataset.lang)
+    if (b.dataset.themeSet) setTheme(b.dataset.themeSet)
+    menu.hidden = true
+  })
+  document.addEventListener('click', function () { menu.hidden = true })
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menu.hidden = true })
+  setLang('zh-CN'); setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'system' : 'system')
+})()
+</script>
+</body>
+</html>

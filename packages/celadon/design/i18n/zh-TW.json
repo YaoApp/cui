@@ -165,6 +165,13 @@
       "emptyHint": "從左側選一項開始，或新建一個。",
       "language": "語言",
       "theme": "主題"
+    },
+    "welcome": {
+      "welcomeTitle": "從一個任務開始",
+      "welcomeSubtitle": "把你想完成的事說清楚，我會帶上需要的工具去做。",
+      "welcomePlaceholder": "描述你想完成的事…",
+      "welcomeMode": "預設權限",
+      "welcomeHint": "也可以先看看範例"
     }
   },
   "sample": {

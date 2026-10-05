@@ -167,6 +167,13 @@ window.CELADON_I18N = {
         "emptyHint": "Pick something on the left, or create one.",
         "language": "Language",
         "theme": "Theme"
+      },
+      "welcome": {
+        "welcomeTitle": "Start with a task",
+        "welcomeSubtitle": "Say what you want done; I bring the tools it needs.",
+        "welcomePlaceholder": "Describe the task…",
+        "welcomeMode": "Default access",
+        "welcomeHint": "Or look at an example first"
       }
     },
     "sample": {
@@ -954,6 +961,13 @@ window.CELADON_I18N = {
         "emptyHint": "左から選ぶか、新しく作成してください。",
         "language": "言語",
         "theme": "テーマ"
+      },
+      "welcome": {
+        "welcomeTitle": "タスクから始める",
+        "welcomeSubtitle": "やってほしいことを書いてください。必要な道具はこちらで揃えます。",
+        "welcomePlaceholder": "タスクを書く…",
+        "welcomeMode": "既定の権限",
+        "welcomeHint": "まず例を見ることもできます"
       }
     },
     "sample": {
@@ -1741,6 +1755,13 @@ window.CELADON_I18N = {
         "emptyHint": "从左侧选一项开始，或新建一个。",
         "language": "语言",
         "theme": "主题"
+      },
+      "welcome": {
+        "welcomeTitle": "从一个任务开始",
+        "welcomeSubtitle": "把你想完成的事说清楚，我会带上需要的工具去做。",
+        "welcomePlaceholder": "描述你想完成的事…",
+        "welcomeMode": "默认权限",
+        "welcomeHint": "也可以先看看示例"
       }
     },
     "sample": {
@@ -2528,6 +2549,13 @@ window.CELADON_I18N = {
         "emptyHint": "從左側選一項開始，或新建一個。",
         "language": "語言",
         "theme": "主題"
+      },
+      "welcome": {
+        "welcomeTitle": "從一個任務開始",
+        "welcomeSubtitle": "把你想完成的事說清楚，我會帶上需要的工具去做。",
+        "welcomePlaceholder": "描述你想完成的事…",
+        "welcomeMode": "預設權限",
+        "welcomeHint": "也可以先看看範例"
       }
     },
     "sample": {
