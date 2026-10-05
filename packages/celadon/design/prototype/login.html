@@ -168,6 +168,21 @@ body.is-client .terms { display: none; }
 body.is-client .bottom { display: none; }   /* 页脚条款同样不展示 */
 body.is-client .ctrl-wrap { margin-block-start: var(--spacing-24); }
 body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inline-start: 50%; transform: translateX(-50%); }
+/* 客户端内：卡片顶部的「返回服务器选择」与当前服务器（静态展示） */
+.client-bar { display: none; align-items: center; justify-content: space-between; gap: var(--spacing-8);
+              margin-block-end: var(--spacing-16); padding-block-end: var(--spacing-12);
+              border-block-end: var(--border-width) solid var(--border-subtle); }
+body.is-client .client-bar { display: flex; }
+.client-back { display: inline-flex; align-items: center; gap: var(--spacing-4); color: var(--text-secondary);
+               font-size: var(--font-size-13); text-decoration: none; }
+.client-back:hover { color: var(--text-primary); }
+.client-back .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
+.client-server { display: inline-flex; align-items: center; gap: var(--spacing-8); color: var(--text-secondary);
+                 font-size: var(--font-size-13); min-inline-size: 0; }
+.client-server__mark { inline-size: calc(var(--spacing-16) + var(--spacing-4)); block-size: calc(var(--spacing-16) + var(--spacing-4)); flex: none; }
+.client-server__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:lang(zh-CN) .client-back, :lang(zh-TW) .client-back, :lang(ja) .client-back,
+:lang(zh-CN) .client-server, :lang(zh-TW) .client-server, :lang(ja) .client-server { font-size: var(--font-size-minimum-cjk); }
 </style>
 </head>
 <body>
@@ -176,6 +191,7 @@ body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inl
   <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
   <symbol id="i-state-error" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-pc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" x2="16" y1="21" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" x2="12" y1="17" y2="21" stroke="currentColor" stroke-width="2"/></symbol>
@@ -210,6 +226,16 @@ body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inl
 
   <div class="stage">
     <main class="card" aria-labelledby="auth-title">
+      <div class="client-bar" id="client-bar">
+        <a class="client-back" href="./servers.html">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+          <span data-i18n="backToServers">Back to servers</span>
+        </a>
+        <span class="client-server">
+          <img class="client-server__mark" id="client-server-mark" src="../logo-mark-celadon.svg" alt="" width="20" height="17">
+          <span class="client-server__name" id="client-server-name"></span>
+        </span>
+      </div>
       <h1 class="title" id="auth-title">
         <span class="title__line" data-i18n="entryTitle">Sign up or sign in to your</span>
         <span class="title__line" data-i18n="entryTitleLine2">Yao Agents account</span>
@@ -364,6 +390,20 @@ document.querySelector('form').addEventListener('submit', async (event) => {
 })
 /* 客户端内模式：从 Connect 跳来（?from=connect）——收起品牌区与协议，控件移到卡片下方 */
 const isClient = new URLSearchParams(location.search).has('from')
+/* 客户端内：卡顶显示返回入口与所选服务器（名称走语言包，跟随语言切换） */
+function renderClientBar() {
+  if (!isClient) return
+  const nameEl = document.getElementById('client-server-name')
+  if (!nameEl) return
+  const key = new URLSearchParams(location.search).get('server') || 'serverApac'
+  const dict = dictOf(lang)
+  nameEl.textContent = key === 'custom' ? dict.customOption : (dict[key] || dict.serverApac)
+  const mark = document.getElementById('client-server-mark')
+  if (mark) mark.outerHTML = key === 'custom'
+    ? '<svg class="client-server__mark" id="client-server-mark" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>'
+    : '<img class="client-server__mark" id="client-server-mark" src="../logo-mark-celadon.svg" alt="" width="20" height="17">'
+}
+
 if (isClient) {
   document.body.classList.add('is-client')
   const wrap = document.createElement('div')
@@ -377,6 +417,7 @@ if (isClient) {
   if (signUpLink) signUpLink.setAttribute('href', './register.html?from=connect')
 }
 
+renderClientBar()
 applyLang('en')
 /* 首屏：跟随系统（head 里那一行已设好 data-theme），图标与选中态据此初始化 */
 applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')

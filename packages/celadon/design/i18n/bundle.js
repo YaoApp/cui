@@ -104,7 +104,8 @@ window.CELADON_I18N = {
         "customOption": "Self-hosted",
         "serverApac": "Yao Agents official · Asia Pacific",
         "serverCn": "Yao Agents official · China",
-        "customDesc": "Connect to a Yao Engine server you run yourself"
+        "customDesc": "Connect to a Yao Engine server you run yourself",
+        "backToServers": "Back to servers"
       },
       "inbox": {
         "unreadCount": "{count} unread",
@@ -881,7 +882,8 @@ window.CELADON_I18N = {
         "customOption": "セルフホスト",
         "serverApac": "Yao Agents 公式・アジア太平洋",
         "serverCn": "Yao Agents 公式・中国",
-        "customDesc": "自分で運用している Yao Engine サーバーに接続します"
+        "customDesc": "自分で運用している Yao Engine サーバーに接続します",
+        "backToServers": "サーバー選択に戻る"
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1658,7 +1660,8 @@ window.CELADON_I18N = {
         "customOption": "自托管",
         "serverApac": "Yao Agents 官方亚太",
         "serverCn": "Yao Agents 官方中国",
-        "customDesc": "连接你自己部署的 Yao Engine 服务器"
+        "customDesc": "连接你自己部署的 Yao Engine 服务器",
+        "backToServers": "返回服务器选择"
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2435,7 +2438,8 @@ window.CELADON_I18N = {
         "customOption": "自託管",
         "serverApac": "Yao Agents 官方亞太",
         "serverCn": "Yao Agents 官方中國",
-        "customDesc": "連接你自己部署的 Yao Engine 伺服器"
+        "customDesc": "連接你自己部署的 Yao Engine 伺服器",
+        "backToServers": "返回伺服器選擇"
       },
       "inbox": {
         "unreadCount": "{count} 未讀",

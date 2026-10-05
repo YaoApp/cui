@@ -102,7 +102,8 @@
       "customOption": "セルフホスト",
       "serverApac": "Yao Agents 公式・アジア太平洋",
       "serverCn": "Yao Agents 公式・中国",
-      "customDesc": "自分で運用している Yao Engine サーバーに接続します"
+      "customDesc": "自分で運用している Yao Engine サーバーに接続します",
+      "backToServers": "サーバー選択に戻る"
     },
     "inbox": {
       "unreadCount": "未読 {count}",

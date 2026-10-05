@@ -102,7 +102,8 @@
       "customOption": "自托管",
       "serverApac": "Yao Agents 官方亚太",
       "serverCn": "Yao Agents 官方中国",
-      "customDesc": "连接你自己部署的 Yao Engine 服务器"
+      "customDesc": "连接你自己部署的 Yao Engine 服务器",
+      "backToServers": "返回服务器选择"
     },
     "inbox": {
       "unreadCount": "{count} 未读",
