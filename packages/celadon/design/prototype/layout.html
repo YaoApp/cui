@@ -465,42 +465,9 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
   </aside>
 </div>
 
-<div class="toolbar celadon">
-  <span class="language-switch">
-    <button data-lang="zh-CN" class="is-active">简</button>
-    <button data-lang="zh-TW">繁</button>
-    <button data-lang="en">EN</button>
-    <button data-lang="ja">日</button>
-  </span>
-  <span style="width:1px;height:18px;background:var(--border-default)"></span>
-  <button data-t="light" class="is-active" data-i18n="ui.theme.light">浅色</button>
-  <button data-t="dark" data-i18n="ui.theme.dark">暗色</button>
-</div>
 <script src="../i18n/bundle.js"></script>
 <script>
 /* ---- 主题切换 ---- */
-document.querySelectorAll('.toolbar button[data-t]').forEach(function(b){
-  b.addEventListener('click', function(){
-    document.documentElement.dataset.theme = b.dataset.t;
-    document.querySelectorAll('.toolbar button[data-t]').forEach(function(x){ x.classList.remove('is-active'); });
-    b.classList.add('is-active');
-  });
-});
-/* ---- 自适应缩放：视口窄/矮时整体等比缩小，避免右侧或底部被裁切 ---- */
-(function(){
-  var DESIGN_WIDTH = 1440, DESIGN_HEIGHT = 888;
-  function fitToViewport(){
-    var win = document.querySelector('.window');
-    var scale = Math.min(1,
-      (window.innerWidth - 36) / DESIGN_WIDTH,
-      (window.innerHeight - 72) / DESIGN_HEIGHT);
-          /* 用 zoom 而不是 transform：zoom 会真正改变布局占位，
-         父容器跟着缩小 → 不溢出、能居中，也不会把右侧裁掉 */
-      win.style.zoom = scale < 1 ? scale.toFixed(4) : '';
-  }
-  fitToViewport();
-  window.addEventListener('resize', fitToViewport);
-})();
 
 /* ---- 多语言：运行时替换，不刷新；缺 key 回退 zh-CN ---- */
 (function(){
