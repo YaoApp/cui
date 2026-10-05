@@ -98,7 +98,8 @@
       "cloudSelectHint": "选择云服务器",
       "customHint": "填写完整服务器地址（含协议）",
       "registerHelper": "部分服务器为邀请制，需要邀请码才能注册。可前往站点申请。",
-      "registerLink": "前往注册申请邀请码"
+      "registerLink": "前往注册申请邀请码",
+      "customOption": "自建服务器"
     },
     "inbox": {
       "unreadCount": "{count} 未读",

@@ -98,7 +98,8 @@
       "cloudSelectHint": "クラウドサーバーを選択",
       "customHint": "完全なサーバーアドレスを入力してください（スキームを含む）",
       "registerHelper": "一部のサーバーは招待制で、登録に招待コードが必要です。サイトで申請できます。",
-      "registerLink": "招待コードを申請する"
+      "registerLink": "招待コードを申請する",
+      "customOption": "カスタムサーバー"
     },
     "inbox": {
       "unreadCount": "未読 {count}",

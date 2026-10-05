@@ -42,7 +42,7 @@ body {
 .sub { margin: 0 0 var(--spacing-24); color: var(--text-secondary); font-size: var(--font-size-14); text-align: start; }
 .sub--hint { margin: var(--spacing-8) 0 var(--spacing-16); font-size: var(--font-size-13); color: var(--text-tertiary); }
 :lang(zh-CN) .sub--hint, :lang(zh-TW) .sub--hint, :lang(ja) .sub--hint { font-size: var(--font-size-minimum-cjk); }
-.seg { margin-block-end: var(--spacing-16); }
+.picker-wrap { margin-block-end: var(--spacing-16); }
 .spinner { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; border: 2px solid var(--border-strong);
            border-block-start-color: transparent; border-radius: 50%; animation: button-spin 0.7s linear infinite; }
 .picker { inline-size: 100%; min-block-size: 56px; display: flex; align-items: center; gap: var(--spacing-8);
@@ -51,9 +51,13 @@ body {
           background: var(--background-field); color: var(--text-primary); font: inherit; }
 .picker:hover { border-color: var(--border-strong); }
 .picker:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-.picker__state { display: flex; align-items: center; gap: var(--spacing-8); min-block-size: 56px; padding-inline: var(--spacing-12);
-                 color: var(--text-secondary); font-size: var(--font-size-14); border: var(--border-width) solid var(--border-subtle);
-                 border-radius: var(--radius-medium); background: var(--background-field); }
+/* 加载 / 空：与选择器同一只盒子，只是内容换成转圈与文字（不再盒中盒） */
+.picker--state { display: flex; align-items: center; gap: var(--spacing-8); cursor: default;
+                 color: var(--text-secondary); font-size: var(--font-size-14); margin-block-end: var(--spacing-16); }
+.picker--state:focus-visible { box-shadow: none; }
+/* 自建：选中后才出现地址输入，与选择器、按钮各留一段间距 */
+.field--reveal { margin-block: 0 var(--spacing-4); }
+.sub--hint { margin: var(--spacing-4) 0 var(--spacing-16); }
 .picker__meta { display: flex; flex-direction: column; gap: 2px; flex: 1; min-inline-size: 0; }
 .picker__name { font-size: var(--font-size-15); font-weight: var(--font-weight-medium); }
 .picker__name.placeholder { color: var(--text-placeholder); font-weight: var(--font-weight-normal); }
@@ -249,40 +253,32 @@ body {
       <h1 class="title"><span class="title__line" data-i18n="serversTitle">Choose a server</span></h1>
       <p class="sub" data-i18n="serversSubtitle">Connect to your Yao Engine server</p>
 
-      <div class="seg" role="tablist">
-        <button type="button" role="tab" id="tab-cloud" aria-selected="true" class="is-on" data-i18n="cloudSection">Cloud servers</button>
-        <button type="button" role="tab" id="tab-custom" aria-selected="false" data-i18n="customSection">Custom server</button>
+      <div class="picker-wrap" id="picker-wrap">
+        <button class="picker" type="button" id="cloud-picker" aria-haspopup="listbox" aria-expanded="false">
+          <span class="picker__meta">
+            <span class="picker__name placeholder" id="cloud-name" data-i18n="cloudSelectHint">Select a cloud server</span>
+            <span class="picker__url" id="cloud-url"></span>
+          </span>
+          <svg class="picker__arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"></use></svg>
+        </button>
+        <div class="picker__list" id="cloud-list" role="listbox" hidden></div>
       </div>
 
-      <div id="panel-cloud" role="tabpanel">
-        <!-- 加载中 / 加载失败 / 空 / 正常 四种样子都在这一处，同一时间只出现一种 -->
-        <div class="picker" id="cloud-state">
-          <div class="picker__state"><span class="spinner" aria-hidden="true"></span><span data-i18n="cloudLoading">Loading cloud servers…</span></div>
-        </div>
-        <div class="picker-wrap" id="cloud-ready" hidden>
-          <button class="picker" type="button" id="cloud-picker" aria-haspopup="listbox" aria-expanded="false">
-            <span class="picker__meta">
-              <span class="picker__name placeholder" id="cloud-name" data-i18n="cloudSelectHint">Select a cloud server</span>
-              <span class="picker__url" id="cloud-url"></span>
-            </span>
-            <svg class="picker__arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"></use></svg>
-          </button>
-          <div class="picker__list" id="cloud-list" role="listbox" hidden></div>
-        </div>
-        <div class="picker-fail" id="cloud-failed" hidden>
-          <p class="error-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-state-error"></use></svg><span data-i18n="cloudLoadFailed">Could not load the cloud server list</span></p>
-          <button class="link" type="button" id="cloud-retry" data-i18n="cloudRetry">Retry</button>
-        </div>
+      <div class="picker picker--state" id="cloud-state">
+        <span class="spinner" aria-hidden="true"></span><span data-i18n="cloudLoading">Loading cloud servers…</span>
       </div>
 
-      <div id="panel-custom" role="tabpanel" hidden>
-        <div class="field" id="custom-field">
-          <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>
-          <input class="input" id="custom-url" type="text" inputmode="url" autocapitalize="off" spellcheck="false"
-                 data-i18n-ph="customHint" placeholder="Enter the full server address, scheme included">
-        </div>
-        <p class="sub sub--hint" data-i18n="customHint">Enter the full server address, scheme included</p>
+      <div class="picker-fail" id="cloud-failed" hidden>
+        <p class="error-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-state-error"></use></svg><span data-i18n="cloudLoadFailed">Could not load the cloud server list</span></p>
+        <button class="link" type="button" id="cloud-retry" data-i18n="cloudRetry">Retry</button>
       </div>
+
+      <div class="field field--reveal" id="custom-field" hidden>
+        <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>
+        <input class="input" id="custom-url" type="text" inputmode="url" autocapitalize="off" spellcheck="false"
+               data-i18n-ph="customHint" placeholder="Enter the full server address, scheme included">
+      </div>
+      <p class="sub sub--hint" id="custom-hint" hidden data-i18n="customHint">Enter the full server address, scheme included</p>
 
       <p class="error-line" id="connect-error" role="alert" hidden>
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-state-error"></use></svg><span></span>
@@ -346,54 +342,65 @@ document.addEventListener('click', () => toggleMenu('lang-menu', false))
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleMenu('lang-menu', false) })
 
 /* ---- 服务器选择 ---- */
-/* 假数据：产品里来自云站点接口（1.0 是 fetch_cloud_servers(cloudBase, locale)）。region · url 是列表项的副标题。 */
+/* 假数据：产品里来自云站点接口（1.0 是 fetch_cloud_servers(cloudBase, locale)）。
+   列表最后一项是「自建服务器」；选中它才出现地址输入。 */
+const CUSTOM = '__custom__'
 const CLOUD = [
   { name: 'Yao Agents 官方', url: 'https://api.yaoagents.com', region: '新加坡' },
   { name: 'Yao Agents 中国', url: 'https://api.yaoagents.cn', region: '上海' },
   { name: '自建 · 团队', url: 'https://team.example.com', region: '私有部署' },
 ]
-let tab = 'cloud'
-let cloudState = 'loading'      /* loading | ready | failed | empty */
-let selected = CLOUD[0].url
+let cloudState = 'loading'        /* loading | ready | failed | empty */
+let selected = CLOUD[0] ? CLOUD[0].url : CUSTOM
 let listOpen = false
 
-const panelCloud = document.getElementById('panel-cloud')
-const panelCustom = document.getElementById('panel-custom')
+const pickerWrap = document.getElementById('picker-wrap')
 const stateBox = document.getElementById('cloud-state')
-const readyBox = document.getElementById('cloud-ready')
 const failedBox = document.getElementById('cloud-failed')
 const listBox = document.getElementById('cloud-list')
 const nameEl = document.getElementById('cloud-name')
 const urlEl = document.getElementById('cloud-url')
 const pickerBtn = document.getElementById('cloud-picker')
+const customField = document.getElementById('custom-field')
+const customHint = document.getElementById('custom-hint')
 const customInput = document.getElementById('custom-url')
 const connectBtn = document.getElementById('connect')
 const connectError = document.getElementById('connect-error')
+const isCustom = () => selected === CUSTOM
 const sub = (msg) => { connectError.querySelector('span').textContent = msg }
 
 function renderCloud() {
-  stateBox.hidden = cloudState !== 'loading'
-  readyBox.hidden = cloudState !== 'ready'
+  stateBox.hidden = cloudState !== 'loading' && cloudState !== 'empty'
+  pickerWrap.hidden = cloudState !== 'ready'
   failedBox.hidden = cloudState !== 'failed'
-  if (cloudState === 'empty') {
-    stateBox.hidden = false
-    stateBox.innerHTML = '<div class="picker__state">' + dictOf(lang).cloudEmpty + '</div>'
-  } else if (cloudState === 'loading') {
-    stateBox.innerHTML = '<div class="picker__state"><span class="spinner" aria-hidden="true"></span><span>' + dictOf(lang).cloudLoading + '</span></div>'
+  if (cloudState === 'loading') {
+    stateBox.innerHTML = '<span class="spinner" aria-hidden="true"></span><span>' + dictOf(lang).cloudLoading + '</span>'
+  } else if (cloudState === 'empty') {
+    stateBox.innerHTML = '<span>' + dictOf(lang).cloudEmpty + '</span>'
   }
-  if (cloudState !== 'ready') return
+  if (cloudState !== 'ready') { customField.hidden = true; customHint.hidden = true; return }
+
   const found = CLOUD.find((c) => c.url === selected)
-  nameEl.textContent = found ? found.name : dictOf(lang).cloudSelectHint
-  nameEl.classList.toggle('placeholder', !found)
-  urlEl.textContent = found ? found.url : ''
-  listBox.innerHTML = CLOUD.map((c) => {
+  nameEl.textContent = isCustom() ? dictOf(lang).customOption : (found ? found.name : dictOf(lang).cloudSelectHint)
+  nameEl.classList.toggle('placeholder', !isCustom() && !found)
+  urlEl.textContent = isCustom() ? (customInput.value.trim() || '') : (found ? found.url : '')
+  customField.hidden = !isCustom()
+  customHint.hidden = !isCustom()
+
+  const items = CLOUD.map((c) => {
     const on = c.url === selected ? ' is-on' : ''
     return '<button class="picker__item' + on + '" type="button" role="option" data-url="' + c.url + '">' +
       '<span class="picker__item-name">' + c.name + '</span>' +
       '<span class="picker__item-meta">' + [c.region, c.url].filter(Boolean).join(' · ') + '</span></button>'
   }).join('')
+  const customOn = isCustom() ? ' is-on' : ''
+  listBox.innerHTML = items +
+    '<button class="picker__item' + customOn + '" type="button" role="option" data-url="' + CUSTOM + '">' +
+    '<span class="picker__item-name">' + dictOf(lang).customOption + '</span>' +
+    '<span class="picker__item-meta">' + dictOf(lang).customHint + '</span></button>'
   listBox.querySelectorAll('[data-url]').forEach((item) => item.addEventListener('click', (e) => {
-    e.stopPropagation(); selected = item.dataset.url; listOpen = false; renderCloud()
+    e.stopPropagation(); selected = item.dataset.url; listOpen = false; connectError.hidden = true; renderCloud()
+    if (isCustom()) customInput.focus()
   }))
   listBox.hidden = !listOpen
   pickerBtn.setAttribute('aria-expanded', String(listOpen))
@@ -405,24 +412,21 @@ function loadCloud() {
 document.getElementById('cloud-retry').addEventListener('click', loadCloud)
 pickerBtn.addEventListener('click', (e) => { e.stopPropagation(); listOpen = !listOpen; renderCloud() })
 document.addEventListener('click', () => { if (listOpen) { listOpen = false; renderCloud() } })
-
-function selectTab(next) {
-  tab = next
-  panelCloud.hidden = next !== 'cloud'
-  panelCustom.hidden = next !== 'custom'
-  document.getElementById('tab-cloud').classList.toggle('is-on', next === 'cloud')
-  document.getElementById('tab-custom').classList.toggle('is-on', next === 'custom')
-  document.getElementById('tab-cloud').setAttribute('aria-selected', String(next === 'cloud'))
-  document.getElementById('tab-custom').setAttribute('aria-selected', String(next === 'custom'))
+customInput.addEventListener('input', () => { if (isCustom()) urlEl.textContent = customInput.value.trim() })
+customInput.addEventListener('input', () => {           /* 一改就清掉错误态 */
+  customInput.classList.remove('is-error')
+  customField.classList.remove('is-error')
   connectError.hidden = true
-}
-document.getElementById('tab-cloud').addEventListener('click', () => selectTab('cloud'))
-document.getElementById('tab-custom').addEventListener('click', () => selectTab('custom'))
+})
 
 function doConnect() {
   const custom = customInput.value.trim()
-  if (tab === 'custom' && !custom) { sub(dictOf(lang).connect + '：' + dictOf(lang).customHint); connectError.hidden = false; return }
-  if (tab === 'cloud' && !selected) { sub(dictOf(lang).cloudSelectHint); connectError.hidden = false; return }
+  if (isCustom() && !custom) {
+    customInput.classList.add('is-error')                /* 出错的控件自己变色 */
+    customField.classList.add('is-error')
+    sub(dictOf(lang).customHint); connectError.hidden = false; customInput.focus(); return
+  }
+  if (!isCustom() && !selected) { sub(dictOf(lang).cloudSelectHint); connectError.hidden = false; return }
   connectError.hidden = true
   connectBtn.classList.add('is-loading')
   connectBtn.disabled = true
@@ -430,8 +434,7 @@ function doConnect() {
   setTimeout(() => {
     connectBtn.classList.remove('is-loading')
     connectBtn.disabled = false
-    applyLang(lang)               /* 文案交回语言包 */
-    sub((tab === 'cloud' ? selected : custom) + ' · ' + (dictOf(lang).connected || 'ok'))
+    applyLang(lang)
   }, 1800)
 }
 connectBtn.addEventListener('click', doConnect)

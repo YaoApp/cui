@@ -98,7 +98,8 @@
       "cloudSelectHint": "Select a cloud server",
       "customHint": "Enter the full server address, scheme included",
       "registerHelper": "Some servers are invite-only and need a code to sign up. You can request one on the site.",
-      "registerLink": "Request an invitation code"
+      "registerLink": "Request an invitation code",
+      "customOption": "Custom server"
     },
     "inbox": {
       "unreadCount": "{count} unread",

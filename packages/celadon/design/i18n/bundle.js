@@ -100,7 +100,8 @@ window.CELADON_I18N = {
         "cloudSelectHint": "Select a cloud server",
         "customHint": "Enter the full server address, scheme included",
         "registerHelper": "Some servers are invite-only and need a code to sign up. You can request one on the site.",
-        "registerLink": "Request an invitation code"
+        "registerLink": "Request an invitation code",
+        "customOption": "Custom server"
       },
       "inbox": {
         "unreadCount": "{count} unread",
@@ -873,7 +874,8 @@ window.CELADON_I18N = {
         "cloudSelectHint": "クラウドサーバーを選択",
         "customHint": "完全なサーバーアドレスを入力してください（スキームを含む）",
         "registerHelper": "一部のサーバーは招待制で、登録に招待コードが必要です。サイトで申請できます。",
-        "registerLink": "招待コードを申請する"
+        "registerLink": "招待コードを申請する",
+        "customOption": "カスタムサーバー"
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1646,7 +1648,8 @@ window.CELADON_I18N = {
         "cloudSelectHint": "选择云服务器",
         "customHint": "填写完整服务器地址（含协议）",
         "registerHelper": "部分服务器为邀请制，需要邀请码才能注册。可前往站点申请。",
-        "registerLink": "前往注册申请邀请码"
+        "registerLink": "前往注册申请邀请码",
+        "customOption": "自建服务器"
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2419,7 +2422,8 @@ window.CELADON_I18N = {
         "cloudSelectHint": "選擇雲端伺服器",
         "customHint": "填寫完整伺服器位址（含協定）",
         "registerHelper": "部分伺服器為邀請制，需要邀請碼才能註冊。可前往站點申請。",
-        "registerLink": "前往註冊申請邀請碼"
+        "registerLink": "前往註冊申請邀請碼",
+        "customOption": "自訂伺服器"
       },
       "inbox": {
         "unreadCount": "{count} 未讀",
