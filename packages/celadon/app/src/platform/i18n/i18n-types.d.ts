@@ -5,6 +5,24 @@ import 'i18next'
 
 /** 基准语言里存在的全部 key —— `t('…')` 只接受这些。 */
 export type I18nKey =
+  | 'base.action.block'
+  | 'base.group.button'
+  | 'base.group.icon'
+  | 'base.group.input'
+  | 'base.group.select'
+  | 'base.group.theme'
+  | 'base.message.error'
+  | 'base.message.hint'
+  | 'base.sub.brands'
+  | 'base.sub.controls'
+  | 'base.sub.iconSizes'
+  | 'base.sub.messages'
+  | 'base.sub.props'
+  | 'base.sub.sizes'
+  | 'base.sub.states'
+  | 'base.sub.types'
+  | 'base.sub.variants'
+  | 'base.title'
   | 'bridge.actions'
   | 'bridge.appInfo'
   | 'bridge.bridge'
@@ -226,6 +244,24 @@ declare module 'i18next' {
     nsSeparator: false
     resources: {
       translation: {
+        'base.action.block': string
+        'base.group.button': string
+        'base.group.icon': string
+        'base.group.input': string
+        'base.group.select': string
+        'base.group.theme': string
+        'base.message.error': string
+        'base.message.hint': string
+        'base.sub.brands': string
+        'base.sub.controls': string
+        'base.sub.iconSizes': string
+        'base.sub.messages': string
+        'base.sub.props': string
+        'base.sub.sizes': string
+        'base.sub.states': string
+        'base.sub.types': string
+        'base.sub.variants': string
+        'base.title': string
         'bridge.actions': string
         'bridge.appInfo': string
         'bridge.bridge': string

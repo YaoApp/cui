@@ -33,7 +33,9 @@ h1{font-size:19px;margin:0 0 4px}
 .meta{flex:1;min-width:0}
 .meta .n{font-family:var(--font-family-monospace);font-size:11.5px;font-weight:600}
 .meta .u{font-size:11px;color:var(--text-tertiary);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.meta .u.long{white-space:normal;font-family:var(--font-family-monospace);word-break:break-all}
+/* 长路径可能含中日韩字符，用中日韩等宽栈；断行按词内任意处断，避免长路径撑破卡片。
+   依据 design/typography.md 第 7 节与第 8 节。 */
+.meta .u.long{white-space:normal;font-family:var(--font-family-monospace-cjk);overflow-wrap:anywhere}
 .hex{font-family:var(--font-family-monospace);font-size:11.5px;color:var(--text-secondary);cursor:pointer;background:var(--background-field);border:1px solid var(--border-default);border-radius:6px;padding:2px 7px;flex:none}
 .hex:hover{background:var(--background-hover)}
 .cr{font-size:10.5px;padding:2px 6px;border-radius:99px;flex:none;font-weight:650;min-width:48px;text-align:center;border:1px solid transparent}
@@ -74,8 +76,9 @@ ol{margin:0;padding-left:20px} ol li{font-size:12.5px;color:var(--text-secondary
 .specimen{border:1px solid var(--border-subtle);border-radius:10px;padding:12px 14px;background:var(--background-content);font-family:var(--font-family-ui)}
 .specimen .spec-head{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
 .specimen .spec-head .name{font-weight:700;font-size:13px}
-.specimen .spec-head .code{font-size:11px;color:var(--text-tertiary);font-family:ui-monospace,Menlo,monospace}
-.specimen .stack{font-size:10.5px;color:var(--text-tertiary);font-family:ui-monospace,Menlo,monospace;word-break:break-all;
+.specimen .spec-head .code{font-size:11px;color:var(--text-tertiary);font-family:var(--font-family-monospace)}
+/* 堆栈文本可能含中日韩字符，用中日韩等宽栈；断行按词内任意处断，不写 word-break: break-all */
+.specimen .stack{font-size:10.5px;color:var(--text-tertiary);font-family:var(--font-family-monospace-cjk);overflow-wrap:anywhere;
   background:var(--background-field);border-radius:6px;padding:5px 7px;margin-bottom:9px;line-height:1.5}
 .specimen .line{padding:5px 0;border-top:1px dashed var(--border-subtle)}
 .specimen .line:first-of-type{border-top:0}

@@ -28,6 +28,7 @@
 | `features/world` | `features/scaffold/routing` | `/scaffold/routing` · `/scaffold/routing/:worldId` | 路由参数 · URL ↔ store 同步 · 列表/详情 |
 | `features/verify` | `features/scaffold/bridge` | `/scaffold/bridge` | 逐条点名调 **18 条桥命令**（唯一允许引桥的页面） |
 | `features/data-check` | `features/scaffold/requests` | `/scaffold/requests` | 出口 · 四态 · 失效 · 登录/退出 · 服务地址 |
+| （新） | `features/scaffold/base` | `/scaffold/base` | **全部基础件按分组的清单页**：输入类 · 选择类 · 勾选类 · 反馈类 · 图标与品牌 · 主题与语言；每组列出默认、悬停、焦点、禁用与错误等状态，供人类验收与浏览器用例断言 |
 | （已撤）`/side` 演示路由 | —— | —— | 侧边面与它的 store 一并删除（没有产品页面时它没有消费者）|
 
 - `/hello` · `/world` · `/verify` · `/data-check` 四条旧路径**全部作废**，`*` 兜底重定向到 `/`。

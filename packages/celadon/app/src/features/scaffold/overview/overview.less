@@ -36,7 +36,8 @@
 }
 
 .overview__cell code {
-  font-family: var(--font-family-monospace);
+  /* 名称可能是中文（服务器名、组件名），走中日韩等宽栈（见 typography.md 第 7 节） */
+  font-family: var(--font-family-monospace-cjk);
   font-size: var(--font-size-label);
   text-align: center;
   line-height: var(--line-height-tight);

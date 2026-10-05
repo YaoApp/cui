@@ -1,0 +1,68 @@
+/* 基础件清单页的排版。三层结构：组（卡片）→ 子组（小标题）→ 单个示例。
+   取值照 design/layout.md 与 design/typography.md，四级文字阶梯：
+   组标题 subtitle 15 + strong，子组标题 body-lg 13 + medium，示例的字段标签 caption 12 + medium，
+   示例名 label 11。卡片内距 24 大于卡内间距 16，层次才立得住。 */
+
+.base-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+  margin-block-end: var(--spacing-24);
+  padding: var(--spacing-24);
+  background: var(--background-surface);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--elevation-surface-1);
+
+  /* 最后一张卡片不再留外边距：外边距归排布者，末尾不需要额外间距 */
+  &:last-child {
+    margin-block-end: 0;
+  }
+
+  /* 标题的浏览器默认外边距必须清零：否则它加在卡片的 padding 与容器的 gap 之上，
+     上边会比左右宽（实测 28 对 16），下边也各多一份。间距只由容器给，见 layout.md 第 1 节。 */
+  &__title {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-subtitle);
+    font-weight: var(--font-weight-strong);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-latin);
+  }
+}
+
+/* 子组标题：比组标题小一档，比字段标签大一档且重一档（strong 对 medium），用次要色。
+   原来与字段标签同为 12 + medium，两级撞在一起，看不出层级。 */
+.base-subgroup__title {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-strong);
+  line-height: var(--line-height-normal);
+}
+
+.base-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--spacing-16);
+}
+
+.base-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-12);
+}
+
+/* 单个示例：名称在上，示例在下，间距 8 */
+.base-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+
+  &__name {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-label);
+    letter-spacing: var(--letter-spacing-latin);
+  }
+}

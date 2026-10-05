@@ -5,7 +5,7 @@
 - **参考**：`cui-desktop`（1.0 桌面壳与其 `cui` 包，只读）· 本仓 `packages/cui`（1.0 的 `cui` 包，只读）
 - **目标**：把 1.0 的"入口"能力归一化为一套产品级实现 —— 一个 `data/user` 域、两个独立页面（登录、注册）、一个服务器选择页面，全部走本仓的平台层与设计体系。
 
-## 0. 旧能力盘点（`/user/entry` 一线）
+## 0. 旧能力盘点（`/user/entry` 相关接口）
 
 ### 0.1 接口（来源：`packages/cui/openapi/user/auth.ts`，1.0 实现）
 
@@ -48,32 +48,124 @@
 
 ## 2. 第二步：接口准备（用啥写啥）
 
-**状态：已完成**（2026-10-05）。产物 `app/src/data/user/`（`types` · `api` · `keys` · `queries` · `index`），
-域内说明见 [`README.md`](../app/src/data/user/README.md)（英文）与 [`README.zh-CN.md`](../app/src/data/user/README.zh-CN.md)（中文）。
-
-**真实清单（13 条，路径以 1.0 源码与服务端 handler 为准）**：
-
-| 组 | 声明 |
-| --- | --- |
-| 入口 | `entryConfig`(GET `/user/entry`) · `entryVerify` · `entryRegister` · `entryLogin` · `entryOtp` · `entryCaptcha` · `entryInvite` · `logout` |
-| 第三方 | `oauthAuthorize`(GET `/user/oauth/:id/authorize`) · `oauthCallback`(POST) |
-| 设备码 | `deviceAuthorize`(POST `/oauth/device/authorize`) · `deviceFlowStart` · `deviceFlowToken`(POST `/user/oauth/:providerId/device/authorize|token`) |
-| 验签 | `oidcKeys`(GET `/oauth/jwks`) |
-
-**规则**：临时令牌经 `RequestOptions.headers`，不进凭据库；失败以值返回、按码翻译；
-语言由 ctx 统一带（域层不传 query `locale`）；端点的取舍以 §1 草图为基准，OAuth 与设备码流本轮做。
-
-**验证**：单元 fixture（真实响应体）+ 浏览器层 15 步活体走查（同域代理 → dev 后端），
-`api`/`keys`/`queries` 覆盖率四项 100%；五条成功分支当前配置不可达，已用带来源标注的 fixture 记录。
+**状态：已完成**（2026-10-05）；交付物为 `app/src/data/user/`（13 条声明，含中英两份 README），字段与路径以 1.0 源码和 `yao/openapi/user/*` handler 为准，临时令牌经 `RequestOptions.headers` 传递，失败按错误码翻译，语言由 ctx 统一提供，单元 fixture 与浏览器层 15 步活体走查均已通过，`api`、`keys`、`queries` 覆盖率四项 100%。
 
 ## 3. 第三步：页面实现（登录与注册分开）
 
-1. **路由**：`/login` 与 `/register` 各自独立页面；两者都从"输入用户名"开始并调用 `verify`，据其 `status` 继续本页流程或提示切换；`/login` 与 `/register` 互相链接。
-2. **服务器选择**：无服务地址时由外壳呈现（应用内页面，走同一套 Token 与公共件）；有地址后进入应用。原桌面壳的原生 DOM 实现退役。
-3. **状态**：会话的采纳与清除沿用 `platform/credential`（登录成功采纳、退出清除 `session` 与 `refresh`）；换服务地址时作废页面上的旧结果，与脚手架「请求」页同一规则。
-4. **文案**：四语齐（`zh-CN` · `zh-TW` · `en-US` · `ja`），文案按域就近放在 `features/<域>/locales/`。
-5. **公共件**：输入框、按钮、提示等优先用 `components/base`，缺什么补什么；不新增页面私有控件。
-6. **页面私有的组件与样式**放在该域自己的目录下；导航与页头沿用 `ScaffoldPage` 的收法，产品页面另行设计外壳（见 [`04-status.md`](04-status.md) §3）。
+### 3.1 路由清单
+
+路径都在构建决定的 base 之下，三个页面都使用独立外壳，不带应用的 Surface 导航。
+「设计原型」一列指向第一步的草图，用于对照界面；草图为占位演示，细节随实现推进。
+
+| 路径 | 页面 | 设计原型 | 说明 |
+| --- | --- | --- | --- |
+| `/login` | `features/auth/login` | [`prototype/login.html`](../design/prototype/login.html) | 从输入用户名开始，调用 `entryVerify`，依据返回的 `status` 在本页切换到密码、一次性口令、邀请码等分支 |
+| `/register` | `features/auth/register` | [`prototype/register.html`](../design/prototype/register.html) | 同样从输入用户名开始，与登录共用输入组件，注册成功或需要登录时链接到 `/login` |
+| `/servers` | `features/auth/servers` | [`prototype/servers.html`](../design/prototype/servers.html) | 选择内置服务地址或手动填写，没有可用地址时由外壳引导到本页 |
+| 兜底 | 既有的 `*` 重定向到 `/` | 无 | 保持不变 |
+
+页面使用的外壳参考 [`prototype/layout.html`](../design/prototype/layout.html) 与 [`prototype/welcome.html`](../design/prototype/welcome.html)。
+登录页与注册页之间互相链接，并在跳转时保留已经输入的用户名。
+
+### 3.2 Feature 清单
+
+Feature 是域，位于 `features/` 下，自带 `locales/` 与 `tests/`。本轮新增一个域，下辖三个页面。
+
+| Feature | 目录 | 页面 | 说明 |
+| --- | --- | --- | --- |
+| `auth` | `features/auth/` | `login`、`register`、`servers` | 登录、注册与服务器选择的域；三个页面共用输入组件与一套四语文案 |
+
+页面属于 Feature，本身不是组件：它持有状态、调用接口，并把界面交给下面的组件渲染。
+
+| 页面 | 目录 | 说明 |
+| --- | --- | --- |
+| 登录页 | `features/auth/login/` | 持有步骤状态，调用 `entryVerify` 与 `entryLogin` |
+| 注册页 | `features/auth/register/` | 调用 `entryVerify` 与 `entryRegister` |
+| 服务器页 | `features/auth/servers/` | 写入与清除服务地址 |
+
+### 3.3 Component 清单
+
+组件分两处落位，判据来自 [`architecture/03-boundaries.md`](../architecture/03-boundaries.md) §3。
+**基础组件**进 `components/base/`，包装 `@base-ui/react`，只有视觉与行为；**页面内部件**留在 `features/auth/parts/`，
+由基础组件拼成，可以感知本页的流程。两者都遵循一个组件一个目录、样式与组件同名。
+
+先补基础组件。组件名与上游保持一致：上游有同名部件的一律沿用它的名称，上游没有对应部件的，
+按上游的命名形状补一个以 `-field` 结尾的名字。
+
+| 基础组件 | 上游对应 | 目录 | 参数 | 说明 |
+| --- | --- | --- | --- | --- |
+| `input` | `input` | `components/base/input/` | `id`、`label`、`type`、`value`、`onChange`、`error`、`hint`、`autoComplete`、`disabled`、`trailing` | 文本输入；用户名、邮箱与密码都用它，靠 `type` 与校验规则区分，`trailing` 供右侧附加内容 |
+| `captcha-field` | 无部件，基于 `input` | `components/base/captcha-field/` | `id`、`image`、`value`、`onChange`、`onRefresh`、`error`、`disabled` | 图形验证码，图像由调用方传入；行为与文本输入不同，因此单列 |
+| `otp-field` | `otp-field` | `components/base/otp-field/` | `id`、`value`、`onChange`、`error`、`disabled` | 一次性口令，分段输入，支持整段粘贴 |
+| `checkbox` | `checkbox` | `components/base/checkbox/` | `id`、`checked`、`onChange`、`label`、`error` | 勾选项，用于服务条款 |
+
+**密码不另立基础件**。上游只有 `input`，密码就是 `type="password"` 的文本输入，因此沿用同一个基础件。
+密码框右侧的可见性切换是组合出来的东西，不放进 `base/`：登录与注册共用它在
+`features/auth/parts/` 下放一个 `PasswordInput`，等出现第二个域的使用者再考虑上提为共享组件。
+
+字段的标签、说明与错误不另立组件，直接用上游 `field` 的部件：`Field.Root` 包住一个字段，
+`Field.Label` 出标签，`Field.Control` 接控件，`Field.Error` 出字段级错误，`Field.Description` 出说明。
+
+通知方面上游有 `toast`。本轮 auth 不使用瞬态通知，页面级的状态提示由页面内部的 `StatusNotice` 承担；
+将来出现真实的通知需求时包装上游的 `toast`，不自造提示组件。
+
+现有的四个件与上游的对应关系如下。`icon` 与 `brand-mark` 上游没有对应部件，架构分册把它们记为例外。
+
+| 现有组件 | 上游对应 | 现状 | 本轮重写要点 |
+| --- | --- | --- | --- |
+| `button` | `button` | 已包装 Base UI，用设计类，有 `solid`、`soft`、`ghost` 三个变体与两档尺寸，有用例 | 补设计里已有的 `warn` 变体与 `is-loading` 状态，补图标槽与整宽档，核对尺寸档 |
+| `select` | `select` | 已包装 Base UI 的触发器、弹层与选项，有用例 | 补错误态与尺寸档，触发器外观与 `input` 统一 |
+| `icon` | 无 | 雪碧图引用，四档尺寸，无障碍属性齐，有用例 | 新增 auth 需要的八个图标，尺寸档按设计核对 |
+| `brand-mark` | 无 | 品牌与无障碍属性正确 | 补单元用例，它是四件里唯一没有用例的 |
+
+图标沿用 `components/base/icon`。现有图标集已经包含 `i-left`、`i-pc` 与 `i-state-error`；原型还用到的邮件、锁、眼睛、隐藏眼睛、礼盒、地球、太阳与月亮这八个需要新增到 `platform/icons`。
+
+页面内部件留在 `features/auth/parts/`，它们感知登录流程，因此不做成基础组件。
+
+| 组件 | 目录 | 参数 | 说明 |
+| --- | --- | --- | --- |
+| `PasswordInput` | `features/auth/parts/password-input/` | `id`、`label`、`value`、`onChange`、`error`、`autoComplete`、`disabled` | 文本输入加可见性切换，登录与注册共用 |
+| `ProviderList` | `features/auth/parts/provider-list/` | `providers`、`onPick`、`pending` | 第三方登录入口，跳转 `oauthAuthorize` 返回的地址 |
+| `ClientHint` | `features/auth/parts/client-hint/` | `serverName`、`onOpen` | 客户端模式下提示回到浏览器或改用设备码 |
+| `StatusNotice` | `features/auth/parts/status-notice/` | `code`、`onRetry` | 展示 `entryConfig` 与各接口返回的状态，文案按错误码取 |
+
+### 3.4 主题与语言切换的规格
+
+这两个组件已经存在，位于 `components/theme-toggle/` 与 `components/locale-switch/`。它们需要读主题与语言状态，
+按架构的判据留在 `components/` 而不进 `base/`。本轮只写 auth 页面用到的规格，其余等有实际用法再补。
+
+| 项 | 规格 |
+| --- | --- |
+| 主题状态 | 三态：跟随系统、浅色、深色，初始为跟随系统 |
+| 主题切换的位置 | 登录页、注册页与服务器页的右上角 |
+| 主题切换的可访问性 | 用 `aria-pressed` 表达选中状态，键盘可操作，焦点环用 `--focus-ring` |
+| 语言范围 | 四语齐备：`zh-CN`、`zh-TW`、`en-US`、`ja` |
+| 语言切换的行为 | 切换之后当前页面的文案立即更新，不刷新页面，已经输入的内容不丢失 |
+| 语言切换的位置 | 与主题切换同一处，位于页面右上角 |
+| 文案归属 | 基础组件与页面内部件的文案放各自目录的 `locales/`，登录流程的文案放 `features/auth/locales/` |
+
+### 3.5 实现约定
+
+1. **状态**：会话的采纳与清除沿用 `platform/credential`，登录成功时采纳，退出时清除 `session` 与 `refresh`；更换服务地址时作废页面上的旧结果，与脚手架「请求」页同一规则。
+2. **文案**：四语齐备（`zh-CN`、`zh-TW`、`en-US`、`ja`），按域放在 `features/auth/locales/` 下。
+3. **公共件**：输入框与勾选项取 `components/base`，字段级错误用上游 `field` 的 `Error` 部件，页面级提示由页面内部的 `StatusNotice` 承担；不新增页面私有的同类控件。
+4. **页面私有的组件与样式**放在 `features/auth/` 自己的目录下；页面使用独立外壳，不复用 `ScaffoldPage` 的导航与页头。
+
+### 3.6 实现顺序
+
+先做能独立验收的底座，再做页面。每一步都跑门禁并本地提交，前一步没有通过不进下一步。
+
+| 顺序 | 内容 | 验收方式 |
+| --- | --- | --- |
+| 1 | 新增四个基础件（`input`、`captcha-field`、`otp-field`、`checkbox`），并按重写要点修订 `button`、`select`、`icon`、`brand-mark` | 每件一个单元用例；图标走图标脚本生成 |
+| 2 | 主题与语言切换按 3.4 的规格补齐 | 单元用例覆盖三态与四语切换；切换不刷新、不丢输入 |
+| 3 | 在脚手架里新增基础件清单页 | 浏览器用例打开该页并逐组断言；人类可按页验收 |
+| 4 | auth 三个页面与页面内部件 | 单元与浏览器用例；真调用走查对开发后端 |
+
+第 3 步的页面按分组列出全部基础件：输入类、选择类、勾选类、反馈类、图标与品牌、主题与语言。
+每组展示默认、悬停、焦点、禁用与错误等状态，作为测试与人类验收的共同入口。
+它落在脚手架里（`features/scaffold/`），路由为 `/scaffold/base`，导航项与既有四个页面并列，
+具体形制见 [`05-scaffold.md`](05-scaffold.md)。
 
 ## 4. 验收与交付
 

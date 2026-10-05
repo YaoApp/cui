@@ -10,7 +10,11 @@
 | [`tokens.less`](tokens.less) | **设计 token 唯一来源**（浅 + 暗，作用域 `.celadon`）+ 用法约定 | 现行 |
 | [`tokens.css`](tokens.css) | 由 `tokens.less` 生成（`node packages/celadon/scripts/build-css.mjs`）| 生成物，勿手改 |
 | [`color-card.html`](color-card.html) · [`color-card.md`](color-card.md) | **色卡**：色值与尺寸实时读 `tokens.css`；对比度按真实内容底实算 | 现行 |
-| [`foundations.html`](foundations.html) · [`foundations.md`](foundations.md) | **基线五项**：间距 · 圆角 · 层级 · 动效 · 边框 | 现行 |
+| [`foundations.html`](foundations.html) · [`foundations.md`](foundations.md) | **基线六项**：间距 · 圆角 · 层级 · 动效 · 边框 · 三栏竖分割 | 现行 |
+| [`typography.html`](typography.html) · [`typography.md`](typography.md) | **排版规范**：语义档位 · 颜色角色与特殊处理 · 行宽 · 文种与字栈 · 等宽字体 · 多语言混排 · 可达性 · 出处 | 现行（2026-10-06）|
+| [`layout.html`](layout.html) · [`layout.md`](layout.md) | **布局规范**：间距刻度 · 内边距与外边距 · 对齐 · 栏与容器 · 可达性 · **常见缺陷（实测）** · 出处 | 现行（2026-10-06）|
+| [`typography-demo.html`](typography-demo.html) | **排版演示**：同页浅暗双栏 · 八个真实场景 · 四语可切；文案全走 `data-t`，不留内联副本 | 现行（2026-10-06）|
+| [`typography-reading.html`](typography-reading.html) | **排版样张**：Yao Agents 博客正文原样（中英混排 · 列表 · 六列表格 · 链接），用于对比 Windows 与 macOS 观感；单一语言，正文属有意保留 | 现行（2026-10-06）|
 | [`icons.html`](icons.html) · [`icons/`](icons/) | 图标样本与 PNG 七档（16–1024）| 现行 |
 | [`css-logical.html`](css-logical.html) · [`css-logical.md`](css-logical.md) | 逻辑属性样例（inline / block 方向）| 现行 |
 | [`data-format.html`](data-format.html) · [`data-format.md`](data-format.md) | 数据格式样例（数字 · 时间 · 金额等）| 现行 |

@@ -40,7 +40,8 @@
 }
 
 .requests__cell code {
-  font-family: var(--font-family-monospace);
+  /* 用户数据，中文与日文下必然含中日韩字符，走中日韩等宽栈（见 typography.md 第 7 节） */
+  font-family: var(--font-family-monospace-cjk);
   font-size: var(--font-size-label);
   text-align: center;
   line-height: var(--line-height-tight);
@@ -95,7 +96,8 @@
 
 .requests__value {
   margin-block-start: var(--spacing-8);
-  font-family: var(--font-family-monospace);
+  /* 请求体值，中文与日文下可能含中日韩字符，走中日韩等宽栈（见 typography.md 第 7 节） */
+  font-family: var(--font-family-monospace-cjk);
   color: var(--text-secondary);
   line-height: var(--line-height-tight);
   overflow-wrap: anywhere;

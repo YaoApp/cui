@@ -19,20 +19,10 @@
  * 语言 → 字体栈映射（:lang 匹配继承的语言；zh-TW 需同时列 zh-Hant）
  * 目的：繁中必须走 TC 字形、日文必须走 JP 字形，否则会出现"简中字形冒充繁中/日文"的错字。
  * 用法：<html lang="zh-TW"> 即可，无需给每个组件传参。
+ *
+ * 注意：这三条规则与字体落点一起放在**文件末尾**。放在这里会被后半部分的具体值覆盖
+ * （特异性相同、源序在前的输），2026-10-06 实测确认过，别再移回来。
  */
-.celadon:lang(zh-CN),
-.celadon:lang(zh-Hans) {
-  --font-family-ui: var(--font-family-ui-hans);
-}
-.celadon:lang(zh-TW),
-.celadon:lang(zh-Hant),
-.celadon:lang(zh-HK) {
-  --font-family-ui: var(--font-family-ui-hant);
-}
-.celadon:lang(ja),
-.celadon:lang(ja-JP) {
-  --font-family-ui: var(--font-family-ui-japanese);
-}
 /* ===== 三栏竖分割（导航区 | 内容区 | 侧栏）=====
  * 主结构是**竖着分割的三栏**（grid-template-columns），不是横向条带。
  * 让位顺序：**侧栏先缩 → 侧栏整条消失 → 中栏才可能低于最小**；**导航栏不参与宽度让步**，
@@ -144,20 +134,38 @@
   --danger-soft: #FBECEA;
   --danger-ink: #B32B22;
   /* 危险色文字/图标：在 --danger-soft 上 5.57:1 ✓、内容底 6.13:1 ✓ */
-  /* ===== 字体（四语：简 / 繁 / 英 / 日）===== */
-  --font-family-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Noto Sans", sans-serif;
+  /* ===== 字体（四语：简 / 繁 / 英 / 日）=====
+   * 字体栈顺序取业内通行的系统字体顺序：`-apple-system` → `BlinkMacSystemFont` → `"Segoe UI"` → `Roboto` →
+   * `"Helvetica Neue"` → `Arial` → `"Noto Sans"` → generic。两处约定：
+   * 1. **不含任何中文字体**，中文交系统默认，不在栈里指定 Windows 的中文字体；
+   * 2. **不含 `system-ui`**，因为**中文版 Windows 上它解析为 `Microsoft YaHei UI`**，会把拉丁与汉字一起接管。
+   *    栈里的 `-apple-system` 与 `BlinkMacSystemFont` 在 Windows 上不存在会被跳过，拉丁自然落到 `"Segoe UI"`。
+   *
+   * 中文回落到浏览器默认中文字体。**不额外加载字体就无法在所有机器上换掉 Windows 的中文字体。**
+   * 候选栈并排对比见 `font-platform-test.html`。
+   *
+   * 栈尾依次带：表情字体（否则键帽与旗帜一类符号可能出豆腐块）、generic family（避免落到浏览器默认衬线）。 */
+  --font-family-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   --font-family-monospace: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Cascadia Mono", "Liberation Mono", monospace;
-  /* 各语言字体栈：**必须分开**，否则繁中会渲染成简体字形、日文会渲染成中文字形 */
-  --font-family-ui-hans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
-  --font-family-ui-hant: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", "Source Han Sans TC", sans-serif;
-  --font-family-ui-japanese: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Source Han Sans JP", sans-serif;
-  --font-family-monospace-cjk: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK SC", "Noto Sans Mono CJK JP", monospace;
-  --font-weight-normal: 430;
-  /* 界面文字用非整百字重（可变字体下更清晰）；不支持时回落 400 */
+  /* 各语言字体栈：**必须分开**，否则繁中会渲染成简体字形、日文会渲染成中文字形。
+     拉丁部分与上面的默认栈一致，保证英文在四种语言下完全一致；`"Noto Sans"` 之后追加该语言字体，
+     再经 Noto Sans CJK 与思源，最后回落 generic family。**不列 Windows 中文字体。** */
+  --font-family-ui-hans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Noto Sans CJK SC", "Source Han Sans SC", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  --font-family-ui-hant: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang TC", "Noto Sans CJK TC", "Source Han Sans TC", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  --font-family-ui-japanese: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Hiragino Sans", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Source Han Sans JP", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  /* 等宽栈（含中日韩）：原顺序缺繁中字形，繁中环境会掉到简中或日文字形上。
+     按 SC → TC → JP 列全，三者字形不同，缺一个就会出现"简中字形冒充繁中"的错字。 */
+  --font-family-monospace-cjk: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK SC", "Noto Sans Mono CJK TC", "Noto Sans Mono CJK JP", monospace;
+  /* 字重刻度：三档，取整百值。
+   * **中日韩文本不得依赖字重区分层级**：微软雅黑只有 Light/Regular/Bold，
+   * 只有 PingFang 与 Hiragino 才有真实的 500 与 600；非整百值只在可变字体上成立，跨平台会跳档。
+   * 依据与实测见 design/typography.md。 */
+  --font-weight-normal: 400;
+  /* 四个平台都有真实 400，不依赖可变字体 */
   --font-weight-medium: 500;
-  --font-weight-strong: 650;
-  --font-weight-heavy: 700;
-  /* 需要明显更重时用（少数强调文本）*/
+  /* 标签与次级标题；Windows 回落 400，因此不单独承担层级 */
+  --font-weight-strong: 600;
+  /* 标题与真正的强调；Windows 回落 700（Bold），只用于标题 */
   --line-height-normal: 1.5;
   /* 拉丁 */
   --line-height-cjk: 1.7;
@@ -171,15 +179,22 @@
   --letter-spacing-cjk: 0;
   /* 中文不要负字距 */
   --font-size-minimum-cjk: 12px;
-  /* 字号阶梯（6 档）：页面文字一律用这几档，不写裸像素。
-     label 只用于纯拉丁/数字小标签；含中日韩文字的最小为 caption（= --font-size-minimum-cjk）。 */
-  --font-size-label: 11px;
+  /* 字号阶梯（5 档）：页面文字一律用这几档，不写中间值。
+     取值按业内通行阶梯：12 · 14 · 16 · 20 · 24，**相邻档至少相差 2px**，
+     正文与正文大相差 2px、正文大到区块标题相差 4px，层级看得见。
+     不设相邻 1px 的档：1px 差不构成可感知层级。细则见 design/typography.md 第 2 节。 */
+  --font-size-label: 12px;
+  /* 纯拉丁与数字小标签；含中日韩文字时用 caption，字号相同靠字重区分 */
   --font-size-caption: 12px;
-  --font-size-body: 12.5px;
-  --font-size-body-lg: 13px;
-  --font-size-subtitle: 15px;
-  --font-size-title: 20px;
-  /* 中文最小档：11px 以下（非 Retina）汉字笔画会糊 */
+  /* 说明与辅助，= --font-size-minimum-cjk */
+  --font-size-body: 14px;
+  /* 界面正文，业内常见的桌面基准字号 */
+  --font-size-body-lg: 16px;
+  /* 需要强调的正文 */
+  --font-size-subtitle: 20px;
+  /* 区块标题 */
+  --font-size-title: 24px;
+  /* 页面标题 */
   /* ===== 字号（7 档 + 16 补档）· 中文最小 12px ===== */
   --font-size-11: 11px;
   /* 仅西文/数字角标，中文勿用 */
@@ -671,4 +686,111 @@
 .link {
   color: var(--brand-ink);
   text-decoration: underline;
+}
+/* ===== 语言字体栈与字体落点（全站唯一一处）=====
+ * 顺序要紧：下面三条 :lang 规则必须排在文件前半那些具体值**之后**，
+ * 否则特异性相同、源序在前的会被覆盖（2026-10-06 实测到语言分栈因此成了死代码）。
+ * 字体也只在这里落一次：`.celadon` 是设计体系的作用域，壳与组件都不再重复设 `font-family`。
+ * 带兜底栈是为了任何情况下都不落到浏览器默认的衬线字体。 */
+.celadon:lang(zh-CN),
+.celadon:lang(zh-Hans) {
+  --font-family-ui: var(--font-family-ui-hans);
+}
+.celadon:lang(zh-TW),
+.celadon:lang(zh-Hant),
+.celadon:lang(zh-HK) {
+  --font-family-ui: var(--font-family-ui-hant);
+}
+.celadon:lang(ja),
+.celadon:lang(ja-JP) {
+  --font-family-ui: var(--font-family-ui-japanese);
+}
+.celadon,
+[data-theme] .celadon {
+  font-family: var(--font-family-ui, system-ui, -apple-system, "Segoe UI", sans-serif);
+  /* 文字色与字体同理，必须由作用域自己落一次。只切自定义属性是不够的：
+     嵌套的 .celadon（例如暗色演示面板）会从作用域**外面**继承到浅色主题的文字色，
+     于是深底配深字，文字看不见（2026-10-06 实测）。 */
+  color: var(--text-primary);
+  /* ===== 多语言混排策略（全站唯一一处）=====
+   * 中西文之间自动留出约四分之一个汉字宽的空隙，不靠手打空格；全角标点收窄。
+   * 两者都是**继承**属性，所以按本文件末尾的清单，由作用域落一次。
+   * 支持情况 2026-10-06 实测：text-autospace 与 text-spacing-trim 在本机 Chrome 均为 true。 */
+  text-autospace: normal;
+  text-spacing-trim: space-first;
+  /* 禁止合成字重：静态字体缺 500 与 600 时，浏览器会伪造粗体，中日韩字形上会糊成一团。
+     实测本页默认值为 `weight style small-caps`（即允许合成），故显式关掉。
+     关掉之后请求不到的字重老实回落到最近的真实档位，例如 500 在雅黑上回落 400。 */
+  font-synthesis: none;
+}
+/* ===== 作用域要落哪些属性（清单，2026-10-06 建立）=====
+ *
+ * 判据：**属性值会被继承，而继承的是「计算后的值」**。自定义属性在作用域里切了之后，
+ * 若不同时把**属性**落到作用域上，作用域内的元素会从作用域**外面**继承旧值。
+ *
+ * 因此下列属性**必须由 `.celadon` 作用域落一次，而且只落一次**，壳与组件都不再重复：
+ *
+ *   `font-family`  随语言变化，取 `--font-family-ui`（`:lang` 分栈见本文件末尾）
+ *   `color`        随主题变化，取 `--text-primary`
+ *
+ * 新增「随主题或语言变化」的**继承属性**时，同步加进这份清单，并在上面的规则里落一次。
+ * 反例（**不是**继承属性，元素自己取 `var()` 即可，不必落）：`background` · `border-*` ·
+ * `border-radius` · `padding` · `gap`。
+ *
+ * 顺序也要紧：本规则在文件末尾，才能压过前半那些具体值；同理，`:lang` 规则也必须在末尾。 */
+/* ===== 等宽用法（设计类，2026-10-06 建立）=====
+ * 用途：**需要字符对齐**的场合。代码 · 路径 · 命令 · 日志 · 标识符与密钥 · 成列的数字。
+ * 不用于正文，不用来排中文段落。单个数字也不必换等宽，用 `tabular-nums` 让 UI 字体里的数字等宽即可。
+ *
+ * 选哪套栈的判据只有一条：**这段文本可能含中日韩字符吗**。
+ *   可能含 → `.code--cjk`（`--font-family-monospace-cjk`，汉字走真正的等宽汉字字形）
+ *   只含拉丁 → `.code`（`--font-family-monospace`）
+ * 若含中日韩却用拉丁等宽栈，汉字会掉到比例字体上，列立刻对不齐；
+ *
+ * 两条与全站规则不同的地方，都与对齐有关：
+ *   1. `text-autospace: no-autospace`：代码里的中西文之间**不加**那四分之一汉字宽的空隙，
+ *      否则每一行的宽度都不一致，对齐失去意义；
+ *   2. 行高用 `--line-height-normal`（1.5）而不是中日韩的 1.7，同样是密度与对齐优先。
+ *      以中日韩为主要内容的段落请勿使用等宽，改用正文档。
+ *
+ * 字重只用 400 与 700：等宽字体通常只有 Regular 与 Bold，`font-synthesis: none` 避免浏览器伪粗。 */
+.code,
+.code--cjk {
+  font-family: var(--font-family-monospace);
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+  text-autospace: no-autospace;
+  text-spacing-trim: space-all;
+  background: var(--background-field);
+  border-radius: var(--radius-xs);
+  padding: 0 var(--spacing-4);
+  unicode-bidi: isolate;
+}
+.code--cjk {
+  font-family: var(--font-family-monospace-cjk);
+}
+/* 块级代码：整块取底色与内距，横向溢出滚动而不是撑破容器 */
+.code-block,
+.code-block--cjk {
+  display: block;
+  margin: 0;
+  padding: var(--spacing-12);
+  overflow-x: auto;
+  white-space: pre;
+  font-family: var(--font-family-monospace);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-normal);
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+  text-autospace: no-autospace;
+  text-spacing-trim: space-all;
+  background: var(--background-field);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-small);
+}
+.code-block--cjk {
+  font-family: var(--font-family-monospace-cjk);
 }

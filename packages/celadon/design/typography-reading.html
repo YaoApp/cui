@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jev 上线 — 在 Agent 中使用结构化决策</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+/* 阅读版式样张：正文取自 Yao Agents 博客，字体与数值全部取本设计体系的 token，
+   用来在 Windows 与 macOS 上对比同一段文字的观感。
+   布局按 layout.md：正文行宽 45ch（汉字约 22 字）、卡内间距小于卡片内距、只用逻辑方向属性。 */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--background-app);color:var(--text-primary);padding-block:var(--spacing-32);padding-inline:var(--spacing-24)}
+.sheet{background:var(--background-surface);border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--spacing-24);max-inline-size:760px;margin-inline:auto}
+.src{font-size:var(--font-size-caption);color:var(--text-tertiary);margin:0;margin-block-end:var(--spacing-16)}
+.meta{font-size:var(--font-size-label);font-weight:var(--font-weight-medium);color:var(--text-secondary);margin:0;margin-block-end:var(--spacing-8)}
+.meta .tag{border:var(--border-width) solid var(--border-default);border-radius:var(--radius-xs);padding-inline:var(--spacing-4);margin-inline-end:var(--spacing-4)}
+h1{font-size:var(--font-size-title);font-weight:var(--font-weight-strong);line-height:var(--line-height-title);margin:0;margin-block-end:var(--spacing-8)}
+h2{font-size:var(--font-size-subtitle);font-weight:var(--font-weight-strong);line-height:var(--line-height-tight);margin:0;margin-block-end:var(--spacing-8);margin-block-start:var(--spacing-32)}
+.lead{font-size:var(--font-size-body-lg);color:var(--text-secondary);line-height:var(--line-height-cjk);margin:0;margin-block-end:var(--spacing-16)}
+p{font-size:var(--font-size-body);line-height:var(--line-height-cjk);margin:0;margin-block-end:var(--spacing-12);max-inline-size:45ch}
+ul{margin:0;margin-block-end:var(--spacing-12);padding-inline-start:var(--spacing-24);max-inline-size:45ch}
+li{font-size:var(--font-size-body);line-height:var(--line-height-cjk);margin-block-end:var(--spacing-4)}
+a{color:var(--brand-ink)}
+code{font-family:var(--font-family-monospace-cjk);font-size:var(--font-size-label);background:var(--background-field);border-radius:var(--radius-xs);padding-inline:var(--spacing-4)}
+.table-wrap{overflow-x:auto;margin-block-end:var(--spacing-12)}
+table{border-collapse:collapse;inline-size:100%}
+th,td{text-align:start;font-size:var(--font-size-caption);padding-block:var(--spacing-8);padding-inline:var(--spacing-8);border-block-end:var(--border-width) solid var(--border-subtle)}
+th{color:var(--text-secondary);font-weight:var(--font-weight-medium);white-space:nowrap}
+td.num{text-align:end;font-variant-numeric:tabular-nums}
+tr:last-child td{border-block-end:none}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="src">text · yaoagents.com/blog/zh-cn/2026/release/jev · fonts and values · celadon design tokens</p>
+
+  <article class="article">
+    <p class="meta"><span class="tag">release</span>2026-09-24</p>
+    <h1>Jev 上线 — 在 Agent 中使用结构化决策</h1>
+    <p class="lead">Jev 是 TypeSafe AI 的 System One 模型：不写文字，只输出带置信度的结构化决策。Tao 已接入，可在 Yao Agents 的 Agent 里直接使用。</p>
+
+    <p>Jev 是 <a href="https://typesafe.ai">TypeSafe AI</a> 的 <strong>System One</strong> 模型：不生成文字，只做决定。给它数据加一组带类型的问题，它还回带置信度的结构化结果，软件可以直接用。</p>
+    <p>Tao 已接入 Jev，现在可以在 Yao Agents 的 Agent 里直接使用。</p>
+
+    <h2>什么是 System One</h2>
+    <p>普通大模型输出文字，软件要解析、校验，还可能跑偏。Jev 输出的是<strong>预先定义好的结构</strong>，问题只有三种类型：</p>
+    <ul>
+      <li><strong>choice（选择）</strong>：从你给的选项里选一个</li>
+      <li><strong>score（打分）</strong>：按你给的评分标准打分</li>
+      <li><strong>noul</strong>：判断某个陈述是否成立，给出 0–1 的概率</li>
+    </ul>
+    <p>choice 和 score 还会附带概率分布与校准过的置信度。答案结构预先定义，编不出错。响应 70–500ms，比通用模型快 40–200 倍。</p>
+
+    <h2>演示：10 张工单一次分类</h2>
+    <p>把表格交给 AI 专家，说一句"把这些工单分类，填好预留的列"。</p>
+    <p>Jev 一次批量调用完成：10/10 全部填好，没有空列。每行给出分类、意图、优先级、情感、升级概率、置信度，并标出是否需要人工复核。</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>工单</th><th>分类</th><th>优先级</th><th>情感</th><th>置信度</th><th>人工复核</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>T-002 上传崩溃</td><td>technical</td><td>P1-Urgent</td><td>negative</td><td class="num">0.74</td><td>是</td></tr>
+          <tr><td>T-004 订单在哪</td><td>shipping</td><td>P3-Normal</td><td>neutral</td><td class="num">0.66</td><td>否</td></tr>
+          <tr><td>T-008 第三次追问</td><td>technical</td><td>P1-Urgent</td><td>negative</td><td class="num">0.92</td><td>是</td></tr>
+          <tr><td>T-009 要 Slack 集成</td><td>general</td><td>P3-Normal</td><td>positive</td><td class="num">0.67</td><td>否</td></tr>
+          <tr><td>T-010 结账 500</td><td>technical</td><td>P1-Urgent</td><td>negative</td><td class="num">0.98</td><td>是</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>输出</h2>
+    <ul>
+      <li><strong>填好的原表</strong>：列顺序不变，预留列全部填上。</li>
+      <li><strong>分类结果表</strong>：单独一份，直接拿去用。</li>
+      <li><strong>完整明细</strong>：每格的概率分布、逐项置信度，以及模型和 token 用量。</li>
+    </ul>
+    <p>Jev 还会标出最不确定的一行：T-001 的升级概率 0.49，差 0.01 到人工复核阈值，是整批里最弱的一格——保险起见，单独看一眼。其余分得很干净：自动完成 0.10–0.29，需要升级 0.61–0.96。</p>
+
+    <h2>怎么开</h2>
+    <p>设置 → 模型配置 → <strong>Structured Decisions</strong>，选 <strong>Tao Service / Jev</strong>。Jev 走 Tao，接入方式见 <a href="/blog/zh-cn/2026/release/tao">Tao 上线</a>。</p>
+  </article>
+</div>
+</body>
+</html>

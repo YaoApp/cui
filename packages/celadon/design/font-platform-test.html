@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Font stack candidates for Windows</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+/* 平台字体栈候选对比页。
+   背景：用户反馈 Windows 下中文观感偏重，怀疑微软雅黑。本页把同一段文字用若干候选字体栈并排渲染，
+   由用户在**自己的 Windows 机器上**判断哪一种可接受。本机是 macOS，无法代测 Windows。
+   页面样式取 token；候选栈写在每个样例的 font-family 上（字体族名不是颜色与尺寸，不属于 token 红线的范围）。 */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--background-app);color:var(--text-primary);padding-block:var(--spacing-32);padding-inline:var(--spacing-24)}
+.wrap{max-inline-size:860px;margin-inline:auto}
+h1{font-size:var(--font-size-title);font-weight:var(--font-weight-strong);line-height:var(--line-height-title);margin:0;margin-block-end:var(--spacing-8)}
+.note{font-size:var(--font-size-body);color:var(--text-secondary);line-height:var(--line-height-cjk);margin:0;margin-block-end:var(--spacing-8);max-inline-size:45ch}
+.tip{font-size:var(--font-size-caption);color:var(--text-tertiary);margin:0;margin-block-end:var(--spacing-24);max-inline-size:60ch}
+.case{background:var(--background-surface);border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-medium);padding:var(--spacing-24);margin-block-end:var(--spacing-16)}
+.case > h2{font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);color:var(--text-secondary);margin:0;margin-block-end:var(--spacing-4);font-family:var(--font-family-monospace-cjk)}
+.case > .stack{font-size:var(--font-size-label);color:var(--text-tertiary);margin:0;margin-block-end:var(--spacing-12);font-family:var(--font-family-monospace-cjk);overflow-wrap:anywhere}
+.case p.sample{font-size:var(--font-size-body);line-height:var(--line-height-cjk);margin:0;margin-block-end:var(--spacing-8);max-inline-size:45ch}
+.case p.sample:last-child{margin-block-end:0}
+.case .big{font-size:var(--font-size-body-lg)}
+.case .num{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Font stack candidates</h1>
+  <p class="note">同一段文字、同一套字号与行高，只有字体栈不同。请在 Windows 上逐块看，指出哪一种可接受。</p>
+  <p class="tip">每块的灰色小字是该项的完整 font-family。若某一块的中文与相邻块完全相同，说明该候选在这台机器上没有被采用，落到了同一个后备字体。</p>
+
+  <section class="case">
+    <h2>candidate 1 · current（Noto Sans SC 已显式写入）</h2>
+    <p class="stack">"Segoe UI", -apple-system, "SF Pro Text", "PingFang SC", "Noto Sans SC", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif</p>
+    <p class="sample big" style="font-family:'Segoe UI', -apple-system, 'SF Pro Text', 'PingFang SC', 'Noto Sans SC', 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif">Jev 是 TypeSafe AI 的 System One 模型：不生成文字，只做决定。响应 70–500ms，比通用模型快 40–200 倍。</p>
+    <p class="sample" style="font-family:'Segoe UI', -apple-system, 'SF Pro Text', 'PingFang SC', 'Noto Sans SC', 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif">把表格交给 AI 专家，说一句"把这些工单分类，填好预留的列"。置信度 <span class="num">0.74</span>，人工复核 是。</p>
+  </section>
+
+  <section class="case">
+    <h2>candidate 2 · 上一版实验（未列 Noto，靠浏览器默认）</h2>
+    <p class="stack">"Segoe UI", -apple-system, "SF Pro Text", "PingFang SC", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif</p>
+    <p class="sample big" style="font-family:'Segoe UI', -apple-system, 'SF Pro Text', 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif">Jev 是 TypeSafe AI 的 System One 模型：不生成文字，只做决定。响应 70–500ms，比通用模型快 40–200 倍。</p>
+    <p class="sample" style="font-family:'Segoe UI', -apple-system, 'SF Pro Text', 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif">把表格交给 AI 专家，说一句"把这些工单分类，填好预留的列"。置信度 <span class="num">0.74</span>，人工复核 是。</p>
+  </section>
+
+  <section class="case">
+    <h2>candidate 3 · YaHei Light</h2>
+    <p class="stack">"Segoe UI", "Microsoft YaHei UI Light", "Microsoft YaHei Light", "Microsoft YaHei UI", sans-serif</p>
+    <p class="sample big" style="font-family:'Segoe UI', 'Microsoft YaHei UI Light', 'Microsoft YaHei Light', 'Microsoft YaHei UI', sans-serif">Jev 是 TypeSafe AI 的 System One 模型：不生成文字，只做决定。响应 70–500ms，比通用模型快 40–200 倍。</p>
+    <p class="sample" style="font-family:'Segoe UI', 'Microsoft YaHei UI Light', 'Microsoft YaHei Light', 'Microsoft YaHei UI', sans-serif">把表格交给 AI 专家，说一句"把这些工单分类，填好预留的列"。置信度 <span class="num">0.74</span>，人工复核 是。</p>
+  </section>
+
+  <section class="case">
+    <h2>candidate 4 · DengXian 等线</h2>
+    <p class="stack">"Segoe UI", "DengXian", "DengXian Light", "Microsoft YaHei UI", sans-serif</p>
+    <p class="sample big" style="font-family:'Segoe UI', 'DengXian', 'DengXian Light', 'Microsoft YaHei UI', sans-serif">Jev 是 TypeSafe AI 的 System One 模型：不生成文字，只做决定。响应 70–500ms，比通用模型快 40–200 倍。</p>
+    <p class="sample" style="font-family:'Segoe UI', 'DengXian', 'DengXian Light', 'Microsoft YaHei UI', sans-serif">把表格交给 AI 专家，说一句"把这些工单分类，填好预留的列"。置信度 <span class="num">0.74</span>，人工复核 是。</p>
+  </section>
+
+  <section class="case">
+    <h2>candidate 5 · JhengHei UI 正黑</h2>
+    <p class="stack">"Segoe UI", "Microsoft JhengHei UI", "Microsoft JhengHei", "Microsoft YaHei UI", sans-serif</p>
+    <p class="sample big" style="font-family:'Segoe UI', 'Microsoft JhengHei UI', 'Microsoft JhengHei', 'Microsoft YaHei UI', sans-serif">Jev 是 TypeSafe AI 的 System One 模型：不生成文字，只做决定。响应 70–500ms，比通用模型快 40–200 倍。</p>
+    <p class="sample" style="font-family:'Segoe UI', 'Microsoft JhengHei UI', 'Microsoft JhengHei', 'Microsoft YaHei UI', sans-serif">把表格交给 AI 专家，说一句"把这些工单分类，填好预留的列"。置信度 <span class="num">0.74</span>，人工复核 是。</p>
+  </section>
+
+  <section class="case">
+    <h2>candidate 6 · system default</h2>
+    <p class="stack">system-ui, sans-serif</p>
+    <p class="sample big" style="font-family:system-ui, sans-serif">Jev 是 TypeSafe AI 的 System One 模型：不生成文字，只做决定。响应 70–500ms，比通用模型快 40–200 倍。</p>
+    <p class="sample" style="font-family:system-ui, sans-serif">把表格交给 AI 专家，说一句"把这些工单分类，填好预留的列"。置信度 <span class="num">0.74</span>，人工复核 是。</p>
+  </section>
+
+  <section class="case">
+    <h2>candidate 7 · Noto / HarmonyOS if installed</h2>
+    <p class="stack">"Segoe UI", "HarmonyOS Sans SC", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei UI", sans-serif</p>
+    <p class="sample big" style="font-family:'Segoe UI', 'HarmonyOS Sans SC', 'Noto Sans SC', 'Source Han Sans SC', 'Microsoft YaHei UI', sans-serif">Jev 是 TypeSafe AI 的 System One 模型：不生成文字，只做决定。响应 70–500ms，比通用模型快 40–200 倍。</p>
+    <p class="sample" style="font-family:'Segoe UI', 'HarmonyOS Sans SC', 'Noto Sans SC', 'Source Han Sans SC', 'Microsoft YaHei UI', sans-serif">把表格交给 AI 专家，说一句"把这些工单分类，填好预留的列"。置信度 <span class="num">0.74</span>，人工复核 是。</p>
+  </section>
+</div>
+</body>
+</html>

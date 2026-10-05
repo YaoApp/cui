@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CUI 2.0 · 布局规范 Layout · 间距 · 卡片解剖 · 对齐 · 点击目标</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+*{box-sizing:border-box} html,body{margin:0}
+body{background:var(--background-app);color:var(--text-primary);padding:var(--spacing-24) var(--spacing-24) var(--spacing-48)}
+h1{font-size:var(--font-size-title);margin:0 0 var(--spacing-4);font-weight:var(--font-weight-strong)}
+.sub{color:var(--text-secondary);font-size:var(--font-size-body);margin:0 0 var(--spacing-8)}
+.src{font-size:var(--font-size-caption);color:var(--text-tertiary);background:var(--background-surface);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-medium);padding:var(--spacing-8) var(--spacing-12);display:inline-block;margin-bottom:var(--spacing-16)}
+code{font-family:var(--font-family-monospace);background:var(--background-field);padding:0 var(--spacing-4);border-radius:var(--radius-xs);font-size:var(--font-size-label)}
+h2{font-size:var(--font-size-subtitle);margin:var(--spacing-24) 0 var(--spacing-8);font-weight:var(--font-weight-strong)}
+h3{font-size:var(--font-size-body-lg);margin:var(--spacing-16) 0 var(--spacing-8);font-weight:var(--font-weight-strong);color:var(--text-secondary)}
+/* 浅暗成对：暗色面板必须让 .celadon 成为 [data-theme='dark'] 的后代，同元素带两个属性不匹配 */
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--spacing-16)}
+.demo{border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-medium);background:var(--background-app);padding:var(--spacing-16)}
+.demo > .lbl{font-size:var(--font-size-label);color:var(--text-tertiary);margin-bottom:var(--spacing-8)}
+/* 间距刻度 */
+.scale{display:flex;flex-direction:column;gap:var(--spacing-8)}
+.scale .row{display:flex;align-items:center;gap:var(--spacing-12)}
+.scale .tok{font-family:var(--font-family-monospace);font-size:var(--font-size-label);color:var(--text-secondary)}
+.scale .bar{block-size:var(--spacing-12);background:var(--brand);border-radius:var(--radius-xs)}
+/* 卡片解剖：正确与错误对照。错误那一侧的标题**故意不重置外边距**，让浏览器默认值生效，
+   这正是线上踩过的坑；正确那一侧显式清零。 */
+.card{border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-medium);background:var(--background-surface);box-shadow:var(--elevation-surface-1);padding:var(--spacing-24);display:flex;flex-direction:column;gap:var(--spacing-16)}
+.card .t{font-size:var(--font-size-subtitle);font-weight:var(--font-weight-strong);line-height:var(--line-height-tight)}
+.card .s{font-size:var(--font-size-body-lg);font-weight:var(--font-weight-strong);color:var(--text-secondary)}
+.card .b{border:var(--border-width) solid var(--border-control);border-radius:var(--radius-small);background:var(--background-field);padding:var(--spacing-8) var(--spacing-12);font-size:var(--font-size-body);color:var(--text-placeholder)}
+.card.ok .t,.card.ok .s{margin:0}
+.flag{display:inline-block;font-size:var(--font-size-label);padding:0 var(--spacing-4);border-radius:var(--radius-xs);background:var(--danger-soft);color:var(--danger-ink);margin-inline-start:var(--spacing-8)}
+.pass{display:inline-block;font-size:var(--font-size-label);padding:0 var(--spacing-4);border-radius:var(--radius-xs);background:var(--brand-soft);color:var(--brand-ink);margin-inline-start:var(--spacing-8)}
+/* 负责人：容器的 gap 对 与 子项外边距 错 */
+.owner{border:var(--border-width) dashed var(--border-control);border-radius:var(--radius-small);padding:var(--spacing-8)}
+.owner .i{border:var(--border-width) solid var(--border-control);border-radius:var(--radius-xs);padding:var(--spacing-4) var(--spacing-12);background:var(--background-field);font-size:var(--font-size-caption)}
+.owner.gap{display:flex;gap:var(--spacing-8)}
+.owner.margin .i + .i{margin-block-start:var(--spacing-8)}
+/* 对齐 */
+.numrow{display:grid;grid-template-columns:1fr auto;gap:var(--spacing-4) var(--spacing-16);font-size:var(--font-size-body)}
+.numrow .v{text-align:end;font-family:var(--font-family-monospace)}
+/* 点击目标 */
+.targets{display:flex;gap:var(--spacing-16);align-items:flex-end}
+.targets .t{display:flex;flex-direction:column;align-items:center;gap:var(--spacing-4);font-size:var(--font-size-label);color:var(--text-tertiary)}
+.targets .box{display:flex;align-items:center;justify-content:center;background:var(--brand-soft);color:var(--brand-ink);border-radius:var(--radius-xs);font-size:var(--font-size-label)}
+</style>
+</head>
+<body>
+<h1>布局规范 · 演示</h1>
+<p class="sub">这张页只引 <code>tokens.css</code>，用于校对 <a href="./layout.md">layout.md</a> 的规则。每一条都配了正确与错误的对照，错误的那一侧就是实际踩过的坑。</p>
+<p class="src">间距取 4 基数列 · 内边距归容器、外边距归排布者 · 文字左对齐数字右对齐 · 点击目标不小于 24</p>
+
+<h2>一、间距刻度</h2>
+<p class="sub">四边内距与组件间距都从这条刻度里取，不出现中间档。下面的色条宽度直接取 token，所以看到的就是真实值。</p>
+<div class="demo">
+  <div class="scale">
+    <div class="row"><span class="tok">--spacing-4</span><span class="bar" style="inline-size:var(--spacing-4)"></span><span class="lbl">图标与文字之间</span></div>
+    <div class="row"><span class="tok">--spacing-8</span><span class="bar" style="inline-size:var(--spacing-8)"></span><span class="lbl">标签与控件之间</span></div>
+    <div class="row"><span class="tok">--spacing-12</span><span class="bar" style="inline-size:var(--spacing-12)"></span><span class="lbl">控件内的横向内距</span></div>
+    <div class="row"><span class="tok">--spacing-16</span><span class="bar" style="inline-size:var(--spacing-16)"></span><span class="lbl">网格间距 · 卡内间距</span></div>
+    <div class="row"><span class="tok">--spacing-24</span><span class="bar" style="inline-size:var(--spacing-24)"></span><span class="lbl">卡片内距（现行）· 卡片之间</span></div>
+    <div class="row"><span class="tok">--spacing-32</span><span class="bar" style="inline-size:var(--spacing-32)"></span><span class="lbl">大区块之间 · 控件内辅助按钮的宽度</span></div>
+    <div class="row"><span class="tok">--spacing-48</span><span class="bar" style="inline-size:var(--spacing-48)"></span><span class="lbl">页面级留白</span></div>
+  </div>
+</div>
+
+<h2>二、卡片解剖：内距必须大于卡内间距</h2>
+<p class="sub">左边是现行做法（内距 24、卡内间距 16）；右边是踩过的坑 —— 标题带着浏览器默认外边距，它加在 <code>padding</code> 与 <code>gap</code> 之上，实测上边 28、左右 16，看着就是「上下比左右宽」。</p>
+<div class="pair">
+  <div class="demo">
+    <div class="lbl">正确：标题 <code>margin: 0</code><span class="pass">通过</span></div>
+    <div class="card ok">
+      <p class="t">组标题</p>
+      <p class="s">子组标题</p>
+      <div class="b">字段</div>
+      <div class="b">字段</div>
+    </div>
+  </div>
+  <div class="demo">
+    <div class="lbl">缺陷：标题保留默认外边距<span class="flag">缺陷</span></div>
+    <div class="card">
+      <p class="t">组标题</p>
+      <p class="s">子组标题</p>
+      <div class="b">字段</div>
+      <div class="b">字段</div>
+    </div>
+  </div>
+</div>
+<div class="pair" style="margin-block-start:var(--spacing-16)">
+  <div data-theme="light">
+    <div class="demo">
+      <div class="lbl">浅色</div>
+      <div class="card ok"><p class="t">组标题</p><p class="s">子组标题</p><div class="b">字段</div></div>
+    </div>
+  </div>
+  <div data-theme="dark" class="celadon">
+    <div class="demo">
+      <div class="lbl">暗色（面板自身同时带 <code>.celadon</code> 与 <code>data-theme</code>，tokens 两种写法都支持）</div>
+      <div class="card ok"><p class="t">组标题</p><p class="s">子组标题</p><div class="b">字段</div></div>
+    </div>
+  </div>
+</div>
+
+<h2>三、间距只有一个负责人</h2>
+<p class="sub">同一个方向要么由容器的 <code>gap</code> 给，要么由子项的外边距给，不许两头都给；组件自己不带外边距。</p>
+<div class="pair">
+  <div class="demo">
+    <div class="lbl">正确：容器用 <code>gap</code><span class="pass">通过</span></div>
+    <div class="owner gap"><div class="i">子项</div><div class="i">子项</div></div>
+  </div>
+  <div class="demo">
+    <div class="lbl">缺陷：子项自己带外边距<span class="flag">缺陷</span></div>
+    <div class="owner margin"><div class="i">子项</div><div class="i">子项</div></div>
+  </div>
+</div>
+
+<h2>四、对齐</h2>
+<p class="sub">文字与中文都以起点左对齐，数字列右对齐并配等宽字栈。</p>
+<div class="demo">
+  <div class="numrow">
+    <span>会话数</span><span class="v">1,284</span>
+    <span>平均时长</span><span class="v">3.75s</span>
+    <span>失败率</span><span class="v">0.42%</span>
+  </div>
+</div>
+
+<h2>五、点击目标</h2>
+<p class="sub">不小于 24 × 24；常用操作做到 32 × 32。控件内部的辅助按钮以控件高度为限（见 layout.md 第 6 节）。</p>
+<div class="demo">
+  <div class="targets">
+    <span class="t"><span class="box" style="inline-size:var(--spacing-24);block-size:var(--spacing-24)">24</span>下限</span>
+    <span class="t"><span class="box" style="inline-size:var(--spacing-32);block-size:var(--spacing-32)">32</span>常用操作</span>
+    <span class="t"><span class="box" style="inline-size:var(--spacing-32);block-size:var(--spacing-24)">24</span>控件内辅助按钮</span>
+  </div>
+</div>
+</body>
+</html>

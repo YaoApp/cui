@@ -1,0 +1,254 @@
+# 排版规范
+
+- **状态**：现行（2026-10-06 建立）
+- **配套**：[`foundations.md`](foundations.md)（F1 间距 · F2 圆角 · F5 边框）· [`layout.md`](layout.md)（布局规范）· [`color-card.md`](color-card.md)（色卡）
+- **token 来源**：[`tokens.less`](tokens.less)。本文只规定**组合方式**，不重复 token 的具体值。
+
+## 1. 原则
+
+1. **成套使用**。一个文字样式由字号、字重、行高与字距四件事共同决定，要一起定，不单独改字号。同一个字号配不同行高会得到不同的密度与阅读节奏，只改字号而不改行高是排版走样的常见原因。
+2. **语义优先**。界面只用第 2 节的语义档，不直接使用 `--font-size-11` 这类数字档。
+3. **层级靠字重与颜色**，不靠继续放大字号。同一屏内的字号档不超过四档。
+4. **按文种分别处理**。中文有最小字号、行高与字距的独立规定，不照搬拉丁的做法。
+5. **可读优先**。行宽、行高与对比度三件事里，任何一件不达标都按缺陷处理。
+
+## 2. 语义档位
+
+一个档位是**字号、字重、行高、字距、颜色五件事的成套取值**，不是单指字号。下表列全，取用时整行照抄。
+
+**基础六档**（决定文字的大小与轻重）。**取值按业内主流阶梯 12 · 14 · 16 · 20 · 24，相邻档至少相差 2px**：
+
+| 用途 | 字号 | 字重 | 行高 | 字距 | 说明 |
+| --- | --- | --- | --- | --- | --- |
+| 页面标题 | `--font-size-title` 24 | `--font-weight-strong` | `--line-height-title` 1.6 | `--letter-spacing-latin` | 每页一处 |
+| 区块标题 | `--font-size-subtitle` 20 | `--font-weight-strong` | `--line-height-tight` 1.25 | `--letter-spacing-latin` | 卡片与分区的标题 |
+| 正文大 | `--font-size-body-lg` 16 | `--font-weight-normal` | `--line-height-cjk` 1.7 | `--letter-spacing-cjk` 0 | 需要强调的正文 |
+| 正文 | `--font-size-body` 14 | `--font-weight-normal` | `--line-height-cjk` 1.7 | `--letter-spacing-cjk` 0 | 界面默认档，与 Ant 基准字号一致 |
+| 说明与辅助 | `--font-size-caption` 12 | `--font-weight-normal` | `--line-height-normal` 1.5 | `--letter-spacing-cjk` 0 | 补充信息与元数据 |
+| 标签与角标 | `--font-size-label` 12 | `--font-weight-medium` | `--line-height-normal` 1.5 | `--letter-spacing-latin` | 仅西文与数字；与说明同字号，靠字重区分 |
+
+**为什么是这五档**：旧版为 `11 · 12 · 13 · 14 · 15 · 20`，其中 13 / 14 / 15 是三个相邻的 1px 档。
+1px 差不构成可感知层级，选档只能凭感觉。业内没有一家这么排：Ant Design 是 12 / 14 / 16 / 20，
+IBM Design Language 是 12 / 14 / 16 / 20 / 24，GitHub Primer 相邻档至少差 2px。
+本体系 2026-10-06 按主流重排，正文由 13 提到 14（与 Ant 基准一致），同时缓解了小字号汉字看不清的问题。
+完整对比与出处见 `memory-history/2026-10-06/semantic-type-scale-industry-research.md`。
+
+**颜色角色**（换色不换字号，同一档位在不同语义下有不同的文字色）：
+
+| 角色 | 取色 | 用于 | 说明 |
+| --- | --- | --- | --- |
+| 内容 | `--text-primary` | 正文、输入值、标题 | 主角，最重的一档 |
+| 元信息 | `--text-secondary` | 字段标签、表单标签、图注 | 与内容拉开，标签与内容**不能同为内容色** |
+| 弱化 | `--text-tertiary` | 计数、时间、单位、页面级提示 | 尚可阅读，但不抢注意力 |
+| 占位 | `--text-placeholder` | 输入框与选择器的占位文字 | 比弱化更浅，仅在控件内出现 |
+| 禁用 | `--text-disabled` | 控件与文字的禁用态 | 不承载信息，允许低于对比度下限 |
+| 危险 | `--danger-ink` | 校验失败的文字 | 只用于文字，填充用 `--danger` |
+
+**特殊处理**（在档位之上叠加，不单独占一档）：
+
+| 处理 | 做法 | 用于 |
+| --- | --- | --- |
+| 强调 | 同级字号加 `--font-weight-strong`，或换 `--text-primary` | 正文里的关键词 |
+| 链接 | `color: var(--brand-ink)` 加下划线，字号随所在档位 | 正文与说明里的可点击文字 |
+| 行内代码 | `--font-size-label` 加等宽字体与 `--background-field` 底，见第 7 节 | 代码、路径、标识符 |
+| 等宽数字 | 所在档位加 `font-variant-numeric: tabular-nums` | 成列对齐的数字 |
+| 全大写小标签 | `--font-size-label` 加 `--text-tertiary`，仅拉丁 | 分区上方的分类名，含中日韩时不用 |
+
+**表单专用**（控件内部的固定搭配，写在这里免得各处自定）：
+
+| 用途 | 档位 | 文字色 |
+| --- | --- | --- |
+| 字段标签 | 说明与辅助 + `--font-weight-medium` | `--text-secondary` |
+| 输入值 | 正文 | `--text-primary` |
+| 占位文字 | 正文 | `--text-placeholder` |
+| 提示文字 | 说明与辅助 | `--text-tertiary` |
+| 错误文字 | 说明与辅助 + `--font-weight-medium` | `--danger-ink` |
+| 禁用文字 | 所在档位 | `--text-disabled` |
+
+## 3. 行宽
+
+- **一行文字控制在 45 到 90 个西文字符**，中文约 22 到 45 个字。这是当前可读行宽的标准区间，超出时收窄容器或分栏。
+- 行距可以换行宽：行高偏大时行宽可以相应放宽。
+- 短段落可以偏离区间，例如表单标签、按钮文字与表格单元格不受此限。
+- 大字号的行宽要相应收窄，字号越大占用的横向空间越多。
+
+## 4. 文种与字栈
+
+- **字栈按语言自动映射**：`.celadon:lang(…)` 依次映射 hans、hant 与 japanese 三套字栈，界面不手写字体名。
+- **中文最小 12**（`--font-size-minimum-cjk`）。11 档只给西文与数字，中文出现 11 即缺陷，笔画会糊。
+- **中文行高取 `--line-height-cjk` 1.7**，西文可用 `--line-height-normal` 1.5。汉字是方块字，行距不足会连成一片。
+- **字距按文种分开**：拉丁可以微收紧（`--letter-spacing-latin`），中文不加负字距（`--letter-spacing-cjk` 为 0）。
+
+## 5. 数字、代码与路径
+
+- 代码、路径、命令与数值列用等宽字栈（`--font-family-monospace`，中文环境用 `--font-family-monospace-cjk`）。
+- 数值列用等宽以便小数点对齐；正文里的数字不强制等宽。
+- 日期、时间、金额与百分比的**格式化**由 `Intl` 负责，排版只负责字体与对齐。
+
+## 6. 可达性
+
+- **正文对底色的对比度不低于 4.5:1**；低于该值的文字只能做装饰，不承载信息。
+- **正文的有效字号不小于 16px 是网页的通行要求**（USWDS 的排版章节，见第 10.7 节）。桌面应用的窗口密度高于网页，本设计体系把界面正文定为 **14**（与 Ant Design 的基准字号一致），这是一处**有意的偏离**，理由记在此处：桌面端观感以信息密度优先，且应用内可随时缩放。网页版若独立发布，正文改用 16 及以上。此前曾定为 13，2026-10-06 按业内主流阶梯上调到 14。
+- **字重分三档**（`--font-weight-normal` 400 · `--font-weight-medium` 500 · `--font-weight-strong` 600），不用细体也不用中间值：暗色背景下细笔画会消失，中间值则只在可变字体上有意义、跨平台落点不一致。
+- **中日韩文本不得依赖字重区分层级**。微软雅黑只有 Light / Regular / Bold 三档，PingFang 与 Hiragino 才有真实的 500 与 600，Noto Sans CJK 静态版实际只有 400 与 700。也就是说同一个字重值在不同平台上会落到不同档位，字重因此**不能作为跨平台的层级手段**。层级改由**字号与颜色**承担，细则见第 10 节。
+- 放大字号时不减行高；缩到 12 档时行高不再压到 1.5 以下。
+
+## 7. 等宽字体
+
+等宽用于**需要字符对齐**的场合，不用于正文。
+
+- **用途**：代码 · 路径 · 命令 · 数字列 · 需要上下对齐的标识符。正文与界面文字一律用 `--font-family-ui`。
+- **中西文两套栈**：纯西文与数字用 `--font-family-monospace`；等宽文本里**含中日韩字符**时用 `--font-family-monospace-cjk`。
+  该栈按 简中 → 繁中 → 日文 列全（`Noto Sans Mono CJK SC` · `TC` · `JP`）。三者字形不同，缺一个就会出现「简中字形冒充繁中」的错字。
+- **数字对齐**：数值列加 `font-variant-numeric: tabular-nums`，让等宽数字的宽度一致，小数点与位数列才能对齐。
+- **视觉字号偏大**：等宽字体的字符宽度与 x 高度普遍大于同字号的界面字体。正文里嵌代码时降一档，用 `--font-size-label`（11）而不是正文的 13。
+- **行内代码的底色**用 `--background-field`，内距用 `--spacing-4`，圆角用 `--radius-xs`，与本规范的间距刻度一致。
+- **不依赖字体没有的字重**：等宽字体通常只有 regular 与 bold 两档。需要更强时优先换字号或颜色，确需伪粗时显式声明 `font-synthesis: none`，避免浏览器伪造出难看的笔画。
+- **什么时候不用等宽**：正文不用；中文段落不用，等宽汉字只服务于代码里的对齐；**单个数字也不用**，加 `tabular-nums` 让界面字体里的数字等宽即可，只有**成列对齐**的数据才值得换成等宽。
+- **选哪套栈只问一件事**：这段文本**可能含中日韩字符吗**。可能含就用 `--font-family-monospace-cjk`，只含拉丁用 `--font-family-monospace`。若含中日韩却用拉丁等宽栈，汉字会掉到比例字体上，列立刻对不齐。同行 lobehub 的等宽栈末尾接的是 HarmonyOS Sans SC 这类比例字体，存在同样的问题，本设计体系不复刻。
+- **两条与全站规则不同的地方，都与对齐有关**：代码里的中西文之间要 `text-autospace: no-autospace`，否则每行宽度不一致；行高用 `--line-height-normal`（1.5）而不是中日韩的 1.7。正因如此，以中日韩为主的段落不适合用等宽。
+- **已落成设计类**：行内用 `.code`（拉丁）与 `.code--cjk`（可能含中日韩），块级用 `.code-block` 与 `.code-block--cjk`，定义在 `tokens.less` 末尾。块级横向溢出滚动，不撑破容器。
+- **可复制与双向文本**：等宽文本加 `unicode-bidi: isolate`；用户输入的标识符与路径再给 `dir="auto"`，避免与周围的从右到左文本互相干扰。
+
+## 8. 多语言混排
+
+中英文在同一段里混排是默认情形，不当作特殊情况处理。以下规则已落在 `.celadon` 作用域上（见 `tokens.less` 末尾的清单），全站继承。
+
+- **字体回落按字符走**：每套 UI 字体栈都是**拉丁字体在前、中日韩字体在后**，浏览器逐字符挑字体，所以一段里英文用拉丁字体、中文用中文字体，无需拆分元素。
+- **中西文之间的空隙由浏览器给**，不手打空格：`text-autospace: normal` 会在汉字与拉丁字母、数字之间自动留出约四分之一个汉字宽的空隙。手打空格会随字号放大而错位。
+- **全角标点收窄**：`text-spacing-trim: space-first`，避免行首行尾出现过大空白。
+- **断行按语言处理**：中文用 `line-break: strict` 执行禁则（不让标点落在行首），需要短语感知时加 `word-break: auto-phrase`；段落收尾避免孤字用 `text-wrap: pretty`。三者在本机 Chrome 实测均支持。
+- **字距按文种分开**：混排整段**不**加 `letter-spacing`，它会把中文一起拉宽。拉丁微收紧只在纯拉丁文本上做。
+- **标点与引号不混用**：中文用全角「」（U+300C · U+300D）与《》，英文用半角 `"` 与 `'`。同一段里两套并存按缺陷处理。
+- **数字与单位**：一律用半角阿拉伯数字；中文与数字、单位之间**不加空格**，空隙交给 `text-autospace`。数值列加 `tabular-nums`（见第 7 节）。
+- **行高按中文取**：混排段落用 `--line-height-cjk`（1.7）。中文是方块字，行距不足会连成一片。
+
+## 9. 出处
+
+- **USWDS 排版章节**：正文最小有效字号 16px、行宽 45 到 90 字符、行距与行宽的互补关系、短段落可超出区间、大字号行宽收窄。该体系声明通过 WCAG 2.1 AA。取自 <https://designsystem.digital.gov/components/typography/>（2026-10-06 抓取）。
+- **Radix Themes 排版章节**：文字级差把字号、行高与字距作为一组协同使用，标尺为九级，并为标题提供 leading-trim。取自 <https://www.radix-ui.com/themes/docs/theme/typography>（2026-10-06 抓取）。
+- **2026 年的实践文章**（DeveloperUX 的响应式排版最佳实践、remtopx 的响应式排版最佳实践）主张用流体字号与 `clamp()` 适配窗口；本设计体系暂不采用流体字号，理由是桌面应用窗口尺寸变化范围小、字号的整数档更利于对齐。这一条属于**有意取舍**。
+- **Vercel Geist、Stripe 与 GitHub Primer** 采用成套级差属于**本轮未逐条核实的旁证**，仅作参照。
+- 对比度下限 4.5:1 取自 WCAG 2.2 的 1.4.3。中文最小 12 是本设计体系自己的决定，写在 `tokens.less` 的注释里。
+
+## 10. 字体与字重的跨平台方案
+
+这一节把前面几节里关于字体栈、字重与语言匹配的约定收在一处，并给出各平台的实际落点。
+判断依据是**实测**（canvas 像素签名）与**同行做法**，出处见第 10.7 小节。
+
+### 10.1 架构：拉丁在前，按字符逐个回落
+
+界面字体不是「一种语言一套字体」，而是**一套栈里按字符逐个挑字体**。因此每套语言栈结构统一为：
+
+    拉丁字体（system-ui 等）→ 该语言的字体（PingFang SC / Microsoft YaHei / Hiragino Sans / Noto Sans CJK）→ 表情字体 → generic family
+
+拉丁字体排在**最前**，作用是让英文、数字与符号在四种语言里**完全一致**；汉字再交给后面的中文字体。
+这与 Ant Design 的字体栈结构一致。若把中文字体排在前面，同一段英文会因语言不同而变形。
+
+### 10.2 拉丁字体为什么用系统字体，而不是自带一款
+
+lobehub 这类产品自带拉丁字体（Geist），Ant Design、Tailwind 与 GitHub Primer 用系统字体栈。
+本设计体系选**系统字体栈**，三条理由：
+
+1. **桌面应用应当像桌面应用**：`system-ui` 就是各平台的界面字体（macOS 的 SF、Windows 的 Segoe UI、Linux 的 Noto），观感原生；
+2. **网页端不打包字体**：中日韩可变字体完整包十几到几十兆，网页发不出去；拉丁字体虽小，一旦自带仍要处理缓存、许可与首屏；
+3. **离线内网环境**：本项目的运行前提是不依赖外部内容分发网络。
+
+代价是**各平台的拉丁字体不同，同一字号的观感有细微差别**，由整数档字号与行高吸收。这属于**有意取舍**。
+
+### 10.3 各平台的实际落点
+
+| 文种 | macOS | Windows | Linux 与 Android |
+| --- | --- | --- | --- |
+| 拉丁 | SF Pro（可变） | Segoe UI（Win11 为可变版） | Noto Sans / DejaVu |
+| 简中 | PingFang SC | **不指定，交系统默认** | Noto Sans CJK SC |
+| 繁中 | PingFang TC | **不指定，交系统默认** | Noto Sans CJK TC |
+| 日文 | Hiragino Sans | **不指定，交系统默认** | Noto Sans CJK JP |
+| 等宽 | SF Mono / Menlo | Cascadia Mono / Consolas | Noto Sans Mono |
+| 等宽含中日韩 | 上述等宽加中日韩等宽栈 | 同左 | Noto Sans Mono CJK SC / TC / JP |
+
+**Windows 上为什么不能只写 `system-ui`**：**中文版 Windows 上 `system-ui` 解析为 `Microsoft YaHei UI`**（系统界面字体），
+它会把拉丁与汉字**一起**接管，后面的 `"Segoe UI"` 轮不到。栈里显式写 `"Segoe UI"` 才能让拉丁落到 Segoe UI。
+四套栈同时**不列任何 Windows 中文字体**，中文交系统默认：**不额外加载字体就无法在所有机器上换掉 Windows 的中文字体**，
+这是所有不打包字体的项目的共同限制。
+
+**字号阶梯的取值依据**：现行五档 12 · 14 · 16 · 20 · 24，**相邻档至少相差 2px**。
+不设相邻 1px 的档，因为 1px 差不构成可感知层级；正文取 14px，与业内常见的桌面基准字号一致。
+对比与出处见 `memory-history/2026-10-06/semantic-type-scale-industry-research.md`。
+
+将来若决定显式指定 Windows 中文字体，需注意两个命名体系：「Noto Sans SC」（Google Fonts 发行版）与
+「Noto Sans CJK SC」（思源同源系统版）是**不同族名**，要按实际安装情况决定列哪一个，或两者都列。
+无论怎么选，未安装对应字体的 Windows 机器上，中文仍会回落到浏览器默认字体。
+**不额外加载字体就无法在所有机器上换掉 Windows 的中文字体**，这一点没有变。
+
+**`"Segoe UI"` 必须排在 `system-ui` 前面**（历史结论，仍然成立）。同一次实测暴露的成因是
+`system-ui` 在中文版 Windows 上会把拉丁与汉字**一起**接管，后面的 `"Segoe UI"` 轮不到。
+把 Windows 的拉丁字体显式写在最前即可：各平台缺哪个字体就跳过哪个。
+同时移除 `system-ui` 之后，macOS 上实际落到 `-apple-system`，与 `system-ui` **不是同一光学尺寸**
+（SF Pro Text 与 Display），本机实测像素签字随之变化，属真实差异而非测量误差。
+
+**字体栈与字重照业内主流，不再自行调整（用户 2026-10-06 明确「我们也不要自己调了」）**。
+字体栈顺序取 Ant Design 的默认栈：`-apple-system` → `BlinkMacSystemFont` → `"Segoe UI"` → `Roboto` →
+`"Helvetica Neue"` → `Arial` → `"Noto Sans"` → generic。它有两处值得记下：**不含任何中文字体**（交系统默认，
+lobehub 与 lobe-ui 同样不覆盖字体栈、不打包字体文件），且**不含 `system-ui`**，这恰好避开了上文那个坑。
+简中 / 繁中 / 日文栈在 `"Noto Sans"` 之后追加该语言字体，属 Ant 生态里 CJK 项目通行的做法
+（Ant issue #5260：「Latin fonts should come first, we just need add Microsoft YaHei UI」）。
+
+**不列中文字体并不等于不用雅黑**。中文没有被任何字体认领时，浏览器会回落到系统默认中文字体，Windows 上就是雅黑，
+把中文交给 generic family 的结果是一样的。**不额外加载字体，就无法真正换掉 Windows 的中文字体**，
+只能选到该平台里较合适的那一款。要彻底替换，唯一可行做法是桌面壳随包带一份可变中日韩字体（第 10.2 节已说明网页端不可行）。
+
+### 10.4 字重：三档，且中日韩不承担层级
+
+`--font-weight-normal` 400 · `--font-weight-medium` 500 · `--font-weight-strong` 600。
+
+**前提要说准**：结论不是「中日韩只有 400 与 700」。准确的说法是「**不额外加载字体时，跨平台能可靠拿到的只有 400 与 700**」。
+PingFang 与 Noto Sans CJK 都有七档，500 与 600 在它们上面是真实的；微软雅黑只有 Light / Regular / Bold，没有 500 与 600。
+本设计体系选择**不额外加载字体**（理由见 10.2），所以按跨平台交集设计。
+
+| token | macOS（PingFang / Hiragino / SF） | Windows（雅黑加 Segoe UI） | Noto Sans CJK 静态版 |
+| --- | --- | --- | --- |
+| `normal` 400 | 400 | 400 | 400 |
+| `medium` 500 | 500（真实档位） | 400，**与正文同重** | 400 |
+| `strong` 600 | 600（真实 Semibold） | 700（Bold） | 700（Bold） |
+
+依据是 CSS 字体匹配规则：目标字重**不超过 500** 时向下取最近档位，**大于 500** 时向上取。
+因此 `550` 与 `650` 这类中间值在只有 400 与 700 的字体上会直接跳到 Bold。
+
+**三档取值照主流，不用中间值**。400 / 500 / 600 与 lobehub 和 Ant Design 一致（Ant 的 `fontWeightStrong` 为 600，
+lobehub 实际只用 400 / 500 / 600）。此前 `normal` 用过 `430`，那是想让拉丁在可变字体上略重一点的自行调整；
+中间值只在可变字体上有意义，不同平台落点不一致，2026-10-06 按用户「我们也不要自己调了」的要求改回主流的 400。
+
+**禁止合成字重**：作用域设 `font-synthesis: none`。默认为 `weight style small-caps`，即允许浏览器伪造粗体；
+静态字体缺 500 与 600 时伪造出的粗体在中日韩字形上会糊成一团。关掉之后，请求不到的字重老实回落到最近的真实档位。
+
+三条硬规则：
+
+1. **中日韩文本不得依赖字重区分层级**，层级由**字号与颜色**承担；
+2. **`strong` 只用于标题与真正的强调**，不用于正文与标签，因为它在 Windows 上就是 Bold；
+3. **非整百字重只对拉丁文本有意义**（拉丁字体普遍可变），中日韩文本只用整百值。
+
+### 10.5 层级改由字号与颜色承担
+
+同一屏内区分层级的手段按优先级排：**字号 → 颜色 → 字重**。
+
+- **输入值（内容）取 `--text-primary`，字段标签（元信息）取 `--text-secondary`**。标签与内容不能同为 primary，否则在 Windows 上两者同重同色，层级消失。这条与 Material 与 Ant Design 的做法一致：标签是元信息，内容才是主角；
+- 提示与说明文字取 `--text-tertiary`，占位文字取 `--text-placeholder`，三档文字色各司其职；
+- 组标题与子组标题靠**字号**（20 与 15）与颜色区分，`strong` 只作加强；
+- 需要强调一段文字时优先用颜色（`--brand-ink`）或容器（边框、底色），不要依赖 500 与 600 的细微差别。
+
+### 10.6 行宽按文种分开
+
+拉丁正文 45 到 90 字符；**中日韩正文 20 到 40 字**。汉字信息密度高，按拉丁的行宽排版会让一行容纳过多汉字，
+回行时难以定位。日文排版实践给出的区间是 15 到 35 字，本设计体系取 20 到 40 作为中日韩档，
+与拉丁的 45 到 90 并存。
+
+### 10.7 出处
+
+- **Ant Design 字体规范**：字体栈为拉丁系统字体在前、中文字体追加在后；字重「多数情况 400 与 500 就够」，强调克制。取自 <https://ant.design/docs/spec/font/>（2026-10-06 抓取）。
+- **TDesign 字体页**：字重 400 与 600，并明确写出 600 在 Windows 为 Bold、在 macOS 为 Semibold。取自 <http://tdesign.tencent.com/design/fonts>（2026-10-06 抓取）。
+- **W3C CSS 工作组议题 3658**：指出 Windows 缺少 500 档的日文字体，Yu Gothic Medium 在 CSS 里并非 Medium 字重。取自 <https://github.com/w3c/csswg-drafts/issues/3658>。
+- **Chromium 议题 40363269**：Noto Sans CJK 静态版实际只有 400 与 700 两档。取自 <https://issues.chromium.org/40363269>。
+- **Microsoft Typography 字体清单**：微软雅黑为 Light / Regular / Bold。取自 <https://learn.microsoft.com/en-us/typography/font-list/microsoft-yahei>。
+- **lobehub**：自带 Geist 与 Geist Mono，字体栈里列有中日韩字体但排在系统字体之后；仓库内不含字体文件。取自本工作区 `lobehub/DESIGN.md`。
+- **本设计体系的实测**：用 canvas 像素签名量出 PingFang SC 有真实的 500、Hiragino Sans 四档全真、雅黑在只有 400 与 700 时中间值一律跳到 Bold。完整数据见 `memory-history/2026-10-06/font-weight-cross-platform-findings.md`。

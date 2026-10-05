@@ -55,7 +55,29 @@ readme.split('\n').forEach((line, i) => {
   }
 })
 
+/* ---- 排版行：字号与字重的取值也要跟着 tokens 走 ----
+ * 与配色同理：改字重之后叙述段落更新了、表格里手写的数值没跟上。
+ * 2026-10-06 就发生过一次：字重已回到 500，README 仍写 medium 550。
+ * 判据：排版行里反引号包住的数值，必须在 tokens.css 的字号或字重里真的存在。
+ * 行宽（45 到 90 字符、中日韩 20 到 40 字）与行高不是 token 数值，列入白名单。 */
+const TYPO_ALLOW = new Set(['45', '90', '20', '40', '1.5', '1.7', '6', '4.5'])
+const tokenNumbers = new Set(
+  [...tokens.matchAll(/--font-(?:size|weight)-[a-z-]+:\s*([0-9.]+)/g)].map((m) => m[1]),
+)
+const typoLine = readme.split('\n').find((l) => l.includes('排版 Typography')) ?? ''
+const typoStale = []
+for (const m of typoLine.matchAll(/`([0-9.]+)`/g)) {
+  if (TYPO_ALLOW.has(m[1]) || tokenNumbers.has(m[1])) continue
+  typoStale.push(`\`${m[1]}\` 不在 tokens 的字号或字重里`)
+}
+
 console.log(`✓ README colour references · tokens.css holds ${tokenValues.size} value(s)`)
+if (typoStale.length) {
+  console.log(`✗ 排版行引用了 tokens 里没有的数值（共 ${typoStale.length} 处）：`)
+  typoStale.forEach((x) => console.log('   ' + x))
+  process.exit(1)
+}
+console.log(`✓ 排版行的字号与字重都能在 tokens 里找到（token 数值 ${tokenNumbers.size} 个）`)
 if (stale.length) {
   console.log(`✗ ${stale.length} value(s) appear in the README but not in tokens (likely stale):`)
   stale.forEach(x => console.log('   ' + x))

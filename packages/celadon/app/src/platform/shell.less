@@ -1,5 +1,8 @@
 /* 运行时壳：页面底色与整页高度归它管，feature 与组件只管自己那一块。
    颜色一律来自 token —— 组件不需要知道当前是深色还是浅色。 */
+
+/* 字体与文字色都不在这里设：两者都由设计体系在 `.celadon` 上落一次
+   （design/tokens.less 末尾），全站继承。壳只负责高度与底色。 */
 html,
 body {
   block-size: 100%;
@@ -8,8 +11,6 @@ body {
 body {
   margin: 0;
   background: var(--background-app);
-  color: var(--text-primary);
-  font-family: var(--font-family-ui);
 }
 
 #app {

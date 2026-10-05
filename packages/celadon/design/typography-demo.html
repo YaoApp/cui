@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>排版演示 · 浅色与暗色</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+/* 排版演示页：同一套标记在两套主题下并排，用来核对档位 · 颜色角色 · 特殊处理在真实场景里的样子。
+   页面自身的样式全部取 token，不写字面量色值与自造尺寸。 */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--background-app);color:var(--text-primary);padding:var(--spacing-24)}
+h1{font-size:var(--font-size-title);font-weight:var(--font-weight-strong);line-height:var(--line-height-title);margin:0;margin-block-end:var(--spacing-4)}
+.sub{color:var(--text-secondary);font-size:var(--font-size-body);line-height:var(--line-height-cjk);margin:0;margin-block-end:var(--spacing-4)}
+.src{font-size:var(--font-size-caption);color:var(--text-tertiary);margin:0;margin-block-end:var(--spacing-16)}
+.langbar{display:flex;gap:var(--spacing-8);flex-wrap:wrap;margin-block-end:var(--spacing-24)}
+/* 按钮点击目标：正文 12 乘行高 1.5 得 18，加 block 内距 8 两侧与边框 2，总高 36，满足第 6 节的 32。 */
+.langbar button{font:inherit;font-size:var(--font-size-caption);padding-block:var(--spacing-8);padding-inline:var(--spacing-12);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-medium);background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
+.langbar button:focus-visible{outline:var(--focus-ring-width) solid var(--focus-ring-color);outline-offset:var(--focus-ring-offset)}
+.langbar button[aria-pressed="true"]{border-color:var(--brand);color:var(--text-primary)}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--spacing-24);align-items:start}
+/* 主题栏必须自己落底色：data-theme 只切 token 值，不铺背景，不落就是浅底配浅字。 */
+.col{background:var(--background-app);border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--spacing-24)}
+.colhead{font-size:var(--font-size-label);font-weight:var(--font-weight-medium);color:var(--text-tertiary);margin-block-end:var(--spacing-16)}
+/* 场景间距 16 小于主题栏内距 24，阶梯成立（布局规范第 3 节）。 */
+.scene{margin-block-end:var(--spacing-16)}
+.scene:last-child{margin-block-end:0}
+.scene > h2{font-size:var(--font-size-subtitle);font-weight:var(--font-weight-strong);line-height:var(--line-height-tight);margin:0;margin-block-end:var(--spacing-8)}
+/* 卡片内距 24，卡内间距最大 16，阶梯成立（布局规范第 3 节与第 7 节）。 */
+.card{background:var(--background-surface);border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-medium);padding:var(--spacing-24)}
+.lead{font-size:var(--font-size-body);color:var(--text-secondary);margin:0;margin-block-end:var(--spacing-12)}
+.field{display:block;margin-block-end:var(--spacing-12)}
+.field .lbl{display:block;font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);color:var(--text-secondary);margin-block-end:var(--spacing-4)}
+.field input{inline-size:100%;font:inherit;font-size:var(--font-size-body);padding-block:var(--spacing-8);padding-inline:var(--spacing-12);border:var(--border-width) solid var(--border-control);border-radius:var(--radius-medium);background:var(--background-field);color:var(--text-primary)}
+.field input::placeholder{color:var(--text-placeholder)}
+.field input:disabled{color:var(--text-disabled);border-color:var(--border-disabled)}
+.hint{font-size:var(--font-size-caption);color:var(--text-tertiary);margin:0;margin-block-start:var(--spacing-4)}
+.err{font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);color:var(--danger-ink);margin:0;margin-block-start:var(--spacing-4)}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;align-items:baseline;gap:var(--spacing-12);padding-block:var(--spacing-8);border-block-end:var(--border-width) solid var(--border-subtle)}
+.list li:last-child{border-block-end:none}
+.list .name{font-size:var(--font-size-body)}
+.list .meta{margin-inline-start:auto;white-space:nowrap;font-size:var(--font-size-caption);color:var(--text-tertiary)}
+.tag{font-size:var(--font-size-label);font-weight:var(--font-weight-medium);color:var(--text-secondary);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-xs);padding-inline:var(--spacing-4)}
+table{border-collapse:collapse;inline-size:100%}
+th,td{text-align:start;font-size:var(--font-size-caption);padding-block:var(--spacing-8);border-block-end:var(--border-width) solid var(--border-subtle)}
+th{color:var(--text-secondary);font-weight:var(--font-weight-medium)}
+td.num{text-align:end;font-variant-numeric:tabular-nums;color:var(--text-primary)}
+tr:last-child td{border-block-end:none}
+.actions{display:flex;gap:var(--spacing-8);justify-content:flex-end;margin-block-start:var(--spacing-16)}
+.btn{font:inherit;font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);padding-block:var(--spacing-8);padding-inline:var(--spacing-12);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-medium);background:var(--background-surface);color:var(--text-primary);cursor:pointer}
+.btn:focus-visible{outline:var(--focus-ring-width) solid var(--focus-ring-color);outline-offset:var(--focus-ring-offset)}
+.btn--primary{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-ink)}
+.btn:disabled{color:var(--text-disabled);border-color:var(--border-disabled);cursor:default}
+.empty{text-align:center;padding-block:var(--spacing-24)}
+.empty .t{font-size:var(--font-size-body);margin:0;margin-block-end:var(--spacing-4)}
+.empty .d{font-size:var(--font-size-caption);color:var(--text-tertiary);margin:0;margin-block-end:var(--spacing-12)}
+.setrow{display:flex;align-items:baseline;gap:var(--spacing-12);padding-block:var(--spacing-8);border-block-end:var(--border-width) solid var(--border-subtle)}
+.setrow:last-child{border-block-end:none}
+.setrow .v{margin-inline-start:auto;font-size:var(--font-size-caption);color:var(--text-tertiary)}
+p.body{font-size:var(--font-size-body);line-height:var(--line-height-cjk);max-inline-size:45ch;margin:0;margin-block-end:var(--spacing-8)}
+p.body code{font-family:var(--font-family-monospace-cjk);font-size:var(--font-size-label);background:var(--background-field);border-radius:var(--radius-xs);padding-inline:var(--spacing-4)}
+@media (max-width:1100px){.stage{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+
+<h1 data-t="td.title"></h1>
+<p class="sub" data-t="td.subtitle"></p>
+<p class="src">tokens.css · typography.md</p>
+
+<div class="langbar" role="group" aria-label="语言">
+  <button type="button" data-lang="zh-CN" aria-pressed="true">中文（简）</button>
+  <button type="button" data-lang="zh-TW" aria-pressed="false">中文（繁）</button>
+  <button type="button" data-lang="en" aria-pressed="false">English</button>
+  <button type="button" data-lang="ja" aria-pressed="false">日本語</button>
+</div>
+
+<div class="stage">
+  <section class="col celadon" data-theme="light">
+    <div class="colhead" data-t="ui.theme.light"></div>
+    <div class="scenes"></div>
+  </section>
+  <section class="col celadon" data-theme="dark">
+    <div class="colhead" data-t="ui.theme.dark"></div>
+    <div class="scenes"></div>
+  </section>
+</div>
+
+<!-- 场景只写一份，脚本把它克隆进两个主题栏 -->
+<template id="scenes">
+  <section class="scene">
+    <h2 data-t="td.login"></h2>
+    <div class="card">
+      <p class="lead" data-t="ui.entry.loginLead"></p>
+      <label class="field">
+        <span class="lbl" data-t="ui.task.id"></span>
+        <input type="text" value="srv-prod-01" autocomplete="off">
+      </label>
+      <label class="field">
+        <span class="lbl" data-t="ui.layout.searchPh"></span>
+        <input type="text" data-t-placeholder="ui.inbox.searchPlaceholder" placeholder="">
+        <span class="hint" data-t="ui.tool.readFiles"></span>
+      </label>
+      <label class="field">
+        <span class="lbl" data-t="ui.panel.highPriority"></span>
+        <input type="text" value="" disabled>
+        <span class="err" data-t="ui.ask.pending"></span>
+      </label>
+      <div class="actions">
+        <button type="button" class="btn" disabled data-t="td.cancel"></button>
+        <button type="button" class="btn btn--primary" data-t="td.confirm"></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2 data-t="td.search"></h2>
+    <div class="card">
+      <ul class="list">
+        <li><span class="name" data-t="sample.file.contract"></span><span class="tag" data-t="ui.panel.inProgress"></span><span class="meta" data-t="ui.time.today"></span></li>
+        <li><span class="name" data-t="sample.file.requirements"></span><span class="tag" data-t="ui.panel.inProgress"></span><span class="meta" data-t="ui.time.yesterday"></span></li>
+        <li><span class="name" data-t="sample.panel.taskTitle"></span><span class="tag" data-t="ui.status.done"></span><span class="meta" data-t="ui.time.earlier"></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2 data-t="td.table"></h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th data-t="ui.task.id"></th><th data-t="ui.panel.remainingDays"></th><th data-t="ui.time.today"></th></tr>
+        </thead>
+        <tbody>
+          <tr><td>srv-prod-01</td><td class="num">1,284</td><td data-t="ui.time.today"></td></tr>
+          <tr><td>srv-prod-02</td><td class="num">3,750</td><td data-t="ui.time.yesterday"></td></tr>
+          <tr><td>srv-stage-01</td><td class="num">842</td><td data-t="ui.time.earlier"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2 data-t="td.dialog"></h2>
+    <div class="card">
+      <p class="body" data-t="ui.welcome.welcomeSubtitle"></p>
+      <div class="actions">
+        <button type="button" class="btn" data-t="td.cancel"></button>
+        <button type="button" class="btn btn--primary" data-t="td.confirm"></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2 data-t="td.empty"></h2>
+    <div class="card">
+      <div class="empty">
+        <p class="t" data-t="ui.layout.emptyTitle"></p>
+        <p class="d" data-t="ui.welcome.welcomeSubtitle"></p>
+        <button type="button" class="btn" data-t="td.retry"></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2 data-t="td.settings"></h2>
+    <div class="card">
+      <div class="setrow"><span data-t="ui.layout.settings"></span><span class="v" data-t="ui.theme.system"></span></div>
+      <div class="setrow"><span data-t="ui.panel.highPriority"></span><span class="v" data-t="ui.theme.dark"></span></div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2 data-t="ty.s4Path"></h2>
+    <div class="card">
+      <p class="body" data-t="ty.sampleBodyText"></p>
+      <p class="body"><code>~/Library/Application Support/Celadon/config.json</code></p>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2 data-t="td.longText"></h2>
+    <div class="card">
+      <p class="body" data-t="td.longTextBody"></p>
+      <p class="body" data-t="td.longTextBody"></p>
+    </div>
+  </section>
+</template>
+
+<script src="./i18n/bundle.js"></script>
+<script>
+/* 文案一律经 data-t 从语言包取，节点本身留空，避免「内联原文」与语言包两份来源各写各的。
+   data-t-placeholder 用于控件的 placeholder，其余走 textContent。 */
+var BUNDLE = window.CELADON_I18N || {};
+var CURRENT = 'zh-CN';
+function lookup(lang, key){ var d = BUNDLE[lang]; if (!d) return null;
+  return key.split('.').reduce(function(o, k){ return o == null ? null : o[k]; }, d); }
+function tr(key){ var v = lookup(CURRENT, key); if (v == null) v = lookup('zh-CN', key); return v == null ? key : v; }
+
+/* 场景克隆进两个主题栏 */
+var tpl = document.getElementById('scenes');
+document.querySelectorAll('.scenes').forEach(function (host) { host.appendChild(tpl.content.cloneNode(true)); });
+
+function applyI18n(){
+  document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = tr(el.dataset.t); });
+  document.querySelectorAll('[data-t-placeholder]').forEach(function (el) { el.placeholder = tr(el.dataset.tPlaceholder); });
+}
+applyI18n();
+
+document.querySelectorAll('.langbar button').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    CURRENT = btn.dataset.lang;
+    document.documentElement.lang = CURRENT === 'en' ? 'en-US' : CURRENT;
+    document.querySelectorAll('.langbar button').forEach(function (other) {
+      other.setAttribute('aria-pressed', String(other === btn));
+    });
+    applyI18n();
+  });
+});
+</script>
+</body>
+</html>

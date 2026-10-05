@@ -37,7 +37,10 @@
 }
 
 .bridge__cell code {
-  font-family: var(--font-family-monospace);
+  /* 单元格里是用户数据（凭据键、值），中文与日文下必然含中日韩字符。
+     用拉丁等宽栈时汉字会掉到比例字体上，列立刻对不齐，因此走中日韩等宽栈
+     （依据见 design/typography.md 第 7 节与第 10 节）。 */
+  font-family: var(--font-family-monospace-cjk);
   font-size: var(--font-size-label);
   text-align: center;
   line-height: var(--line-height-tight);

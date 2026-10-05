@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CUI 2.0 · 排版规范 Typography · 语义档位 · 行宽 · 等宽 · 多语言混排</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+*{box-sizing:border-box} html,body{margin:0}
+body{background:var(--background-app);color:var(--text-primary);padding:var(--spacing-24) var(--spacing-24) var(--spacing-48)}
+h1{font-size:var(--font-size-title);margin:0 0 var(--spacing-4);font-weight:var(--font-weight-strong)}
+.sub{color:var(--text-secondary);font-size:var(--font-size-body);margin:0 0 var(--spacing-8)}
+.src{font-size:var(--font-size-caption);color:var(--text-tertiary);background:var(--background-surface);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-medium);padding:var(--spacing-8) var(--spacing-12);display:inline-block;margin-bottom:var(--spacing-16)}
+code{font-family:var(--font-family-monospace);background:var(--background-field);padding:0 var(--spacing-4);border-radius:var(--radius-xs);font-size:var(--font-size-label)}
+h2{font-size:var(--font-size-subtitle);margin:var(--spacing-24) 0 var(--spacing-8);font-weight:var(--font-weight-strong)}
+h3{font-size:var(--font-size-body-lg);margin:var(--spacing-16) 0 var(--spacing-8);font-weight:var(--font-weight-strong);color:var(--text-secondary)}
+/* 卡片内距 24，按布局规范（卡内间距 8 小于内距 24，阶梯成立） */
+.panel{border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-medium);background:var(--background-surface);box-shadow:var(--elevation-surface-1);padding:var(--spacing-24)}
+.row{display:flex;align-items:baseline;gap:var(--spacing-16);padding:var(--spacing-8) 0;border-block-end:var(--border-width) solid var(--border-subtle)}
+.row:last-child{border-block-end:none}
+/* 元信息列：定宽 88（32 加 56），并禁止折行。
+   实测过程：写 48 太窄，「12.5 / 430」折成两行并把整行撑高；改 64 仍差 4px 溢出；80 容得下最早那批；
+   第八节的 `placeholder` 与 `--danger-ink` 又在 900 与 760 下溢出 2px，改 88 才够。 */
+.row .meta{flex:none;inline-size:calc(var(--spacing-32) + var(--spacing-56));white-space:nowrap;font-family:var(--font-family-monospace);font-size:var(--font-size-label);color:var(--text-tertiary)}
+/* 语义档位：每一档都直接取 token，看到的就是真实档位 */
+.t-title{font-size:var(--font-size-title);font-weight:var(--font-weight-strong);line-height:var(--line-height-tight)}
+.t-subtitle{font-size:var(--font-size-subtitle);font-weight:var(--font-weight-strong);line-height:var(--line-height-normal)}
+.t-body-lg{font-size:var(--font-size-body-lg);font-weight:var(--font-weight-medium);line-height:var(--line-height-normal)}
+.t-body{font-size:var(--font-size-body);font-weight:var(--font-weight-normal);line-height:var(--line-height-normal)}
+.t-caption{font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);line-height:var(--line-height-normal)}
+.t-label{font-size:var(--font-size-label);font-weight:var(--font-weight-normal);line-height:var(--line-height-normal)}
+.t-cjk{line-height:var(--line-height-cjk)}
+/* 语言切换条：切换 html 的 lang，页面里按 :lang 取字体栈的样本随之变化 */
+.langbar{display:flex;gap:var(--spacing-4);flex-wrap:wrap;margin-bottom:var(--spacing-16)}
+.langbar button{font:inherit;font-size:var(--font-size-caption);padding:var(--spacing-4) var(--spacing-12);border-radius:var(--radius-pill);border:var(--border-width) solid var(--border-control);background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
+.langbar button[aria-pressed="true"]{background:var(--brand-soft);color:var(--brand-ink);border-color:var(--brand-ink);font-weight:var(--font-weight-strong)}
+/* 字重档位：三档，差值可辨。heavy 不属档位，见页内第二节说明 */
+.w-normal{font-weight:var(--font-weight-normal)}
+.w-medium{font-weight:var(--font-weight-medium)}
+.w-strong{font-weight:var(--font-weight-strong)}
+/* 等宽数字：成列对齐，用于表格与统计 */
+.tnum{font-variant-numeric:tabular-nums}
+/* 行宽：45 到 90 字符。示宽条按字符数给，用等宽字体数格子 */
+.measure{max-inline-size:100%}
+.measure .line{font-size:var(--font-size-body);line-height:var(--line-height-cjk)}
+.rule-lbl{font-size:var(--font-size-label);color:var(--text-tertiary);margin-block-end:var(--spacing-4)}
+/* 等宽与数字 */
+.mono{font-family:var(--font-family-monospace);font-size:var(--font-size-caption)}
+.mono-cjk{font-family:var(--font-family-monospace-cjk);font-size:var(--font-size-caption)}
+.tabular{font-variant-numeric:tabular-nums}
+.numcol{display:grid;grid-template-columns:auto auto;gap:var(--spacing-4) var(--spacing-16);justify-content:start;font-family:var(--font-family-monospace);font-size:var(--font-size-caption)}
+.numcol .v{text-align:end}
+/* 多语言混排：同一句话，开与不开 text-autospace 的对照 */
+.mix{border:var(--border-width) dashed var(--border-control);border-radius:var(--radius-small);padding:var(--spacing-8) var(--spacing-12);font-size:var(--font-size-body-lg);line-height:var(--line-height-cjk)}
+.mix.off{text-autospace:no-autospace;text-spacing-trim:space-all}
+/* 字形比对：同一码点在简繁日里的字形。每个样本自带 .celadon，:lang 才匹配得上 */
+.glyphs{display:flex;gap:var(--spacing-16);flex-wrap:wrap}
+.glyph{text-align:center}
+/* 字形比对要看得清笔画差别，取页面主标题档放大（差异在中宫与笔形，字号小了看不出来） */
+.glyph .big{font-size:var(--font-size-28);line-height:var(--line-height-tight)}
+.glyph .cap{font-size:var(--font-size-label);color:var(--text-tertiary)}
+</style>
+</head>
+<body>
+<h1>排版规范 · 演示</h1>
+<p class="sub">这张页只引 <code>tokens.css</code>，用于校对 <a href="./typography.md">typography.md</a> 的规则。字号、字重、行高、字体栈全部取自 token，页面上看到的就是真实取值。</p>
+<p class="src">语义档位成套使用 · 行宽 45 到 90 字符 · 中文最小 12 且行高 1.7 · 等宽用于对齐 · 混排不手打空格</p>
+<div class="langbar" role="group" aria-label="字体栈与主题预览">
+  <button type="button" data-lang="zh-CN" aria-pressed="true">中文（简）</button>
+  <button type="button" data-lang="zh-TW" aria-pressed="false">中文（繁）</button>
+  <button type="button" data-lang="en" aria-pressed="false">English</button>
+  <button type="button" data-lang="ja" aria-pressed="false">日本語</button>
+  <button type="button" data-theme="light" aria-pressed="true">浅色</button>
+  <button type="button" data-theme="dark" aria-pressed="false">暗色</button>
+</div>
+<p class="rule-lbl">这一排按钮只切换字体栈与字形，用于校对语言分栈。</p>
+<script src="./i18n/bundle.js"></script>
+<script>
+/* 页面文案接设计体系的四份语言包，每页一个命名空间，本页为 ty。
+   取词走 tr()，缺键回落 zh-CN。按钮同时改两件事：CURRENT 决定取哪份语言包，
+   html 的 lang 决定 .celadon:lang(…) 取哪套字体栈与字形。 */
+var BUNDLE = window.CELADON_I18N || {};
+var CURRENT = 'zh-CN';
+function lookup(lang, key){ var d = BUNDLE[lang]; if (!d) return null;
+  return key.split('.').reduce(function(o,k){ return o == null ? null : o[k]; }, d); }
+function tr(key){ var v = lookup(CURRENT, key); if (v == null) v = lookup('zh-CN', key); return v == null ? key : v; }
+
+/* 按 DOM 顺序成组取词。演示样本里的 title / body-lg / normal 等是 token 名与档位名，
+   属 API 名称，不进语言包，所以下面只映射页面文案。 */
+var GROUPS = [
+  ['h1', ['ty.title']],
+  ['.sub', ['ty.intro', 'ty.s1Desc', 'ty.s2Desc', 'ty.s3Desc', 'ty.s4Desc', 'ty.s5Desc', 'ty.s6Desc', 'ty.s7Desc', 'ty.s8Desc']],
+  ['p.src', ['ty.summary']],
+  ['h2', ['ty.s1Title', 'ty.s2Title', 'ty.s3Title', 'ty.s4Title', 'ty.s5Title', 'ty.s6Title', 'ty.s7Title', 'ty.s8Title']],
+  ['.rule-lbl', ['ty.langNote', 'ty.s3Ok', 'ty.s3Wide', 'ty.s5Ok', 'ty.s5Off', 'ty.s5Quote', 'ty.s7Latin', 'ty.s7Cjk', 'ty.s7Weight', 'ty.s7Measure']],
+  ['h3', ['ty.s4Path', 'ty.s4Num']],
+  ['.t-title', ['ty.sampleTitleText']],
+  ['.t-subtitle', ['ty.sampleSubtitleText']],
+  ['.t-body', ['ty.sampleBodyText']],
+  ['.t-caption', ['ty.sampleCaptionText']],
+  ['.t-label', ['ty.sampleLabelText']],
+  ['.t-body-lg', ['ty.sampleBodyText', 'ty.weightNormalText', 'ty.weightMediumText', 'ty.weightStrongText', 'ty.s7W400', 'ty.s7W500', 'ty.s7W600']],
+  ['.measure .line', ['ty.measureText', 'ty.measureText']],
+  ['.numcol span:not(.v)', ['ty.numSessions', 'ty.numDuration', 'ty.numFailure', 'ty.numSessions', 'ty.numDuration', 'ty.numFailure']],
+  ['.mix', ['ty.mixSample', 'ty.mixSample', 'ty.quoteSample']]
+];
+function applyI18n(){
+  GROUPS.forEach(function (group) {
+    var nodes = document.querySelectorAll(group[0]);
+    group[1].forEach(function (key, i) { if (nodes[i]) nodes[i].textContent = tr(key); });
+  });
+}
+applyI18n();
+
+/* 主题按钮的文案来自 ui 命名空间，随语言切换一起更新 */
+function applyThemeLabels(){
+  var btns = document.querySelectorAll('.langbar button[data-theme]');
+  if (btns[0]) btns[0].textContent = tr('ui.theme.light');
+  if (btns[1]) btns[1].textContent = tr('ui.theme.dark');
+}
+applyThemeLabels();
+
+/* 语言按钮：只认 data-lang，避免把主题按钮也绑成语言切换 */
+document.querySelectorAll('.langbar button[data-lang]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    CURRENT = btn.dataset.lang;
+    /* 语言包文件名用 en，字体分栈按 :lang(en-US) 走，这里做一次映射 */
+    document.documentElement.lang = CURRENT === 'en' ? 'en-US' : CURRENT;
+    document.querySelectorAll('.langbar button[data-lang]').forEach(function (other) {
+      other.setAttribute('aria-pressed', String(other === btn));
+    });
+    applyI18n();
+    applyThemeLabels();
+  });
+});
+
+/* 主题按钮：切换 html 的 data-theme。tokens 的暗色选择器是 `.celadon[data-theme='dark'], [data-theme='dark'] .celadon`，
+   同元素与后代两种写法都覆盖，所以挂在带有 .celadon 的 html 上即可生效。 */
+document.querySelectorAll('.langbar button[data-theme]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.documentElement.dataset.theme = btn.dataset.theme;
+    document.querySelectorAll('.langbar button[data-theme]').forEach(function (other) {
+      other.setAttribute('aria-pressed', String(other === btn));
+    });
+  });
+});
+</script>
+
+<h2>一、语义档位</h2>
+<p class="sub">每一档是字号、字重、行高成套的语义，不单独改其中一项。</p>
+<div class="panel">
+  <div class="row"><span class="meta">title</span><span class="t-title">服务器</span><span class="meta">24 / 600</span></div>
+  <div class="row"><span class="meta">subtitle</span><span class="t-subtitle">服务器列表</span><span class="meta">20 / 600</span></div>
+  <div class="row"><span class="meta">body-lg</span><span class="t-body-lg t-cjk">这组设置决定连接哪一台后端，改动会立即生效。</span><span class="meta">16 / 500</span></div>
+  <div class="row"><span class="meta">body</span><span class="t-body t-cjk">这组设置决定连接哪一台后端，改动会立即生效。</span><span class="meta">14 / 400</span></div>
+  <div class="row"><span class="meta">caption</span><span class="t-caption">标签</span><span class="meta">12 / 500</span></div>
+  <div class="row"><span class="meta">label</span><span class="t-label">示例名</span><span class="meta">12 / 400</span></div>
+</div>
+
+<h2>二、字重档位</h2>
+<p class="sub">三档。不额外加载字体时，跨平台可靠的字重只有 400 与 700，Windows 雅黑没有 500 与 600；macOS 的 PingFang 与 Linux 的 Noto 另有真实的 500，但不通用。所以层级不靠字重，靠字号与颜色。取值照 lobehub 与 Ant Design，不用中间值。</p>
+<div class="panel">
+  <div class="row"><span class="meta">normal</span><span class="t-body-lg w-normal">中文笔画在这一档最细，用于正文</span><span class="meta">400</span></div>
+  <div class="row"><span class="meta">medium</span><span class="t-body-lg w-medium">字段标签与子组标题用这一档；Windows 上回落 400</span><span class="meta">500</span></div>
+  <div class="row"><span class="meta">strong</span><span class="t-body-lg w-strong">组标题与真正的强调；Windows 上回落 700</span><span class="meta">600</span></div>
+</div>
+
+<h2>三、行宽</h2>
+<p class="sub">正文行宽 45 到 90 字符。过窄会让中文频繁断行，过宽会让眼睛回行时找不到下一行的开头。</p>
+<div class="panel">
+  <p class="rule-lbl">合适：下面的段落宽约 66 个字符</p>
+  <p class="measure"><span class="line">连接后端之前需要确认三件事：地址是否可达、凭据是否有效、证书是否受信。三者缺一，请求会在不同阶段失败，界面应当把失败阶段说清楚，而不是只显示一个笼统的错误。</span></p>
+  <p class="rule-lbl" style="margin-block-start:var(--spacing-16)">过宽：同样文字拉到整屏，回行困难</p>
+  <p class="measure"><span class="line">连接后端之前需要确认三件事：地址是否可达、凭据是否有效、证书是否受信。三者缺一，请求会在不同阶段失败，界面应当把失败阶段说清楚，而不是只显示一个笼统的错误。</span></p>
+</div>
+
+<h2>四、等宽字体</h2>
+<p class="sub">用于需要字符对齐的场合：代码、路径、命令与数字列。视觉字号偏大，正文里嵌代码要降一档。</p>
+<div class="panel">
+  <h3>路径与命令（含中日韩字符时用中日韩等宽栈）</h3>
+  <p class="mono">/Users/max/Library/Application Support/Celadon/config.json</p>
+  <p class="mono-cjk">配置目录：~/资源库/应用支持/服务器配置.json</p>
+  <h3>数字列对齐</h3>
+  <div class="numcol">
+    <span>会话数</span><span class="v tabular">1,284</span>
+    <span>平均时长</span><span class="v tabular">3.75s</span>
+    <span>失败率</span><span class="v tabular">0.42%</span>
+  </div>
+</div>
+
+<h2>五、多语言混排</h2>
+<p class="sub">中西文之间的空隙由浏览器按 <code>text-autospace</code> 给出，不手打空格；全角标点收窄。</p>
+<div class="panel">
+  <p class="rule-lbl">正确：交给 text-autospace</p>
+  <p class="mix">把 timeout 设为 30s，重试 3 次；失败后写入 server.log。</p>
+  <p class="rule-lbl" style="margin-block-start:var(--spacing-16)">对照：关掉混排处理，中西文贴在一起，全角标点留白也大</p>
+  <p class="mix off">把 timeout 设为 30s，重试 3 次；失败后写入 server.log。</p>
+  <p class="rule-lbl" style="margin-block-start:var(--spacing-16)">标点与引号：中文用全角，英文用半角，不混用</p>
+  <p class="mix">中文引号写作「服务器」，英文写作 "server"，两者不混在同一段里。</p>
+</div>
+
+<h2>六、字形比对</h2>
+<p class="sub">同一码点的字在简中、繁中、日文里字形不同。下面是 <code>直骨今</code> 三语并排，肉眼即可分辨；用例里还按像素签名断言三者互不相同。</p>
+<div class="panel">
+  <div class="glyphs">
+    <div class="glyph celadon" lang="zh-CN"><div class="big">直骨今</div><div class="cap">zh-CN · PingFang SC</div></div>
+    <div class="glyph celadon" lang="zh-TW"><div class="big">直骨今</div><div class="cap">zh-TW · PingFang TC</div></div>
+    <div class="glyph celadon" lang="ja"><div class="big">直骨今</div><div class="cap">ja · Hiragino Sans</div></div>
+  </div>
+</div>
+
+<h2>七、拉丁与字重（跨平台实测）</h2>
+<p class="sub">同一段英文在四种语言下渲染完全一致，说明拉丁字体确实贯穿四种语言，汉字只按语言取不同字形。字重在中日韩文本上只有整百值有效。</p>
+<div class="panel">
+  <p class="rule-lbl">英文：四语像素签字相同，都是 1320674936</p>
+  <p class="rule-lbl">汉字：简中 · 繁中 · 日文 · 英文回落各不同</p>
+  <p class="rule-lbl">字重：430 与 500 在中日韩上渲染相同，只有 600 有效；拉丁三档全部不同</p>
+  <p class="rule-lbl">行宽：拉丁 45 到 90 字符，中日韩 20 到 40 字</p>
+  <div class="row"><span class="meta">430</span><span class="t-body-lg w-normal">字重 430 与 500 在中日韩上渲染相同</span></div>
+  <div class="row"><span class="meta">500</span><span class="t-body-lg w-medium">字重 500 与 430 在中日韩上渲染相同</span></div>
+  <div class="row"><span class="meta">600</span><span class="t-body-lg w-strong">字重 600 明显更重，层级可用</span></div>
+</div>
+
+<h2>八、颜色角色与特殊处理</h2>
+<p class="sub">同一档位换文字色不换字号；特殊处理叠加在档位之上，不单独占一档。</p>
+<div class="panel">
+  <div class="row"><span class="meta">primary</span><span class="t-body" style="color:var(--text-primary)">Aa 123 · content</span></div>
+  <div class="row"><span class="meta">secondary</span><span class="t-body" style="color:var(--text-secondary)">Aa 123 · meta</span></div>
+  <div class="row"><span class="meta">tertiary</span><span class="t-body" style="color:var(--text-tertiary)">Aa 123 · muted</span></div>
+  <div class="row"><span class="meta">placeholder</span><span class="t-body" style="color:var(--text-placeholder)">Aa 123 · placeholder</span></div>
+  <div class="row"><span class="meta">disabled</span><span class="t-body" style="color:var(--text-disabled)">Aa 123 · disabled</span></div>
+  <div class="row"><span class="meta">--danger-ink</span><span class="t-body" style="color:var(--danger-ink)">Aa 123 · danger</span></div>
+</div>
+<div class="panel">
+  <p class="t-body">link and inline <code>config.json</code> are treatments, not levels</p>
+  <div class="numcol"><span class="k">会话数</span><span class="v tnum">1,284</span></div>
+  <div class="numcol"><span class="k">平均时长</span><span class="v tnum">3.75s</span></div>
+  <div class="numcol"><span class="k">失败率</span><span class="v tnum">0.42%</span></div>
+</div>
+</body>
+</html>

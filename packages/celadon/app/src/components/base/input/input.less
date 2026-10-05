@@ -1,0 +1,111 @@
+/* 字段的容器与槽位。本体用的是设计类 `.input`（见 design/tokens.less，含六态），
+   所以这里只写设计类没有的部分：容器排布、左右槽位与提示文字。
+   颜色、间距、字号与圆角一律取 token，不出现字面量。 */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  inline-size: 100%;
+
+  &__label {
+    /* 标签是字段的名称，属元信息，取次要文字色；输入值是内容，取主文字色（见 design 的 .input 类）。
+       两者靠**颜色**拉开层级，不靠字重：中日韩字体在 Windows 上只有 400 与 700 两个真实档位，
+       medium 会回落成 400，靠它区分在 Windows 上等于没区分（依据见 design/typography.md 第 10 节）。 */
+    color: var(--text-secondary);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+  }
+
+  &__box {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    /* 本体占满字段的弹性行：否则 <input> 用固有宽度，右侧槽位会落到字段框的右边界，
+       看起来像跑到输入框外面（浏览器用例断言过槽位必须落在本体之内）。 */
+    > .input {
+      flex: 1;
+      min-inline-size: 0;
+    }
+  }
+
+  /* 两侧槽位：按本体的**边框内**居中，而不是按字段框（框含 1px 边框，按框居中会差 1px）。
+     左右内距都取 8，槽位里的按钮另有 4 的内距，因此图标视觉上落在一致的位置。 */
+  &__icon,
+  &__trail {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    block-size: calc(100% - var(--border-width) * 2);
+    inset-block: var(--border-width);
+    color: var(--text-tertiary);
+  }
+
+  &__icon {
+    pointer-events: none;
+    inset-inline-start: var(--spacing-8);
+  }
+
+  &__trail {
+    inset-inline-end: var(--spacing-4);
+    /* 可点区域不小于控件高度（layout.md 第 6 节）：槽位高 = 本体边框内高，宽取 32 */
+    inline-size: var(--spacing-32);
+    justify-content: center;
+
+    /* 槽位里放的是调用方传进来的按钮（例如密码的可见性切换） */
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      inline-size: 100%;
+      block-size: 100%;
+      padding: 0;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      background: none;
+      border: 0;
+      border-radius: var(--radius-xs);
+
+      &:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+    }
+  }
+
+  /* 消息位：只占消息自身的高度，不预留下空行。
+     预留一行确实能让同一行的字段等高，但卡片最后一行的每个字段下面都会多出一段空行，
+     下内距看着就成了内距加一行（用户 2026-10-06 指出）。参差改由排布解决：
+     带消息与不带消息的样例分到不同子组，同一行里不混。 */
+  &__message {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  /* 提示与错误：上游 field 的部件自带外边距，会得到两种不同的间距（实测 17 与 5），
+     这里统一清零，间距只由容器的 gap 决定（布局规范：一个方向只有一个负责人）。 */
+  &__hint,
+  .hint-error {
+    margin: 0;
+    line-height: var(--line-height-normal);
+  }
+
+  /* 提示与错误的字号取设计自身的 12.5（`--font-size-body`）：设计类 `.hint-error` 带的是这个值，
+     若提示用 12，两条消息的行盒会差 1px，看起来就是"间距不一致"。 */
+  &__hint {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-normal);
+  }
+
+  &__box:has(.field__icon) .input {
+    padding-inline-start: var(--spacing-32);
+  }
+
+  &__box:has(.field__trail) .input {
+    padding-inline-end: var(--spacing-32);
+  }
+}

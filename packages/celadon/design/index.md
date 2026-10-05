@@ -12,6 +12,10 @@ CUI 2.0 设计资产 · 设计体系代号 **Celadon** · 版本 **v2.0.0**。
 | [foundations.html](foundations.html) | 规范 Foundations | [foundations.md](foundations.md) |
 | [css-logical.html](css-logical.html) | CSS 约定 Conventions | [css-logical.md](css-logical.md) |
 | [data-format.html](data-format.html) | 数据格式 Data format | [data-format.md](data-format.md) |
+| [typography.html](typography.html) | 排版规范 Typography：语义档位 · 颜色角色 · 特殊处理 · 行宽 · 文种字栈 · 等宽 · 混排 | [typography.md](typography.md) |
+| [layout.html](layout.html) | 布局规范 Layout：间距刻度 · 内边距与外边距 · 对齐 · 栏与容器 · 常见缺陷（实测） | [layout.md](layout.md) |
+| [typography-demo.html](typography-demo.html) | 排版演示 Typography demo：同页浅暗双栏 · 八个真实场景 · 四语可切 | **无**（演示页不配文档） |
+| [typography-reading.html](typography-reading.html) | 排版样张 Typography reading：博客正文原样 · 中英混排 · 列表 · 六列表格 · 链接 | **无**（样张不配文档） |
 | [icons.html](icons.html) | 图标与品牌 Icons | [icons.md](icons.md) |
 | [mock.html](mock.html) | 界面稿 Mock | **无**（界面稿不配文档） |
 | [README.md](README.md) | 设计说明 README | — |
@@ -31,7 +35,10 @@ CUI 2.0 设计资产 · 设计体系代号 **Celadon** · 版本 **v2.0.0**。
 
 | 文件 | 说明 |
 | --- | --- |
-| `tokens.less` / `tokens.css` | 唯一来源 / 产物（624 行，**不要手改**） |
+| `tokens.less` / `tokens.css` | 唯一来源 / 产物（799 行，**不要手改**） |
+| `typography.md` · `typography.html` | 排版规范与演示页：语义档位 · 颜色角色 · 特殊处理 · 行宽 · 文种与字栈 · 等宽 · 多语言混排 |
+| `layout.md` · `layout.html` | 布局规范与演示页：间距刻度 · 内边距与外边距 · 对齐 · 栏与容器 · 常见缺陷 |
+| `typography-demo.html` | 排版演示页：同页浅暗双栏 · 八个真实场景 · 四语可切；文案全走 `data-t` |
 | `logo-mark-celadon.svg` | Logo 标记 —— **浅暗同版（同一个文件）** |
 | `icons/icon-16…1024.png` | App 图标 **七档** · 方形画布 · **图形内缩 78%** |
 | `reference/logo-previous.svg` | 上一版旧蓝色原版 —— **只作比对基准，不在这里展示** |

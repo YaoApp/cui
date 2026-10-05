@@ -1,5 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router'
 import { HomePage } from '@/features/home'
+import { BasePage } from '@/features/scaffold/base'
 import { BridgePage } from '@/features/scaffold/bridge'
 import { OverviewPage } from '@/features/scaffold/overview'
 import { RequestsPage } from '@/features/scaffold/requests'
@@ -16,6 +17,8 @@ const pageRoutes: RouteObject[] = [
   { path: 'scaffold/routing/:worldId', element: <RoutingPage /> },
   { path: 'scaffold/bridge', element: <BridgePage /> },
   { path: 'scaffold/requests', element: <RequestsPage /> },
+  /* 基础件清单页：人类验收与浏览器断言共用（plan/06-login-components.md） */
+  { path: 'scaffold/base', element: <BasePage /> },
 ]
 
 export const routes: RouteObject[] = [
