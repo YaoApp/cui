@@ -11,8 +11,14 @@ export type LogoutResult = {
 
 /* ===== 入口（登录 / 注册）===== */
 
-/** 登录的最终状态（1.0 `LoginStatus` 的值；用字符串联合）。 */
-export type LoginStatus = 'ok' | 'mfa_required' | 'team_selection_required' | 'invite_verification_required'
+/** 登录的最终状态。**以服务端为准**（`yao/openapi/user/types.go:15-23` 的 `LoginStatus` 五个常量）：
+ * `ok` · `mfa_required` · `team_selection_required` · `invite_required`（注册响应）· `invite_verification_required`（登录响应）。 */
+export type LoginStatus =
+  | 'ok'
+  | 'mfa_required'
+  | 'team_selection_required'
+  | 'invite_required'
+  | 'invite_verification_required'
 
 /** 判定结果：走登录还是注册（1.0 `EntryVerificationStatus`）。 */
 export type EntryVerificationStatus = 'login' | 'register'

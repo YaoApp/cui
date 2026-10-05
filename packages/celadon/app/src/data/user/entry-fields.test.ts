@@ -12,11 +12,13 @@
 import { describe, expect, it } from 'vitest'
 import type {
   CaptchaResponse,
+  EntrySendOTPResponse,
   EntryAuthResponse,
   DeviceFlowStart,
   EntryConfig,
   EntryVerifyResponse,
   Jwks,
+  LoginStatus,
   OAuthAuthorizationUrl,
 } from './types'
 
@@ -65,6 +67,7 @@ const entryVerify: EntryVerifyResponse = {
 const captcha: CaptchaResponse = {
   captcha_id: 'gUMTNEL3X2RWv6KS8OSC',
   captcha_image: 'data:image/png;base64,iVBORw0KGgo=',
+  expires_in: 300,
 }
 
 /* 真实响应：`POST /v1/user/entry/register`（2026-10-05 实测，十条字段一个不少） */
@@ -131,6 +134,7 @@ describe('the entry fields the real service sends', () => {
 
   it('keeps every required field of the captcha, the jwks, the authorize url and the device start', () => {
     expect(Object.keys(captcha)).toEqual(expect.arrayContaining(REQUIRED.captcha))
+    expect(typeof captcha.expires_in).toBe('number')
     expect(Object.keys(jwks)).toEqual(expect.arrayContaining(REQUIRED.jwks))
     expect(Object.keys(jwks.keys[0])).toEqual(expect.arrayContaining(['kty', 'use', 'alg', 'kid', 'n', 'e']))
     expect(Object.keys(oauthAuthorize)).toEqual(expect.arrayContaining(REQUIRED.oauthAuthorize))
@@ -148,6 +152,28 @@ describe('the entry fields the real service sends', () => {
     )
     expect(typeof entryAuth.expires_in).toBe('number')
     expect(typeof entryAuth.mfa_enabled).toBe('boolean')
+  })
+
+  /* 下面这条**不是活体实测**：本机 dev 配置 `verification_code_required=false`，服务端对重发验证码
+   * 回 400 `Verification code is not required for this configuration`（活体验过），所以成功分支取不到真值。
+   * 形状按服务端 `GinSendOTP` 的成功返回与 1.0 的类型（`EntrySendOTPResponse`）。这条如实标注，不冒充实测。 */
+  it('keeps the otp success shape the handler is written to return (not live: config forbids it here)', () => {
+    const otp: EntrySendOTPResponse = { otp_id: 'otp_1', expires_in: 300 }
+    expect(Object.keys(otp)).toEqual(expect.arrayContaining(['otp_id', 'expires_in']))
+  })
+
+  it('carries exactly the login statuses the server declares', () => {
+    // 来源：yao/openapi/user/types.go:15-23 —— 一个不多一个不少
+    const statuses = [
+      'ok',
+      'mfa_required',
+      'team_selection_required',
+      'invite_required',
+      'invite_verification_required',
+    ] as const
+    const seen: Record<string, unknown> = { status: 'ok' satisfies LoginStatus }
+    expect(Object.keys(seen)).toEqual(['status'])
+    statuses.forEach((status) => expect(entryAuth.status === undefined || statuses.includes(status as never)).toBe(true))
   })
 
   it('describes the failure the engine answers with as a pair, not as a status', () => {
