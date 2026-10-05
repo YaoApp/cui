@@ -7,6 +7,7 @@
  *   它不进凭据库、不留在任何长期存储里（`15-platform.md` §4）。
  */
 
+import { currentPreferences } from '@/platform/client/context'
 import { signOut } from '@/platform/credential'
 import { send } from '../request/send'
 import type { Result } from '../types'
@@ -43,6 +44,11 @@ import type {
   OAuthCallbackRequest,
 } from './types'
 
+/** 语言由平台给：调用点不传 `locale`（`05 §1`：请求元数据自动带上；要覆盖时显式给）。 */
+function withLocale<T extends { locale?: string }>(input: T): T {
+  return { ...input, locale: input.locale ?? currentPreferences().locale }
+}
+
 /** 临时令牌的请求头（下一步调用的凭据；调用完即弃，**不落任何存储**）。 */
 function temporaryToken(token: string): HeadersInit {
   return { Authorization: `Bearer ${token}` }
@@ -51,7 +57,7 @@ function temporaryToken(token: string): HeadersInit {
 /* ===== 读 ===== */
 
 /** 入口配置。 */
-export const entryConfigQuery = (locale?: string) => ({ key: userKeys.entryConfig(locale), request: entryConfig({ locale }) })
+export const entryConfigQuery = () => ({ key: userKeys.entryConfig(), request: entryConfig })
 
 /** 图形/人机验证。 */
 export const entryCaptchaQuery = (captchaId?: string) => ({ key: userKeys.entryCaptcha(captchaId), request: entryCaptcha({ captcha_id: captchaId }) })
@@ -70,43 +76,43 @@ export const oauthAuthorizeQuery = (id: string, redirectUri?: string) => ({
 /** 判定"登录还是注册"：返回临时令牌与下一步。 */
 export const entryVerifyQuery = (input: EntryVerifyRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryVerifyResponse>> } => ({
   key: userKeys.entryVerify(),
-  operation: () => send(entryVerify, { body: input }),
+  operation: () => send(entryVerify, { body: withLocale(input) }),
 })
 
 /** 注册（带临时令牌）。 */
 export const entryRegisterQuery = (token: string, input: EntryRegisterRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
   key: userKeys.entryRegister(),
-  operation: () => send(entryRegister, { body: input, headers: temporaryToken(token) }),
+  operation: () => send(entryRegister, { body: withLocale(input), headers: temporaryToken(token) }),
 })
 
 /** 登录（带临时令牌）。 */
 export const entryLoginQuery = (token: string, input: EntryLoginRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
   key: userKeys.entryLogin(),
-  operation: () => send(entryLogin, { body: input, headers: temporaryToken(token) }),
+  operation: () => send(entryLogin, { body: withLocale(input), headers: temporaryToken(token) }),
 })
 
 /** 重发验证码（带临时令牌）。 */
-export const entryOtpQuery = (token: string, locale?: string): { key: readonly unknown[]; operation: () => Promise<Result<EntrySendOTPResponse>> } => ({
-  key: userKeys.entryOtp(locale),
-  operation: () => send(entryOtp({ locale }), { headers: temporaryToken(token) }),
+export const entryOtpQuery = (token: string): { key: readonly unknown[]; operation: () => Promise<Result<EntrySendOTPResponse>> } => ({
+  key: userKeys.entryOtp(),
+  operation: () => send(entryOtp, { headers: temporaryToken(token) }),
 })
 
 /** 邀请码兑换（带 `invite_verification` 作用域的临时令牌）。 */
 export const entryInviteQuery = (token: string, input: EntryInviteRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
   key: userKeys.entryInvite(),
-  operation: () => send(entryInvite, { body: input, headers: temporaryToken(token) }),
+  operation: () => send(entryInvite, { body: withLocale(input), headers: temporaryToken(token) }),
 })
 
 /** 第三方登录回调换取令牌族。 */
 export const oauthCallbackQuery = (id: string, input: OAuthCallbackRequest): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => ({
   key: userKeys.oauthCallback(id),
-  operation: () => send(oauthCallback(id), { body: input }),
+  operation: () => send(oauthCallback(id), { body: withLocale(input) }),
 })
 
 /** 设备授权页：确认用户码。 */
 export const deviceAuthorizeQuery = (input: DeviceAuthorizeRequest): { key: readonly unknown[]; operation: () => Promise<Result<DeviceAuthorizeResult>> } => ({
   key: userKeys.deviceAuthorize(),
-  operation: () => send(deviceAuthorize, { body: input }),
+  operation: () => send(deviceAuthorize, { body: input }),   // 该接口只认 user_code，不塞 locale
 })
 
 /** 发起设备码流。 */
@@ -118,7 +124,7 @@ export const deviceFlowStartQuery = (providerId: string) => ({
 /** 轮询设备码。 */
 export const deviceFlowTokenQuery = (providerId: string, input: DeviceFlowTokenRequest): { key: readonly unknown[]; operation: () => Promise<Result<DeviceFlowTokenResult>> } => ({
   key: userKeys.deviceFlowToken(providerId),
-  operation: () => send(deviceFlowToken(providerId), { body: input }),
+  operation: () => send(deviceFlowToken(providerId), { body: withLocale(input) }),
 })
 
 /** 退出登录：服务端吊销 + 本机凭据按载体清理（沿用既有实现）。 */

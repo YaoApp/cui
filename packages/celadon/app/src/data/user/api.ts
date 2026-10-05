@@ -36,11 +36,10 @@ function withQuery(path: string, query: Record<string, string | undefined>): str
   return text ? `${path}?${text}` : path
 }
 
-/** `GET /user/entry`：入口配置（标题 · 表单 · 验证码 · 第三方 · 邀请）。 */
-export const entryConfig = (query: { locale?: string } = {}): Request<void, EntryConfig> => ({
-  method: 'GET',
-  path: withQuery('/user/entry', { locale: query.locale }),
-})
+/** `GET /user/entry`：入口配置（标题 · 表单 · 验证码 · 第三方 · 邀请）。
+ *  **语言不在这里传**：`send()` 按 ctx 自动带 query `locale`/`accept` 与头 `Accept-Language`/`X-Locale`
+ *  （登录相关接口只认头，不读 query —— `request/context.ts` 有出处）。 */
+export const entryConfig: Request<void, EntryConfig> = { method: 'GET', path: '/user/entry' }
 
 /** `POST /user/entry/verify`：判定登录还是注册，返回**临时令牌**。 */
 export const entryVerify: Request<EntryVerifyRequest, EntryVerifyResponse> = {
@@ -60,11 +59,8 @@ export const entryLogin: Request<EntryLoginRequest, EntryAuthResponse> = {
   path: '/user/entry/login',
 }
 
-/** `POST /user/entry/otp`：重发验证码（需临时令牌）。 */
-export const entryOtp = (query: { locale?: string } = {}): Request<void, EntrySendOTPResponse> => ({
-  method: 'POST',
-  path: withQuery('/user/entry/otp', { locale: query.locale }),
-})
+/** `POST /user/entry/otp`：重发验证码（需临时令牌）。语言同上，由 ctx 带。 */
+export const entryOtp: Request<void, EntrySendOTPResponse> = { method: 'POST', path: '/user/entry/otp' }
 
 /** `GET /user/entry/captcha`：图形或人机验证；带 `captcha_id` 时取同一张的下一态。 */
 export const entryCaptcha = (query: { captcha_id?: string } = {}): Request<void, CaptchaResponse> => ({

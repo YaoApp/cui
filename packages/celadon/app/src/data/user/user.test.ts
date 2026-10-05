@@ -11,6 +11,7 @@ const sendMock = vi.fn()
 const signOutMock = vi.fn()
 vi.mock('../request/send', () => ({ send: (...args: unknown[]) => sendMock(...args) }))
 vi.mock('@/platform/credential', () => ({ signOut: () => signOutMock() }))
+vi.mock('@/platform/client/context', () => ({ currentPreferences: () => ({ locale: 'zh-CN', theme: 'light' }) }))
 
 import * as api from './api'
 import * as domain from './index'
@@ -39,13 +40,11 @@ beforeEach(() => {
 
 describe('the user domain declarations', () => {
   it('declares the entry line with its methods and paths', () => {
-    expect(api.entryConfig()).toEqual({ method: 'GET', path: '/user/entry' })
-    expect(api.entryConfig({ locale: 'zh-CN' })).toEqual({ method: 'GET', path: '/user/entry?locale=zh-CN' })
+    expect(api.entryConfig).toEqual({ method: 'GET', path: '/user/entry' })   // 语言由 ctx 带，域层不传
     expect(api.entryVerify).toEqual({ method: 'POST', path: '/user/entry/verify' })
     expect(api.entryRegister).toEqual({ method: 'POST', path: '/user/entry/register' })
     expect(api.entryLogin).toEqual({ method: 'POST', path: '/user/entry/login' })
-    expect(api.entryOtp()).toEqual({ method: 'POST', path: '/user/entry/otp' })
-    expect(api.entryOtp({ locale: 'ja' })).toEqual({ method: 'POST', path: '/user/entry/otp?locale=ja' })
+    expect(api.entryOtp).toEqual({ method: 'POST', path: '/user/entry/otp' })
     expect(api.entryInvite).toEqual({ method: 'POST', path: '/user/entry/invite/verify' })
     expect(api.entryCaptcha()).toEqual({ method: 'GET', path: '/user/entry/captcha' })
     expect(api.entryCaptcha({ captcha_id: 'c1' })).toEqual({ method: 'GET', path: '/user/entry/captcha?captcha_id=c1' })
@@ -70,12 +69,12 @@ describe('the user key family', () => {
   it('derives every key from its declaration, under one family root', () => {
     expect(userKeys.all).toEqual(['user'])
     expect(userKeys.logout()).toEqual(['user', 'logout', 'POST', '/user/logout'])
-    expect(userKeys.entryConfig('zh-CN')).toEqual(['user', 'entry', 'config', 'zh-CN', 'GET', '/user/entry?locale=zh-CN'])
+    expect(userKeys.entryConfig()).toEqual(['user', 'entry', 'config', 'GET', '/user/entry'])
     expect(userKeys.entryCaptcha('c1')).toEqual(['user', 'entry', 'captcha', 'c1', 'GET', '/user/entry/captcha?captcha_id=c1'])
     expect(userKeys.entryVerify()).toEqual(['user', 'entry', 'verify', 'POST', '/user/entry/verify'])
     expect(userKeys.entryRegister()).toEqual(['user', 'entry', 'register', 'POST', '/user/entry/register'])
     expect(userKeys.entryLogin()).toEqual(['user', 'entry', 'login', 'POST', '/user/entry/login'])
-    expect(userKeys.entryOtp('ja')).toEqual(['user', 'entry', 'otp', 'ja', 'POST', '/user/entry/otp?locale=ja'])
+    expect(userKeys.entryOtp()).toEqual(['user', 'entry', 'otp', 'POST', '/user/entry/otp'])
     expect(userKeys.entryInvite()).toEqual(['user', 'entry', 'invite', 'POST', '/user/entry/invite/verify'])
     expect(userKeys.oauthAuthorize('google')).toEqual(['user', 'oauth', 'google', 'authorize', 'GET', '/user/oauth/google/authorize'])
     expect(userKeys.oauthCallback('github')).toEqual(['user', 'oauth', 'github', 'callback', 'POST', '/user/oauth/github/callback'])
@@ -87,20 +86,18 @@ describe('the user key family', () => {
 
 
   it('covers the no-argument defaults of the parameterised keys', () => {
-    expect(userKeys.entryConfig()).toEqual(['user', 'entry', 'config', '', 'GET', '/user/entry'])
     expect(userKeys.entryCaptcha()).toEqual(['user', 'entry', 'captcha', '', 'GET', '/user/entry/captcha'])
-    expect(userKeys.entryOtp()).toEqual(['user', 'entry', 'otp', '', 'POST', '/user/entry/otp'])
+    expect(userKeys.oauthAuthorize('github')).toEqual(['user', 'oauth', 'github', 'authorize', 'GET', '/user/oauth/github/authorize'])
   })
 
   it('gives different parameters different keys', () => {
-    expect(userKeys.entryConfig('zh-CN')).not.toEqual(userKeys.entryConfig('ja'))
     expect(userKeys.oauthAuthorize('google')).not.toEqual(userKeys.oauthAuthorize('github'))
   })
 })
 
 describe('the user read queries pair a key with a declaration', () => {
   it('pairs the reads as-is', () => {
-    expect(entryConfigQuery('zh-CN')).toEqual({ key: userKeys.entryConfig('zh-CN'), request: api.entryConfig({ locale: 'zh-CN' }) })
+    expect(entryConfigQuery()).toEqual({ key: userKeys.entryConfig(), request: api.entryConfig })
     expect(entryCaptchaQuery('c1')).toEqual({ key: userKeys.entryCaptcha('c1'), request: api.entryCaptcha({ captcha_id: 'c1' }) })
     expect(oidcKeysQuery()).toEqual({ key: userKeys.oidcKeys(), request: api.oidcKeys })
     expect(oauthAuthorizeQuery('google', 'https://x/back')).toEqual({
@@ -120,32 +117,32 @@ describe('the user write queries hand the temporary token to the egress as a hea
     const query = entryVerifyQuery({ username: 'ada@example.com' })
     expect(query.key).toEqual(userKeys.entryVerify())
     await query.operation()
-    expect(sendMock).toHaveBeenCalledWith(api.entryVerify, { body: { username: 'ada@example.com' } })
+    expect(sendMock).toHaveBeenCalledWith(api.entryVerify, { body: { username: 'ada@example.com', locale: 'zh-CN' } })
   })
 
   it('registers and logs in with the temporary token in the Authorization header', async () => {
     sendMock.mockResolvedValue({ ok: true, value: { status: 'ok' } })
     await entryRegisterQuery('temp-1', { password: 'x' }).operation()
     expect(sendMock).toHaveBeenCalledWith(api.entryRegister, {
-      body: { password: 'x' },
+      body: { password: 'x', locale: 'zh-CN' },
       headers: { Authorization: 'Bearer temp-1' },
     })
     await entryLoginQuery('temp-2', { password: 'y', remember_me: true }).operation()
     expect(sendMock).toHaveBeenCalledWith(api.entryLogin, {
-      body: { password: 'y', remember_me: true },
+      body: { password: 'y', remember_me: true, locale: 'zh-CN' },
       headers: { Authorization: 'Bearer temp-2' },
     })
   })
 
   it('resends the otp and redeems the invite with the temporary token', async () => {
     sendMock.mockResolvedValue({ ok: true, value: { otp_id: 'o1' } })
-    await entryOtpQuery('temp-3', 'zh-CN').operation()
-    expect(sendMock).toHaveBeenCalledWith(api.entryOtp({ locale: 'zh-CN' }), {
+    await entryOtpQuery('temp-3').operation()
+    expect(sendMock).toHaveBeenCalledWith(api.entryOtp, {
       headers: { Authorization: 'Bearer temp-3' },
     })
     await entryInviteQuery('temp-4', { code: 'INV' }).operation()
     expect(sendMock).toHaveBeenCalledWith(api.entryInvite, {
-      body: { code: 'INV' },
+      body: { code: 'INV', locale: 'zh-CN' },
       headers: { Authorization: 'Bearer temp-4' },
     })
   })
@@ -153,13 +150,13 @@ describe('the user write queries hand the temporary token to the egress as a hea
   it('completes the oauth callback, confirms the device code and polls it', async () => {
     sendMock.mockResolvedValue({ ok: true, value: { status: 'ok' } })
     await oauthCallbackQuery('google', { code: 'c', state: 's' }).operation()
-    expect(sendMock).toHaveBeenCalledWith(api.oauthCallback('google'), { body: { code: 'c', state: 's' } })
+    expect(sendMock).toHaveBeenCalledWith(api.oauthCallback('google'), { body: { code: 'c', state: 's', locale: 'zh-CN' } })
     await deviceAuthorizeQuery({ user_code: 'ABCD' }).operation()
     expect(sendMock).toHaveBeenCalledWith(api.deviceAuthorize, { body: { user_code: 'ABCD' } })
     const poll = deviceFlowTokenQuery('apple', { device_code: 'd1' })
     expect(poll.key).toEqual(userKeys.deviceFlowToken('apple'))
     await poll.operation()
-    expect(sendMock).toHaveBeenCalledWith(api.deviceFlowToken('apple'), { body: { device_code: 'd1' } })
+    expect(sendMock).toHaveBeenCalledWith(api.deviceFlowToken('apple'), { body: { device_code: 'd1', locale: 'zh-CN' } })
   })
 })
 
