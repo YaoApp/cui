@@ -27,7 +27,7 @@
       "registerTitle": "アカウントを作成",
       "registerLead": "必要なのはアカウントとパスワードだけです。",
       "account": "アカウント",
-      "accountPh": "メールアドレスまたは携帯番号",
+      "accountPh": "メールアドレスまたはユーザー名を入力",
       "password": "パスワード",
       "passwordPh": "パスワードを入力",
       "reveal": "表示",
@@ -61,7 +61,18 @@
       "errCaptcha": "確認コードが違います。別の画像でお試しください。",
       "errOtp": "コードが違うか期限切れです。再取得してください。",
       "errTerms": "先に規約をお読みいただき同意してください。",
-      "errNetwork": "サービスに接続できません。ネットワークかサーバーアドレスをご確認ください。"
+      "errNetwork": "サービスに接続できません。ネットワークかサーバーアドレスをご確認ください。",
+      "entryTitle": "Yao Agents アカウントに登録またはログイン",
+      "next": "次へ",
+      "signUpNow": "新規登録",
+      "noAccount": "アカウントをお持ちでないですか？",
+      "haveAccount": "すでにアカウントをお持ちですか？",
+      "signInNow": "ログイン",
+      "lang": "言語",
+      "theme": "テーマ",
+      "themeAuto": "自動",
+      "themeLight": "ライト",
+      "themeDark": "ダーク"
     },
     "inbox": {
       "unreadCount": "未読 {count}",

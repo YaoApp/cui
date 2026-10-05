@@ -27,7 +27,7 @@
       "registerTitle": "Create account",
       "registerLead": "All you need is an account and a password.",
       "account": "Account",
-      "accountPh": "Email or mobile number",
+      "accountPh": "Enter your email or username",
       "password": "Password",
       "passwordPh": "Enter your password",
       "reveal": "Show",
@@ -61,7 +61,18 @@
       "errCaptcha": "That code is not right. Ask for a new image.",
       "errOtp": "That code is wrong or expired. Ask for a new one.",
       "errTerms": "Please read and agree to the terms first.",
-      "errNetwork": "Cannot reach the service. Check your network or the server address."
+      "errNetwork": "Cannot reach the service. Check your network or the server address.",
+      "entryTitle": "Sign up or sign in to your YaoAgents account",
+      "next": "Next",
+      "signUpNow": "Sign up now",
+      "noAccount": "Don't have an account?",
+      "haveAccount": "Already have an account?",
+      "signInNow": "Sign in now",
+      "lang": "Language",
+      "theme": "Theme",
+      "themeAuto": "Auto",
+      "themeLight": "Light",
+      "themeDark": "Dark"
     },
     "inbox": {
       "unreadCount": "{count} unread",

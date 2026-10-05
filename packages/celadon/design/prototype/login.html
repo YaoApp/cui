@@ -1,21 +1,22 @@
 <!doctype html>
-<html lang="zh-CN" class="celadon">
+<html lang="en" class="celadon">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Celadon · 登录</title>
+<title>Yao Agents · Sign in</title>
 <link rel="stylesheet" href="../tokens.css">
-<script>if(matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.dataset.theme="dark"</script>
+<script src="../i18n/bundle.js"></script>
 <!--
-  登录界面（login 状态）· 静态设计稿，与产品同构：类名、文案来源、尺寸档都照产品来。
+  入口页（login 状态）· 静态设计稿 = 产品形态。默认语言为英文，默认文案：
+    Sign up or sign in to your YaoAgents account
 
-  版式照 LobeHub 的登录页（用户给的参照图）：一张**卡片**居中，卡内自左向右排 —— 标题（两行、加粗、左对齐）
-  → 第三方按钮（整宽、软底、左图标 + 居中文字）→「OR」分隔 → 输入框 → 主按钮（近黑反白）→ 卡下一行引导；
-  语言与主题放**右上角**，条款放右下角。
+  版式照参照图：一张卡片居中；卡内依次为标题 · 第三方（Google / GitHub / Apple，真品牌图标）· OR 分隔 ·
+  **单个输入框**（无 label，说明写在 placeholder 里）· 协议勾选 · 近黑反白主按钮 · 卡下引导；
+  右上角是语言与主题：语言文字 + 分隔线 + 主题图标，**点开都是菜单**（主题：Auto / Light / Dark）。
 
-  · 第三方品牌图标用真图标集的雪碧图文件：../icons/brand-sprite-6.svg（Google · GitHub）· ../icons/brand-sprite-2.svg（Apple）。
-  · 不含交互脚本（只放设计体系那句"跟随系统"的一行）；主按钮为局部类 `.button--inverse`（近黑反白，照参照图）。
-  · 文案取自 design/i18n/*.json 的 ui.entry.*；LOGO 用正版标记 ../logo-mark-celadon.svg。
+  · 主题与语言是**能用**的（这一段是本页唯一的脚本），其余纯静态。
+  · 品牌图标取真图标集雪碧图：../icons/brand-sprite-6.svg（Google · GitHub）· ../icons/brand-sprite-2.svg（Apple）。
+    输入框前导图标内联自 icons.html 的 `i-nav-user`（界面图标目前只有内联雪碧图，没有独立文件）。
   · 颜色 / 间距 / 字号 / 圆角 / 描边 / 阴影一律取 token（见 ../AGENTS.md）。
 -->
 <style>
@@ -30,31 +31,47 @@ body {
   background: var(--background-app);
   -webkit-font-smoothing: antialiased;
 }
-:root { --auth-card: 512px; }   /* 局部：卡片宽度；进产品时归 token */
+:root { --auth-card: 520px; }   /* 局部：卡片宽度；进产品时归 token */
 
-.page { min-block-size: 100%; display: flex; flex-direction: column; padding: var(--spacing-16) var(--spacing-24) var(--spacing-16); }
+.page { min-block-size: 100%; display: flex; flex-direction: column; padding: var(--spacing-16) var(--spacing-24); }
 
-/* 顶行：左 LOGO，右语言与主题 */
-.top { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-16); }
+/* 顶行：左 LOGO；右语言与主题（照参照图：文字 + 分隔线 + 图标，点开是菜单） */
+.top { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-16); position: relative; }
 .brand { display: flex; align-items: center; gap: var(--spacing-8); }
 .brand__mark { inline-size: 26px; block-size: auto; display: block; }
 .brand__name { font-size: var(--font-size-caption); font-weight: var(--font-weight-medium); color: var(--text-secondary); letter-spacing: var(--letter-spacing-latin); }
-.tools { display: flex; align-items: center; gap: var(--spacing-8); }
-.tools select.input { inline-size: auto; min-block-size: var(--spacing-32); padding-block: 0; font-size: var(--font-size-caption); }
+.ctrl { display: flex; align-items: center; gap: var(--spacing-8); }
+.ctrl__sep { inline-size: var(--border-width); block-size: var(--spacing-16); background: var(--border-default); }
+.ctrl__btn { display: inline-flex; align-items: center; gap: var(--spacing-4); border: 0; background: transparent;
+             color: var(--text-secondary); font: inherit; font-size: var(--font-size-caption); cursor: pointer;
+             padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-small); }
+.ctrl__btn:hover { background: var(--background-hover); color: var(--text-primary); }
+.ctrl__btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.ctrl__btn .icon { inline-size: 16px; block-size: 16px; display: block; }
 
-/* 卡片：整卡居中 */
+/* 菜单：浮层（token 的层级/圆角/阴影） */
+.menu { position: absolute; inset-block-start: calc(100% + var(--spacing-4)); inset-inline-end: 0;
+        min-inline-size: 176px; padding: var(--spacing-4); z-index: var(--z-base);
+        background: var(--background-surface); border: var(--border-width) solid var(--border-default);
+        border-radius: var(--radius-large); box-shadow: var(--shadow-overlay); }
+.menu[hidden] { display: none; }
+.menu button { display: flex; align-items: center; gap: var(--spacing-8); inline-size: 100%; text-align: start;
+               border: 0; background: transparent; color: var(--text-primary); font: inherit;
+               font-size: var(--font-size-body); cursor: pointer; padding: var(--spacing-8) var(--spacing-8);
+               border-radius: var(--radius-small); }
+.menu button:hover { background: var(--background-hover); }
+.menu button.is-on { background: var(--background-selected); }
+.menu button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.menu .icon { inline-size: 16px; block-size: 16px; display: block; flex: none; color: var(--text-secondary); }
+
+/* 卡片 */
 .stage { flex: 1; display: grid; place-items: center; padding-block: var(--spacing-32); }
-.card {
-  inline-size: min(100%, var(--auth-card));
-  padding: var(--spacing-48) var(--spacing-48) var(--spacing-32);
-  background: var(--background-content);
-  border: var(--border-width) solid var(--border-subtle);
-  border-radius: var(--radius-large);
-  box-shadow: var(--shadow-subtle);
-}
+.card { inline-size: min(100%, var(--spacing-8)); padding: var(--spacing-48) var(--spacing-32) var(--spacing-32);
+        background: var(--background-content); border: var(--border-width) solid var(--border-subtle);
+        border-radius: var(--radius-large); box-shadow: var(--shadow-subtle); }
 .title { margin: 0 0 var(--spacing-32); font-size: var(--font-size-20); font-weight: var(--font-weight-strong); line-height: 1.25; }
 
-/* 第三方：整宽、软底、左图标 + 居中文字（照参照图） */
+/* 第三方：整宽、软底、左图标 + 居中文字 */
 .providers { display: grid; gap: var(--spacing-8); margin-block-end: var(--spacing-24); }
 .provider { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--spacing-8);
             min-block-size: var(--row-height); padding-inline: var(--spacing-12);
@@ -66,28 +83,23 @@ body {
 .provider__label { text-align: center; }
 .provider__mark { inline-size: 18px; block-size: 18px; display: block; }
 
-/* 「OR」分隔 */
 .or { display: flex; align-items: center; gap: var(--spacing-12); margin: 0 0 var(--spacing-24);
       color: var(--text-tertiary); font-size: var(--font-size-11); letter-spacing: var(--letter-spacing-latin); }
 .or::before, .or::after { content: ''; flex: 1; block-size: var(--border-width); background: var(--border-subtle); }
 
-/* 字段 */
-.field { margin-block-end: var(--spacing-16); }
-.field__label { display: block; margin-block-end: var(--spacing-4); font-size: var(--font-size-label); font-weight: var(--font-weight-medium); color: var(--text-secondary); }
-.field__control { position: relative; display: flex; align-items: center; }
-.field__control .input { inline-size: 100%; min-block-size: var(--row-height); border-radius: var(--radius-medium); }
-.field__control--trail .input { padding-inline-end: var(--spacing-48); }
-.field__trail { position: absolute; inset-inline-end: var(--spacing-4); border: 0; background: transparent; cursor: pointer;
-                color: var(--text-tertiary); font: inherit; font-size: var(--font-size-caption);
-                padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-xs); }
-.field__trail:hover { color: var(--text-secondary); }
-.field__trail:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+/* 单输入框：无 label，说明在 placeholder；前导图标住在框内 */
+.field { position: relative; display: flex; align-items: center; margin-block-end: var(--spacing-16); }
+.field__icon { position: absolute; inset-inline-start: var(--spacing-12); inline-size: 18px; block-size: 18px;
+               display: block; color: var(--text-placeholder); pointer-events: none; }
+.field .input { inline-size: 100%; min-block-size: var(--row-height); border-radius: var(--radius-medium); padding-inline-start: var(--spacing-48); }
 
-.row { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-8); margin-block: 0 var(--spacing-24); }
-.check { display: inline-flex; align-items: center; gap: var(--spacing-8); font-size: var(--font-size-caption); color: var(--text-secondary); }
-.check input { inline-size: 16px; block-size: 16px; accent-color: var(--brand); }
+/* 协议 */
+.terms { display: flex; gap: var(--spacing-8); align-items: flex-start; margin-block: 0 var(--spacing-16);
+         font-size: var(--font-size-caption); color: var(--text-secondary); }
+.terms input { inline-size: 16px; block-size: 16px; margin-block-start: 3px; flex: none; accent-color: var(--brand); }
+.terms a { color: var(--brand-ink); }
 
-/* 主按钮：布局与尺寸档照产品 `components/base/button`；配色照参照图为近黑反白（局部类，产品若采用则进设计类） */
+/* 主按钮：近黑反白（照参照图） */
 .button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-8);
           white-space: nowrap; cursor: pointer; font-family: var(--font-family-ui);
           font-weight: var(--font-weight-medium); line-height: var(--line-height-cjk); border-radius: var(--radius-medium);
@@ -99,11 +111,17 @@ body {
 .footnote { margin: var(--spacing-16) 0 0; text-align: center; font-size: var(--font-size-caption); color: var(--text-secondary); }
 
 /* 底行：条款 */
-.bottom { display: flex; justify-content: flex-end; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
+.bottom { display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
 .bottom a { color: var(--text-tertiary); }
 </style>
 </head>
 <body>
+<!-- 界面图标：目前只有 icons.html 里的内联雪碧图，没有独立文件；这里内联本次用到的一个符号 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-nav-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-pc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" x2="16" y1="21" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" x2="12" y1="17" y2="21" stroke="currentColor" stroke-width="2"/></symbol>
+</defs></svg>
+
 <div class="page">
 
   <header class="top">
@@ -111,71 +129,77 @@ body {
       <img class="brand__mark" src="../logo-mark-celadon.svg" alt="" width="26" height="22">
       <span class="brand__name">Yao Agents</span>
     </span>
-    <span class="tools">
-      <select class="input" aria-label="语言">
-        <option selected>跟随系统（中文）</option>
-        <option>简体中文</option>
-        <option>繁體中文</option>
-        <option>English</option>
-        <option>日本語</option>
-      </select>
-      <span class="seg theme-toggle" role="group" aria-label="主题">
-        <button type="button" class="is-on" aria-pressed="true">浅色</button>
-        <button type="button" aria-pressed="false">暗色</button>
-      </span>
+
+    <span class="ctrl">
+      <button class="ctrl__btn" type="button" id="lang-btn" aria-haspopup="menu" aria-expanded="false">
+        <span id="lang-label">English</span>
+      </button>
+      <span class="ctrl__sep" aria-hidden="true"></span>
+      <button class="ctrl__btn" type="button" id="theme-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Theme">
+        <svg class="icon" aria-hidden="true"><use href="#i-pc"></use></svg>
+      </button>
     </span>
+
+    <div class="menu" id="lang-menu" role="menu" hidden>
+      <button type="button" role="menuitemradio" data-lang="system">跟随系统（中文）</button>
+      <button type="button" role="menuitemradio" data-lang="zh-CN">简体中文</button>
+      <button type="button" role="menuitemradio" data-lang="zh-TW">繁體中文</button>
+      <button type="button" role="menuitemradio" data-lang="en">English</button>
+      <button type="button" role="menuitemradio" data-lang="ja">日本語</button>
+    </div>
+
+    <div class="menu" id="theme-menu" role="menu" hidden style="inset-inline-end:0">
+      <button type="button" role="menuitemradio" data-theme="auto"><svg class="icon" aria-hidden="true"><use href="#i-pc"></use></svg><span data-i18n="themeAuto">Auto</span></button>
+      <button type="button" role="menuitemradio" data-theme="light"><span data-i18n="themeLight">Light</span></button>
+      <button type="button" role="menuitemradio" data-theme="dark"><span data-i18n="themeDark">Dark</span></button>
+    </div>
   </header>
 
   <div class="stage">
     <main class="card" aria-labelledby="auth-title">
-      <h1 class="title" id="auth-title">登录<br>Yao Agents 账号</h1>
+      <h1 class="title" id="auth-title" data-i18n="entryTitle">Sign up or sign in to your YaoAgents account</h1>
 
-      <!-- 第三方：名单由入口配置（/user/entry）决定；图标来自真图标集的雪碧图 -->
       <div class="providers">
         <button class="provider" type="button">
           <svg class="provider__mark" viewBox="0 0 24 24" aria-hidden="true"><use href="../icons/brand-sprite-6.svg#brand-google"></use></svg>
-          <span class="provider__label">使用 Google 继续</span>
+          <span class="provider__label">Continue with Google</span>
           <span aria-hidden="true"></span>
         </button>
         <button class="provider" type="button">
           <svg class="provider__mark" viewBox="0 0 24 24" aria-hidden="true"><use href="../icons/brand-sprite-6.svg#brand-github"></use></svg>
-          <span class="provider__label">使用 GitHub 继续</span>
+          <span class="provider__label">Continue with GitHub</span>
           <span aria-hidden="true"></span>
         </button>
         <button class="provider" type="button">
           <svg class="provider__mark" viewBox="0 0 24 24" aria-hidden="true"><use href="../icons/brand-sprite-2.svg#brand-apple"></use></svg>
-          <span class="provider__label">使用 Apple 继续</span>
+          <span class="provider__label">Continue with Apple</span>
           <span aria-hidden="true"></span>
         </button>
       </div>
 
-      <p class="or">或</p>
+      <p class="or">OR</p>
 
       <form>
         <div class="field">
-          <label class="field__label" for="account">账号</label>
-          <div class="field__control">
-            <input class="input" id="account" name="account" type="text" autocomplete="username"
-                   inputmode="email" autocapitalize="off" spellcheck="false" placeholder="邮箱或手机号">
-          </div>
+          <svg class="field__icon" aria-hidden="true"><use href="#i-nav-user"></use></svg>
+          <input class="input" id="account" name="account" type="text" autocomplete="username"
+                 inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="accountPh" placeholder="Enter your email or username">
         </div>
 
-        <div class="field">
-          <label class="field__label" for="password">密码</label>
-          <div class="field__control field__control--trail">
-            <input class="input" id="password" name="password" type="password" autocomplete="current-password" placeholder="请输入密码">
-            <button class="field__trail" type="button">显示</button>
-          </div>
+        <div class="terms">
+          <input id="terms" type="checkbox">
+          <label for="terms">
+            <span data-i18n="termsPre">I have read and agree to the</span>
+            <a class="link" href="#">Terms and Conditions</a>
+            <span data-i18n="termsAnd">and</span>
+            <a class="link" href="#">Privacy Policy</a>
+          </label>
         </div>
 
-        <div class="row">
-          <label class="check"><input type="checkbox" checked>记住我</label>
-        </div>
-
-        <button class="button button--block button--inverse" type="submit">登录</button>
+        <button class="button button--block button--inverse" type="submit" data-i18n="next">Next</button>
       </form>
 
-      <p class="footnote">还没有账号？<a class="link" href="./register.html">创建账号</a></p>
+      <p class="footnote"><span data-i18n="noAccount">Don&apos;t have an account?</span> <a class="link" href="./register.html" data-i18n="signUpNow">Sign up now</a></p>
     </main>
   </div>
 
@@ -186,5 +210,55 @@ body {
   </footer>
 
 </div>
+
+<script>
+/* 本页唯一的脚本：主题与语言。（产品的这两处在平台层，这里只为把设计做成"能用"。） */
+const dictOf = (lang) => (((window.CELADON_I18N || {})[lang === 'system' ? 'zh-CN' : lang] || {}).ui || {}).entry || {}
+let lang = 'en'
+let theme = 'auto'
+
+function applyLang(next) {
+  lang = next
+  const langKey = lang === 'system' ? 'zh-CN' : lang
+  const dict = dictOf(lang)
+  document.documentElement.lang = langKey
+  document.querySelectorAll('[data-i18n]').forEach((el) => { const v = dict[el.dataset.i18n]; if (v) el.textContent = v })
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => { const v = dict[el.dataset.i18nPh]; if (v) el.placeholder = v })
+  document.getElementById('lang-label').textContent = { system: '跟随系统（中文）', 'zh-CN': '简体中文', 'zh-TW': '繁體中文', en: 'English', ja: '日本語' }[lang]
+  document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.classList.toggle('is-on', b.dataset.lang === lang))
+}
+
+function applyTheme(next) {
+  theme = next
+  document.documentElement.dataset.theme = next === 'auto'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : next
+  document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.classList.toggle('is-on', b.dataset.theme === theme))
+}
+
+function toggleMenu(id, open) {
+  const menu = document.getElementById(id)
+  const button = document.getElementById(id === 'lang-menu' ? 'lang-btn' : 'theme-btn')
+  const next = open ?? menu.hidden
+  menu.hidden = !next
+  button.setAttribute('aria-expanded', String(next))
+  if (next) menu.querySelector('button')?.focus()
+}
+
+document.getElementById('lang-btn').addEventListener('click', () => toggleMenu('lang-menu'))
+document.getElementById('theme-btn').addEventListener('click', () => toggleMenu('theme-menu'))
+document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.addEventListener('click', () => { applyLang(b.dataset.lang); toggleMenu('lang-menu', false) }))
+document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.addEventListener('click', () => { applyTheme(b.dataset.theme); toggleMenu('theme-menu', false) }))
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.ctrl, .menu')) { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
+})
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
+})
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (theme === 'auto') applyTheme('auto') })
+
+applyLang('en')
+applyTheme('auto')
+</script>
 </body>
 </html>
