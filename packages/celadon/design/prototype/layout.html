@@ -201,6 +201,11 @@ body.is-client .window-controls .icon-button:hover { background: var(--backgroun
 body.is-client .window-controls .icon-button:focus { outline: none; }
 body.is-client .window-controls .icon-button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 body.is-client .window-controls .icon-button .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
+/* 收起键放到顶行右侧（位置固定、不随导航开合移动）；红绿灯仍留最左 */
+body.is-client .window-controls { inset-inline-start: 0; inset-inline-end: 0; padding-inline: var(--spacing-16);
+  justify-content: space-between; }
+body.is-client .window-controls .wc-left { display: inline-flex; align-items: center; gap: var(--spacing-8); }
+body.is-client .window-controls #nav-toggle { margin-inline-start: auto; }
 </style>
 </head>
 <body class="celadon">
@@ -578,7 +583,7 @@ body.is-client .window-controls .icon-button .icon { inline-size: var(--spacing-
   if (!win) return
   var host = document.createElement('div')
   host.className = 'window-controls'
-  host.innerHTML = '<span class="traffic-lights"><i></i><i></i><i></i></span>' +
+  host.innerHTML = '<span class="wc-left"><span class="traffic-lights"><i></i><i></i><i></i></span></span>' +
     '<button class="icon-button" type="button" id="nav-toggle" title="Collapse" aria-expanded="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-collapse"></use></svg></button>'
   win.prepend(host)
   var toggle = document.getElementById('nav-toggle')
