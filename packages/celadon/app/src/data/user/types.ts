@@ -53,6 +53,10 @@ export type EntryConfig = {
     password?: {
       placeholder: string
     }
+    /** 注册时的确认密码框（真实服务返回；1.0 类型里没有，以服务端为准）。 */
+    confirm_password?: {
+      placeholder: string
+    }
     captcha?: {
       type: 'image' | 'turnstile'
       options?: {
