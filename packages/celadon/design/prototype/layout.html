@@ -343,6 +343,10 @@ body.celadon, html.celadon { font-family: var(--font-family-ui); }
 .composer { position: relative; z-index: var(--z-overlay); background: var(--elevation-surface-2); box-shadow: var(--shadow-floating); }
 /* 输入区描边：用更轻的一档 --border-subtle（原为 --border-default） */
 .composer { border-color: var(--border-subtle); }
+/* 实验：交换中栏与右栏的底色 —— 中栏用 surface、右栏用 content（原为相反）。
+   若后续保留，应回写到 F6 的分工说明；若不保留，删掉这两行即可。 */
+.window > .main { background: var(--background-surface); }
+.window > .panel { background: var(--background-content); }
 </style>
 </head>
 <body class="celadon">
