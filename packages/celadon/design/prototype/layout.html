@@ -7,7 +7,7 @@
 <!-- 唯一来源：tokens.less → build-css.mjs → tokens.css（本页零硬编码色值） -->
 <link rel="stylesheet" href="../tokens.css">
 <style>
-body{margin: 0;background: var(--background-active);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+body{margin: 0;background: var(--background-active);font-family: var(--font-family-ui);
   display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;min-height:100vh;padding: 0;-webkit-font-smoothing:antialiased;font-size:var(--font-size-body-lg);line-height:var(--line-height-cjk);}
 [data-theme="dark"] body{background:#0B0B0B}
 svg.icon{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}  /* 24 网格原生 2；16px 显示时视觉 ≈1.33 */
@@ -28,7 +28,7 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .brand-mark .mark-head{fill:url(#mark-live)}        /* 品牌标记：渐变走 --brand-mark-*，全站一版 */
 .celadon[data-theme="dark"] .brand-mark .mark-head, [data-theme="dark"] .celadon .brand-mark .mark-head{fill:url(#mark-live)}
 .brand-name{white-space:nowrap}
-.version-badge{margin-left: auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--font-size-label);font-weight:var(--font-weight-medium);line-height:var(--line-height-normal);color:var(--text-tertiary);
+.version-badge{margin-left: auto;font-family: var(--font-family-monospace);font-size:var(--font-size-label);font-weight:var(--font-weight-medium);line-height:var(--line-height-normal);color:var(--text-tertiary);
   background:var(--background-field);border: var(--border-width) solid var(--border-subtle);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8);letter-spacing:.02em}
 .fixed-navigation{padding: 0 var(--spacing-8);display:flex;flex-direction:column;gap: var(--spacing-4)}
 .navigation-item{height:32px;border-radius:var(--radius-small);display:flex;align-items:center;gap: var(--spacing-8);padding: 0 var(--spacing-8);color:var(--text-secondary);font-size: var(--font-size-body-lg)}
@@ -89,9 +89,9 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
   border: var(--border-width) solid var(--border-default);border-radius:var(--radius-small);padding: var(--spacing-4) var(--spacing-8)}
 .tool-card{align-self:flex-start;width:640px;max-width:100%;border: var(--border-width) solid var(--border-subtle);border-radius: var(--radius-large);background:var(--background-surface);overflow:hidden}
 .tool-card .tool-header{display:flex;align-items:center;gap: var(--spacing-8);padding: var(--spacing-8) var(--spacing-12);border-bottom: var(--border-width) solid var(--border-subtle);font-size: var(--font-size-caption);font-weight:650}
-.tool-card .tool-header .tool-name{color:var(--text-tertiary);font-weight:400;font-family:ui-monospace,Menlo,monospace;font-size: var(--font-size-label)}
+.tool-card .tool-header .tool-name{color:var(--text-tertiary);font-weight:400;font-family: var(--font-family-monospace);font-size: var(--font-size-label)}
 .tool-card .tool-header .status-chip{margin-left: auto;font-size: var(--font-size-label);color:var(--success);background:var(--success-soft);border: var(--border-width) solid var(--success);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8);display:flex;align-items:center;gap: var(--spacing-4)}
-.tool-card .tool-body{padding: var(--spacing-8) var(--spacing-12);background:var(--background-field);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--font-size-caption);line-height:var(--line-height-cjk);color:var(--text-secondary)}
+.tool-card .tool-body{padding: var(--spacing-8) var(--spacing-12);background:var(--background-field);font-family: var(--font-family-monospace);font-size:var(--font-size-caption);line-height:var(--line-height-cjk);color:var(--text-secondary)}
 .question-card{align-self:flex-start;width:640px;max-width:100%;border: var(--border-width) solid var(--border-subtle);border-radius: var(--radius-large);background:var(--background-surface);padding: var(--spacing-12) var(--spacing-12)}
 .question-card .question-header{display:flex;align-items:center;gap: var(--spacing-8);font-size: var(--font-size-caption);color:var(--text-tertiary);margin-bottom: var(--spacing-8)}
 .question-card .question-header .warning-badge{margin-left: auto;color:var(--warm-text);background:var(--warm-soft);border: var(--border-width) solid var(--warm);border-radius:var(--radius-pill);padding: var(--spacing-4) var(--spacing-8);font-weight:650;font-size: var(--font-size-label)}
@@ -137,8 +137,8 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .gate-chip.is-idle{background:transparent;border-style:dashed}
 .diff-card{border: var(--border-width) solid var(--border-subtle);border-radius: var(--radius-large);overflow:hidden;background:var(--background-content)}
 .diff-card .diff-header{display:flex;align-items:center;gap: var(--spacing-8);padding: var(--spacing-8) var(--spacing-12);border-bottom: var(--border-width) solid var(--border-subtle);font-size: var(--font-size-caption);color:var(--text-secondary)}
-.diff-card .diff-header .diff-count{margin-left: auto;font-family:ui-monospace,Menlo,monospace}
-.diff-card pre{margin: 0;padding: var(--spacing-8) var(--spacing-12);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--font-size-caption);line-height:var(--line-height-cjk);color:var(--text-secondary)}
+.diff-card .diff-header .diff-count{margin-left: auto;font-family: var(--font-family-monospace)}
+.diff-card pre{margin: 0;padding: var(--spacing-8) var(--spacing-12);font-family: var(--font-family-monospace);font-size:var(--font-size-caption);line-height:var(--line-height-cjk);color:var(--text-secondary)}
 .diff-added{color:var(--success)}.diff-removed{color:var(--danger)}
 .file-row{display:flex;align-items:center;gap: var(--spacing-8);font-size: var(--font-size-body);color:var(--text-secondary);padding: var(--spacing-4) 0}
 .file-row .file-size{margin-left: auto;font-size: var(--font-size-label);color:var(--text-tertiary)}
@@ -332,6 +332,12 @@ body:not(.is-client) .nav .navigation-header { padding-inline-start: var(--spaci
 .user-menu button.is-on { background: var(--background-selected); font-weight: var(--font-weight-medium); }
 .user-menu .sep { block-size: var(--border-width); background: var(--border-subtle); margin: var(--spacing-4) var(--spacing-8); }
 .user-menu .group { padding: var(--spacing-4) var(--spacing-12) 0; color: var(--text-tertiary); font-size: var(--font-size-12); }
+/* 正文字族落一次：样式表里有 `.celadon { font-family: inherit }`（0,1,0），会压过 `body{…}`（0,0,1），
+   于是正文继承到 UA 默认字体。这里用 body.celadon（0,1,1）确保 token 生效；换语言时 --font-family-ui 随 :lang 变。 */
+body.celadon, html.celadon { font-family: var(--font-family-ui); }
+/* 系统的 `.celadon, [data-theme] .celadon { font-family: inherit }`（0,2,0）把正文字族设成"继承"，
+   于是落到 UA 默认字体。这里用同形选择器再加一层（0,2,1）让 token 真正生效。 */
+[data-theme] body.celadon { font-family: var(--font-family-ui); }
 </style>
 </head>
 <body class="celadon">
@@ -508,7 +514,7 @@ body:not(.is-client) .nav .navigation-header { padding-inline-start: var(--spaci
     </div>
     <div class="user">
       <div class="avatar">M</div>
-      <div style="flex:1;min-width:0"><div style="font-weight:650;font-size:12.5px">Max</div><div style="color:var(--text-tertiary);font-size:11px">max@iqka.com</div></div>
+      <div style="flex:1;min-width:0"><div style="font-weight:650;font-size: var(--font-size-12)">Max</div><div style="color:var(--text-tertiary);font-size: var(--font-size-11)">max@iqka.com</div></div>
       <span class="icon-button"><svg class="icon is-small"><use href="#i-dots"/></svg></span>
     </div>
   </aside>
@@ -549,7 +555,7 @@ body:not(.is-client) .nav .navigation-header { padding-inline-start: var(--spaci
       <div class="message-group" style="margin-top:14px">
         <div class="question-card">
           <div class="question-header"><svg class="icon is-small"><use href="#i-clock"/></svg><span data-i18n="ui.ask.pendingAt" data-time="14:06">待你确认 · 14:06</span><span class="warning-badge" data-i18n="ui.ask.differences" data-count="2">2 处差异</span></div>
-          <div style="font-size:13px" data-i18n="ui.ask.question">摘要口径按哪个来？这会影响输出结构：</div>
+          <div style="font-size: var(--font-size-13)" data-i18n="ui.ask.question">摘要口径按哪个来？这会影响输出结构：</div>
           <div class="question-option is-selected"><svg class="icon is-small"><use href="#i-check"/></svg><span data-i18n="ui.ask.optionRiskFirst">按「风险优先」汇总（推荐）</span></div>
           <div class="question-option"><svg class="icon is-small" style="opacity:.35"><use href="#i-check"/></svg><span data-i18n="ui.ask.optionChronological">按「时间顺序」汇总</span></div>
           <div class="question-option"><svg class="icon is-small" style="opacity:.35"><use href="#i-check"/></svg><span data-i18n="ui.ask.optionCustom">我自己补口径</span></div>
