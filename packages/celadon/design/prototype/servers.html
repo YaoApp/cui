@@ -345,9 +345,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleMenu
    列表最后一项是「自建服务器」；选中它才出现地址输入。 */
 const CUSTOM = '__custom__'
 const CLOUD = [
-  { name: 'Yao Agents 官方', url: 'https://api.yaoagents.com', region: '新加坡' },
-  { name: 'Yao Agents 中国', url: 'https://api.yaoagents.cn', region: '上海' },
-  { name: '自建 · 团队', url: 'https://team.example.com', region: '私有部署' },
+  { key: 'serverApac', url: 'https://api.yaoagents.com' },
+  { key: 'serverCn', url: 'https://api.yaoagents.cn' },
 ]
 let cloudState = 'loading'        /* loading | ready | failed | empty */
 let selected = CLOUD[0] ? CLOUD[0].url : CUSTOM
