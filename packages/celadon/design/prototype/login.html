@@ -89,6 +89,19 @@ body {
 .button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-body); }
 .button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
+/* 右上角：主题与语言。主题用设计类 `.seg`（与产品组件同一套），语言用基础件下拉的视觉（设计类 `.input`） */
+.corner { position: fixed; inset-block-start: var(--spacing-16); inset-inline-end: var(--spacing-16);
+          display: flex; align-items: center; gap: var(--spacing-8); }
+.corner select.input { inline-size: auto; min-block-size: var(--spacing-32); padding-block: 0; font-size: var(--font-size-caption); }
+
+/* 第三方登录：分隔线 + 等宽按钮 */
+.or { display: flex; align-items: center; gap: var(--spacing-12); margin-block: var(--spacing-24) var(--spacing-16);
+      color: var(--text-tertiary); font-size: var(--font-size-11); }
+.or::before, .or::after { content: ''; flex: 1; block-size: var(--border-width); background: var(--border-subtle); }
+.providers { display: grid; gap: var(--spacing-8); }
+.providers .button { min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-body); }
+.providers .button + .button { margin: 0; }
+
 /* 页脚：分隔 + 版本与版权（视觉收口） */
 .foot { margin-block-start: var(--spacing-32); padding-block-start: var(--spacing-16);
         border-block-start: var(--border-width) solid var(--border-subtle);
@@ -98,6 +111,22 @@ body {
 </style>
 </head>
 <body>
+<div class="corner">
+  <!-- 主题：产品里是 `components/theme-toggle`（设计类 .seg，选中项 .is-on）。这里按浅色设计，故「浅色」为选中 -->
+  <span class="seg theme-toggle" role="group" aria-label="主题">
+    <button type="button" class="is-on" aria-pressed="true">浅色</button>
+    <button type="button" aria-pressed="false">暗色</button>
+  </span>
+  <!-- 语言：产品里是基础件下拉，视觉走设计类 .input；选项用各语言的母语写法，「跟随系统」为一等选项 -->
+  <select class="input" aria-label="语言">
+    <option selected>跟随系统（中文）</option>
+    <option>简体中文</option>
+    <option>繁體中文</option>
+    <option>English</option>
+    <option>日本語</option>
+  </select>
+</div>
+
 <div class="screen">
   <main class="auth" aria-labelledby="auth-title">
 
@@ -133,6 +162,14 @@ body {
 
       <button class="button button--block btn-primary is-solid" type="submit">登录</button>
     </form>
+
+    <!-- 第三方登录：名单由入口配置（`/user/entry` 的 form / oauth 段）决定，这里先两名占位；
+         品牌图标尚未进图标集，先用文字按钮 -->
+    <p class="or">或</p>
+    <div class="providers">
+      <button class="button btn-ghost" type="button">使用 GitHub 继续</button>
+      <button class="button btn-ghost" type="button">使用 Google 继续</button>
+    </div>
 
     <div class="foot">
       <span class="foot__mark">Celadon 2.0</span>
