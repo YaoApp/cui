@@ -5,17 +5,14 @@
 
 import type { BridgeFailure } from './result'
 import { i18n } from '../i18n'
+import { codeToKey } from '../i18n/code-key'
+
+export { codeToKey } from '../i18n/code-key'
 
 type Translate = (key: string, options?: Record<string, unknown>) => string
 
 /** 机器码 → 语言包 key：**码是 snake_case，key 是 lowerCamelCase**（`check-i18n` 的命名约定）。
  *  `theme.expected_light_or_dark` → `theme.expectedLightOrDark`；前缀 `bridge.error.` 由调用处加。 */
-export function codeToKey(code: string): string {
-  return code
-    .split('.')
-    .map((segment) => segment.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase()))
-    .join('.')
-}
 
 /** i18next 取不到 key 时会把 key 原样返回（或用 `defaultValue`），据此判断缺翻译。 */
 export function bridgeErrorText(t: Translate, failure: BridgeFailure): string {

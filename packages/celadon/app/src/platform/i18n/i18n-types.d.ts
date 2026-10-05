@@ -92,6 +92,21 @@ export type I18nKey =
   | 'bridge.write'
   | 'client.bootFailed'
   | 'client.bootRetry'
+  | 'data.error.deleteFailed'
+  | 'data.error.forbidden'
+  | 'data.error.getFailed'
+  | 'data.error.insufficientScope'
+  | 'data.error.invalidRequest'
+  | 'data.error.postFailed'
+  | 'data.error.putFailed'
+  | 'data.error.service.notReady'
+  | 'data.error.tokenMissing'
+  | 'data.error.transport.crossOrigin'
+  | 'data.error.transport.network'
+  | 'data.error.transport.parse'
+  | 'data.error.transport.status'
+  | 'data.error.transport.timeout'
+  | 'data.error.unauthorized'
   | 'header.refresh'
   | 'home.client'
   | 'home.clientDesktop'
@@ -298,6 +313,21 @@ declare module 'i18next' {
         'bridge.write': string
         'client.bootFailed': string
         'client.bootRetry': string
+        'data.error.deleteFailed': string
+        'data.error.forbidden': string
+        'data.error.getFailed': string
+        'data.error.insufficientScope': string
+        'data.error.invalidRequest': string
+        'data.error.postFailed': string
+        'data.error.putFailed': string
+        'data.error.service.notReady': string
+        'data.error.tokenMissing': string
+        'data.error.transport.crossOrigin': string
+        'data.error.transport.network': string
+        'data.error.transport.parse': string
+        'data.error.transport.status': string
+        'data.error.transport.timeout': string
+        'data.error.unauthorized': string
         'header.refresh': string
         'home.client': string
         'home.clientDesktop': string
