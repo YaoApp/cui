@@ -398,6 +398,8 @@ if (isClient) {
     stack.append(card)
   }
   const stackEl = document.querySelector('.client-stack')
+  const clientTag = document.querySelector('.client-server')
+  if (card && clientTag) card.prepend(clientTag)   /* 放进卡片：定位相对卡片 */
   if (stackEl) stackEl.after(wrap)                   /* 独立容器：与卡片分开，位置与服务器选择页一致 */
   else if (card) card.after(wrap)
   const signUpLink = document.querySelector('a[href="./register.html"]')
