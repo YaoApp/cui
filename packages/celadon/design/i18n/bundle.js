@@ -87,7 +87,7 @@ window.CELADON_I18N = {
         "or": "OR",
         "nextBusy": "Checking…",
         "errEmail": "That does not look like an email address.",
-        "serversTitle": "Choose a server",
+        "serversTitle": "Choose your Yao Agents server",
         "serversSubtitle": "Connect to your Yao Engine server",
         "cloudSection": "Cloud servers",
         "customSection": "Custom server",
@@ -97,11 +97,13 @@ window.CELADON_I18N = {
         "cloudLoadFailed": "Could not load the cloud server list",
         "cloudRetry": "Retry",
         "cloudEmpty": "No cloud servers available",
-        "cloudSelectHint": "Select a cloud server",
+        "cloudSelectHint": "Choose a server",
         "customHint": "Enter the full server address, scheme included",
         "registerHelper": "Some servers are invite-only and need a code to sign up. You can request one on the site.",
         "registerLink": "Request an invitation code",
-        "customOption": "Custom server"
+        "customOption": "Custom",
+        "serverApac": "Yao Agents official · Asia Pacific",
+        "serverCn": "Yao Agents official · China"
       },
       "inbox": {
         "unreadCount": "{count} unread",
@@ -861,7 +863,7 @@ window.CELADON_I18N = {
         "or": "または",
         "nextBusy": "確認中…",
         "errEmail": "メールアドレスの形式が正しくありません。",
-        "serversTitle": "サーバーを選択",
+        "serversTitle": "Yao Agents サーバーを選択",
         "serversSubtitle": "Yao Engine サーバーに接続します",
         "cloudSection": "クラウドサーバー",
         "customSection": "カスタムサーバー",
@@ -871,11 +873,13 @@ window.CELADON_I18N = {
         "cloudLoadFailed": "クラウドサーバー一覧を読み込めませんでした",
         "cloudRetry": "再試行",
         "cloudEmpty": "利用できるクラウドサーバーがありません",
-        "cloudSelectHint": "クラウドサーバーを選択",
+        "cloudSelectHint": "サーバーを選択",
         "customHint": "完全なサーバーアドレスを入力してください（スキームを含む）",
         "registerHelper": "一部のサーバーは招待制で、登録に招待コードが必要です。サイトで申請できます。",
         "registerLink": "招待コードを申請する",
-        "customOption": "カスタムサーバー"
+        "customOption": "カスタム",
+        "serverApac": "Yao Agents 公式・アジア太平洋",
+        "serverCn": "Yao Agents 公式・中国"
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1635,7 +1639,7 @@ window.CELADON_I18N = {
         "or": "或",
         "nextBusy": "正在检查…",
         "errEmail": "邮箱格式不对，检查一下再试。",
-        "serversTitle": "选择服务器",
+        "serversTitle": "选择 Yao Agents 服务器",
         "serversSubtitle": "连接您的 Yao Engine 服务器",
         "cloudSection": "云服务器",
         "customSection": "自定义服务器",
@@ -1645,11 +1649,13 @@ window.CELADON_I18N = {
         "cloudLoadFailed": "云服务器列表加载失败",
         "cloudRetry": "重试",
         "cloudEmpty": "暂无可用云服务器",
-        "cloudSelectHint": "选择云服务器",
+        "cloudSelectHint": "选择服务器",
         "customHint": "填写完整服务器地址（含协议）",
         "registerHelper": "部分服务器为邀请制，需要邀请码才能注册。可前往站点申请。",
         "registerLink": "前往注册申请邀请码",
-        "customOption": "自建服务器"
+        "customOption": "自定义",
+        "serverApac": "Yao Agents 官方亚太",
+        "serverCn": "Yao Agents 官方中国"
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2409,7 +2415,7 @@ window.CELADON_I18N = {
         "or": "或",
         "nextBusy": "正在檢查…",
         "errEmail": "電子郵件格式不對，檢查一下再試。",
-        "serversTitle": "選擇伺服器",
+        "serversTitle": "選擇 Yao Agents 伺服器",
         "serversSubtitle": "連接您的 Yao Engine 伺服器",
         "cloudSection": "雲端伺服器",
         "customSection": "自訂伺服器",
@@ -2419,11 +2425,13 @@ window.CELADON_I18N = {
         "cloudLoadFailed": "雲端伺服器清單載入失敗",
         "cloudRetry": "重試",
         "cloudEmpty": "暫無可用的雲端伺服器",
-        "cloudSelectHint": "選擇雲端伺服器",
+        "cloudSelectHint": "選擇伺服器",
         "customHint": "填寫完整伺服器位址（含協定）",
         "registerHelper": "部分伺服器為邀請制，需要邀請碼才能註冊。可前往站點申請。",
         "registerLink": "前往註冊申請邀請碼",
-        "customOption": "自訂伺服器"
+        "customOption": "自訂",
+        "serverApac": "Yao Agents 官方亞太",
+        "serverCn": "Yao Agents 官方中國"
       },
       "inbox": {
         "unreadCount": "{count} 未讀",
