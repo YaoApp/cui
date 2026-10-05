@@ -86,7 +86,8 @@ body {
 .brand__name { font-size: var(--font-size-20); font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin);
                background: linear-gradient(105deg, var(--brand-mark-from) 0%, var(--brand-mark-to) 100%);
                -webkit-background-clip: text; background-clip: text; color: transparent; }
-.ctrl { display: flex; align-items: center; gap: var(--spacing-8); }
+.ctrl-wrap { position: relative; margin-block-start: var(--spacing-24); }
+.ctrl { display: flex; align-items: center; justify-content: center; gap: var(--spacing-8); }
 .ctrl__sep { inline-size: var(--border-width); block-size: var(--spacing-16); background: var(--border-default); }
 .ctrl__btn { display: inline-flex; align-items: center; gap: var(--spacing-8); border: 0; background: transparent;
              color: var(--text-secondary); font: inherit; font-size: var(--font-size-13); cursor: pointer;
@@ -96,7 +97,7 @@ body {
 .ctrl__btn .icon { inline-size: 16px; block-size: 16px; display: block; }
 
 /* 菜单：浮层（token 的层级/圆角/阴影） */
-.menu { position: absolute; inset-block-start: calc(100% + var(--spacing-4)); inset-inline-end: 0;
+.menu { position: absolute; inset-block-end: calc(100% + var(--spacing-4)); inset-inline-start: 50%; transform: translateX(-50%);
         min-inline-size: 176px; padding: var(--spacing-4); z-index: var(--z-base);
         background: var(--background-surface); border: var(--border-width) solid var(--border-default);
         border-radius: var(--radius-large); box-shadow: var(--shadow-overlay); }
@@ -218,35 +219,6 @@ body {
 
 <div class="page">
 
-  <header class="top">
-    <span class="brand">
-      <img class="brand__mark" src="../logo-mark-celadon.svg" alt="" width="32" height="27">
-      <span class="brand__name">Yao Agents</span>
-    </span>
-
-    <span class="ctrl">
-      <button class="ctrl__btn" type="button" id="lang-btn" aria-haspopup="menu" aria-expanded="false">
-        <span id="lang-label">English</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-globe"></use></svg>
-      </button>
-      <span class="ctrl__sep" aria-hidden="true"></span>
-      <button class="ctrl__btn" type="button" id="theme-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Theme">
-        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use id="theme-icon" href="#i-sun"></use></svg>
-      </button>
-    </span>
-
-    <div class="menu" id="lang-menu" role="menu" hidden>
-      <button type="button" role="menuitemradio" data-lang="system">跟随系统（中文）</button>
-      <button type="button" role="menuitemradio" data-lang="zh-CN">简体中文</button>
-      <button type="button" role="menuitemradio" data-lang="zh-TW">繁體中文</button>
-      <button type="button" role="menuitemradio" data-lang="en">English</button>
-      <button type="button" role="menuitemradio" data-lang="ja">日本語</button>
-    </div>
-
-    <div class="menu" id="theme-menu" role="menu" hidden style="inset-inline-end:0">
-      <button type="button" role="menuitemradio" data-theme="light"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"></use></svg><span data-i18n="themeLight">Light</span></button>
-      <button type="button" role="menuitemradio" data-theme="dark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"></use></svg><span data-i18n="themeDark">Dark</span></button>
-    </div>
-  </header>
 
   <div class="stage">
     <main class="card" aria-labelledby="auth-title">
@@ -283,15 +255,35 @@ body {
       </p>
       <button class="button button--block button--inverse" type="button" id="connect" data-i18n="connect">Connect</button>
 
-      <p class="invite"><span data-i18n="registerHelper">Some servers are invite-only and need a code to sign up. You can request one on the site.</span> <a class="link" href="https://yaoagents.com/servers" target="_blank" rel="noopener" data-i18n="registerLink">Request an invitation code</a></p>
     </main>
+
+  <div class="ctrl-wrap">
+      <span class="ctrl">
+        <button class="ctrl__btn" type="button" id="lang-btn" aria-haspopup="menu" aria-expanded="false">
+          <span id="lang-label">English</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-globe"></use></svg>
+        </button>
+        <span class="ctrl__sep" aria-hidden="true"></span>
+        <button class="ctrl__btn" type="button" id="theme-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Theme">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use id="theme-icon" href="#i-sun"></use></svg>
+        </button>
+      </span>
+  
+      <div class="menu" id="lang-menu" role="menu" hidden>
+        <button type="button" role="menuitemradio" data-lang="system">跟随系统（中文）</button>
+        <button type="button" role="menuitemradio" data-lang="zh-CN">简体中文</button>
+        <button type="button" role="menuitemradio" data-lang="zh-TW">繁體中文</button>
+        <button type="button" role="menuitemradio" data-lang="en">English</button>
+        <button type="button" role="menuitemradio" data-lang="ja">日本語</button>
+      </div>
+  
+      <div class="menu" id="theme-menu" role="menu" hidden style="inset-inline-end:0">
+        <button type="button" role="menuitemradio" data-theme="light"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"></use></svg><span data-i18n="themeLight">Light</span></button>
+        <button type="button" role="menuitemradio" data-theme="dark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"></use></svg><span data-i18n="themeDark">Dark</span></button>
+      </div>
+    </header>
+  </div>
   </div>
 
-  <footer class="bottom">
-    <a class="link" href="#" data-i18n="termsService">Terms of Service</a>
-    <span>·</span>
-    <a class="link" href="#" data-i18n="termsPrivacy">Privacy Policy</a>
-  </footer>
 
 </div>
 
