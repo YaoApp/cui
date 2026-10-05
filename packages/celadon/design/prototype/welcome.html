@@ -409,6 +409,23 @@ body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desk
 .nav .guide__action:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 /* 用户行原本也有 margin-top:auto，会与指引卡均分空余 —— 这里让位给卡片，使卡紧贴用户行 */
 .nav .user { margin-block-start: 0; }
+/* 下半区上半：最近对话；下半：助手卡（两行式，头像 + 名称/说明） */
+.nav .side-block { display: flex; flex-direction: column; gap: var(--spacing-4); padding: var(--spacing-4) var(--spacing-8); }
+.nav .side-label { padding: var(--spacing-4) var(--spacing-4) 0; color: var(--text-tertiary); font-size: var(--font-size-12); }
+.nav .chat-row { display: flex; align-items: center; gap: var(--spacing-8); padding: var(--spacing-8);
+  border-radius: var(--radius-small); cursor: pointer; }
+.nav .chat-row:hover { background: var(--background-hover); }
+.nav .chat-dot { inline-size: var(--spacing-8); block-size: var(--spacing-8); border-radius: 50%; background: var(--border-control); flex: none; }
+.nav .chat-title { font-size: var(--font-size-13); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav .assistant-card { display: flex; align-items: center; gap: var(--spacing-8); padding: var(--spacing-8);
+  border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-medium); cursor: pointer; }
+.nav .assistant-card:hover { background: var(--background-hover); }
+.nav .assistant-avatar { inline-size: var(--spacing-24); block-size: var(--spacing-24); border-radius: 50%; flex: none;
+  display: inline-flex; align-items: center; justify-content: center; background: var(--brand-soft); color: var(--brand-ink);
+  font-size: var(--font-size-12); font-weight: var(--font-weight-heavy); }
+.nav .assistant-text { display: flex; flex-direction: column; min-inline-size: 0; }
+.nav .assistant-name { font-size: var(--font-size-13); font-weight: var(--font-weight-medium); }
+.nav .assistant-desc { color: var(--text-tertiary); font-size: var(--font-size-11); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
 <body class="celadon">
@@ -571,6 +588,24 @@ body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desk
     </div>
     <div class="navigation-separator"></div>
       <!-- 新手指引：导航下半区的胶囊卡（首屏引导，产品级里后续可换成一次性提示） -->
+      <!-- 下半区上半：最近对话；下半：两个助手卡（首屏可见，未接数据） -->
+      <div class="side-block">
+        <div class="side-label" data-i18n="ui.welcome.chats">对话</div>
+        <div class="chat-row"><span class="chat-dot"></span><span class="chat-title" data-i18n="ui.welcome.chat1">整理本周进展</span></div>
+        <div class="chat-row"><span class="chat-dot"></span><span class="chat-title" data-i18n="ui.welcome.chat2">读合同找风险条款</span></div>
+        <div class="chat-row"><span class="chat-dot"></span><span class="chat-title" data-i18n="ui.welcome.chat3">把需求写成清单</span></div>
+      </div>
+      <div class="side-block">
+        <div class="assistant-card">
+          <span class="assistant-avatar">A</span>
+          <span class="assistant-text"><span class="assistant-name" data-i18n="ui.welcome.assistA">通用助手</span><span class="assistant-desc" data-i18n="ui.welcome.assistADesc">什么都能接，默认用它</span></span>
+        </div>
+        <div class="assistant-card">
+          <span class="assistant-avatar">B</span>
+          <span class="assistant-text"><span class="assistant-name" data-i18n="ui.welcome.assistB">文档助手</span><span class="assistant-desc" data-i18n="ui.welcome.assistBDesc">读长文、出摘要与 diff</span></span>
+        </div>
+      </div>
+
       <div class="guide">
         <span class="guide__title" data-i18n="ui.welcome.guideTitle">第一次使用</span>
         <span class="guide__body" data-i18n="ui.welcome.guideBody">写下一个任务，看它调用哪些工具，结果里再认领要改的地方。</span>

@@ -176,7 +176,15 @@ window.CELADON_I18N = {
         "welcomeHint": "Or look at an example first",
         "guideTitle": "First time here",
         "guideBody": "Write a task, watch which tools it calls, then claim what needs changing in the result.",
-        "guideAction": "Show me"
+        "guideAction": "Show me",
+        "chats": "Chats",
+        "chat1": "Summarise this week",
+        "chat2": "Find risky clauses",
+        "chat3": "Turn the brief into a list",
+        "assistA": "General",
+        "assistADesc": "Takes anything; the default",
+        "assistB": "Documents",
+        "assistBDesc": "Reads long files, drafts summaries and diffs"
       }
     },
     "sample": {
@@ -973,7 +981,15 @@ window.CELADON_I18N = {
         "welcomeHint": "まず例を見ることもできます",
         "guideTitle": "はじめての方へ",
         "guideBody": "タスクを書くと、使う道具と結果が並びます。直すところは結果から選べます。",
-        "guideAction": "ガイドを見る"
+        "guideAction": "ガイドを見る",
+        "chats": "チャット",
+        "chat1": "今週の進捗を整理",
+        "chat2": "契約書のリスク条項を探す",
+        "chat3": "要件をチェックリストに",
+        "assistA": "汎用アシスタント",
+        "assistADesc": "何でも担当。既定はこれ",
+        "assistB": "ドキュメント",
+        "assistBDesc": "長文を読み、要約と差分を出す"
       }
     },
     "sample": {
@@ -1770,7 +1786,15 @@ window.CELADON_I18N = {
         "welcomeHint": "也可以先看看示例",
         "guideTitle": "第一次使用",
         "guideBody": "写下一个任务，看它调用哪些工具，结果里再认领要改的地方。",
-        "guideAction": "看引导"
+        "guideAction": "看引导",
+        "chats": "对话",
+        "chat1": "整理本周进展",
+        "chat2": "读合同找风险条款",
+        "chat3": "把需求写成清单",
+        "assistA": "通用助手",
+        "assistADesc": "什么都能接，默认用它",
+        "assistB": "文档助手",
+        "assistBDesc": "读长文、出摘要与diff"
       }
     },
     "sample": {
@@ -2567,7 +2591,15 @@ window.CELADON_I18N = {
         "welcomeHint": "也可以先看看範例",
         "guideTitle": "第一次使用",
         "guideBody": "寫下一個任務，看它呼叫哪些工具，結果裡再認領要改的地方。",
-        "guideAction": "看引導"
+        "guideAction": "看引導",
+        "chats": "對話",
+        "chat1": "整理本週進展",
+        "chat2": "讀合約找風險條款",
+        "chat3": "把需求寫成清單",
+        "assistA": "通用助手",
+        "assistADesc": "什麼都能接，預設用它",
+        "assistB": "文件助手",
+        "assistBDesc": "讀長文、出摘要與 diff"
       }
     },
     "sample": {

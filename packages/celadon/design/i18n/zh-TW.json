@@ -174,7 +174,15 @@
       "welcomeHint": "也可以先看看範例",
       "guideTitle": "第一次使用",
       "guideBody": "寫下一個任務，看它呼叫哪些工具，結果裡再認領要改的地方。",
-      "guideAction": "看引導"
+      "guideAction": "看引導",
+      "chats": "對話",
+      "chat1": "整理本週進展",
+      "chat2": "讀合約找風險條款",
+      "chat3": "把需求寫成清單",
+      "assistA": "通用助手",
+      "assistADesc": "什麼都能接，預設用它",
+      "assistB": "文件助手",
+      "assistBDesc": "讀長文、出摘要與 diff"
     }
   },
   "sample": {

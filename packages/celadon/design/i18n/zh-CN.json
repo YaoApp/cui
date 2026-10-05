@@ -174,7 +174,15 @@
       "welcomeHint": "也可以先看看示例",
       "guideTitle": "第一次使用",
       "guideBody": "写下一个任务，看它调用哪些工具，结果里再认领要改的地方。",
-      "guideAction": "看引导"
+      "guideAction": "看引导",
+      "chats": "对话",
+      "chat1": "整理本周进展",
+      "chat2": "读合同找风险条款",
+      "chat3": "把需求写成清单",
+      "assistA": "通用助手",
+      "assistADesc": "什么都能接，默认用它",
+      "assistB": "文档助手",
+      "assistBDesc": "读长文、出摘要与diff"
     }
   },
   "sample": {
