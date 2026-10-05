@@ -40,7 +40,9 @@ beforeEach(() => {
 
 describe('the user domain declarations', () => {
   it('declares the entry line with its methods and paths', () => {
-    expect(api.entryConfig).toEqual({ method: 'GET', path: '/user/entry' })   // 语言由 ctx 带，域层不传
+    // 方言：本接口读 query；值由查询层从 ctx 取，调用点不传
+    expect(api.entryConfig({ locale: 'zh-CN' })).toEqual({ method: 'GET', path: '/user/entry?locale=zh-CN' })
+    expect(api.entryConfig()).toEqual({ method: 'GET', path: '/user/entry' })
     expect(api.entryVerify).toEqual({ method: 'POST', path: '/user/entry/verify' })
     expect(api.entryRegister).toEqual({ method: 'POST', path: '/user/entry/register' })
     expect(api.entryLogin).toEqual({ method: 'POST', path: '/user/entry/login' })
@@ -69,7 +71,7 @@ describe('the user key family', () => {
   it('derives every key from its declaration, under one family root', () => {
     expect(userKeys.all).toEqual(['user'])
     expect(userKeys.logout()).toEqual(['user', 'logout', 'POST', '/user/logout'])
-    expect(userKeys.entryConfig()).toEqual(['user', 'entry', 'config', 'GET', '/user/entry'])
+    expect(userKeys.entryConfig('zh-CN')).toEqual(['user', 'entry', 'config', 'zh-CN', 'GET', '/user/entry?locale=zh-CN'])
     expect(userKeys.entryCaptcha('c1')).toEqual(['user', 'entry', 'captcha', 'c1', 'GET', '/user/entry/captcha?captcha_id=c1'])
     expect(userKeys.entryVerify()).toEqual(['user', 'entry', 'verify', 'POST', '/user/entry/verify'])
     expect(userKeys.entryRegister()).toEqual(['user', 'entry', 'register', 'POST', '/user/entry/register'])
@@ -86,6 +88,7 @@ describe('the user key family', () => {
 
 
   it('covers the no-argument defaults of the parameterised keys', () => {
+    expect(userKeys.entryConfig()).toEqual(['user', 'entry', 'config', '', 'GET', '/user/entry'])
     expect(userKeys.entryCaptcha()).toEqual(['user', 'entry', 'captcha', '', 'GET', '/user/entry/captcha'])
     expect(userKeys.oauthAuthorize('github')).toEqual(['user', 'oauth', 'github', 'authorize', 'GET', '/user/oauth/github/authorize'])
   })
@@ -97,7 +100,7 @@ describe('the user key family', () => {
 
 describe('the user read queries pair a key with a declaration', () => {
   it('pairs the reads as-is', () => {
-    expect(entryConfigQuery()).toEqual({ key: userKeys.entryConfig(), request: api.entryConfig })
+    expect(entryConfigQuery()).toEqual({ key: userKeys.entryConfig('zh-CN'), request: api.entryConfig({ locale: 'zh-CN' }) })
     expect(entryCaptchaQuery('c1')).toEqual({ key: userKeys.entryCaptcha('c1'), request: api.entryCaptcha({ captcha_id: 'c1' }) })
     expect(oidcKeysQuery()).toEqual({ key: userKeys.oidcKeys(), request: api.oidcKeys })
     expect(oauthAuthorizeQuery('google', 'https://x/back')).toEqual({

@@ -17,30 +17,38 @@
 
 ## 声明一览
 
-| 声明 | 调用 | 语言从哪来 |
-| --- | --- | --- |
-| `entryConfig` | `GET /user/entry` | query（`locale`） |
-| `entryVerify` | `POST /user/entry/verify` | body `locale`，回落 query |
-| `entryRegister` | `POST /user/entry/register` | body `locale` |
-| `entryLogin` | `POST /user/entry/login` | body `locale` |
-| `entryOtp` | `POST /user/entry/otp` | 由 ctx 带在 query |
-| `entryCaptcha` | `GET /user/entry/captcha` | —（可选 `captcha_id`） |
-| `entryInvite` | `POST /user/entry/invite/verify` | 由 ctx 带在 query |
-| `logout` | `POST /user/logout` | — |
-| `oauthAuthorize` | `GET /user/oauth/:id/authorize` | 由 ctx 带在 query |
-| `oauthCallback` | `POST /user/oauth/:id/callback` | body `locale` |
-| `deviceAuthorize` | `POST /oauth/device/authorize` | — |
-| `deviceFlowStart` | `POST /user/oauth/:providerId/device/authorize` | — |
-| `deviceFlowToken` | `POST /user/oauth/:providerId/device/token` | body `locale` |
-| `oidcKeys` | `GET /oauth/jwks` | — |
+| Declaration | Call |
+| --- | --- |
+| `entryConfig` | `GET /user/entry` |
+| `entryVerify` | `POST /user/entry/verify` |
+| `entryRegister` | `POST /user/entry/register` |
+| `entryLogin` | `POST /user/entry/login` |
+| `entryOtp` | `POST /user/entry/otp` |
+| `entryCaptcha` | `GET /user/entry/captcha` |
+| `entryInvite` | `POST /user/entry/invite/verify` |
+| `logout` | `POST /user/logout` |
+| `oauthAuthorize` | `GET /user/oauth/:id/authorize` |
+| `oauthCallback` | `POST /user/oauth/:id/callback` |
+| `deviceAuthorize` | `POST /oauth/device/authorize` |
+| `deviceFlowStart` | `POST /user/oauth/:providerId/device/authorize` |
+| `deviceFlowToken` | `POST /user/oauth/:providerId/device/token` |
+| `oidcKeys` | `GET /oauth/jwks` |
 
 注册 · 登录 · 邀请 · 重发口令这四条带**临时令牌**，经 `RequestOptions.headers` 放 `Authorization`。
 它不进凭据库，调用完即弃。
 
+## 语言从哪来
+
+**只有一个来源：ctx。** 调用点永远不传 `locale` —— 不塞 body、不拼 query、不加头。`send()` 会把平台当前语言
+自动放进请求元数据；本层再按**各接口自己的方言**把它送到位（有的读 query，登录一线多数读 body，
+而登录族 handler 干脆只认头）。**方言是本层的实现细节，不是域的对外契约。**
+
+服务端目前在这件事上并不统一。我们**先在封装层规范化**，后续由服务端对齐；在那之前，方言适配只留在
+这一处，它上面的任何一层都不需要知道。
+
 ## 本域遵守的规矩
 
-- **元数据由 ctx 带**：`send()` 自动加 query `locale`/`accept` 与头 `X-Locale`/`Accept-Language`/`X-Yao-Accept`，
-  调用点什么都不传。登录相关接口**只认头**，而 `GET /user/entry` **只认 query** —— 这就是上表那一列的意义。
+- **元数据由 ctx 带**：`send()` 给每个请求带上语言与 `accept`，调用点什么都不传（见上一节）。
 - **失败是值、按码翻译**：出口统一成 `{ code, params, message }`；界面取语言包的 `data.error.<code>`
   （`utils/error-text.ts`），**不看 `message`**。
 - **本层不做传输**：没有 `fetch`，除临时令牌外不拼 `Authorization`，不读写 Cookie。

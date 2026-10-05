@@ -21,7 +21,7 @@ import {
 export const userKeys = {
   all: ['user'] as const,
   logout: () => keyOf(logout, [...userKeys.all, 'logout']),
-  entryConfig: () => keyOf(entryConfig, [...userKeys.all, 'entry', 'config']),
+  entryConfig: (locale?: string) => keyOf(entryConfig({ locale }), [...userKeys.all, 'entry', 'config', locale ?? '']),
   entryCaptcha: (captchaId?: string) => keyOf(entryCaptcha({ captcha_id: captchaId }), [...userKeys.all, 'entry', 'captcha', captchaId ?? '']),
   entryVerify: () => keyOf(entryVerify, [...userKeys.all, 'entry', 'verify']),
   entryRegister: () => keyOf(entryRegister, [...userKeys.all, 'entry', 'register']),

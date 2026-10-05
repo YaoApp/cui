@@ -44,9 +44,16 @@ import type {
   OAuthCallbackRequest,
 } from './types'
 
-/** 语言由平台给：调用点不传 `locale`（`05 §1`：请求元数据自动带上；要覆盖时显式给）。 */
+/** **语言只有一个来源：ctx**（`platform/client/context.ts` 的 `currentPreferences()`）。
+ *  **业务方无感**：调用点永远不传 `locale`；各接口的**方言**（query / body / 头）由这一层按接口适配，
+ *  服务端以后再对齐（`05 §1`：请求元数据自动带上，要覆盖时才显式给）。 */
+function localeOf(): string {
+  return currentPreferences().locale
+}
+
+/** 同上，给 body 方言的接口用：调用点给的 `locale` 优先（测试或特殊场景），否则取 ctx。 */
 function withLocale<T extends { locale?: string }>(input: T): T {
-  return { ...input, locale: input.locale ?? currentPreferences().locale }
+  return { ...input, locale: input.locale ?? localeOf() }
 }
 
 /** 临时令牌的请求头（下一步调用的凭据；调用完即弃，**不落任何存储**）。 */
@@ -57,7 +64,7 @@ function temporaryToken(token: string): HeadersInit {
 /* ===== 读 ===== */
 
 /** 入口配置。 */
-export const entryConfigQuery = () => ({ key: userKeys.entryConfig(), request: entryConfig })
+export const entryConfigQuery = () => ({ key: userKeys.entryConfig(localeOf()), request: entryConfig({ locale: localeOf() }) })
 
 /** 图形/人机验证。 */
 export const entryCaptchaQuery = (captchaId?: string) => ({ key: userKeys.entryCaptcha(captchaId), request: entryCaptcha({ captcha_id: captchaId }) })

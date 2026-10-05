@@ -18,31 +18,41 @@ keys for verifying an ID token.
 
 ## The declarations
 
-| Declaration | Call | Language comes from |
-| --- | --- | --- |
-| `entryConfig` | `GET /user/entry` | query (`locale`) |
-| `entryVerify` | `POST /user/entry/verify` | body `locale`, falling back to the query |
-| `entryRegister` | `POST /user/entry/register` | body `locale` |
-| `entryLogin` | `POST /user/entry/login` | body `locale` |
-| `entryOtp` | `POST /user/entry/otp` | query via the context |
-| `entryCaptcha` | `GET /user/entry/captcha` | — (optional `captcha_id`) |
-| `entryInvite` | `POST /user/entry/invite/verify` | query via the context |
-| `logout` | `POST /user/logout` | — |
-| `oauthAuthorize` | `GET /user/oauth/:id/authorize` | query via the context |
-| `oauthCallback` | `POST /user/oauth/:id/callback` | body `locale` |
-| `deviceAuthorize` | `POST /oauth/device/authorize` | — |
-| `deviceFlowStart` | `POST /user/oauth/:providerId/device/authorize` | — |
-| `deviceFlowToken` | `POST /user/oauth/:providerId/device/token` | body `locale` |
-| `oidcKeys` | `GET /oauth/jwks` | — |
+| Declaration | Call |
+| --- | --- |
+| `entryConfig` | `GET /user/entry` |
+| `entryVerify` | `POST /user/entry/verify` |
+| `entryRegister` | `POST /user/entry/register` |
+| `entryLogin` | `POST /user/entry/login` |
+| `entryOtp` | `POST /user/entry/otp` |
+| `entryCaptcha` | `GET /user/entry/captcha` |
+| `entryInvite` | `POST /user/entry/invite/verify` |
+| `logout` | `POST /user/logout` |
+| `oauthAuthorize` | `GET /user/oauth/:id/authorize` |
+| `oauthCallback` | `POST /user/oauth/:id/callback` |
+| `deviceAuthorize` | `POST /oauth/device/authorize` |
+| `deviceFlowStart` | `POST /user/oauth/:providerId/device/authorize` |
+| `deviceFlowToken` | `POST /user/oauth/:providerId/device/token` |
+| `oidcKeys` | `GET /oauth/jwks` |
 
 Register, login, invite and OTP carry a **temporary token** in `Authorization` via `RequestOptions.headers`.
 It never enters the credential store and is dropped after the call.
 
+## Where the language comes from
+
+**One source: the context.** A caller never passes `locale` — not in a body, not in a query, not as a header.
+`send()` puts the platform's current language into request metadata automatically; this layer then delivers it
+in whatever **dialect** each endpoint happens to read (one reads the query, most of the sign-in line reads the
+body, and the sign-in handlers only look at headers at all). That dialect is an implementation detail of this
+layer and is not part of the domain's public surface.
+
+The backend is not uniform about this yet. We normalise here first, and the service is expected to align later;
+until then the dialect handling stays in this one place so nothing above it has to know.
+
 ## Rules this domain follows
 
-- **The context carries the metadata.** `send()` adds `locale` and `accept` as query parameters and
-  `X-Locale` / `Accept-Language` / `X-Yao-Accept` as headers; call sites pass nothing. The sign-in endpoints
-  read only the headers, `GET /user/entry` only the query — hence the table above.
+- **The context carries the metadata.** `send()` adds the language and `accept` to every request; call sites
+  pass nothing (see the section above).
 - **Failures are values, read by code.** The transport normalises everything to `{ code, params, message }`;
   the screen renders `data.error.<code>` from the language packs (`utils/error-text.ts`), never `message`.
 - **No transport here.** No `fetch`, no `Authorization` string building beyond the temporary token, no cookies.

@@ -37,9 +37,11 @@ function withQuery(path: string, query: Record<string, string | undefined>): str
 }
 
 /** `GET /user/entry`：入口配置（标题 · 表单 · 验证码 · 第三方 · 邀请）。
- *  **语言不在这里传**：`send()` 按 ctx 自动带 query `locale`/`accept` 与头 `Accept-Language`/`X-Locale`
- *  （登录相关接口只认头，不读 query —— `request/context.ts` 有出处）。 */
-export const entryConfig: Request<void, EntryConfig> = { method: 'GET', path: '/user/entry' }
+ *  **语言值来自 ctx，不来自调用点**；这个接口的方言是 **query**，所以由查询层把 ctx 的 locale 拼进来。 */
+export const entryConfig = (query: { locale?: string } = {}): Request<void, EntryConfig> => ({
+  method: 'GET',
+  path: withQuery('/user/entry', { locale: query.locale }),
+})
 
 /** `POST /user/entry/verify`：判定登录还是注册，返回**临时令牌**。 */
 export const entryVerify: Request<EntryVerifyRequest, EntryVerifyResponse> = {
