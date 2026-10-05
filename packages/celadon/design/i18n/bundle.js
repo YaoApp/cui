@@ -812,7 +812,7 @@ window.CELADON_I18N = {
         "errOtp": "コードが違うか期限切れです。再取得してください。",
         "errTerms": "先に規約をお読みいただき同意してください。",
         "errNetwork": "サービスに接続できません。ネットワークかサーバーアドレスをご確認ください。",
-        "entryTitle": "Yao Agents アカウントに",
+        "entryTitle": "Yao Agents アカウントに登録またはログイン",
         "next": "次へ",
         "signUpNow": "新規登録",
         "noAccount": "アカウントをお持ちでないですか？",
@@ -823,7 +823,7 @@ window.CELADON_I18N = {
         "themeAuto": "自動",
         "themeLight": "ライト",
         "themeDark": "ダーク",
-        "entryTitleLine2": "登録またはログイン"
+        "entryTitleLine2": ""
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1560,7 +1560,7 @@ window.CELADON_I18N = {
         "errOtp": "动态码不对或已过期，请重新获取。",
         "errTerms": "请先阅读并同意协议。",
         "errNetwork": "连不上服务，检查网络或服务地址。",
-        "entryTitle": "注册或登录你的",
+        "entryTitle": "注册或登录你的 Yao Agents 账号",
         "next": "下一步",
         "signUpNow": "立即注册",
         "noAccount": "还没有账号？",
@@ -1571,7 +1571,7 @@ window.CELADON_I18N = {
         "themeAuto": "跟随系统",
         "themeLight": "浅色",
         "themeDark": "暗色",
-        "entryTitleLine2": "Yao Agents 账号"
+        "entryTitleLine2": ""
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2308,7 +2308,7 @@ window.CELADON_I18N = {
         "errOtp": "動態碼不對或已過期，請重新取得。",
         "errTerms": "請先閱讀並同意條款。",
         "errNetwork": "連不上服務，檢查網路或服務位址。",
-        "entryTitle": "註冊或登入你的",
+        "entryTitle": "註冊或登入你的 Yao Agents 帳號",
         "next": "下一步",
         "signUpNow": "立即註冊",
         "noAccount": "還沒有帳號？",
@@ -2319,7 +2319,7 @@ window.CELADON_I18N = {
         "themeAuto": "跟隨系統",
         "themeLight": "淺色",
         "themeDark": "暗色",
-        "entryTitleLine2": "Yao Agents 帳號"
+        "entryTitleLine2": ""
       },
       "inbox": {
         "unreadCount": "{count} 未讀",

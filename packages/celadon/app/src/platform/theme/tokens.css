@@ -162,6 +162,8 @@
   /* 中日文需要更大行距 */
   --line-height-tight: 1.25;
   /* 界面里的紧凑行高（数值与卡片）*/
+  --line-height-title: 1.6;
+  /* 大标题行高（多行标题用，比正文松、比 tight 透气）*/
   --letter-spacing-latin: -0.01em;
   /* 仅拉丁可收紧 */
   --letter-spacing-cjk: 0;

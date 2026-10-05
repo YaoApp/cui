@@ -66,12 +66,13 @@ body {
 
 /* 卡片 */
 .stage { flex: 1; display: grid; place-items: center; padding-block: var(--spacing-32); }
-.card { inline-size: min(100%, var(--auth-card)); padding: var(--spacing-48) var(--spacing-32) var(--spacing-32);
+.card { inline-size: min(100%, var(--auth-card)); padding: var(--spacing-32) var(--spacing-32) var(--spacing-32);
         background: var(--background-content); border: var(--border-width) solid var(--border-subtle);
         border-radius: var(--radius-large); box-shadow: var(--shadow-subtle); }
 /* 标题两行：每行一个块；字号用新加的 24 档 */
-.title { margin: 0 0 var(--spacing-32); font-size: var(--font-size-28); font-weight: var(--font-weight-strong); line-height: var(--line-height-normal); }
+.title { margin: 0 0 var(--spacing-32); font-size: var(--font-size-28); font-weight: var(--font-weight-strong); line-height: var(--line-height-title); }
 .title__line { display: block; }
+.title__line:empty { display: none; }   /* 某些语言标题不换行：空行收起 */
 
 /* 第三方：整宽、软底、左图标 + 居中文字 */
 .providers { display: grid; gap: var(--spacing-8); margin-block-end: var(--spacing-24); }
@@ -235,7 +236,8 @@ function applyLang(next) {
   const langKey = lang === 'system' ? 'zh-CN' : lang
   const dict = dictOf(lang)
   document.documentElement.lang = langKey
-  document.querySelectorAll('[data-i18n]').forEach((el) => { const v = dict[el.dataset.i18n]; if (v) el.textContent = v })
+  /* 值为空串也要写进去：某些语言的标题不换行，第二行必须被清空 */
+  document.querySelectorAll('[data-i18n]').forEach((el) => { const v = dict[el.dataset.i18n]; if (v !== undefined) el.textContent = v })
   document.querySelectorAll('[data-i18n-ph]').forEach((el) => { const v = dict[el.dataset.i18nPh]; if (v) el.placeholder = v })
   document.getElementById('lang-label').textContent = { system: '跟随系统（中文）', 'zh-CN': '简体中文', 'zh-TW': '繁體中文', en: 'English', ja: '日本語' }[lang]
   document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.classList.toggle('is-on', b.dataset.lang === lang))

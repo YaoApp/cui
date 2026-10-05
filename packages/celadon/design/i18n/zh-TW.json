@@ -62,7 +62,7 @@
       "errOtp": "動態碼不對或已過期，請重新取得。",
       "errTerms": "請先閱讀並同意條款。",
       "errNetwork": "連不上服務，檢查網路或服務位址。",
-      "entryTitle": "註冊或登入你的",
+      "entryTitle": "註冊或登入你的 Yao Agents 帳號",
       "next": "下一步",
       "signUpNow": "立即註冊",
       "noAccount": "還沒有帳號？",
@@ -73,7 +73,7 @@
       "themeAuto": "跟隨系統",
       "themeLight": "淺色",
       "themeDark": "暗色",
-      "entryTitleLine2": "Yao Agents 帳號"
+      "entryTitleLine2": ""
     },
     "inbox": {
       "unreadCount": "{count} 未讀",
