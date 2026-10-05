@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yao Agents · Choose a server</title>
+<link rel="stylesheet" href="../tokens.css">
+<script src="../i18n/bundle.js"></script>
+<!--
+  入口页（login 状态）· 静态设计稿 = 产品形态。默认语言为英文，默认文案：
+    Sign up or sign in to your Yao Agents account
+
+  版式照参照图：一张卡片居中；卡内依次为标题 · 第三方（Google / GitHub / Apple，真品牌图标）· OR 分隔 ·
+  **单个输入框**（无 label，说明写在 placeholder 里）· 协议勾选 · 近黑反白主按钮 · 卡下引导；
+  右上角是语言与主题：语言文字 + 分隔线 + 主题图标，**点开都是菜单**（主题：Auto / Light / Dark）。
+
+  · 主题与语言是**能用**的（这一段是本页唯一的脚本），其余纯静态。
+  · 品牌图标取真图标集雪碧图：../icons/brand-sprite-6.svg（Google · GitHub）· ../icons/brand-sprite-2.svg（Apple）。
+    输入框前导图标内联自 icons.html 的 `i-nav-user`（界面图标目前只有内联雪碧图，没有独立文件）。
+  · 颜色 / 间距 / 字号 / 圆角 / 描边 / 阴影一律取 token（见 ../AGENTS.md）。
+-->
+<style>
+* { box-sizing: border-box; }
+html, body { block-size: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-cjk);
+  color: var(--text-primary);
+  background: var(--background-app);
+  -webkit-font-smoothing: antialiased;
+}
+:root { --auth-card: 480px; --brand-mark: 32px; }   /* 局部：卡片宽度 · 标记尺寸；进产品时归 token */
+
+.page { min-block-size: 100%; display: flex; flex-direction: column; padding: var(--spacing-16) var(--spacing-24); }
+
+/* hidden 必须真的隐藏：下面的 .error-line 用了 display:flex，会盖掉浏览器给 [hidden] 的 display:none */
+[hidden] { display: none !important; }
+
+/* 服务器选择页：卡内为 标题 · 副标题 · 两个页签 · 选择器 / 地址 · 连接 · 邀请 */
+.sub { margin: 0 0 var(--spacing-24); color: var(--text-secondary); font-size: var(--font-size-14); text-align: start; }
+.sub--hint { margin: var(--spacing-8) 0 var(--spacing-16); font-size: var(--font-size-13); color: var(--text-tertiary); }
+:lang(zh-CN) .sub--hint, :lang(zh-TW) .sub--hint, :lang(ja) .sub--hint { font-size: var(--font-size-minimum-cjk); }
+.seg { margin-block-end: var(--spacing-16); }
+.spinner { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; border: 2px solid var(--border-strong);
+           border-block-start-color: transparent; border-radius: 50%; animation: button-spin 0.7s linear infinite; }
+.picker { inline-size: 100%; min-block-size: 56px; display: flex; align-items: center; gap: var(--spacing-8);
+          padding: var(--spacing-8) var(--spacing-12); text-align: start; cursor: pointer;
+          border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-medium);
+          background: var(--background-field); color: var(--text-primary); font: inherit; }
+.picker:hover { border-color: var(--border-strong); }
+.picker:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.picker__state { display: flex; align-items: center; gap: var(--spacing-8); min-block-size: 56px; padding-inline: var(--spacing-12);
+                 color: var(--text-secondary); font-size: var(--font-size-14); border: var(--border-width) solid var(--border-subtle);
+                 border-radius: var(--radius-medium); background: var(--background-field); }
+.picker__meta { display: flex; flex-direction: column; gap: 2px; flex: 1; min-inline-size: 0; }
+.picker__name { font-size: var(--font-size-15); font-weight: var(--font-weight-medium); }
+.picker__name.placeholder { color: var(--text-placeholder); font-weight: var(--font-weight-normal); }
+.picker__url { color: var(--text-tertiary); font-size: var(--font-size-13); overflow-wrap: anywhere; }
+.picker__arrow { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; color: var(--text-tertiary); }
+.picker-wrap { position: relative; }
+.picker__list { position: absolute; inset-block-start: calc(100% + var(--spacing-4)); inset-inline: 0; z-index: var(--z-popover);
+                padding: var(--spacing-4); background: var(--background-surface); border: var(--border-width) solid var(--border-subtle);
+                border-radius: var(--radius-medium); box-shadow: var(--shadow-popover); max-block-size: 264px; overflow: auto; }
+.picker__item { display: flex; flex-direction: column; gap: 2px; inline-size: 100%; padding: var(--spacing-8) var(--spacing-12);
+                text-align: start; border: 0; border-radius: var(--radius-small); background: transparent; cursor: pointer; color: inherit; font: inherit; }
+.picker__item:hover { background: var(--background-hover); }
+.picker__item.is-on { background: var(--background-selected); }
+.picker__item-name { font-size: var(--font-size-15); }
+.picker__item-meta { color: var(--text-tertiary); font-size: var(--font-size-13); }
+.picker-fail { display: flex; flex-direction: column; gap: var(--spacing-4); align-items: flex-start; }
+.invite { margin: var(--spacing-16) 0 0; color: var(--text-tertiary); font-size: var(--font-size-13); text-align: start; }
+:lang(zh-CN) .invite, :lang(zh-TW) .invite, :lang(ja) .invite { font-size: var(--font-size-minimum-cjk); }
+
+/* 顶行：左 LOGO；右语言与主题（照参照图：文字 + 分隔线 + 图标，点开是菜单） */
+.top { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-16); position: relative; }
+.brand { display: flex; align-items: center; gap: var(--spacing-8); }
+.brand__mark { inline-size: var(--brand-mark); block-size: auto; display: block; }
+/* 产品名：大号 + **例外**的品牌渐变（体系里唯一允许渐变文字的地方，用标记自身的渐变 token；
+   浅暗同版，与 logo-mark-celadon.svg 的渐变一致）。 */
+.brand__name { font-size: var(--font-size-20); font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin);
+               background: linear-gradient(105deg, var(--brand-mark-from) 0%, var(--brand-mark-to) 100%);
+               -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ctrl { display: flex; align-items: center; gap: var(--spacing-8); }
+.ctrl__sep { inline-size: var(--border-width); block-size: var(--spacing-16); background: var(--border-default); }
+.ctrl__btn { display: inline-flex; align-items: center; gap: var(--spacing-8); border: 0; background: transparent;
+             color: var(--text-secondary); font: inherit; font-size: var(--font-size-13); cursor: pointer;
+             padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-small); }
+.ctrl__btn:hover { background: var(--background-hover); color: var(--text-primary); }
+.ctrl__btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.ctrl__btn .icon { inline-size: 16px; block-size: 16px; display: block; }
+
+/* 菜单：浮层（token 的层级/圆角/阴影） */
+.menu { position: absolute; inset-block-start: calc(100% + var(--spacing-4)); inset-inline-end: 0;
+        min-inline-size: 176px; padding: var(--spacing-4); z-index: var(--z-base);
+        background: var(--background-surface); border: var(--border-width) solid var(--border-default);
+        border-radius: var(--radius-large); box-shadow: var(--shadow-overlay); }
+.menu[hidden] { display: none; }
+.menu button { display: flex; align-items: center; gap: var(--spacing-8); inline-size: 100%; text-align: start;
+               border: 0; background: transparent; color: var(--text-primary); font: inherit;
+               font-size: var(--font-size-body); cursor: pointer; padding: var(--spacing-8) var(--spacing-8);
+               border-radius: var(--radius-small); }
+.menu button:hover { background: var(--background-hover); }
+.menu button.is-on { background: var(--background-selected); }
+.menu button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.menu .icon { inline-size: 16px; block-size: 16px; display: block; flex: none; color: var(--text-secondary); }
+
+/* 卡片 */
+.stage { flex: 1; display: grid; place-items: center; padding-block: var(--spacing-32); }
+.card { inline-size: min(100%, var(--auth-card)); padding: var(--spacing-32) var(--spacing-24) var(--spacing-32);
+        background: var(--background-content); border: var(--border-width) solid var(--border-subtle);
+        border-radius: var(--radius-large); box-shadow: var(--shadow-subtle); }
+/* 标题两行：每行一个块；字号用新加的 24 档 */
+.title { margin: 0 0 var(--spacing-32); font-size: var(--font-size-28); font-weight: var(--font-weight-strong); line-height: var(--line-height-normal); }
+.title__line { display: block; }
+.title__line:empty { display: none; }   /* 某些语言标题不换行：空行收起 */
+
+/* 第三方：整宽、软底、左图标 + 居中文字 */
+.providers { display: grid; gap: var(--spacing-8); margin-block-end: var(--spacing-24); }
+.provider { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--spacing-8);
+            min-block-size: var(--row-height); padding-inline: var(--spacing-12);
+            background: var(--background-field); color: var(--text-primary);
+            border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-medium);
+            font: inherit; font-size: var(--font-size-14); font-weight: var(--font-weight-medium); cursor: pointer; }
+.provider:hover { background: var(--background-hover); }
+.provider:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.provider__label { text-align: center; }
+.provider__mark { inline-size: 18px; block-size: 18px; display: block; }
+
+.or { display: flex; align-items: center; gap: var(--spacing-12); margin: 0 0 var(--spacing-24);
+      color: var(--text-tertiary); font-size: var(--font-size-11); letter-spacing: var(--letter-spacing-latin); }
+.or::before, .or::after { content: ''; flex: 1; block-size: var(--border-width); background: var(--border-subtle); }
+
+/* 单输入框：无 label，说明在 placeholder；前导图标住在框内 */
+.field { position: relative; display: flex; align-items: center; margin-block-end: var(--spacing-16); }
+.field__icon { position: absolute; inset-inline-start: var(--spacing-12); inline-size: var(--spacing-16); block-size: var(--spacing-16);
+               display: block; color: var(--text-placeholder); pointer-events: none; }
+/* 输入框：本页先用**低对比档**边界（--border-control-low，观感轻）；
+   合规档（WCAG 1.4.11 ≥3:1）是 --border-control-strong，默认档是 --border-control。 */
+.field .input { inline-size: 100%; min-block-size: var(--row-height); border-radius: var(--radius-medium);
+                padding-inline-start: var(--spacing-32); font-size: var(--font-size-14);
+                border-color: var(--border-control-low); }
+
+/* 协议 */
+.terms { display: flex; gap: var(--spacing-8); align-items: flex-start; margin-block: 0 var(--spacing-16);
+         font-size: var(--font-size-13); color: var(--text-secondary); }
+/* 复选框：原生控件的未选中边框无法改，故用 appearance:none 自己画（边框走 low 档，与输入框同一档）。
+   产品实现时这里应是一个基础件 Checkbox（设计体系暂无该类）。 */
+.terms input[type='checkbox'] { appearance: none; -webkit-appearance: none;
+  inline-size: var(--spacing-16); block-size: var(--spacing-16); margin-block-start: 2px; flex: none;
+  border: var(--border-width) solid var(--border-control-low); border-radius: var(--radius-xs);
+  background: var(--background-surface); cursor: pointer; }
+.terms input[type='checkbox']:checked { background: var(--brand); border-color: var(--brand); }
+.terms input[type='checkbox']:checked::after { content: ''; display: block; inline-size: 4px; block-size: 8px;
+  margin: 1px auto 0; border: solid var(--background-surface); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.terms input[type='checkbox']:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.terms a { color: var(--brand-ink); }
+
+/* 主按钮：近黑反白（照参照图） */
+.button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-8);
+          white-space: nowrap; cursor: pointer; font-family: var(--font-family-ui);
+          font-weight: var(--font-weight-medium); line-height: var(--line-height-cjk); border-radius: var(--radius-medium);
+          border: var(--border-width) solid transparent; }
+.button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-14); }
+.button--inverse { background: var(--text-primary); color: var(--background-content); }
+.button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+/* 禁用态：一眼看得出不可点（底色/字色/描边都走禁用档，光标 not-allowed） */
+.button--inverse:disabled { background: var(--background-disabled); color: var(--text-disabled);
+                            border-color: var(--border-disabled); cursor: not-allowed; }
+/* 主按钮内部：横向居中的 inline-flex，便于放加载环 */
+.button--block { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-8); }
+/* 加载动画：按钮内的旋转环（纯 CSS，不引图片） */
+.button.is-loading::before { content: ''; inline-size: 14px; block-size: 14px; flex: none;
+  border: 2px solid currentColor; border-block-start-color: transparent; border-radius: 50%;
+  animation: button-spin 0.7s linear infinite; }
+@keyframes button-spin { to { transform: rotate(360deg); } }
+
+/* 错误态：出错的控件自己变色（输入框边界→危险色；复选框边界→危险色、标签→危险文字色），
+   错误行紧贴控件下方：小图标 + 危险色文字，左对齐。 */
+.field .input.is-error { border-color: var(--danger); }
+.field.is-error .field__label { color: var(--danger-ink); }
+.terms.is-error input[type='checkbox'] { border-color: var(--danger); }
+.terms.is-error label { color: var(--danger-ink); }
+.error-line { display: flex; align-items: flex-start; gap: var(--spacing-4); margin: var(--spacing-4) 0 var(--spacing-12);
+              color: var(--danger-ink); font-size: var(--font-size-13); text-align: start; }
+.error-line .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; margin-block-start: 2px; }
+:lang(zh-CN) .error-line, :lang(zh-TW) .error-line, :lang(ja) .error-line { font-size: var(--font-size-minimum-cjk); }
+
+.footnote { margin: var(--spacing-16) 0 0; text-align: center; font-size: var(--font-size-13); color: var(--text-secondary); }
+
+/* 简繁日的最小字号：设计体系规定中文最小 12（--font-size-minimum-cjk），11 档只给拉丁/数字 */
+:lang(zh-CN) .or, :lang(zh-TW) .or, :lang(ja) .or,
+:lang(zh-CN) .footnote, :lang(zh-TW) .footnote, :lang(ja) .footnote,
+:lang(zh-CN) .bottom, :lang(zh-TW) .bottom, :lang(ja) .bottom { font-size: var(--font-size-minimum-cjk); }
+
+/* 底行：条款 */
+.bottom { display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
+.bottom a { color: var(--text-tertiary); }
+</style>
+</head>
+<body>
+<!-- 界面图标：目前只有 icons.html 里的内联雪碧图，没有独立文件；这里内联本次用到的一个符号 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect width="20" height="8" x="2" y="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 6h.01M6 18h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-state-error" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-pc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" x2="16" y1="21" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" x2="12" y1="17" y2="21" stroke="currentColor" stroke-width="2"/></symbol>
+</defs></svg>
+
+<div class="page">
+
+  <header class="top">
+    <span class="brand">
+      <img class="brand__mark" src="../logo-mark-celadon.svg" alt="" width="32" height="27">
+      <span class="brand__name">Yao Agents</span>
+    </span>
+
+    <span class="ctrl">
+      <button class="ctrl__btn" type="button" id="lang-btn" aria-haspopup="menu" aria-expanded="false">
+        <span id="lang-label">English</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-globe"></use></svg>
+      </button>
+      <span class="ctrl__sep" aria-hidden="true"></span>
+      <button class="ctrl__btn" type="button" id="theme-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Theme">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use id="theme-icon" href="#i-sun"></use></svg>
+      </button>
+    </span>
+
+    <div class="menu" id="lang-menu" role="menu" hidden>
+      <button type="button" role="menuitemradio" data-lang="system">跟随系统（中文）</button>
+      <button type="button" role="menuitemradio" data-lang="zh-CN">简体中文</button>
+      <button type="button" role="menuitemradio" data-lang="zh-TW">繁體中文</button>
+      <button type="button" role="menuitemradio" data-lang="en">English</button>
+      <button type="button" role="menuitemradio" data-lang="ja">日本語</button>
+    </div>
+
+    <div class="menu" id="theme-menu" role="menu" hidden style="inset-inline-end:0">
+      <button type="button" role="menuitemradio" data-theme="light"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"></use></svg><span data-i18n="themeLight">Light</span></button>
+      <button type="button" role="menuitemradio" data-theme="dark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"></use></svg><span data-i18n="themeDark">Dark</span></button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <main class="card" aria-labelledby="auth-title">
+      <h1 class="title"><span class="title__line" data-i18n="serversTitle">Choose a server</span></h1>
+      <p class="sub" data-i18n="serversSubtitle">Connect to your Yao Engine server</p>
+
+      <div class="seg" role="tablist">
+        <button type="button" role="tab" id="tab-cloud" aria-selected="true" class="is-on" data-i18n="cloudSection">Cloud servers</button>
+        <button type="button" role="tab" id="tab-custom" aria-selected="false" data-i18n="customSection">Custom server</button>
+      </div>
+
+      <div id="panel-cloud" role="tabpanel">
+        <!-- 加载中 / 加载失败 / 空 / 正常 四种样子都在这一处，同一时间只出现一种 -->
+        <div class="picker" id="cloud-state">
+          <div class="picker__state"><span class="spinner" aria-hidden="true"></span><span data-i18n="cloudLoading">Loading cloud servers…</span></div>
+        </div>
+        <div class="picker-wrap" id="cloud-ready" hidden>
+          <button class="picker" type="button" id="cloud-picker" aria-haspopup="listbox" aria-expanded="false">
+            <span class="picker__meta">
+              <span class="picker__name placeholder" id="cloud-name" data-i18n="cloudSelectHint">Select a cloud server</span>
+              <span class="picker__url" id="cloud-url"></span>
+            </span>
+            <svg class="picker__arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"></use></svg>
+          </button>
+          <div class="picker__list" id="cloud-list" role="listbox" hidden></div>
+        </div>
+        <div class="picker-fail" id="cloud-failed" hidden>
+          <p class="error-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-state-error"></use></svg><span data-i18n="cloudLoadFailed">Could not load the cloud server list</span></p>
+          <button class="link" type="button" id="cloud-retry" data-i18n="cloudRetry">Retry</button>
+        </div>
+      </div>
+
+      <div id="panel-custom" role="tabpanel" hidden>
+        <div class="field" id="custom-field">
+          <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>
+          <input class="input" id="custom-url" type="text" inputmode="url" autocapitalize="off" spellcheck="false"
+                 data-i18n-ph="customHint" placeholder="Enter the full server address, scheme included">
+        </div>
+        <p class="sub sub--hint" data-i18n="customHint">Enter the full server address, scheme included</p>
+      </div>
+
+      <p class="error-line" id="connect-error" role="alert" hidden>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-state-error"></use></svg><span></span>
+      </p>
+      <button class="button button--block button--inverse" type="button" id="connect" data-i18n="connect">Connect</button>
+
+      <p class="invite"><span data-i18n="registerHelper">Some servers are invite-only and need a code to sign up. You can request one on the site.</span> <a class="link" href="https://yaoagents.com/servers" target="_blank" rel="noopener" data-i18n="registerLink">Request an invitation code</a></p>
+    </main>
+  </div>
+
+  <footer class="bottom">
+    <a class="link" href="#" data-i18n="termsService">Terms of Service</a>
+    <span>·</span>
+    <a class="link" href="#" data-i18n="termsPrivacy">Privacy Policy</a>
+  </footer>
+
+</div>
+
+<script>
+/* 本页脚本：语言与主题（从平台层抄来，只为把设计做成"能用"）+ 服务器选择页的逻辑。
+   产品里语言与主题在平台层，选择器与连接在页面里，各状态由真实接口驱动。 */
+const LANGS = [
+  { code: 'zh-CN', label: '简体中文' }, { code: 'zh-TW', label: '繁體中文' },
+  { code: 'en', label: 'English' }, { code: 'ja', label: '日本語' },
+]
+let lang = document.documentElement.lang || 'en'
+let theme = 'light'
+const dictOf = (code) => (window.CELADON_I18N && window.CELADON_I18N[code] && window.CELADON_I18N[code].ui.entry) || {}
+
+function applyLang(code) {
+  lang = code
+  document.documentElement.lang = code
+  const dict = dictOf(code)
+  document.querySelectorAll('[data-i18n]').forEach((el) => { const v = dict[el.dataset.i18n]; if (v !== undefined) el.textContent = v })
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => { const v = dict[el.dataset.i18nPh]; if (v !== undefined) el.placeholder = v })
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => { const v = dict[el.dataset.i18nAria]; if (v !== undefined) el.setAttribute('aria-label', v) })
+  const current = LANGS.find((l) => l.code === code)
+  document.getElementById('lang-label').textContent = current ? current.label : code
+  document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.classList.toggle('is-on', b.dataset.lang === code))
+}
+function applyTheme(next) {
+  theme = next === 'dark' ? 'dark' : 'light'
+  document.documentElement.dataset.theme = theme
+  document.getElementById('theme-icon').setAttribute('href', theme === 'dark' ? '#i-moon' : '#i-sun')
+  document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.classList.toggle('is-on', b.dataset.theme === theme))
+}
+function toggleMenu(id, open) {
+  const menu = document.getElementById(id)
+  const btn = id === 'lang-menu' ? document.getElementById('lang-btn') : document.getElementById('theme-btn')
+  const next = open === undefined ? menu.hidden : open
+  document.querySelectorAll('.menu').forEach((m) => { m.hidden = true })
+  document.querySelectorAll('.ctrl__btn').forEach((b) => b.setAttribute('aria-expanded', 'false'))
+  menu.hidden = !next
+  btn.setAttribute('aria-expanded', String(next))
+}
+document.getElementById('lang-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleMenu('lang-menu') })
+document.getElementById('theme-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleMenu('theme-menu') })
+document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.addEventListener('click', () => { applyLang(b.dataset.lang); toggleMenu('lang-menu', false) }))
+document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.addEventListener('click', () => { applyTheme(b.dataset.theme); toggleMenu('theme-menu', false) }))
+document.addEventListener('click', () => toggleMenu('lang-menu', false))
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleMenu('lang-menu', false) })
+
+/* ---- 服务器选择 ---- */
+/* 假数据：产品里来自云站点接口（1.0 是 fetch_cloud_servers(cloudBase, locale)）。region · url 是列表项的副标题。 */
+const CLOUD = [
+  { name: 'Yao Agents 官方', url: 'https://api.yaoagents.com', region: '新加坡' },
+  { name: 'Yao Agents 中国', url: 'https://api.yaoagents.cn', region: '上海' },
+  { name: '自建 · 团队', url: 'https://team.example.com', region: '私有部署' },
+]
+let tab = 'cloud'
+let cloudState = 'loading'      /* loading | ready | failed | empty */
+let selected = CLOUD[0].url
+let listOpen = false
+
+const panelCloud = document.getElementById('panel-cloud')
+const panelCustom = document.getElementById('panel-custom')
+const stateBox = document.getElementById('cloud-state')
+const readyBox = document.getElementById('cloud-ready')
+const failedBox = document.getElementById('cloud-failed')
+const listBox = document.getElementById('cloud-list')
+const nameEl = document.getElementById('cloud-name')
+const urlEl = document.getElementById('cloud-url')
+const pickerBtn = document.getElementById('cloud-picker')
+const customInput = document.getElementById('custom-url')
+const connectBtn = document.getElementById('connect')
+const connectError = document.getElementById('connect-error')
+const sub = (msg) => { connectError.querySelector('span').textContent = msg }
+
+function renderCloud() {
+  stateBox.hidden = cloudState !== 'loading'
+  readyBox.hidden = cloudState !== 'ready'
+  failedBox.hidden = cloudState !== 'failed'
+  if (cloudState === 'empty') {
+    stateBox.hidden = false
+    stateBox.innerHTML = '<div class="picker__state">' + dictOf(lang).cloudEmpty + '</div>'
+  } else if (cloudState === 'loading') {
+    stateBox.innerHTML = '<div class="picker__state"><span class="spinner" aria-hidden="true"></span><span>' + dictOf(lang).cloudLoading + '</span></div>'
+  }
+  if (cloudState !== 'ready') return
+  const found = CLOUD.find((c) => c.url === selected)
+  nameEl.textContent = found ? found.name : dictOf(lang).cloudSelectHint
+  nameEl.classList.toggle('placeholder', !found)
+  urlEl.textContent = found ? found.url : ''
+  listBox.innerHTML = CLOUD.map((c) => {
+    const on = c.url === selected ? ' is-on' : ''
+    return '<button class="picker__item' + on + '" type="button" role="option" data-url="' + c.url + '">' +
+      '<span class="picker__item-name">' + c.name + '</span>' +
+      '<span class="picker__item-meta">' + [c.region, c.url].filter(Boolean).join(' · ') + '</span></button>'
+  }).join('')
+  listBox.querySelectorAll('[data-url]').forEach((item) => item.addEventListener('click', (e) => {
+    e.stopPropagation(); selected = item.dataset.url; listOpen = false; renderCloud()
+  }))
+  listBox.hidden = !listOpen
+  pickerBtn.setAttribute('aria-expanded', String(listOpen))
+}
+function loadCloud() {
+  cloudState = 'loading'; renderCloud()
+  setTimeout(() => { cloudState = CLOUD.length ? 'ready' : 'empty'; renderCloud() }, 1100)
+}
+document.getElementById('cloud-retry').addEventListener('click', loadCloud)
+pickerBtn.addEventListener('click', (e) => { e.stopPropagation(); listOpen = !listOpen; renderCloud() })
+document.addEventListener('click', () => { if (listOpen) { listOpen = false; renderCloud() } })
+
+function selectTab(next) {
+  tab = next
+  panelCloud.hidden = next !== 'cloud'
+  panelCustom.hidden = next !== 'custom'
+  document.getElementById('tab-cloud').classList.toggle('is-on', next === 'cloud')
+  document.getElementById('tab-custom').classList.toggle('is-on', next === 'custom')
+  document.getElementById('tab-cloud').setAttribute('aria-selected', String(next === 'cloud'))
+  document.getElementById('tab-custom').setAttribute('aria-selected', String(next === 'custom'))
+  connectError.hidden = true
+}
+document.getElementById('tab-cloud').addEventListener('click', () => selectTab('cloud'))
+document.getElementById('tab-custom').addEventListener('click', () => selectTab('custom'))
+
+function doConnect() {
+  const custom = customInput.value.trim()
+  if (tab === 'custom' && !custom) { sub(dictOf(lang).connect + '：' + dictOf(lang).customHint); connectError.hidden = false; return }
+  if (tab === 'cloud' && !selected) { sub(dictOf(lang).cloudSelectHint); connectError.hidden = false; return }
+  connectError.hidden = true
+  connectBtn.classList.add('is-loading')
+  connectBtn.disabled = true
+  connectBtn.textContent = dictOf(lang).connecting
+  setTimeout(() => {
+    connectBtn.classList.remove('is-loading')
+    connectBtn.disabled = false
+    applyLang(lang)               /* 文案交回语言包 */
+    sub((tab === 'cloud' ? selected : custom) + ' · ' + (dictOf(lang).connected || 'ok'))
+  }, 1800)
+}
+connectBtn.addEventListener('click', doConnect)
+customInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doConnect() })
+
+applyLang(lang)
+applyTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+loadCloud()
+</script></script>
+</body>
+</html>

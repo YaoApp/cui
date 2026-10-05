@@ -84,7 +84,21 @@
       "providerApple": "Continue with Apple",
       "or": "OR",
       "nextBusy": "Checking…",
-      "errEmail": "That does not look like an email address."
+      "errEmail": "That does not look like an email address.",
+      "serversTitle": "Choose a server",
+      "serversSubtitle": "Connect to your Yao Engine server",
+      "cloudSection": "Cloud servers",
+      "customSection": "Custom server",
+      "connect": "Connect",
+      "connecting": "Connecting…",
+      "cloudLoading": "Loading cloud servers…",
+      "cloudLoadFailed": "Could not load the cloud server list",
+      "cloudRetry": "Retry",
+      "cloudEmpty": "No cloud servers available",
+      "cloudSelectHint": "Select a cloud server",
+      "customHint": "Enter the full server address, scheme included",
+      "registerHelper": "Some servers are invite-only and need a code to sign up. You can request one on the site.",
+      "registerLink": "Request an invitation code"
     },
     "inbox": {
       "unreadCount": "{count} unread",
