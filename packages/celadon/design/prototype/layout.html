@@ -8,12 +8,12 @@
 <link rel="stylesheet" href="../tokens.css">
 <style>
 body{margin: 0;background: var(--background-active);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;padding: var(--spacing-32) var(--spacing-16) var(--spacing-16);-webkit-font-smoothing:antialiased;font-size:var(--font-size-body-lg);line-height:var(--line-height-cjk);}
+  display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;min-height:100vh;padding: 0;-webkit-font-smoothing:antialiased;font-size:var(--font-size-body-lg);line-height:var(--line-height-cjk);}
 [data-theme="dark"] body{background:#0B0B0B}
 svg.icon{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}  /* 24 网格原生 2；16px 显示时视觉 ≈1.33 */
 svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
-.window{width:100vw;height:100vh;border-radius: var(--radius-large);overflow:hidden;display:flex;
-  background:var(--background-app);color:var(--text-primary);box-shadow: var(--shadow-overlay);border: var(--border-width) solid var(--border-default)}
+.window{width:100vw;height:100vh;border-radius: 0;overflow:hidden;display:flex;
+  background:var(--background-app);color:var(--text-primary);border: var(--border-width) solid var(--border-default)}
 /* ============ ① 导航列 ============ */
 .nav{width:240px;flex:none;background:var(--background-navigation);border-right: var(--border-width) solid var(--border-subtle);display:flex;flex-direction:column;position:relative}
 .traffic-lights{position:absolute;left:14px;top:14px;display:flex;gap: var(--spacing-8)}
@@ -154,6 +154,10 @@ svg.icon.is-small{width:14px;height:14px;stroke-width:2.25}
 .toolbar button{font:inherit;font-size: var(--font-size-caption);padding: var(--spacing-4) var(--spacing-12);border-radius:var(--radius-pill);border: var(--border-width) solid var(--border-default);
   background:var(--background-surface);color:var(--text-secondary);cursor:pointer}
 .toolbar button.is-active{background:var(--brand-soft);border-color:var(--brand-ink);color:var(--brand-ink);font-weight:650}
+
+/* 产品级「打开即用」：应用直接铺满窗口，没有展板的圆角 · 阴影 · 描边与四周留白 */
+.window { border: 0; border-radius: 0; box-shadow: none; width: 100vw; height: 100vh; }
+body { padding: 0; align-items: stretch; }
 </style>
 </head>
 <body class="celadon">
