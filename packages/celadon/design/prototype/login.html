@@ -170,8 +170,7 @@ body.is-client .ctrl-wrap { margin-block-start: var(--spacing-24); }
 body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inline-start: 50%; transform: translateX(-50%); }
 /* 客户端内：卡片顶部的「返回服务器选择」与当前服务器（静态展示） */
 .client-bar { display: none; align-items: center; justify-content: space-between; gap: var(--spacing-8);
-              margin-block-end: var(--spacing-16); padding-block-end: var(--spacing-12);
-              border-block-end: var(--border-width) solid var(--border-subtle); }
+              inline-size: min(100%, var(--auth-card)); margin: 0 auto var(--spacing-12); }
 body.is-client .client-bar { display: flex; }
 .client-back { display: inline-flex; align-items: center; gap: var(--spacing-4); color: var(--text-secondary);
                font-size: var(--font-size-13); text-decoration: none; }
@@ -225,8 +224,7 @@ body.is-client .client-bar { display: flex; }
   </header>
 
   <div class="stage">
-    <main class="card" aria-labelledby="auth-title">
-      <div class="client-bar" id="client-bar">
+    <div class="client-bar" id="client-bar">
         <a class="client-back" href="./servers.html">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
           <span data-i18n="backToServers">Back to servers</span>
@@ -236,6 +234,7 @@ body.is-client .client-bar { display: flex; }
           <span class="client-server__name" id="client-server-name"></span>
         </span>
       </div>
+    <main class="card" aria-labelledby="auth-title">
       <h1 class="title" id="auth-title">
         <span class="title__line" data-i18n="entryTitle">Sign up or sign in to your</span>
         <span class="title__line" data-i18n="entryTitleLine2">Yao Agents account</span>
