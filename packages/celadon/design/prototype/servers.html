@@ -59,6 +59,9 @@ body {
 .field--reveal { margin-block: 0 var(--spacing-4); }
 .sub--hint { margin: var(--spacing-4) 0 var(--spacing-16); }
 .picker__meta { display: flex; flex-direction: column; gap: 2px; flex: 1; min-inline-size: 0; }
+.opt__logo { inline-size: calc(var(--spacing-16) + var(--spacing-4)); block-size: calc(var(--spacing-16) + var(--spacing-4)); flex: none; object-fit: contain; }
+svg.opt__logo { color: var(--text-tertiary); }
+.picker__item { flex-direction: row; align-items: center; gap: var(--spacing-8); }
 .picker__name { font-size: var(--font-size-15); font-weight: var(--font-weight-medium); }
 .picker__name.placeholder { color: var(--text-placeholder); font-weight: var(--font-weight-normal); }
 .picker__url { color: var(--text-tertiary); font-size: var(--font-size-13); overflow-wrap: anywhere; }
@@ -227,7 +230,9 @@ body {
       <div class="picker-wrap" id="picker-wrap">
         <button class="picker" type="button" id="cloud-picker" aria-haspopup="listbox" aria-expanded="false">
           <span class="picker__meta">
+            <img class="opt__logo" src="../logo-mark-celadon.svg" alt="" width="20" height="17">
             <span class="picker__name placeholder" id="cloud-name" data-i18n="cloudSelectHint">Select a cloud server</span>
+            <span class="picker__url" id="cloud-url"></span>
             <span class="picker__url" id="cloud-url"></span>
           </span>
           <svg class="picker__arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"></use></svg>
@@ -275,11 +280,6 @@ body {
         <button type="button" role="menuitemradio" data-lang="en">English</button>
         <button type="button" role="menuitemradio" data-lang="ja">日本語</button>
       </div>
-  
-      <div class="menu" id="theme-menu" role="menu" hidden style="inset-inline-end:0">
-        <button type="button" role="menuitemradio" data-theme="light"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"></use></svg><span data-i18n="themeLight">Light</span></button>
-        <button type="button" role="menuitemradio" data-theme="dark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"></use></svg><span data-i18n="themeDark">Dark</span></button>
-      </div>
     </header>
   </div>
   </div>
@@ -314,7 +314,6 @@ function applyTheme(next) {
   theme = next === 'dark' ? 'dark' : 'light'
   document.documentElement.dataset.theme = theme
   document.getElementById('theme-icon').setAttribute('href', theme === 'dark' ? '#i-moon' : '#i-sun')
-  document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.classList.toggle('is-on', b.dataset.theme === theme))
 }
 function toggleMenu(id, open) {
   const menu = document.getElementById(id)
@@ -326,9 +325,10 @@ function toggleMenu(id, open) {
   btn.setAttribute('aria-expanded', String(next))
 }
 document.getElementById('lang-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleMenu('lang-menu') })
-document.getElementById('theme-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleMenu('theme-menu') })
+document.getElementById('theme-btn').addEventListener('click', (e) => {
+  e.stopPropagation(); applyTheme(theme === 'dark' ? 'light' : 'dark')      /* 直接切，不再开菜单 */
+})
 document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.addEventListener('click', () => { applyLang(b.dataset.lang); toggleMenu('lang-menu', false) }))
-document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.addEventListener('click', () => { applyTheme(b.dataset.theme); toggleMenu('theme-menu', false) }))
 document.addEventListener('click', () => toggleMenu('lang-menu', false))
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleMenu('lang-menu', false) })
 
@@ -372,12 +372,21 @@ function renderCloud() {
   nameEl.textContent = isCustom() ? dictOf(lang).customOption : (found ? dictOf(lang)[found.key] : dictOf(lang).cloudSelectHint)
   nameEl.classList.toggle('placeholder', !isCustom() && !found)
   customField.hidden = !isCustom()
+  const urlEl = document.getElementById('cloud-url')
+  if (urlEl) urlEl.textContent = isCustom() ? (customInput.value.trim() || '') : (found ? found.url.replace(/^https?:\/\//, '') : '')
 
-  const item = (url, label, on) =>
+  /* 每项两行：LOGO + 名称 / 域名。官方用品牌标记，自建用服务器图标、域名留空。 */
+  const logo = (custom) => custom
+    ? '<svg class="opt__logo" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>'
+    : '<img class="opt__logo" src="../logo-mark-celadon.svg" alt="" width="20" height="17">'
+  const bare = (u) => u.replace(/^https?:\/\//, '')
+  const item = (url, label, domain, on) =>
     '<button class="picker__item' + (on ? ' is-on' : '') + '" type="button" role="option" data-url="' + url + '">' +
-    '<span class="picker__item-name">' + label + '</span></button>'
-  listBox.innerHTML = CLOUD.map((c) => item(c.url, dictOf(lang)[c.key], c.url === selected)).join('') +
-    item(CUSTOM, dictOf(lang).customOption, isCustom())
+    logo(url === CUSTOM) +
+    '<span class="picker__meta"><span class="picker__item-name">' + label + '</span>' +
+    '<span class="picker__item-meta">' + domain + '</span></span></button>'
+  listBox.innerHTML = CLOUD.map((c) => item(c.url, dictOf(lang)[c.key], bare(c.url), c.url === selected)).join('') +
+    item(CUSTOM, dictOf(lang).customOption, '', isCustom())
   listBox.querySelectorAll('[data-url]').forEach((el) => el.addEventListener('click', (e) => {
     e.stopPropagation(); selected = el.dataset.url; listOpen = false; connectError.hidden = true; renderCloud()
     if (isCustom()) customInput.focus()

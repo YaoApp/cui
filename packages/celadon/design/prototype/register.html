@@ -200,11 +200,6 @@ body {
       <button type="button" role="menuitemradio" data-lang="en">English</button>
       <button type="button" role="menuitemradio" data-lang="ja">日本語</button>
     </div>
-
-    <div class="menu" id="theme-menu" role="menu" hidden style="inset-inline-end:0">
-      <button type="button" role="menuitemradio" data-theme="light"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"></use></svg><span data-i18n="themeLight">Light</span></button>
-      <button type="button" role="menuitemradio" data-theme="dark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"></use></svg><span data-i18n="themeDark">Dark</span></button>
-    </div>
   </header>
 
   <div class="stage">
@@ -292,7 +287,6 @@ function applyTheme(next) {
   theme = next === 'dark' ? 'dark' : 'light'      /* 菜单只有 Light / Dark 两项；首屏默认跟随系统 */
   document.documentElement.dataset.theme = theme
   document.getElementById('theme-icon').setAttribute('href', theme === 'dark' ? '#i-moon' : '#i-sun')
-  document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.classList.toggle('is-on', b.dataset.theme === theme))
 }
 
 function toggleMenu(id, open) {
@@ -305,14 +299,15 @@ function toggleMenu(id, open) {
 }
 
 document.getElementById('lang-btn').addEventListener('click', () => toggleMenu('lang-menu'))
-document.getElementById('theme-btn').addEventListener('click', () => toggleMenu('theme-menu'))
+document.getElementById('theme-btn').addEventListener('click', (e) => {
+  e.stopPropagation(); applyTheme(theme === 'dark' ? 'light' : 'dark')
+})
 document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.addEventListener('click', () => { applyLang(b.dataset.lang); toggleMenu('lang-menu', false) }))
-document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.addEventListener('click', () => { applyTheme(b.dataset.theme); toggleMenu('theme-menu', false) }))
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.ctrl, .menu')) { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
+  if (!event.target.closest('.ctrl, .menu')) { toggleMenu('lang-menu', false) }
 })
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
+  if (event.key === 'Escape') { toggleMenu('lang-menu', false) }
 })
 
 
