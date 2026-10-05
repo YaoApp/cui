@@ -61,7 +61,6 @@ body {
 .picker__meta { display: flex; flex-direction: column; gap: 2px; flex: 1; min-inline-size: 0; }
 .opt__logo { inline-size: calc(var(--spacing-16) + var(--spacing-4)); block-size: calc(var(--spacing-16) + var(--spacing-4)); flex: none; object-fit: contain; }
 svg.opt__logo { color: var(--text-tertiary); }
-.picker__item { flex-direction: row; align-items: center; gap: var(--spacing-8); }
 .picker__name { font-size: var(--font-size-15); font-weight: var(--font-weight-medium); }
 .picker__name.placeholder { color: var(--text-placeholder); font-weight: var(--font-weight-normal); }
 .picker__url { color: var(--text-tertiary); font-size: var(--font-size-13); overflow-wrap: anywhere; }
@@ -205,6 +204,18 @@ svg.opt__logo { color: var(--text-tertiary); }
 /* 底行：条款 */
 .bottom { display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
 .bottom a { color: var(--text-tertiary); }
+
+/* 选择器与选项的排布：LOGO 在左，名称与域名在右竖排，文字从上方起排、左对齐。
+   放在样式表末尾是为了压住上面 .picker__item / .picker 里的竖排与居中写法。 */
+.picker, .picker__item { flex-direction: row; align-items: flex-start; justify-content: flex-start;
+                         gap: var(--spacing-8); text-align: start; }
+.picker__meta, .picker__item .picker__meta { align-items: flex-start; text-align: start; }
+.picker .opt__logo, .picker__item .opt__logo { align-self: flex-start; margin-block-start: 2px; }
+/* 列表永远浮在字段之上 */
+.picker-wrap { position: relative; z-index: var(--z-popover); }
+/* 名称与域名两行同一起点，不留额内边距与缩进 */
+.picker__item-name, .picker__item-meta, .picker__name, .picker__url { padding: 0; margin: 0; text-indent: 0;
+                                                                     text-align: start; align-self: stretch; }
 </style>
 </head>
 <body>
