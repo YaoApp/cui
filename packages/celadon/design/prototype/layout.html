@@ -206,6 +206,12 @@ body.is-client .window-controls { inset-inline-start: 0; inset-inline-end: 0; pa
   justify-content: space-between; }
 body.is-client .window-controls .wc-left { display: inline-flex; align-items: center; gap: var(--spacing-8); }
 body.is-client .window-controls #nav-toggle { margin-inline-start: auto; }
+/* 收起键贴在导航栏的右边界上：展开时在导航栏右端（三栏第一根分界处），
+   收起（导航 0 宽）时边界在窗口最左，按钮即跟到红绿灯之后。 */
+body.is-client .window-controls #nav-toggle { position: absolute; margin-inline-start: 0;
+  inset-block-start: calc((var(--column-header-height) - var(--spacing-24)) / 2);
+  inset-inline-start: calc(var(--spacing-16) + 60px); }
+body.is-client.is-nav-open .window-controls #nav-toggle { inset-inline-start: calc(var(--nav-default) - var(--spacing-16) - var(--spacing-24)); }
 </style>
 </head>
 <body class="celadon">
