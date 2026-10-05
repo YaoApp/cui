@@ -194,6 +194,13 @@ body.is-client .window-controls .traffic-lights { position: static; display: fle
 /* 收起状态：导航所在列轨 0 → --nav-default（客户端里点击收起键切换） */
 body.is-client.is-nav-open .window { grid-template-columns: var(--nav-default) minmax(var(--center-min), 1fr) var(--side-width-reading); }
 body.is-client.is-nav-open .nav { visibility: visible; }
+/* 窗口左上的收起键：无边框 · 无底色 · 焦点环按规范用 --focus-ring（红线 6） */
+body.is-client .window-controls .icon-button { border: 0; background: transparent; color: var(--text-secondary);
+  inline-size: var(--spacing-24); block-size: var(--spacing-24); display: inline-flex; align-items: center; justify-content: center; }
+body.is-client .window-controls .icon-button:hover { background: var(--background-hover); color: var(--text-primary); }
+body.is-client .window-controls .icon-button:focus { outline: none; }
+body.is-client .window-controls .icon-button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+body.is-client .window-controls .icon-button .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
 </style>
 </head>
 <body class="celadon">
