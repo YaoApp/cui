@@ -71,7 +71,9 @@ export type EntryConfig = {
   }
   token?: {
     expires_in?: string
-    remember_me_expires_in?: string
+    /** 真实服务返回的是这个（1.0 类型里写作 `remember_me_expires_in`，与自己对不上） */
+    refresh_token_expires_in?: string
+    remember_me_refresh_token_expires_in?: string
   }
   invite_required?: boolean
   /** 注册是否需要邮箱/短信验证码（默认 true）。 */

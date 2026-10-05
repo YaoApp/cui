@@ -43,14 +43,14 @@ test.describe('the entry line against the real service', () => {
         const captcha = await call('/v1/user/entry/captcha')
         const id = String(captcha.body?.captcha_id ?? '')
         const answer = await call(`/v1/test/captcha?id=${encodeURIComponent(id)}`)
-        return { id, answer: String(answer.body?.answer ?? '') }
+        return { id, answer: String(answer.body?.answer ?? ''), response: captcha }
       }
 
       // 1 · entryConfig
       steps.entryConfig = await call('/v1/user/entry?locale=zh-CN')
       // 2 · entryCaptcha（+ test 取真值）
       const captcha = await freshCaptcha()
-      steps.entryCaptcha = { status: captcha.id ? 200 : 0, body: { captcha_id: captcha.id, has_answer: captcha.answer !== '' } }
+      steps.entryCaptcha = captcha.response   // 存**原始响应**，字段级断言才有意义
       // 3 · entryVerify
       steps.entryVerify = await post('/v1/user/entry/verify', { username: email, captcha_id: captcha.id, captcha: captcha.answer, locale: 'zh-CN' })
       const temp = String(steps.entryVerify.body?.access_token ?? '')
@@ -96,7 +96,7 @@ test.describe('the entry line against the real service', () => {
     expect(ok('entryConfig')).toBe(200)
     expect(typeof steps.entryConfig.body?.title).toBe('string')
     expect(ok('entryCaptcha')).toBe(200)
-    expect(steps.entryCaptcha.body?.has_answer).toBe(true)
+    expect(String(steps.entryCaptcha.body?.captcha_image ?? '').length).toBeGreaterThan(0)
     expect(ok('entryVerify')).toBe(200)
     expect(['login', 'register']).toContain(steps.entryVerify.body?.status)
     expect(walk.temp).toBe(true)
@@ -124,6 +124,25 @@ test.describe('the entry line against the real service', () => {
     expect(ok('deviceFlowToken')).toBeGreaterThanOrEqual(400)
     expect(ok('deviceAuthorize')).toBeGreaterThanOrEqual(400)
 
+    // 字段级：声明的必备字段必须在真实响应里出现（这次就是这样抓出 token 段的漂移）
+    expect(Object.keys(steps.entryConfig.body ?? {})).toEqual(
+      expect.arrayContaining(['title', 'description', 'success_url', 'form', 'token', 'verification_code_required']),
+    )
+    expect(Object.keys(steps.entryConfig.body?.form as object)).toEqual(
+      expect.arrayContaining(['username', 'password', 'captcha']),
+    )
+    expect(Object.keys(steps.entryConfig.body?.token as object)).toEqual(
+      expect.arrayContaining(['expires_in', 'refresh_token_expires_in']),
+    )
+    expect(Object.keys(steps.entryCaptcha.body ?? {})).toEqual(expect.arrayContaining(['captcha_id', 'captcha_image']))
+    expect(Object.keys(steps.entryVerify.body ?? {})).toEqual(
+      expect.arrayContaining(['status', 'access_token', 'expires_in', 'token_type', 'scope', 'user_exists']),
+    )
+    expect(Object.keys(steps.entryRegister.body ?? {})).toEqual(expect.arrayContaining(['access_token']))
+    expect(Object.keys(steps.entryLogin.body ?? {})).toEqual(expect.arrayContaining(['session_id']))
+    expect((steps.oidcKeys.body?.keys as Record<string, unknown>[])[0]).toEqual(
+      expect.objectContaining({ kty: 'RSA', use: 'sig', alg: 'RS256' }),
+    )
     console.log('WALK ' + JSON.stringify(Object.fromEntries(Object.entries(steps).map(([k, v]) => [k, v.status]))))
   })
 })
