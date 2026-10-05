@@ -220,6 +220,15 @@ body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform:
 .nav .navigation-header { padding-inline-end: calc(var(--spacing-24) + var(--spacing-16)); }
 /* 可点击的图标按钮：鼠标指针为可点击（hand） */
 .icon-button, body.is-client .window-controls .icon-button { cursor: pointer; }
+/* ===== 导航列：高度跟随屏幕，内部分两区 =====
+   上区（菜单 .fixed-navigation）有最大高度；下区（内容 .navigation-context）占余下高度；
+   高度不够时各自出滚动条，互不影响。 */
+.nav { block-size: 100%; min-block-size: 0; }
+.nav .fixed-navigation { max-block-size: 45%; overflow: auto; min-block-size: 0; }
+.nav .navigation-context { flex: 1 1 auto; min-block-size: 0; overflow: hidden; display: flex; flex-direction: column; }
+.nav .conversation-list { flex: 1 1 auto; min-block-size: 0; overflow: auto; }
+/* 三栏的高度跟随视口：grid 行锁成 minmax(0,1fr)，否则行被内容撑高、导航超出屏幕 */
+.window { grid-template-rows: minmax(0, 1fr); block-size: 100vh; }
 </style>
 </head>
 <body class="celadon">
