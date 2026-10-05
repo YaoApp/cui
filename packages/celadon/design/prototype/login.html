@@ -186,7 +186,6 @@ body.is-client .client-bar { display: flex; }
                  border-start-end-radius: var(--radius-large); border-end-start-radius: var(--radius-small);
                  background: var(--background-selected); color: var(--text-primary);
                  font-size: var(--font-size-13); min-inline-size: 0; }
-.client-server__mark { inline-size: calc(var(--spacing-16) + var(--spacing-4)); block-size: calc(var(--spacing-16) + var(--spacing-4)); flex: none; }
 .client-server__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--font-weight-medium); }
 :lang(zh-CN) .client-back, :lang(zh-TW) .client-back, :lang(ja) .client-back,
 :lang(zh-CN) .client-server, :lang(zh-TW) .client-server, :lang(ja) .client-server { font-size: var(--font-size-minimum-cjk); }
@@ -238,7 +237,6 @@ body.is-client .client-bar { display: flex; }
           <span data-i18n="backToServers">Back to servers</span>
         </a>
         <span class="client-server">
-          <img class="client-server__mark" id="client-server-mark" src="../logo-mark-celadon.svg" alt="" width="20" height="17">
           <span class="client-server__name" id="client-server-name"></span>
         </span>
       </div>
@@ -406,28 +404,6 @@ function renderClientBar() {
   const key = new URLSearchParams(location.search).get('server') || 'serverApac'
   const dict = dictOf(lang)
   nameEl.textContent = key === 'custom' ? dict.customOption : (dict[key] || dict.serverApac)
-  const mark = document.getElementById('client-server-mark')
-  if (mark) mark.outerHTML = key === 'custom'
-    ? '<svg class="client-server__mark" id="client-server-mark" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>'
-    : '<img class="client-server__mark" id="client-server-mark" src="../logo-mark-celadon.svg" alt="" width="20" height="17">'
-}
-
-if (isClient) {
-  document.body.classList.add('is-client')
-  const wrap = document.createElement('div')
-  wrap.className = 'ctrl-wrap'
-  const ctrl = document.querySelector('.ctrl')
-  const menu = document.getElementById('lang-menu')
-  if (ctrl) { ctrl.replaceWith(wrap); wrap.append(ctrl); if (menu) wrap.append(menu) }
-  const card = document.querySelector('.card')
-  const bar = document.getElementById('client-bar')
-  if (card && bar) {                                  /* 横条与卡片同一个区域 */
-    const stack = document.createElement('div')
-    stack.className = 'client-stack'
-    card.before(stack)
-    stack.append(bar)
-    stack.append(card)
-  }
   const stackEl = document.querySelector('.client-stack')
   const clientTag = document.querySelector('.client-server')
   if (card && clientTag) card.prepend(clientTag)   /* 放进卡片：定位相对卡片 */
