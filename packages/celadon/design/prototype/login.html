@@ -77,7 +77,7 @@ body {
             min-block-size: var(--row-height); padding-inline: var(--spacing-12);
             background: var(--background-field); color: var(--text-primary);
             border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-medium);
-            font: inherit; font-size: var(--font-size-body); cursor: pointer; }
+            font: inherit; font-size: var(--font-size-15); cursor: pointer; }
 .provider:hover { background: var(--background-hover); }
 .provider:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .provider__label { text-align: center; }
@@ -104,7 +104,7 @@ body {
           white-space: nowrap; cursor: pointer; font-family: var(--font-family-ui);
           font-weight: var(--font-weight-medium); line-height: var(--line-height-cjk); border-radius: var(--radius-medium);
           border: var(--border-width) solid transparent; }
-.button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-body); }
+.button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-15); }
 .button--inverse { background: var(--text-primary); color: var(--background-content); }
 .button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
@@ -118,7 +118,7 @@ body {
 <body>
 <!-- 界面图标：目前只有 icons.html 里的内联雪碧图，没有独立文件；这里内联本次用到的一个符号 -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <symbol id="i-nav-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-pc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" x2="16" y1="21" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" x2="12" y1="17" y2="21" stroke="currentColor" stroke-width="2"/></symbol>
 </defs></svg>
 
@@ -181,9 +181,9 @@ body {
 
       <form>
         <div class="field">
-          <svg class="field__icon" aria-hidden="true"><use href="#i-nav-user"></use></svg>
+          <svg class="field__icon" aria-hidden="true"><use href="#i-mail"></use></svg>
           <input class="input" id="account" name="account" type="text" autocomplete="username"
-                 inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="accountPh" placeholder="Enter your email or username">
+                 inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="accountPh" placeholder="Enter your email">
         </div>
 
         <div class="terms">

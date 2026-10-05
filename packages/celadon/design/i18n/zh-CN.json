@@ -27,7 +27,7 @@
       "registerTitle": "创建账号",
       "registerLead": "只需一个账号和密码。",
       "account": "账号",
-      "accountPh": "请输入邮箱或用户名",
+      "accountPh": "请输入邮箱账号",
       "password": "密码",
       "passwordPh": "请输入密码",
       "reveal": "显示",
