@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celadon · 登录</title>
+<link rel="stylesheet" href="../tokens.css">
+<!--
+  登录界面（login 状态）· 静态设计稿，与产品同构：类名、文案来源、尺寸档都照产品来。
+
+  · 本页**不含交互脚本**：只做视觉，页面上没有评审控件。
+    主题由平台层的偏好决定：浅色即本页原样；深色是同一个页面加 `data-theme="dark"`（tokens.less 的暗色作用域），
+    截图时在浏览器侧注入该属性，页面本身不多写一份。
+  · 文案取自 design/i18n/*.json 的 ui.entry.*（此处写 zh-CN 的成品字）；
+    产品实现时由语言包与平台层提供，本页只呈现字面。
+  · LOGO 用正版标记文件 ../logo-mark-celadon.svg（结构与颜色是该文件的唯一来源，本页不重绘、不改色）。
+  · 颜色 / 间距 / 字号 / 圆角 / 描边 / 阴影一律取 token（见 ../AGENTS.md）；唯一局部变量是卡片宽度。
+-->
+<style>
+* { box-sizing: border-box; }
+html, body { block-size: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-cjk);
+  color: var(--text-primary);
+  background: var(--background-app);
+  -webkit-font-smoothing: antialiased;
+}
+:root { --auth-card: 384px; }   /* 局部：登录卡片宽度；进产品时归 token */
+
+/* 版面：整屏居中；背景是极轻的品牌晕染，帮助视觉落点，不抢内容 */
+.screen {
+  min-block-size: 100%;
+  display: grid;
+  place-items: center;
+  padding: var(--spacing-48) var(--spacing-24);
+  background:
+    radial-gradient(120% 90% at 50% -10%, var(--brand-soft) 0%, transparent 62%),
+    var(--background-app);
+}
+
+/* 卡片 */
+.auth {
+  inline-size: min(100%, var(--auth-card));
+  padding: var(--spacing-48) var(--spacing-32) var(--spacing-32);
+  background: var(--background-content);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-floating);
+}
+
+/* 品牌区：正版标记 + 产品名 */
+.lockup { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-12); margin-block-end: var(--spacing-32); }
+.lockup__mark { inline-size: 52px; block-size: auto; display: block; }
+.lockup__name { font-size: var(--font-size-body-lg); font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin); color: var(--text-primary); }
+
+/* 标题 */
+.title { margin: 0 0 var(--spacing-4); font-size: var(--font-size-title); font-weight: var(--font-weight-strong); line-height: var(--line-height-tight); text-align: center; }
+.lead { margin: 0 0 var(--spacing-32); color: var(--text-secondary); font-size: var(--font-size-caption); text-align: center; }
+
+/* 字段：标签顶对齐；输入走设计类 `.input`，这里只补布局与尾部按钮位置 */
+.field { margin-block-end: var(--spacing-16); }
+.field__label { display: block; margin-block-end: var(--spacing-4); font-size: var(--font-size-label); font-weight: var(--font-weight-medium); color: var(--text-secondary); }
+.field__control { position: relative; display: flex; align-items: center; }
+.field__control .input { inline-size: 100%; min-block-size: var(--row-height); border-radius: var(--radius-medium); }
+.field__control--trail .input { padding-inline-end: var(--spacing-48); }
+.field__trail { position: absolute; inset-inline-end: var(--spacing-4); border: 0; background: transparent; cursor: pointer;
+                color: var(--text-tertiary); font: inherit; font-size: var(--font-size-caption);
+                padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-xs); }
+.field__trail:hover { color: var(--text-secondary); }
+.field__trail:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* 记住我 + 创建账号 */
+.row { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-8); margin-block: 0 var(--spacing-24); }
+.check { display: inline-flex; align-items: center; gap: var(--spacing-8); font-size: var(--font-size-caption); color: var(--text-secondary); }
+.check input { inline-size: 16px; block-size: 16px; accent-color: var(--brand); }
+
+/* 主按钮：布局与尺寸档照产品 `components/base/button`，配色与四态走设计类 `.btn-primary` */
+.button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-8);
+          white-space: nowrap; cursor: pointer; font-family: var(--font-family-ui);
+          font-weight: var(--font-weight-medium); line-height: var(--line-height-cjk);
+          border-radius: var(--radius-medium);
+          transition: background-color var(--duration-fast) var(--easing-standard),
+                      border-color var(--duration-fast) var(--easing-standard); }
+.button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-body); }
+.button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* 页脚：分隔 + 版本与版权（视觉收口） */
+.foot { margin-block-start: var(--spacing-32); padding-block-start: var(--spacing-16);
+        border-block-start: var(--border-width) solid var(--border-subtle);
+        display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-8);
+        color: var(--text-tertiary); font-size: var(--font-size-11); }
+.foot__mark { color: var(--text-tertiary); letter-spacing: var(--letter-spacing-latin); }
+</style>
+</head>
+<body>
+<div class="screen">
+  <main class="auth" aria-labelledby="auth-title">
+
+    <div class="lockup">
+      <img class="lockup__mark" src="../logo-mark-celadon.svg" alt="" width="52" height="44">
+      <span class="lockup__name">Yao Agents</span>
+    </div>
+
+    <h1 class="title" id="auth-title">登录</h1>
+    <p class="lead">用账号继续。</p>
+
+    <form>
+      <div class="field">
+        <label class="field__label" for="account">账号</label>
+        <div class="field__control">
+          <input class="input" id="account" name="account" type="text" autocomplete="username"
+                 inputmode="email" autocapitalize="off" spellcheck="false" placeholder="邮箱或手机号">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="password">密码</label>
+        <div class="field__control field__control--trail">
+          <input class="input" id="password" name="password" type="password" autocomplete="current-password" placeholder="请输入密码">
+          <button class="field__trail" type="button">显示</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="check"><input type="checkbox" checked>记住我</label>
+        <a class="link" href="./register.html">创建账号</a>
+      </div>
+
+      <button class="button button--block btn-primary is-solid" type="submit">登录</button>
+    </form>
+
+    <div class="foot">
+      <span class="foot__mark">Celadon 2.0</span>
+      <span>© 2026 Yao Agents</span>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>
