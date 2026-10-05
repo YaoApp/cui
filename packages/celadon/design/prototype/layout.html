@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" class="celadon" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yao Agents · Workspace</title>
-<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="../tokens.css">
+<script src="../i18n/bundle.js"></script>
 <style>
 
 /* 登录之后的主界面布局稿（产品级）。纯 HTML + token；只画形态，接真数据在第三步。
@@ -13,6 +14,11 @@
 body { margin: 0; background: var(--background-app); color: var(--text-primary);
        font-family: var(--font-family-ui); font-size: var(--font-size-14); line-height: var(--line-height-normal); }
 [hidden] { display: none !important; }
+/* 界面图标：符号本身不带 fill/stroke（由使用方给）——等同产品 components/base/icon 的规则；
+   同时给统一的尺寸，免得漏掉某处就画成巨大黑块。 */
+.icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none;
+        fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.btn-primary .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
 .app { display: grid; grid-template-columns: 240px minmax(0, 1fr) 320px; block-size: 100vh; }
 .nav { display: flex; flex-direction: column; gap: var(--spacing-8); padding: var(--spacing-16) var(--spacing-12);
        background: var(--background-surface); border-inline-end: var(--border-width) solid var(--border-subtle); }
@@ -28,9 +34,12 @@ body { margin: 0; background: var(--background-app); color: var(--text-primary);
 .nav__item .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; }
 .nav__count { margin-inline-start: auto; color: var(--text-tertiary); font-size: var(--font-size-12); }
 .nav__foot { margin-block-start: auto; display: flex; flex-direction: column; gap: var(--spacing-8); }
+/* 当前服务器：单行截断，避免长名称折行撑满 */
 .nav__server { display: flex; align-items: center; gap: var(--spacing-8); padding: var(--spacing-8) var(--spacing-12);
                border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-small);
-               color: var(--text-primary); font-size: var(--font-size-13); font-weight: var(--font-weight-heavy); }
+               color: var(--text-primary); font-size: var(--font-size-13); font-weight: var(--font-weight-heavy);
+               min-inline-size: 0; }
+.nav__server span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav__server .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; color: var(--text-tertiary); }
 .main { display: flex; flex-direction: column; min-inline-size: 0; }
 .topbar { display: flex; align-items: center; gap: var(--spacing-16); padding: var(--spacing-12) var(--spacing-24);
@@ -101,7 +110,7 @@ body { margin: 0; background: var(--background-app); color: var(--text-primary);
   <!-- [shell] 左导航：品牌 · 主导航 · 底部当前服务器 -->
   <nav class="nav" aria-label="Main">
     <div class="nav__brand">
-      <img class="nav__mark" src="logo-mark-celadon.svg" alt="" width="24" height="20">
+      <img class="nav__mark" src="../logo-mark-celadon.svg" alt="" width="24" height="20">
       <span class="nav__name">Yao Agents</span>
     </div>
     <div class="nav__group">
@@ -113,7 +122,7 @@ body { margin: 0; background: var(--background-app); color: var(--text-primary);
       <a class="nav__item" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pc"></use></svg><span data-i18n-key="ui.navigation.computer">Computer</span></a>
     </div>
     <div class="nav__foot">
-      <a class="nav__item" href="#"><span data-i18n-key="ui.layout.settings">Settings</span></a>
+      <a class="nav__item" href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-board"></use></svg><span data-i18n-key="ui.layout.settings">Settings</span></a>
       <div class="nav__server" title="Yao Agents official · Asia Pacific">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>
         <span>Yao Agents official · Asia Pacific</span>
