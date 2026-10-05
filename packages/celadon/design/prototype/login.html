@@ -173,15 +173,16 @@ body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inl
 /* 客户端内：横条与卡片同属一个区域，间距由容器的 gap 决定 */
 .client-stack { display: grid; gap: var(--spacing-12); inline-size: min(100%, var(--auth-card)); }
 .client-bar { display: none; align-items: center; justify-content: space-between; gap: var(--spacing-8); }
-body.is-client .client-bar { display: flex; }
-.client-back { display: inline-flex; align-items: center; gap: var(--spacing-4); color: var(--text-secondary);
+.client-back { display: inline-flex; align-items: center; gap: var(--spacing-4); color: var(--text-primary);
                font-size: var(--font-size-13); text-decoration: none; }
-.client-back:hover { color: var(--text-primary); }
+.client-back:hover { color: var(--brand-ink); }
 .client-back .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
-.client-server { display: inline-flex; align-items: center; gap: var(--spacing-8); color: var(--text-secondary);
+/* 当前服务器：角标形态（带底色的胶囊），文字用最深一档，比纯文本醒目 */
+.client-server { display: inline-flex; align-items: center; gap: var(--spacing-8); padding: var(--spacing-4) var(--spacing-12);
+                 border-radius: var(--radius-pill); background: var(--background-field); color: var(--text-primary);
                  font-size: var(--font-size-13); min-inline-size: 0; }
 .client-server__mark { inline-size: calc(var(--spacing-16) + var(--spacing-4)); block-size: calc(var(--spacing-16) + var(--spacing-4)); flex: none; }
-.client-server__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.client-server__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--font-weight-medium); }
 :lang(zh-CN) .client-back, :lang(zh-TW) .client-back, :lang(ja) .client-back,
 :lang(zh-CN) .client-server, :lang(zh-TW) .client-server, :lang(ja) .client-server { font-size: var(--font-size-minimum-cjk); }
 </style>
