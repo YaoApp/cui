@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en" class="celadon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yao Agents · Create account</title>
+<link rel="stylesheet" href="../tokens.css">
+<script src="../i18n/bundle.js"></script>
+<!--
+  注册页（register 状态）· 静态设计稿 = 产品形态。默认语言为英文；版面照用户给的参照图：
+    标题一行 · 邮箱 · 密码 · 确认密码 · 邀请码（可选）· 协议 · 近黑反白主按钮 · 卡下「已有账号？」
+    每个字段带前导图标（邮箱 / 锁 / 锁 / 礼物），两个密码框右端各有「显示密码」开关。
+
+  入口页（login 状态）的说明留档：
+    Sign up or sign in to your Yao Agents account
+
+  版式照参照图：一张卡片居中；卡内依次为标题 · 第三方（Google / GitHub，真品牌图标）· OR 分隔 ·
+  **单个输入框**（无 label，说明写在 placeholder 里）· 协议勾选 · 近黑反白主按钮 · 卡下引导；
+  右上角是语言与主题：语言文字 + 分隔线 + 主题图标，**点开都是菜单**（主题：Auto / Light / Dark）。
+
+  · 主题与语言是**能用**的（这一段是本页唯一的脚本），其余纯静态。
+  · 品牌图标取真图标集雪碧图：../icons/brand-sprite-6.svg（Google · GitHub）· ../icons/brand-sprite-2.svg（Apple）。
+    输入框前导图标内联自 icons.html 的 `i-nav-user`（界面图标目前只有内联雪碧图，没有独立文件）。
+  · 颜色 / 间距 / 字号 / 圆角 / 描边 / 阴影一律取 token（见 ../AGENTS.md）。
+-->
+<style>
+* { box-sizing: border-box; }
+html, body { block-size: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-cjk);
+  color: var(--text-primary);
+  background: var(--background-app);
+  -webkit-font-smoothing: antialiased;
+}
+:root { --auth-card: 480px; --brand-mark: 32px; }   /* 局部：卡片宽度 · 标记尺寸；进产品时归 token */
+
+.page { min-block-size: 100%; display: flex; flex-direction: column; padding: var(--spacing-16) var(--spacing-24); }
+
+/* 界面图标：符号本身不带 fill/stroke（由使用方给）——产品里是 `components/base/icon` 的职责，
+   本页照它的规则来：描边 2、圆头圆角、不填充。 */
+.field__icon, .field__trail-icon, .icon { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 字段右端的开关（本页是「显示密码」的眼镜）：绝对定位在框内，按钮自身不留原生外观 */
+.field__trail-icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); display: block; }
+.field__trail { position: absolute; inset-inline-end: var(--spacing-4); display: inline-flex; align-items: center;
+                appearance: none; -webkit-appearance: none; border: 0; background: transparent; cursor: pointer;
+                color: var(--text-tertiary); padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-xs); }
+.field__trail:hover { color: var(--text-secondary); }
+.field__trail:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* 顶行：左 LOGO；右语言与主题（照参照图：文字 + 分隔线 + 图标，点开是菜单） */
+.top { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-16); position: relative; }
+.brand { display: flex; align-items: center; gap: var(--spacing-8); }
+.brand__mark { inline-size: var(--brand-mark); block-size: auto; display: block; }
+/* 产品名：大号 + **例外**的品牌渐变（体系里唯一允许渐变文字的地方，用标记自身的渐变 token；
+   浅暗同版，与 logo-mark-celadon.svg 的渐变一致）。 */
+.brand__name { font-size: var(--font-size-20); font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin);
+               background: linear-gradient(105deg, var(--brand-mark-from) 0%, var(--brand-mark-to) 100%);
+               -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ctrl { display: flex; align-items: center; gap: var(--spacing-8); }
+.ctrl__sep { inline-size: var(--border-width); block-size: var(--spacing-16); background: var(--border-default); }
+.ctrl__btn { display: inline-flex; align-items: center; gap: var(--spacing-8); border: 0; background: transparent;
+             color: var(--text-secondary); font: inherit; font-size: var(--font-size-13); cursor: pointer;
+             padding: var(--spacing-4) var(--spacing-8); border-radius: var(--radius-small); }
+.ctrl__btn:hover { background: var(--background-hover); color: var(--text-primary); }
+.ctrl__btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.ctrl__btn .icon { inline-size: 16px; block-size: 16px; display: block; }
+
+/* 菜单：浮层（token 的层级/圆角/阴影） */
+.menu { position: absolute; inset-block-start: calc(100% + var(--spacing-4)); inset-inline-end: 0;
+        min-inline-size: 176px; padding: var(--spacing-4); z-index: var(--z-base);
+        background: var(--background-surface); border: var(--border-width) solid var(--border-default);
+        border-radius: var(--radius-large); box-shadow: var(--shadow-overlay); }
+.menu[hidden] { display: none; }
+.menu button { display: flex; align-items: center; gap: var(--spacing-8); inline-size: 100%; text-align: start;
+               border: 0; background: transparent; color: var(--text-primary); font: inherit;
+               font-size: var(--font-size-body); cursor: pointer; padding: var(--spacing-8) var(--spacing-8);
+               border-radius: var(--radius-small); }
+.menu button:hover { background: var(--background-hover); }
+.menu button.is-on { background: var(--background-selected); }
+.menu button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.menu .icon { inline-size: 16px; block-size: 16px; display: block; flex: none; color: var(--text-secondary); }
+
+/* 卡片 */
+.stage { flex: 1; display: grid; place-items: center; padding-block: var(--spacing-32); }
+.card { inline-size: min(100%, var(--auth-card)); padding: var(--spacing-32) var(--spacing-24) var(--spacing-32);
+        background: var(--background-content); border: var(--border-width) solid var(--border-subtle);
+        border-radius: var(--radius-large); box-shadow: var(--shadow-subtle); }
+/* 标题两行：每行一个块；字号用新加的 24 档 */
+.title { margin: 0 0 var(--spacing-32); font-size: var(--font-size-28); font-weight: var(--font-weight-strong); line-height: var(--line-height-normal); }
+.title__line { display: block; }
+.title__line:empty { display: none; }   /* 某些语言标题不换行：空行收起 */
+
+/* 第三方：整宽、软底、左图标 + 居中文字 */
+.providers { display: grid; gap: var(--spacing-8); margin-block-end: var(--spacing-24); }
+.provider { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--spacing-8);
+            min-block-size: var(--row-height); padding-inline: var(--spacing-12);
+            background: var(--background-field); color: var(--text-primary);
+            border: var(--border-width) solid var(--border-subtle); border-radius: var(--radius-medium);
+            font: inherit; font-size: var(--font-size-14); font-weight: var(--font-weight-medium); cursor: pointer; }
+.provider:hover { background: var(--background-hover); }
+.provider:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.provider__label { text-align: center; }
+.provider__mark { inline-size: 18px; block-size: 18px; display: block; }
+
+.or { display: flex; align-items: center; gap: var(--spacing-12); margin: 0 0 var(--spacing-24);
+      color: var(--text-tertiary); font-size: var(--font-size-11); letter-spacing: var(--letter-spacing-latin); }
+.or::before, .or::after { content: ''; flex: 1; block-size: var(--border-width); background: var(--border-subtle); }
+
+/* 单输入框：无 label，说明在 placeholder；前导图标住在框内 */
+.field { position: relative; display: flex; align-items: center; margin-block-end: var(--spacing-16); }
+.field__icon { position: absolute; inset-inline-start: var(--spacing-12); inline-size: var(--spacing-16); block-size: var(--spacing-16);
+               display: block; color: var(--text-placeholder); pointer-events: none; }
+/* 输入框：本页先用**低对比档**边界（--border-control-low，观感轻）；
+   合规档（WCAG 1.4.11 ≥3:1）是 --border-control-strong，默认档是 --border-control。 */
+.field .input { inline-size: 100%; min-block-size: var(--row-height); border-radius: var(--radius-medium);
+                padding-inline-start: var(--spacing-32); font-size: var(--font-size-14);
+                border-color: var(--border-control-low); }
+
+/* 协议 */
+.terms { display: flex; gap: var(--spacing-8); align-items: flex-start; margin-block: 0 var(--spacing-16);
+         font-size: var(--font-size-13); color: var(--text-secondary); }
+/* 复选框：原生控件的未选中边框无法改，故用 appearance:none 自己画（边框走 low 档，与输入框同一档）。
+   产品实现时这里应是一个基础件 Checkbox（设计体系暂无该类）。 */
+.terms input[type='checkbox'] { appearance: none; -webkit-appearance: none;
+  inline-size: var(--spacing-16); block-size: var(--spacing-16); margin-block-start: 2px; flex: none;
+  border: var(--border-width) solid var(--border-control-low); border-radius: var(--radius-xs);
+  background: var(--background-surface); cursor: pointer; }
+.terms input[type='checkbox']:checked { background: var(--brand); border-color: var(--brand); }
+.terms input[type='checkbox']:checked::after { content: ''; display: block; inline-size: 4px; block-size: 8px;
+  margin: 1px auto 0; border: solid var(--background-surface); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.terms input[type='checkbox']:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.terms a { color: var(--brand-ink); }
+
+/* 主按钮：近黑反白（照参照图） */
+.button { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-8);
+          white-space: nowrap; cursor: pointer; font-family: var(--font-family-ui);
+          font-weight: var(--font-weight-medium); line-height: var(--line-height-cjk); border-radius: var(--radius-medium);
+          border: var(--border-width) solid transparent; }
+.button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-14); }
+.button--inverse { background: var(--text-primary); color: var(--background-content); }
+.button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.footnote { margin: var(--spacing-16) 0 0; text-align: center;
+            /* 注册页的引导左对齐（照参照图） */ }
+.footnote--start { text-align: start; font-size: var(--font-size-13); color: var(--text-secondary); }
+
+/* 底行：条款 */
+.bottom { display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
+.bottom a { color: var(--text-tertiary); }
+</style>
+</head>
+<body>
+<!-- 界面图标：目前只有 icons.html 里的内联雪碧图，没有独立文件；这里内联本次用到的一个符号 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" /><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" /><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" /><path d="m2 2 20 20" /></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13" /><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" /></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-pc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" x2="16" y1="21" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" x2="12" y1="17" y2="21" stroke="currentColor" stroke-width="2"/></symbol>
+</defs></svg>
+
+<div class="page">
+
+  <header class="top">
+    <span class="brand">
+      <img class="brand__mark" src="../logo-mark-celadon.svg" alt="" width="32" height="27">
+      <span class="brand__name">Yao Agents</span>
+    </span>
+
+    <span class="ctrl">
+      <button class="ctrl__btn" type="button" id="lang-btn" aria-haspopup="menu" aria-expanded="false">
+        <span id="lang-label">English</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-globe"></use></svg>
+      </button>
+      <span class="ctrl__sep" aria-hidden="true"></span>
+      <button class="ctrl__btn" type="button" id="theme-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Theme">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use id="theme-icon" href="#i-sun"></use></svg>
+      </button>
+    </span>
+
+    <div class="menu" id="lang-menu" role="menu" hidden>
+      <button type="button" role="menuitemradio" data-lang="system">跟随系统（中文）</button>
+      <button type="button" role="menuitemradio" data-lang="zh-CN">简体中文</button>
+      <button type="button" role="menuitemradio" data-lang="zh-TW">繁體中文</button>
+      <button type="button" role="menuitemradio" data-lang="en">English</button>
+      <button type="button" role="menuitemradio" data-lang="ja">日本語</button>
+    </div>
+
+    <div class="menu" id="theme-menu" role="menu" hidden style="inset-inline-end:0">
+      <button type="button" role="menuitemradio" data-theme="light"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"></use></svg><span data-i18n="themeLight">Light</span></button>
+      <button type="button" role="menuitemradio" data-theme="dark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"></use></svg><span data-i18n="themeDark">Dark</span></button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <main class="card" aria-labelledby="auth-title">
+      <h1 class="title" id="auth-title">
+        <span class="title__line" data-i18n="registerTitle">Create your Yao Agents account</span>
+      </h1>
+
+      <form id="register-form">
+        <div class="field">
+          <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mail"></use></svg>
+          <input class="input" id="email" name="email" type="email" autocomplete="email"
+                 inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="emailPh" placeholder="Enter your email address">
+        </div>
+
+        <div class="field">
+          <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"></use></svg>
+          <input class="input" id="password" name="new-password" type="password" autocomplete="new-password"
+                 data-i18n-ph="passwordPh" placeholder="Enter your password">
+          <button class="field__trail" type="button" data-eye="password" data-i18n-aria="showPassword" aria-label="Show password">
+            <svg class="field__trail-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eye-off"></use></svg>
+          </button>
+        </div>
+
+        <div class="field">
+          <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"></use></svg>
+          <input class="input" id="confirm" name="confirm-password" type="password" autocomplete="new-password"
+                 data-i18n-ph="confirmPasswordPh" placeholder="Confirm your password">
+          <button class="field__trail" type="button" data-eye="confirm" data-i18n-aria="showPassword" aria-label="Show password">
+            <svg class="field__trail-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eye-off"></use></svg>
+          </button>
+        </div>
+
+        <div class="field">
+          <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-gift"></use></svg>
+          <input class="input" id="invite" name="invite" type="text" autocomplete="off"
+                 data-i18n-ph="invitePh" placeholder="Invitation code (optional)">
+        </div>
+
+        <div class="terms">
+          <input id="terms" type="checkbox">
+          <label for="terms">
+            <span data-i18n="termsPre">I have read and agree to the</span>
+            <a class="link" href="#" data-i18n="termsService">Terms of Service</a>
+            <span data-i18n="termsAnd">and</span>
+            <a class="link" href="#" data-i18n="termsPrivacy">Privacy Policy</a>
+          </label>
+        </div>
+
+        <button class="button button--block button--inverse" type="submit" data-i18n="register">Create account</button>
+      </form>
+
+      <p class="footnote footnote--start"><span data-i18n="haveAccount">Already have an account?</span> <a class="link" href="./login.html" data-i18n="signInNow">Sign in now</a></p>
+    </main>
+  </div>
+
+  <footer class="bottom">
+    <a class="link" href="#" data-i18n="termsService">Terms of Service</a>
+    <span>·</span>
+    <a class="link" href="#" data-i18n="termsPrivacy">Privacy Policy</a>
+  </footer>
+
+</div>
+
+<script>
+/* 本页的脚本：主题 · 语言 · 密码显示开关。（产品的这些在平台层与基础件里，这里只为把设计做成"能用"。） */
+const dictOf = (lang) => (((window.CELADON_I18N || {})[lang === 'system' ? 'zh-CN' : lang] || {}).ui || {}).entry || {}
+let lang = 'en'
+let theme = 'auto'
+
+function applyLang(next) {
+  lang = next
+  const langKey = lang === 'system' ? 'zh-CN' : lang
+  const dict = dictOf(lang)
+  document.documentElement.lang = langKey
+  /* 值为空串也要写进去：某些语言的标题不换行，第二行必须被清空 */
+  document.querySelectorAll('[data-i18n]').forEach((el) => { const v = dict[el.dataset.i18n]; if (v !== undefined) el.textContent = v })
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => { const v = dict[el.dataset.i18nPh]; if (v) el.placeholder = v })
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => { const v = dict[el.dataset.i18nAria]; if (v) el.setAttribute('aria-label', v) })
+  document.getElementById('lang-label').textContent = { system: '跟随系统（中文）', 'zh-CN': '简体中文', 'zh-TW': '繁體中文', en: 'English', ja: '日本語' }[lang]
+  document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.classList.toggle('is-on', b.dataset.lang === lang))
+}
+
+function applyTheme(next) {
+  theme = next === 'dark' ? 'dark' : 'light'      /* 菜单只有 Light / Dark 两项；首屏默认跟随系统 */
+  document.documentElement.dataset.theme = theme
+  document.getElementById('theme-icon').setAttribute('href', theme === 'dark' ? '#i-moon' : '#i-sun')
+  document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.classList.toggle('is-on', b.dataset.theme === theme))
+}
+
+function toggleMenu(id, open) {
+  const menu = document.getElementById(id)
+  const button = document.getElementById(id === 'lang-menu' ? 'lang-btn' : 'theme-btn')
+  const next = open ?? menu.hidden
+  menu.hidden = !next
+  button.setAttribute('aria-expanded', String(next))
+  if (next) menu.querySelector('button')?.focus()
+}
+
+document.getElementById('lang-btn').addEventListener('click', () => toggleMenu('lang-menu'))
+document.getElementById('theme-btn').addEventListener('click', () => toggleMenu('theme-menu'))
+document.querySelectorAll('#lang-menu [data-lang]').forEach((b) => b.addEventListener('click', () => { applyLang(b.dataset.lang); toggleMenu('lang-menu', false) }))
+document.querySelectorAll('#theme-menu [data-theme]').forEach((b) => b.addEventListener('click', () => { applyTheme(b.dataset.theme); toggleMenu('theme-menu', false) }))
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.ctrl, .menu')) { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
+})
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') { toggleMenu('lang-menu', false); toggleMenu('theme-menu', false) }
+})
+
+
+/* 密码显示开关：切 type 与图标，并同步可访问名 */
+document.querySelectorAll('[data-eye]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const input = document.getElementById(btn.dataset.eye)
+    const shown = input.type === 'text'
+    input.type = shown ? 'password' : 'text'
+    const dict = dictOf(lang)
+    btn.setAttribute('aria-label', shown ? dict.showPassword : dict.hidePassword)
+    btn.querySelector('use').setAttribute('href', shown ? '#i-eye-off' : '#i-eye')
+    input.focus()
+  })
+})
+/* 静态设计稿：不让表单真的提交 */
+document.getElementById('register-form').addEventListener('submit', (event) => event.preventDefault())
+
+applyLang('en')
+/* 首屏：跟随系统（head 里那一行已设好 data-theme），图标与选中态据此初始化 */
+applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')
+</script>
+</body>
+</html>

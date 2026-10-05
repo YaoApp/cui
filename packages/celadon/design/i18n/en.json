@@ -24,7 +24,7 @@
     "entry": {
       "loginTitle": "Sign in",
       "loginLead": "Continue with your account.",
-      "registerTitle": "Create account",
+      "registerTitle": "Create your Yao Agents account",
       "registerLead": "All you need is an account and a password.",
       "account": "Account",
       "accountPh": "Enter your email",
@@ -73,7 +73,12 @@
       "themeAuto": "Auto",
       "themeLight": "Light",
       "themeDark": "Dark",
-      "entryTitleLine2": "Yao Agents account"
+      "entryTitleLine2": "Yao Agents account",
+      "confirmPasswordPh": "Confirm your password",
+      "invitePh": "Invitation code (optional)",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "emailPh": "Enter your email address"
     },
     "inbox": {
       "unreadCount": "{count} unread",

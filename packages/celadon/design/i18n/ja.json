@@ -24,7 +24,7 @@
     "entry": {
       "loginTitle": "ログイン",
       "loginLead": "アカウントで続けます。",
-      "registerTitle": "アカウントを作成",
+      "registerTitle": "Yao Agents アカウントを作成",
       "registerLead": "必要なのはアカウントとパスワードだけです。",
       "account": "アカウント",
       "accountPh": "メールアドレスを入力",
@@ -73,7 +73,12 @@
       "themeAuto": "自動",
       "themeLight": "ライト",
       "themeDark": "ダーク",
-      "entryTitleLine2": ""
+      "entryTitleLine2": "",
+      "confirmPasswordPh": "パスワードを再入力",
+      "invitePh": "招待コード（任意）",
+      "showPassword": "パスワードを表示",
+      "hidePassword": "パスワードを隠す",
+      "emailPh": "メールアドレスを入力"
     },
     "inbox": {
       "unreadCount": "未読 {count}",

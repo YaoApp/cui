@@ -26,7 +26,7 @@ window.CELADON_I18N = {
       "entry": {
         "loginTitle": "Sign in",
         "loginLead": "Continue with your account.",
-        "registerTitle": "Create account",
+        "registerTitle": "Create your Yao Agents account",
         "registerLead": "All you need is an account and a password.",
         "account": "Account",
         "accountPh": "Enter your email",
@@ -75,7 +75,12 @@ window.CELADON_I18N = {
         "themeAuto": "Auto",
         "themeLight": "Light",
         "themeDark": "Dark",
-        "entryTitleLine2": "Yao Agents account"
+        "entryTitleLine2": "Yao Agents account",
+        "confirmPasswordPh": "Confirm your password",
+        "invitePh": "Invitation code (optional)",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "emailPh": "Enter your email address"
       },
       "inbox": {
         "unreadCount": "{count} unread",
@@ -774,7 +779,7 @@ window.CELADON_I18N = {
       "entry": {
         "loginTitle": "ログイン",
         "loginLead": "アカウントで続けます。",
-        "registerTitle": "アカウントを作成",
+        "registerTitle": "Yao Agents アカウントを作成",
         "registerLead": "必要なのはアカウントとパスワードだけです。",
         "account": "アカウント",
         "accountPh": "メールアドレスを入力",
@@ -823,7 +828,12 @@ window.CELADON_I18N = {
         "themeAuto": "自動",
         "themeLight": "ライト",
         "themeDark": "ダーク",
-        "entryTitleLine2": ""
+        "entryTitleLine2": "",
+        "confirmPasswordPh": "パスワードを再入力",
+        "invitePh": "招待コード（任意）",
+        "showPassword": "パスワードを表示",
+        "hidePassword": "パスワードを隠す",
+        "emailPh": "メールアドレスを入力"
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1522,7 +1532,7 @@ window.CELADON_I18N = {
       "entry": {
         "loginTitle": "登录",
         "loginLead": "用账号继续。",
-        "registerTitle": "创建账号",
+        "registerTitle": "创建 Yao Agents 账号",
         "registerLead": "只需一个账号和密码。",
         "account": "账号",
         "accountPh": "请输入邮箱账号",
@@ -1571,7 +1581,12 @@ window.CELADON_I18N = {
         "themeAuto": "跟随系统",
         "themeLight": "浅色",
         "themeDark": "暗色",
-        "entryTitleLine2": ""
+        "entryTitleLine2": "",
+        "confirmPasswordPh": "请确认密码",
+        "invitePh": "邀请码（可选）",
+        "showPassword": "显示密码",
+        "hidePassword": "隐藏密码",
+        "emailPh": "请输入邮箱地址"
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2270,7 +2285,7 @@ window.CELADON_I18N = {
       "entry": {
         "loginTitle": "登入",
         "loginLead": "用帳號繼續。",
-        "registerTitle": "建立帳號",
+        "registerTitle": "建立 Yao Agents 帳號",
         "registerLead": "只需要一個帳號和密碼。",
         "account": "帳號",
         "accountPh": "請輸入電子郵件帳號",
@@ -2319,7 +2334,12 @@ window.CELADON_I18N = {
         "themeAuto": "跟隨系統",
         "themeLight": "淺色",
         "themeDark": "暗色",
-        "entryTitleLine2": ""
+        "entryTitleLine2": "",
+        "confirmPasswordPh": "請確認密碼",
+        "invitePh": "邀請碼（選填）",
+        "showPassword": "顯示密碼",
+        "hidePassword": "隱藏密碼",
+        "emailPh": "請輸入電子郵件地址"
       },
       "inbox": {
         "unreadCount": "{count} 未讀",

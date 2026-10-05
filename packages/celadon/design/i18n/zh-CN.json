@@ -24,7 +24,7 @@
     "entry": {
       "loginTitle": "登录",
       "loginLead": "用账号继续。",
-      "registerTitle": "创建账号",
+      "registerTitle": "创建 Yao Agents 账号",
       "registerLead": "只需一个账号和密码。",
       "account": "账号",
       "accountPh": "请输入邮箱账号",
@@ -73,7 +73,12 @@
       "themeAuto": "跟随系统",
       "themeLight": "浅色",
       "themeDark": "暗色",
-      "entryTitleLine2": ""
+      "entryTitleLine2": "",
+      "confirmPasswordPh": "请确认密码",
+      "invitePh": "邀请码（可选）",
+      "showPassword": "显示密码",
+      "hidePassword": "隐藏密码",
+      "emailPh": "请输入邮箱地址"
     },
     "inbox": {
       "unreadCount": "{count} 未读",
