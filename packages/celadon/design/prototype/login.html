@@ -162,6 +162,11 @@ body {
 /* 底行：条款 */
 .bottom { display: flex; justify-content: center; align-items: center; gap: var(--spacing-8); color: var(--text-tertiary); font-size: var(--font-size-11); }
 .bottom a { color: var(--text-tertiary); }
+/* 客户端内模式（?from=connect）：不展示品牌区与服务协议，控件与服务器选择页同位置（卡片下方居中） */
+body.is-client .brand { display: none; }
+body.is-client .terms { display: none; }
+body.is-client .ctrl-wrap { margin-block-start: var(--spacing-24); }
+body.is-client .menu { inset-block-end: calc(100% + var(--spacing-4)); inset-inline-start: 50%; transform: translateX(-50%); }
 </style>
 </head>
 <body>
@@ -344,7 +349,7 @@ document.querySelector('form').addEventListener('submit', async (event) => {
     emailInput.focus()
     return
   }
-  if (!termsBox.checked) {
+  if (!isClient && !termsBox.checked) {
     document.querySelector('.terms').classList.add('is-error')
     termsError.hidden = false
     termsBox.focus()
@@ -354,8 +359,23 @@ document.querySelector('form').addEventListener('submit', async (event) => {
   nextBtn.disabled = true
   nextBtn.textContent = dictOf(lang).nextBusy || 'Checking…'
   await new Promise((resolve) => setTimeout(resolve, 2400))
-  location.href = './register.html'
+  location.href = isClient ? './register.html?from=connect' : './register.html'
 })
+/* 客户端内模式：从 Connect 跳来（?from=connect）——收起品牌区与协议，控件移到卡片下方 */
+const isClient = new URLSearchParams(location.search).has('from')
+if (isClient) {
+  document.body.classList.add('is-client')
+  const wrap = document.createElement('div')
+  wrap.className = 'ctrl-wrap'
+  const ctrl = document.querySelector('.ctrl')
+  const menu = document.getElementById('lang-menu')
+  if (ctrl) { ctrl.replaceWith(wrap); wrap.append(ctrl); if (menu) wrap.append(menu) }
+  const card = document.querySelector('.card')
+  if (card) card.after(wrap)
+  const signUpLink = document.querySelector('a[href="./register.html"]')
+  if (signUpLink) signUpLink.setAttribute('href', './register.html?from=connect')
+}
+
 applyLang('en')
 /* 首屏：跟随系统（head 里那一行已设好 data-theme），图标与选中态据此初始化 */
 applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')

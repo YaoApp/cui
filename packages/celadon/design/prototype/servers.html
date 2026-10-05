@@ -458,7 +458,7 @@ function doConnect() {
   connectBtn.classList.add('is-loading')
   connectBtn.disabled = true
   connectBtn.textContent = dictOf(lang).connecting
-  setTimeout(() => { location.href = './login.html' }, 1800)   /* 连接完成 → 登录页 */
+  setTimeout(() => { location.href = './login.html?from=connect' }, 1800)   /* 连接完成 → 登录页 */
 }
 connectBtn.addEventListener('click', doConnect)
 customInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doConnect() })
