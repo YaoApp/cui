@@ -36,6 +36,7 @@
 | `--radius-small` | `6px` | 按钮 · 输入框 · 小控件 |
 | `--radius-medium` | `8px` | 卡片 · 面板 · 弹层 |
 | `--radius-large` | `12px` | 大容器 · 图片 |
+| `--radius-xl` | `16px` | 大输入区 · 大容器（新增大圆角档）|
 | `--radius-pill` | `999px` | 标签 · 胶囊按钮 · 头像角标 |
 
 ## F3 阴影与层级

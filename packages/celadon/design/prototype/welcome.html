@@ -382,6 +382,8 @@ body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desk
 /* 两列（无右栏）：需与 layout 里 `body.is-nav-open .window`（0,2,0）同特异性才压得住 */
 body.is-nav-open .window { grid-template-columns: var(--nav-default) minmax(var(--center-min), 1fr); }
 body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desktop) minmax(var(--center-min), 1fr); }
+/* 首屏输入区用大圆角档 --radius-xl（F2 新增；元素越大圆角越大） */
+.composer { border-radius: var(--radius-xl); }
 </style>
 </head>
 <body class="celadon">
