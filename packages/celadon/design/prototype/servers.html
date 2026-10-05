@@ -223,6 +223,11 @@ svg.opt__logo { color: var(--text-tertiary); }
 /* 列表压在字段之上 */
 .picker-wrap { position: relative; z-index: var(--z-raised); }
 .picker__list { z-index: var(--z-overlay); }
+/* 加载态：转圈占 LOGO 那一格（同尺寸、贴左） */
+.picker--state .spinner { inline-size: calc(var(--spacing-16) + var(--spacing-4));
+                          block-size: calc(var(--spacing-16) + var(--spacing-4)); border-width: 2px; }
+/* 自托管的图标：与品牌标记同尺寸的描边图标 */
+svg.opt__logo.is-server { inline-size: calc(var(--spacing-16) + var(--spacing-4)); block-size: calc(var(--spacing-16) + var(--spacing-4)); }
 </style>
 </head>
 <body>
@@ -354,8 +359,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleMenu
    列表最后一项是「自建服务器」；选中它才出现地址输入。 */
 const CUSTOM = '__custom__'
 const CLOUD = [
-  { key: 'serverApac', url: 'https://api.yaoagents.com' },
-  { key: 'serverCn', url: 'https://api.yaoagents.cn' },
+  { key: 'serverApac', url: 'https://asia.yaoagents.com' },
+  { key: 'serverCn', url: 'https://bj.yaoagents.cn' },
 ]
 let cloudState = 'loading'        /* loading | ready | failed | empty */
 let selected = CLOUD[0] ? CLOUD[0].url : CUSTOM
@@ -385,6 +390,13 @@ function renderCloud() {
   }
   if (cloudState !== 'ready') { customField.hidden = true; return }
 
+  /* Label 的图标与所选一致：官方 = 品牌标记，自托管 = 服务器图标 */
+  const triggerLogo = document.querySelector('#cloud-picker .opt__logo')
+  if (triggerLogo && isCustom() !== triggerLogo.classList.contains('is-server')) {
+    triggerLogo.outerHTML = isCustom()
+      ? '<svg class="opt__logo is-server" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg>'
+      : '<img class="opt__logo" src="../logo-mark-celadon.svg" alt="" width="20" height="17">'
+  }
   const found = CLOUD.find((c) => c.url === selected)
   nameEl.textContent = isCustom() ? dictOf(lang).customOption : (found ? dictOf(lang)[found.key] : dictOf(lang).cloudSelectHint)
   nameEl.classList.toggle('placeholder', !isCustom() && !found)
@@ -443,11 +455,7 @@ function doConnect() {
   connectBtn.classList.add('is-loading')
   connectBtn.disabled = true
   connectBtn.textContent = dictOf(lang).connecting
-  setTimeout(() => {
-    connectBtn.classList.remove('is-loading')
-    connectBtn.disabled = false
-    applyLang(lang)
-  }, 1800)
+  setTimeout(() => { location.href = './login.html' }, 1800)   /* 连接完成 → 登录页 */
 }
 connectBtn.addEventListener('click', doConnect)
 customInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doConnect() })
