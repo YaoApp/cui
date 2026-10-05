@@ -170,7 +170,7 @@ body.is-client .window { grid-template-columns: var(--nav-collapsed-desktop) min
    中栏会滑进 0 宽列被压没（踩过）。 */
 body.is-client .nav { visibility: hidden; overflow: hidden; }
 .window-controls { display: flex; }
-body.is-client .window-controls { display: flex; align-items: center; gap: var(--spacing-8);
+.window-controls { display: flex; align-items: center; gap: var(--spacing-8);
   position: absolute; inset-block-start: var(--spacing-12); inset-inline-start: var(--spacing-16); z-index: var(--z-raised); }
 body.is-client .content-header, body.is-client .panel-header { padding-inline-start: calc(var(--spacing-16) + 76px); }
 /* Web 中档：保留 56px 图标轨（浏览器没有标题栏可放图标） */
@@ -188,38 +188,38 @@ body.is-client .content-header, body.is-client .panel-header { padding-inline-st
 .panel-body { overflow: auto; }
 .nav, .panel { overflow: hidden auto; }
 /* 窗口左上控制区：红绿灯在最左（系统约定），收起键在右；与内容顶行（--column-header-height）居中对齐 */
-body.is-client .window-controls { inset-block-start: 0; block-size: var(--column-header-height);
+.window-controls { inset-block-start: 0; block-size: var(--column-header-height);
   align-items: center; gap: var(--spacing-8); }
-body.is-client .window-controls .traffic-lights { position: static; display: flex; gap: var(--spacing-8); }
+.window-controls .traffic-lights { position: static; display: flex; gap: var(--spacing-8); }
 /* 收起状态：导航所在列轨 0 → --nav-default（客户端里点击收起键切换） */
 body.is-client.is-nav-open .window { grid-template-columns: var(--nav-default) minmax(var(--center-min), 1fr) var(--side-width-reading); }
 body.is-client.is-nav-open .nav { visibility: visible; }
 /* 窗口左上的收起键：无边框 · 无底色 · 焦点环按规范用 --focus-ring（红线 6） */
-body.is-client .window-controls .icon-button { border: 0; background: transparent; color: var(--text-secondary);
+.window-controls .icon-button { border: 0; background: transparent; color: var(--text-secondary);
   inline-size: var(--spacing-24); block-size: var(--spacing-24); display: inline-flex; align-items: center; justify-content: center; }
-body.is-client .window-controls .icon-button:hover { background: var(--background-hover); color: var(--text-primary); }
-body.is-client .window-controls .icon-button:focus { outline: none; }
-body.is-client .window-controls .icon-button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-body.is-client .window-controls .icon-button .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
+.window-controls .icon-button:hover { background: var(--background-hover); color: var(--text-primary); }
+.window-controls .icon-button:focus { outline: none; }
+.window-controls .icon-button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.window-controls .icon-button .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); }
 /* 收起键放到顶行右侧（位置固定、不随导航开合移动）；红绿灯仍留最左 */
-body.is-client .window-controls { inset-inline-start: 0; inset-inline-end: 0; padding-inline: var(--spacing-16);
+.window-controls { inset-inline-start: 0; inset-inline-end: 0; padding-inline: var(--spacing-16);
   justify-content: space-between; }
-body.is-client .window-controls .wc-left { display: inline-flex; align-items: center; gap: var(--spacing-8); }
-body.is-client .window-controls #nav-toggle { margin-inline-start: auto; }
+.window-controls .wc-left { display: inline-flex; align-items: center; gap: var(--spacing-8); }
+.window-controls #nav-toggle { margin-inline-start: auto; }
 /* 收起键贴在导航栏的右边界上：展开时在导航栏右端（三栏第一根分界处），
    收起（导航 0 宽）时边界在窗口最左，按钮即跟到红绿灯之后。 */
-body.is-client .window-controls #nav-toggle { position: absolute; margin-inline-start: 0;
+.window-controls #nav-toggle { position: absolute; margin-inline-start: 0;
   inset-block-start: calc((var(--column-header-height) - var(--spacing-24)) / 2);
   inset-inline-start: calc(var(--spacing-16) + 60px); }
-body.is-client.is-nav-open .window-controls #nav-toggle { inset-inline-start: calc(var(--nav-default) - var(--spacing-16) - var(--spacing-24)); }
+body.is-nav-open .window-controls #nav-toggle { inset-inline-start: calc(var(--nav-default) - var(--spacing-16) - var(--spacing-24)); }
 /* 导航栏顶行：图标靠右（< > 与收起键都在右端） */
 .nav .navigation-header { justify-content: flex-end; }
 /* 收起 / 展开 是两个方向相反的图标，不是同一个 */
-body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform: scaleX(-1); }
+body:not(.is-nav-open) .window-controls #nav-toggle .icon { transform: scaleX(-1); }
 /* 顶部行右侧给收起键留位，避免 < > 与它互相插入：顺序为 ‹ › |← */
 .nav .navigation-header { padding-inline-end: calc(var(--spacing-24) + var(--spacing-16)); }
 /* 可点击的图标按钮：鼠标指针为可点击（hand） */
-.icon-button, body.is-client .window-controls .icon-button { cursor: pointer; }
+.icon-button, .window-controls .icon-button { cursor: pointer; }
 /* ===== 导航列：高度跟随屏幕，内部分两区 =====
    上区（菜单 .fixed-navigation）有最大高度；下区（内容 .navigation-context）占余下高度；
    高度不够时各自出滚动条，互不影响。 */
@@ -270,6 +270,14 @@ body.is-client .main .content-header { padding-inline-start: calc(var(--spacing-
 /* 中栏头：内容左对齐（mock 里是右对齐，标题被推到最右）；右栏头残留的翻页键隐藏 */
 .main .content-header { justify-content: flex-start; }
 .panel .panel-header > .icon-button { display: none; }
+/* 窗口控制区是浮层，绝不可参与 grid 列轨（否则会抢走第一条列轨、把三栏全挤偏一位） */
+.window-controls { position: absolute; z-index: var(--z-raised); }
+/* 三列宽度由 grid 列轨决定：清掉 mock 写死的列宽，避免溢出列轨 */
+.window > .nav, .window > .main, .window > .panel { inline-size: auto; max-inline-size: 100%; min-inline-size: 0; }
+/* 顶行：LOGO 在左，按钮组贴右（原来挤在 LOGO 旁并压住它） */
+.nav .navigation-header { justify-content: flex-start; gap: var(--spacing-4); }
+.nav .navigation-header .brand { margin-inline-end: auto; }
+.nav .navigation-header .icon-button:first-of-type { margin-inline-start: auto; }
 </style>
 </head>
 <body class="celadon">
