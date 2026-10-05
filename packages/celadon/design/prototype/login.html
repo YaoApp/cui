@@ -31,7 +31,7 @@ body {
   background: var(--background-app);
   -webkit-font-smoothing: antialiased;
 }
-:root { --auth-card: 480px; --brand-mark: 28px; }   /* 局部：卡片宽度 · 标记尺寸；进产品时归 token */
+:root { --auth-card: 480px; --brand-mark: 32px; }   /* 局部：卡片宽度 · 标记尺寸；进产品时归 token */
 
 .page { min-block-size: 100%; display: flex; flex-direction: column; padding: var(--spacing-16) var(--spacing-24); }
 
@@ -41,7 +41,7 @@ body {
 .brand__mark { inline-size: var(--brand-mark); block-size: auto; display: block; }
 /* 产品名：大号 + **例外**的品牌渐变（体系里唯一允许渐变文字的地方，用标记自身的渐变 token；
    浅暗同版，与 logo-mark-celadon.svg 的渐变一致）。 */
-.brand__name { font-size: var(--font-size-18); font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin);
+.brand__name { font-size: var(--font-size-20); font-weight: var(--font-weight-strong); letter-spacing: var(--letter-spacing-latin);
                background: linear-gradient(105deg, var(--brand-mark-from) 0%, var(--brand-mark-to) 100%);
                -webkit-background-clip: text; background-clip: text; color: transparent; }
 .ctrl { display: flex; align-items: center; gap: var(--spacing-8); }
@@ -146,7 +146,7 @@ body {
 
   <header class="top">
     <span class="brand">
-      <img class="brand__mark" src="../logo-mark-celadon.svg" alt="" width="28" height="24">
+      <img class="brand__mark" src="../logo-mark-celadon.svg" alt="" width="32" height="27">
       <span class="brand__name">Yao Agents</span>
     </span>
 
