@@ -85,7 +85,8 @@ window.CELADON_I18N = {
         "providerGitHub": "Continue with GitHub",
         "providerApple": "Continue with Apple",
         "or": "OR",
-        "nextBusy": "Checking…"
+        "nextBusy": "Checking…",
+        "errEmail": "That does not look like an email address."
       },
       "inbox": {
         "unreadCount": "{count} unread",
@@ -843,7 +844,8 @@ window.CELADON_I18N = {
         "providerGitHub": "GitHub で続ける",
         "providerApple": "Apple で続ける",
         "or": "または",
-        "nextBusy": "確認中…"
+        "nextBusy": "確認中…",
+        "errEmail": "メールアドレスの形式が正しくありません。"
       },
       "inbox": {
         "unreadCount": "未読 {count}",
@@ -1601,7 +1603,8 @@ window.CELADON_I18N = {
         "providerGitHub": "使用 GitHub 继续",
         "providerApple": "使用 Apple 继续",
         "or": "或",
-        "nextBusy": "正在检查…"
+        "nextBusy": "正在检查…",
+        "errEmail": "邮箱格式不对，检查一下再试。"
       },
       "inbox": {
         "unreadCount": "{count} 未读",
@@ -2359,7 +2362,8 @@ window.CELADON_I18N = {
         "providerGitHub": "使用 GitHub 繼續",
         "providerApple": "使用 Apple 繼續",
         "or": "或",
-        "nextBusy": "正在檢查…"
+        "nextBusy": "正在檢查…",
+        "errEmail": "電子郵件格式不對，檢查一下再試。"
       },
       "inbox": {
         "unreadCount": "{count} 未讀",

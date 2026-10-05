@@ -83,7 +83,8 @@
       "providerGitHub": "Continue with GitHub",
       "providerApple": "Continue with Apple",
       "or": "OR",
-      "nextBusy": "Checking…"
+      "nextBusy": "Checking…",
+      "errEmail": "That does not look like an email address."
     },
     "inbox": {
       "unreadCount": "{count} unread",

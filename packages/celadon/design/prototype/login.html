@@ -127,6 +127,20 @@ body {
 .button--block { inline-size: 100%; min-block-size: var(--row-height); padding-inline: var(--spacing-16); font-size: var(--font-size-14); }
 .button--inverse { background: var(--text-primary); color: var(--background-content); }
 .button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+/* 禁用态：一眼看得出不可点（底色/字色/描边都走禁用档，光标 not-allowed） */
+.button--inverse:disabled { background: var(--background-disabled); color: var(--text-disabled);
+                            border-color: var(--border-disabled); cursor: not-allowed; }
+
+/* 错误态：出错的控件自己变色（输入框边界→危险色；复选框边界→危险色、标签→危险文字色），
+   错误行紧贴控件下方：小图标 + 危险色文字，左对齐。 */
+.field .input.is-error { border-color: var(--danger); }
+.field.is-error .field__label { color: var(--danger-ink); }
+.terms.is-error input[type='checkbox'] { border-color: var(--danger); }
+.terms.is-error label { color: var(--danger-ink); }
+.error-line { display: flex; align-items: flex-start; gap: var(--spacing-4); margin: var(--spacing-4) 0 0;
+              color: var(--danger-ink); font-size: var(--font-size-13); text-align: start; }
+.error-line .icon { inline-size: var(--spacing-16); block-size: var(--spacing-16); flex: none; margin-block-start: 2px; }
+:lang(zh-CN) .error-line, :lang(zh-TW) .error-line, :lang(ja) .error-line { font-size: var(--font-size-minimum-cjk); }
 
 .footnote { margin: var(--spacing-16) 0 0; text-align: center; font-size: var(--font-size-13); color: var(--text-secondary); }
 
@@ -147,6 +161,7 @@ body {
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-state-error" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-pc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" x2="16" y1="21" y2="21" stroke="currentColor" stroke-width="2"/><line x1="12" x2="12" y1="17" y2="21" stroke="currentColor" stroke-width="2"/></symbol>
 </defs></svg>
 
@@ -209,8 +224,8 @@ body {
 
       <p class="or" data-i18n="or">OR</p>
 
-      <form>
-        <div class="field">
+      <form novalidate>
+        <div class="field" id="account-field">
           <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mail"></use></svg>
           <input class="input" id="account" name="account" type="email" autocomplete="email"
                  inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="accountPh" placeholder="Enter your email">
@@ -225,7 +240,10 @@ body {
             <a class="link" href="#" data-i18n="termsPrivacy">Privacy Policy</a>
           </label>
         </div>
-        <p class="terms__error" id="terms-error" role="alert" hidden data-i18n="errTerms">Please read and agree to the terms first.</p>
+        <p class="error-line" id="terms-error" role="alert" hidden>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-state-error"></use></svg>
+          <span data-i18n="errTerms">Please read and agree to the terms first.</span>
+        </p>
 
         <button class="button button--block button--inverse" type="submit" id="next" data-i18n="next" disabled>Next</button>
       </form>
@@ -293,12 +311,38 @@ const nextBtn = document.getElementById('next')
 const emailInput = document.getElementById('account')
 const termsBox = document.getElementById('terms')
 const termsError = document.getElementById('terms-error')
+const accountField = document.getElementById('account-field')
+const emailError = document.createElement('p')
+emailError.className = 'error-line'
+emailError.hidden = true
+emailError.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-state-error"></use></svg><span></span>'
+accountField.append(emailError)
+const errorText = (key) => { emailError.querySelector('span').textContent = dictOf(lang)[key] || key }
+
 const syncNext = () => { nextBtn.disabled = emailInput.value.trim() === '' }
-emailInput.addEventListener('input', syncNext)
-termsBox.addEventListener('change', () => { if (termsBox.checked) termsError.hidden = true })
+emailInput.addEventListener('input', () => {
+  syncNext()
+  emailInput.classList.remove('is-error')
+  accountField.classList.remove('is-error')
+  emailError.hidden = true
+})
+termsBox.addEventListener('change', () => {
+  if (!termsBox.checked) return
+  termsError.hidden = true
+  document.querySelector('.terms').classList.remove('is-error')
+})
 document.querySelector('form').addEventListener('submit', async (event) => {
   event.preventDefault()
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailInput.value.trim())) {
+    emailInput.classList.add('is-error')
+    accountField.classList.add('is-error')
+    errorText('errEmail')
+    emailError.hidden = false
+    emailInput.focus()
+    return
+  }
   if (!termsBox.checked) {
+    document.querySelector('.terms').classList.add('is-error')
     termsError.hidden = false
     termsBox.focus()
     return

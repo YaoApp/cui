@@ -83,7 +83,8 @@
       "providerGitHub": "使用 GitHub 继续",
       "providerApple": "使用 Apple 继续",
       "or": "或",
-      "nextBusy": "正在检查…"
+      "nextBusy": "正在检查…",
+      "errEmail": "邮箱格式不对，检查一下再试。"
     },
     "inbox": {
       "unreadCount": "{count} 未读",
