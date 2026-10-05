@@ -245,6 +245,16 @@ body.is-client:not(.is-nav-open) .window-controls #nav-toggle .icon { transform:
    高度不够时只让菜单区与内容区各自滚动。 */
 .nav > .navigation-header, .nav > .brand, .nav > .navigation-separator { flex: none; }
 .nav > .navigation-header { block-size: var(--column-header-height); }
+/* ===== 布局原则（三栏通用）=====
+   列内除「滚动区」外，所有块一律 flex:none —— 高度变化只改变滚动区的可视高度，
+   任何组件的尺寸与位置都不得随之变形。滚动区 = 导航会话列表 · 中栏消息流 · 右栏面板正文。 */
+.nav > *, .main > *, .panel > * { flex: none; }
+.nav .navigation-context > * { flex: none; }
+.nav .navigation-context { display: flex; flex-direction: column; overflow: hidden; }
+.nav .conversation-list, .main .message-thread, .panel .panel-body { flex: 1 1 auto; min-block-size: 0; overflow: auto; }
+.nav .search-field { block-size: var(--spacing-32); }
+.main .content-header, .panel .panel-header { block-size: var(--column-header-height); }
+.main .composer { flex: none; }
 </style>
 </head>
 <body class="celadon">
