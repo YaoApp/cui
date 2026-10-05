@@ -88,6 +88,6 @@ describeReal('the entry line against the real service', () => {
     const code = await send(readOtp({ code: otpId }))
     expect(code.ok).toBe(true)
     if (!code.ok) return
-    expect((code.value.code ?? code.value.otp ?? '').length).toBeGreaterThan(0)
+    expect(code.value.code.length).toBeGreaterThan(0)
   })
 })
