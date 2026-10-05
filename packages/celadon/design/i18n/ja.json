@@ -62,7 +62,7 @@
       "errOtp": "コードが違うか期限切れです。再取得してください。",
       "errTerms": "先に規約をお読みいただき同意してください。",
       "errNetwork": "サービスに接続できません。ネットワークかサーバーアドレスをご確認ください。",
-      "entryTitle": "Yao Agents アカウントに登録またはログイン",
+      "entryTitle": "Yao Agents アカウントに",
       "next": "次へ",
       "signUpNow": "新規登録",
       "noAccount": "アカウントをお持ちでないですか？",
@@ -72,7 +72,8 @@
       "theme": "テーマ",
       "themeAuto": "自動",
       "themeLight": "ライト",
-      "themeDark": "ダーク"
+      "themeDark": "ダーク",
+      "entryTitleLine2": "登録またはログイン"
     },
     "inbox": {
       "unreadCount": "未読 {count}",

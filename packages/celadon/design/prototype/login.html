@@ -69,7 +69,9 @@ body {
 .card { inline-size: min(100%, var(--auth-card)); padding: var(--spacing-48) var(--spacing-32) var(--spacing-32);
         background: var(--background-content); border: var(--border-width) solid var(--border-subtle);
         border-radius: var(--radius-large); box-shadow: var(--shadow-subtle); }
-.title { margin: 0 0 var(--spacing-32); font-size: var(--font-size-20); font-weight: var(--font-weight-strong); line-height: 1.25; }
+/* 标题两行：每行一个块；字号用新加的 24 档 */
+.title { margin: 0 0 var(--spacing-32); font-size: var(--font-size-24); font-weight: var(--font-weight-strong); line-height: var(--line-height-tight); }
+.title__line { display: block; }
 
 /* 第三方：整宽、软底、左图标 + 居中文字 */
 .providers { display: grid; gap: var(--spacing-8); margin-block-end: var(--spacing-24); }
@@ -170,7 +172,10 @@ body {
 
   <div class="stage">
     <main class="card" aria-labelledby="auth-title">
-      <h1 class="title" id="auth-title" data-i18n="entryTitle">Sign up or sign in to your YaoAgents account</h1>
+      <h1 class="title" id="auth-title">
+        <span class="title__line" data-i18n="entryTitle">Sign up or sign in to your</span>
+        <span class="title__line" data-i18n="entryTitleLine2">YaoAgents account</span>
+      </h1>
 
       <div class="providers">
         <button class="provider" type="button">
