@@ -304,6 +304,9 @@ body.is-client .nav .navigation-header .icon-button:first-of-type { order: 1; ma
 body.is-client .nav .navigation-header .brand { order: 2; flex-basis: 100%; margin-inline-start: 0; margin-block-start: var(--spacing-4); }
 /* 客户端的两个翻页键都留在第一行（否则第二个会跟着 LOGO 折到下一行） */
 body.is-client .nav .navigation-header .icon-button { order: 1; }
+/* 客户端：翻页键不再贴右，紧跟在红绿灯之后，与左上控制区连成一组 */
+body.is-client .nav .navigation-header { padding-inline-start: calc(var(--spacing-16) + 60px); }
+body.is-client .nav .navigation-header .icon-button:first-of-type { margin-inline-start: 0; }
 </style>
 </head>
 <body class="celadon">
