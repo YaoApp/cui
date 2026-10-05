@@ -72,17 +72,22 @@ test.describe('the entry line against the real service', () => {
       // 9 · entryInvite（无效码也要给出声明的失败形态）
       steps.entryInvite = await post('/v1/user/entry/invite/verify', { code: 'NOT-A-CODE', locale: 'zh-CN' }, { authorization: `Bearer ${temp2}` })
       // 10 · oauthAuthorize
-      steps.oauthAuthorize = await call('/v1/user/oauth/google/authorize?redirect_uri=https%3A%2F%2Fexample.com%2Fback')
+      steps.oauthAuthorize = await call(`/v1/user/oauth/${String((steps.entryConfig.body?.third_party as { providers?: { id: string }[] })?.providers?.[0]?.id ?? 'google')}/authorize?redirect_uri=https%3A%2F%2Fexample.com%2Fback`)
       // 11 · oauthCallback（伪 code：验拒绝形态）
-      steps.oauthCallback = await post('/v1/user/oauth/google/callback', { code: 'not-a-code', state: 'x', locale: 'zh-CN' })
+      steps.oauthCallback = await post(`/v1/user/oauth/${String((steps.entryConfig.body?.third_party as { providers?: { id: string }[] })?.providers?.[0]?.id ?? 'google')}/callback`, { code: 'not-a-code', state: 'x', locale: 'zh-CN' })
       // 12 · deviceFlowStart
-      steps.deviceFlowStart = await post('/v1/user/oauth/google/device/authorize', {})
+      const providers = ((steps.entryConfig.body?.third_party as { providers?: { id: string }[] })?.providers ?? [])
+      const provider = providers[0]?.id ?? 'google'
+      steps.deviceFlowStart = await post(`/v1/user/oauth/${provider}/device/authorize`, {})
       const deviceCode = String(steps.deviceFlowStart.body?.device_code ?? '')
-      // 13 · deviceFlowToken（轮询）
-      steps.deviceFlowToken = await post('/v1/user/oauth/google/device/token', { device_code: deviceCode || 'not-a-code', locale: 'zh-CN' })
-      // 14 · loginWeb（test 域真会话，同源收 Cookie）→ deviceAuthorize → logout
+      const userCode = String(steps.deviceFlowStart.body?.user_code ?? '')
+      // 13 · deviceFlowToken（轮询，尚未授权 → pending 或声明形态）
+      steps.deviceFlowToken = await post(`/v1/user/oauth/${provider}/device/token`, { device_code: deviceCode || 'not-a-code', locale: 'zh-CN' })
+      // 14 · loginWeb（test 域真会话，同源收 Cookie）→ deviceAuthorize（真 user_code）→ logout
       steps.loginWeb = await post('/v1/test/login/web', { user: email })
-      steps.deviceAuthorize = await post('/v1/oauth/device/authorize', { user_code: 'ABCD-EFGH' })
+      steps.deviceAuthorize = await post('/v1/oauth/device/authorize', { user_code: userCode || 'ABCD-EFGH' })
+      // 授权后再轮询一次：这次可能真的换到令牌族
+      steps.deviceFlowTokenAfter = await post(`/v1/user/oauth/${provider}/device/token`, { device_code: deviceCode || 'not-a-code', locale: 'zh-CN' })
       steps.logout = await post('/v1/user/logout', {})
       // 15 · oidcKeys
       steps.oidcKeys = await call('/v1/oauth/jwks')
@@ -143,6 +148,40 @@ test.describe('the entry line against the real service', () => {
     expect((steps.oidcKeys.body?.keys as Record<string, unknown>[])[0]).toEqual(
       expect.objectContaining({ kty: 'RSA', use: 'sig', alg: 'RS256' }),
     )
+    expect(Object.keys(steps.entryOtp.body ?? {})).toEqual(expect.arrayContaining(['error', 'error_description']))
+    expect(Object.keys(steps.entryInvite.body ?? {})).toEqual(expect.arrayContaining(['error', 'error_description']))
+    expect(Object.keys(steps.oauthCallback.body ?? {})).toEqual(expect.arrayContaining(['error', 'error_description']))
+    expect(Object.keys(steps.entryVerifyAgain.body ?? {})).toEqual(
+      expect.arrayContaining(['status', 'access_token', 'expires_in', 'token_type', 'scope', 'user_exists']),
+    )
+    // 令牌族：注册与登录各回一份，按声明的字段核
+    for (const key of ['entryRegister', 'entryLogin'] as const) {
+      const body = steps[key].body ?? {}
+      expect(Object.keys(body).length).toBeGreaterThan(0)
+      expect(body).toEqual(expect.objectContaining({ status: expect.anything() }))
+    }
+    expect(Object.keys(steps.oauthAuthorize.body ?? {})).toEqual(expect.arrayContaining(['authorization_url']))
+    expect(String(steps.oauthAuthorize.body?.authorization_url ?? '')).toMatch(/^https?:\/\//)
+    expect(Object.keys(steps.deviceFlowStart.body ?? {})).toEqual(
+      expect.arrayContaining(['device_code', 'user_code', 'verification_uri', 'expires_in']),
+    )
+    {
+      const body = steps.deviceFlowToken.body ?? {}
+      const okShape = ['pending', 'success'].includes(String(body.status))
+      const errShape = typeof body.error === 'string' && typeof body.error_description === 'string'
+      expect(okShape || errShape).toBe(true)   // 真：等授权/成功 或 标准错误对（IdP 未授权就到这里）
+      console.log('deviceFlowToken_SHAPE ' + (okShape ? String(body.status) : 'error:' + String(body.error)))
+    }
+    expect([200, 400]).toContain(ok('deviceAuthorize'))
+    {
+      const body = steps.deviceFlowTokenAfter.body ?? {}
+      const okShape = ['pending', 'success'].includes(String(body.status))
+      const errShape = typeof body.error === 'string' && typeof body.error_description === 'string'
+      expect(okShape || errShape).toBe(true)   // 真：等授权/成功 或 标准错误对（IdP 未授权就到这里）
+      console.log('deviceFlowTokenAfter_SHAPE ' + (okShape ? String(body.status) : 'error:' + String(body.error)))
+    }
+    expect(ok('loginWeb')).toBe(200)
+    expect(Object.keys(steps.logout.body ?? {})).toEqual(expect.arrayContaining(['message']))
     console.log('WALK ' + JSON.stringify(Object.fromEntries(Object.entries(steps).map(([k, v]) => [k, v.status]))))
   })
 })

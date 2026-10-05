@@ -198,6 +198,8 @@ export type DeviceFlowStart = {
   device_code: string
   user_code: string
   verification_uri: string
+  /** 真实服务同时给了这个（与 `verification_uri` 同值，服务端的历史字段） */
+  verification_url?: string
   verification_uri_complete?: string
   expires_in: number
   interval?: number
@@ -209,7 +211,8 @@ export type DeviceFlowTokenRequest = {
   locale?: string
 }
 
-/** 轮询结果：`pending` 表示还在等授权；`success` 时带令牌族。 */
+/** 轮询结果：`pending` 表示还在等授权；`success` 时带令牌族。
+ *  **失败不走这里**：未授权/IdP 拒绝时服务端回标准的 `{error, error_description}`，由出口归一成 `Failure`。 */
 export type DeviceFlowTokenResult = {
   status: 'pending' | 'success' | string
 } & EntryAuthResponse
