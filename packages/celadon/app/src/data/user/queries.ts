@@ -66,7 +66,9 @@ function temporaryToken(token: string): HeadersInit {
 
 /** 入口配置。 */
 export const entryConfigQuery = (ctx?: Context) => {
-  /* 这条接口的方言是 **query**：下面一行就是"ctx → 请求"的转换，调用点看不到也不需要知道。 */
+  /* 这条接口的方言是 **query**：下面一行就是"ctx → 请求"的转换。
+     **注意**：`{key, request}` 对由页面在构建时绑定，hook 只能在调用时把 ctx 交给 operation，
+     传不进这里 —— 所以不显式传 `ctx` 时，这里会读一次平台当前语言（已知缺口，见 README「已知边界」）。 */
   const locale = localeOf(ctx)
   return { key: userKeys.entryConfig(locale), request: entryConfig({ locale }) }
 }
@@ -97,11 +99,9 @@ export const entryVerifyQuery = (input: Omit<EntryVerifyRequest, 'locale'>): { k
 /** 注册（带临时令牌）。 */
 export const entryRegisterQuery = (token: string, input: Omit<EntryRegisterRequest, 'locale'>): { key: readonly unknown[]; operation: () => Promise<Result<EntryAuthResponse>> } => {
   /* 这条接口的方言是 **body**：ctx 的语言进 body.locale（服务端读它）*/
-  const locale = localeOf()
   return {
-  /* 方言是 **body**：ctx 的语言进 body.locale（服务端读它）*/
-  key: userKeys.entryRegister(),
-  operation: () => send(entryRegister, { body: { ...input, locale }, headers: temporaryToken(token) }),   // 服务端读 body.locale   // 方言：body
+    key: userKeys.entryRegister(),
+    operation: (_input?: void, passed?: Context) => send(entryRegister, { body: { ...input, locale: localeOf(passed) }, headers: temporaryToken(token) }),
   }
 }
 
