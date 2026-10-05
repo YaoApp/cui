@@ -1,37 +1,9 @@
 {
   "ui": {
-    "brand": "Yao Agents",
-    "newTask": "新任务",
-    "navigation": {
-      "chat": "聊天",
-      "inbox": "收件箱",
-      "board": "看板",
-      "workspace": "工作区",
-      "computer": "电脑",
-      "knowledge": "知识库"
-    },
-    "inbox": {
-      "unreadCount": "{count} 未读",
-      "searchPlaceholder": "搜索消息…",
-      "filterAll": "全部",
-      "filterUnread": "未读",
-      "filterArchived": "已归档"
-    },
-    "time": {
-      "today": "今天",
-      "yesterday": "昨天",
-      "earlier": "更早"
-    },
-    "thread": {
-      "newMessages": "{count} 条新消息",
-      "dateAt": "今天 {time}",
-      "changesChip": "变更 +{added} −{removed}"
-    },
-    "tool": {
-      "readFiles": "读取文件"
-    },
-    "status": {
-      "done": "完成"
+    "activity": {
+      "readDocuments": "读取 {count} 份文档",
+      "extractRisks": "提取 {count} 处风险",
+      "waitingConfirmation": "等待口径确认"
     },
     "agent": "Agent",
     "ask": {
@@ -43,11 +15,93 @@
       "optionChronological": "按「时间顺序」汇总",
       "optionCustom": "我自己补口径"
     },
+    "brand": "Yao Agents",
     "composer": {
       "placeholder": "继续：把风险点补进需求文档的验收条款…",
       "defaultPermission": "默认权限",
       "awaitConfirm": "请先确认上方选项后继续…"
     },
+    "entry": {
+      "loginTitle": "登录",
+      "loginLead": "用账号继续。",
+      "registerTitle": "创建 Yao Agents 账号",
+      "registerLead": "只需一个账号和密码。",
+      "account": "账号",
+      "accountPh": "请输入邮箱账号",
+      "password": "密码",
+      "passwordPh": "请输入密码",
+      "reveal": "显示",
+      "hide": "隐藏",
+      "confirm": "确认密码",
+      "name": "显示名称",
+      "nameHint": "选填，之后可以改",
+      "termsPre": "我已阅读并同意",
+      "termsService": "使用协议",
+      "termsAnd": "与",
+      "termsPrivacy": "隐私政策",
+      "captcha": "验证码",
+      "captchaPh": "不区分大小写",
+      "captchaRefresh": "换一张",
+      "otp": "动态码",
+      "otpHint": "填满即自动提交",
+      "continue": "继续",
+      "login": "登录",
+      "register": "创建账号",
+      "loginBusy": "正在登录…",
+      "registerBusy": "正在创建…",
+      "toRegister": "创建账号",
+      "toLogin": "返回登录",
+      "mfaTitle": "第二步验证",
+      "mfaLead": "输入手机或验证器上的 6 位动态码。",
+      "mfaBack": "返回重新输入账号",
+      "errAccountUnknown": "这个账号还没有注册。",
+      "errAccountUnknownCta": "去创建",
+      "errPassword": "密码不对。检查大小写，或看下大写锁定。",
+      "errConfirm": "两次输入不一致。",
+      "errCaptcha": "验证码不对，换一张再试。",
+      "errOtp": "动态码不对或已过期，请重新获取。",
+      "errTerms": "请先阅读并同意协议。",
+      "errNetwork": "连不上服务，检查网络或服务地址。",
+      "entryTitle": "注册或登录你的 Yao Agents 账号",
+      "next": "下一步",
+      "signUpNow": "立即注册",
+      "noAccount": "还没有账号？",
+      "haveAccount": "已有账号？",
+      "signInNow": "立即登录",
+      "lang": "语言",
+      "theme": "主题",
+      "themeAuto": "跟随系统",
+      "themeLight": "浅色",
+      "themeDark": "暗色",
+      "entryTitleLine2": "",
+      "confirmPasswordPh": "请确认密码",
+      "invitePh": "邀请码（可选）",
+      "showPassword": "显示密码",
+      "hidePassword": "隐藏密码",
+      "emailPh": "请输入邮箱地址",
+      "providerGoogle": "使用 Google 继续",
+      "providerGitHub": "使用 GitHub 继续",
+      "providerApple": "使用 Apple 继续",
+      "or": "或",
+      "nextBusy": "正在检查…",
+      "errEmail": "邮箱格式不对，检查一下再试。"
+    },
+    "inbox": {
+      "unreadCount": "{count} 未读",
+      "searchPlaceholder": "搜索消息…",
+      "filterAll": "全部",
+      "filterUnread": "未读",
+      "filterArchived": "已归档"
+    },
+    "navigation": {
+      "chat": "聊天",
+      "inbox": "收件箱",
+      "board": "看板",
+      "workspace": "工作区",
+      "computer": "电脑",
+      "knowledge": "知识库"
+    },
+    "newTask": "新任务",
     "panel": {
       "inProgress": "进行中",
       "highPriority": "高优先级",
@@ -61,17 +115,28 @@
       "relatedFiles": "相关文件",
       "activity": "活动"
     },
-    "activity": {
-      "readDocuments": "读取 {count} 份文档",
-      "extractRisks": "提取 {count} 处风险",
-      "waitingConfirmation": "等待口径确认"
+    "status": {
+      "done": "完成"
+    },
+    "task": {
+      "id": "任务 ID"
     },
     "theme": {
       "light": "浅色",
       "dark": "暗色"
     },
-    "task": {
-      "id": "任务 ID"
+    "thread": {
+      "newMessages": "{count} 条新消息",
+      "dateAt": "今天 {time}",
+      "changesChip": "变更 +{added} −{removed}"
+    },
+    "time": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "earlier": "更早"
+    },
+    "tool": {
+      "readFiles": "读取文件"
     }
   },
   "sample": {

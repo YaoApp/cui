@@ -1,37 +1,9 @@
 {
   "ui": {
-    "brand": "Yao Agents",
-    "newTask": "新增任務",
-    "navigation": {
-      "chat": "聊天",
-      "inbox": "收件匣",
-      "board": "看板",
-      "workspace": "工作區",
-      "computer": "電腦",
-      "knowledge": "知識庫"
-    },
-    "inbox": {
-      "unreadCount": "{count} 未讀",
-      "searchPlaceholder": "搜尋訊息…",
-      "filterAll": "全部",
-      "filterUnread": "未讀",
-      "filterArchived": "已封存"
-    },
-    "time": {
-      "today": "今天",
-      "yesterday": "昨天",
-      "earlier": "更早"
-    },
-    "thread": {
-      "newMessages": "{count} 則新訊息",
-      "dateAt": "今天 {time}",
-      "changesChip": "變更 +{added} −{removed}"
-    },
-    "tool": {
-      "readFiles": "讀取檔案"
-    },
-    "status": {
-      "done": "完成"
+    "activity": {
+      "readDocuments": "讀取 {count} 份文件",
+      "extractRisks": "提取 {count} 處風險",
+      "waitingConfirmation": "等待口徑確認"
     },
     "agent": "Agent",
     "ask": {
@@ -43,11 +15,93 @@
       "optionChronological": "依「時間順序」彙總",
       "optionCustom": "我自己補口徑"
     },
+    "brand": "Yao Agents",
     "composer": {
       "placeholder": "繼續：把風險點補進需求文件的驗收條款…",
       "defaultPermission": "預設權限",
       "awaitConfirm": "請先確認上方選項後繼續…"
     },
+    "entry": {
+      "loginTitle": "登入",
+      "loginLead": "用帳號繼續。",
+      "registerTitle": "建立 Yao Agents 帳號",
+      "registerLead": "只需要一個帳號和密碼。",
+      "account": "帳號",
+      "accountPh": "請輸入電子郵件帳號",
+      "password": "密碼",
+      "passwordPh": "請輸入密碼",
+      "reveal": "顯示",
+      "hide": "隱藏",
+      "confirm": "確認密碼",
+      "name": "顯示名稱",
+      "nameHint": "選填，之後可以改",
+      "termsPre": "我已閱讀並同意",
+      "termsService": "使用條款",
+      "termsAnd": "與",
+      "termsPrivacy": "隱私政策",
+      "captcha": "驗證碼",
+      "captchaPh": "不分大小寫",
+      "captchaRefresh": "換一張",
+      "otp": "動態碼",
+      "otpHint": "填滿即自動送出",
+      "continue": "繼續",
+      "login": "登入",
+      "register": "建立帳號",
+      "loginBusy": "正在登入…",
+      "registerBusy": "正在建立…",
+      "toRegister": "建立帳號",
+      "toLogin": "返回登入",
+      "mfaTitle": "第二步驗證",
+      "mfaLead": "輸入手機或驗證器上的 6 位動態碼。",
+      "mfaBack": "返回重新輸入帳號",
+      "errAccountUnknown": "這個帳號還沒有註冊。",
+      "errAccountUnknownCta": "去建立",
+      "errPassword": "密碼不對。檢查大小寫，或看下大寫鎖定。",
+      "errConfirm": "兩次輸入不一致。",
+      "errCaptcha": "驗證碼不對，換一張再試。",
+      "errOtp": "動態碼不對或已過期，請重新取得。",
+      "errTerms": "請先閱讀並同意條款。",
+      "errNetwork": "連不上服務，檢查網路或服務位址。",
+      "entryTitle": "註冊或登入你的 Yao Agents 帳號",
+      "next": "下一步",
+      "signUpNow": "立即註冊",
+      "noAccount": "還沒有帳號？",
+      "haveAccount": "已經有帳號？",
+      "signInNow": "立即登入",
+      "lang": "語言",
+      "theme": "主題",
+      "themeAuto": "跟隨系統",
+      "themeLight": "淺色",
+      "themeDark": "暗色",
+      "entryTitleLine2": "",
+      "confirmPasswordPh": "請確認密碼",
+      "invitePh": "邀請碼（選填）",
+      "showPassword": "顯示密碼",
+      "hidePassword": "隱藏密碼",
+      "emailPh": "請輸入電子郵件地址",
+      "providerGoogle": "使用 Google 繼續",
+      "providerGitHub": "使用 GitHub 繼續",
+      "providerApple": "使用 Apple 繼續",
+      "or": "或",
+      "nextBusy": "正在檢查…",
+      "errEmail": "電子郵件格式不對，檢查一下再試。"
+    },
+    "inbox": {
+      "unreadCount": "{count} 未讀",
+      "searchPlaceholder": "搜尋訊息…",
+      "filterAll": "全部",
+      "filterUnread": "未讀",
+      "filterArchived": "已封存"
+    },
+    "navigation": {
+      "chat": "聊天",
+      "inbox": "收件匣",
+      "board": "看板",
+      "workspace": "工作區",
+      "computer": "電腦",
+      "knowledge": "知識庫"
+    },
+    "newTask": "新增任務",
     "panel": {
       "inProgress": "進行中",
       "highPriority": "高優先",
@@ -61,17 +115,28 @@
       "relatedFiles": "相關檔案",
       "activity": "活動"
     },
-    "activity": {
-      "readDocuments": "讀取 {count} 份文件",
-      "extractRisks": "提取 {count} 處風險",
-      "waitingConfirmation": "等待口徑確認"
+    "status": {
+      "done": "完成"
+    },
+    "task": {
+      "id": "任務 ID"
     },
     "theme": {
       "light": "淺色",
       "dark": "深色"
     },
-    "task": {
-      "id": "任務 ID"
+    "thread": {
+      "newMessages": "{count} 則新訊息",
+      "dateAt": "今天 {time}",
+      "changesChip": "變更 +{added} −{removed}"
+    },
+    "time": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "earlier": "更早"
+    },
+    "tool": {
+      "readFiles": "讀取檔案"
     }
   },
   "sample": {

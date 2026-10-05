@@ -1,7 +1,7 @@
 # 归档脚手架 + 统一导航与页面样式（2026-10-04）
 
 - **版本**：v1.1（**已实施** 2026-10-04）
-- **上级**：[`04-status.md`](04-status.md) §5（归档脚手架）
+- **上级**：[`04-status.md`](04-status.md)（现状：现在有什么 · 缺口 · 下一步）
 - **规则**：[`07-routing.md`](../architecture/07-routing.md) · [`03-boundaries.md`](../architecture/03-boundaries.md) · [`13-quality-gates.md`](../architecture/13-quality-gates.md)
 
 ## 1. 一句话
