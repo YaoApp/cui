@@ -51,6 +51,14 @@ describe('Input', () => {
     await waitFor(() => expect(control).toHaveClass('is-shake'))
   })
 
+  it('carries the size class on the control, on the same ladder as the button', () => {
+    const small = render(<Input id="account" label="小" size="small" />)
+    expect(small.container.querySelector('.input')).toHaveClass('input--small')
+
+    const large = render(<Input id="mail" label="大" size="large" />)
+    expect(large.container.querySelector('.input')).toHaveClass('input--large')
+  })
+
   it('puts the static state class on the control, not on the field frame', () => {
     /* 设计类的规则都写在 `.input` 上；加在字段框上不会生效（这是清单页并排展示多态的前提）。 */
     render(<Input id="account" label="账号" state="hover" />)

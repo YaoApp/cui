@@ -19,18 +19,20 @@
     border: var(--border-width) solid var(--border-control);
     border-radius: var(--radius-medium);
     color: var(--text-primary);
-    padding-block: var(--spacing-4);
+    padding-block: 0;
     padding-inline: var(--spacing-8);
     font: inherit;
     font-size: var(--font-size-body);
     line-height: var(--line-height-control);
+    /* 中档就是基础档：整高取 32，与输入框、按钮同一档（见 input.less 的同一条说明） */
+    min-block-size: var(--spacing-32);
     /* 悬停与焦点照 F4 的场景表取快档与标准缓动；减动效下时长 token 归零，无需另写分支 */
     transition:
       border-color var(--duration-fast) var(--easing-standard),
       box-shadow var(--duration-fast) var(--easing-standard),
       background-color var(--duration-fast) var(--easing-standard);
 
-    /* 三档尺寸：与输入框的字段尺寸档取同一批 token（小 24 · 中约 34 · 大 40），
+    /* 三档尺寸：与输入框、按钮、复选框取同一条梯子（小 24 · 中 32 · 大 40），
        圆角按档位取同名 token，行高取整避免文字重绘时跳动 */
     &--small {
       min-block-size: var(--spacing-24);

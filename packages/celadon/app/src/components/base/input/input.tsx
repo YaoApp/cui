@@ -5,7 +5,8 @@ import { Field } from '@base-ui/react/field'
 import { Input as BaseInput } from '@base-ui/react/input'
 import { Spinner } from '@/components/base/spinner'
 
-export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+/* 排除原生 `<input size>`（那是字符数）：这里的 `size` 是尺寸档，语义不同，不能共用同一个名字。 */
+export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   /** 必给：标签与错误文本都用它拼 id，保证 htmlFor 与 aria-describedby 对得上。 */
   id: string
   label?: string
@@ -16,6 +17,8 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   /** 右侧附加内容（例如密码的可见性切换），对应原型里的 `.field__trail`。 */
   trailing?: ReactNode
   className?: string
+  /** 尺寸档，与按钮、选择器、复选框同梯：小 24 · 中 32 · 大 40，中档就是基础档。 */
+  size?: 'small' | 'medium' | 'large'
   /** 静态态：把设计类的 `is-*` 直接写在控件本体上，供清单页与设计稿并排展示同一个控件的多种状态。
       真实交互仍由伪类驱动，这里只解决"一张图上要同时看到多态"的问题。 */
   state?: 'hover' | 'focus' | 'error' | 'loading'
@@ -37,6 +40,7 @@ export function Input({
   icon,
   trailing,
   className,
+  size = 'medium',
   disabled,
   state,
   shake,
@@ -82,7 +86,14 @@ export function Input({
         <BaseInput
           id={id}
           /* 状态类必须落在控件本体上：设计类的规则都写在 `.input` 上，加在字段框上不会生效。 */
-          className={['input', error ? 'is-error' : null, state ? `is-${state}` : null, shake && shakeOn ? 'is-shake' : null]
+          className={[
+            'input',
+            size === 'small' ? 'input--small' : null,
+            size === 'large' ? 'input--large' : null,
+            error ? 'is-error' : null,
+            state ? `is-${state}` : null,
+            shake && shakeOn ? 'is-shake' : null,
+          ]
             .filter(Boolean)
             .join(' ')}
           disabled={disabled}

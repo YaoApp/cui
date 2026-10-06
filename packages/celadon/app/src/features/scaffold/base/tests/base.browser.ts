@@ -204,9 +204,14 @@ test('lists the six groups and their states', async ({ page }) => {
 
   const selectHeight = (label: string) =>
     selectTrigger(label).evaluate((el) => (el as HTMLElement).offsetHeight)
-  expect(await selectHeight('select small')).toBe(24)
-  expect(await selectHeight('select large')).toBe(40)
-  /* 中档与输入框同高：字段的观感与高度由同一条规则给出 */
+  /* 两个字段都在按钮那条 24 / 32 / 40 的梯子上，中档同高 */
+  const inputHeights = await page.evaluate(() =>
+    ['demo-input-small', 'demo-input-medium', 'demo-input-large'].map((id) =>
+      Math.round((document.querySelector(`.field:has(#${id}) .input`) as HTMLElement).getBoundingClientRect().height),
+    ),
+  )
+  expect(inputHeights).toEqual([24, 32, 40])
+  expect([await selectHeight('select small'), await selectHeight('select medium'), await selectHeight('select large')]).toEqual([24, 32, 40])
   expect(await selectHeight('select medium')).toBe(
     await page.locator('#demo-state-default').evaluate((el) => Math.round(el.getBoundingClientRect().height)),
   )

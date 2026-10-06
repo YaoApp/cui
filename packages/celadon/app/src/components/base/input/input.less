@@ -118,11 +118,16 @@
     background: var(--background-field);
     border: var(--border-width) solid var(--border-control);
     color: var(--text-primary);
-    padding-block: var(--spacing-4);
+    /* 中档就是基础档：整高取 32，由 min-block-size 定，块向内距归零，文字在盒内自动垂直居中。
+       行高取控件行高（24，整数）：用倍率行高（1.7 × 14 = 23.8）会把文字盒放在小数位置，
+       高度也随之变成 33.8，既离开梯子又违反"文字不许有小数几何"。 */
+    min-block-size: var(--spacing-32);
+    padding-block: 0;
     padding-inline: var(--spacing-8);
     border-radius: var(--radius-medium);
     font: inherit;
     font-size: var(--font-size-body);
+    line-height: var(--line-height-control);
     /* 悬停与焦点的过渡照 F4 的场景表：两个场景都取 --duration-fast 与 --easing-standard。
        减动效偏好下时长 token 归零，这里无需另写分支。 */
     transition:
@@ -216,7 +221,7 @@
     }
   }
 
-  /* 字段尺寸档：小 24 · 大 40；中档就是上面的 `.input` 本身（与输入框同高，约 34）。
+  /* 字段尺寸档与按钮、选择器、复选框同梯：小 24 · 中 32 · 大 40，中档就是上面的 `.input` 本身。
      必须写在 `.input` **之后**：与基础规则同权重，靠源序取胜。圆角按档位取同名 token，
      行高同样取整，避免小数几何让文字在重绘时跳动。 */
   .input--small {

@@ -17,7 +17,7 @@
 
 | # | 组件 | 上游对应 | 目录 | 参数 | 状态 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `input` | `input` | `components/base/input/` | `id`、`label`、`type`、`value`、`onChange`、`error`、`hint`、`icon`、`trailing`、`autoComplete`、`disabled`、`state`、`shake` | **已完成**（2026-10-06，单元用例 7 条；七个状态与错误抖动在清单页有浏览器断言） |
+| 1 | `input` | `input` | `components/base/input/` | `id`、`label`、`type`、`value`、`onChange`、`error`、`hint`、`icon`、`trailing`、`autoComplete`、`disabled`、`size`（`small` · `medium` · `large`）、`state`、`shake` | **已完成**（2026-10-06，单元用例 8 条；七个状态与错误抖动在清单页有浏览器断言；尺寸档与按钮、选择器、复选框同梯，整高小 24 · 中 32 · 大 40，行高 20 · 24 · 24，中档就是基础档，清单页 sizes 组列出三档） |
 | 2 | `captcha-field` | 无，基于 `input` | `components/base/captcha-field/` | `id`、`image`、`value`、`onChange`、`onRefresh`、`error`、`disabled` | 未开始 |
 | 3 | `otp-field` | `otp-field` | `components/base/otp-field/` | `id`、`value`、`onChange`、`error`、`disabled` | 未开始 |
 | 4 | `checkbox` | `checkbox` | `components/base/checkbox/` | `id`、`label`、`hint`、`error`、`checked`、`defaultChecked`、`onCheckedChange`、`indeterminate`、`disabled`、`readOnly`、`required`、`name`、`value`、`size`（`small` · `medium` · `large`）、`state`、`className` | **已完成**（2026-10-06，单元用例 15 条；**选中与不确定态取反色族** `--background-inverse` 与 `--text-inverse`，不取品牌色，未选中的边界取 `--border-control-strong`，浅暗两套实测均 ≥ 3:1；**尺寸档与按钮、输入框、选择器同梯**：行高 24 · 32 · 40，方框 12 · 16 · 20，标签字号 12 · 14 · 16，实测方框中心与首行中心在浅暗两套下均重合；悬停画在整行的表面上（浅底向四周让出内距，方框自身不动），多行标签与首行对齐；标签带 `{id}-label`，上游写在方框上的 `aria-labelledby` 因此念得出名字；回调用上游的 `onCheckedChange`，禁用与只读按上游表达为 `aria-disabled` 与 `aria-readonly`；清单页按属性、状态、尺寸三组共 22 个样例列出，浏览器用例量浅暗两套的底、边界、标记、方框尺寸与三档行高） |

@@ -313,6 +313,13 @@ export function BasePage() {
             onChange={(e) => setAccount(e.target.value)}
           />
         </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.sizes')}</h3>
+        <div className="base-grid">
+          <Input id="demo-input-small" label="small" placeholder="small" size="small" />
+          <Input id="demo-input-medium" label="medium" placeholder="medium" />
+          <Input id="demo-input-large" label="large" placeholder="large" size="large" />
+        </div>
       </section>
 
       <section className="base-group">
