@@ -25,14 +25,22 @@
     transition:
       background-color var(--duration-fast) var(--easing-standard),
       border-color var(--duration-fast) var(--easing-standard),
-      box-shadow var(--duration-fast) var(--easing-standard);
+      box-shadow var(--duration-fast) var(--easing-standard),
+      transform var(--duration-fast) var(--easing-standard);
 
-    /* 悬停：未选中把边界换成**反色**（与选中态的描边同一族），底色仍不填。
-       达标档里再深一档的 `--border-hover-strong` 与默认档几乎同色，只差一点点，悬停看不出反馈；
-       换反色后既有明确的反馈，对比度也更高（实测对内容底浅色 18.7:1、暗色 14.8:1）。 */
-    &:not([data-disabled]):hover,
+    /* 悬停是**中间态**：给一层浅底与一档更深的边界，既不等于默认，也不等于选中。
+       选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上"。
+       只读与禁用不参与悬停：只读可以聚焦与读取，但不给任何交互反馈。 */
+    &:not([data-disabled], [data-readonly]):hover,
     &.is-hover {
-      border-color: var(--background-inverse);
+      background: var(--background-hover);
+      border-color: var(--border-hover-strong);
+    }
+
+    /* 按下：与按钮同一条规则（F4 的 press 场景），只做整体缩放，不换色 */
+    &:not([data-disabled], [data-readonly]):active {
+      transform: scale(.94);
+      will-change: transform;
     }
 
     /* 聚焦：点击不加环，只有键盘聚焦加环（焦点操作完还挂在控件上，一直挂着环会吵） */
@@ -46,7 +54,8 @@
       outline: none;
     }
 
-    /* 选中与不确定：底换成反色族，勾与横杠取反色文字。
+    /* 选中与不确定：底换成反色族，勾与横杠取反色文字；悬停取选中族自己的中间档，
+       这样"已选中"与"已选中且正悬停"也分得开。
        这两条必须带上悬停与键盘聚焦的变体：它们与基础档同权重或更高，不复位就会被盖掉。 */
     &[data-checked],
     &[data-indeterminate] {
@@ -54,7 +63,7 @@
       border-color: var(--background-inverse);
       color: var(--text-inverse);
 
-      &:not([data-disabled]):hover,
+      &:not([data-disabled], [data-readonly]):hover,
       &.is-hover {
         background: var(--background-inverse-hover);
         border-color: var(--background-inverse-hover);
@@ -131,7 +140,9 @@
     transition: color var(--duration-fast) var(--easing-standard);
   }
 
-  .checkbox__row:hover .checkbox__label,
+  /* 悬停的整行反馈要排除只读与禁用：只读没有悬停，禁用连指针都不是手型。
+     选中与不确定仍提到主文字色，因为那是已经做过的选择，与能否交互无关。 */
+  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__label,
   .checkbox__box:focus-visible ~ .checkbox__label,
   .checkbox__box.is-hover ~ .checkbox__label,
   .checkbox__box.is-focus ~ .checkbox__label,

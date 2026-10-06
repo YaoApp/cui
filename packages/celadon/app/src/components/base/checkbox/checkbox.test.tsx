@@ -113,6 +113,12 @@ describe('Checkbox', () => {
     expect(container.querySelector('.checkbox')).toHaveClass('checkbox--large')
   })
 
+  it('takes the static error class on the box', () => {
+    render(<Checkbox id="updates" label="is-error" state="error" />)
+
+    expect(screen.getByRole('checkbox', { name: 'is-error' })).toHaveClass('is-error')
+  })
+
   it('takes the mark out of the accessibility tree', () => {
     /* 选中与否由控件的可访问状态表达，勾只是装饰 */
     const { container } = render(<Checkbox id="updates" label="接收更新通知" defaultChecked />)

@@ -1,5 +1,6 @@
 import './base.less'
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { BrandMark, Button, Checkbox, Icon, Input, SegmentedControl, Select } from '@/components/base'
 import type { SegmentedOption, SelectGroup } from '@/components/base'
 import { LocaleSwitch } from '@/components/locale-switch'
@@ -28,6 +29,26 @@ const SEGMENTED_RANGE: SegmentedOption[] = [
   { value: 'week', label: 'Week', icon: <Icon name="i-spark" /> },
   { value: 'month', label: 'Month', icon: <Icon name="i-book" /> },
 ]
+
+/* 错误样例：错误由**调用方**持有，选中即清除（红边不能一直挂着），取消选中则恢复，便于反复验证。
+   规范里的分工是：错误是持续状态，由调用方决定何时解除；组件只负责把它画出来。 */
+function ErrorSampleCheckbox({ id, label }: { id: string; label: ReactNode }) {
+  const { t } = useTranslation()
+  const [checked, setChecked] = useState(false)
+  const [invalid, setInvalid] = useState(true)
+  return (
+    <Checkbox
+      id={id}
+      label={label}
+      checked={checked}
+      error={invalid ? t('base.message.error') : undefined}
+      onCheckedChange={(next) => {
+        setChecked(next)
+        setInvalid(!next)
+      }}
+    />
+  )
+}
 
 export function BasePage() {
   const { t } = useTranslation()
@@ -315,7 +336,7 @@ export function BasePage() {
             onCheckedChange={setTermsAccepted}
           />
           <Checkbox id="demo-check-hint" label="hint" hint={t('base.message.hint')} />
-          <Checkbox id="demo-check-error" label="error" error={t('base.message.error')} />
+          <ErrorSampleCheckbox id="demo-check-error" label="error" />
           <Checkbox id="demo-check-long" label={t('base.checkbox.labelLong')} />
           {/* 空态：没有标签的纯方框，用于表格行里 */}
           <Checkbox id="demo-check-empty" />
@@ -332,7 +353,7 @@ export function BasePage() {
           <Checkbox id="demo-check-partial" label="indeterminate" indeterminate />
           <Checkbox id="demo-check-disabled" label="disabled" disabled />
           <Checkbox id="demo-check-disabled-on" label="checked disabled" defaultChecked disabled />
-          <Checkbox id="demo-check-invalid" label="is-error" state="error" />
+          <ErrorSampleCheckbox id="demo-check-invalid" label="is-error" />
           <Checkbox id="demo-check-readonly" label="readonly" readOnly defaultChecked />
           <Checkbox id="demo-check-loading" label="is-loading" state="loading" />
         </div>
