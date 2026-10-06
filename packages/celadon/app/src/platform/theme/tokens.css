@@ -39,6 +39,8 @@
 .celadon,
 [data-theme] .celadon {
   /* ===== 中性（近白）===== */
+  /* 原生控件（滚动条、自动填充、日期面板、未清理的步进器）跟随主题：不声明会一律按浅色画。 */
+  color-scheme: light;
   --background-app: #F4F4F6;
   --background-navigation: #F8F8FA;
   --background-content: #FAFAFB;
@@ -349,6 +351,8 @@
 /* 暗色（近黑）· 品牌同值 */
 .celadon[data-theme='dark'],
 [data-theme='dark'] .celadon {
+  /* 原生控件跟随暗色主题；缺这一条会让滚动条、自动填充与未清理的步进器呈浅色块。 */
+  color-scheme: dark;
   --background-app: #121110;
   /* 暖墨（松烟墨）：不再用纯黑，避免 OLED 光晕 */
   --background-navigation: #151413;
@@ -844,6 +848,8 @@
   border-radius: var(--radius-medium);
   font: inherit;
   font-size: var(--font-size-body);
+  /* number 的原生步进器由浏览器绘制，尺寸与配色都不受设计控制，暗色下呈浅色块并挤占文字区，
+       因此整体去掉外观（取值交给键盘与页面自己的步进按钮）。WebKit 与 Firefox 各认一条。 */
   /* 悬停与焦点的过渡照 F4 的场景表：两个场景都取 --duration-fast 与 --easing-standard。
        减动效偏好下时长 token 归零，这里无需另写分支。 */
   transition: border-color var(--duration-fast) var(--easing-standard), box-shadow var(--duration-fast) var(--easing-standard), background-color var(--duration-fast) var(--easing-standard);
@@ -858,6 +864,18 @@
        表现为"鼠标一进来红边就没了、聚焦时红边配品牌描边"。 */
   /* 加载态：只把指针换成进行中，进程指示由右侧槽位的四分之一圆环承担（见 input.tsx）。
        不动文字颜色、不动底色、不动裁剪，值始终按正文呈现。 */
+}
+.celadon .input[type='number'],
+[data-theme] .celadon .input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.celadon .input[type='number']::-webkit-outer-spin-button,
+[data-theme] .celadon .input[type='number']::-webkit-outer-spin-button,
+.celadon .input[type='number']::-webkit-inner-spin-button,
+[data-theme] .celadon .input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
 }
 .celadon .input::placeholder,
 [data-theme] .celadon .input::placeholder {

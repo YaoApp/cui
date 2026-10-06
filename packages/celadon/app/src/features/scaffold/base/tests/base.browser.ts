@@ -170,6 +170,15 @@ test('lists the five groups and their states', async ({ page }) => {
     await expect(page.locator(`#${id}`)).toBeVisible()
   }
 
+  /* number 的原生步进器由浏览器绘制，不受设计控制，暗色下会呈浅色块并挤占文字区：
+     字段要把它去掉外观；主题要声明 color-scheme，其余原生控件才会跟随主题。 */
+  expect(await page.locator('#demo-number').evaluate((el) => getComputedStyle(el).appearance)).toBe('textfield')
+  expect(
+    await page.evaluate(
+      () => getComputedStyle(document.querySelector('.celadon') ?? document.documentElement).colorScheme,
+    ),
+  ).toBe('light')
+
   const borderOf = (id: string) =>
     page.locator(`#${id}`).evaluate((el) => getComputedStyle(el).borderTopColor)
   const bgOf = (id: string) =>
@@ -399,7 +408,20 @@ test('lists the five groups and their states', async ({ page }) => {
 
   /* 浅色与暗色成对，按设计红线各出一张 */
   await shot(page, 'light')
+  const lightFieldBg = await bgOf('demo-state-default')
   await page.emulateMedia({ colorScheme: 'dark' })
+  /* 主题在**页面载入时**决定（跟随系统），改媒体偏好后必须重载，页面才会真的切到暗色；
+     不重载则这一段量到的仍是浅色的值，断言自洽但无效。 */
+  await page.reload({ waitUntil: 'networkidle' })
+
+  /* 暗色下原生控件要跟随主题，否则滚动条与未清理的表单控件会呈浅色块 */
+  expect(
+    await page.evaluate(
+      () => getComputedStyle(document.querySelector('.celadon') ?? document.documentElement).colorScheme,
+    ),
+  ).toBe('dark')
+  /* 重载后确认真的落在暗色主题：字段底与浅色时不同 */
+  expect(await bgOf('demo-state-default')).not.toBe(lightFieldBg)
 
   /* 暗色下同一条规则同样成立：错误边框不因悬停改变，且与正常字段的边框不同。
      切主题会换 token 值，边框随之走一次过渡，量之前必须等它走完。 */
