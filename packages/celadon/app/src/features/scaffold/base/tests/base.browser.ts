@@ -452,6 +452,26 @@ test('lists the five groups and their states', async ({ page }) => {
   await page.waitForTimeout(300)
   expect((await placeholderSample.textContent())?.trim()).toBe('Dark')
 
+  /* 反色档：字段底取反色族；空值项选中后触发器回到占位文字 */
+  expect(
+    await page.locator('[aria-label="variant inverse"]').evaluate((el) => getComputedStyle(el).backgroundColor),
+  ).toBe(
+    hexToRgb(
+      await page.evaluate(() =>
+        getComputedStyle(document.querySelector('.celadon') ?? document.documentElement)
+          .getPropertyValue('--background-inverse')
+          .trim(),
+      ),
+    ),
+  )
+  const clearableSample = page.getByRole('combobox', { name: 'select clearable', exact: true })
+  await clearableSample.click()
+  await page.waitForSelector('.select-popup:visible')
+  await page.waitForTimeout(300)
+  await page.locator('.select-popup:visible [role=option]', { hasText: 'Clear choice' }).first().click()
+  await page.waitForTimeout(300)
+  expect((await clearableSample.textContent())?.trim()).not.toBe('Light')
+
   /* 空态：没有选项时弹层给说明，触发器显示占位文字 */
   expect(await selectTrigger('select empty').textContent()).not.toBe('')
   await selectTrigger('select empty').click()

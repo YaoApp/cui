@@ -18,8 +18,7 @@ import { ScaffoldPage } from '../components/scaffold-page'
 
 const ICON_SIZES = [14, 16, 20, 24] as const
 
-/* 分段控件的示例数据：段文案属于调用方的数据，用固定取值；带图标的一档用现有图标演示图标槽。 */
-const SEGMENTED_THEME: SegmentedOption[] = [
+/* 分段控件的示例数据：段文案属于调用方的数据，用固定取值；带图标的一档用现有图标演示图标槽。 */const SEGMENTED_THEME: SegmentedOption[] = [
   { value: 'system', label: 'Follow system' },
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
@@ -45,6 +44,7 @@ export function BasePage() {
   const [trailingChoice, setTrailingChoice] = useState('compact')
   const [groupChoice, setGroupChoice] = useState('light')
   const [longChoice, setLongChoice] = useState('item-0')
+  const [clearable, setClearable] = useState('light')
   /* 错误抖动的重放计数：同名动画不会自行重跑，靠 key 让节点重挂载 */
   const [shakeTick, setShakeTick] = useState(0)
   /* 主题与语言用真实的偏好源，不自造局部状态（与首页同一套） */
@@ -63,6 +63,8 @@ export function BasePage() {
     /* 一项禁用，用来展示弹层里的禁用项（键盘不可达、选中不改值） */
     { value: 'auto', label: 'Auto（disabled）', disabled: true },
   ]
+  /* 末项是空值项（value 为 null）：选中它即取消选择，触发器回到占位文字 */
+  const clearableOptions = [...selectOptions.slice(0, 3), { value: null, label: 'Clear choice' }]
   /* 带图标的选项 */
   const iconOptions = [
     { value: 'reading', label: 'Reading', icon: <Icon name="i-book" /> },
@@ -431,6 +433,37 @@ export function BasePage() {
             options={selectOptions}
           />
           <Select variant="plain" disabled aria-label="variant plain disabled" value={theme} onValueChange={() => {}} options={selectOptions} />
+          {/* 反色档：深底或品牌底上的字段，与按钮的反色档同一处理 */}
+          <Select inverse aria-label="variant inverse" value={theme} onValueChange={setTheme} options={selectOptions} />
+          <Select
+            inverse
+            variant="plain"
+            aria-label="variant inverse plain"
+            value={theme}
+            onValueChange={setTheme}
+            options={selectOptions}
+          />
+          <Select
+            inverse
+            iconPosition="end"
+            indicator={false}
+            aria-label="variant inverse icon"
+            value={theme}
+            onValueChange={setTheme}
+            options={selectOptions}
+            icon={<Icon name="i-globe" />}
+          />
+        </div>
+
+        {/* 取消选择：末项是空值项（value 为 null），选中它触发器回到占位文字 */}
+        <div className="base-row">
+          <Select
+            aria-label="select clearable"
+            value={clearable}
+            onValueChange={setClearable}
+            options={clearableOptions}
+            placeholder={t('base.select.placeholder')}
+          />
         </div>
 
         <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>

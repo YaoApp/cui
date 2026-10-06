@@ -234,4 +234,26 @@ describe('Select', () => {
     await screen.findByRole('option', { name: 'Light' })
     expect(document.querySelector('.select-popup--search')).toBeNull()
   })
+
+  it('clears the choice with a null item', async () => {
+    const onValueChange = vi.fn()
+    render(
+      <Select
+        aria-label="Theme"
+        value="light"
+        onValueChange={onValueChange}
+        options={[...OPTIONS, { value: null, label: 'Clear choice' }]}
+      />,
+    )
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Clear choice' }))
+
+    expect(onValueChange).toHaveBeenCalledWith('')
+  })
+
+  it('carries the inverse class', () => {
+    render(<Select inverse aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />)
+    expect(screen.getByRole('combobox', { name: 'Theme' })).toHaveClass('input', 'input--inverse')
+  })
 })
