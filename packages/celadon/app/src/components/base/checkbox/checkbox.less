@@ -27,10 +27,12 @@
       border-color var(--duration-fast) var(--easing-standard),
       box-shadow var(--duration-fast) var(--easing-standard);
 
-    /* 悬停：未选中只加深边界一档，不换底（与输入框同一处理） */
+    /* 悬停：未选中把边界换成**反色**（与选中态的描边同一族），底色仍不填。
+       达标档里再深一档的 `--border-hover-strong` 与默认档几乎同色，只差一点点，悬停看不出反馈；
+       换反色后既有明确的反馈，对比度也更高（实测对内容底浅色 18.7:1、暗色 14.8:1）。 */
     &:not([data-disabled]):hover,
     &.is-hover {
-      border-color: var(--border-hover-strong);
+      border-color: var(--background-inverse);
     }
 
     /* 聚焦：点击不加环，只有键盘聚焦加环（焦点操作完还挂在控件上，一直挂着环会吵） */
@@ -89,12 +91,13 @@
     }
   }
 
-  /* 勾与横杠的出现：一次小进场，快档，与选择器的选中标记同一处理（F4 的 check 场景） */
+  /* 勾与横杠的出现属 F4 的 fade 场景：一次小进场，取 `--duration-base` 与减速缓动，
+     与选择器的选中标记同一处理。 */
   .checkbox__mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    animation: celadon-checkbox-mark-in var(--duration-fast) var(--easing-decelerate);
+    animation: celadon-checkbox-mark-in var(--duration-base) var(--easing-decelerate);
   }
 
   /* 不确定态的横杠：宽度取间距刻度里的一半档，两端圆角，颜色随方框的文字色 */
@@ -113,14 +116,35 @@
     min-block-size: calc(var(--spacing-24) + var(--spacing-8));
   }
 
+  /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
+     复选框的可点区域是**整行**，只改 1px 的方框边界在整行尺度上读不出反馈，文字要一起动；
+     选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
+     颜色过渡照 F4 的 hover 与 focus 场景：快档加标准缓动。 */
   .checkbox__label {
     display: inline-flex;
     align-items: center;
     min-block-size: calc(var(--spacing-24) + var(--spacing-8));
-    color: var(--text-primary);
+    color: var(--text-secondary);
     font-size: var(--font-size-body);
     line-height: var(--line-height-control);
     cursor: pointer;
+    transition: color var(--duration-fast) var(--easing-standard);
+  }
+
+  .checkbox__row:hover .checkbox__label,
+  .checkbox__box:focus-visible ~ .checkbox__label,
+  .checkbox__box.is-hover ~ .checkbox__label,
+  .checkbox__box.is-focus ~ .checkbox__label,
+  .checkbox__box[data-checked] ~ .checkbox__label,
+  .checkbox__box[data-indeterminate] ~ .checkbox__label {
+    color: var(--text-primary);
+  }
+
+  /* 禁用：方框与标签一起转禁用色，指针也不再是手型（写在状态提升之后，靠源序压过它） */
+  .checkbox__box[data-disabled] ~ .checkbox__label,
+  .checkbox__box.is-disabled ~ .checkbox__label {
+    color: var(--text-disabled);
+    cursor: not-allowed;
   }
 
   /* 消息位：提示与错误共用说明档字号，两条消息的行盒才一样高（与输入框同一规则） */

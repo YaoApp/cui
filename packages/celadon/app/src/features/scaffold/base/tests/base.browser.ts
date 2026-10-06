@@ -919,6 +919,8 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
         品牌: pick('--brand'),
         禁用底: pick('--background-disabled'),
         危险: pick('--danger'),
+        主文字: pick('--text-primary'),
+        次文字: pick('--text-secondary'),
       }
     })
     const [off, on, partial, disabled, invalid] = await Promise.all([
@@ -946,6 +948,32 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     /* 禁用与错误：禁用只换底，错误只换边界 */
     expect(disabled.底).toBe(hexToRgb(tokens.禁用底))
     expect(invalid.框).toBe(hexToRgb(tokens.危险))
+
+    /* 悬停：未选中的边界换成反色，标签提到主文字色。
+       复选框的可点区域是整行，只改 1px 的边界在整行尺度上读不出反馈，所以文字要一起动 */
+    const hoverTarget = page.locator('.checkbox:has(#demo-check-default)')
+    await page.mouse.move(2, 2)
+    const restLabel = await hoverTarget.locator('.checkbox__label').evaluate((el) => getComputedStyle(el).color)
+    expect(restLabel).toBe(hexToRgb(tokens.次文字))
+    await hoverTarget.locator('.checkbox__box').hover()
+    await page.waitForTimeout(150)
+    const [hoverBox, hoverLabel] = await Promise.all([
+      hoverTarget.locator('.checkbox__box').evaluate((el) => getComputedStyle(el).borderTopColor),
+      hoverTarget.locator('.checkbox__label').evaluate((el) => getComputedStyle(el).color),
+    ])
+    expect(hoverBox).toBe(hexToRgb(tokens.反色底))
+    expect(hoverLabel).toBe(hexToRgb(tokens.主文字))
+    expect(hoverLabel).not.toBe(restLabel)
+    expect(contrast(hoverBox, hexToRgb(tokens.内容底))).toBeGreaterThanOrEqual(3)
+    expect(contrast(hoverLabel, hexToRgb(tokens.内容底))).toBeGreaterThanOrEqual(4.5)
+
+    /* 勾与横杠的出现照 F4 的 fade 场景：--duration-base 加减速缓动 */
+    const mark = await page.locator('.checkbox:has(#demo-check-checked) .checkbox__mark').evaluate((el) => {
+      const cs = getComputedStyle(el)
+      return { name: cs.animationName, duration: cs.animationDuration }
+    })
+    expect(mark.name).toBe('celadon-checkbox-mark-in')
+    expect(mark.duration).toBe('0.2s')
   }
 
   /* 尺寸：中档方框 16 · 大档 20，标签行都不小于 32 的点击高度（layout.md 第 6 节） */

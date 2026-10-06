@@ -1028,9 +1028,15 @@
 [data-theme] .celadon {
   /* 方框：中档 16（图标档里最小的一档），大档 20 = 16 + 4，都由间距刻度推出。
      圆角取最小档，方框的形状不跟控件尺寸档走。 */
-  /* 勾与横杠的出现：一次小进场，快档，与选择器的选中标记同一处理（F4 的 check 场景） */
+  /* 勾与横杠的出现属 F4 的 fade 场景：一次小进场，取 `--duration-base` 与减速缓动，
+     与选择器的选中标记同一处理。 */
   /* 不确定态的横杠：宽度取间距刻度里的一半档，两端圆角，颜色随方框的文字色 */
   /* 标签行：整行取不小于 32 的点击高度（layout.md 第 6 节），点标签等于点方框 */
+  /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
+     复选框的可点区域是**整行**，只改 1px 的方框边界在整行尺度上读不出反馈，文字要一起动；
+     选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
+     颜色过渡照 F4 的 hover 与 focus 场景：快档加标准缓动。 */
+  /* 禁用：方框与标签一起转禁用色，指针也不再是手型（写在状态提升之后，靠源序压过它） */
   /* 消息位：提示与错误共用说明档字号，两条消息的行盒才一样高（与输入框同一规则） */
   /* 大档：方框 20，标签走正文大档 */
 }
@@ -1049,7 +1055,9 @@
   border-radius: var(--radius-xs);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard), border-color var(--duration-fast) var(--easing-standard), box-shadow var(--duration-fast) var(--easing-standard);
-  /* 悬停：未选中只加深边界一档，不换底（与输入框同一处理） */
+  /* 悬停：未选中把边界换成**反色**（与选中态的描边同一族），底色仍不填。
+       达标档里再深一档的 `--border-hover-strong` 与默认档几乎同色，只差一点点，悬停看不出反馈；
+       换反色后既有明确的反馈，对比度也更高（实测对内容底浅色 18.7:1、暗色 14.8:1）。 */
   /* 聚焦：点击不加环，只有键盘聚焦加环（焦点操作完还挂在控件上，一直挂着环会吵） */
   /* 选中与不确定：底换成反色族，勾与横杠取反色文字。
        这两条必须带上悬停与键盘聚焦的变体：它们与基础档同权重或更高，不复位就会被盖掉。 */
@@ -1062,7 +1070,7 @@
 [data-theme] .celadon .checkbox__box:not([data-disabled]):hover,
 .celadon .checkbox__box.is-hover,
 [data-theme] .celadon .checkbox__box.is-hover {
-  border-color: var(--border-hover-strong);
+  border-color: var(--background-inverse);
 }
 .celadon .checkbox__box:focus,
 [data-theme] .celadon .checkbox__box:focus {
@@ -1130,7 +1138,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  animation: celadon-checkbox-mark-in var(--duration-fast) var(--easing-decelerate);
+  animation: celadon-checkbox-mark-in var(--duration-base) var(--easing-decelerate);
 }
 .celadon .checkbox__dash,
 [data-theme] .celadon .checkbox__dash {
@@ -1151,10 +1159,32 @@
   display: inline-flex;
   align-items: center;
   min-block-size: calc(var(--spacing-24) + var(--spacing-8));
-  color: var(--text-primary);
+  color: var(--text-secondary);
   font-size: var(--font-size-body);
   line-height: var(--line-height-control);
   cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+.celadon .checkbox__row:hover .checkbox__label,
+[data-theme] .celadon .checkbox__row:hover .checkbox__label,
+.celadon .checkbox__box:focus-visible ~ .checkbox__label,
+[data-theme] .celadon .checkbox__box:focus-visible ~ .checkbox__label,
+.celadon .checkbox__box.is-hover ~ .checkbox__label,
+[data-theme] .celadon .checkbox__box.is-hover ~ .checkbox__label,
+.celadon .checkbox__box.is-focus ~ .checkbox__label,
+[data-theme] .celadon .checkbox__box.is-focus ~ .checkbox__label,
+.celadon .checkbox__box[data-checked] ~ .checkbox__label,
+[data-theme] .celadon .checkbox__box[data-checked] ~ .checkbox__label,
+.celadon .checkbox__box[data-indeterminate] ~ .checkbox__label,
+[data-theme] .celadon .checkbox__box[data-indeterminate] ~ .checkbox__label {
+  color: var(--text-primary);
+}
+.celadon .checkbox__box[data-disabled] ~ .checkbox__label,
+[data-theme] .celadon .checkbox__box[data-disabled] ~ .checkbox__label,
+.celadon .checkbox__box.is-disabled ~ .checkbox__label,
+[data-theme] .celadon .checkbox__box.is-disabled ~ .checkbox__label {
+  color: var(--text-disabled);
+  cursor: not-allowed;
 }
 .celadon .checkbox__message,
 [data-theme] .celadon .checkbox__message {
@@ -1583,7 +1613,7 @@
   /* 选项行**至少**取列表行高档 --row-height（40），满足「常用操作不小于 32」的点击目标；
      用最小高度而不是固定高度，是为了让两行选项（带说明的异形布局）按内容自然长高。
      纵向内距 8、行内距 12（大于弹层内距 4，符合「卡内间距小于卡片内距」）。 */
-  /* 选中标记的出现：状态切换该动，缩放加淡入，时长取快档 */
+  /* 选中标记的出现属 F4 的 fade 场景：状态切换该动，缩放加淡入，取 `--duration-base` 与减速缓动 */
   /* 选项里的图标：与文字间距由行的 gap 给，颜色取二级文字 */
   /* 选项主体：单行时只有标签，异形布局时标签下面再挂一行说明 */
   /* 选中标记与右侧附加内容都靠右，二者同时出现时依次排列 */
@@ -1965,7 +1995,7 @@
   flex: none;
   display: inline-flex;
   color: var(--brand-ink);
-  animation: celadon-select-check-in var(--duration-fast) var(--easing-decelerate);
+  animation: celadon-select-check-in var(--duration-base) var(--easing-decelerate);
 }
 .celadon .select-item__icon,
 [data-theme] .celadon .select-item__icon {

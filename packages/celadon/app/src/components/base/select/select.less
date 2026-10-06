@@ -386,7 +386,7 @@
     }
   }
 
-  /* 选中标记的出现：状态切换该动，缩放加淡入，时长取快档 */
+  /* 选中标记的出现属 F4 的 fade 场景：状态切换该动，缩放加淡入，取 `--duration-base` 与减速缓动 */
   @keyframes celadon-select-check-in {
     from {
       opacity: 0;
@@ -399,7 +399,7 @@
     flex: none;
     display: inline-flex;
     color: var(--brand-ink);
-    animation: celadon-select-check-in var(--duration-fast) var(--easing-decelerate);
+    animation: celadon-select-check-in var(--duration-base) var(--easing-decelerate);
   }
 
   /* 选项里的图标：与文字间距由行的 gap 给，颜色取二级文字 */
