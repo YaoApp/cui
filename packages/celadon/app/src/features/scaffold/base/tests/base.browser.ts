@@ -914,9 +914,7 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
       return {
         反色底: pick('--background-inverse'),
         反色字: pick('--text-inverse'),
-        反色悬停底: pick('--background-inverse-hover'),
         悬停底: pick('--background-hover'),
-        悬停边界: pick('--border-hover-strong'),
         内容底: pick('--background-surface'),
         强边界: pick('--border-control-strong'),
         品牌: pick('--brand'),
@@ -952,41 +950,42 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     expect(disabled.底).toBe(hexToRgb(tokens.禁用底))
     expect(invalid.框).toBe(hexToRgb(tokens.危险))
 
-    /* 悬停是**中间态**，而且挂在**整行**上：指针落在文字上时方框要一起变。
-       选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上" */
+    /* 悬停画在**表面**上：整行一层浅底，方框的底与边界一律不动。
+       这样"选中"（反色填充）与"悬停"（表面浅底）各占一个通道，选中之后也表达得出悬停 */
     const hoverTarget = page.locator('.checkbox:has(#demo-check-default)')
+    const rowPaint = (id: string) =>
+      page.locator(`.checkbox:has(#${id}) .checkbox__row`).evaluate((el) => getComputedStyle(el).backgroundColor)
     await page.mouse.move(2, 2)
     await page.waitForTimeout(150)
     const restBox = await read('demo-check-default')
+    const restRow = await rowPaint('demo-check-default')
     const restLabel = await hoverTarget.locator('.checkbox__label').evaluate((el) => getComputedStyle(el).color)
+    expect(restRow).toBe('rgba(0, 0, 0, 0)')
     expect(restLabel).toBe(hexToRgb(tokens.次文字))
     await hoverTarget.locator('.checkbox__label').hover()
     await page.waitForTimeout(150)
     const hoverBox = await read('demo-check-default')
+    const hoverRow = await rowPaint('demo-check-default')
     const hoverLabel = await hoverTarget.locator('.checkbox__label').evaluate((el) => getComputedStyle(el).color)
-    expect(hoverBox.底).toBe(hexToRgb(tokens.悬停底))
-    expect(hoverBox.框).toBe(hexToRgb(tokens.悬停边界))
-    expect(hoverBox.底).not.toBe(restBox.底)
-    expect(hoverBox.底).not.toBe(hexToRgb(tokens.反色底))
+    expect(hoverRow).toBe(hexToRgb(tokens.悬停底))
+    expect(hoverRow).not.toBe(restRow)
+    expect(hoverBox.底).toBe(restBox.底)
+    expect(hoverBox.框).toBe(restBox.框)
     expect(hoverLabel).toBe(hexToRgb(tokens.主文字))
     expect(hoverLabel).not.toBe(restLabel)
-    expect(contrast(hoverBox.框, hexToRgb(tokens.内容底))).toBeGreaterThanOrEqual(3)
     expect(contrast(hoverLabel, hexToRgb(tokens.内容底))).toBeGreaterThanOrEqual(4.5)
 
-    /* 已选中的悬停只换**边界**：底仍是一整块反色。换底那一档实测只有 1.16:1，读不出来 */
+    /* 已选中：同样只有表面变，方框的填充与边界不动 */
     await page.mouse.move(2, 2)
     await page.waitForTimeout(100)
     const checkedRest = await read('demo-check-checked')
     await page.locator('.checkbox:has(#demo-check-checked) .checkbox__label').hover()
     await page.waitForTimeout(150)
-    const checkedHover = await read('demo-check-checked')
-    expect(checkedHover.底).toBe(checkedRest.底)
-    expect(checkedHover.框).toBe(hexToRgb(tokens.悬停边界))
-    expect(checkedHover.框).not.toBe(checkedRest.框)
-    /* 静态样例与真实悬停同值：清单页那一档就是照它核对的 */
-    const checkedStaticHover = await read('demo-check-checked-hover')
-    expect(checkedStaticHover.底).toBe(checkedHover.底)
-    expect(checkedStaticHover.框).toBe(checkedHover.框)
+    expect(await read('demo-check-checked')).toEqual(checkedRest)
+    expect(await rowPaint('demo-check-checked')).toBe(hexToRgb(tokens.悬停底))
+    /* 静态样例与真实悬停同值：清单页那两档就是照它核对的 */
+    expect(await rowPaint('demo-check-hover')).toBe(hoverRow)
+    expect(await rowPaint('demo-check-checked-hover')).toBe(hoverRow)
 
     /* 悬停与聚焦是频繁重复的微交互，按 F4 的"不该动"一栏不做过渡（只动 transform 与 opacity） */
     const durations = await page.evaluate(() => {
@@ -996,7 +995,7 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     })
     expect(durations).toEqual(['0s', '0s'])
 
-    /* 只读没有悬停：底、边界与标签都保持静止档（指针落在文字上也是一样） */
+    /* 只读没有悬停：表面、方框与标签都保持静止档（指针落在文字上也是一样） */
     await page.mouse.move(2, 2)
     await page.waitForTimeout(100)
     const readonlyRest = await read('demo-check-readonly')
@@ -1008,6 +1007,7 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     const readonlyHover = await read('demo-check-readonly')
     expect(readonlyHover.底).toBe(readonlyRest.底)
     expect(readonlyHover.框).toBe(readonlyRest.框)
+    expect(await rowPaint('demo-check-readonly')).toBe('rgba(0, 0, 0, 0)')
     expect(
       await page.locator('.checkbox:has(#demo-check-readonly) .checkbox__label').evaluate((el) => getComputedStyle(el).color),
     ).toBe(readonlyLabelRest)

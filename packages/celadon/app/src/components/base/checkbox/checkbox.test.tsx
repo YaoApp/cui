@@ -84,26 +84,25 @@ describe('Checkbox', () => {
     expect(screen.getByText('必选')).toHaveClass('checkbox__error')
   })
 
-  it('marks the box when it carries an error', () => {
-    render(<Checkbox id="updates" label="接收更新通知" error="必选" />)
+  it('marks the field when it carries an error', () => {
+    const { container } = render(<Checkbox id="updates" label="接收更新通知" error="必选" />)
 
-    expect(screen.getByRole('checkbox', { name: '接收更新通知' })).toHaveClass('is-error')
+    expect(container.querySelector('.checkbox')).toHaveClass('is-error')
   })
 
-  it('puts the static state class on the box, not on the row', () => {
-    /* 设计类的规则都写在方框上；加在行上不会生效（这是清单页并排展示多态的前提） */
+  it('puts the static hover class on the row container, which is where the hover surface is painted', () => {
+    /* 悬停画的是整行的浅底，所以状态类落在整行容器上；控件本体不带这个类 */
     const { container } = render(<Checkbox id="updates" label="is-hover" state="hover" />)
-    const box = screen.getByRole('checkbox', { name: 'is-hover' })
 
-    expect(box).toHaveClass('checkbox__box', 'is-hover')
-    expect(container.querySelector('.checkbox__row')).not.toHaveClass('is-hover')
+    expect(container.querySelector('.checkbox')).toHaveClass('is-hover')
+    expect(screen.getByRole('checkbox', { name: 'is-hover' })).not.toHaveClass('is-hover')
   })
 
   it('exposes the busy state while loading', () => {
-    render(<Checkbox id="updates" label="is-loading" state="loading" />)
+    const { container } = render(<Checkbox id="updates" label="is-loading" state="loading" />)
     const control = screen.getByRole('checkbox', { name: 'is-loading' })
 
-    expect(control).toHaveClass('is-loading')
+    expect(container.querySelector('.checkbox')).toHaveClass('is-loading')
     expect(control).toHaveAttribute('aria-busy', 'true')
   })
 
@@ -113,10 +112,10 @@ describe('Checkbox', () => {
     expect(container.querySelector('.checkbox')).toHaveClass('checkbox--large')
   })
 
-  it('takes the static error class on the box', () => {
-    render(<Checkbox id="updates" label="is-error" state="error" />)
+  it('takes the static error class on the field', () => {
+    const { container } = render(<Checkbox id="updates" label="is-error" state="error" />)
 
-    expect(screen.getByRole('checkbox', { name: 'is-error' })).toHaveClass('is-error')
+    expect(container.querySelector('.checkbox')).toHaveClass('is-error')
   })
 
   it('takes the mark out of the accessibility tree', () => {

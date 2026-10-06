@@ -22,8 +22,8 @@ export type CheckboxProps = {
   value?: string
   /** 方框尺寸：中档 16 · 大档 20（都由间距刻度推出）。 */
   size?: 'medium' | 'large'
-  /** 静态态：把设计类的 `is-*` 写在方框上，供清单页并排展示多态。
-      选中、不确定、禁用、只读、错误都用真实属性与真实取值，不造假类。 */
+  /** 静态态：把设计类的 `is-*` 写在**整行容器**上，供清单页并排展示多态。
+      悬停画的是整行的浅底，所以状态类落在整行而不是方框上；选中、不确定、禁用、只读、错误都用真实属性与真实取值。 */
   state?: 'hover' | 'focus' | 'error' | 'loading'
   className?: string
 }
@@ -56,17 +56,21 @@ export function Checkbox({
   const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined
 
   return (
-    <div className={['checkbox', `checkbox--${size}`, className].filter(Boolean).join(' ')}>
+    <div
+      className={[
+        'checkbox',
+        `checkbox--${size}`,
+        error ? 'is-error' : null,
+        state ? `is-${state}` : null,
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className="checkbox__row">
         <BaseCheckbox.Root
           id={id}
-          className={[
-            'checkbox__box',
-            error ? 'is-error' : null,
-            state ? `is-${state}` : null,
-          ]
-            .filter(Boolean)
-            .join(' ')}
+          className="checkbox__box"
           checked={checked}
           defaultChecked={defaultChecked}
           onCheckedChange={onCheckedChange}

@@ -1028,21 +1028,20 @@
 [data-theme] .celadon {
   /* 方框：中档 16（图标档里最小的一档），大档 20 = 16 + 4，都由间距刻度推出。
      圆角取最小档，方框的形状不跟控件尺寸档走。 */
+  /* 静态态：`state` 的三档挂在**整行容器**上（悬停画整行、错误与聚焦落在方框上）。
+     清单页靠这几条并排展示多态；真实交互仍由伪类驱动。
+     静态聚焦的环沿真实聚焦的规则：未选中取品牌环，选中态取反色环。 */
+  /* 禁用同理挂到容器上，写在错误之后，靠源序让禁用态压过错误态（禁用不受校验约束） */
   /* 勾与横杠的出现属 F4 的 fade 场景：一次小进场，取 `--duration-base` 与减速缓动，
      与选择器的选中标记同一处理。 */
   /* 不确定态的横杠：宽度取间距刻度里的一半档，两端圆角，颜色随方框的文字色 */
-  /* 标签行：整行取不小于 32 的点击高度（layout.md 第 6 节），点标签等于点方框 */
-  /* 悬停是**中间态**：一层浅底加一档更深的边界，既不等于默认，也不等于选中。
-     状态挂在**整行**上：可点区域是整行，指针落在文字上时方框要一起变，
-     否则鼠标停在文字上只有文字变色、方框纹丝不动，看着像两个东西。
-     选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上"。
+  /* 标签行：整行取不小于 32 的点击高度（layout.md 第 6 节），点标签等于点方框。
+     行宽取内容宽，悬停的那层浅底因此贴着方框与标签，不会横贯整列。 */
+  /* 悬停画在**表面**上：整行一层浅底，方框的底、边界与勾一律不动。
+     这样"选中"（反色填充）与"悬停"（表面浅底）各占一个通道，任何组合都分得开 ——
+     选中之后不会表达不出悬停，悬停也不会被误读成选中态迈出的半步。
+     16px 的方框容不下第二个信号：换底那一档实测只有 1.16:1，换边界则是深底配一圈暖灰边，两种材料拼在一起。
      只读与禁用不参与：只读可以聚焦与读取，但不给任何交互反馈。 */
-  /* 已选中的悬停只换**边界**：底仍是一整块反色，边界换成悬停档。
-     填充不变、只在边缘让一步，悬停因此既不等于静止的选中态，也不与未选中的悬停混同；
-     换底那一档（#14120E → #2A2723）实测只有 1.16:1，肉眼读不出来，不能承担表达。 */
-  /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
-     选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
-     颜色过渡照 F4 的 hover 与 focus 场景：快档加标准缓动。 */
   /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
      选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
      同样**不做过渡**：悬停是频繁重复的微交互，按 F4 的规则不动效，瞬时切换。 */
@@ -1070,20 +1069,16 @@
        并要求只动 transform 与 opacity。悬停与聚焦因此是瞬时切换；只有状态切换里的勾与横杠做一次进场（fade 场景）。 */
   /* 聚焦：点击不加环，只有键盘聚焦加环（焦点操作完还挂在控件上，一直挂着环会吵） */
   /* 选中与不确定：底换成反色族，勾与横杠取反色文字。
-       悬停与键盘聚焦的变体见文件下方：悬停挂在**整行**上，聚焦挂在本体上。 */
-  /* 错误是持续状态：未选中与已选中的边界都取危险色（错了也要看得出选没选，底不因此改变） */
-  /* 禁用写在最后：与选中、错误两条同权重，靠源序压过它们 */
+       悬停画在整行的表面上（见文件下方），聚焦挂在本体上。 */
+  /* 禁用 */
   /* 只读：可聚焦也可读，但不接受改动，边界与底按常态画，指针保持默认 */
-  /* 加载：只把指针换成进行中；16 的方框容不下圆环，状态由控件的 aria-busy 表达 */
 }
 .celadon .checkbox__box:focus,
 [data-theme] .celadon .checkbox__box:focus {
   outline: none;
 }
 .celadon .checkbox__box:focus-visible,
-[data-theme] .celadon .checkbox__box:focus-visible,
-.celadon .checkbox__box.is-focus,
-[data-theme] .celadon .checkbox__box.is-focus {
+[data-theme] .celadon .checkbox__box:focus-visible {
   box-shadow: var(--focus-ring);
   outline: none;
 }
@@ -1098,21 +1093,11 @@
 .celadon .checkbox__box[data-checked]:focus-visible,
 [data-theme] .celadon .checkbox__box[data-checked]:focus-visible,
 .celadon .checkbox__box[data-indeterminate]:focus-visible,
-[data-theme] .celadon .checkbox__box[data-indeterminate]:focus-visible,
-.celadon .checkbox__box[data-checked].is-focus,
-[data-theme] .celadon .checkbox__box[data-checked].is-focus,
-.celadon .checkbox__box[data-indeterminate].is-focus,
-[data-theme] .celadon .checkbox__box[data-indeterminate].is-focus {
+[data-theme] .celadon .checkbox__box[data-indeterminate]:focus-visible {
   box-shadow: var(--focus-ring-inverse);
 }
-.celadon .checkbox__box.is-error,
-[data-theme] .celadon .checkbox__box.is-error {
-  border-color: var(--danger);
-}
 .celadon .checkbox__box[data-disabled],
-[data-theme] .celadon .checkbox__box[data-disabled],
-.celadon .checkbox__box.is-disabled,
-[data-theme] .celadon .checkbox__box.is-disabled {
+[data-theme] .celadon .checkbox__box[data-disabled] {
   background: var(--background-disabled);
   border-color: var(--border-disabled);
   color: var(--text-disabled);
@@ -1122,9 +1107,31 @@
 [data-theme] .celadon .checkbox__box[data-readonly] {
   cursor: default;
 }
-.celadon .checkbox__box.is-loading,
-[data-theme] .celadon .checkbox__box.is-loading {
+.celadon .checkbox.is-focus .checkbox__box,
+[data-theme] .celadon .checkbox.is-focus .checkbox__box {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+.celadon .checkbox.is-focus .checkbox__box[data-checked],
+[data-theme] .celadon .checkbox.is-focus .checkbox__box[data-checked],
+.celadon .checkbox.is-focus .checkbox__box[data-indeterminate],
+[data-theme] .celadon .checkbox.is-focus .checkbox__box[data-indeterminate] {
+  box-shadow: var(--focus-ring-inverse);
+}
+.celadon .checkbox.is-error .checkbox__box,
+[data-theme] .celadon .checkbox.is-error .checkbox__box {
+  border-color: var(--danger);
+}
+.celadon .checkbox.is-loading .checkbox__box,
+[data-theme] .celadon .checkbox.is-loading .checkbox__box {
   cursor: progress;
+}
+.celadon .checkbox:has([data-disabled]) .checkbox__box,
+[data-theme] .celadon .checkbox:has([data-disabled]) .checkbox__box {
+  background: var(--background-disabled);
+  border-color: var(--border-disabled);
+  color: var(--text-disabled);
+  cursor: not-allowed;
 }
 .celadon .checkbox__mark,
 [data-theme] .celadon .checkbox__mark {
@@ -1145,25 +1152,15 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-8);
+  inline-size: fit-content;
   min-block-size: calc(var(--spacing-24) + var(--spacing-8));
+  border-radius: var(--radius-small);
 }
-.celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box,
-[data-theme] .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box,
-.celadon .checkbox__box.is-hover,
-[data-theme] .celadon .checkbox__box.is-hover {
+.celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover,
+[data-theme] .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover,
+.celadon .checkbox.is-hover .checkbox__row,
+[data-theme] .celadon .checkbox.is-hover .checkbox__row {
   background: var(--background-hover);
-  border-color: var(--border-hover-strong);
-}
-.celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-checked],
-[data-theme] .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-checked],
-.celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-indeterminate],
-[data-theme] .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-indeterminate],
-.celadon .checkbox__box[data-checked].is-hover,
-[data-theme] .celadon .checkbox__box[data-checked].is-hover,
-.celadon .checkbox__box[data-indeterminate].is-hover,
-[data-theme] .celadon .checkbox__box[data-indeterminate].is-hover {
-  background: var(--background-inverse);
-  border-color: var(--border-hover-strong);
 }
 .celadon .checkbox__label,
 [data-theme] .celadon .checkbox__label {
@@ -1177,12 +1174,12 @@
 }
 .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__label,
 [data-theme] .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__label,
+.celadon .checkbox.is-hover .checkbox__label,
+[data-theme] .celadon .checkbox.is-hover .checkbox__label,
+.celadon .checkbox.is-focus .checkbox__label,
+[data-theme] .celadon .checkbox.is-focus .checkbox__label,
 .celadon .checkbox__box:focus-visible ~ .checkbox__label,
 [data-theme] .celadon .checkbox__box:focus-visible ~ .checkbox__label,
-.celadon .checkbox__box.is-hover ~ .checkbox__label,
-[data-theme] .celadon .checkbox__box.is-hover ~ .checkbox__label,
-.celadon .checkbox__box.is-focus ~ .checkbox__label,
-[data-theme] .celadon .checkbox__box.is-focus ~ .checkbox__label,
 .celadon .checkbox__box[data-checked] ~ .checkbox__label,
 [data-theme] .celadon .checkbox__box[data-checked] ~ .checkbox__label,
 .celadon .checkbox__box[data-indeterminate] ~ .checkbox__label,
@@ -1190,9 +1187,7 @@
   color: var(--text-primary);
 }
 .celadon .checkbox__box[data-disabled] ~ .checkbox__label,
-[data-theme] .celadon .checkbox__box[data-disabled] ~ .checkbox__label,
-.celadon .checkbox__box.is-disabled ~ .checkbox__label,
-[data-theme] .celadon .checkbox__box.is-disabled ~ .checkbox__label {
+[data-theme] .celadon .checkbox__box[data-disabled] ~ .checkbox__label {
   color: var(--text-disabled);
   cursor: not-allowed;
 }

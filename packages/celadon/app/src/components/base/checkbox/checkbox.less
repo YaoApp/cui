@@ -30,34 +30,26 @@
       outline: none;
     }
 
-    &:focus-visible,
-    &.is-focus {
+    &:focus-visible {
       box-shadow: var(--focus-ring);
       outline: none;
     }
 
     /* 选中与不确定：底换成反色族，勾与横杠取反色文字。
-       悬停与键盘聚焦的变体见文件下方：悬停挂在**整行**上，聚焦挂在本体上。 */
+       悬停画在整行的表面上（见文件下方），聚焦挂在本体上。 */
     &[data-checked],
     &[data-indeterminate] {
       background: var(--background-inverse);
       border-color: var(--background-inverse);
       color: var(--text-inverse);
 
-      &:focus-visible,
-      &.is-focus {
+      &:focus-visible {
         box-shadow: var(--focus-ring-inverse);
       }
     }
 
-    /* 错误是持续状态：未选中与已选中的边界都取危险色（错了也要看得出选没选，底不因此改变） */
-    &.is-error {
-      border-color: var(--danger);
-    }
-
-    /* 禁用写在最后：与选中、错误两条同权重，靠源序压过它们 */
-    &[data-disabled],
-    &.is-disabled {
+    /* 禁用 */
+    &[data-disabled] {
       background: var(--background-disabled);
       border-color: var(--border-disabled);
       color: var(--text-disabled);
@@ -68,11 +60,35 @@
     &[data-readonly] {
       cursor: default;
     }
+  }
 
-    /* 加载：只把指针换成进行中；16 的方框容不下圆环，状态由控件的 aria-busy 表达 */
-    &.is-loading {
-      cursor: progress;
-    }
+  /* 静态态：`state` 的三档挂在**整行容器**上（悬停画整行、错误与聚焦落在方框上）。
+     清单页靠这几条并排展示多态；真实交互仍由伪类驱动。
+     静态聚焦的环沿真实聚焦的规则：未选中取品牌环，选中态取反色环。 */
+  .checkbox.is-focus .checkbox__box {
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+
+  .checkbox.is-focus .checkbox__box[data-checked],
+  .checkbox.is-focus .checkbox__box[data-indeterminate] {
+    box-shadow: var(--focus-ring-inverse);
+  }
+
+  .checkbox.is-error .checkbox__box {
+    border-color: var(--danger);
+  }
+
+  .checkbox.is-loading .checkbox__box {
+    cursor: progress;
+  }
+
+  /* 禁用同理挂到容器上，写在错误之后，靠源序让禁用态压过错误态（禁用不受校验约束） */
+  .checkbox:has([data-disabled]) .checkbox__box {
+    background: var(--background-disabled);
+    border-color: var(--border-disabled);
+    color: var(--text-disabled);
+    cursor: not-allowed;
   }
 
   /* 勾与横杠的出现属 F4 的 fade 场景：一次小进场，取 `--duration-base` 与减速缓动，
@@ -92,39 +108,27 @@
     background: currentColor;
   }
 
-  /* 标签行：整行取不小于 32 的点击高度（layout.md 第 6 节），点标签等于点方框 */
+  /* 标签行：整行取不小于 32 的点击高度（layout.md 第 6 节），点标签等于点方框。
+     行宽取内容宽，悬停的那层浅底因此贴着方框与标签，不会横贯整列。 */
   .checkbox__row {
     display: flex;
     align-items: center;
     gap: var(--spacing-8);
+    inline-size: fit-content;
     min-block-size: calc(var(--spacing-24) + var(--spacing-8));
+    border-radius: var(--radius-small);
   }
 
-  /* 悬停是**中间态**：一层浅底加一档更深的边界，既不等于默认，也不等于选中。
-     状态挂在**整行**上：可点区域是整行，指针落在文字上时方框要一起变，
-     否则鼠标停在文字上只有文字变色、方框纹丝不动，看着像两个东西。
-     选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上"。
+  /* 悬停画在**表面**上：整行一层浅底，方框的底、边界与勾一律不动。
+     这样"选中"（反色填充）与"悬停"（表面浅底）各占一个通道，任何组合都分得开 ——
+     选中之后不会表达不出悬停，悬停也不会被误读成选中态迈出的半步。
+     16px 的方框容不下第二个信号：换底那一档实测只有 1.16:1，换边界则是深底配一圈暖灰边，两种材料拼在一起。
      只读与禁用不参与：只读可以聚焦与读取，但不给任何交互反馈。 */
-  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box,
-  .checkbox__box.is-hover {
+  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover,
+  .checkbox.is-hover .checkbox__row {
     background: var(--background-hover);
-    border-color: var(--border-hover-strong);
   }
 
-  /* 已选中的悬停只换**边界**：底仍是一整块反色，边界换成悬停档。
-     填充不变、只在边缘让一步，悬停因此既不等于静止的选中态，也不与未选中的悬停混同；
-     换底那一档（#14120E → #2A2723）实测只有 1.16:1，肉眼读不出来，不能承担表达。 */
-  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-checked],
-  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-indeterminate],
-  .checkbox__box[data-checked].is-hover,
-  .checkbox__box[data-indeterminate].is-hover {
-    background: var(--background-inverse);
-    border-color: var(--border-hover-strong);
-  }
-
-  /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
-     选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
-     颜色过渡照 F4 的 hover 与 focus 场景：快档加标准缓动。 */
   /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
      选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
      同样**不做过渡**：悬停是频繁重复的微交互，按 F4 的规则不动效，瞬时切换。 */
@@ -141,17 +145,16 @@
   /* 悬停的整行反馈要排除只读与禁用：只读没有悬停，禁用连指针都不是手型。
      选中与不确定仍提到主文字色，因为那是已经做过的选择，与能否交互无关。 */
   .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__label,
+  .checkbox.is-hover .checkbox__label,
+  .checkbox.is-focus .checkbox__label,
   .checkbox__box:focus-visible ~ .checkbox__label,
-  .checkbox__box.is-hover ~ .checkbox__label,
-  .checkbox__box.is-focus ~ .checkbox__label,
   .checkbox__box[data-checked] ~ .checkbox__label,
   .checkbox__box[data-indeterminate] ~ .checkbox__label {
     color: var(--text-primary);
   }
 
   /* 禁用：方框与标签一起转禁用色，指针也不再是手型（写在状态提升之后，靠源序压过它） */
-  .checkbox__box[data-disabled] ~ .checkbox__label,
-  .checkbox__box.is-disabled ~ .checkbox__label {
+  .checkbox__box[data-disabled] ~ .checkbox__label {
     color: var(--text-disabled);
     cursor: not-allowed;
   }
