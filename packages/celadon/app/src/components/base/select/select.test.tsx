@@ -256,4 +256,32 @@ describe('Select', () => {
     render(<Select inverse aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />)
     expect(screen.getByRole('combobox', { name: 'Theme' })).toHaveClass('input', 'input--inverse')
   })
+
+  it('clears the choice when the selected option is picked again and clearOnReselect is on', async () => {
+    const onValueChange = vi.fn()
+    render(
+      <Select
+        clearOnReselect
+        aria-label="Theme"
+        value="light"
+        onValueChange={onValueChange}
+        options={OPTIONS}
+      />,
+    )
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Light' }))
+
+    expect(onValueChange).toHaveBeenCalledWith('')
+  })
+
+  it('keeps the choice when the selected option is picked again without clearOnReselect', async () => {
+    const onValueChange = vi.fn()
+    render(<Select aria-label="Theme" value="light" onValueChange={onValueChange} options={OPTIONS} />)
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Light' }))
+
+    expect(onValueChange).not.toHaveBeenCalledWith('')
+  })
 })

@@ -61,8 +61,10 @@ type SelectBaseProps = {
   /** 反色档：用于深底或品牌底（设计类 `.input--inverse`），与按钮的反色档同一处理。 */
   inverse?: boolean
   /** 是否必须选一个值才能提交（上游同名属性，只管表单校验，与「能否清除」无关）。
-      取消选择用**空值项**表达：给一个 `value: null` 的选项，选中它触发器就回到占位文字。 */
+      取消选择有两条路：给一个 `value: null` 的空值项，或者打开 `clearOnReselect` 后再点一次已选中项。 */
   required?: boolean
+  /** 再次点选已选中项时取消选择（单选档），并回传空串。默认关闭，与上游的多选语义区分开。 */
+  clearOnReselect?: boolean
   className?: string
 }
 
@@ -93,6 +95,7 @@ export function Select(props: SelectProps) {
     searchLabel,
     noMatchText,
     filterOption,
+    clearOnReselect = false,
     variant = 'field',
     iconPosition = 'start',
     indicator = true,
@@ -255,8 +258,13 @@ export function Select(props: SelectProps) {
   return (
     <BaseSelect.Root
       value={value as string}
-      /* 空值项被选中时上游回传 null，这正是「取消选择」：单选档把空值归一成空串，触发器回到占位文字。 */
+      /* 取消选择有两条路：空值项被选中时上游回传 null（归一成空串），
+         或者在开启 `clearOnReselect` 后再次点选已选中项。 */
       onValueChange={(next) => {
+        if (clearOnReselect && next === value) {
+          onValueChange('')
+          return
+        }
         onValueChange((next ?? '') as string)
       }}
       items={items}

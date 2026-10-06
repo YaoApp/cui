@@ -45,6 +45,7 @@ export function BasePage() {
   const [groupChoice, setGroupChoice] = useState('light')
   const [longChoice, setLongChoice] = useState('item-0')
   const [clearable, setClearable] = useState('light')
+  const [reselect, setReselect] = useState('dark')
   /* 错误抖动的重放计数：同名动画不会自行重跑，靠 key 让节点重挂载 */
   const [shakeTick, setShakeTick] = useState(0)
   /* 主题与语言用真实的偏好源，不自造局部状态（与首页同一套） */
@@ -433,7 +434,11 @@ export function BasePage() {
             options={selectOptions}
           />
           <Select variant="plain" disabled aria-label="variant plain disabled" value={theme} onValueChange={() => {}} options={selectOptions} />
-          {/* 反色档：深底或品牌底上的字段，与按钮的反色档同一处理 */}
+        </div>
+
+        {/* 反色档只对深底或品牌底成立，因此放在深色条里展示；放在浅底上文字会看不见。
+            右起第二档打开 clearOnReselect：再点一次已选中项即取消选择。 */}
+        <div className="base-row base-row--inverse">
           <Select inverse aria-label="variant inverse" value={theme} onValueChange={setTheme} options={selectOptions} />
           <Select
             inverse
@@ -453,6 +458,15 @@ export function BasePage() {
             options={selectOptions}
             icon={<Icon name="i-globe" />}
           />
+          <Select
+            inverse
+            clearOnReselect
+            aria-label="variant inverse reselect"
+            value={reselect}
+            onValueChange={setReselect}
+            options={selectOptions}
+            placeholder={t('base.select.placeholder')}
+          />
         </div>
 
         {/* 取消选择：末项是空值项（value 为 null），选中它触发器回到占位文字 */}
@@ -462,6 +476,14 @@ export function BasePage() {
             value={clearable}
             onValueChange={setClearable}
             options={clearableOptions}
+            placeholder={t('base.select.placeholder')}
+          />
+          <Select
+            clearOnReselect
+            aria-label="select reselect"
+            value={reselect}
+            onValueChange={setReselect}
+            options={selectOptions}
             placeholder={t('base.select.placeholder')}
           />
         </div>

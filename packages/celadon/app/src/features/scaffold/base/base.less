@@ -18,7 +18,6 @@
   &:last-child {
     margin-block-end: 0;
   }
-
   /* 标题的浏览器默认外边距必须清零：否则它加在卡片的 padding 与容器的 gap 之上，
      上边会比左右宽（实测 28 对 16），下边也各多一份。间距只由容器给，见 layout.md 第 1 节。 */
   &__title {
@@ -31,8 +30,14 @@
   }
 }
 
-/* 子组标题：比组标题小一档，比字段标签大一档且重一档（strong 对 medium），用次要色。
-   原来与字段标签同为 12 + medium，两级撞在一起，看不出层级。 */
+/* 反色档样例必须放在深色条上：反色文字是近白色，放在浅底卡片上会看不见 */
+.base-row--inverse {
+  padding: var(--spacing-12);
+  background: var(--background-inverse);
+  border-radius: var(--radius-medium);
+}
+
+/* 子组标题：比组标题小一档，比字段标签大一档且重一档（strong 对 medium），用次要色。   原来与字段标签同为 12 + medium，两级撞在一起，看不出层级。 */
 .base-subgroup__title {
   margin: 0;
   color: var(--text-secondary);

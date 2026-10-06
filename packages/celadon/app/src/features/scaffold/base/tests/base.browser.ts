@@ -472,6 +472,31 @@ test('lists the five groups and their states', async ({ page }) => {
   await page.waitForTimeout(300)
   expect((await clearableSample.textContent())?.trim()).not.toBe('Light')
 
+  /* 反色档必须摆在深底上才有对比：深色条上的四个样例，文字对条底要够看 */
+  const inverseRead = await page.locator('.base-row--inverse').evaluate((strip) => {
+    const styles = getComputedStyle(strip)
+    const sample = strip.querySelector('[aria-label="variant inverse plain"]')!
+    return {
+      条底: styles.backgroundColor,
+      样例底: getComputedStyle(sample).backgroundColor,
+      样例字: getComputedStyle(sample).color,
+      样例数: strip.querySelectorAll('[aria-label^="variant inverse"]').length,
+    }
+  })
+  expect(inverseRead.样例数).toBe(4)
+  expect(inverseRead.条底).toBe(hexToRgb('#14120E'))
+  expect(inverseRead.样例底).toBe('rgba(0, 0, 0, 0)')
+  expect(inverseRead.样例字).toBe(hexToRgb('#FAFAFB'))
+
+  /* 再点一次已选中项即取消选择（clearOnReselect） */
+  const reselectSample = page.getByRole('combobox', { name: 'select reselect', exact: true })
+  await reselectSample.click()
+  await page.waitForSelector('.select-popup:visible')
+  await page.waitForTimeout(300)
+  await page.locator('.select-popup:visible [role=option]', { hasText: 'Dark' }).first().click()
+  await page.waitForTimeout(300)
+  expect((await reselectSample.textContent())?.trim()).not.toBe('Dark')
+
   /* 空态：没有选项时弹层给说明，触发器显示占位文字 */
   expect(await selectTrigger('select empty').textContent()).not.toBe('')
   await selectTrigger('select empty').click()
