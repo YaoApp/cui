@@ -475,7 +475,7 @@ function renderElevation(theme){
 }
 
 /* ===== F4 动效 ===== */
-var DURATIONS = ['--duration-fast','--duration-base','--duration-slow'];
+var DURATIONS = ['--duration-fast','--duration-base','--duration-slow','--duration-loop'];
 var CURVES = [['--easing-standard','square'],['--easing-decelerate','enter'],['--easing-accelerate','exit']];
 function curvePath(v){
   var m = String(v).match(/cubic-bezier\(([^)]+)\)/); if (!m) return 'M0,100 C0,100 100,0 100,0';

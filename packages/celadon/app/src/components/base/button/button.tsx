@@ -1,6 +1,7 @@
 import './button.less'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Button as BaseButton } from '@base-ui/react/button'
+import { Spinner } from '@/components/base/spinner'
 import { Label } from './parts/label'
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -47,6 +48,7 @@ export function Button({
     .join(' ')
   return (
     <BaseButton className={classes} disabled={disabled || loading} aria-busy={loading || undefined} {...rest}>
+      {loading ? <Spinner /> : null}
       <Label>{children}</Label>
     </BaseButton>
   )

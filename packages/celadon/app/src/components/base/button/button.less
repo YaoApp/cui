@@ -23,7 +23,7 @@
   &--small {
     min-block-size: var(--spacing-24);
     padding-inline: var(--spacing-12);
-    /* 12px 档：--font-size-label 是 11px，token 注释写明"仅西文/数字角标，中文勿用" */
+    /* 小档取说明档 12px；--font-size-label 同为 12px，按 token 注释只用于西文与数字角标 */
     font-size: var(--font-size-caption);
   }
 
@@ -57,26 +57,9 @@
     padding-inline: var(--spacing-16);
   }
 
-  /* 加载态：禁用交互 + 指示器。指示器是纯 CSS 圆环，用 currentColor 跟着文字色走。 */
+  /* 加载态：禁用交互。指示器用设计类 .spinner，与输入框共用一套圆环 */
   &.is-loading {
     cursor: progress;
-
-    &::before {
-      content: '';
-      flex: none;
-      inline-size: var(--spacing-16);
-      block-size: var(--spacing-16);
-      border: var(--border-width) solid currentColor;
-      border-block-start-color: transparent;
-      border-radius: var(--radius-pill);
-      animation: button-spin 600ms linear infinite;
-    }
-  }
-}
-
-@keyframes button-spin {
-  to {
-    rotate: 360deg;
   }
 }
 

@@ -23,6 +23,8 @@ export function BasePage() {
   const [password, setPassword] = useState('')
   const [visible, setVisible] = useState(false)
   const [theme, setTheme] = useState('light')
+  /* 错误抖动的重放计数：同名动画不会自行重跑，靠 key 让节点重挂载 */
+  const [shakeTick, setShakeTick] = useState(0)
   /* 主题与语言用真实的偏好源，不自造局部状态（与首页同一套） */
   const { theme: activeTheme, setTheme: selectActiveTheme } = useThemePreference()
 
@@ -89,28 +91,29 @@ export function BasePage() {
 
         {/* 状态齐：默认 · 悬停 · 焦点 · 禁用 · 错误 · 加载 · 空，一态一个样例。
             悬停与焦点用设计类的静态态（真实交互由伪类驱动），错误用字段自身的错误态，
-            禁用用真实属性，空态只留占位符。 */}
+            禁用用真实属性，空态只留占位符。样例值写成常量：值为空时各态的差别（文字色 ·
+            指示器）在屏幕上根本看不见，清单页就失去了核对的作用。 */}
         <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
         <div className="base-grid">
           <Input
             id="demo-state-default"
             label="default"
-            value={account}
-            onChange={(e) => setAccount(e.target.value)}
+            value="value"
+            onChange={() => {}}
           />
           <Input
             id="demo-state-hover"
             label="is-hover"
             state="hover"
-            value={account}
-            onChange={(e) => setAccount(e.target.value)}
+            value="value"
+            onChange={() => {}}
           />
           <Input
             id="demo-state-focus"
             label="is-focus"
             state="focus"
-            value={account}
-            onChange={(e) => setAccount(e.target.value)}
+            value="value"
+            onChange={() => {}}
           />
           <Input
             id="demo-state-disabled"
@@ -123,15 +126,15 @@ export function BasePage() {
             id="demo-state-error"
             label="is-error"
             state="error"
-            value={account}
-            onChange={(e) => setAccount(e.target.value)}
+            value="value"
+            onChange={() => {}}
           />
           <Input
             id="demo-state-loading"
             label="is-loading"
             state="loading"
-            value={account}
-            onChange={(e) => setAccount(e.target.value)}
+            value="value"
+            onChange={() => {}}
           />
           <Input
             id="demo-state-empty"
@@ -140,6 +143,20 @@ export function BasePage() {
             value=""
             onChange={() => {}}
           />
+          {/* 错误抖动是**可选**的一次性反馈，默认不加。这里按真实用法演示：传的是计数器，
+              因此连点重放会一次次重播，不需要页面替它复位，组件自己在播完后摘类。 */}
+          <Input
+            id="demo-shake"
+            label="is-shake"
+            state="error"
+            shake={shakeTick}
+            value="value"
+            onChange={() => {}}
+          />
+          <div className="base-demo">
+            <span className="base-demo__name">replay</span>
+            <Button onClick={() => setShakeTick((tick) => tick + 1)}>replay</Button>
+          </div>
         </div>
 
         {/* 带消息的样例单独一组：同一行里不混有消息与没消息的字段，行高就不会参差 */}

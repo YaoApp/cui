@@ -46,6 +46,8 @@
   --background-content:    #FAFAFB;   /* 非纯白（去刺眼） */
   --background-surface:    #FFFFFF;
   --background-field:      #F4F4F5;
+  /* 聚焦字段底：比字段底亮一档，刻意不用纯白（纯白在浅色主题里偏刺眼）。 */
+  --background-field-focus:#FAFAFB;
   --background-hover:      #F0F0F2;
   --background-active:     #E8E8EB;   /* 按下态底（中性控件） */
   --background-selected:   #ECF3F3;   /* 选中底 = 品牌浅底 */
@@ -178,8 +180,11 @@
 
   /* ===== 动效 Motion =====
      时长：120 微反馈（按下/悬停）· 200 常规（面板展开/淡入）· 320 大位移（抽屉/页面）
-     缓动：standard 通用 · decelerate 进场（快起慢停）· accelerate 退场（慢起快走） */
+     缓动：standard 通用 · decelerate 进场（快起慢停）· accelerate 退场（慢起快走）
+     另有一档**循环时长**：循环型指示（加载）按"跑完一周"计时，不属于位移分档，
+     因此不随 quiet / rich 变档，也不参与进退场缓动的选择。 */
   --duration-fast:120ms; --duration-base:200ms; --duration-slow:320ms;
+  --duration-loop:1600ms;
   --easing:cubic-bezier(.4,0,.2,1);
   --easing-standard:cubic-bezier(.4,0,.2,1);
   /* 动效强度三档（产品级偏好，非系统）：
@@ -245,6 +250,8 @@
   --background-content:    #191816;
   --background-surface:    #1F1E1A;
   --background-field:      #262420;
+  /* 聚焦字段底：暗色下「亮一档」是更亮的深色，取字段底与 hover 底之间的第一档 */
+  --background-field-focus:#2E2B26;
   --background-hover:      #2C2A26;
   --background-active:     #333129;
   --background-selected:   #17292A;   /* 品牌浅底（保留青调，略暖） */
@@ -313,6 +320,37 @@
      更近的祖先（.motion-rich 等）会直接覆盖它。必须落到每个元素上，!important 才能压住局部类。 */
   *, *::before, *::after {
     --duration-fast:0.01ms !important; --duration-base:0.01ms !important; --duration-slow:0.01ms !important;
+  }
+  /* 无限循环的旋转与一次性抖动都不能只靠时长归零：时长极小照样在闪，必须直接停掉。
+     选择器要与设计类同权重并加 !important：媒体查询在文件前面，同权重时会被后面的设计类覆盖。 */
+  .celadon .spinner { animation: none !important; }
+  .celadon .is-shake { animation: none !important; }
+}
+
+@keyframes spinner-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* 错误抖动的横向位移：两次来回，幅度取间距刻度，只动 transform。
+   用 var() 而不是字面量，幅度随间距刻度统一（F4 之外唯一的量是位移，故不另立 token）。 */
+@keyframes shake-invalid {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(calc(-1 * var(--spacing-4)));
+  }
+
+  50% {
+    transform: translateX(var(--spacing-4));
+  }
+
+  75% {
+    transform: translateX(calc(-1 * var(--spacing-4)));
   }
 }
 
@@ -384,10 +422,21 @@
      字号取正文档：输入值是内容，不是说明文字；正文行高 1.7 加 4 的块向内距与 1 的边框，
      控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。 */
   .input       { background: var(--background-field); border: 1px solid var(--border-control); color: var(--text-primary); padding-block: var(--spacing-4); padding-inline: var(--spacing-8); border-radius: var(--radius-medium); font: inherit; font-size: var(--font-size-body);
+    /* 悬停与焦点的过渡照 F4 的场景表：两个场景都取 --duration-fast 与 --easing-standard。
+       减动效偏好下时长 token 归零，这里无需另写分支。 */
+    transition: border-color var(--duration-fast) var(--easing-standard),
+      box-shadow var(--duration-fast) var(--easing-standard),
+      background-color var(--duration-fast) var(--easing-standard);
     &::placeholder { color: var(--text-placeholder); }                       /* 空态：占位 */
     &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover); }
-    /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1） */
-    &:focus, &.is-focus { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); outline: none; }
+    /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1）。
+       底色同时提亮一档，让"正在输入"这件事在整块字段上看得出来；底色跟着上面那条 background-color 过渡走。
+       聚焦优先于悬停：带上悬停的变体并放在悬停规则之后，否则鼠标停在已聚焦的字段上，
+       边框会被悬停色盖掉，出现"聚焦了却还留一条悬停线"。 */
+    &:focus, &.is-focus,
+    &:not(:disabled):focus,
+    &.is-hover.is-focus { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); outline: none;
+      background: var(--background-field-focus); }
     &:read-only, &.is-readonly { background: var(--background-readonly); color: var(--text-secondary); }
     /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
     &.is-strong { border-color: var(--border-control-strong);
@@ -405,8 +454,28 @@
     &:disabled, &.is-disabled { background: var(--background-disabled); color: var(--text-disabled);
       border-color: var(--border-disabled); cursor: not-allowed;
       &::placeholder { color: var(--text-disabled); } }
-    /* 加载态：值仍然可读，右侧指示位由调用方放指示器 */
-    &.is-loading { color: var(--text-secondary); } }
+    /* 加载态：只把指针换成进行中，进程指示由右侧槽位的四分之一圆环承担（见 input.tsx）。
+       不动文字颜色、不动底色、不动裁剪，值始终按正文呈现。 */
+    &.is-loading { cursor: progress; } }
+  /* 旋转指示器：按钮与输入框的加载态共用（形状见 `components/base/spinner`）。
+     **两瓣四分之一弧，互成 180°**，每瓣头端圆帽、尾端收尖：一瓣读不出圆，两瓣既读得出圆，
+     又留出两段空隙看得出在转。用内联 SVG 的填充路径画：边框的端头由斜接决定，做不出圆帽，
+     因此这里只管尺寸、颜色与旋转。
+     一周时长默认取 --duration-loop，并允许逐实例用 --spinner-duration 覆盖。
+     减动效偏好下由文件上方的媒体查询停掉。 */
+  .spinner {
+    flex: none;
+    display: block;
+    inline-size: var(--spacing-16);
+    block-size: var(--spacing-16);
+    fill: currentColor;
+    animation: spinner-spin var(--spinner-duration, var(--duration-loop)) linear infinite;
+  }
+  /* 错误抖动：一次性反馈，**默认不加**，由调用方在判定错误时显式挂上。
+     时长与缓动照 F4 的 shake 场景，只在错误字段上叠加，不改其它状态。 */
+  .is-shake {
+    animation: shake-invalid var(--duration-slow) var(--easing-standard) both;
+  }
   .focusable:focus-visible { box-shadow: var(--focus-ring); outline: none; }
   .scrim       { background: var(--scrim); }
 }

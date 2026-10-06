@@ -67,19 +67,26 @@ IBM Design Language 是 12 / 14 / 16 / 20 / 24，GitHub Primer 相邻档至少�
 
 **控件状态的优先级**（`design/tokens.less` 的 `.input` 里逐条写明，这里是结论）：
 
-| 状态 | 边框 | 描边 |
-| --- | --- | --- |
-| 默认 | `--border-control` | 无 |
-| 悬停 | `--border-hover` | 无 |
-| 聚焦 | `--brand` | `--brand`，1px |
-| 错误 | `--danger` | 无 |
-| **错误 + 悬停** | `--danger`（**悬停不改变错误字段的边框**） | 无 |
-| **错误 + 聚焦** | `--danger` | `--danger`，1px（**不用品牌色**） |
-| 错误 + 禁用 | `--border-disabled`（禁用优先于错误） | 无 |
-| 禁用 | `--border-disabled` | 无 |
+| 状态 | 边框 | 描边 | 底色 |
+| --- | --- | --- | --- |
+| 默认 | `--border-control` | 无 | `--background-field` |
+| 悬停 | `--border-hover` | 无 | `--background-field` |
+| 聚焦 | `--brand` | `--brand`，1px | `--background-field-focus`（比字段底亮一档，刻意不用纯白） |
+| 错误 | `--danger` | 无 | `--background-field` |
+| **错误 + 悬停** | `--danger`（**悬停不改变错误字段的边框**） | 无 | `--background-field` |
+| **错误 + 聚焦** | `--danger` | `--danger`，1px（**不用品牌色**） | `--background-field-focus` |
+| 错误 + 禁用 | `--border-disabled`（禁用优先于错误） | 无 | `--background-disabled` |
+| 禁用 | `--border-disabled` | 无 | `--background-disabled` |
+| 只读 | `--border-control` | 无 | `--background-readonly`（比字段底深一档，聚焦也不改） |
+| 加载 | `--border-control` | 无；右侧槽位放两瓣圆环（`.spinner`），值仍按正文呈现，指针为 `progress` | `--background-field` |
 
 错误是**持续状态**：只要错误没有解除，悬停与聚焦都不得改变它的边框色，聚焦描边也必须取危险色。
 诊断顺序不能含糊，否则会出现"鼠标一进来红边消失、聚焦时红边配品牌描边"这类自相矛盾的画面。
+
+加载态**必须有一个看得见的进程指示器**，只把文字色降一档不算。
+输入框用**四分之一圆环**，放在右侧槽位并让出 `--spacing-32` 内距，值始终按正文呈现；
+按钮用同一个圆环。两者一周的时长都取 `--duration-loop`。
+**加载态不得改变字段的底色、文字色与裁剪**：指示器是叠加物，不是重新着色。
 
 ## 3. 行宽
 

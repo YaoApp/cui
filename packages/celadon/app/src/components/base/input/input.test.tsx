@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Input } from '@/components/base/input'
@@ -32,5 +32,22 @@ describe('Input', () => {
   it('does not accept input when disabled', () => {
     render(<Input id="account" label="账号" value="" onChange={() => {}} disabled />)
     expect(screen.getByLabelText('账号')).toBeDisabled()
+  })
+
+  /* 抖动是可选的一次性反馈：错误在身也不许自己抖，只有调用方明确要求才抖 */
+  it('keeps the shake off unless the caller asks for it', () => {
+    render(<Input id="account" label="账号" value="" onChange={() => {}} error="必填" />)
+    expect(screen.getByLabelText('账号')).not.toHaveClass('is-shake')
+  })
+
+  /* 触发值到达时挂上设计类。连续错误的重播属于动画行为，由浏览器层断言（jsdom 不跑动画） */
+  it('applies the shake class when the caller triggers it', async () => {
+    const props = { id: 'account', label: '账号', value: '', onChange: () => {}, error: '必填' }
+    const { rerender } = render(<Input {...props} shake={1} />)
+    const control = screen.getByLabelText('账号')
+    await waitFor(() => expect(control).toHaveClass('is-shake'))
+
+    rerender(<Input {...props} shake={2} />)
+    await waitFor(() => expect(control).toHaveClass('is-shake'))
   })
 })
