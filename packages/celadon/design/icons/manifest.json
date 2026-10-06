@@ -72,6 +72,24 @@
     "src": "chevron-up"
   },
   {
+    "id": "i-globe",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "globe"
+  },
+  {
+    "id": "i-sun",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "sun"
+  },
+  {
+    "id": "i-moon",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "moon"
+  },
+  {
     "id": "i-down",
     "lib": "lucide",
     "cat": "action",

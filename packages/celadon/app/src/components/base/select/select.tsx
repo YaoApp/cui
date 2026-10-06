@@ -51,6 +51,12 @@ type SelectBaseProps = {
   noMatchText?: ReactNode
   /** 自定义过滤规则；不给则用「标签文本不区分大小写包含查询」 */
   filterOption?: (option: SelectOption, query: string) => boolean
+  /** 形态：`field` 是字段外观（默认）；`plain` 是纯文字档，不画字段底与边框，用于标题栏与工具条（设计类 `.input--plain`）。 */
+  variant?: 'field' | 'plain'
+  /** 触发器图标的位置：`start` 在值之前，`end` 在值之后。纯文字档常放在末尾，由图标承担提示。 */
+  iconPosition?: 'start' | 'end'
+  /** 是否显示右侧的下拉指示器。纯文字档配末尾图标时可关掉，避免指示器与图标重复。 */
+  indicator?: boolean
   className?: string
 }
 
@@ -81,6 +87,9 @@ export function Select(props: SelectProps) {
     searchLabel,
     noMatchText,
     filterOption,
+    variant = 'field',
+    iconPosition = 'start',
+    indicator = true,
     className,
   } = props
   const [query, setQuery] = useState('')
@@ -90,6 +99,7 @@ export function Select(props: SelectProps) {
     'select__trigger',
     /* 触发器档：点击不加焦点环，只有键盘聚焦才加（与按钮同一规则，见 tokens.less 的 .input--trigger） */
     'input--trigger',
+    variant === 'plain' ? 'input--plain' : null,
     size === 'small' ? 'input--small' : null,
     size === 'large' ? 'input--large' : null,
     error ? 'is-error' : null,
@@ -143,13 +153,18 @@ export function Select(props: SelectProps) {
   const content = (
     <>
       <BaseSelect.Trigger id={id} className={classes} aria-label={ariaLabel}>
-        {icon ? (
+        {icon && iconPosition === 'start' ? (
           <span className="select__lead" aria-hidden="true">
             {icon}
           </span>
         ) : null}
         <BaseSelect.Value className="select__value" placeholder={placeholder} />
-        <Icon name="i-down" size={16} className="select-icon" />
+        {icon && iconPosition === 'end' ? (
+          <span className="select__lead" aria-hidden="true">
+            {icon}
+          </span>
+        ) : null}
+        {indicator ? <Icon name="i-down" size={16} className="select-icon" /> : null}
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         {/* 间距归排布者：弹层与触发器的 4px 间隙由定位器给，组件样式里不带外边距（layout.md 第 3 节） */}

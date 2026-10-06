@@ -25,6 +25,9 @@
 <symbol id="i-left" viewBox="0 0 24 24" data-src="lucide:chevron-left"><path d="m15 18-6-6 6-6" /></symbol>
 <symbol id="i-right" viewBox="0 0 24 24" data-src="lucide:chevron-right"><path d="m9 18 6-6-6-6" /></symbol>
 <symbol id="i-up" viewBox="0 0 24 24" data-src="lucide:chevron-up"><path d="m18 15-6-6-6 6" /></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24" data-src="lucide:globe"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24" data-src="lucide:sun"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24" data-src="lucide:moon"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></symbol>
 <symbol id="i-down" viewBox="0 0 24 24" data-src="lucide:chevron-down"><path d="m6 9 6 6 6-6" /></symbol>
 <symbol id="i-collapse" viewBox="0 0 24 24" data-src="lucide:panel-left-close"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M9 3v18" /> <path d="m16 15-3-3 3-3" /></symbol>
 <symbol id="i-dots" viewBox="0 0 24 24" data-src="lucide:ellipsis"><circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" /></symbol>

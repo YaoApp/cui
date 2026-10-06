@@ -38,6 +38,13 @@ export function BasePage() {
   const [theme, setTheme] = useState('light')
   const [segmentedTheme, setSegmentedTheme] = useState('system')
   const [segmentedRange, setSegmentedRange] = useState('week')
+  /* 选择器样例各自的选中值：样例要真的能选，不能挂空回调 */
+  const [placeholderTheme, setPlaceholderTheme] = useState('')
+  const [iconChoice, setIconChoice] = useState('reading')
+  const [richChoice, setRichChoice] = useState('reading')
+  const [trailingChoice, setTrailingChoice] = useState('compact')
+  const [groupChoice, setGroupChoice] = useState('light')
+  const [longChoice, setLongChoice] = useState('item-0')
   /* 错误抖动的重放计数：同名动画不会自行重跑，靠 key 让节点重挂载 */
   const [shakeTick, setShakeTick] = useState(0)
   /* 主题与语言用真实的偏好源，不自造局部状态（与首页同一套） */
@@ -367,8 +374,8 @@ export function BasePage() {
         <div className="base-row">
           <Select
             aria-label="select placeholder"
-            value=""
-            onValueChange={() => {}}
+            value={placeholderTheme}
+            onValueChange={setPlaceholderTheme}
             options={selectOptions}
             placeholder={t('base.select.placeholder')}
           />
@@ -379,8 +386,51 @@ export function BasePage() {
             options={selectOptions}
             icon={<Icon name="i-search" />}
           />
-          <Select aria-label="select error" value={theme} onValueChange={() => {}} options={selectOptions} error />
+          <Select aria-label="select error" value={theme} onValueChange={setTheme} options={selectOptions} error />
           <Select aria-label="select disabled" value={theme} onValueChange={() => {}} options={selectOptions} disabled />
+        </div>
+
+        {/* 形态：字段档与纯文字档对照。纯文字档不画字段底与边框，用于标题栏与工具条；
+            末尾图标那一档关掉指示器，由图标承担提示（与设计草图里的语言选择同形）。 */}
+        <h3 className="base-subgroup__title">{t('base.sub.variants')}</h3>
+        <div className="base-row">
+          <Select aria-label="variant field" value={theme} onValueChange={setTheme} options={selectOptions} />
+          <Select variant="plain" aria-label="variant plain" value={theme} onValueChange={setTheme} options={selectOptions} />
+          <Select
+            variant="plain"
+            iconPosition="end"
+            indicator={false}
+            aria-label="variant plain icon"
+            value={theme}
+            onValueChange={setTheme}
+            options={selectOptions}
+            icon={<Icon name="i-globe" />}
+          />
+          <Select
+            variant="plain"
+            state="hover"
+            aria-label="variant plain hover"
+            value={theme}
+            onValueChange={() => {}}
+            options={selectOptions}
+          />
+          <Select
+            variant="plain"
+            state="focus"
+            aria-label="variant plain focus"
+            value={theme}
+            onValueChange={() => {}}
+            options={selectOptions}
+          />
+          <Select
+            variant="plain"
+            size="small"
+            aria-label="variant plain small"
+            value={theme}
+            onValueChange={setTheme}
+            options={selectOptions}
+          />
+          <Select variant="plain" disabled aria-label="variant plain disabled" value={theme} onValueChange={() => {}} options={selectOptions} />
         </div>
 
         <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
@@ -400,25 +450,30 @@ export function BasePage() {
         <h3 className="base-subgroup__title">{t('base.sub.options')}</h3>
         <div className="base-row">
           <Select aria-label="select plain options" value={theme} onValueChange={setTheme} options={selectOptions} />
-          <Select aria-label="select icon options" value="reading" onValueChange={() => {}} options={iconOptions} />
+          <Select aria-label="select icon options" value={iconChoice} onValueChange={setIconChoice} options={iconOptions} />
           <Select
             aria-label="select rich options"
-            value="reading"
-            onValueChange={() => {}}
+            value={richChoice}
+            onValueChange={setRichChoice}
             options={richOptions}
             icon={<Icon name="i-book" />}
           />
-          <Select aria-label="select trailing options" value="compact" onValueChange={() => {}} options={trailingOptions} />
+          <Select
+            aria-label="select trailing options"
+            value={trailingChoice}
+            onValueChange={setTrailingChoice}
+            options={trailingOptions}
+          />
         </div>
 
         <h3 className="base-subgroup__title">{t('base.sub.groups')}</h3>
         <div className="base-row">
-          <Select aria-label="select groups" value="light" onValueChange={() => {}} groups={groupedOptions} />
+          <Select aria-label="select groups" value={groupChoice} onValueChange={setGroupChoice} groups={groupedOptions} />
         </div>
 
         <h3 className="base-subgroup__title">{t('base.sub.longList')}</h3>
         <div className="base-row">
-          <Select aria-label="select long list" value="item-0" onValueChange={() => {}} options={longOptions} />
+          <Select aria-label="select long list" value={longChoice} onValueChange={setLongChoice} options={longOptions} />
         </div>
 
         <h3 className="base-subgroup__title">{t('base.sub.multiple')}</h3>

@@ -585,6 +585,18 @@
   .input--large { min-block-size: calc(var(--spacing-32) + var(--spacing-8)); padding-inline: var(--spacing-12);
     line-height: var(--line-height-control); font-size: var(--font-size-body-lg);
     border-radius: var(--radius-large); }
+  /* 纯文字档：用在标题栏与工具条的选择器，不画字段底与边框，只有文字与图标。
+     悬停给一圈浅底（因此保留行内距与圆角），键盘聚焦才加环（触发器档已定，这里把它的底色与边框还原成透明）。
+     选择器写成 `.input.input--plain`：主题容器下基础规则是 `[data-theme] .celadon .input`，权重更高，
+     只写 `.input--plain` 压不住。错误档不适用于纯文字档：错误要靠文案与图标表达，不要给无框控件硬加红边。 */
+  .input.input--plain { background: transparent; border-color: transparent; padding-inline: var(--spacing-8);
+    border-radius: var(--radius-small); }
+  .input.input--plain:not(:disabled):hover, .input.input--plain.is-hover { background: var(--background-hover); border-color: transparent; }
+  .input.input--plain:disabled, .input.input--plain.is-disabled { background: transparent; }
+  .input.input--plain.input--trigger:not(:disabled):focus:not(:focus-visible) { background: transparent; border-color: transparent; }
+  .input.input--plain.input--trigger:not(:disabled):focus:not(:focus-visible):hover { background: var(--background-hover); }
+  /* 无框档的图标取二级文字，图标与文字间距取固定的 --spacing-4（由触发器自身的 gap 给） */
+  .input--plain .select-icon, .input--plain .select__lead { color: var(--text-secondary); }
   /* 选择器：触发器直接用上面的 `.input`（同一套字段状态与圆角），这里给弹层与选项。
      弹层是浮层，圆角取弹层档（--radius-medium），阴影取悬浮档；选项与字段同字号，
      高亮用中性悬停底，选中用品牌浅底加品牌文字，禁用沿用禁用字色。

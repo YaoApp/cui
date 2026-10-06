@@ -420,6 +420,38 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(segmented.悬停.选中底).toBe(hexToRgb(segmented.悬停底token))
   expect(segmented.聚焦.选中环).not.toBe('none')
 
+  /* 纯文字档：不画字段底与边框，悬停给浅底，末尾图标那一档不带指示器；
+     第一个演示（占位档）必须真的能选，不能挂空回调。 */
+  const plainRest = await page.locator('[aria-label="variant plain"]').evaluate((el) => ({
+    底: getComputedStyle(el).backgroundColor,
+    框: getComputedStyle(el).borderTopColor,
+  }))
+  expect(plainRest.底).toBe('rgba(0, 0, 0, 0)')
+  expect(plainRest.框).toBe('rgba(0, 0, 0, 0)')
+  await page.locator('[aria-label="variant plain"]').hover()
+  await page.waitForTimeout(200)
+  expect(
+    await page.locator('[aria-label="variant plain"]').evaluate((el) => getComputedStyle(el).backgroundColor),
+  ).not.toBe('rgba(0, 0, 0, 0)')
+  await page.mouse.move(0, 0)
+  expect(
+    await page
+      .locator('[aria-label="variant plain icon"]')
+      .evaluate((el) => el.querySelector('svg use')?.getAttribute('href') ?? ''),
+  ).toBe('#i-globe')
+  expect(
+    await page.locator('[aria-label="variant plain icon"]').evaluate((el) => el.querySelectorAll('.select-icon').length),
+  ).toBe(0)
+
+  const placeholderSample = page.getByRole('combobox', { name: 'select placeholder', exact: true })
+  expect((await placeholderSample.textContent())?.trim()).not.toBe('Dark')
+  await placeholderSample.click()
+  await page.waitForSelector('.select-popup:visible')
+  await page.waitForTimeout(300)
+  await page.locator('.select-popup:visible [role=option]', { hasText: 'Dark' }).first().click()
+  await page.waitForTimeout(300)
+  expect((await placeholderSample.textContent())?.trim()).toBe('Dark')
+
   /* 空态：没有选项时弹层给说明，触发器显示占位文字 */
   expect(await selectTrigger('select empty').textContent()).not.toBe('')
   await selectTrigger('select empty').click()
