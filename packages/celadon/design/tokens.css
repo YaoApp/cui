@@ -1027,7 +1027,11 @@
 .celadon,
 [data-theme] .celadon {
   /* 方框：中档 16（图标档里最小的一档），大档 20 = 16 + 4，都由间距刻度推出。
-     圆角取最小档，方框的形状不跟控件尺寸档走。 */
+     圆角取最小档，方框的形状不跟控件尺寸档走。
+     多行标签时方框要与**首行**对齐（业内做法：文字折行落到方框下方，控件与首行文字对齐），
+     所以它的视觉位置按首行行盒算：首行的内距（4）加上行盒与方框的高差的一半，落在首行的垂直中线上。
+     行高取 `--line-height-control`（24），行盒每侧因此有 5 的天然空隙，加上标签与表面的内距，
+     上下留白一定大于行间距，不会出现"行间距比上下边距还大"。 */
   /* 静态态：`state` 的三档挂在**整行容器**上（悬停画整行、错误与聚焦落在方框上）。
      清单页靠这几条并排展示多态；真实交互仍由伪类驱动。
      静态聚焦的环沿真实聚焦的规则：未选中取品牌环，选中态取反色环。 */
@@ -1056,15 +1060,17 @@
 }
 .celadon .checkbox__box,
 [data-theme] .celadon .checkbox__box {
+  --checkbox-box-size: var(--spacing-16);
   position: relative;
   z-index: 1;
+  inset-block-start: calc(var(--spacing-4) + (var(--line-height-control) - var(--checkbox-box-size)) / 2);
   display: inline-flex;
   flex: none;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  inline-size: var(--spacing-16);
-  block-size: var(--spacing-16);
+  inline-size: var(--checkbox-box-size);
+  block-size: var(--checkbox-box-size);
   background: transparent;
   border: var(--border-width) solid var(--border-control-strong);
   border-radius: var(--radius-xs);
@@ -1155,7 +1161,7 @@
 [data-theme] .celadon .checkbox__row {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-8);
   inline-size: fit-content;
   min-block-size: calc(var(--spacing-24) + var(--spacing-8));
@@ -1165,7 +1171,7 @@
   content: '';
   position: absolute;
   z-index: 0;
-  inset-block: 0;
+  inset-block: calc(-1 * var(--spacing-4));
   inset-inline: calc(-1 * var(--spacing-8));
   border-radius: var(--radius-small);
   background: transparent;
@@ -1180,9 +1186,11 @@
 [data-theme] .celadon .checkbox__label {
   position: relative;
   z-index: 1;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   min-block-size: calc(var(--spacing-24) + var(--spacing-8));
+  padding-block: var(--spacing-4);
   color: var(--text-secondary);
   font-size: var(--font-size-body);
   line-height: var(--line-height-control);
@@ -1228,8 +1236,7 @@
 }
 .celadon .checkbox--large .checkbox__box,
 [data-theme] .celadon .checkbox--large .checkbox__box {
-  inline-size: calc(var(--spacing-16) + var(--spacing-4));
-  block-size: calc(var(--spacing-16) + var(--spacing-4));
+  --checkbox-box-size: calc(var(--spacing-16) + var(--spacing-4));
 }
 .celadon .checkbox--large .checkbox__label,
 [data-theme] .celadon .checkbox--large .checkbox__label {

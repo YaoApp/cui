@@ -954,7 +954,7 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     /* 悬停画在**表面**上：整行一层浅底，方框的底与边界一律不动。
        这样"选中"（反色填充）与"悬停"（表面浅底）各占一个通道，选中之后也表达得出悬停 */
     const hoverTarget = page.locator('.checkbox:has(#demo-check-default)')
-    /* 表面画在行的伪元素上：读数取伪元素，另外核它向两侧各让出的呼吸位（不贴边） */
+    /* 表面画在行的伪元素上：读数取伪元素，另外核它四周让出的呼吸位（不贴边） */
     const rowPaint = (id: string) =>
       page.locator(`.checkbox:has(#${id}) .checkbox__row`).evaluate((el) => {
         const cs = getComputedStyle(el, '::before')
@@ -962,6 +962,8 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
           底: cs.backgroundColor,
           左: cs.insetInlineStart || cs.left,
           右: cs.insetInlineEnd || cs.right,
+          上: cs.insetBlockStart || cs.top,
+          下: cs.insetBlockEnd || cs.bottom,
         }
       })
     await page.mouse.move(2, 2)
@@ -978,15 +980,41 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     const hoverLabel = await hoverTarget.locator('.checkbox__label').evaluate((el) => getComputedStyle(el).color)
     expect(hoverRow.底).toBe(hexToRgb(tokens.悬停底))
     expect(hoverRow.底).not.toBe(restRow.底)
-    /* 内容不贴边：表面向两侧各让出 8（列表项的内距档），而方框与标签的位置不动 */
+    /* 内容不贴边：表面向两侧各让出 8（列表项的内距档）、上下各让出 4，而方框与标签的位置不动 */
     expect(hoverRow.左).toBe('-8px')
     expect(hoverRow.右).toBe('-8px')
+    expect(hoverRow.上).toBe('-4px')
+    expect(hoverRow.下).toBe('-4px')
     expect(hoverBox.左).toBe(restBox.左)
     expect(hoverBox.底).toBe(restBox.底)
     expect(hoverBox.框).toBe(restBox.框)
     expect(hoverLabel).toBe(hexToRgb(tokens.主文字))
     expect(hoverLabel).not.toBe(restLabel)
     expect(contrast(hoverLabel, hexToRgb(tokens.内容底))).toBeGreaterThanOrEqual(4.5)
+
+    /* 多行标签：方框与**首行**对齐（不是整块居中），文字折行落到方框下方；
+       上下留白因此一定大于行间距：表面 4 + 标签内距 4 + 行盒天然空隙 5 = 13，行间距 10 */
+    const multiline = await page.locator('.checkbox:has(#demo-check-long)').evaluate((el) => {
+      const row = el.querySelector('.checkbox__row') as HTMLElement
+      const box = el.querySelector('.checkbox__box') as HTMLElement
+      const label = el.querySelector('.checkbox__label') as HTMLElement
+      const cs = getComputedStyle(label)
+      const lineHeight = parseFloat(cs.lineHeight)
+      const fontSize = parseFloat(cs.fontSize)
+      return {
+        行高: row.offsetHeight,
+        行数: Math.round(label.offsetHeight / lineHeight),
+        方框中心: box.getBoundingClientRect().top + box.offsetHeight / 2 - row.getBoundingClientRect().top,
+        首行中心: parseFloat(cs.paddingBlockStart) + lineHeight / 2,
+        行块中心: row.offsetHeight / 2,
+        上下留白: parseFloat(cs.paddingBlockStart) + 4 + (lineHeight - fontSize) / 2,
+        行间距: lineHeight - fontSize,
+      }
+    })
+    expect(multiline.行数).toBeGreaterThan(1)
+    expect(multiline.方框中心).toBe(multiline.首行中心)
+    expect(multiline.方框中心).not.toBe(multiline.行块中心)
+    expect(multiline.上下留白).toBeGreaterThan(multiline.行间距)
 
     /* 已选中：同样只有表面变，方框的填充与边界不动 */
     await page.mouse.move(2, 2)
@@ -1024,6 +1052,8 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
       底: 'rgba(0, 0, 0, 0)',
       左: '-8px',
       右: '-8px',
+      上: '-4px',
+      下: '-4px',
     })
     expect(
       await page.locator('.checkbox:has(#demo-check-readonly) .checkbox__label').evaluate((el) => getComputedStyle(el).color),
