@@ -63,9 +63,10 @@ test('lists the five groups and their states', async ({ page }) => {
   ])
   expect(Math.abs(hintGap - errorGap)).toBeLessThanOrEqual(1)
 
-  /* 按钮：反色与常规档的计算底色必须不同，加载态禁用并带 aria-busy，整宽档比常规档宽 */
-  const inverse = page.getByRole('button', { name: 'inverse' })
-  const soft = page.getByRole('button', { name: 'soft' })
+  /* 按钮：反色与常规档的计算底色必须不同，加载态禁用并带 aria-busy，整宽档比常规档宽。
+     名称用整串比（exact）：否则「inverse」会同时命中「inverse · hover」这类样例。 */
+  const inverse = page.getByRole('button', { name: 'inverse', exact: true })
+  const soft = page.getByRole('button', { name: 'soft', exact: true })
   await expect(inverse).toBeVisible()
   const [inverseBg, softBg] = await Promise.all([
     inverse.evaluate((el) => getComputedStyle(el).backgroundColor),
@@ -73,14 +74,82 @@ test('lists the five groups and their states', async ({ page }) => {
   ])
   expect(inverseBg).not.toBe(softBg)
 
-  const loading = page.getByRole('button', { name: 'loading' })
+  const loading = page.getByRole('button', { name: 'loading', exact: true })
   await expect(loading).toBeDisabled()
   await expect(loading).toHaveAttribute('aria-busy', 'true')
   await expect(loading).toHaveClass(/is-loading/)
+  await expect(loading.locator('.spinner')).toHaveCount(1)
 
   const block = page.getByRole('button', { name: '整宽（表单主操作）' })
   const [blockBox, inverseBox] = await Promise.all([block.boundingBox(), inverse.boundingBox()])
   expect(blockBox!.width).toBeGreaterThan(inverseBox!.width)
+
+  /* 状态齐：每个样式一行四组（默认 · 悬停 · 按下 · 聚焦），逐样式核对。
+     悬停、按下、聚焦都必须与默认不同，按下还要与悬停不同，且按下是规范 F4 的 scale(.94)；
+     取值里因此带上 transform，否则"只差缩放"的变体会被误判成与悬停相同。 */
+  const paintOfName = (name: string) =>
+    page.getByRole('button', { name, exact: true }).evaluate((el) => {
+      const cs = getComputedStyle(el)
+      return [cs.backgroundColor, cs.color, cs.borderTopColor, cs.boxShadow, cs.transform].join('|')
+    })
+  const variants = ['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const
+  for (const variant of variants) {
+    const idle = await paintOfName(`${variant} · default`)
+    const hover = await paintOfName(`${variant} · hover`)
+    expect(hover).not.toBe(idle)
+    const active = await paintOfName(`${variant} · active`)
+    expect(active).not.toBe(idle)
+    expect(active).not.toBe(hover)
+    expect(active).toContain('0.94')
+    expect(
+      await page
+        .getByRole('button', { name: `${variant} · focus`, exact: true })
+        .evaluate((el) => getComputedStyle(el).boxShadow),
+    ).not.toBe('none')
+  }
+  /* 非品牌样式的聚焦环必须是自己色系，不能借用品牌色环 */
+  const brandRing = await paintOfName('solid · focus')
+  for (const variant of ['warn', 'success', 'danger'] as const) {
+    expect(await paintOfName(`${variant} · focus`)).not.toBe(brandRing)
+  }
+  await expect(page.getByRole('button', { name: 'disabled', exact: true })).toBeDisabled()
+
+  /* 三档尺寸：高度分别等于 24 / 32 / 40；每档同一行里七个变体高度一致 */
+  const heightOf = (name: string) =>
+    page.getByRole('button', { name, exact: true }).evaluate((el) => Math.round(el.getBoundingClientRect().height))
+  for (const [label, height] of [
+    ['small 24', 24],
+    ['medium 32', 32],
+    ['large 40', 40],
+  ] as const) {
+    for (const variant of ['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const) {
+      expect(await heightOf(`${label} · ${variant}`)).toBe(height)
+      expect(await heightOf(`pill ${label} · ${variant}`)).toBe(height)
+    }
+  }
+
+  /* 圆角按规范 F3：**按档位取同名 token**（小 --radius-small · 中 --radius-medium · 大 --radius-large），胶囊取 --radius-pill */
+  const radiusOf = (name: string) =>
+    page.getByRole('button', { name, exact: true }).evaluate((el) => getComputedStyle(el).borderTopLeftRadius)
+  const radiusToken = await page.evaluate(() => {
+    const probe = getComputedStyle(document.querySelector('.celadon') ?? document.documentElement)
+    return {
+      small: probe.getPropertyValue('--radius-small').trim(),
+      medium: probe.getPropertyValue('--radius-medium').trim(),
+      large: probe.getPropertyValue('--radius-large').trim(),
+      pill: probe.getPropertyValue('--radius-pill').trim(),
+    }
+  })
+  expect(await radiusOf('small 24 · solid')).toBe(radiusToken.small)
+  expect(await radiusOf('medium 32 · solid')).toBe(radiusToken.medium)
+  expect(await radiusOf('large 40 · solid')).toBe(radiusToken.large)
+  for (const label of ['small 24', 'medium 32', 'large 40'] as const) {
+    expect(await radiusOf(`pill ${label} · solid`)).toBe(radiusToken.pill)
+  }
+  /* 输入框属中档，与中档按钮同一个 token */
+  expect(await page.locator('#demo-state-default').evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe(
+    radiusToken.medium,
+  )
 
   /* 图标与品牌：四档图标都真的画出来（有尺寸），品牌标识有可访问名 */
   const icons = page.locator('.base-row svg')

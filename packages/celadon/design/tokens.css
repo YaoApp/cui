@@ -48,6 +48,17 @@
   /* 聚焦字段底：比字段底亮一档，刻意不用纯白（纯白在浅色主题里偏刺眼）。 */
   --background-field-focus: #FAFAFB;
   --background-hover: #F0F0F2;
+  /* 悬停底一律**定义成 token**，不在样式里就地算色。三族取同族浅底与内容底的四成对六成，
+     是淡影档，专门给描边式按钮的悬停；品牌档的浅底按钮仍用更深一档（它是浅底到浅底，需要更大步子）。 */
+  --brand-soft-hover: #E4EFEF;
+  --success-soft-hover: #F0F9F3;
+  --danger-soft-hover: #FDF7F7;
+  --warm-soft-hover: #FCF9F3;
+  /* 反色档（暗底按钮）的底色与文字：底色与文字各有名字，不再把 --text-* 当填充用。
+     常态底取原型里主操作的深色；悬停底是同一中性色系的一小步，与各语义族取档方式一致。 */
+  --background-inverse: #14120E;
+  --background-inverse-hover: #2A2723;
+  --text-inverse: #FAFAFB;
   --background-active: #E8E8EB;
   /* 按下态底（中性控件） */
   --background-selected: #ECF3F3;
@@ -109,6 +120,13 @@
   --focus-ring-offset: 2px;
   /* ring 与控件留 2px 间隙 */
   --focus-ring: 0 0 0 var(--focus-ring-offset) var(--background-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
+  /* 各色系的焦点环：与所在按钮同色系。语义色的按钮聚焦时不该出现品牌色环。
+     只声明一次，环色与间隙引用的都是随主题变化的 token，浅暗两套自动成立。 */
+  --focus-ring-success: 0 0 0 var(--focus-ring-offset) var(--background-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--success);
+  --focus-ring-danger: 0 0 0 var(--focus-ring-offset) var(--background-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--danger);
+  --focus-ring-warm: 0 0 0 var(--focus-ring-offset) var(--background-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--warm);
+  /* 反色档的焦点环取本族的深色；它是中性族，不该出现品牌色环。 */
+  --focus-ring-inverse: 0 0 0 var(--focus-ring-offset) var(--background-content), 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--background-inverse);
   --background-disabled: #F0F0F2;
   /* 命名与 background-* 家族一致 */
   --text-disabled: #A8A69E;
@@ -176,6 +194,11 @@
   /* 界面里的紧凑行高（数值与卡片）*/
   --line-height-title: 1.6;
   /* 大标题行高（多行标题用，比正文松、比 tight 透气）*/
+  /* 控件行高取**整数像素**：倍率行高（1.7 × 14px = 23.8px）会把文字盒放在小数位置，
+     重绘或 transform 时字形会被重新吸附到整像素，观感是文字跳位。控件高度本就由间距刻度定，
+     行高整数不改变版面。小档用于 24 高的按钮，标准档用于 32 与 40。 */
+  --line-height-control: 24px;
+  --line-height-control-small: 20px;
   --letter-spacing-latin: -0.01em;
   /* 仅拉丁可收紧 */
   --letter-spacing-cjk: 0;
@@ -335,6 +358,16 @@
   /* 聚焦字段底：暗色下「亮一档」是更亮的深色，取字段底与 hover 底之间的第一档 */
   --background-field-focus: #2E2B26;
   --background-hover: #2C2A26;
+  /* 悬停底：暗色**直接用整块同族浅底**。暗色的同族浅底本就贴近内容底（两者亮度差远小于浅色主题），
+     再按浅色的比例往内容底调会几乎看不出悬停，所以两个主题的取法不同，判据都是「离开内容底一个看得见的步子」。 */
+  --brand-soft-hover: #182C2D;
+  --success-soft-hover: #12261A;
+  --danger-soft-hover: #2A1614;
+  --warm-soft-hover: #2C2718;
+  /* 反色档：暗色主题下暗底按钮反过来是亮底 */
+  --background-inverse: #F4F1EA;
+  --background-inverse-hover: #DDD8CE;
+  --text-inverse: #191816;
   --background-active: #333129;
   --background-selected: #17292A;
   /* 品牌浅底（保留青调，略暖） */
@@ -494,11 +527,30 @@
  */
 .celadon,
 [data-theme] .celadon {
+  /* 按钮设计类：**每个变体各自写全四态**（悬停 · 按下 · 聚焦 · 禁用）。
+     真实伪类与静态类 `.is-hover` / `.is-active` / `.is-focus` / `.is-disabled` 一一对应，
+     后者供清单页把同一个按钮的多种状态并排展示。颜色一律取 token。
+     **按下只做 F4 press 场景的 `transform: scale(.94)`，不改颜色**：形状反馈已经足够表达"按下了"，
+     再叠一层配色反而会把文字与底色撞在一起、并让语义色的悬停与按下分不清。悬停没有形状反馈，
+     所以颜色变化只留给悬停。 */
+  /* 按钮族的共同底座：**清掉浏览器给 `<button>` 的默认外观**（2px outset 边框与 1px 纵向内距）。
+     这一条必须留在设计类层：设计页、原型与其他仓库只引设计类，不给这一条就会露出浏览器默认边框。
+     圆角不在这里给，由组件按尺寸取同名 token（见 button.less），免得两处的权重打架。 */
+  /* 按钮**默认不带边框**（幽灵档除外）：底色与文字已经说明层级，加一圈 1px 边框反而显硬。
+     这是**有意弱化边界**（见 layout.md 第 6 节的可达性豁免）：浅底与内容底的对比度低于 3:1，
+     控件身份由文字标签与底色形状承担；需要强边界时用幽灵档。 */
   /* 错误提示文字（危险色的文字档，取说明档字号） */
+  /* 语义三档（琥珀 · 成功 · 危险）走**描边式**：内容底 + 1px 同族色边框 + 同族色文字，
+     与幽灵档同一种结构，只是边框与文字换成同族色。这样边界对内容底达标 1.4.11，不需要走弱化豁免。
+     悬停是**淡影档**：取 `--*-soft-hover`，它是同族浅底与内容底四成对六成的结果，已在 token 里定好值，
+     不在样式里就地算色。实测文字对底 5.34 至 10.44:1，边框对底 4.36 至 9.50:1。
+     按下仍只做 F4 press 场景的缩放；聚焦环取同族色。
+     文字色对各取已验证的档位；--danger 只做边框与图形，不单独当文字色用。 */
   /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .on */
   /* 输入框：七态（真实伪类与 .is-* 静态类一一对应，后者供设计稿与静态页同时展示多态）。
      字号取正文档：输入值是内容，不是说明文字；正文行高 1.7 加 4 的块向内距与 1 的边框，
-     控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。 */
+     控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。
+     圆角与按钮同一条规则：**按档位取同名 token**。输入框属中档，取 --radius-medium（8px）。 */
   /* 旋转指示器：按钮与输入框的加载态共用（形状见 `components/base/spinner`）。
      **两瓣四分之一弧，互成 180°**，每瓣头端圆帽、尾端收尖：一瓣读不出圆，两瓣既读得出圆，
      又留出两段空隙看得出在转。用内联 SVG 的填充路径画：边框的端头由斜接决定，做不出圆帽，
@@ -509,37 +561,57 @@
      时长与缓动照 F4 的 shake 场景，只在错误字段上叠加，不改其它状态。 */
 }
 .celadon .btn-primary,
+[data-theme] .celadon .btn-primary,
+.celadon .btn-ghost,
+[data-theme] .celadon .btn-ghost,
+.celadon .btn-warn,
+[data-theme] .celadon .btn-warn,
+.celadon .btn-success,
+[data-theme] .celadon .btn-success,
+.celadon .btn-danger,
+[data-theme] .celadon .btn-danger {
+  border: 0;
+  padding-block: 0;
+}
+.celadon .btn-primary,
 [data-theme] .celadon .btn-primary {
   background: var(--brand-soft);
   color: var(--brand-ink);
-  border: 1px solid var(--brand-ink);
-}
-.celadon .btn-primary:hover,
-[data-theme] .celadon .btn-primary:hover {
-  background: var(--background-hover);
-}
-.celadon .btn-primary:active,
-[data-theme] .celadon .btn-primary:active {
-  color: var(--brand-active);
-  border-color: var(--brand-active);
+  /* 软档的悬停只作用于非实心：实心档自己有更深的悬停底 */
+  /* 禁用必须写在实心档之后：两者同权重，靠源序压过 .is-solid 的底色，
+       否则禁用的实心按钮仍然是品牌色，只有边框变淡。 */
 }
 .celadon .btn-primary.is-solid,
 [data-theme] .celadon .btn-primary.is-solid {
   background: var(--brand);
   color: var(--brand-text);
 }
-.celadon .btn-primary.is-solid:hover,
-[data-theme] .celadon .btn-primary.is-solid:hover,
+.celadon .btn-primary.is-solid:not(:disabled):hover,
+[data-theme] .celadon .btn-primary.is-solid:not(:disabled):hover,
 .celadon .btn-primary.is-solid.is-hover,
 [data-theme] .celadon .btn-primary.is-solid.is-hover {
   background: var(--brand-solid-hover);
 }
-.celadon .btn-primary.is-solid:active,
-[data-theme] .celadon .btn-primary.is-solid:active,
+.celadon .btn-primary.is-solid:not(:disabled):active,
+[data-theme] .celadon .btn-primary.is-solid:not(:disabled):active,
 .celadon .btn-primary.is-solid.is-active,
 [data-theme] .celadon .btn-primary.is-solid.is-active {
-  background: var(--brand-solid-active);
+  transform: scale(0.94);
 }
+.celadon .btn-primary:not(.is-solid):not(:disabled):hover,
+[data-theme] .celadon .btn-primary:not(.is-solid):not(:disabled):hover,
+.celadon .btn-primary.is-hover:not(.is-solid),
+[data-theme] .celadon .btn-primary.is-hover:not(.is-solid) {
+  background: var(--brand-soft-hover);
+}
+.celadon .btn-primary:not(.is-solid):not(:disabled):active,
+[data-theme] .celadon .btn-primary:not(.is-solid):not(:disabled):active,
+.celadon .btn-primary.is-active:not(.is-solid),
+[data-theme] .celadon .btn-primary.is-active:not(.is-solid) {
+  transform: scale(0.94);
+}
+.celadon .btn-primary:focus-visible,
+[data-theme] .celadon .btn-primary:focus-visible,
 .celadon .btn-primary.is-focus,
 [data-theme] .celadon .btn-primary.is-focus {
   box-shadow: var(--focus-ring);
@@ -564,6 +636,102 @@
   background: var(--background-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-default);
+}
+.celadon .btn-ghost:not(:disabled):hover,
+[data-theme] .celadon .btn-ghost:not(:disabled):hover,
+.celadon .btn-ghost.is-hover,
+[data-theme] .celadon .btn-ghost.is-hover {
+  background: var(--background-hover);
+}
+.celadon .btn-ghost:not(:disabled):active,
+[data-theme] .celadon .btn-ghost:not(:disabled):active,
+.celadon .btn-ghost.is-active,
+[data-theme] .celadon .btn-ghost.is-active {
+  transform: scale(0.94);
+}
+.celadon .btn-ghost:focus-visible,
+[data-theme] .celadon .btn-ghost:focus-visible,
+.celadon .btn-ghost.is-focus,
+[data-theme] .celadon .btn-ghost.is-focus {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+.celadon .btn-ghost:disabled,
+[data-theme] .celadon .btn-ghost:disabled,
+.celadon .btn-ghost.is-disabled,
+[data-theme] .celadon .btn-ghost.is-disabled {
+  background: var(--background-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-disabled);
+  cursor: not-allowed;
+}
+.celadon .btn-success,
+[data-theme] .celadon .btn-success {
+  background: var(--background-surface);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+.celadon .btn-success:not(:disabled):hover,
+[data-theme] .celadon .btn-success:not(:disabled):hover,
+.celadon .btn-success.is-hover,
+[data-theme] .celadon .btn-success.is-hover {
+  background: var(--success-soft-hover);
+}
+.celadon .btn-success:not(:disabled):active,
+[data-theme] .celadon .btn-success:not(:disabled):active,
+.celadon .btn-success.is-active,
+[data-theme] .celadon .btn-success.is-active {
+  transform: scale(0.94);
+}
+.celadon .btn-success:focus-visible,
+[data-theme] .celadon .btn-success:focus-visible,
+.celadon .btn-success.is-focus,
+[data-theme] .celadon .btn-success.is-focus {
+  box-shadow: var(--focus-ring-success);
+  outline: none;
+}
+.celadon .btn-success:disabled,
+[data-theme] .celadon .btn-success:disabled,
+.celadon .btn-success.is-disabled,
+[data-theme] .celadon .btn-success.is-disabled {
+  background: var(--background-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-disabled);
+  cursor: not-allowed;
+}
+.celadon .btn-danger,
+[data-theme] .celadon .btn-danger {
+  background: var(--background-surface);
+  color: var(--danger-ink);
+  border: 1px solid var(--danger);
+}
+.celadon .btn-danger:not(:disabled):hover,
+[data-theme] .celadon .btn-danger:not(:disabled):hover,
+.celadon .btn-danger.is-hover,
+[data-theme] .celadon .btn-danger.is-hover {
+  background: var(--danger-soft-hover);
+}
+.celadon .btn-danger:not(:disabled):active,
+[data-theme] .celadon .btn-danger:not(:disabled):active,
+.celadon .btn-danger.is-active,
+[data-theme] .celadon .btn-danger.is-active {
+  transform: scale(0.94);
+}
+.celadon .btn-danger:focus-visible,
+[data-theme] .celadon .btn-danger:focus-visible,
+.celadon .btn-danger.is-focus,
+[data-theme] .celadon .btn-danger.is-focus {
+  box-shadow: var(--focus-ring-danger);
+  outline: none;
+}
+.celadon .btn-danger:disabled,
+[data-theme] .celadon .btn-danger:disabled,
+.celadon .btn-danger.is-disabled,
+[data-theme] .celadon .btn-danger.is-disabled {
+  background: var(--background-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-disabled);
+  cursor: not-allowed;
 }
 .celadon .seg,
 [data-theme] .celadon .seg {
@@ -593,9 +761,37 @@
 }
 .celadon .btn-warn,
 [data-theme] .celadon .btn-warn {
-  background: var(--warm-soft);
+  background: var(--background-surface);
   color: var(--warm-text);
   border: 1px solid var(--warm);
+}
+.celadon .btn-warn:not(:disabled):hover,
+[data-theme] .celadon .btn-warn:not(:disabled):hover,
+.celadon .btn-warn.is-hover,
+[data-theme] .celadon .btn-warn.is-hover {
+  background: var(--warm-soft-hover);
+}
+.celadon .btn-warn:not(:disabled):active,
+[data-theme] .celadon .btn-warn:not(:disabled):active,
+.celadon .btn-warn.is-active,
+[data-theme] .celadon .btn-warn.is-active {
+  transform: scale(0.94);
+}
+.celadon .btn-warn:focus-visible,
+[data-theme] .celadon .btn-warn:focus-visible,
+.celadon .btn-warn.is-focus,
+[data-theme] .celadon .btn-warn.is-focus {
+  box-shadow: var(--focus-ring-warm);
+  outline: none;
+}
+.celadon .btn-warn:disabled,
+[data-theme] .celadon .btn-warn:disabled,
+.celadon .btn-warn.is-disabled,
+[data-theme] .celadon .btn-warn.is-disabled {
+  background: var(--background-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-disabled);
+  cursor: not-allowed;
 }
 .celadon .bubble-me,
 [data-theme] .celadon .bubble-me {

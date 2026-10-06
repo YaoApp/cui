@@ -6,45 +6,97 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-8);
-  border-radius: var(--radius-medium);
+  /* 圆角由尺寸档给，见下面的 &--small / &--medium / &--large，胶囊档再用 --radius-pill 覆盖 */
   font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-cjk);
+  /* 行高取整（见 --line-height-control）：1.7 × 14px = 23.8px 会让文字盒落在小数位置，
+     任何一次重绘都可能把字形重新吸附到整像素，看上去就是文字在跳。
+     抗锯齿也强制成灰阶：WebKit 在 transform 前后会切换子像素与灰阶两种模式，字形因此变样；
+     固定一种模式后，静止、悬停与按下三个状态的文字栅格一致。
+     另外要显式清掉浏览器给 <button> 的默认外观（2px outset 边框与 1px 纵向内距），
+     否则去掉设计类的边框后，默认边框会露出来并把小档撑高。 */
+  line-height: var(--line-height-control);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  border: 0;
+  padding-block: 0;
   cursor: pointer;
-  /* 动效归属：CSS（见 architecture/12-motion.md —— 每个场景都要标注归属） */
+  /* 动效归属：CSS（见 architecture/12-motion.md —— 每个场景都要标注归属）。
+     悬停 / 按下 / 焦点三个场景都取 --duration-fast 与 --easing-standard；减动效下时长归零。
+     transform 也在列表里：按下反馈是 F4 press 场景的 scale(.94)。 */
   transition: background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard);
-
-  &--medium {
-    min-block-size: var(--spacing-32);
-    padding-inline: var(--spacing-16);
-    font-size: var(--font-size-body);
+    border-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+  /* 按下是整体缩放，文字随按钮一起走。提升合成层只在真正按下那一档：
+     放在悬停上会让图层在悬停瞬间才被创建，文字当场重新栅格化，出现跳字；
+     放在按下档则提升与缩放同帧开始，缩放期间不再逐帧重绘文字。 */
+  &:not(:disabled):active,
+  &.is-active {
+    will-change: transform;
   }
+
+  /* 圆角按**档位取同名 token**：小档 --radius-small（6px）· 中档 --radius-medium（8px）· 大档 --radius-large（12px）。
+     不让中档去借更大的档，否则同名的档位与数值对不上，输入框（属中档）也会跟着偏大。
+     胶囊档另取 --radius-pill，写在尺寸块之后，靠源序压过尺寸给的圆角。 */
 
   &--small {
     min-block-size: var(--spacing-24);
     padding-inline: var(--spacing-12);
+    line-height: var(--line-height-control-small);
+    border-radius: var(--radius-small);
     /* 小档取说明档 12px；--font-size-label 同为 12px，按 token 注释只用于西文与数字角标 */
     font-size: var(--font-size-caption);
   }
 
-  /* 焦点环走 token；真实伪类，不靠 .is-focus 静态类 */
-  &:focus-visible {
+  &--medium {
+    min-block-size: var(--spacing-32);
+    padding-inline: var(--spacing-16);
+    border-radius: var(--radius-medium);
+    font-size: var(--font-size-body);
+  }
+
+  /* 大档：主操作与需要更宽点击区域的场合。高度 40 = 32 + 8，由间距刻度推出，不另立尺寸 token */
+  &--large {
+    min-block-size: calc(var(--spacing-32) + var(--spacing-8));
+    padding-inline: var(--spacing-24);
+    border-radius: var(--radius-large);
+    font-size: var(--font-size-body-lg);
+  }
+
+  /* 形态档：胶囊（全圆角）。必须写在三个尺寸块之后，否则会被尺寸给的圆角盖掉 */
+  &--pill {
+    border-radius: var(--radius-pill);
+  }
+
+  /* 焦点环走 token；真实伪类与静态类都认，静态类供清单页并排展示 */
+  &:focus-visible,
+  &.is-focus {
     box-shadow: var(--focus-ring);
     outline: none;
   }
 
-  /* 反色档：原型里登录页主操作（Next）的暗底按钮。设计类里还没有，取值仍是 token。 */
+  /* 反色档：原型里登录页主操作（Next）的暗底按钮。底色与文字都取反色档自己的 token，同样不带边框。 */
   &--inverse {
-    background: var(--text-primary);
-    color: var(--background-content);
-    border: var(--border-width) solid var(--text-primary);
+    background: var(--background-inverse);
+    color: var(--text-inverse);
 
-    &:not(:disabled):hover {
-      background: var(--text-secondary);
-      border-color: var(--text-secondary);
+    &:not(:disabled):hover, &.is-hover {
+      background: var(--background-inverse-hover);
     }
 
-    &:disabled {
+    &:not(:disabled):active, &.is-active {
+      /* 按下只做 F4 press 场景的缩放，不换色 */
+      transform: scale(.94);
+    }
+
+    /* 焦点环取本族深色，不用品牌色环（中性族不该出现品牌色） */
+    &:focus-visible, &.is-focus {
+      box-shadow: var(--focus-ring-inverse);
+      outline: none;
+    }
+
+    &:disabled, &.is-disabled {
       background: var(--background-disabled);
       color: var(--text-disabled);
       border-color: var(--background-disabled);

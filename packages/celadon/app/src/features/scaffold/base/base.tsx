@@ -216,21 +216,73 @@ export function BasePage() {
           <Button variant="solid">solid</Button>
           <Button variant="soft">soft</Button>
           <Button variant="ghost">ghost</Button>
+          <Button variant="warn">warn</Button>
+          <Button variant="success">success</Button>
+          <Button variant="danger">danger</Button>
           <Button variant="inverse">inverse</Button>
         </div>
-
-        <h3 className="base-subgroup__title">{t('base.sub.sizes')}</h3>
+        {/* 形态：与变体同一组，第二排是全圆角胶囊，七个变体逐个对应 */}
         <div className="base-row">
-          <Button variant="solid" size="small">
-            small
-          </Button>
-          <Button variant="inverse" loading>
-            loading
-          </Button>
+          {(['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
+            <Button key={variant} variant={variant} shape="pill">
+              {variant} · pill
+            </Button>
+          ))}
+        </div>
+
+        {/* 状态齐：**每个样式一行，四组状态**（默认 · 悬停 · 按下 · 聚焦）。
+            悬停、按下、聚焦用设计类的静态态（真实交互由伪类驱动）。
+            禁用与加载在各样式下表现相同，单独一行共用，不逐样式重复。 */}
+        <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
+        {(['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
+          <div className="base-row" key={variant}>
+            <Button variant={variant}>{variant} · default</Button>
+            <Button variant={variant} state="hover">
+              {variant} · hover
+            </Button>
+            <Button variant={variant} state="active">
+              {variant} · active
+            </Button>
+            <Button variant={variant} state="focus">
+              {variant} · focus
+            </Button>
+          </div>
+        ))}
+        <div className="base-row">
           <Button variant="solid" disabled>
             disabled
           </Button>
+          <Button variant="solid" loading>
+            loading
+          </Button>
         </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.sizes')}</h3>
+        {/* 尺寸与形态：每个尺寸两行，第一行常规圆角、第二行全圆角胶囊，各自列全七个变体。
+            两行都必须是 .base-group 的直接子元素，才吃得到容器的统一间距；
+            套一层包裹元素会把间距掐断，两行首尾相接，看上去像叠在一起。 */}
+        {(
+          [
+            ['small', 'small 24'],
+            ['medium', 'medium 32'],
+            ['large', 'large 40'],
+          ] as const
+        ).flatMap(([size, label]) => [
+          <div className="base-row" key={`${size}-rounded`}>
+            {(['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
+              <Button key={variant} variant={variant} size={size}>
+                {label} · {variant}
+              </Button>
+            ))}
+          </div>,
+          <div className="base-row" key={`${size}-pill`}>
+            {(['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
+              <Button key={variant} variant={variant} size={size} shape="pill">
+                pill {label} · {variant}
+              </Button>
+            ))}
+          </div>,
+        ])}
         <div className="base-row">
           <Button variant="inverse" block>
             {t('base.action.block')}

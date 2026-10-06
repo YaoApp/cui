@@ -54,6 +54,8 @@ h1{font-size:19px;margin:0 0 4px}
 .st .input,.st .btn-primary,.st .btn-ghost{width:100%;height:34px;font-size:12.5px;border-radius:var(--radius-medium);
   padding:0 10px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;cursor:default}
 .st .input{cursor:text}
+/* 按下反馈是 F4 press 场景的整体缩放，静态样例也要把它显出来，否则看着与默认态一模一样 */
+.st .is-active{transform:scale(.94)}
 .st .hint-error{font-size:11.5px;line-height:1.3}
 .stbody{padding:12px 15px 18px}
 .prow{display:flex;align-items:center;gap:9px;padding:4px 0;min-width:0}
@@ -144,23 +146,26 @@ var GROUPS = [
  ['group.brand', [
    ['--brand','brand','fill'], ['--brand-hover','brandHover'], ['--brand-active','brandActive'],
    ['--brand-solid-hover','brandSolidHover'], ['--brand-solid-active','brandSolidActive'],
-   ['--brand-soft','brandSoft','fill'], ['--brand-display','brandDisplay','fill'], ['--brand-text','brandText','on','--brand'], ['--brand-ink','brandInk','on','--brand-soft'],
+   ['--brand-soft','brandSoft','fill'], ['--brand-soft-hover','brandSoftHover','fill'], ['--brand-display','brandDisplay','fill'], ['--brand-text','brandText','on','--brand'], ['--brand-ink','brandInk','on','--brand-soft'],
    ['--brand-lift','brandLift','dark']]],
  ['group.interaction', [
    ['--focus-ring-color','focusRingColor','on'], ['--focus-ring-width','focusRingWidth'], ['--focus-ring-offset','focusRingOffset'],
+   ['--focus-ring-success','focusRingSuccess','on'], ['--focus-ring-danger','focusRingDanger','on'],
+   ['--focus-ring-warm','focusRingWarm','on'], ['--focus-ring-inverse','focusRingInverse','on'],
    ['--background-disabled','backgroundDisabled','exempt'], ['--text-disabled','textDisabled','exempt'], ['--border-disabled','borderDisabled','exempt'],
    ['--scrim','scrim','overlay']]],
  ['group.background', [
    ['--background-app','backgroundApp','fill'], ['--background-navigation','backgroundNavigation','fill'], ['--background-content','backgroundContent','fill'],
    ['--background-surface','backgroundSurface','fill'], ['--background-field','backgroundField','fill'], ['--background-hover','backgroundHover','fill'],
+   ['--background-inverse','backgroundInverse','fill'], ['--background-inverse-hover','backgroundInverseHover','fill'],
    ['--background-selected','backgroundSelected','fill']]],
  ['group.border', [['--border-subtle','borderSubtle','line'], ['--border-default','borderDefault','line'], ['--border-control','borderControl','line'], ['--border-hover','borderHover','line']]],
- ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary','on'], ['--text-placeholder','textPlaceholder','on','--background-field'], ['--text-muted','textMuted','deco']]],
+ ['group.text', [['--text-primary','textPrimary','on'], ['--text-secondary','textSecondary','on'], ['--text-tertiary','textTertiary','on'], ['--text-placeholder','textPlaceholder','on','--background-field'], ['--text-inverse','textInverse','on','--background-inverse'], ['--text-muted','textMuted','deco']]],
  ['group.semantic', [
-   ['--success','success','on','--success-soft'], ['--success-soft','successSoft','fill'],
+   ['--success','success','on','--success-soft'], ['--success-soft','successSoft','fill'], ['--success-soft-hover','successSoftHover','fill'],
    ['--warning','warning','fill'], ['--warning-soft','warningSoft','fill'],
-   ['--warm','warm','fill'], ['--warm-soft','warmSoft','fill'], ['--warm-text','warmText','on','--warm-soft'], ['--warm-contrast','warmContrast','on','--warm'],
-   ['--danger','danger','fill'], ['--danger-soft','dangerSoft','fill'], ['--danger-ink','dangerInk','on','--danger-soft']]],
+   ['--warm','warm','fill'], ['--warm-soft','warmSoft','fill'], ['--warm-soft-hover','warmSoftHover','fill'], ['--warm-text','warmText','on','--warm-soft'], ['--warm-contrast','warmContrast','on','--warm'],
+   ['--danger','danger','fill'], ['--danger-soft','dangerSoft','fill'], ['--danger-soft-hover','dangerSoftHover','fill'], ['--danger-ink','dangerInk','on','--danger-soft']]],
  ['group.metrics', [
    ['--font-family-ui','fontFamilyUi','nocr'], ['--font-family-monospace','fontFamilyMonospace','nocr'],
    ['--font-size-11','fontSize11'], ['--font-size-12','fontSize12'], ['--font-size-13','fontSize13'], ['--font-size-16','fontSize16'],
@@ -175,7 +180,10 @@ var PAIRS = [
  ['--brand-text','--brand','brand'], ['--brand-text','--brand-solid-hover','brandSolidHover'], ['--brand-text','--brand-solid-active','brandSolidActive'], ['--brand-ink','--brand-soft','brandInk'], ['--warm-contrast','--warm','warm'],
  ['--warm-text','--warm-soft','warmSoft'], ['--success','--success-soft','success'],
  ['--danger-ink','--danger-soft','danger'], ['--text-primary','--background-content','textPrimary'],
- ['--text-secondary','--background-content','textSecondary'],];
+ ['--text-secondary','--background-content','textSecondary'],
+ ['--brand-ink','--brand-soft-hover','brandSoftHover'], ['--success','--success-soft-hover','successSoftHover'],
+ ['--danger-ink','--danger-soft-hover','dangerSoftHover'], ['--warm-text','--warm-soft-hover','warmSoftHover'],
+ ['--text-inverse','--background-inverse','textInverse'], ['--text-inverse','--background-inverse-hover','backgroundInverseHover'],];
 var SPECIMEN_LANGUAGES = [
  ['zh-CN','简体中文'], ['zh-TW','繁體中文'], ['ja','日本語'], ['en','English']
 ];
