@@ -33,6 +33,9 @@ const hexToRgb = (hex: string) => {
 }
 
 test('lists the six groups and their states', async ({ page }) => {
+  /* 六个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
+     因此这一条明确放宽预算（Playwright 的 slow 走三倍），其余用例仍守默认值。 */
+  test.slow()
   await page.setViewportSize({ width: 1280, height: 1100 })
   await page.goto('/app/scaffold/base')
 
