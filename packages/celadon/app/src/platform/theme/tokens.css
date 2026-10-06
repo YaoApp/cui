@@ -550,7 +550,8 @@
      不在样式里就地算色。实测文字对底 5.34 至 10.44:1，边框对底 4.36 至 9.50:1。
      按下仍只做 F4 press 场景的缩放；聚焦环取同族色。
      文字色对各取已验证的档位；--danger 只做边框与图形，不单独当文字色用。 */
-  /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .on */
+  /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .is-on。
+     反色档用于深底或品牌底（`.seg--inverse`），底色取反色族，选中项用反色的悬停档。 */
   /* 输入框：七态（真实伪类与 .is-* 静态类一一对应，后者供设计稿与静态页同时展示多态）。
      字号取正文档：输入值是内容，不是说明文字；正文行高 1.7 加 4 的块向内距与 1 的边框，
      控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。
@@ -784,12 +785,74 @@
   border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text-secondary);
+  transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+}
+.celadon .seg button:hover,
+[data-theme] .celadon .seg button:hover,
+.celadon .seg button.is-hover,
+[data-theme] .celadon .seg button.is-hover {
+  background: var(--background-hover);
+}
+.celadon .seg button:focus-visible,
+[data-theme] .celadon .seg button:focus-visible,
+.celadon .seg button.is-focus,
+[data-theme] .celadon .seg button.is-focus {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+.celadon .seg button:disabled,
+[data-theme] .celadon .seg button:disabled,
+.celadon .seg button.is-disabled,
+[data-theme] .celadon .seg button.is-disabled {
+  background: transparent;
+  color: var(--text-disabled);
+  cursor: not-allowed;
 }
 .celadon .seg button.is-on,
 [data-theme] .celadon .seg button.is-on {
   background: var(--brand-soft);
   color: var(--brand-ink);
   font-weight: var(--font-weight-strong);
+}
+.celadon .seg button.is-on:hover,
+[data-theme] .celadon .seg button.is-on:hover,
+.celadon .seg button.is-on.is-hover,
+[data-theme] .celadon .seg button.is-on.is-hover {
+  background: var(--brand-soft-hover);
+}
+.celadon .seg--inverse,
+[data-theme] .celadon .seg--inverse {
+  border-color: transparent;
+  background: var(--background-inverse);
+}
+.celadon .seg--inverse button,
+[data-theme] .celadon .seg--inverse button {
+  color: var(--text-inverse);
+}
+.celadon .seg--inverse button:hover,
+[data-theme] .celadon .seg--inverse button:hover,
+.celadon .seg--inverse button.is-hover,
+[data-theme] .celadon .seg--inverse button.is-hover {
+  background: var(--background-inverse-hover);
+}
+.celadon .seg--inverse button.is-on,
+[data-theme] .celadon .seg--inverse button.is-on {
+  background: var(--background-inverse-hover);
+  color: var(--text-inverse);
+}
+.celadon .seg--inverse button:focus-visible,
+[data-theme] .celadon .seg--inverse button:focus-visible,
+.celadon .seg--inverse button.is-focus,
+[data-theme] .celadon .seg--inverse button.is-focus {
+  box-shadow: var(--focus-ring-inverse);
+  outline: none;
+}
+.celadon .seg--inverse button:disabled,
+[data-theme] .celadon .seg--inverse button:disabled,
+.celadon .seg--inverse button.is-disabled,
+[data-theme] .celadon .seg--inverse button.is-disabled {
+  background: transparent;
+  color: var(--text-disabled);
 }
 .celadon .btn-warn,
 [data-theme] .celadon .btn-warn {
@@ -1017,6 +1080,23 @@
   outline: none;
   min-inline-size: var(--anchor-width, auto);
   max-block-size: var(--available-height, var(--spacing-48));
+  /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速、退场 120ms 加速，只动透明与缩放；
+       缩放原点取定位器给的 --transform-origin，弹层因此在触发器的对应一角展开。
+       系统「减少动态」时全部时长归零（tokens.less 统一处理），这里无需另写分支。 */
+  transform-origin: var(--transform-origin, center);
+  transition: opacity var(--duration-base) var(--easing-decelerate), transform var(--duration-base) var(--easing-decelerate);
+}
+.celadon .select-popup[data-starting-style],
+[data-theme] .celadon .select-popup[data-starting-style],
+.celadon .select-popup[data-ending-style],
+[data-theme] .celadon .select-popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.96) translateY(calc(-1 * var(--spacing-4)));
+}
+.celadon .select-popup[data-ending-style],
+[data-theme] .celadon .select-popup[data-ending-style] {
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-accelerate);
 }
 .celadon .select-popup--search,
 [data-theme] .celadon .select-popup--search {
@@ -1062,6 +1142,13 @@
   color: var(--text-secondary);
   background: var(--background-surface);
   cursor: default;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+.celadon .select-arrow[data-starting-style],
+[data-theme] .celadon .select-arrow[data-starting-style],
+.celadon .select-arrow[data-ending-style],
+[data-theme] .celadon .select-arrow[data-ending-style] {
+  opacity: 0;
 }
 .celadon .select-arrow--up,
 [data-theme] .celadon .select-arrow--up {
@@ -1106,6 +1193,7 @@
   font-size: var(--font-size-body);
   cursor: pointer;
   user-select: none;
+  transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
 }
 .celadon .select-item[data-highlighted],
 [data-theme] .celadon .select-item[data-highlighted] {

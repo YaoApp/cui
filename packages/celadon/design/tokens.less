@@ -482,14 +482,26 @@
     &:focus-visible, &.is-focus { box-shadow: var(--focus-ring-danger); outline: none; }
     &:disabled, &.is-disabled { background: var(--background-disabled); color: var(--text-disabled); border-color: var(--border-disabled); cursor: not-allowed; } }
 
-  /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .on */
+  /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .is-on。
+     反色档用于深底或品牌底（`.seg--inverse`），底色取反色族，选中项用反色的悬停档。 */
   .seg         { display:inline-flex; gap:var(--spacing-4); padding:var(--spacing-4);
                  border-radius:var(--radius-pill); border:1px solid var(--border-control);
                  background:var(--background-field); }
   .seg button  { cursor:pointer; font-family:inherit; font-size:var(--font-size-caption);
                  padding:var(--spacing-4) var(--spacing-12); border:0; border-radius:var(--radius-pill);
-                 background:transparent; color:var(--text-secondary); }
+                 background:transparent; color:var(--text-secondary);
+                 transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard); }
+  .seg button:hover, .seg button.is-hover { background:var(--background-hover); }
+  .seg button:focus-visible, .seg button.is-focus { box-shadow:var(--focus-ring); outline:none; }
+  .seg button:disabled, .seg button.is-disabled { background:transparent; color:var(--text-disabled); cursor:not-allowed; }
   .seg button.is-on { background:var(--brand-soft); color:var(--brand-ink); font-weight:var(--font-weight-strong); }
+  .seg button.is-on:hover, .seg button.is-on.is-hover { background:var(--brand-soft-hover); }
+  .seg--inverse { border-color:transparent; background:var(--background-inverse); }
+  .seg--inverse button { color:var(--text-inverse); }
+  .seg--inverse button:hover, .seg--inverse button.is-hover { background:var(--background-inverse-hover); }
+  .seg--inverse button.is-on { background:var(--background-inverse-hover); color:var(--text-inverse); }
+  .seg--inverse button:focus-visible, .seg--inverse button.is-focus { box-shadow:var(--focus-ring-inverse); outline:none; }
+  .seg--inverse button:disabled, .seg--inverse button.is-disabled { background:transparent; color:var(--text-disabled); }
   .btn-warn    { background: var(--background-surface); color: var(--warm-text); border: 1px solid var(--warm);
     &:not(:disabled):hover, &.is-hover { background: var(--warm-soft-hover); }
     &:not(:disabled):active, &.is-active { transform: scale(.94); }
@@ -571,7 +583,14 @@
     --select-popup-inset: calc(var(--spacing-8) + var(--border-width) * 2);
     background: var(--background-surface); border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-medium); box-shadow: var(--shadow-floating); outline: none;
-    min-inline-size: var(--anchor-width, auto); max-block-size: var(--available-height, var(--spacing-48)); }
+    min-inline-size: var(--anchor-width, auto); max-block-size: var(--available-height, var(--spacing-48));
+    /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速、退场 120ms 加速，只动透明与缩放；
+       缩放原点取定位器给的 --transform-origin，弹层因此在触发器的对应一角展开。
+       系统「减少动态」时全部时长归零（tokens.less 统一处理），这里无需另写分支。 */
+    transform-origin: var(--transform-origin, center);
+    transition: opacity var(--duration-base) var(--easing-decelerate), transform var(--duration-base) var(--easing-decelerate);
+    &[data-starting-style], &[data-ending-style] { opacity: 0; transform: scale(.96) translateY(calc(-1 * var(--spacing-4))); }
+    &[data-ending-style] { transition-duration: var(--duration-fast); transition-timing-function: var(--easing-accelerate); } }
   /* 带筛选框时把它的高度也算进最大高度，否则整行的取整会把筛选框挤出去 */
   .select-popup--search { --select-search-height: calc(var(--spacing-24) + var(--spacing-12)); }
   /* 弹层最大高度对齐成**整行**：可用高度减内距与筛选框高度后向下取整到行高档，再加回去，
@@ -584,8 +603,7 @@
   }
   .select-popup__empty { padding: var(--spacing-4) var(--spacing-12);
     color: var(--text-tertiary); font-size: var(--font-size-caption); }
-  /* 筛选框：图标加输入框，输入框取字段小档，宽度撑满弹层内宽 */
-  .select-search { display: flex; align-items: center; gap: var(--spacing-4);
+  /* 筛选框：图标加输入框，输入框取字段小档，宽度撑满弹层内宽 */  .select-search { display: flex; align-items: center; gap: var(--spacing-4);
     padding: var(--spacing-4) var(--spacing-8) var(--spacing-8); }
   .select-search__icon { flex: none; color: var(--text-tertiary); }
   .select-search__input { flex: 1; min-inline-size: 0; }
@@ -593,7 +611,9 @@
      底色与弹层同底，避免文字从下面透出来 */
   .select-arrow { position: absolute; inset-inline: 0;
     display: flex; align-items: center; justify-content: center;
-    block-size: var(--spacing-24); color: var(--text-secondary); background: var(--background-surface); cursor: default; }
+    block-size: var(--spacing-24); color: var(--text-secondary); background: var(--background-surface); cursor: default;
+    transition: opacity var(--duration-fast) var(--easing-standard);
+    &[data-starting-style], &[data-ending-style] { opacity: 0; } }
   .select-arrow--up { inset-block-start: 0;
     border-start-start-radius: var(--radius-small); border-start-end-radius: var(--radius-small); }
   .select-arrow:not(.select-arrow--up) { inset-block-end: 0;
@@ -613,6 +633,7 @@
     min-block-size: var(--row-height); padding-block: var(--spacing-8); padding-inline: var(--spacing-12);
     border-radius: var(--radius-small); color: var(--text-primary); font-size: var(--font-size-body);
     cursor: pointer; user-select: none;
+    transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
     &[data-highlighted] { background: var(--background-hover); }
     &[data-selected] { background: var(--brand-soft); color: var(--brand-ink); }
     &[data-disabled] { color: var(--text-disabled); cursor: not-allowed; } }

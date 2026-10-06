@@ -21,11 +21,12 @@ code{font-family:var(--font-family-monospace);background:var(--background-field)
 .pf-label{font-size:11.5px;color:var(--text-secondary);font-weight:var(--font-weight-medium)}
 /* 分段控件：外壳胶囊 + 3px 内衬，每段自身也是胶囊（否则选中态会被外壳曲线切掉、右端留缝） */
 .seg-group{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--border-control);border-radius:var(--radius-pill);background:var(--background-field)}
-.seg{font:inherit;font-size:11.5px;padding:3px 12px;border:0;border-radius:var(--radius-pill);background:transparent;color:var(--text-secondary);cursor:pointer}
-.seg:hover{background:var(--background-hover)}
-.seg.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:650;box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--brand-ink) 30%, transparent)}
+/* 本页偏好条的分段控件：外壳沿用设计类 `.seg`，段是页内按钮，类名与设计类区分，避免同名冲突 */
+.seg-item{font:inherit;font-size:var(--font-size-caption);padding:3px 12px;border:0;border-radius:var(--radius-pill);background:transparent;color:var(--text-secondary);cursor:pointer}
+.seg-item:hover{background:var(--background-hover)}
+.seg-item.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:var(--font-weight-strong)}
 /* 本页自有控件统一品牌焦点环，避免 Tab 时露出浏览器默认蓝环 */
-.stage .act:focus-visible, .seg:focus-visible, .stage .sw:focus-visible, .stage .trg:focus-visible,
+.stage .act:focus-visible, .seg-item:focus-visible, .stage .sw:focus-visible, .stage .trg:focus-visible,
 .stage .hdr:focus-visible, .sd:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .pf-note{font-size:11px;color:var(--text-tertiary)}
 /* 动效强度：减少（时长归零）/ 标准 / 丰富（更长） */
@@ -320,6 +321,8 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 <div class="card">
   <h2 id="bd-title"></h2><p class="hint" id="bd-note"></p>
   <div class="prefbar"><span class="pf-label" id="bd-pref-label"></span><span class="seg-group" id="bd-pref"></span><span class="pf-note" id="bd-pref-note"></span></div>
+  <!-- 设计类 .seg 的两条样例：默认与反色，段是按钮，选中项 .is-on -->
+  <div class="prefbar"><span class="seg" id="bd-seg"></span><span class="seg seg--inverse" id="bd-seg-inverse"></span></div>
   <div class="cols">
     <section class="panel" id="bd-light"></section>
     <section class="panel celadon" data-theme="dark" id="bd-dark"></section>
@@ -375,7 +378,13 @@ function prefNote(sysKey, simKey){
   return out;
 }
 function segHtml(group, opts, cur){
-  return opts.map(function(o){ return '<button class="seg'+(o[0]===cur?' on':'')+'" type="button" data-pref="'+group+'" data-level="'+o[0]+'">'+fmt(tr(o[1]))+'</button>'; }).join('');
+  return opts.map(function(o){ return '<button class="seg-item'+(o[0]===cur?' on':'')+'" type="button" data-pref="'+group+'" data-level="'+o[0]+'">'+fmt(tr(o[1]))+'</button>'; }).join('');
+}
+/* 设计类的分段控件（容器 .seg，段是 button，选中项 .is-on）：默认与反色两条样例，
+   文案复用对比度预设的键，不新增语言包条目。 */
+function segClassHtml(cur){
+  return ['f.pref.cLow','f.pref.cStd','f.pref.cHigh'].map(function(k, i){
+    return '<button class="'+(i===cur?'is-on':'')+'" type="button">'+fmt(tr(k))+'</button>'; }).join('');
 }
 function applyPrefs(){
   document.body.classList.toggle('mo-low', PREF.motion === 'low');
@@ -396,6 +405,13 @@ function applyPrefs(){
     document.getElementById('bd-pref').innerHTML = segHtml('contrast', [['low','f.pref.cLow'],['std','f.pref.cStd'],['high','f.pref.cHigh']], PREF.contrast);
     document.getElementById('bd-pref-note').textContent = prefNote(
       sysContrast(), PREF.contrast === 'std' ? null : (PREF.contrast === 'low' ? 'cLow' : 'cHigh'));
+  }
+  /* 设计类分段控件的两条样例：默认与反色，都用同一组文案 */
+  var segStd = document.getElementById('bd-seg');
+  var segInv = document.getElementById('bd-seg-inverse');
+  if (segStd && segInv){
+    segStd.innerHTML = segClassHtml(1);
+    segInv.innerHTML = segClassHtml(1);
   }
 }
 function tok(name, theme){ return getComputedStyle(PROBE[theme]).getPropertyValue(name).trim(); }

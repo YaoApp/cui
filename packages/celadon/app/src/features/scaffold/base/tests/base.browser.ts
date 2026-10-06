@@ -169,9 +169,8 @@ test('lists the five groups and their states', async ({ page }) => {
         ![...document.querySelectorAll('.select-popup')].some((el) => el.getBoundingClientRect().height > 0),
     )
     await selectTrigger(label).click()
-    await page.waitForFunction(() =>
-      [...document.querySelectorAll('.select-popup')].some((el) => el.getBoundingClientRect().height > 0),
-    )
+    /* 弹层有进场动画（200ms 缩放加淡入），起始帧之前还有一次定位，等 600ms 稳定后再量 */
+    await page.waitForTimeout(600)
   }
   await expect(selectTrigger('select default')).toBeVisible()
   const indicator = await selectTrigger('select default').evaluate((el) => ({
@@ -182,7 +181,7 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(indicator.上游指示器).toBe(0)
 
   const selectHeight = (label: string) =>
-    selectTrigger(label).evaluate((el) => Math.round(el.getBoundingClientRect().height))
+    selectTrigger(label).evaluate((el) => (el as HTMLElement).offsetHeight)
   expect(await selectHeight('select small')).toBe(24)
   expect(await selectHeight('select large')).toBe(40)
   /* 中档与输入框同高：字段的观感与高度由同一条规则给出 */
@@ -211,7 +210,7 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(
     await page
       .getByRole('option', { name: 'Light' })
-      .evaluate((el) => Math.round(el.getBoundingClientRect().height)),
+      .evaluate((el) => (el as HTMLElement).offsetHeight),
   ).toBe(Math.round(parseFloat(rowHeight)))
   expect(await page.locator('.select-popup').evaluate((el) => getComputedStyle(el).marginBlockStart)).toBe('0px')
   await page.getByRole('option', { name: 'Dark' }).click()
@@ -254,7 +253,7 @@ test('lists the five groups and their states', async ({ page }) => {
   const rich = await page.evaluate(() => {
     const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
     return {
-      行高: [...popup.querySelectorAll('[role=option]')].map((el) => Math.round(el.getBoundingClientRect().height)),
+      行高: [...popup.querySelectorAll('[role=option]')].map((el) => (el as HTMLElement).offsetHeight),
       说明: popup.querySelectorAll('.select-item__description').length,
     }
   })
@@ -271,7 +270,7 @@ test('lists the five groups and their states', async ({ page }) => {
     const first = popup.querySelector('.select-item__trailing')
     return {
       文字: first?.textContent?.trim() ?? '',
-      行高: Math.round(popup.querySelector('[role=option]')!.getBoundingClientRect().height),
+      行高: (popup.querySelector('[role=option]') as HTMLElement).offsetHeight,
     }
   })
   expect(trailing.文字).not.toBe('')
@@ -286,12 +285,12 @@ test('lists the five groups and their states', async ({ page }) => {
     const list = popup.querySelector('.select-list')!
     return {
       项: popup.querySelectorAll('[role=option]').length,
-      高: Math.round(popup.getBoundingClientRect().height),
+      高: (popup as HTMLElement).offsetHeight,
       内距:
         parseFloat(getComputedStyle(popup).paddingBlockStart) * 2 +
         parseFloat(getComputedStyle(popup).borderTopWidth) * 2,
       可滚: list.scrollHeight > list.clientHeight + 1,
-      箭头: [...popup.querySelectorAll('.select-arrow')].map((el) => Math.round(el.getBoundingClientRect().height)),
+      箭头: [...popup.querySelectorAll('.select-arrow')].map((el) => (el as HTMLElement).offsetHeight),
     }
   })
   expect(long.项).toBe(30)
@@ -345,11 +344,11 @@ test('lists the five groups and their states', async ({ page }) => {
     const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
     const search = popup.querySelector('.select-search')!
     return {
-      高: Math.round(popup.getBoundingClientRect().height),
+      高: (popup as HTMLElement).offsetHeight,
       内距:
         parseFloat(getComputedStyle(popup).paddingBlockStart) * 2 +
         parseFloat(getComputedStyle(popup).borderTopWidth) * 2,
-      搜索高: Math.round(search.getBoundingClientRect().height),
+      搜索高: (search as HTMLElement).offsetHeight,
       可滚: popup.querySelector('.select-list')!.scrollHeight > popup.querySelector('.select-list')!.clientHeight + 1,
     }
   })
