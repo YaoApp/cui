@@ -11,6 +11,7 @@
   "base.sub.types": "types",
   "base.sub.variants": "variants",
   "base.sub.sizes": "sizes and states",
+  "base.sub.icon": "icon buttons",
   "base.sub.states": "states",
   "base.sub.empty": "empty",
   "base.sub.options": "options",

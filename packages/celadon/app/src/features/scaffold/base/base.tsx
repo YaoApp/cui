@@ -398,7 +398,7 @@ export function BasePage() {
         </div>
         {/* 形态：与变体同一组，第二排是全圆角胶囊，七个变体逐个对应 */}
         <div className="base-row">
-          {(['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
+          {(['solid', 'soft', 'ghost', 'plain', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
             <Button key={variant} variant={variant} shape="pill">
               {variant} · pill
             </Button>
@@ -409,7 +409,7 @@ export function BasePage() {
             悬停、按下、聚焦用设计类的静态态（真实交互由伪类驱动）。
             禁用与加载在各样式下表现相同，单独一行共用，不逐样式重复。 */}
         <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
-        {(['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
+        {(['solid', 'soft', 'ghost', 'plain', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
           <div className="base-row" key={variant}>
             <Button variant={variant}>{variant} · default</Button>
             <Button variant={variant} state="hover">
@@ -444,14 +444,14 @@ export function BasePage() {
           ] as const
         ).flatMap(([size, label]) => [
           <div className="base-row" key={`${size}-rounded`}>
-            {(['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
+            {(['solid', 'soft', 'ghost', 'plain', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
               <Button key={variant} variant={variant} size={size}>
                 {label} · {variant}
               </Button>
             ))}
           </div>,
           <div className="base-row" key={`${size}-pill`}>
-            {(['solid', 'soft', 'ghost', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
+            {(['solid', 'soft', 'ghost', 'plain', 'warn', 'success', 'danger', 'inverse'] as const).map((variant) => (
               <Button key={variant} variant={variant} size={size} shape="pill">
                 pill {label} · {variant}
               </Button>
@@ -461,6 +461,54 @@ export function BasePage() {
         <div className="base-row">
           <Button variant="inverse" block>
             {t('base.action.block')}
+          </Button>
+        </div>
+
+        {/* 图标按钮：只放图标，方形，边长等于该档的控件高度。
+            带底与不带底由 variant 决定：solid / soft / inverse 有底，plain 无底无框（悬停才给浅底）。
+            图标按钮没有可见文字，可访问名一律由 aria-label 给。 */}
+        <h3 className="base-subgroup__title">{t('base.sub.icon')}</h3>
+        <div className="base-row">
+          <Button variant="solid" iconOnly aria-label="icon solid">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="soft" iconOnly aria-label="icon soft">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="plain" iconOnly aria-label="icon plain">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="inverse" iconOnly aria-label="icon inverse">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="plain" iconOnly shape="pill" aria-label="icon plain pill">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="soft" iconOnly disabled aria-label="icon disabled">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="plain" iconOnly disabled aria-label="icon plain disabled">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="soft" iconOnly loading aria-label="icon loading">
+            <Icon name="i-plus" size={16} />
+          </Button>
+        </div>
+        <div className="base-row">
+          <Button variant="soft" size="small" iconOnly aria-label="icon small">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="soft" size="medium" iconOnly aria-label="icon medium">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="soft" size="large" iconOnly aria-label="icon large">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="plain" size="small" iconOnly aria-label="icon plain small">
+            <Icon name="i-plus" size={16} />
+          </Button>
+          <Button variant="plain" size="large" iconOnly aria-label="icon plain large">
+            <Icon name="i-plus" size={16} />
           </Button>
         </div>
       </section>

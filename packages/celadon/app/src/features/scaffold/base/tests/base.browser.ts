@@ -220,6 +220,30 @@ test('lists the six groups and their states', async ({ page }) => {
   )
   await expect(selectTrigger('select disabled')).toBeDisabled()
 
+  /* 图标按钮：方形，边长等于该档的控件高度；带底与不带底分别是 `solid` 与 `plain`。
+     plain 静止透明、悬停才给浅底；加载时指示器顶替图标，方形里不同时放两件东西。 */
+  const iconButton = (label: string) => page.locator(`button[aria-label="${label}"]`)
+  const iconGround = (label: string) => iconButton(label).evaluate((el) => getComputedStyle(el).backgroundColor)
+  const iconBoxes = await page.evaluate(() =>
+    ['icon small', 'icon medium', 'icon large'].map((label) => {
+      const el = document.querySelector(`button[aria-label="${label}"]`) as HTMLElement
+      return { 宽: Math.round(el.getBoundingClientRect().width), 高: Math.round(el.getBoundingClientRect().height) }
+    }),
+  )
+  expect(iconBoxes.map((box) => box.宽)).toEqual([24, 32, 40])
+  expect(iconBoxes.map((box) => box.高)).toEqual([24, 32, 40])
+  expect(await iconGround('icon solid')).not.toBe('rgba(0, 0, 0, 0)')
+  expect(await iconGround('icon plain')).toBe('rgba(0, 0, 0, 0)')
+  await iconButton('icon plain').hover()
+  await page.waitForTimeout(150)
+  const hoverGround = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.celadon') ?? document.documentElement).getPropertyValue('--background-hover').trim(),
+  )
+  expect(await iconGround('icon plain')).toBe(hexToRgb(hoverGround))
+  expect(
+    await iconButton('icon loading').locator('.button__label').evaluate((el) => getComputedStyle(el).display),
+  ).toBe('none')
+
   /* 打开弹层：选项齐、禁用项标了禁用、选中之后触发器文字跟着变 */
   await selectTrigger('select default').click()
   await expect(page.getByRole('listbox')).toBeVisible()
@@ -711,10 +735,12 @@ test('lists the six groups and their states', async ({ page }) => {
   expect(await paintOf(loadingInput)).toBe(await paintOf(page.locator('#demo-state-default')))
   await expect(loadingInput).toHaveAttribute('aria-busy', 'true')
 
-  /* 按钮的加载态仍用圆环：它需要占用内容位置，与输入框的边框流光分工不同 */
+  /* 按钮的加载态仍用圆环：它需要占用内容位置，与输入框的边框流光分工不同。
+     每一个加载按钮都要有指示器（不写死数量，加了样例也不会失效）。 */
   const buttonSpinner = page.locator('.button.is-loading .spinner')
-  await expect(buttonSpinner).toHaveCount(1)
-  await expect(buttonSpinner).toBeVisible()
+  expect(await buttonSpinner.count()).toBe(await page.locator('.button.is-loading').count())
+  expect(await buttonSpinner.count()).toBeGreaterThan(0)
+  await expect(buttonSpinner.first()).toBeVisible()
 
   /* 错误态的类必须落在控件本体上：设计类的规则写在 `.input` 上 */
   await expect(errorField).toHaveClass(/is-error/)

@@ -943,6 +943,9 @@
   /* 形态档：胶囊（全圆角）。必须写在三个尺寸块之后，否则会被尺寸给的圆角盖掉 */
   /* 焦点环走 token；真实伪类与静态类都认，静态类供清单页并排展示 */
   /* 反色档：原型里登录页主操作（Next）的暗底按钮。底色与文字都取反色档自己的 token，同样不带边框。 */
+  /* 纯文字档（无底无框）：只有内容与悬停的浅底，用在工具栏与图标按钮上，与「幽灵」档不同 ——
+     幽灵是白底加浅描边，属有底的次级按钮。文字静止取次要色，悬停提到主色并给一层浅底，
+     与输入框纯文字档同一套表现。 */
   /* 整宽档：表单主操作用 */
   /* 加载态：禁用交互。指示器用 `.spinner`，与输入框共用一套圆环 */
 }
@@ -1003,12 +1006,67 @@
   color: var(--text-disabled);
   border-color: var(--background-disabled);
 }
+.button--plain {
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary);
+}
+.button--plain:not(.is-disabled, :disabled):hover,
+.button--plain.is-hover {
+  background: var(--background-hover);
+  color: var(--text-primary);
+}
+.button--plain:not(.is-disabled, :disabled):active,
+.button--plain.is-active {
+  /* 按下只做 F4 press 场景的缩放，不换色 */
+  transform: scale(0.94);
+}
+.button--plain:focus-visible,
+.button--plain.is-focus {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+.button--plain:disabled,
+.button--plain.is-disabled {
+  background: transparent;
+  color: var(--text-disabled);
+}
 .button--block {
   inline-size: 100%;
   padding-inline: var(--spacing-16);
 }
 .button.is-loading {
   cursor: progress;
+}
+/* 图标按钮：只放图标的方形按钮。边长等于该档的控件高度（24 · 32 · 40），横向内距归零，图标在正中；
+   这几条比尺寸块多一个类，权重更高，因此能压过尺寸块给的横向内距。胶囊形态下方形随之变成正圆。
+   图标取图标梯里的两档（16 与 20 = 16 + 4），由这里统一给，调用方传的 size 会被覆盖，三档不会各写各的。
+   带底与不带底由 `variant` 决定：`solid` 与 `soft` 有底，`ghost` 无底（悬停才给一层浅底）。
+   加载时指示器顶替图标，方形里不同时放两件东西。
+   写在 `.button` 块**之外**：嵌套在块内会编译成 `.button .button--icon`，两个类在同一元素上，永不匹配。 */
+.button--icon {
+  padding-inline: 0;
+}
+.button--icon.button--small {
+  inline-size: var(--spacing-24);
+}
+.button--icon.button--medium {
+  inline-size: var(--spacing-32);
+}
+.button--icon.button--large {
+  inline-size: calc(var(--spacing-32) + var(--spacing-8));
+}
+.button--icon.button--small .icon,
+.button--icon.button--medium .icon {
+  inline-size: var(--spacing-16);
+  block-size: var(--spacing-16);
+}
+.button--icon.button--large .icon {
+  inline-size: calc(var(--spacing-16) + var(--spacing-4));
+  block-size: calc(var(--spacing-16) + var(--spacing-4));
+}
+.button--icon.is-loading .button__label {
+  display: none;
 }
 /* 按钮里的图标与文字：用 flex 居中 + 统一间距（与 nav 同一机制）。
    设计类给了四态与配色，没给这一处的布局 —— 组件只管设计类没有的。 */

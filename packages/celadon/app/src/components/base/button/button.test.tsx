@@ -15,6 +15,26 @@ describe('Button', () => {
     expect(screen.getByRole('button', { name: '取消' })).toHaveClass('btn-ghost')
   })
 
+  it('the plain variant is our own class and takes no design background', () => {
+    /* 纯文字档没有底也没有框，因此不该挂任何 `.btn-*` 设计类（那些类都会给底或描边） */
+    render(<Button variant="plain">更多</Button>)
+    const button = screen.getByRole('button', { name: '更多' })
+    expect(button).toHaveClass('button--plain')
+    expect(button.className).not.toMatch(/btn-/)
+  })
+
+  it('takes the icon-only class and the accessible name from aria-label', () => {
+    /* 图标按钮没有可见文字，名字只能来自 aria-label */
+    render(
+      <Button variant="plain" iconOnly aria-label="添加">
+        <span data-testid="mark" />
+      </Button>,
+    )
+    const button = screen.getByRole('button', { name: '添加' })
+    expect(button).toHaveClass('button--icon')
+    expect(button.querySelector('[data-testid="mark"]')).not.toBeNull()
+  })
+
   it('calls back once when clicked', async () => {
     const onClick = vi.fn()
     render(<Button onClick={onClick}>刷新</Button>)
