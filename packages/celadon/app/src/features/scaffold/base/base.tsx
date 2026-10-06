@@ -511,6 +511,49 @@ export function BasePage() {
             <Icon name="i-plus" size={16} />
           </Button>
         </div>
+
+        {/* 图标与文字并排：图标在前（默认）或在后，图标档随按钮尺寸走，文字仍是调用方的四语文案 */}
+        <h3 className="base-subgroup__title">{t('base.sub.iconText')}</h3>
+        <div className="base-row">
+          <Button variant="solid" icon={<Icon name="i-plus" size={16} />}>
+            solid · icon start
+          </Button>
+          <Button variant="soft" icon={<Icon name="i-plus" size={16} />}>
+            soft · icon start
+          </Button>
+          <Button variant="plain" icon={<Icon name="i-plus" size={16} />}>
+            plain · icon start
+          </Button>
+          <Button variant="inverse" icon={<Icon name="i-plus" size={16} />}>
+            inverse · icon start
+          </Button>
+          <Button variant="soft" icon={<Icon name="i-down" size={16} />} iconPosition="end">
+            soft · icon end
+          </Button>
+          <Button variant="plain" icon={<Icon name="i-down" size={16} />} iconPosition="end" disabled>
+            plain · icon end disabled
+          </Button>
+          <Button variant="soft" icon={<Icon name="i-plus" size={16} />} loading>
+            soft · icon loading
+          </Button>
+        </div>
+        <div className="base-row">
+          <Button variant="soft" size="small" icon={<Icon name="i-plus" size={16} />}>
+            small · icon
+          </Button>
+          <Button variant="soft" size="medium" icon={<Icon name="i-plus" size={16} />}>
+            medium · icon
+          </Button>
+          <Button variant="soft" size="large" icon={<Icon name="i-plus" size={16} />}>
+            large · icon
+          </Button>
+          <Button variant="plain" size="small" icon={<Icon name="i-plus" size={16} />}>
+            small · plain icon
+          </Button>
+          <Button variant="plain" size="large" icon={<Icon name="i-plus" size={16} />}>
+            large · plain icon
+          </Button>
+        </div>
       </section>
 
       <section className="base-group">

@@ -244,6 +244,20 @@ test('lists the six groups and their states', async ({ page }) => {
     await iconButton('icon loading').locator('.button__label').evaluate((el) => getComputedStyle(el).display),
   ).toBe('none')
 
+  /* 图标与文字并排：按钮高仍走三档梯子，图标随档位取 16 · 16 · 20（与图标按钮同一条梯子） */
+  const iconTextBoxes = await page.evaluate(() =>
+    ['small · icon', 'medium · icon', 'large · icon'].map((text) => {
+      const el = [...document.querySelectorAll('button')].find((button) => button.textContent?.includes(text)) as HTMLElement
+      const icon = el.querySelector('.icon') as HTMLElement
+      return {
+        高: Math.round(el.getBoundingClientRect().height),
+        图标: Math.round(icon.getBoundingClientRect().width),
+      }
+    }),
+  )
+  expect(iconTextBoxes.map((box) => box.高)).toEqual([24, 32, 40])
+  expect(iconTextBoxes.map((box) => box.图标)).toEqual([16, 16, 20])
+
   /* 打开弹层：选项齐、禁用项标了禁用、选中之后触发器文字跟着变 */
   await selectTrigger('select default').click()
   await expect(page.getByRole('listbox')).toBeVisible()

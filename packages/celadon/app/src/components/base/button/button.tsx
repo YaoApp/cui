@@ -21,7 +21,11 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
       带底与不带底由 `variant` 决定：`solid` 与 `soft` 有底，`ghost` 无底（悬停才给一层浅底）。
       图标按钮没有可见文字，**必须**给 `aria-label`，否则按钮没有可访问名。 */
   iconOnly?: boolean
-  children: ReactNode
+  /** 图标与文字并排时的图标，位置由 `iconPosition` 给（默认在前）。
+      图标显示档随按钮尺寸取 16 · 16 · 20（与图标按钮同一条梯子），调用方传的 size 会被覆盖。 */
+  icon?: ReactNode
+  iconPosition?: 'start' | 'end'
+  children?: ReactNode
 }
 
 /* 视觉来自 design/tokens.less 里已定稿的 .btn-* 类（单一来源），组件不重新发明样式；
@@ -48,6 +52,8 @@ export function Button({
   loading = false,
   state,
   iconOnly = false,
+  icon,
+  iconPosition = 'start',
   className,
   children,
   disabled,
@@ -69,7 +75,11 @@ export function Button({
   return (
     <BaseButton className={classes} disabled={disabled || loading} aria-busy={loading || undefined} {...rest}>
       {loading ? <Spinner /> : null}
-      <Label>{children}</Label>
+      <Label>
+        {icon && iconPosition === 'start' ? icon : null}
+        {children}
+        {icon && iconPosition === 'end' ? icon : null}
+      </Label>
     </BaseButton>
   )
 }

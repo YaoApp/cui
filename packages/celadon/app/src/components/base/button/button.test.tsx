@@ -35,6 +35,18 @@ describe('Button', () => {
     expect(button.querySelector('[data-testid="mark"]')).not.toBeNull()
   })
 
+  it('puts the icon before or after the label as asked', () => {
+    const start = render(<Button icon={<span data-testid="lead" />}>保存</Button>)
+    expect(start.container.querySelector('.button__label')?.firstElementChild).toHaveAttribute('data-testid', 'lead')
+
+    const end = render(
+      <Button icon={<span data-testid="trail" />} iconPosition="end">
+        保存
+      </Button>,
+    )
+    expect(end.container.querySelector('.button__label')?.lastElementChild).toHaveAttribute('data-testid', 'trail')
+  })
+
   it('calls back once when clicked', async () => {
     const onClick = vi.fn()
     render(<Button onClick={onClick}>刷新</Button>)

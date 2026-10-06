@@ -26,6 +26,7 @@ export type I18nKey =
   | 'base.sub.groups'
   | 'base.sub.icon'
   | 'base.sub.iconSizes'
+  | 'base.sub.iconText'
   | 'base.sub.longList'
   | 'base.sub.messages'
   | 'base.sub.multiple'
@@ -279,6 +280,7 @@ declare module 'i18next' {
         'base.sub.groups': string
         'base.sub.icon': string
         'base.sub.iconSizes': string
+        'base.sub.iconText': string
         'base.sub.longList': string
         'base.sub.messages': string
         'base.sub.multiple': string
