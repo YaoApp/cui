@@ -464,7 +464,7 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(rowMotion.名).toBe('none')
   expect(rowMotion.变换).toBe('none')
   await page.locator('.select-popup:visible [role=option]', { hasText: 'Dark' }).first().click()
-  /* 选中瞬间触发器就填上新标签；弹层在退场期间保持打开时的宽度，不跟着触发器改宽改位 */
+  /* 弹层在退场期间保持打开时的宽度，不跟着触发器改宽改位；标签在它完全消失之后才填上 */
   const exitWidths: number[] = []
   for (let index = 0; index < 4; index += 1) {
     exitWidths.push(
@@ -473,7 +473,7 @@ test('lists the five groups and their states', async ({ page }) => {
     await page.waitForTimeout(20)
   }
   expect([...new Set(exitWidths.filter((width) => width > 0))].length).toBeLessThanOrEqual(1)
-  expect((await placeholderSample.textContent())?.trim()).toBe('Dark')
+  await expect(placeholderSample).toContainText('Dark')
   /* 退场只淡出：带 data-ending-style 时仍不得有位移或缩放 */
   await page.waitForTimeout(30)
   const leaving = await page.evaluate(() => {
@@ -524,9 +524,9 @@ test('lists the five groups and their states', async ({ page }) => {
     await page.waitForTimeout(300)
   }
   await chooseOption('Light')
-  expect((await reselectSample.textContent())?.trim()).toBe('Light')
+  await expect(reselectSample).toHaveText('Light')
   await chooseOption('Light')
-  expect((await reselectSample.textContent())?.trim()).not.toBe('Light')
+  await expect(reselectSample).not.toHaveText('Light')
 
   /* 空态：没有选项时弹层给说明，触发器显示占位文字 */
   expect(await selectTrigger('select empty').textContent()).not.toBe('')

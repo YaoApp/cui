@@ -106,6 +106,11 @@ export function Select(props: SelectProps) {
      下一次打开时（onOpenChange(true)）解除记忆，重新按当时的触发器宽度量。 */
   const [frozenWidth, setFrozenWidth] = useState<number | null>(null)
   const popupRef = useRef<HTMLDivElement | null>(null)
+  /* 单选：选中后先把值挂起，等弹层完全消失再回传给调用方。
+     触发器标签因此不会在退场过程中改宽，弹层既不跳宽也不跳位。 */
+  const [pendingValue, setPendingValue] = useState<string | null>(null)
+  const popupOpen = useRef(false)
+  const commitValue = useRef<((next: string) => void) | null>(null)
 
   const classes = [
     'input',
@@ -182,12 +187,13 @@ export function Select(props: SelectProps) {
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         {/* 间距归排布者：弹层与触发器的 4px 间隙由定位器给，组件样式里不带外边距（layout.md 第 3 节） */}
-        <BaseSelect.Positioner className="select__positioner" alignItemWithTrigger={false} sideOffset={4}>
+        <BaseSelect.Positioner className="select__positioner" align="start" alignItemWithTrigger={false} sideOffset={4}>
           <BaseSelect.Popup
             ref={popupRef}
             className={['select-popup', searchable ? 'select-popup--search' : null].filter(Boolean).join(' ')}
             style={frozenWidth === null ? undefined : { inlineSize: `${frozenWidth}px` }}
-            /* 进场结束时记住宽度，退场结束时解除；只认透明度事件，避免位移事件重复触发 */
+            /* 进场结束时记住宽度，退场结束时解除；只认透明度事件，避免位移事件重复触发。
+               挂起的新值不在这里回传：上游在弹层完全消失后另有回调（见 handleOpenChangeComplete）。 */
             onTransitionEnd={(event) => {
               if (event.propertyName !== 'opacity') return
               const element = event.currentTarget
@@ -249,8 +255,17 @@ export function Select(props: SelectProps) {
   /* 打开与关闭时清掉筛选词：下次打开从完整列表开始；
      打开时解除上一轮记住的宽度，关闭后重新量一次（见弹层的 frozenWidth） */
   const handleOpenChange = (open: boolean) => {
+    popupOpen.current = open
     if (open) setFrozenWidth(null)
     else setQuery('')
+  }
+
+  /* 弹层完全打开或完全消失之后上游才回调：关闭完成时把挂起的新值交给调用方，
+     触发器标签与宽度因此都在弹层看不见之后才变，弹层不会跟着跳 */
+  const handleOpenChangeComplete = (open: boolean) => {
+    if (open || pendingValue === null) return
+    commitValue.current?.(pendingValue)
+    setPendingValue(null)
   }
 
   if (props.multiple) {
@@ -263,6 +278,7 @@ export function Select(props: SelectProps) {
         items={items}
         disabled={disabled}
         onOpenChange={handleOpenChange}
+        onOpenChangeComplete={handleOpenChangeComplete}
       >
         {content}
       </BaseSelect.Root>
@@ -270,21 +286,22 @@ export function Select(props: SelectProps) {
   }
 
   const { value, onValueChange } = props
+  commitValue.current = (next: string) => onValueChange(next)
   return (
     <BaseSelect.Root
       value={value as string}
-      /* 单选：再次点选已选中项即取消，回传空串；空值项被选中时上游回传 null，也归一成空串。 */
+      /* 单选：弹层打开着就先把新值挂起，等它完全消失再回传，触发器宽度因此不在退场中变化。
+         再次点选已选中项与空值项都归一成空串。 */
       onValueChange={(next) => {
-        if (next === value) {
-          onValueChange('')
-          return
-        }
-        onValueChange((next ?? '') as string)
+        const normalized = next === value ? '' : ((next ?? '') as string)
+        if (popupOpen.current) setPendingValue(normalized)
+        else onValueChange(normalized)
       }}
       items={items}
       disabled={disabled}
       required={required}
       onOpenChange={handleOpenChange}
+      onOpenChangeComplete={handleOpenChangeComplete}
     >
       {content}
     </BaseSelect.Root>
