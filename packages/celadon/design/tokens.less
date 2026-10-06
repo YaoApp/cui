@@ -608,7 +608,7 @@
      高亮用中性悬停底，选中用品牌浅底加品牌文字，禁用沿用禁用字色。
      弹层与触发器的间距由排布者（定位器）给，组件不带外边距，见 layout.md 第 3 节。 */
   .select-popup { box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;
-    padding: var(--spacing-4); --select-search-height: 0px;
+    padding: var(--spacing-4); --select-search-height: 0px; --select-arrow-reserve: 0px;
     /* 内距加边框的合计：整行取整与滚动区都要减掉它 */
     --select-popup-inset: calc(var(--spacing-8) + var(--border-width) * 2);
     background: var(--background-surface); border: var(--border-width) solid var(--border-default);
@@ -625,12 +625,16 @@
       transition-duration: var(--duration-fast); transition-timing-function: var(--easing-accelerate); } }
   /* 带筛选框时把它的高度也算进最大高度，否则整行的取整会把筛选框挤出去 */
   .select-popup--search { --select-search-height: calc(var(--spacing-24) + var(--spacing-12)); }
+  /* 滚动箭头是浮层：列表按箭头高度预留上下空间，箭头只压在内距上，不压选项。
+     预留量同时并入整行取整的算式，列表的选项区因此仍是整行。 */
+  .select-popup:has(.select-arrow) { --select-arrow-reserve: var(--spacing-24); }
+  .select-popup:has(.select-arrow--up) { --select-arrow-reserve: calc(var(--spacing-24) * 2); }
   /* 弹层最大高度对齐成**整行**：可用高度减内距与筛选框高度后向下取整到行高档，再加回去，
      列表底部就不会露出半行。round() 还不可用的运行时按上面的可用高度走，不影响可用性。
      函数名与整段值用 ~"" 转义，避免被 Less 自己的 round() 抢先求值。 */
   @supports ~"(max-block-size: round(down, 100px, 40px))" {
     .select-popup {
-      max-block-size: ~"calc(max(var(--row-height), round(down, var(--available-height, var(--spacing-48)) - var(--select-popup-inset) - var(--select-search-height), var(--row-height))) + var(--select-popup-inset) + var(--select-search-height))";
+      max-block-size: ~"calc(max(var(--row-height), round(down, var(--available-height, var(--spacing-48)) - var(--select-popup-inset) - var(--select-search-height) - var(--select-arrow-reserve), var(--row-height))) + var(--select-popup-inset) + var(--select-search-height) + var(--select-arrow-reserve))";
     }
   }
   .select-popup__empty { padding: var(--spacing-4) var(--spacing-12);
@@ -655,6 +659,10 @@
      scroll-padding 让键盘移动时被高亮的项不会停在箭头底下。 */
   .select-list { display: flex; flex-direction: column; box-sizing: border-box;
     flex: 1; min-block-size: 0; overflow: auto; scroll-padding-block: var(--spacing-24); }
+  /* 箭头高度从列表的**盒子**里让出去（外边距，不是内距）：列表的可见高度因此是整行，
+     箭头的浮层落在这段让出的空档上，任何滚动位置下都不会压住选项。 */
+  .select-popup:has(.select-arrow) .select-list { margin-block-end: var(--spacing-24); }
+  .select-popup:has(.select-arrow--up) .select-list { margin-block-start: var(--spacing-24); }
   /* 分组标题：说明档字号、三级文字，行内距与选项对齐，因此标题与选项左边缘成一条线 */
   .select-group-label { padding: var(--spacing-4) var(--spacing-12);
     color: var(--text-tertiary); font-size: var(--font-size-caption); font-weight: var(--font-weight-medium); }
