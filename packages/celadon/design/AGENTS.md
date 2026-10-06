@@ -7,8 +7,9 @@
 
 | 路径 | 内容 | 状态 |
 | --- | --- | --- |
-| [`tokens.less`](tokens.less) | **设计 token 唯一来源**（浅 + 暗，作用域 `.celadon`）+ 用法约定 | 现行 |
-| [`tokens.css`](tokens.css) | 由 `tokens.less` 生成（`node packages/celadon/scripts/build-css.mjs`）| 生成物，勿手改 |
+| [`tokens.less`](tokens.less) | **设计 token 唯一来源**（定义：浅 + 暗变量 · 无障碍与对比度偏好 · 动效强度 · 语言字体栈 · 作用域继承属性，作用域 `.celadon`） | 现行 |
+| [`components.less`](components.less) · [`samples.less`](samples.less) · [`utilities.less`](utilities.less) | 组件设计类的汇总入口、设计页样例类与工具类（组件自己的样式在各 `app/src/components/base/<组件>/` 里） | 现行 |
+| [`tokens.css`](tokens.css) | 由 `tokens.less` + `components.less` 生成（`node packages/celadon/scripts/build-css.mjs`）| 生成物，勿手改 |
 | [`color-card.html`](color-card.html) · [`color-card.md`](color-card.md) | **色卡**：色值与尺寸实时读 `tokens.css`；对比度按真实内容底实算 | 现行 |
 | [`foundations.html`](foundations.html) · [`foundations.md`](foundations.md) | **基线六项**：间距 · 圆角 · 层级 · 动效 · 边框 · 三栏竖分割 | 现行 |
 | [`typography.html`](typography.html) · [`typography.md`](typography.md) | **排版规范**：语义档位 · 颜色角色与特殊处理 · 行宽 · 文种与字栈 · 等宽字体 · 多语言混排 · 可达性 · 出处 | 现行（2026-10-06）|

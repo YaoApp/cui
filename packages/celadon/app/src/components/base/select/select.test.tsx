@@ -266,4 +266,32 @@ describe('Select', () => {
 
     expect(onValueChange).toHaveBeenCalledWith('')
   })
+
+  it('keeps the field look in its own class instead of borrowing the input class', () => {
+    /* 触发器与输入框共用字段外观（同一批 token），但不共用类与行为：见 select.less 顶部说明。 */
+    render(<Select aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />)
+    const trigger = screen.getByRole('combobox', { name: 'Theme' })
+
+    expect(trigger).toHaveClass('select-trigger', 'select__trigger')
+    expect(trigger).not.toHaveClass('input')
+    expect(trigger).not.toHaveClass('input--trigger')
+  })
+
+  it('carries the plain form and each size step', () => {
+    const { rerender } = render(
+      <Select variant="plain" size="small" aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />,
+    )
+    const trigger = screen.getByRole('combobox', { name: 'Theme' })
+
+    expect(trigger).toHaveClass('select-trigger--plain', 'select-trigger--small')
+
+    rerender(<Select size="large" aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />)
+    expect(trigger).toHaveClass('select-trigger--large')
+  })
+
+  it('carries the loading state class', () => {
+    render(<Select state="loading" aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />)
+
+    expect(screen.getByRole('combobox', { name: 'Theme' })).toHaveClass('is-loading')
+  })
 })

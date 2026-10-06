@@ -42,8 +42,9 @@ type SelectBaseProps = {
   /** 错误态：边框与聚焦环走危险色，与输入框同一套规则（设计类 `.is-error`）。 */
   error?: boolean
   disabled?: boolean
-  /** 静态态：把设计类的 `is-*` 写在触发器上，供清单页与设计稿并排展示多态。 */
-  state?: 'hover' | 'focus'
+  /** 静态态：把设计类的 `is-*` 写在触发器上，供清单页与设计稿并排展示多态。
+      `loading` 与字段本体同一档：只换指针与右侧槽位的圆环，不动底色与文字。 */
+  state?: 'hover' | 'focus' | 'loading'
   /** 顶部加筛选输入框，按选项标签文本过滤。标签不是字符串时按它的文本内容比较。 */
   searchable?: boolean
   /** 筛选输入框的可访问名与占位文字，由调用方给四语文案 */

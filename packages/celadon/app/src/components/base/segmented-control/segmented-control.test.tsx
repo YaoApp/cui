@@ -77,4 +77,50 @@ describe('SegmentedControl', () => {
     await userEvent.keyboard('{ArrowLeft}')
     expect(onValueChange).toHaveBeenLastCalledWith('system')
   })
+
+  it('carries the static state class on the selected segment so one page can show several states', () => {
+    /* 状态落在**被选中的那一段**上：外壳只有选中标记，交互状态由段自己表达（见组件注释）。 */
+    render(
+      <SegmentedControl aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} state="hover" />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Light' })).toHaveClass('is-on', 'is-hover')
+    expect(screen.getByRole('button', { name: 'Dark' })).not.toHaveClass('is-hover')
+  })
+
+  it('marks the selected segment with the on class and its own pressed state', () => {
+    render(<SegmentedControl aria-label="Theme" value="dark" onValueChange={() => {}} options={OPTIONS} />)
+
+    const selected = screen.getByRole('button', { name: 'Dark' })
+    expect(selected).toHaveClass('is-on')
+    expect(selected).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Light' })).not.toHaveClass('is-on')
+  })
+
+  it('renders a disabled segment without letting it take focus', async () => {
+    render(
+      <SegmentedControl
+        aria-label="Theme"
+        value="light"
+        onValueChange={() => {}}
+        options={[OPTIONS[0], OPTIONS[1], { ...OPTIONS[2], disabled: true }]}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Dark' })).toBeDisabled()
+  })
+
+  it('keeps the caller class on the shell', () => {
+    render(
+      <SegmentedControl
+        aria-label="Theme"
+        value="light"
+        onValueChange={() => {}}
+        options={OPTIONS}
+        className="seg-in-toolbar"
+      />,
+    )
+
+    expect(screen.getByRole('group', { name: 'Theme' })).toHaveClass('seg', 'seg-in-toolbar')
+  })
 })

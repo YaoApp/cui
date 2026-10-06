@@ -50,4 +50,51 @@ describe('Input', () => {
     rerender(<Input {...props} shake={2} />)
     await waitFor(() => expect(control).toHaveClass('is-shake'))
   })
+
+  it('puts the static state class on the control, not on the field frame', () => {
+    /* 设计类的规则都写在 `.input` 上；加在字段框上不会生效（这是清单页并排展示多态的前提）。 */
+    render(<Input id="account" label="账号" state="hover" />)
+    const control = screen.getByLabelText('账号')
+
+    expect(control).toHaveClass('input', 'is-hover')
+    expect(control.closest('.field__box')).not.toHaveClass('is-hover')
+  })
+
+  it('marks the field frame when it carries an error, and the control keeps the error class', () => {
+    render(<Input id="account" label="账号" error="账号已被占用" />)
+    const control = screen.getByLabelText('账号')
+
+    expect(control).toHaveClass('is-error')
+    expect(control.closest('.field__box')).toHaveClass('is-error')
+    expect(screen.getByText('账号已被占用')).toHaveClass('hint-error')
+  })
+
+  it('draws the left icon slot as decoration and keeps it out of the accessibility tree', () => {
+    const { container } = render(<Input id="account" label="账号" icon={<span data-testid="lead" />} />)
+    const slot = container.querySelector('.field__icon')
+
+    expect(slot).not.toBeNull()
+    expect(slot).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('shows the ring in the right slot while loading and marks the control busy', () => {
+    const { container } = render(<Input id="account" label="账号" state="loading" />)
+    const control = screen.getByLabelText('账号')
+    const slot = container.querySelector('.field__trail')
+
+    expect(control).toHaveAttribute('aria-busy', 'true')
+    expect(slot).not.toBeNull()
+    expect(slot?.querySelector('.spinner')).not.toBeNull()
+  })
+
+  it('keeps the caller trailing slot instead of stacking a second one', () => {
+    const { container } = render(
+      <Input id="account" label="账号" state="loading" trailing={<button type="button">显示</button>} />,
+    )
+    const slots = container.querySelectorAll('.field__trail')
+
+    expect(slots).toHaveLength(1)
+    expect(slots[0].querySelector('.spinner')).toBeNull()
+    expect(screen.getByRole('button', { name: '显示' })).toBeInTheDocument()
+  })
 })

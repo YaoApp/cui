@@ -63,7 +63,12 @@
 
 ## 组件草图与状态
 
-`tokens.less` 末尾附**组件草图**（`.btn-primary` / `.btn-ghost` / `.input` / `.badge-*` / `.bubble-*` / `.nav-item.is-active` …），色卡「控件状态」面板即实时渲染这些类。
+**组件草图按组件分文件**：`.input` 在 `app/src/components/base/input/input.less`，`.btn-*` 在 `button/button.less`，
+`.seg*` 在 `segmented-control/segmented-control.less`，选择器的触发器与弹层在 `select/select.less`，
+`.spinner` 在 `spinner/spinner.less`；设计页样例类（`.badge-*` / `.bubble-*` / `.nav-item.is-active`）在 `design/samples.less`，
+工具类（`.link` / `.code*` / `.scrim` / `.focusable`）在 `design/utilities.less`。
+设计页消费的 `design/tokens.css` 由 `design/components.less` 汇总上述文件生成；`tokens.less` 只放 token 定义。
+色卡「控件状态」面板即实时渲染这些类。
 
 - **输入框六态**：默认 / 悬停 / 聚焦 / 占位 / 只读 / 禁用 / 错误；
 - **按钮五态**：默认 / 悬停 / 按下 / 聚焦 / 禁用；
