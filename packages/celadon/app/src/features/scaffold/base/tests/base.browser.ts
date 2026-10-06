@@ -952,17 +952,21 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     expect(disabled.底).toBe(hexToRgb(tokens.禁用底))
     expect(invalid.框).toBe(hexToRgb(tokens.危险))
 
-    /* 悬停是**中间态**：浅底加一档更深的边界，既不等于默认，也不等于选中。
+    /* 悬停是**中间态**，而且挂在**整行**上：指针落在文字上时方框要一起变。
        选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上" */
     const hoverTarget = page.locator('.checkbox:has(#demo-check-default)')
     await page.mouse.move(2, 2)
+    await page.waitForTimeout(150)
+    const restBox = await read('demo-check-default')
     const restLabel = await hoverTarget.locator('.checkbox__label').evaluate((el) => getComputedStyle(el).color)
     expect(restLabel).toBe(hexToRgb(tokens.次文字))
-    await hoverTarget.locator('.checkbox__box').hover()
+    await hoverTarget.locator('.checkbox__label').hover()
     await page.waitForTimeout(150)
-    const [hoverBox, hoverLabel] = await Promise.all([read('demo-check-default'), hoverTarget.locator('.checkbox__label').evaluate((el) => getComputedStyle(el).color)])
+    const hoverBox = await read('demo-check-default')
+    const hoverLabel = await hoverTarget.locator('.checkbox__label').evaluate((el) => getComputedStyle(el).color)
     expect(hoverBox.底).toBe(hexToRgb(tokens.悬停底))
     expect(hoverBox.框).toBe(hexToRgb(tokens.悬停边界))
+    expect(hoverBox.底).not.toBe(restBox.底)
     expect(hoverBox.底).not.toBe(hexToRgb(tokens.反色底))
     expect(hoverLabel).toBe(hexToRgb(tokens.主文字))
     expect(hoverLabel).not.toBe(restLabel)
@@ -972,20 +976,20 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     /* 已选中的悬停换选中族自己的中间档：与静止的选中态也分得开 */
     await page.mouse.move(2, 2)
     await page.waitForTimeout(100)
-    await page.locator('.checkbox:has(#demo-check-checked) .checkbox__box').hover()
+    await page.locator('.checkbox:has(#demo-check-checked) .checkbox__label').hover()
     await page.waitForTimeout(150)
     const checkedHover = await read('demo-check-checked')
     expect(checkedHover.底).toBe(hexToRgb(tokens.反色悬停底))
     expect(checkedHover.底).not.toBe(hexToRgb(tokens.反色底))
 
-    /* 只读没有悬停：底、边界与标签都保持静止档 */
+    /* 只读没有悬停：底、边界与标签都保持静止档（指针落在文字上也是一样） */
     await page.mouse.move(2, 2)
     await page.waitForTimeout(100)
     const readonlyRest = await read('demo-check-readonly')
     const readonlyLabelRest = await page
       .locator('.checkbox:has(#demo-check-readonly) .checkbox__label')
       .evaluate((el) => getComputedStyle(el).color)
-    await page.locator('.checkbox:has(#demo-check-readonly) .checkbox__box').hover()
+    await page.locator('.checkbox:has(#demo-check-readonly) .checkbox__label').hover()
     await page.waitForTimeout(150)
     const readonlyHover = await read('demo-check-readonly')
     expect(readonlyHover.底).toBe(readonlyRest.底)
@@ -993,18 +997,6 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     expect(
       await page.locator('.checkbox:has(#demo-check-readonly) .checkbox__label').evaluate((el) => getComputedStyle(el).color),
     ).toBe(readonlyLabelRest)
-
-    /* 按下：与按钮同一条 F4 press 规则，整体缩到 0.94 */
-    await page.mouse.move(2, 2)
-    await page.waitForTimeout(100)
-    const pressTarget = page.locator('.checkbox:has(#demo-check-default) .checkbox__box')
-    const pressBox = await pressTarget.boundingBox()
-    await page.mouse.move(pressBox!.x + pressBox!.width / 2, pressBox!.y + pressBox!.height / 2)
-    await page.mouse.down()
-    await page.waitForTimeout(200)
-    const pressed = await pressTarget.evaluate((el) => getComputedStyle(el).transform)
-    await page.mouse.up()
-    expect(Math.abs(Number(pressed.match(/matrix\(([\d.]+)/)?.[1] ?? '1') - 0.94)).toBeLessThan(0.01)
 
     /* 勾与横杠的出现照 F4 的 fade 场景：--duration-base 加减速缓动 */
     const mark = await page.locator('.checkbox:has(#demo-check-checked) .checkbox__mark').evaluate((el) => {

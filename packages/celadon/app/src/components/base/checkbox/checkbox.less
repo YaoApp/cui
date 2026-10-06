@@ -25,23 +25,7 @@
     transition:
       background-color var(--duration-fast) var(--easing-standard),
       border-color var(--duration-fast) var(--easing-standard),
-      box-shadow var(--duration-fast) var(--easing-standard),
-      transform var(--duration-fast) var(--easing-standard);
-
-    /* 悬停是**中间态**：给一层浅底与一档更深的边界，既不等于默认，也不等于选中。
-       选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上"。
-       只读与禁用不参与悬停：只读可以聚焦与读取，但不给任何交互反馈。 */
-    &:not([data-disabled], [data-readonly]):hover,
-    &.is-hover {
-      background: var(--background-hover);
-      border-color: var(--border-hover-strong);
-    }
-
-    /* 按下：与按钮同一条规则（F4 的 press 场景），只做整体缩放，不换色 */
-    &:not([data-disabled], [data-readonly]):active {
-      transform: scale(.94);
-      will-change: transform;
-    }
+      box-shadow var(--duration-fast) var(--easing-standard);
 
     /* 聚焦：点击不加环，只有键盘聚焦加环（焦点操作完还挂在控件上，一直挂着环会吵） */
     &:focus {
@@ -54,20 +38,13 @@
       outline: none;
     }
 
-    /* 选中与不确定：底换成反色族，勾与横杠取反色文字；悬停取选中族自己的中间档，
-       这样"已选中"与"已选中且正悬停"也分得开。
-       这两条必须带上悬停与键盘聚焦的变体：它们与基础档同权重或更高，不复位就会被盖掉。 */
+    /* 选中与不确定：底换成反色族，勾与横杠取反色文字。
+       悬停与键盘聚焦的变体见文件下方：悬停挂在**整行**上，聚焦挂在本体上。 */
     &[data-checked],
     &[data-indeterminate] {
       background: var(--background-inverse);
       border-color: var(--background-inverse);
       color: var(--text-inverse);
-
-      &:not([data-disabled], [data-readonly]):hover,
-      &.is-hover {
-        background: var(--background-inverse-hover);
-        border-color: var(--background-inverse-hover);
-      }
 
       &:focus-visible,
       &.is-focus {
@@ -125,8 +102,27 @@
     min-block-size: calc(var(--spacing-24) + var(--spacing-8));
   }
 
+  /* 悬停是**中间态**：一层浅底加一档更深的边界，既不等于默认，也不等于选中。
+     状态挂在**整行**上：可点区域是整行，指针落在文字上时方框要一起变，
+     否则鼠标停在文字上只有文字变色、方框纹丝不动，看着像两个东西。
+     选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上"。
+     只读与禁用不参与：只读可以聚焦与读取，但不给任何交互反馈。 */
+  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box,
+  .checkbox__box.is-hover {
+    background: var(--background-hover);
+    border-color: var(--border-hover-strong);
+  }
+
+  /* 已选中的悬停换选中族自己的中间档：这样"已选中"与"已选中且正悬停"也分得开 */
+  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-checked],
+  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-indeterminate],
+  .checkbox__box[data-checked].is-hover,
+  .checkbox__box[data-indeterminate].is-hover {
+    background: var(--background-inverse-hover);
+    border-color: var(--background-inverse-hover);
+  }
+
   /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
-     复选框的可点区域是**整行**，只改 1px 的方框边界在整行尺度上读不出反馈，文字要一起动；
      选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
      颜色过渡照 F4 的 hover 与 focus 场景：快档加标准缓动。 */
   .checkbox__label {

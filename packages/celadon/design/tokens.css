@@ -1032,8 +1032,13 @@
      与选择器的选中标记同一处理。 */
   /* 不确定态的横杠：宽度取间距刻度里的一半档，两端圆角，颜色随方框的文字色 */
   /* 标签行：整行取不小于 32 的点击高度（layout.md 第 6 节），点标签等于点方框 */
+  /* 悬停是**中间态**：一层浅底加一档更深的边界，既不等于默认，也不等于选中。
+     状态挂在**整行**上：可点区域是整行，指针落在文字上时方框要一起变，
+     否则鼠标停在文字上只有文字变色、方框纹丝不动，看着像两个东西。
+     选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上"。
+     只读与禁用不参与：只读可以聚焦与读取，但不给任何交互反馈。 */
+  /* 已选中的悬停换选中族自己的中间档：这样"已选中"与"已选中且正悬停"也分得开 */
   /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
-     复选框的可点区域是**整行**，只改 1px 的方框边界在整行尺度上读不出反馈，文字要一起动；
      选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
      颜色过渡照 F4 的 hover 与 focus 场景：快档加标准缓动。 */
   /* 悬停的整行反馈要排除只读与禁用：只读没有悬停，禁用连指针都不是手型。
@@ -1056,31 +1061,14 @@
   border: var(--border-width) solid var(--border-control-strong);
   border-radius: var(--radius-xs);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--easing-standard), border-color var(--duration-fast) var(--easing-standard), box-shadow var(--duration-fast) var(--easing-standard), transform var(--duration-fast) var(--easing-standard);
-  /* 悬停是**中间态**：给一层浅底与一档更深的边界，既不等于默认，也不等于选中。
-       选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上"。
-       只读与禁用不参与悬停：只读可以聚焦与读取，但不给任何交互反馈。 */
-  /* 按下：与按钮同一条规则（F4 的 press 场景），只做整体缩放，不换色 */
+  transition: background-color var(--duration-fast) var(--easing-standard), border-color var(--duration-fast) var(--easing-standard), box-shadow var(--duration-fast) var(--easing-standard);
   /* 聚焦：点击不加环，只有键盘聚焦加环（焦点操作完还挂在控件上，一直挂着环会吵） */
-  /* 选中与不确定：底换成反色族，勾与横杠取反色文字；悬停取选中族自己的中间档，
-       这样"已选中"与"已选中且正悬停"也分得开。
-       这两条必须带上悬停与键盘聚焦的变体：它们与基础档同权重或更高，不复位就会被盖掉。 */
+  /* 选中与不确定：底换成反色族，勾与横杠取反色文字。
+       悬停与键盘聚焦的变体见文件下方：悬停挂在**整行**上，聚焦挂在本体上。 */
   /* 错误是持续状态：未选中与已选中的边界都取危险色（错了也要看得出选没选，底不因此改变） */
   /* 禁用写在最后：与选中、错误两条同权重，靠源序压过它们 */
   /* 只读：可聚焦也可读，但不接受改动，边界与底按常态画，指针保持默认 */
   /* 加载：只把指针换成进行中；16 的方框容不下圆环，状态由控件的 aria-busy 表达 */
-}
-.celadon .checkbox__box:not([data-disabled], [data-readonly]):hover,
-[data-theme] .celadon .checkbox__box:not([data-disabled], [data-readonly]):hover,
-.celadon .checkbox__box.is-hover,
-[data-theme] .celadon .checkbox__box.is-hover {
-  background: var(--background-hover);
-  border-color: var(--border-hover-strong);
-}
-.celadon .checkbox__box:not([data-disabled], [data-readonly]):active,
-[data-theme] .celadon .checkbox__box:not([data-disabled], [data-readonly]):active {
-  transform: scale(0.94);
-  will-change: transform;
 }
 .celadon .checkbox__box:focus,
 [data-theme] .celadon .checkbox__box:focus {
@@ -1100,17 +1088,6 @@
   background: var(--background-inverse);
   border-color: var(--background-inverse);
   color: var(--text-inverse);
-}
-.celadon .checkbox__box[data-checked]:not([data-disabled], [data-readonly]):hover,
-[data-theme] .celadon .checkbox__box[data-checked]:not([data-disabled], [data-readonly]):hover,
-.celadon .checkbox__box[data-indeterminate]:not([data-disabled], [data-readonly]):hover,
-[data-theme] .celadon .checkbox__box[data-indeterminate]:not([data-disabled], [data-readonly]):hover,
-.celadon .checkbox__box[data-checked].is-hover,
-[data-theme] .celadon .checkbox__box[data-checked].is-hover,
-.celadon .checkbox__box[data-indeterminate].is-hover,
-[data-theme] .celadon .checkbox__box[data-indeterminate].is-hover {
-  background: var(--background-inverse-hover);
-  border-color: var(--background-inverse-hover);
 }
 .celadon .checkbox__box[data-checked]:focus-visible,
 [data-theme] .celadon .checkbox__box[data-checked]:focus-visible,
@@ -1163,6 +1140,24 @@
   align-items: center;
   gap: var(--spacing-8);
   min-block-size: calc(var(--spacing-24) + var(--spacing-8));
+}
+.celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box,
+[data-theme] .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box,
+.celadon .checkbox__box.is-hover,
+[data-theme] .celadon .checkbox__box.is-hover {
+  background: var(--background-hover);
+  border-color: var(--border-hover-strong);
+}
+.celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-checked],
+[data-theme] .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-checked],
+.celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-indeterminate],
+[data-theme] .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__box[data-indeterminate],
+.celadon .checkbox__box[data-checked].is-hover,
+[data-theme] .celadon .checkbox__box[data-checked].is-hover,
+.celadon .checkbox__box[data-indeterminate].is-hover,
+[data-theme] .celadon .checkbox__box[data-indeterminate].is-hover {
+  background: var(--background-inverse-hover);
+  border-color: var(--background-inverse-hover);
 }
 .celadon .checkbox__label,
 [data-theme] .celadon .checkbox__label {
