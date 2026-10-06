@@ -11,6 +11,7 @@
      圆角取最小档，方框的形状不跟控件尺寸档走。 */
   .checkbox__box {
     position: relative;
+    z-index: 1;
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -109,14 +110,27 @@
   }
 
   /* 标签行：整行取不小于 32 的点击高度（layout.md 第 6 节），点标签等于点方框。
-     行宽取内容宽，悬停的那层浅底因此贴着方框与标签，不会横贯整列。 */
+     行宽取内容宽，悬停的那层浅底因此贴着方框与标签，不会横贯整列。
+     悬停的浅底画在伪元素上，向两侧各多让一个 8 的呼吸位（列表项的内距档），内容因此不贴边；
+     用伪元素而不是给行加内距或外边距：加内距会把方框推离字段左边缘，加外边距则违反
+     "外边距归排布者、组件不设外边距"。方框与标签压在表面之上，指针进入这段留白同样算悬停。 */
   .checkbox__row {
+    position: relative;
     display: flex;
     align-items: center;
     gap: var(--spacing-8);
     inline-size: fit-content;
     min-block-size: calc(var(--spacing-24) + var(--spacing-8));
-    border-radius: var(--radius-small);
+
+    &::before {
+      content: '';
+      position: absolute;
+      z-index: 0;
+      inset-block: 0;
+      inset-inline: calc(-1 * var(--spacing-8));
+      border-radius: var(--radius-small);
+      background: transparent;
+    }
   }
 
   /* 悬停画在**表面**上：整行一层浅底，方框的底、边界与勾一律不动。
@@ -124,8 +138,8 @@
      选中之后不会表达不出悬停，悬停也不会被误读成选中态迈出的半步。
      16px 的方框容不下第二个信号：换底那一档实测只有 1.16:1，换边界则是深底配一圈暖灰边，两种材料拼在一起。
      只读与禁用不参与：只读可以聚焦与读取，但不给任何交互反馈。 */
-  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover,
-  .checkbox.is-hover .checkbox__row {
+  .checkbox__row:not(:has([data-readonly], [data-disabled])):hover::before,
+  .checkbox.is-hover .checkbox__row::before {
     background: var(--background-hover);
   }
 
@@ -133,6 +147,8 @@
      选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
      同样**不做过渡**：悬停是频繁重复的微交互，按 F4 的规则不动效，瞬时切换。 */
   .checkbox__label {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     min-block-size: calc(var(--spacing-24) + var(--spacing-8));
