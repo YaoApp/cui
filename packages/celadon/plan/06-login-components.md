@@ -20,7 +20,7 @@
 | 1 | `input` | `input` | `components/base/input/` | `id`、`label`、`type`、`value`、`onChange`、`error`、`hint`、`icon`、`trailing`、`autoComplete`、`disabled`、`state`、`shake` | **已完成**（2026-10-06，单元用例 7 条；七个状态与错误抖动在清单页有浏览器断言） |
 | 2 | `captcha-field` | 无，基于 `input` | `components/base/captcha-field/` | `id`、`image`、`value`、`onChange`、`onRefresh`、`error`、`disabled` | 未开始 |
 | 3 | `otp-field` | `otp-field` | `components/base/otp-field/` | `id`、`value`、`onChange`、`error`、`disabled` | 未开始 |
-| 4 | `checkbox` | `checkbox` | `components/base/checkbox/` | `id`、`checked`、`onChange`、`label`、`error` | 未开始 |
+| 4 | `checkbox` | `checkbox` | `components/base/checkbox/` | `id`、`label`、`hint`、`error`、`checked`、`defaultChecked`、`onCheckedChange`、`indeterminate`、`disabled`、`readOnly`、`required`、`name`、`value`、`size`、`state`、`className` | **已完成**（2026-10-06，单元用例 15 条；**选中与不确定态取反色族** `--background-inverse` 与 `--text-inverse`，不取品牌色，未选中的边界取 `--border-control-strong`，浅暗两套实测均 ≥ 3:1；方框中档 16 · 大档 20，标签行不小于 32 的点击高度；标签带 `{id}-label`，上游写在方框上的 `aria-labelledby` 因此念得出名字；回调用上游的 `onCheckedChange`，禁用与只读按上游表达为 `aria-disabled` 与 `aria-readonly`；清单页按属性、状态、尺寸三组共 20 个样例列出，浏览器用例量浅暗两套的底、边界、标记与方框尺寸） |
 | 19 | `spinner` | 无 | `components/base/spinner/` | `className` | **已完成**（2026-10-06；两瓣圆环，头端圆帽、尾端收尖，尺寸 16，一周 `--duration-loop`，减动效停转；输入框与按钮共用） |
 | 25 | `segmented-control` | 无 | `components/base/segmented-control/` | `inverse` · `disabled` · `state` · `className` | **已完成**（2026-10-06；互斥分段选择，观感取设计类 `.seg` / `.seg--inverse` / `.seg__icon`，选中段 `.is-on` 与 `aria-pressed`，左右方向键在段间移动并即时选中，整组或单段可禁用；清单页按默认、反色、带图标、禁用与静态悬停／聚焦四档列出） |
 
@@ -32,9 +32,9 @@
 | # | 组件 | 上游对应 | 要补的东西 | 状态 |
 | --- | --- | --- | --- | --- |
 | 5 | `button` | `button` | 七个变体（实心 · 浅底 · 幽灵 · 琥珀 · 成功 · 危险 · 反色）× 四态（默认 · 悬停 · 按下 · 聚焦）+ 禁用与加载；三档尺寸 24 / 32 / 40；两种形态（常规圆角与胶囊）；整宽档 | **已完成**（2026-10-06；加载态共用 `spinner`，图标槽仍未做，见 2.6） |
-| 6 | `select` | `select` | 错误态与尺寸档；触发器外观与 `input` 统一；分组与富选项；多选与筛选；纯文字档与反色档；可取消选择 | **已完成**（2026-10-06；触发器挂 `.input` 并带图标槽，共用字段外观（底、描边、圆角与尺寸档），文本输入专有的行为（聚焦提亮底色、占位色、只读底）只作用于 `<input>` 元素，触发器是按钮语义、聚焦只加环不改底色，三档尺寸与输入框共用 `.input--small` / 默认 / `.input--large`；形态 `variant` 有字段档与纯文字档 `.input--plain`（无底无框，用于标题栏与工具条），图标可置末尾 `.iconPosition="end"` 并可关掉指示器 `indicator={false}`；反色档 `inverse` 取设计类 `.input--inverse`，底色与文字取反色族、边框去掉；取消选择是默认行为：再点一次已选中项即取消，另可用空值项（`value: null`）给一个显式的清除项，两者都回传空串、触发器回到占位文字，`required` 只关表单校验；弹层与选项为 `.select-popup` / `.select-list` / `.select-item`，选项支持左侧图标、第二行说明（两行时按内容长高）、右侧附加内容与选中标记，选项支持 `groups` 分组并带组标题；单行选项行高取 `--row-height` 40；支持 `multiple` 多选与 `searchable` 筛选（含无命中说明）；滚动容器为列表本身，上下箭头为浮层，弹层最大高度按 `--row-height` 对齐整行；指示器与选中标记用本仓图标 `i-down` 与 `i-check`；占位、空态、搜索与无命中文案由调用方给四语） |
-| 7 | `icon` | 无 | 新增邮件、锁、眼睛、隐藏眼睛、礼盒、地球、太阳与月亮八个图标；改 `design/icons/manifest.json` 后跑生成脚本 | 未开始（选择器与滚动箭头需要的 `i-down`、`i-up`，以及语言与主题控件的 `i-globe`、`i-sun`、`i-moon` 已先行加入，清单 72 个） |
-| 8 | `brand-mark` | 无 | 补单元用例，它是四件里唯一没有用例的 | 未开始 |
+| 6 | `select` | `select` | 错误态与尺寸档；触发器外观与 `input` 统一；分组与富选项；多选与筛选；纯文字档与反色档；可取消选择 | **已完成**（2026-10-06；触发器用自己的 `.select-trigger`，不挂输入框的类：字段外观（底、描边、圆角与尺寸档）与输入框取同一批 token，行为各写各的，触发器是按钮语义、点击不加环、只有键盘聚焦加环、聚焦不改底色，三档尺寸 24 / 34 / 40 与输入框同高；形态 `variant` 有字段档与纯文字档 `.select-trigger--plain`（无底无框，用于标题栏与工具条），图标可置末尾 `.iconPosition="end"` 并可关掉指示器 `indicator={false}`；反色档 `inverse` 取设计类 `.select-trigger--inverse`，底色与文字取反色族、任何状态都不描边；取消选择是默认行为：再点一次已选中项即取消，另可用空值项（`value: null`）给一个显式的清除项，两者都回传空串、触发器回到占位文字，`required` 只关表单校验；弹层与选项为 `.select-popup` / `.select-list` / `.select-item`，选项支持左侧图标、第二行说明（两行时按内容长高）、右侧附加内容与选中标记，选项支持 `groups` 分组并带组标题；单行选项行高取 `--row-height` 40；支持 `multiple` 多选与 `searchable` 筛选（含无命中说明）；滚动容器为列表本身，上下箭头为浮层，弹层最大高度按 `--row-height` 对齐整行；指示器与选中标记用本仓图标 `i-down` 与 `i-check`；占位、空态、搜索与无命中文案由调用方给四语） |
+| 7 | `icon` | 无 | 新增邮件、锁、眼睛、隐藏眼睛、礼盒、地球、太阳与月亮八个图标；改 `design/icons/manifest.json` 后跑生成脚本 | 未开始（选择器与滚动箭头需要的 `i-down`、`i-up`，语言与主题控件的 `i-globe`、`i-sun`、`i-moon`，以及复选框的 `i-check` 已先行加入，清单 76 个） |
+| 8 | `brand-mark` | 无 | 补单元用例，它是四件里唯一没有用例的 | **已完成**（2026-10-06，单元用例 5 条：类名与雪碧图指向、尺寸档、装饰与带名字两种角色、调用方类名不被顶掉） |
 
 ### 2.3 主题与语言切换
 

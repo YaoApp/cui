@@ -6,7 +6,10 @@ import 'i18next'
 /** 基准语言里存在的全部 key —— `t('…')` 只接受这些。 */
 export type I18nKey =
   | 'base.action.block'
+  | 'base.checkbox.label'
+  | 'base.checkbox.labelLong'
   | 'base.group.button'
+  | 'base.group.checkbox'
   | 'base.group.icon'
   | 'base.group.input'
   | 'base.group.select'
@@ -255,7 +258,10 @@ declare module 'i18next' {
     resources: {
       translation: {
         'base.action.block': string
+        'base.checkbox.label': string
+        'base.checkbox.labelLong': string
         'base.group.button': string
+        'base.group.checkbox': string
         'base.group.icon': string
         'base.group.input': string
         'base.group.select': string

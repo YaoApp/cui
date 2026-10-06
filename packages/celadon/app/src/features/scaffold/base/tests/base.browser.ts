@@ -12,13 +12,34 @@ const shot = (page: Page, name: string) => capturePage(page, join(SHOTS, `${name
 /* 取出一个 CSS 值里的全部数字：计算值会把 .4 补成 0.4，缓动与颜色都按数值比，避免格式差异误判 */
 const curveNumbers = (value: string) => (value.match(/-?\d*\.?\d+/g) ?? []).map(Number)
 
-test('lists the five groups and their states', async ({ page }) => {
+/* 相对亮度与对比度：按 WCAG 的定义算，用来核 1.4.11 要求的 3:1 */
+const channel = (value: number) => {
+  const s = value / 255
+  return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+}
+const relLum = (rgb: string) => {
+  const [r, g, b] = (rgb.match(/\d+/g) ?? []).map(Number)
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+}
+const contrast = (a: string, b: string) => {
+  const [x, y] = [relLum(a), relLum(b)]
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
+}
+
+/* token 读出来是十六进制字面量，计算样式给的是 rgb()，比较前统一换算 */
+const hexToRgb = (hex: string) => {
+  const value = Number.parseInt(hex.replace('#', ''), 16)
+  return `rgb(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255})`
+}
+
+test('lists the six groups and their states', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 1100 })
   await page.goto('/app/scaffold/base')
 
   /* 分组标题走四语语言包，默认语言是中文；组件名保留英文作为 API 名称（本地化文档的惯例） */
   await expect(page.locator('.base-group__title')).toHaveText([
     '输入 Input',
+    '复选框 Checkbox',
     '按钮 Button',
     '选择器 Select',
     '图标与品牌 Icon & BrandMark',
@@ -26,8 +47,9 @@ test('lists the five groups and their states', async ({ page }) => {
   ])
   /* 子组标题同样随语言走，证明页面文案确实接进了语言包 */
   await expect(page.locator('.base-subgroup__title').first()).toHaveText('属性')
-  await expect(page.getByText('显示在字段下方')).toBeVisible()
-  await expect(page.getByText('以危险色显示')).toBeVisible()
+  /* 两条消息文案在输入组与复选框组都用：定位要落在输入组里，否则同一个文案命中两处 */
+  await expect(page.locator('.field:has(#demo-hint) .field__hint')).toHaveText('显示在字段下方')
+  await expect(page.locator('.field:has(#demo-error) .hint-error')).toHaveText('以危险色显示')
 
   /* 输入：右侧槽位必须落在字段框之内。曾经因为本体没占满弹性行，槽位落到字段框右边界之外 */
   const trailingField = page.locator('#demo-trailing')
@@ -42,12 +64,12 @@ test('lists the five groups and their states', async ({ page }) => {
   /* 输入：错误态要有可见文字，并经 aria-describedby 与控件关联，颜色取危险色的文字档 */
   const errorField = page.locator('#demo-error')
   await expect(errorField).toHaveAttribute('aria-describedby', 'demo-error-error')
-  const errorText = page.getByText('以危险色显示')
+  const errorText = page.locator('.field:has(#demo-error) .hint-error')
   await expect(errorText).toBeVisible()
   await expect(errorText).toHaveClass(/hint-error/)
   const [errorColor, hintColor] = await Promise.all([
     errorText.evaluate((el) => getComputedStyle(el).color),
-    page.getByText('显示在字段下方').evaluate((el) => getComputedStyle(el).color),
+    page.locator('.field:has(#demo-hint) .field__hint').evaluate((el) => getComputedStyle(el).color),
   ])
   expect(errorColor).not.toBe(hintColor)
   /* 提示与错误到字段框下沿的间距必须一致：上游部件自带外边距会得到两个值 */
@@ -415,11 +437,6 @@ test('lists the five groups and their states', async ({ page }) => {
     }
   })
   expect(segmented.默认.段).toBe(3)
-  /* token 读出来是十六进制字面量，计算样式给的是 rgb()，比较前统一换算 */
-  const hexToRgb = (hex: string) => {
-    const value = Number.parseInt(hex.replace('#', ''), 16)
-    return `rgb(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255})`
-  }
   expect(segmented.默认.组底).not.toBe(segmented.反色.组底)
   expect(segmented.反色.组底).toBe(hexToRgb(segmented.反色底token))
   expect(segmented.图标.图标).toBe(3)
@@ -857,4 +874,85 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(await paintOf(loadingInput)).toBe(await paintOf(page.locator('#demo-state-default')))
 
   await shot(page, 'dark')
+})
+
+/* 复选框：选中底取反色族而不是品牌色（选中是持续状态，要自己成立，不是交互中的临时高亮），
+   未选中的边界只对内容底成立并核到 3:1，不确定态换一条横杠，禁用与错误都要看得出选没选。
+   浅暗两套各量一次，尺寸档同时核到像素。 */
+test('draws the checkbox with an inverse checked state and a compliant boundary', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1100 })
+
+  const read = (id: string) =>
+    page.locator(`.checkbox:has(#${id}) .checkbox__box`).evaluate((box) => {
+      const cs = getComputedStyle(box)
+      return {
+        底: cs.backgroundColor,
+        框: cs.borderTopColor,
+        标记: cs.color,
+        横杠: Boolean(box.querySelector('.checkbox__dash')),
+        高: (box as HTMLElement).offsetHeight,
+      }
+    })
+  const labelHeight = (id: string) =>
+    page.locator(`.checkbox:has(#${id}) .checkbox__label`).evaluate((el) => (el as HTMLElement).offsetHeight)
+
+  for (const theme of ['light', 'dark'] as const) {
+    /* 主题在**页面载入时**决定（跟随系统），改媒体偏好后必须重载；载入后先确认真的切过去了，
+       否则量到的还是上一套，断言会自洽但无效。 */
+    await page.emulateMedia({ colorScheme: theme })
+    await page.goto('/app/scaffold/base', { waitUntil: 'networkidle' })
+    expect(
+      await page.evaluate(
+        () => getComputedStyle(document.querySelector('.celadon') ?? document.documentElement).colorScheme,
+      ),
+    ).toBe(theme)
+
+    /* 两套主题的 token 取值不同，本轮才读，浅色读到的值不能拿去比暗色 */
+    const tokens = await page.evaluate(() => {
+      const root = getComputedStyle(document.querySelector('.celadon') ?? document.documentElement)
+      const pick = (name: string) => root.getPropertyValue(name).trim()
+      return {
+        反色底: pick('--background-inverse'),
+        反色字: pick('--text-inverse'),
+        内容底: pick('--background-surface'),
+        强边界: pick('--border-control-strong'),
+        品牌: pick('--brand'),
+        禁用底: pick('--background-disabled'),
+        危险: pick('--danger'),
+      }
+    })
+    const [off, on, partial, disabled, invalid] = await Promise.all([
+      read('demo-check-default'),
+      read('demo-check-checked'),
+      read('demo-check-partial'),
+      read('demo-check-disabled'),
+      read('demo-check-invalid'),
+    ])
+
+    /* 未选中：不填底，边界只对内容底成立，要 ≥ 3:1（1.4.11） */
+    expect(off.底).toBe('rgba(0, 0, 0, 0)')
+    expect(off.框).toBe(hexToRgb(tokens.强边界))
+    expect(contrast(off.框, hexToRgb(tokens.内容底))).toBeGreaterThanOrEqual(3)
+
+    /* 选中：反色底与反色标记，且不等于品牌色 */
+    expect(on.底).toBe(hexToRgb(tokens.反色底))
+    expect(on.底).not.toBe(hexToRgb(tokens.品牌))
+    expect(on.标记).toBe(hexToRgb(tokens.反色字))
+
+    /* 不确定：同一处理，标记换成横杠 */
+    expect(partial.底).toBe(hexToRgb(tokens.反色底))
+    expect(partial.横杠).toBe(true)
+
+    /* 禁用与错误：禁用只换底，错误只换边界 */
+    expect(disabled.底).toBe(hexToRgb(tokens.禁用底))
+    expect(invalid.框).toBe(hexToRgb(tokens.危险))
+  }
+
+  /* 尺寸：中档方框 16 · 大档 20，标签行都不小于 32 的点击高度（layout.md 第 6 节） */
+  await page.emulateMedia({ colorScheme: 'light' })
+  await page.goto('/app/scaffold/base', { waitUntil: 'networkidle' })
+  const [medium, large] = await Promise.all([read('demo-check-medium'), read('demo-check-large')])
+  expect(medium.高).toBe(16)
+  expect(large.高).toBe(20)
+  expect(await labelHeight('demo-check-medium')).toBeGreaterThanOrEqual(32)
 })

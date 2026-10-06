@@ -1,6 +1,6 @@
 import './base.less'
 import { useState } from 'react'
-import { BrandMark, Button, Icon, Input, SegmentedControl, Select } from '@/components/base'
+import { BrandMark, Button, Checkbox, Icon, Input, SegmentedControl, Select } from '@/components/base'
 import type { SegmentedOption, SelectGroup } from '@/components/base'
 import { LocaleSwitch } from '@/components/locale-switch'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -53,6 +53,9 @@ export function BasePage() {
   const [longChoice, setLongChoice] = useState('item-0')
   /* 错误抖动的重放计数：同名动画不会自行重跑，靠 key 让节点重挂载 */
   const [shakeTick, setShakeTick] = useState(0)
+  /* 复选框样例各自的取值：受控组件要真的能改，样例才有意义 */
+  const [termsAccepted, setTermsAccepted] = useState(true)
+  const [updatesOn, setUpdatesOn] = useState(false)
   /* 主题与语言用真实的偏好源，不自造局部状态（与首页同一套） */
   const { theme: activeTheme, setTheme: selectActiveTheme } = useThemePreference()
   /* 两个多选样例各自的选中集：受控组件要真的能改，样例才有意义 */
@@ -287,6 +290,63 @@ export function BasePage() {
             placeholder="0"
             value={account}
             onChange={(e) => setAccount(e.target.value)}
+          />
+        </div>
+      </section>
+
+      <section className="base-group">
+        <h2 className="base-group__title">{t('base.group.checkbox')}</h2>
+
+        {/* 属性：标签 · 必填 · 提示 · 错误 · 长标签 · 无标签。
+            带消息的样例单独列在这里，错误文案经 aria-describedby 与控件关联 */}
+        <h3 className="base-subgroup__title">{t('base.sub.props')}</h3>
+        <div className="base-grid">
+          <Checkbox
+            id="demo-check-label"
+            label={t('base.checkbox.label')}
+            checked={updatesOn}
+            onCheckedChange={setUpdatesOn}
+          />
+          <Checkbox
+            id="demo-check-required"
+            label="required"
+            required
+            checked={termsAccepted}
+            onCheckedChange={setTermsAccepted}
+          />
+          <Checkbox id="demo-check-hint" label="hint" hint={t('base.message.hint')} />
+          <Checkbox id="demo-check-error" label="error" error={t('base.message.error')} />
+          <Checkbox id="demo-check-long" label={t('base.checkbox.labelLong')} />
+          {/* 空态：没有标签的纯方框，用于表格行里 */}
+          <Checkbox id="demo-check-empty" />
+        </div>
+
+        {/* 状态：选中与不确定都用真实属性，悬停与聚焦用设计类的静态态，禁用与只读用真实属性。
+            这几档的取值互相独立（各自的 defaultChecked），不与属性那一组互相牵动 */}
+        <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
+        <div className="base-grid">
+          <Checkbox id="demo-check-default" label="default" />
+          <Checkbox id="demo-check-hover" label="is-hover" state="hover" />
+          <Checkbox id="demo-check-focus" label="is-focus" state="focus" />
+          <Checkbox id="demo-check-checked" label="checked" defaultChecked />
+          <Checkbox id="demo-check-partial" label="indeterminate" indeterminate />
+          <Checkbox id="demo-check-disabled" label="disabled" disabled />
+          <Checkbox id="demo-check-disabled-on" label="checked disabled" defaultChecked disabled />
+          <Checkbox id="demo-check-invalid" label="is-error" state="error" />
+          <Checkbox id="demo-check-readonly" label="readonly" readOnly defaultChecked />
+          <Checkbox id="demo-check-loading" label="is-loading" state="loading" />
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.sizes')}</h3>
+        <div className="base-grid">
+          <Checkbox id="demo-check-medium" label="medium" defaultChecked />
+          <Checkbox id="demo-check-large" label="large" size="large" defaultChecked />
+          <Checkbox id="demo-check-large-off" label="large" size="large" />
+          <Checkbox
+            id="demo-check-partial-size"
+            label="large indeterminate"
+            size="large"
+            indeterminate
           />
         </div>
       </section>

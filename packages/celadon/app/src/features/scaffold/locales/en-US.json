@@ -1,6 +1,7 @@
 {
   "base.title": "Base components",
   "base.group.input": "Input",
+  "base.group.checkbox": "Checkbox",
   "base.group.button": "Button",
   "base.group.select": "Select",
   "base.group.icon": "Icon & BrandMark",
@@ -26,6 +27,8 @@
   "base.sub.controls": "controls",
   "base.message.hint": "shown under the field",
   "base.message.error": "shown in the danger colour",
+  "base.checkbox.label": "Send me updates",
+  "base.checkbox.labelLong": "Product updates, security alerts and account notices. You can turn them off in settings at any time.",
   "base.action.block": "block (form primary action)",
   "bridge.actions": "Try each one",
   "bridge.appInfo": "App info",
