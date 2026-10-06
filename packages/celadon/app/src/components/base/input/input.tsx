@@ -114,7 +114,7 @@ export function Input({
         ) : null}
         {trailing ? <span className="field__trail">{trailing}</span> : null}
       </div>
-      {/* 消息位始终存在并占一行：没有消息时留空。
+      {/* 消息位只占消息自身的高度：没有消息时不预留下空行。
           否则同一行里有消息的字段比没消息的高，网格行高按最高的算，矮的格子底下会空出一段，
           看上去就像"间距比四周还大"。预留下方一行也是表单的常规做法。 */}
       <div className="field__message">

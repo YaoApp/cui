@@ -31,7 +31,7 @@ type SelectBaseProps = {
   /** 可访问名，落在触发器上（Base UI 的 Trigger 渲染为 role=combobox 的按钮）。 */
   'aria-label': string
   id?: string
-  /** 尺寸：小 24 · 中与输入框同高（约 34）· 大 40。尺寸档与圆角都由设计类 `.input--*` 给。 */
+  /** 尺寸：小 24 · 中 32 · 大 40，与输入框、按钮、复选框同一条梯子。整高由 `min-block-size` 定，圆角按档位取同名 token。 */
   size?: 'small' | 'medium' | 'large'
   /** 无选中项时显示的占位文字；一个选项都没有时也显示它。 */
   placeholder?: ReactNode
@@ -43,7 +43,7 @@ type SelectBaseProps = {
   error?: boolean
   disabled?: boolean
   /** 静态态：把设计类的 `is-*` 写在触发器上，供清单页与设计稿并排展示多态。
-      `loading` 与字段本体同一档：只换指针与右侧槽位的圆环，不动底色与文字。 */
+      `loading` 只把指针换成进行中，不动底色与文字。 */
   state?: 'hover' | 'focus' | 'loading'
   /** 顶部加筛选输入框，按选项标签文本过滤。标签不是字符串时按它的文本内容比较。 */
   searchable?: boolean
@@ -73,7 +73,7 @@ export type SelectProps =
   | (SelectBaseProps & { multiple: true; value: readonly string[]; onValueChange: (value: string[]) => void })
 
 /* 行为与无障碍（role=combobox · 键盘 · 高亮 · 受控值 · 多选）交给 Base UI 的 Select；视觉全部走设计类：
-   触发器用 `.input`，与输入框同一套字段观感、状态与尺寸；弹层用 `.select-popup` 与 `.select-list`，
+   触发器用自己的 `.select-trigger`，与输入框取同一批字段 token（底、描边、圆角、尺寸档），行为各写各的；弹层用 `.select-popup` 与 `.select-list`，
    分组标题用 `.select-group-label`，选项用 `.select-item` 及其内部槽位，滚动箭头用 `.select-arrow`；
    指示器、选中标记与箭头用**我们自己的图标**，不使用上游自带的字形。
    Base UI 不参与配色、没有主题系统，它只用 data-* 暴露状态、用 CSS 变量暴露几何。 */
