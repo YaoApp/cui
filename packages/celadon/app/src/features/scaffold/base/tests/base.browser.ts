@@ -156,6 +156,140 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(await icons.count()).toBeGreaterThanOrEqual(4)
   await expect(page.getByRole('img', { name: 'Yao Agents' })).toBeVisible()
 
+  /* 选择器：指示器必须是我们自己的图标 i-down，不再用上游自带的 ▼；
+     三档高度与输入框对齐（中档同高）、错误态改边框、禁用不可点；弹层能开能选、禁用项不可选；空态有说明。 */
+  const selectTrigger = (label: string) => page.getByRole('combobox', { name: label, exact: true })
+  /* 弹层由 portal 渲染，关闭的那些仍留在 DOM 里：打开后先等**可见的那一个**出现，
+     之后一律在可见弹层内部查询，避免读到已关闭的节点（它们的尺寸是 0）。 */
+  const openSelect = async (label: string) => {
+    await selectTrigger(label).click()
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll('.select-popup')].some((el) => el.getBoundingClientRect().height > 0),
+    )
+  }
+  await expect(selectTrigger('select default')).toBeVisible()
+  const indicator = await selectTrigger('select default').evaluate((el) => ({
+    href: el.querySelector('svg use')?.getAttribute('href') ?? '',
+    上游指示器: el.querySelectorAll('.select__indicator').length,
+  }))
+  expect(indicator.href).toBe('#i-down')
+  expect(indicator.上游指示器).toBe(0)
+
+  const selectHeight = (label: string) =>
+    selectTrigger(label).evaluate((el) => Math.round(el.getBoundingClientRect().height))
+  expect(await selectHeight('select small')).toBe(24)
+  expect(await selectHeight('select large')).toBe(40)
+  /* 中档与输入框同高：字段的观感与高度由同一条规则给出 */
+  expect(await selectHeight('select medium')).toBe(
+    await page.locator('#demo-state-default').evaluate((el) => Math.round(el.getBoundingClientRect().height)),
+  )
+  expect(await selectTrigger('select error').evaluate((el) => getComputedStyle(el).borderTopColor)).not.toBe(
+    await selectTrigger('select default').evaluate((el) => getComputedStyle(el).borderTopColor),
+  )
+  await expect(selectTrigger('select disabled')).toBeDisabled()
+
+  /* 打开弹层：选项齐、禁用项标了禁用、选中之后触发器文字跟着变 */
+  await selectTrigger('select default').click()
+  await expect(page.getByRole('listbox')).toBeVisible()
+  expect(
+    await page
+      .getByRole('option', { name: /Auto/ })
+      .evaluate((el) => el.getAttribute('aria-disabled') ?? el.getAttribute('data-disabled') ?? ''),
+  ).not.toBe('')
+  /* 选项行取列表行高档（点击目标不小于 32），弹层不带外边距（间距归排布者，见 layout.md 第 3 节） */
+  const rowHeight = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.celadon') ?? document.documentElement)
+      .getPropertyValue('--row-height')
+      .trim(),
+  )
+  expect(
+    await page
+      .getByRole('option', { name: 'Light' })
+      .evaluate((el) => Math.round(el.getBoundingClientRect().height)),
+  ).toBe(Math.round(parseFloat(rowHeight)))
+  expect(await page.locator('.select-popup').evaluate((el) => getComputedStyle(el).marginBlockStart)).toBe('0px')
+  await page.getByRole('option', { name: 'Dark' }).click()
+  await expect(selectTrigger('select default')).toContainText('Dark')
+
+  /* 触发器图标槽：带图标的那一档要真的画出图标 */
+  expect(
+    await selectTrigger('select with icon').evaluate((el) => {
+      const svg = el.querySelector('.select__lead svg')
+      return svg ? Math.round(svg.getBoundingClientRect().width) : 0
+    }),
+  ).toBeGreaterThanOrEqual(12)
+
+  /* 分组：组标题与组内选项都在，顺序按数据给 */
+  await openSelect('select groups')
+  const grouped = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    return {
+      组: [...popup.querySelectorAll('.select-group-label')].map((el) => el.textContent?.trim() ?? ''),
+      项: [...popup.querySelectorAll('[role=option]')].length,
+    }
+  })
+  expect(grouped.组).toEqual(['Appearance', 'Language'])
+  expect(grouped.项).toBe(5)
+  await page.keyboard.press('Escape')
+
+  /* 选项图标：每个选项真的画出图标，禁用项仍在 */
+  await openSelect('select icon options')
+  expect(
+    await page.evaluate(() => {
+      const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+      const first = popup.querySelector('.select-item__icon svg')
+      return first ? Math.round(first.getBoundingClientRect().width) : 0
+    }),
+  ).toBeGreaterThanOrEqual(12)
+  await page.keyboard.press('Escape')
+
+  /* 异形布局：两行选项（标签加说明）行高大于单行档位，说明真的渲染 */
+  await openSelect('select rich options')
+  const rich = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    return {
+      行高: [...popup.querySelectorAll('[role=option]')].map((el) => Math.round(el.getBoundingClientRect().height)),
+      说明: popup.querySelectorAll('.select-item__description').length,
+    }
+  })
+  expect(rich.说明).toBe(3)
+  for (const height of rich.行高) {
+    expect(height).toBeGreaterThan(Math.round(parseFloat(rowHeight)))
+  }
+  await page.keyboard.press('Escape')
+
+  /* 右侧附加内容：文字在，行高仍是单行档位 */
+  await openSelect('select trailing options')
+  const trailing = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    const first = popup.querySelector('.select-item__trailing')
+    return {
+      文字: first?.textContent?.trim() ?? '',
+      行高: Math.round(popup.querySelector('[role=option]')!.getBoundingClientRect().height),
+    }
+  })
+  expect(trailing.文字).not.toBe('')
+  expect(trailing.行高).toBe(Math.round(parseFloat(rowHeight)))
+  await page.keyboard.press('Escape')
+
+  /* 长列表：项数齐、弹层高度不超过可用高度 */
+  await openSelect('select long list')
+  const long = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    return { 项: popup.querySelectorAll('[role=option]').length, 高: Math.round(popup.getBoundingClientRect().height) }
+  })
+  expect(long.项).toBe(12)
+  expect(long.高).toBeLessThanOrEqual(
+    await page.evaluate(() => window.innerHeight),
+  )
+  await page.keyboard.press('Escape')
+
+  /* 空态：没有选项时弹层给说明，触发器显示占位文字 */
+  expect(await selectTrigger('select empty').textContent()).not.toBe('')
+  await selectTrigger('select empty').click()
+  await expect(page.locator('.select-popup__empty')).not.toBeEmpty()
+  await page.keyboard.press('Escape')
+
   /* 输入：七个状态逐个有样例，静态态类与错误态都要真的改变被绘制元素的样式，不能只看类名 */
   const stateIds = [
     'demo-state-default',

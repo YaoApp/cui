@@ -13,10 +13,16 @@ export type I18nKey =
   | 'base.group.theme'
   | 'base.message.error'
   | 'base.message.hint'
+  | 'base.select.empty'
+  | 'base.select.placeholder'
   | 'base.sub.brands'
   | 'base.sub.controls'
+  | 'base.sub.empty'
+  | 'base.sub.groups'
   | 'base.sub.iconSizes'
+  | 'base.sub.longList'
   | 'base.sub.messages'
+  | 'base.sub.options'
   | 'base.sub.props'
   | 'base.sub.sizes'
   | 'base.sub.states'
@@ -252,10 +258,16 @@ declare module 'i18next' {
         'base.group.theme': string
         'base.message.error': string
         'base.message.hint': string
+        'base.select.empty': string
+        'base.select.placeholder': string
         'base.sub.brands': string
         'base.sub.controls': string
+        'base.sub.empty': string
+        'base.sub.groups': string
         'base.sub.iconSizes': string
+        'base.sub.longList': string
         'base.sub.messages': string
+        'base.sub.options': string
         'base.sub.props': string
         'base.sub.sizes': string
         'base.sub.states': string

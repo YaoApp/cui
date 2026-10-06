@@ -1,5 +1,6 @@
-/* trigger 的字段观感全部来自设计类 `.input`（组件的 className 里挂着它）——
-   这里只补"它是个按钮而不是输入框"这件事：按钮的默认外观没有靠设计类清掉的部分。 */
+/* 观感来自设计类：触发器挂 `.input`（与输入框同一套字段状态与圆角），
+   弹层与选项是 `.select-popup` 与 `.select-item`，指示器是 `.select-icon`。
+   这里只补设计类没有的**布局与尺寸档**，颜色、半径、阴影、间距一律取 token。 */
 .select__trigger {
   display: inline-flex;
   align-items: center;
@@ -9,50 +10,17 @@
   cursor: pointer;
 }
 
-/* Base UI Select.Icon 自带的 ▼：只调大小与颜色，不换字符、不自绘。 */
-.select__indicator {
-  color: var(--text-secondary);
-  font-size: var(--font-size-label);
+/* 长选项不许把触发器撑开：单行截断 */
+.select__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* 弹层是 Base UI 通过 portal 渲染的自定义结构，设计系统里没有对应类；
-   下面只按 token 写它，不引入颜色/间距字面量。
-   Base UI 在 positioner 上用内联样式定位，并通过 CSS 变量给出锚点几何。 */
+/* 尺寸档不在这里写：它属于字段尺寸档（设计类 `.input--small` / `.input--large`），
+   组件只把对应的类名挂上，输入框将来共用同一套。 */
+
+/* 弹层由 Base UI 通过 portal 渲染，定位几何由它在 positioner 上以内联样式给出 */
 .select__positioner {
   z-index: var(--z-overlay);
-}
-
-.select__popup {
-  min-inline-size: var(--anchor-width, auto);
-  max-block-size: var(--available-height, var(--spacing-48));
-  overflow: auto;
-  padding: var(--spacing-4);
-  background: var(--background-surface);
-  border: var(--border-width) solid var(--border-default);
-  border-radius: var(--radius-medium);
-  box-shadow: var(--shadow-floating);
-  outline: none;
-}
-
-.select__item {
-  padding: var(--spacing-4) var(--spacing-8);
-  border-radius: var(--radius-small);
-  color: var(--text-primary);
-  font-size: var(--font-size-caption);
-  cursor: pointer;
-  user-select: none;
-
-  &[data-highlighted] {
-    background: var(--background-hover);
-  }
-
-  &[data-selected] {
-    background: var(--brand-soft);
-    color: var(--brand-ink);
-  }
-
-  &[data-disabled] {
-    color: var(--text-disabled);
-    cursor: not-allowed;
-  }
 }

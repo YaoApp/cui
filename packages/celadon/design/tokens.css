@@ -555,6 +555,23 @@
      字号取正文档：输入值是内容，不是说明文字；正文行高 1.7 加 4 的块向内距与 1 的边框，
      控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。
      圆角与按钮同一条规则：**按档位取同名 token**。输入框属中档，取 --radius-medium（8px）。 */
+  /* 字段尺寸档：小 24 · 大 40；中档就是上面的 `.input` 本身（与输入框同高，约 34）。
+     必须写在 `.input` **之后**：与基础规则同权重，靠源序取胜。圆角按档位取同名 token，
+     行高同样取整，避免小数几何让文字在重绘时跳动。 */
+  /* 选择器：触发器直接用上面的 `.input`（同一套字段状态与圆角），这里给弹层与选项。
+     弹层是浮层，圆角取弹层档（--radius-medium），阴影取悬浮档；选项与字段同字号，
+     高亮用中性悬停底，选中用品牌浅底加品牌文字，禁用沿用禁用字色。
+     弹层与触发器的间距由排布者（定位器）给，组件不带外边距，见 layout.md 第 3 节。 */
+  /* 选项列表：竖排，行与行之间不留缝（间距由行高自己给） */
+  /* 分组标题：说明档字号、三级文字，行内距与选项对齐，因此标题与选项左边缘成一条线 */
+  /* 选项行**至少**取列表行高档 --row-height（40），满足第 6 节「常用操作不小于 32」的点击目标；
+     用最小高度而不是固定高度，是为了让两行选项（带说明的异形布局）按内容自然长高。
+     纵向内距 8、行内距 12（大于弹层内距 4，符合「卡内间距小于卡片内距」）。 */
+  /* 选项里的图标：与文字间距取固定的 --spacing-4（由行的 gap 给），颜色取二级文字 */
+  /* 选项主体：单行时只有标签，异形布局时标签下面再挂一行说明 */
+  /* 选中标记与右侧附加内容都靠右，二者同时出现时依次排列 */
+  /* 触发器左侧的图标槽，与输入框的图标槽同一位置与颜色 */
+  /* 指示器用我们自己的下箭头图标，颜色取二级文字；不参与点击，尺寸由图标组件给 */
   /* 旋转指示器：按钮与输入框的加载态共用（形状见 `components/base/spinner`）。
      **两瓣四分之一弧，互成 180°**，每瓣头端圆帽、尾端收尖：一瓣读不出圆，两瓣既读得出圆，
      又留出两段空隙看得出在转。用内联 SVG 的填充路径画：边框的端头由斜接决定，做不出圆帽，
@@ -953,6 +970,135 @@
 .celadon .input.is-loading,
 [data-theme] .celadon .input.is-loading {
   cursor: progress;
+}
+.celadon .input--small,
+[data-theme] .celadon .input--small {
+  min-block-size: var(--spacing-24);
+  padding-block: 0;
+  padding-inline: var(--spacing-8);
+  line-height: var(--line-height-control-small);
+  font-size: var(--font-size-caption);
+  border-radius: var(--radius-small);
+}
+.celadon .input--large,
+[data-theme] .celadon .input--large {
+  min-block-size: calc(var(--spacing-32) + var(--spacing-8));
+  padding-inline: var(--spacing-12);
+  line-height: var(--line-height-control);
+  font-size: var(--font-size-body-lg);
+  border-radius: var(--radius-large);
+}
+.celadon .select-popup,
+[data-theme] .celadon .select-popup {
+  padding: var(--spacing-4);
+  background: var(--background-surface);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-floating);
+  outline: none;
+  min-inline-size: var(--anchor-width, auto);
+  max-block-size: var(--available-height, var(--spacing-48));
+  overflow: auto;
+}
+.celadon .select-popup__empty,
+[data-theme] .celadon .select-popup__empty {
+  padding: var(--spacing-4) var(--spacing-12);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+}
+.celadon .select-list,
+[data-theme] .celadon .select-list {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+.celadon .select-group-label,
+[data-theme] .celadon .select-group-label {
+  padding: var(--spacing-4) var(--spacing-12);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+.celadon .select-item,
+[data-theme] .celadon .select-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  box-sizing: border-box;
+  min-block-size: var(--row-height);
+  padding-block: var(--spacing-8);
+  padding-inline: var(--spacing-12);
+  border-radius: var(--radius-small);
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
+  cursor: pointer;
+  user-select: none;
+}
+.celadon .select-item[data-highlighted],
+[data-theme] .celadon .select-item[data-highlighted] {
+  background: var(--background-hover);
+}
+.celadon .select-item[data-selected],
+[data-theme] .celadon .select-item[data-selected] {
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+.celadon .select-item[data-disabled],
+[data-theme] .celadon .select-item[data-disabled] {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+.celadon .select-item__icon,
+[data-theme] .celadon .select-item__icon {
+  flex: none;
+  display: inline-flex;
+  color: var(--text-secondary);
+}
+.celadon .select-item__body,
+[data-theme] .celadon .select-item__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-inline-size: 0;
+  flex: 1;
+}
+.celadon .select-item__label,
+[data-theme] .celadon .select-item__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.celadon .select-item__description,
+[data-theme] .celadon .select-item__description {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+}
+.celadon .select-item__trailing,
+[data-theme] .celadon .select-item__trailing {
+  margin-inline-start: auto;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+}
+.celadon .select-item__check,
+[data-theme] .celadon .select-item__check {
+  margin-inline-start: auto;
+  flex: none;
+  display: inline-flex;
+  color: var(--brand-ink);
+}
+.celadon .select__lead,
+[data-theme] .celadon .select__lead {
+  flex: none;
+  display: inline-flex;
+  color: var(--text-secondary);
+}
+.celadon .select-icon,
+[data-theme] .celadon .select-icon {
+  flex: none;
+  color: var(--text-secondary);
 }
 .celadon .spinner,
 [data-theme] .celadon .spinner {

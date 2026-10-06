@@ -1,6 +1,7 @@
 import './base.less'
 import { useState } from 'react'
 import { BrandMark, Button, Icon, Input, Select } from '@/components/base'
+import type { SelectGroup } from '@/components/base'
 import { LocaleSwitch } from '@/components/locale-switch'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useTranslation } from '@/platform/i18n'
@@ -28,14 +29,58 @@ export function BasePage() {
   /* 主题与语言用真实的偏好源，不自造局部状态（与首页同一套） */
   const { theme: activeTheme, setTheme: selectActiveTheme } = useThemePreference()
 
-  /* 选择器的选项是调用方传入的数据，不属于页面文案，用固定取值即可。
+  /* 选择器的示例数据是调用方传入的数据，不属于页面文案，用固定取值即可。
      主题那三个标签住在各功能自己的语言包里（`bridge.themeLight` 等），组件层的文案归属另有缺口，
-     这一轮不动它，记在待办里。 */
+     这一轮不动它，记在待办里。真实界面里的占位与空态文案仍走四语（`base.select.*`）。 */
   const selectOptions = [
     { value: 'light', label: 'Light' },
     { value: 'dark', label: 'Dark' },
     { value: 'system', label: 'Follow system' },
+    /* 一项禁用，用来展示弹层里的禁用项（键盘不可达、选中不改值） */
+    { value: 'auto', label: 'Auto（disabled）', disabled: true },
   ]
+  /* 带图标的选项 */
+  const iconOptions = [
+    { value: 'reading', label: 'Reading', icon: <Icon name="i-book" /> },
+    { value: 'recent', label: 'Recent', icon: <Icon name="i-clock" /> },
+    { value: 'suggested', label: 'Suggested', icon: <Icon name="i-spark" />, disabled: true },
+  ]
+  /* 异形布局：两行选项（标签加说明），行高按内容长高 */
+  const richOptions = [
+    { value: 'reading', label: 'Reading', description: 'Narrow column, larger line spacing', icon: <Icon name="i-book" /> },
+    { value: 'tool', label: 'Tool', description: 'Wide column for panels and tables', icon: <Icon name="i-board" /> },
+    { value: 'task', label: 'Task', description: 'Two columns with a status rail', icon: <Icon name="i-tasks" /> },
+  ]
+  /* 右侧附加内容 */
+  const trailingOptions = [
+    { value: 'compact', label: 'Compact', trailing: '⌘1' },
+    { value: 'comfortable', label: 'Comfortable', trailing: '⌘2' },
+    { value: 'spacious', label: 'Spacious', trailing: '⌘3' },
+  ]
+  /* 分组选项：组标题与组内选项 */
+  const groupedOptions: SelectGroup[] = [
+    {
+      label: 'Appearance',
+      options: [
+        { value: 'light', label: 'Light', icon: <Icon name="i-spark" /> },
+        { value: 'dark', label: 'Dark', icon: <Icon name="i-spark" /> },
+      ],
+    },
+    {
+      label: 'Language',
+      options: [
+        /* 语言名取语言包里已有的 endonym 键，与语言切换器同一来源，不硬编码中文 */
+        { value: 'zh-CN', label: t('localeSwitch.zhCN') },
+        { value: 'en', label: t('localeSwitch.enUS') },
+        { value: 'ja', label: t('localeSwitch.ja') },
+      ],
+    },
+  ]
+  /* 长列表：用来验证弹层最大高度与滚动 */
+  const longOptions = Array.from({ length: 12 }, (_, index) => ({
+    value: `item-${index}`,
+    label: `Option ${index + 1}`,
+  }))
 
   return (
     <ScaffoldPage title={t('base.title')}>
@@ -293,10 +338,74 @@ export function BasePage() {
       <section className="base-group">
         <h2 className="base-group__title">{t('base.group.select')}</h2>
 
+        <h3 className="base-subgroup__title">{t('base.sub.props')}</h3>
+        <div className="base-row">
+          <Select
+            aria-label="select placeholder"
+            value=""
+            onValueChange={() => {}}
+            options={selectOptions}
+            placeholder={t('base.select.placeholder')}
+          />
+          <Select
+            aria-label="select with icon"
+            value={theme}
+            onValueChange={setTheme}
+            options={selectOptions}
+            icon={<Icon name="i-search" />}
+          />
+          <Select aria-label="select error" value={theme} onValueChange={() => {}} options={selectOptions} error />
+          <Select aria-label="select disabled" value={theme} onValueChange={() => {}} options={selectOptions} disabled />
+        </div>
+
         <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
         <div className="base-row">
-          <Select aria-label="theme" value={theme} onValueChange={setTheme} options={selectOptions} />
-          <Select aria-label="theme disabled" value={theme} onValueChange={() => {}} options={selectOptions} disabled />
+          <Select aria-label="select default" value={theme} onValueChange={setTheme} options={selectOptions} />
+          <Select aria-label="select hover" value={theme} onValueChange={() => {}} options={selectOptions} state="hover" />
+          <Select aria-label="select focus" value={theme} onValueChange={() => {}} options={selectOptions} state="focus" />
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.sizes')}</h3>
+        <div className="base-row">
+          <Select aria-label="select small" value={theme} onValueChange={setTheme} options={selectOptions} size="small" />
+          <Select aria-label="select medium" value={theme} onValueChange={setTheme} options={selectOptions} />
+          <Select aria-label="select large" value={theme} onValueChange={setTheme} options={selectOptions} size="large" />
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.options')}</h3>
+        <div className="base-row">
+          <Select aria-label="select plain options" value={theme} onValueChange={setTheme} options={selectOptions} />
+          <Select aria-label="select icon options" value="reading" onValueChange={() => {}} options={iconOptions} />
+          <Select
+            aria-label="select rich options"
+            value="reading"
+            onValueChange={() => {}}
+            options={richOptions}
+            icon={<Icon name="i-book" />}
+          />
+          <Select aria-label="select trailing options" value="compact" onValueChange={() => {}} options={trailingOptions} />
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.groups')}</h3>
+        <div className="base-row">
+          <Select aria-label="select groups" value="light" onValueChange={() => {}} groups={groupedOptions} />
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.longList')}</h3>
+        <div className="base-row">
+          <Select aria-label="select long list" value="item-0" onValueChange={() => {}} options={longOptions} />
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.empty')}</h3>
+        <div className="base-row">
+          <Select
+            aria-label="select empty"
+            value=""
+            onValueChange={() => {}}
+            options={[]}
+            placeholder={t('base.select.placeholder')}
+            emptyText={t('base.select.empty')}
+          />
         </div>
       </section>
 
