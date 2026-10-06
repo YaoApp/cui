@@ -448,9 +448,28 @@ test('lists the five groups and their states', async ({ page }) => {
   await placeholderSample.click()
   await page.waitForSelector('.select-popup:visible')
   await page.waitForTimeout(300)
+  /* 选项依次进入：行序号写成自定义属性，延迟由时长 token 推出，逐行递增 */
+  const stagger = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    return [...popup.querySelectorAll('[role=option]')].map((el) => getComputedStyle(el).animationDelay)
+  })
+  expect(stagger[0]).toBe('0s')
+  expect(stagger[1]).not.toBe(stagger[0])
   await page.locator('.select-popup:visible [role=option]', { hasText: 'Dark' }).first().click()
-  await page.waitForTimeout(300)
+  /* 选中瞬间触发器就填上新标签，不等退场动画 */
   expect((await placeholderSample.textContent())?.trim()).toBe('Dark')
+  /* 退场只淡出：带 data-ending-style 时仍不得有位移或缩放 */
+  await page.waitForTimeout(30)
+  const leaving = await page.evaluate(() => {
+    const popup = document.querySelector('.select-popup')
+    if (popup == null) return { 变换: 'none', 结束态: false }
+    return {
+      变换: getComputedStyle(popup).transform,
+      结束态: popup.hasAttribute('data-ending-style'),
+    }
+  })
+  expect(leaving.变换).toBe('none')
+  await page.waitForTimeout(300)
 
   /* 反色档：字段底取反色族；空值项选中后触发器回到占位文字 */
   expect(

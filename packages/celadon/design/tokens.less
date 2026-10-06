@@ -614,13 +614,15 @@
     background: var(--background-surface); border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-medium); box-shadow: var(--shadow-floating); outline: none;
     min-inline-size: var(--anchor-width, auto); max-block-size: var(--available-height, var(--spacing-48));
-    /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速、退场 120ms 加速，只动透明与缩放；
+    /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速，只动透明与很小的缩放；
+       退场只淡出、不做位移与缩放，避免整块菜单在眼前「飞走」。
        缩放原点取定位器给的 --transform-origin，弹层因此在触发器的对应一角展开。
        系统「减少动态」时全部时长归零（tokens.less 统一处理），这里无需另写分支。 */
     transform-origin: var(--transform-origin, center);
     transition: opacity var(--duration-base) var(--easing-decelerate), transform var(--duration-base) var(--easing-decelerate);
-    &[data-starting-style], &[data-ending-style] { opacity: 0; transform: scale(.96) translateY(calc(-1 * var(--spacing-4))); }
-    &[data-ending-style] { transition-duration: var(--duration-fast); transition-timing-function: var(--easing-accelerate); } }
+    &[data-starting-style] { opacity: 0; transform: scale(.98) translateY(calc(-1 * var(--spacing-4) / 2)); }
+    &[data-ending-style] { opacity: 0; transform: none;
+      transition-duration: var(--duration-fast); transition-timing-function: var(--easing-accelerate); } }
   /* 带筛选框时把它的高度也算进最大高度，否则整行的取整会把筛选框挤出去 */
   .select-popup--search { --select-search-height: calc(var(--spacing-24) + var(--spacing-12)); }
   /* 弹层最大高度对齐成**整行**：可用高度减内距与筛选框高度后向下取整到行高档，再加回去，
@@ -674,6 +676,15 @@
     &[data-selected] { color: var(--brand-ink);
       &::before { background: var(--brand-soft); } }
     &[data-disabled] { color: var(--text-disabled); cursor: not-allowed; } }
+  /* 选项依次进入（F4 的 list 场景）：弹层每次挂载时逐行淡入并上移半个间距档。
+     延迟由时长 token 推导（前八行递增，之后同档），系统「减少动态」把时长归零时延迟同时归零；
+     只动透明度与位移，不动行高。行序号由组件写成 `--select-item-index`。 */
+  @keyframes celadon-select-item-in { from { opacity: 0; transform: translateY(calc(var(--spacing-4) / 2)); } }
+  .select-item { animation: celadon-select-item-in var(--duration-fast) var(--easing-decelerate) both;
+    animation-delay: calc(min(var(--select-item-index, 0), 8) * var(--duration-fast) / 12); }
+  /* 选中标记的出现：状态切换该动，缩放加淡入，时长取快档 */
+  @keyframes celadon-select-check-in { from { opacity: 0; transform: scale(.8); } }
+  .select-item__check { animation: celadon-select-check-in var(--duration-fast) var(--easing-decelerate); }
   /* 选项里的图标：与文字间距取固定的 --spacing-4（由行的 gap 给），颜色取二级文字 */
   .select-item__icon { flex: none; display: inline-flex; color: var(--text-secondary); }
   /* 选项主体：单行时只有标签，异形布局时标签下面再挂一行说明 */

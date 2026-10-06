@@ -587,6 +587,10 @@
   /* 选项行**至少**取列表行高档 --row-height（40），满足第 6 节「常用操作不小于 32」的点击目标；
      用最小高度而不是固定高度，是为了让两行选项（带说明的异形布局）按内容自然长高。
      纵向内距 8、行内距 12（大于弹层内距 4，符合「卡内间距小于卡片内距」）。 */
+  /* 选项依次进入（F4 的 list 场景）：弹层每次挂载时逐行淡入并上移半个间距档。
+     延迟由时长 token 推导（前八行递增，之后同档），系统「减少动态」把时长归零时延迟同时归零；
+     只动透明度与位移，不动行高。行序号由组件写成 `--select-item-index`。 */
+  /* 选中标记的出现：状态切换该动，缩放加淡入，时长取快档 */
   /* 选项里的图标：与文字间距取固定的 --spacing-4（由行的 gap 给），颜色取二级文字 */
   /* 选项主体：单行时只有标签，异形布局时标签下面再挂一行说明 */
   /* 选中标记与右侧附加内容都靠右，二者同时出现时依次排列 */
@@ -1177,21 +1181,22 @@
   outline: none;
   min-inline-size: var(--anchor-width, auto);
   max-block-size: var(--available-height, var(--spacing-48));
-  /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速、退场 120ms 加速，只动透明与缩放；
+  /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速，只动透明与很小的缩放；
+       退场只淡出、不做位移与缩放，避免整块菜单在眼前「飞走」。
        缩放原点取定位器给的 --transform-origin，弹层因此在触发器的对应一角展开。
        系统「减少动态」时全部时长归零（tokens.less 统一处理），这里无需另写分支。 */
   transform-origin: var(--transform-origin, center);
   transition: opacity var(--duration-base) var(--easing-decelerate), transform var(--duration-base) var(--easing-decelerate);
 }
 .celadon .select-popup[data-starting-style],
-[data-theme] .celadon .select-popup[data-starting-style],
-.celadon .select-popup[data-ending-style],
-[data-theme] .celadon .select-popup[data-ending-style] {
+[data-theme] .celadon .select-popup[data-starting-style] {
   opacity: 0;
-  transform: scale(0.96) translateY(calc(-1 * var(--spacing-4)));
+  transform: scale(0.98) translateY(calc(-1 * var(--spacing-4) / 2));
 }
 .celadon .select-popup[data-ending-style],
 [data-theme] .celadon .select-popup[data-ending-style] {
+  opacity: 0;
+  transform: none;
   transition-duration: var(--duration-fast);
   transition-timing-function: var(--easing-accelerate);
 }
@@ -1327,6 +1332,27 @@
 [data-theme] .celadon .select-item[data-disabled] {
   color: var(--text-disabled);
   cursor: not-allowed;
+}
+@keyframes celadon-select-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--spacing-4) / 2));
+  }
+}
+.celadon .select-item,
+[data-theme] .celadon .select-item {
+  animation: celadon-select-item-in var(--duration-fast) var(--easing-decelerate) both;
+  animation-delay: calc(min(var(--select-item-index, 0), 8) * var(--duration-fast) / 12);
+}
+@keyframes celadon-select-check-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+.celadon .select-item__check,
+[data-theme] .celadon .select-item__check {
+  animation: celadon-select-check-in var(--duration-fast) var(--easing-decelerate);
 }
 .celadon .select-item__icon,
 [data-theme] .celadon .select-item__icon {
