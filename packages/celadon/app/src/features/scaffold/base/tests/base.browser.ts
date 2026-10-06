@@ -353,11 +353,14 @@ test('lists the five groups and their states', async ({ page }) => {
         parseFloat(getComputedStyle(popup).paddingBlockStart) * 2 +
         parseFloat(getComputedStyle(popup).borderTopWidth) * 2,
       搜索高: (search as HTMLElement).offsetHeight,
+      让出:
+        parseFloat(getComputedStyle(popup.querySelector('.select-list')!).marginBlockStart) +
+        parseFloat(getComputedStyle(popup.querySelector('.select-list')!).marginBlockEnd),
       可滚: popup.querySelector('.select-list')!.scrollHeight > popup.querySelector('.select-list')!.clientHeight + 1,
     }
   })
   expect(searched.可滚).toBe(true)
-  expect((searched.高 - searched.内距 - searched.搜索高) % Math.round(parseFloat(rowHeight))).toBe(0)
+  expect((searched.高 - searched.内距 - searched.搜索高 - searched.让出) % Math.round(parseFloat(rowHeight))).toBe(0)
   await page.keyboard.press('Escape')
 
   /* 触发器是按钮语义：鼠标选完之后焦点虽在触发器上，也不得留焦点环（与按钮同一规则）；
@@ -452,13 +455,14 @@ test('lists the five groups and their states', async ({ page }) => {
   await placeholderSample.click()
   await page.waitForSelector('.select-popup:visible')
   await page.waitForTimeout(300)
-  /* 选项依次进入：行序号写成自定义属性，延迟由时长 token 推出，逐行递增 */
-  const stagger = await page.evaluate(() => {
+  /* 进入只由弹层一层承担：选项行本身不做逐行进入，也不带位移 */
+  const rowMotion = await page.evaluate(() => {
     const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
-    return [...popup.querySelectorAll('[role=option]')].map((el) => getComputedStyle(el).animationDelay)
+    const row = popup.querySelector('[role=option]')!
+    return { 名: getComputedStyle(row).animationName, 变换: getComputedStyle(row).transform }
   })
-  expect(stagger[0]).toBe('0s')
-  expect(stagger[1]).not.toBe(stagger[0])
+  expect(rowMotion.名).toBe('none')
+  expect(rowMotion.变换).toBe('none')
   await page.locator('.select-popup:visible [role=option]', { hasText: 'Dark' }).first().click()
   /* 选中瞬间触发器就填上新标签，不等退场动画 */
   expect((await placeholderSample.textContent())?.trim()).toBe('Dark')
