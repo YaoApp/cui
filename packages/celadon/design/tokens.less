@@ -659,13 +659,20 @@
   /* 选项行**至少**取列表行高档 --row-height（40），满足第 6 节「常用操作不小于 32」的点击目标；
      用最小高度而不是固定高度，是为了让两行选项（带说明的异形布局）按内容自然长高。
      纵向内距 8、行内距 12（大于弹层内距 4，符合「卡内间距小于卡片内距」）。 */
-  .select-item { display: flex; align-items: center; gap: var(--spacing-8); box-sizing: border-box;
+  .select-item { position: relative; display: flex; align-items: center; gap: var(--spacing-8); box-sizing: border-box;
     min-block-size: var(--row-height); padding-block: var(--spacing-8); padding-inline: var(--spacing-12);
     border-radius: var(--radius-small); color: var(--text-primary); font-size: var(--font-size-body);
     cursor: pointer; user-select: none;
     transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
-    &[data-highlighted] { background: var(--background-hover); }
-    &[data-selected] { background: var(--brand-soft); color: var(--brand-ink); }
+    /* 悬停底与选中底画在伪元素上，并上下各内缩半个间距档：相邻两行（例如一行悬停、下一行选中）
+       的底色之间因此有 4px 空隙，不会连成一整块。行的几何不变，整行取整的算式不受影响。 */
+    &::before { content: ''; position: absolute; inset-block: calc(var(--spacing-4) / 2); inset-inline: 0;
+      border-radius: var(--radius-small); background: transparent; z-index: 0;
+      transition: background-color var(--duration-fast) var(--easing-standard); }
+    & > * { position: relative; z-index: 1; }
+    &[data-highlighted]::before { background: var(--background-hover); }
+    &[data-selected] { color: var(--brand-ink);
+      &::before { background: var(--brand-soft); } }
     &[data-disabled] { color: var(--text-disabled); cursor: not-allowed; } }
   /* 选项里的图标：与文字间距取固定的 --spacing-4（由行的 gap 给），颜色取二级文字 */
   .select-item__icon { flex: none; display: inline-flex; color: var(--text-secondary); }

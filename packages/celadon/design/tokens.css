@@ -1278,6 +1278,7 @@
 }
 .celadon .select-item,
 [data-theme] .celadon .select-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--spacing-8);
@@ -1291,15 +1292,36 @@
   cursor: pointer;
   user-select: none;
   transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+  /* 悬停底与选中底画在伪元素上，并上下各内缩半个间距档：相邻两行（例如一行悬停、下一行选中）
+       的底色之间因此有 4px 空隙，不会连成一整块。行的几何不变，整行取整的算式不受影响。 */
 }
-.celadon .select-item[data-highlighted],
-[data-theme] .celadon .select-item[data-highlighted] {
+.celadon .select-item::before,
+[data-theme] .celadon .select-item::before {
+  content: '';
+  position: absolute;
+  inset-block: calc(var(--spacing-4) / 2);
+  inset-inline: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  z-index: 0;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+.celadon .select-item > *,
+[data-theme] .celadon .select-item > * {
+  position: relative;
+  z-index: 1;
+}
+.celadon .select-item[data-highlighted]::before,
+[data-theme] .celadon .select-item[data-highlighted]::before {
   background: var(--background-hover);
 }
 .celadon .select-item[data-selected],
 [data-theme] .celadon .select-item[data-selected] {
-  background: var(--brand-soft);
   color: var(--brand-ink);
+}
+.celadon .select-item[data-selected]::before,
+[data-theme] .celadon .select-item[data-selected]::before {
+  background: var(--brand-soft);
 }
 .celadon .select-item[data-disabled],
 [data-theme] .celadon .select-item[data-disabled] {
