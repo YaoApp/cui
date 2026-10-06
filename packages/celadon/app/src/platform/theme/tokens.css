@@ -967,11 +967,15 @@
   /* 悬停与焦点的过渡照 F4 的场景表：两个场景都取 --duration-fast 与 --easing-standard。
        减动效偏好下时长 token 归零，这里无需另写分支。 */
   transition: border-color var(--duration-fast) var(--easing-standard), box-shadow var(--duration-fast) var(--easing-standard), background-color var(--duration-fast) var(--easing-standard);
+  /* 占位色只对能输入的元素有意义；触发器是按钮，不参与这一条 */
   /* 空态：占位 */
   /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1）。
        底色同时提亮一档，让"正在输入"这件事在整块字段上看得出来；底色跟着上面那条 background-color 过渡走。
        聚焦优先于悬停：带上悬停的变体并放在悬停规则之后，否则鼠标停在已聚焦的字段上，
-       边框会被悬停色盖掉，出现"聚焦了却还留一条悬停线"。 */
+       边框会被悬停色盖掉，出现"聚焦了却还留一条悬停线"。
+       **只作用于 `<input>` 元素**：字段外观可以共用，但"聚焦提亮底色"是文本输入专有的行为；
+       选择器触发器是按钮，底色由它自己的档位决定（字段档、纯文字档、反色档），不能被这里改写。 */
+  /* 只读底同理：只读是文本输入的状态，按钮没有这一档 */
   /* 触发器档 `.input--trigger`：字段外观落在 <button> 上（选择器的触发器）。
        文本输入框按聚焦加环，因为紧接着要打字；触发器是按钮语义，点击不加环，只有键盘聚焦才加 ——
        否则选完一项后焦点回到触发器，环会一直挂在那里（与按钮同一规则）。
@@ -1005,30 +1009,29 @@
 [data-theme] .celadon .input.is-hover {
   border-color: var(--border-hover);
 }
-.celadon .input:focus,
-[data-theme] .celadon .input:focus,
-.celadon .input.is-focus,
-[data-theme] .celadon .input.is-focus,
-.celadon .input:not(:disabled):focus,
-[data-theme] .celadon .input:not(:disabled):focus,
-.celadon .input.is-hover.is-focus,
-[data-theme] .celadon .input.is-hover.is-focus {
+.celadon .input:where(input):focus,
+[data-theme] .celadon .input:where(input):focus,
+.celadon .input:where(input).is-focus,
+[data-theme] .celadon .input:where(input).is-focus,
+.celadon .input:where(input):not(:disabled):focus,
+[data-theme] .celadon .input:where(input):not(:disabled):focus,
+.celadon .input:where(input).is-hover.is-focus,
+[data-theme] .celadon .input:where(input).is-hover.is-focus {
   border-color: var(--brand);
   box-shadow: 0 0 0 1px var(--brand);
   outline: none;
   background: var(--background-field-focus);
 }
-.celadon .input:read-only,
-[data-theme] .celadon .input:read-only,
-.celadon .input.is-readonly,
-[data-theme] .celadon .input.is-readonly {
+.celadon .input:where(input):read-only,
+[data-theme] .celadon .input:where(input):read-only,
+.celadon .input:where(input).is-readonly,
+[data-theme] .celadon .input:where(input).is-readonly {
   background: var(--background-readonly);
   color: var(--text-secondary);
 }
 .celadon .input.input--trigger:not(:disabled):focus:not(:focus-visible),
 [data-theme] .celadon .input.input--trigger:not(:disabled):focus:not(:focus-visible) {
   box-shadow: none;
-  background: var(--background-field);
   border-color: var(--border-control);
 }
 .celadon .input.input--trigger:not(:disabled):focus:not(:focus-visible):hover,
@@ -1036,9 +1039,10 @@
   border-color: var(--border-hover);
 }
 .celadon .input.input--trigger:not(:disabled):focus-visible,
-[data-theme] .celadon .input.input--trigger:not(:disabled):focus-visible {
+[data-theme] .celadon .input.input--trigger:not(:disabled):focus-visible,
+.celadon .input.input--trigger.is-focus,
+[data-theme] .celadon .input.input--trigger.is-focus {
   border-color: var(--brand);
-  background: var(--background-field-focus);
   box-shadow: 0 0 0 1px var(--brand);
   outline: none;
 }

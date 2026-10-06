@@ -537,25 +537,30 @@
     transition: border-color var(--duration-fast) var(--easing-standard),
       box-shadow var(--duration-fast) var(--easing-standard),
       background-color var(--duration-fast) var(--easing-standard);
+    /* 占位色只对能输入的元素有意义；触发器是按钮，不参与这一条 */
     &::placeholder { color: var(--text-placeholder); }                       /* 空态：占位 */
     &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover); }
     /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1）。
        底色同时提亮一档，让"正在输入"这件事在整块字段上看得出来；底色跟着上面那条 background-color 过渡走。
        聚焦优先于悬停：带上悬停的变体并放在悬停规则之后，否则鼠标停在已聚焦的字段上，
-       边框会被悬停色盖掉，出现"聚焦了却还留一条悬停线"。 */
-    &:focus, &.is-focus,
-    &:not(:disabled):focus,
-    &.is-hover.is-focus { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); outline: none;
+       边框会被悬停色盖掉，出现"聚焦了却还留一条悬停线"。
+       **只作用于 `<input>` 元素**：字段外观可以共用，但"聚焦提亮底色"是文本输入专有的行为；
+       选择器触发器是按钮，底色由它自己的档位决定（字段档、纯文字档、反色档），不能被这里改写。 */
+    &:where(input):focus,
+    &:where(input).is-focus,
+    &:where(input):not(:disabled):focus,
+    &:where(input).is-hover.is-focus { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); outline: none;
       background: var(--background-field-focus); }
-    &:read-only, &.is-readonly { background: var(--background-readonly); color: var(--text-secondary); }
+    /* 只读底同理：只读是文本输入的状态，按钮没有这一档 */
+    &:where(input):read-only, &:where(input).is-readonly { background: var(--background-readonly); color: var(--text-secondary); }
     /* 触发器档 `.input--trigger`：字段外观落在 <button> 上（选择器的触发器）。
        文本输入框按聚焦加环，因为紧接着要打字；触发器是按钮语义，点击不加环，只有键盘聚焦才加 ——
        否则选完一项后焦点回到触发器，环会一直挂在那里（与按钮同一规则）。
        带上悬停的变体并写在基础规则之后，避免鼠标停留在已聚焦的触发器上时丢掉悬停边框。 */
-    &.input--trigger:not(:disabled):focus:not(:focus-visible) { box-shadow: none; background: var(--background-field);
+    &.input--trigger:not(:disabled):focus:not(:focus-visible) { box-shadow: none;
       border-color: var(--border-control); }
     &.input--trigger:not(:disabled):focus:not(:focus-visible):hover { border-color: var(--border-hover); }
-    &.input--trigger:not(:disabled):focus-visible { border-color: var(--brand); background: var(--background-field-focus);
+    &.input--trigger:not(:disabled):focus-visible, &.input--trigger.is-focus { border-color: var(--brand);
       box-shadow: 0 0 0 1px var(--brand); outline: none; }
     /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
     &.is-strong { border-color: var(--border-control-strong);
