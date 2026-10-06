@@ -973,14 +973,28 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     expect(contrast(hoverBox.框, hexToRgb(tokens.内容底))).toBeGreaterThanOrEqual(3)
     expect(contrast(hoverLabel, hexToRgb(tokens.内容底))).toBeGreaterThanOrEqual(4.5)
 
-    /* 已选中的悬停换选中族自己的中间档：与静止的选中态也分得开 */
+    /* 已选中的悬停只换**边界**：底仍是一整块反色。换底那一档实测只有 1.16:1，读不出来 */
     await page.mouse.move(2, 2)
     await page.waitForTimeout(100)
+    const checkedRest = await read('demo-check-checked')
     await page.locator('.checkbox:has(#demo-check-checked) .checkbox__label').hover()
     await page.waitForTimeout(150)
     const checkedHover = await read('demo-check-checked')
-    expect(checkedHover.底).toBe(hexToRgb(tokens.反色悬停底))
-    expect(checkedHover.底).not.toBe(hexToRgb(tokens.反色底))
+    expect(checkedHover.底).toBe(checkedRest.底)
+    expect(checkedHover.框).toBe(hexToRgb(tokens.悬停边界))
+    expect(checkedHover.框).not.toBe(checkedRest.框)
+    /* 静态样例与真实悬停同值：清单页那一档就是照它核对的 */
+    const checkedStaticHover = await read('demo-check-checked-hover')
+    expect(checkedStaticHover.底).toBe(checkedHover.底)
+    expect(checkedStaticHover.框).toBe(checkedHover.框)
+
+    /* 悬停与聚焦是频繁重复的微交互，按 F4 的"不该动"一栏不做过渡（只动 transform 与 opacity） */
+    const durations = await page.evaluate(() => {
+      const box = document.querySelector('.checkbox__box') as HTMLElement
+      const label = document.querySelector('.checkbox__label') as HTMLElement
+      return [getComputedStyle(box).transitionDuration, getComputedStyle(label).transitionDuration]
+    })
+    expect(durations).toEqual(['0s', '0s'])
 
     /* 只读没有悬停：底、边界与标签都保持静止档（指针落在文字上也是一样） */
     await page.mouse.move(2, 2)

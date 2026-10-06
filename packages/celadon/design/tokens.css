@@ -1037,10 +1037,15 @@
      否则鼠标停在文字上只有文字变色、方框纹丝不动，看着像两个东西。
      选中态的底是一整块反色；悬停若也用反色，选中之后就表达不出"正悬停在这一项上"。
      只读与禁用不参与：只读可以聚焦与读取，但不给任何交互反馈。 */
-  /* 已选中的悬停换选中族自己的中间档：这样"已选中"与"已选中且正悬停"也分得开 */
+  /* 已选中的悬停只换**边界**：底仍是一整块反色，边界换成悬停档。
+     填充不变、只在边缘让一步，悬停因此既不等于静止的选中态，也不与未选中的悬停混同；
+     换底那一档（#14120E → #2A2723）实测只有 1.16:1，肉眼读不出来，不能承担表达。 */
   /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
      选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
      颜色过渡照 F4 的 hover 与 focus 场景：快档加标准缓动。 */
+  /* 标签：静止时取次要文字色，悬停、键盘聚焦与选中都提到主文字色。
+     选中之后文字保持主色，因为那是用户已经做过的选择，要一直立得住。
+     同样**不做过渡**：悬停是频繁重复的微交互，按 F4 的规则不动效，瞬时切换。 */
   /* 悬停的整行反馈要排除只读与禁用：只读没有悬停，禁用连指针都不是手型。
      选中与不确定仍提到主文字色，因为那是已经做过的选择，与能否交互无关。 */
   /* 禁用：方框与标签一起转禁用色，指针也不再是手型（写在状态提升之后，靠源序压过它） */
@@ -1061,7 +1066,8 @@
   border: var(--border-width) solid var(--border-control-strong);
   border-radius: var(--radius-xs);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--easing-standard), border-color var(--duration-fast) var(--easing-standard), box-shadow var(--duration-fast) var(--easing-standard);
+  /* **不做过渡**：复选框的悬停与聚焦是频繁重复的微交互，F4 的规则清单把它列在"不该动"一栏，
+       并要求只动 transform 与 opacity。悬停与聚焦因此是瞬时切换；只有状态切换里的勾与横杠做一次进场（fade 场景）。 */
   /* 聚焦：点击不加环，只有键盘聚焦加环（焦点操作完还挂在控件上，一直挂着环会吵） */
   /* 选中与不确定：底换成反色族，勾与横杠取反色文字。
        悬停与键盘聚焦的变体见文件下方：悬停挂在**整行**上，聚焦挂在本体上。 */
@@ -1156,8 +1162,8 @@
 [data-theme] .celadon .checkbox__box[data-checked].is-hover,
 .celadon .checkbox__box[data-indeterminate].is-hover,
 [data-theme] .celadon .checkbox__box[data-indeterminate].is-hover {
-  background: var(--background-inverse-hover);
-  border-color: var(--background-inverse-hover);
+  background: var(--background-inverse);
+  border-color: var(--border-hover-strong);
 }
 .celadon .checkbox__label,
 [data-theme] .celadon .checkbox__label {
@@ -1168,7 +1174,6 @@
   font-size: var(--font-size-body);
   line-height: var(--line-height-control);
   cursor: pointer;
-  transition: color var(--duration-fast) var(--easing-standard);
 }
 .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__label,
 [data-theme] .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__label,

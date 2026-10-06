@@ -350,6 +350,8 @@ export function BasePage() {
           <Checkbox id="demo-check-hover" label="is-hover" state="hover" />
           <Checkbox id="demo-check-focus" label="is-focus" state="focus" />
           <Checkbox id="demo-check-checked" label="checked" defaultChecked />
+          {/* 已选中再悬停：状态本身也是要核对的一档，不能只靠把指针移上去看 */}
+          <Checkbox id="demo-check-checked-hover" label="checked is-hover" defaultChecked state="hover" />
           <Checkbox id="demo-check-partial" label="indeterminate" indeterminate />
           <Checkbox id="demo-check-disabled" label="disabled" disabled />
           <Checkbox id="demo-check-disabled-on" label="checked disabled" defaultChecked disabled />
