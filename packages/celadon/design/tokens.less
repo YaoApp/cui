@@ -614,21 +614,22 @@
     background: var(--background-surface); border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-medium); box-shadow: var(--shadow-floating); outline: none;
     min-inline-size: var(--anchor-width, auto); max-block-size: var(--available-height, var(--spacing-48));
-    /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速，只动透明与很小的缩放；
-       退场只淡出、不做位移与缩放，避免整块菜单在眼前「飞走」。
+    /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速，只动透明度与很小的缩放，
+       面板本身不做位移，位移交给选项；退场只淡出、不做位移与缩放，避免整块菜单在眼前「飞走」。
        缩放原点取定位器给的 --transform-origin，弹层因此在触发器的对应一角展开。
        系统「减少动态」时全部时长归零（tokens.less 统一处理），这里无需另写分支。 */
     transform-origin: var(--transform-origin, center);
     transition: opacity var(--duration-base) var(--easing-decelerate), transform var(--duration-base) var(--easing-decelerate);
-    &[data-starting-style] { opacity: 0; transform: scale(.98) translateY(calc(-1 * var(--spacing-4) / 2)); }
+    &[data-starting-style] { opacity: 0; transform: scale(.98); }
     &[data-ending-style] { opacity: 0; transform: none;
       transition-duration: var(--duration-fast); transition-timing-function: var(--easing-accelerate); } }
   /* 带筛选框时把它的高度也算进最大高度，否则整行的取整会把筛选框挤出去 */
   .select-popup--search { --select-search-height: calc(var(--spacing-24) + var(--spacing-12)); }
   /* 滚动箭头是浮层：列表按箭头高度预留上下空间，箭头只压在内距上，不压选项。
-     预留量同时并入整行取整的算式，列表的选项区因此仍是整行。 */
-  .select-popup:has(.select-arrow) { --select-arrow-reserve: var(--spacing-24); }
-  .select-popup:has(.select-arrow--up) { --select-arrow-reserve: calc(var(--spacing-24) * 2); }
+     只有箭头真正可见（上游在可滚时才写 data-visible）时才预留与显示，不可滚时不占位置也不显形。 */
+  .select-popup:has(.select-arrow[data-visible]) { --select-arrow-reserve: var(--spacing-24); }
+  .select-popup:has(.select-arrow--up[data-visible]) { --select-arrow-reserve: calc(var(--spacing-24) * 2); }
+  .select-arrow:not([data-visible]) { display: none; }
   /* 弹层最大高度对齐成**整行**：可用高度减内距与筛选框高度后向下取整到行高档，再加回去，
      列表底部就不会露出半行。round() 还不可用的运行时按上面的可用高度走，不影响可用性。
      函数名与整段值用 ~"" 转义，避免被 Less 自己的 round() 抢先求值。 */
@@ -661,8 +662,8 @@
     flex: 1; min-block-size: 0; overflow: auto; scroll-padding-block: var(--spacing-24); }
   /* 箭头高度从列表的**盒子**里让出去（外边距，不是内距）：列表的可见高度因此是整行，
      箭头的浮层落在这段让出的空档上，任何滚动位置下都不会压住选项。 */
-  .select-popup:has(.select-arrow) .select-list { margin-block-end: var(--spacing-24); }
-  .select-popup:has(.select-arrow--up) .select-list { margin-block-start: var(--spacing-24); }
+  .select-popup:has(.select-arrow[data-visible]) .select-list { margin-block-end: var(--spacing-24); }
+  .select-popup:has(.select-arrow--up[data-visible]) .select-list { margin-block-start: var(--spacing-24); }
   /* 分组标题：说明档字号、三级文字，行内距与选项对齐，因此标题与选项左边缘成一条线 */
   .select-group-label { padding: var(--spacing-4) var(--spacing-12);
     color: var(--text-tertiary); font-size: var(--font-size-caption); font-weight: var(--font-weight-medium); }
@@ -684,12 +685,6 @@
     &[data-selected] { color: var(--brand-ink);
       &::before { background: var(--brand-soft); } }
     &[data-disabled] { color: var(--text-disabled); cursor: not-allowed; } }
-  /* 选项依次进入（F4 的 list 场景）：弹层每次挂载时逐行淡入并上移半个间距档。
-     延迟由时长 token 推导（前八行递增，之后同档），系统「减少动态」把时长归零时延迟同时归零；
-     只动透明度与位移，不动行高。行序号由组件写成 `--select-item-index`。 */
-  @keyframes celadon-select-item-in { from { opacity: 0; transform: translateY(calc(var(--spacing-4) / 2)); } }
-  .select-item { animation: celadon-select-item-in var(--duration-fast) var(--easing-decelerate) both;
-    animation-delay: calc(min(var(--select-item-index, 0), 8) * var(--duration-fast) / 12); }
   /* 选中标记的出现：状态切换该动，缩放加淡入，时长取快档 */
   @keyframes celadon-select-check-in { from { opacity: 0; transform: scale(.8); } }
   .select-item__check { animation: celadon-select-check-in var(--duration-fast) var(--easing-decelerate); }

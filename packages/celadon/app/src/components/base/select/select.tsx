@@ -1,6 +1,6 @@
 import './select.less'
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Select as BaseSelect } from '@base-ui/react/select'
 import { Icon } from '@/components/base/icon'
 
@@ -141,15 +141,8 @@ export function Select(props: SelectProps) {
   const shownOptions = groups ? [] : flatOptions.filter(matches)
   const shownCount = groups ? (shownGroups?.reduce((total, group) => total + group.options.length, 0) ?? 0) : shownOptions.length
 
-  /* 行序号写成自定义属性：选项依次进入的延迟由它推出（见 tokens.less 的 .select-item 动画） */
-  const renderItem = (option: SelectOption, index: number) => (
-    <BaseSelect.Item
-      key={String(option.value)}
-      value={option.value}
-      disabled={option.disabled}
-      className="select-item"
-      style={{ '--select-item-index': index } as CSSProperties}
-    >
+  const renderItem = (option: SelectOption) => (
+    <BaseSelect.Item key={String(option.value)} value={option.value} disabled={option.disabled} className="select-item">
       {option.icon ? (
         <span className="select-item__icon" aria-hidden="true">
           {option.icon}

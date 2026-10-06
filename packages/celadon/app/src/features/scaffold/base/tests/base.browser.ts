@@ -290,12 +290,16 @@ test('lists the five groups and their states', async ({ page }) => {
         parseFloat(getComputedStyle(popup).paddingBlockStart) * 2 +
         parseFloat(getComputedStyle(popup).borderTopWidth) * 2,
       可滚: list.scrollHeight > list.clientHeight + 1,
+      /* 滚动箭头让出的空档不参与整行取整，断言里要减掉它 */
+      让出:
+        parseFloat(getComputedStyle(list).marginBlockStart) +
+        parseFloat(getComputedStyle(list).marginBlockEnd),
       箭头: [...popup.querySelectorAll('.select-arrow')].map((el) => (el as HTMLElement).offsetHeight),
     }
   })
   expect(long.项).toBe(30)
   expect(long.高).toBeLessThanOrEqual(await page.evaluate(() => window.innerHeight))
-  expect((long.高 - long.内距) % Math.round(parseFloat(rowHeight))).toBe(0)
+  expect((long.高 - long.内距 - long.让出) % Math.round(parseFloat(rowHeight))).toBe(0)
   expect(long.可滚).toBe(true)
   expect(long.箭头.length).toBeGreaterThan(0)
   expect(Math.max(...long.箭头)).toBeGreaterThan(0)

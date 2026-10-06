@@ -575,7 +575,7 @@
      弹层与触发器的间距由排布者（定位器）给，组件不带外边距，见 layout.md 第 3 节。 */
   /* 带筛选框时把它的高度也算进最大高度，否则整行的取整会把筛选框挤出去 */
   /* 滚动箭头是浮层：列表按箭头高度预留上下空间，箭头只压在内距上，不压选项。
-     预留量同时并入整行取整的算式，列表的选项区因此仍是整行。 */
+     只有箭头真正可见（上游在可滚时才写 data-visible）时才预留与显示，不可滚时不占位置也不显形。 */
   /* 弹层最大高度对齐成**整行**：可用高度减内距与筛选框高度后向下取整到行高档，再加回去，
      列表底部就不会露出半行。round() 还不可用的运行时按上面的可用高度走，不影响可用性。
      函数名与整段值用 ~"" 转义，避免被 Less 自己的 round() 抢先求值。 */
@@ -591,9 +591,6 @@
   /* 选项行**至少**取列表行高档 --row-height（40），满足第 6 节「常用操作不小于 32」的点击目标；
      用最小高度而不是固定高度，是为了让两行选项（带说明的异形布局）按内容自然长高。
      纵向内距 8、行内距 12（大于弹层内距 4，符合「卡内间距小于卡片内距」）。 */
-  /* 选项依次进入（F4 的 list 场景）：弹层每次挂载时逐行淡入并上移半个间距档。
-     延迟由时长 token 推导（前八行递增，之后同档），系统「减少动态」把时长归零时延迟同时归零；
-     只动透明度与位移，不动行高。行序号由组件写成 `--select-item-index`。 */
   /* 选中标记的出现：状态切换该动，缩放加淡入，时长取快档 */
   /* 选项里的图标：与文字间距取固定的 --spacing-4（由行的 gap 给），颜色取二级文字 */
   /* 选项主体：单行时只有标签，异形布局时标签下面再挂一行说明 */
@@ -1186,8 +1183,8 @@
   outline: none;
   min-inline-size: var(--anchor-width, auto);
   max-block-size: var(--available-height, var(--spacing-48));
-  /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速，只动透明与很小的缩放；
-       退场只淡出、不做位移与缩放，避免整块菜单在眼前「飞走」。
+  /* 下拉出现与收起（F4 的 dropdown 场景）：进场 200ms 减速，只动透明度与很小的缩放，
+       面板本身不做位移，位移交给选项；退场只淡出、不做位移与缩放，避免整块菜单在眼前「飞走」。
        缩放原点取定位器给的 --transform-origin，弹层因此在触发器的对应一角展开。
        系统「减少动态」时全部时长归零（tokens.less 统一处理），这里无需另写分支。 */
   transform-origin: var(--transform-origin, center);
@@ -1196,7 +1193,7 @@
 .celadon .select-popup[data-starting-style],
 [data-theme] .celadon .select-popup[data-starting-style] {
   opacity: 0;
-  transform: scale(0.98) translateY(calc(-1 * var(--spacing-4) / 2));
+  transform: scale(0.98);
 }
 .celadon .select-popup[data-ending-style],
 [data-theme] .celadon .select-popup[data-ending-style] {
@@ -1209,13 +1206,17 @@
 [data-theme] .celadon .select-popup--search {
   --select-search-height: calc(var(--spacing-24) + var(--spacing-12));
 }
-.celadon .select-popup:has(.select-arrow),
-[data-theme] .celadon .select-popup:has(.select-arrow) {
+.celadon .select-popup:has(.select-arrow[data-visible]),
+[data-theme] .celadon .select-popup:has(.select-arrow[data-visible]) {
   --select-arrow-reserve: var(--spacing-24);
 }
-.celadon .select-popup:has(.select-arrow--up),
-[data-theme] .celadon .select-popup:has(.select-arrow--up) {
+.celadon .select-popup:has(.select-arrow--up[data-visible]),
+[data-theme] .celadon .select-popup:has(.select-arrow--up[data-visible]) {
   --select-arrow-reserve: calc(var(--spacing-24) * 2);
+}
+.celadon .select-arrow:not([data-visible]),
+[data-theme] .celadon .select-arrow:not([data-visible]) {
+  display: none;
 }
 @supports (max-block-size: round(down, 100px, 40px)) {
   .celadon .select-popup,
@@ -1287,12 +1288,12 @@
   overflow: auto;
   scroll-padding-block: var(--spacing-24);
 }
-.celadon .select-popup:has(.select-arrow) .select-list,
-[data-theme] .celadon .select-popup:has(.select-arrow) .select-list {
+.celadon .select-popup:has(.select-arrow[data-visible]) .select-list,
+[data-theme] .celadon .select-popup:has(.select-arrow[data-visible]) .select-list {
   margin-block-end: var(--spacing-24);
 }
-.celadon .select-popup:has(.select-arrow--up) .select-list,
-[data-theme] .celadon .select-popup:has(.select-arrow--up) .select-list {
+.celadon .select-popup:has(.select-arrow--up[data-visible]) .select-list,
+[data-theme] .celadon .select-popup:has(.select-arrow--up[data-visible]) .select-list {
   margin-block-start: var(--spacing-24);
 }
 .celadon .select-group-label,
@@ -1353,17 +1354,6 @@
 [data-theme] .celadon .select-item[data-disabled] {
   color: var(--text-disabled);
   cursor: not-allowed;
-}
-@keyframes celadon-select-item-in {
-  from {
-    opacity: 0;
-    transform: translateY(calc(var(--spacing-4) / 2));
-  }
-}
-.celadon .select-item,
-[data-theme] .celadon .select-item {
-  animation: celadon-select-item-in var(--duration-fast) var(--easing-decelerate) both;
-  animation-delay: calc(min(var(--select-item-index, 0), 8) * var(--duration-fast) / 12);
 }
 @keyframes celadon-select-check-in {
   from {
