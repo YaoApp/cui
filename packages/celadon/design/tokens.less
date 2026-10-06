@@ -597,6 +597,15 @@
   .input.input--plain.input--trigger:not(:disabled):focus:not(:focus-visible):hover { background: var(--background-hover); }
   /* 无框档的图标取二级文字，图标与文字间距取固定的 --spacing-4（由触发器自身的 gap 给） */
   .input--plain .select-icon, .input--plain .select__lead { color: var(--text-secondary); }
+  /* 反色档：深底或品牌底上的字段，与按钮的反色档同一处理，边框去掉（有意弱化边界）。
+     纯文字反色档只改文字与悬停底，不画底；禁用仍走禁用档。图标取反色文字。 */
+  .input.input--inverse { background: var(--background-inverse); color: var(--text-inverse); border-color: transparent; }
+  .input.input--inverse:not(:disabled):hover, .input.input--inverse.is-hover { background: var(--background-inverse-hover); }
+  .input.input--inverse.input--plain { background: transparent; }
+  .input.input--inverse.input--plain:not(:disabled):hover,
+  .input.input--inverse.input--plain.is-hover { background: var(--background-inverse-hover); }
+  .input.input--inverse:disabled, .input.input--inverse.is-disabled { background: var(--background-disabled); color: var(--text-disabled); }
+  .input--inverse .select-icon, .input--inverse .select__lead { color: var(--text-inverse); }
   /* 选择器：触发器直接用上面的 `.input`（同一套字段状态与圆角），这里给弹层与选项。
      弹层是浮层，圆角取弹层档（--radius-medium），阴影取悬浮档；选项与字段同字号，
      高亮用中性悬停底，选中用品牌浅底加品牌文字，禁用沿用禁用字色。

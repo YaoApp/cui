@@ -5,7 +5,8 @@ import { Select as BaseSelect } from '@base-ui/react/select'
 import { Icon } from '@/components/base/icon'
 
 export type SelectOption = {
-  value: string
+  /** 选项值；`null` 是**清除项**（上游的空值项），选中它即取消选择，触发器回到占位文字。 */
+  value: string | null
   label: ReactNode
   /** 选项左侧图标 */
   icon?: ReactNode
@@ -57,6 +58,11 @@ type SelectBaseProps = {
   iconPosition?: 'start' | 'end'
   /** 是否显示右侧的下拉指示器。纯文字档配末尾图标时可关掉，避免指示器与图标重复。 */
   indicator?: boolean
+  /** 反色档：用于深底或品牌底（设计类 `.input--inverse`），与按钮的反色档同一处理。 */
+  inverse?: boolean
+  /** 是否必须选一个值才能提交（上游同名属性，只管表单校验，与「能否清除」无关）。
+      取消选择用**空值项**表达：给一个 `value: null` 的选项，选中它触发器就回到占位文字。 */
+  required?: boolean
   className?: string
 }
 
@@ -90,6 +96,8 @@ export function Select(props: SelectProps) {
     variant = 'field',
     iconPosition = 'start',
     indicator = true,
+    inverse = false,
+    required = false,
     className,
   } = props
   const [query, setQuery] = useState('')
@@ -100,6 +108,7 @@ export function Select(props: SelectProps) {
     /* 触发器档：点击不加焦点环，只有键盘聚焦才加（与按钮同一规则，见 tokens.less 的 .input--trigger） */
     'input--trigger',
     variant === 'plain' ? 'input--plain' : null,
+    inverse ? 'input--inverse' : null,
     size === 'small' ? 'input--small' : null,
     size === 'large' ? 'input--large' : null,
     error ? 'is-error' : null,
@@ -133,7 +142,7 @@ export function Select(props: SelectProps) {
   const shownCount = groups ? (shownGroups?.reduce((total, group) => total + group.options.length, 0) ?? 0) : shownOptions.length
 
   const renderItem = (option: SelectOption) => (
-    <BaseSelect.Item key={option.value} value={option.value} disabled={option.disabled} className="select-item">
+    <BaseSelect.Item key={String(option.value)} value={option.value} disabled={option.disabled} className="select-item">
       {option.icon ? (
         <span className="select-item__icon" aria-hidden="true">
           {option.icon}
@@ -246,12 +255,13 @@ export function Select(props: SelectProps) {
   return (
     <BaseSelect.Root
       value={value as string}
-      /* Base UI 在无选中项时会回传 null；这里的每个 option 都有值，null 不表达任何选择，忽略。 */
+      /* 空值项被选中时上游回传 null，这正是「取消选择」：单选档把空值归一成空串，触发器回到占位文字。 */
       onValueChange={(next) => {
-        if (next != null) onValueChange(next as string)
+        onValueChange((next ?? '') as string)
       }}
       items={items}
       disabled={disabled}
+      required={required}
       onOpenChange={handleOpenChange}
     >
       {content}
