@@ -1,7 +1,7 @@
 import './base.less'
 import { useState } from 'react'
-import { BrandMark, Button, Icon, Input, Select } from '@/components/base'
-import type { SelectGroup } from '@/components/base'
+import { BrandMark, Button, Icon, Input, SegmentedControl, Select } from '@/components/base'
+import type { SegmentedOption, SelectGroup } from '@/components/base'
 import { LocaleSwitch } from '@/components/locale-switch'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useTranslation } from '@/platform/i18n'
@@ -18,12 +18,26 @@ import { ScaffoldPage } from '../components/scaffold-page'
 
 const ICON_SIZES = [14, 16, 20, 24] as const
 
+/* 分段控件的示例数据：段文案属于调用方的数据，用固定取值；带图标的一档用现有图标演示图标槽。 */
+const SEGMENTED_THEME: SegmentedOption[] = [
+  { value: 'system', label: 'Follow system' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+]
+const SEGMENTED_RANGE: SegmentedOption[] = [
+  { value: 'day', label: 'Day', icon: <Icon name="i-clock" /> },
+  { value: 'week', label: 'Week', icon: <Icon name="i-spark" /> },
+  { value: 'month', label: 'Month', icon: <Icon name="i-book" /> },
+]
+
 export function BasePage() {
   const { t } = useTranslation()
   const [account, setAccount] = useState('')
   const [password, setPassword] = useState('')
   const [visible, setVisible] = useState(false)
   const [theme, setTheme] = useState('light')
+  const [segmentedTheme, setSegmentedTheme] = useState('system')
+  const [segmentedRange, setSegmentedRange] = useState('week')
   /* 错误抖动的重放计数：同名动画不会自行重跑，靠 key 让节点重挂载 */
   const [shakeTick, setShakeTick] = useState(0)
   /* 主题与语言用真实的偏好源，不自造局部状态（与首页同一套） */
@@ -490,6 +504,55 @@ export function BasePage() {
         <div className="base-row">
           <ThemeToggle theme={activeTheme} onSelect={selectActiveTheme} />
           <LocaleSwitch />
+        </div>
+
+        {/* 分段控件：默认档与反色档、带图标、整组禁用，以及静态的悬停与聚焦态。
+            段文案是示例数据（不属于页面文案），主题切换件的真实文案在各功能自己的语言包里。 */}
+        <div className="base-row">
+          <SegmentedControl
+            aria-label="segmented default"
+            value={segmentedTheme}
+            onValueChange={setSegmentedTheme}
+            options={SEGMENTED_THEME}
+          />
+          <SegmentedControl
+            inverse
+            aria-label="segmented inverse"
+            value={segmentedTheme}
+            onValueChange={setSegmentedTheme}
+            options={SEGMENTED_THEME}
+          />
+        </div>
+        <div className="base-row">
+          <SegmentedControl
+            aria-label="segmented icons"
+            value={segmentedRange}
+            onValueChange={setSegmentedRange}
+            options={SEGMENTED_RANGE}
+          />
+          <SegmentedControl
+            aria-label="segmented disabled"
+            value="week"
+            onValueChange={() => {}}
+            options={SEGMENTED_RANGE}
+            disabled
+          />
+        </div>
+        <div className="base-row">
+          <SegmentedControl
+            aria-label="segmented hover"
+            value="week"
+            onValueChange={() => {}}
+            options={SEGMENTED_RANGE}
+            state="hover"
+          />
+          <SegmentedControl
+            aria-label="segmented focus"
+            value="week"
+            onValueChange={() => {}}
+            options={SEGMENTED_RANGE}
+            state="focus"
+          />
         </div>
       </section>
     </ScaffoldPage>

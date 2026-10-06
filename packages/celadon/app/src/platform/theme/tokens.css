@@ -552,6 +552,7 @@
      文字色对各取已验证的档位；--danger 只做边框与图形，不单独当文字色用。 */
   /* 分段控件（原在设计页里，应用也要用，提升为设计类）：一组互斥选项，选中项 .is-on。
      反色档用于深底或品牌底（`.seg--inverse`），底色取反色族，选中项用反色的悬停档。 */
+  /* 段内的图标槽：与文字间距由按钮的 gap 给，图标不参与点击 */
   /* 输入框：七态（真实伪类与 .is-* 静态类一一对应，后者供设计稿与静态页同时展示多态）。
      字号取正文档：输入值是内容，不是说明文字；正文行高 1.7 加 4 的块向内距与 1 的边框，
      控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。
@@ -780,12 +781,20 @@
   cursor: pointer;
   font-family: inherit;
   font-size: var(--font-size-caption);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
   padding: var(--spacing-4) var(--spacing-12);
   border: 0;
   border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text-secondary);
   transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+}
+.celadon .seg__icon,
+[data-theme] .celadon .seg__icon {
+  flex: none;
+  display: inline-flex;
 }
 .celadon .seg button:hover,
 [data-theme] .celadon .seg button:hover,
@@ -950,6 +959,10 @@
        底色同时提亮一档，让"正在输入"这件事在整块字段上看得出来；底色跟着上面那条 background-color 过渡走。
        聚焦优先于悬停：带上悬停的变体并放在悬停规则之后，否则鼠标停在已聚焦的字段上，
        边框会被悬停色盖掉，出现"聚焦了却还留一条悬停线"。 */
+  /* 触发器档 `.input--trigger`：字段外观落在 <button> 上（选择器的触发器）。
+       文本输入框按聚焦加环，因为紧接着要打字；触发器是按钮语义，点击不加环，只有键盘聚焦才加 ——
+       否则选完一项后焦点回到触发器，环会一直挂在那里（与按钮同一规则）。
+       带上悬停的变体并写在基础规则之后，避免鼠标停留在已聚焦的触发器上时丢掉悬停边框。 */
   /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
   /* 错误是持续状态：悬停与聚焦都不改变边框色，聚焦时描边取危险色。
        规则必须带上悬停与聚焦的变体并写在它们之后，否则会被权重更高的悬停规则盖掉，
@@ -998,6 +1011,23 @@
 [data-theme] .celadon .input.is-readonly {
   background: var(--background-readonly);
   color: var(--text-secondary);
+}
+.celadon .input.input--trigger:not(:disabled):focus:not(:focus-visible),
+[data-theme] .celadon .input.input--trigger:not(:disabled):focus:not(:focus-visible) {
+  box-shadow: none;
+  background: var(--background-field);
+  border-color: var(--border-control);
+}
+.celadon .input.input--trigger:not(:disabled):focus:not(:focus-visible):hover,
+[data-theme] .celadon .input.input--trigger:not(:disabled):focus:not(:focus-visible):hover {
+  border-color: var(--border-hover);
+}
+.celadon .input.input--trigger:not(:disabled):focus-visible,
+[data-theme] .celadon .input.input--trigger:not(:disabled):focus-visible {
+  border-color: var(--brand);
+  background: var(--background-field-focus);
+  box-shadow: 0 0 0 1px var(--brand);
+  outline: none;
 }
 .celadon .input.is-strong,
 [data-theme] .celadon .input.is-strong {

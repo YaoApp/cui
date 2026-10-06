@@ -356,6 +356,70 @@ test('lists the five groups and their states', async ({ page }) => {
   expect((searched.高 - searched.内距 - searched.搜索高) % Math.round(parseFloat(rowHeight))).toBe(0)
   await page.keyboard.press('Escape')
 
+  /* 触发器是按钮语义：鼠标选完之后焦点虽在触发器上，也不得留焦点环（与按钮同一规则）；
+     键盘聚焦时必须加环。两者用 :focus-visible 区分。 */
+  await openSelect('select default')
+  await page.locator('.select-popup:visible [role=option]', { hasText: 'Dark' }).first().click()
+  await page.waitForTimeout(300)
+  const mouseFocus = await selectTrigger('select default').evaluate((el) => ({
+    焦点可见: el.matches(':focus-visible'),
+    环: getComputedStyle(el).boxShadow,
+    边框: getComputedStyle(el).borderTopColor,
+  }))
+  expect(mouseFocus.焦点可见).toBe(false)
+  expect(mouseFocus.环).toBe('none')
+  await page.keyboard.press('Tab')
+  await selectTrigger('select default').focus()
+  await page.waitForTimeout(300)
+  const keyFocus = await selectTrigger('select default').evaluate((el) => ({
+    焦点可见: el.matches(':focus-visible'),
+    环: getComputedStyle(el).boxShadow,
+  }))
+  expect(keyFocus.焦点可见).toBe(true)
+  expect(keyFocus.环).not.toBe('none')
+
+  /* 分段控件：默认档与反色档、图标槽、整组禁用，以及静态的悬停与聚焦态 */
+  const segmented = await page.evaluate(() => {
+    const token = (name: string) =>
+      getComputedStyle(document.querySelector('.celadon') ?? document.documentElement)
+        .getPropertyValue(name)
+        .trim()
+    const read = (label: string) => {
+      const group = document.querySelector(`[aria-label="${label}"]`)!
+      const on = group.querySelector('button.is-on') as HTMLElement
+      return {
+        段: group.querySelectorAll('button').length,
+        组底: getComputedStyle(group).backgroundColor,
+        选中底: getComputedStyle(on).backgroundColor,
+        选中环: getComputedStyle(on).boxShadow,
+        图标: group.querySelectorAll('.seg__icon svg').length,
+        禁用段: [...group.querySelectorAll('button')].filter((button) => button.disabled).length,
+      }
+    }
+    return {
+      默认: read('segmented default'),
+      反色: read('segmented inverse'),
+      图标: read('segmented icons'),
+      禁用: read('segmented disabled'),
+      悬停: read('segmented hover'),
+      聚焦: read('segmented focus'),
+      反色底token: token('--background-inverse'),
+      悬停底token: token('--brand-soft-hover'),
+    }
+  })
+  expect(segmented.默认.段).toBe(3)
+  /* token 读出来是十六进制字面量，计算样式给的是 rgb()，比较前统一换算 */
+  const hexToRgb = (hex: string) => {
+    const value = Number.parseInt(hex.replace('#', ''), 16)
+    return `rgb(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255})`
+  }
+  expect(segmented.默认.组底).not.toBe(segmented.反色.组底)
+  expect(segmented.反色.组底).toBe(hexToRgb(segmented.反色底token))
+  expect(segmented.图标.图标).toBe(3)
+  expect(segmented.禁用.禁用段).toBe(3)
+  expect(segmented.悬停.选中底).toBe(hexToRgb(segmented.悬停底token))
+  expect(segmented.聚焦.选中环).not.toBe('none')
+
   /* 空态：没有选项时弹层给说明，触发器显示占位文字 */
   expect(await selectTrigger('select empty').textContent()).not.toBe('')
   await selectTrigger('select empty').click()

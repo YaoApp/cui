@@ -88,6 +88,8 @@ export function Select(props: SelectProps) {
   const classes = [
     'input',
     'select__trigger',
+    /* 触发器档：点击不加焦点环，只有键盘聚焦才加（与按钮同一规则，见 tokens.less 的 .input--trigger） */
+    'input--trigger',
     size === 'small' ? 'input--small' : null,
     size === 'large' ? 'input--large' : null,
     error ? 'is-error' : null,

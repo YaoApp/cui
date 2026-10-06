@@ -488,9 +488,12 @@
                  border-radius:var(--radius-pill); border:1px solid var(--border-control);
                  background:var(--background-field); }
   .seg button  { cursor:pointer; font-family:inherit; font-size:var(--font-size-caption);
+                 display:inline-flex; align-items:center; gap:var(--spacing-4);
                  padding:var(--spacing-4) var(--spacing-12); border:0; border-radius:var(--radius-pill);
                  background:transparent; color:var(--text-secondary);
                  transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard); }
+  /* 段内的图标槽：与文字间距由按钮的 gap 给，图标不参与点击 */
+  .seg__icon  { flex:none; display:inline-flex; }
   .seg button:hover, .seg button.is-hover { background:var(--background-hover); }
   .seg button:focus-visible, .seg button.is-focus { box-shadow:var(--focus-ring); outline:none; }
   .seg button:disabled, .seg button.is-disabled { background:transparent; color:var(--text-disabled); cursor:not-allowed; }
@@ -545,6 +548,15 @@
     &.is-hover.is-focus { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); outline: none;
       background: var(--background-field-focus); }
     &:read-only, &.is-readonly { background: var(--background-readonly); color: var(--text-secondary); }
+    /* 触发器档 `.input--trigger`：字段外观落在 <button> 上（选择器的触发器）。
+       文本输入框按聚焦加环，因为紧接着要打字；触发器是按钮语义，点击不加环，只有键盘聚焦才加 ——
+       否则选完一项后焦点回到触发器，环会一直挂在那里（与按钮同一规则）。
+       带上悬停的变体并写在基础规则之后，避免鼠标停留在已聚焦的触发器上时丢掉悬停边框。 */
+    &.input--trigger:not(:disabled):focus:not(:focus-visible) { box-shadow: none; background: var(--background-field);
+      border-color: var(--border-control); }
+    &.input--trigger:not(:disabled):focus:not(:focus-visible):hover { border-color: var(--border-hover); }
+    &.input--trigger:not(:disabled):focus-visible { border-color: var(--brand); background: var(--background-field-focus);
+      box-shadow: 0 0 0 1px var(--brand); outline: none; }
     /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
     &.is-strong { border-color: var(--border-control-strong);
       &:not(:disabled):hover, &.is-hover { border-color: var(--border-hover-strong); } }

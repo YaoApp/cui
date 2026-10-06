@@ -22,6 +22,7 @@
 | 3 | `otp-field` | `otp-field` | `components/base/otp-field/` | `id`、`value`、`onChange`、`error`、`disabled` | 未开始 |
 | 4 | `checkbox` | `checkbox` | `components/base/checkbox/` | `id`、`checked`、`onChange`、`label`、`error` | 未开始 |
 | 19 | `spinner` | 无 | `components/base/spinner/` | `className` | **已完成**（2026-10-06；两瓣圆环，头端圆帽、尾端收尖，尺寸 16，一周 `--duration-loop`，减动效停转；输入框与按钮共用） |
+| 25 | `segmented-control` | 无 | `components/base/segmented-control/` | `inverse` · `disabled` · `state` · `className` | **已完成**（2026-10-06；互斥分段选择，观感取设计类 `.seg` / `.seg--inverse` / `.seg__icon`，选中段 `.is-on` 与 `aria-pressed`，左右方向键在段间移动并即时选中，整组或单段可禁用；清单页按默认、反色、带图标、禁用与静态悬停／聚焦四档列出） |
 
 字段的标签、说明与错误不另立组件，用上游 `field` 的 `Label`、`Control`、`Description` 与 `Error`。
 密码不另立基础件，它是 `type="password"` 的 `input`，可见性切换由页面内部的 `PasswordInput` 组合。
