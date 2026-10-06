@@ -106,10 +106,12 @@ describe('Checkbox', () => {
     expect(control).toHaveAttribute('aria-busy', 'true')
   })
 
-  it('carries the size class on the field', () => {
-    const { container } = render(<Checkbox id="updates" label="large" size="large" />)
+  it('carries the size class on the field, on the same ladder as the button', () => {
+    const { container } = render(<Checkbox id="updates" label="small" size="small" />)
+    expect(container.querySelector('.checkbox')).toHaveClass('checkbox--small')
 
-    expect(container.querySelector('.checkbox')).toHaveClass('checkbox--large')
+    const large = render(<Checkbox id="news" label="large" size="large" />)
+    expect(large.container.querySelector('.checkbox')).toHaveClass('checkbox--large')
   })
 
   it('takes the static error class on the field', () => {

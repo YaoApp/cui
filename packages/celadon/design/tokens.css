@@ -1026,6 +1026,8 @@
    类全部自包含，不借输入框的类：字段外观只是同一批 token，结构与行为各写各的。 */
 .celadon,
 [data-theme] .celadon {
+  /* 尺寸档：与按钮、输入框、选择器同梯，三档高度取 24 · 32 · 40（按钮的三档；中档的标签行高就是控件行高）。
+     行高与行高小档都来自 token，方框与首行对齐的算式按这两个值推。 */
   /* 方框：中档 16（图标档里最小的一档），大档 20 = 16 + 4，都由间距刻度推出。
      圆角取最小档，方框的形状不跟控件尺寸档走。
      多行标签时方框要与**首行**对齐（业内做法：文字折行落到方框下方，控件与首行文字对齐），
@@ -1056,14 +1058,22 @@
      选中与不确定仍提到主文字色，因为那是已经做过的选择，与能否交互无关。 */
   /* 禁用：方框与标签一起转禁用色，指针也不再是手型（写在状态提升之后，靠源序压过它） */
   /* 消息位：提示与错误共用说明档字号，两条消息的行盒才一样高（与输入框同一规则） */
-  /* 大档：方框 20，标签走正文大档 */
+  /* 尺寸档与按钮同梯：小 24 · 中 32 · 大 40。
+     方框跟着档位走：小 12 · 中 16 · 大 20（都出间距刻度），标签字号取说明档 · 正文 · 正文大档，
+     与按钮三档的字号一致。小档的勾按方框缩放：图标梯最小是 14，比 12 的方框还大，
+     让它铺满方框，勾的描边本就内缩（24 网格里只画到 4 到 20），实际画出来仍小于方框。 */
+}
+.celadon .checkbox,
+[data-theme] .celadon .checkbox {
+  --checkbox-row-min: calc(var(--spacing-24) + var(--spacing-8));
+  --line-height-checkbox: var(--line-height-control);
 }
 .celadon .checkbox__box,
 [data-theme] .celadon .checkbox__box {
   --checkbox-box-size: var(--spacing-16);
   position: relative;
   z-index: 1;
-  inset-block-start: calc(var(--spacing-4) + (var(--line-height-control) - var(--checkbox-box-size)) / 2);
+  inset-block-start: calc((var(--checkbox-row-min) - var(--line-height-checkbox)) / 2 + (var(--line-height-checkbox) - var(--checkbox-box-size)) / 2);
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -1164,7 +1174,7 @@
   align-items: flex-start;
   gap: var(--spacing-8);
   inline-size: fit-content;
-  min-block-size: calc(var(--spacing-24) + var(--spacing-8));
+  min-block-size: var(--checkbox-row-min);
 }
 .celadon .checkbox__row::before,
 [data-theme] .celadon .checkbox__row::before {
@@ -1189,11 +1199,11 @@
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  min-block-size: calc(var(--spacing-24) + var(--spacing-8));
+  min-block-size: var(--checkbox-row-min);
   padding-block: var(--spacing-4);
   color: var(--text-secondary);
   font-size: var(--font-size-body);
-  line-height: var(--line-height-control);
+  line-height: var(--line-height-checkbox);
   cursor: pointer;
 }
 .celadon .checkbox__row:not(:has([data-readonly], [data-disabled])):hover .checkbox__label,
@@ -1233,6 +1243,35 @@
   color: var(--danger-ink);
   font-size: var(--font-size-caption);
   line-height: var(--line-height-normal);
+}
+.celadon .checkbox--small,
+[data-theme] .celadon .checkbox--small {
+  --checkbox-row-min: var(--spacing-24);
+  --line-height-checkbox: var(--line-height-control-small);
+}
+.celadon .checkbox--small .checkbox__box,
+[data-theme] .celadon .checkbox--small .checkbox__box {
+  --checkbox-box-size: var(--spacing-12);
+}
+.celadon .checkbox--small .checkbox__mark,
+[data-theme] .celadon .checkbox--small .checkbox__mark {
+  inline-size: var(--checkbox-box-size);
+  block-size: var(--checkbox-box-size);
+}
+.celadon .checkbox--small .checkbox__mark svg,
+[data-theme] .celadon .checkbox--small .checkbox__mark svg {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.celadon .checkbox--small .checkbox__label,
+[data-theme] .celadon .checkbox--small .checkbox__label {
+  /* 小档的控件行高是 24、行盒 20，上下各只剩一档的一半，留 4 会把它撑到 28 */
+  padding-block: calc(var(--spacing-4) / 2);
+  font-size: var(--font-size-caption);
+}
+.celadon .checkbox--large,
+[data-theme] .celadon .checkbox--large {
+  --checkbox-row-min: calc(var(--spacing-32) + var(--spacing-8));
 }
 .celadon .checkbox--large .checkbox__box,
 [data-theme] .celadon .checkbox--large .checkbox__box {

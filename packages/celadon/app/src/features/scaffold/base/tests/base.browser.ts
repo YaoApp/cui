@@ -894,8 +894,6 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
         左: Math.round(box.getBoundingClientRect().left),
       }
     })
-  const labelHeight = (id: string) =>
-    page.locator(`.checkbox:has(#${id}) .checkbox__label`).evaluate((el) => (el as HTMLElement).offsetHeight)
 
   for (const theme of ['light', 'dark'] as const) {
     /* 主题在**页面载入时**决定（跟随系统），改媒体偏好后必须重载；载入后先确认真的切过去了，
@@ -1068,13 +1066,27 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
     expect(mark.duration).toBe('0.2s')
   }
 
-  /* 尺寸：中档方框 16 · 大档 20，标签行都不小于 32 的点击高度（layout.md 第 6 节） */
+  /* 尺寸档与按钮同梯：小 12 · 中 16 · 大 20 的方框，行高依次 24 · 32 · 40（按钮的三档高度） */
   await page.emulateMedia({ colorScheme: 'light' })
   await page.goto('/app/scaffold/base', { waitUntil: 'networkidle' })
-  const [medium, large] = await Promise.all([read('demo-check-medium'), read('demo-check-large')])
-  expect(medium.高).toBe(16)
-  expect(large.高).toBe(20)
-  expect(await labelHeight('demo-check-medium')).toBeGreaterThanOrEqual(32)
+  const sizes = await page.evaluate(() =>
+    ['demo-check-small', 'demo-check-medium', 'demo-check-large'].map((id) => {
+      const field = document.querySelector(`.checkbox:has(#${id})`) as HTMLElement
+      const box = field.querySelector('.checkbox__box') as HTMLElement
+      const row = field.querySelector('.checkbox__row') as HTMLElement
+      const label = field.querySelector('.checkbox__label') as HTMLElement
+      return {
+        方框: box.offsetHeight,
+        行高: row.offsetHeight,
+        标签: label.offsetHeight,
+        字号: parseFloat(getComputedStyle(label).fontSize),
+      }
+    }),
+  )
+  expect(sizes.map((s) => s.方框)).toEqual([12, 16, 20])
+  expect(sizes.map((s) => s.行高)).toEqual([24, 32, 40])
+  expect(sizes.map((s) => s.标签)).toEqual([24, 32, 40])
+  expect(sizes.map((s) => s.字号)).toEqual([12, 14, 16])
 
   /* 错误由调用方持有：选中即清除，红边与红字都要消失 */
   const danger = await page.evaluate(() =>

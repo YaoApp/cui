@@ -20,8 +20,9 @@ export type CheckboxProps = {
   required?: boolean
   name?: string
   value?: string
-  /** 方框尺寸：中档 16 · 大档 20（都由间距刻度推出）。 */
-  size?: 'medium' | 'large'
+  /** 方框尺寸，与按钮、输入框、选择器同梯：小 12 · 中 16 · 大 20（都由间距刻度推出），
+      行高依次取 24 · 32 · 40，标签字号取说明档 · 正文 · 正文大档。 */
+  size?: 'small' | 'medium' | 'large'
   /** 静态态：把设计类的 `is-*` 写在**整行容器**上，供清单页并排展示多态。
       悬停画的是整行的浅底，所以状态类落在整行而不是方框上；选中、不确定、禁用、只读、错误都用真实属性与真实取值。 */
   state?: 'hover' | 'focus' | 'error' | 'loading'

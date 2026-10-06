@@ -362,6 +362,8 @@ export function BasePage() {
 
         <h3 className="base-subgroup__title">{t('base.sub.sizes')}</h3>
         <div className="base-grid">
+          <Checkbox id="demo-check-small" label="small" size="small" defaultChecked />
+          <Checkbox id="demo-check-small-off" label="small" size="small" />
           <Checkbox id="demo-check-medium" label="medium" defaultChecked />
           <Checkbox id="demo-check-large" label="large" size="large" defaultChecked />
           <Checkbox id="demo-check-large-off" label="large" size="large" />
