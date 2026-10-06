@@ -581,7 +581,8 @@
      函数名与整段值用 ~"" 转义，避免被 Less 自己的 round() 抢先求值。 */
   /* 筛选框：图标加输入框，输入框取字段小档，宽度撑满弹层内宽 */
   /* 滚动箭头：列表溢出时出现，做成浮层，不占列表高度，整行取整才不会被它破坏；
-     底色与弹层同底，避免文字从下面透出来 */
+     底色与弹层同底，避免文字从下面透出来；四边各让一个描边宽，整体落在弹层描边以内，
+     压不到弹层的边界与圆角，圆角四角一致 */
   /* 选项列表：竖排，行与行之间不留缝（间距由行高自己给）。
      滚动容器是**列表**本身（上游按列表计算箭头可见性），因此它取剩余高度并自己滚；
      scroll-padding 让键盘移动时被高亮的项不会停在箭头底下。 */
@@ -1250,7 +1251,7 @@
 .celadon .select-arrow,
 [data-theme] .celadon .select-arrow {
   position: absolute;
-  inset-inline: 0;
+  inset-inline: var(--border-width);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1258,6 +1259,7 @@
   color: var(--text-secondary);
   background: var(--background-surface);
   cursor: default;
+  border-radius: var(--radius-small);
   transition: opacity var(--duration-fast) var(--easing-standard);
 }
 .celadon .select-arrow[data-starting-style],
@@ -1268,15 +1270,11 @@
 }
 .celadon .select-arrow--up,
 [data-theme] .celadon .select-arrow--up {
-  inset-block-start: 0;
-  border-start-start-radius: var(--radius-small);
-  border-start-end-radius: var(--radius-small);
+  inset-block-start: var(--border-width);
 }
 .celadon .select-arrow:not(.select-arrow--up),
 [data-theme] .celadon .select-arrow:not(.select-arrow--up) {
-  inset-block-end: 0;
-  border-end-start-radius: var(--radius-small);
-  border-end-end-radius: var(--radius-small);
+  inset-block-end: var(--border-width);
 }
 .celadon .select-list,
 [data-theme] .celadon .select-list {

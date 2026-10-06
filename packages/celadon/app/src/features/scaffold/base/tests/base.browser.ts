@@ -464,7 +464,15 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(rowMotion.名).toBe('none')
   expect(rowMotion.变换).toBe('none')
   await page.locator('.select-popup:visible [role=option]', { hasText: 'Dark' }).first().click()
-  /* 选中瞬间触发器就填上新标签，不等退场动画 */
+  /* 选中瞬间触发器就填上新标签；弹层在退场期间保持打开时的宽度，不跟着触发器改宽改位 */
+  const exitWidths: number[] = []
+  for (let index = 0; index < 4; index += 1) {
+    exitWidths.push(
+      await page.evaluate(() => Math.round(document.querySelector('.select-popup')?.getBoundingClientRect().width ?? 0)),
+    )
+    await page.waitForTimeout(20)
+  }
+  expect([...new Set(exitWidths.filter((width) => width > 0))].length).toBeLessThanOrEqual(1)
   expect((await placeholderSample.textContent())?.trim()).toBe('Dark')
   /* 退场只淡出：带 data-ending-style 时仍不得有位移或缩放 */
   await page.waitForTimeout(30)

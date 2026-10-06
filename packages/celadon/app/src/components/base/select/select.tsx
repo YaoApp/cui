@@ -1,5 +1,5 @@
 import './select.less'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Select as BaseSelect } from '@base-ui/react/select'
 import { Icon } from '@/components/base/icon'
@@ -101,6 +101,11 @@ export function Select(props: SelectProps) {
     className,
   } = props
   const [query, setQuery] = useState('')
+  /* 弹层宽度在进场动画结束时量下来并记住，退场期间不再跟随触发器。
+     选中新值会改触发器宽度，若弹层继续跟随，就会一边淡出一边改宽改位；记住宽度后弹层原地淡出。
+     下一次打开时（onOpenChange(true)）解除记忆，重新按当时的触发器宽度量。 */
+  const [frozenWidth, setFrozenWidth] = useState<number | null>(null)
+  const popupRef = useRef<HTMLDivElement | null>(null)
 
   const classes = [
     'input',
@@ -178,7 +183,18 @@ export function Select(props: SelectProps) {
       <BaseSelect.Portal>
         {/* 间距归排布者：弹层与触发器的 4px 间隙由定位器给，组件样式里不带外边距（layout.md 第 3 节） */}
         <BaseSelect.Positioner className="select__positioner" alignItemWithTrigger={false} sideOffset={4}>
-          <BaseSelect.Popup className={['select-popup', searchable ? 'select-popup--search' : null].filter(Boolean).join(' ')}>
+          <BaseSelect.Popup
+            ref={popupRef}
+            className={['select-popup', searchable ? 'select-popup--search' : null].filter(Boolean).join(' ')}
+            style={frozenWidth === null ? undefined : { inlineSize: `${frozenWidth}px` }}
+            /* 进场结束时记住宽度，退场结束时解除；只认透明度事件，避免位移事件重复触发 */
+            onTransitionEnd={(event) => {
+              if (event.propertyName !== 'opacity') return
+              const element = event.currentTarget
+              if (element.hasAttribute('data-ending-style')) setFrozenWidth(null)
+              else setFrozenWidth(element.offsetWidth)
+            }}
+          >
             {searchable ? (
               <div className="select-search">
                 <Icon name="i-search" size={16} className="select-search__icon" />
@@ -230,9 +246,11 @@ export function Select(props: SelectProps) {
     </>
   )
 
-  /* 打开与关闭时清掉筛选词：下次打开从完整列表开始 */
+  /* 打开与关闭时清掉筛选词：下次打开从完整列表开始；
+     打开时解除上一轮记住的宽度，关闭后重新量一次（见弹层的 frozenWidth） */
   const handleOpenChange = (open: boolean) => {
-    if (!open) setQuery('')
+    if (open) setFrozenWidth(null)
+    else setQuery('')
   }
 
   if (props.multiple) {
