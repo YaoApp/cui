@@ -510,6 +510,7 @@ test('lists the five groups and their states', async ({ page }) => {
     return {
       底: root.getPropertyValue('--background-inverse').trim(),
       字: root.getPropertyValue('--text-inverse').trim(),
+      悬停: root.getPropertyValue('--background-inverse-hover').trim(),
     }
   })
   expect(inverseRead.底).toBe(hexToRgb(inverseTokens.底))
@@ -534,6 +535,16 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(inverseFocused.字).toBe(hexToRgb(inverseTokens.字))
   expect(inverseFocused.框).toBe('rgba(0, 0, 0, 0)')
   expect(inverseFocused.高).toBe(inverseRead.高)
+
+  /* 悬停时也不描边：基础档的悬停规则权重更高，反色档不复位描边就会补出一条灰边 */
+  await page.locator('[aria-label="variant inverse"]').hover()
+  await page.waitForTimeout(200)
+  expect(
+    await page.locator('[aria-label="variant inverse"]').evaluate((el) => getComputedStyle(el).borderTopColor),
+  ).toBe('rgba(0, 0, 0, 0)')
+  expect(
+    await page.locator('[aria-label="variant inverse"]').evaluate((el) => getComputedStyle(el).backgroundColor),
+  ).toBe(hexToRgb(inverseTokens.悬停))
 
   /* 再点一次已选中项即取消选择：默认行为，不需要开关。先选一个值，再点同一个值 */
   const reselectSample = page.getByRole('combobox', { name: 'select placeholder', exact: true })

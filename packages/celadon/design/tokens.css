@@ -1443,8 +1443,9 @@
   /* 加载态：只把指针换成进行中，进程指示由右侧槽位的圆环承担 */
   /* 纯文字档：用在标题栏与工具条，不画字段底与描边，只有文字与图标；
        悬停给一圈浅底（因此保留行内距与圆角），键盘聚焦才加环 */
-  /* 反色档：深底或品牌底上用，自带深底浅字，不描边（有意弱化边界）；
-       悬停换更深的同族底，键盘聚焦取反色族的环 */
+  /* 反色档：深底或品牌底上用，自带深底浅字，**任何状态都不描边**（有意弱化边界）。
+       悬停与键盘聚焦两条都要写明描边复位：基础档的悬停与聚焦规则权重更高，
+       不复位就会在鼠标移上去或键盘聚焦时补出一条灰边。悬停换更深的同族底，键盘聚焦取反色族的环。 */
   /* 槽位颜色随档位走：纯文字档取二级文字，反色档取反色文字 */
 }
 .celadon .select-trigger--small,
@@ -1545,9 +1546,10 @@
 .celadon .select-trigger--inverse.is-hover,
 [data-theme] .celadon .select-trigger--inverse.is-hover {
   background: var(--background-inverse-hover);
+  border-color: transparent;
 }
-.celadon .select-trigger--inverse:focus-visible,
-[data-theme] .celadon .select-trigger--inverse:focus-visible,
+.celadon .select-trigger--inverse:not(.is-disabled, :disabled):focus-visible,
+[data-theme] .celadon .select-trigger--inverse:not(.is-disabled, :disabled):focus-visible,
 .celadon .select-trigger--inverse.is-focus,
 [data-theme] .celadon .select-trigger--inverse.is-focus {
   border-color: transparent;

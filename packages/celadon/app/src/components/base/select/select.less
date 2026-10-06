@@ -114,8 +114,9 @@
       }
     }
 
-    /* 反色档：深底或品牌底上用，自带深底浅字，不描边（有意弱化边界）；
-       悬停换更深的同族底，键盘聚焦取反色族的环 */
+    /* 反色档：深底或品牌底上用，自带深底浅字，**任何状态都不描边**（有意弱化边界）。
+       悬停与键盘聚焦两条都要写明描边复位：基础档的悬停与聚焦规则权重更高，
+       不复位就会在鼠标移上去或键盘聚焦时补出一条灰边。悬停换更深的同族底，键盘聚焦取反色族的环。 */
     &--inverse {
       background: var(--background-inverse);
       color: var(--text-inverse);
@@ -124,9 +125,10 @@
       &:not(.is-disabled, :disabled):hover,
       &.is-hover {
         background: var(--background-inverse-hover);
+        border-color: transparent;
       }
 
-      &:focus-visible,
+      &:not(.is-disabled, :disabled):focus-visible,
       &.is-focus {
         border-color: transparent;
         box-shadow: var(--focus-ring-inverse);
