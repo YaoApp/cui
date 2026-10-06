@@ -1,4 +1,5 @@
 import './select.less'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Select as BaseSelect } from '@base-ui/react/select'
 import { Icon } from '@/components/base/icon'
@@ -21,10 +22,7 @@ export type SelectGroup = {
   options: readonly SelectOption[]
 }
 
-export type SelectProps = {
-  /** 受控值。`system` 之类的哨兵值由调用方定义，基础件不解释。 */
-  value: string
-  onValueChange: (value: string) => void
+type SelectBaseProps = {
   /** 平铺选项。与 `groups` 二选一，给了 `groups` 就以它为准。 */
   options?: readonly SelectOption[]
   /** 分组选项。弹层里按组渲染，每组带一个组标题。 */
@@ -36,7 +34,7 @@ export type SelectProps = {
   size?: 'small' | 'medium' | 'large'
   /** 无选中项时显示的占位文字；一个选项都没有时也显示它。 */
   placeholder?: ReactNode
-  /** 没有选项时弹层里的说明文字。组件不写文案，由调用方给四语文案。 */
+  /** 一个选项都没有时弹层里的说明文字。组件不写文案，由调用方给四语。 */
   emptyText?: ReactNode
   /** 触发器左侧图标，与输入框的图标槽同位置同颜色 */
   icon?: ReactNode
@@ -45,30 +43,48 @@ export type SelectProps = {
   disabled?: boolean
   /** 静态态：把设计类的 `is-*` 写在触发器上，供清单页与设计稿并排展示多态。 */
   state?: 'hover' | 'focus'
+  /** 顶部加筛选输入框，按选项标签文本过滤。标签不是字符串时按它的文本内容比较。 */
+  searchable?: boolean
+  /** 筛选输入框的可访问名与占位文字，由调用方给四语文案 */
+  searchLabel?: string
+  /** 筛选没有命中任何选项时的说明文字 */
+  noMatchText?: ReactNode
+  /** 自定义过滤规则；不给则用「标签文本不区分大小写包含查询」 */
+  filterOption?: (option: SelectOption, query: string) => boolean
   className?: string
 }
 
-/* 行为与无障碍（role=combobox · 键盘 · 高亮 · 受控值）交给 Base UI 的 Select；视觉全部走设计类：
+/** 单选：值是字符串；多选：值是字符串数组。两边都从 `value` 与 `onValueChange` 看类型。 */
+export type SelectProps =
+  | (SelectBaseProps & { multiple?: false; value: string; onValueChange: (value: string) => void })
+  | (SelectBaseProps & { multiple: true; value: readonly string[]; onValueChange: (value: string[]) => void })
+
+/* 行为与无障碍（role=combobox · 键盘 · 高亮 · 受控值 · 多选）交给 Base UI 的 Select；视觉全部走设计类：
    触发器用 `.input`，与输入框同一套字段观感、状态与尺寸；弹层用 `.select-popup` 与 `.select-list`，
-   分组标题用 `.select-group-label`，选项用 `.select-item` 及其内部槽位；
-   指示器与选中标记用**我们自己的图标**，不再使用上游自带的字形。
+   分组标题用 `.select-group-label`，选项用 `.select-item` 及其内部槽位，滚动箭头用 `.select-arrow`；
+   指示器、选中标记与箭头用**我们自己的图标**，不使用上游自带的字形。
    Base UI 不参与配色、没有主题系统，它只用 data-* 暴露状态、用 CSS 变量暴露几何。 */
-export function Select({
-  value,
-  onValueChange,
-  options = [],
-  groups,
-  'aria-label': ariaLabel,
-  id,
-  size = 'medium',
-  placeholder,
-  emptyText,
-  icon,
-  error = false,
-  disabled,
-  state,
-  className,
-}: SelectProps) {
+export function Select(props: SelectProps) {
+  const {
+    options = [],
+    groups,
+    'aria-label': ariaLabel,
+    id,
+    size = 'medium',
+    placeholder,
+    emptyText,
+    icon,
+    error = false,
+    disabled,
+    state,
+    searchable = false,
+    searchLabel,
+    noMatchText,
+    filterOption,
+    className,
+  } = props
+  const [query, setQuery] = useState('')
+
   const classes = [
     'input',
     'select__trigger',
@@ -82,13 +98,27 @@ export function Select({
     .join(' ')
 
   const flatOptions = groups ? groups.flatMap((group) => group.options) : options
-  /* Base UI 用 items 解析选中项要显示的文字：分组时传分组结构，平铺时传平铺列表。 */
+  /* Base UI 用 items 解析选中项要显示的文字：这里始终传**未过滤**的全部选项，
+     否则被筛掉的已选项在触发器上会显示成原值。分组时传分组结构。 */
   const items = groups
     ? groups.map((group) => ({
         label: group.label,
         items: group.options.map((option) => ({ label: option.label, value: option.value })),
       }))
     : flatOptions.map((option) => ({ label: option.label, value: option.value }))
+
+  const trimmed = query.trim()
+  const matches = (option: SelectOption) => {
+    if (!searchable || trimmed === '') return true
+    if (filterOption) return filterOption(option, trimmed)
+    const text = typeof option.label === 'string' ? option.label : String(option.label ?? '')
+    return text.toLowerCase().includes(trimmed.toLowerCase())
+  }
+  const shownGroups = groups
+    ?.map((group) => ({ ...group, options: group.options.filter(matches) }))
+    .filter((group) => group.options.length > 0)
+  const shownOptions = groups ? [] : flatOptions.filter(matches)
+  const shownCount = groups ? (shownGroups?.reduce((total, group) => total + group.options.length, 0) ?? 0) : shownOptions.length
 
   const renderItem = (option: SelectOption) => (
     <BaseSelect.Item key={option.value} value={option.value} disabled={option.disabled} className="select-item">
@@ -108,16 +138,8 @@ export function Select({
     </BaseSelect.Item>
   )
 
-  return (
-    <BaseSelect.Root
-      value={value}
-      /* Base UI 在无选中项时会回传 null；这里的每个 option 都有值，null 不表达任何选择，忽略。 */
-      onValueChange={(next) => {
-        if (next != null) onValueChange(next)
-      }}
-      items={items}
-      disabled={disabled}
-    >
+  const content = (
+    <>
       <BaseSelect.Trigger id={id} className={classes} aria-label={ariaLabel}>
         {icon ? (
           <span className="select__lead" aria-hidden="true">
@@ -130,24 +152,92 @@ export function Select({
       <BaseSelect.Portal>
         {/* 间距归排布者：弹层与触发器的 4px 间隙由定位器给，组件样式里不带外边距（layout.md 第 3 节） */}
         <BaseSelect.Positioner className="select__positioner" alignItemWithTrigger={false} sideOffset={4}>
-          <BaseSelect.Popup className="select-popup">
-            {flatOptions.length === 0 ? (
-              <div className="select-popup__empty">{emptyText}</div>
+          <BaseSelect.Popup className={['select-popup', searchable ? 'select-popup--search' : null].filter(Boolean).join(' ')}>
+            {searchable ? (
+              <div className="select-search">
+                <Icon name="i-search" size={16} className="select-search__icon" />
+                <input
+                  className="input input--small select-search__input"
+                  value={query}
+                  aria-label={searchLabel}
+                  onChange={(event) => setQuery(event.target.value)}
+                  /* 打字与删除不该被当成选项导航；上下键、回车与 Escape 放行，
+                     因此从输入框能直接走进列表，也能用 Escape 关掉弹层 */
+                  onKeyDown={(event) => {
+                    if (
+                      event.key !== 'ArrowDown' &&
+                      event.key !== 'ArrowUp' &&
+                      event.key !== 'Enter' &&
+                      event.key !== 'Escape'
+                    ) {
+                      event.stopPropagation()
+                    }
+                  }}
+                />
+              </div>
+            ) : null}
+            {shownCount === 0 ? (
+              <div className="select-popup__empty">{flatOptions.length === 0 ? emptyText : noMatchText}</div>
             ) : (
-              <BaseSelect.List className="select-list">
-                {groups
-                  ? groups.map((group, index) => (
-                      <BaseSelect.Group key={index}>
-                        <BaseSelect.GroupLabel className="select-group-label">{group.label}</BaseSelect.GroupLabel>
-                        {group.options.map(renderItem)}
-                      </BaseSelect.Group>
-                    ))
-                  : flatOptions.map(renderItem)}
-              </BaseSelect.List>
+              <>
+                <BaseSelect.ScrollUpArrow className="select-arrow select-arrow--up">
+                  <Icon name="i-up" size={16} />
+                </BaseSelect.ScrollUpArrow>
+                <BaseSelect.List className="select-list">
+                  {groups
+                    ? shownGroups?.map((group, index) => (
+                        <BaseSelect.Group key={index}>
+                          <BaseSelect.GroupLabel className="select-group-label">{group.label}</BaseSelect.GroupLabel>
+                          {group.options.map(renderItem)}
+                        </BaseSelect.Group>
+                      ))
+                    : shownOptions.map(renderItem)}
+                </BaseSelect.List>
+                <BaseSelect.ScrollDownArrow className="select-arrow">
+                  <Icon name="i-down" size={16} />
+                </BaseSelect.ScrollDownArrow>
+              </>
             )}
           </BaseSelect.Popup>
         </BaseSelect.Positioner>
       </BaseSelect.Portal>
+    </>
+  )
+
+  /* 打开与关闭时清掉筛选词：下次打开从完整列表开始 */
+  const handleOpenChange = (open: boolean) => {
+    if (!open) setQuery('')
+  }
+
+  if (props.multiple) {
+    const { value, onValueChange } = props
+    return (
+      <BaseSelect.Root
+        multiple
+        value={value as string[]}
+        onValueChange={(next) => onValueChange((next ?? []) as string[])}
+        items={items}
+        disabled={disabled}
+        onOpenChange={handleOpenChange}
+      >
+        {content}
+      </BaseSelect.Root>
+    )
+  }
+
+  const { value, onValueChange } = props
+  return (
+    <BaseSelect.Root
+      value={value as string}
+      /* Base UI 在无选中项时会回传 null；这里的每个 option 都有值，null 不表达任何选择，忽略。 */
+      onValueChange={(next) => {
+        if (next != null) onValueChange(next as string)
+      }}
+      items={items}
+      disabled={disabled}
+      onOpenChange={handleOpenChange}
+    >
+      {content}
     </BaseSelect.Root>
   )
 }

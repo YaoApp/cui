@@ -162,6 +162,12 @@ test('lists the five groups and their states', async ({ page }) => {
   /* 弹层由 portal 渲染，关闭的那些仍留在 DOM 里：打开后先等**可见的那一个**出现，
      之后一律在可见弹层内部查询，避免读到已关闭的节点（它们的尺寸是 0）。 */
   const openSelect = async (label: string) => {
+    /* 上一步的弹层可能还在关闭过渡里，它内部的遮罩会拦住下一次点击：先等它彻底消失再点 */
+    await page.keyboard.press('Escape')
+    await page.waitForFunction(
+      () =>
+        ![...document.querySelectorAll('.select-popup')].some((el) => el.getBoundingClientRect().height > 0),
+    )
     await selectTrigger(label).click()
     await page.waitForFunction(() =>
       [...document.querySelectorAll('.select-popup')].some((el) => el.getBoundingClientRect().height > 0),
@@ -272,16 +278,83 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(trailing.行高).toBe(Math.round(parseFloat(rowHeight)))
   await page.keyboard.press('Escape')
 
-  /* 长列表：项数齐、弹层高度不超过可用高度 */
+  /* 长列表：项数齐、高度不超过可用高度、必须对齐整行（内距与边框减掉后是行高档的整数倍），
+     溢出时出现滚动箭头，悬停箭头列表真的滚动 */
   await openSelect('select long list')
   const long = await page.evaluate(() => {
     const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
-    return { 项: popup.querySelectorAll('[role=option]').length, 高: Math.round(popup.getBoundingClientRect().height) }
+    const list = popup.querySelector('.select-list')!
+    return {
+      项: popup.querySelectorAll('[role=option]').length,
+      高: Math.round(popup.getBoundingClientRect().height),
+      内距:
+        parseFloat(getComputedStyle(popup).paddingBlockStart) * 2 +
+        parseFloat(getComputedStyle(popup).borderTopWidth) * 2,
+      可滚: list.scrollHeight > list.clientHeight + 1,
+      箭头: [...popup.querySelectorAll('.select-arrow')].map((el) => Math.round(el.getBoundingClientRect().height)),
+    }
   })
-  expect(long.项).toBe(12)
-  expect(long.高).toBeLessThanOrEqual(
-    await page.evaluate(() => window.innerHeight),
-  )
+  expect(long.项).toBe(30)
+  expect(long.高).toBeLessThanOrEqual(await page.evaluate(() => window.innerHeight))
+  expect((long.高 - long.内距) % Math.round(parseFloat(rowHeight))).toBe(0)
+  expect(long.可滚).toBe(true)
+  expect(long.箭头.length).toBeGreaterThan(0)
+  expect(Math.max(...long.箭头)).toBeGreaterThan(0)
+  await page.locator('.select-arrow:not(.select-arrow--up)').first().hover()
+  await page.waitForTimeout(400)
+  expect(
+    await page.evaluate(() => {
+      const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+      return Math.round(popup.querySelector('.select-list')!.scrollTop)
+    }),
+  ).toBeGreaterThan(0)
+  await page.keyboard.press('Escape')
+
+  /* 多选：点选之后弹层不关，勾选数增加 */
+  await openSelect('select multiple')
+  const beforeMultiple = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    return popup.querySelectorAll('.select-item__check').length
+  })
+  await page.locator('.select-popup:visible [role=option]', { hasText: 'Dark' }).first().click()
+  await page.waitForTimeout(200)
+  const afterMultiple = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)
+    return popup ? popup.querySelectorAll('.select-item__check').length : -1
+  })
+  expect(afterMultiple).toBe(beforeMultiple + 1)
+  await page.keyboard.press('Escape')
+
+  /* 搜索：筛选真的减少选项，无命中时给说明；等行高的长列表加搜索后仍对齐整行 */
+  await openSelect('select searchable')
+  await page.locator('.select-search__input').fill('zzz')
+  await page.waitForTimeout(200)
+  const noMatch = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    return {
+      项: popup.querySelectorAll('[role=option]').length,
+      说明: popup.querySelector('.select-popup__empty')?.textContent?.trim() ?? '',
+    }
+  })
+  expect(noMatch.项).toBe(0)
+  expect(noMatch.说明).not.toBe('')
+  await page.keyboard.press('Escape')
+
+  await openSelect('select searchable long')
+  const searched = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    const search = popup.querySelector('.select-search')!
+    return {
+      高: Math.round(popup.getBoundingClientRect().height),
+      内距:
+        parseFloat(getComputedStyle(popup).paddingBlockStart) * 2 +
+        parseFloat(getComputedStyle(popup).borderTopWidth) * 2,
+      搜索高: Math.round(search.getBoundingClientRect().height),
+      可滚: popup.querySelector('.select-list')!.scrollHeight > popup.querySelector('.select-list')!.clientHeight + 1,
+    }
+  })
+  expect(searched.可滚).toBe(true)
+  expect((searched.高 - searched.内距 - searched.搜索高) % Math.round(parseFloat(rowHeight))).toBe(0)
   await page.keyboard.press('Escape')
 
   /* 空态：没有选项时弹层给说明，触发器显示占位文字 */

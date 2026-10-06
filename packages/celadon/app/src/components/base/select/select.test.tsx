@@ -173,4 +173,65 @@ describe('Select', () => {
     /* 第三项是禁用的 Auto，键盘不停留，落到第四项之外仍是已到末项，不产生禁用值 */
     expect(onValueChange).not.toHaveBeenCalledWith('auto')
   })
+
+  it('reports an array of values while multiple', async () => {
+    const onValueChange = vi.fn()
+    render(
+      <Select
+        multiple
+        aria-label="Theme"
+        value={['light']}
+        onValueChange={onValueChange}
+        options={OPTIONS}
+      />,
+    )
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
+    await userEvent.click(await screen.findByRole('option', { name: 'Dark' }))
+
+    expect(onValueChange).toHaveBeenCalled()
+    expect(Array.isArray(onValueChange.mock.calls[0]?.[0])).toBe(true)
+  })
+
+  it('filters the options with the search box and reports no match', async () => {
+    render(
+      <Select
+        searchable
+        aria-label="Theme"
+        searchLabel="Search options"
+        noMatchText="No matches"
+        value="light"
+        onValueChange={() => {}}
+        options={OPTIONS}
+      />,
+    )
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
+    expect(await screen.findAllByRole('option')).toHaveLength(3)
+
+    await userEvent.type(screen.getByRole('textbox', { name: 'Search options' }), 'dark')
+    expect(screen.getAllByRole('option')).toHaveLength(1)
+    expect(screen.getByRole('option', { name: 'Dark' })).toBeInTheDocument()
+
+    await userEvent.clear(screen.getByRole('textbox', { name: 'Search options' }))
+    await userEvent.type(screen.getByRole('textbox', { name: 'Search options' }), 'zzz')
+    expect(screen.queryAllByRole('option')).toHaveLength(0)
+    expect(screen.getByText('No matches')).toBeInTheDocument()
+  })
+
+  it('marks the popup as searchable and keeps one list container', async () => {
+    /* 箭头的可见性由布局决定，jsdom 里不会渲染，因此这里只断言类契约，可见性在浏览器用例里核 */
+    render(<Select searchable aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />)
+    await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
+    await screen.findByRole('option', { name: 'Light' })
+    expect(document.querySelector('.select-popup--search')).not.toBeNull()
+    expect(document.querySelectorAll('.select-list')).toHaveLength(1)
+  })
+
+  it('keeps the popup without the search modifier when the search is off', async () => {
+    render(<Select aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />)
+    await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
+    await screen.findByRole('option', { name: 'Light' })
+    expect(document.querySelector('.select-popup--search')).toBeNull()
+  })
 })

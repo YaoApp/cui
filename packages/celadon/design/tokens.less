@@ -506,7 +506,9 @@
      字号取正文档：输入值是内容，不是说明文字；正文行高 1.7 加 4 的块向内距与 1 的边框，
      控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。
      圆角与按钮同一条规则：**按档位取同名 token**。输入框属中档，取 --radius-medium（8px）。 */
-  .input       { background: var(--background-field); border: 1px solid var(--border-control); color: var(--text-primary); padding-block: var(--spacing-4); padding-inline: var(--spacing-8); border-radius: var(--radius-medium); font: inherit; font-size: var(--font-size-body);
+  /* 盒模型统一为 border-box：尺寸档给的是**含边框**的整高，否则 min-block-size 之外再加两侧 1px 边框，
+     小档会变成 26 而不是 24，滚动区与整行计算也随之偏差。 */
+  .input       { box-sizing: border-box; background: var(--background-field); border: 1px solid var(--border-control); color: var(--text-primary); padding-block: var(--spacing-4); padding-inline: var(--spacing-8); border-radius: var(--radius-medium); font: inherit; font-size: var(--font-size-body);
     /* number 的原生步进器由浏览器绘制，尺寸与配色都不受设计控制，暗色下呈浅色块并挤占文字区，
        因此整体去掉外观（取值交给键盘与页面自己的步进按钮）。WebKit 与 Firefox 各认一条。 */
     &[type='number'] {
@@ -563,14 +565,44 @@
      弹层是浮层，圆角取弹层档（--radius-medium），阴影取悬浮档；选项与字段同字号，
      高亮用中性悬停底，选中用品牌浅底加品牌文字，禁用沿用禁用字色。
      弹层与触发器的间距由排布者（定位器）给，组件不带外边距，见 layout.md 第 3 节。 */
-  .select-popup { padding: var(--spacing-4);
+  .select-popup { box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;
+    padding: var(--spacing-4); --select-search-height: 0px;
+    /* 内距加边框的合计：整行取整与滚动区都要减掉它 */
+    --select-popup-inset: calc(var(--spacing-8) + var(--border-width) * 2);
     background: var(--background-surface); border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-medium); box-shadow: var(--shadow-floating); outline: none;
-    min-inline-size: var(--anchor-width, auto); max-block-size: var(--available-height, var(--spacing-48)); overflow: auto; }
+    min-inline-size: var(--anchor-width, auto); max-block-size: var(--available-height, var(--spacing-48)); }
+  /* 带筛选框时把它的高度也算进最大高度，否则整行的取整会把筛选框挤出去 */
+  .select-popup--search { --select-search-height: calc(var(--spacing-24) + var(--spacing-12)); }
+  /* 弹层最大高度对齐成**整行**：可用高度减内距与筛选框高度后向下取整到行高档，再加回去，
+     列表底部就不会露出半行。round() 还不可用的运行时按上面的可用高度走，不影响可用性。
+     函数名与整段值用 ~"" 转义，避免被 Less 自己的 round() 抢先求值。 */
+  @supports ~"(max-block-size: round(down, 100px, 40px))" {
+    .select-popup {
+      max-block-size: ~"calc(max(var(--row-height), round(down, var(--available-height, var(--spacing-48)) - var(--select-popup-inset) - var(--select-search-height), var(--row-height))) + var(--select-popup-inset) + var(--select-search-height))";
+    }
+  }
   .select-popup__empty { padding: var(--spacing-4) var(--spacing-12);
     color: var(--text-tertiary); font-size: var(--font-size-caption); }
-  /* 选项列表：竖排，行与行之间不留缝（间距由行高自己给） */
-  .select-list { display: flex; flex-direction: column; box-sizing: border-box; }
+  /* 筛选框：图标加输入框，输入框取字段小档，宽度撑满弹层内宽 */
+  .select-search { display: flex; align-items: center; gap: var(--spacing-4);
+    padding: var(--spacing-4) var(--spacing-8) var(--spacing-8); }
+  .select-search__icon { flex: none; color: var(--text-tertiary); }
+  .select-search__input { flex: 1; min-inline-size: 0; }
+  /* 滚动箭头：列表溢出时出现，做成浮层，不占列表高度，整行取整才不会被它破坏；
+     底色与弹层同底，避免文字从下面透出来 */
+  .select-arrow { position: absolute; inset-inline: 0;
+    display: flex; align-items: center; justify-content: center;
+    block-size: var(--spacing-24); color: var(--text-secondary); background: var(--background-surface); cursor: default; }
+  .select-arrow--up { inset-block-start: 0;
+    border-start-start-radius: var(--radius-small); border-start-end-radius: var(--radius-small); }
+  .select-arrow:not(.select-arrow--up) { inset-block-end: 0;
+    border-end-start-radius: var(--radius-small); border-end-end-radius: var(--radius-small); }
+  /* 选项列表：竖排，行与行之间不留缝（间距由行高自己给）。
+     滚动容器是**列表**本身（上游按列表计算箭头可见性），因此它取剩余高度并自己滚；
+     scroll-padding 让键盘移动时被高亮的项不会停在箭头底下。 */
+  .select-list { display: flex; flex-direction: column; box-sizing: border-box;
+    flex: 1; min-block-size: 0; overflow: auto; scroll-padding-block: var(--spacing-24); }
   /* 分组标题：说明档字号、三级文字，行内距与选项对齐，因此标题与选项左边缘成一条线 */
   .select-group-label { padding: var(--spacing-4) var(--spacing-12);
     color: var(--text-tertiary); font-size: var(--font-size-caption); font-weight: var(--font-weight-medium); }

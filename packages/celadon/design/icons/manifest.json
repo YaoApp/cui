@@ -66,6 +66,12 @@
     "src": "chevron-right"
   },
   {
+    "id": "i-up",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "chevron-up"
+  },
+  {
     "id": "i-down",
     "lib": "lucide",
     "cat": "action",

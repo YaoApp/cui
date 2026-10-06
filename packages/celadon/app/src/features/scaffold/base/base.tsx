@@ -28,6 +28,9 @@ export function BasePage() {
   const [shakeTick, setShakeTick] = useState(0)
   /* 主题与语言用真实的偏好源，不自造局部状态（与首页同一套） */
   const { theme: activeTheme, setTheme: selectActiveTheme } = useThemePreference()
+  /* 两个多选样例各自的选中集：受控组件要真的能改，样例才有意义 */
+  const [multiTheme, setMultiTheme] = useState<string[]>(['light', 'system'])
+  const [multiIcon, setMultiIcon] = useState<string[]>(['reading', 'task'])
 
   /* 选择器的示例数据是调用方传入的数据，不属于页面文案，用固定取值即可。
      主题那三个标签住在各功能自己的语言包里（`bridge.themeLight` 等），组件层的文案归属另有缺口，
@@ -76,11 +79,19 @@ export function BasePage() {
       ],
     },
   ]
-  /* 长列表：用来验证弹层最大高度与滚动 */
-  const longOptions = Array.from({ length: 12 }, (_, index) => ({
+  /* 长列表：三十项，足以让弹层溢出并显示上下滚动箭头 */
+  const longOptions = Array.from({ length: 30 }, (_, index) => ({
     value: `item-${index}`,
     label: `Option ${index + 1}`,
   }))
+  /* 搜索示例的数据：名称用于过滤，说明与图标一起展示异形布局下的筛选结果 */
+  const searchOptions = [
+    { value: 'reading', label: 'Reading', description: 'Narrow column, larger line spacing', icon: <Icon name="i-book" /> },
+    { value: 'tool', label: 'Tool', description: 'Wide column for panels and tables', icon: <Icon name="i-board" /> },
+    { value: 'task', label: 'Task', description: 'Two columns with a status rail', icon: <Icon name="i-tasks" /> },
+    { value: 'recent', label: 'Recent', description: 'Opened in the last seven days', icon: <Icon name="i-clock" /> },
+    { value: 'suggested', label: 'Suggested', description: 'Picked from your recent work', icon: <Icon name="i-spark" />, disabled: true },
+  ]
 
   return (
     <ScaffoldPage title={t('base.title')}>
@@ -394,6 +405,49 @@ export function BasePage() {
         <h3 className="base-subgroup__title">{t('base.sub.longList')}</h3>
         <div className="base-row">
           <Select aria-label="select long list" value="item-0" onValueChange={() => {}} options={longOptions} />
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.multiple')}</h3>
+        <div className="base-row">
+          <Select
+            multiple
+            aria-label="select multiple"
+            value={multiTheme}
+            onValueChange={setMultiTheme}
+            options={selectOptions}
+          />
+          <Select
+            multiple
+            aria-label="select multiple icons"
+            value={multiIcon}
+            onValueChange={setMultiIcon}
+            options={iconOptions}
+          />
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.search')}</h3>
+        <div className="base-row">
+          <Select
+            searchable
+            aria-label="select searchable"
+            searchLabel={t('base.select.search')}
+            noMatchText={t('base.select.noMatch')}
+            value=""
+            onValueChange={() => {}}
+            options={searchOptions}
+            placeholder={t('base.select.placeholder')}
+          />
+          {/* 等行高的长列表加搜索：用来核对「最大高度对齐整行」在带筛选框时仍成立 */}
+          <Select
+            searchable
+            aria-label="select searchable long"
+            searchLabel={t('base.select.search')}
+            noMatchText={t('base.select.noMatch')}
+            value=""
+            onValueChange={() => {}}
+            options={longOptions}
+            placeholder={t('base.select.placeholder')}
+          />
         </div>
 
         <h3 className="base-subgroup__title">{t('base.sub.empty')}</h3>

@@ -14,7 +14,9 @@ export type I18nKey =
   | 'base.message.error'
   | 'base.message.hint'
   | 'base.select.empty'
+  | 'base.select.noMatch'
   | 'base.select.placeholder'
+  | 'base.select.search'
   | 'base.sub.brands'
   | 'base.sub.controls'
   | 'base.sub.empty'
@@ -22,8 +24,10 @@ export type I18nKey =
   | 'base.sub.iconSizes'
   | 'base.sub.longList'
   | 'base.sub.messages'
+  | 'base.sub.multiple'
   | 'base.sub.options'
   | 'base.sub.props'
+  | 'base.sub.search'
   | 'base.sub.sizes'
   | 'base.sub.states'
   | 'base.sub.types'
@@ -259,7 +263,9 @@ declare module 'i18next' {
         'base.message.error': string
         'base.message.hint': string
         'base.select.empty': string
+        'base.select.noMatch': string
         'base.select.placeholder': string
+        'base.select.search': string
         'base.sub.brands': string
         'base.sub.controls': string
         'base.sub.empty': string
@@ -267,8 +273,10 @@ declare module 'i18next' {
         'base.sub.iconSizes': string
         'base.sub.longList': string
         'base.sub.messages': string
+        'base.sub.multiple': string
         'base.sub.options': string
         'base.sub.props': string
+        'base.sub.search': string
         'base.sub.sizes': string
         'base.sub.states': string
         'base.sub.types': string

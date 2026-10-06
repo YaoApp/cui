@@ -11,6 +11,7 @@ export type IconId =
   | 'i-plus-square'
   | 'i-left'
   | 'i-right'
+  | 'i-up'
   | 'i-down'
   | 'i-collapse'
   | 'i-dots'
