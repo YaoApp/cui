@@ -1,0 +1,46 @@
+/* 设计页与原型里的**样例类**：这些形状暂时没有独立的产品组件（气泡、导航选中项、徽标、头像、标签页），
+   只服务设计稿与拼装样例，因此留在设计层，不进任何组件的 less。
+   一旦其中某个做成产品组件，连同它的类一起搬进那个组件。 */
+.celadon,
+[data-theme] .celadon {
+  .bubble-me {
+    background: var(--brand-soft);
+    color: var(--text-primary);
+    border: var(--border-width) solid var(--border-default);
+  }
+
+  .bubble-ai {
+    background: var(--background-surface);
+    color: var(--text-primary);
+    border: var(--border-width) solid var(--border-subtle);
+  }
+
+  .nav-item.is-active {
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+  }
+
+  .badge-brand {
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+    border: var(--border-width) solid var(--brand-ink);
+  }
+
+  .badge-warn {
+    background: var(--warm-soft);
+    color: var(--warm-text);
+    border: var(--border-width) solid var(--warm);
+  }
+
+  .avatar {
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+    border: var(--border-width) solid var(--brand-ink);
+  }
+
+  .tab-active {
+    background: var(--background-surface);
+    color: var(--text-primary);
+    border: var(--border-width) solid var(--border-control);
+  }
+}

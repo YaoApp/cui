@@ -1,4 +1,202 @@
-/* 只管设计类没有的部分：布局与尺寸档。颜色/边框/四态全在 design/tokens.less 的 .btn-* 里。 */
+/* 按钮设计类：**每个变体各自写全四态**（悬停 · 按下 · 聚焦 · 禁用）。
+   真实伪类与静态类 `.is-hover` / `.is-active` / `.is-focus` / `.is-disabled` 一一对应，
+   后者供清单页把同一个按钮的多种状态并排展示。颜色一律取 token。
+   **按下只做 F4 press 场景的 `transform: scale(.94)`，不改颜色**：形状反馈已经足够表达"按下了"，
+   再叠一层配色反而会把文字与底色撞在一起、并让语义色的悬停与按下分不清。悬停没有形状反馈，
+   所以颜色变化只留给悬停。
+   下半段是这个组件的布局与尺寸档：只写设计类没有的部分。 */
+.celadon,
+[data-theme] .celadon {
+  /* 按钮族的共同底座：**清掉浏览器给 `<button>` 的默认外观**（2px outset 边框与 1px 纵向内距），
+     不给这一条就会露出浏览器默认边框。 */
+  .btn-primary,
+  .btn-ghost,
+  .btn-warn,
+  .btn-success,
+  .btn-danger {
+    border: 0;
+    padding-block: 0;
+  }
+
+  /* 按钮**默认不带边框**（幽灵档除外）：底色与文字已经说明层级，加一圈 1px 边框反而显硬。
+     这是**有意弱化边界**（见 layout.md 第 6 节的可达性豁免）：浅底与内容底的对比度低于 3:1，
+     控件身份由文字标签与底色形状承担；需要强边界时用幽灵档。 */
+  .btn-primary {
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+
+    /* 实心档：品牌底 + 反色字，只用于主操作 */
+    &.is-solid {
+      background: var(--brand);
+      color: var(--brand-text);
+
+      &:not(.is-disabled, :disabled):hover,
+      &.is-hover {
+        background: var(--brand-solid-hover);
+      }
+
+      &:not(.is-disabled, :disabled):active,
+      &.is-active {
+        transform: scale(.94);
+      }
+    }
+
+    /* 软档的悬停只作用于非实心：实心档自己有更深的悬停底 */
+    &:not(.is-solid, .is-disabled, :disabled):hover,
+    &.is-hover:not(.is-solid) {
+      background: var(--brand-soft-hover);
+    }
+
+    &:not(.is-solid, .is-disabled, :disabled):active,
+    &.is-active:not(.is-solid) {
+      transform: scale(.94);
+    }
+
+    &:focus-visible,
+    &.is-focus {
+      box-shadow: var(--focus-ring);
+      outline: none;
+    }
+
+    /* 禁用必须写在实心档之后：两者同权重，靠源序压过 .is-solid 的底色，
+       否则禁用的实心按钮仍然是品牌色，只有边框变淡。 */
+    &:disabled,
+    &.is-disabled {
+      background: var(--background-disabled);
+      color: var(--text-disabled);
+      border-color: var(--border-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-ghost {
+    background: var(--background-surface);
+    color: var(--text-primary);
+    border: var(--border-width) solid var(--border-default);
+
+    &:not(.is-disabled, :disabled):hover,
+    &.is-hover {
+      background: var(--background-hover);
+    }
+
+    &:not(.is-disabled, :disabled):active,
+    &.is-active {
+      transform: scale(.94);
+    }
+
+    &:focus-visible,
+    &.is-focus {
+      box-shadow: var(--focus-ring);
+      outline: none;
+    }
+
+    &:disabled,
+    &.is-disabled {
+      background: var(--background-disabled);
+      color: var(--text-disabled);
+      border-color: var(--border-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  /* 语义三档（琥珀 · 成功 · 危险）走**描边式**：内容底 + 1px 同族色边框 + 同族色文字，
+     与幽灵档同一种结构，只是边框与文字换成同族色。这样边界对内容底达标 1.4.11，不需要走弱化豁免。
+     悬停是**淡影档**：取 `--*-soft-hover`，它是同族浅底与内容底四成对六成的结果，已在 token 里定好值，
+     不在样式里就地算色。实测文字对底 5.34 至 10.44:1，边框对底 4.36 至 9.50:1。
+     按下仍只做 F4 press 场景的缩放；聚焦环取同族色。
+     文字色对各取已验证的档位；--danger 只做边框与图形，不单独当文字色用。 */
+  .btn-success {
+    background: var(--background-surface);
+    color: var(--success);
+    border: var(--border-width) solid var(--success);
+
+    &:not(.is-disabled, :disabled):hover,
+    &.is-hover {
+      background: var(--success-soft-hover);
+    }
+
+    &:not(.is-disabled, :disabled):active,
+    &.is-active {
+      transform: scale(.94);
+    }
+
+    &:focus-visible,
+    &.is-focus {
+      box-shadow: var(--focus-ring-success);
+      outline: none;
+    }
+
+    &:disabled,
+    &.is-disabled {
+      background: var(--background-disabled);
+      color: var(--text-disabled);
+      border-color: var(--border-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-danger {
+    background: var(--background-surface);
+    color: var(--danger-ink);
+    border: var(--border-width) solid var(--danger);
+
+    &:not(.is-disabled, :disabled):hover,
+    &.is-hover {
+      background: var(--danger-soft-hover);
+    }
+
+    &:not(.is-disabled, :disabled):active,
+    &.is-active {
+      transform: scale(.94);
+    }
+
+    &:focus-visible,
+    &.is-focus {
+      box-shadow: var(--focus-ring-danger);
+      outline: none;
+    }
+
+    &:disabled,
+    &.is-disabled {
+      background: var(--background-disabled);
+      color: var(--text-disabled);
+      border-color: var(--border-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-warn {
+    background: var(--background-surface);
+    color: var(--warm-text);
+    border: var(--border-width) solid var(--warm);
+
+    &:not(.is-disabled, :disabled):hover,
+    &.is-hover {
+      background: var(--warm-soft-hover);
+    }
+
+    &:not(.is-disabled, :disabled):active,
+    &.is-active {
+      transform: scale(.94);
+    }
+
+    &:focus-visible,
+    &.is-focus {
+      box-shadow: var(--focus-ring-warm);
+      outline: none;
+    }
+
+    &:disabled,
+    &.is-disabled {
+      background: var(--background-disabled);
+      color: var(--text-disabled);
+      border-color: var(--border-disabled);
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* ===== 布局与尺寸档（设计类没有的部分）===== */
 .button {
   /* 按钮文字**不许折行**：窄窗下「刷新」被折成两行（拟人 S5 的截图抓到过）。 */
   white-space: nowrap;
@@ -23,11 +221,13 @@
   /* 动效归属：CSS（见 architecture/12-motion.md —— 每个场景都要标注归属）。
      悬停 / 按下 / 焦点三个场景都取 --duration-fast 与 --easing-standard；减动效下时长归零。
      transform 也在列表里：按下反馈是 F4 press 场景的 scale(.94)。 */
-  transition: background-color var(--duration-fast) var(--easing-standard),
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
     border-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard),
     transform var(--duration-fast) var(--easing-standard);
+
   /* 按下是整体缩放，文字随按钮一起走。提升合成层只在真正按下那一档：
      放在悬停上会让图层在悬停瞬间才被创建，文字当场重新栅格化，出现跳字；
      放在按下档则提升与缩放同帧开始，缩放期间不再逐帧重绘文字。 */
@@ -81,22 +281,26 @@
     background: var(--background-inverse);
     color: var(--text-inverse);
 
-    &:not(:disabled):hover, &.is-hover {
+    &:not(.is-disabled, :disabled):hover,
+    &.is-hover {
       background: var(--background-inverse-hover);
     }
 
-    &:not(:disabled):active, &.is-active {
+    &:not(.is-disabled, :disabled):active,
+    &.is-active {
       /* 按下只做 F4 press 场景的缩放，不换色 */
       transform: scale(.94);
     }
 
     /* 焦点环取本族深色，不用品牌色环（中性族不该出现品牌色） */
-    &:focus-visible, &.is-focus {
+    &:focus-visible,
+    &.is-focus {
       box-shadow: var(--focus-ring-inverse);
       outline: none;
     }
 
-    &:disabled, &.is-disabled {
+    &:disabled,
+    &.is-disabled {
       background: var(--background-disabled);
       color: var(--text-disabled);
       border-color: var(--background-disabled);
@@ -109,7 +313,7 @@
     padding-inline: var(--spacing-16);
   }
 
-  /* 加载态：禁用交互。指示器用设计类 .spinner，与输入框共用一套圆环 */
+  /* 加载态：禁用交互。指示器用 `.spinner`，与输入框共用一套圆环 */
   &.is-loading {
     cursor: progress;
   }

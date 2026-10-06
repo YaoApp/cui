@@ -1,0 +1,25 @@
+/* 旋转指示器：按钮与输入框的加载态共用。
+   **两瓣四分之一弧，互成 180°**，每瓣头端圆帽、尾端收尖：一瓣读不出圆，两瓣既读得出圆，
+   又留出两段空隙看得出在转。用内联 SVG 的填充路径画：边框的端头由斜接决定，做不出圆帽，
+   因此这里只管尺寸、颜色与旋转。
+   一周时长默认取 --duration-loop，并允许逐实例用 --spinner-duration 覆盖。 */
+.spinner {
+  flex: none;
+  display: block;
+  inline-size: var(--spacing-16);
+  block-size: var(--spacing-16);
+  fill: currentColor;
+  animation: spinner-spin var(--spinner-duration, var(--duration-loop)) linear infinite;
+}
+
+@keyframes spinner-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* 无限循环的旋转不能只靠时长归零：时长极小照样在闪，必须直接停掉。
+   选择器要与设计类同权重并加 !important：媒体查询在文件前面，同权重时会被后面的设计类覆盖。 */
+@media (prefers-reduced-motion: reduce) {
+  .celadon .spinner { animation: none !important; }
+}

@@ -113,14 +113,14 @@ export function Select(props: SelectProps) {
   const commitValue = useRef<((next: string) => void) | null>(null)
 
   const classes = [
-    'input',
+    /* 触发器是选择器自己的设计类（见 select.less），不挂输入框的类：
+       字段外观取同一批 token，行为各写各的（按钮语义，点击不加环、聚焦不改底色） */
+    'select-trigger',
     'select__trigger',
-    /* 触发器档：点击不加焦点环，只有键盘聚焦才加（与按钮同一规则，见 tokens.less 的 .input--trigger） */
-    'input--trigger',
-    variant === 'plain' ? 'input--plain' : null,
-    inverse ? 'input--inverse' : null,
-    size === 'small' ? 'input--small' : null,
-    size === 'large' ? 'input--large' : null,
+    variant === 'plain' ? 'select-trigger--plain' : null,
+    inverse ? 'select-trigger--inverse' : null,
+    size === 'small' ? 'select-trigger--small' : null,
+    size === 'large' ? 'select-trigger--large' : null,
     error ? 'is-error' : null,
     state ? `is-${state}` : null,
     className,

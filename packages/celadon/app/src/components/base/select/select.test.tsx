@@ -92,7 +92,7 @@ describe('Select', () => {
       />,
     )
     const trigger = screen.getByRole('combobox', { name: 'Theme' })
-    expect(trigger).toHaveClass('input', 'input--small', 'is-error', 'is-focus')
+    expect(trigger).toHaveClass('select-trigger', 'select-trigger--small', 'is-error', 'is-focus')
   })
 
   it('renders grouped options with their group labels', async () => {
@@ -254,7 +254,7 @@ describe('Select', () => {
 
   it('carries the inverse class', () => {
     render(<Select inverse aria-label="Theme" value="light" onValueChange={() => {}} options={OPTIONS} />)
-    expect(screen.getByRole('combobox', { name: 'Theme' })).toHaveClass('input', 'input--inverse')
+    expect(screen.getByRole('combobox', { name: 'Theme' })).toHaveClass('select-trigger', 'select-trigger--inverse')
   })
 
   it('clears the choice when the selected option is picked again', async () => {

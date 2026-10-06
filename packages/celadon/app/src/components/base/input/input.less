@@ -1,5 +1,5 @@
-/* 字段的容器与槽位。本体用的是设计类 `.input`（见 design/tokens.less，含六态），
-   所以这里只写设计类没有的部分：容器排布、左右槽位与提示文字。
+/* 字段的容器与槽位。本体用的是 `.input`（在文件下半段，含七态），
+   这里只写设计类没有的部分：容器排布、左右槽位与提示文字。
    颜色、间距、字号与圆角一律取 token，不出现字面量。 */
 
 .field {
@@ -9,7 +9,7 @@
   inline-size: 100%;
 
   &__label {
-    /* 标签是字段的名称，属元信息，取次要文字色；输入值是内容，取主文字色（见 design 的 .input 类）。
+    /* 标签是字段的名称，属元信息，取次要文字色；输入值是内容，取主文字色（见下方的 .input）。
        两者靠**颜色**拉开层级，不靠字重：中日韩字体在 Windows 上只有 400 与 700 两个真实档位，
        medium 会回落成 400，靠它区分在 Windows 上等于没区分（依据见 design/typography.md 第 10 节）。 */
     color: var(--text-secondary);
@@ -93,7 +93,7 @@
     line-height: var(--line-height-normal);
   }
 
-  /* 提示与错误共用说明档字号（`--font-size-caption`）：设计类 `.hint-error` 带的就是这个值，
+  /* 提示与错误共用说明档字号（`--font-size-caption`）：`.hint-error` 带的就是这个值，
      两者同号，两条消息的行盒才一样高，否则看起来"间距不一致"。 */
   &__hint {
     color: var(--text-tertiary);
@@ -101,11 +101,239 @@
     line-height: var(--line-height-normal);
   }
 
-  &__box:has(.field__icon) .input {
-    padding-inline-start: var(--spacing-32);
+  /* 有图标或槽位时的行内让位规则见文件末尾：它们与 `.input` 的基础内距权重相同，
+     必须排在设计类之后，靠源序取胜。 */
+}
+
+/* ===== 字段本体：七态（真实伪类与 .is-* 静态类一一对应，后者供设计稿与静态页同时展示多态）=====
+   字号取正文档：输入值是内容，不是说明文字；正文行高 1.7 加 4 的块向内距与 1 的边框，
+   控件高度约 34，满足 layout.md 第 6 节不小于 32 的要求。
+   圆角与按钮同一条规则：**按档位取同名 token**。输入框属中档，取 --radius-medium（8px）。 */
+.celadon,
+[data-theme] .celadon {
+  /* 盒模型统一为 border-box：尺寸档给的是**含边框**的整高，否则 min-block-size 之外再加两侧 1px 边框，
+     小档会变成 26 而不是 24，滚动区与整行计算也随之偏差。 */
+  .input {
+    box-sizing: border-box;
+    background: var(--background-field);
+    border: var(--border-width) solid var(--border-control);
+    color: var(--text-primary);
+    padding-block: var(--spacing-4);
+    padding-inline: var(--spacing-8);
+    border-radius: var(--radius-medium);
+    font: inherit;
+    font-size: var(--font-size-body);
+    /* 悬停与焦点的过渡照 F4 的场景表：两个场景都取 --duration-fast 与 --easing-standard。
+       减动效偏好下时长 token 归零，这里无需另写分支。 */
+    transition:
+      border-color var(--duration-fast) var(--easing-standard),
+      box-shadow var(--duration-fast) var(--easing-standard),
+      background-color var(--duration-fast) var(--easing-standard);
+
+    /* number 的原生步进器由浏览器绘制，尺寸与配色都不受设计控制，暗色下呈浅色块并挤占文字区，
+       因此整体去掉外观（取值交给键盘与页面自己的步进按钮）。 */
+    &[type='number'] {
+      appearance: textfield;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        appearance: none;
+        margin: 0;
+      }
+    }
+
+    &::placeholder {
+      color: var(--text-placeholder);
+    }
+
+    &:not(.is-disabled, :disabled):hover,
+    &.is-hover {
+      border-color: var(--border-hover);
+    }
+
+    /* 聚焦：单层品牌描边（不再"边框 + 偏移外环"两层）；键盘可达性由颜色对比保证（品牌 vs 字段底 4.54:1）。
+       底色同时提亮一档，让"正在输入"这件事在整块字段上看得出来；底色跟着上面那条 background-color 过渡走。
+       聚焦优先于悬停：带上悬停的变体并放在悬停规则之后，否则鼠标停在已聚焦的字段上，
+       边框会被悬停色盖掉，出现"聚焦了却还留一条悬停线"。 */
+    &:focus,
+    &.is-focus,
+    &:not(.is-disabled, :disabled):focus,
+    &.is-hover.is-focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 1px var(--brand);
+      outline: none;
+      background: var(--background-field-focus);
+    }
+
+    &:read-only,
+    &.is-readonly {
+      background: var(--background-readonly);
+      color: var(--text-secondary);
+    }
+
+    /* 强边界档：需要 1.4.11 达标时显式启用（值见 --border-control-strong） */
+    &.is-strong {
+      border-color: var(--border-control-strong);
+
+      &:not(.is-disabled, :disabled):hover,
+      &.is-hover {
+        border-color: var(--border-hover-strong);
+      }
+    }
+
+    /* 错误是持续状态：悬停与聚焦都不改变边框色，聚焦时描边取危险色。
+       规则必须带上悬停与聚焦的变体并写在它们之后，否则会被权重更高的悬停规则盖掉，
+       表现为"鼠标一进来红边就没了、聚焦时红边配品牌描边"。 */
+    &.is-error,
+    &.is-error:not(.is-disabled, :disabled):hover,
+    &.is-error:focus,
+    &.is-error.is-hover,
+    &.is-error.is-focus {
+      border-color: var(--danger);
+    }
+
+    &.is-error:focus,
+    &.is-error.is-focus {
+      box-shadow: 0 0 0 1px var(--danger);
+    }
+
+    &:disabled,
+    &.is-disabled {
+      background: var(--background-disabled);
+      color: var(--text-disabled);
+      border-color: var(--border-disabled);
+      cursor: not-allowed;
+
+      &::placeholder {
+        color: var(--text-disabled);
+      }
+    }
+
+    /* 加载态：只把指针换成进行中，进程指示由右侧槽位的四分之一圆环承担（见 input.tsx）。
+       不动文字颜色、不动底色、不动裁剪，值始终按正文呈现。 */
+    &.is-loading {
+      cursor: progress;
+    }
   }
 
-  &__box:has(.field__trail) .input {
-    padding-inline-end: var(--spacing-32);
+  /* 字段尺寸档：小 24 · 大 40；中档就是上面的 `.input` 本身（与输入框同高，约 34）。
+     必须写在 `.input` **之后**：与基础规则同权重，靠源序取胜。圆角按档位取同名 token，
+     行高同样取整，避免小数几何让文字在重绘时跳动。 */
+  .input--small {
+    min-block-size: var(--spacing-24);
+    padding-block: 0;
+    padding-inline: var(--spacing-8);
+    line-height: var(--line-height-control-small);
+    font-size: var(--font-size-caption);
+    border-radius: var(--radius-small);
   }
+
+  .input--large {
+    min-block-size: calc(var(--spacing-32) + var(--spacing-8));
+    padding-inline: var(--spacing-12);
+    line-height: var(--line-height-control);
+    font-size: var(--font-size-body-lg);
+    border-radius: var(--radius-large);
+  }
+
+  /* 纯文字档：用在标题栏与工具条，不画字段底与边框，只有文字与图标。
+     悬停给一圈浅底（因此保留行内距与圆角），键盘聚焦才加环。
+     选择器写成 `.input.input--plain`：主题容器下基础规则是 `[data-theme] .celadon .input`，权重更高，
+     只写 `.input--plain` 压不住。错误档不适用于纯文字档：错误要靠文案与图标表达，不要给无框控件硬加红边。 */
+  .input.input--plain {
+    background: transparent;
+    border-color: transparent;
+    padding-inline: var(--spacing-8);
+    border-radius: var(--radius-small);
+  }
+
+  .input.input--plain:not(.is-disabled, :disabled):hover,
+  .input.input--plain.is-hover {
+    background: var(--background-hover);
+    border-color: transparent;
+  }
+
+  .input.input--plain:disabled,
+  .input.input--plain.is-disabled {
+    background: transparent;
+  }
+
+  /* 反色档：深底或品牌底上的字段，与按钮的反色档同一处理，边框去掉（有意弱化边界）。
+     底与字由三条各管一段（常规、悬停、禁用）；描边另外用一条**只写描边**的规则兜住所有状态：
+     悬停、聚焦、键盘聚焦，否则聚焦时会被补上一条灰色描边。 */
+  .input.input--inverse {
+    background: var(--background-inverse);
+    color: var(--text-inverse);
+  }
+
+  .input.input--inverse,
+  .input.input--inverse:not(.is-disabled, :disabled):hover,
+  .input.input--inverse.is-hover,
+  .input.input--inverse:focus,
+  .input.input--inverse.is-focus,
+  .input.input--inverse:focus-visible {
+    border-color: transparent;
+  }
+
+  .input.input--inverse:not(.is-disabled, :disabled):hover,
+  .input.input--inverse.is-hover {
+    background: var(--background-inverse-hover);
+  }
+
+  .input.input--inverse:disabled,
+  .input.input--inverse.is-disabled {
+    background: var(--background-disabled);
+    color: var(--text-disabled);
+  }
+
+  /* 错误提示文字（危险色的文字档，取说明档字号） */
+  .hint-error {
+    color: var(--danger-ink);
+    font-size: var(--font-size-caption);
+  }
+
+  /* 错误抖动：一次性反馈，**默认不加**，由调用方在判定错误时显式挂上。
+     时长与缓动照 F4 的 shake 场景，只在错误字段上叠加，不改其它状态。 */
+  .is-shake {
+    animation: shake-invalid var(--duration-slow) var(--easing-standard) both;
+  }
+}
+
+/* 错误抖动的横向位移：两次来回，幅度取间距刻度，只动 transform。
+   用 var() 而不是字面量，幅度随间距刻度统一（F4 之外唯一的量是位移，故不另立 token）。 */
+@keyframes shake-invalid {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(calc(-1 * var(--spacing-4)));
+  }
+
+  50% {
+    transform: translateX(var(--spacing-4));
+  }
+
+  75% {
+    transform: translateX(calc(-1 * var(--spacing-4)));
+  }
+}
+
+/* 一次性抖动在减少动态下必须直接停掉：时长归零也会持续闪 */
+@media (prefers-reduced-motion: reduce) {
+  .celadon .is-shake {
+    animation: none !important;
+  }
+}
+
+/* 有图标或槽位时，本体给它们让出行内内距（不让文字压在图标下面）。
+   这两条与上面 `.input` 的基础 `padding-inline` 权重相同（主题容器下都是三个类），
+   所以必须排在设计类之后，靠源序取胜 —— 否则会被基础内距盖回 8px，图标压在文字上。 */
+.field__box:has(.field__icon) .input {
+  padding-inline-start: var(--spacing-32);
+}
+
+.field__box:has(.field__trail) .input {
+  padding-inline-end: var(--spacing-32);
 }

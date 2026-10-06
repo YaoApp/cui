@@ -1,0 +1,12 @@
+/* 设计页、原型与其他只引设计产物的地方，从这里取到各组件的设计类。
+   产品侧由组件自己 import 各自的 less（打包器内联），两条路用的是同一批文件。
+   顺序：样例与工具类在前，组件在后；组件内部靠源序决定权重，因此同名的档位规则要写在基础规则之后。 */
+@import (less) './samples.less';
+@import (less) './utilities.less';
+@import (less) '../app/src/components/base/button/button.less';
+@import (less) '../app/src/components/base/icon/icon.less';
+@import (less) '../app/src/components/base/brand-mark/brand-mark.less';
+@import (less) '../app/src/components/base/input/input.less';
+@import (less) '../app/src/components/base/select/select.less';
+@import (less) '../app/src/components/base/segmented-control/segmented-control.less';
+@import (less) '../app/src/components/base/spinner/spinner.less';

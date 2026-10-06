@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* 生成物一致性检查：跑一遍生成脚本，产物与仓库不一致即失败。
-   · tokens.css —— build-css.mjs 一次生成两份相同内容：design/ 与 app/src/platform/theme/，
-     两份都在比对清单里。
+   · tokens.css —— build-css.mjs 从同一份 token 定义生成两份：design/tokens.css（定义 + 各组件设计类）
+     与 app/src/platform/theme/tokens.css（只有定义），两份都在比对清单里。
    · icons.html / mock.html —— build-icons.mjs 从 icons/*.svg + manifest 装配。
    · app/src/platform/icons/{sprite.svg,icon-ids.ts} —— 同一脚本产出的**应用侧**图标产物。
    曾经出现"改了源但忘了重跑，页面里还是旧副本"的问题，这里把它变成可检查的。

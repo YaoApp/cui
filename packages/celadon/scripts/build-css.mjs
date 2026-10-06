@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
- * build-css.mjs — 从 design/tokens.less 生成两份内容相同的 tokens.css
+ * build-css.mjs — 生成设计产物与应用主题
  *
  * 用途：设计规范页与应用主题从「同一份 token」派生，产物不许手改。
- * 落盘（一次生成、两处写相同内容）：
- *   design/tokens.css                     设计规范页消费
- *   app/src/platform/theme/tokens.css     应用消费入口（平台层）
+ * 落盘（两处内容不同，都从 token 定义派生）：
+ *   design/tokens.css                     设计规范页消费 = token 定义 + 各组件的设计类
+ *   app/src/platform/theme/tokens.css     应用消费入口（平台层）= 只有 token 定义
+ * 应用侧的组件样式由组件自己 import 各自的 less（打包器内联），不重复落进主题文件。
  *
  * 用法：node scripts/build-css.mjs             （写包内两处产物）
  *       node scripts/build-css.mjs <root>      （测试用：把 <root> 当包根，写 <root>/design 与 <root>/app/src/platform/theme）
@@ -21,13 +22,13 @@ const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ROOT = process.argv[2] ? resolve(process.argv[2]) : PACKAGE
 
 const lessFile = resolve(ROOT, 'design', 'tokens.less')
+const componentsFile = resolve(ROOT, 'design', 'components.less')
 /* 两份产物的顺序即比对清单的顺序（见 check-generated.mjs）。 */
-const outputs = [
-  resolve(ROOT, 'design', 'tokens.css'),
-  resolve(ROOT, 'app', 'src', 'platform', 'theme', 'tokens.css'),
-]
+const designFile = resolve(ROOT, 'design', 'tokens.css')
+const themeFile = resolve(ROOT, 'app', 'src', 'platform', 'theme', 'tokens.css')
 
 if (!existsSync(lessFile)) { console.error('missing tokens.less:', lessFile); process.exit(1) }
+if (!existsSync(componentsFile)) { console.error('missing components.less:', componentsFile); process.exit(1) }
 /* **内容不变就不落盘** —— 否则每次生成都刷新 mtime，而拟人层用 mtime 判"产物是否比源码旧"：
    `pnpm check` 之后紧接着单跑 `pnpm test:persona` 会得到假失败（2026-10-03 复核者复现过）。 */
 function writeIfChanged(file, content) {
@@ -37,10 +38,11 @@ function writeIfChanged(file, content) {
 }
 
 
-let css
+/* 两路产物同源：定义来自 tokens.less，设计页另加 components.less 里的组件设计类。 */
+let render
 try {
   const less = (await import('less')).default
-  css = (await less.render(readFileSync(lessFile, 'utf8'), { filename: lessFile })).css
+  render = async (file) => (await less.render(readFileSync(file, 'utf8'), { filename: file })).css
 } catch {
   // 退回 lessc 二进制
   const roots = [
@@ -50,14 +52,20 @@ try {
   ]
   const bin = roots.map(r => resolve(r, 'node_modules/.pnpm/node_modules/.bin/lessc')).find(existsSync)
   if (!bin) { console.error('neither the less module nor a lessc binary is available'); process.exit(1) }
-  css = execFileSync(bin, [lessFile], { encoding: 'utf8' })
+  render = async (file) => execFileSync(bin, [file], { encoding: 'utf8' })
 }
 
-/* 两份产物写同样内容、同样的生成头 —— 一次生成、两处落盘。 */
-const HEADER = '/* generated — do not edit by hand; source: design/tokens.less (node scripts/build-css.mjs) */'
-const body = `${HEADER}\n${css}`
-for (const file of outputs) {
+const definitions = await render(lessFile)
+const componentClasses = await render(componentsFile)
+
+const HEADER = '/* generated — do not edit by hand; source: design/tokens.less'
+  + ' (design bundle also design/components.less) · node scripts/build-css.mjs */'
+const targets = [
+  { file: designFile, body: `${HEADER}\n${definitions}\n${componentClasses}` },
+  { file: themeFile, body: `${HEADER}\n${definitions}` },
+]
+for (const { file, body } of targets) {
   mkdirSync(dirname(file), { recursive: true })
   writeIfChanged(file, body)
-  console.log('✓ wrote', file.replace(PACKAGE + '/', ''), `(${css.split('\n').length} lines)`)
+  console.log('✓ wrote', file.replace(PACKAGE + '/', ''), `(${body.split('\n').length} lines)`)
 }

@@ -503,6 +503,7 @@ test('lists the five groups and their states', async ({ page }) => {
   const inverseRead = await page.locator('[aria-label="variant inverse"]').evaluate((el) => ({
     底: getComputedStyle(el).backgroundColor,
     字: getComputedStyle(el).color,
+    高: (el as HTMLElement).offsetHeight,
   }))
   const inverseTokens = await page.evaluate(() => {
     const root = getComputedStyle(document.querySelector('.celadon') ?? document.documentElement)
@@ -514,7 +515,8 @@ test('lists the five groups and their states', async ({ page }) => {
   expect(inverseRead.底).toBe(hexToRgb(inverseTokens.底))
   expect(inverseRead.字).toBe(hexToRgb(inverseTokens.字))
 
-  /* 选中并聚焦之后（焦点会回到触发器）反色档仍保持反色底与反色字：触发器聚焦不换底色 */
+  /* 选中并聚焦之后（焦点会回到触发器）反色档仍保持反色底、反色字与无描边：
+     触发器聚焦只撤掉环，描边与底色都归各档自己 */
   await page.getByRole('combobox', { name: 'variant inverse', exact: true }).click()
   await page.waitForSelector('.select-popup:visible')
   await page.waitForTimeout(250)
@@ -523,11 +525,15 @@ test('lists the five groups and their states', async ({ page }) => {
   const inverseFocused = await page.locator('[aria-label="variant inverse"]').evaluate((el) => ({
     底: getComputedStyle(el).backgroundColor,
     字: getComputedStyle(el).color,
+    框: getComputedStyle(el).borderTopColor,
+    高: (el as HTMLElement).offsetHeight,
     聚焦: el.matches(':focus'),
   }))
   expect(inverseFocused.聚焦).toBe(true)
   expect(inverseFocused.底).toBe(hexToRgb(inverseTokens.底))
   expect(inverseFocused.字).toBe(hexToRgb(inverseTokens.字))
+  expect(inverseFocused.框).toBe('rgba(0, 0, 0, 0)')
+  expect(inverseFocused.高).toBe(inverseRead.高)
 
   /* 再点一次已选中项即取消选择：默认行为，不需要开关。先选一个值，再点同一个值 */
   const reselectSample = page.getByRole('combobox', { name: 'select placeholder', exact: true })

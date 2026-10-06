@@ -1,0 +1,61 @@
+/* 设计体系的**工具类**：跨组件共用的少量样式，不属于任何一个组件。
+   浮层遮罩与焦点环工具类随作用域落；等宽排版类自成一组（用法见下）。 */
+.celadon, [data-theme] .celadon {
+  .focusable:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+  .scrim       { background: var(--scrim); }
+  .link        { color:var(--brand-ink); text-decoration:underline; }
+}
+
+/* ===== 等宽用法（设计类，2026-10-06 建立）=====
+ * 用途：**需要字符对齐**的场合。代码 · 路径 · 命令 · 日志 · 标识符与密钥 · 成列的数字。
+ * 不用于正文，不用来排中文段落。单个数字也不必换等宽，用 `tabular-nums` 让 UI 字体里的数字等宽即可。
+ *
+ * 选哪套栈的判据只有一条：**这段文本可能含中日韩字符吗**。
+ *   可能含 → `.code--cjk`（`--font-family-monospace-cjk`，汉字走真正的等宽汉字字形）
+ *   只含拉丁 → `.code`（`--font-family-monospace`）
+ * 若含中日韩却用拉丁等宽栈，汉字会掉到比例字体上，列立刻对不齐；
+ *
+ * 两条与全站规则不同的地方，都与对齐有关：
+ *   1. `text-autospace: no-autospace`：代码里的中西文之间**不加**那四分之一汉字宽的空隙，
+ *      否则每一行的宽度都不一致，对齐失去意义；
+ *   2. 行高用 `--line-height-normal`（1.5）而不是中日韩的 1.7，同样是密度与对齐优先。
+ *      以中日韩为主要内容的段落请勿使用等宽，改用正文档。
+ *
+ * 字重只用 400 与 700：等宽字体通常只有 Regular 与 Bold，`font-synthesis: none` 避免浏览器伪粗。 */
+.code,
+.code--cjk {
+  font-family: var(--font-family-monospace);
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+  text-autospace: no-autospace;
+  text-spacing-trim: space-all;
+  background: var(--background-field);
+  border-radius: var(--radius-xs);
+  padding: 0 var(--spacing-4);
+  unicode-bidi: isolate;
+}
+.code--cjk { font-family: var(--font-family-monospace-cjk); }
+
+/* 块级代码：整块取底色与内距，横向溢出滚动而不是撑破容器 */
+.code-block,
+.code-block--cjk {
+  display: block;
+  margin: 0;
+  padding: var(--spacing-12);
+  overflow-x: auto;
+  white-space: pre;
+  font-family: var(--font-family-monospace);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-normal);
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+  text-autospace: no-autospace;
+  text-spacing-trim: space-all;
+  background: var(--background-field);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-small);
+}
+.code-block--cjk { font-family: var(--font-family-monospace-cjk); }

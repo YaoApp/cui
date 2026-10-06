@@ -1,3 +1,4 @@
+import './segmented-control.less'
 import type { KeyboardEvent, ReactNode } from 'react'
 
 export type SegmentedOption = {
