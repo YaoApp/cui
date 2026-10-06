@@ -1077,6 +1077,83 @@
   align-items: center;
   gap: var(--spacing-4);
 }
+.celadon,
+[data-theme] .celadon {
+  /* 图形验证码：输入框右侧的取图控件。一张图的三种过程都在同一个控件里 —— 取图中给指示器，
+     取回给图片，取图失败给可点的文字。尾部槽位按档定宽（三倍字段高度，见文件下半段），
+     图片铺满槽宽、高按图片自身比例，因此换图不改变字段的几何。 */
+  /* 普通字段的槽位是绝对定位 + 固定 32 宽预留（放图标足够）。图形验证码的图三倍宽于控件高度
+     （后端给的图约 3:1，实测 72 · 96 · 120），沿用 32 会让图压在输入文字上，因此按档直接给槽位定宽，
+     并按同一档给输入框预留（再加一个间距档）：图与文字各有各的位置，字段外宽与高度都不变。
+     大档的高度在间距梯子上写作「32 加 8」（间距梯子没有 40 这一档），这里沿用同一写法。 */
+}
+.celadon .captcha-field__control,
+[data-theme] .celadon .captcha-field__control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 100%;
+  /* 点击目标不小于 24（layout.md 第 6 节）：小档字段的边框内高只有 22，取 24 的按钮
+       在槽位里上下各探出 1px，仍落在字段外高之内，因此字段几何不变。 */
+  min-block-size: var(--spacing-24);
+  /* 取图中只有 16 宽的指示器、失败时只有一小段文字，两种过程的命中区都要够 24 宽；
+       取回图片后槽位按档撑到 72 · 96 · 120，因此这里只设下限。 */
+  min-inline-size: var(--spacing-24);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.celadon .captcha-field__control:disabled,
+[data-theme] .celadon .captcha-field__control:disabled {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+.celadon .captcha-field__control:focus-visible,
+[data-theme] .celadon .captcha-field__control:focus-visible {
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-xs);
+  outline: none;
+}
+.celadon .captcha-field__picture,
+[data-theme] .celadon .captcha-field__picture {
+  /* 图展成槽位的整宽，高按图片自身比例（后端给的图约 3:1，因此三档正好回到 24 · 32 · 40）。
+       槽位的宽与输入框的预留用同一个算式，两者不会漂移；不写死图片高度，避免与预留互相牵制。 */
+  inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--radius-xs);
+  object-fit: contain;
+}
+.celadon .captcha-field--small .field__box .field__trail,
+[data-theme] .celadon .captcha-field--small .field__box .field__trail {
+  inline-size: calc(var(--spacing-24) * 3);
+}
+.celadon .captcha-field--medium .field__box .field__trail,
+[data-theme] .celadon .captcha-field--medium .field__box .field__trail {
+  inline-size: calc(var(--spacing-32) * 3);
+}
+.celadon .captcha-field--large .field__box .field__trail,
+[data-theme] .celadon .captcha-field--large .field__box .field__trail {
+  inline-size: calc(var(--spacing-32) * 3 + var(--spacing-8) * 3);
+}
+.celadon .captcha-field--small .field__box:has(.field__trail) .input,
+[data-theme] .celadon .captcha-field--small .field__box:has(.field__trail) .input {
+  padding-inline-end: calc(var(--spacing-24) * 3 + var(--spacing-8));
+}
+.celadon .captcha-field--medium .field__box:has(.field__trail) .input,
+[data-theme] .celadon .captcha-field--medium .field__box:has(.field__trail) .input {
+  padding-inline-end: calc(var(--spacing-32) * 3 + var(--spacing-8));
+}
+.celadon .captcha-field--large .field__box:has(.field__trail) .input,
+[data-theme] .celadon .captcha-field--large .field__box:has(.field__trail) .input {
+  padding-inline-end: calc(var(--spacing-32) * 3 + var(--spacing-8) * 3 + var(--spacing-8));
+}
+.celadon .captcha-field__retry,
+[data-theme] .celadon .captcha-field__retry {
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-tight);
+}
 /* 复选框：方框加勾，不确定态是一条横杠，标签在右，消息在下方。
    **选中底取反色族**（`--background-inverse` 与 `--text-inverse`，深色主题下自动翻成浅底深勾），
    不取品牌色：选中是持续状态，要像"已填写"那样自己成立；品牌色留给悬停与聚焦这类临时反馈。

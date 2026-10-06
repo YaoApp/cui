@@ -32,8 +32,8 @@ const hexToRgb = (hex: string) => {
   return `rgb(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255})`
 }
 
-test('lists the six groups and their states', async ({ page }) => {
-  /* 六个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
+test('lists the seven groups and their states', async ({ page }) => {
+  /* 七个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
      因此这一条明确放宽预算（Playwright 的 slow 走三倍），其余用例仍守默认值。 */
   test.slow()
   await page.setViewportSize({ width: 1280, height: 1100 })
@@ -42,6 +42,7 @@ test('lists the six groups and their states', async ({ page }) => {
   /* 分组标题走四语语言包，默认语言是中文；组件名保留英文作为 API 名称（本地化文档的惯例） */
   await expect(page.locator('.base-group__title')).toHaveText([
     '输入 Input',
+    '图形验证码 CaptchaField',
     '复选框 Checkbox',
     '按钮 Button',
     '选择器 Select',
@@ -1146,3 +1147,46 @@ test('draws the checkbox with an inverse checked state and a compliant boundary'
   expect((await read('demo-check-invalid')).框).not.toBe(hexToRgb(danger))
   await expect(page.locator('.checkbox:has(#demo-check-invalid) .checkbox__error')).toHaveCount(0)
 })
+
+/* 图形验证码：字段接在输入框的右侧槽位上，标签、禁用与错误都走字段那一套；
+   右侧控件在三种过程下都带可访问名；三档高度与输入框同梯。取图真实打后端，允许失败，
+   因此这里不断言图片出现，只核与后端无关的结构。 */
+test('shows the captcha field with its three sizes and the id contract visible', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1100 })
+  await page.goto('/app/scaffold/base')
+
+  /* 标签按 id 关联到输入框，右侧控件带可访问名 */
+  const input = page.locator('#demo-captcha-default')
+  await expect(input).toHaveAttribute('id', 'demo-captcha-default')
+  await expect(page.locator('label[for="demo-captcha-default"]')).toHaveText('图形验证码')
+  await expect(page.locator('.field:has(#demo-captcha-default) .captcha-field__control')).toHaveAttribute(
+    'aria-label',
+    '换一张',
+  )
+
+  /* 六档样例都在：属性三档（默认 · 错误 · 禁用）与尺寸三档 */
+  await expect(page.locator('.captcha-field')).toHaveCount(6)
+
+  /* 禁用档同时禁用输入框与控件 */
+  await expect(page.locator('#demo-captcha-disabled')).toBeDisabled()
+  await expect(page.locator('.field:has(#demo-captcha-disabled) .captcha-field__control')).toBeDisabled()
+
+  /* 错误档显示调用方给的错误文字，并经 aria-describedby 关联 */
+  await expect(page.locator('#demo-captcha-error')).toHaveAttribute(
+    'aria-describedby',
+    'demo-captcha-error-error',
+  )
+  await expect(page.locator('.captcha-field:has(#demo-captcha-error) .hint-error')).toHaveText('以危险色显示')
+
+  /* 三档高度与输入框同梯 */
+  const heights = await page.evaluate(() =>
+    ['demo-captcha-small', 'demo-captcha-medium', 'demo-captcha-large'].map((id) =>
+      Math.round((document.querySelector(`#${id}`) as HTMLElement).getBoundingClientRect().height),
+    ),
+  )
+  expect(heights).toEqual([24, 32, 40])
+
+  /* 返回标识这条契约看得见：每档旁边都有 captcha_id 的落点 */
+  await expect(page.locator('.base-demo:has(#demo-captcha-default) .base-demo__name')).toContainText('captcha_id')
+})
+

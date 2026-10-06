@@ -1,7 +1,7 @@
 import './base.less'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { BrandMark, Button, Checkbox, Icon, Input, SegmentedControl, Select } from '@/components/base'
+import { BrandMark, Button, CaptchaField, Checkbox, Icon, Input, SegmentedControl, Select } from '@/components/base'
 import type { SegmentedOption, SelectGroup } from '@/components/base'
 import { LocaleSwitch } from '@/components/locale-switch'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -47,6 +47,45 @@ function ErrorSampleCheckbox({ id, label }: { id: string; label: ReactNode }) {
         setInvalid(!next)
       }}
     />
+  )
+}
+
+/* 图形验证码样例：受控值与当次图的 captcha_id 都由样例自己持有。
+   取图真实打后端，允许失败；失败时组件自己给出可点的重试文字，样例不改动它。
+   captcha_id 上屏，让「取回后把标识交给调用方、提交时随 captcha_id 回传」这条契约看得见。 */
+function CaptchaSampleField({
+  id,
+  size,
+  error,
+  disabled,
+}: {
+  id: string
+  size?: 'small' | 'medium' | 'large'
+  error?: string
+  disabled?: boolean
+}) {
+  const { t } = useTranslation()
+  const [value, setValue] = useState('')
+  const [captchaId, setCaptchaId] = useState('')
+  return (
+    <div className="base-demo">
+      <CaptchaField
+        id={id}
+        value={value}
+        onValueChange={setValue}
+        onCaptchaIdChange={setCaptchaId}
+        label={t('base.captcha.label')}
+        placeholder={t('base.captcha.placeholder')}
+        refreshLabel={t('base.captcha.refresh')}
+        imageAlt={t('base.captcha.image')}
+        error={error}
+        disabled={disabled}
+        size={size}
+      />
+      <span className="base-demo__name">
+        {t('base.captcha.id')}: {captchaId || '-'}
+      </span>
+    </div>
   )
 }
 
@@ -319,6 +358,26 @@ export function BasePage() {
           <Input id="demo-input-small" label="small" placeholder="small" size="small" />
           <Input id="demo-input-medium" label="medium" placeholder="medium" />
           <Input id="demo-input-large" label="large" placeholder="large" size="large" />
+        </div>
+      </section>
+
+      <section className="base-group">
+        <h2 className="base-group__title">{t('base.group.captcha')}</h2>
+
+        {/* 属性：默认 · 调用方错误 · 禁用。默认一档取图真实打后端，取不到图时组件在控件上
+            给出可点的重试文字；每档旁边都显示当次图的 captcha_id，返回标识这条契约因此看得见。 */}
+        <h3 className="base-subgroup__title">{t('base.sub.props')}</h3>
+        <div className="base-grid">
+          <CaptchaSampleField id="demo-captcha-default" />
+          <CaptchaSampleField id="demo-captcha-error" error={t('base.message.error')} />
+          <CaptchaSampleField id="demo-captcha-disabled" disabled />
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.sizes')}</h3>
+        <div className="base-grid">
+          <CaptchaSampleField id="demo-captcha-small" size="small" />
+          <CaptchaSampleField id="demo-captcha-medium" />
+          <CaptchaSampleField id="demo-captcha-large" size="large" />
         </div>
       </section>
 

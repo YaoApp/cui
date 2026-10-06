@@ -55,6 +55,14 @@ const OLD_PACKAGE = '@yaoapp/cui'
 /* 无装配例外：装配点在入口 `app/src/main.tsx`（不属于任何层），platform/ 不反向引 routes/。 */
 const ASSEMBLY_EDGES = []
 
+/* **登记例外**：`components/base/captcha-field` 是唯一自带取图的基础件。图形验证码的接口固定
+   （`GET /user/entry/captcha`），取图与三种过程是控件行为的一部分，因此它直接使用数据层的申报。
+   例外要看得见：逐条列出 import 方与说明符，不放宽整层（见 architecture/03-boundaries.md §4）。 */
+const EXEMPT_IMPORTS = new Set([
+  'components/base/captcha-field/captcha-field.tsx|@/data',
+  'components/base/captcha-field/captcha-field.tsx|@/data/user',
+])
+
 /** 取一个绝对路径在源码根下的相对路径（用 `/` 归一，便于比较）。 */
 const toRel = (abs) => relative(TARGET, abs).split(/[\\/]/).join('/')
 
@@ -218,6 +226,7 @@ function walk(dir) {
       const targetLayer = layerOf(targetAbs)
       if (!targetLayer) continue /* 目标是 locales/ · test-support/ · 根文件 —— 不在依赖图里 */
       resolved++
+      if (EXEMPT_IMPORTS.has(`${importerRel}|${imp.spec}`)) continue
       const hit = violationFor({
         importerLayer,
         importerRel,

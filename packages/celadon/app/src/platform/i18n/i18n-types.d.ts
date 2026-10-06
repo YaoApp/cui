@@ -6,9 +6,15 @@ import 'i18next'
 /** 基准语言里存在的全部 key —— `t('…')` 只接受这些。 */
 export type I18nKey =
   | 'base.action.block'
+  | 'base.captcha.id'
+  | 'base.captcha.image'
+  | 'base.captcha.label'
+  | 'base.captcha.placeholder'
+  | 'base.captcha.refresh'
   | 'base.checkbox.label'
   | 'base.checkbox.labelLong'
   | 'base.group.button'
+  | 'base.group.captcha'
   | 'base.group.checkbox'
   | 'base.group.icon'
   | 'base.group.input'
@@ -260,9 +266,15 @@ declare module 'i18next' {
     resources: {
       translation: {
         'base.action.block': string
+        'base.captcha.id': string
+        'base.captcha.image': string
+        'base.captcha.label': string
+        'base.captcha.placeholder': string
+        'base.captcha.refresh': string
         'base.checkbox.label': string
         'base.checkbox.labelLong': string
         'base.group.button': string
+        'base.group.captcha': string
         'base.group.checkbox': string
         'base.group.icon': string
         'base.group.input': string

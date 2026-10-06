@@ -37,9 +37,10 @@ test('the icon sits on the text line and takes its colour from the theme', async
   // 系统切深色：描边颜色必须跟着换（这条正是"看起来不响应深浅"的那个 bug）
   await page.emulateMedia({ colorScheme: 'dark' })
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  /* 属性切换与样式重算是两次提交，紧接着读会读到浅色值。等描边真的换掉再断言。 */
+  await expect.poll(async () => (await measure()).stroke).not.toBe(light.stroke)
   const dark = await measure()
   expect(dark.stroke).not.toBe('none')
-  expect(dark.stroke).not.toBe(light.stroke)
 })
 
 /* 图标一览：品牌标识与界面图标都能渲染出来（符号指得到）。
