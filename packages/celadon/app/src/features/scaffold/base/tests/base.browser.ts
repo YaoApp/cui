@@ -464,38 +464,34 @@ test('lists the five groups and their states', async ({ page }) => {
       ),
     ),
   )
-  const clearableSample = page.getByRole('combobox', { name: 'select clearable', exact: true })
-  await clearableSample.click()
-  await page.waitForSelector('.select-popup:visible')
-  await page.waitForTimeout(300)
-  await page.locator('.select-popup:visible [role=option]', { hasText: 'Clear choice' }).first().click()
-  await page.waitForTimeout(300)
-  expect((await clearableSample.textContent())?.trim()).not.toBe('Light')
-
-  /* 反色档必须摆在深底上才有对比：深色条上的四个样例，文字对条底要够看 */
-  const inverseRead = await page.locator('.base-row--inverse').evaluate((strip) => {
-    const styles = getComputedStyle(strip)
-    const sample = strip.querySelector('[aria-label="variant inverse plain"]')!
+  /* 反色档与按钮同一形态：自带深底浅字。底色与字色都从 token 取，断言里不写死色值 */
+  const inverseRead = await page.locator('[aria-label="variant inverse"]').evaluate((el) => ({
+    底: getComputedStyle(el).backgroundColor,
+    字: getComputedStyle(el).color,
+  }))
+  const inverseTokens = await page.evaluate(() => {
+    const root = getComputedStyle(document.querySelector('.celadon') ?? document.documentElement)
     return {
-      条底: styles.backgroundColor,
-      样例底: getComputedStyle(sample).backgroundColor,
-      样例字: getComputedStyle(sample).color,
-      样例数: strip.querySelectorAll('[aria-label^="variant inverse"]').length,
+      底: root.getPropertyValue('--background-inverse').trim(),
+      字: root.getPropertyValue('--text-inverse').trim(),
     }
   })
-  expect(inverseRead.样例数).toBe(4)
-  expect(inverseRead.条底).toBe(hexToRgb('#14120E'))
-  expect(inverseRead.样例底).toBe('rgba(0, 0, 0, 0)')
-  expect(inverseRead.样例字).toBe(hexToRgb('#FAFAFB'))
+  expect(inverseRead.底).toBe(hexToRgb(inverseTokens.底))
+  expect(inverseRead.字).toBe(hexToRgb(inverseTokens.字))
 
-  /* 再点一次已选中项即取消选择（clearOnReselect） */
-  const reselectSample = page.getByRole('combobox', { name: 'select reselect', exact: true })
-  await reselectSample.click()
-  await page.waitForSelector('.select-popup:visible')
-  await page.waitForTimeout(300)
-  await page.locator('.select-popup:visible [role=option]', { hasText: 'Dark' }).first().click()
-  await page.waitForTimeout(300)
-  expect((await reselectSample.textContent())?.trim()).not.toBe('Dark')
+  /* 再点一次已选中项即取消选择：默认行为，不需要开关。先选一个值，再点同一个值 */
+  const reselectSample = page.getByRole('combobox', { name: 'select placeholder', exact: true })
+  const chooseOption = async (label: string) => {
+    await reselectSample.click()
+    await page.waitForSelector('.select-popup:visible')
+    await page.waitForTimeout(300)
+    await page.locator('.select-popup:visible [role=option]', { hasText: label }).first().click()
+    await page.waitForTimeout(300)
+  }
+  await chooseOption('Light')
+  expect((await reselectSample.textContent())?.trim()).toBe('Light')
+  await chooseOption('Light')
+  expect((await reselectSample.textContent())?.trim()).not.toBe('Light')
 
   /* 空态：没有选项时弹层给说明，触发器显示占位文字 */
   expect(await selectTrigger('select empty').textContent()).not.toBe('')

@@ -1147,16 +1147,6 @@
 [data-theme] .celadon .input.input--inverse.is-hover {
   background: var(--background-inverse-hover);
 }
-.celadon .input.input--inverse.input--plain,
-[data-theme] .celadon .input.input--inverse.input--plain {
-  background: transparent;
-}
-.celadon .input.input--inverse.input--plain:not(:disabled):hover,
-[data-theme] .celadon .input.input--inverse.input--plain:not(:disabled):hover,
-.celadon .input.input--inverse.input--plain.is-hover,
-[data-theme] .celadon .input.input--inverse.input--plain.is-hover {
-  background: var(--background-inverse-hover);
-}
 .celadon .input.input--inverse:disabled,
 [data-theme] .celadon .input.input--inverse:disabled,
 .celadon .input.input--inverse.is-disabled,

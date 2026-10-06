@@ -601,9 +601,6 @@
      纯文字反色档只改文字与悬停底，不画底；禁用仍走禁用档。图标取反色文字。 */
   .input.input--inverse { background: var(--background-inverse); color: var(--text-inverse); border-color: transparent; }
   .input.input--inverse:not(:disabled):hover, .input.input--inverse.is-hover { background: var(--background-inverse-hover); }
-  .input.input--inverse.input--plain { background: transparent; }
-  .input.input--inverse.input--plain:not(:disabled):hover,
-  .input.input--inverse.input--plain.is-hover { background: var(--background-inverse-hover); }
   .input.input--inverse:disabled, .input.input--inverse.is-disabled { background: var(--background-disabled); color: var(--text-disabled); }
   .input--inverse .select-icon, .input--inverse .select__lead { color: var(--text-inverse); }
   /* 选择器：触发器直接用上面的 `.input`（同一套字段状态与圆角），这里给弹层与选项。

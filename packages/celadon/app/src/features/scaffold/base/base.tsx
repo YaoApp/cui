@@ -44,8 +44,6 @@ export function BasePage() {
   const [trailingChoice, setTrailingChoice] = useState('compact')
   const [groupChoice, setGroupChoice] = useState('light')
   const [longChoice, setLongChoice] = useState('item-0')
-  const [clearable, setClearable] = useState('light')
-  const [reselect, setReselect] = useState('dark')
   /* 错误抖动的重放计数：同名动画不会自行重跑，靠 key 让节点重挂载 */
   const [shakeTick, setShakeTick] = useState(0)
   /* 主题与语言用真实的偏好源，不自造局部状态（与首页同一套） */
@@ -64,8 +62,6 @@ export function BasePage() {
     /* 一项禁用，用来展示弹层里的禁用项（键盘不可达、选中不改值） */
     { value: 'auto', label: 'Auto（disabled）', disabled: true },
   ]
-  /* 末项是空值项（value 为 null）：选中它即取消选择，触发器回到占位文字 */
-  const clearableOptions = [...selectOptions.slice(0, 3), { value: null, label: 'Clear choice' }]
   /* 带图标的选项 */
   const iconOptions = [
     { value: 'reading', label: 'Reading', icon: <Icon name="i-book" /> },
@@ -436,56 +432,9 @@ export function BasePage() {
           <Select variant="plain" disabled aria-label="variant plain disabled" value={theme} onValueChange={() => {}} options={selectOptions} />
         </div>
 
-        {/* 反色档只对深底或品牌底成立，因此放在深色条里展示；放在浅底上文字会看不见。
-            右起第二档打开 clearOnReselect：再点一次已选中项即取消选择。 */}
-        <div className="base-row base-row--inverse">
-          <Select inverse aria-label="variant inverse" value={theme} onValueChange={setTheme} options={selectOptions} />
-          <Select
-            inverse
-            variant="plain"
-            aria-label="variant inverse plain"
-            value={theme}
-            onValueChange={setTheme}
-            options={selectOptions}
-          />
-          <Select
-            inverse
-            iconPosition="end"
-            indicator={false}
-            aria-label="variant inverse icon"
-            value={theme}
-            onValueChange={setTheme}
-            options={selectOptions}
-            icon={<Icon name="i-globe" />}
-          />
-          <Select
-            inverse
-            clearOnReselect
-            aria-label="variant inverse reselect"
-            value={reselect}
-            onValueChange={setReselect}
-            options={selectOptions}
-            placeholder={t('base.select.placeholder')}
-          />
-        </div>
-
-        {/* 取消选择：末项是空值项（value 为 null），选中它触发器回到占位文字 */}
+        {/* 反色档与按钮的反色档同一形态：自带深底浅字，直接放在卡片上 */}
         <div className="base-row">
-          <Select
-            aria-label="select clearable"
-            value={clearable}
-            onValueChange={setClearable}
-            options={clearableOptions}
-            placeholder={t('base.select.placeholder')}
-          />
-          <Select
-            clearOnReselect
-            aria-label="select reselect"
-            value={reselect}
-            onValueChange={setReselect}
-            options={selectOptions}
-            placeholder={t('base.select.placeholder')}
-          />
+          <Select inverse aria-label="variant inverse" value={theme} onValueChange={setTheme} options={selectOptions} />
         </div>
 
         <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
