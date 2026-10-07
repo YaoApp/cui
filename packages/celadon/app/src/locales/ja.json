@@ -56,5 +56,6 @@
   "data.error.tokenMissing": "アクセストークンがありません",
   "data.error.unauthorized": "未ログイン、またはセッションの有効期限が切れています",
   "data.error.forbidden": "アクセス権がありません",
-  "data.error.insufficientScope": "権限が足りません"
+  "data.error.insufficientScope": "権限が足りません",
+  "modal.close": "閉じる"
 }

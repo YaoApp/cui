@@ -1,5 +1,6 @@
 import { useTranslation } from '@/platform/i18n'
 import { Checkbox } from '@/components/base/checkbox'
+import { Link } from '@/components/base/link'
 import './terms-note.less'
 
 export type TermsNoteProps = {
@@ -35,9 +36,9 @@ export function TermsNote({
   const { t } = useTranslation()
 
   const link = (href: string, label: string) => (
-    <a className="terms-note__link" href={href} target="_blank" rel="noopener noreferrer">
+    <Link className="terms-note__link" href={href} external>
       {label}
-    </a>
+    </Link>
   )
 
   return (

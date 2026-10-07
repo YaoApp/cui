@@ -1,0 +1,50 @@
+/* 抽屉：与弹窗页面共用遮罩与面板取值，差别在位置与动效。
+   面板贴边、铺满可用高度，宽度取一个固定的窄档；进出走动效规范的 drawer 场景（进场慢档减速、退场快档加速），
+   位移方向按停靠边：贴行首从左进、贴行末从右进。滑动关闭由上游负责，这里只管画。 */
+.drawer__viewport {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  justify-content: flex-start;
+  padding: var(--spacing-16);
+}
+
+.drawer__viewport--end {
+  justify-content: flex-end;
+}
+
+.drawer {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(100%, calc(var(--spacing-32) * 10));
+  padding: var(--spacing-24);
+  background: var(--background-surface);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-overlay);
+  color: var(--text-primary);
+  transition:
+    opacity var(--duration-slow) var(--easing-decelerate),
+    transform var(--duration-slow) var(--easing-decelerate);
+}
+
+.drawer[data-starting-style],
+.drawer[data-ending-style] {
+  opacity: 0;
+}
+
+.drawer[data-starting-style] {
+  transform: translateX(calc(-1 * var(--spacing-24)));
+}
+
+.drawer--end[data-starting-style] {
+  transform: translateX(var(--spacing-24));
+}
+
+.drawer[data-ending-style] {
+  transform: none;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-accelerate);
+}

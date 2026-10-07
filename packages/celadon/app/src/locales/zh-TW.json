@@ -56,5 +56,6 @@
   "data.error.tokenMissing": "缺少存取權杖",
   "data.error.unauthorized": "未登入或登入已過期",
   "data.error.forbidden": "沒有存取權限",
-  "data.error.insufficientScope": "權限不足"
+  "data.error.insufficientScope": "權限不足",
+  "modal.close": "關閉"
 }

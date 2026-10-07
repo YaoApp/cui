@@ -3,6 +3,7 @@ import { Button } from '@/components/base/button'
 import { Checkbox } from '@/components/base/checkbox'
 import { Icon } from '@/components/base/icon'
 import { Input } from '@/components/base/input'
+import { Link } from '@/components/base/link'
 import { OtpField } from '@/components/base/otp-field'
 import { useRequest } from '@/data'
 import {
@@ -223,9 +224,7 @@ export function LoginPage() {
       footnote={
         <>
           <span>{t('auth.footnote.prefix')}</span>{' '}
-          <a className="login__link" href={appHref('/register')}>
-            {t('auth.footnote.link')}
-          </a>
+          <Link href={appHref('/register')}>{t('auth.footnote.link')}</Link>
         </>
       }
     >

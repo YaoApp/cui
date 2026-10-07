@@ -277,12 +277,16 @@ test('keeps the boundary compliant inside the client and intentionally light on 
 
   await page.goto('/app/login')
   await settle()
+  /* 描边有过渡：填完值立刻量会读到聚焦色与静止色之间的中间值（实测撞见过 3.378，落在两档之间）。
+     先轮询到它落进静止档的范围，再取一次读数用于断言。 */
+  await expect.poll(async () => (await measure()).ratio).toBeLessThan(3)
   const standalone = await measure()
   expect(standalone.focused).toBe(false)
   expect(standalone.ratio).toBeLessThan(3)
 
   await page.goto('/app/login?from=connect')
   await settle()
+  await expect.poll(async () => (await measure()).ratio).toBeGreaterThanOrEqual(3)
   const inClient = await measure()
   expect(inClient.ratio).toBeGreaterThanOrEqual(3)
 
@@ -292,6 +296,7 @@ test('keeps the boundary compliant inside the client and intentionally light on 
   await settle()
   const theme = await page.evaluate(() => document.documentElement.dataset.theme)
   expect(theme).toBe('dark')
+  await expect.poll(async () => (await measure()).ratio).toBeGreaterThanOrEqual(3)
   const inClientDark = await measure()
   expect(inClientDark.ratio).toBeGreaterThanOrEqual(3)
   await shot(page, 'dark-in-client')

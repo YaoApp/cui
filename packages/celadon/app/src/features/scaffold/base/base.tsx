@@ -6,8 +6,10 @@ import {
   Button,
   CaptchaField,
   Checkbox,
+  DialogPage,
   Icon,
   Input,
+  Link,
   OtpField,
   SegmentedControl,
   Select,
@@ -150,6 +152,13 @@ export function BasePage() {
   const [account, setAccount] = useState('')
   const [password, setPassword] = useState('')
   const [visible, setVisible] = useState(false)
+  /* 弹窗样例的开关：四档各自独立，嵌套那档里还有一个内层开关 */
+  const [dialogForm, setDialogForm] = useState(false)
+  const [dialogPage, setDialogPage] = useState(false)
+  const [dialogLong, setDialogLong] = useState(false)
+  const [dialogNested, setDialogNested] = useState(false)
+  const [dialogNestedInner, setDialogNestedInner] = useState(false)
+  const [dialogField, setDialogField] = useState('')
   const [segmentedTheme, setSegmentedTheme] = useState('system')
   const [segmentedRange, setSegmentedRange] = useState('week')
   /* 选择器样例各自的选中值：样例要真的能选，不能挂空回调 */
@@ -1166,6 +1175,139 @@ export function BasePage() {
             state="focus"
           />
         </div>
+      </section>
+
+      <section className="base-group">
+        <h2 className="base-group__title">{t('base.group.link')}</h2>
+
+        <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
+        {/* 链接：静止、悬停与聚焦三个状态，加上站外地址（新窗口打开）。
+             悬停与聚焦用设计类的静态态，与按钮、输入框同一套做法。 */}
+        <div className="base-row">
+          <Link href="https://example.com/docs">link rest</Link>
+          <Link href="https://example.com/docs" className="is-hover">
+            link hover
+          </Link>
+          <Link href="https://example.com/docs" className="is-focus">
+            link focus
+          </Link>
+          <Link href="https://example.com/docs" external>
+            link external
+          </Link>
+        </div>
+      </section>
+
+      <section className="base-group">
+        <h2 className="base-group__title">{t('base.group.dialog')}</h2>
+
+        <h3 className="base-subgroup__title">{t('base.sub.variants')}</h3>
+        {/* 弹窗页面：表单档（带底部操作）、页面档（打开一整页内容）、长内容（正文滚动而头尾不动）、
+             嵌套（在第一层里再开一层，第二层由上游标记为 data-nested）。
+             行为（焦点陷阱 · Esc · 点遮罩 · 焦点归位）全在上游，这里只核对界面适配。 */}
+        <div className="base-row">
+          <Button type="button" variant="soft" onClick={() => setDialogForm(true)}>
+            {t('base.dialog.openForm')}
+          </Button>
+          <Button type="button" variant="soft" onClick={() => setDialogPage(true)}>
+            {t('base.dialog.openPage')}
+          </Button>
+          <Button type="button" variant="soft" onClick={() => setDialogLong(true)}>
+            {t('base.dialog.openLong')}
+          </Button>
+          <Button type="button" variant="soft" onClick={() => setDialogNested(true)}>
+            {t('base.dialog.openNested')}
+          </Button>
+        </div>
+
+        <DialogPage
+          open={dialogForm}
+          onOpenChange={setDialogForm}
+          title={t('base.dialog.title')}
+          description={t('base.dialog.description')}
+          closeLabel={t('base.dialog.close')}
+          footer={
+            <>
+              <Button type="button" variant="ghost" onClick={() => setDialogForm(false)}>
+                {t('base.dialog.cancel')}
+              </Button>
+              <Button type="button" variant="inverse" onClick={() => setDialogForm(false)}>
+                {t('base.dialog.confirm')}
+              </Button>
+            </>
+          }
+        >
+          <Input
+            id="demo-dialog-field"
+            label={t('base.dialog.field')}
+            placeholder={t('base.dialog.field')}
+            value={dialogField}
+            onChange={(event) => setDialogField(event.target.value)}
+          />
+        </DialogPage>
+
+        <DialogPage
+          open={dialogPage}
+          onOpenChange={setDialogPage}
+          size="page"
+          title={t('base.dialog.pageTitle')}
+          closeLabel={t('base.dialog.close')}
+          footer={
+            <Button type="button" variant="inverse" onClick={() => setDialogPage(false)}>
+              {t('base.dialog.confirm')}
+            </Button>
+          }
+        >
+          <p className="base-demo__name">{t('base.dialog.pageBody')}</p>
+        </DialogPage>
+
+        <DialogPage
+          open={dialogLong}
+          onOpenChange={setDialogLong}
+          title={t('base.dialog.longTitle')}
+          closeLabel={t('base.dialog.close')}
+          footer={
+            <Button type="button" variant="inverse" onClick={() => setDialogLong(false)}>
+              {t('base.dialog.confirm')}
+            </Button>
+          }
+        >
+          {Array.from({ length: 40 }, (_, index) => (
+            <p className="base-demo__name" key={index}>
+              {t('base.dialog.longBody', { index: index + 1 })}
+            </p>
+          ))}
+        </DialogPage>
+
+        <DialogPage
+          open={dialogNested}
+          onOpenChange={(next) => {
+            setDialogNested(next)
+            /* 外層關掉時把內層一起復位，否則下次打開外層會看到內層還開著 */
+            if (!next) setDialogNestedInner(false)
+          }}
+          title={t('base.dialog.nestedTitle')}
+          closeLabel={t('base.dialog.close')}
+          footer={
+            <Button type="button" variant="inverse" onClick={() => setDialogNestedInner(true)}>
+              {t('base.dialog.openNestedInner')}
+            </Button>
+          }
+        >
+          <p className="base-demo__name">{t('base.dialog.nestedBody')}</p>
+          <DialogPage
+            open={dialogNestedInner}
+            onOpenChange={setDialogNestedInner}
+            title={t('base.dialog.nestedInnerTitle')}
+            closeLabel={t('base.dialog.close')}
+            footer={
+              <Button type="button" variant="inverse" onClick={() => setDialogNestedInner(false)}>
+                {t('base.dialog.confirm')}
+              </Button>
+            }
+          >
+            <p className="base-demo__name">{t('base.dialog.nestedInnerBody')}</p>
+          </DialogPage>
+        </DialogPage>
       </section>
     </ScaffoldPage>
   )

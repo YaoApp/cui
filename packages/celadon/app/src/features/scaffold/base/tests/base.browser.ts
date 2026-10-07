@@ -35,8 +35,8 @@ const hexToRgb = (hex: string) => {
 /* 图标自己的尺寸档（见 architecture/10-icons.md 第 1 节），不跟字号走 */
 const ICON_LADDER = [14, 16, 20, 24]
 
-test('lists the nine groups and their states', async ({ page }) => {
-  /* 九个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
+test('lists the eleven groups and their states', async ({ page }) => {
+  /* 十一个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
      因此这一条明确放宽预算（Playwright 的 slow 走三倍），其余用例仍守默认值。 */
   test.slow()
   await page.setViewportSize({ width: 1280, height: 1100 })
@@ -54,6 +54,8 @@ test('lists the nine groups and their states', async ({ page }) => {
     '图标与品牌 Icon & BrandMark',
     '主题与语言 Theme & Locale',
     '分段控件 SegmentedControl',
+    '链接 Link',
+    '弹窗 Dialog',
   ])
   /* 子组标题同样随语言走，证明页面文案确实接进了语言包 */
   await expect(page.locator('.base-subgroup__title').first()).toHaveText('属性')
@@ -1556,3 +1558,183 @@ test('keeps the one-time code boxes the same height as the input at every step',
   await expect(page.locator('#demo-otp-readonly')).toHaveAttribute('readonly')
 })
 
+test('draws the dialog from the tokens and leaves nothing to the caller', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1000 })
+  await page.goto('/app/scaffold/base')
+
+  const openDialog = async (label: string) => {
+    await page.getByRole('button', { name: label }).click()
+    return page.locator('.dialog')
+  }
+  /* 表单档：遮罩取 --scrim，面板取表面底 + 常规边界 + 大圆角 + 浮层阴影，宽度取 --dialog-width */
+  const form = await openDialog('表单弹窗')
+  await expect(form).toBeVisible()
+  const drawn = await page.evaluate(() => {
+    const panel = document.querySelector('.dialog') as HTMLElement
+    const backdrop = document.querySelector('.dialog__scrim') as HTMLElement
+    const root = document.querySelector('.celadon') as HTMLElement
+    const token = (name: string) => getComputedStyle(root).getPropertyValue(name).trim()
+    const cs = getComputedStyle(panel)
+    const scs = getComputedStyle(backdrop)
+    return {
+      遮罩: scs.backgroundColor,
+      遮罩token: token('--scrim'),
+      背景: cs.backgroundColor,
+      表面token: token('--background-surface'),
+      边界: cs.borderTopColor,
+      边界token: token('--border-default'),
+      圆角: cs.borderTopLeftRadius,
+      圆角token: token('--radius-large'),
+      阴影非空: cs.boxShadow !== 'none',
+      /* 量布局宽：进场的缩放会改包围盒，offsetWidth 不受 transform 影响 */
+      宽度: panel.offsetWidth,
+      宽度token: token('--dialog-width'),
+      层级: scs.zIndex === token('--z-modal') || getComputedStyle(document.querySelector('.dialog__viewport') as HTMLElement).zIndex === token('--z-modal'),
+      面板内距: cs.paddingTop,
+      内距token: token('--spacing-24'),
+    }
+  })
+  /* token 给的是十六进制或简写透明度，计算值给的是 rgb()/rgba()：先归一化再比 */
+  const sameColor = (computed: string, token: string) =>
+    computed === hexToRgb(token) ||
+    computed.replace(/\s/g, '') === token.replace(/\s/g, '').replace(/([,\(])\.(\d)/, '$10.$2')
+  expect(sameColor(drawn.遮罩, drawn.遮罩token)).toBe(true)
+  expect(sameColor(drawn.背景, drawn.表面token)).toBe(true)
+  expect(sameColor(drawn.边界, drawn.边界token)).toBe(true)
+  expect(drawn.圆角).toBe(drawn.圆角token)
+  expect(drawn.阴影非空).toBe(true)
+  expect(drawn.面板内距).toBe(drawn.内距token)
+  expect(`${drawn.宽度}px`).toBe(drawn.宽度token)
+  expect(drawn.层级).toBe(true)
+
+  /* 进场：动画/过渡落在面板与遮罩上，时长为 --duration-base，缓动为减速 */
+  const motion = await page.evaluate(() => {
+    const panel = document.querySelector('.dialog') as HTMLElement
+    const root = document.querySelector('.celadon') as HTMLElement
+    const token = (name: string) => getComputedStyle(root).getPropertyValue(name).trim()
+    const cs = getComputedStyle(panel)
+    return { 时长: cs.transitionDuration, 缓动: cs.transitionTimingFunction, 基准: token('--duration-base'), 减速: token('--easing-decelerate') }
+  })
+  /* 计算值把 200ms 写成 0.2s，两边都折成毫秒再比 */
+  const toMs = (value: string) => {
+    const text = value.trim()
+    return text.endsWith('ms') ? Number.parseFloat(text) : Number.parseFloat(text) * 1000
+  }
+  expect(toMs(motion.时长.split(',')[0])).toBe(toMs(motion.基准))
+  /* 面板有两条过渡（透明度与缩放），计算值按属性逐个列出，取第一条比对 */
+  expect(motion.缓动.replace(/\s/g, '').startsWith(motion.减速.replace(/\s/g, ''))).toBe(true)
+
+  /* 焦点：打开后焦点在面板本身（不是头部的关闭钮），面板拿到焦点时不画轮廓，焦点确实在弹窗之内 */
+  const focusState = await page.evaluate(() => {
+    const panel = document.querySelector('.dialog') as HTMLElement
+    const active = document.activeElement as HTMLElement
+    return {
+      焦点在面板上: active === panel,
+      焦点在关闭钮上: active?.classList?.contains('dialog__close') ?? false,
+      面板轮廓: getComputedStyle(panel).outlineStyle,
+      焦点在弹窗内: panel.contains(active),
+    }
+  })
+  expect(focusState.焦点在面板上).toBe(true)
+  expect(focusState.焦点在关闭钮上).toBe(false)
+  expect(focusState.面板轮廓).toBe('none')
+  expect(focusState.焦点在弹窗内).toBe(true)
+
+  /* 焦点环向外伸 4（间隙 2 加环宽 2），正文是滚动容器、overflow 会裁掉子元素的 box-shadow：
+     正文四周必须留出不小于环的余量，且左右对称，贴边的字段一聚焦环才不会被切。 */
+  await page.locator('.dialog .input').focus()
+  const ringRoom = await page.evaluate(() => {
+    const body = document.querySelector('.dialog__body') as HTMLElement
+    const field = document.querySelector('.dialog .field') as HTMLElement
+    const bodyBox = body.getBoundingClientRect()
+    const fieldBox = field.getBoundingClientRect()
+    const bodyStyle = getComputedStyle(body)
+    const rootStyle = getComputedStyle(document.body)
+    const ringExtent =
+      Number.parseFloat(rootStyle.getPropertyValue('--focus-ring-offset')) +
+      Number.parseFloat(rootStyle.getPropertyValue('--focus-ring-width'))
+    return {
+      环向外: ringExtent,
+      正文内距: Number.parseFloat(bodyStyle.paddingTop),
+      上方余量: Math.round(fieldBox.top - bodyBox.top),
+      左方余量: Math.round(fieldBox.left - bodyBox.left),
+      右方余量: Math.round(bodyBox.right - fieldBox.right),
+      下方余量: Math.round(bodyBox.bottom - fieldBox.bottom),
+    }
+  })
+  expect(ringRoom.正文内距).toBeGreaterThanOrEqual(ringRoom.环向外)
+  expect(ringRoom.上方余量).toBeGreaterThanOrEqual(ringRoom.环向外)
+  expect(ringRoom.左方余量).toBeGreaterThanOrEqual(ringRoom.环向外)
+  expect(ringRoom.右方余量).toBeGreaterThanOrEqual(ringRoom.环向外)
+  expect(ringRoom.下方余量).toBeGreaterThanOrEqual(ringRoom.环向外)
+  expect(Math.abs(ringRoom.左方余量 - ringRoom.右方余量)).toBeLessThanOrEqual(1)
+
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.dialog')).toHaveCount(0)
+  /* 关闭后焦点回到打开它的按钮（上游的焦点归位） */
+  await expect(page.getByRole('button', { name: '表单弹窗' })).toBeFocused()
+
+  /* 页面档宽度取 --dialog-width-wide */
+  const pageDialog = await openDialog('页面弹窗')
+  await expect(pageDialog).toBeVisible()
+  const wide = await page.evaluate(() => {
+    const panel = document.querySelector('.dialog') as HTMLElement
+    const token = getComputedStyle(document.querySelector('.celadon') as HTMLElement).getPropertyValue('--dialog-width-wide').trim()
+    return { 宽度: `${(panel as HTMLElement).offsetWidth}px`, token }
+  })
+  expect(wide.宽度).toBe(wide.token)
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.dialog')).toHaveCount(0)
+
+  /* 长内容：正文自己滚，头部与底部不动 */
+  await openDialog('长内容')
+  await expect(page.locator('.dialog')).toBeVisible()
+  const long = await page.evaluate(() => {
+    const body = document.querySelector('.dialog__body') as HTMLElement
+    const head = document.querySelector('.dialog__head') as HTMLElement
+    const foot = document.querySelector('.dialog__foot') as HTMLElement
+    return {
+      正文可滚: body.scrollHeight > body.clientHeight,
+      头高: head.getBoundingClientRect().height,
+      底高: foot.getBoundingClientRect().height,
+      面板高: (document.querySelector('.dialog') as HTMLElement).getBoundingClientRect().height,
+    }
+  })
+  expect(long.正文可滚).toBe(true)
+  expect(long.头高).toBeGreaterThan(0)
+  expect(long.底高).toBeGreaterThan(0)
+  expect(long.面板高).toBeLessThanOrEqual(1000)
+  await page.keyboard.press('Escape')
+
+  /* 嵌套：第二层带 data-nested，关掉后焦点回到第一层 */
+  await openDialog('嵌套弹窗')
+  await expect(page.locator('.dialog')).toHaveCount(1)
+  await page.getByRole('button', { name: '再开一层' }).click()
+  await expect(page.locator('.dialog')).toHaveCount(2)
+  const nested = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('.dialog')).map((el) => el.hasAttribute('data-nested')),
+  )
+  expect(nested).toEqual([false, true])
+  const layers = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('.dialog')).map((el) => (el as HTMLElement).offsetWidth),
+  )
+  expect(layers).toEqual([480, 480])
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.dialog')).toHaveCount(1)
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.dialog')).toHaveCount(0)
+
+  /* 遮罩色与面板底在暗色下同样成立 */
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.reload()
+  await openDialog('表单弹窗')
+  const dark = await page.evaluate(() => {
+    const panel = document.querySelector('.dialog') as HTMLElement
+    const backdrop = document.querySelector('.dialog__scrim') as HTMLElement
+    const root = document.querySelector('.celadon') as HTMLElement
+    const token = (name: string) => getComputedStyle(root).getPropertyValue(name).trim()
+    return { 遮罩: getComputedStyle(backdrop).backgroundColor, 遮罩token: token('--scrim'), 背景: getComputedStyle(panel).backgroundColor, 表面token: token('--background-surface') }
+  })
+  expect(sameColor(dark.遮罩, dark.遮罩token)).toBe(true)
+  expect(sameColor(dark.背景, dark.表面token)).toBe(true)
+})

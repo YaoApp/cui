@@ -56,5 +56,6 @@
   "data.error.tokenMissing": "The access token is missing",
   "data.error.unauthorized": "Not signed in, or the session has expired",
   "data.error.forbidden": "No access",
-  "data.error.insufficientScope": "Not enough permission"
+  "data.error.insufficientScope": "Not enough permission",
+  "modal.close": "Close"
 }

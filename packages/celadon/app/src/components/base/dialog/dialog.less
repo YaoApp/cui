@@ -1,0 +1,135 @@
+/* 弹窗页面：遮罩、居中容器与面板三层，取值全部来自 token。
+   位置与层级由我们给（上游不带样式）：遮罩与容器都固定铺满，容器在遮罩之上、面板在容器里居中。
+   进场退场走上游写的 data-starting-style / data-ending-style：进场取 F4 的 modal 场景（200ms 减速、
+   淡入加极小的缩放），退场按同表规则改 120ms 加速且只淡出，整块浮层不做位移。
+   头尾固定、正文滚动：面板是弹性列，正文自己 overflow，面板高度以容器为上限。 */
+
+.dialog__scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  transition: opacity var(--duration-base) var(--easing-decelerate);
+}
+
+.dialog__viewport {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  /* 用弹性容器而不是网格：面板的 max-block-size: 100% 需要确定的参照，
+     网格的隐式行会随内容长高，百分比解不出来（实测面板曾溢出到 1329 而容器只有 1000） */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-16);
+  overflow: auto;
+}
+
+.dialog {
+  /* 面板内距取布局规范「卡片与面板」一档：四边 24；盒模型按边框盒算，
+     否则 480 的宽度会被内距与边框撑到 519（实测）。
+     自己可聚焦（tabIndex=-1）用来接住打开时的焦点，但不画轮廓：焦点在面板上只表示「焦点已进入弹窗」，
+     不是某个可操作物被选中。overflow 收边让正文的滚动条不切到圆角。 */
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(100%, var(--dialog-width));
+  max-block-size: 100%;
+  padding: var(--spacing-24);
+  background: var(--background-surface);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-overlay);
+  color: var(--text-primary);
+  transition:
+    opacity var(--duration-base) var(--easing-decelerate),
+    transform var(--duration-base) var(--easing-decelerate);
+}
+
+.dialog--page {
+  inline-size: min(100%, var(--dialog-width-wide));
+}
+
+/* 面板自己拿到焦点时不画环（见 .dialog 的注释） */
+.dialog:focus,
+.dialog:focus-visible {
+  outline: none;
+}
+
+/* 打开与关闭的两个端点：起始时压暗并略微缩小，结束时同样，但退场更短且只淡出 */
+.dialog[data-starting-style],
+.dialog[data-ending-style] {
+  opacity: 0;
+}
+
+.dialog[data-starting-style] {
+  transform: scale(0.98);
+}
+
+.dialog[data-ending-style] {
+  transform: none;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-accelerate);
+}
+
+.dialog__scrim[data-ending-style] {
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-accelerate);
+}
+
+.dialog__scrim[data-starting-style],
+.dialog__scrim[data-ending-style] {
+  opacity: 0;
+}
+
+/* 头部：标题与关闭钮两端对齐，关闭钮取图标按钮的 32 档（常用操作不小于 32 见 layout.md 第 6 节） */
+.dialog__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+}
+
+.dialog__title {
+  margin: 0;
+  font-size: var(--font-size-20);
+  font-weight: var(--font-weight-strong);
+  line-height: var(--line-height-normal);
+}
+
+.dialog__close {
+  flex: none;
+  /* 标题 20 号字的行盒比 32 矮，用负外边距把关闭钮的中线抬到标题首行上 */
+  margin-block-start: calc((var(--line-height-normal) * var(--font-size-20) - var(--spacing-32)) / 2);
+}
+
+.dialog__description {
+  margin: var(--spacing-8) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-cjk);
+}
+
+/* 正文：可滚，滚动条不占面板边框，超出时只滚这一块。
+   min-block-size 必须显式归零：弹性子项的默认 min-height:auto 会让它撑到内容高，overflow 永远不生效。
+   滚动容器的 overflow 会裁掉子元素的 box-shadow，而焦点环向外伸 4（间隙 2 加环宽 2），
+   贴边的控件一聚焦环就被切（实测撞见过）。因此四周各留一个 --spacing-4 的余量，
+   再用等量负外边距把内容位置与各段间距拉回原值，实测内容的位置与宽度都不变。 */
+.dialog__body {
+  margin-block: calc(var(--spacing-16) - var(--spacing-4)) calc(-1 * var(--spacing-4));
+  margin-inline: calc(-1 * var(--spacing-4));
+  padding: var(--spacing-4);
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* 底部操作区：成组按钮只用一种对齐，这里按表单列右对齐（layout.md 第 4 节）。
+   上边距多算一个 --spacing-4，抵掉正文为焦点环预留的那段负外边距，视觉间距仍是 16。 */
+.dialog__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-8);
+  margin-block-start: calc(var(--spacing-16) + var(--spacing-4));
+  flex: none;
+}

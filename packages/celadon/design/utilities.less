@@ -1,9 +1,9 @@
 /* 设计体系的**工具类**：跨组件共用的少量样式，不属于任何一个组件。
-   浮层遮罩与焦点环工具类随作用域落；等宽排版类自成一组（用法见下）。 */
+   浮层遮罩与焦点环工具类随作用域落；等宽排版类自成一组（用法见下）。
+   链接的外观归基础件 `link`（同一份 less 也进设计产物），这里不再重复一份。 */
 .celadon, [data-theme] .celadon {
   .focusable:focus-visible { box-shadow: var(--focus-ring); outline: none; }
   .scrim       { background: var(--scrim); }
-  .link        { color:var(--brand-ink); text-decoration:underline; }
 }
 
 /* ===== 等宽用法（设计类，2026-10-06 建立）=====

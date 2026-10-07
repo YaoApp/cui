@@ -56,5 +56,6 @@
   "data.error.tokenMissing": "缺少访问令牌",
   "data.error.unauthorized": "未登录或登录已过期",
   "data.error.forbidden": "没有访问权限",
-  "data.error.insufficientScope": "权限不足"
+  "data.error.insufficientScope": "权限不足",
+  "modal.close": "关闭"
 }

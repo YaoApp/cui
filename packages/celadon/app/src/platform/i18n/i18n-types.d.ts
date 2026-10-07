@@ -56,11 +56,32 @@ export type I18nKey =
   | 'base.captcha.refresh'
   | 'base.checkbox.label'
   | 'base.checkbox.labelLong'
+  | 'base.dialog.cancel'
+  | 'base.dialog.close'
+  | 'base.dialog.confirm'
+  | 'base.dialog.description'
+  | 'base.dialog.field'
+  | 'base.dialog.longBody'
+  | 'base.dialog.longTitle'
+  | 'base.dialog.nestedBody'
+  | 'base.dialog.nestedInnerBody'
+  | 'base.dialog.nestedInnerTitle'
+  | 'base.dialog.nestedTitle'
+  | 'base.dialog.openForm'
+  | 'base.dialog.openLong'
+  | 'base.dialog.openNested'
+  | 'base.dialog.openNestedInner'
+  | 'base.dialog.openPage'
+  | 'base.dialog.pageBody'
+  | 'base.dialog.pageTitle'
+  | 'base.dialog.title'
   | 'base.group.button'
   | 'base.group.captcha'
   | 'base.group.checkbox'
+  | 'base.group.dialog'
   | 'base.group.icon'
   | 'base.group.input'
+  | 'base.group.link'
   | 'base.group.otp'
   | 'base.group.segmented'
   | 'base.group.select'
@@ -219,6 +240,7 @@ export type I18nKey =
   | 'localeSwitch.system'
   | 'localeSwitch.zhCN'
   | 'localeSwitch.zhTW'
+  | 'modal.close'
   | 'nav.appLabel'
   | 'nav.bridge'
   | 'nav.home'
@@ -366,11 +388,32 @@ declare module 'i18next' {
         'base.captcha.refresh': string
         'base.checkbox.label': string
         'base.checkbox.labelLong': string
+        'base.dialog.cancel': string
+        'base.dialog.close': string
+        'base.dialog.confirm': string
+        'base.dialog.description': string
+        'base.dialog.field': string
+        'base.dialog.longBody': string
+        'base.dialog.longTitle': string
+        'base.dialog.nestedBody': string
+        'base.dialog.nestedInnerBody': string
+        'base.dialog.nestedInnerTitle': string
+        'base.dialog.nestedTitle': string
+        'base.dialog.openForm': string
+        'base.dialog.openLong': string
+        'base.dialog.openNested': string
+        'base.dialog.openNestedInner': string
+        'base.dialog.openPage': string
+        'base.dialog.pageBody': string
+        'base.dialog.pageTitle': string
+        'base.dialog.title': string
         'base.group.button': string
         'base.group.captcha': string
         'base.group.checkbox': string
+        'base.group.dialog': string
         'base.group.icon': string
         'base.group.input': string
+        'base.group.link': string
         'base.group.otp': string
         'base.group.segmented': string
         'base.group.select': string
@@ -529,6 +572,7 @@ declare module 'i18next' {
         'localeSwitch.system': string
         'localeSwitch.zhCN': string
         'localeSwitch.zhTW': string
+        'modal.close': string
         'nav.appLabel': string
         'nav.bridge': string
         'nav.home': string

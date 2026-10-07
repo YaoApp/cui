@@ -6,14 +6,10 @@
   line-height: var(--line-height-control-small);
 }
 
-/* 两个链接是外部地址，用品牌墨色，不用浏览器默认的蓝色 */
-.terms-note__link {
-  color: var(--brand-ink);
-}
-
 /* 勾选行与主按钮同一列：基础件让行与容器都按内容宽（悬停底色因此不横贯整行），
    这里要的是与按钮一样满宽，因此在本组件里把容器与行都拉满。
-   行这条多一层 `.checkbox` 提高特异性：与基础件的规则同特异性时源序不站在组件这一侧。 */
+   行这条多一层 `.checkbox` 提高特异性：与基础件的规则同特异性时源序不站在组件这一侧。
+   两个链接的颜色与下划线由基础件 `Link` 给，这里不再写一份。 */
 .terms-note .checkbox,
 .terms-note .checkbox .checkbox__row {
   inline-size: 100%;

@@ -1,0 +1,19 @@
+/* 文字链接：品牌墨色加下划线，浅暗两套各自成立（--brand-ink 在暗色下自动切提亮档）。
+   悬停补一层品牌软底而不是换色：软底在两个主题里都与正文有足够反差，换色则要再造一个链接色 token。
+   聚焦环与按钮、输入框同一条 --focus-ring，圆角取最小档，环贴着文字盒不显尖角。 */
+.link {
+  color: var(--brand-ink);
+  text-decoration: underline;
+  border-radius: var(--radius-xs);
+}
+
+.link:hover,
+.link.is-hover {
+  background: var(--brand-soft);
+}
+
+.link:focus-visible,
+.link.is-focus {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
