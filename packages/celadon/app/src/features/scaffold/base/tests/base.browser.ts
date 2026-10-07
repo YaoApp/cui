@@ -1559,6 +1559,9 @@ test('keeps the one-time code boxes the same height as the input at every step',
 })
 
 test('draws the dialog from the tokens and leaves nothing to the caller', async ({ page }) => {
+  /* 这条把弹窗的每一档一次量完（打开、量、关掉，十几次），机器有负载时会顶到默认的 30 秒上限。
+     松动只给预算，不放宽任何断言。 */
+  test.slow()
   await page.setViewportSize({ width: 1280, height: 1000 })
   await page.goto('/app/scaffold/base')
 

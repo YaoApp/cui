@@ -8,14 +8,30 @@ const SHOTS = shotDir('login-page')
 const shot = (page: Page, name: string) => capturePage(page, join(SHOTS, `${name}.png`))
 
 /* 依赖真实服务的用例先探一下：服务不在（例如 CI 只起了前端）就整条跳过，不当失败。
-   探入口配置，它同时说明服务信息与入口一线都可用。 */
+   探入口配置，它同时说明服务信息与入口一线都可用。
+   **必须要求 JSON**：没有配代理时（`YAO_SERVER_HOST` 没给）开发服务的 SPA 回退会拿 `index.html`
+   回一个 200，只看状态码会把「服务不可达」当成可用，用例随后挂在等表单上。 */
 async function hasLiveService(request: APIRequestContext): Promise<boolean> {
   try {
-    return (await request.get('/v1/user/entry?locale=zh-CN')).ok()
+    const response = await request.get('/v1/user/entry?locale=zh-CN')
+    return response.ok() && (response.headers()['content-type'] ?? '').includes('application/json')
   } catch {
     return false
   }
 }
+
+/* 服务信息统一打桩：真实部署里它就是宿主或站点给的一份固定应答，测试没有理由依赖它的可达性。
+   **缺这一条会让入口配置的请求发不出去**：基址来自它，页面于是永远停在加载态 ——
+   CI 上只有前端时正是如此，表现为一批用例超时（本地有后端，看不出来）。 */
+test.beforeEach(async ({ page }) => {
+  await page.route('**/.well-known/yao', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ name: 'development', version: '0.0.0', openapi: '/v1' }),
+    }),
+  )
+})
 
 test('renders the entry configuration, the account field and the provider rows', async ({ page, request }) => {
   test.skip(!(await hasLiveService(request)), 'the development service is not reachable')
@@ -900,6 +916,7 @@ test('goes to the sign-up page in place, without reloading the app', async ({ pa
     const scope = window as unknown as { __documentStarts?: number }
     scope.__documentStarts = (scope.__documentStarts ?? 0) + 1
   })
+  /* 服务信息由文件级 beforeEach 打桩：这一条不该依赖真实服务，CI 上只有前端时同样要能跑 */
   await page.route('**/v1/user/entry**', async (route) => {
     const path = new URL(route.request().url()).pathname
     if (path.endsWith('/entry')) {

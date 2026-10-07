@@ -223,6 +223,18 @@ async function stubEntryConfig(page: Page) {
   })
 }
 
+/* 服务信息统一打桩：真实部署里它就是宿主或站点给的一份固定应答。缺了它，上面那份入口配置的请求
+   根本发不出去，产品一侧停在加载态，比对全线不等 —— CI 上只有前端时正是如此。 */
+test.beforeEach(async ({ page }) => {
+  await page.route('**/.well-known/yao', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ name: 'development', version: '0.0.0', openapi: '/v1' }),
+    }),
+  )
+})
+
 /** 列的几何（卡片与行宽）是这一页自己负责的，必须一致；其余差异按"待确认"列出并打进日志。 */
 function blockingLines(lines: string[]): string[] {
   return lines.filter((line) => /· (card|provider row|provider label|or|field|field input|submit|footnote|bottom) · (width|x):/.test(line))

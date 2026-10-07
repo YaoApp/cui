@@ -18,10 +18,20 @@ export default defineConfig({
     locale: 'zh-CN', colorScheme: 'light' as const,
     trace: 'on-first-retry',
   },
-  webServer: {
-    command: `pnpm dev --host 127.0.0.1 --port ${PORT} --strictPort`,
-    url: BASE_URL,
-    reuseExistingServer: true, // pm2 已经在同一端口跑着 dev
-    timeout: 30_000,
-  },
+  /* 两个服务：应用本体（所有用例的 baseURL）与设计稿预览 —— 比对设计稿的用例要读后者。
+     不在这里一起起，CI 上就只有前端，那几条会以「连接被拒」失败（本地常常已经在跑，看不出来）。 */
+  webServer: [
+    {
+      command: `pnpm dev --host 127.0.0.1 --port ${PORT} --strictPort`,
+      url: BASE_URL,
+      reuseExistingServer: true, // pm2 已经在同一端口跑着 dev
+      timeout: 30_000,
+    },
+    {
+      command: 'node design/serve.mjs',
+      url: 'http://127.0.0.1:8080/',
+      reuseExistingServer: true,
+      timeout: 30_000,
+    },
+  ],
 })

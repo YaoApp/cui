@@ -1,6 +1,19 @@
 import { expect, test } from '@playwright/test'
 
 /* 应用级：首帧占位、站点图标与文档标题。 */
+
+/* 服务信息统一打桩：真实部署里它就是宿主或站点给的一份固定应答。缺了它，
+   入口配置的请求发不出去，页面永远停在加载态 —— 这两条就不该依赖真实服务。 */
+test.beforeEach(async ({ page }) => {
+  await page.route('**/.well-known/yao', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ name: 'development', version: '0.0.0', openapi: '/v1' }),
+    }),
+  )
+})
+
 test('paints the first-paint placeholder from the HTML, before any bundle runs', async ({ page }) => {
   /* 把应用包全部挡住：这正是网络慢时的情形 —— 先到的只有 HTML。
      占位必须在这时已经可见（写在 `index.html` 里），而不是等包下载完才画出来。 */
@@ -51,6 +64,22 @@ test('paints the first-paint placeholder from the HTML, before any bundle runs',
 })
 
 test('replaces the placeholder with the page once the bundle runs', async ({ page }) => {
+  /* 入口配置也打桩：这一条只说「占位被页面替换」，不该依赖真实服务 */
+  await page.route('**/v1/user/entry**', (route) => {
+    const path = new URL(route.request().url()).pathname
+    if (!path.endsWith('/entry')) return route.fallback()
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        title: 'Sign up or sign in',
+        description: 'Enter your account',
+        success_url: '/app/done',
+        secure_cookie: false,
+        form: { username: { placeholder: '请输入邮箱' }, password: { placeholder: '登录密码' } },
+      }),
+    })
+  })
   await page.goto('/app/login')
   await expect(page.getByLabel('邮箱或手机号')).toBeVisible()
   await expect(page.locator('.boot')).toHaveCount(0)
