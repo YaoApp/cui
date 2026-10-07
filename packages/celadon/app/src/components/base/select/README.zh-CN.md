@@ -11,7 +11,7 @@
 | --- | --- |
 | `select.tsx` | `Select` 组件，以及 `SelectProps`、`SelectOption`、`SelectGroup` 类型。 |
 | `select.less` | 触发器、弹层、列表、选项与其槽位、分组标题、滚动箭头与筛选框。 |
-| `select.test.tsx` | 单元用例，覆盖可访问名、受控值、键盘、禁用、空态、分组、选项槽位、反色与纯文字档、搜索、多选与清除项。 |
+| `select.test.tsx` | 单元用例，覆盖可访问名、受控值、键盘、禁用、空态、分组、选项槽位、触发器图标优先级、反色与纯文字档、搜索、多选与清除项。 |
 | `index.ts` | 模块对外的出口，即 `Select`、`SelectProps`、`SelectOption` 与 `SelectGroup`。 |
 
 ## 结构与类名
@@ -22,8 +22,8 @@
 | 部位 | 类名 | 说明 |
 | --- | --- | --- |
 | 触发器 | `.select-trigger` · `.select__trigger` | 追加 `select-trigger--small` / `--large`、`select-trigger--plain`、`select-trigger--inverse`、`is-error` 与 `is-<state>`。由 `Select.Trigger` 渲染，带 `role="combobox"`。 |
-| 触发器取值 | `.select__value` | `Select.Value`；单行截断，没有选中时显示占位文字。 |
-| 触发器图标 | `.select__lead` | 可选的前置或末尾图标槽，`aria-hidden="true"`。 |
+| 触发器取值 | `.select__value` | 单行截断，没有选中时显示占位文字。单选与「多选但调用方传了 `icon`」时由 `Select.Value` 渲染；多选且没传 `icon` 时按选项逐个渲染，每项一个 `.select__value-item`（内含该项图标与 `.select__value-label`），项间用 `.select__value-sep` 的逗号加空格分隔。 |
+| 触发器图标 | `.select__lead` | 可选的前置或末尾图标槽，`aria-hidden="true"`。调用方传了 `icon` 时放它；单选时放选中项的图标；多选时图标跟在各自标签前（见上一行），这个槽为空。 |
 | 指示器 | `.select-icon` | `i-down` 图标；`indicator` 为假时不画。 |
 | 定位器 | `.select__positioner` | 定位弹层，按起始边对齐并留 4px 的间隙。间隙由定位器给，组件不带外边距。 |
 | 弹层 | `.select-popup` | `searchable` 时追加 `select-popup--search`；最大高度对齐整行。 |
@@ -50,7 +50,7 @@
 | `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | 触发器高度 24 / 32 / 40，与按钮、输入框、复选框同梯。 |
 | `placeholder` | `ReactNode` | 无 | 没有选中时显示；一个选项都没有时也显示。 |
 | `emptyText` | `ReactNode` | 无 | 一个选项都没有时显示在弹层里。组件不自带文案。 |
-| `icon` | `ReactNode` | 无 | 触发器图标，位置与颜色与输入框的图标槽一致。 |
+| `icon` | `ReactNode` | 无 | 触发器图标，位置与颜色与输入框的图标槽一致。显式传了就一律以它为准（只显示这一个，多选也用它）。不传时按选中项派生：单选取选中项的图标放开头槽；多选把每个选中项的图标放在**它自己标签的前面**（`[图标] 项一, [图标] 项二`）。没有选中项时不显示图标。 |
 | `error` | `boolean` | `false` | 危险描边与聚焦环，与输入框同一套规则。 |
 | `disabled` | `boolean` | 无 | 阻断交互。 |
 | `state` | `'hover' \| 'focus' \| 'loading'` | 无 | 挂在触发器上的静态态类，供并排展示。 |
@@ -110,6 +110,10 @@
 块向内距 `--spacing-8`，行内内距 `--spacing-12`。带说明的两行选项按内容长高，实测 52。滚动箭头高
 `--spacing-24`。筛选框取输入框的小档。
 
+选项图标与选中标记取 16px，比同行正文（14px）高一档；触发器图标是调用方给的节点，默认尺寸也是 16px。
+两者对**首行的行盒**对齐，不按基线。单行选项在行内居中，实测图标中心 20、行中心 20。两行选项整行顶对齐，图标与勾落在首行，
+**中心与标题文字行的中心对齐**（实测行盒中心 16.5、图标盒中心 16.0），不按标题含降部的墨迹另做偏移，也不沉到整块中心。
+
 ## 无障碍
 
 - `aria-label` 必给。Base UI 的 Trigger 渲染带 `role="combobox"` 的按钮，名字落在它上面。
@@ -162,8 +166,8 @@ pnpm exec playwright test app/src/features/scaffold/base/tests/   # 清单页的
 ```
 
 浏览器用例实测触发器三档高度 24 / 32 / 40 以及中档与输入框同高、`i-down` 指示器、选项行高对
-`--row-height`、长列表与带筛选长列表的整行高度、箭头让出的空档与不重叠、分组标题、选项槽位、多选与搜索
-行为、清除与重选行为、反色档的绘制，以及鼠标聚焦不留环的规则。
+`--row-height`、长列表与带筛选长列表的整行高度、箭头让出的空档与不重叠、分组标题、选项槽位、选中另一项后
+触发器图标换成该项的图标、多选与搜索行为、清除与重选行为、反色档的绘制，以及鼠标聚焦不留环的规则。
 
 ## 已知限制
 

@@ -12,7 +12,7 @@ choices.
 | --- | --- |
 | `select.tsx` | The `Select` component and the `SelectProps`, `SelectOption` and `SelectGroup` types. |
 | `select.less` | The trigger, the popup, the list, the options and their slots, the group label, the scroll arrows and the search field. |
-| `select.test.tsx` | Unit tests for the accessible name, the controlled value, keyboard, disabled, empty, groups, option slots, the inverse and plain forms, search, multiple and the clear item. |
+| `select.test.tsx` | Unit tests for the accessible name, the controlled value, keyboard, disabled, empty, groups, option slots, the trigger icon priority, the inverse and plain forms, search, multiple and the clear item. |
 | `index.ts` | The module's public surface, namely `Select`, `SelectProps`, `SelectOption` and `SelectGroup`. |
 
 ## Structure and classes
@@ -23,8 +23,8 @@ Base UI; geometry such as the anchor width and the available height is exposed a
 | Part | Classes | Notes |
 | --- | --- | --- |
 | Trigger | `.select-trigger` · `.select__trigger` | Adds `select-trigger--small` / `--large`, `select-trigger--plain`, `select-trigger--inverse`, `is-error` and `is-<state>`. Rendered by `Select.Trigger` with `role="combobox"`. |
-| Trigger value | `.select__value` | `Select.Value`; single line with an ellipsis, and the placeholder while nothing is selected. |
-| Trigger icon | `.select__lead` | Optional leading or trailing icon slot, `aria-hidden="true"`. |
+| Trigger value | `.select__value` | Single line with an ellipsis, and the placeholder while nothing is selected. A single select, and a multiple select whose caller passed `icon`, render through `Select.Value`; a multiple select without `icon` renders one `.select__value-item` per picked option (its icon plus a `.select__value-label`), separated by a `.select__value-sep` comma and space. |
+| Trigger icon | `.select__lead` | Optional leading or trailing icon slot, `aria-hidden="true"`, holding one `.select__lead-icon` per icon with a small gap. It holds the `icon` prop when given, or the picked option's icon in a single select; a multiple select puts each icon in front of its own label instead and leaves this slot empty. |
 | Indicator | `.select-icon` | The `i-down` icon; hidden when `indicator` is false. |
 | Positioner | `.select__positioner` | Positions the popup, aligned to the start edge with a 4 px gap. The gap comes from the positioner, not from component margin. |
 | Popup | `.select-popup` | Adds `select-popup--search` when `searchable`; the popup is aligned to whole rows. |
@@ -51,7 +51,7 @@ and a multiple select sets `multiple: true` and takes `value: readonly string[]`
 | `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | Trigger height 24 / 32 / 40, on the same ladder as the button, the input and the checkbox. |
 | `placeholder` | `ReactNode` | none | Shown while nothing is selected and when there are no options at all. |
 | `emptyText` | `ReactNode` | none | Shown in the popup when there are no options. The component writes no copy of its own. |
-| `icon` | `ReactNode` | none | Trigger icon, in the same position and colour as the input's icon slot. |
+| `icon` | `ReactNode` | none | Trigger icon, in the same position and colour as the input's icon slot. An explicit `icon` always wins and shows that single node, multiple selection included. When omitted the trigger derives the icon from the picked options: a single select puts the picked option's icon in the leading slot, while a multiple select puts each option's icon in front of its own label (`[icon] first, [icon] second`). No selection shows no icon. |
 | `error` | `boolean` | `false` | Dangerous boundary and focus ring, the same rules as the input. |
 | `disabled` | `boolean` | none | Blocks interaction. |
 | `state` | `'hover' \| 'focus' \| 'loading'` | none | Static state class on the trigger for side-by-side display. |
@@ -116,6 +116,13 @@ equal-height list does not end on a half row. An option has a min height of `--r
 with its content, measured at 52. A scroll arrow is `--spacing-24` high. The search field uses the small input
 step.
 
+An option icon and the check mark are 16 px, one step above the option's 14 px body text; the trigger icon is
+the node the caller gives, whose default size is also 16 px. They align to the
+first line's line box rather than to the baseline. A single-line option centres them in the row, measured at a
+centre of 20 against a row centre of 20. A two-line option top-aligns the row so they sit on the first line, with
+their centre meeting the centre of the title's text line (measured line box centre 16.5, icon box centre 16.0);
+they are not offset for the title's descender ink and never sink to the centre of the whole row.
+
 ## Accessibility
 
 - `aria-label` is required. Base UI's Trigger renders a button with `role="combobox"`, and the name lands on it.
@@ -175,8 +182,9 @@ pnpm exec playwright test app/src/features/scaffold/base/tests/   # browser case
 
 The browser case measures the trigger heights 24 / 32 / 40 and the medium height against the input, the
 `i-down` indicator, the option row height against `--row-height`, the whole-row height of a long list and a
-searchable long list, the arrow space and non-overlap, the group labels, the option slots, the multiple and
-search behaviour, the clear and reselect behaviour, the inverse paint and the no-ring-on-mouse-focus rule.
+searchable long list, the arrow space and non-overlap, the group labels, the option slots, the trigger icon
+switching to the picked option, the multiple and search behaviour, the clear and reselect behaviour, the
+inverse paint and the no-ring-on-mouse-focus rule.
 
 ## Known limitations
 

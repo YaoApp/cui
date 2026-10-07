@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Select } from '@/components/base/select'
@@ -131,9 +131,11 @@ describe('Select', () => {
       />,
     )
     await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
-    expect(await screen.findByTestId('option-icon')).toBeInTheDocument()
-    expect(screen.getByText('Narrow column')).toBeInTheDocument()
-    expect(screen.getByText('⌘1')).toBeInTheDocument()
+    /* 触发器现在也画选中项的图标，同一个节点因此出现两份：这里限定在选项行内查 */
+    const option = await screen.findByRole('option', { name: /Reading/ })
+    expect(within(option).getByTestId('option-icon')).toBeInTheDocument()
+    expect(within(option).getByText('Narrow column')).toBeInTheDocument()
+    expect(within(option).getByText('⌘1')).toBeInTheDocument()
     /* 选中项的标记：给了值的那一项要画出选中标记 */
     expect(document.querySelectorAll('.select-item__check').length).toBeGreaterThan(0)
   })
@@ -151,6 +153,95 @@ describe('Select', () => {
     const trigger = screen.getByRole('combobox', { name: 'Theme' })
     expect(trigger.querySelector('[data-testid="trigger-icon"]')).not.toBeNull()
     expect(trigger.querySelector('.select__lead')).not.toBeNull()
+  })
+
+  /* 触发器图标默认取当前选中项的 `option.icon`，调用方显式传 `icon` 时以它为准；
+     多选取第一个选中项的图标，没有选中项就不显示。 */
+  it('takes the trigger icon from the selected option', () => {
+    render(
+      <Select
+        aria-label="Theme"
+        value="dark"
+        onValueChange={() => {}}
+        options={[
+          { value: 'light', label: 'Light', icon: <span data-testid="light-icon" /> },
+          { value: 'dark', label: 'Dark', icon: <span data-testid="dark-icon" /> },
+        ]}
+      />,
+    )
+    const trigger = screen.getByRole('combobox', { name: 'Theme' })
+
+    expect(trigger.querySelector('[data-testid="dark-icon"]')).not.toBeNull()
+    expect(trigger.querySelector('[data-testid="light-icon"]')).toBeNull()
+  })
+
+  it('takes the trigger icon from a grouped option', () => {
+    render(
+      <Select
+        aria-label="Theme"
+        value="ja"
+        onValueChange={() => {}}
+        groups={[
+          { label: 'Language', options: [{ value: 'ja', label: '日本語', icon: <span data-testid="ja-icon" /> }] },
+        ]}
+      />,
+    )
+
+    expect(
+      screen.getByRole('combobox', { name: 'Theme' }).querySelector('[data-testid="ja-icon"]'),
+    ).not.toBeNull()
+  })
+
+  it('lets the icon prop win over the selected option icon', () => {
+    render(
+      <Select
+        aria-label="Theme"
+        value="dark"
+        onValueChange={() => {}}
+        options={[{ value: 'dark', label: 'Dark', icon: <span data-testid="dark-icon" /> }]}
+        icon={<span data-testid="trigger-icon" />}
+      />,
+    )
+    const trigger = screen.getByRole('combobox', { name: 'Theme' })
+
+    expect(trigger.querySelector('[data-testid="trigger-icon"]')).not.toBeNull()
+    expect(trigger.querySelector('[data-testid="dark-icon"]')).toBeNull()
+  })
+
+  it('takes one trigger icon per picked option while multiple', () => {
+    render(
+      <Select
+        multiple
+        aria-label="Theme"
+        value={['dark', 'light']}
+        onValueChange={() => {}}
+        options={[
+          { value: 'light', label: 'Light', icon: <span data-testid="light-icon" /> },
+          { value: 'dark', label: 'Dark', icon: <span data-testid="dark-icon" /> },
+        ]}
+      />,
+    )
+    const trigger = screen.getByRole('combobox', { name: 'Theme' })
+    const icons = [...trigger.querySelectorAll('.select__lead-icon')]
+
+    /* 多选时每个选中项各占一个图标槽，按选中顺序排 */
+    expect(icons).toHaveLength(2)
+    expect(icons[0].querySelector('[data-testid="dark-icon"]')).not.toBeNull()
+    expect(icons[1].querySelector('[data-testid="light-icon"]')).not.toBeNull()
+  })
+
+  it('shows no trigger icon while nothing is selected', () => {
+    render(
+      <Select
+        aria-label="Theme"
+        value=""
+        onValueChange={() => {}}
+        options={[{ value: 'light', label: 'Light', icon: <span data-testid="light-icon" /> }]}
+        placeholder="Pick one"
+      />,
+    )
+
+    expect(screen.getByRole('combobox', { name: 'Theme' }).querySelector('.select__lead')).toBeNull()
   })
 
   it('skips the disabled option when moving with the keyboard', async () => {
@@ -209,14 +300,17 @@ describe('Select', () => {
     await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }))
     expect(await screen.findAllByRole('option')).toHaveLength(3)
 
-    await userEvent.type(screen.getByRole('textbox', { name: 'Search options' }), 'dark')
-    expect(screen.getAllByRole('option')).toHaveLength(1)
+    /* 筛选词直接派发 change：输入框是受控的，只需要 onChange 一个事件；
+       逐字符输入会与弹层的过渡计时器抢时序，偶发丢字，这里不测打字本身 */
+    const search = screen.getByRole('textbox', { name: 'Search options' })
+    fireEvent.change(search, { target: { value: 'dark' } })
+    await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(1))
     expect(screen.getByRole('option', { name: 'Dark' })).toBeInTheDocument()
 
-    await userEvent.clear(screen.getByRole('textbox', { name: 'Search options' }))
-    await userEvent.type(screen.getByRole('textbox', { name: 'Search options' }), 'zzz')
+    fireEvent.change(search, { target: { value: 'zzz' } })
+    /* 0 命中时列表整块换成空态说明：等空态出现后再断言没有选项 */
+    expect(await screen.findByText('No matches')).toBeInTheDocument()
     expect(screen.queryAllByRole('option')).toHaveLength(0)
-    expect(screen.getByText('No matches')).toBeInTheDocument()
   })
 
   it('marks the popup as searchable and keeps one list container', async () => {

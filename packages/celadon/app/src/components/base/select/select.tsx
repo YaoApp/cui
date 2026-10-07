@@ -37,7 +37,10 @@ type SelectBaseProps = {
   placeholder?: ReactNode
   /** 一个选项都没有时弹层里的说明文字。组件不写文案，由调用方给四语。 */
   emptyText?: ReactNode
-  /** 触发器左侧图标，与输入框的图标槽同位置同颜色 */
+  /** 触发器图标，与输入框的图标槽同位置同颜色。
+      不传时取当前选中项的 `option.icon`（在 `options` 与 `groups` 里按 `value` 找）；
+      显式传了就一律以它为准。多选不派生图标（一个图标代表不了多项，此时只有显式传的 `icon` 显示）；
+      没有选中项时不显示图标。 */
   icon?: ReactNode
   /** 错误态：边框与聚焦环走危险色，与输入框同一套规则（设计类 `.is-error`）。 */
   error?: boolean
@@ -130,6 +133,23 @@ export function Select(props: SelectProps) {
     .join(' ')
 
   const flatOptions = groups ? groups.flatMap((group) => group.options) : options
+
+  /* 触发器图标：调用方显式传 `icon` 时以它为准；否则按选中项派生。
+     多选时图标**跟着各自的选项标签走**（`[图标] 项一, [图标] 项二`），因此多选的值自己渲染，见下面的 value。
+     选项可能来自 `options` 或 `groups`，`flatOptions` 已把两处合成一份，按 `value` 找即可。 */
+  const selectedValues = props.multiple ? props.value : props.value ? [props.value] : []
+  const selectedOptions = selectedValues
+    .map((selected) => flatOptions.find((option) => option.value === selected))
+    .filter((option): option is SelectOption => option !== undefined)
+  /* 多选且调用方没给 `icon` 时，值按选项逐个渲染，图标紧挨自己的标签；此时开头的图标槽不再放图标 */
+  const renderValueItems = Boolean(props.multiple) && !icon && selectedOptions.length > 0
+  const triggerIcons = icon
+    ? [icon]
+    : renderValueItems
+      ? []
+      : selectedOptions
+          .map((option) => option.icon)
+          .filter((node): node is ReactNode => node !== undefined && node !== null)
   /* Base UI 用 items 解析选中项要显示的文字：这里始终传**未过滤**的全部选项，
      否则被筛掉的已选项在触发器上会显示成原值。分组时传分组结构。 */
   const items = groups
@@ -173,15 +193,40 @@ export function Select(props: SelectProps) {
   const content = (
     <>
       <BaseSelect.Trigger id={id} className={classes} aria-label={ariaLabel}>
-        {icon && iconPosition === 'start' ? (
+        {triggerIcons.length > 0 && iconPosition === 'start' ? (
           <span className="select__lead" aria-hidden="true">
-            {icon}
+            {triggerIcons.map((node, index) => (
+              <span key={index} className="select__lead-icon">
+                {node}
+              </span>
+            ))}
           </span>
         ) : null}
-        <BaseSelect.Value className="select__value" placeholder={placeholder} />
-        {icon && iconPosition === 'end' ? (
+        {renderValueItems ? (
+          /* 多选：每个选中项渲染「图标 + 标签」，项间用逗号加空格分隔，图标因此跟着各自的标签走 */
+          <span className="select__value select__value--items">
+            {selectedOptions.map((option, index) => (
+              <span key={String(option.value)} className="select__value-item">
+                {index > 0 ? <span className="select__value-sep">, </span> : null}
+                {option.icon ? (
+                  <span className="select__lead-icon" aria-hidden="true">
+                    {option.icon}
+                  </span>
+                ) : null}
+                <span className="select__value-label">{option.label}</span>
+              </span>
+            ))}
+          </span>
+        ) : (
+          <BaseSelect.Value className="select__value" placeholder={placeholder} />
+        )}
+        {triggerIcons.length > 0 && iconPosition === 'end' ? (
           <span className="select__lead" aria-hidden="true">
-            {icon}
+            {triggerIcons.map((node, index) => (
+              <span key={index} className="select__lead-icon">
+                {node}
+              </span>
+            ))}
           </span>
         ) : null}
         {indicator ? <Icon name="i-down" size={16} className="select-icon" /> : null}

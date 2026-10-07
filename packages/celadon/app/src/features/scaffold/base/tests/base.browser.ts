@@ -185,6 +185,9 @@ test('lists the seven groups and their states', async ({ page }) => {
   /* 选择器：指示器必须是我们自己的图标 i-down，不再用上游自带的 ▼；
      三档高度与输入框对齐（中档同高）、错误态改边框、禁用不可点；弹层能开能选、禁用项不可选；空态有说明。 */
   const selectTrigger = (label: string) => page.getByRole('combobox', { name: label, exact: true })
+  /* 触发器图标槽里的图标引用名：用于核对默认取选中项、选中另一项后是否跟着换 */
+  const triggerIconHref = (label: string) =>
+    selectTrigger(label).evaluate((el) => el.querySelector('.select__lead svg use')?.getAttribute('href') ?? '')
   /* 弹层由 portal 渲染，关闭的那些仍留在 DOM 里：打开后先等**可见的那一个**出现，
      之后一律在可见弹层内部查询，避免读到已关闭的节点（它们的尺寸是 0）。 */
   const openSelect = async (label: string) => {
@@ -306,7 +309,8 @@ test('lists the seven groups and their states', async ({ page }) => {
   expect(grouped.项).toBe(5)
   await page.keyboard.press('Escape')
 
-  /* 选项图标：每个选项真的画出图标，禁用项仍在 */
+  /* 选项图标：每个选项真的画出图标；触发器图标默认取选中项，选中另一项后跟着换 */
+  expect(await triggerIconHref('select icon options')).toBe('#i-book')
   await openSelect('select icon options')
   expect(
     await page.evaluate(() => {
@@ -315,21 +319,43 @@ test('lists the seven groups and their states', async ({ page }) => {
       return first ? Math.round(first.getBoundingClientRect().width) : 0
     }),
   ).toBeGreaterThanOrEqual(12)
+  await page.locator('.select-popup:visible [role=option]', { hasText: 'Recent' }).first().click()
+  await expect.poll(() => triggerIconHref('select icon options')).toBe('#i-clock')
   await page.keyboard.press('Escape')
 
-  /* 异形布局：两行选项（标签加说明）行高大于单行档位，说明真的渲染 */
+  /* 异形布局：两行选项（标签加说明）行高大于单行档位，说明真的渲染；
+     触发器图标同样默认取选中项，选到 Tool 后换成 Tool 的图标 */
+  expect(await triggerIconHref('select rich options')).toBe('#i-book')
   await openSelect('select rich options')
   const rich = await page.evaluate(() => {
     const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    const rel = (value: number, base: number) => Number((value - base).toFixed(2))
     return {
       行高: [...popup.querySelectorAll('[role=option]')].map((el) => (el as HTMLElement).offsetHeight),
       说明: popup.querySelectorAll('.select-item__description').length,
+      /* 两行选项的对齐口径：图标盒中心对**首行行盒**中心，且不等于整块中心 */
+      对齐: [...popup.querySelectorAll('[role=option]')].map((el) => {
+        const row = el.getBoundingClientRect()
+        const line = el.querySelector('.select-item__body')!.children[0].getBoundingClientRect()
+        const icon = el.querySelector('.select-item__icon svg')!.getBoundingClientRect()
+        return {
+          行中心: rel(row.top + row.height / 2, row.top),
+          首行中心: rel(line.top + line.height / 2, row.top),
+          图标中心: rel(icon.top + icon.height / 2, row.top),
+        }
+      }),
     }
   })
   expect(rich.说明).toBe(3)
   for (const height of rich.行高) {
     expect(height).toBeGreaterThan(Math.round(parseFloat(rowHeight)))
   }
+  for (const item of rich.对齐) {
+    expect(Math.abs(item.图标中心 - item.首行中心)).toBeLessThanOrEqual(0.5)
+    expect(item.图标中心).not.toBe(item.行中心)
+  }
+  await page.locator('.select-popup:visible [role=option]', { hasText: 'Tool' }).first().click()
+  await expect.poll(() => triggerIconHref('select rich options')).toBe('#i-board')
   await page.keyboard.press('Escape')
 
   /* 右侧附加内容：文字在，行高仍是单行档位 */
@@ -395,6 +421,50 @@ test('lists the seven groups and their states', async ({ page }) => {
     return popup ? popup.querySelectorAll('.select-item__check').length : -1
   })
   expect(afterMultiple).toBe(beforeMultiple + 1)
+
+  /* 多选带图标：图标跟着各自的选项标签走（[图标] 项一, [图标] 项二），开头不另堆图标；
+     标签里也不出现选项之外的原始值 */
+  const multiIcons = () =>
+    page.evaluate(() => {
+      const trigger = document.querySelector('button[aria-label="select multiple icons"]')!
+      const value = trigger.querySelector('.select__value')
+      return {
+        label: (value?.textContent ?? '').trim(),
+        items: [...(value?.querySelectorAll('.select__value-item') ?? [])].map((item) => ({
+          icon: (item.querySelector('svg use')?.getAttribute('href') ?? '').replace('#', ''),
+          text: (item.querySelector('.select__value-label')?.textContent ?? '').trim(),
+        })),
+        leadIcons: trigger.querySelectorAll('.select__lead svg use').length,
+      }
+    })
+  const initialMultiple = await multiIcons()
+  expect(initialMultiple.label).toBe('Reading, Recent')
+  expect(initialMultiple.items).toEqual([
+    { icon: 'i-book', text: 'Reading' },
+    { icon: 'i-clock', text: 'Recent' },
+  ])
+  expect(initialMultiple.leadIcons).toBe(0)
+
+  /* 各项同线、且每个图标盒的中心与它自己标签行盒的中心重合：
+     这两条一起挡住「项按各自基线错位」与「图标相对文字偏高或偏低」 */
+  const multiGeometry = await page.evaluate(() => {
+    const value = document.querySelector('button[aria-label="select multiple icons"] .select__value')!
+    const base = value.getBoundingClientRect().top
+    return [...value.querySelectorAll('.select__value-item')].map((item) => {
+      const box = item.getBoundingClientRect()
+      const icon = item.querySelector('svg')!.getBoundingClientRect()
+      const label = item.querySelector('.select__value-label')!.getBoundingClientRect()
+      return {
+        top: Number((box.top - base).toFixed(2)),
+        bottom: Number((box.bottom - base).toFixed(2)),
+        iconCentre: Number((icon.top + icon.height / 2 - base).toFixed(2)),
+        labelCentre: Number((label.top + label.height / 2 - base).toFixed(2)),
+      }
+    })
+  })
+  expect(multiGeometry.map((item) => item.top)).toEqual([0, 0])
+  expect(multiGeometry.map((item) => item.bottom)).toEqual([24, 24])
+  for (const item of multiGeometry) expect(item.iconCentre).toBe(item.labelCentre)
   await page.keyboard.press('Escape')
 
   /* 搜索：筛选真的减少选项，无命中时给说明；等行高的长列表加搜索后仍对齐整行 */

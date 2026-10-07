@@ -1799,7 +1799,11 @@
 [data-theme] .celadon {
   /* 触发器：字段外观落在 <button> 上。值单行截断，指示器不参与点击。 */
   /* 触发器里的值：单行截断，长选项不撑开触发器 */
-  /* 触发器左侧的图标槽与右侧指示器 */
+  /* 多选的值是若干「图标 + 标签」项：整槽改成 flex 行并按中线对齐。
+     否则各项是行内的 inline-flex 盒子，会按各自的第一子元素基线对齐，
+     打头是图标的那项与打头是逗号的那项因此错开几个像素。 */
+  /* 触发器开头的图标槽与末尾指示器。单选的选中项图标放这里；多选的图标跟在各自标签前，见下面的值槽 */
+  /* 多选的值按选项逐个渲染：每一项是「图标 + 标签」，项间用逗号加空格分隔，图标因此跟着自己的标签走 */
   /* 弹层是浮层，圆角取弹层档，阴影取悬浮档；选项与字段同字号，
      高亮用中性悬停底，选中用品牌浅底加品牌文字，禁用沿用禁用字色。
      弹层与触发器的间距由排布者（定位器）给，组件不带外边距，见 layout.md 第 3 节。 */
@@ -1823,7 +1827,9 @@
      用最小高度而不是固定高度，是为了让两行选项（带说明的异形布局）按内容自然长高。
      纵向内距 8、行内距 12（大于弹层内距 4，符合「卡内间距小于卡片内距」）。 */
   /* 选中标记的出现属 F4 的 fade 场景：状态切换该动，缩放加淡入，取 `--duration-base` 与减速缓动 */
-  /* 选项里的图标：与文字间距由行的 gap 给，颜色取二级文字 */
+  /* 选项里的图标：与文字间距由行的 gap 给，颜色取二级文字。 */
+  /* 两行选项（标题 + 说明）里，左侧图标与右侧勾对**标题那一行**，不对整块：整行改用顶对齐，
+     图标与勾因此落在首行的行盒上，中心与标题文字行的中心对齐；单行选项不加这条，仍按行内居中。 */
   /* 选项主体：单行时只有标签，异形布局时标签下面再挂一行说明 */
   /* 选中标记与右侧附加内容都靠右，二者同时出现时依次排列 */
 }
@@ -1996,11 +2002,38 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.celadon .select__value--items,
+[data-theme] .celadon .select__value--items {
+  display: inline-flex;
+  align-items: center;
+  min-inline-size: 0;
+}
 .celadon .select__lead,
 [data-theme] .celadon .select__lead {
   flex: none;
   display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
   color: var(--text-secondary);
+}
+.celadon .select__lead-icon,
+[data-theme] .celadon .select__lead-icon {
+  display: inline-flex;
+}
+.celadon .select__value-item,
+[data-theme] .celadon .select__value-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+.celadon .select__value-sep,
+[data-theme] .celadon .select__value-sep {
+  white-space: pre;
+}
+.celadon .select__value-label,
+[data-theme] .celadon .select__value-label {
+  display: inline-flex;
+  align-items: center;
 }
 .celadon .select-icon,
 [data-theme] .celadon .select-icon {
@@ -2213,6 +2246,10 @@
   flex: none;
   display: inline-flex;
   color: var(--text-secondary);
+}
+.celadon .select-item:has(.select-item__body > * + *),
+[data-theme] .celadon .select-item:has(.select-item__body > * + *) {
+  align-items: flex-start;
 }
 .celadon .select-item__body,
 [data-theme] .celadon .select-item__body {

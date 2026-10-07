@@ -120,7 +120,7 @@ export function BasePage() {
   const { theme: activeTheme, setTheme: selectActiveTheme } = useThemePreference()
   /* 两个多选样例各自的选中集：受控组件要真的能改，样例才有意义 */
   const [multiTheme, setMultiTheme] = useState<string[]>(['light', 'system'])
-  const [multiIcon, setMultiIcon] = useState<string[]>(['reading', 'task'])
+  const [multiIcon, setMultiIcon] = useState<string[]>(['reading', 'recent'])
 
   /* 选择器的示例数据是调用方传入的数据，不属于页面文案，用固定取值即可。
      主题那三个标签住在各功能自己的语言包里（`bridge.themeLight` 等），组件层的文案归属另有缺口，
@@ -808,7 +808,6 @@ export function BasePage() {
             value={richChoice}
             onValueChange={setRichChoice}
             options={richOptions}
-            icon={<Icon name="i-book" />}
             placeholder={selectPlaceholder}
           />
           <Select
