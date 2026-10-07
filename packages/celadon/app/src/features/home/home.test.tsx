@@ -39,7 +39,10 @@ describe('HomePage', () => {
   it('keeps the language and theme switches on the page', () => {
     renderPage()
     expect(screen.getByRole('combobox')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '暗色' })).toBeInTheDocument()
+    /* 主题按钮的可访问名说的是动作，随当前档变化；主题是模块级单例，同进程里跑过的用例可能
+       已经把它切成深色，而写回 `html[data-theme]` 的订阅要等一轮副作用，所以这里只确认这一个
+       控件在页面上，动作名与点击行为由 theme-toggle 自己的用例与浏览器用例覆盖。 */
+    expect(document.querySelector('.theme-toggle')).toBeInTheDocument()
   })
 
   it('offers a way into all four scaffold pages', () => {

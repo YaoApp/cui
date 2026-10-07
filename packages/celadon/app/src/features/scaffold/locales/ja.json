@@ -6,6 +6,7 @@
   "base.group.button": "ボタン Button",
   "base.group.select": "セレクト Select",
   "base.group.icon": "アイコンとブランド Icon & BrandMark",
+  "base.group.segmented": "セグメントコントロール SegmentedControl",
   "base.group.theme": "テーマと言語 Theme & Locale",
   "base.sub.props": "プロパティ",
   "base.sub.messages": "メッセージ",

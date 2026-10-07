@@ -35,14 +35,15 @@ const hexToRgb = (hex: string) => {
 /* 图标自己的尺寸档（见 architecture/10-icons.md 第 1 节），不跟字号走 */
 const ICON_LADDER = [14, 16, 20, 24]
 
-test('lists the seven groups and their states', async ({ page }) => {
-  /* 七个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
+test('lists the eight groups and their states', async ({ page }) => {
+  /* 八个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
      因此这一条明确放宽预算（Playwright 的 slow 走三倍），其余用例仍守默认值。 */
   test.slow()
   await page.setViewportSize({ width: 1280, height: 1100 })
   await page.goto('/app/scaffold/base')
 
-  /* 分组标题走四语语言包，默认语言是中文；组件名保留英文作为 API 名称（本地化文档的惯例） */
+  /* 分组标题走四语语言包，默认语言是中文；组件名保留英文作为 API 名称（本地化文档的惯例）。
+     主题与语言、分段控件分作两组：前者是平台机制的两个件，后者是基础件里的互斥选择。 */
   await expect(page.locator('.base-group__title')).toHaveText([
     '输入 Input',
     '图形验证码 CaptchaField',
@@ -51,6 +52,7 @@ test('lists the seven groups and their states', async ({ page }) => {
     '选择器 Select',
     '图标与品牌 Icon & BrandMark',
     '主题与语言 Theme & Locale',
+    '分段控件 SegmentedControl',
   ])
   /* 子组标题同样随语言走，证明页面文案确实接进了语言包 */
   await expect(page.locator('.base-subgroup__title').first()).toHaveText('属性')
@@ -1386,5 +1388,59 @@ test('keeps every base component on the current type ladder', async ({ page }) =
   /* 控件高按 4 基数列；多行标签与整组高度按内容长高，同样落在 4 的倍数上 */
   for (const height of audit.heights) expect(height % 4).toBe(0)
   for (const size of audit.iconSizes) expect(ICON_LADDER).toContain(size)
+})
+
+test('switches the theme from the inverted icon button and the language from the toolbar select', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1100 })
+  await page.goto('/app/scaffold/base')
+
+  const theme = () => page.evaluate(() => document.documentElement.dataset.theme ?? '(none)')
+  /* 主题按钮在清单页有三处：真身在最前，后面是两档固定主题的静态样例，这里只要真身 */
+  const toggle = page.locator('.theme-toggle').first()
+  const toggleIcon = () => toggle.locator('use').getAttribute('href')
+
+  /* 图标表达的是**点击之后**会变成什么，与当前主题相反：浅色下是月亮，深色下是太阳。
+     可访问名同样是动作，读屏听到的是按下去会发生什么。 */
+  const first = await theme()
+  await expect(toggle).toHaveAttribute('aria-label', first === 'dark' ? '切换到浅色' : '切换到深色')
+  expect(await toggleIcon()).toBe(first === 'dark' ? '#i-sun' : '#i-moon')
+
+  /* 方形图标按钮：三档都是正方形，中档 32；图标按自己的尺寸档走 16 */
+  const toggleBox = (await toggle.boundingBox())!
+  expect(Math.round(toggleBox.width)).toBe(32)
+  expect(Math.round(toggleBox.height)).toBe(32)
+  expect(await toggle.locator('svg.icon').getAttribute('width')).toBe('16')
+
+  await toggle.click()
+  await expect.poll(theme).not.toBe(first)
+  expect(await toggleIcon()).toBe(first === 'dark' ? '#i-moon' : '#i-sun')
+
+  /* 点回去：后面的用例不该继承这一条留下的主题 */
+  await toggle.click()
+  await expect.poll(theme).toBe(first)
+
+  /* 语言下拉是工具条形态：纯文字档，地球图标在值之后、且落在触发器之内，关掉下拉指示器。
+     清单页有两处语言下拉：真身（纯文字档）在最前，末尾还有一档字段形态的静态样例。 */
+  const trigger = page.locator('.select-trigger.locale-switch').first()
+  await expect(trigger).toHaveClass(/select-trigger--plain/)
+  const [triggerBox, iconBox] = await Promise.all([
+    trigger.boundingBox(),
+    trigger.locator('.select__lead').boundingBox(),
+  ])
+  expect(iconBox).not.toBeNull()
+  expect(iconBox!.x + iconBox!.width).toBeLessThanOrEqual(triggerBox!.x + triggerBox!.width + 1)
+  expect(iconBox!.x).toBeGreaterThan(triggerBox!.x + triggerBox!.width / 2)
+  expect(await trigger.locator('use').getAttribute('href')).toBe('#i-globe')
+  await expect(trigger.locator('.select-icon')).toHaveCount(0)
+
+  /* 换语言：不刷新页面，文案立即变；切回来时用各语言自己的写法找选项 */
+  await trigger.click()
+  await page.getByRole('option', { name: '日本語' }).click()
+  await expect(page.locator('.base-group__title').first()).toHaveText('入力 Input')
+
+  await trigger.click()
+  /* exact 必须给：`中文` 是 `繁體中文` 的子串，按子串匹配会命中两个选项 */
+  await page.getByRole('option', { name: '中文', exact: true }).click()
+  await expect(page.locator('.base-group__title').first()).toHaveText('输入 Input')
 })
 

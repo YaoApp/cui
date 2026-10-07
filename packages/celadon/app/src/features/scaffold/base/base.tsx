@@ -937,13 +937,40 @@ export function BasePage() {
         <h2 className="base-group__title">{t('base.group.theme')}</h2>
 
         <h3 className="base-subgroup__title">{t('base.sub.controls')}</h3>
+        {/* 两个件的真身，点击真的切换：语言下拉切换四语文案，主题按钮在浅色下显示月亮（点击变深色）、
+            深色下显示太阳，图标说的是点击之后会变成什么。 */}
         <div className="base-row">
-          <ThemeToggle theme={activeTheme} onSelect={selectActiveTheme} />
           <LocaleSwitch />
+          <ThemeToggle theme={activeTheme} onSelect={selectActiveTheme} />
         </div>
 
+        {/* 两档主题的静态样例：不必把整站切成深色，就能核对图标是反的 */}
+        <div className="base-row">
+          <span className="base-demo">
+            <span className="base-demo__name">light</span>
+            <ThemeToggle theme="light" onSelect={() => {}} />
+          </span>
+          <span className="base-demo">
+            <span className="base-demo__name">dark</span>
+            <ThemeToggle theme="dark" onSelect={() => {}} />
+          </span>
+        </div>
+
+        {/* 语言下拉的字段档：需要边框的位置（侧栏、设置页）用这一档 */}
+        <div className="base-row">
+          <span className="base-demo">
+            <span className="base-demo__name">field</span>
+            <LocaleSwitch variant="field" />
+          </span>
+        </div>
+      </section>
+
+      <section className="base-group">
+        <h2 className="base-group__title">{t('base.group.segmented')}</h2>
+
+        <h3 className="base-subgroup__title">{t('base.sub.variants')}</h3>
         {/* 分段控件：默认档与反色档、带图标、整组禁用，以及静态的悬停与聚焦态。
-            段文案是示例数据（不属于页面文案），主题切换件的真实文案在各功能自己的语言包里。 */}
+            段文案是示例数据（不属于页面文案），组件自己的文案走各调用方的语言包。 */}
         <div className="base-row">
           <SegmentedControl
             aria-label="segmented default"
@@ -974,6 +1001,8 @@ export function BasePage() {
             disabled
           />
         </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
         <div className="base-row">
           <SegmentedControl
             aria-label="segmented hover"

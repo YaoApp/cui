@@ -29,9 +29,12 @@ describe('OverviewPage · theme', () => {
     renderPage()
     expect(document.documentElement.dataset.theme).toBe('light')
 
-    await userEvent.click(screen.getByRole('button', { name: '暗色' }))
+    /* 图标按钮的可访问名说的是动作：浅色下是「切换到深色」 */
+    await userEvent.click(screen.getByRole('button', { name: '切换到深色' }))
 
     expect(document.documentElement.dataset.theme).toBe('dark')
-    expect(screen.getByRole('button', { name: '暗色' })).toHaveClass('is-on')
+    /* 换到深色之后，可访问名跟着反转成「切换到浅色」 */
+    expect(screen.getByRole('button', { name: '切换到浅色' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '切换到深色' })).not.toBeInTheDocument()
   })
 })

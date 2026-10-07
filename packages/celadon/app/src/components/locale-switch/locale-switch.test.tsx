@@ -33,6 +33,26 @@ describe('LocaleSwitch', () => {
     expect(screen.getByRole('combobox', { name: '语言' })).toHaveTextContent('跟随系统（中文）')
   })
 
+  it('wears the toolbar form: plain trigger, globe at the end, no dropdown indicator', () => {
+    render(<LocaleSwitch />)
+    const trigger = screen.getByRole('combobox', { name: '语言' })
+    expect(trigger).toHaveClass('select-trigger--plain')
+
+    /* 值在前、图标在后：触发器里最后一个孩子是图标槽，且不画下拉指示器（图标自己承担提示） */
+    const lead = trigger.querySelector('.select__lead')
+    expect(lead).toBeInTheDocument()
+    expect(lead?.querySelector('use')?.getAttribute('href')).toBe('#i-globe')
+    expect(trigger.lastElementChild).toBe(lead)
+    expect(trigger.querySelector('.select-icon')).not.toBeInTheDocument()
+  })
+
+  it('switches to the field form on request', () => {
+    render(<LocaleSwitch variant="field" size="large" />)
+    const trigger = screen.getByRole('combobox', { name: '语言' })
+    expect(trigger).not.toHaveClass('select-trigger--plain')
+    expect(trigger).toHaveClass('select-trigger--large')
+  })
+
   it.each([
     ['Traditional Chinese', '繁體中文', '重新整理'],
     ['English', 'English', 'Refresh'],

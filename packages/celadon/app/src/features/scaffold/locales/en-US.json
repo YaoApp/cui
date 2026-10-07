@@ -6,6 +6,7 @@
   "base.group.button": "Button",
   "base.group.select": "Select",
   "base.group.icon": "Icon & BrandMark",
+  "base.group.segmented": "Segmented control",
   "base.group.theme": "Theme & Locale",
   "base.sub.props": "props",
   "base.sub.messages": "messages",

@@ -6,7 +6,8 @@ test('the two switches sit on the first row, left aligned', async ({ page }) => 
   await page.goto('/app/')
 
   const locale = page.getByRole('combobox')
-  const theme = page.getByRole('button', { name: '浅色' })
+  /* 主题按钮的可访问名随当前档变化（说的是动作），这里只量位置，按类名定位 */
+  const theme = page.locator('.theme-toggle')
   const version = page.getByRole('heading', { name: '版本信息' })
   await expect(locale).toBeVisible()
   await expect(theme).toBeVisible()

@@ -18,6 +18,7 @@ export type I18nKey =
   | 'base.group.checkbox'
   | 'base.group.icon'
   | 'base.group.input'
+  | 'base.group.segmented'
   | 'base.group.select'
   | 'base.group.theme'
   | 'base.message.error'
@@ -253,9 +254,8 @@ export type I18nKey =
   | 'routing.share'
   | 'routing.title'
   | 'surface.main'
-  | 'themeToggle.label'
-  | 'themeToggle.toDark'
-  | 'themeToggle.toLight'
+  | 'themeToggle.switchToDark'
+  | 'themeToggle.switchToLight'
 
 /* 语言包是**平铺 + 点号分组**（`nav.hello`），运行时 keySeparator:false，类型也必须一致，
    否则 `t('nav.hello')` 会被当成嵌套查找。resources 只列 key 不列值：值随语言变，key 不随。 */
@@ -279,6 +279,7 @@ declare module 'i18next' {
         'base.group.checkbox': string
         'base.group.icon': string
         'base.group.input': string
+        'base.group.segmented': string
         'base.group.select': string
         'base.group.theme': string
         'base.message.error': string
@@ -514,9 +515,8 @@ declare module 'i18next' {
         'routing.share': string
         'routing.title': string
         'surface.main': string
-        'themeToggle.label': string
-        'themeToggle.toDark': string
-        'themeToggle.toLight': string
+        'themeToggle.switchToDark': string
+        'themeToggle.switchToLight': string
       }
     }
   }

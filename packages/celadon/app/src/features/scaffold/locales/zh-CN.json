@@ -6,6 +6,7 @@
   "base.group.button": "按钮 Button",
   "base.group.select": "选择器 Select",
   "base.group.icon": "图标与品牌 Icon & BrandMark",
+  "base.group.segmented": "分段控件 SegmentedControl",
   "base.group.theme": "主题与语言 Theme & Locale",
   "base.sub.props": "属性",
   "base.sub.messages": "消息",
