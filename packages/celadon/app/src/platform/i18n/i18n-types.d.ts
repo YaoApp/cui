@@ -5,6 +5,49 @@ import 'i18next'
 
 /** 基准语言里存在的全部 key —— `t('…')` 只接受这些。 */
 export type I18nKey =
+  | 'auth.action.backToServers'
+  | 'auth.action.change'
+  | 'auth.action.continue'
+  | 'auth.action.hidePassword'
+  | 'auth.action.login'
+  | 'auth.action.redeem'
+  | 'auth.action.register'
+  | 'auth.action.resend'
+  | 'auth.action.resendIn'
+  | 'auth.action.retry'
+  | 'auth.action.showPassword'
+  | 'auth.error.accountInvalid'
+  | 'auth.error.codeRequired'
+  | 'auth.error.idToken'
+  | 'auth.error.passwordMismatch'
+  | 'auth.error.passwordRequired'
+  | 'auth.error.session'
+  | 'auth.error.termsRequired'
+  | 'auth.field.account'
+  | 'auth.field.code'
+  | 'auth.field.codeCell'
+  | 'auth.field.confirmPassword'
+  | 'auth.field.invite'
+  | 'auth.field.password'
+  | 'auth.footnote.link'
+  | 'auth.footnote.prefix'
+  | 'auth.forgotPassword'
+  | 'auth.login.loading'
+  | 'auth.login.titleLine1'
+  | 'auth.login.titleLine2'
+  | 'auth.notice.mfa'
+  | 'auth.notice.registered'
+  | 'auth.notice.team'
+  | 'auth.or'
+  | 'auth.provider.continueWith'
+  | 'auth.remember'
+  | 'auth.server.current'
+  | 'auth.switch.toLogin'
+  | 'auth.switch.toRegister'
+  | 'auth.terms.and'
+  | 'auth.terms.prefix'
+  | 'auth.terms.privacy'
+  | 'auth.terms.service'
   | 'base.action.block'
   | 'base.captcha.id'
   | 'base.captcha.image'
@@ -272,6 +315,49 @@ declare module 'i18next' {
     nsSeparator: false
     resources: {
       translation: {
+        'auth.action.backToServers': string
+        'auth.action.change': string
+        'auth.action.continue': string
+        'auth.action.hidePassword': string
+        'auth.action.login': string
+        'auth.action.redeem': string
+        'auth.action.register': string
+        'auth.action.resend': string
+        'auth.action.resendIn': string
+        'auth.action.retry': string
+        'auth.action.showPassword': string
+        'auth.error.accountInvalid': string
+        'auth.error.codeRequired': string
+        'auth.error.idToken': string
+        'auth.error.passwordMismatch': string
+        'auth.error.passwordRequired': string
+        'auth.error.session': string
+        'auth.error.termsRequired': string
+        'auth.field.account': string
+        'auth.field.code': string
+        'auth.field.codeCell': string
+        'auth.field.confirmPassword': string
+        'auth.field.invite': string
+        'auth.field.password': string
+        'auth.footnote.link': string
+        'auth.footnote.prefix': string
+        'auth.forgotPassword': string
+        'auth.login.loading': string
+        'auth.login.titleLine1': string
+        'auth.login.titleLine2': string
+        'auth.notice.mfa': string
+        'auth.notice.registered': string
+        'auth.notice.team': string
+        'auth.or': string
+        'auth.provider.continueWith': string
+        'auth.remember': string
+        'auth.server.current': string
+        'auth.switch.toLogin': string
+        'auth.switch.toRegister': string
+        'auth.terms.and': string
+        'auth.terms.prefix': string
+        'auth.terms.privacy': string
+        'auth.terms.service': string
         'base.action.block': string
         'base.captcha.id': string
         'base.captcha.image': string

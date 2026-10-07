@@ -1,0 +1,79 @@
+/* 登录页卡片内部，间距与 design/prototype/login.html 一致：
+   第三方列表与分隔线之间由页面给 24、字段之间 16、协议与主按钮之间 16。
+   组件自己不留外边距，字段与邻居的距离由这一层给（layout.md 规则 3）。 */
+.login__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login__loading {
+  margin: 0;
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-cjk);
+  color: var(--text-secondary);
+}
+
+/* 分隔线：文字取三级文字色，两侧各一条 1px 细线；11 档只给拉丁，中日文按最小字号 */
+.login__or {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  margin: 0 0 var(--spacing-24);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+  letter-spacing: var(--letter-spacing-latin);
+}
+
+.login__or::before,
+.login__or::after {
+  content: '';
+  flex: 1;
+  block-size: var(--border-width);
+  background: var(--border-subtle);
+}
+
+.login__account {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-8);
+  margin-block-end: var(--spacing-16);
+}
+
+.login__account > :first-child {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.login__code {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  margin-block-end: var(--spacing-16);
+}
+
+.login__form .field,
+.login__form .captcha-field {
+  margin-block-end: var(--spacing-16);
+}
+
+/* 第三方列表与分隔线之间一个半档 */
+.login__form .provider-list {
+  margin-block-end: var(--spacing-24);
+}
+
+/* 协议行与主按钮是**一组**：组内用一个档的下间距（8），组外用两个档的上间距
+   （字段自己的 16 加这里的 8，合计 24）。间距的层次因此读得出：字段与协议行分属两组。 */
+.login__form .terms-note {
+  margin-block: var(--spacing-8) var(--spacing-8);
+}
+
+.login__link {
+  color: var(--brand-ink);
+}
+
+.auth:lang(zh-CN) .login__or,
+.auth:lang(zh-TW) .login__or,
+.auth:lang(ja) .login__or {
+  font-size: var(--font-size-minimum-cjk);
+}

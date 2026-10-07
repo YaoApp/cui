@@ -49,6 +49,7 @@
 | `name` | `string` | 无 | 输入框的表单名。 |
 | `autoComplete` | `string` | `'off'` | 输入框的 `autocomplete`；验证码不重复使用，默认关闭。 |
 | `size` | `'small' \| 'medium' \| 'large'` | 无 | 传给字段的尺寸档：字段高 24 / 32 / 40，尾部槽宽 72 / 96 / 120。 |
+| `strong` | `boolean` | `false` | 透传给输入框：控件边界取达标档 `--border-control-strong`，入口类页面用这一档。 |
 | `className` | `string` | 无 | 追加到 `.captcha-field` 上的类。 |
 | `refreshLabel` | `string` | 无 | 控件的可访问名，也是取图失败时控件上的文字。四语由调用方给。 |
 | `imageAlt` | `string` | 无 | 图片的替代文字。四语由调用方给；给空串时图片按装饰处理。 |

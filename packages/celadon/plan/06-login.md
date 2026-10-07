@@ -115,7 +115,7 @@ Feature 是域，位于 `features/` 下，自带 `locales/` 与 `tests/`。本�
 ### 3.3 Component 清单
 
 组件分两处落位，判据来自 [`architecture/03-boundaries.md`](../architecture/03-boundaries.md) §3。
-**基础组件**进 `components/base/`，包装 `@base-ui/react`，只有视觉与行为；**页面内部件**留在 `features/auth/parts/`，
+**基础组件**进 `components/base/`，包装 `@base-ui/react`，只有视觉与行为；**页面内部件**留在 `features/auth/components/`，
 由基础组件拼成，可以感知本页的流程。两者都遵循一个组件一个目录、样式与组件同名。
 
 基础件已经交付，页面直接用现成参数，不必再新增；组件名与上游一致，上游没有对应部件的按上游的命名形状补 `-field` 结尾的名字。
@@ -129,7 +129,7 @@ Feature 是域，位于 `features/` 下，自带 `locales/` 与 `tests/`。本�
 
 **密码不另立基础件**。上游只有 `input`，密码就是 `type="password"` 的文本输入，因此沿用同一个基础件。
 密码框右侧的可见性切换是组合出来的东西，不放进 `base/`：登录与注册共用它在
-`features/auth/parts/` 下放一个 `PasswordInput`，等出现第二个域的使用者再考虑上提为共享组件。
+`features/auth/components/` 下放一个 `PasswordInput`，等出现第二个域的使用者再考虑上提为共享组件。
 
 字段的标签、说明与错误不另立组件，直接用上游 `field` 的部件：`Field.Root` 包住一个字段，
 `Field.Label` 出标签，控件本体用上游 `input` 的部件，`Field.Error` 出字段级错误，`Field.Description` 出说明。
@@ -147,14 +147,17 @@ Feature 是域，位于 `features/` 下，自带 `locales/` 与 `tests/`。本�
 | `icon` | 无 | 界面图标 81 个，含登录要用的邮件、锁、眼睛、隐藏眼睛、礼盒、地球、太阳与月亮；取值链路为 `scripts/vendor-lucide.mjs` 加 `build-icons.mjs` |
 | `brand-mark` | 无 | 单元用例 5 条，尺寸档与无障碍属性齐 |
 
-页面内部件留在 `features/auth/parts/`，它们感知登录流程，因此不做成基础组件。四个件随页面一并实现。
+页面内部件留在 `features/auth/components/`，它们感知登录流程，因此不做成基础组件。四个件随页面一并实现。
 
 | 组件 | 目录 | 参数 | 说明 |
 | --- | --- | --- | --- |
-| `PasswordInput` | `features/auth/parts/password-input/` | `id`、`label`、`value`、`onChange`、`error`、`autoComplete`、`disabled` | 文本输入加可见性切换，登录与注册共用 |
-| `ProviderList` | `features/auth/parts/provider-list/` | `providers`、`onPick`、`pending` | 第三方登录入口，跳转 `oauthAuthorize` 返回的地址 |
-| `ClientHint` | `features/auth/parts/client-hint/` | `serverName`、`onOpen` | 客户端模式下提示回到浏览器或改用设备码 |
-| `StatusNotice` | `features/auth/parts/status-notice/` | `code`、`onRetry` | 展示 `entryConfig` 与各接口返回的状态，文案按错误码取 |
+| `PasswordInput` | `features/auth/components/password-input/` | `id`、`label`、`value`、`onValueChange`、`error`、`autoComplete`、`disabled` | 文本输入加可见性切换，登录与注册共用 |
+| `ProviderList` | `features/auth/components/provider-list/` | `providers`、`onPick`、`pending` | 第三方登录入口，跳转 `oauthAuthorize` 返回的地址 |
+| `ClientHint` | `features/auth/components/client-hint/` | `mode`、`onOpenInBrowser`、`onUseDeviceCode` | 客户端内提示回到浏览器或改用设备码 |
+| `StatusNotice` | `features/auth/components/status-notice/` | `code`、`onRetry` | 展示 `entryConfig` 与各接口返回的状态，文案按错误码取 |
+
+三个页面的外壳、域状态、目录结构、页面内部件清单与客户端内模式的完整清单见
+[`06-login-features.md`](06-login-features.md)。
 
 ### 3.4 主题与语言切换的规格
 

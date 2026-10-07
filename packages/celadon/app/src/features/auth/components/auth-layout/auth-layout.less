@@ -1,0 +1,175 @@
+/* 入口页外壳，逐条对应 design/prototype/login.html 的 .page / .top / .stage / .card / .bottom。
+   页面底色用 --background-app（内容底在卡片上），卡片用 --background-content 加细边框与浅阴影。
+   控件行高统一走 --row-height（40），与原型一致。 */
+.auth {
+  display: flex;
+  flex-direction: column;
+  /* 铺满：壳是弹性列（platform/shell.less），入口页要 flex:1 才真的占满 */
+  flex: 1;
+  min-block-size: 100%;
+  padding: var(--spacing-16) var(--spacing-24);
+  background: var(--background-app);
+  /* 与设计稿的 body 同一套基础文字：正文档字号 + 中日韩行高 */
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-cjk);
+}
+
+/* 顶行：左品牌、右语言与主题 */
+.auth__top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+}
+
+.auth__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+/* 产品名：品牌渐变文字，浅暗同版，与标记自身的渐变一致 */
+.auth__brand-name {
+  font-size: var(--font-size-20);
+  font-weight: var(--font-weight-strong);
+  line-height: var(--line-height-cjk);
+  letter-spacing: var(--letter-spacing-latin);
+  background: linear-gradient(105deg, var(--brand-mark-from) 0%, var(--brand-mark-to) 100%);
+  background-clip: text;
+  color: transparent;
+}
+
+.auth__ctrl {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+.auth__ctrl-sep {
+  inline-size: var(--border-width);
+  block-size: var(--spacing-16);
+  background: var(--border-default);
+}
+
+/* 卡片在剩余空间里居中 */
+.auth__stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  padding-block: var(--spacing-32);
+}
+
+/* 设计稿在全局做了 border-box（`* { box-sizing: border-box }`），产品侧只在这一页补上，
+   否则 480 的宽度会被内边距撑成 530。作用域限制在入口页，不动其他页面。 */
+.auth,
+.auth *,
+.auth *::before,
+.auth *::after {
+  box-sizing: border-box;
+}
+
+.auth__card {
+  position: relative;
+  inline-size: min(100%, var(--auth-card-width));
+  padding: var(--spacing-32) var(--spacing-24);
+  background: var(--background-content);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-subtle);
+}
+
+.auth__title {
+  margin: 0 0 var(--spacing-32);
+  font-size: var(--font-size-28);
+  font-weight: var(--font-weight-strong);
+  line-height: var(--line-height-normal);
+}
+
+.auth__title-line {
+  display: block;
+}
+
+/* 某些语言标题不换行：空行收起（与设计稿同一条规则） */
+.auth__title-line:empty {
+  display: none;
+}
+
+.auth__footnote {
+  margin: var(--spacing-16) 0 0;
+  text-align: center;
+  font-size: var(--font-size-13);
+  color: var(--text-secondary);
+}
+
+.auth__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-8);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-11);
+}
+
+.auth__bottom-link {
+  color: var(--text-tertiary);
+}
+
+/* ---- 客户端内：收起品牌与页脚，返回栏与卡片同宽同区，控件移到卡片下方居中 ---- */
+/* 客户端内：不显示品牌；返回栏与卡片同区，控件在卡片下方，整组仍在剩余空间里居中（与设计稿一致） */
+.auth--in-app .auth__brand {
+  display: none;
+}
+
+.auth__stack {
+  display: grid;
+  gap: var(--spacing-12);
+  inline-size: min(100%, var(--auth-card-width));
+}
+
+.auth__client-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-8);
+}
+
+.auth__server {
+  display: inline-flex;
+  align-items: center;
+  margin-inline: auto var(--spacing-12);
+  min-inline-size: 0;
+  font-size: var(--font-size-13);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.auth__server-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--font-weight-medium);
+}
+
+.auth__ctrl-wrap {
+  position: relative;
+  margin-block-start: var(--spacing-24);
+}
+
+.auth--in-app .auth__ctrl {
+  justify-content: center;
+}
+
+/* 简繁日的最小字号：中文最小 12，11 档只给拉丁与数字 */
+.auth:lang(zh-CN) .auth__bottom,
+.auth:lang(zh-TW) .auth__bottom,
+.auth:lang(ja) .auth__bottom,
+.auth:lang(zh-CN) .auth__footnote,
+.auth:lang(zh-TW) .auth__footnote,
+.auth:lang(ja) .auth__footnote,
+.auth:lang(zh-CN) .auth__server,
+.auth:lang(zh-TW) .auth__server,
+.auth:lang(ja) .auth__server {
+  font-size: var(--font-size-minimum-cjk);
+}

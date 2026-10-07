@@ -23,6 +23,8 @@ export type CaptchaFieldProps = {
   name?: string
   autoComplete?: string
   size?: 'small' | 'medium' | 'large'
+  /** 达标边界：控件边界取 `--border-control-strong`，入口类页面统一用这一档。 */
+  strong?: boolean
   className?: string
   /** 刷新控件的可访问名，也是取图失败时控件上的文字。四语由调用方给。 */
   refreshLabel?: string
@@ -51,6 +53,7 @@ export function CaptchaField({
   name,
   autoComplete = 'off',
   size,
+  strong,
   className,
   refreshLabel,
   imageAlt,
@@ -89,6 +92,7 @@ export function CaptchaField({
         name={name}
         autoComplete={autoComplete}
         size={size}
+        strong={strong}
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
         state={state.status === 'loading' ? 'loading' : undefined}

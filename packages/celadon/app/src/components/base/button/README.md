@@ -102,6 +102,11 @@ own layout uses the spacing scale, the radius tokens, `--line-height-control`, `
 `--font-size-body` / `--font-size-body-lg`, and the motion tokens `--duration-fast` and `--easing-standard`.
 Pressing a button is the `press` scene of the motion rules and only scales the element.
 
+The font family is not chosen here. The browser's default stylesheet gives a native `<button>` a `font`
+shorthand, so the family set on the design scope never reaches inside the button. The button root therefore
+declares `font-family: inherit` to take the family from the scope. Without it, switching the language leaves
+button text in the browser default family, and the primary action is the first place where that shows.
+
 ## Usage
 
 ```tsx

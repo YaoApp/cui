@@ -93,6 +93,10 @@ Base UI 的 Button 渲染原生 `<button type="button">`，并用 `data-*` 暴�
 `--line-height-control`、`--font-size-caption` / `--font-size-body` / `--font-size-body-lg`，以及动效 token
 `--duration-fast` 与 `--easing-standard`。按下照动效规范的 `press` 场景，只做缩放。
 
+字族不由组件指定：浏览器默认样式表给原生 `<button>` 落了 `font` 简写，作用域上的字族到不了按钮内部，
+所以按钮根上写 `font-family: inherit` 把作用域的字族接过来。没有这一条，切换语言后按钮里的字会掉回
+浏览器默认族，而按钮文字（例如「下一步」）正是最先被看出来的地方。
+
 ## 使用方式
 
 ```tsx

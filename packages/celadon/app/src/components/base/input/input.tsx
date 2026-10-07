@@ -27,6 +27,9 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
       错误文案变化也算一次新的判定。动作由设计类 `.is-shake` 完成，
       组件只负责在动画结束后摘掉这个类，好让下一次能重新跑。 */
   shake?: boolean | number
+  /** 达标边界：控件边界取 `--border-control-strong`（浅暗两套都过 WCAG 1.4.11 的 3:1），
+      默认档更浅。入口类页面（登录、注册、服务器选择）用这一档，避免边界弱到看不出控件范围。 */
+  strong?: boolean
 }
 
 /* 行为与无障碍（受控值 · 键盘 · 禁用 · 表单联动）交给 Base UI 的 Field 与 Input；
@@ -44,6 +47,7 @@ export function Input({
   disabled,
   state,
   shake,
+  strong,
   ...rest
 }: InputProps) {
   const hintId = hint ? `${id}-hint` : undefined
@@ -90,6 +94,7 @@ export function Input({
             'input',
             size === 'small' ? 'input--small' : null,
             size === 'large' ? 'input--large' : null,
+            strong ? 'is-strong' : null,
             error ? 'is-error' : null,
             state ? `is-${state}` : null,
             shake && shakeOn ? 'is-shake' : null,

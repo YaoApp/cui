@@ -32,8 +32,9 @@ const symbolsById = { ...readSymbols('icons/lucide-sprite.svg'), ...readSymbols(
 
 /* **第三方品牌**（"别人家的"）——设计里它们分片放在 icons/brand-sprite-N.svg，靠外部 `<use>` 引用。
    应用不引外部文件（跨文件 `<use>` 有 Safari 与 CSP 的坑），所以这里挑一批直接并进应用雪碧图。
-   只挑一批：全部 339 个约 1.1 MB，装进演示包没有意义。 */
+   只挑一批：全部 339 个约 1.1 MB，装进演示包没有意义。入口页的登录方式用得到前三个。 */
 const THIRD_PARTY = [
+  'brand-google', 'brand-github', 'brand-apple',
   'brand-claude', 'brand-openai', 'brand-gemini', 'brand-grok', 'brand-deepseek', 'brand-qwen',
   'brand-kimi', 'brand-doubao', 'brand-mistral', 'brand-midjourney', 'brand-perplexity', 'brand-cursor',
 ];

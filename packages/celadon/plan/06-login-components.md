@@ -17,8 +17,8 @@
 
 | # | 组件 | 上游对应 | 目录 | 参数 | 状态 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `input` | `input` | `components/base/input/` | `id`、`label`、`type`、`value`、`onChange`、`error`、`hint`、`icon`、`trailing`、`autoComplete`、`disabled`、`size`（`small` · `medium` · `large`）、`state`、`shake` | **已完成**（2026-10-06，单元用例 8 条；七个状态与错误抖动在清单页有浏览器断言；尺寸档与按钮、选择器、复选框同梯，整高小 24 · 中 32 · 大 40，行高 20 · 24 · 24，中档就是基础档，清单页 sizes 组列出三档） |
-| 2 | `captcha-field` | 无，基于 `input` | `components/base/captcha-field/` | `value`、`onValueChange`、`onCaptchaIdChange`、`label`、`placeholder`、`hint`、`error`、`disabled`、`required`、`name`、`size`、`refreshLabel`、`imageAlt` | **已完成**（2026-10-06）：取图直接走接口声明 `entryCaptcha`（`GET /user/entry/captcha`，经 `useRequest` 发），组件不拼地址也不带身份；图像与 `captcha_id` 由组件持有，每次取回把新的 `captcha_id` 交给调用方，提交时由调用方放进 `captcha_id`。三种过程都在右侧同一个控件里表达：取图中给指示器 · 取回给图片 · 取图失败给可点的文字（`refreshLabel`）。图片铺满槽宽、高按图片自身比例，尾部槽位按档定宽（三档 72 · 96 · 120，输入框预留同式加一个间距档），换图不改字段几何 |
+| 1 | `input` | `input` | `components/base/input/` | `id`、`label`、`type`、`value`、`onChange`、`error`、`hint`、`icon`、`trailing`、`autoComplete`、`disabled`、`size`（`small` · `medium` · `large`）、`state`、`shake`、`strong` | **已完成**（2026-10-06，单元用例 8 条；七个状态与错误抖动在清单页有浏览器断言；尺寸档与按钮、选择器、复选框同梯，整高小 24 · 中 32 · 大 40，行高 20 · 24 · 24，中档就是基础档，清单页 sizes 组列出三档；`strong` 取达标边界 `--border-control-strong`，入口类页面用它，实测浅色 3.45:1 · 暗色 3.74:1） |
+| 2 | `captcha-field` | 无，基于 `input` | `components/base/captcha-field/` | `value`、`onValueChange`、`onCaptchaIdChange`、`label`、`placeholder`、`hint`、`error`、`disabled`、`required`、`name`、`size`、`strong`、`refreshLabel`、`imageAlt` | **已完成**（2026-10-06）：取图直接走接口声明 `entryCaptcha`（`GET /user/entry/captcha`，经 `useRequest` 发），组件不拼地址也不带身份；图像与 `captcha_id` 由组件持有，每次取回把新的 `captcha_id` 交给调用方，提交时由调用方放进 `captcha_id`。三种过程都在右侧同一个控件里表达：取图中给指示器 · 取回给图片 · 取图失败给可点的文字（`refreshLabel`）。图片铺满槽宽、高按图片自身比例，尾部槽位按档定宽（三档 72 · 96 · 120，输入框预留同式加一个间距档），换图不改字段几何；`strong` 透传给字段，供入口类页面取达标边界 |
 | 3 | `otp-field` | `otp-field` | `components/base/otp-field/` | `id`、`value`、`onValueChange`、`onComplete`、`label`、`hint`、`error`、`disabled`、`readOnly`、`required`、`name`、`length`（默认 6）、`size`、`className`、`autoComplete`（默认 `one-time-code`）、`cellLabel`、`state` | **已完成**（2026-10-07，单元用例 15 条）：一位一个正方形格子，**格子边长等于该档控件高度**，逐档实测 small 24 × 24 · medium 32 × 32 · large 40 × 40，同档输入框高 24 · 32 · 40、字号 12 · 14 · 16 与行高 20 · 24 · 24 完全一致；值是**从左往右连续**的数字，格子只是视图（不会留空洞），点右侧空格子把光标拉回第一格空位；只收数字（敲字母被忽略、原样放回，不再误当清空），退格/删除清本格及其右侧，方向键与 Home/End 移动，整段粘贴从当前格铺开并按位过滤，一次收到多位（自动填充）按粘贴处理；填满最后一格时 `onComplete` 触发一次；`name` 给隐藏输入，原生表单拿得到整段口令；它是**多控件字段**，自己搭 `.field*` 结构而不套单控件的 `Field`（Field 会把每格 id 覆盖成同一个、并用 `aria-labelledby` 盖掉每格位置名）；清单页按属性、状态、尺寸三组列出，尺寸组每档旁边并排一个同档输入框，浏览器用例逐档比对高度与字号并跑通逐位输入与整段粘贴 |
 | 4 | `checkbox` | `checkbox` | `components/base/checkbox/` | `id`、`label`、`hint`、`error`、`checked`、`defaultChecked`、`onCheckedChange`、`indeterminate`、`disabled`、`readOnly`、`required`、`name`、`value`、`size`（`small` · `medium` · `large`）、`state`、`className` | **已完成**（2026-10-06，单元用例 15 条；**选中与不确定态取反色族** `--background-inverse` 与 `--text-inverse`，不取品牌色，未选中的边界取 `--border-control-strong`，浅暗两套实测均 ≥ 3:1；**尺寸档与按钮、输入框、选择器同梯**：行高 24 · 32 · 40，方框 12 · 16 · 20，标签字号 12 · 14 · 16，实测方框中心与首行中心在浅暗两套下均重合；悬停画在整行的表面上（浅底向四周让出内距，方框自身不动），多行标签与首行对齐；标签带 `{id}-label`，上游写在方框上的 `aria-labelledby` 因此念得出名字；回调用上游的 `onCheckedChange`，禁用与只读按上游表达为 `aria-disabled` 与 `aria-readonly`；清单页按属性、状态、尺寸三组共 22 个样例列出，浏览器用例量浅暗两套的底、边界、标记、方框尺寸与三档行高） |
 | 19 | `spinner` | 无 | `components/base/spinner/` | `className` | **已完成**（2026-10-06；两瓣圆环，头端圆帽、尾端收尖，尺寸 16，一周 `--duration-loop`，减动效停转；输入框与按钮共用） |
@@ -58,13 +58,15 @@
 ### 2.5 页面内部件
 
 四件都随 auth 页面一并实现：它们只服务登录流程，页面是它们的唯一消费者，因此与页面同批写、同批验收。
+外壳（`AuthLayout`）与域状态（`AuthProvider`）两件也属于页面内部件，与这四件同一批做，落位与清单见
+[`06-login-features.md`](06-login-features.md)。
 
 | # | 组件 | 目录 | 说明 | 状态 |
 | --- | --- | --- | --- | --- |
-| 14 | `PasswordInput` | `features/auth/parts/password-input/` | 文本输入加可见性切换，登录与注册共用 | 随 auth 页面一并实现 |
-| 15 | `ProviderList` | `features/auth/parts/provider-list/` | 第三方登录入口，跳转 `oauthAuthorize` 返回的地址 | 随 auth 页面一并实现 |
-| 16 | `ClientHint` | `features/auth/parts/client-hint/` | 客户端模式下提示回到浏览器或改用设备码 | 随 auth 页面一并实现 |
-| 17 | `StatusNotice` | `features/auth/parts/status-notice/` | 页面级状态提示，文案按错误码取 | 随 auth 页面一并实现 |
+| 14 | `PasswordInput` | `features/auth/components/password-input/` | 文本输入加可见性切换，登录与注册共用 | 随 auth 页面一并实现 |
+| 15 | `ProviderList` | `features/auth/components/provider-list/` | 第三方登录入口，跳转 `oauthAuthorize` 返回的地址 | 随 auth 页面一并实现 |
+| 16 | `ClientHint` | `features/auth/components/client-hint/` | 客户端内提示回到浏览器或改用设备码 | 随 auth 页面一并实现 |
+| 17 | `StatusNotice` | `features/auth/components/status-notice/` | 页面级状态提示，文案按错误码取 | 随 auth 页面一并实现 |
 
 ### 2.6 设计体系同步与未决事项（2026-10-06）
 
@@ -120,7 +122,7 @@
 | 基础件 | 四件新增与四件修订完成，每件有单元用例；`pnpm lint`、`pnpm check`、`pnpm test` 全绿；图标由脚本生成且 `check-generated` 通过 |
 | 主题与语言 | 2.3 的三项判据都有对应用例；切换之后主题与文案立即生效，已输入内容不丢失 |
 | 清单页 | 页面按分组列出全部基础件与状态；每组的状态逐个摆出并带静态态样例；浏览器用例逐组断言；人类可以打开 `/scaffold/base` 验收 |
-| 页面内部件 | 四件完成并有单元用例；auth 页面接入之后浏览器用例覆盖关键路径 |
+| 页面内部件 | 六件完成并有单元用例：外壳 `AuthLayout`、域状态 `AuthProvider` 与四件页面内部件；auth 页面接入之后浏览器用例覆盖关键路径 |
 | 交付前 | 门禁全绿、拟人层执行并附截图、隔离 Review 通过 |
 
 ### 3.4 不可接受的证据

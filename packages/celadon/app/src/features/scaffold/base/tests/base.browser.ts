@@ -224,6 +224,53 @@ test('lists the nine groups and their states', async ({ page }) => {
     ),
   )
   expect(inputHeights).toEqual([24, 32, 40])
+
+  /* 左图标槽：三档图标同取 16，**左边距等于图标的上下留白**
+     （4 · 8 · 12，即「档位高度减图标高度」的一半），图标与文字之间留 6，
+     文字起点因此是 27 · 31 · 35（1px 边框 + 左边距 + 图标 + 6）。中档七个状态同值，图标不漂移。 */
+  const iconSlots = await page.evaluate(() => {
+    const ids = [
+      'demo-input-small-icon',
+      'demo-input-medium-icon',
+      'demo-input-large-icon',
+      'demo-state-default-icon',
+      'demo-state-hover-icon',
+      'demo-state-focus-icon',
+      'demo-state-error-icon',
+      'demo-state-disabled-icon',
+      'demo-state-loading-icon',
+      'demo-state-empty-icon',
+    ]
+    const round = (n: number) => Math.round(n * 10) / 10
+    return ids.map((id) => {
+      const input = document.getElementById(id) as HTMLInputElement
+      const box = input.closest('.field__box') as HTMLElement
+      const slot = box.querySelector('.field__icon') as HTMLElement
+      const icon = slot.firstElementChild as Element
+      const bb = box.getBoundingClientRect()
+      const sb = slot.getBoundingClientRect()
+      const ib = icon.getBoundingClientRect()
+      const nb = input.getBoundingClientRect()
+      const cs = getComputedStyle(input)
+      return {
+        size: `${round(ib.width)}×${round(ib.height)}`,
+        start: round(sb.x - bb.x),
+        top: round(ib.y - bb.y),
+        centered: round(ib.y + ib.height / 2 - (bb.y + bb.height / 2)),
+        textStart: round(nb.x + Number.parseFloat(cs.borderLeftWidth) + Number.parseFloat(cs.paddingLeft) - bb.x),
+      }
+    })
+  })
+  expect(iconSlots.slice(0, 3).map((slot) => slot.size)).toEqual(['16×16', '16×16', '16×16'])
+  expect(iconSlots.slice(3).map((slot) => slot.size)).toEqual(Array(7).fill('16×16'))
+  expect(iconSlots.slice(0, 3).map((slot) => [slot.start, slot.top])).toEqual([
+    [4, 4],
+    [8, 8],
+    [12, 12],
+  ])
+  expect(iconSlots.slice(0, 3).map((slot) => slot.textStart)).toEqual([27, 31, 35])
+  expect(new Set(iconSlots.slice(3).map((slot) => `${slot.start}/${slot.top}/${slot.textStart}`)).size).toBe(1)
+  expect(iconSlots.every((slot) => Math.abs(slot.centered) <= 0.5)).toBe(true)
   expect([await selectHeight('select small'), await selectHeight('select medium'), await selectHeight('select large')]).toEqual([24, 32, 40])
   expect(await selectHeight('select medium')).toBe(
     await page.locator('#demo-state-default').evaluate((el) => Math.round(el.getBoundingClientRect().height)),
@@ -248,11 +295,11 @@ test('lists the nine groups and their states', async ({ page }) => {
   expect(await iconGround('icon solid')).not.toBe('rgba(0, 0, 0, 0)')
   expect(await iconGround('icon plain')).toBe('rgba(0, 0, 0, 0)')
   await iconButton('icon plain').hover()
-  await page.waitForTimeout(150)
   const hoverGround = await page.evaluate(() =>
     getComputedStyle(document.querySelector('.celadon') ?? document.documentElement).getPropertyValue('--background-hover').trim(),
   )
-  expect(await iconGround('icon plain')).toBe(hexToRgb(hoverGround))
+  /* 悬停底有过渡：固定等待会偶发读到过渡中的半透明值，改为轮询到过渡结束 */
+  await expect.poll(() => iconGround('icon plain')).toBe(hexToRgb(hoverGround))
   expect(
     await iconButton('icon loading').locator('.button__label').evaluate((el) => getComputedStyle(el).display),
   ).toBe('none')
@@ -487,7 +534,8 @@ test('lists the nine groups and their states', async ({ page }) => {
     }
   })
   expect(searchField.图标在控件内).toBe(true)
-  expect(searchField.控件左内距).toBe(32)
+  /* 筛选框是小档输入框：图标 16、左边距与上下留白同为 4、图标与文字之间 6，控件左内距因此是 16 + 4 + 6 = 26 */
+  expect(searchField.控件左内距).toBe(26)
   expect(searchField.图标尺寸).toBe(16)
   await page.locator('.select-search input').fill('zzz')
   await page.waitForTimeout(200)

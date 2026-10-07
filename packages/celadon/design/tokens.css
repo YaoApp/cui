@@ -337,6 +337,8 @@
   --content-max: 880px;
   --content-max-wide: 1040px;
   /* 中栏内文可读最大宽 */
+  --auth-card-width: 480px;
+  /* 入口页（登录 / 注册 / 服务器选择）的卡片宽度 */
   /* ===== 边框 Border：强边界档（WCAG 1.4.11 达标值）=====
      默认态用 --border-control（观感轻）；高对比偏好下由下方 @media 自动切到强边界。
      达标实测：内容底 3.31 / 字段底 3.14 */
@@ -514,7 +516,10 @@
 /* ===== 语言字体栈与字体落点（全站唯一一处）=====
  * 顺序要紧：下面三条 :lang 规则必须排在文件前半那些具体值**之后**，
  * 否则特异性相同、源序在前的会被覆盖（2026-10-06 实测到语言分栈因此成了死代码）。
- * 字体也只在这里落一次：`.celadon` 是设计体系的作用域，壳与组件都不再重复设 `font-family`。
+ * 字体也只在这里落一次：`.celadon` 是设计体系的作用域，壳不再重复设 `font-family`。
+ * 例外只有原生控件：浏览器默认样式表给 button / input / textarea 落了 `font` 简写，作用域上的字体
+ * 到不了它们内部，所以**组件自己**在控件根上写 `font-family: inherit`（按钮、输入框、选择器触发器、
+ * 口令格都已如此），切语言时控件里的字才跟得上。
  * 带兜底栈是为了任何情况下都不落到浏览器默认的衬线字体。 */
 .celadon:lang(zh-CN),
 .celadon:lang(zh-Hans) {
@@ -909,6 +914,9 @@
 }
 /* ===== 布局与尺寸档（设计类没有的部分）===== */
 .button {
+  /* 按钮是原生 `<button>`：浏览器默认样式表给它落了 `font` 简写，作用域上的字体到不了它内部。
+     组件自己把字族接过来，字体仍只在设计体系作用域里定一次（见 design/tokens.less）。 */
+  font-family: inherit;
   /* 按钮文字**不许折行**：窄窗下「刷新」被折成两行（拟人 S5 的截图抓到过）。 */
   white-space: nowrap;
   display: inline-flex;
@@ -1455,7 +1463,8 @@
   gap: var(--spacing-8);
   inline-size: 100%;
   /* 两侧槽位：按本体的**边框内**居中，而不是按字段框（框含 1px 边框，按框居中会差 1px）。
-     左右内距都取 8，槽位里的按钮另有 4 的内距，因此图标视觉上落在一致的位置。 */
+     左槽距字段左边取上面那个随档位算的留白，槽位是边长等于图标尺寸的方盒，
+     里面的图形一律归一到该尺寸：图标尺寸不再由调用方决定。 */
   /* 既没有提示也没有错误时，消息位整块收掉。它是空元素，但容器的 gap 照样留出 8px
      （实测框高 32、字段高因此 40），收掉之后字段高就等于框高，与「没有消息时不预留下空行」一致。 */
   /* 消息位：只占消息自身的高度，不预留下空行。
@@ -1482,8 +1491,21 @@
   position: relative;
   display: flex;
   align-items: center;
+  /* 图标与**上下留白**取同一个值：留白等于「档位高度减图标高度」的一半，
+       因此它不是一个固定数，小档给固定值会显得图标贴边，大档给固定值会显得离边太远。
+       图标三档同取 16，留白因此是 4 · 8 · 12；图标与文字之间另留 6（一个间距档再加半档）。 */
+  --field-control-height: var(--spacing-32);
+  --field-icon-size: var(--spacing-16);
+  --field-icon-gap: calc((var(--field-control-height) - var(--field-icon-size)) / 2);
+  --field-icon-text-gap: calc(var(--spacing-4) + var(--spacing-4) / 2);
   /* 本体占满字段的弹性行：否则 <input> 用固有宽度，右侧槽位会落到字段框的右边界，
        看起来像跑到输入框外面（浏览器用例断言过槽位必须落在本体之内）。 */
+}
+.field__box:has(.input--small) {
+  --field-control-height: var(--spacing-24);
+}
+.field__box:has(.input--large) {
+  --field-control-height: calc(var(--spacing-32) + var(--spacing-8));
 }
 .field__box > .input {
   flex: 1;
@@ -1500,7 +1522,14 @@
 }
 .field__icon {
   pointer-events: none;
-  inset-inline-start: var(--spacing-8);
+  inset-inline-start: var(--field-icon-gap);
+  inline-size: var(--field-icon-size);
+  justify-content: center;
+  /* 调用方给的图标按方盒归一：SVG 的固有尺寸、`<img>` 的原始宽度都被覆盖 */
+}
+.field__icon > * {
+  inline-size: var(--field-icon-size);
+  block-size: var(--field-icon-size);
 }
 .field__message:empty {
   display: none;
@@ -1788,10 +1817,11 @@
   }
 }
 /* 有图标或槽位时，本体给它们让出行内内距（不让文字压在图标下面）。
+   左边距同样随档位算：图标右边再留 --field-icon-text-gap，三档文字起点因此是 27 · 31 · 35。
    这两条与上面 `.input` 的基础 `padding-inline` 权重相同（主题容器下都是三个类），
    所以必须排在设计类之后，靠源序取胜 —— 否则会被基础内距盖回 8px，图标压在文字上。 */
 .field__box:has(.field__icon) .input {
-  padding-inline-start: var(--spacing-32);
+  padding-inline-start: calc(var(--field-icon-gap) + var(--field-icon-size) + var(--field-icon-text-gap));
 }
 .field__box:has(.field__trail) .input {
   padding-inline-end: var(--spacing-32);

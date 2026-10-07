@@ -1,0 +1,20 @@
+/* 条款勾选这一行：勾选框本体走基础件自己的尺寸档（入口页用中档），
+   只有这段文字取说明档 12 号，行高用控件小档 20（12 乘 1.7 会得到 20.4 的小数行盒，
+   显式给整数行高更稳，也贴近中文的 1.7 倍行距）。 */
+.terms-note__text {
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-control-small);
+}
+
+/* 两个链接是外部地址，用品牌墨色，不用浏览器默认的蓝色 */
+.terms-note__link {
+  color: var(--brand-ink);
+}
+
+/* 勾选行与主按钮同一列：基础件让行与容器都按内容宽（悬停底色因此不横贯整行），
+   这里要的是与按钮一样满宽，因此在本组件里把容器与行都拉满。
+   行这条多一层 `.checkbox` 提高特异性：与基础件的规则同特异性时源序不站在组件这一侧。 */
+.terms-note .checkbox,
+.terms-note .checkbox .checkbox__row {
+  inline-size: 100%;
+}

@@ -49,6 +49,7 @@ omitted because this component's `size` is the size step, which is a different m
 | `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | Control height 24 / 32 / 40, on the same ladder as the button, the select trigger and the checkbox. |
 | `state` | `'hover' \| 'focus' \| 'error' \| 'loading'` | none | Static state class for side-by-side display. Real interaction is still driven by the CSS pseudo-classes. |
 | `shake` | `boolean \| number` | none | One-off error shake. A counter replays it on every change, so the caller does not have to reset a boolean. |
+| `strong` | `boolean` | `false` | Takes the compliant control boundary `--border-control-strong` instead of the lighter default. Entry screens (sign-in, registration, server selection) use it: measured 3.45:1 in the light theme and 3.74:1 in the dark theme, both above the 3:1 the control boundary needs. |
 
 ## States
 
@@ -81,6 +82,16 @@ comes from `min-block-size` with zero block padding, and the line height is the 
 the text box never lands on a fractional position. The radius follows the rule of taking the token with the
 same name as the step. When an icon or a trailing slot is present the control gives that side a
 `--spacing-32` inline padding so the text does not run under the slot.
+
+The position and the size of the leading icon slot belong to the component, not to the caller: the icon is 16 at
+every step (the set is drawn on a 24 grid), the slot is a box whose edge equals the icon, and its distance from
+the left edge of the field box equals the icon's own top and bottom clearance, that is half of "step height minus
+icon height", which gives 4 · 8 · 12; a gap of 6 then separates the icon from the text. Whatever the caller
+passes (an SVG with fixed attributes or an `<img>` with its own width) is normalised to 16. The three steps and
+the seven states measure: icons of 16×16, a left edge and a top clearance of 4, 8 and 12, an icon centre that
+matches the box centre, and text starting at 27, 31 and 35 from the left edge (a 1px border plus the left
+clearance, the icon and the gap of 6). A `size` passed by the caller therefore affects only the icon the caller
+renders, never the slot.
 
 ## Accessibility
 
@@ -139,8 +150,8 @@ association and their equal gap to the box, the loading ring and the unchanged p
 
 - There is no `variant` prop. The plain and inverse field classes exist in `input.less`, but the `Input`
   component does not expose them.
-- There is no prop for the strong boundary class. The compliant `--border-control-strong` value is switched in
-  by the high-contrast media query in `tokens.less`, not by a component attribute.
+- The strong boundary is opt-in through `strong`; the media query in `tokens.less` raises it further when the
+  system asks for more contrast.
 - The message container is always rendered but does not reserve a row. Fields with and without messages are
   grouped separately instead of being aligned by an empty placeholder.
 - `label`, `hint` and `error` are strings. The component does not accept a node.

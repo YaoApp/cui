@@ -1,4 +1,6 @@
-import { Navigate, type RouteObject } from 'react-router'
+import { Navigate, Outlet, type RouteObject } from 'react-router'
+import { AuthProvider } from '@/features/auth/components/auth-provider'
+import { LoginPage } from '@/features/auth/login'
 import { HomePage } from '@/features/home'
 import { BasePage } from '@/features/scaffold/base'
 import { BridgePage } from '@/features/scaffold/bridge'
@@ -21,7 +23,21 @@ const pageRoutes: RouteObject[] = [
   { path: 'scaffold/base', element: <BasePage /> },
 ]
 
+/* 入口页自带外壳与域状态，因此挂在**表面布局之外**：无路径的布局路由只提供 `AuthProvider`，
+   页面的品牌、全局控件与卡片由 `AuthLayout` 画（见 plan/06-login-features-login.md）。 */
+const authRoutes: RouteObject[] = [
+  {
+    element: (
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    ),
+    children: [{ path: 'login', element: <LoginPage /> }],
+  },
+]
+
 export const routes: RouteObject[] = [
+  ...authRoutes,
   { path: '/', element: <SurfaceLayout />, children: pageRoutes },
   { path: '*', element: <Navigate to="/" replace /> },
 ]

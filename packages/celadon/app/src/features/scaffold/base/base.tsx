@@ -345,6 +345,56 @@ export function BasePage() {
             value=""
             onChange={() => {}}
           />
+          {/* 带左图标的形态：一态一个样例，图标在各态下的颜色与位置逐态核对 */}
+          <Input id="demo-state-default-icon" label="default · icon" value="value" onChange={() => {}} icon={<Icon name="i-mail" />} />
+          <Input
+            id="demo-state-hover-icon"
+            label="is-hover · icon"
+            state="hover"
+            value="value"
+            onChange={() => {}}
+            icon={<Icon name="i-mail" />}
+          />
+          <Input
+            id="demo-state-focus-icon"
+            label="is-focus · icon"
+            state="focus"
+            value="value"
+            onChange={() => {}}
+            icon={<Icon name="i-mail" />}
+          />
+          <Input
+            id="demo-state-disabled-icon"
+            label="disabled · icon"
+            value="not editable"
+            onChange={() => {}}
+            disabled
+            icon={<Icon name="i-mail" />}
+          />
+          <Input
+            id="demo-state-error-icon"
+            label="is-error · icon"
+            state="error"
+            value="value"
+            onChange={() => {}}
+            icon={<Icon name="i-mail" />}
+          />
+          <Input
+            id="demo-state-loading-icon"
+            label="is-loading · icon"
+            state="loading"
+            value="value"
+            onChange={() => {}}
+            icon={<Icon name="i-mail" />}
+          />
+          <Input
+            id="demo-state-empty-icon"
+            label="empty · icon"
+            placeholder="empty"
+            value=""
+            onChange={() => {}}
+            icon={<Icon name="i-mail" />}
+          />
           {/* 错误抖动是**可选**的一次性反馈，默认不加。这里按真实用法演示：传的是计数器，
               因此连点重放会一次次重播，不需要页面替它复位，组件自己在播完后摘类。 */}
           <Input
@@ -414,6 +464,22 @@ export function BasePage() {
           <Input id="demo-input-small" label="small" placeholder="small" size="small" />
           <Input id="demo-input-medium" label="medium" placeholder="medium" />
           <Input id="demo-input-large" label="large" placeholder="large" size="large" />
+          {/* 带左图标的形态：三档都列出来，图标尺寸与左侧间距逐档核对 */}
+          <Input
+            id="demo-input-small-icon"
+            label="small · icon"
+            placeholder="small"
+            size="small"
+            icon={<Icon name="i-mail" />}
+          />
+          <Input id="demo-input-medium-icon" label="medium · icon" placeholder="medium" icon={<Icon name="i-mail" />} />
+          <Input
+            id="demo-input-large-icon"
+            label="large · icon"
+            placeholder="large"
+            size="large"
+            icon={<Icon name="i-mail" />}
+          />
         </div>
       </section>
 

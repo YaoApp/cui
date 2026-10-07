@@ -1,0 +1,63 @@
+/* 第三方入口列表，对应 design/prototype/login.html 的 .providers / .provider：
+   整宽一行、软底、细边框、圆角中档、行高取 --row-height；行内三段（标记 · 居中标签 · 占位）。
+   列表本身不留外边距，与下方分隔线的距离由页面给。 */
+.provider-list {
+  display: grid;
+  gap: var(--spacing-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.provider-list__item {
+  min-block-size: var(--row-height);
+  padding-inline: var(--spacing-12);
+  background: var(--background-field);
+  color: var(--text-primary);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
+}
+
+.provider-list__item:hover:not(:disabled) {
+  background: var(--background-hover);
+}
+
+/* 标签槽撑满整行，三段排布才落在整行的中线上 */
+.provider-list__item .button__label {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.provider-list__row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--spacing-8);
+  inline-size: 100%;
+}
+
+.provider-list__mark {
+  /* 设计稿是 18：间距刻度里没有 18，用 16 + 半档写出来 */
+  inline-size: calc(var(--spacing-16) + var(--spacing-4) / 2);
+  block-size: calc(var(--spacing-16) + var(--spacing-4) / 2);
+  object-fit: contain;
+}
+
+/* 品牌标记是内联 svg：宽高按图标盒给，避免 SVG 自带的默认尺寸把它撑大 */
+.provider-list__mark svg {
+  inline-size: 100%;
+  block-size: 100%;
+  display: block;
+}
+
+.provider-list__mark--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.provider-list__label {
+  text-align: center;
+}

@@ -54,6 +54,7 @@ component's own props are:
 | `name` | `string` | none | The input's form name. |
 | `autoComplete` | `string` | `'off'` | The input's `autocomplete`; off by default because a captcha is never reused. |
 | `size` | `'small' \| 'medium' \| 'large'` | none | Size step passed to the field; field height 24 / 32 / 40 and trailing slot 72 / 96 / 120. |
+| `strong` | `boolean` | `false` | Passed to the input: takes the compliant control boundary `--border-control-strong`. Entry screens use it. |
 | `className` | `string` | none | Extra class on `.captcha-field`. |
 | `refreshLabel` | `string` | none | The control's accessible name and, on failure, its visible retry text. Four languages are supplied by the caller. |
 | `imageAlt` | `string` | none | The image's alternative text. Four languages are supplied by the caller; an empty string makes the image decorative. |

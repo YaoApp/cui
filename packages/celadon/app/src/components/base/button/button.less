@@ -198,6 +198,9 @@
 
 /* ===== 布局与尺寸档（设计类没有的部分）===== */
 .button {
+  /* 按钮是原生 `<button>`：浏览器默认样式表给它落了 `font` 简写，作用域上的字体到不了它内部。
+     组件自己把字族接过来，字体仍只在设计体系作用域里定一次（见 design/tokens.less）。 */
+  font-family: inherit;
   /* 按钮文字**不许折行**：窄窗下「刷新」被折成两行（拟人 S5 的截图抓到过）。 */
   white-space: nowrap;
   display: inline-flex;

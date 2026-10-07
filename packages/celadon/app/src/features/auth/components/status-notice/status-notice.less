@@ -1,0 +1,32 @@
+/* 页面级提示条：一行文字加一个图标，可选一个纯文字按钮。
+   底色与文字取同一族（提示用品牌软底，失败用危险软底），间距取间距刻度，圆角按中档控件。
+   页面样式不包主题作用域：应用侧主题挂在根元素上，组件 less 才需要自己包。 */
+.status-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  padding: var(--spacing-8) var(--spacing-12);
+  border-radius: var(--radius-small);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-normal);
+}
+
+.status-notice__icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.status-notice__text {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.status-notice--info {
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+
+.status-notice--danger {
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+}
