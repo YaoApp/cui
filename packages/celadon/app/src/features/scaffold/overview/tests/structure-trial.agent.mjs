@@ -103,7 +103,7 @@ const icon = await p.evaluate(() => {
 })
 say(`S1 icon      : ${JSON.stringify(icon)}`)
 if (!icon.symbol) problems.push('S1: 刷新按钮的图标没渲染（雪碧图里找不到对应符号）')
-if (icon.w !== 14 || icon.h !== 14) problems.push(`S1: 图标尺寸不是 14（实测 ${icon.w}x${icon.h}）`)
+if (icon.w !== 16 || icon.h !== 16) problems.push(`S1: 图标尺寸不是 16（实测 ${icon.w}x${icon.h}）`)
 
 // 导航项也要有图标：每项一个 `<use>`，符号都指得到
 const navIcons = await p.evaluate(() =>
@@ -201,21 +201,27 @@ if (!focused.shadow || focused.shadow === 'none') problems.push('S3: 焦点环�
 await p.keyboard.press('Enter'); await p.keyboard.press('Space'); await p.waitForTimeout(150)
 await shot(p, 's3-after-keys.png')
 
-// S4 切主题 —— 用**页面上的分段控件**（设计里的主题切换件：浅色 / 暗色）
-await p.getByRole('button', { name: '暗色' }).click()
+// S4 切主题 —— 用页面右上角的主题切换按钮：图标与可访问名都是**反转**的，
+// 浅色下给的是「切换到深色」加月亮，点击之后应变成 dark，按钮改画太阳、名字改成「切换到浅色」。
+await p.locator('.theme-toggle').click()
 await p.waitForTimeout(250)
 await shot(p, 's4-dark.png')
-const dark = await p.evaluate(() => ({
-  body: getComputedStyle(document.body).backgroundColor,
-  title: getComputedStyle(document.querySelector('.header__title')).color,
-  card: getComputedStyle(document.querySelector('.foo-bar')).backgroundColor,
-  root: document.documentElement.dataset.theme,
-  label: document.querySelector('.theme-toggle button.is-on')?.textContent?.trim(),
-}))
+const dark = await p.evaluate(() => {
+  const themeButton = document.querySelector('.theme-toggle')
+  return {
+    body: getComputedStyle(document.body).backgroundColor,
+    title: getComputedStyle(document.querySelector('.header__title')).color,
+    card: getComputedStyle(document.querySelector('.foo-bar')).backgroundColor,
+    root: document.documentElement.dataset.theme,
+    action: themeButton?.getAttribute('aria-label'),
+    icon: themeButton?.querySelector('use')?.getAttribute('href'),
+  }
+})
 say(`S4 dark      : ${JSON.stringify(dark)}`)
 if (dark.body === 'rgb(255, 255, 255)' || dark.body === 'rgba(0, 0, 0, 0)') problems.push('S4: 深色下页面底色还是白的/透明的')
 if (dark.root !== 'dark') problems.push('S4: 点了按钮但根元素 data-theme 不是 dark')
-if (dark.label !== '暗色') problems.push('S4: 分段控件没有把「暗色」标为选中')
+if (dark.action !== '切换到浅色') problems.push('S4: 切换之后按钮的可访问名没有变成「切换到浅色」')
+if (dark.icon !== '#i-sun') problems.push('S4: 深色下按钮画的不是太阳（图标应反转）')
 // 内容面必须铺满视口，否则页面底部会露出另一层的分界（这是本轮抓到并修掉的缺陷）
 const surface = await p.evaluate(() => ({
   h: Math.round(document.querySelector('#app > *').getBoundingClientRect().height),
@@ -268,11 +274,12 @@ if (!(await trial.innerText()).includes('结构试跑')) problems.push('S6: 刷�
   const sysDark = await dp.evaluate(() => ({
     root: document.documentElement.dataset.theme,
     body: getComputedStyle(document.body).backgroundColor,
-    on: document.querySelector('.theme-toggle button.is-on')?.textContent?.trim(),
+    action: document.querySelector('.theme-toggle')?.getAttribute('aria-label'),
   }))
   say(`S7 systemDark: ${JSON.stringify(sysDark)}`)
   if (sysDark.root !== 'dark') problems.push('S7: 深色系统下页面不是暗的')
   if (sysDark.body === 'rgb(255, 255, 255)') problems.push('S7: 深色系统下页面底色还是白的')
+  if (sysDark.action !== '切换到浅色') problems.push('S7: 深色系统下按钮的可访问名不是「切换到浅色」')
   await darkCtx.close()
 
   await b.close()

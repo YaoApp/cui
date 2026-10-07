@@ -1,4 +1,4 @@
-# 06-login-components · 组件与验收（2026-10-06）
+# 06-login-components · 组件与验收（2026-10-07）
 
 - **规则**：[`../architecture/03-boundaries.md`](../architecture/03-boundaries.md) §3（基础件分法与归属）·
   [`../architecture/09-theme.md`](../architecture/09-theme.md)（主题）·
@@ -57,14 +57,16 @@
 
 ### 2.5 页面内部件
 
+四件都随 auth 页面一并实现：它们只服务登录流程，页面是它们的唯一消费者，因此与页面同批写、同批验收。
+
 | # | 组件 | 目录 | 说明 | 状态 |
 | --- | --- | --- | --- | --- |
-| 14 | `PasswordInput` | `features/auth/parts/password-input/` | 文本输入加可见性切换，登录与注册共用 | 未开始 |
-| 15 | `ProviderList` | `features/auth/parts/provider-list/` | 第三方登录入口，跳转 `oauthAuthorize` 返回的地址 | 未开始 |
-| 16 | `ClientHint` | `features/auth/parts/client-hint/` | 客户端模式下提示回到浏览器或改用设备码 | 未开始 |
-| 17 | `StatusNotice` | `features/auth/parts/status-notice/` | 页面级状态提示，文案按错误码取 | 未开始 |
+| 14 | `PasswordInput` | `features/auth/parts/password-input/` | 文本输入加可见性切换，登录与注册共用 | 随 auth 页面一并实现 |
+| 15 | `ProviderList` | `features/auth/parts/provider-list/` | 第三方登录入口，跳转 `oauthAuthorize` 返回的地址 | 随 auth 页面一并实现 |
+| 16 | `ClientHint` | `features/auth/parts/client-hint/` | 客户端模式下提示回到浏览器或改用设备码 | 随 auth 页面一并实现 |
+| 17 | `StatusNotice` | `features/auth/parts/status-notice/` | 页面级状态提示，文案按错误码取 | 随 auth 页面一并实现 |
 
-### 2.6 设计体系同步与本轮遗留（2026-10-06）
+### 2.6 设计体系同步与未决事项（2026-10-06）
 
 | # | 事项 | 现状 |
 | --- | --- | --- |
@@ -74,10 +76,13 @@
 | 23 | 按钮形态 | 品牌档与反色档不带边框（有意弱化边界，理由见 `foundations.md` F5）；幽灵档与语义三档带 1px 同族或中性边框，边框对底满足 1.4.11 |
 | 24 | 色卡 | 已登记悬停底、反色档与四个色系焦点环的浅暗实测值，暗色悬停底按现行 token（`#2C2718` / `#12261A` / `#2A1614`）与实测值重写 |
 
-遗留事项，逐条做完再销：
+两项原先挂在这里的事项已经落地，不再作为遗留：
 
-- `button` 仍缺单元用例，其余基础件都有（输入框 7 条、选择器 16 条）；要覆盖 props 分支（加载禁用、`state` 与 `shape` 生成的类、错误与禁用）。
-- 按钮的**图标槽**未做，图标目前只能由调用方塞进 `children`。
+- `button` 的单元用例已经补齐，六个基础件（`button` · `input` · `select` · `checkbox` · `captcha-field` · `otp-field`）各有覆盖 props 分支、禁用、错误与键盘的用例。
+- 按钮的**图标槽**已经做出：`icon` 加 `iconPosition` 表达图标加文字，`iconOnly` 表达方形图标按钮，图标尺寸按档归一为 16 / 16 / 20。
+
+仍未决的事项：
+
 - 色卡里 `--brand-solid-active` 等按下换色档在按钮上已无引用（设计类按下改为只缩放），去留待定。
 - `--radius-medium` 在按钮上已不再使用（改由尺寸档给圆角），但它仍是卡片、面板与弹层的档位，不是无引用。
 - 选择器未做**虚拟滚动**。上游的高亮与 `aria-activedescendant` 都按 DOM 节点走，窗口化会让键盘到不了窗口外的选项，
@@ -85,6 +90,7 @@
   打开约 163 毫秒（含测试框架开销）；需要支撑更大的列表时，应先换掉上游列表或改成自绘 listbox，而不是在窗口化上打折。
 - 选择器仍未做**分组内的多选汇总**与「已选 n 项」这类摘要显示，多选时触发器按标签逐个拼接。
 - 两行选项的行高不是 `--row-height` 的整数倍，此时弹层只保证可滚，不保证底部对齐整行。
+- `brand-mark`、`icon`、`segmented-control`、`spinner` 四个基础件只有英文文档，中英双语文档待补。
 
 ## 3. 验收规矩
 

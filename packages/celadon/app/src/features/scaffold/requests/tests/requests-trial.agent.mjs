@@ -64,7 +64,7 @@ try {
 }
 
 /* ── 冻结的桩数据（与 requests-trial.agent.md 的「判定数据（冻结）」逐字一致）
-   服务信息给 openapi 前缀；公开 GET/POST 各回各的值；受保护两条回 401（未登录 → 页面按码翻成「需要登录」，并标「未登录（缺凭据）」）。*/
+   服务信息给 openapi 前缀；公开 GET/POST 各回各的值；受保护两条回 401（未登录 → 页面按码翻成「未登录或登录已过期」，并标「未登录（缺凭据）」）。*/
 const SERVICE = { name: 'Yao Agents', version: '1.0.0', openapi: '/v1' }
 const GET_VALUE = { MESSAGE: 'data-check-persona-get', SERVER_TIME: '2020-01-01T00:00:00Z' }
 const POST_VALUE = { MESSAGE: 'data-check-persona-post', SERVER_TIME: '2020-01-01T00:00:00Z' }
@@ -147,7 +147,7 @@ say(`S3 publicPost: ${JSON.stringify(s3)}`)
 if (!s3?.includes('成功')) problems.push('S3: 公开 POST 的结果格不是「成功」')
 if (!s3?.includes('"MESSAGE":"data-check-persona-post"')) problems.push('S3: 公开 POST 的结果值不是冻结的那份')
 
-// ── S4 点两条受保护的：都该失败，并标出「未登录（缺凭据）」
+// ── S4 点两条受保护的：都该失败，按码翻成「未登录或登录已过期」，并标出「未登录（缺凭据）」
 await p.getByRole('button', { name: '受保护 GET' }).click()
 await p.getByRole('button', { name: '受保护 POST' }).click()
 await p.waitForFunction(() => document.body.innerText.includes('未登录（缺凭据）'))
@@ -157,7 +157,7 @@ const s4post = await cellText('受保护 POST')
 say(`S4 protGet   : ${JSON.stringify(s4get)}`)
 say(`S4 protPost  : ${JSON.stringify(s4post)}`)
 for (const [step, text] of [['S4: 受保护 GET', s4get], ['S4: 受保护 POST', s4post]]) {
-  if (!text?.includes('需要登录')) problems.push(`${step} 的结果格没有印出冻结的失败诊断`)
+  if (!text?.includes('未登录或登录已过期')) problems.push(`${step} 的结果格没有按码翻成「未登录或登录已过期」`)
   if (!text?.includes('未登录（缺凭据）')) problems.push(`${step} 没有标出「未登录（缺凭据）」`)
 }
 
