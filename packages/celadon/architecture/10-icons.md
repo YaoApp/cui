@@ -1,13 +1,16 @@
 # 10 · 图标（工程落点）
 
-- **版本**：v1.38
-- **最后修改**：2026-10-03 09:19:47
+- **版本**：v1.40
+- **最后修改**：2026-10-07 08:27:40
 - **说明**：图标与品牌：产物 · 基础件用法 · 第三方品牌
 
 ## 1. 规则
 
-- **源是 lucide**（ISC · 24 网格 · 描边 2 · 本包收录 **67 个**）；不自绘，仅 5 类例外（见 `design/icons.md`）。
+- **源是 lucide**（ISC · 24 网格 · 描边 2 · 本包收录 **81 个**）；不自绘，仅 5 类例外（见 `design/icons.md`）。
 - **源**：`design/icons/lucide-sprite.svg` · `own-sprite.svg` · `manifest.json`（`{id, cat, src}`）· 品牌雪碧图。
+- **新增界面图标**：先在 `manifest.json` 登记（`{id, lib, cat, src}`），源雪碧图里还没有这个符号时跑
+  `node scripts/vendor-lucide.mjs <id…>`（按 manifest 的 `src` 取该版本的 lucide 源图并追加符号，版本取自雪碧图文件头），
+  最后跑 `node scripts/build-icons.mjs`。品牌用 `scripts/vendor-brands.mjs` 与 `scripts/vendor-simple.mjs`。
 - **应用侧产物**（`scripts/build-icons.mjs` 生成，**不许手改**）：`app/src/platform/icons/sprite.svg`（整块）
   与 `icon-ids.ts`（**id 联合类型** —— 写错图标名由 `tsc` 拦下）。
 - **应用侧经平台层**：入口 `mountIconSprite()` 把整块雪碧图**直接插进 `body`** 一次；

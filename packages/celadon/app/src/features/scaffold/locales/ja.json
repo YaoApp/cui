@@ -26,6 +26,7 @@
   "base.select.search": "オプションを検索",
   "base.select.noMatch": "一致する項目がありません",
   "base.sub.iconSizes": "アイコンのサイズ",
+  "base.sub.signInIcons": "サインイン項目のアイコン",
   "base.sub.brands": "ブランドマーク",
   "base.sub.controls": "コントロール",
   "base.message.hint": "フィールドの下に表示",

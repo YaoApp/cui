@@ -26,6 +26,7 @@
   "base.select.search": "搜尋選項",
   "base.select.noMatch": "沒有符合的選項",
   "base.sub.iconSizes": "圖示尺寸",
+  "base.sub.signInIcons": "登入欄位圖示",
   "base.sub.brands": "品牌標識",
   "base.sub.controls": "控制項",
   "base.message.hint": "顯示在欄位下方",

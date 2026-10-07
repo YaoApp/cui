@@ -48,6 +48,12 @@
     inset-inline-start: var(--spacing-8);
   }
 
+  /* 既没有提示也没有错误时，消息位整块收掉。它是空元素，但容器的 gap 照样留出 8px
+     （实测框高 32、字段高因此 40），收掉之后字段高就等于框高，与「没有消息时不预留下空行」一致。 */
+  &__message:empty {
+    display: none;
+  }
+
   &__trail {
     inset-inline-end: var(--spacing-4);
     /* 可点区域不小于控件高度（layout.md 第 6 节）：槽位高 = 本体边框内高，宽取 32 */

@@ -1,8 +1,9 @@
 import './select.less'
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Select as BaseSelect } from '@base-ui/react/select'
 import { Icon } from '@/components/base/icon'
+import { Input } from '@/components/base/input'
 
 export type SelectOption = {
   /** 选项值；`null` 是**清除项**（上游的空值项），选中它即取消选择，触发器回到占位文字。 */
@@ -105,6 +106,9 @@ export function Select(props: SelectProps) {
     className,
   } = props
   const [query, setQuery] = useState('')
+  /* 筛选框的 id：输入框基础件的 `id` 是必填（标签关联用），筛选框自身不带标签，
+     但仍然要一个稳定的 id，交给 `useId` 生成，多个选择器同页也不冲突。 */
+  const searchId = useId()
   /* 弹层宽度在进场动画结束时量下来并记住，退场期间不再跟随触发器。
      选中新值会改触发器宽度，若弹层继续跟随，就会一边淡出一边改宽改位；记住宽度后弹层原地淡出。
      下一次打开时（onOpenChange(true)）解除记忆，重新按当时的触发器宽度量。 */
@@ -248,10 +252,14 @@ export function Select(props: SelectProps) {
             }}
           >
             {searchable ? (
+              /* 筛选框走「图标输入框」形态：图标用输入框自己的左侧槽位，落在控件边框以内，
+                 不另写「图标加输入框并排」那种把图标留在框外的排法 */
               <div className="select-search">
-                <Icon name="i-search" size={16} className="select-search__icon" />
-                <input
-                  className="input input--small select-search__input"
+                <Input
+                  className="select-search__field"
+                  id={searchId}
+                  size="small"
+                  icon={<Icon name="i-search" size={16} />}
                   value={query}
                   aria-label={searchLabel}
                   onChange={(event) => setQuery(event.target.value)}

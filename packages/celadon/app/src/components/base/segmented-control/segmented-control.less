@@ -15,6 +15,9 @@
     cursor: pointer;
     font-family: inherit;
     font-size: var(--font-size-caption);
+    /* 段是控件：行盒取控件小档的 20px，不继承中日韩倍率（12 × 1.7 = 20.4 会让行盒与高度都带上小数）。
+       段高因此是 20 + 上下内距 8 = 28（整数），整组仍是 38 高。 */
+    line-height: var(--line-height-control-small);
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-4);
@@ -55,7 +58,9 @@
   .seg button.is-on {
     background: var(--brand-soft);
     color: var(--brand-ink);
-    font-weight: var(--font-weight-strong);
+    /* 选中态由底色与品牌文字承担层级：12px 的标签档在配对表里是 medium，
+       不额外加粗（中日韩字体在 Windows 上只有 400 与 700，靠字重区分等于没区分）。 */
+    font-weight: var(--font-weight-medium);
   }
 
   .seg button.is-on:hover,

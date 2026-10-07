@@ -14,7 +14,7 @@
 
 **反例（不要这样做）**：不加描边 / 阴影 / 渐变 · 不旋转 / 不镜像 / 不压扁 · 不改品牌色以外的颜色 · 不把标识当界面图标用
 
-## 2. 图标系列（72 个界面图标）
+## 2. 图标系列（81 个界面图标）
 
 | 规格项 | 值 |
 | --- | --- |
@@ -27,7 +27,7 @@
 | 颜色 | `stroke: currentColor` —— 一个图标只有一种颜色来源 |
 | 尺寸 | 显示档 **14 / 16 / 20 / 24**（默认 16）；图标本体只有 24 网格一套 |
 
-**全量语义名 → lucide 名**（按页面的覆盖度表分组；最后一组是自建品牌符号，不计入 67 个界面图标）
+**全量语义名 → lucide 名**（按页面的覆盖度表分组；最后一组是自建品牌符号，不计入 81 个界面图标）
 
 ### 主导航（11）
 
@@ -45,7 +45,7 @@
 | `i-nav-team` | `users` |
 | `i-nav-logout` | `log-out` |
 
-### 操作（27）
+### 操作（37）
 
 | 语义名 | 来源 |
 | --- | --- |
@@ -76,6 +76,16 @@
 | `i-act-redo` | `redo-2` |
 | `i-act-play` | `play` |
 | `i-act-attach` | `paperclip` |
+| `i-up` | `chevron-up` |
+| `i-down` | `chevron-down` |
+| `i-globe` | `globe` |
+| `i-sun` | `sun` |
+| `i-moon` | `moon` |
+| `i-mail` | `mail` |
+| `i-lock` | `lock` |
+| `i-eye` | `eye` |
+| `i-eye-off` | `eye-off` |
+| `i-gift` | `gift` |
 
 ### 文件类型（10）
 
@@ -130,7 +140,7 @@
 | `brand-yao` | `own:yao` |
 | `brand-yao-mono` | `own:yao-mono` |
 
-**统计**：界面图标 **72** 个（lucide）· 自建品牌符号 **4** 个（`brand-yao-agents` / `brand-yao-agents-mono` / `brand-yao` / `brand-yao-mono`）· 第三方品牌 **340** 个（`brand-*`，另存独立雪碧图，外部引用；其中 simple-icons 来源 1 个）。
+**统计**：界面图标 **81** 个（lucide）· 自建品牌符号 **4** 个（`brand-yao-agents` / `brand-yao-agents-mono` / `brand-yao` / `brand-yao-mono`）· 第三方品牌 **340** 个（`brand-*`，另存独立雪碧图，外部引用；其中 simple-icons 来源 1 个）。
 
 ## 3. 尺寸档
 

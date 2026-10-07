@@ -38,4 +38,6 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-4);
+  /* 条目是控件：行盒取控件小档的 20px，不继承中日韩倍率（12 × 1.7 = 20.4 会带来小数行盒） */
+  line-height: var(--line-height-control-small);
 }

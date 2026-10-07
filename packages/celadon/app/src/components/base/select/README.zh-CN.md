@@ -27,7 +27,7 @@
 | 指示器 | `.select-icon` | `i-down` 图标；`indicator` 为假时不画。 |
 | 定位器 | `.select__positioner` | 定位弹层，按起始边对齐并留 4px 的间隙。间隙由定位器给，组件不带外边距。 |
 | 弹层 | `.select-popup` | `searchable` 时追加 `select-popup--search`；最大高度对齐整行。 |
-| 筛选框 | `.select-search` | 含 `.select-search__icon` 与 `.select-search__input`；输入框复用 `.input.input--small`。 |
+| 筛选框 | `.select-search` | 容器只给四周内距；里层是基础件 `Input`（`.select-search__field`，取小档），放大镜走它自己的左侧图标槽（`.field__icon`），因此落在控件边框以内，控件左侧预留 `--spacing-32`。 |
 | 空态文字 | `.select-popup__empty` | 没有选项时显示 `emptyText`，筛选无命中时显示 `noMatchText`。 |
 | 列表 | `.select-list` | 滚动容器，行高为 `--row-height`。 |
 | 滚动箭头 | `.select-arrow` · `.select-arrow--up` | 只有列表可滚时才显示；每个高 `--spacing-24`，浮在列表让出的空档上。 |

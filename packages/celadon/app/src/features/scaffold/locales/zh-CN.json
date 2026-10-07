@@ -26,6 +26,7 @@
   "base.select.search": "搜索选项",
   "base.select.noMatch": "没有匹配项",
   "base.sub.iconSizes": "图标尺寸",
+  "base.sub.signInIcons": "登录字段图标",
   "base.sub.brands": "品牌标识",
   "base.sub.controls": "控件",
   "base.message.hint": "显示在字段下方",

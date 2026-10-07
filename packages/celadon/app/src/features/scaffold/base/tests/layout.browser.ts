@@ -152,6 +152,8 @@ test('the base page obeys the layout rules', async ({ page }) => {
     const originalLang = document.documentElement.lang
     /* 三语（简 · 繁 · 日）同一码点的字形签名，用于证明字形真的换了，而不只是声明里换了字体名 */
     const glyphSignatures: Array<[string, number]> = []
+    /* 各语言的墨迹像素数：用来判断本机到底有没有**分文种**的中日韩字体 */
+    const inkCounts: number[] = []
     const langCases: Array<[string, RegExp]> = [
       ['zh-CN', /PingFang SC|Microsoft YaHei|Noto Sans CJK SC/i],
       ['zh-TW', /PingFang TC|Microsoft JhengHei|Noto Sans CJK TC/i],
@@ -187,13 +189,29 @@ test('the base page obeys the layout rules', async ({ page }) => {
           signature = (signature * 31 + (on ? 1 : 0)) | 0
         }
         notes.push(`lang=${code} 字形签名=${signature}，墨迹像素=${ink}`)
-        for (const [otherLang, otherSignature] of glyphSignatures) {
-          if (otherSignature === signature) {
-            bad.push(`${code} 与 ${otherLang} 的字形签名相同（${signature}），字形没有区分`)
+        glyphSignatures.push([code, signature])
+        inkCounts.push(ink)
+      }
+    }
+    /* 字形签名互不相同这条只在**本机确实装了分文种字体**时才成立。
+       CI 的 Linux runner 上三种语言会回落到同一款中日韩字体，签名必然相同（实测三语都是 -380950058），
+       那是环境缺字体，不是代码没配字体栈。判据取墨迹像素数：三语完全相同即为同一款字体，此时只记录结论；
+       量得出差异时仍按原来那样要求签名互不相同。字体栈本身必须分栈，那条在上面是不带条件的硬要求。 */
+    if (new Set(inkCounts).size > 1) {
+      for (let i = 0; i < glyphSignatures.length; i += 1) {
+        for (let j = i + 1; j < glyphSignatures.length; j += 1) {
+          const [langA, signatureA] = glyphSignatures[i]
+          const [langB, signatureB] = glyphSignatures[j]
+          if (signatureA === signatureB) {
+            bad.push(`${langA} 与 ${langB} 的字形签名相同（${signatureA}），字形没有区分`)
           }
         }
-        glyphSignatures.push([code, signature])
       }
+    } else {
+      notes.push(
+        `三语墨迹像素完全相同（${Array.from(new Set(inkCounts)).join('、')}）：本机没有分文种的中日韩字体，` +
+          '字形差异这一条跳过，只核对字体栈',
+      )
     }
     /* 复原语言：后面的截图必须与当前语言一致，否则会交出一张语言不符的图 */
     document.documentElement.lang = originalLang

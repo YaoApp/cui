@@ -52,6 +52,39 @@
   gap: var(--spacing-12);
 }
 
+/* 图标网格：等宽小格用 grid 排（layout.md 第 5 节「网格优先于手工定位」），网格间距取 16 档；
+   每格是一张小卡片，格内距 16 大于图标与名称之间的 4，内容居中，悬停整格换底色 */
+.base-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--spacing-16);
+}
+
+.base-icon-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-16);
+  background: var(--background-surface);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-small);
+  color: var(--text-secondary);
+
+  &:hover {
+    background: var(--background-hover);
+    border-color: var(--border-hover);
+  }
+
+  &__name {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-label);
+    /* 说明性副标题按配对表取 normal 行高：12 × 1.7 = 20.4 会让行盒带上小数 */
+    line-height: var(--line-height-normal);
+    letter-spacing: var(--letter-spacing-latin);
+  }
+}
+
 /* 单个示例：名称在上，示例在下，间距 8 */
 .base-demo {
   display: flex;
@@ -61,6 +94,8 @@
   &__name {
     color: var(--text-tertiary);
     font-size: var(--font-size-label);
+    /* 说明性副标题按配对表取 normal 行高：12 × 1.7 = 20.4 会让行盒带上小数 */
+    line-height: var(--line-height-normal);
     letter-spacing: var(--letter-spacing-latin);
   }
 }

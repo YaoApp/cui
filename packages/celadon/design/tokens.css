@@ -1456,6 +1456,8 @@
   inline-size: 100%;
   /* 两侧槽位：按本体的**边框内**居中，而不是按字段框（框含 1px 边框，按框居中会差 1px）。
      左右内距都取 8，槽位里的按钮另有 4 的内距，因此图标视觉上落在一致的位置。 */
+  /* 既没有提示也没有错误时，消息位整块收掉。它是空元素，但容器的 gap 照样留出 8px
+     （实测框高 32、字段高因此 40），收掉之后字段高就等于框高，与「没有消息时不预留下空行」一致。 */
   /* 消息位：只占消息自身的高度，不预留下空行。
      预留一行确实能让同一行的字段等高，但卡片最后一行的每个字段下面都会多出一段空行，
      下内距看着就成了内距加一行。参差改由排布解决：
@@ -1499,6 +1501,9 @@
 .field__icon {
   pointer-events: none;
   inset-inline-start: var(--spacing-8);
+}
+.field__message:empty {
+  display: none;
 }
 .field__trail {
   inset-inline-end: var(--spacing-4);
@@ -1813,7 +1818,8 @@
   /* 弹层最大高度对齐成**整行**：可用高度减内距、筛选框与箭头让出量后向下取整到行高档，再加回去，
      列表底部就不会露出半行。round() 还不可用的运行时按上面的可用高度走，不影响可用性。
      函数名与整段值用 ~"" 转义，避免被 Less 自己的 round() 抢先求值。 */
-  /* 筛选框：图标加输入框，输入框取字段小档，宽度撑满弹层内宽 */
+  /* 筛选框：用输入框的「图标输入框」形态（图标走 `.field__icon` 槽位，落在控件边框内），
+     输入框取字段小档、宽度撑满弹层内宽；这里的容器只负责四周内距 */
   /* 滚动箭头：列表溢出时出现，做成浮层，不占列表高度，整行取整才不会被它破坏；
      底色与弹层同底，避免文字从下面透出来；四边各让一个描边宽，整体落在弹层描边以内，
      压不到弹层的边界与圆角，圆角四角一致 */
@@ -2109,16 +2115,10 @@
 [data-theme] .celadon .select-search {
   display: flex;
   align-items: center;
-  gap: var(--spacing-4);
   padding: var(--spacing-4) var(--spacing-8) var(--spacing-8);
 }
-.celadon .select-search__icon,
-[data-theme] .celadon .select-search__icon {
-  flex: none;
-  color: var(--text-tertiary);
-}
-.celadon .select-search__input,
-[data-theme] .celadon .select-search__input {
+.celadon .select-search__field,
+[data-theme] .celadon .select-search__field {
   flex: 1;
   min-inline-size: 0;
 }
@@ -2303,6 +2303,9 @@
   cursor: pointer;
   font-family: inherit;
   font-size: var(--font-size-caption);
+  /* 段是控件：行盒取控件小档的 20px，不继承中日韩倍率（12 × 1.7 = 20.4 会让行盒与高度都带上小数）。
+       段高因此是 20 + 上下内距 8 = 28（整数），整组仍是 38 高。 */
+  line-height: var(--line-height-control-small);
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-4);
@@ -2343,7 +2346,9 @@
 [data-theme] .celadon .seg button.is-on {
   background: var(--brand-soft);
   color: var(--brand-ink);
-  font-weight: var(--font-weight-strong);
+  /* 选中态由底色与品牌文字承担层级：12px 的标签档在配对表里是 medium，
+       不额外加粗（中日韩字体在 Windows 上只有 400 与 700，靠字重区分等于没区分）。 */
+  font-weight: var(--font-weight-medium);
 }
 .celadon .seg button.is-on:hover,
 [data-theme] .celadon .seg button.is-on:hover,

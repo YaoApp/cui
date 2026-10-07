@@ -28,7 +28,7 @@ Base UI; geometry such as the anchor width and the available height is exposed a
 | Indicator | `.select-icon` | The `i-down` icon; hidden when `indicator` is false. |
 | Positioner | `.select__positioner` | Positions the popup, aligned to the start edge with a 4 px gap. The gap comes from the positioner, not from component margin. |
 | Popup | `.select-popup` | Adds `select-popup--search` when `searchable`; the popup is aligned to whole rows. |
-| Search | `.select-search` | `.select-search__icon` and `.select-search__input`; the input reuses `.input.input--small`. |
+| Search | `.select-search` | The container only carries the surrounding padding; inside it is the base `Input` (`.select-search__field`, small step) and the magnifier uses that field's own leading icon slot (`.field__icon`), so it sits inside the control's border with `--spacing-32` reserved on the leading edge. |
 | Empty text | `.select-popup__empty` | Shows `emptyText` when there are no options, `noMatchText` when the search matches nothing. |
 | List | `.select-list` | The scrolling container; `--row-height` is its row height. |
 | Arrows | `.select-arrow` · `.select-arrow--up` | Visible only while the list can scroll; each is `--spacing-24` high and overlays the space the list gives up. |

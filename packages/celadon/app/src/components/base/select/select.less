@@ -283,20 +283,15 @@
     font-size: var(--font-size-caption);
   }
 
-  /* 筛选框：图标加输入框，输入框取字段小档，宽度撑满弹层内宽 */
+  /* 筛选框：用输入框的「图标输入框」形态（图标走 `.field__icon` 槽位，落在控件边框内），
+     输入框取字段小档、宽度撑满弹层内宽；这里的容器只负责四周内距 */
   .select-search {
     display: flex;
     align-items: center;
-    gap: var(--spacing-4);
     padding: var(--spacing-4) var(--spacing-8) var(--spacing-8);
   }
 
-  .select-search__icon {
-    flex: none;
-    color: var(--text-tertiary);
-  }
-
-  .select-search__input {
+  .select-search__field {
     flex: 1;
     min-inline-size: 0;
   }

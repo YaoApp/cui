@@ -39,6 +39,7 @@ export type I18nKey =
   | 'base.sub.options'
   | 'base.sub.props'
   | 'base.sub.search'
+  | 'base.sub.signInIcons'
   | 'base.sub.sizes'
   | 'base.sub.states'
   | 'base.sub.types'
@@ -299,6 +300,7 @@ declare module 'i18next' {
         'base.sub.options': string
         'base.sub.props': string
         'base.sub.search': string
+        'base.sub.signInIcons': string
         'base.sub.sizes': string
         'base.sub.states': string
         'base.sub.types': string

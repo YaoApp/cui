@@ -26,6 +26,7 @@
   "base.select.search": "Search options",
   "base.select.noMatch": "No matches",
   "base.sub.iconSizes": "icon sizes",
+  "base.sub.signInIcons": "sign-in field icons",
   "base.sub.brands": "brand marks",
   "base.sub.controls": "controls",
   "base.message.hint": "shown under the field",

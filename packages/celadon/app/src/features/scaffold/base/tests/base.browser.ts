@@ -32,6 +32,9 @@ const hexToRgb = (hex: string) => {
   return `rgb(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255})`
 }
 
+/* 图标自己的尺寸档（见 architecture/10-icons.md 第 1 节），不跟字号走 */
+const ICON_LADDER = [14, 16, 20, 24]
+
 test('lists the seven groups and their states', async ({ page }) => {
   /* 七个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
      因此这一条明确放宽预算（Playwright 的 slow 走三倍），其余用例仍守默认值。 */
@@ -467,9 +470,23 @@ test('lists the seven groups and their states', async ({ page }) => {
   for (const item of multiGeometry) expect(item.iconCentre).toBe(item.labelCentre)
   await page.keyboard.press('Escape')
 
-  /* 搜索：筛选真的减少选项，无命中时给说明；等行高的长列表加搜索后仍对齐整行 */
+  /* 搜索：筛选真的减少选项，无命中时给说明；图标走输入框自己的槽位，落在控件边框以内 */
   await openSelect('select searchable')
-  await page.locator('.select-search__input').fill('zzz')
+  const searchField = await page.evaluate(() => {
+    const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
+    const icon = popup.querySelector('.field__icon')!.getBoundingClientRect()
+    const control = popup.querySelector('.select-search input')!.getBoundingClientRect()
+    const style = getComputedStyle(popup.querySelector('.select-search input') as HTMLElement)
+    return {
+      图标在控件内: icon.left >= control.left - 0.5 && icon.right <= control.right + 0.5,
+      控件左内距: parseFloat(style.paddingInlineStart),
+      图标尺寸: Math.round(icon.width),
+    }
+  })
+  expect(searchField.图标在控件内).toBe(true)
+  expect(searchField.控件左内距).toBe(32)
+  expect(searchField.图标尺寸).toBe(16)
+  await page.locator('.select-search input').fill('zzz')
   await page.waitForTimeout(200)
   const noMatch = await page.evaluate(() => {
     const popup = [...document.querySelectorAll('.select-popup')].find((el) => el.getBoundingClientRect().height > 0)!
@@ -1258,5 +1275,116 @@ test('shows the captcha field with its three sizes and the id contract visible',
 
   /* 返回标识这条契约看得见：每档旁边都有 captcha_id 的落点 */
   await expect(page.locator('.base-demo:has(#demo-captcha-default) .base-demo__name')).toContainText('captcha_id')
+})
+
+test('paints every sign-in field icon from the sprite', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1100 })
+  await page.goto('/app/scaffold/base')
+
+  /* 「画出来」而不是「元素在」：`<use>` 的墨迹盒非零、不填实心、描边取得到颜色。
+     符号缺失或符号体为空时，盒子会是 0×0，而 DOM 断言仍然过。 */
+  const painted = await page.evaluate(() =>
+    ['i-mail', 'i-lock', 'i-eye', 'i-eye-off', 'i-gift', 'i-globe', 'i-sun', 'i-moon'].map((name) => {
+      const tile = [...document.querySelectorAll('.base-icon-tile')].find(
+        (el) => el.querySelector('.base-icon-tile__name')?.textContent?.trim() === name,
+      )
+      const svg = tile?.querySelector('svg.icon')
+      const box = svg?.querySelector('use')?.getBoundingClientRect()
+      const style = svg ? getComputedStyle(svg) : null
+      return {
+        name,
+        found: Boolean(svg),
+        ink: box ? Math.round(box.width) > 0 && Math.round(box.height) > 0 : false,
+        fill: style?.fill ?? '',
+        stroke: style?.stroke ?? '',
+      }
+    }),
+  )
+
+  for (const icon of painted) {
+    expect(icon.found, `${icon.name} 没有渲染出来`).toBe(true)
+    expect(icon.ink, `${icon.name} 的墨迹盒是空的`).toBe(true)
+    expect(icon.fill).toBe('none')
+    expect(icon.stroke).not.toBe('none')
+  }
+
+  /* 网格排布与居中：格宽一致（grid 的等宽列）、网格间距 16、格内距 16、
+     图标与名称同轴居中、每格有底色与描边（不是只有图标裸排） */
+  const layout = await page.evaluate(() => {
+    const tiles = [...document.querySelectorAll('.base-icon-tile')] as HTMLElement[]
+    const grid = document.querySelector('.base-icon-grid') as HTMLElement
+    const style = getComputedStyle(grid)
+    const widths = [...new Set(tiles.map((tile) => Math.round(tile.getBoundingClientRect().width)))]
+    return {
+      格数: tiles.length,
+      列宽种类: widths.length,
+      网格间距: parseFloat(style.columnGap),
+      格内距: parseFloat(getComputedStyle(tiles[0]).paddingInlineStart),
+      有底色: tiles.every((tile) => getComputedStyle(tile).backgroundColor !== 'rgba(0, 0, 0, 0)'),
+      有描边: tiles.every((tile) => parseFloat(getComputedStyle(tile).borderInlineStartWidth) > 0),
+      居中的格: tiles.filter((tile) => {
+        const box = tile.getBoundingClientRect()
+        const icon = tile.querySelector('svg')!.getBoundingClientRect()
+        const label = tile.querySelector('.base-icon-tile__name')!.getBoundingClientRect()
+        const centre = box.left + box.width / 2
+        return (
+          Math.abs(icon.left + icon.width / 2 - centre) < 0.5 && Math.abs(label.left + label.width / 2 - centre) < 0.5
+        )
+      }).length,
+    }
+  })
+  expect(layout.格数).toBe(8)
+  expect(layout.列宽种类).toBe(1)
+  expect(layout.网格间距).toBe(16)
+  expect(layout.格内距).toBe(16)
+  expect(layout.有底色).toBe(true)
+  expect(layout.有描边).toBe(true)
+  expect(layout.居中的格).toBe(layout.格数)
+})
+
+test('keeps every base component on the current type ladder', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1100 })
+  await page.goto('/app/scaffold/base')
+
+  /* 档位是 12 · 14 · 16 · 20 · 24 与 400 / 500 / 600（见 design/typography.md 第 2 节）。
+     行盒必须是整数 px：12px 的文字若吃到中日韩倍率 1.7 会得到 20.4，高度随之带上小数。
+     控件高度按 4 基数列，用 `offsetHeight` 取布局高，避开按下缩放与旋转动画的包围盒。
+     图标按自己的尺寸档（14 / 16 / 20 / 24）走，不跟字号；复选框的小方框与它的勾是控件形状，
+     按已记录的例外处理，不并入图标档。 */
+  const audit = await page.evaluate(() => {
+    const SIZES = [12, 14, 16, 20, 24]
+    const WEIGHTS = [400, 500, 600]
+    const text = ['.button', '.input', '.select-trigger', '.checkbox__label', '.seg button', '.field__label', '.hint-error', '.field__hint']
+    const controls = ['.button', '.input', '.select-trigger', '.checkbox__label', '.seg button']
+    const bad: string[] = []
+    const heights: number[] = []
+    const iconSizes: number[] = []
+    for (const selector of text) {
+      for (const el of document.querySelectorAll(selector)) {
+        const style = getComputedStyle(el)
+        const size = Number.parseFloat(style.fontSize)
+        const weight = Number.parseInt(style.fontWeight, 10)
+        const line = style.lineHeight === 'normal' ? null : Number.parseFloat(style.lineHeight)
+        if (!SIZES.includes(size)) bad.push(`${selector} 字号 ${size}`)
+        if (!WEIGHTS.includes(weight)) bad.push(`${selector} 字重 ${weight}`)
+        if (line !== null && !Number.isInteger(line)) bad.push(`${selector} 行盒 ${line}`)
+        const icon = el.querySelector('svg.icon')
+        const box = icon?.getBoundingClientRect()
+        if (box && box.width > 0) iconSizes.push(Math.round(box.width))
+      }
+    }
+    for (const selector of controls) {
+      for (const el of document.querySelectorAll(selector)) {
+        const height = (el as HTMLElement).offsetHeight
+        if (height > 0) heights.push(height)
+      }
+    }
+    return { bad: [...new Set(bad)], heights: [...new Set(heights)], iconSizes: [...new Set(iconSizes)] }
+  })
+
+  expect(audit.bad).toEqual([])
+  /* 控件高按 4 基数列；多行标签与整组高度按内容长高，同样落在 4 的倍数上 */
+  for (const height of audit.heights) expect(height % 4).toBe(0)
+  for (const size of audit.iconSizes) expect(ICON_LADDER).toContain(size)
 })
 

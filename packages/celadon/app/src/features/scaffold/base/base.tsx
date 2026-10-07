@@ -19,7 +19,11 @@ import { ScaffoldPage } from '../components/scaffold-page'
 
 const ICON_SIZES = [14, 16, 20, 24] as const
 
-/* 分段控件的示例数据：段文案属于调用方的数据，用固定取值；带图标的一档用现有图标演示图标槽。 */const SEGMENTED_THEME: SegmentedOption[] = [
+/* 登录与注册字段用的界面图标：邮件 · 锁 · 眼睛 · 隐藏眼睛 · 礼盒，加上语言与主题的地球 · 太阳 · 月亮 */
+const SIGN_IN_ICONS = ['i-mail', 'i-lock', 'i-eye', 'i-eye-off', 'i-gift', 'i-globe', 'i-sun', 'i-moon'] as const
+
+/* 分段控件的示例数据：段文案属于调用方的数据，用固定取值；带图标的一档用现有图标演示图标槽。 */
+const SEGMENTED_THEME: SegmentedOption[] = [
   { value: 'system', label: 'Follow system' },
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
@@ -908,6 +912,16 @@ export function BasePage() {
             <span className="base-demo" key={size}>
               <span className="base-demo__name">{size}</span>
               <Icon name="i-search" size={size} />
+            </span>
+          ))}
+        </div>
+
+        <h3 className="base-subgroup__title">{t('base.sub.signInIcons')}</h3>
+        <div className="base-icon-grid">
+          {SIGN_IN_ICONS.map((name) => (
+            <span className="base-icon-tile" key={name}>
+              <Icon name={name} size={20} />
+              <span className="base-icon-tile__name">{name}</span>
             </span>
           ))}
         </div>

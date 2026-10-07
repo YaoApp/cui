@@ -90,6 +90,36 @@
     "src": "moon"
   },
   {
+    "id": "i-mail",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "mail"
+  },
+  {
+    "id": "i-lock",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "lock"
+  },
+  {
+    "id": "i-eye",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "eye"
+  },
+  {
+    "id": "i-eye-off",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "eye-off"
+  },
+  {
+    "id": "i-gift",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "gift"
+  },
+  {
     "id": "i-down",
     "lib": "lucide",
     "cat": "action",
