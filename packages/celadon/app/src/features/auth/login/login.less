@@ -1,16 +1,34 @@
 /* 登录页卡片内部，间距与 design/prototype/login.html 一致：
    第三方列表与分隔线之间由页面给 24、字段之间 16、协议与主按钮之间 16。
-   组件自己不留外边距，字段与邻居的距离由这一层给（layout.md 规则 3）。 */
-.login__form {
+   弹窗里的后续两步（验证码、密码）用同一套间距，字段与字段、字段与底部操作各自对齐这一套。 */
+.login__form,
+.login__dialog-form {
   display: flex;
   flex-direction: column;
 }
 
+/* 弹窗正文的最后一个字段不再留底距：与底部操作的距离由弹窗自己给 */
+.login__dialog-form > :last-child {
+  margin-block-end: 0;
+}
+
+/* 入口配置取回之前的占位：占的正是它到达后入口列表那块地方（两行，每行一个控件高、行间一个档），
+   与列表同宽同高、与下一块的间距也照列表那一档，因此配置到达时卡片高度不变。
+   指示器与文字在这块里居中，指示器用基础件的两瓣圆环。 */
 .login__loading {
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-8);
+  min-block-size: calc(var(--row-height) * 2 + var(--spacing-8));
+  margin-block-end: var(--spacing-24);
+  color: var(--text-secondary);
+}
+
+.login__loading-text {
   font-size: var(--font-size-14);
   line-height: var(--line-height-cjk);
-  color: var(--text-secondary);
 }
 
 /* 分隔线：文字取三级文字色，两侧各一条 1px 细线；11 档只给拉丁，中日文按最小字号 */
@@ -32,28 +50,17 @@
   background: var(--border-subtle);
 }
 
-.login__account {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--spacing-8);
-  margin-block-end: var(--spacing-16);
-}
-
-.login__account > :first-child {
-  flex: 1;
-  min-inline-size: 0;
-}
-
-.login__code {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-4);
-  margin-block-end: var(--spacing-16);
+/* 锁定后的账号行是页内部件（`components/locked-account`）：行自己的排布在组件里。
+   这里**不给它外边距** —— 行里面的字段自带与下一个字段的间距（下面那条规则），
+   再加一层就会变成两个档（实测 32），账号与密码之间就多出一段空档。 */
+.login__form .locked-account {
+  margin-block-end: 0;
 }
 
 .login__form .field,
-.login__form .captcha-field {
+.login__form .captcha-field,
+.login__dialog-form .field,
+.login__dialog-form .captcha-field {
   margin-block-end: var(--spacing-16);
 }
 
@@ -66,6 +73,36 @@
    （字段自己的 16 加这里的 8，合计 24）。间距的层次因此读得出：字段与协议行分属两组。 */
 .login__form .terms-note {
   margin-block: var(--spacing-8) var(--spacing-8);
+}
+
+/* 记住我：与密码字段同组（上面是字段的 16 加这里的 8，合计 24），与主按钮之间留一个档。
+   它自带的悬停表面向上下各伸出 --spacing-4，紧贴按钮时表面会压在按钮上（实测过），因此下间距不能省。 */
+.login__form .checkbox {
+  margin-block: var(--spacing-8) var(--spacing-16);
+}
+
+/* 页面级提示条自成一组：与下一组的间距取两个档（卡片的 16 加这里的 8）。
+   组内一个档、组外两个档的层次，因此在顶部提示与它后面的内容之间也读得出来。 */
+.auth__card > .status-notice {
+  margin-block-end: var(--spacing-8);
+}
+
+/* 字段的消息位在入口页**预留一行**：错误出现时卡片与弹窗的高度不跳。
+   基础件默认「没有消息就不占高度」（列表里的内嵌字段不需要预留，保持零高），
+   这里要盖过那条 `:empty` 规则，因此选择器取三个类：卡片里的表单，以及弹窗里的表单
+   （弹窗被 portal 到 body，用不了页面前缀，改从弹窗自己的容器进来）。 */
+.auth__card .login__form .field__message,
+.dialog__body .login__dialog-form .field__message {
+  display: block;
+  /* 行高 token 是**倍数**，这里要的是长度，因此用字号乘倍数（说明文字 12 × 1.5 = 18） */
+  min-block-size: calc(var(--font-size-caption) * var(--line-height-normal));
+}
+
+/* 例外：锁定账号那一行是只读展示，不会出错误，它的消息位不预留 ——
+   否则账号与密码之间会多出一行，两个输入框就不是标准间距了。 */
+.auth__card .login__form .locked-account .field__message {
+  display: none;
+  min-block-size: 0;
 }
 
 .auth:lang(zh-CN) .login__or,

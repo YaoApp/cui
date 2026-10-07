@@ -149,8 +149,10 @@ export function useRequest<Input = void, Output = void>(
       unsubscribe()
       latest.current += 1 // 让在途结果失效
       controller.abort()
-      settle.current?.(settled.current) // 这次被顶掉了：放行等待者，别悬着
-      settle.current = null
+      /* 这里**不动等待者**：清理发生在下一轮 effect 之前，而 `run()` 已经把新的等待者放上来了
+         （它先 `setAttempt` 再等结果）。若在这里放行并置空，第二次 `run()` 的 Promise 就再也没人接，
+         `await run()` 会一直悬着，界面停在原处 —— 手动钩子第二次提交必中。
+         等待者只由「状态落定」的 effect 或 `reset()` 放行。 */
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...key, attempt])

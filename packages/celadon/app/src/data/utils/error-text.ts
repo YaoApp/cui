@@ -14,6 +14,8 @@ export function dataErrorKey(code: string): string {
   return `data.error.${codeToKey(code)}`
 }
 
+/** 同一个码下要再细分的情形由**域自己**处理（例如某条接口把原因写在描述里），
+ *  这里只按码取 key：通用映射不认识任何接口的细节，一个接口的特例也不会影响别的接口。 */
 export function dataErrorText(t: Translate, failure: Failure): string {
   const key = dataErrorKey(failure.code)
   const text = t(key, failure.params)

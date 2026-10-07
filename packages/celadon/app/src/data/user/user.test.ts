@@ -130,6 +130,32 @@ describe('the user write queries hand the temporary token to the egress as a hea
     expect(sendMock).toHaveBeenCalledWith(api.entryVerify, { body: { username: 'ada@example.com', locale: 'zh-CN' } })
   })
 
+  it('turns a rejected judgement into its own code, and only for this interface', async () => {
+    /* 这条接口把「某一项不合法」统一报成 `invalid_request`，真正的原因在描述原文里。
+       细分只在这里做：通用映射不认识任何接口的细节，别的接口也不受影响。 */
+    sendMock.mockResolvedValue({
+      ok: false,
+      code: 'invalid_request',
+      params: {},
+      message: 'invalid: request',
+      rawMessage: 'Captcha verification failed: invalid captcha',
+    })
+    const refused = await entryVerifyQuery({ username: 'ada@example.com' }).operation()
+    expect(refused.ok).toBe(false)
+    expect(refused.ok ? '' : refused.code).toBe('user.invalid_captcha')
+
+    /* 同一码下没有这条描述时不动它 */
+    sendMock.mockResolvedValue({
+      ok: false,
+      code: 'invalid_request',
+      params: {},
+      message: 'invalid: request',
+      rawMessage: 'the request body is not acceptable',
+    })
+    const other = await entryVerifyQuery({ username: 'ada@example.com' }).operation()
+    expect(other.ok ? '' : other.code).toBe('invalid_request')
+  })
+
   it('registers and logs in with the temporary token in the Authorization header', async () => {
     sendMock.mockResolvedValue({ ok: true, value: { status: 'ok' } })
     await entryRegisterQuery('temp-1', { password: 'x' }).operation()

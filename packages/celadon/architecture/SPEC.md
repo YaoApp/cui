@@ -62,7 +62,7 @@
 | 用法 | 规则 |
 | --- | --- |
 | **命名空间** | 构建决定（`CUI_BASE`，默认 `app`）；Vite 的 `base` 与路由 `basename` **取同一个值**；**根 `/` 不属于应用**；Web 与桌面一致 |
-| **真链接**（`<a href>`）| 必须**带**命名空间 —— 用 `appHref(path)`（`platform/router/basename.ts`）|
+| **真链接**（`<a href>`）| 必须**带**命名空间 —— 用 `appHref(path)`（`platform/router/basename.ts`）。站内地址用基础件的 `Link` 时**自动改走路由**（同落 `<a href>`，左键点击不整页加载；见 `components/base/link/link.tsx`）|
 | **路由路径**（`to` / `navigate`）| **不带**命名空间 —— react-router 自己加。两者混用会出现 `/app/app/...` |
 | **分享链接** | **必须带**命名空间 —— 只经 `buildShareUrl()` 生成，不许手拼 |
 | **写 URL 的时机** | **只在动作中写入**；读只认 `POP`；**禁止在 `useEffect` 里写 URL**（会与"读 URL 写 store"互相追成死循环）|

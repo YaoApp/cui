@@ -1,4 +1,5 @@
 {
+  "auth.login.docTitle": "Sign in",
   "auth.login.titleLine1": "Sign up or sign in to your",
   "auth.login.titleLine2": "Yao Agents account",
   "auth.login.loading": "Loading the sign-in settings",
@@ -41,5 +42,22 @@
   "auth.switch.toLogin": "Already have an account? Sign in",
   "auth.footnote.prefix": "Don't have an account?",
   "auth.footnote.link": "Sign up now",
-  "auth.server.current": "Current server"
+  "auth.server.current": "Current server",
+  "auth.dialog.captchaTitle": "Enter the captcha",
+  "auth.dialog.close": "Close",
+  "auth.action.cancel": "Cancel",
+  "auth.action.confirm": "Confirm",
+  "auth.captcha.label": "Captcha",
+  "auth.captcha.placeholder": "Type the characters shown",
+  "auth.captcha.refresh": "Get another",
+  "auth.captcha.image": "Captcha image, activate to load another",
+  "auth.captcha.turnstile": "Human verification",
+  "auth.error.captchaRequired": "Enter the captcha first",
+  "auth.error.turnstileRequired": "Complete the human verification first",
+  "auth.register.docTitle": "Sign up",
+  "auth.register.titleLine1": "Create your Yao Agents account",
+  "auth.register.titleLine2": "",
+  "auth.register.pending": "The registration form comes next. The account came over from the sign-in page.",
+  "auth.register.hasAccount": "Already have an account?",
+  "auth.register.backToLogin": "Back to sign in"
 }

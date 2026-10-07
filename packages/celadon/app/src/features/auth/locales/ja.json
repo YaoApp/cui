@@ -1,4 +1,5 @@
 {
+  "auth.login.docTitle": "サインイン",
   "auth.login.titleLine1": "Yao Agents アカウントに登録またはログイン",
   "auth.login.titleLine2": "",
   "auth.login.loading": "サインイン設定を読み込んでいます",
@@ -41,5 +42,22 @@
   "auth.switch.toLogin": "アカウントをお持ちの方はサインイン",
   "auth.footnote.prefix": "アカウントをお持ちでないですか？",
   "auth.footnote.link": "新規登録",
-  "auth.server.current": "現在のサーバー"
+  "auth.server.current": "現在のサーバー",
+  "auth.dialog.captchaTitle": "画像認証コードを入力",
+  "auth.dialog.close": "閉じる",
+  "auth.action.cancel": "キャンセル",
+  "auth.action.confirm": "確定",
+  "auth.captcha.label": "画像認証コード",
+  "auth.captcha.placeholder": "画像の文字を入力",
+  "auth.captcha.refresh": "別の画像にする",
+  "auth.captcha.image": "画像認証コード。押すと別の画像になります",
+  "auth.captcha.turnstile": "人機認証",
+  "auth.error.captchaRequired": "画像認証コードを入力してください",
+  "auth.error.turnstileRequired": "先に人機認証を完了してください",
+  "auth.register.docTitle": "新規登録",
+  "auth.register.titleLine1": "Yao Agents アカウントを作成",
+  "auth.register.titleLine2": "",
+  "auth.register.pending": "登録フォームは後で接続します。アカウントはサインイン画面から引き継ぎました。",
+  "auth.register.hasAccount": "すでにアカウントがありますか？",
+  "auth.register.backToLogin": "サインインに戻る"
 }

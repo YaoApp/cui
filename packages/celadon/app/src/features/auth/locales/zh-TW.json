@@ -1,4 +1,5 @@
 {
+  "auth.login.docTitle": "登入",
   "auth.login.titleLine1": "註冊或登入你的 Yao Agents 帳號",
   "auth.login.titleLine2": "",
   "auth.login.loading": "正在載入入口設定",
@@ -41,5 +42,22 @@
   "auth.switch.toLogin": "已有帳號？前往登入",
   "auth.footnote.prefix": "還沒有帳號？",
   "auth.footnote.link": "立即註冊",
-  "auth.server.current": "目前伺服器"
+  "auth.server.current": "目前伺服器",
+  "auth.dialog.captchaTitle": "輸入圖形驗證碼",
+  "auth.dialog.close": "關閉",
+  "auth.action.cancel": "取消",
+  "auth.action.confirm": "確定",
+  "auth.captcha.label": "圖形驗證碼",
+  "auth.captcha.placeholder": "請輸入圖中的字元",
+  "auth.captcha.refresh": "換一張",
+  "auth.captcha.image": "圖形驗證碼，點擊可換一張",
+  "auth.captcha.turnstile": "人機驗證",
+  "auth.error.captchaRequired": "請先填寫圖形驗證碼",
+  "auth.error.turnstileRequired": "請先完成人機驗證",
+  "auth.register.docTitle": "註冊",
+  "auth.register.titleLine1": "建立你的 Yao Agents 帳號",
+  "auth.register.titleLine2": "",
+  "auth.register.pending": "註冊表單隨後接入，帳號已從登入頁帶過來。",
+  "auth.register.hasAccount": "已經有帳號？",
+  "auth.register.backToLogin": "返回登入"
 }

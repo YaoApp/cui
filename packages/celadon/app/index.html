@@ -2,9 +2,79 @@
 <html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="utf-8">
-<!-- 暂用空图标占位，消掉浏览器对 /favicon.ico 的 404；正式图标待 brand-yao-agents 落地 -->
-<link rel="icon" href="data:,">
-<title>CUI 2.0</title>
+<!-- 站点图标：根路径写法由构建按应用命名空间改写成 `/<namespace>/favicon.svg`
+     （文件在 `app/public/`，与包无关，因此首帧占位里也能用）。 -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<!-- 兜底名：具体页面由 `useDocumentTitle` 改。 -->
+<title>Yao Agents</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F4F4F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14120E" media="(prefers-color-scheme: dark)">
+<style>
+  /* **首帧占位的内联样式**。这里的取值必须写死：设计 token 随应用包一起下发，
+     而这一段的意义正是在**包到达之前**就把画面画出来（网络慢时先看到的不能是白屏）。
+     结构与取值照应用里的实现抄一遍：壳的高度与底色照 `platform/shell.less` 的 `#app`，
+     旋转指示器照基础件 `spinner`（两瓣四分之一弧的填充路径、16 网格、`fill: currentColor`、
+     一周 `--duration-loop` 取 320ms 那一档），文字照 `--font-size-caption` 与说明文字色。
+     改其中任何一处都要同时改这里。 */
+  html, body { block-size: 100%; }
+  body { margin: 0; background: #F4F4F5; color: #5E5A52; }
+  html[data-theme='dark'] body { background: #14120E; color: #B4AFA4; }
+  /* 与 shell.less 的 `#app` 一致：弹性列 + 最小整屏高，子元素才能真的居中 */
+  #app { display: flex; flex-direction: column; min-block-size: 100%; }
+  .boot {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* 标记与「旋转指示 + 说明」是两组，组间距两个档；组内一个档 */
+    gap: 24px;
+  }
+  .boot__mark { inline-size: 48px; block-size: auto; }
+  .boot__state { display: flex; align-items: center; gap: 8px; }
+  .boot__ring {
+    inline-size: 16px;
+    block-size: 16px;
+    fill: currentColor;
+    /* 一周 1600ms：与 token `--duration-loop` 一致，基础件 `spinner` 的默认值就是它 */
+    animation: celadon-boot-spin 1600ms linear infinite;
+  }
+  /* 「正在启动」的流光：结构与关键帧照 1.0 的加载消息（`packages/cui/chatbox/messages/Loading`）：
+     三段停靠 0/35/50/65/100、背景 300% 宽、裁进文字、`2s ease-in-out` 无限、从右往左扫。
+     两个色值换成本主题的 token，差值在**独立试色页上挑过**：底色与三级文字（#6B6962）几乎同色时
+     肉眼看不出在动，高光提到 #C9C7C0 才清楚。高光是扫过即逝的装饰，不承载信息，按装饰档取色。 */
+  .boot__text {
+    margin: 0;
+    font: 400 12px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background-image: linear-gradient(90deg, #5E5A52 0%, #5E5A52 35%, #C9C7C0 50%, #5E5A52 65%, #5E5A52 100%);
+    /* 200% 而不是 1.0 的 300%：高光带的宽度按比例算，1.0 那条加载消息文本很长，
+       而这里只有「Starting」这么短，300% 时高光在可见区外的时间占大半，几乎看不到动。 */
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: celadon-boot-shimmer 2s ease-in-out infinite;
+  }
+  html[data-theme='dark'] .boot__text {
+    background-image: linear-gradient(90deg, #B8B3A8 0%, #B8B3A8 35%, #F4F1EA 50%, #B8B3A8 65%, #B8B3A8 100%);
+  }
+  @keyframes celadon-boot-spin { to { rotate: 360deg; } }
+  @keyframes celadon-boot-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  /* 减动效：不停重复的动效按偏好停掉，文字回到可读的实色 */
+  @media (prefers-reduced-motion: reduce) {
+    .boot__ring { animation: none; }
+    .boot__text {
+      background-image: none;
+      color: #5E5A52;
+      animation: none;
+    }
+    html[data-theme='dark'] .boot__text { color: #B8B3A8; }
+  }
+</style>
 <script>
 /* 首帧前定主题 —— 与 src/platform/theme/theme.store.ts 读同一个键、用同一条解析规则，
    否则首屏会先闪一下浅色（见 architecture/09-theme.md §1）。 */
@@ -21,11 +91,40 @@
   } catch (e) {
     document.documentElement.dataset.theme = light
   }
+
+  /* 占位文字也在这里定：应用包到达之前没有语言包可用，只能按浏览器语言就近取一句。
+     与 `client.loading` 四语一致，改文案要一起改。 */
+  var loading = {
+    'zh-CN': '正在启动',
+    'zh-TW': '正在啟動',
+    'en-US': 'Starting',
+    'ja': '起動しています'
+  }
+  var tag = (navigator.language || 'en-US')
+  var key = loading[tag] ? tag : (tag.indexOf('zh') === 0 ? (tag.indexOf('TW') > 0 || tag.indexOf('HK') > 0 ? 'zh-TW' : 'zh-CN') : (tag.indexOf('ja') === 0 ? 'ja' : 'en-US'))
+  document.addEventListener('DOMContentLoaded', function () {
+    var line = document.getElementById('boot-text')
+    if (line) line.textContent = loading[key]
+  })
 })()
 </script>
 </head>
 <body class="celadon">
-  <main id="app"></main>
+  <!-- **首帧占位**：写在 HTML 里，因此从第一字节起就可见。应用包到达后由入口整体替换。
+       放在 HTML 里的理由：网络慢时先下载的是这份 HTML，包还没到，任何由包画出来的画面都还是白屏。 -->
+  <main id="app">
+    <div class="boot" role="status" aria-live="polite">
+      <!-- 标记居中；旋转指示与说明在它下面一行 -->
+      <img class="boot__mark" src="/favicon.svg" alt="">
+      <div class="boot__state">
+        <svg class="boot__ring" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M1.5 8 A6.5 6.5 0 0 1 8 1.5 A1.5 1.5 0 0 1 8 4.5 Q3.2 5.4 1.5 8 Z"></path>
+          <path d="M1.5 8 A6.5 6.5 0 0 1 8 1.5 A1.5 1.5 0 0 1 8 4.5 Q3.2 5.4 1.5 8 Z" transform="rotate(180 8 8)"></path>
+        </svg>
+        <p class="boot__text" id="boot-text">Starting</p>
+      </div>
+    </div>
+  </main>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

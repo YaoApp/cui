@@ -276,15 +276,6 @@ body.is-client .client-bar { display: flex; }
                  inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="accountPh" placeholder="Enter your email">
         </div>
 
-        <div class="terms">
-          <input id="terms" type="checkbox">
-          <label for="terms">
-            <span data-i18n="termsPre">I have read and agree to the</span>
-            <a class="link" href="#" data-i18n="termsService">Terms of Service</a>
-            <span data-i18n="termsAnd">and</span>
-            <a class="link" href="#" data-i18n="termsPrivacy">Privacy Policy</a>
-          </label>
-        </div>
         <p class="error-line" id="terms-error" role="alert" hidden>
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-state-error"></use></svg>
           <span data-i18n="errTerms">Please read and agree to the terms first.</span>
@@ -352,11 +343,9 @@ document.addEventListener('keydown', (event) => {
 })
 
 
-/* 未填邮箱：Next 禁用；提交：先校验协议（未勾选给左对齐错误），再假加载 2–3 秒后进注册页 */
+/* 未填邮箱：Next 禁用；提交：校验邮箱后假加载 2–3 秒进下一步（同意条款属于注册行为，这一步不问） */
 const nextBtn = document.getElementById('next')
 const emailInput = document.getElementById('account')
-const termsBox = document.getElementById('terms')
-const termsError = document.getElementById('terms-error')
 const accountField = document.getElementById('account-field')
 const emailError = document.createElement('p')
 emailError.className = 'error-line'
@@ -370,11 +359,6 @@ emailInput.addEventListener('input', () => {
   accountField.classList.remove('is-error')
   emailError.hidden = true
 })
-termsBox.addEventListener('change', () => {
-  if (!termsBox.checked) return
-  termsError.hidden = true
-  document.querySelector('.terms').classList.remove('is-error')
-})
 document.querySelector('form').addEventListener('submit', async (event) => {
   event.preventDefault()
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailInput.value.trim())) {
@@ -383,12 +367,6 @@ document.querySelector('form').addEventListener('submit', async (event) => {
     errorText('errEmail')
     emailError.hidden = false
     emailInput.focus()
-    return
-  }
-  if (!isClient && !termsBox.checked) {
-    document.querySelector('.terms').classList.add('is-error')
-    termsError.hidden = false
-    termsBox.focus()
     return
   }
   nextBtn.classList.add('is-loading')     /* 只有 checking 期间不可点 */

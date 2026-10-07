@@ -1,0 +1,29 @@
+/* 锁定后的账号行：只读输入框占满整行（长度与密码字段一致），「修改」叠在它的右端。
+   两个基础件由这一层组合，输入框的宽度不被按钮挤掉：按钮绝对定位浮在输入框之上，
+   因此这一行的宽度只由输入框决定（浏览器用例对比两处输入框的宽度，要求相等）。
+   按钮四周的留白与上下一致，都是「控件高减按钮高」的一半（大档 8）—— 上下留白本来就是它，
+   横向取同一个值，四个方向才读得出是同一个内距（layout.md 第 3 节：内边距归容器且成组一致）。
+   纵向再加字段列比本体高出的 4，按钮才落在**输入框本体**的中线上（字段列另有标签位与消息位，
+   只按整列居中会偏 8；实测加这 4 之后中心差 0）。
+   外边距由调用方给（组件自己不留外边距，见 layout.md 规则 3）。 */
+.locked-account {
+  position: relative;
+  display: flex;
+  /* 按钮四周的留白：字段取大档（32 + 8 = 40，见 input.less 的档位算式），按钮取小档 24，
+     差的半档就是 8。行容器读不到字段盒子里定义的 --field-control-height（它只向下继承），
+     因此这里按大档的算式写全：换档时这个值要跟着改。 */
+  --locked-account-inset: calc((var(--spacing-32) + var(--spacing-8) - var(--spacing-24)) / 2);
+}
+
+.locked-account > :first-child {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.locked-account > button {
+  position: absolute;
+  /* 横向与纵向取同一个值，四个方向的留白因此一致；纵向不再另加偏移 —— 叠放之后
+     行的顶边就是字段的顶边，加了会变成上 12 下 4（实测过）。 */
+  inset-inline-end: var(--locked-account-inset);
+  inset-block-start: var(--locked-account-inset);
+}

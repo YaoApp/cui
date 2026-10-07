@@ -108,6 +108,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-8);
+  /* 这一行**常占位**：条目在入口配置到达后才有（地址来自配置），先留出同一行的高度，
+     卡片因此不会被它挤上去（否则配置到达的瞬间整张卡片会上移半行）。 */
+  min-block-size: var(--line-height-control-small);
   color: var(--text-tertiary);
   font-size: var(--font-size-11);
 }

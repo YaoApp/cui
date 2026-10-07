@@ -8,6 +8,10 @@ import './dialog.less'
 /** 面板宽度档：`form` 给表单与步骤（480），`page` 用来打开一整页内容（中栏可读宽）。 */
 export type DialogSize = 'form' | 'page'
 
+/** 打开弹窗的交互方式，取值与上游一致（上游该类型在它自己的工具包里，未随组件导出，这里照抄语义；
+ *  上游还带一个空串取值，程序化打开时是它）。 */
+export type DialogOpenType = '' | 'mouse' | 'touch' | 'pen' | 'keyboard'
+
 export type DialogProps = {
   /** 受控开关。 */
   open: boolean
@@ -26,8 +30,17 @@ export type DialogProps = {
   size?: DialogSize
   /** 点遮罩是否关闭（上游语义）；按 Esc 关闭由上游负责。 */
   disablePointerDismissal?: boolean
-  /** 打开时先聚焦哪里；不传则由上游聚焦第一个可聚焦元素。 */
-  initialFocus?: boolean | RefObject<HTMLElement | null>
+  /**
+   * 打开时先聚焦哪里，类型与语义都照上游：
+   *
+   * - 不传：聚焦面板本身（本组件的默认，见下面 `initialFocus ?? popupRef`）；
+   * - `false`：不动焦点；`true`：上游的默认行为（第一个可聚焦元素或面板）；
+   * - `RefObject`：聚焦该元素；
+   * - 函数：按交互方式（`mouse` / `touch` / `pen` / `keyboard`）返回要聚焦的元素，
+   *   返回 `true` 用默认行为，返回 `false` 或空则不动。函数形态让调用方在**打开的那一刻**
+   *   取到弹窗里的元素（例如某个输入框），不必再用 effect 去追。
+   */
+  initialFocus?: boolean | RefObject<HTMLElement | null> | ((openType: DialogOpenType) => boolean | HTMLElement | null | void)
   className?: string
   children: ReactNode
 }

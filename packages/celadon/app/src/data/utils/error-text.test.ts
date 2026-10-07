@@ -12,6 +12,7 @@ const failure = (over: Partial<Failure> = {}): Failure => ({
 /** 语言包取值的替身：命中时返回句子，未命中时**与 i18next 一样**把 key 原样返回。 */
 const pack: Record<string, string> = {
   'data.error.transport.status': '服务端返回了 {{status}}',
+  'data.error.invalidRequest': '请求不合法',
 }
 const t = (key: string, options?: Record<string, unknown>) => {
   const raw = pack[key]
@@ -32,6 +33,18 @@ describe('the data error key', () => {
 describe('the data error text', () => {
   it('resolves by code and interpolates the params', () => {
     expect(dataErrorText(t, failure())).toBe('服务端返回了 500')
+  })
+
+  it('maps by the code alone, without knowing any interface', () => {
+    /* 通用映射只认码；某一项接口的细分由那个域自己做（见 `data/user/queries.ts`），
+       一个接口的特例不会影响别的接口。 */
+    const generic = failure({
+      code: 'invalid_request',
+      params: {},
+      message: 'invalid: request',
+      rawMessage: 'Captcha verification failed: invalid captcha',
+    })
+    expect(dataErrorKey(generic.code)).toBe('data.error.invalidRequest')
   })
 
   it('falls back to the diagnostic message, and says so, when the key is missing', () => {

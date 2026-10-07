@@ -3,6 +3,7 @@ import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
 import { Input } from '@/components/base/input'
 import { useTranslation } from '@/platform/i18n'
+import './password-input.less'
 
 export type PasswordInputProps = {
   /** 字段的 HTML id，与标签和错误文案的关联都按它拼。 */

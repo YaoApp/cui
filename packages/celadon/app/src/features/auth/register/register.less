@@ -1,0 +1,23 @@
+/* 注册页（通道版）：把登录页带过来的账号显示出来，并说明表单随后接入。
+   条款那一行与页面上的其它内容分成两组：上面是说明，下面是要同意的事，间距取两个档。
+   取值全部来自 token，浅暗两套各自成立。 */
+.register__pending {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  margin-block-end: var(--spacing-24);
+}
+
+.register__account {
+  margin: 0;
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-control);
+  color: var(--text-primary);
+}
+
+.register__note {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-cjk);
+  color: var(--text-secondary);
+}

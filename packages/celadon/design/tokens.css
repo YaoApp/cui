@@ -2722,3 +2722,41 @@
     animation: none !important;
   }
 }
+/* 人机验证控件：容器只给位置，控件本身由脚本异步画在里面。
+   这一层负责三件事：控件没出来之前的加载指示、控件居中、错误文案的位置。
+   错误文案**常驻一行**（内容为空也占位），弹窗的高度因此不随错误出现而变化。 */
+.turnstile-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  /* 控件是第三方画的固定宽度块，居中放在弹窗里 */
+  align-items: center;
+}
+.turnstile-field__frame {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  inline-size: 100%;
+  /* 控件本身与加载指示至少占这么高，脚本没就绪时不至于塌成一条线 */
+  min-block-size: calc(var(--spacing-32) + var(--spacing-8));
+}
+.turnstile-field__widget {
+  min-block-size: calc(var(--spacing-32) + var(--spacing-8));
+}
+/* 加载指示叠在控件的位置上：控件画出来之后由组件撤掉 */
+.turnstile-field__loading {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  translate: -50% -50%;
+}
+/* 错误只由这行文案表达，**不给控件套红框**：控件由第三方画在 iframe 里，
+   外面加一圈红边读起来像我们自己画的控件出了错，也会把它整个盖住。 */
+.turnstile-field__error {
+  margin: 0;
+  align-self: stretch;
+  min-block-size: calc(var(--font-size-caption) * var(--line-height-normal));
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-normal);
+  color: var(--danger-ink);
+}

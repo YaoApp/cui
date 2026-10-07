@@ -86,12 +86,26 @@ export const oauthAuthorizeQuery = (id: string, redirectUri?: string) => ({
 
 /* ===== 写 ===== */
 
+/**
+ * 判定失败的原因细分：这条接口把「某一项不合法」统一报成 `invalid_request`，
+ * 真正的原因（验证码不正确）写在描述原文里，因此在这一条接口自己的域里换成自己的码。
+ * 通用映射只认码，不认识任何接口的细节；别的接口也不受这条规则影响。
+ */
+function refineVerifyFailure(result: Result<EntryVerifyResponse>): Result<EntryVerifyResponse> {
+  if (result.ok) return result
+  if (result.code === 'invalid_request' && /invalid captcha/i.test(result.rawMessage ?? '')) {
+    return { ...result, code: 'user.invalid_captcha' }
+  }
+  return result
+}
+
 /** 判定"登录还是注册"：返回临时令牌与下一步。 */
 export const entryVerifyQuery = (input: Omit<EntryVerifyRequest, 'locale'>): { key: readonly unknown[]; operation: () => Promise<Result<EntryVerifyResponse>> } => {
   /* 这条接口的方言是 **body**：ctx 的语言进 body.locale（服务端读它）*/
   return {
     key: userKeys.entryVerify(),
-    operation: (_input?: void, passed?: Context) => send(entryVerify, { body: { ...input, locale: localeOf(passed) } }),
+    operation: async (_input?: void, passed?: Context) =>
+      refineVerifyFailure(await send(entryVerify, { body: { ...input, locale: localeOf(passed) } })),
   }
 }
 

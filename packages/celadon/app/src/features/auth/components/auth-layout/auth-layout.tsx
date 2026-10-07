@@ -91,7 +91,8 @@ export function AuthLayout({ titleLines, footnote, serviceHref, privacyHref, onB
         {inApp ? <div className="auth__ctrl-wrap">{controls}</div> : null}
       </div>
 
-      {!inApp && (serviceHref || privacyHref) ? (
+      {inApp ? null : (
+        /* 页脚常驻（哪怕一条都没有）：高度恒定，卡片位置才不被配置到达影响 */
         <footer className="auth__bottom">
           {serviceHref ? (
             <a className="auth__bottom-link" href={serviceHref} target="_blank" rel="noopener noreferrer">
@@ -105,7 +106,7 @@ export function AuthLayout({ titleLines, footnote, serviceHref, privacyHref, onB
             </a>
           ) : null}
         </footer>
-      ) : null}
+      )}
     </div>
   )
 }

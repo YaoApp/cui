@@ -1,4 +1,4 @@
-/* 域状态：三步之间的流转、临时令牌的收发，以及成功之后的收尾（采纳会话与跳转）。
+/* 服务端数据的提升共享（入口配置与验签公钥）与成功之后的收尾（采纳会话与跳转）。
    接口走假出口，判定的是可见结果与传给 `signIn` 的响应体。 */
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -13,7 +13,9 @@ vi.mock('@/platform/credential', async (importOriginal) => {
 })
 
 import { transportFetch } from '@/platform/transport/fetch'
-import { AuthProvider, useAuth } from '@/features/auth/components/auth-provider'
+import { AuthProvider } from '@/features/auth/components/auth-provider'
+import { useAuth } from '@/features/auth/use-auth'
+import { useCompleteSignIn } from '@/features/auth/use-complete-sign-in'
 
 const SERVICE = { name: 'Yao Dev', version: '1.0.0', openapi: '/v1' }
 const CONFIG = {
@@ -24,24 +26,14 @@ const CONFIG = {
   secure_cookie: false,
 }
 
-/** 把域状态画成可点的探针，用例按可见文字判定流转。 */
+/** 把提升共享的配置与收尾动作画成可点的探针。 */
 function Probe() {
   const auth = useAuth()
+  const complete = useCompleteSignIn()
   return (
     <div>
-      <p data-testid="phase">{auth.phase}</p>
-      <p data-testid="token">{auth.tempToken}</p>
-      <p data-testid="status">{auth.verifyStatus ?? '-'}</p>
-      <button type="button" onClick={() => auth.enterPassword({ tempToken: 'temp-1', status: 'register', otpId: 'otp-9', needsCode: true })}>
-        enter
-      </button>
-      <button type="button" onClick={() => auth.enterInvite('temp-2')}>
-        invite
-      </button>
-      <button type="button" onClick={() => auth.changeAccount()}>
-        change
-      </button>
-      <button type="button" onClick={() => void auth.complete({ user_id: 'u1', access_token: 'access', status: 'ok' })}>
+      <p data-testid="title">{auth.config?.title ?? '取回中'}</p>
+      <button type="button" onClick={() => void complete({ user_id: 'u1', access_token: 'access', status: 'ok' })}>
         complete
       </button>
     </div>
@@ -72,39 +64,9 @@ describe('the auth provider', () => {
     })
   })
 
-  it('starts on the account step with nothing carried over', async () => {
+  it('shares the entry configuration it fetched through the data layer', async () => {
     renderProbe()
-    expect(await screen.findByTestId('phase')).toHaveProperty('textContent', 'account')
-    expect(screen.getByTestId('token').textContent).toBe('')
-    expect(screen.getByTestId('status').textContent).toBe('-')
-  })
-
-  it('carries the temporary token, the verdict and the code id into the password step', async () => {
-    const user = userEvent.setup()
-    renderProbe()
-    await user.click(screen.getByRole('button', { name: 'enter' }))
-    expect(screen.getByTestId('phase').textContent).toBe('password')
-    expect(screen.getByTestId('token').textContent).toBe('temp-1')
-    expect(screen.getByTestId('status').textContent).toBe('register')
-  })
-
-  it('replaces the temporary token when the invitation step starts', async () => {
-    const user = userEvent.setup()
-    renderProbe()
-    await user.click(screen.getByRole('button', { name: 'enter' }))
-    await user.click(screen.getByRole('button', { name: 'invite' }))
-    expect(screen.getByTestId('phase').textContent).toBe('invite')
-    expect(screen.getByTestId('token').textContent).toBe('temp-2')
-  })
-
-  it('clears the verdict and the token when going back to the account step', async () => {
-    const user = userEvent.setup()
-    renderProbe()
-    await user.click(screen.getByRole('button', { name: 'enter' }))
-    await user.click(screen.getByRole('button', { name: 'change' }))
-    expect(screen.getByTestId('phase').textContent).toBe('account')
-    expect(screen.getByTestId('token').textContent).toBe('')
-    expect(screen.getByTestId('status').textContent).toBe('-')
+    expect(await screen.findByTestId('title')).toHaveProperty('textContent', '欢迎')
   })
 
   it('adopts the session and lands on the success address', async () => {
@@ -117,7 +79,7 @@ describe('the auth provider', () => {
 
   it('refuses to be used outside the provider', async () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    expect(() => render(<Probe />)).toThrow('useAuth must be called inside AuthProvider')
+    expect(() => render(<Probe />)).toThrow('useAuthConfig must be called inside AuthProvider')
     consoleError.mockRestore()
   })
 })

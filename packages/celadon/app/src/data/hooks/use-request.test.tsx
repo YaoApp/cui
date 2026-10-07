@@ -24,6 +24,28 @@ describe('useRequest', () => {
     expect(result.current.state).toEqual({ status: 'idle' })
   })
 
+  it('resolves a second run on the same hook, not only the first one', async () => {
+    /* 手动钩子的第二次提交：上一轮的清理函数不能把这一轮的等待者当作旧的处理掉，
+       否则 `await run()` 永不落定（第二次提交的调用方会停在原处）。 */
+    send.mockResolvedValueOnce({ ok: true, value: 'first' }).mockResolvedValueOnce({ ok: true, value: 'second' })
+    const { result } = renderHook(() => useRequest(REQUEST, { manual: true }))
+
+    let first: Promise<unknown> = Promise.resolve()
+    act(() => {
+      first = result.current.run()
+    })
+    await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 'first' }))
+    await first
+
+    let second: Promise<unknown> = Promise.resolve()
+    act(() => {
+      second = result.current.run()
+    })
+    await waitFor(() => expect(result.current.state).toEqual({ status: 'ok', value: 'second' }))
+    await expect(second).resolves.toEqual({ ok: true, value: 'second' })
+    expect(send).toHaveBeenCalledTimes(2)
+  })
+
     it('runs the declaration on mount and reports the value', async () => {
     send.mockResolvedValue({ ok: true, value: 'v' })
     const { result } = renderHook(() => useRequest(REQUEST))

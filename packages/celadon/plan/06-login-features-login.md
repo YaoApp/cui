@@ -228,3 +228,41 @@ read from the test interface`，实测拿到 `status = register`、`verification
 邮件与短信的一次性口令**取不到**：`data/test` 的 `readOtp` 走 `GET /test/otp?code=…`，而后端那条接口的 `code`
 是口令本身（按口令查它自己的状态），入口一线发出的口令存在另一处存储里，没有对外路由。因此注册最后一步的
 验证码要由收件人从邮箱或短信取，自动化只覆盖到「请求体带上 `otp_id` 与 `verification_code`」这一层。
+
+## 14. 后续逻辑：后续两步进弹窗，账号不存在去注册（2026-10-07）
+
+形态改为：**账号留在页面上，后续两步在弹窗里**，账号不存在时**跳注册**。
+
+| 动作 | 现在的行为 |
+| --- | --- |
+| 点「下一步」 | 校验账号与条款；入口配置要求图形验证码（`form.captcha.type === 'image'`）时弹窗收验证码，不要求就直接判定 |
+| 提交验证码 | 带 `captcha` 与 `captcha_id` 调 `entryVerify`；失败按错误码翻译后显示在**弹窗内**（模态打开时背景被标成 `aria-hidden`，页面上的提示读不到） |
+| 判定为存在（`user_exists` 且 `status === 'login'`） | 弹窗转到密码步：账号只读加「修改」、密码框、记住我（配置声明时）；确认后调 `entryLogin`，邀请码与多因素分支照旧 |
+| 判定为不存在 | 带账号跳 `/register?username=…`，注册页（通道版）把账号显示出来 |
+| 「修改」/关闭弹窗 | 回到账号步并清空密码与已触碰状态 |
+
+弹窗用基础件 `DialogPage`：宽度取 `--dialog-width`（480），遮罩 `--scrim`，圆角 `--radius-large`，底部操作右对齐，
+动效取 `modal` 场景；底部的主按钮用 `form` 属性关联到弹窗内的表单。文案新增
+`auth.dialog.*` · `auth.action.cancel` · `auth.captcha.*` · `auth.error.captchaRequired` · `auth.register.*`，四语齐备。
+
+与本文档上文的差异：
+
+| 上文写法 | 现在的实现 | 依据 |
+| --- | --- | --- |
+| 密码与邀请码都是**页面上的步骤**（`phase` 驱动显隐） | 密码步在弹窗里，邀请码步仍在页面上 | 弹窗承载「判定后的一次交互」，页面始终显示账号步，关闭弹窗即回来 |
+| 注册在本页走「确认密码 + 一次性口令」 | 登录页不再有注册分支，账号不存在即跳注册页 | 注册是独立页面（见 `plan/06-login-features.md`），登录页只负责判定与登录 |
+| 「去注册」链接落地页不存在 | 注册页已建**通道版**：显示带过来的账号、可返回登录 | 表单本身随后落地，先把通道接上 |
+| 条款勾选在账号步（草稿如此） | 移到注册页 | 同意条款属于注册行为，回头登录的人不必再同意一次 |
+
+`features/auth/register/` 是这一版的注册页（通道版），`/register` 与 `/login` 挂在同一个只提供 `AuthProvider` 的布局路由下。
+条款与隐私政策的勾选、两个链接与错误态都在注册页上，登录页的判定不再以它为条件；草图的 `login.html` 同步删掉了这一块与它的事件处理。
+
+实测（`app/logs/2026-10-07/shots/`）：
+
+| 用例 | 读数 |
+| --- | --- |
+| `opens the password step in the dialog for an account that exists, drawn from the tokens` | 弹窗标题「输入登录密码」、账号只读、`修改` 与`记住我`在框内；面板宽 = `--dialog-width`、遮罩 = `--scrim`、圆角 = `--radius-large`、底部 `justify-content: flex-end` |
+| `sends an account that does not exist to the register form with the account in the query` | 跳到 `/app/register?username=new-user%40example.com`，注册页显示该账号 |
+| `walks the first step against the live service with the captcha read from the test interface` | 进入页面不取图；点「下一步」后弹窗标题「输入图形验证码」；答案从 `GET /test/captcha` 读到并回填；真实判定 `status = register`，随后跳到注册通道 |
+
+单元用例 13 例（登录页 10 · 注册页 3），浏览器用例 9 例。

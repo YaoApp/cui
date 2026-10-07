@@ -5,8 +5,11 @@ import 'i18next'
 
 /** 基准语言里存在的全部 key —— `t('…')` 只接受这些。 */
 export type I18nKey =
+  | 'app.name'
   | 'auth.action.backToServers'
+  | 'auth.action.cancel'
   | 'auth.action.change'
+  | 'auth.action.confirm'
   | 'auth.action.continue'
   | 'auth.action.hidePassword'
   | 'auth.action.login'
@@ -16,13 +19,22 @@ export type I18nKey =
   | 'auth.action.resendIn'
   | 'auth.action.retry'
   | 'auth.action.showPassword'
+  | 'auth.captcha.image'
+  | 'auth.captcha.label'
+  | 'auth.captcha.placeholder'
+  | 'auth.captcha.refresh'
+  | 'auth.captcha.turnstile'
+  | 'auth.dialog.captchaTitle'
+  | 'auth.dialog.close'
   | 'auth.error.accountInvalid'
+  | 'auth.error.captchaRequired'
   | 'auth.error.codeRequired'
   | 'auth.error.idToken'
   | 'auth.error.passwordMismatch'
   | 'auth.error.passwordRequired'
   | 'auth.error.session'
   | 'auth.error.termsRequired'
+  | 'auth.error.turnstileRequired'
   | 'auth.field.account'
   | 'auth.field.code'
   | 'auth.field.codeCell'
@@ -32,6 +44,7 @@ export type I18nKey =
   | 'auth.footnote.link'
   | 'auth.footnote.prefix'
   | 'auth.forgotPassword'
+  | 'auth.login.docTitle'
   | 'auth.login.loading'
   | 'auth.login.titleLine1'
   | 'auth.login.titleLine2'
@@ -40,6 +53,12 @@ export type I18nKey =
   | 'auth.notice.team'
   | 'auth.or'
   | 'auth.provider.continueWith'
+  | 'auth.register.backToLogin'
+  | 'auth.register.docTitle'
+  | 'auth.register.hasAccount'
+  | 'auth.register.pending'
+  | 'auth.register.titleLine1'
+  | 'auth.register.titleLine2'
   | 'auth.remember'
   | 'auth.server.current'
   | 'auth.switch.toLogin'
@@ -203,6 +222,7 @@ export type I18nKey =
   | 'bridge.write'
   | 'client.bootFailed'
   | 'client.bootRetry'
+  | 'client.loading'
   | 'data.error.deleteFailed'
   | 'data.error.forbidden'
   | 'data.error.getFailed'
@@ -218,6 +238,7 @@ export type I18nKey =
   | 'data.error.transport.status'
   | 'data.error.transport.timeout'
   | 'data.error.unauthorized'
+  | 'data.error.user.invalidCaptcha'
   | 'header.refresh'
   | 'home.client'
   | 'home.clientDesktop'
@@ -337,8 +358,11 @@ declare module 'i18next' {
     nsSeparator: false
     resources: {
       translation: {
+        'app.name': string
         'auth.action.backToServers': string
+        'auth.action.cancel': string
         'auth.action.change': string
+        'auth.action.confirm': string
         'auth.action.continue': string
         'auth.action.hidePassword': string
         'auth.action.login': string
@@ -348,13 +372,22 @@ declare module 'i18next' {
         'auth.action.resendIn': string
         'auth.action.retry': string
         'auth.action.showPassword': string
+        'auth.captcha.image': string
+        'auth.captcha.label': string
+        'auth.captcha.placeholder': string
+        'auth.captcha.refresh': string
+        'auth.captcha.turnstile': string
+        'auth.dialog.captchaTitle': string
+        'auth.dialog.close': string
         'auth.error.accountInvalid': string
+        'auth.error.captchaRequired': string
         'auth.error.codeRequired': string
         'auth.error.idToken': string
         'auth.error.passwordMismatch': string
         'auth.error.passwordRequired': string
         'auth.error.session': string
         'auth.error.termsRequired': string
+        'auth.error.turnstileRequired': string
         'auth.field.account': string
         'auth.field.code': string
         'auth.field.codeCell': string
@@ -364,6 +397,7 @@ declare module 'i18next' {
         'auth.footnote.link': string
         'auth.footnote.prefix': string
         'auth.forgotPassword': string
+        'auth.login.docTitle': string
         'auth.login.loading': string
         'auth.login.titleLine1': string
         'auth.login.titleLine2': string
@@ -372,6 +406,12 @@ declare module 'i18next' {
         'auth.notice.team': string
         'auth.or': string
         'auth.provider.continueWith': string
+        'auth.register.backToLogin': string
+        'auth.register.docTitle': string
+        'auth.register.hasAccount': string
+        'auth.register.pending': string
+        'auth.register.titleLine1': string
+        'auth.register.titleLine2': string
         'auth.remember': string
         'auth.server.current': string
         'auth.switch.toLogin': string
@@ -535,6 +575,7 @@ declare module 'i18next' {
         'bridge.write': string
         'client.bootFailed': string
         'client.bootRetry': string
+        'client.loading': string
         'data.error.deleteFailed': string
         'data.error.forbidden': string
         'data.error.getFailed': string
@@ -550,6 +591,7 @@ declare module 'i18next' {
         'data.error.transport.status': string
         'data.error.transport.timeout': string
         'data.error.unauthorized': string
+        'data.error.user.invalidCaptcha': string
         'header.refresh': string
         'home.client': string
         'home.clientDesktop': string
