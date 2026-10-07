@@ -1,0 +1,95 @@
+/* 一次性口令字段：一串正方形格子，尺寸与输入框同梯（格子边长 = 该档控件高度）。
+   观感取输入框的同一批 token：字段底、控件描边、圆角档、控件行高；聚焦画一层品牌描边加同样颜色的环。
+   错误是持续状态：悬停与聚焦都不改变格子描边色；禁用与只读各自成档。
+   本文件只管格子，字段的标签与消息位仍用输入框那套 `.field*` 类。 */
+.celadon,
+[data-theme] .celadon {
+  .otp-field__cells {
+    display: flex;
+    gap: var(--spacing-8);
+  }
+
+  .otp-field__cell {
+    box-sizing: border-box;
+    flex: none;
+    inline-size: var(--spacing-32);
+    block-size: var(--spacing-32);
+    padding: 0;
+    border: var(--border-width) solid var(--border-control);
+    border-radius: var(--radius-medium);
+    background: var(--background-field);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-control);
+    text-align: center;
+    transition:
+      border-color var(--duration-fast) var(--easing-standard),
+      box-shadow var(--duration-fast) var(--easing-standard),
+      background-color var(--duration-fast) var(--easing-standard);
+
+    /* 数字在浏览器里默认是西文字形，取等宽数字让每格宽度稳定，不随数字形状跳动 */
+    font-variant-numeric: tabular-nums;
+
+    &:not(.is-disabled, :disabled):hover,
+    &.is-hover {
+      border-color: var(--border-hover);
+    }
+
+    /* 聚焦优先于悬停：带上悬停的变体并放在悬停规则之后，否则鼠标停在已聚焦的格子上会留下一层悬停色。 */
+    &:focus,
+    &.is-focus,
+    &:not(.is-disabled, :disabled):focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 1px var(--brand);
+      outline: none;
+      background: var(--background-field-focus);
+    }
+
+    &:read-only,
+    &.is-readonly {
+      background: var(--background-readonly);
+      color: var(--text-secondary);
+      cursor: default;
+    }
+
+    /* 错误：悬停与聚焦都不改描边色，聚焦时把环也换成危险色 */
+    &.is-error,
+    &.is-error:not(.is-disabled, :disabled):hover,
+    &.is-error:focus,
+    &.is-error.is-hover,
+    &.is-error.is-focus {
+      border-color: var(--danger);
+    }
+
+    &.is-error:focus,
+    &.is-error.is-focus {
+      box-shadow: 0 0 0 1px var(--danger);
+    }
+
+    &:disabled,
+    &.is-disabled {
+      background: var(--background-disabled);
+      border-color: var(--border-disabled);
+      color: var(--text-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  /* 尺寸档与输入框逐条对齐：小 24 / 中 32 / 大 40，字号与行高取同一批控件 token，
+     圆角按档位取同名 token。大档写成两档之和，间距梯上没有 40 这一档。 */
+  .otp-field--small .otp-field__cell {
+    inline-size: var(--spacing-24);
+    block-size: var(--spacing-24);
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-control-small);
+    border-radius: var(--radius-small);
+  }
+
+  .otp-field--large .otp-field__cell {
+    inline-size: calc(var(--spacing-32) + var(--spacing-8));
+    block-size: calc(var(--spacing-32) + var(--spacing-8));
+    font-size: var(--font-size-body-lg);
+    border-radius: var(--radius-large);
+  }
+}

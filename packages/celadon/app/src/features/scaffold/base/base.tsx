@@ -1,7 +1,17 @@
 import './base.less'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { BrandMark, Button, CaptchaField, Checkbox, Icon, Input, SegmentedControl, Select } from '@/components/base'
+import {
+  BrandMark,
+  Button,
+  CaptchaField,
+  Checkbox,
+  Icon,
+  Input,
+  OtpField,
+  SegmentedControl,
+  Select,
+} from '@/components/base'
 import type { SegmentedOption, SelectGroup } from '@/components/base'
 import { LocaleSwitch } from '@/components/locale-switch'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -89,6 +99,48 @@ function CaptchaSampleField({
       <span className="base-demo__name">
         {t('base.captcha.id')}: {captchaId || '-'}
       </span>
+    </div>
+  )
+}
+
+/* 一次性口令样例：口令的值留在样例里，方便真敲真粘。`withInput` 在下面并排一个同一档的输入框，
+   两边高度一样才算「尺寸与输入框一致」，这条用眼睛与浏览器用例一起核。 */
+function OtpSampleField({
+  id,
+  size,
+  error,
+  disabled,
+  readOnly,
+  state,
+  withInput,
+}: {
+  id: string
+  size?: 'small' | 'medium' | 'large'
+  error?: string
+  disabled?: boolean
+  readOnly?: boolean
+  state?: 'hover' | 'focus'
+  withInput?: boolean
+}) {
+  const { t } = useTranslation()
+  const [value, setValue] = useState('')
+  return (
+    <div className="base-demo">
+      <OtpField
+        id={id}
+        value={value}
+        onValueChange={setValue}
+        label={t('base.otp.label')}
+        hint={t('base.otp.hint')}
+        error={error}
+        disabled={disabled}
+        readOnly={readOnly}
+        size={size}
+        state={state}
+        name={`${id}-code`}
+        cellLabel={(index) => t('base.otp.cell', { index: index + 1 })}
+      />
+      {withInput ? <Input id={`${id}-input`} label={t('base.otp.input')} placeholder={t('base.otp.hint')} size={size} /> : null}
     </div>
   )
 }
@@ -382,6 +434,35 @@ export function BasePage() {
           <CaptchaSampleField id="demo-captcha-small" size="small" />
           <CaptchaSampleField id="demo-captcha-medium" />
           <CaptchaSampleField id="demo-captcha-large" size="large" />
+        </div>
+      </section>
+
+      <section className="base-group">
+        <h2 className="base-group__title">{t('base.group.otp')}</h2>
+
+        {/* 属性：默认 · 调用方错误 · 禁用 · 只读。值留在样例里，真敲真粘都由键盘与剪贴板驱动，
+            浏览器用例持住逐位输入与整段粘贴两条路径。 */}
+        <h3 className="base-subgroup__title">{t('base.sub.props')}</h3>
+        <div className="base-grid">
+          <OtpSampleField id="demo-otp-default" />
+          <OtpSampleField id="demo-otp-error" error={t('base.otp.error')} />
+          <OtpSampleField id="demo-otp-disabled" disabled />
+          <OtpSampleField id="demo-otp-readonly" readOnly />
+        </div>
+
+        {/* 静态态：一张图上并排看到悬停与聚焦，不必把指针移上去 */}
+        <h3 className="base-subgroup__title">{t('base.sub.states')}</h3>
+        <div className="base-grid">
+          <OtpSampleField id="demo-otp-hover" state="hover" />
+          <OtpSampleField id="demo-otp-focus" state="focus" />
+        </div>
+
+        {/* 尺寸：每档旁边并排一个同档输入框，格子边长与输入框高度一致这条因此看得见 */}
+        <h3 className="base-subgroup__title">{t('base.sub.sizes')}</h3>
+        <div className="base-grid">
+          <OtpSampleField id="demo-otp-small" size="small" withInput />
+          <OtpSampleField id="demo-otp-medium" withInput />
+          <OtpSampleField id="demo-otp-large" size="large" withInput />
         </div>
       </section>
 

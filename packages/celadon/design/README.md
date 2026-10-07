@@ -63,7 +63,8 @@
 
 ## 组件草图与状态
 
-**组件草图按组件分文件**：`.input` 在 `app/src/components/base/input/input.less`，`.btn-*` 在 `button/button.less`，
+**组件草图按组件分文件**：`.input` 在 `app/src/components/base/input/input.less`，`.otp-field__cell` 在
+`otp-field/otp-field.less`，`.btn-*` 在 `button/button.less`，
 `.seg*` 在 `segmented-control/segmented-control.less`，选择器的触发器与弹层在 `select/select.less`，
 `.spinner` 在 `spinner/spinner.less`；设计页样例类（`.badge-*` / `.bubble-*` / `.nav-item.is-active`）在 `design/samples.less`，
 工具类（`.link` / `.code*` / `.scrim` / `.focusable`）在 `design/utilities.less`。
@@ -71,6 +72,10 @@
 色卡「控件状态」面板即实时渲染这些类。
 
 - **输入框七态**：默认 / 悬停 / 聚焦 / 占位 / 只读 / 禁用 / 错误；
+- **一次性口令**：一位一个正方形格子，**格子边长等于该档控件高度**（24 · 32 · 40），字号与行高也逐档与输入框一致，
+  因此和输入框并排时高度完全相同；格间 `--spacing-8`，圆角按档位取同名 token。值是**从左往右连续**的数字，
+  格子只是它的视图；只收数字，退格清本格及其右侧，整段粘贴从当前格铺开，填满时给出一次完成回调。
+  它是多控件字段，因此自己搭 `.field*` 结构，不套单控件的 `Field`；
 - **按钮五态**：默认 / 悬停 / 按下 / 聚焦 / 禁用；八个变体（实心 · 浅底 · 幽灵 · **纯文字** · 琥珀 · 成功 · 危险 · 反色）。
   纯文字档无底无框，悬停才给一层浅底，用于工具栏与图标按钮；「幽灵」档是白底加浅描边，属有底的次级按钮，两者不要混用；
 - **图标按钮**：只放图标的方形按钮，边长等于该档控件高度（24 · 32 · 40），图标取 16 与 20 两档，胶囊形态下是正圆。

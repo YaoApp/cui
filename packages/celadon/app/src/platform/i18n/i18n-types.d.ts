@@ -18,11 +18,17 @@ export type I18nKey =
   | 'base.group.checkbox'
   | 'base.group.icon'
   | 'base.group.input'
+  | 'base.group.otp'
   | 'base.group.segmented'
   | 'base.group.select'
   | 'base.group.theme'
   | 'base.message.error'
   | 'base.message.hint'
+  | 'base.otp.cell'
+  | 'base.otp.error'
+  | 'base.otp.hint'
+  | 'base.otp.input'
+  | 'base.otp.label'
   | 'base.select.empty'
   | 'base.select.noMatch'
   | 'base.select.placeholder'
@@ -279,11 +285,17 @@ declare module 'i18next' {
         'base.group.checkbox': string
         'base.group.icon': string
         'base.group.input': string
+        'base.group.otp': string
         'base.group.segmented': string
         'base.group.select': string
         'base.group.theme': string
         'base.message.error': string
         'base.message.hint': string
+        'base.otp.cell': string
+        'base.otp.error': string
+        'base.otp.hint': string
+        'base.otp.input': string
+        'base.otp.label': string
         'base.select.empty': string
         'base.select.noMatch': string
         'base.select.placeholder': string

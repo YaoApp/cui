@@ -35,18 +35,19 @@ const hexToRgb = (hex: string) => {
 /* 图标自己的尺寸档（见 architecture/10-icons.md 第 1 节），不跟字号走 */
 const ICON_LADDER = [14, 16, 20, 24]
 
-test('lists the eight groups and their states', async ({ page }) => {
-  /* 八个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
+test('lists the nine groups and their states', async ({ page }) => {
+  /* 九个组一次扫完，断言多，还要等几处动效走完；文件之间并行跑时进程争用会把耗时推到默认的 30 秒之上，
      因此这一条明确放宽预算（Playwright 的 slow 走三倍），其余用例仍守默认值。 */
   test.slow()
   await page.setViewportSize({ width: 1280, height: 1100 })
   await page.goto('/app/scaffold/base')
 
   /* 分组标题走四语语言包，默认语言是中文；组件名保留英文作为 API 名称（本地化文档的惯例）。
-     主题与语言、分段控件分作两组：前者是平台机制的两个件，后者是基础件里的互斥选择。 */
+     两个验证码字段排在一起；主题与语言、分段控件分作两组：前者是平台机制的两个件，后者是基础件里的互斥选择。 */
   await expect(page.locator('.base-group__title')).toHaveText([
     '输入 Input',
     '图形验证码 CaptchaField',
+    '一次性口令 OtpField',
     '复选框 Checkbox',
     '按钮 Button',
     '选择器 Select',
@@ -1442,5 +1443,68 @@ test('switches the theme from the inverted icon button and the language from the
   /* exact 必须给：`中文` 是 `繁體中文` 的子串，按子串匹配会命中两个选项 */
   await page.getByRole('option', { name: '中文', exact: true }).click()
   await expect(page.locator('.base-group__title').first()).toHaveText('输入 Input')
+})
+
+test('keeps the one-time code boxes the same height as the input at every step', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1100 })
+  await page.goto('/app/scaffold/base')
+
+  /* 尺寸：每档的格子与同档输入框等高（24 / 32 / 40），格子是正方形，字号也逐档一致 */
+  const sizes = await page.evaluate(() => {
+    const rows: Array<{ 档: string; 格: string; 输入框高: number; 格字号: string; 输入框字号: string }> = []
+    for (const [step, id] of [
+      ['small', 'demo-otp-small'],
+      ['medium', 'demo-otp-medium'],
+      ['large', 'demo-otp-large'],
+    ] as const) {
+      const demo = document.querySelector(`#${id}`)?.closest('.base-demo')
+      const cell = demo?.querySelector('.otp-field__cell') as HTMLElement | null
+      const input = demo?.querySelector('.input') as HTMLElement | null
+      if (!cell || !input) continue
+      const cellBox = cell.getBoundingClientRect()
+      rows.push({
+        档: step,
+        格: `${Math.round(cellBox.width)}x${Math.round(cellBox.height)}`,
+        输入框高: Math.round(input.getBoundingClientRect().height),
+        格字号: getComputedStyle(cell).fontSize,
+        输入框字号: getComputedStyle(input).fontSize,
+      })
+    }
+    return rows
+  })
+  expect(sizes.map((row) => row.格)).toEqual(['24x24', '32x32', '40x40'])
+  expect(sizes.map((row) => row.输入框高)).toEqual([24, 32, 40])
+  for (const row of sizes) expect(row.格字号).toBe(row.输入框字号)
+
+  /* 键盘：点第一格后逐位敲，值逐位落格；非数字不被接受 */
+  const code = () =>
+    page.$$eval('input[id^="demo-otp-default"]', (nodes) =>
+      (nodes as HTMLInputElement[]).map((node) => node.value).join(''),
+    )
+  await page.locator('#demo-otp-default').click()
+  await page.keyboard.type('123456')
+  expect(await code()).toBe('123456')
+
+  await page.keyboard.press('Backspace')
+  await page.keyboard.type('a')
+  expect(await code()).toBe('12345')
+
+  /* 整段粘贴：真实 paste 事件带 clipboardData，从当前格铺开 */
+  await page.locator('#demo-otp-default').evaluate((node) => {
+    const cells = [...node.closest('.base-demo')!.querySelectorAll<HTMLInputElement>('.otp-field__cell')]
+    const data = new DataTransfer()
+    data.setData('text/plain', '987654')
+    cells[0].dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
+  })
+  await expect.poll(code).toBe('987654')
+
+  /* 契约：整段口令同时交给原生表单 */
+  await expect(page.locator('input[name="demo-otp-default-code"]')).toHaveValue('987654')
+
+  /* 错误是持续状态：格子带 aria-invalid，消息位有调用方文案；禁用与只读各按原生属性表达 */
+  await expect(page.locator('#demo-otp-error')).toHaveAttribute('aria-invalid', 'true')
+  await expect(page.locator('.field:has(#demo-otp-error) .hint-error')).toHaveText('口令不正确')
+  await expect(page.locator('#demo-otp-disabled')).toBeDisabled()
+  await expect(page.locator('#demo-otp-readonly')).toHaveAttribute('readonly')
 })
 
