@@ -2,7 +2,8 @@
 /* 文档引用检查 —— **文档提到的文件与命令必须真实存在**。
 
    文档漂移不靠人 review：提到不存在的文件、不存在的脚本、不存在的命令，直接判失败。
-   目标目录取 process.argv[2]，默认文档三处（architecture/ · plan/ · scripts/tests/README.md）。
+   目标目录取 process.argv[2..]，默认文档三处（architecture/ · plan/ · scripts/tests/README.md）；
+   给文件时只看这些文件（改动文件级）。
 
    两处例外，写在 ALLOW 里并注明原因 —— 例外要看得见，不能悄悄放过。 */
 
@@ -23,8 +24,8 @@ const ALLOW = new Map([
 /** 允许出现在文档里、但不是本包 script 的命令。 */
 const ALLOW_COMMANDS = new Set(['install', 'add', 'dlx', 'exec', 'run'])
 
-const targets = process.argv[2]
-  ? [resolve(process.argv[2])]
+const targets = process.argv.length > 2
+  ? process.argv.slice(2).map((arg) => resolve(arg))
   : [join(PACKAGE, 'architecture'), join(PACKAGE, 'plan'), join(PACKAGE, 'scripts', 'tests', 'README.md')]
 
 try { targets.forEach((t) => statSync(t)) } catch {
@@ -59,7 +60,7 @@ for (const doc of docs) {
 
   for (const raw of new Set(text.match(/`(app\/src\/[A-Za-z0-9_./-]+)`/g) ?? [])) check(raw.slice(1, -1), '路径', existsSync(join(PACKAGE, raw.slice(1, -1))))
   for (const raw of new Set(text.match(/`(scripts\/[A-Za-z0-9_./-]+\.mjs)`/g) ?? [])) check(raw.slice(1, -1), '脚本', existsSync(join(PACKAGE, raw.slice(1, -1))))
-  for (const raw of new Set(text.match(/`pnpm ([a-z:]+)`/g) ?? [])) {
+  for (const raw of new Set(text.match(/`pnpm ([a-z:-]+)`/g) ?? [])) {
     const cmd = raw.slice(6, -1)
     if (ALLOW_COMMANDS.has(cmd)) continue
     check(cmd, '命令 pnpm', Object.prototype.hasOwnProperty.call(scripts, cmd))

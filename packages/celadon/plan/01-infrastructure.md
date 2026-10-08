@@ -3,7 +3,7 @@
 - **状态**：✅ **已完成**（2026-10-03）
 - **交付物**
   - **架构文档**：`../architecture/` —— 00–16 分册 + 两份入口 [`SPEC.md`](../architecture/SPEC.md)（开发规范）与 [`REVIEW.md`](../architecture/REVIEW.md)（代码审核）+ 索引 `README.md` / `AGENTS.md`
-  - **规范脚本**：`scripts/check-*.mjs` —— **11 个检查器**（token · 样式约定 · i18n · i18n 类型 · README 色值 · 生成物 · 应用布局 · 文档引用 · 基础件 · 副作用写 URL · **依赖方向**）+ 自测 **81 个样本用例**
+  - **规范脚本**：`scripts/check-*.mjs` —— **12 个检查器**（token · 样式约定 · i18n · i18n 类型 · README 色值 · 生成物 · 应用布局 · 文档引用 · 基础件 · 副作用写 URL · **依赖方向**）+ 自测 **87 个样本用例**
   - **构建与生成脚本**：`build-css.mjs` · `build-icons.mjs` · `build-i18n-types.mjs` · `serve-dist.mjs`
   - **测试装置**：`vitest` + Testing Library + `jsdom` · `@playwright/test`（本机 Chrome）· 拟人（剧本 + 采集 + 看图）· 日志 `app/logs/` · 两份隔离 CI
 - **目标**：把"可以开始写页面"的工程地基铺好 —— 构建工具、后端 SDK、i18n 构建、图标体系、主题映射、质量门禁、运行时壳
@@ -121,8 +121,12 @@
 | 项 | 结果 |
 | --- | --- |
 | **生产构建** | `pnpm build` ✓ **42–47ms**（Vite 8 上；Vite 6 时为 76–106ms）|
-| **检查器全绿（11 个）** | 见 `package.json` 的 `check:run` |
-| **检查器自测** | `scripts/tests/run.mjs` **81 / 81** 用例（每条规则一个样本）|
+| **检查器全绿（12 个）** | 见 `package.json` 的 `check:run` |
+| **检查器自测** | `scripts/tests/run.mjs` **87 / 87** 用例（每条规则一个样本）· `targets.test.mjs` 与 `file-mode.test.mjs` 共 **23 / 23**（映射与文件级自测，`pnpm test:checkers` 一并跑）|
+| **改动文件的映射** | `scripts/lib/targets.mjs` + `pnpm test:files`：改动文件映射到该跑的检查器与单元用例。实测 `pnpm test:files app/src/components/base/input/input.tsx` 选中 13 条用例、**2.2 秒**；映射自测行覆盖率 **100%** · 分支 **96.51%**（`inputs.mjs` 行与分支均 100%）|
+| **内圈命令** | `pnpm verify:files <文件…>` **3.4 秒**（2 个改动文件、12 步）· `pnpm test:files <文件…>` **2.2 秒** · `pnpm test:coverage <文件…>` 核行与分支都低于九成的改动文件，实测过低时以非 0 退出 |
+| **关一耗时** | `pnpm check` 2 秒 · `pnpm lint` 4 秒 · `pnpm test` 21 秒，合计 **27 秒**（规矩上限 1 分钟）|
+| **CI 等价** | `pnpm test:ci-like` 两条都过：check · lint · test（527）· 浏览器 **64 通过**（后端可达）；另起一个后端不可达的 dev，浏览器 **58 通过**（6 条 live 用例按设计跳过）|
 | **dev / preview** | dev 端口 5199 ✓ · preview HTTP **200** ✓ |
 | **CI（隔离）· 一** | `.github/workflows/celadon-test-build.yml` · 只在 `packages/celadon/**` 改动时跑 · 干净环境演练通过：安装（不触发构建）→ 规范门禁全绿 → 单元 9/9 → 构建；三处隔离：自己的工作目录 · 自己的锁文件 · 自己的 `packageManager` |
 | **CI（隔离）· 二** | `.github/workflows/celadon-browser-test.yml` · 浏览器测试单独一份、自带环境准备；用例自己起 dev（本地已跑则复用）· 失败时上传轨迹与截图 |
@@ -146,7 +150,7 @@
 | --- | --- |
 | [`02-platform.md`](02-platform.md) | 接口类型与取数钩子（原"后端 SDK"）· 运行时壳（服务信息 · 凭据 · 传输）|
 | [`../architecture/16-development.md`](../architecture/16-development.md) | 开发期代理：按引擎保留前缀转发 · **SSE 流式透传** · **WS `ws: true`** |
-| 已完成，见 §2 | 图标落地（`Icon` / `BrandMark`）· 主题映射 · i18n（四语 + 类型 + 门禁）· 测试分层与日志 · 11 个检查器 |
+| 已完成，见 §2 | 图标落地（`Icon` / `BrandMark`）· 主题映射 · i18n（四语 + 类型 + 门禁）· 测试分层与日志 · 12 个检查器 |
 
 **模块外，另行决定**（原样保留）：`cui-desktop` 的包管理器与锁文件 · 是否需要网站 / 文档侧构建。
 
@@ -202,7 +206,7 @@
 | 3 | **i18n 构建** | 四语 JSON → 构建产物 · 运行时切换与持久化 · 组件库 locale 对接 · **缺 key / 漏翻检查进 CI** | 四语切换即时生效且刷新后保持；缺 key 与漏翻让 CI 失败（检查脚本已就绪）|
 | 4 | **图标落地** | **选型与规格见 `architecture/00-principles.md` 的 F7**（lucide 为源 · 产物为 `icons/*-sprite.svg`）· 应用侧图标组件 · 按需引入 | 应用渲染与 `design/icons.html` 一致；打包只含用到的图标 |
 | 5 | **主题映射** | **同一份 `tokens.less`** 生成组件库主题（构建期）· 浅/暗两套 | 改一处 token → 组件库主题与色卡**同步**变化；不引入第二份颜色来源 |
-| 6a | **扫描型门禁（不依赖构建工具，现在就能做）** | 纯 Node 脚本：禁硬编码色 · **禁装饰/填充 token 当文字用** · 关键配对对比度（色卡）· i18n 缺 key/漏翻（**已有**）· README 色值（**已有**）· **物理方向属性**（**已有** `check-css-conventions.mjs`）| 故意写入硬编码色 / 错配对 / 缺 key / 装饰色当文字时，脚本退出码非 0；**检查器自身有样本测试**（`scripts/tests/run.mjs`，**81 个用例**，每条规则一个）|
+| 6a | **扫描型门禁（不依赖构建工具，现在就能做）** | 纯 Node 脚本：禁硬编码色 · **禁装饰/填充 token 当文字用** · 关键配对对比度（色卡）· i18n 缺 key/漏翻（**已有**）· README 色值（**已有**）· **物理方向属性**（**已有** `check-css-conventions.mjs`）| 故意写入硬编码色 / 错配对 / 缺 key / 装饰色当文字时，脚本退出码非 0；**检查器自身有样本测试**（`scripts/tests/run.mjs`，**85 个用例**，每条规则一个）|
 | 6b | **构建期门禁（选定构建工具后接线）** | **禁组件外写内联边框**（会露浏览器默认焦点环）—— 需要"组件边界"这个概念，静态扫描认不出，留给构建期按组件目录判定；stylelint 自定义规则（只允许 `var(--token)` · 禁物理方向属性 —— 扫描版已在 `../scripts/check-css-conventions.mjs`，此处升级为构建期拦截）· TS 类型约束（如 `type Color = \`var(--${string})\`` 让裸色值无法通过类型）· **反向依赖边界**（禁 `import '@yaoapp/cui'`）· 接进 CI job / pre-commit | 违规**让构建或 CI 失败**（不只是脚本失败）—— 规范要能拦住人，而不是只写在文档里 |
 | 7 | **运行时壳** | 引擎全局（`window.$app` / `window.$global`）的**类型化封装与初始化**；显式声明，禁止隐式依赖 | 全局对象有类型；未初始化时给出明确报错而不是白屏 |
 | 9 | **架构规范** | 新建 `architecture/`（与 `design/` 平级）· **总指引 `README.md` + 每个部分一个文件**（Agent 逐份读，不塞一个文件）· 内容取自本模块已定条款 + 新提出的分层与边界草案 | ① 每个分册只讲一件事；② 与 `design/` / `plan/` **不重叠**（不复述视觉规格、不记状态）；③ 文档内引用可落地；④ 草案项标注清楚，定案后回写本文件 |

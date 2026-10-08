@@ -13,16 +13,17 @@
    （world 的过滤框）。在没有受认可的替身之前就禁掉，只会把门禁逼成"过不去"，不是守规范。
    等 `base/input` 落地再把它加进 RAW_CONTROLS。
 
-   目标目录取 process.argv[2]，默认 app/src。 */
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+   目标目录取 process.argv[2]，默认 app/src；给文件时只看这些文件（改动文件级）。 */
+import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { readTargets, reports } from './lib/inputs.mjs'
 
 const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const TARGET = resolve(process.argv[2] || join(PACKAGE, 'app', 'src'))
+const { roots, filter, target: TARGET, dirMode, missing } = readTargets(process.argv.slice(2), { defaultDir: join(PACKAGE, 'app', 'src') })
 
-try { statSync(TARGET) } catch {
-  console.log('✗ target directory does not exist — the checker refuses to pass on an empty tree (target: ' + TARGET + ')')
+if (missing.length) {
+  console.log('✗ target does not exist — the checker refuses to pass on an empty tree (target: ' + missing.join(', ') + ')')
   process.exit(1)
 }
 
@@ -56,6 +57,7 @@ function walk(dir) {
     const rel = relative(TARGET, full)
     if (!GUARDED.includes(rel.split('/')[0])) continue
     if (rel === BASE_DIR || rel.startsWith(BASE_DIR + '/')) continue
+    if (!reports(filter, full)) continue
     scanned++
     readFileSync(full, 'utf8').split('\n').forEach((line, index) => {
       for (const control of RAW_CONTROLS) {
@@ -66,10 +68,11 @@ function walk(dir) {
     })
   }
 }
-walk(TARGET)
+for (const root of roots) walk(root)
 
-/* 0 文件也算通过是最危险的假绿：守卫的目标目录里必须真的有被检查的源码。 */
-if (!scanned) {
+/* 0 文件也算通过是最危险的假绿：目录模式的目标里必须真的有被检查的源码；
+   文件模式给的就是改动文件，跳过（例如只改了测试）不算异常。 */
+if (!scanned && dirMode) {
   console.log(`✗ no .tsx under features/ · routes/ · components/ (except components/base) — the checker refuses to pass on an empty scan (target: ${TARGET})`)
   process.exit(1)
 }

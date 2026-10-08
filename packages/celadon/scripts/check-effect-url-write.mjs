@@ -6,16 +6,17 @@
    （同步代码占死事件循环）。见 architecture/07-routing.md。
 
    规则：`useEffect(...)` 的块里不许出现 `setSearchParams(` 或 `navigate(`。
-   目标目录取 process.argv[2]，默认 app/src。 */
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+   目标目录取 process.argv[2]，默认 app/src；给文件时只看这些文件（改动文件级）。 */
+import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { readTargets, reports } from './lib/inputs.mjs'
 
 const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const TARGET = resolve(process.argv[2] || join(PACKAGE, 'app', 'src'))
+const { roots, filter, target: TARGET, missing } = readTargets(process.argv.slice(2), { defaultDir: join(PACKAGE, 'app', 'src') })
 
-try { statSync(TARGET) } catch {
-  console.log('✗ target directory does not exist — the checker refuses to pass on an empty tree (target: ' + TARGET + ')')
+if (missing.length) {
+  console.log('✗ target does not exist — the checker refuses to pass on an empty tree (target: ' + missing.join(', ') + ')')
   process.exit(1)
 }
 
@@ -56,6 +57,7 @@ function walk(dir) {
     if (entry.isDirectory()) { walk(full); continue }
     if (!CODE.test(entry.name)) continue
     if (ALLOWED.has(relative(TARGET, full))) continue
+    if (!reports(filter, full)) continue
     scanned++
     const source = readFileSync(full, 'utf8')
     let at = source.indexOf('useEffect(')
@@ -73,7 +75,7 @@ function walk(dir) {
     }
   }
 }
-walk(TARGET)
+for (const root of roots) walk(root)
 
 if (problems.length) {
   console.log(`✗ ${problems.length} routing write(s) inside an effect (${scanned} file(s) scanned):`)

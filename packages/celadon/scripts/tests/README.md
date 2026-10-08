@@ -6,7 +6,8 @@
 ## 跑
 
 ```bash
-node packages/celadon/scripts/tests/run.mjs
+pnpm test:checkers                                  # 检查器样本 + 映射自测 + 文件级自测
+node packages/celadon/scripts/tests/run.mjs         # 只跑检查器样本
 ```
 
 输出一行一个用例 + 末尾 `N / N 用例通过`；有失败时打印前几行输出并以非 0 退出。
@@ -15,9 +16,23 @@ node packages/celadon/scripts/tests/run.mjs
 
 ```
 tests/
-  run.mjs                 跑全部用例
+  run.mjs                 跑全部检查器样本
+  targets.test.mjs        映射自测（scripts/lib/targets.mjs · scripts/lib/inputs.mjs）
+  file-mode.test.mjs      文件级自测（每个文件级检查器收单个文件）
   cases/<检查器>/<用例>/    每个用例一个目录
 ```
+
+## 映射自测
+
+`targets.test.mjs` 测 `scripts/lib/targets.mjs`，即「改动文件 → 该跑的检查器与单元用例」的映射：
+
+```bash
+node --test scripts/tests/targets.test.mjs
+```
+
+`pnpm test:checkers` 会把它和检查器样本一起跑。覆盖分类（代码 / 用例 / 样式 / 设计资产 / 语言包 / 文档 / 配置）、检查器与范围（文件级 / 整条跑）、同目录用例、跨目录引用与解析不到的说明符、以及目标解析（目录模式 / 文件模式 / 参数不存在）；覆盖率用 `node --test --experimental-test-coverage scripts/tests/targets.test.mjs` 读。
+
+`file-mode.test.mjs` 逐个文件级检查器验证**文件模式**：干净文件通过、违规文件被拦、参数不存在报错。它在真实树下临时造一个违规文件、跑完就删，所以验的是真实路径布局下的行为，而不是样本目录。
 
 **用例目录名即期望结果**：
 
@@ -28,7 +43,7 @@ tests/
 
 > 另有一类**护栏**样本：目录里没有可检查的东西时，检查器必须**失败** —— "扫到 0 个文件也算通过"是最危险的假绿。
 
-检查器用**第一个参数**接收目标目录（默认 `../design`），所以样本不需要长得像真项目：
+检查器收**路径参数**：给目录走整棵树，给文件只报这些文件（文件级的分工见 [`architecture/13-quality-gates.md`](../../architecture/13-quality-gates.md) §3），所以样本不需要长得像真项目：
 
 ```bash
 node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
@@ -38,7 +53,7 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 
 | 检查器 | 样本 |
 | --- | --- |
-| `check-css-conventions` | 10 条规则各一个反例 + `clean`（纯逻辑属性）+ `clean-exempt-marker`（有物理属性但带豁免标记）|
+| `check-css-conventions` | 10 条规则各一个反例 + `clean`（纯逻辑属性）+ `clean-exempt-marker`（有物理属性但带豁免标记）+ `clean-app-less`（app 侧 `.less` 全逻辑属性）+ `violation-app-less`（app 侧 `.less` 写物理属性）|
 | `check-tokens` | `violation-no-pages`（**没有可检查的源** → 护栏报错，防"扫到 0 个也通过"）+ `clean`（全走 token，含逻辑边框线宽）+ `violation`（写死字号/行高/圆角/内距）+ `violation-muted-text`（装饰色承载文字）+ `violation-border-logical`（`border-inline-start: 2px`）+ `violation-colour-in-fill`（`fill:#FF0000`）+ `violation-outline-colour`（`rgba()`）+ `violation-shorthand-asym`（`margin: 0 0 0 auto`） + `violation-brace-mismatch`（大括号不配对）+ `violation-missing-semicolon`（漏分号）+ `violation-font-shorthand`（`font:` 简写）+ `clean-app-less`（**app 侧** `.less` 全走 token）+ `violation-app-less`（**app 侧**写死颜色/线宽/行高）|
 | `check-i18n` | `clean`（三语齐全，且 key **拆在共用 / feature / 组件三处**，验证合并）+ `violation-missing-baseline`（没有基准语言 `zh-CN`）+ `violation-missing-key` + `violation-untranslated`（ja 与 zh-CN 同文）+ `violation-simplified-in-tw`（繁中夹简体字）+ `violation-en-in-chinese`（en 里写着中文） + `violation-abbrev-key`（key 用缩写）+ `violation-key-naming`（含下划线）+ `violation-key-depth`（4 段）+ `violation-extra-key`（某语多出 key）+ `clean-no-hardcoded-han`（代码无汉字，注释里的中文被剥掉）+ `violation-hardcoded-han`（代码里写死汉字文案）|
 | `check-i18n-types` | `clean`（产物与三处语言包生成的类型一致）+ `violation-stale`（产物里的 key 与语言包对不上 → 过期）|
@@ -53,7 +68,7 @@ node scripts/check-css-conventions.mjs scripts/tests/cases/css-conventions/clean
 - **`check-generated` 的图标比对**（`icons.html` / `mock.html`）：它要**整套图标雪碧图与清单**，只跑真实仓库（给了目标目录时只比对两份 `tokens.css`）。
 - 它比对 `tokens.css` 时会**原地重写产物**，所以样本先整目录拷进临时目录再跑（见 `run.mjs` 的 `DESTRUCTIVE`）—— 否则反例会被"修好"，下次假绿。
 
-**共 83 个用例**。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
+**共 87 个用例**（另有映射与文件级自测 23 条）。加样本时如果发现某条规则没法用样本表达，写在这里，别默默跳过。
 
 ## 加一个样本
 
