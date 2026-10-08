@@ -14,6 +14,12 @@ import { PACKAGE } from './lib/targets.mjs'
 
 const DEAD_BACKEND = 'http://127.0.0.1:9'
 
+/* 浏览器跑在远程（测试机）时，这一遍临时起的 dev 服务也要让测试机能访问到：
+   服务绑 0.0.0.0，地址用主应用同主机的局域网地址，而不是本机的 127.0.0.1。 */
+const BROWSER_WS = process.env.CUI_BROWSER_WS || process.env.PW_TEST_CONNECT_WS_ENDPOINT
+const DEV_HOST = BROWSER_WS ? '0.0.0.0' : '127.0.0.1'
+const URL_HOST = BROWSER_WS && process.env.CUI_BASE_URL ? new URL(process.env.CUI_BASE_URL).hostname : '127.0.0.1'
+
 function run(command, args, env = {}) {
   const result = spawnSync(command, args, { cwd: PACKAGE, stdio: 'inherit', env: { ...process.env, ...env } })
   return result.status ?? 1
@@ -57,7 +63,7 @@ step('test:browser（后端可达）', 'pnpm', ['test:browser'])
 
 console.log('\n▸ 后端不可达再跑一遍浏览器用例')
 const port = await freePort()
-const child = spawn('pnpm', ['dev', '--host', '127.0.0.1', '--port', String(port), '--strictPort'], {
+const child = spawn('pnpm', ['dev', '--host', DEV_HOST, '--port', String(port), '--strictPort'], {
   cwd: PACKAGE,
   env: { ...process.env, YAO_SERVER_HOST: DEAD_BACKEND },
   detached: true,
@@ -69,7 +75,7 @@ for (const [signal, code] of [['SIGINT', 130], ['SIGTERM', 143], ['SIGHUP', 129]
   process.on(signal, () => { stop(); process.exit(code) })
 }
 
-const url = `http://127.0.0.1:${port}`
+const url = `http://${URL_HOST}:${port}`
 if (!(await waitFor(url))) {
   stop()
   failed.push('dev server（后端不可达）没起来')

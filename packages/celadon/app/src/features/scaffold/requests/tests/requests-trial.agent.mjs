@@ -70,7 +70,11 @@ const GET_VALUE = { MESSAGE: 'data-check-persona-get', SERVER_TIME: '2020-01-01T
 const POST_VALUE = { MESSAGE: 'data-check-persona-post', SERVER_TIME: '2020-01-01T00:00:00Z' }
 const DENIED = { error: 'unauthorized', error_description: 'no credential was sent' }
 
-const b = await chromium.launch({ channel: 'chrome', headless: !headed })
+/* 浏览器可以跑在测试机上：设了 `CUI_BROWSER_WS` 就连过去，否则本机 Chrome。 */
+const BROWSER_WS = process.env.CUI_BROWSER_WS || process.env.PW_TEST_CONNECT_WS_ENDPOINT
+const b = BROWSER_WS
+  ? await chromium.connect(BROWSER_WS)
+  : await chromium.launch({ channel: 'chrome', headless: !headed })
 // 浏览器环境显式钉住：语言固定基准 zh-CN，配色固定浅色 —— 两者都跟随系统，
 // 不钉的话剧本断言的界面文案与观感会因跑测机器而异（见 architecture/14-testing.md §1）
 const p = await b.newPage({ viewport: { width: 900, height: 520 }, deviceScaleFactor: 2, locale: 'zh-CN', colorScheme: 'light' })

@@ -16,13 +16,19 @@ test('main path: the scaffold index has its header, nav and refresh', async ({ p
 
 test('a modified click opens the destination in a new tab instead of navigating in place', async ({ page, context }) => {
   await page.goto('/app/scaffold')
-  const modifier = process.platform === 'darwin' ? 'Meta' : 'Control'
+  /* 修饰键按**浏览器所在系统**取，不按跑测试的进程：浏览器可能跑在远程测试机上（见内部文档「浏览器测试服务」）。
+     macOS 用 Meta，其余用 Control。 */
+  const modifier = (await page.evaluate(() => (navigator.userAgent.includes('Mac') ? 'Meta' : 'Control'))) as
+    | 'Meta'
+    | 'Control'
 
   const [opened] = await Promise.all([
     context.waitForEvent('page'),
     page.getByRole('link', { name: '路由' }).click({ modifiers: [modifier] }),
   ])
-  await opened.waitForLoadState('domcontentloaded')
+  /* 等**地址**而不是等 load 状态：新标签先到 `about:blank`，`domcontentloaded` 立刻满足，
+     在慢一点的链路上会读到 `about:blank`。远程浏览器下这条正是这么暴露的。 */
+  await opened.waitForURL(/\/app\/scaffold\/routing/, { timeout: 15_000 })
 
   // 当前页不动，新标签落在目的地 —— 拦掉就等于把"真链接"变成假链接
   await expect(page).toHaveURL(/\/app\/scaffold$/)

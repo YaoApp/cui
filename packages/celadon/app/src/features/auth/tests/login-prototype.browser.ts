@@ -3,12 +3,13 @@ import { expect, test, type Page } from '@playwright/test'
 import { capturePage, shotDir } from '../../../../../scripts/shots.mjs'
 
 /* 与设计稿逐步对齐的机器判据：同一个视口下把设计稿与产品页的同一批元素都量一遍，
-   几何差超过 1px、颜色/字号/圆角不等就失败。设计稿地址用 `PROTOTYPE_URL` 覆盖，默认本地预览。
-   量的是被绘制的元素（盒子的几何与计算样式），不看代码取值。
+   几何差超过 1px、颜色/字号/圆角不等就失败。设计稿地址用 `PROTOTYPE_URL` 覆盖，默认按应用地址推同机 8080，
+   这样浏览器跑在远程测试机上时也指向能访问到的开发机，而不是它自己的 `127.0.0.1`。
 
    产品一侧把入口配置换成与设计稿同形的一份（三个第三方、无图形验证码、两行标题、同两条链接），
    否则内容差（线上是两张第三方、多一个验证码字段）会让"位置"没法逐项比。 */
-const PROTOTYPE = process.env.PROTOTYPE_URL ?? 'http://127.0.0.1:8080/prototype/login.html'
+const APP_ORIGIN = new URL(process.env.CUI_BASE_URL ?? 'http://127.0.0.1:5199')
+const PROTOTYPE = process.env.PROTOTYPE_URL ?? `${APP_ORIGIN.protocol}//${APP_ORIGIN.hostname}:8080/prototype/login.html`
 const APP_STANDALONE = '/app/login'
 const APP_IN_CLIENT = '/app/login?from=connect'
 const SHOTS = shotDir('login-compare')
