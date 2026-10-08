@@ -8,6 +8,6 @@ import { useAuthConfig } from './components/auth-provider'
  */
 export function useAuth() {
   const store = useAuthStore()
-  const { config, keys } = useAuthConfig()
-  return { ...store, config, keys }
+  const { config, keys, configFailed } = useAuthConfig()
+  return { ...store, config, keys, configFailed }
 }

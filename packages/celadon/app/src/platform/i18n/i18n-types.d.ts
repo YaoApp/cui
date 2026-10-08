@@ -19,6 +19,12 @@ export type I18nKey =
   | 'auth.action.resendIn'
   | 'auth.action.retry'
   | 'auth.action.showPassword'
+  | 'auth.back.backToLogin'
+  | 'auth.back.docTitle'
+  | 'auth.back.failed'
+  | 'auth.back.loading'
+  | 'auth.back.missing'
+  | 'auth.back.success'
   | 'auth.captcha.image'
   | 'auth.captcha.label'
   | 'auth.captcha.placeholder'
@@ -55,8 +61,8 @@ export type I18nKey =
   | 'auth.provider.continueWith'
   | 'auth.register.backToLogin'
   | 'auth.register.docTitle'
+  | 'auth.register.exists'
   | 'auth.register.hasAccount'
-  | 'auth.register.pending'
   | 'auth.register.titleLine1'
   | 'auth.register.titleLine2'
   | 'auth.remember'
@@ -227,6 +233,7 @@ export type I18nKey =
   | 'data.error.forbidden'
   | 'data.error.getFailed'
   | 'data.error.insufficientScope'
+  | 'data.error.invalidGrant'
   | 'data.error.invalidRequest'
   | 'data.error.postFailed'
   | 'data.error.putFailed'
@@ -372,6 +379,12 @@ declare module 'i18next' {
         'auth.action.resendIn': string
         'auth.action.retry': string
         'auth.action.showPassword': string
+        'auth.back.backToLogin': string
+        'auth.back.docTitle': string
+        'auth.back.failed': string
+        'auth.back.loading': string
+        'auth.back.missing': string
+        'auth.back.success': string
         'auth.captcha.image': string
         'auth.captcha.label': string
         'auth.captcha.placeholder': string
@@ -408,8 +421,8 @@ declare module 'i18next' {
         'auth.provider.continueWith': string
         'auth.register.backToLogin': string
         'auth.register.docTitle': string
+        'auth.register.exists': string
         'auth.register.hasAccount': string
-        'auth.register.pending': string
         'auth.register.titleLine1': string
         'auth.register.titleLine2': string
         'auth.remember': string
@@ -580,6 +593,7 @@ declare module 'i18next' {
         'data.error.forbidden': string
         'data.error.getFailed': string
         'data.error.insufficientScope': string
+        'data.error.invalidGrant': string
         'data.error.invalidRequest': string
         'data.error.postFailed': string
         'data.error.putFailed': string

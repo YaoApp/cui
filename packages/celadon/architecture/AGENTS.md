@@ -1,7 +1,7 @@
 # architecture/AGENTS · 任务索引
 
-- **版本**：v1.2
-- **最后修改**：2026-10-03 18:53:29
+- **版本**：v1.4
+- **最后修改**：2026-10-08 14:16:06
 - **说明**：任务与分册对应 · 动手前的约束 · 编写测试 · 开发与验证 · 交付要求
 
 > 本文回答一个问题：**拿到一项任务，该读哪一册、有哪些约束、做完如何验证。**
@@ -69,14 +69,20 @@
 pnpm dev            # 开发服务（vite）
 pnpm build          # 构建产物 dist/（拟人层测的是它）
 pnpm lint           # 基础语法：stylelint · eslint · tsc
-pnpm check          # 规范门禁：11 个检查器（自测 81 个样本用例，见 scripts/tests/README.md）
+pnpm check          # 规范门禁：12 个检查器（自测 87 个样本用例，见 scripts/tests/README.md）
 pnpm test           # 单元 / 组件
 pnpm test:browser   # 浏览器（真实渲染）
 pnpm test:persona   # 拟人（剧本 + 采集脚本 + 看图）
 pnpm test:all       # 六层全链：lint → gates → checkers → unit → browser → build → persona
+
+# 内圈按改动文件收窄
+pnpm verify:files <文件…>    # 基础语法加检查器，文件级只报改动文件
+pnpm test:files <文件…>      # 只跑相关单元用例
+pnpm test:coverage <文件…>   # 核改动文件的行与分支覆盖率不低于九成
+pnpm test:ci-like            # CI 等价：lint · check · checkers · test · 全量浏览器 + 后端不可达一遍
 ```
 
-每层落一份日志于 `app/logs/<日期>/`（`lint-` · `gates-` · `checkers-` · `unit-` · `browser-` · 拟人按场景名），
+每层落一份日志于 `app/logs/<日期>/`（`lint-` · `gates-` · `verify-files-` · `checkers-` · `unit-` · `unit-files-` · `coverage-` · `browser-` · `ci-like-` · 拟人按场景名），
 链另落 `all-<HHMM>.log`；断在哪一步以链的日志为准。
 
 ## 5. 交付要求

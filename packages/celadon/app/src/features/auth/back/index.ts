@@ -1,0 +1,1 @@
+export { BackPage } from './back'

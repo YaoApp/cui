@@ -1,23 +1,68 @@
-/* 注册页（通道版）：把登录页带过来的账号显示出来，并说明表单随后接入。
-   条款那一行与页面上的其它内容分成两组：上面是说明，下面是要同意的事，间距取两个档。
-   取值全部来自 token，浅暗两套各自成立。 */
-.register__pending {
+/* 注册页卡片内部，间距与登录页同一套：字段之间 16、协议与主按钮之间 16，
+   账号步与密码步共用同一个表单容器，因此间距规则只写这一处。 */
+.register__form {
   display: flex;
   flex-direction: column;
+}
+
+/* 入口配置取回之前的占位：结构与登录页一致，指示器居中。 */
+.register__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: var(--spacing-8);
+  min-block-size: calc(var(--row-height) * 2 + var(--spacing-8));
+  margin-block-end: var(--spacing-24);
+  color: var(--text-secondary);
+}
+
+.register__loading-text {
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-cjk);
+}
+
+/* 锁定后的账号行自带与下一个字段的间距，这里不再加一层，否则会变成两个档。 */
+.register__form .locked-account {
+  margin-block-end: 0;
+}
+
+.register__form .field,
+.register__form .captcha-field {
+  margin-block-end: var(--spacing-16);
+}
+
+/* 验证码字段与它的「重发」是一组：组内一个档，组外两个档。 */
+.register__form .otp-field {
+  margin-block-end: var(--spacing-8);
+}
+
+.register__resend {
+  display: flex;
+  justify-content: flex-end;
   margin-block-end: var(--spacing-24);
 }
 
-.register__account {
-  margin: 0;
-  font-size: var(--font-size-body-lg);
-  line-height: var(--line-height-control);
-  color: var(--text-primary);
+/* 协议行与主按钮是**一组**：组内一个档，组外两个档。 */
+.register__form .terms-note {
+  margin-block: var(--spacing-8) var(--spacing-8);
 }
 
-.register__note {
-  margin: 0;
-  font-size: var(--font-size-caption);
-  line-height: var(--line-height-cjk);
-  color: var(--text-secondary);
+/* 页面级提示条自成一组：与下一组的间距取两个档。 */
+.auth__card > .status-notice {
+  margin-block-end: var(--spacing-8);
+}
+
+/* 字段的消息位在入口页**预留一行**：错误出现时卡片高度不跳。
+   基础件默认「没有消息就不占高度」，这里要盖过那条 `:empty` 规则。 */
+.auth__card .register__form .field__message {
+  display: block;
+  /* 行高 token 是**倍数**，这里要的是长度，因此用字号乘倍数（说明文字 12 × 1.5 = 18） */
+  min-block-size: calc(var(--font-size-caption) * var(--line-height-normal));
+}
+
+/* 例外：锁定账号那一行是只读展示，不会出错误，它的消息位不预留。 */
+.auth__card .register__form .locked-account .field__message {
+  display: none;
+  min-block-size: 0;
 }

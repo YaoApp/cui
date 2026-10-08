@@ -1,0 +1,24 @@
+/* 验证码弹窗：正文只有一行控件，间距与页面表单同一套。
+   弹窗被 portal 到 body，因此这条从弹窗自己的容器进来，用不了页面前缀。 */
+.captcha-dialog__form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 弹窗正文的最后一个字段不再留底距：与底部操作的距离由弹窗自己给 */
+.captcha-dialog__form > :last-child {
+  margin-block-end: 0;
+}
+
+.captcha-dialog__form .field,
+.captcha-dialog__form .captcha-field {
+  margin-block-end: var(--spacing-16);
+}
+
+/* 字段的消息位在入口页**预留一行**：错误出现时弹窗高度不跳。
+   基础件默认「没有消息就不占高度」，这里要盖过那条 `:empty` 规则。 */
+.dialog__body .captcha-dialog__form .field__message {
+  display: block;
+  /* 行高 token 是**倍数**，这里要的是长度，因此用字号乘倍数（说明文字 12 × 1.5 = 18） */
+  min-block-size: calc(var(--font-size-caption) * var(--line-height-normal));
+}

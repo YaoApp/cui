@@ -6,17 +6,22 @@
    历史：mock 里曾散着 55 处写死的字号与圆角、index 里 7 处，改了 token 也不会跟着变；
          只看 design 页面时，产品样式里的字面值长期漏检。 */
 import { fileURLToPath } from 'node:url';
-import { dirname, join, relative, resolve } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { readTargets } from './lib/inputs.mjs';
 
-/* 本脚本住在 scripts/，默认检查这个包的 design/。第一个参数可指定 design 目录（检查器自测用）。
-   app 侧与 design 侧同属一个包：包根 = dirname(目标)，app 源码在 <包根>/app/src ——
-   真实运行 TARGET = <包根>/design，测试样本把 design/ 与 app/src/ 放进同一个用例目录，形状与真实一致。 */
+/* 本脚本住在 scripts/，默认检查这个包的 design/。参数给目录走整棵树（检查器自测用），
+   给文件只看这些文件（改动文件级）。 */
 const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DESIGN = join(PACKAGE, 'design');
-const TARGET = resolve(process.argv[2] || DESIGN);
-/* 目标所属的包根：真实运行是 <包根>/design 的上一层，测试样本是放了 design/ 与 app/src/ 的用例根。 */
-const ROOT = dirname(TARGET);
+const { filter, target: TARGET, dirMode, missing } = readTargets(process.argv.slice(2), { defaultDir: DESIGN });
+
+if (missing.length) {
+  console.log('✗ target does not exist — the checker refuses to pass on an empty tree (target: ' + missing.join(', ') + ')');
+  process.exit(1);
+}
+/* 目标所属的包根：目录模式是目标目录的上一层，文件模式就是包根。 */
+const ROOT = dirMode ? dirname(TARGET) : PACKAGE;
 const APP_SRC = join(ROOT, 'app', 'src');
 
 /* 存量：这几张是演示稿，按约定不回改（CONVENTIONS §3）。
@@ -38,11 +43,22 @@ function sources() {
   const strip = (css) => css
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^[ \t]*\/\/.*$/gm, '');
+  const pageCss = (html) => strip([...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n'));
+  if (!dirMode) {
+    for (const file of [...filter].sort()) {
+      if (file.endsWith('.html')) {
+        if (LEGACY.has(basename(file))) continue;
+        out.push({ file: relative(PACKAGE, file), css: pageCss(readFileSync(file, 'utf8')) });
+      } else if (file.endsWith('.less')) {
+        out.push({ file: relative(PACKAGE, file), css: strip(readFileSync(file, 'utf8')) });
+      }
+    }
+    return out;
+  }
   if (existsSync(TARGET) && statSync(TARGET).isDirectory()) {
     const pages = readdirSync(TARGET).filter((f) => f.endsWith('.html') && !LEGACY.has(f)).sort();
     for (const f of pages) {
-      const html = readFileSync(join(TARGET, f), 'utf8');
-      out.push({ file: f, css: strip([...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n')) });
+      out.push({ file: f, css: pageCss(readFileSync(join(TARGET, f), 'utf8')) });
     }
   }
   const walk = (dir) => {
@@ -60,7 +76,7 @@ function sources() {
 }
 
 const SOURCES = sources();
-if (SOURCES.length === 0) {
+if (SOURCES.length === 0 && dirMode) {
   console.log('✗ nothing to check — no design/*.html and no app/src/**/*.less (target: ' + TARGET + ')');
   process.exit(1);
 }

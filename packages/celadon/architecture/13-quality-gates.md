@@ -1,7 +1,7 @@
 # 13 · 质量门禁
 
-- **版本**：v1.43
-- **最后修改**：2026-10-03 16:19:49
+- **版本**：v1.49
+- **最后修改**：2026-10-08 14:16:20
 - **说明**：基础语法 · 检查器 · CI · 产物与日志
 
 ## 1. 规则
@@ -15,6 +15,9 @@
   否则"全过"是假象；**扩面时同步补正反样本**，否则扩的是假覆盖。
 - **六层命令**：`pnpm lint`（基础语法）· `pnpm check`（规范门禁）· `pnpm test:checkers`（检查器自测）·
   `pnpm test`（单元 / 组件）· `pnpm test:browser`（浏览器）· `pnpm test:persona`（拟人）；一把跑 `pnpm test:all`。
+- **内圈按改动文件收窄**：`pnpm verify:files <文件…>`（基础语法加检查器，文件级只报改动文件）·
+  `pnpm test:files <文件…>`（只跑相关单元用例）· `pnpm test:coverage <文件…>`（核改动文件的行与分支覆盖率不低于九成）·
+  `pnpm test:ci-like`（CI 等价：lint · check · 检查器自测 · 单元 · 全量浏览器，再在后端不可达时跑一遍浏览器用例）。
 - **运行时输出一律英文**（检查器 · 测试 · 脚本的 console 与报错 · 用例名）；注释与文档仍是中文。
 - **每个检查器扫到它该扫的目录**：只扫一部分会得到"看起来全过"。
 
@@ -37,7 +40,7 @@
 | 检查器 | 拦什么 |
 | --- | --- |
 | `check-tokens` | 硬编码颜色 / 字号 / 行高 / 圆角 / 间距 / 线宽（系统色与品牌官方色白名单）|
-| `check-css-conventions` | **物理方向属性**（`margin-left` `border-left` `left` `text-align:left` …）|
+| `check-css-conventions` | **物理方向属性**（`margin-left` `border-left` `left` `text-align:left` …），design 页面与 app 侧 `.less` 都查 |
 | `check-i18n` | 把三处语言包（`app/src/locales/` · `features/*/locales/` · `components/*/locales/`）按 locale 合并后校验：缺 key · 漏翻 · 繁中夹简体 · 日文汉字误用 · **基准语言 `zh-CN` 缺失**（某处不存在则跳过）· **代码里的硬编码汉字文案**（扫描 `app/src` 的 `.ts` / `.tsx`，先剥注释，排除 `locales/` 与测试 / 生成物；豁免走 `ALLOW_LITERALS` 并写明原因）|
 | `check-i18n-types` | **i18n 类型产物过期**：按基准语言 `zh-CN` 重新生成 `i18n-types.d.ts` 再与仓库里的比对（不同即失败，跑 `pnpm build:i18n`）|
 | `check-readme-values` | README 引用的色值与 `tokens.css` 不一致 |
@@ -49,6 +52,9 @@
 | `check-bridge-imports` | **上层不许碰宿主机制**：`features/` · `components/` · `routes/` 里 import `platform/bridge` 即失败（白名单 `features/verify/**`）。要问能力走 `client/`、读写地址走 `service/` 的面孔（见 `15 §5.4`）|
 | `check-effect-url-write` | **不许在 `useEffect` 里写 URL**（`setSearchParams` / `navigate`）—— 会与"读 URL 写 store"互相追成同步死循环，见 `07-routing.md` |
 
+**文件级与整条跑**：`check-i18n` · `check-i18n-types` · `check-generated` · `check-readme-values` 天生跨文件，
+必须整条跑；其余检查器都收**文件集合**（给目录走整棵树，给文件只报这些文件）。`pnpm verify:files` 按这个分工调用。
+
 **为什么层间方向用检查器而不是 ESLint**：项目用 TypeScript 7，`typescript-eslint` 尚不支持（§2），
 `no-restricted-imports` 落不下来 —— 铁律 8 要的是"机器强制"，不挑工具。等价语义收在
 `check-import-boundaries.mjs`：`allowTypeImports` 对应"只带类型的 import 放行"。
@@ -57,11 +63,11 @@
 
 | 工作流 | 内容 |
 | --- | --- |
-| `celadon-test-build.yml` | **基础语法（`pnpm lint`）→ 规范门禁 → 单元测试 → 构建**，前一步不过不进下一步；`dist/` 由 `.gitignore` 挡在提交之外；结束时把 `app/logs/*/*.log` 写进运行摘要 |
+| `celadon-test-build.yml` | **基础语法（`pnpm lint`）→ 规范门禁 → 检查器自测（`pnpm test:checkers`）→ 单元测试 → 构建**，前一步不过不进下一步；`dist/` 由 `.gitignore` 挡在提交之外；结束时把 `app/logs/*/*.log` 写进运行摘要 |
 | `celadon-browser-test.yml` | **浏览器测试**，单独一份、自带环境准备；失败时上传轨迹与截图（要起服务、要真浏览器，成本高一档）|
 
 ## 5. 产物与日志
 
-- **每层一份日志**：`app/logs/<日期>/<层>-<HHMM>.log`（`lint-` · `gates-` · `checkers-` · `unit-` · `browser-` · 拟人按场景名）。
+- **每层一份日志**：`app/logs/<日期>/<层>-<HHMM>.log`（`lint-` · `gates-` · `verify-files-` · `checkers-` · `unit-` · `unit-files-` · `coverage-` · `browser-` · `ci-like-` · 拟人按场景名）。
 - **链一份日志**：`pnpm test:all` 落 `all-<HHMM>.log` —— **断在哪一步只有链的日志说得清**。
 - **拟人截图**：`app/logs/<日期>/shots/<场景>/`，由 `scripts/shots.mjs` 产出（脚本自己不调 `page.screenshot()`）。

@@ -57,7 +57,13 @@
   "auth.register.docTitle": "註冊",
   "auth.register.titleLine1": "建立你的 Yao Agents 帳號",
   "auth.register.titleLine2": "",
-  "auth.register.pending": "註冊表單隨後接入，帳號已從登入頁帶過來。",
+  "auth.register.exists": "該帳號已經註冊，請直接登入",
   "auth.register.hasAccount": "已經有帳號？",
-  "auth.register.backToLogin": "返回登入"
+  "auth.register.backToLogin": "返回登入",
+  "auth.back.docTitle": "登入驗證",
+  "auth.back.loading": "正在完成登入，請稍候",
+  "auth.back.success": "登入成功",
+  "auth.back.failed": "登入驗證失敗",
+  "auth.back.missing": "授權資訊不完整，請重新登入",
+  "auth.back.backToLogin": "返回登入"
 }

@@ -3,16 +3,17 @@
      1. 单元用例（*.test.ts(x)）与源文件**同目录**，不许待在 tests/ 里
      2. 浏览器用例（*.browser.ts / *.spec.ts）与拟人剧本脚本（*.agent.md / *.agent.mjs）
         **必须**在名为 tests 的目录内
-   目标目录取 process.argv[2]，默认 app/src。 */
-import { readdirSync, statSync } from 'node:fs'
+   目标目录取 process.argv[2]，默认 app/src；给文件时只看这些文件（改动文件级）。 */
+import { readdirSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { readTargets, reports } from './lib/inputs.mjs'
 
 const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const TARGET = resolve(process.argv[2] || join(PACKAGE, 'app', 'src'))
+const { roots, filter, target: TARGET, missing } = readTargets(process.argv.slice(2), { defaultDir: join(PACKAGE, 'app', 'src') })
 
-try { statSync(TARGET) } catch {
-  console.log('✗ target directory does not exist — the checker refuses to pass on an empty tree (target: ' + TARGET + ')')
+if (missing.length) {
+  console.log('✗ target does not exist — the checker refuses to pass on an empty tree (target: ' + missing.join(', ') + ')')
   process.exit(1)
 }
 
@@ -35,6 +36,7 @@ function walk(dir) {
     const rel = relative(TARGET, full)
 
     if (isUnit(entry.name)) {
+      if (!reports(filter, full)) continue
       artefacts.push(rel)
       if (inTests) {
         problems.push(`${rel} is a unit test inside tests/ — unit tests sit beside the file they test (e.g. ${parts.slice(0, -1).filter((p) => p !== 'tests').join('/')}/${entry.name})`)
@@ -44,6 +46,7 @@ function walk(dir) {
       continue
     }
     if (isOuter(entry.name)) {
+      if (!reports(filter, full)) continue
       artefacts.push(rel)
       if (!inTests) {
         problems.push(`${rel} is a browser case or persona scenario outside a tests/ directory — move it into the sibling tests/ folder`)
@@ -51,7 +54,7 @@ function walk(dir) {
     }
   }
 }
-walk(TARGET)
+for (const root of roots) walk(root)
 
 if (problems.length) {
   console.log(`✗ ${problems.length} layout problem(s) found (${artefacts.length} test artefact(s) scanned):`)

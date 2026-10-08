@@ -13,23 +13,28 @@
  *   2. 行内标记：文件里写明 `css-conventions: allow-physical` 的段落（如反例演示）
  *
  * 用法：node check-css-conventions.mjs
+ *   给目录 → 走整个目录；给文件 → 只看这些文件（改动文件级）。
  */
 import { readFileSync, readdirSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { basename, dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { readTargets } from './lib/inputs.mjs'
 
-/* 本脚本住在 scripts/，目标资产在 ../design/ —— 统一切到那里作为工作目录，
-   这样下面所有相对路径（icons/… · *.html · tokens.less · i18n/…）都继续成立，
-   并且从任何目录调用都不会出错。 */
-const DESIGN = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'design')
-process.chdir(DESIGN)
-/* 可选：第一个参数指定目标目录（测试用），默认 ../design */
-const TARGET = resolve(process.argv[2] || DESIGN)
-process.chdir(TARGET)
+/* 本脚本住在 scripts/，目标资产在 ../design/ */
+const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const DESIGN = join(PACKAGE, 'design')
+const { target: TARGET, filter, dirMode, missing } = readTargets(process.argv.slice(2), { defaultDir: DESIGN })
 
-
+if (missing.length) {
+  console.log('✗ target does not exist — the checker refuses to pass on an empty tree (target: ' + missing.join(', ') + ')')
+  process.exit(1)
+}
 
 const dir = TARGET
+/* 目录模式的目标是 design/，产品样式在包根的 app/src —— 两侧都要查（与 check-tokens 同一张检查面）。
+   样例目录把 app/src 放在目标目录里，所以两个位置都试。 */
+const ROOT = dirMode ? dirname(TARGET) : PACKAGE
+const APP_SRC_CANDIDATES = dirMode ? [join(ROOT, 'app', 'src'), join(TARGET, 'app', 'src')] : []
 
 /**
  * 存量豁免：这几张是**演示稿**，按约定不回改（见 CONVENTIONS.md §3 现状一段）。
@@ -71,17 +76,36 @@ function styleBlocks(file, text) {
   return out
 }
 
-const files = readdirSync(dir)
-  .filter((f) => f.endsWith('.html') || f === 'tokens.less' || f === 'tokens.css')
-  .sort()
+/** app 侧的 .less / .css：产品样式，与 design 页面同一套规则。 */
+function appStyles(dir) {
+  const out = []
+  let entries
+  try { entries = readdirSync(dir, { withFileTypes: true }) } catch { return out }
+  for (const entry of entries) {
+    if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue
+    const full = join(dir, entry.name)
+    if (entry.isDirectory()) out.push(...appStyles(full))
+    else if (entry.name.endsWith('.less') || entry.name.endsWith('.css')) out.push(full)
+  }
+  return out
+}
+
+const FILES = dirMode
+  ? [
+      ...readdirSync(dir).filter((f) => f.endsWith('.html') || f === 'tokens.less' || f === 'tokens.css').sort().map((f) => join(dir, f)),
+      ...APP_SRC_CANDIDATES.flatMap((appSrc) => appStyles(appSrc)),
+    ]
+  : [...filter].filter((f) => f.endsWith('.html') || f.endsWith('.less') || f.endsWith('.css')).sort()
 
 let problems = []
 const legacyHits = []
 
-for (const file of files) {
-  const text = readFileSync(resolve(dir, file), 'utf8')
-  const isLegacy = LEGACY.has(file)
-  for (const block of styleBlocks(file, text)) {
+for (const path of FILES) {
+  const name = basename(path)
+  const file = relative(ROOT, path)
+  const text = readFileSync(path, 'utf8')
+  const isLegacy = LEGACY.has(name)
+  for (const block of styleBlocks(name, text)) {
     if (block.exempt) continue
     block.lines.forEach((line, i) => {
       if (line.trim().startsWith('*') || line.trim().startsWith('/*')) return   // 注释行不算
@@ -96,8 +120,8 @@ for (const file of files) {
   }
 }
 
-if (files.length === 0) {
-  console.log('✗ no files to check — wrong target directory? (target: ' + dir + ')')
+if (FILES.length === 0) {
+  console.log('✗ no files to check — wrong target? (target: ' + dir + ')')
   process.exit(1)
 }
 

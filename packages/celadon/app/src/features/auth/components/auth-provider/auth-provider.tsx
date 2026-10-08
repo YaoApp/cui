@@ -24,8 +24,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const config = configCall.state.status === 'ok' ? configCall.state.value : undefined
   const keys = keysCall.state.status === 'ok' ? keysCall.state.value.keys : undefined
+  const configFailed = configCall.state.status === 'error'
 
-  const value = useMemo<AuthConfigValue>(() => ({ config, keys }), [config, keys])
+  const value = useMemo<AuthConfigValue>(() => ({ config, keys, configFailed }), [config, keys, configFailed])
 
   return <AuthConfigContext.Provider value={value}>{children}</AuthConfigContext.Provider>
 }

@@ -1,15 +1,9 @@
 /* 登录页卡片内部，间距与 design/prototype/login.html 一致：
    第三方列表与分隔线之间由页面给 24、字段之间 16、协议与主按钮之间 16。
-   弹窗里的后续两步（验证码、密码）用同一套间距，字段与字段、字段与底部操作各自对齐这一套。 */
-.login__form,
-.login__dialog-form {
+   弹窗里的验证码步用同一套间距，规则在 `components/captcha-dialog/`。 */
+.login__form {
   display: flex;
   flex-direction: column;
-}
-
-/* 弹窗正文的最后一个字段不再留底距：与底部操作的距离由弹窗自己给 */
-.login__dialog-form > :last-child {
-  margin-block-end: 0;
 }
 
 /* 入口配置取回之前的占位：占的正是它到达后入口列表那块地方（两行，每行一个控件高、行间一个档），
@@ -58,9 +52,7 @@
 }
 
 .login__form .field,
-.login__form .captcha-field,
-.login__dialog-form .field,
-.login__dialog-form .captcha-field {
+.login__form .captcha-field {
   margin-block-end: var(--spacing-16);
 }
 
@@ -87,12 +79,10 @@
   margin-block-end: var(--spacing-8);
 }
 
-/* 字段的消息位在入口页**预留一行**：错误出现时卡片与弹窗的高度不跳。
+/* 字段的消息位在入口页**预留一行**：错误出现时卡片的高度不跳。
    基础件默认「没有消息就不占高度」（列表里的内嵌字段不需要预留，保持零高），
-   这里要盖过那条 `:empty` 规则，因此选择器取三个类：卡片里的表单，以及弹窗里的表单
-   （弹窗被 portal 到 body，用不了页面前缀，改从弹窗自己的容器进来）。 */
-.auth__card .login__form .field__message,
-.dialog__body .login__dialog-form .field__message {
+   这里要盖过那条 `:empty` 规则。弹窗里那一条在 `components/captcha-dialog/`。 */
+.auth__card .login__form .field__message {
   display: block;
   /* 行高 token 是**倍数**，这里要的是长度，因此用字号乘倍数（说明文字 12 × 1.5 = 18） */
   min-block-size: calc(var(--font-size-caption) * var(--line-height-normal));

@@ -5,19 +5,18 @@
  * （能力开关），要读写服务地址走 `service/` 的面孔；`bridge/` 是平台层的内部机制。
  *
  * 白名单只有 `features/scaffold/bridge/**` —— 它是桥检查页，用途就是逐条点名调命令。
- * 目标目录取 process.argv[2]，默认 `app/src`。 */
+ * 目标目录取 process.argv[2]，默认 `app/src`；给文件时只看这些文件（改动文件级）。 */
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { readTargets, reports } from './lib/inputs.mjs'
 
 const PACKAGE = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const TARGET = resolve(process.argv[2] || join(PACKAGE, 'app', 'src'))
+const { roots, filter, target: TARGET, missing } = readTargets(process.argv.slice(2), { defaultDir: join(PACKAGE, 'app', 'src') })
 
-try {
-  statSync(TARGET)
-} catch {
-  console.log('✗ target directory does not exist — the checker refuses to pass on an empty tree (target: ' + TARGET + ')')
+if (missing.length) {
+  console.log('✗ target does not exist — the checker refuses to pass on an empty tree (target: ' + missing.join(', ') + ')')
   process.exit(1)
 }
 
@@ -44,10 +43,10 @@ function walk(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, entry.name)
     if (entry.isDirectory()) walk(full)
-    else if (CODE.test(entry.name)) files.push(full)
+    else if (CODE.test(entry.name) && reports(filter, full)) files.push(full)
   }
 }
-walk(TARGET)
+for (const root of roots) walk(root)
 
 const problems = []
 for (const file of files) {

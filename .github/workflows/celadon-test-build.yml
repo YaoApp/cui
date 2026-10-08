@@ -47,12 +47,16 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # 1. The seven checkers. Each run writes its log into app/logs/, which the last
+      # 1. The checkers and their self-tests. Each run writes its log into app/logs/, which the last
       #    step folds into the run summary.
       - name: Base syntax (lint before the checkers)
         run: pnpm lint
       - name: Gates
         run: pnpm check
+      # The checker self-tests guard the gates themselves: a rule that quietly stops failing
+      # would pass `pnpm check` on a broken checker, so this runs in CI too.
+      - name: Checker self-tests
+        run: pnpm test:checkers
 
       # 2. Unit and component tests. A failure stops the job here, before any build.
       - name: Unit and component tests

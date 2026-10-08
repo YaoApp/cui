@@ -1,14 +1,11 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '@/components/base/button'
-import { CaptchaField } from '@/components/base/captcha-field'
 import { Checkbox } from '@/components/base/checkbox'
-import { DialogPage } from '@/components/base/dialog'
 import { Icon } from '@/components/base/icon'
 import { Input } from '@/components/base/input'
 import { Link } from '@/components/base/link'
 import { Spinner } from '@/components/base/spinner'
-import { TurnstileField } from '@/components/base/turnstile-field'
 import { useRequest } from '@/data'
 import {
   entryInviteQuery,
@@ -19,11 +16,13 @@ import {
   type EntryVerifyResponse,
   type SigninProvider,
 } from '@/data/user'
-import { capabilities } from '@/platform/client/capabilities'
+import { openExternal } from '@/platform/client/open-external'
 import { appHref } from '@/platform/router/basename'
 import { useTranslation } from '@/platform/i18n'
 import { useDocumentTitle } from '@/platform/document-title'
+import { looksLikeAccount } from '../account'
 import { AuthLayout } from '../components/auth-layout'
+import { CaptchaDialog } from '../components/captcha-dialog'
 import { LockedAccount } from '../components/locked-account'
 import { PasswordInput } from '../components/password-input'
 import { ProviderList } from '../components/provider-list'
@@ -32,16 +31,16 @@ import { useAuth } from '../use-auth'
 import { useCompleteSignIn } from '../use-complete-sign-in'
 import './login.less'
 
-/** 账号形态：邮箱（含 `@` 与点号）或纯数字的手机号。判定宽松，真实校验在服务端。 */
-function looksLikeAccount(value: string): boolean {
-  const trimmed = value.trim()
-  if (trimmed.includes('@')) return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)
-  return /^\d{6,}$/.test(trimmed)
+/** 注册表单的地址（相对路由基址）：账号带在查询里，注册页据此预填；客户端内的来源标记跟着带过去。 */
+function registerPath(username: string, from: string | null): string {
+  const query = new URLSearchParams({ username })
+  if (from) query.set('from', from)
+  return `/register?${query.toString()}`
 }
 
-/** 注册表单的地址（相对路由基址）：账号带在查询里，注册页据此预填。 */
-function registerPath(username: string): string {
-  return `/register?username=${encodeURIComponent(username)}`
+/** 第三方登录的回跳地址（绝对地址，带应用命名空间）：授权完成后回到 `/auth/back/<提供方>`。 */
+function backUrl(providerId: string): string {
+  return `${window.location.origin}${appHref(`/auth/back/${encodeURIComponent(providerId)}`)}`
 }
 
 /**
@@ -65,7 +64,8 @@ export function LoginPage() {
   const navigate = useNavigate()
   const config = auth.config
   /* 客户端内（地址带 `from`）用达标边界；独立访问有意弱化，与草稿一致 */
-  const inApp = new URLSearchParams(window.location.search).has('from')
+  const from = new URLSearchParams(window.location.search).get('from')
+  const inApp = from !== null
 
   const [password, setPassword] = useState('')
   const [inviteCode, setInviteCode] = useState('')
@@ -111,7 +111,10 @@ export function LoginPage() {
   /* 第三方入口的地址按**选中的那个入口**构建，因此用 `build` 形态：它每次都在运行时读 ref，
      点击动作里改完 ref 立刻发起，不必等一次重渲染，也就没有「监听状态再取数」的 effect。 */
   const providerCall = useRequest(
-    { key: ['user', 'oauthAuthorize'], build: () => oauthAuthorizeQuery(providerIdRef.current).request },
+    {
+      key: ['user', 'oauthAuthorize'],
+      build: () => oauthAuthorizeQuery(providerIdRef.current, backUrl(providerIdRef.current)).request,
+    },
     { manual: true },
   )
 
@@ -123,14 +126,12 @@ export function LoginPage() {
   const captchaBusy = verifyCall.state.status === 'loading'
   const submitting = loginCall.state.status === 'loading'
 
-  /** 选第三方入口：取回授权地址后跳转。独立访问整页跳，客户端内交系统浏览器。这是动作，不是 effect。 */
+  /** 选第三方入口：取回授权地址后跳转。Web 整页跳转，桌面交宿主在系统浏览器里打开。这是动作，不是 effect。 */
   async function onPickProvider(id: string) {
     providerIdRef.current = id
     const result = await providerCall.run()
     if (!result?.ok) return
-    const url = result.value.authorization_url
-    if (capabilities().externalOpen) window.open(url, '_blank', 'noopener,noreferrer')
-    else window.location.assign(url)
+    await openExternal(result.value.authorization_url)
   }
 
   function closeCaptcha() {
@@ -170,14 +171,15 @@ export function LoginPage() {
       tempToken: value.access_token,
       status: value.status,
       otpId: value.otp_id,
-      needsCode: Boolean(config?.verification_code_required),
+      /* 引擎对缺省字段按「需要」处理（isVerificationCodeRequired 为空即真），这里跟随同一口径 */
+      needsCode: config?.verification_code_required !== false,
     })
     if (value.user_exists && value.status === 'login') {
       closeCaptcha()
       return
     }
     /* 账号不存在：带上账号去注册表单（注册页随后落地，这里先把通道接上） */
-    navigate(registerPath(account.trim()))
+    navigate(registerPath(account.trim(), from))
   }
 
   async function runVerify() {
@@ -219,8 +221,7 @@ export function LoginPage() {
     await runVerify()
   }
 
-  async function onSubmitCaptcha(event: FormEvent) {
-    event.preventDefault()
+  async function onSubmitCaptcha() {
     if (captcha.trim() === '') {
       setTouched((value) => ({ ...value, captcha: true }))
       return
@@ -352,12 +353,13 @@ export function LoginPage() {
               </>
             ) : null}
 
+            {/* 账号可以是邮箱或手机号，用文本类型；`type="email"` 会让手机号过不了浏览器约束校验 */}
             <Input
               id="auth-account"
               aria-label={t('auth.field.account')}
               placeholder={config.form?.username?.placeholder || t('auth.field.account')}
-              type="email"
-              autoComplete="email"
+              type="text"
+              autoComplete="username"
               icon={<Icon name="i-mail" />}
               value={account}
               onChange={(event) => auth.setUsername(event.target.value)}
@@ -451,64 +453,21 @@ export function LoginPage() {
       </form>
 
       {/* 验证码在一个弹窗里收，确定后回到页面上的密码步；底部主按钮用 form 属性关联到弹窗里的表单 */}
-      <DialogPage
+      <CaptchaDialog
         open={captchaOpen}
         onOpenChange={(next) => {
           if (!next) closeCaptcha()
         }}
-        title={t('auth.dialog.captchaTitle')}
-        closeLabel={t('auth.dialog.close')}
-        /* 图形验证码有输入，打开即聚焦到输入框（浮层要显式管理焦点，layout.md 第 4 节）；
-           人机验证里面是 iframe，没有可输入的控件，返回 `true` 让上游按默认行为聚焦面板。
-           焦点在这条函数里交给弹窗自己处理，因此页面不需要 effect 去追。 */
-        initialFocus={() => (captchaType === 'image' ? document.getElementById('auth-dialog-captcha') : true)}
-        footer={
-          /* 只有「确定」跟着判定走（禁用 + 转圈），它做的是弹窗自己的事；
-             「取消」一直可用：判定在飞时用户也要能退出，退出去就当没验证过（见 `runVerify`）。 */
-          <>
-            <Button type="button" variant="ghost" onClick={closeCaptcha}>
-              {t('auth.action.cancel')}
-            </Button>
-            <Button
-              type="submit"
-              form="auth-dialog-form"
-              variant="inverse"
-              disabled={captchaBusy}
-              loading={captchaBusy}
-            >
-              {t('auth.action.confirm')}
-            </Button>
-          </>
-        }
-      >
-        <form id="auth-dialog-form" className="login__dialog-form" onSubmit={onSubmitCaptcha}>
-          {captchaType === 'turnstile' ? (
-            <TurnstileField
-              key={`turnstile-${captchaRound}`}
-              sitekey={turnstileSitekey}
-              label={t('auth.captcha.turnstile')}
-              /* 判定失败的文案落在控件下方（人机验证那种由控件自己给提示，不套红框） */
-              error={captchaError ?? verifyFailure}
-              onTokenChange={setCaptcha}
-            />
-          ) : (
-            <CaptchaField
-              key={`captcha-${captchaRound}`}
-              id="auth-dialog-captcha"
-              label={t('auth.captcha.label')}
-              placeholder={t('auth.captcha.placeholder')}
-              refreshLabel={t('auth.captcha.refresh')}
-              imageAlt={t('auth.captcha.image')}
-              value={captcha}
-              onValueChange={setCaptcha}
-              onCaptchaIdChange={setCaptchaId}
-              error={captchaError ?? verifyFailure}
-              disabled={captchaBusy}
-              size="large"
-            />
-          )}
-        </form>
-      </DialogPage>
+        type={captchaType}
+        sitekey={turnstileSitekey}
+        round={captchaRound}
+        value={captcha}
+        onValueChange={setCaptcha}
+        onCaptchaIdChange={setCaptchaId}
+        error={captchaError ?? verifyFailure}
+        pending={captchaBusy}
+        onSubmit={() => void onSubmitCaptcha()}
+      />
     </AuthLayout>
   )
 }

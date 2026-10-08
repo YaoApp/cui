@@ -52,7 +52,14 @@ function userPage(emails: readonly string[]) {
 }
 
 const capsMock = vi.hoisted(() =>
-  vi.fn(() => ({ clipboard: false, files: false, notifications: false, externalOpen: true, serviceAddress: false })),
+  vi.fn(() => ({
+    clipboard: false,
+    files: false,
+    notifications: false,
+    externalOpen: true,
+    systemBrowser: false,
+    serviceAddress: false,
+  })),
 )
 const readAddress = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: '' })))
 const writeAddress = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: '' })))
@@ -455,7 +462,14 @@ describe('the service address, which only a client holds', () => {
   })
 
   it('reads the address the host holds, and saves a typed one', async () => {
-    capsMock.mockReturnValue({ clipboard: false, files: false, notifications: false, externalOpen: true, serviceAddress: true })
+    capsMock.mockReturnValue({
+      clipboard: false,
+      files: false,
+      notifications: false,
+      externalOpen: true,
+      systemBrowser: false,
+      serviceAddress: true,
+    })
     readAddress.mockResolvedValue({ ok: true, value: 'http://host:5099' })
     writeAddress.mockResolvedValue({ ok: true, value: 'http://typed:5099' })
     renderPage()
@@ -479,6 +493,7 @@ describe('saving a new service address', () => {
       files: false,
       notifications: false,
       externalOpen: true,
+      systemBrowser: false,
       serviceAddress: true,
     })
     writeAddress.mockResolvedValue({ ok: true, value: 'http://typed:5099' })
