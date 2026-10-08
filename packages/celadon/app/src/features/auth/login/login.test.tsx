@@ -12,6 +12,10 @@ vi.mock('@/platform/credential', async (importOriginal) => {
   return { ...actual, signIn }
 })
 
+/* 打开外部地址的平台面孔：页面只负责把授权地址交给它，宿主命令与整页跳转的取舍在平台层用例里核。 */
+const openExternal = vi.hoisted(() => vi.fn(async (_url: string) => {}))
+vi.mock('@/platform/client/open-external', () => ({ openExternal }))
+
 import { transportFetch } from '@/platform/transport/fetch'
 import { useAuthStore } from '../auth.store'
 import { i18n } from '@/platform/i18n'
@@ -125,6 +129,9 @@ describe('the sign-in page', () => {
   beforeEach(() => {
     vi.mocked(transportFetch).mockReset()
     signIn.mockClear()
+    openExternal.mockClear()
+    /* 页面会读自己的地址取客户端来源标记，用例之间复位 */
+    window.history.pushState({}, '', '/')
     /* 域状态在 store 里，模块级单例，用例之间要复位，否则顺序会影响结果 */
     useAuthStore.getState().reset()
   })
@@ -213,6 +220,20 @@ describe('the sign-in page', () => {
 
     expect(await screen.findByText(/注册表单/)).toBeTruthy()
     expect(screen.getByText(/username=new%40example\.com/)).toBeTruthy()
+  })
+
+  it('carries the client mode to the register form when the account does not exist', async () => {
+    stubTransport({ '/user/entry/verify': { body: VERIFIED_REGISTER } })
+    const user = userEvent.setup()
+    /* 客户端内的来源标记读的是页面自己的地址，因此写在 window 上 */
+    window.history.pushState({}, '', '/login?from=connect')
+    renderLogin()
+    await user.type(await screen.findByLabelText(t('auth.field.account')), 'new@example.com')
+    await user.click(screen.getByRole('button', { name: t('auth.action.continue') }))
+
+    /* 客户端内的边界档跟着账号一起带过去，注册页据此走达标边界 */
+    expect(await screen.findByText(/注册表单/)).toBeTruthy()
+    expect(screen.getByText(/from=connect/)).toBeTruthy()
   })
 
   it('shows the wording of the language pack instead of the service text when sign-in fails', async () => {
@@ -382,5 +403,27 @@ describe('the sign-in page', () => {
     const mark = provider.querySelector('.provider-list__mark') as HTMLElement
     expect(mark.tagName.toLowerCase()).toBe('svg')
     expect(mark.querySelector('img')).toBeNull()
+  })
+
+  it('uses a text account field, so a phone number passes the browser constraint check', async () => {
+    stubTransport()
+    renderLogin()
+    const account = (await screen.findByLabelText(t('auth.field.account'))) as HTMLInputElement
+    expect(account.type).toBe('text')
+  })
+
+  it('hands the authorization address to the client face that opens it', async () => {
+    stubTransport(
+      { '/user/oauth/google/authorize': { body: { authorization_url: 'https://accounts.example.com/auth' } } },
+      entryConfig({
+        third_party: { providers: [{ id: 'google', label: '谷歌', title: '使用谷歌账号登录', logo: '/assets/brands/google.svg' }] },
+      }),
+    )
+    const user = userEvent.setup()
+    renderLogin()
+    await user.click(await screen.findByRole('button', { name: t('auth.provider.continueWith', { provider: '谷歌' }) }))
+
+    /* 页面不自己判宿主，交给平台层的开外部地址面孔 */
+    await waitFor(() => expect(openExternal).toHaveBeenCalledWith('https://accounts.example.com/auth'))
   })
 })

@@ -161,6 +161,42 @@ describe('the register page', () => {
     expect(screen.queryByPlaceholderText('新密码')).toBeNull()
   })
 
+  it('uses a text account field, so a phone number passes the browser constraint check', async () => {
+    renderRegister()
+    const account = (await screen.findByLabelText(t('auth.field.account'))) as HTMLInputElement
+    expect(account.type).toBe('text')
+  })
+
+  it('drops the already-registered note when the account changes and a new judgement runs', async () => {
+    stubTransport({ '/user/entry/verify': { body: VERIFIED_LOGIN } })
+    const user = userEvent.setup()
+    renderRegister()
+    await user.click(await screen.findByRole('button', { name: t('auth.action.continue') }))
+    expect(await screen.findByText(t('auth.register.exists'))).toBeTruthy()
+
+    /* 换一个账号再判定：这一轮可以注册，旧提示要撤掉并进密码步 */
+    stubTransport()
+    const account = screen.getByLabelText(t('auth.field.account'))
+    await user.clear(account)
+    await user.type(account, 'new-user@example.com')
+    await user.click(screen.getByRole('button', { name: t('auth.action.continue') }))
+
+    expect(await screen.findByPlaceholderText('新密码')).toBeTruthy()
+    expect(screen.queryByText(t('auth.register.exists'))).toBeNull()
+  })
+
+  it('resets the sign-in flow when the footnote returns to the sign-in page', async () => {
+    const user = userEvent.setup()
+    renderRegister()
+    await reachRegisterForm(user)
+    expect(useAuthStore.getState().phase).toBe('password')
+
+    await user.click(screen.getByRole('link', { name: t('auth.register.backToLogin') }))
+
+    expect(useAuthStore.getState().phase).toBe('account')
+    expect(useAuthStore.getState().tempToken).toBe('')
+  })
+
   it('reports a password mismatch on the field and does not call the endpoint', async () => {
     const user = userEvent.setup()
     renderRegister()

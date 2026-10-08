@@ -186,6 +186,8 @@ export function RegisterPage() {
   async function runVerify() {
     /* 判定在途时忽略后续点击：同一枚令牌交两次，第二次必然失败。 */
     if (verifyCall.state.status === 'loading') return
+    /* 换过账号再判定：上一次「该账号已注册」的提示不再成立，先撤掉 */
+    setAccountExists(false)
     const fromDialog = captchaOpenRef.current
     const result = await verifyCall.run()
 
@@ -282,7 +284,10 @@ export function RegisterPage() {
   const footnote = (
     <>
       <span>{t('auth.register.hasAccount')}</span>{' '}
-      <Link href={appHref('/login')}>{t('auth.register.backToLogin')}</Link>
+      {/* 回登录页时把登录域复位：进来时登录页已经进到密码步，不复位会让它带着注册流程的临时令牌停在那一步 */}
+      <Link href={appHref('/login')} onClick={() => auth.changeAccount()}>
+        {t('auth.register.backToLogin')}
+      </Link>
     </>
   )
 
@@ -319,12 +324,13 @@ export function RegisterPage() {
       >
         {!readyToRegister && !inInvite ? (
           <>
+            {/* 账号可以是邮箱或手机号，用文本类型；`type="email"` 会让手机号过不了浏览器约束校验 */}
             <Input
               id="auth-account"
               aria-label={t('auth.field.account')}
               placeholder={config.form?.username?.placeholder || t('auth.field.account')}
-              type="email"
-              autoComplete="email"
+              type="text"
+              autoComplete="username"
               icon={<Icon name="i-mail" />}
               value={account}
               onChange={(event) => setAccount(event.target.value)}

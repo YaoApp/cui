@@ -16,7 +16,7 @@ import {
   type EntryVerifyResponse,
   type SigninProvider,
 } from '@/data/user'
-import { capabilities } from '@/platform/client/capabilities'
+import { openExternal } from '@/platform/client/open-external'
 import { appHref } from '@/platform/router/basename'
 import { useTranslation } from '@/platform/i18n'
 import { useDocumentTitle } from '@/platform/document-title'
@@ -31,9 +31,11 @@ import { useAuth } from '../use-auth'
 import { useCompleteSignIn } from '../use-complete-sign-in'
 import './login.less'
 
-/** 注册表单的地址（相对路由基址）：账号带在查询里，注册页据此预填。 */
-function registerPath(username: string): string {
-  return `/register?username=${encodeURIComponent(username)}`
+/** 注册表单的地址（相对路由基址）：账号带在查询里，注册页据此预填；客户端内的来源标记跟着带过去。 */
+function registerPath(username: string, from: string | null): string {
+  const query = new URLSearchParams({ username })
+  if (from) query.set('from', from)
+  return `/register?${query.toString()}`
 }
 
 /** 第三方登录的回跳地址（绝对地址，带应用命名空间）：授权完成后回到 `/auth/back/<提供方>`。 */
@@ -62,7 +64,8 @@ export function LoginPage() {
   const navigate = useNavigate()
   const config = auth.config
   /* 客户端内（地址带 `from`）用达标边界；独立访问有意弱化，与草稿一致 */
-  const inApp = new URLSearchParams(window.location.search).has('from')
+  const from = new URLSearchParams(window.location.search).get('from')
+  const inApp = from !== null
 
   const [password, setPassword] = useState('')
   const [inviteCode, setInviteCode] = useState('')
@@ -123,14 +126,12 @@ export function LoginPage() {
   const captchaBusy = verifyCall.state.status === 'loading'
   const submitting = loginCall.state.status === 'loading'
 
-  /** 选第三方入口：取回授权地址后跳转。Web 整页跳转，桌面交给系统浏览器打开。这是动作，不是 effect。 */
+  /** 选第三方入口：取回授权地址后跳转。Web 整页跳转，桌面交宿主在系统浏览器里打开。这是动作，不是 effect。 */
   async function onPickProvider(id: string) {
     providerIdRef.current = id
     const result = await providerCall.run()
     if (!result?.ok) return
-    const url = result.value.authorization_url
-    if (capabilities().systemBrowser) window.open(url, '_blank', 'noopener,noreferrer')
-    else window.location.assign(url)
+    await openExternal(result.value.authorization_url)
   }
 
   function closeCaptcha() {
@@ -178,7 +179,7 @@ export function LoginPage() {
       return
     }
     /* 账号不存在：带上账号去注册表单（注册页随后落地，这里先把通道接上） */
-    navigate(registerPath(account.trim()))
+    navigate(registerPath(account.trim(), from))
   }
 
   async function runVerify() {
@@ -352,12 +353,13 @@ export function LoginPage() {
               </>
             ) : null}
 
+            {/* 账号可以是邮箱或手机号，用文本类型；`type="email"` 会让手机号过不了浏览器约束校验 */}
             <Input
               id="auth-account"
               aria-label={t('auth.field.account')}
               placeholder={config.form?.username?.placeholder || t('auth.field.account')}
-              type="email"
-              autoComplete="email"
+              type="text"
+              autoComplete="username"
               icon={<Icon name="i-mail" />}
               value={account}
               onChange={(event) => auth.setUsername(event.target.value)}

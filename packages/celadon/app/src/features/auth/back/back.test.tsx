@@ -173,4 +173,14 @@ describe('the third-party sign-in callback page', () => {
     expect(await screen.findByRole('alert')).toBeTruthy()
     expect(signIn).not.toHaveBeenCalled()
   })
+
+  it('gives the failure state and a way back when the entry configuration cannot be loaded', async () => {
+    stubTransport({ '/user/entry': { body: { error: 'invalid_request' }, status: 500 } })
+    renderBack('/auth/back/test?code=code-5&state=state-5')
+
+    /* 配置取不到时不再停在加载态：这一次的 code 用不上了，页面给失败与回登录入口 */
+    expect(await screen.findByText(t('auth.back.failed'))).toBeTruthy()
+    expect(screen.getByRole('link', { name: t('auth.back.backToLogin') })).toBeTruthy()
+    expect(callbackBody()).toBeUndefined()
+  })
 })

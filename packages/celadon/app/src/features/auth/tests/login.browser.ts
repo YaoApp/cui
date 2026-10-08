@@ -523,7 +523,7 @@ test('walks the captcha step against the live service, driven by the captcha typ
 
     /* 没有令牌直接提交：不发判定请求，只在弹窗里给字段级提示 */
     await dialog.getByRole('button', { name: '确定' }).click()
-    await expect(dialog.locator('.login__dialog-form .hint-error')).toBeVisible()
+    await expect(dialog.locator('.captcha-dialog__form .hint-error')).toBeVisible()
     expect(verifySent).toBe(false)
   } else {
     /* 人机验证的控件在页面里是 iframe，令牌由它自己给（测试环境用 Cloudflare 的 dummy 站点密钥）。

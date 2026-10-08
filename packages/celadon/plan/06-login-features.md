@@ -106,7 +106,7 @@
 | 一次性口令 | 服务端要求时 | `entryOtp` 重发；`register` 或 `login` 带 `verification_code` | 注册需要验证码由 `verification_code_required` 决定 |
 | 邀请码 | 判定或状态要求时 | `entryInvite` | 成功后直接得到 `EntryAuthResponse` |
 | 第三方 | 点提供方 | `oauthAuthorize` | 跳授权地址；回调回到应用后走 `oauthCallback` |
-| 设备码 | 客户端内且没有浏览器时 | `deviceFlowStart` · `deviceAuthorize` · `deviceFlowToken` | 轮询取令牌 |
+| 设备码 | 客户端内且没有浏览器时 | `deviceFlowStart` · `deviceAuthorize` · `deviceFlowToken` | 轮询取令牌（数据层已备，登录页尚未接入，见 `06-login-features-login.md` §7） |
 | 联合状态 | `LoginStatus` 声明时 | 按草图补页面 | `ok` · `mfa_required` · `team_selection_required` · `invite_required` · `invite_verification_required` |
 | 失败 | 任意一步 | 页内提示或跳 `failure_url` | 文案按错误码取，取自语言包 |
 | 自动登录 | 配置 `auto_login` 为真时注册响应带 `id_token` | 注册成功即可采纳会话 | 不带 `id_token` 时是「注册成功但未登录」，回到第一步给一条提示 |
@@ -230,5 +230,6 @@ features/auth/
 | 三个页面共用「第一步」 | 第一步没有整体抽成组件：登录页与注册页各写账号步，验证码弹窗抽成 `captcha-dialog` 共用 | 账号步判定后的去向两页不同（进密码步或跳注册），先共用其中确定相同的一块 |
 | 注册页有「邀请码」输入框（草图） | 表单里没有邀请码输入：`EntryRegisterRequest` 没有这个字段；服务端要求时按 `invite_required` 进页内邀请码步，由 `entryInvite` 兑换 | `data/user/types.ts` |
 | 注册成功一律采纳会话 | 响应带 `id_token` 才采纳；不带时回登录页并给「注册成功，请登录」 | §5.2 自动登录一行 |
+| 账号输入框用邮件类型 | 用 `type="text"` 与 `autocomplete="username"`：账号可以是邮箱或手机号，`type="email"` 会让手机号过不了浏览器约束校验 | `features/auth/account.ts` 的账号形态判定 |
 
 限制：一次性口令的活体走查仍取不到（口令发给收件人，接口读不到），自动化只覆盖到请求体带上 `otp_id` 与 `verification_code`；服务器选择页未做；`mode` 的能力开关与联合状态页仍按 §10。

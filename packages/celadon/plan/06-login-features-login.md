@@ -92,7 +92,7 @@
 | `submitPassword` | 密码非空；注册时两次一致；需要口令时口令填满 | `entryLoginQuery(token, { password, remember_me })` 或 `entryRegisterQuery(token, { password, confirm_password, otp_id, verification_code })` | `signIn(响应体)`；有 `id_token` 时先验签；跳 `success_url` | `notice` 取 `failure.text`；`invite_verification_required` 转 `phase = 'invite'` |
 | `resendCode` | 倒计时结束 | `entryOtpQuery(token)` | 更新 `otpId`，倒计时 60 秒重新开始 | `notice` 取 `failure.text` |
 | `redeemInvite` | 邀请码非空 | `entryInviteQuery(token, { code })` | `signIn(响应体)`；跳 `success_url` | `notice` 取 `failure.text` |
-| `pickProvider` | 无 | `oauthAuthorizeQuery(provider.id)` | 跳授权地址：Web 同窗口，客户端内用系统浏览器（`capabilities().externalOpen`） | `notice` 取 `failure.text` |
+| `pickProvider` | 无 | `oauthAuthorizeQuery(provider.id, redirectUri)` | 跳授权地址：Web 同窗口整页跳转，桌面交宿主的开浏览器命令（`capabilities().systemBrowser`） | `notice` 取 `failure.text` |
 | `changeAccount` | 无 | 无 | 清密码、确认密码、口令、验证码与判定结果，`phase = 'account'`，聚焦账号框 | 无 |
 | `dismissNotice` | 无 | 无 | 清 `notice` | 无 |
 
@@ -125,7 +125,8 @@
 - 失败时若有 `config.failure_url` 同理跳走，否则留在本页给 `StatusNotice`。
 - **不新增地址参数**；读只认 `POP`；**不在 `useEffect` 里写 URL**。
 - 真链接（`<a href>`）一律经 `appHref()`；路由路径（`to`）不带命名空间。
-- 第三方登录的回跳地址是**路径段**，不是查询参数：发起授权时把 `redirect_uri` 指到 `appHref('/auth/back/<提供方>')` 的绝对地址，提供方回来时把 `code` 与 `state` 带在查询里。回跳页把它们交给 `oauthCallback`，再走与账号登录相同的分支（邀请码、多因素回登录页，其余走成功收尾）。Web 下点第三方入口是**整页跳转**（`capabilities().systemBrowser` 为假），桌面宿主才交给系统浏览器打开。
+- 第三方登录的回跳地址是**路径段**，不是查询参数：发起授权时把 `redirect_uri` 指到 `appHref('/auth/back/<提供方>')` 的绝对地址，提供方回来时把 `code` 与 `state` 带在查询里。回跳页把它们交给 `oauthCallback`，再走与账号登录相同的分支（邀请码、多因素回登录页，其余走成功收尾）。Web 下点第三方入口是**整页跳转**；桌面下把授权地址交给宿主的 `celadon_system_open_browser` 命令，在系统浏览器里打开。
+- **桌面第三方登录的回跳尚未闭环**：系统浏览器打开的是宿主自己的来源，回跳页落在浏览器里，拿不到桌面宿主的能力，也写不进桌面凭据库。闭环需要深链或本地回调通道，尚未实现；数据层已经有设备码的接口（`deviceFlowStart` · `deviceFlowToken`），登录页还没有接。
 - 1.0 支持 `?redirect=` 并把目标存进 Cookie；我们是否支持见 §12。
 
 ## 8. 无障碍与键盘

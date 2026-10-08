@@ -137,12 +137,24 @@ test('switches the form wording with the language and takes the dark theme', asy
   await shot(page, 'dark-ja')
 })
 
-test('asks for the captcha in the dialog for an account that does not exist', async ({ page, request }) => {
+test('asks for the captcha in the dialog, in the shape the entry configuration declares', async ({ page, request }) => {
   test.skip(!(await hasLiveService(request)), 'the development service is not reachable')
+  const entry = await request.get('/v1/user/entry?locale=zh-CN')
+  const captchaType = ((await entry.json()) as { form?: { captcha?: { type?: string } } }).form?.captcha?.type
+  expect(captchaType === 'image' || captchaType === 'turnstile').toBe(true)
+
   await page.goto('/app/register')
   await page.getByLabel('邮箱或手机号').fill(`register-${Date.now()}@example.com`)
   await page.getByRole('button', { name: '下一步' }).click()
 
+  const dialog = page.getByRole('dialog')
   await expect(page.getByText('输入图形验证码')).toBeVisible()
+  if (captchaType === 'turnstile') {
+    await expect(dialog.locator('.turnstile-field')).toBeVisible()
+    await expect(dialog.locator('.captcha-field')).toHaveCount(0)
+  } else {
+    await expect(dialog.locator('.captcha-field')).toBeVisible()
+    await expect(dialog.locator('.turnstile-field')).toHaveCount(0)
+  }
   await shot(page, 'captcha-dialog')
 })

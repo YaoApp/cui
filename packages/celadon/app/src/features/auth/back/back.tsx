@@ -88,7 +88,10 @@ export function BackPage() {
   }
 
   const requestError = callbackCall.state.status === 'error' ? callbackCall.state.failure.text : ''
-  const errorText = localError || requestError || (outcome === 'failed' ? auth.notice?.text || t('auth.back.failed') : '')
+  /* 入口配置取失败时不再停在加载态：这一次的 code 用不上了，直接给失败与回登录入口 */
+  const configError = auth.configFailed && !config ? t('auth.back.failed') : ''
+  const errorText =
+    localError || requestError || configError || (outcome === 'failed' ? auth.notice?.text || t('auth.back.failed') : '')
 
   return (
     <AuthLayout

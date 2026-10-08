@@ -12,6 +12,8 @@ export type AuthConfigValue = {
   config?: EntryConfig
   /** 验签公钥集；取回前是 `undefined`。 */
   keys?: JsonWebKey[]
+  /** 入口配置取失败：页面据此给失败态，而不是一直停在加载态。 */
+  configFailed: boolean
 }
 
 export const AuthConfigContext = createContext<AuthConfigValue | undefined>(undefined)
