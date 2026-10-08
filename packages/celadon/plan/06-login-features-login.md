@@ -44,7 +44,7 @@
 
 | 文件 | 职责 | 关键导出 |
 | --- | --- | --- |
-| `routes/routes.tsx`（改） | 加一个**无路径布局路由**，`element` 是 `AuthLayout`，子路由是 `/login`、`/register`、`/servers` | `routes` |
+| `routes/routes.tsx`（改） | 加一个**无路径布局路由**，`element` 是 `AuthLayout`，子路由是 `/login`、`/register`、`/servers`、`/auth/back/:provider` | `routes` |
 | `features/auth/login/login.tsx` | 登录页：三步的界面与事件 | `LoginPage` |
 | `features/auth/login/login.less` | 卡片内的纵向排布与间距 | 无 |
 | `features/auth/login/login.test.tsx` | 单元用例 | 无 |
@@ -112,7 +112,7 @@
 | 项 | 规则 | 落点 |
 | --- | --- | --- |
 | 账号 | 非空，且形似邮箱或手机（宽松：含 `@` 且有点号，或纯数字且长度在 6 以上） | 账号字段的 `error`（`touched` 之后才出现）；同时禁用按钮 |
-| 图形验证码 | `form.captcha` 存在且类型为 `image` 时必填 | 验证码字段的 `error`；`captcha-field` 自己画换图与失败态 |
+| 图形验证码或人机验证 | `form.captcha.type` 为 `image` 或 `turnstile` 时必填 | 验证码字段的 `error`；图形验证码由 `captcha-field` 自己画换图与失败态，人机验证由 `turnstile-field` 管理控件与令牌，两者都放判定请求的 `captcha` 字段 |
 | 密码 | 非空 | 密码字段的 `error` |
 | 确认密码 | 与密码一致 | 确认密码字段的 `error`（文案「两次输入的密码不一致」） |
 | 口令 | 需要时位数填满（`otp-field` 的 `length`），填满即可提交 | 口令字段的 `error` |
@@ -125,6 +125,7 @@
 - 失败时若有 `config.failure_url` 同理跳走，否则留在本页给 `StatusNotice`。
 - **不新增地址参数**；读只认 `POP`；**不在 `useEffect` 里写 URL**。
 - 真链接（`<a href>`）一律经 `appHref()`；路由路径（`to`）不带命名空间。
+- 第三方登录的回跳地址是**路径段**，不是查询参数：发起授权时把 `redirect_uri` 指到 `appHref('/auth/back/<提供方>')` 的绝对地址，提供方回来时把 `code` 与 `state` 带在查询里。回跳页把它们交给 `oauthCallback`，再走与账号登录相同的分支（邀请码、多因素回登录页，其余走成功收尾）。Web 下点第三方入口是**整页跳转**（`capabilities().systemBrowser` 为假），桌面宿主才交给系统浏览器打开。
 - 1.0 支持 `?redirect=` 并把目标存进 Cookie；我们是否支持见 §12。
 
 ## 8. 无障碍与键盘
@@ -177,9 +178,8 @@
 
 1. **邀请码的位置**：本页先做第三步，与 1.0 的独立页不同；是否改回独立页待定。
 2. **联合状态页面**：`mfa_required` 与 `team_selection_required` 按入口配置声明与否决定做不做。
-3. **人机验证 `turnstile`**：本轮只做 `image`。
-4. **`?redirect=` 参数**：1.0 支持并把目标写进 Cookie；我们是否支持、由谁写、要不要落到 `success_url` 之前，待定。
-5. **第三方提供方的标记来源**：`SigninProvider.logo` 是一个图片地址，界面按地址渲染图片；没有地址时用哪一个通用图标待定。
+3. **`?redirect=` 参数**：1.0 支持并把目标写进 Cookie；我们是否支持、由谁写、要不要落到 `success_url` 之前，待定。
+4. **第三方提供方的标记来源**：`SigninProvider.logo` 是一个图片地址，界面按地址渲染图片；没有地址时用哪一个通用图标待定。
 
 ## 13. 实现结果（2026-10-07）
 
@@ -194,7 +194,7 @@
 | `features/auth/id-token.ts` | ID Token 本地验签，只认 RS256；用例里的密钥对现生成 |
 | `features/auth/locales/` | 四语各 41 键 |
 | `features/auth/tests/login.browser.ts` | 真实渲染 7 例：活体配置与验证码、语言换内容、失败按码翻译、注册分支走到口令、客户端内形态、键盘、边界对比度 |
-| `routes/routes.tsx` | 无路径布局路由只提供 `AuthProvider`，`/login` 挂在表面布局之外 |
+| `routes/routes.tsx` | 无路径布局路由只提供 `AuthProvider`，`/login`、`/register` 与 `/auth/back/:provider` 挂在表面布局之外 |
 
 与本文档原先写法的差异：
 
@@ -235,10 +235,10 @@ read from the test interface`，实测拿到 `status = register`、`verification
 
 | 动作 | 现在的行为 |
 | --- | --- |
-| 点「下一步」 | 校验账号与条款；入口配置要求图形验证码（`form.captcha.type === 'image'`）时弹窗收验证码，不要求就直接判定 |
-| 提交验证码 | 带 `captcha` 与 `captcha_id` 调 `entryVerify`；失败按错误码翻译后显示在**弹窗内**（模态打开时背景被标成 `aria-hidden`，页面上的提示读不到） |
+| 点「下一步」 | 校验账号与条款；入口配置要求验证码（`form.captcha.type` 为 `image` 或 `turnstile`）时弹窗收，不要求就直接判定 |
+| 提交验证码 | 带 `captcha` 调 `entryVerify`，图形验证码还要 `captcha_id`；失败按错误码翻译后显示在**弹窗内**（模态打开时背景被标成 `aria-hidden`，页面上的提示读不到） |
 | 判定为存在（`user_exists` 且 `status === 'login'`） | 弹窗转到密码步：账号只读加「修改」、密码框、记住我（配置声明时）；确认后调 `entryLogin`，邀请码与多因素分支照旧 |
-| 判定为不存在 | 带账号跳 `/register?username=…`，注册页（通道版）把账号显示出来 |
+| 判定为不存在 | 带账号跳 `/register?username=…`，注册页把账号显示出来，接着填密码与条款 |
 | 「修改」/关闭弹窗 | 回到账号步并清空密码与已触碰状态 |
 
 弹窗用基础件 `DialogPage`：宽度取 `--dialog-width`（480），遮罩 `--scrim`，圆角 `--radius-large`，底部操作右对齐，
@@ -251,10 +251,10 @@ read from the test interface`，实测拿到 `status = register`、`verification
 | --- | --- | --- |
 | 密码与邀请码都是**页面上的步骤**（`phase` 驱动显隐） | 密码步在弹窗里，邀请码步仍在页面上 | 弹窗承载「判定后的一次交互」，页面始终显示账号步，关闭弹窗即回来 |
 | 注册在本页走「确认密码 + 一次性口令」 | 登录页不再有注册分支，账号不存在即跳注册页 | 注册是独立页面（见 `plan/06-login-features.md`），登录页只负责判定与登录 |
-| 「去注册」链接落地页不存在 | 注册页已建**通道版**：显示带过来的账号、可返回登录 | 表单本身随后落地，先把通道接上 |
+| 「去注册」链接与「账号不存在」跳转的落地页 | 注册页已完成：账号步、密码与确认密码、条款、邀请码步（见 [`06-login-features.md`](06-login-features.md) §11）|
 | 条款勾选在账号步（草稿如此） | 移到注册页 | 同意条款属于注册行为，回头登录的人不必再同意一次 |
 
-`features/auth/register/` 是这一版的注册页（通道版），`/register` 与 `/login` 挂在同一个只提供 `AuthProvider` 的布局路由下。
+`features/auth/register/` 是注册页，`/register` 与 `/login` 挂在同一个只提供 `AuthProvider` 的布局路由下。
 条款与隐私政策的勾选、两个链接与错误态都在注册页上，登录页的判定不再以它为条件；草图的 `login.html` 同步删掉了这一块与它的事件处理。
 
 实测（`app/logs/2026-10-07/shots/`）：

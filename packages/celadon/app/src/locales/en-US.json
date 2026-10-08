@@ -54,6 +54,7 @@
   "data.error.putFailed": "Could not save",
   "data.error.deleteFailed": "Could not delete",
   "data.error.service.notReady": "The service address is not known yet",
+  "data.error.invalidGrant": "The authorization has expired. Please sign in again.",
   "data.error.invalidRequest": "The request was not valid",
   "data.error.user.invalidCaptcha": "That code is not correct. Please enter it again.",
   "data.error.tokenMissing": "The access token is missing",

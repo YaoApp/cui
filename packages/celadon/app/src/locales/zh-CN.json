@@ -54,6 +54,7 @@
   "data.error.putFailed": "保存失败",
   "data.error.deleteFailed": "删除失败",
   "data.error.service.notReady": "还没读到服务地址",
+  "data.error.invalidGrant": "授权已失效，请重新登录",
   "data.error.invalidRequest": "请求不合法",
   "data.error.user.invalidCaptcha": "验证码不正确，请重新输入",
   "data.error.tokenMissing": "缺少访问令牌",

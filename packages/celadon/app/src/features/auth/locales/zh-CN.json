@@ -57,7 +57,13 @@
   "auth.register.docTitle": "注册",
   "auth.register.titleLine1": "创建你的 Yao Agents 账号",
   "auth.register.titleLine2": "",
-  "auth.register.pending": "注册表单随后接入，账号已从登录页带过来。",
+  "auth.register.exists": "该账号已经注册，请直接登录",
   "auth.register.hasAccount": "已经有账号？",
-  "auth.register.backToLogin": "返回登录"
+  "auth.register.backToLogin": "返回登录",
+  "auth.back.docTitle": "登录验证",
+  "auth.back.loading": "正在完成登录，请稍候",
+  "auth.back.success": "登录成功",
+  "auth.back.failed": "登录验证失败",
+  "auth.back.missing": "授权信息不完整，请重新登录",
+  "auth.back.backToLogin": "返回登录"
 }

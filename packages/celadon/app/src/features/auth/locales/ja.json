@@ -57,7 +57,13 @@
   "auth.register.docTitle": "新規登録",
   "auth.register.titleLine1": "Yao Agents アカウントを作成",
   "auth.register.titleLine2": "",
-  "auth.register.pending": "登録フォームは後で接続します。アカウントはサインイン画面から引き継ぎました。",
+  "auth.register.exists": "このアカウントは登録済みです。ログインしてください。",
   "auth.register.hasAccount": "すでにアカウントがありますか？",
-  "auth.register.backToLogin": "サインインに戻る"
+  "auth.register.backToLogin": "サインインに戻る",
+  "auth.back.docTitle": "サインインの確認",
+  "auth.back.loading": "サインインを完了しています。しばらくお待ちください",
+  "auth.back.success": "サインインしました",
+  "auth.back.failed": "サインインの確認に失敗しました",
+  "auth.back.missing": "認可情報が不完全です。もう一度サインインしてください",
+  "auth.back.backToLogin": "サインインに戻る"
 }

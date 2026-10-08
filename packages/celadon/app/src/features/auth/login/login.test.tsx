@@ -98,7 +98,7 @@ function renderLogin() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/done" element={<p>已到达成功地址</p>} />
-          {/* 注册表单尚未落地：这里只证明账号不存在时会走到这个地址，并把账号带在查询里 */}
+          {/* 这里只证明账号不存在时会走到这个地址，并把账号带在查询里；注册页自己另有用例 */}
           <Route path="/register" element={<RegisterProbe />} />
         </Routes>
       </AuthProvider>
@@ -192,6 +192,16 @@ describe('the sign-in page', () => {
     await waitFor(() => expect(signIn).toHaveBeenCalledTimes(1))
     expect(signIn.mock.calls[0][0]).toMatchObject({ user_id: 'u1', access_token: 'access' })
     expect(await screen.findByText('已到达成功地址')).toBeTruthy()
+  })
+
+  it('treats a missing verification_code_required as needing the code, like the engine does', async () => {
+    stubTransport({}, entryConfig({ verification_code_required: undefined }))
+    const user = userEvent.setup()
+    renderLogin()
+    await reachPasswordStep(user)
+
+    /* 字段缺省时引擎按「需要」处理，登录这条通道也要把状态带成「需要口令」 */
+    expect(useAuthStore.getState().needsCode).toBe(true)
   })
 
   it('sends an account that does not exist to the register form with the account in the query', async () => {

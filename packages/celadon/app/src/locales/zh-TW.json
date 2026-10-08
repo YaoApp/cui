@@ -54,6 +54,7 @@
   "data.error.putFailed": "儲存失敗",
   "data.error.deleteFailed": "刪除失敗",
   "data.error.service.notReady": "還沒讀到服務位址",
+  "data.error.invalidGrant": "授權已失效，請重新登入",
   "data.error.invalidRequest": "請求不合法",
   "data.error.user.invalidCaptcha": "驗證碼不正確，請重新輸入",
   "data.error.tokenMissing": "缺少存取權杖",

@@ -364,9 +364,9 @@ test('sends an account that does not exist to the register form with the account
   await page.getByLabel('邮箱或手机号').fill('new-user@example.com')
   await page.locator('.auth__card button[type="submit"]').click()
 
-  /* 账号不存在：跳到注册地址，账号带在查询里，注册页的通道版把它显示出来 */
+  /* 账号不存在：跳到注册地址，账号带在查询里，注册页把它锁定展示出来 */
   await expect(page).toHaveURL(/\/app\/register\?username=new-user%40example\.com$/)
-  await expect(page.locator('.register__account')).toHaveText('new-user@example.com')
+  await expect(page.getByLabel('邮箱或手机号')).toHaveValue('new-user@example.com')
   await shot(page, 'register-channel')
 })
 
@@ -519,16 +519,19 @@ test('walks the captcha step against the live service, driven by the captcha typ
   if (appCaptchaType === 'image') {
     await expect(dialog.locator('.captcha-field')).toBeVisible()
     await expect(dialog.locator('.turnstile-field')).toHaveCount(0)
+    await shot(page, 'live-walk-captcha-step')
+
+    /* 没有令牌直接提交：不发判定请求，只在弹窗里给字段级提示 */
+    await dialog.getByRole('button', { name: '确定' }).click()
+    await expect(dialog.locator('.login__dialog-form .hint-error')).toBeVisible()
+    expect(verifySent).toBe(false)
   } else {
+    /* 人机验证的控件在页面里是 iframe，令牌由它自己给（测试环境用 Cloudflare 的 dummy 站点密钥）。
+       提交与判定的整条路径由测试环境上的 `cui-testing/instance-config/walk.mjs` 走查，这里只核控件按配置渲染。 */
     await expect(dialog.locator('.turnstile-field')).toBeVisible()
     await expect(dialog.locator('.captcha-field')).toHaveCount(0)
+    await shot(page, 'live-walk-captcha-step')
   }
-  await shot(page, 'live-walk-captcha-step')
-
-  /* 没有令牌直接提交：不发判定请求，只在弹窗里给字段级提示 */
-  await dialog.getByRole('button', { name: '确定' }).click()
-  await expect(dialog.locator('.login__dialog-form .hint-error, .login__dialog-form .turnstile-field__error')).toBeVisible()
-  expect(verifySent).toBe(false)
   console.log('[login] live walk saw captcha type', appCaptchaType, 'for', account)
 })
 
@@ -829,6 +832,42 @@ test('a judgement closed mid-flight is treated as not verified', async ({ page }
   await expect(page.locator('#auth-account')).toBeVisible()
   await expect(page.locator('#auth-account-locked')).toHaveCount(0)
   await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('walks a third-party sign-in through the callback page when the instance declares the test provider', async ({
+  page,
+  request,
+}) => {
+  test.skip(!(await hasLiveService(request)), 'the development service is not reachable')
+  /* 第三方登录的活体走查要一个不经过外部身份提供方的提供方：实例里声明了 id 为 `test` 的那一个
+     （端点指向开发机上的 mock，见工作区 `cui-testing/oauth-mock/`）才跑，别的环境按跳过处理。 */
+  const entry = await request.get('/v1/user/entry?locale=zh-CN')
+  const config = (await entry.json()) as { third_party?: { providers?: { id: string }[] } }
+  const providers = config.third_party?.providers ?? []
+  const index = providers.findIndex((provider) => provider.id === 'test')
+  test.skip(index < 0, 'the instance does not declare the test provider')
+
+  await page.goto('/app/login')
+  const providerRow = page.locator('.provider-list__item').nth(index)
+  await expect(providerRow).toBeVisible()
+
+  /* Web 下整页跳转到授权地址：授权、回跳与换会话都发生在同一页上 */
+  const callbackRequest = page.waitForRequest(
+    (sent) => sent.url().includes('/user/oauth/test/callback') && sent.method() === 'POST',
+  )
+  const callbackResponse = page.waitForResponse((received) => received.url().includes('/user/oauth/test/callback'))
+  await providerRow.click()
+
+  /* 回调的请求与回应都要真的发生：请求里应带一次性 code 与 state，回应是 200 */
+  const sent = await callbackRequest
+  const body = sent.postDataJSON() as { code?: string; state?: string }
+  expect(body.code).toBeTruthy()
+  expect(body.state).toBeTruthy()
+  expect((await callbackResponse).status()).toBe(200)
+
+  /* 换到会话后按入口配置的成功地址跳走：地址在应用命名空间之外，因此是整页跳转 */
+  await expect.poll(() => page.url(), { timeout: 15_000 }).not.toContain('/auth/back/')
+  await shot(page, 'third-party-callback')
 })
 
 test('reserves two third-party slots while the entry configuration loads', async ({ page }) => {

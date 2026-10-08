@@ -1,5 +1,6 @@
 import { Navigate, Outlet, type RouteObject } from 'react-router'
 import { AuthProvider } from '@/features/auth/components/auth-provider'
+import { BackPage } from '@/features/auth/back'
 import { LoginPage } from '@/features/auth/login'
 import { RegisterPage } from '@/features/auth/register'
 import { HomePage } from '@/features/home'
@@ -37,6 +38,8 @@ const authRoutes: RouteObject[] = [
       { path: 'login', element: <LoginPage /> },
       /* 注册页先接通道：账号不存在的判定结果跳到这里（表单项按 plan/06 随后落地） */
       { path: 'register', element: <RegisterPage /> },
+      /* 第三方登录的回跳页：授权发起时把地址指到这里（见 plan/06-login-features-login.md 第 7 节） */
+      { path: 'auth/back/:provider', element: <BackPage /> },
     ],
   },
 ]

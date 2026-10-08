@@ -54,6 +54,7 @@
   "data.error.putFailed": "保存に失敗しました",
   "data.error.deleteFailed": "削除に失敗しました",
   "data.error.service.notReady": "サービスのアドレスがまだ分かりません",
+  "data.error.invalidGrant": "認可の有効期限が切れました。もう一度サインインしてください",
   "data.error.invalidRequest": "リクエストが不正です",
   "data.error.user.invalidCaptcha": "認証コードが正しくありません。もう一度入力してください。",
   "data.error.tokenMissing": "アクセストークンがありません",
