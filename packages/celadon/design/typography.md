@@ -35,7 +35,7 @@
 1px 差不构成可感知层级，选档只能凭感觉。业内没有一家这么排：Ant Design 是 12 / 14 / 16 / 20，
 IBM Design Language 是 12 / 14 / 16 / 20 / 24，GitHub Primer 相邻档至少差 2px。
 本体系 2026-10-06 按主流重排，正文由 13 提到 14（与 Ant 基准一致），同时缓解了小字号汉字看不清的问题。
-完整对比与出处见 `memory-history/2026-10-06/semantic-type-scale-industry-research.md`。
+完整对比与取值过程见 §10.7 的出处。
 
 **颜色角色**（换色不换字号，同一档位在不同语义下有不同的文字色）：
 
@@ -308,7 +308,7 @@ lobehub 这类产品自带拉丁字体（Geist），Ant Design、Tailwind 与 Gi
 
 **字号阶梯的取值依据**：现行五档 12 · 14 · 16 · 20 · 24，**相邻档至少相差 2px**。
 不设相邻 1px 的档，因为 1px 差不构成可感知层级；正文取 14px，与业内常见的桌面基准字号一致。
-对比与出处见 `memory-history/2026-10-06/semantic-type-scale-industry-research.md`。
+对比与出处见 §10.7 的出处。
 
 将来若决定显式指定 Windows 中文字体，需注意两个命名体系：「Noto Sans SC」（Google Fonts 发行版）与
 「Noto Sans CJK SC」（思源同源系统版）是**不同族名**，要按实际安装情况决定列哪一个，或两者都列。
@@ -385,4 +385,4 @@ lobehub 实际只用 400 / 500 / 600）。此前 `normal` 用过 `430`，那是�
 - **Chromium 议题 40363269**：Noto Sans CJK 静态版实际只有 400 与 700 两档。取自 <https://issues.chromium.org/40363269>。
 - **Microsoft Typography 字体清单**：微软雅黑为 Light / Regular / Bold。取自 <https://learn.microsoft.com/en-us/typography/font-list/microsoft-yahei>。
 - **lobehub**：自带 Geist 与 Geist Mono，字体栈里列有中日韩字体但排在系统字体之后；仓库内不含字体文件。取自本工作区 `lobehub/DESIGN.md`。
-- **本设计体系的实测**：用 canvas 像素签名量出 PingFang SC 有真实的 500、Hiragino Sans 四档全真、雅黑在只有 400 与 700 时中间值一律跳到 Bold。完整数据见 `memory-history/2026-10-06/font-weight-cross-platform-findings.md`。
+- **本设计体系的实测**：用 canvas 像素签名量出 PingFang SC 有真实的 500、Hiragino Sans 四档全真、雅黑在只有 400 与 700 时中间值一律跳到 Bold。
