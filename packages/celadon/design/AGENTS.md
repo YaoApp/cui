@@ -14,6 +14,7 @@
 | [`foundations.html`](foundations.html) · [`foundations.md`](foundations.md) | **基线六项**：间距 · 圆角 · 层级 · 动效 · 边框 · 三栏竖分割 | 现行 |
 | [`typography.html`](typography.html) · [`typography.md`](typography.md) | **排版规范**：语义档位 · 颜色角色与特殊处理 · 行宽 · 文种与字栈 · 等宽字体 · 多语言混排 · 可达性 · 出处 | 现行（2026-10-06）|
 | [`layout.html`](layout.html) · [`layout.md`](layout.md) | **布局规范**：间距刻度 · 内边距与外边距 · 对齐 · 栏与容器 · 可达性 · **常见缺陷（实测）** · 出处 | 现行（2026-10-06）|
+| [`main-shell.md`](main-shell.md) | **主界面布局**（产品交互简版）：三栏外壳 · 导航列（双区 · 折叠）· 第三栏（浏览器式的侧栏）· 内容形态 · 入口与呈现 · 独占与运行 | 现行（2026-10-09）|
 | [`typography-demo.html`](typography-demo.html) | **排版演示**：同页浅暗双栏 · 八个真实场景 · 四语可切；文案全走 `data-t`，不留内联副本 | 现行（2026-10-06）|
 | [`typography-reading.html`](typography-reading.html) | **排版样张**：Yao Agents 博客正文原样（中英混排 · 列表 · 六列表格 · 链接），用于对比 Windows 与 macOS 观感；单一语言，正文属有意保留 | 现行（2026-10-06）|
 | [`icons.html`](icons.html) · [`icons/`](icons/) | 图标样本与 PNG 七档（16–1024）| 现行 |
