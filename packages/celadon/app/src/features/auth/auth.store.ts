@@ -10,6 +10,18 @@ export type AuthVerifyStatus = 'login' | 'register'
 /** 页面级提示：文案已翻译，`tone` 决定颜色与读屏的播报方式。 */
 export type AuthNotice = { tone: 'info' | 'danger'; text: string }
 
+/** 登录成功后的用户信息：欢迎页展示用，之后按用户信息分流也以它为准。 */
+export type AuthUser = {
+  /** 服务端给的用户标识。 */
+  userId?: string
+  /** 本次登录用的账号（邮箱或手机号）；第三方登录可能没有。 */
+  account?: string
+  /** 显示名；来自 ID Token 的声明，没有就不展示。 */
+  name?: string
+  /** 邮箱；同样来自 ID Token 的声明。 */
+  email?: string
+}
+
 /**
  * 登录域的私有状态（`architecture/06-state.md` §2.2：私有状态住 `features/<域>/<域>.store.ts`）。
  *
@@ -33,12 +45,16 @@ export type AuthState = {
   username: string
   /** 页面级提示；没有就是空。 */
   notice?: AuthNotice
+  /** 登录成功后的用户信息；没登录就是空。 */
+  user?: AuthUser
   /** 动作：记下账号。 */
   setUsername: (username: string) => void
   /** 动作：设置或清掉页面级提示。 */
   setNotice: (notice?: AuthNotice) => void
   /** 动作：更新口令标识（重发验证码成功时用）。 */
   setOtpId: (otpId: string) => void
+  /** 动作：记下登录成功后的用户信息。 */
+  setUser: (user?: AuthUser) => void
   /** 动作：判定成功，记下临时令牌、判定结果与口令标识，并进入密码步。 */
   enterPassword: (input: { tempToken: string; status: AuthVerifyStatus; otpId?: string; needsCode: boolean }) => void
   /** 动作：进入邀请码步，并用本次响应里的临时令牌替换旧的。 */
@@ -57,6 +73,7 @@ const initial = {
   needsCode: false,
   username: '',
   notice: undefined,
+  user: undefined,
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -66,6 +83,7 @@ export const useAuthStore = create<AuthState>()(
       setUsername: (username) => set({ username }, false, 'auth/setUsername'),
       setNotice: (notice) => set({ notice }, false, 'auth/setNotice'),
       setOtpId: (otpId) => set({ otpId }, false, 'auth/setOtpId'),
+      setUser: (user) => set({ user }, false, 'auth/setUser'),
       enterPassword: (input) =>
         set(
           {

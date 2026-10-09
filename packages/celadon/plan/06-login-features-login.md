@@ -33,7 +33,7 @@
 | 重发 | `SendOTP(临时令牌, locale)`，成功后更新 `otp_id` | `entryOtpQuery(token)`，成功后更新 `otp_id` |
 | 邀请码 | 跳到独立页 `/auth/entry/invite`，临时令牌放 `sessionStorage` | 做成**页内第三步**；令牌仍在内存；要不要独立页见 §12 |
 | 联合状态 | `mfa_required` 跳 `/auth/entry/mfa`，`team_selection_required` 跳 `/team/select` | 未决：入口配置声明时才做，见 §12 |
-| 登录成功 | `ValidateIDToken(id_token)` 后 `AfterLogin(...)`，再跳 `success_url` | 验签（已定），成功后 `signIn(响应体)`，再跳 `success_url`；Web 上 `signIn` 是空操作 |
+| 登录成功 | `ValidateIDToken(id_token)` 后 `AfterLogin(...)`，再跳 `success_url` | 验签（已定），成功后 `signIn(响应体)` 并跳 `/welcome`（§7.1），成功地址由欢迎页接手；Web 上 `signIn` 是空操作 |
 | 注册成功但没有 `id_token` | 提示注册成功，1.5 秒后回到入口重新登录 | 同样回到第一步并给一条提示（`auto_login` 为假时就是这个分支） |
 | 失败 | 直接印服务端 `error_description` | 按错误码取 `failure.text`（语言包 `data.error.<码>`），字段级错误挂字段，其余挂 `StatusNotice` |
 | 校验提示 | 弹层提示（`message.warning`） | 字段级错误；按钮在无效时禁用，不弹层 |
@@ -89,10 +89,10 @@
 | 动作 | 前置 | 调用 | 成功 | 失败 |
 | --- | --- | --- | --- | --- |
 | `submitAccount` | 账号非空且形似邮箱或手机；验证码已填（需要时）；条款已勾 | `entryVerifyQuery({ username, captcha_id, captcha })` | 记 `tempToken`、`verifyStatus`、`otpId`、`needsCode`，`phase = 'password'`，聚焦密码框 | `notice` 取 `failure.text`；需要图形验证码时换一张；`phase` 不动 |
-| `submitPassword` | 密码非空；注册时两次一致；需要口令时口令填满 | `entryLoginQuery(token, { password, remember_me })` 或 `entryRegisterQuery(token, { password, confirm_password, otp_id, verification_code })` | `signIn(响应体)`；有 `id_token` 时先验签；跳 `success_url` | `notice` 取 `failure.text`；`invite_verification_required` 转 `phase = 'invite'` |
+| `submitPassword` | 密码非空；注册时两次一致；需要口令时口令填满 | `entryLoginQuery(token, { password, remember_me })` 或 `entryRegisterQuery(token, { password, confirm_password, otp_id, verification_code })` | `signIn(响应体)`；有 `id_token` 时先验签；跳 `/welcome`（§7.1） | `notice` 取 `failure.text`；`invite_verification_required` 转 `phase = 'invite'` |
 | `resendCode` | 倒计时结束 | `entryOtpQuery(token)` | 更新 `otpId`，倒计时 60 秒重新开始 | `notice` 取 `failure.text` |
-| `redeemInvite` | 邀请码非空 | `entryInviteQuery(token, { code })` | `signIn(响应体)`；跳 `success_url` | `notice` 取 `failure.text` |
-| `pickProvider` | 无 | `oauthAuthorizeQuery(provider.id, redirectUri)` | 跳授权地址：Web 同窗口整页跳转，桌面交宿主的开浏览器命令（`capabilities().systemBrowser`） | `notice` 取 `failure.text` |
+| `redeemInvite` | 邀请码非空 | `entryInviteQuery(token, { code })` | `signIn(响应体)`；跳 `/welcome`（§7.1） | `notice` 取 `failure.text` |
+| `pickProvider` | 无 | `oauthAuthorizeQuery(provider.id, redirectUri)` | 跳授权地址：在当前窗口整页跳转（`platform/client/open-external.ts`），不另开窗口 | `notice` 取 `failure.text` |
 | `changeAccount` | 无 | 无 | 清密码、确认密码、口令、验证码与判定结果，`phase = 'account'`，聚焦账号框 | 无 |
 | `dismissNotice` | 无 | 无 | 清 `notice` | 无 |
 
@@ -121,14 +121,31 @@
 
 ## 7. 跳转与地址
 
-- 成功后跳 `config.success_url`：**同源**时走路由（去掉构建命名空间前缀后 `navigate(path)`），**外链**时用 `location.assign(url)`。
-- 失败时若有 `config.failure_url` 同理跳走，否则留在本页给 `StatusNotice`。
+- 登录与注册成功后先跳 `/welcome`（见 §7.1），由欢迎页再走 `config.success_url`：**同源**时走路由（去掉构建命名空间前缀后 `navigate(path)`），**外链**时用 `location.assign(url)`。
+- 失败时留在本页给 `StatusNotice`（字段级错误挂到字段上）；入口配置里的 `failure_url` 尚未接入。
 - **不新增地址参数**；读只认 `POP`；**不在 `useEffect` 里写 URL**。
 - 真链接（`<a href>`）一律经 `appHref()`；路由路径（`to`）不带命名空间。
-- 第三方登录的回跳地址是**路径段**，不是查询参数：发起授权时把 `redirect_uri` 指到 `appHref('/auth/back/<提供方>')` 的绝对地址，提供方回来时把 `code` 与 `state` 带在查询里。回跳页把它们交给 `oauthCallback`，再走与账号登录相同的分支（邀请码、多因素回登录页，其余走成功收尾）。Web 下点第三方入口是**整页跳转**；桌面下把授权地址交给宿主的 `celadon_system_open_browser` 命令，在系统浏览器里打开。
-- **桌面第三方登录的回跳尚未闭环**：系统浏览器打开的是宿主自己的来源，回跳页落在浏览器里，拿不到桌面宿主的能力，也写不进桌面凭据库。闭环需要深链或本地回调通道，尚未实现；数据层已经有设备码的接口（`deviceFlowStart` · `deviceFlowToken`），登录页还没有接。
+- 第三方登录的回跳地址是**路径段**，不是查询参数：发起授权时把 `redirect_uri` 指到 `appHref('/auth/back/<提供方>')` 的绝对地址，提供方回来时把 `code` 与 `state` 带在查询里。回跳页把它们交给 `oauthCallback`，再走与账号登录相同的分支（邀请码、多因素回登录页，其余走成功收尾）。点第三方入口一律**在当前窗口整页跳转**（`platform/client/open-external.ts`），Web 与桌面同一套，不另开窗口、不交系统浏览器。
+- **桌面第三方登录的回跳尚未闭环**：在当前窗口跳转后，回跳落在应用自己的来源上；生产里这个来源是资产协议，第三方提供方是否接受这样的 `redirect_uri`、拿到的会话能否写进桌面凭据库，都还没有验证。闭环需要深链或本地回调通道；数据层已经有设备码的接口（`deviceFlowStart` · `deviceFlowToken`），登录页还没有接。
 - **入口配置取不到时的两半**：请求失败（有错或非 2xx）时回跳页给失败与回登录入口；请求**一直不返回**时仍停在加载态，因为入口配置的取数没有超时。超时值属于产品决定，未设。
 - 1.0 支持 `?redirect=` 并把目标存进 Cookie；我们是否支持见 §12。
+
+### 7.1 欢迎页（占位）
+
+登录或注册成功、会话采纳之后，`use-complete-sign-in` 把本次会话的用户信息写进登录域状态并跳 `/welcome`；欢迎页展示这些信息，点「继续」走 `config.success_url`（没有配置就回应用首页）。直接打开这个地址、或刷新后内存里没有用户信息时回登录页。
+
+用户信息的来源见 `features/auth/user-info.ts`：
+
+| 展示项 | 取值 |
+| --- | --- |
+| 用户标识 | 响应里的 `user_id`，没有就取 ID Token 声明里的 `yao:user_id`，再退到 `sub` |
+| 账号 | 本次登录用的账号（第三方登录没有） |
+| 显示名 | 声明里的 `name`，没有就看 `yao:member.display_name` |
+| 邮箱 | 声明里的 `email` |
+
+声明由 `idTokenClaimsForDisplay` 从载荷读出，**只用于展示**；是否可信由 `verifyIdToken` 判，验签失败仍走原来的失败路径。缺的字段不占一行。按用户信息分流随后接在这一页的「继续」之后。
+
+「继续」在入口配置还没回来之前不可点；配置明确取不到时照旧可点，按没有成功地址处理，回应用首页。
 
 ## 8. 无障碍与键盘
 
@@ -136,7 +153,7 @@
 2. 进入密码步后把焦点给密码框，回第一步时把焦点给账号框；「修改」是可聚焦的按钮。
 3. 错误与提示经 `aria-describedby` 与控件关联，失败提示是 `role="alert"`。
 4. 语言与主题切换后已输入的内容不丢（流程状态在 `AuthProvider`，表单在页面且不随语言重建）。
-5. `PasswordInput` 的可见性切换带 `aria-label` 与 `aria-pressed`，四语由语言包给。
+5. `PasswordInput` 的可见性切换带 `aria-label` 与 `aria-pressed`，四语由语言包给；它不占 Tab 停点，Tab 从密码框直接到下一个字段（确认密码或主操作）。
 
 ## 9. 文案键清单（`features/auth/locales/`，四语齐备）
 
@@ -152,6 +169,8 @@
 | `auth.terms.prefix` · `auth.terms.service` · `auth.terms.and` · `auth.terms.privacy` | 条款一行 |
 | `auth.notice.registered` | 注册成功但未自动登录时的提示 |
 | `auth.switch.toRegister` · `auth.switch.toLogin` | 卡片下方的互相跳转 |
+| `auth.welcome.docTitle` · `title` · `lead` · `continue` | 欢迎页的标题、说明与主操作 |
+| `auth.welcome.userId` · `account` · `name` · `email` | 欢迎页里用户信息的四个字段名 |
 
 服务端失败的文案不在这个包里：它来自 `app/src/locales` 的 `data.error.<码>`。
 

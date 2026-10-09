@@ -92,6 +92,8 @@ function renderRegister(url = '/register?username=max%40example.com') {
         <Routes>
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<p>登录页</p>} />
+          {/* 登录成功的第一站是欢迎页；成功地址由欢迎页自己接着走 */}
+          <Route path="/welcome" element={<p>欢迎页</p>} />
           <Route path="/done" element={<p>已到达成功地址</p>} />
         </Routes>
       </AuthProvider>
@@ -287,7 +289,7 @@ describe('the register page', () => {
     expect(useAuthStore.getState().notice?.text).toBe(t('auth.notice.registered'))
   })
 
-  it('adopts the session and follows the success address when the response carries an id token', async () => {
+  it('adopts the session and lands on the welcome page when the response carries an id token', async () => {
     stubTransport({
       '/user/entry/register': {
         body: { user_id: 'u1', id_token: 'id-token-value', access_token: 'access', refresh_token: 'refresh', status: 'ok' },
@@ -299,7 +301,7 @@ describe('the register page', () => {
     await fillForm(user)
     await user.click(screen.getByRole('button', { name: t('auth.action.register') }))
 
-    expect(await screen.findByText('已到达成功地址')).toBeTruthy()
+    expect(await screen.findByText('欢迎页')).toBeTruthy()
     expect(signIn).toHaveBeenCalledTimes(1)
   })
 
@@ -395,7 +397,7 @@ describe('the register page', () => {
     expect(screen.getByPlaceholderText('新密码')).toBeTruthy()
   })
 
-  it('redeems the invite and follows the success address', async () => {
+  it('redeems the invite and lands on the welcome page', async () => {
     stubTransport({ '/user/entry/register': { body: { status: 'invite_required', access_token: 'invite-token' } } })
     const user = userEvent.setup()
     renderRegister()
@@ -405,7 +407,7 @@ describe('the register page', () => {
 
     await user.type(await screen.findByLabelText(t('auth.field.invite')), 'INVITE-1')
     await user.click(screen.getByRole('button', { name: t('auth.action.redeem') }))
-    expect(await screen.findByText('已到达成功地址')).toBeTruthy()
+    expect(await screen.findByText('欢迎页')).toBeTruthy()
     expect(signIn).toHaveBeenCalledTimes(1)
   })
 

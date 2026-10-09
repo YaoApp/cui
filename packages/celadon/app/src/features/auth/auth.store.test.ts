@@ -48,4 +48,12 @@ describe('the auth store', () => {
     expect(store().username).toBe('')
     expect(store().phase).toBe('account')
   })
+
+  it('gives up the signed-in user on reset', () => {
+    store().setUser({ userId: 'u-1', email: 'max@example.com' })
+    expect(store().user?.userId).toBe('u-1')
+
+    store().reset()
+    expect(store().user).toBeUndefined()
+  })
 })

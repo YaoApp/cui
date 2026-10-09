@@ -33,6 +33,9 @@ export type PasswordInputProps = {
  * 切换控件放在字段自带的尾部槽位里，因此位置与尺寸都跟着输入框走，不需要另写排布。
  * 它是纯文字档的小号图标按钮，可访问名写动作（显示或隐藏），并用 `aria-pressed` 表达当前是否明文。
  * 密码本身仍是 `type="password"` 的文本输入，不另立控件。
+ *
+ * 这个切换**不占 Tab 停点**：Tab 在字段之间走（密码到确认密码，密码到主操作），不会先停在眼睛上。
+ * 指针点击照常可用。
  */
 export function PasswordInput({
   id,
@@ -80,6 +83,8 @@ export function PasswordInput({
           variant="plain"
           size="small"
           iconOnly
+          /* 尾部辅助按钮不占 Tab 停点，Tab 直接去下一个字段 */
+          tabIndex={-1}
           disabled={disabled}
           aria-label={t(action)}
           aria-pressed={visible}

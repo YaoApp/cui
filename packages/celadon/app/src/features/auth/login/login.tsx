@@ -126,12 +126,12 @@ export function LoginPage() {
   const captchaBusy = verifyCall.state.status === 'loading'
   const submitting = loginCall.state.status === 'loading'
 
-  /** 选第三方入口：取回授权地址后跳转。Web 整页跳转，桌面交宿主在系统浏览器里打开。这是动作，不是 effect。 */
+  /** 选第三方入口：取回授权地址后**在当前窗口整页跳转**，授权与回跳都在同一页上。这是动作，不是 effect。 */
   async function onPickProvider(id: string) {
     providerIdRef.current = id
     const result = await providerCall.run()
     if (!result?.ok) return
-    await openExternal(result.value.authorization_url)
+    openExternal(result.value.authorization_url)
   }
 
   function closeCaptcha() {
@@ -243,7 +243,7 @@ export function LoginPage() {
       })
       return
     }
-    await complete(value)
+    await complete(value, account.trim())
   }
 
   async function onSubmitPassword(event: FormEvent) {
@@ -262,7 +262,7 @@ export function LoginPage() {
     if (inviteCode.trim() === '') return
     const result = await inviteCall.run()
     if (!result?.ok) return
-    await complete(result.value)
+    await complete(result.value, account.trim())
   }
 
   /* 失败落在**对应的字段**上，不挂在页面顶端当通知：判定失败属于验证码那一项，

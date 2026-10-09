@@ -22,6 +22,27 @@ function decodePart(part: string): Record<string, unknown> {
 }
 
 /**
+ * **只读展示**用的声明：把 ID Token 的载荷解开，不验签。
+ *
+ * 用于展示（欢迎页的名字、邮箱一类）；**不能**当作授权或身份判断的依据，
+ * 要判断是否可信请用 `verifyIdToken`。
+ */
+export function idTokenClaimsForDisplay(token: string | undefined): Record<string, unknown> | undefined {
+  if (!token) return undefined
+  const payloadPart = token.split('.')[1]
+  if (!payloadPart) return undefined
+  try {
+    const payload: unknown = decodePart(payloadPart)
+    /* 声明必须是一组键值：数组、`null` 与标量都不算 */
+    return typeof payload === 'object' && payload !== null && !Array.isArray(payload)
+      ? (payload as Record<string, unknown>)
+      : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
  * 验一段 ID Token。
  *
  * 判定顺序：形状（三段）、算法（只认 RS256）、有效期（`exp`，可注入当前时间便于用例）、

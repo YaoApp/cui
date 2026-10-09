@@ -57,7 +57,6 @@ const capsMock = vi.hoisted(() =>
     files: false,
     notifications: false,
     externalOpen: true,
-    systemBrowser: false,
     serviceAddress: false,
   })),
 )
@@ -467,7 +466,6 @@ describe('the service address, which only a client holds', () => {
       files: false,
       notifications: false,
       externalOpen: true,
-      systemBrowser: false,
       serviceAddress: true,
     })
     readAddress.mockResolvedValue({ ok: true, value: 'http://host:5099' })
@@ -493,7 +491,6 @@ describe('saving a new service address', () => {
       files: false,
       notifications: false,
       externalOpen: true,
-      systemBrowser: false,
       serviceAddress: true,
     })
     writeAddress.mockResolvedValue({ ok: true, value: 'http://typed:5099' })

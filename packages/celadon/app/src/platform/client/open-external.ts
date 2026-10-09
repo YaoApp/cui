@@ -1,19 +1,18 @@
-/* **打开外部地址**：宿主能把地址交给系统浏览器时走宿主命令，其余情况由页面整页跳转。
+/* **打开外部地址**：在当前窗口整页跳转。
  *
- * `bridge/` 是平台层的内部机制，上层不许直接碰，因此这里给出一个面孔：
- * 第三方授权、帮助链接一类需要离开应用的动作都走它，调用方只给地址。
+ * 第三方授权、帮助链接一类要离开应用的动作都走这个面孔，调用方只给地址；
+ * 不在新窗口或系统浏览器里打开，授权与回跳都发生在同一页上。
  */
-import { system } from '@/platform/bridge'
-import { capabilities } from './capabilities'
 
-export async function openExternal(
+/** 当前窗口整页跳转。 */
+function assign(target: string): void {
+  window.location.assign(target)
+}
+
+export function openExternal(
   url: string,
-  /* 整页跳转是页面自己的动作；留一个可换的接缝，页面与用例都能换掉它 */
-  navigate: (target: string) => void = (target) => window.location.assign(target),
-): Promise<void> {
-  if (capabilities().systemBrowser) {
-    const opened = await system.openBrowser(url)
-    if (opened.ok) return
-  }
+  /* 跳转是页面自己的动作；留一个可换的接缝，页面与用例都能换掉它 */
+  navigate: (target: string) => void = assign,
+): void {
   navigate(url)
 }

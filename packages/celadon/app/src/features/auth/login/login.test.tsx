@@ -12,8 +12,8 @@ vi.mock('@/platform/credential', async (importOriginal) => {
   return { ...actual, signIn }
 })
 
-/* 打开外部地址的平台面孔：页面只负责把授权地址交给它，宿主命令与整页跳转的取舍在平台层用例里核。 */
-const openExternal = vi.hoisted(() => vi.fn(async (_url: string) => {}))
+/* 打开外部地址的平台面孔：页面只负责把授权地址交给它，跳转本身在平台层用例里核。 */
+const openExternal = vi.hoisted(() => vi.fn((_url: string) => undefined))
 vi.mock('@/platform/client/open-external', () => ({ openExternal }))
 
 import { transportFetch } from '@/platform/transport/fetch'
@@ -101,6 +101,8 @@ function renderLogin() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          {/* 登录成功的第一站是欢迎页；成功地址由欢迎页自己接着走 */}
+          <Route path="/welcome" element={<p>欢迎页</p>} />
           <Route path="/done" element={<p>已到达成功地址</p>} />
           {/* 这里只证明账号不存在时会走到这个地址，并把账号带在查询里；注册页自己另有用例 */}
           <Route path="/register" element={<RegisterProbe />} />
@@ -188,7 +190,7 @@ describe('the sign-in page', () => {
     expect(screen.queryByPlaceholderText('登录密码')).toBeNull()
   })
 
-  it('moves to the password step, signs in and lands on the success address', async () => {
+  it('moves to the password step, signs in and lands on the welcome page', async () => {
     stubTransport()
     const user = userEvent.setup()
     renderLogin()
@@ -198,7 +200,7 @@ describe('the sign-in page', () => {
 
     await waitFor(() => expect(signIn).toHaveBeenCalledTimes(1))
     expect(signIn.mock.calls[0][0]).toMatchObject({ user_id: 'u1', access_token: 'access' })
-    expect(await screen.findByText('已到达成功地址')).toBeTruthy()
+    expect(await screen.findByText('欢迎页')).toBeTruthy()
   })
 
   it('treats a missing verification_code_required as needing the code, like the engine does', async () => {
@@ -412,7 +414,7 @@ describe('the sign-in page', () => {
     expect(account.type).toBe('text')
   })
 
-  it('hands the authorization address to the client face that opens it', async () => {
+  it('hands the authorization address to the face that navigates the current window', async () => {
     stubTransport(
       { '/user/oauth/google/authorize': { body: { authorization_url: 'https://accounts.example.com/auth' } } },
       entryConfig({
@@ -423,7 +425,7 @@ describe('the sign-in page', () => {
     renderLogin()
     await user.click(await screen.findByRole('button', { name: t('auth.provider.continueWith', { provider: '谷歌' }) }))
 
-    /* 页面不自己判宿主，交给平台层的开外部地址面孔 */
+    /* 页面不自己判宿主，交给平台层的开外部地址面孔；跳转发生在当前窗口 */
     await waitFor(() => expect(openExternal).toHaveBeenCalledWith('https://accounts.example.com/auth'))
   })
 })
