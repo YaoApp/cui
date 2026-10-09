@@ -14,6 +14,7 @@ import {
   oauthAuthorize,
   oauthCallback,
   oidcKeys,
+  userProfile,
 } from './api'
 
 /** `user` 域的 key（订阅与失效共用同一算法，见 `request/invalidate.ts`）。
@@ -34,4 +35,5 @@ export const userKeys = {
   deviceFlowStart: (providerId: string) => keyOf(deviceFlowStart(providerId), [...userKeys.all, 'device', providerId, 'start']),
   deviceFlowToken: (providerId: string) => keyOf(deviceFlowToken(providerId), [...userKeys.all, 'device', providerId, 'token']),
   oidcKeys: () => keyOf(oidcKeys, [...userKeys.all, 'oidc', 'keys']),
+  profile: () => keyOf(userProfile, [...userKeys.all, 'profile']),
 }

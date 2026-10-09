@@ -9,6 +9,17 @@ export type LogoutResult = {
   message: string
 }
 
+/** `GET /user/profile` 的返回：当前会话的用户资料。引擎按声明给，缺的字段就不在回应里
+ *  （实测 1 号实例：`yao:user_id` · `sub` · `name` · `email` · 两个 `*_verified` · `updated_at`）。 */
+export type UserProfile = {
+  /** 用户标识（引擎的字段名带命名空间前缀）。 */
+  'yao:user_id'?: string
+  /** 标准声明；某些部署的标识只在这里。 */
+  sub?: string
+  name?: string
+  email?: string
+}
+
 /* ===== 入口（登录 / 注册）===== */
 
 /** 登录的最终状态。**以服务端为准**（`yao/openapi/user/types.go:15-23` 的 `LoginStatus` 五个常量）：

@@ -101,12 +101,14 @@ export async function forgetService(): Promise<BridgeResult<number>> {
   return ok(removed)
 }
 
-/** 出口用它做 401 续期重放：注入"怎么刷新"（刷新请求本身由数据层声明，平台不认 URL）。 */
+/** **续期这条线的接线**：注入「怎么刷新」（刷新请求本身由数据层声明，平台不认 URL）。
+ *  出口**不再**做 401 续期重放，所以现在没有调用点；续期单独推进时才接上。 */
 export function setSessionRefresher(fn: (() => Promise<BridgeResult<string>>) | undefined): void {
   refresher = fn
 }
 
-/** 刷新一次（并发只发一次）；没有 refresher、或没登录，就回一条可读失败。 */
+/** 刷新一次（并发只发一次）；没有 refresher、或没登录，就回一条可读失败。
+ *  与 `setSessionRefresher` 一样属于续期那条线，现在没有调用点。 */
 export function refreshSession(): Promise<BridgeResult<string>> {
   if (!refresher || !cached) return Promise.resolve(fail('credential.service_empty', 'no session to refresh', {}))
   refreshing ??= refresher().finally(() => {

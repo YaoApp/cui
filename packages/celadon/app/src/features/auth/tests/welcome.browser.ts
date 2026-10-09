@@ -32,6 +32,14 @@ const VERIFIED_LOGIN = {
 
 const SIGNED_IN = { user_id: 'u-1', access_token: 'access-1', status: 'ok' }
 
+/** `GET /user/profile` 的实测形状（1 号实例）。 */
+const PROFILE = {
+  'yao:user_id': '853296684128',
+  sub: '3694776944429602',
+  name: 'Wren',
+  email: 'max@example.com',
+}
+
 /** 入口一线全部打桩：判定走登录、登录成功发会话。 */
 async function stubSignIn(page: Page) {
   await page.route('**/.well-known/yao', (route) =>
@@ -97,4 +105,41 @@ test('switches the wording with the language and takes the dark theme', async ({
   await page.locator('.theme-toggle').click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await shot(page, 'dark-ja')
+})
+
+test('fills the table from the profile when the page is opened on a machine that is already signed in', async ({
+  page,
+}) => {
+  /* 这一条不依赖活体：服务信息与入口一线都打桩，后端不可达时也要跑 */
+  await stubSignIn(page)
+  /* 直接开这一页（刷新之后）：内存里没有登录那一刻的用户信息，补一次资料取数 */
+  await page.addInitScript(() => {
+    localStorage.setItem('celadon.session', JSON.stringify({ [location.origin]: Date.now() }))
+  })
+  await page.route('**/user/profile', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(PROFILE) }),
+  )
+
+  await page.goto('/app/welcome')
+
+  await expect(page.getByText('用户标识')).toBeVisible()
+  await expect(page.getByText('853296684128')).toBeVisible()
+  await expect(page.getByText('Wren')).toBeVisible()
+  await expect(page.getByText('max@example.com')).toBeVisible()
+  await shot(page, 'welcome-after-reload')
+})
+
+test('signs out: revokes on the server, forgets this machine and returns to the sign-in page', async ({ page }) => {
+  await stubSignIn(page)
+  await page.route('**/user/logout', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'Logout successful' }) }),
+  )
+  await signIn(page)
+
+  await page.getByRole('button', { name: '退出登录' }).click()
+
+  await expect(page).toHaveURL(/\/app\/login$/)
+  const marks = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('celadon.session') ?? '{}')).length)
+  expect(marks).toBe(0)
+  await shot(page, 'signed-out')
 })

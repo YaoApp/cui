@@ -9,6 +9,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { readServiceAddress, writeServiceAddress } from '@/platform/service'
 
 const MESSAGE = 'hello from the scaffold'
 const SERVICE = { name: 'Yao Agents', version: '1.0.0', openapi: '/v1' }
@@ -60,8 +61,12 @@ const capsMock = vi.hoisted(() =>
     serviceAddress: false,
   })),
 )
-const readAddress = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: '' })))
-const writeAddress = vi.hoisted(() => vi.fn(async () => ({ ok: true as const, value: '' })))
+const readAddress = vi.hoisted(() =>
+  vi.fn<typeof readServiceAddress>(async () => ({ ok: true, value: '' })),
+)
+const writeAddress = vi.hoisted(() =>
+  vi.fn<typeof writeServiceAddress>(async () => ({ ok: true, value: '' })),
+)
 vi.mock('@/platform/service', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/platform/service')>()
   return { ...actual, readServiceAddress: readAddress, writeServiceAddress: writeAddress }
@@ -355,6 +360,7 @@ describe('the data check page', () => {
     await user.click(screen.getByRole('button', { name: '登录' }))
     expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
 
+    /* 本机凭据的清理在 `logoutQuery()` 里（这一页只探接口）；退出后不再算登录态 */
     await user.click(screen.getByRole('button', { name: '退出登录' }))
     expect(await screen.findByText(/已退出/)).toBeInTheDocument()
     // 退出后不再算登录态：已登录那行与退出按钮都应当消失
@@ -512,5 +518,170 @@ describe('saving a new service address', () => {
 
     // 旧结果必须从屏上消失（不清就是"换服务后还在宣称旧数据"）
     await waitFor(() => expect(document.body.textContent ?? '').not.toContain(MESSAGE))
+  })
+})
+
+/* 开发面上剩下的几条路：受保护 POST、重新执行、地址读写失败时的提示。 */
+describe('the remaining paths of the data check page', () => {
+  beforeEach(() => {
+    vi.mocked(transportFetch).mockReset()
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/helloworld/protected')) {
+        return json({ error: 'unauthorized', error_description: 'no credential was sent' }, 401)
+      }
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+  })
+
+  it('runs the protected POST cell with the same expected-failure note', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '受保护 POST' }))
+    await waitFor(() => expect(cellText('受保护 POST')).toContain('未登录'))
+  })
+
+  it('runs both public cells and shows what came back', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '公开 GET' }))
+    await waitFor(() => expect(cellText('公开 GET')).toContain(MESSAGE))
+    await user.click(screen.getByRole('button', { name: '公开 POST' }))
+    await waitFor(() => expect(cellText('公开 POST')).toContain(MESSAGE))
+  })
+
+  it('says why a sign-out failed when the server refuses to revoke', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) return json(LOGIN)
+      if (target.includes('/user/logout')) {
+        return { ok: false as const, code: 'transport.status', params: { status: 500 }, message: 'boom' }
+      }
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+    await user.click(screen.getByRole('button', { name: '登录' }))
+    expect(await screen.findByText(/已登录 ada@example\.com/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '退出登录' }))
+    /* 服务端没吊销成功：页面仍算登录态（退出要真的退出） */
+    await waitFor(() => expect(screen.getByText(/已登录 ada@example\.com/)).toBeInTheDocument())
+  })
+
+  it('runs the scaffold call again from the reload button', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+    const before = vi.mocked(transportFetch).mock.calls.length
+
+    await user.click(screen.getByRole('button', { name: '重新执行' }))
+    await waitFor(() => expect(vi.mocked(transportFetch).mock.calls.length).toBeGreaterThan(before))
+  })
+
+  it('tells why reading the current address failed', async () => {
+    capsMock.mockReturnValue({
+      clipboard: false,
+      files: false,
+      notifications: false,
+      externalOpen: true,
+      serviceAddress: true,
+    })
+    readAddress.mockResolvedValueOnce({ ok: false, code: 'transport.network', params: {}, message: 'down' })
+    renderPage()
+
+    await screen.findByLabelText('服务地址')
+    fireEvent.click(screen.getByText('读当前地址'))
+    await waitFor(() => expect(document.querySelector('.requests__notice')?.textContent ?? '').not.toBe(''))
+  })
+
+  it('tells why writing the address failed', async () => {
+    capsMock.mockReturnValue({
+      clipboard: false,
+      files: false,
+      notifications: false,
+      externalOpen: true,
+      serviceAddress: true,
+    })
+    writeAddress.mockResolvedValueOnce({ ok: false, code: 'transport.network', params: {}, message: 'down' })
+    renderPage()
+
+    const input = await screen.findByLabelText('服务地址')
+    fireEvent.change(input, { target: { value: 'http://typed:5099' } })
+    fireEvent.click(screen.getByText('校验并写入'))
+    await waitFor(() => expect(document.querySelector('.requests__notice')?.textContent ?? '').not.toBe(''))
+  })
+
+  it('tells why a sign-in failed, and keeps the row usable', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) {
+        return { ok: false as const, code: 'transport.status', params: { status: 500 }, message: 'boom' }
+      }
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+    await user.click(screen.getByRole('button', { name: '登录' }))
+
+    await waitFor(() => expect(document.querySelector('.requests__notice')?.textContent ?? '').not.toBe(''))
+    expect(screen.queryByText(/已登录/)).toBeNull()
+  })
+
+  it('reads the credential lengths as zero when the login response carries no token', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) return json(userPage(['ada@example.com']))
+      if (target.includes('/test/login/web')) return json({ status: 'active' })
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    await screen.findByText('ada@example.com')
+    await user.click(screen.getByRole('button', { name: '登录' }))
+    expect(await screen.findByText(/access 0 · refresh 0/)).toBeInTheDocument()
+  })
+
+  it('leaves a user row without an email alone, and still lists the rest', async () => {
+    const page = userPage(['ada@example.com'])
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/test/users')) {
+        return json({
+          ...page,
+          data: [{ id: 'id-9', user_id: 'user-9', name: 'No Mail', email_verified: true }],
+        })
+      }
+      return json({ MESSAGE, SERVER_TIME: '2026-01-01T00:00:00Z' })
+    })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(publicCalls().length).toBeGreaterThan(0))
+
+    await user.click(screen.getByRole('button', { name: '列出用户' }))
+    expect(await screen.findByText('No Mail')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '登录' })).toBeNull()
   })
 })

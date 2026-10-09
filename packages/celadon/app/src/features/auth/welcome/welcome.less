@@ -36,3 +36,20 @@
   /* 标识与信箱可能很长：允许在任意位置断行，别把卡片撑破 */
   overflow-wrap: anywhere;
 }
+
+/* 补取用户资料时的一行状态：转圈加一句话，位置与信息表一致 */
+.welcome__pending {
+  display: flex;
+  gap: var(--spacing-8);
+  align-items: center;
+  margin: 0 0 var(--spacing-24);
+  color: var(--text-secondary);
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-cjk);
+}
+
+/* 主按钮与退出按钮竖排，间距与卡片里其余段落一致 */
+.welcome__actions {
+  display: grid;
+  gap: var(--spacing-12);
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { userInfo } from './user-info'
+import { hasAny, profileUser, userInfo } from './user-info'
 
 describe('the user information of a session', () => {
   it('takes the user id the response carries, with the account that was used', () => {
@@ -37,5 +37,30 @@ describe('the user information of a session', () => {
   it('ignores a member claim that is not an object', () => {
     expect(userInfo({}, '', { 'yao:member': null }).name).toBeUndefined()
     expect(userInfo({}, '', { 'yao:member': 'Wren' }).name).toBeUndefined()
+  })
+})
+
+describe('the user information of a profile fetch', () => {
+  it('takes the id, name and email the profile carries', () => {
+    expect(profileUser({ 'yao:user_id': '853296684128', name: 'Wren', email: 'max@example.com' })).toEqual({
+      userId: '853296684128',
+      name: 'Wren',
+      email: 'max@example.com',
+    })
+  })
+
+  it('falls back to the standard subject when the namespaced id is absent', () => {
+    expect(profileUser({ sub: '3694776944429602' })?.userId).toBe('3694776944429602')
+  })
+
+  it('keeps the id when the name and email are absent: the identity is always shown', () => {
+    expect(profileUser({ 'yao:user_id': '853296684128' })).toEqual({ userId: '853296684128' })
+    expect(hasAny(profileUser({ 'yao:user_id': '853296684128' })!)).toBe(true)
+  })
+
+  it('gives nothing back when there is a response with no displayable field', () => {
+    expect(profileUser({})).toBeUndefined()
+    expect(profileUser({ name: '', email: '', 'yao:user_id': '' })).toBeUndefined()
+    expect(profileUser(undefined)).toBeUndefined()
   })
 })

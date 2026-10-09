@@ -28,6 +28,7 @@ import {
   oauthAuthorize,
   oauthCallback,
   oidcKeys,
+  userProfile,
 } from './api'
 import { userKeys } from './keys'
 import type {
@@ -44,6 +45,7 @@ import type {
   EntryVerifyResponse,
   LogoutResult,
   OAuthCallbackRequest,
+  UserProfile,
 } from './types'
 
 /* **具体接口的对接都在这层**：按业务的**参数组合**（语言只是其中一例，比如"中文 foo=123、日语 foo=678、
@@ -170,5 +172,11 @@ export const logoutQuery = (): { key: readonly unknown[]; operation: () => Promi
     const cleared = await signOut()
     return cleared.ok ? result : cleared
   },
+})
+
+/** 当前会话的用户资料：欢迎页在内存里没有用户信息时用它（刷新之后）。 */
+export const userProfileQuery = (): { key: readonly unknown[]; operation: () => Promise<Result<UserProfile>> } => ({
+  key: userKeys.profile(),
+  operation: () => send(userProfile),
 })
 
