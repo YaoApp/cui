@@ -44,7 +44,8 @@
 
 - **拟人层测的是 `dist/`**，所以它打的是预览端口（见 `14-testing.md`）。
 - **构建不经 pm2**：`pnpm build` → `dist/`。
-- **另有两条跑法**：`pnpm dev:client`（客户端跑法，base `/`）—— 不占上表端口；
+- **另有两条跑法**：`pnpm dev:client`（客户端跑法，base `/`，**默认 5210**，用 `CUI_DEV_PORT` 可改）——
+  只在要 HMR 时手动起；桌面壳默认读 `build:client` 的产物（`dist-client`），不起前端服务（见 `04-host-integration.md`）；
   `pnpm test:browser` / `pnpm test:persona` **由仓库脚本自己起 server** ✓，跑之前不用手动备一份。
 - **上表是当前运行环境的实况**：谁在哪个端口上干什么由本节说清；怎么起、怎么改由运行环境定（见 §2.1）。
 

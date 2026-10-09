@@ -202,9 +202,42 @@ test('asks for the captcha in the dialog, in the shape the entry configuration d
   if (captchaType === 'turnstile') {
     await expect(dialog.locator('.turnstile-field')).toBeVisible()
     await expect(dialog.locator('.captcha-field')).toHaveCount(0)
+    /* 人机验证不抢焦点：弹窗里没有任何元素拿到焦点，焦点留在页面上 */
+    const focusInsideDialog = await page.evaluate(() => document.activeElement?.closest('[role="dialog"]') !== null)
+    expect(focusInsideDialog).toBe(false)
   } else {
     await expect(dialog.locator('.captcha-field')).toBeVisible()
     await expect(dialog.locator('.turnstile-field')).toHaveCount(0)
+    await expect(page.locator('#auth-dialog-captcha')).toBeFocused()
   }
   await shot(page, 'captcha-dialog')
+})
+
+test('focuses the input for an image captcha', async ({ page }) => {
+  /* 真实配置声明的是人机验证，这一条用桩把图形验证码那一支固定下来：打开即聚焦输入框。
+     人机验证那一支（打开后弹窗里没有任何元素拿到焦点）在同文件的活体用例里核。 */
+  const imageEntry = { ...ENTRY_CONFIG, form: { ...ENTRY_CONFIG.form, captcha: { type: 'image' } } }
+  await page.route('**/v1/user/entry**', (route) => {
+    const path = new URL(route.request().url()).pathname
+    if (path.endsWith('/entry/captcha')) {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ captcha_id: 'captcha-1', captcha_image: 'data:image/gif;base64,R0lGOD' }),
+      })
+    }
+    if (path.endsWith('/entry')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(imageEntry) })
+    }
+    return route.fallback()
+  })
+
+  await page.goto('/app/register')
+  await page.getByLabel('邮箱或手机号').fill(`captcha-focus-${Date.now()}@example.com`)
+  await page.getByRole('button', { name: '下一步' }).click()
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  await expect(page.locator('#auth-dialog-captcha')).toBeFocused()
+  await expect(dialog.getByRole('button', { name: '关闭' })).not.toBeFocused()
 })

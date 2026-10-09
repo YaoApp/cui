@@ -26,6 +26,8 @@ import { PasswordInput } from '../components/password-input'
 import { StatusNotice } from '../components/status-notice'
 import { TermsNote } from '../components/terms-note'
 import { useAuth } from '../use-auth'
+import { useAuthMode, withMode } from '../use-auth-mode'
+import { useServerName } from '../use-server-name'
 import { useCompleteSignIn } from '../use-complete-sign-in'
 import './register.less'
 
@@ -51,8 +53,10 @@ export function RegisterPage() {
   useDocumentTitle(t('auth.register.docTitle'))
   const navigate = useNavigate()
   const config = auth.config
-  /* 客户端内（地址带 `from`）用达标边界；独立访问有意弱化，与草稿一致 */
-  const inApp = new URLSearchParams(window.location.search).has('from')
+  /* 形态由 `useAuthMode` 一处定：客户端内一律 in-app，Web 带 `from` 才是；这里的独立判断只用来取边界 */
+  const mode = useAuthMode()
+  const inApp = mode === 'in-app'
+  const serverName = useServerName()
   const carried = new URLSearchParams(window.location.search).get('username') ?? ''
 
   const [account, setAccount] = useState(carried || auth.username)
@@ -254,7 +258,7 @@ export function RegisterPage() {
     /* 注册成功但没有会话：回登录页，把「请登录」这条提示留在域里（页面切换后仍读得到） */
     auth.changeAccount()
     auth.setNotice({ tone: 'info', text: t('auth.notice.registered') })
-    navigate('/login')
+    navigate(withMode('/login', mode))
   }
 
   async function onSubmitRegister(event: FormEvent) {
@@ -285,17 +289,42 @@ export function RegisterPage() {
     <>
       <span>{t('auth.register.hasAccount')}</span>{' '}
       {/* 回登录页时把登录域复位：进来时登录页已经进到密码步，不复位会让它带着注册流程的临时令牌停在那一步 */}
-      <Link href={appHref('/login')} onClick={() => auth.changeAccount()}>
+      <Link href={appHref(withMode('/login', mode))} onClick={() => auth.changeAccount()}>
         {t('auth.register.backToLogin')}
       </Link>
     </>
   )
 
+  /* 服务端数据取不到（入口配置，或要验签时的公钥集）：说清并给一次重试，而不是把失败画成一直在转 */
+  if (auth.configFailed) {
+    return (
+      <AuthLayout
+        mode={mode}
+        serverName={serverName}
+        titleLines={[t('auth.register.titleLine1'), t('auth.register.titleLine2')]}
+        onBack={() => navigate('/servers')}
+        footnote={footnote}
+      >
+        {/* 入口配置**取失败**：说清并给一次重试，而不是把失败画成一直在转 */}
+        <div className="register__form">
+          <StatusNotice
+            tone="danger"
+            text={t('auth.configFailed')}
+            retryLabel={t('auth.retry')}
+            onRetry={auth.reloadConfig}
+          />
+        </div>
+      </AuthLayout>
+    )
+  }
+
   if (!config) {
     return (
       <AuthLayout
+        mode={mode}
+        serverName={serverName}
         titleLines={[t('auth.register.titleLine1'), t('auth.register.titleLine2')]}
-        onBack={() => window.history.back()}
+        onBack={() => navigate('/servers')}
         footnote={footnote}
       >
         <div className="register__form" aria-busy="true">
@@ -310,10 +339,12 @@ export function RegisterPage() {
 
   return (
     <AuthLayout
+      mode={mode}
+      serverName={serverName}
       titleLines={[t('auth.register.titleLine1'), t('auth.register.titleLine2')]}
       serviceHref={config.form?.terms_of_service_link}
       privacyHref={config.form?.privacy_policy_link}
-      onBack={() => window.history.back()}
+      onBack={() => navigate('/servers')}
       footnote={footnote}
     >
       {!captchaOpen && notice ? <StatusNotice tone={notice.tone} text={notice.text} /> : null}

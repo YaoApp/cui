@@ -28,14 +28,14 @@ import { PasswordInput } from '../components/password-input'
 import { ProviderList } from '../components/provider-list'
 import { StatusNotice } from '../components/status-notice'
 import { useAuth } from '../use-auth'
+import { useAuthMode, withMode, type AuthMode } from '../use-auth-mode'
+import { useServerName } from '../use-server-name'
 import { useCompleteSignIn } from '../use-complete-sign-in'
 import './login.less'
 
-/** 注册表单的地址（相对路由基址）：账号带在查询里，注册页据此预填；客户端内的来源标记跟着带过去。 */
-function registerPath(username: string, from: string | null): string {
-  const query = new URLSearchParams({ username })
-  if (from) query.set('from', from)
-  return `/register?${query.toString()}`
+/** 注册表单的地址（相对路由基址）：账号带在查询里，注册页据此预填；形态跟着链接走（见 `withMode`）。 */
+function registerPath(username: string, mode: AuthMode): string {
+  return withMode(`/register?${new URLSearchParams({ username }).toString()}`, mode)
 }
 
 /** 第三方登录的回跳地址（绝对地址，带应用命名空间）：授权完成后回到 `/auth/back/<提供方>`。 */
@@ -63,9 +63,10 @@ export function LoginPage() {
   useDocumentTitle(t('auth.login.docTitle'))
   const navigate = useNavigate()
   const config = auth.config
-  /* 客户端内（地址带 `from`）用达标边界；独立访问有意弱化，与草稿一致 */
-  const from = new URLSearchParams(window.location.search).get('from')
-  const inApp = from !== null
+  /* 形态由 `useAuthMode` 一处定：客户端内一律 in-app，Web 带 `from` 才是；这里的独立判断只用来取边界 */
+  const mode = useAuthMode()
+  const inApp = mode === 'in-app'
+  const serverName = useServerName()
 
   const [password, setPassword] = useState('')
   const [inviteCode, setInviteCode] = useState('')
@@ -179,7 +180,7 @@ export function LoginPage() {
       return
     }
     /* 账号不存在：带上账号去注册表单（注册页随后落地，这里先把通道接上） */
-    navigate(registerPath(account.trim(), from))
+    navigate(registerPath(account.trim(), mode))
   }
 
   async function runVerify() {
@@ -277,15 +278,40 @@ export function LoginPage() {
   const footnote = (
     <>
       <span>{t('auth.footnote.prefix')}</span>{' '}
-      <Link href={appHref('/register')}>{t('auth.footnote.link')}</Link>
+      <Link href={appHref(withMode('/register', mode))}>{t('auth.footnote.link')}</Link>
     </>
   )
+
+  /* 服务端数据取不到（入口配置，或要验签时的公钥集）：说清并给一次重试，而不是把失败画成一直在转 */
+  if (auth.configFailed) {
+    return (
+      <AuthLayout
+        mode={mode}
+        serverName={serverName}
+        titleLines={[t('auth.login.titleLine1'), t('auth.login.titleLine2')]}
+        onBack={() => navigate('/servers')}
+        footnote={footnote}
+      >
+        {/* 入口配置**取失败**：说清并给一次重试，而不是把失败画成一直在转 */}
+        <div className="login__form">
+          <StatusNotice
+            tone="danger"
+            text={t('auth.configFailed')}
+            retryLabel={t('auth.retry')}
+            onRetry={auth.reloadConfig}
+          />
+        </div>
+      </AuthLayout>
+    )
+  }
 
   if (!config) {
     return (
       <AuthLayout
+        mode={mode}
+        serverName={serverName}
         titleLines={[t('auth.login.titleLine1'), t('auth.login.titleLine2')]}
-        onBack={() => window.history.back()}
+        onBack={() => navigate('/servers')}
         footnote={footnote}
       >
         {/* 入口配置未到：卡片**照配置到达后的结构先铺一遍**（两行三方入口 + 分隔线 + 账号字段 + 主按钮），
@@ -307,7 +333,7 @@ export function LoginPage() {
               placeholder={t('auth.field.account')}
               icon={<Icon name="i-mail" />}
               value=""
-              onChange={() => undefined}
+              readOnly
               disabled
               size="large"
             />
@@ -325,10 +351,12 @@ export function LoginPage() {
   return (
     <AuthLayout
       /* 标题是设计稿写死的文案：换行也照设计稿，中文一行（第二行为空，由样式收起） */
+      mode={mode}
+      serverName={serverName}
       titleLines={[t('auth.login.titleLine1'), t('auth.login.titleLine2')]}
       serviceHref={config.form?.terms_of_service_link}
       privacyHref={config.form?.privacy_policy_link}
-      onBack={() => window.history.back()}
+      onBack={() => navigate('/servers')}
       footnote={footnote}
     >
       {/* 页面级提示只用于没有对应字段的失败（第三方入口），以及域给出的告知（多因素、选团队） */}

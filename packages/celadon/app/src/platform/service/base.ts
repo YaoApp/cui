@@ -6,6 +6,7 @@
  *     惰性取一次、存内存；Web 没有宿主，也就没有这一步。 */
 
 import { bridge, hasHost } from '../bridge'
+import { capabilities } from '../client/capabilities'
 
 let hostedBase: string | undefined
 let loaded = false
@@ -45,4 +46,9 @@ export function serviceUrl(path: string): string {
   /* 有宿主基址（桌面）→ 基址 + 路径；否则**根相对** —— 引擎的根是站点根，
      与应用的命名空间无关（dev 由 dev server 代转，见 16-development.md §1）。 */
   return base ? `${base}${suffix}` : suffix
+}
+
+/** 桌面且宿主还没给地址：首次进入要先去选服务器，**不是报错**。 */
+export function needsServerChoice(): boolean {
+  return capabilities().serviceAddress && serviceBase() === ''
 }

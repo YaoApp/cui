@@ -1,0 +1,90 @@
+/* 服务器选择页：卡内一句说明 + 清单状态 / 选择器 + 自建地址 + 连接。间距与登录、注册同一套。 */
+.servers__lead {
+  margin: 0 0 var(--spacing-24);
+  color: var(--text-secondary);
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-cjk);
+}
+
+/* 加载：与选择器同一只盒子的高度，切状态时卡片不高低跳 */
+.servers__state {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  min-block-size: var(--row-height);
+  margin-block-end: var(--spacing-16);
+  color: var(--text-secondary);
+  font-size: var(--font-size-14);
+}
+
+.servers__failed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-8);
+  margin-block-end: var(--spacing-16);
+}
+
+.servers__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  margin: 0 0 var(--spacing-16);
+  color: var(--danger-ink);
+  font-size: var(--font-size-13);
+  line-height: var(--line-height-normal);
+}
+
+.servers__error .icon {
+  inline-size: var(--spacing-16);
+  block-size: var(--spacing-16);
+  flex: none;
+  /* 与首行文字光学对齐：16 的图标在 13 的行高里居中差半档，取值由间距刻度推出 */
+  margin-block-start: calc(var(--spacing-4) / 2);
+}
+
+/* 重试用基础件的纯文字档按钮，这里不再自画 */
+
+/* 清单为空时的说明：仍给自建地址与连接，不是死路 */
+.servers__hint {
+  margin: 0 0 var(--spacing-16);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-13);
+  line-height: var(--line-height-normal);
+}
+
+/* 选择器与自建输入框之间留一档；触发器整宽，与输入框和主按钮同一栏宽 */
+.servers__select {
+  inline-size: 100%;
+  margin-block-end: var(--spacing-16);
+}
+
+/* 自建地址与主按钮之间留一档，别贴在一起 */
+.servers__custom {
+  margin-block-end: var(--spacing-16);
+}
+
+/* Web：只读的当前地址 */
+.servers__fixed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin: 0 0 var(--spacing-24);
+  padding: var(--spacing-16);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-medium);
+  background: var(--background-field);
+}
+
+.servers__fixed-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-normal);
+}
+
+.servers__fixed-url {
+  color: var(--text-primary);
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-cjk);
+  overflow-wrap: anywhere;
+}

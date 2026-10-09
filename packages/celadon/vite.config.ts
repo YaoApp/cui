@@ -1,6 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
-import { defineConfig, loadEnv, type ProxyOptions } from 'vite'
+import { defineConfig, loadEnv, type Plugin, type ProxyOptions } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 
@@ -25,19 +24,55 @@ const emitHostLocales = {
   },
 }
 
+/* **这一构建的清单事实**（`15-platform.md` §5.3 的清单由构建注入）。
+   `CUI_CLIENT` 在时用它覆盖源文件里的基础清单：桌面与 Web 两套开发服务可以同时在跑，各自注入自己那一份，
+   **谁都不去改源文件**。不设 `CUI_CLIENT` 时用源文件里的值（单元测试与 Web 开发都走这条）。 */
+function manifestOverrides(): Record<string, unknown> {
+  const client = process.env.CUI_CLIENT
+  if (client !== 'web' && client !== 'desktop') return {}
+  const os = process.env.CUI_OS === 'macos' || process.env.CUI_OS === 'windows' ? process.env.CUI_OS : ''
+  return {
+    client,
+    os,
+    artifact: 'cui',
+    ...(process.env.CUI_LOCALES ? { locales: process.env.CUI_LOCALES.split(',') } : {}),
+    build: {
+      commit: process.env.CUI_BUILD_COMMIT || 'dev',
+      at: new Date().toISOString(),
+      by: process.env.CUI_BUILD_BY || 'celadon dev',
+    },
+  }
+}
+
 /* **不许绕过脚本产出客户端那份**：`dist-client` 里必须是 `client=desktop`。
-   直接 `vite build` 到 dist-client 会跳过清单改写（我就这么错过一次），这条把它拦住。 */
+   直接 `vite build` 到 dist-client 不会带上客户端的事实，这条把它拦住。 */
 function assertClientManifest(outDirName: string | undefined) {
   if (outDirName !== 'dist-client') return
-  const manifest = JSON.parse(readFileSync(resolve(import.meta.dirname, 'app/src/platform/manifest.json'), 'utf8'))
-  if (manifest.client !== 'desktop') {
+  if (process.env.CUI_CLIENT !== 'desktop') {
     throw new Error(
-      `refusing to build into dist-client: the manifest says client=${manifest.client}. ` +
-        "Use `pnpm build:client` (it rewrites the manifest for the client build), not vite build.",
+      'refusing to build into dist-client: CUI_CLIENT is not `desktop`. ' +
+        'Use `pnpm build:client` (it injects the client facts), not a bare vite build.',
     )
   }
 }
 assertClientManifest(process.env.CELADON_OUT_DIR)
+
+/* **把上面那份事实注入给 `platform/client/manifest.ts`**：只替换那一支模块里的
+   `__CELADON_MANIFEST__`（声明见 `app/src/platform/client/manifest-env.d.ts`）。
+   不用 Vite 的 `define`：它在 client dev 这一侧不生效（实测 dev 里没被替换、build 里被替换了）。 */
+function injectManifestFacts(): Plugin {
+  const facts = JSON.stringify(manifestOverrides())
+  return {
+    name: 'celadon-manifest-facts',
+    transform(code, id) {
+      if (!id.endsWith('/platform/client/manifest.ts')) return null
+      return { code: code.replace('__CELADON_MANIFEST__', facts), map: null }
+    },
+  }
+}
+
+/* 开发服务的端口：客户端那份换一个，好与 Web 的开发服务（默认 5199）同时在跑。 */
+const devPort = Number(process.env.CUI_DEV_PORT ?? 5199)
 
 
 
@@ -57,7 +92,7 @@ export default defineConfig(({ mode }) => {
   return {
   root: resolve(import.meta.dirname, 'app'),
   base,
-  plugins: [react(), emitHostLocales],
+  plugins: [react(), emitHostLocales, injectManifestFacts()],
   resolve: {
     alias: { '@': resolve(import.meta.dirname, 'app/src') },
   },
@@ -70,7 +105,7 @@ export default defineConfig(({ mode }) => {
     assetsDir: '_assets',
   },
   // 开发期代理（`YAO_SERVER_HOST` 没给就是空，等于不代理）
-  server: { port: 5199, proxy: devProxy },
-  preview: { port: 5199 },
+  server: { port: devPort, proxy: devProxy },
+  preview: { port: devPort },
 }
 })

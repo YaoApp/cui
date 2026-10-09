@@ -30,6 +30,7 @@ export type I18nKey =
   | 'auth.captcha.placeholder'
   | 'auth.captcha.refresh'
   | 'auth.captcha.turnstile'
+  | 'auth.configFailed'
   | 'auth.dialog.captchaTitle'
   | 'auth.dialog.close'
   | 'auth.error.accountInvalid'
@@ -66,7 +67,24 @@ export type I18nKey =
   | 'auth.register.titleLine1'
   | 'auth.register.titleLine2'
   | 'auth.remember'
+  | 'auth.retry'
   | 'auth.server.current'
+  | 'auth.servers.connect'
+  | 'auth.servers.connecting'
+  | 'auth.servers.current'
+  | 'auth.servers.custom'
+  | 'auth.servers.customDesc'
+  | 'auth.servers.customHint'
+  | 'auth.servers.customRequired'
+  | 'auth.servers.docTitle'
+  | 'auth.servers.empty'
+  | 'auth.servers.lead'
+  | 'auth.servers.loading'
+  | 'auth.servers.placeholder'
+  | 'auth.servers.retry'
+  | 'auth.servers.selectLabel'
+  | 'auth.servers.title'
+  | 'auth.servers.webLead'
   | 'auth.switch.toLogin'
   | 'auth.switch.toRegister'
   | 'auth.terms.and'
@@ -398,6 +416,7 @@ declare module 'i18next' {
         'auth.captcha.placeholder': string
         'auth.captcha.refresh': string
         'auth.captcha.turnstile': string
+        'auth.configFailed': string
         'auth.dialog.captchaTitle': string
         'auth.dialog.close': string
         'auth.error.accountInvalid': string
@@ -434,7 +453,24 @@ declare module 'i18next' {
         'auth.register.titleLine1': string
         'auth.register.titleLine2': string
         'auth.remember': string
+        'auth.retry': string
         'auth.server.current': string
+        'auth.servers.connect': string
+        'auth.servers.connecting': string
+        'auth.servers.current': string
+        'auth.servers.custom': string
+        'auth.servers.customDesc': string
+        'auth.servers.customHint': string
+        'auth.servers.customRequired': string
+        'auth.servers.docTitle': string
+        'auth.servers.empty': string
+        'auth.servers.lead': string
+        'auth.servers.loading': string
+        'auth.servers.placeholder': string
+        'auth.servers.retry': string
+        'auth.servers.selectLabel': string
+        'auth.servers.title': string
+        'auth.servers.webLead': string
         'auth.switch.toLogin': string
         'auth.switch.toRegister': string
         'auth.terms.and': string

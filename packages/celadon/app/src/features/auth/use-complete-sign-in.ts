@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router'
 import type { EntryAuthResponse } from '@/data/user'
 import { signIn } from '@/platform/credential'
 import { useTranslation } from '@/platform/i18n'
+import { serviceBase } from '@/platform/service'
 import { useAuthStore } from './auth.store'
 import { useAuthConfig } from './components/auth-provider'
 import { idTokenClaimsForDisplay, verifyIdToken } from './id-token'
+import { rememberServer } from './server-history'
 import { userInfo } from './user-info'
+import { useAuthMode, withMode } from './use-auth-mode'
 
 /**
  * 登录或注册成功之后的收尾：验签（配置允许时）、采纳会话、记下用户信息，然后进欢迎页。
@@ -20,6 +23,7 @@ import { userInfo } from './user-info'
 export function useCompleteSignIn() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const mode = useAuthMode()
   const { config, keys } = useAuthConfig()
   const setNotice = useAuthStore((state) => state.setNotice)
   const setUser = useAuthStore((state) => state.setUser)
@@ -49,9 +53,12 @@ export function useCompleteSignIn() {
       }
 
       setUser(userInfo(response, account ?? '', claims))
-      navigate('/welcome')
+      /* 有基址就记下这台服务器：客户端里是用户选的地址，Web 上由部署给（`VITE_SERVICE_BASE`）；都没有就不记 */
+      const base = serviceBase()
+      if (base) rememberServer(base)
+      navigate(withMode('/welcome', mode))
       return true
     },
-    [config, keys, navigate, t, setNotice, setUser],
+    [config, keys, mode, navigate, t, setNotice, setUser],
   )
 }

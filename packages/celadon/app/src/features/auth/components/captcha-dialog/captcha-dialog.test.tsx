@@ -1,6 +1,6 @@
 /* 验证码弹窗：只验它自己的三件事 —— 关着不渲染、图形验证码能收能提交、取消会关。 */
 import { useState } from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -74,6 +74,46 @@ describe('the captcha dialog', () => {
   it('renders the turnstile widget when the configuration asks for it', async () => {
     render(<Harness type="turnstile" sitekey="site-key" />)
     expect(screen.getByRole('group', { name: t('auth.captcha.turnstile') })).toBeTruthy()
+  })
+
+  it('focuses the input for an image captcha', async () => {
+    render(<Harness type="image" />)
+    const input = await screen.findByLabelText(t('auth.captcha.label'))
+    await waitFor(() => expect(document.activeElement).toBe(input))
+  })
+
+  it('leaves the focus alone for the turnstile widget', async () => {
+    /* 焦点要留在打开它的那个控件上：只断言关闭钮没焦点不够 —— 焦点落到面板本身也会漏过（上游的默认行为） */
+    function Opener() {
+      const [open, setOpen] = useState(false)
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>
+            打开
+          </button>
+          <CaptchaDialog
+            open={open}
+            onOpenChange={setOpen}
+            type="turnstile"
+            sitekey="site-key"
+            round={1}
+            value=""
+            onValueChange={() => undefined}
+            onCaptchaIdChange={() => undefined}
+            pending={false}
+            onSubmit={() => undefined}
+          />
+        </>
+      )
+    }
+    const user = userEvent.setup()
+    render(<Opener />)
+    const trigger = screen.getByRole('button', { name: '打开' })
+
+    await user.click(trigger)
+    await screen.findByRole('group', { name: t('auth.captcha.turnstile') })
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeTruthy())
+    expect(document.activeElement).toBe(trigger)
   })
 
   it('closes through the dialog itself', async () => {

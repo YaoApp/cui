@@ -17,6 +17,7 @@ const openExternal = vi.hoisted(() => vi.fn((_url: string) => undefined))
 vi.mock('@/platform/client/open-external', () => ({ openExternal }))
 
 import { transportFetch } from '@/platform/transport/fetch'
+import { client } from '@/platform/client'
 import { useAuthStore } from '../auth.store'
 import { i18n } from '@/platform/i18n'
 import { AuthProvider } from '@/features/auth/components/auth-provider'
@@ -95,9 +96,9 @@ function stubTransport(overrides: Record<string, { body: unknown; status?: numbe
   })
 }
 
-function renderLogin() {
+function renderLogin(entry = '/login') {
   return render(
-    <MemoryRouter initialEntries={['/login']}>
+    <MemoryRouter initialEntries={[entry]}>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -106,6 +107,8 @@ function renderLogin() {
           <Route path="/done" element={<p>已到达成功地址</p>} />
           {/* 这里只证明账号不存在时会走到这个地址，并把账号带在查询里；注册页自己另有用例 */}
           <Route path="/register" element={<RegisterProbe />} />
+          {/* 客户端栏的返回目标 */}
+          <Route path="/servers" element={<p>服务器选择页</p>} />
         </Routes>
       </AuthProvider>
     </MemoryRouter>,
@@ -227,9 +230,8 @@ describe('the sign-in page', () => {
   it('carries the client mode to the register form when the account does not exist', async () => {
     stubTransport({ '/user/entry/verify': { body: VERIFIED_REGISTER } })
     const user = userEvent.setup()
-    /* 客户端内的来源标记读的是页面自己的地址，因此写在 window 上 */
-    window.history.pushState({}, '', '/login?from=connect')
-    renderLogin()
+    /* 客户端内的来源标记读的是路由地址（`useAuthMode`），因此写在初始地址上 */
+    renderLogin('/login?from=connect')
     await user.type(await screen.findByLabelText(t('auth.field.account')), 'new@example.com')
     await user.click(screen.getByRole('button', { name: t('auth.action.continue') }))
 
@@ -427,5 +429,292 @@ describe('the sign-in page', () => {
 
     /* 页面不自己判宿主，交给平台层的开外部地址面孔；跳转发生在当前窗口 */
     await waitFor(() => expect(openExternal).toHaveBeenCalledWith('https://accounts.example.com/auth'))
+  })
+
+  it('says the entry configuration failed and reads it again on retry', async () => {
+    let failing = true
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/oauth/jwks')) return json({ keys: [] })
+      if (failing) return { ok: false as const, code: 'transport.network', params: {}, message: 'boom' }
+      return json(entryConfig())
+    })
+    const user = userEvent.setup()
+    renderLogin()
+
+    /* 取失败要给失败态与重试，不能一直停在加载态 */
+    expect(await screen.findByText(t('auth.configFailed'))).toBeTruthy()
+    expect(screen.getByRole('button', { name: t('auth.retry') })).toBeTruthy()
+
+    failing = false
+    await user.click(screen.getByRole('button', { name: t('auth.retry') }))
+    expect(await screen.findByLabelText(t('auth.field.account'))).toBeTruthy()
+    expect(screen.queryByText(t('auth.configFailed'))).toBeNull()
+  })
+
+  it('treats a missing key set as a configuration failure when verification is on, and retries both', async () => {
+    let keysFail = true
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/oauth/jwks')) {
+        if (keysFail) return { ok: false as const, code: 'transport.network', params: {}, message: 'boom' }
+        return json({ keys: [] })
+      }
+      if (target.includes('/user/entry')) return json(entryConfig({ secure_cookie: true }))
+      return json({})
+    })
+    const user = userEvent.setup()
+    renderLogin()
+
+    /* 要验签却没有公钥集：按配置失败处理，不放人进去在最后一步才失败 */
+    expect(await screen.findByText(t('auth.configFailed'))).toBeTruthy()
+    keysFail = false
+    await user.click(screen.getByRole('button', { name: t('auth.retry') }))
+    expect(await screen.findByLabelText(t('auth.field.account'))).toBeTruthy()
+  })
+
+  it('wears the client chrome in the desktop client even without the marker, and carries it to register', async () => {
+    stubTransport()
+    client.capabilities.serviceAddress = true
+    const user = userEvent.setup()
+    try {
+      const { container } = renderLogin()
+      await screen.findByLabelText(t('auth.field.account'))
+
+      /* 桌面用户不该看到 Web 的品牌区与页脚：地址上没有 `from` 也是客户端内形态 */
+      expect(container.querySelector('.auth--in-app')).toBeTruthy()
+      expect(screen.getByRole('link', { name: t('auth.footnote.link') }).getAttribute('href')).toContain('from=connect')
+
+      /* 返回入口指向服务器选择页：开在登录页的历史里没有上一条，`history.back()` 会点不动 */
+      await user.click(screen.getByRole('button', { name: t('auth.action.backToServers') }))
+      expect(await screen.findByText('服务器选择页')).toBeTruthy()
+    } finally {
+      client.capabilities.serviceAddress = false
+    }
+  })
+
+  it('keeps the back entry working while the entry configuration is still on its way', async () => {
+    /* 配置一直不返回时页面停在加载占位；加载占位同样带着客户端栏，返回入口要能点 */
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/oauth/jwks')) return json({ keys: [] })
+      if (target.includes('/user/entry')) return new Promise<never>(() => undefined)
+      return json({})
+    })
+    client.capabilities.serviceAddress = true
+    const user = userEvent.setup()
+    try {
+      renderLogin()
+      expect(await screen.findByText(t('auth.login.loading'))).toBeTruthy()
+
+      await user.click(screen.getByRole('button', { name: t('auth.action.backToServers') }))
+      expect(await screen.findByText('服务器选择页')).toBeTruthy()
+    } finally {
+      client.capabilities.serviceAddress = false
+    }
+  })
+
+  it('keeps the back entry working when the entry configuration failed', async () => {
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/oauth/jwks')) return json({ keys: [] })
+      return { ok: false as const, code: 'transport.network', params: {}, message: 'boom' }
+    })
+    client.capabilities.serviceAddress = true
+    const user = userEvent.setup()
+    try {
+      renderLogin()
+      expect(await screen.findByText(t('auth.configFailed'))).toBeTruthy()
+
+      await user.click(screen.getByRole('button', { name: t('auth.action.backToServers') }))
+      expect(await screen.findByText('服务器选择页')).toBeTruthy()
+    } finally {
+      client.capabilities.serviceAddress = false
+    }
+  })
+
+  it('asks for the captcha value before it judges, and closes the dialog without judging', async () => {
+    stubTransport({}, entryConfig({ form: { ...entryConfig().form, captcha: { type: 'image' } } }))
+    const user = userEvent.setup()
+    renderLogin()
+    await user.type(await screen.findByLabelText(t('auth.field.account')), 'max@example.com')
+    await user.click(screen.getByRole('button', { name: t('auth.action.continue') }))
+    await screen.findByPlaceholderText(t('auth.captcha.placeholder'))
+
+    /* 空值直接「确定」：出字段提示，不发判定 */
+    await user.click(screen.getByRole('button', { name: t('auth.action.confirm') }))
+    expect(screen.getByText(t('auth.error.captchaRequired'))).toBeTruthy()
+    expect(vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/user/entry/verify'))).toBe(false)
+
+    /* 从弹窗本身关掉（Esc）：回账号步，不判定 */
+    await user.keyboard('{Escape}')
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(screen.getByLabelText(t('auth.field.account'))).toBeTruthy()
+  })
+
+  it('drops a judgement that comes back after the dialog was closed', async () => {
+    let release: (() => void) | undefined
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/oauth/jwks')) return json({ keys: [] })
+      if (target.includes('/user/entry/captcha')) {
+        return json({ captcha_id: 'captcha-1', captcha_image: 'data:image/gif;base64,R0lGOD' })
+      }
+      if (target.includes('/user/entry/verify')) {
+        return new Promise((resolve) => {
+          release = () => resolve(json(VERIFIED_LOGIN))
+        })
+      }
+      if (target.includes('/user/entry')) {
+        return json(entryConfig({ form: { ...entryConfig().form, captcha: { type: 'image' } } }))
+      }
+      return json({})
+    })
+    const user = userEvent.setup()
+    renderLogin()
+    await user.type(await screen.findByLabelText(t('auth.field.account')), 'max@example.com')
+    await user.click(screen.getByRole('button', { name: t('auth.action.continue') }))
+    await user.type(await screen.findByPlaceholderText(t('auth.captcha.placeholder')), 'abcd')
+    await user.click(screen.getByRole('button', { name: t('auth.action.confirm') }))
+
+    /* 判定还在飞的时候把弹窗关掉：结果回来当作没验证过，页面不切密码步 */
+    await user.keyboard('{Escape}')
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    /* 先把「请求确实发出去了」钉住，否则下面那条断言会在什么都没发时也通过 */
+    expect(release).toBeDefined()
+    release?.()
+    await waitFor(() => expect(screen.queryByPlaceholderText('登录密码')).toBeNull())
+  })
+
+  it('asks for the password before it signs in', async () => {
+    stubTransport()
+    const user = userEvent.setup()
+    renderLogin()
+    await reachPasswordStep(user)
+
+    await user.click(screen.getByRole('button', { name: t('auth.action.login') }))
+    expect(screen.getByText(t('auth.error.passwordRequired'))).toBeTruthy()
+    expect(vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/user/entry/login'))).toBe(false)
+  })
+
+  it('moves to the invite step when signing in asks for a code', async () => {
+    stubTransport({
+      '/user/entry/login': { body: { status: 'invite_verification_required' } },
+    })
+    const user = userEvent.setup()
+    renderLogin()
+    await reachPasswordStep(user)
+    await user.type(passwordBox(), 'secret-value')
+    await user.click(screen.getByRole('button', { name: t('auth.action.login') }))
+
+    /* 邀请码步留在页面上：空码按回车不发起兑换，填码后请求体带上所填的码 */
+    const invite = await screen.findByPlaceholderText(t('auth.field.invite'))
+    await user.keyboard('{Enter}')
+    expect(
+      vi.mocked(transportFetch).mock.calls.some(([, init]) => JSON.stringify(init?.body ?? '').includes('"code":""')),
+    ).toBe(false)
+
+    await user.type(invite, 'ABC123')
+    await user.click(screen.getByRole('button', { name: t('auth.action.redeem') }))
+    await waitFor(() => {
+      const redeeming = vi.mocked(transportFetch).mock.calls.some(([, init]) =>
+        JSON.stringify(init?.body ?? '').includes('ABC123'),
+      )
+      expect(redeeming).toBe(true)
+    })
+  })
+
+  it('shows the failure of the invite step when the code is refused', async () => {
+    stubTransport({
+      '/user/entry/login': { body: { status: 'invite_verification_required', access_token: 'invite-token' } },
+      '/user/entry/invite': { body: { error: 'invalid_request', error_description: 'nope' }, status: 400 },
+    })
+    const user = userEvent.setup()
+    renderLogin()
+    await reachPasswordStep(user)
+    await user.type(passwordBox(), 'secret-value')
+    await user.click(screen.getByRole('button', { name: t('auth.action.login') }))
+    await user.type(await screen.findByPlaceholderText(t('auth.field.invite')), 'BAD-CODE')
+    await user.click(screen.getByRole('button', { name: t('auth.action.redeem') }))
+
+    /* 失败落在邀请码字段上，文案来自语言包 */
+    const failure = await screen.findByText(t('data.error.invalidRequest'))
+    expect(failure.textContent).not.toContain('nope')
+  })
+
+  it('shows the notice for choosing a team instead of finishing', async () => {
+    stubTransport({ '/user/entry/login': { body: { status: 'team_selection_required', access_token: 'team-token' } } })
+    const user = userEvent.setup()
+    renderLogin()
+    await reachPasswordStep(user)
+    await user.type(passwordBox(), 'secret-value')
+    await user.click(screen.getByRole('button', { name: t('auth.action.login') }))
+
+    expect(await screen.findByText(t('auth.notice.team'))).toBeTruthy()
+  })
+
+  it('falls back to the language pack placeholders when the configuration does not carry them', async () => {
+    stubTransport(
+      {},
+      entryConfig({ form: { captcha: { type: 'none' }, remember_me: false } }),
+    )
+    const user = userEvent.setup()
+    renderLogin()
+
+    const account = (await screen.findByLabelText(t('auth.field.account'))) as HTMLInputElement
+    expect(account.placeholder).toBe(t('auth.field.account'))
+
+    await user.type(account, 'max@example.com')
+    await user.click(screen.getByRole('button', { name: t('auth.action.continue') }))
+    const password = (await screen.findByPlaceholderText(t('auth.field.password'))) as HTMLInputElement
+    expect(password.placeholder).toBe(t('auth.field.password'))
+    /* 配置没有声明记住我时不渲染它 */
+    expect(screen.queryByLabelText(t('auth.remember'))).toBeNull()
+  })
+
+  it('asks for the human verification token when it is still empty', async () => {
+    /* 控件不给令牌（真实情况是还没完成人机验证）：点确定要落到人机验证那一条提示上 */
+    const renderWidget = vi.fn(() => 'widget-1')
+    ;(window as unknown as { turnstile?: unknown }).turnstile = { render: renderWidget, remove: vi.fn() }
+    stubTransport(
+      {},
+      entryConfig({ form: { ...entryConfig().form, captcha: { type: 'turnstile', options: { sitekey: 'site-1' } } } }),
+    )
+    const user = userEvent.setup()
+    try {
+      renderLogin()
+      await user.type(await screen.findByLabelText(t('auth.field.account')), 'max@example.com')
+      await user.click(screen.getByRole('button', { name: t('auth.action.continue') }))
+      await screen.findByRole('dialog')
+
+      await user.click(screen.getByRole('button', { name: t('auth.action.confirm') }))
+      expect(screen.getByText(t('auth.error.turnstileRequired'))).toBeTruthy()
+      expect(vi.mocked(transportFetch).mock.calls.some(([url]) => String(url).includes('/user/entry/verify'))).toBe(false)
+    } finally {
+      delete (window as unknown as { turnstile?: unknown }).turnstile
+    }
+  })
+
+  it('shows the failure of a third party entry when its address cannot be read', async () => {
+    stubTransport(
+      { '/user/oauth/google/authorize': { body: { error: 'invalid_request', error_description: 'nope' }, status: 400 } },
+      entryConfig({
+        third_party: { providers: [{ id: 'google', label: '谷歌', title: '使用谷歌账号登录', logo: '' }] },
+      }),
+    )
+    const user = userEvent.setup()
+    renderLogin()
+    await user.click(await screen.findByRole('button', { name: t('auth.provider.continueWith', { provider: '谷歌' }) }))
+
+    /* 第三方入口没有对应字段，失败按页面级提示呈现，且不跳转 */
+    const notice = await screen.findByRole('alert')
+    expect(notice.textContent).toContain(t('data.error.invalidRequest'))
+    expect(notice.textContent).not.toContain('nope')
+    expect(openExternal).not.toHaveBeenCalled()
   })
 })

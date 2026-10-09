@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react'
+import { useCallback, useMemo, type ReactNode } from 'react'
 import { useRequest } from '@/data'
 import { entryConfigQuery, oidcKeysQuery } from '@/data/user'
 import { useLocaleStore } from '@/platform/i18n/locale.store'
@@ -24,9 +24,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const config = configCall.state.status === 'ok' ? configCall.state.value : undefined
   const keys = keysCall.state.status === 'ok' ? keysCall.state.value.keys : undefined
-  const configFailed = configCall.state.status === 'error'
+  /* 验签只在服务端声明了安全 Cookie 时做（见 `use-complete-sign-in.ts`）。要验签而公钥集取不到时，
+     页面按「配置取不到」处理并给重试：放人进去只会在最后一步失败，重试才是用户能做的动作。 */
+  const keysNeeded = config !== undefined && config.secure_cookie !== false
+  const configFailed =
+    configCall.state.status === 'error' || (keysNeeded && keysCall.state.status === 'error')
 
-  const value = useMemo<AuthConfigValue>(() => ({ config, keys, configFailed }), [config, keys, configFailed])
+  /* 失败态的重试：两份接口都重跑（公钥集与入口配置是同一次网络故障里的两半，`run` 身份稳定） */
+  const reloadConfig = useCallback(() => {
+    void configCall.run()
+    void keysCall.run()
+  }, [configCall.run, keysCall.run])
+
+  const value = useMemo<AuthConfigValue>(
+    () => ({ config, keys, configFailed, reloadConfig }),
+    [config, keys, configFailed, reloadConfig],
+  )
 
   return <AuthConfigContext.Provider value={value}>{children}</AuthConfigContext.Provider>
 }

@@ -112,6 +112,8 @@ test('shows the failure note from the language pack when the account judgement f
             terms_of_service_link: 'https://example.com/terms',
             privacy_policy_link: 'https://example.com/privacy',
           },
+          /* 服务端声明不用安全 Cookie 时不本地验签；声明要验签的桩要另配公钥集，这一条不验签 */
+          secure_cookie: false,
           third_party: { providers: [] },
         }),
       })
