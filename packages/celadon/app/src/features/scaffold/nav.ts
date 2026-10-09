@@ -14,9 +14,9 @@ export type NavItem = {
 
 export type ScaffoldNavItem = NavItem & { label: I18nKey }
 
-/** 脚手架导航项：首页（出脚手架）+ 四个页面。 */
+/** 脚手架导航项：版本信息页 + 四个页面。 */
 export const SCAFFOLD_NAV: ScaffoldNavItem[] = [
-  { label: 'nav.home', href: '/', icon: 'i-spark' },
+  { label: 'nav.home', href: '/scaffold/home', icon: 'i-spark' },
   { label: 'nav.overview', href: '/scaffold', icon: 'i-book' },
   { label: 'nav.routing', href: '/scaffold/routing', icon: 'i-ws' },
   { label: 'nav.bridge', href: '/scaffold/bridge', icon: 'i-check' },

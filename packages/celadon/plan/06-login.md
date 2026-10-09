@@ -1,208 +1,165 @@
-# 产品级登录与注册（计划）
+# 06 · 产品级登录与注册（实现结果）
 
-- **版本**：v1.1（2026-10-07）。底座已交付，页面未开工，开工判据见 §3.0。
-- **上游**：[`04-status.md`](04-status.md) · [`03-data.md`](03-data.md) · [`06-state.md`](../architecture/06-state.md) · [`05-data-and-api.md`](../architecture/05-data-and-api.md)
-- **参考**：`cui-desktop`（1.0 桌面壳与其 `cui` 包，只读）· 本仓 `packages/cui`（1.0 的 `cui` 包，只读）
-- **目标**：把 1.0 的"入口"能力归一化为一套产品级实现 —— 一个 `data/user` 域、两个独立页面（登录、注册）、一个服务器选择页面，全部走本仓的平台层与设计体系。
+- **版本**：v2.0（2026-10-09）· **状态**：已交付（单元 · 浏览器 · 拟人三层用例与门禁全绿）
+- **上游**：[`architecture/05-data-and-api.md`](../architecture/05-data-and-api.md) · [`architecture/06-state.md`](../architecture/06-state.md) · [`architecture/07-routing.md`](../architecture/07-routing.md) · [`architecture/15-platform.md`](../architecture/15-platform.md) · [`architecture/17-transport.md`](../architecture/17-transport.md) · [`design/prototype/`](../design/prototype/)（草图，评审用）
+- **范围**：`/user/entry` 一线的能力归一化为一套产品级实现：一个 `data/user` 域，登录页、注册页、第三方回跳页、服务器选择页与欢迎页五个页面，打开应用时的入口判定与会话失效处置。
 
-## 0. 旧能力盘点（`/user/entry` 相关接口）
+本册只记**结果与现行规则**。原先按组件、页面、登录页与入口路由分开的四份分册已并入本册，过程与取舍写在各次提交里。
 
-### 0.1 接口清单
+## 1. 路由与页面
 
-来源：`packages/cui/openapi/user/auth.ts`（1.0 实现）与 `yao/openapi/user/*` 的处理器。
+路径都在构建决定的 base 之下（`architecture/04-host-integration.md`）。
 
-| 端点 | 作用 | 备注 |
+| 路径 | 页面 | 现行行为 |
 | --- | --- | --- |
-| `GET /user/entry?locale=` | 统一入口配置 `EntryConfig` | 标题、描述、成功/失败跳转、登出跳转、`form`（用户名占位与字段、密码占位、验证码类型 `image`/`turnstile` 及其选项）。入口界面由它驱动 |
-| `POST /user/entry/verify` | 判定"登录还是注册"，并返回**临时令牌** | 入参 `{username, captcha_id?, captcha?, locale?}`；出参含 `status`（`login`/`register`）、`access_token`、`expires_in`、`scope`、`user_exists`、`verification_sent`、`otp_id`。注册分支自动发出验证码 |
-| `POST /user/entry/register` | 注册 | 需临时令牌（`Authorization: Bearer <temp>`）；入参 `{name?, password, confirm_password?, otp_id?, verification_code?, locale?}`；出参 `EntryAuthResponse` |
-| `POST /user/entry/login` | 登录 | 需临时令牌；入参 `{password, remember_me?, locale?}`；出参 `EntryAuthResponse` |
-| `POST /user/entry/otp?locale=` | 重发验证码 | 需临时令牌；出参 `{otp_id, expires_in}` |
-| `POST /user/entry/invite/verify` | 邀请码校验与兑换 | 需带 `invite_verification` 作用域的临时令牌；成功后直接返回 `EntryAuthResponse` |
-| `GET /user/entry/captcha` · `GET /user/entry/captcha?captcha_id=` | 图形或人机验证 | 出参 `{captcha_id, captcha_image, expires_in}` |
-| `POST /user/oauth/:id/authorize` · `POST /user/oauth/:id/callback` | 第三方登录 | 另有设备码流（`/device/authorize`、`/device/token`）与设备授权页 |
-| `POST /user/logout` | 服务端登出 | 本仓 `data/user` 已声明 |
-| `GET /user/profile`（OIDC UserInfo）| 用户资料 | 与本轮入口流程相邻，暂不展开 |
+| `/login` | `features/auth/login/` | 账号步 → 按 `entryVerify` 的判定分支：密码步（可带一次性口令）或跳注册；第三方入口在当前窗口整页跳转 |
+| `/register` | `features/auth/register/` | 账号步与登录页共用判定；密码与确认密码、条款、需要时的一次性口令与页内邀请码步；响应带 `id_token` 才采纳会话，否则回登录页提示「注册成功，请登录」 |
+| `/welcome` | `features/auth/welcome/` | 登录后的第一站：展示本次会话的用户信息（内存里没有时取一次 `GET /user/profile`），点「继续」走入口配置的成功地址，也可在这里退出登录 |
+| `/servers` | `features/auth/servers/` | 官方清单（`platform/portal/`）与自建地址，连接交宿主 `celadon_service_set` 校验并落盘；Web 只读展示当前地址 |
+| `/auth/back/:provider` | `features/auth/back/` | 第三方回跳：读 `code` 与 `state` 调 `oauthCallback`，按状态回登录页或走成功收尾 |
+| `/` | `routes/entry-gate.tsx` | 入口判定（见第 5 节），不再直接画页面 |
+| `*` | `routes/session-guard.tsx` | 未知路径算产品面：未登录带 `next` 去登录页，登录后回 `/` |
 
-### 0.2 数据结构
+五个页面共用 `AuthLayout`（品牌、语言与主题两个全局控件、卡片、页脚、客户端栏），页面之间互相链接时带上已输入的账号与去向。
 
-来源：`packages/cui/openapi/user/types.ts`，本仓 `data/user/types.ts` 已按真实服务校正。
+各页面的状态与现行行为：
 
-- `EntryConfig`：`title` · `description` · `success_url` · `failure_url?` · `logout_redirect?` · `auto_login?` · `role?` · `type?` · `form?`（见上表）。
-- `EntryVerifyResponse`：`status: 'login' | 'register'` · `access_token` · `expires_in` · `token_type` · `scope` · `user_exists` · `verification_sent?` · `otp_id?`。
-- `EntryRegisterRequest` / `EntryLoginRequest` / `EntrySendOTPResponse` / `EntryAuthResponse`：字段同上表。
-- `EntryAuthResponse` 的令牌族：`session_id` · `id_token` · `access_token` · `refresh_token` · `expires_in` · `refresh_token_expires_in` · `mfa_enabled` · `status`。
-- `LoginStatus`：`Success` · `MFARequired` · `TeamSelectionRequired` · `InviteVerification`。
-
-### 0.3 1.0 的界面位置（只读参考）
-
-- `pages/auth/entry/index.tsx`（登录与注册的统一入口）· `pages/auth/entry/invite/index.tsx`（邀请码）· `pages/auth/token/index.tsx`（验证码/令牌）· `pages/auth/connect/index.tsx`（第三方连接）· `pages/setup/redirect.ts` · `pages/team/invite/$.tsx`。
-- **服务器选择**：`cui-desktop/src/pages/servers.ts`（408 行）。它在**应用之外**的桌面壳里用原生 DOM 渲染：`servers` 列表与 `activeServerUrl`、托盘"切换服务器"以 `?switch=1` 进入、首屏自动重连、主题与语言变化时整页重渲染、云端服务器列表异步加载。
-
-### 0.4 归一化要解决的问题与现行结论
-
-1. **入口界面在 1.0 的应用内，服务器选择在 1.0 的应用外**。**结论**：服务器选择做成应用内页面（无服务地址时由外壳呈现），与登录、注册共用设计体系；「没有可用地址时由外壳引导到本页」属于桌面壳那一轮。
-2. **临时令牌**。**结论**：临时令牌不进入会话存储，也不占用 `platform/credential`；`entryRegister`、`entryLogin`、`entryOtp`、`entryInvite` 的查询包装都以 `token` 作为第一个参数，由页面持有并经请求头随每次调用送出。会话的采纳与清除仍由 `platform/credential` 的 `signIn`、`signOut`、`forgetService` 承担。
-3. **ID Token 验签在 1.0 里有降级分支**（无 `crypto.subtle` 时跳过验签、直接解载荷）。**结论**：验签，接口 `oidcKeys` 已具备，不沿用降级分支。
-4. **`EntryConfig` 驱动的动态表单** 与"登录、注册分开两个页面"存在张力：判定登录或注册发生在 `verify` 之后，因此两个页面共用该步，随后各自继续。
-
-## 1. 第一步：草图（结论）
-
-产物为 [`login.html`](../design/prototype/login.html) · [`register.html`](../design/prototype/register.html) · [`servers.html`](../design/prototype/servers.html) · [`layout.html`](../design/prototype/layout.html) · [`welcome.html`](../design/prototype/welcome.html)，均为占位演示，供评审对照界面。草图的细节随实现推进，不作为像素级验收依据。
-
-## 2. 第二步：接口准备（结论）
-
-交付物为 `app/src/data/user/`：
-
-- 14 条端点声明与 14 个查询包装（`api.ts` · `queries.ts` · `keys.ts`），字段与路径以 1.0 源码和 `yao/openapi/user/*` 的处理器为准；
-- 临时令牌经 `RequestOptions.headers` 传递，会话令牌由 `signIn` 采纳；
-- 失败按错误码翻译（`data.error.<code>` 与 `platform/i18n/code-key.ts`），四语齐备；
-- 语言由 ctx 统一提供，页面不需要自己拼 `locale` 参数；
-- 单元 fixture 与浏览器层 15 步活体走查均已通过，`api`、`keys`、`queries` 覆盖率四项 100%。
-
-**当前 dev 配置下的已知限制**：五条成功分支不可达（一次性口令 · 邀请码 · OAuth 回调 · 设备码批准与轮询），已有带来源标注的 fixture 记录，属 fixture 证据而非活体验证。
-
-## 3. 第三步：页面实现（登录与注册分开）
-
-### 3.0 开工判据（结论）
-
-页面所需的底座已经就位，剩下的都是页面本身的活：三个页面、四个页面内部件、一个独立外壳；**不需要再新增基础件**。
-
-| 事项 | 结论 | 依据 |
-| --- | --- | --- |
-| 接口声明与查询包装 | 就绪。入口配置、图形验证码、`verify`、`register`、`login`、`otp`、`invite`、OAuth 两条、设备码三条、OIDC 公钥与登出共 14 条 | `app/src/data/user/index.ts` · `queries.ts` |
-| 请求状态与失败文案 | 就绪。取值、进行中与失败三态由 `useRequest` 给，失败按错误码翻四语 | `app/src/data/hooks/use-request.ts` · `platform/i18n/code-key.ts` |
-| 临时令牌 | 就绪。`register` / `login` / `otp` / `invite` 的包装都以 `token` 为第一个参数，经请求头随调用送出 | `app/src/data/user/queries.ts` 第 99 至 121 行 |
-| 会话采纳与清除 | 就绪。`signIn` 采纳令牌族，`signOut` 清 `session` 与 `refresh`，更换服务地址时用 `forgetService` 作废本机凭据 | `app/src/platform/credential/index.ts` · `session.ts` |
-| 基础件 | 就绪。十个基础件（`brand-mark` · `button` · `captcha-field` · `checkbox` · `icon` · `input` · `otp-field` · `segmented-control` · `select` · `spinner`）各有单元用例；页面要用的四件已在清单页按属性、状态、尺寸列出 | `app/src/components/base/index.ts` · `/scaffold/base` |
-| 主题与语言切换 | 就绪。按 §3.4 的规格实现，四语齐备 | `app/src/components/theme-toggle/` · `locale-switch/` |
-| 页面与页面内部件 | 未开工。`features/` 下现有 `home` 与 `scaffold`；§3.3 的四个页面内部件随页面一并实现 | `app/src/features/` |
-| 独立外壳 | 未开工。现有路由表只有一套外壳 `SurfaceLayout`，页面要另立一个不带应用导航的外壳 | `app/src/routes/routes.tsx` |
-| 服务器选择的归属 | 页面在本仓做；无服务地址时的引导属于桌面壳那一轮 | §0.4 第 1 条 · §5 第 4 条 |
-| 拟人层 | 就绪。两个场景的旧期望已按现行实现订正（主题切换的按钮改为图标反转的方形按钮、图标尺寸取产品默认档 16、受保护请求按码翻成 `data.error.unauthorized`），现在两个场景全部测量通过 | `pnpm test:persona` 当前输出 |
-
-### 3.1 路由清单
-
-路径都在构建决定的 base 之下，三个页面使用独立外壳，不带应用的 Surface 导航。
-「设计原型」一列指向第一步的草图，用于对照界面。
-
-| 路径 | 页面 | 设计原型 | 说明 |
-| --- | --- | --- | --- |
-| `/login` | `features/auth/login` | [`prototype/login.html`](../design/prototype/login.html) | 从输入用户名开始，调用 `entryVerify`，依据返回的 `status` 在本页切换到密码、一次性口令、邀请码等分支 |
-| `/register` | `features/auth/register` | [`prototype/register.html`](../design/prototype/register.html) | 同样从输入用户名开始，与登录共用输入组件，注册成功或需要登录时链接到 `/login` |
-| `/servers` | `features/auth/servers` | [`prototype/servers.html`](../design/prototype/servers.html) | 选择内置服务地址或手动填写 |
-| 兜底 | 既有的 `*` 重定向到 `/` | 无 | 保持不变 |
-
-页面使用的外壳参考 [`prototype/layout.html`](../design/prototype/layout.html) 与 [`prototype/welcome.html`](../design/prototype/welcome.html)。
-登录页与注册页之间互相链接，并在跳转时保留已经输入的用户名。
-
-### 3.2 Feature 清单
-
-Feature 是域，位于 `features/` 下，自带 `locales/` 与 `tests/`。本轮新增一个域，下辖三个页面。
-
-| Feature | 目录 | 页面 | 说明 |
-| --- | --- | --- | --- |
-| `auth` | `features/auth/` | `login`、`register`、`servers` | 登录、注册与服务器选择的域；三个页面共用输入组件与一套四语文案 |
-
-页面属于 Feature，本身不是组件：它持有状态、调用接口，并把界面交给下面的组件渲染。
-
-| 页面 | 目录 | 说明 |
-| --- | --- | --- |
-| 登录页 | `features/auth/login/` | 持有步骤状态，调用 `entryVerify` 与 `entryLogin` |
-| 注册页 | `features/auth/register/` | 调用 `entryVerify` 与 `entryRegister` |
-| 服务器页 | `features/auth/servers/` | 写入与清除服务地址 |
-
-### 3.3 Component 清单
-
-组件分两处落位，判据来自 [`architecture/03-boundaries.md`](../architecture/03-boundaries.md) §3。
-**基础组件**进 `components/base/`，包装 `@base-ui/react`，只有视觉与行为；**页面内部件**留在 `features/auth/components/`，
-由基础组件拼成，可以感知本页的流程。两者都遵循一个组件一个目录、样式与组件同名。
-
-基础件已经交付，页面直接用现成参数，不必再新增；组件名与上游一致，上游没有对应部件的按上游的命名形状补 `-field` 结尾的名字。
-
-| 基础组件 | 上游对应 | 目录 | 现行参数 | 状态 |
-| --- | --- | --- | --- | --- |
-| `input` | `input` | `components/base/input/` | `id`、`label`、`type`、`value`、`onChange`、`error`、`hint`、`icon`、`trailing`、`autoComplete`、`disabled`、`size`（`small` · `medium` · `large`）、`state`、`shake` | 结论：已交付，尺寸小 24 · 中 32 · 大 40 |
-| `captcha-field` | 无部件，基于 `input` | `components/base/captcha-field/` | `id`、`value`、`onValueChange`、`onCaptchaIdChange`、`label`、`placeholder`、`hint`、`error`、`disabled`、`required`、`name`、`size`、`refreshLabel`、`imageAlt`、`autoComplete`、`className` | 结论：已交付，自己取图并把 `captcha_id` 交给调用方，尾部槽位按档定宽 72 · 96 · 120 |
-| `otp-field` | `otp-field` | `components/base/otp-field/` | `id`、`value`、`onValueChange`、`onComplete`、`label`、`hint`、`error`、`disabled`、`readOnly`、`required`、`name`、`length`、`size`、`autoComplete`、`cellLabel`、`state`、`className` | 结论：已交付，一位一格、边长等于该档控件高度，支持整段粘贴 |
-| `checkbox` | `checkbox` | `components/base/checkbox/` | `id`、`label`、`hint`、`error`、`checked`、`defaultChecked`、`onCheckedChange`、`indeterminate`、`disabled`、`readOnly`、`required`、`name`、`value`、`size`、`state`、`className` | 结论：已交付，选中与不确定态取反色族 |
-
-**密码不另立基础件**。上游只有 `input`，密码就是 `type="password"` 的文本输入，因此沿用同一个基础件。
-密码框右侧的可见性切换是组合出来的东西，不放进 `base/`：登录与注册共用它在
-`features/auth/components/` 下放一个 `PasswordInput`，等出现第二个域的使用者再考虑上提为共享组件。
-
-字段的标签、说明与错误不另立组件，直接用上游 `field` 的部件：`Field.Root` 包住一个字段，
-`Field.Label` 出标签，控件本体用上游 `input` 的部件，`Field.Error` 出字段级错误，`Field.Description` 出说明。
-`otp-field` 是例外，它是多控件字段，自己按同一套 `.field*` 类搭结构（见该组件文档的已知限制）。
-
-通知方面上游有 `toast`。本轮 auth 不使用瞬态通知，页面级的状态提示由页面内部的 `StatusNotice` 承担；
-将来出现真实的通知需求时包装上游的 `toast`，不自造提示组件。
-
-现有的四个件与上游的对应关系如下。`icon` 与 `brand-mark` 上游没有对应部件，架构分册把它们记为例外。
-
-| 现有组件 | 上游对应 | 结论 |
-| --- | --- | --- |
-| `button` | `button` | 八个变体（实心 · 浅底 · 幽灵 · 纯文字 · 琥珀 · 成功 · 危险 · 反色）、三档尺寸 24 · 32 · 40、整宽档、加载态、方形图标按钮与 `icon` 加 `iconPosition` 的图标加文字形态都已交付 |
-| `select` | `select` | 触发器用自己的类，与输入框同梯 24 · 32 · 40；分组、富选项、多选、筛选、纯文字档、反色档与取消选择都已交付 |
-| `icon` | 无 | 界面图标 81 个，含登录要用的邮件、锁、眼睛、隐藏眼睛、礼盒、地球、太阳与月亮；取值链路为 `scripts/vendor-lucide.mjs` 加 `build-icons.mjs` |
-| `brand-mark` | 无 | 单元用例 5 条，尺寸档与无障碍属性齐 |
-
-页面内部件留在 `features/auth/components/`，它们感知登录流程，因此不做成基础组件。四个件随页面一并实现。
-
-| 组件 | 目录 | 参数 | 说明 |
-| --- | --- | --- | --- |
-| `PasswordInput` | `features/auth/components/password-input/` | `id`、`label`、`value`、`onValueChange`、`error`、`autoComplete`、`disabled` | 文本输入加可见性切换，登录与注册共用 |
-| `ProviderList` | `features/auth/components/provider-list/` | `providers`、`onPick`、`pending` | 第三方登录入口，跳转 `oauthAuthorize` 返回的地址 |
-| `ClientHint` | `features/auth/components/client-hint/` | `mode`、`onOpenInBrowser`、`onUseDeviceCode` | 客户端内提示回到浏览器或改用设备码 |
-| `StatusNotice` | `features/auth/components/status-notice/` | `code`、`onRetry` | 展示 `entryConfig` 与各接口返回的状态，文案按错误码取 |
-
-三个页面的外壳、域状态、目录结构、页面内部件清单与客户端内模式的完整清单见
-[`06-login-features.md`](06-login-features.md)。
-
-### 3.4 主题与语言切换的规格
-
-这两个组件已经存在，位于 `components/theme-toggle/` 与 `components/locale-switch/`。它们读主题与语言状态，
-按架构的判据留在 `components/` 而不进 `base/`。下表是页面依赖的规格，现已按此实现。
-
-| 项 | 规格 |
+| 页面 | 状态与动作 |
 | --- | --- |
-| 主题状态 | 两档：浅色与深色；首次访问跟随系统，用户点过主题按钮之后写显式档 |
-| 主题切换的形态 | 一个方形图标按钮（纯文字档，边长 24 / 32 / 40）；**图标反转**，显示的是点击后会变成的那一档（浅色画月亮、深色画太阳） |
-| 主题切换的位置 | 登录页、注册页与服务器页的右上角 |
-| 主题切换的可访问性 | 可访问名写动作（「切换到深色」/「切换到浅色」），与图标表达同一件事；键盘可操作，只有键盘聚焦画 `--focus-ring` |
-| 语言范围 | 四语齐备：`zh-CN`、`zh-TW`、`en-US`、`ja` |
-| 语言切换的行为 | 切换之后当前页面的文案立即更新，不刷新页面，已经输入的内容不丢失 |
-| 语言切换的形态 | 纯文字档的下拉，当前语言名在前、地球图标在末尾，关掉下拉指示器；「跟随系统」是一等的选项，文案里带当前解析出的语言名 |
-| 语言切换的位置 | 与主题切换同一处，位于页面右上角 |
-| 文案归属 | 基础组件与页面内部件的文案放各自目录的 `locales/`，登录流程的文案放 `features/auth/locales/` |
+| 登录 | 账号步（空账号按钮禁用 · 账号无效给字段错误）· 密码步（可加一次性口令，可重发并显示倒计时）· 验证码弹窗（图形与人机两种形态）· 第三方入口 · 失败按码翻四语；入口配置取不到给失败态与「重试」，重试同时重取验签公钥 |
+| 注册 | 账号步与登录页同一套判定 · 密码与确认密码（两个输入框作为一组，出错不动其余间距）· 条款勾选 · 需要时的一次性口令步与页内邀请码步 · 注册后不自动登录时回登录页并提示 |
+| 欢迎 | 会话用户信息（内存或补取资料）· 资料取数中一行状态 · 取数失败给原因与「重试」· 没有可展示字段时不画空表格 · 继续 · 退出 |
+| 服务器 | 官方清单三态（加载中 · 失败给原因与重试 · 空清单仍可填自建）· 自建地址为空时字段级错误且不发请求 · 连接失败按码给原因 |
+| 回跳 | 换取会话中给转圈与状态 · 成功走成功收尾 · 失败给原因与回登录页的入口 |
 
-### 3.5 实现约定
+键盘与焦点：表单回车提交、Tab 顺序按视觉顺序、只有键盘聚焦画 `--focus-ring`；验证码弹窗打开时的焦点按内容定（图形验证码进输入框，人机验证不动焦点），规则在 [`design/layout.md`](../design/layout.md)。
 
-1. **状态**：会话的采纳与清除沿用 `platform/credential`，登录成功时采纳，退出时清除 `session` 与 `refresh`；更换服务地址时作废页面上的旧结果，与脚手架「请求」页同一规则。临时令牌只留在页面状态里，不进凭据存储。
-2. **文案**：四语齐备（`zh-CN`、`zh-TW`、`en-US`、`ja`），按域放在 `features/auth/locales/` 下。
-3. **公共件**：输入框与勾选项取 `components/base`，字段级错误用上游 `field` 的 `Error` 部件，页面级提示由页面内部的 `StatusNotice` 承担；不新增页面私有的同类控件。
-4. **页面私有的组件与样式**放在 `features/auth/` 自己的目录下；页面使用独立外壳，不复用 `ScaffoldPage` 的导航与页头。
+脚手架页面（`/scaffold/*`）是**开发面**，与产品面共用外壳但不进两个守卫，地址与形制见 [`05-scaffold.md`](05-scaffold.md)。
 
-### 3.6 实现顺序
+## 2. 数据层
 
-第 1 至第 3 步已经完成，是页面开工的前提；第 4 步是页面本身，页面内部件与页面一并实现。每一步都跑门禁并本地提交，前一步没有通过不进下一步。
+`app/src/data/user/`：**15 条接口声明与 15 个查询包装**（`api.ts` · `queries.ts` · `keys.ts`）。
 
-| 顺序 | 内容 | 状态与验收 |
+| 分组 | 接口 |
+| --- | --- |
+| 入口配置与验证码 | `GET /user/entry` · `GET /user/entry/captcha` |
+| 判定与登录注册 | `POST /user/entry/verify` · `POST /user/entry/register` · `POST /user/entry/login` · `POST /user/entry/otp` · `POST /user/entry/invite/verify` |
+| 第三方 | `POST /user/oauth/:id/authorize` · `POST /user/oauth/:id/callback` · `GET /oauth/jwks` |
+| 设备码 | `POST /oauth/device/authorize` · `POST /user/oauth/:id/device/authorize` · `POST /user/oauth/:id/device/token` |
+| 会话 | `POST /user/logout` · `GET /user/profile` |
+
+现行规则：
+
+- **临时令牌**只留在页面状态里，不进凭据存储；`register` / `login` / `otp` / `invite` 的包装以 `token` 为第一个参数，经请求头随每次调用送出。
+- **会话的采纳与清除**归 `platform/credential`：`signIn` 采纳令牌族，`signOut` 清本机凭据；换服务地址时 `writeServiceAddress()` 调 `resetSession()` 作废本机凭据（`platform/service/address.ts`）。
+- **失败按码翻译**（`data.error.<码>` 与 `platform/i18n/code-key.ts`），四语齐备；**语言由 ctx 统一给**，页面不自己拼 `locale`。
+- ID Token 在客户端**验签**（`features/auth/id-token.ts`，只认 RS256），不沿用跳过验签的降级分支。
+
+## 3. 页面与共用件
+
+**页面内部件**在 `features/auth/components/`：`auth-layout` · `auth-provider` · `captcha-dialog` · `locked-account` · `password-input` · `provider-list` · `status-notice` · `terms-note`。
+
+**基础件**取 `components/base/`：`input` · `captcha-field` · `turnstile-field` · `otp-field` · `checkbox` · `button` · `select` · `link` · `spinner` · `dialog` · `alert-dialog` · `segmented-control` · `icon` · `brand-mark`。密码不另立基础件（`type="password"` 的文本输入加可见性按钮）；字段的标签、说明与错误用上游 `field` 的部件；本轮不新增基础件。组件与验收口径见 `architecture/03-boundaries.md` 与 `architecture/14-testing.md`。
+
+**域内纯函数与钩子**在 `features/auth/`：
+
+| 文件 | 作用 |
+| --- | --- |
+| `account.ts` | 账号形态判定（邮箱或手机号），登录与注册的账号步共用 |
+| `id-token.ts` | ID Token 本地验签（RS256），声明另由 `idTokenClaimsForDisplay` 读出供展示 |
+| `user-info.ts` | 登录响应与声明 / 用户资料 → 展示用的用户信息；标识优先 |
+| `success-address.ts` | 成功地址的落地：同源走路由，外链用 `location.assign` |
+| `server-history.ts` | 本机服务器记录（`celadon.servers`，最近 8 条） |
+| `entry.ts` · `routes/entry-gate.tsx` | 入口判定的纯函数与它的接线 |
+| `session-marker.ts` · `landing-record.ts` · `next.ts` | 本机登录标记、最后落点、登录后去向 |
+| `sign-out.ts` · `use-sign-out.ts` | 退出的本机清理与产品动作 |
+| `use-auth.ts` · `use-auth-mode.ts` · `use-complete-sign-in.ts` · `use-server-name.ts` · `use-landing-record.ts` | 域状态、客户端内形态判定、登录收尾、客户端栏的服务器名、落点记录 |
+
+## 4. 域状态与本机记录
+
+- **域状态**（`features/auth/auth.store.ts`，`zustand`）：`phase`（账号步 / 密码步 / 邀请码步）· `verifyStatus` · `tempToken` · `otpId` · `needsCode` · `username` · `notice` · 会话用户信息 `user` · 入口配置 `config` 与 `configFailed`；`AuthProvider` 负责取入口配置、登录收尾（验签 · 采纳会话 · 写本机记录 · 跳转）与退出后的状态复位。
+- **本机记录**（都按服务 origin 分账，坏数据一律当没有）：
+
+| 键 | 载体 | 内容 |
 | --- | --- | --- |
-| 1 | 新增四个基础件（`input`、`captcha-field`、`otp-field`、`checkbox`），并按重写要点修订 `button`、`select`、`icon`、`brand-mark` | 结论：已完成。每件有单元用例，图标由脚本生成并纳入 `sprite.test.ts` 与图标浏览器用例 |
-| 2 | 主题与语言切换按 §3.4 的规格补齐 | 结论：已完成。切换立即生效、不刷新、不丢已输入内容，浏览器用例覆盖主题图标反转与四语切换 |
-| 3 | 在脚手架里新增基础件清单页 | 结论：已完成。落到 `features/scaffold/`，路由 `/scaffold/base`，导航项与既有页面并列，形制见 [`05-scaffold.md`](05-scaffold.md)；九组共列全部基础件与状态，浏览器用例逐组断言 |
-| 4 | auth 三个页面与页面内部件 | 待办：页面内部件随页面一并实现，完成后单元与浏览器用例覆盖关键路径，真调用走查对开发后端 |
+| `celadon.session` | `localStorage` | 登录标记（一笔时间戳）。只决定首屏往哪跳，不是授权依据；存储写不进去时本次打开内留一个内存兜底，免得登录成功那一刻被自己的守卫弹回登录页 |
+| `celadon.landing` | `localStorage` | 最后落点，值 `{ path, at }`，只收应用内路径（根地址不算） |
+| `celadon.next` | `sessionStorage` | 第三方往返期间暂存的去向，用过即删；没有明确去向时也要写（清掉上一次留下的） |
+| `celadon.servers` | `localStorage` | 连过的服务器（最近 8 条），与谁登录无关，退出时不动 |
 
-## 4. 验收与交付
+- **凭据**（会话令牌族）在 `platform/credential`：Web 上由服务端的 HttpOnly Cookie 承担（JS 碰不到），客户端里进系统凭据库；退出时先由服务端吊销，成功后再清本机。
+- **开发面的验证页**只探接口：它的「退出登录」走 `logoutQuery()`（服务端吊销并清平台凭据），不动登录域的本机记录（它不引 auth 域，退出的本机清理由 `useSignOut()` 与 `SessionExpiryGuard` 共用 `clearLocalSession()`）。
+- **客户端内形态**由 `useAuthMode()` 一处判定（`capabilities().serviceAddress` 为真即 `in-app`），页面之间的链接与跳转过 `withMode()` 带标记；客户端栏的服务器名取本机记录，返回入口写死 `/servers`。
 
-1. 门禁：`lint` · `check`（12 个检查器）· 单元 · 浏览器 · 拟人场景 · `build`，全部通过。
-2. 证据：草图（评审用）· 真客户端截图（macOS 与 Windows）· 单元用例覆盖 `verify` 的两个分支与失败码 · 浏览器用例覆盖两个页面的关键路径。
-3. 流程：本地逐轮提交，交付前走一轮隔离 Review，通过后合并推送。
+## 5. 入口与默认路由（现行规则）
 
-## 5. 待定与已定
+打开应用时按三个本机信号决定首屏去哪，**不查后端**；判定是一处纯函数（`features/auth/entry.ts`）。
 
-1. **ID Token 客户端验签**：已定，验签；所需接口 `oidcKeys` 已具备。
-2. **第三方登录（OAuth）与设备码流**：已定，本轮做；接口声明与查询包装已具备，页面与页面内部件随之实现。
-3. **MFA · 团队选择 · 邀请码**：入口配置若声明，按草图补页面；否则不做。
-4. **服务器选择的最终归属**：与登录、注册这条线无关，随桌面壳那一轮一并定。
+| 信号 | 取值 |
+| --- | --- |
+| 服务地址 | `serviceBase()` 有没有值（桌面首次由宿主给） |
+| 本机登录标记 | `celadon.session` 在本服务这一账上有没有 |
+| 最后落点 | `celadon.landing` 在本服务这一账上的路径 |
+
+| 情形 | 首屏 |
+| --- | --- |
+| 桌面还没选过服务器 | `/servers` |
+| 有地址、没有登录标记 | `/login` |
+| 有标记、有落点 | 落点路径（含查询串） |
+| 有标记、没有落点 | `/welcome` |
+| 留位：以后接「有没有配好」的判断 | 未就绪时按没有落点处理 |
+
+装配是三层：`ServerGuard`（桌面首次去选服务器）→ 产品面（`SessionExpiryGuard` 订 401 · `RequireSession` 管未登录 · `SurfaceLayout` 与根地址的入口判定）与开发面（脚手架）。
+
+**明确地址优先**：受保护页面被未登录访问时，守卫把原地址带进 `next`，登录或注册收尾后去那里。
+
+| 环节 | 约定 |
+| --- | --- |
+| 参数 | `next`，登录后去向的唯一参数（`from` 是客户端内形态的标记，`redirect_uri` 是第三方授权的事，都不混用） |
+| 取值 | 应用命名空间**之内**的路径，不带 base，可带查询串。不合法的一律忽略：绝对地址、以 `//` 开头、带协议、根地址 `/`、以流程页开头（`/login` `/register` `/auth/back` `/servers` `/welcome`）、超长串 |
+| 默认进入不算明确意图 | 根地址与不带命名空间的站点根不写 `next`，登录后按落点与欢迎页自己决定；`next` 只出现在分享链接与深链这类明确地址上 |
+| 传递 | 登录 ↔ 注册 ↔ 第三方之间带着走；第三方往返期间放 `celadon.next`，收尾时用掉并删除 |
+| 收尾 | 地址上的 `next` 先看，暂存再看；都没有就去 `/welcome` |
+
+**401 即会话失效**：传输层不再「续期一次、重放一次」，非入口类请求的 401 发一次事件；`SessionExpiryGuard` 收到后清本机标记、落点、待去地址与域状态，跳登录页并带上当前地址。入口类接口（按路径结尾认：`/user/entry` · `/user/oauth` · `/oauth/jwks`，不绑接口根）的 401 排除在外，免得打断正在填的页面；设备授权页的 `/oauth/device/authorize` 是已登录的人批准设备时调的，不在排除之列；重复的 401 只跳一次；已经在登录页时只清状态不跳。令牌的续期是另一条线，不在本册。
+
+**退出登录**（`use-sign-out.ts`）：`POST /user/logout` 服务端吊销并清平台凭据 → `clearLocalSession()` 清登录标记、最后落点、待去地址与域状态 → 回 `/login`。服务端吊销失败就本机不动，页面给原因。
+
+## 6. 文案与四语
+
+- 登录一线的文案在 `features/auth/locales/`，四语各 **95 键**（`zh-CN` · `zh-TW` · `en-US` · `ja`），键类型由 `scripts/build-i18n-types.mjs` 生成到 `platform/i18n/i18n-types.d.ts`。
+- 服务端失败的文案不在这个包里：取 `app/src/locales` 的 `data.error.<码>`。
+- 基础组件与页面内部件的展示文案放各自目录的 `locales/`。
+- 语言切换立即换内容、不刷新、不丢已输入的内容；主题两档，首次跟随系统，点过之后写显式档。
+
+## 7. 测试与读数
+
+- **单元**：与源文件同目录（`account` · `id-token` · `user-info` · `success-address` · `server-history` · `entry` · `session-marker` · `landing-record` · `next` · `sign-out` · `auth.store` 与五个页面的用例）。
+- **浏览器**（`features/auth/tests/`）：`login.browser.ts` · `register.browser.ts` · `servers.browser.ts` · `welcome.browser.ts` · `entry.browser.ts` · `login-prototype.browser.ts`，覆盖真渲染、活体验证码、四语换内容、失败按码翻译、客户端内形态、入口判定五条与退出的本机清理。
+- **拟人**：`features/scaffold/overview/tests/structure-trial.agent.mjs` 与 `features/scaffold/requests/tests/requests-trial.agent.mjs` 两个场景。
+- **读数（2026-10-09）**：`pnpm lint` · `pnpm check` · `pnpm test` 全过（**111 文件 763 例**）；全量 `pnpm test:browser` **84 过 1 跳**；`pnpm test:persona` **2 / 2**；`pnpm build` 通过；`pnpm test:ci-like` 两条都过；本册涉及文件的行与分支覆盖率都不低于九成。
+
+## 8. 未做与待定
+
+1. **联合状态页面**：`mfa_required` 与 `team_selection_required` 按入口配置声明与否决定做不做，现在没做。
+2. **桌面的成功地址落地**：入口配置的 `success_url` 是引擎相对路径（实例上是 `/dashboard/inbox`），桌面两端 basename 与引擎不同源，`goToSuccess` 现在把这样的路径当站内路由，会落到应用首页；是改走 `serviceUrl` 打开引擎页，还是由部署配成应用自己的路由，待定。
+3. **客户端内第三方登录的回程**：第三方入口在当前窗口整页跳转，提供方报错时整页停在对方的页面，webview 没有后退栏，用户回不到应用；需要深链、本地回调通道或设备码中的一条。
+4. **`?redirect=` 参数**：1.0 支持并把目标写进 Cookie；我们是否支持、由谁写、要不要落在 `success_url` 之前，待定。
+5. **第三方提供方没有 logo 时的通用图标**：现在按 `SigninProvider.logo` 的地址渲染图片，没有地址时用哪一个待定。
+6. **「在宿主内」的能力开关**：`capabilities()` 里还没有这一项，页面形态现由外壳显式传 `mode`。
+7. **一次性口令的活体走查**：口令发给收件人，接口读不到，自动化只覆盖到请求体带上 `otp_id` 与 `verification_code`。
+8. **按用户信息分流**：欢迎页「继续」之后按用户信息去哪仍未接。
+9. **邀请码的形态**：现为页内一步，是否改回独立页面待定。
+10. **令牌续期**：桌面静默续期依赖引擎给原生客户端一条刷新路径，属另一条线，与本册不耦合。
+11. **设计体系的遗留**：`--brand-solid-active` 等按下换色档在按钮上已无引用，去留待定；选择器未做虚拟滚动（窗口化与键盘可达冲突，保留整表挂载）与多选摘要；`brand-mark` · `icon` · `segmented-control` · `spinner` 四个基础件只有英文文档；两行选项的行高不是 `--row-height` 的整数倍时，弹层只保证可滚。
+12. **取数没有超时**：入口配置请求一直不返回时，登录页停在加载态（其余按 `failure` 处理）；回跳页与欢迎页补取资料的那一次同样。
+
+## 9. 变更沿革
+
+| 时间 | 内容 |
+| --- | --- |
+| 2026-10-05 | 草图进 `design/prototype/`（登录 · 注册 · 服务器 · 外壳 · 欢迎页） |
+| 2026-10-06 至 07 | `data/user` 域与四个基础件（`input` · `captcha-field` · `otp-field` · `checkbox`）交付；主题与语言切换按规格补齐；脚手架基础件清单页落地 |
+| 2026-10-07 | 登录页与外壳、域状态、四个页面内部件交付；ID Token 本地验签 |
+| 2026-10-08 | 注册页交付，验证码弹窗抽成共用件；账号步不整体抽组件，注册不采纳没有 `id_token` 的会话 |
+| 2026-10-09 | 服务器选择页与客户端内形态一处判定；入口与默认路由（本机标记 · 最后落点 · `next` · 401 处置）；欢迎页的用户信息（含刷新后补取资料）与产品级退出登录；四份分册并入本册 |

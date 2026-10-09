@@ -13,6 +13,7 @@ export {
   oauthAuthorize,
   oauthCallback,
   oidcKeys,
+  userProfile,
 } from './api'
 export { userKeys } from './keys'
 export {
@@ -30,6 +31,7 @@ export {
   oauthAuthorizeQuery,
   oauthCallbackQuery,
   oidcKeysQuery,
+  userProfileQuery,
 } from './queries'
 export type {
   CaptchaResponse,
@@ -56,4 +58,5 @@ export type {
   OAuthAuthorizeQuery,
   OAuthCallbackRequest,
   SigninProvider,
+  UserProfile,
 } from './types'

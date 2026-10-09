@@ -26,6 +26,7 @@ import type {
   OAuthAuthorizationUrl,
   OAuthAuthorizeQuery,
   OAuthCallbackRequest,
+  UserProfile,
 } from './types'
 
 /** 把域查询并进路径（`useRequest` 的选项里没有 `query`，参数化在域层收口 —— 与 `test` 域同一做法）。 */
@@ -114,3 +115,6 @@ export const oidcKeys: Request<void, Jwks> = { method: 'GET', path: '/oauth/jwks
 
 /** `POST /user/logout`：服务端吊销令牌并清认证 Cookie（本机凭据的清理见 `queries.ts`）。 */
 export const logout: Request<void, LogoutResult> = { method: 'POST', path: '/user/logout' }
+
+/** `GET /user/profile`：当前会话的用户资料（欢迎页在内存里没有用户信息时用它）。 */
+export const userProfile: Request<void, UserProfile> = { method: 'GET', path: '/user/profile' }

@@ -6,6 +6,11 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/platform/transport/fetch', () => ({ transportFetch: vi.fn() }))
+/* 只换掉基址这一处，`serviceUrl` 等仍用真实现：入口配置的地址要照常拼得出来 */
+vi.mock('@/platform/service', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/platform/service')>()
+  return { ...actual, serviceBase: vi.fn(() => '') }
+})
 const signIn = vi.hoisted(() =>
   vi.fn(
     async (
@@ -37,11 +42,14 @@ vi.mock('@/features/auth/id-token', async (importOriginal) => {
 })
 
 import { transportFetch } from '@/platform/transport/fetch'
+import { serviceBase } from '@/platform/service'
 import { i18n } from '@/platform/i18n'
 import { AuthProvider } from '@/features/auth/components/auth-provider'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { useAuth } from '@/features/auth/use-auth'
 import { useCompleteSignIn } from '@/features/auth/use-complete-sign-in'
+import { stashNext } from '@/features/auth/next'
+import { readServers } from '@/features/auth/server-history'
 import type { EntryAuthResponse } from '@/data/user'
 
 const SERVICE = { name: 'Yao Dev', version: '1.0.0', openapi: '/v1' }
@@ -68,9 +76,9 @@ function Probe({ response = SIGNED_IN }: { response?: EntryAuthResponse }) {
   )
 }
 
-function renderProbe(response?: EntryAuthResponse) {
+function renderProbe(response?: EntryAuthResponse, entry = '/login') {
   return render(
-    <MemoryRouter initialEntries={['/login']}>
+    <MemoryRouter initialEntries={[entry]}>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Probe response={response} />} />
@@ -108,6 +116,30 @@ describe('the auth provider', () => {
     await user.click(screen.getByRole('button', { name: 'complete' }))
     await waitFor(() => expect(signIn).toHaveBeenCalledWith(expect.objectContaining({ user_id: 'u1' })))
     expect(await screen.findByText('欢迎页')).toBeTruthy()
+  })
+
+  it('goes to the address the link asked for when the URL names one', async () => {
+    const user = userEvent.setup()
+    renderProbe(undefined, '/login?next=%2Fdone')
+    await user.click(screen.getByRole('button', { name: 'complete' }))
+    expect(await screen.findByText('已到达成功地址')).toBeTruthy()
+  })
+
+  it('goes to the stashed address after a third-party round trip', async () => {
+    stashNext('/done')
+    const user = userEvent.setup()
+    renderProbe()
+    await user.click(screen.getByRole('button', { name: 'complete' }))
+    expect(await screen.findByText('已到达成功地址')).toBeTruthy()
+  })
+
+  it('remembers the server it signed in to when the platform has a base', async () => {
+    vi.mocked(serviceBase).mockReturnValue('http://one.example:15099')
+    const user = userEvent.setup()
+    renderProbe()
+    await user.click(screen.getByRole('button', { name: 'complete' }))
+    await waitFor(() => expect(readServers().map((entry) => entry.url)).toContain('http://one.example:15099'))
+    vi.mocked(serviceBase).mockReturnValue('')
   })
 
   it('keeps the claims of a verified id token as the user to show', async () => {

@@ -11,24 +11,33 @@ import { BridgePage } from '@/features/scaffold/bridge'
 import { OverviewPage } from '@/features/scaffold/overview'
 import { RequestsPage } from '@/features/scaffold/requests'
 import { RoutingPage } from '@/features/scaffold/routing'
+import { EntryGate, ServerGuard } from './entry-gate'
+import { RequireSession, SessionExpiryGuard } from './session-guard'
 import { SurfaceLayout } from './surface-layout'
 
 /* 路由表：**只做装配**，业务实现不住这里。应用挂在构建决定的段下（base，见 04-host-integration.md）；
-   路径**在 base 之下**：首页在 `/`，脚手架在 `/scaffold/*`（见 architecture/07-routing.md · plan/05-scaffold.md）。 */
-const pageRoutes: RouteObject[] = [
-  { index: true, element: <HomePage /> },
+   路径**在 base 之下**：根是入口判定，脚手架在 `/scaffold/*`（见 architecture/07-routing.md · plan/05-scaffold.md）。 */
+
+/* 开发面：脚手架页面与产品面共用外壳，但**不进会话失效守卫与会话守卫** ——
+   这些页面的探针会故意打出 401 看预期失败态，被守卫接走就没法看。 */
+const scaffoldRoutes: RouteObject[] = [
+  /* 版本信息页：真首页到来之前给壳与主题做核对，地址在脚手架命名空间下 */
+  { path: 'scaffold/home', element: <HomePage /> },
   { path: 'scaffold', element: <OverviewPage /> },
   /* 路由参数的样例：对象在路径里（`/scaffold/routing/<worldId>`） */
   { path: 'scaffold/routing', element: <RoutingPage /> },
   { path: 'scaffold/routing/:worldId', element: <RoutingPage /> },
   { path: 'scaffold/bridge', element: <BridgePage /> },
   { path: 'scaffold/requests', element: <RequestsPage /> },
-  /* 基础件清单页：人类验收与浏览器断言共用（plan/06-login-components.md） */
+  /* 基础件清单页：人类验收与浏览器断言共用 */
   { path: 'scaffold/base', element: <BasePage /> },
 ]
 
+/* 产品面：今天还没有产品页，先留出这一格；未登录时产品页与会话守卫的消费者都去登录页。 */
+const productRoutes: RouteObject[] = []
+
 /* 入口页自带外壳与域状态，因此挂在**表面布局之外**：无路径的布局路由只提供 `AuthProvider`，
-   页面的品牌、全局控件与卡片由 `AuthLayout` 画（见 plan/06-login-features-login.md）。 */
+   页面的品牌、全局控件与卡片由 `AuthLayout` 画。 */
 const authRoutes: RouteObject[] = [
   {
     element: (
@@ -38,20 +47,44 @@ const authRoutes: RouteObject[] = [
     ),
     children: [
       { path: 'login', element: <LoginPage /> },
-      /* 注册页先接通道：账号不存在的判定结果跳到这里（表单项按 plan/06 随后落地） */
+      /* 注册页先接通道：账号不存在的判定结果跳到这里（表单项按 06 随后落地） */
       { path: 'register', element: <RegisterPage /> },
       /* 登录成功后的第一站（占位）：展示本次会话的用户信息，点继续再走成功地址 */
       { path: 'welcome', element: <WelcomePage /> },
       /* 服务器选择（客户端内特有）：选好并校验通过后进登录页；Web 只读展示当前地址 */
       { path: 'servers', element: <ServersPage /> },
-      /* 第三方登录的回跳页：授权发起时把地址指到这里（见 plan/06-login-features-login.md 第 7 节） */
+      /* 第三方登录的回跳页：授权发起时把地址指到这里 */
       { path: 'auth/back/:provider', element: <BackPage /> },
     ],
   },
 ]
 
+/* 三层装配：选服务器（桌面首次）→ 产品面（会话失效守卫 401 清状态回登录页 · 会话守卫 · 表面布局与入口判定）
+   → 开发面（脚手架）；根地址走入口判定，未知路径算产品面。 */
 export const routes: RouteObject[] = [
-  ...authRoutes,
-  { path: '/', element: <SurfaceLayout />, children: pageRoutes },
-  { path: '*', element: <Navigate to="/" replace /> },
+  {
+    element: <ServerGuard />,
+    children: [
+      {
+        element: <SessionExpiryGuard />,
+        children: [
+          ...authRoutes,
+          {
+            path: '/',
+            element: <SurfaceLayout />,
+            children: [{ index: true, element: <EntryGate /> }, ...productRoutes],
+          },
+          {
+            /* 会话守卫的消费者：产品页（还没有）与未知路径 */
+            element: <RequireSession />,
+            children: [{ path: '*', element: <Navigate to="/" replace /> }],
+          },
+        ],
+      },
+      {
+        element: <SurfaceLayout />,
+        children: scaffoldRoutes,
+      },
+    ],
+  },
 ]

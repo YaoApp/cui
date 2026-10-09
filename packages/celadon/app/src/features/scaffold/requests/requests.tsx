@@ -250,9 +250,8 @@ export function RequestsPage() {
           <Button
             onClick={() =>
               void logoutCall.run().then((result) => {
-                  // 服务端吊销成功后再清本地那把（顺序不能反）—— 仍在动作里，不写副作用
-                // 服务端已吊销并清 Cookie：两边的旧登录结果都不能再代表"已登录"
-                // 服务端吊销成功才算退出：失败时页面仍应算登录态
+                /* 服务端吊销成功才算退出：失败时页面仍算登录态（顺序不能反）；
+                   本机凭据的清理在 `logoutQuery()` 里，退出的本机记录由产品侧的登录域收拾 */
                 if (result?.ok) loginCall.reset()
               })
             }

@@ -19,6 +19,7 @@ export type I18nKey =
   | 'auth.action.resendIn'
   | 'auth.action.retry'
   | 'auth.action.showPassword'
+  | 'auth.action.signOut'
   | 'auth.back.backToLogin'
   | 'auth.back.docTitle'
   | 'auth.back.failed'
@@ -96,6 +97,7 @@ export type I18nKey =
   | 'auth.welcome.docTitle'
   | 'auth.welcome.email'
   | 'auth.welcome.lead'
+  | 'auth.welcome.loadingInfo'
   | 'auth.welcome.name'
   | 'auth.welcome.title'
   | 'auth.welcome.userId'
@@ -405,6 +407,7 @@ declare module 'i18next' {
         'auth.action.resendIn': string
         'auth.action.retry': string
         'auth.action.showPassword': string
+        'auth.action.signOut': string
         'auth.back.backToLogin': string
         'auth.back.docTitle': string
         'auth.back.failed': string
@@ -482,6 +485,7 @@ declare module 'i18next' {
         'auth.welcome.docTitle': string
         'auth.welcome.email': string
         'auth.welcome.lead': string
+        'auth.welcome.loadingInfo': string
         'auth.welcome.name': string
         'auth.welcome.title': string
         'auth.welcome.userId': string

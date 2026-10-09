@@ -262,7 +262,11 @@ if (!(await trial.innerText()).includes('结构试跑')) problems.push('S6: 刷�
   const dp = await darkCtx.newPage()
   dp.on('pageerror', (e) => problems.push(`S7 pageerror: ${e.message}`))
   // 把主包延迟住：这期间根元素上就该已经是暗的，否则说明主题是等 JS 跑完才写的（会先闪浅色）
-  await dp.route('**/src/main.tsx*', async (route) => { await new Promise((r) => setTimeout(r, 1500)); await route.continue() })
+  // 延迟期间可能已经开始下一次导航，浏览器会先把这个请求取消：那时 route 已被处理过，continue 会报错，忽略它就是
+  await dp.route('**/src/main.tsx*', async (route) => {
+    await new Promise((r) => setTimeout(r, 1500))
+    await route.continue().catch(() => {})
+  })
   await dp.goto(`${BASE_URL}/app/scaffold`, { waitUntil: 'commit' })
   let firstPaint
   try {

@@ -89,6 +89,14 @@ export default defineConfig(({ mode }) => {
     ? Object.fromEntries(enginePaths.map((path) => [`/${path}`, { target: proxyTarget, changeOrigin: true }]))
     : {}
 
+  /* 开发服务经隧道公开时（例如把本机 5199 挂到某个开发子域），要显式列出这个主机名：
+     Vite 默认只认 localhost 与已绑定的地址，不列会被拒成 `Blocked request`。
+     主机名不进代码，由 `CUI_ALLOWED_HOSTS`（逗号分隔，shell 或 `.env`）给；不给就保持默认检查。 */
+  const allowedHosts = (process.env.CUI_ALLOWED_HOSTS || env.CUI_ALLOWED_HOSTS || '')
+    .split(',')
+    .map((host) => host.trim())
+    .filter(Boolean)
+
   return {
   root: resolve(import.meta.dirname, 'app'),
   base,
@@ -104,8 +112,8 @@ export default defineConfig(({ mode }) => {
     // 引擎把 /assets 列为保留前缀 —— 产物静态目录不能用默认名
     assetsDir: '_assets',
   },
-  // 开发期代理（`YAO_SERVER_HOST` 没给就是空，等于不代理）
-  server: { port: devPort, proxy: devProxy },
+  // 开发期代理（`YAO_SERVER_HOST` 没给就是空，等于不代理）与允许的主机名（没给就只认 localhost）
+  server: { port: devPort, proxy: devProxy, ...(allowedHosts.length ? { allowedHosts } : {}) },
   preview: { port: devPort },
 }
 })

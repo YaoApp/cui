@@ -23,7 +23,7 @@
 
 | 现在 | 之后 | 路由 | 它到底在演示什么 |
 | --- | --- | --- | --- |
-| （新，占位） | `features/home` | `/`（`index: true`） | **当前版本信息**（应用版本 · 客户端 · 宿主 · 命名空间 · 语言/主题）—— 真首页的占位 |
+| （新，占位） | `features/home` | `/scaffold/home` | **当前版本信息**（应用版本 · 客户端 · 宿主 · 命名空间 · 语言/主题）—— 真首页的占位；应用根地址自 2026-10-09 起走入口判定（`06-login.md` §5），这一页因此挂在脚手架命名空间下 |
 | `features/hello` | `features/scaffold/overview` | `/scaffold`（索引） | 客户端事实 + 品牌/图标样本 = 设计体系的活样本（今天的 `hello`）|
 | `features/world` | `features/scaffold/routing` | `/scaffold/routing` · `/scaffold/routing/:worldId` | 路由参数 · URL ↔ store 同步 · 列表/详情 |
 | `features/verify` | `features/scaffold/bridge` | `/scaffold/bridge` | 逐条点名调 **18 条桥命令**（唯一允许引桥的页面） |

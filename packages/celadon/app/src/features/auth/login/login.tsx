@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/base/button'
 import { Checkbox } from '@/components/base/checkbox'
 import { Icon } from '@/components/base/icon'
@@ -31,11 +31,12 @@ import { useAuth } from '../use-auth'
 import { useAuthMode, withMode, type AuthMode } from '../use-auth-mode'
 import { useServerName } from '../use-server-name'
 import { useCompleteSignIn } from '../use-complete-sign-in'
+import { readNext, stashNext, withNext } from '../next'
 import './login.less'
 
-/** 注册表单的地址（相对路由基址）：账号带在查询里，注册页据此预填；形态跟着链接走（见 `withMode`）。 */
-function registerPath(username: string, mode: AuthMode): string {
-  return withMode(`/register?${new URLSearchParams({ username }).toString()}`, mode)
+/** 注册表单的地址（相对路由基址）：账号与登录后去向带在查询里，注册页据此预填与收尾；形态跟着链接走（见 `withMode`）。 */
+function registerPath(username: string, mode: AuthMode, next: string | undefined): string {
+  return withMode(withNext(`/register?${new URLSearchParams({ username }).toString()}`, next), mode)
 }
 
 /** 第三方登录的回跳地址（绝对地址，带应用命名空间）：授权完成后回到 `/auth/back/<提供方>`。 */
@@ -62,6 +63,9 @@ export function LoginPage() {
   /* 标签页上的名字：这一页叫什么由页面给，应用名与语言跟随由平台层统一处理 */
   useDocumentTitle(t('auth.login.docTitle'))
   const navigate = useNavigate()
+  const location = useLocation()
+  /* 登录后的明确去向（分享链接、深链带来的）：本页只负责把它带到注册页与第三方往返（见 `plan/06-login.md` §5） */
+  const next = readNext(location.search)
   const config = auth.config
   /* 形态由 `useAuthMode` 一处定：客户端内一律 in-app，Web 带 `from` 才是；这里的独立判断只用来取边界 */
   const mode = useAuthMode()
@@ -132,6 +136,8 @@ export function LoginPage() {
     providerIdRef.current = id
     const result = await providerCall.run()
     if (!result?.ok) return
+    /* 提供方只回到登记过的回跳地址，带不回我们的参数：发起之前把去向暂存起来，回跳页读回 */
+    stashNext(next)
     openExternal(result.value.authorization_url)
   }
 
@@ -180,7 +186,7 @@ export function LoginPage() {
       return
     }
     /* 账号不存在：带上账号去注册表单（注册页随后落地，这里先把通道接上） */
-    navigate(registerPath(account.trim(), mode))
+    navigate(registerPath(account.trim(), mode, next))
   }
 
   async function runVerify() {
@@ -278,7 +284,7 @@ export function LoginPage() {
   const footnote = (
     <>
       <span>{t('auth.footnote.prefix')}</span>{' '}
-      <Link href={appHref(withMode('/register', mode))}>{t('auth.footnote.link')}</Link>
+      <Link href={appHref(withMode(withNext('/register', next), mode))}>{t('auth.footnote.link')}</Link>
     </>
   )
 
