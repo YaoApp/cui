@@ -14,6 +14,7 @@ CUI 2.0 设计资产 · 设计体系代号 **Celadon** · 版本 **v2.0.0**。
 | [data-format.html](data-format.html) | 数据格式 Data format | [data-format.md](data-format.md) |
 | [typography.html](typography.html) | 排版规范 Typography：语义档位 · 颜色角色 · 特殊处理 · 行宽 · 文种字栈 · 等宽 · 混排 | [typography.md](typography.md) |
 | [layout.html](layout.html) | 布局规范 Layout：间距刻度 · 内边距与外边距 · 对齐 · 栏与容器 · 常见缺陷（实测） | [layout.md](layout.md) |
+| **无**（界面结构文档） | 主界面布局 Main shell：三栏外壳 · 导航列 · 第三栏 · 内容形态 · 入口与呈现 | [main-shell.md](main-shell.md) |
 | [typography-demo.html](typography-demo.html) | 排版演示 Typography demo：同页浅暗双栏 · 八个真实场景 · 四语可切 | **无**（演示页不配文档） |
 | [typography-reading.html](typography-reading.html) | 排版样张 Typography reading：博客正文原样 · 中英混排 · 列表 · 六列表格 · 链接 | **无**（样张不配文档） |
 | [icons.html](icons.html) | 图标与品牌 Icons | [icons.md](icons.md) |
