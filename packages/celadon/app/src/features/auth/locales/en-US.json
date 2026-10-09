@@ -65,5 +65,13 @@
   "auth.back.success": "Signed in",
   "auth.back.failed": "Sign-in verification failed",
   "auth.back.missing": "Authorization details are incomplete. Please sign in again.",
-  "auth.back.backToLogin": "Back to sign in"
+  "auth.back.backToLogin": "Back to sign in",
+  "auth.welcome.docTitle": "Signed in",
+  "auth.welcome.title": "Welcome",
+  "auth.welcome.lead": "You are signed in. Here is the user information from this session.",
+  "auth.welcome.userId": "User ID",
+  "auth.welcome.account": "Account",
+  "auth.welcome.name": "Display name",
+  "auth.welcome.email": "Email",
+  "auth.welcome.continue": "Continue"
 }

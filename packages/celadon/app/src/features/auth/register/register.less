@@ -32,6 +32,24 @@
   margin-block-end: var(--spacing-16);
 }
 
+/* 两个密码框是一组，两个输入框之间与账号到密码取同一档（实测 16）。
+   消息位不参与高度：第一个字段的错误绝对定位落在这一档里，
+   出错时确认密码与下面的内容都不动，两个间距也不变。 */
+.register__password-pair {
+  display: flex;
+  flex-direction: column;
+}
+
+.register__password-pair .field:first-child {
+  position: relative;
+}
+
+.register__password-pair .field:first-child .field__message {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline: 0;
+}
+
 /* 验证码字段与它的「重发」是一组：组内一个档，组外两个档。 */
 .register__form .otp-field {
   margin-block-end: var(--spacing-8);

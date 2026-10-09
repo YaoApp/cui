@@ -103,6 +103,56 @@ test('keeps the passwords on the page when they do not match', async ({ page }) 
   await shot(page, 'mismatch')
 })
 
+test('keeps the password pair at the same step as the account row, and the step holds when the first field errors', async ({
+  page,
+}) => {
+  await stubEntry(page)
+  await page.goto('/app/register?username=max%40example.com')
+  await page.getByRole('button', { name: '下一步' }).click()
+  await expect(page.getByPlaceholder('确认密码')).toBeVisible()
+
+  /* 账号到密码、密码到确认密码，两处的输入框间距取同一档 */
+  const gaps = () =>
+    page.evaluate(() => {
+      const account = document.querySelector('#auth-account-locked')!.getBoundingClientRect()
+      const password = document.querySelector('#auth-password')!.getBoundingClientRect()
+      const confirm = document.querySelector('#auth-confirm-password')!.getBoundingClientRect()
+      return {
+        accountToPassword: Math.round(password.top - account.bottom),
+        passwordToConfirm: Math.round(confirm.top - password.bottom),
+      }
+    })
+
+  const before = await gaps()
+  /* 两处都是字段档的 16，不靠相对比较兜住 */
+  expect(before.accountToPassword).toBe(16)
+  expect(before.passwordToConfirm).toBe(16)
+
+  /* 第一个字段出错误时两处间距都不变：错误落在这一档里，不把下一个字段顶下去 */
+  await page.getByRole('button', { name: '注册' }).click()
+  await expect(page.getByText('请输入密码')).toBeVisible()
+  expect(await gaps()).toEqual(before)
+
+  await shot(page, 'password-pair')
+})
+
+test('moves the tab from the password to the confirm password, past the visibility toggle', async ({ page }) => {
+  await stubEntry(page)
+  await page.goto('/app/register?username=max%40example.com')
+  await page.getByRole('button', { name: '下一步' }).click()
+  await expect(page.getByPlaceholder('确认密码')).toBeVisible()
+
+  /* 眼睛按钮不占 Tab 停点：Tab 直接到确认密码框 */
+  await page.getByPlaceholder('新密码').click()
+  await page.keyboard.press('Tab')
+  await expect(page.locator('#auth-confirm-password')).toBeFocused()
+
+  /* 指针点它仍然可用 */
+  await page.locator('#auth-password').fill('secret-1')
+  await page.locator('.password-input__toggle').first().click()
+  await expect(page.locator('#auth-password')).toHaveAttribute('type', 'text')
+})
+
 test('registers and returns to the sign-in page when no session comes back', async ({ page }) => {
   await stubEntry(page)
   await page.goto('/app/register?username=max%40example.com')

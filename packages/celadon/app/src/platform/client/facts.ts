@@ -72,7 +72,6 @@ export const client: Client = {
     files: false,
     notifications: false,
     externalOpen: false,
-    systemBrowser: false,
     serviceAddress: false,
   },
   info: clientInfo(),

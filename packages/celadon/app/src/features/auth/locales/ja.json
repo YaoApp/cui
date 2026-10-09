@@ -65,5 +65,13 @@
   "auth.back.success": "サインインしました",
   "auth.back.failed": "サインインの確認に失敗しました",
   "auth.back.missing": "認可情報が不完全です。もう一度サインインしてください",
-  "auth.back.backToLogin": "サインインに戻る"
+  "auth.back.backToLogin": "サインインに戻る",
+  "auth.welcome.docTitle": "サインインしました",
+  "auth.welcome.title": "ようこそ",
+  "auth.welcome.lead": "サインインが完了しました。このセッションのユーザー情報です。",
+  "auth.welcome.userId": "ユーザー ID",
+  "auth.welcome.account": "アカウント",
+  "auth.welcome.name": "表示名",
+  "auth.welcome.email": "メールアドレス",
+  "auth.welcome.continue": "続ける"
 }

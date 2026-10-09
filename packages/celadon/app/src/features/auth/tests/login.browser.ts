@@ -842,7 +842,7 @@ test('walks a third-party sign-in through the callback page when the instance de
   /* 第三方登录的活体走查要一个不经过外部身份提供方的提供方：实例里声明了 id 为 `test` 的那一个
      （端点指向开发机上的 mock，见工作区 `cui-testing/oauth-mock/`）才跑，别的环境按跳过处理。 */
   const entry = await request.get('/v1/user/entry?locale=zh-CN')
-  const config = (await entry.json()) as { third_party?: { providers?: { id: string }[] } }
+  const config = (await entry.json()) as { success_url?: string; third_party?: { providers?: { id: string }[] } }
   const providers = config.third_party?.providers ?? []
   const index = providers.findIndex((provider) => provider.id === 'test')
   test.skip(index < 0, 'the instance does not declare the test provider')
@@ -851,7 +851,7 @@ test('walks a third-party sign-in through the callback page when the instance de
   const providerRow = page.locator('.provider-list__item').nth(index)
   await expect(providerRow).toBeVisible()
 
-  /* Web 下整页跳转到授权地址：授权、回跳与换会话都发生在同一页上 */
+  /* 在当前窗口整页跳转到授权地址：授权、回跳与换会话都发生在同一页上 */
   const callbackRequest = page.waitForRequest(
     (sent) => sent.url().includes('/user/oauth/test/callback') && sent.method() === 'POST',
   )
@@ -865,9 +865,17 @@ test('walks a third-party sign-in through the callback page when the instance de
   expect(body.state).toBeTruthy()
   expect((await callbackResponse).status()).toBe(200)
 
-  /* 换到会话后按入口配置的成功地址跳走：地址在应用命名空间之外，因此是整页跳转 */
-  await expect.poll(() => page.url(), { timeout: 15_000 }).not.toContain('/auth/back/')
-  await shot(page, 'third-party-callback')
+  /* 换到会话后先进欢迎页：把本次会话的用户信息展示出来 */
+  await expect(page).toHaveURL(/\/app\/welcome$/, { timeout: 15_000 })
+  await expect(page.getByText('用户标识')).toBeVisible()
+  const values = (await page.locator('.welcome__value').allTextContents()).map((text) => text.trim()).filter(Boolean)
+  expect(values.length).toBeGreaterThan(0)
+  await shot(page, 'welcome')
+
+  /* 点继续走入口配置的成功地址：实例上是应用命名空间之外的地址，整页跳转 */
+  await page.getByRole('button', { name: '继续' }).click()
+  const success = config.success_url ?? '/'
+  await page.waitForURL((url) => url.pathname === success, { timeout: 15_000 })
 })
 
 test('reserves two third-party slots while the entry configuration loads', async ({ page }) => {

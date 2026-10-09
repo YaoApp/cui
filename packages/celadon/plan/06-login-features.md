@@ -69,7 +69,7 @@
 | --- | --- | --- | --- | --- |
 | 服务地址 | 构建期与服务端决定，页面不可写 | 用户可填、跨重启保留 | `capabilities().serviceAddress` | `/servers` 在 Web 只读展示当前地址并说明由部署决定，不画写入控件 |
 | 凭据载体 | 服务端下发的 HttpOnly Cookie，脚本不碰 | OS 凭据库，经 `bridge` | `credentialCarrier()` 与 `credential.managedByApp()` | 成功后统一调 `signIn(响应体)`，Web 上是空操作，页面不判载体 |
-| 第三方登录 | 同窗口跳转授权地址 | 用系统浏览器打开，或改走设备码 | `capabilities().externalOpen` | `ProviderList` 走能力开关；`ClientHint` 给出这两条路 |
+| 第三方登录 | 当前窗口整页跳转 | 同 Web：当前窗口整页跳转 | `platform/client/open-external.ts` | `ProviderList` 只发动作，跳转走平台面孔，不另开窗口 |
 | 品牌区 | 显示 | 收起 | 原型的 `is-client` 规则 | `AuthLayout` 的 `mode` 变体 |
 | 条款与页脚 | 显示 | 收起 | 同上 | 同上 |
 | 全局控件位置 | 页面右上角 | 卡片下方居中 | 同上 | 同上 |
@@ -83,7 +83,7 @@
 
 ### 5.1 路由表
 
-三个页面挂在同一个**无路径布局路由**下（`routes.tsx` 的 `pageRoutes` 里，路径在构建决定的 base 之下），
+这些页面挂在同一个**无路径布局路由**下（`routes.tsx` 的 `authRoutes` 里，路径在构建决定的 base 之下），
 不用应用外壳 `SurfaceLayout`，也不带应用导航。
 
 | 路径 | 页面 | 说明 |
@@ -91,6 +91,7 @@
 | `/login` | `features/auth/login/` | 单页多步：第三方入口、账号、密码、一次性口令、邀请码与条款勾选；`entryVerify` 之后按判定结果切换 |
 | `/register` | `features/auth/register/` | 账号、密码、确认密码、邀请码与条款勾选；与登录页共用字段组件，跳转时带用户名 |
 | `/auth/back/:provider` | `features/auth/back/` | 第三方登录的回跳页：读地址里的 `code` 与 `state` 调 `oauthCallback`，再按状态回登录页或走成功收尾 |
+| `/welcome` | `features/auth/welcome/` | 登录成功后的第一站（占位）：展示本次会话的用户信息，点「继续」走入口配置的成功地址；按用户信息分流随后接在这里 |
 | `/servers` | `features/auth/servers/` | 云服务器列表（异步）、手填地址、连接；客户端内模式下是登录页返回的目标 |
 | 兜底 | 既有的 `*` 重定向到 `/` | 不变 |
 
@@ -102,13 +103,13 @@
 | --- | --- | --- | --- |
 | 输入账号 | 提交 | `entryVerify` | `status = login` 进密码步；`status = register` 提示去注册页并带上用户名 |
 | 图形验证码 | 账号步之前 | 由 `captcha-field` 自己取图 | 输入与 `captcha_id` 一起随 `entryVerify` 回传 |
-| 密码 | 提交 | `entryLogin` | `EntryAuthResponse`，成功时采纳会话并跳 `success_url` |
+| 密码 | 提交 | `entryLogin` | `EntryAuthResponse`，成功时采纳会话并跳 `/welcome`（见 `06-login-features-login.md` §7.1），成功地址由欢迎页接手 |
 | 一次性口令 | 服务端要求时 | `entryOtp` 重发；`register` 或 `login` 带 `verification_code` | 注册需要验证码由 `verification_code_required` 决定 |
 | 邀请码 | 判定或状态要求时 | `entryInvite` | 成功后直接得到 `EntryAuthResponse` |
 | 第三方 | 点提供方 | `oauthAuthorize` | 跳授权地址；回调回到应用后走 `oauthCallback` |
 | 设备码 | 客户端内且没有浏览器时 | `deviceFlowStart` · `deviceAuthorize` · `deviceFlowToken` | 轮询取令牌（数据层已备，登录页尚未接入，见 `06-login-features-login.md` §7） |
 | 联合状态 | `LoginStatus` 声明时 | 按草图补页面 | `ok` · `mfa_required` · `team_selection_required` · `invite_required` · `invite_verification_required` |
-| 失败 | 任意一步 | 页内提示或跳 `failure_url` | 文案按错误码取，取自语言包 |
+| 失败 | 任意一步 | 页内提示（字段级错误挂字段，其余挂页面级提示） | 文案按错误码取，取自语言包；入口配置的 `failure_url` 尚未接入 |
 | 自动登录 | 配置 `auto_login` 为真时注册响应带 `id_token` | 注册成功即可采纳会话 | 不带 `id_token` 时是「注册成功但未登录」，回到第一步给一条提示 |
 
 三个页面共用一个域，先把登录页做出来，共用件（外壳、域状态与四个页面内部件）随之落地：
@@ -231,5 +232,7 @@ features/auth/
 | 注册页有「邀请码」输入框（草图） | 表单里没有邀请码输入：`EntryRegisterRequest` 没有这个字段；服务端要求时按 `invite_required` 进页内邀请码步，由 `entryInvite` 兑换 | `data/user/types.ts` |
 | 注册成功一律采纳会话 | 响应带 `id_token` 才采纳；不带时回登录页并给「注册成功，请登录」 | §5.2 自动登录一行 |
 | 账号输入框用邮件类型 | 用 `type="text"` 与 `autocomplete="username"`：账号可以是邮箱或手机号，`type="email"` 会让手机号过不了浏览器约束校验 | `features/auth/account.ts` 的账号形态判定 |
+| 密码与确认密码之间按字段档留白 | 两个密码框作为一组（`.register__password-pair`）：两个输入框之间与账号到密码取同一档（实测都是 16）。第一个字段的消息位绝对定位落在这一档里，出错时间距不变、确认密码与下面内容不动 | `register.less` 与 `register.browser.ts` 的用例实测 |
+| 客户端内第三方登录交系统浏览器打开，或改走设备码 | 与 Web 同一套：在当前窗口整页跳转（`platform/client/open-external.ts`），不另开窗口；`systemBrowser` 能力与宿主开浏览器命令不再用于这条路径 | 跳转发生在当前页 |
 
 限制：一次性口令的活体走查仍取不到（口令发给收件人，接口读不到），自动化只覆盖到请求体带上 `otp_id` 与 `verification_code`；服务器选择页未做；`mode` 的能力开关与联合状态页仍按 §10。

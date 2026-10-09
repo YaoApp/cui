@@ -37,9 +37,15 @@ describe('the password input', () => {
     expect(onValueChange.mock.calls.map(([value]) => value).join('')).toBe('abc')
   })
 
-  it('shows the error and keeps the toggle reachable', () => {
+  it('shows the error and keeps the toggle clickable without taking a tab stop', async () => {
+    const user = userEvent.setup()
     render(<PasswordInput {...base} error="必填" />)
     expect(screen.getByText('必填')).toBeTruthy()
-    expect(screen.getByRole('button', { name: t('auth.action.showPassword') })).toBeTruthy()
+
+    const toggle = screen.getByRole('button', { name: t('auth.action.showPassword') })
+    /* 尾部辅助按钮不进 Tab 序列，但仍可点 */
+    expect(toggle.tabIndex).toBe(-1)
+    await user.click(toggle)
+    expect((screen.getByLabelText('Password') as HTMLInputElement).type).toBe('text')
   })
 })

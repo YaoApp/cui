@@ -1,7 +1,7 @@
 /* ID Token 验签的用例：密钥对在用例里现生成，签出来的令牌与真服务同形，
    因此判定的是真的签名校验，而不是打桩的布尔值。 */
-import { describe, expect, it } from 'vitest'
-import { verifyIdToken } from './id-token'
+import { describe, expect, it, vi } from 'vitest'
+import { idTokenClaimsForDisplay, verifyIdToken } from './id-token'
 
 const encoder = new TextEncoder()
 
@@ -64,5 +64,57 @@ describe('id token verification', () => {
   it('reports a malformed token for missing parts and for an empty value', async () => {
     expect(await verifyIdToken(undefined, [])).toEqual({ ok: false, reason: 'malformed' })
     expect(await verifyIdToken('not-a-token', [])).toEqual({ ok: false, reason: 'malformed' })
+  })
+
+  it('reports a malformed token when a part cannot be decoded', async () => {
+    expect(await verifyIdToken('%%%%.%%%%.signature', [])).toEqual({ ok: false, reason: 'malformed' })
+  })
+
+  it('accepts a token that carries no expiry claim', async () => {
+    const { token, keys } = await makeToken({ alg: 'RS256', kid: 'test-key' }, { sub: 'u1' })
+    const result = await verifyIdToken(token, keys)
+    expect(result.ok).toBe(true)
+  })
+
+  it('reports unsupported when the platform has no WebCrypto', async () => {
+    const { token, keys } = await makeToken({ alg: 'RS256', kid: 'test-key' }, { exp: future() })
+    vi.stubGlobal('crypto', { subtle: undefined })
+    expect(await verifyIdToken(token, keys)).toEqual({ ok: false, reason: 'unsupported' })
+    vi.unstubAllGlobals()
+  })
+
+  it('reports unsupported when the key cannot be imported', async () => {
+    const { token } = await makeToken({ alg: 'RS256', kid: 'test-key' }, { exp: future() })
+    const broken = [{ kty: 'RSA', kid: 'test-key' } as JsonWebKey]
+    expect(await verifyIdToken(token, broken)).toEqual({ ok: false, reason: 'unsupported' })
+  })
+
+  it('reports a missing key when the caller has no keys at all', async () => {
+    const { token } = await makeToken({ alg: 'RS256', kid: 'test-key' }, { exp: future() })
+    expect(await verifyIdToken(token, undefined)).toEqual({ ok: false, reason: 'no_key' })
+  })
+})
+
+describe('reading the claims for display', () => {
+  it('reads the payload of a shaped token without verifying it', () => {
+    const headerPart = base64Url(encoder.encode(JSON.stringify({ alg: 'RS256' })))
+    const payloadPart = base64Url(encoder.encode(JSON.stringify({ name: 'Wren', email: 'max@example.com' })))
+    expect(idTokenClaimsForDisplay(`${headerPart}.${payloadPart}.signature`)).toMatchObject({
+      name: 'Wren',
+      email: 'max@example.com',
+    })
+  })
+
+  it('gives nothing for a missing or malformed token', () => {
+    expect(idTokenClaimsForDisplay(undefined)).toBeUndefined()
+    expect(idTokenClaimsForDisplay('not-a-token')).toBeUndefined()
+    expect(idTokenClaimsForDisplay('header.%%%%.signature')).toBeUndefined()
+  })
+
+  it('turns down payloads that are not a group of claims', () => {
+    const part = (value: unknown) => base64Url(encoder.encode(JSON.stringify(value)))
+    expect(idTokenClaimsForDisplay(`header.${part(null)}.signature`)).toBeUndefined()
+    expect(idTokenClaimsForDisplay(`header.${part([1, 2])}.signature`)).toBeUndefined()
+    expect(idTokenClaimsForDisplay(`header.${part('text')}.signature`)).toBeUndefined()
   })
 })

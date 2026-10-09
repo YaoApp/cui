@@ -248,7 +248,7 @@ export function RegisterPage() {
       return
     }
     if (value.id_token) {
-      await complete(value)
+      await complete(value, account.trim())
       return
     }
     /* 注册成功但没有会话：回登录页，把「请登录」这条提示留在域里（页面切换后仍读得到） */
@@ -278,7 +278,7 @@ export function RegisterPage() {
     if (inviteCode.trim() === '') return
     const result = await inviteCall.run()
     if (!result?.ok) return
-    await complete(result.value)
+    await complete(result.value, account.trim())
   }
 
   const footnote = (
@@ -358,30 +358,33 @@ export function RegisterPage() {
               strong={inApp}
             />
 
-            <PasswordInput
-              id="auth-password"
-              placeholder={config.form?.password?.placeholder || t('auth.field.password')}
-              autoComplete="new-password"
-              value={password}
-              onValueChange={setPassword}
-              error={passwordError}
-              disabled={busy}
-              strong={inApp}
-              size="large"
-              autoFocus
-            />
+            {/* 两个密码框是一组：组内只留消息位那一行，不再叠一个字段档（见 register.less） */}
+            <div className="register__password-pair">
+              <PasswordInput
+                id="auth-password"
+                placeholder={config.form?.password?.placeholder || t('auth.field.password')}
+                autoComplete="new-password"
+                value={password}
+                onValueChange={setPassword}
+                error={passwordError}
+                disabled={busy}
+                strong={inApp}
+                size="large"
+                autoFocus
+              />
 
-            <PasswordInput
-              id="auth-confirm-password"
-              placeholder={config.form?.confirm_password?.placeholder || t('auth.field.confirmPassword')}
-              autoComplete="new-password"
-              value={confirm}
-              onValueChange={setConfirm}
-              error={confirmError}
-              disabled={busy}
-              strong={inApp}
-              size="large"
-            />
+              <PasswordInput
+                id="auth-confirm-password"
+                placeholder={config.form?.confirm_password?.placeholder || t('auth.field.confirmPassword')}
+                autoComplete="new-password"
+                value={confirm}
+                onValueChange={setConfirm}
+                error={confirmError}
+                disabled={busy}
+                strong={inApp}
+                size="large"
+              />
+            </div>
 
             {needsCode ? (
               <>

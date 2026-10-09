@@ -15,8 +15,6 @@ describe('capabilities', () => {
       files: false,
       notifications: false,
       externalOpen: true,
-      /* 浏览器没有系统浏览器可交，入口页整页跳转 */
-      systemBrowser: false,
       serviceAddress: false,
     })
   })
@@ -29,7 +27,6 @@ describe('capabilities', () => {
       files: true,
       notifications: true,
       externalOpen: true,
-      systemBrowser: true,
       serviceAddress: true,
     })
     vi.doUnmock('./manifest')

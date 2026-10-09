@@ -73,6 +73,14 @@ export type I18nKey =
   | 'auth.terms.prefix'
   | 'auth.terms.privacy'
   | 'auth.terms.service'
+  | 'auth.welcome.account'
+  | 'auth.welcome.continue'
+  | 'auth.welcome.docTitle'
+  | 'auth.welcome.email'
+  | 'auth.welcome.lead'
+  | 'auth.welcome.name'
+  | 'auth.welcome.title'
+  | 'auth.welcome.userId'
   | 'base.action.block'
   | 'base.captcha.id'
   | 'base.captcha.image'
@@ -433,6 +441,14 @@ declare module 'i18next' {
         'auth.terms.prefix': string
         'auth.terms.privacy': string
         'auth.terms.service': string
+        'auth.welcome.account': string
+        'auth.welcome.continue': string
+        'auth.welcome.docTitle': string
+        'auth.welcome.email': string
+        'auth.welcome.lead': string
+        'auth.welcome.name': string
+        'auth.welcome.title': string
+        'auth.welcome.userId': string
         'base.action.block': string
         'base.captcha.id': string
         'base.captcha.image': string

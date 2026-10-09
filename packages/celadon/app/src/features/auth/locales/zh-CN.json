@@ -65,5 +65,13 @@
   "auth.back.success": "登录成功",
   "auth.back.failed": "登录验证失败",
   "auth.back.missing": "授权信息不完整，请重新登录",
-  "auth.back.backToLogin": "返回登录"
+  "auth.back.backToLogin": "返回登录",
+  "auth.welcome.docTitle": "登录成功",
+  "auth.welcome.title": "欢迎回来",
+  "auth.welcome.lead": "登录已完成，下面是这次会话的用户信息。",
+  "auth.welcome.userId": "用户标识",
+  "auth.welcome.account": "账号",
+  "auth.welcome.name": "显示名",
+  "auth.welcome.email": "邮箱",
+  "auth.welcome.continue": "继续"
 }

@@ -65,5 +65,13 @@
   "auth.back.success": "登入成功",
   "auth.back.failed": "登入驗證失敗",
   "auth.back.missing": "授權資訊不完整，請重新登入",
-  "auth.back.backToLogin": "返回登入"
+  "auth.back.backToLogin": "返回登入",
+  "auth.welcome.docTitle": "登入成功",
+  "auth.welcome.title": "歡迎回來",
+  "auth.welcome.lead": "登入已完成，以下是這次工作階段的用戶資訊。",
+  "auth.welcome.userId": "用戶識別",
+  "auth.welcome.account": "帳號",
+  "auth.welcome.name": "顯示名稱",
+  "auth.welcome.email": "電子郵件",
+  "auth.welcome.continue": "繼續"
 }
