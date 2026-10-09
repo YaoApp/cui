@@ -567,4 +567,33 @@ describe('the register page', () => {
     expect(await screen.findByText(t('auth.notice.team'))).toBeTruthy()
     expect(screen.getByPlaceholderText('新密码')).toBeTruthy()
   })
+
+  it('says the entry configuration failed and reads it again on retry', async () => {
+    let failing = true
+    vi.mocked(transportFetch).mockImplementation(async (url) => {
+      const target = String(url)
+      if (target.includes('/.well-known/yao')) return json(SERVICE)
+      if (target.includes('/oauth/jwks')) return json({ keys: [] })
+      if (failing) return { ok: false as const, code: 'transport.network', params: {}, message: 'boom' }
+      return json(entryConfig())
+    })
+    const user = userEvent.setup()
+    renderRegister()
+
+    /* 取失败要给失败态与重试，不能一直停在加载态 */
+    expect(await screen.findByText(t('auth.configFailed'))).toBeTruthy()
+
+    failing = false
+    await user.click(screen.getByRole('button', { name: t('auth.retry') }))
+    expect(await screen.findByLabelText(t('auth.field.account'))).toBeTruthy()
+    expect(screen.queryByText(t('auth.configFailed'))).toBeNull()
+  })
+
+  it('keeps the client marker on the way back to sign-in', async () => {
+    stubTransport()
+    renderRegister('/register?from=connect')
+
+    const link = await screen.findByRole('link', { name: t('auth.register.backToLogin') })
+    expect(link.getAttribute('href')).toContain('from=connect')
+  })
 })

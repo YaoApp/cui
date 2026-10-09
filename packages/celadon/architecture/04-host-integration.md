@@ -232,10 +232,13 @@ ENGINE = "engine.example.com"           # Functions 里以 env.ENGINE 读取
 
 ## 桌面端挂载（与 Web 的差别只在谁提供制品）
 
-- **壳不打包自己的前端**：桌面壳的界面**就是 CUI 的构建产物**（`frontendDist` 指向那份 `dist/`）。
-- **打包前两步**：① 把清单改写成这一构建的事实（`client = "desktop"` · `os` · `artifact` · `build`）；
-  ② 把 `dist/` 交给壳（复制或链接）。**构建脚本做这两步**，不手改。
-- **开发期**：壳的 `devUrl` 直接指应用自己的 dev server（`/<namespace>/`），**连构建都不需要**。
+- **壳不打包自己的前端**：桌面壳的界面**就是 CUI 的构建产物**（`frontendDist` 指向那份 `dist-client/`）。
+- **打包前两步**：① 把这一构建的清单事实（`client = "desktop"` · `os` · `artifact` · `build`）**注入**产物，
+  不再改写源文件（`vite.config.ts` 的 `manifestOverrides` 读 `CUI_CLIENT` 等环境）；
+  ② 把 `dist-client/` 交给壳（复制或链接）。**构建脚本做这两步**，不手改。
+- **开发期同样读产物**：壳没有 `devUrl`，开发与打包都读 `frontendDist`（`dist-client`）——开发时由 Tauri
+  自己的本地资产服务经手，打包后直接内嵌，**壳不起前端服务**。要 HMR 时才手动 `pnpm dev:client`
+  （客户端 dev server，默认 **5210**，与 Web 的 **5199** 分开）并临时给壳配 `devUrl`。
 - **桌面端的两份不同**：**构建产出两份** —— Web 那份挂 `/<namespace>/`（宿主同源代理），
   客户端那份**应用就是根**（`CUI_BASE=''` → 资源在 `/assets/*`）。两份分开，各按自己的挂载点构建
   （`pnpm build` / `pnpm build:client`）。

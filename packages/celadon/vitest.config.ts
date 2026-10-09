@@ -5,6 +5,9 @@ import { resolve } from 'node:path'
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { '@': resolve(import.meta.dirname, 'app/src') } },
+  /* 单元测试读**基础清单**（源文件里的值）：不给覆盖，与 `vite.config.ts` 的注入同一处约定，
+     见 `platform/client/manifest.ts`。 */
+  define: { __CELADON_MANIFEST__: '{}' },
   test: {
     environment: 'jsdom',
     // 只认单元用例。*.spec.ts 是浏览器用例，交给 Playwright ——

@@ -6,6 +6,8 @@ import { routerBasename } from '@/platform/router/basename'
 import { AuthLayout } from '../components/auth-layout'
 import { goToSuccess } from '../success-address'
 import { useAuth } from '../use-auth'
+import { useAuthMode, withMode } from '../use-auth-mode'
+import { useServerName } from '../use-server-name'
 import './welcome.less'
 
 /**
@@ -17,10 +19,12 @@ import './welcome.less'
 export function WelcomePage() {
   const { t } = useTranslation()
   const auth = useAuth()
+  const mode = useAuthMode()
+  const serverName = useServerName()
   const navigate = useNavigate()
   useDocumentTitle(t('auth.welcome.docTitle'))
 
-  if (!auth.user) return <Navigate to="/login" replace />
+  if (!auth.user) return <Navigate to={withMode('/login', mode)} replace />
 
   const rows = [
     { label: t('auth.welcome.userId'), value: auth.user.userId },
@@ -42,7 +46,12 @@ export function WelcomePage() {
   const waiting = !auth.config && !auth.configFailed
 
   return (
-    <AuthLayout titleLines={[t('auth.welcome.title')]}>
+    <AuthLayout
+      mode={mode}
+      serverName={serverName}
+      titleLines={[t('auth.welcome.title')]}
+      onBack={() => navigate('/servers')}
+    >
       <p className="welcome__lead">{t('auth.welcome.lead')}</p>
 
       <dl className="welcome__info">

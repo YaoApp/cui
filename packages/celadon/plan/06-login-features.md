@@ -36,9 +36,9 @@
 
 ### 2.1 客户端内模式（原型已有的变体）
 
-原型用 `?from=connect` 点亮 `body.is-client`，从客户端里跳进来的那一次才生效，独立页不生效。
+原型用 `?from=connect` 点亮 `body.is-client`。当前规则：**客户端内一律是这个形态**（`capabilities().serviceAddress` 为真就是客户端），Web 只有地址带 `from` 时才是，后者等同于原型的预览入口。
 该模式下：不显示品牌区、条款勾选与页脚；两个全局控件移到卡片下方居中；语言弹层向上展开；
-卡片上方出现一条客户端栏，含返回服务器选择的入口与当前服务器名。服务器选择页在同一次会话里就是它的返回目标。
+卡片上方出现一条客户端栏，返回入口**指向选服务器页**（写死路由，不用浏览历史），当前服务器名取本机记录（见 §5.4）。
 
 ## 3. 外壳与域状态：两层都要（结论）
 
@@ -75,9 +75,8 @@
 | 全局控件位置 | 页面右上角 | 卡片下方居中 | 同上 | 同上 |
 | 剪贴板与通知 | 特性探测 | 宿主提供 | `capabilities().clipboard` · `notifications` | 本轮不涉及；口令粘贴用原生粘贴事件 |
 
-`mode` 的来源：外壳显式告知（等价于原型的 `?from=connect`），页面不嗅探宿主。
-**未决**：`capabilities()` 目前没有「运行在宿主内」这一项开关，是否补一个（例如 `hosted`）待定；
-在那之前 `mode` 由外壳传，`AuthLayout` 只认这一个输入。
+`mode` 的来源：由 `useAuthMode()` 在一处判定，再显式传给 `AuthLayout`，外壳只认这一个输入，页面不嗅探宿主。**客户端内一律 `in-app`**：`capabilities().serviceAddress` 为真（有宿主、地址由用户选）就是客户端，地址上没有 `from` 也一样，否则桌面用户会看到 Web 的品牌区与页脚。Web 只有地址带 `from` 时才是 `in-app`，这是原型 `?from=connect` 给出的预览入口。登录与注册之间的真链接与跳转用 `withMode()` 把 `from` 带上，形态跟着链接走；选服务器页固定 `standalone`（它就是客户端栏的返回目标）。
+**未决**：是否补一个专门的「运行在宿主内」能力开关（当前借 `serviceAddress` 表达同一件事）待定。
 
 ## 5. 路由与页面架构
 
@@ -92,7 +91,7 @@
 | `/register` | `features/auth/register/` | 账号、密码、确认密码、邀请码与条款勾选；与登录页共用字段组件，跳转时带用户名 |
 | `/auth/back/:provider` | `features/auth/back/` | 第三方登录的回跳页：读地址里的 `code` 与 `state` 调 `oauthCallback`，再按状态回登录页或走成功收尾 |
 | `/welcome` | `features/auth/welcome/` | 登录成功后的第一站（占位）：展示本次会话的用户信息，点「继续」走入口配置的成功地址；按用户信息分流随后接在这里 |
-| `/servers` | `features/auth/servers/` | 云服务器列表（异步）、手填地址、连接；客户端内模式下是登录页返回的目标 |
+| `/servers` | `features/auth/servers/` | 云服务器列表（异步）、手填地址、连接；连接由宿主导校验并落盘（见 §5.4） |
 | 兜底 | 既有的 `*` 重定向到 `/` | 不变 |
 
 ### 5.2 登录页的步骤与取值
@@ -116,7 +115,7 @@
 具体到字段、状态、动作与用例的实现见 [`06-login-features-login.md`](06-login-features-login.md)。
 登录页与共用件**已完成**（2026-10-07）：外壳 `AuthLayout`、`AuthProvider`、`PasswordInput`、`ProviderList`、
 `StatusNotice`、`TermsNote` 与登录页都在 `features/auth/` 下，路由是 `routes/routes.tsx` 里的无路径布局路由。
-注册页**已完成**（2026-10-08，见 §11）；服务器选择页仍待做。
+注册页**已完成**（2026-10-08，见 §11）；服务器选择页已落地（2026-10-09，见 §5.4 与 §11）。
 
 ### 5.3 状态归属
 
@@ -128,6 +127,27 @@
 | 当前服务信息与服务地址 | `AuthProvider`（读 `platform/service`） | 客户端栏显示名字；换地址后作废页面上的旧结果 |
 | 表单字段与勾选 | 页面 | 各页自己的账号、密码、验证码、条款勾选 |
 | 会话采纳 | `AuthProvider` 在成功后调 `signIn` | Web 上是空操作，客户端写 OS 凭据库 |
+
+### 5.4 服务器选择页（结论）
+
+客户端内特有。Web 上地址由部署决定，页面只读展示当前地址，不画写入控件。
+
+| 项 | 结论 | 依据 |
+| --- | --- | --- |
+| 路由 | `/servers`，与登录、注册同在入口页的无路径布局路由下 | §5.1 |
+| 官方清单 | `POST {portal}/v1/__yao/sui/v1/run/servers`，体 `{ method: 'ServerList', args: [locale] }`；门户基址按语言取 `https://yaoagents.cn`（简繁中文）或 `https://yaoagents.com`（其余） | 按 1.0 的门户接口 |
+| 清单的取数位置 | `platform/portal/`，用出口 `transportFetch` 直发绝对地址：桌面由宿主代发，浏览器被出口的同源判定拒绝 | 引擎接口走 `data/`，门户不是引擎 |
+| 自建 | 手填完整地址（含协议） | 原型 |
+| 连接与校验 | `writeServiceAddress(url)` → 宿主 `celadon_service_set` 先取 `<url>/.well-known/yao` 校验，通过才落盘；失败回可读原因 | `plan/01-bridge-commands.md` §2 |
+| 换地址后的旧数据 | 连接成功后作废 `user` 域的全部取数（`invalidate(userKeys.all)`），登录页按新地址重取入口配置与验签公钥 | 查询 key 不含基址，换服务必须显式失效 |
+| 本机记录 | 应用自己管：连接成功与登录成功各记一次 `{ url, label?, lastConnected }` 到 `localStorage` 的 `celadon.servers`（最近 8 条，不给名字时保留原有的）；云条目记清单里的显示名，自建那格不记名字。选服务器页用它预选，清单里没有就回填到自建那一格；客户端栏的服务器名也取它（没有名字就是「自建」，一条记录都没有就退回地址） | `features/auth/server-history.ts` · `use-server-name.ts` |
+| 状态 | 清单加载中 · 失败（带重试）· 空 · 就绪（选择器展开 / 自建地址 / 连接中 / 连接失败） | 原型与设计红线 |
+| 选择器清空 | 选择器允许把选中项清掉（再点已选项），本页把空值当成"没有变更"、保持原选中：这一页永远得有一项 | 连接要靠它决定去哪个服务 |
+| 连上之后 | 进 `/login?from=connect` | 原型 |
+
+与原型不同的两处：清单为空时仍给出自建地址与连接（原型此时是死路）；选择器直接用基础件 `select` 的富选项，不自画列表。
+
+桌面首次进入（宿主还没有地址）时不报错，先去 `/servers`：入口在装填客户端事实之后读一次宿主地址，`needsServerChoice()` 为真就把地址换成选服务器页（`main.tsx`）。
 
 ## 6. 目录结构
 
@@ -206,11 +226,12 @@ features/auth/
 ## 10. 未决
 
 1. **「在宿主内」的能力开关**：`capabilities()` 目前没有这一项，`mode` 暂由外壳传；是否补一个待定。
-2. **人机验证 `turnstile`**：`form.captcha.type` 可为 `image` 或 `turnstile`。本轮先做 `image`（现成 `captcha-field`）；
-   `turnstile` 需要第三方脚本与站点密钥，是否做、做到什么程度待定。
+2. **人机验证 `turnstile`**：`form.captcha.type` 可为 `image` 或 `turnstile`，两种形态都已实现（`components/base/turnstile-field` 与 `captcha-field`，弹窗按配置选一个）。
 3. **联合状态页面**：`mfa_required` 与 `team_selection_required` 按入口配置声明与否决定做不做。
 4. **邀请码的位置**：独立一步或独立页面，按草图的邀请码页文案（配置里的 `invite`）定。
-5. **云服务器列表的来源**：1.0 里由桌面壳异步取回；本仓要不要拉、拉哪个接口待定，本轮先按「传入列表 + 手填地址」实现。
+5. **云服务器列表的来源**：已定，按 1.0 的门户接口取（见 §5.4）；Web 上跨域会被出口拒绝，因此这条路只在客户端内走。
+6. **桌面登录后的落地**：入口配置的 `success_url` 是**引擎相对路径**（实例上是 `/dashboard/inbox`）；桌面两端 basename 与引擎不同源，`goToSuccess` 现在把这样的路径当站内路由，会落到应用首页。是改走 `serviceUrl` 打开引擎页，还是由部署把 `success_url` 配成应用自己的路由，待定。
+7. **客户端内第三方登录的回程**：第三方入口在当前窗口整页跳转，提供方报错时（例如客户端 id 未登记的回调地址）整页停在对方的报错页，客户端的 webview 没有后退栏，用户回不到应用。需要一条回程（深链、本地回调通道或设备码，见 `06-login-features-login.md` §7）。
 
 ## 11. 实现结果（2026-10-08）
 
@@ -235,4 +256,30 @@ features/auth/
 | 密码与确认密码之间按字段档留白 | 两个密码框作为一组（`.register__password-pair`）：两个输入框之间与账号到密码取同一档（实测都是 16）。第一个字段的消息位绝对定位落在这一档里，出错时间距不变、确认密码与下面内容不动 | `register.less` 与 `register.browser.ts` 的用例实测 |
 | 客户端内第三方登录交系统浏览器打开，或改走设备码 | 与 Web 同一套：在当前窗口整页跳转（`platform/client/open-external.ts`），不另开窗口；`systemBrowser` 能力与宿主开浏览器命令不再用于这条路径 | 跳转发生在当前页 |
 
-限制：一次性口令的活体走查仍取不到（口令发给收件人，接口读不到），自动化只覆盖到请求体带上 `otp_id` 与 `verification_code`；服务器选择页未做；`mode` 的能力开关与联合状态页仍按 §10。
+限制：一次性口令的活体走查仍取不到（口令发给收件人，接口读不到），自动化只覆盖到请求体带上 `otp_id` 与 `verification_code`；`mode` 的能力开关与联合状态页仍按 §10。
+
+## 12. 实现结果（2026-10-09）
+
+服务器选择页已落地，客户端内模式与验证码弹窗按下面的规则收口；登录与注册两条流程在桌面壳里逐屏实跑过一遍。
+
+| 位置 | 内容 |
+| --- | --- |
+| `features/auth/servers/` | 服务器选择页：官方清单（`platform/portal/`）、自建地址、连接（宿主 `celadon_service_set` 校验并落盘）、三态与错误提示 |
+| `features/auth/server-history.ts` | 本机记录（`localStorage` 的 `celadon.servers`，最近 8 条）：连接与登录各记一次，不给名字时保留原有名字；选服务器页用它预选并回填 |
+| `features/auth/use-auth-mode.ts` | 客户端内模式的**唯一判定**：`capabilities().serviceAddress` 为真即 `in-app`；`withMode()` 让页面之间的链接带上标记 |
+| `features/auth/use-server-name.ts` | 客户端栏的服务器名：本机记录里的显示名，没有名字取「自建」，一条记录都没有退回地址；Web 取服务信息里的名字 |
+| `app/src/platform/portal/` | 官方清单的取数（1.0 的门户接口，只读） |
+| `features/auth/components/captcha-dialog/` | 打开时的焦点按内容定：图形验证码进输入框，人机验证不动焦点（规则见 `design/layout.md`） |
+| `features/auth/tests/servers.browser.ts` | Web 上的服务器选择页：只读地址、无写入控件 |
+
+与本文档原写法的差异：
+
+| 原写法 | 实际实现 | 依据 |
+| --- | --- | --- |
+| `AuthLayout` 自己从地址里读 `?from=` 判形态 | 形态由外壳显式传给 `AuthLayout`（`mode`），判定集中在 `useAuthMode()` | 客户端内页面的链接与跳转一旦不带标记，判定就会退回 Web 形态 |
+| 客户端栏的名字取 `/.well-known/yao` 的 `name` | 取本机记录里与该地址同址那条的显示名（自建那格显示「自建」，没有记录退回地址） | 原型 `login.html` 的 `renderClientBar()` 用的就是所选条目名 |
+| 客户端栏的返回用浏览历史 | 写死路由 `navigate('/servers')` | 桌面壳直接停在某一页时，历史里没有上一条 |
+
+实跑（桌面壳读 `dist-client`，宿主地址 `https://service.example.com`，实例入口声明 `turnstile`）：清空宿主地址 → 首屏进 `/servers` → 选自建并连接 → `/login` 客户端形态（客户端栏「自建」）→ 注册（验证码弹窗 → 密码步 → 创建账号）→ `/welcome`（会话进系统凭据库，键为 `<服务 origin>#session`）→ 删掉会话后同一路径登录成功 → 「继续」按 §10 第 6 条落到应用首页。客户端栏在两种形态、两种语言下都与原型一致。
+
+限制：客户端内的第三方入口只走到提供方报错页（§10 第 7 条）；`success_url` 的落地仍按 §10 第 6 条；服务器选择页的连接失败、空清单两态由单元用例覆盖，未在壳里逐态实跑。

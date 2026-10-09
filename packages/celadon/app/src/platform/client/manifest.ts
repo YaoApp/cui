@@ -1,7 +1,7 @@
 /* **构建清单的唯一读者**（15-platform.md §5.3）。
  *
- * 规则：`client/` 只读它 · **别处不许再判宿主** · 打包时由构建脚本改写成这一构建的事实。
- * 开发时文件里手写开发期取值（进 git）。 */
+ * 规则：`client/` 只读它 · **别处不许再判宿主** · 构建把这一构建的事实注入进来。
+ * 源文件写基础值（进 git），构建用 `CUI_CLIENT` 等环境给出的事实覆盖它（见 `vite.config.ts`）。 */
 
 import raw from '@/platform/manifest.json'
 
@@ -30,7 +30,8 @@ export type Manifest = {
   locales: readonly string[]
 }
 
-const manifest = raw as Manifest
+/* 构建注入的清单事实（见 `manifest-env.d.ts` 与 `vite.config.ts`）：空对象就用源文件里的基础值。 */
+const manifest = { ...(raw as Manifest), ...__CELADON_MANIFEST__ }
 
 /** 构建清单（只读）。**要判宿主就到这里来，不要各自读环境或猜 UA。** */
 export function buildManifest(): Manifest {

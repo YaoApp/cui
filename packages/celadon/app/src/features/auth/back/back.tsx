@@ -10,6 +10,8 @@ import { useDocumentTitle } from '@/platform/document-title'
 import { AuthLayout } from '../components/auth-layout'
 import { StatusNotice } from '../components/status-notice'
 import { useAuth } from '../use-auth'
+import { useAuthMode, withMode } from '../use-auth-mode'
+import { useServerName } from '../use-server-name'
 import { useCompleteSignIn } from '../use-complete-sign-in'
 import './back.less'
 
@@ -25,6 +27,8 @@ import './back.less'
 export function BackPage() {
   const { t } = useTranslation()
   const auth = useAuth()
+  const mode = useAuthMode()
+  const serverName = useServerName()
   const complete = useCompleteSignIn()
   const config = auth.config
   const navigate = useNavigate()
@@ -72,7 +76,7 @@ export function BackPage() {
     const status = value.status
     if (status === 'invite_verification_required' || status === 'invite_required') {
       auth.enterInvite(value.access_token || auth.tempToken)
-      navigate('/login')
+      navigate(withMode('/login', mode))
       return
     }
     if (status === 'mfa_required' || status === 'team_selection_required') {
@@ -80,7 +84,7 @@ export function BackPage() {
         tone: 'info',
         text: t(status === 'mfa_required' ? 'auth.notice.mfa' : 'auth.notice.team'),
       })
-      navigate('/login')
+      navigate(withMode('/login', mode))
       return
     }
     const ok = await complete(value)
@@ -95,10 +99,12 @@ export function BackPage() {
 
   return (
     <AuthLayout
+      mode={mode}
+      serverName={serverName}
       titleLines={[t('auth.back.docTitle'), '']}
-      onBack={() => window.history.back()}
+      onBack={() => navigate('/servers')}
       footnote={
-        errorText ? <Link href={appHref('/login')}>{t('auth.back.backToLogin')}</Link> : null
+        errorText ? <Link href={appHref(withMode('/login', mode))}>{t('auth.back.backToLogin')}</Link> : null
       }
     >
       {errorText ? (

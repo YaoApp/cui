@@ -54,9 +54,10 @@ export function CaptchaDialog({
       onOpenChange={(next) => onOpenChange(next)}
       title={t('auth.dialog.captchaTitle')}
       closeLabel={t('auth.dialog.close')}
-      /* 图形验证码有输入，打开即聚焦到输入框（浮层要显式管理焦点，layout.md 第 4 节）；
-         人机验证里面是 iframe，没有可输入的控件，返回 `true` 让上游按默认行为聚焦面板。 */
-      initialFocus={() => (type === 'turnstile' ? true : document.getElementById('auth-dialog-captcha'))}
+      /* 打开时的焦点分两路：图形验证码聚焦输入框；人机验证**不动焦点**。
+         上游不指定时按默认行为落在第一个可聚焦元素，也就是右上角的关闭钮，人机验证里没有可输入的控件，
+         把焦点交给它只会亮出一个与任务无关的焦点框（`layout.md` 第 4 节：浮层显式管理焦点）。 */
+      initialFocus={() => (type === 'turnstile' ? false : document.getElementById('auth-dialog-captcha'))}
       footer={
         <>
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>

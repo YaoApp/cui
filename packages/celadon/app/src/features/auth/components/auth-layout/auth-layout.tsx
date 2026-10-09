@@ -1,5 +1,4 @@
 import { useId, type ReactNode } from 'react'
-import { useLocation } from 'react-router'
 import { BrandMark } from '@/components/base/brand-mark'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
@@ -7,10 +6,14 @@ import { LocaleSwitch } from '@/components/locale-switch'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useThemePreference } from '@/platform/client'
 import { useTranslation } from '@/platform/i18n'
-import { serviceInfo } from '@/platform/service'
 import './auth-layout.less'
 
+/** 入口页的两种形态：独立访问（品牌区与页脚都在）与客户端内（收起品牌与页脚，控件移到卡片下方）。 */
+export type AuthMode = 'standalone' | 'in-app'
+
 export type AuthLayoutProps = {
+  /** 形态。由调用方显式给（见 `useAuthMode`），外壳自己不看地址也不看宿主。 */
+  mode: AuthMode
   /** 卡片标题。多行时逐行给，空行由样式收起（某些语言的标题不换行）。 */
   titleLines: string[]
   /** 卡片下方那一句（去注册或去登录）。 */
@@ -18,7 +21,9 @@ export type AuthLayoutProps = {
   /** 独立访问时页脚的条款与隐私地址；客户端内不显示。 */
   serviceHref?: string
   privacyHref?: string
-  /** 客户端内的返回入口。 */
+  /** 客户端栏里的当前服务器名（见 `useServerName`）；空串不显示这一块。 */
+  serverName?: string
+  /** 客户端内的返回入口，指向服务器选择页。 */
   onBack?: () => void
   children: ReactNode
 }
@@ -28,13 +33,12 @@ export type AuthLayoutProps = {
  *
  * 顶行左边是品牌标记与产品名，产品名走品牌渐变，是体系里唯一允许渐变文字的地方；
  * 右边是语言与主题，两者之间一条 1px 分隔线。卡片在剩余空间里居中，页脚只有条款与隐私两条。
- * 客户端内（地址带 `from`）收起品牌与页脚，返回栏与卡片同宽同区，控件移到卡片下方居中。
+ * 客户端内形态收起品牌与页脚，返回栏与卡片同宽同区，控件移到卡片下方居中。
  */
-export function AuthLayout({ titleLines, footnote, serviceHref, privacyHref, onBack, children }: AuthLayoutProps) {
+export function AuthLayout({ mode, titleLines, footnote, serviceHref, privacyHref, serverName, onBack, children }: AuthLayoutProps) {
   const { t } = useTranslation()
   const { theme, setTheme } = useThemePreference()
-  const inApp = new URLSearchParams(useLocation().search).has('from')
-  const server = serviceInfo()?.name
+  const inApp = mode === 'in-app'
   const titleId = `${useId()}-title`
 
   const card = (
@@ -77,9 +81,9 @@ export function AuthLayout({ titleLines, footnote, serviceHref, privacyHref, onB
               <Button type="button" variant="plain" size="small" icon={<Icon name="i-left" />} onClick={onBack}>
                 {t('auth.action.backToServers')}
               </Button>
-              {server ? (
+              {serverName ? (
                 <span className="auth__server">
-                  <span className="auth__server-name">{server}</span>
+                  <span className="auth__server-name">{serverName}</span>
                 </span>
               ) : null}
             </div>

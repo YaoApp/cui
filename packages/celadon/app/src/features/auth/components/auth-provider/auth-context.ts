@@ -14,6 +14,8 @@ export type AuthConfigValue = {
   keys?: JsonWebKey[]
   /** 入口配置取失败：页面据此给失败态，而不是一直停在加载态。 */
   configFailed: boolean
+  /** 再取一次入口配置（失败态的「重试」用）。 */
+  reloadConfig: () => void
 }
 
 export const AuthConfigContext = createContext<AuthConfigValue | undefined>(undefined)
