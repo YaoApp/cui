@@ -4,8 +4,9 @@
    只有本文件发请求；别处一律不直接调 `fetch`。 */
 
 import { hasHost } from '../bridge/invoke'
-import { refreshSession, sessionAuthorization } from '../credential/session'
+import { sessionAuthorization } from '../credential/session'
 import { networkFailure, statusFailure, withTimeout } from './errors'
+import { emitUnauthorized, isEntryRequest } from './unauthorized'
 import { fail, type BridgeFailure } from '../bridge/result'
 import { ok, type BridgeResult } from '../bridge/result'
 
@@ -65,12 +66,11 @@ export async function transportFetch(
     return { ...init, headers: merged }
   }
   const outcome = await withTimeout((signal) => call(input, { ...withCredential(rest), signal }), url, timeoutMs)
-  if (!outcome.ok || outcome.value.status !== 401) return outcome.ok ? ok(outcome.value) : outcome.failure
-  // 401：**续期一次、重放一次**（刷新本身由数据层声明，出口只认注入的那一支；不循环）
-  const refreshed = await refreshSession()
-  if (!refreshed.ok || !refreshed.value) return ok(outcome.value)
-  const retried = await withTimeout((signal) => call(input, { ...withCredential(rest), signal }), url, timeoutMs)
-  return retried.ok ? ok(retried.value) : retried.failure
+  if (!outcome.ok) return outcome.failure
+  /* 401：会话失效。**不重放、不续期**（续期是另一件事，见 `plan/06-login.md` §5），
+     只把事件发出去、由上层跳登录页；入口类接口的 401 不算失效（未登录时本来就会遇到）。 */
+  if (outcome.value.status === 401 && !isEntryRequest(input)) emitUnauthorized()
+  return ok(outcome.value)
 }
 
 /** 同上，但**非 2xx 也算失败**（多数业务调用要这个）。 */

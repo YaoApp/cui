@@ -11,8 +11,8 @@ import { ClientBootError, loadClient } from '@/platform/client'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
-import { appHref, routerBasename } from '@/platform/router/basename'
-import { loadServiceBase, needsServerChoice } from '@/platform/service'
+import { routerBasename } from '@/platform/router/basename'
+import { loadServiceBase } from '@/platform/service'
 import { routes } from '@/routes/routes'
 import { mountIconSprite } from '@/platform/icons'
 
@@ -69,9 +69,9 @@ async function boot(): Promise<void> {
     renderBootError(error)
     return
   }
-  /* 宿主地址在桌面是异步取回、存内存：取一次，还没选过就先去选服务器页（不是报错） */
+  /* 宿主地址在桌面是异步取回、存内存：取一次。还没选过服务器时由路由层的 ServerGuard 把人送去选服务器页
+     （不是报错），判定与跳转因此在路由表里只有一处（见 `plan/06-login.md` §5）。 */
   await loadServiceBase()
-  if (needsServerChoice()) globalThis.history.replaceState(null, '', appHref('/servers'))
   /* 路由实例建在模块作用域 —— 每次渲染重建会丢掉导航栈。
      **装配点放在入口**：入口不属于任何层，于是 platform/ 不必反过来引 routes/
      （见 architecture/03-boundaries.md §2）。 */

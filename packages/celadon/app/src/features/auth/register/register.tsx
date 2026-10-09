@@ -29,6 +29,7 @@ import { useAuth } from '../use-auth'
 import { useAuthMode, withMode } from '../use-auth-mode'
 import { useServerName } from '../use-server-name'
 import { useCompleteSignIn } from '../use-complete-sign-in'
+import { readNext, withNext } from '../next'
 import './register.less'
 
 /** 一次性口令的位数与重发冷却，与登录页的口令步同一套取值。 */
@@ -58,6 +59,8 @@ export function RegisterPage() {
   const inApp = mode === 'in-app'
   const serverName = useServerName()
   const carried = new URLSearchParams(window.location.search).get('username') ?? ''
+  /* 登录后的明确去向：本页只负责把它带到登录页（见 `plan/06-login.md` §5） */
+  const next = readNext(window.location.search)
 
   const [account, setAccount] = useState(carried || auth.username)
   const [password, setPassword] = useState('')
@@ -258,7 +261,7 @@ export function RegisterPage() {
     /* 注册成功但没有会话：回登录页，把「请登录」这条提示留在域里（页面切换后仍读得到） */
     auth.changeAccount()
     auth.setNotice({ tone: 'info', text: t('auth.notice.registered') })
-    navigate(withMode('/login', mode))
+    navigate(withMode(withNext('/login', next), mode))
   }
 
   async function onSubmitRegister(event: FormEvent) {
@@ -289,7 +292,7 @@ export function RegisterPage() {
     <>
       <span>{t('auth.register.hasAccount')}</span>{' '}
       {/* 回登录页时把登录域复位：进来时登录页已经进到密码步，不复位会让它带着注册流程的临时令牌停在那一步 */}
-      <Link href={appHref(withMode('/login', mode))} onClick={() => auth.changeAccount()}>
+      <Link href={appHref(withMode(withNext('/login', next), mode))} onClick={() => auth.changeAccount()}>
         {t('auth.register.backToLogin')}
       </Link>
     </>

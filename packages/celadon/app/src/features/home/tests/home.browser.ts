@@ -1,9 +1,10 @@
 import { expect, test } from '@playwright/test'
 
-/* 首页第一行是语言与主题：左对齐、同一行，且在版本信息之上（2026-10-04 用户指出的位置）。 */
+/* 版本信息页第一行是语言与主题：左对齐、同一行，且在版本信息之上（2026-10-04 用户指出的位置）。
+   地址在脚手架的命名空间下：应用根是入口判定，不再直接画这一页。 */
 test('the two switches sit on the first row, left aligned', async ({ page }) => {
   await page.setViewportSize({ width: 1080, height: 700 })
-  await page.goto('/app/')
+  await page.goto('/app/scaffold/home')
 
   const locale = page.getByRole('combobox')
   /* 主题按钮的可访问名随当前档变化（说的是动作），这里只量位置，按类名定位 */

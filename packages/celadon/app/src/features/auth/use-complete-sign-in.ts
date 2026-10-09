@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import type { EntryAuthResponse } from '@/data/user'
 import { signIn } from '@/platform/credential'
 import { useTranslation } from '@/platform/i18n'
@@ -7,22 +7,23 @@ import { serviceBase } from '@/platform/service'
 import { useAuthStore } from './auth.store'
 import { useAuthConfig } from './components/auth-provider'
 import { idTokenClaimsForDisplay, verifyIdToken } from './id-token'
+import { forgetNext, readNext, takeNext } from './next'
 import { rememberServer } from './server-history'
+import { rememberSession } from './session-marker'
 import { userInfo } from './user-info'
 import { useAuthMode, withMode } from './use-auth-mode'
 
 /**
- * 登录或注册成功之后的收尾：验签（配置允许时）、采纳会话、记下用户信息，然后进欢迎页。
+ * 登录或注册成功之后的收尾：验签（配置允许时）、采纳会话、记下本机登录标记与用户信息，然后决定去哪。
  *
- * 这一步会**发请求与跳转**，按 `architecture/06-state.md` §1（store 不写 DOM、不发请求）不放进 store，
- * 作为域级动作由页面在拿到响应后调用（也因此在动作里完成，不靠 `useEffect` 追状态）。
- * 失败时只把一句四语文案交给 store 的 `setNotice`，具体原因留控制台。
- *
- * 欢迎页是登录后的第一站（占位），会话后的具体去向（按用户信息分流）在那之后接。
+ * 去向按 `plan/06-login.md` §5：地址上带着 `next`（或第三方往返前暂存的）就去那里，
+ * 没有才进欢迎页。这一步会**发请求与跳转**，按 `architecture/06-state.md` §1 不放进 store，
+ * 作为域级动作由页面在拿到响应后调用。失败时只把一句四语文案交给 store 的 `setNotice`。
  */
 export function useCompleteSignIn() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
   const mode = useAuthMode()
   const { config, keys } = useAuthConfig()
   const setNotice = useAuthStore((state) => state.setNotice)
@@ -53,12 +54,18 @@ export function useCompleteSignIn() {
       }
 
       setUser(userInfo(response, account ?? '', claims))
+      /* 本机登录标记：入口判定下一次打开应用时用它（不是授权依据，见 `session-marker.ts`） */
+      rememberSession()
       /* 有基址就记下这台服务器：客户端里是用户选的地址，Web 上由部署给（`VITE_SERVICE_BASE`）；都没有就不记 */
       const base = serviceBase()
       if (base) rememberServer(base)
-      navigate(withMode('/welcome', mode))
+
+      /* 明确去向优先：地址上的 `next` 先看，第三方往返留下的暂存再看；用过就把暂存丢掉 */
+      const target = readNext(location.search) ?? takeNext()
+      forgetNext()
+      navigate(target ?? withMode('/welcome', mode))
       return true
     },
-    [config, keys, mode, navigate, t, setNotice, setUser],
+    [config, keys, location.search, mode, navigate, t, setNotice, setUser],
   )
 }

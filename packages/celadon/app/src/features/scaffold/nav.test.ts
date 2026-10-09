@@ -5,7 +5,7 @@ describe('navWithActive', () => {
   it('marks the item whose href is the current path', () => {
     const items = navWithActive('/scaffold/routing')
     expect(items.find((i) => i.href === '/scaffold/routing')?.active).toBe(true)
-    expect(items.find((i) => i.href === '/')?.active).toBe(false)
+    expect(items.find((i) => i.href === '/scaffold/home')?.active).toBe(false)
   })
 
   it('keeps a parent from lighting up when a child is open — the longest match wins', () => {
@@ -19,9 +19,23 @@ describe('navWithActive', () => {
     expect(items[0].active).toBe(false)
   })
 
-  it('offers the scaffold pages and a way home', () => {
+  it('keeps the longest match when a shorter one comes later', () => {
+    const items = navWithActive('/scaffold/routing', [
+      { label: 'nav.routing', href: '/scaffold/routing' },
+      { label: 'nav.overview', href: '/scaffold' },
+    ])
+    expect(items.find((i) => i.href === '/scaffold/routing')?.active).toBe(true)
+    expect(items.find((i) => i.href === '/scaffold')?.active).toBe(false)
+  })
+
+  it('lights nothing up when the path belongs to no item', () => {
+    const items = navWithActive('/elsewhere')
+    expect(items.every((i) => !i.active)).toBe(true)
+  })
+
+  it('offers the scaffold pages and the version page', () => {
     expect(SCAFFOLD_NAV.map((i) => i.href)).toEqual([
-      '/', '/scaffold', '/scaffold/routing', '/scaffold/bridge', '/scaffold/requests',
+      '/scaffold/home', '/scaffold', '/scaffold/routing', '/scaffold/bridge', '/scaffold/requests',
     ])
   })
 })

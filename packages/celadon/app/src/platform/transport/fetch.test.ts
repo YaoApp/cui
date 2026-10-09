@@ -1,13 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { probe, transportFetch, transportFetchOk } from './fetch'
-import type { BridgeResult } from '../bridge/result'
+import { probe, transportFetch, transportFetchOk, crossOriginRefusal } from './fetch'
+import { emitUnauthorized, onUnauthorized } from './unauthorized'
 import { parseFailure } from './errors'
 
 const sessionAuthorization = vi.hoisted(() => vi.fn<() => string | undefined>(() => undefined))
-const refreshSession = vi.hoisted(() =>
-  vi.fn<() => Promise<BridgeResult<string>>>(async () => ({ ok: true, value: 'new-token' })),
-)
-vi.mock('../credential/session', () => ({ sessionAuthorization, refreshSession }))
+vi.mock('../credential/session', () => ({ sessionAuthorization }))
 
 const pluginFetch = vi.fn()
 vi.mock('@tauri-apps/plugin-http', () => ({ fetch: (...args: unknown[]) => pluginFetch(...args) }))
@@ -22,8 +19,6 @@ afterEach(() => {
   pluginFetch.mockReset()
   sessionAuthorization.mockReset()
   sessionAuthorization.mockReturnValue(undefined)
-  refreshSession.mockReset()
-  refreshSession.mockResolvedValue({ ok: true, value: 'new-token' })
 })
 
 describe('transportFetch', () => {
@@ -91,13 +86,54 @@ describe('transportFetch', () => {
     expect(browser).not.toHaveBeenCalled()
   })
 
+  it('lets a target it cannot even parse fall through to fetch', () => {
+    expect(crossOriginRefusal('http://[', false)).toBeNull()
+  })
+
+  it('reads a target that is not a plain string, and gives up when there is no location', () => {
+    expect(crossOriginRefusal(new URL('https://example.com/x'), false)).toMatchObject({
+      code: 'transport.cross_origin',
+    })
+    vi.stubGlobal('location', undefined)
+    expect(crossOriginRefusal('https://example.com/x', false)).toBeNull()
+    vi.unstubAllGlobals()
+    vi.stubGlobal('location', { origin: 'null', href: 'http://localhost/' })
+    expect(crossOriginRefusal('https://example.com/x', false)).toBeNull()
+    vi.unstubAllGlobals()
+  })
+
+  it('passes an ok answer through the strict form, and names the url when it is not ok', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('hi', { status: 200 })))
+    expect((await transportFetchOk('/api/things')).ok).toBe(true)
+
+    asHost()
+    pluginFetch.mockResolvedValue(new Response('nope', { status: 500 }))
+    expect(await transportFetchOk('https://example.com')).toMatchObject({
+      ok: false,
+      code: 'transport.status',
+      params: { status: 500, url: 'https://example.com' },
+    })
+    expect(await transportFetchOk(new URL('https://example.com/x'))).toMatchObject({
+      ok: false,
+      code: 'transport.status',
+      params: { status: 500, url: 'https://example.com/x' },
+    })
+    vi.unstubAllGlobals()
+  })
+
+  it('hands the transport failure back untouched from the strict form and from the probe', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('no route') }))
+    expect(await transportFetchOk('/api/things')).toMatchObject({ ok: false, code: 'transport.network' })
+    expect(await probe('/api/things')).toMatchObject({ ok: false, code: 'transport.network' })
+  })
+
   it('names a body it cannot read', () => {
     expect(parseFailure(new Error('bad json'), 'https://x'))
       .toMatchObject({ code: 'transport.parse', params: { url: 'https://x' } })
   })
 })
 
-describe('the egress carries the session, and survives one expiry', () => {
+describe('the egress carries the session, and reports an expiry', () => {
   it('adds the bearer when the platform has one, and never overrides an explicit one', async () => {
     const seen: (string | null)[] = []
     const browser = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
@@ -124,30 +160,50 @@ describe('the egress carries the session, and survives one expiry', () => {
     expect(seen).toBeNull()
   })
 
-  it('replays once after a 401, with the refreshed credential', async () => {
-    const seen: (string | null)[] = []
-    const responses = [new Response('nope', { status: 401 }), new Response('hi', { status: 200 })]
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-        seen.push(new Headers(init?.headers).get('authorization'))
-        return responses.shift() as Response
-      }),
-    )
-    sessionAuthorization.mockReturnValueOnce('Bearer old').mockReturnValue('Bearer new')
-    const result = await transportFetch('/api/things')
-    expect(result).toMatchObject({ ok: true })
-    expect(seen).toEqual(['Bearer old', 'Bearer new'])
-    expect(refreshSession).toHaveBeenCalledOnce()
-  })
-
-  it('does not replay when the refresh could not produce a credential', async () => {
+  it('reports a 401 on a product call, and does not replay it', async () => {
     const call = vi.fn(async () => new Response('nope', { status: 401 }))
     vi.stubGlobal('fetch', call)
-    sessionAuthorization.mockReturnValue('Bearer old')
-    refreshSession.mockResolvedValue({ ok: false, code: 'credential.service_empty', params: {}, message: 'no' })
-    const result = await transportFetch('/api/things')
+    const heard: number[] = []
+    const off = onUnauthorized(() => heard.push(1))
+    const result = await transportFetch('/v1/user/profile')
+    off()
+
     expect(call).toHaveBeenCalledOnce()
+    expect(heard).toHaveLength(1)
     expect(result.ok && result.value.status).toBe(401)
+  })
+
+  it('stays quiet for the entry calls: their 401 is not an expiry', async () => {
+    const call = vi.fn(async () => new Response('nope', { status: 401 }))
+    vi.stubGlobal('fetch', call)
+    const heard: number[] = []
+    const off = onUnauthorized(() => heard.push(1))
+    await transportFetch('/v1/user/entry/login')
+    await transportFetch('/v1/user/oauth/google/authorize')
+    await transportFetch('/oauth/jwks')
+    off()
+
+    expect(heard).toHaveLength(0)
+    expect(call).toHaveBeenCalledTimes(3)
+  })
+
+  it('lets a non-401 answer through without an event', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('nope', { status: 403 })))
+    const heard: number[] = []
+    const off = onUnauthorized(() => heard.push(1))
+    await transportFetch('/v1/user/profile')
+    off()
+    expect(heard).toHaveLength(0)
+  })
+
+  it('carries the event to every listener, and stops after unsubscribing', () => {
+    const heard: string[] = []
+    const off = onUnauthorized(() => heard.push('first'))
+    const off2 = onUnauthorized(() => heard.push('second'))
+    emitUnauthorized()
+    off()
+    emitUnauthorized()
+    off2()
+    expect(heard).toEqual(['first', 'second', 'second'])
   })
 })
