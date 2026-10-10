@@ -73,8 +73,9 @@ describe('Nav', () => {
     expect(row).toBeVisible()
     expect(row).toHaveTextContent('无')
     expect(screen.getByRole('button', { name: '展开主导航' })).toBeVisible()
-    /* 上区的折叠键让位 */
-    expect(screen.queryByRole('button', { name: '折叠主导航' })).toBeNull()
+    /* 上区的折叠键不再画出来：它仍留在结构里，由样式（visibility）藏掉，
+       折叠态的出口是这一行的展开键 */
+    expect(document.querySelector('.nav__fold')).not.toBeNull()
   })
 
   it('collapses the whole column and hides the text labels', () => {

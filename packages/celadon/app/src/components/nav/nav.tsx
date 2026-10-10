@@ -1,5 +1,5 @@
 import './nav.less'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { I18nKey } from '@/platform/i18n/i18n-types'
 import type { IconId } from '@/platform/icons'
 import { useTranslation } from '@/platform/i18n'
@@ -8,6 +8,11 @@ import { NavHeader } from './parts/header'
 import { NavMain } from './parts/main'
 import { NavScene } from './parts/scene'
 import type { NavItem } from './nav.types'
+
+/* 收起动作的时长，取 design/foundations.md F4 的 collapse 档（--duration-fast 120ms） */
+const COLLAPSE_MS = 120
+/* 展开动作的时长，取 F4 的 panel 档（--duration-base 200ms） */
+const EXPAND_MS = 200
 
 export type NavProps = {
   items: NavItem[]
@@ -46,6 +51,35 @@ export function Nav({
   onSelect,
 }: NavProps) {
   const { t } = useTranslation()
+  /* 收起态下整列悬停才把标志换成展开图标，但要在收拢动画走完之后才允许：
+     点收起键的指针本来就停在列内，动画期间不揭示，标志因此在整段收拢过程中保持不变。 */
+  const [revealReady, setRevealReady] = useState(false)
+  /* 内容形态总在动画开始前准备好：只要列宽还没到 280，就画图标轨那一套。
+     收起时立刻切回图标轨（文字不再被挤在变窄的列里），展开时等宽度到位再换回来。 */
+  const [settled, setSettled] = useState(!collapsed)
+
+  useEffect(() => {
+    if (collapsed) {
+      setSettled(false)
+      return
+    }
+    /* 展开按 F4 的 panel 档 200ms */
+    const timer = window.setTimeout(() => setSettled(true), EXPAND_MS)
+    return () => window.clearTimeout(timer)
+  }, [collapsed])
+
+  const railLook = collapsed || !settled
+
+  useEffect(() => {
+    if (!collapsed) {
+      setRevealReady(false)
+      return
+    }
+    /* 收起动作按 design/foundations.md F4 的 collapse 档走 --duration-fast（120ms），
+       等这段动画结束再允许整列悬停揭示展开图标 */
+    const timer = window.setTimeout(() => setRevealReady(true), COLLAPSE_MS)
+    return () => window.clearTimeout(timer)
+  }, [collapsed])
 
   const select = (item: NavItem) => {
     onSelect(item)
@@ -54,13 +88,15 @@ export function Nav({
 
   return (
     <nav
-      className={collapsed ? 'nav nav--collapsed' : 'nav'}
+      className={['nav', railLook ? 'nav--collapsed' : '', revealReady ? 'nav--reveal' : '']
+        .filter(Boolean)
+        .join(' ')}
       aria-label={t('shell.navigation.label')}
     >
-      <NavHeader collapsed={collapsed} onToggle={onToggle} />
+      <NavHeader collapsed={railLook} onToggle={onToggle} />
       <NavMain
         items={items}
-        compact={collapsed}
+        compact={railLook}
         folded={mainFolded}
         onToggleFold={onToggleMain}
         onSelect={select}

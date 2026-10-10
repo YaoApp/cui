@@ -9,7 +9,7 @@
 ```
 app/src/
   routes/
-    layout.tsx               三栏装配、栏宽与让步顺序；没有上下文时不画导航栏（现名 surface-layout.tsx）
+    layout.tsx               三栏装配、栏宽与让步顺序；没有上下文时不画导航栏（落点 `routes/layout.tsx`）
     entry-gate.tsx           根地址的去向（已有）
   components/
     base/

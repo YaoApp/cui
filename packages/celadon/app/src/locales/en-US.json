@@ -63,7 +63,7 @@
   "data.error.insufficientScope": "Not enough permission",
   "modal.close": "Close",
   "shell.navigation.label": "Main navigation",
-  "shell.navigation.main": "Main",
+  "shell.navigation.main": "Start",
   "shell.navigation.current": "Now",
   "shell.navigation.scene.none": "Nothing",
   "shell.navigation.account.placeholder": "Not signed in",

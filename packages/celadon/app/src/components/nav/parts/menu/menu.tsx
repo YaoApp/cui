@@ -81,7 +81,7 @@ export function NavMenu({ items, currentLabel, sceneIcon, onSelect }: NavMenuPro
                   aria-current={item.active ? 'page' : undefined}
                   onClick={() => onSelect(item)}
                 >
-                  <Icon name={item.icon} size={16} />
+                  <Icon name={item.icon} size={18} />
                   <span className="nav__label">{t(item.labelKey)}</span>
                   {item.badge ? <span className="nav__badge">{item.badge}</span> : null}
                 </BaseMenu.Item>

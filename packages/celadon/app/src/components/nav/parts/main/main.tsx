@@ -20,13 +20,16 @@ export type NavMainProps = {
    （`design/main-shell.md` §三）；折叠后留「当前」那一行与展开键找回。 */
 export function NavMain({ items, compact, folded, onToggleFold, onSelect }: NavMainProps) {
   const { t } = useTranslation()
-  const label = folded ? t('shell.navigation.action.unfold') : t('shell.navigation.action.fold')
+  /* 这一颗键只做「收上区」一件事：名字固定，折叠态它被样式藏掉，
+     展开由下区那一行的键负责 */
+  const label = t('shell.navigation.action.fold')
   return (
     <div className={folded ? 'nav__main nav__main--folded' : 'nav__main'}>
+      <div className="nav__main-body">
       <div className="nav__main-head">
         <span className="nav__section">{t('shell.navigation.main')}</span>
-        {/* 收起键只在上区展开时出现；折叠后由「当前」那一行的展开键接手，两者互斥 */}
-        {folded ? null : (
+        {/* 收起键常驻在结构里，折叠时由样式藏掉：过渡期间头部尺寸不跳。
+            折叠态的出口是下区「当前」那一行的展开键，两者互斥 */}
         <Tooltip label={label} side="bottom">
           <Button
             className="nav__fold"
@@ -37,11 +40,9 @@ export function NavMain({ items, compact, folded, onToggleFold, onSelect }: NavM
             aria-expanded={!folded}
             onClick={onToggleFold}
           >
-            {/* 主导航是一段：展开时双箭头向下（可以收下去），折叠时向上（可以放出来） */}
             <Icon name={folded ? 'i-dock' : 'i-undock'} size={16} />
           </Button>
         </Tooltip>
-        )}
       </div>
       <ScrollArea className="nav__scroll" size="small">
         <NavList
@@ -51,6 +52,7 @@ export function NavMain({ items, compact, folded, onToggleFold, onSelect }: NavM
           onSelect={onSelect}
         />
       </ScrollArea>
+      </div>
     </div>
   )
 }

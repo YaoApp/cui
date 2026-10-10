@@ -62,7 +62,7 @@ app/src/
 | --- | --- | --- | --- |
 | 3 | 列容器与四段 | `app/src/components/nav/` | 头部、列表与底部在位；列表先用写死的六项占位；收起状态与所在的一侧读 `stores/layout/columns.ts` |
 | 4 | 整列收起与展开 | `app/src/stores/layout/columns.ts` | 头部键收起后只剩窄条；刷新后仍是收起态；F6 同效 |
-| 5 | 折叠态的找回 | `app/src/components/nav/list/parts/menu/` | 「当前」行常驻；悬停、点击与键盘都能弹出菜单并选到项；`Esc` 关闭并把焦点交回 |
+| 5 | 折叠态的找回 | `app/src/components/nav/parts/menu/` | 「当前」行常驻；悬停、点击与键盘都能弹出菜单并选到项；`Esc` 关闭并把焦点交回 |
 | 6 | 状态与四语 | 组件内 | 默认、悬停、焦点、禁用与空逐条可见；文案四语齐备 |
 
 ### 3.3 内容区

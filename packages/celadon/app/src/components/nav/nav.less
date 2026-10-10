@@ -2,9 +2,13 @@
    视口变窄先收第三栏，导航列只在 < --nav-auto-collapse 时自动进图标轨（见文件末尾的媒体查询）。 */
 .nav {
   flex: none;
+  /* 自己做容器：列宽是形态的唯一判据，窄的时候无论 JS 时序如何都不画文字 */
+  container-type: inline-size;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  /* 整列的收放：展开按 F4 的 panel 档（200ms 减速），收起在下面按 collapse 档（120ms 加速） */
+  transition: inline-size var(--duration-base) var(--easing-decelerate);
   gap: var(--spacing-8);
   inline-size: var(--nav-default);
   min-block-size: 0;
@@ -15,6 +19,8 @@
 
 /* 收起：Web 留图标轨，客户端整列为 0（`--nav-collapsed-desktop`），红绿灯与收起键位置不变。 */
 .nav--collapsed {
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-accelerate);
   inline-size: var(--nav-collapsed);
   /* 图标轨只容得下图标：条目的文字已经收起来，这里再兜一层，保证没有任何内容溢出到内容区上。 */
   overflow: hidden;
@@ -31,9 +37,12 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-8);
-  /* 与下两行同一条左右内距：三行的右侧键落在同一条竖线上 */
+  /* 头部与下面两段之间比列内其他间距大一档 */
+  margin-block-end: var(--spacing-8);
+  /* 标志的左边距在两种状态下都不动：这里补一档内距，图标轨里再加上居中，
+     两处算下来都是 16；右内距去掉，收起键贴到列的内缘 */
   min-block-size: var(--spacing-24);
-  padding-inline: var(--spacing-12);
+  padding-inline: var(--spacing-8) 0;
 }
 
 .nav__brand {
@@ -47,6 +56,33 @@
 /* 收起成图标轨：文字与内块标题都收起来，条目只留图标并居中（`design/foundations.md` F6）。 */
 .nav--collapsed .nav__brand,
 .nav--collapsed .nav__window,
+/* 收起态（图标轨）：主菜单始终展示，位置往上提一档；用户头像钉在列底 */
+.nav--collapsed .nav__header {
+  margin-block-end: 0;
+}
+
+/* 图标轨里不画上区的内块（分区名与折叠键都收走），条目直接跟着标志排 */
+.nav--collapsed .nav__main-head {
+  display: none;
+  padding-inline-end: 0;
+}
+
+/* 图标轨里主导航始终展示：上区被折叠过也放开（高度回到一整行）。
+   这条只在列宽真的落到位（图标轨）时生效，整列收放的中间宽度里不生效，
+   否则展开过程中会把本来折起的主导航给冒出来。 */
+@container (width < 80px) {
+  .nav--collapsed .nav__main,
+  .nav--collapsed .nav__main--folded {
+    grid-template-rows: 1fr;
+  }
+
+  .nav--collapsed .nav__main--folded .nav__main-body {
+    opacity: 1;
+  }
+}
+
+
+
 .nav--collapsed .nav__label,
 .nav--collapsed .nav__section,
 .nav--collapsed .nav__name {
@@ -56,11 +92,14 @@
 .nav--collapsed .nav__link,
 .nav--collapsed .nav__shortcut {
   justify-content: center;
-  padding-inline: 0;
+  min-block-size: var(--spacing-24);
+  block-size: var(--spacing-24);
+  padding: 0;
 }
 
 .nav--collapsed .nav__current {
   justify-content: center;
+  justify-content: space-between;
 }
 
 /* 图标轨里只留六项与底部一行：六项已经一步可达，「当前」区与它的二级导航让位
@@ -78,18 +117,71 @@
   gap: var(--spacing-4);
 }
 
+/* 收起态：标志就是展开入口。指针落上去，标志淡化并浮出展开图标 */
+.nav__logo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.nav__logo-mark {
+  display: inline-flex;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.nav__logo-overlay {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-small);
+  background: var(--background-hover);
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease;
+}
+
+/* 指针落在导航列的任何位置（不只标志上）就把标志淡出、浮出展开图标，
+   收起态下用户一眼能看出这里可以展开。
+   延时一档基础时长：整列正在收的时候仍画标志（点收起的指针本来就在导航区里），
+   等收拢动作走完再换成展开图标，不然会误以为这里已经是展开态。 */
+.nav--reveal:hover .nav__logo-mark,
+.nav__logo:hover .nav__logo-mark {
+  opacity: 0.25;
+}
+
+.nav--reveal:hover .nav__logo-overlay,
+.nav__logo:hover .nav__logo-overlay {
+  opacity: 1;
+}
+
+
 .nav__toggle {
   margin-inline-start: auto;
 }
 
 .nav__main {
-  /* 上区与下区都可以压缩：高度不够时两边各自让一点，各自溢出时各自滚 */
+  /* 上区展开收起用 grid-template-rows（1fr 与 0fr）做高度过渡：
+     这条在 Safari 与 Chrome 都能动，不依赖 interpolate-size。
+     展开走 F4 的 panel 档，收起在下面按 collapse 档改成快档加速。 */
   flex: 0 1 auto;
+  display: grid;
+  grid-template-rows: 1fr;
+  min-block-size: 0;
+  transition: grid-template-rows var(--duration-base) var(--easing-decelerate);
+}
+
+.nav__main-body {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
   min-block-size: 0;
-  transition: opacity var(--duration-base) ease;
+  overflow: hidden;
 }
 
 /* 展开时两区之间有一条分割线（上区主导航与下区当前）。 */
@@ -100,9 +192,22 @@
 
 /* 折叠只折上区：高度与不透明度过渡到零，只留「当前」一行。 */
 .nav__main--folded {
-  block-size: 0;
-  overflow: hidden;
+  grid-template-rows: 0fr;
+  /* 收起比展开快，且用加速缓动（design/foundations.md F4 的 collapse 档） */
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--easing-accelerate);
+}
+
+.nav__main--folded .nav__main-body {
   opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-accelerate);
+}
+
+/* 上区折成零高之后，它与下区之间那一档列内 gap 还在，会让二级导航标题低一档（8）。
+   这里把它抵消掉：标题因此严格落在上区展开时「开始」那一行的位置。下区位置由它自己负责，
+   折起的上区不再占位。 */
+.nav__main--folded + .nav__scene {
+  margin-block-start: calc(-1 * var(--spacing-8));
 }
 
 .nav__main-head,
@@ -114,6 +219,15 @@
   /* 与条目行同高：标题行与它下面的行左边缘对齐 */
   min-block-size: var(--spacing-32);
   padding-inline: var(--spacing-12);
+  padding-inline-end: 0;
+}
+
+/* 上区内块、下区折叠行与用户区：右内距都去掉，右侧的键与图标贴到列的内缘，
+   与头部的收起键落在同一条竖线上 */
+.nav__main-head,
+.nav__scene-head,
+.nav__footer {
+  padding-inline-end: 0;
 }
 
 /* 折叠态的那一行压在列表下方：上面补一条分割线，左内距与条目一致，
@@ -128,8 +242,11 @@
 
 .nav__section {
   flex: 1;
-  font-size: var(--font-size-caption);
+  /* 与菜单条目同一号字（14），分组只靠颜色表达，不再压字号或加粗细；
+     上边距比下边距大一档，标题与上面的组拉开、与下面自己的条目靠近 */
+  font-size: var(--font-size-body);
   color: var(--text-tertiary);
+  padding-block: var(--spacing-12) var(--spacing-8);
 }
 
 .nav__fold,
@@ -146,12 +263,25 @@
   display: none;
 }
 
+/* 上区的收起键只在指针进入导航列时出现；键盘走到它时也出现（焦点可见）。
+   下区的展开键是折叠态唯一的出口，一直展示，免得内块交互忽隐忽现。 */
+.nav__fold {
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.nav:hover .nav__fold,
+.nav__fold:focus-visible {
+  opacity: 1;
+}
+
 .nav__scroll {
   min-block-size: 0;
 }
 
 .nav__scene {
   flex: 1 1 auto;
+  transition: margin-block-start var(--duration-base) var(--easing-decelerate);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
@@ -289,12 +419,12 @@
   flex: none;
   display: grid;
   place-items: center;
-  inline-size: var(--spacing-24);
-  block-size: var(--spacing-24);
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
   border-radius: var(--radius-pill);
   background: var(--brand-soft);
   color: var(--brand-ink);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-body);
 }
 
 .nav__name {
@@ -338,6 +468,19 @@
 }
 
 /* 视口低于 --nav-auto-collapse：自动进图标轨（视口驱动，不写偏好）。 */
+/* 列宽没到展开态时一律按图标轨画：文字与分区名不参与过渡，避免挤在窄列里 */
+@container (width < 240px) {
+  .nav__label,
+  .nav__brand,
+  .nav__section {
+    display: none;
+  }
+
+  .nav__main-head {
+    display: none;
+  }
+}
+
 @media (width <= 1023px) {
   .nav {
     inline-size: var(--nav-collapsed);
@@ -349,4 +492,63 @@
   .nav__main-head .nav__section {
     display: none;
   }
+}
+
+/* 用户区与折叠行右端对齐：把这两个容器与里面的快捷图标钉死，
+   免得被共享的条目规则（32 高、上下内距 8）撑出多余的空间。 */
+.nav .nav__footer {
+  /* 左内距一档底（8 + 4 = 12），头像在两种状态下都落在 left 12；
+     右内距为零，右上方的键同一条竖线；行高与上方的折叠行同档 */
+  block-size: auto;
+  /* 行高与折叠行同档（32 加一档），这一档放在上内距上：
+     头像到上分割线与到列底边各留 8，视觉上是垂直居中的 */
+  min-block-size: calc(var(--spacing-32) + var(--spacing-8));
+  padding-block: var(--spacing-8) 0;
+  padding-inline: var(--spacing-4) 0;
+}
+
+.nav .nav__shortcut {
+  min-block-size: var(--spacing-24);
+  block-size: var(--spacing-24);
+  padding: 0;
+}
+
+/* 图标轨里的功能图标：方形按钮（四边内距一致），图标比条目行里的大一档 */
+.nav--collapsed .nav__link {
+  inline-size: var(--spacing-32);
+  block-size: var(--spacing-32);
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--radius-small);
+}
+
+/* 图标轨里的条目间距：条目本身不变，条目之间拉开一档 */
+
+
+/* 图标轨里的头部：标志在列里居中，左右内距因此相等，上下取列内距一档 */
+.nav--collapsed .nav__header {
+  /* 不额外居中：左边距取列内距加头部内距，右边距是列内距，
+     列宽 56 = 8 + 8 + 24 + 8 + 8，左右各 16，标志落在与展开态完全相同的位置 */
+  min-block-size: var(--spacing-24);
+  block-size: var(--spacing-24);
+}
+
+/* 图标轨里的条目与头像：整列居中，左右余量相等 */
+
+/* 图标轨里的条目：整列居中，左右余量相等；组内间距一档 8 */
+.nav--collapsed .nav__list {
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+/* 标志与功能条目是两组，组间留白要比组内大一档：
+   列内 gap 给一档（8），这里由容器的上内距再补一档，合计 16（design/layout.md §1 留白成组、
+   §2 的 16 档用于组与组之间）。间距的负责人仍只有列内 gap 一个，这里补的是容器内距。 */
+.nav--collapsed .nav__main {
+  padding-block-start: var(--spacing-8);
+}
+
+/* 图标轨里的用户区：头像位置与展开态完全相同（左 12），上下钉住列底 */
+.nav--collapsed .nav__footer {
+  margin-block-start: auto;
 }

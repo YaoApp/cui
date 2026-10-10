@@ -113,7 +113,7 @@ export function Browser({
             aria-label={t('shell.browser.action.collapse')}
             onClick={onCollapse}
           >
-            <Icon name="i-collapse" size={16} />
+            <Icon name="i-panel-right" size={16} />
           </Button>
         </Tooltip>
       </div>

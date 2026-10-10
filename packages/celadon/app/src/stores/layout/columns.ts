@@ -32,7 +32,8 @@ export const useColumnsStore = create<ColumnsState>()(
         browserSide: 'right',
         setNavCollapsed: (navCollapsed) =>
           set({ navCollapsed }, false, 'layout/setNavCollapsed'),
-        toggleNav: () => get().setNavCollapsed(!get().navCollapsed),
+        toggleNav: () =>
+          set({ navCollapsed: !get().navCollapsed }, false, 'layout/toggleNav'),
         toggleNavMain: () =>
           set(
             { navMainCollapsed: !get().navMainCollapsed },
@@ -44,7 +45,17 @@ export const useColumnsStore = create<ColumnsState>()(
         setBrowserSide: (browserSide) =>
           set({ browserSide }, false, 'layout/setBrowserSide'),
       }),
-      { name: 'cui.layout', version: 1 },
+      {
+        name: 'cui.layout',
+        version: 1,
+        /* 只留数据，不收动作：偏好记本机，动作每次由代码带上 */
+        partialize: (state) => ({
+          navCollapsed: state.navCollapsed,
+          navMainCollapsed: state.navMainCollapsed,
+          browserCollapsed: state.browserCollapsed,
+          browserSide: state.browserSide,
+        }),
+      },
     ),
     { name: 'layout' },
   ),

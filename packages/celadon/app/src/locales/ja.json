@@ -63,7 +63,7 @@
   "data.error.insufficientScope": "権限が足りません",
   "modal.close": "閉じる",
   "shell.navigation.label": "メインナビゲーション",
-  "shell.navigation.main": "メイン",
+  "shell.navigation.main": "スタート",
   "shell.navigation.current": "現在",
   "shell.navigation.scene.none": "なし",
   "shell.navigation.account.placeholder": "未サインイン",

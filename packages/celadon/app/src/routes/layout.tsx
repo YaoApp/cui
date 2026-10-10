@@ -15,7 +15,7 @@ import { useColumnsStore } from '@/stores/layout/columns'
 /* 一级导航的六项：**路由信息的投影**，写在装配层（`architecture/07-routing.md`）。
    每一项一个图标加文字；「新任务」是动作但占一级位置（超高频，一步可达）。 */
 const MAIN_ITEMS: NavItem[] = [
-  { key: 'new', icon: 'i-plus', labelKey: 'shell.navigation.item.new', to: '/new' },
+  { key: 'new', icon: 'i-new-task', labelKey: 'shell.navigation.item.new', to: '/new' },
   { key: 'apps', icon: 'i-apps', labelKey: 'shell.navigation.item.apps', to: '/apps' },
   { key: 'inbox', icon: 'i-inbox', labelKey: 'shell.navigation.item.inbox', to: '/inbox' },
   { key: 'board', icon: 'i-board', labelKey: 'shell.navigation.item.board', to: '/board' },

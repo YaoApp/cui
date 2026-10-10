@@ -10,4 +10,4 @@
 - 命名用**事实名**（`tabs.ts` · `columns.ts` · `session.ts`），不加 `.store` 后缀 —— 目录已经说明了角色
   （见 [`architecture/06-state.md`](../../architecture/06-state.md)）；
 - 按族建目录，`stores/<族>/<事实>.ts`（`browser/tabs.ts` · `layout/columns.ts`），族里只有一个事实时同样建目录；
-- 功能自己的私有状态不放这里，跟着它自己的域住在 `features/<域>/<名>.store.ts`。
+- 功能自己的私有状态不放这里，跟着它自己的域住在 `features/<域>/<名>.ts`。

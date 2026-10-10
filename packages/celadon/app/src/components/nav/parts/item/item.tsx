@@ -27,7 +27,7 @@ export function NavItemRow({ item, compact = false, onSelect }: NavItemRowProps)
         onSelect(item)
       }}
     >
-      <Icon name={item.icon} size={16} />
+      <Icon name={item.icon} size={18} />
       {compact ? null : <span className="nav__label">{label}</span>}
       {item.badge ? <span className="nav__badge">{item.badge}</span> : null}
     </a>

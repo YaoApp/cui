@@ -20,21 +20,44 @@ export function NavHeader({ collapsed, onToggle }: NavHeaderProps) {
     : t('shell.navigation.action.collapse')
   return (
     <div className="nav__header" {...chrome.dragProps}>
-      <BrandMark name="brand-yao-agents" size={20} label={t('app.name')} />
-      <span className="nav__brand">{t('app.name')}</span>
-      <Tooltip label={label} side="bottom">
-        <Button
-          className="nav__toggle"
-          iconOnly
-          variant="plain"
-          size="small"
-          aria-label={label}
-          aria-expanded={!collapsed}
-          onClick={onToggle}
-        >
-          <Icon name={collapsed ? 'i-expand' : 'i-collapse'} size={16} />
-        </Button>
-      </Tooltip>
+      {collapsed ? (
+        /* 收起态不画展开键：指针落在标志上，标志被遮罩淡化并浮出展开图标，点它展开导航 */
+        <Tooltip label={t('shell.navigation.action.expand')} side="bottom">
+          <Button
+            className="nav__logo"
+            variant="plain"
+            aria-label={t('shell.navigation.action.expand')}
+            aria-expanded={false}
+            onClick={onToggle}
+          >
+            <span className="nav__logo-mark">
+              <BrandMark name="brand-yao-agents" size={24} label={t('app.name')} />
+            </span>
+            <span className="nav__logo-overlay">
+              <Icon name="i-panel-left" size={16} />
+            </span>
+          </Button>
+        </Tooltip>
+      ) : (
+        <>
+          <BrandMark name="brand-yao-agents" size={24} label={t('app.name')} />
+          <span className="nav__brand">{t('app.name')}</span>
+          <Tooltip label={label} side="bottom">
+            <Button
+              className="nav__toggle"
+              iconOnly
+              variant="plain"
+              size="small"
+              aria-label={label}
+              aria-expanded
+              onClick={onToggle}
+            >
+              {/* 一对分栏图标：展开态是左栏，收起态是右栏（栏收走了） */}
+              <Icon name="i-panel-left" size={16} />
+            </Button>
+          </Tooltip>
+        </>
+      )}
       {chrome.visible ? (
         <span className="nav__window">
           <Button

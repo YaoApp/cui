@@ -53,7 +53,12 @@ export const useTabsStore = create<TabsState>()(
         },
         activate: (tab) => set({ activeKey: tabKey(tab) }, false, 'browser/activate'),
       }),
-      { name: 'cui.browser', version: 1 },
+      {
+        name: 'cui.browser',
+        version: 1,
+        /* 只留数据，不收动作：打开的页与当前页记本机，换会话不清空 */
+        partialize: (state) => ({ tabs: state.tabs, activeKey: state.activeKey }),
+      },
     ),
     { name: 'browser' },
   ),

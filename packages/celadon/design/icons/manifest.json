@@ -60,6 +60,12 @@
     "src": "minus"
   },
   {
+    "id": "i-new-task",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "square-pen"
+  },
+  {
     "id": "i-plus",
     "lib": "lucide",
     "cat": "action",
@@ -156,10 +162,16 @@
     "src": "chevrons-down"
   },
   {
-    "id": "i-collapse",
+    "id": "i-panel-left",
     "lib": "lucide",
     "cat": "action",
-    "src": "panel-left-close"
+    "src": "panel-left"
+  },
+  {
+    "id": "i-panel-right",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "panel-right"
   },
   {
     "id": "i-dots",
@@ -202,12 +214,6 @@
     "lib": "lucide",
     "cat": "action",
     "src": "square"
-  },
-  {
-    "id": "i-expand",
-    "lib": "lucide",
-    "cat": "action",
-    "src": "panel-left-open"
   },
   {
     "id": "i-split2",
