@@ -7,6 +7,7 @@ import { useAuthStore } from '@/features/auth/auth.store'
 import { useLandingRecord } from '@/features/auth/use-landing-record'
 import { InboxNav } from '@/features/inbox'
 import { client } from '@/platform/client'
+import { useMediaQuery } from '@/platform/client/use-media-query'
 import type { I18nKey } from '@/platform/i18n/i18n-types'
 import { useTranslation } from '@/platform/i18n'
 import { HOME_TAB, tabKey, useTabsStore, type TabEntry } from '@/stores/browser/tabs'
@@ -37,6 +38,9 @@ export function AppLayout() {
   useLandingRecord(location.pathname, location.search)
 
   const collapsed = useColumnsStore((state) => state.navCollapsed)
+  /* 视口不够宽时按收起呈现，与手动点收起走同一个状态、同一套样式：
+     区别只在来源，视口驱动的这一档不写偏好（design/foundations.md F6）。 */
+  const narrow = useMediaQuery('(width <= 1023px)')
   const toggleNav = useColumnsStore((state) => state.toggleNav)
   const mainFolded = useColumnsStore((state) => state.navMainCollapsed)
   const toggleMain = useColumnsStore((state) => state.toggleNavMain)
@@ -44,6 +48,8 @@ export function AppLayout() {
   const toggleBrowser = useColumnsStore((state) => state.toggleBrowser)
   const browserSide = useColumnsStore((state) => state.browserSide)
   const setBrowserSide = useColumnsStore((state) => state.setBrowserSide)
+  const navWidth = useColumnsStore((state) => state.navWidth)
+  const setNavWidth = useColumnsStore((state) => state.setNavWidth)
 
   const account = useAuthStore((state) => state.user)
   const tabs = useTabsStore((state) => state.tabs)
@@ -84,11 +90,13 @@ export function AppLayout() {
         scene={scene}
         sceneIcon={current?.icon ?? 'i-apps'}
         accountName={account?.name ?? account?.account ?? t('shell.navigation.account.placeholder')}
-        collapsed={collapsed}
+        collapsed={collapsed || narrow}
         onToggle={toggleNav}
         mainFolded={mainFolded}
         onToggleMain={toggleMain}
         onSelect={(item) => navigate(item.to)}
+        navWidth={navWidth}
+        onNavWidth={setNavWidth}
       >
         {location.pathname.startsWith('/inbox') ? <InboxNav /> : null}
       </Nav>

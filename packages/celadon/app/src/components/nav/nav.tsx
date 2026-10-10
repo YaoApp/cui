@@ -7,6 +7,7 @@ import { NavFooter } from './parts/footer'
 import { NavHeader } from './parts/header'
 import { NavMain } from './parts/main'
 import { NavScene } from './parts/scene'
+import { useNavResize } from './hooks/use-nav-resize'
 import type { NavItem } from './nav.types'
 
 /* 两处时长不写死，从 token 读：取 design/foundations.md F4 的 collapse 档（--duration-fast）
@@ -37,6 +38,9 @@ export type NavProps = {
   /** 「当前」区里的二级导航，由业务域以插槽给（没有也要把那一行画出来） */
   children?: ReactNode
   onSelect: (item: NavItem) => void
+  /** 用户拖过的导航列宽度（像素）；null 表示跟随 `--nav-default` */
+  navWidth: number | null
+  onNavWidth: (width: number | null) => void
 }
 
 /* 导航列：四段（头部内块 · 上区主导航 · 下区当前 · 底部一行），两处收起分开 ——
@@ -54,6 +58,8 @@ export function Nav({
   onToggleMain,
   children,
   onSelect,
+  navWidth,
+  onNavWidth,
 }: NavProps) {
   const { t } = useTranslation()
   /* 收起态下整列悬停才把标志换成展开图标，但要在收拢动画走完之后才允许：
@@ -90,10 +96,17 @@ export function Nav({
     onSelect(item)
   }
   const currentLabel = t(scene)
+  const resize = useNavResize(navWidth, onNavWidth)
 
   return (
     <nav
-      className={['nav', railLook ? 'nav--collapsed' : '', revealReady ? 'nav--reveal' : '']
+      ref={resize.ref}
+      className={[
+        'nav',
+        railLook ? 'nav--collapsed' : '',
+        revealReady ? 'nav--reveal' : '',
+        resize.dragging ? 'nav--resizing' : '',
+      ]
         .filter(Boolean)
         .join(' ')}
       aria-label={t('shell.navigation.label')}
@@ -117,6 +130,26 @@ export function Nav({
         {children}
       </NavScene>
       <NavFooter name={accountName} shortcuts={shortcuts} onSelect={select} />
+      {railLook ? null : (
+        <>
+          <span className="nav__grip" aria-hidden="true" />
+          <div
+            className="nav__resize"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label={t('shell.navigation.resize')}
+            aria-valuemin={resize.min}
+            aria-valuemax={resize.max}
+            aria-valuenow={resize.current}
+            tabIndex={0}
+            onPointerEnter={resize.onPointerEnter}
+            onPointerLeave={resize.onPointerLeave}
+            onPointerDown={resize.onPointerDown}
+            onKeyDown={resize.onKeyDown}
+            onDoubleClick={resize.onDoubleClick}
+          />
+        </>
+      )}
     </nav>
   )
 }

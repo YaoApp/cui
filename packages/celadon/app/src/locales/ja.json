@@ -62,6 +62,7 @@
   "data.error.forbidden": "アクセス権がありません",
   "data.error.insufficientScope": "権限が足りません",
   "modal.close": "閉じる",
+  "shell.navigation.resize": "ナビゲーション列の幅を調整",
   "shell.navigation.label": "メインナビゲーション",
   "shell.navigation.main": "スタート",
   "shell.navigation.current": "現在",

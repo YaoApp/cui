@@ -221,6 +221,7 @@ export type I18nKey =
   | 'shell.navigation.item.workspace'
   | 'shell.navigation.label'
   | 'shell.navigation.main'
+  | 'shell.navigation.resize'
   | 'shell.navigation.scene.none'
   | 'shell.window.close'
   | 'shell.window.minimize'
@@ -453,6 +454,7 @@ declare module 'i18next' {
         'shell.navigation.item.workspace': string
         'shell.navigation.label': string
         'shell.navigation.main': string
+        'shell.navigation.resize': string
         'shell.navigation.scene.none': string
         'shell.window.close': string
         'shell.window.minimize': string
