@@ -12,11 +12,14 @@ type ColumnsState = {
   /** 标签浏览器收掉：整栏让给内容区 */
   browserCollapsed: boolean
   browserSide: BrowserSide
+  /** 导航列宽度（像素）。null 表示跟随 `--nav-default`，用户拖过把手才有值 */
+  navWidth: number | null
   setNavCollapsed: (collapsed: boolean) => void
   toggleNav: () => void
   toggleNavMain: () => void
   toggleBrowser: () => void
   setBrowserSide: (side: BrowserSide) => void
+  setNavWidth: (width: number | null) => void
 }
 
 /* 三栏的布局事实：两处收起、标签浏览器所在的一侧。装配层、内容区与快捷键都读它，
@@ -30,6 +33,7 @@ export const useColumnsStore = create<ColumnsState>()(
         navMainCollapsed: false,
         browserCollapsed: false,
         browserSide: 'right',
+        navWidth: null,
         setNavCollapsed: (navCollapsed) =>
           set({ navCollapsed }, false, 'layout/setNavCollapsed'),
         toggleNav: () =>
@@ -44,6 +48,7 @@ export const useColumnsStore = create<ColumnsState>()(
           set({ browserCollapsed: !get().browserCollapsed }, false, 'layout/toggleBrowser'),
         setBrowserSide: (browserSide) =>
           set({ browserSide }, false, 'layout/setBrowserSide'),
+        setNavWidth: (navWidth) => set({ navWidth }, false, 'layout/setNavWidth'),
       }),
       {
         name: 'cui.layout',
@@ -54,6 +59,7 @@ export const useColumnsStore = create<ColumnsState>()(
           navMainCollapsed: state.navMainCollapsed,
           browserCollapsed: state.browserCollapsed,
           browserSide: state.browserSide,
+          navWidth: state.navWidth,
         }),
       },
     ),

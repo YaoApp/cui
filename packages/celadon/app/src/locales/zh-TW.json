@@ -62,6 +62,7 @@
   "data.error.forbidden": "沒有存取權限",
   "data.error.insufficientScope": "權限不足",
   "modal.close": "關閉",
+  "shell.navigation.resize": "調整導覽列寬度",
   "shell.navigation.label": "主導覽",
   "shell.navigation.main": "開始",
   "shell.navigation.current": "當前",

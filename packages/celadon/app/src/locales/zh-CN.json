@@ -62,6 +62,7 @@
   "data.error.forbidden": "没有访问权限",
   "data.error.insufficientScope": "权限不足",
   "modal.close": "关闭",
+  "shell.navigation.resize": "调整导航列宽度",
   "shell.navigation.label": "主导航",
   "shell.navigation.main": "开始",
   "shell.navigation.current": "当前",

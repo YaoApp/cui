@@ -18,6 +18,7 @@ function renderNav(props: Partial<Parameters<typeof Nav>[0]> = {}) {
   const onSelect = props.onSelect ?? vi.fn()
   const onToggle = props.onToggle ?? vi.fn()
   const onToggleMain = props.onToggleMain ?? vi.fn()
+  const onNavWidth = props.onNavWidth ?? vi.fn()
   render(
     <MemoryRouter>
       <Nav
@@ -31,6 +32,8 @@ function renderNav(props: Partial<Parameters<typeof Nav>[0]> = {}) {
         mainFolded={false}
         onToggleMain={onToggleMain}
         onSelect={onSelect}
+        navWidth={null}
+        onNavWidth={onNavWidth}
         {...props}
       />
     </MemoryRouter>,

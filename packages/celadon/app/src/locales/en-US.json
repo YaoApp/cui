@@ -62,6 +62,7 @@
   "data.error.forbidden": "No access",
   "data.error.insufficientScope": "Not enough permission",
   "modal.close": "Close",
+  "shell.navigation.resize": "Resize the navigation column",
   "shell.navigation.label": "Main navigation",
   "shell.navigation.main": "Start",
   "shell.navigation.current": "Now",

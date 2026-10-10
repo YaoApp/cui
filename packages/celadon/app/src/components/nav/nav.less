@@ -7,6 +7,8 @@
    视口变窄先收第三栏，导航列只在 < --nav-auto-collapse 时自动进图标轨（见文件末尾的媒体查询）。 */
 .nav {
   flex: none;
+  /* 右缘把手绝对定位在列上 */
+  position: relative;
   /* 自己做容器：列宽是形态的唯一判据，窄的时候无论 JS 时序如何都不画文字 */
   container-type: inline-size;
   box-sizing: border-box;
@@ -15,11 +17,63 @@
   /* 整列的收放：展开按 F4 的 panel 档（200ms 减速），收起在下面按 collapse 档（120ms 加速） */
   transition: inline-size var(--duration-base) var(--easing-decelerate);
   gap: var(--spacing-8);
-  inline-size: var(--nav-default);
+  /* 宽度：用户拖过把手就用存下来的值，没拖过跟随默认。样式这一层再夹一次上下限，
+     存值越界（旧偏好或窗口变小）也不会把列压到最小宽度以下（design/main-shell.md §三 第 4 条） */
+  inline-size: clamp(var(--nav-min), var(--nav-width, var(--nav-default)), var(--nav-max));
   min-block-size: 0;
   padding: var(--spacing-8);
   background: var(--background-navigation);
   border-inline-end: var(--border-width) solid var(--border-subtle);
+}
+
+/* 拖动中把宽度过渡关掉，做到跟手；键盘调整与收起展开仍走上面的过渡。
+   同时关掉文本选择：拖过内容时不会把界面文字刷成选中态。 */
+.nav--resizing {
+  transition: none;
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* 首次落位（进页面还原存值）不要动画：这一帧挂上，下一帧由脚本摘掉 */
+.nav--instant {
+  transition: none;
+}
+
+/* 右缘的拖拽把手，按 VS Code 的 sash 那套：命中区 8 像素压在列的内缘上；
+   光标即时表达（一进入就是拖动光标）；高亮**延迟** 300 毫秒才显形（由钩子加
+   `nav--resize-hover`），拖动中强制显示。 */
+.nav__resize {
+  position: absolute;
+  z-index: 2;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: var(--spacing-8);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.nav--resize-hover,
+.nav--resizing {
+  border-inline-end-color: var(--border-hover);
+}
+
+/* 高亮那条带：宽度取 VS Code 的 sash 悬停尺寸（`--vscode-sash-hover-size` 是 4px，
+   这里用间距刻度的 4），画在分割线内侧一格内距里；绝对定位不参与布局，
+   所以列宽与内容位置一像素都不动。 */
+.nav__grip {
+  position: absolute;
+  z-index: 1;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: var(--spacing-4);
+  background: var(--border-hover);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav--resize-hover .nav__grip,
+.nav--resizing .nav__grip {
+  opacity: 1;
 }
 
 /* 收起：Web 留图标轨，客户端整列为 0（`--nav-collapsed-desktop`），红绿灯与收起键位置不变。 */
@@ -490,20 +544,18 @@
   .nav__main-head {
     display: none;
   }
-}
 
-@media (width <= 1023px) {
-  .nav {
-    inline-size: var(--nav-collapsed);
-  }
-
-  .nav__label,
-  .nav__brand,
-  .nav__name,
-  .nav__main-head .nav__section {
+  /* 列宽不够时整列按图标轨那一套呈现：二级导航与底部一行的文字收走，只留图标、
+     标志与头像。业务域插进来的内容一并让位，避免文字压到内容区上。 */
+  .nav__scene,
+  .nav__shortcuts,
+  .nav__name {
     display: none;
   }
 }
+
+/* 视口不够宽时由装配层把 collapsed 置位，走与手动收起完全相同的那一套样式；
+   这里不再按视口另写一份呈现（design/foundations.md F6）。 */
 
 /* 用户区与折叠行右端对齐：把这两个容器与里面的快捷图标钉死，
    免得被共享的条目规则（32 高、上下内距 8）撑出多余的空间。 */
