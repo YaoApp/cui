@@ -82,8 +82,8 @@ function renderProbe(response?: EntryAuthResponse, entry = '/login') {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Probe response={response} />} />
-          {/* 登录成功的第一站是欢迎页；成功地址由欢迎页自己接着走 */}
-          <Route path="/welcome" element={<p>欢迎页</p>} />
+          {/* 登录成功的第一站是收件箱；成功地址随后再接 */}
+          <Route path="/inbox" element={<p>收件箱</p>} />
           <Route path="/done" element={<p>已到达成功地址</p>} />
         </Routes>
       </AuthProvider>
@@ -115,7 +115,7 @@ describe('the auth provider', () => {
     renderProbe()
     await user.click(screen.getByRole('button', { name: 'complete' }))
     await waitFor(() => expect(signIn).toHaveBeenCalledWith(expect.objectContaining({ user_id: 'u1' })))
-    expect(await screen.findByText('欢迎页')).toBeTruthy()
+    expect(await screen.findByText('收件箱')).toBeTruthy()
   })
 
   it('goes to the address the link asked for when the URL names one', async () => {
@@ -179,7 +179,7 @@ describe('the auth provider', () => {
     await user.click(screen.getByRole('button', { name: 'complete' }))
 
     await waitFor(() => expect(useAuthStore.getState().notice?.text).toBe(i18n.t('auth.error.idToken' as never)))
-    expect(screen.queryByText('欢迎页')).toBeNull()
+    expect(screen.queryByText('收件箱')).toBeNull()
     expect(useAuthStore.getState().user).toBeUndefined()
     expect(signIn).not.toHaveBeenCalled()
   })
@@ -192,7 +192,7 @@ describe('the auth provider', () => {
     await user.click(screen.getByRole('button', { name: 'complete' }))
 
     await waitFor(() => expect(useAuthStore.getState().notice?.text).toBe(i18n.t('auth.error.session' as never)))
-    expect(screen.queryByText('欢迎页')).toBeNull()
+    expect(screen.queryByText('收件箱')).toBeNull()
     expect(useAuthStore.getState().user).toBeUndefined()
   })
 

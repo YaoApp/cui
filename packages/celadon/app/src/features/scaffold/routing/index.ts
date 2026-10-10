@@ -1,1 +1,0 @@
-export { RoutingPage } from './routing'

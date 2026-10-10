@@ -1,0 +1,14 @@
+/* 文字提示的视觉（`design/layout.md` §5 栏与容器 · `design/foundations.md` F3 层级）。
+   底用反色面、文字用反色文字，与设计体系里"浮层压在内容上"的一档一致；层级取 F3 的浮层档。 */
+.tooltip__positioner {
+  z-index: var(--z-overlay);
+}
+
+.tooltip__popup {
+  padding: var(--spacing-4) var(--spacing-8);
+  background: var(--background-inverse);
+  color: var(--text-inverse);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-caption);
+  box-shadow: var(--shadow-floating);
+}

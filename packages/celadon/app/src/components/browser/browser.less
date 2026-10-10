@@ -1,0 +1,129 @@
+/* 标签浏览器（第三栏）：宽度按 design/foundations.md F6 —— 最小 300，上限由列轨给；
+   让位顺序里它先缩、再整条消失。标签条不换行，溢出横向滚动，新建与操作钮吸附在右端。 */
+.browser {
+  flex: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  inline-size: var(--side-width-reading);
+  min-inline-size: var(--side-min);
+  max-inline-size: calc(100% - var(--nav-min) - var(--center-min) - var(--side-resize-handle));
+  min-block-size: 0;
+  background: var(--background-surface);
+  border-inline-start: var(--border-width) solid var(--border-subtle);
+}
+
+.browser[data-side='left'] {
+  border-inline-start: 0;
+  border-inline-end: var(--border-width) solid var(--border-subtle);
+}
+
+.browser__bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-8);
+  border-block-end: var(--border-width) solid var(--border-subtle);
+}
+
+.browser__tabs {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.browser__tabs-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  white-space: nowrap;
+}
+
+.browser__tab {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding-inline-end: var(--spacing-4);
+  border-radius: var(--radius-small);
+}
+
+.browser__tab:has([aria-selected='true']) {
+  background: var(--background-selected);
+}
+
+.browser__tab-button {
+  max-inline-size: var(--side-width-reading);
+}
+
+.browser__tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.browser__page {
+  padding: var(--spacing-16);
+}
+
+.browser__home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+}
+
+.browser__address {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+.browser__recent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+.browser__recent-title {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--text-tertiary);
+}
+
+.browser__recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.browser__recent-item,
+.browser__address-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+}
+
+.browser__web {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+.browser__hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+}
+
+/* 让位顺序的第二档（design/foundations.md F6）：导航（图标轨 56）加内容区最小宽不再容得下
+   第三栏的最小宽时，第三栏整条消失，不是压窄 —— 此时中栏才可能低于最小。
+   规则与基础规则同文件、排在它后面，才不会被模块加载顺序左右。 */
+@media (width <= 963px) {
+  .browser {
+    display: none;
+  }
+}

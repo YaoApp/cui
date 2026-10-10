@@ -17,17 +17,17 @@ describe('resolveEntry', () => {
     expect(resolveEntry({ ...base, landing: '/scaffold/base?q=alpha' })).toBe('/scaffold/base?q=alpha')
   })
 
-  it('goes to the welcome page when there is no landing', () => {
-    expect(resolveEntry({ ...base, landing: undefined })).toBe('/welcome')
+  it('goes to the inbox when there is no landing', () => {
+    expect(resolveEntry({ ...base, landing: undefined })).toBe('/inbox')
   })
 
-  it('goes to the welcome page when the follow-up logic says it is not ready', () => {
-    expect(resolveEntry({ ...base, ready: false, landing: '/scaffold/base' })).toBe('/welcome')
+  it('goes to the inbox when the follow-up logic says it is not ready', () => {
+    expect(resolveEntry({ ...base, ready: false, landing: '/scaffold/base' })).toBe('/inbox')
   })
 
   it('keeps the client chrome on the paths it decides', () => {
     expect(resolveEntry({ ...base, mode: 'in-app', signedIn: false })).toBe('/login?from=connect')
-    expect(resolveEntry({ ...base, mode: 'in-app', landing: undefined })).toBe('/welcome?from=connect')
+    expect(resolveEntry({ ...base, mode: 'in-app', landing: undefined })).toBe('/inbox?from=connect')
     expect(resolveEntry({ ...base, mode: 'in-app', needsServer: true })).toBe('/servers')
   })
 })

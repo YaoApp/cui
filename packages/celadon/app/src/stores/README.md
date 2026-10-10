@@ -7,6 +7,7 @@
 什么时候该有文件：
 
 - 这份状态**说不清归哪个功能**（跨功能共享），并且**已经有真实的消费方**；
-- 命名用**事实名**（`session.ts` · `current-team.ts`），不加 `.store` 后缀 —— 目录已经说明了角色
+- 命名用**事实名**（`tabs.ts` · `columns.ts` · `session.ts`），不加 `.store` 后缀 —— 目录已经说明了角色
   （见 [`architecture/06-state.md`](../../architecture/06-state.md)）；
-- 功能自己的私有状态不放这里，跟着它自己的域住在 `features/<域>/<名>.store.ts`。
+- 按族建目录，`stores/<族>/<事实>.ts`（`browser/tabs.ts` · `layout/columns.ts`），族里只有一个事实时同样建目录；
+- 功能自己的私有状态不放这里，跟着它自己的域住在 `features/<域>/<名>.ts`。

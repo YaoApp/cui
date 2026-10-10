@@ -102,8 +102,8 @@ function renderLogin(entry = '/login') {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          {/* 登录成功的第一站是欢迎页；成功地址由欢迎页自己接着走 */}
-          <Route path="/welcome" element={<p>欢迎页</p>} />
+          {/* 登录成功的第一站是收件箱；成功地址随后再接 */}
+          <Route path="/inbox" element={<p>收件箱</p>} />
           <Route path="/done" element={<p>已到达成功地址</p>} />
           {/* 这里只证明账号不存在时会走到这个地址，并把账号带在查询里；注册页自己另有用例 */}
           <Route path="/register" element={<RegisterProbe />} />
@@ -193,7 +193,7 @@ describe('the sign-in page', () => {
     expect(screen.queryByPlaceholderText('登录密码')).toBeNull()
   })
 
-  it('moves to the password step, signs in and lands on the welcome page', async () => {
+  it('moves to the password step, signs in and lands on the inbox', async () => {
     stubTransport()
     const user = userEvent.setup()
     renderLogin()
@@ -203,7 +203,7 @@ describe('the sign-in page', () => {
 
     await waitFor(() => expect(signIn).toHaveBeenCalledTimes(1))
     expect(signIn.mock.calls[0][0]).toMatchObject({ user_id: 'u1', access_token: 'access' })
-    expect(await screen.findByText('欢迎页')).toBeTruthy()
+    expect(await screen.findByText('收件箱')).toBeTruthy()
   })
 
   it('treats a missing verification_code_required as needing the code, like the engine does', async () => {

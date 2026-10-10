@@ -1,0 +1,181 @@
+/* 收件箱：导航列的会话列表与内容区的会话。间距取 4 基数列（design/layout.md §2），
+   颜色一律取 token，深浅两套主题都成立。 */
+
+/* 会话列表（导航列的「当前」区） */
+.inbox-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inbox-nav__section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-8);
+  padding-inline: var(--spacing-12);
+  color: var(--text-tertiary);
+  /* 与条目同一号字（14），上边距大一档 */
+  font-size: var(--font-size-body);
+  padding-block: var(--spacing-12) var(--spacing-8);
+}
+
+.inbox-nav__count {
+  white-space: nowrap;
+}
+
+.inbox-nav__item {
+  display: block;
+  padding-block: var(--spacing-8);
+  padding-inline: var(--spacing-12);
+  border-radius: var(--radius-small);
+  color: var(--text-primary);
+}
+
+.inbox-nav__item:hover {
+  background: var(--background-hover);
+}
+
+.inbox-nav__item.is-active {
+  background: var(--background-selected);
+}
+
+.inbox-nav__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  font-size: var(--font-size-body);
+}
+
+.inbox-nav__summary,
+.inbox-nav__empty {
+  display: block;
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inbox-nav__empty {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding-block: var(--spacing-8);
+  padding-inline: var(--spacing-12);
+}
+
+.inbox-nav__badge {
+  flex: none;
+  min-inline-size: var(--spacing-16);
+  padding-inline: var(--spacing-4);
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+  font-size: var(--font-size-caption);
+  text-align: center;
+}
+
+/* 会话（内容区） */
+.inbox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+  min-block-size: 100%;
+}
+
+.inbox__head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+.inbox__title {
+  margin: 0;
+  font-size: var(--font-size-subtitle);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.inbox__status {
+  padding-block: var(--spacing-4);
+  padding-inline: var(--spacing-8);
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+  font-size: var(--font-size-caption);
+}
+
+.inbox__messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inbox__message {
+  max-inline-size: 80%;
+  padding-block: var(--spacing-8);
+  padding-inline: var(--spacing-12);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-medium);
+  background: var(--background-surface);
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
+}
+
+.inbox__message--me {
+  align-self: flex-end;
+  border-color: transparent;
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+
+.inbox__refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inbox__ref {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding-block: var(--spacing-4);
+  padding-inline: var(--spacing-8);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-small);
+  font-size: var(--font-size-caption);
+}
+
+.inbox__ref-kind {
+  color: var(--text-tertiary);
+}
+
+.inbox__ref-label {
+  color: var(--text-primary);
+}
+
+.inbox__composer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  margin-block-start: auto;
+  padding-block: var(--spacing-8);
+  padding-inline: var(--spacing-12);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-medium);
+}
+
+.inbox__composer-hint {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+}

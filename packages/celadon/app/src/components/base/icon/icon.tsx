@@ -2,7 +2,7 @@ import './icon.less'
 import type { IconId } from '@/platform/icons'
 
 /** 尺寸档（见 architecture/10-icons.md §1）：产品默认 16，小档按比例变细。 */
-export type IconSize = 14 | 16 | 20 | 24
+export type IconSize = 14 | 16 | 18 | 20 | 24
 
 export type IconProps = {
   /** 与 `design/icons/manifest.json` 一一对应；写错名字由类型拦下 */

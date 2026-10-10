@@ -36,10 +36,34 @@
     "src": "book"
   },
   {
+    "id": "i-apps",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "layout-grid"
+  },
+  {
+    "id": "i-home",
+    "lib": "lucide",
+    "cat": "navigation",
+    "src": "house"
+  },
+  {
     "id": "i-search",
     "lib": "lucide",
     "cat": "action",
     "src": "search"
+  },
+  {
+    "id": "i-minus",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "minus"
+  },
+  {
+    "id": "i-new-task",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "square-pen"
   },
   {
     "id": "i-plus",
@@ -126,10 +150,28 @@
     "src": "chevron-down"
   },
   {
-    "id": "i-collapse",
+    "id": "i-dock",
     "lib": "lucide",
     "cat": "action",
-    "src": "panel-left-close"
+    "src": "chevrons-up"
+  },
+  {
+    "id": "i-undock",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "chevrons-down"
+  },
+  {
+    "id": "i-panel-left",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "panel-left"
+  },
+  {
+    "id": "i-panel-right",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "panel-right"
   },
   {
     "id": "i-dots",
@@ -172,12 +214,6 @@
     "lib": "lucide",
     "cat": "action",
     "src": "square"
-  },
-  {
-    "id": "i-expand",
-    "lib": "lucide",
-    "cat": "action",
-    "src": "panel-left-open"
   },
   {
     "id": "i-split2",

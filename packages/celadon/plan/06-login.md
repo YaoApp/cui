@@ -1,6 +1,6 @@
 # 06 · 产品级登录与注册（实现结果）
 
-- **版本**：v2.0（2026-10-09）· **状态**：已交付（单元 · 浏览器 · 拟人三层用例与门禁全绿）
+- **版本**：v2.1（2026-10-10）· **状态**：已交付（单元 · 浏览器 · 拟人三层用例与门禁全绿）；登录后的默认去向改为 `/inbox`，随布局第一阶段落地
 - **上游**：[`architecture/05-data-and-api.md`](../architecture/05-data-and-api.md) · [`architecture/06-state.md`](../architecture/06-state.md) · [`architecture/07-routing.md`](../architecture/07-routing.md) · [`architecture/15-platform.md`](../architecture/15-platform.md) · [`architecture/17-transport.md`](../architecture/17-transport.md) · [`design/prototype/`](../design/prototype/)（草图，评审用）
 - **范围**：`/user/entry` 一线的能力归一化为一套产品级实现：一个 `data/user` 域，登录页、注册页、第三方回跳页、服务器选择页与欢迎页五个页面，打开应用时的入口判定与会话失效处置。
 
@@ -14,7 +14,7 @@
 | --- | --- | --- |
 | `/login` | `features/auth/login/` | 账号步 → 按 `entryVerify` 的判定分支：密码步（可带一次性口令）或跳注册；第三方入口在当前窗口整页跳转 |
 | `/register` | `features/auth/register/` | 账号步与登录页共用判定；密码与确认密码、条款、需要时的一次性口令与页内邀请码步；响应带 `id_token` 才采纳会话，否则回登录页提示「注册成功，请登录」 |
-| `/welcome` | `features/auth/welcome/` | 登录后的第一站：展示本次会话的用户信息（内存里没有时取一次 `GET /user/profile`），点「继续」走入口配置的成功地址，也可在这里退出登录 |
+| `/welcome` | `features/auth/welcome/` | 用户信息页：展示本次会话的用户信息（内存里没有时取一次 `GET /user/profile`），点「继续」走入口配置的成功地址，也可在这里退出登录；**不再是登录后的默认去向**，默认见下表的收件箱 |
 | `/servers` | `features/auth/servers/` | 官方清单（`platform/portal/`）与自建地址，连接交宿主 `celadon_service_set` 校验并落盘；Web 只读展示当前地址 |
 | `/auth/back/:provider` | `features/auth/back/` | 第三方回跳：读 `code` 与 `state` 调 `oauthCallback`，按状态回登录页或走成功收尾 |
 | `/` | `routes/entry-gate.tsx` | 入口判定（见第 5 节），不再直接画页面 |
@@ -106,7 +106,7 @@
 | 桌面还没选过服务器 | `/servers` |
 | 有地址、没有登录标记 | `/login` |
 | 有标记、有落点 | 落点路径（含查询串） |
-| 有标记、没有落点 | `/welcome` |
+| 有标记、没有落点 | `/inbox`（收件箱，见 `08-layout-base.md`） |
 | 留位：以后接「有没有配好」的判断 | 未就绪时按没有落点处理 |
 
 装配是三层：`ServerGuard`（桌面首次去选服务器）→ 产品面（`SessionExpiryGuard` 订 401 · `RequireSession` 管未登录 · `SurfaceLayout` 与根地址的入口判定）与开发面（脚手架）。
@@ -117,9 +117,9 @@
 | --- | --- |
 | 参数 | `next`，登录后去向的唯一参数（`from` 是客户端内形态的标记，`redirect_uri` 是第三方授权的事，都不混用） |
 | 取值 | 应用命名空间**之内**的路径，不带 base，可带查询串。不合法的一律忽略：绝对地址、以 `//` 开头、带协议、根地址 `/`、以流程页开头（`/login` `/register` `/auth/back` `/servers` `/welcome`）、超长串 |
-| 默认进入不算明确意图 | 根地址与不带命名空间的站点根不写 `next`，登录后按落点与欢迎页自己决定；`next` 只出现在分享链接与深链这类明确地址上 |
+| 默认进入不算明确意图 | 根地址与不带命名空间的站点根不写 `next`，登录后按落点与收件箱自己决定；`next` 只出现在分享链接与深链这类明确地址上 |
 | 传递 | 登录 ↔ 注册 ↔ 第三方之间带着走；第三方往返期间放 `celadon.next`，收尾时用掉并删除 |
-| 收尾 | 地址上的 `next` 先看，暂存再看；都没有就去 `/welcome` |
+| 收尾 | 地址上的 `next` 先看，暂存再看；都没有就去 `/inbox` |
 
 **401 即会话失效**：传输层不再「续期一次、重放一次」，非入口类请求的 401 发一次事件；`SessionExpiryGuard` 收到后清本机标记、落点、待去地址与域状态，跳登录页并带上当前地址。入口类接口（按路径结尾认：`/user/entry` · `/user/oauth` · `/oauth/jwks`，不绑接口根）的 401 排除在外，免得打断正在填的页面；设备授权页的 `/oauth/device/authorize` 是已登录的人批准设备时调的，不在排除之列；重复的 401 只跳一次；已经在登录页时只清状态不跳。令牌的续期是另一条线，不在本册。
 
@@ -163,3 +163,4 @@
 | 2026-10-07 | 登录页与外壳、域状态、四个页面内部件交付；ID Token 本地验签 |
 | 2026-10-08 | 注册页交付，验证码弹窗抽成共用件；账号步不整体抽组件，注册不采纳没有 `id_token` 的会话 |
 | 2026-10-09 | 服务器选择页与客户端内形态一处判定；入口与默认路由（本机标记 · 最后落点 · `next` · 401 处置）；欢迎页的用户信息（含刷新后补取资料）与产品级退出登录；四份分册并入本册 |
+| 2026-10-10 | 登录后的默认去向由 `/welcome` 改为 `/inbox`（收件箱落成后生效，见 `08-layout-base.md`）；欢迎页保留为可直接打开的页，不再是默认第一站 |

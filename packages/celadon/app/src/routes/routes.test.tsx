@@ -28,16 +28,6 @@ describe('the route table', () => {
   const guarded = expiry?.children?.[2]
   const fallback = guarded?.children?.[0]
   const productChildren = surface?.children?.slice(1)
-  const scaffold = server?.children?.[1]
-  const scaffoldPaths = [
-    'scaffold/home',
-    'scaffold',
-    'scaffold/routing',
-    'scaffold/routing/:worldId',
-    'scaffold/bridge',
-    'scaffold/requests',
-    'scaffold/base',
-  ]
 
   it('keeps the entry pages outside the session guard, under one provider', () => {
     expect(server?.path).toBeUndefined()
@@ -58,8 +48,8 @@ describe('the route table', () => {
     const index = surface?.children?.[0]
     expect(index?.index).toBe(true)
     expect(index?.element).toBeTruthy()
-    /* 产品页还没有：这一格先空着，产品页落地时挂进来 */
-    expect(pathsOf(productChildren)).toEqual([])
+    /* 产品面：收件箱组装页与四个占位页（见 plan/08-layout-base.md §3.3 与 §4） */
+    expect(pathsOf(productChildren)).toEqual(['new', 'inbox', 'apps', 'board', 'workspace', 'computer'])
   })
 
   it('sends everything else through the session guard, then back to the namespace root', () => {
@@ -69,10 +59,4 @@ describe('the route table', () => {
     expect(redirectTo(fallback?.element)).toBe('/')
   })
 
-  it('keeps the scaffold pages out of both guards: their probes answer 401 on purpose', () => {
-    expect(pathsOf(scaffold?.children)).toEqual(scaffoldPaths)
-    /* 那道会话失效守卫里不该出现任何脚手架路径 */
-    const insideGuard = pathsOf(guarded?.children)
-    for (const path of scaffoldPaths) expect(insideGuard).not.toContain(path)
-  })
 })

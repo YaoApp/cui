@@ -49,6 +49,14 @@ async function stubSignIn(page: Page) {
       body: JSON.stringify({ name: 'development', version: '0.0.0', openapi: '/v1' }),
     }),
   )
+  /* 欢迎页可能是在登录之后新开的页面：内存里没有用户信息时它会取一次资料接口 */
+  await page.route('**/v1/user/profile**', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ 'yao:user_id': 'u-1', name: 'max', email: 'max@example.com' }),
+    }),
+  )
   await page.route('**/v1/user/entry**', (route) => {
     const path = new URL(route.request().url()).pathname
     const body = path.endsWith('/entry')
@@ -70,6 +78,9 @@ async function signIn(page: Page) {
   await expect(page.getByPlaceholder('登录密码')).toBeVisible()
   await page.getByPlaceholder('登录密码').fill('secret-1')
   await page.getByRole('button', { name: '登录' }).click()
+  /* 登录后的落点现在是收件箱，欢迎页仍可由它自己的地址打开 */
+  await expect(page).toHaveURL(/\/app\/inbox$/)
+  await page.goto('/app/welcome')
   await expect(page).toHaveURL(/\/app\/welcome$/)
 }
 

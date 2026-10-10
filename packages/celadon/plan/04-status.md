@@ -19,7 +19,7 @@
 | `features/scaffold` | 四个开发期页面 `/scaffold` · `/scaffold/routing` · `/scaffold/bridge` · `/scaffold/requests`；导航常量 `nav.ts`、页壳 `ScaffoldPage`（页头与导航统一渲染）、页头与导航组件 | 单元用例 · 浏览器用例 |
 | `features/home` | 应用首页 `/`：版本信息 · 语言与主题 · 通往脚手架的四条链接 | 单元用例 · 浏览器用例 |
 | `components` | `base`（按钮、图标等）· `locale-switch` · `theme-toggle` · `page`（`Page`/`PageSection`/`PageRow`/`PageCell`）| 单元用例 |
-| `routes` | 外壳 `surface-layout`（仅渲染 `<main>` 与 `<Outlet/>`）· `routes.tsx`（`/` · `/scaffold/*` · 未知路径返回 `/`）| 单元用例 · 浏览器用例 |
+| `routes` | 外壳 `layout`（三栏：导航列 · 内容区 · 标签浏览器）· `routes.tsx`（产品面各页 · `/scaffold/*` · 未知路径返回入口）| 单元用例 · 浏览器用例 |
 | `stores/` | 空目录，仅有 `README.md` 说明 store 的建立时机 | —— |
 | 门禁 | `lint` · `check`（12 个检查器）· 检查器自测 **85/85** · 单元 **61 文件 / 308 条** · 浏览器 **35 条** · 拟人 **2 个场景** · `build` | 每次交付前全部执行 |
 

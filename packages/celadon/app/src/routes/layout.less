@@ -1,0 +1,21 @@
+/* 三栏外壳：列轨与让步顺序取自 design/foundations.md F6 —— 侧栏先缩、再整条消失，
+   中栏才可能低于最小；导航栏不参与宽度让步（它只在窄视口进图标轨，见 components/nav/nav.less）。
+   高度链上每一环都是弹性列，下一环的 flex / min-block-size 才有确定高度可算。 */
+.layout {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  min-block-size: 0;
+  /* 三栏定在自己的高度里：栏内溢出交给各自的滚动容器，页面本身不滚 */
+  overflow: hidden;
+}
+
+/* 第三栏换到左边：列序对调，分界线交给 components/browser 自己的 data-side。 */
+.layout[data-browser='left'] {
+  flex-direction: row-reverse;
+}
+
+/* 第三栏收掉：整条让给内容区（再引用一次又切回来，见 design/main-shell.md §五）。 */
+.layout[data-browser='collapsed'] .browser {
+  display: none;
+}

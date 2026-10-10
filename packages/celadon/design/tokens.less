@@ -258,6 +258,12 @@
   --side-width-wide:840px;
   /* 侧栏上限**不写死**：= 总宽 − 导航区 − 内容区最小（见 --center-min）。用户可自由拖拽到此上限。 */
   --side-resize-handle:6px;   /* 拖拽把手宽度（贴在内容区与侧栏之间） */
+  /* 滚动条：三栏、弹窗与列表共用一套（尺寸与滑块色都只写在这里）。
+     尺寸三档按 4 基数：small 4（导航列这类窄栏）· medium 6（内容区与面板）· large 8（大页面）。
+     滑块色与控件边界同源，悬停加深一档。 */
+  --scrollbar-size-small:4px; --scrollbar-size-medium:6px; --scrollbar-size-large:8px;
+  --scrollbar-thumb:var(--border-control); --scrollbar-thumb-hover:var(--border-hover);
+  --scrollbar-track:transparent;
   --content-max:880px; --content-max-wide:1040px;           /* 中栏内文可读最大宽 */
   --auth-card-width:480px;                                  /* 入口页（登录 / 注册 / 服务器选择）的卡片宽度 */
   /* 弹窗面板的两档宽度：表单与步骤用窄档（与入口页卡片同宽），打开一整页内容用宽档（中栏可读宽） */
