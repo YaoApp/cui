@@ -93,9 +93,9 @@ app/src/components/nav/
 ### 已实现：宽度可调与窄视口合成一套状态
 
 - 列宽可拖右缘把手调整，取值夹在 `--nav-min` 264 与 `--nav-max` 420 之间，初始 `--nav-default` 280，自由拖动不做吸附；上限另受「窗口宽减内容区最小 400 减第三栏最小 300」约束，存值越界时在样式层与逻辑层各夹一次。宽度作为用户偏好记在本机（`stores/layout/columns.ts` 的 `navWidth`，`null` 表示跟随默认）。
-- 把手按可拖动分割条那一套：光标即时表达，高亮停住 300 毫秒后显形、宽度 4 像素、画在分割线原位且不参与布局；位移不到 4 像素按点击处理；拖动中的落位每帧最多应用一次；键盘左右箭头每次 8 像素、`Home` 与 `End` 到上下限、双击复位。
+- 把手按可拖动分割条那一套：光标即时表达，高亮停住 300 毫秒后显形、宽度 4 像素、压在分割线上向列内铺开且不参与布局；位移不到 4 像素按点击处理；拖动中的落位每帧最多应用一次；键盘左右箭头每次 8 像素、`Home` 与 `End` 到上下限、双击复位。
 - 窄视口（宽度不超过 1023）由装配层把整列收起，与手动点收起走同一个状态与同一套样式；两处都不再按视口另写呈现。
-- 规则见 `design/main-shell.md` §三 第 4 条与 `design/foundations.md` F6；用例见 `app/src/components/nav/hooks/use-nav-resize.test.tsx` 与 `app/src/components/nav/tests/resize.browser.ts`。
+- 宽度与上下限的规则见 `design/main-shell.md` §三 第 4 条，分割线拖动与高亮的规则见 `design/foundations.md` F5，三栏让步与导航收起三档见 F6；用例见 `app/src/components/nav/hooks/use-nav-resize.test.tsx` 与 `app/src/components/nav/tests/resize.browser.ts`。
 
 ### 待做：窄视口手动展开为浮层
 

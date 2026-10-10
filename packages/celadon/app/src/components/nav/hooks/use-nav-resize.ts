@@ -150,11 +150,13 @@ export function useNavResize(
     nodeRef.current?.classList.toggle('nav--resize-hover', hovered)
   }, [hovered])
 
-  /* 卸载时清掉挂起的计时器与帧 */
+  /* 卸载时清掉挂起的计时器与帧，并把接管过的正文光标交还：
+     拖动中列被卸载、或指针在窗口外释放导致抬起事件到不了时，光标不会卡在拖动光标上 */
   useEffect(
     () => () => {
       clearHoverTimer()
       if (frame.current !== null) window.cancelAnimationFrame(frame.current)
+      document.body.style.removeProperty('cursor')
     },
     [clearHoverTimer],
   )
