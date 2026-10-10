@@ -6,34 +6,14 @@ import { RegisterPage } from '@/features/auth/register'
 import { ServersPage } from '@/features/auth/servers'
 import { WelcomePage } from '@/features/auth/welcome'
 import { PlaceholderPage } from '@/components/content'
-import { HomePage } from '@/features/home'
 import { InboxPage } from '@/features/inbox'
-import { BasePage } from '@/features/scaffold/base'
-import { BridgePage } from '@/features/scaffold/bridge'
-import { OverviewPage } from '@/features/scaffold/overview'
-import { RequestsPage } from '@/features/scaffold/requests'
-import { RoutingPage } from '@/features/scaffold/routing'
 import { EntryGate, ServerGuard } from './entry-gate'
 import { RequireSession, SessionExpiryGuard } from './session-guard'
 import { AppLayout } from './layout'
 
 /* 路由表：**只做装配**，业务实现不住这里。应用挂在构建决定的段下（base，见 04-host-integration.md）；
-   路径**在 base 之下**：根是入口判定，脚手架在 `/scaffold/*`（见 architecture/07-routing.md · plan/05-scaffold.md）。 */
+   路径**在 base 之下**：根是入口判定，产品页在导航六项的地址下。 */
 
-/* 开发面：脚手架页面与产品面共用外壳，但**不进会话失效守卫与会话守卫** ——
-   这些页面的探针会故意打出 401 看预期失败态，被守卫接走就没法看。 */
-const scaffoldRoutes: RouteObject[] = [
-  /* 版本信息页：真首页到来之前给壳与主题做核对，地址在脚手架命名空间下 */
-  { path: 'scaffold/home', element: <HomePage /> },
-  { path: 'scaffold', element: <OverviewPage /> },
-  /* 路由参数的样例：对象在路径里（`/scaffold/routing/<worldId>`） */
-  { path: 'scaffold/routing', element: <RoutingPage /> },
-  { path: 'scaffold/routing/:worldId', element: <RoutingPage /> },
-  { path: 'scaffold/bridge', element: <BridgePage /> },
-  { path: 'scaffold/requests', element: <RequestsPage /> },
-  /* 基础件清单页：人类验收与浏览器断言共用 */
-  { path: 'scaffold/base', element: <BasePage /> },
-]
 
 /* 产品面：第一阶段先落收件箱组装页，其余四个入口用占位页（见 plan/08-layout-base.md §3.3 与 §4）。 */
 const productRoutes: RouteObject[] = [
@@ -92,7 +72,6 @@ export const routes: RouteObject[] = [
       },
       {
         element: <AppLayout />,
-        children: scaffoldRoutes,
       },
     ],
   },

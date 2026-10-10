@@ -4,7 +4,7 @@
  * 依据 `15-platform.md` §5：宿主差异只在平台层消化；要问"这是不是桌面 / 能不能做某事"先问 `client/`
  * （能力开关），要读写服务地址走 `service/` 的面孔；`bridge/` 是平台层的内部机制。
  *
- * 白名单只有 `features/scaffold/bridge/**` —— 它是桥检查页，用途就是逐条点名调命令。
+ * 白名单只有 `platform/bridge/**` —— 平台桥是唯一该点名调宿主命令的地方。
  * 目标目录取 process.argv[2]，默认 `app/src`；给文件时只看这些文件（改动文件级）。 */
 
 import { readdirSync, readFileSync } from 'node:fs'
@@ -23,7 +23,7 @@ if (missing.length) {
 /** 受约束的上层（平台层以下不许出现宿主机制）。 */
 const LAYERS = ['features', 'components', 'routes']
 /** 白名单：桥检查页。 */
-const ALLOW = /^features[\\/]scaffold[\\/]bridge[\\/]/
+const ALLOW = /^platform[\\/]bridge[\\/]/
 const CODE = /\.(?:ts|tsx)$/
 /** 把注释换成等长空白（保留换行），免得注释里的 import 被当成真的；
     行注释只在 `//` 前面不是引号/冒号/反斜杠时才算注释（保住字符串里的 `https://`）。 */

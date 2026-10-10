@@ -101,88 +101,8 @@ export type I18nKey =
   | 'auth.welcome.name'
   | 'auth.welcome.title'
   | 'auth.welcome.userId'
-  | 'base.action.block'
-  | 'base.captcha.id'
-  | 'base.captcha.image'
-  | 'base.captcha.label'
-  | 'base.captcha.placeholder'
-  | 'base.captcha.refresh'
-  | 'base.checkbox.label'
-  | 'base.checkbox.labelLong'
-  | 'base.dialog.cancel'
-  | 'base.dialog.close'
-  | 'base.dialog.confirm'
-  | 'base.dialog.description'
-  | 'base.dialog.field'
-  | 'base.dialog.longBody'
-  | 'base.dialog.longTitle'
-  | 'base.dialog.nestedBody'
-  | 'base.dialog.nestedInnerBody'
-  | 'base.dialog.nestedInnerTitle'
-  | 'base.dialog.nestedTitle'
-  | 'base.dialog.openForm'
-  | 'base.dialog.openLong'
-  | 'base.dialog.openNested'
-  | 'base.dialog.openNestedInner'
-  | 'base.dialog.openPage'
-  | 'base.dialog.pageBody'
-  | 'base.dialog.pageTitle'
-  | 'base.dialog.title'
-  | 'base.group.button'
-  | 'base.group.captcha'
-  | 'base.group.checkbox'
-  | 'base.group.dialog'
-  | 'base.group.icon'
-  | 'base.group.input'
-  | 'base.group.link'
-  | 'base.group.otp'
-  | 'base.group.segmented'
-  | 'base.group.select'
-  | 'base.group.theme'
-  | 'base.message.error'
-  | 'base.message.hint'
-  | 'base.otp.cell'
-  | 'base.otp.error'
-  | 'base.otp.hint'
-  | 'base.otp.input'
-  | 'base.otp.label'
-  | 'base.select.empty'
-  | 'base.select.noMatch'
-  | 'base.select.placeholder'
-  | 'base.select.search'
-  | 'base.sub.brands'
-  | 'base.sub.controls'
-  | 'base.sub.empty'
-  | 'base.sub.groups'
-  | 'base.sub.icon'
-  | 'base.sub.iconSizes'
-  | 'base.sub.iconText'
-  | 'base.sub.longList'
-  | 'base.sub.messages'
-  | 'base.sub.multiple'
-  | 'base.sub.options'
-  | 'base.sub.props'
-  | 'base.sub.search'
-  | 'base.sub.signInIcons'
-  | 'base.sub.sizes'
-  | 'base.sub.states'
-  | 'base.sub.types'
-  | 'base.sub.variants'
-  | 'base.title'
-  | 'bridge.actions'
-  | 'bridge.appInfo'
-  | 'bridge.bridge'
-  | 'bridge.capabilities'
-  | 'bridge.client'
-  | 'bridge.credential'
-  | 'bridge.credentialKey'
-  | 'bridge.credentialKeyMissing'
-  | 'bridge.credentialKeyNone'
-  | 'bridge.egress'
-  | 'bridge.egressHint'
   | 'bridge.error.bridge.notRunning'
   | 'bridge.error.bridge.rejected'
-  | 'bridge.error.bridge.threw'
   | 'bridge.error.bridge.unavailable'
   | 'bridge.error.bridge.unknown'
   | 'bridge.error.credential.noEntry'
@@ -219,41 +139,6 @@ export type I18nKey =
   | 'bridge.error.transport.status'
   | 'bridge.error.transport.timeout'
   | 'bridge.error.unauthorized'
-  | 'bridge.filePick'
-  | 'bridge.folderPick'
-  | 'bridge.hintClient'
-  | 'bridge.hostAbilities'
-  | 'bridge.hostHint'
-  | 'bridge.language'
-  | 'bridge.list'
-  | 'bridge.localIps'
-  | 'bridge.notPinged'
-  | 'bridge.openBrowser'
-  | 'bridge.openInClient'
-  | 'bridge.path'
-  | 'bridge.platform'
-  | 'bridge.read'
-  | 'bridge.ready'
-  | 'bridge.remove'
-  | 'bridge.result'
-  | 'bridge.results'
-  | 'bridge.reveal'
-  | 'bridge.secret'
-  | 'bridge.service'
-  | 'bridge.serviceAddress'
-  | 'bridge.serviceAddressHint'
-  | 'bridge.serviceGet'
-  | 'bridge.serviceInfo'
-  | 'bridge.serviceInfoRead'
-  | 'bridge.serviceSet'
-  | 'bridge.themeDark'
-  | 'bridge.themeLight'
-  | 'bridge.themeRead'
-  | 'bridge.title'
-  | 'bridge.transport'
-  | 'bridge.transportProbe'
-  | 'bridge.url'
-  | 'bridge.write'
   | 'client.bootFailed'
   | 'client.bootRetry'
   | 'client.loading'
@@ -274,22 +159,6 @@ export type I18nKey =
   | 'data.error.transport.timeout'
   | 'data.error.unauthorized'
   | 'data.error.user.invalidCaptcha'
-  | 'header.refresh'
-  | 'home.client'
-  | 'home.clientDesktop'
-  | 'home.clientWeb'
-  | 'home.host'
-  | 'home.hostNone'
-  | 'home.hostReady'
-  | 'home.language'
-  | 'home.namespace'
-  | 'home.os'
-  | 'home.scaffold'
-  | 'home.theme'
-  | 'home.themeDark'
-  | 'home.themeLight'
-  | 'home.title'
-  | 'home.version'
   | 'inbox.composer.hint'
   | 'inbox.composer.placeholder'
   | 'inbox.mention.action'
@@ -325,89 +194,6 @@ export type I18nKey =
   | 'localeSwitch.zhCN'
   | 'localeSwitch.zhTW'
   | 'modal.close'
-  | 'nav.appLabel'
-  | 'nav.bridge'
-  | 'nav.home'
-  | 'nav.overview'
-  | 'nav.requests'
-  | 'nav.routing'
-  | 'overview.brands'
-  | 'overview.brandsOther'
-  | 'overview.browser'
-  | 'overview.client'
-  | 'overview.clientDesktop'
-  | 'overview.clientId'
-  | 'overview.clientType'
-  | 'overview.clientWeb'
-  | 'overview.host'
-  | 'overview.hostNone'
-  | 'overview.hostReady'
-  | 'overview.icons'
-  | 'overview.namespace'
-  | 'overview.os'
-  | 'overview.title'
-  | 'overview.trial'
-  | 'overview.version'
-  | 'requests.authenticatedDenied'
-  | 'requests.authzHint'
-  | 'requests.colActions'
-  | 'requests.emailUnverified'
-  | 'requests.emailVerified'
-  | 'requests.expectedFailure'
-  | 'requests.fieldEmail'
-  | 'requests.fieldEmailVerified'
-  | 'requests.fieldId'
-  | 'requests.fieldName'
-  | 'requests.fieldPreferredUsername'
-  | 'requests.fieldRoleId'
-  | 'requests.fieldStatus'
-  | 'requests.fieldTypeId'
-  | 'requests.fieldUserId'
-  | 'requests.listUsers'
-  | 'requests.listUsersHint'
-  | 'requests.locale'
-  | 'requests.loginAction'
-  | 'requests.loginHint'
-  | 'requests.loginResult'
-  | 'requests.loginTest'
-  | 'requests.loginTestHint'
-  | 'requests.noEmailForLogin'
-  | 'requests.ok'
-  | 'requests.protectedGet'
-  | 'requests.protectedPost'
-  | 'requests.publicGet'
-  | 'requests.publicPost'
-  | 'requests.reload'
-  | 'requests.scaffold'
-  | 'requests.scaffoldHint'
-  | 'requests.signOut'
-  | 'requests.signOutDone'
-  | 'requests.stateError'
-  | 'requests.stateIdle'
-  | 'requests.stateLoading'
-  | 'requests.stateOk'
-  | 'requests.states'
-  | 'requests.statesHint'
-  | 'requests.statusActive'
-  | 'requests.theme'
-  | 'requests.title'
-  | 'routing.detailLabel'
-  | 'routing.filter'
-  | 'routing.filterPlaceholder'
-  | 'routing.fixture.e1.name'
-  | 'routing.fixture.e2.name'
-  | 'routing.fixture.e3.name'
-  | 'routing.fixture.e4.name'
-  | 'routing.fixture.w1.name'
-  | 'routing.fixture.w1.summary'
-  | 'routing.fixture.w2.name'
-  | 'routing.fixture.w2.summary'
-  | 'routing.fixture.w3.name'
-  | 'routing.fixture.w3.summary'
-  | 'routing.missing'
-  | 'routing.navLabel'
-  | 'routing.share'
-  | 'routing.title'
   | 'shell.browser.action.collapse'
   | 'shell.browser.action.expand'
   | 'shell.browser.action.move'
@@ -547,88 +333,8 @@ declare module 'i18next' {
         'auth.welcome.name': string
         'auth.welcome.title': string
         'auth.welcome.userId': string
-        'base.action.block': string
-        'base.captcha.id': string
-        'base.captcha.image': string
-        'base.captcha.label': string
-        'base.captcha.placeholder': string
-        'base.captcha.refresh': string
-        'base.checkbox.label': string
-        'base.checkbox.labelLong': string
-        'base.dialog.cancel': string
-        'base.dialog.close': string
-        'base.dialog.confirm': string
-        'base.dialog.description': string
-        'base.dialog.field': string
-        'base.dialog.longBody': string
-        'base.dialog.longTitle': string
-        'base.dialog.nestedBody': string
-        'base.dialog.nestedInnerBody': string
-        'base.dialog.nestedInnerTitle': string
-        'base.dialog.nestedTitle': string
-        'base.dialog.openForm': string
-        'base.dialog.openLong': string
-        'base.dialog.openNested': string
-        'base.dialog.openNestedInner': string
-        'base.dialog.openPage': string
-        'base.dialog.pageBody': string
-        'base.dialog.pageTitle': string
-        'base.dialog.title': string
-        'base.group.button': string
-        'base.group.captcha': string
-        'base.group.checkbox': string
-        'base.group.dialog': string
-        'base.group.icon': string
-        'base.group.input': string
-        'base.group.link': string
-        'base.group.otp': string
-        'base.group.segmented': string
-        'base.group.select': string
-        'base.group.theme': string
-        'base.message.error': string
-        'base.message.hint': string
-        'base.otp.cell': string
-        'base.otp.error': string
-        'base.otp.hint': string
-        'base.otp.input': string
-        'base.otp.label': string
-        'base.select.empty': string
-        'base.select.noMatch': string
-        'base.select.placeholder': string
-        'base.select.search': string
-        'base.sub.brands': string
-        'base.sub.controls': string
-        'base.sub.empty': string
-        'base.sub.groups': string
-        'base.sub.icon': string
-        'base.sub.iconSizes': string
-        'base.sub.iconText': string
-        'base.sub.longList': string
-        'base.sub.messages': string
-        'base.sub.multiple': string
-        'base.sub.options': string
-        'base.sub.props': string
-        'base.sub.search': string
-        'base.sub.signInIcons': string
-        'base.sub.sizes': string
-        'base.sub.states': string
-        'base.sub.types': string
-        'base.sub.variants': string
-        'base.title': string
-        'bridge.actions': string
-        'bridge.appInfo': string
-        'bridge.bridge': string
-        'bridge.capabilities': string
-        'bridge.client': string
-        'bridge.credential': string
-        'bridge.credentialKey': string
-        'bridge.credentialKeyMissing': string
-        'bridge.credentialKeyNone': string
-        'bridge.egress': string
-        'bridge.egressHint': string
         'bridge.error.bridge.notRunning': string
         'bridge.error.bridge.rejected': string
-        'bridge.error.bridge.threw': string
         'bridge.error.bridge.unavailable': string
         'bridge.error.bridge.unknown': string
         'bridge.error.credential.noEntry': string
@@ -665,41 +371,6 @@ declare module 'i18next' {
         'bridge.error.transport.status': string
         'bridge.error.transport.timeout': string
         'bridge.error.unauthorized': string
-        'bridge.filePick': string
-        'bridge.folderPick': string
-        'bridge.hintClient': string
-        'bridge.hostAbilities': string
-        'bridge.hostHint': string
-        'bridge.language': string
-        'bridge.list': string
-        'bridge.localIps': string
-        'bridge.notPinged': string
-        'bridge.openBrowser': string
-        'bridge.openInClient': string
-        'bridge.path': string
-        'bridge.platform': string
-        'bridge.read': string
-        'bridge.ready': string
-        'bridge.remove': string
-        'bridge.result': string
-        'bridge.results': string
-        'bridge.reveal': string
-        'bridge.secret': string
-        'bridge.service': string
-        'bridge.serviceAddress': string
-        'bridge.serviceAddressHint': string
-        'bridge.serviceGet': string
-        'bridge.serviceInfo': string
-        'bridge.serviceInfoRead': string
-        'bridge.serviceSet': string
-        'bridge.themeDark': string
-        'bridge.themeLight': string
-        'bridge.themeRead': string
-        'bridge.title': string
-        'bridge.transport': string
-        'bridge.transportProbe': string
-        'bridge.url': string
-        'bridge.write': string
         'client.bootFailed': string
         'client.bootRetry': string
         'client.loading': string
@@ -720,22 +391,6 @@ declare module 'i18next' {
         'data.error.transport.timeout': string
         'data.error.unauthorized': string
         'data.error.user.invalidCaptcha': string
-        'header.refresh': string
-        'home.client': string
-        'home.clientDesktop': string
-        'home.clientWeb': string
-        'home.host': string
-        'home.hostNone': string
-        'home.hostReady': string
-        'home.language': string
-        'home.namespace': string
-        'home.os': string
-        'home.scaffold': string
-        'home.theme': string
-        'home.themeDark': string
-        'home.themeLight': string
-        'home.title': string
-        'home.version': string
         'inbox.composer.hint': string
         'inbox.composer.placeholder': string
         'inbox.mention.action': string
@@ -771,89 +426,6 @@ declare module 'i18next' {
         'localeSwitch.zhCN': string
         'localeSwitch.zhTW': string
         'modal.close': string
-        'nav.appLabel': string
-        'nav.bridge': string
-        'nav.home': string
-        'nav.overview': string
-        'nav.requests': string
-        'nav.routing': string
-        'overview.brands': string
-        'overview.brandsOther': string
-        'overview.browser': string
-        'overview.client': string
-        'overview.clientDesktop': string
-        'overview.clientId': string
-        'overview.clientType': string
-        'overview.clientWeb': string
-        'overview.host': string
-        'overview.hostNone': string
-        'overview.hostReady': string
-        'overview.icons': string
-        'overview.namespace': string
-        'overview.os': string
-        'overview.title': string
-        'overview.trial': string
-        'overview.version': string
-        'requests.authenticatedDenied': string
-        'requests.authzHint': string
-        'requests.colActions': string
-        'requests.emailUnverified': string
-        'requests.emailVerified': string
-        'requests.expectedFailure': string
-        'requests.fieldEmail': string
-        'requests.fieldEmailVerified': string
-        'requests.fieldId': string
-        'requests.fieldName': string
-        'requests.fieldPreferredUsername': string
-        'requests.fieldRoleId': string
-        'requests.fieldStatus': string
-        'requests.fieldTypeId': string
-        'requests.fieldUserId': string
-        'requests.listUsers': string
-        'requests.listUsersHint': string
-        'requests.locale': string
-        'requests.loginAction': string
-        'requests.loginHint': string
-        'requests.loginResult': string
-        'requests.loginTest': string
-        'requests.loginTestHint': string
-        'requests.noEmailForLogin': string
-        'requests.ok': string
-        'requests.protectedGet': string
-        'requests.protectedPost': string
-        'requests.publicGet': string
-        'requests.publicPost': string
-        'requests.reload': string
-        'requests.scaffold': string
-        'requests.scaffoldHint': string
-        'requests.signOut': string
-        'requests.signOutDone': string
-        'requests.stateError': string
-        'requests.stateIdle': string
-        'requests.stateLoading': string
-        'requests.stateOk': string
-        'requests.states': string
-        'requests.statesHint': string
-        'requests.statusActive': string
-        'requests.theme': string
-        'requests.title': string
-        'routing.detailLabel': string
-        'routing.filter': string
-        'routing.filterPlaceholder': string
-        'routing.fixture.e1.name': string
-        'routing.fixture.e2.name': string
-        'routing.fixture.e3.name': string
-        'routing.fixture.e4.name': string
-        'routing.fixture.w1.name': string
-        'routing.fixture.w1.summary': string
-        'routing.fixture.w2.name': string
-        'routing.fixture.w2.summary': string
-        'routing.fixture.w3.name': string
-        'routing.fixture.w3.summary': string
-        'routing.missing': string
-        'routing.navLabel': string
-        'routing.share': string
-        'routing.title': string
         'shell.browser.action.collapse': string
         'shell.browser.action.expand': string
         'shell.browser.action.move': string

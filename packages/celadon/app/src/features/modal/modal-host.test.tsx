@@ -7,8 +7,8 @@ import { Button } from '@/components/base/button'
 
 const registry = {
   captcha: {
-    titleKey: 'base.dialog.title',
-    descriptionKey: 'base.dialog.description',
+    titleKey: 'shell.navigation.main',
+    descriptionKey: 'shell.navigation.label',
     body: ({ params }: { params: { username: string } }) => <p>code for {params.username}</p>,
     footer: ({ close }: { close: () => void }) => (
       <Button type="button" variant="inverse" onClick={close}>
@@ -17,7 +17,7 @@ const registry = {
     ),
   },
   page: {
-    titleKey: 'base.dialog.pageTitle',
+    titleKey: 'shell.navigation.main',
     size: 'page' as const,
     body: () => <p>page body</p>,
   },
@@ -55,7 +55,7 @@ describe('the modal page host', () => {
     render(<Harness />)
     await user.click(screen.getByRole('button', { name: 'open captcha' }))
     const dialog = await screen.findByRole('dialog')
-    expect(dialog.textContent).toContain('编辑资料')
+    expect(dialog.textContent).toContain('开始')
     expect(dialog.textContent).toContain('code for max')
     expect(screen.getByRole('button', { name: '关闭' })).toBeTruthy()
   })

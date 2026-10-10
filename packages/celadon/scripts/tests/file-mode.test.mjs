@@ -34,8 +34,8 @@ const CLEAN_FILE = [
   ['check-tokens.mjs', 'app/src/components/base/button/button.less'],
   ['check-app-layout.mjs', 'app/src/components/base/input/input.test.tsx'],
   ['check-base-components.mjs', 'app/src/components/base/button/button.tsx'],
-  ['check-bridge-imports.mjs', 'app/src/features/scaffold/base/base.tsx'],
-  ['check-effect-url-write.mjs', 'app/src/features/scaffold/base/base.tsx'],
+  ['check-bridge-imports.mjs', 'app/src/components/nav/nav.tsx'],
+  ['check-effect-url-write.mjs', 'app/src/components/nav/nav.tsx'],
   ['check-import-boundaries.mjs', 'app/src/platform/transport/fetch.ts'],
   ['check-doc-references.mjs', 'plan/01-infrastructure.md'],
 ]

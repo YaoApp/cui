@@ -2,7 +2,7 @@
 /* 预览 dist/ 的静态服务器 —— **带 SPA fallback**。
 
    为什么不能用 `python3 -m http.server`：它没有 fallback。我们的路由是**路径**路由
-   （`/app/scaffold/routing/w1`，见 architecture/07-routing.md），用户刷新深链时服务器必须把 index.html 发回去。
+   （`/app/inbox`，见 architecture/07-routing.md），用户刷新深链时服务器必须把 index.html 发回去。
    生产由引擎托管，同样需要这条 fallback —— 这是选路径路由的代价，写在 04 里。
    应用跑在**构建决定的命名空间**之下（见 architecture/04）：名字取 CUI_BASE（默认 app），根 `/` 不属于应用。
 

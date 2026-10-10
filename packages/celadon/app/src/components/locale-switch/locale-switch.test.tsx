@@ -7,10 +7,10 @@ import { useTranslation } from '@/platform/i18n'
 /* 语言切换是一个下拉（四种语言塞不进分段控件）。断言用户看到什么 ——
    语言名都是可见选项，默认"跟随系统"并显示解析出的语言，选中后页面文案跟着换。
    它现在是基础件 Select（Base UI 的 listbox），选项在展开后才渲染，所以先点开再选。 */
-/** 翻译探针：只借它看"刷新"这个词随语言变 —— 页头现在归脚手架，组件测试不许向上引。 */
-function RefreshProbe() {
+/** 翻译探针：只借它看"开始"这个词随语言变 —— 页头现在归脚手架，组件测试不许向上引。 */
+function StartProbe() {
   const { t } = useTranslation()
-  return <button type="button">{t('header.refresh')}</button>
+  return <button type="button">{t('shell.navigation.main')}</button>
 }
 
 describe('LocaleSwitch', () => {
@@ -54,15 +54,15 @@ describe('LocaleSwitch', () => {
   })
 
   it.each([
-    ['Traditional Chinese', '繁體中文', '重新整理'],
-    ['English', 'English', 'Refresh'],
-    ['Japanese', '日本語', '更新'],
+    ['Traditional Chinese', '繁體中文', '開始'],
+    ['English', 'English', 'Start'],
+    ['Japanese', '日本語', 'スタート'],
   ])('switches the visible copy to %s', async (_label, option, refresh) => {
     const user = userEvent.setup()
     render(
       <>
         <LocaleSwitch />
-        <RefreshProbe />
+        <StartProbe />
       </>,
     )
 
@@ -77,15 +77,15 @@ describe('LocaleSwitch', () => {
     render(
       <>
         <LocaleSwitch />
-        <RefreshProbe />
+        <StartProbe />
       </>,
     )
-    expect(screen.getByRole('button', { name: '刷新' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '开始' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('combobox', { name: '语言' }))
     await user.click(await screen.findByRole('option', { name: '日本語' }))
 
-    expect(screen.getByRole('button', { name: '更新' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '刷新' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'スタート' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '开始' })).not.toBeInTheDocument()
   })
 })

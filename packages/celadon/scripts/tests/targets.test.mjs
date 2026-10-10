@@ -53,7 +53,7 @@ test('checkersFor 按类别给出检查器与范围', () => {
   const cssRule = checkersFor([join(APP_SRC, 'platform/theme/tokens.css')]).find((c) => c.script === 'check-css-conventions.mjs')
   assert.deepEqual(cssRule.files, ['app/src/platform/theme/tokens.css'])
 
-  const code = checkersFor([join(APP_SRC, 'features/scaffold/base/base.tsx')]).map((c) => c.script)
+  const code = checkersFor([join(APP_SRC, 'components/nav/nav.tsx')]).map((c) => c.script)
   for (const script of ['check-app-layout.mjs', 'check-base-components.mjs', 'check-bridge-imports.mjs', 'check-effect-url-write.mjs', 'check-import-boundaries.mjs', 'check-i18n.mjs']) {
     assert.ok(code.includes(script), script)
   }
