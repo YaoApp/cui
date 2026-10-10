@@ -9,10 +9,15 @@ import { NavMain } from './parts/main'
 import { NavScene } from './parts/scene'
 import type { NavItem } from './nav.types'
 
-/* 收起动作的时长，取 design/foundations.md F4 的 collapse 档（--duration-fast 120ms） */
-const COLLAPSE_MS = 120
-/* 展开动作的时长，取 F4 的 panel 档（--duration-base 200ms） */
-const EXPAND_MS = 200
+/* 两处时长不写死，从 token 读：取 design/foundations.md F4 的 collapse 档（--duration-fast）
+   与 panel 档（--duration-base）。样式改档位时组件跟着走，两边不会各说各话。 */
+function durationMs(name: string, fallback: number): number {
+  if (typeof window === 'undefined') return fallback
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  const value = Number.parseFloat(raw)
+  if (!Number.isFinite(value)) return fallback
+  return raw.endsWith('ms') ? value : raw.endsWith('s') ? value * 1000 : fallback
+}
 
 export type NavProps = {
   items: NavItem[]
@@ -64,7 +69,7 @@ export function Nav({
       return
     }
     /* 展开按 F4 的 panel 档 200ms */
-    const timer = window.setTimeout(() => setSettled(true), EXPAND_MS)
+    const timer = window.setTimeout(() => setSettled(true), durationMs('--duration-base', 200))
     return () => window.clearTimeout(timer)
   }, [collapsed])
 
@@ -77,7 +82,7 @@ export function Nav({
     }
     /* 收起动作按 design/foundations.md F4 的 collapse 档走 --duration-fast（120ms），
        等这段动画结束再允许整列悬停揭示展开图标 */
-    const timer = window.setTimeout(() => setRevealReady(true), COLLAPSE_MS)
+    const timer = window.setTimeout(() => setRevealReady(true), durationMs('--duration-fast', 120))
     return () => window.clearTimeout(timer)
   }, [collapsed])
 

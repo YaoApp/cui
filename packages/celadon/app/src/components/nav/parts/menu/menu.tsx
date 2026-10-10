@@ -6,6 +6,9 @@ import { useTranslation } from '@/platform/i18n'
 import type { IconId } from '@/platform/icons'
 import type { NavItem } from '../../nav.types'
 
+/* 指针移开后延迟收起的时长，取 design/foundations.md F4 的 hover 档（--duration-base 200ms） */
+const CLOSE_DELAY_MS = 200
+
 export type NavMenuProps = {
   items: NavItem[]
   /** 「当前 · 场景」的完整文字，作为触发元素的无障碍名 */
@@ -32,7 +35,7 @@ export function NavMenu({ items, currentLabel, sceneIcon, onSelect }: NavMenuPro
   }
   const scheduleClose = () => {
     cancelClose()
-    closeTimer.current = window.setTimeout(() => setOpen(false), 200)
+    closeTimer.current = window.setTimeout(() => setOpen(false), CLOSE_DELAY_MS)
   }
   useEffect(() => cancelClose, [])
 

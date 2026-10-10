@@ -1,3 +1,8 @@
+/* 收起态与展开态的两条宽度界线。列宽小于前者时按图标轨画，小于后者时不画文字。
+   两条都按导航列的内容盒口径取值（展开内容盒 263、图标轨内容盒 39）。 */
+@nav-rail-band: 80px;
+@nav-label-band: 240px;
+
 /* 导航列：四段结构，宽度与让位顺序取自 design/foundations.md F6。这一栏不参与宽度让步 ——
    视口变窄先收第三栏，导航列只在 < --nav-auto-collapse 时自动进图标轨（见文件末尾的媒体查询）。 */
 .nav {
@@ -70,7 +75,7 @@
 /* 图标轨里主导航始终展示：上区被折叠过也放开（高度回到一整行）。
    这条只在列宽真的落到位（图标轨）时生效，整列收放的中间宽度里不生效，
    否则展开过程中会把本来折起的主导航给冒出来。 */
-@container (width < 80px) {
+@container (width < @nav-rail-band) {
   .nav--collapsed .nav__main,
   .nav--collapsed .nav__main--folded {
     grid-template-rows: 1fr;
@@ -123,6 +128,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* 按钮本身就是 24 方形：基础件的悬停底画在按钮上，盒子不是方的就会露出长方形。
+     基础件默认最小高度是 32，这里连同一并收掉。 */
+  inline-size: var(--spacing-24);
+  block-size: var(--spacing-24);
+  min-block-size: var(--spacing-24);
   padding: 0;
   border: 0;
   background: transparent;
@@ -136,6 +146,7 @@
 
 .nav__logo-overlay {
   position: absolute;
+  /* 与按钮同尺寸（24 × 24 方形） */
   inset: 0;
   display: inline-flex;
   align-items: center;
@@ -469,7 +480,7 @@
 
 /* 视口低于 --nav-auto-collapse：自动进图标轨（视口驱动，不写偏好）。 */
 /* 列宽没到展开态时一律按图标轨画：文字与分区名不参与过渡，避免挤在窄列里 */
-@container (width < 240px) {
+@container (width < @nav-label-band) {
   .nav__label,
   .nav__brand,
   .nav__section {
