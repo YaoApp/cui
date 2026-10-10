@@ -1,6 +1,6 @@
 /* 导航的布局归组件；选中态用设计类 .nav-item.is-active（设计系统里已有）。
-   链接与语言切换并排一行（导航里的控制件）。 */
-.nav {
+   链接与语言切换并排一行（导航里的控制件）。类名带 `scaffold-` 前缀，与产品导航列的同名类分开。 */
+.scaffold-nav {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -34,7 +34,7 @@
 
 /* 图标与文字之间留空。设计类给了选中态与配色，没给这一处的布局 ——
    组件只管设计类没有的（与 button.less 同一分工），间距走 token 不写字面量。 */
-.nav__link {
+.scaffold-nav__link {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-4);

@@ -17,7 +17,7 @@ import { useAuthMode, withMode } from './use-auth-mode'
  * 登录或注册成功之后的收尾：验签（配置允许时）、采纳会话、记下本机登录标记与用户信息，然后决定去哪。
  *
  * 去向按 `plan/06-login.md` §5：地址上带着 `next`（或第三方往返前暂存的）就去那里，
- * 没有才进欢迎页。这一步会**发请求与跳转**，按 `architecture/06-state.md` §1 不放进 store，
+ * 没有才进收件箱。这一步会**发请求与跳转**，按 `architecture/06-state.md` §1 不放进 store，
  * 作为域级动作由页面在拿到响应后调用。失败时只把一句四语文案交给 store 的 `setNotice`。
  */
 export function useCompleteSignIn() {
@@ -63,7 +63,7 @@ export function useCompleteSignIn() {
       /* 明确去向优先：地址上的 `next` 先看，第三方往返留下的暂存再看；用过就把暂存丢掉 */
       const target = readNext(location.search) ?? takeNext()
       forgetNext()
-      navigate(target ?? withMode('/welcome', mode))
+      navigate(target ?? withMode('/inbox', mode))
       return true
     },
     [config, keys, location.search, mode, navigate, t, setNotice, setUser],

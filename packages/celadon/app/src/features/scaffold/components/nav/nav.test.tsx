@@ -26,7 +26,7 @@ describe('Nav', () => {
     const { container } = render(
       <Nav items={[...ITEMS, { label: 'NoIcon', href: '/plain' }]} label="应用导航" />,
     )
-    const links = [...container.querySelectorAll('a.nav__link')]
+    const links = [...container.querySelectorAll('a.scaffold-nav__link')]
     expect(links[0].querySelector('use')?.getAttribute('href')).toBe('#i-spark')
     expect(links[1].querySelector('use')?.getAttribute('href')).toBe('#i-ws')
     expect(links[2].querySelector('svg')).toBeNull()

@@ -18,12 +18,14 @@ export type NavProps = {
    谁提供 items、点击后怎么走，都是调用方的事（见 architecture/07-routing.md）。 */
 export function Nav({ items, label, localeSwitch, onSelect }: NavProps) {
   return (
-    <nav className="nav" aria-label={label}>
-      <ul className="nav__list">
+    <nav className="scaffold-nav" aria-label={label}>
+      <ul className="scaffold-nav__list">
         {items.map((item) => (
           <li key={item.href}>
             <a
-              className={item.active ? 'nav__link nav-item is-active' : 'nav__link nav-item'}
+              className={
+                item.active ? 'scaffold-nav__link nav-item is-active' : 'scaffold-nav__link nav-item'
+              }
               href={appHref(item.href)}
               aria-current={item.active ? 'page' : undefined}
               onClick={(event) => {

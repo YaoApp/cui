@@ -5,6 +5,7 @@
 
 export { client, loadClient, ClientBootError, type Client } from './facts'
 export { useLocalePreference, useThemePreference } from './use-preferences'
+export { useWindowChrome, type WindowChrome } from './window'
 export type { ArtifactKind, BuildInfo, ClientKind, Manifest, TargetOs } from './manifest'
 export type { Capabilities } from './capabilities'
 export type { ClientInfo } from './info'

@@ -1,7 +1,7 @@
 # 06 · 状态
 
-- **版本**：v1.53
-- **最后修改**：2026-10-03 09:19:47
+- **版本**：v1.54
+- **最后修改**：2026-10-10 10:05:00
 - **说明**：私有跟 feature 走 · 公共放 `stores/` · 先问归属再问地址栏 · 什么不进 store · 改 store 留动作名
 
 ## 1. 规则
@@ -61,8 +61,8 @@ export type XxxState = {
 
 | 项 | 规则 |
 | --- | --- |
-| 住哪 | `stores/<事实>.ts`（与 `features/` 并列，见 `00-principles.md` §2.3）|
-| 命名 | **事实名**（`session.ts` · `current-team.ts`），不是域名字；**不加 `.store` 后缀**（目录即角色）|
+| 住哪 | `stores/<族>/<事实>.ts`（与 `features/` 并列，见 `00-principles.md` §2.3）。族按事实的归属分（`browser/` · `layout/`），族里只有一个事实时同样用族目录 |
+| 命名 | **事实名**（`tabs.ts` · `columns.ts` · `session.ts`），不是域名字；**不加 `.store` 后缀**（目录即角色）|
 | 谁能 import | 谁都可以；**它不许 import 上层**（features / routes / components 都不行）|
 | 地址栏 | 由**路由层**统一绑一次，功能不必知道参数名 |
 

@@ -41,10 +41,10 @@ test('sends a marked machine to its last landing', async ({ page }) => {
   await expect(page).toHaveURL(/\/app\/scaffold\/base$/)
 })
 
-test('sends a marked machine with no landing to the welcome page', async ({ page }) => {
+test('sends a marked machine with no landing to the inbox', async ({ page }) => {
   await markSignedIn(page)
   await page.goto('/app/')
-  await expect(page).toHaveURL(/\/app\/welcome$/)
+  await expect(page).toHaveURL(/\/app\/inbox$/)
 })
 
 test('takes a product call answered with 401 back to sign-in', async ({ page }) => {

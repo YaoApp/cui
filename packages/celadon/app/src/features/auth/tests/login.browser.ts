@@ -867,8 +867,9 @@ test('walks a third-party sign-in through the callback page when the instance de
   expect(body.state).toBeTruthy()
   expect((await callbackResponse).status()).toBe(200)
 
-  /* 换到会话后先进欢迎页：把本次会话的用户信息展示出来 */
-  await expect(page).toHaveURL(/\/app\/welcome$/, { timeout: 15_000 })
+  /* 换到会话后落在收件箱；欢迎页仍可直接打开，用户信息在那里展示 */
+  await expect(page).toHaveURL(/\/app\/inbox$/, { timeout: 15_000 })
+  await page.goto('/app/welcome')
   await expect(page.getByText('用户标识')).toBeVisible()
   const values = (await page.locator('.welcome__value').allTextContents()).map((text) => text.trim()).filter(Boolean)
   expect(values.length).toBeGreaterThan(0)

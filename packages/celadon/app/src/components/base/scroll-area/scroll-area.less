@@ -1,0 +1,89 @@
+/* 滚动容器：三栏共用。滚动条与溢出状态由上游部件给，这里只定尺寸、颜色与边缘阴影
+   （`design/layout.md` §5 · `design/foundations.md` F1 间距与 F3 层级）。 */
+.scroll-area {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.scroll-area__viewport {
+  flex: 1;
+  min-block-size: 0;
+  overscroll-behavior: contain;
+}
+
+/* 边缘阴影：只有那一侧真的还有内容时才画（上游在视口上给出 data-overflow-y-*）。 */
+.scroll-area::before,
+.scroll-area::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  block-size: var(--spacing-8);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.scroll-area::before {
+  inset-block-start: 0;
+  background: linear-gradient(var(--background-navigation), transparent);
+}
+
+.scroll-area::after {
+  inset-block-end: 0;
+  background: linear-gradient(transparent, var(--background-navigation));
+}
+
+.scroll-area:has(.scroll-area__viewport[data-overflow-y-start])::before,
+.scroll-area:has(.scroll-area__viewport[data-overflow-y-end])::after {
+  opacity: 1;
+}
+
+.scroll-area__bar {
+  display: flex;
+  inline-size: var(--scrollbar-size-medium);
+  margin: var(--spacing-4);
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-track);
+  /* 默认隐藏：指针进入这一块（或正在滚动）时才显出来 */
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease;
+}
+
+/* 第一档：指针进入这一块（或正在滚动）时滚动条出现；常驻档一直展示 */
+.scroll-area:hover .scroll-area__bar,
+.scroll-area__bar[data-scrolling] {
+  opacity: 1;
+}
+
+.scroll-area--persistent .scroll-area__bar {
+  opacity: 1;
+}
+
+
+.scroll-area--small .scroll-area__bar {
+  inline-size: var(--scrollbar-size-small);
+}
+
+.scroll-area--medium .scroll-area__bar {
+  inline-size: var(--scrollbar-size-medium);
+}
+
+.scroll-area--large .scroll-area__bar {
+  inline-size: var(--scrollbar-size-large);
+}
+
+.scroll-area__thumb {
+  flex: 1;
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-thumb);
+  transition: background var(--duration-fast) ease;
+}
+
+/* 第二档：指针落在滚动条本身，滑块再加深一档（与第一档分开，两个梯度各自成立） */
+.scroll-area__bar:hover .scroll-area__thumb {
+  background: var(--scrollbar-thumb-hover);
+}

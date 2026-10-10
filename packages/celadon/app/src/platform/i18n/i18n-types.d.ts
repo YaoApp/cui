@@ -290,6 +290,34 @@ export type I18nKey =
   | 'home.themeLight'
   | 'home.title'
   | 'home.version'
+  | 'inbox.composer.hint'
+  | 'inbox.composer.placeholder'
+  | 'inbox.mention.action'
+  | 'inbox.message1'
+  | 'inbox.message2'
+  | 'inbox.message3'
+  | 'inbox.message4'
+  | 'inbox.navigation.empty'
+  | 'inbox.navigation.label'
+  | 'inbox.quote.hint'
+  | 'inbox.quote.title'
+  | 'inbox.reference.builder'
+  | 'inbox.reference.contract'
+  | 'inbox.reference.kind.app'
+  | 'inbox.reference.kind.file'
+  | 'inbox.reference.kind.repo'
+  | 'inbox.reference.pdf'
+  | 'inbox.reference.repo'
+  | 'inbox.session.contract.summary'
+  | 'inbox.session.contract.title'
+  | 'inbox.session.materials.summary'
+  | 'inbox.session.materials.title'
+  | 'inbox.session.release.summary'
+  | 'inbox.session.release.title'
+  | 'inbox.session.sample'
+  | 'inbox.status.waiting'
+  | 'inbox.title'
+  | 'inbox.unread'
   | 'localeSwitch.enUS'
   | 'localeSwitch.ja'
   | 'localeSwitch.label'
@@ -380,6 +408,36 @@ export type I18nKey =
   | 'routing.navLabel'
   | 'routing.share'
   | 'routing.title'
+  | 'shell.browser.action.collapse'
+  | 'shell.browser.action.expand'
+  | 'shell.browser.action.move'
+  | 'shell.browser.address.label'
+  | 'shell.browser.address.placeholder'
+  | 'shell.browser.home'
+  | 'shell.browser.label'
+  | 'shell.browser.recent'
+  | 'shell.browser.recent.empty'
+  | 'shell.browser.tab.close'
+  | 'shell.browser.tab.new'
+  | 'shell.browser.web.hint'
+  | 'shell.content.placeholder'
+  | 'shell.navigation.account.placeholder'
+  | 'shell.navigation.action.collapse'
+  | 'shell.navigation.action.expand'
+  | 'shell.navigation.action.fold'
+  | 'shell.navigation.action.unfold'
+  | 'shell.navigation.current'
+  | 'shell.navigation.item.apps'
+  | 'shell.navigation.item.board'
+  | 'shell.navigation.item.computer'
+  | 'shell.navigation.item.inbox'
+  | 'shell.navigation.item.new'
+  | 'shell.navigation.item.workspace'
+  | 'shell.navigation.label'
+  | 'shell.navigation.main'
+  | 'shell.navigation.scene.none'
+  | 'shell.window.close'
+  | 'shell.window.minimize'
   | 'surface.main'
   | 'themeToggle.switchToDark'
   | 'themeToggle.switchToLight'
@@ -678,6 +736,34 @@ declare module 'i18next' {
         'home.themeLight': string
         'home.title': string
         'home.version': string
+        'inbox.composer.hint': string
+        'inbox.composer.placeholder': string
+        'inbox.mention.action': string
+        'inbox.message1': string
+        'inbox.message2': string
+        'inbox.message3': string
+        'inbox.message4': string
+        'inbox.navigation.empty': string
+        'inbox.navigation.label': string
+        'inbox.quote.hint': string
+        'inbox.quote.title': string
+        'inbox.reference.builder': string
+        'inbox.reference.contract': string
+        'inbox.reference.kind.app': string
+        'inbox.reference.kind.file': string
+        'inbox.reference.kind.repo': string
+        'inbox.reference.pdf': string
+        'inbox.reference.repo': string
+        'inbox.session.contract.summary': string
+        'inbox.session.contract.title': string
+        'inbox.session.materials.summary': string
+        'inbox.session.materials.title': string
+        'inbox.session.release.summary': string
+        'inbox.session.release.title': string
+        'inbox.session.sample': string
+        'inbox.status.waiting': string
+        'inbox.title': string
+        'inbox.unread': string
         'localeSwitch.enUS': string
         'localeSwitch.ja': string
         'localeSwitch.label': string
@@ -768,6 +854,36 @@ declare module 'i18next' {
         'routing.navLabel': string
         'routing.share': string
         'routing.title': string
+        'shell.browser.action.collapse': string
+        'shell.browser.action.expand': string
+        'shell.browser.action.move': string
+        'shell.browser.address.label': string
+        'shell.browser.address.placeholder': string
+        'shell.browser.home': string
+        'shell.browser.label': string
+        'shell.browser.recent': string
+        'shell.browser.recent.empty': string
+        'shell.browser.tab.close': string
+        'shell.browser.tab.new': string
+        'shell.browser.web.hint': string
+        'shell.content.placeholder': string
+        'shell.navigation.account.placeholder': string
+        'shell.navigation.action.collapse': string
+        'shell.navigation.action.expand': string
+        'shell.navigation.action.fold': string
+        'shell.navigation.action.unfold': string
+        'shell.navigation.current': string
+        'shell.navigation.item.apps': string
+        'shell.navigation.item.board': string
+        'shell.navigation.item.computer': string
+        'shell.navigation.item.inbox': string
+        'shell.navigation.item.new': string
+        'shell.navigation.item.workspace': string
+        'shell.navigation.label': string
+        'shell.navigation.main': string
+        'shell.navigation.scene.none': string
+        'shell.window.close': string
+        'shell.window.minimize': string
         'surface.main': string
         'themeToggle.switchToDark': string
         'themeToggle.switchToLight': string

@@ -17,11 +17,13 @@ export { ping, PING_COMMAND, type HostStatus } from './ping'
 export { credential, CREDENTIAL_COMMANDS, type CredentialMeta } from './credential'
 export { system, SYSTEM_COMMANDS, type AppInfo } from './system'
 export { service, SERVICE_COMMANDS, type ServiceState } from './service'
+export { windowChrome, WINDOW_COMMANDS } from './window'
 
 import { credential } from './credential'
 import { system } from './system'
 import { service } from './service'
 import { ping } from './ping'
+import { windowChrome } from './window'
 
 /** 公共面聚合：其它层写 `bridge.ping()`，不直接 import 命令文件。 */
-export const bridge = { ping, credential, system, service }
+export const bridge = { ping, credential, system, service, window: windowChrome }

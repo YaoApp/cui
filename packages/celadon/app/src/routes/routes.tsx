@@ -5,7 +5,9 @@ import { LoginPage } from '@/features/auth/login'
 import { RegisterPage } from '@/features/auth/register'
 import { ServersPage } from '@/features/auth/servers'
 import { WelcomePage } from '@/features/auth/welcome'
+import { PlaceholderPage } from '@/components/content'
 import { HomePage } from '@/features/home'
+import { InboxPage } from '@/features/inbox'
 import { BasePage } from '@/features/scaffold/base'
 import { BridgePage } from '@/features/scaffold/bridge'
 import { OverviewPage } from '@/features/scaffold/overview'
@@ -13,7 +15,7 @@ import { RequestsPage } from '@/features/scaffold/requests'
 import { RoutingPage } from '@/features/scaffold/routing'
 import { EntryGate, ServerGuard } from './entry-gate'
 import { RequireSession, SessionExpiryGuard } from './session-guard'
-import { SurfaceLayout } from './surface-layout'
+import { AppLayout } from './layout'
 
 /* 路由表：**只做装配**，业务实现不住这里。应用挂在构建决定的段下（base，见 04-host-integration.md）；
    路径**在 base 之下**：根是入口判定，脚手架在 `/scaffold/*`（见 architecture/07-routing.md · plan/05-scaffold.md）。 */
@@ -33,8 +35,15 @@ const scaffoldRoutes: RouteObject[] = [
   { path: 'scaffold/base', element: <BasePage /> },
 ]
 
-/* 产品面：今天还没有产品页，先留出这一格；未登录时产品页与会话守卫的消费者都去登录页。 */
-const productRoutes: RouteObject[] = []
+/* 产品面：第一阶段先落收件箱组装页，其余四个入口用占位页（见 plan/08-layout-base.md §3.3 与 §4）。 */
+const productRoutes: RouteObject[] = [
+  { path: 'new', element: <PlaceholderPage titleKey="shell.navigation.item.new" /> },
+  { path: 'inbox', element: <InboxPage /> },
+  { path: 'apps', element: <PlaceholderPage titleKey="shell.navigation.item.apps" /> },
+  { path: 'board', element: <PlaceholderPage titleKey="shell.navigation.item.board" /> },
+  { path: 'workspace', element: <PlaceholderPage titleKey="shell.navigation.item.workspace" /> },
+  { path: 'computer', element: <PlaceholderPage titleKey="shell.navigation.item.computer" /> },
+]
 
 /* 入口页自带外壳与域状态，因此挂在**表面布局之外**：无路径的布局路由只提供 `AuthProvider`，
    页面的品牌、全局控件与卡片由 `AuthLayout` 画。 */
@@ -71,7 +80,7 @@ export const routes: RouteObject[] = [
           ...authRoutes,
           {
             path: '/',
-            element: <SurfaceLayout />,
+            element: <AppLayout />,
             children: [{ index: true, element: <EntryGate /> }, ...productRoutes],
           },
           {
@@ -82,7 +91,7 @@ export const routes: RouteObject[] = [
         ],
       },
       {
-        element: <SurfaceLayout />,
+        element: <AppLayout />,
         children: scaffoldRoutes,
       },
     ],

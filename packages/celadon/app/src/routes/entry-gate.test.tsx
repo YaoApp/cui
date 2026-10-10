@@ -18,7 +18,7 @@ function renderAt(entry: string) {
         <Route element={<ServerGuard />}>
           <Route path="/servers" element={<p>服务器选择页</p>} />
           <Route path="/login" element={<p>登录页</p>} />
-          <Route path="/welcome" element={<p>欢迎页</p>} />
+          <Route path="/inbox" element={<p>收件箱</p>} />
           <Route path="/scaffold/base" element={<p>基础件清单</p>} />
           <Route path="/" element={<EntryGate />} />
         </Route>
@@ -38,10 +38,10 @@ describe('the entry decision on the route table', () => {
     expect(await screen.findByText('登录页')).toBeTruthy()
   })
 
-  it('sends a signed-in machine with no landing to the welcome page', async () => {
+  it('sends a signed-in machine with no landing to the inbox', async () => {
     rememberSession()
     renderAt('/')
-    expect(await screen.findByText('欢迎页')).toBeTruthy()
+    expect(await screen.findByText('收件箱')).toBeTruthy()
   })
 
   it('sends a signed-in machine to its last landing', async () => {

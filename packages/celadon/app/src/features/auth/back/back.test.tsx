@@ -76,8 +76,8 @@ function renderBack(entry: string) {
         <Routes>
           <Route path="/auth/back/:provider" element={<BackPage />} />
           <Route path="/login" element={<Probe label="到达登录页" />} />
-          {/* 登录成功的第一站是欢迎页；成功地址由欢迎页自己接着走 */}
-          <Route path="/welcome" element={<Probe label="到达欢迎页" />} />
+          {/* 登录成功的第一站是收件箱；成功地址随后再接 */}
+          <Route path="/inbox" element={<Probe label="到达收件箱" />} />
           <Route path="/done" element={<Probe label="到达成功地址" />} />
         </Routes>
       </AuthProvider>
@@ -99,12 +99,12 @@ describe('the third-party sign-in callback page', () => {
     useAuthStore.getState().reset()
   })
 
-  it('exchanges the code and state, adopts the session and goes to the welcome page', async () => {
+  it('exchanges the code and state, adopts the session and goes to the inbox', async () => {
     /* 登录页上留下的账号不算第三方登录的账号 */
     useAuthStore.getState().setUsername('leftover@example.com')
     stubTransport()
     renderBack('/auth/back/test?code=code-1&state=state-1')
-    expect(await screen.findByText(/到达欢迎页/)).toBeTruthy()
+    expect(await screen.findByText(/到达收件箱/)).toBeTruthy()
     expect(callbackBody()).toMatchObject({ code: 'code-1', state: 'state-1' })
     expect(signIn).toHaveBeenCalledTimes(1)
     expect(useAuthStore.getState().user).toMatchObject({ userId: 'u1' })
@@ -152,10 +152,10 @@ describe('the third-party sign-in callback page', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(t('auth.error.session'))
   })
 
-  it('goes to the welcome page even when the configuration names no success address', async () => {
+  it('goes to the inbox even when the configuration names no success address', async () => {
     stubTransport({}, entryConfig({ success_url: '' }))
     renderBack('/auth/back/test?code=code-25&state=state-25')
-    expect(await screen.findByText(/到达欢迎页/)).toBeTruthy()
+    expect(await screen.findByText(/到达收件箱/)).toBeTruthy()
     expect(signIn).toHaveBeenCalledTimes(1)
   })
 

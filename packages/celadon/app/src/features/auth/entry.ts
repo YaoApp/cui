@@ -15,14 +15,14 @@ export type EntrySignals = {
   signedIn: boolean
   /** 最后落点（应用内路径），没有就是 `undefined`。 */
   landing?: string
-  /** 后续逻辑的接缝：为假时先去 `/welcome`（现在恒真）。 */
+  /** 后续逻辑的接缝：为假时先去收件箱（现在恒真）。 */
   ready: boolean
 }
 
-/** 判定结果是一条应用内路径；`/login` 与 `/welcome` 会带上当前形态。 */
+/** 判定结果是一条应用内路径；`/login` 与 `/inbox` 会带上当前形态。 */
 export function resolveEntry(signals: EntrySignals): string {
   if (signals.needsServer) return '/servers'
   if (!signals.signedIn) return withMode('/login', signals.mode)
-  if (!signals.ready) return withMode('/welcome', signals.mode)
-  return signals.landing ?? withMode('/welcome', signals.mode)
+  if (!signals.ready) return withMode('/inbox', signals.mode)
+  return signals.landing ?? withMode('/inbox', signals.mode)
 }

@@ -111,7 +111,7 @@ if (icon.w !== 16 || icon.h !== 16) problems.push(`S1: 图标尺寸不是 16（�
 
 // 导航项也要有图标：每项一个 `<use>`，符号都指得到
 const navIcons = await p.evaluate(() =>
-  [...document.querySelectorAll('nav.nav a.nav__link')].map((a) => {
+  [...document.querySelectorAll('nav.scaffold-nav a.scaffold-nav__link')].map((a) => {
     const href = a.querySelector('use')?.getAttribute('href')
     return { text: a.textContent?.trim(), href, symbol: href ? !!document.querySelector(href) : false }
   }),
@@ -125,7 +125,7 @@ const iconFit = await p.evaluate(() => {
   const cy = (el) => { const b = el?.getBoundingClientRect(); return b ? (b.top + b.bottom) / 2 : null }
   const btn = document.querySelector('header.header .header__actions button')
   const svg = btn?.querySelector('svg.icon')
-  const link = document.querySelector('nav.nav a.nav__link')
+  const link = document.querySelector('nav.scaffold-nav a.scaffold-nav__link')
   return {
     btnIcon: cy(svg), btnSpan: cy(btn?.querySelector('span')),
     navIcon: cy(link?.querySelector('svg.icon')), navLink: cy(link),

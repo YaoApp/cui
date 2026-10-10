@@ -58,8 +58,8 @@ describe('the route table', () => {
     const index = surface?.children?.[0]
     expect(index?.index).toBe(true)
     expect(index?.element).toBeTruthy()
-    /* 产品页还没有：这一格先空着，产品页落地时挂进来 */
-    expect(pathsOf(productChildren)).toEqual([])
+    /* 产品面：收件箱组装页与四个占位页（见 plan/08-layout-base.md §3.3 与 §4） */
+    expect(pathsOf(productChildren)).toEqual(['new', 'inbox', 'apps', 'board', 'workspace', 'computer'])
   })
 
   it('sends everything else through the session guard, then back to the namespace root', () => {
