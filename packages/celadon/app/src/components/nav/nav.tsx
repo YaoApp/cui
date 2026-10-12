@@ -1,5 +1,5 @@
 import './nav.less'
-import { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import type { I18nKey } from '@/platform/i18n/i18n-types'
 import type { IconId } from '@/platform/icons'
 import { useTranslation } from '@/platform/i18n'
@@ -11,16 +11,6 @@ import { NavMain } from './parts/main'
 import { NavScene } from './parts/scene'
 import { useNavResize } from './hooks/use-nav-resize'
 import type { NavItem } from './nav.types'
-
-/* 两处时长不写死，从 token 读：取 design/foundations.md F4 的 collapse 档（--duration-fast）
-   与 panel 档（--duration-base）。样式改档位时组件跟着走，两边不会各说各话。 */
-function durationMs(name: string, fallback: number): number {
-	if (typeof window === 'undefined') return fallback
-	const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-	const value = Number.parseFloat(raw)
-	if (!Number.isFinite(value)) return fallback
-	return raw.endsWith('ms') ? value : raw.endsWith('s') ? value * 1000 : fallback
-}
 
 export type NavProps = {
 	items: NavItem[]
@@ -64,26 +54,7 @@ export function Nav({
 	onNavWidth
 }: NavProps) {
 	const { t } = useTranslation()
-	/* 收起态下整列悬停才把标志换成展开图标，但要在收拢动画走完之后才允许：
-     点收起键的指针本来就停在列内，动画期间不揭示，标志因此在整段收拢过程中保持不变。 */
-	const [revealReady, setRevealReady] = useState(false)
-	/* 内容形态总在动画开始前准备好：只要列宽还没到 280，就画图标轨那一套。
-     收起时立刻切回图标轨（文字不再被挤在变窄的列里），展开时等宽度到位再换回来。 */
-	/* 形态由收起状态直接决定；图标轨里的键靠列宽（容器查询）进出，宽列里不会闪 LOGO */
 	const chrome = useWindowChrome()
-	/* 收起一律零宽：没有图标轨这一档，收放的出口在内容列头左端 */
-	const railLook = false
-
-	useEffect(() => {
-		if (!collapsed) {
-			setRevealReady(false)
-			return
-		}
-		/* 收起动作按 design/foundations.md F4 的 collapse 档走 --duration-fast（120ms），
-       等这段动画结束再允许整列悬停揭示展开图标 */
-		const timer = window.setTimeout(() => setRevealReady(true), durationMs('--duration-fast', 120))
-		return () => window.clearTimeout(timer)
-	}, [collapsed])
 
 	const select = (item: NavItem) => {
 		onSelect(item)
@@ -96,58 +67,50 @@ export function Nav({
 			ref={resize.ref}
 			data-main={mainFolded ? 'folded' : 'expanded'}
 			data-collapsed={collapsed ? 'true' : 'false'}
-			className={[
-				'nav',
-				railLook ? 'nav--collapsed' : '',
-				revealReady ? 'nav--reveal' : '',
-				resize.dragging ? 'nav--resizing' : ''
-			]
+			className={['nav', resize.dragging ? 'nav--resizing' : '']
 				.filter(Boolean)
 				.join(' ')}
 			aria-label={t('shell.navigation.label')}
 		>
 			{chrome.controls === 'own' ? null : (
 				<NavHeader
-					collapsed={railLook}
 					mainFolded={mainFolded}
 					onToggle={onToggle}
 					onToggleMain={onToggleMain}
 				/>
 			)}
 			{chrome.controls === 'none' ? null : <NavBrand mainFolded={mainFolded} onToggleMain={onToggleMain} />}
-			<NavMain items={items} compact={railLook} folded={mainFolded && !railLook} onSelect={select} />
+			<NavMain items={items} folded={mainFolded} onSelect={select} />
 			<NavScene
 				items={items}
 				columnWidth={resize.current}
 				currentLabel={currentLabel}
 				sceneIcon={sceneIcon}
-				folded={mainFolded && !railLook}
+				folded={mainFolded}
 				onSelect={select}
 				onUnfold={onToggleMain}
 			>
 				{children}
 			</NavScene>
 			<NavFooter name={accountName} shortcuts={shortcuts} onSelect={select} />
-			{railLook ? null : (
-				<>
-					<span className='nav__grip' aria-hidden='true' />
-					<div
-						className='nav__resize'
-						role='separator'
-						aria-orientation='vertical'
-						aria-label={t('shell.navigation.resize')}
-						aria-valuemin={resize.min}
-						aria-valuemax={resize.max}
-						aria-valuenow={resize.current}
-						tabIndex={0}
-						onPointerEnter={resize.onPointerEnter}
-						onPointerLeave={resize.onPointerLeave}
-						onPointerDown={resize.onPointerDown}
-						onKeyDown={resize.onKeyDown}
-						onDoubleClick={resize.onDoubleClick}
-					/>
-				</>
-			)}
+			<>
+				<span className='nav__grip' aria-hidden='true' />
+				<div
+					className='nav__resize'
+					role='separator'
+					aria-orientation='vertical'
+					aria-label={t('shell.navigation.resize')}
+					aria-valuemin={resize.min}
+					aria-valuemax={resize.max}
+					aria-valuenow={resize.current}
+					tabIndex={0}
+					onPointerEnter={resize.onPointerEnter}
+					onPointerLeave={resize.onPointerLeave}
+					onPointerDown={resize.onPointerDown}
+					onKeyDown={resize.onKeyDown}
+					onDoubleClick={resize.onDoubleClick}
+				/>
+			</>
 		</nav>
 	)
 }

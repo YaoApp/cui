@@ -6,19 +6,15 @@ import type { NavItem } from '../../nav.types'
 
 export type NavMainProps = {
 	items: NavItem[]
-	/** 图标轨形态：条目只画图标 */
-	compact: boolean
 	/** 上区是否折叠 */
 	folded: boolean
 	onSelect: (item: NavItem) => void
 }
 
-/* 上区 · 主导航：内块标题与折叠键、六项列表。折叠只折这一段，不是整列
-   （`design/main-shell.md` §三）；折叠后留「当前」那一行与展开键找回。 */
-export function NavMain({ items, compact, folded, onSelect }: NavMainProps) {
+/* 上区 · 主导航：六项列表。折叠只折这一段，不是整列（`design/main-shell.md` §三）；
+   折叠后留「当前」那一行与展开键找回。 */
+export function NavMain({ items, folded, onSelect }: NavMainProps) {
 	const { t } = useTranslation()
-	/* 这一颗键只做「收上区」一件事：名字固定，折叠态它被样式藏掉，
-     展开由下区那一行的键负责 */
 	const reduced = useReducedMotion()
 	return (
 		<div className={folded ? 'nav__main nav__main--folded' : 'nav__main'}>
@@ -33,12 +29,7 @@ export function NavMain({ items, compact, folded, onSelect }: NavMainProps) {
 				style={{ overflow: 'hidden' }}
 			>
 				<ScrollArea className='nav__scroll' size='small'>
-					<NavList
-						items={items}
-						label={t('shell.navigation.main')}
-						compact={compact}
-						onSelect={onSelect}
-					/>
+					<NavList items={items} label={t('shell.navigation.main')} onSelect={onSelect} />
 				</ScrollArea>
 			</motion.div>
 		</div>

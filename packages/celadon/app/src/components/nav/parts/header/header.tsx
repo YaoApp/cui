@@ -7,7 +7,6 @@ import { useTranslation } from '@/platform/i18n'
 import { useWindowChrome } from '@/platform/client'
 
 export type NavHeaderProps = {
-	collapsed: boolean
 	onToggle: () => void
 
 	/* 上区是否折叠；一级菜单的收放键画在列头里 */
@@ -15,14 +14,15 @@ export type NavHeaderProps = {
 	onToggleMain: () => void
 }
 
-/* 列头：右侧放两个键，一级菜单的收放键在整列收起键左侧；整列收起键只有 Web 有，
-   客户端列头因此只留一级菜单的收放键。Web 收起态画标志，指针停在标志上时它淡化并浮出切换图标。
-   品牌在列头下面那一行（`parts/brand`），列头里不重复画，因此不会出现两个标志。
-   macOS 上整行按 `--nav-head-inset` 给原生交通灯让位；平台判定来自 `platform/client` 的钩子。 */
-export function NavHeader({ mainFolded, onToggleMain, collapsed, onToggle }: NavHeaderProps) {
+/* 列头：Web 上右侧依次是一级菜单的收放键与整列收起键；客户端列头只留整列收起键，
+   一级菜单的收放键在品牌那一行（`parts/brand`）。品牌在列头下面那一行，列头里不重复画，
+   因此不会出现两个标志。macOS 上整行按 `--nav-head-inset` 给原生交通灯让位；
+   平台判定来自 `platform/client` 的钩子。 */
+export function NavHeader({ mainFolded, onToggleMain, onToggle }: NavHeaderProps) {
 	const { t } = useTranslation()
 	const chrome = useWindowChrome()
-	const label = collapsed ? t('shell.navigation.action.expand') : t('shell.navigation.action.collapse')
+	/* 这颗键只在整列展开时能看见（收起后整列为零宽），因此名字固定为收起、状态固定为已展开 */
+	const label = t('shell.navigation.action.collapse')
 	const foldLabel = t('shell.navigation.action.fold')
 	return (
 		<div
@@ -37,24 +37,7 @@ export function NavHeader({ mainFolded, onToggleMain, collapsed, onToggle }: Nav
 			}
 			{...chrome.dragProps}
 		>
-			{collapsed && chrome.controls === 'none' ? (
-				<Tooltip label={label} side='bottom'>
-					<Button
-						className='nav__logo'
-						variant='plain'
-						aria-label={label}
-						aria-expanded={!collapsed}
-						onClick={onToggle}
-					>
-						<span className='nav__logo-mark'>
-							<BrandMark name='brand-yao-agents' size={24} label={t('app.name')} />
-						</span>
-						<span className='nav__logo-overlay'>
-							<Icon name='i-panel-left' size={16} />
-						</span>
-					</Button>
-				</Tooltip>
-			) : chrome.controls === 'none' ? (
+			{chrome.controls === 'none' ? (
 				<>
 					{/* Web 展开态：LOGO 不可点，右侧依次是一级菜单的收放键与整列收起键 */}
 					<BrandMark name='brand-yao-agents' size={24} label={t('app.name')} />
@@ -79,7 +62,7 @@ export function NavHeader({ mainFolded, onToggleMain, collapsed, onToggle }: Nav
 							variant='plain'
 							size='small'
 							aria-label={label}
-							aria-expanded={!collapsed}
+							aria-expanded={true}
 							onClick={onToggle}
 						>
 							<Icon name='i-panel-left' size={16} />
@@ -88,7 +71,7 @@ export function NavHeader({ mainFolded, onToggleMain, collapsed, onToggle }: Nav
 				</>
 			) : (
 				<>
-					{/* 客户端：一级菜单的收放键在整列收起键左侧；macOS 的整列收起键保留，
+					{/* 客户端：一级菜单的收放键在品牌那一行；列头只留整列收起键，
 					     Windows 的列头整块不渲染，那个键由壳与内容列头承担 */}
 					<Tooltip label={label} side='bottom'>
 						<Button
@@ -97,7 +80,7 @@ export function NavHeader({ mainFolded, onToggleMain, collapsed, onToggle }: Nav
 							variant='plain'
 							size='small'
 							aria-label={label}
-							aria-expanded={!collapsed}
+							aria-expanded={true}
 							onClick={onToggle}
 						>
 							<Icon name='i-panel-left' size={16} />
