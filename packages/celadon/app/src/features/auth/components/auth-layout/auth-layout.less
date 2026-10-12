@@ -2,85 +2,85 @@
    页面底色用 --background-app（内容底在卡片上），卡片用 --background-content 加细边框与浅阴影。
    控件行高统一走 --row-height（40），与原型一致。 */
 .auth {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  /* 铺满：壳是弹性列（platform/shell.less），入口页要 flex:1 才真的占满 */
-  flex: 1;
-  min-block-size: 100%;
-  padding: var(--spacing-16) var(--spacing-24);
-  background: var(--background-app);
-  /* 与设计稿的 body 同一套基础文字：正文档字号 + 中日韩行高 */
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-cjk);
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	/* 铺满：壳是弹性列（platform/shell.less），入口页要 flex:1 才真的占满 */
+	flex: 1;
+	min-block-size: 100%;
+	padding: var(--spacing-16) var(--spacing-24);
+	background: var(--background-app);
+	/* 与设计稿的 body 同一套基础文字：正文档字号 + 中日韩行高 */
+	font-size: var(--font-size-body);
+	line-height: var(--line-height-cjk);
 }
 
 /* 窗口拖动带：盖住顶行那一带（页内距加顶行高度），压在最底层。
    指针落在顶行的空白处时由它接管拖动；顶行的控件抬一层，点击照旧。 */
 .auth__drag {
-  position: absolute;
-  z-index: 0;
-  inset-block-start: 0;
-  inset-inline: 0;
-  block-size: calc(var(--spacing-16) + var(--spacing-32) + var(--spacing-8));
-  cursor: default;
+	position: absolute;
+	z-index: 0;
+	inset-block-start: 0;
+	inset-inline: 0;
+	block-size: calc(var(--spacing-16) + var(--spacing-32) + var(--spacing-8));
+	cursor: default;
 }
 
 /* 拖动请求的结果标记：交付前删掉这一条与元素（排查用） */
 .auth__drag-state {
-  position: absolute;
-  inset-block-start: var(--spacing-2);
-  inset-inline-start: var(--spacing-8);
-  font-size: var(--font-size-caption);
-  opacity: 0.6;
+	position: absolute;
+	inset-block-start: var(--spacing-4);
+	inset-inline-start: var(--spacing-8);
+	font-size: var(--font-size-caption);
+	opacity: 0.6;
 }
 
 /* 顶行：左品牌、右语言与主题 */
 .auth__top {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-16);
+	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--spacing-16);
 }
 
 .auth__brand {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-8);
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-8);
 }
 
 /* 产品名：品牌渐变文字，浅暗同版，与标记自身的渐变一致 */
 .auth__brand-name {
-  font-size: var(--font-size-20);
-  font-weight: var(--font-weight-strong);
-  line-height: var(--line-height-cjk);
-  letter-spacing: var(--letter-spacing-latin);
-  background: linear-gradient(105deg, var(--brand-mark-from) 0%, var(--brand-mark-to) 100%);
-  background-clip: text;
-  color: transparent;
+	font-size: var(--font-size-20);
+	font-weight: var(--font-weight-strong);
+	line-height: var(--line-height-cjk);
+	letter-spacing: var(--letter-spacing-latin);
+	background: linear-gradient(105deg, var(--brand-mark-from) 0%, var(--brand-mark-to) 100%);
+	background-clip: text;
+	color: transparent;
 }
 
 .auth__ctrl {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-8);
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-8);
 }
 
 .auth__ctrl-sep {
-  inline-size: var(--border-width);
-  block-size: var(--spacing-16);
-  background: var(--border-default);
+	inline-size: var(--border-width);
+	block-size: var(--spacing-16);
+	background: var(--border-default);
 }
 
 /* 卡片在剩余空间里居中 */
 .auth__stage {
-  flex: 1;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  padding-block: var(--spacing-32);
+	flex: 1;
+	display: grid;
+	place-items: center;
+	align-content: center;
+	padding-block: var(--spacing-32);
 }
 
 /* 设计稿在全局做了 border-box（`* { box-sizing: border-box }`），产品侧只在这一页补上，
@@ -89,103 +89,103 @@
 .auth *,
 .auth *::before,
 .auth *::after {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 .auth__card {
-  position: relative;
-  inline-size: min(100%, var(--auth-card-width));
-  padding: var(--spacing-32) var(--spacing-24);
-  background: var(--background-content);
-  border: var(--border-width) solid var(--border-subtle);
-  border-radius: var(--radius-large);
-  box-shadow: var(--shadow-subtle);
+	position: relative;
+	inline-size: min(100%, var(--auth-card-width));
+	padding: var(--spacing-32) var(--spacing-24);
+	background: var(--background-content);
+	border: var(--border-width) solid var(--border-subtle);
+	border-radius: var(--radius-large);
+	box-shadow: var(--shadow-subtle);
 }
 
 .auth__title {
-  margin: 0 0 var(--spacing-32);
-  font-size: var(--font-size-28);
-  font-weight: var(--font-weight-strong);
-  line-height: var(--line-height-normal);
+	margin: 0 0 var(--spacing-32);
+	font-size: var(--font-size-28);
+	font-weight: var(--font-weight-strong);
+	line-height: var(--line-height-normal);
 }
 
 .auth__title-line {
-  display: block;
+	display: block;
 }
 
 /* 某些语言标题不换行：空行收起（与设计稿同一条规则） */
 .auth__title-line:empty {
-  display: none;
+	display: none;
 }
 
 .auth__footnote {
-  margin: var(--spacing-16) 0 0;
-  text-align: center;
-  font-size: var(--font-size-13);
-  color: var(--text-secondary);
+	margin: var(--spacing-16) 0 0;
+	text-align: center;
+	font-size: var(--font-size-13);
+	color: var(--text-secondary);
 }
 
 .auth__bottom {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-8);
-  /* 这一行**常占位**：条目在入口配置到达后才有（地址来自配置），先留出同一行的高度，
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--spacing-8);
+	/* 这一行**常占位**：条目在入口配置到达后才有（地址来自配置），先留出同一行的高度，
      卡片因此不会被它挤上去（否则配置到达的瞬间整张卡片会上移半行）。 */
-  min-block-size: var(--line-height-control-small);
-  color: var(--text-tertiary);
-  font-size: var(--font-size-11);
+	min-block-size: var(--line-height-control-small);
+	color: var(--text-tertiary);
+	font-size: var(--font-size-11);
 }
 
 .auth__bottom-link {
-  color: var(--text-tertiary);
+	color: var(--text-tertiary);
 }
 
 /* ---- 客户端内：收起品牌与页脚，返回栏与卡片同宽同区，控件移到卡片下方居中 ---- */
 /* 客户端内：不显示品牌；返回栏与卡片同区，控件在卡片下方，整组仍在剩余空间里居中（与设计稿一致） */
 .auth--in-app .auth__brand {
-  display: none;
+	display: none;
 }
 
 .auth__stack {
-  display: grid;
-  gap: var(--spacing-12);
-  inline-size: min(100%, var(--auth-card-width));
+	display: grid;
+	gap: var(--spacing-12);
+	inline-size: min(100%, var(--auth-card-width));
 }
 
 .auth__client-bar {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-8);
+	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--spacing-8);
 }
 
 .auth__server {
-  display: inline-flex;
-  align-items: center;
-  margin-inline: auto var(--spacing-12);
-  min-inline-size: 0;
-  font-size: var(--font-size-13);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-primary);
+	display: inline-flex;
+	align-items: center;
+	margin-inline: auto var(--spacing-12);
+	min-inline-size: 0;
+	font-size: var(--font-size-13);
+	font-weight: var(--font-weight-medium);
+	color: var(--text-primary);
 }
 
 .auth__server-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: var(--font-weight-medium);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: var(--font-weight-medium);
 }
 
 .auth__ctrl-wrap {
-  position: relative;
-  margin-block-start: var(--spacing-24);
+	position: relative;
+	margin-block-start: var(--spacing-24);
 }
 
 .auth--in-app .auth__ctrl {
-  justify-content: center;
+	justify-content: center;
 }
 
 /* 简繁日的最小字号：中文最小 12，11 档只给拉丁与数字 */
@@ -198,5 +198,5 @@
 .auth:lang(zh-CN) .auth__server,
 .auth:lang(zh-TW) .auth__server,
 .auth:lang(ja) .auth__server {
-  font-size: var(--font-size-minimum-cjk);
+	font-size: var(--font-size-minimum-cjk);
 }
