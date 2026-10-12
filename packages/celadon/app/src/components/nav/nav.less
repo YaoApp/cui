@@ -77,14 +77,6 @@
 }
 
 /* 收起：Web 留图标轨，客户端整列为 0（`--nav-collapsed-desktop`），红绿灯与收起键位置不变。 */
-.nav--collapsed {
-	transition-duration: var(--duration-fast);
-	transition-timing-function: var(--easing-accelerate);
-	inline-size: var(--nav-collapsed);
-	/* 图标轨只容得下图标：条目的文字已经收起来，这里再兜一层，保证没有任何内容溢出到内容区上。 */
-	overflow: hidden;
-}
-
 [data-client='desktop'] .nav--collapsed {
 	inline-size: var(--nav-collapsed-desktop);
 	padding-inline: 0;
@@ -116,54 +108,18 @@
 .nav--collapsed .nav__brand,
 .nav--collapsed .nav__window,
 /* 收起态（图标轨）：主菜单始终展示，位置往上提一档；用户头像钉在列底 */
-.nav--collapsed .nav__header {
-	margin-block-end: 0;
-}
-
 /* 图标轨里不画上区的内块（分区名与折叠键都收走），条目直接跟着标志排 */
-.nav--collapsed .nav__main-head {
-	display: none;
-	padding-inline-end: 0;
-}
-
 /* 图标轨里主导航始终展示：上区被折叠过也放开（高度回到一整行）。
    这条只在列宽真的落到位（图标轨）时生效，整列收放的中间宽度里不生效，
    否则展开过程中会把本来折起的主导航给冒出来。 */
-@container (width < @nav-rail-band) {
-	.nav--collapsed .nav__main,
-	.nav--collapsed .nav__main--folded .nav__main-body {
-		opacity: 1;
-	}
-}
-
 .nav--collapsed .nav__label,
 .nav--collapsed .nav__section,
-.nav--collapsed .nav__name {
-	display: none;
-}
-
 .nav--collapsed .nav__link,
-.nav--collapsed .nav__shortcut {
-	justify-content: center;
-	min-block-size: var(--spacing-24);
-	block-size: var(--spacing-24);
-	padding: 0;
-}
-
-.nav--collapsed .nav__current {
-	justify-content: center;
-	justify-content: space-between;
-}
-
 /* 图标轨里只留六项与底部一行：六项已经一步可达，「当前」区与它的二级导航让位
    （`design/foundations.md` F6：导航列进入图标轨时，主导航与当前区按图标轨规则处理）。
    底部一行只留头像：两个快捷图标与主导航里那两项是同一份内容，图标轨里不重复画。 */
 .nav--collapsed .nav__scene,
 .nav--collapsed .nav__fold,
-.nav--collapsed .nav__shortcuts {
-	display: none;
-}
-
 .nav__window {
 	display: flex;
 	align-items: center;
@@ -496,10 +452,6 @@
 	white-space: nowrap;
 	font-size: var(--font-size-body);
 	color: var(--text-secondary);
-}
-
-.nav--collapsed .nav__name {
-	display: none;
 }
 
 .nav__shortcuts {
