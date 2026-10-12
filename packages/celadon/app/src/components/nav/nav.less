@@ -97,55 +97,6 @@
 	white-space: nowrap;
 }
 
-/* 收起态：标志就是展开入口。指针落上去，标志淡化并浮出展开图标 */
-.nav__logo {
-	position: relative;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	/* 按钮本身就是 24 方形：基础件的悬停底画在按钮上，盒子不是方的就会露出长方形。
-     基础件默认最小高度是 32，这里连同一并收掉。 */
-	inline-size: var(--spacing-24);
-	block-size: var(--spacing-24);
-	min-block-size: var(--spacing-24);
-	padding: 0;
-	border: 0;
-	background: transparent;
-	cursor: pointer;
-}
-
-.nav__logo-mark {
-	display: inline-flex;
-	transition: opacity var(--duration-fast) ease;
-}
-
-.nav__logo-overlay {
-	position: absolute;
-	/* 与按钮同尺寸（24 × 24 方形） */
-	inset: 0;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: var(--radius-small);
-	background: var(--background-hover);
-	opacity: 0;
-	transition: opacity var(--duration-fast) ease;
-}
-
-/* 指针落在导航列的任何位置（不只标志上）就把标志淡出、浮出展开图标，
-   收起态下用户一眼能看出这里可以展开。
-   延时一档基础时长：整列正在收的时候仍画标志（点收起的指针本来就在导航区里），
-   等收拢动作走完再换成展开图标，不然会误以为这里已经是展开态。 */
-.nav--reveal:hover .nav__logo-mark,
-.nav__logo:hover .nav__logo-mark {
-	opacity: 0.25;
-}
-
-.nav--reveal:hover .nav__logo-overlay,
-.nav__logo:hover .nav__logo-overlay {
-	opacity: 1;
-}
-
 .nav__toggle {
 	margin-inline-start: auto;
 }
@@ -189,7 +140,8 @@
    这里把它抵消掉：标题因此严格落在上区展开时「开始」那一行的位置。下区位置由它自己负责，
    折起的上区不再占位。 */
 
-.nav__main-head,
+/* 折叠态的那一行压在列表下方：上面补一条分割线，左内距与条目一致，
+   右边放展开键，与左侧的场景名一头一尾对齐。 */
 .nav__scene-head {
 	flex: none;
 	display: flex;
@@ -199,23 +151,6 @@
 	min-block-size: var(--spacing-32);
 	padding-inline: var(--spacing-12);
 	padding-inline-end: 0;
-	/* 折叠态时落到场景区底部，也就是用户区上方 */
-	margin-block-start: auto;
-}
-
-/* 上区内块、下区折叠行与用户区：右内距都去掉，右侧的键与图标贴到列的内缘，
-   与头部的收起键落在同一条竖线上 */
-.nav__main-head,
-.nav__scene-head,
-.nav__footer {
-	/* 钉在列底：场景区在图标轨里隐藏时，用户区靠这条落到最下面 */
-	margin-block-start: auto;
-	padding-inline-end: 0;
-}
-
-/* 折叠态的那一行压在列表下方：上面补一条分割线，左内距与条目一致，
-   右边放展开键，与左侧的场景名一头一尾对齐。 */
-.nav__scene-head {
 	/* 上下边距一致：上边距是行自己的 8，下边距由导航列的 gap 给 8，两侧看起来一样 */
 	margin-block-start: 0;
 	/* 只留上内距，下边距由导航列的 gap 给，两侧看起来一样 */
@@ -383,6 +318,8 @@
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-8);
+	/* 钉在列底：场景区收起时用户区靠这条落到最下面 */
+	margin-block-start: auto;
 	/* 用户区自带一条上分割线，与上面的导航区隔开；整行高 48（比条目行高一档），
      上下不留内距，折叠行的上下边距因此都是 8 */
 	box-sizing: border-box;
