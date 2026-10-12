@@ -30,6 +30,7 @@ test.describe('导航列的交互', () => {
 
 	test('点一级菜单键折起上区，折叠行出现且展开键可用，再点它恢复', async ({ page }) => {
 		await page.mouse.move(140, 20)
+		await expect(page.locator(FOLD).first()).toHaveCSS('opacity', '1')
 		const main = page.locator(`${NAV} .nav__main`)
 		await expect(main).toBeVisible()
 		await page.locator(FOLD).first().click()
@@ -45,14 +46,26 @@ test.describe('导航列的交互', () => {
 		await expect(main).not.toHaveCSS('height', '0px')
 	})
 
-	test('折叠行悬停弹出菜单，Esc 关闭并把焦点交回触发元素', async ({ page }) => {
+	test('折叠行的找回菜单：悬停可弹出，Esc 关闭；键盘进入时焦点交回触发元素', async ({ page }) => {
 		await page.mouse.move(140, 20)
+		await expect(page.locator(FOLD).first()).toHaveCSS('opacity', '1')
 		await page.locator(FOLD).first().click()
+		await expect(page.locator('.nav__scene-head')).toBeVisible()
 		const trigger = page.locator('.nav__current').first()
 		await expect(trigger).toBeVisible()
-		await trigger.click()
+
+		/* 路径一：悬停弹出，Esc 关闭（这条路径下焦点从未进入菜单，不做焦点断言） */
+		await trigger.hover({ force: true })
 		const menu = page.locator('.nav__menu')
-		await expect(menu).toBeVisible()
+		await expect(menu).toBeVisible({ timeout: 15000 })
+		await page.keyboard.press('Escape')
+		await expect(menu).toBeHidden()
+
+		/* 路径二：键盘把焦点放到触发元素后打开，Esc 关闭并交回焦点 */
+		await trigger.focus()
+		await expect(trigger).toBeFocused()
+		await page.keyboard.press('Enter')
+		await expect(menu).toBeVisible({ timeout: 15000 })
 		await page.keyboard.press('Escape')
 		await expect(menu).toBeHidden()
 		await expect(trigger).toBeFocused()
