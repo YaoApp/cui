@@ -180,6 +180,9 @@
 }
 
 .nav__main {
+	/* 上区自己做弹性列：高度被压短时，内部滚动区拿到确定高度，滚动条才出得来 */
+	display: flex;
+	flex-direction: column;
 	/* 高度不够时由内部滚动区裁切，不让条目溢出压在场景区上 */
 	overflow: hidden;
 
