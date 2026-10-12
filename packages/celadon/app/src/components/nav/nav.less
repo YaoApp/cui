@@ -131,11 +131,7 @@
    否则展开过程中会把本来折起的主导航给冒出来。 */
 @container (width < @nav-rail-band) {
 	.nav--collapsed .nav__main,
-	.nav--collapsed .nav__main--folded {
-		grid-template-rows: 1fr;
-	}
-
-	.nav--collapsed .nav__main--folded .nav__main-body {
+	.nav--collapsed .nav--collapsed .nav__main--folded .nav__main-body {
 		opacity: 1;
 	}
 }
@@ -232,10 +228,7 @@
      这条在 Safari 与 Chrome 都能动，不依赖 interpolate-size。
      展开走 F4 的 panel 档，收起在下面按 collapse 档改成快档加速。 */
 	flex: 0 1 auto;
-	display: grid;
-	grid-template-rows: 1fr;
 	min-block-size: 0;
-	transition: grid-template-rows var(--duration-base) var(--easing-decelerate);
 }
 
 .nav__main-body {
@@ -253,12 +246,6 @@
 }
 
 /* 折叠只折上区：高度与不透明度过渡到零，只留「当前」一行。 */
-.nav__main--folded {
-	grid-template-rows: 0fr;
-	/* 收起比展开快，且用加速缓动（design/foundations.md F4 的 collapse 档） */
-	transition-duration: var(--duration-fast);
-	transition-timing-function: var(--easing-accelerate);
-}
 
 .nav__main--folded .nav__main-body {
 	opacity: 0;
@@ -268,8 +255,13 @@
 /* 上区折成零高之后，它与下区之间那一档列内 gap 还在，会让二级导航标题低一档（8）。
    这里把它抵消掉：标题因此严格落在上区展开时「开始」那一行的位置。下区位置由它自己负责，
    折起的上区不再占位。 */
-.nav__main--folded + .nav__scene {
+.nav__main--folded + {
 	margin-block-start: calc(-1 * var(--spacing-8));
+	/* 场景区自己做弹性列：滚动区吃掉剩余高度，折叠行落在用户区上方 */
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-block-size: 0;
 }
 
 .nav__main-head,
@@ -282,6 +274,8 @@
 	min-block-size: var(--spacing-32);
 	padding-inline: var(--spacing-12);
 	padding-inline-end: 0;
+	/* 折叠态时落到场景区底部，也就是用户区上方 */
+	margin-block-start: auto;
 }
 
 /* 上区内块、下区折叠行与用户区：右内距都去掉，右侧的键与图标贴到列的内缘，
@@ -321,7 +315,7 @@
 }
 
 /* 折叠态的展开键常驻在「当前」那一行里：只在主导航折叠时出现（整列收起是另一件事）。 */
-.nav:not(:has(.nav__main--folded)) .nav__unfold {
+.nav:not([data-main='folded']) .nav__unfold {
 	display: none;
 }
 
@@ -338,6 +332,10 @@
 }
 
 .nav__scroll {
+	flex: 1;
+	/* 高度由弹性分配决定，不锁死内容高 */
+	block-size: auto;
+
 	min-block-size: 0;
 }
 
@@ -517,9 +515,10 @@
 	flex-direction: column;
 	gap: var(--spacing-4);
 	box-sizing: border-box;
-	inline-size: var(--nav-default);
+	/* 宽度跟随导航列宽（列宽可拖） */
+	inline-size: clamp(var(--nav-min), var(--nav-width, var(--nav-default)), var(--nav-max));
 	/* 面板不超出导航列：宽度按列宽减两侧内距算，位置再由位置器的偏移贴到列的左缘 */
-	max-inline-size: calc(var(--nav-default) - var(--spacing-16));
+	max-inline-size: none;
 	/* 高度不够时菜单自己滚：上限取上游给的可放置高度 */
 	max-block-size: var(--available-height, 60vh);
 	padding: var(--spacing-4);
@@ -527,118 +526,25 @@
 	border: var(--border-width) solid var(--border-default);
 	border-radius: var(--radius-medium);
 	box-shadow: var(--shadow-floating);
+
+	/* 挂载即进场：淡入加轻微上移；退场见下（关闭态只淡出） */
+	animation: nav-menu-in var(--duration-base) var(--easing-decelerate);
+	/* 挂载即进场：淡入加轻微上移；关闭态只淡出（见 design/foundations.md 动画一节） */
 }
 
-/* 视口低于 --nav-auto-collapse：自动进图标轨（视口驱动，不写偏好）。 */
-/* 列宽没到展开态时一律按图标轨画：文字与分区名不参与过渡，避免挤在窄列里 */
-@container (width < @nav-label-band) {
-	.nav__label,
-	.nav__brand,
-	.nav__section {
-		display: none;
-	}
+.nav__menu[data-closed] {
+	animation: nav-menu-out var(--duration-fast) var(--easing-accelerate);
+}
 
-	.nav__main-head {
-		display: none;
-	}
-
-	/* 列宽不够时整列按图标轨那一套呈现：二级导航与底部一行的文字收走，只留图标、
-     标志与头像。业务域插进来的内容一并让位，避免文字压到内容区上。 */
-	.nav__scene,
-	.nav__shortcuts,
-	.nav__name {
-		display: none;
+@keyframes nav-menu-in {
+	from {
+		opacity: 0;
+		transform: translateY(var(--spacing-4)) scale(0.98);
 	}
 }
 
-/* 视口不够宽时由装配层把 collapsed 置位，走与手动收起完全相同的那一套样式；
-   这里不再按视口另写一份呈现（design/foundations.md F6）。 */
-
-/* 用户区与折叠行右端对齐：把这两个容器与里面的快捷图标钉死，
-   免得被共享的条目规则（32 高、上下内距 8）撑出多余的空间。 */
-.nav .nav__footer {
-	/* 左内距一档底（8 + 4 = 12），头像在两种状态下都落在 left 12；
-     右内距为零，右上方的键同一条竖线；行高与上方的折叠行同档 */
-	block-size: auto;
-	/* 行高与折叠行同档（32 加一档），这一档放在上内距上：
-     头像到上分割线与到列底边各留 8，视觉上是垂直居中的 */
-	min-block-size: calc(var(--spacing-32) + var(--spacing-8));
-	padding-block: var(--spacing-8) 0;
-	padding-inline: var(--spacing-4) 0;
-}
-
-.nav .nav__shortcut {
-	min-block-size: var(--spacing-24);
-	block-size: var(--spacing-24);
-	padding: 0;
-}
-
-/* 图标轨里的功能图标：方形按钮（四边内距一致），图标比条目行里的大一档 */
-.nav--collapsed .nav__link {
-	inline-size: var(--spacing-32);
-	block-size: var(--spacing-32);
-	padding: 0;
-	justify-content: center;
-	border-radius: var(--radius-small);
-}
-
-/* 图标轨里的条目间距：条目本身不变，条目之间拉开一档 */
-
-/* 图标轨里的头部：标志在列里居中，左右内距因此相等，上下取列内距一档 */
-.nav--collapsed .nav__header {
-	/* 不额外居中：左边距取列内距加头部内距，右边距是列内距，
-     列宽 56 = 8 + 8 + 24 + 8 + 8，左右各 16，标志落在与展开态完全相同的位置 */
-	min-block-size: var(--spacing-24);
-	block-size: var(--spacing-24);
-}
-
-/* 图标轨里的条目与头像：整列居中，左右余量相等 */
-
-/* 图标轨里的条目：整列居中，左右余量相等；组内间距一档 8 */
-.nav--collapsed .nav__list {
-	align-items: center;
-	gap: var(--spacing-8);
-}
-
-/* 标志与功能条目是两组，组间留白要比组内大一档：
-   列内 gap 给一档（8），这里由容器的上内距再补一档，合计 16（design/layout.md §1 留白成组、
-   §2 的 16 档用于组与组之间）。间距的负责人仍只有列内 gap 一个，这里补的是容器内距。 */
-.nav--collapsed .nav__main {
-	padding-block-start: var(--spacing-8);
-}
-
-/* 图标轨里的用户区：头像位置与展开态完全相同（左 12），上下钉住列底 */
-.nav--collapsed .nav__footer {
-	margin-block-start: auto;
-}
-
-/* 品牌行：列头下面一行放标志与产品名（列头本身不放品牌）。
-   与原来的头部同样排布：一行、垂直居中、间距一档、左右取列内距。 */
-.nav__brand-row {
-	display: flex;
-	align-items: center;
-	gap: var(--spacing-8);
-	padding-inline: var(--spacing-8);
-	white-space: nowrap;
-}
-
-/* 头部内块里的品牌键：标志与产品名一行，标志即收放开关（Web 不另画收起键） */
-.nav__brand-button {
-	display: flex;
-	align-items: center;
-	gap: var(--spacing-8);
-	padding: 0;
-	white-space: nowrap;
-}
-
-/* 桌面收起：整列收成零宽（形态属性由装配层给出，与 Web 的图标轨区分开） */
-[data-width='zero'] .nav {
-	inline-size: 0;
-	min-inline-size: 0;
-	padding-inline: 0;
-	border-inline-end-width: 0;
-	overflow: clip;
-	transition: inline-size var(--duration-base) var(--easing-decelerate),
-		padding-inline var(--duration-base) var(--easing-decelerate),
-		border-inline-end-width var(--duration-base) var(--easing-decelerate);
+@keyframes nav-menu-out {
+	to {
+		opacity: 0;
+	}
 }
