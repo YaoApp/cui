@@ -537,3 +537,14 @@
 	min-block-size: 0;
 	overflow: auto;
 }
+
+/* 品牌行：标志与产品名同一行，列再窄也不折行 */
+.nav__brand-row {
+	flex: none;
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-8);
+	min-inline-size: 0;
+	padding-inline: var(--spacing-8);
+	white-space: nowrap;
+}
