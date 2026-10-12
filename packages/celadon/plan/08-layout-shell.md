@@ -56,8 +56,6 @@ celadon-desktop/src-tauri/
 | `controls` | `'native' \| 'own' \| 'none'` | 窗口按钮归谁：macOS 原生 · Windows 自绘 · Web 没有 |
 | `maximized` | `boolean` | 当前是否最大化，用来在最大化与还原之间换图形 |
 | `toggleMaximize` · `minimize` · `close` | `() => void` | 三个窗口动作 |
-| `dragProps` | `Record<string, string>` | `data-tauri-drag-region`，交给原生拖动 |
-| `dragHandlers` | `{ onPointerDown: () => void }` | 显式拖动，供需要按下即拖的地方使用 |
 | `dragState` | `string` | 最近一次拖动请求的结果，供排查用的探针显示 |
 
 ## 3. 施工清单
