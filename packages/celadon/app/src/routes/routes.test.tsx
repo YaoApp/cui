@@ -21,13 +21,21 @@ function redirectTo(element: unknown): unknown {
 }
 
 describe('the route table', () => {
-  const server = routes[0]
+  /* 最外层是窗口外壳（Windows 自绘标题栏那一层，见内部文档「桌面客户端壳」），守卫在它下面 */
+  const frame = routes[0]
+  const server = frame?.children?.[0]
   const expiry = server?.children?.[0]
   const auth = expiry?.children?.[0]
   const surface = expiry?.children?.[1]
   const guarded = expiry?.children?.[2]
   const fallback = guarded?.children?.[0]
   const productChildren = surface?.children?.slice(1)
+
+  it('puts the window frame above everything, and the guards under it', () => {
+    expect(frame?.path).toBeUndefined()
+    expect(frame?.element).toBeTruthy()
+    expect(frame?.children).toHaveLength(1)
+  })
 
   it('keeps the entry pages outside the session guard, under one provider', () => {
     expect(server?.path).toBeUndefined()

@@ -4,7 +4,7 @@ import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
 import { LocaleSwitch } from '@/components/locale-switch'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { useThemePreference } from '@/platform/client'
+import { useThemePreference, useWindowChrome } from '@/platform/client'
 import { useTranslation } from '@/platform/i18n'
 import './auth-layout.less'
 
@@ -38,6 +38,8 @@ export type AuthLayoutProps = {
 export function AuthLayout({ mode, titleLines, footnote, serviceHref, privacyHref, serverName, onBack, children }: AuthLayoutProps) {
   const { t } = useTranslation()
   const { theme, setTheme } = useThemePreference()
+  /* 客户端内窗口没有原生标题栏，顶行就是窗口栏：与导航列头部同一处取拖动区（`platform/client/window.ts`） */
+  const chrome = useWindowChrome()
   const inApp = mode === 'in-app'
   const titleId = `${useId()}-title`
 
@@ -65,6 +67,12 @@ export function AuthLayout({ mode, titleLines, footnote, serviceHref, privacyHre
 
   return (
     <div className={['auth', inApp ? 'auth--in-app' : null].filter(Boolean).join(' ')}>
+      {/* 窗口拖动带：压在顶行最底层，空白处按下即拖动窗口；顶行的控件在它上面，点击不受影响 */}
+      {chrome.visible ? (
+        <div className="auth__drag" aria-hidden="true">
+          <span className="auth__drag-state">{chrome.dragState}</span>
+        </div>
+      ) : null}
       <header className="auth__top">
         <span className="auth__brand">
           <BrandMark name="brand-yao-agents" size={32} />

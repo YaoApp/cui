@@ -165,7 +165,7 @@ body { padding: 0; align-items: stretch; }
 .window { display: grid;
           grid-template-columns: var(--nav-default) minmax(var(--center-min), 1fr) var(--side-width-reading); }
 /* 客户端（?view=client）：导航收起为 0，内容从最左铺满；左上只浮着红绿灯 + 收起键 */
-body.is-client .window { grid-template-columns: var(--nav-collapsed-desktop) minmax(var(--center-min), 1fr) var(--side-width-reading); }
+body.is-client .window { grid-template-columns: 0 minmax(var(--center-min), 1fr) var(--side-width-reading); }
 /* 收起为「0 宽的列」：导航仍占住第一条列轨，只是不可见 —— 若用 display:none 移出 grid，
    中栏会滑进 0 宽列被压没（踩过）。 */
 body.is-client .nav { visibility: hidden; overflow: hidden; }
@@ -173,14 +173,12 @@ body.is-client .nav { visibility: hidden; overflow: hidden; }
 .window-controls { display: flex; align-items: center; gap: var(--spacing-8);
   position: absolute; inset-block-start: var(--spacing-12); inset-inline-start: var(--spacing-16); z-index: var(--z-raised); }
 body.is-client .content-header, body.is-client .panel-header { padding-inline-start: calc(var(--spacing-16) + 76px); }
-/* Web 中档：保留 56px 图标轨（浏览器没有标题栏可放图标） */
+/* Web 中档（<1024）：与客户端一致，收起为零宽的列（没有图标轨这一档） */
 @media (max-width: 1023px) {
-  .window { grid-template-columns: var(--nav-collapsed) minmax(var(--center-min), 1fr) var(--side-width-reading); }
-  .window .nav { inline-size: var(--nav-collapsed); }
-  .window .nav .navigation-item span, .window .nav .brand-name, .window .nav .version-badge,
-  .window .nav .navigation-context { display: none; }
+  .window { grid-template-columns: 0 minmax(var(--center-min), 1fr) var(--side-width-reading); }
+  .window .nav { visibility: hidden; overflow: hidden; }
 }
-/* mock 里写死了导航宽度，填满 F6 的列轨（默认 280 / 中档 56） */
+/* mock 里写死了导航宽度，填满 F6 的列轨（默认 280 / 收起 0） */
 .window .nav { inline-size: 100%; border-inline-end: var(--border-width) solid var(--border-subtle); }
 /* grid 列轨的经典溢出：中栏内容有最小内容宽，会把列轨撑开、挤掉右栏 —— 给三列各自 min-inline-size:0 */
 .window > * { min-inline-size: 0; }
@@ -279,7 +277,7 @@ body.is-client .main .content-header { padding-inline-start: calc(var(--spacing-
 .nav .navigation-header .brand { margin-inline-end: auto; }
 .nav .navigation-header .icon-button:first-of-type { margin-inline-start: auto; }
 /* 收起态：两个视图一致 —— 导航列轨 0、内容从最左铺满（F6：客户端/Web 宽屏 ≥1024 收起为 0） */
-body:not(.is-nav-open) .window { grid-template-columns: var(--nav-collapsed-desktop) minmax(var(--center-min), 1fr) var(--side-width-reading); }
+body:not(.is-nav-open) .window { grid-template-columns: 0 minmax(var(--center-min), 1fr) var(--side-width-reading); }
 body:not(.is-nav-open) .nav { visibility: hidden; overflow: hidden; }
 /* 控制区（红绿灯/收起键）在两个视图都必须显示，且不参与 grid */
 .window-controls { display: flex !important; position: absolute !important; z-index: var(--z-raised);

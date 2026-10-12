@@ -217,14 +217,6 @@ ul{margin:0;padding-left:18px} li{font-size:12px;color:var(--text-secondary);mar
 .gnav{grid-column:1;background:var(--background-navigation);border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .gnav span{display:block;height:12px;border-radius:3px;background:var(--background-field)}
 .gnav.overlay{position:absolute;left:0;top:0;bottom:0;z-index:var(--z-overlay);box-shadow:var(--shadow-floating)}
-/* 图标轨：只留图标，hover 出标签（图标无文字时的标准做法） */
-.gnav.rail{padding:var(--nav-rail-pad) 0;align-items:center;width:var(--nav-collapsed);box-sizing:border-box}
-.gnav.rail .gi{flex:none;width:var(--nav-rail-icon);height:var(--nav-rail-icon);border-radius:var(--radius-small);position:relative;background:var(--background-field)}
-.gnav.rail .gi::after{content:attr(data-label);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);
-  white-space:nowrap;background:var(--background-surface);color:var(--text-primary);border:1px solid var(--border-default);
-  border-radius:var(--radius-small);padding:4px 8px;font-size:11px;box-shadow:var(--shadow-subtle);opacity:0;pointer-events:none;
-  transition:opacity var(--duration-fast) var(--easing-standard);z-index:var(--z-tooltip)}
-.gnav.rail .gi:hover::after{opacity:1}
 .gnav .gi.on{background:var(--brand-soft);box-shadow:inset 2px 0 0 var(--brand)}
 /* Web 窄屏抽屉：导航浮在内容上 + 遮罩 */
 .gscrim{position:absolute;inset:0;background:var(--scrim);z-index:var(--z-overlay);opacity:0;pointer-events:none;transition:opacity var(--duration-base) var(--easing-standard)}
@@ -656,13 +648,13 @@ var PRESETS = [['half',720],['default',1280],['large',1600],['uhd',1920]];
 function clampW(px, min, max){ return Math.min(max, Math.max(min, Math.round(px))); }
 /* 让位顺序：侧栏先缩 → 侧栏整条消失 → 中栏才可能低于最小；导航不参与宽度让步 */
 var SIDE_TYPES = [['reading',400],['tool',600],['task',640],['wide',840]];
-var NAVITEMS = ['overview','inbox','tasks','files','apps','settings','help'];  /* 导航项：图标轨/顶栏图标共用 */
+var NAVITEMS = ['overview','inbox','tasks','files','apps','settings','help'];  /* 导航项 */
 var SIDE_TYPE = 0;                       /* 默认：阅读型 */
 var SIDE_DRAG = 0;                       /* 用户拖拽后的宽度（0 = 用类型默认） */
 function computeColumns(theme, viewport, navPref, sidePref, navManual, collapsed){
   var NAV_MIN = px(tok('--nav-min',theme)), NAV_MAX = px(tok('--nav-max',theme));
-  /* 收起形态按端：客户端收到 0（导航改顶栏图标）；Web 保留 56 图标轨 */
-  var RAIL = PLATFORM === 1 ? px(tok('--nav-collapsed',theme)) : px(tok('--nav-collapsed-desktop',theme));
+  /* 收起一律零宽（三端一致）：导航区整条消失，内容区从窗口最左铺满 */
+  var RAIL = 0;
   var CENTER_MIN = px(tok('--center-min',theme)), SIDE_MIN = px(tok('--side-min',theme));
   var HANDLE = px(tok('--side-resize-handle',theme));
   var autoCollapse = viewport < px(tok('--nav-auto-collapse',theme));
@@ -673,7 +665,7 @@ function computeColumns(theme, viewport, navPref, sidePref, navManual, collapsed
       side: 0, center: viewport, centerBelowMin: viewport < CENTER_MIN, autoCollapse: true, drawer: true };
   }
   var navWanted = navPref > 0;
-  var wantRail = !navWanted || autoCollapse || collapsed;          /* 用户收起 = 图标轨 */
+  var wantRail = !navWanted || autoCollapse || collapsed;          /* 用户收起或窄视口 = 零宽 */
   var navTrack = wantRail ? RAIL : navFull;
   var navOverlay = autoCollapse && navManual && navWanted;         /* 窄屏手动展开：覆盖中栏 */
   var available = viewport - navTrack - CENTER_MIN;
@@ -683,7 +675,7 @@ function computeColumns(theme, viewport, navPref, sidePref, navManual, collapsed
   var side = (sidePref === 0 || cap < SIDE_MIN) ? 0
     : clampW(base, SIDE_MIN, cap);
   var center = Math.max(0, viewport - navTrack - side);
-  return { sideCap: cap, navMode: navOverlay ? 'overlay' : (wantRail ? (RAIL === 0 ? 'none' : 'rail') : 'full'), navTrack:navTrack, navOverlay:navOverlay,
+  return { sideCap: cap, navMode: navOverlay ? 'overlay' : (wantRail ? 'none' : 'full'), navTrack:navTrack, navOverlay:navOverlay,
     navOverlayW:navOverlay ? navFull : 0, scrim:false, side:side, center:center,
     centerBelowMin:center < CENTER_MIN, autoCollapse:autoCollapse, drawer:false };
 }
@@ -691,7 +683,7 @@ function renderGrid(theme){
   var c = computeColumns(theme, 1280, 280, 0, 0.45, false);
   var contract = '<div class="grp">'+fmt(tr('f.grid.contractTitle'))+'</div><table>'
     + '<tr><th>'+fmt(tr('f.grid.colZone'))+'</th><th>'+fmt(tr('f.grid.colMin'))+'</th><th>'+fmt(tr('f.grid.colMax'))+'</th><th>'+fmt(tr('f.grid.colDefault'))+'</th></tr>'
-    + '<tr><td>'+fmt(tr('f.grid.navZone'))+'</td><td><code>'+tok('--nav-min',theme)+'</code></td><td><code>'+tok('--nav-max',theme)+'</code></td><td><code>'+tok('--nav-default',theme)+'</code> · '+fmt(tr('f.grid.navCollapsedNote'))+' <code>'+tok('--nav-collapsed',theme)+'</code></td></tr>'
+    + '<tr><td>'+fmt(tr('f.grid.navZone'))+'</td><td><code>'+tok('--nav-min',theme)+'</code></td><td><code>'+tok('--nav-max',theme)+'</code></td><td><code>'+tok('--nav-default',theme)+'</code> · '+fmt(tr('f.grid.navCollapsedNote'))+'</td></tr>'
     + '<tr><td>'+fmt(tr('f.grid.centerZone'))+'</td><td><code>'+tok('--center-min',theme)+'</code></td><td>'+fmt(tr('f.grid.centerMax'))+'</td><td>'+fmt(tr('f.grid.centerDefault'))+'</td></tr>'
     + '<tr><td>'+fmt(tr('f.grid.sideZone'))+'</td><td><code>'+tok('--side-min',theme)+'</code></td><td>'+fmt(tr('f.grid.sideMaxFormula'))+'</td><td><code>'+tok('--side-width-reading',theme)+'</code> / <code>'+tok('--side-width-tool',theme)+'</code> / <code>'+tok('--side-width-task',theme)+'</code> / <code>'+tok('--side-width-wide',theme)+'</code> '+fmt(tr('f.grid.byViewType'))+'</td></tr>'
     + '</table>';
@@ -738,10 +730,9 @@ function syncGrid(){
     var gnav = document.getElementById('gnav-'+theme);
     vp.classList.toggle('plt-client', PLATFORM === 0); vp.classList.toggle('plt-web', PLATFORM === 1);
     var ggridEl = document.getElementById('ggrid-'+theme);
-    if (ggridEl) ggridEl.classList.toggle('nav-none', L.navTrack === 0);   /* 轨=0：内容顶行给左上控件让位 */
+    if (ggridEl) ggridEl.classList.toggle('nav-none', L.navTrack === 0);   /* 列宽=0：内容顶行给左上控件让位 */
     gnav.style.width = L.navTrack === 0 ? '0px' : '';
-    gnav.style.visibility = L.navTrack === 0 ? 'hidden' : '';   /* 轨=0：整列隐藏（列已显式定位，不会导致其他列位移） */
-    gnav.classList.toggle('rail', L.navMode === 'rail');
+    gnav.style.visibility = L.navTrack === 0 ? 'hidden' : '';   /* 列宽=0：整列隐藏（列已显式定位，不会导致其他列位移） */
     gnav.classList.toggle('overlay', L.navMode === 'overlay');
     gnav.classList.toggle('drawer', !!L.drawer);
     gnav.classList.toggle('open', L.navMode === 'drawerOpen');

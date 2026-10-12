@@ -330,10 +330,34 @@
     "src": "arrow-up-down"
   },
   {
+    "id": "i-square",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "square"
+  },
+  {
+    "id": "i-restore",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "copy"
+  },
+  {
     "id": "i-act-close",
     "lib": "lucide",
     "cat": "action",
     "src": "x"
+  },
+  {
+    "id": "i-win-restore",
+    "lib": "own",
+    "cat": "action",
+    "src": "win-restore"
+  },
+  {
+    "id": "i-win-max",
+    "lib": "own",
+    "cat": "action",
+    "src": "win-max"
   },
   {
     "id": "i-act-undo",

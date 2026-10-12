@@ -68,7 +68,11 @@
 <symbol id="i-act-external" viewBox="0 0 24 24" data-src="lucide:external-link"><path d="M15 3h6v6" /> <path d="M10 14 21 3" /> <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol>
 <symbol id="i-act-filter" viewBox="0 0 24 24" data-src="lucide:funnel"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z" /></symbol>
 <symbol id="i-act-sort" viewBox="0 0 24 24" data-src="lucide:arrow-up-down"><path d="m21 16-4 4-4-4" /> <path d="M17 20V4" /> <path d="m3 8 4-4 4 4" /> <path d="M7 4v16" /></symbol>
+<symbol id="i-square" viewBox="0 0 24 24" data-src="lucide:square"><rect width="18" height="18" x="3" y="3" rx="2" /></symbol>
+<symbol id="i-restore" viewBox="0 0 24 24" data-src="lucide:copy"><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></symbol>
 <symbol id="i-act-close" viewBox="0 0 24 24" data-src="lucide:x"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
+<symbol id="i-win-restore" viewBox="0 0 24 24" data-src="own:win-restore"><path d="M9 3h12v12h-2" /><rect x="5" y="5" width="14" height="14" rx="2" /></symbol>
+<symbol id="i-win-max" viewBox="0 0 24 24" data-src="own:win-max"><rect x="5" y="5" width="14" height="14" rx="2" /></symbol>
 <symbol id="i-act-undo" viewBox="0 0 24 24" data-src="lucide:undo-2"><path d="M9 14 4 9l5-5" /> <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" /></symbol>
 <symbol id="i-act-redo" viewBox="0 0 24 24" data-src="lucide:redo-2"><path d="m15 14 5-5-5-5" /> <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13" /></symbol>
 <symbol id="i-act-play" viewBox="0 0 24 24" data-src="lucide:play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" /></symbol>

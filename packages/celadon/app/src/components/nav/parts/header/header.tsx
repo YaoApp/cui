@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { BrandMark } from '@/components/base/brand-mark'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
@@ -6,80 +7,86 @@ import { useTranslation } from '@/platform/i18n'
 import { useWindowChrome } from '@/platform/client'
 
 export type NavHeaderProps = {
-  collapsed: boolean
-  onToggle: () => void
+	onToggle: () => void
+
+	/* 上区是否折叠；一级菜单的收放键画在列头里 */
+	mainFolded: boolean
+	onToggleMain: () => void
 }
 
-/* 头部内块：品牌与整列的收起键，右侧留给客户端的窗口控制。这一行**留给客户端**，
-   任何导航内容都不许挤占；Web 下不画窗口控制（能力开关）。见 design/main-shell.md §三。 */
-export function NavHeader({ collapsed, onToggle }: NavHeaderProps) {
-  const { t } = useTranslation()
-  const chrome = useWindowChrome()
-  const label = collapsed
-    ? t('shell.navigation.action.expand')
-    : t('shell.navigation.action.collapse')
-  return (
-    <div className="nav__header" {...chrome.dragProps}>
-      {collapsed ? (
-        /* 收起态不画展开键：指针落在标志上，标志被遮罩淡化并浮出展开图标，点它展开导航 */
-        <Tooltip label={t('shell.navigation.action.expand')} side="bottom">
-          <Button
-            className="nav__logo"
-            variant="plain"
-            aria-label={t('shell.navigation.action.expand')}
-            aria-expanded={false}
-            onClick={onToggle}
-          >
-            <span className="nav__logo-mark">
-              <BrandMark name="brand-yao-agents" size={24} label={t('app.name')} />
-            </span>
-            <span className="nav__logo-overlay">
-              <Icon name="i-panel-left" size={16} />
-            </span>
-          </Button>
-        </Tooltip>
-      ) : (
-        <>
-          <BrandMark name="brand-yao-agents" size={24} label={t('app.name')} />
-          <span className="nav__brand">{t('app.name')}</span>
-          <Tooltip label={label} side="bottom">
-            <Button
-              className="nav__toggle"
-              iconOnly
-              variant="plain"
-              size="small"
-              aria-label={label}
-              aria-expanded
-              onClick={onToggle}
-            >
-              {/* 一对分栏图标：展开态是左栏，收起态是右栏（栏收走了） */}
-              <Icon name="i-panel-left" size={16} />
-            </Button>
-          </Tooltip>
-        </>
-      )}
-      {chrome.visible ? (
-        <span className="nav__window">
-          <Button
-            iconOnly
-            variant="plain"
-            size="small"
-            aria-label={t('shell.window.minimize')}
-            onClick={chrome.minimize}
-          >
-            <Icon name="i-minus" size={16} />
-          </Button>
-          <Button
-            iconOnly
-            variant="plain"
-            size="small"
-            aria-label={t('shell.window.close')}
-            onClick={chrome.close}
-          >
-            <Icon name="i-act-close" size={16} />
-          </Button>
-        </span>
-      ) : null}
-    </div>
-  )
+/* 列头：Web 上右侧依次是一级菜单的收放键与整列收起键；客户端列头只留整列收起键，
+   一级菜单的收放键在品牌那一行（`parts/brand`）。品牌在列头下面那一行，列头里不重复画，
+   因此不会出现两个标志。macOS 上整行按 `--nav-head-inset` 给原生交通灯让位；
+   平台判定来自 `platform/client` 的钩子。 */
+export function NavHeader({ mainFolded, onToggleMain, onToggle }: NavHeaderProps) {
+	const { t } = useTranslation()
+	const chrome = useWindowChrome()
+	/* 这颗键只在整列展开时能看见（收起后整列为零宽），因此名字固定为收起、状态固定为已展开 */
+	const label = t('shell.navigation.action.collapse')
+	const foldLabel = t('shell.navigation.action.fold')
+	return (
+		<div
+			className='nav__header'
+			data-controls={chrome.controls}
+			data-no-drag
+			style={
+				{
+					/* macOS：头部内块给原生交通灯让位 */
+					'--nav-head-inset': chrome.controls === 'native' ? 'var(--traffic-lights-width)' : '0px'
+				} as CSSProperties
+			}
+		>
+			{chrome.controls === 'none' ? (
+				<>
+					{/* Web 展开态：LOGO 不可点，右侧依次是一级菜单的收放键与整列收起键 */}
+					<BrandMark name='brand-yao-agents' size={24} label={t('app.name')} />
+					<span className='nav__brand'>{t('app.name')}</span>
+					<Tooltip label={foldLabel} side='bottom'>
+						<Button
+							className='nav__fold'
+							iconOnly
+							variant='plain'
+							size='small'
+							aria-label={foldLabel}
+							aria-expanded={!mainFolded}
+							onClick={onToggleMain}
+						>
+							<Icon name={mainFolded ? 'i-dock' : 'i-undock'} size={16} />
+						</Button>
+					</Tooltip>
+					<Tooltip label={label} side='bottom'>
+						<Button
+							className='nav__toggle'
+							iconOnly
+							variant='plain'
+							size='small'
+							aria-label={label}
+							aria-expanded={true}
+							onClick={onToggle}
+						>
+							<Icon name='i-panel-left' size={16} />
+						</Button>
+					</Tooltip>
+				</>
+			) : (
+				<>
+					{/* 客户端：一级菜单的收放键在品牌那一行；列头只留整列收起键，
+					     Windows 的列头整块不渲染，那个键由壳与内容列头承担 */}
+					<Tooltip label={label} side='bottom'>
+						<Button
+							className='nav__toggle'
+							iconOnly
+							variant='plain'
+							size='small'
+							aria-label={label}
+							aria-expanded={true}
+							onClick={onToggle}
+						>
+							<Icon name='i-panel-left' size={16} />
+						</Button>
+					</Tooltip>
+				</>
+			)}
+		</div>
+	)
 }

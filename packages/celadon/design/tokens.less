@@ -33,109 +33,113 @@
  *   ② 视口驱动 —— 阈值按**视口 CSS px**（已含系统缩放）判定，4K@200% 与 1080p 走同一套。
  * 媒体查询不能使用 CSS var()，所以这些必须写成 LESS 变量由构建期展开。
  */
-@nav-min: 264px; @nav-max: 420px; @nav-default: 280px; @nav-collapsed: 56px;
-@center-min: 400px;                       /* 中栏最小宽（保护） */
-@side-min: 300px;                         /* 侧栏最小宽 */
+@nav-min: 264px;
+@nav-max: 420px;
+@nav-default: 280px;
+@center-min: 400px; /* 中栏最小宽（保护） */
+@side-min: 300px; /* 侧栏最小宽 */
 /* 侧栏上限 = 总宽 − 导航 − 内容最小（由判定函数算，不写死） */
-@nav-auto-collapse: 1024px;               /* 视口低于此值 → 导航自动收图标轨 */
+@nav-auto-collapse: 1024px; /* 视口低于此值 → 导航自动收起（零宽） */
 
-.celadon, [data-theme] .celadon {
-  /* ===== 中性（近白）===== */
-  /* 原生控件（滚动条、自动填充、日期面板、未清理的步进器）跟随主题：不声明会一律按浅色画。 */
-  color-scheme: light;
-  --background-app:        #F4F4F6;
-  --background-navigation:        #F8F8FA;
-  --background-content:    #FAFAFB;   /* 非纯白（去刺眼） */
-  --background-surface:    #FFFFFF;
-  --background-field:      #F4F4F5;
-  /* 聚焦字段底：比字段底亮一档，刻意不用纯白（纯白在浅色主题里偏刺眼）。 */
-  --background-field-focus:#FAFAFB;
-  --background-hover:      #F0F0F2;
-  /* 悬停底一律**定义成 token**，不在样式里就地算色。三族取同族浅底与内容底的四成对六成，
+.celadon,
+[data-theme] .celadon {
+	/* ===== 中性（近白）===== */
+	/* 原生控件（滚动条、自动填充、日期面板、未清理的步进器）跟随主题：不声明会一律按浅色画。 */
+	color-scheme: light;
+	--background-app: #f4f4f6;
+	--background-navigation: #f8f8fa;
+	--background-content: #fafafb; /* 非纯白（去刺眼） */
+	--background-surface: #ffffff;
+	--background-field: #f4f4f5;
+	/* 聚焦字段底：比字段底亮一档，刻意不用纯白（纯白在浅色主题里偏刺眼）。 */
+	--background-field-focus: #fafafb;
+	--background-hover: #f0f0f2;
+	/* 悬停底一律**定义成 token**，不在样式里就地算色。三族取同族浅底与内容底的四成对六成，
      是淡影档，专门给描边式按钮的悬停；品牌档的浅底按钮仍用更深一档（它是浅底到浅底，需要更大步子）。 */
-  --brand-soft-hover:      #E4EFEF;
-  --success-soft-hover:    #F0F9F3;
-  --danger-soft-hover:     #FDF7F7;
-  --warm-soft-hover:       #FCF9F3;
-  /* 反色档（暗底按钮）的底色与文字：底色与文字各有名字，不再把 --text-* 当填充用。
+	--brand-soft-hover: #e4efef;
+	--success-soft-hover: #f0f9f3;
+	--danger-soft-hover: #fdf7f7;
+	--warm-soft-hover: #fcf9f3;
+	/* 反色档（暗底按钮）的底色与文字：底色与文字各有名字，不再把 --text-* 当填充用。
      常态底取原型里主操作的深色；悬停底是同一中性色系的一小步，与各语义族取档方式一致。 */
-  --background-inverse:       #14120E;
-  --background-inverse-hover: #2A2723;
-  --text-inverse:             #FAFAFB;
-  --background-active:     #E8E8EB;   /* 按下态底（中性控件） */
-  --background-selected:   #ECF3F3;   /* 选中底 = 品牌浅底 */
-  --background-readonly:   #EDEDF0;   /* 只读字段底（比 --background-field 略深 → 明确「不可编辑」）；文字用 --text-secondary */
+	--background-inverse: #14120e;
+	--background-inverse-hover: #2a2723;
+	--text-inverse: #fafafb;
+	--background-active: #e8e8eb; /* 按下态底（中性控件） */
+	--background-selected: #ecf3f3; /* 选中底 = 品牌浅底 */
+	--background-readonly: #ededf0; /* 只读字段底（比 --background-field 略深 → 明确「不可编辑」）；文字用 --text-secondary */
 
-  --border-subtle:        #EBEAE6;   /* 装饰线（暖灰） */
-  --border-default:      #DEDCD7;   /* 常规边界（暖灰） */
-  --border-control:      #C9C7C0;   /* 控件边界（暖灰） */
-  --border-hover:        #9F9D96;   /* 控件悬停边界（比 --border-control 深一档） */
+	--border-subtle: #ebeae6; /* 装饰线（暖灰） */
+	--border-default: #dedcd7; /* 常规边界（暖灰） */
+	--border-control: #c9c7c0; /* 控件边界（暖灰） */
+	--border-hover: #9f9d96; /* 控件悬停边界（比 --border-control 深一档） */
 
-  --text-primary:        #14120E;   /* 暖墨（b* +2.35）；18.98 → 17.93:1 ✓ 与暗色暖白同源 */
-  --text-secondary:        #5E5A52;   /* 暖灰 */
-  --text-tertiary:        #6B6962;   /* 暖灰；字段底(#F4F4F5) 上 5.00:1 ✓ AA（原 #7A7A82 仅 3.87:1 不达标） */
-  --text-placeholder:      var(--text-tertiary);  /* 输入占位文字：与三级文字同色（单一来源）；**不要用 --text-muted**（仅 2.15:1，只能做装饰） */
-  --text-muted:    #A8A69E;   /* **纯装饰**（分隔符/水印）；承载文字请用 --text-tertiary（5.00:1 ✓ AA） */
+	--text-primary: #14120e; /* 暖墨（b* +2.35）；18.98 → 17.93:1 ✓ 与暗色暖白同源 */
+	--text-secondary: #5e5a52; /* 暖灰 */
+	--text-tertiary: #6b6962; /* 暖灰；字段底(#F4F4F5) 上 5.00:1 ✓ AA（原 #7A7A82 仅 3.87:1 不达标） */
+	--text-placeholder: var(
+		--text-tertiary
+	); /* 输入占位文字：与三级文字同色（单一来源）；**不要用 --text-muted**（仅 2.15:1，只能做装饰） */
+	--text-muted: #a8a69e; /* **纯装饰**（分隔符/水印）；承载文字请用 --text-tertiary（5.00:1 ✓ AA） */
 
-  /* ===== 品牌 · 青 #2A7B7B ===== */
-  --brand:         #2A7B7B;   /* 真实内容底(#FAFAFB) 4.77:1 ✓ AA */
-  --brand-hover:   #236B6B;   /* 浅底/描边档：悬停 */
-  --brand-active:  #1D5C5C;   /* 浅底/描边档：按下（作文字/描边色） */
-  --brand-solid-hover:  #236B6B;   /* **实心档**悬停底（压 --brand-text 白字，≥4.5:1） */
-  --brand-solid-active: #1D5C5C;   /* **实心档**按下底 */
-  --brand-soft:    #ECF3F3;
-  --brand-display: #96C5C5;   /* **只做填充/图形，不承载文字与图标** */
-  --brand-text:    #FFFFFF;   /* 压在 --brand 实心底上的文字 */
-  --brand-ink:     #287575;        /* 品牌色文字/图标：比填充深 0.4%，为在 --brand-soft 上过 AA（4.8:1）；暗色自动切 --brand-lift */
-  --brand-lift:    #389F9F;   /* 暗色文字/描边档（6.01:1 ✓） */
-  --brand-graphic: var(--brand);       /* 品牌图形（LOGO/标记）用色：浅色=品牌青，暗色=提升色 */
-  /* 品牌标记（LOGO）专用：与 UI 用的 --brand 解耦，且刻意不随主题切换 ——
+	/* ===== 品牌 · 青 #2A7B7B ===== */
+	--brand: #2a7b7b; /* 真实内容底(#FAFAFB) 4.77:1 ✓ AA */
+	--brand-hover: #236b6b; /* 浅底/描边档：悬停 */
+	--brand-active: #1d5c5c; /* 浅底/描边档：按下（作文字/描边色） */
+	--brand-solid-hover: #236b6b; /* **实心档**悬停底（压 --brand-text 白字，≥4.5:1） */
+	--brand-solid-active: #1d5c5c; /* **实心档**按下底 */
+	--brand-soft: #ecf3f3;
+	--brand-display: #96c5c5; /* **只做填充/图形，不承载文字与图标** */
+	--brand-text: #ffffff; /* 压在 --brand 实心底上的文字 */
+	--brand-ink: #287575; /* 品牌色文字/图标：比填充深 0.4%，为在 --brand-soft 上过 AA（4.8:1）；暗色自动切 --brand-lift */
+	--brand-lift: #389f9f; /* 暗色文字/描边档（6.01:1 ✓） */
+	--brand-graphic: var(--brand); /* 品牌图形（LOGO/标记）用色：浅色=品牌青，暗色=提升色 */
+	/* 品牌标记（LOGO）专用：与 UI 用的 --brand 解耦，且刻意不随主题切换 ——
      实测同一支渐变在浅底与暗底都成立，省掉一套深色分支 */
-  --brand-mark-from: #2FA79C;   /* 渐变起点 = 原品牌青提亮一档 */
-  --brand-mark-to:   #0CC8B7;   /* 渐变终点 = 再 +0.5 档；旧值 #2A7B7B 太暗、#00E8D4 太冲 */
-  --brand-eye:       #F4F1EA;   /* 眼白：暖白，与暗面正文同源，脸不冷 */
+	--brand-mark-from: #2fa79c; /* 渐变起点 = 原品牌青提亮一档 */
+	--brand-mark-to: #0cc8b7; /* 渐变终点 = 再 +0.5 档；旧值 #2A7B7B 太暗、#00E8D4 太冲 */
+	--brand-eye: #f4f1ea; /* 眼白：暖白，与暗面正文同源，脸不冷 */
 
-  /* ===== 交互态 ===== */
-  --focus-ring-color:  var(--brand);      /* 焦点环：与品牌同源 */
-  --focus-ring-width:  2px;
-  --focus-ring-offset: 2px;               /* ring 与控件留 2px 间隙 */
-  --focus-ring: 0 0 0 var(--focus-ring-offset) var(--background-content),
-                0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
-  /* 各色系的焦点环：与所在按钮同色系。语义色的按钮聚焦时不该出现品牌色环。
+	/* ===== 交互态 ===== */
+	--focus-ring-color: var(--brand); /* 焦点环：与品牌同源 */
+	--focus-ring-width: 2px;
+	--focus-ring-offset: 2px; /* ring 与控件留 2px 间隙 */
+	--focus-ring: 0 0 0 var(--focus-ring-offset) var(--background-content),
+		0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
+	/* 各色系的焦点环：与所在按钮同色系。语义色的按钮聚焦时不该出现品牌色环。
      只声明一次，环色与间隙引用的都是随主题变化的 token，浅暗两套自动成立。 */
-  --focus-ring-success: 0 0 0 var(--focus-ring-offset) var(--background-content),
-                        0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--success);
-  --focus-ring-danger: 0 0 0 var(--focus-ring-offset) var(--background-content),
-                       0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--danger);
-  --focus-ring-warm: 0 0 0 var(--focus-ring-offset) var(--background-content),
-                     0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--warm);
-  /* 反色档的焦点环取本族的深色；它是中性族，不该出现品牌色环。 */
-  --focus-ring-inverse: 0 0 0 var(--focus-ring-offset) var(--background-content),
-                        0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--background-inverse);
+	--focus-ring-success: 0 0 0 var(--focus-ring-offset) var(--background-content),
+		0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--success);
+	--focus-ring-danger: 0 0 0 var(--focus-ring-offset) var(--background-content),
+		0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--danger);
+	--focus-ring-warm: 0 0 0 var(--focus-ring-offset) var(--background-content),
+		0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--warm);
+	/* 反色档的焦点环取本族的深色；它是中性族，不该出现品牌色环。 */
+	--focus-ring-inverse: 0 0 0 var(--focus-ring-offset) var(--background-content),
+		0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--background-inverse);
 
-  --background-disabled: #F0F0F2;   /* 命名与 background-* 家族一致 */
-  --text-disabled:       #A8A69E;   /* 禁用态豁免对比度要求 */
-  --border-disabled:     #E3E1DA;
+	--background-disabled: #f0f0f2; /* 命名与 background-* 家族一致 */
+	--text-disabled: #a8a69e; /* 禁用态豁免对比度要求 */
+	--border-disabled: #e3e1da;
 
-  --scrim:           rgba(18,17,16,.32);  /* 弹窗/抽屉遮罩（暖墨，与暗面同源） */
+	--scrim: rgba(18, 17, 16, 0.32); /* 弹窗/抽屉遮罩（暖墨，与暗面同源） */
 
-  /* ===== 警示 · 淡琥珀（不像 error）===== */
-  --warm:          #8B6214;   /* 实心底（白字 5.45:1） */
-  --warm-soft:     #F7F0E2;
-  --warm-text:     #6E4D0C;   /* 只配 --warm-soft（6.78:1） */
-  --warm-contrast: #FFFFFF;   /* 压在 --warm 实心底上的文字 */
-  --warning:       var(--warm);           /* 同源别名，避免两处维护 */
-  --warning-soft:  var(--warm-soft);
+	/* ===== 警示 · 淡琥珀（不像 error）===== */
+	--warm: #8b6214; /* 实心底（白字 5.45:1） */
+	--warm-soft: #f7f0e2;
+	--warm-text: #6e4d0c; /* 只配 --warm-soft（6.78:1） */
+	--warm-contrast: #ffffff; /* 压在 --warm 实心底上的文字 */
+	--warning: var(--warm); /* 同源别名，避免两处维护 */
+	--warning-soft: var(--warm-soft);
 
-  /* ===== 语义 ===== */
-  --success:            #057748;
-  --success-soft:       #D9F0E0;   /* 与 --brand-soft #ECF3F3 拉开（ΔE 3.4 → 10.4），否则"已完成"与"选中"分不清 */
-  --danger:        #D93B30;   /* **只做填充/图形**（文字用途仅 3.96:1，不达 AA） */
-  --danger-soft:   #FBECEA;
-  --danger-ink:    #B32B22;   /* 危险色文字/图标：在 --danger-soft 上 5.57:1 ✓、内容底 6.13:1 ✓ */
+	/* ===== 语义 ===== */
+	--success: #057748;
+	--success-soft: #d9f0e0; /* 与 --brand-soft #ECF3F3 拉开（ΔE 3.4 → 10.4），否则"已完成"与"选中"分不清 */
+	--danger: #d93b30; /* **只做填充/图形**（文字用途仅 3.96:1，不达 AA） */
+	--danger-soft: #fbecea;
+	--danger-ink: #b32b22; /* 危险色文字/图标：在 --danger-soft 上 5.57:1 ✓、内容底 6.13:1 ✓ */
 
-
-  /* ===== 字体（四语：简 / 繁 / 英 / 日）=====
+	/* ===== 字体（四语：简 / 繁 / 英 / 日）=====
    * 字体栈顺序取业内通行的系统字体顺序：`-apple-system` → `BlinkMacSystemFont` → `"Segoe UI"` → `Roboto` →
    * `"Helvetica Neue"` → `Arial` → `"Noto Sans"` → generic。两处约定：
    * 1. **不含任何中文字体**，中文交系统默认，不在栈里指定 Windows 的中文字体；
@@ -146,234 +150,285 @@
    * 候选栈并排对比见 `font-platform-test.html`。
    *
    * 栈尾依次带：表情字体（否则键帽与旗帜一类符号可能出豆腐块）、generic family（避免落到浏览器默认衬线）。 */
-  --font-family-ui:      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-  --font-family-monospace: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Cascadia Mono", "Liberation Mono", monospace;
-  /* 各语言字体栈：**必须分开**，否则繁中会渲染成简体字形、日文会渲染成中文字形。
+	--font-family-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+		'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+	--font-family-monospace: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Cascadia Mono',
+		'Liberation Mono', monospace;
+	/* 各语言字体栈：**必须分开**，否则繁中会渲染成简体字形、日文会渲染成中文字形。
      拉丁部分与上面的默认栈一致，保证英文在四种语言下完全一致；`"Noto Sans"` 之后追加该语言字体，
      再经 Noto Sans CJK 与思源，最后回落 generic family。**不列 Windows 中文字体。** */
-  --font-family-ui-hans:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Noto Sans CJK SC", "Source Han Sans SC", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-  --font-family-ui-hant:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang TC", "Noto Sans CJK TC", "Source Han Sans TC", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-  --font-family-ui-japanese: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Hiragino Sans", "Yu Gothic", Meiryo, "Noto Sans CJK JP", "Source Han Sans JP", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-  /* 等宽栈（含中日韩）：原顺序缺繁中字形，繁中环境会掉到简中或日文字形上。
+	--font-family-ui-hans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+		'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+	--font-family-ui-hant: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+		'PingFang TC', 'Noto Sans CJK TC', 'Source Han Sans TC', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+	--font-family-ui-japanese: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+		'Noto Sans', 'Hiragino Sans', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Source Han Sans JP',
+		'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+	/* 等宽栈（含中日韩）：原顺序缺繁中字形，繁中环境会掉到简中或日文字形上。
      按 SC → TC → JP 列全，三者字形不同，缺一个就会出现"简中字形冒充繁中"的错字。 */
-  --font-family-monospace-cjk: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK SC", "Noto Sans Mono CJK TC", "Noto Sans Mono CJK JP", monospace;
+	--font-family-monospace-cjk: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Noto Sans Mono CJK SC',
+		'Noto Sans Mono CJK TC', 'Noto Sans Mono CJK JP', monospace;
 
-  /* 字重刻度：三档，取整百值。
+	/* 字重刻度：三档，取整百值。
    * **中日韩文本不得依赖字重区分层级**：微软雅黑只有 Light/Regular/Bold，
    * 只有 PingFang 与 Hiragino 才有真实的 500 与 600；非整百值只在可变字体上成立，跨平台会跳档。
    * 依据与实测见 design/typography.md。 */
-  --font-weight-normal:  400;   /* 四个平台都有真实 400，不依赖可变字体 */
-  --font-weight-medium:  500;   /* 标签与次级标题；Windows 回落 400，因此不单独承担层级 */
-  --font-weight-strong:  600;   /* 标题与真正的强调；Windows 回落 700（Bold），只用于标题 */
-  --line-height-normal:  1.5;   /* 拉丁 */
-  --line-height-cjk:     1.7;   /* 中日文需要更大行距 */
-  --line-height-tight:   1.25;  /* 界面里的紧凑行高（数值与卡片）*/
-  --line-height-title:   1.6;   /* 大标题行高（多行标题用，比正文松、比 tight 透气）*/
-  /* 控件行高取**整数像素**：倍率行高（1.7 × 14px = 23.8px）会把文字盒放在小数位置，
+	--font-weight-normal: 400; /* 四个平台都有真实 400，不依赖可变字体 */
+	--font-weight-medium: 500; /* 标签与次级标题；Windows 回落 400，因此不单独承担层级 */
+	--font-weight-strong: 600; /* 标题与真正的强调；Windows 回落 700（Bold），只用于标题 */
+	--line-height-normal: 1.5; /* 拉丁 */
+	--line-height-cjk: 1.7; /* 中日文需要更大行距 */
+	--line-height-tight: 1.25; /* 界面里的紧凑行高（数值与卡片）*/
+	--line-height-title: 1.6; /* 大标题行高（多行标题用，比正文松、比 tight 透气）*/
+	/* 控件行高取**整数像素**：倍率行高（1.7 × 14px = 23.8px）会把文字盒放在小数位置，
      重绘或 transform 时字形会被重新吸附到整像素，观感是文字跳位。控件高度本就由间距刻度定，
      行高整数不改变版面。小档用于 24 高的按钮，标准档用于 32 与 40。 */
-  --line-height-control:        24px;
-  --line-height-control-small:  20px;
-  --letter-spacing-latin: -0.01em;  /* 仅拉丁可收紧 */
-  --letter-spacing-cjk:    0;       /* 中文不要负字距 */
-  --font-size-minimum-cjk: 12px;
+	--line-height-control: 24px;
+	--line-height-control-small: 20px;
+	--letter-spacing-latin: -0.01em; /* 仅拉丁可收紧 */
+	--letter-spacing-cjk: 0; /* 中文不要负字距 */
+	--font-size-minimum-cjk: 12px;
 
-  /* 字号阶梯（5 档）：页面文字一律用这几档，不写中间值。
+	/* 字号阶梯（5 档）：页面文字一律用这几档，不写中间值。
      取值按业内通行阶梯：12 · 14 · 16 · 20 · 24，**相邻档至少相差 2px**，
      正文与正文大相差 2px、正文大到区块标题相差 4px，层级看得见。
      不设相邻 1px 的档：1px 差不构成可感知层级。细则见 design/typography.md 第 2 节。 */
-  --font-size-label:    12px;   /* 纯拉丁与数字小标签；含中日韩文字时用 caption，字号相同靠字重区分 */
-  --font-size-caption:  12px;   /* 说明与辅助，= --font-size-minimum-cjk */
-  --font-size-body:     14px;   /* 界面正文，业内常见的桌面基准字号 */
-  --font-size-body-lg:  16px;   /* 需要强调的正文 */
-  --font-size-subtitle: 20px;   /* 区块标题 */
-  --font-size-title:    24px;   /* 页面标题 */
+	--font-size-label: 12px; /* 纯拉丁与数字小标签；含中日韩文字时用 caption，字号相同靠字重区分 */
+	--font-size-caption: 12px; /* 说明与辅助，= --font-size-minimum-cjk */
+	--font-size-body: 14px; /* 界面正文，业内常见的桌面基准字号 */
+	--font-size-body-lg: 16px; /* 需要强调的正文 */
+	--font-size-subtitle: 20px; /* 区块标题 */
+	--font-size-title: 24px; /* 页面标题 */
 
-  /* ===== 字号（7 档 + 16 补档）· 中文最小 12px ===== */
-  --font-size-11:11px;   /* 仅西文/数字角标，中文勿用 */
-  --font-size-12:12px;   /* 中文最小档 */
-  --font-size-13:13px;   /* 正文默认 */
-  --font-size-14:14px; --font-size-15:15px; --font-size-16:16px; --font-size-17:17px; --font-size-18:18px; --font-size-20:20px;
-  --font-size-24:24px;   /* 大标题档（卡片/页面主标题）*/
-  --font-size-28:28px;   /* 页面主标题档 */
+	/* ===== 字号（7 档 + 16 补档）· 中文最小 12px ===== */
+	--font-size-11: 11px; /* 仅西文/数字角标，中文勿用 */
+	--font-size-12: 12px; /* 中文最小档 */
+	--font-size-13: 13px; /* 正文默认 */
+	--font-size-14: 14px;
+	--font-size-15: 15px;
+	--font-size-16: 16px;
+	--font-size-17: 17px;
+	--font-size-18: 18px;
+	--font-size-20: 20px;
+	--font-size-24: 24px; /* 大标题档（卡片/页面主标题）*/
+	--font-size-28: 28px; /* 页面主标题档 */
 
-  /* ===== 间距 Spacing（纯 4 基数列：4/8/12/16/24/32/48；禁魔法数字）=====
+	/* ===== 间距 Spacing（纯 4 基数列：4/8/12/16/24/32/48；禁魔法数字）=====
      用法：组件内距 4/6/8/12 · 元素间 8/12/16 · 区块间 24/32/48 · 栅格槽宽 16/24 */
-  /* 线宽：分割线与边框统一 1px（视网膜屏下即物理 2px，够细且不糊）。
+	/* 线宽：分割线与边框统一 1px（视网膜屏下即物理 2px，够细且不糊）。
      可拖动的分割线也不加粗，高亮只换颜色，见 design/foundations.md F5。 */
-  --border-width:  1px;
-  --spacing-4:4px; --spacing-8:8px; --spacing-12:12px; --spacing-16:16px; --spacing-24:24px; --spacing-32:32px; --spacing-48:48px;
+	--border-width: 1px;
+	--spacing-4: 4px;
+	--spacing-8: 8px;
+	--spacing-12: 12px;
+	--spacing-16: 16px;
+	--spacing-24: 24px;
+	--spacing-32: 32px;
+	--spacing-48: 48px;
 
-  /* ===== 圆角 Radius（用法：按钮/输入 medium · 卡片/面板 large · 标签/胶囊 pill · 小控件 small）===== */
-  --radius-xs:4px; --radius-small:6px; --radius-medium:8px; --radius-large:12px; --radius-pill:999px;
-  --radius-xl:16px;    /* 大输入区 / 大容器（比 large 再大一档） */
+	/* ===== 圆角 Radius（用法：按钮/输入 medium · 卡片/面板 large · 标签/胶囊 pill · 小控件 small）===== */
+	--radius-xs: 4px;
+	--radius-small: 6px;
+	--radius-medium: 8px;
+	--radius-large: 12px;
+	--radius-pill: 999px;
+	--radius-xl: 16px; /* 大输入区 / 大容器（比 large 再大一档） */
 
-  /* ===== 动效 Motion =====
+	/* ===== 动效 Motion =====
      时长：120 微反馈（按下/悬停）· 200 常规（面板展开/淡入）· 320 大位移（抽屉/页面）
      缓动：standard 通用 · decelerate 进场（快起慢停）· accelerate 退场（慢起快走）
      另有一档**循环时长**：循环型指示（加载）按"跑完一周"计时，不属于位移分档，
      因此不随 quiet / rich 变档，也不参与进退场缓动的选择。 */
-  --duration-fast:120ms; --duration-base:200ms; --duration-slow:320ms;
-  --duration-loop:1600ms;
-  --easing:cubic-bezier(.4,0,.2,1);
-  --easing-standard:cubic-bezier(.4,0,.2,1);
-  /* 动效强度三档（产品级偏好，非系统）：
+	--duration-fast: 120ms;
+	--duration-base: 200ms;
+	--duration-slow: 320ms;
+	--duration-loop: 1600ms;
+	--easing: cubic-bezier(0.4, 0, 0.2, 1);
+	--easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+	/* 动效强度三档（产品级偏好，非系统）：
      quiet 低调（高频区域）/ 默认=标准 / rich 丰富（一次性、有意义的动效） */
-  --duration-fast-quiet:80ms;  --duration-base-quiet:140ms; --duration-slow-quiet:220ms;
-  --duration-fast-rich:180ms;  --duration-base-rich:300ms;  --duration-slow-rich:480ms;
-  --easing-decelerate:cubic-bezier(0,0,.2,1);
-  --easing-accelerate:cubic-bezier(.4,0,1,1);
+	--duration-fast-quiet: 80ms;
+	--duration-base-quiet: 140ms;
+	--duration-slow-quiet: 220ms;
+	--duration-fast-rich: 180ms;
+	--duration-base-rich: 300ms;
+	--duration-slow-rich: 480ms;
+	--easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+	--easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
-  /* ===== 阴影与层级 Elevation =====
+	/* ===== 阴影与层级 Elevation =====
      L0 base 无阴影 · L1 raised 卡片/标签页 · L2 floating 下拉/气泡 · L3 overlay 弹窗/抽屉/提示 */
-  /* 层级表面：浅色下各层同为白面（靠阴影分离）；暗色下**必须**用面阶分离（见暗色块） */
-  --elevation-surface-1:#FFFFFF;
-  --elevation-surface-2:#FFFFFF;
-  --elevation-surface-3:#FFFFFF;
-  --elevation-highlight:transparent;   /* 暗色用 1px 内高光勾边，浅色不需要 */
+	/* 层级表面：浅色下各层同为白面（靠阴影分离）；暗色下**必须**用面阶分离（见暗色块） */
+	--elevation-surface-1: #ffffff;
+	--elevation-surface-2: #ffffff;
+	--elevation-surface-3: #ffffff;
+	--elevation-highlight: transparent; /* 暗色用 1px 内高光勾边，浅色不需要 */
 
-  --shadow-subtle:0 1px 2px rgba(18,17,16,.05);
-  --shadow-floating:0 10px 30px rgba(18,17,16,.10), 0 2px 6px rgba(18,17,16,.06);
-  --shadow-overlay:0 24px 60px rgba(18,17,16,.18), 0 4px 12px rgba(18,17,16,.08);
-  --z-base:0; --z-raised:10; --z-sticky:100; --z-overlay:1000; --z-modal:1100; --z-toast:1200; --z-tooltip:1300;
+	--shadow-subtle: 0 1px 2px rgba(18, 17, 16, 0.05);
+	--shadow-floating: 0 10px 30px rgba(18, 17, 16, 0.1), 0 2px 6px rgba(18, 17, 16, 0.06);
+	--shadow-overlay: 0 24px 60px rgba(18, 17, 16, 0.18), 0 4px 12px rgba(18, 17, 16, 0.08);
+	--z-base: 0;
+	--z-raised: 10;
+	--z-sticky: 100;
+	--z-overlay: 1000;
+	--z-modal: 1100;
+	--z-toast: 1200;
+	--z-tooltip: 1300;
 
-  /* ===== 栅格与响应式 Grid（断点见文件顶部 LESS 变量；以下是尺寸）===== */
-  /* ===== 窗口与三栏（阈值/比例见文件顶部 LESS 变量）===== */
-  --window-default:1280px; --window-default-height:820px;   /* 默认打开：两栏（导航 + 内容） */
-  --titlebar-height:48px;                                   /* 窗口左上角控制区高度（红绿灯 + 收起按钮），**不是**横跨全宽的标题栏 */
-  --traffic-lights-width:62px;                              /* 红绿灯占位（macOS） */
-  --titlebar-inset:96px;                                     /* 收起导航后，内容区顶行要给左上控件让出的左内距 */
-  --page-min-width:520px; --page-min-height:600px;          /* 最小窗口（壳层设定） */
-  --nav-min:264px; --nav-max:420px; --nav-default:280px; --nav-collapsed:56px;
-  /* 收起为图标轨的构成：24 图标 + 16×2 padding = 56（见下 --nav-collapsed）
+	/* ===== 栅格与响应式 Grid（断点见文件顶部 LESS 变量；以下是尺寸）===== */
+	/* ===== 窗口与三栏（阈值/比例见文件顶部 LESS 变量）===== */
+	--window-default: 1280px;
+	--window-default-height: 820px; /* 默认打开：两栏（导航 + 内容） */
+	--titlebar-height: 48px; /* 窗口左上角控制区高度（红绿灯 + 收起按钮），**不是**横跨全宽的标题栏 */
+	--traffic-lights-width: 62px; /* 红绿灯占位（macOS） */
+	--titlebar-inset: 96px; /* 收起导航后，内容区顶行要给左上控件让出的左内距 */
+	--page-min-width: 520px;
+	--page-min-height: 600px; /* 最小窗口（壳层设定） */
+	--nav-min: 264px;
+	--nav-max: 420px;
+	--nav-default: 280px;
+	/* 收起一律零宽（三端一致，没有图标轨这一档），重新展开的入口在内容列头左端；
      Web 窄屏（< --bp-nav-drawer）转抽屉：导航浮在内容上 + 遮罩，不占列轨 */
-  --nav-rail-icon:24px; --nav-rail-pad:16px; --bp-nav-drawer:768px;
-  /* 收起形态按端不同：**客户端收到 0**（导航改为顶栏图标，和标题栏按钮同一行）；
-     **Web 保留 56 图标轨**（浏览器没有标题栏可放）；窄屏 Web 转抽屉 */
-  --nav-collapsed-desktop:0px;
-  --nav-auto-collapse:1024px;
-  --center-min:400px;
-  --side-min:300px;
-  /* 右侧栏默认宽**按视图类型**给（阅读 / 工具 / 任务 / 宽屏），再被上限比例兜住 */
-  --side-width-reading:400px; --side-width-tool:600px; --side-width-task:640px;
-  --side-width-wide:840px;
-  /* 侧栏上限**不写死**：= 总宽 − 导航区 − 内容区最小（见 --center-min）。用户可自由拖拽到此上限。 */
-  --side-resize-handle:6px;   /* 拖拽把手宽度（贴在内容区与侧栏之间） */
-  /* 滚动条：三栏、弹窗与列表共用一套（尺寸与滑块色都只写在这里）。
+	--bp-nav-drawer: 768px;
+	--nav-auto-collapse: 1024px;
+	/* 窗口顶部可拖动带的高度：无标题栏窗口里这一条内的空白处都能移动窗口 */
+	--window-drag-band: 48px;
+	--center-min: 400px;
+	--side-min: 300px;
+	/* 右侧栏默认宽**按视图类型**给（阅读 / 工具 / 任务 / 宽屏），再被上限比例兜住 */
+	--side-width-reading: 400px;
+	--side-width-tool: 600px;
+	--side-width-task: 640px;
+	--side-width-wide: 840px;
+	/* 侧栏上限**不写死**：= 总宽 − 导航区 − 内容区最小（见 --center-min）。用户可自由拖拽到此上限。 */
+	--side-resize-handle: 6px; /* 拖拽把手宽度（贴在内容区与侧栏之间） */
+	/* 滚动条：三栏、弹窗与列表共用一套（尺寸与滑块色都只写在这里）。
      尺寸三档按 4 基数：small 4（导航列这类窄栏）· medium 6（内容区与面板）· large 8（大页面）。
      滑块色与控件边界同源，悬停加深一档。 */
-  --scrollbar-size-small:4px; --scrollbar-size-medium:6px; --scrollbar-size-large:8px;
-  --scrollbar-thumb:var(--border-control); --scrollbar-thumb-hover:var(--border-hover);
-  --scrollbar-track:transparent;
-  --content-max:880px; --content-max-wide:1040px;           /* 中栏内文可读最大宽 */
-  --auth-card-width:480px;                                  /* 入口页（登录 / 注册 / 服务器选择）的卡片宽度 */
-  /* 弹窗面板的两档宽度：表单与步骤用窄档（与入口页卡片同宽），打开一整页内容用宽档（中栏可读宽） */
-  --dialog-width:480px;
-  --dialog-width-wide:var(--content-max-wide);
+	--scrollbar-size-small: 4px;
+	--scrollbar-size-medium: 6px;
+	--scrollbar-size-large: 8px;
+	--scrollbar-thumb: var(--border-control);
+	--scrollbar-thumb-hover: var(--border-hover);
+	--scrollbar-track: transparent;
+	--content-max: 880px;
+	--content-max-wide: 1040px; /* 中栏内文可读最大宽 */
+	--auth-card-width: 480px; /* 入口页（登录 / 注册 / 服务器选择）的卡片宽度 */
+	/* 弹窗面板的两档宽度：表单与步骤用窄档（与入口页卡片同宽），打开一整页内容用宽档（中栏可读宽） */
+	--dialog-width: 480px;
+	--dialog-width-wide: var(--content-max-wide);
 
-  /* ===== 边框 Border：强边界档（WCAG 1.4.11 达标值）=====
+	/* ===== 边框 Border：强边界档（WCAG 1.4.11 达标值）=====
      默认态用 --border-control（观感轻）；高对比偏好下由下方 @media 自动切到强边界。
      达标实测：内容底 3.31 / 字段底 3.14 */
-  --border-control-strong:#8D8A80;
-  --border-hover-strong:#847F73;
-  /* 降低对比偏好档（prefers-contrast: less）：边界更淡 */
-  --border-control-low:#D5D3CC;
-  --border-hover-low:#C2BEB4;
-  --column-header-height:40px;
-  --row-height:40px;
+	--border-control-strong: #8d8a80;
+	--border-hover-strong: #847f73;
+	/* 降低对比偏好档（prefers-contrast: less）：边界更淡 */
+	--border-control-low: #d5d3cc;
+	--border-hover-low: #c2beb4;
+	--column-header-height: 40px;
+	--row-height: 40px;
 }
 
 /* 暗色（近黑）· 品牌同值 */
-.celadon[data-theme='dark'], [data-theme='dark'] .celadon {
-  /* 原生控件跟随暗色主题；缺这一条会让滚动条、自动填充与未清理的步进器呈浅色块。 */
-  color-scheme: dark;
-  --background-app:        #121110;   /* 暖墨（松烟墨）：不再用纯黑，避免 OLED 光晕 */
-  --background-navigation:        #151413;
-  --background-content:    #191816;
-  --background-surface:    #1F1E1A;
-  --background-field:      #262420;
-  /* 聚焦字段底：暗色下「亮一档」是更亮的深色，取字段底与 hover 底之间的第一档 */
-  --background-field-focus:#2E2B26;
-  --background-hover:      #2C2A26;
-  /* 悬停底：暗色**直接用整块同族浅底**。暗色的同族浅底本就贴近内容底（两者亮度差远小于浅色主题），
+.celadon[data-theme='dark'],
+[data-theme='dark'] .celadon {
+	/* 原生控件跟随暗色主题；缺这一条会让滚动条、自动填充与未清理的步进器呈浅色块。 */
+	color-scheme: dark;
+	--background-app: #121110; /* 暖墨（松烟墨）：不再用纯黑，避免 OLED 光晕 */
+	--background-navigation: #151413;
+	--background-content: #191816;
+	--background-surface: #1f1e1a;
+	--background-field: #262420;
+	/* 聚焦字段底：暗色下「亮一档」是更亮的深色，取字段底与 hover 底之间的第一档 */
+	--background-field-focus: #2e2b26;
+	--background-hover: #2c2a26;
+	/* 悬停底：暗色**直接用整块同族浅底**。暗色的同族浅底本就贴近内容底（两者亮度差远小于浅色主题），
      再按浅色的比例往内容底调会几乎看不出悬停，所以两个主题的取法不同，判据都是「离开内容底一个看得见的步子」。 */
-  --brand-soft-hover:      #182C2D;
-  --success-soft-hover:    #12261A;
-  --danger-soft-hover:     #2A1614;
-  --warm-soft-hover:       #2C2718;
-  /* 反色档：暗色主题下暗底按钮反过来是亮底 */
-  --background-inverse:       #F4F1EA;
-  --background-inverse-hover: #DDD8CE;
-  --text-inverse:             #191816;
-  --background-active:     #333129;
-  --background-selected:   #17292A;   /* 品牌浅底（保留青调，略暖） */
-  --background-readonly:   #232119;
+	--brand-soft-hover: #182c2d;
+	--success-soft-hover: #12261a;
+	--danger-soft-hover: #2a1614;
+	--warm-soft-hover: #2c2718;
+	/* 反色档：暗色主题下暗底按钮反过来是亮底 */
+	--background-inverse: #f4f1ea;
+	--background-inverse-hover: #ddd8ce;
+	--text-inverse: #191816;
+	--background-active: #333129;
+	--background-selected: #17292a; /* 品牌浅底（保留青调，略暖） */
+	--background-readonly: #232119;
 
-  --border-subtle:        #2E2C28;
-  --border-default:      #3B3933;
-  --border-control:      #4A4740;
-  --border-hover:        #5E5A52;
+	--border-subtle: #2e2c28;
+	--border-default: #3b3933;
+	--border-control: #4a4740;
+	--border-hover: #5e5a52;
 
-  --text-primary:        #F4F1EA;   /* 暖白 */
-  --text-secondary:        #B8B3A8;
-  --text-tertiary:        #9A9489;
-  --text-muted:    #736E64;   /* 纯装饰 */
+	--text-primary: #f4f1ea; /* 暖白 */
+	--text-secondary: #b8b3a8;
+	--text-tertiary: #9a9489;
+	--text-muted: #736e64; /* 纯装饰 */
 
-  --brand:         #2A7B7B;
-  --brand-hover:   #338F8F;   /* 浅底/描边档：悬停 */
-  --brand-active:  #3FA3A3;   /* 浅底/描边档：按下（作文字/描边色） */
-  --brand-solid-hover:  #2C8080;   /* 实心档悬停底：白字 4.66:1 ✓（原 #338F8F 仅 3.84:1 ✗） */
-  --brand-solid-active: #266F6F;   /* 实心档按下底：白字 5.86:1 ✓（原 #3FA3A3 仅 3.01:1 ✗） */
-  --brand-soft:    #16292A;
-  --brand-display: #96C5C5;
-  --brand-text:    #FFFFFF;
-  --brand-ink:     var(--brand-lift);   /* 暗色：品牌色文字/图标一律用提亮档（软底 4.79:1） */
-  --brand-lift:    #389F9F;
+	--brand: #2a7b7b;
+	--brand-hover: #338f8f; /* 浅底/描边档：悬停 */
+	--brand-active: #3fa3a3; /* 浅底/描边档：按下（作文字/描边色） */
+	--brand-solid-hover: #2c8080; /* 实心档悬停底：白字 4.66:1 ✓（原 #338F8F 仅 3.84:1 ✗） */
+	--brand-solid-active: #266f6f; /* 实心档按下底：白字 5.86:1 ✓（原 #3FA3A3 仅 3.01:1 ✗） */
+	--brand-soft: #16292a;
+	--brand-display: #96c5c5;
+	--brand-text: #ffffff;
+	--brand-ink: var(--brand-lift); /* 暗色：品牌色文字/图标一律用提亮档（软底 4.79:1） */
+	--brand-lift: #389f9f;
 
-  /* 暗色：焦点环改用提亮档，否则在近黑上看不见 */
-  --focus-ring-color:  var(--brand-lift);
-  --brand-graphic: var(--brand-lift);  /* 暗底上标记必须提亮，否则看不见 */
-  /* --brand-mark-* / --brand-eye 不在此覆盖：品牌标记刻意全站一版 */
+	/* 暗色：焦点环改用提亮档，否则在近黑上看不见 */
+	--focus-ring-color: var(--brand-lift);
+	--brand-graphic: var(--brand-lift); /* 暗底上标记必须提亮，否则看不见 */
+	/* --brand-mark-* / --brand-eye 不在此覆盖：品牌标记刻意全站一版 */
 
-  --background-disabled: #232119;
-  --text-disabled:       #5F5A52;
-  --border-disabled:     #322F29;
-  --scrim:           rgba(18,17,16,.60);   /* 暖墨遮罩 */
+	--background-disabled: #232119;
+	--text-disabled: #5f5a52;
+	--border-disabled: #322f29;
+	--scrim: rgba(18, 17, 16, 0.6); /* 暖墨遮罩 */
 
-  --warm:          #C4A767;
-  --warm-soft:     #2C2718;
-  --warm-text:     #E4CE9C;
-  --warm-contrast: #2A1B05;   /* 暗色下 --warm 较亮 → 用深字（7.21:1） */
+	--warm: #c4a767;
+	--warm-soft: #2c2718;
+	--warm-text: #e4ce9c;
+	--warm-contrast: #2a1b05; /* 暗色下 --warm 较亮 → 用深字（7.21:1） */
 
-  --success:            #4ADE80;   --success-soft:      #12261A;
-  --danger:        #F87171;   --danger-soft:  #2A1614;
-  --danger-ink:    #EC7A6E;   /* 暗色文字/图标档（danger-soft 上 5.65:1） */
+	--success: #4ade80;
+	--success-soft: #12261a;
+	--danger: #f87171;
+	--danger-soft: #2a1614;
+	--danger-ink: #ec7a6e; /* 暗色文字/图标档（danger-soft 上 5.65:1） */
 
-  /* 暗色层级：**用面阶表达**（深阴影在暗底上看不见）；内高光只勾一道边 */
-  --elevation-surface-1:#232119;   /* ≈ L1 在 content(#191816) 上可辨 */
-  --elevation-surface-2:#2B2923;
-  --elevation-surface-3:#33312A;
-  --elevation-highlight:rgba(244,241,234,.07);   /* 暖白高光，与暖墨同源 */
+	/* 暗色层级：**用面阶表达**（深阴影在暗底上看不见）；内高光只勾一道边 */
+	--elevation-surface-1: #232119; /* ≈ L1 在 content(#191816) 上可辨 */
+	--elevation-surface-2: #2b2923;
+	--elevation-surface-3: #33312a;
+	--elevation-highlight: rgba(244, 241, 234, 0.07); /* 暖白高光，与暖墨同源 */
 
-  --shadow-subtle:inset 0 1px 0 var(--elevation-highlight), 0 1px 3px rgba(18,17,16,.55);
-  --shadow-floating:inset 0 1px 0 var(--elevation-highlight), 0 12px 34px rgba(18,17,16,.7);
-  --shadow-overlay:inset 0 1px 0 var(--elevation-highlight), 0 26px 64px rgba(18,17,16,.8), 0 4px 14px rgba(18,17,16,.55);
+	--shadow-subtle: inset 0 1px 0 var(--elevation-highlight), 0 1px 3px rgba(18, 17, 16, 0.55);
+	--shadow-floating: inset 0 1px 0 var(--elevation-highlight), 0 12px 34px rgba(18, 17, 16, 0.7);
+	--shadow-overlay: inset 0 1px 0 var(--elevation-highlight), 0 26px 64px rgba(18, 17, 16, 0.8),
+		0 4px 14px rgba(18, 17, 16, 0.55);
 
-  /* 强边界档（暗）：内容底 3.98 / 字段底 3.47 ✓ */
-  --border-control-strong:#7C776B;
-  --border-hover-strong:#827D70;
-  --border-control-low:#3E3C36;
-  --border-hover-low:#474540;
+	/* 强边界档（暗）：内容底 3.98 / 字段底 3.47 ✓ */
+	--border-control-strong: #7c776b;
+	--border-hover-strong: #827d70;
+	--border-control-low: #3e3c36;
+	--border-hover-low: #474540;
 }
 
 /* ===== 减动效：系统偏好开启时，全部时长归零（组件无需各自处理）===== */
 @media (prefers-reduced-motion: reduce) {
-  /* 无障碍总开关。注意：只在 :root 上写 !important 是**没用的** —— 自定义属性沿继承链传递，
+	/* 无障碍总开关。注意：只在 :root 上写 !important 是**没用的** —— 自定义属性沿继承链传递，
      更近的祖先（.motion-rich 等）会直接覆盖它。必须落到每个元素上，!important 才能压住局部类。 */
-  *, *::before, *::after {
-    --duration-fast:0.01ms !important; --duration-base:0.01ms !important; --duration-slow:0.01ms !important;
-  }
-  /* 无限循环的旋转与一次性抖动都不能只靠时长归零：时长极小照样在闪，必须直接停掉。
+	*,
+	*::before,
+	*::after {
+		--duration-fast: 0.01ms !important;
+		--duration-base: 0.01ms !important;
+		--duration-slow: 0.01ms !important;
+	}
+	/* 无限循环的旋转与一次性抖动都不能只靠时长归零：时长极小照样在闪，必须直接停掉。
      两条停用规则分别写在 `components/base/spinner/spinner.less` 与 `components/base/input/input.less`。 */
 }
 
@@ -382,21 +437,25 @@
 
 /* ===== 降低对比偏好：控件边界更淡（与"高对比"同一机制）===== */
 @media (prefers-contrast: less) {
-  :root, .celadon,
-  .celadon[data-theme='dark'], [data-theme='dark'] .celadon {
-    --border-control:var(--border-control-low);
-    --border-hover:var(--border-hover-low);
-  }
+	:root,
+	.celadon,
+	.celadon[data-theme='dark'],
+	[data-theme='dark'] .celadon {
+		--border-control: var(--border-control-low);
+		--border-hover: var(--border-hover-low);
+	}
 }
 
 /* ===== 高对比偏好：控件边界自动切到 1.4.11 达标档 =====
    注意：必须重复暗色作用域选择器，否则 .celadon[data-theme='dark']（0,2,0）会盖掉本段（0,1,0） */
 @media (prefers-contrast: more) {
-  :root, .celadon,
-  .celadon[data-theme='dark'], [data-theme='dark'] .celadon {
-    --border-control:var(--border-control-strong);
-    --border-hover:var(--border-hover-strong);
-  }
+	:root,
+	.celadon,
+	.celadon[data-theme='dark'],
+	[data-theme='dark'] .celadon {
+		--border-control: var(--border-control-strong);
+		--border-hover: var(--border-hover-strong);
+	}
 }
 
 /**
@@ -404,9 +463,21 @@
  *  ① 减少动态 = 无障碍，系统级强制（见文件末尾 @media 里的 !important，任何局部都覆盖不掉）
  *  ② 标准/丰富/低调 = 产品口味，全局默认 + **场景可局部指定**（容器加下面三个类即可，随继承生效）
  */
-.motion-still { --duration-fast:0.01ms; --duration-base:0.01ms; --duration-slow:0.01ms; }
-.motion-quiet { --duration-fast:var(--duration-fast-quiet); --duration-base:var(--duration-base-quiet); --duration-slow:var(--duration-slow-quiet); }
-.motion-rich  { --duration-fast:var(--duration-fast-rich);  --duration-base:var(--duration-base-rich);  --duration-slow:var(--duration-slow-rich); }
+.motion-still {
+	--duration-fast: 0.01ms;
+	--duration-base: 0.01ms;
+	--duration-slow: 0.01ms;
+}
+.motion-quiet {
+	--duration-fast: var(--duration-fast-quiet);
+	--duration-base: var(--duration-base-quiet);
+	--duration-slow: var(--duration-slow-quiet);
+}
+.motion-rich {
+	--duration-fast: var(--duration-fast-rich);
+	--duration-base: var(--duration-base-rich);
+	--duration-slow: var(--duration-slow-rich);
+}
 
 /**
  * 用法约定
@@ -433,28 +504,39 @@
  * 到不了它们内部，所以**组件自己**在控件根上写 `font-family: inherit`（按钮、输入框、选择器触发器、
  * 口令格都已如此），切语言时控件里的字才跟得上。
  * 带兜底栈是为了任何情况下都不落到浏览器默认的衬线字体。 */
-.celadon:lang(zh-CN), .celadon:lang(zh-Hans) { --font-family-ui: var(--font-family-ui-hans); }
-.celadon:lang(zh-TW), .celadon:lang(zh-Hant), .celadon:lang(zh-HK) { --font-family-ui: var(--font-family-ui-hant); }
-.celadon:lang(ja), .celadon:lang(ja-JP) { --font-family-ui: var(--font-family-ui-japanese); }
-.celadon, [data-theme] .celadon {
-  font-family: var(--font-family-ui, system-ui, -apple-system, "Segoe UI", sans-serif);
+.celadon:lang(zh-CN),
+.celadon:lang(zh-Hans) {
+	--font-family-ui: var(--font-family-ui-hans);
+}
+.celadon:lang(zh-TW),
+.celadon:lang(zh-Hant),
+.celadon:lang(zh-HK) {
+	--font-family-ui: var(--font-family-ui-hant);
+}
+.celadon:lang(ja),
+.celadon:lang(ja-JP) {
+	--font-family-ui: var(--font-family-ui-japanese);
+}
+.celadon,
+[data-theme] .celadon {
+	font-family: var(--font-family-ui, system-ui, -apple-system, 'Segoe UI', sans-serif);
 
-  /* 文字色与字体同理，必须由作用域自己落一次。只切自定义属性是不够的：
+	/* 文字色与字体同理，必须由作用域自己落一次。只切自定义属性是不够的：
      嵌套的 .celadon（例如暗色演示面板）会从作用域**外面**继承到浅色主题的文字色，
      于是深底配深字，文字看不见（2026-10-06 实测）。 */
-  color: var(--text-primary);
+	color: var(--text-primary);
 
-  /* ===== 多语言混排策略（全站唯一一处）=====
+	/* ===== 多语言混排策略（全站唯一一处）=====
    * 中西文之间自动留出约四分之一个汉字宽的空隙，不靠手打空格；全角标点收窄。
    * 两者都是**继承**属性，所以按本文件末尾的清单，由作用域落一次。
    * 支持情况 2026-10-06 实测：text-autospace 与 text-spacing-trim 在本机 Chrome 均为 true。 */
-  text-autospace: normal;
-  text-spacing-trim: space-first;
+	text-autospace: normal;
+	text-spacing-trim: space-first;
 
-  /* 禁止合成字重：静态字体缺 500 与 600 时，浏览器会伪造粗体，中日韩字形上会糊成一团。
+	/* 禁止合成字重：静态字体缺 500 与 600 时，浏览器会伪造粗体，中日韩字形上会糊成一团。
      实测本页默认值为 `weight style small-caps`（即允许合成），故显式关掉。
      关掉之后请求不到的字重老实回落到最近的真实档位，例如 500 在雅黑上回落 400。 */
-  font-synthesis: none;
+	font-synthesis: none;
 }
 
 /* ===== 作用域要落哪些属性（清单，2026-10-06 建立）=====
@@ -474,4 +556,3 @@
  * 顺序也要紧：本规则在文件末尾，才能压过前半那些具体值；同理，`:lang` 规则也必须在末尾。 */
 
 /* 等宽排版类（`.code` / `.code--cjk` / `.code-block`）在 `design/utilities.less`。 */
-

@@ -5,7 +5,7 @@ import { devtools, persist } from 'zustand/middleware'
 export type BrowserSide = 'right' | 'left'
 
 type ColumnsState = {
-  /** 导航栏整列收起：收起后只留收起键与图标轨（见 design/foundations.md F6） */
+  /** 导航栏整列收起：收起后列宽为零，重新展开的入口在内容列头左端（见 design/foundations.md F6） */
   navCollapsed: boolean
   /** 主导航那一段折叠：只折上区，不是整列 */
   navMainCollapsed: boolean
