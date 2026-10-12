@@ -17,7 +17,7 @@
 | --- | --- |
 | `nav.tsx` | `Nav` 组件与 `NavProps`。四段装配，两处收放的状态与动作由调用方传入；列宽由 `useNavResize` 管。 |
 | `nav.types.ts` | `NavItem`：`key` · `icon` · `labelKey` · `to` · `badge?` · `active?`。 |
-| `nav.less` | 列容器、四段布局、两处收放、折叠菜单与各状态。宽度取 `--nav-width`（缺省 `--nav-default`，上下限 `--nav-min` 与 `--nav-max`）；整列收起为 `0`，由 `[data-width='zero']` 一条规则表达。 |
+| `nav.less` | 列容器、四段布局、两处收放、折叠菜单与各状态。宽度取 `--nav-width`（运行时由拖动写入，缺省 `--nav-default`，上下限 `--nav-min` 与 `--nav-max`）；整列收起为 `0`，由 `[data-width='zero']` 一条规则表达。 |
 | `hooks/use-nav-resize.ts` | 列宽拖动：指针按下、按帧应用、键盘方向键、双击复位、悬停高亮与光标。 |
 | `parts/header/` | 头部内块：整列收起键；Web 上另画品牌（标志与产品名）。桌面客户端的 `controls` 为 `own` 时整块不渲染，窗口键由壳负责。 |
 | `parts/brand/` | 品牌行：标志与产品名，两端在 `controls` 不为 `none` 时画在头部下方一行。 |
@@ -41,7 +41,7 @@
 | `sceneIcon` | `IconId` | 无 | 场景图标，画在「当前」那一行的最前。 |
 | `accountName` | `string` | 无 | 底部一行的名字，取不到会话用户时由装配层给占位词。 |
 | `navWidth` | `number \| null` | `null` | 存下来的列宽；`null` 表示用缺省值。 |
-| `onNavWidth` | `(width: number) => void` | 无 | 拖动结束或键盘调整后的列宽写回。 |
+| `onNavWidth` | `(width: number \| null) => void` | 无 | 拖动结束或键盘调整后的列宽写回。 |
 | `collapsed` | `boolean` | 无 | 整列是否收起。取值由调用方持有，组件不自己存偏好。 |
 | `onToggle` | `() => void` | 无 | 整列收起键的动作。 |
 | `mainFolded` | `boolean` | 无 | 上区是否折叠，与整列收起不是一件事。 |
