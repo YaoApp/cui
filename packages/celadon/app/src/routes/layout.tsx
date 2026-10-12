@@ -104,7 +104,7 @@ export function AppLayout() {
 			</Nav>
 			<Content
 				title={t('shell.content.demoTitle')}
-				navCollapsed={collapsed}
+				navCollapsed={collapsed || narrow}
 				browserCollapsed={browserCollapsed}
 				onToggleNav={toggleNav}
 				onToggleBrowser={toggleBrowser}
