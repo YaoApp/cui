@@ -9,7 +9,7 @@
 | --- | --- |
 | `nav.tsx` | `Nav` 组件与 `NavProps`。四段装配，两处收起的状态与两个动作由调用方传入。 |
 | `nav.types.ts` | `NavItem`：`key` · `icon` · `labelKey` · `to` · `badge?` · `active?`。 |
-| `nav.less` | 列容器、四段的布局、两处收放、图标轨、菜单与各状态；宽度取 `--nav-default` 与 `--nav-collapsed`。 |
+| `nav.less` | 列容器、四段的布局、两处收放、折叠菜单与各状态；宽度取 `--nav-default` 与 `--nav-width`（可拖，上下限 `--nav-min` 与 `--nav-max`），整列收起时宽度为 `0`。 |
 | `parts/header/` | 头部内块：品牌、整列收起键；客户端里另加窗口控制，Web 下不画。 |
 | `parts/main/` | 上区主导航：内块（分区名与折上区键）与六项列表；折起后整段让位。 |
 | `parts/scene/` | 下区：二级导航插槽；主导航折起时这一区顶上「当前」那一行与展开键。 |
