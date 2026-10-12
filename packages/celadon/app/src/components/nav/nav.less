@@ -1,14 +1,10 @@
-/* 收起态与展开态的两条宽度界线。列宽小于前者时按图标轨画，小于后者时不画文字。
-   两条都按导航列的内容盒口径取值（展开内容盒 263、图标轨内容盒 39）。 */
-
 /* 导航列：四段结构，宽度与让位顺序取自 design/foundations.md F6。这一栏不参与宽度让步 ——
-   视口变窄先收第三栏，导航列只在 < --nav-auto-collapse 时自动进图标轨（见文件末尾的媒体查询）。 */
+   视口变窄先收第三栏；导航列在视口低于自动收起阈值时与手动收起合成同一个状态，
+   判定在装配层（`routes/layout.tsx`），样式只认 `[data-width='zero']`。 */
 .nav {
 	flex: none;
 	/* 右缘把手绝对定位在列上 */
 	position: relative;
-	/* 自己做容器：列宽是形态的唯一判据，窄的时候无论 JS 时序如何都不画文字 */
-	container-type: inline-size;
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
@@ -83,8 +79,8 @@
 	gap: var(--spacing-8);
 	/* 头部与下面两段之间比列内其他间距大一档 */
 	margin-block-end: var(--spacing-8);
-	/* 标志的左边距在两种状态下都不动：这里补一档内距，图标轨里再加上居中，
-     两处算下来都是 16；右内距去掉，收起键贴到列的内缘 */
+	/* 头部左内距：列内距 8 加平台留白（macOS 给交通灯让位），
+     右内距为 0，收起键贴到列的内缘 */
 	min-block-size: var(--spacing-24);
 	padding-inline: calc(var(--spacing-8) + var(--nav-head-inset, 0)) 0;
 }
