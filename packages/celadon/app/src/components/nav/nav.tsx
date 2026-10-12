@@ -114,7 +114,7 @@ export function Nav({
 					onToggleMain={onToggleMain}
 				/>
 			)}
-			{chrome.controls === 'none' ? null : <NavBrand />}
+			{chrome.controls === 'none' ? null : <NavBrand mainFolded={mainFolded} onToggleMain={onToggleMain} />}
 			<NavMain items={items} compact={railLook} folded={mainFolded && !railLook} onSelect={select} />
 			<NavScene
 				items={items}
