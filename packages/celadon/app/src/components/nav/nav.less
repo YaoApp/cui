@@ -131,7 +131,7 @@
    否则展开过程中会把本来折起的主导航给冒出来。 */
 @container (width < @nav-rail-band) {
 	.nav--collapsed .nav__main,
-	.nav--collapsed .nav--collapsed .nav__main--folded .nav__main-body {
+	.nav--collapsed .nav__main--folded .nav__main-body {
 		opacity: 1;
 	}
 }
@@ -283,6 +283,8 @@
 .nav__main-head,
 .nav__scene-head,
 .nav__footer {
+	/* 钉在列底：场景区在图标轨里隐藏时，用户区靠这条落到最下面 */
+	margin-block-start: auto;
 	padding-inline-end: 0;
 }
 

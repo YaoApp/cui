@@ -110,7 +110,7 @@ export function Nav({
 			<NavMain
 				items={items}
 				compact={railLook}
-				folded={mainFolded}
+				folded={mainFolded && !railLook}
 				onToggleFold={onToggleMain}
 				onSelect={select}
 			/>
@@ -118,7 +118,7 @@ export function Nav({
 				items={items}
 				currentLabel={currentLabel}
 				sceneIcon={sceneIcon}
-				folded={mainFolded}
+				folded={mainFolded && !railLook}
 				onSelect={select}
 				onUnfold={onToggleMain}
 			>
