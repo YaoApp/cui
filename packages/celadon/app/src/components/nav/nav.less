@@ -548,3 +548,14 @@
 [data-controls='own'] .nav__toggle {
 	opacity: 1;
 }
+
+/* 品牌行里的一级菜单收放键靠右：右缘与列头里的整列收起键落在同一条竖线上 */
+.nav__brand-row .nav__fold {
+	margin-inline-start: auto;
+}
+
+/* 客户端品牌行与上区之间补一档间距，首项因此比品牌行低一档 */
+[data-controls='native'] .nav__main,
+[data-controls='own'] .nav__main {
+	margin-block-start: var(--spacing-8);
+}
