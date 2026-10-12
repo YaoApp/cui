@@ -71,8 +71,8 @@ export function Nav({
      收起时立刻切回图标轨（文字不再被挤在变窄的列里），展开时等宽度到位再换回来。 */
 	/* 形态由收起状态直接决定；图标轨里的键靠列宽（容器查询）进出，宽列里不会闪 LOGO */
 	const chrome = useWindowChrome()
-	/* 图标轨只有 Web 有：桌面收起直接到零宽，不走形态切换，品牌与切换键因此不换元素、不跳 */
-	const railLook = collapsed && chrome.controls === 'none'
+	/* 收起一律零宽：没有图标轨这一档，收放的出口在内容列头左端 */
+	const railLook = false
 
 	useEffect(() => {
 		if (!collapsed) {

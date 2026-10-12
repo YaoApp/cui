@@ -82,7 +82,7 @@ export function AppLayout() {
 			data-client={client.kind}
 			data-controls={chrome.controls}
 			data-os={client.os || 'unknown'}
-			data-width={collapsed ? (chrome.controls === 'none' ? 'rail' : 'zero') : 'panel'}
+			data-width={collapsed ? 'zero' : 'panel'}
 			data-nav={collapsed ? 'collapsed' : 'expanded'}
 			data-browser={browserCollapsed ? 'collapsed' : browserSide}
 		>
