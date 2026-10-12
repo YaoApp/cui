@@ -180,6 +180,9 @@
 }
 
 .nav__main {
+	/* 高度不够时由内部滚动区裁切，不让条目溢出压在场景区上 */
+	overflow: hidden;
+
 	/* 上区展开收起用 grid-template-rows（1fr 与 0fr）做高度过渡：
      这条在 Safari 与 Chrome 都能动，不依赖 interpolate-size。
      展开走 F4 的 panel 档，收起在下面按 collapse 档改成快档加速。 */
@@ -521,4 +524,11 @@
 	transition: inline-size var(--duration-base) var(--easing-decelerate),
 		padding-inline var(--duration-base) var(--easing-decelerate),
 		border-inline-end-width var(--duration-base) var(--easing-decelerate);
+}
+
+/* 上区自己的滚动区：头部固定，条目区吃剩余高度并自己滚动 */
+.nav__main > .nav__scroll {
+	flex: 1 1 0;
+	min-block-size: 0;
+	overflow: auto;
 }
