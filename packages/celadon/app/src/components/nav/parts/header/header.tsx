@@ -9,12 +9,16 @@ import { useWindowChrome } from '@/platform/client'
 export type NavHeaderProps = {
 	collapsed: boolean
 	onToggle: () => void
+
+	/* 上区是否折叠；一级菜单的收放键现在画在列头里 */
+	mainFolded: boolean
+	onToggleMain: () => void
 }
 
 /* 列头：收起态画标志，指针停在标志上时它淡化并浮出切换图标，点它展开（Web 图标轨里这是唯一出口）；
    展开态只画切换键。品牌在列头下面那一行（`parts/brand`），列头里不重复画，因此不会出现两个标志。
    macOS 上整行按 `--nav-head-inset` 给原生交通灯让位；平台判定来自 `platform/client` 的钩子。 */
-export function NavHeader({ collapsed, onToggle }: NavHeaderProps) {
+export function NavHeader({ mainFolded, onToggleMain, collapsed, onToggle }: NavHeaderProps) {
 	const { t } = useTranslation()
 	const chrome = useWindowChrome()
 	const label = collapsed ? t('shell.navigation.action.expand') : t('shell.navigation.action.collapse')
@@ -31,6 +35,20 @@ export function NavHeader({ collapsed, onToggle }: NavHeaderProps) {
 			}
 			{...chrome.dragProps}
 		>
+			{/* 一级菜单的收放键：与整列收起键同一行，排在最左 */}
+			<Tooltip label={t('shell.navigation.action.fold')} side='bottom'>
+				<Button
+					className='nav__fold'
+					iconOnly
+					variant='plain'
+					size='small'
+					aria-label={t('shell.navigation.action.fold')}
+					aria-expanded={!mainFolded}
+					onClick={onToggleMain}
+				>
+					<Icon name={mainFolded ? 'i-dock' : 'i-undock'} size={16} />
+				</Button>
+			</Tooltip>
 			{collapsed && chrome.controls === 'none' ? (
 				<Tooltip label={label} side='bottom'>
 					<Button

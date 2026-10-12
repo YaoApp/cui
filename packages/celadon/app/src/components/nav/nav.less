@@ -532,3 +532,19 @@
 [data-controls='native'] .nav {
 	padding-block-start: var(--spacing-8);
 }
+
+/* 整列收起键：Web 默认隐藏，鼠标进入导航区或键盘聚焦时出现；客户端常显 */
+[data-controls='none'] .nav__toggle {
+	opacity: 0;
+	transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+[data-controls='none'] .nav:hover .nav__toggle,
+[data-controls='none'] .nav:focus-within .nav__toggle {
+	opacity: 1;
+}
+
+[data-controls='native'] .nav__toggle,
+[data-controls='own'] .nav__toggle {
+	opacity: 1;
+}

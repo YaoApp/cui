@@ -106,15 +106,16 @@ export function Nav({
 				.join(' ')}
 			aria-label={t('shell.navigation.label')}
 		>
-			{chrome.controls === 'own' ? null : <NavHeader collapsed={railLook} onToggle={onToggle} />}
+			{chrome.controls === 'own' ? null : (
+				<NavHeader
+					collapsed={railLook}
+					mainFolded={mainFolded}
+					onToggle={onToggle}
+					onToggleMain={onToggleMain}
+				/>
+			)}
 			{chrome.controls === 'none' ? null : <NavBrand />}
-			<NavMain
-				items={items}
-				compact={railLook}
-				folded={mainFolded && !railLook}
-				onToggleFold={onToggleMain}
-				onSelect={select}
-			/>
+			<NavMain items={items} compact={railLook} folded={mainFolded && !railLook} onSelect={select} />
 			<NavScene
 				items={items}
 				columnWidth={resize.current}
