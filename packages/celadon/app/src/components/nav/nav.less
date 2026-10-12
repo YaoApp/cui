@@ -477,8 +477,8 @@
 	flex-direction: column;
 	gap: var(--spacing-4);
 	box-sizing: border-box;
-	/* 宽度跟随导航列宽（列宽可拖） */
-	inline-size: clamp(var(--nav-min), var(--nav-width, var(--nav-default)), var(--nav-max));
+	/* 宽度跟随导航列宽：菜单渲染在列外，取定位器给的锚点宽度（等于折叠行整行宽，随列宽变化） */
+	inline-size: var(--anchor-width, clamp(var(--nav-min), var(--nav-default), var(--nav-max)));
 	/* 面板不超出导航列：宽度按列宽减两侧内距算，位置再由位置器的偏移贴到列的左缘 */
 	max-inline-size: none;
 	/* 高度不够时菜单自己滚：上限取上游给的可放置高度 */
