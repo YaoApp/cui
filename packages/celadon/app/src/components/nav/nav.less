@@ -557,3 +557,16 @@
 	block-size: auto;
 	min-block-size: 0;
 }
+
+/* 收起态：整列收成零宽（三端一致，没有图标轨这一档）。
+   放在文件末尾，确保压过 .nav 自身的宽度与内距 */
+[data-width='zero'] .nav {
+	inline-size: 0;
+	min-inline-size: 0;
+	padding-inline: 0;
+	border-inline-end-width: 0;
+	overflow: clip;
+	transition: inline-size var(--duration-base) var(--easing-decelerate),
+		padding-inline var(--duration-base) var(--easing-decelerate),
+		border-inline-end-width var(--duration-base) var(--easing-decelerate);
+}
