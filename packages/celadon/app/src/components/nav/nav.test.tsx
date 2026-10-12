@@ -83,7 +83,7 @@ describe('Nav', () => {
 
 	it('collapses the whole column and hides the text labels', () => {
 		renderNav({ collapsed: true })
-		expect(document.querySelector('.nav--collapsed')).not.toBeNull()
+		expect(document.querySelector('.nav')?.getAttribute('data-collapsed')).toBe('true')
 	})
 
 	it('calls both toggles from their own keys', async () => {

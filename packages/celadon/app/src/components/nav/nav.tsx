@@ -95,6 +95,7 @@ export function Nav({
 		<nav
 			ref={resize.ref}
 			data-main={mainFolded ? 'folded' : 'expanded'}
+			data-collapsed={collapsed ? 'true' : 'false'}
 			className={[
 				'nav',
 				railLook ? 'nav--collapsed' : '',
