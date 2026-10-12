@@ -22,6 +22,8 @@
 	inline-size: clamp(var(--nav-min), var(--nav-width, var(--nav-default)), var(--nav-max));
 	min-block-size: 0;
 	padding: var(--spacing-8);
+	/* 上方没有交通灯时多留一档；macOS 由交通灯留白承担，见文末覆盖 */
+	padding-block-start: calc(var(--spacing-8) * 2);
 	background: var(--background-navigation);
 	border-inline-end: var(--border-width) solid var(--border-subtle);
 }
@@ -93,9 +95,7 @@
 	/* 标志的左边距在两种状态下都不动：这里补一档内距，图标轨里再加上居中，
      两处算下来都是 16；右内距去掉，收起键贴到列的内缘 */
 	min-block-size: var(--spacing-24);
-	/* 左内距只让出交通灯：列本身已有一档内距，这里再加一档会让标志比上、右各多一档。
-   Web 与 Windows 没有交通灯，取值 0，标志因此与上、右同为列内距一档 */
-	padding-inline: var(--nav-head-inset, 0) 0;
+	padding-inline: calc(var(--spacing-8) + var(--nav-head-inset, 0)) 0;
 }
 
 .nav__brand {
@@ -527,4 +527,8 @@
    这里抵消掉：下区标题因此严格落在上区展开时「开始」那一行的位置。 */
 .nav__main--folded + .nav__scene {
 	margin-block-start: calc(-1 * var(--spacing-8));
+}
+
+[data-controls='native'] .nav {
+	padding-block-start: var(--spacing-8);
 }
