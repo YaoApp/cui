@@ -1,7 +1,5 @@
 /* 收起态与展开态的两条宽度界线。列宽小于前者时按图标轨画，小于后者时不画文字。
    两条都按导航列的内容盒口径取值（展开内容盒 263、图标轨内容盒 39）。 */
-@nav-rail-band: 80px;
-@nav-label-band: 240px;
 
 /* 导航列：四段结构，宽度与让位顺序取自 design/foundations.md F6。这一栏不参与宽度让步 ——
    视口变窄先收第三栏，导航列只在 < --nav-auto-collapse 时自动进图标轨（见文件末尾的媒体查询）。 */
@@ -232,22 +230,9 @@
 	border-block-start: var(--border-width) solid var(--border-subtle);
 }
 
-.nav__section {
-	flex: 1;
-	/* 与菜单条目同一号字（14），分组只靠颜色表达，不再压字号或加粗细；
-     上边距比下边距大一档，标题与上面的组拉开、与下面自己的条目靠近 */
-	font-size: var(--font-size-body);
-	color: var(--text-tertiary);
-	padding-block: var(--spacing-12) var(--spacing-8);
-}
-
 .nav__fold,
 .nav__unfold {
 	flex: none;
-}
-
-.nav__main--folded .nav__fold {
-	display: none;
 }
 
 /* 折叠态的展开键常驻在「当前」那一行里：只在主导航折叠时出现（整列收起是另一件事）。 */
@@ -496,13 +481,6 @@
 	transition: inline-size var(--duration-base) var(--easing-decelerate),
 		padding-inline var(--duration-base) var(--easing-decelerate),
 		border-inline-end-width var(--duration-base) var(--easing-decelerate);
-}
-
-/* 上区自己的滚动区：头部固定，条目区吃剩余高度并自己滚动 */
-.nav__main > .nav__scroll {
-	flex: 1 1 0;
-	min-block-size: 0;
-	overflow: auto;
 }
 
 /* 品牌行：标志与产品名同一行，列再窄也不折行 */
