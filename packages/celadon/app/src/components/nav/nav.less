@@ -93,7 +93,9 @@
 	/* 标志的左边距在两种状态下都不动：这里补一档内距，图标轨里再加上居中，
      两处算下来都是 16；右内距去掉，收起键贴到列的内缘 */
 	min-block-size: var(--spacing-24);
-	padding-inline: calc(var(--spacing-8) + var(--nav-head-inset, 0px)) 0;
+	/* 左内距只让出交通灯：列本身已有一档内距，这里再加一档会让标志比上、右各多一档。
+   Web 与 Windows 没有交通灯，取值 0，标志因此与上、右同为列内距一档 */
+	padding-inline: var(--nav-head-inset, 0) 0;
 }
 
 .nav__brand {
