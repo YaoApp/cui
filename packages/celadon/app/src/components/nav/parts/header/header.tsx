@@ -79,7 +79,7 @@ export function NavHeader({ mainFolded, onToggleMain, collapsed, onToggle }: Nav
 							variant='plain'
 							size='small'
 							aria-label={label}
-							aria-expanded
+							aria-expanded={!collapsed}
 							onClick={onToggle}
 						>
 							<Icon name='i-panel-left' size={16} />
@@ -97,7 +97,7 @@ export function NavHeader({ mainFolded, onToggleMain, collapsed, onToggle }: Nav
 							variant='plain'
 							size='small'
 							aria-label={label}
-							aria-expanded
+							aria-expanded={!collapsed}
 							onClick={onToggle}
 						>
 							<Icon name='i-panel-left' size={16} />
