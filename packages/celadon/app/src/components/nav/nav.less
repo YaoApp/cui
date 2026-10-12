@@ -195,14 +195,6 @@
 /* 上区折成零高之后，它与下区之间那一档列内 gap 还在，会让二级导航标题低一档（8）。
    这里把它抵消掉：标题因此严格落在上区展开时「开始」那一行的位置。下区位置由它自己负责，
    折起的上区不再占位。 */
-.nav__main--folded + {
-	margin-block-start: calc(-1 * var(--spacing-8));
-	/* 场景区自己做弹性列：滚动区吃掉剩余高度，折叠行落在用户区上方 */
-	display: flex;
-	flex-direction: column;
-	flex: 1;
-	min-block-size: 0;
-}
 
 .nav__main-head,
 .nav__scene-head {
@@ -520,4 +512,11 @@
 	min-inline-size: 0;
 	padding-inline: var(--spacing-8);
 	white-space: nowrap;
+}
+
+/* 折叠态：不吃剩余高度，也不被压薄。折叠体高度由动画收到零，上区跟着收到零 */
+.nav__main--folded {
+	flex: 0 1 auto;
+	block-size: auto;
+	min-block-size: 0;
 }
