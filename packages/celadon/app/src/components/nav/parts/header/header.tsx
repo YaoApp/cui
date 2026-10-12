@@ -87,19 +87,36 @@ export function NavHeader({ mainFolded, onToggleMain, collapsed, onToggle }: Nav
 					</Tooltip>
 				</>
 			) : (
-				<Tooltip label={foldLabel} side='bottom'>
-					<Button
-						className='nav__fold'
-						iconOnly
-						variant='plain'
-						size='small'
-						aria-label={foldLabel}
-						aria-expanded={!mainFolded}
-						onClick={onToggleMain}
-					>
-						<Icon name={mainFolded ? 'i-dock' : 'i-undock'} size={16} />
-					</Button>
-				</Tooltip>
+				<>
+					{/* 客户端：一级菜单的收放键在整列收起键左侧；macOS 的整列收起键保留，
+					     Windows 的列头整块不渲染，那个键由壳与内容列头承担 */}
+					<Tooltip label={foldLabel} side='bottom'>
+						<Button
+							className='nav__fold'
+							iconOnly
+							variant='plain'
+							size='small'
+							aria-label={foldLabel}
+							aria-expanded={!mainFolded}
+							onClick={onToggleMain}
+						>
+							<Icon name={mainFolded ? 'i-dock' : 'i-undock'} size={16} />
+						</Button>
+					</Tooltip>
+					<Tooltip label={label} side='bottom'>
+						<Button
+							className='nav__toggle'
+							iconOnly
+							variant='plain'
+							size='small'
+							aria-label={label}
+							aria-expanded
+							onClick={onToggle}
+						>
+							<Icon name='i-panel-left' size={16} />
+						</Button>
+					</Tooltip>
+				</>
 			)}
 		</div>
 	)
