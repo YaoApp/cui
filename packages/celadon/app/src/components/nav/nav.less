@@ -520,3 +520,9 @@
 	block-size: auto;
 	min-block-size: 0;
 }
+
+/* 上区折成零高后，它与下区之间那一档列内间距仍在，会让下区标题低一档（8）。
+   这里抵消掉：下区标题因此严格落在上区展开时「开始」那一行的位置。 */
+.nav__main--folded + .nav__scene {
+	margin-block-start: calc(-1 * var(--spacing-8));
+}
