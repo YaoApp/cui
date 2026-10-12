@@ -180,7 +180,7 @@
 
 | 栏 | 最小 | 最大 | 默认 |
 | --- | --- | --- | --- |
-| 导航区 | `--nav-min` `264px` | `--nav-max` `420px` | `--nav-default` `280px` · 收起：客户端 `--nav-collapsed-desktop` `0px` · Web 与桌面客户端一致，收起一律为零宽（无图标轨这一档）
+| 导航区 | `--nav-min` `264px` | `--nav-max` `420px` | `--nav-default` `280px` · 收起一律为 `0px`（三端一致，无图标轨这一档） |
 | 内容区 | `--center-min` `400px` | 剩余空间（内文另有可读上限） | 剩余空间 |
 | 侧栏 | `--side-min` `300px` | **总宽 −（导航区 + 内容区最小 + 把手）** —— 可自由拖拽到此上限，不写死比例 | `--side-width-reading` `400px` / `--side-width-tool` `600px` / `--side-width-task` `640px` / `--side-width-wide` `840px` 按视图类型 |
 
