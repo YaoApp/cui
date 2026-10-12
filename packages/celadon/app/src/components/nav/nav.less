@@ -104,28 +104,6 @@
 	white-space: nowrap;
 }
 
-/* 收起成图标轨：文字与内块标题都收起来，条目只留图标并居中（`design/foundations.md` F6）。 */
-.nav--collapsed .nav__brand,
-.nav--collapsed .nav__window,
-/* 收起态（图标轨）：主菜单始终展示，位置往上提一档；用户头像钉在列底 */
-/* 图标轨里不画上区的内块（分区名与折叠键都收走），条目直接跟着标志排 */
-/* 图标轨里主导航始终展示：上区被折叠过也放开（高度回到一整行）。
-   这条只在列宽真的落到位（图标轨）时生效，整列收放的中间宽度里不生效，
-   否则展开过程中会把本来折起的主导航给冒出来。 */
-.nav--collapsed .nav__label,
-.nav--collapsed .nav__section,
-.nav--collapsed .nav__link,
-/* 图标轨里只留六项与底部一行：六项已经一步可达，「当前」区与它的二级导航让位
-   （`design/foundations.md` F6：导航列进入图标轨时，主导航与当前区按图标轨规则处理）。
-   底部一行只留头像：两个快捷图标与主导航里那两项是同一份内容，图标轨里不重复画。 */
-.nav--collapsed .nav__scene,
-.nav--collapsed .nav__fold,
-.nav__window {
-	display: flex;
-	align-items: center;
-	gap: var(--spacing-4);
-}
-
 /* 收起态：标志就是展开入口。指针落上去，标志淡化并浮出展开图标 */
 .nav__logo {
 	position: relative;
@@ -512,11 +490,6 @@
 }
 
 /* 折叠态：不吃剩余高度。折叠体高度由动画收到零，上区跟着收到零，列里不留空白 */
-.nav__main--folded {
-	flex: 0 1 auto;
-	block-size: auto;
-	min-block-size: 0;
-}
 
 /* 收起态：整列收成零宽（三端一致，没有图标轨这一档）。
    放在文件末尾，确保压过 .nav 自身的宽度与内距 */
