@@ -512,7 +512,8 @@
 	align-items: center;
 	gap: var(--spacing-8);
 	min-inline-size: 0;
-	padding-inline: var(--spacing-8);
+	/* 左内距一档；右内距为 0，右侧靠列自身那一档，键的右缘因此与列头里的键对齐 */
+	padding-inline: var(--spacing-8) 0;
 	white-space: nowrap;
 }
 
