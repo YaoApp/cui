@@ -69,11 +69,11 @@ export function AuthLayout({ mode, titleLines, footnote, serviceHref, privacyHre
     <div className={['auth', inApp ? 'auth--in-app' : null].filter(Boolean).join(' ')}>
       {/* 窗口拖动带：压在顶行最底层，空白处按下即拖动窗口；顶行的控件在它上面，点击不受影响 */}
       {chrome.visible ? (
-        <div className="auth__drag" aria-hidden="true" {...chrome.dragProps}>
+        <div className="auth__drag" aria-hidden="true">
           <span className="auth__drag-state">{chrome.dragState}</span>
         </div>
       ) : null}
-      <header className="auth__top" {...chrome.dragProps}>
+      <header className="auth__top">
         <span className="auth__brand">
           <BrandMark name="brand-yao-agents" size={32} />
           {/* 产品名是专有名词，不进语言包；渐变取品牌标记自身的两个取值 */}
@@ -85,7 +85,7 @@ export function AuthLayout({ mode, titleLines, footnote, serviceHref, privacyHre
       <div className="auth__stage">
         {inApp ? (
           <div className="auth__stack">
-            <div className="auth__client-bar" {...chrome.dragProps}>
+            <div className="auth__client-bar">
               <Button type="button" variant="plain" size="small" icon={<Icon name="i-left" />} onClick={onBack}>
                 {t('auth.action.backToServers')}
               </Button>

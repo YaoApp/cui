@@ -9,8 +9,6 @@ const chrome = {
 	controls: 'own' as 'native' | 'own' | 'none',
 	maximized: false,
 	toggleMaximize: vi.fn(),
-	dragProps: {},
-	dragHandlers: { onPointerDown: vi.fn() },
 	dragState: 'idle',
 	minimize: vi.fn(),
 	close: vi.fn()

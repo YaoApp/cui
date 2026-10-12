@@ -35,7 +35,6 @@ export function NavHeader({ mainFolded, onToggleMain, onToggle }: NavHeaderProps
 					'--nav-head-inset': chrome.controls === 'native' ? 'var(--traffic-lights-width)' : '0px'
 				} as CSSProperties
 			}
-			{...chrome.dragProps}
 		>
 			{chrome.controls === 'none' ? (
 				<>

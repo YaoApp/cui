@@ -19,10 +19,6 @@ export type WindowChrome = {
 	/** 当前是否最大化，用来在最大化与还原之间换图形 */
 	maximized: boolean
 	toggleMaximize: () => void
-	/** 顶行的拖动区属性；Web 下为空对象 */
-	dragProps: Record<string, string>
-	/** 与上面属性配套的显式拖动：指针按下即让窗口跟着走 */
-	dragHandlers: { onPointerDown: () => void }
 	/** 最近一次拖动请求的结果，给顶行的调试标记显示：idle · calling · ok · failed:… */
 	dragState: string
 	minimize: () => void
@@ -95,10 +91,6 @@ export function useWindowChrome(): WindowChrome {
 				if (isOk(result)) setMaximized(result.value)
 			})
 		},
-		/* 只保留一处拖动入口：窗口级的 pointerdown。
-       同一处指针按下若既走原生拖动区、又调一次 startDragging，会起两次拖动，表现为失焦后拖不动 */
-		dragProps: {},
-		dragHandlers: visible ? { onPointerDown: drag } : { onPointerDown: () => {} },
 		dragState,
 		minimize: () => {
 			void windowChrome.minimize()

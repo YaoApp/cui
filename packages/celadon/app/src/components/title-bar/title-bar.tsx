@@ -22,7 +22,7 @@ export function TitleBar({ navCollapsed, onToggleNav }: TitleBarProps) {
 	const navLabel = navCollapsed ? t('shell.navigation.action.expand') : t('shell.navigation.action.collapse')
 
 	return (
-		<header className='title-bar' {...chrome.dragProps}>
+		<header className='title-bar'>
 			<Tooltip label={navLabel} side='bottom'>
 				<Button
 					className='title-bar__key'

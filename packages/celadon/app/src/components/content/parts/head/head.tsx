@@ -45,7 +45,6 @@ export function ContentHead({
 						navCollapsed && chrome.controls === 'native' ? 'var(--traffic-lights-width)' : '0px'
 				} as CSSProperties
 			}
-			{...chrome.dragProps}
 		>
 			{/* Windows 的收放键在自绘标题栏里，这一栏不重复展示打开按钮 */}
 			<span className='content__head-slot' data-hidden={!navCollapsed || chrome.controls === 'own'}>
