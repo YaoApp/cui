@@ -95,7 +95,9 @@ export function useWindowChrome(): WindowChrome {
 				if (isOk(result)) setMaximized(result.value)
 			})
 		},
-		dragProps: visible ? { 'data-tauri-drag-region': 'true' } : {},
+		/* 只保留一处拖动入口：窗口级的 pointerdown。
+       同一处指针按下若既走原生拖动区、又调一次 startDragging，会起两次拖动，表现为失焦后拖不动 */
+		dragProps: {},
 		dragHandlers: visible ? { onPointerDown: drag } : { onPointerDown: () => {} },
 		dragState,
 		minimize: () => {
