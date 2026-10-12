@@ -301,6 +301,8 @@
 }
 
 .nav__scene {
+	/* 高度由弹性分配决定，超出部分由内部滚动区裁切 */
+	overflow: hidden;
 	flex: 1 1 auto;
 	transition: margin-block-start var(--duration-base) var(--easing-decelerate);
 	display: flex;
