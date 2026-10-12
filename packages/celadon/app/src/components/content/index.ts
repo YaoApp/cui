@@ -1,4 +1,6 @@
 export { Content } from './content'
+export { ContentHead } from './parts/head'
+export type { ContentHeadProps } from './parts/head'
 export type { ContentProps } from './content'
 export { PlaceholderPage } from './parts/placeholder'
 export type { PlaceholderPageProps } from './parts/placeholder'

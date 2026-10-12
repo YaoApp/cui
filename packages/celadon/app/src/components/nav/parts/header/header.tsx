@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { BrandMark } from '@/components/base/brand-mark'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
@@ -6,80 +7,81 @@ import { useTranslation } from '@/platform/i18n'
 import { useWindowChrome } from '@/platform/client'
 
 export type NavHeaderProps = {
-  collapsed: boolean
-  onToggle: () => void
+	collapsed: boolean
+	onToggle: () => void
 }
 
-/* 头部内块：品牌与整列的收起键，右侧留给客户端的窗口控制。这一行**留给客户端**，
-   任何导航内容都不许挤占；Web 下不画窗口控制（能力开关）。见 design/main-shell.md §三。 */
+/* 列头：收起态画标志，指针停在标志上时它淡化并浮出切换图标，点它展开（Web 图标轨里这是唯一出口）；
+   展开态只画切换键。品牌在列头下面那一行（`parts/brand`），列头里不重复画，因此不会出现两个标志。
+   macOS 上整行按 `--nav-head-inset` 给原生交通灯让位；平台判定来自 `platform/client` 的钩子。 */
 export function NavHeader({ collapsed, onToggle }: NavHeaderProps) {
-  const { t } = useTranslation()
-  const chrome = useWindowChrome()
-  const label = collapsed
-    ? t('shell.navigation.action.expand')
-    : t('shell.navigation.action.collapse')
-  return (
-    <div className="nav__header" {...chrome.dragProps}>
-      {collapsed ? (
-        /* 收起态不画展开键：指针落在标志上，标志被遮罩淡化并浮出展开图标，点它展开导航 */
-        <Tooltip label={t('shell.navigation.action.expand')} side="bottom">
-          <Button
-            className="nav__logo"
-            variant="plain"
-            aria-label={t('shell.navigation.action.expand')}
-            aria-expanded={false}
-            onClick={onToggle}
-          >
-            <span className="nav__logo-mark">
-              <BrandMark name="brand-yao-agents" size={24} label={t('app.name')} />
-            </span>
-            <span className="nav__logo-overlay">
-              <Icon name="i-panel-left" size={16} />
-            </span>
-          </Button>
-        </Tooltip>
-      ) : (
-        <>
-          <BrandMark name="brand-yao-agents" size={24} label={t('app.name')} />
-          <span className="nav__brand">{t('app.name')}</span>
-          <Tooltip label={label} side="bottom">
-            <Button
-              className="nav__toggle"
-              iconOnly
-              variant="plain"
-              size="small"
-              aria-label={label}
-              aria-expanded
-              onClick={onToggle}
-            >
-              {/* 一对分栏图标：展开态是左栏，收起态是右栏（栏收走了） */}
-              <Icon name="i-panel-left" size={16} />
-            </Button>
-          </Tooltip>
-        </>
-      )}
-      {chrome.visible ? (
-        <span className="nav__window">
-          <Button
-            iconOnly
-            variant="plain"
-            size="small"
-            aria-label={t('shell.window.minimize')}
-            onClick={chrome.minimize}
-          >
-            <Icon name="i-minus" size={16} />
-          </Button>
-          <Button
-            iconOnly
-            variant="plain"
-            size="small"
-            aria-label={t('shell.window.close')}
-            onClick={chrome.close}
-          >
-            <Icon name="i-act-close" size={16} />
-          </Button>
-        </span>
-      ) : null}
-    </div>
-  )
+	const { t } = useTranslation()
+	const chrome = useWindowChrome()
+	const label = collapsed ? t('shell.navigation.action.expand') : t('shell.navigation.action.collapse')
+	return (
+		<div
+			className='nav__header'
+			data-controls={chrome.controls}
+			data-no-drag
+			style={
+				{
+					/* macOS：头部内块给原生交通灯让位 */
+					'--nav-head-inset': chrome.controls === 'native' ? 'var(--traffic-lights-width)' : '0px'
+				} as CSSProperties
+			}
+			{...chrome.dragProps}
+		>
+			{collapsed && chrome.controls === 'none' ? (
+				<Tooltip label={label} side='bottom'>
+					<Button
+						className='nav__logo'
+						variant='plain'
+						aria-label={label}
+						aria-expanded={!collapsed}
+						onClick={onToggle}
+					>
+						<span className='nav__logo-mark'>
+							<BrandMark name='brand-yao-agents' size={24} label={t('app.name')} />
+						</span>
+						<span className='nav__logo-overlay'>
+							<Icon name='i-panel-left' size={16} />
+						</span>
+					</Button>
+				</Tooltip>
+			) : chrome.controls === 'none' ? (
+				<>
+					{/* Web 展开态：LOGO 不可点，切换键在它右侧 */}
+					<BrandMark name='brand-yao-agents' size={24} label={t('app.name')} />
+					<span className='nav__brand'>{t('app.name')}</span>
+					<Tooltip label={label} side='bottom'>
+						<Button
+							className='nav__toggle'
+							iconOnly
+							variant='plain'
+							size='small'
+							aria-label={label}
+							aria-expanded
+							onClick={onToggle}
+						>
+							<Icon name='i-panel-left' size={16} />
+						</Button>
+					</Tooltip>
+				</>
+			) : (
+				<Tooltip label={label} side='bottom'>
+					<Button
+						className='nav__toggle'
+						iconOnly
+						variant='plain'
+						size='small'
+						aria-label={label}
+						aria-expanded
+						onClick={onToggle}
+					>
+						<Icon name='i-panel-left' size={16} />
+					</Button>
+				</Tooltip>
+			)}
+		</div>
+	)
 }

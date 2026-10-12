@@ -1,0 +1,30 @@
+/* 自绘标题栏：整行 30 高，与参照客户端的实测规格一致（内部文档「桌面客户端壳」第二节）。
+   左侧是应用标识与两处收起键，右侧是三个窗口键；它与整页同宽，压在内容之上。 */
+.title-bar {
+	flex: none;
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-4);
+	block-size: var(--spacing-32);
+	padding-inline: var(--spacing-8);
+	background: var(--background-app);
+	border-block-end: var(--border-width) solid var(--border-subtle);
+}
+
+.title-bar__brand {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-8);
+	padding-inline-end: var(--spacing-4);
+}
+
+.title-bar__name {
+	font-size: var(--font-size-caption);
+	color: var(--text-secondary);
+}
+
+.title-bar__key {
+	inline-size: var(--spacing-24);
+	block-size: var(--spacing-24);
+	color: var(--text-secondary);
+}

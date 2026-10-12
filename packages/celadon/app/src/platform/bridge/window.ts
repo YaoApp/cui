@@ -9,6 +9,9 @@ export const WINDOW_COMMANDS = {
   toggleMaximize: 'celadon_window_toggle_maximize',
   close: 'celadon_window_close',
   maximized: 'celadon_window_maximized',
+  /* 由窗口自己开始的拖动（core 的内部命令）。macOS 的 Overlay 档下自动拖动区在部分
+     场景不生效，这里给一条显式路径：在顶栏空白处按下直接让窗口进入拖动。 */
+  startDragging: 'plugin:window|start_dragging',
 } as const
 
 export const windowChrome = {
@@ -19,4 +22,6 @@ export const windowChrome = {
   close: (): Promise<BridgeResult<null>> => invoke<null>(WINDOW_COMMANDS.close),
   /** 当前是否最大化，窗口尺寸变化后读一次 */
   maximized: (): Promise<BridgeResult<boolean>> => invoke<boolean>(WINDOW_COMMANDS.maximized),
+  /** 让窗口跟着指针走 */
+  startDragging: (): Promise<BridgeResult<null>> => invoke<null>(WINDOW_COMMANDS.startDragging),
 }

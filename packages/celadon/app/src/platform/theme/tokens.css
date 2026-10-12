@@ -325,6 +325,8 @@
      **Web 保留 56 图标轨**（浏览器没有标题栏可放）；窄屏 Web 转抽屉 */
   --nav-collapsed-desktop: 0px;
   --nav-auto-collapse: 1024px;
+  /* 窗口顶部可拖动带的高度：无标题栏窗口里这一条内的空白处都能移动窗口 */
+  --window-drag-band: 48px;
   --center-min: 400px;
   --side-min: 300px;
   /* 右侧栏默认宽**按视图类型**给（阅读 / 工具 / 任务 / 宽屏），再被上限比例兜住 */

@@ -2,6 +2,7 @@
    页面底色用 --background-app（内容底在卡片上），卡片用 --background-content 加细边框与浅阴影。
    控件行高统一走 --row-height（40），与原型一致。 */
 .auth {
+  position: relative;
   display: flex;
   flex-direction: column;
   /* 铺满：壳是弹性列（platform/shell.less），入口页要 flex:1 才真的占满 */
@@ -14,9 +15,30 @@
   line-height: var(--line-height-cjk);
 }
 
+/* 窗口拖动带：盖住顶行那一带（页内距加顶行高度），压在最底层。
+   指针落在顶行的空白处时由它接管拖动；顶行的控件抬一层，点击照旧。 */
+.auth__drag {
+  position: absolute;
+  z-index: 0;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: calc(var(--spacing-16) + var(--spacing-32) + var(--spacing-8));
+  cursor: default;
+}
+
+/* 拖动请求的结果标记：交付前删掉这一条与元素（排查用） */
+.auth__drag-state {
+  position: absolute;
+  inset-block-start: var(--spacing-2);
+  inset-inline-start: var(--spacing-8);
+  font-size: var(--font-size-caption);
+  opacity: 0.6;
+}
+
 /* 顶行：左品牌、右语言与主题 */
 .auth__top {
   position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -132,6 +154,8 @@
 }
 
 .auth__client-bar {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;

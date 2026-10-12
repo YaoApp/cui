@@ -1,0 +1,65 @@
+/* 内容列的标题栏：三个区域固定（导航操作按钮 · 标题 · Browser 操作按钮），高度与另两列列头一致。
+   自身不画下边线；需要分隔时由内容自己决定（见内部文档「Content 标题栏」）。 */
+.content__head {
+	position: relative;
+	flex: none;
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-8);
+	block-size: var(--row-height);
+	/* 左内距含交通灯留白：留白由组件按状态以内联自定义属性给出（--head-inset），
+	   收起且平台有原生交通灯时为留白宽度，其余为 0。写成两条值的简写以通过样式检查 */
+	padding-inline: calc(var(--spacing-12) + var(--head-inset, 0px)) var(--spacing-12);
+	transition: padding-inline-start var(--duration-base) var(--easing-decelerate);
+}
+
+/* 按钮按几何居中：定 32 命中区、图标在其中居中，不受基线影响；不展示时不渲染也不占位 */
+.content__head-key {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--spacing-32);
+	block-size: var(--spacing-32);
+}
+
+/* 操作键的槽位：展示时占 32，不展示时收成 0，与列宽同一条时长过渡，标题因此平滑平移 */
+.content__head-slot {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--spacing-32);
+	overflow: hidden;
+	transition: inline-size var(--duration-base) var(--easing-decelerate);
+}
+
+.content__head-slot[data-hidden='true'] {
+	inline-size: 0;
+	pointer-events: none;
+}
+
+.content__head-slot--browser {
+	margin-inline-start: auto;
+}
+
+.content__head-key--browser {
+	margin-inline-start: auto;
+}
+
+.content__title {
+	margin: 0;
+	font-size: var(--font-size-body-lg);
+	font-weight: var(--font-weight-medium);
+	/* 行高收到最紧的一档：墨迹中心贴近行盒中心，才能与交通灯中心对齐 */
+	line-height: var(--line-height-tight);
+	color: var(--text-primary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.content__head-trailing {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-4);
+	margin-inline-start: auto;
+}

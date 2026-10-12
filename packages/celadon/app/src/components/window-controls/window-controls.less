@@ -1,0 +1,18 @@
+/* 自绘窗口键：三个等距、细线、无底色的键，放在标题栏右端，关闭键右缘留白 14。
+   规格见内部文档「桌面客户端壳」第二节；键的间距用 token 里的两个 4 像素档拼出 34 的中心距。 */
+.window-controls {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-8);
+	margin-inline-start: auto;
+}
+
+.window-controls__key {
+	/* 命中区 32，字形细线，默认无底色；字形在命中区正中，与两侧的图标键一致 */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--spacing-32);
+	block-size: var(--spacing-32);
+	color: var(--text-secondary);
+}

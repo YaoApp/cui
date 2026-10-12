@@ -206,6 +206,7 @@ export type I18nKey =
   | 'shell.browser.tab.close'
   | 'shell.browser.tab.new'
   | 'shell.browser.web.hint'
+  | 'shell.content.demoTitle'
   | 'shell.content.placeholder'
   | 'shell.navigation.account.placeholder'
   | 'shell.navigation.action.collapse'
@@ -224,7 +225,9 @@ export type I18nKey =
   | 'shell.navigation.resize'
   | 'shell.navigation.scene.none'
   | 'shell.window.close'
+  | 'shell.window.maximize'
   | 'shell.window.minimize'
+  | 'shell.window.restore'
   | 'surface.main'
   | 'themeToggle.switchToDark'
   | 'themeToggle.switchToLight'
@@ -439,6 +442,7 @@ declare module 'i18next' {
         'shell.browser.tab.close': string
         'shell.browser.tab.new': string
         'shell.browser.web.hint': string
+        'shell.content.demoTitle': string
         'shell.content.placeholder': string
         'shell.navigation.account.placeholder': string
         'shell.navigation.action.collapse': string
@@ -457,7 +461,9 @@ declare module 'i18next' {
         'shell.navigation.resize': string
         'shell.navigation.scene.none': string
         'shell.window.close': string
+        'shell.window.maximize': string
         'shell.window.minimize': string
+        'shell.window.restore': string
         'surface.main': string
         'themeToggle.switchToDark': string
         'themeToggle.switchToLight': string
