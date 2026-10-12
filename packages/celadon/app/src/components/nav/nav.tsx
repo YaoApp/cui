@@ -117,6 +117,7 @@ export function Nav({
 			/>
 			<NavScene
 				items={items}
+				columnWidth={resize.current}
 				currentLabel={currentLabel}
 				sceneIcon={sceneIcon}
 				folded={mainFolded && !railLook}
