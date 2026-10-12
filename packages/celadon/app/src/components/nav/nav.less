@@ -548,3 +548,10 @@
 		opacity: 0;
 	}
 }
+
+/* 折叠态：不吃剩余高度。折叠体高度由动画收到零，上区跟着收到零，列里不留空白 */
+.nav__main--folded {
+	flex: 0 1 auto;
+	block-size: auto;
+	min-block-size: 0;
+}
