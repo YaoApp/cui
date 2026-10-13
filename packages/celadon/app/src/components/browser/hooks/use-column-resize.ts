@@ -7,6 +7,9 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 /** 拖动阈值：位移不到这个数按点击处理。 */
 const DRAG_THRESHOLD = 3
 
+/** 两次抬起之间的间隔小于这个数、且都没有位移，按双击算（复位回默认宽）。 */
+const DOUBLE_CLICK_MS = 400
+
 /** 从节点上读一个长度 token，取不到时用回退值。 */
 function tokenPx(name: string, fallback: number, node: HTMLElement | null): number {
   if (typeof window === 'undefined' || !node) return fallback
@@ -39,6 +42,7 @@ export function useColumnResize(
   const [hovered, setHovered] = useState(false)
   const [limits, setLimits] = useState({ min: 300, max: 600 })
   const start = useRef({ x: 0, width: 0 })
+  const lastUp = useRef(0)
   const frame = useRef<number | null>(null)
   const pending = useRef<number | null>(null)
 
@@ -109,7 +113,17 @@ export function useColumnResize(
       document.body.style.removeProperty('cursor')
       if (node?.hasPointerCapture?.(event.pointerId)) node.releasePointerCapture(event.pointerId)
       const moved = Math.abs(event.clientX - start.current.x)
-      if (!node || moved < DRAG_THRESHOLD) return
+      /* 双击复位自己判：抓手持有指针捕获时 `dblclick` 与 `pointerup.detail` 都不可靠，
+         按两次抬起的时间间隔算（两次都几乎没有位移），与窗口顶带双击同一口径 */
+      const now = performance.now()
+      if (!node || (moved < DRAG_THRESHOLD && now - lastUp.current < DOUBLE_CLICK_MS)) {
+        lastUp.current = 0
+        paint(nodeRef.current, null)
+        onCommit(null)
+        return
+      }
+      lastUp.current = now
+      if (moved < DRAG_THRESHOLD) return
       const next = clamp(start.current.width + sign * (event.clientX - start.current.x), measure())
       paint(node, next)
       onCommit(Math.round(next))
@@ -153,6 +167,9 @@ export function useColumnResize(
       start.current = { x: event.clientX, width: clamp(width ?? defaultWidth(node), bounds) }
       setDragging(true)
     },
-    onDoubleClick: () => onCommit(null),
+    onDoubleClick: () => {
+      paint(nodeRef.current, null)
+      onCommit(null)
+    },
   }
 }
