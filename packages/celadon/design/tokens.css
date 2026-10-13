@@ -42,7 +42,8 @@
   /* 原生控件（滚动条、自动填充、日期面板、未清理的步进器）跟随主题：不声明会一律按浅色画。 */
   color-scheme: light;
   --background-app: #f4f4f6;
-  --background-navigation: #f8f8fa;
+  /* 备选一档（导航列独立色）：#f8f8fa */
+  --background-navigation: var(--background-app);
   --background-content: #fafafb;
   /* 非纯白（去刺眼） */
   --background-surface: #ffffff;
@@ -366,7 +367,8 @@
   color-scheme: dark;
   --background-app: #121110;
   /* 暖墨（松烟墨）：不再用纯黑，避免 OLED 光晕 */
-  --background-navigation: #151413;
+  /* 备选一档（导航列独立色）：#151413 */
+  --background-navigation: var(--background-app);
   --background-content: #191816;
   --background-surface: #1f1e1a;
   --background-field: #262420;

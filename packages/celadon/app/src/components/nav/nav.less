@@ -19,7 +19,9 @@
 	/* 上方没有交通灯时多留一档；macOS 由交通灯留白承担，见文末覆盖 */
 	padding-block-start: calc(var(--spacing-8) * 2);
 	background: var(--background-navigation);
-	border-inline-end: var(--border-width) solid var(--border-subtle);
+	/* 备选：与内容面之间的 1px 分界 --border-subtle */
+	/* border-inline-end: var(--border-width) solid var(--border-subtle); */
+	border-inline-end: var(--border-width) solid transparent;
 }
 
 /* 拖动中把宽度过渡关掉，做到跟手；键盘调整与收起展开仍走上面的过渡。
