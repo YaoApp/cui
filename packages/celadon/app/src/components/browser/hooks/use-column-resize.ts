@@ -45,6 +45,8 @@ export function useColumnResize(
   const [limits, setLimits] = useState({ min: 300, max: 600 })
   const start = useRef({ x: 0, width: 0 })
   const lastUp = useRef(0)
+  /* 上一次抬起是不是「点一下」（几乎没有位移）：拖动结束不能算作双击的第一下 */
+  const lastWasTap = useRef(false)
   const hoverTimer = useRef<number | null>(null)
   const frame = useRef<number | null>(null)
   const pending = useRef<number | null>(null)
@@ -118,17 +120,21 @@ export function useColumnResize(
       document.body.style.removeProperty('cursor')
       if (node?.hasPointerCapture?.(event.pointerId)) node.releasePointerCapture(event.pointerId)
       const moved = Math.abs(event.clientX - start.current.x)
+      const isTap = moved < DRAG_THRESHOLD
       /* 双击复位自己判：抓手持有指针捕获时 `dblclick` 与 `pointerup.detail` 都不可靠，
-         按两次抬起的时间间隔算（两次都几乎没有位移），与窗口顶带双击同一口径 */
+         按两次抬起的时间间隔算。两次都必须是没有位移的「点一下」：拖完松手后的
+         一次单击不能算作双击的第二下，否则会在拖动结束后突然复位。 */
       const now = performance.now()
-      if (!node || (moved < DRAG_THRESHOLD && now - lastUp.current < DOUBLE_CLICK_MS)) {
+      if (!node || (isTap && lastWasTap.current && now - lastUp.current < DOUBLE_CLICK_MS)) {
         lastUp.current = 0
+        lastWasTap.current = false
         paint(nodeRef.current, null)
         onCommit(null)
         return
       }
       lastUp.current = now
-      if (moved < DRAG_THRESHOLD) return
+      lastWasTap.current = isTap
+      if (isTap) return
       const next = clamp(start.current.width + sign * (event.clientX - start.current.x), measure())
       paint(node, next)
       onCommit(Math.round(next))
@@ -146,6 +152,7 @@ export function useColumnResize(
   useEffect(
     () => () => {
       if (frame.current !== null) window.cancelAnimationFrame(frame.current)
+      if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current)
       document.body.style.removeProperty('cursor')
       document.body.style.removeProperty('user-select')
     },

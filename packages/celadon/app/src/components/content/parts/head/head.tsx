@@ -13,7 +13,7 @@ export type ContentHeadProps = {
 	navCollapsed: boolean
 	/** 窗口窄到由视口强制收起导航：切换键置灰并给出原因，按下去不会有任何变化 */
 	navBlocked?: boolean
-	/** 标签浏览器列是否收起：收起才展示 Browser 操作按钮 */
+	/** 标签浏览器列是否收起：决定切换键的文案与 aria-expanded */
 	browserCollapsed: boolean
 	/** 窗口窄到放不下标签浏览器那一栏：切换键置灰并给出原因，按下去不会有任何变化 */
 	browserBlocked?: boolean
@@ -23,9 +23,9 @@ export type ContentHeadProps = {
 	trailing?: ReactNode
 }
 
-/* 内容列的标题栏（40 像素，与另两列列头等高，见内部文档「Content 标题栏」）。
+/* 内容列的标题栏（40 像素，与另两列列头等高）。
    三个区域固定：左导航操作按钮 · 中标题 · 右 Browser 操作按钮。
-   两个按钮按各自那一列的状态展示：列展开时不展示。不展示用隐藏实现，占位保留，标题因此不跳。
+   导航键按那一列的状态展示（列展开时不展示），标签浏览器键恒在；不展示用隐藏实现，占位保留，标题因此不跳。
    它不认识业务：标题与右侧插槽都由装配层给。 */
 export function ContentHead({
 	title,
@@ -44,7 +44,7 @@ export function ContentHead({
 	const browserLabel = browserCollapsed ? t('shell.browser.action.expand') : t('shell.browser.action.collapse')
 	const browserTitle = browserBlocked ? t('shell.browser.action.blocked') : browserLabel
 	return (
-		/* 列头随列平移，不做显隐切换：尺寸变化的投影不允许缩到标题上（plan/08-layout-motion.md §3 第 4 处） */
+		/* 列头随列平移，不做显隐切换：尺寸变化的投影不允许缩到标题上 */
 		<MotionPanel
 			as='header'
 			position

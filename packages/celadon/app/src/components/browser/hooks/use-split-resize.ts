@@ -72,9 +72,10 @@ export function useSplitResize(
     }
   }, [dragging, orientation, onChange])
 
-  /* 卸载时把接管过的正文光标交还 */
+  /* 卸载时把接管过的正文光标交还，并清掉还没到点的悬停定时器 */
   useEffect(
     () => () => {
+      if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current)
       document.body.style.removeProperty('cursor')
       document.body.style.removeProperty('user-select')
     },

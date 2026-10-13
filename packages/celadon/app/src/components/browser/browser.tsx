@@ -144,7 +144,7 @@ export function Browser({
         <ScrollArea className="browser__tabs" size="small">
           <div className="browser__tabs-row" role="tablist" aria-label={t('shell.browser.label')}>
             {tabs.map((tab) => (
-              /* 标签只做平移：新建与关闭时其余标签跟着挪，文字不参与尺寸投影（plan/08-layout-motion.md §3 第 7 处） */
+              /* 标签只做平移：新建与关闭时其余标签跟着挪，文字不参与尺寸投影 */
               <MotionPanel as="span" position className="browser__tab" key={tab.key}>
                 <Button
                   className="browser__tab-button"

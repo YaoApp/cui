@@ -39,11 +39,11 @@ export function AppLayout() {
 	const collapsed = useColumnsStore((state) => state.navCollapsed)
 	const chrome = useWindowChrome()
 	/* 视口不够宽时按收起呈现，与手动点收起走同一个状态、同一套样式：
-     区别只在来源，视口驱动的这一档不写偏好。阈值取 token --nav-auto-collapse（970：导航区最小 + 内容区最小 + 侧栏最小 + 把手），
+     区别只在来源，视口驱动的这一档不写偏好。阈值取 token --nav-auto-collapse（972：导航区最小 + 内容区最小 + 侧栏最小 + 把手），
      即前两栏已经各自压到最小之后才轮到导航区收起（design/foundations.md F6）。 */
-	const narrow = useMediaQuery('(width <= 969px)')
-	/* 继续压窄到内容区最小 + 侧栏最小 + 把手（400 + 300 + 6），侧栏也让不动了，整条收起（F6 的最后一步）。 */
-	const narrowForBrowser = useMediaQuery('(width <= 705px)')
+	const narrow = useMediaQuery('(width <= 971px)')
+	/* 继续压窄到内容区最小 + 侧栏最小 + 把手（400 + 300 + 8），侧栏也让不动了，整条收起（F6 的最后一步）。 */
+	const narrowForBrowser = useMediaQuery('(width <= 707px)')
 	const toggleNav = useColumnsStore((state) => state.toggleNav)
 	const mainFolded = useColumnsStore((state) => state.navMainCollapsed)
 	const toggleMain = useColumnsStore((state) => state.toggleNavMain)
@@ -70,8 +70,8 @@ export function AppLayout() {
 		return () => window.removeEventListener('keydown', onKey)
 	}, [exclusive])
 	/* 左右分栏要两个面板各有一个可用宽：导航区默认宽 + 内容区最小 + 两侧栏最小 + 把手
-     （280 + 400 + 600 + 6 = 1286），窗口不够宽时这两颗键禁用（design/main-shell.md §五）。上下分栏按栏高判，这里不挡。 */
-	const splitBlocked = useMediaQuery('(width <= 1285px)')
+     （280 + 400 + 600 + 8 = 1288），窗口不够宽时这两颗键禁用（design/main-shell.md §五）。上下分栏按栏高判，这里不挡。 */
+	const splitBlocked = useMediaQuery('(width <= 1287px)')
 	const toggleBrowser = useColumnsStore((state) => state.toggleBrowser)
 	const browserSide = useColumnsStore((state) => state.browserSide)
 	const setBrowserSide = useColumnsStore((state) => state.setBrowserSide)

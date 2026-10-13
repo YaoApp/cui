@@ -20,9 +20,9 @@ export type ContentProps = {
 }
 
 /* 中栏：页面容器。栏宽由三栏的列轨给（让步顺序见 design/foundations.md F6），
-   这一层只管最小宽与自己的滚动 —— 内容形态的其余三种等用到处再加（plan/08-layout-base.md §3.3）。
-   列头（40 像素）与另外两列等高，见 plan/08-layout-shell.md §5.2；标题与插槽都由装配层给。
-   宽度变化由列轨与 `content.less` 的过渡承担：不做尺寸投影，正文就不会被横向压缩（plan/08-layout-motion.md §2 硬约束一）。 */
+   这一层只管最小宽与自己的滚动 —— 内容形态的其余三种等用到处再加。
+   列头（40 像素）与另外两列等高；标题与插槽都由装配层给。
+   宽度变化由列轨与 `content.less` 的过渡承担：不做尺寸投影，正文就不会被横向压缩。 */
 export function Content({
 	children,
 	title,

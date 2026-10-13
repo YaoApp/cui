@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-/* 三栏骨架的浏览器用例（`plan/08-layout-base.md` 第一阶段）：跑真开发服务上的真应用，
+/* 三栏骨架的浏览器用例：跑真开发服务上的真应用，
    本机登录标记按存储的真实格式预置，因此不用走登录一线。核的是三条链路：
    收起与展开、打开、窗口动作（Web 下不出现）。 */
 
@@ -180,7 +180,7 @@ test('disables the head key when the window cannot fit the browser column', asyn
 })
 
 test('disables the head key when the window forces the navigation column shut', async ({ page }) => {
-	/* 969 及以下由视口收起导航，列头那颗展开键此时按不动，置灰并给出原因 */
+	/* 971 及以下由视口收起导航，列头那颗展开键此时按不动，置灰并给出原因 */
 	await page.setViewportSize({ width: 900, height: 700 })
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
@@ -290,7 +290,7 @@ test('splits the browser into two panes and back', async ({ page }) => {
 	const panes = await browser
 		.locator('.browser__pane')
 		.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)))
-	// 平分时两个面板宽度差只来自中间那根抓手（--side-resize-handle 6px）
+	// 平分时两个面板宽度差只来自中间那根抓手（--side-resize-handle 8px）
 	expect(Math.abs(panes[0] - panes[1])).toBeLessThanOrEqual(8)
 
 	// 换方向：直接改朝向，不回到单面板
@@ -442,7 +442,7 @@ test('locks text selection while a divider is dragged', async ({ page }) => {
 	await expect(body).not.toHaveCSS('user-select', 'none')
 })
 
-/* 双击分界线回默认宽（见 plan/08-layout-content-browser.md §3.1 第 9 处） */
+/* 双击分界线回默认宽 */
 test('resets the browser width by double clicking the boundary', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)
