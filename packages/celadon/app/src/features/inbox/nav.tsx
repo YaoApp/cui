@@ -25,7 +25,7 @@ export function InboxNav() {
           >
             <span className="inbox-nav__title">
               {t(session.titleKey)}
-              {/* 未读角标先不显示，样式 .inbox-nav__badge 保留：
+              {/* 未读角标不渲染，样式 .inbox-nav__badge 保留：
               {session.unread ? <span className="inbox-nav__badge">{session.unread}</span> : null} */}
             </span>
             <span className="inbox-nav__summary">{t(session.summaryKey)}</span>
