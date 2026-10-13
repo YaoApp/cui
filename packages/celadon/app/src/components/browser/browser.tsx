@@ -19,6 +19,8 @@ export type BrowserProps = {
   tabs: BrowserTab[]
   activeKey: string
   side: 'right' | 'left'
+  /** 整栏收成零宽（用户收起，或窗口压窄到最后一档）；样式在 routes/layout.less */
+  collapsed?: boolean
   onActivate: (key: string) => void
   onClose: (key: string) => void
   /** 新建：落在首页的地址栏 */
@@ -36,6 +38,7 @@ export function Browser({
   tabs,
   activeKey,
   side,
+  collapsed = false,
   onActivate,
   onClose,
   onNew,
@@ -45,7 +48,14 @@ export function Browser({
 }: BrowserProps) {
   const { t } = useTranslation()
   return (
-    <aside className="browser" data-side={side} aria-label={t('shell.browser.label')}>
+    <aside
+      className="browser"
+      data-side={side}
+      data-collapsed={collapsed}
+      aria-label={t('shell.browser.label')}
+      aria-hidden={collapsed || undefined}
+      inert={collapsed || undefined}
+    >
       <div className="browser__bar">
         <ScrollArea className="browser__tabs" size="small">
           <div className="browser__tabs-row" role="tablist" aria-label={t('shell.browser.label')}>

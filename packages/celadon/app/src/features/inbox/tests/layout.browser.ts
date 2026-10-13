@@ -125,7 +125,8 @@ test('collapses the browser column and gives the space to the content', async ({
 	const wide = await content.evaluate((el) => el.getBoundingClientRect().width)
 
 	await browser.getByRole('button', { name: '收掉这一栏' }).click()
-	await expect(browser).toHaveCount(0)
+	await expect(browser).toHaveAttribute('data-collapsed', 'true')
+	await expect(browser).toHaveCSS('inline-size', '0px')
 	expect(await content.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(wide)
 })
 
@@ -170,4 +171,31 @@ test('fits the smallest window without horizontal scrolling', async ({ page }) =
 	)
 	expect(overflow).toBeLessThanOrEqual(0)
 	await expect(columns(page).content).toBeVisible()
+})
+
+test('yields in order: content first, then the browser, then the navigation column', async ({ page }) => {
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+
+	// 1000：内容区已到最小，标签浏览器还在缩，导航列还没收
+	await page.setViewportSize({ width: 1000, height: 700 })
+	await expect(page.locator('.content')).toHaveCSS('inline-size', '400px')
+	const mid = await metrics(page)
+	expect(mid.browser.width).toBeGreaterThanOrEqual(300)
+	expect(mid.browser.width).toBeLessThan(400)
+	await expect(page.locator('.layout')).toHaveAttribute('data-width', 'panel')
+
+	// 900：内容区与标签浏览器都到最小，导航列收起零宽，腾出的宽度还给标签浏览器
+	await page.setViewportSize({ width: 900, height: 700 })
+	await expect(page.locator('.layout')).toHaveAttribute('data-width', 'zero')
+	await expect(page.locator('.nav')).toHaveCSS('inline-size', '0px')
+	const narrow = await metrics(page)
+	expect(narrow.content.width).toBeGreaterThanOrEqual(400)
+	expect(narrow.browser.width).toBeGreaterThanOrEqual(300)
+	expect(narrow.browser.width).toBeLessThanOrEqual(400)
+
+	// 700：标签浏览器也让不动，整条收起为零宽
+	await page.setViewportSize({ width: 700, height: 700 })
+	await expect(page.locator('.layout')).toHaveAttribute('data-browser', 'collapsed')
+	await expect(columns(page).browser).toHaveCSS('inline-size', '0px')
 })

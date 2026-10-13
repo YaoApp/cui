@@ -38,12 +38,16 @@ export function AppLayout() {
 	const collapsed = useColumnsStore((state) => state.navCollapsed)
 	const chrome = useWindowChrome()
 	/* 视口不够宽时按收起呈现，与手动点收起走同一个状态、同一套样式：
-     区别只在来源，视口驱动的这一档不写偏好（design/foundations.md F6）。 */
-	const narrow = useMediaQuery('(width <= 1023px)')
+     区别只在来源，视口驱动的这一档不写偏好。阈值取 token --nav-auto-collapse（970：导航区最小 + 内容区最小 + 侧栏最小 + 把手），
+     即前两栏已经各自压到最小之后才轮到导航区收起（design/foundations.md F6）。 */
+	const narrow = useMediaQuery('(width <= 969px)')
+	/* 继续压窄到内容区最小 + 侧栏最小 + 把手（400 + 300 + 6），侧栏也让不动了，整条收起（F6 的最后一步）。 */
+	const narrowForBrowser = useMediaQuery('(width <= 705px)')
 	const toggleNav = useColumnsStore((state) => state.toggleNav)
 	const mainFolded = useColumnsStore((state) => state.navMainCollapsed)
 	const toggleMain = useColumnsStore((state) => state.toggleNavMain)
 	const browserCollapsed = useColumnsStore((state) => state.browserCollapsed)
+	const browserHidden = browserCollapsed || narrowForBrowser
 	const toggleBrowser = useColumnsStore((state) => state.toggleBrowser)
 	const browserSide = useColumnsStore((state) => state.browserSide)
 	const setBrowserSide = useColumnsStore((state) => state.setBrowserSide)
@@ -84,7 +88,7 @@ export function AppLayout() {
 			data-os={client.os || 'unknown'}
 			data-width={collapsed || narrow ? 'zero' : 'panel'}
 			data-nav={collapsed || narrow ? 'collapsed' : 'expanded'}
-			data-browser={browserCollapsed ? 'collapsed' : browserSide}
+			data-browser={browserHidden ? 'collapsed' : browserSide}
 		>
 			<Nav
 				items={MAIN_ITEMS.map(mark)}
@@ -111,37 +115,36 @@ export function AppLayout() {
 			>
 				<Outlet />
 			</Content>
-			{browserCollapsed ? null : (
-				<Browser
-					tabs={view}
-					activeKey={activeKey}
-					side={browserSide}
-					onActivate={(key) => {
-						const tab = byKey(key)
-						if (tab) activateTab(tab)
-					}}
-					onClose={(key) => {
-						const tab = byKey(key)
-						if (tab) closeTab(tab)
-					}}
-					onNew={() => activateTab(HOME_TAB)}
-					onMove={() => setBrowserSide(browserSide === 'right' ? 'left' : 'right')}
-					onCollapse={toggleBrowser}
-				>
-					{active.kind === 'browser-home' ? (
-						<Home
-							recent={tabs
-								.filter((tab) => tab.kind !== 'browser-home')
-								.map((tab) => ({ key: tabKey(tab), label: nameOf(tab) }))}
-							onOpenAddress={(address) => openTab({ kind: 'browser-web', id: address })}
-						/>
-					) : null}
-					{active.kind === 'browser-web' ? <Web address={active.id} /> : null}
-					{active.kind !== 'browser-home' && active.kind !== 'browser-web' ? (
-						<p className='content__hint'>{t('shell.content.placeholder')}</p>
-					) : null}
-				</Browser>
-			)}
+			<Browser
+				tabs={view}
+				activeKey={activeKey}
+				side={browserSide}
+				collapsed={browserHidden}
+				onActivate={(key) => {
+					const tab = byKey(key)
+					if (tab) activateTab(tab)
+				}}
+				onClose={(key) => {
+					const tab = byKey(key)
+					if (tab) closeTab(tab)
+				}}
+				onNew={() => activateTab(HOME_TAB)}
+				onMove={() => setBrowserSide(browserSide === 'right' ? 'left' : 'right')}
+				onCollapse={toggleBrowser}
+			>
+				{active.kind === 'browser-home' ? (
+					<Home
+						recent={tabs
+							.filter((tab) => tab.kind !== 'browser-home')
+							.map((tab) => ({ key: tabKey(tab), label: nameOf(tab) }))}
+						onOpenAddress={(address) => openTab({ kind: 'browser-web', id: address })}
+					/>
+				) : null}
+				{active.kind === 'browser-web' ? <Web address={active.id} /> : null}
+				{active.kind !== 'browser-home' && active.kind !== 'browser-web' ? (
+					<p className='content__hint'>{t('shell.content.placeholder')}</p>
+				) : null}
+			</Browser>
 		</div>
 	)
 }

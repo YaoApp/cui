@@ -32,7 +32,18 @@
   order: 2;
 }
 
-/* 第三栏收掉：整条让给内容区（再引用一次又切回来，见 design/main-shell.md §五）。 */
+/* 第三栏收掉：整条让给内容区（再引用一次又切回来，见 design/main-shell.md §五）。
+   用零宽收起而不是 display: none，布局动画才量得到前后状态。 */
 .layout[data-browser='collapsed'] .browser {
-  display: none;
+  inline-size: 0;
+  min-inline-size: 0;
+  max-inline-size: 0;
+  padding-inline: 0;
+  border-inline-width: 0;
+  overflow: hidden;
+}
+
+/* 导航区收起后为零宽，侧栏的上限要把导航区那一份让出来（让位顺序见 design/foundations.md F6）。 */
+.layout[data-width='zero'] .browser {
+  max-inline-size: calc(100% - var(--center-min) - var(--side-resize-handle));
 }
