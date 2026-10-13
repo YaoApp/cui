@@ -93,6 +93,8 @@
   "shell.browser.split.columns": "左右分欄",
   "shell.browser.split.rows": "上下分欄",
   "shell.browser.split.blocked": "欄寬不足，拖寬側邊欄後再分欄",
+  "shell.browser.action.more": "更多",
+  "shell.browser.action.exclusive": "面板獨佔視窗",
   "shell.browser.address.label": "外部網址",
   "shell.browser.address.placeholder": "輸入網址，按 Enter 開啟",
   "shell.browser.recent": "這一側開啟過的內容",

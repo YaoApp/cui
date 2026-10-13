@@ -195,7 +195,9 @@ export type I18nKey =
   | 'localeSwitch.zhTW'
   | 'modal.close'
   | 'shell.browser.action.collapse'
+  | 'shell.browser.action.exclusive'
   | 'shell.browser.action.expand'
+  | 'shell.browser.action.more'
   | 'shell.browser.action.move'
   | 'shell.browser.address.label'
   | 'shell.browser.address.placeholder'
@@ -434,7 +436,9 @@ declare module 'i18next' {
         'localeSwitch.zhTW': string
         'modal.close': string
         'shell.browser.action.collapse': string
+        'shell.browser.action.exclusive': string
         'shell.browser.action.expand': string
+        'shell.browser.action.more': string
         'shell.browser.action.move': string
         'shell.browser.address.label': string
         'shell.browser.address.placeholder': string

@@ -93,6 +93,8 @@
   "shell.browser.split.columns": "Split side by side",
   "shell.browser.split.rows": "Split top and bottom",
   "shell.browser.split.blocked": "Not enough room: widen this column before splitting",
+  "shell.browser.action.more": "More",
+  "shell.browser.action.exclusive": "Take the pane full window",
   "shell.browser.address.label": "External address",
   "shell.browser.address.placeholder": "Type an address and press Enter",
   "shell.browser.recent": "Opened on this side",

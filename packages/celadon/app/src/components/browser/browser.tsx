@@ -51,6 +51,9 @@ export type BrowserProps = {
   /** 聚焦哪个面板（0 是第一个）：标签条的点击落在聚焦的那个面板上 */
   focusedPane?: number
   onFocusPane?: (pane: number) => void
+  /** 面板独占整扇窗口：导航区与内容区让位，只留这一栏（与窗口自身的最大化不是一件事） */
+  exclusive?: boolean
+  onExclusive?: () => void
 }
 
 /* 标签浏览器：顶部标签条（首页固定第一个、新建吸附右端），下面当前页或两个面板。
@@ -78,6 +81,8 @@ export function Browser({
   secondaryLabel = '',
   focusedPane = 0,
   onFocusPane = () => {},
+  exclusive = false,
+  onExclusive = () => {},
 }: BrowserProps) {
   const { t } = useTranslation()
   const splitResize = useSplitResize(
@@ -225,14 +230,22 @@ export function Browser({
         <BaseMenu.Root>
           <BaseMenu.Trigger
             className="browser__more"
-            aria-label={t('shell.browser.label')}
+            aria-label={t('shell.browser.action.more')}
             render={<Button iconOnly variant="ghost" size="small" />}
           >
             <Icon name="i-dots" size={16} />
           </BaseMenu.Trigger>
           <BaseMenu.Portal>
             <BaseMenu.Positioner side="bottom" align="end" sideOffset={4}>
-              <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.move')}>
+              <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.more')}>
+                <BaseMenu.Item
+                  className="browser__menu-item"
+                  aria-pressed={exclusive}
+                  onClick={onExclusive}
+                >
+                  <Icon name="i-expand" size={16} />
+                  <span>{t('shell.browser.action.exclusive')}</span>
+                </BaseMenu.Item>
                 <BaseMenu.Item className="browser__menu-item" onClick={onMove}>
                   <Icon name="i-swap" size={16} />
                   <span>{t('shell.browser.action.move')}</span>

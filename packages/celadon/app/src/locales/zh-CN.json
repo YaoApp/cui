@@ -93,6 +93,8 @@
   "shell.browser.split.columns": "左右分栏",
   "shell.browser.split.rows": "上下分栏",
   "shell.browser.split.blocked": "栏宽不足，拖宽侧边栏后再分栏",
+  "shell.browser.action.more": "更多",
+  "shell.browser.action.exclusive": "面板独占窗口",
   "shell.browser.address.label": "外部地址",
   "shell.browser.address.placeholder": "输入地址，回车打开",
   "shell.browser.recent": "这一侧打开过的东西",

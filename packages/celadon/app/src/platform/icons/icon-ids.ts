@@ -33,6 +33,7 @@ export type IconId =
   | 'i-file'
   | 'i-split'
   | 'i-rows'
+  | 'i-expand'
   | 'i-swap'
   | 'i-send'
   | 'i-check'
