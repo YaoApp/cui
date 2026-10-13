@@ -89,10 +89,10 @@ export function useWindowChrome(): WindowChrome {
 		})
 	}
 
-	/* 顶部那一条带子统一可拖、双击即在最大化与还原之间切换：无论导航列、内容区还是标签栏，
-     只要指针落在窗口最上面这一带，空白处按下并移动即拖动窗口，空白处双击即切换。
-     按下不移动什么都不做，因此单击与双击都原样到达；控件（按钮、链接、输入、标了
-     data-no-drag 的）两件事都不参与，点击照旧。在 window 上受理一次，各栏不必各写一层。 */
+	/* 顶部那一条带子统一可拖：无论导航列、内容区还是标签栏，只要指针落在窗口最上面这一带，
+     空白处按下并移动即拖动窗口。双击的归属按平台分：macOS 的原生标题栏归系统，Windows 的自绘
+     顶栏由应用切换最大化。控件（按钮、链接、输入、标了 data-no-drag 的）两件事都不参与，
+     点击照旧。在 window 上受理一次，各栏不必各写一层。 */
 	useEffect(() => {
 		if (!visible) return
 		let pressed: { x: number; y: number } | null = null
@@ -103,8 +103,10 @@ export function useWindowChrome(): WindowChrome {
 			if (!(target instanceof Element)) return false
 			return !target.closest(INTERACTIVE)
 		}
-		const onPointerDown = (event: PointerEvent) => {
-			pressed = inBand(event) ? { x: event.clientX, y: event.clientY } : null
+		/* 按下用 mousedown 读点击次数：`detail` 为 2 表示这是双击的第二下，
+           那一下留给双击（macOS 交给系统标题栏，Windows 交给下面的 dblclick），不启动拖动。 */
+		const onMouseDown = (event: MouseEvent) => {
+			pressed = event.detail <= 1 && inBand(event) ? { x: event.clientX, y: event.clientY } : null
 		}
 		const onPointerMove = (event: PointerEvent) => {
 			if (!pressed) return
@@ -121,18 +123,21 @@ export function useWindowChrome(): WindowChrome {
 			pressed = null
 			releaseCursor()
 		}
+		/* 双击最大化只在 Windows 由应用做：macOS 的标题栏是原生的，双击归系统，
+           应用再切一次就会变成切两下（放大又还原）。 */
 		const onDoubleClick = (event: MouseEvent) => {
+			if (controls !== 'own') return
 			if (!inBand(event)) return
 			if (firstToHandle(event)) toggle()
 		}
-		window.addEventListener('pointerdown', onPointerDown, true)
+		window.addEventListener('mousedown', onMouseDown, true)
 		window.addEventListener('pointermove', onPointerMove, true)
 		window.addEventListener('pointerup', onPointerEnd, true)
 		window.addEventListener('pointercancel', onPointerEnd, true)
 		window.addEventListener('blur', onPointerEnd)
 		window.addEventListener('dblclick', onDoubleClick, true)
 		return () => {
-			window.removeEventListener('pointerdown', onPointerDown, true)
+			window.removeEventListener('mousedown', onMouseDown, true)
 			window.removeEventListener('pointermove', onPointerMove, true)
 			window.removeEventListener('pointerup', onPointerEnd, true)
 			window.removeEventListener('pointercancel', onPointerEnd, true)

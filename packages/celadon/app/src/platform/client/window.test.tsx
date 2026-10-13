@@ -2,8 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, render, waitFor } from '@testing-library/react'
 import { useWindowChrome, type WindowChrome } from './window'
 
-/* 窗口动作的契约：顶带里按下并移动才拖动窗口，双击在最大化与还原之间切换；
-   单击不拖动，控件与带外两件事都不参与。真实窗口行为由桌面壳与人工验收，这里只验分发。 */
+/* 窗口动作的契约：顶带里按下并移动拖动窗口（两个平台都由应用受理），双击最大化按平台分，
+   macOS 归系统标题栏、Windows 归这里的切换；单击不拖动，控件与带外都不参与。
+   真实窗口行为由桌面壳与人工验收，这里只验分发。 */
 const { bridge, facts } = vi.hoisted(() => ({
   bridge: {
     minimize: vi.fn(() => Promise.resolve({ ok: true as const, value: null })),
@@ -33,10 +34,17 @@ function mount() {
   return () => chrome[chrome.length - 1]
 }
 
-/** 在窗口顶带里派发一次事件，目标默认是正文（非控件）。 */
+/** 在窗口顶带里派发一次事件，目标默认是正文（非控件）。detail 表示点击次数。 */
 function fire(
-  type: 'pointerdown' | 'pointermove' | 'pointerup' | 'dblclick',
-  options: { y?: number; x?: number; target?: Element; button?: number; buttons?: number } = {}
+  type: 'mousedown' | 'pointermove' | 'pointerup' | 'dblclick',
+  options: {
+    y?: number
+    x?: number
+    target?: Element
+    button?: number
+    buttons?: number
+    detail?: number
+  } = {}
 ) {
   const target = options.target ?? document.body
   const buttons = options.buttons ?? (type === 'pointerup' ? 0 : 1)
@@ -44,6 +52,7 @@ function fire(
     bubbles: true,
     cancelable: true,
     button: options.button ?? 0,
+    detail: options.detail ?? 1,
     clientX: options.x ?? 100,
     clientY: options.y ?? 10
   })
@@ -55,7 +64,7 @@ function fire(
 
 /** 一次完整的拖动：按下、移动、抬起。 */
 function dragBy(distance = 12) {
-  fire('pointerdown', { x: 100, y: 10 })
+  fire('mousedown', { x: 100, y: 10 })
   fire('pointermove', { x: 100 + distance, y: 10 })
   fire('pointerup', { x: 100 + distance, y: 10 })
 }
@@ -88,7 +97,7 @@ describe('the window chrome hook', () => {
     const current = mount()
     expect(current().visible).toBe(true)
     expect(current().controls).toBe('native')
-    fire('pointerdown')
+    fire('mousedown')
     fire('pointerup')
     expect(bridge.startDragging).not.toHaveBeenCalled()
     dragBy()
@@ -96,10 +105,22 @@ describe('the window chrome hook', () => {
     expect(bridge.startDragging).toHaveBeenCalledTimes(1)
   })
 
+  it('macOS：双击的第二下不启动拖动，双击切换交给系统标题栏', () => {
+    facts.kind = 'desktop'
+    facts.os = 'macos'
+    mount()
+    // 第二下（detail 为 2）即便移动也不拖动，否则系统收不到这次双击
+    fire('mousedown', { detail: 2 })
+    fire('pointermove', { x: 140 })
+    expect(bridge.startDragging).not.toHaveBeenCalled()
+    fire('dblclick')
+    expect(bridge.toggleMaximize).not.toHaveBeenCalled()
+  })
+
   it('拖动期间把指针统一成箭头，抬起后交还', () => {
     facts.kind = 'desktop'
     mount()
-    fire('pointerdown')
+    fire('mousedown')
     fire('pointermove', { x: 130 })
     expect(document.body.style.cursor).toBe('default')
     fire('pointerup')
@@ -135,18 +156,19 @@ describe('the window chrome hook', () => {
 
   it('控件、带外与非左键都不吃拖动，也不吃双击', () => {
     facts.kind = 'desktop'
+    facts.os = 'windows'
     mount()
     const button = document.createElement('button')
     const noDrag = document.createElement('div')
     noDrag.setAttribute('data-no-drag', '')
     document.body.append(button, noDrag)
-    fire('pointerdown', { target: button })
+    fire('mousedown', { target: button })
     fire('pointermove', { x: 120, target: button })
-    fire('pointerdown', { target: noDrag })
+    fire('mousedown', { target: noDrag })
     fire('pointermove', { x: 120, target: noDrag })
-    fire('pointerdown', { y: 200 })
+    fire('mousedown', { y: 200 })
     fire('pointermove', { x: 120, y: 200 })
-    fire('pointerdown', { button: 2 })
+    fire('mousedown', { button: 2 })
     fire('pointermove', { x: 120 })
     fire('dblclick', { target: button })
     fire('dblclick', { y: 200 })
@@ -163,10 +185,10 @@ describe('the window chrome hook', () => {
     scope.className = 'celadon'
     scope.style.setProperty('--window-drag-band', '20px')
     document.body.append(scope)
-    fire('pointerdown', { y: 30 })
+    fire('mousedown', { y: 30 })
     fire('pointermove', { x: 120, y: 30 })
     expect(bridge.startDragging).not.toHaveBeenCalled()
-    fire('pointerdown', { y: 10 })
+    fire('mousedown', { y: 10 })
     fire('pointermove', { x: 120, y: 10 })
     expect(bridge.startDragging).toHaveBeenCalledTimes(1)
   })

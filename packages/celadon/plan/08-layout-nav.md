@@ -93,7 +93,7 @@ app/src/components/nav/
 ### 已实现：行状态与窗口动作
 
 - 行状态用导航列专用 token：悬停取 `--nav-hover`，当前项取 `--nav-select` 配 `--text-primary`，当前项不再用品牌色；一级菜单与二级菜单同一套。取值、来源与对比度实测见 `design/color-card.md`。
-- 顶带（窗口最上面 `--window-drag-band`，48 像素）空白处**按下并移动**才拖动窗口，空白处双击在最大化与还原之间切换；macOS 与 Windows 走同一套实现（`platform/client/window.ts`）。按下即拖会把双击吃掉，因此单击与双击都留给原动作。控件、导航列右缘的把手与标了 `data-no-drag` 的元素不吃这两个动作，列头空白处可以拖。
+- 顶带（窗口最上面 `--window-drag-band`，48 像素）空白处**按下并移动**才拖动窗口，双击的归属按平台分：Windows 的自绘顶栏由应用在最大化与还原之间切换，macOS 的原生标题栏归系统，应用不再插手，否则一次双击会被切两下。按下即拖会把双击吃掉，因此单击与双击都留给原动作；双击的第二下（`mousedown` 的 `detail` 为 2）不启动拖动。控件、导航列右缘的把手与标了 `data-no-drag` 的元素不吃这两个动作，列头空白处可以拖。
 - 这个钩子被多处调用（列头 · 内容列头 · 窗口键 · 外壳），每处各挂一份 window 监听；同一个事件只由第一份处理，否则一次双击会切换好几轮最大化。拖动期间指针统一成箭头，避免拖过文字或把手时光标变形。
 - 顶带里的四个元素（列头 · 内容列头 · 右栏标签条 · Windows 顶栏）取 `cursor: default` 与 `user-select: none`：这条带子里的按下用于拖窗口与双击最大化，不该带出文字选中。
 - 窗口命令的契约见 `architecture/15-platform.md` §6；分发逻辑的用例见 `app/src/platform/client/window.test.tsx`。
