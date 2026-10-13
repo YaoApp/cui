@@ -320,7 +320,8 @@
 ### 6.3 无标题栏窗口的窗口动作
 
 - 桌面壳关掉原生标题栏：Windows 关装饰、由顶栏自绘三个窗口键，macOS 用 `titleBarStyle: overlay` 保住原生交通灯。窗口键与拖动两条路径的判定都在 `app/src/platform/client/window.ts` 一处，命令经 `app/src/platform/bridge/window.ts`（`celadon_window_*` 与 `window.startDragging`）。
-- **顶带**：窗口最上面 `--window-drag-band`（48 像素）内，空白处**按下并移动**才拖动窗口，两个平台都由应用受理。双击最大化按平台分：Windows 的自绘顶栏由应用切换，macOS 的原生标题栏归系统，应用不再插手，否则一次双击会被切两下。按下即拖会把双击吃掉，所以拖动从移动起算，双击的第二下（`mousedown` 的 `detail` 为 2）也不启动拖动。
+- **顶带**：窗口最上面 `--window-drag-band`（48 像素）内，空白处**按下并移动**才拖动窗口，空白处双击在最大化与还原之间切换，两个平台都由应用受理：macOS 的 `titleBarStyle: overlay` 让标题栏被网络视图盖住，系统收不到这一下。按下即拖会把双击吃掉，所以拖动从移动起算，双击的第二下（`mousedown` 的 `detail` 为 2）也不启动拖动。
+- **macOS 的放大状态自己记**：`celadon_window_toggle_maximize` 在 macOS 侧不读 `is_maximized`（该档下放大之后它仍报 false，`unmaximize` 会提前返回，表现为第二次双击不还原），改为在 `MaximizeFrame` 里存下放大前的窗口框，第二次切换按框放回；`celadon_window_maximized` 也读这份记录。Windows 侧仍走系统状态。
 - **一份判定，多处调用**：这个钩子被列头、内容列头、窗口键与外壳各调一次，每处都挂一份 window 监听；同一个事件只由第一份处理，动作不会重复执行。拖动期间指针统一成箭头。
 - **控件不吃这两个动作**：按钮、链接、输入、可编辑区与标了 `data-no-drag` 的元素；导航列右缘的拖拽把手标 `data-no-drag`，列头空白处可以拖。
 - **顶带里不选文字**：占住这条带子的四个元素（导航列列头 · 内容列头 · 右栏标签条 · Windows 顶栏）取 `cursor: default` 与 `user-select: none`，拖动与双击不会带出文字选中。

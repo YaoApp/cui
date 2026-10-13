@@ -105,16 +105,16 @@ describe('the window chrome hook', () => {
     expect(bridge.startDragging).toHaveBeenCalledTimes(1)
   })
 
-  it('macOS：双击的第二下不启动拖动，双击切换交给系统标题栏', () => {
+  it('macOS：双击的第二下不启动拖动，双击切换由应用受理', () => {
     facts.kind = 'desktop'
     facts.os = 'macos'
     mount()
-    // 第二下（detail 为 2）即便移动也不拖动，否则系统收不到这次双击
+    // 第二下（detail 为 2）即便移动也不拖动，否则双击会被拖动吃掉
     fire('mousedown', { detail: 2 })
     fire('pointermove', { x: 140 })
     expect(bridge.startDragging).not.toHaveBeenCalled()
     fire('dblclick')
-    expect(bridge.toggleMaximize).not.toHaveBeenCalled()
+    expect(bridge.toggleMaximize).toHaveBeenCalledTimes(1)
   })
 
   it('拖动期间把指针统一成箭头，抬起后交还', () => {

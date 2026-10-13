@@ -89,10 +89,11 @@ export function useWindowChrome(): WindowChrome {
 		})
 	}
 
-	/* 顶部那一条带子统一可拖：无论导航列、内容区还是标签栏，只要指针落在窗口最上面这一带，
-     空白处按下并移动即拖动窗口。双击的归属按平台分：macOS 的原生标题栏归系统，Windows 的自绘
-     顶栏由应用切换最大化。控件（按钮、链接、输入、标了 data-no-drag 的）两件事都不参与，
-     点击照旧。在 window 上受理一次，各栏不必各写一层。 */
+	/* 顶部那一条带子统一受理两件事：无论导航列、内容区还是标签栏，只要指针落在窗口最上面这一带，
+     空白处按下并移动即拖动窗口，空白处双击即在最大化与还原之间切换。macOS 的标题栏是 Overlay，
+     被网络视图盖住，系统收不到这一下双击，所以两个平台都由应用切换。
+     控件（按钮、链接、输入、标了 data-no-drag 的）两件事都不参与，点击照旧。
+     在 window 上受理一次，各栏不必各写一层。 */
 	useEffect(() => {
 		if (!visible) return
 		let pressed: { x: number; y: number } | null = null
@@ -104,7 +105,7 @@ export function useWindowChrome(): WindowChrome {
 			return !target.closest(INTERACTIVE)
 		}
 		/* 按下用 mousedown 读点击次数：`detail` 为 2 表示这是双击的第二下，
-           那一下留给双击（macOS 交给系统标题栏，Windows 交给下面的 dblclick），不启动拖动。 */
+           那一下留给双击，不启动拖动，否则系统与原生控件都收不到这次双击。 */
 		const onMouseDown = (event: MouseEvent) => {
 			pressed = event.detail <= 1 && inBand(event) ? { x: event.clientX, y: event.clientY } : null
 		}
@@ -123,10 +124,7 @@ export function useWindowChrome(): WindowChrome {
 			pressed = null
 			releaseCursor()
 		}
-		/* 双击最大化只在 Windows 由应用做：macOS 的标题栏是原生的，双击归系统，
-           应用再切一次就会变成切两下（放大又还原）。 */
 		const onDoubleClick = (event: MouseEvent) => {
-			if (controls !== 'own') return
 			if (!inBand(event)) return
 			if (firstToHandle(event)) toggle()
 		}
