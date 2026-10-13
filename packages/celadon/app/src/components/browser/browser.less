@@ -104,8 +104,12 @@
 	user-select: none;
 }
 
-/* 标签条右端的「…」更多菜单：一行一项，图标 + 文案，悬停与键盘高亮同一底色 */
+/* 标签条右端的「…」更多菜单：口径与导航列折叠菜单一致 ——
+   项内距纵向 8、横向 12，行高凑到 32（design/layout.md §3 的列表项），项间距 4，悬停与键盘高亮同一底色 */
 .browser__menu {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-4);
 	min-inline-size: 180px;
 	padding: var(--spacing-4);
 	border: var(--border-width) solid var(--border-subtle);
@@ -116,9 +120,12 @@
 
 .browser__menu-item {
 	display: flex;
+	box-sizing: border-box;
 	align-items: center;
 	gap: var(--spacing-8);
-	padding: var(--spacing-8);
+	min-block-size: var(--spacing-32);
+	padding-block: var(--spacing-8);
+	padding-inline: var(--spacing-12);
 	border-radius: var(--radius-small);
 	color: var(--text-primary);
 	cursor: default;
