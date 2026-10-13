@@ -133,6 +133,14 @@
 	inline-size: var(--spacing-4);
 }
 
+/* 上下分屏时分隔条是横的，高亮带也横过来：整条宽、4 像素高，居中在黑线上 */
+.browser__body[data-split='rows'] .browser__divider .browser__grip {
+	inset-inline: 0;
+	inset-block-start: calc(50% - var(--spacing-4) / 2);
+	inline-size: auto;
+	block-size: var(--spacing-4);
+}
+
 .browser__body[data-split='rows'] .browser__divider {
 	inline-size: auto;
 	block-size: var(--side-resize-handle);

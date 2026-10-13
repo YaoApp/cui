@@ -181,7 +181,9 @@ export function useColumnResize(
     onPointerDown: (event) => {
       const node = nodeRef.current
       if (!node || event.button !== 0) return
-      /* 不 preventDefault：按下那一下不能吃掉后续的 click 与双击（双击要回默认宽） */
+      /* 与导航列右缘一致：按下即 preventDefault，指针从这一下开始就不再拉文字选择；
+         双击复位走抬起层的间隔判定，不依赖 dblclick，所以拦掉它不影响复位 */
+      event.preventDefault()
       const bounds = measure()
       setLimits(bounds)
       document.body.style.setProperty('cursor', 'col-resize')
