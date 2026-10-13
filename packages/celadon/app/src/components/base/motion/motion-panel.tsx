@@ -2,8 +2,8 @@ import { motion, useReducedMotion, type HTMLMotionProps } from 'motion/react'
 import { PANEL_SPRING, PANEL_INSTANT } from './panel-motion'
 
 export type MotionPanelProps = HTMLMotionProps<'div'> & {
-	/** 参与布局动画的元素标签，默认 div；列用 aside、主区用 main、行用 li、列头用 header */
-	as?: 'div' | 'aside' | 'main' | 'section' | 'nav' | 'li' | 'header'
+	/** 参与布局动画的元素标签，默认 div；列用 aside、主区用 main、行用 li、列头用 header、标签用 span */
+	as?: 'div' | 'aside' | 'main' | 'section' | 'nav' | 'li' | 'header' | 'span'
 	/** 是否为位移型元素（行、文字、图标）：只平移不缩放，文字因此不变形 */
 	position?: boolean
 }

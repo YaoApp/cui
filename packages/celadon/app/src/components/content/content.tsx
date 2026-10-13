@@ -10,6 +10,8 @@ export type ContentProps = {
 	title?: string
 	/** 导航列是否收起：收起才展示导航操作按钮，并接管交通灯留白 */
 	navCollapsed?: boolean
+	/** 窗口窄到由视口强制收起导航：切换键置灰并给出原因 */
+	navBlocked?: boolean
 	/** 标签浏览器列是否收起：收起才展示 Browser 操作按钮 */
 	browserCollapsed?: boolean
 	/** 窗口窄到放不下标签浏览器那一栏：切换键置灰并给出原因 */
@@ -25,6 +27,7 @@ export function Content({
 	children,
 	title,
 	navCollapsed = false,
+	navBlocked = false,
 	browserCollapsed = false,
 	browserBlocked = false,
 	onToggleNav = () => {},
@@ -36,6 +39,7 @@ export function Content({
 				<ContentHead
 					title={title}
 					navCollapsed={navCollapsed}
+					navBlocked={navBlocked}
 					browserCollapsed={browserCollapsed}
 					browserBlocked={browserBlocked}
 					onToggleNav={onToggleNav}
