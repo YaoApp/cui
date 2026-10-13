@@ -1,7 +1,6 @@
 import { BrandMark } from '@/components/base/brand-mark'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
-import { MotionPanel } from '@/components/base/motion'
 import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 
@@ -17,8 +16,7 @@ export function NavBrand({ mainFolded, onToggleMain }: NavBrandProps) {
 	const { t } = useTranslation()
 	const foldLabel = t('shell.navigation.action.fold')
 	return (
-		/* 品牌行随列平移，不做显隐切换（plan/08-layout-motion.md §3 第 3 处） */
-		<MotionPanel position className='nav__brand-row'>
+		<div className='nav__brand-row'>
 			<BrandMark name='brand-yao-agents' size={24} label={t('app.name')} />
 			<span className='nav__brand'>{t('app.name')}</span>
 			<Tooltip label={foldLabel} side='bottom'>
@@ -34,6 +32,6 @@ export function NavBrand({ mainFolded, onToggleMain }: NavBrandProps) {
 					<Icon name={mainFolded ? 'i-dock' : 'i-undock'} size={16} />
 				</Button>
 			</Tooltip>
-		</MotionPanel>
+		</div>
 	)
 }

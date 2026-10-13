@@ -1,5 +1,4 @@
 import { Icon } from '@/components/base/icon'
-import { MotionPanel } from '@/components/base/motion'
 import { Tooltip } from '@/components/base/tooltip'
 import { appHref } from '@/platform/router/basename'
 import { useTranslation } from '@/platform/i18n'
@@ -16,8 +15,7 @@ export type NavFooterProps = {
 export function NavFooter({ name, shortcuts, onSelect }: NavFooterProps) {
   const { t } = useTranslation()
   return (
-    /* 底部一行随列平移，不做显隐切换 */
-    <MotionPanel position className="nav__footer">
+    <div className="nav__footer">
       <span className="nav__avatar" aria-hidden="true">
         {name.slice(0, 1).toUpperCase()}
       </span>
@@ -51,6 +49,6 @@ export function NavFooter({ name, shortcuts, onSelect }: NavFooterProps) {
           )
         })}
       </span>
-    </MotionPanel>
+    </div>
   )
 }

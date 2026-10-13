@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
-import { MotionPanel } from '@/components/base/motion'
 import { ScrollArea } from '@/components/base/scroll-area'
 import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
@@ -42,13 +41,12 @@ export function NavScene({
 	const unfoldLabel = t('shell.navigation.action.unfold')
 
 	return (
-		/* 下区随列平移；折叠行的进出由投影补位置，不靠切换外边距（plan/08-layout-motion.md §3 第 9 处） */
-		<MotionPanel position className='nav__scene'>
+		<div className='nav__scene'>
 			<ScrollArea className='nav__scroll' size='small'>
 				{children}
 			</ScrollArea>
 			{folded ? (
-				<MotionPanel position className='nav__scene-head'>
+				<div className='nav__scene-head'>
 					<NavMenu
 						columnWidth={columnWidth}
 						items={items}
@@ -69,8 +67,8 @@ export function NavScene({
 							<Icon name='i-dock' size={16} />
 						</Button>
 					</Tooltip>
-				</MotionPanel>
+				</div>
 			) : null}
-		</MotionPanel>
+		</div>
 	)
 }
