@@ -37,9 +37,9 @@
 | token | 浅色 | 暗色 | 用法 |
 | --- | --- | --- | --- |
 | `--background-app` | `#F4F4F6` | `#121110` | 窗口底 |
-| `--background-navigation` | `#F8F8FA` | `#151413` | ① 导航列 |
-| `--background-content` | `#FAFAFB` | `#191816` | ② 内容区（非纯白） |
-| `--background-surface` | `#FFFFFF` | `#1F1E1A` | ③ 面板/卡片 |
+| `--background-navigation` | `#F4F4F6` | `#121110` | ① 导航列，与 `--background-app` 同值（`var(--background-app)`） |
+| `--background-content` | `#FAFAFB` | `#191816` | 认证页整页底 · 焦点环内圈；内容区不再用它 |
+| `--background-surface` | `#FFFFFF` | `#1F1E1A` | ② 内容区与右栏 · 面板/卡片 |
 | `--background-field` | `#F4F4F5` | `#262420` | 输入框/字段 |
 | `--background-hover` | `#F0F0F2` | `#2C2A26` | 悬停 |
 | `--background-selected` | `#ECF3F3` | `#17292A` | 选中底（= 品牌浅底） |
