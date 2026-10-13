@@ -25,10 +25,11 @@ export type WindowChrome = {
 	close: () => void
 }
 
-/** 顶部拖动带的高度：优先读 token，取不到用兜底值。 */
+/** 顶部拖动带的高度：优先读 token，取不到用兜底值。token 挂在 `.celadon` 作用域上。 */
 function dragBandHeight(): number {
 	if (typeof window === 'undefined') return DRAG_BAND_FALLBACK
-	const value = getComputedStyle(document.documentElement).getPropertyValue('--window-drag-band')
+	const scope = document.querySelector('.celadon') ?? document.documentElement
+	const value = getComputedStyle(scope).getPropertyValue('--window-drag-band')
 	const parsed = Number.parseFloat(value)
 	return Number.isFinite(parsed) && parsed > 0 ? parsed : DRAG_BAND_FALLBACK
 }
@@ -62,22 +63,36 @@ export function useWindowChrome(): WindowChrome {
 		)
 	}
 
-	/* 顶部那一条带子统一可拖：无论导航列、内容区还是标签栏，只要指针落在窗口最上面这一带，
-     空白处按下即拖动窗口。控件（按钮、链接、输入、标了 data-no-drag 的）不吃拖动，点击照旧。
+	const toggle = () => {
+		void windowChrome.toggleMaximize().then((result) => {
+			if (isOk(result)) setMaximized(result.value)
+		})
+	}
+
+	/* 顶部那一条带子统一可拖、双击即在最大化与还原之间切换：无论导航列、内容区还是标签栏，
+     只要指针落在窗口最上面这一带，空白处按下即拖动窗口，空白处双击即切换。
+     控件（按钮、链接、输入、标了 data-no-drag 的）不吃这两个动作，点击照旧。
      在 window 上受理一次，各栏不必各写一层。 */
 	useEffect(() => {
 		if (!visible) return
-		const onPointerDown = (event: PointerEvent) => {
-			if (event.button !== 0) return
-			if (event.clientY > dragBandHeight()) return
+		const inBand = (event: MouseEvent) => {
+			if (event.button !== 0) return false
+			if (event.clientY > dragBandHeight()) return false
 			const target = event.target
-			if (!(target instanceof Element)) return
-			if (target.closest(INTERACTIVE)) return
-			drag()
+			if (!(target instanceof Element)) return false
+			return !target.closest(INTERACTIVE)
+		}
+		const onPointerDown = (event: PointerEvent) => {
+			if (inBand(event)) drag()
+		}
+		const onDoubleClick = (event: MouseEvent) => {
+			if (inBand(event)) toggle()
 		}
 		window.addEventListener('pointerdown', onPointerDown, true)
+		window.addEventListener('dblclick', onDoubleClick, true)
 		return () => {
 			window.removeEventListener('pointerdown', onPointerDown, true)
+			window.removeEventListener('dblclick', onDoubleClick, true)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [visible])
@@ -86,11 +101,7 @@ export function useWindowChrome(): WindowChrome {
 		visible,
 		controls,
 		maximized,
-		toggleMaximize: () => {
-			void windowChrome.toggleMaximize().then((result) => {
-				if (isOk(result)) setMaximized(result.value)
-			})
-		},
+		toggleMaximize: toggle,
 		dragState,
 		minimize: () => {
 			void windowChrome.minimize()

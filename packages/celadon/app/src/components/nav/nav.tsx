@@ -104,6 +104,7 @@ export function Nav({
 					aria-valuemax={resize.max}
 					aria-valuenow={resize.current}
 					tabIndex={0}
+					data-no-drag
 					onPointerEnter={resize.onPointerEnter}
 					onPointerLeave={resize.onPointerLeave}
 					onPointerDown={resize.onPointerDown}
