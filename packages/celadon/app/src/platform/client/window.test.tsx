@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, render, waitFor } from '@testing-library/react'
 import { useWindowChrome, type WindowChrome } from './window'
 
-/* 窗口动作的契约：顶带里按下并移动拖动窗口（两个平台都由应用受理），双击最大化按平台分，
-   macOS 归系统标题栏、Windows 归这里的切换；单击不拖动，控件与带外都不参与。
-   真实窗口行为由桌面壳与人工验收，这里只验分发。 */
+/* 窗口动作的契约：顶带里按下并移动才拖动窗口，双击在最大化与还原之间切换，两个平台都由应用受理
+   （macOS 的 overlay 标题栏被网络视图盖住，系统收不到这一下）；单击不拖动，控件与带外都不参与。
+   真实窗口行为由桌面壳验收，这里只验分发。 */
 const { bridge, facts } = vi.hoisted(() => ({
   bridge: {
     minimize: vi.fn(() => Promise.resolve({ ok: true as const, value: null })),
