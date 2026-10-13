@@ -115,4 +115,14 @@ test.describe('导航列的交互', () => {
 		await page.locator(`${NAV} .nav__main .nav__scroll`).hover()
 		await expect(bar).toHaveCSS('opacity', '1')
 	})
+
+	test('顶带里的三块都不参与文本选择，指针是箭头', async ({ page }) => {
+		// 顶带里的按下用来拖窗口与双击最大化，选中文字会跟着这两个动作一起出现
+		// Windows 顶栏是第四块，Web 上不渲染，由桌面壳侧验
+		for (const selector of [`${NAV} .nav__header`, '.content__head', '.browser__bar']) {
+			const block = page.locator(selector)
+			await expect(block).toHaveCSS('user-select', 'none')
+			await expect(block).toHaveCSS('cursor', 'default')
+		}
+	})
 })

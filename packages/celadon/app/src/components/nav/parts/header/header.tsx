@@ -28,7 +28,6 @@ export function NavHeader({ mainFolded, onToggleMain, onToggle }: NavHeaderProps
 		<div
 			className='nav__header'
 			data-controls={chrome.controls}
-			data-no-drag
 			style={
 				{
 					/* macOS：头部内块给原生交通灯让位 */
