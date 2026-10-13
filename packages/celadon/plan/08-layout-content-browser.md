@@ -30,20 +30,20 @@
 
 **这份清单只到第一轮。** 十条全部做完之后不再往下开新活，先把这一轮交给各端测试（Web 的浏览器与拟人用例 · macOS 客户端 · Windows 客户端），测试通过再安排第二轮（§4：标签键盘路径 · 首页按使用顺序记录 · 地址错误态 · 溢出与长内容 · 状态齐）。
 
-## 1. 现有的与缺的
+## 1. 现状（每一次更新与此同步）
 
 | 能力 | 落点 | 现状 |
 | --- | --- | --- |
-| 第三栏在哪一侧 | `stores/layout/columns.ts` 的 `browserSide` · `components/browser/browser.tsx` 的 `data-side` · `browser.less` 的 `[data-side='left']` | 列序已修（见 §3 第 1 处）；状态与本机持久在 |
-| 换边的入口 | 标签条右端的键（`shell.browser.action.move`） | 在，四语文案齐；按本册要收进「…」菜单 |
-| 收掉与展开 | `browserCollapsed` · `narrowForBrowser` · 标签条右端的「收掉这一栏」键 | 在；收掉改为零宽，不再卸载节点 |
-| 标签 | 标签条（`role='tablist'`）· 关闭 · 新建 · 溢出横向滚动 | 在；「只有首页时不画新建键」未做，键盘路径未做 |
-| 首页 | `components/browser/parts/home/`：地址表单与「这一侧打开过的东西」 | 在；列表内容现在是当前标签，不是使用顺序记录 |
-| 外部地址页 | `components/browser/parts/web/`：地址与占位说明 | 占位，不抓取内容 |
-| 分屏 | 无 | 未做 |
-| 面板独占窗口 | 无 | 未做 |
+| 第三栏在哪一侧 | `stores/layout/columns.ts` 的 `browserSide` · `browser.tsx` 的 `data-side` | **在**：列序用显式 `order`，导航列恒为第一；侧别记本机 |
+| 换边的入口 | 「…」菜单第一项（`shell.browser.action.move`） | **在**：四语文案齐，图标 `i-swap` |
+| 分屏 | `browser.tsx` 的 `.browser__body` 与两个 `.browser__pane` · `hooks/use-split-resize.ts` | **在**：左右与上下两种，两面板各自绑页与聚焦，分隔条跟手并双击回平分，比例夹在 0.2 与 0.8 |
+| 两栏分界线 | `hooks/use-column-resize.ts` · `.browser__edge` | **在**：拖动改本栏宽、双击回默认宽、宽度记本机；口径与导航列右缘一致（抓手 8 像素 · 悬停延迟 300ms · 4 像素高亮带） |
+| 收掉与展开 | `browserCollapsed` · `narrowForBrowser` · 「…」菜单第二项 | **在**：收成零宽不卸载节点，重新展开的入口在内容列头左端 |
+| 面板独占窗口 | 根节点 `data-exclusive` · `layout.less` | **在**：整栏铺满整扇窗口，导航区与内容区让位，`Esc` 或菜单项退出；收掉本栏时先退出独占 |
+| 标签 | 标签条（`role='tablist'`）· 关闭 · 新建 · 溢出横向滚动 | 在；「只有首页时不画新建键」与标签键盘路径归第二轮 |
+| 首页 | `parts/home/`：地址表单与「这一侧打开过的东西」 | 在；按使用顺序记录归第二轮 |
+| 外部地址页 | `parts/web/`：地址与占位说明 | 占位，不抓取内容 |
 | 动效 | 只有导航列折叠用了 Motion | 未做；收掉已改零宽，为布局动画留出可测的前后状态 |
-| 侧栏宽度可拖 | F6 规定可拖到上限，token `--side-resize-handle` 6px 已在 | 未实现，本册不做，另行排期 |
 | 内容区 | `components/content/`：单块加列头 | 本册不改形态 |
 
 ## 2. 先写回设计
