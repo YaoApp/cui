@@ -1,37 +1,62 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { PointerEvent as ReactPointerEvent } from 'react'
+import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 
-/** 两个面板之间那根分隔条的拖动：跟手算比例，松手交给调用方存；双击回到平分。 */
+/** 两个面板之间那根抓手：跟手拖动算比例，双击回平分，方向键微调。口径与导航列右缘一致。 */
 const MIN_RATIO = 0.2
 const MAX_RATIO = 0.8
+/** 键盘每次调整的比例。 */
+const STEP = 0.02
 
 export type SplitOrientation = 'columns' | 'rows'
 
+const clamp = (value: number) => Math.min(MAX_RATIO, Math.max(MIN_RATIO, value))
+
 export function useSplitResize(
   orientation: SplitOrientation,
+  ratio: number,
   onChange: (ratio: number) => void
 ) {
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const nodeRef = useRef<HTMLDivElement | null>(null)
   const [dragging, setDragging] = useState(false)
+  const [hovered, setHovered] = useState(false)
+  const start = useRef({ x: 0, y: 0, ratio })
+  const ratioRef = useRef(ratio)
+  ratioRef.current = ratio
 
-  const onPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0) return
-    event.preventDefault()
-    setDragging(true)
-  }, [])
+  const onPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (event.button !== 0) return
+      const node = nodeRef.current
+      if (!node) return
+      const box = node.getBoundingClientRect()
+      if (box.width === 0 || box.height === 0) return
+      event.preventDefault()
+      /* 按下即接管光标：拖出抓手、拖到面板上，光标仍是拖动光标 */
+      document.body.style.setProperty('cursor', orientation === 'rows' ? 'row-resize' : 'col-resize')
+      node.setPointerCapture?.(event.pointerId)
+      start.current = { x: event.clientX, y: event.clientY, ratio: ratioRef.current }
+      setDragging(true)
+    },
+    [orientation]
+  )
 
+  /* 拖动：移动与抬起都挂在窗口上，指针移出抓手、移出窗口也不丢 */
   useEffect(() => {
     if (!dragging) return
     const move = (event: PointerEvent) => {
-      const box = containerRef.current?.getBoundingClientRect()
-      if (!box || box.width === 0 || box.height === 0) return
-      const value =
-        orientation === 'columns'
-          ? (event.clientX - box.left) / box.width
-          : (event.clientY - box.top) / box.height
-      onChange(Math.min(MAX_RATIO, Math.max(MIN_RATIO, value)))
+      const box = nodeRef.current?.getBoundingClientRect()
+      if (!box) return
+      const span = orientation === 'rows' ? box.height : box.width
+      if (span === 0) return
+      const moved =
+        orientation === 'rows' ? event.clientY - start.current.y : event.clientX - start.current.x
+      onChange(clamp(start.current.ratio + moved / span))
     }
-    const end = () => setDragging(false)
+    const end = (event: PointerEvent) => {
+      setDragging(false)
+      document.body.style.removeProperty('cursor')
+      nodeRef.current?.releasePointerCapture?.(event.pointerId)
+    }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', end)
     window.addEventListener('pointercancel', end)
@@ -42,16 +67,46 @@ export function useSplitResize(
     }
   }, [dragging, orientation, onChange])
 
-  /* 拖动中指针保持箭头并锁住选择：拖过两个面板的内容时不该出现文本选中 */
-  useEffect(() => {
-    const previous = document.body.style.userSelect
-    document.body.style.userSelect = dragging ? 'none' : previous
-    return () => {
-      document.body.style.userSelect = previous
-    }
-  }, [dragging])
+  /* 卸载时把接管过的正文光标交还 */
+  useEffect(
+    () => () => {
+      document.body.style.removeProperty('cursor')
+    },
+    []
+  )
 
+  const onKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      const move = (delta: number) => {
+        event.preventDefault()
+        onChange(clamp(ratioRef.current + delta))
+      }
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') move(-STEP)
+      else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') move(STEP)
+      else if (event.key === 'Home') move(MIN_RATIO - ratioRef.current)
+      else if (event.key === 'End') move(MAX_RATIO - ratioRef.current)
+      else if (event.key === 'Enter') {
+        event.preventDefault()
+        onChange(0.5)
+      }
+    },
+    [onChange]
+  )
+
+  const onPointerEnter = useCallback(() => setHovered(true), [])
+  const onPointerLeave = useCallback(() => setHovered(false), [])
   const reset = useCallback(() => onChange(0.5), [onChange])
 
-  return { containerRef, dragging, onPointerDown, reset }
+  return {
+    ref: (node: HTMLDivElement | null) => {
+      nodeRef.current = node
+    },
+    dragging,
+    highlighted: dragging || hovered,
+    onPointerEnter,
+    onPointerLeave,
+    onPointerDown,
+    onKeyDown,
+    onDoubleClick: reset,
+  }
 }

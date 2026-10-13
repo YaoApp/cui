@@ -55,9 +55,11 @@
 .browser__divider {
 	flex: none;
 	position: relative;
+	z-index: 1;
 	inline-size: var(--side-resize-handle);
 	background: transparent;
 	cursor: col-resize;
+	touch-action: none;
 	/* 分隔条本身是抓手，中间那条线由伪元素画，线宽取描边宽度 */
 	&::before {
 		content: '';
@@ -67,6 +69,11 @@
 		inline-size: var(--border-width);
 		background: var(--border-subtle);
 	}
+}
+
+/* 悬停与拖动中亮出可拖的提示：与导航列右缘同一口径，改的是那条线的颜色 */
+.browser__divider[data-highlighted]::before {
+	background: var(--border-hover);
 }
 
 .browser__body[data-split='rows'] .browser__divider {

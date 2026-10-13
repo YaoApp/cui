@@ -65,8 +65,9 @@ export function Browser({
   secondary = null,
 }: BrowserProps) {
   const { t } = useTranslation()
-  const { containerRef, dragging, onPointerDown, reset } = useSplitResize(
+  const splitResize = useSplitResize(
     split === 'rows' ? 'rows' : 'columns',
+    splitRatio,
     onSplitRatio
   )
   return (
@@ -195,7 +196,7 @@ export function Browser({
 
       {/* 分屏：一层，左右或上下两个面板；单面板时只渲染 children，结构不变。
           第一面板的比例由分隔条拖动给出（跟手，见 hooks/use-split-resize）。 */}
-      <div className="browser__body" data-split={split} data-dragging={dragging} ref={containerRef}>
+      <div className="browser__body" data-split={split} data-dragging={splitResize.dragging}>
         <div
           className="browser__pane"
           data-focused={split === 'none' || undefined}
@@ -216,8 +217,15 @@ export function Browser({
               className="browser__divider"
               role="separator"
               aria-orientation={split === 'columns' ? 'vertical' : 'horizontal'}
-              onPointerDown={onPointerDown}
-              onDoubleClick={reset}
+              tabIndex={0}
+              data-no-drag
+              data-highlighted={splitResize.highlighted || undefined}
+              ref={splitResize.ref}
+              onPointerEnter={splitResize.onPointerEnter}
+              onPointerLeave={splitResize.onPointerLeave}
+              onPointerDown={splitResize.onPointerDown}
+              onKeyDown={splitResize.onKeyDown}
+              onDoubleClick={splitResize.onDoubleClick}
             />
             <div className="browser__pane">
               <ScrollArea className="browser__page" size="medium" persistent>{secondary}</ScrollArea>
