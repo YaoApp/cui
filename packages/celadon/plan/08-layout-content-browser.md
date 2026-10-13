@@ -32,8 +32,9 @@
 3. **三个动作的键盘与朗读**：换边 · 收掉 · 展开都进 Tab 序，`aria-label` 说明动作与结果，动作完成后焦点留在原来那颗键上；收掉之后重新展开的入口仍在内容列头。
 4. **几何与让位**：换边与收掉的过程不出现横向滚动条，结束后三栏总宽等于窗口宽；窗口压窄时按 F6 的让位顺序（第三栏先缩、再整条消失，导航列随后收起）。
 5. **偏好的读写**：换边与收掉的取值写入本机（`cui.layout`），刷新后保持；清空本机记录回到「右侧 · 展开」。
+6. **内容区的双槽与两槽角色互换**：按 `design/main-shell.md` §四 的「双槽」形态，内容区可以分成两个槽，角色可互换（会话加应用切片 · Builder 的会话加预览 · 详情都按这一形态承载）。互换只换两槽的位置与角色，两侧各自的宽度、滚动与列头跟着槽走；入口与第三栏的「换到另一侧」同一体例，每槽自己有这颗键，互换后焦点留在原键上。这一条只在装配层用到双槽时生效，单槽内容不吃它。
 
-算做完的样子：换边与收起在浅暗两套主题、四语、三端（Web · macOS · Windows）下都有可量的值。`features/inbox/tests/layout.browser.ts` 的换边一条扩成「换边 → 交界描边与列头留白跟着走 → 四语下文案与朗读齐 → 刷新后保持」；`stores/layout/` 补一条单元用例覆盖 `browserSide` 与 `browserCollapsed` 的读写。
+算做完的样子：换边与收起在浅暗两套主题、四语、三端（Web · macOS · Windows）下都有可量的值。`features/inbox/tests/layout.browser.ts` 的换边一条扩成「换边 → 交界描边与列头留白跟着走 → 四语下文案与朗读齐 → 刷新后保持」；`stores/layout/` 补一条单元用例覆盖 `browserSide` 与 `browserCollapsed` 的读写；双槽的互换另有一条浏览器用例（两槽位置互换、各自宽度与滚动不乱、焦点留在原键上）。
 
 ### 第二轮：标签浏览器的细节
 
@@ -49,14 +50,14 @@
 
 ## 3. 不做
 
-- 内容区的双槽（两个槽角色可互换）与单区 · 两栏三种形态：等各自用到处再加（`design/main-shell.md` §四）。
+- 内容区的单区与两栏两种形态：等各自用到处再加（`design/main-shell.md` §四 的四种形态里，双槽归第一轮，单块已在，剩下的两种随用到的页面一起做）。
 - 外部地址页的真实抓取与渲染：`parts/web/` 保持占位，接真实内容另行安排。
 - 第三栏的宽度可调：`design/main-shell.md` §五 没有这一条，本册不做。
 - 标签的持久历史跨会话同步：第二轮只做到本机按顺序记录。
 
 ## 4. 验证方式
 
-- 几何读数：三栏的 `x` 与宽（展开 · 第三栏在左 · 第三栏收掉三种状态），以及交界处的 `border` 与列头的 `padding-inline-start`。
-- 用例：`features/inbox/tests/layout.browser.ts`（换边 · 收掉 · 让位）· `components/browser/browser.test.tsx` 与新增的首页用例 · `stores/layout/` 的单元用例。
+- 几何读数：三栏的 `x` 与宽（展开 · 第三栏在左 · 第三栏收掉三种状态），交界处的 `border` 与列头的 `padding-inline-start`，以及双槽互换前后两槽的 `x` 与宽。
+- 用例：`features/inbox/tests/layout.browser.ts`（换边 · 收掉 · 让位 · 双槽互换）· `components/browser/browser.test.tsx` 与新增的首页用例 · `components/content/` 的双槽用例 · `stores/layout/` 的单元用例。
 - 四语与主题：每个新增或改动的可见文案四语齐；浅暗各一张截图。
 - 两端客户端：换边与收掉在 macOS 与 Windows 的壳里各走一遍，含 macOS 的交通灯留白归属。
