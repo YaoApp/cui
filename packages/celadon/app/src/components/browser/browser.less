@@ -91,9 +91,8 @@
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	/* 分栏与合栏、改朝向：面板尺寸走过渡（进场 decelerate）；拖分隔条时关掉，保证跟手 */
-	transition: inline-size var(--duration-base) var(--easing-decelerate),
-		block-size var(--duration-base) var(--easing-decelerate);
+	/* 分栏与合栏的尺寸过渡暂不加：它与拖动跟手和用例里量到的几何互相干扰，
+	   要加就先给用例补落定判定，见 plan/08-layout-content-browser.md 第 9 条 */
 }
 
 /* 第一个面板的尺寸由分隔条给出的比例定，剩余空间留给第二个面板 */
