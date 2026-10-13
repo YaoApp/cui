@@ -145,9 +145,19 @@ export function useColumnResize(
     () => () => {
       if (frame.current !== null) window.cancelAnimationFrame(frame.current)
       document.body.style.removeProperty('cursor')
+      document.body.style.removeProperty('user-select')
     },
     []
   )
+
+  /* 拖动期间锁住正文选择：指针扫过内容区与面板里的文字时不该带出选中，卸载时交还 */
+  useEffect(() => {
+    const previous = document.body.style.userSelect
+    document.body.style.userSelect = dragging ? 'none' : previous
+    return () => {
+      document.body.style.userSelect = previous
+    }
+  }, [dragging])
 
   return {
     ref: (node) => {

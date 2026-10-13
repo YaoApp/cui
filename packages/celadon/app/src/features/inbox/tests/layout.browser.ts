@@ -289,6 +289,36 @@ test('drags the boundary between the content and the browser', async ({ page }) 
 	expect(wider).toBeGreaterThan(before + 80)
 })
 
+test('locks text selection while a divider is dragged', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	const body = page.locator('body')
+
+	// 分界线：按下后锁住选择，松开交还
+	const edge = browser.locator('.browser__edge')
+	const grip = (await edge.boundingBox())!
+	const y = grip.y + 300
+	await page.mouse.move(grip.x + grip.width / 2, y)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + grip.width / 2 - 40, y, { steps: 4 })
+	await expect(body).toHaveCSS('user-select', 'none')
+	await page.mouse.up()
+	await expect(body).not.toHaveCSS('user-select', 'none')
+
+	// 分屏分隔条：同样
+	await browser.getByRole('button', { name: '左右分栏' }).click()
+	const divider = browser.locator('.browser__divider')
+	const dbox = (await divider.boundingBox())!
+	await page.mouse.move(dbox.x + dbox.width / 2, dbox.y + 200)
+	await page.mouse.down()
+	await page.mouse.move(dbox.x + dbox.width / 2 - 40, dbox.y + 200, { steps: 4 })
+	await expect(body).toHaveCSS('user-select', 'none')
+	await page.mouse.up()
+	await expect(body).not.toHaveCSS('user-select', 'none')
+})
+
 /* 双击分界线回默认宽（见 plan/08-layout-content-browser.md §3.1 第 9 处） */
 test('resets the browser width by double clicking the boundary', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
