@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import { BrandMark } from '@/components/base/brand-mark'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
+import { MotionPanel } from '@/components/base/motion'
 import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import { useWindowChrome } from '@/platform/client'
@@ -25,7 +26,9 @@ export function NavHeader({ mainFolded, onToggleMain, onToggle }: NavHeaderProps
 	const label = t('shell.navigation.action.collapse')
 	const foldLabel = t('shell.navigation.action.fold')
 	return (
-		<div
+		/* 列头随列平移，只做位置投影 */
+		<MotionPanel
+			position
 			className='nav__header'
 			data-controls={chrome.controls}
 			style={
@@ -86,6 +89,6 @@ export function NavHeader({ mainFolded, onToggleMain, onToggle }: NavHeaderProps
 					</Tooltip>
 				</>
 			)}
-		</div>
+		</MotionPanel>
 	)
 }
