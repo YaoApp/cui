@@ -66,10 +66,12 @@ export function useColumnResize(
 
   const defaultWidth = (node: HTMLElement | null) => tokenPx('--side-width-reading', 400, node)
 
+  /* 宽度写成自定义属性，不写内联 `inline-size`：内联样式会压过样式表里的收起态，
+     导致「拖过分界线之后再也收不起来」。与导航列右缘同一口径（那边写的也是 `--nav-width`）。 */
   const paint = useCallback((node: HTMLElement | null, value: number | null) => {
     if (!node) return
-    if (value === null) node.style.removeProperty('inline-size')
-    else node.style.setProperty('inline-size', `${value}px`)
+    if (value === null) node.style.removeProperty('--side-width')
+    else node.style.setProperty('--side-width', `${value}px`)
   }, [])
 
   const limits$ = useRef(limits)

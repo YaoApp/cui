@@ -371,6 +371,46 @@ test('drags the boundary between the content and the browser', async ({ page }) 
 	expect(wider).toBeGreaterThan(before + 80)
 })
 
+test('keeps the collapse working after the column width has been dragged', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	const box = async () => await browser.boundingBox()
+
+	/* 先拖分界线把本栏拖宽，再进分屏并拖一次分隔条：这是「拖过之后再点就没反应」的现场 */
+	const widened = await widenBrowser(page)
+	expect(await widened.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBeGreaterThan(600)
+	const dividerSplit = browser.getByRole('button', { name: '左右分栏' })
+	await dividerSplit.click()
+	await expect(browser.locator('.browser__pane')).toHaveCount(2)
+	const divider = browser.locator('.browser__divider')
+	const dbox = (await divider.boundingBox())!
+	await page.mouse.move(dbox.x + dbox.width / 2, dbox.y + 200)
+	await page.mouse.down()
+	await page.mouse.move(dbox.x + dbox.width / 2 - 100, dbox.y + 200, { steps: 6 })
+	await page.mouse.up()
+	await page.waitForTimeout(400)
+
+	/* 宽度只写自定义属性，不写内联 inline-size：内联会压过样式表里的收起态 */
+	const style = (await browser.getAttribute('style')) ?? ''
+	expect(style).toContain('--side-width')
+	expect(style).not.toContain('inline-size')
+
+	const wide = (await box())!.width
+	const key = page.locator('.content__head-key--browser')
+	await key.click()
+	await expect(browser).toHaveAttribute('data-collapsed', 'true')
+	await page.waitForTimeout(500)
+	expect((await box())!.width).toBeLessThan(1)
+
+	/* 再展开回到拖出来的宽度，宽度偏好没有被收起动作改掉 */
+	await key.click()
+	await expect(browser).not.toHaveAttribute('data-collapsed', 'true')
+	await page.waitForTimeout(500)
+	expect(Math.abs((await box())!.width - wide)).toBeLessThanOrEqual(2)
+})
+
 test('locks text selection while a divider is dragged', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)

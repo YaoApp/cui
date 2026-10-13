@@ -7,7 +7,9 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	inline-size: var(--side-width-reading);
+	/* 宽度：用户拖过分界线就用存下来的值（写成自定义属性），没拖过跟随默认。
+	   用变量而不是内联宽度，收起态的 `inline-size: 0` 才压得住。 */
+	inline-size: var(--side-width, var(--side-width-reading));
 	min-inline-size: var(--side-min);
 	max-inline-size: calc(100% - var(--nav-min) - var(--center-min) - var(--side-resize-handle));
 	min-block-size: 0;
