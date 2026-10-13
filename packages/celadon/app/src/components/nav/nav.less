@@ -8,7 +8,8 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	/* 整列的收放交给布局投影完成（plan/08-layout-motion.md §3 第 1 处），不再各写宽度过渡 */
+	/* 整列收放：展开按 F4 的 panel 档（200ms 减速）；拖动期间由 .nav--resizing 关掉，保证跟手 */
+	transition: inline-size var(--duration-base) var(--easing-decelerate);
 	gap: var(--spacing-8);
 	/* 宽度：用户拖过把手就用存下来的值，没拖过跟随默认。样式这一层再夹一次上下限，
      存值越界（旧偏好或窗口变小）也不会把列压到最小宽度以下（design/main-shell.md §三 第 4 条） */

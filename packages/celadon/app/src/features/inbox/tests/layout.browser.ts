@@ -282,6 +282,7 @@ test('drags the divider and resets it by double click', async ({ page }) => {
 
 	// 双击回平分
 	await divider.dblclick()
+	await page.waitForTimeout(400)
 	const even = await widths()
 	// 双击回平分：宽度差只来自中间那根抓手
 	expect(Math.abs(even[0] - even[1])).toBeLessThanOrEqual(8)
@@ -521,6 +522,7 @@ test('drags the stacked divider and resets it by double click', async ({ page })
 
 	// 双击回平分：高度差只来自中间那根抓手
 	await divider.dblclick()
+	await page.waitForTimeout(400)
 	const even = await heights()
 	expect(Math.abs(even[0] - even[1])).toBeLessThanOrEqual(10)
 

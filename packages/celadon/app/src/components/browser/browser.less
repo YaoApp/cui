@@ -13,7 +13,9 @@
 	min-block-size: 0;
 	background: var(--background-surface);
 	border-inline-start: var(--border-width) solid var(--border-subtle);
-	/* 收掉、展开与换边交给布局投影完成（plan/08-layout-motion.md §3 第 6 处），不再各写宽度过渡 */
+	/* 收掉与展开：进场 decelerate，时长取 --duration-base；换边的列序变化由三栏的过渡一起带出；
+	   拖动分界线时由 [data-dragging] 关掉，保证跟手 */
+	transition: inline-size var(--duration-base) var(--easing-decelerate);
 }
 
 .browser[data-dragging] {
@@ -89,8 +91,9 @@
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	/* 分栏与合栏的尺寸过渡暂不加：它与拖动跟手和用例里量到的几何互相干扰，
-	   要加就先给用例补落定判定，见 plan/08-layout-content-browser.md 第 9 条 */
+	/* 分栏与合栏、改朝向：面板尺寸走过渡（进场 decelerate）；拖分隔条时关掉，保证跟手 */
+	transition: inline-size var(--duration-base) var(--easing-decelerate),
+		block-size var(--duration-base) var(--easing-decelerate);
 }
 
 /* 第一个面板的尺寸由分隔条给出的比例定，剩余空间留给第二个面板 */
