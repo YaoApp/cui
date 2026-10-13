@@ -9,6 +9,8 @@ const DRAG_THRESHOLD = 3
 
 /** 两次抬起之间的间隔小于这个数、且都没有位移，按双击算（复位回默认宽）。 */
 const DOUBLE_CLICK_MS = 400
+/** 悬停高亮的延迟，与导航列右缘同一口径：指针进入后先给光标，停住这么久才亮出可拖的提示。 */
+const HOVER_DELAY_MS = 300
 
 /** 从节点上读一个长度 token，取不到时用回退值。 */
 function tokenPx(name: string, fallback: number, node: HTMLElement | null): number {
@@ -43,6 +45,7 @@ export function useColumnResize(
   const [limits, setLimits] = useState({ min: 300, max: 600 })
   const start = useRef({ x: 0, width: 0 })
   const lastUp = useRef(0)
+  const hoverTimer = useRef<number | null>(null)
   const frame = useRef<number | null>(null)
   const pending = useRef<number | null>(null)
 
@@ -154,8 +157,17 @@ export function useColumnResize(
     highlighted: dragging || hovered,
     min: limits.min,
     max: limits.max,
-    onPointerEnter: () => setHovered(true),
-    onPointerLeave: () => setHovered(false),
+    onPointerEnter: () => {
+      if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current)
+      hoverTimer.current = window.setTimeout(() => setHovered(true), HOVER_DELAY_MS)
+    },
+    onPointerLeave: () => {
+      if (hoverTimer.current !== null) {
+        window.clearTimeout(hoverTimer.current)
+        hoverTimer.current = null
+      }
+      setHovered(false)
+    },
     onPointerDown: (event) => {
       const node = nodeRef.current
       if (!node || event.button !== 0) return

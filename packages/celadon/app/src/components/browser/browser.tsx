@@ -83,7 +83,7 @@ export function Browser({
       data-side={side}
       data-split={split}
       data-collapsed={collapsed}
-      data-resizing={columnResize.highlighted || undefined}
+      data-edge-hover={columnResize.highlighted || undefined}
       ref={columnResize.ref}
       aria-label={t('shell.browser.label')}
       aria-hidden={collapsed || undefined}
@@ -100,6 +100,7 @@ export function Browser({
         aria-valuenow={width ?? undefined}
         tabIndex={0}
         data-no-drag
+        data-highlighted={columnResize.highlighted || undefined}
         onPointerEnter={columnResize.onPointerEnter}
         onPointerLeave={columnResize.onPointerLeave}
         onPointerDown={columnResize.onPointerDown}
@@ -227,7 +228,6 @@ export function Browser({
         className="browser__body"
         data-split={split}
         data-dragging={splitResize.dragging}
-        data-highlighted={splitResize.highlighted || undefined}
       >
         <div
           className="browser__pane"
@@ -252,8 +252,7 @@ export function Browser({
               tabIndex={0}
               data-no-drag
               data-highlighted={splitResize.highlighted || undefined}
-              ref={splitResize.ref}
-              onPointerEnter={splitResize.onPointerEnter}
+              ref={splitResize.ref}              onPointerEnter={splitResize.onPointerEnter}
               onPointerLeave={splitResize.onPointerLeave}
               onPointerDown={splitResize.onPointerDown}
               onKeyDown={splitResize.onKeyDown}

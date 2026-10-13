@@ -44,16 +44,17 @@
 	pointer-events: none;
 }
 
-.browser[data-resizing] .browser__grip,
-.browser__body[data-highlighted] .browser__grip {
+/* 高亮只认各自那把抓手的属性：分界线与分屏分隔条各亮各的，互不牵连 */
+.browser__edge[data-highlighted] .browser__grip,
+.browser__divider[data-highlighted] .browser__grip {
 	opacity: 1;
 }
 
-.browser[data-side='right'][data-resizing] {
+.browser[data-edge-hover][data-side='right'] {
 	border-inline-start-color: var(--border-hover);
 }
 
-.browser[data-side='left'][data-resizing] {
+.browser[data-edge-hover][data-side='left'] {
 	border-inline-end-color: var(--border-hover);
 }
 
