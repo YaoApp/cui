@@ -690,6 +690,33 @@ test('takes the pane full window and comes back with Escape', async ({ page }) =
 	expect((await columns(page).content.boundingBox())!.width).toBeGreaterThan(400)
 })
 
+test('takes the whole window in exclusive mode after the width has been dragged', async ({ page }) => {
+	/* 拖过分界线之后进独占：宽度只写在自定义属性上，整栏才铺得满整扇窗口 */
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = await widenBrowser(page)
+	const dragged = (await browser.boundingBox())!.width
+	expect(dragged).toBeGreaterThan(600)
+
+	await browser.getByRole('button', { name: '更多' }).click()
+	await page.getByRole('menuitem', { name: '面板独占窗口' }).click()
+	await expect(page.locator('.layout')).toHaveAttribute('data-exclusive', 'true')
+	await page.waitForTimeout(500)
+
+	const full = (await browser.boundingBox())!
+	expect(Math.round(full.width)).toBeGreaterThanOrEqual(1598)
+	expect(full.x).toBeLessThanOrEqual(1)
+	const style = (await browser.getAttribute('style')) ?? ''
+	expect(style).toContain('--side-width')
+	expect(style).not.toContain('inline-size')
+
+	/* 退出后回到拖出来的宽度 */
+	await page.keyboard.press('Escape')
+	await page.waitForTimeout(600)
+	expect(Math.abs((await browser.boundingBox())!.width - dragged)).toBeLessThanOrEqual(2)
+})
+
 test('leaves the exclusive mode when the column is collapsed from the menu', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)
