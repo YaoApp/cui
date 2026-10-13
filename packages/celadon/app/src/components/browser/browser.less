@@ -13,6 +13,13 @@
 	min-block-size: 0;
 	background: var(--background-surface);
 	border-inline-start: var(--border-width) solid var(--border-subtle);
+	/* 收起与展开、分界线落位走这一条过渡：进场 decelerate，时长取 --duration-base（design/foundations.md F4）；
+	   拖动分界线时由 [data-dragging] 关掉过渡，保证跟手 */
+	transition: inline-size var(--duration-base) var(--easing-decelerate);
+}
+
+.browser[data-dragging] {
+	transition: none;
 }
 
 .browser[data-side='left'] {
@@ -84,11 +91,18 @@
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+	/* 分栏与合栏、改朝向：面板尺寸走过渡（进场 decelerate）；拖分隔条时关掉，保证跟手 */
+	transition: inline-size var(--duration-base) var(--easing-decelerate),
+		block-size var(--duration-base) var(--easing-decelerate);
 }
 
 /* 第一个面板的尺寸由分隔条给出的比例定，剩余空间留给第二个面板 */
 .browser__pane[data-sized='true'] {
 	flex: none;
+}
+
+.browser__body[data-dragging] .browser__pane {
+	transition: none;
 }
 
 /* 第二个面板自己的小条：高度与标签条一致，写出它绑的是哪一页 */
@@ -195,6 +209,20 @@
 	user-select: none;
 }
 
+/* 新建或新出现的一页：淡入加一点位移，进场 decelerate（design/foundations.md F4）。
+   减少动态由 token 层统一归零，这里不各自判断（architecture/12-motion.md） */
+@keyframes browser-tab-in {
+	from {
+		opacity: 0;
+		transform: translateY(-2px);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
 .browser__bar {
 	position: relative;
 	flex: none;
@@ -235,6 +263,8 @@
 	gap: var(--spacing-4);
 	padding-inline-end: var(--spacing-4);
 	border-radius: var(--radius-small);
+	/* 新建或新出现的一页：淡入加一点位移（关键帧在同文件上方），减少动态由 token 层统一归零 */
+	animation: browser-tab-in var(--duration-fast) var(--easing-decelerate);
 }
 
 .browser__tab:has([aria-selected='true']) {

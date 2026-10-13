@@ -375,6 +375,9 @@ test('keeps the column width when the split is switched on', async ({ page }) =>
 	const wide = (await browser.boundingBox())!.width
 
 	await browser.getByRole('button', { name: '左右分栏' }).click()
+	// 等分栏的过渡落定再量宽度：过渡期间量到的是中间态
+	await expect(browser.locator('.browser__pane')).toHaveCount(2)
+	await page.waitForTimeout(400)
 	const after = (await browser.boundingBox())!.width
 	// 分屏不改栏宽，点下去不跳
 	expect(Math.abs(after - wide)).toBeLessThanOrEqual(2)
@@ -600,4 +603,44 @@ test('leaves the exclusive mode when the column is collapsed from the menu', asy
 	// 整扇窗口不留空白：内容区占住了并且宽度正常
 	const contentBox = (await columns(page).content.boundingBox())!
 	expect(contentBox.width).toBeGreaterThan(900)
+})
+
+test('uses the motion tokens and stays instant while dragging', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+
+	// 收起与展开：过渡落在 inline-size 上，时长与缓动取 token（--duration-base 200ms · 进场 decelerate）
+	await expect(browser).toHaveCSS('transition-property', 'inline-size')
+	await expect(browser).toHaveCSS('transition-duration', '0.2s')
+	await expect(browser).toHaveCSS('transition-timing-function', 'cubic-bezier(0, 0, 0.2, 1)')
+
+	// 拖分界线时关掉过渡，保证跟手；松手恢复
+	const edge = browser.locator('.browser__edge')
+	const grip = (await edge.boundingBox())!
+	const y = grip.y + 300
+	await page.mouse.move(grip.x + grip.width / 2, y)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + grip.width / 2 - 300, y, { steps: 6 })
+	await expect(browser).toHaveCSS('transition-duration', '0s')
+	await page.mouse.up()
+	// 松手后状态更新要一个渲染周期，等一拍再断言过渡回来了
+	await page.waitForTimeout(150)
+	await expect(browser).toHaveCSS('transition-duration', '0.2s')
+
+	// 分栏：面板尺寸同样有过渡，拖分隔条时关掉
+	await browser.getByRole('button', { name: '左右分栏' }).click()
+	const pane = browser.locator('.browser__pane').first()
+	await expect(pane).toHaveCSS('transition-duration', '0.2s')
+	const divider = browser.locator('.browser__divider')
+	const dbox = (await divider.boundingBox())!
+	await page.mouse.move(dbox.x + dbox.width / 2, dbox.y + 200)
+	await page.mouse.down()
+	await page.mouse.move(dbox.x + dbox.width / 2 - 60, dbox.y + 200, { steps: 4 })
+	await expect(pane).toHaveCSS('transition-duration', '0s')
+	await page.mouse.up()
+
+	// 标签淡入的动画在
+	await expect(browser.locator('.browser__tab').first()).toHaveCSS('animation-name', 'browser-tab-in')
 })

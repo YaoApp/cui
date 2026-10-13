@@ -114,6 +114,7 @@ export function Browser({
       data-split={split}
       data-collapsed={collapsed}
       data-edge-hover={columnResize.highlighted || undefined}
+      data-dragging={columnResize.dragging || undefined}
       ref={columnResize.ref}
       aria-label={t('shell.browser.label')}
       aria-hidden={collapsed || undefined}
