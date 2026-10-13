@@ -105,6 +105,12 @@
 	transition: none;
 }
 
+/* 拖内容区与标签浏览器之间那条分界线时整栏在跟手改宽，面板不能再各自补一拍，
+   否则栏内内容看着在滑。拖动相关的内容一律不做冗余动画。 */
+.browser[data-dragging] .browser__pane {
+	transition: none;
+}
+
 /* 第二个面板自己的小条：高度与标签条一致，写出它绑的是哪一页 */
 .browser__pane-head {
 	flex: none;

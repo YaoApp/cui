@@ -318,6 +318,11 @@ test('drags the boundary between the content and the browser', async ({ page }) 
 	await page.mouse.move(grip.x + grip.width / 2, y)
 	await page.mouse.down()
 	await page.mouse.move(grip.x + grip.width / 2 - 120, y, { steps: 6 })
+	// 拖动整栏改宽时，栏内内容不做冗余动画：面板与分栏条都不带过渡，眼随指针
+	if (await browser.locator('.browser__pane').count()) {
+		await expect(browser.locator('.browser__pane').first()).toHaveCSS('transition-duration', '0s')
+	}
+	await expect(browser).toHaveCSS('transition-duration', '0s')
 	await page.mouse.up()
 	const wider = (await box()).width
 	expect(wider).toBeGreaterThan(before + 80)
