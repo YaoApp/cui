@@ -291,6 +291,8 @@ test('drags the boundary between the content and the browser', async ({ page }) 
 
 /* 双击分界线回默认宽：拖动本身已经通过，复位这一下点下去没有落下来。
    按 fixme 记着，修好之前显示为跳过，不算通过（见 plan/08-layout-content-browser.md §3.1 第 9 处）。 */
+/* 双击分界线回默认宽：拖动已通过，复位这一下点下去没有落下来。
+   按 fixme 记着，修好之前显示为跳过，不算通过（见 plan/08-layout-content-browser.md §3.1 第 9 处）。 */
 test.fixme('resets the browser width by double clicking the boundary', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)

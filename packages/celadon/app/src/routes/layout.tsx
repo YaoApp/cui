@@ -150,7 +150,11 @@ export function AppLayout() {
 				onSplitRatio={setSplitRatio}
 				width={browserWidth}
 				onWidth={setBrowserWidth}
-				onSplit={setBrowserSplit}
+				onSplit={(next) => {
+					/* 每次从单面板进分屏都从平分开始：上次拖过的比例会让点下去那一下跳 */
+					if (next !== 'none') setSplitRatio(0.5)
+					setBrowserSplit(next)
+				}}
 				onActivate={(key) => {
 					const tab = byKey(key)
 					if (tab) activateTab(tab)
