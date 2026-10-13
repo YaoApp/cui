@@ -85,6 +85,9 @@
      右内距为 0，收起键贴到列的内缘 */
 	min-block-size: var(--spacing-24);
 	padding-inline: calc(var(--spacing-8) + var(--nav-head-inset, 0)) 0;
+	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
+	cursor: default;
+	user-select: none;
 }
 
 .nav__brand {

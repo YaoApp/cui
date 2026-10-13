@@ -11,6 +11,9 @@
 	   收起且平台有原生交通灯时为留白宽度，其余为 0。写成两条值的简写以通过样式检查 */
 	padding-inline: calc(var(--spacing-12) + var(--head-inset, 0px)) var(--spacing-12);
 	transition: padding-inline-start var(--duration-base) var(--easing-decelerate);
+	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
+	cursor: default;
+	user-select: none;
 }
 
 /* 按钮按几何居中：定 32 命中区、图标在其中居中，不受基线影响；不展示时不渲染也不占位 */
