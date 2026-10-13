@@ -6,6 +6,8 @@ const MIN_RATIO = 0.2
 const MAX_RATIO = 0.8
 /** 键盘每次调整的比例。 */
 const STEP = 0.02
+/** 悬停高亮的延迟，与导航列右缘同一口径：指针进入后先给光标，停住这么久才亮出可拖的提示。 */
+const HOVER_DELAY_MS = 300
 
 export type SplitOrientation = 'columns' | 'rows'
 
@@ -23,12 +25,15 @@ export function useSplitResize(
   const ratioRef = useRef(ratio)
   ratioRef.current = ratio
 
+  /* 抓手本身只有几像素宽，比例要按**容器**算：按抓手算的话，拖一点点就被夹到上下限，看起来就是跳 */
+  const containerBox = () => nodeRef.current?.parentElement?.getBoundingClientRect() ?? null
+
   const onPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       if (event.button !== 0) return
       const node = nodeRef.current
-      if (!node) return
-      const box = node.getBoundingClientRect()
+      const box = containerBox()
+      if (!node || !box) return
       if (box.width === 0 || box.height === 0) return
       event.preventDefault()
       /* 按下即接管光标：拖出抓手、拖到面板上，光标仍是拖动光标 */
@@ -44,7 +49,7 @@ export function useSplitResize(
   useEffect(() => {
     if (!dragging) return
     const move = (event: PointerEvent) => {
-      const box = nodeRef.current?.getBoundingClientRect()
+      const box = containerBox()
       if (!box) return
       const span = orientation === 'rows' ? box.height : box.width
       if (span === 0) return
@@ -93,8 +98,18 @@ export function useSplitResize(
     [onChange]
   )
 
-  const onPointerEnter = useCallback(() => setHovered(true), [])
-  const onPointerLeave = useCallback(() => setHovered(false), [])
+  const hoverTimer = useRef<number | null>(null)
+  const onPointerEnter = useCallback(() => {
+    if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current)
+    hoverTimer.current = window.setTimeout(() => setHovered(true), HOVER_DELAY_MS)
+  }, [])
+  const onPointerLeave = useCallback(() => {
+    if (hoverTimer.current !== null) {
+      window.clearTimeout(hoverTimer.current)
+      hoverTimer.current = null
+    }
+    setHovered(false)
+  }, [])
   const reset = useCallback(() => onChange(0.5), [onChange])
 
   return {

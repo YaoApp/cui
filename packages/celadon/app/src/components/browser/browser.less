@@ -20,38 +20,46 @@
 	border-inline-end: var(--border-width) solid var(--border-subtle);
 }
 
-/* 内容区与标签浏览器之间那条分界线：贴在面向内容区的一侧，抓手取 --side-resize-handle，
-   线由伪元素画。与导航列右缘同一口径：悬停与拖动时把线换成 --border-hover。 */
+/* 内容区与标签浏览器之间那条分界线：与导航列右缘同一口径 —— 抓手 8 像素（--spacing-8）、
+   高亮是 4 像素的带（--spacing-4）并把本栏边界换成 --border-hover，带子的 opacity 由 0 到 1，
+   300ms 的延迟在 hooks/use-column-resize 里给。 */
 .browser__edge {
 	position: absolute;
 	z-index: 2;
 	inset-block: 0;
 	inset-inline-start: 0;
-	inline-size: var(--side-resize-handle);
+	inline-size: var(--spacing-8);
 	cursor: col-resize;
 	touch-action: none;
-
-	&::before {
-		content: '';
-		position: absolute;
-		inset-block: 0;
-		inset-inline-start: 0;
-		inline-size: var(--border-width);
-		background: var(--border-subtle);
-	}
 }
 
-.browser[data-side='left'] .browser__edge {
-	inset-inline: auto 0;
-
-	&::before {
-		inset-inline: auto 0;
-	}
-}
-
-.browser[data-resizing] .browser__edge::before,
-.browser__edge:hover::before {
+.browser__grip {
+	position: absolute;
+	z-index: 1;
+	inset-block: 0;
+	inset-inline-start: 0;
+	inline-size: var(--spacing-4);
 	background: var(--border-hover);
+	opacity: 0;
+	pointer-events: none;
+}
+
+.browser[data-resizing] .browser__grip,
+.browser__body[data-highlighted] .browser__grip {
+	opacity: 1;
+}
+
+.browser[data-side='right'][data-resizing] {
+	border-inline-start-color: var(--border-hover);
+}
+
+.browser[data-side='left'][data-resizing] {
+	border-inline-end-color: var(--border-hover);
+}
+
+.browser[data-side='left'] .browser__edge,
+.browser[data-side='left'] .browser__grip {
+	inset-inline: auto 0;
 }
 
 /* 分屏：一层两个面板（左右或上下），单面板不渲染第二个面板与分隔条。
@@ -85,8 +93,8 @@
 .browser__divider {
 	flex: none;
 	position: relative;
-	z-index: 1;
-	inline-size: var(--side-resize-handle);
+	z-index: 2;
+	inline-size: var(--spacing-8);
 	background: transparent;
 	cursor: col-resize;
 	touch-action: none;
@@ -101,9 +109,14 @@
 	}
 }
 
-/* 悬停与拖动中亮出可拖的提示：与导航列右缘同一口径，改的是那条线的颜色 */
+/* 悬停与拖动中亮出可拖的提示：与导航列右缘同一口径（改的是那条线的颜色） */
 .browser__divider[data-highlighted]::before {
 	background: var(--border-hover);
+}
+
+.browser__divider .browser__grip {
+	inset-inline-start: calc(50% - var(--spacing-4) / 2);
+	inline-size: var(--spacing-4);
 }
 
 .browser__body[data-split='rows'] .browser__divider {

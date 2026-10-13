@@ -104,7 +104,9 @@ export function Browser({
         onPointerLeave={columnResize.onPointerLeave}
         onPointerDown={columnResize.onPointerDown}
         onDoubleClick={columnResize.onDoubleClick}
-      />
+      >
+        <span className="browser__grip" aria-hidden="true" />
+      </span>
       <div className="browser__bar">
         <ScrollArea className="browser__tabs" size="small">
           <div className="browser__tabs-row" role="tablist" aria-label={t('shell.browser.label')}>
@@ -221,7 +223,12 @@ export function Browser({
 
       {/* 分屏：一层，左右或上下两个面板；单面板时只渲染 children，结构不变。
           第一面板的比例由分隔条拖动给出（跟手，见 hooks/use-split-resize）。 */}
-      <div className="browser__body" data-split={split} data-dragging={splitResize.dragging}>
+      <div
+        className="browser__body"
+        data-split={split}
+        data-dragging={splitResize.dragging}
+        data-highlighted={splitResize.highlighted || undefined}
+      >
         <div
           className="browser__pane"
           data-focused={split === 'none' || undefined}
@@ -251,7 +258,9 @@ export function Browser({
               onPointerDown={splitResize.onPointerDown}
               onKeyDown={splitResize.onKeyDown}
               onDoubleClick={splitResize.onDoubleClick}
-            />
+            >
+              <span className="browser__grip" aria-hidden="true" />
+            </div>
             <div className="browser__pane">
               <ScrollArea className="browser__page" size="medium" persistent>{secondary}</ScrollArea>
             </div>
