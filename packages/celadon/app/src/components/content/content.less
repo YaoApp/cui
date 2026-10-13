@@ -12,9 +12,10 @@
   background: var(--background-surface);
 }
 
-/* 内容面左上角圆角：只在 Windows 生效（自绘顶栏与内容面在左上角相接的那一端）；
-   Web 不用圆角，macOS 通栏，两端都不适用。半径取 --radius-large（12px）。 */
-[data-controls='own'] .content {
+/* 内容面左上角圆角：只在 Windows 且导航列有宽度时生效（自绘顶栏与内容面在左上角相接的那一端）；
+   Web 不用圆角，macOS 通栏，两端都不适用；导航列收成 0 时内容面顶到窗口左缘，取直角。
+   半径取 --radius-large（12px）。 */
+[data-controls='own']:not([data-width='zero']) .content {
   border-start-start-radius: var(--radius-large);
 }
 

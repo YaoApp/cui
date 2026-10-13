@@ -35,12 +35,14 @@
 	color: var(--text-primary);
 }
 
+/* 二级菜单（导航列下半区）与一级菜单同一套行状态：底是 --background-app，
+   通用档在白底上才够，这里各取更深一步 */
 .inbox-nav__item:hover {
-	background: var(--background-hover);
+	background: var(--nav-hover);
 }
 
 .inbox-nav__item.is-active {
-	background: var(--background-selected);
+	background: var(--nav-select);
 }
 
 .inbox-nav__title {

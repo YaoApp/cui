@@ -68,6 +68,11 @@
   /* 选中底 = 品牌浅底 */
   --background-readonly: #ededf0;
   /* 只读字段底（比 --background-field 略深 → 明确「不可编辑」）；文字用 --text-secondary */
+  /* 导航列专用的行状态：导航列的底是 --background-app，比工作区深一档，
+     通用悬停/选中在白底上合适，落在这里偏淡，因此各取更深一步（浅色悬停对底 1.064:1、选中对底 1.112:1，
+     选中项不再用品牌色，改由明度表达）。 */
+  --nav-hover: #ededf0;
+  --nav-select: #e8e8eb;
   --border-subtle: #ebeae6;
   /* 装饰线（暖灰） */
   --border-default: #dedcd7;
@@ -389,6 +394,10 @@
   --background-selected: #17292a;
   /* 品牌浅底（保留青调，略暖） */
   --background-readonly: #232119;
+  /* 导航列专用的行状态：暗色导航底是 --background-app（#121110），
+     悬停用通用悬停档（对底 1.32:1），选中取按下档（对底约 1.45:1），选中同样不用品牌色。 */
+  --nav-hover: #2c2a26;
+  --nav-select: #333129;
   --border-subtle: #2e2c28;
   --border-default: #3b3933;
   --border-control: #4a4740;

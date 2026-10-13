@@ -41,8 +41,10 @@
 | `--background-content` | `#FAFAFB` | `#191816` | 认证页整页底 · 焦点环内圈；内容区不再用它 |
 | `--background-surface` | `#FFFFFF` | `#1F1E1A` | ② 内容区与右栏 · 面板/卡片 |
 | `--background-field` | `#F4F4F5` | `#262420` | 输入框/字段 |
-| `--background-hover` | `#F0F0F2` | `#2C2A26` | 悬停 |
-| `--background-selected` | `#ECF3F3` | `#17292A` | 选中底（= 品牌浅底） |
+| `--background-hover` | `#F0F0F2` | `#2C2A26` | 悬停（白底场景：按钮 · 字段 · 复选框 · 分段控件 · 下拉项） |
+| `--background-selected` | `#ECF3F3` | `#17292A` | 选中底（= 品牌浅底；白底场景：右栏标签与收件箱行） |
+| `--nav-hover` | `#EDEDF0` | `#2C2A26` | 导航列与二级菜单的悬停：导航底比工作区深一档，通用悬停档落上去偏淡，因此各深一步 |
+| `--nav-select` | `#E8E8EB` | `#333129` | 导航列与二级菜单的当前项：中性底 + `--text-primary`，**不用品牌色**，选中由明度差表达 |
 
 ### 中性 · 界
 
