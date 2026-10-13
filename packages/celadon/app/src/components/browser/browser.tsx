@@ -266,7 +266,7 @@ export function Browser({
       <div
         className="browser__body"
         data-split={split}
-        data-dragging={splitResize.dragging}
+        data-dragging={splitResize.dragging || undefined}
       >
         <div
           className="browser__pane"
