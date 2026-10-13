@@ -628,7 +628,8 @@ test('uses the motion tokens and stays instant while dragging', async ({ page })
 	// 松手后恢复 0.2s 这一点由 node 探针单独量过（拖动前 0.2s / 拖动中 0s / 松手后 0.2s），
 	// 用例里不再断言：拖动末尾紧接着读计算样式，容易读到上一帧
 
-	// 分栏：面板尺寸同样有过渡，拖分隔条时关掉
+	// 分栏：面板尺寸同样有过渡，拖分隔条时关掉。先等上一次拖动彻底收尾，再量面板的过渡
+	await expect(browser).not.toHaveAttribute('data-dragging')
 	await browser.getByRole('button', { name: '左右分栏' }).click()
 	const pane = browser.locator('.browser__pane').first()
 	await expect(pane).toHaveCSS('transition-duration', '0.2s')
