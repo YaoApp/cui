@@ -2,8 +2,8 @@ import { motion, useReducedMotion, type HTMLMotionProps } from 'motion/react'
 import { PANEL_SPRING, PANEL_INSTANT } from './panel-motion'
 
 export type MotionPanelProps = HTMLMotionProps<'div'> & {
-	/** 参与布局动画的元素标签，默认 div；列用 aside、主区用 main */
-	as?: 'div' | 'aside' | 'main' | 'section' | 'nav'
+	/** 参与布局动画的元素标签，默认 div；列用 aside、主区用 main、行用 li、列头用 header、标签用 span */
+	as?: 'div' | 'aside' | 'main' | 'section' | 'nav' | 'li' | 'header' | 'span'
 	/** 是否为位移型元素（行、文字、图标）：只平移不缩放，文字因此不变形 */
 	position?: boolean
 }
@@ -18,7 +18,9 @@ export type MotionPanelProps = HTMLMotionProps<'div'> & {
  */
 export function MotionPanel({ as = 'div', position = false, transition, ...rest }: MotionPanelProps) {
 	const reduced = useReducedMotion()
-	const Component = motion[as]
+	/* 标签由 `as` 选，Motion 的每个标签各有一套事件类型，这里统一按 div 那一套转交属性 */
+	const Component = motion[as] as typeof motion.div
 	const layout = position ? 'position' : true
-	return <Component layout={layout} transition={transition ?? (reduced ? PANEL_INSTANT : PANEL_SPRING)} {...rest} />
+	/* 首次落位不播动画：还原存值那一帧直接到位，之后的变化才走投影 */
+	return <Component initial={false} layout={layout} transition={transition ?? (reduced ? PANEL_INSTANT : PANEL_SPRING)} {...rest} />
 }

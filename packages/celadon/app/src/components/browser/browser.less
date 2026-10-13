@@ -1,21 +1,234 @@
 /* 标签浏览器（第三栏）：宽度按 design/foundations.md F6 —— 最小 300，上限由列轨给；
-   让位顺序里它先缩、再整条消失。标签条不换行，溢出横向滚动，新建与操作钮吸附在右端。 */
+   让位顺序里内容区先缩、它随后缩到最小，导航区收起之后才轮到它整条消失。
+   标签条不换行，溢出横向滚动，新建与操作钮吸附在右端。 */
 .browser {
 	flex: none;
+	position: relative;
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	inline-size: var(--side-width-reading);
+	/* 宽度：用户拖过分界线就用存下来的值（写成自定义属性），没拖过跟随默认。
+	   用变量而不是内联宽度，收起态的 `inline-size: 0` 才压得住。 */
+	inline-size: var(--side-width, var(--side-width-reading));
 	min-inline-size: var(--side-min);
 	max-inline-size: calc(100% - var(--nav-min) - var(--center-min) - var(--side-resize-handle));
 	min-block-size: 0;
 	background: var(--background-surface);
 	border-inline-start: var(--border-width) solid var(--border-subtle);
+	/* 收掉与展开：进场 decelerate，时长取 --duration-base；换边的列序变化由三栏的过渡一起带出；
+	   拖动分界线时由 [data-dragging] 关掉，保证跟手 */
+	transition: inline-size var(--duration-base) var(--easing-decelerate);
+}
+
+.browser[data-dragging] {
+	transition: none;
 }
 
 .browser[data-side='left'] {
 	border-inline-start: 0;
 	border-inline-end: var(--border-width) solid var(--border-subtle);
+}
+
+/* 内容区与标签浏览器之间那条分界线：与导航列右缘同一口径 —— 抓手 8 像素（--spacing-8）、
+   高亮是 4 像素的带（--spacing-4）并把本栏边界换成 --border-hover，带子的 opacity 由 0 到 1，
+   300ms 的延迟在 hooks/use-column-resize 里给。 */
+.browser__edge {
+	position: absolute;
+	z-index: 2;
+	inset-block: 0;
+	inset-inline-start: 0;
+	inline-size: var(--spacing-8);
+	cursor: col-resize;
+	touch-action: none;
+}
+
+.browser__grip {
+	position: absolute;
+	z-index: 1;
+	inset-block: 0;
+	inset-inline-start: 0;
+	inline-size: var(--spacing-4);
+	background: var(--border-hover);
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* 高亮只认各自那把抓手的属性：分界线与分屏分隔条各亮各的，互不牵连 */
+.browser__edge[data-highlighted] .browser__grip,
+.browser__divider[data-highlighted] .browser__grip {
+	opacity: 1;
+}
+
+.browser[data-edge-hover][data-side='right'] {
+	border-inline-start-color: var(--border-hover);
+}
+
+.browser[data-edge-hover][data-side='left'] {
+	border-inline-end-color: var(--border-hover);
+}
+
+.browser[data-side='left'] .browser__edge,
+.browser[data-side='left'] .browser__grip {
+	inset-inline: auto 0;
+}
+
+/* 分屏：一层两个面板（左右或上下），单面板不渲染第二个面板与分隔条。
+   分屏不加宽本栏：宽度由分界线拖出来，栏宽不够时两颗分栏键禁用。 */
+.browser__body {
+	flex: 1;
+	min-block-size: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.browser__body[data-split='columns'] {
+	flex-direction: row;
+}
+
+.browser__pane {
+	flex: 1;
+	min-inline-size: 0;
+	min-block-size: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	/* 分栏与合栏、改朝向：面板尺寸走过渡（进场 decelerate）；拖分隔条时关掉，保证跟手 */
+	transition: inline-size var(--duration-base) var(--easing-decelerate),
+		block-size var(--duration-base) var(--easing-decelerate);
+}
+
+/* 第一个面板的尺寸由分隔条给出的比例定，剩余空间留给第二个面板 */
+.browser__pane[data-sized='true'] {
+	flex: none;
+}
+
+.browser__body[data-dragging] .browser__pane {
+	transition: none;
+}
+
+/* 拖内容区与标签浏览器之间那条分界线时整栏在跟手改宽，面板不能再各自补一拍，
+   否则栏内内容看着在滑。拖动相关的内容一律不做冗余动画。 */
+.browser[data-dragging] .browser__pane {
+	transition: none;
+}
+
+/* 第二个面板自己的小条：高度与标签条一致，写出它绑的是哪一页 */
+.browser__pane-head {
+	flex: none;
+	block-size: var(--row-height);
+	display: flex;
+	align-items: center;
+	padding-inline: var(--spacing-8);
+	border-block-end: var(--border-width) solid var(--border-subtle);
+	color: var(--text-secondary);
+	cursor: default;
+	user-select: none;
+}
+
+/* 标签条右端的「…」更多菜单：口径与导航列折叠菜单一致 ——
+   项内距纵向 8、横向 12，行高凑到 32（design/layout.md §3 的列表项），项间距 4，悬停与键盘高亮同一底色 */
+.browser__menu {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-4);
+	min-inline-size: 180px;
+	padding: var(--spacing-4);
+	border: var(--border-width) solid var(--border-subtle);
+	border-radius: var(--radius-medium);
+	background: var(--background-surface);
+	box-shadow: var(--shadow-medium);
+}
+
+.browser__menu-item {
+	display: flex;
+	box-sizing: border-box;
+	align-items: center;
+	gap: var(--spacing-8);
+	min-block-size: var(--spacing-32);
+	padding-block: var(--spacing-8);
+	padding-inline: var(--spacing-12);
+	border-radius: var(--radius-small);
+	/* 界面正文档：与导航列条目同一档，不用浏览器默认的 16 */
+	font-size: var(--font-size-body);
+	color: var(--text-primary);
+	cursor: default;
+	user-select: none;
+}
+
+.browser__menu-item:hover,
+.browser__menu-item[data-highlighted] {
+	background: var(--background-hover);
+}
+
+.browser__divider {
+	flex: none;
+	position: relative;
+	z-index: 2;
+	inline-size: var(--spacing-8);
+	background: transparent;
+	cursor: col-resize;
+	touch-action: none;
+	/* 分隔条本身是抓手，中间那条线由伪元素画，线宽取描边宽度 */
+	&::before {
+		content: '';
+		position: absolute;
+		inset-block: 0;
+		inset-inline-start: calc(50% - var(--border-width) / 2);
+		inline-size: var(--border-width);
+		background: var(--border-subtle);
+	}
+}
+
+/* 悬停与拖动中亮出可拖的提示：与导航列右缘同一口径（改的是那条线的颜色） */
+.browser__divider[data-highlighted]::before {
+	background: var(--border-hover);
+}
+
+.browser__divider .browser__grip {
+	inset-inline-start: calc(50% - var(--spacing-4) / 2);
+	inline-size: var(--spacing-4);
+}
+
+/* 上下分屏时分隔条是横的，高亮带也横过来：整条宽、4 像素高，居中在黑线上 */
+.browser__body[data-split='rows'] .browser__divider .browser__grip {
+	inset-inline: 0;
+	inset-block-start: calc(50% - var(--spacing-4) / 2);
+	inline-size: auto;
+	block-size: var(--spacing-4);
+}
+
+.browser__body[data-split='rows'] .browser__divider {
+	inline-size: auto;
+	block-size: var(--side-resize-handle);
+	cursor: row-resize;
+}
+
+.browser__body[data-split='rows'] .browser__divider::before {
+	inset-block: auto;
+	inset-block-start: calc(50% - var(--border-width) / 2);
+	inset-inline: 0;
+	inline-size: auto;
+	block-size: var(--border-width);
+}
+
+/* 拖动中两个面板都不参与文本选择 */
+.browser__body[data-dragging='true'] {
+	user-select: none;
+}
+
+/* 新建或新出现的一页：淡入加一点位移，进场 decelerate（design/foundations.md F4）。
+   减少动态由 token 层统一归零，这里不各自判断（architecture/12-motion.md） */
+@keyframes browser-tab-in {
+	from {
+		opacity: 0;
+		transform: translateY(-2px);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
 }
 
 .browser__bar {
@@ -58,6 +271,8 @@
 	gap: var(--spacing-4);
 	padding-inline-end: var(--spacing-4);
 	border-radius: var(--radius-small);
+	/* 新建或新出现的一页：淡入加一点位移（关键帧在同文件上方），减少动态由 token 层统一归零 */
+	animation: browser-tab-in var(--duration-fast) var(--easing-decelerate);
 }
 
 .browser__tab:has([aria-selected='true']) {
@@ -132,11 +347,5 @@
 	font-size: var(--font-size-body);
 }
 
-/* 让位顺序的第二档（design/foundations.md F6）：导航（图标轨 56）加内容区最小宽不再容得下
-   第三栏的最小宽时，第三栏整条消失，不是压窄 —— 此时中栏才可能低于最小。
-   规则与基础规则同文件、排在它后面，才不会被模块加载顺序左右。 */
-@media (width <= 963px) {
-	.browser {
-		display: none;
-	}
-}
+/* 让位顺序的最后一步（design/foundations.md F6）：内容区与标签浏览器都到了最小宽、导航区也收起之后，
+   仍然放不下时标签浏览器整条收成零宽，规则在 routes/layout.less 里（用零宽而不是 display: none，动效才量得到前后状态）。 */

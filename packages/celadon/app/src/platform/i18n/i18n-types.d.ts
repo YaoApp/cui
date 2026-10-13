@@ -194,8 +194,11 @@ export type I18nKey =
   | 'localeSwitch.zhCN'
   | 'localeSwitch.zhTW'
   | 'modal.close'
+  | 'shell.browser.action.blocked'
   | 'shell.browser.action.collapse'
+  | 'shell.browser.action.exclusive'
   | 'shell.browser.action.expand'
+  | 'shell.browser.action.more'
   | 'shell.browser.action.move'
   | 'shell.browser.address.label'
   | 'shell.browser.address.placeholder'
@@ -203,12 +206,16 @@ export type I18nKey =
   | 'shell.browser.label'
   | 'shell.browser.recent'
   | 'shell.browser.recent.empty'
+  | 'shell.browser.split.blocked'
+  | 'shell.browser.split.columns'
+  | 'shell.browser.split.rows'
   | 'shell.browser.tab.close'
   | 'shell.browser.tab.new'
   | 'shell.browser.web.hint'
   | 'shell.content.demoTitle'
   | 'shell.content.placeholder'
   | 'shell.navigation.account.placeholder'
+  | 'shell.navigation.action.blocked'
   | 'shell.navigation.action.collapse'
   | 'shell.navigation.action.expand'
   | 'shell.navigation.action.fold'
@@ -430,8 +437,11 @@ declare module 'i18next' {
         'localeSwitch.zhCN': string
         'localeSwitch.zhTW': string
         'modal.close': string
+        'shell.browser.action.blocked': string
         'shell.browser.action.collapse': string
+        'shell.browser.action.exclusive': string
         'shell.browser.action.expand': string
+        'shell.browser.action.more': string
         'shell.browser.action.move': string
         'shell.browser.address.label': string
         'shell.browser.address.placeholder': string
@@ -439,12 +449,16 @@ declare module 'i18next' {
         'shell.browser.label': string
         'shell.browser.recent': string
         'shell.browser.recent.empty': string
+        'shell.browser.split.blocked': string
+        'shell.browser.split.columns': string
+        'shell.browser.split.rows': string
         'shell.browser.tab.close': string
         'shell.browser.tab.new': string
         'shell.browser.web.hint': string
         'shell.content.demoTitle': string
         'shell.content.placeholder': string
         'shell.navigation.account.placeholder': string
+        'shell.navigation.action.blocked': string
         'shell.navigation.action.collapse': string
         'shell.navigation.action.expand': string
         'shell.navigation.action.fold': string

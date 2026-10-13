@@ -9,20 +9,27 @@ export type ContentProps = {
 	title?: string
 	/** 导航列是否收起：收起才展示导航操作按钮，并接管交通灯留白 */
 	navCollapsed?: boolean
+	/** 窗口窄到由视口强制收起导航：切换键置灰并给出原因 */
+	navBlocked?: boolean
 	/** 标签浏览器列是否收起：收起才展示 Browser 操作按钮 */
 	browserCollapsed?: boolean
+	/** 窗口窄到放不下标签浏览器那一栏：切换键置灰并给出原因 */
+	browserBlocked?: boolean
 	onToggleNav?: () => void
 	onToggleBrowser?: () => void
 }
 
 /* 中栏：页面容器。栏宽由三栏的列轨给（让步顺序见 design/foundations.md F6），
-   这一层只管最小宽与自己的滚动 —— 内容形态的其余三种等用到处再加（plan/08-layout-base.md §3.3）。
-   列头（40 像素）与另外两列等高，见 plan/08-layout-shell.md §5.2；标题与插槽都由装配层给。 */
+   这一层只管最小宽与自己的滚动 —— 内容形态的其余三种等用到处再加。
+   列头（40 像素）与另外两列等高；标题与插槽都由装配层给。
+   宽度变化由列轨与 `content.less` 的过渡承担：不做尺寸投影，正文就不会被横向压缩。 */
 export function Content({
 	children,
 	title,
 	navCollapsed = false,
+	navBlocked = false,
 	browserCollapsed = false,
+	browserBlocked = false,
 	onToggleNav = () => {},
 	onToggleBrowser = () => {}
 }: ContentProps) {
@@ -32,7 +39,9 @@ export function Content({
 				<ContentHead
 					title={title}
 					navCollapsed={navCollapsed}
+					navBlocked={navBlocked}
 					browserCollapsed={browserCollapsed}
+					browserBlocked={browserBlocked}
 					onToggleNav={onToggleNav}
 					onToggleBrowser={onToggleBrowser}
 				/>

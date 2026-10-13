@@ -192,6 +192,24 @@
     "src": "columns-2"
   },
   {
+    "id": "i-rows",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "rows-2"
+  },
+  {
+    "id": "i-expand",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "expand"
+  },
+  {
+    "id": "i-swap",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "arrow-left-right"
+  },
+  {
     "id": "i-send",
     "lib": "lucide",
     "cat": "action",

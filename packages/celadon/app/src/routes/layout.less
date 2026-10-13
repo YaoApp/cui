@@ -1,5 +1,5 @@
-/* 三栏外壳：列轨与让步顺序取自 design/foundations.md F6 —— 侧栏先缩、再整条消失，
-   中栏才可能低于最小；导航栏不参与宽度让步（它只在窄视口进图标轨，见 components/nav/nav.less）。
+/* 三栏外壳：列轨与让步顺序取自 design/foundations.md F6 —— 内容区先压到最小，
+   再压标签浏览器，最后收导航列。
    高度链上每一环都是弹性列，下一环的 flex / min-block-size 才有确定高度可算。 */
 .layout {
   flex: 1;
@@ -10,12 +10,64 @@
   overflow: hidden;
 }
 
-/* 第三栏换到左边：列序对调，分界线交给 components/browser 自己的 data-side。 */
-.layout[data-browser='left'] {
-  flex-direction: row-reverse;
+/* 三栏的顺序由 order 定：导航列永远第一，内容区与标签浏览器按 data-browser 互换。
+   不用 row-reverse：那会把导航列一起镜像到右边。 */
+.layout > .nav {
+  order: 1;
 }
 
-/* 第三栏收掉：整条让给内容区（再引用一次又切回来，见 design/main-shell.md §五）。 */
+.layout > .content {
+  order: 2;
+}
+
+.layout > .browser {
+  order: 3;
+}
+
+.layout[data-browser='left'] > .content {
+  order: 3;
+}
+
+.layout[data-browser='left'] > .browser {
+  order: 2;
+}
+
+/* 第三栏收掉：整条让给内容区（再引用一次又切回来，见 design/main-shell.md §五）。
+   用零宽收起而不是 display: none，布局动画才量得到前后状态。 */
 .layout[data-browser='collapsed'] .browser {
+  inline-size: 0;
+  min-inline-size: 0;
+  /* 不写 max-inline-size: 0：它会把宽度当场夹到零，inline-size 的过渡就看不见了 */
+  padding-inline: 0;
+  border-inline-width: 0;
+  overflow: hidden;
+}
+
+/* 面板独占整扇窗口：导航区与内容区让位，标签浏览器占满（见 design/main-shell.md §七）。
+   让位用宽度与内距收到零，而不是 display: none —— 布局投影要能量到前后两个状态，才动得起来；
+   这一档不画分界线，抓手也不参与。 */
+.layout[data-exclusive] > .nav,
+.layout[data-exclusive] > .content {
+  inline-size: 0;
+  min-inline-size: 0;
+  max-inline-size: 0;
+  padding-inline: 0;
+  border-inline-width: 0;
+  overflow: hidden;
+}
+
+.layout[data-exclusive] > .browser {
+  flex: 1;
+  inline-size: 100%;
+  max-inline-size: none;
+  border-inline: 0;
+}
+
+.layout[data-exclusive] .browser__edge {
   display: none;
+}
+
+/* 导航区收起后为零宽，侧栏的上限要把导航区那一份让出来（让位顺序见 design/foundations.md F6）。 */
+.layout[data-width='zero'] .browser {
+  max-inline-size: calc(100% - var(--center-min) - var(--side-resize-handle));
 }
