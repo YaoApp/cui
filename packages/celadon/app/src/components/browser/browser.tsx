@@ -56,6 +56,8 @@ export type BrowserProps = {
   /** 面板独占整扇窗口：导航区与内容区让位，只留这一栏（与窗口自身的最大化不是一件事） */
   exclusive?: boolean
   onExclusive?: () => void
+  /** 拖分界线改宽的开始与结束：装配层据此让中栏同期退化为瞬时 */
+  onResizing?: (dragging: boolean) => void
 }
 
 /* 标签浏览器：顶部标签条（首页固定第一个、新建吸附右端），下面当前页或两个面板。
@@ -85,6 +87,7 @@ export function Browser({
   onFocusPane = () => {},
   exclusive = false,
   onExclusive = () => {},
+  onResizing,
 }: BrowserProps) {
   const { t } = useTranslation()
   const splitResize = useSplitResize(
@@ -93,6 +96,9 @@ export function Browser({
     onSplitRatio
   )
   const columnResize = useColumnResize(width, onWidth, side)
+  useEffect(() => {
+    onResizing?.(columnResize.dragging)
+  }, [columnResize.dragging, onResizing])
   /* 分屏能不能开，按**本栏实宽**判：宽度由分界线拖出来，窗口宽只是其中一半条件。
      两个长度 token 从 `.celadon` 上读一次（默认宽与最小宽），读不到就用回退值 */
   const [limits, setLimits] = useState({ defaultWidth: 400, sideMin: 300 })
@@ -112,6 +118,8 @@ export function Browser({
   return (
     <MotionPanel
       as="aside"
+      /* 这一列只做位置投影：宽度由列轨与分界线给，栏内文字不参与尺寸投影，收起展开与拖动都不变形 */
+      position
       className="browser"
       data-side={side}
       data-split={split}
