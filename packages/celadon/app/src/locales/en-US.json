@@ -70,6 +70,7 @@
   "shell.navigation.account.placeholder": "Not signed in",
   "shell.navigation.action.collapse": "Collapse navigation",
   "shell.navigation.action.expand": "Expand navigation",
+  "shell.navigation.action.blocked": "Window too narrow to expand the navigation",
   "shell.navigation.action.fold": "Fold the main navigation",
   "shell.navigation.action.unfold": "Unfold the main navigation",
   "shell.navigation.item.new": "New task",

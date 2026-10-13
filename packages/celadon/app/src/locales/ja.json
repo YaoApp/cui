@@ -70,6 +70,7 @@
   "shell.navigation.account.placeholder": "未サインイン",
   "shell.navigation.action.collapse": "ナビゲーションをたたむ",
   "shell.navigation.action.expand": "ナビゲーションを展開する",
+  "shell.navigation.action.blocked": "ウィンドウが狭すぎてナビゲーションを展開できません",
   "shell.navigation.action.fold": "メインナビを折りたたむ",
   "shell.navigation.action.unfold": "メインナビを展開する",
   "shell.navigation.item.new": "新しいタスク",

@@ -11,6 +11,8 @@ export type ContentHeadProps = {
 	title?: string
 	/** 导航列是否收起：收起才展示导航操作按钮，并接管交通灯留白 */
 	navCollapsed: boolean
+	/** 窗口窄到由视口强制收起导航：切换键置灰并给出原因，按下去不会有任何变化 */
+	navBlocked?: boolean
 	/** 标签浏览器列是否收起：收起才展示 Browser 操作按钮 */
 	browserCollapsed: boolean
 	/** 窗口窄到放不下标签浏览器那一栏：切换键置灰并给出原因，按下去不会有任何变化 */
@@ -28,6 +30,7 @@ export type ContentHeadProps = {
 export function ContentHead({
 	title,
 	navCollapsed,
+	navBlocked = false,
 	browserCollapsed,
 	browserBlocked = false,
 	onToggleNav,
@@ -37,6 +40,7 @@ export function ContentHead({
 	const { t } = useTranslation()
 	const chrome = useWindowChrome()
 	const navLabel = navCollapsed ? t('shell.navigation.action.expand') : t('shell.navigation.action.collapse')
+	const navTitle = navBlocked ? t('shell.navigation.action.blocked') : navLabel
 	const browserLabel = browserCollapsed ? t('shell.browser.action.expand') : t('shell.browser.action.collapse')
 	const browserTitle = browserBlocked ? t('shell.browser.action.blocked') : browserLabel
 	return (
@@ -55,19 +59,25 @@ export function ContentHead({
 				} as CSSProperties
 			}
 		>
-			{/* Windows 的收放键在自绘标题栏里，这一栏不重复展示打开按钮 */}
+			{/* Windows 的收放键在自绘标题栏里，这一栏不重复展示打开按钮；
+			    窗口窄到由视口强制收起时置灰并给出原因，不出现按下去没有反应的键 */}
 			<span className='content__head-slot' data-hidden={!navCollapsed || chrome.controls === 'own'}>
-				<Button
-					className='content__head-key'
-					iconOnly
-					variant='plain'
-					size='small'
-					aria-label={navLabel}
-					aria-expanded={!navCollapsed}
-					onClick={onToggleNav}
-				>
-					<Icon name='i-panel-left' size={16} />
-				</Button>
+				<Tooltip label={navTitle} side='bottom'>
+					<span className='content__head-key-wrap' title={navBlocked ? navTitle : undefined}>
+						<Button
+							className='content__head-key'
+							iconOnly
+							variant='plain'
+							size='small'
+							disabled={navBlocked}
+							aria-label={navTitle}
+							aria-expanded={!navCollapsed}
+							onClick={onToggleNav}
+						>
+							<Icon name='i-panel-left' size={16} />
+						</Button>
+					</span>
+				</Tooltip>
 			</span>
 			{title ? <h1 className='content__title'>{title}</h1> : null}
 			{trailing ? <span className='content__head-trailing'>{trailing}</span> : null}

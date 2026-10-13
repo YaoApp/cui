@@ -215,6 +215,7 @@ export type I18nKey =
   | 'shell.content.demoTitle'
   | 'shell.content.placeholder'
   | 'shell.navigation.account.placeholder'
+  | 'shell.navigation.action.blocked'
   | 'shell.navigation.action.collapse'
   | 'shell.navigation.action.expand'
   | 'shell.navigation.action.fold'
@@ -457,6 +458,7 @@ declare module 'i18next' {
         'shell.content.demoTitle': string
         'shell.content.placeholder': string
         'shell.navigation.account.placeholder': string
+        'shell.navigation.action.blocked': string
         'shell.navigation.action.collapse': string
         'shell.navigation.action.expand': string
         'shell.navigation.action.fold': string

@@ -152,6 +152,8 @@ export function AppLayout() {
 			<Content
 				title={t('shell.content.demoTitle')}
 				navCollapsed={collapsed || narrow}
+				/* 视口窄到自动收起导航时，列头那颗展开键置灰并给出原因，不出现按下去没有反应的键 */
+				navBlocked={narrow}
 				/* 给列头的是**实际**状态：窗口窄到放不下这一栏时它本来就是收起的，
 				   切换键同时置灰并给出原因，避免按下去什么都不发生 */
 				browserCollapsed={browserHidden}

@@ -179,6 +179,28 @@ test('disables the head key when the window cannot fit the browser column', asyn
 	await expect(page.locator('.layout')).toHaveAttribute('data-browser', 'collapsed')
 })
 
+test('disables the head key when the window forces the navigation column shut', async ({ page }) => {
+	/* 969 及以下由视口收起导航，列头那颗展开键此时按不动，置灰并给出原因 */
+	await page.setViewportSize({ width: 900, height: 700 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const root = page.locator('.layout')
+	const key = page.locator('.content__head-slot:not(.content__head-slot--browser) .content__head-key')
+
+	await expect(root).toHaveAttribute('data-width', 'zero')
+	await expect(key).toHaveCount(1)
+	await expect(key).toBeVisible()
+	await expect(key).toBeDisabled()
+	await expect(key).toHaveAttribute('aria-expanded', 'false')
+	await expect(key).toHaveAccessibleName('窗口太窄，导航暂不能展开')
+
+	/* 按不动：导航仍是视口给出的收起态，不会出现按了没反应 */
+	await key.click({ force: true })
+	await page.waitForTimeout(300)
+	await expect(root).toHaveAttribute('data-width', 'zero')
+	await expect(root).toHaveAttribute('data-nav', 'collapsed')
+})
+
 test('moves the browser column to the other side and keeps the navigation column still', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/inbox')

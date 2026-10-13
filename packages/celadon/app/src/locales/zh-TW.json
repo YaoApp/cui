@@ -70,6 +70,7 @@
   "shell.navigation.account.placeholder": "未登入",
   "shell.navigation.action.collapse": "收起導覽",
   "shell.navigation.action.expand": "展開導覽",
+  "shell.navigation.action.blocked": "視窗太窄，導覽暫不能展開",
   "shell.navigation.action.fold": "折疊主導覽",
   "shell.navigation.action.unfold": "展開主導覽",
   "shell.navigation.item.new": "新任務",
