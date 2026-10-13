@@ -1,5 +1,5 @@
-/* 三栏外壳：列轨与让步顺序取自 design/foundations.md F6 —— 侧栏先缩、再整条消失，
-   中栏才可能低于最小；导航栏不参与宽度让步（它只在窄视口进图标轨，见 components/nav/nav.less）。
+/* 三栏外壳：列轨与让步顺序取自 design/foundations.md F6 —— 内容区先压到最小，
+   再压标签浏览器，最后收导航列（顺序见 plan/08-layout-content-browser.md §2）。
    高度链上每一环都是弹性列，下一环的 flex / min-block-size 才有确定高度可算。 */
 .layout {
   flex: 1;
@@ -10,9 +10,26 @@
   overflow: hidden;
 }
 
-/* 第三栏换到左边：列序对调，分界线交给 components/browser 自己的 data-side。 */
-.layout[data-browser='left'] {
-  flex-direction: row-reverse;
+/* 三栏的顺序由 order 定：导航列永远第一，内容区与标签浏览器按 data-browser 互换。
+   不用 row-reverse：那会把导航列一起镜像到右边（见 plan/08-layout-content-browser.md §1）。 */
+.layout > .nav {
+  order: 1;
+}
+
+.layout > .content {
+  order: 2;
+}
+
+.layout > .browser {
+  order: 3;
+}
+
+.layout[data-browser='left'] > .content {
+  order: 3;
+}
+
+.layout[data-browser='left'] > .browser {
+  order: 2;
 }
 
 /* 第三栏收掉：整条让给内容区（再引用一次又切回来，见 design/main-shell.md §五）。 */

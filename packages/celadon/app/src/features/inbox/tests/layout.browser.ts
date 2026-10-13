@@ -25,6 +25,21 @@ const columns = (page: import('@playwright/test').Page) => ({
 	browser: page.locator('.browser')
 })
 
+/** 一次量三栏的位置与宽，用来比互换前后的读数。 */
+async function metrics(page: import('@playwright/test').Page) {
+	const { nav, content, browser } = columns(page)
+	const read = async (locator: import('@playwright/test').Locator) =>
+		locator.evaluate((el) => {
+			const box = el.getBoundingClientRect()
+			return { x: box.x, width: box.width }
+		})
+	return {
+		nav: await read(nav),
+		content: await read(content),
+		browser: await read(browser)
+	}
+}
+
 test('lands on the inbox with the three columns in place', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/')
@@ -114,16 +129,29 @@ test('collapses the browser column and gives the space to the content', async ({
 	expect(await content.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(wide)
 })
 
-test('moves the browser column to the other side', async ({ page }) => {
+test('moves the browser column to the other side and keeps the navigation column still', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
 	await expect(browser).toHaveAttribute('data-side', 'right')
 
+	const before = await metrics(page)
 	await browser.getByRole('button', { name: '换到另一侧' }).click()
 	await expect(browser).toHaveAttribute('data-side', 'left')
-	const box = await browser.evaluate((el) => el.getBoundingClientRect().left)
-	expect(box).toBeLessThan(200)
+	const after = await metrics(page)
+
+	// 导航列位置与宽度不动
+	expect(after.nav.x).toBeCloseTo(before.nav.x, 0)
+	expect(after.nav.width).toBeCloseTo(before.nav.width, 0)
+	// 两栏各自保留原宽，只是换了位置
+	expect(after.content.width).toBeCloseTo(before.content.width, 0)
+	expect(after.browser.width).toBeCloseTo(before.browser.width, 0)
+	// 分界线按两者宽度之和移位：内容区跑到右边
+	expect(after.browser.x).toBeLessThan(after.content.x)
+	expect(Math.round(after.browser.x)).toBe(Math.round(after.nav.x + after.nav.width))
+	// 三栏总宽不变，等于窗口宽
+	const total = (m: typeof before) => Math.round(m.nav.width + m.content.width + m.browser.width)
+	expect(total(after)).toBe(total(before))
 })
 
 test('shows no window buttons on the web client', async ({ page }) => {
