@@ -8,8 +8,7 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	/* 整列的收放：展开按 F4 的 panel 档（200ms 减速），收起在下面按 collapse 档（120ms 加速） */
-	transition: inline-size var(--duration-base) var(--easing-decelerate);
+	/* 整列的收放交给布局投影完成（plan/08-layout-motion.md §3 第 1 处），不再各写宽度过渡 */
 	gap: var(--spacing-8);
 	/* 宽度：用户拖过把手就用存下来的值，没拖过跟随默认。样式这一层再夹一次上下限，
      存值越界（旧偏好或窗口变小）也不会把列压到最小宽度以下（design/main-shell.md §三 第 4 条） */
@@ -193,7 +192,6 @@
 	/* 高度由弹性分配决定，超出部分由内部滚动区裁切 */
 	overflow: hidden;
 	flex: 1 1 auto;
-	transition: margin-block-start var(--duration-base) var(--easing-decelerate);
 	display: flex;
 	flex-direction: column;
 	gap: var(--spacing-4);
@@ -410,9 +408,6 @@
 	padding-inline: 0;
 	border-inline-end-width: 0;
 	overflow: clip;
-	transition: inline-size var(--duration-base) var(--easing-decelerate),
-		padding-inline var(--duration-base) var(--easing-decelerate),
-		border-inline-end-width var(--duration-base) var(--easing-decelerate);
 }
 
 /* 品牌行：标志与产品名同一行，列再窄也不折行 */

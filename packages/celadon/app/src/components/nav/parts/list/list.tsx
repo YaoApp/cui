@@ -1,3 +1,4 @@
+import { MotionPanel } from '@/components/base/motion'
 import { NavItemRow } from '../item'
 import type { NavItem } from '../../nav.types'
 
@@ -13,9 +14,10 @@ export function NavList({ items, label, onSelect }: NavListProps) {
   return (
     <ul className="nav__list" aria-label={label}>
       {items.map((item) => (
-        <li key={item.key}>
+        /* 行容器只做平移：不给尺寸变化的投影留缩放文字的机会（plan/08-layout-motion.md §2 硬约束一） */
+        <MotionPanel as="li" position key={item.key}>
           <NavItemRow item={item} onSelect={onSelect} />
-        </li>
+        </MotionPanel>
       ))}
     </ul>
   )

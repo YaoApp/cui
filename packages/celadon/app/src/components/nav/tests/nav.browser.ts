@@ -78,7 +78,8 @@ test.describe('导航列的交互', () => {
 		await expect(nav).toHaveCSS('inline-size', '0px')
 		const key = page.getByRole('button', { name: '展开导航' })
 		await expect(key).toBeVisible()
-		// 内容列从窗口最左起排
+		// 布局投影要走完才算落定，落定后内容列从窗口最左起排
+		await page.waitForTimeout(500)
 		const navBox = await nav.boundingBox()
 		const contentBox = await page.locator('.content').boundingBox()
 		expect(navBox?.width ?? -1).toBeLessThan(1)

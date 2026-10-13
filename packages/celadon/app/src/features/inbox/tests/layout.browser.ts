@@ -87,7 +87,8 @@ test('collapses the navigation column to zero and remembers it after a reload', 
 	await page.mouse.move(140, 20)
 	await page.locator('.nav__header .nav__toggle').click()
 	await expect.poll(async () => nav.evaluate((el) => el.getBoundingClientRect().width)).toBeLessThan(1)
-	/* 零宽后内容列从窗口最左铺满，重新展开的入口在内容列头 */
+	/* 布局投影要走完才算落定，落定后内容列从窗口最左铺满 */
+	await page.waitForTimeout(500)
 	const contentBox = await page.locator('.content').boundingBox()
 	expect(Math.round(contentBox?.x ?? -1)).toBe(0)
 	await expect(page.getByRole('button', { name: '展开导航' })).toBeVisible()
@@ -154,6 +155,8 @@ test('moves the browser column to the other side and keeps the navigation column
 	await browser.getByRole('button', { name: '更多' }).click()
 	await page.getByRole('menuitem', { name: '换到另一侧' }).click()
 	await expect(browser).toHaveAttribute('data-side', 'left')
+	// 换边是布局动画，等投影落定再量三栏位置
+	await page.waitForTimeout(500)
 	const after = await metrics(page)
 
 	// 导航列位置与宽度不动
@@ -405,6 +408,8 @@ test('keeps the split and the boundary working after the browser moves to the le
 	await expect(browser).toHaveAttribute('data-side', 'left')
 	await expect(browser).toHaveAttribute('data-split', 'columns')
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
+	// 换边是布局动画，等投影落定再量列序
+	await page.waitForTimeout(500)
 
 	// 列序：导航列最左，中间是标签浏览器，右边是内容区
 	const navBox = (await columns(page).nav.boundingBox())!
@@ -609,34 +614,73 @@ test('leaves the exclusive mode when the column is collapsed from the menu', asy
 	expect(contentBox.width).toBeGreaterThan(900)
 })
 
-test('uses the motion tokens and stays instant while dragging', async ({ page }) => {
+test('keeps the navigation rows steady through the layout animation', async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 800 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const nav = columns(page).nav
+	const rows = page.locator('.nav__list > li')
+	/* 每一条的纵坐标与高度：动画中段与落定后都应当与动画前一致，也就是没有被宽度压扁或重排 */
+	const shape = async () =>
+		rows.evaluateAll((els) =>
+			els.map((el) => {
+				const box = el.getBoundingClientRect()
+				return [Math.round(box.height), Math.round(box.top)]
+			})
+		)
+	const before = await shape()
+
+	await page.mouse.move(140, 20)
+	await page.locator('.nav__header .nav__toggle').click()
+	await page.waitForTimeout(120) // 动画中段
+	const mid = await shape()
+	await page.waitForTimeout(500) // 落定
+	const settled = await shape()
+
+	expect(mid).toEqual(before)
+	expect(settled).toEqual(before)
+	// 列宽确实收到了零，说明动画真的走完
+	expect(await nav.evaluate((el) => el.getBoundingClientRect().width)).toBeLessThan(1)
+})
+
+test('turns the layout animation off under the reduced motion preference', async ({ page }) => {
+	await page.emulateMedia({ reducedMotion: 'reduce' })
+	await page.setViewportSize({ width: 1280, height: 800 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const nav = columns(page).nav
+
+	await page.mouse.move(140, 20)
+	await page.locator('.nav__header .nav__toggle').click()
+	// 该偏好下退化为瞬时：点完立刻就是零宽
+	expect(await nav.evaluate((el) => el.getBoundingClientRect().width)).toBeLessThan(1)
+})
+
+test('keeps the boundary drag instant while the layout animation is on', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
-
-	// 收起与展开：过渡落在 inline-size 上，时长与缓动取 token（--duration-base 200ms · 进场 decelerate）
-	await expect(browser).toHaveCSS('transition-property', 'inline-size')
-	await expect(browser).toHaveCSS('transition-duration', '0.2s')
-	await expect(browser).toHaveCSS('transition-timing-function', 'cubic-bezier(0, 0, 0.2, 1)')
-
-	// 拖分界线时关掉过渡，保证跟手；松手恢复
 	const edge = browser.locator('.browser__edge')
 	const grip = (await edge.boundingBox())!
 	const y = grip.y + 300
+	const before = (await browser.boundingBox())!.width
+
 	await page.mouse.move(grip.x + grip.width / 2, y)
 	await page.mouse.down()
-	await page.mouse.move(grip.x + grip.width / 2 - 300, y, { steps: 6 })
-	await expect(browser).toHaveCSS('transition-duration', '0s')
+	await page.mouse.move(grip.x + grip.width / 2 - 200, y, { steps: 6 })
+	await expect(browser).toHaveAttribute('data-dragging', 'true')
+	// 跟手：拖动中没有阻尼拖尾，栏宽与指针走过的距离一致（允许 2 像素误差）
+	const moved = (await browser.boundingBox())!.width
+	expect(Math.abs(moved - (before + 200))).toBeLessThanOrEqual(2)
 	await page.mouse.up()
-	// 松手后恢复 0.2s 这一点由 node 探针单独量过（拖动前 0.2s / 拖动中 0s / 松手后 0.2s），
-	// 用例里不再断言：拖动末尾紧接着读计算样式，容易读到上一帧
 
-	// 分栏：面板过渡暂未加（见 plan 第 9 条），这里只核标签淡入的动画在
-	await expect(browser).not.toHaveAttribute('data-dragging')
+	// 松手后投影接手，宽度落定在拖动结束的位置
+	await page.waitForTimeout(500)
+	expect(Math.abs((await browser.boundingBox())!.width - moved)).toBeLessThanOrEqual(2)
+
+	// 分栏与标签的动画仍在
 	await browser.getByRole('button', { name: '左右分栏' }).click()
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
-
-	// 标签淡入的动画在
 	await expect(browser.locator('.browser__tab').first()).toHaveCSS('animation-name', 'browser-tab-in')
 })

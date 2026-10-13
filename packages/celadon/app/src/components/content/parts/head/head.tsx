@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { Button, Icon } from '@/components/base'
+import { MotionPanel } from '@/components/base/motion'
 import { useTranslation } from '@/platform/i18n'
 import { useWindowChrome } from '@/platform/client'
 import './head.less'
@@ -34,7 +35,10 @@ export function ContentHead({
 	const navLabel = navCollapsed ? t('shell.navigation.action.expand') : t('shell.navigation.action.collapse')
 	const browserLabel = browserCollapsed ? t('shell.browser.action.expand') : t('shell.browser.action.collapse')
 	return (
-		<header
+		/* 列头随列平移，不做显隐切换：尺寸变化的投影不允许缩到标题上（plan/08-layout-motion.md §3 第 4 处） */
+		<MotionPanel
+			as='header'
+			position
 			className='content__head'
 			data-controls={chrome.controls}
 			data-nav={navCollapsed ? 'collapsed' : 'expanded'}
@@ -75,6 +79,6 @@ export function ContentHead({
 					<Icon name='i-panel-right' size={16} />
 				</Button>
 			</span>
-		</header>
+		</MotionPanel>
 	)
 }

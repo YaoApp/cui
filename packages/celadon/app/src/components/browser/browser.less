@@ -13,9 +13,7 @@
 	min-block-size: 0;
 	background: var(--background-surface);
 	border-inline-start: var(--border-width) solid var(--border-subtle);
-	/* 收起与展开、分界线落位走这一条过渡：进场 decelerate，时长取 --duration-base（design/foundations.md F4）；
-	   拖动分界线时由 [data-dragging] 关掉过渡，保证跟手 */
-	transition: inline-size var(--duration-base) var(--easing-decelerate);
+	/* 收掉、展开与换边交给布局投影完成（plan/08-layout-motion.md §3 第 6 处），不再各写宽度过渡 */
 }
 
 .browser[data-dragging] {
