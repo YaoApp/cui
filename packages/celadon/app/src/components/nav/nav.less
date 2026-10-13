@@ -19,7 +19,9 @@
 	/* 上方没有交通灯时多留一档；macOS 由交通灯留白承担，见文末覆盖 */
 	padding-block-start: calc(var(--spacing-8) * 2);
 	background: var(--background-navigation);
-	border-inline-end: var(--border-width) solid var(--border-subtle);
+	/* 备选：与内容面之间的 1px 分界 --border-subtle */
+	/* border-inline-end: var(--border-width) solid var(--border-subtle); */
+	border-inline-end: var(--border-width) solid transparent;
 }
 
 /* 拖动中把宽度过渡关掉，做到跟手；键盘调整与收起展开仍走上面的过渡。
@@ -223,9 +225,9 @@
 	outline: none;
 }
 
-/* 键盘高亮与悬停同一套底色 */
+/* 键盘高亮与悬停同一套底色（导航列专用档） */
 .nav__menu-item[data-highlighted] {
-	background: var(--background-hover);
+	background: var(--nav-hover);
 }
 
 .nav__menu-scroll .scroll-area__viewport {
@@ -260,18 +262,19 @@
 	text-decoration: none;
 }
 
-/* 条目与弹出菜单项：悬停给一层浅底 */
+/* 条目与弹出菜单项：悬停给一层浅底（导航列专用档，通用档在白底上才够） */
 .nav__link:hover,
 .nav__shortcut:hover,
 .nav__menu-item:hover {
-	background: var(--background-hover);
+	background: var(--nav-hover);
 }
 
+/* 当前项：中性底加主文字色，选中由明度表达，不用品牌色 */
 .nav__link.is-active,
 .nav__shortcut[aria-current='page'],
 .nav__menu-item[aria-current='page'] {
-	background: var(--background-selected);
-	color: var(--brand-ink);
+	background: var(--nav-select);
+	color: var(--text-primary);
 }
 
 /* 用户区的两个快捷图标只用图标：方形、无底，悬停与收起展开键同一套反馈 */
