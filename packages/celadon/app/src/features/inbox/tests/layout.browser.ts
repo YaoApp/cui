@@ -40,6 +40,19 @@ async function metrics(page: import('@playwright/test').Page) {
 	}
 }
 
+/** 把标签浏览器拖宽到放得下两个面板：分栏键按本栏实宽判，默认 400 时是禁用的。 */
+async function widenBrowser(page: import('@playwright/test').Page, delta = 320) {
+	const browser = columns(page).browser
+	const edge = browser.locator('.browser__edge')
+	const grip = (await edge.boundingBox())!
+	const y = grip.y + 300
+	await page.mouse.move(grip.x + grip.width / 2, y)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + grip.width / 2 - delta, y, { steps: 8 })
+	await page.mouse.up()
+	return browser
+}
+
 test('lands on the inbox with the three columns in place', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/')
@@ -208,6 +221,7 @@ test('splits the browser into two panes and back', async ({ page }) => {
 	await expect(browser).toHaveAttribute('data-split', 'none')
 	await expect(browser.locator('.browser__pane')).toHaveCount(1)
 
+	await widenBrowser(page)
 	await browser.getByRole('button', { name: '左右分栏' }).click()
 	await expect(browser).toHaveAttribute('data-split', 'columns')
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
@@ -243,6 +257,7 @@ test('drags the divider and resets it by double click', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
+	await widenBrowser(page)
 	await browser.getByRole('button', { name: '左右分栏' }).click()
 
 	const body = browser.locator('.browser__body')
@@ -308,6 +323,7 @@ test('locks text selection while a divider is dragged', async ({ page }) => {
 	await expect(body).not.toHaveCSS('user-select', 'none')
 
 	// 分屏分隔条：同样
+	await widenBrowser(page)
 	await browser.getByRole('button', { name: '左右分栏' }).click()
 	const divider = browser.locator('.browser__divider')
 	const dbox = (await divider.boundingBox())!
@@ -429,4 +445,97 @@ test('shows another page in the second pane instead of the same page twice', asy
 	await expect(panes).toHaveCount(2)
 	await expect(panes.nth(0).getByText('example.com')).toHaveCount(1)
 	await expect(browser.locator('.browser__pane-head')).toHaveText('首页')
+})
+
+test('switches the pane that has focus when a tab is clicked', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	const panes = browser.locator('.browser__pane')
+
+	await browser.getByLabel('外部地址').fill('example.com')
+	await browser.getByLabel('外部地址').press('Enter')
+	const edge = browser.locator('.browser__edge')
+	const grip = (await edge.boundingBox())!
+	await page.mouse.move(grip.x + grip.width / 2, grip.y + 300)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + grip.width / 2 - 300, grip.y + 300, { steps: 8 })
+	await page.mouse.up()
+	await browser.getByRole('button', { name: '左右分栏' }).click()
+	// 起始：第一个面板 example.com，第二个面板首页
+	await expect(browser.locator('.browser__pane-head')).toHaveText('首页')
+
+	// 聚焦第二个面板后点「首页」标签：只换第二个面板，第一个面板不动
+	await panes.nth(1).click()
+	await browser.getByRole('tab', { name: '首页' }).click()
+	await expect(browser.locator('.browser__pane-head')).toHaveText('首页')
+	await expect(panes.nth(0).getByText('example.com')).toHaveCount(1)
+
+	// 聚焦第一个面板后点「首页」标签：换的是第一个面板，第二个面板的小条跟着变它自己那一页
+	await panes.nth(0).click()
+	await browser.getByRole('tab', { name: '首页' }).click()
+	await expect(panes.nth(0).getByLabel('外部地址')).toHaveCount(1)
+})
+
+test('drags the stacked divider and resets it by double click', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+
+	// 先拖宽本栏（分栏键按本栏实宽判，400 时是禁用的）
+	const edge = browser.locator('.browser__edge')
+	const grip = (await edge.boundingBox())!
+	await page.mouse.move(grip.x + grip.width / 2, grip.y + 300)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + grip.width / 2 - 300, grip.y + 300, { steps: 8 })
+	await page.mouse.up()
+	await browser.getByRole('button', { name: '上下分栏' }).click()
+
+	const divider = browser.locator('.browser__divider')
+	const panes = browser.locator('.browser__pane')
+	const heights = async () =>
+		panes.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().height)))
+
+	// 往下拖到容器的四分之一：第一个面板变矮
+	const box = (await browser.locator('.browser__body').boundingBox())!
+	const handle = (await divider.boundingBox())!
+	await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(handle.x + handle.width / 2, box.y + box.height * 0.25, { steps: 8 })
+	await page.mouse.up()
+	const dragged = await heights()
+	expect(dragged[0]).toBeLessThan(dragged[1])
+
+	// 双击回平分：高度差只来自中间那根抓手
+	await divider.dblclick()
+	const even = await heights()
+	expect(Math.abs(even[0] - even[1])).toBeLessThanOrEqual(10)
+})
+
+test('disables the split keys when the column itself is too narrow', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+
+	// 宽窗口下先把本栏拖到最小（300），此时两颗分栏键应按**本栏实宽**禁用
+	const edge = browser.locator('.browser__edge')
+	const grip = (await edge.boundingBox())!
+	const y = grip.y + 300
+	await page.mouse.move(grip.x + grip.width / 2, y)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + 600, y, { steps: 12 })
+	await page.mouse.up()
+	expect(await browser.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBeLessThanOrEqual(302)
+	await expect(browser.getByRole('button', { name: '左右分栏' })).toBeDisabled()
+
+	// 再拖宽到 700，两颗键恢复可用
+	const grip2 = (await edge.boundingBox())!
+	await page.mouse.move(grip2.x + grip2.width / 2, y)
+	await page.mouse.down()
+	await page.mouse.move(grip2.x + grip2.width / 2 - 400, y, { steps: 12 })
+	await page.mouse.up()
+	await expect(browser.getByRole('button', { name: '左右分栏' })).toBeEnabled()
 })

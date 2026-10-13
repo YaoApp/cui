@@ -1,5 +1,5 @@
 import './browser.less'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
 import { ScrollArea } from '@/components/base/scroll-area'
@@ -47,6 +47,9 @@ export type BrowserProps = {
   secondary?: ReactNode
   /** 第二个面板那一页的名字，画在它自己的小条上 */
   secondaryLabel?: string
+  /** 聚焦哪个面板（0 是第一个）：标签条的点击落在聚焦的那个面板上 */
+  focusedPane?: number
+  onFocusPane?: (pane: number) => void
 }
 
 /* 标签浏览器：顶部标签条（首页固定第一个、新建吸附右端），下面当前页或两个面板。
@@ -72,6 +75,8 @@ export function Browser({
   children,
   secondary = null,
   secondaryLabel = '',
+  focusedPane = 0,
+  onFocusPane = () => {},
 }: BrowserProps) {
   const { t } = useTranslation()
   const splitResize = useSplitResize(
@@ -80,6 +85,22 @@ export function Browser({
     onSplitRatio
   )
   const columnResize = useColumnResize(width, onWidth, side)
+  /* 分屏能不能开，按**本栏实宽**判：宽度由分界线拖出来，窗口宽只是其中一半条件。
+     两个长度 token 从 `.celadon` 上读一次（默认宽与最小宽），读不到就用回退值 */
+  const [limits, setLimits] = useState({ defaultWidth: 400, sideMin: 300 })
+  useEffect(() => {
+    const read = (name: string, fallback: number) => {
+      const raw = getComputedStyle(document.body).getPropertyValue(name).trim()
+      const value = Number.parseFloat(raw)
+      return Number.isFinite(value) ? value : fallback
+    }
+    setLimits({
+      defaultWidth: read('--side-width-reading', 400),
+      sideMin: read('--side-min', 300),
+    })
+  }, [])
+  const tooNarrowToSplit = (width ?? limits.defaultWidth) < limits.sideMin * 2
+  const blocked = splitBlocked || tooNarrowToSplit
   return (
     <aside
       className="browser"
@@ -159,7 +180,7 @@ export function Browser({
         </Tooltip>
         <Tooltip
           label={
-            splitBlocked && split === 'none'
+            blocked && split === 'none'
               ? t('shell.browser.split.blocked')
               : t('shell.browser.split.columns')
           }
@@ -170,7 +191,7 @@ export function Browser({
             iconOnly
             variant="ghost"
             size="small"
-            disabled={splitBlocked && split === 'none'}
+            disabled={blocked && split === 'none'}
             aria-pressed={split === 'columns'}
             aria-label={t('shell.browser.split.columns')}
             onClick={() => onSplit(split === 'columns' ? 'none' : 'columns')}
@@ -180,7 +201,7 @@ export function Browser({
         </Tooltip>
         <Tooltip
           label={
-            splitBlocked && split === 'none'
+            blocked && split === 'none'
               ? t('shell.browser.split.blocked')
               : t('shell.browser.split.rows')
           }
@@ -191,7 +212,7 @@ export function Browser({
             iconOnly
             variant="ghost"
             size="small"
-            disabled={splitBlocked && split === 'none'}
+            disabled={blocked && split === 'none'}
             aria-pressed={split === 'rows'}
             aria-label={t('shell.browser.split.rows')}
             onClick={() => onSplit(split === 'rows' ? 'none' : 'rows')}
@@ -234,8 +255,9 @@ export function Browser({
       >
         <div
           className="browser__pane"
-          data-focused={split === 'none' || undefined}
+          data-focused={focusedPane === 0 || undefined}
           data-sized={split === 'none' ? undefined : 'true'}
+          onPointerDown={() => onFocusPane(0)}
           style={
             split === 'none'
               ? undefined
@@ -255,7 +277,8 @@ export function Browser({
               tabIndex={0}
               data-no-drag
               data-highlighted={splitResize.highlighted || undefined}
-              ref={splitResize.ref}              onPointerEnter={splitResize.onPointerEnter}
+              ref={splitResize.ref}
+              onPointerEnter={splitResize.onPointerEnter}
               onPointerLeave={splitResize.onPointerLeave}
               onPointerDown={splitResize.onPointerDown}
               onKeyDown={splitResize.onKeyDown}
@@ -263,7 +286,7 @@ export function Browser({
             >
               <span className="browser__grip" aria-hidden="true" />
             </div>
-            <div className="browser__pane">
+            <div className="browser__pane" data-focused={focusedPane === 1 || undefined} onPointerDown={() => onFocusPane(1)}>
               {/* 第二个面板自己的小条：写出它绑的是哪一页，与第一个面板的内容区分开 */}
               <div className="browser__pane-head">{secondaryLabel}</div>
               <ScrollArea className="browser__page" size="medium" persistent>{secondary}</ScrollArea>

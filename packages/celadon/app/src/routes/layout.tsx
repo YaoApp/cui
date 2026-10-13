@@ -1,4 +1,5 @@
 import './layout.less'
+import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { Browser, Home, Web, type BrowserTab } from '@/components/browser'
 import { Content } from '@/components/content'
@@ -54,6 +55,9 @@ export function AppLayout() {
 	const setSplitRatio = useColumnsStore((state) => state.setSplitRatio)
 	const browserWidth = useColumnsStore((state) => state.browserWidth)
 	const setBrowserWidth = useColumnsStore((state) => state.setBrowserWidth)
+	/* 聚焦哪个面板（0 是第一个）与第二个面板绑哪一页；后者为空时按上面的默认取 */
+	const [focusedPane, setFocusedPane] = useState(0)
+	const [secondaryKey, setSecondaryKey] = useState('')
 	/* 左右分栏要两个面板各有一个可用宽：导航区默认宽 + 内容区最小 + 两侧栏最小 + 把手
      （280 + 400 + 600 + 6 = 1286），窗口不够宽时这两颗键禁用（design/main-shell.md §五）。上下分栏按栏高判，这里不挡。 */
 	const splitBlocked = useMediaQuery('(width <= 1285px)')
@@ -88,9 +92,9 @@ export function AppLayout() {
 		closable: tab.kind !== 'browser-home'
 	}))
 	const active = tabs.find((tab) => tabKey(tab) === activeKey) ?? HOME_TAB
-	/* 第二个面板绑另一页：取第一个不是当前页的标签，没有别的页时停在首页。
-	   这样分屏一开就是两页并排，而不是同一页画两遍（面板各自选页随第 7 · 8 处一起做） */
-	const secondaryTab = tabs.find((tab) => tabKey(tab) !== activeKey) ?? HOME_TAB
+	/* 第二个面板绑自己那一页：默认取第一个不是当前页的标签，没有别的页时停在首页。
+	   标签条上的点击落在**聚焦的那个面板**：面板 0 写全局当前页，面板 1 写它自己这一页 */
+	const secondaryTab = byKey(secondaryKey) ?? tabs.find((tab) => tabKey(tab) !== activeKey) ?? HOME_TAB
 
 	/* 一页的内容：两个面板共用同一个函数，分屏时各自渲染自己那一页 */
 	const renderTab = (tab: TabEntry) => {
@@ -159,6 +163,11 @@ export function AppLayout() {
 					setBrowserSplit(next)
 				}}
 				onActivate={(key) => {
+					/* 标签条的点击落在聚焦的那个面板：第二个面板聚焦时只换它自己那一页 */
+					if (focusedPane === 1 && browserSplit !== 'none') {
+						setSecondaryKey(key)
+						return
+					}
 					const tab = byKey(key)
 					if (tab) activateTab(tab)
 				}}
@@ -171,6 +180,8 @@ export function AppLayout() {
 				onCollapse={toggleBrowser}
 				secondary={renderTab(secondaryTab)}
 				secondaryLabel={nameOf(secondaryTab)}
+				focusedPane={focusedPane}
+				onFocusPane={setFocusedPane}
 			>
 				{renderTab(active)}
 			</Browser>
