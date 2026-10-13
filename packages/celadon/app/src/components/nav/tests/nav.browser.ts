@@ -92,6 +92,8 @@ test.describe('导航列的交互', () => {
 		await expect(root).toHaveAttribute('data-width', 'zero')
 		await expect(root).toHaveAttribute('data-nav', 'collapsed')
 		const nav = page.locator(NAV)
+		// 列宽走 --duration-base 过渡，先等它真的收到零再量，固定等待在负载下会读到中间值
+		await expect(nav).toHaveCSS('inline-size', '0px')
 		expect((await nav.boundingBox())?.width ?? -1).toBeLessThan(1)
 	})
 
