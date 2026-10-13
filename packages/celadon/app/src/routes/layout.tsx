@@ -1,5 +1,6 @@
 import './layout.less'
 import { useEffect, useState } from 'react'
+import { LayoutGroup } from 'motion/react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { Browser, Home, Web, type BrowserTab } from '@/components/browser'
 import { Content } from '@/components/content'
@@ -123,6 +124,8 @@ export function AppLayout() {
 	}
 
 	return (
+		/* 三列同属一组：同一组共享一次布局投影，收放、换边、分屏联动起来才齐（plan/08-layout-motion.md §3 第 8 处） */
+		<LayoutGroup>
 		<div
 			className='layout'
 			data-client={client.kind}
@@ -205,5 +208,6 @@ export function AppLayout() {
 				{renderTab(active)}
 			</Browser>
 		</div>
+		</LayoutGroup>
 	)
 }

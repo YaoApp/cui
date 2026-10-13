@@ -4,6 +4,8 @@ import type { I18nKey } from '@/platform/i18n/i18n-types'
 import type { IconId } from '@/platform/icons'
 import { useTranslation } from '@/platform/i18n'
 import { useWindowChrome } from '@/platform/client'
+import { MotionPanel } from '@/components/base/motion'
+import { PANEL_INSTANT } from '@/components/base/motion/panel-motion'
 import { NavBrand } from './parts/brand'
 import { NavFooter } from './parts/footer'
 import { NavHeader } from './parts/header'
@@ -63,7 +65,8 @@ export function Nav({
 	const resize = useNavResize(navWidth, onNavWidth)
 
 	return (
-		<nav
+		<MotionPanel
+			as='nav'
 			ref={resize.ref}
 			data-main={mainFolded ? 'folded' : 'expanded'}
 			data-collapsed={collapsed ? 'true' : 'false'}
@@ -71,6 +74,8 @@ export function Nav({
 				.filter(Boolean)
 				.join(' ')}
 			aria-label={t('shell.navigation.label')}
+			/* 拖右缘改宽期间退化为瞬时，宽度跟手；其余时候宽度变化由布局投影给出 */
+			transition={resize.dragging ? PANEL_INSTANT : undefined}
 		>
 			{chrome.controls === 'own' ? null : (
 				<NavHeader
@@ -112,6 +117,6 @@ export function Nav({
 					onDoubleClick={resize.onDoubleClick}
 				/>
 			</>
-		</nav>
+		</MotionPanel>
 	)
 }

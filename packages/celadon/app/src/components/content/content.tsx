@@ -1,6 +1,7 @@
 import './content.less'
 import type { ReactNode } from 'react'
 import { ScrollArea } from '@/components/base/scroll-area'
+import { MotionPanel } from '@/components/base/motion'
 import { ContentHead } from './parts/head'
 
 export type ContentProps = {
@@ -27,7 +28,7 @@ export function Content({
 	onToggleBrowser = () => {}
 }: ContentProps) {
 	return (
-		<main className='content'>
+		<MotionPanel as='main' className='content'>
 			{title ? (
 				<ContentHead
 					title={title}
@@ -40,6 +41,6 @@ export function Content({
 			<ScrollArea className='content__scroll' size='medium' persistent>
 				{children}
 			</ScrollArea>
-		</main>
+		</MotionPanel>
 	)
 }

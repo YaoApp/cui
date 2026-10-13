@@ -3,6 +3,8 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
+import { MotionPanel } from '@/components/base/motion'
+import { PANEL_INSTANT } from '@/components/base/motion/panel-motion'
 import { ScrollArea } from '@/components/base/scroll-area'
 import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
@@ -108,7 +110,8 @@ export function Browser({
   const tooNarrowToSplit = (width ?? limits.defaultWidth) < limits.sideMin * 2
   const blocked = splitBlocked || tooNarrowToSplit
   return (
-    <aside
+    <MotionPanel
+      as="aside"
       className="browser"
       data-side={side}
       data-split={split}
@@ -119,6 +122,8 @@ export function Browser({
       aria-label={t('shell.browser.label')}
       aria-hidden={collapsed || undefined}
       inert={collapsed || undefined}
+      /* 拖分界线改宽期间退化为瞬时，宽度跟手；收掉、展开与换边都走布局投影 */
+      transition={columnResize.dragging ? PANEL_INSTANT : undefined}
     >
       {/* 内容区与标签浏览器之间那条分界线：拖动改本栏宽度，双击回默认宽（口径同导航列右缘） */}
       <span
@@ -309,6 +314,6 @@ export function Browser({
           </>
         )}
       </div>
-    </aside>
+    </MotionPanel>
   )
 }

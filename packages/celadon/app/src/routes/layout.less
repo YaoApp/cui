@@ -44,10 +44,16 @@
 }
 
 /* 面板独占整扇窗口：导航区与内容区让位，标签浏览器占满（见 design/main-shell.md §七）。
+   让位用宽度与内距收到零，而不是 display: none —— 布局投影要能量到前后两个状态，才动得起来；
    这一档不画分界线，抓手也不参与。 */
 .layout[data-exclusive] > .nav,
 .layout[data-exclusive] > .content {
-  display: none;
+  inline-size: 0;
+  min-inline-size: 0;
+  max-inline-size: 0;
+  padding-inline: 0;
+  border-inline-width: 0;
+  overflow: hidden;
 }
 
 .layout[data-exclusive] > .browser {

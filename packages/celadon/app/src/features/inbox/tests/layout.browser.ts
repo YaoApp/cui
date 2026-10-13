@@ -566,9 +566,10 @@ test('takes the pane full window and comes back with Escape', async ({ page }) =
 	await browser.getByRole('button', { name: '更多' }).click()
 	await page.getByRole('menuitem', { name: '面板独占窗口' }).click()
 	await expect(page.locator('.layout')).toHaveAttribute('data-exclusive', 'true')
-	// 导航区与内容区让位，标签浏览器占满整扇窗口
-	await expect(columns(page).nav).toBeHidden()
-	await expect(columns(page).content).toBeHidden()
+	// 导航区与内容区让位（收到零宽，不是 display: none，这样布局投影才动得起来）
+	await page.waitForTimeout(500)
+	await expect(columns(page).nav).toHaveCSS('inline-size', '0px')
+	await expect(columns(page).content).toHaveCSS('inline-size', '0px')
 	const box = (await browser.boundingBox())!
 	expect(box.width).toBeGreaterThan(1500)
 	expect(box.x).toBeLessThanOrEqual(1)
@@ -576,8 +577,9 @@ test('takes the pane full window and comes back with Escape', async ({ page }) =
 	// Esc 退出，回到原来的三栏
 	await page.keyboard.press('Escape')
 	await expect(page.locator('.layout')).not.toHaveAttribute('data-exclusive', 'true')
-	await expect(columns(page).nav).toBeVisible()
-	await expect(columns(page).content).toBeVisible()
+	await page.waitForTimeout(500)
+	expect((await columns(page).nav.boundingBox())!.width).toBeGreaterThan(200)
+	expect((await columns(page).content.boundingBox())!.width).toBeGreaterThan(400)
 })
 
 test('leaves the exclusive mode when the column is collapsed from the menu', async ({ page }) => {
@@ -596,6 +598,8 @@ test('leaves the exclusive mode when the column is collapsed from the menu', asy
 
 	// 独占已经退出，导航区与内容区回来，本栏收成零宽，重新展开的入口在内容列头里
 	await expect(page.locator('.layout')).not.toHaveAttribute('data-exclusive', 'true')
+	// 布局投影要走完才算落定
+	await page.waitForTimeout(500)
 	await expect(columns(page).nav).toBeVisible()
 	await expect(columns(page).content).toBeVisible()
 	await expect(browser).toHaveAttribute('data-collapsed', 'true')
