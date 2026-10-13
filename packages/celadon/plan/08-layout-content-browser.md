@@ -1,4 +1,4 @@
-# 09 · 布局：内容区与标签浏览器
+# 08 · 布局：内容区与标签浏览器
 
 - 上层：[08-layout-index.md](08-layout-index.md)（三栏骨架 · 导航列 · 外壳）
 - 依据：`design/main-shell.md` §四（内容形态）· §五（第三栏：浏览器式的侧栏）· §六（入口与呈现方式）· `design/foundations.md` F6（三栏竖分割与让位顺序）
