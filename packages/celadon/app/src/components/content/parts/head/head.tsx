@@ -66,7 +66,8 @@ export function ContentHead({
 			</span>
 			{title ? <h1 className='content__title'>{title}</h1> : null}
 			{trailing ? <span className='content__head-trailing'>{trailing}</span> : null}
-			<span className='content__head-slot content__head-slot--browser' data-hidden={!browserCollapsed}>
+			{/* 标签浏览器那一栏的切换键恒在列头右端：展开与收起都从这里切，不必先去菜单里找「收掉这一栏」 */}
+			<span className='content__head-slot content__head-slot--browser'>
 				<Button
 					className='content__head-key content__head-key--browser'
 					iconOnly

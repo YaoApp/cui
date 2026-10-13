@@ -138,11 +138,24 @@ test('collapses the browser column and gives the space to the content', async ({
 	const { content, browser } = columns(page)
 	const wide = await content.evaluate((el) => el.getBoundingClientRect().width)
 
-	await browser.getByRole('button', { name: '更多' }).click()
-	await page.getByRole('menuitem', { name: '收掉这一栏' }).click()
+	// 列头右端那颗切换键恒在：展开时它就是收起键
+	const key = page.locator('.content__head-key--browser')
+	await expect(key).toBeVisible()
+	await expect(key).toHaveAttribute('aria-expanded', 'true')
+
+	await key.click()
 	await expect(browser).toHaveAttribute('data-collapsed', 'true')
 	await expect(browser).toHaveCSS('inline-size', '0px')
+	await page.waitForTimeout(500)
 	expect(await content.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(wide)
+
+	// 收起后同一颗键变成展开键，按回去恢复原状，不必去菜单里找
+	await expect(key).toBeVisible()
+	await expect(key).toHaveAttribute('aria-expanded', 'false')
+	await key.click()
+	await expect(browser).not.toHaveAttribute('data-collapsed', 'true')
+	await page.waitForTimeout(500)
+	expect(await browser.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBeGreaterThan(300)
 })
 
 test('moves the browser column to the other side and keeps the navigation column still', async ({ page }) => {
