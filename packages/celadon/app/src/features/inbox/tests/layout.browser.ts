@@ -362,3 +362,44 @@ test('keeps the column width when the split is switched on', async ({ page }) =>
 	expect(Math.abs(after - wide)).toBeLessThanOrEqual(2)
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
 })
+
+test('keeps the split and the boundary working after the browser moves to the left', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	const edge = browser.locator('.browser__edge')
+
+	// 先把分界线拖宽，再分屏，再换到左侧
+	let grip = (await edge.boundingBox())!
+	const y = grip.y + 300
+	await page.mouse.move(grip.x + grip.width / 2, y)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + grip.width / 2 - 300, y, { steps: 8 })
+	await page.mouse.up()
+	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await browser.getByRole('button', { name: '换到另一侧' }).click()
+
+	await expect(browser).toHaveAttribute('data-side', 'left')
+	await expect(browser).toHaveAttribute('data-split', 'columns')
+	await expect(browser.locator('.browser__pane')).toHaveCount(2)
+
+	// 列序：导航列最左，中间是标签浏览器，右边是内容区
+	const navBox = (await columns(page).nav.boundingBox())!
+	const browserBox = (await browser.boundingBox())!
+	const contentBox = (await columns(page).content.boundingBox())!
+	expect(navBox.x).toBeLessThan(browserBox.x)
+	expect(browserBox.x).toBeLessThan(contentBox.x)
+
+	// 换边后分界线在面向内容区的那一侧（右缘），仍可拖，方向反过来
+	const width = async () => (await browser.boundingBox())!.width
+	const before = await width()
+	grip = (await edge.boundingBox())!
+	await page.mouse.move(grip.x + grip.width / 2, grip.y + 300)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + grip.width / 2 + 100, grip.y + 300, { steps: 6 })
+	await expect(page.locator('body')).toHaveCSS('user-select', 'none')
+	await page.mouse.up()
+	expect(await width()).toBeGreaterThan(before + 60)
+	await expect(page.locator('body')).not.toHaveCSS('user-select', 'none')
+})
