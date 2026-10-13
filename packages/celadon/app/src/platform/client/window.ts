@@ -8,8 +8,21 @@ import { isOk } from '../bridge/result'
 /** 顶部拖动带的高度：窗口最上面这一条里，空白处都可移动窗口。 */
 const DRAG_BAND_FALLBACK = 48
 
+/** 带内按下后移动超过这个距离才请求拖动。按下即拖会把双击吃掉，双击要留给最大化。 */
+const DRAG_START_DISTANCE = 3
+
 /** 这些元素上的按下不当作拖动，控件照旧可用。 */
 const INTERACTIVE = 'button, a, input, select, textarea, [contenteditable], [data-no-drag]'
+
+/* 这个钩子被多个组件各调一次（列头 · 内容列头 · 窗口键 · 外壳），每个实例都挂一份 window 监听，
+   同一个事件会依次到达每一份。动作只由第一份执行一次，否则一次双击会切换好几轮最大化。 */
+const consumed = new WeakSet<Event>()
+
+function firstToHandle(event: Event): boolean {
+	if (consumed.has(event)) return false
+	consumed.add(event)
+	return true
+}
 
 export type WindowChrome = {
 	/** 要不要画窗口按钮：只有桌面壳有窗口可管 */
@@ -55,7 +68,14 @@ export function useWindowChrome(): WindowChrome {
 		return () => window.removeEventListener('resize', sync)
 	}, [controls])
 
+	/* 拖动由宿主接管，指针停在什么元素上都不再决定光标，统一成箭头，
+     避免拖过文字、把手或链接时显示成文本光标或调整光标。 */
+	const releaseCursor = () => {
+		document.body.style.removeProperty('cursor')
+	}
+
 	const drag = () => {
+		document.body.style.setProperty('cursor', 'default')
 		setDragState('calling')
 		windowChrome.startDragging().then(
 			() => setDragState('ok'),
@@ -70,11 +90,12 @@ export function useWindowChrome(): WindowChrome {
 	}
 
 	/* 顶部那一条带子统一可拖、双击即在最大化与还原之间切换：无论导航列、内容区还是标签栏，
-     只要指针落在窗口最上面这一带，空白处按下即拖动窗口，空白处双击即切换。
-     控件（按钮、链接、输入、标了 data-no-drag 的）不吃这两个动作，点击照旧。
-     在 window 上受理一次，各栏不必各写一层。 */
+     只要指针落在窗口最上面这一带，空白处按下并移动即拖动窗口，空白处双击即切换。
+     按下不移动什么都不做，因此单击与双击都原样到达；控件（按钮、链接、输入、标了
+     data-no-drag 的）两件事都不参与，点击照旧。在 window 上受理一次，各栏不必各写一层。 */
 	useEffect(() => {
 		if (!visible) return
+		let pressed: { x: number; y: number } | null = null
 		const inBand = (event: MouseEvent) => {
 			if (event.button !== 0) return false
 			if (event.clientY > dragBandHeight()) return false
@@ -83,15 +104,39 @@ export function useWindowChrome(): WindowChrome {
 			return !target.closest(INTERACTIVE)
 		}
 		const onPointerDown = (event: PointerEvent) => {
-			if (inBand(event)) drag()
+			pressed = inBand(event) ? { x: event.clientX, y: event.clientY } : null
+		}
+		const onPointerMove = (event: PointerEvent) => {
+			if (!pressed) return
+			if ((event.buttons & 1) === 0) {
+				pressed = null
+				return
+			}
+			const moved = Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y)
+			if (moved < DRAG_START_DISTANCE) return
+			pressed = null
+			if (firstToHandle(event)) drag()
+		}
+		const onPointerEnd = () => {
+			pressed = null
+			releaseCursor()
 		}
 		const onDoubleClick = (event: MouseEvent) => {
-			if (inBand(event)) toggle()
+			if (!inBand(event)) return
+			if (firstToHandle(event)) toggle()
 		}
 		window.addEventListener('pointerdown', onPointerDown, true)
+		window.addEventListener('pointermove', onPointerMove, true)
+		window.addEventListener('pointerup', onPointerEnd, true)
+		window.addEventListener('pointercancel', onPointerEnd, true)
+		window.addEventListener('blur', onPointerEnd)
 		window.addEventListener('dblclick', onDoubleClick, true)
 		return () => {
 			window.removeEventListener('pointerdown', onPointerDown, true)
+			window.removeEventListener('pointermove', onPointerMove, true)
+			window.removeEventListener('pointerup', onPointerEnd, true)
+			window.removeEventListener('pointercancel', onPointerEnd, true)
+			window.removeEventListener('blur', onPointerEnd)
 			window.removeEventListener('dblclick', onDoubleClick, true)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps

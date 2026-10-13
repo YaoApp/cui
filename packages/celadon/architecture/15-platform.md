@@ -320,7 +320,8 @@
 ### 6.3 无标题栏窗口的窗口动作
 
 - 桌面壳关掉原生标题栏：Windows 关装饰、由顶栏自绘三个窗口键，macOS 用 `titleBarStyle: overlay` 保住原生交通灯。窗口键与拖动两条路径的判定都在 `app/src/platform/client/window.ts` 一处，命令经 `app/src/platform/bridge/window.ts`（`celadon_window_*` 与 `window.startDragging`）。
-- **顶带**：窗口最上面 `--window-drag-band`（48 像素）内，空白处按下即拖动窗口，空白处双击即在最大化与还原之间切换；macOS 与 Windows 同一套实现，不按平台分叉。
+- **顶带**：窗口最上面 `--window-drag-band`（48 像素）内，空白处**按下并移动**才拖动窗口，空白处双击在最大化与还原之间切换；macOS 与 Windows 同一套实现，不按平台分叉。按下即拖会把双击吃掉，所以拖动从移动起算。
+- **一份判定，多处调用**：这个钩子被列头、内容列头、窗口键与外壳各调一次，每处都挂一份 window 监听；同一个事件只由第一份处理，动作不会重复执行。拖动期间指针统一成箭头。
 - **控件不吃这两个动作**：按钮、链接、输入、可编辑区与标了 `data-no-drag` 的元素；导航列右缘的拖拽把手标 `data-no-drag`，列头空白处可以拖。
 - `web` 制品没有窗口可管，这条路径整体不生效。
 

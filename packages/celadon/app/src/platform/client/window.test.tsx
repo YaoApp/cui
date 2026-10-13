@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, render, waitFor } from '@testing-library/react'
 import { useWindowChrome, type WindowChrome } from './window'
 
-/* 窗口动作的契约：顶带里的空白按下拖动、双击切换最大化，控件与带外不吃这两个动作。
-   真实窗口行为（窗口是否真的移动、是否真的最大化）由桌面壳与人工验收，这里只验分发。 */
+/* 窗口动作的契约：顶带里按下并移动才拖动窗口，双击在最大化与还原之间切换；
+   单击不拖动，控件与带外两件事都不参与。真实窗口行为由桌面壳与人工验收，这里只验分发。 */
 const { bridge, facts } = vi.hoisted(() => ({
   bridge: {
     minimize: vi.fn(() => Promise.resolve({ ok: true as const, value: null })),
@@ -18,39 +18,53 @@ const { bridge, facts } = vi.hoisted(() => ({
 vi.mock('../bridge/window', () => ({ windowChrome: bridge }))
 vi.mock('./facts', () => ({ client: facts }))
 
-let chrome: WindowChrome
+const chrome: WindowChrome[] = []
 
 /* 每次渲染都把最新的钩子结果记下来：状态更新后读的是新值，不是挂载时那一份。 */
 function Probe() {
-  chrome = useWindowChrome()
+  chrome.push(useWindowChrome())
   return null
 }
 
+/** 挂载探针，返回一个读「最后挂载那个实例」当前结果的函数。 */
 function mount() {
+  chrome.length = 0
   render(<Probe />)
+  return () => chrome[chrome.length - 1]
 }
 
-/** 在窗口顶带里派发一次按下或双击，目标默认是正文（非控件）。 */
-function fireInBand(
-  type: 'pointerdown' | 'dblclick',
-  options: { y?: number; target?: Element; button?: number } = {}
+/** 在窗口顶带里派发一次事件，目标默认是正文（非控件）。 */
+function fire(
+  type: 'pointerdown' | 'pointermove' | 'pointerup' | 'dblclick',
+  options: { y?: number; x?: number; target?: Element; button?: number; buttons?: number } = {}
 ) {
   const target = options.target ?? document.body
+  const buttons = options.buttons ?? (type === 'pointerup' ? 0 : 1)
   const event = new MouseEvent(type, {
     bubbles: true,
     cancelable: true,
     button: options.button ?? 0,
+    clientX: options.x ?? 100,
     clientY: options.y ?? 10
   })
+  Object.defineProperty(event, 'buttons', { value: buttons })
   act(() => {
     target.dispatchEvent(event)
   })
+}
+
+/** 一次完整的拖动：按下、移动、抬起。 */
+function dragBy(distance = 12) {
+  fire('pointerdown', { x: 100, y: 10 })
+  fire('pointermove', { x: 100 + distance, y: 10 })
+  fire('pointerup', { x: 100 + distance, y: 10 })
 }
 
 beforeEach(() => {
   facts.kind = 'web'
   facts.os = 'macos'
   for (const fn of Object.values(bridge)) fn.mockClear()
+  document.body.style.removeProperty('cursor')
 })
 
 afterEach(() => {
@@ -58,36 +72,65 @@ afterEach(() => {
 })
 
 describe('the window chrome hook', () => {
-  it('Web：没有窗口可管，顶带里的按下与双击都不分发', () => {
-    mount()
-    expect(chrome.visible).toBe(false)
-    expect(chrome.controls).toBe('none')
-    fireInBand('pointerdown')
-    fireInBand('dblclick')
+  it('Web：没有窗口可管，带内按下移动与双击都不分发', () => {
+    const current = mount()
+    expect(current().visible).toBe(false)
+    expect(current().controls).toBe('none')
+    dragBy()
+    fire('dblclick')
     expect(bridge.startDragging).not.toHaveBeenCalled()
     expect(bridge.toggleMaximize).not.toHaveBeenCalled()
   })
 
-  it('macOS：窗口键归原生交通灯，顶带里按下即请求拖动', async () => {
+  it('macOS：带内按下并移动才请求拖动，单击不请求', async () => {
     facts.kind = 'desktop'
     facts.os = 'macos'
-    mount()
-    expect(chrome.visible).toBe(true)
-    expect(chrome.controls).toBe('native')
-    fireInBand('pointerdown')
-    await waitFor(() => expect(chrome.dragState).toBe('ok'))
+    const current = mount()
+    expect(current().visible).toBe(true)
+    expect(current().controls).toBe('native')
+    fire('pointerdown')
+    fire('pointerup')
+    expect(bridge.startDragging).not.toHaveBeenCalled()
+    dragBy()
+    await waitFor(() => expect(current().dragState).toBe('ok'))
     expect(bridge.startDragging).toHaveBeenCalledTimes(1)
   })
 
-  it('Windows：窗口键自绘，顶带里双击即切换最大化', async () => {
+  it('拖动期间把指针统一成箭头，抬起后交还', () => {
+    facts.kind = 'desktop'
+    mount()
+    fire('pointerdown')
+    fire('pointermove', { x: 130 })
+    expect(document.body.style.cursor).toBe('default')
+    fire('pointerup')
+    expect(document.body.style.cursor).toBe('')
+  })
+
+  it('Windows：带内双击切换一次最大化', async () => {
     facts.kind = 'desktop'
     facts.os = 'windows'
-    mount()
-    expect(chrome.controls).toBe('own')
+    const current = mount()
+    expect(current().controls).toBe('own')
     await waitFor(() => expect(bridge.maximized).toHaveBeenCalledTimes(1))
-    fireInBand('dblclick')
-    await waitFor(() => expect(chrome.maximized).toBe(true))
+    fire('dblclick')
+    await waitFor(() => expect(current().maximized).toBe(true))
     expect(bridge.toggleMaximize).toHaveBeenCalledTimes(1)
+  })
+
+  it('多个组件各调一次钩子时，一次双击只切换一次', async () => {
+    facts.kind = 'desktop'
+    facts.os = 'windows'
+    chrome.length = 0
+    render(
+      <>
+        <Probe />
+        <Probe />
+        <Probe />
+      </>
+    )
+    await waitFor(() => expect(bridge.maximized).toHaveBeenCalledTimes(3))
+    fire('dblclick')
+    await waitFor(() => expect(bridge.toggleMaximize).toHaveBeenCalledTimes(1))
   })
 
   it('控件、带外与非左键都不吃拖动，也不吃双击', () => {
@@ -97,12 +140,16 @@ describe('the window chrome hook', () => {
     const noDrag = document.createElement('div')
     noDrag.setAttribute('data-no-drag', '')
     document.body.append(button, noDrag)
-    fireInBand('pointerdown', { target: button })
-    fireInBand('pointerdown', { target: noDrag })
-    fireInBand('pointerdown', { y: 200 })
-    fireInBand('pointerdown', { button: 2 })
-    fireInBand('dblclick', { target: button })
-    fireInBand('dblclick', { y: 200 })
+    fire('pointerdown', { target: button })
+    fire('pointermove', { x: 120, target: button })
+    fire('pointerdown', { target: noDrag })
+    fire('pointermove', { x: 120, target: noDrag })
+    fire('pointerdown', { y: 200 })
+    fire('pointermove', { x: 120, y: 200 })
+    fire('pointerdown', { button: 2 })
+    fire('pointermove', { x: 120 })
+    fire('dblclick', { target: button })
+    fire('dblclick', { y: 200 })
     expect(bridge.startDragging).not.toHaveBeenCalled()
     expect(bridge.toggleMaximize).not.toHaveBeenCalled()
     button.remove()
@@ -116,32 +163,34 @@ describe('the window chrome hook', () => {
     scope.className = 'celadon'
     scope.style.setProperty('--window-drag-band', '20px')
     document.body.append(scope)
-    fireInBand('pointerdown', { y: 30 })
+    fire('pointerdown', { y: 30 })
+    fire('pointermove', { x: 120, y: 30 })
     expect(bridge.startDragging).not.toHaveBeenCalled()
-    fireInBand('pointerdown', { y: 10 })
+    fire('pointerdown', { y: 10 })
+    fire('pointermove', { x: 120, y: 10 })
     expect(bridge.startDragging).toHaveBeenCalledTimes(1)
   })
 
   it('拖动失败时把原因写进 dragState', async () => {
     facts.kind = 'desktop'
     bridge.startDragging.mockRejectedValueOnce(new Error('no permission'))
-    mount()
-    fireInBand('pointerdown')
-    await waitFor(() => expect(chrome.dragState.startsWith('failed:')).toBe(true))
+    const current = mount()
+    dragBy()
+    await waitFor(() => expect(current().dragState.startsWith('failed:')).toBe(true))
   })
 
   it('窗口尺寸变化后重读最大化状态，最小化与关闭直接落到桥', async () => {
     facts.kind = 'desktop'
     facts.os = 'windows'
-    mount()
+    const current = mount()
     await waitFor(() => expect(bridge.maximized).toHaveBeenCalledTimes(1))
     act(() => {
       window.dispatchEvent(new Event('resize'))
     })
     await waitFor(() => expect(bridge.maximized).toHaveBeenCalledTimes(2))
     act(() => {
-      chrome.minimize()
-      chrome.close()
+      current().minimize()
+      current().close()
     })
     expect(bridge.minimize).toHaveBeenCalledTimes(1)
     expect(bridge.close).toHaveBeenCalledTimes(1)
