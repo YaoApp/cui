@@ -37,7 +37,7 @@
 .layout[data-browser='collapsed'] .browser {
   inline-size: 0;
   min-inline-size: 0;
-  max-inline-size: 0;
+  /* 不写 max-inline-size: 0：它会把宽度当场夹到零，inline-size 的过渡就看不见了 */
   padding-inline: 0;
   border-inline-width: 0;
   overflow: hidden;

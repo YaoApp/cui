@@ -1,5 +1,5 @@
 import './nav.less'
-import { useEffect, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import type { I18nKey } from '@/platform/i18n/i18n-types'
 import type { IconId } from '@/platform/icons'
 import { useTranslation } from '@/platform/i18n'
@@ -33,8 +33,6 @@ export type NavProps = {
 	/** 用户拖过的导航列宽度（像素）；null 表示跟随 `--nav-default` */
 	navWidth: number | null
 	onNavWidth: (width: number | null) => void
-	/** 拖右缘改宽的开始与结束：装配层据此让中栏同期退化为瞬时 */
-	onResizing?: (dragging: boolean) => void
 }
 
 /* 导航列：四段（头部内块 · 上区主导航 · 下区当前 · 底部一行），两处收起分开 ——
@@ -53,8 +51,7 @@ export function Nav({
 	children,
 	onSelect,
 	navWidth,
-	onNavWidth,
-	onResizing
+	onNavWidth
 }: NavProps) {
 	const { t } = useTranslation()
 	const chrome = useWindowChrome()
@@ -64,9 +61,6 @@ export function Nav({
 	}
 	const currentLabel = t(scene)
 	const resize = useNavResize(navWidth, onNavWidth)
-	useEffect(() => {
-		onResizing?.(resize.dragging)
-	}, [resize.dragging, onResizing])
 
 	return (
 		<nav

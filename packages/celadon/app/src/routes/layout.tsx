@@ -1,7 +1,6 @@
 import './layout.less'
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { PANEL_INSTANT } from '@/components/base/motion/panel-motion'
 import { Browser, Home, Web, type BrowserTab } from '@/components/browser'
 import { Content } from '@/components/content'
 import { Nav, type NavItem } from '@/components/nav'
@@ -61,8 +60,6 @@ export function AppLayout() {
 	const [secondaryKey, setSecondaryKey] = useState('')
 	/* 面板独占整扇窗口：这一档把导航区与内容区让出去（见 design/main-shell.md §七） */
 	const [exclusive, setExclusive] = useState(false)
-	/* 有列在拖右缘改宽：此时中栏退化为瞬时，只跟手，不做任何补间（plan/08-layout-motion.md §2 硬约束三） */
-	const [resizing, setResizing] = useState(false)
 	/* 独占档里 `Esc` 退出，回到原来的三栏（见 design/main-shell.md §七） */
 	useEffect(() => {
 		if (!exclusive) return
@@ -149,7 +146,6 @@ export function AppLayout() {
 				onSelect={(item) => navigate(item.to)}
 				navWidth={navWidth}
 				onNavWidth={setNavWidth}
-				onResizing={setResizing}
 			>
 				{location.pathname.startsWith('/inbox') ? <InboxNav /> : null}
 			</Nav>
@@ -162,7 +158,6 @@ export function AppLayout() {
 				   切换键同时置灰并给出原因，避免按下去什么都不发生 */
 				browserCollapsed={browserHidden}
 				browserBlocked={narrowForBrowser}
-				transition={resizing ? PANEL_INSTANT : undefined}
 				onToggleNav={toggleNav}
 				onToggleBrowser={toggleBrowser}
 			>
@@ -211,7 +206,6 @@ export function AppLayout() {
 				onFocusPane={setFocusedPane}
 				exclusive={exclusive}
 				onExclusive={() => setExclusive(!exclusive)}
-				onResizing={setResizing}
 			>
 				{renderTab(active)}
 			</Browser>
