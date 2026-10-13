@@ -152,7 +152,10 @@ export function AppLayout() {
 			<Content
 				title={t('shell.content.demoTitle')}
 				navCollapsed={collapsed || narrow}
-				browserCollapsed={browserCollapsed}
+				/* 给列头的是**实际**状态：窗口窄到放不下这一栏时它本来就是收起的，
+				   切换键同时置灰并给出原因，避免按下去什么都不发生 */
+				browserCollapsed={browserHidden}
+				browserBlocked={narrowForBrowser}
 				onToggleNav={toggleNav}
 				onToggleBrowser={toggleBrowser}
 			>

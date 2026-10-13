@@ -12,6 +12,8 @@ export type ContentProps = {
 	navCollapsed?: boolean
 	/** 标签浏览器列是否收起：收起才展示 Browser 操作按钮 */
 	browserCollapsed?: boolean
+	/** 窗口窄到放不下标签浏览器那一栏：切换键置灰并给出原因 */
+	browserBlocked?: boolean
 	onToggleNav?: () => void
 	onToggleBrowser?: () => void
 }
@@ -24,6 +26,7 @@ export function Content({
 	title,
 	navCollapsed = false,
 	browserCollapsed = false,
+	browserBlocked = false,
 	onToggleNav = () => {},
 	onToggleBrowser = () => {}
 }: ContentProps) {
@@ -34,6 +37,7 @@ export function Content({
 					title={title}
 					navCollapsed={navCollapsed}
 					browserCollapsed={browserCollapsed}
+					browserBlocked={browserBlocked}
 					onToggleNav={onToggleNav}
 					onToggleBrowser={onToggleBrowser}
 				/>

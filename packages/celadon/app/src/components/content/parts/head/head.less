@@ -25,6 +25,13 @@
 	block-size: var(--spacing-32);
 }
 
+/* 键的外层：提示挂在它身上，禁用态的按钮收不到指针事件时气泡仍能出现 */
+.content__head-key-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 /* 操作键的槽位：展示时占 32，不展示时收成 0，与列宽同一条时长过渡，标题因此平滑平移 */
 .content__head-slot {
 	display: flex;

@@ -95,6 +95,7 @@
   "shell.browser.split.blocked": "幅が足りません。列を広げてから分割してください",
   "shell.browser.action.more": "その他",
   "shell.browser.action.exclusive": "パネルをウィンドウ全体に",
+  "shell.browser.action.blocked": "ウィンドウが狭すぎてこの列を表示できません",
   "shell.browser.address.label": "外部アドレス",
   "shell.browser.address.placeholder": "アドレスを入力して Enter",
   "shell.browser.recent": "この側で開いたもの",

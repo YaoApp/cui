@@ -95,6 +95,7 @@
   "shell.browser.split.blocked": "Not enough room: widen this column before splitting",
   "shell.browser.action.more": "More",
   "shell.browser.action.exclusive": "Take the pane full window",
+  "shell.browser.action.blocked": "Window too narrow to fit this column",
   "shell.browser.address.label": "External address",
   "shell.browser.address.placeholder": "Type an address and press Enter",
   "shell.browser.recent": "Opened on this side",

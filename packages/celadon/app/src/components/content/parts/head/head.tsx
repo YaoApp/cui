@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { Button, Icon } from '@/components/base'
 import { MotionPanel } from '@/components/base/motion'
+import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import { useWindowChrome } from '@/platform/client'
 import './head.less'
@@ -12,6 +13,8 @@ export type ContentHeadProps = {
 	navCollapsed: boolean
 	/** 标签浏览器列是否收起：收起才展示 Browser 操作按钮 */
 	browserCollapsed: boolean
+	/** 窗口窄到放不下标签浏览器那一栏：切换键置灰并给出原因，按下去不会有任何变化 */
+	browserBlocked?: boolean
 	onToggleNav: () => void
 	onToggleBrowser: () => void
 	/** 右侧插槽：与当前页有关的动作，放在 Browser 操作按钮之前 */
@@ -26,6 +29,7 @@ export function ContentHead({
 	title,
 	navCollapsed,
 	browserCollapsed,
+	browserBlocked = false,
 	onToggleNav,
 	onToggleBrowser,
 	trailing
@@ -34,6 +38,7 @@ export function ContentHead({
 	const chrome = useWindowChrome()
 	const navLabel = navCollapsed ? t('shell.navigation.action.expand') : t('shell.navigation.action.collapse')
 	const browserLabel = browserCollapsed ? t('shell.browser.action.expand') : t('shell.browser.action.collapse')
+	const browserTitle = browserBlocked ? t('shell.browser.action.blocked') : browserLabel
 	return (
 		/* 列头随列平移，不做显隐切换：尺寸变化的投影不允许缩到标题上（plan/08-layout-motion.md §3 第 4 处） */
 		<MotionPanel
@@ -66,19 +71,25 @@ export function ContentHead({
 			</span>
 			{title ? <h1 className='content__title'>{title}</h1> : null}
 			{trailing ? <span className='content__head-trailing'>{trailing}</span> : null}
-			{/* 标签浏览器那一栏的切换键恒在列头右端：展开与收起都从这里切，不必先去菜单里找「收掉这一栏」 */}
+			{/* 标签浏览器那一栏的切换键恒在列头右端：展开与收起都从这里切；窗口放不下时置灰并给出原因。
+			    提示挂在外层 span 上，因为禁用态的按钮收不到指针事件，气泡否则不会出现 */}
 			<span className='content__head-slot content__head-slot--browser'>
-				<Button
-					className='content__head-key content__head-key--browser'
-					iconOnly
-					variant='plain'
-					size='small'
-					aria-label={browserLabel}
-					aria-expanded={!browserCollapsed}
-					onClick={onToggleBrowser}
-				>
-					<Icon name='i-panel-right' size={16} />
-				</Button>
+				<Tooltip label={browserTitle} side='bottom'>
+					<span className='content__head-key-wrap' title={browserBlocked ? browserTitle : undefined}>
+						<Button
+							className='content__head-key content__head-key--browser'
+							iconOnly
+							variant='plain'
+							size='small'
+							disabled={browserBlocked}
+							aria-label={browserTitle}
+							aria-expanded={!browserCollapsed}
+							onClick={onToggleBrowser}
+						>
+							<Icon name='i-panel-right' size={16} />
+						</Button>
+					</span>
+				</Tooltip>
 			</span>
 		</MotionPanel>
 	)

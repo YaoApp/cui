@@ -158,6 +158,27 @@ test('collapses the browser column and gives the space to the content', async ({
 	expect(await browser.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBeGreaterThan(300)
 })
 
+test('disables the head key when the window cannot fit the browser column', async ({ page }) => {
+	/* 520 是设计里的最小窗口：内容区最小 400 加这一栏最小 300 放不下，这一栏由视口收起 */
+	await page.setViewportSize({ width: 520, height: 700 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const { browser } = columns(page)
+	const key = page.locator('.content__head-key--browser')
+
+	await expect(browser).toHaveAttribute('data-collapsed', 'true')
+	await expect(key).toBeVisible()
+	await expect(key).toBeDisabled()
+	await expect(key).toHaveAttribute('aria-expanded', 'false')
+	await expect(key).toHaveAccessibleName('窗口太窄，放不下这一栏')
+
+	/* 键在，但按不动：栏的状态与视口给出的结果一致，不会出现「按了没反应」 */
+	await key.click({ force: true })
+	await page.waitForTimeout(300)
+	await expect(browser).toHaveAttribute('data-collapsed', 'true')
+	await expect(page.locator('.layout')).toHaveAttribute('data-browser', 'collapsed')
+})
+
 test('moves the browser column to the other side and keeps the navigation column still', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
