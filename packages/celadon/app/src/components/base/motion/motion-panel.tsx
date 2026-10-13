@@ -21,6 +21,6 @@ export function MotionPanel({ as = 'div', position = false, transition, ...rest 
 	/* 标签由 `as` 选，Motion 的每个标签各有一套事件类型，这里统一按 div 那一套转交属性 */
 	const Component = motion[as] as typeof motion.div
 	const layout = position ? 'position' : true
-	/* 位置与尺寸的变化交给布局投影：进入与首帧都按落位算，不播进场动画 */
-	return <Component layout={layout} transition={transition ?? (reduced ? PANEL_INSTANT : PANEL_SPRING)} {...rest} />
+	/* 首次落位不播动画：还原存值那一帧直接到位，之后的变化才走投影 */
+	return <Component initial={false} layout={layout} transition={transition ?? (reduced ? PANEL_INSTANT : PANEL_SPRING)} {...rest} />
 }
