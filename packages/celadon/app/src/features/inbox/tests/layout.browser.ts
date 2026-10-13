@@ -216,7 +216,8 @@ test('splits the browser into two panes and back', async ({ page }) => {
 	const panes = await browser
 		.locator('.browser__pane')
 		.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)))
-	expect(Math.abs(panes[0] - panes[1])).toBeLessThanOrEqual(2)
+	// 平分时两个面板宽度差只来自中间那根抓手（--side-resize-handle 6px）
+	expect(Math.abs(panes[0] - panes[1])).toBeLessThanOrEqual(8)
 
 	// 换方向：直接改朝向，不回到单面板
 	await browser.getByRole('button', { name: '上下分栏' }).click()
@@ -236,4 +237,33 @@ test('disables the split keys when the window cannot fit two panes', async ({ pa
 	const browser = columns(page).browser
 	await expect(browser.getByRole('button', { name: '左右分栏' })).toBeDisabled()
 	await expect(browser.getByRole('button', { name: '上下分栏' })).toBeDisabled()
+})
+
+test('drags the divider and resets it by double click', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await browser.getByRole('button', { name: '左右分栏' }).click()
+
+	const body = browser.locator('.browser__body')
+	const divider = browser.locator('.browser__divider')
+	const panes = browser.locator('.browser__pane')
+	const widths = async () =>
+		panes.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)))
+
+	const box = (await body.boundingBox())!
+	const handle = (await divider.boundingBox())!
+	await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(box.x + box.width * 0.25, handle.y + handle.height / 2, { steps: 6 })
+	await page.mouse.up()
+	const dragged = await widths()
+	expect(dragged[0]).toBeLessThan(dragged[1])
+
+	// 双击回平分
+	await divider.dblclick()
+	const even = await widths()
+	// 双击回平分：宽度差只来自中间那根抓手
+	expect(Math.abs(even[0] - even[1])).toBeLessThanOrEqual(8)
 })

@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/base/scroll-area'
 import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserSplit } from '@/stores/layout/columns'
+import { useSplitResize } from './hooks/use-split-resize'
 
 export type BrowserTab = {
   /** 一页的稳定标识 */
@@ -26,6 +27,9 @@ export type BrowserProps = {
   split?: BrowserSplit
   /** 栏宽（或栏高）不足以放下两个面板：分栏键禁用，气泡说明原因 */
   splitBlocked?: boolean
+  /** 第一个面板占的比例，0.2 到 0.8，0.5 是平分 */
+  splitRatio?: number
+  onSplitRatio?: (ratio: number) => void
   onSplit?: (split: BrowserSplit) => void
   onActivate: (key: string) => void
   onClose: (key: string) => void
@@ -49,6 +53,8 @@ export function Browser({
   collapsed = false,
   split = 'none',
   splitBlocked = false,
+  splitRatio = 0.5,
+  onSplitRatio = () => {},
   onSplit = () => {},
   onActivate,
   onClose,
@@ -59,6 +65,10 @@ export function Browser({
   secondary = null,
 }: BrowserProps) {
   const { t } = useTranslation()
+  const { containerRef, dragging, onPointerDown, reset } = useSplitResize(
+    split === 'rows' ? 'rows' : 'columns',
+    onSplitRatio
+  )
   return (
     <aside
       className="browser"
@@ -183,14 +193,32 @@ export function Browser({
         </Tooltip>
       </div>
 
-      {/* 分屏：一层，左右或上下两个面板；单面板时只渲染 children，结构不变 */}
-      <div className="browser__body" data-split={split}>
-        <div className="browser__pane" data-focused={split === 'none' || undefined}>
+      {/* 分屏：一层，左右或上下两个面板；单面板时只渲染 children，结构不变。
+          第一面板的比例由分隔条拖动给出（跟手，见 hooks/use-split-resize）。 */}
+      <div className="browser__body" data-split={split} data-dragging={dragging} ref={containerRef}>
+        <div
+          className="browser__pane"
+          data-focused={split === 'none' || undefined}
+          data-sized={split === 'none' ? undefined : 'true'}
+          style={
+            split === 'none'
+              ? undefined
+              : split === 'rows'
+                ? { blockSize: `${splitRatio * 100}%` }
+                : { inlineSize: `${splitRatio * 100}%` }
+          }
+        >
           <ScrollArea className="browser__page" size="medium" persistent>{children}</ScrollArea>
         </div>
         {split === 'none' ? null : (
           <>
-            <div className="browser__divider" role="separator" aria-orientation={split === 'columns' ? 'vertical' : 'horizontal'} />
+            <div
+              className="browser__divider"
+              role="separator"
+              aria-orientation={split === 'columns' ? 'vertical' : 'horizontal'}
+              onPointerDown={onPointerDown}
+              onDoubleClick={reset}
+            />
             <div className="browser__pane">
               <ScrollArea className="browser__page" size="medium" persistent>{secondary}</ScrollArea>
             </div>

@@ -47,15 +47,45 @@
 	overflow: hidden;
 }
 
+/* 第一个面板的尺寸由分隔条给出的比例定，剩余空间留给第二个面板 */
+.browser__pane[data-sized='true'] {
+	flex: none;
+}
+
 .browser__divider {
 	flex: none;
-	inline-size: var(--border-width);
-	background: var(--border-subtle);
+	position: relative;
+	inline-size: var(--side-resize-handle);
+	background: transparent;
+	cursor: col-resize;
+	/* 分隔条本身是抓手，中间那条线由伪元素画，线宽取描边宽度 */
+	&::before {
+		content: '';
+		position: absolute;
+		inset-block: 0;
+		inset-inline-start: calc(50% - var(--border-width) / 2);
+		inline-size: var(--border-width);
+		background: var(--border-subtle);
+	}
 }
 
 .browser__body[data-split='rows'] .browser__divider {
 	inline-size: auto;
+	block-size: var(--side-resize-handle);
+	cursor: row-resize;
+}
+
+.browser__body[data-split='rows'] .browser__divider::before {
+	inset-block: auto;
+	inset-block-start: calc(50% - var(--border-width) / 2);
+	inset-inline: 0;
+	inline-size: auto;
 	block-size: var(--border-width);
+}
+
+/* 拖动中两个面板都不参与文本选择 */
+.browser__body[data-dragging='true'] {
+	user-select: none;
 }
 
 .browser__bar {
