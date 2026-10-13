@@ -512,6 +512,17 @@ test('drags the stacked divider and resets it by double click', async ({ page })
 	await divider.dblclick()
 	const even = await heights()
 	expect(Math.abs(even[0] - even[1])).toBeLessThanOrEqual(10)
+
+	// 拖到上端极值：两个面板都留得住自己那一份，比例夹在 0.2 与 0.8 之间
+	const again = (await divider.boundingBox())!
+	await page.mouse.move(again.x + again.width / 2, again.y + again.height / 2)
+	await page.mouse.down()
+	await page.mouse.move(again.x + again.width / 2, box.y - 200, { steps: 10 })
+	await page.mouse.up()
+	const top = await heights()
+	const total = top[0] + top[1]
+	expect(top[0] / total).toBeGreaterThanOrEqual(0.18)
+	expect(top[1] / total).toBeGreaterThanOrEqual(0.18)
 })
 
 test('disables the split keys when the column itself is too narrow', async ({ page }) => {

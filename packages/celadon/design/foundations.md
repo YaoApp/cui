@@ -182,7 +182,9 @@
 | --- | --- | --- | --- |
 | 导航区 | `--nav-min` `264px` | `--nav-max` `420px` | `--nav-default` `280px` · 收起一律为 `0px`（三端一致，无图标轨这一档） |
 | 内容区 | `--center-min` `400px` | 剩余空间（内文另有可读上限） | 剩余空间 |
-| 侧栏 | `--side-min` `300px` | **总宽 −（导航区 + 内容区最小 + 把手）** —— 可自由拖拽到此上限，不写死比例 | `--side-width-reading` `400px` / `--side-width-tool` `600px` / `--side-width-task` `640px` / `--side-width-wide` `840px` 按视图类型 |
+| 侧栏 | `--side-min` `300px` | **总宽 −（导航区 + 内容区最小 + 抓手）** —— 可自由拖拽到此上限，不写死比例 | `--side-width-reading` `400px` / `--side-width-tool` `600px` / `--side-width-task` `640px` / `--side-width-wide` `840px` 按视图类型 |
+
+侧栏与内容区之间那条分界线的抓手取 `--side-resize-handle`（`8px`），与导航列右缘的抓手同一尺寸、同一套悬停口径：指针停住 300ms 才亮出 4 像素的高亮带并把边界换成 `--border-hover`，按下一路接管光标，双击回到本栏默认宽。
 
 | 屏幕 | token | 值 |
 | --- | --- | --- |
