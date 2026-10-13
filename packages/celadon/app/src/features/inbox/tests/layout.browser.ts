@@ -137,7 +137,7 @@ test('collapses the browser column and gives the space to the content', async ({
 	const { content, browser } = columns(page)
 	const wide = await content.evaluate((el) => el.getBoundingClientRect().width)
 
-	await browser.getByRole('button', { name: '标签浏览器' }).click()
+	await browser.getByRole('button', { name: '更多' }).click()
 	await page.getByRole('menuitem', { name: '收掉这一栏' }).click()
 	await expect(browser).toHaveAttribute('data-collapsed', 'true')
 	await expect(browser).toHaveCSS('inline-size', '0px')
@@ -151,7 +151,7 @@ test('moves the browser column to the other side and keeps the navigation column
 	await expect(browser).toHaveAttribute('data-side', 'right')
 
 	const before = await metrics(page)
-	await browser.getByRole('button', { name: '标签浏览器' }).click()
+	await browser.getByRole('button', { name: '更多' }).click()
 	await page.getByRole('menuitem', { name: '换到另一侧' }).click()
 	await expect(browser).toHaveAttribute('data-side', 'left')
 	const after = await metrics(page)
@@ -396,7 +396,7 @@ test('keeps the split and the boundary working after the browser moves to the le
 	await page.mouse.move(grip.x + grip.width / 2 - 300, y, { steps: 8 })
 	await page.mouse.up()
 	await browser.getByRole('button', { name: '左右分栏' }).click()
-	await browser.getByRole('button', { name: '标签浏览器' }).click()
+	await browser.getByRole('button', { name: '更多' }).click()
 	await page.getByRole('menuitem', { name: '换到另一侧' }).click()
 
 	await expect(browser).toHaveAttribute('data-side', 'left')
@@ -552,4 +552,27 @@ test('disables the split keys when the column itself is too narrow', async ({ pa
 	await page.mouse.move(grip2.x + grip2.width / 2 - 400, y, { steps: 12 })
 	await page.mouse.up()
 	await expect(browser.getByRole('button', { name: '左右分栏' })).toBeEnabled()
+})
+
+test('takes the pane full window and comes back with Escape', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+
+	await browser.getByRole('button', { name: '更多' }).click()
+	await page.getByRole('menuitem', { name: '面板独占窗口' }).click()
+	await expect(page.locator('.layout')).toHaveAttribute('data-exclusive', 'true')
+	// 导航区与内容区让位，标签浏览器占满整扇窗口
+	await expect(columns(page).nav).toBeHidden()
+	await expect(columns(page).content).toBeHidden()
+	const box = (await browser.boundingBox())!
+	expect(box.width).toBeGreaterThan(1500)
+	expect(box.x).toBeLessThanOrEqual(1)
+
+	// Esc 退出，回到原来的三栏
+	await page.keyboard.press('Escape')
+	await expect(page.locator('.layout')).not.toHaveAttribute('data-exclusive', 'true')
+	await expect(columns(page).nav).toBeVisible()
+	await expect(columns(page).content).toBeVisible()
 })

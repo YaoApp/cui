@@ -43,6 +43,24 @@
   overflow: hidden;
 }
 
+/* 面板独占整扇窗口：导航区与内容区让位，标签浏览器占满（见 design/main-shell.md §七）。
+   这一档不画分界线，抓手也不参与。 */
+.layout[data-exclusive] > .nav,
+.layout[data-exclusive] > .content {
+  display: none;
+}
+
+.layout[data-exclusive] > .browser {
+  flex: 1;
+  inline-size: 100%;
+  max-inline-size: none;
+  border-inline: 0;
+}
+
+.layout[data-exclusive] .browser__edge {
+  display: none;
+}
+
 /* 导航区收起后为零宽，侧栏的上限要把导航区那一份让出来（让位顺序见 design/foundations.md F6）。 */
 .layout[data-width='zero'] .browser {
   max-inline-size: calc(100% - var(--center-min) - var(--side-resize-handle));

@@ -34,13 +34,16 @@ function renderBrowser(props: Partial<Parameters<typeof Browser>[0]> = {}) {
 }
 
 describe('Browser', () => {
-  it('draws the tab strip, the three actions and the current page', () => {
+  it('draws the tab strip, the split keys, the more key and the current page', () => {
     renderBrowser()
     expect(screen.getByRole('tablist', { name: '标签浏览器' })).toBeVisible()
     expect(screen.getByRole('tab', { name: '首页' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('button', { name: '新建标签' })).toBeVisible()
-    expect(screen.getByRole('button', { name: '换到另一侧' })).toBeVisible()
-    expect(screen.getByRole('button', { name: '收掉这一栏' })).toBeVisible()
+    // 标签条右端只留两颗分屏键与一颗「…」：换边与收掉在菜单里
+    expect(screen.getByRole('button', { name: '左右分栏' })).toBeVisible()
+    expect(screen.getByRole('button', { name: '上下分栏' })).toBeVisible()
+    expect(screen.getByRole('button', { name: '更多' })).toBeVisible()
+    expect(screen.queryByRole('button', { name: '换到另一侧' })).toBeNull()
     expect(screen.getByText('首页内容')).toBeVisible()
   })
 
@@ -58,14 +61,24 @@ describe('Browser', () => {
     expect(onClose).toHaveBeenCalledWith('browser-web:example.com')
   })
 
-  it('reports its side and the three actions', async () => {
-    const { onNew, onMove, onCollapse } = renderBrowser({ side: 'left' })
+  it('reports its side and the three menu actions', async () => {
+    const onMove = vi.fn()
+    const onCollapse = vi.fn()
+    const onExclusive = vi.fn()
+    const { onNew } = renderBrowser({ side: 'left', onMove, onCollapse, onExclusive })
     expect(screen.getByRole('complementary')).toHaveAttribute('data-side', 'left')
     await userEvent.click(screen.getByRole('button', { name: '新建标签' }))
-    await userEvent.click(screen.getByRole('button', { name: '换到另一侧' }))
-    await userEvent.click(screen.getByRole('button', { name: '收掉这一栏' }))
     expect(onNew).toHaveBeenCalledTimes(1)
+
+    // 菜单里的三项：面板独占 · 换到另一侧 · 收掉这一栏
+    await userEvent.click(screen.getByRole('button', { name: '更多' }))
+    await userEvent.click(await screen.findByRole('menuitem', { name: '面板独占窗口' }))
+    expect(onExclusive).toHaveBeenCalledTimes(1)
+    await userEvent.click(screen.getByRole('button', { name: '更多' }))
+    await userEvent.click(await screen.findByRole('menuitem', { name: '换到另一侧' }))
     expect(onMove).toHaveBeenCalledTimes(1)
+    await userEvent.click(screen.getByRole('button', { name: '更多' }))
+    await userEvent.click(await screen.findByRole('menuitem', { name: '收掉这一栏' }))
     expect(onCollapse).toHaveBeenCalledTimes(1)
   })
 })

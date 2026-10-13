@@ -1,5 +1,5 @@
 import './layout.less'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { Browser, Home, Web, type BrowserTab } from '@/components/browser'
 import { Content } from '@/components/content'
@@ -58,6 +58,17 @@ export function AppLayout() {
 	/* 聚焦哪个面板（0 是第一个）与第二个面板绑哪一页；后者为空时按上面的默认取 */
 	const [focusedPane, setFocusedPane] = useState(0)
 	const [secondaryKey, setSecondaryKey] = useState('')
+	/* 面板独占整扇窗口：这一档把导航区与内容区让出去（见 design/main-shell.md §七） */
+	const [exclusive, setExclusive] = useState(false)
+	/* 独占档里 `Esc` 退出，回到原来的三栏（见 design/main-shell.md §七） */
+	useEffect(() => {
+		if (!exclusive) return
+		const onKey = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') setExclusive(false)
+		}
+		window.addEventListener('keydown', onKey)
+		return () => window.removeEventListener('keydown', onKey)
+	}, [exclusive])
 	/* 左右分栏要两个面板各有一个可用宽：导航区默认宽 + 内容区最小 + 两侧栏最小 + 把手
      （280 + 400 + 600 + 6 = 1286），窗口不够宽时这两颗键禁用（design/main-shell.md §五）。上下分栏按栏高判，这里不挡。 */
 	const splitBlocked = useMediaQuery('(width <= 1285px)')
@@ -120,6 +131,7 @@ export function AppLayout() {
 			data-width={collapsed || narrow ? 'zero' : 'panel'}
 			data-nav={collapsed || narrow ? 'collapsed' : 'expanded'}
 			data-browser={browserHidden ? 'collapsed' : browserSide}
+			data-exclusive={exclusive ? 'true' : undefined}
 		>
 			<Nav
 				items={MAIN_ITEMS.map(mark)}
@@ -182,6 +194,8 @@ export function AppLayout() {
 				secondaryLabel={nameOf(secondaryTab)}
 				focusedPane={focusedPane}
 				onFocusPane={setFocusedPane}
+				exclusive={exclusive}
+				onExclusive={() => setExclusive(!exclusive)}
 			>
 				{renderTab(active)}
 			</Browser>
