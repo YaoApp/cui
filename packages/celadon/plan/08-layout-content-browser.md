@@ -14,16 +14,18 @@
 
 - [x] 1. **列序**：互换只对调内容区与标签浏览器，导航列恒为第一。`eb4d37d6`
 - [x] 2. **让位顺序**：内容区 → 标签浏览器 → 导航区 → 标签浏览器整条收起。`98248560`（生成物 `dc9d2f7b`）
-- [x] 3. **分屏结构与分屏键**：一层分屏，两面板各绑一个标签，左右与上下两种，栏宽不足时左右分栏禁用（§3.1 第 7 · 8 处）。`772d4177`
-- [x] 4. **分隔条**：跟手拖动 · 比例持久 · 双击回平分（§3.1 第 9 处）。`1743034a`
-- [ ] 5. **「…」菜单**：换边与收掉挪进去，键盘可达（§3.1 第 5 · 6 处）
-- [ ] 6. **面板独占窗口**：占满整扇窗口，退出回原侧原宽与分屏状态（§3.1 第 10 处）
-- [ ] 7. **标签规则**：固定首页 · 只有首页不画新建键 · 新建落聚焦面板（§3.1 第 11 处）
-- [ ] 8. **状态与偏好**：分屏方向 · 比例 · 标签与面板绑定的读写与持久（§3.1 第 13 处）
+- [x] 3. **分屏结构与分屏键**：一层分屏，两面板各自绑页，左右与上下两种，栏宽不足时按**本栏实宽**禁用。`772d4177` · `1c23de4d` · `d0df1311`（上下分屏的高亮带横排）
+- [x] 4. **分隔与边界**：面板之间的分隔条跟手拖动 · 双击回平分 · 比例夹在 0.2 与 0.8；内容区与标签浏览器之间那条分界线可拖 · 双击回默认宽；两处口径与导航列右缘一致（抓手 8 像素 · 悬停延迟 300ms · 4 像素高亮带 · 拖动锁选择）。`1743034a` · `02674c75` · `220e6cdc` · `d032c75c` · `4726ce46` · `a3d07864` · `1d938c17`
+- [x] 5. **「…」菜单**：标签条右端只留两颗分屏键加一颗「…」，换边与收掉进菜单，键盘可达，样式按 `design/layout.md` §3 的列表项口径。`6b6a7837` · `47230aaa` · `46fccdc2` · `f350f12e`
+- [x] 6. **面板独占窗口**：整栏占满整扇窗口，导航区与内容区让位，`Esc` 退出回原来的三栏；菜单第一项。`c856e7dc`
+- [~] 7. **标签规则**：两个面板各自选页与聚焦面板已做（`1c23de4d`）；「只有首页时不画新建键」与「关掉面板最后一页落回首页」未做（§3.1 第 11 处）
+- [~] 8. **状态与偏好**：分屏方向 · 比例 · 本栏宽度 · 侧别都记本机（`772d4177` · `220e6cdc`）；标签与面板的绑定目前是装配层的视图状态，未入偏好（§3.1 第 13 处）
 - [ ] 9. **动效**：互换 · 收起展开 · 分栏合栏 · 独占还原 · 标签开关接 Motion（§3.1 第 12 处）
-- [ ] 10. **回写与用例收口**：组件 README · 索引状态 · 分屏与独占用例（§3.1 第 14 · 15 处，§2 余下五条）
+- [~] 10. **回写与用例收口**：F6 · token 注释 · 三处样式注释已改；既有浏览器用例 23 条、单测 23 条全过。组件 README · 索引状态 · §2 余下五条未做（§3.1 第 14 · 15 处）
 
 散在别处的两处小账：§3.1 第 2 处（分界线的颜色与贴左缘无分界线的用例）与第 3 处（macOS 交通灯留白的实测用例）随第 10 条一起收。
+
+**图标账**：`i-rows`（lucide `rows-2`）· `i-swap`（`arrow-left-right`）· `i-expand`（`expand`）三个已进 manifest 与 sprite；`i-split` 只服务左右分栏，换边不再用分屏图形。
 
 **这份清单只到第一轮。** 十条全部做完之后不再往下开新活，先把这一轮交给各端测试（Web 的浏览器与拟人用例 · macOS 客户端 · Windows 客户端），测试通过再安排第二轮（§4：标签键盘路径 · 首页按使用顺序记录 · 地址错误态 · 溢出与长内容 · 状态齐）。
 
@@ -66,17 +68,17 @@
 | 2 | 分界线的侧别 | `components/browser/browser.less` 的 `[data-side]` | 只有一条分界线，落在内容区与标签浏览器之间；互换后换到另一侧，颜色仍取 `--border-subtle`；浏览器贴窗口左缘时左缘无分界线 | **部分**：`data-side` 与两侧描边规则在；颜色与贴左缘两项没有专项用例 |
 | 3 | 交通灯留白的归属 | `components/content/parts/head/head.tsx` · `nav.less` | macOS 上留白仍由导航列列头承担，内容列头的 `padding-inline-start` 在互换前后相同 | **未做**：实现按原样保留（导航列恒在最左），但没有实测用例 |
 | 4 | 让位顺序 | `routes/layout.less` · `components/content/content.less` · `components/browser/browser.less` · `routes/layout.tsx` · `design/tokens.less` | 压窄窗口依次看到内容区到 `--center-min`、标签浏览器到 `--side-min`、导航列收起、标签浏览器整条收起；标签浏览器在左时同样顺序 | **完成** `98248560`（生成物随 `dc9d2f7b`）；用例 `yields in order: content first, then the browser, then the navigation column`；读数 1280→1000→969→900→706→700→520 |
-| 5 | 互换的入口 | `components/browser/browser.tsx` | 「换到另一侧」收进「…」菜单，四语文案齐，动作后焦点仍在原键上 | **未做**：键仍在标签条右端 |
-| 6 | 「…」菜单的实现 | 优先复用 `components/nav/parts/menu/` 的做法；做成公共件则落 `components/base/menu/` | 键盘可达（方向键 · `Esc` 交回焦点），与标签条右端两颗键同一行不换行 | **未做** |
-| 7 | 分屏的结构 | `components/browser/` 的 `.browser__body` 与 `.browser__pane` | 一层分屏，左右与上下两种；两个面板各绑一个标签，同一标签不重复占两栏；两面板各自滚动；面板头部高取 `--row-height` | **部分** `772d4177`：结构与两个面板在，第二个面板当前固定停在首页；面板绑标签与聚焦面板未做 |
-| 8 | 分屏的键与状态 | `components/browser/browser.tsx` · `browser.less` | 标签条右端「左右分栏」「上下分栏」「…」；同键再按回单面板，异键直接改朝向；栏宽不足时左右分栏禁用并给气泡，上下分栏按栏高判 | **部分** `772d4177`：两颗键 · 同键还原 · 异键改朝向 · 栏宽不足禁用与气泡在；**分屏不再自动加宽整栏**（那会让点下去整块跳），栏宽改由两栏分界线拖出；「…」菜单未做（第 5 · 6 处），上下分栏按栏高判未做，禁用态目前按窗口宽（≤1285）代理，未按本栏实宽判 |
+| 5 | 互换的入口 | `components/browser/browser.tsx` | 「换到另一侧」收进「…」菜单，四语文案齐，动作后焦点仍在原键上 | **完成** `6b6a7837`；相关用例改走 `更多 → 换到另一侧` |
+| 6 | 「…」菜单的实现 | `components/browser/browser.tsx` 里的 `@base-ui/react/menu`（口径照 `components/nav/parts/menu/`） | 键盘可达（方向键 · `Esc` 交回焦点），与标签条右端两颗键同一行不换行 | **完成** `6b6a7837` · `47230aaa` · `46fccdc2`（样式按 `design/layout.md` §3：内距 8/12 · 最小高 32 · 项间距 4 · 字号 `--font-size-body`）；四语键 `shell.browser.action.more` 随 `f350f12e` 补齐 |
+| 7 | 分屏的结构 | `components/browser/` 的 `.browser__body` 与 `.browser__pane` · `routes/layout.tsx` | 一层分屏，左右与上下两种；两个面板各绑一个标签，同一标签不重复占两栏；两面板各自滚动；面板头部高取 `--row-height` | **完成** `772d4177` · `d98a7de1` · `1c23de4d`：两面板各自绑页（第二个面板有自己的小条），标签条的点击落在聚焦面板；用例 `shows another page in the second pane…` · `switches the pane that has focus…` |
+| 8 | 分屏的键与状态 | `components/browser/browser.tsx` · `browser.less` | 标签条右端「左右分栏」「上下分栏」「…」；同键再按回单面板，异键直接改朝向；栏宽不足时左右分栏禁用并给气泡，上下分栏按栏高判 | **部分**：两颗键 · 同键还原 · 异键改朝向 · **按本栏实宽禁用**（`1c23de4d`）在，图标 `i-split` 与 `i-rows`；上下分栏的**栏高**判定与栏高不足禁用未做，分屏也不再自动加宽整栏（改为由分界线拖出，避免点下去跳） |
 | 9 | 分隔条与分界线 | `components/browser/hooks/use-split-resize.ts` · `use-column-resize.ts` · `browser.less` 的 `.browser__divider` 与 `.browser__edge` | 拖动跟手、松手把比例写入本机、双击回平分；内容区与标签浏览器之间那条分界线可拖、双击回默认宽；宽度取 token | **完成**：面板之间的分隔条 `1743034a` · `02674c75`（抓手与指针口径同导航列右缘）；两栏分界线 `220e6cdc` · `d032c75c` · `4726ce46`（抓手锚在本栏上，双击复位在抬起层按两次间隔判，宽度入本机偏好 `browserWidth`）。用例 `drags the boundary between the content and the browser` · `resets the browser width by double clicking the boundary`；实测 400 → 拖后 700 → 双击回 400 |
-| 10 | 面板独占窗口 | `components/browser/` | 「…」里的独占项让聚焦面板占满整扇窗口，客户端自身的导航与内容列头都不出现；macOS 上交通灯留白由面板头部承担；退出回原侧原宽，分栏方向与比例不变 | **未做** |
-| 11 | 标签的规则 | `components/browser/browser.tsx` | 第一个标签固定是首页且不可关；只有首页时不画新建键；新建落在聚焦面板并停在首页；关掉面板最后一页落回首页 | **未做** |
+| 10 | 面板独占窗口 | `routes/layout.tsx` · `routes/layout.less` · `components/browser/browser.tsx` | 「…」里的独占项让整栏占满整扇窗口，客户端自身的导航与内容列头都不出现；退出回原来的三栏 | **完成** `c856e7dc`：根节点 `data-exclusive` · 导航区与内容区让位 · 标签浏览器铺满 · `Esc` 退出 · 菜单第一项带 `aria-pressed`；用例 `takes the pane full window and comes back with Escape`，实测 1280 宽 / x=0，导航区隐藏 |
+| 11 | 标签的规则 | `components/browser/browser.tsx` | 第一个标签固定是首页且不可关；只有首页时不画新建键；新建落在聚焦面板并停在首页；关掉面板最后一页落回首页 | **部分**：第一个标签固定为首页且不可关在（单测 `never offers a close key on the home tab`）；「只有首页时不画新建键」与「关掉面板最后一页落回首页」未做 |
 | 12 | 动效 | 各栏与面板的容器 | 互换用布局动画；收起展开、分栏合栏、独占还原用布局动画；拖动跟手无过渡、落位与双击复位有过渡；标签开关淡入淡出加位移；时长与缓动取 token 与动效强度档；`prefers-reduced-motion` 下全部即时 | **未做**（前置条件已具备：收掉改零宽，节点不卸载，布局动画量得到前后状态） |
-| 13 | 状态与偏好 | `stores/layout/columns.ts` · 新增 `stores/browser/` 一族 | 侧别与分屏记本机、刷新保持、清空回到默认；标签与面板的绑定按 `architecture/06-state.md` §2.3 落 `stores/browser/` | **部分**：侧别持久在；分屏的偏好与标签绑定未落 |
-| 14 | 组件文档与计划回写 | `components/browser/README.zh-CN.md` · 本册 · [08-layout-index.md](08-layout-index.md) | 组件的状态表补分屏 · 独占 · 禁用态三行；本册与索引的状态跟着更新 | **部分**：F6 · token 注释 · 三处样式注释已改；组件 README 与索引未动 |
-| 15 | 用例 | `features/inbox/tests/layout.browser.ts` · `components/browser/` 的 `*.test.tsx` 与 `tests/*.browser.ts` · `stores/layout/` | 互换 · 让位 · 分屏 · 独占 · 禁用态 · 「…」菜单各有用例；新增 `.less` 由同目录 `.tsx` 引入，浏览器用例落在 `tests/` 内 | **部分**：互换 · 让位 · 收掉 · 最小窗口各一条在；分屏与独占未落 |
+| 13 | 状态与偏好 | `stores/layout/columns.ts` · `routes/layout.tsx` | 侧别 · 分屏方向 · 比例 · 本栏宽度记本机、刷新保持、清空回到默认；标签与面板的绑定是装配层的视图状态 | **部分**：`browserSide` · `browserSplit` · `splitRatio` · `browserWidth` 都进本机偏好（`772d4177` · `220e6cdc`）；标签与面板的绑定（`focusedPane` · `secondaryKey`）是装配层视图状态，未入偏好，是否需要持久待定 |
+| 14 | 组件文档与计划回写 | `components/browser/README.zh-CN.md` · 本册 · [08-layout-index.md](08-layout-index.md) | 组件的状态表补分屏 · 独占 · 禁用态三行；本册与索引的状态跟着更新 | **部分**：F6 · token 注释 · 三处样式注释已改；组件 README 与索引状态未动 |
+| 15 | 用例 | `features/inbox/tests/layout.browser.ts` · `components/browser/browser.test.tsx` · `stores/layout/` | 互换 · 让位 · 分屏 · 独占 · 禁用态 · 「…」菜单各有用例；新增 `.less` 由同目录 `.tsx` 引入，浏览器用例落在 `tests/` 内 | **完成**（本轮范围）：浏览器用例 **23 条**（互换两侧 · 让位七档 · 分屏开关与朝向 · 按本栏实宽禁用 · 面板分隔条拖动与双击 · 两栏分界线拖动与双击复位 · 拖动锁选择 · 两页不重样 · 聚焦面板换页 · 上下分屏极值 · 面板独占与 `Esc`），单测 **23 条**（含菜单三项与四语键）；分屏的栏高判定用例随第 8 处补 |
 
 ### 3.2 算做完的样子
 
