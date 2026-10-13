@@ -189,7 +189,12 @@ export function AppLayout() {
 				}}
 				onNew={() => activateTab(HOME_TAB)}
 				onMove={() => setBrowserSide(browserSide === 'right' ? 'left' : 'right')}
-				onCollapse={toggleBrowser}
+				onCollapse={() => {
+					/* 独占档里收掉这一栏：先退出独占。否则导航区与内容区都在让位、本栏又收成零宽，
+					   整扇窗口空着，重新展开的入口也不在（它在内容列头里） */
+					setExclusive(false)
+					toggleBrowser()
+				}}
 				secondary={renderTab(secondaryTab)}
 				secondaryLabel={nameOf(secondaryTab)}
 				focusedPane={focusedPane}

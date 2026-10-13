@@ -576,3 +576,28 @@ test('takes the pane full window and comes back with Escape', async ({ page }) =
 	await expect(columns(page).nav).toBeVisible()
 	await expect(columns(page).content).toBeVisible()
 })
+
+test('leaves the exclusive mode when the column is collapsed from the menu', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+
+	// 进独占，再从菜单里收掉这一栏
+	await browser.getByRole('button', { name: '更多' }).click()
+	await page.getByRole('menuitem', { name: '面板独占窗口' }).click()
+	await expect(page.locator('.layout')).toHaveAttribute('data-exclusive', 'true')
+
+	await browser.getByRole('button', { name: '更多' }).click()
+	await page.getByRole('menuitem', { name: '收掉这一栏' }).click()
+
+	// 独占已经退出，导航区与内容区回来，本栏收成零宽，重新展开的入口在内容列头里
+	await expect(page.locator('.layout')).not.toHaveAttribute('data-exclusive', 'true')
+	await expect(columns(page).nav).toBeVisible()
+	await expect(columns(page).content).toBeVisible()
+	await expect(browser).toHaveAttribute('data-collapsed', 'true')
+	await expect(browser).toHaveCSS('inline-size', '0px')
+	// 整扇窗口不留空白：内容区占住了并且宽度正常
+	const contentBox = (await columns(page).content.boundingBox())!
+	expect(contentBox.width).toBeGreaterThan(900)
+})
