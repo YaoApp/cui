@@ -97,10 +97,10 @@ const items: NavItem[] = [
 | 状态 | 表达方式 |
 | --- | --- |
 | 缺省 | 条目透明底，文字取 `--text-primary`。 |
-| 悬停 | 底取 `--background-hover`。 |
+| 悬停 | 底取 `--nav-hover`（导航列专用档，通用 `--background-hover` 只服务白底场景）；键盘高亮 `[data-highlighted]` 同用这一档。 |
 | 焦点 | `box-shadow: var(--focus-ring)`，由 `:focus-visible` 触发。 |
-| 当前 | 底取 `--background-selected`，文字取 `--brand-ink`，并带 `aria-current="page"`。 |
-| 未读 | 角标底取 `--brand-soft`，字色取 `--brand-ink`。 |
+| 当前 | 底取 `--nav-select`，文字取 `--text-primary`，并带 `aria-current="page"`；选中由明度差表达，不用品牌色。 |
+| 未读 | 角标底取 `--brand-soft`，字色取 `--brand-ink`；当前项上的角标暂不渲染，样式保留。 |
 | 整列收起 | 列宽为 `0`（`[data-width='zero']`），内距与右侧描边一起收到零，整列不可见；重新展开的出口在内容列头左端。 |
 | 上区折叠 | 上区收缩到零高：折叠体的高度由 Motion 动到 `0`（`overflow: hidden`），上区自身 `flex: 0 1 auto` 不吃剩余高度；列底出现「当前」那一行与展开键。 |
 | 拖动列宽 | 指针进入右缘 4 像素带后光标即时变化、高亮延迟 300 毫秒出现；按下按帧应用，双击复位，方向键调整。 |
