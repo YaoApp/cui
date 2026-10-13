@@ -45,6 +45,8 @@ export type BrowserProps = {
   children: ReactNode
   /** 第二个面板的当前页；只有分屏时才渲染 */
   secondary?: ReactNode
+  /** 第二个面板那一页的名字，画在它自己的小条上 */
+  secondaryLabel?: string
 }
 
 /* 标签浏览器：顶部标签条（首页固定第一个、新建吸附右端），下面当前页或两个面板。
@@ -69,6 +71,7 @@ export function Browser({
   onCollapse,
   children,
   secondary = null,
+  secondaryLabel = '',
 }: BrowserProps) {
   const { t } = useTranslation()
   const splitResize = useSplitResize(
@@ -261,6 +264,8 @@ export function Browser({
               <span className="browser__grip" aria-hidden="true" />
             </div>
             <div className="browser__pane">
+              {/* 第二个面板自己的小条：写出它绑的是哪一页，与第一个面板的内容区分开 */}
+              <div className="browser__pane-head">{secondaryLabel}</div>
               <ScrollArea className="browser__page" size="medium" persistent>{secondary}</ScrollArea>
             </div>
           </>

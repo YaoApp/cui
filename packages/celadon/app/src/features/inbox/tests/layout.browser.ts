@@ -403,3 +403,30 @@ test('keeps the split and the boundary working after the browser moves to the le
 	expect(await width()).toBeGreaterThan(before + 60)
 	await expect(page.locator('body')).not.toHaveCSS('user-select', 'none')
 })
+
+test('shows another page in the second pane instead of the same page twice', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+
+	// 先开第二页：首页的地址栏里回车开一个外部地址
+	await browser.getByLabel('外部地址').fill('example.com')
+	await browser.getByLabel('外部地址').press('Enter')
+	await expect(browser.getByRole('tab', { name: 'example.com' })).toHaveCount(1)
+
+	// 拖宽本栏，再分屏
+	const edge = browser.locator('.browser__edge')
+	const grip = (await edge.boundingBox())!
+	await page.mouse.move(grip.x + grip.width / 2, grip.y + 300)
+	await page.mouse.down()
+	await page.mouse.move(grip.x + grip.width / 2 - 300, grip.y + 300, { steps: 8 })
+	await page.mouse.up()
+	await browser.getByRole('button', { name: '左右分栏' }).click()
+
+	// 第一个面板是当前页（example.com），第二个面板绑另一页（首页），两页不重样
+	const panes = browser.locator('.browser__pane')
+	await expect(panes).toHaveCount(2)
+	await expect(panes.nth(0).getByText('example.com')).toHaveCount(1)
+	await expect(browser.locator('.browser__pane-head')).toHaveText('首页')
+})

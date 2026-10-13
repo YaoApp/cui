@@ -91,6 +91,19 @@
 	flex: none;
 }
 
+/* 第二个面板自己的小条：高度与标签条一致，写出它绑的是哪一页 */
+.browser__pane-head {
+	flex: none;
+	block-size: var(--row-height);
+	display: flex;
+	align-items: center;
+	padding-inline: var(--spacing-8);
+	border-block-end: var(--border-width) solid var(--border-subtle);
+	color: var(--text-secondary);
+	cursor: default;
+	user-select: none;
+}
+
 .browser__divider {
 	flex: none;
 	position: relative;

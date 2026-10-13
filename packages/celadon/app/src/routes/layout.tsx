@@ -88,6 +88,9 @@ export function AppLayout() {
 		closable: tab.kind !== 'browser-home'
 	}))
 	const active = tabs.find((tab) => tabKey(tab) === activeKey) ?? HOME_TAB
+	/* 第二个面板绑另一页：取第一个不是当前页的标签，没有别的页时停在首页。
+	   这样分屏一开就是两页并排，而不是同一页画两遍（面板各自选页随第 7 · 8 处一起做） */
+	const secondaryTab = tabs.find((tab) => tabKey(tab) !== activeKey) ?? HOME_TAB
 
 	/* 一页的内容：两个面板共用同一个函数，分屏时各自渲染自己那一页 */
 	const renderTab = (tab: TabEntry) => {
@@ -166,7 +169,8 @@ export function AppLayout() {
 				onNew={() => activateTab(HOME_TAB)}
 				onMove={() => setBrowserSide(browserSide === 'right' ? 'left' : 'right')}
 				onCollapse={toggleBrowser}
-				secondary={renderTab(HOME_TAB)}
+				secondary={renderTab(secondaryTab)}
+				secondaryLabel={nameOf(secondaryTab)}
 			>
 				{renderTab(active)}
 			</Browser>
