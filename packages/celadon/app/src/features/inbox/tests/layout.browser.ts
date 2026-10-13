@@ -199,3 +199,41 @@ test('yields in order: content first, then the browser, then the navigation colu
 	await expect(page.locator('.layout')).toHaveAttribute('data-browser', 'collapsed')
 	await expect(columns(page).browser).toHaveCSS('inline-size', '0px')
 })
+
+test('splits the browser into two panes and back', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await expect(browser).toHaveAttribute('data-split', 'none')
+	await expect(browser.locator('.browser__pane')).toHaveCount(1)
+
+	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await expect(browser).toHaveAttribute('data-split', 'columns')
+	await expect(browser.locator('.browser__pane')).toHaveCount(2)
+	// 分屏后整栏加宽到工具档，两个面板平分
+	expect(await browser.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThanOrEqual(600)
+	const panes = await browser
+		.locator('.browser__pane')
+		.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)))
+	expect(Math.abs(panes[0] - panes[1])).toBeLessThanOrEqual(2)
+
+	// 换方向：直接改朝向，不回到单面板
+	await browser.getByRole('button', { name: '上下分栏' }).click()
+	await expect(browser).toHaveAttribute('data-split', 'rows')
+	await expect(browser.locator('.browser__pane')).toHaveCount(2)
+
+	// 再点同一颗回到单面板
+	await browser.getByRole('button', { name: '上下分栏' }).click()
+	await expect(browser).toHaveAttribute('data-split', 'none')
+	await expect(browser.locator('.browser__pane')).toHaveCount(1)
+})
+
+test('disables the split keys when the window cannot fit two panes', async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 800 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	await expect(browser.getByRole('button', { name: '左右分栏' })).toBeDisabled()
+	await expect(browser.getByRole('button', { name: '上下分栏' })).toBeDisabled()
+})

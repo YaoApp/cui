@@ -19,6 +19,45 @@
 	border-inline-end: var(--border-width) solid var(--border-subtle);
 }
 
+/* 分屏：一层两个面板（左右或上下）。分屏时整栏加宽到工具档，两个面板才各有一个可用的宽；
+   单面板不渲染第二个面板与分隔条，结构不变。 */
+.browser[data-split='columns'],
+.browser[data-split='rows'] {
+	inline-size: var(--side-width-tool);
+}
+
+.browser__body {
+	flex: 1;
+	min-block-size: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.browser__body[data-split='columns'] {
+	flex-direction: row;
+}
+
+.browser__pane {
+	flex: 1;
+	min-inline-size: 0;
+	min-block-size: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.browser__divider {
+	flex: none;
+	inline-size: var(--border-width);
+	background: var(--border-subtle);
+}
+
+.browser__body[data-split='rows'] .browser__divider {
+	inline-size: auto;
+	block-size: var(--border-width);
+}
+
 .browser__bar {
 	position: relative;
 	flex: none;

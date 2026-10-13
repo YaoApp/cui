@@ -48,6 +48,11 @@ export function AppLayout() {
 	const toggleMain = useColumnsStore((state) => state.toggleNavMain)
 	const browserCollapsed = useColumnsStore((state) => state.browserCollapsed)
 	const browserHidden = browserCollapsed || narrowForBrowser
+	const browserSplit = useColumnsStore((state) => state.browserSplit)
+	const setBrowserSplit = useColumnsStore((state) => state.setBrowserSplit)
+	/* 左右分栏要两个面板各有一个可用宽：导航区默认宽 + 内容区最小 + 两侧栏最小 + 把手
+     （280 + 400 + 600 + 6 = 1286），窗口不够宽时这两颗键禁用（design/main-shell.md §五）。上下分栏按栏高判，这里不挡。 */
+	const splitBlocked = useMediaQuery('(width <= 1285px)')
 	const toggleBrowser = useColumnsStore((state) => state.toggleBrowser)
 	const browserSide = useColumnsStore((state) => state.browserSide)
 	const setBrowserSide = useColumnsStore((state) => state.setBrowserSide)
@@ -79,6 +84,21 @@ export function AppLayout() {
 		closable: tab.kind !== 'browser-home'
 	}))
 	const active = tabs.find((tab) => tabKey(tab) === activeKey) ?? HOME_TAB
+
+	/* 一页的内容：两个面板共用同一个函数，分屏时各自渲染自己那一页 */
+	const renderTab = (tab: TabEntry) => {
+		if (tab.kind === 'browser-home')
+			return (
+				<Home
+					recent={tabs
+						.filter((item) => item.kind !== 'browser-home')
+						.map((item) => ({ key: tabKey(item), label: nameOf(item) }))}
+					onOpenAddress={(address) => openTab({ kind: 'browser-web', id: address })}
+				/>
+			)
+		if (tab.kind === 'browser-web') return <Web address={tab.id} />
+		return <p className='content__hint'>{t('shell.content.placeholder')}</p>
+	}
 
 	return (
 		<div
@@ -120,6 +140,9 @@ export function AppLayout() {
 				activeKey={activeKey}
 				side={browserSide}
 				collapsed={browserHidden}
+				split={browserSplit}
+				splitBlocked={splitBlocked}
+				onSplit={setBrowserSplit}
 				onActivate={(key) => {
 					const tab = byKey(key)
 					if (tab) activateTab(tab)
@@ -131,19 +154,9 @@ export function AppLayout() {
 				onNew={() => activateTab(HOME_TAB)}
 				onMove={() => setBrowserSide(browserSide === 'right' ? 'left' : 'right')}
 				onCollapse={toggleBrowser}
+				secondary={renderTab(HOME_TAB)}
 			>
-				{active.kind === 'browser-home' ? (
-					<Home
-						recent={tabs
-							.filter((tab) => tab.kind !== 'browser-home')
-							.map((tab) => ({ key: tabKey(tab), label: nameOf(tab) }))}
-						onOpenAddress={(address) => openTab({ kind: 'browser-web', id: address })}
-					/>
-				) : null}
-				{active.kind === 'browser-web' ? <Web address={active.id} /> : null}
-				{active.kind !== 'browser-home' && active.kind !== 'browser-web' ? (
-					<p className='content__hint'>{t('shell.content.placeholder')}</p>
-				) : null}
+				{renderTab(active)}
 			</Browser>
 		</div>
 	)
