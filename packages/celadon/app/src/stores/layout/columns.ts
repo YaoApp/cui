@@ -21,6 +21,8 @@ type ColumnsState = {
   splitRatio: number
   /** 导航列宽度（像素）。null 表示跟随 `--nav-default`，用户拖过把手才有值 */
   navWidth: number | null
+  /** 标签浏览器宽度（像素）。null 表示跟随 `--side-width-reading`，用户拖过分界线才有值 */
+  browserWidth: number | null
   setNavCollapsed: (collapsed: boolean) => void
   toggleNav: () => void
   toggleNavMain: () => void
@@ -29,6 +31,7 @@ type ColumnsState = {
   setBrowserSplit: (split: BrowserSplit) => void
   setSplitRatio: (ratio: number) => void
   setNavWidth: (width: number | null) => void
+  setBrowserWidth: (width: number | null) => void
 }
 
 /* 三栏的布局事实：两处收起、标签浏览器所在的一侧与分屏。装配层、内容区与快捷键都读它，
@@ -43,6 +46,7 @@ export const useColumnsStore = create<ColumnsState>()(
         browserCollapsed: false,
         browserSide: 'right',
         browserSplit: 'none',
+        browserWidth: null,
         splitRatio: 0.5,
         navWidth: null,
         setNavCollapsed: (navCollapsed) =>
@@ -69,6 +73,8 @@ export const useColumnsStore = create<ColumnsState>()(
             'layout/setSplitRatio',
           ),
         setNavWidth: (navWidth) => set({ navWidth }, false, 'layout/setNavWidth'),
+        setBrowserWidth: (browserWidth) =>
+          set({ browserWidth }, false, 'layout/setBrowserWidth'),
       }),
       {
         name: 'cui.layout',
@@ -82,6 +88,7 @@ export const useColumnsStore = create<ColumnsState>()(
           browserSplit: state.browserSplit,
           splitRatio: state.splitRatio,
           navWidth: state.navWidth,
+          browserWidth: state.browserWidth,
         }),
       },
     ),

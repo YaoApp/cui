@@ -52,6 +52,8 @@ export function AppLayout() {
 	const setBrowserSplit = useColumnsStore((state) => state.setBrowserSplit)
 	const splitRatio = useColumnsStore((state) => state.splitRatio)
 	const setSplitRatio = useColumnsStore((state) => state.setSplitRatio)
+	const browserWidth = useColumnsStore((state) => state.browserWidth)
+	const setBrowserWidth = useColumnsStore((state) => state.setBrowserWidth)
 	/* 左右分栏要两个面板各有一个可用宽：导航区默认宽 + 内容区最小 + 两侧栏最小 + 把手
      （280 + 400 + 600 + 6 = 1286），窗口不够宽时这两颗键禁用（design/main-shell.md §五）。上下分栏按栏高判，这里不挡。 */
 	const splitBlocked = useMediaQuery('(width <= 1285px)')
@@ -146,6 +148,8 @@ export function AppLayout() {
 				splitBlocked={splitBlocked}
 				splitRatio={splitRatio}
 				onSplitRatio={setSplitRatio}
+				width={browserWidth}
+				onWidth={setBrowserWidth}
 				onSplit={setBrowserSplit}
 				onActivate={(key) => {
 					const tab = byKey(key)

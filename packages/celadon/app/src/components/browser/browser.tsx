@@ -7,6 +7,7 @@ import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserSplit } from '@/stores/layout/columns'
 import { useSplitResize } from './hooks/use-split-resize'
+import { useColumnResize } from './hooks/use-column-resize'
 
 export type BrowserTab = {
   /** 一页的稳定标识 */
@@ -31,6 +32,9 @@ export type BrowserProps = {
   splitRatio?: number
   onSplitRatio?: (ratio: number) => void
   onSplit?: (split: BrowserSplit) => void
+  /** 整栏宽度（像素）。null 表示跟随 token 默认宽，用户拖过分界线才有值 */
+  width?: number | null
+  onWidth?: (width: number | null) => void
   onActivate: (key: string) => void
   onClose: (key: string) => void
   /** 新建：落在首页的地址栏 */
@@ -56,6 +60,8 @@ export function Browser({
   splitRatio = 0.5,
   onSplitRatio = () => {},
   onSplit = () => {},
+  width = null,
+  onWidth = () => {},
   onActivate,
   onClose,
   onNew,
@@ -70,16 +76,35 @@ export function Browser({
     splitRatio,
     onSplitRatio
   )
+  const columnResize = useColumnResize(width, onWidth, side)
   return (
     <aside
       className="browser"
       data-side={side}
       data-split={split}
       data-collapsed={collapsed}
+      data-resizing={columnResize.highlighted || undefined}
+      ref={columnResize.ref}
       aria-label={t('shell.browser.label')}
       aria-hidden={collapsed || undefined}
       inert={collapsed || undefined}
     >
+      {/* 内容区与标签浏览器之间那条分界线：拖动改本栏宽度，双击回默认宽（口径同导航列右缘） */}
+      <span
+        className="browser__edge"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label={t('shell.browser.split.columns')}
+        aria-valuemin={columnResize.min}
+        aria-valuemax={columnResize.max}
+        aria-valuenow={width ?? undefined}
+        tabIndex={0}
+        data-no-drag
+        onPointerEnter={columnResize.onPointerEnter}
+        onPointerLeave={columnResize.onPointerLeave}
+        onPointerDown={columnResize.onPointerDown}
+        onDoubleClick={columnResize.onDoubleClick}
+      />
       <div className="browser__bar">
         <ScrollArea className="browser__tabs" size="small">
           <div className="browser__tabs-row" role="tablist" aria-label={t('shell.browser.label')}>

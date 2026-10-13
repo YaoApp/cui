@@ -19,13 +19,42 @@
 	border-inline-end: var(--border-width) solid var(--border-subtle);
 }
 
-/* 分屏：一层两个面板（左右或上下）。分屏时整栏加宽到工具档，两个面板才各有一个可用的宽；
-   单面板不渲染第二个面板与分隔条，结构不变。 */
-.browser[data-split='columns'],
-.browser[data-split='rows'] {
-	inline-size: var(--side-width-tool);
+/* 内容区与标签浏览器之间那条分界线：贴在面向内容区的一侧，抓手取 --side-resize-handle，
+   线由伪元素画。与导航列右缘同一口径：悬停与拖动时把线换成 --border-hover。 */
+.browser__edge {
+	position: absolute;
+	z-index: 2;
+	inset-block: 0;
+	inset-inline-start: 0;
+	inline-size: var(--side-resize-handle);
+	cursor: col-resize;
+	touch-action: none;
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset-block: 0;
+		inset-inline-start: 0;
+		inline-size: var(--border-width);
+		background: var(--border-subtle);
+	}
 }
 
+.browser[data-side='left'] .browser__edge {
+	inset-inline: auto 0;
+
+	&::before {
+		inset-inline: auto 0;
+	}
+}
+
+.browser[data-resizing] .browser__edge::before,
+.browser__edge:hover::before {
+	background: var(--border-hover);
+}
+
+/* 分屏：一层两个面板（左右或上下），单面板不渲染第二个面板与分隔条。
+   分屏不加宽本栏：宽度由分界线拖出来，栏宽不够时两颗分栏键禁用。 */
 .browser__body {
 	flex: 1;
 	min-block-size: 0;
