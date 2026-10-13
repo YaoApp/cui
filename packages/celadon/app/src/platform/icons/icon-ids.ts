@@ -32,6 +32,8 @@ export type IconId =
   | 'i-dots'
   | 'i-file'
   | 'i-split'
+  | 'i-rows'
+  | 'i-swap'
   | 'i-send'
   | 'i-check'
   | 'i-clock'

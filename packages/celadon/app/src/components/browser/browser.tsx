@@ -1,5 +1,6 @@
 import './browser.less'
 import { useEffect, useState, type ReactNode } from 'react'
+import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Button } from '@/components/base/button'
 import { Icon } from '@/components/base/icon'
 import { ScrollArea } from '@/components/base/scroll-area'
@@ -217,33 +218,33 @@ export function Browser({
             aria-label={t('shell.browser.split.rows')}
             onClick={() => onSplit(split === 'rows' ? 'none' : 'rows')}
           >
-            <Icon name="i-split2" size={16} />
+            <Icon name="i-rows" size={16} />
           </Button>
         </Tooltip>
-        <Tooltip label={t('shell.browser.action.move')} side="bottom">
-          <Button
-            className="browser__move"
-            iconOnly
-            variant="ghost"
-            size="small"
-            aria-label={t('shell.browser.action.move')}
-            onClick={onMove}
+        {/* 右端第三颗是「…」更多：换边与收掉收进菜单，标签条上只留分屏两颗键（design/main-shell.md §五） */}
+        <BaseMenu.Root>
+          <BaseMenu.Trigger
+            className="browser__more"
+            aria-label={t('shell.browser.label')}
+            render={<Button iconOnly variant="ghost" size="small" />}
           >
-            <Icon name="i-split" size={16} />
-          </Button>
-        </Tooltip>
-        <Tooltip label={t('shell.browser.action.collapse')} side="bottom">
-          <Button
-            className="browser__collapse"
-            iconOnly
-            variant="ghost"
-            size="small"
-            aria-label={t('shell.browser.action.collapse')}
-            onClick={onCollapse}
-          >
-            <Icon name="i-panel-right" size={16} />
-          </Button>
-        </Tooltip>
+            <Icon name="i-dots" size={16} />
+          </BaseMenu.Trigger>
+          <BaseMenu.Portal>
+            <BaseMenu.Positioner side="bottom" align="end" sideOffset={4}>
+              <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.move')}>
+                <BaseMenu.Item className="browser__menu-item" onClick={onMove}>
+                  <Icon name="i-swap" size={16} />
+                  <span>{t('shell.browser.action.move')}</span>
+                </BaseMenu.Item>
+                <BaseMenu.Item className="browser__menu-item" onClick={onCollapse}>
+                  <Icon name="i-panel-right" size={16} />
+                  <span>{t('shell.browser.action.collapse')}</span>
+                </BaseMenu.Item>
+              </BaseMenu.Popup>
+            </BaseMenu.Positioner>
+          </BaseMenu.Portal>
+        </BaseMenu.Root>
       </div>
 
       {/* 分屏：一层，左右或上下两个面板；单面板时只渲染 children，结构不变。

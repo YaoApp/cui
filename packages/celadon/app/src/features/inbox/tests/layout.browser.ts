@@ -137,7 +137,8 @@ test('collapses the browser column and gives the space to the content', async ({
 	const { content, browser } = columns(page)
 	const wide = await content.evaluate((el) => el.getBoundingClientRect().width)
 
-	await browser.getByRole('button', { name: '收掉这一栏' }).click()
+	await browser.getByRole('button', { name: '标签浏览器' }).click()
+	await page.getByRole('menuitem', { name: '收掉这一栏' }).click()
 	await expect(browser).toHaveAttribute('data-collapsed', 'true')
 	await expect(browser).toHaveCSS('inline-size', '0px')
 	expect(await content.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(wide)
@@ -150,7 +151,8 @@ test('moves the browser column to the other side and keeps the navigation column
 	await expect(browser).toHaveAttribute('data-side', 'right')
 
 	const before = await metrics(page)
-	await browser.getByRole('button', { name: '换到另一侧' }).click()
+	await browser.getByRole('button', { name: '标签浏览器' }).click()
+	await page.getByRole('menuitem', { name: '换到另一侧' }).click()
 	await expect(browser).toHaveAttribute('data-side', 'left')
 	const after = await metrics(page)
 
@@ -394,7 +396,8 @@ test('keeps the split and the boundary working after the browser moves to the le
 	await page.mouse.move(grip.x + grip.width / 2 - 300, y, { steps: 8 })
 	await page.mouse.up()
 	await browser.getByRole('button', { name: '左右分栏' }).click()
-	await browser.getByRole('button', { name: '换到另一侧' }).click()
+	await browser.getByRole('button', { name: '标签浏览器' }).click()
+	await page.getByRole('menuitem', { name: '换到另一侧' }).click()
 
 	await expect(browser).toHaveAttribute('data-side', 'left')
 	await expect(browser).toHaveAttribute('data-split', 'columns')
