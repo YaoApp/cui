@@ -243,7 +243,8 @@
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-4);
-	padding: var(--spacing-4) var(--spacing-8);
+	/* 与内容列头同一档内距；键是 small 档 24 高，40 高的栏里上下正好各留 8 */
+	padding: var(--spacing-8);
 	border-block-end: var(--border-width) solid var(--border-subtle);
 	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
 	cursor: default;

@@ -81,9 +81,9 @@ export function ContentHead({
 			</span>
 			{title ? <h1 className='content__title'>{title}</h1> : null}
 			{trailing ? <span className='content__head-trailing'>{trailing}</span> : null}
-			{/* 标签浏览器那一栏的切换键恒在列头右端：展开与收起都从这里切；窗口放不下时置灰并给出原因。
+			{/* 本栏打开时不留键（顶栏有关闭键），收起后出现，用于把本栏找回来；窗口放不下时置灰并给出原因。
 			    提示挂在外层 span 上，因为禁用态的按钮收不到指针事件，气泡否则不会出现 */}
-			<span className='content__head-slot content__head-slot--browser'>
+			<span className='content__head-slot content__head-slot--browser' data-hidden={!browserCollapsed}>
 				<Tooltip label={browserTitle} side='bottom'>
 					<span className='content__head-key-wrap' title={browserBlocked ? browserTitle : undefined}>
 						<Button

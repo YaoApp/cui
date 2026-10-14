@@ -49,6 +49,11 @@
 	margin-inline-start: auto;
 }
 
+/* 本栏打开时这一颗整颗不画：零宽的槽不裁子元素，按钮会从槽里露出来 */
+.content__head-slot--browser[data-hidden='true'] {
+	display: none;
+}
+
 .content__head-key--browser {
 	margin-inline-start: auto;
 }

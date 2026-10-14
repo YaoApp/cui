@@ -144,18 +144,17 @@ test('collapses the browser column and gives the space to the content', async ({
 	const { content, browser } = columns(page)
 	const wide = await content.evaluate((el) => el.getBoundingClientRect().width)
 
-	// 列头右端那颗切换键恒在：展开时它就是收起键
+	// 本栏打开时列头不留键，收起键在顶栏；收起后列头才出现找回键
 	const key = page.locator('.content__head-key--browser')
-	await expect(key).toBeVisible()
-	await expect(key).toHaveAttribute('aria-expanded', 'true')
+	await expect(key).toBeHidden()
 
-	await key.click()
+	await page.locator('.browser__close').click()
 	await expect(browser).toHaveAttribute('data-collapsed', 'true')
 	await expect(browser).toHaveCSS('inline-size', '0px')
 	await page.waitForTimeout(500)
 	expect(await content.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(wide)
 
-	// 收起后同一颗键变成展开键，按回去恢复原状，不必去菜单里找
+	// 收起后列头那颗键出现，按回去恢复原状，不必去菜单里找
 	await expect(key).toBeVisible()
 	await expect(key).toHaveAttribute('aria-expanded', 'false')
 	await key.click()
@@ -411,12 +410,14 @@ test('keeps the collapse working after the column width has been dragged', async
 
 	const wide = (await box())!.width
 	const key = page.locator('.content__head-key--browser')
-	await key.click()
+	await expect(key).toBeHidden()
+	await page.locator('.browser__close').click()
 	await expect(browser).toHaveAttribute('data-collapsed', 'true')
 	/* 等落定再量：收起是过渡，固定等待在机器忙的时候会量到中间帧 */
 	await expect(browser).toHaveCSS('inline-size', '0px')
 
 	/* 再展开回到拖出来的宽度，宽度偏好没有被收起动作改掉 */
+	await expect(key).toBeVisible()
 	await key.click()
 	await expect(browser).not.toHaveAttribute('data-collapsed', 'true')
 	await expect.poll(async () => Math.abs((await box())!.width - wide), { timeout: 5000 }).toBeLessThanOrEqual(2)
