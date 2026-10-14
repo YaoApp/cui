@@ -46,6 +46,43 @@ test('turns the layout animation off under the reduced motion preference', async
 	expect(await nav.evaluate((el) => el.getBoundingClientRect().width)).toBeLessThan(1)
 })
 
+test('keeps the browser content still while the column opens and closes', async ({ page }) => {
+	await page.setViewportSize({ width: 1400, height: 900 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const browser = columns(page).browser
+	const sample = (selector: string) =>
+		page.evaluate(async (sel) => {
+			const hint = document.querySelector('.browser__hint')!
+			const rows: Array<{ column: number; content: number }> = []
+			;(document.querySelector(sel) as HTMLElement).click()
+			await new Promise<void>((resolve) => {
+				const start = performance.now()
+				const tick = () => {
+					rows.push({
+						column: Math.round(document.querySelector('.browser')!.getBoundingClientRect().width),
+						content: Math.round(hint.getBoundingClientRect().width)
+					})
+					if (performance.now() - start < 700) requestAnimationFrame(tick)
+					else resolve()
+				}
+				requestAnimationFrame(tick)
+			})
+			return rows
+		}, selector)
+
+	await page.locator('.browser__close').click()
+	await expect(browser).toHaveAttribute('data-collapsed', 'true')
+	const opening = await sample('.content__head-key--browser')
+	/* 本栏在长，而栏内文本块的宽度只有一个取值：窗口在变、内容不动 */
+	expect(new Set(opening.map((row) => row.content)).size).toBe(1)
+	expect(opening.some((row) => row.column < row.content)).toBe(true)
+
+	const closing = await sample('.browser__close')
+	expect(new Set(closing.map((row) => row.content)).size).toBe(1)
+	await expect(browser).toHaveAttribute('data-collapsed', 'true')
+})
+
 test('keeps the boundary drag instant while the layout animation is on', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 })
 	await markSignedIn(page)
