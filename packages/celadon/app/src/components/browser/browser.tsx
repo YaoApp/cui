@@ -33,7 +33,7 @@ export type BrowserProps = {
   onWidth?: (width: number | null) => void
   onActivate: (key: string) => void
   onClose: (key: string) => void
-  /** 新建：落在首页的地址栏 */
+  /** 新建：开一个空页并停到它（空页里再开东西就在这一页里换内容） */
   onNew: () => void
   onMove: () => void
   onCollapse: () => void

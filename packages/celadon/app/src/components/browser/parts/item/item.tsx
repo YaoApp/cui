@@ -41,6 +41,9 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 			setTruncated(label.scrollWidth - label.clientWidth > 1)
 		}
 		check()
+		/* 单测环境（jsdom）没有 ResizeObserver：只跳过观测，不往全局钉桩 ——
+		   钉了会让上游组件走进只有真浏览器才成立的分支 */
+		if (typeof ResizeObserver === 'undefined') return
 		const observer = new ResizeObserver(check)
 		observer.observe(block)
 		return () => observer.disconnect()
@@ -52,7 +55,7 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 			aria-selected={active}
 			onClick={() => onActivate(tab.key)}
 		>
-			<Icon name={tab.closable ? 'i-globe' : 'i-home'} size={14} />
+			<Icon name={tab.icon ?? (tab.closable ? 'i-globe' : 'i-home')} size={14} />
 			<span className="browser__tab-label">{tab.label}</span>
 		</span>
 	)

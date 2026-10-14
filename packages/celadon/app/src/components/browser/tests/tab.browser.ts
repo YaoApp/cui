@@ -111,3 +111,34 @@ test('the close key only shows when the pointer or the keyboard is on the tab', 
 	const newBack = (await newKey.boundingBox())!
 	expect(Math.abs(newBack.x - newAtRest.x)).toBeLessThanOrEqual(1)
 })
+
+test('the new key opens a blank page first and fills it in place', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 })
+	await markSignedIn(page)
+	const browser = await openSecondTab(page)
+	const tabs = browser.getByRole('tab')
+	await expect(tabs).toHaveCount(2)
+
+	await browser.getByRole('button', { name: '新建标签' }).click()
+
+	/* 先出现一项并激活，内容与首页相同：地址入口就在这一页里 */
+	const blank = browser.getByRole('tab', { name: '新标签页' })
+	await expect(blank).toBeVisible()
+	await expect(blank).toHaveAttribute('aria-selected', 'true')
+	await expect(tabs).toHaveCount(3)
+	await expect(browser.getByLabel('外部地址')).toBeVisible()
+
+	/* 在空页里填地址：页本身与位置都不换，换的是内容与标签名 */
+	await browser.getByLabel('外部地址').fill('help')
+	await browser.getByLabel('外部地址').press('Enter')
+
+	const filled = browser.getByRole('tab', { name: '/help' })
+	await expect(filled).toBeVisible()
+	await expect(filled).toHaveAttribute('aria-selected', 'true')
+	await expect(tabs).toHaveCount(3)
+	/* 原位换内容：第三个还是第三个，前两页的名字不动 */
+	await expect(tabs.nth(0)).toHaveAccessibleName('首页')
+	await expect(tabs.nth(1)).toHaveAccessibleName('example.com')
+	await expect(tabs.nth(2)).toHaveAccessibleName('/help')
+	await expect(browser.getByText('内部路由的页先占位，稍后接真实内容')).toBeVisible()
+})
