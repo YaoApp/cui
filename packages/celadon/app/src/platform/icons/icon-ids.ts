@@ -34,6 +34,8 @@ export type IconId =
   | 'i-split'
   | 'i-rows'
   | 'i-expand'
+  | 'i-maximize'
+  | 'i-minimize-2'
   | 'i-swap'
   | 'i-send'
   | 'i-check'

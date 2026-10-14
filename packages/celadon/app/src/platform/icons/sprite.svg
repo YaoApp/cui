@@ -47,6 +47,8 @@
 <symbol id="i-split" viewBox="0 0 24 24" data-src="lucide:columns-2"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M12 3v18" /></symbol>
 <symbol id="i-rows" viewBox="0 0 24 24" data-src="lucide:rows-2"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M3 12h18" /></symbol>
 <symbol id="i-expand" viewBox="0 0 24 24" data-src="lucide:expand"><path d="m15 15 6 6" /> <path d="m15 9 6-6" /> <path d="M21 16v5h-5" /> <path d="M21 8V3h-5" /> <path d="M3 16v5h5" /> <path d="m3 21 6-6" /> <path d="M3 8V3h5" /> <path d="M9 9 3 3" /></symbol>
+<symbol id="i-maximize" viewBox="0 0 24 24" data-src="lucide:maximize"><path d="M8 3H5a2 2 0 0 0-2 2v3" /> <path d="M21 8V5a2 2 0 0 0-2-2h-3" /> <path d="M3 16v3a2 2 0 0 0 2 2h3" /> <path d="M16 21h3a2 2 0 0 0 2-2v-3" /></symbol>
+<symbol id="i-minimize-2" viewBox="0 0 24 24" data-src="lucide:minimize-2"><path d="m14 10 7-7" /> <path d="M20 10h-6V4" /> <path d="m3 21 7-7" /> <path d="M4 14h6v6" /></symbol>
 <symbol id="i-swap" viewBox="0 0 24 24" data-src="lucide:arrow-left-right"><path d="M8 3 4 7l4 4" /> <path d="M4 7h16" /> <path d="m16 21 4-4-4-4" /> <path d="M20 17H4" /></symbol>
 <symbol id="i-send" viewBox="0 0 24 24" data-src="lucide:send"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /> <path d="m21.854 2.147-10.94 10.939" /></symbol>
 <symbol id="i-check" viewBox="0 0 24 24" data-src="lucide:check"><path d="M20 6 9 17l-5-5" /></symbol>

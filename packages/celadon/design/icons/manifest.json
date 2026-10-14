@@ -204,6 +204,20 @@
     "src": "expand"
   },
   {
+    "id": "i-maximize",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "maximize",
+    "note": "标签浏览器顶栏：本栏独占窗口"
+  },
+  {
+    "id": "i-minimize-2",
+    "lib": "lucide",
+    "cat": "action",
+    "src": "minimize-2",
+    "note": "标签浏览器顶栏：从独占窗口恢复"
+  },
+  {
     "id": "i-swap",
     "lib": "lucide",
     "cat": "action",
