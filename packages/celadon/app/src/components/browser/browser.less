@@ -18,12 +18,56 @@
 	background: var(--background-content);
 	border-inline-start: var(--border-width) solid var(--border-subtle);
 	/* 收掉与展开：进场 decelerate，时长取 --duration-base；换边的列序变化由三栏的过渡一起带出；
-	   拖动分界线时由 [data-dragging] 关掉，保证跟手 */
-	transition: inline-size var(--duration-base) var(--easing-decelerate);
+	   拖动分界线时由 [data-dragging] 关掉，保证跟手。
+	   min-inline-size 与宽度一起过渡：收起态把它压到零，展开时若让它一步跳回 300，
+	   本栏会先瞬间跳到 300 再继续长到 400，看起来就是开头顿一下（真 Safari 逐帧实测到这一步） */
+	transition:
+		inline-size var(--duration-base) var(--easing-decelerate),
+		min-inline-size var(--duration-base) var(--easing-decelerate);
 }
 
 .browser[data-dragging] {
 	transition: none;
+}
+
+/* 裁切层：铺满整栏并裁切。栏宽变化只在这里开窗，本栏从零宽长到实宽时露出来的是同一份
+   已排好版的内容，栏内不发生重排，也不必逐帧重新光栅化整棵子树。`overflow` 常驻 hidden，
+   不在收放开始那一刻切换（切换会让 WebKit 重建裁切层，那一步正落在动画第一帧上）。
+   分界线句柄是这一层的兄弟，留在外面，不会被裁掉。 */
+.browser__clip {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+}
+
+/* 内容壳：按落点宽度定尺、贴本栏的外侧边（右栏贴右缘，左栏贴左缘）。
+   定尺意味着窗口在变、内容不动，这正是导航列行定高、宽度变化只改裁切范围的那条性质。 */
+.browser__shell {
+	position: absolute;
+	inset-block: 0;
+	display: flex;
+	flex-direction: column;
+	inline-size: var(--side-width, var(--side-width-reading));
+	min-block-size: 0;
+}
+
+.browser[data-side='right'] .browser__shell {
+	inset-inline-end: 0;
+}
+
+.browser[data-side='left'] .browser__shell {
+	inset-inline-start: 0;
+}
+
+/* 分屏时本栏会加宽到工具档：壳取同一档，避免多出来的那一段没有内容 */
+.browser[data-split='columns'] .browser__shell,
+.browser[data-split='rows'] .browser__shell {
+	inline-size: var(--side-width, var(--side-width-tool));
+}
+
+/* 面板独占整扇窗口时本栏铺满：壳跟着铺满，内容随窗口排（独占不进收放动画） */
+.layout[data-exclusive] .browser__shell {
+	inline-size: 100%;
 }
 
 .browser[data-side='left'] {

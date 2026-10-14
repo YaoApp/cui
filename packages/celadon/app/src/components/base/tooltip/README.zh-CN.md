@@ -40,7 +40,7 @@
 ## 验证方式
 
 - 单元用例与组件同目录：`tooltip.test.tsx`（jsdom 里量不出浮层，因此只钉触发元素这一侧）。
-- 浮层本身在真实浏览器里验：`app/src/features/inbox/tests/layout.browser.ts` 通过提示定位收起键与标签操作。
+- 浮层本身在真实浏览器里验：`app/src/features/inbox/tests/layout.shell.browser.ts` 通过提示定位收起键，`app/src/components/browser/tests/tab.browser.ts` 验标签截断标题上的提示。
 
 ## 已知限制
 

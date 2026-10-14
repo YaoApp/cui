@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 /* 导航列的交互用例：模拟真实指针与键盘，覆盖两处收放、键的显隐、折叠行的找回菜单与滚动。
-   与几何用例的分工是：这里只断言「点了以后会怎样」，不量尺寸；尺寸由 layout.browser.ts 负责。 */
+   与几何用例的分工是：这里只断言「点了以后会怎样」，不量尺寸；尺寸由 `layout.shell.browser.ts` 与 `layout.motion.browser.ts` 负责。 */
 
 const NAV = '.nav'
 const TOGGLE = '.nav__toggle'

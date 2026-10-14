@@ -136,6 +136,10 @@ export function Browser({
       >
         <span className="browser__grip" aria-hidden="true" />
       </span>
+      {/* 裁切层与内容壳：本栏的宽度变化只在这里开窗，栏内内容按落点宽度排版一次、不随宽度重排。
+          分界线句柄留在这一层外面，因此不会被裁掉（见 browser.less 的同名规则） */}
+      <div className="browser__clip">
+        <div className="browser__shell">
       {/* 顶栏：空白处点右键开同一个下拉菜单（标签上的右键留给标签自己的菜单，第 13 条） */}
       <div
         className="browser__bar"
@@ -269,6 +273,8 @@ export function Browser({
             </div>
           </>
         )}
+      </div>
+        </div>
       </div>
     </aside>
   )

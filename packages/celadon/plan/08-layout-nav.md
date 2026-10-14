@@ -61,7 +61,7 @@ app/src/components/nav/
 | 8 | 整列收起 | `nav.less` | 三端一律收成 0；视口低于 `--nav-auto-collapse` 时自动收起，与手动收起同一状态；重新展开入口在内容列头左端 | 完成 |
 | 9 | 尺寸与 token | `nav.less` | 展开宽取 `--nav-default` 280，可在 `--nav-min` 264 与 `--nav-max` 420 之间；实测宽度与 token 一致 | 完成 |
 | 10 | 四语与状态齐 | `app/src/locales/` | 六项、收起与折叠、菜单、提示在四语下都换文案；缺省、悬停、焦点、当前、收起、空态都有可判定的表达 | 完成 |
-| 11 | 用例 | `nav.client.test.tsx` · `nav.browser.ts` · `tests/resize.browser.ts` · `features/inbox/tests/layout.browser.ts` | 单元用例覆盖折叠与选中回调；浏览器用例覆盖悬停与焦点态、折叠后找回菜单的键盘路径、刷新后的偏好保持 | 完成 |
+| 11 | 用例 | `nav.client.test.tsx` · `nav.browser.ts` · `tests/resize.browser.ts` · `features/inbox/tests/layout.shell.browser.ts` · `layout.motion.browser.ts` | 单元用例覆盖折叠与选中回调；浏览器用例覆盖悬停与焦点态、折叠后找回菜单的键盘路径、刷新后的偏好保持 | 完成 |
 
 ## 4. 不做
 
