@@ -7,10 +7,9 @@
 	align-items: center;
 	gap: var(--spacing-8);
 	block-size: var(--row-height);
-	/* 左内距含交通灯留白：留白由组件按状态以内联自定义属性给出（--head-inset），
-	   收起且平台有原生交通灯时为留白宽度，其余为 0。写成两条值的简写以通过样式检查 */
-	padding-inline: calc(var(--spacing-12) + var(--head-inset, 0px)) var(--spacing-12);
-	transition: padding-inline-start var(--duration-base) var(--easing-decelerate);
+	/* 左内距只给固定的一档：交通灯留白不落在这一层，否则收起导航时这颗键自己会向右跳
+	   （见下一条，留白只推标题） */
+	padding-inline: var(--spacing-12);
 	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
 	cursor: default;
 	user-select: none;
@@ -56,7 +55,11 @@
 }
 
 .content__title {
+	/* 交通灯留白只推标题：导航收起且平台有原生交通灯时，标题让出留白宽度，
+	   列头左端那颗切换键的位置不动（留白由组件按状态以 --head-inset 给出） */
 	margin: 0;
+	margin-inline-start: var(--head-inset, 0);
+	transition: margin-inline-start var(--duration-base) var(--easing-decelerate);
 	font-size: var(--font-size-body-lg);
 	font-weight: var(--font-weight-medium);
 	/* 行高收到最紧的一档：墨迹中心贴近行盒中心，才能与交通灯中心对齐 */

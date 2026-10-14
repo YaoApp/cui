@@ -158,6 +158,31 @@ test('collapses the browser column and gives the space to the content', async ({
 	expect(await browser.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBeGreaterThan(300)
 })
 
+test('keeps the collapse key still when the head takes over the traffic light inset', async ({ page }) => {
+	/* macOS 收起导航后，内容列头接管交通灯留白。留白只推标题：左端那颗切换键的位置不动，
+	   否则点收起时正是这颗键自己向右跳一下。这里直接给出留白宽度，等价于该平台的状态。 */
+	await page.setViewportSize({ width: 1280, height: 800 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const head = page.locator('.content__head')
+	const key = head.locator('.content__head-key').first()
+	const title = head.locator('.content__title')
+	const keyX = async () => Math.round((await key.boundingBox())!.x)
+	const titleX = async () => Math.round((await title.boundingBox())!.x)
+	const before = { key: await keyX(), title: await titleX() }
+
+	await head.evaluate((el) => el.style.setProperty('--head-inset', '72px'))
+	await page.waitForTimeout(500)
+	expect(await keyX()).toBe(before.key)
+	expect(await titleX()).toBeGreaterThan(before.title + 60)
+
+	/* 留白收回时同样只有标题动 */
+	await head.evaluate((el) => el.style.setProperty('--head-inset', '0'))
+	await page.waitForTimeout(500)
+	expect(await keyX()).toBe(before.key)
+	expect(await titleX()).toBe(before.title)
+})
+
 test('disables the head key when the window cannot fit the browser column', async ({ page }) => {
 	/* 520 是设计里的最小窗口：内容区最小 400 加这一栏最小 300 放不下，这一栏由视口收起 */
 	await page.setViewportSize({ width: 520, height: 700 })
