@@ -20,24 +20,29 @@ export type BrowserTabItemProps = {
    入场的淡入位移由 browser.less 的 browser-tab-in 关键帧给，纯 CSS，不碰布局投影。 */
 export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabItemProps) {
 	const { t } = useTranslation()
-	const labelRef = useRef<HTMLSpanElement>(null)
+	/* 观测挂在主体上，不挂在标题上：标题要作为统一 Tooltip 的触发元素交给基础件渲染，
+	   基础件会接管它的 ref，挂在同一节点上的 ref 拿不到节点。主体是我们自己的元素，稳定 */
+	const mainRef = useRef<HTMLSpanElement>(null)
 	/* 标题被省略号截断时才挂统一 Tooltip。截断与否必须在指针进来之前就定下来：
 	   若等悬停时才挂上 Tooltip，第一次悬停赶不上这次指针事件，气泡不会出现；
-	   所以挂一个尺寸观测，标签宽度或文字一变就重算，指针进来时 Tooltip 已经在树上 */
+	   所以挂尺寸观测，标签宽度或文字一变就重算，指针进来时 Tooltip 已经在树上 */
 	const [truncated, setTruncated] = useState(false)
 	useEffect(() => {
-		const node = labelRef.current
-		if (!node) return
-		const check = () => setTruncated(node.scrollWidth > node.clientWidth)
+		const main = mainRef.current
+		if (!main) return
+		const check = () => {
+			const label = main.querySelector('.browser__tab-label')
+			if (!label) return
+			setTruncated(label.scrollWidth > label.clientWidth)
+		}
 		check()
 		const observer = new ResizeObserver(check)
-		observer.observe(node)
+		observer.observe(main)
 		return () => observer.disconnect()
 	}, [tab.label])
 	const label = (
 		<span
 			className="browser__tab-label"
-			ref={labelRef}
 			/* 显式给空 title：原生气泡一律不出现，提示只走下面的统一 Tooltip */
 			title=""
 		>
@@ -59,6 +64,7 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 		>
 			<span
 				className="browser__tab-main"
+				ref={mainRef}
 				role="tab"
 				aria-selected={active}
 				onClick={() => onActivate(tab.key)}
