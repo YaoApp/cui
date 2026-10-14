@@ -401,14 +401,13 @@ test('keeps the collapse working after the column width has been dragged', async
 	const key = page.locator('.content__head-key--browser')
 	await key.click()
 	await expect(browser).toHaveAttribute('data-collapsed', 'true')
-	await page.waitForTimeout(500)
-	expect((await box())!.width).toBeLessThan(1)
+	/* 等落定再量：收起是过渡，固定等待在机器忙的时候会量到中间帧 */
+	await expect(browser).toHaveCSS('inline-size', '0px')
 
 	/* 再展开回到拖出来的宽度，宽度偏好没有被收起动作改掉 */
 	await key.click()
 	await expect(browser).not.toHaveAttribute('data-collapsed', 'true')
-	await page.waitForTimeout(500)
-	expect(Math.abs((await box())!.width - wide)).toBeLessThanOrEqual(2)
+	await expect.poll(async () => Math.abs((await box())!.width - wide), { timeout: 5000 }).toBeLessThanOrEqual(2)
 })
 
 test('locks text selection while a divider is dragged', async ({ page }) => {
