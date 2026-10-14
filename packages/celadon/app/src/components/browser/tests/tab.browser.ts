@@ -53,9 +53,10 @@ test('the tab label reads at the body size and the close key sits inside the blo
 	const block = (await tab.boundingBox())!
 	const close = (await tab.locator('.browser__tab-close').boundingBox())!
 	expect(close.x + close.width).toBeGreaterThan(block.x + block.width - 8)
-	expect(close.x + close.width).toBeLessThanOrEqual(block.x + block.width)
+	/* 块宽由内容算出，可能是小数；关闭键的盒取整，所以允许 1 像素的亚像素差 */
+	expect(close.x + close.width).toBeLessThanOrEqual(block.x + block.width + 1)
 	expect(close.y).toBeGreaterThanOrEqual(block.y)
-	expect(close.y + close.height).toBeLessThanOrEqual(block.y + block.height)
+	expect(close.y + close.height).toBeLessThanOrEqual(block.y + block.height + 1)
 
 	/* 关闭键图标是图标梯最小档 14，悬停时给自己一档底 */
 	const glyph = (await tab.locator('.browser__tab-close svg').boundingBox())!
