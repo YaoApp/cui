@@ -61,7 +61,6 @@ export type IconId =
   | 'i-act-filter'
   | 'i-act-sort'
   | 'i-square'
-  | 'i-restore'
   | 'i-act-close'
   | 'i-win-restore'
   | 'i-win-max'

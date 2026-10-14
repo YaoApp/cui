@@ -368,12 +368,6 @@
     "src": "square"
   },
   {
-    "id": "i-restore",
-    "lib": "lucide",
-    "cat": "action",
-    "src": "copy"
-  },
-  {
     "id": "i-act-close",
     "lib": "lucide",
     "cat": "action",
