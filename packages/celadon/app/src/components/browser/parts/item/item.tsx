@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/base/icon'
 import { Tooltip } from '@/components/base/tooltip'
 import { useTranslation } from '@/platform/i18n'
@@ -21,19 +21,25 @@ export type BrowserTabItemProps = {
 export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabItemProps) {
 	const { t } = useTranslation()
 	const labelRef = useRef<HTMLSpanElement>(null)
-	/* 标题被省略号截断时才给提示；提示用本包统一的 Tooltip，观感与导航列等处一致，
-	   不用浏览器原生的 title 气泡 */
+	/* 标题被省略号截断时才挂统一 Tooltip。截断与否必须在指针进来之前就定下来：
+	   若等悬停时才挂上 Tooltip，第一次悬停赶不上这次指针事件，气泡不会出现；
+	   所以挂一个尺寸观测，标签宽度或文字一变就重算，指针进来时 Tooltip 已经在树上 */
 	const [truncated, setTruncated] = useState(false)
+	useEffect(() => {
+		const node = labelRef.current
+		if (!node) return
+		const check = () => setTruncated(node.scrollWidth > node.clientWidth)
+		check()
+		const observer = new ResizeObserver(check)
+		observer.observe(node)
+		return () => observer.disconnect()
+	}, [tab.label])
 	const label = (
 		<span
 			className="browser__tab-label"
 			ref={labelRef}
 			/* 显式给空 title：原生气泡一律不出现，提示只走下面的统一 Tooltip */
 			title=""
-			onPointerEnter={() => {
-				const node = labelRef.current
-				setTruncated(!!node && node.scrollWidth > node.clientWidth)
-			}}
 		>
 			{tab.label}
 		</span>
