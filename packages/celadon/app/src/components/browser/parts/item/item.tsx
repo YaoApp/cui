@@ -19,39 +19,45 @@ export type BrowserTabItemProps = {
    而投影测量在 WebKit 里会对小数宽度（本行实测 75.25）来回取整，指针一进一出就看见跳。
    入场的淡入位移由 browser.less 的 browser-tab-in 关键帧给，纯 CSS，不碰布局投影。
 
-   标题分两层：外层是被悬停的框（统一 Tooltip 的触发元素），内层才是负责省略号的那一段。
-   Safari 会给「正在被省略号截断的元素」自己弹一个原生提示，且与 title 属性无关；
-   把省略号放在内层并让它不接指针事件，Safari 就没有可瞄准的对象，原生提示不会出现。 */
+   WebKit 会给「正在被省略号截断的元素」自己弹一个原生提示，它与 title 属性无关，
+   元素上写空 title 也压不住。所以标题这一段取 pointer-events: none，指针永远落不到它身上，
+   截断信息由覆盖整块主体的统一 Tooltip 承担。观测因此挂在最外层块上：
+   主体在截断时会交给基础件当触发元素，ref 会被接管，外层块是我们自己的元素，稳定。 */
 export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabItemProps) {
 	const { t } = useTranslation()
-	/* 观测挂在主体上，不挂在标题上：标题要作为统一 Tooltip 的触发元素交给基础件渲染，
-	   基础件会接管它的 ref，挂在同一节点上的 ref 拿不到节点。主体是我们自己的元素，稳定 */
-	const mainRef = useRef<HTMLSpanElement>(null)
+	const blockRef = useRef<HTMLSpanElement>(null)
 	/* 标题被省略号截断时才挂统一 Tooltip。截断与否必须在指针进来之前就定下来：
 	   若等悬停时才挂上 Tooltip，第一次悬停赶不上这次指针事件，气泡不会出现；
 	   所以挂尺寸观测，标签宽度或文字一变就重算，指针进来时 Tooltip 已经在树上 */
 	const [truncated, setTruncated] = useState(false)
 	useEffect(() => {
-		const main = mainRef.current
-		if (!main) return
+		const block = blockRef.current
+		if (!block) return
 		const check = () => {
-			const text = main.querySelector('.browser__tab-text')
-			if (!text) return
-			setTruncated(text.scrollWidth > text.clientWidth)
+			const label = block.querySelector('.browser__tab-label')
+			if (!label) return
+			setTruncated(label.scrollWidth > label.clientWidth)
 		}
 		check()
 		const observer = new ResizeObserver(check)
-		observer.observe(main)
+		observer.observe(block)
 		return () => observer.disconnect()
 	}, [tab.label])
-	const label = (
-		<span className="browser__tab-label">
-			<span className="browser__tab-text">{tab.label}</span>
+	const main = (
+		<span
+			className="browser__tab-main"
+			role="tab"
+			aria-selected={active}
+			onClick={() => onActivate(tab.key)}
+		>
+			<Icon name={tab.closable ? 'i-globe' : 'i-home'} size={14} />
+			<span className="browser__tab-label">{tab.label}</span>
 		</span>
 	)
 	return (
 		<span
 			className="browser__tab"
+			ref={blockRef}
 			data-active={active || undefined}
 			data-closable={tab.closable || undefined}
 			onAuxClick={(event) => {
@@ -62,22 +68,13 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 				}
 			}}
 		>
-			<span
-				className="browser__tab-main"
-				ref={mainRef}
-				role="tab"
-				aria-selected={active}
-				onClick={() => onActivate(tab.key)}
-			>
-				<Icon name={tab.closable ? 'i-globe' : 'i-home'} size={14} />
-				{truncated ? (
-					<Tooltip label={tab.label} side="bottom">
-						{label}
-					</Tooltip>
-				) : (
-					label
-				)}
-			</span>
+			{truncated ? (
+				<Tooltip label={tab.label} side="bottom">
+					{main}
+				</Tooltip>
+			) : (
+				main
+			)}
 			{tab.closable ? (
 				/* 关闭键不套基础 Button，也不套 Tooltip：两者都会往这一行里插自己的包装与属性。
 				   这里只留一个固定 24 的普通元素，悬停只改它自己的颜色与缩放；名字用 aria-label 给 */
