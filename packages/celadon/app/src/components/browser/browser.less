@@ -277,18 +277,38 @@
 	gap: var(--spacing-4);
 	padding-inline-end: var(--spacing-4);
 	border-radius: var(--radius-small);
+	/* 解剖：图标 16 · 标题（省略号）· 关闭键，整体宽度 96 到 200 */
+	min-inline-size: 96px;
+	max-inline-size: 200px;
 	/* 新建或新出现的一页：淡入加一点位移（关键帧在同文件上方），减少动态由 token 层统一归零 */
 	animation: browser-tab-in var(--duration-fast) var(--easing-decelerate);
+	transition: background var(--duration-fast) var(--easing-decelerate);
+}
+
+/* 悬停与焦点给同一档底：当前标签另给一档更亮的面，靠底色分档，不加分割线 */
+.browser__tab:hover {
+	background: var(--background-hover);
+}
+
+.browser__tab:has(:focus-visible) {
+	background: var(--background-hover);
 }
 
 .browser__tab:has([aria-selected='true']) {
-	background: var(--background-selected);
+	background: var(--background-surface);
+}
+
+.browser__tab:has([aria-selected='true']):hover {
+	background: var(--background-surface);
 }
 
 .browser__tab-button {
-	max-inline-size: var(--side-width-reading);
+	min-inline-size: 0;
+	flex: 1;
+	justify-content: flex-start;
 }
 
+/* 标题超出标签宽度时省略，完整标题由 Tooltip 给（见组件的 title 属性） */
 .browser__tab-label {
 	overflow: hidden;
 	text-overflow: ellipsis;
