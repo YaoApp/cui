@@ -13,7 +13,7 @@ export type TabEntry = {
 	icon?: IconId
 }
 
-/** 首页：恒在第一位、不可关，也是所有可关闭的页都关掉之后落回的那一页。 */
+/** 首页：空状态的落点。它不是不可关的那一个：自己也能被关掉，一个都不剩时它重新出现。 */
 export const HOME_TAB: TabEntry = { key: 'home', target: { kind: 'home' } }
 
 export const tabKey = (tab: TabEntry): string => tab.key
@@ -32,7 +32,7 @@ type TabsState = {
 	openBlank: () => void
 	/** 在这一页里打开：页的 key 与位置都不变，只换装的内容 */
 	navigate: (key: string, target: TabTarget, meta?: OpenMeta) => void
-	/** 关一页：首页不可关；关的是当前页时按右邻优先、没有右邻取左邻、都没有落回首页 */
+	/** 关一页：每一页都能关；关的是当前页时按右邻优先、没有右邻取左邻；一个都不剩时首页重新出现 */
 	close: (key: string) => void
 	activate: (key: string) => void
 }
@@ -77,12 +77,9 @@ export const useTabsStore = create<TabsState>()(
 				navigate: (key, target, meta) => {
 					if (target.kind === 'blank') return
 					const { tabs } = get()
-					const page = tabs.find((tab) => tab.key === key)
-					/* 首页不装别的内容：从首页打开的东西另开一页，首页始终是那一步的落点 */
-					if (!page || page.target.kind === 'home') {
-						get().open(target, meta)
-						return
-					}
+					if (!tabs.some((tab) => tab.key === key)) return
+					/* 每一页都在自己的窗口里换内容，首页也是这样：首页被填上目标之后就是那一页，
+					   再想回到新标签页，靠关掉所有页之后重新出现的首页 */
 					set(
 						{
 							tabs: tabs.map((tab) =>
@@ -97,9 +94,8 @@ export const useTabsStore = create<TabsState>()(
 					const { tabs, activeKey } = get()
 					const index = tabs.findIndex((tab) => tab.key === key)
 					if (index < 0) return
-					const closing = tabs[index]
-					if (isHome(closing)) return
 					const next = tabs.filter((tab) => tab.key !== key)
+					/* 一个都不剩时首页重新出现：首页是空状态本身，不是不可关的那一个 */
 					if (next.length === 0) {
 						set({ tabs: [HOME_TAB], activeKey: HOME_TAB.key }, false, 'browser/close')
 						return

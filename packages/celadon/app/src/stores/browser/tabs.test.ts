@@ -12,13 +12,16 @@ const reset = () => {
 describe('标签集', () => {
 	beforeEach(reset)
 
-	it('首页是第一位、当前页，且不可关', () => {
+	it('开局是首页一页；首页也能关，关掉之后一个都不剩时它重新出现', () => {
 		const state = useTabsStore.getState()
 		expect(state.tabs).toEqual([HOME_TAB])
 		expect(state.activeKey).toBe('home')
 		expect(isHome(state.tabs[0])).toBe(true)
+
 		useTabsStore.getState().close('home')
-		expect(useTabsStore.getState().tabs).toEqual([HOME_TAB])
+		const after = useTabsStore.getState()
+		expect(after.tabs).toEqual([HOME_TAB])
+		expect(after.activeKey).toBe('home')
 	})
 
 	it('开一页：追加并停到它；同一目标再开只切过去', () => {
@@ -57,12 +60,17 @@ describe('标签集', () => {
 		expect(useTabsStore.getState().tabs).toHaveLength(2)
 	})
 
-	it('从首页打开不落在首页：首页另开一页', () => {
+	it('首页也在自己的窗口里换内容：填上之后它就是那一页', () => {
 		useTabsStore.getState().navigate('home', external('example.com'))
 		const state = useTabsStore.getState()
-		expect(state.tabs).toHaveLength(2)
-		expect(isHome(state.tabs[0])).toBe(true)
-		expect(state.tabs[1].target).toEqual({ kind: 'external', url: 'example.com' })
+		expect(state.tabs).toHaveLength(1)
+		expect(state.tabs[0].key).toBe('home')
+		expect(state.tabs[0].target).toEqual({ kind: 'external', url: 'example.com' })
+		expect(state.activeKey).toBe('home')
+
+		/* 关掉它：一个都不剩，首页重新出现 */
+		useTabsStore.getState().close('home')
+		expect(useTabsStore.getState().tabs).toEqual([HOME_TAB])
 	})
 
 	it('关当前页按右邻优先，没有右邻取左邻，都没有落回首页', () => {
