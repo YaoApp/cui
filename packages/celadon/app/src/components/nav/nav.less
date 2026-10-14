@@ -8,20 +8,31 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	/* 整列的收放：展开按 F4 的 panel 档（200ms 减速），收起在下面按 collapse 档（120ms 加速） */
+	/* 整列的收放只动宽度：列内距不进收起态，也就不需要过渡。
+	   内距若在收起时归零，列内内容的左边缘会跟着移动；而逻辑简写 `padding-inline` 在 WebKit 下
+	   不参与过渡，内距会在一帧内跳完，看上去就是内容向左跳一下。 */
 	transition: inline-size var(--duration-base) var(--easing-decelerate);
 	gap: var(--spacing-8);
 	/* 宽度：用户拖过把手就用存下来的值，没拖过跟随默认。样式这一层再夹一次上下限，
      存值越界（旧偏好或窗口变小）也不会把列压到最小宽度以下（design/main-shell.md §三 第 4 条） */
 	inline-size: clamp(var(--nav-min), var(--nav-width, var(--nav-default)), var(--nav-max));
 	min-block-size: 0;
-	padding: var(--spacing-8);
+	/* 内外距分家：上下内距留在列上，左右内距交给列内各块做外边距。
+	   这样收起时只动列宽，列内内容的左边缘不动，右侧由列宽裁切 */
+	padding-block: var(--spacing-8);
+	padding-inline: 0;
 	/* 上方没有交通灯时多留一档；macOS 由交通灯留白承担，见文末覆盖 */
 	padding-block-start: calc(var(--spacing-8) * 2);
 	background: var(--background-navigation);
 	/* 备选：与内容面之间的 1px 分界 --border-subtle */
 	/* border-inline-end: var(--border-width) solid var(--border-subtle); */
 	border-inline-end: var(--border-width) solid transparent;
+}
+
+/* 列内各块的左右外边距：与原来的列内距等宽，收起时保持不变。
+   两根绝对定位的抓手不参与（它们贴列右缘，不需要这一档外边距） */
+.nav > :not(.nav__grip, .nav__resize) {
+	margin-inline: var(--spacing-8);
 }
 
 /* 拖动中把宽度过渡关掉，做到跟手；键盘调整与收起展开仍走上面的过渡。
@@ -403,16 +414,12 @@
 /* 折叠态：不吃剩余高度。折叠体高度由动画收到零，上区跟着收到零，列里不留空白 */
 
 /* 收起态：整列收成零宽（三端一致，没有图标轨这一档）。
-   放在文件末尾，确保压过 .nav 自身的宽度与内距 */
+   放在文件末尾，确保压过 .nav 自身的宽度；列内距不参与，过渡沿用基础规则那一份 */
 [data-width='zero'] .nav {
 	inline-size: 0;
 	min-inline-size: 0;
-	padding-inline: 0;
 	border-inline-end-width: 0;
 	overflow: clip;
-	transition: inline-size var(--duration-base) var(--easing-decelerate),
-		padding-inline var(--duration-base) var(--easing-decelerate),
-		border-inline-end-width var(--duration-base) var(--easing-decelerate);
 }
 
 /* 品牌行：标志与产品名同一行，列再窄也不折行 */

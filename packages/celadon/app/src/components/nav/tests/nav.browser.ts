@@ -126,4 +126,48 @@ test.describe('导航列的交互', () => {
 			await expect(block).toHaveCSS('cursor', 'default')
 		}
 	})
+
+	test('整列收放时列内内容不移动，只有列宽在变', async ({ page }) => {
+		/* 收起与展开只动列宽：列内各块的左右外边距保持 8，内容的左边缘因此定在 16（外边距 + 列头内距），
+		   右侧由列宽裁切。内距若在收起时归零，内容会向左移动；逻辑简写 `padding-inline` 在 WebKit 下
+		   不参与过渡，这一动会在一帧内完成，看上去就是跳。 */
+		const nav = page.locator(NAV)
+		const wide = await nav.evaluate((el) => el.getBoundingClientRect().width)
+		const startSampling = () =>
+			page.evaluate(() => {
+				const w = window as unknown as { frames: [number, number][]; go: () => void }
+				const node = document.querySelector('.nav') as HTMLElement
+				const logo = document.querySelector('.nav__header svg') as SVGElement
+				const loop = () => {
+					w.frames.push([node.getBoundingClientRect().width, logo.getBoundingClientRect().x])
+					if (w.frames.length < 44) requestAnimationFrame(loop)
+				}
+				w.go = () => {
+					w.frames = []
+					requestAnimationFrame(loop)
+				}
+				w.go()
+			})
+		const readSamples = async () => {
+			const frames = await page.evaluate(() => (window as unknown as { frames: [number, number][] }).frames)
+			return { mid: frames.filter(([width]) => width > 0 && width < wide), rest: frames[frames.length - 1][1] }
+		}
+		const assertStill = ({ mid, rest }: { mid: [number, number][]; rest: number }, label: string) => {
+			expect(mid.length, `${label}没有采到中间帧`).toBeGreaterThan(2)
+			for (const [width, x] of mid) {
+				expect(Math.abs(x - rest), `${label}列宽 ${width.toFixed(1)} 时标志在 ${x.toFixed(1)}`).toBeLessThan(0.6)
+			}
+		}
+
+		await page.mouse.move(140, 20)
+		await startSampling()
+		await page.locator(TOGGLE).first().click()
+		await page.waitForTimeout(900)
+		assertStill(await readSamples(), '收起：')
+
+		await startSampling()
+		await page.locator('.content__head-slot:not(.content__head-slot--browser) .content__head-key').click()
+		await page.waitForTimeout(900)
+		assertStill(await readSamples(), '展开：')
+	})
 })
