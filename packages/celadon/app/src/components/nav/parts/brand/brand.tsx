@@ -24,7 +24,7 @@ export function NavBrand({ mainFolded, onToggleMain }: NavBrandProps) {
 					className='nav__fold'
 					iconOnly
 					variant='plain'
-					size='medium'
+					size='small'
 					aria-label={foldLabel}
 					aria-expanded={!mainFolded}
 					onClick={onToggleMain}

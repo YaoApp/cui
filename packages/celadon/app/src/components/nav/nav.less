@@ -20,9 +20,10 @@
 	min-block-size: 0;
 	/* 内外距分家：上下内距留在列上，左右内距交给列内各块做外边距。
 	   这样收起时只动列宽，列内内容的左边缘不动，右侧由列宽裁切 */
-	/* 首行与另两列同一条基线：列内不留块首内距，列头自身占一行高（--row-height，内容居中） */
-	padding-block: 0 var(--spacing-8);
+	padding-block: var(--spacing-8);
 	padding-inline: 0;
+	/* 上方没有交通灯时多留一档；macOS 由交通灯留白承担，见文末覆盖 */
+	padding-block-start: calc(var(--spacing-8) * 2);
 	background: var(--background-navigation);
 	/* 备选：与内容面之间的 1px 分界 --border-subtle */
 	/* border-inline-end: var(--border-width) solid var(--border-subtle); */
@@ -90,12 +91,11 @@
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-8);
-	/* 头部与另两列的首行同一条基线：占一行高，内容居中 */
-	block-size: var(--row-height);
-	/* 与下面两段之间比列内其他间距大一档 */
+	/* 头部与下面两段之间比列内其他间距大一档 */
 	margin-block-end: var(--spacing-8);
 	/* 头部左内距：列内各块那一档外边距 8 加平台留白（macOS 给交通灯让位），
-     右内距为 0，收起键贴到块的内缘 */
+     右内距为 0，收起键贴到列的内缘 */
+	min-block-size: var(--spacing-24);
 	padding-inline: calc(var(--spacing-8) + var(--nav-head-inset, 0)) 0;
 	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
 	cursor: default;
@@ -446,6 +446,10 @@
    这里抵消掉：下区标题因此严格落在上区展开时「开始」那一行的位置。 */
 .nav__main--folded + .nav__scene {
 	margin-block-start: calc(-1 * var(--spacing-8));
+}
+
+[data-controls='native'] .nav {
+	padding-block-start: var(--spacing-8);
 }
 
 /* 整列收起键：Web 默认隐藏，鼠标进入导航区或键盘聚焦时出现；客户端常显 */
