@@ -8,10 +8,11 @@
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	/* 整列的收放只动宽度：列内距不进收起态，也就不需要过渡。
+	/* 整列的收放只动宽度与右缘那 1 像素线：列内距不进收起态，也就不需要过渡。
 	   内距若在收起时归零，列内内容的左边缘会跟着移动；而逻辑简写 `padding-inline` 在 WebKit 下
 	   不参与过渡，内距会在一帧内跳完，看上去就是内容向左跳一下。 */
-	transition: inline-size var(--duration-base) var(--easing-decelerate);
+	transition: inline-size var(--duration-base) var(--easing-decelerate),
+		border-inline-end-width var(--duration-base) var(--easing-decelerate);
 	gap: var(--spacing-8);
 	/* 宽度：用户拖过把手就用存下来的值，没拖过跟随默认。样式这一层再夹一次上下限，
      存值越界（旧偏好或窗口变小）也不会把列压到最小宽度以下（design/main-shell.md §三 第 4 条） */
@@ -29,7 +30,7 @@
 	border-inline-end: var(--border-width) solid transparent;
 }
 
-/* 列内各块的左右外边距：与原来的列内距等宽，收起时保持不变。
+/* 列内各块的左右外边距：列内距由这一层承担，收起时保持不变，内容左缘因此不动。
    两根绝对定位的抓手不参与（它们贴列右缘，不需要这一档外边距） */
 .nav > :not(.nav__grip, .nav__resize) {
 	margin-inline: var(--spacing-8);
@@ -92,7 +93,7 @@
 	gap: var(--spacing-8);
 	/* 头部与下面两段之间比列内其他间距大一档 */
 	margin-block-end: var(--spacing-8);
-	/* 头部左内距：列内距 8 加平台留白（macOS 给交通灯让位），
+	/* 头部左内距：列内各块那一档外边距 8 加平台留白（macOS 给交通灯让位），
      右内距为 0，收起键贴到列的内缘 */
 	min-block-size: var(--spacing-24);
 	padding-inline: calc(var(--spacing-8) + var(--nav-head-inset, 0)) 0;
@@ -429,7 +430,7 @@
 	align-items: center;
 	gap: var(--spacing-8);
 	min-inline-size: 0;
-	/* 左内距一档；右内距为 0，右侧靠列自身那一档，键的右缘因此与列头里的键对齐 */
+	/* 左内距一档；右内距为 0，右侧靠列内各块那一档外边距，键的右缘因此与列头里的键对齐 */
 	padding-inline: var(--spacing-8) 0;
 	white-space: nowrap;
 }

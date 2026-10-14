@@ -153,13 +153,15 @@ test.describe('导航列的交互', () => {
 			})
 		const readSamples = async () => {
 			const frames = await page.evaluate(() => (window as unknown as { frames: [number, number][] }).frames)
-			return { mid: frames.filter(([width]) => width > 0 && width < wide), rest: frames[frames.length - 1][1] }
+			/* 起点取点击后的第一帧（此时列宽还是满的），落定取最后一帧 */
+			return { start: frames[0][1], mid: frames.filter(([width]) => width > 0 && width < wide), rest: frames[frames.length - 1][1] }
 		}
-		const assertStill = ({ mid, rest }: { mid: [number, number][]; rest: number }, label: string) => {
-			/* 机器忙时采到的中间帧可能只有一两帧，帧数不作强要求；只要采到，内容就不许移动 */
-			expect(mid.length, `${label}没有采到中间帧`).toBeGreaterThan(0)
+		const assertStill = ({ start, mid, rest }: { start: number; mid: [number, number][]; rest: number }, label: string) => {
+			/* 内容不动 = 每一帧（含落定帧）都停在点击前的位置。逐帧比较起点值，
+			   阶跃（一帧内跳完）与渐变都会被量出来；中间帧数不作要求，reduced motion 下没有中间帧也成立 */
+			expect(Math.abs(rest - start), `${label}落定后标志在 ${rest.toFixed(1)}，起点 ${start.toFixed(1)}`).toBeLessThan(0.6)
 			for (const [width, x] of mid) {
-				expect(Math.abs(x - rest), `${label}列宽 ${width.toFixed(1)} 时标志在 ${x.toFixed(1)}`).toBeLessThan(0.6)
+				expect(Math.abs(x - start), `${label}列宽 ${width.toFixed(1)} 时标志在 ${x.toFixed(1)}`).toBeLessThan(0.6)
 			}
 		}
 
