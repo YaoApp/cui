@@ -81,6 +81,7 @@
 
 ## 6. 实现记录
 
+- **面板独占与导航区收起同时成立时本栏右侧空一条**：根因是两条上限的层叠顺序。`layout.less` 里「导航区收起后把内容区那一份让出来」的 `.layout[data-width='zero'] .browser { max-inline-size: calc(100% - var(--center-min) - var(--side-resize-handle)) }` 写在独占那条之后，两者选择器权重相同，于是后者压过 `.layout[data-exclusive] > .browser { max-inline-size: none }`，本栏被限到 `100% − 408`，右侧空出一条；导航区展开时那条不成立，所以只在收起时出现。修法是在该规则之后补一条更高权重的 `.layout[data-exclusive][data-width='zero'] > .browser { max-inline-size: none }`。回归用例 `app/src/components/browser/tests/exclusive-width.browser.ts` 量本栏与面板的宽度等于视口宽（1200 ± 2）。
 - **第 2 至 5 条第一版实现并回退**：改完顶栏结构后跑既有用例 15 条失败（分屏两键从顶栏收进菜单，用例点击路径全变），当时未迁移用例，工作区整体回退。
 - **第 2、3、4、5 条与用例迁移同批落地**：新建键移进标签行且只有首页时不渲染；下拉键换 `i-down`、菜单改为换边与两项分栏；后段加最大化/恢复与关闭两颗键；顶栏空白右键开同一菜单。用例同批迁移：`layout.browser.ts` 里 18 处「按名字点分屏键」改为先开下拉再点菜单项（新增 `openTabMenu` 辅助），三处独占改点 `.browser__maximize`，一处「从菜单收掉这一栏」改点 `.browser__close`；`browser.test.tsx` 两条按新结构重写（分栏那条补 `width: 800` 让菜单项可用）。`e324af5c` · `ddf349aa`
 - **第 6 条落地**：内容列头的找回键改成打开时整颗不画、收起后出现；零宽的槽不裁子元素，所以该槽在 `data-hidden` 时单独用 `display: none`。用例两条跟着改（收起改点 `.browser__close`，加「打开时不存在」的断言）。`5bc65176`
