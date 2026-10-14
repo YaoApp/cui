@@ -303,13 +303,14 @@
 }
 
 /* 块里的主体：图标与标题。它承担 tab 角色与点选，标题取 label 档（12），
-   图标取与文字相称的 14 档，两者之间留 8 的呼吸；
-   宽度吃掉块内余量，右侧关闭键因此贴块右缘，余量留在标题与关闭键之间 */
+   图标取与文字相称的 14 档，两者之间留 8 的呼吸。
+   按内容收、不外扩，右侧关闭键用 auto 外边距贴块右缘：整块的宽度不随悬停变化，
+   条里后面的新建键与下拉键因此不会跟着动 */
 .browser__tab-main {
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-8);
-	flex: 1 1 auto;
+	flex: 0 1 auto;
 	min-inline-size: 0;
 	font-size: var(--font-size-label);
 	color: var(--text-primary);
@@ -326,10 +327,11 @@
 /* 关闭键默认不画，指针进到这块或键盘已走到这块时出现：非当前标签不被一串叉号占满。
    命中区仍按本包的键口径 24，图形取图标梯最小档 14，看着小、点得到；悬停给自己一档底 */
 .browser__tab-close {
-	flex: none;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	flex: none;
+	margin-inline-start: auto;
 	inline-size: var(--spacing-24);
 	block-size: var(--spacing-24);
 	border-radius: var(--radius-small);
