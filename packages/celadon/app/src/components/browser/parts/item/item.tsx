@@ -1,5 +1,4 @@
 import { Icon } from '@/components/base/icon'
-import { MotionPanel } from '@/components/base/motion'
 import { useTranslation } from '@/platform/i18n'
 import type { BrowserTab } from '../../types'
 
@@ -16,10 +15,11 @@ export type BrowserTabItemProps = {
    标签只做平移，新建与关闭时其余标签跟着挪，文字不参与尺寸投影。 */
 export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabItemProps) {
 	const { t } = useTranslation()
+	/* 刻意不用 MotionPanel：它基于 motion 的布局投影，会在元素上写 transform，
+	   而投影测量在 WebKit 里会对小数宽度（本行实测 75.25）来回取整，指针一进一出就看见跳。
+	   入场的淡入位移由 browser.less 的 browser-tab-in 关键帧给，纯 CSS，不碰布局投影。 */
 	return (
-		<MotionPanel
-			as="span"
-			position
+		<span
 			className="browser__tab"
 			data-active={active || undefined}
 			onAuxClick={(event) => {
@@ -55,6 +55,6 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 					<Icon name="i-act-close" size={14} />
 				</span>
 			) : null}
-		</MotionPanel>
+		</span>
 	)
 }
