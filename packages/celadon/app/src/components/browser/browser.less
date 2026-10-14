@@ -18,8 +18,12 @@
 	background: var(--background-content);
 	border-inline-start: var(--border-width) solid var(--border-subtle);
 	/* 收掉与展开：进场 decelerate，时长取 --duration-base；换边的列序变化由三栏的过渡一起带出；
-	   拖动分界线时由 [data-dragging] 关掉，保证跟手 */
-	transition: inline-size var(--duration-base) var(--easing-decelerate);
+	   拖动分界线时由 [data-dragging] 关掉，保证跟手。
+	   min-inline-size 与宽度一起过渡：收起态把它压到零，展开时若让它一步跳回 300，
+	   本栏会先瞬间跳到 300 再继续长到 400，看起来就是开头顿一下（真 Safari 逐帧实测到这一步） */
+	transition:
+		inline-size var(--duration-base) var(--easing-decelerate),
+		min-inline-size var(--duration-base) var(--easing-decelerate);
 }
 
 .browser[data-dragging] {
