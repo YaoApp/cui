@@ -83,7 +83,6 @@ export function AppLayout() {
 	const account = useAuthStore((state) => state.user)
 	const tabs = useTabsStore((state) => state.tabs)
 	const activeKey = useTabsStore((state) => state.activeKey)
-	const openTab = useTabsStore((state) => state.open)
 	const openBlankTab = useTabsStore((state) => state.openBlank)
 	const navigateTab = useTabsStore((state) => state.navigate)
 	const closeTab = useTabsStore((state) => state.close)
@@ -113,7 +112,8 @@ export function AppLayout() {
 	const view: BrowserTab[] = tabs.map((tab) => ({
 		key: tabKey(tab),
 		label: nameOf(tab),
-		closable: tab.target.kind !== 'home',
+		/* 每一页都能关：首页也能关掉，一个都不剩时它会重新出现（见标签集） */
+		closable: true,
 		icon: iconOf(tab)
 	}))
 	const active = tabs.find((tab) => tabKey(tab) === activeKey) ?? HOME_TAB
@@ -126,16 +126,12 @@ export function AppLayout() {
 		.filter((tab) => tab.target.kind !== 'home' && tab.target.kind !== 'blank')
 		.map((tab) => ({ key: tabKey(tab), label: nameOf(tab) }))
 
-	/* 一页里的地址入口提交了：解析成目标后决定落在哪。
-	   空页（含 `＋` 新建出来的）在**本页**换内容；首页不装别的内容，另开一页。
+	/* 一页里的地址入口提交了：解析成目标后落在这**本页**里，首页也一样。
+	   想回到新标签页就把它关掉，或者关掉所有页让首页重新出现。
 	   两个面板共用这一套，各自传自己那一页。 */
 	const openIn = (tab: TabEntry, input: string) => {
 		const target = parseTarget(input)
 		if (target.kind === 'blank') return
-		if (tab.target.kind === 'home') {
-			openTab(target)
-			return
-		}
 		navigateTab(tabKey(tab), target)
 	}
 
