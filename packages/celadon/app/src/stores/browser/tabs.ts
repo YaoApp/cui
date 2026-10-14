@@ -13,7 +13,8 @@ export type TabEntry = {
 	icon?: IconId
 }
 
-/** 首页：空状态的落点。它不是不可关的那一个：自己也能被关掉，一个都不剩时它重新出现。 */
+/** 首页：空状态的落点。还是首页那一页时不可关；它换上目标成了普通一页之后就能关，
+    关到一个都不剩时首页重新出现。 */
 export const HOME_TAB: TabEntry = { key: 'home', target: { kind: 'home' } }
 
 export const tabKey = (tab: TabEntry): string => tab.key
@@ -94,8 +95,10 @@ export const useTabsStore = create<TabsState>()(
 					const { tabs, activeKey } = get()
 					const index = tabs.findIndex((tab) => tab.key === key)
 					if (index < 0) return
+					/* 还是首页那一页时不可关：它换上了目标（成了普通一页）之后才能关 */
+					if (tabs[index].target.kind === 'home') return
 					const next = tabs.filter((tab) => tab.key !== key)
-					/* 一个都不剩时首页重新出现：首页是空状态本身，不是不可关的那一个 */
+					/* 一个都不剩时首页重新出现：首页是空状态的落点 */
 					if (next.length === 0) {
 						set({ tabs: [HOME_TAB], activeKey: HOME_TAB.key }, false, 'browser/close')
 						return

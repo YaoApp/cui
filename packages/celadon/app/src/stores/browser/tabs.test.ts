@@ -12,12 +12,20 @@ const reset = () => {
 describe('标签集', () => {
 	beforeEach(reset)
 
-	it('开局是首页一页；首页也能关，关掉之后一个都不剩时它重新出现', () => {
+	it('还是首页那一页时不可关；换成普通一页之后能关，关完首页重新出现', () => {
 		const state = useTabsStore.getState()
 		expect(state.tabs).toEqual([HOME_TAB])
 		expect(state.activeKey).toBe('home')
 		expect(isHome(state.tabs[0])).toBe(true)
 
+		/* 还是首页：关不动 */
+		useTabsStore.getState().close('home')
+		expect(useTabsStore.getState().tabs).toEqual([HOME_TAB])
+
+		/* 换上目标之后它就是普通一页，可以关；关完一个不剩，首页回来 */
+		useTabsStore.getState().navigate('home', external('example.com'))
+		expect(useTabsStore.getState().tabs).toHaveLength(1)
+		expect(isHome(useTabsStore.getState().tabs[0])).toBe(false)
 		useTabsStore.getState().close('home')
 		const after = useTabsStore.getState()
 		expect(after.tabs).toEqual([HOME_TAB])
