@@ -13,17 +13,27 @@ export type BrowserTabItemProps = {
 	onClose: (key: string) => void
 }
 
-/* 一个标签是一整块（见 browser.less 的 `.browser__tab`）：图标、标题与关闭键在同一块底里，
-   块自己表达悬停与当前态，里面两颗按钮都用 plain，不各画一层边框或底。
+/* 一个标签项：整块是标签本体，悬停、当前、焦点、点选与中键都由它自己接；
+   块里只放图标与标题，关闭键是块内的兄弟控件，点它不激活标签。
    标签只做平移，新建与关闭时其余标签跟着挪，文字不参与尺寸投影。 */
 export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabItemProps) {
 	const { t } = useTranslation()
 	return (
-		<MotionPanel as="span" position className="browser__tab">
-			<Button
-				className="browser__tab-button"
-				variant="plain"
-				size="small"
+		<MotionPanel
+			as="span"
+			position
+			className="browser__tab"
+			data-active={active || undefined}
+			onAuxClick={(event) => {
+				// 中键关闭（首页不可关）
+				if (event.button === 1 && tab.closable) {
+					event.preventDefault()
+					onClose(tab.key)
+				}
+			}}
+		>
+			<span
+				className="browser__tab-main"
 				role="tab"
 				aria-selected={active}
 				onClick={() => onActivate(tab.key)}
@@ -32,7 +42,7 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 				<span className="browser__tab-label" title={tab.label}>
 					{tab.label}
 				</span>
-			</Button>
+			</span>
 			{tab.closable ? (
 				<Tooltip label={t('shell.browser.tab.close')} side="bottom">
 					<Button

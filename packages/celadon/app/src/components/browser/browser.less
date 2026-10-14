@@ -296,24 +296,25 @@
 	background: var(--nav-hover);
 }
 
-.browser__tab:has([aria-selected='true']),
-.browser__tab:has([aria-selected='true']):hover {
+.browser__tab[data-active],
+.browser__tab[data-active]:hover {
 	background: var(--nav-select);
 }
 
-.browser__tab-button {
-	flex: 1;
+/* 块里的主体：图标与标题。它承担 tab 角色与点选，宽度按内容收，不抢走块内右侧关闭键的位置 */
+.browser__tab-main {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-4);
 	min-inline-size: 0;
-	justify-content: flex-start;
-	background: transparent;
+	flex: 0 1 auto;
+	cursor: default;
 }
 
-/* 块自己表达悬停与当前，块内的按钮不再叠一层自己的底 */
-.browser__tab-button:hover,
-.browser__tab-button:active,
-.browser__tab-close:hover,
-.browser__tab-close:active {
-	background: transparent;
+.browser__tab-main:focus-visible {
+	outline: var(--focus-ring);
+	outline-offset: calc(-1 * var(--border-width));
+	border-radius: var(--radius-small);
 }
 
 .browser__tab-close {

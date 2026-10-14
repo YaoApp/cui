@@ -51,7 +51,9 @@ describe('Browser', () => {
   it('never offers a close key on the home tab', () => {
     renderBrowser()
     const home = screen.getByRole('tab', { name: '首页' }).closest('.browser__tab')
-    expect(home?.querySelectorAll('button')).toHaveLength(1)
+    // 标签主体是块里的 tab 本体，首页没有关闭键
+    expect(home?.querySelectorAll('.browser__tab-close')).toHaveLength(0)
+    expect(home?.querySelector('.browser__tab-main')).not.toBeNull()
   })
 
   it('activates and closes pages through the caller', async () => {
