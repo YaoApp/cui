@@ -261,6 +261,35 @@ export function Browser({
             </BaseMenu.Positioner>
           </BaseMenu.Portal>
         </BaseMenu.Root>
+        {/* 后段：最大化 / 恢复 与 关闭；图形与导航列、内容列头同族，同一档按钮 */}
+        <Tooltip
+          label={exclusive ? t('shell.window.restore') : t('shell.browser.action.exclusive')}
+          side="bottom"
+        >
+          <Button
+            className="browser__maximize"
+            iconOnly
+            variant="plain"
+            size="small"
+            aria-pressed={exclusive}
+            aria-label={exclusive ? t('shell.window.restore') : t('shell.browser.action.exclusive')}
+            onClick={onExclusive}
+          >
+            <Icon name={exclusive ? 'i-minimize-2' : 'i-maximize'} size={16} />
+          </Button>
+        </Tooltip>
+        <Tooltip label={t('shell.browser.action.collapse')} side="bottom">
+          <Button
+            className="browser__close"
+            iconOnly
+            variant="plain"
+            size="small"
+            aria-label={t('shell.browser.action.collapse')}
+            onClick={onCollapse}
+          >
+            <Icon name={side === 'left' ? 'i-panel-left' : 'i-panel-right'} size={16} />
+          </Button>
+        </Tooltip>
       </div>
 
       {/* 分屏：一层，左右或上下两个面板；单面板时只渲染 children，结构不变。
