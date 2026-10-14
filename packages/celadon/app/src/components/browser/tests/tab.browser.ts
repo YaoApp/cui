@@ -62,6 +62,8 @@ test('the tab label reads at the body size and the close key sits inside the blo
 	const glyph = (await tab.locator('.browser__tab-close svg').boundingBox())!
 	expect(Math.round(glyph.width)).toBeLessThanOrEqual(14)
 	const closeBox = tab.locator('.browser__tab-close')
+	/* 关闭键只在指针进到标签块时可见：先悬停块，再悬停它 */
+	await tab.hover()
 	await closeBox.hover()
 	await expect(closeBox).toHaveCSS('background-color', 'rgb(232, 232, 235)')
 
