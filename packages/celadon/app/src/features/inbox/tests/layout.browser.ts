@@ -120,25 +120,23 @@ test('folds the main navigation and finds it again from the current row', async 
 	await expect.poll(async () => main.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(1)
 })
 
-test('opens an external address in a tab and closes it again', async ({ page }) => {
+test('opens an external address in the home page and closes it again', async ({ page }) => {
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
 
+	/* 首页也在自己的窗口里换内容：填上地址之后它就是那一页，不另开一项 */
 	await browser.getByLabel('外部地址').fill('example.com')
 	await browser.getByLabel('外部地址').press('Enter')
-	await expect(browser.getByRole('tab', { name: 'example.com' })).toBeVisible()
-	await expect(browser.getByRole('tab', { name: 'example.com' })).toHaveAttribute('aria-selected', 'true')
+	await expect(browser.getByRole('tab')).toHaveCount(1)
+	const pageTab = browser.locator('.browser__tab').first()
+	await expect(pageTab.getByRole('tab', { name: 'example.com' })).toHaveAttribute('aria-selected', 'true')
 
-	/* 首页那个标签不可关：它没有关闭键 */
-	await expect(
-		browser.locator('.browser__tab', { hasText: '首页' }).locator('.browser__tab-close')
-	).toHaveCount(0)
-
-	/* 关闭键只在指针进到标签块时可见：先悬停，再点它 */
-	await browser.getByRole('tab', { name: 'example.com' }).hover()
-	await browser.getByRole('button', { name: '关闭这个标签' }).click()
-	await expect(browser.getByRole('tab', { name: 'example.com' })).toHaveCount(0)
+	/* 这一页也有关闭键；关掉之后一个都不剩，首页重新出现 */
+	await pageTab.hover()
+	await expect(pageTab.locator('.browser__tab-close')).toHaveCount(1)
+	await pageTab.locator('.browser__tab-close').click()
+	await expect(browser.getByRole('tab')).toHaveCount(1)
 	await expect(browser.getByRole('tab', { name: '首页' })).toHaveAttribute('aria-selected', 'true')
 })
 
@@ -558,7 +556,8 @@ test('shows another page in the second pane instead of the same page twice', asy
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
 
-	// 先开第二页：首页的地址栏里回车开一个外部地址
+	// 先开第二页：点新建开一个空页，再在空页里填地址（首页因此留在第一位）
+	await browser.getByRole('button', { name: '新建标签' }).click()
 	await browser.getByLabel('外部地址').fill('example.com')
 	await browser.getByLabel('外部地址').press('Enter')
 	await expect(browser.getByRole('tab', { name: 'example.com' })).toHaveCount(1)
@@ -587,6 +586,7 @@ test('switches the pane that has focus when a tab is clicked', async ({ page }) 
 	const browser = columns(page).browser
 	const panes = browser.locator('.browser__pane')
 
+	await browser.getByRole('button', { name: '新建标签' }).click()
 	await browser.getByLabel('外部地址').fill('example.com')
 	await browser.getByLabel('外部地址').press('Enter')
 	const edge = browser.locator('.browser__edge')
