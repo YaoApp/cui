@@ -45,7 +45,7 @@ export function NavHeader({ mainFolded, onToggleMain, onToggle }: NavHeaderProps
 							className='nav__fold'
 							iconOnly
 							variant='plain'
-							size='small'
+							size='medium'
 							aria-label={foldLabel}
 							aria-expanded={!mainFolded}
 							onClick={onToggleMain}
@@ -58,7 +58,7 @@ export function NavHeader({ mainFolded, onToggleMain, onToggle }: NavHeaderProps
 							className='nav__toggle'
 							iconOnly
 							variant='plain'
-							size='small'
+							size='medium'
 							aria-label={label}
 							aria-expanded={true}
 							onClick={onToggle}
@@ -76,7 +76,7 @@ export function NavHeader({ mainFolded, onToggleMain, onToggle }: NavHeaderProps
 							className='nav__toggle'
 							iconOnly
 							variant='plain'
-							size='small'
+							size='medium'
 							aria-label={label}
 							aria-expanded={true}
 							onClick={onToggle}

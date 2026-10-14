@@ -234,15 +234,24 @@
 .browser__bar {
 	position: relative;
 	flex: none;
+	box-sizing: border-box;
 	block-size: var(--row-height);
+	/* 与内容列头、导航列头同一条基线：高度由 --row-height 定，键 32 上下各留 4，不被内容撑高 */
+	min-block-size: 0;
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-4);
-	padding: var(--spacing-8);
+	padding: var(--spacing-4) var(--spacing-8);
 	border-block-end: var(--border-width) solid var(--border-subtle);
 	/* 顶带：拖窗口与双击最大化落在这条带子里，因此不参与文本选择，指针保持箭头 */
 	cursor: default;
 	user-select: none;
+}
+
+/* 顶栏里的键与另两列同口径：32 × 32 命中区（标签内部的两颗键仍走 small 档） */
+.browser__bar > .button--icon {
+	inline-size: var(--spacing-32);
+	min-block-size: var(--spacing-32);
 }
 
 /* 标签与 ＋ 号抬到拖动层之上，点击照旧 */

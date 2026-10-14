@@ -68,7 +68,7 @@ export function ContentHead({
 							className='content__head-key'
 							iconOnly
 							variant='plain'
-							size='small'
+							size='medium'
 							disabled={navBlocked}
 							aria-label={navTitle}
 							aria-expanded={!navCollapsed}
@@ -90,7 +90,7 @@ export function ContentHead({
 							className='content__head-key content__head-key--browser'
 							iconOnly
 							variant='plain'
-							size='small'
+							size='medium'
 							disabled={browserBlocked}
 							aria-label={browserTitle}
 							aria-expanded={!browserCollapsed}
