@@ -118,7 +118,7 @@ const items: NavItem[] = [
 ## 验证方式
 
 - 单元用例与组件同目录：`nav.test.tsx` 覆盖条目与当前态、修饰键点击、折叠与展开键、整列收起（断言 `data-collapsed`）、两处动作分流、二级导航插槽；`hooks/use-nav-resize.test.tsx` 覆盖拖动、键盘与复位。
-- 浏览器用例：`app/src/features/inbox/tests/layout.browser.ts` 覆盖整列收起与刷新保持、折叠与键盘找回、菜单的 `Esc` 与焦点交回、最小窗口不出横向滚动。
+- 浏览器用例：`app/src/features/inbox/tests/layout.shell.browser.ts` 覆盖整列收起与刷新保持、折叠与键盘找回；`layout.shell.browser.ts` 与 `layout.motion.browser.ts` 另覆盖最小窗口不出横向滚动与动画期间的条目几何。
 - 几何按实测核对：栏宽与两段高度取 `getBoundingClientRect()`，收起态读数为列宽 `0`、内容列从 `0` 起铺满；折叠态读数为上区高度 `0`、折叠行贴用户区上方、间距一档内距。
 
 ## 已知限制

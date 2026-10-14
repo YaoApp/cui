@@ -50,7 +50,7 @@
 ## 验证方式
 
 - 单元用例与组件同目录：`content.test.tsx`。
-- 浏览器用例：`app/src/features/inbox/tests/layout.browser.ts` 量中栏宽度不小于 400，并核对第三栏收掉后中栏变宽。
+- 浏览器用例：`app/src/features/inbox/tests/layout.shell.browser.ts` 量中栏宽度不小于 400，并核对第三栏收掉后中栏变宽。
 
 ## 已知限制
 
