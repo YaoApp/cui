@@ -17,7 +17,7 @@
 - [x] 2. **标题栏结构**：前段「标签（内含关闭键）→ 新建 → 下拉」，后段「最大化/恢复 → 关闭」；顶栏空白处仍是窗口拖动顶带；下边线保留。新建键落在标签行内、紧跟最后一个标签，下拉键在滚动区之外；后段是 `browser__maximize` 与 `browser__close` 两颗常显键；顶栏内距回到 `--spacing-8`（键是 `small` 档 24 高，40 高的栏上下各留 8）。`9a9aead7` · `e324af5c`
 - [x] 3. **新建键规则**：紧跟最后一个标签；只有一个首页标签时不渲染新建键，只画它后面的下拉键。`e324af5c`
 - [~] 4. **标题栏菜单**：下段已成（换到另一侧 · 左右分栏 · 上下分栏，分栏两项按可用性置灰），由下拉键与「在标题栏上点右键」两处触发，右键只在顶栏空白处生效且不触发窗口拖动；**上段的「放不下的标签列表」还没做**（第 14 条，含 `ResizeObserver` 的可见数计算），无溢出时这一段本就不画。`e324af5c`
-- [~] 5. **最大化 / 恢复**：本栏独占窗口与恢复已成，图标随状态切换，`i-maximize`（lucide `maximize`）与 `i-minimize-2`（lucide `minimize-2`）已进 manifest 与生成物；恢复态文案暂借 `shell.window.restore`；**`i-restore` 错挂 `copy` 图形这一条还没改**（见 §5 待修）。`2d78d775` · `9a9aead7`
+- [x] 5. **最大化 / 恢复**：本栏独占窗口与恢复已成，图标随状态切换，`i-maximize`（lucide `maximize`）与 `i-minimize-2`（lucide `minimize-2`）已进 manifest 与生成物；恢复态文案暂借 `shell.window.restore`。错挂 `copy` 的 `i-restore` 无人引用，已从 manifest 删除，`design/README.md` 的计数由 90 改为 89。`2d78d775` · `9a9aead7` · `f7a3e587`
 - [x] 6. **关闭键与找回键**：顶栏关闭键常显（图形取 `i-panel-right` / `i-panel-left`，与内容列头那颗键同一颗）；内容列头右端那颗键改成**本栏打开时整颗不画**（零宽的槽不裁子元素，所以该槽在 `data-hidden` 时用 `display: none`，导航列那颗键的规则未动），**收起后出现**把本栏找回来。`design/README.md` 与 `design/main-shell.md` 的「切换键恒在」已改写。用例跟着迁：收起动作改点 `.browser__close`，展开仍点列头那颗键，并加「打开时该键不存在」的断言。`9a9aead7` · `5bc65176`
 - [ ] 7. **标签样式**：圆角块，内含图标、标题（省略号）与关闭键；关闭键恒显；当前标签用 `--background-surface`、不加分割线；宽度最小 96、最大 200；默认 / 悬停 / 当前 / 焦点四态齐；关掉最后一个可关闭标签落回首页；**首页标签固定在首位、不参与拖动换序**；标题被省略号截断时给 Tooltip 显示完整标题。现状：宽度上限还是 `--side-width-reading`（400），缺悬停与焦点态，标签里没有图标位。
 - [x] 8. **背景分档**：本栏底改 `--background-content`，内容区保持 `--background-surface`；当前标签用 `--background-surface`；`content.less` 里那两行备选注释已清；`design/color-card.md` 该 token 的用途补上「标签浏览器整栏底」。实测（浅色）：浏览器 250/250/251 对内容 255/255/255，通道差 5/5/4。`b987b449`
@@ -77,7 +77,7 @@
 - 各处的图形：导航列收起键 `i-panel-left`、上区折起键 `i-dock` / `i-undock`（**未动**）；内容列头 `i-panel-left`（导航）与 `i-panel-right`（本栏，打开时不画）；标签栏新建 `i-plus`、下拉 `i-down`、菜单里换边 `i-swap` 与分栏 `i-split` / `i-rows`、后段最大化/恢复 `i-maximize` / `i-minimize-2`、关闭 `i-panel-right` / `i-panel-left`。
 - 待补：标签右键菜单其余三项的图形（刷新用 `rotate-cw` 或 `refresh-cw` · 关闭其他用 `square-x` · 关闭全部用 `equal`），实现时按 lucide 的实际名登记。
 - 渲染口径：三列的图标键同一套——`Button` 的 `small` 档（24 × 24 命中区）· `plain` 变体 · 图标显示档 16 · lucide 24 网格描边 2；不引入风格不同的图形。曾试过把三处都提到 32 × 32（`medium` 档）并为此动过导航列，按 D14 全部回退。
-- 待修：`i-restore` 现挂 `copy` 图形，应改为恢复语义（或直接改用 `i-minimize-2` 并删除 `i-restore` 的多余映射）。
+- 已办：`i-restore` 原来在 manifest 里挂 `copy` 图形（仓库里没有任何代码引用它，所以界面上看不出问题），已把这条登记删除，生成物随之重建，`design/README.md` 的 lucide 计数由 90 改为 89。`f7a3e587`
 
 ## 6. 实现记录
 
