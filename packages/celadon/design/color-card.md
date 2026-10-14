@@ -38,8 +38,8 @@
 | --- | --- | --- | --- |
 | `--background-app` | `#F4F4F6` | `#121110` | 窗口底 |
 | `--background-navigation` | `#F4F4F6` | `#121110` | ① 导航列，与 `--background-app` 同值（`var(--background-app)`） |
-| `--background-content` | `#FAFAFB` | `#191816` | 认证页整页底 · 焦点环内圈；内容区不再用它 |
-| `--background-surface` | `#FFFFFF` | `#1F1E1A` | ② 内容区与右栏 · 面板/卡片 |
+| `--background-content` | `#FAFAFB` | `#191816` | 认证页整页底 · 焦点环内圈 · 标签浏览器整栏底（比内容区深一档，两栏相邻时能分开） |
+| `--background-surface` | `#FFFFFF` | `#1F1E1A` | ② 内容区 · 标签浏览器里的标签与面板 · 面板/卡片 |
 | `--background-field` | `#F4F4F5` | `#262420` | 输入框/字段 |
 | `--background-hover` | `#F0F0F2` | `#2C2A26` | 悬停（白底场景：按钮 · 字段 · 复选框 · 分段控件 · 下拉项） |
 | `--background-selected` | `#ECF3F3` | `#17292A` | 选中底（= 品牌浅底；白底场景：右栏标签与收件箱行） |

@@ -13,7 +13,9 @@
 	min-inline-size: var(--side-min);
 	max-inline-size: calc(100% - var(--nav-min) - var(--center-min) - var(--side-resize-handle));
 	min-block-size: 0;
-	background: var(--background-surface);
+	/* 本栏的底与内容区差一档（--background-content 比 --background-surface 深 5 到 6 阶），
+	   与内容区相邻时才分得出两栏；本栏自己的标签与面板仍用 --background-surface */
+	background: var(--background-content);
 	border-inline-start: var(--border-width) solid var(--border-subtle);
 	/* 收掉与展开：进场 decelerate，时长取 --duration-base；换边的列序变化由三栏的过渡一起带出；
 	   拖动分界线时由 [data-dragging] 关掉，保证跟手 */
