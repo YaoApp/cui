@@ -86,6 +86,8 @@
   "shell.window.restore": "還原",
   "shell.browser.label": "分頁瀏覽器",
   "shell.browser.home": "首頁",
+  "shell.browser.internal.hint": "內部路由的頁先佔位，稍後接真實內容",
+  "shell.browser.tab.blank": "新分頁",
   "shell.browser.tab.close": "關閉這個分頁",
   "shell.browser.tab.new": "新增分頁",
   "shell.browser.action.collapse": "收掉這一欄",

@@ -86,6 +86,8 @@
   "shell.window.restore": "还原",
   "shell.browser.label": "标签浏览器",
   "shell.browser.home": "首页",
+  "shell.browser.internal.hint": "内部路由的页先占位，稍后接真实内容",
+  "shell.browser.tab.blank": "新标签页",
   "shell.browser.tab.close": "关闭这个标签",
   "shell.browser.tab.new": "新建标签",
   "shell.browser.action.collapse": "收掉这一栏",

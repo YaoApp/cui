@@ -86,6 +86,8 @@
   "shell.window.restore": "元に戻す",
   "shell.browser.label": "タブブラウザー",
   "shell.browser.home": "ホーム",
+  "shell.browser.internal.hint": "内部ルートのページは仮表示です。内容は後で接続します",
+  "shell.browser.tab.blank": "新しいタブ",
   "shell.browser.tab.close": "このタブを閉じる",
   "shell.browser.tab.new": "新しいタブ",
   "shell.browser.action.collapse": "この列をたたむ",
