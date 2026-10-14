@@ -285,21 +285,23 @@
 	transition: background var(--duration-fast) var(--easing-decelerate);
 }
 
-/* 悬停与焦点给同一档底：当前标签另给一档更亮的面，靠底色分档，不加分割线 */
+/* 悬停与焦点给同一档底：当前标签另给一档更深的灰，靠底色分档，不加分割线。
+   两档取导航列同族的行状态灰：本栏底是浅灰的 --background-content，用白面的 --background-surface
+   与它只差 5 阶，画不出参考图里那块清晰的标签底 */
 .browser__tab:hover {
-	background: var(--background-hover);
+	background: var(--nav-hover);
 }
 
 .browser__tab:has(:focus-visible) {
-	background: var(--background-hover);
+	background: var(--nav-hover);
 }
 
 .browser__tab:has([aria-selected='true']) {
-	background: var(--background-surface);
+	background: var(--nav-select);
 }
 
 .browser__tab:has([aria-selected='true']):hover {
-	background: var(--background-surface);
+	background: var(--nav-select);
 }
 
 .browser__tab-button {
