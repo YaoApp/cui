@@ -54,6 +54,8 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 			className="browser__tab"
 			data-active={active || undefined}
 			data-closable={tab.closable || undefined}
+			/* 块自身也压一条空 title：指针落在块的内距或关闭键上时也命不中原生提示 */
+			title=""
 			onAuxClick={(event) => {
 				// 中键关闭（首页不可关）
 				if (event.button === 1 && tab.closable) {
@@ -67,6 +69,9 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 				ref={mainRef}
 				role="tab"
 				aria-selected={active}
+				/* 空 title 压住整块范围内可能从上层继承来的原生提示：指针落在块里任何一处
+				   （图标、留白、文字）时最近的 title 都是空串，原生气泡就不会出现 */
+				title=""
 				onClick={() => onActivate(tab.key)}
 			>
 				<Icon name={tab.closable ? 'i-globe' : 'i-home'} size={14} />
