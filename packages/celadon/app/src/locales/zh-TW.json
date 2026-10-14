@@ -100,6 +100,7 @@
   "shell.browser.action.exclusive": "面板獨佔視窗",
   "shell.browser.action.blocked": "視窗太窄，放不下這一欄",
   "shell.browser.address.label": "外部網址",
+  "shell.browser.address.open": "開啟",
   "shell.browser.address.placeholder": "輸入網址，按 Enter 開啟",
   "shell.browser.recent": "這一側開啟過的內容",
   "shell.browser.recent.empty": "還沒開啟過內容",

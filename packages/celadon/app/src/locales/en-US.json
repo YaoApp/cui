@@ -100,6 +100,7 @@
   "shell.browser.action.exclusive": "Take the pane full window",
   "shell.browser.action.blocked": "Window too narrow to fit this column",
   "shell.browser.address.label": "External address",
+  "shell.browser.address.open": "Open",
   "shell.browser.address.placeholder": "Type an address and press Enter",
   "shell.browser.recent": "Opened on this side",
   "shell.browser.recent.empty": "Nothing opened yet",

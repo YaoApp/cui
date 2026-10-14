@@ -100,6 +100,7 @@
   "shell.browser.action.exclusive": "パネルをウィンドウ全体に",
   "shell.browser.action.blocked": "ウィンドウが狭すぎてこの列を表示できません",
   "shell.browser.address.label": "外部アドレス",
+  "shell.browser.address.open": "開く",
   "shell.browser.address.placeholder": "アドレスを入力して Enter",
   "shell.browser.recent": "この側で開いたもの",
   "shell.browser.recent.empty": "まだ何も開いていません",

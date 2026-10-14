@@ -201,6 +201,7 @@ export type I18nKey =
   | 'shell.browser.action.more'
   | 'shell.browser.action.move'
   | 'shell.browser.address.label'
+  | 'shell.browser.address.open'
   | 'shell.browser.address.placeholder'
   | 'shell.browser.home'
   | 'shell.browser.internal.hint'
@@ -446,6 +447,7 @@ declare module 'i18next' {
         'shell.browser.action.more': string
         'shell.browser.action.move': string
         'shell.browser.address.label': string
+        'shell.browser.address.open': string
         'shell.browser.address.placeholder': string
         'shell.browser.home': string
         'shell.browser.internal.hint': string
