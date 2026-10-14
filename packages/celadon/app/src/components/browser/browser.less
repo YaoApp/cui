@@ -301,13 +301,16 @@
 	background: var(--nav-select);
 }
 
-/* 块里的主体：图标与标题。它承担 tab 角色与点选，宽度按内容收，不抢走块内右侧关闭键的位置 */
+/* 块里的主体：图标与标题。它承担 tab 角色与点选，字号与导航列同类文字同档（body 14）；
+   宽度吃掉块内余量，右侧关闭键因此贴块右缘，余量留在标题与关闭键之间 */
 .browser__tab-main {
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-4);
+	flex: 1 1 auto;
 	min-inline-size: 0;
-	flex: 0 1 auto;
+	font-size: var(--font-size-body);
+	color: var(--text-primary);
 	cursor: default;
 }
 
@@ -317,8 +320,22 @@
 	border-radius: var(--radius-small);
 }
 
+/* 关闭键默认不画，指针进到这块或键盘已走到这块时出现：非当前标签不被一串叉号占满。
+   命中区仍按本包的键口径 24，图形取图标梯最小档 14，看着小、点得到 */
 .browser__tab-close {
 	flex: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--spacing-24);
+	block-size: var(--spacing-24);
+	opacity: 0;
+	transition: opacity var(--duration-fast) var(--easing-decelerate);
+}
+
+.browser__tab:hover .browser__tab-close,
+.browser__tab:has(:focus-visible) .browser__tab-close {
+	opacity: 1;
 }
 
 /* 标题超出标签宽度时省略，完整标题由 Tooltip 给（见组件的 title 属性） */

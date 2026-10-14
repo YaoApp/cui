@@ -131,7 +131,9 @@ test('opens an external address in a tab and closes it again', async ({ page }) 
 	await expect(browser.getByRole('tab', { name: 'example.com' })).toHaveAttribute('aria-selected', 'true')
 
 	/* 首页那个标签不可关：它没有关闭键 */
-	await expect(browser.locator('.browser__tab', { hasText: '首页' }).locator('button')).toHaveCount(1)
+	await expect(
+		browser.locator('.browser__tab', { hasText: '首页' }).locator('.browser__tab-close')
+	).toHaveCount(0)
 
 	await browser.getByRole('button', { name: '关闭这个标签' }).click()
 	await expect(browser.getByRole('tab', { name: 'example.com' })).toHaveCount(0)
