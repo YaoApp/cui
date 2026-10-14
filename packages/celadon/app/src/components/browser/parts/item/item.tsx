@@ -22,6 +22,7 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 		<span
 			className="browser__tab"
 			data-active={active || undefined}
+			data-closable={tab.closable || undefined}
 			onAuxClick={(event) => {
 				// 中键关闭（首页不可关）
 				if (event.button === 1 && tab.closable) {

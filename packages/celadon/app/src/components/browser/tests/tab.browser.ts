@@ -8,6 +8,20 @@ async function markSignedIn(page: Page) {
 	)
 }
 
+test('the home tab keeps its left and right insets equal', async ({ page }) => {
+	await page.setViewportSize({ width: 1100, height: 800 })
+	await markSignedIn(page)
+	await page.goto('/app/inbox')
+	const home = page.locator('.browser__tab').first()
+	/* 首页没有关闭键：块按内容居中，左右留白必须等值 */
+	const block = (await home.boundingBox())!
+	const icon = (await home.locator('svg').boundingBox())!
+	const label = (await home.locator('.browser__tab-label').boundingBox())!
+	const left = icon.x - block.x
+	const right = block.x + block.width - (label.x + label.width)
+	expect(Math.abs(left - right)).toBeLessThanOrEqual(1)
+})
+
 async function openSecondTab(page: Page) {
 	await page.goto('/app/inbox')
 	const browser = page.locator('.browser')

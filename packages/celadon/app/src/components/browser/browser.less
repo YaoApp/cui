@@ -273,7 +273,10 @@
 
 /* 标签是一整块：图标 · 标题（省略号）· 关闭键都在同一块底里，块自己给悬停与当前态。
    块高取 24 档，与栏内上下内距 8 相加正好落在 40 的行高上，块的上留白因此与左留白等值；
-   最窄 48 就够，短标题不占一大片空底 */
+   最窄 48 就够，短标题不占一大片空底。
+   左右内距分两种：有可关闭的页时左 8 右 4（右侧由关闭键自己那 24 的命中区补足，
+   叉号到块右缘的视觉间距与左侧的 8 相当），只有首页这种没有关闭键的页时左右都取 8、
+   内容整体居中，块的左右边距因此严格相等 */
 .browser__tab {
 	display: flex;
 	align-items: center;
@@ -288,6 +291,15 @@
 	animation: browser-tab-in var(--duration-fast) var(--easing-decelerate);
 	/* 只过渡具体属性，不写 background 简写：简写在 WebKit 上会带上图片与定位一起参与 */
 	transition: background-color var(--duration-fast) var(--easing-decelerate);
+}
+
+.browser__tab:not([data-closable]) {
+	justify-content: center;
+	padding-inline: var(--spacing-8);
+}
+
+.browser__tab:not([data-closable]) .browser__tab-main {
+	flex: 0 1 auto;
 }
 
 /* 悬停与当前两档底。这里不写 :has()：WebKit 在指针状态变化时会按 :has() 向上重算，
