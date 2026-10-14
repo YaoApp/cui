@@ -107,6 +107,8 @@ export function Browser({
     })
   }, [])
   const tooNarrowToSplit = (width ?? limits.defaultWidth) < limits.sideMin * 2
+  /* 下拉菜单的开合：下拉键与在顶栏空白处点右键都开它 */
+  const [menuOpen, setMenuOpen] = useState(false)
   const blocked = splitBlocked || tooNarrowToSplit
   return (
     <aside
@@ -140,7 +142,14 @@ export function Browser({
       >
         <span className="browser__grip" aria-hidden="true" />
       </span>
-      <div className="browser__bar">
+      {/* 顶栏：空白处点右键开同一个下拉菜单（标签上的右键留给标签自己的菜单，第 13 条） */}
+      <div
+        className="browser__bar"
+        onContextMenu={(event) => {
+          event.preventDefault()
+          setMenuOpen(true)
+        }}
+      >
         <ScrollArea className="browser__tabs" size="small">
           <div className="browser__tabs-row" role="tablist" aria-label={t('shell.browser.label')}>
             {tabs.map((tab) => (
@@ -173,89 +182,56 @@ export function Browser({
                 ) : null}
               </MotionPanel>
             ))}
+            {/* 新建键紧跟最后一个标签；只有一个首页标签时不画（不渲染，不是隐藏） */}
+            {tabs.length > 1 ? (
+              <Tooltip label={t('shell.browser.tab.new')} side="bottom">
+                <Button
+                  className="browser__new"
+                  iconOnly
+                  variant="plain"
+                  size="small"
+                  aria-label={t('shell.browser.tab.new')}
+                  onClick={onNew}
+                >
+                  <Icon name="i-plus" size={16} />
+                </Button>
+              </Tooltip>
+            ) : null}
           </div>
         </ScrollArea>
-        <Tooltip label={t('shell.browser.tab.new')} side="bottom">
-          <Button
-            className="browser__new"
-            iconOnly
-            variant="plain"
-            size="small"
-            aria-label={t('shell.browser.tab.new')}
-            onClick={onNew}
-          >
-            <Icon name="i-plus" size={16} />
-          </Button>
-        </Tooltip>
-        <Tooltip
-          label={
-            blocked && split === 'none'
-              ? t('shell.browser.split.blocked')
-              : t('shell.browser.split.columns')
-          }
-          side="bottom"
-        >
-          <Button
-            className="browser__split"
-            iconOnly
-            variant="plain"
-            size="small"
-            disabled={blocked && split === 'none'}
-            aria-pressed={split === 'columns'}
-            aria-label={t('shell.browser.split.columns')}
-            onClick={() => onSplit(split === 'columns' ? 'none' : 'columns')}
-          >
-            <Icon name="i-split" size={16} />
-          </Button>
-        </Tooltip>
-        <Tooltip
-          label={
-            blocked && split === 'none'
-              ? t('shell.browser.split.blocked')
-              : t('shell.browser.split.rows')
-          }
-          side="bottom"
-        >
-          <Button
-            className="browser__split"
-            iconOnly
-            variant="plain"
-            size="small"
-            disabled={blocked && split === 'none'}
-            aria-pressed={split === 'rows'}
-            aria-label={t('shell.browser.split.rows')}
-            onClick={() => onSplit(split === 'rows' ? 'none' : 'rows')}
-          >
-            <Icon name="i-rows" size={16} />
-          </Button>
-        </Tooltip>
-        {/* 右端第三颗是「…」更多：换边与收掉收进菜单，标签条上只留分屏两颗键（design/main-shell.md §五） */}
-        <BaseMenu.Root>
+        {/* 下拉：菜单上段放溢出的标签（第 14 条），下段是操作项；顶栏空白处点右键也开它 */}
+        <BaseMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
           <BaseMenu.Trigger
             className="browser__more"
             aria-label={t('shell.browser.action.more')}
             render={<Button iconOnly variant="plain" size="small" />}
           >
-            <Icon name="i-dots" size={16} />
+            <Icon name="i-down" size={16} />
           </BaseMenu.Trigger>
           <BaseMenu.Portal>
             <BaseMenu.Positioner side="bottom" align="end" sideOffset={4}>
               <BaseMenu.Popup className="browser__menu" aria-label={t('shell.browser.action.more')}>
-                <BaseMenu.Item
-                  className="browser__menu-item"
-                  aria-pressed={exclusive}
-                  onClick={onExclusive}
-                >
-                  <Icon name="i-expand" size={16} />
-                  <span>{t('shell.browser.action.exclusive')}</span>
-                </BaseMenu.Item>
                 <BaseMenu.Item className="browser__menu-item" onClick={onMove}>
                   <Icon name="i-swap" size={16} />
                   <span>{t('shell.browser.action.move')}</span>
                 </BaseMenu.Item>
-                <BaseMenu.Item className="browser__menu-item" onClick={onCollapse}>
-                  <Icon name="i-panel-right" size={16} />
-                  <span>{t('shell.browser.action.collapse')}</span>
+                <BaseMenu.Item
+                  className="browser__menu-item"
+                  disabled={blocked && split === 'none'}
+                  aria-pressed={split === 'columns'}
+                  onClick={() => onSplit(split === 'columns' ? 'none' : 'columns')}
+                >
+                  <Icon name="i-split" size={16} />
+                  <span>{t('shell.browser.split.columns')}</span>
+                </BaseMenu.Item>
+                <BaseMenu.Item
+                  className="browser__menu-item"
+                  disabled={blocked && split === 'none'}
+                  aria-pressed={split === 'rows'}
+                  onClick={() => onSplit(split === 'rows' ? 'none' : 'rows')}
+                >
+                  <Icon name="i-rows" size={16} />
+                  <span>{t('shell.browser.split.rows')}</span>
                 </BaseMenu.Item>
               </BaseMenu.Popup>
             </BaseMenu.Positioner>

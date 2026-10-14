@@ -1,4 +1,10 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '@playwright/test'
+
+/* 分栏与换边都收进顶栏的下拉菜单：先开菜单，再点菜单项 */
+async function openTabMenu(page: Page, browser: Locator) {
+	await browser.locator('.browser__more').click()
+	await expect(page.getByRole('menuitem').first()).toBeVisible()
+}
 
 /* 三栏骨架的浏览器用例：跑真开发服务上的真应用，
    本机登录标记按存储的真实格式预置，因此不用走登录一线。核的是三条链路：
@@ -283,7 +289,8 @@ test('splits the browser into two panes and back', async ({ page }) => {
 	await expect(browser.locator('.browser__pane')).toHaveCount(1)
 
 	await widenBrowser(page)
-	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 	await expect(browser).toHaveAttribute('data-split', 'columns')
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
 	// 分屏不改栏宽：栏宽仍由分界线决定
@@ -294,12 +301,14 @@ test('splits the browser into two panes and back', async ({ page }) => {
 	expect(Math.abs(panes[0] - panes[1])).toBeLessThanOrEqual(8)
 
 	// 换方向：直接改朝向，不回到单面板
-	await browser.getByRole('button', { name: '上下分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '上下分栏' }).click()
 	await expect(browser).toHaveAttribute('data-split', 'rows')
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
 
 	// 再点同一颗回到单面板
-	await browser.getByRole('button', { name: '上下分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '上下分栏' }).click()
 	await expect(browser).toHaveAttribute('data-split', 'none')
 	await expect(browser.locator('.browser__pane')).toHaveCount(1)
 })
@@ -309,8 +318,9 @@ test('disables the split keys when the window cannot fit two panes', async ({ pa
 	await markSignedIn(page)
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
-	await expect(browser.getByRole('button', { name: '左右分栏' })).toBeDisabled()
-	await expect(browser.getByRole('button', { name: '上下分栏' })).toBeDisabled()
+	await openTabMenu(page, browser)
+	await expect(page.getByRole('menuitem', { name: '左右分栏' })).toBeDisabled()
+	await expect(page.getByRole('menuitem', { name: '上下分栏' })).toBeDisabled()
 })
 
 test('drags the divider and resets it by double click', async ({ page }) => {
@@ -319,7 +329,8 @@ test('drags the divider and resets it by double click', async ({ page }) => {
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
 	await widenBrowser(page)
-	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 
 	const body = browser.locator('.browser__body')
 	const divider = browser.locator('.browser__divider')
@@ -381,7 +392,8 @@ test('keeps the collapse working after the column width has been dragged', async
 	/* 先拖分界线把本栏拖宽，再进分屏并拖一次分隔条：这是「拖过之后再点就没反应」的现场 */
 	const widened = await widenBrowser(page)
 	expect(await widened.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBeGreaterThan(600)
-	const dividerSplit = browser.getByRole('button', { name: '左右分栏' })
+	await openTabMenu(page, browser)
+	const dividerSplit = page.getByRole('menuitem', { name: '左右分栏' })
 	await dividerSplit.click()
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
 	const divider = browser.locator('.browser__divider')
@@ -430,7 +442,8 @@ test('locks text selection while a divider is dragged', async ({ page }) => {
 
 	// 分屏分隔条：同样
 	await widenBrowser(page)
-	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 	const divider = browser.locator('.browser__divider')
 	const dbox = (await divider.boundingBox())!
 	await page.mouse.move(dbox.x + dbox.width / 2, dbox.y + 200)
@@ -478,7 +491,8 @@ test('keeps the column width when the split is switched on', async ({ page }) =>
 	await page.mouse.up()
 	const wide = (await browser.boundingBox())!.width
 
-	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 	// 等分栏的过渡落定再量宽度：过渡期间量到的是中间态
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
 	await page.waitForTimeout(400)
@@ -502,7 +516,8 @@ test('keeps the split and the boundary working after the browser moves to the le
 	await page.mouse.down()
 	await page.mouse.move(grip.x + grip.width / 2 - 300, y, { steps: 8 })
 	await page.mouse.up()
-	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 	await browser.getByRole('button', { name: '更多' }).click()
 	await page.getByRole('menuitem', { name: '换到另一侧' }).click()
 
@@ -550,7 +565,8 @@ test('shows another page in the second pane instead of the same page twice', asy
 	await page.mouse.down()
 	await page.mouse.move(grip.x + grip.width / 2 - 300, grip.y + 300, { steps: 8 })
 	await page.mouse.up()
-	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 
 	// 第一个面板是当前页（example.com），第二个面板绑另一页（首页），两页不重样
 	const panes = browser.locator('.browser__pane')
@@ -574,7 +590,8 @@ test('switches the pane that has focus when a tab is clicked', async ({ page }) 
 	await page.mouse.down()
 	await page.mouse.move(grip.x + grip.width / 2 - 300, grip.y + 300, { steps: 8 })
 	await page.mouse.up()
-	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 	// 起始：第一个面板 example.com，第二个面板首页
 	await expect(browser.locator('.browser__pane-head')).toHaveText('首页')
 
@@ -603,7 +620,8 @@ test('drags the stacked divider and resets it by double click', async ({ page })
 	await page.mouse.down()
 	await page.mouse.move(grip.x + grip.width / 2 - 300, grip.y + 300, { steps: 8 })
 	await page.mouse.up()
-	await browser.getByRole('button', { name: '上下分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '上下分栏' }).click()
 
 	const divider = browser.locator('.browser__divider')
 	const panes = browser.locator('.browser__pane')
@@ -653,7 +671,8 @@ test('disables the split keys when the column itself is too narrow', async ({ pa
 	await page.mouse.move(grip.x + 600, y, { steps: 12 })
 	await page.mouse.up()
 	expect(await browser.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBeLessThanOrEqual(302)
-	await expect(browser.getByRole('button', { name: '左右分栏' })).toBeDisabled()
+	await openTabMenu(page, browser)
+	await expect(page.getByRole('menuitem', { name: '左右分栏' })).toBeDisabled()
 
 	// 再拖宽到 700，两颗键恢复可用
 	const grip2 = (await edge.boundingBox())!
@@ -661,7 +680,8 @@ test('disables the split keys when the column itself is too narrow', async ({ pa
 	await page.mouse.down()
 	await page.mouse.move(grip2.x + grip2.width / 2 - 400, y, { steps: 12 })
 	await page.mouse.up()
-	await expect(browser.getByRole('button', { name: '左右分栏' })).toBeEnabled()
+	await openTabMenu(page, browser)
+	await expect(page.getByRole('menuitem', { name: '左右分栏' })).toBeEnabled()
 })
 
 test('takes the pane full window and comes back with Escape', async ({ page }) => {
@@ -670,8 +690,7 @@ test('takes the pane full window and comes back with Escape', async ({ page }) =
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
 
-	await browser.getByRole('button', { name: '更多' }).click()
-	await page.getByRole('menuitem', { name: '面板独占窗口' }).click()
+	await page.locator('.browser__maximize').click()
 	await expect(page.locator('.layout')).toHaveAttribute('data-exclusive', 'true')
 	// 导航区与内容区让位（收到零宽，不是 display: none，这样布局投影才动得起来）
 	await page.waitForTimeout(500)
@@ -698,8 +717,7 @@ test('takes the whole window in exclusive mode after the width has been dragged'
 	const dragged = (await browser.boundingBox())!.width
 	expect(dragged).toBeGreaterThan(600)
 
-	await browser.getByRole('button', { name: '更多' }).click()
-	await page.getByRole('menuitem', { name: '面板独占窗口' }).click()
+	await page.locator('.browser__maximize').click()
 	await expect(page.locator('.layout')).toHaveAttribute('data-exclusive', 'true')
 	await page.waitForTimeout(500)
 
@@ -722,13 +740,11 @@ test('leaves the exclusive mode when the column is collapsed from the menu', asy
 	await page.goto('/app/inbox')
 	const browser = columns(page).browser
 
-	// 进独占，再从菜单里收掉这一栏
-	await browser.getByRole('button', { name: '更多' }).click()
-	await page.getByRole('menuitem', { name: '面板独占窗口' }).click()
+	// 进独占，再点顶栏常显的关闭键收掉这一栏
+	await page.locator('.browser__maximize').click()
 	await expect(page.locator('.layout')).toHaveAttribute('data-exclusive', 'true')
 
-	await browser.getByRole('button', { name: '更多' }).click()
-	await page.getByRole('menuitem', { name: '收掉这一栏' }).click()
+	await page.locator('.browser__close').click()
 
 	// 独占已经退出，导航区与内容区回来，本栏收成零宽，重新展开的入口在内容列头里
 	await expect(page.locator('.layout')).not.toHaveAttribute('data-exclusive', 'true')
@@ -809,7 +825,8 @@ test('keeps the boundary drag instant while the layout animation is on', async (
 	expect(Math.abs((await browser.boundingBox())!.width - moved)).toBeLessThanOrEqual(2)
 
 	// 分栏与标签的动画仍在
-	await browser.getByRole('button', { name: '左右分栏' }).click()
+	await openTabMenu(page, browser)
+	await page.getByRole('menuitem', { name: '左右分栏' }).click()
 	await expect(browser.locator('.browser__pane')).toHaveCount(2)
 	await expect(browser.locator('.browser__tab').first()).toHaveCSS('animation-name', 'browser-tab-in')
 })
