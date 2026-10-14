@@ -1,7 +1,7 @@
 # 08 · 布局（主文档）
 
 - 依据：`design/main-shell.md`（结构与交互）· `architecture/03-boundaries.md` §1 与 §3（落位）
-- 分册：[08-layout-base.md](08-layout-base.md)（第一阶段：骨架）· [08-layout-nav.md](08-layout-nav.md)（导航列） · [08-layout-shell.md](08-layout-shell.md)（窗口封装） · [08-layout-motion.md](08-layout-motion.md)（动效）
+- 分册：[08-layout-base.md](08-layout-base.md)（第一阶段：骨架）· [08-layout-nav.md](08-layout-nav.md)（导航列） · [08-layout-shell.md](08-layout-shell.md)（窗口封装） · [08-layout-motion.md](08-layout-motion.md)（动效） · [08-layout-browser-tabs.md](08-layout-browser-tabs.md)（标签浏览器的标题栏与标签）
 - 状态：已实现 · 待验收（2026-10-10）
 
 ## 1. 组件与目录
