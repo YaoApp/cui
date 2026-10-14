@@ -18,7 +18,7 @@
 - [ ] 3. **新建键规则**：紧跟最后一个标签；只有一个首页标签时不渲染新建键，只画它后面的下拉键。
 - [ ] 4. **标题栏菜单**：下段是切换方位 · 左右分栏 · 上下分栏（从顶栏收进菜单），上段是收起的标签列表（无溢出时不画）；由下拉键与「在标题栏上点右键」两处触发；**右键只在顶栏空白处生效**（落在标签上时开的是标签右键菜单），且右键不触发窗口拖动；Esc 与方向键沿用现有菜单口径。
 - [ ] 5. **最大化 / 恢复**：本栏独占窗口与恢复，图标随状态切换；补 `i-maximize`（lucide `maximize`）与 `i-minimize-2`（lucide `minimize-2`），并把 `i-restore` 错挂的 `copy` 图形改对。
-- [ ] 6. **关闭键与找回键**：顶栏关闭键常显；内容列头右端那颗「收起 / 展开这一栏」键改为本栏打开时隐藏、收起后出现（并回写 `design/README.md` 与 `design/main-shell.md` 里「切换键恒在」的规则）。
+- [ ] 6. **关闭键与找回键**：顶栏关闭键常显，图形与内容列头那颗键**同一颗** `panel` 系图形（本栏在右取 `i-panel-right`、在左取 `i-panel-left`，与导航列、内容列头的图形同一族、同一渲染）；内容列头右端那颗「收起 / 展开这一栏」键改为本栏打开时隐藏、收起后出现（并回写 `design/README.md` 与 `design/main-shell.md` 里「切换键恒在」的规则）。
 - [ ] 7. **标签样式**：圆角块，内含图标、标题（省略号）与关闭键；关闭键恒显；当前标签用 `--background-surface`、不加分割线；宽度最小 96、最大 200；默认 / 悬停 / 当前 / 焦点四态齐；关掉最后一个可关闭标签落回首页；**首页标签固定在首位、不参与拖动换序**；标题被省略号截断时给 Tooltip 显示完整标题。
 - [x] 8. **背景分档**：本栏底改 `--background-content`，内容区保持 `--background-surface`；当前标签用 `--background-surface`；`content.less` 里那两行备选注释已清；`design/color-card.md` 该 token 的用途补上「标签浏览器整栏底」。实测（浅色）：浏览器 250/250/251 对内容 255/255/255，通道差 5/5/4。`b987b449`
 - [ ] 9. **键盘与鼠标**：标签条 roving tabindex（只当前标签可 Tab 到）· `←` `→` 切换 · `Enter` / `Space` 激活 · `Delete` 关闭当前标签 · 中键关闭 · Tab 序为 标签条 → 新建 → 下拉 → 最大化/恢复 → 关闭；指针位移不超过 4 像素算点击，超过算拖动，两者互不误触。
@@ -70,6 +70,7 @@
 
 ## 5. 图标账
 
-- 已在：`i-plus` · `i-act-close`（`x`）· `i-down`（`chevron-down`）· `i-split`（`columns-2`）· `i-rows`（`rows-2`）· `i-swap`（`arrow-left-right`）· `i-home`（`house`）· `i-globe`（`globe`）。
-- 待补：`i-maximize`（`maximize`）· `i-minimize-2`（`minimize-2`）；标签右键菜单三项的图形（刷新用 `rotate-cw` 或 `refresh-cw` · 关闭其他用 `square-x` · 关闭全部用 `equal`），实现时按 lucide 的实际名登记。
+- 已在：`i-plus` · `i-down`（`chevron-down`）· `i-split`（`columns-2`）· `i-rows`（`rows-2`）· `i-swap`（`arrow-left-right`）· `i-home`（`house`）· `i-globe`（`globe`）· `i-panel-left` / `i-panel-right`（`panel-left` / `panel-right`，顶栏关闭键用，与内容列头那颗键同一颗图形）· `i-act-close`（`x`，只用于标签右键菜单里的「关闭标签」）。
+- 待补：`i-maximize`（`maximize`）· `i-minimize-2`（`minimize-2`）；标签右键菜单其余两项的图形（刷新用 `rotate-cw` 或 `refresh-cw` · 关闭其他用 `square-x` · 关闭全部用 `equal`），实现时按 lucide 的实际名登记。
+- 渲染口径：三列的图标键都走同一套——lucide 24 网格、描边 2、显示档 16、键命中区 32 × 32（`Button` 的 `medium` 档），不引入风格不同的图形。
 - 待修：`i-restore` 现挂 `copy` 图形，应改为恢复语义（或直接改用 `i-minimize-2` 并删除 `i-restore` 的多余映射）。
