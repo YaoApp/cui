@@ -17,7 +17,11 @@ export type BrowserTabItemProps = {
 
    刻意不用 MotionPanel：它基于 motion 的布局投影，会在元素上写 transform，
    而投影测量在 WebKit 里会对小数宽度（本行实测 75.25）来回取整，指针一进一出就看见跳。
-   入场的淡入位移由 browser.less 的 browser-tab-in 关键帧给，纯 CSS，不碰布局投影。 */
+   入场的淡入位移由 browser.less 的 browser-tab-in 关键帧给，纯 CSS，不碰布局投影。
+
+   标题分两层：外层是被悬停的框（统一 Tooltip 的触发元素），内层才是负责省略号的那一段。
+   Safari 会给「正在被省略号截断的元素」自己弹一个原生提示，且与 title 属性无关；
+   把省略号放在内层并让它不接指针事件，Safari 就没有可瞄准的对象，原生提示不会出现。 */
 export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabItemProps) {
 	const { t } = useTranslation()
 	/* 观测挂在主体上，不挂在标题上：标题要作为统一 Tooltip 的触发元素交给基础件渲染，
@@ -31,9 +35,9 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 		const main = mainRef.current
 		if (!main) return
 		const check = () => {
-			const label = main.querySelector('.browser__tab-label')
-			if (!label) return
-			setTruncated(label.scrollWidth > label.clientWidth)
+			const text = main.querySelector('.browser__tab-text')
+			if (!text) return
+			setTruncated(text.scrollWidth > text.clientWidth)
 		}
 		check()
 		const observer = new ResizeObserver(check)
@@ -41,12 +45,8 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 		return () => observer.disconnect()
 	}, [tab.label])
 	const label = (
-		<span
-			className="browser__tab-label"
-			/* 显式给空 title：原生气泡一律不出现，提示只走下面的统一 Tooltip */
-			title=""
-		>
-			{tab.label}
+		<span className="browser__tab-label">
+			<span className="browser__tab-text">{tab.label}</span>
 		</span>
 	)
 	return (
@@ -54,8 +54,6 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 			className="browser__tab"
 			data-active={active || undefined}
 			data-closable={tab.closable || undefined}
-			/* 块自身也压一条空 title：指针落在块的内距或关闭键上时也命不中原生提示 */
-			title=""
 			onAuxClick={(event) => {
 				// 中键关闭（首页不可关）
 				if (event.button === 1 && tab.closable) {
@@ -69,9 +67,6 @@ export function BrowserTabItem({ tab, active, onActivate, onClose }: BrowserTabI
 				ref={mainRef}
 				role="tab"
 				aria-selected={active}
-				/* 空 title 压住整块范围内可能从上层继承来的原生提示：指针落在块里任何一处
-				   （图标、留白、文字）时最近的 title 都是空串，原生气泡就不会出现 */
-				title=""
 				onClick={() => onActivate(tab.key)}
 			>
 				<Icon name={tab.closable ? 'i-globe' : 'i-home'} size={14} />

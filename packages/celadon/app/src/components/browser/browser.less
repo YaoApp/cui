@@ -367,11 +367,21 @@
 	visibility: visible;
 }
 
-/* 标题超出标签宽度时省略，完整标题由 Tooltip 给（见组件的 title 属性） */
+/* 标题分两层：外层只负责占位与被悬停（统一 Tooltip 的触发元素），
+   内层才写省略号，并且不接指针事件。
+   Safari 会给「正在被省略号截断的元素」自己弹一个原生提示，这与 title 属性无关，
+   空 title 也压不住；把省略号放在不接指针的内层，它就没有可瞄准的对象。
+   （口径：原生提示一律不用，截断信息由本包统一的 Tooltip 承担） */
 .browser__tab-label {
+	overflow: hidden;
+}
+
+.browser__tab-text {
+	display: block;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	pointer-events: none;
 }
 
 .browser__page {
